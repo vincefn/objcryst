@@ -356,7 +356,11 @@ void WXCrystal::CrystUpdate()
    this->WXRefinableObj::CrystUpdate();
    //mWXParent->Layout();
    #ifdef OBJCRYST_GL
-   this->UpdateGL();
+   if(mpCrystalGL!=0)
+   {
+      BBox box=mpCrystalGL->GetCellBBox();
+      this->UpdateGL(false,box.xMin,box.xMax,box.yMin,box.yMax,box.zMin,box.zMax);
+   }
    #endif
    VFN_DEBUG_EXIT("WXCrystal::CrystUpdate():End",7)
 }
@@ -367,6 +371,7 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
                          const REAL yMin,const REAL yMax,
                          const REAL zMin,const REAL zMax)
 {
+   // :KLUDGE: !!! UGLY !!! This should be done in WXGLCrystalCanvas !
    VFN_DEBUG_ENTRY("WXCrystal::UpdateGL()",8)
    WXCrystValidateAllUserInput();
    if(mpCrystalGL!=0)
@@ -455,7 +460,11 @@ void WXCrystal::OnMenuCrystalGL(wxCommandEvent & WXUNUSED(event))
    frame->SetStatusText(mpCrystal->GetName().c_str());
    #endif
    frame->Show(true);
-   this->UpdateGL();
+   if(mpCrystalGL!=0)
+   {
+      BBox box=mpCrystalGL->GetCellBBox();
+      this->UpdateGL(false,box.xMin,box.xMax,box.yMin,box.yMax,box.zMin,box.zMax);
+   }
 }
 void WXCrystal::NotifyCrystalGLDelete()
 {
@@ -1043,6 +1052,7 @@ void UnitCellMapImport::GLInitDisplayList(const float minValue,
 					  WXGLCrystalCanvas * parentCrystal) const
 {
    VFN_DEBUG_ENTRY("UnitCellMapImport::GLInitDisplayList()",7)
+   cout<<"Generating OpenGL Triangles for Fourier map:"<<mName<<", contour="<<minValue<<endl;
    // Generate triangles
       VFN_DEBUG_MESSAGE("UnitCellMapImport::GLInitDisplayList(): Generate Triangles",7)
 
@@ -1099,18 +1109,32 @@ void UnitCellMapImport::GLInitDisplayList(const float minValue,
          float normx,normy,normz;
          for(int i=0; i < numOfTriangles; i++)
          {
-            for(int j=0; j < 3; j++)
-            {
-               //VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnPaint():MC1:"<<i<<" "<<j,5)
-               //:TODO: Fix normals
-               normx=pTriangles[i].norm[j].x;
-               normy=pTriangles[i].norm[j].y;
-               normz=pTriangles[i].norm[j].z;
-               //mpCrystal->FractionalToOrthonormalCoords(normx, normy, normz);
-               //mpCrystal->OrthonormalToFractionalCoords(normx, normy, normz);
-               glNormal3f(normx, normy, normz);
-               glVertex3f(pTriangles[i].p[j].x    ,pTriangles[i].p[j].y    ,pTriangles[i].p[j].z);
-            }
+            if(minValue>0)
+               for(int j=0; j < 3; j++)
+               {
+                  //VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnPaint():MC1:"<<i<<" "<<j,5)
+                  //:TODO: Fix normals
+                  normx=pTriangles[i].norm[j].x;
+                  normy=pTriangles[i].norm[j].y;
+                  normz=pTriangles[i].norm[j].z;
+                  //mpCrystal->FractionalToOrthonormalCoords(normx, normy, normz);
+                  //mpCrystal->OrthonormalToFractionalCoords(normx, normy, normz);
+                  glNormal3f(normx, normy, normz);
+                  glVertex3f(pTriangles[i].p[j].x    ,pTriangles[i].p[j].y    ,pTriangles[i].p[j].z);
+               }
+            else
+               for(int j=2; j >=0; j--)
+               {
+                  //VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnPaint():MC1:"<<i<<" "<<j,5)
+                  //:TODO: Fix normals
+                  normx=pTriangles[i].norm[j].x;
+                  normy=pTriangles[i].norm[j].y;
+                  normz=pTriangles[i].norm[j].z;
+                  //mpCrystal->FractionalToOrthonormalCoords(normx, normy, normz);
+                  //mpCrystal->OrthonormalToFractionalCoords(normx, normy, normz);
+                  glNormal3f(normx, normy, normz);
+                  glVertex3f(pTriangles[i].p[j].x    ,pTriangles[i].p[j].y    ,pTriangles[i].p[j].z);
+               }
          }
       glEnd();
 
@@ -1175,6 +1199,22 @@ void UnitCellMapImport::POVRayDescription(ostream &os,const float minValue,
       float normx,normy,normz;
       for(int i=0; i < numOfTriangles; i++)
       {
+         const float x1=pTriangles[i].p[0].x;
+         const float x2=pTriangles[i].p[1].x;
+         const float x3=pTriangles[i].p[2].x;
+         const float y1=pTriangles[i].p[0].y;
+         const float y2=pTriangles[i].p[1].y;
+         const float y3=pTriangles[i].p[2].y;
+         const float z1=pTriangles[i].p[0].z;
+         const float z2=pTriangles[i].p[1].z;
+         const float z3=pTriangles[i].p[2].z;
+         
+         // Avoid null-length cylinders that make POV-Ray choke
+         const float d12=abs(x1-x2)+abs(y1-y2)+abs(z1-z2);
+         const float d13=abs(x1-x3)+abs(y1-y3)+abs(z1-z3);
+         const float d23=abs(x2-x3)+abs(y2-y3)+abs(z2-z3);
+         if((d12<0.05)||(d13<0.05)||(d23<0.05)) continue;
+         
          //:TODO: Fix normals
          normx=pTriangles[i].norm[j].x;
          normy=pTriangles[i].norm[j].y;
@@ -1182,9 +1222,9 @@ void UnitCellMapImport::POVRayDescription(ostream &os,const float minValue,
          //mpCrystal->FractionalToOrthonormalCoords(normx, normy, normz);
          //mpCrystal->OrthonormalToFractionalCoords(normx, normy, normz);
          os<<"      ObjCrystMeshTriangle("
-           <<pTriangles[i].p[0].x<<","<<pTriangles[i].p[0].y<<","<<pTriangles[i].p[0].z<<","
-           <<pTriangles[i].p[1].x<<","<<pTriangles[i].p[1].y<<","<<pTriangles[i].p[1].z<<","
-           <<pTriangles[i].p[2].x<<","<<pTriangles[i].p[2].y<<","<<pTriangles[i].p[2].z<<","
+           <<x1<<","<<y1<<","<<z1<<","
+           <<x2<<","<<y2<<","<<z2<<","
+           <<x3<<","<<y3<<","<<z3<<","
            <<normx<<","<<normy<<","<<normz<<","
            <<normx<<","<<normy<<","<<normz<<","
            <<normx<<","<<normy<<","<<normz<<")"
@@ -1251,6 +1291,25 @@ int UnitCellMapImport::ImportGRD(const string&filename)
      }
    }
    ffile.close();
+   
+   mMean=mPoints.sum()/(REAL)(mPoints.numElements());
+   mMin=mPoints.min();
+   mMax=mPoints.max();
+   {
+      mStandardDeviation=0.0;
+      const REAL *tmp=mPoints.data();
+      for(unsigned long i=0;i<mPoints.numElements();i++)
+      {
+         mStandardDeviation += (*tmp-mMean) * (*tmp-mMean);
+         tmp++;
+      }
+      mStandardDeviation = sqrt(mStandardDeviation/(REAL)(mPoints.numElements()));
+   }
+   cout << "Min density value="<<mMin<<endl
+        << "Max density value="<<mMax<<endl
+        << "Mean density="<<mMean<<endl
+        << "Standard Deviation="<<mStandardDeviation<<endl;
+   
    {// Use short name
       std::string::size_type idx =filename.rfind("/");
       std::string::size_type idx2=filename.rfind("\\");
@@ -1267,6 +1326,145 @@ int UnitCellMapImport::ImportGRD(const string&filename)
    }
    VFN_DEBUG_EXIT("UnitCellMapImport::ImportGRD()",7)
      return 1;
+}
+
+/// Byte-swapping function for DSN6 import
+void swap2(void *data, unsigned int nb)
+{
+   char * dataptr = (char *)data;
+   char tmp;
+
+   for (unsigned int i=0; i<(nb-1); i+=2)
+   {
+      tmp = dataptr[i];
+      dataptr[i] = dataptr[i+1];
+      dataptr[i+1] = tmp;
+   }
+}
+
+int UnitCellMapImport::ImportDSN6(const string&filename)
+{
+   VFN_DEBUG_ENTRY("UnitCellMapImport::ImportDSN6()",7)
+   FILE *pfile=fopen(filename.c_str(),"rb");
+   if(NULL==pfile)
+   {     //if file could not be loaded for some reason then exit
+     VFN_DEBUG_MESSAGE("UnitCellMapImport::ImportDSN6() error opening "<<filename.c_str(),10)
+      (*fpObjCrystInformUser)("Error opening file: "+filename);
+      return 0;
+   }
+   // :KLUDGE: assume sizeof(short int)==2...
+   short header[256];
+   fread(header, sizeof(short), 256, pfile);
+   bool needswap=false;
+   if (header[18] == 25600) needswap=true;
+   if(needswap) swap2(header, 19*sizeof(short));
+   
+   const long xstart=header[0];
+   const long ystart=header[1];
+   const long zstart=header[2];
+   const long xextent=header[3];
+   const long yextent=header[4];
+   const long zextent=header[5];
+   const long xsamplingrate=header[6];
+   const long ysamplingrate=header[7];
+   const long zsamplingrate=header[8];
+   const float celledgea=(float)header[ 9]/(float)header[17];
+   const float celledgeb=(float)header[10]/(float)header[17];
+   const float celledgec=(float)header[11]/(float)header[17];
+   const float alpha=(float)header[12]/(float)header[17];
+   const float beta=(float)header[13]/(float)header[17];
+   const float gamma=(float)header[14]/(float)header[17];
+   const float rhoscale=(float)header[15]/(float)header[18];
+   const float rhozero =(float)header[16];
+   cout <<"xstart="<<xstart<<endl
+        <<"ystart="<<ystart<<endl
+        <<"zstart="<<zstart<<endl
+        <<"xextent="<<xextent<<endl
+        <<"yextent="<<yextent<<endl
+        <<"zextent="<<zextent<<endl
+        <<"xsamplingrate="<<xsamplingrate<<endl
+        <<"ysamplingrate="<<ysamplingrate<<endl
+        <<"zsamplingrate="<<zsamplingrate<<endl
+        <<"celledgea="<<celledgea<<endl
+        <<"celledgeb="<<celledgeb<<endl
+        <<"celledgec="<<celledgec<<endl
+        <<"alpha="<<alpha<<endl
+        <<"beta="<<beta<<endl
+        <<"gamma="<<gamma<<endl
+        <<"rhoscale="<<rhoscale<<endl
+        <<"rhozero="<<rhozero<<endl;
+
+   #define BRICKSIZE 512
+   #define BRICKEDGE 8
+   
+   unsigned char Points[BRICKSIZE];
+   // :KLUDGE: stored map is the size of the entire unit cell, not of the input map...
+   // The result is that if the input map is smaller than the unit cell size,
+   // the rest of the cell will be with zero density
+   mPoints.resize(xsamplingrate,ysamplingrate,zsamplingrate);
+   mPoints=0;
+
+   const unsigned int nxbrick=((xextent)/BRICKEDGE)+(xextent%8 ? 1 : 0);
+   const unsigned int nybrick=((yextent)/BRICKEDGE)+(zextent%8 ? 1 : 0);
+   const unsigned int nzbrick=((zextent)/BRICKEDGE)+(zextent%8 ? 1 : 0);
+
+   for(unsigned int zbrick=0;zbrick<nzbrick;zbrick++)
+      for(unsigned int ybrick=0;ybrick<nybrick;ybrick++)
+         for(unsigned int xbrick=0;xbrick<nxbrick;xbrick++)
+         {
+            fread(&Points, sizeof(unsigned char), BRICKSIZE, pfile);
+            // In this SICK format, data is stored as bytes, but which are
+            // nevertheless byteswapped as 2-byte words. Bizarre, vous avez dit bizarre...
+            if(needswap) swap2((void *)&Points, BRICKSIZE);
+            const unsigned char* pPoint=&Points[0];
+            for(unsigned int z=0;z<BRICKEDGE;z++)
+               for(unsigned int y=0;y<BRICKEDGE;y++)
+                  for(unsigned int x=0;x<BRICKEDGE;x++)
+                  {
+                     if(  ((xbrick*BRICKEDGE+x)<xsamplingrate)
+                        &&((ybrick*BRICKEDGE+y)<ysamplingrate)
+                        &&((zbrick*BRICKEDGE+z)<zsamplingrate))
+                        mPoints(zbrick*BRICKEDGE+z,ybrick*BRICKEDGE+y,xbrick*BRICKEDGE+x)
+                           = ((float) *pPoint - rhozero)/ rhoscale ;
+                        pPoint++;
+                  }
+         }
+   fclose (pfile);
+   
+   mMean=mPoints.sum()/(REAL)(mPoints.numElements());
+   mMin=mPoints.min();
+   mMax=mPoints.max();
+   {
+      mStandardDeviation=0.0;
+      const REAL *tmp=mPoints.data();
+      for(unsigned long i=0;i<mPoints.numElements();i++)
+      {
+         mStandardDeviation += (*tmp-mMean) * (*tmp-mMean);
+         tmp++;
+      }
+      mStandardDeviation = sqrt(mStandardDeviation/(REAL)(mPoints.numElements()));
+   }
+   cout << "Min density value="<<mMin<<endl
+        << "Max density value="<<mMax<<endl
+        << "Mean density="<<mMean<<endl
+        << "Standard Deviation="<<mStandardDeviation<<endl;
+   
+   {// Use short name
+      std::string::size_type idx =filename.rfind("/");
+      std::string::size_type idx2=filename.rfind("\\");
+      std::string::size_type idx3=filename.rfind(":");
+      if(((long)idx2!=(long)string::npos)&&((long)idx2>(long)idx))idx=idx2;
+      if(((long)idx3!=(long)string::npos)&&((long)idx3>(long)idx))idx=idx3;
+      if(idx==string::npos)
+         mName=filename;
+      else
+      {
+         cout<<"name="<<filename.substr(idx+1)<<endl;
+         mName=filename.substr(idx+1);
+      }
+   }
+   VFN_DEBUG_EXIT("UnitCellMapImport::ImportDSN6()",7)
+   return 1;
 }
 
 const string & UnitCellMapImport::GetName()const
@@ -1287,6 +1485,10 @@ REAL UnitCellMapImport::GetValue(const REAL x,const REAL y,const REAL z)const
    if(iz<0) iz+=nz;
    return mPoints(iz,iy,ix);
 }
+REAL UnitCellMapImport::Max()const{return mMax;}
+REAL UnitCellMapImport::Min()const{return mMin;}
+REAL UnitCellMapImport::Mean()const{return mMean;}
+REAL UnitCellMapImport::StandardDeviation()const{return mStandardDeviation;}
 
 ////////////////////////////////////////////////////////////////////////
 //
@@ -1398,7 +1600,8 @@ static const long ID_GLCRYSTAL_MENU_SETCURSOR=        WXCRYST_ID();
 static const long ID_GLCRYSTAL_UPDATEUI=               WXCRYST_ID(); 
 static const long ID_GLCRYSTAL_MENU_CHANGELIMITS=      WXCRYST_ID(); 
 static const long ID_GLCRYSTAL_MENU_SHOWCRYSTAL=       WXCRYST_ID(); 
-static const long ID_GLCRYSTAL_MENU_LOADFOURIER=       WXCRYST_ID(); 
+static const long ID_GLCRYSTAL_MENU_LOADFOURIERGRD=    WXCRYST_ID(); 
+static const long ID_GLCRYSTAL_MENU_LOADFOURIERDSN6=   WXCRYST_ID(); 
 static const long ID_GLCRYSTAL_MENU_CHANGECONTOUR=     WXCRYST_ID(); 
 static const long ID_GLCRYSTAL_MENU_ADDCONTOUR=        WXCRYST_ID(); 
 static const long ID_GLCRYSTAL_MENU_SHOWFOURIER=       WXCRYST_ID(); 
@@ -1419,7 +1622,8 @@ BEGIN_EVENT_TABLE(WXGLCrystalCanvas, wxGLCanvas)
    EVT_MENU             (ID_GLCRYSTAL_MENU_SHOWATOMLABEL,       WXGLCrystalCanvas::OnShowAtomLabel)
    EVT_MENU             (ID_GLCRYSTAL_MENU_SHOWCURSOR,          WXGLCrystalCanvas::OnShowCursor)
    EVT_MENU             (ID_GLCRYSTAL_MENU_SETCURSOR,           WXGLCrystalCanvas::OnSetCursor)
-   EVT_MENU             (ID_GLCRYSTAL_MENU_LOADFOURIER,         WXGLCrystalCanvas::OnLoadFourier)
+   EVT_MENU             (ID_GLCRYSTAL_MENU_LOADFOURIERGRD,      WXGLCrystalCanvas::OnLoadFourierGRD)
+   EVT_MENU             (ID_GLCRYSTAL_MENU_LOADFOURIERDSN6,     WXGLCrystalCanvas::OnLoadFourierDSN6)
    EVT_MENU             (ID_GLCRYSTAL_MENU_CHANGECONTOUR,       WXGLCrystalCanvas::OnChangeContour)
    EVT_MENU             (ID_GLCRYSTAL_MENU_ADDCONTOUR,          WXGLCrystalCanvas::OnAddContour)
    EVT_MENU             (ID_GLCRYSTAL_MENU_SHOWFOURIER,         WXGLCrystalCanvas::OnShowFourier)
@@ -1460,7 +1664,8 @@ mIsGLFontBuilt(false),mGLFontDisplayListBase(0)
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SETCURSOR, "Set view cntr and cursor pos.");
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_POVRAY, "Create POVRay file");
    mpPopUpMenu->AppendSeparator();
-   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_LOADFOURIER, "Load Fourier Map");	
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_LOADFOURIERGRD, "Load GRD Fourier Map");	
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_LOADFOURIERDSN6,"Load DSN6 Fourier Map");	
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_CHANGECONTOUR, "Change Contour Value");
    mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_CHANGECONTOUR, FALSE);	//disable it for now
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_ADDCONTOUR, "Add Contour Value");
@@ -1607,9 +1812,9 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
       REAL y=mY0;
       REAL z=mZ0;
       mpWXCrystal->GetCrystal().OrthonormalToFractionalCoords(x,y,z);
-      x=0.5-x;
-      y=0.5-y;
-      z=0.5-z;
+      x=(mcellbbox.xMax+mcellbbox.xMin)/2.-x;
+      y=(mcellbbox.yMax+mcellbbox.yMin)/2.-y;
+      z=(mcellbbox.zMax+mcellbbox.zMin)/2.-z;
       statusText.sprintf("Center@(%5.3f,%5.3f,%5.3f)",x,y,z);
       for(unsigned int i=0;i<mvpUnitCellMapImport.size();++i)
       {
@@ -1924,14 +2129,21 @@ void WXGLCrystalCanvas::OnChangeLimits(wxCommandEvent & WXUNUSED(event))
   UserSelectBoundingBox *BoxDlg = new UserSelectBoundingBox(this,
 	    "Set bounding box for display of\natoms (fractional coordinates)",
 			 mcellbbox);
-  if (BoxDlg->ShowModal() == wxID_OK ) {
-    mcellbbox =  BoxDlg->GetBBox();
-    mpWXCrystal->UpdateGL(false,
+   if (BoxDlg->ShowModal() == wxID_OK )
+   {
+      mcellbbox =  BoxDlg->GetBBox();
+      mpWXCrystal->UpdateGL(false,
 			 mcellbbox.xMin,mcellbbox.xMax,
 			 mcellbbox.yMin,mcellbbox.yMax,
 			 mcellbbox.zMin,mcellbbox.zMax);
-    this->CrystUpdate();
-    VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnChangeLimits (X: " << 
+      vector<pair<pair<const UnitCellMapImport*,float>,UnitCellMapGLList* > >::iterator pos;
+      for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();pos++)
+      {
+         wxBusyInfo wait("Processing Fourier Map...");
+         pos->second->GenList(*(pos->first.first),this, pos->first.second);
+      }
+      this->CrystUpdate();
+      VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnChangeLimits (X: " << 
 		      mcellbbox.xMin << ", " << mcellbbox.xMax << 
 		      " Y: " << 
 		      mcellbbox.yMin << ", " << mcellbbox.yMax << 
@@ -1975,9 +2187,9 @@ void WXGLCrystalCanvas::OnSetCursor()
   REAL z=mZ0;
   mpWXCrystal->GetCrystal().OrthonormalToFractionalCoords(x,y,z);
 
-  mViewCntr.x = 0.5 - x;
-  mViewCntr.y = 0.5 - y;
-  mViewCntr.z = 0.5 - z;
+  mViewCntr.x = (mcellbbox.xMax+mcellbbox.xMin)/2. - x;
+  mViewCntr.y = (mcellbbox.yMax+mcellbbox.yMin)/2. - y;
+  mViewCntr.z = (mcellbbox.zMax+mcellbbox.zMin)/2. - z;
   UserXYZBox *BoxDlg = new UserXYZBox(this,
        "Set fractional coordinates for view\ncenter and cursor position",
 			 mViewCntr);
@@ -1985,43 +2197,61 @@ void WXGLCrystalCanvas::OnSetCursor()
      mViewCntr =  BoxDlg->GetXYZ();
      VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnSetCursor (frac) = " <<
 		 mViewCntr.x << "," << mViewCntr.y << "," << mViewCntr.z,1)
-     mX0 = 0.5 - mViewCntr.x;
-     mY0 = 0.5 - mViewCntr.y;
-     mZ0 = 0.5 - mViewCntr.z;
+     mX0 = (mcellbbox.xMax+mcellbbox.xMin)/2. - mViewCntr.x;
+     mY0 = (mcellbbox.yMax+mcellbbox.yMin)/2. - mViewCntr.y;
+     mZ0 = (mcellbbox.zMax+mcellbbox.zMin)/2. - mViewCntr.z;
      mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(mX0, mY0, mZ0);
      VFN_DEBUG_MESSAGE("...ortho" << mX0 << "," << mY0 << "," << mZ0,1)
      Refresh(FALSE);
   }
 }
 
-void WXGLCrystalCanvas::OnLoadFourier()
+void WXGLCrystalCanvas::OnLoadFourierGRD()
 {
    wxFileDialog fd((wxWindow*)this, "Choose a file containing a Fourier Map",
-           "", "", "Fourier Map files (*.grd)|*.grd", wxOPEN | wxHIDE_READONLY | wxFILE_MUST_EXIST);
+           "", "", "Fourier Map files (*.grd)|*.grd", wxOPEN | wxFILE_MUST_EXIST);
    //if okay then read Fourier map, run MC on it and display the triangles
    if(fd.ShowModal() == wxID_OK)
    {
-     VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnLoadFourier opening "<<fd.GetPath().c_str(),10)
-      this->LoadFourier((string)(fd.GetPath().c_str()));
+      const string filename=fd.GetPath().c_str();
+      UnitCellMapImport *pMap=new UnitCellMapImport(mpWXCrystal->GetCrystal());
+      if (pMap->ImportGRD(filename) == 0)
+      {
+         string tmp="Error reading Fourier file:"+filename;
+         wxMessageBox(tmp.c_str(), "File error", wxOK, this);
+      return;
+      }
+      this->AddFourier(pMap);
    }
 }
 
-void WXGLCrystalCanvas::LoadFourier(const string&filename)
-{//read fourier map from 0.0 to 1.0 on all axis
+void WXGLCrystalCanvas::OnLoadFourierDSN6()
+{
+   wxFileDialog fd((wxWindow*)this, "Choose a file containing a Fourier Map",
+           "", "", "Fourier Map files (*.DN6)|*.DN6", wxOPEN | wxFILE_MUST_EXIST);
+   //if okay then read Fourier map, run MC on it and display the triangles
+   if(fd.ShowModal() == wxID_OK)
+   {
+      const string filename=fd.GetPath().c_str();
+      UnitCellMapImport *pMap=new UnitCellMapImport(mpWXCrystal->GetCrystal());
+      if (pMap->ImportDSN6(filename) == 0)
+      {
+         string tmp="Error reading Fourier file:"+filename;
+         wxMessageBox(tmp.c_str(), "File error", wxOK, this);
+      return;
+      }
+      this->AddFourier(pMap);
+   }
+}
+
+void WXGLCrystalCanvas::AddFourier(UnitCellMapImport *map)
+{
+   mvpUnitCellMapImport.push_back(map);
    wxBusyInfo wait("Processing Fourier Map...");
    {
-      //auto_ptr<UnitCellMapImport> ptr(new UnitCellMapImport(mpWXCrystal->GetCrystal()));
-      mvpUnitCellMapImport.push_back(new UnitCellMapImport(mpWXCrystal->GetCrystal()));
-      // load the map; exit on error
-      if (mvpUnitCellMapImport.back()->ImportGRD(filename) == 0) {
-	// how can I insert filename into this message?
-	wxMessageBox("Error reading Fourier file", "File error", wxOK, this);
-	return;
-      }
-   }
-   {
-      //auto_ptr<UnitCellMapGLList> ptr(new UnitCellMapGLList);
-      mvpUnitCellMapGLList.push_back(make_pair(make_pair(mvpUnitCellMapImport.back(),1.0),
+      float contour=map->Mean()+2*map->StandardDeviation();
+      if(contour>map->Max()) contour=map->Mean()+0.75*(map->Max()-map->Mean());
+      mvpUnitCellMapGLList.push_back(make_pair(make_pair(mvpUnitCellMapImport.back(),contour),
                                                new UnitCellMapGLList) );
       switch(mvpUnitCellMapGLList.size())
       {
@@ -2030,8 +2260,9 @@ void WXGLCrystalCanvas::LoadFourier(const string&filename)
          default:mvpUnitCellMapGLList.back().second->SetColour(0.,1.,0.,1.);break;
       }
       this->SetCurrent();
-      mvpUnitCellMapGLList.back().second->GenList(*(mvpUnitCellMapImport.back()),
+      mvpUnitCellMapGLList.back().second->GenList(*map,
 		     this, mvpUnitCellMapGLList.back().first.second);
+      mvpUnitCellMapGLList.back().second->SetName(map->GetName());
    }
 
    mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_CHANGECONTOUR, TRUE);
@@ -2060,7 +2291,7 @@ void WXGLCrystalCanvas::OnChangeContour()
    wxBusyInfo wait("Processing Fourier Map...");
    contourValueDialog.GetValue().ToDouble(&contourValue);
    mvpUnitCellMapGLList[mapgl].first.second = (float) contourValue;
-   mvpUnitCellMapGLList[mapgl].second->GenList(*(mvpUnitCellMapImport.back()),
+   mvpUnitCellMapGLList[mapgl].second->GenList(*(mvpUnitCellMapGLList[mapgl].first.first),
 					       this, mvpUnitCellMapGLList[mapgl].first.second);
    this->CrystUpdate();
 }
@@ -2070,21 +2301,39 @@ void WXGLCrystalCanvas::OnAddContour()
    int map=this->UserSelectUnitCellMapImport();
    
    // Choose contour value
-      double contourValue=1.;
+      const REAL min  =mvpUnitCellMapImport[map]->Min();
+      const REAL max  =mvpUnitCellMapImport[map]->Max();
+      const REAL mean =mvpUnitCellMapImport[map]->Mean();
+      const REAL sigma=mvpUnitCellMapImport[map]->StandardDeviation();
+      double contour=mean+2*sigma;
+      if(contour>max) contour=mean+0.75*(max-mean);
       wxString strValue;
-      strValue.Printf("%lf",contourValue);
-      wxTextEntryDialog contourValueDialog(this,"Add contour value",
+      strValue.Printf("%lf",contour);
+      wxString info;
+      info.Printf(_T("Add a new contour value\n")
+                  _T("For this map: min  =%6.3f\n")
+                  _T("              max  =%6.3f\n")
+                  _T("              mean =%6.3f\n")
+                  _T("              sigma=%6.3f\n\n")
+                  _T("Recommended values are mean + 2sigma\n")
+                  _T("i.e. %6.3f for a Fobs or Fcalc map\n")
+                  _T("or %6.3f and %6.3f for a Fobs-Fcalc map\n"),
+                  min,max,mean,sigma,
+                  mean+2*sigma,mean+2*sigma,mean-2*sigma
+                 );
+                  
+      wxTextEntryDialog contourValueDialog(this,info,
                               "Add contour value",strValue,wxOK | wxCANCEL);
       if(wxID_OK!=contourValueDialog.ShowModal())  return;
-      contourValueDialog.GetValue().ToDouble(&contourValue);
+      contourValueDialog.GetValue().ToDouble(&contour);
    // Choose colour
       wxColor ncolor(255,0,0);
       ncolor = wxGetColourFromUser((wxWindow*)this, ncolor);   
       if(!(ncolor.Ok())) return;
    // Add display map
       wxBusyInfo wait("Processing Fourier Map...");
-      mvpUnitCellMapGLList.push_back(make_pair(make_pair(mvpUnitCellMapImport.back(),
-                                                         (float)contourValue),
+      mvpUnitCellMapGLList.push_back(make_pair(make_pair(mvpUnitCellMapImport[map],
+                                                         (float)contour),
                                                new UnitCellMapGLList()) );
       mvpUnitCellMapGLList.back().second->SetName(mvpUnitCellMapImport[map]->GetName());
       mvpUnitCellMapGLList.back().second
@@ -2131,8 +2380,7 @@ void WXGLCrystalCanvas::OnFourierChangeBbox()
     mmapbbox =  BoxDlg->GetBBox();
     vector<pair<pair<const UnitCellMapImport*,float>,UnitCellMapGLList* > >::iterator pos;
     for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();pos++)
-      pos->second->GenList(*(mvpUnitCellMapImport.back()),
-			   this, pos->first.second);
+         pos->second->GenList(*(pos->first.first),this, pos->first.second);
 
     this->CrystUpdate();
     VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnFourierChangeBbox (X: " << 

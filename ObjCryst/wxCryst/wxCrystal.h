@@ -146,10 +146,23 @@ class UnitCellMapImport
       * \param filename: the file with the fourier map
       */ 
       int ImportGRD(const string&filename);
+      /** Import map with DSN6 format.
+      * Returns 0 on error, 1 on success
+      * \param filename: the file with the fourier map
+      */ 
+      int ImportDSN6(const string&filename);
       /// Name associated to this map (the filename)
       const string & GetName()const;
       /// Get the value of the map at a given set of fractionnal coordinates
       REAL GetValue(const REAL x,const REAL y,const REAL z)const;
+      /// Max value of the map
+      REAL Max()const;
+      /// Min value of the map
+      REAL Min()const;
+      /// Mean value of the map
+      REAL Mean()const;
+      /// Standard Deviation of the map
+      REAL StandardDeviation()const;
    private:
       /// The crystal corresponding to this map
       const Crystal *mpCrystal;
@@ -157,6 +170,12 @@ class UnitCellMapImport
       CrystArray3D_REAL mPoints;
       /// Name associated to this map (the filename)
       string mName;
+      /// Min and max value of the map
+      REAL mMin,mMax;
+      /// Mean value of the map
+      REAL mMean;
+      /// Standard Deviation of the map
+      REAL mStandardDeviation;
 };
 
 /// Class to store and execute OpenGL Display Lists of fourier maps.
@@ -225,8 +244,9 @@ class WXGLCrystalCanvas : public wxGLCanvas
       void OnShowAtomLabel();
       void OnShowCursor();
       void OnSetCursor();
-      void OnLoadFourier();
-      void LoadFourier(const string&filename);
+      void OnLoadFourierGRD();
+      void OnLoadFourierDSN6();
+      void AddFourier(UnitCellMapImport*);
       void OnAddContour();
       void OnChangeContour();
       void OnShowFourier();
