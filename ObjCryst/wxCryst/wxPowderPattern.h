@@ -1,11 +1,8 @@
 /*
-* LibCryst++ : a Crystallographic computing library in C++
+* ObjCryst++ : a Crystallographic computing library in C++
 *
 *  (c) 2000 Vincent FAVRE-NICOLIN
-*           Laboratoire de Cristallographie
-*           24, quai Ernest-Ansermet, CH-1211 Geneva 4, Switzerland
-*  Contact: Vincent.Favre-Nicolin@cryst.unige.ch
-*           Radovan.Cerny@cryst.unige.ch
+*  vincefn@users.sourceforge.net
 *
 */
 
@@ -16,19 +13,6 @@
 #include "ObjCryst/PowderPattern.h"
 namespace ObjCryst
 {
-/// WX Class for Radiation
-class WXRadiation: public WXCrystObjBasic
-{
-   public:
-      WXRadiation(wxWindow *parent, Radiation*);
-      virtual void CrystUpdate();
-   private:
-      Radiation *mpRadiation;
-      WXFieldOption *mpFieldRadType;
-      WXFieldRefPar *mpFieldWavelength;
-      wxBoxSizer *mpSizer;
-   DECLARE_EVENT_TABLE()
-};
 class WXPowderPatternGraph;
 
 /// WX Class for PowderPattern objects

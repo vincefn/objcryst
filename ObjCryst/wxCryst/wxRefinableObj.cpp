@@ -341,7 +341,7 @@ template class WXRegistry<ScatteringPowerAtom>;
 template class WXRegistry<PowderPattern>;
 template class WXRegistry<PowderPatternComponent>;
 template class WXRegistry<DiffractionDataSingleCrystal>;
-template class WXRegistry<GlobalOptimObj>;
+template class WXRegistry<OptimizationObj>;
 template class WXRegistry<XMLCrystTag>;
 //template class WXRegistry<IOCrystTag>;//to be removed
 template class WXRegistry<ZAtom>;
@@ -384,8 +384,8 @@ template PowderPatternComponent*
 template DiffractionDataSingleCrystal* 
    WXDialogChooseFromRegistry(ObjRegistry<DiffractionDataSingleCrystal>&,wxWindow*,
                               const string &,int &);
-template GlobalOptimObj* 
-   WXDialogChooseFromRegistry(ObjRegistry<GlobalOptimObj> &,wxWindow*,const string &,int &);
+template OptimizationObj* 
+   WXDialogChooseFromRegistry(ObjRegistry<OptimizationObj> &,wxWindow*,const string &,int &);
 template XMLCrystTag* 
    WXDialogChooseFromRegistry(ObjRegistry<XMLCrystTag> &,wxWindow*,const string &,int &);
 
@@ -436,8 +436,8 @@ template const DiffractionDataSingleCrystal*
    WXDialogChooseFromRegistry(const ObjRegistry<DiffractionDataSingleCrystal>&,wxWindow*,
                               const string &,int &);
                               
-template const GlobalOptimObj* 
-   WXDialogChooseFromRegistry(const ObjRegistry<GlobalOptimObj> &,wxWindow*,
+template const OptimizationObj* 
+   WXDialogChooseFromRegistry(const ObjRegistry<OptimizationObj> &,wxWindow*,
                               const string &,int &);
                               
 template const XMLCrystTag* 

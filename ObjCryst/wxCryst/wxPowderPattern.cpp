@@ -3,6 +3,7 @@
 
 #include "wx/wx.h"
 #include "wxCryst/wxPowderPattern.h"
+#include "wxCryst/wxRadiation.h"
 
 //Fixes for Cygwin; where do those stupid macros come from ? Somewhere in wxMSW headers
 #ifdef max

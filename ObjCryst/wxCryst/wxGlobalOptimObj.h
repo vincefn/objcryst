@@ -26,7 +26,7 @@ class WXGlobalOptimRunThread;
 class WXGlobalOptimObj: public WXCrystObj
 {
    public:
-      WXGlobalOptimObj(wxWindow *parent, GlobalOptimObj*);
+      WXGlobalOptimObj(wxWindow *parent, MonteCarloObj*);
       virtual void CrystUpdate();
       ///Update the number of trials to go, to show the user something's still going on...
       virtual void UpdateDisplayNbTrial();
@@ -44,7 +44,7 @@ class WXGlobalOptimObj: public WXCrystObj
       virtual void OnRunOptimization();
       virtual void OnStopOptimization();
    private:
-      GlobalOptimObj *mpGlobalOptimObj;
+      MonteCarloObj *mpGlobalOptimObj;
       WXCrystMenuBar* mpMenuBar;
       WXGlobalOptimRunThread *mpGlobalOptimRunThread;
       /// The number of trials asked by the user
@@ -57,12 +57,12 @@ class WXGlobalOptimObj: public WXCrystObj
 class WXGlobalOptimRunThread: public wxThread
 {
    public:
-      WXGlobalOptimRunThread(GlobalOptimObj *globalOptObj,long &nbTrial);
+      WXGlobalOptimRunThread(OptimizationObj *globalOptObj,long &nbTrial);
       
       virtual void *Entry();
       virtual void OnExit();
    private:
-      GlobalOptimObj *mpGlobalOptObj;
+      OptimizationObj *mpGlobalOptObj;
       ///This points to the mNbTrial member in WXGlobalOptimObj
       long *mpNbTrial;
 };

@@ -30,10 +30,10 @@ BEGIN_EVENT_TABLE(WXGlobalOptimObj, wxWindow)
    EVT_MENU(ID_GLOBALOPT_MENU_GLOBAlOPT_ADDOBJ,        WXGlobalOptimObj::OnAddRefinedObject)
    EVT_MENU(ID_GLOBALOPT_MENU_GLOBAlOPT_ADDCOSTFUNC,   WXGlobalOptimObj::OnAddCostFunction)
    EVT_MENU(ID_GLOBALOPT_MENU_GLOBAlOPT_RUN,           WXGlobalOptimObj::OnRunOptimization)
-   EVT_MENU(ID_GLOBALOPT_MENU_GLOBAlOPT_STOP,           WXGlobalOptimObj::OnStopOptimization)
+   EVT_MENU(ID_GLOBALOPT_MENU_GLOBAlOPT_STOP,          WXGlobalOptimObj::OnStopOptimization)
 END_EVENT_TABLE()
 
-WXGlobalOptimObj::WXGlobalOptimObj(wxWindow* parent, GlobalOptimObj*obj):
+WXGlobalOptimObj::WXGlobalOptimObj(wxWindow* parent, MonteCarloObj *obj):
 WXCrystObj(parent),mpGlobalOptimObj(obj),mpGlobalOptimRunThread(0),mNbTrial(100000000)
 {
    VFN_DEBUG_MESSAGE("WXGlobalOptimObj::WXGlobalOptimObj(wxWindow*,GlobalOptimObj*,)",6)
@@ -251,7 +251,7 @@ void WXGlobalOptimObj::OnStopOptimization()
 //    WXGlobalOptimRunThread
 //
 ////////////////////////////////////////////////////////////////////////
-WXGlobalOptimRunThread::WXGlobalOptimRunThread(GlobalOptimObj *globalOptObj,long &nbTrial):
+WXGlobalOptimRunThread::WXGlobalOptimRunThread(OptimizationObj *globalOptObj,long &nbTrial):
 wxThread(wxTHREAD_DETACHED),mpGlobalOptObj(globalOptObj),mpNbTrial(&nbTrial)
 {
 }

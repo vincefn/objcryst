@@ -130,7 +130,7 @@ void testPbSO4()
       data.SetUseFastLessPreciseFunc(true);
 
    //Create the global optimization object
-      GlobalOptimObj globalOptObj;
+      MonteCarloObj globalOptObj;
       globalOptObj.AddRefinableObj(data);
       globalOptObj.AddCostFunction(data,0,1.0);
    

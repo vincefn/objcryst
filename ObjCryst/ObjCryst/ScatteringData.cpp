@@ -23,6 +23,7 @@
 
 #ifdef __WX__CRYST__
    #include "wxCryst/wxPowderPattern.h"
+   #include "wxCryst/wxRadiation.h"
 #endif
 
 #include <fstream>

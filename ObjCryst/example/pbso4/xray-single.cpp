@@ -107,7 +107,7 @@ void testPbSO4()
       data.SetUseFastLessPreciseFunc(true);
 
    //Create the global optimization object
-      GlobalOptimObj globalOptObj;
+      MonteCarloObj globalOptObj;
       globalOptObj.AddRefinableObj(data);
       globalOptObj.AddRefinableObj(cryst);
       globalOptObj.AddCostFunction(data,0,1.0);
@@ -129,12 +129,12 @@ void testPbSO4()
       
    //Calc intensity before doing anything
       data.GetIcalc();
-      data.CalcBestScaleFactorForR();
+      data.FitScaleFactorForRw();
       data.PrintObsCalcData();
    
    //Annealing parameters (schedule, Tmax, Tmin, displacement schedule, 
       globalOptObj.SetAlgorithmSimulAnnealing(ANNEALING_EXPONENTIAL,.05,.005,
-                                              ANNEALING_EXPONENTIAL,10,1,
+                                              ANNEALING_SMART,10.,.125,
                                               40000,.25,20000);
       
    //Global Optimization
@@ -147,7 +147,7 @@ void testPbSO4()
       //Annealing parameters
       globalOptObj.SetAlgorithmSimulAnnealing(ANNEALING_EXPONENTIAL,.01,.001,
                                               ANNEALING_EXPONENTIAL,1,1,
-                                              .30,40000,20000);
+                                              40000,.30,20000);
       //Finer optimization
       //globalOptObj.Optimize(10000);
    

@@ -21,6 +21,10 @@
 #include "Quirks/VFNDebug.h"
 #include "Quirks/VFNStreamFormat.h"
 
+#ifdef __WX__CRYST__
+#include "wxCryst/wxDiffractionSingleCrystal.h"
+#endif
+
 #include <fstream>
 #include <iomanip>
 
@@ -36,6 +40,14 @@ DiffractionDataSingleCrystal::DiffractionDataSingleCrystal():mScaleFactor(1.)
 {
    VFN_DEBUG_MESSAGE("DiffractionDataSingleCrystal::DiffractionDataSingleCrystal()",5)
    this->InitRefParList();
+   gDiffractionDataSingleCrystalRegistry.Register(*this);
+   gTopRefinableObjRegistry.Register(*this);
+}
+DiffractionDataSingleCrystal::DiffractionDataSingleCrystal(Crystal &cryst):mScaleFactor(1.)
+{
+   VFN_DEBUG_MESSAGE("DiffractionDataSingleCrystal::DiffractionDataSingleCrystal()",5)
+   this->InitRefParList();
+	this->SetCrystal(cryst);
    gDiffractionDataSingleCrystalRegistry.Register(*this);
    gTopRefinableObjRegistry.Register(*this);
 }
@@ -528,7 +540,7 @@ void DiffractionDataSingleCrystal::SetUseOnlyLowAngleData(
 void DiffractionDataSingleCrystal::SaveHKLIobsIcalc(const string &filename)
 {
    VFN_DEBUG_MESSAGE("DiffractionDataSingleCrystal::SaveHKLIobsIcalc",5)
-   //:TODO: test if everything is ready...
+   this->GetIcalc();
    ofstream out(filename.c_str());
    CrystVector_double theta;
    theta=mTheta;
@@ -559,8 +571,8 @@ const string& DiffractionDataSingleCrystal::GetCostFunctionName(const unsigned i
    static string costFunctionName[2];
    if(0==costFunctionName[0].length())
    {
-      costFunctionName[0]="R()";
-      costFunctionName[1]="Rw()";
+      costFunctionName[0]="Best R()";
+      costFunctionName[1]="Best Rw()";
    }
    switch(id)
    {
@@ -579,8 +591,8 @@ const string& DiffractionDataSingleCrystal::GetCostFunctionDescription(const uns
    static string costFunctionDescription[2];
    if(0==costFunctionDescription[0].length())
    {
-      costFunctionDescription[0]="Crystallographic, unweighted R-factor";
-      costFunctionDescription[1]="Crystallographic, weigthed R-factor";
+      costFunctionDescription[0]="Crystallographic, unweighted R-factor with best scale";
+      costFunctionDescription[1]="Crystallographic, weigthed R-factor with best scale";
    }
    switch(id)
    {
@@ -628,5 +640,13 @@ void DiffractionDataSingleCrystal::CalcIcalc() const
    mCalcIntensity=this->GetFhklCalcSq();
    mCalcIntensity*=mScaleFactor;
 }
+#ifdef __WX__CRYST__
+WXCrystObjBasic* DiffractionDataSingleCrystal::WXCreate(wxWindow* parent)
+{
+   //:TODO: Check mpWXCrystObj==0
+   mpWXCrystObj=new WXDiffractionSingleCrystal(parent,this);
+   return mpWXCrystObj;
+}
+#endif
 
 }//namespace

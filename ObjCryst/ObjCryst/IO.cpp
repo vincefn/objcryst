@@ -65,8 +65,8 @@ void XMLCrystFileSaveGlobal(const string & filename)
    for(int i=0;i<gPowderPatternRegistry.GetNb();i++)
       gPowderPatternRegistry.GetObj(i).XMLOutput(out,1);
    
-   for(int i=0;i<gGlobalOptimObjRegistry.GetNb();i++)
-      gGlobalOptimObjRegistry.GetObj(i).XMLOutput(out,1);
+   for(int i=0;i<gOptimizationObjRegistry.GetNb();i++)
+      gOptimizationObjRegistry.GetObj(i).XMLOutput(out,1);
    
    tag.SetIsEndTag(true);
    out<<tag;
@@ -149,7 +149,7 @@ template void XMLCrystFileLoadObject(const string & ,const string &,const string
 template void XMLCrystFileLoadObject(const string & ,const string &,const string &,
                                      PowderPatternDiffraction*);
 template void XMLCrystFileLoadObject(const string & ,const string &,const string &,
-                                     GlobalOptimObj*);
+                                     MonteCarloObj*);
                                     
 void XMLCrystFileLoadAllObject(const string & filename)
 {
@@ -181,7 +181,7 @@ void XMLCrystFileLoadAllObject(const string & filename)
       }
       if(tag.GetName()=="GlobalOptimObj")
       {
-         GlobalOptimObj* obj = new GlobalOptimObj;
+         MonteCarloObj* obj = new MonteCarloObj;
          obj->XMLInput(is,tag);
       }
    }
@@ -210,8 +210,8 @@ void IOCrystFileSaveGlobal(const string & filename)
    for(int i=0;i<gPowderPatternRegistry.GetNb();i++)
       gPowderPatternRegistry.GetObj(i).XMLOutput(out);
    
-   for(int i=0;i<gGlobalOptimObjRegistry.GetNb();i++)
-      gGlobalOptimObjRegistry.GetObj(i).XMLOutput(out);
+   for(int i=0;i<gOptimizationObjRegistry.GetNb();i++)
+      gOptimizationObjRegistry.GetObj(i).XMLOutput(out);
    
    out.close();
    
@@ -289,7 +289,7 @@ template void IOCrystFileLoadObject(const string &,const IOCrystTag &,
 template void IOCrystFileLoadObject(const string &,const IOCrystTag &,
                                     PowderPatternDiffraction*);
 template void IOCrystFileLoadObject(const string &,const IOCrystTag &,
-                                    GlobalOptimObj*);
+                                    OptimizationObj*);
                                     
 void IOCrystFileLoadAllObject(const string & filename)
 {

@@ -1,17 +1,13 @@
 /*
-* LibCryst++ : a Crystallographic computing library in C++
+* ObjCryst++ : a Crystallographic computing library in C++
 *
 *  (c) 2000 Vincent FAVRE-NICOLIN
-*           Laboratoire de Cristallographie
-*           24, quai Ernest-Ansermet, CH-1211 Geneva 4, Switzerland
-*  Contact: Vincent.Favre-Nicolin@cryst.unige.ch
-*           Radovan.Cerny@cryst.unige.ch
+*  	vincefn@users.sourceforge.net
 *
 */
 /*
 *  header file for the RefinablePar and RefinableObj classes
 *
-* This is still in early development stages !! Not secure !
 *
 */
 

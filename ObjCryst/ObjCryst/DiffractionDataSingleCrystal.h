@@ -51,6 +51,10 @@ class DiffractionDataSingleCrystal:public ScatteringData
 {
    public:
       DiffractionDataSingleCrystal();
+		/** Constructor, with an assigned crystal structure.
+		*
+		*/
+      DiffractionDataSingleCrystal(Crystal &cryst);
       ~DiffractionDataSingleCrystal();
       virtual DiffractionDataSingleCrystal* CreateCopy()const;
       virtual const string GetClassName() const;
@@ -224,6 +228,12 @@ class DiffractionDataSingleCrystal:public ScatteringData
       /// Scale factor. It is applied when computing intensities. The scale
       ///applies to intensities
       double mScaleFactor;
+   #ifdef __WX__CRYST__
+   public:
+      virtual WXCrystObjBasic* WXCreate(wxWindow*);
+      //friend class WXDiffractionSinglCrystal;
+
+   #endif
 };
 /// Global registry for all PowderPattern objects
 extern ObjRegistry<DiffractionDataSingleCrystal> gDiffractionDataSingleCrystalRegistry;

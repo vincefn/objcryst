@@ -21,9 +21,10 @@
 #include <locale.h>
 
 #include "ObjCryst/IO.h"
-#include "wxCryst/wxCrystal.h"
-#include "wxCryst/wxPowderPattern.h"
-#include "wxCryst/wxGlobalOptimObj.h"
+#include "ObjCryst/Crystal.h"
+#include "ObjCryst/PowderPattern.h"
+#include "ObjCryst/DiffractionDataSingleCrystal.h"
+#include "RefinableObj/GlobalOptimObj.h"
 
 using namespace ObjCryst;
 using namespace std;
@@ -48,6 +49,7 @@ public:
    void OnSave(wxCommandEvent& WXUNUSED(event));
    void OnAddCrystal(wxCommandEvent& WXUNUSED(event));
    void OnAddPowderPattern(wxCommandEvent& WXUNUSED(event));
+   void OnAddSingleCrystalData(wxCommandEvent& WXUNUSED(event));
    void OnAddGlobalOptimObj(wxCommandEvent& WXUNUSED(event));
    void OnSetDebugLevel0(wxCommandEvent& WXUNUSED(event));
    void OnSetDebugLevel1(wxCommandEvent& WXUNUSED(event));
@@ -61,7 +63,7 @@ public:
    void OnSetDebugLevel9(wxCommandEvent& WXUNUSED(event));
    void OnSetDebugLevel10(wxCommandEvent& WXUNUSED(event));
 private:
-   wxScrolledWindow *mpWin1,*mpWin2,*mpWin3;
+   wxScrolledWindow *mpWin1,*mpWin2,*mpWin3,*mpWin4;
     DECLARE_EVENT_TABLE()
 };
 // ----------------------------------------------------------------------------
@@ -77,6 +79,7 @@ enum
    MENU_FILE_SAVE,
    MENU_OBJECT_CREATE_CRYSTAL,
    MENU_OBJECT_CREATE_POWDERSPECTRUM,
+   MENU_OBJECT_CREATE_SINGLECRYSTALDATA,
    MENU_OBJECT_CREATE_GLOBALOPTOBJ,
    MENU_DEBUG_LEVEL0,
    MENU_DEBUG_LEVEL1,
@@ -103,6 +106,7 @@ BEGIN_EVENT_TABLE(WXCrystMainFrame, wxFrame)
    EVT_MENU(MENU_FILE_SAVE, WXCrystMainFrame::OnSave)
    EVT_MENU(MENU_OBJECT_CREATE_CRYSTAL, WXCrystMainFrame::OnAddCrystal)
    EVT_MENU(MENU_OBJECT_CREATE_POWDERSPECTRUM, WXCrystMainFrame::OnAddPowderPattern)
+   EVT_MENU(MENU_OBJECT_CREATE_SINGLECRYSTALDATA, WXCrystMainFrame::OnAddSingleCrystalData)
    EVT_MENU(MENU_OBJECT_CREATE_GLOBALOPTOBJ, WXCrystMainFrame::OnAddGlobalOptimObj)
    EVT_MENU(MENU_DEBUG_LEVEL0, WXCrystMainFrame::OnSetDebugLevel0)
    EVT_MENU(MENU_DEBUG_LEVEL1, WXCrystMainFrame::OnSetDebugLevel1)
@@ -131,8 +135,8 @@ bool MyApp::OnInit()
 
    WXCrystMainFrame *frame ;
    
-   frame = new WXCrystMainFrame("FOX: Free Objects for Xtal structures v1.0.2 (dev)",
-                                 wxPoint(50, 50), wxSize(450, 340));
+   frame = new WXCrystMainFrame("FOX: Free Objects for Xtal structures v1.0.3 (dev)",
+                                 wxPoint(50, 50), wxSize(550, 400));
 
    return TRUE;
 }
@@ -162,8 +166,10 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
                            "Add a new Crystal structure");
          objectMenu->Append(MENU_OBJECT_CREATE_POWDERSPECTRUM, "New PowderPattern",
                            "Add a new PowderPattern Object");
-         objectMenu->Append(MENU_OBJECT_CREATE_GLOBALOPTOBJ, "New Global Optimization Object",
-                           "Add a new Global Optimization Object");
+         objectMenu->Append(MENU_OBJECT_CREATE_SINGLECRYSTALDATA, "New Single Crystal Diffraction",
+                           "Add a new Single Crystal Diffraction Object");
+         objectMenu->Append(MENU_OBJECT_CREATE_GLOBALOPTOBJ, "New Monte-Carlo Object",
+                           "Add a new Monte-Carlo Object");
       
       wxMenu *helpMenu = new wxMenu;
          helpMenu->Append(MENU_HELP_ABOUT, "&About...", "About ObjCryst...");
@@ -296,7 +302,7 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
       gCrystalRegistry.WXCreate(mpWin1);
       notebook->AddPage(mpWin1, "Crystals", TRUE);
 
-   // Second window - DiffractionData
+   // Second window - PowderPattern
       wxScrolledWindow *mpWin2 = new wxScrolledWindow(notebook, -1);
       mpWin2->SetScrollbars( 10, 10, 0, 500 );
       //wxBoxSizer * sizer2=new wxBoxSizer(wxVERTICAL);
@@ -305,16 +311,27 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
       //win2->SetAutoLayout(true);
       gPowderPatternRegistry.WXCreate(mpWin2);
       notebook->AddPage(mpWin2,"Powder Diffraction",true);
-      
-   // Third window - Global Optimization
+		
+   // Third window - SingleCrystal
       wxScrolledWindow *mpWin3 = new wxScrolledWindow(notebook, -1);
       mpWin3->SetScrollbars( 10, 10, 0, 500 );
       //wxBoxSizer * sizer3=new wxBoxSizer(wxVERTICAL);
-      //sizer3->Add(gGlobalOptimObjRegistry.WXCreate(mpWin3));
+      //sizer3->Add(gPowderPatternRegistry.WXCreate(mpWin3));
       //mpWin3->SetSizer(sizer3);
-      //mpWin3->SetAutoLayout(true);
-      gGlobalOptimObjRegistry.WXCreate(mpWin3);
-      notebook->AddPage(mpWin3,"Global Optimization",true);
+      //win3->SetAutoLayout(true);
+		gDiffractionDataSingleCrystalRegistry.WXCreate(mpWin3);
+      notebook->AddPage(mpWin3,"Single Crystal Diffraction",true);
+      
+   // Fourth window - Global Optimization
+      wxScrolledWindow *mpWin4 = new wxScrolledWindow(notebook, -1);
+      mpWin4->SetScrollbars( 10, 10, 0, 500 );
+      //wxBoxSizer * sizer4=new wxBoxSizer(wxVERTICAL);
+      //sizer4->Add(gOptimizationObjRegistry.WXCreate(mpWin4));
+      //mpWin4->SetSizer(sizer4);
+      //mpWin4->SetAutoLayout(true);
+      gOptimizationObjRegistry.WXCreate(mpWin4);
+      notebook->AddPage(mpWin4,"Global Optimization",true);
+		
    this->Show(TRUE);
    this->Layout();
    //Splash Screen
@@ -392,11 +409,23 @@ void WXCrystMainFrame::OnAddPowderPattern(wxCommandEvent& WXUNUSED(event))
    obj=new PowderPattern;
    obj->SetName("Change Me!");
 }
+
+void WXCrystMainFrame::OnAddSingleCrystalData(wxCommandEvent& WXUNUSED(event))
+{
+   int choice;
+   Crystal *cryst=dynamic_cast<Crystal*>
+      (WXDialogChooseFromRegistry(gCrystalRegistry,(wxWindow*)this,
+         "Choose a Crystal Structure:",choice));
+   if(0==cryst) return;
+
+   DiffractionDataSingleCrystal* obj;
+   obj=new DiffractionDataSingleCrystal(*cryst);
+   obj->SetName("Change Me!");
+}
 void WXCrystMainFrame::OnAddGlobalOptimObj(wxCommandEvent& WXUNUSED(event))
 {
-   GlobalOptimObj* obj;
-   obj=new GlobalOptimObj;
-   obj->SetName("Change Me!");
+   MonteCarloObj* obj;
+   obj=new MonteCarloObj("Change Me!");
 }
 void WXCrystMainFrame::OnSetDebugLevel0(wxCommandEvent& WXUNUSED(event))
 {
