@@ -809,9 +809,13 @@ class RefinableObj
       * function. This also affects all sub-objects.
       * \note this may be called several time for some objects which are used by several
       * other objects.
+		*
+		* \param allowApproximations: if true, then the object can use faster
+		* but less precise functions during the optimization. This is useful for
+		* global optimization not using derivatives.
       */
-      virtual void BeginOptimization();
-      /** This should be called by any optimization class at the begining of an optimization
+      virtual void BeginOptimization(const bool allowApproximations=false);
+      /** This should be called by any optimization class at the end of an optimization
       *
       * This also affects all sub-objects.
       * \note this may be called several time for some objects which are used by several

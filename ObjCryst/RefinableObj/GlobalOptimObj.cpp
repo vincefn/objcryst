@@ -385,7 +385,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
    TAU_PROFILE("MonteCarloObj::Optimize()","void (long)",TAU_DEFAULT);
    VFN_DEBUG_ENTRY("MonteCarloObj::Optimize()",5)
    if(!silent) mRefParList.Print();
-   for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).BeginOptimization();
+   for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).BeginOptimization(true);
    this->PrepareRefParList();
    if(!silent) mRefParList.Print();
    mNbTrial=0;

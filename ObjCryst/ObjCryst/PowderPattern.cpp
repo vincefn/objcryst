@@ -155,10 +155,6 @@ Error opening file for input:"+filename);
    VFN_DEBUG_MESSAGE("PowderPatternBackground::ImportUserBackground():finished",5)
 }
 
-void PowderPatternBackground::SetUseFastLessPreciseFunc(const bool useItOrNot)
-{//:TODO
-}
-
 void PowderPatternBackground::SetUseOnlyLowAngleData(const bool useOnlyLowAngle,
                                                       const REAL angle)
 {
@@ -335,11 +331,6 @@ void PowderPatternDiffraction::SetReflectionProfilePar(const ReflectionProfileTy
    mClockProfilePar.Click();
 }
 
-void PowderPatternDiffraction::SetUseFastLessPreciseFunc(const bool useItOrNot)
-{
-   this->ScatteringData::SetUseFastLessPreciseFunc(useItOrNot);
-}
-
 void PowderPatternDiffraction::SetUseOnlyLowAngleData(const bool useOnlyLowAngle,
                                                        const REAL angle)
 {
@@ -404,6 +395,22 @@ void PowderPatternDiffraction::GenHKLFullSpace()
 {
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::GenHKLFullSpace():",3)
    this->ScatteringData::GenHKLFullSpace(mpParentPowderPattern->Get2ThetaMax()/2,true);
+}
+void PowderPatternDiffraction::BeginOptimization(const bool allowApproximations)
+{
+	if(mUseFastLessPreciseFunc!=allowApproximations)
+	{
+		mClockProfileCalc.Reset();
+	}
+	this->ScatteringData::BeginOptimization(allowApproximations);
+}
+void PowderPatternDiffraction::EndOptimization()
+{
+	if(mUseFastLessPreciseFunc==true)
+	{
+		mClockProfileCalc.Reset();
+	}
+	this->ScatteringData::EndOptimization();
 }
 void PowderPatternDiffraction::GetGeneGroup(const RefinableObj &obj,
 										  CrystVector_uint & groupIndex,
@@ -604,8 +611,11 @@ Computing Widths",5)
       fwhm=      mCagliotiW + mCagliotiV*tmp + mCagliotiU*tmp*tmp;
       if(fwhm<1e-10) fwhm=1e-10;
       fwhm=sqrt(fwhm);
-                
-      mSavedPowderReflProfileNbPoint =(long)(mFullProfileWidthFactor
+      if(true==mUseFastLessPreciseFunc)
+      	mSavedPowderReflProfileNbPoint =(long)(mFullProfileWidthFactor
+                                             *fwhm/specStep/2);
+		else
+      	mSavedPowderReflProfileNbPoint =(long)(mFullProfileWidthFactor
                                              *fwhm/specStep);
       VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile():"<<\
       "Profiles half-width="<<mFullProfileWidthFactor*fwhm*RAD2DEG<<" ("<<\
@@ -939,7 +949,6 @@ void PowderPattern::AddPowderPatternComponent(PowderPatternComponent &comp)
    comp.RegisterClient(*this);
    mClockPowderPatternCalc.Reset();
    comp.SetRadiation(mRadiation);
-   comp.SetUseFastLessPreciseFunc(mUseFastLessPreciseFunc);
    mPowderPatternComponentRegistry.Register(comp);
 	//:TODO: check if there are enough scale factors
    //mScaleFactor.resizeAndPreserve(mPowderPatternComponentRegistry.GetNb());
@@ -1032,14 +1041,6 @@ void PowderPattern::SetWavelength(const string &XRayTubeElementName,const REAL a
 }
 
 REAL PowderPattern::GetWavelength()const{return mRadiation.GetWavelength()(0);}
-
-void PowderPattern::SetUseFastLessPreciseFunc(const bool useItOrNot)
-{
-   mUseFastLessPreciseFunc=useItOrNot;
-   for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++)
-      mPowderPatternComponentRegistry.GetObj(i)
-         .SetUseFastLessPreciseFunc(mUseFastLessPreciseFunc);
-}
 
 void PowderPattern::SetUseOnlyLowAngleData(const bool useOnlyLowAngle,const REAL angle)
 {
@@ -2153,7 +2154,7 @@ void PowderPattern::FitScaleFactorForIntegratedR()
       		for(long k=0;k<numInterval;k++)
 				{
 					b += *p1++ * *p2++;
-					cout<<"B:"<<mIntegratedPatternMin(k)<<" "<<mIntegratedPatternMax(k)<<" "<<b<<endl;
+					//cout<<"B:"<<mIntegratedPatternMin(k)<<" "<<mIntegratedPatternMax(k)<<" "<<b<<endl;
 				}
 			else
 			{
@@ -2457,7 +2458,7 @@ void PowderPattern::FitScaleFactorForIntegratedRw()
       		for(long k=0;k<numInterval;k++)
 				{
 					b += *p1++ * *p2++ * *p4++;
-					cout<<"B:"<<mIntegratedPatternMin(k)<<" "<<mIntegratedPatternMax(k)<<" "<<b<<endl;
+					//cout<<"B:"<<mIntegratedPatternMin(k)<<" "<<mIntegratedPatternMax(k)<<" "<<b<<endl;
 				}
 			else
 			{
@@ -2847,7 +2848,7 @@ void PowderPattern::PrepareIntegratedRfactor()const
 		tmp=mIntegratedPatternMax;
 		for(int i=0;i<numInterval;i++) mIntegratedPatternMax(i)=tmp(index(i));
 	}
-	cout<<FormatVertVector<long>(mIntegratedPatternMin,mIntegratedPatternMax)<<endl;
+	//cout<<FormatVertVector<long>(mIntegratedPatternMin,mIntegratedPatternMax)<<endl;
    VFN_DEBUG_MESSAGE("PowderPattern::PrepareIntegratedRfactor():3",3);
 	// Check all intervals are within pattern limits, correct them if necessary,
 	// remove them if necessary (keep=false)
@@ -2952,9 +2953,9 @@ void PowderPattern::PrepareIntegratedRfactor()const
 		mIntegratedWeight(i)=1./mIntegratedWeight(i);
 	}
 
-	cout<<FormatVertVector<REAL>(mIntegratedPatternMin,
-											 mIntegratedPatternMax,
-											 mIntegratedObs,mIntegratedWeight,12,6)<<endl;
+	//cout<<FormatVertVector<REAL>(mIntegratedPatternMin,
+	//										 mIntegratedPatternMax,
+	//										 mIntegratedObs,mIntegratedWeight,12,6)<<endl;
 	mClockIntegratedFactorsPrep.Click();
    VFN_DEBUG_EXIT("PowderPattern::PrepareIntegratedRfactor()",3);
 }

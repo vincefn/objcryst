@@ -47,9 +47,6 @@ class PowderPatternComponent : virtual public RefinableObj
       /// Note that the spectrum is \e not scaled.
 		/// 
       virtual const CrystVector_REAL& GetPowderPatternCalc()const=0;
-      /// Use faster, less precise functions ? Good for global optimizations.
-		/// Currently does nothing.
-      virtual void SetUseFastLessPreciseFunc(const bool useItOrNot)=0;
       /// Set an option so that only low-angle reflections (theta < angle)
       /// are used. See DiffractionData::mUseOnlyLowAngleData
 		/// \deprecated Do not use, as this will probably be removed
@@ -131,7 +128,6 @@ class PowderPatternBackground : public PowderPatternComponent
       virtual const CrystVector_REAL& GetPowderPatternCalc()const;
       /// Import background points from a file (with two columns 2theta, intensity)
       void ImportUserBackground(const string &filename);
-      void SetUseFastLessPreciseFunc(const bool useItOrNot);
       virtual void SetUseOnlyLowAngleData(const bool useOnlyLowAngle,const REAL angle=0);
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
@@ -210,7 +206,6 @@ class PowderPatternDiffraction : public PowderPatternComponent,public Scattering
                                    const REAL fwhmCagliotiV=0,
                                    const REAL eta0=0.5,
                                    const REAL eta1=0.);
-      void SetUseFastLessPreciseFunc(const bool useItOrNot);
       virtual void SetUseOnlyLowAngleData(const bool useOnlyLowAngle,const REAL angle=0);
       virtual void GenHKLFullSpace();
       virtual void XMLOutput(ostream &os,int indent=0)const;
@@ -219,6 +214,8 @@ class PowderPatternDiffraction : public PowderPatternComponent,public Scattering
 		virtual void GetGeneGroup(const RefinableObj &obj, 
 										  CrystVector_uint & groupIndex,
 										  unsigned int &firstGroup) const;
+      virtual void BeginOptimization(const bool allowApproximations=false);
+      virtual void EndOptimization();
    protected:
       virtual void CalcPowderPattern() const;
       
@@ -420,10 +417,6 @@ class PowderPattern : public RefinableObj
          REAL GetWavelength()const;
       
       // Options to go faster...
-         /// Use of faster, less precise approximations to compute the powder spectrums
-			/// This can be useful fot global optimization, but should be avoided
-			/// for precise (eg derivative calculation) work. 
-         void SetUseFastLessPreciseFunc(const bool useItOrNot);
          /** Set an option so that only low-amgle reflections (theta < angle)
          * are used. See DiffractionData::mUseOnlyLowAngleData
 			* \deprecated

@@ -121,7 +121,6 @@ void Atom::Init(const REAL x, const REAL y, const REAL z,
             const string &name, const ScatteringPowerAtom *pow,
             const REAL popu)
 {
-	cout <<"yoyo"<<endl;
    VFN_DEBUG_MESSAGE("Atom::Init():"<<name,3)
    mName=name;
    mpScattPowAtom=pow;

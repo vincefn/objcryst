@@ -284,9 +284,6 @@ class ScatteringData: virtual public RefinableObj
       ///wavelength of the experiment (in Angstroems)
       CrystVector_REAL GetWavelength()const;
       
-      /// Use of faster, less precise approximations to compute structure factors
-      ///and interatomic distances ? (DiffractionData::mUseFastLessPreciseFunc)
-      void SetUseFastLessPreciseFunc(const bool useItOrNot);
       /// If true, then the imaginary part of the scattering factor is ignored during
       /// Structure factor computation. (default value=false)
       ///
@@ -305,6 +302,8 @@ class ScatteringData: virtual public RefinableObj
       */
       virtual void PrintFhklCalc(ostream &os=cout)const;
 
+      virtual void BeginOptimization(const bool allowApproximations=false);
+      virtual void EndOptimization();
    protected:
       /// \internal This function is called after H,K and L arrays have 
       /// been initialized or modified.
@@ -397,7 +396,9 @@ class ScatteringData: virtual public RefinableObj
       
       ///Use faster, but less precise, approximations for functions? (integer
       ///approximations to compute sin and cos in structure factors, and also
-      ///to compute interatomic distances)
+      ///to compute interatomic distances).
+		/// This is activated by global optimization algortithms, only during the 
+		/// optimization.
       bool mUseFastLessPreciseFunc;
       
       //The Following members are only kept to avoid useless re-computation

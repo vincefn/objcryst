@@ -82,8 +82,8 @@ static REAL sLibCrystTabulCosineRatio;
 void InitLibCrystTabulCosine();
 // Number of tabulated values of cosine between [0;2pi]
 // 100 000 is far enough for a model search, yielding a maximum
-// error less than .05%
-static const long sLibCrystNbTabulSine=100000;
+// error less than .05%... 10000 should be enough, too, with (probably) a higher cache hit
+static const long sLibCrystNbTabulSine=10000;
 //storage of tabulated values of cosine and sine
 static REAL *spLibCrystTabulCosine;
 static REAL *spLibCrystTabulSine;
@@ -681,13 +681,14 @@ void ScatteringData::SetEnergy(const REAL energy)
    this->SetWavelength(12398.4/energy);
 }
 CrystVector_REAL ScatteringData::GetWavelength()const {return mRadiation.GetWavelength();}
-
+#if 0
 void ScatteringData::SetUseFastLessPreciseFunc(const bool useItOrNot)
 {
    mUseFastLessPreciseFunc=useItOrNot;
    mClockGeomStructFact.Reset();
    mClockStructFactor.Reset();
 }
+#endif
 void ScatteringData::SetIsIgnoringImagScattFact(const bool b)
 {
    mIgnoreImagScattFact=b;
@@ -709,6 +710,26 @@ void ScatteringData::PrintFhklCalc(ostream &os)const
    os << FormatVertVectorHKLFloats<REAL>
                (mH,mK,mL,mFhklCalcSq,mFhklCalcReal,mFhklCalcImag,theta,mSinThetaLambda,12,4);
    VFN_DEBUG_EXIT("ScatteringData::PrintFhklCalc()",5)
+}
+void ScatteringData::BeginOptimization(const bool allowApproximations)
+{
+	if(mUseFastLessPreciseFunc!=allowApproximations)
+	{
+   	mClockGeomStructFact.Reset();
+   	mClockStructFactor.Reset();
+	}
+	mUseFastLessPreciseFunc=allowApproximations;
+	this->RefinableObj::BeginOptimization(allowApproximations);
+}
+void ScatteringData::EndOptimization()
+{
+	if(mUseFastLessPreciseFunc==true)
+	{
+   	mClockGeomStructFact.Reset();
+   	mClockStructFactor.Reset();
+	}
+	mUseFastLessPreciseFunc=false;
+	this->RefinableObj::EndOptimization();
 }
 
 void ScatteringData::PrepareHKLarrays()
@@ -911,7 +932,6 @@ void ScatteringData::PrepareCalcStructFactor()const
       for(long i=0;i<nbComponent;i++)
       {  
          tmp=(*mpScattCompList)(i).mpScattPow->GetScatteringPowerId()+1;
-         //cout << "YOYO"<<tmp<<endl;
          if(tmp>nbScatteringPower) nbScatteringPower=tmp;
       }
       

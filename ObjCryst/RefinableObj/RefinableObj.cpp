@@ -1394,12 +1394,12 @@ void RefinableObj::DeRegisterClient(RefinableObj &obj)const
 
 bool RefinableObj::IsBeingRefined()const {return mIsbeingRefined;}
 
-void RefinableObj::BeginOptimization()
+void RefinableObj::BeginOptimization(const bool allowApproximations)
 {
    mIsbeingRefined=true;
    this->Prepare();
    for(int i=0;i<mSubObjRegistry.GetNb();i++)
-      mSubObjRegistry.GetObj(i).BeginOptimization();
+      mSubObjRegistry.GetObj(i).BeginOptimization(allowApproximations);
    #ifdef __WX__CRYST__
    if(0!=mpWXCrystObj) mpWXCrystObj->Enable(false);
    #endif
