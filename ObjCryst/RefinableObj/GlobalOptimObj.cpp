@@ -424,7 +424,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
       if(mSaveDetailledHistory.GetChoice()>0)
       {
          outHistory.open(mHistorySaveFileName.c_str());
-         outHistory << "Trial World Accept OverallCost ";
+         outHistory << "Trial World origWorld Accept OverallCost ";
          for(long j=0;j<mRefParList.GetNbParNotFixed();j++)
             outHistory << mRefParList.GetParNotFixed(j).GetName() << " ";
          outHistory <<endl;
@@ -661,6 +661,8 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
          // world must be i=nbWorld-1, and the most changing World (high mutation,
          // high temperature) is i=0.
             const long nbWorld=30;
+            CrystVector_long worldSwapIndex(nbWorld);
+            for(int i=0;i<nbWorld;++i) worldSwapIndex(i)=i;
          // Number of successive trials for each World. At the end of these trials
          // a swap is tried with the upper World (eg i-1). This number effectvely sets
          // the rate of swapping.
@@ -786,7 +788,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                         this->TagNewBestConfig();
                         mRefParList.SaveParamSet(mBestParSavedSetIndex);
                         if(!silent) cout << "->Trial :" << mNbTrial 
-                                         << " World="<< i
+                                         << " World="<< worldSwapIndex(i)
                                          << " Temp="<< mTemperature
                                          << " Mutation Ampl.: "<<mMutationAmplitude
                                          << " NEW Best Cost="<<mBestCost<< endl;
@@ -815,10 +817,10 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                      {
                         if(accept==2)
                         {
-                           outHistory << mNbTrial <<" "<<i<<" "<<accept<<" "
-                                      <<this->GetLogLikelihood()<<" ";
-                           for(long j=0;j<mRefParList.GetNbParNotFixed();j++) 
-                              outHistory << " "<< mRefParList.GetParNotFixed(j).GetHumanValue() ;
+                           outHistory << mNbTrial <<" "<<i<<" "<<worldSwapIndex(i)<<" "<<accept<<" "
+                                      <<currentCost(i)<<" ";
+                           //for(long j=0;j<mRefParList.GetNbParNotFixed();j++) 
+                           //   outHistory << " "<< mRefParList.GetParNotFixed(j).GetHumanValue() ;
                            outHistory <<endl;
                         }
                         break;
@@ -827,20 +829,20 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                      {
                         if(accept>0)
                         {
-                           outHistory << mNbTrial <<" "<<i<<" "<<accept<<" "
-                                      <<this->GetLogLikelihood()<<" ";
-                           for(long j=0;j<mRefParList.GetNbParNotFixed();j++) 
-                              outHistory << " "<< mRefParList.GetParNotFixed(j).GetHumanValue() ;
+                           outHistory << mNbTrial <<" "<<i<<" "<<worldSwapIndex(i)<<" "<<accept<<" "
+                                      <<currentCost(i)<<" ";
+                           //for(long j=0;j<mRefParList.GetNbParNotFixed();j++) 
+                           //   outHistory << " "<< mRefParList.GetParNotFixed(j).GetHumanValue() ;
                            outHistory <<endl;
                         }
                         break;
                      }
                      case 3: 
                      {
-                        outHistory << mNbTrial <<" "<<i<<" "<<accept<<" "
-                                   <<this->GetLogLikelihood()<<" ";
-                        for(long j=0;j<mRefParList.GetNbParNotFixed();j++) 
-                           outHistory << " "<< mRefParList.GetParNotFixed(j).GetHumanValue() ;
+                        outHistory << mNbTrial <<" "<<i<<" "<<worldSwapIndex(i)<<" "<<accept<<" "
+                                   <<currentCost(i)<<" ";
+                        //for(long j=0;j<mRefParList.GetNbParNotFixed();j++) 
+                        //   outHistory << " "<< mRefParList.GetParNotFixed(j).GetHumanValue() ;
                         outHistory <<endl;
                         break;
                      }
@@ -890,6 +892,9 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                   const REAL tmp=currentCost(i);
                   currentCost(i)=currentCost(i-1);
                   currentCost(i-1)=tmp;
+                  const long tmpIndex=worldSwapIndex(i);
+                  worldSwapIndex(i)=worldSwapIndex(i-1);
+                  worldSwapIndex(i-1)=tmpIndex;
                }
             }
             #if 0
@@ -985,7 +990,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                            this->TagNewBestConfig();
                            mRefParList.SaveParamSet(mBestParSavedSetIndex);
                            if(!silent) cout << "->Trial :" << mNbTrial 
-                                << " World="<< k
+                                << " World="<< worldSwapIndex(k)
                                 << " Temp="<< simAnnealTemp(k)
                                 << " Mutation Ampl.: "<<mMutationAmplitude
                                 << " NEW Best Cost="<<mBestCost<< "(MATING !)"<<endl;
@@ -1064,7 +1069,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                   #if 1 //def __DEBUG__
                   for(int i=0;i<nbWorld;i++)
                   {
-                     cout<<"   World :"<<i<<":";
+                     cout<<"   World :"<<worldSwapIndex(i)<<":";
                      map<const RefinableObj*,LogLikelihoodStats>::iterator pos;
                      for(pos=mvContextObjStats[i].begin();pos!=mvContextObjStats[i].end();++pos)
                      {
@@ -1086,7 +1091,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                   for(int i=0;i<nbWorld;i++)
                   {
                      //mRefParList.RestoreParamSet(worldCurrentSetIndex(i));
-                     cout <<"   World :" << i
+                     cout <<"   World :" << worldSwapIndex(i)
                           <<" Temp.: " << simAnnealTemp(i)
                           <<" Mutation Ampl.: " << mutationAmplitude(i)
                           <<" Current Cost=" << currentCost(i)
