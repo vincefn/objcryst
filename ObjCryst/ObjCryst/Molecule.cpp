@@ -2609,7 +2609,7 @@ void Molecule::InitOptions()
    }
    mFlexModel.Init(5,&Flexname,Flexchoices);
    mFlexModel.SetChoice(0);
-   this->AddOption(&mFlexModel);
+   //this->AddOption(&mFlexModel);
    
    VFN_DEBUG_EXIT("Molecule::InitOptions",10)
 }
