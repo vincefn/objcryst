@@ -15,7 +15,7 @@ $(TARGET).exe: $(OBJECTS) $(TARGET).res libsglite libatominfo libnewmat libCryst
 	ilink32 $(LINKFLAGS) @&&!
 c0w32.obj $(OBJECTS)
 $(TARGET)
-nul
+
 $(LINKLIBS)
 
 $(TARGET).res
