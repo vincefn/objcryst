@@ -299,12 +299,12 @@ REAL MolBondAngle::GetLogLikelihood()const
    }
    return 0;
 }
-const MolAtom& MolBondAngle::GetAtom1()const{return *(mvpAtom.at(0));}
-const MolAtom& MolBondAngle::GetAtom2()const{return *(mvpAtom.at(1));}
-const MolAtom& MolBondAngle::GetAtom3()const{return *(mvpAtom.at(2));}
-//MolAtom& MolBondAngle::GetAtom1(){return *(mvpAtom.at(0));}
-//MolAtom& MolBondAngle::GetAtom2(){return *(mvpAtom.at(1));}
-//MolAtom& MolBondAngle::GetAtom3(){return *(mvpAtom.at(2));}
+const MolAtom& MolBondAngle::GetAtom1()const{return *(mvpAtom[0]);}
+const MolAtom& MolBondAngle::GetAtom2()const{return *(mvpAtom[1]);}
+const MolAtom& MolBondAngle::GetAtom3()const{return *(mvpAtom[2]);}
+//MolAtom& MolBondAngle::GetAtom1(){return *(mvpAtom[0]);}
+//MolAtom& MolBondAngle::GetAtom2(){return *(mvpAtom[1]);}
+//MolAtom& MolBondAngle::GetAtom3(){return *(mvpAtom[2]);}
 //######################################################################
 //
 //      MolDihedralAngle
@@ -414,10 +414,10 @@ REAL MolDihedralAngle::GetLogLikelihood()const
    return 0;
 }
 
-const MolAtom& MolDihedralAngle::GetAtom1()const{return *(mvpAtom.at(0));}
-const MolAtom& MolDihedralAngle::GetAtom2()const{return *(mvpAtom.at(1));}
-const MolAtom& MolDihedralAngle::GetAtom3()const{return *(mvpAtom.at(2));}
-const MolAtom& MolDihedralAngle::GetAtom4()const{return *(mvpAtom.at(3));}
+const MolAtom& MolDihedralAngle::GetAtom1()const{return *(mvpAtom[0]);}
+const MolAtom& MolDihedralAngle::GetAtom2()const{return *(mvpAtom[1]);}
+const MolAtom& MolDihedralAngle::GetAtom3()const{return *(mvpAtom[2]);}
+const MolAtom& MolDihedralAngle::GetAtom4()const{return *(mvpAtom[3]);}
 //MolAtom& MolDihedralAngle::GetAtom1();
 //MolAtom& MolDihedralAngle::GetAtom2();
 //MolAtom& MolDihedralAngle::GetAtom3();
@@ -673,7 +673,7 @@ const ScatteringComponentList& Molecule::GetScatteringComponentList() const
 
 string Molecule::GetComponentName(const int i) const
 {
-   return mvAtom.at(i).GetScatteringPower().GetName();
+   return mvAtom[i].GetScatteringPower().GetName();
 } 
 
 ostream& Molecule::POVRayDescription(ostream &os,const bool noSymmetrics)const
@@ -725,9 +725,9 @@ void Molecule::AddDihedralAngle(MolAtom &atom1, MolAtom &atom2, MolAtom &atom3, 
    VFN_DEBUG_EXIT("Molecule::AddDihedralAngle()",5)
 }
 
-MolAtom &Molecule::GetAtom(unsigned int i){return mvAtom.at(i);}
+MolAtom &Molecule::GetAtom(unsigned int i){return mvAtom[i];}
 
-const MolAtom &Molecule::GetAtom(unsigned int i)const{return mvAtom.at(i);}
+const MolAtom &Molecule::GetAtom(unsigned int i)const{return mvAtom[i];}
 
 void MinimizeConfiguration()
 {
@@ -752,11 +752,11 @@ void Molecule::UpdateScattCompList()const
    // Get internal coords
    for(long i;i<this->GetNbComponent();++i)
    {
-      mScattCompList(i).mpScattPow=&(mvAtom.at(i).GetScatteringPower());
-      mScattCompList(i).mX=mvAtom.at(i).GetX();
-      mScattCompList(i).mY=mvAtom.at(i).GetX();
-      mScattCompList(i).mZ=mvAtom.at(i).GetX();
-      mScattCompList(i).mOccupancy=mvAtom.at(i).GetOccupancy();
+      mScattCompList(i).mpScattPow=&(mvAtom[i].GetScatteringPower());
+      mScattCompList(i).mX=mvAtom[i].GetX();
+      mScattCompList(i).mY=mvAtom[i].GetX();
+      mScattCompList(i).mZ=mvAtom[i].GetX();
+      mScattCompList(i).mOccupancy=mvAtom[i].GetOccupancy();
    }
    // translate center to (0,0,0)
    {

@@ -812,7 +812,7 @@ const ScatteringComponent& ScatteringComponentList::operator()(const long i) con
       throw ObjCrystException("ScatteringComponentList::operator()(i)::i>mNbComponent!!");
    }
    if(i<0) throw ObjCrystException("ScatteringComponentList::operator()&(i)::i<0!!");
-   return mvScattComp.at(i);
+   return mvScattComp[i];
 }
 
 ScatteringComponent& ScatteringComponentList::operator()(const long i)
@@ -824,7 +824,7 @@ ScatteringComponent& ScatteringComponentList::operator()(const long i)
       throw ObjCrystException("ScatteringComponentList::operator()&(i)::i>mNbComponent!!");
    }
    if(i<0) throw ObjCrystException("ScatteringComponentList::operator()&(i):: i<0!!");
-   return mvScattComp.at(i);
+   return mvScattComp[i];
 }
 
 long ScatteringComponentList::GetNbComponent() const {return mvScattComp.size();}

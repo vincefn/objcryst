@@ -886,38 +886,38 @@ template<class T> void ObjRegistry<T>::DeleteAll()
 
 template<class T> T& ObjRegistry<T>::GetObj(const unsigned int i)
 {
-   return *(mvpRegistry.at(i));
+   return *(mvpRegistry[i]);
 }
 
 template<class T> const T& ObjRegistry<T>::GetObj(const unsigned int i) const
 {
-   return *(mvpRegistry.at(i));
+   return *(mvpRegistry[i]);
 }
 
 template<class T> T& ObjRegistry<T>::GetObj(const string &objName)
 {
    const long i=this->Find(objName);
-   return *(mvpRegistry.at(i));
+   return *(mvpRegistry[i]);
 }
 
 template<class T> const T& ObjRegistry<T>::GetObj(const string &objName) const
 {
    const long i=this->Find(objName);
-   return *(mvpRegistry.at(i));
+   return *(mvpRegistry[i]);
 }
 
 template<class T> T& ObjRegistry<T>::GetObj(const string &objName,
                                                   const string& className)
 {
    const long i=this->Find(objName,className);
-   return *(mvpRegistry.at(i));
+   return *(mvpRegistry[i]);
 }
 
 template<class T> const T& ObjRegistry<T>::GetObj(const string &objName,
                                                         const string& className) const
 {
    const long i=this->Find(objName,className);
-   return *(mvpRegistry.at(i));
+   return *(mvpRegistry[i]);
 }
 
 template<class T> long ObjRegistry<T>::GetNb()const{return (long)mvpRegistry.size();}
@@ -941,7 +941,7 @@ template<class T> long ObjRegistry<T>::Find(const string &objName) const
    long index=-1;
    //bool error=false;
    for(long i=this->GetNb()-1;i>=0;i--) 
-      if( mvpRegistry.at(i)->GetName() == objName) return i;
+      if( mvpRegistry[i]->GetName() == objName) return i;
    //      if(-1 != index) error=true ;else index=i;
    //if(true == error)
    //{
@@ -965,8 +965,8 @@ template<class T> long ObjRegistry<T>::Find(const string &objName,
    long index=-1;
    //bool error=false;
    for(long i=this->GetNb()-1;i>=0;i--) 
-      if( mvpRegistry.at(i)->GetName() == objName) 
-         if(className==mvpRegistry.at(i)->GetClassName()) return i;
+      if( mvpRegistry[i]->GetName() == objName) 
+         if(className==mvpRegistry[i]->GetClassName()) return i;
    //      if(-1 != index) error=true ;else index=i;
    //if(true == error)
    //{
@@ -987,7 +987,7 @@ template<class T> long ObjRegistry<T>::Find(const T &obj) const
 {
    VFN_DEBUG_MESSAGE("ObjRegistry::Find(&obj)",2)
    for(long i=this->GetNb()-1;i>=0;i--) 
-      if( mvpRegistry.at(i)== &obj)  return i;
+      if( mvpRegistry[i]== &obj)  return i;
    //:TODO: throw something
    return -1;
 }
@@ -1227,12 +1227,12 @@ long RefinableObj::GetNbParNotFixed()const {return mNbRefParNotFixed;}
 
 RefinablePar& RefinableObj::GetPar(const long i)
 {
-   return *(mvpRefPar.at(i));
+   return *(mvpRefPar[i]);
 }
 
 const RefinablePar& RefinableObj::GetPar(const long i) const
 {
-   return *(mvpRefPar.at(i));
+   return *(mvpRefPar[i]);
 }
 
 RefinablePar& RefinableObj::GetPar(const string & name)
@@ -1246,7 +1246,7 @@ RefinablePar& RefinableObj::GetPar(const string & name)
       return *p; //:KLUDGE: !
       //throw 0;
    }
-   return *(mvpRefPar.at(i));
+   return *(mvpRefPar[i]);
 }
 
 const RefinablePar& RefinableObj::GetPar(const string & name) const
@@ -1260,7 +1260,7 @@ const RefinablePar& RefinableObj::GetPar(const string & name) const
       return *p; //:KLUDGE: !
       //throw 0;
    }
-   return *(mvpRefPar.at(i));
+   return *(mvpRefPar[i]);
 }
 
 RefinablePar& RefinableObj::GetPar(const REAL *p)
@@ -1274,7 +1274,7 @@ RefinablePar& RefinableObj::GetPar(const REAL *p)
       return *p; //:KLUDGE: !
       //throw 0;
    }
-   return *(mvpRefPar.at(i));
+   return *(mvpRefPar[i]);
 }
 
 const RefinablePar& RefinableObj::GetPar(const REAL *p) const
@@ -1288,17 +1288,17 @@ const RefinablePar& RefinableObj::GetPar(const REAL *p) const
       return *p; //:KLUDGE: !
       //throw 0;
    }
-   return *(mvpRefPar.at(i));
+   return *(mvpRefPar[i]);
 }
 
 RefinablePar& RefinableObj::GetParNotFixed(const long i)
 {
-   return *(mvpRefPar.at(mRefparNotFixedIndex(i)));
+   return *(mvpRefPar[mRefparNotFixedIndex(i)]);
 }
 
 const RefinablePar& RefinableObj::GetParNotFixed(const long i) const
 {
-   return *(mvpRefPar.at(mRefparNotFixedIndex(i)));
+   return *(mvpRefPar[mRefparNotFixedIndex(i)]);
 }
 
 void RefinableObj::AddPar(const RefinablePar &newRefPar)
