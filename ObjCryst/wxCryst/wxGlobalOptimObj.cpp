@@ -4,6 +4,10 @@
 #include "wx/wx.h"
 #include "wxCryst/wxGlobalOptimObj.h"
 
+// Next two just to fix some parameters during global optimization
+#include "ObjCryst/Crystal.h"
+#include "ObjCryst/ScatteringData.h"
+
 //Fixes for Cygwin; where do those stupid macros come from ? Somewhere in wxMSW headers
 #ifdef max
 #undef max
@@ -279,6 +283,11 @@ void WXMonteCarloObj::OnRunOptimization()
    	VFN_DEBUG_EXIT("WXGeneticAlgorithm::OnRunOptimization()",6)
       return;
    }
+	
+	//Fix parameters than really should not be global-optimized
+		mpMonteCarloObj->SetParIsFixed(gpRefParTypeUnitCell,true);
+		mpMonteCarloObj->SetParIsFixed(gpRefParTypeScattDataProfile,true);
+	
 	double finalCost=0;
 	if(mNbTrial<0)
 	{
