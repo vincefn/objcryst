@@ -877,7 +877,7 @@ Computing all Profiles: Reflection #"<<i,2)
       //:KLUDGE: Need to use the same 'thetaPt' when calculating the complete powder spectrum
       thetaPt =(long) ((2*tmp-specMin)/specStep);
       tmp2theta = ttheta;
-      tmp2theta += 2*tmp-(specMin + thetaPt * specStep);
+      tmp2theta += (specMin + thetaPt * specStep)-2*tmp;
       
       label.str("");
       label<<mIntH(i)<<" "<<mIntK(i)<<" "<<mIntL(i);
