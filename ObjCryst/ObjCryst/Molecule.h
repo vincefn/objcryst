@@ -631,6 +631,14 @@ class Molecule: public Scatterer
       /// molecule: rigid body, free atoms + restraints, torsion angles...
       /// \warning still EXPERIMENTAL !
       RefObjOpt mFlexModel;
+
+      /** Option to automatically optimize the starting conformation, if the
+      * total restraint cost is too high. This is done in BeginOptimization().
+      *
+      * This is enabled by default, and should be disabled by people who already
+      * supply a good starting conformation for their molecule.
+      */
+      RefObjOpt mAutoOptimizeConformation;
       
       /// Connectivity table: for each atom, keep the list of atoms
       /// bonded to it. All atoms are referenced from their index.

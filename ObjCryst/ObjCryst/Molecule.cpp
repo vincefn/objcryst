@@ -1302,7 +1302,9 @@ void Molecule::XMLInput(istream &is,const XMLCrystTag &tag)
 void Molecule::BeginOptimization(const bool allowApproximations,const bool enableRestraints)
 {
    #if 1 // Is doing this automatically too dangerous ?
-   if((!mIsSelfOptimizing) &&(this->GetLogLikelihood()>(mvpRestraint.size()*500)))
+   if(  (!mIsSelfOptimizing)
+      &&(this->GetLogLikelihood()>(mvpRestraint.size()*500))
+      &&(mAutoOptimizeConformation.GetChoice()==0))
    {
       (*fpObjCrystInformUser)("Optimizing initial conformation of Molecule:"+this->GetName());
       this->OptimizeConformation(100000,(REAL)(mvpRestraint.size()));
@@ -1323,7 +1325,9 @@ void Molecule::BeginOptimization(const bool allowApproximations,const bool enabl
 void Molecule::RandomizeConfiguration()
 {
    VFN_DEBUG_ENTRY("Molecule::RandomizeConfiguration()",4)
-   if((!mIsSelfOptimizing) &&(this->GetLogLikelihood()>(mvpRestraint.size()*50)))
+   if(  (!mIsSelfOptimizing)
+      &&(this->GetLogLikelihood()>(mvpRestraint.size()*500))
+      &&(mAutoOptimizeConformation.GetChoice()==0))
    {
       (*fpObjCrystInformUser)("Optimizing initial conformation of Molecule:"+this->GetName());
       this->OptimizeConformation(100000,(REAL)(mvpRestraint.size()));
@@ -2796,6 +2800,9 @@ void Molecule::InitOptions()
    VFN_DEBUG_ENTRY("Molecule::InitOptions",10)
    static string Flexname;
    static string Flexchoices[3];
+
+   static string autoOptimizeConformationName;
+   static string autoOptimizeConformationChoices[2];
    
    static bool needInitNames=true;
    if(true==needInitNames)
@@ -2807,11 +2814,19 @@ void Molecule::InitOptions()
       //Flexchoices[3]="Rigid body (relaxed)";
       //Flexchoices[4]="Torsion Angles (relaxed)";
       
+      autoOptimizeConformationName="Auto Optimize Starting Conformation";
+      autoOptimizeConformationChoices[0]="Yes";
+      autoOptimizeConformationChoices[1]="No";
+      
       needInitNames=false;
    }
    mFlexModel.Init(3,&Flexname,Flexchoices);
    mFlexModel.SetChoice(0);
    //this->AddOption(&mFlexModel);
+   
+   mAutoOptimizeConformation.Init(2,&autoOptimizeConformationName,
+                                  autoOptimizeConformationChoices);
+   this->AddOption(&mAutoOptimizeConformation);
    
    VFN_DEBUG_EXIT("Molecule::InitOptions",10)
 }
