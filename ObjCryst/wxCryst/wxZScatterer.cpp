@@ -140,6 +140,7 @@ void WXZAtom::OnChangeScattPow(wxCommandEvent & WXUNUSED(event))
    if(0==scatt) return;
    mpZAtom->SetScatteringPower(scatt);
    this->CrystUpdate();
+	this->UpdateUI();
 }
 ////////////////////////////////////////////////////////////////////////
 //
