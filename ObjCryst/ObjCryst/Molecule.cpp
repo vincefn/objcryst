@@ -977,10 +977,80 @@ mIsSelfOptimizing(false)
    this->InitOptions();
 }
 
-Molecule::Molecule(const Molecule &old)
+Molecule::Molecule(const Molecule &old):
+mIsSelfOptimizing(false)
 {
-   VFN_DEBUG_MESSAGE("Molecule::Molecule(old&)",5)
-   //:TODO:
+   VFN_DEBUG_ENTRY("Molecule::Molecule(old&)",5)
+   // a hack, but const-correct
+   mpCryst=&(gCrystalRegistry.GetObj(gCrystalRegistry.Find(old.GetCrystal())));
+   {
+      RefinablePar tmp(this->GetName()+"_x",&mXYZ(0),0.,1.,
+                        gpRefParTypeScattTranslX,
+                        REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,1.,1.);
+      tmp.AssignClock(mClockScatterer);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp(this->GetName()+"_y",&mXYZ(1),0,1,
+                        gpRefParTypeScattTranslY,
+                        REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,1.,1.);
+      tmp.AssignClock(mClockScatterer);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp(this->GetName()+"_z",&mXYZ(2),0,1,
+                        gpRefParTypeScattTranslZ,
+                        REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,1.,1.);
+      tmp.AssignClock(mClockScatterer);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp(this->GetName()+"_Occ",&mOccupancy,0,1,
+                        gpRefParTypeScattOccup,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1.,1.);
+      tmp.AssignClock(mClockScatterer);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp(this->GetName()+"Q0",&(mQuat.Q0()),0,1,
+                        gpRefParTypeScattOrient,
+                        REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
+      tmp.AssignClock(mClockScatterer);
+      tmp.SetGlobalOptimStep(0.04);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp(this->GetName()+"Q1",&(mQuat.Q1()),0,1,
+                        gpRefParTypeScattOrient,
+                        REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
+      tmp.AssignClock(mClockScatterer);
+      tmp.SetGlobalOptimStep(0.04);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp(this->GetName()+"Q2",&(mQuat.Q2()),0,1,
+                        gpRefParTypeScattOrient,
+                        REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
+      tmp.AssignClock(mClockScatterer);
+      tmp.SetGlobalOptimStep(0.04);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp(this->GetName()+"Q3",&(mQuat.Q3()),0,1,
+                        gpRefParTypeScattOrient,
+                        REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
+      tmp.AssignClock(mClockScatterer);
+      tmp.SetGlobalOptimStep(0.04);
+      this->AddPar(tmp);
+   }
+   mLocalParamSet=this->CreateParamSet("saved parameters for local minimization");
+   this->InitOptions();
+
+   stringstream str;
+   old.XMLOutput(str);
+   XMLCrystTag tag(str);
+   this->XMLInput(str,tag);
+   VFN_DEBUG_EXIT("Molecule::Molecule(old&)",5)
 }
 
 Molecule::~Molecule()
