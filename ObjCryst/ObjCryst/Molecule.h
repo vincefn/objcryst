@@ -544,7 +544,7 @@ class Molecule: public Scatterer
       * No duplicate dihedral angle is generated.
       */
       void RigidifyWithDihedralAngles();
-   private:
+   public:
       virtual void InitRefParList();
       /** Build the list of rings in the molecule.
       *
@@ -566,6 +566,12 @@ class Molecule: public Scatterer
       * to test which RotorGroups are forbidden by restraints (but it should be const).
       */
       void BuildRotorGroup();
+      /** Tune the rotation amplitude for free torsions and for the overall Molecule
+      * Rotation.
+      *
+      * This should be done after Molecule::BuildRotorGroup();
+      */
+      void TuneGlobalOptimRotationAmplitude();
       /** Build the groups of atoms that can be flipped.
       *
       * This is not const because we temporarily modify the molecule conformation
@@ -620,6 +626,12 @@ class Molecule: public Scatterer
       *
       */
       Quaternion mQuat;
+      /** Base Rotation amplitude (in radians) for the Molecule, so that
+      * the average atomic displacement is equal to 0.1 A
+      *
+      * Default=0.02*pi
+      */
+      REAL mBaseRotationAmplitude;
       // Clocks
          RefinableObjClock mClockAtomList;
          RefinableObjClock mClockBondList;
@@ -677,6 +689,14 @@ class Molecule: public Scatterer
          const MolAtom * mpAtom2;
          /// The set of atoms that are to be rotated
          set<unsigned long> mvRotatedAtomList;
+         /** The recommended rotation amplitude, for a base global optimization
+         * displacement, to obtain an average 0.1 Angstroem displacement 
+         * per atom (pi*0.04 by default)
+         *
+         * This is learnt at the beginning of an optimization, i.e. in
+         * Molecule::BuildRotorGroup()
+         */
+         REAL mBaseRotationAmplitude;
       };
       /** List of RotorGroups corresponding to free torsion bonds.
       *

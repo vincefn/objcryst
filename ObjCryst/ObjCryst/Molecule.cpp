@@ -992,7 +992,7 @@ REAL& Quaternion::Q3(){return mQ3;}
 //
 //######################################################################
 Molecule::Molecule(Crystal &cryst, const string &name):
-mIsSelfOptimizing(false)
+mIsSelfOptimizing(false),mBaseRotationAmplitude(M_PI*0.02)
 {
    VFN_DEBUG_MESSAGE("Molecule::Molecule()",5)
    this->SetName(name);
@@ -1354,6 +1354,7 @@ void Molecule::BeginOptimization(const bool allowApproximations,const bool enabl
    if(!mIsSelfOptimizing)
    {
       this->BuildRotorGroup();
+      this->TuneGlobalOptimRotationAmplitude();
       this->BuildFlipGroup();
    }
    this->RefinableObj::BeginOptimization(allowApproximations,enableRestraints);
@@ -1433,7 +1434,7 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
    mClockScatterer.Click();
    if(mOptimizeOrientation.GetChoice()==0)
    {//Rotate around an arbitrary vector
-      static const REAL amp=2.*M_PI/100./RAND_MAX;
+      static const REAL amp=mBaseRotationAmplitude/(REAL)RAND_MAX;
       switch(mFlexModel.GetChoice())
       {// With the flexible approach, use a smaller rotation amplitude
          case 0://Free atoms + restraints
@@ -1453,7 +1454,7 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
          case 2://user-chosen free torsion
          {
             mQuat *= Quaternion::RotationQuaternion
-                        ((2.*(REAL)rand()-(REAL)RAND_MAX)*amp*mutationAmplitude*2.,
+                        ((2.*(REAL)rand()-(REAL)RAND_MAX)*amp*mutationAmplitude,
                          (REAL)rand(),(REAL)rand(),(REAL)rand());
             break;
          }
@@ -1487,7 +1488,8 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                {//rotate around torsion bonds
                   if((rand()%2)==0) continue;
                   const REAL angle=(2.*(REAL)rand()-(REAL)RAND_MAX)
-                                   *M_PI/25./(REAL)RAND_MAX*mutationAmplitude;
+                                   *pos->mBaseRotationAmplitude
+                                   /(REAL)RAND_MAX*mutationAmplitude;
                   this->RotateAtomGroup(*(pos->mpAtom1),*(pos->mpAtom2),
                                         pos->mvRotatedAtomList,angle,false);
                }
@@ -1496,7 +1498,8 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                {//rotate around torsion bonds (single chain)
                   if((rand()%2)==0) continue;
                   const REAL angle=(2.*(REAL)rand()-(REAL)RAND_MAX)
-                                   *M_PI/25./(REAL)RAND_MAX*mutationAmplitude;
+                                   *pos->mBaseRotationAmplitude
+                                   /(REAL)RAND_MAX*mutationAmplitude;
                   this->RotateAtomGroup(*(pos->mpAtom1),*(pos->mpAtom2),
                                         pos->mvRotatedAtomList,angle,false);
                }
@@ -2611,7 +2614,7 @@ void ExpandAtomGroupRecursive(const unsigned long atom,
 }
 
 Molecule::RotorGroup::RotorGroup(const MolAtom &at1,const MolAtom &at2):
-mpAtom1(&at1),mpAtom2(&at2)
+mpAtom1(&at1),mpAtom2(&at2),mBaseRotationAmplitude(M_PI*0.04)
 {}
 
 void Molecule::BuildRotorGroup()
@@ -2838,6 +2841,8 @@ void Molecule::BuildRotorGroup()
             cout <<" -> free torsion"<<endl;
       }
    }
+   cout<<endl;
+   
    // Label free torsions
    for(vector<MolBond*>::iterator pos=mvpBond.begin();pos!=mvpBond.end();++pos)
       (*pos)->SetFreeTorsion(false);
@@ -2850,6 +2855,175 @@ void Molecule::BuildRotorGroup()
    
    mClockRotorGroup.Click();
    VFN_DEBUG_EXIT("Molecule::BuildRotorGroup()",5)
+}
+
+void Molecule::TuneGlobalOptimRotationAmplitude()
+{
+   // Torsion angles
+   {
+      unsigned long initialConfig=this->CreateParamSet("Initial Configuration");
+      const unsigned int nbTest=100;
+      
+      // This holds the cumulated atomic displacement for nbTest rotations of 0.01 rad
+      map<RotorGroup*,REAL> vDisplacement;//For torsion angles
+      
+      for(list<RotorGroup>::iterator pos=mvRotorGroupTorsion.begin();
+          pos!=mvRotorGroupTorsion.end();++pos) vDisplacement[&(*pos)]=0.0;
+      for(list<RotorGroup>::iterator pos=mvRotorGroupTorsionSingleChain.begin();
+          pos!=mvRotorGroupTorsionSingleChain.end();++pos) vDisplacement[&(*pos)]=0.0;
+      for(list<RotorGroup>::iterator pos=mvRotorGroupInternal.begin();
+          pos!=mvRotorGroupInternal.end();++pos) vDisplacement[&(*pos)]=0.0;
+      
+      REAL displacement=0;//For the global Molecule rotation
+      
+      for(unsigned int j=0;j<nbTest;j++)
+      {
+         // randomize configuration
+            for(list<RotorGroup>::const_iterator pos=mvRotorGroupTorsion.begin();
+                pos!=mvRotorGroupTorsion.end();++pos)
+            {
+               const REAL angle=(REAL)rand()*2.*M_PI/(REAL)RAND_MAX;
+               this->RotateAtomGroup(*(pos->mpAtom1),*(pos->mpAtom2),
+                                     pos->mvRotatedAtomList,angle);
+            }
+            for(list<RotorGroup>::const_iterator pos=mvRotorGroupTorsionSingleChain.begin();
+                pos!=mvRotorGroupTorsionSingleChain.end();++pos)
+            {
+               const REAL angle=(REAL)rand()*2.*M_PI/(REAL)RAND_MAX;
+               this->RotateAtomGroup(*(pos->mpAtom1),*(pos->mpAtom2),
+                                     pos->mvRotatedAtomList,angle);
+            }
+            for(list<RotorGroup>::const_iterator pos=mvRotorGroupInternal.begin();
+                pos!=mvRotorGroupInternal.end();++pos)
+            {
+               const REAL angle=(REAL)rand()*2.*M_PI/(REAL)RAND_MAX;
+               this->RotateAtomGroup(*(pos->mpAtom1),*(pos->mpAtom2),
+                                     pos->mvRotatedAtomList,angle);
+            }
+         // Atomic positions, orthonormal coordinates
+         vector<REAL> x0(this->GetNbComponent());
+         vector<REAL> y0(this->GetNbComponent());
+         vector<REAL> z0(this->GetNbComponent());
+         // Center of molecule coords
+         REAL xc=0.,yc=0.,zc=0.;
+         for(long i=0;i<this->GetNbComponent();++i)
+         {
+            x0[i]=mvpAtom[i]->GetX(); xc += x0[i];
+            y0[i]=mvpAtom[i]->GetY(); yc += y0[i];
+            z0[i]=mvpAtom[i]->GetZ(); zc += z0[i];
+         }
+         xc /= (REAL)(this->GetNbComponent());
+         yc /= (REAL)(this->GetNbComponent());
+         zc /= (REAL)(this->GetNbComponent());
+         // Record displacement amplitude for torsion angles
+         REAL dx,dy,dz;
+         for(unsigned int k=1;k<=3;++k)
+         {
+            list<RotorGroup> *pRotorGroup1;
+            switch(k)
+            {
+               case 1: pRotorGroup1=&mvRotorGroupTorsion;break;
+               case 2: pRotorGroup1=&mvRotorGroupTorsionSingleChain;break;
+               case 3: pRotorGroup1=&mvRotorGroupInternal;break;
+            }
+            for(list<RotorGroup>::iterator pos=pRotorGroup1->begin();
+                pos!=pRotorGroup1->end();++pos)
+            {
+               this->RotateAtomGroup(*(pos->mpAtom1),*(pos->mpAtom2),
+                                     pos->mvRotatedAtomList,pos->mBaseRotationAmplitude,false);
+               for(long i=0;i<this->GetNbComponent();++i)
+               {
+                  dx=x0[i]-mvpAtom[i]->GetX();
+                  dy=y0[i]-mvpAtom[i]->GetY();
+                  dz=z0[i]-mvpAtom[i]->GetZ();
+                  vDisplacement[&(*pos)]+=sqrt(dx*dx+dy*dy+dz*dz);
+               }
+               this->RotateAtomGroup(*(pos->mpAtom1),*(pos->mpAtom2),
+                                     pos->mvRotatedAtomList,-pos->mBaseRotationAmplitude,false);
+            }
+         }
+         // Record displacement amplitude for global rotation, for 10 random rot axis
+         for(unsigned int k=0;k<10;++k)
+         {
+            Quaternion quat=Quaternion::RotationQuaternion
+                        (mBaseRotationAmplitude,(REAL)rand(),(REAL)rand(),(REAL)rand());
+            for(long i=0;i<this->GetNbComponent();++i)
+            {
+               REAL x=x0[i]-xc;
+               REAL y=y0[i]-yc;
+               REAL z=z0[i]-zc;
+               quat.RotateVector(x,y,z);
+               dx=(x0[i]-xc)-x;
+               dy=(y0[i]-yc)-y;
+               dz=(z0[i]-zc)-z;
+               displacement+=sqrt(dx*dx+dy*dy+dz*dz);
+            }
+         }
+      }
+      // Write results and modify base rotation amplitudes
+      for(unsigned int k=1;k<=3;++k)
+      {
+         list<RotorGroup> *pRotorGroup1;
+         switch(k)
+         {
+            case 1: pRotorGroup1=&mvRotorGroupTorsion;break;
+            case 2: pRotorGroup1=&mvRotorGroupTorsionSingleChain;break;
+            case 3: pRotorGroup1=&mvRotorGroupInternal;break;
+         }
+         for(list<RotorGroup>::iterator pos=pRotorGroup1->begin();
+             pos!=pRotorGroup1->end();++pos)
+         {
+            switch(k)
+            {
+               case 1: cout<<"Rotation Group around bond :";break;
+               case 2: cout<<"Rotation Group (single chain) around bond :";break;
+               case 3: cout<<"Rotation Group (internal) between :";break;
+            }
+            cout <<pos->mpAtom1->GetName()<<"-"
+                <<pos->mpAtom2->GetName()<<" : ";
+            const REAL d=vDisplacement[&(*pos)]/(REAL)(nbTest*this->GetNbComponent());
+            for(set<unsigned long>::iterator pos1=pos->mvRotatedAtomList.begin();
+                pos1!=pos->mvRotatedAtomList.end();++pos1)
+               cout<<mvpAtom[*pos1]->GetName()<<"  ";
+            cout<<", <d>="<< d;
+            // We want an average displacement of 0.1 Angstroem, so...
+            if(d>0) pos->mBaseRotationAmplitude *= 0.1/d;
+            if(pos->mBaseRotationAmplitude<(0.02*M_PI/20.))
+            {
+               mBaseRotationAmplitude=0.02*M_PI/20.;
+               cout <<"WARNING - too low torsion BaseRotationAmplitude - setting to: "
+                    << pos->mBaseRotationAmplitude*RAD2DEG<< " °"<<endl;
+            }
+            if(pos->mBaseRotationAmplitude>(0.02*M_PI*20.))
+            {
+               pos->mBaseRotationAmplitude=0.02*M_PI*20.;
+               cout <<"WARNING - too high Global BaseRotationAmplitude - setting to: "
+                    << pos->mBaseRotationAmplitude*RAD2DEG<< " °"<<endl;
+            }
+            cout <<" -> Base rotation="<<pos->mBaseRotationAmplitude*RAD2DEG<<"°"<<endl;
+         }
+      }
+      // Same for global rotation
+         displacement/=(REAL)(10*nbTest*this->GetNbComponent());
+         cout<<"Overall Atomic Displacement for Global Rotation:<d>="<<displacement;
+         if(displacement>0) mBaseRotationAmplitude*=0.1/displacement;
+         if(mBaseRotationAmplitude<(0.02*M_PI/20.))
+         {
+            mBaseRotationAmplitude=0.02*M_PI/20.;
+            cout <<"WARNING - too low Global BaseRotationAmplitude - setting to: "
+                 << mBaseRotationAmplitude*RAD2DEG<< " °"<<endl;
+         }
+         if(mBaseRotationAmplitude>(0.02*M_PI*20.))
+         {
+            mBaseRotationAmplitude=0.02*M_PI*20.;
+            cout <<"WARNING - too high Global BaseRotationAmplitude - setting to: "
+                 << mBaseRotationAmplitude*RAD2DEG<< " °"<<endl;
+         }
+         cout <<" -> Base rotation="<<mBaseRotationAmplitude*RAD2DEG<<"°"<<endl;
+      
+      // Move back atoms to initial position
+      this->RestoreParamSet(initialConfig);
+   }
 }
 
 void Molecule::BuildFlipGroup()
