@@ -451,9 +451,9 @@ void ScatteringData::GenHKLFullSpace(const REAL maxTheta,const bool useMultiplic
    CrystVector_long K(mNbRefl);
    CrystVector_long L(mNbRefl);
    long i=0;
-   for(int h = -maxH ; h <= maxH;h++)
-      for(int k = -maxK ; k <= maxK;k++)
-         for(int l = -maxL ; l<= maxL;l++)
+   for(int h = maxH ; h >= -maxH;h--)
+      for(int k = maxK ; k >= -maxK;k--)
+         for(int l = maxL ; l>= -maxL;l--)
          {
             H(i)=h;
             K(i)=k;
@@ -464,41 +464,34 @@ void ScatteringData::GenHKLFullSpace(const REAL maxTheta,const bool useMultiplic
    this->SetHKL(H,K,L);
    //this->CalcSinThetaLambda();//calc theta
    this->SortReflectionByTheta(maxTheta);
+   #if 0
+   {
+      REAL h,k,l;
+      for(int i=0;i<mNbRefl;i++)
+      {
+         h=mH(i);
+         k=mK(i);
+         l=mL(i);
+         if(i<40) cout <<"Reflection:"<<h<<" "<<k<<" "<<l<<endl;
+         if(this->GetCrystal().GetSpaceGroup().IsReflSystematicAbsent(h,k,l))
+         {
+            cout <<"Reflection:"<<h<<" "<<k<<" "<<l<<endl;
+            cout <<"     is centric:"<<this->GetCrystal().GetSpaceGroup().IsReflCentric(h,k,l)<<endl;
+            cout <<"     is systematiccaly absent:"
+                 << this->GetCrystal().GetSpaceGroup().IsReflSystematicAbsent(h,k,l)<<endl;
+            cout <<"      list of equivalent reflections:"<<endl
+                 << this->GetCrystal().GetSpaceGroup().GetAllEquivRefl(h,k,l)<<endl;
+            cout <<"      list of equivalent reflections (exclude Friedels):"<<endl
+                 << this->GetCrystal().GetSpaceGroup().GetAllEquivRefl(h,k,l,true)<<endl;
+            cout <<"      list of equivalent reflections (impose Friedel law):"<<endl
+                 << this->GetCrystal().GetSpaceGroup().GetAllEquivRefl(h,k,l,false,true)<<endl;
+         }
+      }
+   }
+   #endif
    if(true==useMultiplicity)
    {
       VFN_DEBUG_MESSAGE("ScatteringData::GenHKLFullSpace():Multiplicity...",3)
-      {
-         //CrystVector_REAL tmp;
-         //tmp=mTheta;
-         //cout << FormatVertVectorHKLFloats<REAL>(mH,mK,mL,tmp,12,4);
-      }
-      //generate 10 random atom positions, to check which reflections are equivalent
-         int nbTestPositions=3;
-         {//Init pseudo-random number generator
-            time_t junk;
-            time(&junk);
-            tm *tmp=localtime(&junk);
-            srand((unsigned)( (*tmp).tm_sec+60* (*tmp).tm_min+3600* (*tmp).tm_hour));
-         }
-         ScatteringComponentList scattList(nbTestPositions);
-         CrystVector_long structFactorIndex(nbTestPositions);
-         for(int i=0;i<nbTestPositions;i++)
-         {
-            scattList(i).mX=rand()/(REAL)RAND_MAX;
-            scattList(i).mY=rand()/(REAL)RAND_MAX;
-            scattList(i).mZ=rand()/(REAL)RAND_MAX;
-            scattList(i).mOccupancy=1.;
-            scattList(i).mDynPopCorr=1.;
-            structFactorIndex(i)=i;
-         }
-      //calc geometrical struct factor for these positions
-         CrystVector_REAL* realGeomSF=new CrystVector_REAL[nbTestPositions];
-         CrystVector_REAL* imagGeomSF=new CrystVector_REAL[nbTestPositions];
-         for(int i=0;i<nbTestPositions;i++)
-         {
-            this->CalcGeomStructFactor(scattList,mpCrystal->GetSpaceGroup(),structFactorIndex,
-                  realGeomSF,imagGeomSF);
-         }
       //OK, now sort reflections to keep or remove
          long nbKeptRefl=0;
          CrystVector_long subscriptKeptRefl(mNbRefl);
@@ -506,7 +499,6 @@ void ScatteringData::GenHKLFullSpace(const REAL maxTheta,const bool useMultiplic
          CrystVector_bool treatedRefl(mNbRefl);
          long currentBaseRefl=0,testedRefl=0;
          REAL currentTheta=0;
-         REAL compare;
          REAL h,k,l,h1,k1,l1;
          subscriptKeptRefl=0;
          mMultiplicity=0;
@@ -520,45 +512,32 @@ void ScatteringData::GenHKLFullSpace(const REAL maxTheta,const bool useMultiplic
             mMultiplicity(nbKeptRefl)=1;
             currentTheta=mTheta(currentBaseRefl);
             treatedRefl(currentBaseRefl)=true;
-            h=mH(currentBaseRefl)+.001;
-            k=mK(currentBaseRefl)+.001;
-            l=mL(currentBaseRefl)+.001;
+            h=mH(currentBaseRefl);
+            k=mK(currentBaseRefl);
+            l=mL(currentBaseRefl);
             testedRefl=currentBaseRefl+1;
             if(testedRefl==mNbRefl) break;
             bool test;
+            int equiv;
             do
             {
                VFN_DEBUG_MESSAGE("...Multiplicity 3, IgnoreImagScattFact="<<mIgnoreImagScattFact,1)
-               compare=0;
-               if(true==mIgnoreImagScattFact) //Friedel pairs are equivalent.
-                  for(int i=0;i<nbTestPositions;i++) 
-                     compare+= 
-                        fabs(   fabs( (*(realGeomSF+i))(testedRefl     ) )
-                              -fabs( (*(realGeomSF+i))(currentBaseRefl) ))
-                       +fabs(   fabs( (*(imagGeomSF+i))(testedRefl     ) )
-                              -fabs( (*(imagGeomSF+i))(currentBaseRefl) ));
-               else
-                  for(int i=0;i<nbTestPositions;i++) 
-                     compare+= fabs(  (*(realGeomSF+i))(testedRefl)
-                                    -(*(realGeomSF+i))(currentBaseRefl))
-                              +fabs(  (*(imagGeomSF+i))(testedRefl)
-                                    -(*(imagGeomSF+i))(currentBaseRefl));
-               VFN_DEBUG_MESSAGE("...Multiplicity 4",1)
-               if(.001 > compare)
+               h1=mH(testedRefl);
+               k1=mK(testedRefl);
+               l1=mL(testedRefl);
+               equiv=this->GetCrystal().GetSpaceGroup().AreReflEquiv(h,k,l,h1,k1,l1);
+               if( (equiv==1) || ((equiv==2)&&(mIgnoreImagScattFact==true)))
                {
                   mMultiplicity(nbKeptRefl) +=1;
                   treatedRefl(testedRefl)=true;
                   
                   //keep the reflection with 0) max indices positive then 
                   //1)max H, 2)max K and 3) max L
-                  h1=mH(testedRefl)+.001;
-                  k1=mK(testedRefl)+.001;
-                  l1=mL(testedRefl)+.001;
                   VFN_DEBUG_MESSAGE("...Multiplicity 5",1)
                   VFN_DEBUG_MESSAGE(h1<<","<<k1<<","<<l1<<",",1)
                   VFN_DEBUG_MESSAGE(fabs(h1)<<","<<fabs(k1)<<","<<fabs(l1)<<",",1)
-                  if( ((int)(h1/fabs(h1)+k1/fabs(k1)+l1/fabs(l1)))
-                        > ((int)(h/fabs(h)+k/fabs(k)+l/fabs(l))) )
+                  if( ((int)(h1/fabs(h1+.001)+k1/fabs(k1+.001)+l1/fabs(l1+.001)))
+                        > ((int)(h/fabs(h+.001)+k/fabs(k+.001)+l/fabs(l+.001))) )
                   {
                      VFN_DEBUG_MESSAGE("...Multiplicity 6a",1)
                      subscriptKeptRefl(nbKeptRefl)=testedRefl;
@@ -632,8 +611,6 @@ void ScatteringData::GenHKLFullSpace(const REAL maxTheta,const bool useMultiplic
          }
          this->PrepareHKLarrays();
          //this->CalcSinThetaLambda(true);
-      delete[] realGeomSF;
-      delete[] imagGeomSF;
       // Eliminate extinct reflections now
          this->EliminateExtinctReflections();
    } //true==useMultiplicity
@@ -912,51 +889,17 @@ CrystVector_long ScatteringData::SortReflectionByTheta(const REAL maxTheta)
 
 CrystVector_long ScatteringData::EliminateExtinctReflections()
 {
-   //:TODO: do something more intelligent. After moving to cctbx
    TAU_PROFILE("ScatteringData::EliminateExtinctReflections()","void ()",TAU_DEFAULT);
    VFN_DEBUG_ENTRY("ScatteringData::EliminateExtinctReflections()",7)
-   //return;
-   //generate 5 random atom positions, to check which reflections are extinct
-      int nbTestPositions=5;
-      {//Init pseudo-random number generator
-         time_t junk;
-         time(&junk);
-         tm *tmp=localtime(&junk);
-         srand((unsigned)( (*tmp).tm_sec+60* (*tmp).tm_min+3600* (*tmp).tm_hour));
-      }
-      ScatteringComponentList scattList(nbTestPositions);
-      CrystVector_long structFactorIndex(nbTestPositions);
-      for(int i=0;i<nbTestPositions;i++)
-      {
-         scattList(i).mX=rand()/(REAL)RAND_MAX;
-         scattList(i).mY=rand()/(REAL)RAND_MAX;
-         scattList(i).mZ=rand()/(REAL)RAND_MAX;
-         scattList(i).mOccupancy=1.;
-         scattList(i).mDynPopCorr=1.;
-         structFactorIndex(i)=i;
-      }
-   VFN_DEBUG_MESSAGE("ScatteringData::EliminateExtinctReflections():2",5)
-   //calc geometrical struct factor for these positions
-      CrystVector_REAL* realGeomSF=new CrystVector_REAL[nbTestPositions];
-      CrystVector_REAL* imagGeomSF=new CrystVector_REAL[nbTestPositions];
-      for(int i=0;i<nbTestPositions;i++)
-      {
-         this->CalcGeomStructFactor(scattList,mpCrystal->GetSpaceGroup(),structFactorIndex,
-               realGeomSF,imagGeomSF);
-      }
-   VFN_DEBUG_MESSAGE("ScatteringData::EliminateExtinctReflections():3",5)
-   //OK, get reflections to keep
-      long nbKeptRefl=0;
-      CrystVector_long subscriptKeptRefl(mNbRefl);
-      REAL value;
-      subscriptKeptRefl=0;
-      for(long j=0;j<mNbRefl;j++)
-      {
-         value=0;
-         for(int i=0;i<nbTestPositions;i++) 
-            value+= fabs( (*(realGeomSF+i))(j) )+fabs( (*(imagGeomSF+i))(j) );
-         if(.01 < value) subscriptKeptRefl(nbKeptRefl++)=j;
-      }
+   
+   long nbKeptRefl=0;
+   CrystVector_long subscriptKeptRefl(mNbRefl);
+   subscriptKeptRefl=0;
+   for(long j=0;j<mNbRefl;j++)
+   {
+      if( this->GetCrystal().GetSpaceGroup().IsReflSystematicAbsent(mH(j),mK(j),mL(j))==false )
+         subscriptKeptRefl(nbKeptRefl++)=j;
+   }
    VFN_DEBUG_MESSAGE("ScatteringData::EliminateExtinctReflections():4",5)
    //Keep only the elected reflections
       mNbRefl=nbKeptRefl;
@@ -983,8 +926,6 @@ CrystVector_long ScatteringData::EliminateExtinctReflections()
             mMultiplicity(i)=oldMulti(subs);
          }
       }
-   delete[] realGeomSF;
-   delete[] imagGeomSF;
    this->PrepareHKLarrays();
    VFN_DEBUG_EXIT("ScatteringData::EliminateExtinctReflections():End",7)
    return subscriptKeptRefl;

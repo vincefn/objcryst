@@ -390,6 +390,117 @@ const T_HM_as_Hall& SpaceGroup::GetHM_as_Hall()const
 
 unsigned int SpaceGroup::GetUniqueAxis()const{return mUniqueAxisId;}
 
+unsigned int SpaceGroup::AreReflEquiv(const REAL h1, const REAL k1, const REAL l1,
+                          const REAL h2, const REAL k2, const REAL l2)const
+{
+   const REAL eps=.001;
+   const T_RTMx *pMatrix;
+   pMatrix=&(mSgOps.SMx[0]);
+   float h,k,l;
+   unsigned int equiv=0;
+   for(int j=0;j<mSgOps.nSMx;j++)
+   {
+      h=h2*(*pMatrix).s.R[0]+k2*(*pMatrix).s.R[3]+l2*(*pMatrix).s.R[6];
+      k=h2*(*pMatrix).s.R[1]+k2*(*pMatrix).s.R[4]+l2*(*pMatrix).s.R[7];
+      l=h2*(*pMatrix).s.R[2]+k2*(*pMatrix).s.R[5]+l2*(*pMatrix).s.R[8];
+      if( (fabs(h-h1) + fabs(k-k1) + fabs(l-l1) )<eps){equiv=1; break;}
+      if( (fabs(h+h1) + fabs(k+k1) + fabs(l+l1) )<eps){equiv=2; /*break;*/}
+      pMatrix++;
+   }
+   if(this->IsCentrosymmetric() && (equiv==2)) equiv=1;
+   return equiv;
+}
+
+CrystMatrix_REAL SpaceGroup::GetAllEquivRefl(const REAL h, const REAL k, const REAL l,
+                                             const bool excludeFriedelMate,
+                                             const bool forceFriedelLaw) const
+{
+   const REAL eps=.001;
+   const T_RTMx *pMatrix;
+   pMatrix=&(mSgOps.SMx[0]);
+   float h1,k1,l1;
+   int nbEquiv=0;
+   CrystMatrix_REAL equivReflList(1,3);
+   for(int j=0;j<mSgOps.nSMx;j++)
+   {
+      h1=h*(*pMatrix).s.R[0]+k*(*pMatrix).s.R[3]+l*(*pMatrix).s.R[6];
+      k1=h*(*pMatrix).s.R[1]+k*(*pMatrix).s.R[4]+l*(*pMatrix).s.R[7];
+      l1=h*(*pMatrix).s.R[2]+k*(*pMatrix).s.R[5]+l*(*pMatrix).s.R[8];
+      pMatrix++;
+      //Already listed ?
+         bool noRepeat=false;
+         for(int i=0;i<nbEquiv;i++)
+            if(  (( fabs(equivReflList(i,0)-h1)
+                   +fabs(equivReflList(i,1)-k1)
+                   +fabs(equivReflList(i,2)-l1))<eps)
+               ||(( fabs(equivReflList(i,0)+h1)
+                   +fabs(equivReflList(i,1)+k1)
+                   +fabs(equivReflList(i,2)+l1))<eps))
+            {noRepeat=true;continue;}
+         
+         if(noRepeat) continue;
+      nbEquiv++;
+      if(equivReflList.rows()<=nbEquiv) equivReflList.resizeAndPreserve(nbEquiv,3);
+      equivReflList(nbEquiv-1,0)=h1;
+      equivReflList(nbEquiv-1,1)=k1;
+      equivReflList(nbEquiv-1,2)=l1;
+   }
+   if((this->IsCentrosymmetric() || forceFriedelLaw) && (!excludeFriedelMate))
+   {
+      cout <<"Adding Friedels !"<<endl;
+      equivReflList.resizeAndPreserve(nbEquiv*2,3);
+      for(int i=0;i<nbEquiv;i++)
+      {
+         equivReflList(nbEquiv+i,0)=-equivReflList(i,0);
+         equivReflList(nbEquiv+i,1)=-equivReflList(i,1);
+         equivReflList(nbEquiv+i,2)=-equivReflList(i,2);
+      }
+      nbEquiv*=2;
+   }
+   equivReflList.resizeAndPreserve(nbEquiv,3);
+   return equivReflList;
+}
+
+bool SpaceGroup::IsReflSystematicAbsent(const REAL h, const REAL k, const REAL l)const
+{
+   const REAL eps=.001;
+   const T_RTMx *pMatrix;
+   pMatrix=&(mSgOps.SMx[0]);
+   float h1,k1,l1,t;
+   double junk;
+   for(int j=0;j<mSgOps.nSMx;j++)
+   {
+      h1=h*(*pMatrix).s.R[0]+k*(*pMatrix).s.R[3]+l*(*pMatrix).s.R[6];
+      k1=h*(*pMatrix).s.R[1]+k*(*pMatrix).s.R[4]+l*(*pMatrix).s.R[7];
+      l1=h*(*pMatrix).s.R[2]+k*(*pMatrix).s.R[5]+l*(*pMatrix).s.R[8];
+      t=(h*(*pMatrix).s.T[0]+k*(*pMatrix).s.T[1]+l*(*pMatrix).s.T[2])/(REAL)STBF;
+      t= modf(t+fabs(h)+fabs(k)+fabs(l),&junk);// +h+k+l ensures it is >0 before modf..
+      if( ((fabs(h-h1) + fabs(k-k1) + fabs(l-l1) )<eps) && (t>eps)) return true;
+      if(this->IsCentrosymmetric() &&
+          ((fabs(h+h1) + fabs(k+k1) + fabs(l+l1) )<eps) && (t>eps)) return true;
+      pMatrix++;
+   }
+   return false;
+}
+
+bool SpaceGroup::IsReflCentric(const REAL h, const REAL k, const REAL l)const
+{
+   if(this->IsCentrosymmetric()) return true;
+   const REAL eps=.001;
+   const T_RTMx *pMatrix;
+   pMatrix=&(mSgOps.SMx[0]);
+   float h1,k1,l1;
+   for(int j=1;j<mSgOps.nSMx;j++)
+   {
+      h1=h*(*pMatrix).s.R[0]+k*(*pMatrix).s.R[3]+l*(*pMatrix).s.R[6];
+      k1=h*(*pMatrix).s.R[1]+k*(*pMatrix).s.R[4]+l*(*pMatrix).s.R[7];
+      l1=h*(*pMatrix).s.R[2]+k*(*pMatrix).s.R[5]+l*(*pMatrix).s.R[8];
+      if( (fabs(h+h1) + fabs(k+k1) + fabs(l+l1) )<eps) return true;
+      pMatrix++;
+   }
+   return false;
+}
+
 void SpaceGroup::InitSpaceGroup(const string &spgId)
 {
    VFN_DEBUG_MESSAGE("SpaceGroup::InitSpaceGroup():"<<spgId,5)

@@ -213,7 +213,30 @@ class SpaceGroup
       const T_HM_as_Hall& GetHM_as_Hall()const;
       /// Which is the unique axis (for monoclinic space groups )
       unsigned int GetUniqueAxis()const;
-   protected:
+      /** Are these reflections equivalent ?
+      *
+      * \return 1 if they are equivalent, 2 if they are Friedel/Bijvoet mates, and else 0.
+      */
+      unsigned int AreReflEquiv(const REAL h1, const REAL k1, const REAL l1,
+                                const REAL h2, const REAL k2, const REAL l2)const;
+      /** Get the list of all equivalent reflections.
+      *
+      * \return a matrix with 3 columns for h,k,l, and as many rows as there are 
+      * reflections (the input reflection is included).
+      * \param excludeFriedelMate if true, then Friedel mates of reflections will not
+      * be listed, even if there is a center of symmetry.
+      * \param forceFriedelLaw if true, a center of symmetry will be added (to force
+      * considering Friedel mates as equivalent). This as no effect if 
+      * excludeFriedelMate=true
+      */
+      CrystMatrix_REAL GetAllEquivRefl(const REAL h, const REAL k, const REAL l,
+                                       const bool excludeFriedelMate=false,
+                                       const bool forceFriedelLaw=false) const;
+      /// Is the reflection systematically absent ?
+      bool IsReflSystematicAbsent(const REAL h, const REAL k, const REAL l)const;
+      /// Is the reflection centric ?
+      bool IsReflCentric(const REAL h, const REAL k, const REAL l)const;
+  protected:
    private:
       /** \brief Init the spaceGroup object from its name
       *
