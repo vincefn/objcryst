@@ -297,7 +297,7 @@ class DiffractionDataSingleCrystal:public ScatteringData
    #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);
-      //friend class WXDiffractionSinglCrystal;
+      friend class WXDiffractionSingleCrystal;//to access the Radiation object
 
    #endif
 };
