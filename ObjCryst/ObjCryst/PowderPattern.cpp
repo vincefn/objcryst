@@ -2857,6 +2857,30 @@ void PowderPattern::PrepareIntegratedRfactor()const
 			if(mIntegratedPatternMax(i)>=(long)mNbPoint) mIntegratedPatternMax(i)=mNbPoint-1;
 		}
    VFN_DEBUG_MESSAGE("PowderPattern::PrepareIntegratedRfactor():4",3);
+	// Make sure all intervals do not overlap, and correct if necessary, by
+	// setting an intermediate point at the middle of the two intervals extremities
+		for(int i=0;i<(numInterval-1);i++) 
+		{// Here we assume the intervals are distributed ideally
+		 // :TODO: some more thorough testing may be needed
+		 // (eg for several phases with different widths...)
+		 	if(false==keep(i)) continue;
+			if(mIntegratedPatternMax(i)<mIntegratedPatternMin(i+1))
+			{
+				if(mIntegratedPatternMin(i)>mIntegratedPatternMax(i+1))
+				{
+					continue;
+					keep(i)=false;
+				}
+				if(mIntegratedPatternMin(i)<mIntegratedPatternMin(i+1)) keep(i)=false;
+				else
+				{
+					mIntegratedPatternMax(i)=(mIntegratedPatternMax(i)+mIntegratedPatternMin(i+1))/2;
+					mIntegratedPatternMin(i+1)=mIntegratedPatternMax(i)+1;
+					//just in case...Could it happen ?
+					if(mIntegratedPatternMin(i)<mIntegratedPatternMax(i)) keep(i)=false;
+				}
+			}
+		}
 	// Take care of excluded regions (change integration areas accordingly)
 	// regions are sorted by ascending theta
       const long nbExclude=mExcludedRegionMin2Theta.numElements();
