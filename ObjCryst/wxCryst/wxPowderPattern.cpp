@@ -209,6 +209,7 @@ void WXPowderPattern::CrystUpdate()
    //mList.CrystUpdate();
    if(mpGraph!=0)
    {
+		WXCrystValidateAllUserInput();
       mpGraph->SetPattern( mpPowderPattern->GetPowderPatternObs(),
                            mpPowderPattern->GetPowderPatternCalc(),
                            mpPowderPattern->Get2ThetaMin(),
@@ -220,6 +221,7 @@ void WXPowderPattern::CrystUpdate()
 void WXPowderPattern::OnMenuAddCompBackgd(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompBackgd()",6)
+	WXCrystValidateAllUserInput();
    PowderPatternBackground *backgdData= new PowderPatternBackground;
    mpPowderPattern->AddPowderPatternComponent(*backgdData);
 	if(mpGraph!=0) mpPowderPattern->Prepare();//else this will be done when opening the graph
@@ -229,6 +231,7 @@ void WXPowderPattern::OnMenuAddCompBackgd(wxCommandEvent & WXUNUSED(event))
 void WXPowderPattern::OnMenuAddCompCryst(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompCryst()",6)
+	WXCrystValidateAllUserInput();
 	/*
    bool hasCrystaPhase=false;
    for(int i=0;(unsigned int)i<mpPowderPattern->GetNbPowderPatternComponent();i++)
@@ -257,6 +260,7 @@ void WXPowderPattern::OnMenuShowGraph(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuShowGraph()"<<mpGraph,6)
    if(mpGraph!=0) return;
+	WXCrystValidateAllUserInput();
    mpPowderPattern->Prepare();
    wxFrame *frame= new wxFrame(this,-1,mpPowderPattern->GetName().c_str());
    mpGraph = new WXPowderPatternGraph(frame,this);
@@ -269,6 +273,7 @@ void WXPowderPattern::OnMenuShowGraph(wxCommandEvent & WXUNUSED(event))
 void WXPowderPattern::OnMenuSaveText(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuSaveText()",6)
+	WXCrystValidateAllUserInput();
    wxFileDialog save(this,"Choose a file","","","*.txt",wxSAVE | wxOVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
    
@@ -281,6 +286,7 @@ void WXPowderPattern::OnMenuSaveText(wxCommandEvent & WXUNUSED(event))
 void WXPowderPattern::OnMenuSimulate(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXPowderPattern::OnMenuSimulate()",6)
+	WXCrystValidateAllUserInput();
    double min=0.,max=120.;
    long nbPoints=6000;
    {
@@ -398,6 +404,7 @@ void WXPowderPattern::OnMenuImport2ThetaObs(wxCommandEvent & WXUNUSED(event))
 void WXPowderPattern::OnMenuFitScaleForR(wxCommandEvent & WXUNUSED(event))
 {
    if(0==mpGraph) return;
+	WXCrystValidateAllUserInput();
    mpPowderPattern->FitScaleFactorForR();//FitScaleFactorForIntegratedR
    this->CrystUpdate();
 }
@@ -405,6 +412,7 @@ void WXPowderPattern::OnMenuFitScaleForR(wxCommandEvent & WXUNUSED(event))
 void WXPowderPattern::OnMenuFitScaleForRw(wxCommandEvent & WXUNUSED(event))
 {
    if(0==mpGraph) return;
+	WXCrystValidateAllUserInput();
    mpPowderPattern->FitScaleFactorForRw();//FitScaleFactorForIntegratedRw
    this->CrystUpdate();
 }
@@ -412,6 +420,7 @@ void WXPowderPattern::OnMenuFitScaleForRw(wxCommandEvent & WXUNUSED(event))
 
 void WXPowderPattern::OnMenuSetWavelength(wxCommandEvent & event)
 {
+	WXCrystValidateAllUserInput();
    // this looks stupid. In fact, if a user changed the wavelength in the
    // corresponding field, this is (unfortunately) not applied to the
    // components automagically. So we need this function to do the job...
@@ -460,6 +469,7 @@ void WXPowderPattern::OnMenuSetWavelength(wxCommandEvent & event)
 
 void WXPowderPattern::OnMenuAdd2ThetaExclude(wxCommandEvent & WXUNUSED(event))
 {
+	WXCrystValidateAllUserInput();
    double min,max;
    //min
    {
@@ -861,6 +871,7 @@ void WXPowderPatternDiffraction::CrystUpdate()
 void WXPowderPatternDiffraction::OnChangeCrystal(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXPowderPatternDiffraction::OnChangeCrystal()",6)
+	WXCrystValidateAllUserInput();
    int choice;
    Crystal *cryst=dynamic_cast<Crystal*>
       ( WXDialogChooseFromRegistry(gCrystalRegistry,(wxWindow*)this,
@@ -872,6 +883,7 @@ void WXPowderPatternDiffraction::OnChangeCrystal(wxCommandEvent & WXUNUSED(event
 void WXPowderPatternDiffraction::OnMenuSaveHKLFcalc(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXPowderPatternDiffraction::OnMenuSaveHKLFcalc()",6)
+	WXCrystValidateAllUserInput();
    wxFileDialog save(this,"Choose a file to save to","","","*.txt",wxSAVE | wxOVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
    

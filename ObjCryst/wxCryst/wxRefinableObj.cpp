@@ -31,6 +31,11 @@
  
 namespace ObjCryst
 {
+/// This pointer records the last wxField in which something was enetered,
+/// so that it can be validated when inpu is finished (either when another
+/// input has begun in another field, or when an action requires to purge
+/// all input
+extern WXField *spLastWXFieldInputNotValidated;
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXFieldRefPar
@@ -38,6 +43,7 @@ namespace ObjCryst
 ////////////////////////////////////////////////////////////////////////
 BEGIN_EVENT_TABLE(WXFieldRefPar,wxEvtHandler)
    EVT_TEXT_ENTER(ID_WXFIELD,                   WXFieldRefPar::OnEnter)
+   EVT_TEXT(ID_WXFIELD,                   		WXFieldRefPar::OnText)
    EVT_CHECKBOX(ID_WXFIELD_REFPAR_FIXBUTTON,    WXFieldRefPar::OnToggleFix)
    EVT_RIGHT_DOWN(                              WXFieldRefPar::OnPopupMenu)
    EVT_UPDATE_UI(ID_WXFIELD_REFPAR,             WXFieldRefPar::OnUpdateUI)
@@ -47,7 +53,7 @@ END_EVENT_TABLE()
 
 WXFieldRefPar::WXFieldRefPar(wxWindow *parent,const string& label,
                          RefinablePar *par, const int hsize):
-WXField(parent,label,ID_WXFIELD_REFPAR),mValue(0.),mpRefPar(par)
+WXField(parent,label,ID_WXFIELD_REFPAR),mValue(0.),mpRefPar(par),mIsSelfUpdating(false)
 {
    VFN_DEBUG_MESSAGE("WXFieldRefPar::WXFieldName():End",6)
 
@@ -80,7 +86,9 @@ void WXFieldRefPar::OnUpdateUI(wxUpdateUIEvent & WXUNUSED(event))
    //mpField->SetValue(wxString::Printf("%f",mValue));
    wxString tmp;
    tmp.Printf("%f",mValue);
+	mIsSelfUpdating=true;
    mpField->SetValue(tmp);
+	mIsSelfUpdating=false;
    mpButtonFix->SetValue(!(mpRefPar->IsFixed()));
    VFN_DEBUG_MESSAGE("WXFieldRefPar::OnUpdateUI():End",2)
 }
@@ -88,11 +96,17 @@ void WXFieldRefPar::OnUpdateUI(wxUpdateUIEvent & WXUNUSED(event))
 void WXFieldRefPar::OnEnter(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXFieldRefPar::OnEnter()",6)
-   //:TODO: Check that the object is not busy (input should be frozen)
-   mValueOld=mValue;
-   wxString s=mpField->GetValue();
-   s.ToDouble(&mValue);
-   mpRefPar->SetHumanValue(mValue);
+   this->ValidateUserInput();
+}
+void WXFieldRefPar::OnText(wxCommandEvent & WXUNUSED(event))
+{	
+   VFN_DEBUG_MESSAGE("WXFieldRefPar::OnEnter()",10)
+	if(true==mIsSelfUpdating) return;
+	if(spLastWXFieldInputNotValidated!=this)
+	{
+		WXCrystValidateAllUserInput();
+		spLastWXFieldInputNotValidated=this;
+	}
 }
 
 void WXFieldRefPar::OnToggleFix(wxCommandEvent & WXUNUSED(event))
@@ -172,6 +186,14 @@ void WXFieldRefPar::Revert()
    wxUpdateUIEvent event(ID_WXFIELD_REFPAR);
    wxPostEvent(this,event);
 }
+void WXFieldRefPar::ValidateUserInput()
+{
+   VFN_DEBUG_MESSAGE("WXFieldRefPar::ValidateUserInput()",10)
+   mValueOld=mValue;
+   wxString s=mpField->GetValue();
+   s.ToDouble(&mValue);
+   mpRefPar->SetHumanValue(mValue);
+}
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXFieldOption
@@ -227,7 +249,9 @@ void WXFieldOption::Revert()
    wxUpdateUIEvent event(ID_WXFIELD_OPTION);
    wxPostEvent(this,event);
 }
-
+void WXFieldOption::ValidateUserInput()
+{
+}
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXCostFunction
@@ -274,6 +298,9 @@ void WXCostFunction::CrystUpdate()
 void WXCostFunction::Revert()
 {
    //Nothing to do here
+}
+void WXCostFunction::ValidateUserInput()
+{
 }
 
 ////////////////////////////////////////////////////////////////////////

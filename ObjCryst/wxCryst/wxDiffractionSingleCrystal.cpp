@@ -142,6 +142,7 @@ void WXDiffractionSingleCrystal::CrystUpdate()
 }
 void WXDiffractionSingleCrystal::OnMenuSimulate(wxCommandEvent & WXUNUSED(event))
 {
+	WXCrystValidateAllUserInput();
 	double theta;
    {
       wxTextEntryDialog dialog(this,"Theta Max",
@@ -220,12 +221,14 @@ void WXDiffractionSingleCrystal::OnMenuImport(wxCommandEvent & event)
 void WXDiffractionSingleCrystal::OnMenuSaveHKLIobsIcalc(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXDiffractionSingleCrystal::OnMenuSaveHKLIobsIcalc()",6)
+	WXCrystValidateAllUserInput();
    wxFileDialog save(this,"Choose a file","","","*.txt",wxSAVE | wxOVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
    mpData->SaveHKLIobsIcalc(save.GetPath().c_str());
 }
 void WXDiffractionSingleCrystal::OnMenuSetWavelength(wxCommandEvent &event)
 {
+	WXCrystValidateAllUserInput();
 	//:TODO: Use wxRadiation instead
    switch(event.GetId())
    {
@@ -272,6 +275,7 @@ void WXDiffractionSingleCrystal::OnMenuSetWavelength(wxCommandEvent &event)
 void WXDiffractionSingleCrystal::OnChangeCrystal(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXDiffractionSingleCrystal::OnChangeCrystal()",6)
+	WXCrystValidateAllUserInput();
    int choice;
    Crystal *cryst=dynamic_cast<Crystal*>
       (WXDialogChooseFromRegistry(gCrystalRegistry,(wxWindow*)this,

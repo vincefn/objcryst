@@ -193,6 +193,7 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
                          const double zMin,const double zMax)
 {
    VFN_DEBUG_ENTRY("WXCrystal::UpdateGL()",8)
+	WXCrystValidateAllUserInput();
    #ifdef OBJCRYST_GL
    if(mpCrystalGL!=0)
    {
@@ -279,6 +280,7 @@ void WXCrystal::NotifyCrystalGLDelete()
 
 void WXCrystal::OnMenuSaveCIF(wxCommandEvent & WXUNUSED(event))
 {
+	WXCrystValidateAllUserInput();
    wxFileDialog save(this,"Choose a file","","","*.cif",wxSAVE | wxOVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
    
@@ -290,6 +292,7 @@ void WXCrystal::OnMenuSaveCIF(wxCommandEvent & WXUNUSED(event))
 
 void WXCrystal::OnMenuSaveText(wxCommandEvent & WXUNUSED(event))
 {
+	WXCrystValidateAllUserInput();
    wxFileDialog save(this,"Choose a file","","","*.txt",wxSAVE | wxOVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
    
@@ -311,6 +314,7 @@ void WXCrystal::OnMenuAddScattPowAtom(wxCommandEvent & WXUNUSED(event))
 void WXCrystal::OnMenuRemoveScattPow(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXCrystal::OnButtonRemoveScattPow()",6)
+	WXCrystValidateAllUserInput();
    int choice;
    ScatteringPower *scatt=
       WXDialogChooseFromRegistry(mpCrystal->GetScatteringPowerRegistry(),this,
@@ -325,6 +329,7 @@ void WXCrystal::OnMenuRemoveScattPow(wxCommandEvent & WXUNUSED(event))
 void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
 {
    VFN_DEBUG_ENTRY("WXCrystal::OnMenuAddScatterer()",6)
+	WXCrystValidateAllUserInput();
    Scatterer *scatt;
    switch(event.GetId())
    {
@@ -648,6 +653,7 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
 void WXCrystal::OnMenuRemoveScatterer(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXCrystal::OnButtonRemoveScatterer()",6)
+	WXCrystValidateAllUserInput();
    int choice;
    Scatterer *scatt=WXDialogChooseFromRegistry(mpCrystal->GetScattererRegistry(),this,
                                              "Select the Scatterer to remove:",choice);
@@ -660,6 +666,7 @@ void WXCrystal::OnMenuRemoveScatterer(wxCommandEvent & WXUNUSED(event))
 
 void WXCrystal::OnMenuAddAntiBumpDist(wxCommandEvent & WXUNUSED(event))
 {
+	WXCrystValidateAllUserInput();
    int choice;
    //Scattering power 1
       const ScatteringPower *scattPow1=WXDialogChooseFromRegistry(

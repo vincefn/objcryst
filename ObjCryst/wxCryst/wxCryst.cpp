@@ -127,6 +127,26 @@ void WXCrystObjBasicList::CrystUpdate()
 
 ////////////////////////////////////////////////////////////////////////
 //
+//    For the automatic validation of user input
+//
+////////////////////////////////////////////////////////////////////////
+/// This pointer records the last wxField in which something was enetered,
+/// so that it can be validated when inpu is finished (either when another
+/// input has begun in another field, or when an action requires to purge
+/// all input
+WXField *spLastWXFieldInputNotValidated=0;
+
+void WXCrystValidateAllUserInput()
+{
+	if(0==spLastWXFieldInputNotValidated) return;
+   VFN_DEBUG_ENTRY("WXCrystValidateAllUserInput()...",10)
+	spLastWXFieldInputNotValidated->ValidateUserInput();
+	spLastWXFieldInputNotValidated=0;
+   VFN_DEBUG_EXIT("WXCrystValidateAllUserInput()...",10)
+}
+
+////////////////////////////////////////////////////////////////////////
+//
 //    WXField
 //
 ////////////////////////////////////////////////////////////////////////
@@ -169,13 +189,14 @@ bool WXField::SetForegroundColour(const wxColour& colour)
 //
 ////////////////////////////////////////////////////////////////////////
 BEGIN_EVENT_TABLE(WXFieldName,wxEvtHandler)
-   EVT_TEXT_ENTER(ID_WXFIELD,WXFieldName::OnEnter)
-   EVT_UPDATE_UI(ID_WXFIELD_REFPAR,WXFieldName::OnUpdateUI)
+   EVT_TEXT_ENTER(ID_WXFIELD, 		WXFieldName::OnEnter)
+   EVT_TEXT(		ID_WXFIELD, 		WXFieldName::OnText)
+   EVT_UPDATE_UI( ID_WXFIELD_REFPAR,WXFieldName::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXFieldName::WXFieldName(wxWindow *parent,const string& label, WXCrystObj* owner,
                          const int id,const int hsize, bool isEditable):
-WXField(parent,label,id),mpWXObj(owner),mValue("")
+WXField(parent,label,id),mpWXObj(owner),mValue(""),mIsSelfUpdating(false)
 {
    VFN_DEBUG_MESSAGE("WXFieldName::WXFieldName():End",6)
 
@@ -195,18 +216,26 @@ WXField(parent,label,id),mpWXObj(owner),mValue("")
 void WXFieldName::OnUpdateUI(wxUpdateUIEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXFieldName::OnUpdateUI()",6)
+	mIsSelfUpdating=true;
    mpField->SetValue(mValue);
+	mIsSelfUpdating=false;
    //mpSizer->SetItemMinSize(mpField, mpField->GetSize().GetWidth(),
    //                     mpField->GetSize().GetHeight());
 }
 void WXFieldName::OnEnter(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXFieldName::OnEnter()",6)
-   //:TODO: Check that the object is not busy (input should be frozen)
-   mValueOld=mValue;
-   wxString s=mpField->GetValue();
-   mValue=s.c_str();
-   mpWXObj->OnChangeName(mId);
+	this->ValidateUserInput();
+}
+void WXFieldName::OnText(wxCommandEvent & WXUNUSED(event))
+{
+   VFN_DEBUG_MESSAGE("WXFieldName::OnText():"<<mpField->GetValue(),10)
+	if(true==mIsSelfUpdating) return;
+	if(spLastWXFieldInputNotValidated!=this)
+	{
+		WXCrystValidateAllUserInput();
+		spLastWXFieldInputNotValidated=this;
+	}
 }
 
 void WXFieldName::SetValue(const string&s)
@@ -236,6 +265,16 @@ void WXFieldName::Revert()
    wxUpdateUIEvent event(ID_WXFIELD_REFPAR);
    wxPostEvent(this,event);
 }
+void WXFieldName::ValidateUserInput()
+{
+   VFN_DEBUG_MESSAGE("WXFieldName::ValidateUserInput()",10)
+   //:TODO: Check that the object is not busy (input should be frozen)
+   mValueOld=mValue;
+   wxString s=mpField->GetValue();
+   mValue=s.c_str();
+   VFN_DEBUG_MESSAGE("WXFieldName::ValidateUserInput():"<<mValue,10)
+   mpWXObj->OnChangeName(mId);
+}
 
 ////////////////////////////////////////////////////////////////////////
 //
@@ -243,13 +282,14 @@ void WXFieldName::Revert()
 //
 ////////////////////////////////////////////////////////////////////////
 BEGIN_EVENT_TABLE(WXFieldParBase,wxWindow)
-   EVT_TEXT_ENTER(ID_WXFIELD,WXFieldParBase::OnEnter)
-   EVT_UPDATE_UI(ID_WXFIELD_REFPAR,WXFieldParBase::OnUpdateUI)
+   EVT_TEXT_ENTER(ID_WXFIELD, 		WXFieldParBase::OnEnter)
+   EVT_TEXT(		ID_WXFIELD, 		WXFieldParBase::OnText)
+   EVT_UPDATE_UI( ID_WXFIELD_REFPAR,WXFieldParBase::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXFieldParBase::WXFieldParBase(wxWindow *parent,const string& label,
                                const int id, const int hsize):
-WXField(parent,label,id)
+WXField(parent,label,id),mIsSelfUpdating(false)
 {
    VFN_DEBUG_MESSAGE("WXFieldParBase::WXFieldName():End",6)
 
@@ -273,6 +313,21 @@ void WXFieldParBase::OnEnter(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXFieldRefPar::OnEnter()",6)
    this->ReadNewValue();
+}
+void WXFieldParBase::OnText(wxCommandEvent & WXUNUSED(event))
+{	
+   VFN_DEBUG_MESSAGE("WXFieldRefPar::OnText()",10)
+	if(true==mIsSelfUpdating) return;
+	if(spLastWXFieldInputNotValidated!=this)
+	{
+		WXCrystValidateAllUserInput();
+		spLastWXFieldInputNotValidated=this;
+	}
+}
+void WXFieldParBase::ValidateUserInput()
+{
+   VFN_DEBUG_MESSAGE("WXFieldRefPar::ValidateUserInput()",10)
+	this->ReadNewValue();
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -322,22 +377,28 @@ template<> void WXFieldPar<double>::ApplyNewValue()
    VFN_DEBUG_MESSAGE("WXFieldPar<double>::ApplyNewValue()",6)
    wxString tmp;
    tmp.Printf("%f",*mpValue);
+	mIsSelfUpdating=true;
    mpField->SetValue(tmp);
+	mIsSelfUpdating=false;
 }
 template<> void WXFieldPar<long>::ApplyNewValue()
 {
    VFN_DEBUG_MESSAGE("WXFieldPar<long>::ApplyNewValue()",6)
    wxString tmp;
    tmp.Printf("%d",*mpValue);
+	mIsSelfUpdating=true;
    mpField->SetValue(tmp);
+	mIsSelfUpdating=false;
 }
 /*
 template<class T> void WXFieldPar<T>::ApplyNewValue()
 {
    stringstream s;
    s <<*mpValue;
+	mIsSelfUpdating=true;
    mpField->SetValue(s.str().c_str());;
    mpField->SetValue(wxString::Printf("%f",*mpValue));
+	mIsSelfUpdating=false;
 }
 */
 
@@ -386,6 +447,8 @@ void WXFieldChoice::SetValue(const string&name)
 {
    mpButton->SetLabel(name.c_str());
 }
+void WXFieldChoice::ValidateUserInput(){}
+
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXCrystObj

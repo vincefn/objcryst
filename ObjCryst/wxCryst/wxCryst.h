@@ -267,12 +267,6 @@ class WXCrystObj: public WXCrystObjBasic
 /** This is the abstract base class for all fields, wether they contain
 * a floating-point parameter, or a string,... All WXField have a title
 * and an entry field.
-* \todo Currently for all fields, the user must hit the 'enter' key to validate
-* the input, which is annoying. So it would be nice to use another way. For 
-* example by recording when some typing has been made in a field, and 
-* doing the actual reading afterwards (eg a global function should be 
-* created to read the input for all fields, and that could be 
-* complicated to handle).
 */
 class WXField: public WXCrystObjBasic
 {
@@ -291,6 +285,8 @@ class WXField: public WXCrystObjBasic
 		/// Change the colour of the field's title. Can be used (with parcimony)
 		/// to clarify the interface.
       virtual bool SetForegroundColour(const wxColour& colour);
+		/// This function shall be called when a new value has been entered.
+		virtual void ValidateUserInput()=0;
    protected:
 		/// The horizontal sizer in which the title, button, fields, are put. 
       wxBoxSizer *mpSizer;
@@ -299,6 +295,11 @@ class WXField: public WXCrystObjBasic
 		/// The Id of this field
       const int mId;
 };
+
+/// This function validates all user input (in a WXField) 
+/// not yet taken into account, if needs be. This should be called by \b ALL
+/// functions using data stored in fields (basically all functions !)
+void WXCrystValidateAllUserInput();
 
 /** A field with the name of a WXCrystObj. Updating must be done by the WXCrystObj owner.
 *
@@ -317,7 +318,10 @@ class WXFieldName:public WXField
       /// forwards the event to its owner, who will take care of anything
       /// that must be done.
       void OnEnter(wxCommandEvent & event);
-      /// This posts an UpdateUI event.
+		/// Records when text is entered (either from self-updating or user input)
+      void OnText(wxCommandEvent & WXUNUSED(event));
+      /// This actually posts an UpdateUI event, so that it is safe to call it
+		/// from a non-graphic thread.
       void SetValue(const string&);
 		/// Get the current name.
       const string GetValue() const;
@@ -325,6 +329,7 @@ class WXFieldName:public WXField
       /// case of names.
       virtual void CrystUpdate();
       void Revert();
+		virtual void ValidateUserInput();
    protected:
 		/// The WXCrystObj whose name is shown here
       WXCrystObj* mpWXObj;
@@ -335,6 +340,9 @@ class WXFieldName:public WXField
 		/// Last name displayed, before the value was changed by the user. Not used yet,
 		/// could be useful for undo.
       wxString mValueOld;
+		/// Set to true if the Field is being updated, so that no 
+		/// 'EVT_TEXT' is understood as user input.
+		bool mIsSelfUpdating;
    DECLARE_EVENT_TABLE()
 };
 
@@ -355,10 +363,13 @@ class WXFieldParBase:public WXField
       /// and directly changes the RefinablePar value (contrary to what happens
       /// for WXFieldName)by using RefinablePar::SetHumanValue().
       void OnEnter(wxCommandEvent & WXUNUSED(event));
+		/// Records when text is entered (either from self-updating or user input)
+      void OnText(wxCommandEvent & WXUNUSED(event));
       /// This gets a new value from the parameter.
       virtual void CrystUpdate()=0;
       /// Revert to the previous value
       virtual void Revert()=0;
+		virtual void ValidateUserInput();
    protected:
       /// Reads the new value when the Enter key is hit
       virtual void ReadNewValue()=0;
@@ -366,6 +377,9 @@ class WXFieldParBase:public WXField
       virtual void ApplyNewValue()=0;
 		/// The field in which the value is written.
       wxTextCtrl *mpField;
+		/// Set to true if the Field is being updated, so that no 
+		/// 'EVT_TEXT' is understood as user input.
+		bool mIsSelfUpdating;
    DECLARE_EVENT_TABLE()
 };
 
@@ -411,6 +425,8 @@ class WXFieldChoice:public WXField
       void Revert();
       /// Used by the owner to change the name of the choice
       void SetValue(const string&);
+		/// Unnecessary here. Any change is immediately taken into account.
+		virtual void ValidateUserInput();
    protected:
 		/// The button to be clicked to change the value.
       wxButton *mpButton;

@@ -58,6 +58,8 @@ class WXFieldRefPar:public WXField
       /// and directly changes the RefinablePar value (contrary to what happens
       /// for WXFieldName)by using RefinablePar::SetHumanValue().
       void OnEnter(wxCommandEvent & WXUNUSED(event));
+		/// Records when text is entered (either from self-updating or user input)
+      void OnText(wxCommandEvent & WXUNUSED(event));
       /// Toggle the 'fixed' status of the parameter.
       void OnToggleFix(wxCommandEvent & WXUNUSED(event));
       /// Opens the popu menu, to allow changing limits
@@ -70,6 +72,7 @@ class WXFieldRefPar:public WXField
       /// Get the RefinablePar associated to this field
       RefinablePar& GetRefPar();
       void Revert();
+		virtual void ValidateUserInput();
    protected:
       double mValue;
       wxCheckBox *mpButtonFix;
@@ -77,6 +80,7 @@ class WXFieldRefPar:public WXField
       RefinablePar *mpRefPar;
       double mValueOld;
       wxMenu *mpPopUpMenu;
+		bool mIsSelfUpdating;
    DECLARE_EVENT_TABLE()
 };
 
@@ -95,6 +99,8 @@ class WXFieldOption:public WXField
       void OnChoice(wxCommandEvent & WXUNUSED(event));
       virtual void CrystUpdate();
       void Revert();
+		/// Does nothing. Any user input is directly validated (OnChoice).
+		virtual void ValidateUserInput();
    protected:
       int mChoice;
       int mChoiceOld;
@@ -113,6 +119,8 @@ class WXCostFunction:public WXField
       void OnEnter(wxCommandEvent & WXUNUSED(event));
       virtual void CrystUpdate();
       virtual void Revert();
+		/// Not used. Not an user input field.
+		virtual void ValidateUserInput();
    protected:
       wxTextCtrl *mpValue;
       double mValue;

@@ -397,6 +397,7 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
 }
 void WXCrystMainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
 {
+	WXCrystValidateAllUserInput();
    wxFileDialog *open= new wxFileDialog(this,"Choose File to save all objects:",
                                         "","","*.xml", wxSAVE | wxOVERWRITE_PROMPT);
    if(open->ShowModal() != wxID_OK) return;
@@ -418,6 +419,7 @@ void WXCrystMainFrame::OnAddPowderPattern(wxCommandEvent& WXUNUSED(event))
 
 void WXCrystMainFrame::OnAddSingleCrystalData(wxCommandEvent& WXUNUSED(event))
 {
+	WXCrystValidateAllUserInput();
    int choice;
    Crystal *cryst=dynamic_cast<Crystal*>
       (WXDialogChooseFromRegistry(gCrystalRegistry,(wxWindow*)this,
@@ -457,6 +459,7 @@ void WXCrystMainFrame::OnSetDebugLevel(wxCommandEvent& event)
 }
 void WXCrystMainFrame::OnDebugTest(wxCommandEvent& event)
 {
+	WXCrystValidateAllUserInput();
 	static long saveId=-1;
 	static long saveId2=-1;
 	switch(event.GetId())

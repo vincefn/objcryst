@@ -127,6 +127,7 @@ void WXZAtom::OnChangeName(wxCommandEvent & WXUNUSED(event))
 void WXZAtom::OnChangeScattPow(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXAtom::OnChangeScattPow()",6)
+	WXCrystValidateAllUserInput();
    int choice;
    const ScatteringPower *scatt=WXDialogChooseFromRegistry(
                mpZAtom->GetZScatterer().GetCrystal().GetScatteringPowerRegistry(),
@@ -212,6 +213,7 @@ void WXZScatterer::CrystUpdate()
 void WXZScatterer::OnMenuAddZAtom(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXZScatterer::OnMenuAddZAtom()",6)
+	WXCrystValidateAllUserInput();
    
    int choice;
    int bondAtomId=0;
@@ -320,6 +322,7 @@ void WXZScatterer::OnMenuAddZAtom(wxCommandEvent & WXUNUSED(event))
 void WXZScatterer::OnMenuSetLimits(wxCommandEvent & event)
 {//:TODO: Need to 
    VFN_DEBUG_ENTRY("WXZScatterer::OnMenuSetLimits()",6)
+	WXCrystValidateAllUserInput();
    switch(event.GetId())
    {
       case ID_ZSCATTERER_MENU_PAR_LIMITS_RELAT_BOND:
@@ -392,6 +395,7 @@ void WXZScatterer::OnMenuSetLimits(wxCommandEvent & event)
 
 void WXZScatterer::OnMenuChangePivotAtom(wxCommandEvent &WXUNUSED(event))
 {
+	WXCrystValidateAllUserInput();
    int pivot=mpZScatterer->mCenterAtomIndex;
    const ZAtom *atom=WXDialogChooseFromRegistry(mpZScatterer->GetZAtomRegistry(),
                                               this,"Choose the new Pivot atom",pivot);

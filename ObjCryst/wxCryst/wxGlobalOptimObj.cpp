@@ -99,6 +99,7 @@ void WXOptimizationObj::OnLoad(){}
 
 void WXOptimizationObj::OnAddRefinedObject()
 {
+	WXCrystValidateAllUserInput();
    int choice;
    RefinableObj *obj=
       WXDialogChooseFromRegistry(gTopRefinableObjRegistry,this,
@@ -109,6 +110,7 @@ void WXOptimizationObj::OnAddRefinedObject()
 
 void WXOptimizationObj::AddRefinedObject(RefinableObj &obj)
 {
+	WXCrystValidateAllUserInput();
    WXFieldName *refobj=new WXFieldName(this,"Optimized object:",this,-1,300,false);
    refobj->SetValue(obj.GetClassName()+":"+obj.GetName());
    mpSizer->Add(refobj);
@@ -119,6 +121,7 @@ void WXOptimizationObj::AddRefinedObject(RefinableObj &obj)
 void WXOptimizationObj::OnAddCostFunction()
 {
    VFN_DEBUG_MESSAGE("WXOptimizationObj::OnAddCostFunction()",6)
+	WXCrystValidateAllUserInput();
    const int nbObj=this->GetOptimizationObj().mRefinedObjList.GetNb();
    int nbCostFunc=0;
    for(int i=0;i<nbObj;i++)
@@ -157,6 +160,7 @@ VFN_DEBUG_MESSAGE(this->GetOptimizationObj().mRefinedObjList.GetObj(i).GetName()
 void WXOptimizationObj::AddCostFunction(RefinableObj &obj, const int costFunc)
 {
    VFN_DEBUG_MESSAGE("WXOptimizationObj::AddCostFunction()",6)
+	WXCrystValidateAllUserInput();
    //:KLUDGE: Here we are assuming that this is the *last* function added
    WXCostFunction *cf=new
          WXCostFunction(this,&obj,-1,costFunc,
@@ -260,6 +264,7 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(100000000)
 void WXMonteCarloObj::OnRunOptimization()
 {
    VFN_DEBUG_ENTRY("WXGeneticAlgorithm::OnRunOptimization()",6)
+	WXCrystValidateAllUserInput();
    if(true==this->GetOptimizationObj().IsOptimizing())
    {
       wxMessageDialog dumbUser(this,"The optimization is already running !","Huh ?",
