@@ -345,6 +345,9 @@ template<class T>class WXFieldPar:public WXFieldParBase
       virtual void CrystUpdate();
       virtual void UpdateUI();
       virtual void Revert();
+      /// Set Coefficient between the value used by ObjCryst++ and the one
+      /// to be displayed to the user. Typically, 180/pi
+      void SetHumanValueScale(const T s);
    protected:
       /// Reads the new value when the Enter key is hit
       virtual void ReadNewValue();
@@ -354,6 +357,9 @@ template<class T>class WXFieldPar:public WXFieldParBase
       T mValue;
       /// Last value
       T mValueOld;
+      /// Coefficient between the value used by ObjCryst++ and the one
+      /// to be displayed to the user. Typically, 180/pi
+      T mHumanScale;
 };
 
 /// Class to pick one choice... Choice change/update is handled by the WXCrystObj owner, who

@@ -470,7 +470,7 @@ void WXFieldParBase::ValidateUserInput()
 ////////////////////////////////////////////////////////////////////////
 template<class T> WXFieldPar<T>::WXFieldPar(wxWindow *parent,const string& label, 
                                             const int id,T *par,const int hsize):
-WXFieldParBase(parent,label,id,hsize),mpValue(par),mValue(*par),mValueOld(*par)
+WXFieldParBase(parent,label,id,hsize),mpValue(par),mValue(*par),mValueOld(*par),mHumanScale(1)
 {
    this->CrystUpdate();
 }
@@ -491,7 +491,7 @@ template<> void WXFieldPar<REAL>::UpdateUI()
    if(mNeedUpdateUI==false) return;
    VFN_DEBUG_ENTRY("WXFieldPar<REAL>::UpdateUI()",4)
    wxString tmp;
-   tmp.Printf("%f",mValue);
+   tmp.Printf("%f",mValue*mHumanScale);
    mIsSelfUpdating=true;
    mpField->SetValue(tmp);
    mIsSelfUpdating=false;
@@ -504,7 +504,7 @@ template<> void WXFieldPar<long>::UpdateUI()
    if(mNeedUpdateUI==false) return;
    VFN_DEBUG_ENTRY("WXFieldPar<long>::UpdateUI()",4)
    wxString tmp;
-   tmp.Printf("%ld",mValue);
+   tmp.Printf("%ld",mValue*mHumanScale);
    mIsSelfUpdating=true;
    mpField->SetValue(tmp);
    mIsSelfUpdating=false;
@@ -534,6 +534,11 @@ template<class T> void WXFieldPar<T>::Revert()
    if(true==wxThread::IsMain()) this->UpdateUI();
 }
 
+template<class T> void WXFieldPar<T>::SetHumanValueScale(const T s)
+{
+   mHumanScale=s;
+}
+
 template<> void WXFieldPar<REAL>::ReadNewValue()
 {
    VFN_DEBUG_MESSAGE("WXFieldPar<REAL>::ReadNewValue()",6)
@@ -542,6 +547,7 @@ template<> void WXFieldPar<REAL>::ReadNewValue()
    double tmp;
    s.ToDouble(&tmp);
    *mpValue=tmp;
+   *mpValue /= mHumanScale;
 }
 template<> void WXFieldPar<long>::ReadNewValue()
 {
@@ -549,6 +555,7 @@ template<> void WXFieldPar<long>::ReadNewValue()
    mValueOld=*mpValue;
    wxString s=mpField->GetValue();
    s.ToLong(mpValue);
+   *mpValue /= mHumanScale;
 }
 
 
