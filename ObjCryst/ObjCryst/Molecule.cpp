@@ -992,7 +992,7 @@ REAL& Quaternion::Q3(){return mQ3;}
 //
 //######################################################################
 Molecule::Molecule(Crystal &cryst, const string &name):
-mIsSelfOptimizing(false),mBaseRotationAmplitude(M_PI*0.02)
+mBaseRotationAmplitude(M_PI*0.02),mIsSelfOptimizing(false)
 {
    VFN_DEBUG_MESSAGE("Molecule::Molecule()",5)
    this->SetName(name);
@@ -2859,6 +2859,7 @@ void Molecule::BuildRotorGroup()
 
 void Molecule::TuneGlobalOptimRotationAmplitude()
 {
+   VFN_DEBUG_ENTRY("Molecule::TuneGlobalOptimRotationAmplitude()",5)
    // Torsion angles
    {
       unsigned long initialConfig=this->CreateParamSet("Initial Configuration");
@@ -3024,6 +3025,7 @@ void Molecule::TuneGlobalOptimRotationAmplitude()
       // Move back atoms to initial position
       this->RestoreParamSet(initialConfig);
    }
+   VFN_DEBUG_EXIT("Molecule::TuneGlobalOptimRotationAmplitude()",5)
 }
 
 void Molecule::BuildFlipGroup()
@@ -3229,6 +3231,8 @@ vector<MolAtom*>::reverse_iterator Molecule::FindAtom(const string &name)
          VFN_DEBUG_EXIT("Molecule::FindAtom():"<<name<<"...found",4)
          return rpos;
       }
+   throw ObjCrystException("Molecule::FindAtom():"+name
+                           +" is not in this Molecule:"+this->GetName());
    VFN_DEBUG_EXIT("Molecule::FindAtom():"<<name<<"...NOT FOUND !",4)
    return rpos;
 }
