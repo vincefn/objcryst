@@ -268,6 +268,7 @@ ZScatterer::~ZScatterer()
 {
    VFN_DEBUG_MESSAGE("ZScatterer::~ZScatterer():("<<mName<<")",5)
    if(0 != mpGlobalScattPow) delete mpGlobalScattPow;
+   mZAtomRegistry.DeleteAll();
 }
 
 ZScatterer* ZScatterer::CreateCopy() const
