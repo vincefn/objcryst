@@ -624,6 +624,11 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
       	REAL y000= 0.;
       	REAL z000= 0.;
       	this->FractionalToOrthonormalCoords(x000,y000,z000);
+      	REAL xM= 0.5;
+      	REAL yM= 0.5;
+      	REAL zM= 0.5;
+      	this->FractionalToOrthonormalCoords(xM,yM,zM);
+			xM*=2;yM*=2;zM*=2;
       glPushMatrix();
    	//Add Axis & axis names
       	GLfloat colour_font[]= { 1.0,1.0,1.0, 1.0 };
@@ -649,28 +654,53 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
       	this->FractionalToOrthonormalCoords(xc,yc,zc);
          glTranslatef(-xc, -yc, -zc);
       	glColor3f(1.0f,1.0f,1.0f);	   // White
-      	glBegin(GL_LINE_LOOP);				// Bottom
+      	glBegin(GL_LINES);
+				//top
+				glNormal3f(x110+x010-xM,y110+y010-yM,z110+z010-zM);
          	glVertex3f(    x110,    y110,    z110);
          	glVertex3f(    x010,    y010,    z010);
+			
+				glNormal3f(x011+x010-xM,y011+y010-yM,z011+z010-zM);
+         	glVertex3f(    x010,    y010,    z010);
+         	glVertex3f(    x011,    y011,    z011);
+				
+				glNormal3f(x011+x111-xM,y011+y111-yM,z011+z111-zM);
          	glVertex3f(    x011,    y011,    z011);
          	glVertex3f(    x111,    y111,    z111);
-      	glEnd();	
-      	glBegin(GL_LINE_LOOP);				// Top
+
+				glNormal3f(x110+x111-xM,y110+y111-yM,z110+z111-zM);
+         	glVertex3f(    x111,    y111,    z111);
+         	glVertex3f(    x110,    y110,    z110);
+				//bottom
+				glNormal3f(x101+x001-xM,y101+y001-yM,z101+z001-zM);
          	glVertex3f(    x101,    y101,    z101);
          	glVertex3f(    x001,    y001,    z001);
+
+				glNormal3f(x000+x001-xM,y000+y001-yM,z000+z001-zM);
+         	glVertex3f(    x001,    y001,    z001);
+         	glVertex3f(    x000,    y000,    z000);
+
+				glNormal3f(x000+x100-xM,y000+y100-yM,z000+z100-zM);
          	glVertex3f(    x000,    y000,    z000);
          	glVertex3f(    x100,    y100,    z100);
-      	glEnd();
-      	glBegin(GL_LINES);				// Top
+
+				glNormal3f(x101+x100-xM,y101+y100-yM,z101+z100-zM);
+         	glVertex3f(    x100,    y100,    z100);
+         	glVertex3f(    x101,    y101,    z101);
+				//sides
+				glNormal3f(x101+x111-xM,y101+y111-yM,z101+z111-zM);
          	glVertex3f(    x101,    y101,    z101);
          	glVertex3f(    x111,    y111,    z111);
-
+				
+				glNormal3f(x001+x011-xM,y001+y011-yM,z001+z011-zM);
          	glVertex3f(    x001,    y001,     z001);
          	glVertex3f(    x011,    y011,     z011);
-
+			
+				glNormal3f(x000+x010-xM,y000+y010-yM,z000+z010-zM);
          	glVertex3f(    x000,    y000,    z000);
          	glVertex3f(    x010,    y010,    z010);
-
+			
+				glNormal3f(x100+x110-xM,y100+y110-yM,z100+z110-zM);
          	glVertex3f(    x100,    y100,    z100);
          	glVertex3f(    x110,    y110,    z110);
       	glEnd();
