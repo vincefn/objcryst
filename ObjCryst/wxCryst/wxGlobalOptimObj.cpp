@@ -234,11 +234,15 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(100000000)
          new WXFieldPar<REAL>(this,"Temperature Max:",-1,&(mpMonteCarloObj->mTemperatureMax));
       WXFieldPar<REAL> *tempMin=
          new WXFieldPar<REAL>(this,"Temperature Min:",-1,&(mpMonteCarloObj->mTemperatureMin));
+      WXFieldPar<REAL> *tempGamma=
+         new WXFieldPar<REAL>(this,"Gamma:",-1,&(mpMonteCarloObj->mTemperatureGamma));
       sizerTemp->Add(tempMax);
       sizerTemp->Add(tempMin);
+      sizerTemp->Add(tempGamma);
       mpSizer->Add(sizerTemp);
       mList.Add(tempMax);
       mList.Add(tempMin);
+      mList.Add(tempGamma);
       
       opt=new WXFieldOption(this,-1,&(mpMonteCarloObj->mAnnealingScheduleMutation));
       mpSizer->Add(opt,0,wxALIGN_LEFT);
@@ -249,11 +253,15 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(100000000)
          new WXFieldPar<REAL>(this,"Amplitude Max:",-1,&(mpMonteCarloObj->mMutationAmplitudeMax));
       WXFieldPar<REAL> *ampMin=
          new WXFieldPar<REAL>(this,"Amplitude Min:",-1,&(mpMonteCarloObj->mMutationAmplitudeMin));
+      WXFieldPar<REAL> *ampGamma=
+         new WXFieldPar<REAL>(this,"Gamma:",-1,&(mpMonteCarloObj->mMutationAmplitudeGamma));
       sizerAmp->Add(ampMax);
       sizerAmp->Add(ampMin);
+      sizerAmp->Add(ampGamma);
       mpSizer->Add(sizerAmp);
       mList.Add(ampMax);
       mList.Add(ampMin);
+      mList.Add(ampGamma);
       
       #if 0
       // Only to evaluate how the algorithm works

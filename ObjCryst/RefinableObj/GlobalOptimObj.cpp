@@ -233,6 +233,7 @@ void OptimizationObj::TagNewBestConfig()const
 {
    for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
       mRecursiveRefinedObjList.GetObj(i).TagNewBestConfig();
+   this->UpdateDisplay();
 }
 
 REAL OptimizationObj::GetLastOptimElapsedTime()const
@@ -330,8 +331,8 @@ OptimizationObj(name),
 mCurrentCost(-1),
 mHistorySaveFileName("GlobalOptim_history.out"),
 mLastParSavedSetIndex(-1),
-mTemperatureMax(1),mTemperatureMin(.000001),
-mMutationAmplitudeMax(8.),mMutationAmplitudeMin(.125),
+mTemperatureMax(1),mTemperatureMin(.000001),mTemperatureGamma(1.0),
+mMutationAmplitudeMax(8.),mMutationAmplitudeMin(.125),mMutationAmplitudeGamma(1.0),
 mNbTrialRetry(0),mMinCostRetry(0),mMaxNbTrialSinceBest(0)
 #ifdef __WX__CRYST__
 ,mpWXCrystObj(0)
@@ -432,6 +433,10 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
    mNbTrial=0;
    mRefParList.EraseAllParamSet();
    mIsOptimizing=true;
+   if(mTemperatureGamma<0.1) mTemperatureGamma= 0.1;
+   if(mTemperatureGamma>10.0)mTemperatureGamma=10.0;
+   if(mMutationAmplitudeGamma<0.1) mMutationAmplitudeGamma= 0.1;
+   if(mMutationAmplitudeGamma>10.0)mMutationAmplitudeGamma=10.0;
    // If using history, open file
       ofstream outHistory;
       if(mSaveDetailledHistory.GetChoice()>0)
@@ -494,6 +499,9 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                      mTemperature=mTemperatureMax
                                     *pow(mTemperatureMin/mTemperatureMax,
                                           mNbTrial/(REAL)nbSteps);break;
+                  case ANNEALING_GAMMA:
+                     mTemperature=mTemperatureMax+(mTemperatureMin-mTemperatureMax)
+                                    *pow(mNbTrial/(REAL)nbSteps,mTemperatureGamma);break;
                   case ANNEALING_SMART:
                   {
                      if((nbAcceptedMovesTemp/(REAL)nbTryPerTemp)>0.30)
@@ -520,6 +528,9 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                      mMutationAmplitude=mMutationAmplitudeMax
                                     *pow(mMutationAmplitudeMin/mMutationAmplitudeMax,
                                           mNbTrial/(REAL)nbSteps);break;
+                  case ANNEALING_GAMMA:
+                     mMutationAmplitude=mMutationAmplitudeMax+(mMutationAmplitudeMin-mMutationAmplitudeMax)
+                                    *pow(mNbTrial/(REAL)nbSteps,mMutationAmplitudeGamma);break;
                   case ANNEALING_SMART:
                      if((nbAcceptedMovesTemp/(REAL)nbTryPerTemp)>0.3) mMutationAmplitude*=2.;
                      if((nbAcceptedMovesTemp/(REAL)nbTryPerTemp)<0.1) mMutationAmplitude/=2.;
@@ -552,7 +563,6 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                                    << " Mutation Ampl.: "<<mMutationAmplitude
                                    << " NEW Best Cost="<<mBestCost<< endl;
                   nbTriesSinceBest=0;
-                  this->UpdateDisplay();
                }
                nbAcceptedMoves++;
                nbAcceptedMovesTemp++;
@@ -702,6 +712,9 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                      simAnnealTemp(i)=mTemperatureMax
                                     *pow(mTemperatureMin/mTemperatureMax,
                                           i/(REAL)(nbWorld-1));break;
+                  case ANNEALING_GAMMA:
+                     simAnnealTemp(i)=mTemperatureMax+(mTemperatureMin-mTemperatureMax)
+                                    *pow(i/(REAL)(nbWorld-1),mTemperatureGamma);break;
                   case ANNEALING_SMART:
                      simAnnealTemp(i)=mCurrentCost/(100.+(REAL)i/(REAL)nbWorld*900.);break;
                   default:
@@ -725,6 +738,9 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                      mutationAmplitude(i)=mMutationAmplitudeMax
                                     *pow(mMutationAmplitudeMin/mMutationAmplitudeMax,
                                           i/(REAL)(nbWorld-1));break;
+                  case ANNEALING_GAMMA:
+                     mutationAmplitude(i)=mMutationAmplitudeMax+(mMutationAmplitudeMin-mMutationAmplitudeMax)
+                                    *pow(i/(REAL)(nbWorld-1),mMutationAmplitudeGamma);break;
                   case ANNEALING_SMART:
                      mutationAmplitude(i)=sqrt(mMutationAmplitudeMin*mMutationAmplitudeMax);break;
                   default:
@@ -808,7 +824,6 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                                          << " NEW Best Cost="<<mBestCost<< endl;
                         bestConfigNb=mNbTrial;
                         if(!silent) this->DisplayReport();
-                        this->UpdateDisplay();
                         //for(int i=0;i<mRefinedObjList.GetNb();i++) 
                         //   mRefinedObjList.GetObj(i).Print();
                      }
@@ -1034,7 +1049,6 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                                 << " NEW Best Cost="<<mBestCost<< "(MATING !)"<<endl;
                            bestConfigNb=mNbTrial;
                            if(!silent) this->DisplayReport();
-                           this->UpdateDisplay();
                            //for(int i=0;i<mRefinedObjList.GetNb();i++) 
                            //   mRefinedObjList.GetObj(i).Print();
                         }
@@ -1469,6 +1483,7 @@ void MonteCarloObj::InitOptions()
       AnnealingScheduleChoices[2]="Cauchy";
       AnnealingScheduleChoices[3]="Exponential";
       AnnealingScheduleChoices[4]="Smart";
+      AnnealingScheduleChoices[5]="Gamma";
       
       saveDetailledHistoryName="Save evolution of all parameters (for tests ONLY!!!)";
       saveDetailledHistoryChoices[0]="No (highly recommended)";
@@ -1479,8 +1494,8 @@ void MonteCarloObj::InitOptions()
       needInitNames=false;//Only once for the class
    }
    mGlobalOptimType.Init(2,&GlobalOptimTypeName,GlobalOptimTypeChoices);
-   mAnnealingScheduleTemp.Init(5,&AnnealingScheduleTempName,AnnealingScheduleChoices);
-   mAnnealingScheduleMutation.Init(5,&AnnealingScheduleMutationName,AnnealingScheduleChoices);
+   mAnnealingScheduleTemp.Init(6,&AnnealingScheduleTempName,AnnealingScheduleChoices);
+   mAnnealingScheduleMutation.Init(6,&AnnealingScheduleMutationName,AnnealingScheduleChoices);
    mSaveDetailledHistory.Init(4,&saveDetailledHistoryName,saveDetailledHistoryChoices);
    VFN_DEBUG_MESSAGE("MonteCarloObj::InitOptions():End",5)
 }

@@ -55,6 +55,7 @@ namespace ObjCryst
 * \f[ A_{Boltzmann} = A_{min} \frac{\ln(NbStep)}{\ln(step)} \f]
 * \f[ A_{Cauchy} = A_{min} \frac{NbStep}{step} \f]
 * \f[ A_{exponential} = A_{max} (\frac{T_{min}}{T_{max}})^{\frac{step}{NbStep}} \f]
+* \f[ A_{\gamma} = A_{max} +(A_{min}-A_{max}*(\frac{step}{NbStep})^{\gamma} \f]
 *
 * For the 'smart' schedule, it is only supported so far for the mutation amplitude:
 * it is modulated so that for each temperature between 30 and 70% of trial
@@ -67,7 +68,8 @@ enum AnnealingSchedule
    ANNEALING_CAUCHY,
 //   ANNEALING_QUENCHING,
    ANNEALING_EXPONENTIAL,
-   ANNEALING_SMART
+   ANNEALING_SMART,
+   ANNEALING_GAMMA
 };
 
 /** Global optimization type. Eventually it would be better to build
@@ -79,7 +81,9 @@ enum GlobalOptimType
 {
    GLOBAL_OPTIM_SIMULATED_ANNEALING,
    GLOBAL_OPTIM_PARALLEL_TEMPERING,
-   GLOBAL_OPTIM_GENETIC
+   GLOBAL_OPTIM_GENETIC,
+   GLOBAL_OPTIM_SIMULATED_ANNEALING_MULTI,
+   GLOBAL_OPTIM_PARALLEL_TEMPERING_MULTI
 };
 
 /** \brief Base object for Optimization methods.
@@ -411,6 +415,8 @@ class MonteCarloObj:public OptimizationObj
          REAL mTemperatureMin;
          /// Schedule for the annealing
          RefObjOpt mAnnealingScheduleTemp;
+         /// Gamma for the 'gamma' temperature schedule
+         REAL mTemperatureGamma;
       //Parameters to create new configurations
          /// Mutation amplitude. From .25 to 64. Random moves will have a maximum amplitude
          /// equal to this amplitude multiplied by the Global optimization step defined
@@ -423,6 +429,8 @@ class MonteCarloObj:public OptimizationObj
          REAL mMutationAmplitudeMin;
          /// Schedule for the annealing
          RefObjOpt mAnnealingScheduleMutation;
+         /// Gamma for the 'gamma' Mutation amplitude schedule
+         REAL mMutationAmplitudeGamma;
       //Automatic retry 
          /// Number of trials before testing if we are below the given minimum cost.
          /// If <=0, this will be ignored.
