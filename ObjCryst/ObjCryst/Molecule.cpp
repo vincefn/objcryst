@@ -413,7 +413,10 @@ REAL MolBondAngle::GetAngle()const
    const REAL z23=this->GetAtom3().GetZ()-this->GetAtom2().GetZ();
    const REAL norm21= x21*x21+y21*y21+z21*z21;
    const REAL norm23= x23*x23+y23*y23+z23*z23;
-   return acos( (x21*x23+y21*y23+z21*z23)/sqrt(norm21*norm23));
+   const REAL angle=(x21*x23+y21*y23+z21*z23)/sqrt(norm21*norm23+1e-6);
+   if(angle>=1)  return 0;
+   if(angle<=-1) return M_PI;
+   return acos(angle);
 }
 
 REAL MolBondAngle::GetLogLikelihood()const
@@ -499,7 +502,7 @@ void MolDihedralAngle::XMLOutput(ostream &os,int indent)const
    {
       stringstream ss;
       ss <<mAngle0;
-      tag.AddAttribute("DihedralAngle",ss.str());
+      tag.AddAttribute("Angle",ss.str());
    }
    {
       stringstream ss;
@@ -561,23 +564,35 @@ REAL MolDihedralAngle::GetAngle()const
    const REAL x21=this->GetAtom1().GetX()-this->GetAtom2().GetX();
    const REAL y21=this->GetAtom1().GetY()-this->GetAtom2().GetY();
    const REAL z21=this->GetAtom1().GetZ()-this->GetAtom2().GetZ();
+   
    const REAL x34=this->GetAtom4().GetX()-this->GetAtom3().GetX();
    const REAL y34=this->GetAtom4().GetY()-this->GetAtom3().GetY();
    const REAL z34=this->GetAtom4().GetZ()-this->GetAtom3().GetZ();
-   const REAL norm21= x21*x21+y21*y21+z21*z21;
-   const REAL norm34= x34*x34+y34*y34+z34*z34;
-   const REAL angle=acos( (x21*x34+y21*y34+z21*z34)/sqrt(norm21*norm34));
    
    const REAL x23=this->GetAtom3().GetX()-this->GetAtom2().GetX();
    const REAL y23=this->GetAtom3().GetY()-this->GetAtom2().GetY();
    const REAL z23=this->GetAtom3().GetZ()-this->GetAtom2().GetZ();
    
-   // v23 x v21
-   const REAL x123= y23*z21-z23*y21;
-   const REAL y123= z23*x21-x23*z21;
-   const REAL z123= x23*y21-y23*x21;
+   // v21 x v23
+   const REAL x123= y21*z23-z21*y23;
+   const REAL y123= z21*x23-x21*z23;
+   const REAL z123= x21*y23-y21*x23;
+   const REAL norm123= x123*x123+y123*y123+z123*z123;
    
-   if((x123*x34 + y123*y34 + z123*z34)<0) return -angle;
+   // v32 x v34 (= -v23 x v34)
+   const REAL x234= -(y23*z34-z23*y34);
+   const REAL y234= -(z23*x34-x23*z34);
+   const REAL z234= -(x23*y34-y23*x34);
+   const REAL norm234= x234*x234+y234*y234+z234*z234;
+   
+   REAL angle=(x123*x234+y123*y234+z123*z234)/sqrt(norm123*norm234+1e-6);
+   if(angle>= 1) angle=0;
+   else 
+   {
+      if(angle<=-1) angle=M_PI;
+      else angle=acos(angle);
+   }
+   if((x21*x34 + y21*y34 + z21*z34)<0) return -angle;
    return angle;
 }
 
@@ -588,6 +603,8 @@ REAL MolDihedralAngle::GetLogLikelihood()const
    VFN_DEBUG_ENTRY("MolDihedralAngle::GetLogLikelihood():",2)
    const REAL angle=this->GetAngle();
    REAL tmp=angle-(mAngle0+mDelta);
+   if(abs(tmp+2*M_PI)<abs(tmp)) tmp += 2*M_PI;
+   if(abs(tmp-2*M_PI)<abs(tmp)) tmp -= 2*M_PI;
    if(tmp>0)
    {
       tmp/=mSigma;
@@ -598,6 +615,8 @@ REAL MolDihedralAngle::GetLogLikelihood()const
       return tmp*tmp;
    }
    tmp=angle-(mAngle0-mDelta);
+   if(abs(tmp+2*M_PI)<abs(tmp)) tmp=tmp+2*M_PI;
+   if(abs(tmp-2*M_PI)<abs(tmp)) tmp=tmp-2*M_PI;
    if(tmp<0)
    {
       tmp/=mSigma;
