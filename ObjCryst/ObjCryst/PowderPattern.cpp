@@ -63,6 +63,10 @@ const RefinableObjClock& PowderPatternComponent::GetClockPowderPatternCalc()cons
 {
    return mClockPowderPatternCalc;
 }
+const RefinableObjClock& PowderPatternComponent::GetClockBraggLimits()const
+{
+	return mClockBraggLimits;
+}
 
 ////////////////////////////////////////////////////////////////////////
 //
@@ -237,6 +241,11 @@ void PowderPatternBackground::SetRadiation(const Radiation& rad)
 }
 void PowderPatternBackground::Prepare()
 {
+}
+void PowderPatternBackground::GetBraggLimits(CrystVector_long *min,CrystVector_long *max)const
+{
+	min=0;
+	max=0;
 }
 
 #ifdef __WX__CRYST__
@@ -837,6 +846,26 @@ void PowderPatternDiffraction::InitOptions()
       this->AddPar(tmp);
    }
 }
+void PowderPatternDiffraction::GetBraggLimits(CrystVector_long *min,CrystVector_long *max)const
+{
+	this->CalcPowderReflProfile();
+	if(mClockProfileCalc>mClockBraggLimits)
+	{
+		mIntegratedReflMin.resize(this->GetNbRefl());
+		mIntegratedReflMax.resize(this->GetNbRefl());
+		double fwhm,tmp;
+   	for(long i=0;i<this->GetNbRefl();i++)
+   	{
+      	tmp=mTheta(i);
+			fwhm=mCagliotiW + mCagliotiV*tmp + mCagliotiU*tmp*tmp;
+			mIntegratedReflMin(i)=mpParentPowderPattern->Get2ThetaCorrPixel(2*mTheta(i)-2*fwhm);
+			mIntegratedReflMax(i)=mpParentPowderPattern->Get2ThetaCorrPixel(2*mTheta(i)+2*fwhm);
+		}
+	}
+	min=&mIntegratedReflMin;
+	max=&mIntegratedReflMax;
+	mClockBraggLimits.Click();
+}
 #ifdef __WX__CRYST__
 WXCrystObjBasic* PowderPatternDiffraction::WXCreate(wxWindow* parent)
 {
@@ -858,7 +887,7 @@ PowderPattern::PowderPattern():
 m2ThetaMin(0),m2ThetaStep(0),mNbPoint(0),mWavelength(1.),
 m2ThetaZero(0.),m2ThetaDisplacement(0.),m2ThetaTransparency(0.),
 mScaleFactor(20),mUseFastLessPreciseFunc(false),
-mStatisticsExcludeBackground(false),mStatisticsUseIntegratedPeak(false),
+mStatisticsExcludeBackground(false),
 mUseOnlyLowAngleData(false),mUseOnlyLowAngleDataLimit(0)
 {
    mScaleFactor=1;
@@ -878,7 +907,6 @@ mPowderPatternComponentRegistry(old.mPowderPatternComponentRegistry),
 mScaleFactor(old.mScaleFactor),
 mUseFastLessPreciseFunc(old.mUseFastLessPreciseFunc),
 mStatisticsExcludeBackground(old.mStatisticsExcludeBackground),
-mStatisticsUseIntegratedPeak(old.mStatisticsUseIntegratedPeak),
 mUseOnlyLowAngleData(old.mUseOnlyLowAngleData),
 mUseOnlyLowAngleDataLimit(old.mUseOnlyLowAngleDataLimit)
 {
@@ -1412,6 +1440,7 @@ supplied vector of observed intensities does not have the expected number of poi
 	
 	this->SetSigmaToSqrtIobs();
 	this->SetWeightToInvSigmaSq();
+	mClockIntegratedFactorsPrep.Reset();
 }
 void PowderPattern::SavePowderPattern(const string &filename) const
 {
@@ -1460,188 +1489,184 @@ double PowderPattern::GetR()const
    double tmp1=0.;
    double tmp2=0.;
    
-   if(false==mStatisticsUseIntegratedPeak)
+   long maxPoints=mNbPoint;
+   if(true==mUseOnlyLowAngleData) 
+      maxPoints= (long)((2*mUseOnlyLowAngleDataLimit-m2ThetaMin)
+                     /m2ThetaStep+1);
+
+   if(  (true==mStatisticsExcludeBackground)
+      &&(mPowderPatternBackgroundCalc.numElements()>0))
    {
-      long maxPoints=mNbPoint;
-      if(true==mUseOnlyLowAngleData) 
-         maxPoints= (long)((2*mUseOnlyLowAngleDataLimit-m2ThetaMin)
-                        /m2ThetaStep+1);
-
-      if(  (true==mStatisticsExcludeBackground)
-         &&(mPowderPatternBackgroundCalc.numElements()>0))
+      const double *p1, *p2, *p3;
+      p1=mPowderPatternCalc.data();
+      p2=mPowderPatternObs.data();
+      p3=mPowderPatternBackgroundCalc.data();
+      const long nbExclude=mExcludedRegionMin2Theta.numElements();
+      if(0==nbExclude)
       {
-         const double *p1, *p2, *p3;
-         p1=mPowderPatternCalc.data();
-         p2=mPowderPatternObs.data();
-         p3=mPowderPatternBackgroundCalc.data();
-         const long nbExclude=mExcludedRegionMin2Theta.numElements();
-         if(0==nbExclude)
+         VFN_DEBUG_MESSAGE("PowderPattern::GetR():Exclude Backgd",4);
+         for(long i=0;i<maxPoints;i++)
          {
-            VFN_DEBUG_MESSAGE("PowderPattern::GetR():Exclude Backgd",4);
-            for(long i=0;i<maxPoints;i++)
+            tmp1 += ((*p1)-(*p2)) * ((*p1)-(*p2));
+            tmp2 += ((*p2)-(*p3)) * ((*p2)-(*p3));
+            p1++;p2++;p3++;
+         }
+      }
+      else
+      {
+         VFN_DEBUG_MESSAGE("PowderPattern::GetR():Exclude Backgd,Exclude regions",4);
+         long min,max;
+         long i=0;
+         for(int j=0;j<nbExclude;j++)
+         {
+            min=(long)floor((mExcludedRegionMin2Theta(j)-m2ThetaMin)
+                                 /m2ThetaStep);
+            max=(long)ceil((mExcludedRegionMax2Theta(j)-m2ThetaMin)
+                                 /m2ThetaStep);
+            if(min>maxPoints) break;
+            if(max>maxPoints)max=maxPoints;
+            for(;i<min;i++)//! min is the *beginning* of the excluded region !
             {
                tmp1 += ((*p1)-(*p2)) * ((*p1)-(*p2));
                tmp2 += ((*p2)-(*p3)) * ((*p2)-(*p3));
                p1++;p2++;p3++;
             }
+            p1 += max-i;
+            p2 += max-i;
+            p3 += max-i;
+            i  += max-i;
          }
-         else
+         for(;i<maxPoints;i++)
          {
-            VFN_DEBUG_MESSAGE("PowderPattern::GetR():Exclude Backgd,Exclude regions",4);
-            long min,max;
-            long i=0;
-            for(int j=0;j<nbExclude;j++)
-            {
-               min=(long)floor((mExcludedRegionMin2Theta(j)-m2ThetaMin)
-                                    /m2ThetaStep);
-               max=(long)ceil((mExcludedRegionMax2Theta(j)-m2ThetaMin)
-                                    /m2ThetaStep);
-               if(min>maxPoints) break;
-               if(max>maxPoints)max=maxPoints;
-               for(;i<min;i++)//! min is the *beginning* of the excluded region !
-               {
-                  tmp1 += ((*p1)-(*p2)) * ((*p1)-(*p2));
-                  tmp2 += ((*p2)-(*p3)) * ((*p2)-(*p3));
-                  p1++;p2++;p3++;
-               }
-               p1 += max-i;
-               p2 += max-i;
-               p3 += max-i;
-               i  += max-i;
-            }
-            for(;i<maxPoints;i++)
-            {
-               tmp1 += ((*p1)-(*p2)) * ((*p1)-(*p2));
-               tmp2 += ((*p2)-(*p3)) * ((*p2)-(*p3));
-               p1++;p2++;p3++;
-            }
+            tmp1 += ((*p1)-(*p2)) * ((*p1)-(*p2));
+            tmp2 += ((*p2)-(*p3)) * ((*p2)-(*p3));
+            p1++;p2++;p3++;
+         }
 
+      }
+   } // Exclude Background ?
+   else
+   {
+      const double *p1, *p2;
+      p1=mPowderPatternCalc.data();
+      p2=mPowderPatternObs.data();
+      const long nbExclude=mExcludedRegionMin2Theta.numElements();
+      if(0==nbExclude)
+      {
+         VFN_DEBUG_MESSAGE("PowderPattern::GetR()",4);
+         for(unsigned long i=0;i<mNbPoint;i++)
+         {
+            tmp1 += ((*p1)-(*p2))*((*p1)-(*p2));
+            tmp2 += (*p2) * (*p2);
+            //cout <<i<<":"<< tmp1 << " "<<tmp2 << " " << *p1 <<" "<<*p2<<endl;
+            p1++;p2++;
          }
-      } // Exclude Background ?
+      }
       else
       {
-         const double *p1, *p2;
-         p1=mPowderPatternCalc.data();
-         p2=mPowderPatternObs.data();
-         const long nbExclude=mExcludedRegionMin2Theta.numElements();
-         if(0==nbExclude)
+         VFN_DEBUG_MESSAGE("PowderPattern::GetR(),Exclude regions",4);
+         long min,max;
+         long i=0;
+         for(int j=0;j<nbExclude;j++)
          {
-            VFN_DEBUG_MESSAGE("PowderPattern::GetR()",4);
-            for(unsigned long i=0;i<mNbPoint;i++)
-            {
-               tmp1 += ((*p1)-(*p2))*((*p1)-(*p2));
-               tmp2 += (*p2) * (*p2);
-               //cout <<i<<":"<< tmp1 << " "<<tmp2 << " " << *p1 <<" "<<*p2<<endl;
-               p1++;p2++;
-            }
-         }
-         else
-         {
-            VFN_DEBUG_MESSAGE("PowderPattern::GetR(),Exclude regions",4);
-            long min,max;
-            long i=0;
-            for(int j=0;j<nbExclude;j++)
-            {
-               min=(long)floor((mExcludedRegionMin2Theta(j)-m2ThetaMin)
-                                    /m2ThetaStep);
-               max=(long)ceil((mExcludedRegionMax2Theta(j)-m2ThetaMin)
-                                    /m2ThetaStep);
-               if(min>maxPoints) break;
-               if(max>maxPoints)max=maxPoints;
-               for(;i<min;i++)//! min is the *beginning* of the excluded region !
-               {
-                  tmp1 += ((*p1)-(*p2))*((*p1)-(*p2));
-                  tmp2 += (*p2) * (*p2);
-                  p1++;p2++;
-               }
-               p1 += max-i;
-               p2 += max-i;
-               i  += max-i;
-            }
-            for(;i<maxPoints;i++)
+            min=(long)floor((mExcludedRegionMin2Theta(j)-m2ThetaMin)
+                                 /m2ThetaStep);
+            max=(long)ceil((mExcludedRegionMax2Theta(j)-m2ThetaMin)
+                                 /m2ThetaStep);
+            if(min>maxPoints) break;
+            if(max>maxPoints)max=maxPoints;
+            for(;i<min;i++)//! min is the *beginning* of the excluded region !
             {
                tmp1 += ((*p1)-(*p2))*((*p1)-(*p2));
                tmp2 += (*p2) * (*p2);
                p1++;p2++;
             }
+            p1 += max-i;
+            p2 += max-i;
+            i  += max-i;
          }
-      }
-   }
-   else //Use integrated peaks ?
-   { 
-      throw ObjCrystException("PowderPattern::GetR(): Unimplemented yet !");
-      /*
-      long nbRefl=this->NbRefl();
-      double theta;
-      long thetaPt,first,last;
-      double fwhm;
-      {
-         double tmp = m2ThetaMin+m2ThetaStep*mNbPoint;
-         tmp/= 2;
-         fwhm=sqrt(mPowderCagliotiW + mPowderCagliotiV*tmp + mPowderCagliotiU*tmp*tmp);
-      }
-      const long nbIntegrPt=(long)(fwhm/m2ThetaStep);
-      #ifdef __DEBUG__
-      if(  (true==mStatisticsExcludeBackground)
-         &&(mPowderPatternBackgroundCalc.numElements()>0))
-      {
-         VFN_DEBUG_MESSAGE("PowderPattern::GetR() Integrated R (2x"<<nbIntegrPt<<
-            "points) & Exclude Backgd",3)
-      }
-      else
-      {
-         VFN_DEBUG_MESSAGE("PowderPattern::GetR()Integrated R",3)
-      }
-      #endif
-         
-      for(long i=0;i<nbRefl;i++)
-      {
-         theta=mTheta(i);
-         if((true==mUseOnlyLowAngleData) && (theta>mUseOnlyLowAngleDataLimit)) continue;
-         theta +=  m2ThetaZero/2.
-                  +m2ThetaDisplacement/cos(theta)
-                  +m2ThetaTransparency*sin(2*theta);
-         thetaPt =(long) ((2*theta-(m2ThetaMin))
-                           /m2ThetaStep);
-         
-         first=thetaPt-nbIntegrPt;
-         if( first >= mNbPoint) continue;
-         if( first < 0) first =0;
-         last=thetaPt+nbIntegrPt;
-         if( last >= mNbPoint) last=mNbPoint;
-         
-         double ttmp1 = 0;
-         double ttmp2 = 0;
-         double ttmp3 = 0;
-         if((true==mStatisticsExcludeBackground)&&(true==mHasPowderPatternBackground))
+         for(;i<maxPoints;i++)
          {
-            const double *p1 = mPowderPatternCalc.data()+first;
-            const double *p2 = mPowderPatternObs.data()+first;
-            const double *p3 = mPowderPatternBackgroundCalc.data()+first;
-            for(long j=first;j<last;j++)
-            {
-               ttmp1 += *p1++;
-               ttmp2 += *p2++;
-               ttmp3 += *p3++;
-            }
+            tmp1 += ((*p1)-(*p2))*((*p1)-(*p2));
+            tmp2 += (*p2) * (*p2);
+            p1++;p2++;
          }
-         else
-         {
-            const double *p1 = mPowderPatternCalc.data()+first;
-            const double *p2 = mPowderPatternObs.data()+first;
-            for(long j=first;j<last;j++)
-            {
-               ttmp1 += *p1++;
-               ttmp2 += *p2++;
-            }
-         }
-         tmp1 += (ttmp1-ttmp2) * (ttmp1-ttmp2);
-         tmp2 += (ttmp2-ttmp3) * (ttmp2-ttmp3);
       }
-      */
    }
    
    VFN_DEBUG_MESSAGE("PowderPattern::GetR()="<<sqrt(tmp1/tmp2),4);
+   //cout << FormatVertVector<double>(mPowderPatternCalc,mPowderPatternObs);
+   //this->SavePowderPattern("refinedPattern.out");
+   //abort();
+   return sqrt(tmp1/tmp2);
+}
+double PowderPattern::GetIntegratedR()const
+{
+   this->CalcPowderPattern();
+	this->PrepareIntegratedRfactor();
+   TAU_PROFILE("PowderPattern::GetIntegratedR()","void ()",TAU_DEFAULT);
+   
+   double tmp1=0.;
+   double tmp2=0.;
+	const long numInterval=mIntegratedPatternMin.numElements();
+   if(  (true==mStatisticsExcludeBackground)
+      &&(mPowderPatternBackgroundCalc.numElements()>0))
+   {
+      const double *p1, *p2, *p3;
+		CrystVector_double integratedCalc(numInterval);
+		integratedCalc=0;
+		CrystVector_double backgdCalc(numInterval);
+		backgdCalc=0;
+		double *pp1=integratedCalc.data();
+		double *pp2=backgdCalc.data();
+		for(int i=0;i<numInterval;i++)
+		{
+			const long max=mIntegratedPatternMax(i);
+			p1=mPowderPatternCalc.data()+mIntegratedPatternMin(i);
+			for(int j=mIntegratedPatternMin(i);j<=max;j++) *pp1 += *p1++;
+			pp1++;
+			p1=mPowderPatternBackgroundCalc.data()+mIntegratedPatternMin(i);
+			for(int j=mIntegratedPatternMin(i);j<=max;j++) *pp2 += *p1++;
+			pp2++;
+		}
+		
+      p1=integratedCalc.data();
+      p2=mIntegratedObs.data();
+      p3=backgdCalc.data();
+      VFN_DEBUG_MESSAGE("PowderPattern::GetIntegratedR():Exclude Backgd",4);
+      for(long i=0;i<numInterval;i++)
+      {
+         tmp1 += ((*p1)-(*p2)) * ((*p1)-(*p2));
+         tmp2 += ((*p2)-(*p3)) * ((*p2)-(*p3));
+         p1++;p2++;p3++;
+      }
+   } // Exclude Background ?
+   else
+   {
+      const double *p1, *p2;
+		CrystVector_double integratedCalc(numInterval);
+		integratedCalc=0;
+		double *pp1=integratedCalc.data();
+		for(int i=0;i<numInterval;i++)
+		{
+			const long max=mIntegratedPatternMax(i);
+			p1=mPowderPatternCalc.data()+mIntegratedPatternMin(i);
+			for(int j=mIntegratedPatternMin(i);j<=max;j++) *pp1 += *p1++;
+			pp1++;
+		}
+      p1=integratedCalc.data();
+      p2=mIntegratedObs.data();
+      VFN_DEBUG_MESSAGE("PowderPattern::GetIntegratedR()",4);
+      for(long i=0;i<numInterval;i++)
+      {
+         tmp1 += ((*p1)-(*p2))*((*p1)-(*p2));
+         tmp2 += (*p2) * (*p2);
+         //cout <<i<<":"<< tmp1 << " "<<tmp2 << " " << *p1 <<" "<<*p2<<endl;
+         p1++;p2++;
+      }
+   }
+   
+   VFN_DEBUG_MESSAGE("PowderPattern::GetIntegratedR()="<<sqrt(tmp1/tmp2),4);
    //cout << FormatVertVector<double>(mPowderPatternCalc,mPowderPatternObs);
    //this->SavePowderPattern("refinedPattern.out");
    //abort();
@@ -1661,116 +1686,186 @@ double PowderPattern::GetRw()const
    double tmp1=0.;
    double tmp2=0.;
    
-   if(false==mStatisticsUseIntegratedPeak)
+   long maxPoints=mNbPoint;
+   if(true==mUseOnlyLowAngleData) 
+      maxPoints= (long)((2*mUseOnlyLowAngleDataLimit-m2ThetaMin)
+                     /m2ThetaStep+1);
+
+   if(  (true==mStatisticsExcludeBackground)
+      &&(mPowderPatternBackgroundCalc.numElements()>0))
    {
-      long maxPoints=mNbPoint;
-      if(true==mUseOnlyLowAngleData) 
-         maxPoints= (long)((2*mUseOnlyLowAngleDataLimit-m2ThetaMin)
-                        /m2ThetaStep+1);
-
-      if(  (true==mStatisticsExcludeBackground)
-         &&(mPowderPatternBackgroundCalc.numElements()>0))
+      VFN_DEBUG_MESSAGE("PowderPattern::GetRw():Exclude Backgd",3);
+      const double *p1, *p2, *p3, *p4;
+      p1=mPowderPatternCalc.data();
+      p2=mPowderPatternObs.data();
+      p3=mPowderPatternBackgroundCalc.data();
+      p4=mPowderPatternWeight.data();
+      const long nbExclude=mExcludedRegionMin2Theta.numElements();
+      if(0==nbExclude)
       {
-         VFN_DEBUG_MESSAGE("PowderPattern::GetRw():Exclude Backgd",3);
-         const double *p1, *p2, *p3, *p4;
-         p1=mPowderPatternCalc.data();
-         p2=mPowderPatternObs.data();
-         p3=mPowderPatternBackgroundCalc.data();
-         p4=mPowderPatternWeight.data();
-         const long nbExclude=mExcludedRegionMin2Theta.numElements();
-         if(0==nbExclude)
+         for(long i=0;i<maxPoints;i++)
          {
-            for(long i=0;i<maxPoints;i++)
-            {
-               tmp1 += *p4   * ((*p1)-(*p2)) * ((*p1)-(*p2));
-               tmp2 += *p4++ * ((*p2)-(*p3)) * ((*p2)-(*p3));
-               p1++;p2++;p3++;
-            }
-         }
-         else
-         {
-            long min,max;
-            long i=0;
-            for(int j=0;j<nbExclude;j++)
-            {
-               min=(long)floor((mExcludedRegionMin2Theta(j)-m2ThetaMin)
-                                    /m2ThetaStep);
-               max=(long)ceil((mExcludedRegionMax2Theta(j)-m2ThetaMin)
-                                    /m2ThetaStep);
-               if(min>maxPoints) break;
-               if(max>maxPoints)max=maxPoints;
-               for(;i<min;i++)//! min is the *beginning* of the excluded region !
-               {
-                  tmp1 += *p4   * ((*p1)-(*p2)) * ((*p1)-(*p2));
-                  tmp2 += *p4++ * ((*p2)-(*p3)) * ((*p2)-(*p3));
-                  p1++;p2++;p3++;
-               }
-               p1 += max-i;
-               p2 += max-i;
-               p3 += max-i;
-               p4 += max-i;
-               i  += max-i;
-            }
-            for(;i<maxPoints;i++)
-            {
-               tmp1 += *p4   * ((*p1)-(*p2)) * ((*p1)-(*p2));
-               tmp2 += *p4++ * ((*p2)-(*p3)) * ((*p2)-(*p3));
-               p1++;p2++;p3++;
-            }
-
+            tmp1 += *p4   * ((*p1)-(*p2)) * ((*p1)-(*p2));
+            tmp2 += *p4++ * ((*p2)-(*p3)) * ((*p2)-(*p3));
+            p1++;p2++;p3++;
          }
       }
       else
       {
-         VFN_DEBUG_MESSAGE("PowderPattern::GetRw()",3);
-         const double *p1, *p2, *p4;
-         p1=mPowderPatternCalc.data();
-         p2=mPowderPatternObs.data();
-         p4=mPowderPatternWeight.data();
-         const long nbExclude=mExcludedRegionMin2Theta.numElements();
-         if(0==nbExclude)
+         long min,max;
+         long i=0;
+         for(int j=0;j<nbExclude;j++)
          {
-            for(unsigned long i=0;i<mNbPoint;i++)
+            min=(long)floor((mExcludedRegionMin2Theta(j)-m2ThetaMin)
+                                 /m2ThetaStep);
+            max=(long)ceil((mExcludedRegionMax2Theta(j)-m2ThetaMin)
+                                 /m2ThetaStep);
+            if(min>maxPoints) break;
+            if(max>maxPoints)max=maxPoints;
+            for(;i<min;i++)//! min is the *beginning* of the excluded region !
             {
-               tmp1 += *p4   * ((*p1)-(*p2))*((*p1)-(*p2));
-               tmp2 += *p4++ * (*p2) * (*p2);
-               p1++;p2++;
+               tmp1 += *p4   * ((*p1)-(*p2)) * ((*p1)-(*p2));
+               tmp2 += *p4++ * ((*p2)-(*p3)) * ((*p2)-(*p3));
+               p1++;p2++;p3++;
             }
+            p1 += max-i;
+            p2 += max-i;
+            p3 += max-i;
+            p4 += max-i;
+            i  += max-i;
          }
-         else
+         for(;i<maxPoints;i++)
          {
-            long min,max;
-            long i=0;
-            for(int j=0;j<nbExclude;j++)
-            {
-               min=(long)floor((mExcludedRegionMin2Theta(j)-m2ThetaMin)
-                                    /m2ThetaStep);
-               max=(long)ceil((mExcludedRegionMax2Theta(j)-m2ThetaMin)
-                                    /m2ThetaStep);
-               if(min>maxPoints) break;
-               if(max>maxPoints)max=maxPoints;
-               for(;i<min;i++)//! min is the *beginning* of the excluded region !
-               {
-                  tmp1 += *p4   * ((*p1)-(*p2))*((*p1)-(*p2));
-                  tmp2 += *p4++ * (*p2) * (*p2);
-                  p1++;p2++;
-               }
-               p1 += max-i;
-               p2 += max-i;
-               p4 += max-i;
-               i  += max-i;
-            }
-            for(;i<maxPoints;i++)
+            tmp1 += *p4   * ((*p1)-(*p2)) * ((*p1)-(*p2));
+            tmp2 += *p4++ * ((*p2)-(*p3)) * ((*p2)-(*p3));
+            p1++;p2++;p3++;
+         }
+
+      }
+   }
+   else
+   {
+      VFN_DEBUG_MESSAGE("PowderPattern::GetRw()",3);
+      const double *p1, *p2, *p4;
+      p1=mPowderPatternCalc.data();
+      p2=mPowderPatternObs.data();
+      p4=mPowderPatternWeight.data();
+      const long nbExclude=mExcludedRegionMin2Theta.numElements();
+      if(0==nbExclude)
+      {
+         for(unsigned long i=0;i<mNbPoint;i++)
+         {
+            tmp1 += *p4   * ((*p1)-(*p2))*((*p1)-(*p2));
+            tmp2 += *p4++ * (*p2) * (*p2);
+            p1++;p2++;
+         }
+      }
+      else
+      {
+         long min,max;
+         long i=0;
+         for(int j=0;j<nbExclude;j++)
+         {
+            min=(long)floor((mExcludedRegionMin2Theta(j)-m2ThetaMin)
+                                 /m2ThetaStep);
+            max=(long)ceil((mExcludedRegionMax2Theta(j)-m2ThetaMin)
+                                 /m2ThetaStep);
+            if(min>maxPoints) break;
+            if(max>maxPoints)max=maxPoints;
+            for(;i<min;i++)//! min is the *beginning* of the excluded region !
             {
                tmp1 += *p4   * ((*p1)-(*p2))*((*p1)-(*p2));
                tmp2 += *p4++ * (*p2) * (*p2);
                p1++;p2++;
             }
+            p1 += max-i;
+            p2 += max-i;
+            p4 += max-i;
+            i  += max-i;
+         }
+         for(;i<maxPoints;i++)
+         {
+            tmp1 += *p4   * ((*p1)-(*p2))*((*p1)-(*p2));
+            tmp2 += *p4++ * (*p2) * (*p2);
+            p1++;p2++;
          }
       }
    }
-   else throw ObjCrystException("Use of Integrated R-factor for Rw not implemented yet !!");
    VFN_DEBUG_MESSAGE("PowderPattern::GetRw()="<<sqrt(tmp1/tmp2),3);
+   return sqrt(tmp1/tmp2);
+}
+double PowderPattern::GetIntegratedRw()const
+{
+   this->CalcPowderPattern();
+	this->PrepareIntegratedRfactor();
+   TAU_PROFILE("PowderPattern::GetIntegratedRw()","void ()",TAU_DEFAULT);
+   
+   double tmp1=0.;
+   double tmp2=0.;
+	const long numInterval=mIntegratedPatternMin.numElements();
+   if(  (true==mStatisticsExcludeBackground)
+      &&(mPowderPatternBackgroundCalc.numElements()>0))
+   {
+      const double *p1, *p2, *p3, *p4;
+		CrystVector_double integratedCalc(numInterval);
+		integratedCalc=0;
+		CrystVector_double backgdCalc(numInterval);
+		backgdCalc=0;
+		double *pp1=integratedCalc.data();
+		double *pp2=backgdCalc.data();
+		for(int i=0;i<numInterval;i++)
+		{
+			const long max=mIntegratedPatternMax(i);
+			p1=mPowderPatternCalc.data()+mIntegratedPatternMin(i);
+			for(int j=mIntegratedPatternMin(i);j<=max;j++) *pp1 += *p1++;
+			pp1++;
+			p1=mPowderPatternBackgroundCalc.data()+mIntegratedPatternMin(i);
+			for(int j=mIntegratedPatternMin(i);j<=max;j++) *pp2 += *p1++;
+			pp2++;
+		}
+		
+      p1=integratedCalc.data();
+      p2=mIntegratedObs.data();
+      p3=backgdCalc.data();
+      p4=mIntegratedWeight.data();
+      VFN_DEBUG_MESSAGE("PowderPattern::GetIntegratedRw():Exclude Backgd",4);
+      for(long i=0;i<numInterval;i++)
+      {
+         tmp1 += *p4   * ((*p1)-(*p2)) * ((*p1)-(*p2));
+         tmp2 += *p4++ * ((*p2)-(*p3)) * ((*p2)-(*p3));
+         p1++;p2++;p3++;
+      }
+   } // Exclude Background ?
+   else
+   {
+      const double *p1, *p2, *p4;
+		CrystVector_double integratedCalc(numInterval);
+		integratedCalc=0;
+		double *pp1=integratedCalc.data();
+		for(int i=0;i<numInterval;i++)
+		{
+			const long max=mIntegratedPatternMax(i);
+			p1=mPowderPatternCalc.data()+mIntegratedPatternMin(i);
+			for(int j=mIntegratedPatternMin(i);j<=max;j++) *pp1 += *p1++;
+			pp1++;
+		}
+      p1=integratedCalc.data();
+      p2=mIntegratedObs.data();
+      p4=mIntegratedWeight.data();
+      VFN_DEBUG_MESSAGE("PowderPattern::GetIntegratedRw()",4);
+      for(long i=0;i<numInterval;i++)
+      {
+         tmp1 += *p4   * ((*p1)-(*p2))*((*p1)-(*p2));
+         tmp2 += *p4++ * (*p2) * (*p2);
+         //cout <<i<<":"<< tmp1 << " "<<tmp2 << " " << *p1 <<" "<<*p2<<endl;
+         p1++;p2++;
+      }
+   }
+   
+   VFN_DEBUG_MESSAGE("PowderPattern::GetIntegratedRw()="<<sqrt(tmp1/tmp2),4);
+   //cout << FormatVertVector<double>(mPowderPatternCalc,mPowderPatternObs);
+   //this->SavePowderPattern("refinedPattern.out");
+   //abort();
    return sqrt(tmp1/tmp2);
 }
 
@@ -1957,6 +2052,106 @@ void PowderPattern::FitScaleFactorForR()
    }
    VFN_DEBUG_EXIT("PowderPattern::FitScaleFactorForR():End",3);
 }
+void PowderPattern::FitScaleFactorForIntegratedR()
+{
+   this->CalcPowderPattern();
+	this->PrepareIntegratedRfactor();
+   TAU_PROFILE("PowderPattern::FitScaleFactorForIntegratedR()","void ()",TAU_DEFAULT);
+   VFN_DEBUG_ENTRY("PowderPattern::FitScaleFactorForIntegratedR()",3);
+   // Which components are scalable ?
+      mScalableComponentIndex.resize(mPowderPatternComponentRegistry.GetNb());
+      int nbScale=0;
+      for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++)
+		{
+         if(mPowderPatternComponentRegistry.GetObj(i).IsScalable())
+				mScalableComponentIndex(nbScale++)=i;
+		}
+      mScalableComponentIndex.resizeAndPreserve(nbScale);
+   VFN_DEBUG_MESSAGE("-> Number of Scale Factors:"<<nbScale<<":Index:"<<endl<<mScalableComponentIndex,3);
+   // prepare matrices
+      //mFitScaleFactorD.resize(mNbPoint,nbScale);
+      mFitScaleFactorM.resize(nbScale,nbScale);
+      mFitScaleFactorB.resize(nbScale,1);
+      mFitScaleFactorX.resize(nbScale,1);
+   // Build Matrix & Vector for LSQ
+		const long numInterval=mIntegratedPatternMin.numElements();
+		CrystVector_double integratedCalc[nbScale];
+   	for(int i=0;i<nbScale;i++)
+   	{
+			integratedCalc[i].resize(numInterval);
+			
+         // Here use a direct access to the powder spectrum, since
+         // we know it has just been recomputed
+			const double *p1=mPowderPatternComponentRegistry.GetObj(mScalableComponentIndex(i))
+                          .mPowderPatternCalc.data();
+			
+			double *p2=integratedCalc[i].data();
+			for(int j=0;j<numInterval;j++)
+			{
+				const long max=mIntegratedPatternMax(j);
+				p1=mPowderPatternComponentRegistry.GetObj(mScalableComponentIndex(i))
+                          .mPowderPatternCalc.data()+mIntegratedPatternMin(j);
+				for(int k=mIntegratedPatternMin(j);k<=max;k++) *p2 += *p1++;
+				p2++;
+			}
+		}
+		CrystVector_double backdIntegrated(numInterval);
+		if(mPowderPatternBackgroundCalc.numElements()>1)
+		{	
+			const double *p1;
+			double *p2=backdIntegrated.data();
+			for(int j=0;j<numInterval;j++)
+			{
+				const long max=mIntegratedPatternMax(j);
+				p1=mPowderPatternBackgroundCalc.data()+mIntegratedPatternMin(j);
+				for(int k=mIntegratedPatternMin(j);k<=max;k++) *p2 += *p1++;
+				p2++;
+			}
+		}
+   	for(int i=0;i<nbScale;i++)
+   	{
+      	for(int j=i;j<nbScale;j++)
+      	{
+         	const double *p1=integratedCalc[i].data();
+         	const double *p2=integratedCalc[j].data();
+         	double m=0.;
+         	for(unsigned long k=0;k<mNbPoint;k++) m += *p1++ * *p2++;
+         	mFitScaleFactorM(i,j)=m;
+         	mFitScaleFactorM(j,i)=m;
+      	}
+   	}
+   	for(int i=0;i<nbScale;i++)
+   	{
+      	const double *p1=mIntegratedObs.data();
+      	const double *p2=integratedCalc[i].data();
+      	double b=0.;
+			if(mPowderPatternBackgroundCalc.numElements()<=1)
+      		for(long k=0;k<numInterval;k++) b += *p1++ * *p2++;
+			else
+			{
+      		const double *p3=backdIntegrated.data();
+      		for(long k=0;k<numInterval;k++) b += (*p1++ - *p3++) * *p2++;
+			}
+      	mFitScaleFactorB(i,0) =b;
+   	}
+   if(1==nbScale) mFitScaleFactorX=mFitScaleFactorB(0)/mFitScaleFactorM(0);
+   else
+      mFitScaleFactorX=product(InvertMatrix(mFitScaleFactorM),mFitScaleFactorB);
+   VFN_DEBUG_MESSAGE("B, M, X"<<endl<<mFitScaleFactorB<<endl<<mFitScaleFactorM<<endl<<mFitScaleFactorX,2)
+   for(int i=0;i<nbScale;i++)
+   {
+      const double * p1=mPowderPatternComponentRegistry.GetObj(mScalableComponentIndex(i))
+                        .mPowderPatternCalc.data();
+      double * p0 = mPowderPatternCalc.data();
+      const double s = mFitScaleFactorX(i)
+							  -mScaleFactor(mScalableComponentIndex(i));
+      for(unsigned long j=0;j<mNbPoint;j++) *p0++ += s * *p1++;
+      VFN_DEBUG_MESSAGE("-> Old:"<<mScaleFactor(mScalableComponentIndex(i)) <<" Change:"<<mFitScaleFactorX(i),2);
+      mScaleFactor(mScalableComponentIndex(i)) = mFitScaleFactorX(i);
+		mClockScaleFactor.Click();
+   }
+   VFN_DEBUG_EXIT("PowderPattern::FitScaleFactorForIntegratedR():End",3);
+}
 
 void PowderPattern::FitScaleFactorForRw()
 {
@@ -2124,6 +2319,11 @@ void PowderPattern::FitScaleFactorForRw()
    }
    VFN_DEBUG_EXIT("PowderPattern::FitScaleFactorForRw():End",3);
 }
+void PowderPattern::FitScaleFactorForIntegratedRw()
+{
+	//:TODO:
+	throw 0;
+}
 
 void PowderPattern::SetSigmaToSqrtIobs()
 {
@@ -2206,20 +2406,24 @@ void PowderPattern::Add2ThetaExcludedRegion(const double min2Theta,const double 
    VFN_DEBUG_MESSAGE("PowderPattern::Add2ThetaExcludedRegion():End",5)
 }
 
-unsigned int PowderPattern::GetNbCostFunction()const {return 2;}
+unsigned int PowderPattern::GetNbCostFunction()const {return 4;}
 
 const string& PowderPattern::GetCostFunctionName(const unsigned int id)const
 {
-   static string costFunctionName[2];
+   static string costFunctionName[4];
    if(0==costFunctionName[0].length())
    {
-      costFunctionName[0]="Best R()";
-      costFunctionName[1]="Best Rw()";
+      costFunctionName[0]="Best R";
+      costFunctionName[1]="Best Rw";
+      costFunctionName[2]="Best R, integrated";
+      costFunctionName[3]="Best Rw,integrated";
    }
    switch(id)
    {
       case 0: return costFunctionName[0];
       case 1: return costFunctionName[1];
+      case 2: return costFunctionName[2];
+      case 3: return costFunctionName[3];
       default:
       {
          cout << "RefinableObj::GetCostFunctionName(): Not Found !" <<endl;
@@ -2230,16 +2434,20 @@ const string& PowderPattern::GetCostFunctionName(const unsigned int id)const
 
 const string& PowderPattern::GetCostFunctionDescription(const unsigned int id)const
 {
-   static string costFunctionDescription[2];
+   static string costFunctionDescription[4];
    if(0==costFunctionDescription[0].length())
    {
       costFunctionDescription[0]="unweighted R-factor (best scale)";
       costFunctionDescription[1]="weigthed R-factor (best scale)";
+      costFunctionDescription[2]="unweighted R-factor (best scale), integrated";
+      costFunctionDescription[3]="weigthed R-factor (best scale), integrated";
    }
    switch(id)
    {
       case 0: return costFunctionDescription[0];
       case 1: return costFunctionDescription[1];
+      case 2: return costFunctionDescription[2];
+      case 3: return costFunctionDescription[3];
       default:
       {
          cout << "RefinableObj::GetCostFunctionDescription(): Not Found !" <<endl;
@@ -2252,12 +2460,10 @@ double PowderPattern::GetCostFunctionValue(const unsigned int n)
 {
    switch(n)
    {
-      case 0:
-      {
-         this->FitScaleFactorForR()  ;
-         return this->GetR();
-      }
+      case 0: this->FitScaleFactorForR()  ;return this->GetR();
       case 1: this->FitScaleFactorForRw() ;return this->GetRw();
+      case 2: this->FitScaleFactorForIntegratedR()  ;return this->GetIntegratedR();
+      case 3: this->FitScaleFactorForIntegratedRw() ;return this->GetIntegratedRw();
       default:
       {
          cout << "RefinableObj::GetCostFunctionValue(): Not Found !" <<endl;
@@ -2399,6 +2605,123 @@ void PowderPattern::Init()
       tmp.SetDerivStep(1e-6);
       this->AddPar(tmp);
    }
+}
+void PowderPattern::PrepareIntegratedRfactor()const
+{
+	bool needPrep=false;
+	CrystVector_long *min,*max;
+	for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++)
+	{
+		mPowderPatternComponentRegistry.GetObj(i).GetBraggLimits(min,max);
+		if(mPowderPatternComponentRegistry.GetObj(i).GetClockBraggLimits()
+				>mClockIntegratedFactorsPrep)
+		{
+			needPrep=true;
+			break;
+		}
+	}
+	if(false==needPrep) return;
+	
+	// First get all integration intervals and concatenate the arrays
+	long numInterval=0;
+	long numNewInterval=0;
+	for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++)
+	{
+		mPowderPatternComponentRegistry.GetObj(i).GetBraggLimits(min,max);
+		if(0==min) continue;
+		numNewInterval=min->numElements();
+		mIntegratedPatternMin.resizeAndPreserve(numInterval+numNewInterval);
+		for(int j=0;j<numNewInterval;j++) mIntegratedPatternMin(numInterval+j)=(*min)(j);
+		for(int j=0;j<numNewInterval;j++) mIntegratedPatternMax(numInterval+j)=(*max)(j);
+		numInterval+=numNewInterval;
+	}
+	//sort the arrays USELESS ?
+	{
+		CrystVector_long index,tmp;
+		index=SortSubs(mIntegratedPatternMin);
+		tmp=mIntegratedPatternMin;
+		for(int i=0;i<numInterval;i++) mIntegratedPatternMin(i)=tmp(index(i));
+		tmp=mIntegratedPatternMax;
+		for(int i=0;i<numInterval;i++) mIntegratedPatternMax(i)=tmp(index(i));
+	}
+	// Check all intervals are within pattern limits, correct them if necessary,
+	// remove them if necessary (keep=false)
+		CrystVector_bool keep(numInterval);
+		keep=true;
+		for(int i=0;i<numInterval;i++) 
+		{
+			if(mIntegratedPatternMin(i)<0) mIntegratedPatternMin(i)=0;
+			if(mIntegratedPatternMin(i)>=(long)mNbPoint) keep(i)=false;
+			if(mIntegratedPatternMax(i)<0) keep(i)=false;
+			if(mIntegratedPatternMax(i)>=(long)mNbPoint) mIntegratedPatternMax(i)=mNbPoint-1;
+		}
+	// Take care of excluded regions (change integration areas accordingly)
+	// regions are sorted by ascending theta
+      const long nbExclude=mExcludedRegionMin2Theta.numElements();
+      if(nbExclude>0)
+		{
+			long j=0;
+			long minExcl,maxExcl;
+			minExcl=this->Get2ThetaCorrPixel(mExcludedRegionMin2Theta(0));
+			maxExcl=this->Get2ThetaCorrPixel(mExcludedRegionMax2Theta(0));
+			for(int i=0;i<nbExclude;i++)
+			{
+				while(mIntegratedPatternMax(j)<minExcl)
+				{
+					j++;
+					if(j>=numInterval) break;
+				}
+				if(j>=numInterval) break;
+				while(mIntegratedPatternMin(j)<maxExcl)
+				{
+					if( (mIntegratedPatternMin(j)>minExcl) &&(mIntegratedPatternMax(j)<maxExcl))
+						keep(j)=false;
+					if( (mIntegratedPatternMin(j)<minExcl) &&(mIntegratedPatternMax(j)<maxExcl))
+						mIntegratedPatternMax(j)=minExcl;
+					if( (mIntegratedPatternMin(j)>minExcl) &&(mIntegratedPatternMax(j)>maxExcl))
+						mIntegratedPatternMin(j)=maxExcl;
+					j++;
+					if(j>=numInterval) break;
+				}
+				minExcl=this->Get2ThetaCorrPixel(mExcludedRegionMin2Theta(i));
+				maxExcl=this->Get2ThetaCorrPixel(mExcludedRegionMax2Theta(i));
+				//go back if one integration segment is concerned by several exclusion zones...
+				while(mIntegratedPatternMax(j)>=minExcl)
+				{
+					j--;
+					if(j==0) break;
+				}
+			}
+		}
+	// Keep only the selected intervals
+	long j=0;
+	for(int i=0;i<numInterval;i++)
+	{
+		if(keep(i))
+		{
+			mIntegratedPatternMin(j  )=mIntegratedPatternMin(i);
+			mIntegratedPatternMax(j++)=mIntegratedPatternMin(i);
+		}
+	}
+	numInterval=j;
+	mIntegratedPatternMax.resizeAndPreserve(numInterval);
+	mIntegratedPatternMin.resizeAndPreserve(numInterval);
+	// Integrate Obs and weight arrays
+	mIntegratedObs.resize(numInterval);
+	mIntegratedWeight.resize(numInterval);
+	mIntegratedObs=0;
+	mIntegratedWeight=0;
+	for(int i=0;i<numInterval;i++)
+	{
+		for(int j=mIntegratedPatternMin(i);j<=mIntegratedPatternMax(i);j++)
+		{
+			mIntegratedObs   (i)+=mPowderPatternObs(j);
+			// NOTE : this will reset the effect of any SetWeight... but it's not available, so...
+			mIntegratedWeight(i)+=mPowderPatternObsSigma(j)*mPowderPatternObsSigma(j);
+		}
+		mIntegratedWeight(i)=1/mIntegratedWeight(i);
+	}
+	mClockIntegratedFactorsPrep.Click();
 }
 
 #ifdef __WX__CRYST__

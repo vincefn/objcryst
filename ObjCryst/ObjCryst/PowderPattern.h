@@ -76,6 +76,15 @@ class PowderPatternComponent : virtual public RefinableObj
       /// \internal Set the radiation. This is called by PowderPattern
       virtual void SetRadiation(const Radiation &rad)=0;
       
+		/// Get the integration limits (first and last pixels) around each reflection,
+		/// if this component has Bragg reflections. Used for integrated R(w) factors.
+		/// The limits currently go from -2*FWHM to +2*FWHM.
+		/// returns a pointer to the min and max pixels arrays (null pointers if
+		/// no reflection for this phase).
+		virtual void GetBraggLimits(CrystVector_long *min,CrystVector_long *max)const=0;
+		/// Get last time the Bragg Limits were changed
+		const RefinableObjClock& GetClockBraggLimits()const;
+		
       /// The calculated component of a powder spectrum. It is mutable since it is
       /// completely defined by other parameters (eg it is not an 'independent parameter')
       mutable CrystVector_double mPowderPatternCalc;
@@ -95,7 +104,9 @@ class PowderPatternComponent : virtual public RefinableObj
       
       /// The PowderPattern object in which this component is included
       const PowderPattern *mpParentPowderPattern;
-        
+      /// Get last time the Bragg Limits were changed
+		mutable RefinableObjClock mClockBraggLimits;
+		
 		//Eventually this should be removed (?)
       friend class PowderPattern;
 };
@@ -132,6 +143,7 @@ class PowderPatternBackground : public PowderPatternComponent
       virtual void CalcPowderPattern() const;
       virtual void SetRadiation(const Radiation &rad);
       virtual void Prepare();
+		virtual void GetBraggLimits(CrystVector_long *min,CrystVector_long *max)const;
       
       /// The kind of interpolation used
       PowderBackgroundInterpType mBackgroundType;
@@ -154,7 +166,7 @@ class PowderPatternBackground : public PowderPatternComponent
          bool mUseOnlyLowAngleData;
          /// Limit (theta angle, in radian) for the above option. \deprecated
          double mUseOnlyLowAngleDataLimit;
-			
+		
       //To be removed
       friend class PowderPattern; 
    #ifdef __WX__CRYST__
@@ -220,6 +232,7 @@ class PowderPatternDiffraction : public PowderPatternComponent,public Scattering
       virtual void SetRadiation(const Radiation &rad);
       virtual void Prepare();
       virtual void InitOptions();
+		virtual void GetBraggLimits(CrystVector_long *min,CrystVector_long *max)const;
       //Clocks
          /// Last time the reflection parameters were changed
          RefinableObjClock mClockProfilePar;
@@ -307,6 +320,8 @@ class PowderPatternDiffraction : public PowderPatternComponent,public Scattering
          CrystVector_long  mUseOnlyLowAngleData_SavedH,
                            mUseOnlyLowAngleData_SavedK,
                            mUseOnlyLowAngleData_SavedL;
+			/// First and last pixel for integrated R-factors around each reflection
+			mutable CrystVector_long mIntegratedReflMin,mIntegratedReflMax;
    #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);
@@ -522,11 +537,13 @@ class PowderPattern : public RefinableObj
          * {\sum_i (I_i^{obs})^2} }\f$
          */
          double GetR()const ;
+         double GetIntegratedR()const ;
          /** Get the weighted R-factor 
          * \return \f$ R_{w}= \sqrt {\frac{\sum_i w_i\left( I_i^{obs}-I_i^{calc} \right)^2}
          * {\sum_i w_i (I_i^{obs})^2} }\f$
          */
          double GetRw()const;
+         double GetIntegratedRw()const;
          /** \brief  Return conventionnal Chi^2 
          *
          * \return \f$ \chi^2 = \sum_i w_i \left(I_i^{obs}-I_i^{calc} \right)^2
@@ -535,8 +552,10 @@ class PowderPattern : public RefinableObj
          double GetChiSq()const;
          /// Fit the scale(s) factor of each component to minimize R
          void FitScaleFactorForR();
+         void FitScaleFactorForIntegratedR();
          /// Fit the scale(s) factor of each component to minimize Rw
          void FitScaleFactorForRw();
+         void FitScaleFactorForIntegratedRw();
          /// Set sigma=sqrt(Iobs)
          void SetSigmaToSqrtIobs();
          /// Set w = 1/sigma^2.
@@ -589,6 +608,8 @@ class PowderPattern : public RefinableObj
       void CalcPowderPattern() const;
       /// Init parameters and options
       virtual void Init();
+		/// Prepare  the calculation of the integrated R-factors
+		void PrepareIntegratedRfactor()const;
       /// The calculated powder spectrum. It is mutable since it is
       /// completely defined by other parameters (eg it is not an 'independent parameter')
       mutable CrystVector_double mPowderPatternCalc;
@@ -655,10 +676,6 @@ class PowderPattern : public RefinableObj
       // For statistics
          /// Should Statistics (R, Rw,..) exclude the background ?
          bool mStatisticsExcludeBackground;
-         /// Use integrated R & Rw factors (=>don't care about peak profiles)
-         /// NOT IMPLEMENTED yet. Requires delicate tuning for the width of
-			/// integration
-         bool mStatisticsUseIntegratedPeak;
          /// \internal To compute scale factors, which are the components (phases) that
          /// can be scaled ?
          mutable CrystVector_int mScalableComponentIndex;
@@ -686,6 +703,11 @@ class PowderPattern : public RefinableObj
          * \deprecated
          */
          double mUseOnlyLowAngleDataLimit;
+		// Integrated R-factors
+			mutable CrystVector_long mIntegratedPatternMin,mIntegratedPatternMax;
+			mutable CrystVector_double mIntegratedObs;
+			mutable CrystVector_double mIntegratedWeight;
+			mutable RefinableObjClock mClockIntegratedFactorsPrep;
    #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);
