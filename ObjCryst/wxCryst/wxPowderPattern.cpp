@@ -1860,7 +1860,7 @@ WXCrystObj(parent),mpProfile(prof)
       wxBoxSizer* sizer1=new wxBoxSizer(wxHORIZONTAL);
       WXFieldRefPar* pFieldCagliotiA0   =new WXFieldRefPar(this,"Instrument: Alpha0:",
                                    &(mpProfile->GetPar("Alpha0")),90 );
-      WXFieldRefPar* pFieldCagliotiA    =new WXFieldRefPar(this,"Instrument: Alpha1:",
+      WXFieldRefPar* pFieldCagliotiA    =new WXFieldRefPar(this,"Alpha1:",
                                    &(mpProfile->GetPar("Alpha1")),90 );
       WXFieldRefPar* pFieldCagliotiB0   =new WXFieldRefPar(this,"Beta0:",
                                    &(mpProfile->GetPar("Beta0")),90 );
