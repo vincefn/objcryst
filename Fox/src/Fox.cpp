@@ -16,6 +16,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+
 #ifdef __GNUG__
     #pragma implementation "minimal.cpp"
     #pragma interface "minimal.cpp"
@@ -46,6 +47,11 @@
 #include "ObjCryst/DiffractionDataSingleCrystal.h"
 #include "RefinableObj/GlobalOptimObj.h"
 //#include "RefinableObj/GeneticAlgorithm.h"
+
+#if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__) || defined(__WXMGL__) || defined(__WXX11__)
+   #include "Fox.xpm"
+#endif
+
 
 using namespace ObjCryst;
 using namespace std;
@@ -462,7 +468,7 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
       //mpWin4->SetAutoLayout(true);
       gOptimizationObjRegistry.WXCreate(mpWin4);
       notebook->AddPage(mpWin4,"Global Optimization",true);
-      
+   this->SetIcon(wxICON(Fox));
    this->Show(TRUE);
    this->Layout();
    //Splash Screen
