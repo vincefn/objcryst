@@ -195,7 +195,7 @@ const string& TexturePhaseMarchDollase::GetName()const
 
 void TexturePhaseMarchDollase::SetPar(const REAL f, const REAL c,const REAL h,const REAL k, const REAL l)
 {mFraction=f;mMarchCoeff=c;mH=h;mK=k;mL=l;}
-void TexturePhaseMarchDollase::XMLOutput(ostream &os,int indent=0)const
+void TexturePhaseMarchDollase::XMLOutput(ostream &os,int indent)const
 {
    VFN_DEBUG_ENTRY("TexturePhaseMarchDollase::XMLOutput():"<<this->GetName(),5)
    for(int i=0;i<indent;i++) os << "  " ;
@@ -636,7 +636,7 @@ void TextureMarchDollase::CalcCorr() const
             for(long i=0;i<nbRefl;i++)
             {
                tmp=(tx * (*xx++) + ty * (*yy++) + tz * (*zz++))/ (*xyznorm++);
-               mCorr(i)+=frac*powf(march+march2*tmp*tmp,-1.5);
+               mCorr(i)+=frac*pow(march+march2*tmp*tmp,-1.5);
             }
             
       }
