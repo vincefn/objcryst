@@ -28,7 +28,11 @@
 #include "RefinableObj/GlobalOptimObj.h"
 
 #ifdef OBJCRYST_GL
-   #include <GL/glu.h>
+   #ifdef __DARWIN__
+      #include <OpenGL/glu.h>
+   #else
+      #include <GL/glu.h>
+   #endif
 #endif
 
 #ifdef __WX__CRYST__

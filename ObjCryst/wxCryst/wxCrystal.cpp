@@ -43,13 +43,20 @@
 #include "ObjCryst/Polyhedron.h"
 
 #ifdef OBJCRYST_GL
-   #include "GL/glu.h"
+   #ifdef __DARWIN__
+      #include <OpenGL/glu.h>
+   #else
+      #include <GL/glu.h>
+   #endif
 
    #ifdef __LINUX__
       #include "GL/glx.h"
    #endif
    #ifdef __WIN32__
      #include "gl/glaux.h"
+   #endif
+   #ifdef __DARWIN
+     #include "AGL/agl.h"
    #endif
 #endif
 

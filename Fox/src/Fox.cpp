@@ -17,13 +17,10 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifdef __GNUG__
-    #pragma implementation "minimal.cpp"
-    #pragma interface "minimal.cpp"
-#endif
-
 // For compilers that support precompilation, includes "wx/wx.h".
-#include "wx/wxprec.h"
+#ifndef __DARWIN__ // work around MacOSX type_info bug (??)
+   #include "wx/wxprec.h"
+#endif
 
 #ifdef __BORLANDC__
     #pragma hdrstop
