@@ -1,3 +1,21 @@
+#### 1.7? BETA
+NEW FEATURES
+   * Fox can be compiled without GUI under Linux, using "make Fox-nogui"
+     removing the requirement for wxGTK on Linux servers.
+   * Background calculation can now use either a linear or a cubic
+     spline interpolation
+   * Significant speed improvements for powder patterns when using
+     the default integrated Chi^2
+   * Rotation amplitudes for torsion angles and overall molecule
+     rotation is now tuned so that the average displacament per atom
+     is now set to 0.1 Angstroem.
+   * Preliminary support for Mac OS X (using Apple Developper tools)
+   * Compilation for windows is now done using the free (as in 'free as
+     a beer') compiler Visual C++ 2003. Large speed improvement.
+   
+BUG FIXES
+   * Avoid creating H-H bonds when converting ZScatterer to a Molecule
+   
 #### 1.6.0.2 - december 2003
 NEW FEATURES
    * Added the export to a POV-Ray file to create a Ray-traced

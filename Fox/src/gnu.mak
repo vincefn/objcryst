@@ -18,6 +18,9 @@ DIR_CRYST := ../ObjCryst
 Fox: Fox.o libCrystVector libQuirks libRefinableObj libsglite libatominfo libCryst libwxCryst
 	${LINKER} ${LDFLAGS} -o $@ ${filter-out %.a %.so lib%, $^} ${LOADLIBES} 
 
+Fox-nogui: Fox.o libCrystVector libQuirks libRefinableObj libsglite libatominfo libCryst
+	${LINKER} ${LDFLAGS} -o $@ ${filter-out %.a %.so lib%, $^} ${LOADLIBES} 
+
 fox: Fox
 
 # target for making everything

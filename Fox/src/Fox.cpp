@@ -17,23 +17,25 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-// For compilers that support precompilation, includes "wx/wx.h".
-#ifndef __DARWIN__ // work around MacOSX type_info bug (??)
-   #include "wx/wxprec.h"
-#endif
+#ifdef __WX__CRYST__
+   // For compilers that support precompilation, includes "wx/wx.h".
+   #ifndef __DARWIN__ // work around MacOSX type_info bug (??)
+      #include "wx/wxprec.h"
+   #endif
 
-#ifdef __BORLANDC__
-    #pragma hdrstop
-#endif
+   #ifdef __BORLANDC__
+       #pragma hdrstop
+   #endif
 
-// for all others, include the necessary headers (this file is usually all you
-// need because it includes almost all "standard" wxWindows headers)
-#ifndef WX_PRECOMP
-    #include "wx/wx.h"
-#endif
+   // for all others, include the necessary headers (this file is usually all you
+   // need because it includes almost all "standard" wxWindows headers)
+   #ifndef WX_PRECOMP
+       #include "wx/wx.h"
+   #endif
 
-#include "wx/tooltip.h"
-#include "wx/notebook.h"
+   #include "wx/tooltip.h"
+   #include "wx/notebook.h"
+#endif
 
 #include <locale.h>
 #include <sstream>
@@ -47,15 +49,24 @@
 #include "ObjCryst/test.h"
 #include "RefinableObj/GlobalOptimObj.h"
 #include "Quirks/VFNStreamFormat.h"
-#include "wxCryst/wxCrystal.h"
 
-#if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__) || defined(__WXMGL__) || defined(__WXX11__)
-   #include "Fox.xpm"
+#ifdef __WX__CRYST__
+   #include "wxCryst/wxCrystal.h"
+
+   #if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__) || defined(__WXMGL__) || defined(__WXX11__)
+      #include "Fox.xpm"
+   #endif
 #endif
 
 
 using namespace ObjCryst;
 using namespace std;
+// ----------------------------------------------------------------------------
+// Speed test
+// ----------------------------------------------------------------------------
+void standardSpeedTest();
+
+#ifdef __WX__CRYST__
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
@@ -111,11 +122,6 @@ void WXCrystInformUserStdOut(const string &str)
 {
    pMainFrameForUserMessage->SetStatusText((wxString)str.c_str());
 }
-
-// ----------------------------------------------------------------------------
-// Speed test
-// ----------------------------------------------------------------------------
-void standardSpeedTest();
 
 // ----------------------------------------------------------------------------
 // constants
@@ -187,6 +193,9 @@ IMPLEMENT_APP(MyApp)
 
 // 'Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
+#else
+int main (int argc, char *argv[])
+#endif
 {
    TAU_PROFILE_SET_NODE(0); // sequential code 
    TAU_PROFILE("main()","int()",TAU_DEFAULT);
@@ -204,86 +213,86 @@ bool MyApp::OnInit()
    list<string> vFourierFilenameGRD;
    bool loadFourierDSN6(false);
    list<string> vFourierFilenameDSN6;
-   for(int i=1;i<this->argc;i++)
+   for(int i=1;i<argc;i++)
    {
-      if('-'==this->argv[i][0])
+      if('-'==argv[i][0])
       {
-         if(string("--nogui")==string(this->argv[i]))
+         if(string("--nogui")==string(argv[i]))
          {
             useGUI=false;
             cout << "Running Fox without GUI"<<endl;
             continue;  
          }
-         if(string("--randomize")==string(this->argv[i]))
+         if(string("--randomize")==string(argv[i]))
          {
             randomize=true;
             cout << "Randomizing parameters before running"<<endl;
             continue;  
          }
-         if(string("--silent")==string(this->argv[i]))
+         if(string("--silent")==string(argv[i]))
          {
             silent=true;
             cout << "Running Fox quietly"<<endl;
             continue;  
          }
-         if(string("--finalcost")==string(this->argv[i]))
+         if(string("--finalcost")==string(argv[i]))
          {
             ++i;
-            stringstream sstr(this->argv[i]);
+            stringstream sstr(argv[i]);
             sstr >> finalCost;
             cout << "Fox will stop after reaching cost:"<<finalCost<<endl;
             continue;  
          }
-         if(string("-n")==string(this->argv[i]))
+         if(string("-n")==string(argv[i]))
          {
             ++i;
-            stringstream sstr(this->argv[i]);
+            stringstream sstr(argv[i]);
             sstr >> nbTrial;
             cout << "Fox will run for "<<nbTrial<<" trials"<<endl;
             continue;
          }
-         if(string("-i")==string(this->argv[i]))
+         if(string("-i")==string(argv[i]))
          {
             ++i;
-            XMLCrystFileLoadAllObject(this->argv[i]);
+            XMLCrystFileLoadAllObject(argv[i]);
             continue;
          }
-         if(string("-o")==string(this->argv[i]))
+         if(string("-o")==string(argv[i]))
          {
             ++i;
-            outfilename=string(this->argv[i]);
+            outfilename=string(argv[i]);
             continue;
          }
-         if(string("--loadfouriergrd")==string(this->argv[i]))
+         if(string("--loadfouriergrd")==string(argv[i]))
          {
             ++i;
             loadFourierGRD=true;
-            vFourierFilenameGRD.push_back(string(this->argv[i]));
+            vFourierFilenameGRD.push_back(string(argv[i]));
             continue;
          }
-         if(string("--loadfourierdsn6")==string(this->argv[i]))
+         if(string("--loadfourierdsn6")==string(argv[i]))
          {
             ++i;
             loadFourierDSN6=true;
-            vFourierFilenameDSN6.push_back(string(this->argv[i]));
+            vFourierFilenameDSN6.push_back(string(argv[i]));
             continue;
          }
-         if(string("--only3d")==string(this->argv[i]))
+         if(string("--only3d")==string(argv[i]))
          {
             only3D=true;
             continue;
          }
-         if(string("--speedtest")==string(this->argv[i]))
+         if(string("--speedtest")==string(argv[i]))
          {
             standardSpeedTest();
             exit(0);
          }
          #ifdef __DEBUG__
-         if(string("--debuglevel")==string(this->argv[i]))
+         if(string("--debuglevel")==string(argv[i]))
          {
             int level;
             ++i;
-            stringstream sstr(this->argv[i]);
+            stringstream sstr(argv[i]);
             sstr >> level;
             VFN_DEBUG_GLOBAL_LEVEL(level);
             continue;
@@ -311,6 +320,9 @@ bool MyApp::OnInit()
       for(int i=0;i<gOptimizationObjRegistry.GetNb();i++)
          gOptimizationObjRegistry.GetObj(i).RandomizeStartingConfig();
    
+#ifndef __WX__CRYST__
+   useGUI=false;
+#endif
    if(!useGUI)
    {
       if(nbTrial!=0)
@@ -321,6 +333,7 @@ bool MyApp::OnInit()
       cout <<"End of Fox execution. Bye !"<<endl;
       exit (0);
    }
+#ifdef __WX__CRYST__
    
    WXCrystMainFrame *frame ;
    
@@ -371,9 +384,12 @@ bool MyApp::OnInit()
          pWXCryst->GetCrystalGL()->AddFourier(pMap);
       }
    }
-   
    return TRUE;
+#else
+   return 0;
+#endif
 }
+#ifdef __WX__CRYST__
 int MyApp::OnExit()
 {
    TAU_REPORT_STATISTICS();
@@ -634,8 +650,15 @@ void WXCrystMainFrame::OnDebugTest(wxCommandEvent& event)
    }
    if(event.GetId()== MENU_DEBUG_TEST2)
    {
-      gScattererRegistry.GetObj(0).RestoreParamSet(saveId);
-      gCrystalRegistry.GetObj(0).UpdateDisplay();
+      Crystal *cryst=new Crystal(25.,30.,35.,"P1");
+      ScatteringPowerAtom *ScattPowS=new ScatteringPowerAtom("S" ,"S",0.74);
+      ScatteringPowerAtom *ScattPowO=new ScatteringPowerAtom("O","O",1.87);
+      cryst->AddScatteringPower(ScattPowS);
+      cryst->AddScatteringPower(ScattPowO);
+      Molecule *mol;
+      mol=MakeOctahedron(*cryst,"SO6",ScattPowS,ScattPowO,1.5);
+      cryst->AddScatterer(mol);
+      mol->CreateCopy();
    }
    if(event.GetId()== MENU_DEBUG_TEST3)
    {
@@ -687,6 +710,7 @@ void WXCrystMainFrame::OnToggleTooltips(wxCommandEvent& event)
     wxToolTip::Enable(tooltip_enabled);
     VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnToggleTooltips(): Tooltips= "<<tooltip_enabled,10)
 }
+#endif
 ///////////////////////////////////////// Speed Test////////////////////
 void standardSpeedTest()
 {
