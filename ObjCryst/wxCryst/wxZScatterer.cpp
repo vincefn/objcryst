@@ -91,6 +91,12 @@ WXCrystObjBasic(parent),mpZAtom(obj)
       mpSizer->Add(pFieldDihed,0,wxALIGN_LEFT);
       mList.Add(pFieldDihed);
    }
+   {
+      WXFieldRefPar* pFieldOccup =new WXFieldRefPar(this,
+               "Occup.",&(mpZAtom->GetZScatterer().GetPar(&(mpZAtom->mOccupancy))));
+      mpSizer->Add(pFieldOccup,0,wxALIGN_LEFT);
+      mList.Add(pFieldOccup);
+   }
 #else
    if(0<mpZAtom->GetZScatterer().GetZAtomRegistry().Find(*mpZAtom))
    {
@@ -113,6 +119,12 @@ WXCrystObjBasic(parent),mpZAtom(obj)
        =mpZAtom->GetZScatterer().GetPar(&(mpZAtom->mDihed)).WXCreate(this);
       mpSizer->Add(pFieldDihed,0,wxALIGN_LEFT);
       mList.Add(pFieldDihed);
+   }
+   {
+      WXFieldRefPar* pFieldOccup
+         =mpZAtom->GetZScatterer().GetPar(&(mpZAtom->mOccupancy)).WXCreate(this);
+      mpSizer->Add(pFieldOccup,0,wxALIGN_LEFT);
+      mList.Add(pFieldOccup);
    }
 #endif   
    this->SetSizer(mpSizer);

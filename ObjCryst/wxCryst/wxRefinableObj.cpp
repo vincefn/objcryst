@@ -64,6 +64,7 @@ BEGIN_EVENT_TABLE(WXFieldRefPar,wxEvtHandler)
    EVT_TEXT_ENTER(ID_WXFIELD,                   WXFieldRefPar::OnEnter)
    EVT_TEXT(ID_WXFIELD,                         WXFieldRefPar::OnText)
    EVT_CHECKBOX(ID_WXFIELD_REFPAR_FIXBUTTON,    WXFieldRefPar::OnToggleFix)
+   EVT_CHECKBOX(ID_WXFIELD_REFPAR_LIMITEDBUTTON,WXFieldRefPar::OnToggleLimited)
    EVT_RIGHT_DOWN(                              WXFieldRefPar::OnPopupMenu)
    EVT_MENU(ID_REFPAR_POPUP_SET_LIMITS,         WXFieldRefPar::OnPopupMenuChoice)
    EVT_MENU(ID_REFPAR_POPUP_REMOVE_LIMITS,      WXFieldRefPar::OnPopupMenuChoice)
@@ -71,12 +72,13 @@ END_EVENT_TABLE()
 
 WXFieldRefPar::WXFieldRefPar(wxWindow *parent,const string& label,
                          RefinablePar *par, const int hsize):
-WXField(parent,label,ID_WXFIELD_REFPAR),mValue(0.),mpRefPar(par),mIsSelfUpdating(false)
+WXField(parent,label+"R",ID_WXFIELD_REFPAR),mValue(0.),mpRefPar(par),mIsSelfUpdating(false)
 {
    VFN_DEBUG_MESSAGE("WXFieldRefPar::WXFieldName():End",6)
-   mpButtonFix=new wxCheckBox(this,ID_WXFIELD_REFPAR_FIXBUTTON,"");
-   //mpButtonFix->PushEventHandler(this);
+   mpButtonFix=new wxCheckBox(this,ID_WXFIELD_REFPAR_FIXBUTTON,"L",wxDefaultPosition, wxSize(24,20));
    mpSizer->Add(mpButtonFix,0,wxALIGN_CENTER);
+   mpButtonLimited=new wxCheckBox(this,ID_WXFIELD_REFPAR_LIMITEDBUTTON,"",wxDefaultPosition, wxSize(16,20));
+   mpSizer->Add(mpButtonLimited,0,wxALIGN_CENTER);
    
    mpField=new wxTextCtrl(this,ID_WXFIELD,"",
                             wxDefaultPosition,wxSize(hsize,-1),wxTE_PROCESS_ENTER,
@@ -86,7 +88,7 @@ WXField(parent,label,ID_WXFIELD_REFPAR),mValue(0.),mpRefPar(par),mIsSelfUpdating
 
    mpPopUpMenu=new wxMenu("Refinable Parameter");
    mpPopUpMenu->Append(ID_REFPAR_POPUP_SET_LIMITS, "Set Limits");
-   mpPopUpMenu->Append(ID_REFPAR_POPUP_REMOVE_LIMITS, "Remove Limits");
+   //mpPopUpMenu->Append(ID_REFPAR_POPUP_REMOVE_LIMITS, "Remove Limits");
    
    this->SetToolTip("right-click label to change limits");
    this->Layout();
@@ -116,6 +118,13 @@ void WXFieldRefPar::OnToggleFix(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXFieldRefPar::OnToggleFix()",6)
    mpRefPar->SetIsFixed(!(mpButtonFix->GetValue()));
+   mpRefPar->Print();
+}
+
+void WXFieldRefPar::OnToggleLimited(wxCommandEvent & WXUNUSED(event))
+{
+   VFN_DEBUG_MESSAGE("WXFieldRefPar::OnToggleLimited()",6)
+   mpRefPar->SetIsLimited(mpButtonLimited->GetValue());
    mpRefPar->Print();
 }
 
@@ -169,7 +178,7 @@ void WXFieldRefPar::OnPopupMenuChoice(wxMenuEvent& event)
          mpRefPar->Print();
          break;
       }
-      case ID_REFPAR_POPUP_REMOVE_LIMITS:mpRefPar->SetIsLimited(false);mpRefPar->Print();break;
+      //case ID_REFPAR_POPUP_REMOVE_LIMITS:mpRefPar->SetIsLimited(false);mpRefPar->Print();break;
    }
  
 }
@@ -180,7 +189,8 @@ void WXFieldRefPar::CrystUpdate()
    //cout << mpField <<endl;
    if(mpRefPar->IsUsed()!=this->IsShown()) mNeedUpdateUI=true;
    if(  (mValue==mpRefPar->GetHumanValue())
-      &&(mpButtonFix->GetValue()!=mpRefPar->IsFixed())) return;
+      &&(mpButtonFix->GetValue()!=mpRefPar->IsFixed())
+      &&(mpButtonLimited->GetValue()==mpRefPar->IsLimited())) return;
    mValueOld=mValue;
    mValue=mpRefPar->GetHumanValue();
    mNeedUpdateUI=true;
@@ -202,6 +212,7 @@ void WXFieldRefPar::UpdateUI()
    mpField->SetValue(tmp);
    mIsSelfUpdating=false;
    mpButtonFix->SetValue(!(mpRefPar->IsFixed()));
+   mpButtonLimited->SetValue(mpRefPar->IsLimited());
    mNeedUpdateUI=false;
 }
 

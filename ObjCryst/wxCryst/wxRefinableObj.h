@@ -70,6 +70,8 @@ class WXFieldRefPar:public WXField
       void OnText(wxCommandEvent & WXUNUSED(event));
       /// Toggle the 'fixed' status of the parameter.
       void OnToggleFix(wxCommandEvent & WXUNUSED(event));
+      /// Toggle the 'limited' status of the parameter.
+      void OnToggleLimited(wxCommandEvent & WXUNUSED(event));
       /// Opens the popu menu, to allow changing limits
       void OnPopupMenu(wxCommandEvent & event);
       /// Opens the popu menu, to allow changing limits
@@ -83,6 +85,7 @@ class WXFieldRefPar:public WXField
    protected:
       REAL mValue;
       wxCheckBox *mpButtonFix;
+      wxCheckBox *mpButtonLimited;
       wxTextCtrl *mpField;
       RefinablePar *mpRefPar;
       REAL mValueOld;
