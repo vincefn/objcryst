@@ -892,13 +892,6 @@ void UnitCellMapImport::GLInitDisplayList(const float minValue,
    VFN_DEBUG_ENTRY("UnitCellMapImport::GLInitDisplayList()",7)
    // Generate triangles
       VFN_DEBUG_MESSAGE("UnitCellMapImport::GLInitDisplayList(): Generate Triangles",7)
-      BBox cellbbox = parentCrystal->GetCellBBox();
-     //this is also done in Crystal
-      REAL xc=(cellbbox.xMin+cellbbox.xMax)/2.;  
-      REAL yc=(cellbbox.yMin+cellbbox.yMax)/2.; 
-      REAL zc=(cellbbox.zMin+cellbbox.zMax)/2.; 
-      mpCrystal->FractionalToOrthonormalCoords(xc, yc, zc);
-      glTranslatef(-xc, -yc, -zc);
 
       const int nx=mPoints.cols();
       const int ny=mPoints.rows();
@@ -1264,10 +1257,20 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
       }
    if(mShowFourier)
    {
-      // Draw all Fourier maps
-      vector<pair<pair<const UnitCellMapImport*,float>,UnitCellMapGLList* > >::const_iterator pos;
-      for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();++pos)
-         pos->second->Draw();
+      glPushMatrix();
+         // The display origin is the center of the Crystal BoundingBox, so translate
+            BBox cellbbox = this->GetCellBBox();
+            REAL xc=(cellbbox.xMin+cellbbox.xMax)/2.;  
+            REAL yc=(cellbbox.yMin+cellbbox.yMax)/2.; 
+            REAL zc=(cellbbox.zMin+cellbbox.zMax)/2.; 
+            mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(xc, yc, zc);
+            glTranslatef(-xc, -yc, -zc);
+         // Draw all Fourier maps
+         vector<pair<pair<const UnitCellMapImport*,float>,UnitCellMapGLList* > >::
+            const_iterator pos;
+         for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();++pos)
+            pos->second->Draw();
+      glPopMatrix();
    }
    if(mShowCrystal)
    {
@@ -1719,7 +1722,7 @@ void WXGLCrystalCanvas::OnFourierChangeBbox()
       "Set bounding box for display of\nFourier map (fractional coordinates)",
        bbox);
   if (BoxDlg->ShowModal() == wxID_OK ) {
-    BBox mmapbbox =  BoxDlg->GetBBox();
+    mmapbbox =  BoxDlg->GetBBox();
     vector<pair<pair<const UnitCellMapImport*,float>,UnitCellMapGLList* > >::iterator pos;
     for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();pos++)
       pos->second->GenList(*(mvpUnitCellMapImport.back()),
