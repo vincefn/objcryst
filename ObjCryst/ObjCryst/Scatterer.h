@@ -23,10 +23,16 @@ extern const RefParType *gpRefParTypeScattOccup;
 //
 //      SCATTERER
 /** \brief Generic type of scatterer
-* Scatterers can be an atom, or a more complex assembly of atoms...
+* Scatterers can be an atom, or a more complex assembly of atoms.
 *
-* This class gives a basic interface to compute :
-*         -The scatterer position, etc...
+* A Scatterer is able to give its position (in fractionnal coordinates)
+* in the unit cell, and more generally the position of all point
+* scattering centers (ScatteringComponent), along with the ScatteringPower
+* associated with each position.
+*
+* For simple atoms, there is only one scattering position with the associated
+* scattering power (scattering factor, anomalous, thermic). For complex
+* scatterers (molecules: ZScatterer) there are as many positions as atoms.
 *
 * This is an abstract base class.
 */
@@ -49,7 +55,10 @@ class Scatterer:virtual public RefinableObj
       /// Number of components in the scatterer (eg number of point scatterers)
       virtual int GetNbComponent() const=0;
       
-      /** \brief Get the list of all scattering components for this scatterer
+      /** \brief Get the list of all scattering components for this scatterer.
+		*
+		* This is the most important function of this class, giving the list of 
+		* scattering positions along with the associated ScatteringPower.
       *
       */
       virtual const ScatteringComponentList& GetScatteringComponentList() const=0;
@@ -63,33 +72,54 @@ class Scatterer:virtual public RefinableObj
       /// \bug does not take into account dummy atoms !!
       virtual string GetComponentName(const int i) const=0;
 
-      /// X coordinate of the scatterer
+      /// X coordinate (fractionnal) of the scatterer (for complex scatterers,
+		/// this corresponds to the position of one atom of the Scatterer, ideally
+		/// it should be near the center of the Scatterer.
       double GetX() const;
-      /// Y coordinate of the scatterer
+      /// Y coordinate (fractionnal) of the scatterer (for complex scatterers,
+		/// this corresponds to the position of one atom of the Scatterer, ideally
+		/// it should be near the center of the Scatterer.
       double GetY() const;  
-      /// Z coordinate of the scatterer
+      /// Z coordinate (fractionnal) of the scatterer (for complex scatterers,
+		/// this corresponds to the position of one atom of the Scatterer, ideally
+		/// it should be near the center of the Scatterer.
       double GetZ() const;
       
-      /** \brief The occupancy of the scatterer (0. -> 1.0)
+      /** \brief Get the occupancy of the scatterer (0. -> 1.0)
       *
       *The occupancy is given in %, and must take into account the
       *'special position' character of atoms (ie an atom on a 2fold axis
       *should have at most a .5 population, etc...).
       *For a multi-atom scatterer (polyhedra), this is the \b overall occupancy
-      *of the scatterer, affecting all atoms
+      *of the scatterer, affecting all atoms.
       */
       double GetOccupancy() const ;
 
-      /// X coordinate of the scatterer
+      /// X coordinate (fractionnal) of the scatterer (for complex scatterers,
+		/// this corresponds to the position of one atom of the Scatterer, ideally
+		/// it should be near the center of the Scatterer.
       virtual void SetX(const double x);
-      /// Y coordinate of the scatterer
+      /// Y coordinate (fractionnal) of the scatterer (for complex scatterers,
+		/// this corresponds to the position of one atom of the Scatterer, ideally
+		/// it should be near the center of the Scatterer.
       virtual void SetY(const double y);  
-      /// Z coordinate of the scatterer
+      /// Z coordinate (fractionnal) of the scatterer (for complex scatterers,
+		/// this corresponds to the position of one atom of the Scatterer, ideally
+		/// it should be near the center of the Scatterer.
       virtual void SetZ(const double z);
-      /// The population of the scatterer (0. -> 1.0)
+      /** \brief Change the occupancy of the scatterer (0. -> 1.0)
+      *
+      *The occupancy is given in %, and must take into account the
+      *'special position' character of atoms (ie an atom on a 2fold axis
+      *should have at most a .5 population, etc...).
+      *For a multi-atom scatterer (polyhedra), this is the \b overall occupancy
+      *of the scatterer, affecting all atoms.
+      */
       virtual void SetOccupancy(const double occupancy) ;
       
       /// Conversion function.-> returns the scatt name
+		///
+		/// \warning DO NOT USE.
       operator string()const;
       /// Print some info about the scatterer (one line).
       virtual void Print() const=0;
@@ -120,6 +150,7 @@ class Scatterer:virtual public RefinableObj
       const RefinableObjClock& GetClockScatterer()const;
       /// Set the crystal in which is included this Scatterer
       void SetCrystal(const Crystal&);
+      /// In which crystal is this Scatterer included ?
       const Crystal& GetCrystal()const;
    protected:
       /** \brief  Update the scatterer's parameters (scattering positions, occupancy)
@@ -127,14 +158,17 @@ class Scatterer:virtual public RefinableObj
       * This is necessary for composite scatterers (eg not atoms), which include
       * more than a single scattering center. The coordinates of all scattering
       * points are updated from the scatterer's parameters.
+		*
+		* This is automatically called each time GetScatteringComponentList() is used.
+		*
+		* As always, update is only made if nessary (ie if one parameter determining
+		* the atom positions has changed)
       *
-      * NOTE: This function should turn private soon, with the Clocks system allowing
-      * an automatic update only when necessary.
       **/
       virtual void Update() const=0;
-      ///Prepare refinable parameters for the scatterer object
+      /// \internal Prepare refinable parameters for the scatterer object
       virtual void InitRefParList()=0;
-      ///Get RGB Colour coordinates from Colour Name
+      /// Get RGB Colour coordinates from Colour Name
       virtual void InitRGBColour();
       /// Last time the ScatteringComponentList was generated
       const RefinableObjClock& GetClockScattCompList()const;

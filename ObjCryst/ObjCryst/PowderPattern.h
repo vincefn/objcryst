@@ -313,7 +313,7 @@ class PowderPatternDiffraction : public PowderPatternComponent,public Scattering
 /** \brief Powder pattern class, with an observed pattern and several
 * calculated components to modelize the spectrum.
 *
-* This can also be used for simulation, using a fake Iobs. This supports
+* This can also be used for simulation, using a fake Iobs. Supports
 * multiple phases.
 * 
 */
@@ -346,6 +346,10 @@ class PowderPattern : public RefinableObj
       // Pattern parameters (2theta range, wavelength, radiation)
          /** \briefSet the powder spectrum angular range & resolution parameter.
          * this will affect all components (phases) of the spectrum.
+			*
+			*	Use this with caution, as the number of points must be correct with
+			* respect to the observed data (Iobs).
+			*
          * \param tthetaMin: min 2theta value, in radians
          * \param tthetaStep: step (assumed constant) in 2theta.
          * \param nbPoints: number of points in the spectrum.
@@ -362,11 +366,10 @@ class PowderPattern : public RefinableObj
          const Radiation& GetRadiation()const;
          
          /// Set the radiation type
-         void SetRadiationType(RadiationType radiation);
+         void SetRadiationType(const RadiationType radiation);
          ///Neutron or x-ray experiment ?
          RadiationType GetRadiationType()const;
-         ///Set the wavelength of the experiment (in Angstroems). This is 
-         ///used to calculate theta angles and get X-Ray anomalous factors
+         ///Set the wavelength of the experiment (in Angstroems).
          void SetWavelength(const double lambda);
 
          /** \brief Set the wavelength of the experiment to that of an X-Ray tube.
@@ -385,21 +388,24 @@ class PowderPattern : public RefinableObj
          *then the program considers that 
          *there are both Alpha1 and Alpha2, and thus automatically changes the WavelengthType 
          *to WAVELENGTH_ALPHA12. If instead either alpha1 or alpha2 (eg "CuA1") is asked for,
-         *the WavelengthType is set to WAVELENGTH_MONOCHROMATIC.
+         *the WavelengthType is set to WAVELENGTH_MONOCHROMATIC. In both cases,
+			* the radiation type is set to X-Ray.
          */
          void SetWavelength(const string &XRayTubeElementName,const double alpha12ratio=0.5);
 
-         ///Set the energy of the experiment (in keV). This is 
-         ///used to calculate theta angles and get X-Ray anomalous factors
+         /// Set the energy of the experiment [in keV, lambda(A)=12398/E(keV)].
          void SetEnergy(const double energy);
-         ///wavelength of the experiment (in Angstroems)
+         /// wavelength of the experiment (in Angstroems)
          double GetWavelength()const;
       
       // Options to go faster...
          /// Use of faster, less precise approximations to compute the powder spectrums
+			/// This can be useful fot global optimization, but should be avoided
+			/// for precise (eg derivative calculation) work. 
          void SetUseFastLessPreciseFunc(const bool useItOrNot);
          /// Set an option so that only low-amgle reflections (theta < angle)
          /// are used. See DiffractionData::mUseOnlyLowAngleData
+			/// \warning OBSOLETE. Will be removed eventually.
          void SetUseOnlyLowAngleData(const bool useOnlyLowAngle,const double angle);
       
       //Access to spectrum data
@@ -439,13 +445,14 @@ class PowderPattern : public RefinableObj
          /// \f$ (2\theta)_{obs} = (2\theta)_{real} + b\sin(2\theta) \f$
          void Set2ThetaTransparency(const double transparency);
          /// Get the experimental 2theta from the theoretical value, taking
-         /// into account all corrections.
+         /// into account all corrections (zero, transparency,..).
          /// \internal
          /// \param ttheta: the theoretical 2theta value.
          /// \return the 2theta value as it appears on the spectrum.
          double Get2ThetaCorr(const double ttheta)const;
          /// Get the pixel number on the experimental spectrum, from the
          /// theoretical (uncorrected) value of 2theta, taking into account all corrections.
+			/// (zero, transparency,..).
          /// \internal
          /// \param ttheta: the theoretical 2theta value.
          /// \return the 2theta value as it appears on the spectrum.
@@ -492,10 +499,13 @@ class PowderPattern : public RefinableObj
          
          ///Save powder spectrum to one file, text format, 3 columns theta Iobs Icalc.
          ///If Iobs is missing, the column is omitted.
+			///
+			/// \todo export in other formats (.prf,...), with a list of reflection
+			/// position for all phases...
          void SavePowderPattern(const string &filename="powderPattern.out") const;
-         /// Print the observed and calculated spectrum (long !)
+         /// Print to thee screen/console the observed and calculated spectrum (long,
+			/// mostly useful for debugging)
          void PrintObsCalcData(ostream&os=cout)const;
-
          
       // Statistics..
          /** \brief  Unweighted R-factor 
@@ -573,7 +583,7 @@ class PowderPattern : public RefinableObj
       CrystVector_double mPowderPatternObs;
       /// The sigma of the observed spectrum.
       CrystVector_double mPowderPatternObsSigma;
-      /// The weigth for each point of the spectrum.
+      /// The weight for each point of the spectrum.
       CrystVector_double mPowderPatternWeight;
       
       /// 2theta min and step for the spectrum
@@ -582,6 +592,7 @@ class PowderPattern : public RefinableObj
       unsigned long mNbPoint;
       
       /// The wavelength of the experiment, in Angstroems.
+		/// \warning This should be removed, as it is also available in mRadiation.
       double mWavelength;
       /// The wavelength of the experiment, in Angstroems.
       Radiation mRadiation;
@@ -616,9 +627,10 @@ class PowderPattern : public RefinableObj
          ///\f$ (2\theta)_{obs} = (2\theta)_{real} + b\sin(2\theta) \f$
          double m2ThetaTransparency;
       // Components of the powder spectrum
-         /// The components (different phases, background,...) of the powder spectrum
+         /// The components (crystalline phases, background,...) of the powder spectrum
          ObjRegistry<PowderPatternComponent> mPowderPatternComponentRegistry;
-         /// The scale factors for each component
+         /// The scale factors for each component. For unscalable phases,
+			/// this is set to 1 (constant).
          CrystVector_double mScaleFactor;
          
       /// Use faster, less precise functions ?
@@ -650,7 +662,7 @@ class PowderPattern : public RefinableObj
          * the limit is simply ignored, not calculated,
          * not taken into account in statistics.
 			*
-			* OBSOLETE
+			* \warning OBSOLETE
          */
          bool mUseOnlyLowAngleData;
 
@@ -662,6 +674,7 @@ class PowderPattern : public RefinableObj
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);
       friend class WXPowderPattern;
+		// This should be removed
       friend class WXPowderPatternGraph;
    #endif
 };

@@ -941,7 +941,7 @@ void PowderPattern::SetRadiation(const Radiation &radiation)
 }
 const Radiation& PowderPattern::GetRadiation()const {return mRadiation;}
 
-void PowderPattern::SetRadiationType(RadiationType rad)
+void PowderPattern::SetRadiationType(const RadiationType rad)
 {
    mRadiation.SetRadiationType(rad);
    for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++)

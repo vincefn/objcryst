@@ -38,45 +38,104 @@ extern const RefParType *gpRefParTypeRadiation;
 extern const RefParType *gpRefParTypeRadiationWavelength;
 
 //######################################################################
-/** \brief Class to define the radiation (type, monochromaticity) of an experiment
+/** \brief Class to define the radiation (type, monochromaticity, wavelength(s)) of an experiment
 *
 * This can be developped for more complex experiments, hence the \e vector of
 * wavelengths (so far it is not possible to use several wavelengths, though).
+*
+* X-Rays and Neutrons are available. Electrons are not available yet in
+* ScatteringData classes.
+*
+* \todo also add here information about the polarization of the beam.
 */
 //######################################################################
 class Radiation: public RefinableObj
 {
    public:
+		/// Default constructor
       Radiation();
+		/** \ brief Constructor
+		*
+		* \param rad the RadiationType used (X-Rays, neutrons)
+		* \param wavelength the wavelength (in Angstroems) of the monochromatic
+		* radiation.
+		*/
       Radiation(const RadiationType rad,const double wavelength);
+		/** \ brief Constructor for X-Ray tube radiation
+      *
+      *\param XRayTubeElementName : name of the anticathode element name. Known
+      *ones are Cr, Fe, Cu, Mo, Ag. 
+      *\param alpha2Alpha2ratio: Kalpha2/Kalpha1 ratio (0.5 by default)
+      *
+      *the average wavelength is calculated
+      *using the alpha2/alpha1 weight. All structure factors computation are made 
+      *using the average wavelength, and for powder diffraction, profiles are output
+      *at the alpha1 and alpha2 ratio for the calculated pattern.
+      *
+      *NOTE : if the name of the wavelength is generic (eg"Cu"), 
+      *then the program considers that 
+      *there are both Alpha1 and Alpha2, and thus automatically changes the WavelengthType 
+      *to WAVELENGTH_ALPHA12. If instead either alpha1 or alpha2 (eg "CuA1") is asked for,
+      *the WavelengthType is set to WAVELENGTH_MONOCHROMATIC. In both cases,
+		* the radiation type is set to X-Ray.
+      */
       Radiation(const string &XRayTubeElementName,const double alpha2Alpha2ratio=0.5);
+		/// Copy constructor
       Radiation(const Radiation&);
       ~Radiation();
       virtual const string GetClassName() const;
       
       void operator=(const Radiation&);
       
+		/// Get the radiation type (X-Rays, Neutron)
       RadiationType GetRadiationType()const;
+		/// Set the radiation type (X-Rays, Neutron)
       void SetRadiationType(const RadiationType);
-
+		//Get the Wavelength type (monochromatic, Alpha1+Alpha2, ...)
       WavelengthType GetWavelengthType()const;
-      
+      /// Get the wavelength(s) in Angstroems. Currently only
+		/// monochromatic is used, so the vector should only return
+		/// only one wavelength.
       const CrystVector_double& GetWavelength()const;
+		/// Set the (monochromatic) wavelength of the beam.
       void SetWavelength(const double );
+		/** \ brief Set X-Ray tube radiation.
+      *
+      *\param XRayTubeElementName : name of the anticathode element name. Known
+      *ones are Cr, Fe, Cu, Mo, Ag. 
+      *\param alpha2Alpha2ratio: Kalpha2/Kalpha1 ratio (0.5 by default)
+      *
+      *the average wavelength is calculated
+      *using the alpha2/alpha1 weight. All structure factors computation are made 
+      *using the average wavelength, and for powder diffraction, profiles are output
+      *at the alpha1 and alpha2 ratio for the calculated pattern.
+      *
+      *NOTE : if the name of the wavelength is generic (eg"Cu"), 
+      *then the program considers that 
+      *there are both Alpha1 and Alpha2, and thus automatically changes the WavelengthType 
+      *to WAVELENGTH_ALPHA12. If instead either alpha1 or alpha2 (eg "CuA1") is asked for,
+      *the WavelengthType is set to WAVELENGTH_MONOCHROMATIC. In both cases,
+		* the radiation type is set to X-Ray.
+      */
       void SetWavelength(const string &XRayTubeElementName,const double alpha2Alpha2ratio=0.5);
       
-      double GetXRayTubeDeltaLambda()const;
+      /// Get the wavelength difference for Alpha1 and Alpha2
+		double GetXRayTubeDeltaLambda()const;
+		/// Get the Kalpha2/Kalpha1 ratio
       double GetXRayTubeAlpha2Alpha1Ratio()const;
       
-      const RefinableObjClock& GetClockWavelength()const ;
+      /// Last time the wavelength has been changed
+		const RefinableObjClock& GetClockWavelength()const ;
+		/// Last time the nature (X-Rays/Neutron, number of wavelengths)radiation has been changed
       const RefinableObjClock& GetClockRadiation()const ;
       virtual void Output(ostream &os,int indent=0)const;
       virtual void Input(istream &is,const XMLCrystTag &tag);
       virtual void InputOld(istream &is,const IOCrystTag &tag);
+		/// Print to screen/console the charcteristics of the radiation.
       void Print()const;
    private:
       void InitOptions();
-      /// Neutron ? X-Ray ? Electron (unimplemented)
+      /// Neutron ? X-Ray ? (Electron: unimplemented)
       RefObjOpt mRadiationType;
       /// monochromatic ? Alpha1 & Alpha2 ? Multi-Wavelength ?
       RefObjOpt mWavelengthType;
@@ -91,6 +150,7 @@ class Radiation: public RefinableObj
       double mXRayTubeAlpha2Alpha1Ratio;
       //Clocks
          RefinableObjClock mClockWavelength;
+         RefinableObjClock mClockRadiation;
    #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);
@@ -105,10 +165,13 @@ class Radiation: public RefinableObj
 * not include any correction such as absorption, Lorentz or Polarization.
 *
 * Does this really need to be a RefinableObj ?
-* \todo Optimize computation for Bijvoet/Friedel mates. To this generate
+* \todo Optimize computation for Bijvoet/Friedel mates. To do this, generate
 * an internal list of 'true independent reflections', with two entries for each,
-* for both mates, and make the 'real' reflections only a reference to these reflections. 
-* 
+* for both mates, and make the 'real' reflections only a reference to these reflections.
+*
+* \todo a \b lot of cleaning is necessary in the computing of structure
+* factors, for (1) the 'preparation' part (deciding what needs to be recomputed)
+* and (2) to allow anisotropic temperature factors (or other anisotropic parts)
 */
 //######################################################################
 class ScatteringData: virtual public RefinableObj
@@ -184,13 +247,11 @@ class ScatteringData: virtual public RefinableObj
       ///for all reflections
       const CrystVector_double& GetSinThetaOverLambda()const;
    
-      ///  Returns the Array of calculated |F(hkl)|^2 for all reflections. These
-      ///are squared structure factor, which may have been corrected for Lorentz, Polarization,
-      ///depending on parameters.
+      ///  Returns the Array of calculated |F(hkl)|^2 for all reflections.
       const CrystVector_double& GetFhklCalcSq() const;
-      ///Access to real part of F(hkl)calc
+      /// Access to real part of F(hkl)calc
       const CrystVector_double& GetFhklCalcReal() const;
-      ///Access to imaginary part of F(hkl)calc
+      /// Access to imaginary part of F(hkl)calc
       const CrystVector_double& GetFhklCalcImag() const;
       
       ///Set the wavelength of the experiment (in Angstroems). This is 
@@ -239,14 +300,14 @@ class ScatteringData: virtual public RefinableObj
       // Set an option so that only low-amgle reflections (theta < angle)
       // are used. See DiffractionData::mUseOnlyLowAngleData
       //virtual void SetUseOnlyLowAngleData(const bool useOnlyLowAngle,const double angle)=0;
-      /** \brief Print H, K, L F^2 Re(F) Im(F) theta sint(theta/lambda) for all reflections
+      /** \brief Print H, K, L F^2 Re(F) Im(F) theta sin(theta)/lambda for all reflections
       *
       */
       virtual void PrintFhklCalc()const;
 
    protected:
-      /// \internal This function should be called after H,K and L arrays have 
-      ///been initialized or modified.
+      /// \internal This function is called after H,K and L arrays have 
+      /// been initialized or modified.
       virtual void PrepareHKLarrays() ;
       /// \internal sort reflections by theta values (also get rid of [0,0,0] if present)
       /// If maxTheta >0, then only reflections where theta<maxTheta are kept
@@ -266,6 +327,9 @@ class ScatteringData: virtual public RefinableObj
          /// be recomputed to get the new structure factors. No calculation is made in
          /// this function. Just getting prepared...
          /// \todo Clean up the code, which is a really unbelievable mess (but working!)
+			///
+			/// Currently using flags to decide what should be recomputed, whereas
+			/// Clocks should be used. a LOT of cleaning is necessary
          virtual void PrepareCalcStructFactor()const;
          /// \internal Compute sin(theta)/lambda. 
          /// theta and tan(theta) values are also re-computed, provided a wavelength has
