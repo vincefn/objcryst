@@ -22,6 +22,9 @@ extern const RefParType *gpRefParTypeScattConform;
 extern const RefParType *gpRefParTypeScattConformBondLength;
 extern const RefParType *gpRefParTypeScattConformBondAngle;
 extern const RefParType *gpRefParTypeScattConformDihedAngle;
+extern const RefParType *gpRefParTypeScattConformX;
+extern const RefParType *gpRefParTypeScattConformY;
+extern const RefParType *gpRefParTypeScattConformZ;
 extern const RefParType *gpRefParTypeScattOccup;
 //######################################################################
 //

@@ -89,7 +89,7 @@ mBackgroundInterpPointIntensity(old.mBackgroundInterpPointIntensity)
 {}
 
 PowderPatternBackground::~PowderPatternBackground(){}
-const string& PowderPatternBackground::GetClassName()
+const string& PowderPatternBackground::GetClassName() const
 {
 	const static string className="PowderPatternBackground";
 	return className;

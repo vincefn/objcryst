@@ -61,6 +61,12 @@ const RefParType *gpRefParTypeScattConformBondAngle=
    new RefParType(gpRefParTypeScattConform,"Bond Angles");
 const RefParType *gpRefParTypeScattConformDihedAngle=
    new RefParType(gpRefParTypeScattConform,"Dihedral Angles ");
+const RefParType *gpRefParTypeScattConformX=
+   new RefParType(gpRefParTypeScatt,"Orth. X coordinates");
+const RefParType *gpRefParTypeScattConformY=
+   new RefParType(gpRefParTypeScatt,"Orth. Y coordinates");
+const RefParType *gpRefParTypeScattConformZ=
+   new RefParType(gpRefParTypeScatt,"Orth. Z coordinates");
 const RefParType *gpRefParTypeScattOccup=
    new RefParType(gpRefParTypeScatt,"Occupancy");
 

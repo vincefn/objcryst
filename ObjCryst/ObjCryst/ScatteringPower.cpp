@@ -89,7 +89,7 @@ ScatteringPower::~ScatteringPower()
    gScatteringPowerRegistry.DeRegister(*this);
 }
 
-const string& ScatteringPower::GetClassName()
+const string& ScatteringPower::GetClassName()const
 {
 	const static string className="ScatteringPower";
 	return className;
