@@ -2932,8 +2932,8 @@ void PowderPattern::PrepareIntegratedRfactor()const
 						mIntegratedPatternMax(j)=minExcl;
 					if( (mIntegratedPatternMin(j)>minExcl) &&(mIntegratedPatternMax(j)>maxExcl))
 						mIntegratedPatternMin(j)=maxExcl;
+					if(j==(numInterval-1)) break;
 					j++;
-					if(j>=numInterval) break;
 				}
 				minExcl=this->Get2ThetaCorrPixel(mExcludedRegionMin2Theta(i));
 				maxExcl=this->Get2ThetaCorrPixel(mExcludedRegionMax2Theta(i));
