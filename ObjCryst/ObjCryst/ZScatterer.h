@@ -237,6 +237,12 @@ class ZScatterer: public Scatterer
       ///Access to psi parameter (overall orientation of the scatterer)
       void SetPsi(const REAL);
 
+      /// Get the X fractionnal coordinate of atom i
+      REAL GetZAtomX(const int i)const;
+      /// Get the Y fractionnal coordinate of atom i
+      REAL GetZAtomY(const int i)const;
+      /// Get the Z fractionnal coordinate of atom i
+      REAL GetZAtomZ(const int i)const;
       /// Index of the 1st atom used to define the i-th atom in the Z-Matrix (the one from
       /// which the bondlength is calculated)
       long GetZBondAtom(const int i)const;
@@ -325,6 +331,10 @@ class ZScatterer: public Scatterer
       * \todo USe more strict formatting than space-delimited.
       */
       void ExportFenskeHallZMatrix(ostream &os);
+      /// Set the index of the central atom (around which the rotation is made)
+      void SetCenterAtomIndex(const unsigned int);
+      /// Get the index of the central atom (around which the rotation is made)
+      unsigned int GetCenterAtomIndex()const;
    protected:
       /** Update the atom coordinates (in real units, in Angstroems).
       *

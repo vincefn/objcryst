@@ -431,6 +431,9 @@ void ZScatterer::SetPhi(const REAL x) { mClockScatterer.Click();mPhi=x;}
 void ZScatterer::SetChi(const REAL y) { mClockScatterer.Click();mChi=y;}
 void ZScatterer::SetPsi(const REAL z) { mClockScatterer.Click();mPsi=z;}
 
+REAL ZScatterer::GetZAtomX(const int i)const{this->UpdateCoordinates(); return mXCoord(i);}
+REAL ZScatterer::GetZAtomY(const int i)const{this->UpdateCoordinates(); return mYCoord(i);}
+REAL ZScatterer::GetZAtomZ(const int i)const{this->UpdateCoordinates(); return mZCoord(i);}
 long ZScatterer::GetZBondAtom(const int i)const 
 {return mZAtomRegistry.GetObj(i).GetZBondAtom();}
 
@@ -1295,6 +1298,9 @@ void ZScatterer::ExportFenskeHallZMatrix(ostream &os)
          << " "<<this->GetZDihedralAngleAtom(i)+1<< " "<<this->GetZDihedralAngle(i)*RAD2DEG
          <<endl;
 }
+
+void ZScatterer::SetCenterAtomIndex(const unsigned int ix){mCenterAtomIndex=ix;}
+unsigned int ZScatterer::GetCenterAtomIndex()const{return mCenterAtomIndex;}
 
 void ZScatterer::GlobalOptRandomMove(const REAL mutationAmplitude,
                                      const RefParType *type)
