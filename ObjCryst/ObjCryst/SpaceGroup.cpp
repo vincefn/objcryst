@@ -466,21 +466,42 @@ bool SpaceGroup::IsReflSystematicAbsent(const REAL h, const REAL k, const REAL l
    const REAL eps=.01;
    const T_RTMx *pMatrix;
    pMatrix=&(mSgOps.SMx[0]);
-   float h1,k1,l1,t;
+   float h1,k1,l1,t1,h2,k2,l2,t2,t3;
    double junk;
+   int cen;
+   if(this->IsCentrosymmetric()) cen=2 ; else cen=1;
    for(int j=0;j<mSgOps.nSMx;j++)
    {
       h1=h*(*pMatrix).s.R[0]+k*(*pMatrix).s.R[3]+l*(*pMatrix).s.R[6];
       k1=h*(*pMatrix).s.R[1]+k*(*pMatrix).s.R[4]+l*(*pMatrix).s.R[7];
       l1=h*(*pMatrix).s.R[2]+k*(*pMatrix).s.R[5]+l*(*pMatrix).s.R[8];
-      t=(h*(*pMatrix).s.T[0]+k*(*pMatrix).s.T[1]+l*(*pMatrix).s.T[2])/(REAL)STBF;
+      t1=h*(*pMatrix).s.T[0]+k*(*pMatrix).s.T[1]+l*(*pMatrix).s.T[2];// /(REAL)STBF;
       
-      // +h+k+l ensures it is >0 before modf.. Add .001 for rounding errors...
-      t= modf(t+fabs(h)+fabs(k)+fabs(l)+.001,&junk);
-      
-      if( ((fabs(h-h1) + fabs(k-k1) + fabs(l-l1) )<eps) && (t>eps)) return true;
-      if(this->IsCentrosymmetric() &&
-          ((fabs(h+h1) + fabs(k+k1) + fabs(l+l1) )<eps) && (t>eps)) return true;
+      for(int i=0;i<this->GetNbTranslationVectors();i++)
+      {
+         t2=t1+h*mSgOps.LTr[i].v[0] + k*mSgOps.LTr[i].v[1] + l*mSgOps.LTr[i].v[2];
+         for(int c=1;c<=cen;c++)
+         {
+            if(c==1)
+            {
+               h2= h1;k2= k1;l2= l1;
+               t3= t2/(REAL)STBF;
+            }
+            else
+            {
+               h2=-h1;k2=-k1;l2=-l1;
+               t3=( h2*(REAL)mSgOps.InvT[0]
+                   +k2*(REAL)mSgOps.InvT[1]
+                   +l2*(REAL)mSgOps.InvT[2]
+                   -t2)/(REAL)STBF;
+            }
+            // +3(h+k+l) ensures it is >0 before modf.. Add .001 for rounding errors...
+            t3= modf(t3+3*(fabs(h)+fabs(k)+fabs(l))+.001,&junk);
+            //cout << "    " << RTMx2XYZ(&mSgOps.SMx[j],1,STBF,0,0,1,NULL,NULL,80) <<endl;
+            //cout <<h<<" "<<k<<" "<<l<<" : "<<h2<<" "<<k2<<" "<<l2<<" : "<<t3<<endl;
+            if( ((fabs(h-h2) + fabs(k-k2) + fabs(l-l2) )<eps) && (t3>eps)) return true;
+         }
+      }
       pMatrix++;
    }
    return false;
@@ -598,7 +619,7 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
          ch++;
       }
    }else mUniqueAxisId=0;
-   //this->Print();
+   this->Print();
    mClock.Click();
    (*fpObjCrystInformUser)("Initializing spacegroup: "+spgId+"... Done");
    VFN_DEBUG_MESSAGE("SpaceGroup::InitSpaceGroup():End",4)
