@@ -52,7 +52,7 @@ For <b>Linux</b>, download the Fox-date.tar.bz2 (source code).
 \anchor install <h2>Installation</h2> 
 
    - For <b>Linux</b>:
-      - You will need valid libraries and development files for <b>OpenGL</b>. You may require a specific library for your card (NVidia,...), and the <b>Mesa</b>, <b>Mesa-devel</b>, <b>Xfree-devel</b> packages (for Redhat, also <b>glut</b> and <b>glut-devel</b>).
+      - You will need valid libraries and development files for <b>OpenGL</b>. You may require a specific library for your card (NVidia,...), the <b>Mesa</b>, <b>Mesa-devel</b>, <b>Xfree-devel</b> packages. Generally, the default installation include these.
       - First you need to also download and install the wxWindows for GTK+ shared libraries (you need the <b>wxGTK</b>, <b>wxGTK-gl</b> and <b>wxGTK-devel</b>).
          - If you are using <b>wxGTK-2.2.*</b>, just install the 3 RPM.
          - With <b>wxGTK-2.4.*</b>, after the install you must do:
@@ -60,7 +60,7 @@ For <b>Linux</b>, download the Fox-date.tar.bz2 (source code).
       - Then uncompress the Fox tar.bz2 archive. Then do <tt>make</tt> and (as root) <tt>make install</tt>. The install will put Fox in <tt>/usr/local/bin/Fox</tt>. (otherwise the compiled file is in Fox/src/ObjCryst/wxCryst/Fox)             
       - <b>NOTE</b>: if Fox crashes when loading an example file, rebuild the wxGTK libraries from the src.rpm (rpm --rebuild) or the tar.gz (with opengl enabled). It (probably) means there is a conflict between your compiler and the one used to compile the RPM (lousy 2.96 compilers....).
 
-    - For <b>windows</b>, unzip the file, which will also create a folder with the Fox program. This program uses the glut library, which is distributed along the Fox program, you do not need to move the glut32.dll to your System directory, as long as the 'Fox.exe' application remains along the glut32.dll file (you may not see it if your windows explorer is configured to hide sytem files such as dll's).
+    - For <b>windows</b>, unzip the file, which will also create a folder with the Fox program..
 
 As always, send me an email at vincefn@users.sf.net if you have any trouble with the installation.
 
