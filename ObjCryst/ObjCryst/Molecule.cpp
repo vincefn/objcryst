@@ -522,6 +522,8 @@ REAL& MolBondAngle::Angle0()
 {
    return mAngle0;
 }
+REAL& MolBondAngle::AngleDelta(){return mDelta;}
+REAL& MolBondAngle::AngleSigma(){return mSigma;}
 
 REAL MolBondAngle::GetAngle()const
 {
@@ -694,6 +696,8 @@ REAL MolDihedralAngle::GetAngle()const
 }
 
 REAL& MolDihedralAngle::Angle0(){return mAngle0;}
+REAL& MolDihedralAngle::AngleDelta(){return mDelta;}
+REAL& MolDihedralAngle::AngleSigma(){return mSigma;}
 
 REAL MolDihedralAngle::GetLogLikelihood()const
 {
@@ -1304,12 +1308,15 @@ void Molecule::BeginOptimization(const bool allowApproximations,const bool enabl
 {
    #if 1 // Is doing this automatically too dangerous ?
    if(  (!mIsSelfOptimizing)
-      &&(this->GetLogLikelihood()>(mvpRestraint.size()*500))
       &&(mAutoOptimizeConformation.GetChoice()==0))
    {
-      (*fpObjCrystInformUser)("Optimizing initial conformation of Molecule:"+this->GetName());
-      this->OptimizeConformation(100000,(REAL)(mvpRestraint.size()));
-      (*fpObjCrystInformUser)("");
+      if(this->GetLogLikelihood()>(mvpRestraint.size()*500))
+      {
+         (*fpObjCrystInformUser)("Optimizing initial conformation of Molecule:"+this->GetName());
+         this->OptimizeConformation(100000,(REAL)(mvpRestraint.size()));
+         (*fpObjCrystInformUser)("");
+      }
+      mAutoOptimizeConformation.SetChoice(1);
    }
    #endif
    if(!mIsSelfOptimizing)
@@ -1395,9 +1402,30 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
    if(mOptimizeOrientation.GetChoice()==0)
    {//Rotate around an arbitrary vector
       static const REAL amp=2.*M_PI/100./RAND_MAX;
-      mQuat *= Quaternion::RotationQuaternion
-                  ((2.*(REAL)rand()-(REAL)RAND_MAX)*amp*mutationAmplitude,
-                   (REAL)rand(),(REAL)rand(),(REAL)rand());
+      switch(mFlexModel.GetChoice())
+      {// With the flexible approach, use a smaller rotation amplitude
+         case 0://Free atoms + restraints
+         {
+            mQuat *= Quaternion::RotationQuaternion
+                        ((2.*(REAL)rand()-(REAL)RAND_MAX)*amp*mutationAmplitude,
+                         (REAL)rand(),(REAL)rand(),(REAL)rand());
+            break;
+         }
+         case 1://Rigid body
+         {
+            mQuat *= Quaternion::RotationQuaternion
+                        ((2.*(REAL)rand()-(REAL)RAND_MAX)*amp*mutationAmplitude*2.,
+                         (REAL)rand(),(REAL)rand(),(REAL)rand());
+            break;
+         }
+         case 2://user-chosen free torsion
+         {
+            mQuat *= Quaternion::RotationQuaternion
+                        ((2.*(REAL)rand()-(REAL)RAND_MAX)*amp*mutationAmplitude*2.,
+                         (REAL)rand(),(REAL)rand(),(REAL)rand());
+            break;
+         }
+      }
       mQuat.Normalize();
       mClockOrientation.Click();
    }
@@ -1541,9 +1569,20 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                 pos!=mvRotorGroupTorsion.end();++pos)
             {//rotate around torsion bonds
                const REAL angle=(2.*(REAL)rand()-(REAL)RAND_MAX)
-                                *M_PI/50./(REAL)RAND_MAX*mutationAmplitude;
+                                *M_PI/12.5/(REAL)RAND_MAX*mutationAmplitude;
                this->RotateAtomGroup(*(pos->mpAtom1),*(pos->mpAtom2),
                                      pos->mvRotatedAtomList,angle);
+            }
+            if(((rand()%20)==0)&&(mvFlipGroup.size()>0))
+            {// Try a flip from time to time
+               this->SaveParamSet(mLocalParamSet);
+               const REAL lastll=this->GetLogLikelihood();
+               const unsigned long i=rand() % mvFlipGroup.size();
+               list<FlipGroup>::const_iterator posFlip=mvFlipGroup.begin();
+               for(unsigned long j=0;j<i;++j)++posFlip;
+               this->FlipAtomGroup(*posFlip);
+               const REAL newll=this->GetLogLikelihood();
+               if((newll-lastll)>1000.) this->RestoreParamSet(mLocalParamSet);
             }
             break;
          }

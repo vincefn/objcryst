@@ -223,6 +223,8 @@ class MolBondAngle:public Restraint
       virtual REAL GetLogLikelihood()const;
       REAL GetAngle()const;
       REAL& Angle0();
+      REAL& AngleDelta();
+      REAL& AngleSigma();
       const MolAtom& GetAtom1()const;
       const MolAtom& GetAtom2()const;
       const MolAtom& GetAtom3()const;
@@ -282,6 +284,8 @@ class MolDihedralAngle:public Restraint
       virtual REAL GetLogLikelihood()const;
       REAL GetAngle()const;
       REAL& Angle0();
+      REAL& AngleDelta();
+      REAL& AngleSigma();
       const MolAtom& GetAtom1()const;
       const MolAtom& GetAtom2()const;
       const MolAtom& GetAtom3()const;
