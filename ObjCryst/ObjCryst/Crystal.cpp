@@ -986,15 +986,16 @@ REAL Crystal::GetCostFunctionValue(const unsigned int n)
 
 void Crystal::GlobalOptRandomMove(const REAL mutationAmplitude)
 {
-   VFN_DEBUG_MESSAGE("Crystal::GlobalOptRandomMove()",2)
+	if(mRandomMoveIsDone) return;
+   VFN_DEBUG_ENTRY("Crystal::GlobalOptRandomMove()",2)
    //Either a random move or a permutation of two scatterers
-   const long nb=this->GetNbScatterer();
+   const unsigned long nb=(unsigned long)this->GetNbScatterer();
    if( ((rand()/(REAL)RAND_MAX)<.02) && (nb>1))
    {
 		// This is safe even if one scatterer is partially fixed,
 		// since we the SetX/SetY/SetZ actually use the MutateTo() function.
-      const unsigned long n1=(unsigned long)((rand()/(REAL)(RAND_MAX+1))*nb);
-      const long n2=( (long)((rand()/(REAL)(RAND_MAX+1))*(nb-1))+1+n1)%nb;
+      const unsigned long n1=rand()%nb;
+      const unsigned long n2=(  (rand()%(nb-1)) +n1+1) %nb;
       const float x1=this->GetScatt(n1).GetX();
       const float y1=this->GetScatt(n1).GetY();
       const float z1=this->GetScatt(n1).GetZ();
@@ -1009,7 +1010,7 @@ void Crystal::GlobalOptRandomMove(const REAL mutationAmplitude)
    {
       this->RefinableObj::GlobalOptRandomMove(mutationAmplitude);
    }
-   VFN_DEBUG_MESSAGE("Crystal::GlobalOptRandomMove():End",1)
+   VFN_DEBUG_EXIT("Crystal::GlobalOptRandomMove()",2)
 }
 
 void Crystal::CIFOutput(ostream &os)const

@@ -1226,6 +1226,7 @@ void ZScatterer::ExportFenskeHallZMatrix(ostream &os)
 
 void ZScatterer::GlobalOptRandomMove(const REAL mutationAmplitude)
 {
+	if(mRandomMoveIsDone) return;
    VFN_DEBUG_ENTRY("ZScatterer::GlobalOptRandomMove()",3)
    TAU_PROFILE("ZScatterer::GlobalOptRandomMove()","void ()",TAU_DEFAULT);
    // give a 2% chance of either moving a single atom, or move
@@ -1256,7 +1257,7 @@ void ZScatterer::GlobalOptRandomMove(const REAL mutationAmplitude)
          if(nbDihed<2) //Can't play :-(
          {
             this->RefinableObj::GlobalOptRandomMove(mutationAmplitude);
-            VFN_DEBUG_EXIT("Crystal::GlobalOptRandomMove():End",3)
+            VFN_DEBUG_EXIT("ZScatterer::GlobalOptRandomMove():End",3)
             return;
          }
       // Build mpZMoveMinimizer object
@@ -1497,7 +1498,8 @@ void ZScatterer::GlobalOptRandomMove(const REAL mutationAmplitude)
    {
       this->RefinableObj::GlobalOptRandomMove(mutationAmplitude);
    }
-   VFN_DEBUG_EXIT("Crystal::GlobalOptRandomMove():End",3)
+	mRandomMoveIsDone=true;
+   VFN_DEBUG_EXIT("ZScatterer::GlobalOptRandomMove():End",3)
 }
 
 void ZScatterer::UpdateCoordinates() const

@@ -1557,7 +1557,8 @@ void RefinableObj::RandomizeConfiguration()
 
 void RefinableObj::GlobalOptRandomMove(const REAL mutationAmplitude)
 {
-   VFN_DEBUG_MESSAGE("RefinableObj::GlobalOptRandomMove()",2)
+	if(mRandomMoveIsDone) return;
+   VFN_DEBUG_ENTRY("RefinableObj::GlobalOptRandomMove()",2)
    for(int j=0;j<this->GetNbParNotFixed();j++)
    {
       this->GetParNotFixed(j).Mutate( this->GetParNotFixed(j).GetGlobalOptimStep()
@@ -1565,7 +1566,14 @@ void RefinableObj::GlobalOptRandomMove(const REAL mutationAmplitude)
    }
    for(int i=0;i<mSubObjRegistry.GetNb();i++)
       mSubObjRegistry.GetObj(i).GlobalOptRandomMove(mutationAmplitude);
-   VFN_DEBUG_MESSAGE("RefinableObj::GlobalOptRandomMove():End",1)
+	mRandomMoveIsDone=true;
+   VFN_DEBUG_EXIT("RefinableObj::GlobalOptRandomMove()",2)
+}
+void RefinableObj::BeginGlobalOptRandomMove()
+{
+	mRandomMoveIsDone=false;
+   for(int i=0;i<mSubObjRegistry.GetNb();i++)
+      mSubObjRegistry.GetObj(i).BeginGlobalOptRandomMove();
 }
 
 unsigned int RefinableObj::GetNbCostFunction()const {return 0;}

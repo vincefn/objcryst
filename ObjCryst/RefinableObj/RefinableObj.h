@@ -943,6 +943,14 @@ class RefinableObj
       *  for all parameters
       */
       virtual void GlobalOptRandomMove(const REAL mutationAmplitude);
+		/** Raise a flag, to be sure not to make a random change more than once
+		* in each RefinableObj. This calls recursively all sub-objects.
+		*
+		* This is necessary since one object may be included in several others.
+		* This must be called before making a random configuration change on
+		* a list of objects.
+		*/
+      void BeginGlobalOptRandomMove();
       
       //Cost functions
          /// Number of Cost functions
@@ -1128,6 +1136,9 @@ class RefinableObj
       bool mDeleteRefParInDestructor;
 		/// Last time the RefinableParList was modified (a parameter added or removed).
 		RefinableObjClock mRefParListClock;
+		/// \internal This true is false if RefinableObj::GlobalOptRandomMove() has been called
+		/// since RefinableObj::BeginGlobalOptRandomMove() was called.
+		bool mRandomMoveIsDone;
    #ifdef __WX__CRYST__
    public:
       /// Create a WXCrystObj for this object. Only a generic WXCrystObj pointer is kept.
