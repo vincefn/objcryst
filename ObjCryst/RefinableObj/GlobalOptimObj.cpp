@@ -438,7 +438,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
       if(mSaveDetailledHistory.GetChoice()>0)
       {
          outHistory.open(mHistorySaveFileName.c_str());
-         outHistory << "Trial World OverallCost ";
+         outHistory << "Trial World Accept OverallCost ";
          for(unsigned int i=0;i<mNbCostFunction;i++) outHistory << "Cost ";
          for(long j=0;j<mRefParList.GetNbParNotFixed();j++)
             outHistory << mRefParList.GetParNotFixed(j).GetName() << " ";
@@ -752,7 +752,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
             CrystVector_long worldNbAcceptedMoves(nbWorld);
             worldNbAcceptedMoves=0;
          //Do a report each... And check if mutation rate is OK (for annealing_smart)s
-            const int nbTrialsReport=1000;
+            const int nbTrialsReport=3000;
          // TEST : allow GENETIC mating of configurations
             //Get gene groups list :TODO: check for missing groups
                CrystVector_uint refParGeneGroupIndex(mRefParList.GetNbPar());
