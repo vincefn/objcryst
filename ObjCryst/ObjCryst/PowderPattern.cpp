@@ -1568,11 +1568,13 @@ Error opening file for input:"+filename);
    for(;ct<mNbPoint;)
    {            
       getline(fin,str);
+      for(unsigned int i=0;i<str.size();i++) if(' '==str[i]) str[i]='0';
       sscanf(str.c_str(),"%8f%8f%8f%8f%8f%8f%8f%8f%8f%8f",
                          line+0,line+1,line+2,line+3,line+4,line+5,line+6,line+7,line+8,line+9);
       for(unsigned int j=0;j<10;j++)
          if(ct<mNbPoint) mPowderPatternObs(ct++)=line[j];
       getline(fin,str);
+      for(unsigned int i=0;i<str.size();i++) if(' '==str[i]) str[i]='0';
       sscanf(str.c_str(),"%8f%8f%8f%8f%8f%8f%8f%8f%8f%8f",
                          line+0,line+1,line+2,line+3,line+4,line+5,line+6,line+7,line+8,line+9);
       for(unsigned int j=0;j<10;j++)
