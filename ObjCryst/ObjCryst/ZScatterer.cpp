@@ -123,7 +123,7 @@ ZMoveMinimizer::ZMoveMinimizer(ZScatterer &scatt):
 RefinableObj(true),
 mpZScatt(&scatt),mOptimObj(true)
 {
-	mOptimObj.SetAlgorithmSimulAnnealing(ANNEALING_EXPONENTIAL,1,.001,
+	mOptimObj.SetAlgorithmSimulAnnealing(ANNEALING_EXPONENTIAL,.1,.001,
 														  ANNEALING_EXPONENTIAL,16,.25);
 	mOptimObj.AddRefinableObj(*this);
 	mOptimObj.AddCostFunction(*this,0);
@@ -142,19 +142,39 @@ const string& ZMoveMinimizer::GetCostFunctionDescription(const unsigned int)cons
 }
 double ZMoveMinimizer::GetCostFunctionValue(const unsigned int)
 {
+   TAU_PROFILE("ZMoveMinimizer::GetCostFunctionValue()","void ()",TAU_DEFAULT);
+	const double *pX1=mpZScatt->GetXCoord().data();
+	const double *pY1=mpZScatt->GetYCoord().data();
+	const double *pZ1=mpZScatt->GetZCoord().data();
+	const double *pX0=mXCoord0.data();
+	const double *pY0=mYCoord0.data();
+	const double *pZ0=mZCoord0.data();
+	const double *pW=mAtomWeight.data();
+	double dist=0;
+	//for(int i=mXCoord0.numElements()-1;i>=0;i--)
+	//	dist+= abs(*pX1++ - *pX0++) + abs(*pY1++ - *pY0++) + abs(*pZ1++ - *pZ0++);
+	for(int i=mXCoord0.numElements()-1;i>=0;i--)
+	{
+		dist+= *pW++* ( (*pX1 - *pX0)*(*pX1 - *pX0) 
+							+(*pY1 - *pY0)*(*pY1 - *pY0)
+							+(*pZ1 - *pZ0)*(*pZ1 - *pZ0));
+		pX1++;pY1++;pZ1++;
+		pX0++;pY0++;pZ0++;
+	}
+	
+	#if 0
 	const CrystVector_double *pXcoord=&(mpZScatt->GetXCoord());
 	const CrystVector_double *pYcoord=&(mpZScatt->GetYCoord());
 	const CrystVector_double *pZcoord=&(mpZScatt->GetZCoord());
 	double dist=0;
-	double norm=0;
 	for(int i=pXcoord->numElements()-1;i>=0;i--)
 	{
 		dist+=mAtomWeight(i)*( ((*pXcoord)(i)-mXCoord0(i))*((*pXcoord)(i)-mXCoord0(i))
 									 +((*pYcoord)(i)-mYCoord0(i))*((*pYcoord)(i)-mYCoord0(i))
 									 +((*pZcoord)(i)-mZCoord0(i))*((*pZcoord)(i)-mZCoord0(i)));
-		norm+=mAtomWeight(i);
 	}
-	return dist/norm;
+	#endif
+	return dist/mAtomWeight.sum();
 }
 void ZMoveMinimizer::RecordConformation()
 {
@@ -1048,7 +1068,7 @@ void ZScatterer::GlobalOptRandomMove(const double mutationAmplitude)
 	//
 	// Should try to do better by really minimizing the conformation
 	// changes
-   if( (rand()/(double)RAND_MAX)<.02)//.01
+   if(false)// (rand()/(double)RAND_MAX)<.01)//.01
 	{
    	TAU_PROFILE_TIMER(timer1,\
 							"ZScatterer::GlobalOptRandomMoveSmart1(prepare ref par & mutate)"\
@@ -1196,7 +1216,7 @@ void ZScatterer::GlobalOptRandomMove(const double mutationAmplitude)
 		// not-so-random angles., and then minimize the conformation change
 			mpZMoveMinimizer->SetZAtomWeight(weight);
 			double change;
-			if( (rand()%3)==0)
+			if( (rand()%5)==0)
 			{
 				switch(rand()%5)
 				{
@@ -1236,9 +1256,9 @@ void ZScatterer::GlobalOptRandomMove(const double mutationAmplitude)
 				if(tmp>.05)
 				{
    				TAU_PROFILE_START(timer2);
-					if(tmp<1) mpZMoveMinimizer->MinimizeChange(200);
-					else if(tmp<5) mpZMoveMinimizer->MinimizeChange(400);
-						  else mpZMoveMinimizer->MinimizeChange(1000);
+					if(tmp<1) mpZMoveMinimizer->MinimizeChange(100);
+					else if(tmp<5) mpZMoveMinimizer->MinimizeChange(200);
+						  else mpZMoveMinimizer->MinimizeChange(500);
    				TAU_PROFILE_STOP(timer2);
 				}
 				//cout <<" -> "<<mpZMoveMinimizer->GetCostFunctionValue(0)<<endl;

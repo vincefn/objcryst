@@ -283,7 +283,8 @@ mHistorySavedParamSetIndex(1000),
 mHistorySaveAfterEachOptim(false),mHistorySaveFileName("GlobalOptim_history.out"),
 mLastParSavedSetIndex(-1),
 mTemperatureMax(.03),mTemperatureMin(.003),
-mMutationAmplitudeMax(16.),mMutationAmplitudeMin(.125)
+mMutationAmplitudeMax(16.),mMutationAmplitudeMin(.125),
+mNbTrialRetry(0),mMinCostRetry(0),mMaxNbTrialSinceBest(100000)
 #ifdef __WX__CRYST__
 ,mpWXCrystObj(0)
 #endif
@@ -306,7 +307,8 @@ mHistorySavedParamSetIndex(1000),
 mHistorySaveAfterEachOptim(true),mHistorySaveFileName("GlobalOptim_history.out"),
 mLastParSavedSetIndex(-1),
 mTemperatureMax(.03),mTemperatureMin(.003),
-mMutationAmplitudeMax(16.),mMutationAmplitudeMin(.125)
+mMutationAmplitudeMax(16.),mMutationAmplitudeMin(.125),
+mNbTrialRetry(0),mMinCostRetry(0),mMaxNbTrialSinceBest(100000)
 #ifdef __WX__CRYST__
 ,mpWXCrystObj(0)
 #endif
@@ -650,6 +652,11 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
 				CrystVector_int crossoverGroupIndex(nbGeneGroup);
             const long parSetOffspringA=mRefParList.CreateParamSet("Offspring A");
             const long parSetOffspringB=mRefParList.CreateParamSet("Offspring B");
+			// Used for automatic restart from minimum or randomization
+				long bestConfigNb=0;//when was the best config recorded ? (to restart if necessary)
+				long nbRestartFromMin=0;//Number of times we restarted from the minimum
+				double oldBestCost=-1;
+				long oldBestConfigIndex=mRefParList.CreateParamSet();
          //Do the refinement
          bool makeReport=false;
          Chronometer chrono;
@@ -678,7 +685,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
                                          << " Temp="<< simAnnealTemp(i)
                                          << " Mutation Ampl.: "<<mMutationAmplitude
                                          << " NEW Best Cost="<<mBestCost<< endl;
-                        //nbTriesSinceBest=0;
+								bestConfigNb=mNbTrial;
                         if(!silent) this->DisplayReport();
                         this->UpdateDisplay();
                         //for(int i=0;i<mRefinedObjList.GetNb();i++) 
@@ -715,18 +722,18 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
                           <<" with "<< (i-1) <<"(cost="<< currentCost(i-1)<<")"<<endl;
                   }
                   */
-                  mRefParList.RestoreParamSet(worldCurrentSetIndex(i));
-                  mRefParList.SaveParamSet(swapParSavedSetIndex);
-                  mRefParList.RestoreParamSet(worldCurrentSetIndex(i-1));
-                  mRefParList.SaveParamSet(worldCurrentSetIndex(i));
-                  mRefParList.RestoreParamSet(swapParSavedSetIndex);
-                  mRefParList.SaveParamSet(worldCurrentSetIndex(i-1));
+                  mRefParList.GetParamSet(swapParSavedSetIndex)=
+                  	mRefParList.GetParamSet(worldCurrentSetIndex(i));
+						mRefParList.GetParamSet(worldCurrentSetIndex(i))=
+                  	mRefParList.GetParamSet(worldCurrentSetIndex(i-1));
+                  mRefParList.GetParamSet(worldCurrentSetIndex(i-1))=
+							mRefParList.GetParamSet(swapParSavedSetIndex);
                   const double tmp=currentCost(i);
                   currentCost(i)=currentCost(i-1);
                   currentCost(i-1)=tmp;
                }
             }
-				#if 1
+				#if 0
             //Try mating worlds- NEW !
    			TAU_PROFILE_TIMER(timer1,\
 							"MonteCarloObj::Optimize (Try mating Worlds)"\
@@ -822,7 +829,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
                            	  << " Temp="<< simAnnealTemp(k)
                            	  << " Mutation Ampl.: "<<mMutationAmplitude
                            	  << " NEW Best Cost="<<mBestCost<< "(MATING !)"<<endl;
-                        	//nbTriesSinceBest=0;
+									bestConfigNb=mNbTrial;
                         	if(!silent) this->DisplayReport();
                         	this->UpdateDisplay();
                         	//for(int i=0;i<mRefinedObjList.GetNb();i++) 
@@ -882,6 +889,45 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
                }
                worldNbAcceptedMoves=0;
                //this->DisplayReport();
+					if(mMaxNbTrialSinceBest>0)
+						if((mNbTrial-bestConfigNb)>mMaxNbTrialSinceBest)
+						{
+							if(nbRestartFromMin==2)
+							{
+               			if(!silent)
+									cout << endl 
+									<< "More than "<< mMaxNbTrialSinceBest <<"trials since best!:"
+									<<" Again!!! Restart from random config"<<endl;
+								//restart everything
+								if((oldBestCost<0) || ( (oldBestCost>0) &&(mBestCost<oldBestCost)) )
+								{
+									oldBestCost=mBestCost;
+									mRefParList.GetParamSet(oldBestConfigIndex)=
+										mRefParList.GetParamSet(mBestParSavedSetIndex);
+								}
+								this->RandomizeStartingConfig();
+								mCurrentCost=this->GetCostFunctionValue();
+								mBestCost=this->GetCostFunctionValue();
+                  		for(int i=0;i<nbWorld;i++)
+                  		{
+									currentCost(i)=mCurrentCost;
+									mRefParList.SaveParamSet(worldCurrentSetIndex(i));
+								}
+								mRefParList.SaveParamSet(mBestParSavedSetIndex);
+							}
+							else
+							{
+               			if(!silent)
+									cout << endl 
+									<< "More than "<< mMaxNbTrialSinceBest <<"trials since best!:"
+									<<" reverting all worlds to best config"<<endl;
+               			for(int i=0;i<nbWorld;i++)
+									mRefParList.GetParamSet(worldCurrentSetIndex(i))=
+										mRefParList.GetParamSet(mBestParSavedSetIndex);
+								bestConfigNb=mNbTrial;
+								nbRestartFromMin++;
+							}
+						}
                #ifdef __WX__CRYST__
                if(0!=mpWXCrystObj) mpWXCrystObj->UpdateDisplayNbTrial();
                #endif
@@ -895,7 +941,10 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
          //Restore Best values
             //mRefParList.Print();
             if(!silent) this->DisplayReport();
-            mRefParList.RestoreParamSet(mBestParSavedSetIndex);
+				if((oldBestCost>0)&&(oldBestCost<mBestCost))
+            	mRefParList.RestoreParamSet(oldBestConfigIndex);
+				else
+            	mRefParList.RestoreParamSet(mBestParSavedSetIndex);
             //for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).Print();
             mCurrentCost=this->GetCostFunctionValue();
 				if(!silent) 
