@@ -390,6 +390,10 @@ void WXCrystal::OnMenuCrystalGL(wxCommandEvent & WXUNUSED(event))
                                wxDefaultPosition,wxSize(400,400));
    mpCrystalGL=new WXGLCrystalCanvas(this,frame,-1);
    frame->Show(true);
+   #if wxUSE_STATUSBAR
+   frame->CreateStatusBar(1);
+   frame->SetStatusText(mpCrystal->GetName().c_str());
+   #endif
    this->UpdateGL();
 }
 void WXCrystal::NotifyCrystalGLDelete()
@@ -1065,6 +1069,20 @@ const string & UnitCellMapImport::GetName()const
    return mName;
 }
 
+REAL UnitCellMapImport::GetValue(const REAL x,const REAL y,const REAL z)const
+{
+   const int nx=mPoints.cols();
+   const int ny=mPoints.rows();
+   const int nz=mPoints.depth();
+   long ix=((long)(x*nx))%nx;
+   long iy=((long)(y*ny))%ny;
+   long iz=((long)(z*nz))%nz;
+   if(ix<0) ix+=nx;
+   if(iy<0) iy+=ny;
+   if(iz<0) iz+=nz;
+   return mPoints(iz,iy,ix);
+}
+
 ////////////////////////////////////////////////////////////////////////
 //
 //    UnitCellMapGLList
@@ -1165,6 +1183,7 @@ const string &UnitCellMapGLList::GetName()const
 //
 ////////////////////////////////////////////////////////////////////////
 static const long ID_GLCRYSTAL_MENU_SHOWATOMLABEL=     WXCRYST_ID(); 
+static const long ID_GLCRYSTAL_MENU_SHOWCURSOR=        WXCRYST_ID(); 
 static const long ID_GLCRYSTAL_UPDATEUI=               WXCRYST_ID(); 
 static const long ID_GLCRYSTAL_MENU_CHANGELIMITS=      WXCRYST_ID(); 
 static const long ID_GLCRYSTAL_MENU_SHOWCRYSTAL=       WXCRYST_ID(); 
@@ -1184,8 +1203,9 @@ BEGIN_EVENT_TABLE(WXGLCrystalCanvas, wxGLCanvas)
    EVT_MOUSE_EVENTS     (WXGLCrystalCanvas::OnMouse)
    EVT_MENU             (ID_GLCRYSTAL_MENU_UPDATE,              WXGLCrystalCanvas::OnUpdate)
    EVT_MENU             (ID_GLCRYSTAL_MENU_CHANGELIMITS,        WXGLCrystalCanvas::OnChangeLimits)
-   EVT_MENU             (ID_GLCRYSTAL_MENU_SHOWCRYSTAL,         WXGLCrystalCanvas::OnShowCrystal)     //shows or hides the crystal
-   EVT_MENU             (ID_GLCRYSTAL_MENU_SHOWATOMLABEL,       WXGLCrystalCanvas::OnShowAtomLabel)     //shows or hides the crystal
+   EVT_MENU             (ID_GLCRYSTAL_MENU_SHOWCRYSTAL,         WXGLCrystalCanvas::OnShowCrystal)
+   EVT_MENU             (ID_GLCRYSTAL_MENU_SHOWATOMLABEL,       WXGLCrystalCanvas::OnShowAtomLabel)
+   EVT_MENU             (ID_GLCRYSTAL_MENU_SHOWCURSOR,          WXGLCrystalCanvas::OnShowCursor)
    EVT_MENU             (ID_GLCRYSTAL_MENU_LOADFOURIER,         WXGLCrystalCanvas::OnLoadFourier)
    EVT_MENU             (ID_GLCRYSTAL_MENU_CHANGECONTOUR,       WXGLCrystalCanvas::OnChangeContour)
    EVT_MENU             (ID_GLCRYSTAL_MENU_ADDCONTOUR,          WXGLCrystalCanvas::OnAddContour)
@@ -1204,9 +1224,9 @@ WXGLCrystalCanvas::WXGLCrystalCanvas(WXCrystal *wxcryst,
                                      wxFrame *parent, wxWindowID id,
                                      const wxPoint &pos,
                                      const wxSize &size):
-wxGLCanvas(parent,id,pos,size,wxDEFAULT_FRAME_STYLE),//
+wxGLCanvas(parent,id,pos,size,wxDEFAULT_FRAME_STYLE),mpParentFrame(parent),
 mpWXCrystal(wxcryst),mIsGLInit(false),mDist(60),mX0(0),mY0(0),mZ0(0),mViewAngle(15),
-mShowFourier(true),mShowCrystal(true),mShowAtomName(true)
+mShowFourier(true),mShowCrystal(true),mShowAtomName(true),mShowCursor(false)
 {
    VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::WXGLCrystalCanvas()",3)
      // N.B. xMin=xMax so that the previous cell bbox is used for Maps 
@@ -1221,6 +1241,7 @@ mShowFourier(true),mShowCrystal(true),mShowAtomName(true)
    
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWCRYSTAL, "Hide Crystal");
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, "Hide Atom Labels");
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWCURSOR, "Show Cursor");
    mpPopUpMenu->AppendSeparator();
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_LOADFOURIER, "Load Fourier Map");	
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_CHANGECONTOUR, "Change Contour Value");
@@ -1335,6 +1356,48 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
       }
          
    }
+   if(mShowCursor)
+   {
+      glLoadIdentity();
+      glTranslatef( 0, 0, -mDist);
+      glMultMatrixf( &m[0][0] );
+      const GLfloat colour0 [] = {0.00, 0.00, 0.00, 0.00}; 
+      const GLfloat colour1 [] = {1.0f, 1.0f, 1.0f, 1.00}; 
+      glMaterialfv(GL_FRONT, GL_AMBIENT,   colour0); 
+      glMaterialfv(GL_FRONT, GL_DIFFUSE,   colour0); 
+      glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0); 
+      glMaterialfv(GL_FRONT, GL_EMISSION,  colour1); 
+      glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
+      glBegin(GL_LINES);
+         glVertex3f(-1.0f, 0.0f, 0.0f);
+         glVertex3f( 1.0f, 0.0f, 0.0f);
+
+         glVertex3f( 0.0f,-1.0f, 0.0f);
+         glVertex3f( 0.0f, 1.0f, 0.0f);
+
+         glVertex3f( 0.0f, 0.0f,-1.0f);
+         glVertex3f( 0.0f, 0.0f, 1.0f);
+      glEnd();
+   }
+   // Print position of center of image, plus intensity of Fourier maps (if any)
+   {
+      wxString statusText;
+      REAL x=mX0;
+      REAL y=mY0;
+      REAL z=mZ0;
+      mpWXCrystal->GetCrystal().OrthonormalToFractionalCoords(x,y,z);
+      x-=0.5f;y-=0.5f;z-=0.5f;
+      statusText.sprintf("Center@(%5.3f,%5.3f,%5.3f)",x,y,z);
+      for(unsigned int i=0;i<mvpUnitCellMapImport.size();++i)
+      {
+         wxString tmp;
+         tmp=statusText;
+         statusText.sprintf("%s, map(%s)=%5.2fe",tmp.c_str(),
+                            mvpUnitCellMapImport[i]->GetName().c_str(),
+                            mvpUnitCellMapImport[i]->GetValue(x,y,z));
+      }
+      mpParentFrame->SetStatusText(statusText);
+    }  
    glFlush();
    SwapBuffers();
    VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnPaint():End",7)
@@ -1655,9 +1718,17 @@ void WXGLCrystalCanvas::OnShowCrystal()
 
 void WXGLCrystalCanvas::OnShowAtomLabel()
 {
-   if(mShowCrystal) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, "Show Atom Labels");
+   if(mShowAtomName) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, "Show Atom Labels");
    else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, "Hide Atom Labels");
    mShowAtomName= !mShowAtomName;
+   this->CrystUpdate();
+}
+
+void WXGLCrystalCanvas::OnShowCursor()
+{
+   if(mShowCursor) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWCURSOR, "Show Cursor");
+   else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWCURSOR, "Hide Cursor");
+   mShowCursor= !mShowCursor;
    this->CrystUpdate();
 }
 

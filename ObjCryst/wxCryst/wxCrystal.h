@@ -138,6 +138,8 @@ class UnitCellMapImport
       int ImportGRD(const string&filename);
       /// Name associated to this map (the filename)
       const string & GetName()const;
+      /// Get the value of the map at a given set of fractionnal coordinates
+      REAL GetValue(const REAL x,const REAL y,const REAL z)const;
    private:
       /// The crystal corresponding to this map
       const Crystal *mpCrystal;
@@ -209,6 +211,7 @@ class WXGLCrystalCanvas : public wxGLCanvas
       void OnUpdateUI(wxUpdateUIEvent& WXUNUSED(event));
       void OnShowCrystal();
       void OnShowAtomLabel();
+      void OnShowCursor();
       void OnLoadFourier();
       void LoadFourier(const string&filename);
       void OnAddContour();
@@ -243,6 +246,8 @@ class WXGLCrystalCanvas : public wxGLCanvas
       * which are not const-correct...
       */
       void UnProject(REAL &x, REAL &y, REAL &z);
+      /// The parent wxFrame
+      wxFrame* mpParentFrame;
       /// The owner WXCrystal
       WXCrystal* mpWXCrystal;
       /// \internal
@@ -260,7 +265,7 @@ class WXGLCrystalCanvas : public wxGLCanvas
       wxMenu* mpPopUpMenu;
       
       /// To display Fourier map
-      bool mShowFourier, mShowCrystal, mShowAtomName;
+      bool mShowFourier, mShowCrystal, mShowAtomName, mShowCursor;
       // bounding box for atoms to be included
       BBox mcellbbox;
       // bounding box for display of Fourier map
