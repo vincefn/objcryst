@@ -1969,39 +1969,10 @@ void PowderPatternDiffraction::XMLOutput(ostream &os,int indent)const
       ss<<this->IsIgnoringImagScattFact();
       tag.AddAttribute("IgnoreImagScattFact",ss.str());
    }
-  os <<tag<<endl;
+   os <<tag<<endl;
    indent++;
-   
-   mReflectionProfileType.XMLOutput(os,indent);
-   os<<endl;
-   
-   if(this->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
-   {
-      this->GetPar(&mW0).XMLOutput(os,"W0",indent);
-      os<<endl;
 
-      this->GetPar(&mW1).XMLOutput(os,"W1",indent);
-      os<<endl;
-
-      this->GetPar(&mW2).XMLOutput(os,"W2",indent);
-      os<<endl;
-   }
-   else
-   {
-      this->GetPar(&mCagliotiU).XMLOutput(os,"U",indent);
-      os<<endl;
-
-      this->GetPar(&mCagliotiV).XMLOutput(os,"V",indent);
-      os<<endl;
-
-      this->GetPar(&mCagliotiW).XMLOutput(os,"W",indent);
-      os<<endl;
-   }
-   this->GetPar(&mPseudoVoigtEta0).XMLOutput(os,"Eta0",indent);
-   os<<endl;
-   
-   this->GetPar(&mPseudoVoigtEta1).XMLOutput(os,"Eta1",indent);
-   os<<endl;
+   if(mpReflectionProfile!=0) mpReflectionProfile->XMLOutput(os,indent);
 
    this->GetPar(&mGlobalBiso).XMLOutput(os,"globalBiso",indent);
    os <<endl;
@@ -2082,49 +2053,49 @@ void PowderPatternDiffraction::XMLInput(istream &is,const XMLCrystTag &tagg)
          {
             if("Name"==tag.GetAttributeName(i))
             {
-               if("U"==tag.GetAttributeValue(i))
-               {
-                  this->GetPar(&mCagliotiU).XMLInput(is,tag);
-                  break;
-               }
-               if("V"==tag.GetAttributeValue(i))
-               {
-                  this->GetPar(&mCagliotiV).XMLInput(is,tag);
-                  break;
-               }
-               if("W"==tag.GetAttributeValue(i))
-               {
-                  this->GetPar(&mCagliotiW).XMLInput(is,tag);
-                  break;
-               }
-               if("Eta0"==tag.GetAttributeValue(i))
-               {
-                  this->GetPar(&mPseudoVoigtEta0).XMLInput(is,tag);
-                  break;
-               }
-               if("Eta1"==tag.GetAttributeValue(i))
-               {
-                  this->GetPar(&mPseudoVoigtEta1).XMLInput(is,tag);
-                  break;
-               }
                if("globalBiso"==tag.GetAttributeValue(i))
                {
                   this->GetPar(&mGlobalBiso).XMLInput(is,tag);
                   break;
                }
+               if("U"==tag.GetAttributeValue(i))
+               {
+                  mpReflectionProfile->GetPar("U").XMLInput(is,tag);
+                  break;
+               }
+               if("V"==tag.GetAttributeValue(i))
+               {
+                  mpReflectionProfile->GetPar("V").XMLInput(is,tag);
+                  break;
+               }
+               if("W"==tag.GetAttributeValue(i))
+               {
+                  mpReflectionProfile->GetPar("W").XMLInput(is,tag);
+                  break;
+               }
+               if("Eta0"==tag.GetAttributeValue(i))
+               {
+                  mpReflectionProfile->GetPar("Eta0").XMLInput(is,tag);
+                  break;
+               }
+               if("Eta1"==tag.GetAttributeValue(i))
+               {
+                  mpReflectionProfile->GetPar("Eta1").XMLInput(is,tag);
+                  break;
+               }
                if("W0"==tag.GetAttributeValue(i))
                {
-                  this->GetPar(&mW0).XMLInput(is,tag);
+                  //:TODO: mpReflectionProfile->GetPar("Eta0").XMLInput(is,tag);
                   break;
                }
                if("W1"==tag.GetAttributeValue(i))
                {
-                  this->GetPar(&mW1).XMLInput(is,tag);
+                  //:TODO: mpReflectionProfile->GetPar("Eta1").XMLInput(is,tag);
                   break;
                }
                if("W2"==tag.GetAttributeValue(i))
                {
-                  this->GetPar(&mW2).XMLInput(is,tag);
+                  //:TODO: mpReflectionProfile->GetPar("Eta2").XMLInput(is,tag);
                   break;
                }
             }
@@ -2134,13 +2105,48 @@ void PowderPatternDiffraction::XMLInput(istream &is,const XMLCrystTag &tagg)
       if("Option"==tag.GetName())
       {
          for(unsigned int i=0;i<tag.GetNbAttribute();i++)
+         {
             if("Name"==tag.GetAttributeName(i)) 
-               mOptionRegistry.GetObj(tag.GetAttributeValue(i)).XMLInput(is,tag);
+            {
+               if("Profile Type"!=tag.GetAttributeValue(i))
+                  mOptionRegistry.GetObj(tag.GetAttributeValue(i)).XMLInput(is,tag);
+            }
+         }
          continue;
       }
       if("TextureMarchDollase"==tag.GetName())
       {
          mCorrTextureMarchDollase.XMLInput(is,tag);
+         continue;
+      }
+      if("ReflectionProfilePseudoVoigt"==tag.GetName())
+      {
+         if(mpReflectionProfile==0)
+         {
+            mpReflectionProfile=new ReflectionProfilePseudoVoigt;
+         }
+         else
+            if(mpReflectionProfile->GetClassName()!="ReflectionProfilePseudoVoigt")
+            {
+               delete mpReflectionProfile;
+               mpReflectionProfile=new ReflectionProfilePseudoVoigt;
+            }
+         mpReflectionProfile->XMLInput(is,tag);
+         continue;
+      }
+      if("ReflectionProfileDoubleExponentialPseudoVoigt"==tag.GetName())
+      {
+         if(mpReflectionProfile==0)
+         {
+            mpReflectionProfile=new ReflectionProfileDoubleExponentialPseudoVoigt;
+         }
+         else
+            if(mpReflectionProfile->GetClassName()!="ReflectionProfileDoubleExponentialPseudoVoigt")
+            {
+               delete mpReflectionProfile;
+               mpReflectionProfile=new ReflectionProfileDoubleExponentialPseudoVoigt;
+            }
+         mpReflectionProfile->XMLInput(is,tag);
          continue;
       }
    }
