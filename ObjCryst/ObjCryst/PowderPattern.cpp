@@ -3851,7 +3851,7 @@ void PowderPattern::PrepareIntegratedRfactor()const
          {
             mIntegratedPatternMax(i)=(mIntegratedPatternMax(i)+mIntegratedPatternMin(i+1))/2;
             long j=1;
-            while(mIntegratedPatternMin(i + j)<mIntegratedPatternMax(i))
+            while(mIntegratedPatternMin(i + j)<=mIntegratedPatternMax(i))
             {
                mIntegratedPatternMin(i+j)=mIntegratedPatternMax(i)+1;
                if(mIntegratedPatternMin(i+j)>mIntegratedPatternMax(i+j)) keep(i+j)=false;
