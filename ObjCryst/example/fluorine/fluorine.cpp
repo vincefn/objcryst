@@ -48,7 +48,7 @@ void fluorine()
 		//we don't have data, so just simulate (0->Pi/2)..
 		//give a constant 'obs pattern of unit intensity
    	data.SetPowderPatternPar(0,M_PI/10000.,5000);
-   	CrystVector_double obs(5000);
+   	CrystVector_REAL obs(5000);
    	obs=1;
    	data.SetPowderPatternObs(obs);
 		data.Prepare();

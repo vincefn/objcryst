@@ -41,17 +41,17 @@ class LSQNumObj
       void SetParIsUsed(const RefParType *type,const bool use);
       
 		void Refine (int nbCycle=1,bool useLevenbergMarquardt=false);
-		CrystVector_double Sigma()const;
-		CrystMatrix_double CorrelMatrix()const;
-		double Rfactor()const;
-		double RwFactor()const;
-		double ChiSquare()const;	//uses the weight if specified
+		CrystVector_REAL Sigma()const;
+		CrystMatrix_REAL CorrelMatrix()const;
+		REAL Rfactor()const;
+		REAL RwFactor()const;
+		REAL ChiSquare()const;	//uses the weight if specified
       ///Add an object to refine
 		void SetRefinedObj(RefinableObj &obj, const unsigned int LSQFuncIndex=0);
 		void SetUseSaveFileOnEachCycle(bool yesOrNo=true);
 		void SetSaveFile(string fileName="refine.save");
 		void PrintRefResults()const;
-		void SetDampingFactor(const double newDampFact);
+		void SetDampingFactor(const REAL newDampFact);
 		void PurgeSaveFile();
 		void WriteReportToFile()const;
       
@@ -67,20 +67,20 @@ class LSQNumObj
       /// of the parameters in RefinableObj and its sub-objects
 		mutable RefinableObj mRefParList;
       /// Damping factor for the refinement (unused yet...)
-		double mDampingFactor;
+		REAL mDampingFactor;
       ///Save result to file after each cycle ?
 		bool mSaveReportOnEachCycle;	
       /// Name of the refined object
 		string mName;
       /// File name where refinement info is saved
 		string mSaveFileName;
-		double mR,mRw,mChiSq;
+		REAL mR,mRw,mChiSq;
       /// Correlation matrix between all refined parameters.
-		CrystMatrix_double mCorrelMatrix;
+		CrystMatrix_REAL mCorrelMatrix;
       /// Observed values.
-		CrystVector_double mObs;
+		CrystVector_REAL mObs;
       /// Weight corresponding to all observed values.
-		CrystVector_double mWeight;
+		CrystVector_REAL mWeight;
       /// Index of the set of saved values for all refinable parameters, before refinement
       /// and before the last cycle.
       int mIndexValuesSetInitial, mIndexValuesSetLast;

@@ -6,7 +6,7 @@
 #define L (*l)
 #define SF (*sf)
 
-#define __VFN_GEOM_STRUCT_FACTOR_POINTERS_INIT const double *h,*k,*l; double*sf;\
+#define __VFN_GEOM_STRUCT_FACTOR_POINTERS_INIT const REAL *h,*k,*l; REAL*sf;\
    h=hh.data();k=kk.data();l=ll.data();sf=sfsf.data(); for(long i=0;i<hh.numElements();i++){
 #define __VFN_GEOM_STRUCT_FACTOR_POINTERS_END h++ ; k++ ; l++ ; sf++; };
 
@@ -25,13 +25,13 @@
 namespace ObjCryst
 {
 
-void ImagGeomStructFactor_centro(const double x,
-                                const double y,
-                                const double z,
-                                const CrystVector_double&h,
-                                const CrystVector_double&k,
-                                const CrystVector_double&l,
-                                CrystVector_double& isf){return;}; //do nothing
+void ImagGeomStructFactor_centro(const REAL x,
+                                const REAL y,
+                                const REAL z,
+                                const CrystVector_REAL&h,
+                                const CrystVector_REAL&k,
+                                const CrystVector_REAL&l,
+                                CrystVector_REAL& isf){return;}; //do nothing
 
 }
 

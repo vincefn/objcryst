@@ -35,9 +35,9 @@ class WXCrystal: public WXRefinableObj
       virtual void CrystUpdate();
       /// Update the OpenGL Display List
       void UpdateGL(const bool onlyIndependentAtoms=false,
-                    const double xMin=-.1,const double xMax=1.1,
-                    const double yMin=-.1,const double yMax=1.1,
-                    const double zMin=-.1,const double zMax=1.1);
+                    const REAL xMin=-.1,const REAL xMax=1.1,
+                    const REAL yMin=-.1,const REAL yMax=1.1,
+                    const REAL zMin=-.1,const REAL zMax=1.1);
       /// Gets the integer index of the OpenGL display list. Wait, if necessary, for the list
       /// not to be used any more. When finished, ReleaseCrystalGLDisplayList() must be called.
       int GrabCrystalGLDisplayList()const;

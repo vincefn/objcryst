@@ -84,8 +84,8 @@ const string DiffractionDataSingleCrystal::GetClassName() const
 void DiffractionDataSingleCrystal::SetHklIobs(CrystVector_long const &h,
                                               CrystVector_long const &k,
                                               CrystVector_long const &l,
-                                              CrystVector_double const &iObs,
-                                              CrystVector_double const &sigma)
+                                              CrystVector_REAL const &iObs,
+                                              CrystVector_REAL const &sigma)
 {
    VFN_DEBUG_ENTRY("DiffractionDataSingleCrystal::SetHklIobs(h,k,l,i,s)",5)
    mNbRefl=h.numElements();
@@ -113,34 +113,34 @@ void DiffractionDataSingleCrystal::SetHklIobs(CrystVector_long const &h,
    VFN_DEBUG_EXIT("DiffractionDataSingleCrystal::SetHklIobs(h,k,l,i,s)",5)
 }
 
-const CrystVector_double& DiffractionDataSingleCrystal::GetIcalc()const
+const CrystVector_REAL& DiffractionDataSingleCrystal::GetIcalc()const
 {
    this->CalcIcalc();
    return mCalcIntensity;
 }
-const CrystVector_double& DiffractionDataSingleCrystal::GetIobs()const
+const CrystVector_REAL& DiffractionDataSingleCrystal::GetIobs()const
 {
    //if(mHasObservedData==false) DoSomething
    return mObsIntensity;
 }
 
-void DiffractionDataSingleCrystal::SetIobs(const CrystVector_double &obs) {mObsIntensity=obs;}
+void DiffractionDataSingleCrystal::SetIobs(const CrystVector_REAL &obs) {mObsIntensity=obs;}
 
-const CrystVector_double& DiffractionDataSingleCrystal::GetSigma()const
+const CrystVector_REAL& DiffractionDataSingleCrystal::GetSigma()const
 {
    //if(mHasObservedData=false) DoSomething
    return mObsSigma;
 }
 
-void DiffractionDataSingleCrystal::SetSigma(const CrystVector_double& sigma) {mObsSigma=sigma;}
+void DiffractionDataSingleCrystal::SetSigma(const CrystVector_REAL& sigma) {mObsSigma=sigma;}
 
-const CrystVector_double& DiffractionDataSingleCrystal::GetWeight()const
+const CrystVector_REAL& DiffractionDataSingleCrystal::GetWeight()const
 {
    //if(mHasObservedData=false) DoSomething
    return mWeight;
 }
 
-void DiffractionDataSingleCrystal::SetWeight(const CrystVector_double& weight)
+void DiffractionDataSingleCrystal::SetWeight(const CrystVector_REAL& weight)
 {
    VFN_DEBUG_MESSAGE("DiffractionDataSingleCrystal::SetWeight(w)",5)
    mWeight=weight;
@@ -196,7 +196,7 @@ Error opening file for input:"+fileName);
    }
   //Finish
    mWeight.resize(mNbRefl);
-	const double minIobs=mObsIntensity.max()*1e-6;
+	const REAL minIobs=mObsIntensity.max()*1e-6;
    for(int i=0;i<mNbRefl;i++) 
 		if(mObsIntensity(i)<minIobs) mWeight(i)=1./minIobs;
 		else mWeight(i)=1./mObsIntensity(i);
@@ -252,7 +252,7 @@ Error opening file for input:"+fileName);
    }
   //Finish
    mWeight.resize(mNbRefl);
-	const double minSigma=mObsSigma.max()*1e-3;
+	const REAL minSigma=mObsSigma.max()*1e-3;
    for(int i=0;i<mNbRefl;i++) 
 		if(mObsSigma(i)<minSigma) mWeight(i)=1./minSigma/minSigma;
 		else mWeight(i)=1./mObsSigma(i)/mObsSigma(i);
@@ -287,8 +287,8 @@ void DiffractionDataSingleCrystal::ImportHklIobsSigmaJanaM91(const string &fileN
 Error opening file for input:"+fileName);
       }
       long i=0;
-      double tmpH;
-      double junk;
+      REAL tmpH;
+      REAL junk;
       fin >> tmpH;
       while(tmpH != 999)
       { // :TODO: A little faster....
@@ -337,20 +337,20 @@ Error opening file for input:"+fileName);
 
    mHasObservedData=true;
 }
-double DiffractionDataSingleCrystal::GetRw()const
+REAL DiffractionDataSingleCrystal::GetRw()const
 {
-   TAU_PROFILE("DiffractionData::Rw()"," double()",TAU_DEFAULT);
+   TAU_PROFILE("DiffractionData::Rw()"," REAL()",TAU_DEFAULT);
    VFN_DEBUG_MESSAGE("DiffractionData::Rw()",3);
    if(mHasObservedData==false)
    {
       throw ObjCrystException("DiffractionData::Rw() Cannot compute Rw ! \
          There is no observed data !");
    }
-   double tmp1=0;
-   double tmp2=0;
-   const double *p1=mCalcIntensity.data();
-   const double *p2=mObsIntensity.data();
-   const double *p3=mWeight.data();
+   REAL tmp1=0;
+   REAL tmp2=0;
+   const REAL *p1=mCalcIntensity.data();
+   const REAL *p2=mObsIntensity.data();
+   const REAL *p3=mWeight.data();
   for(long i=0;i<this->GetNbRefl();i++)
    {
       //avoid pow(f,i); too SLOW !
@@ -365,9 +365,9 @@ double DiffractionDataSingleCrystal::GetRw()const
    return tmp1 ;// /this->GetNbRefl();
 }
 
-double DiffractionDataSingleCrystal::GetR()const
+REAL DiffractionDataSingleCrystal::GetR()const
 {
-   TAU_PROFILE("DiffractionData::R()"," double()",TAU_DEFAULT);
+   TAU_PROFILE("DiffractionData::R()"," REAL()",TAU_DEFAULT);
    VFN_DEBUG_MESSAGE("DiffractionData::R()",3);
    if(mHasObservedData==false)
    {
@@ -375,10 +375,10 @@ double DiffractionDataSingleCrystal::GetR()const
          There is no observed data !");
    }
    
-   double tmp1=0;
-   double tmp2=0;
-   const double *p1=mCalcIntensity.data();
-   const double *p2=mObsIntensity.data();
+   REAL tmp1=0;
+   REAL tmp2=0;
+   const REAL *p1=mCalcIntensity.data();
+   const REAL *p2=mObsIntensity.data();
    for(long i=0;i<this->GetNbRefl();i++)
    {
       //avoid pow(f,i); too SLOW !
@@ -394,19 +394,19 @@ double DiffractionDataSingleCrystal::GetR()const
    return tmp1 ;
 }
 
-double DiffractionDataSingleCrystal::GetChi2()const
+REAL DiffractionDataSingleCrystal::GetChi2()const
 {
-   TAU_PROFILE("DiffractionData::Chi2()"," double()",TAU_DEFAULT);
+   TAU_PROFILE("DiffractionData::Chi2()"," REAL()",TAU_DEFAULT);
    VFN_DEBUG_MESSAGE("DiffractionData::Chi2()",3);
    if(mHasObservedData==false)
    {
       throw ObjCrystException("DiffractionData::Chi2() Cannot compute Chi^2 ! \
          There is no observed data !");
    }
-   double tmp1=0;
-   const double *p1=mCalcIntensity.data();
-   const double *p2=mObsIntensity.data();
-   const double *p3=mWeight.data();
+   REAL tmp1=0;
+   const REAL *p1=mCalcIntensity.data();
+   const REAL *p2=mObsIntensity.data();
+   const REAL *p3=mWeight.data();
   for(long i=0;i<this->GetNbRefl();i++)
    {
       //avoid pow(f,i); too SLOW !
@@ -428,11 +428,11 @@ void DiffractionDataSingleCrystal::FitScaleFactorForRw()
       throw ObjCrystException("DiffractionData::FitScaleFactorForRw() Cannot compute Rw \
          or scale factor: there is no observed data !");
    }
-   double tmp1=0;
-   double tmp2=0;
-   const double *p1=mCalcIntensity.data();
-   const double *p2=mObsIntensity.data();
-   const double *p3=mWeight.data();
+   REAL tmp1=0;
+   REAL tmp2=0;
+   const REAL *p1=mCalcIntensity.data();
+   const REAL *p2=mObsIntensity.data();
+   const REAL *p3=mWeight.data();
    for(long i=0;i<this->GetNbRefl();i++)
    {
       tmp1 += *p3 * (*p1) * (*p2++);
@@ -453,10 +453,10 @@ void DiffractionDataSingleCrystal::FitScaleFactorForR()
       throw ObjCrystException("DiffractionData::FitScaleFactorForR() Cannot compute R \
          or scale factor: there is no observed data !");
    }
-   double tmp1=0;
-   double tmp2=0;
-   const double *p1=mCalcIntensity.data();
-   const double *p2=mObsIntensity.data();
+   REAL tmp1=0;
+   REAL tmp2=0;
+   const REAL *p1=mCalcIntensity.data();
+   const REAL *p2=mObsIntensity.data();
    for(long i=0;i<this->GetNbRefl();i++)
    {
       tmp1 += (*p1) * (*p2++);
@@ -467,7 +467,7 @@ void DiffractionDataSingleCrystal::FitScaleFactorForR()
    mCalcIntensity *= tmp1/tmp2;
 }
 
-double DiffractionDataSingleCrystal::GetBestRFactor()
+REAL DiffractionDataSingleCrystal::GetBestRFactor()
 {
    TAU_PROFILE("DiffractionData::GetBestRFactor()","void ()",TAU_DEFAULT);
    VFN_DEBUG_MESSAGE("DiffractionData::GetBestRFactor()",3);
@@ -485,19 +485,19 @@ void DiffractionDataSingleCrystal::SetSigmaToSqrtIobs()
    for(long i=0;i<mObsIntensity.numElements();i++) mObsSigma(i)=sqrt(fabs(mObsIntensity(i)));
 }
 
-void DiffractionDataSingleCrystal::SetWeightToInvSigma2(const double minRelatSigma)
+void DiffractionDataSingleCrystal::SetWeightToInvSigma2(const REAL minRelatSigma)
 {
    //:KLUDGE: If less than 1e-6*max, set to 0.... Do not give weight to unobserved points
-   const double min=MaxAbs(mObsSigma)*minRelatSigma;
+   const REAL min=MaxAbs(mObsSigma)*minRelatSigma;
    for(long i=0;i<mObsSigma.numElements();i++)
    {
       if(mObsSigma(i)<min) mWeight(i)=0 ; else  mWeight(i) =1./mObsSigma(i)/mObsSigma(i);
    }
 }
 
-double DiffractionDataSingleCrystal::GetScaleFactor()const {return mScaleFactor;}
+REAL DiffractionDataSingleCrystal::GetScaleFactor()const {return mScaleFactor;}
 
-//void DiffractionDataSingleCrystal::SetScaleFactor(const double s) {mScaleFactor=s;}
+//void DiffractionDataSingleCrystal::SetScaleFactor(const REAL s) {mScaleFactor=s;}
 
 void DiffractionDataSingleCrystal::PrintObsData()const
 {
@@ -511,18 +511,18 @@ void DiffractionDataSingleCrystal::PrintObsData()const
    cout << mObsIntensity.numElements()<<endl;
    cout << mObsSigma.numElements()<<endl;
    cout << mSinThetaLambda.numElements()<<endl;
-   cout << FormatVertVectorHKLFloats<double>
+   cout << FormatVertVectorHKLFloats<REAL>
                (mH,mK,mL,mObsIntensity,mObsSigma,mSinThetaLambda,12,4);
 }
 
 void DiffractionDataSingleCrystal::PrintObsCalcData()const
 {
    this->CalcIcalc();
-   CrystVector_double tmpTheta=mTheta;
+   CrystVector_REAL tmpTheta=mTheta;
    tmpTheta*= RAD2DEG;
    /*
-   CrystVector_double tmp=mObsIntensity;
-   CrystVector_double tmpS=mObsSigma;
+   CrystVector_REAL tmp=mObsIntensity;
+   CrystVector_REAL tmpS=mObsSigma;
    if(true==mHasObservedData)
    {
       cout << "Scale factor : " << mScaleFactor <<endl;
@@ -536,14 +536,14 @@ void DiffractionDataSingleCrystal::PrintObsCalcData()const
    
    cout << "       H        K        L     Iobs        Sigma       Icalc  ";
    cout << "      multiplicity     Theta      SiThSL       Re(F)     Im(F)    Weight" <<endl;
-   cout << FormatVertVectorHKLFloats<double>(mH,mK,mL,
+   cout << FormatVertVectorHKLFloats<REAL>(mH,mK,mL,
                mObsIntensity,mObsSigma,mCalcIntensity,
                mMultiplicity,tmpTheta,mSinThetaLambda,
                mFhklCalcReal,mFhklCalcImag,mWeight,12,4);
 }
 
 void DiffractionDataSingleCrystal::SetUseOnlyLowAngleData(
-                     const bool useOnlyLowAngle,const double angle)
+                     const bool useOnlyLowAngle,const REAL angle)
 {
    throw ObjCrystException("DiffractionDataSingleCrystal::SetUseOnlyLowAngleData() :\
  not yet implemented for DiffractionDataSingleCrystal.");
@@ -554,7 +554,7 @@ void DiffractionDataSingleCrystal::SaveHKLIobsIcalc(const string &filename)
    VFN_DEBUG_MESSAGE("DiffractionDataSingleCrystal::SaveHKLIobsIcalc",5)
    this->GetIcalc();
    ofstream out(filename.c_str());
-   CrystVector_double theta;
+   CrystVector_REAL theta;
    theta=mTheta;
    theta *= RAD2DEG;
    
@@ -562,14 +562,14 @@ void DiffractionDataSingleCrystal::SaveHKLIobsIcalc(const string &filename)
    {
       out << "#    H        K        L      Icalc    theta  sin(theta)/lambda"
           <<"  Re(F)   Im(F)" << endl;
-      out << FormatVertVectorHKLFloats<double>(mH,mK,mL,mCalcIntensity,
+      out << FormatVertVectorHKLFloats<REAL>(mH,mK,mL,mCalcIntensity,
                            theta,mSinThetaLambda,mFhklCalcReal,mFhklCalcImag,12,4);
    }
    else
    {
       out << "#    H        K        L      Iobs   Icalc    theta"
           <<" sin(theta)/lambda  Re(F)   Im(F)" << endl;
-      out << FormatVertVectorHKLFloats<double>(mH,mK,mL,mObsIntensity,mCalcIntensity,
+      out << FormatVertVectorHKLFloats<REAL>(mH,mK,mL,mObsIntensity,mCalcIntensity,
                            theta,mSinThetaLambda,mFhklCalcReal,mFhklCalcImag,12,4);
    }
    out.close();
@@ -619,7 +619,7 @@ const string& DiffractionDataSingleCrystal::GetCostFunctionDescription(const uns
    }
 }
 
-double DiffractionDataSingleCrystal::GetCostFunctionValue(const unsigned int n)
+REAL DiffractionDataSingleCrystal::GetCostFunctionValue(const unsigned int n)
 {
    VFN_DEBUG_MESSAGE("DiffractionDataSingleCrystal::GetCostFunctionValue():"<<mName,4)
    this->CalcIcalc();
@@ -645,15 +645,15 @@ void DiffractionDataSingleCrystal::InitRefParList()
    cout << "DiffractionDataSingleCrystal::InitRefParList():no parameters !" <<endl;
 }
 unsigned int DiffractionDataSingleCrystal::GetNbLSQFunction()const{return 1;}
-const CrystVector_double& 
+const CrystVector_REAL& 
 	DiffractionDataSingleCrystal::GetLSQCalc(const unsigned int) const
 {return this->GetIcalc();}
 
-const CrystVector_double& 
+const CrystVector_REAL& 
 	DiffractionDataSingleCrystal::GetLSQObs(const unsigned int) const
 {return this->GetIobs();}
 
-const CrystVector_double& 
+const CrystVector_REAL& 
 	DiffractionDataSingleCrystal::GetLSQWeight(const unsigned int) const
 {return this->GetWeight();}
 

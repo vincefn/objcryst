@@ -24,9 +24,10 @@
    class wxWindow;
 namespace ObjCryst
 {
-template<class T> class ObjRegistry;
-class RefObjOpt;
-template<class T> class RefObjOption;
+	template<class T> class ObjRegistry;
+	class RefObjOpt;
+	template<class T> class RefObjOption;
+	class RefinableObj;
 }
 #include "wxCryst/wxRefinableObj.h"
 #endif
@@ -157,17 +158,17 @@ class RefinablePar
       * is equal to 1.0 (no scaling required).
       */
       RefinablePar(  const string &name,
-                     double *refPar,
-                     const double min,
-                     const double max,
+                     REAL *refPar,
+                     const REAL min,
+                     const REAL max,
                      const RefParType *type,
                      RefParDerivStepModel derivMode=REFPAR_DERIV_STEP_RELATIVE,
                      const bool hasLimits=true,
                      const bool isFixed=false,
                      const bool isUsed=true,
                      const bool isPeriodic=false,
-                     const double humanScale=1.,
-                     double period=1.);
+                     const REAL humanScale=1.,
+                     REAL period=1.);
       ~RefinablePar();
       /** \brief Constructor
       *\par name: the name of the parameter
@@ -192,17 +193,17 @@ class RefinablePar
       * is equal to 1.0 (no scaling required).
       */
       void Init(     const string &name,
-                     double *refPar,
-                     const double min,
-                     const double max,
+                     REAL *refPar,
+                     const REAL min,
+                     const REAL max,
                      const RefParType *type,
                      RefParDerivStepModel derivMode=REFPAR_DERIV_STEP_RELATIVE,
                      const bool hasLimits=true,
                      const bool isFixed=false,
                      const bool isUsed=true,
                      const bool isPeriodic=false,
-                     const double humanScale=1.,
-                     double period=1.);
+                     const REAL humanScale=1.,
+                     REAL period=1.);
                      
       //@}
       
@@ -211,22 +212,22 @@ class RefinablePar
          /** of the parameter. Use the The Mutate() and MutateTo() function
          *  to change this value.
          */
-         double GetValue()const;
+         REAL GetValue()const;
 
          /** of the parameter. Use the The Mutate() and MutateTo() function
          *  to change this value.
          */
-         void SetValue(const double value);
+         void SetValue(const REAL value);
 
          /** \brief Current value of parameter, scaled if necessary (for angles) to a
          * human-understandable value.
          */
-         const double& GetHumanValue() const;
+         const REAL& GetHumanValue() const;
 
          /** \brief Current value of parameter, scaled if necessary (for angles) to a
          * human-understandable value.
          */
-         void SetHumanValue(const double&) ;
+         void SetHumanValue(const REAL&) ;
 
          /** \brief Add the given amount to the parameter current value.
          *
@@ -235,18 +236,18 @@ class RefinablePar
          * back to allowed values.
          *\warning Will throw an exception if the parameter is defined by an equation.
          */
-         void Mutate(const double mutateValue);
+         void Mutate(const REAL mutateValue);
          /**Change the current value to the given one.
          *
          * If the limit is hit, then set to the limit (unless the pameter is periodic,
          * then shift by the period amount back to allowed values).
          *\warning Will throw an exception if the parameter is defined by an equation.
          */
-         void MutateTo(const double newValue);
+         void MutateTo(const REAL newValue);
 
-         double GetSigma()const;
-         double GetHumanSigma()const;
-         void SetSigma(const double);
+         REAL GetSigma()const;
+         REAL GetHumanSigma()const;
+         void SetSigma(const REAL);
       //@}
       
       /// \name General info 
@@ -272,71 +273,71 @@ class RefinablePar
          void SetIsUsed(const bool);
 
          bool IsPeriodic()const;
-         void SetIsPeriodic(const bool,double period=1);
+         void SetIsPeriodic(const bool,REAL period=1);
 
          /// Human scale for this parameter : for angles, this is equal to 180/pi.
-         double GetHumanScale()const;
+         REAL GetHumanScale()const;
          /// Human scale for this parameter : for angles, this is equal to 180/pi.
-         void SetHumanScale(const double);
+         void SetHumanScale(const REAL);
       //@}
       
 
       /// \name Min, max values
       //@{
          /// Minimum value allowed (if limited or periodic)
-         double GetMin()const;
+         REAL GetMin()const;
          /// Set the Minimum value allowed (if limited)
-         void  SetMin(const double);
+         void  SetMin(const REAL);
          
          ///Get the minimum value allowed (if limited)
-         double GetHumanMin()const;
+         REAL GetHumanMin()const;
          ///Set the minimum value allowed (if limited)
-         void  SetHumanMin(const double);
+         void  SetHumanMin(const REAL);
 
          ///Get the maximum value allowed (if limited)
-         double GetMax()const;
+         REAL GetMax()const;
          ///Get the maximum value allowed (if limited)
-         void  SetMax(const double);
+         void  SetMax(const REAL);
          
          ///Get the maximum value allowed (if limited)
-         double GetHumanMax()const;
+         REAL GetHumanMax()const;
          ///Get the maximum value allowed (if limited)
-         void  SetHumanMax(const double);
+         void  SetHumanMax(const REAL);
 			
          ///Get the period (if periodic)
-         double GetPeriod()const;
+         REAL GetPeriod()const;
          ///Set the period value (if periodic)
-         void  SetPeriod(const double);
+         void  SetPeriod(const REAL);
       //@}
       
       /// \name Steps during refinement
       //@{
          ///Fixed step to use to compute numerical derivative
-         double GetDerivStep()const;
+         REAL GetDerivStep()const;
          ///Fixed step to use to compute numerical derivative
-         void  SetDerivStep(const double);
+         void  SetDerivStep(const REAL);
 
          ///Maximum step to use during Global Optimization algorithms
-         double GetGlobalOptimStep()const;
+         REAL GetGlobalOptimStep()const;
          ///Maximum step to use during Global Optimization algorithms
-         void  SetGlobalOptimStep(const double);
+         void  SetGlobalOptimStep(const REAL);
       //@}
 
       
       
       /// \name Equations-In development ! ->do not use or even look.
       //@{
-         void SetUseEquation(const bool useItOrNot,const double c0=0.);
-         void SetUseEquation(const bool useItOrNot,const double c0,
-                             const double c1, const RefinablePar &refpar1);
+         void SetUseEquation(const bool useItOrNot,const REAL c0=0.);
+         void SetUseEquation(const bool useItOrNot,const REAL c0,
+                             const REAL c1, const RefinablePar &refpar1);
 
-         void SetUseEquation(const bool useItOrNot,const double c0,
-                             const double c1, const RefinablePar &refpar1,
-                             const double c2, const RefinablePar &refpar2);
-         void SetUseEquation(const bool useItOrNot,const double c0,
-                             const double c1, const RefinablePar &refpar1,
-                             const double c2, const RefinablePar &refpar2,
-                             const double c3, const RefinablePar &refpar3);
+         void SetUseEquation(const bool useItOrNot,const REAL c0,
+                             const REAL c1, const RefinablePar &refpar1,
+                             const REAL c2, const RefinablePar &refpar2);
+         void SetUseEquation(const bool useItOrNot,const REAL c0,
+                             const REAL c1, const RefinablePar &refpar1,
+                             const REAL c2, const RefinablePar &refpar2,
+                             const REAL c3, const RefinablePar &refpar3);
       //@}
              
       /// \name Parameter's Clock
@@ -350,14 +351,14 @@ class RefinablePar
       /// \name Change Limits
       //@{
          /// Change the limits for this object, giving absolute new limits
-         void SetLimitsAbsolute(const double min, const double max);
+         void SetLimitsAbsolute(const REAL min, const REAL max);
          /// Change the limits for this object, giving relative new limits (eg giving -.1 
          /// and +.1 will set new limits at the current value + min and current value + max)
          /// Thus min should logically be <0 and max >0.
-         void SetLimitsRelative(const double min, const double max);
+         void SetLimitsRelative(const REAL min, const REAL max);
          /// Change the limits for this object, proportionnaly to the current value.
          /// min should be < 1. and max > 1.
-         void SetLimitsProportional(const double min, const double max);
+         void SetLimitsProportional(const REAL min, const REAL max);
       //@}
 
       /** \brief XMLOutput to stream in well-formed XML 
@@ -384,11 +385,11 @@ class RefinablePar
       ///Type of refined variable
       const RefParType *mpRefParType;
       /// Pointer to the refinable value
-      double *mValue;
+      REAL *mValue;
       /// Min value
-      double mMin;
+      REAL mMin;
       /// Max value
-      double mMax;
+      REAL mMax;
       /// Does the refinable parameter need limits (min,max) ?
       bool mHasLimits;
       /// is the parameter currently fixed ?
@@ -400,19 +401,19 @@ class RefinablePar
       /// it will be shifted by the value of its period.
       bool mIsPeriodic;
       /// Period value (if relevant)
-      double mPeriod;
+      REAL mPeriod;
       /// Step to use for global method search (simulated annealing,...)
-      double mGlobalOptimStep;
+      REAL mGlobalOptimStep;
       /// Step to use for numerical derivative calculation
-      double mDerivStep;
+      REAL mDerivStep;
       /// Model followed for derivation
       RefParDerivStepModel mRefParDerivStepModel;
       /// Calculated sigma on value
-      double mSigma;
+      REAL mSigma;
       /// Scale to be used to display 'human' value. This is for angular parameters: the computer
       /// stores values in radians, whil the user only understands degrees. So a scale
       /// factor of 180/pi is necessary.
-      double mHumanScale;
+      REAL mHumanScale;
       
       // Parameter defined by equations ?
          ///Is this parameter deined by an equation ? eg: mValue= c0 +c1*par1.Value+...
@@ -422,7 +423,7 @@ class RefinablePar
          /// number of other ref. parameters involved in the equation evaluation
          int mEquationNbRefPar;
          /// Coefficient Ci used in equation: Value= C0 + C1 * RefPar1 + C2 * RefPar2 +...
-         CrystVector_double mEquationCoeff;
+         CrystVector_REAL mEquationCoeff;
          /// Array of pointers to the RefinablePar used in the equation
          const RefinablePar *mEquationRefPar[10];
       
@@ -689,9 +690,9 @@ class RefinableObj
       const RefinablePar& GetPar(const string & name) const;
       
       /// Access parameter from its adress
-      RefinablePar& GetPar(const double*);
+      RefinablePar& GetPar(const REAL*);
       /// Access parameter from its adress
-      const RefinablePar& GetPar(const double*) const;
+      const RefinablePar& GetPar(const REAL*) const;
       
       /// Access all parameters in the order they were inputted,
       /// skipping fixed parameters. Must call PrepareForRefinement() before !
@@ -745,12 +746,12 @@ class RefinableObj
       *
       * \param setId : the number identifying the set.
       */
-      const CrystVector_double& GetParamSet(const long setId)const;
+      const CrystVector_REAL& GetParamSet(const long setId)const;
       /** \brief Access one save refpar set
       *
       * \param setId : the number identifying the set.
       */
-      CrystVector_double& GetParamSet(const long setId);
+      CrystVector_REAL& GetParamSet(const long setId);
       /** \brief Access the (human) value of one refined parameter in a saved set of parameters
       *
       * \internal
@@ -760,30 +761,30 @@ class RefinableObj
       * \return if parNumber=5 and setId=37, then the returned value will be the value (scaled
       *if it is an angle) value of the 5th not-fixed parameter in the saved set #37.
       */
-      double GetParamSet_ParNotFixedHumanValue(const long setId,const long parNumber)const;
+      REAL GetParamSet_ParNotFixedHumanValue(const long setId,const long parNumber)const;
       /** \brief Erase all saved refpar sets
       *
       */
       const void EraseAllParamSet();
       
       /// Change the limits for a given parameter, giving absolute new limits
-      void SetLimitsAbsolute(const string &parName, const double min, const double max);
+      void SetLimitsAbsolute(const string &parName, const REAL min, const REAL max);
       /// Change the limits for a category of parameters, giving absolute new limits
-      void SetLimitsAbsolute(const RefParType *type, const double min, const double max);
+      void SetLimitsAbsolute(const RefParType *type, const REAL min, const REAL max);
       /// Change the limits for a given parameter, giving relative new limits (eg giving -.1 
       /// and +.1 will set new limits at the current value + min and current value + max)
       /// Thus min should logically be <0 and max >0.
-      void SetLimitsRelative(const string &parName, const double min, const double max);
+      void SetLimitsRelative(const string &parName, const REAL min, const REAL max);
       /// Change the limits for a category of parameters, giving relative new limits 
       /// (eg giving -.1 and +.1 will set new limits at the current value + min and 
       /// current value + max). Thus min should logically be <0 and max >0.
-      void SetLimitsRelative(const RefParType *type, const double min, const double max);
+      void SetLimitsRelative(const RefParType *type, const REAL min, const REAL max);
       /// Change the limits for a given parameter, proportionnaly to the current value.
       /// min should be < 1. and max > 1.
-      void SetLimitsProportional(const string &parName, const double min, const double max);
+      void SetLimitsProportional(const string &parName, const REAL min, const REAL max);
       /// Change the limits for a category of parameters, proportionnaly to their current value.
       /// min should be < 1. and max > 1.
-      void SetLimitsProportional(const RefParType *type, const double min, const double max);
+      void SetLimitsProportional(const RefParType *type, const REAL min, const REAL max);
       
       /// Access to the registry of RefinableObj used by this object
       ObjRegistry<RefinableObj>& GetSubObjRegistry();
@@ -837,7 +838,7 @@ class RefinableObj
       *  \param mutationAmplitude: multiplier for the maximum move amplitude,
       *  for all parameters
       */
-      virtual void GlobalOptRandomMove(const double mutationAmplitude);
+      virtual void GlobalOptRandomMove(const REAL mutationAmplitude);
       
       //Cost functions
          /// Number of Cost functions
@@ -848,7 +849,7 @@ class RefinableObj
          virtual const string& GetCostFunctionDescription(const unsigned int)const;
          /// Get the current value of a cost function
          /// this should be const...
-         virtual double GetCostFunctionValue(const unsigned int);
+         virtual REAL GetCostFunctionValue(const unsigned int);
       //LSQ functions
          /// Number of LSQ functions
          virtual unsigned int GetNbLSQFunction()const;
@@ -857,11 +858,11 @@ class RefinableObj
          // Get the (short) description of a cost function
          //virtual const string& GetLSQFunctionDescription(const unsigned int)const;
          /// Get the current calculated value for the LSQ function
-         virtual const CrystVector_double& GetLSQCalc(const unsigned int) const;
+         virtual const CrystVector_REAL& GetLSQCalc(const unsigned int) const;
          /// Get the observed values for the LSQ function
-         virtual const CrystVector_double& GetLSQObs(const unsigned int) const;
+         virtual const CrystVector_REAL& GetLSQObs(const unsigned int) const;
          /// Get the weight values for the LSQ function
-         virtual const CrystVector_double& GetLSQWeight(const unsigned int) const;
+         virtual const CrystVector_REAL& GetLSQWeight(const unsigned int) const;
 
       /// Re-init the list of refinable parameters, removing all parameters.
       /// This does \e not delete the RefinablePar if 
@@ -935,7 +936,7 @@ class RefinableObj
       /// Find a refinable parameter with a given name
       long FindPar(const string &name) const;
       /// Find a refinable parameter from the adress of its value
-      long FindPar(const double*) const;
+      long FindPar(const REAL*) const;
       
       /// \internal Add an object in the registry of used objects.
       void AddSubRefObj(RefinableObj &);
@@ -962,7 +963,7 @@ class RefinableObj
          ///Max number of saved sets (memory is dynamically allocated...)
          static const int mMaxNbSavedSets=1000;
          ///Array of pointers to arrays used to save sets of values for all parameters
-         mutable CrystVector_double **mpSavedValuesSet;
+         mutable CrystVector_REAL **mpSavedValuesSet;
          ///Names associated to the saved values sets
          mutable string **mpSavedValuesSetName;
          ///Is the set associated with (id) currently used ?

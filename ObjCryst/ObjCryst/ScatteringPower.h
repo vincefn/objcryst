@@ -22,6 +22,7 @@ extern const RefParType *gpRefParTypeScattPowTemperature;
 extern const RefParType *gpRefParTypeScattPowTemperatureIso;
 extern const RefParType *gpRefParTypeScattPowTemperatureAniso;
 
+	class ScatteringData;//forward declaration :KLUDGE: ?
 //######################################################################
 //
 //      SCATTERING POWER
@@ -71,7 +72,7 @@ class ScatteringPower:virtual public RefinableObj
       * \warning There is no anisotropic code yet, so spgSymPosIndex is simply ignored so far
       * , but the design of this function is general for any anisotropic scattering.
       */
-      virtual CrystVector_double GetScatteringFactor(const ScatteringData &data,
+      virtual CrystVector_REAL GetScatteringFactor(const ScatteringData &data,
                                                      const int spgSymPosIndex=-1) const=0;
       /** \brief Get the temperature factor for all reflections of a given 
       * ScatteringData object.
@@ -86,7 +87,7 @@ class ScatteringPower:virtual public RefinableObj
       * \warning There is no anisotropic code yet, so spgSymPosIndex is simply ignored so far
       * , but the design of this function is general for any anisotropic scattering.
       */
-      virtual CrystVector_double GetTemperatureFactor(const ScatteringData &data,
+      virtual CrystVector_REAL GetTemperatureFactor(const ScatteringData &data,
                                                       const int spgSymPosIndex=-1) const=0;
       /** \brief Get the real part of the resonant scattering factor.
       *
@@ -103,7 +104,7 @@ class ScatteringPower:virtual public RefinableObj
       * \warning There is no anisotropic code yet, so spgSymPosIndex is simply ignored so far
       * , but the design of this function is general for any anisotropic scattering.
       */
-      virtual CrystMatrix_double GetResonantScattFactReal(const ScatteringData &data,
+      virtual CrystMatrix_REAL GetResonantScattFactReal(const ScatteringData &data,
                                                           const int spgSymPosIndex=-1) const=0;
       /** \brief Get the imaginary part of the resonant scattering factor.
       *
@@ -120,7 +121,7 @@ class ScatteringPower:virtual public RefinableObj
       * \warning There is no anisotropic code yet, so spgSymPosIndex is simply ignored so far
       * , but the design of this function is general for any anisotropic scattering.
       */
-      virtual CrystMatrix_double GetResonantScattFactImag(const ScatteringData &data,
+      virtual CrystMatrix_REAL GetResonantScattFactImag(const ScatteringData &data,
                                                           const int spgSymPosIndex=-1) const=0;
       /// Is the scattering factor anisotropic ?
       virtual bool IsScatteringFactorAnisotropic()const;
@@ -135,15 +136,15 @@ class ScatteringPower:virtual public RefinableObj
       /** \brief Returns the isotropic temperature B factor
       *
       */
-      double GetBiso() const;
+      REAL GetBiso() const;
       /** \brief Returns the isotropic temperature B factor
       *
       */
-      double& GetBiso();
+      REAL& GetBiso();
       /** \brief Sets the isotropic temperature B factor
       *
       */
-      virtual void SetBiso(const double newB);
+      virtual void SetBiso(const REAL newB);
       /** \brief Returns true if the scattering power is isotropic, else false.
       *
       */
@@ -167,7 +168,7 @@ class ScatteringPower:virtual public RefinableObj
       void SetColour(const float r,const float g,const float b);
       /// Return the physical radius of this type of scatterer (for 3D display purposes).
       /// \warning this may be removed later.
-      virtual double GetRadius()const=0;
+      virtual REAL GetRadius()const=0;
 		virtual void GetGeneGroup(const RefinableObj &obj, 
 										  CrystVector_uint & groupIndex,
 										  unsigned int &firstGroup) const;
@@ -181,11 +182,11 @@ class ScatteringPower:virtual public RefinableObj
       /// Right now it is the atomic number.
       long mDynPopCorrIndex;
       /// Temperature isotropic B factor.
-      double mBiso;
+      REAL mBiso;
       /// Is the scattering isotropic ?
       bool mIsIsotropic;
       /// Anisotropic Beta(ij)
-      CrystVector_double mBeta;
+      CrystVector_REAL mBeta;
       /// Unique number identifying this ScatteringPower. Needed for avoiding re-calculations
       /// in ScatteringData
       const long mScatteringPowerId;
@@ -233,19 +234,19 @@ class ScatteringPowerAtom:virtual public ScatteringPower
       *will generate problems when reading the names from a file...
       *  \param biso : Isotropic thermic coefficient
       */
-      ScatteringPowerAtom(const string &name,const string &symbol,const double bIso=1.0);
+      ScatteringPowerAtom(const string &name,const string &symbol,const REAL bIso=1.0);
       ScatteringPowerAtom(const ScatteringPowerAtom& old);
       ~ScatteringPowerAtom();
       virtual const string GetClassName() const;
       /// Re-initialize parameters (after using the default constructor).
-      void Init(const string &name,const string &symbol,const double bIso=1.0);
-      virtual CrystVector_double GetScatteringFactor(const ScatteringData &data,
+      void Init(const string &name,const string &symbol,const REAL bIso=1.0);
+      virtual CrystVector_REAL GetScatteringFactor(const ScatteringData &data,
                                                      const int spgSymPosIndex=0) const;
-      virtual CrystVector_double GetTemperatureFactor(const ScatteringData &data,
+      virtual CrystVector_REAL GetTemperatureFactor(const ScatteringData &data,
                                                      const int spgSymPosIndex=0) const;
-      virtual CrystMatrix_double GetResonantScattFactReal(const ScatteringData &data,
+      virtual CrystMatrix_REAL GetResonantScattFactReal(const ScatteringData &data,
                                                      const int spgSymPosIndex=0) const;
-      virtual CrystMatrix_double GetResonantScattFactImag(const ScatteringData &data,
+      virtual CrystMatrix_REAL GetResonantScattFactImag(const ScatteringData &data,
                                                      const int spgSymPosIndex=0) const;
       /// Set the symbol for this atom
       void SetSymbol(const string &symbol) ;
@@ -260,7 +261,7 @@ class ScatteringPowerAtom:virtual public ScatteringPower
       ///Atomic number for this atom
       int GetAtomicNumber() const;
       ///Atomic radius for this atom, in Angstroems
-      double GetRadius() const;
+      REAL GetRadius() const;
       virtual void Print()const;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
@@ -290,18 +291,18 @@ class ScatteringPowerAtom:virtual public ScatteringPower
       *[Acta Cryst. A51, 416-431]
       *[International Tables for Crystallography, Vol. C, 1992 (6.1.1)]
       */
-      CrystVector_double mScattAi,mScattBi;
-      double mScattC;
+      CrystVector_REAL mScattAi,mScattBi;
+      REAL mScattC;
       /** \brief Neutron Bond Coherent Scattering lengths
       *
       *Real and imaginary (for atoms who have an imaginary part)
       *
       *Reference : Neutron News, Vol. 3, No. 3, 1992, pp. 29-37.
       */
-      double mNeutronScattLengthReal,mNeutronScattLengthImag;
+      REAL mNeutronScattLengthReal,mNeutronScattLengthImag;
       
       /// Radius of the atom, in Angstroems
-      double mRadius;
+      REAL mRadius;
       
       /** \brief Neutron Absorption cross section (barn)
       *
@@ -309,7 +310,7 @@ class ScatteringPowerAtom:virtual public ScatteringPower
       *
       *Reference : Neutron News, Vol. 3, No. 3, 1992, pp. 29-37.
       */
-      double mNeutronAbsCrossSection;
+      REAL mNeutronAbsCrossSection;
       
    private:
    #ifdef __WX__CRYST__
@@ -336,7 +337,7 @@ struct ScatteringComponent
    ///Print  one line oabout this component
    void Print() const;
    /// Coordinates of scattering positions i the crystal with the corresponding occupancy
-   double mX,mY,mZ,mOccupancy;
+   REAL mX,mY,mZ,mOccupancy;
    /// The ScatteringPower associated with this position
    const ScatteringPower *mpScattPow;
    /// Dynamical Population Correction.
@@ -351,7 +352,7 @@ struct ScatteringComponent
    /// See also Crystal::CalcDynPopCorr
    ///
    /// \note this parameter is mutable, and is computed by the Crystal object
-   mutable double mDynPopCorr;
+   mutable REAL mDynPopCorr;
    // The scatterer to which this component is associated
    // Scatterer *mScatterer;
 };

@@ -16,7 +16,7 @@
 
 #include "ObjCryst/Atom.h"
 
-#include "Quirks/VFNStreamFormat.h" //simple formatting of integers, doubles..
+#include "Quirks/VFNStreamFormat.h" //simple formatting of integers, REALs..
 #include "Quirks/VFNDebug.h"
 
 #ifdef OBJCRYST_GL
@@ -65,7 +65,7 @@ Atom::Atom()
    mScattCompList(0).mpScattPow=mpScattPowAtom;
 }
 
-Atom::Atom( const double x, const double y, const double z,
+Atom::Atom( const REAL x, const REAL y, const REAL z,
             const string &name,const ScatteringPowerAtom *pow)
 :mScattCompList(1),mpScattPowAtom(pow)
 {
@@ -73,8 +73,8 @@ Atom::Atom( const double x, const double y, const double z,
    this->Init(x,y,z,name,pow,1);
 }
 
-Atom::Atom( const double x, const double y, const double z, const string &name,
-            const ScatteringPowerAtom *pow,const double popu)
+Atom::Atom( const REAL x, const REAL y, const REAL z, const string &name,
+            const ScatteringPowerAtom *pow,const REAL popu)
 :mScattCompList(1),mpScattPowAtom(pow)
 {
    VFN_DEBUG_MESSAGE("Atom::Atom(x,y,z,P,B,name,ScatteringPower):"<<name,5)
@@ -117,9 +117,9 @@ void Atom::operator=(const Atom &rhs)
               rhs.mOccupancy);
 }
 
-void Atom::Init(const double x, const double y, const double z,
+void Atom::Init(const REAL x, const REAL y, const REAL z,
             const string &name, const ScatteringPowerAtom *pow,
-            const double popu)
+            const REAL popu)
 {
    VFN_DEBUG_MESSAGE("Atom::Init():"<<name,3)
    mName=name;
@@ -175,13 +175,13 @@ void Atom::Print() const
    cout << endl;
 }
 
-double Atom::GetMass() const
+REAL Atom::GetMass() const
 {
    if(true==this->IsDummy()) return 0;
    return mpScattPowAtom->GetBiso();
 }
 
-double Atom::GetRadius() const
+REAL Atom::GetRadius() const
 {
    if(this->IsDummy()) return 0.5;
    return mpScattPowAtom->GetRadius();
@@ -193,13 +193,13 @@ ostream& Atom::POVRayDescription(ostream &os,
    if(this->IsDummy()) return os;
    if(true==onlyIndependentAtoms)
    {
-      double x,y,z;
+      REAL x,y,z;
       x=mXYZ(0);
       y=mXYZ(1);
       z=mXYZ(2);
-      x = fmod((double)x,(int)1); if(x<0) x+=1.;
-      y = fmod((double)y,(int)1); if(y<0) y+=1.;
-      z = fmod((double)z,(int)1); if(z<0) z+=1.;
+      x = fmod((REAL)x,(int)1); if(x<0) x+=1.;
+      y = fmod((REAL)y,(int)1); if(y<0) y+=1.;
+      z = fmod((REAL)z,(int)1); if(z<0) z+=1.;
       this->GetCrystal().FractionalToOrthonormalCoords(x,y,z);
       os << "// Description of Atom :" << this->GetName() <<endl;
       os << "   #declare colour_"<< this ->GetName() <<"="<< this ->mColourName<<";"<< endl;
@@ -211,11 +211,11 @@ ostream& Atom::POVRayDescription(ostream &os,
    }
    else
    {
-      double x0,y0,z0;
+      REAL x0,y0,z0;
       x0=mXYZ(0);
       y0=mXYZ(1);
       z0=mXYZ(2);
-      CrystMatrix_double xyzCoords ;
+      CrystMatrix_REAL xyzCoords ;
       xyzCoords=this->GetCrystal().GetSpaceGroup().GetAllSymmetrics(x0,y0,z0,false,false,true);
       int nbSymmetrics=xyzCoords.rows();
       os << "// Description of Atom :" << this->GetName();
@@ -227,11 +227,11 @@ ostream& Atom::POVRayDescription(ostream &os,
          x0=xyzCoords(i,0);
          y0=xyzCoords(i,1);
          z0=xyzCoords(i,2);
-         x0 = fmod((double) x0,(int)1); if(x0<0) x0+=1.;
-         y0 = fmod((double) y0,(int)1); if(y0<0) y0+=1.;
-         z0 = fmod((double) z0,(int)1); if(z0<0) z0+=1.;
+         x0 = fmod((REAL) x0,(int)1); if(x0<0) x0+=1.;
+         y0 = fmod((REAL) y0,(int)1); if(y0<0) y0+=1.;
+         z0 = fmod((REAL) z0,(int)1); if(z0<0) z0+=1.;
          //Generate also translated atoms near the unit cell
-         const double limit =0.1;
+         const REAL limit =0.1;
          CrystMatrix_int translate(27,3);
          translate=  -1,-1,-1,
                      -1,-1, 0,
@@ -262,9 +262,9 @@ ostream& Atom::POVRayDescription(ostream &os,
                       1, 1, 1;
          for(int j=0;j<translate.rows();j++)
          {
-            double x=x0+translate(j,0);
-            double y=y0+translate(j,1);
-            double z=z0+translate(j,2);
+            REAL x=x0+translate(j,0);
+            REAL y=y0+translate(j,1);
+            REAL z=z0+translate(j,2);
             if(   (x>(-limit)) && (x<(1+limit))
                 &&(y>(-limit)) && (y<(1+limit))
                 &&(z>(-limit)) && (z<(1+limit)))
@@ -285,9 +285,9 @@ ostream& Atom::POVRayDescription(ostream &os,
 }
 
 void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
-                             const double xMin,const double xMax,
-                             const double yMin,const double yMax,
-                             const double zMin,const double zMax)const
+                             const REAL xMin,const REAL xMax,
+                             const REAL yMin,const REAL yMax,
+                             const REAL zMin,const REAL zMax)const
 {
    #ifdef OBJCRYST_GL
    VFN_DEBUG_MESSAGE("Atom::GLInitDisplayList():"<<this->GetName(),5)
@@ -297,13 +297,13 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
    GLUquadricObj* pQuadric = gluNewQuadric();
    if(true==onlyIndependentAtoms)
    {
-      double x,y,z;
+      REAL x,y,z;
       x=mXYZ(0);
       y=mXYZ(1);
       z=mXYZ(2);
-      x = fmod((double)x,(int)1); if(x<0) x+=1.;
-      y = fmod((double)y,(int)1); if(y<0) y+=1.;
-      z = fmod((double)z,(int)1); if(z<0) z+=1.;
+      x = fmod((REAL)x,(int)1); if(x<0) x+=1.;
+      y = fmod((REAL)y,(int)1); if(y<0) y+=1.;
+      z = fmod((REAL)z,(int)1); if(z<0) z+=1.;
       this->GetCrystal().FractionalToOrthonormalCoords(x,y,z);
       glPushMatrix();
          glTranslatef(x, y, z);
@@ -312,11 +312,11 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
    }
    else
    {
-      double x0,y0,z0;
+      REAL x0,y0,z0;
       x0=mXYZ(0);
       y0=mXYZ(1);
       z0=mXYZ(2);
-      CrystMatrix_double xyzCoords ;
+      CrystMatrix_REAL xyzCoords ;
       xyzCoords=this->GetCrystal().GetSpaceGroup().GetAllSymmetrics(x0,y0,z0,false,false,true);
       int nbSymmetrics=xyzCoords.rows();
       for(int i=0;i<nbSymmetrics;i++)
@@ -324,9 +324,9 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
          x0=xyzCoords(i,0);
          y0=xyzCoords(i,1);
          z0=xyzCoords(i,2);
-         x0 = fmod((double) x0,(int)1); if(x0<0) x0+=1.;
-         y0 = fmod((double) y0,(int)1); if(y0<0) y0+=1.;
-         z0 = fmod((double) z0,(int)1); if(z0<0) z0+=1.;
+         x0 = fmod((REAL) x0,(int)1); if(x0<0) x0+=1.;
+         y0 = fmod((REAL) y0,(int)1); if(y0<0) y0+=1.;
+         z0 = fmod((REAL) z0,(int)1); if(z0<0) z0+=1.;
          //Generate also translated atoms near the unit cell
          CrystMatrix_int translate(27,3);
          translate=  -1,-1,-1,
@@ -358,9 +358,9 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
                       1, 1, 1;
          for(int j=0;j<translate.rows();j++)
          {
-            double x=x0+translate(j,0);
-            double y=y0+translate(j,1);
-            double z=z0+translate(j,2);
+            REAL x=x0+translate(j,0);
+            REAL y=y0+translate(j,1);
+            REAL z=z0+translate(j,2);
             if(   (x>xMin) && (x<xMax)
                 &&(y>yMin) && (y<yMax)
                 &&(z>zMin) && (z<zMax))
@@ -368,7 +368,7 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
                this->GetCrystal().FractionalToOrthonormalCoords(x,y,z);
                glPushMatrix();
                   glTranslatef(x, y, z);
-                  gluSphere(pQuadric,this->GetRadius()/3,10,10);
+                  gluSphere(pQuadric,this->GetRadius()/3.,10,10);
                glPopMatrix();
             }
          }

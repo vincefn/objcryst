@@ -358,12 +358,14 @@ template<class T> void WXFieldPar<T>::Revert()
    wxPostEvent(this,event);
 }
 
-template<> void WXFieldPar<double>::ReadNewValue()
+template<> void WXFieldPar<REAL>::ReadNewValue()
 {
-   VFN_DEBUG_MESSAGE("WXFieldPar<double>::ReadNewValue()",6)
+   VFN_DEBUG_MESSAGE("WXFieldPar<REAL>::ReadNewValue()",6)
    mValueOld=*mpValue;
    wxString s=mpField->GetValue();
-   s.ToDouble(mpValue);
+	double tmp;
+   s.ToDouble(&tmp);
+	*mpValue=tmp;
 }
 template<> void WXFieldPar<long>::ReadNewValue()
 {
@@ -373,9 +375,9 @@ template<> void WXFieldPar<long>::ReadNewValue()
    s.ToLong(mpValue);
 }
 
-template<> void WXFieldPar<double>::ApplyNewValue()
+template<> void WXFieldPar<REAL>::ApplyNewValue()
 {
-   VFN_DEBUG_MESSAGE("WXFieldPar<double>::ApplyNewValue()",6)
+   VFN_DEBUG_MESSAGE("WXFieldPar<REAL>::ApplyNewValue()",6)
    wxString tmp;
    tmp.Printf("%f",*mpValue);
 	mIsSelfUpdating=true;
@@ -403,7 +405,7 @@ template<class T> void WXFieldPar<T>::ApplyNewValue()
 }
 */
 
-template class WXFieldPar<double>;
+template class WXFieldPar<REAL>;
 template class WXFieldPar<long>;
 
 

@@ -9,6 +9,7 @@
 *  source file for the RefinablePar and RefinableObj classes
 *
 */
+#include <ctime>
 #include "RefinableObj/RefinableObj.h"
 #include "Quirks/VFNStreamFormat.h"
 #include "Quirks/VFNDebug.h"
@@ -126,17 +127,17 @@ RefinablePar::RefinablePar():mName(""),mpRefParType(0),mValue(0),mMin(0),mMax(0)
 {}
                      
 RefinablePar::RefinablePar(  const string &name,
-                     double *refPar,
-                     const double min,
-                     const double max,
+                     REAL *refPar,
+                     const REAL min,
+                     const REAL max,
                      const RefParType *type,
                      RefParDerivStepModel derivMode,
                      const bool hasLimits,
                      const bool isFixed,
                      const bool isUsed,
                      const bool isPeriodic,
-                     const double humanScale,
-                     double period):
+                     const REAL humanScale,
+                     REAL period):
 mName(name),mpRefParType(type),mValue(refPar),mMin(min),mMax(max),
 mHasLimits(hasLimits),mIsFixed(isFixed),mIsUsed(isUsed),mIsPeriodic(isPeriodic),mPeriod(period),
 mGlobalOptimStep((max-min)/100.),mDerivStep(1e-5),mRefParDerivStepModel(derivMode),
@@ -149,17 +150,17 @@ RefinablePar::~RefinablePar()
 {}
 
 void RefinablePar::Init(const string &name,
-                        double *refPar,
-                        const double min,
-                        const double max,
+                        REAL *refPar,
+                        const REAL min,
+                        const REAL max,
                         const RefParType *type,
                         RefParDerivStepModel derivMode,
                         const bool hasLimits,
                         const bool isFixed,
                         const bool isUsed,
                         const bool isPeriodic,
-                        const double humanScale,
-                        double period)
+                        const REAL humanScale,
+                        REAL period)
 {
    mName=name;
    mpRefParType=type;
@@ -185,13 +186,13 @@ void RefinablePar::Init(const string &name,
 
       
 
-double RefinablePar::GetValue()const
+REAL RefinablePar::GetValue()const
 {
    if(false==mUseEquation) return *mValue;
    else
    {
       VFN_DEBUG_MESSAGE("RefinablePar::Value():Evaluating Equation",0)
-      double tmp=mEquationCoeff(0);
+      REAL tmp=mEquationCoeff(0);
       for(int i=0;i<mEquationNbRefPar;i++) 
          tmp += mEquationCoeff(i+1) * mEquationRefPar[i]->GetValue();
       *mValue = tmp;
@@ -199,7 +200,7 @@ double RefinablePar::GetValue()const
    return *mValue;
 }
 
-void RefinablePar::SetValue(const double value)
+void RefinablePar::SetValue(const REAL value)
 {
    this->Click();
    VFN_DEBUG_MESSAGE("RefinablePar::SetValue()",2)
@@ -236,14 +237,14 @@ void RefinablePar::SetValue(const double value)
    }
 }
 
-const double& RefinablePar::GetHumanValue() const
+const REAL& RefinablePar::GetHumanValue() const
 {
-   static double val;
+   static REAL val;
    val = *mValue * mHumanScale;
    return val;
 }
 
-void RefinablePar::SetHumanValue(const double &value)
+void RefinablePar::SetHumanValue(const REAL &value)
 {
    this->Click();
    VFN_DEBUG_MESSAGE("RefinablePar::SetHumanValue()",2)
@@ -280,7 +281,7 @@ void RefinablePar::SetHumanValue(const double &value)
    }
 }
 
-void RefinablePar::Mutate(const double mutateValue)
+void RefinablePar::Mutate(const REAL mutateValue)
 {
    VFN_DEBUG_MESSAGE("RefinablePar::Mutate():"<<this->GetName(),1)
 	if(true==mIsFixed) return;
@@ -319,7 +320,7 @@ void RefinablePar::Mutate(const double mutateValue)
    VFN_DEBUG_MESSAGE("RefinablePar::Mutate():End",0)
 }
 
-void RefinablePar::MutateTo(const double mutateValue)
+void RefinablePar::MutateTo(const REAL mutateValue)
 {
    VFN_DEBUG_MESSAGE("RefinablePar::MutateTo()",2)
 	if(true==mIsFixed) return;
@@ -357,9 +358,9 @@ void RefinablePar::MutateTo(const double mutateValue)
    }
 }
 
-double  RefinablePar::GetSigma()const {return mSigma;}
-double  RefinablePar::GetHumanSigma()const {return mSigma*mHumanScale;}
-void   RefinablePar::SetSigma(const double sigma) {mSigma=sigma; this->Click();}
+REAL  RefinablePar::GetSigma()const {return mSigma;}
+REAL  RefinablePar::GetHumanSigma()const {return mSigma*mHumanScale;}
+void   RefinablePar::SetSigma(const REAL sigma) {mSigma=sigma; this->Click();}
 
 const RefParType*  RefinablePar::GetType()const {return mpRefParType;}
 void RefinablePar::SetType(const RefParType *type) { mpRefParType=type;}
@@ -391,47 +392,47 @@ bool RefinablePar::IsUsed()const {return mIsUsed;}
 void RefinablePar::SetIsUsed(const bool b) {mIsUsed=b;this->Click();}
 
 bool RefinablePar::IsPeriodic()const {return mIsPeriodic;}
-void RefinablePar::SetIsPeriodic(const bool b,double period)
+void RefinablePar::SetIsPeriodic(const bool b,REAL period)
 {mIsPeriodic=b;mPeriod=period;this->Click();}
 
 
-double RefinablePar::GetMin()const   {return mMin;}
-void  RefinablePar::SetMin(const double min) { mMin=min;this->Click();}
-double RefinablePar::GetHumanMin()const   {return mMin * mHumanScale;}
-void  RefinablePar::SetHumanMin(const double min) { mMin=min/mHumanScale;this->Click();}
+REAL RefinablePar::GetMin()const   {return mMin;}
+void  RefinablePar::SetMin(const REAL min) { mMin=min;this->Click();}
+REAL RefinablePar::GetHumanMin()const   {return mMin * mHumanScale;}
+void  RefinablePar::SetHumanMin(const REAL min) { mMin=min/mHumanScale;this->Click();}
 
-double RefinablePar::GetMax()const   {return mMax;}
-void  RefinablePar::SetMax(const double max) { mMax=max;this->Click();}
-double RefinablePar::GetHumanMax()const   {return mMax * mHumanScale;}
-void  RefinablePar::SetHumanMax(const double max) { mMax=max/mHumanScale;this->Click();}
+REAL RefinablePar::GetMax()const   {return mMax;}
+void  RefinablePar::SetMax(const REAL max) { mMax=max;this->Click();}
+REAL RefinablePar::GetHumanMax()const   {return mMax * mHumanScale;}
+void  RefinablePar::SetHumanMax(const REAL max) { mMax=max/mHumanScale;this->Click();}
 
-double RefinablePar::GetPeriod()const   {return mPeriod;}
-void  RefinablePar::SetPeriod(const double period)
+REAL RefinablePar::GetPeriod()const   {return mPeriod;}
+void  RefinablePar::SetPeriod(const REAL period)
 { mPeriod=period;this->Click();}
 
-double  RefinablePar::GetDerivStep()const
+REAL  RefinablePar::GetDerivStep()const
 {
    if(REFPAR_DERIV_STEP_ABSOLUTE==mRefParDerivStepModel) return mDerivStep;
-   double d=mDerivStep* (*mValue);
+   REAL d=mDerivStep* (*mValue);
    
    //:KLUDGE: Parameter will probably has a singular value, so it should not matter..
    if(d == 0.) return 1e-8;
    return d;
 }
 
-void RefinablePar::SetDerivStep(const double step)
+void RefinablePar::SetDerivStep(const REAL step)
 {
    this->Click();
    mDerivStep = step;
 }
 
-double RefinablePar::GetGlobalOptimStep()const {return mGlobalOptimStep;}
-void  RefinablePar::SetGlobalOptimStep(const double step) {mGlobalOptimStep=step;}
+REAL RefinablePar::GetGlobalOptimStep()const {return mGlobalOptimStep;}
+void  RefinablePar::SetGlobalOptimStep(const REAL step) {mGlobalOptimStep=step;}
 
-double RefinablePar::GetHumanScale()const {return mHumanScale;}
-void  RefinablePar::SetHumanScale(const double scale) {mHumanScale=scale;}
+REAL RefinablePar::GetHumanScale()const {return mHumanScale;}
+void  RefinablePar::SetHumanScale(const REAL scale) {mHumanScale=scale;}
 
-void RefinablePar::SetUseEquation(const bool useItOrNot,const double c0)
+void RefinablePar::SetUseEquation(const bool useItOrNot,const REAL c0)
 {
    this->Click();
    mUseEquation=useItOrNot;
@@ -442,8 +443,8 @@ void RefinablePar::SetUseEquation(const bool useItOrNot,const double c0)
    }
 }
 
-void RefinablePar::SetUseEquation(const bool useItOrNot,const double c0,
-                                  const double c1, const RefinablePar &refpar1)
+void RefinablePar::SetUseEquation(const bool useItOrNot,const REAL c0,
+                                  const REAL c1, const RefinablePar &refpar1)
 {
    this->Click();
    mUseEquation=useItOrNot;
@@ -456,9 +457,9 @@ void RefinablePar::SetUseEquation(const bool useItOrNot,const double c0,
    }
 }
 
-void RefinablePar::SetUseEquation(const bool useItOrNot,const double c0,
-                                  const double c1, const RefinablePar &refpar1,
-                                  const double c2, const RefinablePar &refpar2)
+void RefinablePar::SetUseEquation(const bool useItOrNot,const REAL c0,
+                                  const REAL c1, const RefinablePar &refpar1,
+                                  const REAL c2, const RefinablePar &refpar2)
 {
    this->Click();
    mUseEquation=useItOrNot;
@@ -473,10 +474,10 @@ void RefinablePar::SetUseEquation(const bool useItOrNot,const double c0,
    }
 }
 
-void RefinablePar::SetUseEquation(const bool useItOrNot,const double c0,
-                                  const double c1, const RefinablePar &refpar1,
-                                  const double c2, const RefinablePar &refpar2,
-                                  const double c3, const RefinablePar &refpar3)
+void RefinablePar::SetUseEquation(const bool useItOrNot,const REAL c0,
+                                  const REAL c1, const RefinablePar &refpar1,
+                                  const REAL c2, const RefinablePar &refpar2,
+                                  const REAL c3, const RefinablePar &refpar3)
 {
    this->Click();
    mUseEquation=useItOrNot;
@@ -507,14 +508,14 @@ void RefinablePar::Click()
    //VFN_DEBUG_MESSAGE("RefinablePar::Click():End",2)
 }
 
-void RefinablePar::SetLimitsAbsolute(const double min, const double max)
+void RefinablePar::SetLimitsAbsolute(const REAL min, const REAL max)
 {
    //:TODO: check limits
    mMin=min;
    mMax=max;
    mHasLimits=true;
 }
-void RefinablePar::SetLimitsRelative(const double min, const double max)
+void RefinablePar::SetLimitsRelative(const REAL min, const REAL max)
 {
    VFN_DEBUG_MESSAGE("RefinablePar::SetLimitsRelative():"<<this->GetName(),1)
    //:TODO: check limits
@@ -522,7 +523,7 @@ void RefinablePar::SetLimitsRelative(const double min, const double max)
    mMax=this->GetValue()+max;
    mHasLimits=true;
 }
-void RefinablePar::SetLimitsProportional(const double min, const double max)
+void RefinablePar::SetLimitsProportional(const REAL min, const REAL max)
 {
    //:TODO: check limits
    mMin=this->GetValue()*min;
@@ -943,7 +944,7 @@ mNbRefParNotFixed(-1),mIsbeingRefined(false),mDeleteRefParInDestructor(true)
 {
    VFN_DEBUG_MESSAGE("RefinableObj::RefinableObj()",3)
    mpRefPar = new RefinablePar*[mMaxNbRefPar];
-   mpSavedValuesSet = new CrystVector_double* [mMaxNbSavedSets];
+   mpSavedValuesSet = new CrystVector_REAL* [mMaxNbSavedSets];
    mpSavedValuesSetName = new string* [mMaxNbSavedSets];
    mSavedValuesSetIsUsed=false;
    gRefinableObjRegistry.Register(*this);
@@ -961,7 +962,7 @@ mNbRefParNotFixed(-1),mIsbeingRefined(false),mDeleteRefParInDestructor(true)
 {
    VFN_DEBUG_MESSAGE("RefinableObj::RefinableObj(bool)",3)
    mpRefPar = new RefinablePar*[mMaxNbRefPar];
-   mpSavedValuesSet = new CrystVector_double* [mMaxNbSavedSets];
+   mpSavedValuesSet = new CrystVector_REAL* [mMaxNbSavedSets];
    mpSavedValuesSetName = new string* [mMaxNbSavedSets];
    mSavedValuesSetIsUsed=false;
    if(false==internalUseOnly) gRefinableObjRegistry.Register(*this);
@@ -980,7 +981,7 @@ mIsbeingRefined(false),mDeleteRefParInDestructor(true)
 {
    VFN_DEBUG_MESSAGE("RefinableObj::RefinableObj(RefinableObj&)",3)
    mpRefPar = new RefinablePar*[mMaxNbRefPar];
-   mpSavedValuesSet = new CrystVector_double* [mMaxNbSavedSets];
+   mpSavedValuesSet = new CrystVector_REAL* [mMaxNbSavedSets];
    mpSavedValuesSetName = new string* [mMaxNbSavedSets];
    mSavedValuesSetIsUsed=false;
    *this=old;
@@ -1155,7 +1156,7 @@ const RefinablePar& RefinableObj::GetPar(const string & name) const
    return *mpRefPar[i];
 }
 
-RefinablePar& RefinableObj::GetPar(const double *p)
+RefinablePar& RefinableObj::GetPar(const REAL *p)
 {
    const long i=this->FindPar(p);
    if(-1==i)
@@ -1169,7 +1170,7 @@ RefinablePar& RefinableObj::GetPar(const double *p)
    return *mpRefPar[i];
 }
 
-const RefinablePar& RefinableObj::GetPar(const double *p) const
+const RefinablePar& RefinableObj::GetPar(const REAL *p) const
 {
    const long i=this->FindPar(p);
    if(-1==i)
@@ -1270,7 +1271,7 @@ long RefinableObj::CreateParamSet(const string name) const
    mSavedValuesSetIsUsed(id)=true;
    *(mpSavedValuesSetName+id)= new string;
    **(mpSavedValuesSetName+id) = name;
-   *(mpSavedValuesSet+id)=new CrystVector_double;
+   *(mpSavedValuesSet+id)=new CrystVector_REAL;
 	this->SaveParamSet(id);
    return id;
 }
@@ -1284,14 +1285,14 @@ void RefinableObj::SaveParamSet(const long id)const
       throw 0;//:TODO: some more inteligent exception
    }
    (*(mpSavedValuesSet+id))->resize(mNbRefPar);
-   double *p=(*(mpSavedValuesSet+id))->data();
+   REAL *p=(*(mpSavedValuesSet+id))->data();
    for(long i=0;i<mNbRefPar;i++) *p++ = this->GetPar(i).GetValue();
 }
 
 void RefinableObj::RestoreParamSet(const long id)
 {
    VFN_DEBUG_MESSAGE("RefinableObj::RestoreRefParSet()",2)
-   const double *p=(*(mpSavedValuesSet+id))->data();
+   const REAL *p=(*(mpSavedValuesSet+id))->data();
    for(long i=0;i<mNbRefPar;i++)
    {
       if( !this->GetPar(i).IsFixed() && this->GetPar(i).IsUsed())
@@ -1300,19 +1301,19 @@ void RefinableObj::RestoreParamSet(const long id)
    }
 }
 
-const CrystVector_double & RefinableObj::GetParamSet(const long id)const
+const CrystVector_REAL & RefinableObj::GetParamSet(const long id)const
 {
    VFN_DEBUG_MESSAGE("RefinableObj::GetParamSet() const",2)
    return **(mpSavedValuesSet+id);
 }
 
-CrystVector_double & RefinableObj::GetParamSet(const long id)
+CrystVector_REAL & RefinableObj::GetParamSet(const long id)
 {
    VFN_DEBUG_MESSAGE("RefinableObj::GetParamSet()",2)
    return **(mpSavedValuesSet+id);
 }
 
-double RefinableObj::GetParamSet_ParNotFixedHumanValue(const long id,
+REAL RefinableObj::GetParamSet_ParNotFixedHumanValue(const long id,
                                                       const long par)const
 {
    VFN_DEBUG_MESSAGE("RefinableObj::RefParSetNotFixedHumanValue()",0)
@@ -1330,13 +1331,13 @@ const void RefinableObj::EraseAllParamSet()
    mSavedValuesSetIsUsed=false;
 }
 
-void RefinableObj::SetLimitsAbsolute(const string &name,const double min,const double max)
+void RefinableObj::SetLimitsAbsolute(const string &name,const REAL min,const REAL max)
 {
    const long i=this->FindPar(name);
    this->GetPar(i).SetLimitsAbsolute(min,max);
 }
 void RefinableObj::SetLimitsAbsolute(const RefParType *type,
-                                     const double min,const double max)
+                                     const REAL min,const REAL max)
 {
    for(long i=0;i<mNbRefPar;i++)
       if(this->GetPar(i).GetType()->IsDescendantFromOrSameAs(type))
@@ -1344,13 +1345,13 @@ void RefinableObj::SetLimitsAbsolute(const RefParType *type,
    for(int i=0;i<this->GetSubObjRegistry().GetNb();i++)
       this->GetSubObjRegistry().GetObj(i).SetLimitsAbsolute(type,min,max);
 }
-void RefinableObj::SetLimitsRelative(const string &name, const double min, const double max)
+void RefinableObj::SetLimitsRelative(const string &name, const REAL min, const REAL max)
 {
    const long i=this->FindPar(name);
    this->GetPar(i).SetLimitsRelative(min,max);
 }
 void RefinableObj::SetLimitsRelative(const RefParType *type,
-                                     const double min, const double max)
+                                     const REAL min, const REAL max)
 {
    VFN_DEBUG_MESSAGE("RefinableObj::SetLimitsRelative(RefParType*):"<<this->GetName(),2)
    for(long i=0;i<mNbRefPar;i++)
@@ -1362,13 +1363,13 @@ void RefinableObj::SetLimitsRelative(const RefParType *type,
    for(int i=0;i<this->GetSubObjRegistry().GetNb();i++)
       this->GetSubObjRegistry().GetObj(i).SetLimitsRelative(type,min,max);
 }
-void RefinableObj::SetLimitsProportional(const string &name,const double min,const double max)
+void RefinableObj::SetLimitsProportional(const string &name,const REAL min,const REAL max)
 {
    const long i=this->FindPar(name);
    this->GetPar(i).SetLimitsProportional(min,max);
 }
 void RefinableObj::SetLimitsProportional(const RefParType *type, 
-                                         const double min, const double max)
+                                         const REAL min, const REAL max)
 {
    for(long i=0;i<mNbRefPar;i++)
       if(this->GetPar(i).GetType()->IsDescendantFromOrSameAs(type)) 
@@ -1427,15 +1428,15 @@ void RefinableObj::RandomizeConfiguration()
    {
       if(true==this->GetParNotFixed(j).IsLimited())
       {
-         const double min=this->GetParNotFixed(j).GetMin();
-         const double max=this->GetParNotFixed(j).GetMax();
-         this->GetParNotFixed(j).MutateTo(min+(max-min)*(rand()/(double)RAND_MAX) );
+         const REAL min=this->GetParNotFixed(j).GetMin();
+         const REAL max=this->GetParNotFixed(j).GetMax();
+         this->GetParNotFixed(j).MutateTo(min+(max-min)*(rand()/(REAL)RAND_MAX) );
       }
 		else
       	if(true==this->GetParNotFixed(j).IsPeriodic())
 			{
 
-         	this->GetParNotFixed(j).MutateTo((rand()/(double)RAND_MAX)
+         	this->GetParNotFixed(j).MutateTo((rand()/(REAL)RAND_MAX)
 						* this->GetParNotFixed(j).GetPeriod());
 			}
    }
@@ -1444,13 +1445,13 @@ void RefinableObj::RandomizeConfiguration()
    VFN_DEBUG_EXIT("RefinableObj::RandomizeConfiguration():Finished",5)
 }
 
-void RefinableObj::GlobalOptRandomMove(const double mutationAmplitude)
+void RefinableObj::GlobalOptRandomMove(const REAL mutationAmplitude)
 {
    VFN_DEBUG_MESSAGE("RefinableObj::GlobalOptRandomMove()",2)
    for(int j=0;j<this->GetNbParNotFixed();j++)
    {
       this->GetParNotFixed(j).Mutate( this->GetParNotFixed(j).GetGlobalOptimStep()
-                  *2*(rand()/(double)RAND_MAX-0.5)*mutationAmplitude);
+                  *2*(rand()/(REAL)RAND_MAX-0.5)*mutationAmplitude);
    }
    for(int i=0;i<mSubObjRegistry.GetNb();i++)
       mSubObjRegistry.GetObj(i).GlobalOptRandomMove(mutationAmplitude);
@@ -1471,31 +1472,31 @@ const string& RefinableObj::GetCostFunctionDescription(const unsigned int id)con
    throw 0;
 }
 
-double RefinableObj::GetCostFunctionValue(const unsigned int)
+REAL RefinableObj::GetCostFunctionValue(const unsigned int)
 {
    cout << "RefinableObj::GetCostFunctionValue(): no cost functions !" <<endl;
    throw 0;
 }
 unsigned int RefinableObj::GetNbLSQFunction()const{return 0;}
 
-const CrystVector_double& RefinableObj::GetLSQCalc(const unsigned int) const
+const CrystVector_REAL& RefinableObj::GetLSQCalc(const unsigned int) const
 {
 	throw ObjCrystException("Error: called RefinableObj::GetLSQCalc()");
-	CrystVector_double *noWarning=new CrystVector_double;
+	CrystVector_REAL *noWarning=new CrystVector_REAL;
 	return *noWarning;
 }
 
-const CrystVector_double& RefinableObj::GetLSQObs(const unsigned int) const
+const CrystVector_REAL& RefinableObj::GetLSQObs(const unsigned int) const
 {
 	throw ObjCrystException("Error: called RefinableObj::GetLSQObs()");
-	CrystVector_double *noWarning=new CrystVector_double;
+	CrystVector_REAL *noWarning=new CrystVector_REAL;
 	return *noWarning;
 }
 
-const CrystVector_double& RefinableObj::GetLSQWeight(const unsigned int) const
+const CrystVector_REAL& RefinableObj::GetLSQWeight(const unsigned int) const
 {
 	throw ObjCrystException("Error: called RefinableObj::GetLSQWeight()");
-	CrystVector_double *noWarning=new CrystVector_double;
+	CrystVector_REAL *noWarning=new CrystVector_REAL;
 	return *noWarning;
 }
 
@@ -1590,7 +1591,7 @@ long RefinableObj::FindPar(const string &name) const
    return index;
 }
 
-long RefinableObj::FindPar(const double *p) const
+long RefinableObj::FindPar(const REAL *p) const
 {
    long index=-1;
    bool warning=false;

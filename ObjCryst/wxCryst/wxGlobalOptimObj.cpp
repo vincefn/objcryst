@@ -182,7 +182,7 @@ void WXOptimizationObj::OnStopOptimization()
 //
 ////////////////////////////////////////////////////////////////////////
 WXGlobalOptimRunThread::WXGlobalOptimRunThread(OptimizationObj &globalOptObj,
-															  long &nbTrial,const double finalCost):
+															  long &nbTrial,const REAL finalCost):
 wxThread(wxTHREAD_DETACHED),mpGlobalOptObj(&globalOptObj),mpNbTrial(&nbTrial),
 mFinalCost(finalCost)
 {
@@ -229,10 +229,10 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(100000000)
       mList.Add(opt);
       
       wxBoxSizer *sizerTemp=new wxBoxSizer(wxHORIZONTAL);
-      WXFieldPar<double> *tempMax=
-         new WXFieldPar<double>(this,"Temperature Max:",-1,&(mpMonteCarloObj->mTemperatureMax));
-      WXFieldPar<double> *tempMin=
-         new WXFieldPar<double>(this,"Temperature Min:",-1,&(mpMonteCarloObj->mTemperatureMin));
+      WXFieldPar<REAL> *tempMax=
+         new WXFieldPar<REAL>(this,"Temperature Max:",-1,&(mpMonteCarloObj->mTemperatureMax));
+      WXFieldPar<REAL> *tempMin=
+         new WXFieldPar<REAL>(this,"Temperature Min:",-1,&(mpMonteCarloObj->mTemperatureMin));
       sizerTemp->Add(tempMax);
       sizerTemp->Add(tempMin);
       mpSizer->Add(sizerTemp);
@@ -244,10 +244,10 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(100000000)
       mList.Add(opt);
       
       wxBoxSizer *sizerAmp=new wxBoxSizer(wxHORIZONTAL);
-      WXFieldPar<double> *ampMax=
-         new WXFieldPar<double>(this,"Amplitude Max:",-1,&(mpMonteCarloObj->mMutationAmplitudeMax));
-      WXFieldPar<double> *ampMin=
-         new WXFieldPar<double>(this,"Amplitude Min:",-1,&(mpMonteCarloObj->mMutationAmplitudeMin));
+      WXFieldPar<REAL> *ampMax=
+         new WXFieldPar<REAL>(this,"Amplitude Max:",-1,&(mpMonteCarloObj->mMutationAmplitudeMax));
+      WXFieldPar<REAL> *ampMin=
+         new WXFieldPar<REAL>(this,"Amplitude Min:",-1,&(mpMonteCarloObj->mMutationAmplitudeMin));
       sizerAmp->Add(ampMax);
       sizerAmp->Add(ampMin);
       mpSizer->Add(sizerAmp);

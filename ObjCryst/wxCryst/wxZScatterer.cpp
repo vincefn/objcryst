@@ -348,7 +348,7 @@ void WXZScatterer::OnMenuSetLimits(wxCommandEvent & event)
       }
       case ID_ZSCATTERER_MENU_PAR_LIMITS_RELAT_ANGLE:
       {
-         double limit=.1;
+         double limit=5;
          wxTextEntryDialog limitDialog(this,"Enter maximum shift in Degrees\n The limits are taken symmetrically around current position:\n X0-l < X < X0+l ",
                                  "Set limits (relative) for bond angles",".1",wxOK | wxCANCEL);
          if(wxID_OK!=limitDialog.ShowModal())
@@ -370,7 +370,7 @@ void WXZScatterer::OnMenuSetLimits(wxCommandEvent & event)
       }
       case ID_ZSCATTERER_MENU_PAR_LIMITS_RELAT_DIHED:
       {
-         double limit=.1;
+         double limit=5;
          wxTextEntryDialog limitDialog(this,"Enter maximum shift in Degrees\n The limits are taken symmetrically around current position:\n X0-l < X < X0+l ",
                                  "Set limits (relative) for dihedral angles",".1",wxOK | wxCANCEL);
          if(wxID_OK!=limitDialog.ShowModal())

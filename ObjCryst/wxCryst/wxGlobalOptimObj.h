@@ -52,7 +52,7 @@ class WXOptimizationObj: public WXCrystObj
 class WXGlobalOptimRunThread: public wxThread
 {
    public:
-      WXGlobalOptimRunThread(OptimizationObj &globalOptObj,long &nbTrial,const double finalCost=0);
+      WXGlobalOptimRunThread(OptimizationObj &globalOptObj,long &nbTrial,const REAL finalCost=0);
       
       virtual void *Entry();
       virtual void OnExit();
@@ -62,7 +62,7 @@ class WXGlobalOptimRunThread: public wxThread
       long *mpNbTrial;
 		/// The value of the cost below which the optimization should stop
 		/// (0 by default) even if the desired number pf trial has not been reached.
-		const double mFinalCost;
+		const REAL mFinalCost;
 };
 
 /** Class for Graphical interface to Monte-Carlo objects 

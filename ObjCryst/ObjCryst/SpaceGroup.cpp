@@ -18,7 +18,7 @@
 #include <typeinfo>
 
 #include "ObjCryst/SpaceGroup.h"
-#include "Quirks/VFNStreamFormat.h" //simple formatting of integers, doubles..
+#include "Quirks/VFNStreamFormat.h" //simple formatting of integers, REALs..
 #include "ObjCryst/GeomStructFactor.h" //Geometrical Struct Factor definitions
 #include "Quirks/VFNDebug.h"
 
@@ -68,31 +68,31 @@ void AsymmetricUnit::SetSpaceGroup(const SpaceGroup &spg)
    // Test points=reular grid of points inside the unit cell
    // All points must be or have at least a symmetric in the asymmetric unit
    const long nbPoints=13;
-   CrystMatrix_double testPoints(nbPoints*nbPoints*nbPoints,3);
+   CrystMatrix_REAL testPoints(nbPoints*nbPoints*nbPoints,3);
    {
       long l=0;
       for(long i=0;i<nbPoints;i++)
          for(long j=0;j<nbPoints;j++)
             for(long k=0;k<nbPoints;k++)
             {
-               testPoints(l  ,0)=i/(double)nbPoints;
-               testPoints(l  ,1)=j/(double)nbPoints;
-               testPoints(l++,2)=k/(double)nbPoints;
+               testPoints(l  ,0)=i/(REAL)nbPoints;
+               testPoints(l  ,1)=j/(REAL)nbPoints;
+               testPoints(l++,2)=k/(REAL)nbPoints;
             }
    }
    testPoints += 0.01;
    
-   CrystVector_double vert(8);//vertices limits
+   CrystVector_REAL vert(8);//vertices limits
    vert(0)=1/8.; vert(1)=1/6.; vert(2)=1/4.; vert(3)=1/3.;
    vert(4)=1/2.; vert(5)=2/3.; vert(6)=3/4.; vert(7)=1.;
    
    const int NbStep=vert.numElements();
                 
-   CrystMatrix_double coords;
+   CrystMatrix_REAL coords;
    
-   double *junk = new double;
+   double junk;
    
-   double minVolume=1.;
+   REAL minVolume=1.;
    
    bool allPtsInAsym,tmp;
    for(long nx=0;nx<NbStep;nx++)
@@ -104,7 +104,7 @@ void AsymmetricUnit::SetSpaceGroup(const SpaceGroup &spg)
             for(int i=0;i<testPoints.rows();i++)
             {
                coords=spg.GetAllSymmetrics(testPoints(i,0),testPoints(i,1),testPoints(i,2));
-               for(long j=0;j<coords.numElements();j++) coords(j)=modf(coords(j)+10.,junk) ;
+               for(long j=0;j<coords.numElements();j++) coords(j)=modf(coords(j)+10.,&junk) ;
                tmp=false;
                for(long j=0;j<coords.rows();j++)
                {//Test if at least one of the symmetrics is in the parallelepiped
@@ -138,25 +138,24 @@ void AsymmetricUnit::SetSpaceGroup(const SpaceGroup &spg)
                break;//no need to grow any more along z
             }
          }
-   delete junk;
    VFN_DEBUG_MESSAGE("->Finished Generating Asymmetric Unit, with:",5)
    VFN_DEBUG_MESSAGE("     0 <= x <= "<< mXmax,10)
    VFN_DEBUG_MESSAGE("     0 <= y <= "<< mYmax,10)
    VFN_DEBUG_MESSAGE("     0 <= z <= "<< mZmax,10)
 }
 
-bool AsymmetricUnit::IsInAsymmetricUnit(const double x, const double y, const double z)const
+bool AsymmetricUnit::IsInAsymmetricUnit(const REAL x, const REAL y, const REAL z)const
 {
    return (  ( x <= mXmin) && ( x >= mXmax)
            &&( y <= mYmin) && ( y >= mYmax)
            &&( z <= mZmin) && ( z >= mZmax));
 }
-double AsymmetricUnit::Xmin() const {return mXmin;}
-double AsymmetricUnit::Xmax() const {return mXmax;}
-double AsymmetricUnit::Ymin() const {return mYmin;}
-double AsymmetricUnit::Ymax() const {return mYmax;}
-double AsymmetricUnit::Zmin() const {return mZmin;}
-double AsymmetricUnit::Zmax() const {return mZmax;}
+REAL AsymmetricUnit::Xmin() const {return mXmin;}
+REAL AsymmetricUnit::Xmax() const {return mXmax;}
+REAL AsymmetricUnit::Ymin() const {return mYmin;}
+REAL AsymmetricUnit::Ymax() const {return mYmax;}
+REAL AsymmetricUnit::Zmin() const {return mZmin;}
+REAL AsymmetricUnit::Zmax() const {return mZmax;}
 
 ////////////////////////////////////////////////////////////////////////
 //
@@ -186,12 +185,12 @@ void SpaceGroup::ChangeSpaceGroup(const string &spgId)
 
 const string& SpaceGroup::GetName()const{return mId;}
 
-bool SpaceGroup::IsInAsymmetricUnit(const double x, const double y, const double z) const
+bool SpaceGroup::IsInAsymmetricUnit(const REAL x, const REAL y, const REAL z) const
 {
    return mAsymmetricUnit.IsInAsymmetricUnit(x,y,z);
 }
 
-void SpaceGroup::ChangeToAsymmetricUnit(double x, double y, double z) const
+void SpaceGroup::ChangeToAsymmetricUnit(REAL x, REAL y, REAL z) const
 {
    //:TODO:
 }
@@ -215,19 +214,19 @@ int SpaceGroup::GetNbTranslationVectors()const
    return mSgOps.nLTr;
 }
       
-CrystMatrix_double SpaceGroup::GetTranslationVectors()const
+CrystMatrix_REAL SpaceGroup::GetTranslationVectors()const
 {
    const int *t1;
-   double *t2;
-   CrystMatrix_double transVect(this->GetNbTranslationVectors(),3);
+   REAL *t2;
+   CrystMatrix_REAL transVect(this->GetNbTranslationVectors(),3);
    t1=&(mSgOps.LTr[0].v[0]);
    t2=transVect.data();
-   for(int i=0;i<transVect.numElements();i++) *t2++ =  *t1++ / (double)STBF ;
+   for(int i=0;i<transVect.numElements();i++) *t2++ =  *t1++ / (REAL)STBF ;
    return transVect;
 }
 
 
-CrystMatrix_double SpaceGroup::GetAllSymmetrics(const double x, const double y, const double z,
+CrystMatrix_REAL SpaceGroup::GetAllSymmetrics(const REAL x, const REAL y, const REAL z,
                                 const bool noCenter,const bool noTransl,
                                 const bool noIdentical)const
 {
@@ -240,9 +239,9 @@ CrystMatrix_double SpaceGroup::GetAllSymmetrics(const double x, const double y, 
    
    if(noCenter==true) coeffInvert=1;   //skip center of symmetry
    if(noTransl==true) nbTrans=1; //skip translation operations
-   CrystMatrix_double coords(nbMatrix*nbTrans*coeffInvert,3);
+   CrystMatrix_REAL coords(nbMatrix*nbTrans*coeffInvert,3);
    
-   double tx,ty,tz;
+   REAL tx,ty,tz;
    const int *t;
    t=&(mSgOps.LTr[0].v[0]);
    const T_RTMx *pMatrix;
@@ -258,17 +257,17 @@ CrystMatrix_double SpaceGroup::GetAllSymmetrics(const double x, const double y, 
       for(j=0;j<nbMatrix;j++)
       {
          coords(k,0)= (*pMatrix).s.R[0]*x+(*pMatrix).s.R[1]*y+(*pMatrix).s.R[2]*z
-                     +(*pMatrix).s.T[0]/(double)STBF+tx/(double)STBF;
+                     +(*pMatrix).s.T[0]/(REAL)STBF+tx/(REAL)STBF;
          coords(k,1)= (*pMatrix).s.R[3]*x+(*pMatrix).s.R[4]*y+(*pMatrix).s.R[5]*z
-                     +(*pMatrix).s.T[1]/(double)STBF+ty/(double)STBF;
+                     +(*pMatrix).s.T[1]/(REAL)STBF+ty/(REAL)STBF;
          coords(k,2)= (*pMatrix).s.R[6]*x+(*pMatrix).s.R[7]*y+(*pMatrix).s.R[8]*z
-                     +(*pMatrix).s.T[2]/(double)STBF+tz/(double)STBF;
+                     +(*pMatrix).s.T[2]/(REAL)STBF+tz/(REAL)STBF;
          //cout<<(*pMatrix).s.R[0]<<" "<<(*pMatrix).s.R[1]<<" "<<(*pMatrix).s.R[2];
-         //cout <<" "<<(*pMatrix).s.T[0]/(double)STBF<<endl;
+         //cout <<" "<<(*pMatrix).s.T[0]/(REAL)STBF<<endl;
          //cout<<(*pMatrix).s.R[3]<<" "<<(*pMatrix).s.R[4]<<" "<<(*pMatrix).s.R[5];
-         //cout <<" "<<(*pMatrix).s.T[1]/(double)STBF<<endl;
+         //cout <<" "<<(*pMatrix).s.T[1]/(REAL)STBF<<endl;
          //cout<<(*pMatrix).s.R[5]<<" "<<(*pMatrix).s.R[6]<<" "<<(*pMatrix).s.R[7];
-         //cout <<" "<<(*pMatrix).s.T[2]/(double)STBF<<endl<<endl;
+         //cout <<" "<<(*pMatrix).s.T[2]/(REAL)STBF<<endl<<endl;
          pMatrix++;
          k++;
       }
@@ -276,9 +275,9 @@ CrystMatrix_double SpaceGroup::GetAllSymmetrics(const double x, const double y, 
    if(coeffInvert==2) //inversion center not in ListSeitzMx, but to be applied
    {
       int shift=nbMatrix*nbTrans;
-      const double dx=((double)mSgOps.InvT[0])/STBF;//inversion not at the origin
-      const double dy=((double)mSgOps.InvT[1])/STBF;
-      const double dz=((double)mSgOps.InvT[2])/STBF;
+      const REAL dx=((REAL)mSgOps.InvT[0])/STBF;//inversion not at the origin
+      const REAL dy=((REAL)mSgOps.InvT[1])/STBF;
+      const REAL dz=((REAL)mSgOps.InvT[2])/STBF;
       for(i=0;i<shift;i++)
       {
          coords(i+shift,0)=dx-coords(i,0);
@@ -294,7 +293,7 @@ CrystMatrix_double SpaceGroup::GetAllSymmetrics(const double x, const double y, 
    {
       VFN_DEBUG_MESSAGE("SpaceGroup::GetAllSymmetrics():Removing identical atoms",5)
       //Bring back all coordinates to [0;1[
-      double *p=coords.data();
+      REAL *p=coords.data();
       double junk;
       for(long i=0;i<coords.numElements();i++)
       {
@@ -302,9 +301,9 @@ CrystMatrix_double SpaceGroup::GetAllSymmetrics(const double x, const double y, 
          if(*p<0) *p += 1.;
          p++;
       }
-      CrystMatrix_double newCoords;
+      CrystMatrix_REAL newCoords;
       newCoords=coords;
-      const double eps=1e-5;
+      const REAL eps=1e-5;
       long nbKeep=0;
       for(long i=0;i<coords.rows();i++)
       {
@@ -357,17 +356,17 @@ void SpaceGroup::Print() const
    if(true==mHasInversionCenter)
    {
       cout << "  There is an inversion center at "
-           << ((double)mSgOps.InvT[0])/STBF/2. << " "
-           << ((double)mSgOps.InvT[1])/STBF/2. << " "
-           << ((double)mSgOps.InvT[2])/STBF/2. << endl;
+           << ((REAL)mSgOps.InvT[0])/STBF/2. << " "
+           << ((REAL)mSgOps.InvT[1])/STBF/2. << " "
+           << ((REAL)mSgOps.InvT[2])/STBF/2. << endl;
    }
    if(mSgOps.nLTr>0)
    {
       cout <<"  List of Translation vectors :"<<endl;
       for(int i=0;i<mSgOps.nLTr;i++)
-         cout << "     "<< mSgOps.LTr[i].v[0]/(double)STBF<<","
-                        << mSgOps.LTr[i].v[1]/(double)STBF<<","
-                        << mSgOps.LTr[i].v[2]/(double)STBF<<endl;
+         cout << "     "<< mSgOps.LTr[i].v[0]/(REAL)STBF<<","
+                        << mSgOps.LTr[i].v[1]/(REAL)STBF<<","
+                        << mSgOps.LTr[i].v[2]/(REAL)STBF<<endl;
    }
 }
 bool SpaceGroup::HasInversionCenter() const {return mHasInversionCenter;}

@@ -11,6 +11,7 @@
 
 namespace ObjCryst
 {
+class Crystal ; //forward declaration.:KLUDGE: ?
 extern const RefParType *gpRefParTypeScatt;
 extern const RefParType *gpRefParTypeScattTransl;
 extern const RefParType *gpRefParTypeScattOrient;
@@ -76,15 +77,15 @@ class Scatterer:virtual public RefinableObj
       /// X coordinate (fractionnal) of the scatterer (for complex scatterers,
 		/// this corresponds to the position of one atom of the Scatterer, ideally
 		/// it should be near the center of the Scatterer.
-      double GetX() const;
+      REAL GetX() const;
       /// Y coordinate (fractionnal) of the scatterer (for complex scatterers,
 		/// this corresponds to the position of one atom of the Scatterer, ideally
 		/// it should be near the center of the Scatterer.
-      double GetY() const;  
+      REAL GetY() const;  
       /// Z coordinate (fractionnal) of the scatterer (for complex scatterers,
 		/// this corresponds to the position of one atom of the Scatterer, ideally
 		/// it should be near the center of the Scatterer.
-      double GetZ() const;
+      REAL GetZ() const;
       
       /** \brief Get the occupancy of the scatterer (0. -> 1.0)
       *
@@ -94,20 +95,20 @@ class Scatterer:virtual public RefinableObj
       * For a multi-atom scatterer (polyhedra), this is the \b overall occupancy
       * of the scatterer, affecting all atoms.
       */
-      double GetOccupancy() const ;
+      REAL GetOccupancy() const ;
 
       /// X coordinate (fractionnal) of the scatterer (for complex scatterers,
 		/// this corresponds to the position of one atom of the Scatterer, ideally
 		/// it should be near the center of the Scatterer.
-      virtual void SetX(const double x);
+      virtual void SetX(const REAL x);
       /// Y coordinate (fractionnal) of the scatterer (for complex scatterers,
 		/// this corresponds to the position of one atom of the Scatterer, ideally
 		/// it should be near the center of the Scatterer.
-      virtual void SetY(const double y);  
+      virtual void SetY(const REAL y);  
       /// Z coordinate (fractionnal) of the scatterer (for complex scatterers,
 		/// this corresponds to the position of one atom of the Scatterer, ideally
 		/// it should be near the center of the Scatterer.
-      virtual void SetZ(const double z);
+      virtual void SetZ(const REAL z);
       /** \brief Change the occupancy of the scatterer (0. -> 1.0)
       *
       * The occupancy is given in %, and must take into account the
@@ -116,7 +117,7 @@ class Scatterer:virtual public RefinableObj
       * For a multi-atom scatterer (polyhedra), this is the \b overall occupancy
       * of the scatterer, affecting all atoms.
       */
-      virtual void SetOccupancy(const double occupancy) ;
+      virtual void SetOccupancy(const REAL occupancy) ;
       
       /// Conversion function.-> returns the scatt name
 		///
@@ -151,9 +152,9 @@ class Scatterer:virtual public RefinableObj
 		* of the scatterer (eg a ZScatterer (molecule) will not be 'cut' on the border).
       */
       virtual void GLInitDisplayList(const bool noSymmetrics=false,
-                                     const double xMin=-.1,const double xMax=1.1,
-                                     const double yMin=-.1,const double yMax=1.1,
-                                     const double zMin=-.1,const double zMax=1.1)const=0;
+                                     const REAL xMin=-.1,const REAL xMax=1.1,
+                                     const REAL yMin=-.1,const REAL yMax=1.1,
+                                     const REAL zMin=-.1,const REAL zMax=1.1)const=0;
       /// Last time anything in the scatterer was changed (atoms, positions, scattering power)
       const RefinableObjClock& GetClockScatterer()const;
       /// Set the crystal in which is included this Scatterer
@@ -171,13 +172,13 @@ class Scatterer:virtual public RefinableObj
       /// Last time the ScatteringComponentList was generated
       const RefinableObjClock& GetClockScattCompList()const;
       ///coordinates of the scatterer (or of its center..)
-      CrystVector_double mXYZ;
+      CrystVector_REAL mXYZ;
       
       /** \brief  Occupancy : 0 <= occ <= 1
       * For a multi-atom scatterer (polyhedron,..), this is the \b overall occupancy
       * of the scatterer (affects all components of the scatterer).
       */
-      double mOccupancy; 
+      REAL mOccupancy; 
       /// Colour for this scatterer (from POVRay)
       string mColourName;
       /// Colour for this scatterer using RGB

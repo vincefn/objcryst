@@ -27,7 +27,7 @@ ostream& operator<< (ostream& os, const FormatInt& fInt)
 //
 ////////////////////////////////////////////////////////////////////////
 
-FormatFloat::FormatFloat(const double num,const int width,const int precision)
+FormatFloat::FormatFloat(const REAL num,const int width,const int precision)
          :mValue(num),mWidth(width),mPrecision(precision) 
          {
          }
@@ -492,12 +492,12 @@ template<class T> ostream& operator<< (ostream& os, const FormatVertVectorHKLFlo
 
 
 //Explicit instantiations
-template class FormatVertVector<double>;
-template ostream& operator<< (ostream&,const FormatVertVector<double>&);
-template class FormatHorizVector<double>;
-template ostream& operator<< (ostream&,const FormatHorizVector<double>&);
-template class FormatVertVectorHKLFloats<double>;
-template ostream& operator<< (ostream&,const FormatVertVectorHKLFloats<double>&);
+template class FormatVertVector<REAL>;
+template ostream& operator<< (ostream&,const FormatVertVector<REAL>&);
+template class FormatHorizVector<REAL>;
+template ostream& operator<< (ostream&,const FormatHorizVector<REAL>&);
+template class FormatVertVectorHKLFloats<REAL>;
+template ostream& operator<< (ostream&,const FormatVertVectorHKLFloats<REAL>&);
 template class FormatVertVector<long>;
 template ostream& operator<< (ostream&,const FormatVertVector<long>&);
 template class FormatHorizVector<long>;

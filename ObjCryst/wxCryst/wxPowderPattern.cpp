@@ -319,7 +319,7 @@ void WXPowderPattern::OnMenuSimulate(wxCommandEvent & WXUNUSED(event))
       }
       dialog.GetValue().ToLong(&nbPoints);
    }
-   CrystVector_double newObs(nbPoints);
+   CrystVector_REAL newObs(nbPoints);
    mpPowderPattern->SetPowderPatternPar(min*DEG2RAD,(max-min)/(nbPoints-1)*DEG2RAD,nbPoints);
    newObs=1;//we must not have 0 in case a scale factor is fitted...
    mpPowderPattern->SetPowderPatternObs(newObs);
@@ -574,9 +574,9 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
       wxCoord xc,yc;
       //Y axis
          xc=(wxCoord)mMargin;
-         double yStep=pow(10,floor(log10((mMaxIntensity-mMinIntensity)/nbTick)));
+         REAL yStep=pow(10,floor(log10((mMaxIntensity-mMinIntensity)/nbTick)));
          yStep *= floor((mMaxIntensity-mMinIntensity)/yStep/nbTick);
-         for(double y=yStep*floor(mMinIntensity/yStep);y<mMaxIntensity;y+=yStep)
+         for(REAL y=yStep*floor(mMinIntensity/yStep);y<mMaxIntensity;y+=yStep)
          {
             yc=(wxCoord) (height-mMargin-(y-mMinIntensity)*(height-2*mMargin)
                            /(mMaxIntensity-mMinIntensity));
@@ -587,9 +587,9 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
          }
       //X axis
          yc=(wxCoord)(height-mMargin);
-         double xStep=pow(10,floor(log10((mMax2Theta-mMin2Theta)/nbTick)));
+         REAL xStep=pow(10,floor(log10((mMax2Theta-mMin2Theta)/nbTick)));
          xStep *= floor((mMax2Theta-mMin2Theta)/xStep/nbTick);
-         for(double x=xStep*floor(mMin2Theta/xStep);x<mMax2Theta;x+=xStep)
+         for(REAL x=xStep*floor(mMin2Theta/xStep);x<mMax2Theta;x+=xStep)
          {
             xc=(wxCoord)(mMargin+(x-mMin2Theta)*(width-mMargin)/(mMax2Theta-mMin2Theta));
             dc.DrawLine(xc,yc-3,xc,yc+3);
@@ -602,14 +602,14 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
    {
       dc.SetPen(* wxCYAN_PEN);
       wxCoord x1,y1,x2,y2;
-      x2=(wxCoord)(mMargin+ 0. *(width-mMargin)/(double)nbPoints);
+      x2=(wxCoord)(mMargin+ 0. *(width-mMargin)/(REAL)nbPoints);
       y2=(wxCoord)(height-mMargin-(mObs(mFirst)-mMinIntensity)*(height-2*mMargin)
                      /(mMaxIntensity-mMinIntensity));
       for(long i=mFirst+1;i<=mLast;i++)
       {
          x1=x2;
          y1=y2;
-         x2=(wxCoord)(mMargin+ (i-mFirst)*(width-mMargin)/(double)nbPoints);
+         x2=(wxCoord)(mMargin+ (i-mFirst)*(width-mMargin)/(REAL)nbPoints);
          y2=(wxCoord)(height-mMargin-(mObs(i)-mMinIntensity)*(height-2*mMargin)
                         /(mMaxIntensity-mMinIntensity));
          dc.DrawLine(x1,y1,x2,y2);
@@ -620,14 +620,14 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
    {
       dc.SetPen(* wxRED_PEN);
       wxCoord x1,y1,x2,y2;
-      x2=(wxCoord)(mMargin+ 0.     *(width-mMargin)/(double)nbPoints);
+      x2=(wxCoord)(mMargin+ 0.     *(width-mMargin)/(REAL)nbPoints);
       y2=(wxCoord)(height-mMargin- (mCalc(mFirst)-mMinIntensity)*(height-2*mMargin)
                      /(mMaxIntensity-mMinIntensity));
       for(long i=mFirst+1;i<=mLast;i++)
       {
          x1=x2;
          y1=y2;
-         x2=(wxCoord)(mMargin+ (i-mFirst)*(width-mMargin)/(double)nbPoints);
+         x2=(wxCoord)(mMargin+ (i-mFirst)*(width-mMargin)/(REAL)nbPoints);
          y2=(wxCoord)(height-mMargin-(mCalc(i)-mMinIntensity)*(height-2*mMargin)
                         /(mMaxIntensity-mMinIntensity));
          dc.DrawLine(x1,y1,x2,y2);
@@ -651,10 +651,10 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
 
    	wxCoord width,height;
    	this->GetSize(&width, &height);
-   	const double 
-      	ttheta=mMin2Theta+(x-mMargin)*(mMax2Theta-mMin2Theta)/(double)(width-mMargin);
-   	const double intensity=mMinIntensity+(height-mMargin-y)*(mMaxIntensity-mMinIntensity)
-                                          	/(double)(height-2*mMargin);
+   	const REAL 
+      	ttheta=mMin2Theta+(x-mMargin)*(mMax2Theta-mMin2Theta)/(REAL)(width-mMargin);
+   	const REAL intensity=mMinIntensity+(height-mMargin-y)*(mMaxIntensity-mMinIntensity)
+                                          	/(REAL)(height-2*mMargin);
 
    	wxString str;
 		const long pixel=
@@ -732,9 +732,9 @@ void WXPowderPatternGraph::OnUpdate(wxCommandEvent & WXUNUSED(event))
    mpPattern->CrystUpdate();
 }
 
-void WXPowderPatternGraph::SetPattern(const CrystVector_double &obs,
-                                        const CrystVector_double &calc,
-                                        const double tthetaMin,const double tthetaStep)
+void WXPowderPatternGraph::SetPattern(const CrystVector_REAL &obs,
+                                        const CrystVector_REAL &calc,
+                                        const REAL tthetaMin,const REAL tthetaStep)
 {
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph::SetPattern()",5)
    //Make sure spectrum is not being used (for drawing)

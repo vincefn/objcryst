@@ -27,6 +27,7 @@ extern "C"
 {
 #include "sglite/sglite.h"
 }
+class SpaceGroup;
 //######################################################################
 //  AsymmetricUnit.
 /**
@@ -55,16 +56,16 @@ class AsymmetricUnit
       /// Assign a SpaceGroup and generate the corrsponding Xmax, Ymax, ZMax.
       void SetSpaceGroup(const SpaceGroup &spg);
       /// Test if (x,y,z) is in the asymmetric unit
-      bool IsInAsymmetricUnit(const double x, const double y, const double z)const;
-      double Xmin() const;
-      double Xmax() const;
-      double Ymin() const;
-      double Ymax() const;
-      double Zmin() const;
-      double Zmax() const;
+      bool IsInAsymmetricUnit(const REAL x, const REAL y, const REAL z)const;
+      REAL Xmin() const;
+      REAL Xmax() const;
+      REAL Ymin() const;
+      REAL Ymax() const;
+      REAL Zmin() const;
+      REAL Zmax() const;
    protected:
    private:
-      double mXmin,mXmax,mYmin,mYmax,mZmin,mZmax;
+      REAL mXmin,mXmax,mYmin,mYmax,mZmin,mZmax;
 };
 
 //######################################################################
@@ -115,11 +116,11 @@ class SpaceGroup
 		/// the calling program or user)
       const string& GetName()const;
       /// Test if a given scatterer at (x,y,z) is in the asymmetric unit.
-      bool IsInAsymmetricUnit(const double x, const double y, const double z) const;
+      bool IsInAsymmetricUnit(const REAL x, const REAL y, const REAL z) const;
       /// Move (x,y,z) coordinates to their equivalent in the asym unit
       /// \warning Not implemented yet.
 		/// \todo SpaceGroup::IsInAsymmetricUnit()
-      void ChangeToAsymmetricUnit(double x, double y, double z) const;//:TODO:
+      void ChangeToAsymmetricUnit(REAL x, REAL y, REAL z) const;//:TODO:
       /// Get the AsymmetricUnit for this spacegroup
       const AsymmetricUnit& GetAsymUnit() const;
       
@@ -150,7 +151,7 @@ class SpaceGroup
       *                       0 & \frac{1}{2} & \frac{1}{2} \\ \end{array} \right] \f$
       *for a 'F' cell,etc...
       */
-      CrystMatrix_double GetTranslationVectors()const;
+      CrystMatrix_REAL GetTranslationVectors()const;
       
       /** \brief Get all equivalent positions of a (xyz) position
       *
@@ -173,7 +174,7 @@ class SpaceGroup
       * atom in special position will return duplicate entries. This may be
       * corrected automatically later.) You can use the 'noIdentical' option for that,
       */
-      CrystMatrix_double GetAllSymmetrics(const double x, const double y, const double z,
+      CrystMatrix_REAL GetAllSymmetrics(const REAL x, const REAL y, const REAL z,
                                 const bool noCenter=false,const bool noTransl=false,
                                 const bool noIdentical=false) const;
       

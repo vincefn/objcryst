@@ -70,18 +70,18 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt)
 	//variables
       long nbVar=mRefParList.GetNbParNotFixed();
 		const long nbObs=mObs.numElements();
-		CrystVector_double calc,calc0,calc1,tmpV1,tmpV2;
-		CrystMatrix_double M(nbVar,nbVar);
-		CrystMatrix_double N(nbVar,nbVar);
-		CrystVector_double B(nbVar);
-		CrystMatrix_double designMatrix(nbVar,nbObs);
-		CrystVector_double deltaVar(nbVar);
+		CrystVector_REAL calc,calc0,calc1,tmpV1,tmpV2;
+		CrystMatrix_REAL M(nbVar,nbVar);
+		CrystMatrix_REAL N(nbVar,nbVar);
+		CrystVector_REAL B(nbVar);
+		CrystMatrix_REAL designMatrix(nbVar,nbObs);
+		CrystVector_REAL deltaVar(nbVar);
 		long i,j,k;
-		double R_ini,Rw_ini;
-      double *pTmp1,*pTmp2;
+		REAL R_ini,Rw_ini;
+      REAL *pTmp1,*pTmp2;
       
-      double marquardt=1e-2;
-      const double marquardtMult=4.;
+      REAL marquardt=1e-2;
+      const REAL marquardtMult=4.;
 	//store old values
    mIndexValuesSetInitial=mRefParList.CreateParamSet("LSQ Refinement-Initial Values");
    mIndexValuesSetLast=mRefParList.CreateParamSet("LSQ Refinement-Last Cycle Values");
@@ -167,7 +167,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt)
        //Apply LevenBerg-Marquardt factor
          if(true==useLevenbergMarquardt)
          {
-            const double lmfact=1.+marquardt;
+            const REAL lmfact=1.+marquardt;
 			   for(i=0;i<nbVar;i++) M(i,i) *= lmfact;
          }
         
@@ -189,8 +189,8 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt)
 		         deltaVar.resize(nbVar);
 
                //Just remove the ith line in the design matrix
-                        double *p1=designMatrix.data();
-                  const double *p2=designMatrix.data();
+                        REAL *p1=designMatrix.data();
+                  const REAL *p2=designMatrix.data();
                   p1 += i*nbObs;
                   p2 += i*nbObs+nbObs;
                   for(long j=i*nbObs+nbObs;j<nbObs*nbVar;j++) *p1++ = *p2++;
@@ -227,8 +227,8 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt)
          DiagonalMatrix newmatW(nbVar);
          ColumnVector newmatB(nbObs);
          
-         CrystMatrix_double U(nbVar,nbObs), V(nbVar,nbVar);
-         CrystVector_double W(nbVar),invW(nbVar);
+         CrystMatrix_REAL U(nbVar,nbObs), V(nbVar,nbVar);
+         CrystVector_REAL W(nbVar),invW(nbVar);
          for(long i=0;i<nbVar;i++)
          {
             for(long j=0;j<nbObs;j++)
@@ -241,8 +241,8 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt)
          
          ColumnVector newmatDelta(nbVar);
          DiagonalMatrix newmatInvW(nbVar);
-         double max=newmatW.MaximumAbsoluteValue();
-         double minAllowedValue=1e-16*max;// :TODO: Check if reasonable !
+         REAL max=newmatW.MaximumAbsoluteValue();
+         REAL minAllowedValue=1e-16*max;// :TODO: Check if reasonable !
          //Avoid singular values,following 'Numerical Recipes in C'
          for(long i=0;i<nbVar;i++) 
             if(newmatW(i+1,i+1) > minAllowedValue) newmatInvW(i+1,i+1) = 1./newmatW(i+1,i+1);
@@ -265,8 +265,8 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt)
 		//Perform "Eigenvalue Filtering" on normal matrix (using newmat library)
       {
          cout << "LSQNumObj::Refine():Eigenvalue Filtering..." <<endl;
-         CrystMatrix_double V(nbVar,nbVar);
-         CrystVector_double invW(nbVar);//diagonal matrix, in fact
+         CrystMatrix_REAL V(nbVar,nbVar);
+         CrystVector_REAL invW(nbVar);//diagonal matrix, in fact
          cout << "LSQNumObj::Refine():Eigenvalue Filtering...1" <<endl;
          {
             SymmetricMatrix newmatA(nbVar);
@@ -296,8 +296,8 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt)
          cout << "LSQNumObj::Refine():Eigenvalue Filtering...4" <<endl;
             //Avoid singular values
             {
-               double max=newmatW.MaximumAbsoluteValue();
-               double minAllowedValue=1e-5*max;// :TODO: Check if reasonable !
+               REAL max=newmatW.MaximumAbsoluteValue();
+               REAL minAllowedValue=1e-5*max;// :TODO: Check if reasonable !
                for(long i=0;i<nbVar;i++) 
                   if(newmatW(i+1,i+1) > minAllowedValue) 
                      newmatInvW(i+1,i+1)= 1./newmatW(i+1,i+1);
@@ -308,9 +308,9 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt)
                   }
                
                /*
-               double max;
+               REAL max;
                int maxIndex;
-               const double minRatio=1e-6;
+               const REAL minRatio=1e-6;
                for(long i=0;i<nbVar;i++)
                {
                   max=fabs(newmatW(1)*newmatV(1,i+1)*newmatV(1,i+1));
@@ -372,8 +372,8 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt)
 		//Perform Singular value Decomposition normalon normal matrix (using newmat library)
       {
          cout << "LSQNumObj::Refine():Performing SVD on normal matrix" <<endl;
-         CrystMatrix_double U(nbVar,nbVar),V(nbVar,nbVar);
-         CrystVector_double invW(nbVar);//diagonal matrix, in fact
+         CrystMatrix_REAL U(nbVar,nbVar),V(nbVar,nbVar);
+         CrystVector_REAL invW(nbVar);//diagonal matrix, in fact
          {
             Matrix   newmatA(nbVar,nbVar),
                      newmatU(nbVar,nbVar),
@@ -389,8 +389,8 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt)
             SVD(newmatA,newmatW,newmatU,newmatV);
             ColumnVector newmatDelta(nbVar);
             DiagonalMatrix newmatInvW(nbVar);
-            double max=newmatW.MaximumAbsoluteValue();
-            double minAllowedValue=1e-10*max;// :TODO: Check if reasonable !
+            REAL max=newmatW.MaximumAbsoluteValue();
+            REAL minAllowedValue=1e-10*max;// :TODO: Check if reasonable !
             //Avoid singular values,following 'Numerical Recipes in C'
             for(long i=0;i<nbVar;i++) 
                if(newmatW(i+1,i+1) > minAllowedValue) newmatInvW(i+1,i+1) = 1./newmatW(i+1,i+1);
@@ -429,7 +429,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt)
             cout << "With refinable parameter: " << mRefParList.GetParNotFixed(svix).Name() <<endl;
             cout << "LSQNumObj::Refine(): Automatically fixing parameter and re-start cycle..";              cout << endl;
             {
-               CrystMatrix_double Mtmp;
+               CrystMatrix_REAL Mtmp;
                Mtmp=M;
                Mtmp /= 1e14;
                cout << Mtmp << endl << endl;
@@ -450,7 +450,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt)
 */
          /* 
          {
-            CrystMatrix_double Mtmp,Ntmp;
+            CrystMatrix_REAL Mtmp,Ntmp;
             Mtmp=M;
             Ntmp=N;
             Mtmp /= 1e20;
@@ -473,7 +473,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt)
          //Chi^2
       cout << "LSQNumObj::Refine():Computing Chi^2 for last cycle..." <<endl;
          {
-            double oldChiSq=mChiSq;
+            REAL oldChiSq=mChiSq;
             tmpV1 = mObs;
             tmpV1 -= calc;
             tmpV1 *= tmpV1;
@@ -521,13 +521,13 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt)
 	}
 }
 
-CrystMatrix_double LSQNumObj::CorrelMatrix()const{return mCorrelMatrix;};
+CrystMatrix_REAL LSQNumObj::CorrelMatrix()const{return mCorrelMatrix;};
 
-double LSQNumObj::Rfactor()const{return mR;};
+REAL LSQNumObj::Rfactor()const{return mR;};
 
-double LSQNumObj::RwFactor()const{return mRw;};
+REAL LSQNumObj::RwFactor()const{return mRw;};
 
-double LSQNumObj::ChiSquare()const{return mChiSq;};
+REAL LSQNumObj::ChiSquare()const{return mChiSq;};
 
 void LSQNumObj::SetRefinedObj(RefinableObj &obj, const unsigned int LSQFuncIndex)
 {
@@ -573,7 +573,7 @@ void LSQNumObj::PrintRefResults() const
 	cout <<endl;
 }
 
-void LSQNumObj::SetDampingFactor(const double newDampFact)
+void LSQNumObj::SetDampingFactor(const REAL newDampFact)
 {
 	mDampingFactor=newDampFact;
 }

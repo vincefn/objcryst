@@ -65,29 +65,31 @@ namespace ObjCryst
 #define DEG2RAD (M_PI/180.)
 #define RAD2DEG (180./M_PI)
 
+#define REAL float
+
 // forward declarations... These should be removed...
-   class AsymmetricUnit;
+   //class AsymmetricUnit;
    //class Atom;
-   class Crystal ;
-   class IOCrystTag;
-   class PowderPattern;
-   class RefinableObj;
-   class RefinableObjClock;
-   template<class T> class ObjRegistry;
-   class RefinablePar;
-   class Scatterer ;
-   class ScatteringComponent;
-   class ScatteringComponentList;
-   class ScatteringData ;
-   class ScatteringPower;
-   class ScatteringPowerAtom;
-   class SpaceGroup;
-   class ZPolyhedron ;
-   class ZScatterer ;
+   //class Crystal ;
+   //class IOCrystTag;
+   //class PowderPattern;
+   //class RefinableObj;
+   //class RefinableObjClock;
+   //template<class T> class ObjRegistry;
+   //class RefinablePar;
+   //class Scatterer ;
+   //class ScatteringComponent;
+   //class ScatteringComponentList;
+   //class ScatteringData ;
+   //class ScatteringPower;
+   //class ScatteringPowerAtom;
+   //class SpaceGroup;
+   //class ZPolyhedron ;
+   //class ZScatterer ;
    #ifdef __WX__CRYST__
-   class WXCrystObj;
-   class WXRefinableObj;
-   class WXCrystRegistry;
+   //class WXCrystObj;
+   //class WXRefinableObj;
+   //class WXCrystRegistry;
    #endif
 /*
 */

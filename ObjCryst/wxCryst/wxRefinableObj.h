@@ -31,7 +31,8 @@ class WXFieldOption;
 
 namespace ObjCryst
 {
-
+class RefinablePar;
+class RefinableObj;
 /// This function allows to pick up one object in a registry. Shows a modal
 /// dialog with a list of objects
 template<class T> T* WXDialogChooseFromRegistry(ObjRegistry<T> &reg,wxWindow*parent,
@@ -74,11 +75,11 @@ class WXFieldRefPar:public WXField
       void Revert();
 		virtual void ValidateUserInput();
    protected:
-      double mValue;
+      REAL mValue;
       wxCheckBox *mpButtonFix;
       wxTextCtrl *mpField;
       RefinablePar *mpRefPar;
-      double mValueOld;
+      REAL mValueOld;
       wxMenu *mpPopUpMenu;
 		bool mIsSelfUpdating;
    DECLARE_EVENT_TABLE()
@@ -114,7 +115,7 @@ class WXCostFunction:public WXField
 {
    public:
       WXCostFunction(wxWindow *parent,RefinableObj *obj, const int field_id,
-                     const int funcNum,double * weight);
+                     const int funcNum,REAL * weight);
       void OnUpdateUI(wxUpdateUIEvent & WXUNUSED(event));
       void OnEnter(wxCommandEvent & WXUNUSED(event));
       virtual void CrystUpdate();
@@ -123,10 +124,10 @@ class WXCostFunction:public WXField
 		virtual void ValidateUserInput();
    protected:
       wxTextCtrl *mpValue;
-      double mValue;
+      REAL mValue;
       RefinableObj *mpObj;
       const int mFuncNum;
-      WXFieldPar<double> *mpWeight;
+      WXFieldPar<REAL> *mpWeight;
    DECLARE_EVENT_TABLE()
 };
 

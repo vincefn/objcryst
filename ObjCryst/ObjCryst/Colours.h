@@ -5,7 +5,7 @@
 struct POVRayColours
 {
    const char *mName;
-   double mRGB[3];
+   REAL mRGB[3];
 };
 
 const POVRayColours gPOVRayColours[]=

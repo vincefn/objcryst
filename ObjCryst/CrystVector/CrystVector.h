@@ -4,6 +4,8 @@
 #ifndef __LIBCRYST_VECTOR_H
 #define __LIBCRYST_VECTOR_H
 
+#include "ObjCryst/General.h"
+
 #undef __LIBCRYST_VECTOR_USE_BLITZ__
 //#define __LIBCRYST_VECTOR_USE_BLITZ__
 
@@ -17,13 +19,13 @@ using namespace blitz;
 //to much memory when compiling)
 #define __VFN_GEOM_STRUCT_FACTOR_USE_POINTERS
 
-#define CrystVector_double Array<double,1>
+#define CrystVector_REAL Array<REAL,1>
 #define CrystVector_float  Array<float,1>
 #define CrystVector_long   Array<long,1>
 #define CrystVector_int    Array<int,1>
 #define CrystVector_uint   Array<unsigned int,1>
 #define CrystVector_bool   Array<bool,1>
-#define CrystMatrix_double Array<double,2>
+#define CrystMatrix_REAL Array<REAL,2>
 #define CrystMatrix_float  Array<float,2>
 #define CrystMatrix_long   Array<long,2>
 #define CrystMatrix_int    Array<int,2>
@@ -40,13 +42,13 @@ template<class T> T MaxDifference(const Array<T,2> &a,const Array<T,2> &b);
 #else  // __VFN_VECTOR_USE_BLITZ__
 
 
-#define CrystVector_double CrystVector<double>
+#define CrystVector_REAL CrystVector<REAL>
 #define CrystVector_float  CrystVector<float>
 #define CrystVector_long   CrystVector<long>
 #define CrystVector_int    CrystVector<int>
 #define CrystVector_uint   CrystVector<unsigned int>
 #define CrystVector_bool   CrystVector<bool>
-#define CrystMatrix_double CrystMatrix<double>
+#define CrystMatrix_REAL CrystMatrix<REAL>
 #define CrystMatrix_float  CrystMatrix<float>
 #define CrystMatrix_long   CrystMatrix<long>
 #define CrystMatrix_int    CrystMatrix<int>
@@ -80,7 +82,7 @@ using namespace std;
 * Blitz++ documentation</a>. CrystVector and CrystMatrix use the same kind of storage
 * in memory.
 *
-* You can use CrystVector_double, CrystVector_long,etc... to declare 1D vectors. Macros
+* You can use CrystVector_REAL, CrystVector_long,etc... to declare 1D vectors. Macros
 * ensure (well, should) ensure compatibility with Blitz++. (as of april 2001 support of
 * blitz++ is broken).
 *
@@ -138,9 +140,9 @@ template<class T> class CrystVector
       vect=*this;
       return vect;
    }
-   operator CrystVector<double>() const
+   operator CrystVector<REAL>() const
    {
-      CrystVector<double> vect;
+      CrystVector<REAL> vect;
       vect=*this;
       return vect;
    }
@@ -287,7 +289,7 @@ template<class T> CrystVector<T> sqrt(const CrystVector<T> &vect);
 * Blitz++ documentation</a>. CrystVector and CrystMatrix use the same kind of storage
 * in memory.
 *
-* You can use CrystMatrix_double, CrystMatrix_long,etc... to declare 2D vectors. Macros
+* You can use CrystMatrix_REAL, CrystMatrix_long,etc... to declare 2D vectors. Macros
 * ensure (well, should) ensure compatibility with Blitz++. (as of april 2001 support of
 * blitz++ is broken).
 */
@@ -418,7 +420,7 @@ template<class T> CrystMatrix<T> product(const CrystMatrix<T> &a,const CrystMatr
 
 //Basic Gauss-Jordan elimination with partial pivot (rows only, using max pivot)
 //Definitly *not* optimized !
-CrystMatrix_double InvertMatrix(const CrystMatrix_double &m);
+CrystMatrix_REAL InvertMatrix(const CrystMatrix_REAL &m);
 template<class T> void MatrixExchangeRows(CrystMatrix_T &m, const long row1, const long row2);
 
 ///Maximum absolute value of vector
@@ -434,16 +436,16 @@ class CubicSpline
 {
    public:
       /// Spline with given extremum derivatives
-      CubicSpline(const CrystVector_double &x, const CrystVector_double &y, 
-                  const double yp1, const double ypn);
+      CubicSpline(const CrystVector_REAL &x, const CrystVector_REAL &y, 
+                  const REAL yp1, const REAL ypn);
       /// Natural cubic spline
-      CubicSpline(const CrystVector_double &x, const CrystVector_double &y);
+      CubicSpline(const CrystVector_REAL &x, const CrystVector_REAL &y);
       ~CubicSpline();
-      double operator()(const double x) const;
+      REAL operator()(const REAL x) const;
    private:
-      const CrystVector_double mX;
-      const CrystVector_double mY;
-      CrystVector_double mYsecond;
+      const CrystVector_REAL mX;
+      const CrystVector_REAL mY;
+      CrystVector_REAL mYsecond;
 };
 
 #endif   // __LIBCRYST_VECTOR_H

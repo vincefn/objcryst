@@ -19,7 +19,7 @@
 #include "ObjCryst/Crystal.h"
 #include "ObjCryst/Scatterer.h"
 
-#include "Quirks/VFNStreamFormat.h" //simple formatting of integers, doubles..
+#include "Quirks/VFNStreamFormat.h" //simple formatting of integers, REALs..
 
 #include "Quirks/VFNDebug.h"
 #ifdef OBJCRYST_GL
@@ -94,16 +94,16 @@ Scatterer::~Scatterer()
 
 const string Scatterer::GetClassName() const {return "Scatterer";}
 
-double Scatterer::GetX()    const {return mXYZ(0);}
-double Scatterer::GetY()    const {return mXYZ(1);}
-double Scatterer::GetZ()    const {return mXYZ(2);}
-double Scatterer::GetOccupancy() const {return mOccupancy;}
+REAL Scatterer::GetX()    const {return mXYZ(0);}
+REAL Scatterer::GetY()    const {return mXYZ(1);}
+REAL Scatterer::GetZ()    const {return mXYZ(2);}
+REAL Scatterer::GetOccupancy() const {return mOccupancy;}
 
 
-void Scatterer::SetX(const double x) { mClockScatterer.Click();mXYZ(0)=x;}
-void Scatterer::SetY(const double y) { mClockScatterer.Click();mXYZ(1)=y;}
-void Scatterer::SetZ(const double z) { mClockScatterer.Click();mXYZ(2)=z;}
-void Scatterer::SetOccupancy(const double occupancy)
+void Scatterer::SetX(const REAL x) { mClockScatterer.Click();mXYZ(0)=x;}
+void Scatterer::SetY(const REAL y) { mClockScatterer.Click();mXYZ(1)=y;}
+void Scatterer::SetZ(const REAL z) { mClockScatterer.Click();mXYZ(2)=z;}
+void Scatterer::SetOccupancy(const REAL occupancy)
 {
    mClockScatterer.Click();
    mOccupancy=occupancy;

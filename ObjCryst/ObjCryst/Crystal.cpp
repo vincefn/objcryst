@@ -19,7 +19,7 @@
 
 #include "ObjCryst/Crystal.h"
 
-#include "Quirks/VFNStreamFormat.h" //simple formatting of integers, doubles..
+#include "Quirks/VFNStreamFormat.h" //simple formatting of integers, REALs..
 #include "Quirks/VFNDebug.h"
 
 #ifdef OBJCRYST_GL
@@ -61,7 +61,7 @@ mScatteringPowerRegistry("List of Crystal ScatteringPowers")
    gTopRefinableObjRegistry.Register(*this);
 }
 
-Crystal::Crystal(const double a, const double b, const double c, const string &SpaceGroupId):
+Crystal::Crystal(const REAL a, const REAL b, const REAL c, const string &SpaceGroupId):
 mCellDim(6),mScattererRegistry("List of Crystal Scatterers"),
 mBMatrix(3,3),mOrthMatrix(3,3),mOrthMatrixInvert(3,3),
 mScatteringPowerRegistry("List of Crystal ScatteringPowers")
@@ -72,8 +72,8 @@ mScatteringPowerRegistry("List of Crystal ScatteringPowers")
    gTopRefinableObjRegistry.Register(*this);
 }
 
-Crystal::Crystal(const double a, const double b, const double c, const double alpha,
-              const double beta, const double gamma,const string &SpaceGroupId):
+Crystal::Crystal(const REAL a, const REAL b, const REAL c, const REAL alpha,
+              const REAL beta, const REAL gamma,const string &SpaceGroupId):
 mCellDim(6),mScattererRegistry("List of Crystal Scatterers"),
 mBMatrix(3,3),mOrthMatrix(3,3),mOrthMatrixInvert(3,3),
 mScatteringPowerRegistry("List of Crystal ScatteringPowers")
@@ -234,7 +234,7 @@ const ScatteringComponentList& Crystal::GetScatteringComponentList()const
    return mScattCompList;
 }
 
-CrystVector_double Crystal::GetLatticePar() const
+CrystVector_REAL Crystal::GetLatticePar() const
 {
    VFN_DEBUG_MESSAGE("Crystal::GetLatticePar()",0)
    
@@ -243,7 +243,7 @@ CrystVector_double Crystal::GetLatticePar() const
    {
       //:NOTE: cannot use this->UpdateLatticePar() because it is not a const member function
       int num = mSpaceGroup.GetSpaceGroupNumber();
-      CrystVector_double cellDim=mCellDim;
+      CrystVector_REAL cellDim=mCellDim;
       if(num <=2) return cellDim;
       if((num <=15) && (0==mSpaceGroup.GetUniqueAxis()))
       {
@@ -295,7 +295,7 @@ CrystVector_double Crystal::GetLatticePar() const
    }
 }
 
-double Crystal::GetLatticePar(int whichPar)const
+REAL Crystal::GetLatticePar(int whichPar)const
 {
    VFN_DEBUG_MESSAGE("Crystal::LatticePar(i)",0)
    if( (whichPar<0) || (whichPar>5))
@@ -306,7 +306,7 @@ double Crystal::GetLatticePar(int whichPar)const
    {
       const int num = mSpaceGroup.GetSpaceGroupNumber();
 
-      static CrystVector_double cellDim;
+      static CrystVector_REAL cellDim;
       cellDim=mCellDim;
       if(num <=2)
          return cellDim(whichPar);
@@ -361,42 +361,42 @@ double Crystal::GetLatticePar(int whichPar)const
    }
 }
 
-const CrystMatrix_double& Crystal::GetBMatrix()const
+const CrystMatrix_REAL& Crystal::GetBMatrix()const
 {
    VFN_DEBUG_MESSAGE("Crystal::GetBMatrix()",0)
    this->InitMatrices();
    return mBMatrix;
 }
 
-CrystVector_double Crystal::GetOrthonormalCoords(const double x,
-                                                const double y,
-                                                const double z) const
+CrystVector_REAL Crystal::GetOrthonormalCoords(const REAL x,
+                                                const REAL y,
+                                                const REAL z) const
 {
    this->InitMatrices();
-   CrystVector_double coords(3);
+   CrystVector_REAL coords(3);
    coords(0)=mOrthMatrix(0,0)*x+mOrthMatrix(0,1)*y+mOrthMatrix(0,2)*z;
    coords(1)=mOrthMatrix(1,0)*x+mOrthMatrix(1,1)*y+mOrthMatrix(1,2)*z;
    coords(2)=mOrthMatrix(2,0)*x+mOrthMatrix(2,1)*y+mOrthMatrix(2,2)*z;
    return coords;
 }
 
-void Crystal::FractionalToOrthonormalCoords(double &x,double &y,double &z) const
+void Crystal::FractionalToOrthonormalCoords(REAL &x,REAL &y,REAL &z) const
 {
    this->InitMatrices();
-   const double oldx=x;
-   const double oldy=y;
+   const REAL oldx=x;
+   const REAL oldy=y;
    x=mOrthMatrix(0,0)*oldx+mOrthMatrix(0,1)*oldy+mOrthMatrix(0,2)*z;
    y=mOrthMatrix(1,0)*oldx+mOrthMatrix(1,1)*oldy+mOrthMatrix(1,2)*z;
    z=mOrthMatrix(2,0)*oldx+mOrthMatrix(2,1)*oldy+mOrthMatrix(2,2)*z;
 }
 
-void Crystal::OrthonormalToFractionalCoords(double &x,double &y,double &z) const
+void Crystal::OrthonormalToFractionalCoords(REAL &x,REAL &y,REAL &z) const
 {
    //cout << x << " " << y << " " << z <<endl;
    //cout << endl << mOrthMatrixInvert <<endl;
    this->InitMatrices();
-   const double oldx=x;
-   const double oldy=y;
+   const REAL oldx=x;
+   const REAL oldy=y;
    x=mOrthMatrixInvert(0,0)*oldx+mOrthMatrixInvert(0,1)*oldy+mOrthMatrixInvert(0,2)*z;
    y=mOrthMatrixInvert(1,0)*oldx+mOrthMatrixInvert(1,1)*oldy+mOrthMatrixInvert(1,2)*z;
    z=mOrthMatrixInvert(2,0)*oldx+mOrthMatrixInvert(2,1)*oldy+mOrthMatrixInvert(2,2)*z;
@@ -450,7 +450,7 @@ void Crystal::Print(ostream &os)const
       << "          overlapping (dyn=0.5 -> atom on a symetry plane / 2fold axis.."<< endl 
       << "                               -> OR 2 atoms strictly overlapping)"<< endl 
       <<endl;
-   double nbAtoms=0;
+   REAL nbAtoms=0;
    const long genMult=mSpaceGroup.GetNbSymmetrics();
    for(int i=0;i<mScattCompList.GetNbComponent();i++) 
       nbAtoms += genMult * mScattCompList(i).mOccupancy * mScattCompList(i).mDynPopCorr;
@@ -462,16 +462,16 @@ void Crystal::Print(ostream &os)const
 const SpaceGroup & Crystal::GetSpaceGroup() const {return mSpaceGroup;}
 SpaceGroup & Crystal::GetSpaceGroup()  {return mSpaceGroup;}
  
-CrystMatrix_double Crystal::GetMinDistanceTable(const double minDistance) const
+CrystMatrix_REAL Crystal::GetMinDistanceTable(const REAL minDistance) const
 {
    VFN_DEBUG_MESSAGE("Crystal::MinDistanceTable()",5)
    this->CalcDistTable(true);
    const long nbComponent=mScattCompList.GetNbComponent();
-   CrystMatrix_double minDistTable(nbComponent,nbComponent);
+   CrystMatrix_REAL minDistTable(nbComponent,nbComponent);
    const int nbAtoms=mDistTableIndex.numElements();
-   double dist;
-   double tmp;
-   const double min=minDistance*minDistance;
+   REAL dist;
+   REAL tmp;
+   const REAL min=minDistance*minDistance;
    //cout<<mDistTableSq.rows()<<" "<<mDistTableSq.cols()<<" "<<nbComponent<<" "<<nbAtoms<<endl;
    minDistTable=10000.;
    for(int i=0;i<nbComponent;i++)
@@ -499,10 +499,10 @@ CrystMatrix_double Crystal::GetMinDistanceTable(const double minDistance) const
    return minDistTable;
 }
 
-void Crystal::PrintMinDistanceTable(const double minDistance,ostream &os) const
+void Crystal::PrintMinDistanceTable(const REAL minDistance,ostream &os) const
 {
    VFN_DEBUG_MESSAGE("Crystal::PrintMinDistanceTable()",5)
-   CrystMatrix_double minDistTable;
+   CrystMatrix_REAL minDistTable;
    minDistTable=this->GetMinDistanceTable(minDistance);
    VFN_DEBUG_MESSAGE("Crystal::PrintMinDistanceTable():0",5)
    os << "Table of minimal distances between all components (atoms)"<<endl;
@@ -540,12 +540,12 @@ ostream& Crystal::POVRayDescription(ostream &os,bool onlyIndependentAtoms)const
    os << "    location  <200, 0, 0>"<<endl;
    os << "    rotate  <0, -30, -30-clock>" <<endl;
    os << "    sky   <0, 0, 1>"<<endl;
-   double x=0.5;
-   double y=0.5;
-   double z=0.5;
+   REAL x=0.5;
+   REAL y=0.5;
+   REAL z=0.5;
    this->FractionalToOrthonormalCoords(x,y,z);
    os << "    look_at   <" << x << "," << y << "," << z <<">"<<endl;
-   double maxDim=x;
+   REAL maxDim=x;
    if(y>maxDim) maxDim=y;
    if(z>maxDim) maxDim=z;
    os << "    angle   "<< 2.5*atan(2*maxDim/200.)*RAD2DEG <<endl;
@@ -575,9 +575,9 @@ ostream& Crystal::POVRayDescription(ostream &os,bool onlyIndependentAtoms)const
 }
 
 void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
-                                const double xMin,const double xMax,
-                                const double yMin,const double yMax,
-                                const double zMin,const double zMax)const
+                                const REAL xMin,const REAL xMax,
+                                const REAL yMin,const REAL yMax,
+                                const REAL zMin,const REAL zMax)const
 {
    VFN_DEBUG_ENTRY("Crystal::GLInitDisplayList()",5)
    #ifdef OBJCRYST_GL
@@ -588,48 +588,48 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
 	//cout << yMin << ":"<<yMax <<endl;
 	//cout << zMin << ":"<<zMax <<endl;
 	//Center of displayed unit
-		double xc=(xMin+xMax)/2.;
-		double yc=(yMin+yMax)/2.;
-		double zc=(zMin+zMax)/2.;
+		REAL xc=(xMin+xMax)/2.;
+		REAL yc=(yMin+yMax)/2.;
+		REAL zc=(zMin+zMax)/2.;
    	//Describe Unit Cell
-      	double x111= 1.;
-      	double y111= 1.;
-      	double z111= 1.;
+      	REAL x111= 1.;
+      	REAL y111= 1.;
+      	REAL z111= 1.;
       	this->FractionalToOrthonormalCoords(x111,y111,z111);
-      	double x110= 1.;
-      	double y110= 1.;
-      	double z110= 0.;
+      	REAL x110= 1.;
+      	REAL y110= 1.;
+      	REAL z110= 0.;
       	this->FractionalToOrthonormalCoords(x110,y110,z110);
-      	double x101= 1.;
-      	double y101= 0.;
-      	double z101= 1.;
+      	REAL x101= 1.;
+      	REAL y101= 0.;
+      	REAL z101= 1.;
       	this->FractionalToOrthonormalCoords(x101,y101,z101);
-      	double x100= 1.;
-      	double y100= 0.;
-      	double z100= 0.;
+      	REAL x100= 1.;
+      	REAL y100= 0.;
+      	REAL z100= 0.;
       	this->FractionalToOrthonormalCoords(x100,y100,z100);
-      	double x011= 0.;
-      	double y011= 1.;
-      	double z011= 1.;
+      	REAL x011= 0.;
+      	REAL y011= 1.;
+      	REAL z011= 1.;
       	this->FractionalToOrthonormalCoords(x011,y011,z011);
-      	double x010= 0.;
-      	double y010= 1.;
-      	double z010= 0.;
+      	REAL x010= 0.;
+      	REAL y010= 1.;
+      	REAL z010= 0.;
       	this->FractionalToOrthonormalCoords(x010,y010,z010);
-      	double x001= 0.;
-      	double y001= 0.;
-      	double z001= 1.;
+      	REAL x001= 0.;
+      	REAL y001= 0.;
+      	REAL z001= 1.;
       	this->FractionalToOrthonormalCoords(x001,y001,z001);
-      	double x000= 0.;
-      	double y000= 0.;
-      	double z000= 0.;
+      	REAL x000= 0.;
+      	REAL y000= 0.;
+      	REAL z000= 0.;
       	this->FractionalToOrthonormalCoords(x000,y000,z000);
       glPushMatrix();
    	//Add Axis & axis names
       	GLfloat colour_font[]= { 1.0,1.0,1.0, 1.0 };
       	glMaterialfv (GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE,colour_font);
       	//glMaterialfv (GL_FRONT, GL_EMISSION,colour_font);
-      	double x,y,z;
+      	REAL x,y,z;
 
       	x=1.2-xc;y=-yc;z=-zc;
       	this->FractionalToOrthonormalCoords(x,y,z);
@@ -689,24 +689,24 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
    VFN_DEBUG_EXIT("Crystal::GLInitDisplayList(bool)",5)
 }
 
-void Crystal::CalcDynPopCorr(const double overlapDist, const double mergeDist) const
+void Crystal::CalcDynPopCorr(const REAL overlapDist, const REAL mergeDist) const
 {
-   VFN_DEBUG_MESSAGE("Crystal::CalcDynPopCorr(double)",4)
-   TAU_PROFILE("Crystal::CalcDynPopCorr()","void (double)",TAU_DEFAULT);
+   VFN_DEBUG_MESSAGE("Crystal::CalcDynPopCorr(REAL)",4)
+   TAU_PROFILE("Crystal::CalcDynPopCorr()","void (REAL)",TAU_DEFAULT);
    
    this->CalcDistTable(true,overlapDist);
    if(mClockDynPopCorr>mClockNeighborTable) return;
    
    const long nbComponent=mScattCompList.GetNbComponent();
    const int nbSymmetrics=mSpaceGroup.GetNbSymmetrics();
-   CrystVector_double neighborsDist(nbComponent*nbSymmetrics);
+   CrystVector_REAL neighborsDist(nbComponent*nbSymmetrics);
    long nbNeighbors=0;
-   double corr;
+   REAL corr;
    
    int atomicNumber;
    const long nbAtomSym=mDistTableIndex.numElements();
-   const double overlapDistSq=overlapDist*overlapDist;
-   double dist;
+   const REAL overlapDistSq=overlapDist*overlapDist;
+   REAL dist;
    for(long i=0;i<nbComponent;i++)
    {
       atomicNumber=mScattCompList(i).mpScattPow->GetDynPopCorrIndex();
@@ -741,7 +741,7 @@ void Crystal::CalcDynPopCorr(const double overlapDist, const double mergeDist) c
       mScattCompList(i).mDynPopCorr=1./corr;
    }
    mClockDynPopCorr.Click();
-   VFN_DEBUG_MESSAGE("Crystal::CalcDynPopCorr(double):End.",3)
+   VFN_DEBUG_MESSAGE("Crystal::CalcDynPopCorr(REAL):End.",3)
 }
 
 void Crystal::ResetDynPopCorr() const
@@ -770,10 +770,10 @@ int Crystal::FindScatterer(const string &scattName)const
       Cannot find this scatterer:"+scattName);
 }
 
-double Crystal::GetBumpMergeCostFunction() const
+REAL Crystal::GetBumpMergeCostFunction() const
 {
    VFN_DEBUG_MESSAGE("Crystal::GetBumpMergeCostFunction()",2)
-   TAU_PROFILE("Crystal::GetBumpMergeCostFunction()","double (double)",TAU_DEFAULT);
+   TAU_PROFILE("Crystal::GetBumpMergeCostFunction()","REAL (REAL)",TAU_DEFAULT);
    
    if(mBumpDistanceMatrix.numElements()==0) return 0;
 
@@ -786,23 +786,23 @@ double Crystal::GetBumpMergeCostFunction() const
    //this->CalcDistTable(true,overlapDist);//:KLUDGE: Assume computing has already been done
    
    //Average number of neighbors, used to normalize the cost function (max env. =1)
-   //double avNbNeighbor;
+   //REAL avNbNeighbor;
    //{
-   // const double a=GetLatticePar(0);
-   // const double b=GetLatticePar(1);
-   // const double c=GetLatticePar(2);
-   // const double alpha=GetLatticePar(3);
-   // const double beta=GetLatticePar(4);
-   // const double gamma=GetLatticePar(5);
-   // const double v=a*b*c*sqrt(1-cos(alpha)*cos(alpha)-cos(beta)*cos(beta)-cos(gamma)*cos(gamma)
+   // const REAL a=GetLatticePar(0);
+   // const REAL b=GetLatticePar(1);
+   // const REAL c=GetLatticePar(2);
+   // const REAL alpha=GetLatticePar(3);
+   // const REAL beta=GetLatticePar(4);
+   // const REAL gamma=GetLatticePar(5);
+   // const REAL v=a*b*c*sqrt(1-cos(alpha)*cos(alpha)-cos(beta)*cos(beta)-cos(gamma)*cos(gamma)
    //            +2*cos(alpha)*cos(beta)*cos(gamma));
-   // const double m=3;//sqrt(mBumpDistanceMatrix.max());
+   // const REAL m=3;//sqrt(mBumpDistanceMatrix.max());
    // avNbNeighbor=nbComponent*nbSymmetrics*4./3.*M_PI*m*m*m/v;
    //}
    
    const long nbAtomSym=mDistTableIndex.numElements();
    //Init the cubic splines
-      CrystVector_double x(3),y(3);
+      CrystVector_REAL x(3),y(3);
       x(0)=0.;x(1)=.5;x(2)=1.;
       y(0)=0.;y(1)=.5;y(2)=0.;
       static const CubicSpline splineBumpMerge(x,y,0,0);
@@ -811,7 +811,7 @@ double Crystal::GetBumpMergeCostFunction() const
       x(0)=.5;x(1)=1.;
       y(0)=1.;y(1)=0.;
       static const CubicSpline splineBump(x,y,0,0);
-   double cost=0;
+   REAL cost=0;
    
    CrystVector_int atomicNumber(nbComponent);
    for(long i=0;i<nbComponent;i++)
@@ -824,7 +824,7 @@ double Crystal::GetBumpMergeCostFunction() const
    //cout << mDistTableSq.cols()<<" "<<mDistTableSq.rows()<<endl;
    
    //:TODO: faster store the splines in arrays
-   double tmp;
+   REAL tmp;
    for(long i=0;i<nbComponent;i++)
    {
       nbNeighbors=0;
@@ -862,7 +862,7 @@ double Crystal::GetBumpMergeCostFunction() const
 }
 
 void Crystal::SetBumpMergeDistance(const ScatteringPower &scatt1,
-                                   const ScatteringPower &scatt2,const double dist)
+                                   const ScatteringPower &scatt2,const REAL dist)
 {
    VFN_DEBUG_MESSAGE("Crystal::SetBumpMergeDistance()",5)
    const int num1=scatt1.GetDynPopCorrIndex();
@@ -872,7 +872,7 @@ void Crystal::SetBumpMergeDistance(const ScatteringPower &scatt1,
 }
 
 void Crystal::SetBumpMergeDistance(const ScatteringPower &scatt1,
-                                   const ScatteringPower &scatt2,const double dist,
+                                   const ScatteringPower &scatt2,const REAL dist,
                                    const bool allowMerge)
 {
    VFN_DEBUG_MESSAGE("Crystal::SetBumpMergeDistance()",5)
@@ -934,7 +934,7 @@ const string& Crystal::GetCostFunctionDescription(const unsigned int id)const
    }
 }
 
-double Crystal::GetCostFunctionValue(const unsigned int n)
+REAL Crystal::GetCostFunctionValue(const unsigned int n)
 {
    VFN_DEBUG_MESSAGE("Crystal::GetCostFunctionValue():"<<mName,4)
    switch(n)
@@ -948,15 +948,15 @@ double Crystal::GetCostFunctionValue(const unsigned int n)
    }
 }
 
-void Crystal::GlobalOptRandomMove(const double mutationAmplitude)
+void Crystal::GlobalOptRandomMove(const REAL mutationAmplitude)
 {
    VFN_DEBUG_MESSAGE("Crystal::GlobalOptRandomMove()",2)
    //Either a random move or a permutation of two scatterers
-   if( (rand()/(double)RAND_MAX)<-.1)//disabled :TODO: exclude fixed scatterers
+   if( (rand()/(REAL)RAND_MAX)<-.1)//disabled :TODO: exclude fixed scatterers
    {
       const long nb=this->GetNbScatterer();
-      const unsigned long n1=(unsigned long)((rand()/(double)(RAND_MAX-1))*nb);
-      const long n2=( (long)((rand()/(double)(RAND_MAX-1))*(nb-1))+1+n1)%nb;
+      const unsigned long n1=(unsigned long)((rand()/(REAL)(RAND_MAX-1))*nb);
+      const long n2=( (long)((rand()/(REAL)(RAND_MAX-1))*(nb-1))+1+n1)%nb;
       const float x1=this->GetScatt(n1).GetX();
       const float y1=this->GetScatt(n1).GetY();
       const float z1=this->GetScatt(n1).GetZ();
@@ -1088,8 +1088,8 @@ void Crystal::GetGeneGroup(const RefinableObj &obj,
 			}
 }
 
-void Crystal::Init(const double a, const double b, const double c, const double alpha,
-                   const double beta, const double gamma,const string &SpaceGroupId,
+void Crystal::Init(const REAL a, const REAL b, const REAL c, const REAL alpha,
+                   const REAL beta, const REAL gamma,const string &SpaceGroupId,
                    const string& name)
 {
    VFN_DEBUG_MESSAGE("Crystal::Init(a,b,c,alpha,beta,gamma,Sg,name)",10)
@@ -1146,9 +1146,9 @@ void Crystal::InitMatrices() const
    //mClockMetricMatrix.Print();
    //mClockLatticePar.Print();
 
-   double a,b,c,alpha,beta,gamma;//direct space parameters
-   double aa,bb,cc,alphaa,betaa,gammaa;//reciprocal space parameters
-   double v;//volume of the unit cell
+   REAL a,b,c,alpha,beta,gamma;//direct space parameters
+   REAL aa,bb,cc,alphaa,betaa,gammaa;//reciprocal space parameters
+   REAL v;//volume of the unit cell
    a=GetLatticePar(0);
    b=GetLatticePar(1);
    c=GetLatticePar(2);
@@ -1326,7 +1326,7 @@ void Crystal::InitRefParList()
       beta=false;
       gamma=false;
    }
-   double *pLatPar=mCellDim.data();
+   REAL *pLatPar=mCellDim.data();
    if(this->GetNbPar()==0)
    {//:KLUDGE:
       {
@@ -1391,7 +1391,7 @@ void Crystal::InitRefParList()
    VFN_DEBUG_MESSAGE("Crystal::InitRefParList():Finished",5)
 }
 
-void Crystal::CalcDistTable(const bool fast, const double asymUnitMargin) const
+void Crystal::CalcDistTable(const bool fast, const REAL asymUnitMargin) const
 {
    this->GetScatteringComponentList();
    this->InitMatrices();
@@ -1420,7 +1420,7 @@ void Crystal::CalcDistTable(const bool fast, const double asymUnitMargin) const
       CrystVector_long xCoords2(nbComponent);
       CrystVector_long yCoords2(nbComponent);
       CrystVector_long zCoords2(nbComponent);
-      CrystMatrix_double symmetricsCoords;
+      CrystMatrix_REAL symmetricsCoords;
       mDistTableIndex.resize(nbComponent*nbSymmetrics);
       long *pIndex=mDistTableIndex.data();
       //get the fractionnal coordinates of all atoms
@@ -1587,21 +1587,21 @@ void Crystal::CalcDistTable(const bool fast, const double asymUnitMargin) const
       //:NOTE: Assume mOrthMatrix is upper triangular
       TAU_PROFILE_START(timer4);
       {
-         const double M00=mOrthMatrix(0,0);
-         const double M01=mOrthMatrix(0,1);
-         const double M02=mOrthMatrix(0,2);
-         //const double M10=mOrthMatrix(1,0);
-         const double M11=mOrthMatrix(1,1);
-         const double M12=mOrthMatrix(1,2);
-         //const double M20=mOrthMatrix(2,0);
-         //const double M21=mOrthMatrix(2,1);
-         const double M22=mOrthMatrix(2,2);
+         const REAL M00=mOrthMatrix(0,0);
+         const REAL M01=mOrthMatrix(0,1);
+         const REAL M02=mOrthMatrix(0,2);
+         //const REAL M10=mOrthMatrix(1,0);
+         const REAL M11=mOrthMatrix(1,1);
+         const REAL M12=mOrthMatrix(1,2);
+         //const REAL M20=mOrthMatrix(2,0);
+         //const REAL M21=mOrthMatrix(2,1);
+         const REAL M22=mOrthMatrix(2,2);
          const long *x=xDist.data();
          const long *y=yDist.data();
          const long *z=zDist.data();
-         double *d=mDistTableSq.data();
-         double xo,yo,zo;
-         const double back= pow((double)intScale,2);
+         REAL *d=mDistTableSq.data();
+         REAL xo,yo,zo;
+         const REAL back= pow((REAL)intScale,2);
          for(long i=0;i<nbAtoms;i++)
          {
             for(long j=0;j<nbComponent;j++)
@@ -1621,11 +1621,11 @@ void Crystal::CalcDistTable(const bool fast, const double asymUnitMargin) const
       VFN_DEBUG_MESSAGE("Crystal::CalcDistTable(fast=false)",3)
       TAU_PROFILE("Crystal::CalcDistTable(fast=false)","Matrix (string&)",TAU_DEFAULT);
       const int nbSymmetrics=mSpaceGroup.GetNbSymmetrics();
-      CrystVector_double xCoords(nbComponent*nbSymmetrics);
-      CrystVector_double yCoords(nbComponent*nbSymmetrics);
-      CrystVector_double zCoords(nbComponent*nbSymmetrics);
+      CrystVector_REAL xCoords(nbComponent*nbSymmetrics);
+      CrystVector_REAL yCoords(nbComponent*nbSymmetrics);
+      CrystVector_REAL zCoords(nbComponent*nbSymmetrics);
       long nbAtoms=0;
-      CrystMatrix_double symmetricsCoords(nbSymmetrics,3);
+      CrystMatrix_REAL symmetricsCoords(nbSymmetrics,3);
       mDistTableIndex.resize(nbComponent*nbSymmetrics);
       long *pIndex=mDistTableIndex.data();
       //get the reduced coordinates of all atoms
@@ -1652,9 +1652,9 @@ void Crystal::CalcDistTable(const bool fast, const double asymUnitMargin) const
       mDistTableIndex.resizeAndPreserve(nbAtoms);
 
       // Now get all distances, in reduced coordinates
-      CrystMatrix_double xDist(nbAtoms,nbAtoms);
-      CrystMatrix_double yDist(nbAtoms,nbAtoms);
-      CrystMatrix_double zDist(nbAtoms,nbAtoms);
+      CrystMatrix_REAL xDist(nbAtoms,nbAtoms);
+      CrystMatrix_REAL yDist(nbAtoms,nbAtoms);
+      CrystMatrix_REAL zDist(nbAtoms,nbAtoms);
       mDistTableSq.resize(nbAtoms,nbAtoms);
       /*
       {
@@ -1670,9 +1670,9 @@ void Crystal::CalcDistTable(const bool fast, const double asymUnitMargin) const
       }
       */
       {
-         double f1;
-         const double *p1;
-         double *p2;
+         REAL f1;
+         const REAL *p1;
+         REAL *p2;
          double junk;
          p2=xDist.data();
          for(long i=0;i<nbAtoms;i++)
@@ -1716,20 +1716,20 @@ void Crystal::CalcDistTable(const bool fast, const double asymUnitMargin) const
       }
       //convert these distances to euclidian coordinates
       {//:KLUDGE: ? Assume mOrthMatrix is upper triangular for optimization
-         const double M00=mOrthMatrix(0,0);
-         const double M01=mOrthMatrix(0,1);
-         const double M02=mOrthMatrix(0,2);
-         //const double M10=mOrthMatrix(1,0);
-         const double M11=mOrthMatrix(1,1);
-         const double M12=mOrthMatrix(1,2);
-         //const double M20=mOrthMatrix(2,0);
-         //const double M21=mOrthMatrix(2,1);
-         const double M22=mOrthMatrix(2,2);
-         const double *x=xDist.data();
-         const double *y=yDist.data();
-         const double *z=zDist.data();
-         double *d=mDistTableSq.data();
-         double xo,yo,zo;
+         const REAL M00=mOrthMatrix(0,0);
+         const REAL M01=mOrthMatrix(0,1);
+         const REAL M02=mOrthMatrix(0,2);
+         //const REAL M10=mOrthMatrix(1,0);
+         const REAL M11=mOrthMatrix(1,1);
+         const REAL M12=mOrthMatrix(1,2);
+         //const REAL M20=mOrthMatrix(2,0);
+         //const REAL M21=mOrthMatrix(2,1);
+         const REAL M22=mOrthMatrix(2,2);
+         const REAL *x=xDist.data();
+         const REAL *y=yDist.data();
+         const REAL *z=zDist.data();
+         REAL *d=mDistTableSq.data();
+         REAL xo,yo,zo;
          for(long i=0;i<nbAtoms;i++)
          {
             for(long j=0;j<i;j++)
@@ -1748,8 +1748,8 @@ void Crystal::CalcDistTable(const bool fast, const double asymUnitMargin) const
          }
       }
       {
-         const double *d=mDistTableSq.data();
-         double *d2;
+         const REAL *d=mDistTableSq.data();
+         REAL *d2;
          for(long i=0;i<nbAtoms;i++)
          {
             d2=mDistTableSq.data()+i;

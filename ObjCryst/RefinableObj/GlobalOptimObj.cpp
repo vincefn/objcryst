@@ -65,13 +65,13 @@ void OptimizationObj::RandomizeStartingConfig()
    {
       if(true==mRefParList.GetParNotFixed(j).IsLimited())
       {
-         const double min=mRefParList.GetParNotFixed(j).GetMin();
-         const double max=mRefParList.GetParNotFixed(j).GetMax();
-         mRefParList.GetParNotFixed(j).MutateTo(min+(max-min)*(rand()/(double)RAND_MAX) );
+         const REAL min=mRefParList.GetParNotFixed(j).GetMin();
+         const REAL max=mRefParList.GetParNotFixed(j).GetMax();
+         mRefParList.GetParNotFixed(j).MutateTo(min+(max-min)*(rand()/(REAL)RAND_MAX) );
       }
 		else if(true==mRefParList.GetParNotFixed(j).IsPeriodic())
 			    mRefParList.GetParNotFixed(j).
-				 	Mutate(mRefParList.GetParNotFixed(j).GetPeriod()*rand()/(double)RAND_MAX);
+				 	Mutate(mRefParList.GetParNotFixed(j).GetPeriod()*rand()/(REAL)RAND_MAX);
    }
       //else cout << mRefParList.GetParNotFixed(j).Name() <<" Not limited :-(" <<endl;
    VFN_DEBUG_EXIT("OptimizationObj::RandomizeStartingConfig()",5)
@@ -118,38 +118,38 @@ void OptimizationObj::SetParIsUsed(const RefParType *type,const bool use)
       mRecursiveRefinedObjList.GetObj(i).SetParIsUsed(type,use);
 }
 void OptimizationObj::SetLimitsRelative(const string &parName,
-                                       const double min, const double max)
+                                       const REAL min, const REAL max)
 {
 	this->BuildRecursiveRefObjList();
    for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
       mRecursiveRefinedObjList.GetObj(i).SetLimitsRelative(parName,min,max);
 }
 void OptimizationObj::SetLimitsRelative(const RefParType *type,
-                                       const double min, const double max)
+                                       const REAL min, const REAL max)
 {
 	this->BuildRecursiveRefObjList();
    for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
       mRecursiveRefinedObjList.GetObj(i).SetLimitsRelative(type,min,max);
 }
 void OptimizationObj::SetLimitsAbsolute(const string &parName,
-                                       const double min, const double max)
+                                       const REAL min, const REAL max)
 {
 	this->BuildRecursiveRefObjList();
    for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
       mRecursiveRefinedObjList.GetObj(i).SetLimitsAbsolute(parName,min,max);
 }
 void OptimizationObj::SetLimitsAbsolute(const RefParType *type,
-                                       const double min, const double max)
+                                       const REAL min, const REAL max)
 {
 	this->BuildRecursiveRefObjList();
    for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
       mRecursiveRefinedObjList.GetObj(i).SetLimitsAbsolute(type,min,max);
 }
 
-double OptimizationObj::GetCostFunctionValue() 
+REAL OptimizationObj::GetCostFunctionValue() 
 {
    TAU_PROFILE("OptimizationObj::GetCostFunctionValue()","void ()",TAU_DEFAULT);
-   double cost =0.;
+   REAL cost =0.;
    for(unsigned int i=0;i<mNbCostFunction;i++)
 		if(mCostFunctionWeight(i)>0)
       	cost += mCostFunctionWeight(i)*mpCostFunctionRefinableObj[i]
@@ -187,7 +187,7 @@ void OptimizationObj::AddRefinableObj(RefinableObj &obj)
    #endif
 }
 
-void OptimizationObj::AddCostFunction(RefinableObj &obj,const unsigned int id, const double w)
+void OptimizationObj::AddCostFunction(RefinableObj &obj,const unsigned int id, const REAL w)
 {
    VFN_DEBUG_MESSAGE("OptimizationObj::AddGetCostFunctionValue()",5)
    mpCostFunctionRefinableObj[mNbCostFunction]=&obj;
@@ -330,10 +330,10 @@ MonteCarloObj::~MonteCarloObj()
 {
 }
 void MonteCarloObj::SetAlgorithmSimulAnnealing(const AnnealingSchedule scheduleTemp,
-                           const double tMax, const double tMin,
+                           const REAL tMax, const REAL tMin,
                            const AnnealingSchedule scheduleMutation,
-                           const double mutMax, const double mutMin,
-                           const long nbTrialRetry,const double minCostRetry,
+                           const REAL mutMax, const REAL mutMin,
+                           const long nbTrialRetry,const REAL minCostRetry,
                            const long maxNbTrialSinceBest)
 {
    VFN_DEBUG_MESSAGE("MonteCarloObj::SetAlgorithmSimulAnnealing()",5)
@@ -356,9 +356,9 @@ Cannot use ANNEALING_SMART for the Temperature schedule (yet).");
 }
 
 void MonteCarloObj::SetAlgorithmParallTempering(const AnnealingSchedule scheduleTemp,
-                                 const double tMax, const double tMin,
+                                 const REAL tMax, const REAL tMin,
                                  const AnnealingSchedule scheduleMutation,
-                                 const double mutMax, const double mutMin)
+                                 const REAL mutMax, const REAL mutMin)
 {
    VFN_DEBUG_MESSAGE("MonteCarloObj::SetAlgorithmParallTempering()",5)
    if(mAnnealingScheduleTemp.GetChoice()==ANNEALING_SMART)
@@ -377,7 +377,7 @@ Cannot use ANNEALING_SMART for the Temperature schedule (yet).");
    //mMaxNbTrialSinceBest=maxNbTrialSinceBest;
    VFN_DEBUG_MESSAGE("MonteCarloObj::SetAlgorithmParallTempering():End",3)
 }
-void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalcost=0)
+void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost=0)
 {
    //Keep a copy of the total number of steps, and decrement nbStep
    const long nbSteps=nbStep;
@@ -437,7 +437,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
          // Change temperature (and mutation) every...
             const int nbTryPerTemp=100;
 
-         double simAnnealTemp=-1;
+         REAL simAnnealTemp=-1;
          mMutationAmplitude=1.;
 
          Chronometer chrono;
@@ -452,14 +452,14 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
                {
                   case ANNEALING_BOLTZMANN:
                      simAnnealTemp=
-                        mTemperatureMin*log((double)nbSteps)/log((double)(mNbTrial+1));break;
+                        mTemperatureMin*log((REAL)nbSteps)/log((REAL)(mNbTrial+1));break;
                   case ANNEALING_CAUCHY:
                      simAnnealTemp=mTemperatureMin*nbSteps/mNbTrial;break;
                   //case ANNEALING_QUENCHING:
                   case ANNEALING_EXPONENTIAL:
                      simAnnealTemp=mTemperatureMax
                                     *pow(mTemperatureMin/mTemperatureMax,
-                                          mNbTrial/(double)nbSteps);break;
+                                          mNbTrial/(REAL)nbSteps);break;
                   case ANNEALING_SMART:break;//:TODO:
                   default: simAnnealTemp=mTemperatureMin;break;
                }
@@ -467,7 +467,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
                {
                   case ANNEALING_BOLTZMANN:
                      mMutationAmplitude=
-                        mMutationAmplitudeMin*log((double)nbSteps)/log((double)(mNbTrial+1));
+                        mMutationAmplitudeMin*log((REAL)nbSteps)/log((REAL)(mNbTrial+1));
                      break;
                   case ANNEALING_CAUCHY:
                      mMutationAmplitude=mMutationAmplitudeMin*nbSteps/mNbTrial;break;
@@ -475,10 +475,10 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
                   case ANNEALING_EXPONENTIAL:
                      mMutationAmplitude=mMutationAmplitudeMax
                                     *pow(mMutationAmplitudeMin/mMutationAmplitudeMax,
-                                          mNbTrial/(double)nbSteps);break;
+                                          mNbTrial/(REAL)nbSteps);break;
                   case ANNEALING_SMART:
-                     if((nbAcceptedMovesTemp/(double)nbTryPerTemp)>0.3) mMutationAmplitude*=2.;
-                     if((nbAcceptedMovesTemp/(double)nbTryPerTemp)<0.1) mMutationAmplitude/=2.;
+                     if((nbAcceptedMovesTemp/(REAL)nbTryPerTemp)>0.3) mMutationAmplitude*=2.;
+                     if((nbAcceptedMovesTemp/(REAL)nbTryPerTemp)<0.1) mMutationAmplitude/=2.;
                      if(mMutationAmplitude>mMutationAmplitudeMax) 
 								mMutationAmplitude=mMutationAmplitudeMax;
                      if(mMutationAmplitude<mMutationAmplitudeMin) 
@@ -490,7 +490,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
             }
 
             this->NewConfiguration();
-            double cost=this->GetCostFunctionValue();
+            REAL cost=this->GetCostFunctionValue();
             if(cost<mCurrentCost)
             {
                mCurrentCost=cost;
@@ -515,7 +515,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
             }
             else
             {
-               if( (rand()/(double)RAND_MAX) < exp(-(cost-mCurrentCost)/simAnnealTemp) )
+               if( (rand()/(REAL)RAND_MAX) < exp(-(cost-mCurrentCost)/simAnnealTemp) )
                {
                   mCurrentCost=cost;
                   mRefParList.SaveParamSet(mLastParSavedSetIndex);
@@ -529,7 +529,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
                if(!silent) cout <<"Trial :" << mNbTrial << " Temp="<< simAnnealTemp;
                if(!silent) cout <<" Mutation Ampl.: " <<mMutationAmplitude<< " Best Cost=" << mBestCost 
                                 <<" Current Cost=" << mCurrentCost 
-                                <<" Accepting "<<(int)((double)nbAcceptedMoves/nbTryReport*100)
+                                <<" Accepting "<<(int)((REAL)nbAcceptedMoves/nbTryReport*100)
                                 <<"% moves" << endl;
                nbAcceptedMoves=0;
                #ifdef __WX__CRYST__
@@ -574,44 +574,44 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
          //Total number of parallel refinements,each is a 'World'. The most stable
          // world must be i=nbWorld-1, and the most changing World (high mutation,
          // high temperature) is i=0.
-            const long nbWorld=20;
+            const long nbWorld=30;
          // Init the different temperatures
-            CrystVector_double simAnnealTemp(nbWorld);
+            CrystVector_REAL simAnnealTemp(nbWorld);
             for(int i=0;i<nbWorld;i++)
             {
                switch(mAnnealingScheduleTemp.GetChoice())
                {
                   case ANNEALING_BOLTZMANN:
                      simAnnealTemp(i)=
-                        mTemperatureMin*log((double)nbWorld)/log((double)(i+1));break;
+                        mTemperatureMin*log((REAL)nbWorld)/log((REAL)(i+1));break;
                   case ANNEALING_CAUCHY:
                      simAnnealTemp(i)=mTemperatureMin*nbWorld/(i+1);break;
                   //case ANNEALING_QUENCHING:
                   case ANNEALING_EXPONENTIAL:
                      simAnnealTemp(i)=mTemperatureMax
                                     *pow(mTemperatureMin/mTemperatureMax,
-                                          i/(double)(nbWorld-1));break;
+                                          i/(REAL)(nbWorld-1));break;
                   case ANNEALING_SMART:simAnnealTemp(i)=.1;//will be updated later
                   default: simAnnealTemp(i)=mTemperatureMin;break;
                }
             }
          //Init the different mutation rate parameters
-            CrystVector_double mutationAmplitude(nbWorld);
+            CrystVector_REAL mutationAmplitude(nbWorld);
             for(int i=0;i<nbWorld;i++)
             {
                switch(mAnnealingScheduleMutation.GetChoice())
                {
                   case ANNEALING_BOLTZMANN:
                      mutationAmplitude(i)=
-                        mMutationAmplitudeMin*log((double)(nbWorld-1))/log((double)(i+1));
+                        mMutationAmplitudeMin*log((REAL)(nbWorld-1))/log((REAL)(i+1));
                      break;
                   case ANNEALING_CAUCHY:
-                     mutationAmplitude(i)=mMutationAmplitudeMin*(double)(nbWorld-1)/i;break;
+                     mutationAmplitude(i)=mMutationAmplitudeMin*(REAL)(nbWorld-1)/i;break;
                   //case ANNEALING_QUENCHING:
                   case ANNEALING_EXPONENTIAL:
                      mutationAmplitude(i)=mMutationAmplitudeMax
                                     *pow(mMutationAmplitudeMin/mMutationAmplitudeMax,
-                                          i/(double)(nbWorld-1));break;
+                                          i/(REAL)(nbWorld-1));break;
                   case ANNEALING_SMART:mutationAmplitude(i)=1.;//will be updated later
                   default: mMutationAmplitude=mMutationAmplitudeMin;break;
                }
@@ -623,7 +623,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
          // Initialize the costs
             mCurrentCost=this->GetCostFunctionValue();
             mBestCost=mCurrentCost;
-            CrystVector_double currentCost(nbWorld);
+            CrystVector_REAL currentCost(nbWorld);
             currentCost=mCurrentCost;
          // Init the parameter sets for each World
          // All Worlds start from the same (current) configuration.
@@ -658,10 +658,10 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
 			// Used for automatic restart from minimum or randomization
 				long bestConfigNb=0;//when was the best config recorded ? (to restart if necessary)
 				long nbRestartFromMin=0;//Number of times we restarted from the minimum
-				double oldBestCost=-1;
+				REAL oldBestCost=-1;
 				long oldBestConfigIndex=mRefParList.CreateParamSet();
 			// record the statistical distribution n=f(cost function) for each World
-				//CrystMatrix_double trialsDensity(100,nbWorld+1);
+				//CrystMatrix_REAL trialsDensity(100,nbWorld+1);
 				//trialsDensity=0;
 				//for(int i=0;i<100;i++) trialsDensity(i,0)=i/(float)100;
          //Do the refinement
@@ -678,7 +678,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
                {
                   mRefParList.SaveParamSet(mLastParSavedSetIndex);
                   this->NewConfiguration();
-                  double cost=this->GetCostFunctionValue();
+                  REAL cost=this->GetCostFunctionValue();
 						//trialsDensity((long)(cost*100.),i+1)+=1;
                   if(cost<currentCost(i))
                   {
@@ -703,7 +703,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
                   }
                   else
                   {
-                     if((rand()/(double)RAND_MAX)<exp(-(cost-currentCost(i))/simAnnealTemp(i)) )
+                     if((rand()/(REAL)RAND_MAX)<exp(-(cost-currentCost(i))/simAnnealTemp(i)) )
                      {
                         currentCost(i)=cost;
                         mRefParList.SaveParamSet(worldCurrentSetIndex(i));
@@ -720,7 +720,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
             for(int i=1;i<nbWorld;i++)
             {
                
-               if((rand()/(double)RAND_MAX)
+               if((rand()/(REAL)RAND_MAX)
                       < exp(-(currentCost(i-1)-currentCost(i))/simAnnealTemp(i)))
                {  
                /*
@@ -736,7 +736,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
                   	mRefParList.GetParamSet(worldCurrentSetIndex(i-1));
                   mRefParList.GetParamSet(worldCurrentSetIndex(i-1))=
 							mRefParList.GetParamSet(swapParSavedSetIndex);
-                  const double tmp=currentCost(i);
+                  const REAL tmp=currentCost(i);
                   currentCost(i)=currentCost(i-1);
                   currentCost(i-1)=tmp;
                }
@@ -747,14 +747,14 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
 							"MonteCarloObj::Optimize (Try mating Worlds)"\
                      ,"", TAU_FIELD);
    			TAU_PROFILE_START(timer1);
-   			if( (rand()/(double)RAND_MAX)<.1)
+   			if( (rand()/(REAL)RAND_MAX)<.1)
             for(int k=nbWorld-1;k>nbWorld/2;k--)
             	for(int i=k-nbWorld/3;i<k;i++)
             	{
 						#if 0
 						// Random switching of gene groups
 						for(unsigned int j=0;j<nbGeneGroup;j++) 
-							crossoverGroupIndex(j)= (int) floor(rand()/((double)RAND_MAX-1)*2);
+							crossoverGroupIndex(j)= (int) floor(rand()/((REAL)RAND_MAX-1)*2);
 						for(int j=0;j<mRefParList.GetNbPar();j++)
 						{
 							if(0==crossoverGroupIndex(refParGeneGroupIndex(j)-1))
@@ -776,9 +776,9 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
 						#if 1
 						// Switch gene groups in two parts
 						unsigned int crossoverPoint1=
-							(int)(1+floor(rand()/((double)RAND_MAX-1)*(nbGeneGroup)));
+							(int)(1+floor(rand()/((REAL)RAND_MAX-1)*(nbGeneGroup)));
 						unsigned int crossoverPoint2=
-							(int)(1+floor(rand()/((double)RAND_MAX-1)*(nbGeneGroup)));
+							(int)(1+floor(rand()/((REAL)RAND_MAX-1)*(nbGeneGroup)));
 						if(crossoverPoint2<crossoverPoint1)
 						{
 							int tmp=crossoverPoint1;
@@ -809,8 +809,8 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
 						{
                   	if(junk==0) mRefParList.RestoreParamSet(parSetOffspringA);
 							else mRefParList.RestoreParamSet(parSetOffspringB);
-                  	double cost=this->GetCostFunctionValue();
-               		//if((rand()/(double)RAND_MAX)
+                  	REAL cost=this->GetCostFunctionValue();
+               		//if((rand()/(REAL)RAND_MAX)
                      //	 < exp(-(cost-currentCost(k))/simAnnealTemp(k)))
                		if(cost<currentCost(k))
 							{
@@ -865,7 +865,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
                        <<" Mutation Ampl.: " << mutationAmplitude(i)
                        <<" Current Cost=" << currentCost(i)
                        <<" Accepting "
-                       << (int)((double)worldNbAcceptedMoves(i)/nbTrialsReport*100)
+                       << (int)((REAL)worldNbAcceptedMoves(i)/nbTrialsReport*100)
                        <<"% moves" << endl;
                }
                //Change the mutation rate if necessary for each world
@@ -873,9 +873,9 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
                {
                   for(int i=0;i<nbWorld;i++)
                   {
-                     if((worldNbAcceptedMoves(i)/(double)nbTrialsReport)>0.30)
+                     if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)>0.30)
                         mutationAmplitude(i)*=2.;
-                     if((worldNbAcceptedMoves(i)/(double)nbTrialsReport)<0.10)
+                     if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)<0.10)
                         mutationAmplitude(i)/=2.;
                      if(mutationAmplitude(i)>mMutationAmplitudeMax) 
 								mutationAmplitude(i)=mMutationAmplitudeMax;
@@ -887,9 +887,9 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
                {
                   for(int i=0;i<nbWorld;i++)
                   {
-                     if((worldNbAcceptedMoves(i)/(double)nbTrialsReport)>0.30)
+                     if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)>0.30)
                         simAnnealTemp(i)/=1.5;
-                     if((worldNbAcceptedMoves(i)/(double)nbTrialsReport)<0.10)
+                     if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)<0.10)
                         simAnnealTemp(i)*=1.5;
                      if(simAnnealTemp(i)>mTemperatureMax) simAnnealTemp(i)=mTemperatureMax;
                      if(simAnnealTemp(i)<mTemperatureMin) simAnnealTemp(i)=mTemperatureMin;
@@ -1297,7 +1297,7 @@ void MonteCarloObj::XMLInputOld(istream &is,const IOCrystTag &tagg)
                   IOCrystExtractNameQuoted(is,className);
                   IOCrystExtractNameQuoted(is,name);
                   int func;
-                  double weight;
+                  REAL weight;
                   is >> func>>weight;
                   RefinableObj* obj=& (gRefinableObjRegistry.GetObj(name,className));
                   this->AddCostFunction(*obj,func,weight);

@@ -40,11 +40,11 @@ ostream& operator<< (ostream& os, const FormatInt& fInt);
 class FormatFloat
 {
    public:
-      FormatFloat(const double num,const int width=10,const int precision=4);
+      FormatFloat(const REAL num,const int width=10,const int precision=4);
       ~FormatFloat();
       
    private:
-      const double mValue;
+      const REAL mValue;
       const int mWidth;
       const int mPrecision;
   friend ostream& operator<< (ostream&, const FormatFloat&);
@@ -75,11 +75,11 @@ ostream& operator<< (ostream& os, const FormatString& fStr);
 /** output one or several vectors as (a) column(s): 
 *
 * \code 
-*  os << FormatVertVector<double>(vect,8,3);
-*  os << FormatVertVector<double>(vect1,vect2,vetc3,12,6);
+*  os << FormatVertVector<REAL>(vect,8,3);
+*  os << FormatVertVector<REAL>(vect1,vect2,vetc3,12,6);
 *  // For 7 vectors with width 12 and precision 4,
 *  // pVect being a pointer to an array of 7 vectors:
-*  os << FormatVertVector<double>(pVect,7,12,4);
+*  os << FormatVertVector<REAL>(pVect,7,12,4);
 * \endcode
 */
 template<class T> class FormatVertVector
@@ -142,7 +142,7 @@ template<class T> ostream& operator<< (ostream &os, const FormatVertVector<T> &f
 
 /** Format vector as horiz array:
 *
-* \code os << FormatHorizVector<double>(vect,8,3);\endcode
+* \code os << FormatHorizVector<REAL>(vect,8,3);\endcode
 */
 template<class T> class FormatHorizVector
 {
@@ -164,7 +164,7 @@ template<class T> ostream& operator<< (ostream &os, const FormatHorizVector<T> &
 
 /** Output vectors as column arrays, with the first 3 columns printed as integers.
 *
-* \code cout << FormatVertVectorHKLFloats<double>(vH,vK,vL,vIobs,vIcalc,vSigma,12,4);\endcode
+* \code cout << FormatVertVectorHKLFloats<REAL>(vH,vK,vL,vIobs,vIcalc,vSigma,12,4);\endcode
 */
 template<class T>class FormatVertVectorHKLFloats
 {

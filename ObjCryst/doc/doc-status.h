@@ -101,7 +101,7 @@
 * (3D display with OpenGL) and of the PowderPattern !
 * \li Saving structures, data to files has been implemented. See RefinableObj::XMLOutput().
 * Refinement flags are not saved (yet).
-* \li Changed all float to double precision. Performance hit=+15% on structure factor,
+* \li Changed all float to REAL precision. Performance hit=+15% on structure factor,
 * and +25% on full powder spectrums.
 *
 *\par 0.6(march 2001)

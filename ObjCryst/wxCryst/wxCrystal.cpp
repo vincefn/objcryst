@@ -188,9 +188,9 @@ void WXCrystal::CrystUpdate()
 }
 
 void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
-                         const double xMin,const double xMax,
-                         const double yMin,const double yMax,
-                         const double zMin,const double zMax)
+                         const REAL xMin,const REAL xMax,
+                         const REAL yMin,const REAL yMax,
+                         const REAL zMin,const REAL zMax)
 {
    VFN_DEBUG_ENTRY("WXCrystal::UpdateGL()",8)
 	WXCrystValidateAllUserInput();
@@ -837,7 +837,7 @@ void WXGLCrystalCanvas::OnSize(wxSizeEvent& event)
       glLoadIdentity();
    	VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnSize():"<<mViewAngle<<","<<width<<","<<height<<","<<mDist,2)
       if( (width>0)&&(height>0)) //in case the window is docked...
-      	gluPerspective(mViewAngle,(GLdouble)width/(GLdouble)height,1.f,2.*mDist);	
+      	gluPerspective(mViewAngle,(float)width/(float)height,1.f,2.*mDist);	
    }
    VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnSize():End",7)
 }
@@ -861,7 +861,7 @@ void WXGLCrystalCanvas::OnKeyDown(wxKeyEvent& event)
          glMatrixMode(GL_PROJECTION);
          glLoadIdentity();
          if( (width>0)&&(height>0)) //in case size is null...
-         	gluPerspective(mViewAngle,(GLdouble)width/(GLdouble)height,
+         	gluPerspective(mViewAngle,(float)width/(float)height,
                         (mDist>100)?(mDist-100):1.,mDist+100);	
          Refresh(FALSE);
          break;
@@ -876,7 +876,7 @@ void WXGLCrystalCanvas::OnKeyDown(wxKeyEvent& event)
          glMatrixMode(GL_PROJECTION);
          glLoadIdentity();
          if( (width>0)&&(height>0)) //in case size is null...
-         	gluPerspective(mViewAngle,(GLdouble)width/(GLdouble)height,
+         	gluPerspective(mViewAngle,(float)width/(float)height,
                         (mDist>100)?(mDist-100):1.,mDist+100);	
          Refresh(FALSE);
          break;
@@ -999,7 +999,7 @@ void WXGLCrystalCanvas::OnMouse( wxMouseEvent& event )
          glMatrixMode(GL_PROJECTION);
          glLoadIdentity();
          if( (width>0)&&(height>0)) //in case size is null...
-         	gluPerspective(mViewAngle,(GLdouble)width/(GLdouble)height,
+         	gluPerspective(mViewAngle,(float)width/(float)height,
                         (mDist>100)?(mDist-100):1.,mDist+100);	
          Refresh(FALSE);
          VFN_DEBUG_MESSAGE(mViewAngle <<" "<<mDist,2)

@@ -22,7 +22,7 @@
 #include "ObjCryst/ZScatterer.h"
 #include "ObjCryst/ScatteringData.h"
 
-#include "Quirks/VFNStreamFormat.h" //simple formatting of integers, doubles..
+#include "Quirks/VFNStreamFormat.h" //simple formatting of integers, REALs..
 
 #include "Quirks/VFNDebug.h"
 #ifdef OBJCRYST_GL
@@ -46,10 +46,10 @@ namespace ObjCryst
 //
 //######################################################################
 ZAtom::ZAtom(ZScatterer &scatt,const ScatteringPower *pow,
-             const long atomBond, const double bondLength,
-             const long atomAngle, const double bondAngle,
-             const long atomDihedral, const double dihedralAngle,
-             const double popu, const string &name):
+             const long atomBond, const REAL bondLength,
+             const long atomAngle, const REAL bondAngle,
+             const long atomDihedral, const REAL dihedralAngle,
+             const REAL popu, const string &name):
 mpScattPow(pow),
 mAtomBond(atomBond),mAtomAngle(atomAngle),mAtomDihed(atomDihedral),
 mBondLength(bondLength),mAngle(bondAngle),mDihed(dihedralAngle),
@@ -75,16 +75,16 @@ void ZAtom::SetName(const string& name) {mName=name;}
 long ZAtom::GetZBondAtom()const {return mAtomBond;}
 long ZAtom::GetZAngleAtom()const {return mAtomAngle;}
 long ZAtom::GetZDihedralAngleAtom()const {return mAtomDihed;}
-double ZAtom::GetZBondLength()const {return mBondLength;}
-double ZAtom::GetZAngle()const {return mAngle;}
-double ZAtom::GetZDihedralAngle()const {return mDihed;}
-double ZAtom::GetOccupancy()const {return mOccupancy;}
+REAL ZAtom::GetZBondLength()const {return mBondLength;}
+REAL ZAtom::GetZAngle()const {return mAngle;}
+REAL ZAtom::GetZDihedralAngle()const {return mDihed;}
+REAL ZAtom::GetOccupancy()const {return mOccupancy;}
 const ScatteringPower* ZAtom::GetScatteringPower()const{return mpScattPow;}
 //:TODO: fix the following so that their clocks are clicked accordingly
-void ZAtom::SetZBondLength(const double bond) {mBondLength=bond;}
-void ZAtom::SetZAngle(const double angle) {mAngle=angle;}
-void ZAtom::SetZDihedralAngle(const double dihed) {mDihed=dihed;}
-void ZAtom::SetOccupancy(const double pop) {mOccupancy=pop;}
+void ZAtom::SetZBondLength(const REAL bond) {mBondLength=bond;}
+void ZAtom::SetZAngle(const REAL angle) {mAngle=angle;}
+void ZAtom::SetZDihedralAngle(const REAL dihed) {mDihed=dihed;}
+void ZAtom::SetOccupancy(const REAL pop) {mOccupancy=pop;}
 void ZAtom::SetScatteringPower(const ScatteringPower* scatt) {mpScattPow=scatt;}
 #ifdef __WX__CRYST__
 WXCrystObjBasic* ZAtom::WXCreate(wxWindow *parent)
@@ -140,17 +140,17 @@ const string& ZMoveMinimizer::GetCostFunctionDescription(const unsigned int)cons
 	static const string *str= new string("Conformation change distances squared");
 	return *str;
 }
-double ZMoveMinimizer::GetCostFunctionValue(const unsigned int)
+REAL ZMoveMinimizer::GetCostFunctionValue(const unsigned int)
 {
    TAU_PROFILE("ZMoveMinimizer::GetCostFunctionValue()","void ()",TAU_DEFAULT);
-	const double *pX1=mpZScatt->GetXCoord().data();
-	const double *pY1=mpZScatt->GetYCoord().data();
-	const double *pZ1=mpZScatt->GetZCoord().data();
-	const double *pX0=mXCoord0.data();
-	const double *pY0=mYCoord0.data();
-	const double *pZ0=mZCoord0.data();
-	const double *pW=mAtomWeight.data();
-	double dist=0;
+	const REAL *pX1=mpZScatt->GetXCoord().data();
+	const REAL *pY1=mpZScatt->GetYCoord().data();
+	const REAL *pZ1=mpZScatt->GetZCoord().data();
+	const REAL *pX0=mXCoord0.data();
+	const REAL *pY0=mYCoord0.data();
+	const REAL *pZ0=mZCoord0.data();
+	const REAL *pW=mAtomWeight.data();
+	REAL dist=0;
 	//for(int i=mXCoord0.numElements()-1;i>=0;i--)
 	//	dist+= abs(*pX1++ - *pX0++) + abs(*pY1++ - *pY0++) + abs(*pZ1++ - *pZ0++);
 	for(int i=mXCoord0.numElements()-1;i>=0;i--)
@@ -163,10 +163,10 @@ double ZMoveMinimizer::GetCostFunctionValue(const unsigned int)
 	}
 	
 	#if 0
-	const CrystVector_double *pXcoord=&(mpZScatt->GetXCoord());
-	const CrystVector_double *pYcoord=&(mpZScatt->GetYCoord());
-	const CrystVector_double *pZcoord=&(mpZScatt->GetZCoord());
-	double dist=0;
+	const CrystVector_REAL *pXcoord=&(mpZScatt->GetXCoord());
+	const CrystVector_REAL *pYcoord=&(mpZScatt->GetYCoord());
+	const CrystVector_REAL *pZcoord=&(mpZScatt->GetZCoord());
+	REAL dist=0;
 	for(int i=pXcoord->numElements()-1;i>=0;i--)
 	{
 		dist+=mAtomWeight(i)*( ((*pXcoord)(i)-mXCoord0(i))*((*pXcoord)(i)-mXCoord0(i))
@@ -187,7 +187,7 @@ void ZMoveMinimizer::RecordConformation()
 		mAtomWeight=1;
 	}
 }
-void ZMoveMinimizer::SetZAtomWeight(const CrystVector_double weight) {mAtomWeight=weight;}
+void ZMoveMinimizer::SetZAtomWeight(const CrystVector_REAL weight) {mAtomWeight=weight;}
 void ZMoveMinimizer::MinimizeChange(long nbTrial=10000)
 {
 	if(mAtomWeight.max()<1e-3) return;
@@ -202,8 +202,8 @@ void ZMoveMinimizer::MinimizeChange(long nbTrial=10000)
 //######################################################################
 
 ZScatterer::ZScatterer(const string &name,const Crystal &cryst, 
-                       const double x,const double y,const double z,
-                       const double phi,const double chi, const double psi):
+                       const REAL x,const REAL y,const REAL z,
+                       const REAL phi,const REAL chi, const REAL psi):
 mScattCompList(0),mNbAtom(0),mNbDummyAtom(0),
 mPhi(0),mChi(0),mPsi(0),
 mZAtomRegistry("List of ZAtoms"),
@@ -268,10 +268,10 @@ ZScatterer* ZScatterer::CreateCopy() const
 const string ZScatterer::GetClassName() const {return "ZScatterer";}
 
 void ZScatterer::AddAtom(const string &name,const ScatteringPower *pow,
-             const long atomBond, const double bondLength,
-             const long atomAngle, const double bondAngle,
-             const long atomDihedral, const double dihedralAngle,
-             const double popu)
+             const long atomBond, const REAL bondLength,
+             const long atomAngle, const REAL bondAngle,
+             const long atomDihedral, const REAL dihedralAngle,
+             const REAL popu)
 {
    VFN_DEBUG_MESSAGE("ZScatterer::AddAtom():"<<name<<")",5)
    ZAtom *zatom =new ZAtom(*this,pow,
@@ -381,13 +381,13 @@ void ZScatterer::Print() const
    //for(int i=0;i<this->mNbAtom;i++) ??;
 }
 
-double ZScatterer::GetPhi()    const {return mPhi;}
-double ZScatterer::GetChi()    const {return mChi;}
-double ZScatterer::GetPsi()    const {return mPsi;}
+REAL ZScatterer::GetPhi()    const {return mPhi;}
+REAL ZScatterer::GetChi()    const {return mChi;}
+REAL ZScatterer::GetPsi()    const {return mPsi;}
 
-void ZScatterer::SetPhi(const double x) { mClockScatterer.Click();mPhi=x;}
-void ZScatterer::SetChi(const double y) { mClockScatterer.Click();mChi=y;}
-void ZScatterer::SetPsi(const double z) { mClockScatterer.Click();mPsi=z;}
+void ZScatterer::SetPhi(const REAL x) { mClockScatterer.Click();mPhi=x;}
+void ZScatterer::SetChi(const REAL y) { mClockScatterer.Click();mChi=y;}
+void ZScatterer::SetPsi(const REAL z) { mClockScatterer.Click();mPsi=z;}
 
 long ZScatterer::GetZBondAtom(const int i)const 
 {return mZAtomRegistry.GetObj(i).GetZBondAtom();}
@@ -398,20 +398,20 @@ long ZScatterer::GetZAngleAtom(const int i)const
 long ZScatterer::GetZDihedralAngleAtom(const int i)const
 {return mZAtomRegistry.GetObj(i).GetZDihedralAngleAtom();}
 
-double ZScatterer::GetZBondLength(const int i)const 
+REAL ZScatterer::GetZBondLength(const int i)const 
 {return mZAtomRegistry.GetObj(i).GetZBondLength();}
-double ZScatterer::GetZAngle(const int i)const
+REAL ZScatterer::GetZAngle(const int i)const
 {return mZAtomRegistry.GetObj(i).GetZAngle();}
-double ZScatterer::GetZDihedralAngle(const int i)const
+REAL ZScatterer::GetZDihedralAngle(const int i)const
 {return mZAtomRegistry.GetObj(i).GetZDihedralAngle();}
 
-void ZScatterer::SetZBondLength(const int i,const double a)
+void ZScatterer::SetZBondLength(const int i,const REAL a)
 {mClockScatterer.Click();mZAtomRegistry.GetObj(i).SetZBondLength(a);}
 
-void ZScatterer::SetZAngle(const int i,const double a)
+void ZScatterer::SetZAngle(const int i,const REAL a)
 {mClockScatterer.Click();mZAtomRegistry.GetObj(i).SetZAngle(a);}
 
-void ZScatterer::SetZDihedralAngle(const int i,const double a)
+void ZScatterer::SetZDihedralAngle(const int i,const REAL a)
    {mClockScatterer.Click();mZAtomRegistry.GetObj(i).SetZDihedralAngle(a);}
 
 const ObjRegistry<ZAtom>& ZScatterer::GetZAtomRegistry()const
@@ -443,7 +443,7 @@ ostream& ZScatterer::POVRayDescription(ostream &os,
    
    if(true==onlyIndependentAtoms)
    {
-      CrystVector_double x(mNbAtom),y(mNbAtom),z(mNbAtom);
+      CrystVector_REAL x(mNbAtom),y(mNbAtom),z(mNbAtom);
       for(int i=0;i<mNbAtom;i++)
       {
          x(i)=mpAtom[i]->GetX();
@@ -478,7 +478,7 @@ ostream& ZScatterer::POVRayDescription(ostream &os,
    }
    else
    {
-      CrystMatrix_double* xyzCoords=new CrystMatrix_double[mNbAtom];
+      CrystMatrix_REAL* xyzCoords=new CrystMatrix_REAL[mNbAtom];
       for(int i=0;i<mNbAtom;i++)
          *(xyzCoords+i)=this->GetCrystal().GetSpaceGroup().GetAllSymmetrics(mpAtom[i]->GetX(),
                                                             mpAtom[i]->GetY(),
@@ -514,9 +514,9 @@ ostream& ZScatterer::POVRayDescription(ostream &os,
                    1, 1,-1,
                    1, 1, 0,
                    1, 1, 1;
-      double dx,dy,dz;
-      CrystVector_double x(mNbAtom),y(mNbAtom),z(mNbAtom);
-      CrystVector_double xSave,ySave,zSave;
+      REAL dx,dy,dz;
+      CrystVector_REAL x(mNbAtom),y(mNbAtom),z(mNbAtom);
+      CrystVector_REAL xSave,ySave,zSave;
       for(int i=0;i<nbSymmetrics;i++)
       {
          for(int j=0;j<mNbAtom;j++)
@@ -529,9 +529,9 @@ ostream& ZScatterer::POVRayDescription(ostream &os,
             dx=x(0);
             dy=y(0);
             dz=z(0);
-            x(0) = fmod((double) x(0),(int)1); if(x(0)<0) x(0)+=1.;
-            y(0) = fmod((double) y(0),(int)1); if(y(0)<0) y(0)+=1.;
-            z(0) = fmod((double) z(0),(int)1); if(z(0)<0) z(0)+=1.;
+            x(0) = fmod((REAL) x(0),(int)1); if(x(0)<0) x(0)+=1.;
+            y(0) = fmod((REAL) y(0),(int)1); if(y(0)<0) y(0)+=1.;
+            z(0) = fmod((REAL) z(0),(int)1); if(z(0)<0) z(0)+=1.;
             dx = x(0)-dx;
             dy = y(0)-dy;
             dz = z(0)-dz;
@@ -542,7 +542,7 @@ ostream& ZScatterer::POVRayDescription(ostream &os,
                z(j) += dz;
             }
          //Generate also translated atoms near the unit cell
-         const double limit =0.1;
+         const REAL limit =0.1;
          for(int j=0;j<translate.rows();j++)
          {
             xSave=x;
@@ -596,9 +596,9 @@ ostream& ZScatterer::POVRayDescription(ostream &os,
 }
 
 void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
-                                   const double xMin,const double xMax,
-                                   const double yMin,const double yMax,
-                                   const double zMin,const double zMax)const
+                                   const REAL xMin,const REAL xMax,
+                                   const REAL yMin,const REAL yMax,
+                                   const REAL zMin,const REAL zMax)const
 {
    #ifdef OBJCRYST_GL
    VFN_DEBUG_ENTRY("ZScatterer::GLInitDisplayList()",4)
@@ -617,7 +617,7 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
    if(true==onlyIndependentAtoms)
    {
       //cout << m3DDisplayIndex <<endl;
-      CrystVector_double x,y,z;
+      CrystVector_REAL x,y,z;
       x=mXCoord;
       y=mYCoord;
       z=mZCoord;
@@ -651,7 +651,7 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                      glMaterialfv (GL_FRONT, GL_AMBIENT_AND_DIFFUSE,colour_bond);
                      GLUquadricObj *quadobj = gluNewQuadric();
                      glColor3f(1.0f,1.0f,1.0f);
-                     const double height= sqrt( (x(n2)-x(n1))*(x(n2)-x(n1))
+                     const REAL height= sqrt( (x(n2)-x(n1))*(x(n2)-x(n1))
                                               +(y(n2)-y(n1))*(y(n2)-y(n1))
                                               +(z(n2)-z(n1))*(z(n2)-z(n1)));
                      glRotatef(180,x(n2)-x(n1),y(n2)-y(n1),z(n2)-z(n1)+height);// ?!?!?!
@@ -663,7 +663,7 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                case 3: // Draw a triangular face
                {
                   long n1,n2,n3;
-                  double x1,y1,z1,x2,y2,z2,xn,yn,zn,xc,yc,zc;
+                  REAL x1,y1,z1,x2,y2,z2,xn,yn,zn,xc,yc,zc;
                   n1=m3DDisplayIndex(k,1);
                   n2=m3DDisplayIndex(k,2);
                   n3=m3DDisplayIndex(k,3);
@@ -703,7 +703,7 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                case 4: // Draw a quadric face
                {
                   long n1,n2,n3,n4;
-                  double x1,y1,z1,x2,y2,z2,xn,yn,zn,xc,yc,zc;
+                  REAL x1,y1,z1,x2,y2,z2,xn,yn,zn,xc,yc,zc;
                   n1=m3DDisplayIndex(k,1);
                   n2=m3DDisplayIndex(k,2);
                   n3=m3DDisplayIndex(k,3);
@@ -764,7 +764,7 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                   glMaterialfv (GL_FRONT, GL_AMBIENT_AND_DIFFUSE,colour_bond);
                   GLUquadricObj *quadobj = gluNewQuadric();
                   glColor3f(1.0f,1.0f,1.0f);
-                  const double height= sqrt( (x(bond)-x(k))*(x(bond)-x(k))
+                  const REAL height= sqrt( (x(bond)-x(k))*(x(bond)-x(k))
                                            +(y(bond)-y(k))*(y(bond)-y(k))
                                            +(z(bond)-z(k))*(z(bond)-z(k)));
                   glRotatef(180,x(bond)-x(k),y(bond)-y(k),z(bond)-z(k)+height);// !!!
@@ -778,9 +778,9 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
    else
    {
       VFN_DEBUG_ENTRY("ZScatterer::GLInitDisplayList():Show all symmetrics",3)
-      CrystMatrix_double xyzCoords[100]; //:TODO:
+      CrystMatrix_REAL xyzCoords[100]; //:TODO:
       {
-         double x0,y0,z0;
+         REAL x0,y0,z0;
          for(int i=0;i<mNbAtom;i++)
          {//We also generate the positions of dummy atoms.. This may be needed...
             x0=mXCoord(i);
@@ -819,9 +819,9 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                    1, 1,-1,
                    1, 1, 0,
                    1, 1, 1;
-      double dx,dy,dz;
-      CrystVector_double x(mNbAtom),y(mNbAtom),z(mNbAtom);
-      CrystVector_double xSave,ySave,zSave;
+      REAL dx,dy,dz;
+      CrystVector_REAL x(mNbAtom),y(mNbAtom),z(mNbAtom);
+      CrystVector_REAL xSave,ySave,zSave;
       const int nbSymmetrics=xyzCoords[0].rows();
       for(int i=0;i<nbSymmetrics;i++)
       {
@@ -836,9 +836,9 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
             dx=x(0);
             dy=y(0);
             dz=z(0);
-            x(0) = fmod((double) x(0),(int)1); if(x(0)<0) x(0)+=1.;
-            y(0) = fmod((double) y(0),(int)1); if(y(0)<0) y(0)+=1.;
-            z(0) = fmod((double) z(0),(int)1); if(z(0)<0) z(0)+=1.;
+            x(0) = fmod((REAL) x(0),(int)1); if(x(0)<0) x(0)+=1.;
+            y(0) = fmod((REAL) y(0),(int)1); if(y(0)<0) y(0)+=1.;
+            z(0) = fmod((REAL) z(0),(int)1); if(z(0)<0) z(0)+=1.;
             dx = x(0)-dx;
             dy = y(0)-dy;
             dz = z(0)-dz;
@@ -867,7 +867,7 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                if(m3DDisplayIndex.numElements()>0)
                {
                   long n1,n2,n3;
-                  double x1,y1,z1,x2,y2,z2,xn,yn,zn,xc,yc,zc;
+                  REAL x1,y1,z1,x2,y2,z2,xn,yn,zn,xc,yc,zc;
                   for(long k=0;k<m3DDisplayIndex.rows();k++)
                   {
                      n1=m3DDisplayIndex(k,0);
@@ -925,7 +925,7 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                            glMaterialfv (GL_FRONT, GL_AMBIENT_AND_DIFFUSE,colour_bond);
                            GLUquadricObj *quadobj = gluNewQuadric();
                            glColor3f(1.0f,1.0f,1.0f);
-                           const double height= sqrt( (x(bond)-x(k))*(x(bond)-x(k))
+                           const REAL height= sqrt( (x(bond)-x(k))*(x(bond)-x(k))
                                                     +(y(bond)-y(k))*(y(bond)-y(k))
                                                     +(z(bond)-z(k))*(z(bond)-z(k)));
                            glRotatef(180,x(bond)-x(k),y(bond)-y(k),z(bond)-z(k)+height);// !!!
@@ -954,7 +954,7 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                         glMaterialfv (GL_FRONT, GL_AMBIENT_AND_DIFFUSE,colour_bond);
                         GLUquadricObj *quadobj = gluNewQuadric();
                         glColor3f(1.0f,1.0f,1.0f);	   // Red
-                        const double height= sqrt( (x(bond)-x(k))*(x(bond)-x(k))
+                        const REAL height= sqrt( (x(bond)-x(k))*(x(bond)-x(k))
                                                  +(y(bond)-y(k))*(y(bond)-y(k))
                                                  +(z(bond)-z(k))*(z(bond)-z(k)));
                         glRotatef(180,x(bond)-x(k),y(bond)-y(k),z(bond)-z(k)+height);// !!!
@@ -1035,17 +1035,17 @@ void ZScatterer::GetGeneGroup(const RefinableObj &obj,
 					else groupIndex(i)= first++;
 			}
 }
-const CrystVector_double& ZScatterer::GetXCoord() const
+const CrystVector_REAL& ZScatterer::GetXCoord() const
 {
 	this->UpdateCoordinates();
 	return mXCoord;
 }
-const CrystVector_double& ZScatterer::GetYCoord() const
+const CrystVector_REAL& ZScatterer::GetYCoord() const
 {
 	this->UpdateCoordinates();
 	return mYCoord;
 }
-const CrystVector_double& ZScatterer::GetZCoord() const
+const CrystVector_REAL& ZScatterer::GetZCoord() const
 {
 	this->UpdateCoordinates();
 	return mZCoord;
@@ -1058,7 +1058,7 @@ void ZScatterer::EndOptimization()
 	this->RefinableObj::EndOptimization();
 }
 
-void ZScatterer::GlobalOptRandomMove(const double mutationAmplitude)
+void ZScatterer::GlobalOptRandomMove(const REAL mutationAmplitude)
 {
    VFN_DEBUG_ENTRY("ZScatterer::GlobalOptRandomMove()",3)
    TAU_PROFILE("ZScatterer::GlobalOptRandomMove()","void ()",TAU_DEFAULT);
@@ -1068,7 +1068,7 @@ void ZScatterer::GlobalOptRandomMove(const double mutationAmplitude)
 	//
 	// Should try to do better by really minimizing the conformation
 	// changes
-   if(false)// (rand()/(double)RAND_MAX)<.01)//.01
+   if(false)// (rand()/(REAL)RAND_MAX)<.01)//.01
 	{
    	TAU_PROFILE_TIMER(timer1,\
 							"ZScatterer::GlobalOptRandomMoveSmart1(prepare ref par & mutate)"\
@@ -1102,7 +1102,7 @@ void ZScatterer::GlobalOptRandomMove(const double mutationAmplitude)
 		// Pick one to move and get the relevant parameter
 		// (maybe we should random-move also the associated bond lengths an angles,
 		// but for now we'll concentrate on dihedral (torsion) angles.
-			const int atom=dihed((int) (rand()/((double)RAND_MAX+1)*nbDihed));
+			const int atom=dihed((int) (rand()/((REAL)RAND_MAX+1)*nbDihed));
 			//cout<<endl;
    		VFN_DEBUG_MESSAGE("ZScatterer::GlobalOptRandomMove(): Changing atom #"<<atom ,3)
 			if(atom==2)
@@ -1115,9 +1115,9 @@ void ZScatterer::GlobalOptRandomMove(const double mutationAmplitude)
 		// Set up
 			const int moveType= rand()%3;
 			mpZMoveMinimizer->FixAllPar();
-			double x0,y0,z0;
+			REAL x0,y0,z0;
 			//cout << " Move Type:"<<moveType<<endl;
-			CrystVector_double weight(mNbAtom);
+			CrystVector_REAL weight(mNbAtom);
 			switch(moveType)
 			{// :TODO: rather build a connectivity table, to include more atoms
 				case 0:// (0) Try to move only one atom
@@ -1215,7 +1215,7 @@ void ZScatterer::GlobalOptRandomMove(const double mutationAmplitude)
 		// Move it, and with some probability use flipping to some
 		// not-so-random angles., and then minimize the conformation change
 			mpZMoveMinimizer->SetZAtomWeight(weight);
-			double change;
+			REAL change;
 			if( (rand()%5)==0)
 			{
 				switch(rand()%5)
@@ -1230,7 +1230,7 @@ void ZScatterer::GlobalOptRandomMove(const double mutationAmplitude)
 			else
 			{
 				change= par->GetGlobalOptimStep()
-                     	 *2*(rand()/(double)RAND_MAX-0.5)*mutationAmplitude*16;
+                     	 *2*(rand()/(REAL)RAND_MAX-0.5)*mutationAmplitude*16;
 			}
    	TAU_PROFILE_STOP(timer1);
    		VFN_DEBUG_MESSAGE("ZScatterer::GlobalOptRandomMove(): mutation:"<<change*RAD2DEG,3)
@@ -1252,7 +1252,7 @@ void ZScatterer::GlobalOptRandomMove(const double mutationAmplitude)
 			else
 			{
 				//cout <<"ZMoveMinimizer(flip):cost="<<mpZMoveMinimizer->GetCostFunctionValue(0);
-				const double tmp=mpZMoveMinimizer->GetCostFunctionValue(0);
+				const REAL tmp=mpZMoveMinimizer->GetCostFunctionValue(0);
 				if(tmp>.05)
 				{
    				TAU_PROFILE_START(timer2);
@@ -1283,7 +1283,7 @@ void ZScatterer::GlobalOptRandomMove(const double mutationAmplitude)
 		if(nbDihed<2) //Can't play :-(
 			this->RefinableObj::GlobalOptRandomMove(mutationAmplitude);
 		// Pick one
-		const int atom=dihed((int) (rand()/((double)RAND_MAX+1)*nbDihed));
+		const int atom=dihed((int) (rand()/((REAL)RAND_MAX+1)*nbDihed));
    	VFN_DEBUG_MESSAGE("ZScatterer::GlobalOptRandomMove(): "<<FormatHorizVector<long>(dihed) ,10)
    	VFN_DEBUG_MESSAGE("ZScatterer::GlobalOptRandomMove(): Changing atom #"<<atom ,10)
 		if(atom==2)
@@ -1291,9 +1291,9 @@ void ZScatterer::GlobalOptRandomMove(const double mutationAmplitude)
 		else
 			par=&(this->GetPar(&(mZAtomRegistry.GetObj(atom).mDihed)));
 		// Get the old value
-		const double old=par->GetValue();
+		const REAL old=par->GetValue();
 		// Move it, with a max amplitude 8x greater than usual
-		if( (rand()/(double)RAND_MAX)<.1)
+		if( (rand()/(REAL)RAND_MAX)<.1)
 		{// give some probability to use certain angles: -120,-90,90,120,180
 			switch(rand()%5)
 			{
@@ -1306,8 +1306,8 @@ void ZScatterer::GlobalOptRandomMove(const double mutationAmplitude)
 		}
 		else
 			par->Mutate( par->GetGlobalOptimStep()
-                      *2*(rand()/(double)RAND_MAX-0.5)*mutationAmplitude*8);
-		const double change=mZAtomRegistry.GetObj(atom).GetZDihedralAngle()-old;
+                      *2*(rand()/(REAL)RAND_MAX-0.5)*mutationAmplitude*8);
+		const REAL change=mZAtomRegistry.GetObj(atom).GetZDihedralAngle()-old;
 		// Now move all atoms using this changed bond as a reference
 		//const int atom2=	mZAtomRegistry.GetObj(atom).GetZAngleAtom();
 		for(int i=atom;i<mNbAtom;i++)
@@ -1342,7 +1342,7 @@ void ZScatterer::UpdateCoordinates() const
    if(0==mNbAtom) return;
    
    {
-      CrystMatrix_double phiMatrix(3,3),chiMatrix(3,3),psiMatrix(3,3);
+      CrystMatrix_REAL phiMatrix(3,3),chiMatrix(3,3),psiMatrix(3,3);
       phiMatrix= cos(mPhi)   , -sin(mPhi)   , 0,
                  sin(mPhi)   , cos(mPhi)    , 0,
                  0           ,0             ,1;
@@ -1388,9 +1388,9 @@ void ZScatterer::UpdateCoordinates() const
    VFN_DEBUG_MESSAGE("->Atom #2:"<<mXCoord(2)<<" : "<<mYCoord(2)<<" : "<<mZCoord(2),1)
    for(int i=1;i<3;i++)// Global rotation of scatterer
    {
-      const double x=mXCoord(i);
-      const double y=mYCoord(i);
-      const double z=mZCoord(i);
+      const REAL x=mXCoord(i);
+      const REAL y=mYCoord(i);
+      const REAL z=mZCoord(i);
       mXCoord(i)=mPhiChiPsiMatrix(0,0)*x+mPhiChiPsiMatrix(0,1)*y+mPhiChiPsiMatrix(0,2)*z;
       mYCoord(i)=mPhiChiPsiMatrix(1,0)*x+mPhiChiPsiMatrix(1,1)*y+mPhiChiPsiMatrix(1,2)*z;
       mZCoord(i)=mPhiChiPsiMatrix(2,0)*x+mPhiChiPsiMatrix(2,1)*y+mPhiChiPsiMatrix(2,2)*z;
@@ -1398,12 +1398,12 @@ void ZScatterer::UpdateCoordinates() const
    }
    if(mNbAtom>3)
    {
-      double xa,ya,za,xb,yb,zb,xd,yd,zd,cosph,sinph,costh,sinth,coskh,sinkh,cosa,sina;
-      double xpd,ypd,zpd,xqd,yqd,zqd;
-      double rbc,xyb,yza,tmp,xpa,ypa,zqa;
+      REAL xa,ya,za,xb,yb,zb,xd,yd,zd,cosph,sinph,costh,sinth,coskh,sinkh,cosa,sina;
+      REAL xpd,ypd,zpd,xqd,yqd,zqd;
+      REAL rbc,xyb,yza,tmp,xpa,ypa,zqa;
       int na,nb,nc;
       bool flag;
-      double dist,angle,dihed;
+      REAL dist,angle,dihed;
       for(int i=3;i<mNbAtom;i++)
       {
          na=GetZBondAtom(i);
@@ -1492,14 +1492,14 @@ void ZScatterer::UpdateCoordinates() const
       }
    }
    //shift atom around Central atom
-   double x,y,z;
+   REAL x,y,z;
    x=this->GetX();
    y=this->GetY();
    z=this->GetZ();
    mpCryst->FractionalToOrthonormalCoords(x,y,z);
-   const double x0=x-mXCoord(mCenterAtomIndex);
-   const double y0=y-mYCoord(mCenterAtomIndex);
-   const double z0=z-mZCoord(mCenterAtomIndex);
+   const REAL x0=x-mXCoord(mCenterAtomIndex);
+   const REAL y0=y-mYCoord(mCenterAtomIndex);
+   const REAL z0=z-mZCoord(mCenterAtomIndex);
    for(int i=0;i<mNbAtom;i++)
    {
       mXCoord(i) += x0;
@@ -1539,7 +1539,7 @@ void ZScatterer::UpdateScattCompList() const
    }
 
    long j=0;
-	double x,y,z;
+	REAL x,y,z;
    VFN_DEBUG_MESSAGE("ZScatterer::UpdateScattCompList(bool):Finishing"<<mNbAtom<<","<<mNbDummyAtom,3)
    for(long i=0;i<mNbAtom;i++)
    {
@@ -1678,11 +1678,11 @@ WXCrystObjBasic* ZScatterer::WXCreate(wxWindow* parent)
 //
 //######################################################################
 ZPolyhedron::ZPolyhedron( const RegularPolyhedraType type, const Crystal &cryst,
-      const double x, const double y, const double z,
+      const REAL x, const REAL y, const REAL z,
       const string &name, const ScatteringPower *centralAtomSymbol,
-      const ScatteringPower *periphAtomSymbol,const double centralPeriphDist,
-      const double ligandPopu,
-      const double phi, const double chi, const double psi):
+      const ScatteringPower *periphAtomSymbol,const REAL centralPeriphDist,
+      const REAL ligandPopu,
+      const REAL phi, const REAL chi, const REAL psi):
 ZScatterer(name,cryst,x,y,z,phi,chi,psi),mPolyhedraType(type)
 {
    VFN_DEBUG_MESSAGE("ZPolyhedron::ZPolyhedron(..)",5)
@@ -1694,7 +1694,7 @@ ZScatterer(name,cryst,x,y,z,phi,chi,psi),mPolyhedraType(type)
    {
       case TETRAHEDRON :
       {
-         double ang=2*asin(sqrt(2./3.));
+         REAL ang=2*asin(sqrt(2./3.));
          this ->AddAtom (name_central,   centralAtomSymbol,
                            0,0.,
                            0,0.,
@@ -2036,8 +2036,8 @@ ZScatterer(name,cryst,x,y,z,phi,chi,psi),mPolyhedraType(type)
       }
       case  PRISM_TRIGONAL:
       {
-         const double ang=55.*DEG2RAD;
-         const double ang2=120.*DEG2RAD;
+         const REAL ang=55.*DEG2RAD;
+         const REAL ang2=120.*DEG2RAD;
          this ->AddAtom (name_central,   centralAtomSymbol,
                            0,0.,
                            0,0.,
@@ -2082,8 +2082,8 @@ ZScatterer(name,cryst,x,y,z,phi,chi,psi),mPolyhedraType(type)
       }
       case  PRISM_TRIGONAL_TRICAPPED:
       {
-         const double ang=55.*DEG2RAD;
-         const double ang2=120.*DEG2RAD;
+         const REAL ang=55.*DEG2RAD;
+         const REAL ang2=120.*DEG2RAD;
          this ->AddAtom (name_central,   centralAtomSymbol,
                            0,0.,
                            0,0.,
@@ -2143,8 +2143,8 @@ ZScatterer(name,cryst,x,y,z,phi,chi,psi),mPolyhedraType(type)
       }
       case  ICOSAHEDRON:
       {
-         const double ang=acos(sqrt(.2));
-         const double ang2=M_PI*2./5.;
+         const REAL ang=acos(sqrt(.2));
+         const REAL ang2=M_PI*2./5.;
          this ->AddAtom (name_central,   centralAtomSymbol,
                            0,0.,
                            0,0.,
@@ -2312,7 +2312,7 @@ void GlobalScatteringPower::Init(const ZScatterer &scatt)
       mDynPopCorrIndex += (*tmp)(i).mpScattPow->GetDynPopCorrIndex();
 }
 
-CrystVector_double GlobalScatteringPower::
+CrystVector_REAL GlobalScatteringPower::
    GetScatteringFactor(const ScatteringData &data,
                        const int spgSymPosIndex) const
 {
@@ -2323,7 +2323,7 @@ CrystVector_double GlobalScatteringPower::
    // copy both the scatterer and the DiffractionData object to determine
    // the average isotropic scattering power for each reflection
    ScatteringData* pData=data.CreateCopy();
-   CrystVector_double sf(data.GetNbRefl()),rsf,isf;
+   CrystVector_REAL sf(data.GetNbRefl()),rsf,isf;
    sf=0;
    
    Crystal cryst(data.GetCrystal().GetLatticePar(0),data.GetCrystal().GetLatticePar(1),
@@ -2337,7 +2337,7 @@ CrystVector_double GlobalScatteringPower::
    VFN_DEBUG_LOCAL_LEVEL(10)
    
    const long nbStep=4;//number of steps over 90 degrees for phi,chi psi
-   double norm=0;
+   REAL norm=0;
    for(int i=-nbStep;i<=nbStep;i++)
    {
       mpZScatterer->SetChi(i*M_PI/2/nbStep);
@@ -2362,7 +2362,7 @@ CrystVector_double GlobalScatteringPower::
             sf += rsf;
          }
       }
-      //cout << FormatHorizVector<double>(sf) <<endl<<norm<<endl;
+      //cout << FormatHorizVector<REAL>(sf) <<endl<<norm<<endl;
    }
    
    VFN_DEBUG_LOCAL_LEVEL(-1)
@@ -2371,34 +2371,34 @@ CrystVector_double GlobalScatteringPower::
    delete pData;
    return sf;
 }
-CrystVector_double GlobalScatteringPower::
+CrystVector_REAL GlobalScatteringPower::
    GetTemperatureFactor(const ScatteringData &data,
                         const int spgSymPosIndex) const
 {
    VFN_DEBUG_MESSAGE("GlobalScatteringPower::GetTemperatureFactor(data):"<<mName,5)
-   CrystVector_double temp(data.GetNbRefl());
+   CrystVector_REAL temp(data.GetNbRefl());
    temp=1.;
    return temp;
 }
-CrystMatrix_double GlobalScatteringPower::
+CrystMatrix_REAL GlobalScatteringPower::
    GetResonantScattFactReal(const ScatteringData &data,
                             const int spgSymPosIndex) const
 {
    VFN_DEBUG_MESSAGE("GlobalScatteringPower::GetResonantScattFactReal(data):"<<mName,5)
-   CrystMatrix_double res(1,1);
+   CrystMatrix_REAL res(1,1);
    res=0.;
    return res;
 }
-CrystMatrix_double GlobalScatteringPower::
+CrystMatrix_REAL GlobalScatteringPower::
    GetResonantScattFactImag(const ScatteringData &data,
                             const int spgSymPosIndex) const
 {
    VFN_DEBUG_MESSAGE("GlobalScatteringPower::GetResonantScattFactImag(data):"<<mName,5)
-   CrystMatrix_double res(1,1);
+   CrystMatrix_REAL res(1,1);
    res=0.;
    return res;
 }
-double GlobalScatteringPower::GetRadius()const
+REAL GlobalScatteringPower::GetRadius()const
 {
    //:TODO:
    return 3.;

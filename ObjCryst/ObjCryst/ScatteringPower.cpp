@@ -105,9 +105,9 @@ bool ScatteringPower::IsTemperatureFactorAnisotropic()const{return false;}
 bool ScatteringPower::IsResonantScatteringAnisotropic()const{return false;}
 
 const string& ScatteringPower::GetSymbol() const {return this->GetName();}
-double ScatteringPower::GetBiso() const {return mBiso;}
-double& ScatteringPower::GetBiso() {mClock.Click();return mBiso;}
-void ScatteringPower::SetBiso(const double newB) { mClock.Click();mBiso=newB;}
+REAL ScatteringPower::GetBiso() const {return mBiso;}
+REAL& ScatteringPower::GetBiso() {mClock.Click();return mBiso;}
+void ScatteringPower::SetBiso(const REAL newB) { mClock.Click();mBiso=newB;}
 bool ScatteringPower::IsIsotropic() const {return mIsIsotropic;}
 long ScatteringPower::GetDynPopCorrIndex() const {return mDynPopCorrIndex;}
 long ScatteringPower::GetScatteringPowerId()const {return mScatteringPowerId;}
@@ -209,7 +209,7 @@ ScatteringPower(),mSymbol(""),mAtomicNumber(0),mScattAi(5),mScattBi(5)
 
 ScatteringPowerAtom::ScatteringPowerAtom(const string &name,
                                          const string &symbol,
-                                         const double bIso):
+                                         const REAL bIso):
 mScattAi(5),mScattBi(5)
 {
    VFN_DEBUG_MESSAGE("ScatteringPowerAtom::ScatteringPowerAtom(n,s,B):"<<name,5)
@@ -235,7 +235,7 @@ ScatteringPowerAtom::~ScatteringPowerAtom()
 
 const string ScatteringPowerAtom::GetClassName() const{return "ScatteringPowerAtom";}
 
-void ScatteringPowerAtom::Init(const string &name,const string &symbol,const double bIso)
+void ScatteringPowerAtom::Init(const string &name,const string &symbol,const REAL bIso)
 {
    VFN_DEBUG_MESSAGE("ScatteringPowerAtom::Init(n,s,b)"<<mName<<":"<<mScatteringPowerId,4)
    this->ScatteringPower::Init();
@@ -374,11 +374,11 @@ void ScatteringPowerAtom::Init(const string &name,const string &symbol,const dou
    VFN_DEBUG_MESSAGE("ScatteringPowerAtom::Init(n,s,b):End",3)
 }
 
-CrystVector_double ScatteringPowerAtom::GetScatteringFactor(const ScatteringData &data,
+CrystVector_REAL ScatteringPowerAtom::GetScatteringFactor(const ScatteringData &data,
                                                             const int spgSymPosIndex) const
 {
    VFN_DEBUG_MESSAGE("ScatteringPower::GetScatteringFactor(&data):"<<mName,3)
-   CrystVector_double sf(data.GetNbRefl());
+   CrystVector_REAL sf(data.GetNbRefl());
    switch(data.GetRadiationType())
    {
       case(RAD_NEUTRON):
@@ -390,11 +390,11 @@ CrystVector_double ScatteringPowerAtom::GetScatteringFactor(const ScatteringData
       case(RAD_XRAY):
       {
          VFN_DEBUG_MESSAGE("ScatteringPower::GetScatteringFactor():XRAY:"<<mName,3)
-         CrystVector_double stolsq(data.GetNbRefl());
+         CrystVector_REAL stolsq(data.GetNbRefl());
          stolsq=data.GetSinThetaOverLambda();
          stolsq*=data.GetSinThetaOverLambda();
          sf=mScattC;
-         double a,b;
+         REAL a,b;
          for(int i=0;i<5;i++) 
          {
             a=  mScattAi(i);
@@ -406,8 +406,8 @@ CrystVector_double ScatteringPowerAtom::GetScatteringFactor(const ScatteringData
             #else
                #define SF (*ssf)
                #define STOLSQ (*sstolsq)
-               double *ssf=sf.data();
-               const double *sstolsq=stolsq.data();
+               REAL *ssf=sf.data();
+               const REAL *sstolsq=stolsq.data();
                for(long ii=0;ii<sf.numElements();ii++)
                {
             #endif
@@ -436,17 +436,17 @@ CrystVector_double ScatteringPowerAtom::GetScatteringFactor(const ScatteringData
    return sf;
 }
 
-CrystVector_double ScatteringPowerAtom::GetTemperatureFactor(const ScatteringData &data,
+CrystVector_REAL ScatteringPowerAtom::GetTemperatureFactor(const ScatteringData &data,
                                                              const int spgSymPosIndex) const
 {
    VFN_DEBUG_MESSAGE("ScatteringPower::GetTemperatureFactor(&data):"<<mName,3)
-   CrystVector_double sf(data.GetNbRefl());
+   CrystVector_REAL sf(data.GetNbRefl());
    if(mIsIsotropic)
    {
       // :NOTE: can't use 'return exp(-mBiso*pow2(diffData.GetSinThetaOverLambda()))'
       //using kcc (OK with gcc)
-      CrystVector_double stolsq(data.GetNbRefl());
-      const CrystVector_double stol=data.GetSinThetaOverLambda();
+      CrystVector_REAL stolsq(data.GetNbRefl());
+      const CrystVector_REAL stol=data.GetSinThetaOverLambda();
       stolsq=stol;
       stolsq*=stol;
       
@@ -457,8 +457,8 @@ CrystVector_double ScatteringPowerAtom::GetTemperatureFactor(const ScatteringDat
          #define SF (*ssf)
          #define STOLSQ (*sstolsq)
 
-         double *ssf=sf.data();
-         const double *sstolsq=stolsq.data();
+         REAL *ssf=sf.data();
+         const REAL *sstolsq=stolsq.data();
 
          for(long ii=0;ii<sf.numElements();ii++)
          {
@@ -479,12 +479,12 @@ CrystVector_double ScatteringPowerAtom::GetTemperatureFactor(const ScatteringDat
    }
    else
    {
-      const double b11=mBeta(0);
-      const double b22=mBeta(1);
-      const double b33=mBeta(2);
-      const double b12=mBeta(3);
-      const double b13=mBeta(4);
-      const double b23=mBeta(5);
+      const REAL b11=mBeta(0);
+      const REAL b22=mBeta(1);
+      const REAL b33=mBeta(2);
+      const REAL b12=mBeta(3);
+      const REAL b13=mBeta(4);
+      const REAL b23=mBeta(5);
       
       #ifdef __VFN_VECTOR_USE_BLITZ__
          #define HH data.H()
@@ -497,10 +497,10 @@ CrystVector_double ScatteringPowerAtom::GetTemperatureFactor(const ScatteringDat
          #define LL (*ll)
          #define SF (*ssf)
 
-         const double *hh=(data.GetH()).data();
-         const double *kk=(data.GetK()).data();
-         const double *ll=(data.GetL()).data();
-         double *ssf=sf.data();
+         const REAL *hh=(data.GetH()).data();
+         const REAL *kk=(data.GetK()).data();
+         const REAL *ll=(data.GetL()).data();
+         REAL *ssf=sf.data();
 
          for(long ii=0;ii<sf.numElements();ii++)
          {
@@ -531,13 +531,13 @@ CrystVector_double ScatteringPowerAtom::GetTemperatureFactor(const ScatteringDat
    return sf;
 }
 
-CrystMatrix_double ScatteringPowerAtom::
+CrystMatrix_REAL ScatteringPowerAtom::
    GetResonantScattFactReal(const ScatteringData &data,
                             const int spgSymPosIndex) const
 {
    VFN_DEBUG_MESSAGE("ScatteringPower::GetResonantScattFactReal(&data):"<<mName,3)
-   CrystMatrix_double fprime(1,1);//:TODO: More than one wavelength
-   CrystMatrix_double fsecond(1,1);
+   CrystMatrix_REAL fprime(1,1);//:TODO: More than one wavelength
+   CrystMatrix_REAL fsecond(1,1);
    switch(data.GetRadiationType())
    {
       case(RAD_NEUTRON):
@@ -572,13 +572,13 @@ CrystMatrix_double ScatteringPowerAtom::
    return fprime;
 }
 
-CrystMatrix_double ScatteringPowerAtom::
+CrystMatrix_REAL ScatteringPowerAtom::
    GetResonantScattFactImag(const ScatteringData &data,
                             const int spgSymPosIndex) const
 {
    VFN_DEBUG_MESSAGE("ScatteringPower::GetResonantScattFactImag():"<<mName,3)
-   CrystMatrix_double fprime(1,1);//:TODO: More than one wavelength
-   CrystMatrix_double fsecond(1,1);
+   CrystMatrix_REAL fprime(1,1);//:TODO: More than one wavelength
+   CrystMatrix_REAL fsecond(1,1);
    switch(data.GetRadiationType())
    {
       case(RAD_NEUTRON):
@@ -634,7 +634,7 @@ string ScatteringPowerAtom::GetElementName() const
 }
 
 int ScatteringPowerAtom::GetAtomicNumber() const {return mAtomicNumber;}
-double ScatteringPowerAtom::GetRadius() const {return mRadius;}
+REAL ScatteringPowerAtom::GetRadius() const {return mRadius;}
 
 void ScatteringPowerAtom::Print()const
 {

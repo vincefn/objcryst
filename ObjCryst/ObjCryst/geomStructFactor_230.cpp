@@ -6,7 +6,7 @@
 #define L (*l)
 #define SF (*sf)
 
-#define __VFN_GEOM_STRUCT_FACTOR_POINTERS_INIT const double *h,*k,*l; double*sf;\
+#define __VFN_GEOM_STRUCT_FACTOR_POINTERS_INIT const REAL *h,*k,*l; REAL*sf;\
    h=hh.data();k=kk.data();l=ll.data();sf=sfsf.data(); for(long i=0;i<hh.numElements();i++){
 #define __VFN_GEOM_STRUCT_FACTOR_POINTERS_END h++ ; k++ ; l++ ; sf++; };
 
@@ -25,13 +25,13 @@
 namespace ObjCryst
 {
 
-void RealGeomStructFactor_230  (const double x,
-                                const double y,
-                                const double z,
-                                const CrystVector_double&hh,
-                                const CrystVector_double&kk,
-                                const CrystVector_double&ll,
-                                CrystVector_double& sfsf)
+void RealGeomStructFactor_230  (const REAL x,
+                                const REAL y,
+                                const REAL z,
+                                const CrystVector_REAL&hh,
+                                const CrystVector_REAL&kk,
+                                const CrystVector_REAL&ll,
+                                CrystVector_REAL& sfsf)
 {
 __VFN_GEOM_STRUCT_FACTOR_POINTERS_INIT
 

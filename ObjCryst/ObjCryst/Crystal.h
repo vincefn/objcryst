@@ -30,6 +30,7 @@
 
 namespace ObjCryst
 {
+class Scatterer; //forward declaration of another header's class :KLUDGE:
 extern const RefParType *gpRefParTypeCrystal;
 extern const RefParType *gpRefParTypeUnitCell;
 extern const RefParType *gpRefParTypeUnitCellLength;
@@ -73,15 +74,15 @@ class Crystal:public RefinableObj
       *  \param a,b,c : unit cell dimension, in angstroems
       *  \param SpaceGroupId: space group symbol or number
       */
-      Crystal(const double a, const double b, const double c,
+      Crystal(const REAL a, const REAL b, const REAL c,
               const string &SpaceGroupId);
       /** \brief Crystal Constructor (triclinic)
       *  \param a,b,c : unit cell dimension, in angstroems
       *  \param alpha,beta,gamma : unit cell angles, in radians.
       *  \param SpaceGroupId: space group symbol or number
       */
-      Crystal(const double a, const double b, const double c, const double alpha,
-              const double beta, const double gamma,const string &SpaceGroupId);
+      Crystal(const REAL a, const REAL b, const REAL c, const REAL alpha,
+              const REAL beta, const REAL gamma,const string &SpaceGroupId);
               
       /// Crystal copy constructor
       Crystal(const Crystal &oldCryst);
@@ -151,17 +152,17 @@ class Crystal:public RefinableObj
       virtual const ScatteringComponentList& GetScatteringComponentList()const;
       /// Lattice parameters (a,b,c,alpha,beta,gamma) as a 6-element vector in Angstroems 
       /// and radians.
-      CrystVector_double GetLatticePar() const;
+      CrystVector_REAL GetLatticePar() const;
       /// Return one of the 6 Lattice parameters, 0<= whichPar <6 (a,b,c,alpha,beta,gamma),
       /// returned in Angstroems and radians. 
-      double GetLatticePar(const int whichPar)const;
+      REAL GetLatticePar(const int whichPar)const;
       /** \brief Get the 'B' matrix (Crystal::mBMatrix)for the crystal (orthogonalization 
       * matrix for the given lattice, in the reciprocal space)
       *
       * The convention is taken following Giacovazzo, "Fundamentals of Crystallography", p.69
       * "e1 is chosen along a*, e2 in the (a*,b*) plane, then e3 is along c".
       */
-      const CrystMatrix_double& GetBMatrix() const;
+      const CrystMatrix_REAL& GetBMatrix() const;
       /** \brief Get orthonormal cartesian coordinates for a set of (x,y,z)
       * fractional coordinates.
       *
@@ -169,7 +170,7 @@ class Crystal:public RefinableObj
       * The convention is taken following :
       * e1 is chosen along a, e2 in the (a,b) plane, then e3 is along c*
       */
-      CrystVector_double GetOrthonormalCoords(const double x,const double y,const double z) const;
+      CrystVector_REAL GetOrthonormalCoords(const REAL x,const REAL y,const REAL z) const;
       /** \brief Get orthonormal cartesian coordinates for a set of (x,y,z)
       * fractional coordinates.
       *
@@ -177,7 +178,7 @@ class Crystal:public RefinableObj
       * The convention is taken following :
       * e1 is chosen along a, e2 in the (a,b) plane, then e3 is along c*
       */
-      void FractionalToOrthonormalCoords(double &x,double &y,double &z) const;
+      void FractionalToOrthonormalCoords(REAL &x,REAL &y,REAL &z) const;
       /** \brief Get fractional cartesian coordinates for a set of (x,y,z)
       * orthonormal coordinates.
       *
@@ -185,7 +186,7 @@ class Crystal:public RefinableObj
       * The convention is taken following :
       * e1 is chosen along a, e2 in the (a,b) plane, then e3 is along c*
       */
-      void OrthonormalToFractionalCoords(double &x,double &y,double &z) const;
+      void OrthonormalToFractionalCoords(REAL &x,REAL &y,REAL &z) const;
       /// Prints some info about the crystal
       /// \todo one function to print on one line and a PrintLong() function
 		/// \param os the stream to which the information is outputed (default=cout)
@@ -211,12 +212,12 @@ class Crystal:public RefinableObj
       * are considered equivalent. So the smallest distance between any atoms will
       * be at least minDistance.
       */
-      CrystMatrix_double GetMinDistanceTable(const double minDistance=0.1) const;
+      CrystMatrix_REAL GetMinDistanceTable(const REAL minDistance=0.1) const;
       /** \brief Print the minimum distance table between all scattering centers
       * (atoms) in the crystal.
 		* \param os the stream to which the information is outputed (default=cout)
       */
-      void PrintMinDistanceTable(const double minDistance=0.1,ostream &os=cout) const;
+      void PrintMinDistanceTable(const REAL minDistance=0.1,ostream &os=cout) const;
 
       /** \brief XMLOutput POV-Ray Description for this Crystal
 		*
@@ -238,9 +239,9 @@ class Crystal:public RefinableObj
 		* of the scatterer (eg a ZScatterer (molecule) will not be 'cut' on the border).
       */
       virtual void GLInitDisplayList(const bool onlyIndependentAtoms=false,
-                                     const double xMin=-.1,const double xMax=1.1,
-                                     const double yMin=-.1,const double yMax=1.1,
-                                     const double zMin=-.1,const double zMax=1.1)const;
+                                     const REAL xMin=-.1,const REAL xMax=1.1,
+                                     const REAL yMin=-.1,const REAL yMax=1.1,
+                                     const REAL zMin=-.1,const REAL zMax=1.1)const;
       
       /** \internal \brief Compute the 'Dynamical population correction for all atoms.
       * Atoms which are considered "equivalent" (ie currently with the same Z number)
@@ -262,7 +263,7 @@ class Crystal:public RefinableObj
 		* \warning. Do not call this function, which will turn private. This is
 		* called by \e only Crystal::GetScatteringComponentList()
       */
-      void CalcDynPopCorr(const double overlapDist=1., const double mergeDist=.0)const ;
+      void CalcDynPopCorr(const REAL overlapDist=1., const REAL mergeDist=.0)const ;
       /// Reset Dynamical Population Correction factors (ie set it to 1)
       void ResetDynPopCorr()const ;
       /** Set the use of dynamical population correction (Crystal::mUseDynPopCorr).
@@ -285,15 +286,15 @@ class Crystal:public RefinableObj
 		* Probably due to the optimization used (ie we are using a "fast" calculation
 		* of distances, which uses integers...)
 		*/
-      double GetBumpMergeCostFunction() const;
+      REAL GetBumpMergeCostFunction() const;
       /** Set the Anti-bumping distance between two scattering types
 		* 
 		*/
       void SetBumpMergeDistance(const ScatteringPower &scatt1,
-                                const ScatteringPower &scatt2, const double dist=1.5);
+                                const ScatteringPower &scatt2, const REAL dist=1.5);
       /// Set the Anti-bumping distance between two scattering types.
       void SetBumpMergeDistance(const ScatteringPower &scatt1,
-                                const ScatteringPower &scatt2, const double dist,
+                                const ScatteringPower &scatt2, const REAL dist,
                                 const bool allowMerge);
       /// When were lattice parameters last changed ?
       const RefinableObjClock& GetClockLatticePar()const;
@@ -303,13 +304,13 @@ class Crystal:public RefinableObj
          unsigned int GetNbCostFunction()const;
          const string& GetCostFunctionName(const unsigned int)const;
          const string& GetCostFunctionDescription(const unsigned int)const;
-         virtual double GetCostFunctionValue(const unsigned int);
+         virtual REAL GetCostFunctionValue(const unsigned int);
          
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
       
-      virtual void GlobalOptRandomMove(const double mutationAmplitude);
+      virtual void GlobalOptRandomMove(const REAL mutationAmplitude);
       /** \brief output Crystal structure as a cif file (EXPERIMENTAL !)
       *
       * \warning This is very crude and EXPERIMENTAL so far: only isotropic scattering power
@@ -330,8 +331,8 @@ class Crystal:public RefinableObj
       *  \param SpcGroup: space group number (1..230)
       *  \param name: name for the crystal, : '(TaSe4)2I'
       */
-      void Init(const double a, const double b, const double c, const double alpha,
-                const double beta, const double gamma,const string &SpaceGroupId,
+      void Init(const REAL a, const REAL b, const REAL c, const REAL alpha,
+                const REAL beta, const REAL gamma,const string &SpaceGroupId,
                 const string& name);
       
       /// Find a scatterer (its index # in mpScatterrer[]) with a given name
@@ -381,13 +382,13 @@ class Crystal:public RefinableObj
 		* \todo optimize again. Test if recomputation is needed using Clocks.
 		* Use a global option instead of asymUnitMargin.
       */
-      void CalcDistTable(const bool fast,const double asymUnitMargin=4)const;
+      void CalcDistTable(const bool fast,const REAL asymUnitMargin=4)const;
             
       /// a,b and c in Angstroems, angles (stored) in radians
       /// For cubic, rhomboedric crystals, only the 'a' parameter is relevant.
       /// For quadratic and hexagonal crystals, only a and c parameters are relevant.
       /// The MUTABLE is temporary ! It should not be !
-      CrystVector_double mCellDim;
+      CrystVector_REAL mCellDim;
       /// The space group of the crystal
       SpaceGroup mSpaceGroup ;
       /// The registry of scatterers for this crystal
@@ -402,7 +403,7 @@ class Crystal:public RefinableObj
       * \note this matrix is and must remain upper triangular. this is assumed for
       * some optimizations.
       */
-      mutable CrystMatrix_double mBMatrix;
+      mutable CrystMatrix_REAL mBMatrix;
       /** \brief Eucl Matrix (Orthogonalization matrix for direct space)
       * \f[ M_{orth}= \left[ \begin {array}{ccc} a & b\cos(\gamma) & c\cos(\beta) \\
       *                            0 & b\sin(\gamma) & -c\sin(\beta)\cos(\alpha^*) \\
@@ -413,9 +414,9 @@ class Crystal:public RefinableObj
       * \note this matrix is and must remain upper triangular. this is assumed for
       * some optimizations.
       */
-      mutable CrystMatrix_double mOrthMatrix;
+      mutable CrystMatrix_REAL mOrthMatrix;
       /// inverse of Eucl Matrix (de-orthogonalization matrix for direct space)
-      mutable CrystMatrix_double mOrthMatrixInvert;
+      mutable CrystMatrix_REAL mOrthMatrixInvert;
             
       /** \brief Distance table (squared) between all scattering components in the crystal
       *
@@ -427,7 +428,7 @@ class Crystal:public RefinableObj
 		* The order of columns follows the order in Crystal::mScattCompList. The order
 		* of rows is given in Crystal::mDistTableIndex
       */
-      mutable CrystMatrix_double mDistTableSq;
+      mutable CrystMatrix_REAL mDistTableSq;
       /** \brief Index of scattering components for the Distance table
       *
       * These are the index of the scattering components corresponding to each row in
@@ -443,7 +444,7 @@ class Crystal:public RefinableObj
       /// factor calculation ?
       RefObjOpt mUseDynPopCorr;
       /// Matrix of "bumping" (squared) distances
-      CrystMatrix_double mBumpDistanceMatrix;
+      CrystMatrix_REAL mBumpDistanceMatrix;
       /// Allow merging of atoms in the bump/merge function(should be true for identical atoms)?
       CrystMatrix_bool mAllowMerge;
       

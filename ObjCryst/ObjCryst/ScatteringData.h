@@ -60,7 +60,7 @@ class Radiation: public RefinableObj
 		* \param wavelength the wavelength (in Angstroems) of the monochromatic
 		* radiation.
 		*/
-      Radiation(const RadiationType rad,const double wavelength);
+      Radiation(const RadiationType rad,const REAL wavelength);
 		/** \ brief Constructor for X-Ray tube radiation
       *
       *\param XRayTubeElementName : name of the anticathode element name. Known
@@ -79,7 +79,7 @@ class Radiation: public RefinableObj
       *the WavelengthType is set to WAVELENGTH_MONOCHROMATIC. In both cases,
 		* the radiation type is set to X-Ray.
       */
-      Radiation(const string &XRayTubeElementName,const double alpha2Alpha2ratio=0.5);
+      Radiation(const string &XRayTubeElementName,const REAL alpha2Alpha2ratio=0.5);
 		/// Copy constructor
       Radiation(const Radiation&);
       ~Radiation();
@@ -96,9 +96,9 @@ class Radiation: public RefinableObj
       /// Get the wavelength(s) in Angstroems. Currently only
 		/// monochromatic is used, so the vector should only return
 		/// only one wavelength.
-      const CrystVector_double& GetWavelength()const;
+      const CrystVector_REAL& GetWavelength()const;
 		/// Set the (monochromatic) wavelength of the beam.
-      void SetWavelength(const double );
+      void SetWavelength(const REAL );
 		/** \ brief Set X-Ray tube radiation.
       *
       *\param XRayTubeElementName : name of the anticathode element name. Known
@@ -117,12 +117,12 @@ class Radiation: public RefinableObj
       *the WavelengthType is set to WAVELENGTH_MONOCHROMATIC. In both cases,
 		* the radiation type is set to X-Ray.
       */
-      void SetWavelength(const string &XRayTubeElementName,const double alpha2Alpha2ratio=0.5);
+      void SetWavelength(const string &XRayTubeElementName,const REAL alpha2Alpha2ratio=0.5);
       
       /// Get the wavelength difference for Alpha1 and Alpha2
-		double GetXRayTubeDeltaLambda()const;
+		REAL GetXRayTubeDeltaLambda()const;
 		/// Get the Kalpha2/Kalpha1 ratio
-      double GetXRayTubeAlpha2Alpha1Ratio()const;
+      REAL GetXRayTubeAlpha2Alpha1Ratio()const;
       
       /// Last time the wavelength has been changed
 		const RefinableObjClock& GetClockWavelength()const ;
@@ -140,14 +140,14 @@ class Radiation: public RefinableObj
       /// monochromatic ? Alpha1 & Alpha2 ? Multi-Wavelength ?
       RefObjOpt mWavelengthType;
       ///Wavelength of the Experiment, in Angstroems.
-      CrystVector_double mWavelength;
+      CrystVector_REAL mWavelength;
       ///Name of the X-Ray tube used, if relevant. ie "Cu", "Fe",etc... 
       /// "CuA1" for Cu-alpha1, etc...
       string mXRayTubeName;
       ///Absolute difference between alpha1 and alpha2, in angstroems
-      double mXRayTubeDeltaLambda;
+      REAL mXRayTubeDeltaLambda;
       ///Ratio alpha2/alpha1 (should be 0.5)
-      double mXRayTubeAlpha2Alpha1Ratio;
+      REAL mXRayTubeAlpha2Alpha1Ratio;
       //Clocks
          RefinableObjClock mClockWavelength;
          RefinableObjClock mClockRadiation;
@@ -185,12 +185,12 @@ class ScatteringData: virtual public RefinableObj
       
       /** \brief input H,K,L
       *
-      * \param h,k,l: double arrays (vectors with NbRefl elements -same size),
+      * \param h,k,l: REAL arrays (vectors with NbRefl elements -same size),
       *with the h, k and l coordinates of all reflections.
       */
-      virtual void SetHKL( CrystVector_double const &h,
-                           CrystVector_double const &k,
-                           CrystVector_double const &l);
+      virtual void SetHKL( CrystVector_REAL const &h,
+                           CrystVector_REAL const &k,
+                           CrystVector_REAL const &l);
       /** \brief Generate a list of h,k,l to describe a full reciprocal space, 
       * up to a given maximum theta value
       *
@@ -208,7 +208,7 @@ class ScatteringData: virtual public RefinableObj
       * \todo smarter generation, using spacegroup information to remove extinct reflection
       * rather than brute-force computation.
       */
-      virtual void GenHKLFullSpace(const double maxTheta,
+      virtual void GenHKLFullSpace(const REAL maxTheta,
                                    const bool useMultiplicity=false);
       
       /// Set : neutron or x-ray experiment ? Wavelength ?
@@ -228,35 +228,35 @@ class ScatteringData: virtual public RefinableObj
       ///Return the number of reflections in this experiment.
       long GetNbRefl() const;
       ///Return the 1D array of H coordinates for all reflections
-      const CrystVector_double& GetH() const;
+      const CrystVector_REAL& GetH() const;
       ///Return the 1D array of K coordinates
-      const CrystVector_double& GetK() const;
+      const CrystVector_REAL& GetK() const;
       ///Return the 1D array of L coordinates
-      const CrystVector_double& GetL() const;
+      const CrystVector_REAL& GetL() const;
       /// Return the 1D array of H coordinates for all reflections, multiplied by 2*pi
       /// \internal  Should be private
-      const CrystVector_double& GetH2Pi() const;
+      const CrystVector_REAL& GetH2Pi() const;
       ///Return the 1D array of K coordinates for all reflections, multiplied by 2*pi
       /// \internal  Should be private
-      const CrystVector_double& GetK2Pi() const;
+      const CrystVector_REAL& GetK2Pi() const;
       ///Return the 1D array of L coordinates for all reflections, multiplied by 2*pi
       /// \internal  Should be private
-      const CrystVector_double& GetL2Pi() const;
+      const CrystVector_REAL& GetL2Pi() const;
       
       /// Return an array with \f$ \frac{sin(\theta)}{\lambda} = \frac{1}{2d_{hkl}}\f$ 
       ///for all reflections
-      const CrystVector_double& GetSinThetaOverLambda()const;
+      const CrystVector_REAL& GetSinThetaOverLambda()const;
    
       ///  Returns the Array of calculated |F(hkl)|^2 for all reflections.
-      const CrystVector_double& GetFhklCalcSq() const;
+      const CrystVector_REAL& GetFhklCalcSq() const;
       /// Access to real part of F(hkl)calc
-      const CrystVector_double& GetFhklCalcReal() const;
+      const CrystVector_REAL& GetFhklCalcReal() const;
       /// Access to imaginary part of F(hkl)calc
-      const CrystVector_double& GetFhklCalcImag() const;
+      const CrystVector_REAL& GetFhklCalcImag() const;
       
       ///Set the wavelength of the experiment (in Angstroems). This is 
       ///used to calculate theta angles and get X-Ray anomalous factors
-      void SetWavelength(const double lambda);
+      void SetWavelength(const REAL lambda);
       
       /** \brief Set the wavelength of the experiment to that of an X-Ray tube.
       *
@@ -276,13 +276,13 @@ class ScatteringData: virtual public RefinableObj
       *to WAVELENGTH_ALPHA12. If instead either alpha1 or alpha2 (eg "CuA1") is asked for,
       *the WavelengthType is set to WAVELENGTH_MONOCHROMATIC.
       */
-      void SetWavelength(const string &XRayTubeElementName,const double alpha2Alpha1ratio=0.5);
+      void SetWavelength(const string &XRayTubeElementName,const REAL alpha2Alpha1ratio=0.5);
       
       ///Set the energy of the experiment (in keV). This is 
       ///used to calculate theta angles and get X-Ray anomalous factors
-      void SetEnergy(const double energy);
+      void SetEnergy(const REAL energy);
       ///wavelength of the experiment (in Angstroems)
-      CrystVector_double GetWavelength()const;
+      CrystVector_REAL GetWavelength()const;
       
       /// Use of faster, less precise approximations to compute structure factors
       ///and interatomic distances ? (DiffractionData::mUseFastLessPreciseFunc)
@@ -299,7 +299,7 @@ class ScatteringData: virtual public RefinableObj
       bool IsIgnoringImagScattFact() const;
       // Set an option so that only low-amgle reflections (theta < angle)
       // are used. See DiffractionData::mUseOnlyLowAngleData
-      //virtual void SetUseOnlyLowAngleData(const bool useOnlyLowAngle,const double angle)=0;
+      //virtual void SetUseOnlyLowAngleData(const bool useOnlyLowAngle,const REAL angle)=0;
       /** \brief Print H, K, L F^2 Re(F) Im(F) theta sin(theta)/lambda for all reflections
       *
       */
@@ -312,7 +312,7 @@ class ScatteringData: virtual public RefinableObj
       /// \internal sort reflections by theta values (also get rid of [0,0,0] if present)
       /// If maxTheta >0, then only reflections where theta<maxTheta are kept
       /// \return an array with the subscript of the kept reflections (for inherited classes)
-      CrystVector_long SortReflectionByTheta(const double maxTheta=-1.);
+      CrystVector_long SortReflectionByTheta(const REAL maxTheta=-1.);
       /// \internal Get rid of extinct reflections. Useful after GenHKLFullSpace().
       /// Do not use this if you have a list of observed reflections !
       ///
@@ -364,26 +364,26 @@ class ScatteringData: virtual public RefinableObj
       void CalcGeomStructFactor(const ScatteringComponentList &scattCompList,
                                 const SpaceGroup &spg,
                                 const CrystVector_long &structFactorIndex,
-                                CrystVector_double* rsf2,
-                                CrystVector_double* isf2,
+                                CrystVector_REAL* rsf2,
+                                CrystVector_REAL* isf2,
                                 bool useFastTabulatedTrigFunctions=false) const;
       
       /// Number of H,K,L reflections
       long mNbRefl;
       ///H,K,L coordinates
-      CrystVector_double mH, mK, mL ;
+      CrystVector_REAL mH, mK, mL ;
       ///H,K,L integer coordinates
       mutable CrystVector_long mIntH, mIntK, mIntL ;
       ///H,K,L coordinates, multiplied by 2PI
-      mutable CrystVector_double mH2Pi, mK2Pi, mL2Pi ;
+      mutable CrystVector_REAL mH2Pi, mK2Pi, mL2Pi ;
 
       ///Multiplicity for each reflections (mostly for powder diffraction)
       CrystVector_int mMultiplicity ;
       
       /// real &imaginary parts of F(HKL)calc
-      mutable CrystVector_double mFhklCalcReal, mFhklCalcImag ;
+      mutable CrystVector_REAL mFhklCalcReal, mFhklCalcImag ;
       ///F(HKL)^2 calc for each reflection
-      mutable CrystVector_double mFhklCalcSq ;
+      mutable CrystVector_REAL mFhklCalcSq ;
       
       /// Radiation
       Radiation mRadiation;
@@ -405,27 +405,27 @@ class ScatteringData: virtual public RefinableObj
       
          ///  \f$ \frac{sin(\theta)}{\lambda} = \frac{1}{2d_{hkl}}\f$ 
          ///for the crystal and the reflections in ReciprSpace
-         mutable CrystVector_double mSinThetaLambda;
+         mutable CrystVector_REAL mSinThetaLambda;
 
          /// theta for the crystal and the HKL in ReciprSpace (in radians)
-         mutable CrystVector_double mTheta;
+         mutable CrystVector_REAL mTheta;
 
          /// tan(theta) for the crystal and the HKL in ReciprSpace (for Caglioti's law)
          /// \note this should be moved to DiffractionDataPowder
-         mutable CrystVector_double mTanTheta;
+         mutable CrystVector_REAL mTanTheta;
 
          /// Anomalous X-Ray scattering term f' and f" are stored here for each ScatteringPower 
          /// We assume yet that data is monochromatic, but this could be specialized.
-         mutable CrystVector_double mFprime,mFsecond;
+         mutable CrystVector_REAL mFprime,mFsecond;
 
          ///Thermic factors as mNbScatteringPower vectors with NbRefl elements
-         mutable CrystVector_double* mpTemperatureFactor;
+         mutable CrystVector_REAL* mpTemperatureFactor;
 
          ///Scattering factors as mNbScatteringPower vectors with NbRefl elements
-         mutable CrystVector_double* mpScatteringFactor;
+         mutable CrystVector_REAL* mpScatteringFactor;
       
          ///Geometrical Structure factor for all reflection and ScatteringPower
-         mutable CrystVector_double* mpRealGeomSF,*mpImagGeomSF;
+         mutable CrystVector_REAL* mpRealGeomSF,*mpImagGeomSF;
       
       //Public Clocks
          /// Clock for the list of hkl
@@ -512,7 +512,7 @@ class ScatteringData: virtual public RefinableObj
          /* \brief Limit (theta angle, radian) for the above option.
          *
          */
-         //double mUseOnlyLowAngleDataLimit;
+         //REAL mUseOnlyLowAngleDataLimit;
 };
 
 }//namespace ObjCryst

@@ -405,7 +405,7 @@ void ScatteringPowerAtom::XMLInputOld(istream &is,const IOCrystTag &tag)
       {
          string symbol;
          bool isIso;
-         double bIso;
+         REAL bIso;
          //First read name of the object
          IOCrystExtractNameQuoted(is,symbol);
          is>> isIso;
@@ -524,7 +524,7 @@ void Atom::XMLInputOld(istream &is,const IOCrystTag &tag)
    {
       case 0:
       {
-         double x,y,z,p;
+         REAL x,y,z,p;
          string scattPow;
          is >> x >> y>> z>> p;
          IOCrystExtractNameQuoted(is,scattPow);
@@ -832,7 +832,7 @@ void ZScatterer::XMLInputOld(istream &is,const IOCrystTag &tag)
                if(tag.GetName()=="XYZPhiChiPsiPopu")
                {
                   VFN_DEBUG_MESSAGE("ZScatterer::XMLInput():XMLInput position&popu",5)
-                  double x,y,z,phi,chi,psi,p;
+                  REAL x,y,z,phi,chi,psi,p;
                   is >>x>>y>>z>>phi>>chi>>psi>>p;
                   this->SetX(x);
                   this->SetY(y);
@@ -864,7 +864,7 @@ void ZScatterer::XMLInputOld(istream &is,const IOCrystTag &tag)
                   string scattPow;
                   string name;
                   int abond,aangle,adihed;
-                  double bond,angle,dihed,p;
+                  REAL bond,angle,dihed,p;
                   IOCrystExtractNameQuoted(is,name);
                   is >>abond>>bond>>aangle>>angle>>adihed>>dihed>>p;
                   IOCrystExtractNameQuoted(is,scattPow);
@@ -1154,7 +1154,7 @@ void Crystal::XMLInputOld(istream &is,const IOCrystTag &tagg)
                if(tag.GetName()=="Lattice")
                {
                   VFN_DEBUG_MESSAGE("Crystal::XMLInput():reading Lattice",5)
-                  double a,b,c,alpha,beta,gamma;
+                  REAL a,b,c,alpha,beta,gamma;
                   string spg;
                   is >>a>>b>>c>>alpha>>beta>>gamma;
                   IOCrystExtractNameQuoted(is,spg);
@@ -1392,7 +1392,7 @@ void Radiation::XMLInputOld(istream &is,const IOCrystTag &tagg)
                   IOCrystExtractNameSpace(is,rad);
                   if(rad=="monochromatic")
                   {
-                     double l;
+                     REAL l;
                      is>>l;
                      this->SetWavelength(l);
                      bool fix;
@@ -1404,7 +1404,7 @@ void Radiation::XMLInputOld(istream &is,const IOCrystTag &tagg)
                   {
                      string tube;
                      IOCrystExtractNameSpace(is,tube);
-                     double ratio;
+                     REAL ratio;
                      is>>ratio;
                      this->SetWavelength(tube,ratio);
                      continue;
@@ -1487,7 +1487,7 @@ void DiffractionDataSingleCrystal::XMLInput(istream &is,const XMLCrystTag &tagg)
       {
          long nbrefl=0;
          CrystVector_long h(100),k(100),l(100);
-         CrystVector_double iobs(100),sigma(100),weight(100);
+         CrystVector_REAL iobs(100),sigma(100),weight(100);
          do
          {
             is >>h(nbrefl)>>k(nbrefl)>>l(nbrefl)
@@ -1573,7 +1573,7 @@ void DiffractionDataSingleCrystal::XMLInputOld(istream &is,const IOCrystTag &tag
                {
                   long nbrefl=0;
                   CrystVector_long h(100),k(100),l(100);
-                  CrystVector_double iobs(100),sigma(100),weight(100);
+                  CrystVector_REAL iobs(100),sigma(100),weight(100);
                   do
                   {
                      is >>h(nbrefl)>>k(nbrefl)>>l(nbrefl)
@@ -1808,7 +1808,7 @@ void PowderPatternBackground::XMLInputOld(istream &is,const IOCrystTag &tagg)
                      this->AddPar(tmp);
                   }
 
-                  //cout<<FormatVertVector<double>(mBackgroundInterpPoint2Theta,
+                  //cout<<FormatVertVector<REAL>(mBackgroundInterpPoint2Theta,
                   //                              mBackgroundInterpPointIntensity);
                }//BackgroundPoints2ThetaIntensity
             }//ParList
@@ -2257,7 +2257,7 @@ void PowderPattern::XMLInput(istream &is,const XMLCrystTag &tagg)
       }
       if("PowderPatternComponent"==tag.GetName())
       {
-         double scale=1.0;
+         REAL scale=1.0;
          string name;
          for(unsigned int i=0;i<tag.GetNbAttribute();i++)
          {
@@ -2359,7 +2359,7 @@ void PowderPattern::XMLInputOld(istream &is,const IOCrystTag &tagg)
                {
                   string comp;
                   IOCrystExtractNameQuoted(is,comp);
-                  double scale;
+                  REAL scale;
                   is >> scale;
                   //:TODO: Check we found the component
                   this->AddPowderPatternComponent(

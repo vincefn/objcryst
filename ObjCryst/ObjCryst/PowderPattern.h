@@ -46,7 +46,7 @@ class PowderPatternComponent : virtual public RefinableObj
       /// Get the calculated powder spectrum for this component.
       /// Note that the spectrum is \e not scaled.
 		/// 
-      virtual const CrystVector_double& GetPowderPatternCalc()const=0;
+      virtual const CrystVector_REAL& GetPowderPatternCalc()const=0;
       /// Use faster, less precise functions ? Good for global optimizations.
 		/// Currently does nothing.
       virtual void SetUseFastLessPreciseFunc(const bool useItOrNot)=0;
@@ -54,7 +54,7 @@ class PowderPatternComponent : virtual public RefinableObj
       /// are used. See DiffractionData::mUseOnlyLowAngleData
 		/// \deprecated Do not use, as this will probably be removed
 		/// eventually.
-      virtual void SetUseOnlyLowAngleData(const bool useOnlyLowAngle,const double angle=0)=0;
+      virtual void SetUseOnlyLowAngleData(const bool useOnlyLowAngle,const REAL angle=0)=0;
       
       /** \brief Is this component scalable ?
       *
@@ -87,7 +87,7 @@ class PowderPatternComponent : virtual public RefinableObj
 		
       /// The calculated component of a powder spectrum. It is mutable since it is
       /// completely defined by other parameters (eg it is not an 'independent parameter')
-      mutable CrystVector_double mPowderPatternCalc;
+      mutable CrystVector_REAL mPowderPatternCalc;
       
       /// \internal
 		/// This will be called by the parent PowderPattern object, before
@@ -128,11 +128,11 @@ class PowderPatternBackground : public PowderPatternComponent
       virtual const string GetClassName() const;
       
       virtual void SetParentPowderPattern(const PowderPattern&);
-      virtual const CrystVector_double& GetPowderPatternCalc()const;
+      virtual const CrystVector_REAL& GetPowderPatternCalc()const;
       /// Import background points from a file (with two columns 2theta, intensity)
       void ImportUserBackground(const string &filename);
       void SetUseFastLessPreciseFunc(const bool useItOrNot);
-      virtual void SetUseOnlyLowAngleData(const bool useOnlyLowAngle,const double angle=0);
+      virtual void SetUseOnlyLowAngleData(const bool useOnlyLowAngle,const REAL angle=0);
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
@@ -150,9 +150,9 @@ class PowderPatternBackground : public PowderPatternComponent
       /// Number of fitting points for background
       int mBackgroundNbPoint;
       /// Vector of 2theta values for the fitting points of the background
-      CrystVector_double mBackgroundInterpPoint2Theta;
+      CrystVector_REAL mBackgroundInterpPoint2Theta;
       /// Values of background at interpolating points
-      CrystVector_double mBackgroundInterpPointIntensity;
+      CrystVector_REAL mBackgroundInterpPointIntensity;
       
       // Clocks
          /// Modification of the interpolated points
@@ -165,7 +165,7 @@ class PowderPatternBackground : public PowderPatternComponent
          /// Use only low-angle data ? \deprecated
          bool mUseOnlyLowAngleData;
          /// Limit (theta angle, in radian) for the above option. \deprecated
-         double mUseOnlyLowAngleDataLimit;
+         REAL mUseOnlyLowAngleDataLimit;
 		
       //To be removed
       friend class PowderPattern; 
@@ -192,7 +192,7 @@ class PowderPatternDiffraction : public PowderPatternComponent,public Scattering
       virtual const string GetClassName() const;
       
       virtual void SetParentPowderPattern(const PowderPattern&);
-      virtual const CrystVector_double& GetPowderPatternCalc()const;
+      virtual const CrystVector_REAL& GetPowderPatternCalc()const;
       
       /** Set reflection profile parameters
       *
@@ -205,13 +205,13 @@ class PowderPatternDiffraction : public PowderPatternComponent,public Scattering
       * pseudo-Voigt function.
       */
       void SetReflectionProfilePar(const ReflectionProfileType prof,
-                                   const double fwhmCagliotiW,
-                                   const double fwhmCagliotiU=0,
-                                   const double fwhmCagliotiV=0,
-                                   const double eta0=0.5,
-                                   const double eta1=0.);
+                                   const REAL fwhmCagliotiW,
+                                   const REAL fwhmCagliotiU=0,
+                                   const REAL fwhmCagliotiV=0,
+                                   const REAL eta0=0.5,
+                                   const REAL eta1=0.);
       void SetUseFastLessPreciseFunc(const bool useItOrNot);
-      virtual void SetUseOnlyLowAngleData(const bool useOnlyLowAngle,const double angle=0);
+      virtual void SetUseOnlyLowAngleData(const bool useOnlyLowAngle,const REAL angle=0);
       virtual void GenHKLFullSpace();
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
@@ -250,12 +250,12 @@ class PowderPatternDiffraction : public PowderPatternComponent,public Scattering
          RefObjOpt mReflectionProfileType;
          /// The 'full' profile of each reflection os taken equal
          /// to the FWHM, multiplied by this factor.
-         double mFullProfileWidthFactor;
+         REAL mFullProfileWidthFactor;
          ///FWHM parameters, following Caglioti's law
-         double mCagliotiU,mCagliotiV,mCagliotiW;
+         REAL mCagliotiU,mCagliotiV,mCagliotiW;
          ///Pseudo-Voigt mixing parameter : eta=eta0 +2*theta*eta1
          /// eta=1 -> pure Lorentzian ; eta=0 -> pure Gaussian
-         double mPseudoVoigtEta0,mPseudoVoigtEta1;
+         REAL mPseudoVoigtEta0,mPseudoVoigtEta1;
          /// Use asymmetric profiles ? (unused yet)
          bool mUseAsymmetricProfile;
       // Corrections
@@ -273,7 +273,7 @@ class PowderPatternDiffraction : public PowderPatternComponent,public Scattering
          *The factor \f$ SlitAp = \frac{1}{\sin(\theta)} \f$ takes into account the 
          *fraction of the diffracted cone which falls in the detector slit.
          */
-         mutable CrystVector_double mLorentzPolarSlitCorr;
+         mutable CrystVector_REAL mLorentzPolarSlitCorr;
          /// Need to apply Lorentz correction ? 
          bool mNeedLorentzCorr;
          /// Need to apply Polarization correction ?
@@ -283,14 +283,14 @@ class PowderPatternDiffraction : public PowderPatternComponent,public Scattering
          bool mNeedSlitApertureCorr;
          /// the A factor in the polarization correction. Default value=1, corresponding
          /// to an X-Ray tube without monochromator.
-         double mPolarAfactor;
+         REAL mPolarAfactor;
          
       /// Computed intensities for all reflections
-         mutable CrystVector_double mIhklCalc;
+         mutable CrystVector_REAL mIhklCalc;
       
       // Saved arrays to speed-up computations
          ///Reflection profiles for ALL reflections during the last powder spectrum generation
-         mutable CrystMatrix_double mSavedPowderReflProfile;
+         mutable CrystMatrix_REAL mSavedPowderReflProfile;
          /// \internal Number of points used to describe each individual profile
          mutable long mSavedPowderReflProfileNbPoint;
          /// \internal The 1st pixel for each reflection
@@ -314,7 +314,7 @@ class PowderPatternDiffraction : public PowderPatternComponent,public Scattering
          /** \brief Limit (theta angle, in radian) for the above option.
          * TO BE REMOVED
          */
-         double mUseOnlyLowAngleDataLimit;
+         REAL mUseOnlyLowAngleDataLimit;
          /// Saved H, K and L arrays when using only low-angle data
 			/// TO BE REMOVED
          CrystVector_long  mUseOnlyLowAngleData_SavedH,
@@ -375,8 +375,8 @@ class PowderPattern : public RefinableObj
          * \param tthetaStep: step (assumed constant) in 2theta.
          * \param nbPoints: number of points in the spectrum.
          */
-         void SetPowderPatternPar(const double tthetaMin,
-                                           const double tthetaStep,
+         void SetPowderPatternPar(const REAL tthetaMin,
+                                           const REAL tthetaStep,
                                            unsigned long nbPoint);
          ///Number of points ?
          unsigned long GetNbPoint()const;
@@ -391,7 +391,7 @@ class PowderPattern : public RefinableObj
          ///Neutron or x-ray experiment ?
          RadiationType GetRadiationType()const;
          ///Set the wavelength of the experiment (in Angstroems).
-         void SetWavelength(const double lambda);
+         void SetWavelength(const REAL lambda);
 
          /** \brief Set the wavelength of the experiment to that of an X-Ray tube.
          *
@@ -412,12 +412,12 @@ class PowderPattern : public RefinableObj
          *the WavelengthType is set to WAVELENGTH_MONOCHROMATIC. In both cases,
 			* the radiation type is set to X-Ray.
          */
-         void SetWavelength(const string &XRayTubeElementName,const double alpha12ratio=0.5);
+         void SetWavelength(const string &XRayTubeElementName,const REAL alpha12ratio=0.5);
 
          /// Set the energy of the experiment [in keV, lambda(A)=12398/E(keV)].
-         void SetEnergy(const double energy);
+         void SetEnergy(const REAL energy);
          /// wavelength of the experiment (in Angstroems)
-         double GetWavelength()const;
+         REAL GetWavelength()const;
       
       // Options to go faster...
          /// Use of faster, less precise approximations to compute the powder spectrums
@@ -428,26 +428,26 @@ class PowderPattern : public RefinableObj
          * are used. See DiffractionData::mUseOnlyLowAngleData
 			* \deprecated
 			*/
-         void SetUseOnlyLowAngleData(const bool useOnlyLowAngle,const double angle);
+         void SetUseOnlyLowAngleData(const bool useOnlyLowAngle,const REAL angle);
       
       //Access to spectrum data
          /// Get the calculated powder spectrum
-         const CrystVector_double& GetPowderPatternCalc()const;
+         const CrystVector_REAL& GetPowderPatternCalc()const;
          /// Get the observed powder spectrum
-         const CrystVector_double& GetPowderPatternObs()const;
+         const CrystVector_REAL& GetPowderPatternObs()const;
          /// Get the sigma for each point of the observed powder spectrum 
-         const CrystVector_double& GetPowderPatternObsSigma()const;
+         const CrystVector_REAL& GetPowderPatternObsSigma()const;
          /// Get the weight for each point of the powder spectrum 
-         const CrystVector_double& GetPowderPatternWeight()const;
+         const CrystVector_REAL& GetPowderPatternWeight()const;
          // Get the 2theta values corresponding to the powder spectrum.
          //Values are returned in radian, and are experimental 2theta values.
-         //CrystVector_double Get2Theta()const;
+         //CrystVector_REAL Get2Theta()const;
          /// Get the Minimum 2theta
-         double Get2ThetaMin()const;
+         REAL Get2ThetaMin()const;
          /// Get the step in 2theta
-         double Get2ThetaStep()const;
+         REAL Get2ThetaStep()const;
          /// Get the maximum 2theta
-         double Get2ThetaMax()const;
+         REAL Get2ThetaMax()const;
       
       // Clocks
          /// Last time the spectrum was calculated
@@ -459,26 +459,26 @@ class PowderPattern : public RefinableObj
       
       // Corrections to 2theta
          ///Change Zero in 2Theta
-         void Set2ThetaZero(const double newZero);
+         void Set2ThetaZero(const REAL newZero);
          /// Change displacement correction
          /// \f$ (2\theta)_{obs} = (2\theta)_{real} + \frac{a}{\cos(\theta)} \f$
-         void Set2ThetaDisplacement(const double displacement);
+         void Set2ThetaDisplacement(const REAL displacement);
          ///Change transparency correction
          /// \f$ (2\theta)_{obs} = (2\theta)_{real} + b\sin(2\theta) \f$
-         void Set2ThetaTransparency(const double transparency);
+         void Set2ThetaTransparency(const REAL transparency);
          /// Get the experimental 2theta from the theoretical value, taking
          /// into account all corrections (zero, transparency,..).
          /// \internal
          /// \param ttheta: the theoretical 2theta value.
          /// \return the 2theta value as it appears on the spectrum.
-         double Get2ThetaCorr(const double ttheta)const;
+         REAL Get2ThetaCorr(const REAL ttheta)const;
          /// Get the pixel number on the experimental spectrum, from the
          /// theoretical (uncorrected) value of 2theta, taking into account all corrections.
 			/// (zero, transparency,..).
          /// \internal
          /// \param ttheta: the theoretical 2theta value.
          /// \return the 2theta value as it appears on the spectrum.
-         long Get2ThetaCorrPixel(const double ttheta)const;
+         long Get2ThetaCorrPixel(const REAL ttheta)const;
 
       // Import & export powder spectrum
          /** \brief Import fullprof-style diffraction data.
@@ -518,7 +518,7 @@ class PowderPattern : public RefinableObj
          * Note: powder spectrum parameters must have been set before calling this function,
          * for example by calling DiffractionDataPowder::InitPowderPatternPar().
          */
-         void SetPowderPatternObs(const CrystVector_double& obs);
+         void SetPowderPatternObs(const CrystVector_REAL& obs);
          
          ///Save powder spectrum to one file, text format, 3 columns theta Iobs Icalc.
          ///If Iobs is missing, the column is omitted.
@@ -536,20 +536,20 @@ class PowderPattern : public RefinableObj
          * \return \f$ R= \sqrt {\frac{\sum_i \left( I_i^{obs}-I_i^{calc} \right)^2}
          * {\sum_i (I_i^{obs})^2} }\f$
          */
-         double GetR()const ;
-         double GetIntegratedR()const ;
+         REAL GetR()const ;
+         REAL GetIntegratedR()const ;
          /** Get the weighted R-factor 
          * \return \f$ R_{w}= \sqrt {\frac{\sum_i w_i\left( I_i^{obs}-I_i^{calc} \right)^2}
          * {\sum_i w_i (I_i^{obs})^2} }\f$
          */
-         double GetRw()const;
-         double GetIntegratedRw()const;
+         REAL GetRw()const;
+         REAL GetIntegratedRw()const;
          /** \brief  Return conventionnal Chi^2 
          *
          * \return \f$ \chi^2 = \sum_i w_i \left(I_i^{obs}-I_i^{calc} \right)^2
          *  \f$
          */
-         double GetChiSq()const;
+         REAL GetChiSq()const;
          /// Fit the scale(s) factor of each component to minimize R
          void FitScaleFactorForR();
          void FitScaleFactorForIntegratedR();
@@ -562,9 +562,9 @@ class PowderPattern : public RefinableObj
 			///
 			/// To filter too small or null intensities :If sigma< minRelatSigma* max(sigma),
 			/// then w=1/(minRelatSigma* max(sigma))^2
-         void SetWeightToInvSigmaSq(const double minRelatSigma=1e-3);
+         void SetWeightToInvSigmaSq(const REAL minRelatSigma=1e-3);
          /// Set w = sin(theta). Not really usful, huh ?
-         void SetWeightToSinTheta(const double power=1.);
+         void SetWeightToSinTheta(const REAL power=1.);
          /// Set w = 1
          void SetWeightToUnit();
          /// Set w = 1/(a+ Iobs + b*Iobs^2+c*Iobs^3)
@@ -574,27 +574,27 @@ class PowderPattern : public RefinableObj
 			/// to compute the weight.
 			///
 			/// Typical values: a=2*min(Iobs) b=2/max(Iobs) c=0
-         void SetWeightPolynomial(const double a, const double b, const double c,
-												 const double minRelatIobs=1e-3);
+         void SetWeightPolynomial(const REAL a, const REAL b, const REAL c,
+												 const REAL minRelatIobs=1e-3);
 
          /// Add an Exclusion region, in 2theta, which will be ignored when computing R's
          /// XMLInput values must be, as always, in radians. Does not work yet with
          /// integrated R factors.
          /// Note that the pattern is still computed in these regions. They are only ignored
          /// by statistics functions (R, Rws).
-         void Add2ThetaExcludedRegion(const double min2Theta,const double max2theta);
+         void Add2ThetaExcludedRegion(const REAL min2Theta,const REAL max2theta);
          
       //Cost functions
          /// Number of Cost functions
          unsigned int GetNbCostFunction()const;
          const string& GetCostFunctionName(const unsigned int)const;
          const string& GetCostFunctionDescription(const unsigned int)const;
-         virtual double GetCostFunctionValue(const unsigned int);
+         virtual REAL GetCostFunctionValue(const unsigned int);
       //LSQ functions
          virtual unsigned int GetNbLSQFunction()const;
-         virtual const CrystVector_double& GetLSQCalc(const unsigned int) const;
-         virtual const CrystVector_double& GetLSQObs(const unsigned int) const;
-         virtual const CrystVector_double& GetLSQWeight(const unsigned int) const;
+         virtual const CrystVector_REAL& GetLSQCalc(const unsigned int) const;
+         virtual const CrystVector_REAL& GetLSQObs(const unsigned int) const;
+         virtual const CrystVector_REAL& GetLSQWeight(const unsigned int) const;
 		// I/O	
       	virtual void XMLOutput(ostream &os,int indent=0)const;
       	virtual void XMLInput(istream &is,const XMLCrystTag &tag);
@@ -612,25 +612,25 @@ class PowderPattern : public RefinableObj
 		void PrepareIntegratedRfactor()const;
       /// The calculated powder spectrum. It is mutable since it is
       /// completely defined by other parameters (eg it is not an 'independent parameter')
-      mutable CrystVector_double mPowderPatternCalc;
+      mutable CrystVector_REAL mPowderPatternCalc;
       /// The calculated powder spectrum part which corresponds to 'background' 
       /// (eg non-scalable components). It is already included in mPowderPatternCalc
-      mutable CrystVector_double mPowderPatternBackgroundCalc;
+      mutable CrystVector_REAL mPowderPatternBackgroundCalc;
       /// The observed powder spectrum.
-      CrystVector_double mPowderPatternObs;
+      CrystVector_REAL mPowderPatternObs;
       /// The sigma of the observed spectrum.
-      CrystVector_double mPowderPatternObsSigma;
+      CrystVector_REAL mPowderPatternObsSigma;
       /// The weight for each point of the spectrum.
-      CrystVector_double mPowderPatternWeight;
+      CrystVector_REAL mPowderPatternWeight;
       
       /// 2theta min and step for the spectrum
-      double m2ThetaMin,m2ThetaStep;
+      REAL m2ThetaMin,m2ThetaStep;
       /// Number of points in the spectrum
       unsigned long mNbPoint;
       
       /// The wavelength of the experiment, in Angstroems.
 		/// \warning This should be removed, as it is also available in mRadiation.
-      double mWavelength;
+      REAL mWavelength;
       /// The wavelength of the experiment, in Angstroems.
       Radiation mRadiation;
       
@@ -648,27 +648,27 @@ class PowderPattern : public RefinableObj
       
       //Excluded 2Theta regions in the powder spectrum, for statistics.
          /// Min value for 2theta for all excluded regions
-         CrystVector_double mExcludedRegionMin2Theta;
+         CrystVector_REAL mExcludedRegionMin2Theta;
          /// Max value for 2theta for all excluded regions
-         CrystVector_double mExcludedRegionMax2Theta;
+         CrystVector_REAL mExcludedRegionMax2Theta;
   
       //Various corrections to 2theta-to be used by the components
          /// Zero correction :
          /// \f$ (2\theta)_{obs} = (2\theta)_{real} +(2\theta)_{0}\f$
          ///Thus mPowderPattern2ThetaMin=(mPowderPattern2ThetaMin-m2ThetaZero)
-         double m2ThetaZero;
+         REAL m2ThetaZero;
          /// Displacement correction :
          ///\f$ (2\theta)_{obs} = (2\theta)_{real} + \frac{a}{\cos(\theta)} \f$
-         double m2ThetaDisplacement;
+         REAL m2ThetaDisplacement;
          /// Transparency correction : 
          ///\f$ (2\theta)_{obs} = (2\theta)_{real} + b\sin(2\theta) \f$
-         double m2ThetaTransparency;
+         REAL m2ThetaTransparency;
       // Components of the powder spectrum
          /// The components (crystalline phases, background,...) of the powder spectrum
          ObjRegistry<PowderPatternComponent> mPowderPatternComponentRegistry;
          /// The scale factors for each component. For unscalable phases,
 			/// this is set to 1 (constant).
-         CrystVector_double mScaleFactor;
+         CrystVector_REAL mScaleFactor;
          
       /// Use faster, less precise functions ?
       bool mUseFastLessPreciseFunc;
@@ -680,7 +680,7 @@ class PowderPattern : public RefinableObj
          /// can be scaled ?
          mutable CrystVector_int mScalableComponentIndex;
          /// \internal Used to fit the components' scale factors
-         mutable CrystMatrix_double mFitScaleFactorM,mFitScaleFactorB,mFitScaleFactorX;
+         mutable CrystMatrix_REAL mFitScaleFactorM,mFitScaleFactorB,mFitScaleFactorX;
          
       // Use only low-angle reflections
          /** \brief Flag forcing the use of only low-angle reflections
@@ -702,11 +702,11 @@ class PowderPattern : public RefinableObj
          /** \brief Limit (theta angle, in radian) for the above option.
          * \deprecated
          */
-         double mUseOnlyLowAngleDataLimit;
+         REAL mUseOnlyLowAngleDataLimit;
 		// Integrated R-factors
 			mutable CrystVector_long mIntegratedPatternMin,mIntegratedPatternMax;
-			mutable CrystVector_double mIntegratedObs;
-			mutable CrystVector_double mIntegratedWeight;
+			mutable CrystVector_REAL mIntegratedObs;
+			mutable CrystVector_REAL mIntegratedWeight;
 			mutable RefinableObjClock mClockIntegratedFactorsPrep;
    #ifdef __WX__CRYST__
    public:
@@ -725,15 +725,15 @@ extern ObjRegistry<PowderPattern> gPowderPatternRegistry;
 ///Gaussian, normalized (ie integral is equal to 1), as a function of theta
 /// and of the FWHM. The input is an array of the theta values. The maximum of the 
 ///function is in theta=0. If asymmetry is used, negative tth values must be first.
-CrystVector_double PowderProfileGauss  (const CrystVector_double theta,
-                                      const double fwhm,
-                                      const double asymmetryPar=1.);
+CrystVector_REAL PowderProfileGauss  (const CrystVector_REAL theta,
+                                      const REAL fwhm,
+                                      const REAL asymmetryPar=1.);
 ///Lorentzian, normalized (ie integral is equal to 1), as a function of theta
 /// and of the FWHM. The input is an array of the theta values. The maximum of the 
 ///function is in theta=0. If asymmetry is used, negative tth values must be first.
-CrystVector_double PowderProfileLorentz(const CrystVector_double theta,
-                                      const double fwhm,
-                                      const double asymmetryPar=1.);
+CrystVector_REAL PowderProfileLorentz(const CrystVector_REAL theta,
+                                      const REAL fwhm,
+                                      const REAL asymmetryPar=1.);
 
 
 }//namespace ObjCryst

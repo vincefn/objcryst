@@ -235,7 +235,7 @@ void RefinablePar::XMLInput(istream &is,const XMLCrystTag &tag)
       }
       if("Min"==tag.GetAttributeName(i))
       {
-         double f;
+         REAL f;
          stringstream ss(tag.GetAttributeValue(i));
          ss >>f;
          this->SetHumanMin(f);
@@ -243,7 +243,7 @@ void RefinablePar::XMLInput(istream &is,const XMLCrystTag &tag)
       }
       if("Max"==tag.GetAttributeName(i))
       {
-         double f;
+         REAL f;
          stringstream ss(tag.GetAttributeValue(i));
          ss >>f;
          this->SetHumanMax(f);
@@ -258,7 +258,7 @@ void RefinablePar::XMLInput(istream &is,const XMLCrystTag &tag)
          continue;
       }
    }
-   double f;
+   REAL f;
    is>>f;
    this->SetHumanValue(f);
    XMLCrystTag junk(is);//read end tag

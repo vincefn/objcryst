@@ -66,19 +66,19 @@ class WXPowderPatternGraph: public wxWindow
       /// the WXPowderPattern::CrystUpdate().
       void OnUpdate(wxCommandEvent & WXUNUSED(event));
       /// Update the spectrum. This is called by the WXPowderPattern parent.
-      void SetPattern(const CrystVector_double &obs,
-                       const CrystVector_double &calc,
-                       const double tthetaMin,const double tthetaStep);
+      void SetPattern(const CrystVector_REAL &obs,
+                       const CrystVector_REAL &calc,
+                       const REAL tthetaMin,const REAL tthetaStep);
       /// Redraw the pattern (special function to ensure complete redrawing under windows...)
       void OnRedrawNewPattern(wxUpdateUIEvent& WXUNUSED(event));
    private:
 		/// Reset the limits of the axis to full range.
 		void ResetAxisLimits();
       WXPowderPattern *mpPattern;
-      CrystVector_double mObs,mCalc,m2theta;
+      CrystVector_REAL mObs,mCalc,m2theta;
       const long mMargin;
-      const double mDiffPercentShift;
-      double mMaxIntensity,mMinIntensity,mMin2Theta,mMax2Theta;
+      const REAL mDiffPercentShift;
+      REAL mMaxIntensity,mMinIntensity,mMin2Theta,mMax2Theta;
       wxFrame *mpParentFrame;
       bool mCalcPatternIsLocked;
       /// Pop-up menu
@@ -86,7 +86,7 @@ class WXPowderPatternGraph: public wxWindow
 		/// Are we within a dragging event ?
 		bool mIsDragging;
 		/// Remember coordinates at the beginning of the dragging
-		double mDragging2Theta0,mDraggingIntensity0;
+		REAL mDragging2Theta0,mDraggingIntensity0;
 		/// Index of the first and last points drawn of the pattern
 		mutable long mFirst,mLast;
       DECLARE_EVENT_TABLE()
@@ -101,11 +101,11 @@ class WXFieldRefParBackground:public WXFieldRefPar
 {
    public:
       WXFieldRefParBackground(wxWindow *parent,RefinablePar *refpar,
-                              CrystVector_double *backgd2Theta, const int numPt);
+                              CrystVector_REAL *backgd2Theta, const int numPt);
    private:
       wxTextCtrl *mpField2Theta;
       /// The vector of 2theta values
-      CrystVector_double* mpBackgd2Theta;
+      CrystVector_REAL* mpBackgd2Theta;
       const int mBackgdPointNum;
 }
 #endif

@@ -15,20 +15,20 @@
 
 #include "ObjCryst/General.h"
 
-#ifdef __WX__CRYST__
 namespace ObjCryst
 {
 	class OptimizationObj;
 	class MonteCarloObj;
 }
-   //#undef GetClassName // Conflict from wxMSW headers ? (cygwin)
-#include "wxCryst/wxGlobalOptimObj.h"
-#endif
 
 #include "RefinableObj/RefinableObj.h"
 #include "RefinableObj/IO.h"
 #include <string>
 #include <iostream>
+#ifdef __WX__CRYST__
+   //#undef GetClassName // Conflict from wxMSW headers ? (cygwin)
+#include "wxCryst/wxGlobalOptimObj.h"
+#endif
 
 namespace ObjCryst
 {
@@ -97,7 +97,7 @@ class OptimizationObj
       /// \param nbSteps: the number of steps to go. This number is modified (decreases!)
       /// as the refinement goes on.
 		/// \param silent : if true, absolutely no message should be printed (except debugging)
-      virtual void Optimize(long &nbSteps,const bool silent=false,const double finalcost=0)=0;
+      virtual void Optimize(long &nbSteps,const bool silent=false,const REAL finalcost=0)=0;
    //Set Refinable parameters status
       /// Fix all parameters
       void FixAllPar();
@@ -112,20 +112,20 @@ class OptimizationObj
       /// Set a family of parameters to be used
       void SetParIsUsed(const RefParType *type,const bool use);
 		/// Change the relative limits for a parameter from its name
-      void SetLimitsRelative(const string &parName, const double min, const double max);
+      void SetLimitsRelative(const string &parName, const REAL min, const REAL max);
 		/// Change the relative limits for a family of parameter
-      void SetLimitsRelative(const RefParType *type, const double min, const double max);
+      void SetLimitsRelative(const RefParType *type, const REAL min, const REAL max);
 		/// Change the absolute limits for a parameter from its name
-      void SetLimitsAbsolute(const string &parName, const double min, const double max);
+      void SetLimitsAbsolute(const string &parName, const REAL min, const REAL max);
 		/// Change the absolute limits for a family of parameter
-      void SetLimitsAbsolute(const RefParType *type, const double min, const double max);
+      void SetLimitsAbsolute(const RefParType *type, const REAL min, const REAL max);
 		
       /** \brief The optimized (minimized, actually) function.
       *
       * This function is the weighted sum of the chosen Cost Functions for
 		* the refined objects. All Cost Functions \b must be strictly positive.
       */
-      double GetCostFunctionValue();
+      REAL GetCostFunctionValue();
 
       /// Stop after the current cycle. USed for interactive refinement.
       void StopAfterCycle();
@@ -138,7 +138,7 @@ class OptimizationObj
 		/// should be strictly positive, and ideally should behave like a R/Rw function,
 		/// ie a value above 0.50 corresponds to a very inadequate configuration,
 		/// while 0.05 is excellent.
-      void AddCostFunction(RefinableObj &,const unsigned int id, const double weight=1.);
+      void AddCostFunction(RefinableObj &,const unsigned int id, const REAL weight=1.);
       /** \brief Output a description of the object in XML format to a stream.
       *
 		* This saves the list of refined object and the cost functions, as well as options
@@ -194,7 +194,7 @@ class OptimizationObj
          /// Number of trials so far
          long mNbTrial;
          /// Best value of the cost function so far
-         double mBestCost;
+         REAL mBestCost;
          /// Index of the 'best' saved parameter set
          long mBestParSavedSetIndex;
 			
@@ -218,7 +218,7 @@ class OptimizationObj
          /// The id of the cost functions in each RefinableObj
          CrystVector_int mpCostFunctionId;
          /// The weight associated with each cost function
-         CrystVector_double mCostFunctionWeight;
+         CrystVector_REAL mCostFunctionWeight;
 	private:
    #ifdef __WX__CRYST__
    public:
@@ -282,10 +282,10 @@ class MonteCarloObj:public OptimizationObj
 		* classes.
       */
       void SetAlgorithmSimulAnnealing(const AnnealingSchedule scheduleTemp,
-                                 const double tMax, const double tMin,
+                                 const REAL tMax, const REAL tMin,
                                  const AnnealingSchedule scheduleMutation=ANNEALING_CONSTANT,
-                                 const double mutMax=16., const double mutMin=.125,
-                                 const long nbTrialRetry=0,const double minCostRetry=0.,
+                                 const REAL mutMax=16., const REAL mutMin=.125,
+                                 const long nbTrialRetry=0,const REAL minCostRetry=0.,
                                  const long maxNbTrialSinceBest=0);
       /** \brief  Set the refinement method to Parallel Tempering.
       *
@@ -306,11 +306,11 @@ class MonteCarloObj:public OptimizationObj
 		* classes.
       */
       void SetAlgorithmParallTempering(const AnnealingSchedule scheduleTemp,
-                                 const double tMax, const double tMin,
+                                 const REAL tMax, const REAL tMin,
                                  const AnnealingSchedule scheduleMutation=ANNEALING_CONSTANT,
-                                 const double mutMax=16., const double mutMin=.125);
+                                 const REAL mutMax=16., const REAL mutMin=.125);
       
-      virtual void Optimize(long &nbSteps,const bool silent=false,const double finalcost=0);
+      virtual void Optimize(long &nbSteps,const bool silent=false,const REAL finalcost=0);
       
       //Parameter Access by name
       //RefinablePar& GetPar(const string& parName);
@@ -351,7 +351,7 @@ class MonteCarloObj:public OptimizationObj
       
       //Status of optimization
          /// Current value of the cost function
-         double mCurrentCost;
+         REAL mCurrentCost;
          
       //Keep an history with the evolution of optimization
          /// Total number of saved configurations
@@ -359,7 +359,7 @@ class MonteCarloObj:public OptimizationObj
          /// Trials corresponding to each stored values
          CrystVector_long mHistoryTrialNumber;
          /// Evolution of cost function
-         CrystVector_double mHistoryCostFunction;
+         CrystVector_REAL mHistoryCostFunction;
          /// Index of saved parameters set in mRefParList for each saved trial
          CrystVector_long mHistorySavedParamSetIndex;
          /// Save the evolution of refined parameters after optimization ?
@@ -372,9 +372,9 @@ class MonteCarloObj:public OptimizationObj
       
       // Annealing parameters
          /// Beginning temperature for annealing
-         double mTemperatureMax;
+         REAL mTemperatureMax;
          /// Lower temperature
-         double mTemperatureMin;
+         REAL mTemperatureMin;
          /// Schedule for the annealing
          RefObjOpt mAnnealingScheduleTemp;
       //Parameters to create new configurations
@@ -382,11 +382,11 @@ class MonteCarloObj:public OptimizationObj
          /// equal to this amplitude multiplied by the Global optimization step defined
          /// for each RefinablePar. Large amplitude should be used at the beginning of the
          /// refinement (high temeratures).
-         double mMutationAmplitude;
+         REAL mMutationAmplitude;
          /// Mutation amplitude at the beginning of the optimization.
-         double mMutationAmplitudeMax;
+         REAL mMutationAmplitudeMax;
          /// Mutation amplitude at the end of the optimization.
-         double mMutationAmplitudeMin;
+         REAL mMutationAmplitudeMin;
          /// Schedule for the annealing
          RefObjOpt mAnnealingScheduleMutation;
       //Automatic retry 
@@ -394,7 +394,7 @@ class MonteCarloObj:public OptimizationObj
          /// If <=0, this will be ignored.
          long mNbTrialRetry;
          /// Cost to reach unless an automatic randomization and retry is done
-         double mMinCostRetry;
+         REAL mMinCostRetry;
          /// If more than mMaxNbTrialSinceBest trials have been made since the best
          /// configuration has been found, then revert to the best configuration. If <=0,
          /// then this is ignored. This must be large enough to have an ergodic 

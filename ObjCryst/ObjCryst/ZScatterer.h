@@ -13,7 +13,7 @@
 
 namespace ObjCryst
 {
-
+class ZScatterer;
 //######################################################################
 //
 //      GLOBAL SCATTERING POWER
@@ -40,15 +40,15 @@ class GlobalScatteringPower:virtual public ScatteringPower
       ~GlobalScatteringPower();
       /// Re-initialize parameters (after using the default constructor).
       void Init(const ZScatterer &scatt);
-      virtual CrystVector_double GetScatteringFactor(const ScatteringData &data,
+      virtual CrystVector_REAL GetScatteringFactor(const ScatteringData &data,
                                                      const int spgSymPosIndex=0) const;
-      virtual CrystVector_double GetTemperatureFactor(const ScatteringData &data,
+      virtual CrystVector_REAL GetTemperatureFactor(const ScatteringData &data,
                                                           const int spgSymPosIndex=0) const;
-      virtual CrystMatrix_double GetResonantScattFactReal(const ScatteringData &data,
+      virtual CrystMatrix_REAL GetResonantScattFactReal(const ScatteringData &data,
                                                           const int spgSymPosIndex=0) const;
-      virtual CrystMatrix_double GetResonantScattFactImag(const ScatteringData &data,
+      virtual CrystMatrix_REAL GetResonantScattFactImag(const ScatteringData &data,
                                                           const int spgSymPosIndex=0) const;
-      virtual double GetRadius()const;
+      virtual REAL GetRadius()const;
    protected:
       virtual void InitRefParList();
       /// a copy of the ZScatterer associated to this object
@@ -66,10 +66,10 @@ class ZAtom
 {
    public:
       ZAtom(ZScatterer &scatt,const ScatteringPower *pow,
-            const long atomBond=0, const double bondLength=1,
-            const long atomAngle=0, const double bondAngle=M_PI,
-            const long atomDihedral=0, const double dihedralAngle=M_PI,
-            const double popu=1., const string &name="");
+            const long atomBond=0, const REAL bondLength=1,
+            const long atomAngle=0, const REAL bondAngle=M_PI,
+            const long atomDihedral=0, const REAL dihedralAngle=M_PI,
+            const REAL popu=1., const string &name="");
       ~ZAtom();
       const string& GetClassName()const;
       const string& GetName()const;
@@ -90,24 +90,24 @@ class ZAtom
       long GetZDihedralAngleAtom()const;
       
       ///Const access to bondlength parameter.
-      double GetZBondLength()const;
+      REAL GetZBondLength()const;
       ///Const access to the angle parameter.
-      double GetZAngle()const;
+      REAL GetZAngle()const;
       ///Const access to the dihedral angle parameter.
-      double GetZDihedralAngle()const;
+      REAL GetZDihedralAngle()const;
       ///Const access to the ocupancy parameter.
-      double GetOccupancy()const;
+      REAL GetOccupancy()const;
       ///ScatteringPower for this atom.
       const ScatteringPower* GetScatteringPower()const;
       
       ///Access to bondlength parameter.
-      void SetZBondLength(const double);
+      void SetZBondLength(const REAL);
       ///Access to the angle parameter.
-      void SetZAngle(const double);
+      void SetZAngle(const REAL);
       ///Access to the dihedral angle parameter.
-      void SetZDihedralAngle(const double);
+      void SetZDihedralAngle(const REAL);
       ///Access to the dihedral angle parameter.
-      void SetOccupancy(const double);
+      void SetOccupancy(const REAL);
       ///Set the ScatteringPower.
       void SetScatteringPower(const ScatteringPower*);
       void XMLOutput(ostream &os,int indent=0)const;
@@ -119,7 +119,7 @@ class ZAtom
       /// position of this atom.
       long mAtomBond,mAtomAngle,mAtomDihed;
       /// Bond length, angle and dihedral angle.
-      double mBondLength,mAngle,mDihed,mOccupancy;
+      REAL mBondLength,mAngle,mDihed,mOccupancy;
       /// Name for this atom
       string mName;
       /// the ZScatterer in which this atom is included.
@@ -152,15 +152,15 @@ class ZMoveMinimizer:public RefinableObj
       virtual unsigned int GetNbCostFunction()const;
       virtual const string& GetCostFunctionName(const unsigned int)const;
       virtual const string& GetCostFunctionDescription(const unsigned int)const;
-      virtual double GetCostFunctionValue(const unsigned int);
+      virtual REAL GetCostFunctionValue(const unsigned int);
 		void RecordConformation();
-		void SetZAtomWeight(const CrystVector_double weight);
+		void SetZAtomWeight(const CrystVector_REAL weight);
 		void MinimizeChange(long nbTrial=10000);
 	private:
 		ZScatterer *mpZScatt;
 		MonteCarloObj mOptimObj;
-		CrystVector_double mXCoord0,mYCoord0,mZCoord0;
-		CrystVector_double mAtomWeight;
+		CrystVector_REAL mXCoord0,mYCoord0,mZCoord0;
+		CrystVector_REAL mAtomWeight;
 };
 
 //######################################################################
@@ -181,8 +181,8 @@ class ZScatterer: public Scatterer
       *  \param phi,chi: angles defining the orientation of the scatterer
       */
       ZScatterer(const string &name,const Crystal &cryst, 
-                 const double x=0.,const double y=0.,const double z=0.,
-                 const double phi=0.,const double chi=0., const double psi=0.);
+                 const REAL x=0.,const REAL y=0.,const REAL z=0.,
+                 const REAL phi=0.,const REAL chi=0., const REAL psi=0.);
       /** \brief Copy constructor
       *
       */
@@ -196,10 +196,10 @@ class ZScatterer: public Scatterer
       /// atom and will be ignored for any scattering analysis. The 'name' supplied may
       /// not be respected, and can be replaced by 'ZScatterer_name'+'AtomNum'+'ScattPowName'
       void AddAtom(const string &name,const ScatteringPower *pow,
-                   const long atomBond, const double bondLength,
-                   const long atomAngle, const double bondAngle,
-                   const long atomDihedral, const double dihedralAngle,
-                   const double popu=1.);
+                   const long atomBond, const REAL bondLength,
+                   const long atomAngle, const REAL bondAngle,
+                   const long atomDihedral, const REAL dihedralAngle,
+                   const REAL popu=1.);
       
       virtual int GetNbComponent() const;
       virtual const ScatteringComponentList& GetScatteringComponentList() const;
@@ -209,17 +209,17 @@ class ZScatterer: public Scatterer
       void Print() const;
             
       ///Access to phi parameter (overall orientation of the scatterer)
-      double GetPhi()const;
+      REAL GetPhi()const;
       ///Access to chi parameter (overall orientation of the scatterer)
-      double GetChi()const;
+      REAL GetChi()const;
       ///Access to psi parameter (overall orientation of the scatterer)
-      double GetPsi()const;
+      REAL GetPsi()const;
       ///Access to phi parameter (overall orientation of the scatterer)
-      void SetPhi(const double);
+      void SetPhi(const REAL);
       ///Access to chi parameter (overall orientation of the scatterer)
-      void SetChi(const double);
+      void SetChi(const REAL);
       ///Access to psi parameter (overall orientation of the scatterer)
-      void SetPsi(const double);
+      void SetPsi(const REAL);
 
       /// Index of the 1st atom used to define the i-th atom in the Z-Matrix (the one from
       /// which the bondlength is calculated)
@@ -232,18 +232,18 @@ class ZScatterer: public Scatterer
       long GetZDihedralAngleAtom(const int i)const;
       
       ///Const access to bondlength parameter, for the i-th row in the Z-Matrix.
-      double GetZBondLength(const int i)const;
+      REAL GetZBondLength(const int i)const;
       ///Const access to the angle parameter, for the i-th row in the Z-Matrix.
-      double GetZAngle(const int i)const;
+      REAL GetZAngle(const int i)const;
       ///Const access to the dihedral angle parameter, for the i-th row in the Z-Matrix.
-      double GetZDihedralAngle(const int i)const;
+      REAL GetZDihedralAngle(const int i)const;
       
       ///Access to bondlength parameter, for the i-th row in the Z-Matrix.
-      void SetZBondLength(const int i,const double);
+      void SetZBondLength(const int i,const REAL);
       ///Access to the angle parameter, for the i-th row in the Z-Matrix.
-      void SetZAngle(const int i,const double);
+      void SetZAngle(const int i,const REAL);
       ///Access to the dihedral angle parameter, for the i-th row in the Z-Matrix.
-      void SetZDihedralAngle(const int i,const double);
+      void SetZDihedralAngle(const int i,const REAL);
 
       ///Access to the registry of ZAtoms
       const ObjRegistry<ZAtom>& GetZAtomRegistry()const;
@@ -252,9 +252,9 @@ class ZScatterer: public Scatterer
                                          const bool onlyIndependentAtoms=false)const;
 
       virtual void GLInitDisplayList(const bool onlyIndependentAtoms=false,
-                                     const double xMin=-.1,const double xMax=1.1,
-                                     const double yMin=-.1,const double yMax=1.1,
-                                     const double zMin=-.1,const double zMax=1.1)const;
+                                     const REAL xMin=-.1,const REAL xMax=1.1,
+                                     const REAL yMin=-.1,const REAL yMax=1.1,
+                                     const REAL zMin=-.1,const REAL zMax=1.1)const;
       /** \brief use a Global scattering power for this scatterer ?
       *
       * If true, then the overall scattering power of this ZScatterer will be 
@@ -271,13 +271,13 @@ class ZScatterer: public Scatterer
 		virtual void GetGeneGroup(const RefinableObj &obj, 
 										  CrystVector_uint & groupIndex,
 										  unsigned int &firstGroup) const;
-      virtual void GlobalOptRandomMove(const double mutationAmplitude);
+      virtual void GlobalOptRandomMove(const REAL mutationAmplitude);
 		/// Get the list of all ZAtom cartesian x coordinates.
-		const CrystVector_double& GetXCoord() const;
+		const CrystVector_REAL& GetXCoord() const;
 		/// Get the list of all ZAtom cartesian x coordinates.
-		const CrystVector_double& GetYCoord() const;
+		const CrystVector_REAL& GetYCoord() const;
 		/// Get the list of all ZAtom cartesian x coordinates.
-		const CrystVector_double& GetZCoord() const;
+		const CrystVector_REAL& GetZCoord() const;
       virtual void EndOptimization();
    protected:
 		/** Update the atom coordinates (in real units, in Angstroems).
@@ -351,7 +351,7 @@ class ZScatterer: public Scatterer
       *
       * The rotation is performed around a 'pivot' atom (see ZScatterer::mPivotAtom)
       */
-      double mPhi,mChi,mPsi;
+      REAL mPhi,mChi,mPsi;
       
       /// Registry for ZAtoms in this Scatterer.
       ObjRegistry<ZAtom> mZAtomRegistry;
@@ -360,7 +360,7 @@ class ZScatterer: public Scatterer
       long mCenterAtomIndex;
       
       /// Rotation matrix for the orientation of the scatterer
-      mutable CrystMatrix_double mPhiChiPsiMatrix;
+      mutable CrystMatrix_REAL mPhiChiPsiMatrix;
       
       /// Does the ZScatterer use a global scattering power ?
 		/// \warning EXPERIMENTAL.
@@ -372,7 +372,7 @@ class ZScatterer: public Scatterer
       
       /// Storage for Cartesian coordinates. The (0,0,0) is on the central atom. This
       /// includes Dummy atoms.
-      mutable CrystVector_double mXCoord,mYCoord,mZCoord;
+      mutable CrystVector_REAL mXCoord,mYCoord,mZCoord;
 		/// Last time the cartesian coordinates were computed
       mutable RefinableObjClock mClockCoord;
 		ZMoveMinimizer *mpZMoveMinimizer;
@@ -424,11 +424,11 @@ class ZPolyhedron: public ZScatterer
       * \param phi,chi,psi: initial angles for this polyhedron
       */
       ZPolyhedron( const RegularPolyhedraType type, const Crystal &cryst,
-            const double x, const double y, const double z,
+            const REAL x, const REAL y, const REAL z,
             const string &name, const ScatteringPower *centralAtomPow,
-            const ScatteringPower *periphAtomPow,const double centralPeriphDist,
-            const double ligandPopu=1,
-            const double phi=0., const double chi=0., const double psi=0.);
+            const ScatteringPower *periphAtomPow,const REAL centralPeriphDist,
+            const REAL ligandPopu=1,
+            const REAL phi=0., const REAL chi=0., const REAL psi=0.);
       /// Copy Constructor
 		ZPolyhedron(const ZPolyhedron&);
       /// \internal so-called Virtual copy constructor, needed to make copies

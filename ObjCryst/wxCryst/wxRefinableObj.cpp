@@ -191,7 +191,9 @@ void WXFieldRefPar::ValidateUserInput()
    VFN_DEBUG_MESSAGE("WXFieldRefPar::ValidateUserInput()",6)
    mValueOld=mValue;
    wxString s=mpField->GetValue();
-   s.ToDouble(&mValue);
+	double tmp;
+   s.ToDouble(&tmp);
+	mValue=tmp;
    mpRefPar->SetHumanValue(mValue);
 }
 ////////////////////////////////////////////////////////////////////////
@@ -262,14 +264,14 @@ BEGIN_EVENT_TABLE(WXCostFunction,wxWindow)
 END_EVENT_TABLE()
 
 WXCostFunction::WXCostFunction(wxWindow *parent,RefinableObj *obj, const int field_id,
-               const int funcNum,double * weight):
+               const int funcNum,REAL * weight):
 WXField(parent,obj->GetName()+":"+obj->GetCostFunctionName(funcNum)+"=",-1),
 mpObj(obj),mFuncNum(funcNum)
 {
    mpValue=new wxTextCtrl(this,ID_WXFIELD,"",wxDefaultPosition,wxDefaultSize,wxTE_READONLY);
    mpSizer->Add(mpValue,0,wxALIGN_CENTER);
    
-   mpWeight=new WXFieldPar<double>(this,",weight=",-1,weight);
+   mpWeight=new WXFieldPar<REAL>(this,",weight=",-1,weight);
    mpSizer->Add(mpWeight,0,wxALIGN_CENTER);
    
    this->CrystUpdate();

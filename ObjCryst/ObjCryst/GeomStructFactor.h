@@ -24,215 +24,215 @@ namespace ObjCryst
 //do not yet have a coded Geom Structure factor, or for those
 //where it does not make much difference
 /// \deprecated
-void RealGeomStructFactor      (const double x,
-                                const double y,
-                                const double z,
-                                const CrystVector_double&h,
-                                const CrystVector_double&k,
-                                const CrystVector_double&l,
-                                CrystVector_double& rsf);
+void RealGeomStructFactor      (const REAL x,
+                                const REAL y,
+                                const REAL z,
+                                const CrystVector_REAL&h,
+                                const CrystVector_REAL&k,
+                                const CrystVector_REAL&l,
+                                CrystVector_REAL& rsf);
 // Same for the imaginary part
 /// \deprecated
-void ImagGeomStructFactor      (const double x,
-                                const double y,
-                                const double z,
-                                const CrystVector_double&h,
-                                const CrystVector_double&k,
-                                const CrystVector_double&l,
-                                CrystVector_double& rsf);
+void ImagGeomStructFactor      (const REAL x,
+                                const REAL y,
+                                const REAL z,
+                                const CrystVector_REAL&h,
+                                const CrystVector_REAL&k,
+                                const CrystVector_REAL&l,
+                                CrystVector_REAL& rsf);
 
 
 /// \deprecated
-void RealGeomStructFactor_1    (const double x,
-                                const double y,
-                                const double z,
-                                const CrystVector_double&h,
-                                const CrystVector_double&k,
-                                const CrystVector_double&l,
-                                CrystVector_double& rsf);
+void RealGeomStructFactor_1    (const REAL x,
+                                const REAL y,
+                                const REAL z,
+                                const CrystVector_REAL&h,
+                                const CrystVector_REAL&k,
+                                const CrystVector_REAL&l,
+                                CrystVector_REAL& rsf);
 
 /// \deprecated
-void RealGeomStructFactor_2    (const double x,
-                                const double y,
-                                const double z,
-                                const CrystVector_double&h,
-                                const CrystVector_double&k,
-                                const CrystVector_double&l,
-                                CrystVector_double& rsf);
+void RealGeomStructFactor_2    (const REAL x,
+                                const REAL y,
+                                const REAL z,
+                                const CrystVector_REAL&h,
+                                const CrystVector_REAL&k,
+                                const CrystVector_REAL&l,
+                                CrystVector_REAL& rsf);
 
 /// \deprecated
-void RealGeomStructFactor_67   (const double x,
-                                const double y,
-                                const double z,
-                                const CrystVector_double&h,
-                                const CrystVector_double&k,
-                                const CrystVector_double&l,
-                                CrystVector_double& rsf);
+void RealGeomStructFactor_67   (const REAL x,
+                                const REAL y,
+                                const REAL z,
+                                const CrystVector_REAL&h,
+                                const CrystVector_REAL&k,
+                                const CrystVector_REAL&l,
+                                CrystVector_REAL& rsf);
 
 /// \deprecated
-void RealGeomStructFactor_67ba_c(const double x,
-                                const double y,
-                                const double z,
-                                const CrystVector_double&h,
-                                const CrystVector_double&k,
-                                const CrystVector_double&l,
-                                CrystVector_double& rsf);
+void RealGeomStructFactor_67ba_c(const REAL x,
+                                const REAL y,
+                                const REAL z,
+                                const CrystVector_REAL&h,
+                                const CrystVector_REAL&k,
+                                const CrystVector_REAL&l,
+                                CrystVector_REAL& rsf);
 
 /// \deprecated
-void RealGeomStructFactor_67cab(const double x,
-                                const double y,
-                                const double z,
-                                const CrystVector_double&h,
-                                const CrystVector_double&k,
-                                const CrystVector_double&l,
-                                CrystVector_double& rsf);
+void RealGeomStructFactor_67cab(const REAL x,
+                                const REAL y,
+                                const REAL z,
+                                const CrystVector_REAL&h,
+                                const CrystVector_REAL&k,
+                                const CrystVector_REAL&l,
+                                CrystVector_REAL& rsf);
 
 /// \deprecated
-void RealGeomStructFactor_67_cba(const double x,
-                                const double y,
-                                const double z,
-                                const CrystVector_double&h,
-                                const CrystVector_double&k,
-                                const CrystVector_double&l,
-                                CrystVector_double& rsf);
+void RealGeomStructFactor_67_cba(const REAL x,
+                                const REAL y,
+                                const REAL z,
+                                const CrystVector_REAL&h,
+                                const CrystVector_REAL&k,
+                                const CrystVector_REAL&l,
+                                CrystVector_REAL& rsf);
 
 /// \deprecated
-void RealGeomStructFactor_67bca(const double x,
-                                const double y,
-                                const double z,
-                                const CrystVector_double&h,
-                                const CrystVector_double&k,
-                                const CrystVector_double&l,
-                                CrystVector_double& rsf);
+void RealGeomStructFactor_67bca(const REAL x,
+                                const REAL y,
+                                const REAL z,
+                                const CrystVector_REAL&h,
+                                const CrystVector_REAL&k,
+                                const CrystVector_REAL&l,
+                                CrystVector_REAL& rsf);
                                 
 /// \deprecated
-void RealGeomStructFactor_67a_cb(const double x,
-                                const double y,
-                                const double z,
-                                const CrystVector_double&h,
-                                const CrystVector_double&k,
-                                const CrystVector_double&l,
-                                CrystVector_double& rsf);
+void RealGeomStructFactor_67a_cb(const REAL x,
+                                const REAL y,
+                                const REAL z,
+                                const CrystVector_REAL&h,
+                                const CrystVector_REAL&k,
+                                const CrystVector_REAL&l,
+                                CrystVector_REAL& rsf);
                                 
 /// \deprecated
-void RealGeomStructFactor_97   (const double x,
-                                const double y,
-                                const double z,
-                                const CrystVector_double&h,
-                                const CrystVector_double&k,
-                                const CrystVector_double&l,
-                                CrystVector_double& rsf);
+void RealGeomStructFactor_97   (const REAL x,
+                                const REAL y,
+                                const REAL z,
+                                const CrystVector_REAL&h,
+                                const CrystVector_REAL&k,
+                                const CrystVector_REAL&l,
+                                CrystVector_REAL& rsf);
 
 /// \deprecated
-void RealGeomStructFactor_230  (const double x,
-                                const double y,
-                                const double z,
-                                const CrystVector_double&h,
-                                const CrystVector_double&k,
-                                const CrystVector_double&l,
-                                CrystVector_double& rsf);
+void RealGeomStructFactor_230  (const REAL x,
+                                const REAL y,
+                                const REAL z,
+                                const CrystVector_REAL&h,
+                                const CrystVector_REAL&k,
+                                const CrystVector_REAL&l,
+                                CrystVector_REAL& rsf);
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
 /// \deprecated
-void ImagGeomStructFactor_centro(const double x,
-                                const double y,
-                                const double z,
-                                const CrystVector_double&h,
-                                const CrystVector_double&k,
-                                const CrystVector_double&l,
-                                CrystVector_double& isf); //do nothing
+void ImagGeomStructFactor_centro(const REAL x,
+                                const REAL y,
+                                const REAL z,
+                                const CrystVector_REAL&h,
+                                const CrystVector_REAL&k,
+                                const CrystVector_REAL&l,
+                                CrystVector_REAL& isf); //do nothing
 
 /// \deprecated
-void ImagGeomStructFactor_1    (const double x,
-                                const double y,
-                                const double z,
-                                const CrystVector_double&h,
-                                const CrystVector_double&k,
-                                const CrystVector_double&l,
-                                CrystVector_double& isf);
+void ImagGeomStructFactor_1    (const REAL x,
+                                const REAL y,
+                                const REAL z,
+                                const CrystVector_REAL&h,
+                                const CrystVector_REAL&k,
+                                const CrystVector_REAL&l,
+                                CrystVector_REAL& isf);
 
 /// \deprecated
-void ImagGeomStructFactor_2    (const double x,
-                                const double y,
-                                const double z,
-                                const CrystVector_double&h,
-                                const CrystVector_double&k,
-                                const CrystVector_double&l,
-                                CrystVector_double& isf);
+void ImagGeomStructFactor_2    (const REAL x,
+                                const REAL y,
+                                const REAL z,
+                                const CrystVector_REAL&h,
+                                const CrystVector_REAL&k,
+                                const CrystVector_REAL&l,
+                                CrystVector_REAL& isf);
 
 /// \deprecated
-void ImagGeomStructFactor_67   (const double x,
-                                const double y,
-                                const double z,
-                                const CrystVector_double&h,
-                                const CrystVector_double&k,
-                                const CrystVector_double&l,
-                                CrystVector_double& isf);
+void ImagGeomStructFactor_67   (const REAL x,
+                                const REAL y,
+                                const REAL z,
+                                const CrystVector_REAL&h,
+                                const CrystVector_REAL&k,
+                                const CrystVector_REAL&l,
+                                CrystVector_REAL& isf);
 
 /// \deprecated
-void ImagGeomStructFactor_67ba_c(const double x,
-                                const double y,
-                                const double z,
-                                const CrystVector_double&h,
-                                const CrystVector_double&k,
-                                const CrystVector_double&l,
-                                CrystVector_double& rsf);
+void ImagGeomStructFactor_67ba_c(const REAL x,
+                                const REAL y,
+                                const REAL z,
+                                const CrystVector_REAL&h,
+                                const CrystVector_REAL&k,
+                                const CrystVector_REAL&l,
+                                CrystVector_REAL& rsf);
 
 /// \deprecated
-void ImagGeomStructFactor_67cab(const double x,
-                                const double y,
-                                const double z,
-                                const CrystVector_double&h,
-                                const CrystVector_double&k,
-                                const CrystVector_double&l,
-                                CrystVector_double& rsf);
+void ImagGeomStructFactor_67cab(const REAL x,
+                                const REAL y,
+                                const REAL z,
+                                const CrystVector_REAL&h,
+                                const CrystVector_REAL&k,
+                                const CrystVector_REAL&l,
+                                CrystVector_REAL& rsf);
 
 /// \deprecated
-void ImagGeomStructFactor_67_cba(const double x,
-                                const double y,
-                                const double z,
-                                const CrystVector_double&h,
-                                const CrystVector_double&k,
-                                const CrystVector_double&l,
-                                CrystVector_double& rsf);
+void ImagGeomStructFactor_67_cba(const REAL x,
+                                const REAL y,
+                                const REAL z,
+                                const CrystVector_REAL&h,
+                                const CrystVector_REAL&k,
+                                const CrystVector_REAL&l,
+                                CrystVector_REAL& rsf);
 
 /// \deprecated
-void ImagGeomStructFactor_67bca(const double x,
-                                const double y,
-                                const double z,
-                                const CrystVector_double&h,
-                                const CrystVector_double&k,
-                                const CrystVector_double&l,
-                                CrystVector_double& rsf);
+void ImagGeomStructFactor_67bca(const REAL x,
+                                const REAL y,
+                                const REAL z,
+                                const CrystVector_REAL&h,
+                                const CrystVector_REAL&k,
+                                const CrystVector_REAL&l,
+                                CrystVector_REAL& rsf);
                                 
 /// \deprecated
-void ImagGeomStructFactor_67a_cb(const double x,
-                                const double y,
-                                const double z,
-                                const CrystVector_double&h,
-                                const CrystVector_double&k,
-                                const CrystVector_double&l,
-                                CrystVector_double& rsf);
+void ImagGeomStructFactor_67a_cb(const REAL x,
+                                const REAL y,
+                                const REAL z,
+                                const CrystVector_REAL&h,
+                                const CrystVector_REAL&k,
+                                const CrystVector_REAL&l,
+                                CrystVector_REAL& rsf);
                                 
 /// \deprecated
-void ImagGeomStructFactor_97   (const double x,
-                                const double y,
-                                const double z,
-                                const CrystVector_double&h,
-                                const CrystVector_double&k,
-                                const CrystVector_double&l,
-                                CrystVector_double& isf);
+void ImagGeomStructFactor_97   (const REAL x,
+                                const REAL y,
+                                const REAL z,
+                                const CrystVector_REAL&h,
+                                const CrystVector_REAL&k,
+                                const CrystVector_REAL&l,
+                                CrystVector_REAL& isf);
 
 /// \deprecated
-void ImagGeomStructFactor_230  (const double x,
-                                const double y,
-                                const double z,
-                                const CrystVector_double&h,
-                                const CrystVector_double&k,
-                                const CrystVector_double&l,
-                                CrystVector_double& isf);
+void ImagGeomStructFactor_230  (const REAL x,
+                                const REAL y,
+                                const REAL z,
+                                const CrystVector_REAL&h,
+                                const CrystVector_REAL&k,
+                                const CrystVector_REAL&l,
+                                CrystVector_REAL& isf);
 
 }//namespace
 

@@ -56,7 +56,7 @@ class Atom: public Scatterer
       *  \param name : name of the atom ('Ta1','Sm2', 'Tungsten_1'...).
       * The name can have \e any format but spaces should be avoided.
       */
-      Atom( const double x, const double y, const double z,
+      Atom( const REAL x, const REAL y, const REAL z,
             const string &name, const ScatteringPowerAtom *pow);
       /**   \brief Atom constructor
       *  \param x,y,z : \e fractional coordinates of the atom
@@ -71,8 +71,8 @@ class Atom: public Scatterer
       *  \param name : name of the atom ('Ta1','Sm2', 'Tungsten_1'...).
       * The name can have \e any format but spaces should be avoided (just a precaution)
       */
-      Atom( const double x, const double y, const double z,const string &name,
-             const ScatteringPowerAtom *pow, const double popu);
+      Atom( const REAL x, const REAL y, const REAL z,const string &name,
+             const ScatteringPowerAtom *pow, const REAL popu);
       /// Copy constructor
       Atom(const Atom &old);
       virtual Atom* CreateCopy() const;
@@ -87,9 +87,9 @@ class Atom: public Scatterer
       *  \param pow : the ScatteringPower associated to this atom. Must be allocated separately.
       *  \param name : name of the atom ('Ta1','Sm2', 'Tungsten_1'...).
 		*/
-      void Init(const double x, const double y, const double z,
+      void Init(const REAL x, const REAL y, const REAL z,
             const string &name, const ScatteringPowerAtom *pow,
-            const double popu=1);
+            const REAL popu=1);
       
       virtual int GetNbComponent() const;
       virtual const ScatteringComponentList& GetScatteringComponentList() const;
@@ -103,23 +103,23 @@ class Atom: public Scatterer
       * which uses data from the CRC Handbook of Chemistry & Physics, 63rd & 70th editions
       * The Mass is actually extracted from the ScatteringPowerAtom.
       */
-      double GetMass() const;
+      REAL GetMass() const;
       /** \brief Returns the radius (in Angstroems) of the atom.
       *
       *  Values are extracted from the 'atominfo' package,
       * which uses data from the ICSD/CRYSTIN Manual
       * The Radius is extracted from the ScatteringPowerAtom.
       */
-      double GetRadius() const;
+      REAL GetRadius() const;
       /** \brief XMLOutput a description of the scatterer for POVRay
       *
       */
       virtual ostream& POVRayDescription(ostream &os,
                                          const bool onlyIndependentAtoms=false)const;
       virtual void GLInitDisplayList(const bool onlyIndependentAtoms=false,
-                                     const double xMin=-.1,const double xMax=1.1,
-                                     const double yMin=-.1,const double yMax=1.1,
-                                     const double zMin=-.1,const double zMax=1.1)const;
+                                     const REAL xMin=-.1,const REAL xMax=1.1,
+                                     const REAL yMin=-.1,const REAL yMax=1.1,
+                                     const REAL zMin=-.1,const REAL zMax=1.1)const;
 
       /// Is this a dummy atom ? (ie no ScatteringPower)
       /// Dummy atoms should not exist !

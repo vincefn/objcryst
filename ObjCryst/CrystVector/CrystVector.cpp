@@ -3,8 +3,8 @@
 
 #ifdef __LIBCRYST_VECTOR_USE_BLITZ__
 
-#define CrystVector Array<double,1>
-#define CrystMatrix Array<double,2>
+#define CrystVector Array<REAL,1>
+#define CrystMatrix Array<REAL,2>
 
 template<class T> T MaxDifference(const Array<T,1> &a,const Array<T,1> &b)
 {
@@ -535,11 +535,11 @@ template<class T> T MaxDifference(const CrystVector<T> &a,const CrystVector<T> &
 {
    const T *p1=a.data();
    const T *p2=b.data();
-   double max=0;
-   double tmp=0;
+   REAL max=0;
+   REAL tmp=0;
    for(long i=0;i<a.numElements();i++)
    {
-      tmp=(T)fabs((double) (*p1++ - *p2++));
+      tmp=(T)fabs((REAL) (*p1++ - *p2++));
       if(tmp>max) max=tmp;
    }
    return (T)max;
@@ -553,7 +553,7 @@ template<class T> T MaxDifference(const CrystMatrix<T> &a,const CrystMatrix<T> &
    T tmp=0;
    for(long i=0;i<a.numElements();i++)
    {
-      tmp=(T)fabs((double)(*p1++ - *p2++));
+      tmp=(T)fabs((REAL)(*p1++ - *p2++));
       if(tmp>max) max=tmp;
    }
    return max;
@@ -577,35 +577,20 @@ template<class T> CrystMatrix<T> product(const CrystMatrix<T> &a,const CrystMatr
 }
 
 //explicit instantiation
-template class CrystVector<double>;
-template double MaxDifference(const CrystVector<double>&,const CrystVector<double>&);
-template ostream& operator<<(ostream &os, CrystVector<double> &vect);
-template CrystVector<long> SortSubs(const CrystVector<double> &vect);
-template long QuickSortSubs(CrystVector<double> &vect,CrystVector<long> &subscript,
+template class CrystVector<REAL>;
+template REAL MaxDifference(const CrystVector<REAL>&,const CrystVector<REAL>&);
+template ostream& operator<<(ostream &os, CrystVector<REAL> &vect);
+template CrystVector<long> SortSubs(const CrystVector<REAL> &vect);
+template long QuickSortSubs(CrystVector<REAL> &vect,CrystVector<long> &subscript,
                             long last,long first, int depth);
-template class CrystMatrix<double>;
-template double MaxDifference(const CrystMatrix<double>&,const CrystMatrix<double>&);
-template CrystMatrix<double> product(const CrystMatrix<double>&,const CrystMatrix<double>&);
-template ostream& operator<<(ostream &os, const CrystMatrix<double> &vect);
-template CrystVector<double> cos(const CrystVector<double>&);
-template CrystVector<double> sin(const CrystVector<double>&);
-template CrystVector<double> tan(const CrystVector<double>&);
-template CrystVector<double> sqrt(const CrystVector<double>&);
-
-template class CrystVector<float>;
-template float MaxDifference(const CrystVector<float>&,const CrystVector<float>&);
-template ostream& operator<<(ostream &os, CrystVector<float> &vect);
-template CrystVector<long> SortSubs(const CrystVector<float> &vect);
-template long QuickSortSubs(CrystVector<float> &vect,CrystVector<long> &subscript,
-                            long last,long first, int depth);
-template class CrystMatrix<float>;
-template float MaxDifference(const CrystMatrix<float>&,const CrystMatrix<float>&);
-template CrystMatrix<float> product(const CrystMatrix<float>&,const CrystMatrix<float>&);
-template ostream& operator<<(ostream &os, const CrystMatrix<float> &vect);
-template CrystVector<float> cos(const CrystVector<float>&);
-template CrystVector<float> sin(const CrystVector<float>&);
-template CrystVector<float> tan(const CrystVector<float>&);
-template CrystVector<float> sqrt(const CrystVector<float>&);
+template class CrystMatrix<REAL>;
+template REAL MaxDifference(const CrystMatrix<REAL>&,const CrystMatrix<REAL>&);
+template CrystMatrix<REAL> product(const CrystMatrix<REAL>&,const CrystMatrix<REAL>&);
+template ostream& operator<<(ostream &os, const CrystMatrix<REAL> &vect);
+template CrystVector<REAL> cos(const CrystVector<REAL>&);
+template CrystVector<REAL> sin(const CrystVector<REAL>&);
+template CrystVector<REAL> tan(const CrystVector<REAL>&);
+template CrystVector<REAL> sqrt(const CrystVector<REAL>&);
 
 template class CrystVector<long>;
 template long MaxDifference(const CrystVector<long>&,const CrystVector<long>&);
@@ -657,11 +642,11 @@ template ostream& operator<<(ostream &os, const CrystMatrix<bool> &vect);
 //######################################################################
 
 
-CrystMatrix_double InvertMatrix(const CrystMatrix_double &m)
+CrystMatrix_REAL InvertMatrix(const CrystMatrix_REAL &m)
 {//:TODO: Check Pivoting...
    VFN_DEBUG_ENTRY("InvertMatrix()",2)
 	VFN_DEBUG_MESSAGE("->Matrix to invert :"<<endl<<m,1)
-   double eps = 1e-8;
+   REAL eps = 1e-8;
    //check matrix is square
       if( (m.rows() != m.cols()) || (m.rows() <2))
       {//DoSomethingBad
@@ -670,20 +655,20 @@ CrystMatrix_double InvertMatrix(const CrystMatrix_double &m)
       }
    //prepare...
       long size=m.rows();
-      CrystMatrix_double im(size,size),cm(size,size);//(future) invert matrix & copy of matrix
+      CrystMatrix_REAL im(size,size),cm(size,size);//(future) invert matrix & copy of matrix
       cm=m;
       im=0;
       for(long i=0;i<size;i++) im(i,i)=1.;
       CrystMatrix_long rowIndex(size,1);//Keep track of pivoted rows
       for(long i=0;i<size;i++) rowIndex(i)=i;
-      double det=1;
+      REAL det=1;
    //Make an upper triangular matrix
       for(long i=0;i<size;i++)
       {
          //get absolute maximum the ith column
             long rowMax=i;
             {
-               double max=fabs(m(i,i));
+               REAL max=fabs(m(i,i));
                for(long j=i+1;j<m.rows();j++)
                   if(fabs(m(j,i)) > max)
                   {
@@ -710,7 +695,7 @@ CrystMatrix_double InvertMatrix(const CrystMatrix_double &m)
          /*
          */
          //substract
-            double a;
+            REAL a;
             for(long j=i+1;j<size;j++)
             {
                a=cm(j,i)/cm(i,i);
@@ -724,7 +709,7 @@ CrystMatrix_double InvertMatrix(const CrystMatrix_double &m)
    VFN_DEBUG_MESSAGE("Finish solving from the upper triangular matrix...",1);
       for(long i=0;i<size;i++)
       {
-         double a;
+         REAL a;
          for(long j=i-1;j>=0;j--)
          {
             a=cm(j,i)/cm(i,i);
@@ -770,25 +755,24 @@ template<class T> void MatrixExchangeRows(CrystMatrix_T &m, const long row1, con
    //cout << "Exchanging rows:end" <<endl;
 }
 
-template void MatrixExchangeRows(CrystMatrix_double &m, const long row1, const long row2);
+template void MatrixExchangeRows(CrystMatrix_REAL &m, const long row1, const long row2);
 
 
 
 template<class T> T MaxAbs(const CrystVector_T &vector)
 {
    const T* pData=vector.data();
-   T max =(T) fabs((double) *pData++);
+   T max =(T) fabs((REAL) *pData++);
    for(long i=1;i<vector.numElements();i++)
    {
-      if ( fabs((double) *pData) > max) max=(T) fabs((double) *pData);
+      if ( fabs((REAL) *pData) > max) max=(T) fabs((REAL) *pData);
       pData++;
    }
    return max;
 }
 
 //Explicit instatiation
-template double  MaxAbs(const CrystVector_double &vector);
-template float MaxAbs(const CrystVector_float &vector);
+template REAL  MaxAbs(const CrystVector_REAL &vector);
 template int    MaxAbs(const CrystVector_int &vector);
 template unsigned int    MaxAbs(const CrystVector_uint &vector);
 template long   MaxAbs(const CrystVector_long &vector);
@@ -797,18 +781,17 @@ template long   MaxAbs(const CrystVector_long &vector);
 template<class T> T MinAbs(const CrystVector_T &vector)
 {
    const T* pData=vector.data();
-   T min =(T)  fabs((double) *pData++);
+   T min =(T)  fabs((REAL) *pData++);
    for(long i=1;i<vector.numElements();i++)
    {
-      if ( fabs((double) *pData) < min) min=(T) fabs((double) *pData);
+      if ( fabs((REAL) *pData) < min) min=(T) fabs((REAL) *pData);
       pData++;
    }
    return min;
 }
 
 //Explicit instatiation
-template double  MinAbs(const CrystVector_double &vector);
-template float MinAbs(const CrystVector_float &vector);
+template REAL  MinAbs(const CrystVector_REAL &vector);
 template int    MinAbs(const CrystVector_int &vector);
 template unsigned int    MinAbs(const CrystVector_uint &vector);
 template long   MinAbs(const CrystVector_long &vector);
@@ -817,16 +800,16 @@ template long   MinAbs(const CrystVector_long &vector);
 //  CubicSpline
 //######################################################################
 
-CubicSpline::CubicSpline(const CrystVector_double &x, const CrystVector_double &y, 
-            const double yp0, const double ypn):
+CubicSpline::CubicSpline(const CrystVector_REAL &x, const CrystVector_REAL &y, 
+            const REAL yp0, const REAL ypn):
 mX(x),mY(y),mYsecond(x.numElements())
 {
    VFN_DEBUG_MESSAGE("CubicSpline::CubicSpline(x,y,yp0,ypn)",5)
    const long n=x.numElements();
-   CrystVector_double u(mX.numElements());
+   CrystVector_REAL u(mX.numElements());
    mYsecond(0)=-0.5;
    u(0)=(3/(mX(1)-mX(0)))*((mY(1)-mY(0))/(mX(1)-mX(0))-yp0);
-   double a,b;
+   REAL a,b;
    for(long i=1;i<(n-1);i++)
    {
       a=(mX(i)-mX(i-1))/(mX(i+1)-mX(i-1));
@@ -835,21 +818,21 @@ mX(x),mY(y),mYsecond(x.numElements())
       u(i)=(6*((mY(i+1)-mY(i))/(mX(i+1)-mX(i))-(mY(i)-mY(i-1))/(mX(i)-mX(i-1)))
            /(mX(i+1)-mX(i-1))-a*u(i-1))/b;
    }
-   const double c=(3./(mX(n-1)-mX(n-2)))*(ypn-(mY(n-1)-mY(n-2))/(mX(n-1)-mX(n-2)));
+   const REAL c=(3./(mX(n-1)-mX(n-2)))*(ypn-(mY(n-1)-mY(n-2))/(mX(n-1)-mX(n-2)));
    mYsecond(n-1)=(c-.5*u(n-2))/(0.5*mYsecond(n-2)+1);
    for(long i=(n-2);i>=0;i--) mYsecond(i)=mYsecond(i)*mYsecond(i+1)+u(i);
    VFN_DEBUG_MESSAGE("CubicSpline::CubicSpline(x,y,yp0,ypn):End",5)
 }
 
-CubicSpline::CubicSpline(const CrystVector_double &x, const CrystVector_double &y):
+CubicSpline::CubicSpline(const CrystVector_REAL &x, const CrystVector_REAL &y):
 mX(x),mY(y),mYsecond(x.numElements())
 {
    VFN_DEBUG_MESSAGE("CubicSpline::CubicSpline(x,y)",5)
    const long n=x.numElements();
-   CrystVector_double u(mX.numElements());
+   CrystVector_REAL u(mX.numElements());
    mYsecond(0)=0;
    u(0)=0;
-   double a,b;
+   REAL a,b;
    for(long i=1;i<=(n-2);i++)
    {
       a=(mX(i)-mX(i-1))/(mX(i+1)-mX(i-1));
@@ -867,7 +850,7 @@ CubicSpline::~CubicSpline()
 {
 }
 
-double CubicSpline::operator()(const double x) const
+REAL CubicSpline::operator()(const REAL x) const
 {
    //:TODO: faster!
    long i;
@@ -876,11 +859,11 @@ double CubicSpline::operator()(const double x) const
       if(x<mX(i+1))
       {
          VFN_DEBUG_MESSAGE("CubicSpline::operator()(x):"<<x<<":"<<mX(i+1)<<":"<<i,0)
-         const double e=mX(i+1)-mX(i);
-         const double a=(mX(i+1)-x)/e;
-         const double b=1.-a;
-         const double c=1./6.*(a*a*a-a)*e*e;
-         const double d=1./6.*(b*b*b-b)*e*e;
+         const REAL e=mX(i+1)-mX(i);
+         const REAL a=(mX(i+1)-x)/e;
+         const REAL b=1.-a;
+         const REAL c=1./6.*(a*a*a-a)*e*e;
+         const REAL d=1./6.*(b*b*b-b)*e*e;
          return a*mY(i)+b*mY(i+1)+c*mYsecond(i)+d*mYsecond(i+1);
       }
    return mY(mY.numElements()-1);

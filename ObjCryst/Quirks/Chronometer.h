@@ -28,7 +28,7 @@ class Chronometer
 			cout.precision(tmp);
 			cout.unsetf(ios::fixed);
 		}
-		double seconds()
+		REAL seconds()
       {
          if(mPaused ==false)
 			{
@@ -36,7 +36,7 @@ class Chronometer
 				mTimeSec1=time(0);
 			}
 			if((mTimeSec1-mTimeSec0)>100) return (mTimeSec1-mTimeSec0);
-         return (mTime1-mTime0)/(double)CLOCKS_PER_SEC;
+         return (mTime1-mTime0)/(REAL)CLOCKS_PER_SEC;
       }
 	private:
 		clock_t mTime0;

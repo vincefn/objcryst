@@ -165,7 +165,7 @@ void WXDiffractionSingleCrystal::OnMenuSimulate(wxCommandEvent & WXUNUSED(event)
 	if(0==choice) mpData->GenHKLFullSpace(theta*DEG2RAD,false);
 	else mpData->GenHKLFullSpace(theta*DEG2RAD,true);
 	
-	CrystVector_double iobs(mpData->GetNbRefl());
+	CrystVector_REAL iobs(mpData->GetNbRefl());
 	iobs=100.;
 	mpData->SetIobs(iobs);
 }
