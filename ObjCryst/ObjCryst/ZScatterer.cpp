@@ -530,13 +530,13 @@ ostream& ZScatterer::POVRayDescription(ostream &os,
    }
    else
    {
-      CrystMatrix_REAL* xyzCoords=new CrystMatrix_REAL[mNbAtom];
+      vector<CrystMatrix_REAL> xyzCoords;
       for(int i=0;i<mNbAtom;i++)
-         *(xyzCoords+i)=this->GetCrystal().GetSpaceGroup().GetAllSymmetrics(mpAtom[i]->GetX(),
+         vXYZCoords.push_back(this->GetCrystal().GetSpaceGroup().GetAllSymmetrics(mpAtom[i]->GetX(),
                                                             mpAtom[i]->GetY(),
                                                             mpAtom[i]->GetZ(),
-                                                            false,false,false);
-      const int nbSymmetrics=(xyzCoords+0)->rows();
+                                                            false,false,false));
+      const int nbSymmetrics=(vXYZCoords[0])->rows();
       int symNum=0;
       CrystMatrix_int translate(27,3);
       translate=  -1,-1,-1,
@@ -573,9 +573,9 @@ ostream& ZScatterer::POVRayDescription(ostream &os,
       {
          for(int j=0;j<mNbAtom;j++)
          {
-            x(j)=(*(xyzCoords+j))(i,0);
-            y(j)=(*(xyzCoords+j))(i,1);
-            z(j)=(*(xyzCoords+j))(i,2);
+            x(j)=vXYZCoords[j](i,0);
+            y(j)=vXYZCoords[j](i,1);
+            z(j)=vXYZCoords[j](i,2);
          }
          //Bring back central atom in unit cell; move peripheral atoms with the same amount
             dx=x(0);
@@ -641,7 +641,6 @@ ostream& ZScatterer::POVRayDescription(ostream &os,
             z=zSave;
          }//for translation
       }//for symmetrics
-      delete[] xyzCoords;
    }//else
 #endif
    return os;
@@ -833,7 +832,7 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
    else
    {
       VFN_DEBUG_ENTRY("ZScatterer::GLInitDisplayList():Show all symmetrics",3)
-      CrystMatrix_REAL xyzCoords[100]; //:TODO:
+      vector<CrystMatrix_REAL> vXYZCoords;
       {
          REAL x0,y0,z0;
          for(int i=0;i<mNbAtom;i++)
@@ -842,8 +841,8 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
             y0=mYCoord(i);
             z0=mZCoord(i);
             this->GetCrystal().OrthonormalToFractionalCoords(x0,y0,z0);
-            xyzCoords[i]=this->GetCrystal().GetSpaceGroup().
-                           GetAllSymmetrics(x0,y0,z0,false,false,false);
+            vXYZCoords.push_back(this->GetCrystal().GetSpaceGroup().
+                           GetAllSymmetrics(x0,y0,z0,false,false,false));
          }
       }
       CrystMatrix_int translate(27,3);
@@ -877,15 +876,15 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
       REAL dx,dy,dz;
       CrystVector_REAL x(mNbAtom),y(mNbAtom),z(mNbAtom);
       CrystVector_REAL xSave,ySave,zSave;
-      const int nbSymmetrics=xyzCoords[0].rows();
+      const int nbSymmetrics=vXYZCoords[0].rows();
       for(int i=0;i<nbSymmetrics;i++)
       {
          VFN_DEBUG_ENTRY("ZScatterer::GLInitDisplayList():Symmetric#"<<i,3)
          for(int j=0;j<mNbAtom;j++)
          {
-            x(j)=xyzCoords[j](i,0);
-            y(j)=xyzCoords[j](i,1);
-            z(j)=xyzCoords[j](i,2);
+            x(j)=vXYZCoords[j](i,0);
+            y(j)=vXYZCoords[j](i,1);
+            z(j)=vXYZCoords[j](i,2);
          }
          //Bring back central atom in unit cell; move peripheral atoms with the same amount
             dx=x(0);
@@ -1640,7 +1639,15 @@ void ZScatterer::UpdateCoordinates() const
          yb = mYCoord(nb) - mYCoord(na);
          zb = mZCoord(nb) - mZCoord(na);
 
-         rbc= 1./sqrt(xb*xb + yb*yb + zb*zb);
+         rbc= sqrt(xb*xb + yb*yb + zb*zb);
+         if(rbc<1e-5)
+         {
+            throw ObjCrystException("ZScatterer::UpdateCoordinates(): two atoms ("
+                                    +mZAtomRegistry.GetObj(na).GetName()
+                                    +" and "+ mZAtomRegistry.GetObj(nb).GetName()
+                                    +") have the same coordinates (d<1e-5): aborting.");
+         }
+         rbc=1./rbc;
 
          cosa = cos(angle);
          sina = sin(angle);
