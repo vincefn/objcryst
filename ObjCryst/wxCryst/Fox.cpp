@@ -55,6 +55,7 @@ public:
    void OnAddGeneticAlgorithm(wxCommandEvent& WXUNUSED(event));
 	void OnDebugTest(wxCommandEvent& event);
    void OnSetDebugLevel(wxCommandEvent& event);
+   void OnUpdateUI(wxUpdateUIEvent& event);
 private:
    wxScrolledWindow *mpWin1,*mpWin2,*mpWin3,*mpWin4;
     DECLARE_EVENT_TABLE()
@@ -120,6 +121,7 @@ BEGIN_EVENT_TABLE(WXCrystMainFrame, wxFrame)
    EVT_MENU(MENU_DEBUG_TEST1,  WXCrystMainFrame::OnDebugTest)
    EVT_MENU(MENU_DEBUG_TEST2,  WXCrystMainFrame::OnDebugTest)
    EVT_MENU(MENU_DEBUG_TEST3,  WXCrystMainFrame::OnDebugTest)
+   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, WXCrystMainFrame::OnUpdateUI)
 END_EVENT_TABLE()
 
 IMPLEMENT_APP(MyApp)
@@ -486,4 +488,9 @@ void WXCrystMainFrame::OnDebugTest(wxCommandEvent& event)
 			break;
 		}
 	}
+}
+
+void WXCrystMainFrame::OnUpdateUI(wxUpdateUIEvent& event)
+{
+   VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnUpdateUI(): Uncaught event !!",10)
 }

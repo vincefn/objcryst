@@ -87,6 +87,7 @@ void WXZAtom::CrystUpdate()
 {
    VFN_DEBUG_ENTRY("WXZAtom::CrystUpdate()",6)
    mList.CrystUpdate();
+   VFN_DEBUG_EXIT("WXZAtom::CrystUpdate()",6)
 }
 
 void WXZAtom::UpdateUI()

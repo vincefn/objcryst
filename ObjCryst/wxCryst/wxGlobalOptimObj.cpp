@@ -308,9 +308,10 @@ void WXMonteCarloObj::OnRunOptimization()
 }
 void WXMonteCarloObj::UpdateDisplayNbTrial()
 {
-   VFN_DEBUG_ENTRY("WXMonteCarloObj::OnChangeName()",5)
+   VFN_DEBUG_MESSAGE("WXMonteCarloObj::UpdateDisplayNbTrial()",5)
    mpWXFieldNbTrial->CrystUpdate();
-   VFN_DEBUG_EXIT("WXMonteCarloObj::OnChangeName()",5)
+   wxUpdateUIEvent event(ID_CRYST_UPDATEUI);
+   wxPostEvent(this,event);
 }
 OptimizationObj & WXMonteCarloObj::GetOptimizationObj()
 {
