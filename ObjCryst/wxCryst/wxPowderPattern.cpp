@@ -607,7 +607,9 @@ END_EVENT_TABLE()
 
 WXPowderPatternGraph::WXPowderPatternGraph(wxFrame *frame, WXPowderPattern* parent):
 wxWindow(frame,-1,wxPoint(-1,-1),wxSize(-1,-1),wxRETAINED),
-mpPattern(parent),mMargin(50),mDiffPercentShift(.20),mpParentFrame(frame),
+mpPattern(parent),mMargin(50),mDiffPercentShift(.20),
+mMaxIntensity(-1),mMinIntensity(-1),mMin2Theta(-1),mMax2Theta(-1),
+mpParentFrame(frame),
 mCalcPatternIsLocked(false),mIsDragging(false)
 {
    mpPopUpMenu=new wxMenu("Crystal");
@@ -774,7 +776,7 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
       VFN_DEBUG_MESSAGE("WXPowderPatternGraph::OnMouse():Finished zooming...",5)
       mIsDragging=false;
       
-      if( (abs(ttheta-mDragging2Theta0)<.3) || (abs(mDraggingIntensity0-intensity)< abs(mMaxIntensity*.05)) )
+      if( (abs(ttheta-mDragging2Theta0)<.1) || (abs(mDraggingIntensity0-intensity)< abs(mMaxIntensity*.02)) )
       {
          return;
       }
@@ -807,8 +809,12 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
          if(flag) if(m2theta(i)>=mMin2Theta) {mFirst=i;flag=false;}
          if(m2theta(i)>=mMax2Theta) {mLast=i;break;}
       }
-      if(mFirst<0) mFirst=0;
-      if(mLast>=nbpoints) mLast=nbpoints-1;
+      if(mMin2Theta<m2theta.min()) mMin2Theta=m2theta.min();
+      if(mMax2Theta>m2theta.max())
+      {
+         mLast=nbpoints-1;
+         mMax2Theta=m2theta.max();
+      }
       wxUpdateUIEvent event(ID_POWDERSPECTRUM_GRAPH_NEW_PATTERN);
       wxPostEvent(this,event);
       return;
@@ -852,7 +858,8 @@ void WXPowderPatternGraph::SetPattern(const CrystVector_REAL &obs,
    m2theta.resize(nbPoint);
    for(long i=0;i<nbPoint;i++) m2theta(i)=tthetaMin+i*tthetaStep;
    m2theta*=RAD2DEG;
-   this->ResetAxisLimits();
+   // Reset the zoom parameters, only for the first display
+   if(mMax2Theta<0) this->ResetAxisLimits();
    // If we only send an OnPaint event, only the parts which have been erased are redrawn
    // (under windows). SO we must force the complete Refresh of the window... in the
    // main thread of course...
