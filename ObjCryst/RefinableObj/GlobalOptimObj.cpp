@@ -694,7 +694,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                {
                   case ANNEALING_BOLTZMANN:
                      simAnnealTemp(i)=
-                        mTemperatureMin*log((REAL)nbWorld)/log((REAL)(i+1));break;
+                        mTemperatureMin*log((REAL)nbWorld)/log((REAL)(i+2));break;
                   case ANNEALING_CAUCHY:
                      simAnnealTemp(i)=mTemperatureMin*nbWorld/(i+1);break;
                   //case ANNEALING_QUENCHING:
@@ -716,10 +716,10 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                {
                   case ANNEALING_BOLTZMANN:
                      mutationAmplitude(i)=
-                        mMutationAmplitudeMin*log((REAL)(nbWorld-1))/log((REAL)(i+1));
+                        mMutationAmplitudeMin*log((REAL)(nbWorld-1))/log((REAL)(i+2));
                      break;
                   case ANNEALING_CAUCHY:
-                     mutationAmplitude(i)=mMutationAmplitudeMin*(REAL)(nbWorld-1)/i;break;
+                     mutationAmplitude(i)=mMutationAmplitudeMin*(REAL)(nbWorld-1)/(i+1);break;
                   //case ANNEALING_QUENCHING:
                   case ANNEALING_EXPONENTIAL:
                      mutationAmplitude(i)=mMutationAmplitudeMax
@@ -1173,7 +1173,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                         simAnnealTemp(i)*=2;
                      if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)<0.01)
                         simAnnealTemp(i)*=4;
-                        
+                     //cout<<"World#"<<i<<":"<<worldNbAcceptedMoves(i)<<":"<<nbTrialsReport<<endl;
                      //if(simAnnealTemp(i)>mTemperatureMax) simAnnealTemp(i)=mTemperatureMax;
                      //if(simAnnealTemp(i)<mTemperatureMin) simAnnealTemp(i)=mTemperatureMin;
                   }
