@@ -1340,7 +1340,9 @@ void RefinableObj::Print() const
          }
       VFN_DEBUG_MESSAGE_SHORT(" (at "<<this->GetPar(i).mpValue<<")",5)
       if(true == this->GetPar(i).mHasAssignedClock)
+      {
          VFN_DEBUG_MESSAGE_SHORT(" (Clock at "<<this->GetPar(i).mpClock<<")",5)
+      }
       cout << endl;
    }
    VFN_DEBUG_EXIT("RefinableObj::Print()",2)
