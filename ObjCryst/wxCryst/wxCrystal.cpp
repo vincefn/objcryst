@@ -16,7 +16,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-//#include <sstream> //for stringstream
+#include <sstream> //for stringstream
 #include <fstream>
 
 #include <stdlib.h>
@@ -61,6 +61,8 @@ extern "C" {
 
 namespace ObjCryst
 {
+/// Conversion from ZScatterer to the newer Molecule object. (in WXZScatterer.cpp)
+Molecule *ZScatterer2Molecule(ZScatterer *scatt);
 
 // dialog to get a bounding box
   class UserSelectBoundingBox : public wxDialog {
@@ -190,13 +192,12 @@ mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
                                 "Add Sphere Scattering Power");
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_REMOVESCATTPOW,
                                 "Remove Scattering Power");
-         //mpMenuBar->AppendSeparator();
+         mpMenuBar->GetMenu(ID_CRYSTAL_MENU_SCATT).AppendSeparator();
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_ADDATOM,
                                 "Add Atom");
-         mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_ADDZSCATTERER,
-                                "Add Z-Matrix Scatterer");
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_ADDMOLECULE,
                                 "Add Molecule");
+         mpMenuBar->GetMenu(ID_CRYSTAL_MENU_SCATT).AppendSeparator();
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_ADDTETRAHEDRON,
                                 "Add Tetrahedron");
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_ADDOCTAHEDRON,
@@ -214,7 +215,7 @@ mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
                                 "Add Prism Trigonal");
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_ADDICOSAHEDRON,
                                 "Add Icosahedron");
-         //mpMenuBar->AppendSeparator();
+         mpMenuBar->GetMenu(ID_CRYSTAL_MENU_SCATT).AppendSeparator();
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_REMOVESCATTERER,
                                 "Remove Scatterer");
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_DUPLICSCATTERER,
@@ -547,8 +548,12 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
          double bondLength;
          bondLengthDialog.GetValue().ToDouble(&bondLength);
 
-      scatt=new ZPolyhedron(TETRAHEDRON,*mpCrystal,0,0,0,"Change Me!",
-                            scattPow1,scattPow2,bondLength);
+      stringstream st;
+      st<<scattPow1->GetName()<<scattPow2->GetName()<<"4";
+      ZScatterer *tmp=new ZPolyhedron(TETRAHEDRON,*mpCrystal,0,0,0,st.str(),
+                                      scattPow1,scattPow2,bondLength);
+      scatt=ZScatterer2Molecule(tmp);
+      delete tmp;
    }
    if(event.GetId()== ID_CRYSTAL_MENU_SCATT_ADDOCTAHEDRON)
    {
@@ -582,8 +587,12 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
          double bondLength;
          bondLengthDialog.GetValue().ToDouble(&bondLength);
 
-      scatt=new ZPolyhedron(OCTAHEDRON,*mpCrystal,0,0,0,"Change Me!",
-                            scattPow1,scattPow2,bondLength);
+      stringstream st;
+      st<<scattPow1->GetName()<<scattPow2->GetName()<<"6";
+      ZScatterer *tmp=new ZPolyhedron(OCTAHEDRON,*mpCrystal,0,0,0,st.str(),
+                                      scattPow1,scattPow2,bondLength);
+      scatt=ZScatterer2Molecule(tmp);
+      delete tmp;
    }
    if(event.GetId()== ID_CRYSTAL_MENU_SCATT_ADDTRIANGLE)
    {
@@ -618,8 +627,12 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
          double bondLength;
          bondLengthDialog.GetValue().ToDouble(&bondLength);
 
-      scatt=new ZPolyhedron(TRIANGLE_PLANE,*mpCrystal,0,0,0,"Change Me!",
-                            scattPow1,scattPow2,bondLength);
+      stringstream st;
+      st<<scattPow1->GetName()<<scattPow2->GetName()<<"3";
+      ZScatterer *tmp=new ZPolyhedron(TRIANGLE_PLANE,*mpCrystal,0,0,0,st.str(),
+                                      scattPow1,scattPow2,bondLength);
+      scatt=ZScatterer2Molecule(tmp);
+      delete tmp;
    }
    if(event.GetId()== ID_CRYSTAL_MENU_SCATT_ADDSQUAREPLANE)
    {
@@ -654,8 +667,12 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
          double bondLength;
          bondLengthDialog.GetValue().ToDouble(&bondLength);
 
-      scatt=new ZPolyhedron(SQUARE_PLANE,*mpCrystal,0,0,0,"Change Me!",
-                            scattPow1,scattPow2,bondLength);
+      stringstream st;
+      st<<scattPow1->GetName()<<scattPow2->GetName()<<"3";
+      ZScatterer *tmp=new ZPolyhedron(SQUARE_PLANE,*mpCrystal,0,0,0,st.str(),
+                                      scattPow1,scattPow2,bondLength);
+      scatt=ZScatterer2Molecule(tmp);
+      delete tmp;
    }
    if(event.GetId()== ID_CRYSTAL_MENU_SCATT_ADDCUBE)
    {
@@ -689,8 +706,12 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
          double bondLength;
          bondLengthDialog.GetValue().ToDouble(&bondLength);
 
-      scatt=new ZPolyhedron(CUBE,*mpCrystal,0,0,0,"Change Me!",
-                            scattPow1,scattPow2,bondLength);
+      stringstream st;
+      st<<scattPow1->GetName()<<scattPow2->GetName()<<"8";
+      ZScatterer *tmp=new ZPolyhedron(CUBE,*mpCrystal,0,0,0,st.str(),
+                                      scattPow1,scattPow2,bondLength);
+      scatt=ZScatterer2Molecule(tmp);
+      delete tmp;
    }
    if(event.GetId()== ID_CRYSTAL_MENU_SCATT_ADDANTIPRISMTETRAGONAL)
    {
@@ -724,8 +745,12 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
          double bondLength;
          bondLengthDialog.GetValue().ToDouble(&bondLength);
 
-      scatt=new ZPolyhedron(ANTIPRISM_TETRAGONAL,*mpCrystal,0,0,0,"Change Me!",
-                            scattPow1,scattPow2,bondLength);
+      stringstream st;
+      st<<scattPow1->GetName()<<scattPow2->GetName()<<"8";
+      ZScatterer *tmp=new ZPolyhedron(ANTIPRISM_TETRAGONAL,*mpCrystal,0,0,0,st.str(),
+                                      scattPow1,scattPow2,bondLength);
+      scatt=ZScatterer2Molecule(tmp);
+      delete tmp;
    }
    if(event.GetId()== ID_CRYSTAL_MENU_SCATT_ADDPRISMTRIGONAL)
    {
@@ -759,8 +784,12 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
          double bondLength;
          bondLengthDialog.GetValue().ToDouble(&bondLength);
 
-      scatt=new ZPolyhedron(PRISM_TRIGONAL,*mpCrystal,0,0,0,"Change Me!",
-                            scattPow1,scattPow2,bondLength);
+      stringstream st;
+      st<<scattPow1->GetName()<<scattPow2->GetName()<<"6";
+      ZScatterer *tmp=new ZPolyhedron(PRISM_TRIGONAL,*mpCrystal,0,0,0,st.str(),
+                                      scattPow1,scattPow2,bondLength);
+      scatt=ZScatterer2Molecule(tmp);
+      delete tmp;
    }
    if(event.GetId()== ID_CRYSTAL_MENU_SCATT_ADDICOSAHEDRON)
    {
@@ -794,8 +823,12 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
          double bondLength;
          bondLengthDialog.GetValue().ToDouble(&bondLength);
 
-      scatt=new ZPolyhedron(ICOSAHEDRON,*mpCrystal,0,0,0,"Change Me!",
-                            scattPow1,scattPow2,bondLength);
+      stringstream st;
+      st<<scattPow1->GetName()<<scattPow2->GetName()<<"12";
+      ZScatterer *tmp=new ZPolyhedron(ICOSAHEDRON,*mpCrystal,0,0,0,st.str(),
+                                      scattPow1,scattPow2,bondLength);
+      scatt=ZScatterer2Molecule(tmp);
+      delete tmp;
    }
    mpCrystal->AddScatterer(scatt);
    //mpCrystal->XMLOutput(cout);
