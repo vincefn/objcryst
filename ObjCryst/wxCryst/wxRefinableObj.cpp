@@ -207,20 +207,20 @@ void WXFieldRefPar::CrystUpdate()
    //cout << mpField <<endl;
    bool needUpdate=false;
    if(mpRefPar->IsUsed()!=this->IsShown()) needUpdate=true;
+   wxMutexLocker mlock(mMutex);
    if(mValue!=mpRefPar->GetHumanValue()) needUpdate=true;
    if(0!=mpButtonFix) if(mpButtonFix->GetValue()==mpRefPar->IsFixed()) needUpdate=true;
    if(0!=mpButtonLimited) if(mpButtonLimited->GetValue()==mpRefPar->IsLimited()) needUpdate=true;
    if(!needUpdate) return;
-   mMutex.Lock();
    mValueOld=mValue;
    mValue=mpRefPar->GetHumanValue();
    mNeedUpdateUI=true;
-   mMutex.Unlock();
 }
 
 void WXFieldRefPar::UpdateUI()
 {
    VFN_DEBUG_MESSAGE("WXFieldRefPar::UpdateUI()"<<mValue,3)
+   wxMutexLocker mlock(mMutex);
    if(mNeedUpdateUI==false)return;
    if(false==mpRefPar->IsUsed()) this->Show(false);
    else this->Show(true);
@@ -235,9 +235,7 @@ void WXFieldRefPar::UpdateUI()
    mIsSelfUpdating=false;
    if(0!=mpButtonFix) mpButtonFix->SetValue(!(mpRefPar->IsFixed()));
    if(0!=mpButtonLimited) mpButtonLimited->SetValue(mpRefPar->IsLimited());
-   mMutex.Lock();
    mNeedUpdateUI=false;
-   mMutex.Unlock();
 }
 
 void WXFieldRefPar::Revert()
@@ -308,9 +306,9 @@ void WXFieldOption::CrystUpdate()
 void WXFieldOption::UpdateUI()
 {
    VFN_DEBUG_MESSAGE("WXFieldOption::UpdateUI()",6)
+   wxMutexLocker mlock(mMutex);
    if(mNeedUpdateUI==false) return;
    mpList->SetSelection(mChoice);
-   mMutex.Lock();
    mNeedUpdateUI=false;
    mMutex.Unlock();
 }

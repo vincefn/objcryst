@@ -517,19 +517,23 @@ WXFieldParBase(parent,label,id,hsize),mpValue(par),mValue(*par),mValueOld(*par),
 
 template<class T> void WXFieldPar<T>::CrystUpdate()
 {
-   if(mValue==*mpValue) return;
+   mMutex.Lock();
+   if(mValue==*mpValue)
+   {
+      mMutex.UnLock();
+      return;
+   }
    VFN_DEBUG_ENTRY("WXFieldPar<T>::CrystUpdate()",6)
    mValueOld=mValue;
-   mMutex.Lock();
    mValue=*mpValue;
    mNeedUpdateUI=true;
-   mMutex.Unlock();
    if(true==wxThread::IsMain()) this->UpdateUI();
    VFN_DEBUG_EXIT("WXFieldPar<T>::CrystUpdate()",6)
 }
 
 template<> void WXFieldPar<REAL>::UpdateUI()
 {
+   wxMutexLocker mlock(mMutex);
    if(mNeedUpdateUI==false) return;
    VFN_DEBUG_ENTRY("WXFieldPar<REAL>::UpdateUI()",4)
    wxString tmp;
@@ -537,14 +541,13 @@ template<> void WXFieldPar<REAL>::UpdateUI()
    mIsSelfUpdating=true;
    mpField->SetValue(tmp);
    mIsSelfUpdating=false;
-   mMutex.Lock();
    mNeedUpdateUI=false;
-   mMutex.Unlock();
    VFN_DEBUG_EXIT("WXFieldPar<REAL>::UpdateUI()",4)
 }
 
 template<> void WXFieldPar<long>::UpdateUI()
 {
+   wxMutexLocker mlock(mMutex);
    if(mNeedUpdateUI==false) return;
    VFN_DEBUG_ENTRY("WXFieldPar<long>::UpdateUI()",4)
    wxString tmp;
@@ -552,9 +555,7 @@ template<> void WXFieldPar<long>::UpdateUI()
    mIsSelfUpdating=true;
    mpField->SetValue(tmp);
    mIsSelfUpdating=false;
-   mMutex.Lock();
    mNeedUpdateUI=false;
-   mMutex.Unlock();
    VFN_DEBUG_EXIT("WXFieldPar<long>::UpdateUI()",4)
 }
 /*
