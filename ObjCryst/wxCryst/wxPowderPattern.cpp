@@ -657,13 +657,19 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
 	if(event.LeftUp() && mIsDragging)
 	{//Finished zooming !
 		mIsDragging=false;
+		#ifdef __WINDOWS__
+		return;
+		#endif
+		if(abs(ttheta-mDragging2Theta0)<.01) return;
 		if(mDraggingIntensity0>intensity)
 		{
+			if((mDraggingIntensity0-intensity)<(mDraggingIntensity0*.01)) return;
 			mMinIntensity=intensity;
 			mMaxIntensity=mDraggingIntensity0;
 		}
 		else
 		{
+			if((intensity-mDraggingIntensity0)<(intensity*.01)) return;
 			mMinIntensity=mDraggingIntensity0;
 			mMaxIntensity=intensity;
 		}
