@@ -68,6 +68,18 @@ public:
     virtual bool OnInit();
 };
 
+// WXCrystScr
+class WXCrystScrolledWindow:public wxScrolledWindow
+{
+   public:
+      WXCrystScrolledWindow(wxWindow* parent);
+      virtual bool Layout();
+      void SetChild(const wxWindow* pChild);
+   private:
+      const wxWindow* mpChild;
+      int mHeight,mWidth;
+};
+
 // main frame
 class WXCrystMainFrame : public wxFrame
 {
@@ -88,7 +100,6 @@ public:
    void OnUpdateUI(wxUpdateUIEvent& event);
    void OnToggleTooltips(wxCommandEvent& event);
 private:
-   wxScrolledWindow *mpWin1,*mpWin2,*mpWin3,*mpWin4;
     DECLARE_EVENT_TABLE()
 };
 // ----------------------------------------------------------------------------
@@ -317,6 +328,30 @@ bool MyApp::OnInit()
 }
 
 // ----------------------------------------------------------------------------
+// WXCrystScrolledWindow
+// ----------------------------------------------------------------------------
+WXCrystScrolledWindow::WXCrystScrolledWindow(wxWindow* parent):
+wxScrolledWindow(parent),mpChild((wxWindow*)0),mHeight(-1),mWidth(-1)
+{}
+
+bool WXCrystScrolledWindow::Layout()
+{
+   if(0==mpChild) return true;
+   int width,height;
+   mpChild->GetSize(&width,&height);
+   
+   if((mHeight!=height)||(mWidth!=width)) this->SetScrollbars(40,40,width/40+1,height/40+1);
+   mHeight=height;
+   mWidth=width;
+   return true;
+}
+
+void WXCrystScrolledWindow::SetChild(const wxWindow* pChild)
+{
+   mpChild=pChild;
+}
+
+// ----------------------------------------------------------------------------
 // main frame
 // ----------------------------------------------------------------------------
 
@@ -346,8 +381,6 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
                            "Add a new Single Crystal Diffraction Object");
          objectMenu->Append(MENU_OBJECT_CREATE_GLOBALOPTOBJ, "New Monte-Carlo Object",
                            "Add a new Monte-Carlo Object");
-         //objectMenu->Append(MENU_OBJECT_CREATE_GENETICALGORITHM, "New Genetic Algorithm Object",
-         //                  "Add a new Genetic Algorithm Object");
       
       wxMenu *helpMenu = new wxMenu;
          helpMenu->Append(MENU_HELP_ABOUT, "&About...", "About ObjCryst...");
@@ -376,91 +409,13 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
          #endif
          menuBar->Append(helpMenu,  "&Help");
 
-   // ... and attach this menu bar to the frame
    SetMenuBar(menuBar);
 
 #if wxUSE_STATUSBAR
-   // create a status bar just for fun (by default with 1 pane only)
    CreateStatusBar(1);
    SetStatusText("Welcome to ObjCryst++!");
 #endif // wxUSE_STATUSBAR
 
-   
-   /*   
-   //create something to display
-      Crystal *cryst=new Crystal(8.482,5.398,6.959,"Pnma");
-      cryst->SetName("PbSO4-(reference structure)");
-      //Create 'real' PBSO4 structure (for reference only)
-         ScatteringPowerAtom *ScattPowPb=new ScatteringPowerAtom("Pb","Pb",1.48);
-         ScatteringPowerAtom *ScattPowS =new ScatteringPowerAtom("S" ,"S",0.74);
-         ScatteringPowerAtom *ScattPowO1=new ScatteringPowerAtom("O1","O",1.87);
-         ScatteringPowerAtom *ScattPowO2=new ScatteringPowerAtom("O2","O",1.76);
-         ScatteringPowerAtom *ScattPowO3=new ScatteringPowerAtom("O3","O",1.34);
-         cryst->AddScatteringPower(ScattPowPb);
-         cryst->AddScatteringPower(ScattPowS);
-         cryst->AddScatteringPower(ScattPowO1);
-         cryst->AddScatteringPower(ScattPowO2);
-         cryst->AddScatteringPower(ScattPowO3);
-         ObjCryst::Atom *Pb=new ObjCryst::Atom(.188,.250,.167,"Pb",ScattPowPb   ,.5);
-         ObjCryst::Atom *S=new ObjCryst::Atom (.437,.750,.186,"S" ,ScattPowS    ,.5);
-         ObjCryst::Atom *O1=new ObjCryst::Atom(.595,.750,.100,"O1",ScattPowO1   ,.5);
-         ObjCryst::Atom *O2=new ObjCryst::Atom(.319,.750,.043,"O2",ScattPowO2   ,.5);
-         ObjCryst::Atom *O3=new ObjCryst::Atom(.415,.974,.306,"O3",ScattPowO3   ,1.);
-         cryst->AddScatterer(Pb);
-         cryst->AddScatterer(S);
-         cryst->AddScatterer(O1);
-         cryst->AddScatterer(O2);
-         cryst->AddScatterer(O3);
-      // Create a Global Optim object
-         GlobalOptimObj *globalOptObj=new GlobalOptimObj;
-         globalOptObj->SetName("PbSO4 optimization");
-      // Create a few PowderPattern objects
-         //1
-            PowderPattern *data1=new PowderPattern;
-            data1->SetWavelength("CuA1");
-            data1->SetName("PbSO4-RR");
-            data1->ImportPowderPatternFullprof("../example/pbso4-xray/roundrobin.dat");
-            
-            data1->SetSigmaToPoisson();
-            data1->SetWeightToInvSigmaSq();
-            //Components
-               PowderPatternDiffraction * diffData=new PowderPatternDiffraction;
-               diffData->SetCrystal(*cryst);
-               data1->AddPowderPatternComponent(*diffData);
-               diffData->SetName("PbSo4-diffraction");
-               diffData->SetIsIgnoringImagScattFact(true);
-               //approximate (hand-determined) background
-               PowderPatternBackground *backgdData= new PowderPatternBackground;
-               //backgdData->ImportUserBackground("pbso4-xray/background.dat");
-               backgdData->SetName("PbSo4-background");
-               backgdData->ImportUserBackground("../example/pbso4-xray/background.dat");
-               data1->AddPowderPatternComponent(*backgdData);
-
-               diffData->SetReflectionProfilePar(PROFILE_PSEUDO_VOIGT,
-                                                 .03*DEG2RAD*DEG2RAD,
-                                                 0*DEG2RAD*DEG2RAD,
-                                                 0*DEG2RAD*DEG2RAD,
-                                                 0.3,0);
-         //2
-            PowderPattern *data2=new PowderPattern;
-            data2->SetRadiationType(RAD_NEUTRON);
-            data2->SetName("My second, very stupd PowderDiff object !!");
-   
-   
-   //Simple tests
-      //WXFieldRefPar *mpFieldX    =new WXFieldRefPar(this,"x:",0,-1,&(Pb->GetPar(1)) );
-
-      //WXFieldName *mpWXTitle = new WXFieldName(this,"name:",0,0,300);
-      //mpWXTitle->SetValue("Toto est content");
-      
-      //ScattPowPb->WXCreate(this);
-      //Pb->WXCreate(this);
-      //cryst->GetScatteringPowerRegistry().WXCreate(this);
-      //cryst->GetScattererRegistry().WXCreate(this);
-      cryst->WXCreate(this);
-
-   
-   */
    // Create the notebook
 
       wxNotebook *notebook = new wxNotebook(this, -1);
@@ -475,44 +430,29 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
       notebook->SetConstraints(c);
 
    // First window -Crystals
-      wxScrolledWindow *mpWin1 = new wxScrolledWindow(notebook, -1);
-      mpWin1->SetScrollbars( 10, 10, 0, 2000 );
-      //wxBoxSizer * sizer1=new wxBoxSizer(wxVERTICAL);
-      //sizer1->Add(gCrystalRegistry.WXCreate(mpWin1));
-      //mpWin1->SetSizer(sizer1);
-      //mpWin1->SetAutoLayout(true);
-      gCrystalRegistry.WXCreate(mpWin1);
+      WXCrystScrolledWindow *mpWin1 = new WXCrystScrolledWindow(notebook);
+      mpWin1->SetChild(gCrystalRegistry.WXCreate(mpWin1));
+      mpWin1->Layout();
       notebook->AddPage(mpWin1, "Crystals", TRUE);
 
    // Second window - PowderPattern
-      wxScrolledWindow *mpWin2 = new wxScrolledWindow(notebook, -1);
-      mpWin2->SetScrollbars( 10, 10, 0, 500 );
-      //wxBoxSizer * sizer2=new wxBoxSizer(wxVERTICAL);
-      //sizer2->Add(gPowderPatternRegistry.WXCreate(mpWin2));
-      //mpWin2->SetSizer(sizer2);
-      //win2->SetAutoLayout(true);
-      gPowderPatternRegistry.WXCreate(mpWin2);
+      WXCrystScrolledWindow *mpWin2 = new WXCrystScrolledWindow(notebook);
+      mpWin2->SetChild(gPowderPatternRegistry.WXCreate(mpWin2));
+      mpWin2->Layout();
       notebook->AddPage(mpWin2,"Powder Diffraction",true);
       
    // Third window - SingleCrystal
-      wxScrolledWindow *mpWin3 = new wxScrolledWindow(notebook, -1);
-      mpWin3->SetScrollbars( 10, 10, 0, 500 );
-      //wxBoxSizer * sizer3=new wxBoxSizer(wxVERTICAL);
-      //sizer3->Add(gPowderPatternRegistry.WXCreate(mpWin3));
-      //mpWin3->SetSizer(sizer3);
-      //win3->SetAutoLayout(true);
-      gDiffractionDataSingleCrystalRegistry.WXCreate(mpWin3);
+      WXCrystScrolledWindow *mpWin3 = new WXCrystScrolledWindow(notebook);
+      mpWin3->SetChild(gDiffractionDataSingleCrystalRegistry.WXCreate(mpWin3));
+      mpWin3->Layout();
       notebook->AddPage(mpWin3,"Single Crystal Diffraction",true);
       
    // Fourth window - Global Optimization
-      wxScrolledWindow *mpWin4 = new wxScrolledWindow(notebook, -1);
-      mpWin4->SetScrollbars( 10, 10, 0, 500 );
-      //wxBoxSizer * sizer4=new wxBoxSizer(wxVERTICAL);
-      //sizer4->Add(gOptimizationObjRegistry.WXCreate(mpWin4));
-      //mpWin4->SetSizer(sizer4);
-      //mpWin4->SetAutoLayout(true);
-      gOptimizationObjRegistry.WXCreate(mpWin4);
+      WXCrystScrolledWindow *mpWin4 = new WXCrystScrolledWindow(notebook);
+      mpWin4->SetChild(gOptimizationObjRegistry.WXCreate(mpWin4));
+      mpWin4->Layout();
       notebook->AddPage(mpWin4,"Global Optimization",true);
+
    this->SetIcon(wxICON(Fox));
    this->Show(TRUE);
    this->Layout();
