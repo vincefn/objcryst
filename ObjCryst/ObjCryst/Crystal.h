@@ -197,6 +197,18 @@ class Crystal:public RefinableObj
       * e1 is chosen along a, e2 in the (a,b) plane, then e3 is along c*
       */
       void OrthonormalToFractionalCoords(REAL &x,REAL &y,REAL &z) const;
+      /** \brief Get Miller H,K, L indices from orthonormal coordinates 
+      * in reciprocal space.
+      *
+      * Result is stored into x,y and z
+      */
+      void MillerToOrthonormalCoords(REAL &x,REAL &y,REAL &z) const;
+      /** \brief Get orthonormal coordinates given a set of H,K, L indices
+      * in reciprocal space.
+      *
+      * Result is stored into x,y and z
+      */
+      void OrthonormalToMillerCoords(REAL &x,REAL &y,REAL &z) const;
       /// Prints some info about the crystal
       /// \todo one function to print on one line and a PrintLong() function
       /// \param os the stream to which the information is outputed (default=cout)
@@ -410,6 +422,8 @@ class Crystal:public RefinableObj
       * some optimizations.
       */
       mutable CrystMatrix_REAL mBMatrix;
+      /// inverse of B Matrix (i.e. inverse of orthogonalization matrix for direct space)
+      mutable CrystMatrix_REAL mBMatrixInvert;
       /** \brief Eucl Matrix (Orthogonalization matrix for direct space)
       * \f[ M_{orth}= \left[ \begin {array}{ccc} a & b\cos(\gamma) & c\cos(\beta) \\
       *                            0 & b\sin(\gamma) & -c\sin(\beta)\cos(\alpha^*) \\
@@ -421,7 +435,7 @@ class Crystal:public RefinableObj
       * some optimizations.
       */
       mutable CrystMatrix_REAL mOrthMatrix;
-      /// inverse of Eucl Matrix (de-orthogonalization matrix for direct space)
+      /// inverse of Eucl Matrix (i.e. inverse of de-orthogonalization matrix for direct space)
       mutable CrystMatrix_REAL mOrthMatrixInvert;
             
       /** \brief Distance table (squared) between all scattering components in the crystal

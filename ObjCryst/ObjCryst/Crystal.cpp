@@ -415,6 +415,26 @@ void Crystal::OrthonormalToFractionalCoords(REAL &x,REAL &y,REAL &z) const
    //cout << x << " " << y << " " << z <<endl;
 }
 
+void Crystal::MillerToOrthonormalCoords(REAL &x,REAL &y,REAL &z) const
+{
+   this->InitMatrices();
+   const REAL oldx=x;
+   const REAL oldy=y;
+   x=mBMatrix(0,0)*oldx+mBMatrix(0,1)*oldy+mBMatrix(0,2)*z;
+   y=mBMatrix(1,0)*oldx+mBMatrix(1,1)*oldy+mBMatrix(1,2)*z;
+   z=mBMatrix(2,0)*oldx+mBMatrix(2,1)*oldy+mBMatrix(2,2)*z;
+}
+
+void Crystal::OrthonormalToMillerCoords(REAL &x,REAL &y,REAL &z) const
+{
+   this->InitMatrices();
+   const REAL oldx=x;
+   const REAL oldy=y;
+   x=mBMatrixInvert(0,0)*oldx+mBMatrixInvert(0,1)*oldy+mBMatrixInvert(0,2)*z;
+   y=mBMatrixInvert(1,0)*oldx+mBMatrixInvert(1,1)*oldy+mBMatrixInvert(1,2)*z;
+   z=mBMatrixInvert(2,0)*oldx+mBMatrixInvert(2,1)*oldy+mBMatrixInvert(2,2)*z;
+}
+
 void Crystal::Print(ostream &os)const
 {
    VFN_DEBUG_MESSAGE("Crystal::Print()",5)
@@ -1264,6 +1284,7 @@ void Crystal::InitMatrices() const
    //                   0  , 1/b/sin(gamma)  , bb*cos(alphaa),
    //                   0  , 0               , cc;
    mOrthMatrixInvert=InvertMatrix(mOrthMatrix);
+   mBMatrixInvert=InvertMatrix(mBMatrix);
    //cout << "Orth Matrix :"<<endl<<mOrthMatrix <<endl;
    //cout << "InvOrth Matrix :"<<endl<<mOrthMatrixInvert <<endl;
    //cout << "Orth * InvOrth matrix :"<<endl<<product(mOrthMatrix,mOrthMatrixInvert) <<endl;
