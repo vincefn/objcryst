@@ -168,6 +168,15 @@ mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
       mpMenuBar->AddMenu("Display",ID_CRYSTAL_MENU_DISPLAY);
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_DISPLAY,ID_CRYSTAL_MENU_DISPLAY_3DVIEW,
                                 "3D Display");
+   // AntiBump
+      wxBoxSizer* pStats=new wxBoxSizer(wxHORIZONTAL);
+      
+      WXFieldPar<REAL> *pWXFieldAntibump=new WXFieldPar<REAL>(this,"Antibump cost",-1,&mBumpmergeCost,70);
+      pStats->Add(pWXFieldAntibump    ,0,wxALIGN_CENTER);
+      mList.Add(pWXFieldAntibump);
+      
+      mpSizer->Add(pStats);
+      
    // Lattice
       wxBoxSizer* lattice=new wxBoxSizer(wxHORIZONTAL);
 #if 1
@@ -228,7 +237,6 @@ mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
                     ->GetScatteringPowerRegistry().WXCreate(this);
       mpSizer->Add(mpWXScatteringPowerRegistry,0,wxALIGN_LEFT);
       mList.Add(mpWXScatteringPowerRegistry);
-      
    // Scatterers
       mpWXScattererRegistry=mpCrystal
                     ->GetScattererRegistry().WXCreate(this);
@@ -243,6 +251,7 @@ mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
 void WXCrystal::CrystUpdate()
 {
    VFN_DEBUG_ENTRY("WXCrystal::CrystUpdate()",7)
+   mBumpmergeCost=mpCrystal->GetBumpMergeCost();
    this->WXRefinableObj::CrystUpdate();
    //mWXParent->Layout();
    #ifdef OBJCRYST_GL

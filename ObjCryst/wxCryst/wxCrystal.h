@@ -94,6 +94,8 @@ class WXCrystal: public WXRefinableObj
          WXRegistry<Scatterer>* mpWXScattererRegistry;
       /// Scattering Powers
          WXRegistry<ScatteringPower>* mpWXScatteringPowerRegistry;
+      /// Storage for the Anti-bump/merge cost
+         REAL mBumpmergeCost;
 
       #ifdef OBJCRYST_GL
       //OpenGl

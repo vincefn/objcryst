@@ -972,35 +972,24 @@ void Crystal::XMLOutput(ostream &os,int indent)const
       mScattererRegistry.GetObj(i).XMLOutput(os,indent);
    os <<endl;
 
-   if(mBumpDistanceMatrix.numElements()>0)
+   if(mvBumpMergePar.size()>0)
    {
-      const int num=mBumpDistanceMatrix.rows();
-      for(int i=0;i<num;i++)
-         for(int j=i;j<num;j++)
-            if(.1<mBumpDistanceMatrix(i,j))
-            {
-               for(int k=0;k<=indent;k++) os << "  " ;
-               XMLCrystTag tagBump("AntiBumpDistance");
-               const ScatteringPower *scatt1=0;
-               for(int k=0;k<mScatteringPowerRegistry.GetNb();k++)
-                  if(i==mScatteringPowerRegistry.GetObj(k).GetDynPopCorrIndex())
-                  {
-                     scatt1=&(mScatteringPowerRegistry.GetObj(k));
-                     break;
-                  }
-               const ScatteringPower *scatt2=0;
-               for(int k=0;k<mScatteringPowerRegistry.GetNb();k++)
-                  if(j==mScatteringPowerRegistry.GetObj(k).GetDynPopCorrIndex())
-                  {
-                     scatt2=&(mScatteringPowerRegistry.GetObj(k));
-                     break;
-                  }
-               tagBump.AddAttribute("ScattPow1",scatt1->GetName());
-               tagBump.AddAttribute("ScattPow2",scatt2->GetName());
-               os<<tagBump;
-               tagBump.SetIsEndTag(true);
-               os<<sqrt(mBumpDistanceMatrix(i,j))<<tagBump<<endl;
-            }
+      VBumpMergePar::const_iterator pos;
+      for(pos=mvBumpMergePar.begin();pos!=mvBumpMergePar.end();pos++)
+      {
+         for(int k=0;k<=indent;k++) os << "  " ;
+         XMLCrystTag tagBump("AntiBumpDistance");
+         tagBump.AddAttribute("ScattPow1",pos->first.first ->GetName());
+         tagBump.AddAttribute("ScattPow2",pos->first.second->GetName());
+         {
+            stringstream ss;
+            ss << pos->second.mCanOverlap;
+            tag.AddAttribute("AllowMerge",ss.str());
+         }
+         os<<tagBump;
+         tagBump.SetIsEndTag(true);
+         os<<sqrt(pos->second.mDist2)<<tagBump<<endl;
+      }
    }
    
    indent--;

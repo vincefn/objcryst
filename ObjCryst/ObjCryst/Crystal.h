@@ -305,7 +305,7 @@ class Crystal:public RefinableObj
       * value) if you have added antibump distances using Crystal::SetBumpMergeDistance().
       *
       */
-      REAL GetBumpMergeCostFunction() const;
+      REAL GetBumpMergeCost() const;
       /** Set the Anti-bumping distance between two scattering types
       * 
       */
@@ -331,6 +331,7 @@ class Crystal:public RefinableObj
       
       virtual void GlobalOptRandomMove(const REAL mutationAmplitude,
                                        const RefParType *type=gpRefParTypeObjCryst);
+      virtual REAL GetLogLikelihood()const;
       /** \brief output Crystal structure as a cif file (EXPERIMENTAL !)
       *
       * \warning This is very crude and EXPERIMENTAL so far: only isotropic scattering power
@@ -443,24 +444,67 @@ class Crystal:public RefinableObj
       mutable CrystMatrix_REAL mOrthMatrix;
       /// inverse of Eucl Matrix (i.e. inverse of de-orthogonalization matrix for direct space)
       mutable CrystMatrix_REAL mOrthMatrixInvert;
-            
-      /** \brief Distance table (squared) between all scattering components in the crystal
+   // Interatomice distance & Anti-bump
+      /// Storage for anti-bump/merge parameters
+      struct BumpMergePar
+      {
+         BumpMergePar();
+         /** Constructor
+         *
+         * \param dist: the bump/merge distance in Angstroems
+         */
+         BumpMergePar(const REAL dist, const bool canOverlap=false);
+         /// The squared antibump interatomic distance
+         REAL mDist2;
+         /// Can the two atoms completely overlap ?
+         bool mCanOverlap;
+      };
+      
+      /// Anti-bump parameters
+      typedef std::vector<pair<pair<const ScatteringPower*, const ScatteringPower*>,
+                               Crystal::BumpMergePar> > VBumpMergePar;
+      /// Anti-bump parameters map
+      VBumpMergePar mvBumpMergePar;
+      /// Last Time Anti-bump parameters were changed
+      RefinableObjClock mBumpMergeParClock;
+      /// Last Time Anti-bump parameters were changed
+      mutable RefinableObjClock mBumpMergeCostClock;
+      /// Current bump-merge cost
+      mutable REAL mBumpMergeCost;
+
+      
+      /// Interatomic distance for a given neighbour
+      struct Neighbour
+      {
+         Neighbour(const unsigned long neighbourIndex,const int sym,
+                   const REAL dist2);
+         /// The number associated to the neighbour 
+         /// (its index in the Crystal's scattering component list)
+         unsigned long mNeighbourIndex;
+         /// The symmetry position associated to the neighbour 
+         /// (its index in the Crystal's scattering component list)
+         unsigned int mNeighbourSymmetryIndex;
+         /// The squared distance, in square Angstroems
+         REAL mDist2;
+      };
+      /// Table of neighbours for a given unique atom
+      struct NeighbourHood
+      {
+         /// Index of the atom in the scattering component list
+         unsigned long mIndex;
+         /// Index of the symmetry operation for the chosen unique position in the 
+         /// (pseudo) asymmetric unit
+         unsigned int mUniquePosSymmetryIndex;
+         /// List of neighbours
+         std::vector<Crystal::Neighbour> mvNeighbour;
+      };
+      /** Interatomic distance table for all unique atoms
       *
-      * Matrix, in Angstroems^2 (the square root is not computed
-      *for optimization purposes), with as many columns as there are components
-      * in Crystal::mScattCompList, and as many rows as necessary (to include
-      * symmetrics in and nearby the Asymmetric Unit). See Crystal::CalcDistTable()
-      *
-      * The order of columns follows the order in Crystal::mScattCompList. The order
-      * of rows is given in Crystal::mDistTableIndex
       */
-      mutable CrystMatrix_REAL mDistTableSq;
-      /** \brief Index of scattering components for the Distance table
-      *
-      * These are the index of the scattering components corresponding to each row in
-      * Crystal::mDistTableSq.
-      */
-      mutable CrystVector_long  mDistTableIndex;
+      mutable std::vector<NeighbourHood> mvDistTableSq;
+      /// The time when the distance table was last calculated
+      mutable RefinableObjClock mDistTableClock;
+      
       /// The list of all scattering components in the crystal
       mutable ScatteringComponentList mScattCompList;
          
@@ -469,10 +513,6 @@ class Crystal:public RefinableObj
       /// Use Dynamical population correction (ScatteringComponent::mDynPopCorr) during Structure
       /// factor calculation ?
       RefObjOpt mUseDynPopCorr;
-      /// Matrix of "bumping" (squared) distances
-      CrystMatrix_REAL mBumpDistanceMatrix;
-      /// Allow merging of atoms in the bump/merge function(should be true for identical atoms)?
-      CrystMatrix_bool mAllowMerge;
       
       /// The registry of ScatteringPower for this Crystal.
       ObjRegistry<ScatteringPower> mScatteringPowerRegistry;

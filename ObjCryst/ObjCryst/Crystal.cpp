@@ -506,24 +506,28 @@ CrystMatrix_REAL Crystal::GetMinDistanceTable(const REAL minDistance) const
    VFN_DEBUG_MESSAGE("Crystal::MinDistanceTable()",5)
    this->CalcDistTable(true);
    const long nbComponent=mScattCompList.GetNbComponent();
+   
    CrystMatrix_REAL minDistTable(nbComponent,nbComponent);
-   const int nbAtoms=mDistTableIndex.numElements();
    REAL dist;
    REAL tmp;
    const REAL min=minDistance*minDistance;
-   //cout<<mDistTableSq.rows()<<" "<<mDistTableSq.cols()<<" "<<nbComponent<<" "<<nbAtoms<<endl;
    minDistTable=10000.;
    for(int i=0;i<nbComponent;i++)
    {
       //VFN_DEBUG_MESSAGE("Crystal::MinDistanceTable():comp="<<i,10)
-      for(int j=0;j<nbAtoms;j++)
+      std::vector<Crystal::Neighbour>::const_iterator pos;
+      for(pos=mvDistTableSq[i].mvNeighbour.begin();
+          pos<mvDistTableSq[i].mvNeighbour.end();pos++)
       {
-         tmp=mDistTableSq(j,i);
-         dist=minDistTable(i,mDistTableIndex(j));
-         if( (tmp<dist) && ((tmp>min) || (i!=j))) minDistTable(i,mDistTableIndex(j))=tmp;
+         tmp=pos->mDist2;
+         dist=minDistTable(i,pos->mNeighbourIndex);
+         if(  (tmp<dist) 
+            && ((tmp>min) || (  (mvDistTableSq[i].mIndex !=pos->mNeighbourIndex)
+                              &&(mvDistTableSq[i].mUniquePosSymmetryIndex
+                                 !=pos->mNeighbourSymmetryIndex))))
+            minDistTable(i,pos->mNeighbourIndex)=tmp;
       }
    }
-   //cout << mDistTableSq<<endl<<minDistTable<<endl;
    for(int i=0;i<nbComponent;i++)
    {
       for(int j=0;j<=i;j++)
@@ -533,7 +537,6 @@ CrystMatrix_REAL Crystal::GetMinDistanceTable(const REAL minDistance) const
          minDistTable(j,i)=minDistTable(i,j);
       }
    }
-   //cout << mDistTableSq<<endl<<minDistTable<<endl;
    VFN_DEBUG_MESSAGE("Crystal::MinDistanceTable():End",3)
    return minDistTable;
 }
@@ -769,11 +772,11 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
 
 void Crystal::CalcDynPopCorr(const REAL overlapDist, const REAL mergeDist) const
 {
-   VFN_DEBUG_MESSAGE("Crystal::CalcDynPopCorr(REAL)",4)
+   VFN_DEBUG_ENTRY("Crystal::CalcDynPopCorr(REAL)",4)
    TAU_PROFILE("Crystal::CalcDynPopCorr()","void (REAL)",TAU_DEFAULT);
    
    this->CalcDistTable(true,overlapDist);
-   if(mClockDynPopCorr>mClockNeighborTable) return;
+   if(mClockDynPopCorr>mDistTableClock) return;
    
    const long nbComponent=mScattCompList.GetNbComponent();
    const int nbSymmetrics=mSpaceGroup.GetNbSymmetrics();
@@ -782,44 +785,35 @@ void Crystal::CalcDynPopCorr(const REAL overlapDist, const REAL mergeDist) const
    REAL corr;
    
    int atomicNumber;
-   const long nbAtomSym=mDistTableIndex.numElements();
    const REAL overlapDistSq=overlapDist*overlapDist;
    REAL dist;
    for(long i=0;i<nbComponent;i++)
    {
+      VFN_DEBUG_MESSAGE("Crystal::CalcDynPopCorr(): Component:"<<i,0)
       atomicNumber=mScattCompList(i).mpScattPow->GetDynPopCorrIndex();
       nbNeighbors=0;
-      for(long j=0;j<nbAtomSym;j++)
-         if(atomicNumber==mScattCompList(mDistTableIndex(j)).mpScattPow->GetDynPopCorrIndex())
-         {
-            if(overlapDistSq > mDistTableSq(j,i))
-               neighborsDist(nbNeighbors++)=sqrt(mDistTableSq(j,i));
-         }
-      corr=0.;
-      if(nbNeighbors==0)
+      std::vector<Crystal::Neighbour>::const_iterator pos;
+      for(pos=mvDistTableSq[i].mvNeighbour.begin();
+          pos<mvDistTableSq[i].mvNeighbour.end();pos++)
       {
-         cout << "Crystal::CalcDynPopCorr():no neighbors !"<<i<<":"<< sqrt(overlapDistSq)<<endl;
-         #ifdef __DEBUG__
-         cout <<mDistTableSq<<endl<<endl;
-         for(long j=0;j<nbAtomSym;j++)
-            if(atomicNumber
-                ==mScattCompList(mDistTableIndex(j)).mpScattPow->GetDynPopCorrIndex())
-            {
-               cout << sqrt(mDistTableSq(j,i)) <<" "<<(overlapDistSq>mDistTableSq(j,i)) <<endl;
-            }
-         #endif
-         abort();
+         VFN_DEBUG_MESSAGE("Crystal::CalcDynPopCorr(): Component:"<<i<<"Neighbour:"<<pos->mNeighbourIndex,0)
+         if(atomicNumber==mScattCompList(pos->mNeighbourIndex).mpScattPow->GetDynPopCorrIndex())
+         {
+            if(overlapDistSq > pos->mDist2)
+               neighborsDist(nbNeighbors++)=sqrt(pos->mDist2);
+         }
       }
+      corr=0.;
       for(long j=0;j<nbNeighbors;j++) 
       {
          dist=neighborsDist(j)-mergeDist;
          if(dist<0.) dist=0.;
          corr += fabs((overlapDist-dist-mergeDist)/(overlapDist-mergeDist));
       }
-      mScattCompList(i).mDynPopCorr=1./corr;
+      mScattCompList(i).mDynPopCorr=1./(1+corr);
    }
    mClockDynPopCorr.Click();
-   VFN_DEBUG_MESSAGE("Crystal::CalcDynPopCorr(REAL):End.",3)
+   VFN_DEBUG_EXIT("Crystal::CalcDynPopCorr(REAL):End.",4)
 }
 
 void Crystal::ResetDynPopCorr() const
@@ -848,104 +842,77 @@ int Crystal::FindScatterer(const string &scattName)const
       Cannot find this scatterer:"+scattName);
 }
 
-REAL Crystal::GetBumpMergeCostFunction() const
+Crystal::BumpMergePar::BumpMergePar():
+   mDist2(1.),mCanOverlap(false){}
+
+Crystal::BumpMergePar::BumpMergePar(const REAL dist, const bool canOverlap):
+   mDist2(dist*dist),mCanOverlap(canOverlap){}
+
+REAL Crystal::GetBumpMergeCost() const
 {
-   VFN_DEBUG_MESSAGE("Crystal::GetBumpMergeCostFunction()",2)
-   TAU_PROFILE("Crystal::GetBumpMergeCostFunction()","REAL (REAL)",TAU_DEFAULT);
+   if(mvBumpMergePar.size()==0) return 0;
+   this->CalcDistTable(true,3);
+   VFN_DEBUG_ENTRY("Crystal::GetBumpMergeCost()",4)
+   if(  (mBumpMergeCostClock>mBumpMergeParClock)
+      &&(mBumpMergeCostClock>mDistTableClock)) return mBumpMergeCost;
+   TAU_PROFILE("Crystal::GetBumpMergeCost()","REAL (REAL)",TAU_DEFAULT);
    
-   if(mBumpDistanceMatrix.numElements()==0) return 0;
-
-   this->GetScatteringComponentList();//update list if necessary
+   mBumpMergeCost=0;
    
-   const long nbComponent=mScattCompList.GetNbComponent();
-   //const int nbSymmetrics=mSpaceGroup.GetNbSymmetrics();
-   long nbNeighbors=0;
-   
-   //this->CalcDistTable(true,overlapDist);//:KLUDGE: Assume computing has already been done
-   
-   //Average number of neighbors, used to normalize the cost function (max env. =1)
-   //REAL avNbNeighbor;
-   //{
-   // const REAL a=GetLatticePar(0);
-   // const REAL b=GetLatticePar(1);
-   // const REAL c=GetLatticePar(2);
-   // const REAL alpha=GetLatticePar(3);
-   // const REAL beta=GetLatticePar(4);
-   // const REAL gamma=GetLatticePar(5);
-   // const REAL v=a*b*c*sqrt(1-cos(alpha)*cos(alpha)-cos(beta)*cos(beta)-cos(gamma)*cos(gamma)
-   //            +2*cos(alpha)*cos(beta)*cos(gamma));
-   // const REAL m=3;//sqrt(mBumpDistanceMatrix.max());
-   // avNbNeighbor=nbComponent*nbSymmetrics*4./3.*M_PI*m*m*m/v;
-   //}
-   
-   const long nbAtomSym=mDistTableIndex.numElements();
-   //Init the cubic splines
-      CrystVector_REAL x(3),y(3);
-      x(0)=0.;x(1)=.5;x(2)=1.;
-      y(0)=0.;y(1)=.5;y(2)=0.;
-      static const CubicSpline splineBumpMerge(x,y,0,0);
-      x.resize(2);
-      y.resize(2);
-      x(0)=.5;x(1)=1.;
-      y(0)=1.;y(1)=0.;
-      static const CubicSpline splineBump(x,y,0,0);
-   REAL cost=0;
-   
-   CrystVector_int atomicNumber(nbComponent);
-   for(long i=0;i<nbComponent;i++)
-      atomicNumber(i)=mScattCompList(i).mpScattPow->GetDynPopCorrIndex();
-   CrystVector_int atomicNumber2(nbAtomSym);
-   for(long j=0;j<nbAtomSym;j++)
-      atomicNumber2(j)=mScattCompList(mDistTableIndex(j)).mpScattPow->GetDynPopCorrIndex();
-
-   //cout << nbComponent <<" "<<nbAtomSym<<endl;
-   //cout << mDistTableSq.cols()<<" "<<mDistTableSq.rows()<<endl;
-   
-   //:TODO: faster store the splines in arrays
-   REAL tmp;
-   for(long i=0;i<nbComponent;i++)
-   {
-      nbNeighbors=0;
-      //cout << mScattCompList(i).mpScattPow->GetName()<<":::";
-      for(long j=0;j<nbAtomSym;j++)
+   // we don't want to search the corresponding antibump distance for each
+   // couple of neighbours, so build an index table
+      const unsigned int nbScattPow=this->GetScatteringPowerRegistry().GetNb();
+      long maxGetDynPopCorrIndex=0;
+      for(unsigned int i=0;i<nbScattPow;i++)
+         if(this->GetScatteringPowerRegistry().GetObj(i).GetDynPopCorrIndex()>maxGetDynPopCorrIndex)
+            maxGetDynPopCorrIndex=this->GetScatteringPowerRegistry().GetObj(i).GetDynPopCorrIndex();
+      CrystVector_long index(maxGetDynPopCorrIndex+1);
+      for(unsigned int i=0;i<nbScattPow;i++)
+         index(this->GetScatteringPowerRegistry().GetObj(i).GetDynPopCorrIndex())=i;
+      CrystMatrix_long paridx(nbScattPow,nbScattPow);
+      paridx=-1;
       {
-         if(mBumpDistanceMatrix(atomicNumber(i),atomicNumber2(j))<.1) continue;
-         mDistTableSq(j,i);
-         tmp=mDistTableSq(j,i)/mBumpDistanceMatrix(atomicNumber(i),atomicNumber2(j));
-         if(tmp>=1.) continue;
-         //cout <<mScattCompList(mDistTableIndex(j)).mpScattPow->GetName()<<" "
-         //     <<sqrt(mDistTableSq(j,i))<<"->";
-         //if(atomicNumber(i)==atomicNumber2(j))
-         if(true==mAllowMerge(atomicNumber(i),atomicNumber2(j)))
+         for(unsigned int i=0;i<mvBumpMergePar.size();i++)
          {
-            cost+= splineBumpMerge(sqrt(tmp));
-            //cout <<splineBumpMerge(sqrt(tmp))<<"M :: ";
-         }
-         else
-         {
-            cost+= splineBump(sqrt(tmp));
-            //cout <<splineBump(sqrt(tmp))<<"B :: ";
+            paridx(index(mvBumpMergePar[i].first.first ->GetDynPopCorrIndex()),
+                   index(mvBumpMergePar[i].first.second->GetDynPopCorrIndex()))=i;
          }
       }
-      //cout <<endl;
+      
+   std::vector<NeighbourHood>::const_iterator pos;
+   std::vector<Crystal::Neighbour>::const_iterator neigh;
+   REAL tmp;
+   long par;
+   const ScatteringPower *pow1;
+   const ScatteringPower *pow2;
+   for(pos=mvDistTableSq.begin();pos<mvDistTableSq.end();pos++)
+   {
+      pow1=mScattCompList(pos->mIndex).mpScattPow;
+      for(neigh=pos->mvNeighbour.begin();neigh<pos->mvNeighbour.end();neigh++)
+      {
+         pow2=mScattCompList(neigh->mNeighbourIndex).mpScattPow;
+         par=paridx(index( pow1->GetDynPopCorrIndex() ),
+                    index( pow2->GetDynPopCorrIndex() ));
+         if(-1==par) continue;
+         if(neigh->mDist2 > mvBumpMergePar[par].second.mDist2) continue;
+         if(true==mvBumpMergePar[par].second.mCanOverlap)
+            tmp = 0.5*sin(M_PI*(1.-sqrt(neigh->mDist2/mvBumpMergePar[par].second.mDist2)))/0.1;
+         else
+            tmp = tan(M_PI*0.5*(1.-sqrt(neigh->mDist2/mvBumpMergePar[par].second.mDist2)))/0.1;
+         mBumpMergeCost += tmp*tmp;
+      }
    }
-   //cout << "BumpMergeCost:"<<cost<<" "<<avNbNeighbor<<endl;
-   cost /= nbComponent*nbComponent;//avNbNeighbor*nbComponent;
-   //cout << "BumpMergeCost:"<<cost<<endl;
-   //cout << mDistTableSq<<endl;
-   //this->PrintMinDistanceTable(.001);
-   //abort();
-   VFN_DEBUG_MESSAGE("Crystal::GetBumpMergeCostFunction():End",2)
-   return cost;
+   mBumpMergeCost *= mSpaceGroup.GetNbSymmetrics();
+   mBumpMergeCostClock.Click();
+   VFN_DEBUG_EXIT("Crystal::GetBumpMergeCost():"<<mBumpMergeCost,4)
+   return mBumpMergeCost;
 }
 
 void Crystal::SetBumpMergeDistance(const ScatteringPower &scatt1,
                                    const ScatteringPower &scatt2,const REAL dist)
 {
    VFN_DEBUG_MESSAGE("Crystal::SetBumpMergeDistance()",5)
-   const int num1=scatt1.GetDynPopCorrIndex();
-   const int num2=scatt2.GetDynPopCorrIndex();
-   if(num1==num2) this->SetBumpMergeDistance(scatt1,scatt2,dist,true) ;
+   if(&scatt1 == &scatt2) this->SetBumpMergeDistance(scatt1,scatt2,dist,true) ;
    else this->SetBumpMergeDistance(scatt1,scatt2,dist,false);
 }
 
@@ -953,21 +920,9 @@ void Crystal::SetBumpMergeDistance(const ScatteringPower &scatt1,
                                    const ScatteringPower &scatt2,const REAL dist,
                                    const bool allowMerge)
 {
-   VFN_DEBUG_MESSAGE("Crystal::SetBumpMergeDistance()",5)
-   const int num1=scatt1.GetDynPopCorrIndex();
-   const int num2=scatt2.GetDynPopCorrIndex();
-   if(mBumpDistanceMatrix.numElements()==0) 
-   {
-      mBumpDistanceMatrix.resize(400,400);
-      mBumpDistanceMatrix=0;
-      mAllowMerge.resize(400,400);
-      mAllowMerge=false;
-   }
-   VFN_DEBUG_MESSAGE("Crystal::SetBumpMergeDistance():"<<num1<<","<<num2,8)
-   mBumpDistanceMatrix(num1,num2)=dist*dist;
-   mBumpDistanceMatrix(num2,num1)=dist*dist;
-   mAllowMerge(num1,num2)=allowMerge;
-   mAllowMerge(num2,num1)=allowMerge;
+   VFN_DEBUG_MESSAGE("Crystal::SetBumpMergeDistance()",8)
+   mvBumpMergePar.push_back(std::make_pair(std::make_pair(&scatt1,&scatt2),
+                                           BumpMergePar(dist,allowMerge)));
 }
 
 const RefinableObjClock& Crystal::GetClockLatticePar()const {return mClockLatticePar;}
@@ -1017,7 +972,7 @@ REAL Crystal::GetCostFunctionValue(const unsigned int n)
    VFN_DEBUG_MESSAGE("Crystal::GetCostFunctionValue():"<<mName,4)
    switch(n)
    {
-      case 0: return this->GetBumpMergeCostFunction();
+      case 0: return this->GetBumpMergeCost();
       default:
       {
          cout << "Crystal::GetCostFunctionValue(): Not Found !" <<endl;
@@ -1055,6 +1010,11 @@ void Crystal::GlobalOptRandomMove(const REAL mutationAmplitude,
    }
    mRandomMoveIsDone=true;
    VFN_DEBUG_EXIT("Crystal::GlobalOptRandomMove()",2)
+}
+
+REAL Crystal::GetLogLikelihood()const
+{  
+   return this->GetBumpMergeCost();
 }
 
 void Crystal::CIFOutput(ostream &os)const
@@ -1522,379 +1482,301 @@ void Crystal::InitRefParList()
    VFN_DEBUG_MESSAGE("Crystal::InitRefParList():Finished",5)
 }
 
+Crystal::Neighbour::Neighbour(const unsigned long neighbourIndex,const int sym,
+                              const REAL dist2):
+mNeighbourIndex(neighbourIndex),mNeighbourSymmetryIndex(sym),mDist2(dist2)
+{}
+
+struct DistTableInternalPosition
+{
+   DistTableInternalPosition(const long atomIndex, const int sym,
+                             const REAL x,const REAL y,const REAL z):
+   mAtomIndex(atomIndex),mSymmetryIndex(sym),mX(x),mY(y),mZ(z)
+   {}
+   DistTableInternalPosition(const long atomIndex, const int sym,
+                             const long x,const long y,const long z):
+   mAtomIndex(atomIndex),mSymmetryIndex(sym),mXL(x),mYL(y),mZL(z)
+   {}
+   long mAtomIndex;
+   int mSymmetryIndex;
+   REAL mX,mY,mZ;
+   long mXL,mYL,mZL;
+};
+
 void Crystal::CalcDistTable(const bool fast, const REAL asymUnitMargin) const
 {
    this->GetScatteringComponentList();
    this->InitMatrices();
    
-   if(  (mClockNeighborTable>mClockScattCompList)
-      &&(mClockNeighborTable>mClockMetricMatrix)) return;
-   
+   if(  (mDistTableClock>mClockScattCompList)
+      &&(mDistTableClock>mClockMetricMatrix)) return;
+   VFN_DEBUG_ENTRY("Crystal::CalcDistTable()",4)
+      
    const long nbComponent=mScattCompList.GetNbComponent();
-   if(true==fast)
+   const int nbSymmetrics=mSpaceGroup.GetNbSymmetrics();
+   
+   mvDistTableSq.resize(nbComponent);
    {
-      VFN_DEBUG_MESSAGE("Crystal::CalcDistTable(fast=true)",3)
+      std::vector<NeighbourHood>::iterator pos;
+      for(pos=mvDistTableSq.begin();pos<mvDistTableSq.end();pos++)
+         pos->mvNeighbour.clear();
+   }
+   VFN_DEBUG_MESSAGE("Crystal::CalcDistTable():1",3)
+   
+   // Get limits of the (pseudo) asymmetric unit
+      // strict limits
+      const REAL xMax0=mSpaceGroup.GetAsymUnit().Xmax();
+      const REAL yMax0=mSpaceGroup.GetAsymUnit().Ymax();
+      const REAL zMax0=mSpaceGroup.GetAsymUnit().Zmax();
+   
+      // limits with a margin, within [0;1[
+      const REAL xMax=mSpaceGroup.GetAsymUnit().Xmax()+asymUnitMargin/GetLatticePar(0);
+      const REAL yMax=mSpaceGroup.GetAsymUnit().Ymax()+asymUnitMargin/GetLatticePar(1);
+      const REAL zMax=mSpaceGroup.GetAsymUnit().Zmax()+asymUnitMargin/GetLatticePar(2);
+      const REAL xMin=1.-asymUnitMargin/GetLatticePar(0);
+      const REAL yMin=1.-asymUnitMargin/GetLatticePar(1);
+      const REAL zMin=1.-asymUnitMargin/GetLatticePar(2);
+      
+      bool useAsymUnit=false;
+      if((xMax0*yMax0*zMax0)<0.6) useAsymUnit=true;
+   
+   
+   // List of all positions within or near the asymmetric unit
+   std::vector<DistTableInternalPosition> vPos;
+   // index of unique atoms in vPos, which are strictly in the asymmetric unit
+   std::vector<unsigned long> vUniqueIndex(nbComponent);
+   
+   if(true==fast)//
+   {
+      VFN_DEBUG_MESSAGE("Crystal::CalcDistTable(fast):2",3)
       TAU_PROFILE("Crystal::CalcDistTable(fast=true)","Matrix (string&)",TAU_DEFAULT);
       TAU_PROFILE_TIMER(timer1,"DiffractionData::CalcDistTable1","", TAU_FIELD);
       TAU_PROFILE_TIMER(timer2,"DiffractionData::CalcDistTable2","", TAU_FIELD);
-      TAU_PROFILE_TIMER(timer3,"DiffractionData::CalcDistTable3","", TAU_FIELD);
-      TAU_PROFILE_TIMER(timer4,"DiffractionData::CalcDistTable4","", TAU_FIELD);
-
+      
       TAU_PROFILE_START(timer1);
-      const long intScale=16384;//Do not change this. Used later with AND (&)
-      const long intScale2=8192;
-      const int nbSymmetrics=mSpaceGroup.GetNbSymmetrics();
-      long nbAtoms=0;
-      CrystVector_long xCoords(nbComponent*nbSymmetrics);
-      CrystVector_long yCoords(nbComponent*nbSymmetrics);
-      CrystVector_long zCoords(nbComponent*nbSymmetrics);
-      CrystVector_long xCoords2(nbComponent);
-      CrystVector_long yCoords2(nbComponent);
-      CrystVector_long zCoords2(nbComponent);
+      #define FRAC2LONG 0x4000
+      #define FRAC2LONGMASK 0x3FFF
+      #define HALF_FRAC2LONG 0x2000
+      #define HALF_FRAC2LONGMASK 0x1FFF
+      
+      // Get limits of the (pseudo) asymmetric unit in long
+         // strict limits
+         const long xMax0l=(long)(xMax0*(REAL)FRAC2LONG);
+         const long yMax0l=(long)(yMax0*(REAL)FRAC2LONG);
+         const long zMax0l=(long)(zMax0*(REAL)FRAC2LONG);
+
+         // limits with a margin, within [0;FRAC2LONG[
+         const long xMaxl=(long)(xMax*(REAL)FRAC2LONG);
+         const long yMaxl=(long)(yMax*(REAL)FRAC2LONG);
+         const long zMaxl=(long)(zMax*(REAL)FRAC2LONG);
+         const long xMinl=(long)(xMin*(REAL)FRAC2LONG);
+         const long yMinl=(long)(yMin*(REAL)FRAC2LONG);
+         const long zMinl=(long)(zMin*(REAL)FRAC2LONG);
+      
+      long xl,yl,zl;
+      
       CrystMatrix_REAL symmetricsCoords;
-      mDistTableIndex.resize(nbComponent*nbSymmetrics);
-      long *pIndex=mDistTableIndex.data();
-      //get the fractionnal coordinates of all atoms
-      double junk;
+      
+      // Get the list of all atoms within or near the asymmetric unit
       for(long i=0;i<nbComponent;i++)
       {
+         VFN_DEBUG_MESSAGE("Crystal::CalcDistTable(fast):3:component "<<i,0)
          symmetricsCoords=mSpaceGroup.GetAllSymmetrics(mScattCompList(i).mX,
                                                        mScattCompList(i).mY,
                                                        mScattCompList(i).mZ);
-         
-         //:KLUDGE: Ensure that all coordinates are >0. This assumes that fractional
-         //coordinates are > -8.
-         symmetricsCoords += 8;
-         
-         // Ensure that coords are all between 0 and 1
+         mvDistTableSq[i].mIndex=i;//USELESS ?
          for(int j=0;j<nbSymmetrics;j++)
-         {//'Optimizing' this loop with pointers is useless
-            xCoords(nbAtoms)=(long)(modf(symmetricsCoords(j,0),&junk) * intScale);
-            yCoords(nbAtoms)=(long)(modf(symmetricsCoords(j,1),&junk) * intScale);
-            zCoords(nbAtoms)=(long)(modf(symmetricsCoords(j,2),&junk) * intScale);
-            nbAtoms++;
-            *pIndex++ = i;
-         }
-         xCoords2(i)=(long) (mScattCompList(i).mX*intScale);
-         yCoords2(i)=(long) (mScattCompList(i).mY*intScale);
-         zCoords2(i)=(long) (mScattCompList(i).mZ*intScale);
-      }
-      VFN_DEBUG_MESSAGE("-->Size of DistTable:"<<nbComponent<<" x "<<nbAtoms,2)
-      //:TODO: will be needed when special positions will be implemented
-      xCoords.resizeAndPreserve(nbAtoms);
-      yCoords.resizeAndPreserve(nbAtoms);
-      zCoords.resizeAndPreserve(nbAtoms);
-      mDistTableIndex.resizeAndPreserve(nbAtoms);
-      
-      //cout << xCoords<<endl<<endl<<yCoords<<endl<<zCoords<<endl<<mDistTableIndex<<endl;
-      
-      TAU_PROFILE_STOP (timer1);
-      TAU_PROFILE_START(timer2);
-      // Only keep atoms which are in the asymmetric unit, or less than 3 Angstroem
-      // from the asymmetric unit Cell
-      if( mSpaceGroup.GetAsymUnit().Xmax()
-         *mSpaceGroup.GetAsymUnit().Ymax()
-         *mSpaceGroup.GetAsymUnit().Zmax() < 0.6) 
-      {
-         // Get rid of atoms outside asymmetric unit+3 Angstroems
-         // Make sure that the list of independant atoms contains only atoms
-         // inside the Asymmetric unit (else shit happens).
-         
-         // Prepare
-            //CrystVector_long xCoordsOld,yCoordsOld,zCoordsOld,indexOld;
-            //xCoordsOld=xCoords;
-            //yCoordsOld=yCoords;// i>nbAtoms, so useless
-            //zCoordsOld=zCoords;
-            CrystVector_long indexOld;
-            indexOld=mDistTableIndex;
-            const long nbAtomsOld=nbAtoms;
+         {
+            // Convert to long [0;1[ -> [0 ; FRAC2LONG[ with some bit twidlling
+            xl=(long)(symmetricsCoords(j,0)*(REAL)FRAC2LONG);
+            yl=(long)(symmetricsCoords(j,1)*(REAL)FRAC2LONG);
+            zl=(long)(symmetricsCoords(j,2)*(REAL)FRAC2LONG);
+            xl= xl & FRAC2LONGMASK; //xl %= FRAC2LONG;if(xl<0) xl += FRAC2LONG;
+            yl= yl & FRAC2LONGMASK; //yl %= FRAC2LONG;if(yl<0) yl += FRAC2LONG;
+            zl= zl & FRAC2LONGMASK; //zl %= FRAC2LONG;if(zl<0) zl += FRAC2LONG;
             
-            const long xMax0=(long)(mSpaceGroup.GetAsymUnit().Xmax()*intScale);
-            const long yMax0=(long)(mSpaceGroup.GetAsymUnit().Ymax()*intScale);
-            const long zMax0=(long)(mSpaceGroup.GetAsymUnit().Zmax()*intScale);
-            const long xMax=(long)((mSpaceGroup.GetAsymUnit().Xmax()
-                                    +asymUnitMargin/GetLatticePar(0))*intScale);
-            const long yMax=(long)((mSpaceGroup.GetAsymUnit().Ymax()
-                                    +asymUnitMargin/GetLatticePar(1))*intScale);
-            const long zMax=(long)((mSpaceGroup.GetAsymUnit().Zmax()+
-                                    asymUnitMargin/GetLatticePar(2))*intScale);
-            // xMin < x < xMax ...but xMin is <0 so it's actually wrapped near 1...
-            // So a valid point is either 0 < x < xMax or 1+xMin < x < 1
-            const long xMin=(long)((1-asymUnitMargin/GetLatticePar(0))*intScale);
-            const long yMin=(long)((1-asymUnitMargin/GetLatticePar(1))*intScale);
-            const long zMin=(long)((1-asymUnitMargin/GetLatticePar(2))*intScale);
-            VFN_DEBUG_MESSAGE("-> "<< xMax <<" "<< xMax0 <<" "<< xMin,0)
-            VFN_DEBUG_MESSAGE("-> "<< yMax <<" "<< yMax0 <<" "<< yMin,0)
-            VFN_DEBUG_MESSAGE("-> "<< zMax <<" "<< zMax0 <<" "<< zMin,0)
-         // Do it
-         nbAtoms=0;
-         mDistTableIndex=0;
-         for(long i=0;i<nbAtomsOld;i++)
-         {
-            if(  ((xCoords(i) < xMax) || (xCoords(i) > xMin))
-               &&((yCoords(i) < yMax) || (yCoords(i) > yMin))
-               &&((zCoords(i) < zMax) || (zCoords(i) > zMin)))
+            if(useAsymUnit)
             {
-               xCoords(nbAtoms)=xCoords(i);
-               yCoords(nbAtoms)=yCoords(i);
-               zCoords(nbAtoms)=zCoords(i);
-               mDistTableIndex(nbAtoms)=indexOld(i);
-               //Is it strictly inside the Asymmetric Unit ?
-               //=> use as new origin
-               if((xCoords(nbAtoms) <= xMax0) && 
-                  (yCoords(nbAtoms) <= yMax0) && 
-                  (zCoords(nbAtoms) <= zMax0))
-               {
-                  xCoords2(mDistTableIndex(nbAtoms))=xCoords(nbAtoms);
-                  yCoords2(mDistTableIndex(nbAtoms))=yCoords(nbAtoms);
-                  zCoords2(mDistTableIndex(nbAtoms))=zCoords(nbAtoms);
-               }
-               nbAtoms++;
+               if( (zl>zMinl) || (zl<zMaxl)) 
+                  if( (xl>xMinl) || (xl<xMaxl)) 
+                     if( (yl>yMinl) || (yl<yMaxl))
+                     {
+                        vPos.push_back(DistTableInternalPosition(i,j,xl,yl,zl));
+                        if((xl<xMax0l)&&(yl<yMax0l)&&(zl<zMax0l))
+                        {
+                           vUniqueIndex[i]=vPos.size()-1;
+                           mvDistTableSq[i].mUniquePosSymmetryIndex=j;
+                        }
+                     }
+            }
+            else
+            {
+               vPos.push_back(DistTableInternalPosition(i,j,xl,yl,zl));
+               vUniqueIndex[i]=vPos.size()-1;
+               mvDistTableSq[i].mUniquePosSymmetryIndex=j;
             }
          }
-         VFN_DEBUG_MESSAGE("-> Keeping "<<nbAtoms<<" out of "<< nbAtomsOld <<" atoms for distance calculations",2)
       }
-      xCoords.resizeAndPreserve(nbAtoms);
-      yCoords.resizeAndPreserve(nbAtoms);
-      zCoords.resizeAndPreserve(nbAtoms);
-      mDistTableIndex.resizeAndPreserve(nbAtoms);
-      TAU_PROFILE_STOP (timer2);
-      TAU_PROFILE_START(timer3);
+      TAU_PROFILE_STOP(timer1);
+      TAU_PROFILE_START(timer2);
+      // Compute interatomic vectors & distance 
+      // between (i) unique atoms and (ii) all remaining atoms
       
-      mDistTableIndex.resizeAndPreserve(nbAtoms);
-
-      // Now get all distances, in fractionnal coordinates
-      CrystMatrix_long xDist(nbAtoms,nbComponent);
-      CrystMatrix_long yDist(nbAtoms,nbComponent);
-      CrystMatrix_long zDist(nbAtoms,nbComponent);
-      mDistTableSq.resize(nbAtoms,nbComponent);
+      const REAL M00=mOrthMatrix(0,0)/(REAL)FRAC2LONG;
+      const REAL M01=mOrthMatrix(0,1)/(REAL)FRAC2LONG;
+      const REAL M02=mOrthMatrix(0,2)/(REAL)FRAC2LONG;
+      //const REAL M10=mOrthMatrix(1,0)/(REAL)FRAC2LONG;
+      const REAL M11=mOrthMatrix(1,1)/(REAL)FRAC2LONG;
+      const REAL M12=mOrthMatrix(1,2)/(REAL)FRAC2LONG;
+      //const REAL M20=mOrthMatrix(2,0)/(REAL)FRAC2LONG;
+      //const REAL M21=mOrthMatrix(2,1)/(REAL)FRAC2LONG;
+      const REAL M22=mOrthMatrix(2,2)/(REAL)FRAC2LONG;
+      
+      for(long i=0;i<nbComponent;i++)
       {
-         const long *f1;
-         const long *p1;
-         long *p2;
-         p2=xDist.data();
-         f1=xCoords.data();
-         for(long i=0;i<nbAtoms;i++)
+         VFN_DEBUG_MESSAGE("Crystal::CalcDistTable(fast):4:component "<<i,0)
+         #if 0
+         cout<<endl<<"Unique pos:"<<vUniqueIndex[i]<<":"
+             <<vPos[vUniqueIndex[i]].mAtomIndex<<":"
+             <<mScattCompList(vPos[vUniqueIndex[i]].mAtomIndex).mpScattPow->GetName()<<":"
+             <<vPos[vUniqueIndex[i]].mSymmetryIndex<<":"
+             <<vPos[vUniqueIndex[i]].mXL/(REAL)FRAC2LONG<<","
+             <<vPos[vUniqueIndex[i]].mYL/(REAL)FRAC2LONG<<","
+             <<vPos[vUniqueIndex[i]].mZL/(REAL)FRAC2LONG<<endl;
+         #endif
+         std::vector<Crystal::Neighbour> * const vnb=&(mvDistTableSq[i].mvNeighbour);
+         for(unsigned long j=0;j<vPos.size();j++)
          {
-            p1=xCoords2.data();
-            for(long j=0;j<nbComponent;j++)
-            {
-               *p2 = (*f1 - *p1++ ) & 16383;
-               if(*p2>intScale2) *p2 -= intScale;
-               p2++;
-            }
-            f1++;
-         }
-         p2=yDist.data();
-         f1=yCoords.data();
-         for(long i=0;i<nbAtoms;i++)
-         {
-            p1=yCoords2.data();
-            for(long j=0;j<nbComponent;j++)
-            {
-               *p2 = (*f1 - *p1++ ) & 16383;
-               if(*p2>intScale2) *p2 -= intScale;
-               p2++;
-            }
-            f1++;
-         }
-         p2=zDist.data();
-         f1=zCoords.data();
-         for(long i=0;i<nbAtoms;i++)
-         {
-            p1=zCoords2.data();
-            for(long j=0;j<nbComponent;j++)
-            {
-               *p2 = (*f1 - *p1++ ) & 16383;
-               if(*p2>intScale2) *p2 -= intScale;
-               p2++;
-            }
-            f1++;
+            if(vUniqueIndex[i]==j) continue;
+            xl=vPos[j].mXL - vPos[ vUniqueIndex[i] ].mXL;
+            yl=vPos[j].mYL - vPos[ vUniqueIndex[i] ].mYL;
+            zl=vPos[j].mZL - vPos[ vUniqueIndex[i] ].mZL;
+            
+            xl= xl & FRAC2LONGMASK;  //xl %= FRAC2LONG;if(xl<0) xl += FRAC2LONG;
+            yl= yl & FRAC2LONGMASK;  //yl %= FRAC2LONG;if(yl<0) yl += FRAC2LONG;
+            zl= zl & FRAC2LONGMASK;  //zl %= FRAC2LONG;if(zl<0) zl += FRAC2LONG;
+            
+            if(xl & HALF_FRAC2LONG) xl= (~xl) & HALF_FRAC2LONGMASK;//if(xl>HALF_FRAC2LONG) xl = FRAC2LONG-xl;
+            if(yl & HALF_FRAC2LONG) yl= (~yl) & HALF_FRAC2LONGMASK;//if(yl>HALF_FRAC2LONG) yl = FRAC2LONG-yl;
+            if(zl & HALF_FRAC2LONG) zl= (~zl) & HALF_FRAC2LONGMASK;//if(zl>HALF_FRAC2LONG) zl = FRAC2LONG-zl;
+            
+            const REAL x=M00 * (REAL)xl + M01 * (REAL)yl + M02 * (REAL)zl;
+            const REAL y=                 M11 * (REAL)yl + M12 * (REAL)zl;
+            const REAL z=                                  M22 * (REAL)zl;
+            Neighbour neigh(vPos[j].mAtomIndex,vPos[j].mSymmetryIndex,x*x+y*y+z*z);
+            vnb->push_back(neigh);
+            #if 0
+            cout<<vPos[j].mAtomIndex<<":"
+                <<mScattCompList(vPos[j].mAtomIndex).mpScattPow->GetName()<<":"
+                <<vPos[j].mSymmetryIndex<<":"
+                <<vPos[j].mXL/(REAL)FRAC2LONG<<","
+                <<vPos[j].mYL/(REAL)FRAC2LONG<<","
+                <<vPos[j].mZL/(REAL)FRAC2LONG<<" vector="
+                <<x<<","<<y<<","<<z<<endl;
+            #endif
          }
       }
-      TAU_PROFILE_STOP (timer3);
-      //mDistTableSq=0.;
-      //convert these distances to euclidian coordinates
-      //:NOTE: Assume mOrthMatrix is upper triangular
-      TAU_PROFILE_START(timer4);
-      {
-         const REAL M00=mOrthMatrix(0,0);
-         const REAL M01=mOrthMatrix(0,1);
-         const REAL M02=mOrthMatrix(0,2);
-         //const REAL M10=mOrthMatrix(1,0);
-         const REAL M11=mOrthMatrix(1,1);
-         const REAL M12=mOrthMatrix(1,2);
-         //const REAL M20=mOrthMatrix(2,0);
-         //const REAL M21=mOrthMatrix(2,1);
-         const REAL M22=mOrthMatrix(2,2);
-         const long *x=xDist.data();
-         const long *y=yDist.data();
-         const long *z=zDist.data();
-         REAL *d=mDistTableSq.data();
-         REAL xo,yo,zo;
-         const REAL back= pow((REAL)intScale,2);
-         for(long i=0;i<nbAtoms;i++)
-         {
-            for(long j=0;j<nbComponent;j++)
-            {
-               xo=M00* *x++ +M01* *y +M02* *z;
-               yo=/* M10* *x + */ M11* *y++ +M12* *z;
-               zo=/* M20* *x +M21* *y + */ M22* *z++;
-               //mDistTableSq(i,j)=(xo*xo + yo*yo + zo*zo)/back;
-               *d++ = (xo*xo + yo*yo + zo*zo)/back;
-            }
-         }
-      }
-      TAU_PROFILE_STOP (timer4);
+      TAU_PROFILE_STOP(timer2);
    }
    else
    {
-      VFN_DEBUG_MESSAGE("Crystal::CalcDistTable(fast=false)",3)
+      VFN_DEBUG_MESSAGE("Crystal::CalcDistTable(fast):2",3)
       TAU_PROFILE("Crystal::CalcDistTable(fast=false)","Matrix (string&)",TAU_DEFAULT);
-      const int nbSymmetrics=mSpaceGroup.GetNbSymmetrics();
-      CrystVector_REAL xCoords(nbComponent*nbSymmetrics);
-      CrystVector_REAL yCoords(nbComponent*nbSymmetrics);
-      CrystVector_REAL zCoords(nbComponent*nbSymmetrics);
-      long nbAtoms=0;
-      CrystMatrix_REAL symmetricsCoords(nbSymmetrics,3);
-      mDistTableIndex.resize(nbComponent*nbSymmetrics);
-      long *pIndex=mDistTableIndex.data();
-      //get the reduced coordinates of all atoms
+      TAU_PROFILE_TIMER(timer1,"DiffractionData::CalcDistTable1","", TAU_FIELD);
+      TAU_PROFILE_TIMER(timer2,"DiffractionData::CalcDistTable2","", TAU_FIELD);
+      
+      TAU_PROFILE_START(timer1);
+      CrystMatrix_REAL symmetricsCoords;
+      
+      REAL x,y,z;
+      double junk;
+      // Get the list of all atoms within or near the asymmetric unit
       for(long i=0;i<nbComponent;i++)
       {
+         VFN_DEBUG_MESSAGE("Crystal::CalcDistTable(fast):3:component "<<i,3)
          symmetricsCoords=mSpaceGroup.GetAllSymmetrics(mScattCompList(i).mX,
-                                                     mScattCompList(i).mY,
-                                                     mScattCompList(i).mZ);
+                                                       mScattCompList(i).mY,
+                                                       mScattCompList(i).mZ);
+         mvDistTableSq[i].mIndex=i;//USELESS ?
          for(int j=0;j<nbSymmetrics;j++)
          {
-            xCoords(nbAtoms)=symmetricsCoords(j,0);
-            yCoords(nbAtoms)=symmetricsCoords(j,1);
-            zCoords(nbAtoms)=symmetricsCoords(j,2);
-            nbAtoms++;
-            *pIndex++ = i;
+            x=modf(symmetricsCoords(j,0),&junk);
+            y=modf(symmetricsCoords(j,1),&junk);
+            z=modf(symmetricsCoords(j,2),&junk);
+            if(x<0) x +=1.;
+            if(y<0) y +=1.;
+            if(z<0) z +=1.;
+            
+            if(useAsymUnit)
+            {
+               if( (z>zMin) || (z<zMax)) 
+                  if( (x>xMin) || (x<xMax)) 
+                     if( (y>yMin) || (y<yMax))
+                     {
+                        vPos.push_back(DistTableInternalPosition(i,j,x,y,z));
+                        if((x<xMax0)&&(y<yMax0)&&(z<zMax0))
+                        {
+                           vUniqueIndex[i]=vPos.size()-1;
+                           mvDistTableSq[i].mUniquePosSymmetryIndex=j;
+                        }
+                     }
+            }
+            else
+            {
+               vPos.push_back(DistTableInternalPosition(i,j,x,y,z));
+               vUniqueIndex[i]=vPos.size()-1;
+               mvDistTableSq[i].mUniquePosSymmetryIndex=j;
+            }
          }
       }
-      VFN_DEBUG_MESSAGE("-->Size of DistTable:"<<nbAtoms*nbAtoms,2)
-
-      //:TODO: will be needed when special positions will be implemented
-      xCoords.resizeAndPreserve(nbAtoms);
-      yCoords.resizeAndPreserve(nbAtoms);
-      zCoords.resizeAndPreserve(nbAtoms);
-      mDistTableIndex.resizeAndPreserve(nbAtoms);
-
-      // Now get all distances, in reduced coordinates
-      CrystMatrix_REAL xDist(nbAtoms,nbAtoms);
-      CrystMatrix_REAL yDist(nbAtoms,nbAtoms);
-      CrystMatrix_REAL zDist(nbAtoms,nbAtoms);
-      mDistTableSq.resize(nbAtoms,nbAtoms);
-      /*
+      TAU_PROFILE_STOP(timer1);
+      TAU_PROFILE_START(timer2);
+      // Compute interatomic vectors & distance 
+      // between (i) unique atoms and (ii) all remaining atoms
+      for(long i=0;i<nbComponent;i++)
       {
-         for(long i=0;i<nbAtoms;i++)
+         VFN_DEBUG_MESSAGE("Crystal::CalcDistTable(fast):4:component "<<i,3)
+         #if 0
+         cout<<endl<<"Unique pos:"
+             <<vPos[vUniqueIndex[i]].mAtomIndex<<":"
+             <<mScattCompList(vPos[vUniqueIndex[i]].mAtomIndex).mpScattPow->GetName()<<":"
+             <<vPos[vUniqueIndex[i]].mSymmetryIndex<<":"
+             <<vPos[vUniqueIndex[i]].mX<<","
+             <<vPos[vUniqueIndex[i]].mY<<","
+             <<vPos[vUniqueIndex[i]].mZ<<endl;
+         #endif
+         std::vector<Crystal::Neighbour> * const vnb=&(mvDistTableSq[i].mvNeighbour);
+         VFN_DEBUG_MESSAGE("Crystal::CalcDistTable(fast):4:vector "<<vnb->size(),3)
+         for(unsigned long j=0;j<vPos.size();j++)
          {
-            for(long j=0;j<i;j++)
-            {  // +1000 ensures that the value is >0
-               xDist(i,j)=xCoords(i)-xCoords(j);
-               yDist(i,j)=yCoords(i)-yCoords(j);
-               zDist(i,j)=zCoords(i)-zCoords(j);
-            }
+            if(vUniqueIndex[i]==j) continue;
+            x=modf(vPos[j].mX - vPos[ vUniqueIndex[i] ].mX,&junk);
+            y=modf(vPos[j].mY - vPos[ vUniqueIndex[i] ].mY,&junk);
+            z=modf(vPos[j].mZ - vPos[ vUniqueIndex[i] ].mZ,&junk);
+            if(x<0) x+=1 ;
+            if(y<0) y+=1 ;
+            if(z<0) z+=1 ;
+            if(x>0.5) x=1-x ;
+            if(y>0.5) y=1-y ;
+            if(z>0.5) z=1-z ;
+            this->FractionalToOrthonormalCoords(x,y,z);
+            Neighbour neigh(vPos[j].mAtomIndex,vPos[j].mSymmetryIndex,x*x+y*y+z*z);
+            vnb->push_back(neigh);
+            #if 0
+            cout<<vPos[j].mAtomIndex<<":"
+                <<mScattCompList(vPos[j].mAtomIndex).mpScattPow->GetName()<<":"
+                <<vPos[j].mSymmetryIndex<<":"
+                <<vPos[j].mX<<","
+                <<vPos[j].mY<<","
+                <<vPos[j].mZ<<" vector="
+                <<x<<","<<y<<","<<z<<endl;
+            #endif
          }
       }
-      */
-      {
-         REAL f1;
-         const REAL *p1;
-         REAL *p2;
-         double junk;
-         p2=xDist.data();
-         for(long i=0;i<nbAtoms;i++)
-         {
-            f1=xCoords(i)+1000.;//:KLUDGE: +1000 ensures that the value is >0
-            p1=xCoords.data();
-            for(long j=0;j<i;j++)
-            {
-               *p2 = modf(f1 - *p1++,&junk);
-               if(*p2>0.5) *p2 -= 1.;
-               p2++;
-            }
-            p2 += nbAtoms-i;
-         }
-         p2=yDist.data();
-         for(long i=0;i<nbAtoms;i++)
-         {
-            f1=yCoords(i)+1000.;
-            p1=yCoords.data();
-            for(long j=0;j<i;j++)
-            {
-               *p2 = modf(f1 - *p1++,&junk);
-               if(*p2>0.5) *p2 -= 1.;
-               p2++;
-            }
-            p2 += nbAtoms-i;
-         }
-         p2=zDist.data();
-         for(long i=0;i<nbAtoms;i++)
-         {
-            f1=zCoords(i)+1000.;
-            p1=zCoords.data();
-            for(long j=0;j<i;j++)
-            {
-               *p2 = modf(f1 - *p1++,&junk);
-               if(*p2>0.5) *p2 -= 1.;
-               p2++;
-            }
-            p2 += nbAtoms-i;
-         }
-      }
-      //convert these distances to euclidian coordinates
-      {//:KLUDGE: ? Assume mOrthMatrix is upper triangular for optimization
-         const REAL M00=mOrthMatrix(0,0);
-         const REAL M01=mOrthMatrix(0,1);
-         const REAL M02=mOrthMatrix(0,2);
-         //const REAL M10=mOrthMatrix(1,0);
-         const REAL M11=mOrthMatrix(1,1);
-         const REAL M12=mOrthMatrix(1,2);
-         //const REAL M20=mOrthMatrix(2,0);
-         //const REAL M21=mOrthMatrix(2,1);
-         const REAL M22=mOrthMatrix(2,2);
-         const REAL *x=xDist.data();
-         const REAL *y=yDist.data();
-         const REAL *z=zDist.data();
-         REAL *d=mDistTableSq.data();
-         REAL xo,yo,zo;
-         for(long i=0;i<nbAtoms;i++)
-         {
-            for(long j=0;j<i;j++)
-            {
-               xo=M00* *x +M01* *y +M02* *z;
-               yo=/* M10* *x + */ M11* *y +M12* *z;
-               zo=/* M20* *x +M21* *y + */ M22* *z;
-               *d++ = (xo*xo+ yo*yo + zo*zo);
-               x++ ; y++ ;z++;
-            }
-            x += nbAtoms-i;
-            y += nbAtoms-i;
-            z += nbAtoms-i;
-            d += nbAtoms-i;
-            mDistTableSq(i,i)=0;
-         }
-      }
-      {
-         const REAL *d=mDistTableSq.data();
-         REAL *d2;
-         for(long i=0;i<nbAtoms;i++)
-         {
-            d2=mDistTableSq.data()+i;
-            for(long j=0;j<i;j++)
-            {
-               *d2 = *d++;
-               d2 += nbAtoms;
-            }
-            d += nbAtoms-i;
-         }
-      }
+      TAU_PROFILE_STOP(timer2);
    }
-   mClockNeighborTable.Click();
-   VFN_DEBUG_MESSAGE("Crystal::CalcDistTable():End",3)
+   mDistTableClock.Click();
+   VFN_DEBUG_EXIT("Crystal::CalcDistTable()",4)
 }
 
 #ifdef __WX__CRYST__
