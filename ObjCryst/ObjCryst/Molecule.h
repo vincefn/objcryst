@@ -53,23 +53,22 @@ class MolAtom
       *
       */
       MolAtom(const REAL x=0, const REAL y=0, const REAL z=0,
-              const ScatteringPower *pPow=0, const Molecule *pParentMol=0);
+              const ScatteringPower *pPow=0);
       /** Destructor
       *
       * Tells the parent Molecule and all Bond that it is being destroyed.
       */
-      ~MolAtom();
+      virtual ~MolAtom();
       REAL GetX()const;
       REAL GetY()const;
       REAL GetZ()const;
-      REAL GetOccup()const;
+      REAL GetOccupancy()const;
       void SetX(const REAL);
       void SetY(const REAL);
       void SetZ(const REAL);
       void SetOccupancy(const REAL);
       const ScatteringPower& GetScatteringPower()const;
       void SetScatteringPower(const ScatteringPower&);
-      void Print() const;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
    private:
@@ -97,12 +96,15 @@ class MolBond:public Restraint
       *
       * \param atom1, atom2: the atoms of the bond
       * \param length: the expected ideal bond length
-      * \param sigma,delta: the allowed range (without penalty, with 100% likelihood)
-      * is [length-delta;length+delta]. Beyond this range the likelihood is equal to:
-      * - if \f$bondLength > bondLength_{ideal}\f$:
-      * \f$ -\log(likelihood)= \left(\frac{(BondLength-\delta)-BondLength_{ideal}}{\sigma} \right)^2\f$
-      * - if \f$bondLength < bondLength_{ideal}\f$:
-      * \f$ -\log(likelihood)= \left(\frac{(BondLength+\delta)-BondLength_{ideal}}{\sigma} \right)^2\f$
+      * \param sigma,delta: depending on the calculated length, the log(likelihood) is equal to:
+      * - within \f$[length_{ideal}-\delta;length_{ideal}+\delta]\f$:
+      * \f$ -\log(likelihood)= \log\left(2\delta+\sqrt{2\pi\sigma^2}\right)\f$
+      * - if \f$length > length_{ideal}+\delta\f$:
+      * \f$ -\log(likelihood)= \log\left(2\delta+\sqrt{2\pi\sigma^2}\right)
+      * + \left(\frac{(length-\delta)-length_{ideal}}{\sigma} \right)^2\f$
+      * - if \f$length < length_{ideal}-\delta\f$:
+      * \f$ -\log(likelihood)= \log\left(2\delta+\sqrt{2\pi\sigma^2}\right)
+      * + \left(\frac{(length+\delta)-length_{ideal}}{\sigma} \right)^2\f$
       * 
       */
       MolBond(const MolAtom &atom1, const MolAtom &atom2,
@@ -112,7 +114,7 @@ class MolBond:public Restraint
       *
       * Notifies the atoms that the bond has disappeared.
       */
-      ~MolBond();
+      virtual ~MolBond();
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       virtual REAL GetLogLikelihood()const;
@@ -153,7 +155,7 @@ class MolBondAngle:public Restraint
       /** Destructor
       *
       */
-      ~MolBondAngle();
+      virtual ~MolBondAngle();
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       virtual REAL GetLogLikelihood()const;
@@ -187,7 +189,7 @@ class MolDihedralAngle:public Restraint
       /** Destructor
       *
       */
-      ~MolDihedralAngle();
+      virtual ~MolDihedralAngle();
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       virtual REAL GetLogLikelihood()const;
@@ -235,9 +237,13 @@ class UnitQuaternion
       ~UnitQuaternion();
       /// Create a rotation quaternion around a given vector for a given angle 
       static UnitQuaternion  RotationQuaternion(const REAL ang,const REAL v1,const REAL v2,const REAL v3);
+      /// Get the conjugate (inverse) of this quaternion
+      UnitQuaternion  GetConjugate()const;
       /// Quaternion multiplication
       UnitQuaternion operator*(const UnitQuaternion &q)const;
-      /// Rotate vector v=(v1,v2,v3). The rotated values directly applied to (v1,v2,v3)
+      void XMLOutput(ostream &os,int indent=0)const;
+      void XMLInput(istream &is,const XMLCrystTag &tag);
+      /// Rotate vector v=(v1,v2,v3). The rotated components are directly written
       void RotateVector(REAL &v1,REAL &v2, REAL &v3)const;
       /// Re-normalize the quaternion to unity. This should not be useful, except
       /// on individual component input, or after long calculations. And even
@@ -277,7 +283,7 @@ class Molecule: public Scatterer
       /** Constructor
       *
       */
-      Molecule(const Crystal &cryst);
+      Molecule(Crystal &cryst, const string &name="");
       /** Copy constructor
       *
       */
@@ -288,11 +294,14 @@ class Molecule: public Scatterer
       ~Molecule();
       virtual Molecule* CreateCopy() const;
       virtual const string& GetClassName() const;
+      virtual void Print()const;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       virtual int GetNbComponent() const;
       virtual const ScatteringComponentList& GetScatteringComponentList() const;
       virtual string GetComponentName(const int i) const;
+      virtual ostream& POVRayDescription(ostream &os,
+                                         const bool noSymmetrics=false)const;
       virtual void GLInitDisplayList(const bool onlyIndependentAtoms=false,
                                      const REAL xMin=-.1,const REAL xMax=1.1,
                                      const REAL yMin=-.1,const REAL yMax=1.1,
@@ -323,10 +332,18 @@ class Molecule: public Scatterer
       */
       void AddDihedralAngle(MolAtom &atom1, MolAtom &atom2, MolAtom &atom3, MolAtom &atom4,
                             const REAL angle, const REAL sigma, const REAL delta);
+      MolAtom &GetAtom(unsigned int i);
+      const MolAtom &GetAtom(unsigned int i)const;
+      /** Minimize configuration from internal restraints (bond lengths, angles
+      * and dihedral angles). Useful when adding manually atoms to get an initial
+      * reasonable configuration. 
+      */
+      void MinimizeConfiguration();
    private:
+      virtual void InitRefParList();
       /** Build the list of rings in the molecule.
       *
-      * The list is actually \e only rebuilt if the bond or atom list has changed,so
+      * The list is \e only rebuilt if the bond or atom list has changed,so
       * it should be safe to call again this function.
       *
       * \note So far this is a const method as the ring list just reflects the bond list 
@@ -334,6 +351,15 @@ class Molecule: public Scatterer
       * change...
       */
       void BuildRingList()const;
+      /** Update the Molecule::mScattCompList from the cartesian coordinates
+      * of all atoms, and the orientation parameters.
+      */
+      void UpdateScattCompList()const;
+      /** The list of scattering components
+      *
+      * this is mutable since it only reflects the list of atoms.
+      */
+      mutable ScatteringComponentList mScattCompList;
       /** The list of atoms
       *
       */
@@ -372,6 +398,7 @@ class Molecule: public Scatterer
          RefinableObjClock mClockDihedralAngleList;
          RefinableObjClock mClockRingList;
          RefinableObjClock mClockAtomPosition;
+         RefinableObjClock mClockAtomScattPow;
          RefinableObjClock mClockOrientation;
 };
 
