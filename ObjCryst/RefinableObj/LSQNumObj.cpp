@@ -23,8 +23,11 @@
 #include "newmat/newmatio.h"
 
 using namespace NEWMAT;
+using namespace std;
 
 #include <iomanip>
+namespace ObjCryst
+{
 
 LSQNumObj::LSQNumObj(string objName)
 {
@@ -623,4 +626,5 @@ void LSQNumObj::PrepareRefParList()
    mRefParList.Print();
 }
 
+}//namespace
 

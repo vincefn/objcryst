@@ -21,13 +21,24 @@
 *
 */
 #ifndef _LSQOBJNUM_H
+#define _LSQOBJNUM_H
 
 #include "CrystVector/CrystVector.h"
 #include "RefinableObj/RefinableObj.h"
 #include <string>
 
-using namespace std;
-using namespace ObjCryst;
+#if 0
+#ifdef __WX__CRYST__
+	namespace ObjCryst
+	{
+		class LSQNumObj;
+	}
+	#include "wxCryst/wxLSQNumObj.h"
+#endif
+#endif
+
+namespace ObjCryst
+{
 /** \brief (Quick & dirty) Least-Squares Refinement Object with Numerical derivatives
 *
 * This is still highly experimental !
@@ -94,10 +105,16 @@ class LSQNumObj
       int mIndexValuesSetInitial, mIndexValuesSetLast;
       /// If true, then stop at the end of the cycle. Used in multi-threading environment
       bool mStopAfterCycle;
-		/// The opitimized object
+		/// The optimized object
 		RefinableObj *mpRefinedObj;
 		/// The index of the LSQ function in the refined object (if there are several...)
 		unsigned int mLSQFuncIndex;
+#if 0
+#ifdef __WX__CRYST__
+		friend class WXLSQNumObj;
+#endif
+#endif
 };
 
+}//namespace
 #endif //_LSQOBJNUM_H
