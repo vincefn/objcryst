@@ -547,8 +547,8 @@ void ScatteringData::GenHKLFullSpace(const REAL maxTheta,const bool useMultiplic
                   } else
                   {
                      VFN_DEBUG_MESSAGE("...Multiplicity 6b",1)
-                     if( (int)(h1/fabs(h1)+k1/fabs(k1)+l1/fabs(l1))
-                                 == (int)(h/fabs(h)+k/fabs(k)+l/fabs(l)) )
+                     if( (int)(h1/fabs(h1+.001)+k1/fabs(k1+.001)+l1/fabs(l1+.001))
+                                 == (int)(h/fabs(h+.001)+k/fabs(k+.001)+l/fabs(l+.001)) )
                      {
                         if(  (mH(testedRefl) > mH(subscriptKeptRefl(nbKeptRefl)))  ||
 
