@@ -945,9 +945,6 @@ void ZScatterer::XMLInputOld(istream &is,const IOCrystTag &tag)
 void Crystal::XMLOutput(ostream &os,int indent)const
 {
    VFN_DEBUG_ENTRY("Crystal::XMLOutput():"<<this->GetName(),5)
-   using namespace std;
-   // set locale settings: not available yet in GNU library ?
-   //os.imbue(locale::classic());
    
    for(int i=0;i<indent;i++) os << "  " ;
    XMLCrystTag tag("Crystal");
