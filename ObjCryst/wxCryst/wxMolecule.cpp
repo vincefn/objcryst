@@ -754,8 +754,24 @@ void WXMolecule::OnMenuAddAtom(wxCommandEvent & WXUNUSED(event))
                mpMolecule->GetCrystal().GetScatteringPowerRegistry(),
                (wxWindow*)this,"Choose a new Scattering Power",choice);
    if(0==scatt) return;
+   long num=mpMolecule->GetAtomList().size()+1;
+   if(num>0)
+   {
+      wxString lastAtom=mpMolecule->GetAtom(num-1).GetName().c_str();
+      for(;;)
+      {
+         if(lastAtom.size()==0) break;
+         if(lastAtom.IsNumber())
+         {
+            lastAtom.ToLong(&num);
+            num+=1;
+            break;
+         }
+         lastAtom.erase(0,1);
+      }
+   }
    stringstream st;
-   st<<"_"<<mpMolecule->GetAtomList().size();
+   st<<num;
    mpMolecule->AddAtom(0.,0.,0.,scatt,scatt->GetName()+st.str());
    VFN_DEBUG_EXIT("WXMolecule::OnMenuAddAtom()",6)
 }
@@ -781,9 +797,9 @@ void WXMolecule::OnMenuAddBond(wxCommandEvent & WXUNUSED(event))
       return;
    }
    
-   double d;
-   if((at1->IsDummy())||(at2->IsDummy())) d=1.5;
-   else d= (at1->GetScatteringPower().GetRadius()+at2->GetScatteringPower().GetRadius())*0.9;
+   static double d=1.5;
+   // if((at1->IsDummy())||(at2->IsDummy())) d=1.5;
+   // else d= (at1->GetScatteringPower().GetRadius()+at2->GetScatteringPower().GetRadius())*0.9;
    stringstream s;
    s<<d;
    string mes="Enter bond distance (Angstroems) for "+at1->GetName()+"-"+at2->GetName();
@@ -825,7 +841,7 @@ void WXMolecule::OnMenuAddAngle(wxCommandEvent & WXUNUSED(event))
       return;
    }
    
-   double a=109.5;
+   static double a=109.5;
    stringstream s;
    s<<a;
    string mes="Enter bond angle (degrees) for "+at1->GetName()
@@ -873,7 +889,7 @@ void WXMolecule::OnMenuAddDihedralAngle(wxCommandEvent & WXUNUSED(event))
       return;
    }
 
-   double a=180;
+   static double a=180;
    stringstream s;
    s<<a;
    string mes="Enter dihedral angle (degrees) for "+at1->GetName()
