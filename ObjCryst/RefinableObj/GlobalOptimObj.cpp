@@ -285,8 +285,8 @@ mHistoryNb(0),mHistoryTrialNumber(1000),mHistoryCostFunction(1000),
 mHistorySavedParamSetIndex(1000),
 mHistorySaveAfterEachOptim(false),mHistorySaveFileName("GlobalOptim_history.out"),
 mLastParSavedSetIndex(-1),
-mTemperatureMax(.03),mTemperatureMin(.003),
-mMutationAmplitudeMax(16.),mMutationAmplitudeMin(.125),
+mTemperatureMax(1),mTemperatureMin(.0001),
+mMutationAmplitudeMax(8.),mMutationAmplitudeMin(.125),
 mNbTrialRetry(0),mMinCostRetry(0),mMaxNbTrialSinceBest(0)
 #ifdef __WX__CRYST__
 ,mpWXCrystObj(0)

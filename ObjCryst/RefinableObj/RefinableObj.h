@@ -146,9 +146,11 @@ class Restraint
 		* \param softRange: when the value goes below min or above max limits,
 		* the penalty will be equal to 1 at min-softRange and at max+softRange.
 		* Thus softRange must be strictly positive.
-		* enableRestraints: if true, then the value may go beyond the hard limits,
+		* \param enableRestraint: if true, then the value may go beyond the hard limits,
 		* with penalty defined by the soft limits. Else no value beyond the hard limits
 		* should be accepted.
+		* \param restraintWeigth: the weight associated to this restraint. This should
+		* be tuned by the RefinableObj owner.
 		*/
 		Restraint(const RefParType *type,
                 const REAL hardMin,
@@ -156,7 +158,8 @@ class Restraint
                 const bool hasMinLimit,
                 const bool hasMaxLimit,
                 const REAL softRange,
-					 const bool enableRestraints=false);
+					 const REAL restraintWeigth=1,
+					 const bool enableRestraint=false);
 		/// Destructor
 		virtual ~Restraint();
 		/** Initializer for the base Restrain class, setting hard&soft limits.
@@ -169,9 +172,11 @@ class Restraint
 		* \param softRange: when the value goes below min or above max limits,
 		* the penalty will be equal to 1 at min-softRange and at max+softRange.
 		* Thus softRange must be strictly positive.
-		* enableRestraints: if true, then the value may go beyond the hard limits,
+		* \param enableRestraint: if true, then the value may go beyond the hard limits,
 		* with penalty defined by the soft limits. Else no value beyond the hard limits
 		* should be accepted.
+		* \param restraintWeigth: the weight associated to this restraint. This should
+		* be tuned by the RefinableObj owner.
 		*/
 		void Init(const RefParType *type,
          		 const REAL hardMin,
@@ -179,7 +184,8 @@ class Restraint
          		 const bool hasMinLimit,
          		 const bool hasMaxLimit,
                 const REAL softRange,
-					 const bool enableRestraints=false);
+					 const REAL restraintWeigth=1,
+					 const bool enableRestraint=false);
 		/// Get the current value.
 		virtual REAL GetValue()const=0;
 		/** Get the value of the penalty (cost) associated to the restraint.
@@ -187,13 +193,13 @@ class Restraint
 		* If the parameter is within limits, the cost is null. If it is
 		* below the min (and if there is a lower limit), the cost is equal
 		* to:
-      * \f[ cost= \left( \frac{min_{hard}-value}{looseness \times range} \right)^2\f]
+      * \f[ cost= weight\times\left(\frac{min_{hard}-value}{looseness \times range} \right)^2\f]
 		* And if there is a higher limit and the value is above it:
-      * \f[ cost= \left( \frac{value-max_{hard}}{loosenes \times srange} \right)^2\f]
+      * \f[ cost= weight\times\left(\frac{value-max_{hard}}{loosenes \times srange} \right)^2\f]
 		*
 		* If restraints are disabled, the returned cost is always null.
 		*/
-		virtual REAL GetRestraintCost(const REAL looseness)const;
+		virtual REAL GetRestraintCost(const REAL looseness=1.)const;
 	protected:
 		/// Type of value constrained/restrained.
       const RefParType *mpRefParType;
@@ -205,6 +211,8 @@ class Restraint
 		REAL mRestraintRange;
 		/// Is this restraint enabled ?
 		bool mEnableRestraint;
+		/// weight for the restraint. This shoud be set by the RefinableObj.
+		REAL mWeight;
 };
 
 /** Generic class for parameters of refinable objects.
@@ -730,7 +738,7 @@ class RefinableObj
       /// Name for this class ("RefinableObj", "Crystal",...). This is only useful
       /// to distinguish different classes when picking up objects from the
       /// RefinableObj Global Registry 
-      virtual const string GetClassName() const;
+      virtual const string& GetClassName() const;
       /// Name of the object
       virtual const string& GetName() const;
       /// Name of the object
@@ -897,8 +905,13 @@ class RefinableObj
 		* \param allowApproximations: if true, then the object can use faster
 		* but less precise functions during the optimization. This is useful for
 		* global optimization not using derivatives.
+		* \param enableRestraints: if true, then restrained parameters will be allowed
+		* to go beyond theur hard limits. This implies that the algorithm will take
+		* into account the cost (penalty) related to the restraints. Objects which do not
+		* use restraints will simply ignore this.
       */
-      virtual void BeginOptimization(const bool allowApproximations=false);
+      virtual void BeginOptimization(const bool allowApproximations=false,
+												 const bool enableRestraints=false);
       /** This should be called by any optimization class at the end of an optimization
       *
       * This also affects all sub-objects.
@@ -1023,6 +1036,25 @@ class RefinableObj
 		*
 		*/
 		const RefinableObjClock& GetRefParListClock()const;
+		// Restraints
+			/** Get the restraint cost (penalty)
+			*
+			* \note by default this returns 0, so this \e must be overloaded by any
+			* object which actually uses retsraint.
+			* \todo Instead, we could return by default the sum of the restraints,
+			* but this is dangerous since we need to have objects using restraints fully
+			* responsible for them.
+			*/
+			virtual REAL GetRestraintCost()const;
+			/** Add a new restraint
+			*
+			*/
+			void AddRestraint(Restraint *pNewRestraint);
+			/* Remove a restraint
+			*
+			*void RemoveRestraint(Restraint *newRestraint);
+			*void RemoveRestraint(const RefParType);
+			*/
    protected:
       /// Find a refinable parameter with a given name
       long FindPar(const string &name) const;
@@ -1043,13 +1075,24 @@ class RefinableObj
       
       ///Name for this RefinableObject. Should be unique, at least in the same scope.+
       string mName;
-      ///Array of refinable parameters
-      RefinablePar **mpRefPar;
-      ///Number of refinable parameters
-      long mNbRefPar;
-      ///Maximum number of refinable parameters (array size-dynamically allocated)
-      long mMaxNbRefPar;
-      
+		// Parameters
+      	/// Array of pointers to the refinable parameters
+      	RefinablePar **mpRefPar;
+      	/// Number of refinable parameters
+      	long mNbRefPar;
+      	/// Maximum number of refinable parameters (array size-dynamically allocated)
+      	long mMaxNbRefPar;
+      // Restraints
+      	/// Array of pointers to the restraints for this object. This excludes
+			/// all RefinableP.ar declared in RefinableObj::mpRefPar, which can also
+			/// be restrained.
+      	Restraint **mpRestraint;
+      	/// Number of refinable parameters (\e not including possible RefinablePar which
+			/// are also restrained)
+      	long mNbRestraint;
+      	/// Maximum number of restraints (dynamically allocated)
+      	long mMaxNbRestraint;
+			
       //Saved sets of parameters
          ///Max number of saved sets (memory is dynamically allocated...)
          static const int mMaxNbSavedSets=1000;
