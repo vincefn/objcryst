@@ -388,33 +388,22 @@ wxScrolledWindow(parent),mpChild((wxWindow*)0),mHeight(-1),mWidth(-1)
 {
    mpSizer=new wxBoxSizer(wxHORIZONTAL);
    this->SetSizer(mpSizer);
+   this->FitInside();
+   this->SetScrollRate(60,60);
 }
 
 bool WXCrystScrolledWindow::Layout()
 {
-   #ifndef __WINDOWS__   // to be tested for windows...
-   this->Scroll(0,0);//workaround bug ?
-   return this->wxWindow::Layout();
-   #else
-   if(0==mpChild) return true;
-   int width,height;
-   mpChild->GetSize(&width,&height);
-   this->Scroll(0,0);//workaround bug ?
-   if((mHeight!=height)||(mWidth!=width)) this->SetScrollbars(40,40,width/40+1,height/40+1);
-   mHeight=height;
-   mWidth=width;
-   return true;
-   #endif
+   //this->Scroll(0,0);//workaround bug ?
+   return this->wxScrolledWindow::Layout();
 }
 
 void WXCrystScrolledWindow::SetChild(wxWindow* pChild)
 {
    mpChild=pChild;
-   #ifndef __WINDOWS__   // to be tested for windows...
-   // we do not use the custom Layout() function so define scroll here
-   this->SetScrollbars(40,40,2,2);
-   #endif
    mpSizer->Add(mpChild);
+   // Initialize scrollbars
+   //this->SetScrollbars(40,40,2,2);
 }
 
 // ----------------------------------------------------------------------------
