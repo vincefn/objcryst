@@ -79,8 +79,9 @@ ifeq ($(debug),1)
    CPPFLAGS = -g -Wall -D__DEBUG__ 
 else
 # do not use -fomit-frame-pointer, or throw() catch() does not work !! GCC BUG ?
+# -mcpu=athlon,pentiumpro
    DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS}
-   CPPFLAGS = -O2 -w -ffast-math 
+   CPPFLAGS = -O3 -w -ffast-math -mcpu=pentiumpro
 endif
 
 # Add to statically link: -nodefaultlibs -lgcc /usr/lib/libstdc++.a

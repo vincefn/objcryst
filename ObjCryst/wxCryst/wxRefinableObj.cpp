@@ -100,8 +100,8 @@ void WXFieldRefPar::OnEnter(wxCommandEvent & WXUNUSED(event))
 }
 void WXFieldRefPar::OnText(wxCommandEvent & WXUNUSED(event))
 {	
-   VFN_DEBUG_MESSAGE("WXFieldRefPar::OnEnter()",10)
 	if(true==mIsSelfUpdating) return;
+   VFN_DEBUG_MESSAGE("WXFieldRefPar::OnEnter()",6)
 	if(spLastWXFieldInputNotValidated!=this)
 	{
 		WXCrystValidateAllUserInput();
@@ -123,7 +123,7 @@ void WXFieldRefPar::OnPopupMenu(wxCommandEvent & WXUNUSED(event))
 
 void WXFieldRefPar::OnPopupMenuChoice(wxMenuEvent& event)
 {
-   VFN_DEBUG_MESSAGE("WXFieldRefPar::OnPopupMenuChoice()",10)
+   VFN_DEBUG_MESSAGE("WXFieldRefPar::OnPopupMenuChoice()",7)
    switch(event.GetId())
    {
       case ID_REFPAR_POPUP_SET_LIMITS:
@@ -188,7 +188,7 @@ void WXFieldRefPar::Revert()
 }
 void WXFieldRefPar::ValidateUserInput()
 {
-   VFN_DEBUG_MESSAGE("WXFieldRefPar::ValidateUserInput()",10)
+   VFN_DEBUG_MESSAGE("WXFieldRefPar::ValidateUserInput()",6)
    mValueOld=mValue;
    wxString s=mpField->GetValue();
    s.ToDouble(&mValue);

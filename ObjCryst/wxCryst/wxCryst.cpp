@@ -229,8 +229,8 @@ void WXFieldName::OnEnter(wxCommandEvent & WXUNUSED(event))
 }
 void WXFieldName::OnText(wxCommandEvent & WXUNUSED(event))
 {
-   VFN_DEBUG_MESSAGE("WXFieldName::OnText():"<<mpField->GetValue(),10)
 	if(true==mIsSelfUpdating) return;
+   VFN_DEBUG_MESSAGE("WXFieldName::OnText():",6)
 	if(spLastWXFieldInputNotValidated!=this)
 	{
 		WXCrystValidateAllUserInput();
@@ -267,12 +267,11 @@ void WXFieldName::Revert()
 }
 void WXFieldName::ValidateUserInput()
 {
-   VFN_DEBUG_MESSAGE("WXFieldName::ValidateUserInput()",10)
+   VFN_DEBUG_MESSAGE("WXFieldName::ValidateUserInput()",6)
    //:TODO: Check that the object is not busy (input should be frozen)
    mValueOld=mValue;
    wxString s=mpField->GetValue();
    mValue=s.c_str();
-   VFN_DEBUG_MESSAGE("WXFieldName::ValidateUserInput():"<<mValue,10)
    mpWXObj->OnChangeName(mId);
 }
 
@@ -316,8 +315,8 @@ void WXFieldParBase::OnEnter(wxCommandEvent & WXUNUSED(event))
 }
 void WXFieldParBase::OnText(wxCommandEvent & WXUNUSED(event))
 {	
-   VFN_DEBUG_MESSAGE("WXFieldRefPar::OnText()",10)
 	if(true==mIsSelfUpdating) return;
+   VFN_DEBUG_MESSAGE("WXFieldRefPar::OnText()",6)
 	if(spLastWXFieldInputNotValidated!=this)
 	{
 		WXCrystValidateAllUserInput();
@@ -326,7 +325,7 @@ void WXFieldParBase::OnText(wxCommandEvent & WXUNUSED(event))
 }
 void WXFieldParBase::ValidateUserInput()
 {
-   VFN_DEBUG_MESSAGE("WXFieldRefPar::ValidateUserInput()",10)
+   VFN_DEBUG_MESSAGE("WXFieldRefPar::ValidateUserInput()",6)
 	this->ReadNewValue();
 }
 

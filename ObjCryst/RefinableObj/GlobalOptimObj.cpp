@@ -574,7 +574,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
          //Total number of parallel refinements,each is a 'World'. The most stable
          // world must be i=nbWorld-1, and the most changing World (high mutation,
          // high temperature) is i=0.
-            const long nbWorld=10;
+            const long nbWorld=20;
          // Init the different temperatures
             CrystVector_double simAnnealTemp(nbWorld);
             for(int i=0;i<nbWorld;i++)
@@ -660,6 +660,10 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
 				long nbRestartFromMin=0;//Number of times we restarted from the minimum
 				double oldBestCost=-1;
 				long oldBestConfigIndex=mRefParList.CreateParamSet();
+			// record the statistical distribution n=f(cost function) for each World
+				//CrystMatrix_double trialsDensity(100,nbWorld+1);
+				//trialsDensity=0;
+				//for(int i=0;i<100;i++) trialsDensity(i,0)=i/(float)100;
          //Do the refinement
          bool makeReport=false;
          Chronometer chrono;
@@ -675,6 +679,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
                   mRefParList.SaveParamSet(mLastParSavedSetIndex);
                   this->NewConfiguration();
                   double cost=this->GetCostFunctionValue();
+						//trialsDensity((long)(cost*100.),i+1)+=1;
                   if(cost<currentCost(i))
                   {
                      currentCost(i)=cost;
@@ -962,6 +967,10 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
             if(!silent) cout<<"Overall cost:"<<mCurrentCost<<"("<<mBestCost<<")"<<endl;
             if(!silent) chrono.print();
             this->UpdateDisplay();
+			//Save density of states
+				//ofstream out("densityOfStates.txt");
+				//out << trialsDensity<<endl;
+				//out.close();
       }//case GLOBAL_OPTIM_PARALLEL_TEMPERING
       case GLOBAL_OPTIM_GENETIC: //:TODO:
       {
