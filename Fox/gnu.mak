@@ -18,7 +18,7 @@ tidy:
 
 #install Fox in /usr/local/bin
 install:
-	install -m 755 Fox /usr/local/bin
+	install -m 755 src/Fox /usr/local/bin
 
 update:
 	cvs -z3 update
