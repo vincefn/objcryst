@@ -789,7 +789,7 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
       wxString str;
       const long pixel=
          mpPattern->GetPowderPattern().Get2ThetaCorrPixel(ttheta*DEG2RAD);
-      str.Printf("2Theta=%6.2f    ,I=%12.2f.   pixel=#%d",ttheta,intensity,pixel);
+      str.Printf("2Theta=%6.2f    ,I=%12.2f.   pixel=#%ld",ttheta,intensity,pixel);
       mpParentFrame->SetStatusText(str);
 
    if (event.Dragging() && event.LeftIsDown() && (!mIsDragging))
