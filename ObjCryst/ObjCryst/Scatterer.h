@@ -182,6 +182,8 @@ class Scatterer:virtual public RefinableObj
                                      const bool displayEnantiomer=false)const=0;
       /// Last time anything in the scatterer was changed (atoms, positions, scattering power)
       const RefinableObjClock& GetClockScatterer()const;
+      /// Last time anything in the scatterer was changed (atoms, positions, scattering power)
+      RefinableObjClock& GetClockScatterer();
       /// Set the crystal in which is included this Scatterer
       void SetCrystal(Crystal&);
       /// In which crystal is this Scatterer included ?
