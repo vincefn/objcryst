@@ -961,7 +961,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
                     <<", weight="<<mCostFunctionWeight(i)<<endl;
             if(!silent) cout<<"Overall cost:"<<mCurrentCost<<"("<<mBestCost<<")"<<endl;
             if(!silent) chrono.print();
-
+            this->UpdateDisplay();
       }//case GLOBAL_OPTIM_PARALLEL_TEMPERING
       case GLOBAL_OPTIM_GENETIC: //:TODO:
       {
