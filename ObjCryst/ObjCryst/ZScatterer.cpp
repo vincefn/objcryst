@@ -1059,6 +1059,17 @@ void ZScatterer::EndOptimization()
 }
 void ZScatterer::ImportFenskeHallZMatrix(istream &is)
 {
+	// Get read of "KEYWORD GO HERE", just in case...
+	{
+		const char c=is.peek();
+		if ( (c < '0') || (c > '9') )
+		{
+			cout<<"ZScatterer::ImportFenskeHallZMatrix()"
+				 <<":getting rid of first line..."<<endl;
+			char buf[100];
+			is.getline(buf,100);
+		}
+	}
 	// 17
 	//C  1
 	//N   1 1.465
