@@ -870,7 +870,20 @@ void WXCrystal::OnMenuImportMoleculeFromFenskeHallZMatrix(wxCommandEvent &event)
       throw ObjCrystException("WXCrystal::OnMenuImportFenskeHallZMatrix() : \
 Error opening file for input:"+string(open.GetPath().c_str()));
    }
-   ZScatterer scatt(open.GetPath().c_str(),*mpCrystal);
+   string filename=open.GetPath().c_str();
+   string shortName;
+   {// Use short name
+      std::string::size_type idx =filename.rfind("/");
+      std::string::size_type idx2=filename.rfind("\\");
+      std::string::size_type idx3=filename.rfind(":");
+      if((idx2!=string::npos)&&(idx2>idx))idx=idx2;
+      if((idx2!=string::npos)&&(idx3>idx))idx=idx3;
+      if(idx==string::npos)
+         shortName=filename;
+      else
+         shortName=filename.substr(idx+1);
+   }
+   ZScatterer scatt(shortName,*mpCrystal);
    scatt.ImportFenskeHallZMatrix(fin);
    fin.close();
    mpCrystal->AddScatterer(ZScatterer2Molecule(&scatt));
