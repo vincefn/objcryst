@@ -285,7 +285,7 @@ mHistoryNb(0),mHistoryTrialNumber(1000),mHistoryCostFunction(1000),
 mHistorySavedParamSetIndex(1000),
 mHistorySaveAfterEachOptim(false),mHistorySaveFileName("GlobalOptim_history.out"),
 mLastParSavedSetIndex(-1),
-mTemperatureMax(1),mTemperatureMin(.0001),
+mTemperatureMax(1),mTemperatureMin(.000001),
 mMutationAmplitudeMax(8.),mMutationAmplitudeMin(.125),
 mNbTrialRetry(0),mMinCostRetry(0),mMaxNbTrialSinceBest(0)
 #ifdef __WX__CRYST__
@@ -893,8 +893,18 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                   {
                      if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)>0.30)
                         simAnnealTemp(i)/=1.5;
+                     if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)>0.80)
+                        simAnnealTemp(i)/=2;
+                     if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)>0.95)
+                        simAnnealTemp(i)/=2;
+								
                      if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)<0.10)
                         simAnnealTemp(i)*=1.5;
+                     if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)<0.04)
+                        simAnnealTemp(i)*=2;
+                     if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)<0.01)
+                        simAnnealTemp(i)*=2;
+								
                      if(simAnnealTemp(i)>mTemperatureMax) simAnnealTemp(i)=mTemperatureMax;
                      if(simAnnealTemp(i)<mTemperatureMin) simAnnealTemp(i)=mTemperatureMin;
                   }
@@ -1318,6 +1328,8 @@ const string MonteCarloObj::GetClassName()const { return "MonteCarloObj";}
 
 void MonteCarloObj::NewConfiguration()
 {
+   for(int i=0;i<mRefinedObjList.GetNb();i++)
+      mRefinedObjList.GetObj(i).BeginGlobalOptRandomMove();
    for(int i=0;i<mRefinedObjList.GetNb();i++)
       mRefinedObjList.GetObj(i).GlobalOptRandomMove(mMutationAmplitude);
 }
