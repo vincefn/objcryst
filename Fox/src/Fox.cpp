@@ -249,6 +249,17 @@ bool MyApp::OnInit()
             only3D=true;
             continue;
          }
+         #ifdef __DEBUG__
+         if(string("--debuglevel")==string(this->argv[i]))
+         {
+            int level;
+            ++i;
+            stringstream sstr(this->argv[i]);
+            sstr >> level;
+            VFN_DEBUG_GLOBAL_LEVEL(level);
+            continue;
+         }
+         #endif
          cout <<"command-line arguments:"<<endl
               <<"   -i input.xml: input 'in.xml' file"<<endl
               <<"   --loadfouriergrd map.grd: load and display 'map.grd' fourier map with (first) crystal structure"<<endl
