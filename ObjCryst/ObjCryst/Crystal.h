@@ -49,19 +49,16 @@ class Crystal:public RefinableObj
 {
    public:
       Crystal();
-      
       /** \brief Crystal Constructor (orthorombic)
       *  \param a,b,c : unit cell dimension, in angstroems
-      *  \param SpcGroup: space group number (1..230)
-      *  \param name: name for the crystal, : '(TaSe4)2I'
+      *  \param SpaceGroupId: space group symbol or number
       */
       Crystal(const double a, const double b, const double c,
               const string &SpaceGroupId);
       /** \brief Crystal Constructor (triclinic)
       *  \param a,b,c : unit cell dimension, in angstroems
       *  \param alpha,beta,gamma : unit cell angles
-      *  \param SpcGroup: space group number (1..230)
-      *  \param name: name for the crystal, : '(TaSe4)2I'
+      *  \param SpaceGroupId: space group symbol or number
       */
       Crystal(const double a, const double b, const double c, const double alpha,
               const double beta, const double gamma,const string &SpaceGroupId);
@@ -129,32 +126,32 @@ class Crystal:public RefinableObj
       * will be computed and stored in the list for each component.
       */
       virtual const ScatteringComponentList& GetScatteringComponentList()const;
-      ///Lattice parameters (a,b,c,alpha,beta,gamma) as a 6-element vector in Angstroems 
-      ///and radians.
+      /// Lattice parameters (a,b,c,alpha,beta,gamma) as a 6-element vector in Angstroems 
+      /// and radians.
       CrystVector_double GetLatticePar() const;
-      ///Return one of the 6 Lattice parameters, 0<= whichPar <6 (a,b,c,alpha,beta,gamma),
-      ///returned in Angstroems. 
+      /// Return one of the 6 Lattice parameters, 0<= whichPar <6 (a,b,c,alpha,beta,gamma),
+      /// returned in Angstroems. 
       double GetLatticePar(const int whichPar)const;
       /** \brief Get the 'B' matrix (Crystal::mBMatrix)for the crystal (orthogonalization 
-      *matrix for the given lattice, in the reciprocal space)
+      * matrix for the given lattice, in the reciprocal space)
       *
-      *The convention is taken following Giacovazzo, "Fundamentals of Crystallography", p.69
-      *"e1 is chosen along a*, e2 in the (a*,b*) plane, then e3 is along c".
+      * The convention is taken following Giacovazzo, "Fundamentals of Crystallography", p.69
+      * "e1 is chosen along a*, e2 in the (a*,b*) plane, then e3 is along c".
       */
       const CrystMatrix_double& GetBMatrix() const;
       /** \brief Get orthonormal cartesian coordinates for a set of (x,y,z)
-      *fractional coordinates.
+      * fractional coordinates.
       *
       * Results are given in Amgstroems.
-      *The convention is taken following :
-      *e1 is chosen along a, e2 in the (a,b) plane, then e3 is along c*
+      * The convention is taken following :
+      * e1 is chosen along a, e2 in the (a,b) plane, then e3 is along c*
       */
       CrystVector_double GetOrthonormalCoords(const double x,const double y,const double z) const;
       /** \brief Get orthonormal cartesian coordinates for a set of (x,y,z)
       *fractional coordinates.
       *
       * X,y and z input are changed to Amgstroems values
-      *The convention is taken following :
+      * The convention is taken following :
       *e1 is chosen along a, e2 in the (a,b) plane, then e3 is along c*
       */
       void FractionalToOrthonormalCoords(double &x,double &y,double &z) const;
@@ -212,7 +209,7 @@ class Crystal:public RefinableObj
       /** \brief Compute the 'Dynamical population correction for all atoms.
       *
       *\param overlapDist : distance below which atoms are considered overlapping and
-      *should be corrected. 
+      * should be corrected. 
       *\param mergeDist : distance below which atoms are considered fully overlapping.
       * If 3 atoms are 'fully' overlapping, then all have a dynamical population 
       * correction equal to 1/3
@@ -220,7 +217,7 @@ class Crystal:public RefinableObj
       *\note This is const as long as ScatteringComponent::mDynPopCorr is mutable.
       */
       void CalcDynPopCorr(const double overlapDist=1., const double mergeDist=.0)const ;
-      ///Reset Dynamical Population Correction factors
+      /// Reset Dynamical Population Correction factors
       void ResetDynPopCorr()const ;
       /// Set the use of dynamical population correction (Crystal::mUseDynPopCorr).
       /// This \e seriously affects the speed of the calculation, since computing
@@ -276,14 +273,14 @@ class Crystal:public RefinableObj
       int FindScatterer(const string &scattName)const;
       
       /// Init the UBMatrix and EuclMatrix. They are re-computed only if parameters
-      ///have changed since last call.
+      /// have changed since last call.
       
       void InitMatrices() const;
       /// \internal
       /// Update cell parameters for tetragonal, trigonal, hexagonal, cubic lattices.
-      ///Also set angular parameters for those group which need it. This is needed during
-      ///Refinement, since for example in a quadratic spg, only a is refined and
-      ///we need to have b=a updated very often...
+      /// Also set angular parameters for those group which need it. This is needed during
+      /// Refinement, since for example in a quadratic spg, only a is refined and
+      /// we need to have b=a updated very often...
       void UpdateLatticePar();
 
       /** \brief Prepare the refinable parameters list
@@ -311,9 +308,9 @@ class Crystal:public RefinableObj
       */
       void CalcDistTable(const bool fast,const double asymUnitMargin=4)const;
             
-      ///a,b and c in Angstroems, angles (stored) in radians
-      ///For cubic, rhomboedric crystals, only the 'a' parameter is relevant.
-      ///For quadratic and hexagonal crystals, only a and c parameters are relevant.
+      /// a,b and c in Angstroems, angles (stored) in radians
+      /// For cubic, rhomboedric crystals, only the 'a' parameter is relevant.
+      /// For quadratic and hexagonal crystals, only a and c parameters are relevant.
       /// The MUTABLE is temporary ! It should not be !
       CrystVector_double mCellDim;
       /// The space group of the crystal
@@ -327,19 +324,19 @@ class Crystal:public RefinableObj
       *                            0 & 0 & \frac{1}{c}\end{array} \right]\f]
       *\f[ \left[ \begin{array}{c} k_x \\ k_y \\ k_z \end{array} \right]_{orthonormal}  
       *  = B \times \left[ \begin{array}{c} h \\ k \\ l \end{array}\right]_{integer} \f]
-      *\note this matrix is and must remain upper triangular. this is assumed for
-      *some optimizations.
+      * \note this matrix is and must remain upper triangular. this is assumed for
+      * some optimizations.
       */
       mutable CrystMatrix_double mBMatrix;
       /** \brief Eucl Matrix (Orthogonalization matrix for direct space)
       * \f[ M_{orth}= \left[ \begin {array}{ccc} a & b\cos(\gamma) & c\cos(\beta) \\
       *                            0 & b\sin(\gamma) & -c\sin(\beta)\cos(\alpha^*) \\
       *                            0 & 0 & \frac{1}{c^*}\end{array} \right]\f]
-      *\f[ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right]_{orthonormal}  
+      * \f[ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right]_{orthonormal}  
       *  = M_{orth} \times \left[ \begin{array}{c} x \\ y \\ z \end{array}
       *                    \right]_{fractional coords}\f]
-      *\note this matrix is and must remain upper triangular. this is assumed for
-      *some optimizations.
+      * \note this matrix is and must remain upper triangular. this is assumed for
+      * some optimizations.
       */
       mutable CrystMatrix_double mOrthMatrix;
       /// inverse of Eucl Matrix (de-orthogonalization matrix for direct space)
@@ -353,9 +350,9 @@ class Crystal:public RefinableObj
       mutable CrystMatrix_double mDistTableSq;
       /** \brief Index of scattering components for the Distance table
       *
-      *These are the index of the scattering components corresponding to each row/column in
-      *the distance table. Each component has as many entries as its number of symetrics.
-      *\note (kludge) this will only be valid if the order of components does not change...
+      * These are the index of the scattering components corresponding to each row/column in
+      * the distance table. Each component has as many entries as its number of symetrics.
+      * \note (kludge) this will only be valid if the order of components does not change...
       */
       mutable CrystVector_long  mDistTableIndex;
       /// The list of all scattering components in the crystal
@@ -363,8 +360,8 @@ class Crystal:public RefinableObj
          
       /// Clock for lattice paramaters.
       RefinableObjClock mLatticeClock;
-      ///Use Dynamical population correction (ScatteringComponent::mDynPopCorr) during Structure
-      ///factor calculation ?
+      /// Use Dynamical population correction (ScatteringComponent::mDynPopCorr) during Structure
+      /// factor calculation ?
       RefObjOpt mUseDynPopCorr;
       /// Matrix of "bumping" (squared) distances
       CrystMatrix_double mBumpDistanceMatrix;
@@ -400,7 +397,7 @@ class Crystal:public RefinableObj
 extern ObjRegistry<Crystal> gCrystalRegistry;
 
 
-}//namespace
+}// namespace
 
 
 #endif //_OBJCRYST_CRYSTAL_H_

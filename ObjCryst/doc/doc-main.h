@@ -44,7 +44,7 @@
 * Even if we intend to use this library mainly for the development of a global optimization
 * program from powder diffraction, this library is programmed in a general way so that
 * other applications can make use of it.
-* The library was designed sto be reusable, by adding new kind of experiments, new algorithms,
+* The library was designed to be reusable, by adding new kind of experiments, new algorithms,
 * new Scatterer type, new ScatteringPower,... See \ref page_design to learn more about
 * the object-oriented design of this library and why it is good for its expandability.
 * 
@@ -100,7 +100,7 @@
 * Note that this package
 * is part of the <a href="http://pymol.sourceforge.net/">PyMOL Molecular 
 * Graphics System</a> (used with permission),
-* and is not free software. It is used to derive symetry operations from a given
+* and is not free software. It is used to derive symmetry operations from a given
 * spacegroup symbol or number.
 *
 *\par 
@@ -219,7 +219,7 @@
 * (iii) how to access one or several 'cost function' for the optimized object (to
 * characterize 'how good' the current configuration is). Indeed, the global optimization
 * class (for simulated annealing and parallel tempering) does not include any of the
-* crystallographic headers, and yet it can refine the crystal strutures...
+* crystallographic headers, and yet it can refine the crystal structures...
 * \par 
 * This design does not mean that only 'stupid' algorithms can be handled. Since the
 * 'random moves' are handled by the refined objects, this 'random moves' can be very

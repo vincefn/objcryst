@@ -12,18 +12,17 @@
 *  Thanks to the sglite package, all SpaceGroup can be recognized from their symbol. 
 * An AsymmetricUnit is also generated for each spacegroup (actually it is a parallelepipedic
 * approximation). Only 3D spacegroup are allowed.
-* We will eventually (that is, when I find time... probably at the autumn 2001, move
+* We will eventually (that is, when I find time... at the autumn 2001, move
 * to the <a href="http://cctbx.sourceforge.net/"> cctbx library </a>
 *\par Crystal
-* For a Crystal, Definition of spacegroup and adding of various types of scatterers 
+* For a Crystal, definition of spacegroup and adding of various types of scatterers 
 * are working. Dynamical occupancy correction 
 * for global optimizations has been implemeted  (to correct overlap of identical
-* atoms due to sharing of corner atoms in polyhedra, or due to symetry). An anti-bump
+* atoms due to sharing of corner atoms in polyhedra, or due to symmetry). An anti-bump
 * cost function (simple) is also implemented, and also enables atoms to merge continuously.
 * An output to povray file is provided, as well as an OpenGL display of the cystal structure
 * (only tested using Mesa under linux, with glut). Most important lacking features are
-* saving structure to CIF files (\e really missing feature-you can't save/restore anything
-*  in the library and is really needed).
+* saving structure to CIF files.
 *\par Scatterer
 *  Various type of Scatterer are provided : simple Atom but also ZScatterer, using a
 * Z-Matrix Description, and derived form it are ZPolyedron (tetrahedron...icosahedron..).
@@ -35,12 +34,12 @@
 *  PowderPattern is the most developped class and its support is sufficient
 * for most Global Optimization work. DiffractionDataSingleCrystal is less being worked on,
 * but it can be used provided that the data has been corrected and merged beforehand.
-*\par GLobal optimization 
+*\par Global optimization 
 *  GlobalOptimObj provides an algorithm for the so-called 'ab initio' structure determination
 * from diffraction data using either a simulated annealing or a parallel tempering
 * algorithm. Genetic algorithm may be added later.
 *\par Least Squares
-*  LSQObjNum class provides a rough least squares support, but it is definitly not
+*  LSQObjNum class provides a rough least squares support, but it is definitely not
 * the purpose (as of yet, at least) of this library. The most important lack is
 * that numerical derivatives are systematicllay used. I wrote this only for testing
 * purposes and have not sed it for some time, so try it at your own risk !

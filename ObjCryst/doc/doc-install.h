@@ -89,7 +89,7 @@
 *     On a 500 Mhz linux box, pbso4-xray2 (using only the first 80 reflections and no
 *     dynamical occupancy correction),
 *     50000 trials are done in less than 30 s (for 5 independent atoms, each with 4
-*     symetrics (not counting the center of symetry): that's 
+*     symetrics (not counting the center of symmetry): that's 
 *     80*50000*5*4/27.2 = 2.9 10^6 reflection.atom per second).
 *     For pbso4-xray and pbso4-neutron, it takes 2 to 3 more time, using only the first
 *     90 degrees of the powder pattern (about 80 reflections again), because a full
