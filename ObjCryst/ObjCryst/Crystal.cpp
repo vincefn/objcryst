@@ -719,6 +719,7 @@ Crystal::BumpMergePar::BumpMergePar(const REAL dist, const bool canOverlap):
 REAL Crystal::GetBumpMergeCost() const
 {
    if(mvBumpMergePar.size()==0) return 0;
+   if(mBumpMergeScale<1e-5) return 0;
    this->CalcDistTable(true,3);
    VFN_DEBUG_ENTRY("Crystal::GetBumpMergeCost()",4)
    if(  (mBumpMergeCostClock>mBumpMergeParClock)
@@ -727,46 +728,25 @@ REAL Crystal::GetBumpMergeCost() const
    
    mBumpMergeCost=0;
    
-   // we don't want to search the corresponding antibump distance for each
-   // couple of neighbours, so build an index table
-      const unsigned int nbScattPow=this->GetScatteringPowerRegistry().GetNb();
-      long maxGetDynPopCorrIndex=0;
-      for(unsigned int i=0;i<nbScattPow;i++)
-         if(this->GetScatteringPowerRegistry().GetObj(i).GetDynPopCorrIndex()>maxGetDynPopCorrIndex)
-            maxGetDynPopCorrIndex=this->GetScatteringPowerRegistry().GetObj(i).GetDynPopCorrIndex();
-      CrystVector_long index(maxGetDynPopCorrIndex+1);
-      for(unsigned int i=0;i<nbScattPow;i++)
-         index(this->GetScatteringPowerRegistry().GetObj(i).GetDynPopCorrIndex())=i;
-      CrystMatrix_long paridx(nbScattPow,nbScattPow);
-      paridx=-1;
-      {
-         for(unsigned int i=0;i<mvBumpMergePar.size();i++)
-         {
-            paridx(index(mvBumpMergePar[i].first.first ->GetDynPopCorrIndex()),
-                   index(mvBumpMergePar[i].first.second->GetDynPopCorrIndex()))=i;
-         }
-      }
-      
    std::vector<NeighbourHood>::const_iterator pos;
    std::vector<Crystal::Neighbour>::const_iterator neigh;
    REAL tmp;
-   long par;
-   const ScatteringPower *pow1;
-   const ScatteringPower *pow2;
+   long i1,i2;
+   VBumpMergePar::const_iterator par;
    for(pos=mvDistTableSq.begin();pos<mvDistTableSq.end();pos++)
    {
-      pow1=mScattCompList(pos->mIndex).mpScattPow;
+      i1=mScattCompList(pos->mIndex).mpScattPow->GetDynPopCorrIndex();
       for(neigh=pos->mvNeighbour.begin();neigh<pos->mvNeighbour.end();neigh++)
       {
-         pow2=mScattCompList(neigh->mNeighbourIndex).mpScattPow;
-         par=paridx(index( pow1->GetDynPopCorrIndex() ),
-                    index( pow2->GetDynPopCorrIndex() ));
-         if(-1==par) continue;
-         if(neigh->mDist2 > mvBumpMergePar[par].second.mDist2) continue;
-         if(true==mvBumpMergePar[par].second.mCanOverlap)
-            tmp = 0.5*sin(M_PI*(1.-sqrt(neigh->mDist2/mvBumpMergePar[par].second.mDist2)))/0.1;
+         i2=mScattCompList(neigh->mNeighbourIndex).mpScattPow->GetDynPopCorrIndex();
+         if(i1<i2) par=mvBumpMergePar.find(std::make_pair(i1,i2));
+         else par=mvBumpMergePar.find(std::make_pair(i2,i1));
+         if(par==mvBumpMergePar.end()) continue;
+         if(neigh->mDist2 > par->second.mDist2) continue;
+         if(true==par->second.mCanOverlap)
+            tmp = 0.5*sin(M_PI*(1.-sqrt(neigh->mDist2/par->second.mDist2)))/0.1;
          else
-            tmp = tan(M_PI*0.49999*(1.-sqrt(neigh->mDist2/mvBumpMergePar[par].second.mDist2)))/0.1;
+            tmp = tan(M_PI*0.49999*(1.-sqrt(neigh->mDist2/par->second.mDist2)))/0.1;
          mBumpMergeCost += tmp*tmp;
       }
    }
@@ -789,8 +769,9 @@ void Crystal::SetBumpMergeDistance(const ScatteringPower &scatt1,
                                    const bool allowMerge)
 {
    VFN_DEBUG_MESSAGE("Crystal::SetBumpMergeDistance()",8)
-   mvBumpMergePar.push_back(std::make_pair(std::make_pair(&scatt1,&scatt2),
-                                           BumpMergePar(dist,allowMerge)));
+   long i1=scatt1.GetDynPopCorrIndex(),i2=scatt2.GetDynPopCorrIndex();
+   if(i2<i1) {const long i=i1; i1=i2; i2=i;}
+   mvBumpMergePar[std::make_pair(i1,i2)]=BumpMergePar(dist,allowMerge);
 }
 
 const RefinableObjClock& Crystal::GetClockScattererList()const {return mClockScattererList;}

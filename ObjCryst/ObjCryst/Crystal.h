@@ -354,9 +354,9 @@ class Crystal:public UnitCell
          bool mCanOverlap;
       };
       
-      /// Anti-bump parameters
-      typedef std::vector<pair<pair<const ScatteringPower*, const ScatteringPower*>,
-                               Crystal::BumpMergePar> > VBumpMergePar;
+      /// Anti-bump parameters. Each atom type (ScatteringPower is referenced
+      /// using a reference number)
+      typedef std::map<pair<long, long>,Crystal::BumpMergePar > VBumpMergePar;
       /// Anti-bump parameters map
       VBumpMergePar mvBumpMergePar;
       /// Last Time Anti-bump parameters were changed
