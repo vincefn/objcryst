@@ -852,6 +852,7 @@ void PowderPatternDiffraction::GetBraggLimits(CrystVector_long *&min,CrystVector
 	this->CalcPowderReflProfile();
 	if(mClockProfileCalc>mClockBraggLimits)
 	{
+   	TAU_PROFILE("PowderPatternDiffraction::GetBraggLimits()","void ()",TAU_DEFAULT);
    	VFN_DEBUG_MESSAGE("PowderPatternDiffraction::GetBraggLimits(*min,*max):Recalc",3)
 		mIntegratedReflMin.resize(this->GetNbRefl());
 		mIntegratedReflMax.resize(this->GetNbRefl());
@@ -2788,6 +2789,7 @@ void PowderPattern::PrepareIntegratedRfactor()const
 	}
    VFN_DEBUG_MESSAGE("PowderPattern::PrepareIntegratedRfactor():1",3);
 	if(false==needPrep) return;
+   TAU_PROFILE("PowderPattern::PrepareIntegratedRfactor()","void ()",TAU_DEFAULT);
 	
 	// First get all integration intervals and concatenate the arrays
 	long numInterval=0;

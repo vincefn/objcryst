@@ -1041,6 +1041,7 @@ void ZScatterer::EndOptimization()
 void ZScatterer::GlobalOptRandomMove(const double mutationAmplitude)
 {
    VFN_DEBUG_ENTRY("ZScatterer::GlobalOptRandomMove()",3)
+   TAU_PROFILE("ZScatterer::GlobalOptRandomMove()","void ()",TAU_DEFAULT);
    // give a 30% chance of moving a single dihedral angle
 	// while keeping at a minimum the configuration change in the
 	// depending atoms.
@@ -1049,6 +1050,13 @@ void ZScatterer::GlobalOptRandomMove(const double mutationAmplitude)
 	// changes
    if( (rand()/(double)RAND_MAX)<.02)//.01
 	{
+   	TAU_PROFILE_TIMER(timer1,\
+							"ZScatterer::GlobalOptRandomMoveSmart1(prepare ref par & mutate)"\
+                     ,"", TAU_FIELD);
+   	TAU_PROFILE_TIMER(timer2,\
+							"ZScatterer::GlobalOptRandomMoveSmart2(optimize if necessary)"\
+                     ,"", TAU_FIELD);
+   	TAU_PROFILE_START(timer1);
 		// Build mpZMoveMinimizer object
 		if(0==mpZMoveMinimizer)
 		{
@@ -1204,6 +1212,7 @@ void ZScatterer::GlobalOptRandomMove(const double mutationAmplitude)
 				change= par->GetGlobalOptimStep()
                      	 *2*(rand()/(double)RAND_MAX-0.5)*mutationAmplitude*16;
 			}
+   	TAU_PROFILE_STOP(timer1);
    		VFN_DEBUG_MESSAGE("ZScatterer::GlobalOptRandomMove(): mutation:"<<change*RAD2DEG,3)
 			par->Mutate(change);
 			if(2==moveType)
@@ -1226,9 +1235,11 @@ void ZScatterer::GlobalOptRandomMove(const double mutationAmplitude)
 				const double tmp=mpZMoveMinimizer->GetCostFunctionValue(0);
 				if(tmp>.05)
 				{
+   				TAU_PROFILE_START(timer2);
 					if(tmp<1) mpZMoveMinimizer->MinimizeChange(200);
 					else if(tmp<5) mpZMoveMinimizer->MinimizeChange(400);
 						  else mpZMoveMinimizer->MinimizeChange(1000);
+   				TAU_PROFILE_STOP(timer2);
 				}
 				//cout <<" -> "<<mpZMoveMinimizer->GetCostFunctionValue(0)<<endl;
 			}

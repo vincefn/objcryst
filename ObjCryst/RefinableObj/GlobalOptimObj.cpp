@@ -145,6 +145,7 @@ void OptimizationObj::SetLimitsAbsolute(const RefParType *type,
 
 double OptimizationObj::GetCostFunctionValue() 
 {
+   TAU_PROFILE("OptimizationObj::GetCostFunctionValue()","void ()",TAU_DEFAULT);
    double cost =0.;
    for(unsigned int i=0;i<mNbCostFunction;i++)
 		if(mCostFunctionWeight(i)>0)
@@ -727,6 +728,10 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
             }
 				#if 1
             //Try mating worlds- NEW !
+   			TAU_PROFILE_TIMER(timer1,\
+							"MonteCarloObj::Optimize (Try mating Worlds)"\
+                     ,"", TAU_FIELD);
+   			TAU_PROFILE_START(timer1);
    			if( (rand()/(double)RAND_MAX)<.1)
             for(int k=nbWorld-1;k>nbWorld/2;k--)
             	for(int i=k-nbWorld/3;i<k;i++)
@@ -830,6 +835,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
                   	//if((mNbTrial%nbTrialsReport)==0) makeReport=true;
 						}
             	}
+   			TAU_PROFILE_STOP(timer1);
             #endif
             if(true==makeReport)
             {
