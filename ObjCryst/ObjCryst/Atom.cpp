@@ -327,9 +327,9 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
       GLfloat colourChar [] = {1.0, 1.0, 1.0, 1.0}; 
       if((r>0.8)&&(g>0.8)&&(b>0.8))
       {
-         colourChar[0] = 0.2;
-         colourChar[1] = 0.2;
-         colourChar[2] = 0.2;
+         colourChar[0] = 0.5;
+         colourChar[1] = 0.5;
+         colourChar[2] = 0.5;
       }
 
    if(this->IsDummy()) return ;
