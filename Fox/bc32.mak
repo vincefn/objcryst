@@ -15,7 +15,6 @@ clean:
 	$(MAKE) -f bc32.mak cleanall
 
 update:
-	cd src
 	cvs -z3 update
-	cd ..\..\ObjCryst
+	cd ObjCryst
 	cvs -z3 update
