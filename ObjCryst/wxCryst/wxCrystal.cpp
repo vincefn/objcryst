@@ -23,7 +23,9 @@ extern "C" {
 #ifdef DrawText
 #undef DrawText
 #endif
- 
+
+//#include "ObjCryst/Map.cpp"
+
 namespace ObjCryst
 {
 
@@ -225,6 +227,12 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
       glNewList(mCrystalGLDisplayList,GL_COMPILE);
          glPushMatrix();
             mpCrystal->GLInitDisplayList(onlyIndependentAtoms,xMin,xMax,yMin,yMax,zMin,zMax);
+				//ScatteringPowerMap map1(mpCrystal->GetScatteringPowerRegistry().GetObj(0),
+				//									 *mpCrystal,.02,.05,.05,RAD_XRAY);
+				//map1.GLInitDisplayList(xMin,xMax,yMin,yMax,zMin,zMax);
+				//UnitCellScattererDensityMap map2(*mpCrystal,21,21,21);
+				//cout << map2.GetMap3D()<<endl;
+				//map2.GLInitDisplayList(xMin,xMax,yMin,yMax,zMin,zMax);
          glPopMatrix();
       glEndList();
       //#ifdef __WINDOWS__
@@ -802,6 +810,7 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
    glCallList(mpWXCrystal->GrabCrystalGLDisplayList());  //Draw Crystal
    mpWXCrystal->ReleaseCrystalGLDisplayList();
    
+	#if 0
    {// :KLUDGE: to reset the colour
       GLfloat colour[]= { 1, 1, 1, 1.0 };
       glMaterialfv (GL_FRONT, GL_AMBIENT_AND_DIFFUSE,colour);
@@ -810,7 +819,7 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
          glVertex3f(   0,    0,   -10000);
       glEnd();	
    }
-   
+   #endif
    glFlush();
    SwapBuffers();
    VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnPaint():End",7)
@@ -1028,63 +1037,25 @@ void WXGLCrystalCanvas::CrystUpdate()
 void WXGLCrystalCanvas::InitGL()
 {
    VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::InitGL()",8)
-	#if 0
-   glClearColour(0.0f, 0.0f, 0.0f, 1.0f);//Black background
-   //glClearColour(1.0f, 1.0f, 1.0f, 1.0f);//White background
-   
-   glClearDepth(1.0);// Enables Clearing Of The Depth Buffer
-   glDepthFunc(GL_LESS);//Type Of Depth Test
-   glDepthRange(20.f,200.f);
+   this->SetCurrent();
+    
    glEnable(GL_DEPTH_TEST);
-
-   
-   //Lights
-      GLfloat LightAmbient[]= { 0.3, 0.3, 0.3, 1.0 };
-      GLfloat LightDiffuse[]= { 0.5, 0.5, 0.5, 1.0 };
-      //GLfloat LightSpecular[]= { 0.8, 0.8, 0.8, 1.0 };
-      GLfloat LightPosition[]= { 100.0, 100.0, 5.0, 1.0 };
-      
-      glLightfv(GL_LIGHT1, GL_AMBIENT, LightAmbient);
-      glLightfv(GL_LIGHT1, GL_DIFFUSE, LightDiffuse);
-      //glLightfv(GL_LIGHT1, GL_SPECULAR,LightSpecular);
-      glLightfv(GL_LIGHT1, GL_POSITION,LightPosition);
-      glEnable(GL_LIGHT1);
       glEnable(GL_LIGHTING);
-      
-   //faster
-      //glShadeModel(GL_SMOOTH);//Smooth Colour Shading
-      glEnable(GL_DITHER);
+		
+      const GLfloat color_Ambient [] = {0.3, 0.3, 0.3, 1.00}; 
+      const GLfloat color_Diffuse [] = {0.6, 0.6, 0.6, 1.00}; 
+      const GLfloat color_Specular[] = {0.8, 0.8, 0.8, 1.00}; 
+		
+		glLightfv( GL_LIGHT0, GL_AMBIENT,  color_Ambient); 
+		glLightfv( GL_LIGHT0, GL_DIFFUSE,  color_Diffuse); 
+		glLightfv( GL_LIGHT0, GL_SPECULAR, color_Specular); 
+		glLightModelf(GL_LIGHT_MODEL_TWO_SIDE, 1.0); 
+
+		glEnable( GL_LIGHT0 ); 
+
+   	glEnable(GL_NORMALIZE);
       glHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_FASTEST);
       glHint(GL_POLYGON_SMOOTH_HINT,GL_FASTEST);
-   
-   //Size
-   wxSizeEvent event;
-   this->OnSize(event);
-   
-   //Initialize Trackball
-   trackball(mQuat,0.,0.,0.,0.);
-   
-   //First display
-   this->CrystUpdate();
-   #endif
-    this->SetCurrent();
-    
-    glEnable(GL_DEPTH_TEST);
-   //Lights
-      glEnable(GL_LIGHTING);
-      GLfloat LightAmbient[]= { 0.2, 0.2, 0.2, 1.0 };
-      GLfloat LightDiffuse[]= { 0.6, 0.6, 0.6, 1.0 };
-      //GLfloat LightSpecular[]= { 0.8, 0.8, 0.8, 1.0 };
-      GLfloat LightPosition[]= { 100.0, 100.0, 5.0, 1.0 };
-      
-      glLightfv(GL_LIGHT1, GL_AMBIENT, LightAmbient);
-      glLightfv(GL_LIGHT1, GL_DIFFUSE, LightDiffuse);
-      //glLightfv(GL_LIGHT1, GL_SPECULAR,LightSpecular);
-      glLightfv(GL_LIGHT1, GL_POSITION,LightPosition);
-      glEnable(GL_LIGHT1);
-    	//glEnable(GL_LIGHTING);
-    	//glEnable(GL_LIGHT0);
-
    
    //Initialize Trackball
    trackball(mQuat,0.,0.,0.,0.);
