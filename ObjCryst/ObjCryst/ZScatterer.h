@@ -180,7 +180,7 @@ class ZScatterer: public Scatterer
       *  \param x,y,z: fractionnal coordinates of the scatterer
       *  \param phi,chi: angles defining the orientation of the scatterer
       */
-      ZScatterer(const string &name,const Crystal &cryst, 
+      ZScatterer(const string &name,Crystal &cryst, 
                  const REAL x=0.,const REAL y=0.,const REAL z=0.,
                  const REAL phi=0.,const REAL chi=0., const REAL psi=0.);
       /** \brief Copy constructor
@@ -279,6 +279,28 @@ class ZScatterer: public Scatterer
 		/// Get the list of all ZAtom cartesian x coordinates.
 		const CrystVector_REAL& GetZCoord() const;
       virtual void EndOptimization();
+		/** Import "Fenske-Hall" ZMatrix file (fhz in the babel
+		* program http://www.eyesopen.com/babel.html\
+		* example: use "./babel -ipdb foo.pdb -ofhz foo.fhz -d",
+		* to convert a pdb file to a Z-Matrix file (the -d removes
+		* hydrogen atoms)
+		*
+		* \warning: this should be called before any atom has been
+		* added (if there are already atoms, they should be removed
+		* but this has not been tested...)
+		*
+		* \note: this will search in the Crystal associated with this
+		* ZScatterer the relevant ScatteringPowerAtom, which should have
+		* the name of the corresponding symbol (eg 'H', 'C',...)
+		* if these are not found then they will be added to the Crystal
+		* with a default isotropic B-factor equal to 1.
+		* \note: this also sets relative limits of +/-.03 Angstroems
+		* for all bond distances, and +/-3.6 degress for bond and
+		* dihedral angles.
+		* \todo: identify which dihedral angles should \e not be limited,
+		* by analysing a coordination table.
+		*/
+		void ImportFenskeHallZMatrix(istream &is);
    protected:
 		/** Update the atom coordinates (in real units, in Angstroems).
 		*
@@ -423,7 +445,7 @@ class ZPolyhedron: public ZScatterer
       * Correction', then keep this parameter to 1.
       * \param phi,chi,psi: initial angles for this polyhedron
       */
-      ZPolyhedron( const RegularPolyhedraType type, const Crystal &cryst,
+      ZPolyhedron( const RegularPolyhedraType type, Crystal &cryst,
             const REAL x, const REAL y, const REAL z,
             const string &name, const ScatteringPower *centralAtomPow,
             const ScatteringPower *periphAtomPow,const REAL centralPeriphDist,

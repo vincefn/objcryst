@@ -158,7 +158,7 @@ class Scatterer:virtual public RefinableObj
       /// Last time anything in the scatterer was changed (atoms, positions, scattering power)
       const RefinableObjClock& GetClockScatterer()const;
       /// Set the crystal in which is included this Scatterer
-      void SetCrystal(const Crystal&);
+      void SetCrystal(Crystal&);
       /// In which crystal is this Scatterer included ?
       const Crystal& GetCrystal()const;
    protected:
@@ -191,7 +191,9 @@ class Scatterer:virtual public RefinableObj
       /// This is needed so that we can know which scattering powers are available
       /// in the crystal, and also to convert fractionnal to orthonormal
       /// coordinates (for some scatterers only).
-      const Crystal *mpCryst;
+		/// It cannot be const since some scatterers may want to modify
+		/// the list of scattering powers of the crystal...
+      Crystal *mpCryst;
       
    private:
    #ifdef __WX__CRYST__

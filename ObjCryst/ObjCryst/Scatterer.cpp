@@ -126,7 +126,7 @@ const float* Scatterer::GetColourRGB()const{ return mColourRGB;}
 
 const RefinableObjClock& Scatterer::GetClockScatterer()const {return mClockScatterer;}
 
-void Scatterer::SetCrystal(const Crystal &cryst){mpCryst=&cryst;}
+void Scatterer::SetCrystal(Crystal &cryst){mpCryst=&cryst;}
 const Crystal& Scatterer::GetCrystal()const{return *mpCryst;}
 
 void Scatterer::InitRGBColour()

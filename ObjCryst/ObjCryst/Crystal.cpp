@@ -56,7 +56,7 @@ mBMatrix(3,3),mOrthMatrix(3,3),mOrthMatrixInvert(3,3),
 mScatteringPowerRegistry("List of Crystal ScatteringPowers")
 {
    VFN_DEBUG_MESSAGE("Crystal::Crystal()",10)
-   this->Init(1,1,1,M_PI/2,M_PI/2,M_PI/2,"P1","");
+   this->Init(10,11,12,M_PI/2+.1,M_PI/2+.2,M_PI/2+.3,"P1","");
    gCrystalRegistry.Register(*this);
    gTopRefinableObjRegistry.Register(*this);
 }

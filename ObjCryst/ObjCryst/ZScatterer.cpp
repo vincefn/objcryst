@@ -201,7 +201,7 @@ void ZMoveMinimizer::MinimizeChange(long nbTrial=10000)
 //
 //######################################################################
 
-ZScatterer::ZScatterer(const string &name,const Crystal &cryst, 
+ZScatterer::ZScatterer(const string &name,Crystal &cryst, 
                        const REAL x,const REAL y,const REAL z,
                        const REAL phi,const REAL chi, const REAL psi):
 mScattCompList(0),mNbAtom(0),mNbDummyAtom(0),
@@ -1057,6 +1057,129 @@ void ZScatterer::EndOptimization()
 	mpZMoveMinimizer=0;
 	this->RefinableObj::EndOptimization();
 }
+void ZScatterer::ImportFenskeHallZMatrix(istream &is)
+{
+	// 17
+	//C  1
+	//N   1 1.465
+	//C   2 1.366  1 119.987
+	//N   3 1.321  2 120.030  1   6.0
+	//C   4 1.355  3 119.982  2   6.8
+	//N   5 1.136  4 180.000  3  46.3
+	//N   3 1.366  2 120.022  1 186.0
+	//C   7 1.466  3 119.988  2 354.9
+	// ...
+	int nbAtoms=0;
+	is >> nbAtoms;
+	string symbol;
+	int bondAtom=0,angleAtom=0,dihedAtom=0,junk=0;
+	float bond=0,angle=0,dihed=0;
+	int scattPow;
+   char buf [10];
+	//first
+		is >> symbol >> junk;
+		cout << symbol <<" "
+			  << bondAtom  <<" "<< bond <<" "
+			  << angleAtom <<" "<< angle<<" "
+			  << dihedAtom <<" "<< dihed<<endl;
+	{
+		scattPow=mpCryst->GetScatteringPowerRegistry().Find
+						(symbol,"ScatteringPowerAtom",true);
+		if(scattPow==-1)
+		{
+			cout<<"Scattering power"<<symbol<<"not found, creating it..."<<endl;
+			mpCryst->AddScatteringPower(new ScatteringPowerAtom(symbol,symbol));
+		}
+		scattPow=mpCryst->GetScatteringPowerRegistry().Find
+						(symbol,"ScatteringPowerAtom");
+      sprintf(buf,"%d",1);
+		this->AddAtom(symbol+(string)buf,
+					     &(mpCryst->GetScatteringPowerRegistry().GetObj(scattPow)),
+						  0,0,
+						  0,0,
+						  0,0);
+	}
+	//second
+		is >> symbol 
+			>> bondAtom  >> bond;
+	cout << symbol <<" "
+		  << bondAtom  <<" "<< bond <<" "
+		  << angleAtom <<" "<< angle<<" "
+		  << dihedAtom <<" "<< dihed<<endl;
+	{
+		scattPow=mpCryst->GetScatteringPowerRegistry().Find
+						(symbol,"ScatteringPowerAtom",true);
+		if(scattPow==-1)
+		{
+			cout<<"Scattering power"<<symbol<<"not found, creating it..."<<endl;
+			mpCryst->AddScatteringPower(new ScatteringPowerAtom(symbol,symbol));
+		}
+		scattPow=mpCryst->GetScatteringPowerRegistry().Find
+						(symbol,"ScatteringPowerAtom");
+         sprintf(buf,"%d",2);
+		this->AddAtom(symbol+(string)buf,
+					     &(mpCryst->GetScatteringPowerRegistry().GetObj(scattPow)),
+						  bondAtom-1,bond,
+						  0,0,
+						  0,0);
+	}
+	//third
+		is >> symbol 
+			>> bondAtom  >> bond
+			>> angleAtom >> angle;
+	cout << symbol <<" "
+		  << bondAtom  <<" "<< bond <<" "
+		  << angleAtom <<" "<< angle<<endl;
+	{
+		scattPow=mpCryst->GetScatteringPowerRegistry().Find
+						(symbol,"ScatteringPowerAtom",true);
+		if(scattPow==-1)
+		{
+			cout<<"Scattering power"<<symbol<<"not found, creating it..."<<endl;
+			mpCryst->AddScatteringPower(new ScatteringPowerAtom(symbol,symbol));
+		}
+		scattPow=mpCryst->GetScatteringPowerRegistry().Find
+						(symbol,"ScatteringPowerAtom");
+         sprintf(buf,"%d",3);
+		this->AddAtom(symbol+(string)buf,
+					     &(mpCryst->GetScatteringPowerRegistry().GetObj(scattPow)),
+						  bondAtom-1,bond,
+						  angleAtom-1,angle*DEG2RAD,
+						  0,0);
+	}
+	for(int i=3;i<nbAtoms;i++)
+	{
+		is >> symbol 
+			>> bondAtom  >> bond
+			>> angleAtom >> angle
+			>> dihedAtom >> dihed;
+		cout << symbol <<" "
+			  << bondAtom  <<" "<< bond <<" "
+			  << angleAtom <<" "<< angle
+			  << dihedAtom <<" "<< dihed<<endl;
+		{
+			scattPow=mpCryst->GetScatteringPowerRegistry().Find
+							(symbol,"ScatteringPowerAtom",true);
+			if(scattPow==-1)
+			{
+				cout<<"Scattering power"<<symbol<<"not found, creating it..."<<endl;
+				mpCryst->AddScatteringPower(new ScatteringPowerAtom(symbol,symbol));
+			}
+			scattPow=mpCryst->GetScatteringPowerRegistry().Find
+							(symbol,"ScatteringPowerAtom");
+			cout<<
+         	sprintf(buf,"%d",i);
+			this->AddAtom(symbol+(string)buf,
+					   	  &(mpCryst->GetScatteringPowerRegistry().GetObj(scattPow)),
+							  bondAtom-1,bond,
+							  angleAtom-1,angle*DEG2RAD,
+							  dihedAtom-1,dihed*DEG2RAD);
+		}
+	}
+	this->SetLimitsRelative(gpRefParTypeScattConformBondLength,-.03,.03);
+	this->SetLimitsRelative(gpRefParTypeScattConformBondAngle,-.01,.01);
+	this->SetLimitsRelative(gpRefParTypeScattConformDihedAngle,-.01,.01);
+}
 
 void ZScatterer::GlobalOptRandomMove(const REAL mutationAmplitude)
 {
@@ -1677,7 +1800,7 @@ WXCrystObjBasic* ZScatterer::WXCreate(wxWindow* parent)
 //
 //
 //######################################################################
-ZPolyhedron::ZPolyhedron( const RegularPolyhedraType type, const Crystal &cryst,
+ZPolyhedron::ZPolyhedron( const RegularPolyhedraType type,Crystal &cryst,
       const REAL x, const REAL y, const REAL z,
       const string &name, const ScatteringPower *centralAtomSymbol,
       const ScatteringPower *periphAtomSymbol,const REAL centralPeriphDist,
