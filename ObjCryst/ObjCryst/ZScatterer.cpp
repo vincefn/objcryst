@@ -304,7 +304,7 @@ You are using the Global ScatteringPower approximation !!");
    if(mZAtomRegistry.GetNb()<1) usedBond=false;
    if(mZAtomRegistry.GetNb()<2) usedAngle=false;
    if(mZAtomRegistry.GetNb()<3) usedDihed=false;
-   char buf [10];
+   char buf [20];
    {
       sprintf(buf,"%d-%d",(int)mNbAtom,(int)atomBond);
       RefinablePar tmp("Length"+(string)buf,&(zatom->mBondLength),
@@ -1807,7 +1807,7 @@ void ZScatterer::InitRefParList()
          tmp.AssignClock(mClockScatterer);
          this->AddPar(tmp);
       }
-      char buf [10];
+      char buf [20];
       for(long i=0;i<mNbAtom;i++)
       {
          {

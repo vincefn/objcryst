@@ -90,6 +90,10 @@ WXField(parent,label,ID_WXFIELD_REFPAR),mValue(0.),mpRefPar(par),mIsSelfUpdating
    
    this->Layout();
 }
+WXFieldRefPar::~WXFieldRefPar()
+{
+   mpRefPar->WXNotifyDelete();
+}
 
 void WXFieldRefPar::OnEnter(wxCommandEvent & WXUNUSED(event))
 {

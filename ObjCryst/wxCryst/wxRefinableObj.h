@@ -64,6 +64,7 @@ class WXFieldRefPar:public WXField
       /// The Field reads the new value, 
       /// and directly changes the RefinablePar value (contrary to what happens
       /// for WXFieldName)by using RefinablePar::SetHumanValue().
+      ~WXFieldRefPar();
       void OnEnter(wxCommandEvent & WXUNUSED(event));
       /// Records when text is entered (either from self-updating or user input)
       void OnText(wxCommandEvent & WXUNUSED(event));

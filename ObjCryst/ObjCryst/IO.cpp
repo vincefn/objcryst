@@ -806,7 +806,7 @@ void ZScatterer::XMLInput(istream &is,const XMLCrystTag &tagg)
          mZAtomRegistry.GetObj(nb).XMLInput(is,tag);
          // Update the name of refinable parameters
          {
-            char buf [10];
+            char buf [20];
             sprintf(buf,"%d-%d",(int)nb,(int)(mZAtomRegistry.GetObj(nb).GetZBondAtom()));
             this->GetPar(&(mZAtomRegistry.GetObj(nb).mBondLength))
                .SetName("Length"+(string)buf);
@@ -2366,7 +2366,7 @@ void PowderPattern::XMLInput(istream &is,const XMLCrystTag &tagg)
                >>mPowderPatternObsSigma(mNbPoint)
                >>mPowderPatternWeight(mNbPoint);
             mNbPoint++;
-            VFN_DEBUG_MESSAGE("Point #"<<mNbPoint,8);
+            VFN_DEBUG_MESSAGE("Point #"<<mNbPoint,5);
             if(mNbPoint==(unsigned long)mPowderPatternObs.numElements())
             {
                mPowderPatternObs.resizeAndPreserve(mNbPoint+500);

@@ -652,6 +652,10 @@ void RefinablePar::SetLimitsProportional(const REAL min, const REAL max)
 WXCrystObjBasic* RefinablePar::WXCreate(wxWindow *parent)
 {
    VFN_DEBUG_MESSAGE("RefinablePar::WXCreate()",10)
+   if(mpWXFieldRefPar!=0)
+   {
+      throw ObjCrystException((string)"RefinablePar::WXCreate():"+this->GetName()+(string)" WXFieldRefPar already exists !");
+   }
    mpWXFieldRefPar=new WXFieldRefPar (parent,this->GetName(),this);
    return mpWXFieldRefPar;
 }
