@@ -287,7 +287,7 @@ mHistorySaveAfterEachOptim(false),mHistorySaveFileName("GlobalOptim_history.out"
 mLastParSavedSetIndex(-1),
 mTemperatureMax(.03),mTemperatureMin(.003),
 mMutationAmplitudeMax(16.),mMutationAmplitudeMin(.125),
-mNbTrialRetry(0),mMinCostRetry(0),mMaxNbTrialSinceBest(100000)
+mNbTrialRetry(0),mMinCostRetry(0),mMaxNbTrialSinceBest(0)
 #ifdef __WX__CRYST__
 ,mpWXCrystObj(0)
 #endif
@@ -311,7 +311,7 @@ mHistorySaveAfterEachOptim(true),mHistorySaveFileName("GlobalOptim_history.out")
 mLastParSavedSetIndex(-1),
 mTemperatureMax(.03),mTemperatureMin(.003),
 mMutationAmplitudeMax(16.),mMutationAmplitudeMin(.125),
-mNbTrialRetry(0),mMinCostRetry(0),mMaxNbTrialSinceBest(100000)
+mNbTrialRetry(0),mMinCostRetry(0),mMaxNbTrialSinceBest(0)
 #ifdef __WX__CRYST__
 ,mpWXCrystObj(0)
 #endif
@@ -574,7 +574,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
          //Total number of parallel refinements,each is a 'World'. The most stable
          // world must be i=nbWorld-1, and the most changing World (high mutation,
          // high temperature) is i=0.
-            const long nbWorld=30;
+            const long nbWorld=10;
          // Init the different temperatures
             CrystVector_double simAnnealTemp(nbWorld);
             for(int i=0;i<nbWorld;i++)
