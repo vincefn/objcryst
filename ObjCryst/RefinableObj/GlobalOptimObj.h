@@ -385,6 +385,8 @@ class MonteCarloObj:public OptimizationObj
          long mLastParSavedSetIndex;
       
       // Annealing parameters
+         /// Current temperature for annealing
+         REAL mTemperature;
          /// Beginning temperature for annealing
          REAL mTemperatureMax;
          /// Lower temperature

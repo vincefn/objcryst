@@ -460,7 +460,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
          // Change temperature (and mutation) every...
             const int nbTryPerTemp=100;
 
-         REAL simAnnealTemp=sqrt(mTemperatureMin*mTemperatureMax);
+         mTemperature=sqrt(mTemperatureMin*mTemperatureMax);
          mMutationAmplitude=sqrt(mMutationAmplitudeMin*mMutationAmplitudeMax);
 
          Chronometer chrono;
@@ -474,27 +474,27 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                switch(mAnnealingScheduleTemp.GetChoice())
                {
                   case ANNEALING_BOLTZMANN:
-                     simAnnealTemp=
+                     mTemperature=
                         mTemperatureMin*log((REAL)nbSteps)/log((REAL)(mNbTrial+1));break;
                   case ANNEALING_CAUCHY:
-                     simAnnealTemp=mTemperatureMin*nbSteps/mNbTrial;break;
+                     mTemperature=mTemperatureMin*nbSteps/mNbTrial;break;
                   //case ANNEALING_QUENCHING:
                   case ANNEALING_EXPONENTIAL:
-                     simAnnealTemp=mTemperatureMax
+                     mTemperature=mTemperatureMax
                                     *pow(mTemperatureMin/mTemperatureMax,
                                           mNbTrial/(REAL)nbSteps);break;
                   case ANNEALING_SMART:
                   {
                      if((nbAcceptedMovesTemp/(REAL)nbTryPerTemp)>0.30)
-                        simAnnealTemp/=1.5;
+                        mTemperature/=1.5;
                      if((nbAcceptedMovesTemp/(REAL)nbTryPerTemp)<0.10)
-                        simAnnealTemp*=1.5;
-                     if(simAnnealTemp>mTemperatureMax) simAnnealTemp=mTemperatureMax;
-                     if(simAnnealTemp<mTemperatureMin) simAnnealTemp=mTemperatureMin;
+                        mTemperature*=1.5;
+                     if(mTemperature>mTemperatureMax) mTemperature=mTemperatureMax;
+                     if(mTemperature<mTemperatureMin) mTemperature=mTemperatureMin;
                      nbAcceptedMovesTemp=0;
                      break;
                   }
-                  default: simAnnealTemp=mTemperatureMin;break;
+                  default: mTemperature=mTemperatureMin;break;
                }
                switch(mAnnealingScheduleMutation.GetChoice())
                {
@@ -538,7 +538,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                   //mHistorySavedParamSetIndex(mHistoryNb)=mRefParList.CreateParamSet();
                   //mHistoryNb++;
                   if(!silent) cout << "Trial :" << mNbTrial 
-                                   << " Temp="<< simAnnealTemp
+                                   << " Temp="<< mTemperature
                                    << " Mutation Ampl.: "<<mMutationAmplitude
                                    << " NEW Best Cost="<<mBestCost<< endl;
                   nbTriesSinceBest=0;
@@ -549,7 +549,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
             }
             else
             {
-               if( log((rand()+1)/(REAL)RAND_MAX) < (-(cost-mCurrentCost)/simAnnealTemp) )
+               if( log((rand()+1)/(REAL)RAND_MAX) < (-(cost-mCurrentCost)/mTemperature) )
                {
                   mCurrentCost=cost;
                   mRefParList.SaveParamSet(mLastParSavedSetIndex);
@@ -560,7 +560,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
             }
             if( (mNbTrial % nbTryReport) == 0)
             {
-               if(!silent) cout <<"Trial :" << mNbTrial << " Temp="<< simAnnealTemp;
+               if(!silent) cout <<"Trial :" << mNbTrial << " Temp="<< mTemperature;
                if(!silent) cout <<" Mutation Ampl.: " <<mMutationAmplitude<< " Best Cost=" << mBestCost 
                                 <<" Current Cost=" << mCurrentCost 
                                 <<" Accepting "<<(int)((REAL)nbAcceptedMoves/nbTryReport*100)
@@ -713,6 +713,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
             {
                mRefParList.RestoreParamSet(worldCurrentSetIndex(i));
                mMutationAmplitude=mutationAmplitude(i);
+               mTemperature=simAnnealTemp(i);
                for(int j=0;j<nbTryPerWorld;j++)
                {
                   mRefParList.SaveParamSet(mLastParSavedSetIndex);
@@ -730,7 +731,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                         mRefParList.SaveParamSet(mBestParSavedSetIndex);
                         if(!silent) cout << "->Trial :" << mNbTrial 
                                          << " World="<< i
-                                         << " Temp="<< simAnnealTemp(i)
+                                         << " Temp="<< mTemperature
                                          << " Mutation Ampl.: "<<mMutationAmplitude
                                          << " NEW Best Cost="<<mBestCost<< endl;
                         bestConfigNb=mNbTrial;
@@ -743,7 +744,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                   }
                   else
                   {
-                     if(log((rand()+1)/(REAL)RAND_MAX)<(-(cost-currentCost(i))/simAnnealTemp(i)) )
+                     if(log((rand()+1)/(REAL)RAND_MAX)<(-(cost-currentCost(i))/mTemperature) )
                      {
                         currentCost(i)=cost;
                         mRefParList.SaveParamSet(worldCurrentSetIndex(i));
@@ -1376,7 +1377,7 @@ void MonteCarloObj::NewConfiguration()
       biasCost0 += mRecursiveRefinedObjList.GetObj(i).GetBiasingCost();
    for(;;)
    {
-      nbNewConfig++;
+      /*if(mMutationAmplitude>7)*/nbNewConfig++;
       for(int i=0;i<mRefinedObjList.GetNb();i++)
          mRefinedObjList.GetObj(i).BeginGlobalOptRandomMove();
       for(int i=0;i<mRefinedObjList.GetNb();i++)
@@ -1385,15 +1386,19 @@ void MonteCarloObj::NewConfiguration()
       biasCost1=0;
       for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
          biasCost1 += mRecursiveRefinedObjList.GetObj(i).GetBiasingCost();
-      //if(true)
-      if(log((rand()+1)/(REAL)RAND_MAX)< ((biasCost0-biasCost1)/mMutationAmplitude))
+      //if(log((rand()+1)/(REAL)RAND_MAX)< ((biasCost0-biasCost1)/mTemperature))
+      //if(log((rand()+1)/(REAL)RAND_MAX)< (-biasCost1/mTemperature))
+      if(true)
       {
          VFN_DEBUG_EXIT("MonteCarloObj::NewConfiguration()",4)
          return;
       }
-      nbNewConfigRejectedFromBias++;
+      /*if(mMutationAmplitude>7)*/nbNewConfigRejectedFromBias++;
+      if((rand()/(REAL)RAND_MAX)<.0001) 
+         cout <<endl<<"MonteCarloObj::NewConfiguration()rejected:"
+              <<nbNewConfigRejectedFromBias/(float)nbNewConfig*100.<<"%"<<endl<<endl;
       #ifdef __DEBUG__
-      if(((rand()+1)/(REAL)RAND_MAX)<.01)
+      if((rand()/(REAL)RAND_MAX)<.01)
          VFN_DEBUG_MESSAGE("MonteCarloObj::NewConfiguration()rejected:"<<nbNewConfigRejectedFromBias/(float)nbNewConfig*100.<<"%",10)
       #endif
       mRefParList.RestoreParamSet(mLastParSavedSetIndex);  
