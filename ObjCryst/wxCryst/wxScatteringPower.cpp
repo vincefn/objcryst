@@ -82,12 +82,14 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpScatteringPowerAtom(obj)
 #endif            
       sizer->Add(mpFieldSymbol  ,0,wxALIGN_CENTER);
       sizer->Add(pFieldBiso    ,0,wxALIGN_CENTER);
-      
+      #if 0
       WXFieldRefPar* pFieldError  =new WXFieldRefPar(this,"ML Error:",
             &(mpScatteringPowerAtom->GetPar("ML Error") ));
       sizer->Add(pFieldError    ,0,wxALIGN_CENTER);
       mList.Add(pFieldError);
-      
+      #else
+      mpScatteringPowerAtom->GetPar("ML Error").SetValue(0.);
+      #endif
       mpSizer->Add(sizer,0,wxALIGN_LEFT);
       mList.Add(mpFieldSymbol);
       mList.Add(pFieldBiso);
