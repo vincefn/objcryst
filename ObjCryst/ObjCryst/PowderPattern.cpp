@@ -3468,7 +3468,9 @@ void PowderPattern::CalcPowderPattern() const
       }
       REAL *p0 = mPowderPatternWeight.data();
       const REAL *p1=mPowderPatternVariance.data();
-      for(unsigned long j=0;j<mNbPointUsed;j++) *p0++ = 1. / *p1++;
+      for(unsigned long j=0;j<mNbPointUsed;j++)
+         if(*p1 <=0) {*p0++ =0;p1++;}
+         else *p0++ = 1. / *p1++;
    }
    mClockPowderPatternCalc.Click();
    VFN_DEBUG_EXIT("PowderPattern::CalcPowderPattern():End",3);
@@ -3614,8 +3616,9 @@ void PowderPattern::CalcPowderPatternIntegrated() const
       }
       REAL *p0 = mIntegratedWeight.data();
       const REAL *p1=mPowderPatternVarianceIntegrated.data();
-      for(unsigned long j=0;j<mNbIntegrationUsed;j++) *p0++ = 1. / *p1++;
-      
+      for(unsigned long j=0;j<mNbPointUsed;j++)
+         if(*p1 <=0) {*p0++ =0;p1++;}
+         else *p0++ = 1. / *p1++;
    }
    mClockPowderPatternIntegratedCalc.Click();
    /*
