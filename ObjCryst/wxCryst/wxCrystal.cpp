@@ -264,6 +264,10 @@ void WXCrystal::ReleaseCrystalGLDisplayList()const
    VFN_DEBUG_MESSAGE("WXCrystal::ReleaseCrystalGLDisplayList()",7)
    mCrystalGLDisplayListIsLocked=false;
 }
+bool WXCrystal::GLDisplayListIsLocked()const
+{
+   return mCrystalGLDisplayListIsLocked;
+}
 
 void WXCrystal::OnMenuCrystalGL(wxCommandEvent & WXUNUSED(event))
 {
@@ -775,6 +779,9 @@ void WXGLCrystalCanvas::OnExit(wxCommandEvent &event)
 void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
 {
    VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnPaint()",7)
+	// This means that another update of the display list is being done, so...
+	if(true==mpWXCrystal->GLDisplayListIsLocked()) return;
+	
    wxPaintDC dc(this);
    PrepareDC(dc);
    this->GetParent()->PrepareDC(dc);
@@ -807,19 +814,12 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
    glMultMatrixf( &m[0][0] );
    
    //Draw
-   glCallList(mpWXCrystal->GrabCrystalGLDisplayList());  //Draw Crystal
-   mpWXCrystal->ReleaseCrystalGLDisplayList();
+		// another update of the display list is being done, so...
+		if(true==mpWXCrystal->GLDisplayListIsLocked()) return;
+	
+   	glCallList(mpWXCrystal->GrabCrystalGLDisplayList());  //Draw Crystal
+   	mpWXCrystal->ReleaseCrystalGLDisplayList();
    
-	#if 0
-   {// :KLUDGE: to reset the colour
-      GLfloat colour[]= { 1, 1, 1, 1.0 };
-      glMaterialfv (GL_FRONT, GL_AMBIENT_AND_DIFFUSE,colour);
-      glColor3f(1.0f,1.0f,1.0f);
-      glBegin(GL_POINTS);
-         glVertex3f(   0,    0,   -10000);
-      glEnd();	
-   }
-   #endif
    glFlush();
    SwapBuffers();
    VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnPaint():End",7)

@@ -42,6 +42,7 @@ class WXCrystal: public WXRefinableObj
       /// not to be used any more. When finished, ReleaseCrystalGLDisplayList() must be called.
       int GrabCrystalGLDisplayList()const;
       void ReleaseCrystalGLDisplayList()const;
+		bool GLDisplayListIsLocked()const;
       /// Create OpenGL Display of the Crystal Structure
       void OnMenuCrystalGL(wxCommandEvent & WXUNUSED(event));
       /// Tell this object that its 3D OpenGL display has been destroyed
