@@ -61,11 +61,13 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpScatteringPowerAtom(obj)
    
       mpFieldSymbol=new WXFieldName
          (this,"Symbol:",this,ID_WXSCATTPOWATOM_SYMBOL);
-
+#if 1
+      WXFieldRefPar* pFieldBiso  =new WXFieldRefPar(this,"Biso:",
+            &(mpScatteringPowerAtom->GetPar(&(mpScatteringPowerAtom->mBiso))) );
+#else
       WXCrystObjBasic* pFieldBiso
          =mpScatteringPowerAtom->GetPar(&(mpScatteringPowerAtom->mBiso)).WXCreate(this);
-            
-      
+#endif            
       sizer->Add(mpFieldSymbol  ,0,wxALIGN_CENTER);
       sizer->Add(pFieldBiso    ,0,wxALIGN_CENTER);
       

@@ -56,30 +56,65 @@ WXCrystObjBasic(parent),mpZAtom(obj)
    mpFieldScattPower=new WXFieldChoice(this,ID_ZATOM_SCATTPOW,"Type:",60);
    mpSizer->Add(mpFieldScattPower,0,wxALIGN_LEFT);
    mList.Add(mpFieldScattPower);
-
+#if 1
    if(0<mpZAtom->GetZScatterer().GetZAtomRegistry().Find(*mpZAtom))
    {
-      WXCrystObjBasic* mpFieldBond 
-         =mpZAtom->GetZScatterer().GetPar(&(mpZAtom->mBondLength)).WXCreate(this);
-      mpSizer->Add(mpFieldBond,0,wxALIGN_LEFT);
-      mList.Add(mpFieldBond);
+      WXFieldRefPar* pFieldBond  =new WXFieldRefPar(this,
+               "Bond(w/"+
+               (mpZAtom->GetZScatterer().
+                  GetZAtomRegistry().GetObj(mpZAtom->GetZBondAtom())).GetName()
+               +")",
+               &(mpZAtom->GetZScatterer().GetPar(&(mpZAtom->mBondLength))));
+      mpSizer->Add(pFieldBond,0,wxALIGN_LEFT);
+      mList.Add(pFieldBond);
    }
    
    if(1<mpZAtom->GetZScatterer().GetZAtomRegistry().Find(*mpZAtom))
    {
-       WXCrystObjBasic* mpFieldAngle
-          =mpZAtom->GetZScatterer().GetPar(&(mpZAtom->mAngle)).WXCreate(this);
-      mpSizer->Add(mpFieldAngle,0,wxALIGN_LEFT);
-      mList.Add(mpFieldAngle);
+      WXFieldRefPar* pFieldAngle =new WXFieldRefPar(this,
+               "Angle(w/"+
+               (mpZAtom->GetZScatterer().
+                  GetZAtomRegistry().GetObj(mpZAtom->GetZAngleAtom())).GetName()
+               +")",
+                        &(mpZAtom->GetZScatterer().GetPar(&(mpZAtom->mAngle))));
+      mpSizer->Add(pFieldAngle,0,wxALIGN_LEFT);
+      mList.Add(pFieldAngle);
    }
    if(2<mpZAtom->GetZScatterer().GetZAtomRegistry().Find(*mpZAtom))
    {
-       WXCrystObjBasic* mpFieldDihed 
-       =mpZAtom->GetZScatterer().GetPar(&(mpZAtom->mDihed)).WXCreate(this);
-      mpSizer->Add(mpFieldDihed,0,wxALIGN_LEFT);
-      mList.Add(mpFieldDihed);
+      WXFieldRefPar* pFieldDihed =new WXFieldRefPar(this,
+               "DihedralAngle(w/"+
+               (mpZAtom->GetZScatterer().
+                  GetZAtomRegistry().GetObj(mpZAtom->GetZDihedralAngleAtom())).GetName()
+               +")",
+                        &(mpZAtom->GetZScatterer().GetPar(&(mpZAtom->mDihed))));
+      mpSizer->Add(pFieldDihed,0,wxALIGN_LEFT);
+      mList.Add(pFieldDihed);
+   }
+#else
+   if(0<mpZAtom->GetZScatterer().GetZAtomRegistry().Find(*mpZAtom))
+   {
+      WXCrystObjBasic* pFieldBond 
+         =mpZAtom->GetZScatterer().GetPar(&(mpZAtom->mBondLength)).WXCreate(this);
+      mpSizer->Add(pFieldBond,0,wxALIGN_LEFT);
+      mList.Add(pFieldBond);
    }
    
+   if(1<mpZAtom->GetZScatterer().GetZAtomRegistry().Find(*mpZAtom))
+   {
+       WXCrystObjBasic* pFieldAngle
+          =mpZAtom->GetZScatterer().GetPar(&(mpZAtom->mAngle)).WXCreate(this);
+      mpSizer->Add(pFieldAngle,0,wxALIGN_LEFT);
+      mList.Add(pFieldAngle);
+   }
+   if(2<mpZAtom->GetZScatterer().GetZAtomRegistry().Find(*mpZAtom))
+   {
+       WXCrystObjBasic* pFieldDihed 
+       =mpZAtom->GetZScatterer().GetPar(&(mpZAtom->mDihed)).WXCreate(this);
+      mpSizer->Add(pFieldDihed,0,wxALIGN_LEFT);
+      mList.Add(pFieldDihed);
+   }
+#endif   
    this->SetSizer(mpSizer);
    
    this->CrystUpdate();
@@ -190,12 +225,18 @@ WXScatterer(parent,obj),mpZScatterer(obj)
    //Orientation
       wxBoxSizer* sizer=new wxBoxSizer(wxHORIZONTAL);
       mpScatterer->RefinableObj::Print();
+#if 1
+      WXFieldRefPar* pFieldPhi    =new WXFieldRefPar(this,"Phi:",
+                                     &(mpZScatterer->GetPar(&(mpZScatterer->mPhi))) );
+      WXFieldRefPar* pFieldChi    =new WXFieldRefPar(this,"Chi:",
+                                     &(mpZScatterer->GetPar(&(mpZScatterer->mChi))) );
+      WXFieldRefPar* pFieldPsi    =new WXFieldRefPar(this,"Psi:",
+                                     &(mpZScatterer->GetPar(&(mpZScatterer->mPsi))) );
+#else
       WXCrystObjBasic* pFieldPhi =mpZScatterer->GetPar(&(mpZScatterer->mPhi)).WXCreate(this);
-
       WXCrystObjBasic* pFieldChi =mpZScatterer->GetPar(&(mpZScatterer->mChi)).WXCreate(this);
-
       WXCrystObjBasic* pFieldPsi =mpZScatterer->GetPar(&(mpZScatterer->mPsi)).WXCreate(this);
-
+#endif
       sizer->Add(pFieldPhi    ,0,wxALIGN_CENTER);
       sizer->Add(pFieldChi    ,0,wxALIGN_CENTER);
       sizer->Add(pFieldPsi    ,0,wxALIGN_CENTER);

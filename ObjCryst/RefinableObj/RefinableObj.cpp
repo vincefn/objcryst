@@ -657,11 +657,11 @@ WXCrystObjBasic* RefinablePar::WXCreate(wxWindow *parent)
       throw ObjCrystException((string)"RefinablePar::WXCreate():"+this->GetName()+(string)" WXFieldRefPar already exists !");
    }
    mpWXFieldRefPar=new WXFieldRefPar (parent,this->GetName(),this);
-   return mpWXFieldRefPar;
+   return (WXCrystObjBasic*) mpWXFieldRefPar;
 }
 WXCrystObjBasic* RefinablePar::WXGet()
 {
-   return mpWXFieldRefPar;
+   return (WXCrystObjBasic*) mpWXFieldRefPar;
 }
 void RefinablePar::WXDelete()
 {

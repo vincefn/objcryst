@@ -60,9 +60,13 @@ WXCrystObjBasic(parent),mpRadiation(rad)
    mpFieldWavelengthType= new WXFieldOption(this,-1,&(mpRadiation->mWavelengthType));
    mpSizer->Add(mpFieldWavelengthType,0);
    mList.Add(mpFieldWavelengthType);
-   
+#if 1
+   WXFieldRefPar* pFieldWavelength=new WXFieldRefPar(this,"Wavelength:",
+                                     &(mpRadiation->GetPar(mpRadiation->mWavelength.data())));
+#else
    WXCrystObjBasic* pFieldWavelength
       =mpRadiation->GetPar(mpRadiation->mWavelength.data()).WXCreate(this);
+#endif
    mpSizer->Add(pFieldWavelength,0);
    mList.Add(pFieldWavelength);
 
@@ -244,12 +248,24 @@ mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUM_MENU_IMPORT_CPI,
       mList.Add(mpPowderPattern->mRadiation.WXGet());
    // Correction to 2Theta
       wxBoxSizer* thetaCorrSizer=new wxBoxSizer(wxHORIZONTAL);
+#if 1
+      WXFieldRefPar* fieldThetaZero    =new WXFieldRefPar(this,"2theta zero:",
+                                   &(mpPowderPattern
+                                     ->GetPar(&(mpPowderPattern->m2ThetaZero))),90 );
+      WXFieldRefPar* fieldThetaDispl    =new WXFieldRefPar(this,"2theta displacement:",
+                                   &(mpPowderPattern
+                                     ->GetPar(&(mpPowderPattern->m2ThetaDisplacement))),90 );
+      WXFieldRefPar* fieldThetaTransp    =new WXFieldRefPar(this,"2theta transparency:",
+                                   &(mpPowderPattern
+                                     ->GetPar(&(mpPowderPattern->m2ThetaTransparency))),90 );
+#else
       WXCrystObjBasic* fieldThetaZero    
          =mpPowderPattern->GetPar(&(mpPowderPattern->m2ThetaZero)).WXCreate(this);
       WXCrystObjBasic* fieldThetaDispl
          =mpPowderPattern->GetPar(&(mpPowderPattern->m2ThetaDisplacement)).WXCreate(this);
       WXCrystObjBasic* fieldThetaTransp
          =mpPowderPattern->GetPar(&(mpPowderPattern->m2ThetaTransparency)).WXCreate(this);
+#endif
       thetaCorrSizer->Add(fieldThetaZero,0);
       thetaCorrSizer->Add(fieldThetaDispl,0);
       thetaCorrSizer->Add(fieldThetaTransp,0);
@@ -923,6 +939,23 @@ WXRefinableObj(parent,p),mpPowderPatternDiffraction(p)
       mList.Add(mpFieldCrystal);
    //Profile Parameters
       wxBoxSizer* profileSizer=new wxBoxSizer(wxHORIZONTAL);
+#if 1
+      WXFieldRefPar* pFieldCagliotiU    =new WXFieldRefPar(this,"U:",
+                                   &(mpPowderPatternDiffraction
+                                     ->GetPar(&(mpPowderPatternDiffraction->mCagliotiU))),90 );
+      WXFieldRefPar* pFieldCagliotiV    =new WXFieldRefPar(this,"V:",
+                                   &(mpPowderPatternDiffraction
+                                     ->GetPar(&(mpPowderPatternDiffraction->mCagliotiV))),90 );
+      WXFieldRefPar* pFieldCagliotiW    =new WXFieldRefPar(this,"W:",
+                                   &(mpPowderPatternDiffraction
+                                     ->GetPar(&(mpPowderPatternDiffraction->mCagliotiW))),90 );
+      WXFieldRefPar* pFieldEta0         =new WXFieldRefPar(this,"Eta0:",
+                                 &(mpPowderPatternDiffraction
+                                  ->GetPar(&(mpPowderPatternDiffraction->mPseudoVoigtEta0))));
+      WXFieldRefPar* pFieldEta1         =new WXFieldRefPar(this,"Eta1:",
+                                 &(mpPowderPatternDiffraction
+                                  ->GetPar(&(mpPowderPatternDiffraction->mPseudoVoigtEta1))));
+#else
       WXCrystObjBasic* pFieldCagliotiU
          =mpPowderPatternDiffraction->GetPar(&(mpPowderPatternDiffraction->mCagliotiU))
             .WXCreate(this);
@@ -938,6 +971,7 @@ WXRefinableObj(parent,p),mpPowderPatternDiffraction(p)
       WXCrystObjBasic* pFieldEta1=
          mpPowderPatternDiffraction->GetPar(&(mpPowderPatternDiffraction->mPseudoVoigtEta1))
             .WXCreate(this);
+#endif
       profileSizer->Add(pFieldCagliotiU,0);
       profileSizer->Add(pFieldCagliotiV,0);
       profileSizer->Add(pFieldCagliotiW,0);

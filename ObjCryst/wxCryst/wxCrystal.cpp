@@ -136,6 +136,25 @@ mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
                                 "3D Display");
    // Lattice
       wxBoxSizer* lattice=new wxBoxSizer(wxHORIZONTAL);
+#if 1
+      WXFieldRefPar* pFieldLatticeA    =new WXFieldRefPar(this,"a:",
+                                     &(mpCrystal->GetPar(mpCrystal->mCellDim.data()+0)) );
+          
+      WXFieldRefPar* pFieldLatticeB    =new WXFieldRefPar(this,"b:",
+                                     &(mpCrystal->GetPar(mpCrystal->mCellDim.data()+1)) );
+          
+      WXFieldRefPar* pFieldLatticeC    =new WXFieldRefPar(this,"c:",
+                                     &(mpCrystal->GetPar(mpCrystal->mCellDim.data()+2)) );
+          
+      WXFieldRefPar* pFieldLatticeAlpha=new WXFieldRefPar(this,"alpha:",
+                                     &(mpCrystal->GetPar(mpCrystal->mCellDim.data()+3)) );
+          
+      WXFieldRefPar* pFieldLatticeBeta =new WXFieldRefPar(this,"beta:",
+                                     &(mpCrystal->GetPar(mpCrystal->mCellDim.data()+4)) );
+          
+      WXFieldRefPar* pFieldLatticeGamma=new WXFieldRefPar(this,"gamma:",
+                                     &(mpCrystal->GetPar(mpCrystal->mCellDim.data()+5)) );
+#else
       WXCrystObjBasic* pFieldLatticeA 
          =mpCrystal->GetPar(mpCrystal->mCellDim.data()+0).WXCreate(this);
       WXCrystObjBasic* pFieldLatticeB 
@@ -148,7 +167,7 @@ mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
          =mpCrystal->GetPar(mpCrystal->mCellDim.data()+4).WXCreate(this);
       WXCrystObjBasic* pFieldLatticeGamma
          =mpCrystal->GetPar(mpCrystal->mCellDim.data()+5).WXCreate(this);
-
+#endif
       lattice->Add(pFieldLatticeA    ,0,wxALIGN_CENTER);
       lattice->Add(pFieldLatticeB    ,0,wxALIGN_CENTER);
       lattice->Add(pFieldLatticeC    ,0,wxALIGN_CENTER);

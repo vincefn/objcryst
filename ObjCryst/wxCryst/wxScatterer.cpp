@@ -48,28 +48,35 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpScatterer(obj)
    //Lattice
       wxBoxSizer* sizer=new wxBoxSizer(wxHORIZONTAL);
       mpScatterer->RefinableObj::Print();
-      WXCrystObjBasic* mpFieldX
+#if 1
+      WXFieldRefPar* pFieldX    =new WXFieldRefPar(this,"x:",
+                                     &(mpScatterer->GetPar(mpScatterer->mXYZ.data()+0)) );
+      WXFieldRefPar* pFieldY    =new WXFieldRefPar(this,"y:",
+                                     &(mpScatterer->GetPar(mpScatterer->mXYZ.data()+1)) );
+      WXFieldRefPar* pFieldZ    =new WXFieldRefPar(this,"z:",
+                                     &(mpScatterer->GetPar(mpScatterer->mXYZ.data()+2)) );
+      WXFieldRefPar* pFieldPopu    =new WXFieldRefPar(this,"Occup:",
+                                     &(mpScatterer->GetPar(&(mpScatterer->mOccupancy))) );
+#else
+      WXCrystObjBasic* pFieldX
          =mpScatterer->GetPar(mpScatterer->mXYZ.data()+0).WXCreate(this);
-
-      WXCrystObjBasic* mpFieldY
+      WXCrystObjBasic* pFieldY
          =mpScatterer->GetPar(mpScatterer->mXYZ.data()+1).WXCreate(this);
-
-      WXCrystObjBasic* mpFieldZ
+      WXCrystObjBasic* pFieldZ
          =mpScatterer->GetPar(mpScatterer->mXYZ.data()+2).WXCreate(this);
-          
-      WXCrystObjBasic* mpFieldPopu 
+      WXCrystObjBasic* pFieldPopu 
          =mpScatterer->GetPar(&(mpScatterer->mOccupancy)).WXCreate(this);
-
-      sizer->Add(mpFieldX    ,0,wxALIGN_CENTER);
-      sizer->Add(mpFieldY    ,0,wxALIGN_CENTER);
-      sizer->Add(mpFieldZ    ,0,wxALIGN_CENTER);
-      sizer->Add(mpFieldPopu ,0,wxALIGN_CENTER);
+#endif
+      sizer->Add(pFieldX    ,0,wxALIGN_CENTER);
+      sizer->Add(pFieldY    ,0,wxALIGN_CENTER);
+      sizer->Add(pFieldZ    ,0,wxALIGN_CENTER);
+      sizer->Add(pFieldPopu ,0,wxALIGN_CENTER);
       
       mpSizer->Add(sizer,0,wxALIGN_LEFT);
-      mList.Add(mpFieldX);
-      mList.Add(mpFieldY);
-      mList.Add(mpFieldZ);
-      mList.Add(mpFieldPopu);
+      mList.Add(pFieldX);
+      mList.Add(pFieldY);
+      mList.Add(pFieldZ);
+      mList.Add(pFieldPopu);
    
    //mWXParent->Layout();
    mpSizer->Layout();
