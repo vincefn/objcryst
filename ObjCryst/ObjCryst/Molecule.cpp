@@ -2831,8 +2831,17 @@ void Molecule::FlipAtomGroup(const FlipGroup& group)
             const REAL a1=v012x*v03x+v012y*v03y+v012z*v03z;
             const REAL a2= v0mx*v03x+ v0my*v03y+ v0mz*v03z;
             const REAL a3= v12x*v03x+ v12y*v03y+ v12z*v03z;
-            REAL angle;
-            angle=-asin(a1/sqrt(1-a3*a3));
+            REAL angle = -a1/sqrt(1-a3*a3);
+            if(angle>=1.)
+               angle = M_PI/2.;
+            else
+            {
+               if(angle<=-1.)
+               {
+                  angle = -M_PI/2.;
+               }
+               else angle = asin(angle);
+            }
             if(a2<0) angle=M_PI-angle;
             this->RotateAtomGroup(*(group.mpAtom0),v12x,v12y,v12z,
                                   chain->second,2*angle);
