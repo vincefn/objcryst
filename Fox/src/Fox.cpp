@@ -207,6 +207,7 @@ int main (int argc, char *argv[])
    REAL finalCost=0.;
    bool silent=false;
    string outfilename("Fox-out.xml");
+   long filenameInsertCost=-1;
    bool randomize(false);
    bool only3D(false);
    bool loadFourierGRD(false);
@@ -261,6 +262,9 @@ int main (int argc, char *argv[])
          {
             ++i;
             outfilename=string(argv[i]);
+            filenameInsertCost = outfilename.find("#cost",0);
+            cout <<"Fox:#cost, pos="<<filenameInsertCost<<","<<string::npos<<endl;
+            if(string::npos==filenameInsertCost) filenameInsertCost=-1;
             continue;
          }
          if(string("--loadfouriergrd")==string(argv[i]))
@@ -329,7 +333,15 @@ int main (int argc, char *argv[])
          for(int i=0;i<gOptimizationObjRegistry.GetNb();i++)
             for(int j=0;j<5;j++)
                gOptimizationObjRegistry.GetObj(i).Optimize(nbTrial,silent,finalCost);
-      XMLCrystFileSaveGlobal(outfilename);
+      string tmpstr=outfilename;
+      if(filenameInsertCost>=0)
+      {
+         char costAsChar[50];
+         sprintf(costAsChar,"-Cost-%f",gOptimizationObjRegistry.GetObj(0).GetLogLikelihood());
+         string tmpstr2=costAsChar;
+         tmpstr.replace(filenameInsertCost,5,tmpstr2,0,tmpstr2.length());
+      }
+      XMLCrystFileSaveGlobal(tmpstr);
       cout <<"End of Fox execution. Bye !"<<endl;
       exit (0);
    }
