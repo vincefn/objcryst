@@ -8,10 +8,9 @@ using namespace NEWMAT;
 
 #include <iomanip>
 
-LSQObjNum::LSQObjNum(CrystVector_double (*pFunc)(),
+LSQNumObj::LSQNumObj(CrystVector_double (*pFunc)(),
                      string objName)
 {
-   mNbRefParList=0;
 	mpRefinedFunc=pFunc;
 	mDampingFactor=1.;
 	mSaveReportOnEachCycle=false;
@@ -23,42 +22,57 @@ LSQObjNum::LSQObjNum(CrystVector_double (*pFunc)(),
    mStopAfterCycle=false;
 }
 
-LSQObjNum::~LSQObjNum()
+LSQNumObj::~LSQNumObj()
 {
 }
 
-void LSQObjNum::Init(CrystVector_double &obs,CrystVector_double&w)
+void LSQNumObj::Init(const CrystVector_double &obs,const CrystVector_double&w)
 {
 	mObs=obs;
 	mWeight=w;
 }
 
-void LSQObjNum::Init(CrystVector_double &obs)
+void LSQNumObj::Init(const CrystVector_double &obs)
 {
 	CrystVector_double tmp(obs.numElements());
 	tmp=1.;
 	this->Init(obs,tmp);
 }
 
-void LSQObjNum::SetParIsFixed(const string& parName,const bool fix)
-   {for(int i=0;i<mNbRefParList;i++) mpRefParList[i]->SetParIsFixed(parName,fix);}
-void LSQObjNum::SetParIsFixed(const RefParType *type,const bool fix)
-   {for(int i=0;i<mNbRefParList;i++) mpRefParList[i]->SetParIsFixed(type,fix);}
+void LSQNumObj::SetParIsFixed(const string& parName,const bool fix)
+{
+   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
+      mRecursiveRefinedObjList.GetObj(i).SetParIsFixed(parName,fix);
+}
+void LSQNumObj::SetParIsFixed(const RefParType *type,const bool fix)
+{
+   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
+      mRecursiveRefinedObjList.GetObj(i).SetParIsFixed(type,fix);
+}
    
-void LSQObjNum::UnFixAllPar()
-   {for(int i=0;i<mNbRefParList;i++) mpRefParList[i]->UnFixAllPar();}
+void LSQNumObj::UnFixAllPar()
+{
+   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
+      mRecursiveRefinedObjList.GetObj(i).UnFixAllPar();
+}
    
-void LSQObjNum::SetParIsUsed(const string& parName,const bool use)
-   {for(int i=0;i<mNbRefParList;i++) mpRefParList[i]->SetParIsUsed(parName,use);}
-void LSQObjNum::SetParIsUsed(const RefParType *type,const bool use)
-   {for(int i=0;i<mNbRefParList;i++) mpRefParList[i]->SetParIsUsed(type,use);}
+void LSQNumObj::SetParIsUsed(const string& parName,const bool use)
+{
+   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
+      mRecursiveRefinedObjList.GetObj(i).SetParIsUsed(parName,use);
+}
+void LSQNumObj::SetParIsUsed(const RefParType *type,const bool use)
+{
+   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
+      mRecursiveRefinedObjList.GetObj(i).SetParIsUsed(type,use);
+}
 
-void LSQObjNum::Refine (int nbCycle,bool useLevenbergMarquardt)
+void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt)
 {
 
 	//Check if we are ready for the refinement
 	//:TODO:
-   cout << "LSQObjNum::Refine():Beginning "<<endl;
+   cout << "LSQNumObj::Refine():Beginning "<<endl;
    //Prepare for refinement (get non-fixed parameters)
       this->PrepareRefParList();
       mRefParList.PrepareForRefinement();
@@ -86,8 +100,8 @@ void LSQObjNum::Refine (int nbCycle,bool useLevenbergMarquardt)
 	for(int cycle=1 ; cycle <=nbCycle;cycle++)
 	{
 		mRefParList.SaveParamSet(mIndexValuesSetLast);// end of last cycle
-      cout << "LSQObjNum::Refine():Cycle#"<< cycle <<endl;
-      cout << "LSQObjNum::Refine():Computing initial values" <<endl;
+      cout << "LSQNumObj::Refine():Cycle#"<< cycle <<endl;
+      cout << "LSQNumObj::Refine():Computing initial values" <<endl;
 		//initial value of function
 			calc0=(*mpRefinedFunc)();
          //R
@@ -102,7 +116,7 @@ void LSQObjNum::Refine (int nbCycle,bool useLevenbergMarquardt)
             tmpV2 *= mWeight;
             Rw_ini=sqrt(tmpV1.sum()/tmpV2.sum());
 		//derivatives
-      cout << "LSQObjNum::Refine():Computing derivatives" <<endl;
+      cout << "LSQNumObj::Refine():Computing derivatives" <<endl;
       designMatrix=0.;
       pTmp2=designMatrix.data();
 		for(i=0;i<nbVar;i++)
@@ -137,9 +151,9 @@ void LSQObjNum::Refine (int nbCycle,bool useLevenbergMarquardt)
 		}
          //cout << designMatrix;
          
-      LSQObjNum_Refine_Restart: //Used in case of singular matrix or for Marquardt
+      LSQNumObj_Refine_Restart: //Used in case of singular matrix or for Marquardt
       
-      cout << "LSQObjNum::Refine():Computing M and B Matrices" <<endl;
+      cout << "LSQNumObj::Refine():Computing M and B Matrices" <<endl;
 		//Calculate M and B matrices
          tmpV1.resize(nbObs);
          tmpV2.resize(nbObs);
@@ -173,10 +187,10 @@ void LSQObjNum::Refine (int nbCycle,bool useLevenbergMarquardt)
          {
             if( M(i,i) < 1e-10) //:TODO: Check what value to use as a limit
             {  
-               cout << "LSQObjNum::Refine()Singular parameter";
+               cout << "LSQNumObj::Refine()Singular parameter";
                cout << "(null derivate in all points) : ";
                cout << mRefParList.GetParNotFixed(i).GetName() << endl;
-               cout << "LSQObjNum::Refine(): Automatically fixing parameter";
+               cout << "LSQNumObj::Refine(): Automatically fixing parameter";
                cout << " and re-start cycle..";
                cout << endl;
                mRefParList.GetParNotFixed(i).SetIsFixed(true);
@@ -212,14 +226,14 @@ void LSQObjNum::Refine (int nbCycle,bool useLevenbergMarquardt)
                */
 		         M.resize(nbVar,nbVar);
 		         B.resize(nbVar);
-               goto LSQObjNum_Refine_Restart;
+               goto LSQNumObj_Refine_Restart;
             }
          }
          
 /*
 		//Solve with Singular value Decomposition on design matrix (using newmat)
       {
-         cout << "LSQObjNum::Refine():Performing SVD on design matrix..." << endl;
+         cout << "LSQNumObj::Refine():Performing SVD on design matrix..." << endl;
          Matrix newmatA(nbObs,nbVar), newmatU(nbObs,nbVar), newmatV(nbVar,nbVar);
          DiagonalMatrix newmatW(nbVar);
          ColumnVector newmatB(nbObs);
@@ -245,7 +259,7 @@ void LSQObjNum::Refine (int nbCycle,bool useLevenbergMarquardt)
             if(newmatW(i+1,i+1) > minAllowedValue) newmatInvW(i+1,i+1) = 1./newmatW(i+1,i+1);
             else 
             {  
-               cout << "LSQObjNum::Refine():SVD: fixing singular value "<< i <<endl;
+               cout << "LSQNumObj::Refine():SVD: fixing singular value "<< i <<endl;
                newmatInvW(i+1,i+1) = 0.;
             }
          newmatDelta=newmatV * newmatInvW * newmatU.t() * newmatB;
@@ -261,9 +275,10 @@ void LSQObjNum::Refine (int nbCycle,bool useLevenbergMarquardt)
 */
 		//Perform "Eigenvalue Filtering" on normal matrix (using newmat library)
       {
-         cout << "LSQObjNum::Refine():Eigenvalue Filtering..." <<endl;
+         cout << "LSQNumObj::Refine():Eigenvalue Filtering..." <<endl;
          CrystMatrix_double V(nbVar,nbVar);
          CrystVector_double invW(nbVar);//diagonal matrix, in fact
+         cout << "LSQNumObj::Refine():Eigenvalue Filtering...1" <<endl;
          {
             SymmetricMatrix newmatA(nbVar);
             Matrix   newmatV(nbVar,nbVar),
@@ -280,13 +295,16 @@ void LSQObjNum::Refine (int nbCycle,bool useLevenbergMarquardt)
                for(long j=0;j<nbVar;j++) 
                   newmatA(i+1,j+1) = M(i,j) * newmatDscale(i+1,i+1) * newmatDscale(j+1,j+1);
             }
+         cout << "LSQNumObj::Refine():Eigenvalue Filtering...2" <<endl;
             
-            //cout << newmatA.SubMatrix(1,11,1,11) <<endl;
+            //cout << newmatA.SubMatrix(1,3,1,3) <<endl;
+         cout << "LSQNumObj::Refine():Eigenvalue Filtering...3" <<endl;
             
-            Jacobi(newmatA,newmatW,newmatV);
-            //EigenValues(newmatA,newmatW,newmatV);
+            //Jacobi(newmatA,newmatW,newmatV);
+            EigenValues(newmatA,newmatW,newmatV);
             ColumnVector newmatDelta(nbVar);
             DiagonalMatrix newmatInvW(nbVar);
+         cout << "LSQNumObj::Refine():Eigenvalue Filtering...4" <<endl;
             //Avoid singular values
             {
                double max=newmatW.MaximumAbsoluteValue();
@@ -296,7 +314,7 @@ void LSQObjNum::Refine (int nbCycle,bool useLevenbergMarquardt)
                      newmatInvW(i+1,i+1)= 1./newmatW(i+1,i+1);
                   else 
                   {
-                     cout << "LSQObjNum::Refine():fixing ill-cond EigenValue "<< i <<endl;
+                     cout << "LSQNumObj::Refine():fixing ill-cond EigenValue "<< i <<endl;
                      newmatInvW(i+1,i+1) = 0.;
                   }
                
@@ -328,7 +346,7 @@ void LSQObjNum::Refine (int nbCycle,bool useLevenbergMarquardt)
                   }
                   else 
                   {  
-                     cout << "LSQObjNum::Refine():fixing ill-cond EigenValue "<< i <<endl;
+                     cout << "LSQNumObj::Refine():fixing ill-cond EigenValue "<< i <<endl;
                      newmatInvW(i+1,i+1) = 0.;
                   }
                }
@@ -336,10 +354,9 @@ void LSQObjNum::Refine (int nbCycle,bool useLevenbergMarquardt)
             }
             newmatN=newmatV * newmatInvW * newmatV.t();
             
-            //Back 'Derivative Scaling'
+            //Back 'Derivative Scaling' :TODO:
                cout << "Back-scaling" << endl;
                newmatN = newmatDscale * newmatN * newmatDscale;
-               
             newmatDelta = newmatN * newmatB;
             
             for(long i=0;i<nbVar;i++)
@@ -355,7 +372,7 @@ void LSQObjNum::Refine (int nbCycle,bool useLevenbergMarquardt)
             //cout << invW <<endl << U << endl << V << endl << B << endl << deltaVar << endl;
             //cout<<setw(10)<<setprecision(4)<< newmatV*100. << endl;
             //cout << newmatA/1e15 << endl;
-            cout << newmatW << endl;
+            //cout << newmatW << endl;
             //cout << newmatDscale*1e20 << endl;
             //cout << newmatB <<endl;
          }
@@ -365,7 +382,7 @@ void LSQObjNum::Refine (int nbCycle,bool useLevenbergMarquardt)
 /*
 		//Perform Singular value Decomposition normalon normal matrix (using newmat library)
       {
-         cout << "LSQObjNum::Refine():Performing SVD on normal matrix" <<endl;
+         cout << "LSQNumObj::Refine():Performing SVD on normal matrix" <<endl;
          CrystMatrix_double U(nbVar,nbVar),V(nbVar,nbVar);
          CrystVector_double invW(nbVar);//diagonal matrix, in fact
          {
@@ -390,7 +407,7 @@ void LSQObjNum::Refine (int nbCycle,bool useLevenbergMarquardt)
                if(newmatW(i+1,i+1) > minAllowedValue) newmatInvW(i+1,i+1) = 1./newmatW(i+1,i+1);
                else 
                {  
-                  cout << "LSQObjNum::Refine():SVD: fixing ill-cond value "<< i <<endl;
+                  cout << "LSQNumObj::Refine():SVD: fixing ill-cond value "<< i <<endl;
                   newmatInvW(i+1,i+1) = 0.;
                }
             newmatN=newmatV * newmatInvW * newmatU.t();
@@ -415,13 +432,13 @@ void LSQObjNum::Refine (int nbCycle,bool useLevenbergMarquardt)
 /* 
       //OLD VERSION USING GAUS INVERSION
 		//Calculate new values for variables
-      cout << "LSQObjNum::Refine():Computing new values for variables" <<endl;
+      cout << "LSQNumObj::Refine():Computing new values for variables" <<endl;
          try { N=InvertMatrix(M);}
          catch(long svix)
          {
-            cout << "LSQObjNum::Refine(): WARNING : Singular Matrix !!!";
+            cout << "LSQNumObj::Refine(): WARNING : Singular Matrix !!!";
             cout << "With refinable parameter: " << mRefParList.GetParNotFixed(svix).Name() <<endl;
-            cout << "LSQObjNum::Refine(): Automatically fixing parameter and re-start cycle..";              cout << endl;
+            cout << "LSQNumObj::Refine(): Automatically fixing parameter and re-start cycle..";              cout << endl;
             {
                CrystMatrix_double Mtmp;
                Mtmp=M;
@@ -436,7 +453,7 @@ void LSQObjNum::Refine (int nbCycle,bool useLevenbergMarquardt)
 		      B.resize(nbVar);
 		      designMatrix.resize(nbVar,nbObs);
 		      deltaVar.resize(nbVar);
-            goto LSQObjNum_Refine_Restart;
+            goto LSQNumObj_Refine_Restart;
          }
          deltaVar=0;
          for(i=0;i<nbVar;i++)
@@ -455,17 +472,17 @@ void LSQObjNum::Refine (int nbCycle,bool useLevenbergMarquardt)
             //cout << deltaVar  << endl;
          }
          */
-         cout << "LSQObjNum::Refine():Computing new values for variables" <<endl;
+         cout << "LSQNumObj::Refine():Computing new values for variables" <<endl;
          
 
 			for(i=0;i<nbVar;i++) mRefParList.GetParNotFixed(i).Mutate(deltaVar(i));
          
-      cout << "LSQObjNum::Refine():Computing statistics for last cycle..." <<endl;
+      cout << "LSQNumObj::Refine():Computing statistics for last cycle..." <<endl;
 		//for statistics...
          //mRefParList.Print();
 			calc=(*mpRefinedFunc)();
          //Chi^2
-      cout << "LSQObjNum::Refine():Computing Chi^2 for last cycle..." <<endl;
+      cout << "LSQNumObj::Refine():Computing Chi^2 for last cycle..." <<endl;
          {
             double oldChiSq=mChiSq;
             tmpV1 = mObs;
@@ -478,13 +495,13 @@ void LSQObjNum::Refine (int nbCycle,bool useLevenbergMarquardt)
                if(mChiSq > oldChiSq)
                {
                   marquardt *= marquardtMult;
-                  cout << "LSQObjNum::Refine():new Levenberg-Marquardt factor :" ;
+                  cout << "LSQNumObj::Refine():new Levenberg-Marquardt factor :" ;
                   cout << FormatFloat(marquardt,18,14) <<endl;
                   mChiSq=oldChiSq;
-                  goto LSQObjNum_Refine_Restart;
+                  goto LSQNumObj_Refine_Restart;
                }
                else marquardt /= marquardtMult;
-               cout << "LSQObjNum::Refine():new Levenberg-Marquardt factor :" ;
+               cout << "LSQNumObj::Refine():new Levenberg-Marquardt factor :" ;
                cout << FormatFloat(marquardt,18,14) <<endl;
             }
          }
@@ -519,31 +536,31 @@ void LSQObjNum::Refine (int nbCycle,bool useLevenbergMarquardt)
 	}
 }
 
-CrystMatrix_double LSQObjNum::CorrelMatrix()const{return mCorrelMatrix;};
+CrystMatrix_double LSQNumObj::CorrelMatrix()const{return mCorrelMatrix;};
 
-double LSQObjNum::Rfactor()const{return mR;};
+double LSQNumObj::Rfactor()const{return mR;};
 
-double LSQObjNum::RwFactor()const{return mRw;};
+double LSQNumObj::RwFactor()const{return mRw;};
 
-double LSQObjNum::ChiSquare()const{return mChiSq;};
+double LSQNumObj::ChiSquare()const{return mChiSq;};
 
-void LSQObjNum::AddRefParList(RefinableObj &refParList)
+void LSQNumObj::AddRefinableObj(RefinableObj &obj)
 {
-   mpRefParList[mNbRefParList]=&refParList;
-   mNbRefParList += 1;
+   mRefinedObjList.Register(obj);
+   RefObjRegisterRecursive(obj,mRecursiveRefinedObjList);
 }
 
-void LSQObjNum::SetUseSaveFileOnEachCycle(bool yesOrNo)
+void LSQNumObj::SetUseSaveFileOnEachCycle(bool yesOrNo)
 {
 	mSaveReportOnEachCycle=yesOrNo;
 }
 
-void LSQObjNum::SetSaveFile(string fileName)
+void LSQNumObj::SetSaveFile(string fileName)
 {
 	mSaveFileName=fileName;
 }
 
-void LSQObjNum::PrintRefResults() const
+void LSQNumObj::PrintRefResults() const
 {
    //:TODO:
    //this->PrepareRefParList(); activate this when PrepareRefParList() will be more savy
@@ -570,34 +587,34 @@ void LSQObjNum::PrintRefResults() const
 	cout <<endl;
 }
 
-void LSQObjNum::SetDampingFactor(const double newDampFact)
+void LSQNumObj::SetDampingFactor(const double newDampFact)
 {
 	mDampingFactor=newDampFact;
 }
 
-void LSQObjNum::PurgeSaveFile()
+void LSQNumObj::PurgeSaveFile()
 {
    //:TODO:
 }
 
-void LSQObjNum::WriteReportToFile() const
+void LSQNumObj::WriteReportToFile() const
 {
    //:TODO:
 }
 
-void LSQObjNum::OptimizeDerivativeSteps()
+void LSQNumObj::OptimizeDerivativeSteps()
 {
    //:TODO:
 }
 
-void LSQObjNum::PrepareRefParList() const
+void LSQNumObj::PrepareRefParList() const
 {
    //:TODO: instead of resetting the list every time, check if it is necessary !
    mRefParList.ResetParList();
-   for(int i=0;i<mNbRefParList;i++)
+   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
    {
-      mpRefParList[i]->Print();
-      mRefParList.AddPar( *mpRefParList[i]);
+      mRecursiveRefinedObjList.GetObj(i).Print();
+      mRefParList.AddPar( mRecursiveRefinedObjList.GetObj(i));
    }
    mRefParList.Print();
 }

@@ -80,8 +80,6 @@ class PowderPatternComponent : virtual public RefinableObj
       bool mIsScalable;
       
       //Clocks
-         /// Last modification of the scale factor
-         RefinableObjClock mClockScaleFactor;
          /// When was the powder spectrum last computed ?
          mutable RefinableObjClock mClockPowderPatternCalc;
       
@@ -583,6 +581,8 @@ class PowderPattern : public RefinableObj
          mutable RefinableObjClock mClockPowderPatternCalc;
          /// Corrections to 2Theta
          RefinableObjClock mClockPowderPattern2ThetaCorr;
+         /// Last modification of the scale factor
+         RefinableObjClock mClockScaleFactor;
       
       //Excluded 2Theta regions in the powder spectrum, for statistics.
          /// Min value for 2theta for all excluded regions

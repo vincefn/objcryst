@@ -562,7 +562,8 @@ void GlobalOptimObj::SetParIsFixed(const RefParType *type,const bool fix)
 void GlobalOptimObj::UnFixAllPar()
 {
    for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
-      mRecursiveRefinedObjList.GetObj(i).UnFixAllPar();}
+      mRecursiveRefinedObjList.GetObj(i).UnFixAllPar();
+}
    
 void GlobalOptimObj::SetParIsUsed(const string& parName,const bool use)
 {

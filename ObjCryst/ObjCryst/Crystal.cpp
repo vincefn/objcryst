@@ -1311,7 +1311,7 @@ void Crystal::InitRefParList()
    {//:KLUDGE:
       {
          RefinablePar tmp(this->GetName()+"_A",pLatPar,1.,100.,
-                           gpRefParTypeUnitCell,REFPAR_DERIV_STEP_ABSOLUTE,
+                           gpRefParTypeUnitCellLength,REFPAR_DERIV_STEP_ABSOLUTE,
                            true,true,a,false,1.0);
          tmp.SetDerivStep(1e-4);
          tmp.AssignClock(mClockLatticePar);
@@ -1319,7 +1319,7 @@ void Crystal::InitRefParList()
       }
       {
          RefinablePar tmp(this->GetName()+"_B",pLatPar+1,1.,100.,
-                           gpRefParTypeUnitCell,REFPAR_DERIV_STEP_ABSOLUTE,
+                           gpRefParTypeUnitCellLength,REFPAR_DERIV_STEP_ABSOLUTE,
                            true,true,b,false,1.0);
          tmp.SetDerivStep(1e-4);
          tmp.AssignClock(mClockLatticePar);
@@ -1327,7 +1327,7 @@ void Crystal::InitRefParList()
       }
       {
          RefinablePar tmp(this->GetName()+"_C",pLatPar+2,1.,100.,
-                           gpRefParTypeUnitCell,REFPAR_DERIV_STEP_ABSOLUTE,
+                           gpRefParTypeUnitCellLength,REFPAR_DERIV_STEP_ABSOLUTE,
                            true,true,c,false,1.0);
          tmp.SetDerivStep(1e-4);
          tmp.AssignClock(mClockLatticePar);
@@ -1335,7 +1335,7 @@ void Crystal::InitRefParList()
       }
       {
          RefinablePar tmp(this->GetName()+"_ALPHA",pLatPar+3,.5,3.,
-                           gpRefParTypeUnitCell,REFPAR_DERIV_STEP_ABSOLUTE,
+                           gpRefParTypeUnitCellAngle,REFPAR_DERIV_STEP_ABSOLUTE,
                            true,true,alpha,false,RAD2DEG);
          tmp.SetDerivStep(1e-4);
          tmp.AssignClock(mClockLatticePar);
@@ -1343,7 +1343,7 @@ void Crystal::InitRefParList()
       }
       {
          RefinablePar tmp(this->GetName()+"_BETA",pLatPar+4,.5,3.,
-                           gpRefParTypeUnitCell,REFPAR_DERIV_STEP_ABSOLUTE,
+                           gpRefParTypeUnitCellAngle,REFPAR_DERIV_STEP_ABSOLUTE,
                            true,true,beta,false,RAD2DEG);
          tmp.SetDerivStep(1e-4);
          tmp.AssignClock(mClockLatticePar);
@@ -1351,7 +1351,7 @@ void Crystal::InitRefParList()
       }
       {
          RefinablePar tmp(this->GetName()+"_GAMMA",pLatPar+5,.5,3.,
-                           gpRefParTypeUnitCell,REFPAR_DERIV_STEP_ABSOLUTE,
+                           gpRefParTypeUnitCellAngle,REFPAR_DERIV_STEP_ABSOLUTE,
                            true,true,gamma,false,RAD2DEG);
          tmp.SetDerivStep(1e-4);
          tmp.AssignClock(mClockLatticePar);

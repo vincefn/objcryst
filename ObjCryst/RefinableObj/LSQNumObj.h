@@ -8,7 +8,7 @@
 *           Radovan.Cerny@cryst.unige.ch
 *
 */
-/*   LSQObjNum.h
+/*   LSQNumObj.h
 *  header file for Least-Squares refinement witn Numerical derivatives Objects
 *
 */
@@ -25,14 +25,14 @@ using namespace ObjCryst;
 * This is is very quick& dirty (slow), written one day for tests... Do not expect anything
 * from it yet... I'm not sure it currently works !
 */
-class LSQObjNum
+class LSQNumObj
 {
 	public:
-		LSQObjNum(CrystVector_double (*pRefinedFunc)(),
+		LSQNumObj(CrystVector_double (*pRefinedFunc)(),
                                   string objName="Unnamed LSQ object");
-		~LSQObjNum();
-		void Init(CrystVector_double&obs,CrystVector_double&weight);
-		void Init(CrystVector_double&obs);//using unit weight
+		~LSQNumObj();
+		void Init(const CrystVector_double&obs,const CrystVector_double&weight);
+		void Init(const CrystVector_double&obs);//using unit weight
       
       /// Fix one parameter
       void SetParIsFixed(const string& parName,const bool fix);
@@ -51,8 +51,8 @@ class LSQObjNum
 		double Rfactor()const;
 		double RwFactor()const;
 		double ChiSquare()const;	//uses the weight if specified
-      ///Add a list of refinable parameters
-		void AddRefParList(RefinableObj &refParList);
+      ///Add an object to refine
+		void AddRefinableObj(RefinableObj &obj);
 		void SetUseSaveFileOnEachCycle(bool yesOrNo=true);
 		void SetSaveFile(string fileName="refine.save");
 		void PrintRefResults()const;
@@ -65,12 +65,13 @@ class LSQObjNum
 	private:
       /// Prepare mRefParList for the refinement
       void PrepareRefParList()const;
-      /// Array of pointers to the lists of refined parameters
-		RefinableObj *mpRefParList[100];
-      /// Number of lists of refined parameters
-      int mNbRefParList;
-      /// The refinable par list used during refinement. Only a condensed version
-      /// of the refinable par list *mpRefParList[]
+      // Refined objects
+         /// The refined objects
+         ObjRegistry<RefinableObj> mRefinedObjList;
+         /// The refined objects, recursively including all sub-objects
+         ObjRegistry<RefinableObj> mRecursiveRefinedObjList;
+      /// The refinable par list used during refinement. Only a compilation
+      /// of the parameters in RefinableObj
 		mutable RefinableObj mRefParList;
 		//The minimised function
 		//	Obs and Calc values are stored into Obs and Calc arrays

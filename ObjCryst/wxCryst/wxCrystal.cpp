@@ -184,7 +184,10 @@ void WXCrystal::CrystUpdate()
    VFN_DEBUG_EXIT("WXCrystal::CrystUpdate():End",7)
 }
 
-void WXCrystal::UpdateGL()
+void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
+                         const double xMin,const double xMax,
+                         const double yMin,const double yMax,
+                         const double zMin,const double zMax)
 {
    VFN_DEBUG_ENTRY("WXCrystal::UpdateGL()",8)
    #ifdef OBJCRYST_GL
@@ -222,7 +225,7 @@ void WXCrystal::UpdateGL()
 		#endif
       glNewList(mCrystalGLDisplayList,GL_COMPILE);
          glPushMatrix();
-            mpCrystal->GLInitDisplayList();
+            mpCrystal->GLInitDisplayList(onlyIndependentAtoms,xMin,xMax,yMin,yMax,zMin,zMax);
          glPopMatrix();
       glEndList();
       //#ifdef __WINDOWS__
@@ -690,6 +693,7 @@ BEGIN_EVENT_TABLE(WXGLCrystalCanvas, wxGLCanvas)
    EVT_ERASE_BACKGROUND (WXGLCrystalCanvas::OnEraseBackground)
    EVT_MOUSE_EVENTS     (WXGLCrystalCanvas::OnMouse)
    EVT_MENU(ID_GLCRYSTAL_MENU_UPDATE,WXGLCrystalCanvas::OnUpdate)
+   EVT_MENU(ID_GLCRYSTAL_MENU_CHANGELIMITS,WXGLCrystalCanvas::OnChangeLimits)
    EVT_CHAR             (WXGLCrystalCanvas::OnKeyDown)
    EVT_KEY_DOWN         (WXGLCrystalCanvas::OnKeyDown)
    EVT_KEY_UP           (WXGLCrystalCanvas::OnKeyUp)
@@ -700,11 +704,13 @@ WXGLCrystalCanvas::WXGLCrystalCanvas(WXCrystal *wxcryst,
                                      const wxPoint &pos,
                                      const wxSize &size):
 wxGLCanvas(parent,id,pos,size,wxDEFAULT_FRAME_STYLE),//
-mpWXCrystal(wxcryst),mIsGLInit(false),mDist(60),mViewAngle(15)
+mpWXCrystal(wxcryst),mIsGLInit(false),mDist(60),mViewAngle(15),
+mXmin(-.1),mXmax(1.1),mYmin(-.1),mYmax(1.1),mZmin(-.1),mZmax(1.1)
 {
    VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::WXGLCrystalCanvas()",3)
    mpPopUpMenu=new wxMenu("Crystal");
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_UPDATE, "&Update");
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_CHANGELIMITS, "Change display &Limits");
 }
 
 WXGLCrystalCanvas::~WXGLCrystalCanvas()
@@ -966,7 +972,7 @@ void WXGLCrystalCanvas::OnMouse( wxMouseEvent& event )
 void WXGLCrystalCanvas::OnUpdate(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnUpdate()",10)
-   mpWXCrystal->UpdateGL();
+   mpWXCrystal->UpdateGL(false,mXmin,mXmax,mYmin,mYmax,mZmin,mZmax);
    //This will call WXGLCrystalCanvas::CrystUpdate() after updating
    // the GL display list
 }
@@ -1048,6 +1054,109 @@ void WXGLCrystalCanvas::InitGL()
    //First display
    this->CrystUpdate();
    VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::InitGL():End",10)
+}
+void WXGLCrystalCanvas::OnChangeLimits(wxCommandEvent & WXUNUSED(event))
+{
+   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnChangeLimits():End",10)
+   double xMin,xMax,yMin,yMax,zMin,zMax;
+   {
+      wxString str;
+      str << mXmin;
+      wxTextEntryDialog limitDialog(this,"Enter the minimum x value (reduced coords)",
+                              "x min",str,wxOK | wxCANCEL);
+      if(wxID_OK!=limitDialog.ShowModal())
+      {
+         VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnChangeLimits():Cancelled",6)
+         return;
+      }
+      limitDialog.GetValue().ToDouble(&xMin);
+   }
+   {
+      wxString str;
+      str << mXmax;
+      wxTextEntryDialog limitDialog(this,"Enter the maximum x value (reduced coords)",
+                              "x max",str,wxOK | wxCANCEL);
+      if(wxID_OK!=limitDialog.ShowModal())
+      {
+         VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnChangeLimits():Cancelled",6)
+         return;
+      }
+      limitDialog.GetValue().ToDouble(&xMax);
+   }
+   if(xMax<=xMin)
+   {
+      wxMessageDialog dumbUser(this,"max <= min !!!",
+                               "Whooops",wxOK|wxICON_EXCLAMATION);
+      dumbUser.ShowModal();
+      return;
+   }
+   {
+      wxString str;
+      str << mYmin;
+      wxTextEntryDialog limitDialog(this,"Enter the minimum y value (reduced coords)",
+                              "y min",str,wxOK | wxCANCEL);
+      if(wxID_OK!=limitDialog.ShowModal())
+      {
+         VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnChangeLimits():Cancelled",6)
+         return;
+      }
+      limitDialog.GetValue().ToDouble(&yMin);
+   }
+   {
+      wxString str;
+      str << mYmax;
+      wxTextEntryDialog limitDialog(this,"Enter the maximum y value (reduced coords)",
+                              "y max",str,wxOK | wxCANCEL);
+      if(wxID_OK!=limitDialog.ShowModal())
+      {
+         VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnChangeLimits():Cancelled",6)
+         return;
+      }
+      limitDialog.GetValue().ToDouble(&yMax);
+   }
+   if(yMax<=yMin)
+   {
+      wxMessageDialog dumbUser(this,"max <= min !!!",
+                               "Whooops",wxOK|wxICON_EXCLAMATION);
+      dumbUser.ShowModal();
+      return;
+   }
+   {
+      wxString str;
+      str << mZmin;
+      wxTextEntryDialog limitDialog(this,"Enter the minimum z value (reduced coords)",
+                              "z min",str,wxOK | wxCANCEL);
+      if(wxID_OK!=limitDialog.ShowModal())
+      {
+         VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnChangeLimits():Cancelled",6)
+         return;
+      }
+      limitDialog.GetValue().ToDouble(&zMin);
+   }
+   {
+      wxString str;
+      str << mZmax;
+      wxTextEntryDialog limitDialog(this,"Enter the maximum z value (reduced coords)",
+                              "z max",str,wxOK | wxCANCEL);
+      if(wxID_OK!=limitDialog.ShowModal())
+      {
+         VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnChangeLimits():Cancelled",6)
+         return;
+      }
+      limitDialog.GetValue().ToDouble(&zMax);
+   }
+   if(zMax<=zMin)
+   {
+      wxMessageDialog dumbUser(this,"max <= min !!!",
+                               "Whooops",wxOK|wxICON_EXCLAMATION);
+      dumbUser.ShowModal();
+      return;
+   }
+	mXmin=xMin;mXmax=xMax;
+	mYmin=yMin;mYmax=yMax;
+	mZmin=zMin;mZmax=zMax;
+   mpWXCrystal->UpdateGL(false,mXmin,mXmax,mYmin,mYmax,mZmin,mZmax);
+	this->CrystUpdate();
 }
 
 }// namespace 

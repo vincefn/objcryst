@@ -39,6 +39,8 @@ extern "C"
 }
 const RefParType *gpRefParTypeScattData
    = new RefParType(gpRefParTypeObjCryst,"Scattering Data");
+const RefParType *gpRefParTypeScattDataScale
+   = new RefParType(gpRefParTypeObjCryst,"Scale Factor");
 const RefParType *gpRefParTypeScattDataProfile
    = new RefParType(gpRefParTypeScattData,"Profile");
 const RefParType *gpRefParTypeScattDataProfileType

@@ -764,37 +764,37 @@ void PowderPatternDiffraction::InitOptions()
    //Init parameters. This should not be done here !!!
    {
       RefinablePar tmp("U",&mCagliotiU,-1/RAD2DEG/RAD2DEG,1./RAD2DEG/RAD2DEG,
-                        gpRefParTypeScattDataProfile,
+                        gpRefParTypeScattDataProfileWidth,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG*RAD2DEG);
       tmp.AssignClock(mClockProfilePar);
-      tmp.SetDerivStep(1e-4);
+      tmp.SetDerivStep(1e-5);
       this->AddPar(tmp);
    }
    {
       RefinablePar tmp("V",&mCagliotiV,-1/RAD2DEG/RAD2DEG,1./RAD2DEG/RAD2DEG,
-                        gpRefParTypeScattDataProfile,
+                        gpRefParTypeScattDataProfileWidth,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG*RAD2DEG);
       tmp.AssignClock(mClockProfilePar);
-      tmp.SetDerivStep(1e-4);
+      tmp.SetDerivStep(1e-5);
       this->AddPar(tmp);
    }
    {
       RefinablePar tmp("W",&mCagliotiW,0,1./RAD2DEG/RAD2DEG,
-                        gpRefParTypeScattDataProfile,
+                        gpRefParTypeScattDataProfileWidth,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG*RAD2DEG);
       tmp.AssignClock(mClockProfilePar);
-      tmp.SetDerivStep(1e-4);
+      tmp.SetDerivStep(1e-5);
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp("Eta0",&mPseudoVoigtEta0,0,1.,gpRefParTypeScattDataProfile,
+      RefinablePar tmp("Eta0",&mPseudoVoigtEta0,0,1.,gpRefParTypeScattDataProfileType,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
       tmp.AssignClock(mClockProfilePar);
       tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp("Eta1",&mPseudoVoigtEta1,-1,1.,gpRefParTypeScattDataProfile,
+      RefinablePar tmp("Eta1",&mPseudoVoigtEta1,-1,1.,gpRefParTypeScattDataProfileType,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
       tmp.AssignClock(mClockProfilePar);
       tmp.SetDerivStep(1e-4);
@@ -821,7 +821,7 @@ ObjRegistry<PowderPattern>
 PowderPattern::PowderPattern():
 m2ThetaMin(0),m2ThetaStep(0),mNbPoint(0),mWavelength(1.),
 m2ThetaZero(0.),m2ThetaDisplacement(0.),m2ThetaTransparency(0.),
-mUseFastLessPreciseFunc(false),
+mScaleFactor(20),mUseFastLessPreciseFunc(false),
 mStatisticsExcludeBackground(false),mStatisticsUseIntegratedPeak(false),
 mUseOnlyLowAngleData(false),mUseOnlyLowAngleDataLimit(0)
 {
@@ -867,7 +867,7 @@ const string PowderPattern::GetClassName() const {return "PowderPattern";}
 
 void PowderPattern::AddPowderPatternComponent(PowderPatternComponent &comp)
 {
-   VFN_DEBUG_MESSAGE("PowderPattern::AddPowderPatternComponent():"<<comp.GetName(),5)
+   VFN_DEBUG_ENTRY("PowderPattern::AddPowderPatternComponent():"<<comp.GetName(),5)
    comp.SetParentPowderPattern(*this);
    mSubObjRegistry.Register(comp);
    comp.RegisterClient(*this);
@@ -875,9 +875,20 @@ void PowderPattern::AddPowderPatternComponent(PowderPatternComponent &comp)
    comp.SetRadiation(mRadiation);
    comp.SetUseFastLessPreciseFunc(mUseFastLessPreciseFunc);
    mPowderPatternComponentRegistry.Register(comp);
-   mScaleFactor.resizeAndPreserve(mPowderPatternComponentRegistry.GetNb());
+	//:TODO: check if there are enough scale factors
+   //mScaleFactor.resizeAndPreserve(mPowderPatternComponentRegistry.GetNb());
    mScaleFactor(mPowderPatternComponentRegistry.GetNb()-1)=1.;
-   VFN_DEBUG_MESSAGE("PowderPattern::AddPowderPatternComponent():End",5)
+	mClockScaleFactor.Click();
+	if(comp.IsScalable())
+   {//Init refinable parameter
+      RefinablePar tmp("Scale_"+comp.GetName(),mScaleFactor.data()+mPowderPatternComponentRegistry.GetNb()-1,
+                        0.,0.,gpRefParTypeScattDataScale,REFPAR_DERIV_STEP_RELATIVE,
+                        false,true,true,false,1.);
+      tmp.AssignClock(mClockScaleFactor);
+      tmp.SetDerivStep(1e-4);
+      this->AddPar(tmp);
+   }
+   VFN_DEBUG_EXIT("PowderPattern::AddPowderPatternComponent():"<<comp.GetName(),5)
 }
 
 unsigned int PowderPattern::GetNbPowderPatternComponent()const
@@ -1906,6 +1917,7 @@ void PowderPattern::FitScaleFactorForR()
       for(unsigned long j=0;j<mNbPoint;j++) *p0++ += s * *p1++;
       VFN_DEBUG_MESSAGE("-> Old:"<<mScaleFactor(mScalableComponentIndex(i)) <<" Change:"<<mFitScaleFactorX(i),2);
       mScaleFactor(mScalableComponentIndex(i)) = mFitScaleFactorX(i);
+		mClockScaleFactor.Click();
    }
    VFN_DEBUG_EXIT("PowderPattern::FitScaleFactorForR():End",3);
 }
@@ -2072,6 +2084,7 @@ void PowderPattern::FitScaleFactorForRw()
       for(unsigned long j=0;j<mNbPoint;j++) *p0++ += s * *p1++;
       VFN_DEBUG_MESSAGE("-> Old:"<<mScaleFactor(mScalableComponentIndex(i)) <<" Change:"<<mFitScaleFactorX(i),2);
       mScaleFactor(mScalableComponentIndex(i)) = mFitScaleFactorX(i);
+		mClockScaleFactor.Click();
    }
    VFN_DEBUG_EXIT("PowderPattern::FitScaleFactorForRw():End",3);
 }
@@ -2243,13 +2256,15 @@ void PowderPattern::CalcPowderPattern() const
       mPowderPatternComponentRegistry.GetObj(i).CalcPowderPattern();
    VFN_DEBUG_MESSAGE("PowderPattern::CalcPowderPattern():Calculated components..",3);
    bool b=false;
-   for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++) 
-      if(mClockPowderPatternCalc<
-            mPowderPatternComponentRegistry.GetObj(i).GetClockPowderPatternCalc())
-      {
-         b=true;
-         break;
-      }
+	if(mClockPowderPatternCalc<mClockScaleFactor) b=true;
+	else
+   	for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++) 
+      	if(mClockPowderPatternCalc<
+            	mPowderPatternComponentRegistry.GetObj(i).GetClockPowderPatternCalc())
+      	{
+         	b=true;
+         	break;
+      	}
    TAU_PROFILE_STOP (timer1);
       
    if(true==b)

@@ -21,6 +21,7 @@
 namespace ObjCryst
 {
 extern const RefParType *gpRefParTypeScattData;
+extern const RefParType *gpRefParTypeScattDataScale;
 extern const RefParType *gpRefParTypeScattDataProfile;
 extern const RefParType *gpRefParTypeScattDataProfileType;
 extern const RefParType *gpRefParTypeScattDataProfileWidth;

@@ -40,7 +40,7 @@ const RefParType *gpRefParTypeScattPowResonant
 const RefParType *gpRefParTypeScattPowTemperature
    =new RefParType(gpRefParTypeScattPow,"Temperature");
 const RefParType *gpRefParTypeScattPowTemperatureIso
-   =new RefParType(gpRefParTypeScattPowTemperatureIso,"Isotropic");
+   =new RefParType(gpRefParTypeScattPowTemperature,"Isotropic");
 const RefParType *gpRefParTypeScattPowTemperatureAniso
    =new RefParType(gpRefParTypeScattPowTemperatureIso,"Anisotropic");
 
