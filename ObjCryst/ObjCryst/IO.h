@@ -6,10 +6,14 @@
 #include "RefinableObj/RefinableObj.h"
 namespace ObjCryst
 {
-/** \brief Save the complete Objcryst environment.
+/** \brief Save all Objcryst++ objects.
 *
 * This saves all Crystal, PowderPattern, DiffDataSingleCrystal and GlobalOptimObj objects,
-* using the global registries for these classes
+* using the global registries for these classes. All other objects (Scatterer, 
+* ScatteringPower, PowderPatternComponent are saved as well since they are sub-objects
+* of Crystal or PowderPattern objects).
+*
+* Saving is done in well-formed xml format.
 */
 void XMLCrystFileSaveGlobal(const string & filename);
 /** \brief Get the list (tags) of ObjCryst objects in a file
@@ -20,6 +24,8 @@ void XMLCrystFileSaveGlobal(const string & filename);
 *
 * \note It will be the duty of the caller to destroy all the tags which have been
 * allocated.
+*
+* NOT TESTED YET !
 */
 ObjRegistry<XMLCrystTag> XMLCrystFileLoadObjectList(const string & filename);
 
@@ -30,6 +36,8 @@ ObjRegistry<XMLCrystTag> XMLCrystFileLoadObjectList(const string & filename);
 * \param name: the name of the object to be found (in a 'Name' attribute)
 * \param obj: the pointer to the object to be loaded. The allocation will be done
 * by the function, and the pointer changed accordingly.
+*
+* NOT TESTED YET !
 */
 template<class T> void XMLCrystFileLoadObject(const string & file,
                                               const string &tagName,
@@ -44,10 +52,13 @@ template<class T> void XMLCrystFileLoadObject(const string & file,
 void XMLCrystFileLoadAllObject(const string & file);
 
 
-
+///OBSOLETE
 void IOCrystFileSaveGlobal(const string & filename);
+///OBSOLETE
 ObjRegistry<IOCrystTag> IOCrystFileLoadObjectList(const string & filename);
+///OBSOLETE
 template<class T> void IOCrystFileLoadObject(const string & file,const IOCrystTag &tag, T*obj);
+///OBSOLETE
 void IOCrystFileLoadAllObject(const string & file);
 
 }

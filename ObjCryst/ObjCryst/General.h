@@ -4,12 +4,11 @@
 *  (c) 2000 Vincent FAVRE-NICOLIN
 *           Laboratoire de Cristallographie
 *           24, quai Ernest-Ansermet, CH-1211 Geneva 4, Switzerland
-*  Contact: Vincent.Favre-Nicolin@cryst.unige.ch
-*           Radovan.Cerny@cryst.unige.ch
+*  Contact: vincefn@users.sourceforge.net
 *
 */
-/*   LibCryst.h
-*  header file for all crystallographic objects
+/*   General.h
+*  header file for various global definitions
 *
 */
 

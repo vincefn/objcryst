@@ -1,11 +1,11 @@
-#ifndef _OBJCRYST_POWDERSPECTRUM_H_
-#define _OBJCRYST_POWDERSPECTRUM_H_
+#ifndef _OBJCRYST_POWDERPATTERN_H_
+#define _OBJCRYST_POWDERPATTERN_H_
 
 #include "CrystVector/CrystVector.h"
 #include "ObjCryst/General.h"
-#include "ObjCryst/SpaceGroup.h"
-#include "ObjCryst/ScatteringPower.h"
-#include "ObjCryst/Scatterer.h"
+//#include "ObjCryst/SpaceGroup.h"
+//#include "ObjCryst/ScatteringPower.h"
+//#include "ObjCryst/Scatterer.h"
 #include "ObjCryst/Crystal.h"
 
 //#include <stdlib.h>
@@ -23,10 +23,10 @@ class PowderPattern;
 
 //######################################################################
 /** \brief Generic class to compute components (eg the contribution of
-* a given phase, or background) of a powder spectrum. This is an abstract base class.
+* a given phase, or background) of a powder pattern. This is an abstract base class.
 *
 * Most functions are protected, only to be accessed,
-* internally or from the friend class PowderPattern
+* internally or from the friend class PowderPattern.
 */
 //######################################################################
 class PowderPatternComponent : virtual public RefinableObj
@@ -34,20 +34,26 @@ class PowderPatternComponent : virtual public RefinableObj
    public:
       PowderPatternComponent();
       PowderPatternComponent(const PowderPatternComponent&);
-      ~PowderPatternComponent();
+      virtual ~PowderPatternComponent();
       virtual const string GetClassName() const;
       
-      /// Set the PowderPattern object which uses this component.
+      /// \internal
+		/// Set the PowderPattern object which uses this component.
       /// This sets all necessary spectrum parameters (2theta range,
       /// wavelength, radiation type...) accordingly.
+		/// 
       virtual void SetParentPowderPattern(const PowderPattern&)=0;
       /// Get the calculated powder spectrum for this component.
       /// Note that the spectrum is \e not scaled.
+		/// 
       virtual const CrystVector_double& GetPowderPatternCalc()const=0;
       /// Use faster, less precise functions ? Good for global optimizations.
+		/// Currently does nothing.
       virtual void SetUseFastLessPreciseFunc(const bool useItOrNot)=0;
-      /// Set an option so that only low-amgle reflections (theta < angle)
+      /// Set an option so that only low-angle reflections (theta < angle)
       /// are used. See DiffractionData::mUseOnlyLowAngleData
+		/// OBSOLETE Do not use, as this will probably be removed
+		/// eventually.
       virtual void SetUseOnlyLowAngleData(const bool useOnlyLowAngle,const double angle=0)=0;
       
       /** \brief Is this component scalable ?
@@ -59,24 +65,28 @@ class PowderPatternComponent : virtual public RefinableObj
       */
       bool IsScalable()const;
    protected:
-      /// Last time the spectrum was calculated
+      /// Last time the spectrum was actually calculated.
       const RefinableObjClock& GetClockPowderPatternCalc()const;
          
-      /// Calc the powder spectrum
+      /// Calc the powder spectrum. As always, recomputation is only
+		/// done if necessary (ie if a parameter has changed since the last
+		/// computation)
       virtual void CalcPowderPattern() const=0;
+      
+      /// \internal Set the radiation. This is called by PowderPattern
+      virtual void SetRadiation(const Radiation &rad)=0;
       
       /// The calculated component of a powder spectrum. It is mutable since it is
       /// completely defined by other parameters (eg it is not an 'independent parameter')
       mutable CrystVector_double mPowderPatternCalc;
       
-      /// \internal Set the radiation. This is called by PowderPattern
-      virtual void SetRadiation(const Radiation &rad)=0;
-      
-      /// This will be called by the parent PowderPattern object, before
-      /// calculating the first powder spectrum.
+      /// \internal
+		/// This will be called by the parent PowderPattern object, before
+      /// calculating the first powder spectrum. Or maybe it should be called
+		/// automatically by the object itself...
       virtual void Prepare()=0;
       
-      /// Scalable ?
+      /// Scalable ? (crystal phase = scalable, background= not scalable)
       bool mIsScalable;
       
       //Clocks
@@ -85,18 +95,17 @@ class PowderPatternComponent : virtual public RefinableObj
       
       /// The PowderPattern object in which this component is included
       const PowderPattern *mpParentPowderPattern;
-         
+        
+		//Eventually this should be removed (?)
       friend class PowderPattern;
 };
 /// Global registry for all PowderPatternComponent objects
 extern ObjRegistry<PowderPatternComponent> gPowderPatternComponentRegistry;
 
 //######################################################################
-/** \brief Generic class to compute components (eg the contribution of
-* a given phase, or background) of a powder spectrum.
-*
-* This is an abstract class. Most functions are protected, only to be accessed,
-* internally or from the friend class PowderPattern
+/** \brief Phase to compute a background contribution to a powder
+* pattern using an interpolation. Currently only linear interpolation is
+* available. (in the works: cubic spline interpolation background)
 */
 //######################################################################
 class PowderPatternBackground : public PowderPatternComponent
@@ -104,12 +113,12 @@ class PowderPatternBackground : public PowderPatternComponent
    public:
       PowderPatternBackground();
       PowderPatternBackground(const PowderPatternBackground&);
-      ~PowderPatternBackground();
+      virtual ~PowderPatternBackground();
       virtual const string GetClassName() const;
       
       virtual void SetParentPowderPattern(const PowderPattern&);
       virtual const CrystVector_double& GetPowderPatternCalc()const;
-      /// Import background points from a file (with two columns 2ttheta, intensity)
+      /// Import background points from a file (with two columns 2theta, intensity)
       void ImportUserBackground(const string &filename);
       void SetUseFastLessPreciseFunc(const bool useItOrNot);
       virtual void SetUseOnlyLowAngleData(const bool useOnlyLowAngle,const double angle=0);
@@ -138,12 +147,13 @@ class PowderPatternBackground : public PowderPatternComponent
          mutable RefinableObjClock mClockBackgroundSpline;
       
       // Use only low-angle data ?
-         /// Use only low-angle data ?
+         /// Use only low-angle data ? OBSOLETE
          bool mUseOnlyLowAngleData;
-         /// Limit (theta angle, in radian) for the above option.
+         /// Limit (theta angle, in radian) for the above option. OBSOLETE
          double mUseOnlyLowAngleDataLimit;
-         
-      friend class PowderPattern; //For the access to the scale factor
+			
+      //To be removed
+      friend class PowderPattern; 
    #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);
@@ -152,7 +162,7 @@ class PowderPatternBackground : public PowderPatternComponent
 };
 
 //######################################################################
-/** \brief Class to compute the contribution to a powder spectrum from
+/** \brief Class to compute the contribution to a powder pattern from
 * a crystalline phase.
 *
 */
@@ -162,7 +172,7 @@ class PowderPatternDiffraction : public PowderPatternComponent,public Scattering
    public:
       PowderPatternDiffraction();
       PowderPatternDiffraction(const PowderPatternDiffraction&);
-      ~PowderPatternDiffraction();
+      virtual ~PowderPatternDiffraction();
       virtual PowderPatternDiffraction* CreateCopy()const;
       virtual const string GetClassName() const;
       
@@ -278,14 +288,16 @@ class PowderPatternDiffraction : public PowderPatternComponent,public Scattering
          * Practically, this means that any reflections below 
          * DiffractionData::mLowAngleReflectionLimit is simply ignored, not calculated,
          * not taken into account in statistics.
+			* TO BE REMOVED
          */
          bool mUseOnlyLowAngleData;
 
          /** \brief Limit (theta angle, in radian) for the above option.
-         *
+         * TO BE REMOVED
          */
          double mUseOnlyLowAngleDataLimit;
          /// Saved H, K and L arrays when using only low-angle data
+			/// TO BE REMOVED
          CrystVector_long  mUseOnlyLowAngleData_SavedH,
                            mUseOnlyLowAngleData_SavedK,
                            mUseOnlyLowAngleData_SavedL;
@@ -298,9 +310,11 @@ class PowderPatternDiffraction : public PowderPatternComponent,public Scattering
 
 
 //######################################################################
-/** \brief Powder spectrum class, with an observed spectrum and several
+/** \brief Powder pattern class, with an observed pattern and several
 * calculated components to modelize the spectrum.
 *
+* This can also be used for simulation, using a fake Iobs. This supports
+* multiple phases.
 * 
 */
 //######################################################################
@@ -512,7 +526,7 @@ class PowderPattern : public RefinableObj
 			/// To filter too small or null intensities :If sigma< minRelatSigma* max(sigma),
 			/// then w=1/(minRelatSigma* max(sigma))^2
          void SetWeightToInvSigmaSq(const double minRelatSigma=1e-3);
-         /// Set w = sin(theta)
+         /// Set w = sin(theta). Not really usful, huh ?
          void SetWeightToSinTheta(const double power=1.);
          /// Set w = 1
          void SetWeightToUnit();
@@ -526,11 +540,11 @@ class PowderPattern : public RefinableObj
          void SetWeightPolynomial(const double a, const double b, const double c,
 												 const double minRelatIobs=1e-3);
 
-         /// Add an Eclusion region, in 2theta, which will be ignored when computing R's
+         /// Add an Exclusion region, in 2theta, which will be ignored when computing R's
          /// Input values must be, as always, in radians. Does not work yet with
          /// integrated R factors.
          /// Note that the pattern is still computed in these regions. They are only ignored
-         /// by statistics functions.
+         /// by statistics functions (R, Rws).
          void Add2ThetaExcludedRegion(const double min2Theta,const double max2theta);
          
       //Cost functions
@@ -539,11 +553,11 @@ class PowderPattern : public RefinableObj
          const string& GetCostFunctionName(const unsigned int)const;
          const string& GetCostFunctionDescription(const unsigned int)const;
          virtual double GetCostFunctionValue(const unsigned int);
-      // I/O
-         virtual void Output(ostream &os,int indent=0)const;
-      virtual void Input(istream &is,const XMLCrystTag &tag);
-      virtual void InputOld(istream &is,const IOCrystTag &tag);
-      void Prepare();
+		// I/O	
+      	virtual void Output(ostream &os,int indent=0)const;
+      	virtual void Input(istream &is,const XMLCrystTag &tag);
+      	virtual void InputOld(istream &is,const IOCrystTag &tag);
+      	void Prepare();
    protected:
       /// Calc the powder spectrum
       void CalcPowderPattern() const;
@@ -614,12 +628,13 @@ class PowderPattern : public RefinableObj
          /// Should Statistics (R, Rw,..) exclude the background ?
          bool mStatisticsExcludeBackground;
          /// Use integrated R & Rw factors (=>don't care about peak profiles)
-         /// NOT IMPLEMENTED yet. 
+         /// NOT IMPLEMENTED yet. Requires delicate tuning for the width of
+			/// integration
          bool mStatisticsUseIntegratedPeak;
-         /// \internal To compute scale factors, which are the components that
+         /// \internal To compute scale factors, which are the components (phases) that
          /// can be scaled ?
          mutable CrystVector_int mScalableComponentIndex;
-         /// \internal 
+         /// \internal Used to fit the components' scale factors
          mutable CrystMatrix_double mFitScaleFactorM,mFitScaleFactorB,mFitScaleFactorX;
          
       // Use only low-angle reflections
@@ -634,11 +649,13 @@ class PowderPattern : public RefinableObj
          * Practically, this means that any reflections below 
          * the limit is simply ignored, not calculated,
          * not taken into account in statistics.
+			*
+			* OBSOLETE
          */
          bool mUseOnlyLowAngleData;
 
          /** \brief Limit (theta angle, in radian) for the above option.
-         *
+         * OBSOLETE
          */
          double mUseOnlyLowAngleDataLimit;
    #ifdef __WX__CRYST__
@@ -669,4 +686,4 @@ CrystVector_double PowderProfileLorentz(const CrystVector_double theta,
 
 
 }//namespace ObjCryst
-#endif // _OBJCRYST_POWDERSPECTRUM_H_
+#endif // _OBJCRYST_POWDERPATTERN_H_

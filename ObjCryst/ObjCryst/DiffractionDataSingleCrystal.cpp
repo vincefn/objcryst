@@ -395,13 +395,13 @@ double DiffractionDataSingleCrystal::GetChi2()const
    return tmp1;
 }
 
-void DiffractionDataSingleCrystal::CalcBestScaleFactorForRw()
+void DiffractionDataSingleCrystal::FitScaleFactorForRw()
 {
-   TAU_PROFILE("DiffractionData::CalcBestScaleFactorForRw()","void ()",TAU_DEFAULT);
-   VFN_DEBUG_MESSAGE("DiffractionData::CalcBestScaleFactorForRw()",3);
+   TAU_PROFILE("DiffractionData::FitScaleFactorForRw()","void ()",TAU_DEFAULT);
+   VFN_DEBUG_MESSAGE("DiffractionData::FitScaleFactorForRw()",3);
    if(mHasObservedData==false)
    {//throw exception here ?
-      throw ObjCrystException("DiffractionData::CalcBestScaleFactorForRw() Cannot compute Rw \
+      throw ObjCrystException("DiffractionData::FitScaleFactorForRw() Cannot compute Rw \
          or scale factor: there is no observed data !");
    }
    double tmp1=0;
@@ -420,13 +420,13 @@ void DiffractionDataSingleCrystal::CalcBestScaleFactorForRw()
    
 }
 
-void DiffractionDataSingleCrystal::CalcBestScaleFactorForR()
+void DiffractionDataSingleCrystal::FitScaleFactorForR()
 {
-   TAU_PROFILE("DiffractionData::CalcBestScaleFactorForR()","void ()",TAU_DEFAULT);
-   VFN_DEBUG_MESSAGE("DiffractionData::CalcBestScaleFactorForR()",3);
+   TAU_PROFILE("DiffractionData::FitScaleFactorForR()","void ()",TAU_DEFAULT);
+   VFN_DEBUG_MESSAGE("DiffractionData::FitScaleFactorForR()",3);
    if(mHasObservedData==false)
    {//throw exception here ?
-      throw ObjCrystException("DiffractionData::CalcBestScaleFactorForR() Cannot compute R \
+      throw ObjCrystException("DiffractionData::FitScaleFactorForR() Cannot compute R \
          or scale factor: there is no observed data !");
    }
    double tmp1=0;

@@ -25,7 +25,6 @@ namespace ObjCryst
 ///    ATOM : the basic atom, within the crystal
 ///
 /// Note that there can be 'Dummy' atoms, for which the used symbol is "X".
-/// These atoms should be ignored anywhere but in ZScatterer.
 //######################################################################
 
 class Atom: public Scatterer
@@ -35,7 +34,7 @@ class Atom: public Scatterer
       Atom();
       /**   \brief Atom constructor
       *  \param x,y,z : \e fractional coordinates of the atom
-      *  \param pow : the ScatteringPower associated to this atom. Must be allocated separatly.
+      *  \param pow : the ScatteringPower associated to this atom. Must be allocated separately.
       *  \param name : name of the atom ('Ta1','Sm2', 'Tungsten_1'...).
       * The name can have \e any format but spaces should be avoided, since it
       * will generate problems when reading the names from a file...
@@ -49,8 +48,7 @@ class Atom: public Scatterer
       * an atom in group P2 and on the 2 axis, this should be set to 0.5
       *  \param pow : the ScatteringPower associated to this atom. Must be allocated separatly.
       *  \param name : name of the atom ('Ta1','Sm2', 'Tungsten_1'...).
-      * The name can have \e any format but spaces should be avoided, since it
-      *w ill generate problems when reading the names from a file...
+      * The name can have \e any format but spaces should be avoided
       */
       Atom( const double x, const double y, const double z,const string &name,
              const ScatteringPowerAtom *pow, const double popu);
@@ -133,6 +131,7 @@ class Atom: public Scatterer
 
 }//namespace Objcryst
 
+// do we need this ?
 #include "ObjCryst/Crystal.h"
 
 #endif //_OBJCRYST_ATOM_H_

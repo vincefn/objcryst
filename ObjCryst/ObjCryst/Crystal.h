@@ -25,9 +25,25 @@ extern const RefParType *gpRefParTypeUnitCellLength;
 extern const RefParType *gpRefParTypeUnitCellAngle;
 
 //######################################################################
-//
-//                CRYSTAL
-///The crystal (Unit cell, spaceGroup, scatterers)
+/** \brief Crystal class: Unit cell, spaceGroup, scatterers
+*
+* A  Crystal object has several main characteristics : (1) a unit cell,
+* (2) a Spacegroup and (3) a list of Scatterer. Also stored in the Crystal
+* is a list of the ScttaringPower used by all the scatterers of this crystal.
+*
+* The crystal is capable of giving a list of all scattering components
+* (ie the list of all unique scattering 'points' (ScatteringComponent, ie atoms) 
+* in the unit cell, each associated to a ScatteringPower). When those
+* scattering components are on a special position or oevrlapping with
+* another component of the same type, it is possible to correct
+* dynamically the occupancy of this/these components to effectively have
+* only one component instead of several due to the overlapping.
+*
+* A crystal structure can be viewed in 3D using OpenGL.
+*
+* Currently only 3D crystal structures can be handled (no magnetic
+* structure (that may be done later) and no incommensurate structure.
+*/
 //######################################################################
 class Crystal:public RefinableObj
 {
@@ -274,6 +290,7 @@ class Crystal:public RefinableObj
       *
       *This is called once when creating the crystal. Scatterers parameters
       *are added by  Crystal::AddScatterer()
+		* OBSOLETE ?
       */
       void InitRefParList();
       

@@ -25,6 +25,13 @@ namespace ObjCryst
 //                   DiffractionDataSingleCrystal
 /**
 * \brief DiffractionData object for Single Crystal analysis.
+*
+* Currently this handles only in the simplest way single crystal dat: ie
+* only data which has been completely corrected for Lorentz/Polarization
+* and absorption.
+*
+* What needs to be developped: define the geometry of the experiment
+* (incident and emerging angles), the polarization of the beam, etc...
 */
 //######################################################################
 
@@ -133,12 +140,12 @@ class DiffractionDataSingleCrystal:public ScatteringData
       *
       * The computed scale factor is \e immediatly applied to Icalc
       */
-      virtual void CalcBestScaleFactorForRw();
+      virtual void FitScaleFactorForRw();
       /** Compute the best scale factor minimising R.
       *
       * The computed scale factor is \e immediatly applied to Icalc
       */
-      virtual void CalcBestScaleFactorForR();
+      virtual void FitScaleFactorForR();
       /// Compute the best scale factor to minimize R, apply this scale factor and return
       /// the R value obtained.
       virtual double GetBestRFactor();
