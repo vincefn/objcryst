@@ -129,7 +129,7 @@ const string& ReflectionProfilePseudoVoigt::GetClassName()const
 }
 
 CrystVector_REAL ReflectionProfilePseudoVoigt::GetProfile(const CrystVector_REAL &x,
-                            const REAL center,const REAL dcenter)const
+                            const REAL center,const REAL h, const REAL k, const REAL l)const
 {
    VFN_DEBUG_ENTRY("ReflectionProfilePseudoVoigt::GetProfile(),c="<<center,2)
    const REAL fwhm=sqrt( mCagliotiW
@@ -150,13 +150,6 @@ CrystVector_REAL ReflectionProfilePseudoVoigt::GetProfile(const CrystVector_REAL
    return profile;
 }
 
-CrystVector_REAL ReflectionProfilePseudoVoigt::GetProfile(const CrystVector_REAL &x,
-                            const REAL center,const REAL dcenter,
-                            const REAL h, const REAL k, const REAL l)const
-{
-   return this->GetProfile(x,center,dcenter);
-}
-
 void ReflectionProfilePseudoVoigt::SetProfilePar(const REAL fwhmCagliotiW,
                    const REAL fwhmCagliotiU,
                    const REAL fwhmCagliotiV,
@@ -173,7 +166,7 @@ void ReflectionProfilePseudoVoigt::SetProfilePar(const REAL fwhmCagliotiW,
 
 bool ReflectionProfilePseudoVoigt::IsAnisotropic()const{return false;}
 REAL ReflectionProfilePseudoVoigt::GetFullProfileWidth(const REAL relativeIntensity,
-                                                       const REAL center,const REAL dcenter)
+                            const REAL center,const REAL h, const REAL k, const REAL l)
 {
    VFN_DEBUG_ENTRY("ReflectionProfilePseudoVoigt::GetFullProfileWidth()",2)
    const int nb=100;
@@ -190,7 +183,7 @@ REAL ReflectionProfilePseudoVoigt::GetFullProfileWidth(const REAL relativeIntens
       const REAL tmp=fwhm*n/nb;
       for(int i=0;i<nb;i++) *p++ = tmp*(i-halfnb);
       x+=center;
-      prof=this->GetProfile(x,center,dcenter);
+      prof=this->GetProfile(x,center,0,0,0);
       const REAL max=prof.max();
       const REAL test=max*relativeIntensity;
       int n1=0,n2=0;
@@ -417,8 +410,10 @@ WXCrystObjBasic* ReflectionProfilePseudoVoigt::WXCreate(wxWindow* parent)
 //    ReflectionProfileDoubleExponentialPseudoVoigt    
 //
 ////////////////////////////////////////////////////////////////////////
-ReflectionProfileDoubleExponentialPseudoVoigt::ReflectionProfileDoubleExponentialPseudoVoigt():
+ReflectionProfileDoubleExponentialPseudoVoigt
+   ::ReflectionProfileDoubleExponentialPseudoVoigt(const UnitCell &cell):
 ReflectionProfile(),
+mInstrumentAlpha0(0.0),
 mInstrumentAlpha1(0.0952),
 mInstrumentBeta0(0.0239),
 mInstrumentBeta1(0.0043),
@@ -427,7 +422,8 @@ mGaussianSigma1(7.0),
 mGaussianSigma2(0.0),
 mLorentzianGamma0(0.0),
 mLorentzianGamma1(0.0),
-mLorentzianGamma2(0.414)
+mLorentzianGamma2(0.414),
+mpCell(&cell)
 {
    this->InitParameters();
 }
@@ -435,6 +431,7 @@ mLorentzianGamma2(0.414)
 ReflectionProfileDoubleExponentialPseudoVoigt::ReflectionProfileDoubleExponentialPseudoVoigt
    (const ReflectionProfileDoubleExponentialPseudoVoigt &old):
 ReflectionProfile(),
+mInstrumentAlpha0(old.mInstrumentAlpha0),
 mInstrumentAlpha1(old.mInstrumentAlpha1),
 mInstrumentBeta0(old.mInstrumentBeta0),
 mInstrumentBeta1(old.mInstrumentBeta1),
@@ -443,7 +440,8 @@ mGaussianSigma1(old.mGaussianSigma1),
 mGaussianSigma2(old.mGaussianSigma2),
 mLorentzianGamma0(old.mLorentzianGamma0),
 mLorentzianGamma1(old.mLorentzianGamma1),
-mLorentzianGamma2(old.mLorentzianGamma2)
+mLorentzianGamma2(old.mLorentzianGamma2),
+mpCell(old.mpCell)
 {
    this->InitParameters();
 }
@@ -472,11 +470,18 @@ const string& ReflectionProfileDoubleExponentialPseudoVoigt::GetClassName()const
 }
 
 CrystVector_REAL ReflectionProfileDoubleExponentialPseudoVoigt
-   ::GetProfile(const CrystVector_REAL &x, const REAL center,const REAL dcenter)const
+   ::GetProfile(const CrystVector_REAL &x, const REAL center,
+                const REAL h, const REAL k, const REAL l)const
 {
-   VFN_DEBUG_ENTRY("ReflectionProfileDoubleExponentialPseudoVoigt::GetProfile()",10)
-   const REAL alpha=mInstrumentAlpha1/dcenter;
-   const REAL beta=mInstrumentBeta0+mInstrumentBeta1/pow(dcenter,4);
+   VFN_DEBUG_ENTRY("ReflectionProfileDoubleExponentialPseudoVoigt::GetProfile()",4)
+   REAL dcenter;
+   {
+      REAL hh=h,kk=k,ll=l;// orthonormal coordinates in reciprocal space
+      mpCell->MillerToOrthonormalCoords(hh,kk,ll);
+      dcenter=sqrt(hh*hh+kk*kk+ll*ll);//1/d
+   }
+   const REAL alpha=mInstrumentAlpha0+mInstrumentAlpha1/dcenter;
+   const REAL beta=mInstrumentBeta0+mInstrumentBeta1/pow(dcenter,3);
    const REAL siggauss2= mGaussianSigma0
                         +mGaussianSigma1*pow(dcenter,2)
                         +mGaussianSigma2*pow(dcenter,4);
@@ -493,7 +498,7 @@ CrystVector_REAL ReflectionProfileDoubleExponentialPseudoVoigt
    VFN_DEBUG_MESSAGE("ReflectionProfileDoubleExponentialPseudoVoigt::GetProfile():alpha="
                      <<alpha<<",beta="<<beta<<",siggauss2="<<siggauss2
                      <<",hg="<<hg<<",hl="<<hl<<",hcom="<<hcom<<",sigcom2="<<sigcom2
-                     <<",eta="<<eta,10)
+                     <<",eta="<<eta,2)
    CrystVector_REAL prof;
    prof=x;
    prof+=-center;
@@ -512,7 +517,7 @@ CrystVector_REAL ReflectionProfileDoubleExponentialPseudoVoigt
                         <<",p=("<<p.real()<<","<<p.imag()
                         <<"),q=("<<q.real()<<","<<q.imag()
                         <<"),e^p*E1(p)=("<<e1p.real()<<","<<e1p.imag()
-                        <<"),e^q*E1(q)=("<<e1q.real()<<","<<e1q.imag(),10)
+                        <<"),e^q*E1(q)=("<<e1q.real()<<","<<e1q.imag(),2)
       REAL expnu_erfcz,expu_erfcy;
       // Use asymptotic value for erfc(x) = 1/(sqrt(pi)*x*exp(x^2)) [A&S 7.1.23]
       if(z>10.0) expnu_erfcz=exp(nu-z*z)/(z*sqrt(M_PI));
@@ -556,19 +561,13 @@ CrystVector_REAL ReflectionProfileDoubleExponentialPseudoVoigt
       #endif
       *pp++;
    }
-   VFN_DEBUG_EXIT("ReflectionProfileDoubleExponentialPseudoVoigt::GetProfile()",10)
+   VFN_DEBUG_EXIT("ReflectionProfileDoubleExponentialPseudoVoigt::GetProfile()",3)
    return prof;
 }
 
-CrystVector_REAL ReflectionProfileDoubleExponentialPseudoVoigt
-   ::GetProfile(const CrystVector_REAL &x, const REAL center, const REAL dcenter,
-                const REAL h, const REAL k, const REAL l)const
-{
-   return this->GetProfile(x,center,dcenter);
-}
-
 void ReflectionProfileDoubleExponentialPseudoVoigt
-   ::SetProfilePar(const REAL instrumentAlpha1,
+   ::SetProfilePar(const REAL instrumentAlpha0,
+                   const REAL instrumentAlpha1,
                    const REAL instrumentBeta0,
                    const REAL instrumentBeta1,
                    const REAL gaussianSigma0,
@@ -578,6 +577,7 @@ void ReflectionProfileDoubleExponentialPseudoVoigt
                    const REAL lorentzianGamma1,
                    const REAL lorentzianGamma2)
 {
+   mInstrumentAlpha0=instrumentAlpha0;
    mInstrumentAlpha1=instrumentAlpha1;
    mInstrumentBeta0=instrumentBeta0;
    mInstrumentBeta1=instrumentBeta1;
@@ -587,12 +587,20 @@ void ReflectionProfileDoubleExponentialPseudoVoigt
    mLorentzianGamma0=lorentzianGamma0;
    mLorentzianGamma1=lorentzianGamma1;
    mLorentzianGamma2=lorentzianGamma2;
+   mClockMaster.Click();
 }
 
 REAL ReflectionProfileDoubleExponentialPseudoVoigt
-   ::GetFullProfileWidth(const REAL relativeIntensity, const REAL center, const REAL dcenter)
+   ::GetFullProfileWidth(const REAL relativeIntensity, const REAL center,
+                         const REAL h, const REAL k, const REAL l)
 {
    VFN_DEBUG_ENTRY("ReflectionProfileDoubleExponentialPseudoVoigt::GetFullProfileWidth()",10)
+   REAL dcenter;
+   {
+      REAL hh=h,kk=k,ll=l;// orthonormal coordinates in reciprocal space
+      mpCell->MillerToOrthonormalCoords(hh,kk,ll);
+      dcenter=sqrt(hh*hh+kk*kk+ll*ll);//1/d
+   }
    const int nb=100;
    const int halfnb=nb/2;
    CrystVector_REAL x(nb);
@@ -614,7 +622,7 @@ REAL ReflectionProfileDoubleExponentialPseudoVoigt
       const REAL tmp=fwhm*n/nb;
       for(int i=0;i<nb;i++) *p++ = tmp*(i-halfnb);
       x+=center;
-      prof=this->GetProfile(x,center,dcenter);
+      prof=this->GetProfile(x,center,h,k,l);
       const REAL max=prof.max();
       const REAL test=max*relativeIntensity;
       int n1=0,n2=0;
@@ -646,6 +654,9 @@ void ReflectionProfileDoubleExponentialPseudoVoigt
    os <<tag<<endl;
    indent++;
 
+   this->GetPar(&mInstrumentAlpha0).XMLOutput(os,"Alpha0",indent);
+   os <<endl;
+   
    this->GetPar(&mInstrumentAlpha1).XMLOutput(os,"Alpha1",indent);
    os <<endl;
    
@@ -721,6 +732,13 @@ void ReflectionProfileDoubleExponentialPseudoVoigt
 void ReflectionProfileDoubleExponentialPseudoVoigt
    ::InitParameters()
 {
+   {
+      RefinablePar tmp("Alpha0",&mInstrumentAlpha0,0,1.,gpRefParTypeScattDataProfile,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
+      tmp.AssignClock(mClockMaster);
+      tmp.SetDerivStep(1e-4);
+      this->AddPar(tmp);
+   }
    {
       RefinablePar tmp("Alpha1",&mInstrumentAlpha1,0,1.,gpRefParTypeScattDataProfile,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);

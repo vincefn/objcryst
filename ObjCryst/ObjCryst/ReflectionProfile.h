@@ -22,6 +22,7 @@
 #include <complex>
 #include "CrystVector/CrystVector.h"
 #include "ObjCryst/General.h"
+#include "ObjCryst/UnitCell.h"
 #include "RefinableObj/RefinableObj.h"
 
 namespace ObjCryst
@@ -67,27 +68,21 @@ class ReflectionProfile:public RefinableObj
       ReflectionProfile(const ReflectionProfile &old);
       virtual ~ReflectionProfile();
       virtual ReflectionProfile* CreateCopy()const=0;
-      /** Get the reflection profile.
+      /** Get the reflection profile
       *
       *\param x: the vector of x  coordinates (i.e. either 2theta or time-of-flight)
       *\param xcenter: coordinate (2theta, tof) of the center of the peak
-      *\param dcenter: d=lambda/(2*sin(theta)) (in Angstroems) at the center of the peak
+      *\param h,k,l: reflection Miller indices
+      *\note: derived classes who need either d_hkl or the orthonormal coordinates
+      * of the scattering vector should be passed a ObjCryst::UnitCell object in
+      * the constructor so that they can use ObjCryst::UnitCell::MillerToOrthonormalCoords()
       */
       virtual CrystVector_REAL GetProfile(const CrystVector_REAL &x, const REAL xcenter,
-                                          const REAL dcenter)const=0;
-      /** Get the reflection profile (for anisotropic profiles)
-      *
-      *\param x: the vector of x  coordinates (i.e. either 2theta or time-of-flight)
-      *\param xcenter: coordinate (2theta, tof) of the center of the peak
-      *\param dcenter: d=lambda/(2*sin(theta)) (in Angstroems) at the center of the peak
-      *\param h,k,l: reflection Miller indices
-      */
-      virtual CrystVector_REAL GetProfile(const CrystVector_REAL &x, const REAL xcenter,const REAL dcenter,
                                   const REAL h, const REAL k, const REAL l)const=0;
       /// Get the (approximate) full profile width at a given percentage 
       /// of the profile maximum (e.g. FWHM=GetFullProfileWidth(0.5)).
-      virtual REAL GetFullProfileWidth(const REAL relativeIntensity, const REAL xcenter=0,
-                                       const REAL dcenter=0)=0;
+      virtual REAL GetFullProfileWidth(const REAL relativeIntensity, const REAL xcenter,
+                                       const REAL h, const REAL k, const REAL l)=0;
       /// Is the profile anisotropic ?
       virtual bool IsAnisotropic()const;
       virtual void XMLOutput(ostream &os,int indent=0)const=0;
@@ -111,8 +106,6 @@ class ReflectionProfilePseudoVoigt:public ReflectionProfile
       virtual ReflectionProfilePseudoVoigt* CreateCopy()const;
       virtual const string& GetClassName()const;
       CrystVector_REAL GetProfile(const CrystVector_REAL &x, const REAL xcenter,
-                                  const REAL dcenter)const;
-      CrystVector_REAL GetProfile(const CrystVector_REAL &x, const REAL xcenter,const REAL dcenter,
                                   const REAL h, const REAL k, const REAL l)const;
       /** Set reflection profile parameters
       *
@@ -128,7 +121,7 @@ class ReflectionProfilePseudoVoigt:public ReflectionProfile
                          const REAL eta0=0.5,
                          const REAL eta1=0.);
       virtual REAL GetFullProfileWidth(const REAL relativeIntensity, const REAL xcenter,
-                                       const REAL dcenter);
+                                       const REAL h, const REAL k, const REAL l);
       bool IsAnisotropic()const;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
@@ -158,20 +151,19 @@ class ReflectionProfilePseudoVoigt:public ReflectionProfile
 class ReflectionProfileDoubleExponentialPseudoVoigt:public ReflectionProfile
 {
    public:
-      ReflectionProfileDoubleExponentialPseudoVoigt();
+      ReflectionProfileDoubleExponentialPseudoVoigt(const UnitCell &cell);
       ReflectionProfileDoubleExponentialPseudoVoigt
          (const ReflectionProfileDoubleExponentialPseudoVoigt &old);
       virtual ~ReflectionProfileDoubleExponentialPseudoVoigt();
       virtual ReflectionProfileDoubleExponentialPseudoVoigt* CreateCopy()const;
       virtual const string& GetClassName()const;
       CrystVector_REAL GetProfile(const CrystVector_REAL &x, const REAL xcenter,
-                                  const REAL dcenter)const;
-      CrystVector_REAL GetProfile(const CrystVector_REAL &x, const REAL xcenter,const REAL dcenter,
                                   const REAL h, const REAL k, const REAL l)const;
       /** Set reflection profile parameters
       *
       */
-      void SetProfilePar(const REAL instrumentAlpha1,
+      void SetProfilePar(const REAL instrumentAlpha0,
+                         const REAL instrumentAlpha1,
                          const REAL instrumentBeta0,
                          const REAL instrumentBeta1,
                          const REAL gaussianSigma0,
@@ -181,13 +173,14 @@ class ReflectionProfileDoubleExponentialPseudoVoigt:public ReflectionProfile
                          const REAL lorentzianGamma1,
                          const REAL lorentzianGamma2);
       virtual REAL GetFullProfileWidth(const REAL relativeIntensity, const REAL xcenter,
-                                       const REAL dcenter);
+                                       const REAL h, const REAL k, const REAL l);
       bool IsAnisotropic()const;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
    private:
       /// Initialize parameters
       void InitParameters();
+      REAL mInstrumentAlpha0;
       REAL mInstrumentAlpha1;
       REAL mInstrumentBeta0;
       REAL mInstrumentBeta1;
@@ -197,6 +190,7 @@ class ReflectionProfileDoubleExponentialPseudoVoigt:public ReflectionProfile
       REAL mLorentzianGamma0;
       REAL mLorentzianGamma1;
       REAL mLorentzianGamma2;
+      const UnitCell *mpCell;
 #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow* parent);

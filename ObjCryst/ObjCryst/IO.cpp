@@ -2138,13 +2138,15 @@ void PowderPatternDiffraction::XMLInput(istream &is,const XMLCrystTag &tagg)
       {
          if(mpReflectionProfile==0)
          {
-            mpReflectionProfile=new ReflectionProfileDoubleExponentialPseudoVoigt;
+            mpReflectionProfile
+               =new ReflectionProfileDoubleExponentialPseudoVoigt(this->GetCrystal());
          }
          else
             if(mpReflectionProfile->GetClassName()!="ReflectionProfileDoubleExponentialPseudoVoigt")
             {
                delete mpReflectionProfile;
-               mpReflectionProfile=new ReflectionProfileDoubleExponentialPseudoVoigt;
+               mpReflectionProfile
+                  =new ReflectionProfileDoubleExponentialPseudoVoigt(this->GetCrystal());
             }
          mpReflectionProfile->XMLInput(is,tag);
          continue;

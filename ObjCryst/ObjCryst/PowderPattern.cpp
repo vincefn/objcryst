@@ -726,12 +726,13 @@ Applying profiles for "<<nbRefl<<" reflections",3)
          REAL intensity=0.;
          REAL var=0.;
          //check if the next reflection is at the same theta. If this is true,
-         //Then assume that the profile is exactly the same.
+         //Then assume that the profile is exactly the same, unless it is anisotropic
          for(step=0; ;)
          {
             intensity += mIhklCalc(i + step);
             if(useML) var += mIhklCalcVariance(i + step);
             step++;
+            if(mpReflectionProfile->IsAnisotropic()) break;// Anisotropic profiles
             if( (i+step) >= nbRefl) break;
             if(mSinThetaLambda(i+step) > (mSinThetaLambda(i)+1e-5) ) break;
          }
@@ -804,7 +805,7 @@ void PowderPatternDiffraction::CalcPowderPatternIntegrated() const
       REAL var=0.;
       const REAL thmax=*psith+1e-5;
       //check if the next reflection is at the same theta. If this is true,
-      //Then assume that the profile is exactly the same.
+      //Then assume that the profile is exactly the same, unless profiles are anisotropic.
       for(;;)
       {
          intensity += *pI++;
@@ -812,6 +813,7 @@ void PowderPatternDiffraction::CalcPowderPatternIntegrated() const
          ++pos;
          if( ++i >= nbRefl) break;
          if( *(++psith) > thmax ) break;
+         if(mpReflectionProfile->IsAnisotropic()) break;// Anisotropic profile
       }
       --pos;
       VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderPatternIntegrated():"<<i,2)
@@ -934,10 +936,15 @@ Computing all Profiles",5)
    const REAL xmin=mpParentPowderPattern->GetPowderPatternX()(0);
    const REAL xmax=mpParentPowderPattern->GetPowderPatternX()(mpParentPowderPattern->GetNbPoint()-1);
    
-   REAL fullwidth0=mpReflectionProfile->GetFullProfileWidth(0.04,xmin,1/(2*mpParentPowderPattern->X2STOL(xmin))),
-        fullwidth1=mpReflectionProfile->GetFullProfileWidth(0.04,xmax,1/(2*mpParentPowderPattern->X2STOL(xmin)));
+   REAL fullwidth0,fullwidth1;
+   {
+      long imax=this->GetNbReflBelowMaxSinThetaOvLambda();
+      if(imax==mNbRefl)imax-=1;
+      fullwidth0=mpReflectionProfile->GetFullProfileWidth(0.04,xmin,mH(0),mK(0),mL(0)),
+      fullwidth1=mpReflectionProfile->GetFullProfileWidth(0.04,xmax,mH(imax),mK(imax),mL(imax));
+      if(!mUseFastLessPreciseFunc) {fullwidth0*=2;fullwidth1*=2;}
+   }
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile()w="<<fullwidth0<<"->"<<fullwidth1,10)
-   if(!mUseFastLessPreciseFunc) {fullwidth0*=2;fullwidth1*=2;}
    
    for(unsigned int line=0;line<nbLine;line++)
    {
@@ -1007,7 +1014,7 @@ Computing all Profiles",5)
             }
 
             VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile():"<<first<<","<<last<<","<<center,3)
-            reflProfile=mpReflectionProfile->GetProfile(vx,center,1/(2*mSinThetaLambda(i)));
+            reflProfile=mpReflectionProfile->GetProfile(vx,center,mH(i),mK(i),mL(i));
             VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile()",2)
             if(nbLine>1) reflProfile *=spectrumFactor(line);
             if(line==0) mvReflProfile[i].profile = reflProfile;

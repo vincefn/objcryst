@@ -379,6 +379,12 @@ WXRefinableObj(parent,pow),mpPowderPattern(pow),mpGraph(0)
                               &(mpPowderPattern->mMaxSinThetaOvLambda));
       mpSizer->Add(maxSiThOvLa,0,wxALIGN_LEFT);
       mList.Add(maxSiThOvLa);
+      maxSiThOvLa->SetToolTip(_T("Maximum sin(theta)/lambda=1/2d\n")
+                              _T("For global optimization, the default value of ")
+                              _T("0.25 (2A resolution) should be sufficient.\n")
+                              _T("Use larger values if necessary (0.4(1.25A), 0.5(1A))")
+                              _T("but keep in mind that the number of reflections (and")
+                              _T("therefore the computing time) varies as [sin(theta/lambda)]^3..."));
    // Statistics
       wxBoxSizer* pStats=new wxBoxSizer(wxHORIZONTAL);
       
@@ -1598,6 +1604,12 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpTextureMarchDollase(obj)
       mList.Add(pWXPhaseRegistry);
    this->BottomLayout(0);
    this->CrystUpdate();
+   this->SetToolTip(_T("Texture for this crystalline phase.\n")
+                    _T("You can describe the preferred orientation using ")
+                    _T("the March-Dollase model (use the menu).\n\n")
+                    _T("Although possible, it is not recommended to enable ")
+                    _T("the global optimization of texture parameters, ")
+                    _T("as it is *extremely* slow"));
    VFN_DEBUG_EXIT("WXTextureMarchDollase::WXTextureMarchDollase()",5)
 }
 void WXTextureMarchDollase::OnAddTexturePhase(wxCommandEvent & WXUNUSED(event))
@@ -1650,6 +1662,8 @@ WXRefinableObj(parent,p),mpPowderPatternDiffraction(p)
       mpFieldCrystal=new WXFieldChoice(this,ID_POWDERDIFF_CRYSTAL,"Crystal:",300);
       mpSizer->Add(mpFieldCrystal,0,wxALIGN_LEFT);
       mList.Add(mpFieldCrystal);
+      mpFieldCrystal->SetToolTip(_T("Crystal structure for this diffraction phase\n")
+                                 _T("Click on the button to select another structure"));
    //Global Biso factor
       WXCrystObjBasic* fieldGlobalBiso
          =mpPowderPatternDiffraction->GetPar(&(mpPowderPatternDiffraction->mGlobalBiso))
@@ -1732,7 +1746,8 @@ void WXPowderPatternDiffraction::OnChangeProfile(wxCommandEvent & event)
       if(mpPowderPatternDiffraction->mpReflectionProfile==0)
       {
          mpPowderPatternDiffraction->mpReflectionProfile
-            = new ReflectionProfileDoubleExponentialPseudoVoigt;
+            = new ReflectionProfileDoubleExponentialPseudoVoigt
+                     (mpPowderPatternDiffraction->GetCrystal());
          add=true;
       }
       else
@@ -1741,7 +1756,8 @@ void WXPowderPatternDiffraction::OnChangeProfile(wxCommandEvent & event)
          {
             delete mpPowderPatternDiffraction->mpReflectionProfile;
             mpPowderPatternDiffraction->mpReflectionProfile
-               = new ReflectionProfileDoubleExponentialPseudoVoigt;
+               = new ReflectionProfileDoubleExponentialPseudoVoigt
+                        (mpPowderPatternDiffraction->GetCrystal());
             add=true;
          }
    }
@@ -1842,15 +1858,19 @@ WXCrystObj(parent),mpProfile(prof)
    mpWXTitle->BottomLayout(0);
    // Instrumental
       wxBoxSizer* sizer1=new wxBoxSizer(wxHORIZONTAL);
+      WXFieldRefPar* pFieldCagliotiA0   =new WXFieldRefPar(this,"Instrument: Alpha0:",
+                                   &(mpProfile->GetPar("Alpha0")),90 );
       WXFieldRefPar* pFieldCagliotiA    =new WXFieldRefPar(this,"Instrument: Alpha1:",
                                    &(mpProfile->GetPar("Alpha1")),90 );
       WXFieldRefPar* pFieldCagliotiB0   =new WXFieldRefPar(this,"Beta0:",
                                    &(mpProfile->GetPar("Beta0")),90 );
       WXFieldRefPar* pFieldCagliotiB1   =new WXFieldRefPar(this,"Beta1:",
                                    &(mpProfile->GetPar("Beta1")),90 );
+      sizer1->Add(pFieldCagliotiA0,0);
       sizer1->Add(pFieldCagliotiA,0);
       sizer1->Add(pFieldCagliotiB0,0);
       sizer1->Add(pFieldCagliotiB1,0);
+      mList.Add(pFieldCagliotiA0);
       mList.Add(pFieldCagliotiA);
       mList.Add(pFieldCagliotiB0);
       mList.Add(pFieldCagliotiB1);
