@@ -102,9 +102,10 @@ void WXCrystObjBasic::BottomLayout(WXCrystObjBasic *pChild)
       {
          this->GetParent()->GetSizer()->SetItemMinSize
             (this,this->GetSize().GetWidth(),this->GetSize().GetHeight());
-         this->GetParent()->GetSizer()->Fit(this->GetParent());
+         //this->GetParent()->GetSizer()->Fit(this->GetParent());
+         this->GetParent()->GetSizer()->SetVirtualSizeHints(this->GetParent());
       }
-      this->GetParent()->Layout();
+      //this->GetParent()->Layout();
    }
    VFN_DEBUG_EXIT("WXCrystObjBasic::BottomLayout(...)"<<this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
 }
@@ -758,9 +759,10 @@ void WXCrystObj::BottomLayout(WXCrystObjBasic *pChild)
       {
          this->GetParent()->GetSizer()->SetItemMinSize
             (this,this->GetSize().GetWidth(),this->GetSize().GetHeight());
-         this->GetParent()->GetSizer()->Fit(this->GetParent());
+         //this->GetParent()->GetSizer()->Fit(this->GetParent());
+         this->GetParent()->GetSizer()->SetVirtualSizeHints(this->GetParent());
       }
-      this->GetParent()->Layout();
+      //this->GetParent()->Layout();
    }
    VFN_DEBUG_EXIT("WXCrystObj::BottomLayout(..)"<<this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
 }
