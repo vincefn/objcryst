@@ -236,6 +236,19 @@ class SpaceGroup
       bool IsReflSystematicAbsent(const REAL h, const REAL k, const REAL l)const;
       /// Is the reflection centric ?
       bool IsReflCentric(const REAL h, const REAL k, const REAL l)const;
+      /** Get the "expected intensity factor" for a given reflection.
+      * This is the
+      * number of times the reflection is identical to the reflections deduced by
+      * the symmetry operators, under all distinct pure rotationnal symmetry operations
+      * of the space group.
+      *
+      * This is used for the probability distribution of reflection intensities.
+      *
+      * See:
+      *  - Stewart & Karle, Acta. Cryst 132 (1976), 1005
+      *  - Wilson, Acta Cryst 3 (1950), 258
+      */
+      unsigned int GetExpectedIntensityFactor(const REAL h, const REAL k, const REAL l)const;
   protected:
    private:
       /** \brief Init the spaceGroup object from its name
@@ -279,19 +292,6 @@ class SpaceGroup
 
       /// The spacegroup asymmetric unit
       AsymmetricUnit mAsymmetricUnit;
-      
-      /** Use geometrical structure factor ?
-      *
-      * \deprecated
-      * when all atoms have an isotropic 
-      * thermic factor, use a sophisticated formula to compute the structure 
-      * factor for a given independent atom, instead of generating all symmetric 
-      * positions and summing all contributions. This NOT USED CURRENTLY.
-      * Given the speed improvement 
-      * obtained by using tabulated sine and cosines, the use of geometrical 
-      * structure factors has become useless and will be removed from the class.
-      */
-      const static bool mUseGeomStructFactor=false;
       
       /// The Spacegroup clock
       RefinableObjClock mClock;

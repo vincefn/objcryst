@@ -525,14 +525,27 @@ bool SpaceGroup::IsReflCentric(const REAL h, const REAL k, const REAL l)const
    return false;
 }
 
+unsigned int SpaceGroup::GetExpectedIntensityFactor(const REAL h,
+                                                    const REAL k,
+                                                    const REAL l)const
+{
+   unsigned int f=0;
+   const REAL eps=.001;
+   for(int i=0;i<mSgOps.nSMx;i++)
+   {
+      const T_RTMx *pMatrix=&(mSgOps.SMx[i]);
+      const REAL h0=h*(*pMatrix).s.R[0]+k*(*pMatrix).s.R[3]+l*(*pMatrix).s.R[6];
+      const REAL k0=h*(*pMatrix).s.R[1]+k*(*pMatrix).s.R[4]+l*(*pMatrix).s.R[7];
+      const REAL l0=h*(*pMatrix).s.R[2]+k*(*pMatrix).s.R[5]+l*(*pMatrix).s.R[8];
+      if( (fabs(h-h0) + fabs(k-k0) + fabs(l-l0) )<eps) f++;
+   }
+   return f;
+}
+
 void SpaceGroup::InitSpaceGroup(const string &spgId)
 {
    VFN_DEBUG_MESSAGE("SpaceGroup::InitSpaceGroup():"<<spgId,5)
    (*fpObjCrystInformUser)("Initializing spacegroup: "+spgId);
-#if 0
-   mfpRealGeomStructFactor=0;
-   mfpImagGeomStructFactor=0;
-#endif
    int match;
    
    ResetSgOps(&mSgOps);
@@ -573,40 +586,6 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
    //initialize asymmetric unit
    mAsymmetricUnit.SetSpaceGroup(*this);
    
-   //:TODO: This may be obsolete... Not using Geometrical structure factors any more ?
-#if 0
-   const char *ext=mHM_as_Hall.Qualif ;
-   switch(mHM_as_Hall.SgNumber)
-   {
-      case 1:  mfpRealGeomStructFactor=RealGeomStructFactor_1        ;break;
-      case 2:  mfpRealGeomStructFactor=RealGeomStructFactor_2        ;break;
-      case 67: 
-         mfpRealGeomStructFactor=RealGeomStructFactor_67;
-         if(strcmp(ext,"ba-c")==0)mfpRealGeomStructFactor=RealGeomStructFactor_67ba_c;
-         if(strcmp(ext,"cab" )==0)mfpRealGeomStructFactor=RealGeomStructFactor_67cab;
-         if(strcmp(ext,"-cba")==0)mfpRealGeomStructFactor=RealGeomStructFactor_67_cba;
-         if(strcmp(ext,"bca" )==0)mfpRealGeomStructFactor=RealGeomStructFactor_67bca;
-         if(strcmp(ext,"a-cb")==0)mfpRealGeomStructFactor=RealGeomStructFactor_67a_cb;
-         break;
-      case 97: mfpRealGeomStructFactor=RealGeomStructFactor_97       ;break;
-      case 230:mfpRealGeomStructFactor=RealGeomStructFactor_230      ;break;
-
-      //should return an errror there...
-      default: break;
-   }
-   
-   switch(mHM_as_Hall.SgNumber)
-   {
-      case 1:  mfpImagGeomStructFactor=ImagGeomStructFactor_1        ;break;
-      case 2:  mfpImagGeomStructFactor=ImagGeomStructFactor_centro   ;break;
-      case 67: mfpImagGeomStructFactor=ImagGeomStructFactor_centro   ;break;
-      case 97: mfpImagGeomStructFactor=ImagGeomStructFactor_97       ;break;
-      case 230:mfpImagGeomStructFactor=ImagGeomStructFactor_centro   ;break;
-      
-      //should throw an exception here...
-      default: break ;
-   }
-#endif
    if( (mHM_as_Hall.SgNumber >2) && (mHM_as_Hall.SgNumber <16))
    {
       const char * ch=this->GetHM_as_Hall().Hall;
