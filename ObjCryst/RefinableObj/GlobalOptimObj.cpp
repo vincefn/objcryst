@@ -1167,6 +1167,10 @@ void MonteCarloObj::XMLOutput(ostream &os,int indent)const
 
    mAnnealingScheduleTemp.XMLOutput(os,indent);
    os<<endl;
+
+   mXMLAutoSave.XMLOutput(os,indent);
+   os<<endl;
+
    {
       XMLCrystTag tag2("TempMaxMin");
       for(int i=0;i<indent;i++) os << "  " ;
@@ -1236,6 +1240,11 @@ void MonteCarloObj::XMLInput(istream &is,const XMLCrystTag &tagg)
                if("Displacement Amplitude Schedule"==tag.GetAttributeValue(i))
                {
                   mAnnealingScheduleMutation.XMLInput(is,tag);
+                  break;
+               }
+               if("Save Best Config Regularly"==tag.GetAttributeValue(i))
+               {
+                  mXMLAutoSave.XMLInput(is,tag);
                   break;
                }
             }
