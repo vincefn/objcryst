@@ -616,112 +616,34 @@ Applying profiles for "<<nbRefl<<" reflections",3)
             if( (i+step) >= nbRefl) break;
             if(mTheta(i+step) > (mTheta(i)+1e-4) ) break;
          }
-         switch(this->GetRadiation().GetWavelengthType())
+         theta =  mpParentPowderPattern->Get2ThetaCorr(2*mTheta(i));
+         thetaPt= mpParentPowderPattern->Get2ThetaCorrPixel(2*mTheta(i));
+         VFN_DEBUG_MESSAGE("Apply profile(Monochromatic)Refl("<<i<<")"\
+            <<mIntH(i)<<" "<<mIntK(i)<<" "<<mIntL(i)<<" "\
+            <<"  I="<<intensity<<"  2Theta="<<2*mTheta(i)*RAD2DEG\
+            <<",pixel #"<<thetaPt,2)
+
+         first=thetaPt-mSavedPowderReflProfileNbPoint;
+
+         if( first >= specNbPoints) continue;
+         if( first < 0)
          {
-            case WAVELENGTH_MONOCHROMATIC:
-            {
-               theta =  mpParentPowderPattern->Get2ThetaCorr(2*mTheta(i));
-               thetaPt= mpParentPowderPattern->Get2ThetaCorrPixel(2*mTheta(i));
-               VFN_DEBUG_MESSAGE("Apply profile(Monochromatic)Refl("<<i<<")"\
-                  <<mIntH(i)<<" "<<mIntK(i)<<" "<<mIntL(i)<<" "\
-                  <<"  I="<<intensity<<"  2Theta="<<2*mTheta(i)*RAD2DEG\
-                  <<",pixel #"<<thetaPt,2)
-               
-               first=thetaPt-mSavedPowderReflProfileNbPoint;
-               
-               if( first >= specNbPoints) continue;
-               if( first < 0)
-               {
-                  shift = -first;
-                  first =0;
-               } else shift =0;
-               last=thetaPt+mSavedPowderReflProfileNbPoint;
-               if( last > specNbPoints) last=specNbPoints;
-               VFN_DEBUG_MESSAGE("first:"<<first<<"  last:"<<last,1)
-               {
-                  const REAL *p2 = mSavedPowderReflProfile.data() + i*nbPoints +shift;
-                  REAL *p3 = mPowderPatternCalc.data()+first;
-                  for(long j=first;j<last;j++) *p3++ += *p2++ * intensity;
-               }
-               if(useML)
-               {
-                  const REAL *p2 = mSavedPowderReflProfile.data() + i*nbPoints +shift;
-                  REAL *p3 = mPowderPatternCalcVariance.data()+first;
-                  for(long j=first;j<last;j++) *p3++ += *p2++ * var;
-               }
-               break;
-            }
-            case WAVELENGTH_ALPHA12:
-            {
-               VFN_DEBUG_MESSAGE("Apply profile(X-Ray Tube)Refl="<<i<<\
-               "  I="<<intensity<<"  Theta="<<mTheta(i)*RAD2DEG,2)
-               //:TODO: Use only ONE profile array for both alpha1&2 (faster)
-               {//Alpha1
-                  intensity /= (1+this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio());
-                  theta=mTheta(i);
-                  theta+=tan(theta)*(
-                     -this->GetRadiation().GetXRayTubeDeltaLambda()
-                      *this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio())
-                        /(1+this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio())
-                           /this->GetRadiation().GetWavelength()(0);
-                  thetaPt= mpParentPowderPattern->Get2ThetaCorrPixel(2*theta);
-                  theta=mpParentPowderPattern->Get2ThetaCorr(2*theta);
-                  first=thetaPt-mSavedPowderReflProfileNbPoint;
-                  if( first >= specNbPoints) continue;
-                  if( first < 0)
-                  {
-                     shift = -first;
-                     first =0;
-                  } else shift =0;
-                  last=thetaPt+mSavedPowderReflProfileNbPoint;
-                  if( last > specNbPoints) last=specNbPoints;
-                  VFN_DEBUG_MESSAGE("first:"<<first<<"  last:"<<last,1)
-                  {
-                     const REAL *p2 = mSavedPowderReflProfile.data() + i*nbPoints +shift;
-                     REAL *p3 = mPowderPatternCalc.data()+first;
-                     for(long j=first;j<last;j++) *p3++ += *p2++ * intensity;
-                  }
-                  if(useML)
-                  {
-                     const REAL *p2 = mSavedPowderReflProfile.data() + i*nbPoints +shift;
-                     REAL *p3 = mPowderPatternCalcVariance.data()+first;
-                     for(long j=first;j<last;j++) *p3++ += *p2++ * var;
-                  }
-               }
-               {//Alpha2
-                  intensity *= this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio();
-                  REAL theta=mTheta(i);
-                  theta+=tan(theta)*(this->GetRadiation().GetXRayTubeDeltaLambda()
-                              /(1+this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio()))
-                           /this->GetRadiation().GetWavelength()(0);
-                  thetaPt= mpParentPowderPattern->Get2ThetaCorrPixel(2*theta);
-                  theta=mpParentPowderPattern->Get2ThetaCorr(2*theta);
-                  first=thetaPt-mSavedPowderReflProfileNbPoint;
-                  if( first >= specNbPoints) continue;
-                  if( first < 0)
-                  {
-                     shift = -first;
-                     first =0;
-                  } else shift =0;
-                  last=thetaPt+mSavedPowderReflProfileNbPoint;
-                  if( last > specNbPoints) last=specNbPoints;
-                  VFN_DEBUG_MESSAGE("first:"<<first<<"  last:"<<last,0)
-                  {
-                     const REAL *p2 = mSavedPowderReflProfile.data() + i*nbPoints +shift;
-                     REAL *p3 = mPowderPatternCalc.data()+first;
-                     for(long j=first;j<last;j++) *p3++ += *p2++ * intensity;
-                  }
-                  if(useML)
-                  {
-                     const REAL *p2 = mSavedPowderReflProfile.data() + i*nbPoints +shift;
-                     REAL *p3 = mPowderPatternCalcVariance.data()+first;
-                     for(long j=first;j<last;j++) *p3++ += *p2++ * var;
-                  }
-               }
-               break;
-            }
-            default: throw ObjCrystException("PowderPatternDiffraction::CalcPowderPattern():\
-Beam must either be monochromatic or from an XRay Tube !!");
+            shift = -first;
+            first =0;
+         } else shift =0;
+         last=thetaPt+mSavedPowderReflProfileNbPoint;
+         if( last > specNbPoints) last=specNbPoints;
+         VFN_DEBUG_MESSAGE("first:"<<first<<"  last:"<<last,1)
+         {
+            const REAL *p2 = mSavedPowderReflProfile.data() + i*nbPoints +shift;
+            REAL *p3 = mPowderPatternCalc.data()+first;
+            for(long j=first;j<last;j++) *p3++ += *p2++ * intensity;
+         }
+         if(useML)
+         {
+            const REAL *p2 = mSavedPowderReflProfile.data() + i*nbPoints +shift;
+            REAL *p3 = mPowderPatternCalcVariance.data()+first;
+            for(long j=first;j<last;j++) *p3++ += *p2++ * var;
          }
       }
    }
@@ -828,7 +750,7 @@ void PowderPatternDiffraction::CalcPowderReflProfile()const
       &&(mClockProfileCalc>mClockHKL)) return;
    
    TAU_PROFILE("PowderPatternDiffraction::CalcPowderReflProfile()","void (bool)",TAU_DEFAULT);
-   VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile()",5)
+   VFN_DEBUG_ENTRY("PowderPatternDiffraction::CalcPowderReflProfile()",5)
 
    const REAL specMin     =mpParentPowderPattern->Get2ThetaMin();
    //const REAL specMax     =mpParentPowderPattern->Get2ThetaMax();
@@ -853,7 +775,21 @@ Computing Widths",5)
                                              *fwhm/specStep/2);
       else
          mSavedPowderReflProfileNbPoint =(long)(mFullProfileWidthFactor
-                                             *fwhm/specStep);
+                                       *fwhm/specStep);
+      switch(this->GetRadiation().GetWavelengthType())
+      {
+         case WAVELENGTH_MONOCHROMATIC:break;
+         case WAVELENGTH_ALPHA12:
+         {
+            mSavedPowderReflProfileNbPoint
+               +=(long)( tan(mpParentPowderPattern->Get2ThetaMax())
+                        *this->GetRadiation().GetXRayTubeDeltaLambda()
+                        /this->GetRadiation().GetWavelength()(0));
+            break;
+         }
+         default: throw ObjCrystException("PowderPatternDiffraction::PrepareIntegratedProfile():\
+Radiation must be either monochromatic or from an X-Ray Tube !!");
+      }
       VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile():"<<\
       "Profiles half-width="<<mFullProfileWidthFactor*fwhm*RAD2DEG<<" ("<<\
       mSavedPowderReflProfileNbPoint<<" points)",5)
@@ -866,93 +802,142 @@ Computing Widths",5)
          *p2++ = i * specStep;
       mSavedPowderReflProfile.resize(this->GetNbRefl(),2*mSavedPowderReflProfileNbPoint+1);
    //Calc all profiles
-   p1=mSavedPowderReflProfile.data();
-   
    mvLabel.clear();
    stringstream label;
 
+   unsigned int nbLine=1;
+   CrystVector_REAL spectrumDeltaLambdaOvLambda;
+   CrystVector_REAL spectrumFactor;//relative weigths of different lines of X-Ray tube
+   switch(this->GetRadiation().GetWavelengthType())
+   {
+      case WAVELENGTH_MONOCHROMATIC:
+      {
+         spectrumDeltaLambdaOvLambda.resize(1);spectrumDeltaLambdaOvLambda=0.0;
+         spectrumFactor.resize(1);spectrumFactor=1.0;
+         break;
+      }
+      case WAVELENGTH_ALPHA12:
+      {
+         nbLine=2;
+         spectrumDeltaLambdaOvLambda.resize(2);
+         spectrumDeltaLambdaOvLambda(0)
+            =-this->GetRadiation().GetXRayTubeDeltaLambda()
+             *this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio()
+             /(1+this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio())
+             /this->GetRadiation().GetWavelength()(0);
+         spectrumDeltaLambdaOvLambda(1)
+            = this->GetRadiation().GetXRayTubeDeltaLambda()
+             /(1+this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio())
+             /this->GetRadiation().GetWavelength()(0);
+         
+         spectrumFactor.resize(2);
+         spectrumFactor(0)=1./(1.+this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio());
+         spectrumFactor(1)=this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio()
+                           /(1.+this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio());
+         break;
+      }
+      default: throw ObjCrystException("PowderPatternDiffraction::PrepareIntegratedProfile():\
+Radiation must be either monochromatic or from an X-Ray Tube !!");
+   }
+   
+   
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile():\
 Computing all Profiles",5)
-   for(long i=0;i<this->GetNbRefl();i++)
+   for(unsigned int line=0;line<nbLine;line++)
    {
-   VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile():\
-Computing all Profiles: Reflection #"<<i,2)
-      tmp=mTheta(i);
-      fwhm=mCagliotiW + mCagliotiV*tmp + mCagliotiU*tmp*tmp;
-      if(fwhm<1e-10) fwhm=1e-10;
-      fwhm =sqrt(fwhm);
-   
-      REAL powderAsym=1.;
-      //if(true == mUseAsymmetricProfile) 
-      //   powderAsym=mPowderAsymA0+mPowderAsymA1/sin(tmp)+mPowderAsymA2/sin(tmp)/sin(tmp);
-         
-      //:KLUDGE: Need to use the same 'thetaPt' when calculating the complete powder spectrum
-      thetaPt =(long) ((2*tmp-specMin)/specStep);
-      tmp2theta = ttheta;
-      tmp2theta += (specMin + thetaPt * specStep)-2*tmp;
-      
-      label.str("");
-      label<<mIntH(i)<<" "<<mIntK(i)<<" "<<mIntL(i);
-      mvLabel.push_back(make_pair(mpParentPowderPattern->Get2ThetaCorr(2*tmp),label.str()));
-
-      switch(mReflectionProfileType.GetChoice())
+      p1=mSavedPowderReflProfile.data();
+      for(long i=0;i<this->GetNbRefl();i++)
       {
-         case PROFILE_GAUSSIAN:
-         {
-            if(true == mUseAsymmetricProfile)
-               reflProfile=PowderProfileGauss(tmp2theta,fwhm,powderAsym);
-            else reflProfile=PowderProfileGauss(tmp2theta,fwhm);
-            break;
-         }
-         case PROFILE_LORENTZIAN:
-         {
-            if(true == mUseAsymmetricProfile)
-               reflProfile=PowderProfileLorentz(tmp2theta,fwhm,powderAsym);
-            else reflProfile=PowderProfileLorentz(tmp2theta,fwhm);
-            break;
-         }
-         case PROFILE_PSEUDO_VOIGT:
-         {
-            if(true == mUseAsymmetricProfile)
-               reflProfile=PowderProfileGauss(tmp2theta,fwhm,powderAsym);
-            else reflProfile=PowderProfileGauss(tmp2theta,fwhm);
-            reflProfile *= 1-(mPseudoVoigtEta0+2*mTheta(i)*mPseudoVoigtEta1);
-            if(true == mUseAsymmetricProfile)
-               tmpV=PowderProfileLorentz(tmp2theta,fwhm,powderAsym);
-            else tmpV=PowderProfileLorentz(tmp2theta,fwhm);
-            tmpV *= mPseudoVoigtEta0+2*mTheta(i)*mPseudoVoigtEta1;
-            reflProfile += tmpV;
-            break;
-         }
-         case PROFILE_PSEUDO_VOIGT_FINGER_COX_JEPHCOAT:
-         {
-            throw ObjCrystException(
-               "PROFILE_PSEUDO_VOIGT_FINGER_COX_JEPHCOAT Not implemented");
-            /*
-            tmp2theta*=180./M_PI;//Keep degrees:external library used
-            fwhm *=180./M_PI;
-            REAL eta=mPowderPseudoVoigtEta0+2*mTheta(i)*mPowderPseudoVoigtEta1;
-            REAL dPRdT, dPRdG, dPRdE , dPRdS, dPRdD;
-            bool useAsym=true;
-            if( (mPowderAsymSourceWidth < 1e-8) && (mPowderAsymSourceWidth < 1e-8) )
-               useAsym=false;
-               
-            for(long j=0;j<2*mSavedPowderReflProfileNbPoint+1;j++)
-               reflProfile(j)=Profval( eta,fwhm,mPowderAsymSourceWidth,
-                                       mPowderAsymDetectorWidth,tmp2theta(j) ,
-                                       0.,&dPRdT,&dPRdG,&dPRdE,&dPRdS,&dPRdD,
-                                       useAsym);
-            break;
-            */
-         }
-         case PROFILE_PEARSON_VII: throw ObjCrystException("PEARSON_VII Not implemented yet");
+         VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile():\
+Computing all Profiles: Reflection #"<<i,5)
+         tmp=mTheta(i);
+         fwhm=mCagliotiW + mCagliotiV*tmp + mCagliotiU*tmp*tmp;
+         if(fwhm<1e-10) fwhm=1e-10;
+         fwhm =sqrt(fwhm);
+         tmp=mpParentPowderPattern->Get2ThetaCorr(2*tmp);
 
+         REAL powderAsym=1.;
+         //if(true == mUseAsymmetricProfile) 
+         //   powderAsym=mPowderAsymA0+mPowderAsymA1/sin(tmp)+mPowderAsymA2/sin(tmp)/sin(tmp);
+
+         //:KLUDGE: Need to use the same 'thetaPt' when calculating the complete powder spectrum
+         thetaPt =(long) ((tmp-specMin)/specStep);
+         tmp2theta = ttheta;
+         if(nbLine>1)
+         {// we have several lines, not centered on the profile range
+            tmp=mTheta(i);
+            tmp = mpParentPowderPattern->Get2ThetaCorr(
+                        2*(tmp+tan(tmp)*spectrumDeltaLambdaOvLambda(line)));
+         }
+         tmp2theta += (specMin + thetaPt * specStep)-tmp;
+         if(line==0)
+         {// For an X-Ray tube, label on first (strongest) of reflections lines (Kalpha1)
+            label.str("");
+            label<<mIntH(i)<<" "<<mIntK(i)<<" "<<mIntL(i);
+            mvLabel.push_back(make_pair(tmp,label.str()));
+         }
+
+         switch(mReflectionProfileType.GetChoice())
+         {
+            case PROFILE_GAUSSIAN:
+            {
+               if(true == mUseAsymmetricProfile)
+                  reflProfile=PowderProfileGauss(tmp2theta,fwhm,powderAsym);
+               else reflProfile=PowderProfileGauss(tmp2theta,fwhm);
+               break;
+            }
+            case PROFILE_LORENTZIAN:
+            {
+               if(true == mUseAsymmetricProfile)
+                  reflProfile=PowderProfileLorentz(tmp2theta,fwhm,powderAsym);
+               else reflProfile=PowderProfileLorentz(tmp2theta,fwhm);
+               break;
+            }
+            case PROFILE_PSEUDO_VOIGT:
+            {
+               if(true == mUseAsymmetricProfile)
+                  reflProfile=PowderProfileGauss(tmp2theta,fwhm,powderAsym);
+               else reflProfile=PowderProfileGauss(tmp2theta,fwhm);
+               reflProfile *= 1-(mPseudoVoigtEta0+2*mTheta(i)*mPseudoVoigtEta1);
+               if(true == mUseAsymmetricProfile)
+                  tmpV=PowderProfileLorentz(tmp2theta,fwhm,powderAsym);
+               else tmpV=PowderProfileLorentz(tmp2theta,fwhm);
+               tmpV *= mPseudoVoigtEta0+2*mTheta(i)*mPseudoVoigtEta1;
+               reflProfile += tmpV;
+               break;
+            }
+            case PROFILE_PSEUDO_VOIGT_FINGER_COX_JEPHCOAT:
+            {
+               throw ObjCrystException(
+                  "PROFILE_PSEUDO_VOIGT_FINGER_COX_JEPHCOAT Not implemented");
+               /*
+               tmp2theta*=180./M_PI;//Keep degrees:external library used
+               fwhm *=180./M_PI;
+               REAL eta=mPowderPseudoVoigtEta0+2*mTheta(i)*mPowderPseudoVoigtEta1;
+               REAL dPRdT, dPRdG, dPRdE , dPRdS, dPRdD;
+               bool useAsym=true;
+               if( (mPowderAsymSourceWidth < 1e-8) && (mPowderAsymSourceWidth < 1e-8) )
+                  useAsym=false;
+
+               for(long j=0;j<2*mSavedPowderReflProfileNbPoint+1;j++)
+                  reflProfile(j)=Profval( eta,fwhm,mPowderAsymSourceWidth,
+                                          mPowderAsymDetectorWidth,tmp2theta(j) ,
+                                          0.,&dPRdT,&dPRdG,&dPRdE,&dPRdS,&dPRdD,
+                                          useAsym);
+               break;
+               */
+            }
+            case PROFILE_PEARSON_VII: throw ObjCrystException("PEARSON_VII Not implemented yet");
+
+         }
+         if(nbLine>1) reflProfile *=spectrumFactor(line);
+         p2=reflProfile.data();
+         if(line==0)for(int j=0;j<2*mSavedPowderReflProfileNbPoint+1;j++) *p1++  = *p2++;
+         else       for(int j=0;j<2*mSavedPowderReflProfileNbPoint+1;j++) *p1++ += *p2++;
       }
-      p2=reflProfile.data();
-      for(int j=0;j<2*mSavedPowderReflProfileNbPoint+1;j++) *p1++ = *p2++;
    }
    mClockProfileCalc.Click();
-   VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile():finished",5)
+   VFN_DEBUG_EXIT("PowderPatternDiffraction::CalcPowderReflProfile()",5)
 }
 
 void PowderPatternDiffraction::CalcIntensityCorr()const
@@ -1212,75 +1197,19 @@ void PowderPatternDiffraction::PrepareIntegratedProfile()const
       pos->clear();
       for(long j=0;j<numInterval;j++)
       {
-         switch(this->GetRadiation().GetWavelengthType())
+         const long thetaPt= mpParentPowderPattern->Get2ThetaCorrPixel(2*mTheta(i));
+         const long first0 = thetaPt - mSavedPowderReflProfileNbPoint;
+         const long last0  = thetaPt + mSavedPowderReflProfileNbPoint;
+               long first= first0>(*pMin)(j) ? first0:(*pMin)(j);
+         const long last = last0 <(*pMax)(j) ? last0 :(*pMax)(j);
+         if(first<last)
          {
-            case WAVELENGTH_MONOCHROMATIC:
-            {
-               const long thetaPt= mpParentPowderPattern->Get2ThetaCorrPixel(2*mTheta(i));
-               const long first0 = thetaPt - mSavedPowderReflProfileNbPoint;
-               const long last0  = thetaPt + mSavedPowderReflProfileNbPoint;
-                     long first= first0>(*pMin)(j) ? first0:(*pMin)(j);
-               const long last = last0 <(*pMax)(j) ? last0 :(*pMax)(j);
-               if(first<last)
-               {
-                  if(pos->find(j) == pos->end()) (*pos)[j]=0.;
-                  REAL *fact = &((*pos)[j]);//this creates the 'j' entry if necessary
-                  const long shift=first-first0;
-                  const REAL *p2 = mSavedPowderReflProfile.data() + i*nbPoints +shift;
-                  for(int k=first;k<=last;k++) *fact += *p2++;
-                  //cout << i<<","<<j<<","<<first<<","<<last<<":"<<*fact<<endl;
-               }
-               break;
-            }
-            case WAVELENGTH_ALPHA12:
-            {
-               //:TODO: Use only ONE profile array for both alpha1&2 (faster, simpler !)
-               {//Alpha1
-                  const REAL factor = 1./(1.+this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio());
-                  REAL theta=mTheta(i);
-                  theta+=tan(theta)*(
-                     -this->GetRadiation().GetXRayTubeDeltaLambda()
-                      *this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio())
-                        /(1+this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio())
-                           /this->GetRadiation().GetWavelength()(0);
-                  const long thetaPt= mpParentPowderPattern->Get2ThetaCorrPixel(2*theta);
-                  const long first0=thetaPt-mSavedPowderReflProfileNbPoint;
-                  const long last0  = thetaPt + mSavedPowderReflProfileNbPoint;
-                        long first= first0>(*pMin)(j) ? first0:(*pMin)(j);
-                  const long last = last0 <(*pMax)(j) ? last0 :(*pMax)(j);
-                  if(first<last)
-                  {
-                     if(pos->find(j) == pos->end()) (*pos)[j]=0.;
-                     REAL *fact = &((*pos)[j]);//this creates the 'j' entry if necessary
-                     const long shift=first-first0;
-                     const REAL *p2 = mSavedPowderReflProfile.data() + i*nbPoints +shift;
-                     for(int k=first;k<=last;k++) *fact += *p2++ * factor;
-                  }
-               }
-               {//Alpha2
-                  const REAL factor = this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio();
-                  REAL theta=mTheta(i);
-                  theta+=tan(theta)*(this->GetRadiation().GetXRayTubeDeltaLambda()
-                              /(1+this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio()))
-                           /this->GetRadiation().GetWavelength()(0);
-                  const long thetaPt= mpParentPowderPattern->Get2ThetaCorrPixel(2*theta);
-                  const long first0=thetaPt-mSavedPowderReflProfileNbPoint;
-                  const long last0  = thetaPt + mSavedPowderReflProfileNbPoint;
-                        long first= first0>(*pMin)(j) ? first0:(*pMin)(j);
-                  const long last = last0 <(*pMax)(j) ? last0 :(*pMax)(j);
-                  if(first<last)
-                  {
-                     if(pos->find(j) == pos->end()) (*pos)[j]=0.;
-                     REAL *fact = &((*pos)[j]);//this creates the 'j' entry if necessary
-                     const long shift=first-first0;
-                     const REAL *p2 = mSavedPowderReflProfile.data() + i*nbPoints +shift;
-                     for(int k=first;k<=last;k++) *fact += *p2++ * factor;
-                  }
-               }
-               break;
-            }
-            default: throw ObjCrystException("PowderPatternDiffraction::PrepareIntegratedProfile():\
-Radiation must be either monochromatic or from an X-Ray Tube !!");
+            if(pos->find(j) == pos->end()) (*pos)[j]=0.;
+            REAL *fact = &((*pos)[j]);//this creates the 'j' entry if necessary
+            const long shift=first-first0;
+            const REAL *p2 = mSavedPowderReflProfile.data() + i*nbPoints +shift;
+            for(int k=first;k<=last;k++) *fact += *p2++;
+            //cout << i<<","<<j<<","<<first<<","<<last<<":"<<*fact<<endl;
          }
       }
       pos++;
