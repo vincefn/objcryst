@@ -26,13 +26,9 @@
 #define _VFN_OBJCRYST_H_
 
 
-//#include <stdlib.h>
 #include <string>
-//#include <iomanip>
 #include <cmath>
-//#include <typeinfo>
-//#include <fstream>
-//#include <ctime>
+#include <utility>
 
 //profiling
 #ifdef __MWERKS__
