@@ -76,7 +76,7 @@ Atom::Atom()
 }
 
 Atom::Atom( const REAL x, const REAL y, const REAL z,
-            const string &name,const ScatteringPowerAtom *pow)
+            const string &name,const ScatteringPower *pow)
 :mScattCompList(1),mpScattPowAtom(pow)
 {
    VFN_DEBUG_MESSAGE("Atom::Atom(x,y,z,name,ScatteringPower):"<<name,5)
@@ -84,7 +84,7 @@ Atom::Atom( const REAL x, const REAL y, const REAL z,
 }
 
 Atom::Atom( const REAL x, const REAL y, const REAL z, const string &name,
-            const ScatteringPowerAtom *pow,const REAL popu)
+            const ScatteringPower *pow,const REAL popu)
 :mScattCompList(1),mpScattPowAtom(pow)
 {
    VFN_DEBUG_MESSAGE("Atom::Atom(x,y,z,P,B,name,ScatteringPower):"<<name,5)
@@ -140,7 +140,7 @@ void Atom::operator=(const Atom &rhs)
 }
 
 void Atom::Init(const REAL x, const REAL y, const REAL z,
-            const string &name, const ScatteringPowerAtom *pow,
+            const string &name, const ScatteringPower *pow,
             const REAL popu)
 {
    VFN_DEBUG_MESSAGE("Atom::Init():"<<name,3)
@@ -408,7 +408,7 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
 
 bool Atom::IsDummy()const { if(0==mScattCompList(0).mpScattPow) return true; return false;}
 
-const ScatteringPowerAtom& Atom::GetScatteringPower()const
+const ScatteringPower& Atom::GetScatteringPower()const
 { return *mpScattPowAtom;}
 
 void Atom::GetGeneGroup(const RefinableObj &obj,

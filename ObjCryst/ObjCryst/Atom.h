@@ -67,7 +67,7 @@ class Atom: public Scatterer
       * The name can have \e any format but spaces should be avoided.
       */
       Atom( const REAL x, const REAL y, const REAL z,
-            const string &name, const ScatteringPowerAtom *pow);
+            const string &name, const ScatteringPower *pow);
       /**   \brief Atom constructor
       *  \param x,y,z : \e fractional coordinates of the atom
       *  \param popu : the population of the atom (0.0->1.0)
@@ -82,7 +82,7 @@ class Atom: public Scatterer
       * The name can have \e any format but spaces should be avoided (just a precaution)
       */
       Atom( const REAL x, const REAL y, const REAL z,const string &name,
-             const ScatteringPowerAtom *pow, const REAL popu);
+             const ScatteringPower *pow, const REAL popu);
       /// Copy constructor
       Atom(const Atom &old);
       virtual Atom* CreateCopy() const;
@@ -98,7 +98,7 @@ class Atom: public Scatterer
       *  \param name : name of the atom ('Ta1','Sm2', 'Tungsten_1'...).
       */
       void Init(const REAL x, const REAL y, const REAL z,
-            const string &name, const ScatteringPowerAtom *pow,
+            const string &name, const ScatteringPower *pow,
             const REAL popu=1);
       
       virtual int GetNbComponent() const;
@@ -140,7 +140,7 @@ class Atom: public Scatterer
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
       /// Get the ScatteringPowerAtom corresponding to this atom.
-      const ScatteringPowerAtom& GetScatteringPower()const;
+      const ScatteringPower& GetScatteringPower()const;
       virtual void GetGeneGroup(const RefinableObj &obj, 
                                 CrystVector_uint & groupIndex,
                                 unsigned int &firstGroup) const;
@@ -152,7 +152,7 @@ class Atom: public Scatterer
       /// The list of scattering components.
       mutable ScatteringComponentList mScattCompList;
       /// The ScatteringPowerAtom associated to that atom
-      const ScatteringPowerAtom *mpScattPowAtom;
+      const ScatteringPower *mpScattPowAtom;
    #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);
