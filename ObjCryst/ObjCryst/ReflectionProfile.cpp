@@ -89,7 +89,8 @@ ReflectionProfile(),
 mCagliotiU(0),mCagliotiV(0),mCagliotiW(3e-5),
 mPseudoVoigtEta0(0.0),mPseudoVoigtEta1(0.0),
 mAsymBerarBaldinozziA0(0.0),mAsymBerarBaldinozziA1(0.0),
-mAsymBerarBaldinozziB0(0.0),mAsymBerarBaldinozziB1(0.0)
+mAsymBerarBaldinozziB0(0.0),mAsymBerarBaldinozziB1(0.0),
+mAsym0(1.0),mAsym1(0.0),mAsym2(0.0)
 {
    this->InitParameters();
 }
@@ -101,7 +102,8 @@ mPseudoVoigtEta0(old.mPseudoVoigtEta0),mPseudoVoigtEta1(old.mPseudoVoigtEta1),
 mAsymBerarBaldinozziA0(old.mAsymBerarBaldinozziA0),
 mAsymBerarBaldinozziA1(old.mAsymBerarBaldinozziA1),
 mAsymBerarBaldinozziB0(old.mAsymBerarBaldinozziB0),
-mAsymBerarBaldinozziB1(old.mAsymBerarBaldinozziB1)
+mAsymBerarBaldinozziB1(old.mAsymBerarBaldinozziB1),
+mAsym0(old.mAsym0),mAsym1(old.mAsym1),mAsym2(old.mAsym2)
 {
    this->InitParameters();
 }
@@ -137,15 +139,15 @@ CrystVector_REAL ReflectionProfilePseudoVoigt::GetProfile(const CrystVector_REAL
                         +mCagliotiU*pow(tan(center/2.0),2));
    
    CrystVector_REAL profile,tmpV;
-   
-   profile=PowderProfileGauss(x,fwhm,center);
+   const REAL asym=mAsym0+mAsym1/sin(center)+mAsym2/pow((REAL)sin(center),(REAL)2.0);
+   profile=PowderProfileGauss(x,fwhm,center,asym);
    profile *= 1-(mPseudoVoigtEta0+center*mPseudoVoigtEta1);
-   tmpV=PowderProfileLorentz(x,fwhm,center);
+   tmpV=PowderProfileLorentz(x,fwhm,center,asym);
    tmpV *= mPseudoVoigtEta0+center*mPseudoVoigtEta1;
    profile += tmpV;
-   profile *= AsymmetryBerarBaldinozzi(x,fwhm,center,
-                                       mAsymBerarBaldinozziA0,mAsymBerarBaldinozziA1,
-                                       mAsymBerarBaldinozziB0,mAsymBerarBaldinozziB1);
+   //profile *= AsymmetryBerarBaldinozzi(x,fwhm,center,
+   //                                    mAsymBerarBaldinozziA0,mAsymBerarBaldinozziA1,
+   //                                    mAsymBerarBaldinozziB0,mAsymBerarBaldinozziB1);
    VFN_DEBUG_EXIT("ReflectionProfilePseudoVoigt::GetProfile()",2)
    return profile;
 }
@@ -271,6 +273,27 @@ void ReflectionProfilePseudoVoigt::InitParameters()
       tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }
+   {
+      RefinablePar tmp("Asym0",&mAsym0,0.01,10.0,gpRefParTypeScattDataProfileAsym,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
+      tmp.AssignClock(mClockMaster);
+      tmp.SetDerivStep(1e-4);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("Asym1",&mAsym1,-1.0,1.0,gpRefParTypeScattDataProfileAsym,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
+      tmp.AssignClock(mClockMaster);
+      tmp.SetDerivStep(1e-4);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("Asym2",&mAsym2,-1.0,1.0,gpRefParTypeScattDataProfileAsym,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
+      tmp.AssignClock(mClockMaster);
+      tmp.SetDerivStep(1e-4);
+      this->AddPar(tmp);
+   }
 }
 
 void ReflectionProfilePseudoVoigt::XMLOutput(ostream &os,int indent)const
@@ -296,6 +319,15 @@ void ReflectionProfilePseudoVoigt::XMLOutput(ostream &os,int indent)const
    this->GetPar(&mPseudoVoigtEta1).XMLOutput(os,"Eta1",indent);
    os <<endl;
    
+   this->GetPar(&mAsym0).XMLOutput(os,"Asym0",indent);
+   os <<endl;
+   
+   this->GetPar(&mAsym1).XMLOutput(os,"Asym1",indent);
+   os <<endl;
+   
+   this->GetPar(&mAsym2).XMLOutput(os,"Asym2",indent);
+   os <<endl;
+   #if 0
    this->GetPar(&mAsymBerarBaldinozziA0).XMLOutput(os,"AsymA0",indent);
    os <<endl;
    
@@ -307,7 +339,7 @@ void ReflectionProfilePseudoVoigt::XMLOutput(ostream &os,int indent)const
    
    this->GetPar(&mAsymBerarBaldinozziB1).XMLOutput(os,"AsymB1",indent);
    os <<endl;
-   
+   #endif
    indent--;
    tag.SetIsEndTag(true);
    for(int i=0;i<indent;i++) os << "  " ;
@@ -361,6 +393,22 @@ void ReflectionProfilePseudoVoigt::XMLInput(istream &is,const XMLCrystTag &tagg)
                   this->GetPar(&mPseudoVoigtEta1).XMLInput(is,tag);
                   break;
                }
+               if("Asym0"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar(&mAsym0).XMLInput(is,tag);
+                  break;
+               }
+               if("Asym1"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar(&mAsym1).XMLInput(is,tag);
+                  break;
+               }
+               if("Asym2"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar(&mAsym2).XMLInput(is,tag);
+                  break;
+               }
+               #if 0
                if("AsymA0"==tag.GetAttributeValue(i))
                {
                   this->GetPar(&mAsymBerarBaldinozziA0).XMLInput(is,tag);
@@ -381,6 +429,7 @@ void ReflectionProfilePseudoVoigt::XMLInput(istream &is,const XMLCrystTag &tagg)
                   this->GetPar(&mAsymBerarBaldinozziB1).XMLInput(is,tag);
                   break;
                }
+               #endif
             }
          }
          continue;
@@ -817,7 +866,7 @@ WXCrystObjBasic* ReflectionProfileDoubleExponentialPseudoVoigt::WXCreate(wxWindo
 //######################################################################
 
 CrystVector_REAL PowderProfileGauss  (const CrystVector_REAL ttheta,const REAL fwhm,
-                                      const REAL center)
+                                      const REAL center, const REAL asym)
 {
    TAU_PROFILE("PowderProfileGauss()","Vector (Vector,REAL)",TAU_DEFAULT);
    const long nbPoints=ttheta.numElements();
@@ -825,11 +874,24 @@ CrystVector_REAL PowderProfileGauss  (const CrystVector_REAL ttheta,const REAL f
    result=ttheta;
    result+= -center;
    result *= result;
-   REAL *p=result.data();
+   REAL *p;
    
-   //reference: IUCr Monographs on Crystallo 5 - The Rietveld Method (ed RA Young)
-   result *= -4.*log(2.)/fwhm/fwhm;
-   p=result.data();
+   if( fabs(asym-1.) < 1e-5)
+   {
+      //reference: IUCr Monographs on Crystallo 5 - The Rietveld Method (ed RA Young)
+      result *= -4.*log(2.)/fwhm/fwhm;
+   }
+   else
+   {  // Adapted from Toraya J. Appl. Cryst 23(1990),485-491
+      const REAL c1= -(1.+asym)/asym*log(2.)/fwhm/fwhm;
+      const REAL c2= -(1.+asym)     *log(2.)/fwhm/fwhm;
+      long i;
+      p=result.data();
+      const REAL *pt=ttheta.data();
+      for(i=0;i<nbPoints;i++){ *p++ *= c1;if(*pt++>center) break;}
+      i++;
+      for(   ;i<nbPoints;i++)  *p++ *= c2;
+   }   p=result.data();
    #ifdef _MSC_VER
    // Bug from Hell (in MSVC++) !
    // The *last* point ends up sometimes with an arbitrary large value...
@@ -843,7 +905,7 @@ CrystVector_REAL PowderProfileGauss  (const CrystVector_REAL ttheta,const REAL f
 }
 
 CrystVector_REAL PowderProfileLorentz(const CrystVector_REAL ttheta,const REAL fwhm,
-                                      const REAL center)
+                                      const REAL center, const REAL asym)
 {
    TAU_PROFILE("PowderProfileLorentz()","Vector (Vector,REAL)",TAU_DEFAULT);
    const long nbPoints=ttheta.numElements();
@@ -851,9 +913,23 @@ CrystVector_REAL PowderProfileLorentz(const CrystVector_REAL ttheta,const REAL f
    result=ttheta;
    result+= -center;
    result *= result;
-   REAL *p=result.data();
-   //reference: IUCr Monographs on Crystallo 5 - The Rietveld Method (ed RA Young)
-   result *= 4./fwhm/fwhm;
+   REAL *p;
+   if( fabs(asym-1.) < 1e-5)
+   {
+      //reference: IUCr Monographs on Crystallo 5 - The Rietveld Method (ed RA Young)
+      result *= 4./fwhm/fwhm;
+   }
+   else
+   {  // Adapted from Toraya J. Appl. Cryst 23(1990),485-491
+      const REAL c1= (1+asym)/asym*(1+asym)/asym/fwhm/fwhm;
+      const REAL c2= (1+asym)     *(1+asym)     /fwhm/fwhm;
+      long i;
+      p=result.data();
+      const REAL *pt=ttheta.data();
+      for(i=0;i<nbPoints;i++){ *p++ *= c1;if(*pt++>center) break;}
+      i++;
+      for(   ;i<nbPoints;i++)  *p++ *= c2 ;
+   }
    p=result.data();
    result += 1. ;
    for(long i=0;i<nbPoints;i++) { *p = 1/(*p) ; p++ ;}

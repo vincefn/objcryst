@@ -35,12 +35,12 @@ namespace ObjCryst
 /// and of the FWHM. The input is an array of the theta values. The maximum of the 
 ///function is in theta=center. If asymmetry is used, negative tth values must be first.
 CrystVector_REAL PowderProfileGauss  (const CrystVector_REAL theta,
-                                      const REAL fwhm, const REAL center);
+                                      const REAL fwhm, const REAL center, const REAL asym=1.0);
 ///Lorentzian, normalized (ie integral is equal to 1), as a function of theta
 /// and of the FWHM. The input is an array of the theta values. The maximum of the 
 ///function is in theta=center. If asymmetry is used, negative tth values must be first.
 CrystVector_REAL PowderProfileLorentz(const CrystVector_REAL theta,
-                                      const REAL fwhm, const REAL center);
+                                      const REAL fwhm, const REAL center, const REAL asym=1.0);
 /// Asymmetry function [Ref J. Appl. Cryst 26 (1993), 128-129
 CrystVector_REAL AsymmetryBerarBaldinozzi(const CrystVector_REAL theta,
                                           const REAL fwhm, const REAL center,
@@ -135,9 +135,15 @@ class ReflectionProfilePseudoVoigt:public ReflectionProfile
       REAL mPseudoVoigtEta0,mPseudoVoigtEta1;
       /** Asymmetry parameters, following the Bérar \& Baldinozzi approach
       * ( Bérar \& baldinozzi, J. Appl. Cryst 26 (1993), 128-129)
+      *
+      * \note: these are not used right now.
       */
       REAL mAsymBerarBaldinozziA0,mAsymBerarBaldinozziA1,
            mAsymBerarBaldinozziB0,mAsymBerarBaldinozziB1;
+      /** Asymmetry parameters, following the analytical function for asymmetric pseudo-voigt
+      * given by (e.g.) Toraya in J. Appl. Cryst 23(1990),485-491
+      */
+      REAL mAsym0,mAsym1,mAsym2;
 #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow* parent);

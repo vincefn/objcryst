@@ -1703,6 +1703,12 @@ WXCrystObj(parent),mpProfile(prof)
       mList.Add(pFieldCagliotiV);
       mList.Add(pFieldCagliotiW);
       mpSizer->Add(sizer1);
+      pFieldCagliotiU->SetToolTip(_T("Width Parameters (Caglioti's law):\n")
+                                  _T("fwhm=[W+V*tan(theta)+U*tan^2(theta)]^1/2"));
+      pFieldCagliotiV->SetToolTip(_T("Width Parameters (Caglioti's law):\n")
+                                  _T("fwhm=[W+V*tan(theta)+U*tan^2(theta)]^1/2"));
+      pFieldCagliotiW->SetToolTip(_T("Width Parameters (Caglioti's law):\n")
+                                  _T("fwhm=[W+V*tan(theta)+U*tan^2(theta)]^1/2"));
    // Mixing parameter
       wxBoxSizer* sizer2=new wxBoxSizer(wxHORIZONTAL);
       WXCrystObjBasic* pFieldEta0=mpProfile->GetPar("Eta0").WXCreate(this);
@@ -1712,21 +1718,43 @@ WXCrystObj(parent),mpProfile(prof)
       mList.Add(pFieldEta0);
       mList.Add(pFieldEta1);
       mpSizer->Add(sizer2);
+      pFieldEta0->SetToolTip(_T("Gaussian/Lorentzian mixing parameters:\n")
+                             _T(" PV(x) = eta*L(x) + (1-eta)*G(x)\n\n")
+                             _T("eta=Eta0+Eta11*2theta"));
+      pFieldEta1->SetToolTip(_T("Gaussian/Lorentzian mixing parameters:\n")
+                             _T(" PV(x) = eta*L(x) + (1-eta)*G(x)\n\n")
+                             _T("eta=Eta0+Eta11*2theta"));
    // Asymmetry parameter
       wxBoxSizer* sizer3=new wxBoxSizer(wxHORIZONTAL);
-      WXCrystObjBasic* pFieldAsymA0=mpProfile->GetPar("AsymA0").WXCreate(this);
-      WXCrystObjBasic* pFieldAsymA1=mpProfile->GetPar("AsymA1").WXCreate(this);
-      WXCrystObjBasic* pFieldAsymB0=mpProfile->GetPar("AsymB0").WXCreate(this);
-      WXCrystObjBasic* pFieldAsymB1=mpProfile->GetPar("AsymB1").WXCreate(this);
-      sizer3->Add(pFieldAsymA0,0);
-      sizer3->Add(pFieldAsymA1,0);
-      sizer3->Add(pFieldAsymB0,0);
-      sizer3->Add(pFieldAsymB1,0);
-      mList.Add(pFieldAsymA0);
-      mList.Add(pFieldAsymA1);
-      mList.Add(pFieldAsymB0);
-      mList.Add(pFieldAsymB1);
+      //WXCrystObjBasic* pFieldAsymA0=mpProfile->GetPar("AsymA0").WXCreate(this);
+      //WXCrystObjBasic* pFieldAsymA1=mpProfile->GetPar("AsymA1").WXCreate(this);
+      //WXCrystObjBasic* pFieldAsymB0=mpProfile->GetPar("AsymB0").WXCreate(this);
+      //WXCrystObjBasic* pFieldAsymB1=mpProfile->GetPar("AsymB1").WXCreate(this);
+      //sizer3->Add(pFieldAsymA0,0);
+      //sizer3->Add(pFieldAsymA1,0);
+      //sizer3->Add(pFieldAsymB0,0);
+      //sizer3->Add(pFieldAsymB1,0);
+      //mList.Add(pFieldAsymA0);
+      //mList.Add(pFieldAsymA1);
+      //mList.Add(pFieldAsymB0);
+      //mList.Add(pFieldAsymB1);
+      WXCrystObjBasic* pFieldAsym0=mpProfile->GetPar("Asym0").WXCreate(this);
+      WXCrystObjBasic* pFieldAsym1=mpProfile->GetPar("Asym1").WXCreate(this);
+      WXCrystObjBasic* pFieldAsym2=mpProfile->GetPar("Asym2").WXCreate(this);
+      sizer3->Add(pFieldAsym0,0);
+      sizer3->Add(pFieldAsym1,0);
+      sizer3->Add(pFieldAsym2,0);
+      mList.Add(pFieldAsym0);
+      mList.Add(pFieldAsym1);
+      mList.Add(pFieldAsym2);
       mpSizer->Add(sizer3);
+
+      pFieldAsym0->SetToolTip(_T("Asymmetry parameters:\n\n")
+                              _T("A=A0+A1/sin(2theta)+A2/sin^2(2theta) "));
+      pFieldAsym1->SetToolTip(_T("Asymmetry parameters:\n\n")
+                              _T("A=A0+A1/sin(2theta)+A2/sin^2(2theta) "));
+      pFieldAsym2->SetToolTip(_T("Asymmetry parameters:\n\n")
+                              _T("A=A0+A1/sin(2theta)+A2/sin^2(2theta) "));
    
    this->BottomLayout(0);
    this->CrystUpdate();
