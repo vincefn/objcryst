@@ -136,7 +136,7 @@ bool MyApp::OnInit()
 
    WXCrystMainFrame *frame ;
    
-   frame = new WXCrystMainFrame("FOX: Free Objects for Xtal structures v1.1 (dev)",
+   frame = new WXCrystMainFrame("FOX: Free Objects for Xtal structures v1.1",
                                  wxPoint(50, 50), wxSize(550, 400));
 
    return TRUE;
@@ -355,13 +355,12 @@ void WXCrystMainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
    wxString msg;
    msg.Printf( _T("F.O.X. - Free Objects for Xtal structures\n")
-               _T("Version 1.1 - (dev)\n\n")
+               _T("Version 1.1\n\n")
                _T("(c) 2000-2001 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n")
                _T("            & Radovan CERNY, University of Geneva\n\n")
                _T("http://objcryst.sourceforge.net\n")
                _T("http://www.ccp14.ac.uk/ccp/web-mirrors/objcryst/ (Mirror)\n\n")
-               _T("Note: this is still in development. Please look \n")
-               _T("      for newer version on the above web sites,\n")
+               _T("Note: look for newer version on the above web sites,\n")
                _T("      or subscribe, to the mailing-list at :\n")
                _T("      http://lists.sourceforge.net/lists/listinfo/objcryst-foxx\n\n")
                _T("Project supported by the Swiss National Science Foundation (#21-53847.98)")

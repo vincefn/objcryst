@@ -45,7 +45,7 @@ tidy::
 # target for removing all object files and libraries
 .PHONY : clean
 clean:: tidy
-	@${RM} *.a *.exe
+	@${RM} *.a Fox
 
 cvsignore:
 	cp -f ${DIR_CRYST}/.cvsignore ./

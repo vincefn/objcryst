@@ -37,6 +37,8 @@ tidy::
 	$(MAKE) -f gnu.mak -C ${DIR_CRYSTVECTOR} tidy
 	$(MAKE) -f gnu.mak -C ${DIR_VFNQUIRKS} tidy
 	$(MAKE) -f gnu.mak -C ${DIR_REFOBJ} tidy
+	$(MAKE) -f gnu.mak -C ${DIR_WXWCRYST} tidy
+	$(MAKE) -f gnu.mak -C ${DIR_EXAMPLE} tidy
 
 # target for removing all object files and libraries
 # (does not affect blitz/newmat/sglite/atominfo)
