@@ -639,7 +639,7 @@ void ScatteringData::SetCrystal(Crystal &crystal)
    VFN_DEBUG_MESSAGE("ScatteringData::SetCrystal()",5)
    mpCrystal=&crystal;
    mSubObjRegistry.Register(crystal);
-   //crystal.RegisterClient(*this);
+   crystal.RegisterClient(*this);
    mClockGeomStructFact.Reset();
    mClockStructFactor.Reset();
 }
