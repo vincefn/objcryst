@@ -122,12 +122,12 @@ void testPbSO4()
    //Options for faster calculations
       //Use Dynamical population correction for special positions / shared atoms
       diffData->GetCrystal().SetUseDynPopCorr(true);
-      //faster for global optimization
+      // To go faster -sufficient for structure solution
+      data.SetMaxSinThetaOvLambda(0.25);
 
    //Create the global optimization object
       MonteCarloObj globalOptObj;
       globalOptObj.AddRefinableObj(data);
-      globalOptObj.AddCostFunction(data,0,1.0);
    
    //Refine only positionnal parameters
       globalOptObj.FixAllPar();

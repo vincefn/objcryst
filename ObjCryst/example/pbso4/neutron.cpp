@@ -116,21 +116,20 @@ void testPbSO4()
    //Set sigma and weight to be used (useless here)
    data.SetSigmaToSqrtIobs();
    data.SetWeightToInvSigmaSq();
-   
+   // To go a bit faster -sufficient for structure solution
+   data.SetMaxSinThetaOvLambda(0.25);
    //Profile=gaussian
    diffData->SetReflectionProfilePar(PROFILE_PSEUDO_VOIGT,
                                      .25*DEG2RAD*DEG2RAD,
                                      0*DEG2RAD*DEG2RAD,
                                      0*DEG2RAD*DEG2RAD,
                                      0.15,0);
-
    //Use Dynamical population correction for special positions / shared atoms
    diffData->GetCrystal().SetUseDynPopCorr(true);
 
    //Create the global optimization object
       MonteCarloObj globalOptObj;
       globalOptObj.AddRefinableObj(data);
-      globalOptObj.AddCostFunction(data,0,1.0);
    
    //Refine only positionnal parameters
       globalOptObj.FixAllPar();

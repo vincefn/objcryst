@@ -113,7 +113,7 @@ void testPbSO4()
       MonteCarloObj globalOptObj;
       globalOptObj.AddRefinableObj(data);
       globalOptObj.AddRefinableObj(cryst);
-      globalOptObj.AddCostFunction(data,0,1.0);
+
    //Refine only positionnal parameters
       globalOptObj.FixAllPar();
       globalOptObj.SetParIsFixed(gpRefParTypeScattTransl,false);
