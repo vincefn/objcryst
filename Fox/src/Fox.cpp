@@ -199,8 +199,10 @@ bool MyApp::OnInit()
    string outfilename("Fox-out.xml");
    bool randomize(false);
    bool only3D(false);
-   bool loadFourier(false);
-   list<string> vFourierFilename;
+   bool loadFourierGRD(false);
+   list<string> vFourierFilenameGRD;
+   bool loadFourierDSN6(false);
+   list<string> vFourierFilenameDSN6;
    for(int i=1;i<this->argc;i++)
    {
       if('-'==this->argv[i][0])
@@ -254,8 +256,15 @@ bool MyApp::OnInit()
          if(string("--loadfouriergrd")==string(this->argv[i]))
          {
             ++i;
-            loadFourier=true;
-            vFourierFilename.push_back(string(this->argv[i]));
+            loadFourierGRD=true;
+            vFourierFilenameGRD.push_back(string(this->argv[i]));
+            continue;
+         }
+         if(string("--loadfourierdsn6")==string(this->argv[i]))
+         {
+            ++i;
+            loadFourierDSN6=true;
+            vFourierFilenameDSN6.push_back(string(this->argv[i]));
             continue;
          }
          if(string("--only3d")==string(this->argv[i]))
@@ -282,6 +291,7 @@ bool MyApp::OnInit()
          cout <<"command-line arguments:"<<endl
               <<"   -i input.xml: input 'in.xml' file"<<endl
               <<"   --loadfouriergrd map.grd: load and display 'map.grd' fourier map with (first) crystal structure"<<endl
+              <<"   --loadfourierdsn6 map.DN6: load and display a DSN6 fourier map with (first) crystal structure"<<endl
               <<"   --nogui: run without GUI, automatically launches optimization"<<endl
               <<"      options with --nogui:"<<endl
               <<"         -n 10000     : run for 10000 trials at most (default: 1000000)"<<endl
@@ -313,26 +323,52 @@ bool MyApp::OnInit()
    
    WXCrystMainFrame *frame ;
    
-   frame = new WXCrystMainFrame("FOX: Free Objects for Xtal structures v1.6",
-                                 wxPoint(50, 50), wxSize(550, 400),!loadFourier);
+   frame = new WXCrystMainFrame("FOX: Free Objects for Xtal structures v1.6.1",
+                                 wxPoint(50, 50), wxSize(550, 400),
+                                 !(loadFourierGRD||loadFourierDSN6));
    // Use the main frame status bar to pass messages to the user
       pMainFrameForUserMessage=frame;
       fpObjCrystInformUser=&WXCrystInformUserStdOut;
-      
-   if(loadFourier)
+   
+   WXCrystal *pWXCryst;
+   if(loadFourierGRD || loadFourierDSN6)
    {
       //wxFrame *pWXFrame= new wxFrame((wxFrame *)NULL, -1, "FOX", wxPoint(50, 50), wxSize(550, 400));
       //wxScrolledWindow *pWXScWin=new wxScrolledWindow(pWXFrame,-1);
       //WXCrystal * pWXCrystal=new WXCrystal(pWXScWin,&(gCrystalRegistry.GetObj(0)));
-      WXCrystal *pWXCryst=dynamic_cast<WXCrystal*> (gCrystalRegistry.GetObj(0).WXGet());
+      pWXCryst=dynamic_cast<WXCrystal*> (gCrystalRegistry.GetObj(0).WXGet());
       wxCommandEvent com;
       pWXCryst->OnMenuCrystalGL(com);
+   }
+   if(loadFourierGRD)
+   {
       list<string>::iterator pos;
-      for(pos=vFourierFilename.begin();pos!=vFourierFilename.end();++pos)
+      for(pos=vFourierFilenameGRD.begin();pos!=vFourierFilenameGRD.end();++pos)
       {
-         pWXCryst->GetCrystalGL()->LoadFourier(*pos);
+         UnitCellMapImport *pMap=new UnitCellMapImport(pWXCryst->GetCrystal());
+         cout<<"Reading Fourier file:"<<*pos<<endl;
+         if (pMap->ImportGRD(*pos) == 0)
+         {
+            cout<<"Error reading Fourier file:"<< *pos<<endl;
+            return FALSE;
+         }
+         pWXCryst->GetCrystalGL()->AddFourier(pMap);
       }
-      return true;
+   }
+   if(loadFourierDSN6)
+   {
+      list<string>::iterator pos;
+      for(pos=vFourierFilenameDSN6.begin();pos!=vFourierFilenameDSN6.end();++pos)
+      {
+         UnitCellMapImport *pMap=new UnitCellMapImport(pWXCryst->GetCrystal());
+         cout<<"Reading Fourier file:"<<*pos<<endl;
+         if (pMap->ImportDSN6(*pos) == 0)
+         {
+            cout<<"Error reading Fourier file:"<< *pos<<endl;
+            return FALSE;
+         }
+         pWXCryst->GetCrystalGL()->AddFourier(pMap);
+      }
    }
    
    return TRUE;
@@ -492,7 +528,7 @@ void WXCrystMainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
    wxString msg;
    msg.Printf( _T("F.O.X. - Free Objects for Xtal structures\n")
-               _T("Version 1.6\n\n")
+               _T("Version 1.6.1\n\n")
                _T("(c) 2000-2003 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n")
                _T("    2000-2001 Radovan CERNY, University of Geneva\n\n")
                _T("http://objcryst.sourceforge.net\n")
