@@ -1785,9 +1785,9 @@ int WXGLCrystalCanvas::UserSelectUnitCellMapGLList()const
    int mapgl=0;
    if(mvpUnitCellMapGLList.size()>1)
    {
-      wxString choices[mvpUnitCellMapGLList.size()];
+      wxString *pChoices=new wxString[mvpUnitCellMapGLList.size()];
       for(unsigned int i=0;i<mvpUnitCellMapGLList.size();i++) 
-         choices[i].Printf("%s:contour=%5.3f,rgb=(%5.3f,%5.3f,%5.3f)",
+         (pChoices+i)->Printf("%s:contour=%5.3f,rgb=(%5.3f,%5.3f,%5.3f)",
                            mvpUnitCellMapGLList[i].second->GetName().c_str(),
                            mvpUnitCellMapGLList[i].first.second,
                            mvpUnitCellMapGLList[i].second->GetColour()[0],
@@ -1795,9 +1795,10 @@ int WXGLCrystalCanvas::UserSelectUnitCellMapGLList()const
                            mvpUnitCellMapGLList[i].second->GetColour()[2]);
       wxSingleChoiceDialog dialog
          ((wxWindow*)this,"Choose displayed map","Choose displayed map",
-          mvpUnitCellMapGLList.size(),choices,0,wxOK);
+          mvpUnitCellMapGLList.size(),pChoices,0,wxOK);
       dialog.ShowModal();
       mapgl=dialog.GetSelection();
+      delete[] pChoices;
    }
    return mapgl;
 }
@@ -1808,14 +1809,15 @@ int WXGLCrystalCanvas::UserSelectUnitCellMapImport()const
    int map=0;
    if(1<mvpUnitCellMapImport.size())
    {
-      wxString choices[mvpUnitCellMapImport.size()]; //:TODO: 
+      wxString *pChoices=new wxString[mvpUnitCellMapImport.size()];
       for(unsigned int i=0;i<mvpUnitCellMapImport.size();i++) 
-         choices[i]=mvpUnitCellMapImport[i]->GetName().c_str();
+         *(pChoices+i) = mvpUnitCellMapImport[i]->GetName().c_str();
       wxSingleChoiceDialog dialog
          ((wxWindow*)this,"Choose map","Choose map",
-          mvpUnitCellMapImport.size(),choices,0,wxOK);
+          mvpUnitCellMapImport.size(),pChoices,0,wxOK);
       dialog.ShowModal();
       map=dialog.GetSelection();
+      delete[] pChoices;
    }
    return map;
 }
