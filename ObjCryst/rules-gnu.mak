@@ -42,7 +42,7 @@ SEARCHDIRS = -I- -I${DIR_CRYST}/.. -I./ -I$(DIR_BLITZ)  -I$(DIR_TAU)/include -I$
 #wxWindows flags
 ifeq ($(wxcryst),1)
    WXCRYSTFLAGS = -D__WX__CRYST__ `wx-config --cxxflags`
-   WX_LDFLAGS = -L/usr/X11R6/lib -lwxcryst `wx-config --libs` $(GL_WX_LIB)
+   WX_LDFLAGS = -L/usr/X11R6/lib -lwxcryst `wx-config --libs` $(GL_WX_LIB) -lXmu
 else
    WXCRYSTFLAGS :=
    WX_LDFLAGS :=
