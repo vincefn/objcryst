@@ -1776,7 +1776,7 @@ void WXGLCrystalCanvas::OnSetCursor()
   mViewCntr.y = 0.5 - y;
   mViewCntr.z = 0.5 - z;
   UserXYZBox *BoxDlg = new UserXYZBox(this,
-       "Set position for view center and cursor\nposition (fractional coordinates)",
+       "Set fractional coordinates for view\ncenter and cursor position",
 			 mViewCntr);
   if (BoxDlg->ShowModal() == wxID_OK ) {
      mViewCntr =  BoxDlg->GetXYZ();
