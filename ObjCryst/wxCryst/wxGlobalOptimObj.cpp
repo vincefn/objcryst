@@ -316,9 +316,6 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(100000000)
       opt=new WXFieldOption(this,-1,&(mpMonteCarloObj->mXMLAutoSave));
       mpSizer->Add(opt,0,wxALIGN_LEFT);
       mList.Add(opt);
-      opt=new WXFieldOption(this,-1,&(mpMonteCarloObj->mOptAutoRestartFromBest));
-      mpSizer->Add(opt,0,wxALIGN_LEFT);
-      mList.Add(opt);
    // Number of trials to go
       mpWXFieldNbTrial=new WXFieldPar<long>(this,"Number of trials to go:",-1,&mNbTrial,70);
       mpSizer->Add(mpWXFieldNbTrial);

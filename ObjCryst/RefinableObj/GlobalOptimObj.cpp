@@ -673,38 +673,6 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                XMLCrystFileSaveGlobal(saveFileName);
                if(accept!=2) mRefParList.RestoreParamSet(mLastParSavedSetIndex);
             }
-            switch(mOptAutoRestartFromBest.GetChoice())
-            {
-               case 0:break;
-               case 1:
-               {
-                  if(nbTriesSinceBest > 10000   ) 
-                     mRefParList.RestoreParamSet(mBestParSavedSetIndex);
-                  nbTriesSinceBest=0;
-                  break;
-               }
-               case 2:
-               {
-                  if(nbTriesSinceBest > 100000  )
-                     mRefParList.RestoreParamSet(mBestParSavedSetIndex);nbTriesSinceBest=0;
-                  nbTriesSinceBest=0;
-                  break;
-               }
-               case 3:
-               {
-                  if(nbTriesSinceBest > 1000000 ) 
-                     mRefParList.RestoreParamSet(mBestParSavedSetIndex);
-                  nbTriesSinceBest=0;
-                  break;
-               }
-               case 4:
-               {
-                  if(nbTriesSinceBest > 10000000) 
-                     mRefParList.RestoreParamSet(mBestParSavedSetIndex);
-                  nbTriesSinceBest=0;
-                  break;
-               }
-            }
          }
          //Restore Best values
          mRefParList.RestoreParamSet(mBestParSavedSetIndex);
@@ -1174,54 +1142,6 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                if(0!=mpWXCrystObj) mpWXCrystObj->UpdateDisplayNbTrial();
                #endif
             }
-            switch(mOptAutoRestartFromBest.GetChoice())
-            {
-               case 0:break;
-               case 1:
-               {
-                  if((mNbTrial-bestConfigNb) > (long)10000   )
-                  {
-                     for(int i=0;i<nbWorld;i++) 
-                        mRefParList.GetParamSet(worldCurrentSetIndex(i))
-                           =mRefParList.GetParamSet(mBestParSavedSetIndex);
-                     bestConfigNb=mNbTrial;
-                  }
-                  break;
-               }
-               case 2:
-               {
-                  if((mNbTrial-bestConfigNb) > (long)100000   )
-                  {
-                     for(int i=0;i<nbWorld;i++) 
-                        mRefParList.GetParamSet(worldCurrentSetIndex(i))
-                           =mRefParList.GetParamSet(mBestParSavedSetIndex);
-                     bestConfigNb=mNbTrial;
-                  }
-                  break;
-               }
-               case 3:
-               {
-                  if((mNbTrial-bestConfigNb) > (long)1000000   )
-                  {
-                     for(int i=0;i<nbWorld;i++) 
-                        mRefParList.GetParamSet(worldCurrentSetIndex(i))
-                           =mRefParList.GetParamSet(mBestParSavedSetIndex);
-                     bestConfigNb=mNbTrial;
-                  }
-                  break;
-               }
-               case 4:
-               {
-                  if((mNbTrial-bestConfigNb) > (long)10000000   )
-                  {
-                     for(int i=0;i<nbWorld;i++) 
-                        mRefParList.GetParamSet(worldCurrentSetIndex(i))
-                           =mRefParList.GetParamSet(mBestParSavedSetIndex);
-                     bestConfigNb=mNbTrial;
-                  }
-                  break;
-               }
-            }
             if((mBestCost<finalcost) || mStopAfterCycle) 
             {
                if(!silent) cout << endl <<endl << "Refinement Stopped:"<<mBestCost<<endl;
@@ -1622,9 +1542,6 @@ void MonteCarloObj::InitOptions()
    static string saveDetailledHistoryName;
    static string saveDetailledHistoryChoices[4];
 
-   static string optAutoRestartFromBestName;
-   static string optAutoRestartFromBestChoices[5];
-
    static bool needInitNames=true;
    if(true==needInitNames)
    {
@@ -1647,20 +1564,12 @@ void MonteCarloObj::InitOptions()
       saveDetailledHistoryChoices[2]="Every accepted configuration";
       saveDetailledHistoryChoices[3]="Every configuration";
 
-      optAutoRestartFromBestName="Restart from best config ";
-      optAutoRestartFromBestChoices[0]="Never (default, recommended)";
-      optAutoRestartFromBestChoices[1]="10 000 trials after best config";
-      optAutoRestartFromBestChoices[2]="100 000 trials after best config";
-      optAutoRestartFromBestChoices[3]="1 million trials after best config";
-      optAutoRestartFromBestChoices[4]="10 million trials after best config";
-      
       needInitNames=false;//Only once for the class
    }
    mGlobalOptimType.Init(2,&GlobalOptimTypeName,GlobalOptimTypeChoices);
    mAnnealingScheduleTemp.Init(5,&AnnealingScheduleTempName,AnnealingScheduleChoices);
    mAnnealingScheduleMutation.Init(5,&AnnealingScheduleMutationName,AnnealingScheduleChoices);
    mSaveDetailledHistory.Init(4,&saveDetailledHistoryName,saveDetailledHistoryChoices);
-   mOptAutoRestartFromBest.Init(5,&optAutoRestartFromBestName,optAutoRestartFromBestChoices);
    VFN_DEBUG_MESSAGE("MonteCarloObj::InitOptions():End",5)
 }
 

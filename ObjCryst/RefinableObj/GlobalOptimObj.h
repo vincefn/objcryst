@@ -411,11 +411,6 @@ class MonteCarloObj:public OptimizationObj
          /// then this is ignored. This must be large enough to have an ergodic 
          /// algorithm (more strictly, should not be used ?)
          long mMaxNbTrialSinceBest;
-         /// Automatic retry from best config every n steps (may help finding the minimum)
-         /// Practically, every n retries, all parallel configurations are set to the
-         /// best so far
-         /// This is \b EXPERIMENTAL, and may be removed !!
-         RefObjOpt mOptAutoRestartFromBest;
       
    private:
    #ifdef __WX__CRYST__
