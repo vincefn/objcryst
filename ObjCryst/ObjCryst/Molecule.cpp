@@ -1447,9 +1447,11 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
    // Occupancy
    if(gpRefParTypeScattOccup->IsDescendantFromOrSameAs(type))
       this->RefinableObj::GlobalOptRandomMove(mutationAmplitude,gpRefParTypeScattOccup);
+   mRandomMoveIsDone=false;
    //translation
    if(gpRefParTypeScattTransl->IsDescendantFromOrSameAs(type))
       this->RefinableObj::GlobalOptRandomMove(mutationAmplitude,gpRefParTypeScattTransl);
+   mRandomMoveIsDone=false;
    TAU_PROFILE_STOP(timer1);
    if(gpRefParTypeScattConform->IsDescendantFromOrSameAs(type))
    {
