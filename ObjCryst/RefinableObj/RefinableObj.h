@@ -92,10 +92,14 @@ class RefParType
       /// Get the name for this parameter
       const string& GetName() const;
    private:
+      /// Get a Unique id (RefParType::mId)
+      void InitId();
       /// the parent for this RefParType (we could easily allow several...)
        const RefParType* mpParent;
       /// The name/description for this parameter type
       const string mName;
+      /// The unique number identifying this type
+      unsigned long mId;
 };
 
 /// Top RefParType for the ObjCryst++ library.

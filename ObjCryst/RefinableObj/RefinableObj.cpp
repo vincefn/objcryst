@@ -37,20 +37,23 @@ namespace ObjCryst
 //
 //######################################################################
 RefParType::RefParType(const string &name):
-mpParent(0),mName(name)
+mpParent(0),mName(name),mId(0)
 {
+   this->InitId();
 }
 
 RefParType::RefParType(const RefParType *parent,const string &name):
-mpParent(parent),mName(name)
-{}
+mpParent(parent),mName(name),mId(0)
+{
+   this->InitId();
+}
 
 RefParType::~RefParType(){}; 
 
 bool RefParType::IsDescendantFromOrSameAs(const RefParType *type) const
 {
    VFN_DEBUG_MESSAGE("RefParType::IsDescendantFromOrSameAs(RefParType*): "<<this<<" : "<<mpParent,1)
-   if(this==type) return true;
+   if(type->mId==mId) return true;
    if(0==mpParent) return false;
    return mpParent->IsDescendantFromOrSameAs(type);
 }
@@ -61,6 +64,12 @@ bool RefParType::operator==(const RefParType *type) const
    return false;
 }
 const string& RefParType::GetName() const{ return mName;}
+
+void RefParType::InitId()
+{
+   static unsigned long nbRefParType=0;
+   mId=nbRefParType++;
+}
 
 const RefParType *gpRefParTypeObjCryst=new RefParType("ObjCryst++");
 
