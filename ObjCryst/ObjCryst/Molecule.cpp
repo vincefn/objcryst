@@ -1275,7 +1275,8 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                   this->RotateAtomGroup(*(pos->mpAtom1),*(pos->mpAtom2),
                                         pos->mvRotatedAtomList,angle);
                }
-               list<FlipGroup>::const_iterator posFlip=0;
+               bool doneFlip=false;
+               list<FlipGroup>::const_iterator posFlip;
                if((rand()%20)==0)
                {// Try a flip from time to time
                   const unsigned long i=rand() % mvFlipGroup.size();
@@ -1308,6 +1309,7 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                      }
                   #endif
                   this->FlipAtomGroup(*posFlip);
+                  doneFlip=true;
                }
                TAU_PROFILE_STOP(timer3);
                TAU_PROFILE_START(timer4);
@@ -1323,7 +1325,7 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                if( log((rand()+1)/(REAL)RAND_MAX) 
                    < (-(newll-lastll)/mRandomConformChangeTemp ))
                {
-                  if(posFlip!=0) posFlip->mNbAccept++;
+                  if(doneFlip) posFlip->mNbAccept++;
                   break;
                }
                //if( log((rand()+1)/(REAL)RAND_MAX) 
@@ -2408,7 +2410,7 @@ void Molecule::BuildFlipGroup()
              chain!=pos->mvRotatedChainList.end();++chain)
          {
             cout<<"    -"<<chain->first->GetName()<<":";
-            for(set<unsigned long>::iterator pos1=chain->second.begin();
+            for(set<unsigned long>::const_iterator pos1=chain->second.begin();
                 pos1!=chain->second.end();++pos1)
                cout<<mvpAtom[*pos1]->GetName()<<"  ";
          }
