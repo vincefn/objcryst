@@ -104,18 +104,6 @@ void testPbSO4()
       backgdData->SetName("PbSo4-background");
       data.AddPowderPatternComponent(*backgdData);
       
-   //Powder data can reasonably (?) ignore f" terms
-   diffData->SetIsIgnoringImagScattFact(true);
-   
-   //Set sigma and weight to be used
-   data.SetSigmaToSqrtIobs();
-   data.SetWeightToInvSigmaSq();
-   
-   //Exclude the background for any statistics calculation (R, Rw)
-//   data.SetStatisticsExcludeBackground(true);
-   //Compare 'integrated' (sort of) intensities. Be less sensitive to profile
-//   data.SetUseIntegratedRfactor(true);
-   
    //Profile (approximate parameters,again)
    diffData->SetReflectionProfilePar(PROFILE_PSEUDO_VOIGT,
                                      .03*DEG2RAD*DEG2RAD,
@@ -150,27 +138,13 @@ void testPbSO4()
    cout << "Random starting configuration"<<endl;
    cryst.Print();
    
-   //Only use 2theta<2x35 to begin
-      data.SetUseOnlyLowAngleData(true,35.*DEG2RAD);
-   
    //Annealing parameters (schedule, Tmax, Tmin, displacement schedule, 
-      globalOptObj.SetAlgorithmSimulAnnealing(ANNEALING_EXPONENTIAL,.05,.005,
-                                              ANNEALING_EXPONENTIAL,10,1,
-                                              100000,.25,40000);      
+      globalOptObj.SetAlgorithmParallTempering(ANNEALING_SMART,1,.00001,
+                                              ANNEALING_EXPONENTIAL,8,.125);      
    //Global Optimization
       //The real job-first test
       long nbTrial=50000;
       globalOptObj.Optimize(nbTrial);
-   /*   
-      //Use full powder spectrum
-      data.SetUseOnlyLowAngleData(false);
-      //Annealing parameters
-      globalOptObj.SetAlgorithmSimulAnnealing(ANNEALING_EXPONENTIAL,.01,.001,
-                                              ANNEALING_EXPONENTIAL,1,1,
-                                              .30,40000,20000);
-      //Finer optimization
-      globalOptObj.Optimize(10000);
-   */
    
    //Save obtained spectrum
    //data.SavePowderPattern("calc.out");

@@ -97,14 +97,9 @@ void testPbSO4()
       data.ImportHklIobsSigma("xray-single.hkl",80);//83,374
       
 
-   //Powder data can reasonably ignore f" terms
-   data.SetIsIgnoringImagScattFact(true);
    //Options for faster or better calculations
       //Use Dynamical population correction for special positions / shared atoms
-      //data.GetCrystal().Print();
-      //data.GetCrystal().SetUseDynPopCorr(1);
-      //faster for global optimization
-      data.SetUseFastLessPreciseFunc(true);
+      data.GetCrystal().SetUseDynPopCorr(1);
 
    //Create the global optimization object
       MonteCarloObj globalOptObj;
@@ -124,33 +119,20 @@ void testPbSO4()
    
    
    
-   //Only use 2theta<2x35 to begin
-      //data.SetUseOnlyLowAngleData(true,35.*DEG2RAD);
-      
    //Calc intensity before doing anything
       data.GetIcalc();
       data.FitScaleFactorForRw();
       data.PrintObsCalcData();
    
    //Annealing parameters (schedule, Tmax, Tmin, displacement schedule, 
-      globalOptObj.SetAlgorithmSimulAnnealing(ANNEALING_EXPONENTIAL,.05,.005,
-                                              ANNEALING_SMART,10.,.125,
-                                              40000,.25,20000);
+      globalOptObj.SetAlgorithmParallTempering(ANNEALING_SMART,1,.00001,
+                                              ANNEALING_EXPONENTIAL,8,.125);      
       
    //Global Optimization
       //The real job-first test
       long nbTrial=50000;
       globalOptObj.Optimize(nbTrial);
       
-      //Use full powder spectrum
-      //data.SetUseOnlyLowAngleData(false);
-      //Annealing parameters
-      globalOptObj.SetAlgorithmSimulAnnealing(ANNEALING_EXPONENTIAL,.01,.001,
-                                              ANNEALING_EXPONENTIAL,1,1,
-                                              40000,.30,20000);
-      //Finer optimization
-      //globalOptObj.Optimize(10000);
-   
    //Print calculated reflections
    data.PrintObsCalcData();
    
@@ -177,7 +159,7 @@ int main (int argc, char *argv[])
    TAU_PROFILE("main()","int()",TAU_DEFAULT);
 
 	cout << " Beginning PbSO4 example...." << endl ;
-   
+   cout <<FormatFloat(5.0)<<endl;
    int level =10;
    if(argc==2)//debug level hase been supplied
    {
