@@ -447,7 +447,7 @@ CrystMatrix_REAL SpaceGroup::GetAllEquivRefl(const REAL h, const REAL k, const R
    }
    if((this->IsCentrosymmetric() || forceFriedelLaw) && (!excludeFriedelMate))
    {
-      cout <<"Adding Friedels !"<<endl;
+      //cout <<"Adding Friedels !"<<endl;
       equivReflList.resizeAndPreserve(nbEquiv*2,3);
       for(int i=0;i<nbEquiv;i++)
       {
