@@ -312,9 +312,10 @@ class Crystal:public UnitCell
       virtual void BeginOptimization(const bool allowApproximations=false,
                                      const bool enableRestraints=false);
       void AddBondValenceRo(const ScatteringPower*,const ScatteringPower*,const REAL ro);
-      void CalcBondValenceSum()const;
-   protected:
-   
+      /** Get the Bond-Valence cost function, which compares the expected valence
+      * to the one computed from Bond-Valence Ro parameters.
+      */
+      REAL GetBondValenceCost() const;
    private:
       /** \brief Init all Crystal parameters
       *  \param a,b,c : unit cell dimension, in angstroems
@@ -359,6 +360,11 @@ class Crystal:public UnitCell
       * Use a global option instead of asymUnitMargin.
       */
       void CalcDistTable(const bool fast,const REAL asymUnitMargin=4)const;
+      
+      /** Calculate all Bond Valences.
+      *
+      */
+      void CalcBondValenceSum()const;
             
       /// The registry of scatterers for this UnitCell
       ObjRegistry<Scatterer> mScattererRegistry ;
@@ -458,6 +464,19 @@ class Crystal:public UnitCell
       * ScatteringPower
       */
       map<pair<const ScatteringPower*,const ScatteringPower*>, REAL> mvBondValenceRo;
+      /// Last Time Bond Valence parameters were changed
+      RefinableObjClock mBondValenceParClock;
+      /// Last time Bond Valences were calculated
+      mutable RefinableObjClock mBondValenceCalcClock;
+      /// Last time the Bond Valence cost was calculated
+      mutable RefinableObjClock mBondValenceCostClock;
+      /// Current Bond Valence cost
+      mutable REAL mBondValenceCost;
+      /// Bond Valence cost scale factor
+      REAL mBondValenceCostScale;
+      /// List of calculated bond valences, as a map, the key being the index
+      /// of the atom in Crystal::mScattCompList.
+      mutable std::map<long, REAL> mvBondValenceCalc;
 
    #ifdef __WX__CRYST__
    public:

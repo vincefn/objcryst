@@ -62,11 +62,11 @@ class NiftyStaticGlobalObjectsInitializer_ScatteringPower
             delete gpRefParTypeScattPowTemperature;
             delete gpRefParTypeScattPowTemperatureIso;
             delete gpRefParTypeScattPowTemperatureAniso;
-            gpRefParTypeScattPow;
-            gpRefParTypeScattPowResonant;
-            gpRefParTypeScattPowTemperature;
-            gpRefParTypeScattPowTemperatureIso;
-            gpRefParTypeScattPowTemperatureAniso;
+            gpRefParTypeScattPow=0;
+            gpRefParTypeScattPowResonant=0;
+            gpRefParTypeScattPowTemperature=0;
+            gpRefParTypeScattPowTemperatureIso=0;
+            gpRefParTypeScattPowTemperatureAniso=0;
          }
       }
    private:
@@ -232,6 +232,8 @@ class ScatteringPower:virtual public RefinableObj
       virtual REAL GetMaximumLikelihoodPositionError()const;
       /// Get the clock value for the last change on the positionnal errors.
       virtual const RefinableObjClock& GetMaximumLikelihoodPositionErrorClock()const;
+      virtual REAL GetValence()const;
+      virtual void SetValence(const REAL valence);
    protected:
       virtual void InitRefParList()=0;
       /// Initialization of the object, used by all constructors, and operator=.
@@ -268,6 +270,11 @@ class ScatteringPower:virtual public RefinableObj
          REAL mMaximumLikelihoodPositionError;
          /// 
          RefinableObjClock mMaximumLikelihoodPositionErrorClock;
+      /** Expected Valence. This can be used for bond valence analysis.
+      *
+      * Default value is 0.
+      */
+      REAL mValence;
    private:
       friend const ScatteringPower& GetScatteringPower(const long i);
 };
@@ -377,7 +384,6 @@ class ScatteringPowerAtom:virtual public ScatteringPower
       *Reference : Neutron News, Vol. 3, No. 3, 1992, pp. 29-37.
       */
       REAL mNeutronAbsCrossSection;
-      
    private:
    #ifdef __WX__CRYST__
    public:

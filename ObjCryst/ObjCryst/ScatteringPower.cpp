@@ -70,7 +70,7 @@ CrystVector_bool ScatteringPower::mspScatteringPowerGlobalListIsUsed(1000);
 
 
 ScatteringPower::ScatteringPower():mDynPopCorrIndex(0),mBiso(1.0),mIsIsotropic(true),
-mScatteringPowerId(mNbScatteringPower)
+mScatteringPowerId(mNbScatteringPower),mValence(0.0)
 {
    VFN_DEBUG_MESSAGE("ScatteringPower::ScatteringPower():"<<mName,5)
    if(mNbScatteringPower>1000) throw ObjCrystException("ScatteringPower::ScatteringPower() \
@@ -86,7 +86,8 @@ mScatteringPowerId(mNbScatteringPower)
 }
 ScatteringPower::ScatteringPower(const ScatteringPower& old):
 mDynPopCorrIndex(old.mDynPopCorrIndex),mBiso(old.mBiso),mIsIsotropic(old.mIsIsotropic),
-mBeta(old.mBeta),mScatteringPowerId(mNbScatteringPower)
+mBeta(old.mBeta),mScatteringPowerId(mNbScatteringPower),
+mValence(old.mValence)
 {
    VFN_DEBUG_MESSAGE("ScatteringPower::ScatteringPower(&old):"<<mName,5)
    if(mNbScatteringPower>1000) throw ObjCrystException("ScatteringPower::ScatteringPower() \
@@ -169,6 +170,10 @@ REAL ScatteringPower::GetMaximumLikelihoodPositionError()const
 
 const RefinableObjClock& ScatteringPower::GetMaximumLikelihoodPositionErrorClock()const
 {return mMaximumLikelihoodPositionErrorClock;}
+
+REAL ScatteringPower::GetValence()const{return mValence;}
+void ScatteringPower::SetValence(const REAL valence)
+{mValence=valence;}
 
 void ScatteringPower::Init()
 {
@@ -749,10 +754,19 @@ void ScatteringPowerAtom::InitRefParList()
    {
       RefinablePar tmp("ML Error",&mMaximumLikelihoodPositionError,0.,1.,
                         gpRefParTypeScattPow,REFPAR_DERIV_STEP_ABSOLUTE,
-                        true,true,true,false);
+                        false,true,true,false);
       tmp.SetDerivStep(1e-4);
       tmp.SetGlobalOptimStep(.001);
       tmp.AssignClock(mMaximumLikelihoodPositionErrorClock);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("Valence",&mValence,-10.,10.,
+                        gpRefParTypeScattPow,REFPAR_DERIV_STEP_ABSOLUTE,
+                        true,true,true,false);
+      tmp.SetDerivStep(1e-3);
+      tmp.SetGlobalOptimStep(.05);
+      tmp.AssignClock(mClock);
       this->AddPar(tmp);
    }
 }

@@ -50,8 +50,9 @@ ObjRegistry<Crystal> gCrystalRegistry("List of all Crystals");
 
 Crystal::Crystal():
 mScattererRegistry("List of Crystal Scatterers"),
-mBumpMergeScale(1.0),
-mScatteringPowerRegistry("List of Crystal ScatteringPowers")
+mBumpMergeCost(0.0),mBumpMergeScale(1.0),
+mScatteringPowerRegistry("List of Crystal ScatteringPowers"),
+mBondValenceCost(0.0),mBondValenceCostScale(1.0)
 {
    VFN_DEBUG_MESSAGE("Crystal::Crystal()",10)
    this->InitOptions();
@@ -65,8 +66,9 @@ mScatteringPowerRegistry("List of Crystal ScatteringPowers")
 
 Crystal::Crystal(const REAL a, const REAL b, const REAL c, const string &SpaceGroupId):
 mScattererRegistry("List of Crystal Scatterers"),
-mBumpMergeScale(1.0),
-mScatteringPowerRegistry("List of Crystal ScatteringPowers")
+mBumpMergeCost(0.0),mBumpMergeScale(1.0),
+mScatteringPowerRegistry("List of Crystal ScatteringPowers"),
+mBondValenceCost(0.0),mBondValenceCostScale(1.0)
 {
    VFN_DEBUG_MESSAGE("Crystal::Crystal(a,b,c,Sg)",10)
    this->Init(a,b,c,M_PI/2,M_PI/2,M_PI/2,SpaceGroupId,"");
@@ -81,8 +83,9 @@ mScatteringPowerRegistry("List of Crystal ScatteringPowers")
 Crystal::Crystal(const REAL a, const REAL b, const REAL c, const REAL alpha,
               const REAL beta, const REAL gamma,const string &SpaceGroupId):
 mScattererRegistry("List of Crystal Scatterers"),
-mBumpMergeScale(1.0),
-mScatteringPowerRegistry("List of Crystal ScatteringPowers")
+mBumpMergeCost(0.0),mBumpMergeScale(1.0),
+mScatteringPowerRegistry("List of Crystal ScatteringPowers"),
+mBondValenceCost(0.0),mBondValenceCostScale(1.0)
 {
    VFN_DEBUG_MESSAGE("Crystal::Crystal(a,b,c,alpha,beta,gamma,Sg)",10)
    this->Init(a,b,c,alpha,beta,gamma,SpaceGroupId,"");
@@ -96,8 +99,9 @@ mScatteringPowerRegistry("List of Crystal ScatteringPowers")
 
 Crystal::Crystal(const Crystal &old):
 mScattererRegistry(old.mScattererRegistry),
-mBumpMergeScale(old.mBumpMergeScale),
-mScatteringPowerRegistry(old.mScatteringPowerRegistry)
+mBumpMergeCost(old.mBumpMergeCost),mBumpMergeScale(old.mBumpMergeScale),
+mScatteringPowerRegistry(old.mScatteringPowerRegistry),
+mBondValenceCost(old.mBondValenceCost),mBondValenceCostScale(old.mBondValenceCostScale)
 {
    VFN_DEBUG_MESSAGE("Crystal::Crystal(&oldCrystal)",10)
    for(long i=0;i<old.GetNbScatterer();i++)
@@ -808,7 +812,7 @@ void Crystal::GlobalOptRandomMove(const REAL mutationAmplitude,
 
 REAL Crystal::GetLogLikelihood()const
 {  
-   return this->GetBumpMergeCost();
+   return this->GetBumpMergeCost()+this->GetBondValenceCost();
 }
 
 void Crystal::CIFOutput(ostream &os)const
@@ -995,14 +999,74 @@ void Crystal::BeginOptimization(const bool allowApproximations,const bool enable
 void Crystal::AddBondValenceRo(const ScatteringPower *pow1,const ScatteringPower *pow2,const REAL ro)
 {
    mvBondValenceRo[make_pair(pow1,pow2)]=ro;
+   mBondValenceParClock.Click();
+   this->UpdateDisplay();
+}
+
+REAL Crystal::GetBondValenceCost() const
+{
+   VFN_DEBUG_MESSAGE("Crystal::GetBondValenceCost()?",4)
+   if(mvBondValenceRo.size()==0)
+   {
+      mBondValenceCost=0.0;
+      return mBondValenceCost;
+   }
+   this->CalcBondValenceSum();
+   if(  (mBondValenceCostClock>mBondValenceCalcClock)
+      &&(mBondValenceCostClock>this->GetMasterClockScatteringPower())) return mBondValenceCost;
+   VFN_DEBUG_MESSAGE("Crystal::GetBondValenceCost():"<<mvBondValenceCalc.size()<<" valences",4)
+   mBondValenceCost=0.0;
+   std::map<long, REAL>::const_iterator pos;
+   for(pos=mvBondValenceCalc.begin();pos!=mvBondValenceCalc.end();++pos)
+   {
+      const REAL a=pos->second-mScattCompList(pos->first).mpScattPow->GetValence();
+      mBondValenceCost += a*a;
+      VFN_DEBUG_MESSAGE("Crystal::GetBondValenceCost():"
+                        <<mScattCompList(pos->first).mpScattPow->GetName()
+                        <<"="<<pos->second,4)
+   }
+   mBondValenceCostClock.Click();
+   return mBondValenceCost;
 }
 
 void Crystal::CalcBondValenceSum()const
 {
+   if(mvBondValenceRo.size()==0) return;
    this->CalcDistTable(true,5);
    //mDistTableClock.Click();// Force recomputation of DynPopCorr
    //if(1==mUseDynPopCorr.GetChoice()) 
    //   this->CalcDynPopCorr(1.,.5); else this->ResetDynPopCorr();
+   VFN_DEBUG_MESSAGE("Crystal::CalcBondValenceSum()?",4)
+   if(   (mBondValenceCalcClock>mDistTableClock)
+       &&(mBondValenceCalcClock>mBondValenceParClock)) return;
+   VFN_DEBUG_MESSAGE("Crystal::CalcBondValenceSum()",4)
+   mvBondValenceCalc.clear();
+   for(long i=0;i<mScattCompList.GetNbComponent();i++)
+   {
+      const ScatteringPower *pow1=mScattCompList(i).mpScattPow;
+      int nb=0;
+      REAL val=0.0;
+      std::vector<Crystal::Neighbour>::const_iterator pos;
+      for(pos=mvDistTableSq[i].mvNeighbour.begin();
+          pos<mvDistTableSq[i].mvNeighbour.end();pos++)
+      {
+         const REAL dist=sqrt(pos->mDist2);
+         const REAL occup= mScattCompList(pos->mNeighbourIndex).mOccupancy
+                          *mScattCompList(pos->mNeighbourIndex).mDynPopCorr;
+         const ScatteringPower *pow2=mScattCompList(pos->mNeighbourIndex).mpScattPow;
+         map<pair<const ScatteringPower*,const ScatteringPower*>,REAL>::const_iterator pos;
+         pos=mvBondValenceRo.find(make_pair(pow1,pow2));
+         if(pos!=mvBondValenceRo.end())
+         {
+            const REAL v=exp((pos->second-dist)/0.37);
+            val += occup * v;
+            nb++;
+         }
+      }
+      if(nb!=0) mvBondValenceCalc[i]=val;
+   }
+   mBondValenceCalcClock.Click();
+   /*
    this->Print(cout);
    long l=0;
    for(long i=0;i<mScattererRegistry.GetNb();i++)
@@ -1040,7 +1104,7 @@ void Crystal::CalcBondValenceSum()const
          }
          l++;
    }
-   
+   */
 }
 
 void Crystal::Init(const REAL a, const REAL b, const REAL c, const REAL alpha,
