@@ -41,7 +41,8 @@ void WXTrackerGraph::UpdateDisplay()
    if(mClockGraphList<mpMainTracker->GetClockTrackerList())
    {
       std::map<Tracker*,long>::iterator pos1;
-      for(pos1=mvId.begin();pos1!=mvId.end();pos1++)
+      std::map<Tracker*,long> id=mvId;
+      for(pos1=id.begin();pos1!=id.end();pos1++)
          if(pList->find(pos1->first)==pList->end())
          {
             this->DeleteGraph(pos1->second);
