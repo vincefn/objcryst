@@ -17,7 +17,8 @@
 
 #include <typeinfo>
 #include <stdio.h> //for sprintf()
-
+#include <typeinfo>
+#include <stdio.h> //for sprintf()
 #include "ObjCryst/PowderPattern.h"
 #include "Quirks/VFNDebug.h"
 #include "Quirks/VFNStreamFormat.h"
@@ -2894,6 +2895,7 @@ void PowderPattern::PrepareIntegratedRfactor()const
       const long nbExclude=mExcludedRegionMin2Theta.numElements();
       if(nbExclude>0)
 		{
+   		VFN_DEBUG_MESSAGE("PowderPattern::PrepareIntegratedRfactor():5:Excluded regions("<<nbExclude<<")",3);
 			long j=0;
 			long minExcl,maxExcl;
 			minExcl=this->Get2ThetaCorrPixel(mExcludedRegionMin2Theta(0));
@@ -2920,14 +2922,16 @@ void PowderPattern::PrepareIntegratedRfactor()const
 				minExcl=this->Get2ThetaCorrPixel(mExcludedRegionMin2Theta(i));
 				maxExcl=this->Get2ThetaCorrPixel(mExcludedRegionMax2Theta(i));
 				//go back if one integration segment is concerned by several exclusion zones...
-				while(mIntegratedPatternMax(j)>=minExcl)
-				{
-					j--;
-					if(j==0) break;
-				}
+				if(j!=0)
+					while(mIntegratedPatternMax(j)>=minExcl)
+					{
+						j--;
+						if(j==0) break;
+					}
 			}
 		}
 	// Keep only the selected intervals
+   VFN_DEBUG_MESSAGE("PowderPattern::PrepareIntegratedRfactor():6",3);
 	long j=0;
 	for(int i=0;i<numInterval;i++)
 	{
