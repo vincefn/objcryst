@@ -336,7 +336,7 @@ bool WXCrystScrolledWindow::Layout()
    if(0==mpChild) return true;
    int width,height;
    mpChild->GetSize(&width,&height);
-   
+   this->Scroll(0,0);//workaround wxMSW 2.2.9 bug
    if((mHeight!=height)||(mWidth!=width)) this->SetScrollbars(40,40,width/40+1,height/40+1);
    mHeight=height;
    mWidth=width;
