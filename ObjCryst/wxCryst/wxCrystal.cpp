@@ -24,7 +24,7 @@
 #include "wx/wx.h"
 #include "wx/colordlg.h"
 #include "wx/progdlg.h"
-
+#include "wx/busyinfo.h"
 #include "wxCryst/wxCrystal.h"
 
 #include "ObjCryst/Atom.h"
@@ -918,24 +918,20 @@ void UnitCellMapImport::GLInitDisplayList(const float minValue,
       const TRIANGLE *pTriangles= MC(snx-1, sny-1, snz-1, step[0], step[1], step[2], minValue, subPoints, numOfTriangles);
    // OpenGL drawing instructions
       VFN_DEBUG_MESSAGE("UnitCellMapImport::GLInitDisplayList(): OpenGL instructions",7)
-      /*
-      if(showWire) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-      else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-      float mccolor[] = {  (float)fcolor.Red()/255.0, 
-                    (float)fcolor.Green()/255.0, 
-                    (float)fcolor.Blue()/255.0,    1.0};
-      glColor4fv(mccolor);
-      glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, mccolor);
-      glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mccolor);
-      glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 100.0);
-      */
       glBegin(GL_TRIANGLES);
+         float normx,normy,normz;
          for(int i=0; i < numOfTriangles; i++)
          {
             for(int j=0; j < 3; j++)
             {
                //VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnPaint():MC1:"<<i<<" "<<j,5)
-               glNormal3f(pTriangles[i].norm[j].x, pTriangles[i].norm[j].y, pTriangles[i].norm[j].z);
+               //:TODO: Fix normals
+               normx=pTriangles[i].norm[j].x;
+               normy=pTriangles[i].norm[j].y;
+               normz=pTriangles[i].norm[j].z;
+               //mpCrystal->FractionalToOrthonormalCoords(normx, normy, normz);
+               //mpCrystal->OrthonormalToFractionalCoords(normx, normy, normz);
+               glNormal3f(normx, normy, normz);
                glVertex3f(pTriangles[i].p[j].x    ,pTriangles[i].p[j].y    ,pTriangles[i].p[j].z);
             }
          }
@@ -1073,10 +1069,20 @@ void UnitCellMapGLList::Draw()const
    glPushMatrix();
       if(mShowWire) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
       else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-      glColor4fv(mColour);
-      glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, mColour);
-      glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mColour);
-      glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 100.0);
+      
+      glMaterialfv(GL_FRONT, GL_AMBIENT, mColour);
+      glMaterialfv(GL_FRONT, GL_DIFFUSE, mColour);
+      glMaterialfv(GL_FRONT, GL_SPECULAR, mColour);
+      // :TODO: 
+      // Disabled Shininess as there is a problem with normals 
+      // and non-orthogonal unit cells
+      glMaterialf( GL_FRONT, GL_SHININESS, 0.0); 
+
+      const GLfloat colorBack [] = {mColour[0]/3., mColour[1]/3., mColour[2]/3., 1.00}; 
+      glMaterialfv(GL_BACK, GL_AMBIENT, colorBack);
+      glMaterialfv(GL_BACK, GL_DIFFUSE, colorBack);
+      glMaterialfv(GL_BACK, GL_SPECULAR, colorBack);
+      glMaterialf( GL_BACK, GL_SHININESS, 0.0); 
       // :TODO: Check display list is not being modified (lock it), useless for now
       // as the map is not dynamically updated.
       glCallList(mGLDisplayList);
@@ -1628,6 +1634,7 @@ void WXGLCrystalCanvas::OnLoadFourier()
 
 void WXGLCrystalCanvas::LoadFourier(const string&filename)
 {//read fourier map from 0.0 to 1.0 on all axis
+   wxBusyInfo wait("Processing Fourier Map...");
    {
       //auto_ptr<UnitCellMapImport> ptr(new UnitCellMapImport(mpWXCrystal->GetCrystal()));
       mvpUnitCellMapImport.push_back(new UnitCellMapImport(mpWXCrystal->GetCrystal()));
@@ -1667,6 +1674,7 @@ void WXGLCrystalCanvas::OnChangeContour()
    {
       return;
    }
+   wxBusyInfo wait("Processing Fourier Map...");
    contourValueDialog.GetValue().ToDouble(&contourValue);
    mvpUnitCellMapGLList[mapgl].first.second = (float) contourValue;
    mvpUnitCellMapGLList[mapgl].second->GenList(*(mvpUnitCellMapImport.back()),
@@ -1692,6 +1700,7 @@ void WXGLCrystalCanvas::OnAddContour()
       ncolor = wxGetColourFromUser((wxWindow*)this, ncolor);   
       if(!(ncolor.Ok())) return;
    // Add display map
+      wxBusyInfo wait("Processing Fourier Map...");
       mvpUnitCellMapGLList.push_back(make_pair(make_pair(mvpUnitCellMapImport.back(),
                                                          (float)contourValue),
                                                new UnitCellMapGLList()) );
