@@ -2844,6 +2844,7 @@ void PowderPattern::PrepareIntegratedRfactor()const
 		tmp=mIntegratedPatternMax;
 		for(int i=0;i<numInterval;i++) mIntegratedPatternMax(i)=tmp(index(i));
 	}
+	cout<<FormatVertVector<long>(mIntegratedPatternMin,mIntegratedPatternMax)<<endl;
    VFN_DEBUG_MESSAGE("PowderPattern::PrepareIntegratedRfactor():3",3);
 	// Check all intervals are within pattern limits, correct them if necessary,
 	// remove them if necessary (keep=false)
@@ -2864,22 +2865,19 @@ void PowderPattern::PrepareIntegratedRfactor()const
 		 // :TODO: some more thorough testing may be needed
 		 // (eg for several phases with different widths...)
 		 	if(false==keep(i)) continue;
-			if(mIntegratedPatternMax(i)<mIntegratedPatternMin(i+1))
+			if(mIntegratedPatternMax(i)>=mIntegratedPatternMin(i+1))
 			{
-				if(mIntegratedPatternMin(i)>mIntegratedPatternMax(i+1))
+				mIntegratedPatternMax(i)=(mIntegratedPatternMax(i)+mIntegratedPatternMin(i+1))/2;
+				long j=1;
+				while(mIntegratedPatternMin(i + j)<mIntegratedPatternMax(i))
 				{
-					continue;
-					keep(i)=false;
-				}
-				if(mIntegratedPatternMin(i)<mIntegratedPatternMin(i+1)) keep(i)=false;
-				else
-				{
-					mIntegratedPatternMax(i)=(mIntegratedPatternMax(i)+mIntegratedPatternMin(i+1))/2;
-					mIntegratedPatternMin(i+1)=mIntegratedPatternMax(i)+1;
-					//just in case...Could it happen ?
-					if(mIntegratedPatternMin(i)<mIntegratedPatternMax(i)) keep(i)=false;
+					mIntegratedPatternMin(i+j)=mIntegratedPatternMax(i)+1;
+					if(mIntegratedPatternMin(i+j)>mIntegratedPatternMax(i+j)) keep(i+j)=false;
+					if( (i+ ++j)==numInterval) break;
 				}
 			}
+			//just in case...Could it happen ?
+			if(mIntegratedPatternMin(i)>mIntegratedPatternMax(i)) keep(i)=false;
 		}
 	// Take care of excluded regions (change integration areas accordingly)
 	// regions are sorted by ascending theta
@@ -2932,6 +2930,9 @@ void PowderPattern::PrepareIntegratedRfactor()const
 	numInterval=j;
 	mIntegratedPatternMax.resizeAndPreserve(numInterval);
 	mIntegratedPatternMin.resizeAndPreserve(numInterval);
+  
+   VFN_DEBUG_MESSAGE("PowderPattern::PrepareIntegratedRfactor():intervals"<<endl\
+						<<FormatVertVector<long>(mIntegratedPatternMin,mIntegratedPatternMax),2);
 	// Integrate Obs and weight arrays
 	mIntegratedObs.resize(numInterval);
 	mIntegratedWeight.resize(numInterval);
@@ -2947,6 +2948,10 @@ void PowderPattern::PrepareIntegratedRfactor()const
 		}
 		mIntegratedWeight(i)=1/mIntegratedWeight(i);
 	}
+
+	cout<<FormatVertVector<double>(mIntegratedPatternMin,
+											 mIntegratedPatternMax,
+											 mIntegratedObs,mIntegratedWeight,8)<<endl;
 	mClockIntegratedFactorsPrep.Click();
    VFN_DEBUG_EXIT("PowderPattern::PrepareIntegratedRfactor()",3);
 }
