@@ -418,6 +418,8 @@ void WXPowderPattern::CrystUpdate()
    VFN_DEBUG_MESSAGE("WXPowderPattern::CrystUpdate()",6)
    WXCrystValidateAllUserInput();
    
+   if(mpPowderPattern->GetNbPoint()<=0) return;// nothing to display yet
+   
    // Will force re-generating reflection list if the wavelength,
    // or lattice par, or the spacegroup has changed.
    mpPowderPattern->Prepare();

@@ -1651,14 +1651,20 @@ const CrystVector_REAL& PowderPattern::GetPowderPatternWeight()const
 
 REAL PowderPattern::GetPowderPatternXMin()const
 {
+   if(mNbPoint==0) return 0;//:KLUDGE: ?
    if(true==mIsXAscending) return mX(0);
    return mX(mNbPoint-1);
 }
 
-REAL PowderPattern::GetPowderPatternXStep()const {return abs((mX(0)+mX(mNbPoint-1))/(mNbPoint-1));}
+REAL PowderPattern::GetPowderPatternXStep()const
+{
+   if(mNbPoint==0) return 0;//:KLUDGE: ?
+   return abs((mX(0)+mX(mNbPoint-1))/(mNbPoint-1));
+}
 
 REAL PowderPattern::GetPowderPatternXMax()const 
 {
+   if(mNbPoint==0) return 0;//:KLUDGE: ?
    if(true==mIsXAscending) return mX(mNbPoint-1);
    return mX(0);
 }
@@ -1761,7 +1767,7 @@ REAL PowderPattern::X2Pixel(const REAL x)const
    else
    {
       VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<this->GetPowderPatternXMin()<<","<<this->GetPowderPatternXMax(),3)
-      long pix=(long)((this->GetPowderPatternXMax()-x)/this->GetPowderPatternXStep());
+      long pix=(long)((x-this->GetPowderPatternXMin())/this->GetPowderPatternXStep());
       if((pix>0)&&(pix<((long)mNbPoint-1)))
       {
          // Why floor() and ceil() don't return a bloody integer is beyond me
@@ -4527,7 +4533,13 @@ CrystVector_REAL PowderProfileGauss  (const CrystVector_REAL ttheta,const REAL f
       for(long i=middlePt;i<nbPoints;i++) *p++ *= c2;
    }
    p=result.data();
+   #ifdef _MSC_VER
+   // Bug from Hell (in MSVC++) !
+   // The *last* point ends up sometimes with an arbitrary large value...
+   for(long i=0;i<nbPoints;i++) { *p = pow((float)2.71828182846,(float)*p) ; p++ ;}
+   #else
    for(long i=0;i<nbPoints;i++) { *p = exp(*p) ; p++ ;}
+   #endif
    
    result *= 2. / fwhm * sqrt(log(2.)/M_PI);
    return result;
