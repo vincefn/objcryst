@@ -40,6 +40,7 @@
 
 #include <locale.h>
 #include <sstream>
+#include <list>
 
 #include "ObjCryst/IO.h"
 #include "ObjCryst/Crystal.h"
@@ -103,35 +104,31 @@ void WXCrystInformUserStdOut(const string &str)
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
-enum
-{
-   // menu items
-   MENU_FILE_QUIT,
-   MENU_HELP_ABOUT,
-   MENU_HELP_TOGGLETOOLTIP,
-   MENU_FILE_LOAD,
-   MENU_FILE_LOAD_OXY,
-   MENU_FILE_SAVE,
-   MENU_OBJECT_CREATE_CRYSTAL,
-   MENU_OBJECT_CREATE_POWDERSPECTRUM,
-   MENU_OBJECT_CREATE_SINGLECRYSTALDATA,
-   MENU_OBJECT_CREATE_GLOBALOPTOBJ,
-   MENU_OBJECT_CREATE_GENETICALGORITHM,
-   MENU_DEBUG_LEVEL0,
-   MENU_DEBUG_LEVEL1,
-   MENU_DEBUG_LEVEL2,
-   MENU_DEBUG_LEVEL3,
-   MENU_DEBUG_LEVEL4,
-   MENU_DEBUG_LEVEL5,
-   MENU_DEBUG_LEVEL6,
-   MENU_DEBUG_LEVEL7,
-   MENU_DEBUG_LEVEL8,
-   MENU_DEBUG_LEVEL9,
-   MENU_DEBUG_LEVEL10,
-   MENU_DEBUG_TEST1,
-   MENU_DEBUG_TEST2,
-   MENU_DEBUG_TEST3
-};
+static const long MENU_FILE_QUIT=                      WXCRYST_ID();
+static const long MENU_HELP_ABOUT=                     WXCRYST_ID();
+static const long MENU_HELP_TOGGLETOOLTIP=             WXCRYST_ID();
+static const long MENU_FILE_LOAD=                      WXCRYST_ID();
+static const long MENU_FILE_LOAD_OXY=                  WXCRYST_ID();
+static const long MENU_FILE_SAVE=                      WXCRYST_ID();
+static const long MENU_OBJECT_CREATE_CRYSTAL=          WXCRYST_ID();
+static const long MENU_OBJECT_CREATE_POWDERSPECTRUM=   WXCRYST_ID();
+static const long MENU_OBJECT_CREATE_SINGLECRYSTALDATA=WXCRYST_ID();
+static const long MENU_OBJECT_CREATE_GLOBALOPTOBJ=     WXCRYST_ID();
+static const long MENU_OBJECT_CREATE_GENETICALGORITHM= WXCRYST_ID();
+static const long MENU_DEBUG_LEVEL0=                   WXCRYST_ID();
+static const long MENU_DEBUG_LEVEL1=                   WXCRYST_ID();
+static const long MENU_DEBUG_LEVEL2=                   WXCRYST_ID();
+static const long MENU_DEBUG_LEVEL3=                   WXCRYST_ID();
+static const long MENU_DEBUG_LEVEL4=                   WXCRYST_ID();
+static const long MENU_DEBUG_LEVEL5=                   WXCRYST_ID();
+static const long MENU_DEBUG_LEVEL6=                   WXCRYST_ID();
+static const long MENU_DEBUG_LEVEL7=                   WXCRYST_ID();
+static const long MENU_DEBUG_LEVEL8=                   WXCRYST_ID();
+static const long MENU_DEBUG_LEVEL9=                   WXCRYST_ID();
+static const long MENU_DEBUG_LEVEL10=                  WXCRYST_ID();
+static const long MENU_DEBUG_TEST1=                    WXCRYST_ID();
+static const long MENU_DEBUG_TEST2=                    WXCRYST_ID();
+static const long MENU_DEBUG_TEST3=                    WXCRYST_ID();
 
 // ----------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -186,7 +183,7 @@ bool MyApp::OnInit()
    bool randomize(false);
    bool only3D(false);
    bool loadFourier(false);
-   string fourierFilename;
+   list<string> vFourierFilename;
    for(int i=1;i<this->argc;i++)
    {
       if('-'==this->argv[i][0])
@@ -241,7 +238,7 @@ bool MyApp::OnInit()
          {
             ++i;
             loadFourier=true;
-            fourierFilename=string(this->argv[i]);
+            vFourierFilename.push_back(string(this->argv[i]));
             continue;
          }
          if(string("--only3d")==string(this->argv[i]))
@@ -283,7 +280,8 @@ bool MyApp::OnInit()
    if(!useGUI)
    {
       for(int i=0;i<gOptimizationObjRegistry.GetNb();i++)
-         gOptimizationObjRegistry.GetObj(i).Optimize(nbTrial,silent,finalCost);
+         for(int j=0;j<5;j++)
+            gOptimizationObjRegistry.GetObj(i).Optimize(nbTrial,silent,finalCost);
       XMLCrystFileSaveGlobal(outfilename);
       cout <<"End of Fox execution. Bye !"<<endl;
       exit (1);
@@ -305,7 +303,11 @@ bool MyApp::OnInit()
       WXCrystal *pWXCryst=dynamic_cast<WXCrystal*> (gCrystalRegistry.GetObj(0).WXGet());
       wxCommandEvent com;
       pWXCryst->OnMenuCrystalGL(com);
-      pWXCryst->GetCrystalGL()->LoadFourier(fourierFilename);
+      list<string>::iterator pos;
+      for(pos=vFourierFilename.begin();pos!=vFourierFilename.end();++pos)
+      {
+         pWXCryst->GetCrystalGL()->LoadFourier(*pos);
+      }
       return true;
    }
    
@@ -547,26 +549,12 @@ void WXCrystMainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
 {
    wxFileDialog *open;
-   switch(event.GetId())
+   if(event.GetId()==MENU_FILE_LOAD)
    {
-      #if 0
-      case MENU_FILE_LOAD_OXY:
-      {
-         open= new wxFileDialog(this,"Choose File :",
-                                              "","","*.oxy",wxOPEN | wxFILE_MUST_EXIST);
-         if(open->ShowModal() != wxID_OK) return;
-         IOCrystFileLoadAllObject(open->GetPath().c_str());
-         break;
-      }
-      #endif
-      case MENU_FILE_LOAD:
-      {
-         open= new wxFileDialog(this,"Choose File :",
-                                              "","","*.xml",wxOPEN | wxFILE_MUST_EXIST);
-         if(open->ShowModal() != wxID_OK) return;
-         XMLCrystFileLoadAllObject(open->GetPath().c_str());
-         break;
-      }
+      open= new wxFileDialog(this,"Choose File :",
+                                           "","","*.xml",wxOPEN | wxFILE_MUST_EXIST);
+      if(open->ShowModal() != wxID_OK) return;
+      XMLCrystFileLoadAllObject(open->GetPath().c_str());
    }
    open->Destroy();
 }
@@ -617,50 +605,41 @@ void WXCrystMainFrame::OnAddGeneticAlgorithm(wxCommandEvent& WXUNUSED(event))
 }
 void WXCrystMainFrame::OnSetDebugLevel(wxCommandEvent& event)
 {
-   switch(event.GetId())
-   {
-      case MENU_DEBUG_LEVEL0 :VFN_DEBUG_GLOBAL_LEVEL(0);break;
-      case MENU_DEBUG_LEVEL1 :VFN_DEBUG_GLOBAL_LEVEL(1);break;
-      case MENU_DEBUG_LEVEL2 :VFN_DEBUG_GLOBAL_LEVEL(2);break;
-      case MENU_DEBUG_LEVEL3 :VFN_DEBUG_GLOBAL_LEVEL(3);break;
-      case MENU_DEBUG_LEVEL4 :VFN_DEBUG_GLOBAL_LEVEL(4);break;
-      case MENU_DEBUG_LEVEL5 :VFN_DEBUG_GLOBAL_LEVEL(5);break;
-      case MENU_DEBUG_LEVEL6 :VFN_DEBUG_GLOBAL_LEVEL(6);break;
-      case MENU_DEBUG_LEVEL7 :VFN_DEBUG_GLOBAL_LEVEL(7);break;
-      case MENU_DEBUG_LEVEL8 :VFN_DEBUG_GLOBAL_LEVEL(8);break;
-      case MENU_DEBUG_LEVEL9 :VFN_DEBUG_GLOBAL_LEVEL(9);break;
-      case MENU_DEBUG_LEVEL10:VFN_DEBUG_GLOBAL_LEVEL(10);break;
-   }
+   if(event.GetId()== MENU_DEBUG_LEVEL0 ){VFN_DEBUG_GLOBAL_LEVEL(0);}
+   if(event.GetId()== MENU_DEBUG_LEVEL1 ){VFN_DEBUG_GLOBAL_LEVEL(1);}
+   if(event.GetId()== MENU_DEBUG_LEVEL2 ){VFN_DEBUG_GLOBAL_LEVEL(2);}
+   if(event.GetId()== MENU_DEBUG_LEVEL3 ){VFN_DEBUG_GLOBAL_LEVEL(3);}
+   if(event.GetId()== MENU_DEBUG_LEVEL4 ){VFN_DEBUG_GLOBAL_LEVEL(4);}
+   if(event.GetId()== MENU_DEBUG_LEVEL5 ){VFN_DEBUG_GLOBAL_LEVEL(5);}
+   if(event.GetId()== MENU_DEBUG_LEVEL6 ){VFN_DEBUG_GLOBAL_LEVEL(6);}
+   if(event.GetId()== MENU_DEBUG_LEVEL7 ){VFN_DEBUG_GLOBAL_LEVEL(7);}
+   if(event.GetId()== MENU_DEBUG_LEVEL8 ){VFN_DEBUG_GLOBAL_LEVEL(8);}
+   if(event.GetId()== MENU_DEBUG_LEVEL9 ){VFN_DEBUG_GLOBAL_LEVEL(9);}
+   if(event.GetId()== MENU_DEBUG_LEVEL10){VFN_DEBUG_GLOBAL_LEVEL(10);}
 }
 void WXCrystMainFrame::OnDebugTest(wxCommandEvent& event)
 {
    WXCrystValidateAllUserInput();
    static long saveId=-1;
    static long saveId2=-1;
-   switch(event.GetId())
+   if(event.GetId()== MENU_DEBUG_TEST1)
    {
-      case MENU_DEBUG_TEST1:
-      {
-         if(saveId==-1) saveId=gScattererRegistry.GetObj(0).CreateParamSet();
-         else gScattererRegistry.GetObj(0).SaveParamSet(saveId);
-         gScattererRegistry.GetObj(0).GlobalOptRandomMove(1);
-         gCrystalRegistry.GetObj(0).UpdateDisplay();
-         if(saveId2==-1) saveId2=gScattererRegistry.GetObj(0).CreateParamSet();
-         else gScattererRegistry.GetObj(0).SaveParamSet(saveId2);
-         break;
-      }
-      case MENU_DEBUG_TEST2:
-      {
-         gScattererRegistry.GetObj(0).RestoreParamSet(saveId);
-         gCrystalRegistry.GetObj(0).UpdateDisplay();
-         break;
-      }
-      case MENU_DEBUG_TEST3:
-      {
-         gScattererRegistry.GetObj(0).RestoreParamSet(saveId2);
-         gCrystalRegistry.GetObj(0).UpdateDisplay();
-         break;
-      }
+      if(saveId==-1) saveId=gScattererRegistry.GetObj(0).CreateParamSet();
+      else gScattererRegistry.GetObj(0).SaveParamSet(saveId);
+      gScattererRegistry.GetObj(0).GlobalOptRandomMove(1);
+      gCrystalRegistry.GetObj(0).UpdateDisplay();
+      if(saveId2==-1) saveId2=gScattererRegistry.GetObj(0).CreateParamSet();
+      else gScattererRegistry.GetObj(0).SaveParamSet(saveId2);
+   }
+   if(event.GetId()== MENU_DEBUG_TEST2)
+   {
+      gScattererRegistry.GetObj(0).RestoreParamSet(saveId);
+      gCrystalRegistry.GetObj(0).UpdateDisplay();
+   }
+   if(event.GetId()== MENU_DEBUG_TEST3)
+   {
+      gScattererRegistry.GetObj(0).RestoreParamSet(saveId2);
+      gCrystalRegistry.GetObj(0).UpdateDisplay();
    }
 }
 
