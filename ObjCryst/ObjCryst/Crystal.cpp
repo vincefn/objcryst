@@ -1014,8 +1014,9 @@ REAL Crystal::GetBondValenceCost() const
    }
    this->CalcBondValenceSum();
    if(  (mBondValenceCostClock>mBondValenceCalcClock)
-      &&(mBondValenceCostClock>this->GetMasterClockScatteringPower())) return mBondValenceCost;
+      &&(mBondValenceCostClock>this->GetMasterClockScatteringPower())) return mBondValenceCost*mBondValenceCost;
    VFN_DEBUG_MESSAGE("Crystal::GetBondValenceCost():"<<mvBondValenceCalc.size()<<" valences",4)
+   TAU_PROFILE("Crystal::GetBondValenceCost()","REAL ()",TAU_DEFAULT);
    mBondValenceCost=0.0;
    std::map<long, REAL>::const_iterator pos;
    for(pos=mvBondValenceCalc.begin();pos!=mvBondValenceCalc.end();++pos)
@@ -1038,6 +1039,7 @@ void Crystal::CalcBondValenceSum()const
    if(   (mBondValenceCalcClock>mDistTableClock)
        &&(mBondValenceCalcClock>mBondValenceParClock)) return;
    VFN_DEBUG_MESSAGE("Crystal::CalcBondValenceSum()",4)
+   TAU_PROFILE("Crystal::CalcBondValenceSum()","void ()",TAU_DEFAULT);
    mvBondValenceCalc.clear();
    for(long i=0;i<mScattCompList.GetNbComponent();i++)
    {
