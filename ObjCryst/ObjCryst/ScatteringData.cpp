@@ -418,8 +418,11 @@ void ScatteringData::GenHKLFullSpace(const REAL maxTheta,const bool useMultiplic
       throw ObjCrystException("ScatteringData::GenHKLFullSpace() \
       no crystal assigned yet to this ScatteringData object.");;
    }
-   VFN_DEBUG_MESSAGE("ScatteringData::GenHKLFullSpace():Max theta="<<maxTheta \
+   VFN_DEBUG_MESSAGE(" ->Max theta="<<maxTheta \
    << " Using Multiplicity : "<<useMultiplicity,3)
+   VFN_DEBUG_MESSAGE("-> wavelength:"<< mRadiation.GetWavelength()(0)<<"a,b,c:"\
+	                  <<mpCrystal->GetLatticePar(0)<<","<<mpCrystal->GetLatticePar(1)\
+							<<","<<mpCrystal->GetLatticePar(2)<<",",3)
    long maxH,maxK,maxL;
    maxH=(int) (sin(maxTheta)/mRadiation.GetWavelength()(0) * mpCrystal->GetLatticePar(0)*2+1);
    maxK=(int) (sin(maxTheta)/mRadiation.GetWavelength()(0) * mpCrystal->GetLatticePar(1)*2+1);
@@ -1059,7 +1062,7 @@ void ScatteringData::PrepareCalcStructFactor()const
       mAnomalousNeedRecalc=true;
       mScattFactNeedRecalc=true;
    }
-
+	if(mClockStructFactor<mClockHKL) mGeomFhklCalcNeedRecalc=true;
    mLastScattCompList=*mpScattCompList;
    mClockScattFactor.Click();//update clock
    VFN_DEBUG_MESSAGE("->mGeomFhklCalcNeedRecalc:"<<mGeomFhklCalcNeedRecalc,2)
@@ -1261,7 +1264,9 @@ void ScatteringData::CalcGlobalTemperatureFactor() const
 {
    TAU_PROFILE("ScatteringData::CalcGlobalTemperatureFactor()","void ()",TAU_DEFAULT);
 	this->CalcSinThetaLambda();
-	if(mClockGlobalBiso<mClockGlobalTemperatureFact) return;
+	if(  (mClockGlobalBiso<mClockGlobalTemperatureFact)
+	   &&(mClockGlobalBiso>mClockTheta)) return;
+   VFN_DEBUG_MESSAGE("ScatteringData::CalcGlobalTemperatureFactor()",2)
 	
 	mGlobalTemperatureFactor.resize(mNbRefl);
 	//if(true==mUseFastLessPreciseFunc) //:TODO:
