@@ -47,7 +47,6 @@
 
 namespace ObjCryst
 {
-
 ////////////////////////////////////////////////////////////////////////
 //
 //    PowderPatternComponent    
@@ -524,36 +523,31 @@ WXCrystObjBasic* PowderPatternBackground::WXCreate(wxWindow* parent)
 //
 ////////////////////////////////////////////////////////////////////////
 PowderPatternDiffraction::PowderPatternDiffraction():
-mFullProfileWidthFactor(5.),
-mCagliotiU(0),mCagliotiV(0),mCagliotiW(3e-5),
-mW0(20.0),mW1(20.0),mW2(0.0),
-mPseudoVoigtEta0(0.5),mPseudoVoigtEta1(0.),mUseAsymmetricProfile(false),
+mpReflectionProfile(0),
 mCorrLorentz(*this),mCorrPolar(*this),mCorrSlitAperture(*this),
 mCorrTextureMarchDollase(*this),mCorrTOF(*this)
 {
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::PowderPatternDiffraction()",5)
    mIsScalable=true;
    this->InitOptions();
-   mReflectionProfileType.SetChoice(PROFILE_PSEUDO_VOIGT);
+   this->SetProfile(new ReflectionProfilePseudoVoigt);
    this->SetIsIgnoringImagScattFact(true);
    this->AddSubRefObj(mCorrTextureMarchDollase);
    mClockMaster.AddChild(mClockProfilePar);
    mClockMaster.AddChild(mClockLorentzPolarSlitCorrPar);
+   mClockMaster.AddChild(mpReflectionProfile->GetClockMaster());
 }
 
 PowderPatternDiffraction::PowderPatternDiffraction(const PowderPatternDiffraction &old):
-mReflectionProfileType(old.mReflectionProfileType),
-mFullProfileWidthFactor(old.mFullProfileWidthFactor),
-mCagliotiU(old.mCagliotiU),mCagliotiV(old.mCagliotiV),mCagliotiW(old.mCagliotiW),
-mW0(old.mW0),mW1(old.mW1),mW2(old.mW2),
-mPseudoVoigtEta0(old.mPseudoVoigtEta0),mPseudoVoigtEta1(old.mPseudoVoigtEta1),
-mUseAsymmetricProfile(old.mUseAsymmetricProfile),
+mpReflectionProfile(0),
 mCorrLorentz(*this),mCorrPolar(*this),mCorrSlitAperture(*this),
 mCorrTextureMarchDollase(*this),mCorrTOF(*this)
 {
    this->AddSubRefObj(mCorrTextureMarchDollase);
+   this->SetProfile(old.mpReflectionProfile->CreateCopy());
    mClockMaster.AddChild(mClockProfilePar);
    mClockMaster.AddChild(mClockLorentzPolarSlitCorrPar);
+   mClockMaster.AddChild(mpReflectionProfile->GetClockMaster());
 }
 
 PowderPatternDiffraction::~PowderPatternDiffraction()
@@ -594,20 +588,27 @@ pair<const CrystVector_REAL*,const RefinableObjClock*>
 }
 
 void PowderPatternDiffraction::SetReflectionProfilePar(const ReflectionProfileType prof,
-                          const REAL fwhmCagliotiW,
-                          const REAL fwhmCagliotiU,
-                          const REAL fwhmCagliotiV,
-                          const REAL eta0,
-                          const REAL eta1)
+                                                       const REAL w, const REAL u, const REAL v,
+                                                       const REAL eta0, const REAL eta1)
 {
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::SetReflectionProfilePar()",5)
-   mReflectionProfileType.SetChoice(prof);
-   mCagliotiU=fwhmCagliotiU;
-   mCagliotiV=fwhmCagliotiV;
-   mCagliotiW=fwhmCagliotiW;
-   mPseudoVoigtEta0=eta0;
-   mPseudoVoigtEta1=eta1;
-   mClockProfilePar.Click();
+   if(mpReflectionProfile!=0) delete mpReflectionProfile;
+   ReflectionProfilePseudoVoigt* p=new ReflectionProfilePseudoVoigt();
+   p->SetProfilePar(w,u,v,eta0,eta1);
+   this->SetProfile(p);
+}
+
+void PowderPatternDiffraction::SetProfile(ReflectionProfile *p)
+{
+   if(mpReflectionProfile!=0)
+   {
+      this->RemoveSubRefObj(*mpReflectionProfile);
+      delete mpReflectionProfile;
+   }
+   if(p==mpReflectionProfile) return;
+   mpReflectionProfile= p;
+   this->AddSubRefObj(*mpReflectionProfile);
+   mClockMaster.AddChild(mpReflectionProfile->GetClockMaster());
 }
 
 void PowderPatternDiffraction::GenHKLFullSpace()
@@ -868,7 +869,7 @@ void PowderPatternDiffraction::CalcPowderReflProfile()const
    //this->GetRadiation().GetClockWavelength().Print();
    //this->GetRadiation().GetClockRadiation().Print();
    if(  (mClockProfileCalc>mClockProfilePar)
-      &&(mClockProfileCalc>mReflectionProfileType.GetClock())
+      &&(mClockProfileCalc>mpReflectionProfile->GetClockMaster())
       &&(mClockProfileCalc>mClockTheta)
       &&(mClockProfileCalc>this->GetRadiation().GetClockWavelength())
       &&(mClockProfileCalc>mpParentPowderPattern->GetClockPowderPatternXCorr())
@@ -926,46 +927,33 @@ Radiation must be either monochromatic, from an X-Ray Tube, or neutron TOF !!");
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile():\
 Computing all Profiles",5)
    REAL center,// center of current reflection (depends on line if several)
-        fwhm,  // fwhm of profile
         x0;    // theoretical (uncorrected for zero's, etc..) position of center of line
    long first,last;// first & last point of the stored profile
    CrystVector_REAL vx,reflProfile,tmpV;
    mvReflProfile.resize(this->GetNbRefl());
+   const REAL xmin=mpParentPowderPattern->GetPowderPatternX()(0);
+   const REAL xmax=mpParentPowderPattern->GetPowderPatternX()(mpParentPowderPattern->GetNbPoint()-1);
+   
+   REAL fullwidth0=mpReflectionProfile->GetFullProfileWidth(0.04,xmin,1/(2*mpParentPowderPattern->X2STOL(xmin))),
+        fullwidth1=mpReflectionProfile->GetFullProfileWidth(0.04,xmax,1/(2*mpParentPowderPattern->X2STOL(xmin)));
+   VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile()w="<<fullwidth0<<"->"<<fullwidth1,10)
+   if(!mUseFastLessPreciseFunc) {fullwidth0*=2;fullwidth1*=2;}
+   
    for(unsigned int line=0;line<nbLine;line++)
    {
       for(long i=0;i<this->GetNbRefl();i++)
       {
          VFN_DEBUG_ENTRY("PowderPatternDiffraction::CalcPowderReflProfile()#"<<i,5)
          x0=mpParentPowderPattern->STOL2X(mSinThetaLambda(i));
-         if(this->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
-         {
-            fwhm=mW0;
-            REAL d=mSinThetaLambda(i);
-            if(d>0)
-            {
-               d=1/(2.0*d);
-               fwhm += mW1*d + mW2*d*d;
-            }
-         }
-         else
-         {
-            fwhm=mCagliotiW + mCagliotiV*tan(x0/2.0) + mCagliotiU*tan(x0/2.0)*tan(x0/2.0);
-            fwhm =sqrt(fwhm);
-         }
-         if(fwhm<1e-5) fwhm=1e-5;
 
-         REAL powderAsym=1.;
-         //if(true == mUseAsymmetricProfile) 
-         //   powderAsym=mPowderAsymA0+mPowderAsymA1/sin(tmp)+mPowderAsymA2/sin(tmp)/sin(tmp);
-
-         VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile()#"<<i<<",fwhm="<<fwhm<<",w="<<mCagliotiW,5)
+         VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile()#"<<i,5)
          if(nbLine>1)
          {// we have several lines, not centered on the profile range
             center = mpParentPowderPattern->X2XCorr(
                         x0+2*tan(x0/2.0)*spectrumDeltaLambdaOvLambda(line));
          }
          else center=mpParentPowderPattern->X2XCorr(x0);
-         
+         const REAL halfwidth=(fullwidth0+(center-xmin)/(xmax-xmin)*fullwidth1)/2.0;
          if(line==0)
          {
             // For an X-Ray tube, label on first (strongest) of reflections lines (Kalpha1)
@@ -978,16 +966,8 @@ Computing all Profiles",5)
                spectrumwidth=2*this->GetRadiation().GetXRayTubeDeltaLambda()
                               /this->GetRadiation().GetWavelength()(0)*tan(x0/2.0);
             }
-            if(mUseFastLessPreciseFunc)
-            {
-               first=(long)(mpParentPowderPattern->X2Pixel(center-mFullProfileWidthFactor*fwhm/2.0));
-               last =(long)(mpParentPowderPattern->X2Pixel(center+mFullProfileWidthFactor*fwhm/2.0+spectrumwidth));
-            }
-            else
-            {
-               first=(long)(mpParentPowderPattern->X2Pixel(center-mFullProfileWidthFactor*fwhm/1.0));
-               last =(long)(mpParentPowderPattern->X2Pixel(center+mFullProfileWidthFactor*fwhm/1.0+spectrumwidth));
-            }
+            first=(long)(mpParentPowderPattern->X2Pixel(center-halfwidth));
+            last =(long)(mpParentPowderPattern->X2Pixel(center+halfwidth+spectrumwidth));
             if(this->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
             {
                const long f=first;
@@ -1024,63 +1004,10 @@ Computing all Profiles",5)
                const REAL *p0=mpParentPowderPattern->GetPowderPatternX().data()+first;
                REAL *p1=vx.data();
                for(long i=first;i<=last;i++) *p1++ = *p0++;
-               vx += -center;
             }
 
             VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile():"<<first<<","<<last<<","<<center,3)
-            switch(mReflectionProfileType.GetChoice())
-            {
-               case PROFILE_GAUSSIAN:
-               {
-                  if(true == mUseAsymmetricProfile)
-                     reflProfile=PowderProfileGauss(vx,fwhm,powderAsym);
-                  else reflProfile=PowderProfileGauss(vx,fwhm);
-                  break;
-               }
-               case PROFILE_LORENTZIAN:
-               {
-                  if(true == mUseAsymmetricProfile)
-                     reflProfile=PowderProfileLorentz(vx,fwhm,powderAsym);
-                  else reflProfile=PowderProfileLorentz(vx,fwhm);
-                  break;
-               }
-               case PROFILE_PSEUDO_VOIGT:
-               {
-                  if(true == mUseAsymmetricProfile)
-                     reflProfile=PowderProfileGauss(vx,fwhm,powderAsym);
-                  else reflProfile=PowderProfileGauss(vx,fwhm);
-                  reflProfile *= 1-(mPseudoVoigtEta0+x0*mPseudoVoigtEta1);
-                  if(true == mUseAsymmetricProfile)
-                     tmpV=PowderProfileLorentz(vx,fwhm,powderAsym);
-                  else tmpV=PowderProfileLorentz(vx,fwhm);
-                  tmpV *= mPseudoVoigtEta0+x0*mPseudoVoigtEta1;
-                  reflProfile += tmpV;
-                  break;
-               }
-               case PROFILE_PSEUDO_VOIGT_FINGER_COX_JEPHCOAT:
-               {
-                  throw ObjCrystException(
-                     "PROFILE_PSEUDO_VOIGT_FINGER_COX_JEPHCOAT Not implemented");
-                  /*
-                  tmp2theta*=180./M_PI;//Keep degrees:external library used
-                  fwhm *=180./M_PI;
-                  REAL eta=mPowderPseudoVoigtEta0+2*mTheta(i)*mPowderPseudoVoigtEta1;
-                  REAL dPRdT, dPRdG, dPRdE , dPRdS, dPRdD;
-                  bool useAsym=true;
-                  if( (mPowderAsymSourceWidth < 1e-8) && (mPowderAsymSourceWidth < 1e-8) )
-                     useAsym=false;
-
-                  for(long j=0;j<2*mSavedPowderReflProfileNbPoint+1;j++)
-                     reflProfile(j)=Profval( eta,fwhm,mPowderAsymSourceWidth,
-                                             mPowderAsymDetectorWidth,tmp2theta(j) ,
-                                             0.,&dPRdT,&dPRdG,&dPRdE,&dPRdS,&dPRdD,
-                                             useAsym);
-                  break;
-                  */
-               }
-               case PROFILE_PEARSON_VII: throw ObjCrystException("PEARSON_VII Not implemented yet");
-
-            }
+            reflProfile=mpReflectionProfile->GetProfile(vx,center,1/(2*mSinThetaLambda(i)));
             VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile()",2)
             if(nbLine>1) reflProfile *=spectrumFactor(line);
             if(line==0) mvReflProfile[i].profile = reflProfile;
@@ -1250,6 +1177,7 @@ void PowderPatternDiffraction::Prepare()
 void PowderPatternDiffraction::InitOptions()
 {
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::InitOptions()",5)
+   #if 0
    static string ReflectionProfileTypeName;
    static string ReflectionProfileTypeChoices[3];
    
@@ -1265,70 +1193,7 @@ void PowderPatternDiffraction::InitOptions()
    }
    mReflectionProfileType.Init(3,&ReflectionProfileTypeName,ReflectionProfileTypeChoices);
    this->AddOption(&mReflectionProfileType);
-   
-   //Init parameters. This should not be done here !!!
-   {
-      RefinablePar tmp("U",&mCagliotiU,-1/RAD2DEG/RAD2DEG,1./RAD2DEG/RAD2DEG,
-                        gpRefParTypeScattDataProfileWidth,
-                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG*RAD2DEG);
-      tmp.AssignClock(mClockProfilePar);
-      tmp.SetDerivStep(1e-7);
-      this->AddPar(tmp);
-   }
-   {
-      RefinablePar tmp("V",&mCagliotiV,-1/RAD2DEG/RAD2DEG,1./RAD2DEG/RAD2DEG,
-                        gpRefParTypeScattDataProfileWidth,
-                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG*RAD2DEG);
-      tmp.AssignClock(mClockProfilePar);
-      tmp.SetDerivStep(1e-7);
-      this->AddPar(tmp);
-   }
-   {
-      RefinablePar tmp("W",&mCagliotiW,0,1./RAD2DEG/RAD2DEG,
-                        gpRefParTypeScattDataProfileWidth,
-                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG*RAD2DEG);
-      tmp.AssignClock(mClockProfilePar);
-      tmp.SetDerivStep(1e-7);
-      this->AddPar(tmp);
-   }
-   {
-      RefinablePar tmp("Eta0",&mPseudoVoigtEta0,0,1.,gpRefParTypeScattDataProfileType,
-                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
-      tmp.AssignClock(mClockProfilePar);
-      tmp.SetDerivStep(1e-4);
-      this->AddPar(tmp);
-   }
-   {
-      RefinablePar tmp("Eta1",&mPseudoVoigtEta1,-1,1.,gpRefParTypeScattDataProfileType,
-                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
-      tmp.AssignClock(mClockProfilePar);
-      tmp.SetDerivStep(1e-4);
-      this->AddPar(tmp);
-   }
-   {
-      RefinablePar tmp("W0",&mW0,0,1e5,
-                        gpRefParTypeScattDataProfileWidth,
-                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1.0);
-      tmp.AssignClock(mClockProfilePar);
-      tmp.SetDerivStep(1e-2);
-      this->AddPar(tmp);
-   }
-   {
-      RefinablePar tmp("W1",&mW1,-1e5,1e5,
-                        gpRefParTypeScattDataProfileWidth,
-                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1.0);
-      tmp.AssignClock(mClockProfilePar);
-      tmp.SetDerivStep(1e-2);
-      this->AddPar(tmp);
-   }
-   {
-      RefinablePar tmp("W2",&mW2,-1e5,1e5,
-                        gpRefParTypeScattDataProfileWidth,
-                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1.0);
-      tmp.AssignClock(mClockProfilePar);
-      tmp.SetDerivStep(1e-2);
-      this->AddPar(tmp);
-   }
+   #endif
 }
 void PowderPatternDiffraction::GetBraggLimits(CrystVector_long *&min,CrystVector_long *&max)const
 {
@@ -1336,16 +1201,7 @@ void PowderPatternDiffraction::GetBraggLimits(CrystVector_long *&min,CrystVector
    if(mClockProfileCalc>mClockBraggLimits)
    {
       VFN_DEBUG_ENTRY("PowderPatternDiffraction::GetBraggLimits(*min,*max)",3)
-      REAL fwhmRatio;//integrate from -fwhmRatio*fwhm to -fwhmRatio*fwhm
-      switch(mReflectionProfileType.GetChoice())
-      {
-         case PROFILE_GAUSSIAN:fwhmRatio=1;
-         case PROFILE_LORENTZIAN:fwhmRatio=2.;
-         case PROFILE_PSEUDO_VOIGT:fwhmRatio=1.+mPseudoVoigtEta0;
-      }
-      cout <<" Integrated R/Rw-factors up to +/- "<<fwhmRatio<<"*FWHM"<<endl;
       TAU_PROFILE("PowderPatternDiffraction::GetBraggLimits()","void ()",TAU_DEFAULT);
-      VFN_DEBUG_MESSAGE("PowderPatternDiffraction::GetBraggLimits(*min,*max):Recalc",3)
       mIntegratedReflMin.resize(this->GetNbRefl());
       mIntegratedReflMax.resize(this->GetNbRefl());
       //REAL fwhm,tmp;
@@ -4498,90 +4354,5 @@ WXCrystObjBasic* PowderPattern::WXCreate(wxWindow* parent)
    return mpWXCrystObj;
 }
 #endif
-//######################################################################
-//    PROFILE FUNCTIONS (for powder diffraction)
-//######################################################################
-
-CrystVector_REAL PowderProfileGauss  (const CrystVector_REAL ttheta,const REAL fwhm,
-                                      const REAL asymmetryPar)
-{
-   TAU_PROFILE("PowderProfileGauss()","Vector (Vector,REAL)",TAU_DEFAULT);
-   //:TODO: faster... What if we return to using blitz++ ??
-   const long nbPoints=ttheta.numElements();
-   CrystVector_REAL result(nbPoints);
-   result=ttheta;
-   result *= result;
-   REAL *p=result.data();
-   
-   if( fabs(asymmetryPar-1.) < 1e-5)
-   {
-      //reference: IUCr Monographs on Crystallo 5 - The Rietveld Method (ed RA Young)
-      result *= -4.*log(2.)/fwhm/fwhm;
-   }
-   else
-   {
-      //reference : Toraya J. Appl. Cryst 23(1990),485-491
-      
-      //Search values <0
-      long middlePt;
-      const REAL *pt=ttheta.data();
-      for( middlePt=0;middlePt<nbPoints;middlePt++) if( *pt++ > 0) break;
-      
-      const REAL c1= -(1.+asymmetryPar)/asymmetryPar*log(2.)/fwhm/fwhm;
-      const REAL c2= -(1.+asymmetryPar)             *log(2.)/fwhm/fwhm;
-      for(long i=0;i<middlePt;i++) *p++ *= c1;
-      for(long i=middlePt;i<nbPoints;i++) *p++ *= c2;
-   }
-   p=result.data();
-   #ifdef _MSC_VER
-   // Bug from Hell (in MSVC++) !
-   // The *last* point ends up sometimes with an arbitrary large value...
-   for(long i=0;i<nbPoints;i++) { *p = pow((float)2.71828182846,(float)*p) ; p++ ;}
-   #else
-   for(long i=0;i<nbPoints;i++) { *p = exp(*p) ; p++ ;}
-   #endif
-   
-   result *= 2. / fwhm * sqrt(log(2.)/M_PI);
-   return result;
-}
-
-CrystVector_REAL PowderProfileLorentz(const CrystVector_REAL ttheta,const REAL fwhm,
-                                      const REAL asymmetryPar)
-{
-   TAU_PROFILE("PowderProfileLorentz()","Vector (Vector,REAL)",TAU_DEFAULT);
-   //:TODO: faster... What if we return to using blitz++ ??
-   //reference: IUCr Monographs on Crystallo 5 - The Rietveld Method (ed RA Young)
-   const long nbPoints=ttheta.numElements();
-   CrystVector_REAL result(nbPoints);
-   result=ttheta;
-   result *= result;
-   REAL *p=result.data();
-   if( fabs(asymmetryPar-1.) < 1e-5)
-   {
-      //reference: IUCr Monographs on Crystallo 5 - The Rietveld Method (ed RA Young)
-      result *= 4./fwhm/fwhm;
-   }
-   else
-   {
-      //reference : Toraya J. Appl. Cryst 23(1990),485-491
-      //Search values <0
-      long middlePt;
-      const REAL *pt=ttheta.data();
-      for( middlePt=0;middlePt<nbPoints;middlePt++) if( *pt++ > 0) break;
-      //cout << nbPoints << " " << middlePt <<endl;
-      const REAL c1= (1+asymmetryPar)/asymmetryPar*(1+asymmetryPar)/asymmetryPar/fwhm/fwhm;
-      const REAL c2= (1+asymmetryPar)*(1+asymmetryPar)/fwhm/fwhm;
-      for(long i=0;i<middlePt;i++) *p++ *= c1 ;
-      for(long i=middlePt;i<nbPoints;i++)  *p++ *= c2 ;
-   }
-   p=result.data();
-   result += 1. ;
-   for(long i=0;i<nbPoints;i++) { *p = 1/(*p) ; p++ ;}
-   
-   
-   result *= 2./M_PI/fwhm;
-   return result;
-}
-
 
 }//namespace ObjCryst

@@ -1615,10 +1615,16 @@ void WXTextureMarchDollase::OnDeleteTexturePhase(wxCommandEvent & WXUNUSED(event
 //    WXPowderPatternDiffraction
 //
 ////////////////////////////////////////////////////////////////////////
+static const long ID_POWDERDIFF_PROFILE=                       WXCRYST_ID();
+static const long ID_POWDERDIFF_PROFILE_PV=                    WXCRYST_ID();
+static const long ID_POWDERDIFF_PROFILE_DEPV=                  WXCRYST_ID();
+
 BEGIN_EVENT_TABLE(WXPowderPatternDiffraction, wxWindow)
    EVT_BUTTON(ID_POWDERDIFF_CRYSTAL,WXPowderPatternDiffraction::OnChangeCrystal)
    EVT_MENU(ID_POWDERDIFF_SAVEHKLFCALC, 
                                             WXPowderPatternDiffraction::OnMenuSaveHKLFcalc)
+   EVT_MENU(ID_POWDERDIFF_PROFILE_PV,       WXPowderPatternDiffraction::OnChangeProfile)
+   EVT_MENU(ID_POWDERDIFF_PROFILE_DEPV,     WXPowderPatternDiffraction::OnChangeProfile)
    EVT_UPDATE_UI(ID_CRYST_UPDATEUI,         WXRefinableObj::OnUpdateUI)
 END_EVENT_TABLE()
 
@@ -1626,11 +1632,17 @@ WXPowderPatternDiffraction::WXPowderPatternDiffraction(wxWindow *parent,
                                                          PowderPatternDiffraction *p):
 WXRefinableObj(parent,p),mpPowderPatternDiffraction(p)
 {
+   VFN_DEBUG_ENTRY("WXPowderPatternDiffraction::WXPowderPatternDiffraction()",6)
    mpWXTitle->SetForegroundColour(wxColour(0,255,0));
     //Menu
       mpMenuBar->AddMenu("Object",ID_REFOBJ_MENU_OBJ);
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERDIFF_SAVEHKLFCALC,
                                 "Save HKL Fcalc");
+      mpMenuBar->AddMenu("Profile",ID_POWDERDIFF_PROFILE);
+         mpMenuBar->AddMenuItem(ID_POWDERDIFF_PROFILE,ID_POWDERDIFF_PROFILE_PV,
+                                "Pseudo-Voigt (X-Ray & monochromatic neutron)");
+         mpMenuBar->AddMenuItem(ID_POWDERDIFF_PROFILE,ID_POWDERDIFF_PROFILE_DEPV,
+                                "Double-Exponential Pseudo-Voigt (neutron TOF)");
       mpSizer->SetItemMinSize(mpMenuBar,
                               mpMenuBar->GetSize().GetWidth(),
                               mpMenuBar->GetSize().GetHeight());
@@ -1638,70 +1650,6 @@ WXRefinableObj(parent,p),mpPowderPatternDiffraction(p)
       mpFieldCrystal=new WXFieldChoice(this,ID_POWDERDIFF_CRYSTAL,"Crystal:",300);
       mpSizer->Add(mpFieldCrystal,0,wxALIGN_LEFT);
       mList.Add(mpFieldCrystal);
-   //Profile Parameters
-      wxBoxSizer* profileSizer=new wxBoxSizer(wxHORIZONTAL);
-#if 1
-      WXFieldRefPar* pFieldCagliotiU    =new WXFieldRefPar(this,"U:",
-                                   &(mpPowderPatternDiffraction
-                                     ->GetPar(&(mpPowderPatternDiffraction->mCagliotiU))),90 );
-      WXFieldRefPar* pFieldCagliotiV    =new WXFieldRefPar(this,"V:",
-                                   &(mpPowderPatternDiffraction
-                                     ->GetPar(&(mpPowderPatternDiffraction->mCagliotiV))),90 );
-      WXFieldRefPar* pFieldCagliotiW    =new WXFieldRefPar(this,"W:",
-                                   &(mpPowderPatternDiffraction
-                                     ->GetPar(&(mpPowderPatternDiffraction->mCagliotiW))),90 );
-      WXFieldRefPar* pFieldEta0         =new WXFieldRefPar(this,"Eta0:",
-                                 &(mpPowderPatternDiffraction
-                                  ->GetPar(&(mpPowderPatternDiffraction->mPseudoVoigtEta0))));
-      WXFieldRefPar* pFieldEta1         =new WXFieldRefPar(this,"Eta1:",
-                                 &(mpPowderPatternDiffraction
-                                  ->GetPar(&(mpPowderPatternDiffraction->mPseudoVoigtEta1))));
-#else
-      WXCrystObjBasic* pFieldCagliotiU
-         =mpPowderPatternDiffraction->GetPar(&(mpPowderPatternDiffraction->mCagliotiU))
-            .WXCreate(this);
-      WXCrystObjBasic* pFieldCagliotiV
-         =mpPowderPatternDiffraction->GetPar(&(mpPowderPatternDiffraction->mCagliotiV))
-            .WXCreate(this);
-      WXCrystObjBasic* pFieldCagliotiW
-         =mpPowderPatternDiffraction->GetPar(&(mpPowderPatternDiffraction->mCagliotiW))
-            .WXCreate(this);
-      WXCrystObjBasic* pFieldEta0
-         =mpPowderPatternDiffraction->GetPar(&(mpPowderPatternDiffraction->mPseudoVoigtEta0))
-            .WXCreate(this);
-      WXCrystObjBasic* pFieldEta1=
-         mpPowderPatternDiffraction->GetPar(&(mpPowderPatternDiffraction->mPseudoVoigtEta1))
-            .WXCreate(this);
-#endif
-      profileSizer->Add(pFieldCagliotiU,0);
-      profileSizer->Add(pFieldCagliotiV,0);
-      profileSizer->Add(pFieldCagliotiW,0);
-      profileSizer->Add(pFieldEta0,0);
-      profileSizer->Add(pFieldEta1,0);
-      mList.Add(pFieldCagliotiU);
-      mList.Add(pFieldCagliotiV);
-      mList.Add(pFieldCagliotiW);
-      mList.Add(pFieldEta0);
-      mList.Add(pFieldEta1);
-      mpSizer->Add(profileSizer);
-   //Profile Parameters (TOF)
-      wxBoxSizer* profileSizerTOF=new wxBoxSizer(wxHORIZONTAL);
-      WXFieldRefPar* pFieldCagliotiW0    =new WXFieldRefPar(this,"W0:",
-                                   &(mpPowderPatternDiffraction
-                                     ->GetPar(&(mpPowderPatternDiffraction->mW0))),90 );
-      WXFieldRefPar* pFieldCagliotiW1    =new WXFieldRefPar(this,"W1:",
-                                   &(mpPowderPatternDiffraction
-                                     ->GetPar(&(mpPowderPatternDiffraction->mW1))),90 );
-      WXFieldRefPar* pFieldCagliotiW2    =new WXFieldRefPar(this,"W2:",
-                                   &(mpPowderPatternDiffraction
-                                     ->GetPar(&(mpPowderPatternDiffraction->mW2))),90 );
-      profileSizerTOF->Add(pFieldCagliotiW0,0);
-      profileSizerTOF->Add(pFieldCagliotiW1,0);
-      profileSizerTOF->Add(pFieldCagliotiW2,0);
-      mList.Add(pFieldCagliotiW0);
-      mList.Add(pFieldCagliotiW1);
-      mList.Add(pFieldCagliotiW2);
-      mpSizer->Add(profileSizerTOF);
    //Global Biso factor
       WXCrystObjBasic* fieldGlobalBiso
          =mpPowderPatternDiffraction->GetPar(&(mpPowderPatternDiffraction->mGlobalBiso))
@@ -1713,9 +1661,21 @@ WXRefinableObj(parent,p),mpPowderPatternDiffraction(p)
          =new WXTextureMarchDollase(this,&(mpPowderPatternDiffraction->mCorrTextureMarchDollase));
       mList.Add(pTex);
       mpSizer->Add(pTex);
+   // Profile
+      
+      if(mpPowderPatternDiffraction->mpReflectionProfile!=0)
+      {
+         VFN_DEBUG_ENTRY("WXPowderPatternDiffraction::WXPowderPatternDiffraction()",6)
+         WXCrystObjBasic* pWXProf=mpPowderPatternDiffraction
+                                    ->mpReflectionProfile->WXCreate(this);
+         mpSizer->Add(pWXProf);
+         mList.Add(pWXProf);
+         VFN_DEBUG_EXIT("WXPowderPatternDiffraction::WXPowderPatternDiffraction()",6)
+      }
       
    this->BottomLayout(0);
    this->CrystUpdate();
+   VFN_DEBUG_EXIT("WXPowderPatternDiffraction::WXPowderPatternDiffraction()",6)
 }
 
 void WXPowderPatternDiffraction::OnChangeCrystal(wxCommandEvent & WXUNUSED(event))
@@ -1746,6 +1706,189 @@ void WXPowderPatternDiffraction::UpdateUI()
 {
    mpFieldCrystal->SetValue(mpPowderPatternDiffraction->GetCrystal().GetName());
    this->WXRefinableObj::UpdateUI();
+}
+void WXPowderPatternDiffraction::OnChangeProfile(wxCommandEvent & event)
+{
+   VFN_DEBUG_ENTRY("WXPowderPatternDiffraction::OnChangeProfile()",6)
+   bool add=false;
+   if(event.GetId()==ID_POWDERDIFF_PROFILE_PV)
+   {
+      if(mpPowderPatternDiffraction->mpReflectionProfile==0)
+      {
+         mpPowderPatternDiffraction->mpReflectionProfile= new ReflectionProfilePseudoVoigt;
+         add=true;
+      }
+      else
+         if(mpPowderPatternDiffraction->mpReflectionProfile->GetClassName()
+            !="ReflectionProfilePseudoVoigt")
+         {
+            delete mpPowderPatternDiffraction->mpReflectionProfile;
+            mpPowderPatternDiffraction->mpReflectionProfile= new ReflectionProfilePseudoVoigt;
+            add=true;
+         }
+   }
+   if(event.GetId()==ID_POWDERDIFF_PROFILE_DEPV)
+   {
+      if(mpPowderPatternDiffraction->mpReflectionProfile==0)
+      {
+         mpPowderPatternDiffraction->mpReflectionProfile
+            = new ReflectionProfileDoubleExponentialPseudoVoigt;
+         add=true;
+      }
+      else
+         if(mpPowderPatternDiffraction->mpReflectionProfile->GetClassName()
+            !="ReflectionProfileDoubleExponentialPseudoVoigt")
+         {
+            delete mpPowderPatternDiffraction->mpReflectionProfile;
+            mpPowderPatternDiffraction->mpReflectionProfile
+               = new ReflectionProfileDoubleExponentialPseudoVoigt;
+            add=true;
+         }
+   }
+   if(add)
+   {
+      mpPowderPatternDiffraction->mpReflectionProfile->WXCreate(this);
+      mList.Add(mpPowderPatternDiffraction->mpReflectionProfile->WXGet());
+      mpSizer->Add(mpPowderPatternDiffraction->mpReflectionProfile->WXGet());
+      this->BottomLayout(mpPowderPatternDiffraction->mpReflectionProfile->WXGet());
+      this->CrystUpdate();
+   }
+   VFN_DEBUG_EXIT("WXPowderPatternDiffraction::OnChangeProfile()",6)
+}
+////////////////////////////////////////////////////////////////////////
+//
+//    WXProfilePseudoVoigt
+//
+////////////////////////////////////////////////////////////////////////
+WXProfilePseudoVoigt::WXProfilePseudoVoigt(wxWindow *parent, ReflectionProfilePseudoVoigt *prof):
+WXCrystObj(parent),mpProfile(prof)
+{
+   VFN_DEBUG_ENTRY("WXProfilePseudoVoigt::WXProfilePseudoVoigt()",6)
+   mpWXTitle->SetLabel("Pseudo-Voigt profile");
+   mpWXTitle->SetForegroundColour(wxColour(0,0,255));
+   // Width
+      wxBoxSizer* sizer1=new wxBoxSizer(wxHORIZONTAL);
+      WXFieldRefPar* pFieldCagliotiU    =new WXFieldRefPar(this,"Width: U:",
+                                   &(mpProfile
+                                     ->GetPar("U")),90 );
+      WXFieldRefPar* pFieldCagliotiV    =new WXFieldRefPar(this,"V:",
+                                   &(mpProfile
+                                     ->GetPar("V")),90 );
+      WXFieldRefPar* pFieldCagliotiW    =new WXFieldRefPar(this,"W:",
+                                   &(mpProfile
+                                     ->GetPar("W")),90 );
+      sizer1->Add(pFieldCagliotiU,0);
+      sizer1->Add(pFieldCagliotiV,0);
+      sizer1->Add(pFieldCagliotiW,0);
+      mList.Add(pFieldCagliotiU);
+      mList.Add(pFieldCagliotiV);
+      mList.Add(pFieldCagliotiW);
+      mpSizer->Add(sizer1);
+   // Mixing parameter
+      wxBoxSizer* sizer2=new wxBoxSizer(wxHORIZONTAL);
+      WXFieldRefPar* pFieldEta0    =new WXFieldRefPar(this,"Type: Eta0:",
+                                   &(mpProfile->GetPar("Eta0")),90 );
+      WXFieldRefPar* pFieldEta1   =new WXFieldRefPar(this,"Eta1:",
+                                   &(mpProfile->GetPar("Eta1")),90 );
+      sizer2->Add(pFieldEta0,0);
+      sizer2->Add(pFieldEta1,0);
+      mList.Add(pFieldEta0);
+      mList.Add(pFieldEta1);
+      mpSizer->Add(sizer2);
+   // Asymmetry parameter
+      wxBoxSizer* sizer3=new wxBoxSizer(wxHORIZONTAL);
+      WXFieldRefPar* pFieldAsymA0=new WXFieldRefPar(this,"Asymmetry: AsymA0:",
+                                   &(mpProfile->GetPar("AsymA0")),90 );
+      WXFieldRefPar* pFieldAsymA1=new WXFieldRefPar(this,"Asymmetry: AsymA1:",
+                                   &(mpProfile->GetPar("AsymA1")),90 );
+      WXFieldRefPar* pFieldAsymB0=new WXFieldRefPar(this,"Asymmetry: AsymB0:",
+                                   &(mpProfile->GetPar("AsymB0")),90 );
+      WXFieldRefPar* pFieldAsymB1=new WXFieldRefPar(this,"Asymmetry: AsymB1:",
+                                   &(mpProfile->GetPar("AsymB1")),90 );
+      sizer3->Add(pFieldAsymA0,0);
+      sizer3->Add(pFieldAsymA1,0);
+      sizer3->Add(pFieldAsymB0,0);
+      sizer3->Add(pFieldAsymB1,0);
+      mList.Add(pFieldAsymA0);
+      mList.Add(pFieldAsymA1);
+      mList.Add(pFieldAsymB0);
+      mList.Add(pFieldAsymB1);
+      mpSizer->Add(sizer3);
+   
+   this->BottomLayout(0);
+   this->CrystUpdate();
+   VFN_DEBUG_EXIT("WXProfilePseudoVoigt::WXProfilePseudoVoigt()",6)
+}
+bool WXProfilePseudoVoigt::OnChangeName(const int id)
+{
+   return false;
+}
+////////////////////////////////////////////////////////////////////////
+//
+//    WXProfileDoubleExponentialPseudoVoigt
+//
+////////////////////////////////////////////////////////////////////////
+WXProfileDoubleExponentialPseudoVoigt::WXProfileDoubleExponentialPseudoVoigt
+   (wxWindow *parent, ReflectionProfileDoubleExponentialPseudoVoigt *prof):
+WXCrystObj(parent),mpProfile(prof)
+{
+   VFN_DEBUG_ENTRY("WXProfileDoubleExponentialPseudoVoigt::WXProfileDoubleExponentialPseudoVoigt()",6)
+   mpWXTitle->SetLabel("Double-Exponential Pseudo-Voigt profile (for neutron TOF)");
+   mpWXTitle->SetForegroundColour(wxColour(0,0,255));
+   mpWXTitle->BottomLayout(0);
+   // Instrumental
+      wxBoxSizer* sizer1=new wxBoxSizer(wxHORIZONTAL);
+      WXFieldRefPar* pFieldCagliotiA    =new WXFieldRefPar(this,"Instrument: Alpha1:",
+                                   &(mpProfile->GetPar("Alpha1")),90 );
+      WXFieldRefPar* pFieldCagliotiB0   =new WXFieldRefPar(this,"Beta0:",
+                                   &(mpProfile->GetPar("Beta0")),90 );
+      WXFieldRefPar* pFieldCagliotiB1   =new WXFieldRefPar(this,"Beta1:",
+                                   &(mpProfile->GetPar("Beta1")),90 );
+      sizer1->Add(pFieldCagliotiA,0);
+      sizer1->Add(pFieldCagliotiB0,0);
+      sizer1->Add(pFieldCagliotiB1,0);
+      mList.Add(pFieldCagliotiA);
+      mList.Add(pFieldCagliotiB0);
+      mList.Add(pFieldCagliotiB1);
+      mpSizer->Add(sizer1);
+   // Instrumental
+      wxBoxSizer* sizer2=new wxBoxSizer(wxHORIZONTAL);
+      WXFieldRefPar* pFieldSigma0=new WXFieldRefPar(this,"Gaussian Width: Sigma0:",
+                           &(mpProfile->GetPar("GaussianSigma0")),90 );
+      WXFieldRefPar* pFieldSigma1=new WXFieldRefPar(this,"Sigma1:",
+                           &(mpProfile->GetPar("GaussianSigma1")),90 );
+      WXFieldRefPar* pFieldSigma2=new WXFieldRefPar(this,"Sigma2:",
+                                   &(mpProfile->GetPar("GaussianSigma2")),90 );
+      sizer2->Add(pFieldSigma0,0);
+      sizer2->Add(pFieldSigma1,0);
+      sizer2->Add(pFieldSigma2,0);
+      mList.Add(pFieldSigma0);
+      mList.Add(pFieldSigma1);
+      mList.Add(pFieldSigma2);
+      mpSizer->Add(sizer2);
+   // Instrumental
+      wxBoxSizer* sizer3=new wxBoxSizer(wxHORIZONTAL);
+      WXFieldRefPar* pFieldGamma0=new WXFieldRefPar(this,"Lorentzian Width: Gamma0:",
+                           &(mpProfile->GetPar("LorentzianGamma0")),90 );
+      WXFieldRefPar* pFieldGamma1=new WXFieldRefPar(this,"Gamma1:",
+                           &(mpProfile->GetPar("LorentzianGamma1")),90 );
+      WXFieldRefPar* pFieldGamma2=new WXFieldRefPar(this,"Gamma2:",
+                                   &(mpProfile->GetPar("LorentzianGamma2")),90 );
+      sizer3->Add(pFieldGamma0,0);
+      sizer3->Add(pFieldGamma1,0);
+      sizer3->Add(pFieldGamma2,0);
+      mList.Add(pFieldGamma0);
+      mList.Add(pFieldGamma1);
+      mList.Add(pFieldGamma2);
+      mpSizer->Add(sizer3);
+   
+   this->BottomLayout(0);
+   this->CrystUpdate();
+   VFN_DEBUG_EXIT("WXProfileDoubleExponentialPseudoVoigt::WXProfileDoubleExponentialPseudoVoigt()",6)
+}
+bool WXProfileDoubleExponentialPseudoVoigt::OnChangeName(const int id)
+{
+   return false;
 }
 
 }// namespace 

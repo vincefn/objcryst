@@ -1,0 +1,903 @@
+/*  ObjCryst++ Object-Oriented Crystallographic Library
+    (c) 2000-2005 Vincent Favre-Nicolin vincefn@users.sourceforge.net
+        2000-2001 University of Geneva (Switzerland)
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+/*
+*  source file for LibCryst++ ReflectionProfile and derived classes
+*
+*/
+#include <limits>
+#include "ObjCryst/ReflectionProfile.h"
+#include "Quirks/VFNStreamFormat.h"
+#ifdef __WX__CRYST__
+   #include "wxCryst/wxPowderPattern.h"
+#endif
+
+namespace ObjCryst
+{
+extern const RefParType *gpRefParTypeScattDataProfile;
+extern const RefParType *gpRefParTypeScattDataProfileType;
+extern const RefParType *gpRefParTypeScattDataProfileWidth;
+extern const RefParType *gpRefParTypeScattDataProfileAsym;
+
+ObjRegistry<ReflectionProfile>
+   gReflectionProfileRegistry("List of all ReflectionProfile types");;
+////////////////////////////////////////////////////////////////////////
+//
+//    ReflectionProfile    
+//
+////////////////////////////////////////////////////////////////////////
+ReflectionProfile::ReflectionProfile():
+RefinableObj()
+{}
+ReflectionProfile::ReflectionProfile(const ReflectionProfile &old)
+{}
+ReflectionProfile::~ReflectionProfile()
+{}
+bool ReflectionProfile::IsAnisotropic()const
+{return false;}
+////////////////////////////////////////////////////////////////////////
+//
+//    ReflectionProfilePseudoVoigt    
+//
+////////////////////////////////////////////////////////////////////////
+ReflectionProfilePseudoVoigt::ReflectionProfilePseudoVoigt():
+ReflectionProfile(),
+mCagliotiU(0),mCagliotiV(0),mCagliotiW(3e-5),
+mPseudoVoigtEta0(0.0),mPseudoVoigtEta1(0.0),
+mAsymBerarBaldinozziA0(0.0),mAsymBerarBaldinozziA1(0.0),
+mAsymBerarBaldinozziB0(0.0),mAsymBerarBaldinozziB1(0.0)
+{
+   this->InitParameters();
+}
+
+ReflectionProfilePseudoVoigt::ReflectionProfilePseudoVoigt
+   (const ReflectionProfilePseudoVoigt &old):
+mCagliotiU(old.mCagliotiU),mCagliotiV(old.mCagliotiV),mCagliotiW(old.mCagliotiW),
+mPseudoVoigtEta0(old.mPseudoVoigtEta0),mPseudoVoigtEta1(old.mPseudoVoigtEta1),
+mAsymBerarBaldinozziA0(old.mAsymBerarBaldinozziA0),
+mAsymBerarBaldinozziA1(old.mAsymBerarBaldinozziA1),
+mAsymBerarBaldinozziB0(old.mAsymBerarBaldinozziB0),
+mAsymBerarBaldinozziB1(old.mAsymBerarBaldinozziB1)
+{
+   this->InitParameters();
+}
+
+ReflectionProfilePseudoVoigt::~ReflectionProfilePseudoVoigt()
+{}
+
+ReflectionProfilePseudoVoigt* ReflectionProfilePseudoVoigt::CreateCopy()const
+{
+   return new ReflectionProfilePseudoVoigt(*this);
+}
+
+const string& ReflectionProfilePseudoVoigt::GetClassName()const
+{
+   static string className="ReflectionProfilePseudoVoigt";
+   return className;
+}
+
+CrystVector_REAL ReflectionProfilePseudoVoigt::GetProfile(const CrystVector_REAL &x,
+                            const REAL center,const REAL dcenter)const
+{
+   VFN_DEBUG_ENTRY("ReflectionProfilePseudoVoigt::GetProfile(),c="<<center,2)
+   const REAL fwhm=sqrt( mCagliotiW
+                        +mCagliotiV*tan(center/2.0)
+                        +mCagliotiU*pow(tan(center/2.0),2));
+   
+   CrystVector_REAL profile,tmpV;
+   
+   profile=PowderProfileGauss(x,fwhm,center);
+   profile *= 1-(mPseudoVoigtEta0+center*mPseudoVoigtEta1);
+   tmpV=PowderProfileLorentz(x,fwhm,center);
+   tmpV *= mPseudoVoigtEta0+center*mPseudoVoigtEta1;
+   profile += tmpV;
+   profile *= AsymmetryBerarBaldinozzi(x,fwhm,center,
+                                       mAsymBerarBaldinozziA0,mAsymBerarBaldinozziA1,
+                                       mAsymBerarBaldinozziB0,mAsymBerarBaldinozziB1);
+   VFN_DEBUG_EXIT("ReflectionProfilePseudoVoigt::GetProfile()",2)
+   return profile;
+}
+
+CrystVector_REAL ReflectionProfilePseudoVoigt::GetProfile(const CrystVector_REAL &x,
+                            const REAL center,const REAL dcenter,
+                            const REAL h, const REAL k, const REAL l)const
+{
+   return this->GetProfile(x,center,dcenter);
+}
+
+void ReflectionProfilePseudoVoigt::SetProfilePar(const REAL fwhmCagliotiW,
+                   const REAL fwhmCagliotiU,
+                   const REAL fwhmCagliotiV,
+                   const REAL eta0,
+                   const REAL eta1)
+{
+   mCagliotiU=fwhmCagliotiU;
+   mCagliotiV=fwhmCagliotiV;
+   mCagliotiW=fwhmCagliotiW;
+   mPseudoVoigtEta0=eta0;
+   mPseudoVoigtEta1=eta1;
+   mClockMaster.Click();
+}
+
+bool ReflectionProfilePseudoVoigt::IsAnisotropic()const{return false;}
+REAL ReflectionProfilePseudoVoigt::GetFullProfileWidth(const REAL relativeIntensity,
+                                                       const REAL center,const REAL dcenter)
+{
+   VFN_DEBUG_ENTRY("ReflectionProfilePseudoVoigt::GetFullProfileWidth()",2)
+   const int nb=100;
+   const int halfnb=nb/2;
+   CrystVector_REAL x(nb);
+   REAL n=5.0;
+   const REAL fwhm=sqrt( mCagliotiW
+                        +mCagliotiV*tan(center/2.0)
+                        +mCagliotiU*pow(tan(center/2.0),2));
+   CrystVector_REAL prof;
+   while(true)
+   {
+      REAL *p=x.data();
+      const REAL tmp=fwhm*n/nb;
+      for(int i=0;i<nb;i++) *p++ = tmp*(i-halfnb);
+      x+=center;
+      prof=this->GetProfile(x,center,dcenter);
+      const REAL max=prof.max();
+      const REAL test=max*relativeIntensity;
+      int n1=0,n2=0;
+      if((prof(0)<test)&&(prof(nb-1)<test))
+      {
+         p=prof.data();
+         while(*p<test){ p++; n1++;n2++;}
+         n1--;
+         while(*p>test){ p++; n2++;}
+         VFN_DEBUG_EXIT("ReflectionProfilePseudoVoigt::GetFullProfileWidth():"<<x(n2)-x(n1),2)
+         return x(n2)-x(n1);
+      }
+      VFN_DEBUG_MESSAGE("ReflectionProfilePseudoVoigt::GetFullProfileWidth():"<<max<<","<<test
+                        <<endl<<FormatVertVector<REAL>(x,prof),2)
+      n*=2.0;
+      //if(n>200) exit(0);
+   }
+}
+
+void ReflectionProfilePseudoVoigt::InitParameters()
+{
+   {
+      RefinablePar tmp("U",&mCagliotiU,-1/RAD2DEG/RAD2DEG,1./RAD2DEG/RAD2DEG,
+                        gpRefParTypeScattDataProfileWidth,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG*RAD2DEG);
+      tmp.AssignClock(mClockMaster);
+      tmp.SetDerivStep(1e-7);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("V",&mCagliotiV,-1/RAD2DEG/RAD2DEG,1./RAD2DEG/RAD2DEG,
+                        gpRefParTypeScattDataProfileWidth,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG*RAD2DEG);
+      tmp.AssignClock(mClockMaster);
+      tmp.SetDerivStep(1e-7);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("W",&mCagliotiW,0,1./RAD2DEG/RAD2DEG,
+                        gpRefParTypeScattDataProfileWidth,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG*RAD2DEG);
+      tmp.AssignClock(mClockMaster);
+      tmp.SetDerivStep(1e-7);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("Eta0",&mPseudoVoigtEta0,0,1.,gpRefParTypeScattDataProfileType,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
+      tmp.AssignClock(mClockMaster);
+      tmp.SetDerivStep(1e-4);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("Eta1",&mPseudoVoigtEta1,-1,1.,gpRefParTypeScattDataProfileType,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
+      tmp.AssignClock(mClockMaster);
+      tmp.SetDerivStep(1e-4);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("AsymA0",&mAsymBerarBaldinozziA0,-1,1.,gpRefParTypeScattDataProfileAsym,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
+      tmp.AssignClock(mClockMaster);
+      tmp.SetDerivStep(1e-4);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("AsymA1",&mAsymBerarBaldinozziA1,-1,1.,gpRefParTypeScattDataProfileAsym,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
+      tmp.AssignClock(mClockMaster);
+      tmp.SetDerivStep(1e-4);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("AsymB0",&mAsymBerarBaldinozziB0,-1,1.,gpRefParTypeScattDataProfileAsym,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
+      tmp.AssignClock(mClockMaster);
+      tmp.SetDerivStep(1e-4);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("AsymB1",&mAsymBerarBaldinozziB1,-1,1.,gpRefParTypeScattDataProfileAsym,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
+      tmp.AssignClock(mClockMaster);
+      tmp.SetDerivStep(1e-4);
+      this->AddPar(tmp);
+   }
+}
+
+void ReflectionProfilePseudoVoigt::XMLOutput(ostream &os,int indent)const
+{
+   VFN_DEBUG_ENTRY("ReflectionProfilePseudoVoigt::XMLOutput():"<<this->GetName(),5)
+   for(int i=0;i<indent;i++) os << "  " ;
+   XMLCrystTag tag("ReflectionProfilePseudoVoigt");
+   os <<tag<<endl;
+   indent++;
+
+   this->GetPar(&mCagliotiU).XMLOutput(os,"U",indent);
+   os <<endl;
+   
+   this->GetPar(&mCagliotiV).XMLOutput(os,"V",indent);
+   os <<endl;
+   
+   this->GetPar(&mCagliotiW).XMLOutput(os,"W",indent);
+   os <<endl;
+   
+   this->GetPar(&mPseudoVoigtEta0).XMLOutput(os,"Eta0",indent);
+   os <<endl;
+   
+   this->GetPar(&mPseudoVoigtEta1).XMLOutput(os,"Eta1",indent);
+   os <<endl;
+   
+   this->GetPar(&mAsymBerarBaldinozziA0).XMLOutput(os,"AsymA0",indent);
+   os <<endl;
+   
+   this->GetPar(&mAsymBerarBaldinozziA1).XMLOutput(os,"AsymA1",indent);
+   os <<endl;
+   
+   this->GetPar(&mAsymBerarBaldinozziB0).XMLOutput(os,"AsymB0",indent);
+   os <<endl;
+   
+   this->GetPar(&mAsymBerarBaldinozziB1).XMLOutput(os,"AsymB1",indent);
+   os <<endl;
+   
+   indent--;
+   tag.SetIsEndTag(true);
+   for(int i=0;i<indent;i++) os << "  " ;
+   os <<tag<<endl;
+   VFN_DEBUG_EXIT("ReflectionProfilePseudoVoigt::XMLOutput():"<<this->GetName(),5)
+}
+void ReflectionProfilePseudoVoigt::XMLInput(istream &is,const XMLCrystTag &tagg)
+{
+   VFN_DEBUG_ENTRY("ReflectionProfilePseudoVoigt::XMLInput():"<<this->GetName(),5)
+   for(unsigned int i=0;i<tagg.GetNbAttribute();i++)
+   {
+      if("Name"==tagg.GetAttributeName(i)) this->SetName(tagg.GetAttributeValue(i));
+   }
+   while(true)
+   {
+      XMLCrystTag tag(is);
+      if(("ReflectionProfilePseudoVoigt"==tag.GetName())&&tag.IsEndTag())
+      {
+         this->UpdateDisplay();
+         VFN_DEBUG_EXIT("ReflectionProfilePseudoVoigt::Exit():"<<this->GetName(),5)
+         return;
+      }
+      if("Par"==tag.GetName())
+      {
+         for(unsigned int i=0;i<tag.GetNbAttribute();i++)
+         {
+            if("Name"==tag.GetAttributeName(i))
+            {
+               if("U"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar(&mCagliotiU).XMLInput(is,tag);
+                  break;
+               }
+               if("V"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar(&mCagliotiV).XMLInput(is,tag);
+                  break;
+               }
+               if("W"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar(&mCagliotiW).XMLInput(is,tag);
+                  break;
+               }
+               if("Eta0"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar(&mPseudoVoigtEta0).XMLInput(is,tag);
+                  break;
+               }
+               if("Eta1"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar(&mPseudoVoigtEta1).XMLInput(is,tag);
+                  break;
+               }
+               if("AsymA0"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar(&mAsymBerarBaldinozziA0).XMLInput(is,tag);
+                  break;
+               }
+               if("AsymA1"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar(&mAsymBerarBaldinozziA1).XMLInput(is,tag);
+                  break;
+               }
+               if("AsymB0"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar(&mAsymBerarBaldinozziB0).XMLInput(is,tag);
+                  break;
+               }
+               if("AsymB1"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar(&mAsymBerarBaldinozziB1).XMLInput(is,tag);
+                  break;
+               }
+            }
+         }
+         continue;
+      }
+      if("Option"==tag.GetName())
+      {
+         for(unsigned int i=0;i<tag.GetNbAttribute();i++)
+            if("Name"==tag.GetAttributeName(i)) 
+               mOptionRegistry.GetObj(tag.GetAttributeValue(i)).XMLInput(is,tag);
+         continue;
+      }
+   }
+}
+#ifdef __WX__CRYST__
+WXCrystObjBasic* ReflectionProfilePseudoVoigt::WXCreate(wxWindow* parent)
+{
+   VFN_DEBUG_ENTRY("ReflectionProfilePseudoVoigt::WXCreate()",6)
+   if(mpWXCrystObj==0)
+      mpWXCrystObj=new WXProfilePseudoVoigt(parent,this);
+   VFN_DEBUG_EXIT("ReflectionProfilePseudoVoigt::WXCreate()",6)
+   return mpWXCrystObj;
+}
+#endif
+
+////////////////////////////////////////////////////////////////////////
+//
+//    ReflectionProfileDoubleExponentialPseudoVoigt    
+//
+////////////////////////////////////////////////////////////////////////
+ReflectionProfileDoubleExponentialPseudoVoigt::ReflectionProfileDoubleExponentialPseudoVoigt():
+ReflectionProfile(),
+mInstrumentAlpha1(0.0952),
+mInstrumentBeta0(0.0239),
+mInstrumentBeta1(0.0043),
+mGaussianSigma0(0.0),
+mGaussianSigma1(7.0),
+mGaussianSigma2(0.0),
+mLorentzianGamma0(0.0),
+mLorentzianGamma1(0.0),
+mLorentzianGamma2(0.414)
+{
+   this->InitParameters();
+}
+
+ReflectionProfileDoubleExponentialPseudoVoigt::ReflectionProfileDoubleExponentialPseudoVoigt
+   (const ReflectionProfileDoubleExponentialPseudoVoigt &old):
+ReflectionProfile(),
+mInstrumentAlpha1(old.mInstrumentAlpha1),
+mInstrumentBeta0(old.mInstrumentBeta0),
+mInstrumentBeta1(old.mInstrumentBeta1),
+mGaussianSigma0(old.mGaussianSigma0),
+mGaussianSigma1(old.mGaussianSigma1),
+mGaussianSigma2(old.mGaussianSigma2),
+mLorentzianGamma0(old.mLorentzianGamma0),
+mLorentzianGamma1(old.mLorentzianGamma1),
+mLorentzianGamma2(old.mLorentzianGamma2)
+{
+   this->InitParameters();
+}
+
+ReflectionProfileDoubleExponentialPseudoVoigt::~ReflectionProfileDoubleExponentialPseudoVoigt()
+{}
+
+ReflectionProfileDoubleExponentialPseudoVoigt*
+   ReflectionProfileDoubleExponentialPseudoVoigt::CreateCopy()const
+{
+   return new ReflectionProfileDoubleExponentialPseudoVoigt(*this);
+}
+
+const string& ReflectionProfileDoubleExponentialPseudoVoigt::GetClassName()const
+{
+   static string className="ReflectionProfileDoubleExponentialPseudoVoigt";
+   return className;
+}
+
+CrystVector_REAL ReflectionProfileDoubleExponentialPseudoVoigt
+   ::GetProfile(const CrystVector_REAL &x, const REAL center,const REAL dcenter)const
+{
+   VFN_DEBUG_ENTRY("ReflectionProfileDoubleExponentialPseudoVoigt::GetProfile()",10)
+   const REAL alpha=mInstrumentAlpha1/dcenter;
+   const REAL beta=mInstrumentBeta0+mInstrumentBeta1/pow(dcenter,4);
+   const REAL siggauss2= mGaussianSigma0
+                        +mGaussianSigma1*pow(dcenter,2)
+                        +mGaussianSigma2*pow(dcenter,4);
+   static const REAL log2=log(2.0);
+   const REAL hg=sqrt(8*siggauss2*log2);
+   const REAL hl= mLorentzianGamma0
+                 +mLorentzianGamma1*dcenter
+                 +mLorentzianGamma2*dcenter*dcenter;
+   const REAL hcom=pow(pow(hg,5)+2.69269*pow(hg,4)*hl+2.42843*pow(hg,3)*hl*hl
+                       +4.47163*hg*hg*pow(hl,3)+0.07842*hg*pow(hl,4)+pow(hl,5),0.2);
+   const REAL sigcom2=hcom*hcom/(8.0*log2);
+   const REAL eta=1.36603*hl/hcom-0.47719*pow(hl/hcom,2)+0.11116*pow(hl/hcom,3);
+   const long nbPoints=x.numElements();
+   VFN_DEBUG_MESSAGE("ReflectionProfileDoubleExponentialPseudoVoigt::GetProfile():alpha="
+                     <<alpha<<",beta="<<beta<<",siggauss2="<<siggauss2
+                     <<",hg="<<hg<<",hl="<<hl<<",hcom="<<hcom<<",sigcom2="<<sigcom2
+                     <<",eta="<<eta,10)
+   CrystVector_REAL prof;
+   prof=x;
+   prof+=-center;
+   REAL *pp=prof.data();
+   for(long i=0;i<nbPoints;i++)
+   {
+      const double u=alpha/2*(alpha*sigcom2+2* *pp);
+      const double nu=beta/2*(beta *sigcom2-2* *pp);
+      const double y=(alpha*sigcom2+*pp)/sqrt(2*sigcom2);
+      const double z=(beta *sigcom2-*pp)/sqrt(2*sigcom2);
+      const complex<double> p(alpha* *pp,alpha*hcom/2);
+      const complex<double> q(-beta* *pp, beta*hcom/2);
+      const complex<double> e1p=ExponentialIntegral1_ExpZ(p);
+      const complex<double> e1q=ExponentialIntegral1_ExpZ(q);
+      VFN_DEBUG_MESSAGE("dt="<<*pp<<",  u="<<u<<",nu="<<nu<<",y="<<y<<",z="<<z
+                        <<",p=("<<p.real()<<","<<p.imag()
+                        <<"),q=("<<q.real()<<","<<q.imag()
+                        <<"),e^p*E1(p)=("<<e1p.real()<<","<<e1p.imag()
+                        <<"),e^q*E1(q)=("<<e1q.real()<<","<<e1q.imag(),10)
+      REAL expnu_erfcz,expu_erfcy;
+      // Use asymptotic value for erfc(x) = 1/(sqrt(pi)*x*exp(x^2)) [A&S 7.1.23]
+      if(z>10.0) expnu_erfcz=exp(nu-z*z)/(z*sqrt(M_PI));
+      else expnu_erfcz=exp(nu)*erfc(z);
+      
+      if(y>10.0) expu_erfcy=exp(u-y*y)/(y*sqrt(M_PI));
+      else expu_erfcy=exp(u)*erfc(y);
+      
+      double tmp=(1-eta)*alpha*beta/(2*(alpha+beta))*(expu_erfcy+expnu_erfcz)
+           -eta*alpha*beta/(M_PI*(alpha+beta))*(e1p.imag()+e1q.imag());
+      *pp=(1-eta)*alpha*beta/(2*(alpha+beta))*(expu_erfcy+expnu_erfcz)
+           -eta*alpha*beta/(M_PI*(alpha+beta))*(e1p.imag()+e1q.imag());
+      #if 0
+      if(isnan(*pp))// Is this portable ? Test for numeric_limits<REAL>::quiet_NaN()
+      {
+         cout<<"*pp==numeric_limits<REAL>::quiet_NaN()"<<endl;
+         cout<<"ReflectionProfileDoubleExponentialPseudoVoigt::GetProfile():"<<endl
+                     <<"   alpha="<<alpha<<",beta="<<beta<<",siggauss2="<<siggauss2
+                     <<",hg="<<hg<<",hl="<<hl<<",hcom="<<hcom<<",sigcom2="<<sigcom2
+                     <<",eta="<<eta<<endl;
+         cout<<"   dt="<<*pp<<",  u="<<u<<",nu="<<nu<<",y="<<y<<",z="<<z
+                        <<",e^u*E1(y)="<<expu_erfcy
+                        <<",e^nu*E1(z)="<<expnu_erfcz
+                        <<endl
+                        <<"   p=("<<p.real()<<","<<p.imag()
+                        <<"),q=("<<q.real()<<","<<q.imag()
+                        <<"),e^p*E1(p)=("<<e1p.real()<<","<<e1p.imag()
+                        <<"),e^q*E1(q)=("<<e1q.real()<<","<<e1q.imag()<<endl;
+         cout<<(1-eta)*alpha*beta/(2*(alpha+beta))*(expu_erfcy+expnu_erfcz)<<endl
+             <<eta*alpha*beta/(M_PI*(alpha+beta))*(e1p.imag()+e1q.imag())<<endl
+             << *pp<<endl
+             << tmp<<endl;
+         exit(0);
+      }
+      if(abs(*pp)==numeric_limits<REAL>::infinity())
+      {
+         cout<<"*pp==numeric_limits<REAL>::infinity()"<<endl;
+         exit(0);
+      }
+      //if(*pp>1e30) exit(0);
+      #endif
+      *pp++;
+   }
+   VFN_DEBUG_EXIT("ReflectionProfileDoubleExponentialPseudoVoigt::GetProfile()",10)
+   return prof;
+}
+
+CrystVector_REAL ReflectionProfileDoubleExponentialPseudoVoigt
+   ::GetProfile(const CrystVector_REAL &x, const REAL center, const REAL dcenter,
+                const REAL h, const REAL k, const REAL l)const
+{
+   return this->GetProfile(x,center,dcenter);
+}
+
+void ReflectionProfileDoubleExponentialPseudoVoigt
+   ::SetProfilePar(const REAL instrumentAlpha1,
+                   const REAL instrumentBeta0,
+                   const REAL instrumentBeta1,
+                   const REAL gaussianSigma0,
+                   const REAL gaussianSigma1,
+                   const REAL gaussianSigma2,
+                   const REAL lorentzianGamma0,
+                   const REAL lorentzianGamma1,
+                   const REAL lorentzianGamma2)
+{
+   mInstrumentAlpha1=instrumentAlpha1;
+   mInstrumentBeta0=instrumentBeta0;
+   mInstrumentBeta1=instrumentBeta1;
+   mGaussianSigma0=gaussianSigma0;
+   mGaussianSigma1=gaussianSigma1;
+   mGaussianSigma2=gaussianSigma2;
+   mLorentzianGamma0=lorentzianGamma0;
+   mLorentzianGamma1=lorentzianGamma1;
+   mLorentzianGamma2=lorentzianGamma2;
+}
+
+REAL ReflectionProfileDoubleExponentialPseudoVoigt
+   ::GetFullProfileWidth(const REAL relativeIntensity, const REAL center, const REAL dcenter)
+{
+   VFN_DEBUG_ENTRY("ReflectionProfileDoubleExponentialPseudoVoigt::GetFullProfileWidth()",10)
+   const int nb=100;
+   const int halfnb=nb/2;
+   CrystVector_REAL x(nb);
+   REAL n=5.0;
+   const REAL siggauss2= mGaussianSigma0
+                        +mGaussianSigma1*pow(dcenter,2)
+                        +mGaussianSigma2*pow(dcenter,4);
+   static const REAL log2=log(2.0);
+   const REAL hg=sqrt(8*siggauss2*log2);
+   const REAL hl= mLorentzianGamma0
+                 +mLorentzianGamma1*dcenter
+                 +mLorentzianGamma2*dcenter*dcenter;
+   const REAL fwhm=pow(pow(hg,5)+2.69269*pow(hg,4)*hl+2.42843*pow(hg,3)*hl*hl
+                       +4.47163*hg*hg*pow(hl,3)+0.07842*hg*pow(hl,4)+pow(hl,5),0.2);
+   CrystVector_REAL prof;
+   while(true)
+   {
+      REAL *p=x.data();
+      const REAL tmp=fwhm*n/nb;
+      for(int i=0;i<nb;i++) *p++ = tmp*(i-halfnb);
+      x+=center;
+      prof=this->GetProfile(x,center,dcenter);
+      const REAL max=prof.max();
+      const REAL test=max*relativeIntensity;
+      int n1=0,n2=0;
+      if((prof(0)<test)&&(prof(nb-1)<test))
+      {
+         p=prof.data();
+         while(*p<test){ p++; n1++;n2++;}
+         n1--;
+         while(*p>test){ p++; n2++;}
+         VFN_DEBUG_EXIT("ReflectionProfilePseudoVoigt::GetFullProfileWidth():"<<x(n2)-x(n1),10)
+         return abs(x(n2)-x(n1));
+      }
+      VFN_DEBUG_MESSAGE("ReflectionProfilePseudoVoigt::GetFullProfileWidth():"<<max<<","<<test
+                        <<endl<<FormatVertVector<REAL>(x,prof),10)
+      n*=2.0;
+      //if(n>200) exit(0);
+   }
+}
+
+bool ReflectionProfileDoubleExponentialPseudoVoigt
+   ::IsAnisotropic()const{return false;}
+
+void ReflectionProfileDoubleExponentialPseudoVoigt
+   ::XMLOutput(ostream &os,int indent)const
+{
+   VFN_DEBUG_ENTRY("ReflectionProfileDoubleExponentialPseudoVoigt::XMLOutput():"<<this->GetName(),5)
+   for(int i=0;i<indent;i++) os << "  " ;
+   XMLCrystTag tag("ReflectionProfileDoubleExponentialPseudoVoigt");
+   os <<tag<<endl;
+   indent++;
+
+   this->GetPar(&mInstrumentAlpha1).XMLOutput(os,"Alpha1",indent);
+   os <<endl;
+   
+   this->GetPar(&mInstrumentBeta0).XMLOutput(os,"Beta0",indent);
+   os <<endl;
+   
+   this->GetPar(&mInstrumentBeta1).XMLOutput(os,"Beta1",indent);
+   os <<endl;
+   
+   this->GetPar(&mGaussianSigma0).XMLOutput(os,"GaussianSigma0",indent);
+   os <<endl;
+   
+   this->GetPar(&mGaussianSigma1).XMLOutput(os,"GaussianSigma1",indent);
+   os <<endl;
+   
+   this->GetPar(&mGaussianSigma2).XMLOutput(os,"GaussianSigma2",indent);
+   os <<endl;
+   
+   this->GetPar(&mLorentzianGamma0).XMLOutput(os,"LorentzianGamma0",indent);
+   os <<endl;
+   
+   this->GetPar(&mLorentzianGamma1).XMLOutput(os,"LorentzianGamma1",indent);
+   os <<endl;
+   
+   this->GetPar(&mLorentzianGamma2).XMLOutput(os,"LorentzianGamma2",indent);
+   os <<endl;
+   
+   indent--;
+   tag.SetIsEndTag(true);
+   for(int i=0;i<indent;i++) os << "  " ;
+   os <<tag<<endl;
+   VFN_DEBUG_EXIT("ReflectionProfileDoubleExponentialPseudoVoigt::XMLOutput():"<<this->GetName(),5)
+}
+
+void ReflectionProfileDoubleExponentialPseudoVoigt
+   ::XMLInput(istream &is,const XMLCrystTag &tagg)
+{
+   VFN_DEBUG_ENTRY("ReflectionProfileDoubleExponentialPseudoVoigt::XMLInput():"<<this->GetName(),5)
+   for(unsigned int i=0;i<tagg.GetNbAttribute();i++)
+   {
+      if("Name"==tagg.GetAttributeName(i)) this->SetName(tagg.GetAttributeValue(i));
+   }
+   while(true)
+   {
+      XMLCrystTag tag(is);
+      if(("ReflectionProfileDoubleExponentialPseudoVoigt"==tag.GetName())&&tag.IsEndTag())
+      {
+         this->UpdateDisplay();
+         VFN_DEBUG_EXIT("ReflectionProfileDoubleExponentialPseudoVoigt::Exit():"<<this->GetName(),5)
+         return;
+      }
+      if("Par"==tag.GetName())
+      {
+         for(unsigned int i=0;i<tag.GetNbAttribute();i++)
+         {
+            if("Name"==tag.GetAttributeName(i))
+            {
+               this->GetPar(tag.GetAttributeValue(i)).XMLInput(is,tag);
+            }
+         }
+         continue;
+      }
+      if("Option"==tag.GetName())
+      {
+         for(unsigned int i=0;i<tag.GetNbAttribute();i++)
+            if("Name"==tag.GetAttributeName(i)) 
+               mOptionRegistry.GetObj(tag.GetAttributeValue(i)).XMLInput(is,tag);
+         continue;
+      }
+   }
+}
+
+void ReflectionProfileDoubleExponentialPseudoVoigt
+   ::InitParameters()
+{
+   {
+      RefinablePar tmp("Alpha1",&mInstrumentAlpha1,0,1.,gpRefParTypeScattDataProfile,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
+      tmp.AssignClock(mClockMaster);
+      tmp.SetDerivStep(1e-4);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("Beta0",&mInstrumentBeta0,0,1.,gpRefParTypeScattDataProfile,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
+      tmp.AssignClock(mClockMaster);
+      tmp.SetDerivStep(1e-4);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("Beta1",&mInstrumentBeta1,0,1.,gpRefParTypeScattDataProfile,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
+      tmp.AssignClock(mClockMaster);
+      tmp.SetDerivStep(1e-4);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("GaussianSigma0",&mGaussianSigma0,0,1.,gpRefParTypeScattDataProfileWidth,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
+      tmp.AssignClock(mClockMaster);
+      tmp.SetDerivStep(1e-4);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("GaussianSigma1",&mGaussianSigma1,0,1.,gpRefParTypeScattDataProfileWidth,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
+      tmp.AssignClock(mClockMaster);
+      tmp.SetDerivStep(1e-4);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("GaussianSigma2",&mGaussianSigma2,0,1.,gpRefParTypeScattDataProfileWidth,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
+      tmp.AssignClock(mClockMaster);
+      tmp.SetDerivStep(1e-4);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("LorentzianGamma0",&mLorentzianGamma0,0,1.,gpRefParTypeScattDataProfileWidth,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
+      tmp.AssignClock(mClockMaster);
+      tmp.SetDerivStep(1e-4);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("LorentzianGamma1",&mLorentzianGamma1,0,1.,gpRefParTypeScattDataProfileWidth,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
+      tmp.AssignClock(mClockMaster);
+      tmp.SetDerivStep(1e-4);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("LorentzianGamma2",&mLorentzianGamma2,0,1.,gpRefParTypeScattDataProfileWidth,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
+      tmp.AssignClock(mClockMaster);
+      tmp.SetDerivStep(1e-4);
+      this->AddPar(tmp);
+   }
+}
+
+#ifdef __WX__CRYST__
+WXCrystObjBasic* ReflectionProfileDoubleExponentialPseudoVoigt::WXCreate(wxWindow* parent)
+{
+   if(mpWXCrystObj==0)
+      mpWXCrystObj=new WXProfileDoubleExponentialPseudoVoigt(parent,this);
+   return mpWXCrystObj;
+}
+#endif
+
+//######################################################################
+//    Basic PROFILE FUNCTIONS
+//######################################################################
+
+CrystVector_REAL PowderProfileGauss  (const CrystVector_REAL ttheta,const REAL fwhm,
+                                      const REAL center)
+{
+   TAU_PROFILE("PowderProfileGauss()","Vector (Vector,REAL)",TAU_DEFAULT);
+   const long nbPoints=ttheta.numElements();
+   CrystVector_REAL result(nbPoints);
+   result=ttheta;
+   result+= -center;
+   result *= result;
+   REAL *p=result.data();
+   
+   //reference: IUCr Monographs on Crystallo 5 - The Rietveld Method (ed RA Young)
+   result *= -4.*log(2.)/fwhm/fwhm;
+   p=result.data();
+   #ifdef _MSC_VER
+   // Bug from Hell (in MSVC++) !
+   // The *last* point ends up sometimes with an arbitrary large value...
+   for(long i=0;i<nbPoints;i++) { *p = pow((float)2.71828182846,(float)*p) ; p++ ;}
+   #else
+   for(long i=0;i<nbPoints;i++) { *p = exp(*p) ; p++ ;}
+   #endif
+   
+   result *= 2. / fwhm * sqrt(log(2.)/M_PI);
+   return result;
+}
+
+CrystVector_REAL PowderProfileLorentz(const CrystVector_REAL ttheta,const REAL fwhm,
+                                      const REAL center)
+{
+   TAU_PROFILE("PowderProfileLorentz()","Vector (Vector,REAL)",TAU_DEFAULT);
+   const long nbPoints=ttheta.numElements();
+   CrystVector_REAL result(nbPoints);
+   result=ttheta;
+   result+= -center;
+   result *= result;
+   REAL *p=result.data();
+   //reference: IUCr Monographs on Crystallo 5 - The Rietveld Method (ed RA Young)
+   result *= 4./fwhm/fwhm;
+   p=result.data();
+   result += 1. ;
+   for(long i=0;i<nbPoints;i++) { *p = 1/(*p) ; p++ ;}
+   result *= 2./M_PI/fwhm;
+   return result;
+}
+
+CrystVector_REAL AsymmetryBerarBaldinozzi(const CrystVector_REAL x,
+                                          const REAL fwhm, const REAL center,
+                                          const REAL a0, const REAL a1,
+                                          const REAL b0, const REAL b1)
+{
+   TAU_PROFILE("AsymmetryBerarBaldinozzi()","Vector (Vector,REAL)",TAU_DEFAULT);
+   const long nbPoints=x.numElements();
+   CrystVector_REAL result(nbPoints);
+   result=x;
+   result+= -center;
+   result *= 1/fwhm;
+   REAL *p=result.data();
+   for(long i=0;i<nbPoints;i++)
+   { 
+      if(*p<1e-6) *p++ = 1.0;
+      else
+      {
+         *p = 1+exp(-pow(*p,2))*((a0 * 2 * *p + b0*(8*pow(*p,3)-12* *p) )/tan(*p)
+                                +(a1 * 2 * *p + b1*(8*pow(*p,3)-12* *p) )/tan(2* *p));
+         p++ ;
+      }
+   }
+   return result;
+}
+/*
+from python:
+E1(1)= 0.219383934396       (0.219383934396+0j)
+E1(1j)= (-0.337403922901-0.624713256428j)
+E1(1+1j)= (0.000281624451981-0.179324535039j)
+E1(100+1j)= (1.95936883899e-46-3.11904399563e-46j)
+E1(10+20j)= (-1.20141500252e-06-1.58298052926e-06j)
+
+this code (REAL=float)
+CE1(1.000000000000+0.000000000000j) = 0.219383955002+0.000000000000j
+CE1(0.000000000000+1.000000000000j) = -0.337403953075+-0.624713361263j
+CE1(1.000000000000+1.000000000000j) = 0.000281602144+-0.179324567318j
+CE1(100.000000000000+1.000000000000j) = 0.000000000000+-0.000000000000j
+CE1(10.000000000000+20.000000000000j) = -0.000001201415+-0.000001582981j
+   {
+      complex<REAL>z(1.0,0.0);
+      complex<REAL>ce1=ExponentialIntegral1(z);
+      cout<<"CE1("<<z.real()<<"+"<<z.imag()<<"j) = "<<ce1.real()<<"+"<<ce1.imag()<<"j"<<endl;
+   }
+   {
+      complex<REAL>z(0.0,1.0);
+      complex<REAL>ce1=ExponentialIntegral1(z);
+      cout<<"CE1("<<z.real()<<"+"<<z.imag()<<"j) = "<<ce1.real()<<"+"<<ce1.imag()<<"j"<<endl;
+   }
+   {
+      complex<REAL>z(1.0,1.0);
+      complex<REAL>ce1=ExponentialIntegral1(z);
+      cout<<"CE1("<<z.real()<<"+"<<z.imag()<<"j) = "<<ce1.real()<<"+"<<ce1.imag()<<"j"<<endl;
+   }
+   {
+      complex<REAL>z(100.0,1.0);
+      complex<REAL>ce1=ExponentialIntegral1(z);
+      cout<<"CE1("<<z.real()<<"+"<<z.imag()<<"j) = "<<ce1.real()<<"+"<<ce1.imag()<<"j"<<endl;
+   }
+   {
+      complex<REAL>z(10.0,20.0);
+      complex<REAL>ce1=ExponentialIntegral1(z);
+      cout<<"CE1("<<z.real()<<"+"<<z.imag()<<"j) = "<<ce1.real()<<"+"<<ce1.imag()<<"j"<<endl;
+   }
+   exit(0);
+*/
+
+template <class T>std::complex<T>ExponentialIntegral1(const complex<T> z)
+{
+   return exp(-z)*ExponentialIntegral1_ExpZ(z);
+}
+
+template <class T>std::complex<T>ExponentialIntegral1_ExpZ(const complex<T> z)
+{
+   const T zr=z.real();
+   const T zn=abs(z);
+   complex<T> ce1;
+   if(zn==0.0) return 1e100;// Should return an error ? std::numeric_limits::quiet_NaN() ?
+   if((zn<10.0)||((zr<0.0)&&(zn<20.0)))// Abramowitz & Stegun 5.1.11
+   {
+      ce1=complex<T>(1,0);
+      complex<T> y(1,0);
+      for(unsigned int i=1;i<=150;i++)
+      {
+         y=-y*(T)i*z / (T)((i+1)*(i+1));
+         ce1+=y;
+         if(abs(y)<=abs(ce1)*1e-15) break;
+      }
+      static const T EulerMascheroni=0.5772156649015328606065120900;
+      return exp(z)*(z*ce1-EulerMascheroni-log(z));// Euler-Mascheroni constant
+   }
+   else// Abramowitz & Stegun 5.1.51
+   {
+      if(zn>500) return 1.0/z;
+      complex<T> y(0.0,0.0);
+      for(unsigned int i=120;i>=1;i--) y=(T)i/((T)1+(T)i/(z+y));
+      ce1/=(z+y);
+      if((zr<0)&&(z.imag()==0)) ce1 -= complex<T>(0.0,M_PI)*exp(z);
+      return ce1;
+   }
+}
+
+}

@@ -27,6 +27,7 @@
 #include "ObjCryst/General.h"
 #include "ObjCryst/Crystal.h"
 #include "ObjCryst/ScatteringCorr.h"
+#include "ObjCryst/ReflectionProfile.h"
 
 namespace ObjCryst
 {
@@ -291,6 +292,10 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
                                    const REAL fwhmCagliotiV=0,
                                    const REAL eta0=0.5,
                                    const REAL eta1=0.);
+      /** Assign a new profile
+      *
+      */
+      void SetProfile(ReflectionProfile *prof);
       virtual void GenHKLFullSpace();
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
@@ -335,21 +340,8 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
          mutable RefinableObjClock mClockProfileCalc;
          /// Last time intensities were computed
          mutable RefinableObjClock mClockIhklCalc;
-      //Profile parameters
-         ///Gaussian ? Lorentzian ? Pseudo-Voigt ?
-         RefObjOpt mReflectionProfileType;
-         /// The 'full' profile of each reflection os taken equal
-         /// to the FWHM, multiplied by this factor.
-         REAL mFullProfileWidthFactor;
-         ///FWHM parameters, following Caglioti's law
-         REAL mCagliotiU,mCagliotiV,mCagliotiW;
-         ///FWHM for TOF (in progress...)
-         REAL mW0,mW1,mW2;
-         ///Pseudo-Voigt mixing parameter : eta=eta0 +2*theta*eta1
-         /// eta=1 -> pure Lorentzian ; eta=0 -> pure Gaussian
-         REAL mPseudoVoigtEta0,mPseudoVoigtEta1;
-         /// Use asymmetric profiles ? (unused yet)
-         bool mUseAsymmetricProfile;
+      /// Profile
+         ReflectionProfile *mpReflectionProfile;
       // Corrections
          /** \brief Calculated corrections for all reflections. Calc F^2 must be multiplied
          *by this factor to yield intensities.

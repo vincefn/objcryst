@@ -1977,6 +1977,7 @@ template void RefObjRegisterRecursive(RefinableObj &obj,ObjRegistry<RefinableObj
 #include "ObjCryst/ScatteringCorr.h"
 #include "RefinableObj/GlobalOptimObj.h"
 #include "RefinableObj/IO.h"
+#include "ObjCryst/ReflectionProfile.h"
 using namespace ObjCryst;
 template class ObjRegistry<RefObjOpt>;
 template class ObjRegistry<RefinableObj>;
@@ -1992,6 +1993,7 @@ template class ObjRegistry<OptimizationObj>;
 template class ObjRegistry<XMLCrystTag>;
 template class ObjRegistry<ZAtom>;
 template class ObjRegistry<TexturePhaseMarchDollase>;
+template class ObjRegistry<ReflectionProfile>;
 
 template class RefObjOption<RefinableObj>;
 template class RefObjOption<Crystal>;

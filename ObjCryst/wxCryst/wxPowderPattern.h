@@ -228,11 +228,37 @@ class WXPowderPatternDiffraction: public WXRefinableObj
       WXPowderPatternDiffraction(wxWindow *parent, PowderPatternDiffraction*);
       void OnChangeCrystal(wxCommandEvent & WXUNUSED(event));
       void OnMenuSaveHKLFcalc(wxCommandEvent & WXUNUSED(event));
+      void OnChangeProfile(wxCommandEvent & event);
       virtual void UpdateUI();
    private:
       PowderPatternDiffraction *mpPowderPatternDiffraction;
       WXFieldChoice* mpFieldCrystal;
    DECLARE_EVENT_TABLE()
+};
+
+/** Class to display a Powder Pattern Pseudo-Voigt Profile
+*
+*/
+class WXProfilePseudoVoigt: public WXCrystObj
+{
+   public:
+      WXProfilePseudoVoigt(wxWindow *parent, ReflectionProfilePseudoVoigt *prof);
+      virtual bool OnChangeName(const int id);
+   private:
+      ReflectionProfilePseudoVoigt *mpProfile;
+};
+
+/** Class to display a Powder Pattern Pseudo-Voigt Profile
+*
+*/
+class WXProfileDoubleExponentialPseudoVoigt: public WXCrystObj
+{
+   public:
+      WXProfileDoubleExponentialPseudoVoigt
+         (wxWindow *parent, ReflectionProfileDoubleExponentialPseudoVoigt *prof);
+      virtual bool OnChangeName(const int id);
+   private:
+      ReflectionProfileDoubleExponentialPseudoVoigt *mpProfile;
 };
 
 } //namespace
