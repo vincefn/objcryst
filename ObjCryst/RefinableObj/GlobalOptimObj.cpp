@@ -715,7 +715,6 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                      mutationAmplitude(i)=sqrt(mMutationAmplitudeMin*mMutationAmplitudeMax);break;
                }
             }
-            cout << simAnnealTemp<<endl<<mutationAmplitude<<endl;
          // Init the parameter sets for each World
          // All Worlds start from the same (current) configuration.
             CrystVector_long worldCurrentSetIndex(nbWorld);
@@ -735,11 +734,12 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                unsigned int first=1;
                for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
                   mRecursiveRefinedObjList.GetObj(i).GetGeneGroup(mRefParList,refParGeneGroupIndex,first);
-               for(int i=0;i<mRefParList.GetNbPar();i++)
-               {
-                  if(!silent) cout << "Gene Group:"<<refParGeneGroupIndex(i)<<" :";
-                  mRefParList.GetPar(i).Print();
-               }
+               if(!silent) 
+                  for(int i=0;i<mRefParList.GetNbPar();i++)
+                  {
+                     cout << "Gene Group:"<<refParGeneGroupIndex(i)<<" :";
+                     mRefParList.GetPar(i).Print();
+                  }
             // number of gene groups
             // to select which gene groups are exchanged in the mating
                //const unsigned int nbGeneGroup=refParGeneGroupIndex.max();
