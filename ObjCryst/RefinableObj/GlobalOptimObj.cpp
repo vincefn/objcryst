@@ -866,13 +866,13 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
    // Init the parameter sets for each World
    // All Worlds start from the same (current) configuration.
       CrystVector_long worldCurrentSetIndex(nbWorld);
-      for(int i=0;i<nbWorld;i++)
+      for(int i=nbWorld-1;i>=0;i--)
       {
-         mRefParList.RestoreParamSet(mBestParSavedSetIndex);
          if((i!=(nbWorld-1))&&(i%2==0))
             for(int j=0;j<mRecursiveRefinedObjList.GetNb();j++)
                mRecursiveRefinedObjList.GetObj(j).RandomizeConfiguration();
          worldCurrentSetIndex(i)=mRefParList.CreateParamSet();
+         mRefParList.RestoreParamSet(worldCurrentSetIndex(nbWorld-1));
       }
       //mNbTrial=nbSteps;;
       const long lastParSavedSetIndex=mRefParList.CreateParamSet("MonteCarloObj:Last parameters");
