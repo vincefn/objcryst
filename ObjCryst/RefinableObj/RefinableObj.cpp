@@ -888,7 +888,7 @@ template<class T> void ObjRegistry<T>::Register(T &obj)
       for(unsigned long i=0;i<mMaxNbRegistered;i++) newRegistry[i]=mpRegistry[i];
       if(0!=mpRegistry) delete[] mpRegistry;
       mpRegistry=newRegistry;
-      mMaxNbRegistered+=100;
+      mMaxNbRegistered+=32;
    }
    mpRegistry[mNbRegistered++]=&obj;
    mListClock.Click();
