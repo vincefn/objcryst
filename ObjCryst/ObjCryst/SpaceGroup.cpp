@@ -463,7 +463,7 @@ CrystMatrix_REAL SpaceGroup::GetAllEquivRefl(const REAL h, const REAL k, const R
 
 bool SpaceGroup::IsReflSystematicAbsent(const REAL h, const REAL k, const REAL l)const
 {
-   const REAL eps=.001;
+   const REAL eps=.01;
    const T_RTMx *pMatrix;
    pMatrix=&(mSgOps.SMx[0]);
    float h1,k1,l1,t;
@@ -474,7 +474,10 @@ bool SpaceGroup::IsReflSystematicAbsent(const REAL h, const REAL k, const REAL l
       k1=h*(*pMatrix).s.R[1]+k*(*pMatrix).s.R[4]+l*(*pMatrix).s.R[7];
       l1=h*(*pMatrix).s.R[2]+k*(*pMatrix).s.R[5]+l*(*pMatrix).s.R[8];
       t=(h*(*pMatrix).s.T[0]+k*(*pMatrix).s.T[1]+l*(*pMatrix).s.T[2])/(REAL)STBF;
-      t= modf(t+fabs(h)+fabs(k)+fabs(l),&junk);// +h+k+l ensures it is >0 before modf..
+      
+      // +h+k+l ensures it is >0 before modf.. Add .001 for rounding errors...
+      t= modf(t+fabs(h)+fabs(k)+fabs(l)+.001,&junk);
+      
       if( ((fabs(h-h1) + fabs(k-k1) + fabs(l-l1) )<eps) && (t>eps)) return true;
       if(this->IsCentrosymmetric() &&
           ((fabs(h+h1) + fabs(k+k1) + fabs(l+l1) )<eps) && (t>eps)) return true;
