@@ -776,8 +776,9 @@ class RefinableObj
       void AddPar(RefinableObj &newRefParList);
       /** Remove a refinable parameter. 
       *
+      * This returns an iterator to the next parameter in the vector.
       */ 
-      void RemovePar(RefinablePar *refPar);
+      vector<RefinablePar *>::iterator RemovePar(RefinablePar *refPar);
       
       virtual void Print() const;
       
@@ -1044,12 +1045,13 @@ class RefinableObj
          virtual REAL GetRestraintCost()const;
          /** Add a new restraint
          *
+         * This returns an iterator pointing to the next Restraint in the vector.
          */
          void AddRestraint(Restraint *pNewRestraint);
          /** Remove a restraint from the list of known restraints. This does not
          * delete the Restraint object.
          */
-         void RemoveRestraint(Restraint *pRestraint);
+         vector<Restraint*>::iterator RemoveRestraint(Restraint *pRestraint);
       /** During a global optimization, tells the object that the current config is
       * the latest "best" config.
       *

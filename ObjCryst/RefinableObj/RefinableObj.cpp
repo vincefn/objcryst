@@ -1326,7 +1326,7 @@ void RefinableObj::AddPar(RefinableObj &newRefParList)
    for(long i=0;i<newRefParList.GetNbPar();i++) this->AddPar(&(newRefParList.GetPar(i)));
 }
 
-void RefinableObj::RemovePar(RefinablePar *refPar)
+vector<RefinablePar *>::iterator RefinableObj::RemovePar(RefinablePar *refPar)
 {
    VFN_DEBUG_MESSAGE("RefinableObj::RemovePar(RefPar&)",2)
    vector<RefinablePar *>::iterator pos=find(mvpRefPar.begin(),mvpRefPar.end(),refPar);
@@ -1335,7 +1335,7 @@ void RefinableObj::RemovePar(RefinablePar *refPar)
       throw ObjCrystException("RefinableObj::RemovePar():"+refPar->GetName()
                               +"is not in this object:"+this->GetName());
    }
-   mvpRefPar.erase(pos);
+   return mvpRefPar.erase(pos);
 }
 
 void RefinableObj::Print() const
@@ -1707,19 +1707,20 @@ void RefinableObj::AddRestraint(Restraint *pNewRestraint)
    mvpRestraint.push_back(pNewRestraint);
 }
 
-void RefinableObj::RemoveRestraint(Restraint *pRestraint)
+vector<Restraint*>::iterator RefinableObj::RemoveRestraint(Restraint *pRestraint)
 {
    VFN_DEBUG_MESSAGE("RefinableObj::RemoveRestraint(Restraint*)",2)
    vector<Restraint*>::iterator pos=find(mvpRestraint.begin(),mvpRestraint.end(),pRestraint);
    if(mvpRestraint.end() != pos)
    {
-      mvpRestraint.erase(pos);
+      return mvpRestraint.erase(pos);
    }
    else
    {
       cout <<"RefinableObj::RemoveRestraint(..)"
            <<" Whoops... tried to remove a Restraint which does not exist..."<<endl;
    }
+   return pos;
 }
 
 void RefinableObj::TagNewBestConfig()const
