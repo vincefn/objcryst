@@ -62,7 +62,9 @@ BEGIN_EVENT_TABLE(WXCrystal,wxEvtHandler)
    EVT_MENU(ID_REFOBJ_MENU_PAR_UNFIXALL,              WXRefinableObj::OnMenuUnFixAllPar)
    EVT_MENU(ID_REFOBJ_MENU_PAR_RANDOMIZE,             WXRefinableObj::OnMenuParRandomize)
    EVT_MENU(ID_CRYSTAL_MENU_PAR_ADDANTIBUMP,          WXCrystal::OnMenuAddAntiBumpDist)
+#ifdef OBJCRYST_GL
    EVT_MENU(ID_CRYSTAL_MENU_DISPLAY_3DVIEW,           WXCrystal::OnMenuCrystalGL)
+#endif
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDSCATTPOWATOM,    WXCrystal::OnMenuAddScattPowAtom)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_REMOVESCATTPOW,     WXCrystal::OnMenuRemoveScattPow)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDATOM,            WXCrystal::OnMenuAddScatterer)
@@ -80,11 +82,13 @@ BEGIN_EVENT_TABLE(WXCrystal,wxEvtHandler)
 END_EVENT_TABLE()
 
 WXCrystal::WXCrystal(wxWindow* parent, Crystal *obj):
-WXRefinableObj(parent,(RefinableObj*)obj),mpCrystal(obj),
-mCrystalGLDisplayList(0),
+WXRefinableObj(parent,(RefinableObj*)obj),mpCrystal(obj)
+#ifdef OBJCRYST_GL
+,mCrystalGLDisplayList(0),
 /*mCrystalGLDisplayList(gGLDisplayListNb++),
 mCrystalGLDisplayList(glGenLists(1)),*/
 mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
+#endif
 {
    VFN_DEBUG_MESSAGE("WXCrystal::WXCrystal()",6)
    //this->SetBackgroundColour("Red");
@@ -211,10 +215,13 @@ void WXCrystal::CrystUpdate()
    VFN_DEBUG_ENTRY("WXCrystal::CrystUpdate()",7)
    this->WXRefinableObj::CrystUpdate();
    //mWXParent->Layout();
+   #ifdef OBJCRYST_GL
    this->UpdateGL();
+   #endif
    VFN_DEBUG_EXIT("WXCrystal::CrystUpdate():End",7)
 }
 
+#ifdef OBJCRYST_GL
 void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
                          const REAL xMin,const REAL xMax,
                          const REAL yMin,const REAL yMax,
@@ -222,7 +229,6 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
 {
    VFN_DEBUG_ENTRY("WXCrystal::UpdateGL()",8)
    WXCrystValidateAllUserInput();
-   #ifdef OBJCRYST_GL
    if(mpCrystalGL!=0)
    {
       VFN_DEBUG_MESSAGE("WXCrystal::UpdateGL():mpCrystalGL",7)
@@ -264,7 +270,6 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
    {
       VFN_DEBUG_MESSAGE("WXCrystal::UpdateGL():No mpCrystalGL",7)
    }
-   #endif
    VFN_DEBUG_EXIT("WXCrystal::UpdateGL():End",8)
 }
 
@@ -297,12 +302,12 @@ void WXCrystal::OnMenuCrystalGL(wxCommandEvent & WXUNUSED(event))
    frame->Show(true);
    this->UpdateGL();
 }
-
 void WXCrystal::NotifyCrystalGLDelete()
 {
    VFN_DEBUG_MESSAGE("WXCrystal::NotifyCrystalGLDelete()",7)
    mpCrystalGL=0;
 }
+#endif
 
 void WXCrystal::OnMenuSaveCIF(wxCommandEvent & WXUNUSED(event))
 {
@@ -757,10 +762,13 @@ bool WXCrystal::OnChangeName(const int id)
 void WXCrystal::UpdateUI()
 {
    mpFieldSpacegroup->SetValue(mpCrystal->GetSpaceGroup().GetName());
+   #ifdef OBJCRYST_GL
    if(0!=mpCrystalGL) mpCrystalGL->GetParent()->SetTitle(mpCrystal->GetName().c_str());
+   #endif
    this->WXRefinableObj::UpdateUI();
 }
 
+#ifdef OBJCRYST_GL
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXGLCrystalCanvas
@@ -1201,6 +1209,6 @@ void WXGLCrystalCanvas::OnChangeLimits(wxCommandEvent & WXUNUSED(event))
    mpWXCrystal->UpdateGL(false,mXmin,mXmax,mYmin,mYmax,mZmin,mZmax);
    this->CrystUpdate();
 }
-
+#endif
 }// namespace 
 

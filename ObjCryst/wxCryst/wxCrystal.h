@@ -41,6 +41,7 @@ class WXCrystal: public WXRefinableObj
    public:
       WXCrystal(wxWindow *parent, Crystal*);
       virtual void CrystUpdate();
+      #ifdef OBJCRYST_GL
       /// Update the OpenGL Display List
       void UpdateGL(const bool onlyIndependentAtoms=false,
                     const REAL xMin=-.1,const REAL xMax=1.1,
@@ -55,6 +56,7 @@ class WXCrystal: public WXRefinableObj
       void OnMenuCrystalGL(wxCommandEvent & WXUNUSED(event));
       /// Tell this object that its 3D OpenGL display has been destroyed
       void NotifyCrystalGLDelete();
+      #endif
       void OnMenuSaveCIF(wxCommandEvent & WXUNUSED(event));
       void OnMenuSaveText(wxCommandEvent & WXUNUSED(event));
       void OnMenuAddScattPowAtom(wxCommandEvent & WXUNUSED(event));
@@ -72,7 +74,8 @@ class WXCrystal: public WXRefinableObj
          WXRegistry<Scatterer>* mpWXScattererRegistry;
       /// Scattering Powers
          WXRegistry<ScatteringPower>* mpWXScatteringPowerRegistry;
-         
+
+      #ifdef OBJCRYST_GL
       //OpenGl
          /// OpenGL Display of the Crystal-Display List. Updated each time CrystUpdate() is called.
          unsigned int mCrystalGLDisplayList;
@@ -80,9 +83,11 @@ class WXCrystal: public WXRefinableObj
          mutable bool mCrystalGLDisplayListIsLocked;
          /// the frame in which the crystal is displayed. There can only be one...
          WXGLCrystalCanvas* mpCrystalGL;
+      #endif
    DECLARE_EVENT_TABLE()
 };
 
+#ifdef OBJCRYST_GL
 /// Class for 3D OpenGL display of Crystal structures
 class WXGLCrystalCanvas : public wxGLCanvas
 {
@@ -126,6 +131,7 @@ class WXGLCrystalCanvas : public wxGLCanvas
       float mXmin,mXmax,mYmin,mYmax,mZmin,mZmax;
    DECLARE_EVENT_TABLE()
 };
+#endif
 
 
 } //namespace
