@@ -35,6 +35,17 @@
 
 namespace ObjCryst
 {
+typedef struct
+  {
+    float       xMin;
+    float       xMax;
+    float       yMin;
+    float       yMax;
+    float       zMin;
+    float       zMax;
+  }
+  BBox;
+
 class WXGLCrystalCanvas;
 
 /// wxCryst class for Crystals
@@ -199,10 +210,10 @@ class WXGLCrystalCanvas : public wxGLCanvas
       void OnUnloadFourier();
       void OnShowWire();
       void OnFourierChangeBbox();
-      // bounding box for atoms to be included
-      float mXmin,mXmax,mYmin,mYmax,mZmin,mZmax;
-      // bounding box for display of Fourier map
-      float mXminF,mXmaxF,mYminF,mYmaxF,mZminF,mZmaxF;
+      // get bounding box for atoms display
+      BBox GetCellBBox();
+      // get bounding box for display of Fourier map
+      BBox GetMapBBox();
    private:
       void InitGL();
       /// Shows a dialog to choose a displayed fourier map from one of those
@@ -229,6 +240,10 @@ class WXGLCrystalCanvas : public wxGLCanvas
       
       /// To display Fourier map
       bool mShowFourier, mShowCrystal;
+      // bounding box for atoms to be included
+      BBox mcellbbox;
+      // bounding box for display of Fourier map
+      BBox mmapbbox;
       /** Imported fourier maps
       *
       * :TODO: use an auto_ptr<UnitCellMapGLList>
@@ -245,25 +260,6 @@ class WXGLCrystalCanvas : public wxGLCanvas
       
    DECLARE_EVENT_TABLE()
 };
-
-// dialog to get a bounding box
-class UserSelectBoundingBox : public wxDialog {
- public:
-    UserSelectBoundingBox(wxWindow * parent, char * title,
-			  const float xMin=.0, const float xMax=1.,
-			  const float yMin=.0, const float yMax=1.,
-			  const float zMin=.0, const float zMax=1.);
-    ~UserSelectBoundingBox ();
-    float mxMin, mxMax, myMin, myMax, mzMin, mzMax;
- private:
-    void OnOk (void);
-    wxTextCtrl * pXminCtrl, *pXmaxCtrl;
-    wxTextCtrl * pYminCtrl, *pYmaxCtrl;
-    wxTextCtrl * pZminCtrl, *pZmaxCtrl;
-    DECLARE_EVENT_TABLE()
-
-};
-
 #endif
 
 
