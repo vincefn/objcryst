@@ -1,8 +1,12 @@
 # Base ObjCryst directory
-DIR_CRYST=C:\Dev\ObjCryst
+DIR_CRYST=C:\Dev\Fox\src\ObjCryst
 # Borland Directory
 DIR_BORLAND=C:\Borland\BCC55
+# wxWindows Directory
+DIR_WXWINDOWS = C:\Dev\wxWindows
 
+#You should not need to modify anything below
+###################################################################
 #use wxCryst ?
 wxcryst=1
 #debugging ? (only activates debugging messages)
@@ -21,7 +25,6 @@ DIR_SGLITE = ${DIR_CRYST}\..\sglite
 DIR_TAU = ${DIR_CRYST}\..\tau
 DIR_VFNQUIRKS = ${DIR_CRYST}\Quirks
 DIR_WXWCRYST = ${DIR_CRYST}\wxCryst
-DIR_WXWINDOWS = ${DIR_CRYST}\..\wxWindows
 
 DIR_DOC := ${DIR_CRYST}/doc
 
