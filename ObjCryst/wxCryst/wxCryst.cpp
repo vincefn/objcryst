@@ -100,8 +100,8 @@ void WXCrystObjBasic::BottomLayout(WXCrystObjBasic *pChild)
       wxSizer *pParentSizer=this->GetParent()->GetSizer();
       if(pParentSizer!=0)
       {
-         this->GetParent()->GetSizer()->SetItemMinSize
-            (this,this->GetSize().GetWidth(),this->GetSize().GetHeight());
+         //this->GetParent()->GetSizer()->SetItemMinSize
+            //(this,this->GetSize().GetWidth(),this->GetSize().GetHeight());
          //this->GetParent()->GetSizer()->Fit(this->GetParent());
          this->GetParent()->GetSizer()->SetVirtualSizeHints(this->GetParent());
       }
