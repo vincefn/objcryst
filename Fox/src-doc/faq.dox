@@ -77,15 +77,14 @@ You have to put at least as many independent atoms as there are in the final res
 </ul>
 <b><i>How can I use an Antibump criterion ? How can I see the Antibump parameters ? Does it prevent the "merging" of atoms using the Dynamical Occupancy Correction ?</i></b>
 <ul>
-To use the antibump you need:
+To use the antibump:
 <ul>
-   <li> To select (Crystal, menu "Parameters -> Set Antibump Distance") the couple of ScatteringPower (atom types)  and declare the interatomic distance below which a penalty is used. Do that for all couples of atom types you want to affect with an antibump.
-   <li> You must add the AntiBump cost function in you algorithm (Global Optimization object). Otherwise, the antibump does not work.
+<li>you need to add (Crystal, menu "Parameters -> Set Antibump Distance") the couple of ScatteringPower (atom types) and declare the interatomic distance below which a penalty is used (this should approximately be the expected distance between the two atoms). Do that for all couples of atom types you want to affect with an antibump.
+<li>the cost will automatically be added to the overall cost (as long as you added the Crystal structure tpo the list of objects to be optimized). If the cost is too small with regard to the Chi^2 of your diffraction data, you can use the "scale" factor displayed beside the antibump cost to increase it. Be warned that a too large antibump factor will prevent the optimization to work correctly; therefore, <b>do not</b> mistake the antibump function for an energetic description of your crystal structure.
 </ul>
-
 You cannot see the antibump parameters, unless you edit an xml save file (where each line <tt><AntiBumpDistance ScattPow1="O" ScattPow2="Pb">1.2</AntiBumpDistance></tt> corresponds to an antibump distance). You can change an antibump distance by re-setting the antibump distance using the Crystal "Parameters -> Set Antibump Distance" menu. To delete it simply remove the corresponding line.
 
-For identical types of atoms, the antibump penalty vanishes to zero when the atoms get near each over (practically, the penalty goes from reaches its maximu when the distance decreases from the given dmin to dmin/2, and then decreases to 0 when the atoms fully merge). So the antibump cost function does not prevent merging.
+For identical types of atoms, the antibump penalty vanishes to zero when the atoms get near each over (practically, the penalty goes from reaches its maximum when the distance decreases from the given dmin to dmin/2, and then decreases to 0 when the atoms fully merge). So the antibump cost function does not prevent merging.
 
 Note that you cannot use different antibump parameters for (say) two different oxygen types: as the antibump evaluation currently uses the atomic number, all oxygens will necessary have the same antibump parameters.
 </ul>
