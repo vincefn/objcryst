@@ -80,10 +80,15 @@ RefinableObjClock::RefinableObjClock()
 }
 RefinableObjClock::~RefinableObjClock()
 {
-   for(std::set<const RefinableObjClock*>::iterator pos=mvChild.begin();
-       pos!=mvChild.end();++pos) (*pos)->RemoveParent(*this);
-   for(std::set<RefinableObjClock*>::iterator pos=mvParent.begin();
-       pos!=mvParent.end();++pos) (*pos)->RemoveChild(*this);
+   // first copy & clear sets to avoid possible loops in RemoveChild()
+   set<const RefinableObjClock*> vChild=mvChild;
+   set<RefinableObjClock*> vParent=mvParent;
+   mvChild.clear();
+   mvParent.clear();
+   for(std::set<const RefinableObjClock*>::iterator pos=vChild.begin();
+       pos!=vChild.end();++pos) (*pos)->RemoveParent(*this);
+   for(std::set<RefinableObjClock*>::iterator pos=vParent.begin();
+       pos!=vParent.end();++pos) (*pos)->RemoveChild(*this);
 }
 
 bool RefinableObjClock::operator< (const RefinableObjClock &rhs)const
@@ -139,7 +144,12 @@ void RefinableObjClock::PrintStatic()const
 void RefinableObjClock::AddChild(const RefinableObjClock &clock)
 {mvChild.insert(&clock);clock.AddParent(*this);this->Click();}
 void RefinableObjClock::RemoveChild(const RefinableObjClock &clock)
-{mvChild.erase(&clock);clock.RemoveParent(*this);this->Click();}
+{
+   const unsigned int i=mvChild.erase(&clock);
+   VFN_DEBUG_MESSAGE("RefinableObjClock::RemoveChild():"<<i,10)
+   clock.RemoveParent(*this);
+   this->Click();
+}
 void RefinableObjClock::AddParent(RefinableObjClock &clock)const
 {
    // First check for loop
@@ -150,7 +160,10 @@ void RefinableObjClock::AddParent(RefinableObjClock &clock)const
    mvParent.insert(&clock);
 }
 void RefinableObjClock::RemoveParent(RefinableObjClock &clock)const
-{mvParent.erase(&clock);}
+{
+   const unsigned int i=mvParent.erase(&clock);
+   VFN_DEBUG_MESSAGE("RefinableObjClock::RemoveParent():"<<i,10)
+}
 
 bool RefinableObjClock::HasParent(const RefinableObjClock &clock) const
 {
@@ -162,7 +175,6 @@ bool RefinableObjClock::HasParent(const RefinableObjClock &clock) const
    }
    return false;
 }
-
 //######################################################################
 //    Restraint
 //######################################################################
@@ -305,6 +317,7 @@ REAL RefinablePar::GetValue()const
 
 void RefinablePar::SetValue(const REAL value)
 {
+   if(*mpValue == value) return;
    this->Click();
    VFN_DEBUG_MESSAGE("RefinablePar::SetValue()",2)
    #if 0
@@ -351,6 +364,7 @@ const REAL& RefinablePar::GetHumanValue() const
 
 void RefinablePar::SetHumanValue(const REAL &value)
 {
+   if(*mpValue == (value/mHumanScale)) return;
    this->Click();
    VFN_DEBUG_MESSAGE("RefinablePar::SetHumanValue()",2)
    #if 0
@@ -390,6 +404,7 @@ void RefinablePar::SetHumanValue(const REAL &value)
 
 void RefinablePar::Mutate(const REAL mutateValue)
 {
+   if(0==mutateValue) return;
    VFN_DEBUG_MESSAGE("RefinablePar::Mutate():"<<this->GetName(),1)
    if(true==mIsFixed) return;
    this->Click();
