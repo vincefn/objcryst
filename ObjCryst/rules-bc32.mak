@@ -158,10 +158,10 @@ SEARCHDIRS = -I${DIR_CRYST} -I. -I.. -I..\.. -I..\..\.. -I$(DIR_BLITZ) -I$(DIR_N
 
 #wxWindows flags
 !if $(wxcryst)==1
-   WXCRYSTFLAGS = -D__WX__CRYST__ @$(DIR_WXWINDOWS)\src\msw\wxwin32.cfg
+   WXCRYSTFLAGS = -D__WX__CRYST__ @$(DIR_WXWINDOWS)\src\msw\wxw32.cfg
 #-aa : windows application -ap: console application
    WX_LDFLAGS = -ap
-   WX_LIBS = libwxcryst.lib wx32.lib jpeg.lib tiff.lib winpng.lib zlib.lib xpm.lib
+   WX_LIBS = libwxcryst.lib wx24s_bcc.lib jpeg.lib tiff.lib winpng.lib zlib.lib
 !else
    WXCRYSTFLAGS :=
    WX_LDFLAGS :=
