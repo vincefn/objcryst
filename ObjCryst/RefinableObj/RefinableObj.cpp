@@ -1344,19 +1344,35 @@ void RefinableObj::Print() const
 
 long RefinableObj::CreateParamSet(const string name) const
 {
-   VFN_DEBUG_MESSAGE("RefinableObj::CreateRefParSet()",3)
+   VFN_DEBUG_ENTRY("RefinableObj::CreateParamSet()",3)
    long id;
    for(id=0;id<mMaxNbSavedSets;id++) if(false==mSavedValuesSetIsUsed(id)) break;
    if(mMaxNbSavedSets==id)
-   {//:TODO:
-      cout << "RefinableObj::CreateRefParSet():cannot store that many saved sets !"<<endl;
-      throw 0;
+   {
+		const long newMaxNbSavedSets=(long)(mMaxNbSavedSets*1.1+10);
+   	CrystVector_REAL** newSavedValuesSet = new CrystVector_REAL* [newMaxNbSavedSets];
+   	string** newSavedValuesSetName = new string* [newMaxNbSavedSets];
+		
+   	mSavedValuesSetIsUsed.resizeAndPreserve(newMaxNbSavedSets);
+		
+		for(long i=0;i<mMaxNbSavedSets;i++)
+		{
+			newSavedValuesSet    [i]=mpSavedValuesSet[i];
+			newSavedValuesSetName[i]=mpSavedValuesSetName[i];
+		}
+		for(long i=mSavedValuesSetIsUsed.numElements();i>=mMaxNbSavedSets;i++)
+			mSavedValuesSetIsUsed(i)=false;
+		delete[] mpSavedValuesSet;
+		delete[] mpSavedValuesSetName;
+		mpSavedValuesSet    =newSavedValuesSet;
+		mpSavedValuesSetName=newSavedValuesSetName;
    }
    mSavedValuesSetIsUsed(id)=true;
    *(mpSavedValuesSetName+id)= new string;
    **(mpSavedValuesSetName+id) = name;
    *(mpSavedValuesSet+id)=new CrystVector_REAL;
 	this->SaveParamSet(id);
+   VFN_DEBUG_EXIT("RefinableObj::CreateParamSet()",3)
    return id;
 }
 
