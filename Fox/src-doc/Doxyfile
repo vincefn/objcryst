@@ -1,5 +1,5 @@
 PROJECT_NAME      = "Fox"
-PROJECT_NUMBER    = 1.6.0.1
+PROJECT_NUMBER    = 1.6.0.2
 OUTPUT_DIRECTORY  = ../
 HTML_HEADER       = header.html
 HTML_FOOTER       = footer.html

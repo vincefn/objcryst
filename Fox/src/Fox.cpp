@@ -323,7 +323,7 @@ bool MyApp::OnInit()
    
    WXCrystMainFrame *frame ;
    
-   frame = new WXCrystMainFrame("FOX: Free Objects for Xtal structures v1.6.0.1",
+   frame = new WXCrystMainFrame("FOX: Free Objects for Xtal structures v1.6.0.2",
                                  wxPoint(50, 50), wxSize(550, 400),
                                  !(loadFourierGRD||loadFourierDSN6));
    // Use the main frame status bar to pass messages to the user
@@ -528,7 +528,7 @@ void WXCrystMainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
    wxString msg;
    msg.Printf( _T("F.O.X. - Free Objects for Xtal structures\n")
-               _T("Version 1.6.0.1\n\n")
+               _T("Version 1.6.0.2\n\n")
                _T("(c) 2000-2003 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n")
                _T("    2000-2001 Radovan CERNY, University of Geneva\n\n")
                _T("http://objcryst.sourceforge.net\n")
