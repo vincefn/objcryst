@@ -66,7 +66,9 @@ MainTracker::MainTracker()
 
 MainTracker::~MainTracker()
 {
+   #ifdef __WX__CRYST__
    this->WXDelete();
+   #endif
    this->ClearTrackers();
 }
 void MainTracker::AddTracker(Tracker *t)
