@@ -108,7 +108,7 @@ class OptimizationObj
       /** \brief Randomize starting configuration. Only affects limited and periodic parameters.
       */
       virtual void RandomizeStartingConfig();
-      /// Launch optimization for N steps
+      /// Launch optimization (a single run) for N steps
       /// \param nbSteps: the number of steps to go. This number is modified (decreases!)
       /// as the refinement goes on.
       /// \param silent : if true, absolutely no message should be printed (except debugging)
@@ -117,6 +117,19 @@ class OptimizationObj
       /// been spent optimizing (ignored if <0).
       virtual void Optimize(long &nbSteps,const bool silent=false,const REAL finalcost=0,
                             const REAL maxTime=-1)=0;
+      /** Launch optimization for multiple runs of N steps
+      * \param nbCycle: the number of runs (cycles) to perform. The structure is randomized
+      * at the beginning of each cycle. If nbCycle==-1, this will run indefinitely.
+      * The nbCycle parameter is decreased after each run.
+      * \param nbSteps: the number of steps to go. This number is modified (decreases!)
+      * as the refinement goes on.
+      * \param silent : if true, absolutely no message should be printed (except debugging)
+      * \param finalcost: the optimization will stop if overall cost fallse below this value
+      * \param maxTime: the optimization will stop after the given number of seconds has
+      * been spent optimizing (ignored if <0).
+      */
+      virtual void MultiRunOptimize(long &nbCycle=-1,long &nbSteps=1e6,const bool silent=false,const REAL finalcost=0,
+                                    const REAL maxTime=-1)=0;
    //Set Refinable parameters status
       /// Fix all parameters
       void FixAllPar();
@@ -243,7 +256,14 @@ class OptimizationObj
          };
          /// Weights for each objects in each context
          map<const RefinableObj*,DynamicObjWeight> mvObjWeight;
-         
+
+         /// List of saved parameter sets. This is used to save possible
+         /// solutions during the optimization, so that the user can check them
+         /// afterwards.
+         ///
+         /// The first member of each pair is the \e index of the parameter set,
+         /// and the second is the overall cost for that set.
+         std::vector<pair<long,REAL> > mvSavedParamSet;
          
       /// True if a refinement is being done. For multi-threaded environment
       bool mIsOptimizing;
@@ -328,8 +348,7 @@ class MonteCarloObj:public OptimizationObj
                                  const REAL tMax, const REAL tMin,
                                  const AnnealingSchedule scheduleMutation=ANNEALING_CONSTANT,
                                  const REAL mutMax=16., const REAL mutMin=.125,
-                                 const long nbTrialRetry=0,const REAL minCostRetry=0.,
-                                 const long maxNbTrialSinceBest=0);
+                                 const long nbTrialRetry=0,const REAL minCostRetry=0.);
       /** \brief  Set the refinement method to Parallel Tempering.
       *
       * The refinement begins at max and finishes at min temperature.
@@ -355,6 +374,19 @@ class MonteCarloObj:public OptimizationObj
       
       virtual void Optimize(long &nbSteps,const bool silent=false,const REAL finalcost=0,
                             const REAL maxTime=-1);
+      virtual void MultiRunOptimize(long &nbCycle=-1,long &nbSteps=1e6,const bool silent=false,const REAL finalcost=0,
+                                    const REAL maxTime=-1);
+      
+      /** \internal Do a single simulated annealing run. This is called by Optimize(...) and
+      /* MultiRunOptimize(), which must also prepare the optimization (PrepareRefParList(), etc..).
+      */
+      void RunSimulatedAnnealing(long &nbSteps,const bool silent=false,const REAL finalcost=0,
+                                 const REAL maxTime=-1);
+      /** \internal Do a single Parallel Tempering run. This is called by Optimize(...) and
+      /* MultiRunOptimize(), which must also prepare the optimization (PrepareRefParList(), etc..).
+      */
+      void RunParallelTempering(long &nbSteps,const bool silent=false,const REAL finalcost=0,
+                                const REAL maxTime=-1);
       
       //Parameter Access by name
       //RefinablePar& GetPar(const string& parName);
@@ -373,8 +405,7 @@ class MonteCarloObj:public OptimizationObj
       * 
       * \internal
       *  This just generates a new configuration with random changes (according
-      * to current parameters). The old config is stored in mRefParList as the
-      * last config (index mLastParSavedSetIndex). The new one is \e not tested \e in \e this \e function
+      * to current parameters). The new configuration is \e not tested \e in \e this \e function
       * vs temperature: this should be done in the OptimizationObj::Optimize() function,
       * which also chooses whether to revert to the previous configuration.
       *
@@ -402,9 +433,6 @@ class MonteCarloObj:public OptimizationObj
          RefObjOpt mSaveDetailledHistory;
          /// Save the evolution of refined parameters after optimization ?
          string mHistorySaveFileName;
-         
-         /// Index of the 'last' parameter set
-         long mLastParSavedSetIndex;
          
       // Annealing parameters
          /// Current temperature for annealing
@@ -437,11 +465,6 @@ class MonteCarloObj:public OptimizationObj
          long mNbTrialRetry;
          /// Cost to reach unless an automatic randomization and retry is done
          REAL mMinCostRetry;
-         /// If more than mMaxNbTrialSinceBest trials have been made since the best
-         /// configuration has been found, then revert to the best configuration. If <=0,
-         /// then this is ignored. This must be large enough to have an ergodic 
-         /// algorithm (more strictly, should not be used ?)
-         long mMaxNbTrialSinceBest;
       
    private:
    #ifdef __WX__CRYST__

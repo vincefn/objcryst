@@ -61,7 +61,11 @@ static long ID_GLOBALOPT_MENU_OBJECTS_ADDCOSTFUNC=   WXCRYST_ID();
 static long ID_GLOBALOPT_MENU_OBJECTS_REMOVECOSTFUNC=WXCRYST_ID(); 
 static long ID_GLOBALOPT_MENU_OPT=                   WXCRYST_ID(); 
 static long ID_GLOBALOPT_MENU_OPT_RUN=               WXCRYST_ID(); 
+static long ID_GLOBALOPT_MENU_OPT_RUN_MULTIPLE=      WXCRYST_ID(); 
 static long ID_GLOBALOPT_MENU_OPT_STOP=              WXCRYST_ID(); 
+static long ID_GLOBALOPT_MENU_SOLUTIONS=             WXCRYST_ID(); 
+static long ID_GLOBALOPT_MENU_SOLUTIONS_BROWSE=      WXCRYST_ID(); 
+static long ID_BROWSE_WIN=                           WXCRYST_ID(); 
 
 WXOptimizationObj::WXOptimizationObj(wxWindow* parent, OptimizationObj *obj):
 WXCrystObj(parent),mpGlobalOptimRunThread(0)
@@ -82,9 +86,14 @@ WXCrystObj(parent),mpGlobalOptimRunThread(0)
                                 "Add object to optimize");
       mpMenuBar->AddMenu("Run/Stop",ID_GLOBALOPT_MENU_OPT);
          mpMenuBar->AddMenuItem(ID_GLOBALOPT_MENU_OPT,
-                                ID_GLOBALOPT_MENU_OPT_RUN,"Run Optimization");
+                                ID_GLOBALOPT_MENU_OPT_RUN_MULTIPLE,"Multiple Runs");
+         mpMenuBar->AddMenuItem(ID_GLOBALOPT_MENU_OPT,
+                                ID_GLOBALOPT_MENU_OPT_RUN,"Single Run");
          mpMenuBar->AddMenuItem(ID_GLOBALOPT_MENU_OPT,
                                 ID_GLOBALOPT_MENU_OPT_STOP,"Stop Optimization");
+      mpMenuBar->AddMenu("Solutions",ID_GLOBALOPT_MENU_SOLUTIONS);
+         mpMenuBar->AddMenuItem(ID_GLOBALOPT_MENU_SOLUTIONS,
+                                ID_GLOBALOPT_MENU_SOLUTIONS_BROWSE,"Browse Solutions");
       mpMenuBar->Layout();
       mpSizer->SetItemMinSize(mpMenuBar,
                               mpMenuBar->GetSize().GetWidth(),
@@ -176,22 +185,71 @@ void WXOptimizationObj::UpdateUI()
    VFN_DEBUG_EXIT("WXOptimizationObj::UpdateUI()",5)
 }
 
+void WXOptimizationObj::OnBrowseParamSet(wxCommandEvent & WXUNUSED(event))
+{
+   if(this->GetOptimizationObj().IsOptimizing())
+   {
+      wxMessageDialog dumbUser(this,"Cannot browse during Optimisation !",
+                               "Cannot browse during Optimisation!",wxOK|wxICON_EXCLAMATION);
+      dumbUser.ShowModal();
+      return;
+   }
+   wxFrame *frame= new wxFrame(this,-1,"Stored Configurations",
+                               wxDefaultPosition,wxSize(250,200));
+   const long nb=this->GetOptimizationObj().mvSavedParamSet.size();
+   wxString *choices = new wxString[nb];
+   for(unsigned int i=0;i<nb;i++)
+   {
+      choices[i].sprintf("%d, cost= %f, %s",i,
+                         this->GetOptimizationObj().mvSavedParamSet[i].second,
+                         this->GetOptimizationObj().mRefParList.GetParamSetName
+                           (this->GetOptimizationObj().mvSavedParamSet[i].first).c_str());
+      //cout<<choices[i]<<endl;
+   }
+   wxListBox* wxlist=new wxListBox(frame, ID_BROWSE_WIN, wxDefaultPosition, 
+                                   wxDefaultSize, nb, choices,
+                                   wxLB_SINGLE|wxLB_NEEDED_SB, wxDefaultValidator,
+                                   "listBox");
+   wxlist->SetEventHandler(this);
+   mClockParamSetWindow.Click();
+   frame->Show(true);
+}
+
+void WXOptimizationObj::OnSelectParamSet(wxCommandEvent &event)
+{
+   if(this->GetOptimizationObj().IsOptimizing())
+   {
+      wxMessageDialog dumbUser(this,"Cannot browse during Optimisation !",
+                               "Cannot browse during Optimisation!",wxOK|wxICON_EXCLAMATION);
+      dumbUser.ShowModal();
+      return;
+   }
+   const long n=event.GetSelection();
+   if(mClockParamSetWindow>this->GetOptimizationObj().mRefParList.GetRefParListClock())
+   {
+      this->GetOptimizationObj().mRefParList
+         .RestoreParamSet(this->GetOptimizationObj().mvSavedParamSet[n].first);
+      this->GetOptimizationObj().UpdateDisplay();
+   }
+}
+
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXGlobalOptimRunThread
 //
 ////////////////////////////////////////////////////////////////////////
-WXGlobalOptimRunThread::WXGlobalOptimRunThread(OptimizationObj &globalOptObj,
-                                               long &nbTrial,const REAL finalCost):
-wxThread(wxTHREAD_DETACHED),mpGlobalOptObj(&globalOptObj),mpNbTrial(&nbTrial),
-mFinalCost(finalCost)
+WXGlobalOptimRunThread::WXGlobalOptimRunThread(OptimizationObj &globalOptObj,long &nbTrial,
+                             const REAL finalCost,long &nbRun,const bool multiple):
+wxThread(wxTHREAD_DETACHED),mpGlobalOptObj(&globalOptObj),mpNbTrial(&nbTrial),mpNbRun(&nbRun),
+mFinalCost(finalCost),mDoMultiple(multiple)
 {
 }
 
 void *WXGlobalOptimRunThread::Entry()
 {
    cout <<endl<<"Entering refinement thread "<<endl<<endl;
-   mpGlobalOptObj->Optimize(*mpNbTrial,false,mFinalCost);
+   if(mDoMultiple) mpGlobalOptObj->MultiRunOptimize(*mpNbRun,*mpNbTrial,false,mFinalCost);
+   else mpGlobalOptObj->Optimize(*mpNbTrial,false,mFinalCost);
    return NULL;
 }
 void WXGlobalOptimRunThread::OnExit()
@@ -210,12 +268,16 @@ BEGIN_EVENT_TABLE(WXMonteCarloObj, wxWindow)
    //EVT_MENU(ID_REFOBJ_MENU_OBJ_LOAD,                   WXOptimizationObj::OnLoad)
    EVT_MENU(ID_GLOBALOPT_MENU_OBJECTS_ADDOBJ,        WXOptimizationObj::OnAddRefinedObject)
    EVT_MENU(ID_GLOBALOPT_MENU_OPT_RUN,           WXOptimizationObj::OnRunOptimization)
+   EVT_MENU(ID_GLOBALOPT_MENU_OPT_RUN_MULTIPLE,  WXOptimizationObj::OnRunOptimization)
    EVT_MENU(ID_GLOBALOPT_MENU_OPT_STOP,          WXOptimizationObj::OnStopOptimization)
+   EVT_MENU(ID_GLOBALOPT_MENU_SOLUTIONS_BROWSE,  WXOptimizationObj::OnBrowseParamSet)
    EVT_UPDATE_UI(ID_CRYST_UPDATEUI,                    WXOptimizationObj::OnUpdateUI)
+   EVT_LISTBOX(ID_BROWSE_WIN,                    WXOptimizationObj::OnSelectParamSet)
+   EVT_LISTBOX_DCLICK(ID_BROWSE_WIN,             WXOptimizationObj::OnSelectParamSet)
 END_EVENT_TABLE()
 
 WXMonteCarloObj::WXMonteCarloObj(wxWindow *parent, MonteCarloObj* obj):
-WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(100000000)
+WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(10000000),mNbRun(-1)
 {
    VFN_DEBUG_ENTRY("WXMonteCarloObj::WXMonteCarloObj()",7)
    //options
@@ -273,15 +335,29 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(100000000)
       mpSizer->Add(opt,0,wxALIGN_LEFT);
       mList.Add(opt);
    // Number of trials to go
-      mpWXFieldNbTrial=new WXFieldPar<long>(this,"Number of trials to go:",-1,&mNbTrial,70);
+      mpWXFieldNbTrial=new WXFieldPar<long>(this,"Number of trials per run:",-1,&mNbTrial,70);
       mpSizer->Add(mpWXFieldNbTrial);
       mList.Add(mpWXFieldNbTrial);
+      mpWXFieldNbTrial->SetToolTip(_T("Number of triels per run.\n")
+             _T("This number will be updated during the optimization.\n\n")
+             _T("Using Multiple Runs:\n")
+             _T("  For simple problems (e.g. PbSO4), use 200 000\n")
+             _T("  For larger problems (e.g. Cimetidine), use 2 000 000\n")
+             _T("  For much larger problems, use 10 000 000\n\n")
+             _T("For a single run using Parallel Tempering, use a large number (100 000 000:\n"));
+   // Number of cycles (-1=run indefinitely)
+      WXFieldPar<long> *pWXFieldNbRun=new WXFieldPar<long>(this,"Number of Runs to perform:",-1,&mNbRun,40);
+      mpSizer->Add(pWXFieldNbRun);
+      mList.Add(pWXFieldNbRun);
+      pWXFieldNbRun->SetToolTip(_T("Number of runs to perform (for Multiple Runs).\n")
+                                _T("Use -1 (the default) to run an infinite number of Runs.\n\n")
+                                _T("The model will be randomized at the beginning of each run.\n"));
    this->BottomLayout(0);
    this->CrystUpdate();
    VFN_DEBUG_EXIT("WXMonteCarloObj::WXMonteCarloObj()",7)
 }
 
-void WXMonteCarloObj::OnRunOptimization(wxCommandEvent & WXUNUSED(event))
+void WXMonteCarloObj::OnRunOptimization(wxCommandEvent & event)
 {
    VFN_DEBUG_ENTRY("WXGeneticAlgorithm::OnRunOptimization()",6)
    WXCrystValidateAllUserInput();
@@ -314,7 +390,12 @@ void WXMonteCarloObj::OnRunOptimization(wxCommandEvent & WXUNUSED(event))
                               "Goal Cost",".20",wxOK | wxCANCEL);
       if(wxID_OK==costDialog.ShowModal()) costDialog.GetValue().ToDouble(&finalCost);
    }
-   mpGlobalOptimRunThread = new WXGlobalOptimRunThread(this->GetOptimizationObj(),mNbTrial,finalCost);
+   if(event.GetId()==ID_GLOBALOPT_MENU_OPT_RUN_MULTIPLE)
+      mpGlobalOptimRunThread = new WXGlobalOptimRunThread(this->GetOptimizationObj(),
+                                                          mNbTrial,finalCost,mNbRun,true);
+   else
+      mpGlobalOptimRunThread = new WXGlobalOptimRunThread(this->GetOptimizationObj(),
+                                                          mNbTrial,finalCost,mNbRun,false);
    if(mpGlobalOptimRunThread->Create() != wxTHREAD_NO_ERROR) 
       wxLogError("Can't create optimization thread");
    else mpGlobalOptimRunThread->Run();
@@ -324,7 +405,7 @@ void WXMonteCarloObj::OnRunOptimization(wxCommandEvent & WXUNUSED(event))
 void WXMonteCarloObj::UpdateDisplayNbTrial()
 {
    VFN_DEBUG_MESSAGE("WXMonteCarloObj::UpdateDisplayNbTrial()",5)
-   mpWXFieldNbTrial->CrystUpdate();
+   mList.CrystUpdate();
    wxUpdateUIEvent event(ID_CRYST_UPDATEUI);
    wxPostEvent(this,event);
 }

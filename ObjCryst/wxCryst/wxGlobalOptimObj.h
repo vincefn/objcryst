@@ -53,27 +53,37 @@ class WXOptimizationObj: public WXCrystObj
       virtual const OptimizationObj & GetOptimizationObj()const=0;
       virtual void OnUpdateUI(wxUpdateUIEvent& event);
       virtual void UpdateUI();
+      /// Opens a window where the stored parameter set can be selected
+      virtual void OnBrowseParamSet(wxCommandEvent & WXUNUSED(event));
+      /// Restore one parameter set
+      virtual void OnSelectParamSet(wxCommandEvent & WXUNUSED(event));
    protected:
       WXCrystMenuBar* mpMenuBar;
       WXGlobalOptimRunThread *mpGlobalOptimRunThread;
       WXFieldPar<long> *mpWXFieldNbTrial;
+      /// Record when the window giving the list of recorded parameter set was created.
+      RefinableObjClock mClockParamSetWindow;
 };
 
 /// Class for a GlobalOptimization thread
 class WXGlobalOptimRunThread: public wxThread
 {
    public:
-      WXGlobalOptimRunThread(OptimizationObj &globalOptObj,long &nbTrial,const REAL finalCost=0);
-      
+      WXGlobalOptimRunThread(OptimizationObj &globalOptObj,long &nbTrial,
+                             const REAL finalCost=0,long &nbRun=-1,const bool multiple=true);
       virtual void *Entry();
       virtual void OnExit();
    private:
       OptimizationObj *mpGlobalOptObj;
       ///This points to the mNbTrial member in WXOptimizationObj
       long *mpNbTrial;
+      ///This points to the mNbRun member in WXOptimizationObj
+      long *mpNbRun;
       /// The value of the cost below which the optimization should stop
       /// (0 by default) even if the desired number pf trial has not been reached.
       const REAL mFinalCost;
+      /// Use multiple Runs ?
+      const bool mDoMultiple;
 };
 
 /** Class for Graphical interface to Monte-Carlo objects 
@@ -85,7 +95,7 @@ class WXMonteCarloObj: public WXOptimizationObj
    public:
       WXMonteCarloObj(wxWindow *parent, MonteCarloObj*);
       //virtual void CrystUpdate();
-      virtual void OnRunOptimization(wxCommandEvent & WXUNUSED(event));
+      virtual void OnRunOptimization(wxCommandEvent &event);
       /// Called during optimization, to show the user something's still going on...
       void UpdateDisplayNbTrial();
       virtual OptimizationObj & GetOptimizationObj();
@@ -95,6 +105,8 @@ class WXMonteCarloObj: public WXOptimizationObj
       MonteCarloObj *mpMonteCarloObj;
       /// The number of trials asked by the user
       long mNbTrial;
+      /// The number of cycles
+      long mNbRun;
       WXFieldPar<long> *mpWXFieldNbTrial;
    DECLARE_EVENT_TABLE()
 };

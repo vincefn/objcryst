@@ -107,6 +107,18 @@ void SimplexObj::Optimize(long &nbSteps,const bool silent,const REAL finalcost,
    for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).EndOptimization();
    VFN_DEBUG_EXIT("SimplexObj::Optimize()",10)
 }
+void SimplexObj::MultiRunOptimize(long &nbCycle,long &nbSteps,const bool silent,
+                                    const REAL finalcost,const REAL maxTime)
+{
+   const long nbStep0=nbSteps;
+   while(nbCycle--!=0)
+   {
+      if(!silent) cout <<"SimplexObj::MultiRunOptimize: Starting Run#"<<abs(nbCycle)<<endl;
+      nbSteps=nbStep0;
+      this->Optimize(nbSteps,silent,finalcost,maxTime);
+      if(!silent) cout <<"SimplexObj::MultiRunOptimize: Finished Run#"<<abs(nbCycle)<<endl;
+   }
+}
 void SimplexObj::XMLOutput(ostream &os,int indent)const
 {
 }

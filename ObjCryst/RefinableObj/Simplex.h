@@ -40,6 +40,8 @@ class SimplexObj:public OptimizationObj
       SimplexObj(const string name="Unnamed Simplex Object");
       virtual void Optimize(long &nbSteps,const bool silent=false,const REAL finalcost=0,
                             const REAL maxTime=-1);
+      virtual void MultiRunOptimize(long &nbCycle=-1,long &nbSteps=1e6,const bool silent=false,
+                                    const REAL finalcost=0,const REAL maxTime=-1);
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
    private:
