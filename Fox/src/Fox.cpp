@@ -253,7 +253,7 @@ bool MyApp::OnInit()
               <<"   -i input.xml: input 'in.xml' file"<<endl
               <<"   --loadfouriergrd map.grd: load and display 'map.grd' fourier map with (first) crystal structure"<<endl
               <<"   --nogui: run without GUI, automatically launches optimization"<<endl
-              <<"      options with --nogui:
+              <<"      options with --nogui:"<<endl
               <<"         -n 10000     : run for 10000 trials at most (default: 1000000)"<<endl
               <<"         -o out.xml   : output in 'out.xml'"<<endl
               <<"         --randomize  : randomize initial configuration"<<endl
