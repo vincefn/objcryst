@@ -82,6 +82,8 @@ class WXPowderPatternGraph: public wxWindow
       void OnPaint(wxPaintEvent& WXUNUSED(event));
       /// Display the Theta and intensity values at the mouse position, in the status bar
       void OnMouse(wxMouseEvent &event);
+      /// Wheel wan be used to scroll the pattern 
+      void OnMouseWheel(wxMouseEvent &event);
       /// Update the powder spectrum, at the user's request. This calls
       /// the WXPowderPattern::CrystUpdate().
       void OnUpdate(wxCommandEvent & WXUNUSED(event));
@@ -93,6 +95,7 @@ class WXPowderPatternGraph: public wxWindow
       /// Redraw the pattern (special function to ensure complete redrawing under windows...)
       void OnRedrawNewPattern(wxUpdateUIEvent& WXUNUSED(event));
       void OnToggleLabel(wxCommandEvent& WXUNUSED(event));
+      void OnKeyDown(wxKeyEvent& event);
    private:
       /// Reset the limits of the axis to full range.
       void ResetAxisLimits();

@@ -745,6 +745,8 @@ BEGIN_EVENT_TABLE(WXPowderPatternGraph, wxWindow)
    EVT_MENU(ID_POWDERSPECTRUMGRAPH_MENU_UPDATE, WXPowderPatternGraph::OnUpdate)
    EVT_MENU(ID_POWDERSPECTRUMGRAPH_MENU_TOGGLELABEL, WXPowderPatternGraph::OnToggleLabel)
    EVT_UPDATE_UI(ID_POWDERSPECTRUM_GRAPH_NEW_PATTERN,WXPowderPatternGraph::OnRedrawNewPattern)
+   EVT_CHAR(                                    WXPowderPatternGraph::OnKeyDown)
+   EVT_MOUSEWHEEL(                              WXPowderPatternGraph::OnMouseWheel)
 END_EVENT_TABLE()
 
 WXPowderPatternGraph::WXPowderPatternGraph(wxFrame *frame, WXPowderPattern* parent):
@@ -1020,6 +1022,32 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
       return;
    }
 }
+void WXPowderPatternGraph::OnMouseWheel(wxMouseEvent &event)
+{
+   VFN_DEBUG_ENTRY("WXPowderPatternGraph::OnMouseWheel()",6)
+   if(event.GetWheelRotation()>=event.GetWheelDelta())
+   {
+      const long range=mLast-mFirst;
+      mLast += range/8;
+      if(mLast>=m2theta.numElements()) mLast=m2theta.numElements()-1;
+      mFirst=mLast-range;
+      mMin2Theta=m2theta(mFirst);
+      mMax2Theta=m2theta(mLast);
+   }
+   if(event.GetWheelRotation()<=(-event.GetWheelDelta()))
+   {
+      const long range=mLast-mFirst;
+      mFirst -= range/8;
+      if(mFirst<0) mFirst=0;
+      mLast=mFirst+range;
+      mMin2Theta=m2theta(mFirst);
+      mMax2Theta=m2theta(mLast);
+   }
+   mClockAxisLimits.Click();
+   wxUpdateUIEvent ev(ID_POWDERSPECTRUM_GRAPH_NEW_PATTERN);
+   wxPostEvent(this,ev);
+   VFN_DEBUG_EXIT("WXPowderPatternGraph::OnMouseWheel()",6)
+}
 
 void WXPowderPatternGraph::OnUpdate(wxCommandEvent & WXUNUSED(event))
 {
@@ -1034,6 +1062,89 @@ void WXPowderPatternGraph::OnToggleLabel(wxCommandEvent & WXUNUSED(event))
    this->Refresh(false);
    if(mDisplayLabel) mpPopUpMenu->SetLabel(ID_POWDERSPECTRUMGRAPH_MENU_TOGGLELABEL, "Hide Labels");
    else mpPopUpMenu->SetLabel(ID_POWDERSPECTRUMGRAPH_MENU_TOGGLELABEL, "Show Labels");
+}
+
+void WXPowderPatternGraph::OnKeyDown(wxKeyEvent& event)
+{
+   switch(event.GetKeyCode())
+   {
+      case(WXK_LEFT):
+      {
+         const long range=mLast-mFirst;
+         mFirst -= range/8;
+         if(mFirst<0) mFirst=0;
+         mLast=mFirst+range;
+         mMin2Theta=m2theta(mFirst);
+         mMax2Theta=m2theta(mLast);
+         break;
+      }
+      case(WXK_RIGHT):
+      {
+         const long range=mLast-mFirst;
+         mLast += range/8;
+         if(mLast>=m2theta.numElements()) mLast=m2theta.numElements()-1;
+         mFirst=mLast-range;
+         mMin2Theta=m2theta(mFirst);
+         mMax2Theta=m2theta(mLast);
+         break;
+      }
+      case(WXK_UP):
+      {
+         const REAL range=mMaxIntensity-mMinIntensity;
+         mMinIntensity+=range/8;
+         mMaxIntensity+=range/8;
+         break;
+      }
+      case(WXK_DOWN):
+      {
+         const REAL range=mMaxIntensity-mMinIntensity;
+         mMinIntensity-=range/8;
+         mMaxIntensity-=range/8;
+         break;
+      }
+      case(43):// WXK_ADD ?
+      {
+         const long halfrange=(mLast-mFirst)/2;
+         const long middle=(mLast+mFirst)/2;
+         mFirst= middle-halfrange*4./5.;
+         mLast = middle+halfrange*4./5.;
+         mMin2Theta=m2theta(mFirst);
+         mMax2Theta=m2theta(mLast);
+         break;
+      }
+      case(45):// WXK_SUBTRACT ?
+      {
+         const long halfrange=(mLast-mFirst)/2;
+         const long middle=(mLast+mFirst)/2;
+         mFirst= middle-halfrange*5./4.;
+         mLast = middle+halfrange*5./4.;
+         if(mFirst<0) mFirst=0;
+         if(mLast>=m2theta.numElements()) mLast=m2theta.numElements()-1;
+         mMin2Theta=m2theta(mFirst);
+         mMax2Theta=m2theta(mLast);
+         break;
+      }
+      case(42):// WXK_MULTIPLY
+      {
+         const REAL range=mMaxIntensity-mMinIntensity;
+         mMaxIntensity=mMinIntensity+range*4./5.;
+         break;
+      }
+      case(47):// WXK_DIVIDE
+      {
+         const REAL range=mMaxIntensity-mMinIntensity;
+         mMaxIntensity=mMinIntensity+range*5./4.;
+         break;
+      }
+      default: 
+      {
+         VFN_DEBUG_MESSAGE("WXPowderPatternGraph::OnKeyDown(): no command for key #"<<event.GetKeyCode(),5);
+         cout<<"WXPowderPatternGraph::OnKeyDown(): no command for key #"<<event.GetKeyCode()<<endl;
+      }
+   }
+   mClockAxisLimits.Click();
+   wxUpdateUIEvent ev(ID_POWDERSPECTRUM_GRAPH_NEW_PATTERN);
+   wxPostEvent(this,ev);
 }
 
 void WXPowderPatternGraph::SetPattern(const CrystVector_REAL &obs,
