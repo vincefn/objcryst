@@ -75,7 +75,8 @@ WXCrystObjBasic::~WXCrystObjBasic()
    // Every time we destroy a widget, validate all input to make sure the destroyed
    // widget does not have some unread info.
    WXCrystValidateAllUserInput();
-   for(set<WXCrystObjBasicList*>::iterator pos=mvpList.begin();pos!=mvpList.end();++pos)
+   set<WXCrystObjBasicList*> vpList=mvpList;//use a copy
+   for(set<WXCrystObjBasicList*>::iterator pos=vpList.begin();pos!=vpList.end();++pos)
       (*pos)->Remove(this);
 }
 
@@ -130,13 +131,19 @@ WXCrystObjBasicList::WXCrystObjBasicList()
 {}
 
 WXCrystObjBasicList::~WXCrystObjBasicList()
-{}
+{
+   set<WXCrystObjBasic*> vpWXCrystObj=mvpWXCrystObj;
+   for(set<WXCrystObjBasic*>::iterator pos=vpWXCrystObj.begin();pos!=vpWXCrystObj.end();pos++)
+      (*pos)->RemovedFromList(this);
+   mvpWXCrystObj.clear();
+}
 
 unsigned int WXCrystObjBasicList::GetNb()const {return mvpWXCrystObj.size();}
 
 void WXCrystObjBasicList::Add(WXCrystObjBasic *win)
 {
    VFN_DEBUG_MESSAGE("WXCrystObjBasicList::Add()",6)
+   win->AddedToList(this);
    mvpWXCrystObj.insert(win);
 }
 
@@ -144,6 +151,7 @@ void WXCrystObjBasicList::Remove(WXCrystObjBasic *win)
 {
    VFN_DEBUG_MESSAGE("WXCrystObjBasicList::Remove():"<<win,6)
    mvpWXCrystObj.erase(win);
+   win->RemovedFromList(this);
 }
 
 bool WXCrystObjBasicList::Show(bool show)
