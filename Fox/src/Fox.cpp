@@ -319,7 +319,7 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
       wxMenu *menuFile = new wxMenu;//
          menuFile->Append(MENU_FILE_LOAD, "Load", "Load some objects");
          //menuFile->Append(MENU_FILE_LOAD_OXY,"Load OLD .OXY","Load using the old .oxy format");
-         menuFile->Append(MENU_FILE_SAVE, "Save", "Save Evrything...");
+         menuFile->Append(MENU_FILE_SAVE, "Save", "Save Everything...");
          menuFile->Append(MENU_FILE_QUIT, "E&xit\tAlt-Q", "Quit ");
       
       wxMenu *objectMenu = new wxMenu("", wxMENU_TEAROFF);
@@ -372,7 +372,7 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
 
    
    /*   
-   //crate something to display
+   //create something to display
       Crystal *cryst=new Crystal(8.482,5.398,6.959,"Pnma");
       cryst->SetName("PbSO4-(reference structure)");
       //Create 'real' PBSO4 structure (for reference only)
