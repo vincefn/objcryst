@@ -126,7 +126,16 @@ Molecule *ZScatterer2Molecule(ZScatterer *scatt)
          if(   (dist<(1.10*( mol->GetAtom(i).GetScatteringPower().GetRadius()
                             +mol->GetAtom(j).GetScatteringPower().GetRadius())))
              &&(pos==mol->GetBondList().end()))
+         {
+            // test if we are not creating a H-H bond
+               const ScatteringPowerAtom *p1=dynamic_cast<const ScatteringPowerAtom *> 
+                  (&(mol->GetAtom(i).GetScatteringPower()));
+               const ScatteringPowerAtom *p2=dynamic_cast<const ScatteringPowerAtom *> 
+                  (&(mol->GetAtom(i).GetScatteringPower()));
+               if((0!=p1)&&(0!=p2))
+                  if((1==p1->GetAtomicNumber())&&(1==p2->GetAtomicNumber())) continue;
             mol->AddBond(mol->GetAtom(i),mol->GetAtom(j),dist,.01,.05,false);
+         }
       }
    
    for(map<unsigned long,set<unsigned long> >::const_iterator pos=mol->GetConnectivityTable().begin();
