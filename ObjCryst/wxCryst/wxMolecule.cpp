@@ -942,7 +942,44 @@ void WXMolecule::OnMenuRemoveBond(wxCommandEvent & WXUNUSED(event))
    list<MolBond*> vBond=WXDialogChooseMultipleFromVector(v,(wxWindow*)this,
                                                          "Choose the Bond(s) to be removed");
    if(0==vBond.size()) return;
-   for(list<MolBond*>::iterator pos=vBond.begin();pos!=vBond.end();++pos) mpMolecule->RemoveBond(**pos);
+   const int answer =wxMessageBox
+                  ("Remove Bond and Dihedral Angles involving the deleted Bond(s) (if any) ?",
+                   "Delete related Restraints ?",wxYES_NO, this);
+   for(list<MolBond*>::iterator pos=vBond.begin();pos!=vBond.end();++pos)
+   {
+      if(answer==wxYES)
+      {
+         const MolAtom *pAtom1= &((*pos)->GetAtom1());
+         const MolAtom *pAtom2= &((*pos)->GetAtom2());
+         for(vector<MolBondAngle*>::iterator posb=mpMolecule->GetBondAngleList().begin();
+             posb!=mpMolecule->GetBondAngleList().end();++posb)
+         {
+            if(  ( (pAtom1==&((*posb)->GetAtom1())) && (pAtom2==&((*posb)->GetAtom2())) )
+               ||( (pAtom1==&((*posb)->GetAtom2())) && (pAtom2==&((*posb)->GetAtom1())) )
+               ||( (pAtom1==&((*posb)->GetAtom2())) && (pAtom2==&((*posb)->GetAtom3())) )
+               ||( (pAtom1==&((*posb)->GetAtom3())) && (pAtom2==&((*posb)->GetAtom2())) ))
+            {
+               posb=mpMolecule->RemoveBondAngle(**posb);
+               --posb;
+            }
+         }
+         for(vector<MolDihedralAngle*>::iterator posb=mvpDihedralAngle.begin();
+             posb!=mvpDihedralAngle.end();++posb)
+         {
+            if(  ( (pAtom1==&((*posb)->GetAtom1())) && (pAtom2==&((*posb)->GetAtom2())) )
+               ||( (pAtom1==&((*posb)->GetAtom2())) && (pAtom2==&((*posb)->GetAtom1())) )
+               ||( (pAtom1==&((*posb)->GetAtom2())) && (pAtom2==&((*posb)->GetAtom3())) )
+               ||( (pAtom1==&((*posb)->GetAtom3())) && (pAtom2==&((*posb)->GetAtom2())) )
+               ||( (pAtom1==&((*posb)->GetAtom3())) && (pAtom2==&((*posb)->GetAtom4())) )
+               ||( (pAtom1==&((*posb)->GetAtom4())) && (pAtom2==&((*posb)->GetAtom3())) ))
+            {
+               posb=mpMolecule->RemoveDihedralAngle(**posb);
+               --posb;
+            }
+         }
+      }
+      mpMolecule->RemoveBond(**pos);
+   }
    #endif
    this->CrystUpdate();
    VFN_DEBUG_EXIT("WXMolecule::OnMenuRemoveBond()",6)
