@@ -590,6 +590,11 @@ void Crystal::CalcDynPopCorr(const REAL overlapDist, const REAL mergeDist) const
    for(long i=0;i<nbComponent;i++)
    {
       VFN_DEBUG_MESSAGE("Crystal::CalcDynPopCorr(): Component:"<<i,0)
+      if(0==mScattCompList(i).mpScattPow)
+      {
+         mScattCompList(i).mDynPopCorr=1.;
+         continue;
+      }
       atomicNumber=mScattCompList(i).mpScattPow->GetDynPopCorrIndex();
       nbNeighbors=0;
       std::vector<Crystal::Neighbour>::const_iterator pos;
@@ -597,6 +602,7 @@ void Crystal::CalcDynPopCorr(const REAL overlapDist, const REAL mergeDist) const
           pos<mvDistTableSq[i].mvNeighbour.end();pos++)
       {
          VFN_DEBUG_MESSAGE("Crystal::CalcDynPopCorr(): Component:"<<i<<"Neighbour:"<<pos->mNeighbourIndex,0)
+         if(0==mScattCompList(pos->mNeighbourIndex).mpScattPow)continue;
          if(atomicNumber==mScattCompList(pos->mNeighbourIndex).mpScattPow->GetDynPopCorrIndex())
          {
             if(overlapDistSq > pos->mDist2)
@@ -815,7 +821,6 @@ void Crystal::CIFOutput(ostream &os)const
       << "_cell_angle_beta  " << FormatFloat(this->GetLatticePar(4)*RAD2DEG,7,3) << endl 
       << "_cell_angle_gamma " << FormatFloat(this->GetLatticePar(5)*RAD2DEG,7,3) << endl ;
    os <<endl;
-   
    this->GetScatteringComponentList();
    
    os << "loop_" << endl
@@ -837,6 +842,7 @@ void Crystal::CIFOutput(ostream &os)const
       const ScatteringComponentList list=this->GetScatt(i).GetScatteringComponentList();
       for(int j=0;j<list.GetNbComponent();j++)
       {
+         if(0==list(j).mpScattPow) continue;
          bool redundant=false;
          for(unsigned long l=0;l<k;++l) if(minDistTable(l,k)<0.5) redundant=true;
          if(!redundant)
@@ -865,6 +871,7 @@ void Crystal::CIFOutput(ostream &os)const
       const ScatteringComponentList list=this->GetScatt(i).GetScatteringComponentList();
       for(int j=0;j<list.GetNbComponent();j++)
       {
+         if(0==list(j).mpScattPow) continue;
          bool redundant=false;
          for(unsigned long l=0;l<k;++l) if(minDistTable(l,k)<0.5) redundant=true;
          if(redundant)
