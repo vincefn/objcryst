@@ -876,8 +876,8 @@ Error opening file for input:"+string(open.GetPath().c_str()));
       std::string::size_type idx =filename.rfind("/");
       std::string::size_type idx2=filename.rfind("\\");
       std::string::size_type idx3=filename.rfind(":");
-      if((idx2!=string::npos)&&(idx2>idx))idx=idx2;
-      if((idx2!=string::npos)&&(idx3>idx))idx=idx3;
+      if(((long)idx2!=(long)string::npos)&&((long)idx2>(long)idx))idx=idx2;
+      if(((long)idx3!=(long)string::npos)&&((long)idx3>(long)idx))idx=idx3;
       if(idx==string::npos)
          shortName=filename;
       else
@@ -1139,8 +1139,8 @@ int UnitCellMapImport::ImportGRD(const string&filename)
       std::string::size_type idx =filename.rfind("/");
       std::string::size_type idx2=filename.rfind("\\");
       std::string::size_type idx3=filename.rfind(":");
-      if((idx2!=string::npos)&&(idx2>idx))idx=idx2;
-      if((idx2!=string::npos)&&(idx3>idx))idx=idx3;
+      if(((long)idx2!=(long)string::npos)&&((long)idx2>(long)idx))idx=idx2;
+      if(((long)idx3!=(long)string::npos)&&((long)idx3>(long)idx))idx=idx3;
       if(idx==string::npos)
          mName=filename;
       else
