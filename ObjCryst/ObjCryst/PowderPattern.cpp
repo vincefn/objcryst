@@ -1288,7 +1288,7 @@ Error opening file for input:"+filename);
    
    m2ThetaMin=tmp2Theta(0);
    m2ThetaStep=(tmp2Theta(mNbPoint-1)-tmp2Theta(0))
-                                 /mNbPoint;
+                                 /(mNbPoint-1);
    m2ThetaMin  *= DEG2RAD;
    m2ThetaStep *= DEG2RAD;
 	
@@ -1339,7 +1339,7 @@ Error opening file for input:"+filename);
    mPowderPatternWeight.resize(mNbPoint);
 
    m2ThetaMin=tmp2Theta(0);
-   m2ThetaStep=(tmp2Theta(mNbPoint-1)-tmp2Theta(0))/mNbPoint;
+   m2ThetaStep=(tmp2Theta(mNbPoint-1)-tmp2Theta(0))/(mNbPoint-1);
    m2ThetaMin  *= DEG2RAD;
    m2ThetaStep *= DEG2RAD;
 
