@@ -138,6 +138,9 @@ class UnitCellMapImport
       /// is chosen before calling this display list.
       void GLInitDisplayList(const float contourValue,
 			     WXGLCrystalCanvas * parentCrystal) const;
+      /// Generate POVRay script to draw
+      void POVRayDescription(ostream &os,const float contourValue,
+                             const CrystalPOVRayOptions &options)const;
       /** Import map from a '.grd' GSAS/EXPGUI map.
       * Returns 0 on error, 1 on success
       * \param filename: the file with the fourier map
@@ -180,6 +183,8 @@ class UnitCellMapGLList
       const float* GetColour()const;
       /// Toggle show Wire/Filled
       void ToggleShowWire();
+      /// Show Wire/Filled ?
+      bool ShowWire()const;
       /// Perform the OpenGL drawing
       void Draw()const;
    private:

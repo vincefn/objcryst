@@ -1115,9 +1115,87 @@ void UnitCellMapImport::GLInitDisplayList(const float minValue,
       glEnd();
 
    delete [] subPoints; 
+   delete [] pTriangles; 
    VFN_DEBUG_EXIT("UnitCellMapImport::GLInitDisplayList()",7)
-
 }
+
+void UnitCellMapImport::POVRayDescription(ostream &os,const float minValue,
+                                          const CrystalPOVRayOptions &options)const
+{// basically the same code asGLInitDisplayList(), but creates cylinders
+   VFN_DEBUG_ENTRY("UnitCellMapImport::POVRayDescription()",7)
+   // Generate triangles
+      VFN_DEBUG_MESSAGE("UnitCellMapImport::POVRayDescription(): Generate Triangles",7)
+
+      const int nx=mPoints.cols();
+      const int ny=mPoints.rows();
+      const int nz=mPoints.depth();
+      float step[3];
+      step[0]=1/(float)nx;
+      step[1]=1/(float)ny;
+      step[2]=1/(float)nz;
+      int nxMin, nxMax, nyMin, nyMax, nzMin, nzMax;
+      nxMin = (int)(options.mXmin * nx);
+      nxMax = (int)(options.mXmax * nx);
+      nyMin = (int)(options.mYmin * ny);
+      nyMax = (int)(options.mYmax * ny);
+      nzMin = (int)(options.mZmin * nz);
+      nzMax = (int)(options.mZmax * nz);
+      const int snx = nxMax-nxMin+1, sny = nyMax-nyMin+1, snz = nzMax-nzMin+1;
+      const unsigned int sny_snz = sny*snz;
+      int i, j, k;
+      unsigned int ni, nj, si, sj, sk, sni, snj, sind;
+      float x, y, z;
+
+      //create new set of points
+      mp4Vector * subPoints = new mp4Vector[snx*sny*snz];
+      for(i=nxMin, si=0; i <= nxMax; i++, si++)
+      {
+         ni = ((nx + i % nx) % nx);    //this will 'wrap' around any value (negative or positive)
+         sni = si*sny_snz;
+         for(j=nyMin, sj=0; j <= nyMax; j++, sj++)
+         {
+            nj = ((ny + j % ny) % ny);
+            snj = sj*snz;
+            for(k=nzMin, sk=0; k <= nzMax; k++, sk++)
+            {
+               sind = sni + snj + sk;
+               x = i*step[0]; y = j*step[1]; z = k*step[2];
+               mpCrystal->FractionalToOrthonormalCoords(x, y, z);
+               subPoints[sind].x = x; subPoints[sind].y = y; subPoints[sind].z = z;
+               //cout << ni <<" "<<nj<<" "<<(nz+ k % nz)<<endl;
+               subPoints[sind].val = mPoints((nz+ k % nz)% nz,nj,ni);
+            }
+         }
+      }
+      int numOfTriangles;
+      VFN_DEBUG_MESSAGE("UnitCellMapImport::POVRayDescription(): MC, Min Value="<<minValue,10)
+      const TRIANGLE *pTriangles= MC(snx-1, sny-1, snz-1, step[0], step[1], step[2], minValue, subPoints, numOfTriangles);
+   // drawing instructions
+      VFN_DEBUG_MESSAGE("UnitCellMapImport::POVRayDescription(): POVRay instructions",7)
+      float normx,normy,normz;
+      for(int i=0; i < numOfTriangles; i++)
+      {
+         //:TODO: Fix normals
+         normx=pTriangles[i].norm[j].x;
+         normy=pTriangles[i].norm[j].y;
+         normz=pTriangles[i].norm[j].z;
+         //mpCrystal->FractionalToOrthonormalCoords(normx, normy, normz);
+         //mpCrystal->OrthonormalToFractionalCoords(normx, normy, normz);
+         os<<"      ObjCrystMeshTriangle("
+           <<pTriangles[i].p[0].x<<","<<pTriangles[i].p[0].y<<","<<pTriangles[i].p[0].z<<","
+           <<pTriangles[i].p[1].x<<","<<pTriangles[i].p[1].y<<","<<pTriangles[i].p[1].z<<","
+           <<pTriangles[i].p[2].x<<","<<pTriangles[i].p[2].y<<","<<pTriangles[i].p[2].z<<","
+           <<normx<<","<<normy<<","<<normz<<","
+           <<normx<<","<<normy<<","<<normz<<","
+           <<normx<<","<<normy<<","<<normz<<")"
+           <<endl;
+      }
+
+   delete [] subPoints; 
+   delete [] pTriangles; 
+   VFN_DEBUG_EXIT("UnitCellMapImport::GLInitDisplayList()",7)
+}
+
 int UnitCellMapImport::ImportGRD(const string&filename)
 {
    VFN_DEBUG_ENTRY("UnitCellMapImport::ImportGRD()",7)
@@ -1260,6 +1338,11 @@ const float* UnitCellMapGLList::GetColour()const
 void UnitCellMapGLList::ToggleShowWire()
 {
    mShowWire =! mShowWire;
+}
+
+bool UnitCellMapGLList::ShowWire()const
+{
+   return mShowWire;
 }
 
 void UnitCellMapGLList::Draw()const
@@ -2153,7 +2236,7 @@ void WXGLCrystalCanvas::OnPOVRay()
       << "//"<<endl<<endl;
    
    os << "// Description of Crystal :" << mpWXCrystal->GetCrystal().GetName() <<endl;
-   os << "global_settings { assumed_gamma 2.2 ambient_light rgb <2,2,2>}"<<endl;
+   os << "global_settings { assumed_gamma 2.2 ambient_light rgb <1,1,1>}"<<endl;
    float m[4][4];
    REAL xcam=0,ycam=0,zcam=mDist;
    build_rotmatrix( m,mQuat);
@@ -2224,7 +2307,88 @@ void WXGLCrystalCanvas::OnPOVRay()
    options.mZmin=mcellbbox.zMin;
    options.mZmax=mcellbbox.zMax;
    options.mShowLabel=mShowAtomName;
-   mpWXCrystal->GetCrystal().POVRayDescription(os,options);
+   if(mShowCrystal)
+   {
+      mpWXCrystal->GetCrystal().POVRayDescription(os,options);
+   }
+   if(mShowFourier)
+   {
+      wxBusyInfo wait("Processing Fourier Map...");
+      // use cell bbox if mapbbox has zero volume (default)
+      if (mmapbbox.xMin != mmapbbox.xMax)
+      {
+         options.mXmin=mmapbbox.xMin;
+         options.mXmax=mmapbbox.xMax;
+         options.mYmin=mmapbbox.yMin;
+         options.mYmax=mmapbbox.yMax;
+         options.mZmin=mmapbbox.zMin;
+         options.mZmax=mmapbbox.zMax;
+      }
+
+      os<<"/////////////////// FOURIER MAPS///////////////////////////"<<endl;
+      vector<pair<pair<const UnitCellMapImport*,float>,UnitCellMapGLList* > >::
+         const_iterator pos;
+      for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();++pos)
+      {
+         const float *prgbf=pos->second->GetColour();
+         if(pos->second->ShowWire())
+         {
+            os << "#macro ObjCrystMeshTriangle(x1,y1,z1,x2,y2,z2,x3,y3,z3,"
+               << "nx1,ny1,nz1,nx2,ny2,nz2,nx3,ny3,nz3)"<<endl
+               << "   cylinder"<<endl
+               << "   {  <x1,y1,z1>,"<<endl
+               << "      <x2,y2,z2>,"<<endl
+               << "      0.01"<<endl
+               << "      finish {ambient 0.5 diffuse 0.4}"<<endl
+               << "      pigment { colour rgb<"
+               <<*(prgbf+0)<<","<<*(prgbf+1)<<","<<*(prgbf+2)<<">}"<<endl
+               << "      no_shadow"<<endl
+               << "   }"<<endl
+               << "   cylinder"<<endl
+               << "   {  <x2,y2,z2>,"<<endl
+               << "      <x3,y3,z3>,"<<endl
+               << "      0.01"<<endl
+               << "      finish {ambient 0.5 diffuse 0.4}"<<endl
+               << "      pigment { colour rgb<"
+               <<*(prgbf+0)<<","<<*(prgbf+1)<<","<<*(prgbf+2)<<">}"<<endl
+               << "      no_shadow"<<endl
+               << "   }"<<endl
+               << "   cylinder"<<endl
+               << "   {  <x1,y1,z1>,"<<endl
+               << "      <x3,y3,z3>,"<<endl
+               << "      0.01"<<endl
+               << "      finish {ambient 0.5 diffuse 0.4}"<<endl
+               << "      pigment { colour rgb<"
+               <<*(prgbf+0)<<","<<*(prgbf+1)<<","<<*(prgbf+2)<<">}"<<endl
+               << "      no_shadow"<<endl
+               << "   }"<<endl
+               << "#end"<<endl<<endl;
+            pos->first.first->POVRayDescription(os,pos->first.second,options);
+         }
+         else
+         {
+            os << "#macro ObjCrystMeshTriangle(x1,y1,z1,x2,y2,z2,x3,y3,z3,"
+               << "nx1,ny1,nz1,nx2,ny2,nz2,nx3,ny3,nz3)"<<endl
+               << "      smooth_triangle"<<endl
+               <<"       {<x1,y1,z1>,<nx1,ny1,nz1>"<<endl
+               <<"        <x2,y2,z2>,<nx2,ny2,nz2>"<<endl
+               <<"        <x3,y3,z3>,<nx3,ny3,nz3>}"<<endl
+               << "#end"<<endl<<endl;
+            os << "   mesh"<<endl
+               << "   {"<<endl;
+            pos->first.first->POVRayDescription(os,pos->first.second,options);
+            os << "      texture"<<endl
+               << "      {"<<endl
+               << "         finish {ambient 0.5 diffuse 0.4}"<<endl
+               << "         pigment { colour rgb<"
+               <<*prgbf++<<","<<*prgbf++<<","<<*prgbf++<<">}"<<endl
+               << "      }"<<endl
+               << "      no_shadow"<<endl
+               << "   }"<<endl;
+         }
+      }
+      
+   }
 }
 
 int WXGLCrystalCanvas::UserSelectUnitCellMapGLList()const

@@ -385,7 +385,7 @@ ostream& Crystal::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opti
    os << "#macro ObjCrystAtom(atomx,atomy,atomz,atomr,atomc)"
       << "   sphere"<<endl
       << "   { <atomx,atomy,atomz>,atomr/3.0"<<endl
-      << "      finish {ambient 0.3 diffuse 0.7 phong 1 specular 0.2 "
+      << "      finish {ambient 0.5 diffuse 0.4 phong 1 specular 0.2 "
       << "roughness 0.02 metallic reflection 0.0}"<<endl
       << "      pigment { colour atomc }"<<endl
       << "      no_shadow"<<endl
@@ -397,7 +397,7 @@ ostream& Crystal::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opti
       << "   {  <x1,y1,z1>,"<<endl
       << "      <x2,y2,z2>,"<<endl
       << "      bondradius"<<endl
-      << "      finish {ambient 0.3 diffuse 0.7 phong 1 specular 0.2 "
+      << "      finish {ambient 0.5 diffuse 0.4 phong 1 specular 0.2 "
       << "roughness 0.02 metallic reflection 0.0}"<<endl
       << "      pigment { colour bondColour}"<<endl
       << "      no_shadow"<<endl
