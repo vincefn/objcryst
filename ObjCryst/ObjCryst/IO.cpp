@@ -33,6 +33,7 @@
 #include "ObjCryst/ZScatterer.h"
 //#include "ObjCryst/ScatteringData.h"
 #include "ObjCryst/ScatteringPower.h"
+#include "ObjCryst/ScatteringPowerFullerene.h"
 #include "ObjCryst/Atom.h"
 #include "ObjCryst/DiffractionDataSingleCrystal.h"
 #include "ObjCryst/PowderPattern.h"
@@ -1137,6 +1138,16 @@ void Crystal::XMLInput(istream &is,const XMLCrystTag &tagg)
          sc->XMLInput(is,tag);
          this->AddScatteringPower(sc);
          VFN_DEBUG_EXIT("Crystal::XMLInput():reading a ScatteringPowerAtom",5)
+         continue;
+      }
+      if("ScatteringPowerFullerene"==tag.GetName())
+      {
+         VFN_DEBUG_ENTRY("Crystal::XMLInput():reading a ScatteringPowerFullerene",5)
+         VFN_DEBUG_MESSAGE("Crystal::XMLInput():reading a ScatteringPowerFullerene",5)
+         ScatteringPowerFullerene *sc=new ScatteringPowerFullerene;
+         sc->XMLInput(is,tag);
+         this->AddScatteringPower(sc);
+         VFN_DEBUG_EXIT("Crystal::XMLInput():reading a ScatteringPowerFullerene",5)
          continue;
       }
       if("ZScatterer"==tag.GetName())

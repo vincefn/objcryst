@@ -60,10 +60,10 @@ void WXAtom::OnChangeScattPow(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXAtom::OnChangeScattPow()",6)
    int choice;
-   const ScatteringPowerAtom *scatt=dynamic_cast<const ScatteringPowerAtom*>
-      ( WXDialogChooseFromRegistry
+   const ScatteringPower *scatt=
+       WXDialogChooseFromRegistry
          (mpAtom->GetCrystal().GetScatteringPowerRegistry(),(wxWindow*)this,
-         "Choose a new Scattering Power",choice));
+         "Choose a new Scattering Power",choice);
    if(0==scatt) return;
    mpAtom->Init(mpAtom->GetX(),mpAtom->GetY(),mpAtom->GetZ(),mpAtom->GetName(),
                 scatt,mpAtom->GetOccupancy());

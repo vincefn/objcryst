@@ -958,9 +958,9 @@ void Crystal::SetBumpMergeDistance(const ScatteringPower &scatt1,
    const int num2=scatt2.GetDynPopCorrIndex();
    if(mBumpDistanceMatrix.numElements()==0) 
    {
-      mBumpDistanceMatrix.resize(200,200);
+      mBumpDistanceMatrix.resize(400,400);
       mBumpDistanceMatrix=0;
-      mAllowMerge.resize(200,200);
+      mAllowMerge.resize(400,400);
       mAllowMerge=false;
    }
    VFN_DEBUG_MESSAGE("Crystal::SetBumpMergeDistance():"<<num1<<","<<num2,8)

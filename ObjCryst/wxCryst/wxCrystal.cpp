@@ -25,6 +25,7 @@
 
 #include "ObjCryst/Atom.h"
 #include "ObjCryst/ZScatterer.h"
+#include "ObjCryst/ScatteringPowerFullerene.h"
 
 extern "C" {
 #include "GL/glu.h"
@@ -67,6 +68,7 @@ BEGIN_EVENT_TABLE(WXCrystal,wxEvtHandler)
    EVT_MENU(ID_CRYSTAL_MENU_DISPLAY_3DVIEW,           WXCrystal::OnMenuCrystalGL)
 #endif
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDSCATTPOWATOM,    WXCrystal::OnMenuAddScattPowAtom)
+   EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDSCATTPOWFULLERENE,WXCrystal::OnMenuAddScattPowFullerene)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_REMOVESCATTPOW,     WXCrystal::OnMenuRemoveScattPow)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDATOM,            WXCrystal::OnMenuAddScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDZSCATTERER,      WXCrystal::OnMenuAddScatterer)
@@ -114,8 +116,11 @@ mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
       mpMenuBar->AddMenu("Scatterers",ID_CRYSTAL_MENU_SCATT);
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_ADDSCATTPOWATOM,
                                 "Add Atomic Scattering Power");
+         mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_ADDSCATTPOWFULLERENE,
+                                "Add Fullerene Scattering Power");
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_REMOVESCATTPOW,
                                 "Remove Scattering Power");
+         //mpMenuBar->AppendSeparator();
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_ADDATOM,
                                 "Add Atom");
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_ADDZSCATTERER,
@@ -137,6 +142,7 @@ mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
                                 "Add Prism Trigonal");
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_ADDICOSAHEDRON,
                                 "Add Icosahedron");
+         //mpMenuBar->AppendSeparator();
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_REMOVESCATTERER,
                                 "Remove Scatterer");
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_DUPLICSCATTERER,
@@ -348,6 +354,16 @@ void WXCrystal::OnMenuAddScattPowAtom(wxCommandEvent & WXUNUSED(event))
    VFN_DEBUG_MESSAGE("WXCrystal::OnMenuAddScattPowAtom():End",6)
    this->Layout();
 }
+
+void WXCrystal::OnMenuAddScattPowFullerene(wxCommandEvent & WXUNUSED(event))
+{
+   VFN_DEBUG_ENTRY("WXCrystal::OnMenuAddScattPowFullerene()",6)
+   ScatteringPower *scatt= new ScatteringPowerFullerene;
+   mpCrystal->AddScatteringPower(scatt);
+   this->Layout();
+   VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScattPowFullerene()",6)
+}
+
 void WXCrystal::OnMenuRemoveScattPow(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXCrystal::OnButtonRemoveScattPow()",6)
@@ -377,9 +393,9 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
       case ID_CRYSTAL_MENU_SCATT_ADDATOM:
       {
          int choice;
-         ScatteringPowerAtom *scattPow=dynamic_cast<ScatteringPowerAtom*>(
+         ScatteringPower *scattPow=
             WXDialogChooseFromRegistry(mpCrystal->GetScatteringPowerRegistry(),this,
-                                       "Choose an atom type (ScatteringPower):",choice));
+                                       "Choose an atom type (ScatteringPower):",choice);
          if(0==scattPow)
          {
             VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)

@@ -60,6 +60,7 @@ class WXCrystal: public WXRefinableObj
       void OnMenuSaveCIF(wxCommandEvent & WXUNUSED(event));
       void OnMenuSaveText(wxCommandEvent & WXUNUSED(event));
       void OnMenuAddScattPowAtom(wxCommandEvent & WXUNUSED(event));
+      void OnMenuAddScattPowFullerene(wxCommandEvent & WXUNUSED(event));
       void OnMenuRemoveScattPow(wxCommandEvent & WXUNUSED(event));
       void OnMenuAddScatterer(wxCommandEvent & event);
       void OnMenuRemoveScatterer(wxCommandEvent & WXUNUSED(event));
