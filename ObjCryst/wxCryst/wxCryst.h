@@ -390,6 +390,8 @@ class WXCrystMenuBar: public WXCrystObjBasic
       bool Layout();
       /// Add a menu
       void AddMenu(const string &name,const int menuId, const string& help="");
+      /// Get access to a menu
+      wxMenu& GetMenu(const int menuId);
       /// Add an entry to a menu
       void AddMenuItem(const int menuId, int id, const string& item, const string& help="",
                        const bool checkable= false);

@@ -773,6 +773,14 @@ void WXCrystMenuBar::AddMenu(const string &name,const int menuId, const string& 
    VFN_DEBUG_MESSAGE("WXCrystMenuBar::AddMenu():End",6)
 }
 
+wxMenu& WXCrystMenuBar::GetMenu(const int menuId)
+{
+   //:TODO: Check we found the correct menu
+   unsigned int i;
+   for(i=0;i<mNbMenu;i++) if(menuId==mMenuId(i)) break;
+   return *mpMenu[i];
+}
+
 void WXCrystMenuBar::AddMenuItem(const int menuId, int id, const string& item, const string& help,const bool checkable)
 {
    VFN_DEBUG_MESSAGE("WXCrystMenuBar::AddMenuItem():",6)
