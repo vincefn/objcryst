@@ -766,6 +766,25 @@ REAL Crystal::GetLogLikelihood()const
 void Crystal::CIFOutput(ostream &os)const
 {
    VFN_DEBUG_ENTRY("Crystal::OutputCIF()",5)
+
+   //Data block name (must have no spaces)
+   string tempname = mName;
+   int where, size;
+   size = tempname.size();
+   if (size > 32) 
+     {
+       tempname = tempname.substr(0,32);
+       size = tempname.size();
+     }
+   where = tempname.find(" ",0);
+   while (where != (int)string::npos)
+   { 
+     tempname.replace(where,1,"_");
+     where = tempname.find(" ",0);
+     cout << tempname << endl;
+   }
+   os << "data_" << tempname <<endl<<endl;
+
    //Program
    os <<"_computing_structure_solution     'FOX http://objcryst.sourceforge.net'"<<endl<<endl;
 
@@ -783,31 +802,31 @@ void Crystal::CIFOutput(ostream &os)const
    os <<endl;
    
    //Symmetry
-   os <<"_symmetry_space_group_name_H-M    "
-      << this->GetSpaceGroup().GetHM_as_Hall().HM<<""<<endl;
+   os <<"_symmetry_space_group_name_H-M    '"
+      << this->GetSpaceGroup().GetHM_as_Hall().HM<<"'"<<endl;
    os <<"_symmetry_space_group_name_Hall   '"
       << this->GetSpaceGroup().GetHM_as_Hall().Hall<<"'"<<endl;
    os <<endl;
       
-   os << "_cell_length_a "   << FormatFloat(this->GetLatticePar(0),8,5) << endl
-      << "_cell_length_b "   << FormatFloat(this->GetLatticePar(1),8,5) << endl
-      << "_cell_length_c "   << FormatFloat(this->GetLatticePar(2),8,5) << endl
-      << "_cell_angle_alpha "<< FormatFloat(this->GetLatticePar(3)*RAD2DEG,8,5) << endl 
-      << "_cell_angle_beta " << FormatFloat(this->GetLatticePar(4)*RAD2DEG,8,5) << endl 
-      << "_cell_angle_gamma "<< FormatFloat(this->GetLatticePar(5)*RAD2DEG,8,5) << endl ;
+   os << "_cell_length_a    " << FormatFloat(this->GetLatticePar(0),8,5) << endl
+      << "_cell_length_b    " << FormatFloat(this->GetLatticePar(1),8,5) << endl
+      << "_cell_length_c    " << FormatFloat(this->GetLatticePar(2),8,5) << endl
+      << "_cell_angle_alpha " << FormatFloat(this->GetLatticePar(3)*RAD2DEG,7,3) << endl 
+      << "_cell_angle_beta  " << FormatFloat(this->GetLatticePar(4)*RAD2DEG,7,3) << endl 
+      << "_cell_angle_gamma " << FormatFloat(this->GetLatticePar(5)*RAD2DEG,7,3) << endl ;
    os <<endl;
    
    this->GetScatteringComponentList();
    
    os << "loop_" << endl
+      << "    _atom_site_type_symbol" <<endl
       << "    _atom_site_label" <<endl
       << "    _atom_site_fract_x"<<endl
       << "    _atom_site_fract_y" <<endl
       << "    _atom_site_fract_z" <<endl
       << "    _atom_site_U_iso_or_equiv" <<endl
-      << "    _atom_site_thermal_displace_type" <<endl
       << "    _atom_site_occupancy" <<endl
-      << "    _atom_site_type_symbol" <<endl;
+      << "    _atom_site_adp_type" <<endl;
    
    long k=0;
    for(int i=0;i<mScattererRegistry.GetNb();i++) 
@@ -817,41 +836,42 @@ void Crystal::CIFOutput(ostream &os)const
       for(int j=0;j<list.GetNbComponent();j++)
       {
          os   << "    "
-              << FormatString(this->GetScatt(i).GetComponentName(j),16)
-              << FormatFloat(list(j).mX,7,4) 
-              << FormatFloat(list(j).mY,7,4) 
-              << FormatFloat(list(j).mZ,7,4) 
-              << FormatFloat(list(j).mpScattPow->GetBiso()/8./M_PI/M_PI)
-              << " 1 "
+              << FormatString(list(j).mpScattPow->GetName(),8) << " "
+              << FormatString(this->GetScatt(i).GetComponentName(j),10) << " "
+              << FormatFloat(list(j).mX,7,4) << " "
+              << FormatFloat(list(j).mY,7,4) << " "
+              << FormatFloat(list(j).mZ,7,4) << " "
+              << FormatFloat(list(j).mpScattPow->GetBiso()/8./M_PI/M_PI) << " "
               << FormatFloat(list(j).mOccupancy,6,4)
-              << FormatString(list(j).mpScattPow->GetName(),16)
+              << " Uiso"
               << endl;
          k++;
       }
       
    }
+
    os <<endl;
    k=0;
    if(1==mUseDynPopCorr.GetChoice())
    {
-      os << ";  Dynamical occupancy corrections found by ObjCryst++:"<<endl
-         << "   values below 1. (100%) indicate a correction,"<<endl
-         << "   which means either that the atom is on a special position,"<<endl
-         << "   or that it is overlapping with another identical atom."<<endl;
+      os << "#  Dynamical occupancy corrections found by ObjCryst++:"<<endl
+         << "#  values below 1. (100%) indicate a correction,"<<endl
+         << "#  which means either that the atom is on a special position,"<<endl
+         << "#  or that it is overlapping with another identical atom."<<endl;
       for(int i=0;i<mScattererRegistry.GetNb();i++) 
       {
          //mpScatterrer[i]->Print();
          const ScatteringComponentList list=this->GetScatt(i).GetScatteringComponentList();
          for(int j=0;j<list.GetNbComponent();j++)
          {
-            os   << "    "
+            os   << "#   "
                  << FormatString(this->GetScatt(i).GetComponentName(j),16)
                  << " : " << FormatFloat(mScattCompList(k).mDynPopCorr,6,4)
                  << endl;
             k++;
          }
       }
-      os << ";"<<endl;
+      os << "#"<<endl;
    }
    
    VFN_DEBUG_EXIT("Crystal::OutputCIF()",5)
