@@ -57,10 +57,13 @@ else
    PROFILELIB :=
 endif
 
+#Using GLUT ? Remove this to generate Fonts using a display list
+GLUT_FLAGS= -DHAVE_GLUT 
+GLUT_LIB= -lglut  
 #Using OpenGL ?
 ifeq ($(opengl),1)
-GL_WX_LIB = `wx-config --gl-libs` -lGL -lGLU
-GL_FLAGS := -DOBJCRYST_GL -IGL
+GL_WX_LIB = `wx-config --gl-libs` -lGL -lGLU $(GLUT_LIB)
+GL_FLAGS := -DOBJCRYST_GL -IGL $(GLUT_FLAGS)
 else
 GL_WX_LIB :=
 GL_FLAGS :=
@@ -76,7 +79,7 @@ else
 # do not use -fomit-frame-pointer, or throw() catch() does not work !! GCC BUG ?
 # -mcpu=athlon,pentiumpro
    DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS}
-   CPPFLAGS = -O3 -w -ffast-math -mcpu=pentiumpro
+   CPPFLAGS = -O3 -w -ffast-math -march=i686
    LOADLIBES = -s -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lsglite -latominfo ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS}
 endif
 

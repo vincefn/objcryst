@@ -51,6 +51,9 @@
 
    #ifdef __LINUX__
       #include "GL/glx.h"
+      #ifdef HAVE_GLUT
+         #include "GL/glut.h"
+      #endif
    #endif
    #ifdef __WIN32__
      #include "gl/glaux.h"
@@ -79,13 +82,15 @@ extern "C" {
 
 namespace ObjCryst
 {
+#ifndef HAVE_GLUT
 // This must be changed for each GL world to the correct first display list,
 // i.e. in SetCurrent().
 static int sFontDisplayListBase=0;
+#endif
 
 GLvoid crystGLPrint(const string &s)
 {
-   #if 0
+   #ifdef HAVE_GLUT
    for(unsigned int l=0;l<s.size();l++)
       glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12,*(s.c_str()+l));
    #else
@@ -1401,7 +1406,9 @@ WXGLCrystalCanvas::~WXGLCrystalCanvas()
          delete pos->second;
       mvpUnitCellMapGLList.clear();
    }
+   #ifndef HAVE_GLUT
    this->DeleteGLFont();
+   #endif
 }
 
 void WXGLCrystalCanvas::OnExit(wxCommandEvent &event)
@@ -1783,8 +1790,10 @@ void WXGLCrystalCanvas::SetCurrent()
 {
    VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::SetCurrent()",4)
    this->wxGLCanvas::SetCurrent();
+   #ifndef HAVE_GLUT
    this->BuildGLFont();
    sFontDisplayListBase=mGLFontDisplayListBase;
+   #endif
 }
 
 void WXGLCrystalCanvas::InitGL()
@@ -2175,6 +2184,7 @@ void WXGLCrystalCanvas::UnProject(REAL &x, REAL &y, REAL &z)
    z= m[2][0]* vx + m[2][1]*vy + m[2][2]*vz -mZ0;
 	VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::UnProject():X Y Z = "<<x<<" , "<<y<<" , "<<z,5)
 }
+#ifndef HAVE_GLUT
 void WXGLCrystalCanvas::BuildGLFont()
 {
    if(mIsGLFontBuilt) return;
@@ -2246,7 +2256,7 @@ void WXGLCrystalCanvas::DeleteGLFont() const
    mIsGLFontBuilt=false;
    mGLFontDisplayListBase=0;
 }
-
+#endif
 
 
 ////////////////////////////////////////////////////////////////////////
