@@ -512,12 +512,22 @@ class Molecule: public Scatterer
       vector<MolBond*>& GetBondList();
       vector<MolBondAngle*>& GetBondAngleList();
       vector<MolDihedralAngle*>& GetDihedralAngleList();
-      /// Rotate a group of atoms around an axis defined by two atoms
+      /** Rotate a group of atoms around an axis defined by two atoms
+      *
+      * \param keepCenter: if true, the coordinates of the molecule are modified
+      * so that only the rotated atoms are moved.
+      */
       void RotateAtomGroup(const MolAtom &at1,const MolAtom &at2,
-                           const set<unsigned long> &atoms, const REAL angle);
-      /// Rotate a group of atoms around an axis defined by one atom and a vector
+                           const set<unsigned long> &atoms, const REAL angle,
+                           const bool keepCenter=true);
+      /** Rotate a group of atoms around an axis defined by one atom and a vector
+      *
+      * \param keepCenter: if true, the coordinates of the molecule are modified
+      * so that only the rotated atoms are moved.
+      */
       void RotateAtomGroup(const MolAtom &at,const REAL vx,const REAL vy,const REAL vz,
-                           const set<unsigned long> &atoms, const REAL angle);
+                           const set<unsigned long> &atoms, const REAL angle,
+                           const bool keepCenter=true);
       /// Print the status of all restraints (bond length, angles...)
       void RestraintStatus(ostream &os)const;
       /// Get the connectivity table

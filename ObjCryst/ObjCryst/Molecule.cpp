@@ -1489,7 +1489,7 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                   const REAL angle=(2.*(REAL)rand()-(REAL)RAND_MAX)
                                    *M_PI/25./(REAL)RAND_MAX*mutationAmplitude;
                   this->RotateAtomGroup(*(pos->mpAtom1),*(pos->mpAtom2),
-                                        pos->mvRotatedAtomList,angle);
+                                        pos->mvRotatedAtomList,angle,false);
                }
                for(list<RotorGroup>::const_iterator pos=mvRotorGroupTorsionSingleChain.begin();
                    pos!=mvRotorGroupTorsionSingleChain.end();++pos)
@@ -1498,7 +1498,7 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                   const REAL angle=(2.*(REAL)rand()-(REAL)RAND_MAX)
                                    *M_PI/25./(REAL)RAND_MAX*mutationAmplitude;
                   this->RotateAtomGroup(*(pos->mpAtom1),*(pos->mpAtom2),
-                                        pos->mvRotatedAtomList,angle);
+                                        pos->mvRotatedAtomList,angle,false);
                }
                bool doneFlip=false;
                list<FlipGroup>::const_iterator posFlip;
@@ -2391,26 +2391,36 @@ vector<MolBondAngle*>& Molecule::GetBondAngleList(){return mvpBondAngle;}
 vector<MolDihedralAngle*>& Molecule::GetDihedralAngleList(){return mvpDihedralAngle;}
 
 void Molecule::RotateAtomGroup(const MolAtom &at1,const MolAtom &at2,
-                               const set<unsigned long> &atoms, const REAL angle)
+                               const set<unsigned long> &atoms, const REAL angle,
+                               const bool keepCenter)
 {
    const REAL vx=at2.X()-at1.X();
    const REAL vy=at2.Y()-at1.Y();
    const REAL vz=at2.Z()-at1.Z();
-   this->RotateAtomGroup(at1,vx,vy,vz,atoms,angle);
+   this->RotateAtomGroup(at1,vx,vy,vz,atoms,angle,keepCenter);
 }
 void Molecule::RotateAtomGroup(const MolAtom &at,const REAL vx,const REAL vy,const REAL vz,
-                               const set<unsigned long> &atoms, const REAL angle)
+                               const set<unsigned long> &atoms, const REAL angle,
+                               const bool keepCenter)
 {
    TAU_PROFILE("Molecule::RotateAtomGroup(MolAtom&,vx,vy,vz,...)","void (...)",TAU_DEFAULT);
+   if(atoms.size()==0) return;
    const REAL x0=at.X();
    const REAL y0=at.Y();
    const REAL z0=at.Z();
    // :KLUDGE: ? Refuse to do anything if vector is not well defined
    if((fabs(vx)+fabs(vy)+fabs(vz))<1e-6) return;
    const Quaternion quat=Quaternion::RotationQuaternion(angle,vx,vy,vz);
+   REAL dx=0.,dy=0.,dz=0.;
    for(set<unsigned long>::const_iterator pos=atoms.begin();pos!=atoms.end();++pos)
    {
       MolAtom*const pAtom= mvpAtom[*pos];
+      if(keepCenter)
+      {
+         dx -= pAtom->X();
+         dy -= pAtom->Y();
+         dz -= pAtom->Z();
+      }
       pAtom->X() -= x0;
       pAtom->Y() -= y0;
       pAtom->Z() -= z0;
@@ -2418,6 +2428,24 @@ void Molecule::RotateAtomGroup(const MolAtom &at,const REAL vx,const REAL vy,con
       pAtom->X() += x0;
       pAtom->Y() += y0;
       pAtom->Z() += z0;
+      if(keepCenter)
+      {
+         dx += pAtom->X();
+         dy += pAtom->Y();
+         dz += pAtom->Z();
+      }
+   }
+   // (dx,dy,dz) = vector of the translation of the center of the molecule due to the rotation
+   if(keepCenter)
+   {
+      dx /= (REAL)(this->GetNbComponent());
+      dy /= (REAL)(this->GetNbComponent());
+      dz /= (REAL)(this->GetNbComponent());
+      mQuat.RotateVector(dx,dy,dz);
+      this->GetCrystal().OrthonormalToFractionalCoords(dx,dy,dz);
+      mXYZ(0) += dx;
+      mXYZ(1) += dy;
+      mXYZ(2) += dz;
    }
    mClockAtomPosition.Click();
    mClockScatterer.Click();

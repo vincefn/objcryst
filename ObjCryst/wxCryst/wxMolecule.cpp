@@ -698,7 +698,9 @@ mpBondWin(0),mpAngleWin(0),mpDihedralAngleWin(0)
                                 "Show Bond Angle List");
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_SHOW_DIHEDRALANGLELIST,
                                 "Show Dihedral Angle List");
-         //mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_TEST,"Test");
+         #ifdef __DEBUG__
+         mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_TEST,"Debug Test");
+         #endif
       mpSizer->SetItemMinSize(mpMenuBar,
                               mpMenuBar->GetSize().GetWidth(),
                               mpMenuBar->GetSize().GetHeight());
@@ -1000,8 +1002,12 @@ void WXMolecule::OnMenuRemoveDihedralAngle(wxCommandEvent & WXUNUSED(event))
 void WXMolecule::OnMenuTest(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXMolecule::OnMenuTest()",6)
-   mpMolecule->RestraintStatus(cout);
-   mpMolecule->OptimizeConformation();
+   #if 0
+   mpMolecule->BuildRotorGroup();
+   mpMolecule->BuildFlipGroup();
+   mpMolecule->FlipAtomGroup(*(mpMolecule->mvFlipGroup.begin()));
+   mpMolecule->GetCrystal().UpdateDisplay();
+   #endif
    VFN_DEBUG_EXIT("WXMolecule::OnMenuTest()",6)
 }
 
