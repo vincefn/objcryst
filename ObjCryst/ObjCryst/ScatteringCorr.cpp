@@ -450,7 +450,10 @@ void TextureMarchDollase::GlobalOptRandomMove(const REAL mutationAmplitude,
             ymax=.5+1/M_PI*atan((y+delta-y0)/(2.*sig));
             ymin=.5+1/M_PI*atan((y-delta-y0)/(2.*sig));
             y=ymin+rand()/(REAL)RAND_MAX*(ymax-ymin);
-            pF->MutateTo(y0+2*sig*tan(M_PI*(y-.5)));
+            y-=.5;
+            if(y<-.499)y=-.499;//Should not happen but make sure we remain in [-pi/2;pi/2]
+            if(y> .499)y= .499;
+            pF->MutateTo(y0+2*sig*tan(M_PI*y));
          }
          if((pH->IsFixed()==false)||(pK->IsFixed()==false)||(pL->IsFixed()==false))
          {
@@ -470,17 +473,26 @@ void TextureMarchDollase::GlobalOptRandomMove(const REAL mutationAmplitude,
                ymax=.5+1/M_PI*atan((tx+delta-tx0)/(2.*sig));
                ymin=.5+1/M_PI*atan((tx-delta-tx0)/(2.*sig));
                y=ymin+rand()/(REAL)RAND_MAX*(ymax-ymin);
-               tx=tx0+2*sig*tan(M_PI*(y-.5));
+               y-=.5;
+               if(y<-.499)y=-.499;
+               if(y> .499)y= .499;
+               tx=tx0+2*sig*tan(M_PI*y);
 
                ymax=.5+1/M_PI*atan((ty+delta-ty0)/(2.*sig));
                ymin=.5+1/M_PI*atan((ty-delta-ty0)/(2.*sig));
                y=ymin+rand()/(REAL)RAND_MAX*(ymax-ymin);
-               ty=ty0+2*sig*tan(M_PI*(y-.5));
+               y-=.5;
+               if(y<-.499)y=-.499;
+               if(y> .499)y= .499;
+               ty=ty0+2*sig*tan(M_PI*y);
 
                ymax=.5+1/M_PI*atan((tz+delta-tz0)/(2.*sig));
                ymin=.5+1/M_PI*atan((tz-delta-tz0)/(2.*sig));
                y=ymin+rand()/(REAL)RAND_MAX*(ymax-ymin);
-               tz=tz0+2*sig*tan(M_PI*(y-.5));
+               y-=.5;
+               if(y<-.499)y=-.499;
+               if(y> .499)y= .499;
+               tz=tz0+2*sig*tan(M_PI*y);
             }
             const REAL factor=mPhaseRegistry.GetObj(i).mNorm/sqrt(tx*tx+ty*ty+tz*tz);
             tx *= factor;
@@ -503,7 +515,10 @@ void TextureMarchDollase::GlobalOptRandomMove(const REAL mutationAmplitude,
             ymin=.5+1/M_PI*atan((y-delta-y0)/(2.*sig));
             ymax=.5+1/M_PI*atan((y+delta-y0)/(2.*sig));
             y=ymin+rand()/(REAL)RAND_MAX*(ymax-ymin);
-            pM->MutateTo(exp(y0+2*sig*tan(M_PI*(y-.5))));
+               y-=.5;
+               if(y<-.499)y=-.499;
+               if(y> .499)y= .499;
+            pM->MutateTo(exp(y0+2*sig*tan(M_PI*y)));
          }
       }
    }
@@ -591,6 +606,8 @@ void TextureMarchDollase::BeginOptimization(const bool allowApproximations,
       REAL tz=pL->GetValue();
       mpData->GetCrystal().MillerToOrthonormalCoords(tx,ty,tz);
       mPhaseRegistry.GetObj(i).mNorm=sqrt(tx*tx+ty*ty+tz*tz);
+      // Something went wrong, preferred orientation vector has null norm !
+      if(mPhaseRegistry.GetObj(i).mNorm<1e-6) mPhaseRegistry.GetObj(i).mNorm=1;
    }
    this->RefinableObj::BeginOptimization(allowApproximations,enableRestraints);
 }
@@ -649,10 +666,10 @@ void TextureMarchDollase::CalcCorr() const
          hkl=mpData->GetCrystal().GetSpaceGroup()
                .GetAllEquivRefl(this->GetPhaseH(i),this->GetPhaseK(i),this->GetPhaseL(i),true);
          //coefficients
-            const REAL march=1./this->GetMarchCoeff(i);
+            const REAL march=1./(this->GetMarchCoeff(i)+1e-6);
             const REAL march2=this->GetMarchCoeff(i)*this->GetMarchCoeff(i)-march;
             // Normalized by the number of symmetrical reflections
-            const REAL frac=this->GetFraction(i)/fractionNorm/hkl.rows();
+            const REAL frac=this->GetFraction(i)/(fractionNorm+1e-6)/hkl.rows();
          
          for(long j=0;j<hkl.rows();j++)
          {
@@ -668,16 +685,18 @@ void TextureMarchDollase::CalcCorr() const
                {
                   mpData->GetCrystal().MillerToOrthonormalCoords(tx,ty,tz);
                   const REAL norm=sqrt(tx*tx+ty*ty+tz*tz);
-                  tx/=norm;
-                  ty/=norm;
-                  tz/=norm;
+                  tx/=(norm+1e-6);
+                  ty/=(norm+1e-6);
+                  tz/=(norm+1e-6);
                }
             // Calculation
                REAL tmp;
                for(long k=0;k<nbReflUsed;k++)
                {
                   tmp=(tx * (*xx++) + ty * (*yy++) + tz * (*zz++))/ (*xyznorm++);
-                  mCorr(k)+=frac*pow((float)(march+march2*tmp*tmp),(float)-1.5);
+                  tmp=march+march2*tmp*tmp;
+                  if(tmp<0) tmp=0;// rounding errors ?
+                  mCorr(k)+=frac*pow((float)tmp,(float)-1.5);
                }
          }
       }
