@@ -828,6 +828,9 @@ void Crystal::CIFOutput(ostream &os)const
       << "    _atom_site_occupancy" <<endl
       << "    _atom_site_adp_type" <<endl;
    
+   CrystMatrix_REAL minDistTable;
+   minDistTable=this->GetMinDistanceTable(-1.);
+   const long nbComponent=mScattCompList.GetNbComponent();
    long k=0;
    for(int i=0;i<mScattererRegistry.GetNb();i++) 
    {
@@ -835,19 +838,51 @@ void Crystal::CIFOutput(ostream &os)const
       const ScatteringComponentList list=this->GetScatt(i).GetScatteringComponentList();
       for(int j=0;j<list.GetNbComponent();j++)
       {
-         os   << "    "
-              << FormatString(list(j).mpScattPow->GetName(),8) << " "
-              << FormatString(this->GetScatt(i).GetComponentName(j),10) << " "
-              << FormatFloat(list(j).mX,7,4) << " "
-              << FormatFloat(list(j).mY,7,4) << " "
-              << FormatFloat(list(j).mZ,7,4) << " "
-              << FormatFloat(list(j).mpScattPow->GetBiso()/8./M_PI/M_PI) << " "
-              << FormatFloat(list(j).mOccupancy,6,4)
-              << " Uiso"
-              << endl;
+         bool redundant=false;
+         for(unsigned long l=0;l<k;++l) if(minDistTable(l,k)<0.5) redundant=true;
+         if(!redundant)
+         {
+            os   << "    "
+                 << FormatString(list(j).mpScattPow->GetName(),8) << " "
+                 << FormatString(this->GetScatt(i).GetComponentName(j),10) << " "
+                 << FormatFloat(list(j).mX,7,4) << " "
+                 << FormatFloat(list(j).mY,7,4) << " "
+                 << FormatFloat(list(j).mZ,7,4) << " "
+                 << FormatFloat(list(j).mpScattPow->GetBiso()/8./M_PI/M_PI) << " "
+                 << FormatFloat(list(j).mOccupancy,6,4)
+                 << " Uiso"
+                 << endl;
+         }
          k++;
       }
-      
+   }
+   
+   os <<endl
+      << "# The following atoms have been excluded by Fox because they are"<<endl
+      << "# almost fully overlapping with another atom (d<0.5A)"<< endl;
+   k=0;
+   for(int i=0;i<mScattererRegistry.GetNb();i++) 
+   {
+      const ScatteringComponentList list=this->GetScatt(i).GetScatteringComponentList();
+      for(int j=0;j<list.GetNbComponent();j++)
+      {
+         bool redundant=false;
+         for(unsigned long l=0;l<k;++l) if(minDistTable(l,k)<0.5) redundant=true;
+         if(redundant)
+         {
+            os   << "#    "
+                 << FormatString(list(j).mpScattPow->GetName(),8) << " "
+                 << FormatString(this->GetScatt(i).GetComponentName(j),10) << " "
+                 << FormatFloat(list(j).mX,7,4) << " "
+                 << FormatFloat(list(j).mY,7,4) << " "
+                 << FormatFloat(list(j).mZ,7,4) << " "
+                 << FormatFloat(list(j).mpScattPow->GetBiso()/8./M_PI/M_PI) << " "
+                 << FormatFloat(list(j).mOccupancy,6,4)
+                 << " Uiso"
+                 << endl;
+         }
+         k++;
+      }
    }
 
    os <<endl;
