@@ -227,6 +227,12 @@ void Radiation::SetWavelength(const string &XRayTubeElementName,
    {
       mWavelengthType.SetChoice(WAVELENGTH_MONOCHROMATIC);
       const T_ChXrayWaveLength *xrayWaveLength;
+      if(xrayWaveLength==NULL)
+      {
+         cout << "WARNING: could not interpret X-Ray tube name:"<<XRayTubeElementName<<endl
+              << "         not modifying wavelength !"<<endl;
+         return;
+      }
       xrayWaveLength=ChXrayWaveLengthOf(mXRayTubeName.c_str());
       mWavelength=xrayWaveLength->Length;
    }
@@ -237,8 +243,20 @@ void Radiation::SetWavelength(const string &XRayTubeElementName,
       const T_ChXrayWaveLength *xrayWaveLength;
       REAL lambda1,lambda2;
       xrayWaveLength=ChXrayWaveLengthOf((mXRayTubeName+"A1").c_str());
+      if(xrayWaveLength==NULL)
+      {
+         cout << "WARNING: could not interpret X-Ray tube name:"<<XRayTubeElementName<<endl
+              << "         not modifying wavelength !"<<endl;
+         return;
+      }
       lambda1=xrayWaveLength->Length;
       xrayWaveLength=ChXrayWaveLengthOf((mXRayTubeName+"A2").c_str());
+      if(xrayWaveLength==NULL)
+      {
+         cout << "WARNING: could not interpret X-Ray tube name:"<<XRayTubeElementName<<endl
+              << "         not modifying wavelength !"<<endl;
+         return;
+      }
       lambda2=xrayWaveLength->Length;
       mXRayTubeDeltaLambda=lambda2-lambda1;
       mWavelength=lambda1
