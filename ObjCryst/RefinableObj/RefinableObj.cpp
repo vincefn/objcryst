@@ -135,12 +135,12 @@ Restraint::Restraint(const RefParType *type,
                      const REAL hardMax,
                      const bool hasMinLimit,
                      const bool hasMaxLimit,
-                      const REAL softRange,
-                      const REAL restraintWeigth,
-                     const bool enableRestraints)
+                     const REAL softRange,
+                     const bool enableRestraints,
+                     const bool isQuenched)
 {
    this->Init(type,hardMin,hardMax,hasMinLimit,hasMaxLimit,
-              softRange,restraintWeigth,enableRestraints);
+              softRange,enableRestraints,isQuenched);
 }
 
 Restraint::~Restraint()
@@ -152,8 +152,8 @@ void Restraint::Init(const RefParType *type,
                      const bool hasMinLimit,
                      const bool hasMaxLimit,
                      const REAL softRange,
-                      const REAL restraintWeigth,
-                     const bool enableRestraints)
+                     const bool enableRestraints,
+                     const bool isQuenched)
 {
    mpRefParType=type;
    mMin=hardMin;
@@ -161,13 +161,20 @@ void Restraint::Init(const RefParType *type,
    mHasMin=hasMinLimit;
    mHasMax=hasMaxLimit;
    mRestraintRange=softRange;
-   mWeight=restraintWeigth;
    mEnableRestraint=enableRestraints;
+   mEnableQuenching=isQuenched;
 }
 
 REAL Restraint::GetRestraintCost()const
 {
-   if((false==mEnableRestraint)|| ((mHasMin==false)&&(mHasMax==false))) return 0.;
+   if( ((false==mEnableRestraint)|| ((mHasMin==false)&&(mHasMax==false)))
+       && (false==mEnableQuenching)) return 0.;
+   if(true==mEnableQuenching)
+   {
+      REAL value=this->GetValue();
+      value= (value-mQuenchingValue)/(mRestraintRange);
+      return value*value;
+   }
    else
    {
       REAL value=this->GetValue();
@@ -183,6 +190,18 @@ REAL Restraint::GetRestraintCost()const
       }
    }
    return 0.;
+}
+void Restraint::SetRestraintRange(const REAL range)
+{
+   mRestraintRange=range;
+}
+void Restraint::SetQuenching(const bool enableQuenching)
+{
+   mEnableQuenching=enableQuenching;
+}
+void Restraint::SetQuenchingValue() const
+{
+   mQuenchingValue=this->GetValue();
 }
 //######################################################################
 //    RefinablePar
@@ -207,7 +226,7 @@ RefinablePar::RefinablePar(  const string &name,
                      const bool isPeriodic,
                      const REAL humanScale,
                      REAL period):
-Restraint(type,min,max,hasLimits,hasLimits,max-min,1.,false),
+Restraint(type,min,max,hasLimits,hasLimits,max-min,false,false),
 mName(name),mpValue(refPar),
 mHasLimits(hasLimits),mIsFixed(isFixed),mIsUsed(isUsed),mIsPeriodic(isPeriodic),mPeriod(period),
 mGlobalOptimStep((max-min)/100.),mDerivStep(1e-5),mRefParDerivStepModel(derivMode),
@@ -234,7 +253,7 @@ void RefinablePar::Init(const string &name,
                         const REAL humanScale,
                         REAL period)
 {
-   this->Restraint::Init(type,min,max,hasLimits,hasLimits,max-min,false);
+   this->Restraint::Init(type,min,max,hasLimits,hasLimits,max-min,false,false);
    mName=name;
    mpValue=refPar;
    mHasLimits=hasLimits;
@@ -1703,6 +1722,11 @@ void RefinableObj::AddRestraint(Restraint *pNewRestraint)
       delete[] oldmpRestraint;
    }
    mpRestraint[mNbRestraint++]=pNewRestraint;
+}
+
+void RefinableObj::TagNewBestConfig()const
+{
+   for(int i=0;i<mNbRestraint;i++) mpRestraint[i]->SetQuenchingValue();
 }
 
 void RefinableObj::UpdateDisplay()const

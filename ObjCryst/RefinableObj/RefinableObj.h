@@ -132,17 +132,21 @@ class RefinableObjClock
 * limits associated with a RefinableObj. These can be restrictions on a single
 * parameter (see RefinablePar), but inheritance allows involving several parameters.
 *
-* There are two kind of restrictions: first, the 'hard' limits [hardmin,hardmax] in which the
-* value should be ideally located. And the soft limits, which correspond to penalty
-* applied beyond the 'hard' limits. There is no restriction within hard limits,
-* and \e if the optimization algorithm allows restraints, then the value may go outside
-* this range, but with a cost (penalty) which is taken into account by the algorithm
-* when evaluating the configuration.
+* There are four behaviour for restraints:
+* - no limits whatsoever.
+* - hard min and/or max limits (constraint), beyond which the parameter cannot go at all.
+* - quenched (dynamical restraint): this is a special type of restraints for global optimization
+*  only, where the value is restrained around (for example) the value recorded 
+*  for the last "best" configuration. (i.e. there is a penalty for going away from the
+*  "ideal" recorded value). This can be combined with hard min and/or max
+*  absolute limits.
+* - soft limits (restraint): if the restraint has a min and/or a max, then this time the
+*  value can go beyond the given limits, but with a penalty.
 *
-* It is the duty of the algorithm to enable or disable restraints, and to evaluate
-* them (more or less loosely).
+* All penalties for restraints are calculated under the form of a cost (strictly
+* positive number, weighted).
 *
-* This is an abstract base class
+* This is an abstract base class.
 */
 class Restraint
 {
@@ -155,13 +159,22 @@ class Restraint
       * \param hasMinLimit,hasMaxLimit: set to 'true' if the parameter has 
       * upper and/or lower limit.
       * \param softRange: when the value goes below min or above max limits,
-      * the penalty will be equal to 1 at min-softRange and at max+softRange.
-      * Thus softRange must be strictly positive.
+      * (resp. away from the "quenching" value)
+      * the penalty will be equal to 1 at min-softRange and at max+softRange
+      * (resp. at 1-QuenchingValue) SoftRange must be strictly positive.
       * \param enableRestraint: if true, then the value may go beyond the hard limits,
       * with penalty defined by the soft limits. Else no value beyond the hard limits
       * should be accepted.
-      * \param restraintWeigth: the weight associated to this restraint. This should
-      * be tuned by the RefinableObj owner.
+      * \param isQuenched: if true (useful only for global optimization), then each time
+      * a new "best" configuration is notified to the object, a new "QuenchingValue"
+      * is recorded, and a penalty is set each time the value goes away from this
+      * QuenchingValue. This forces some parameters to vary more slowly, and avoids
+      * exploring a wide range of values away from the current minimum for the worst
+      * configurations explored. WARNING: this should be used only for some type of
+      * parameters, generally those who have a very large influence on the overall
+      * cost of a given configuration, without being correlated to other values.
+      * \note if isQuenched=true, then enableRestraint is \e ignored, and existing
+      * limits (if any) are considered as hard limits \e automatically.
       */
       Restraint(const RefParType *type,
                 const REAL hardMin,
@@ -169,11 +182,11 @@ class Restraint
                 const bool hasMinLimit,
                 const bool hasMaxLimit,
                 const REAL softRange,
-                const REAL restraintWeigth=1,
-                const bool enableRestraint=false);
+                const bool enableRestraint=false,
+                const bool isQuenched=false);
       /// Destructor
       virtual ~Restraint();
-      /** Initializer for the base Restrain class, setting hard&soft limits.
+      /** Constructor for the base Restrain class, setting hard&soft limits.
       *
       * \param type: the type of value which is constrained/restrained.
       * \param hardMin,hardMax: the hard limits between which the value should
@@ -181,13 +194,22 @@ class Restraint
       * \param hasMinLimit,hasMaxLimit: set to 'true' if the parameter has 
       * upper and/or lower limit.
       * \param softRange: when the value goes below min or above max limits,
-      * the penalty will be equal to 1 at min-softRange and at max+softRange.
-      * Thus softRange must be strictly positive.
+      * (resp. away from the "quenching" value)
+      * the penalty will be equal to 1 at min-softRange and at max+softRange
+      * (resp. at 1-QuenchingValue) SoftRange must be strictly positive.
       * \param enableRestraint: if true, then the value may go beyond the hard limits,
       * with penalty defined by the soft limits. Else no value beyond the hard limits
       * should be accepted.
-      * \param restraintWeigth: the weight associated to this restraint. This should
-      * be tuned by the RefinableObj owner.
+      * \param isQuenched: if true (useful only for global optimization), then each time
+      * a new "best" configuration is notified to the object, a new "QuenchingValue"
+      * is recorded, and a penalty is set each time the value goes away from this
+      * QuenchingValue. This forces some parameters to vary more slowly, and avoids
+      * exploring a wide range of values away from the current minimum for the worst
+      * configurations explored. WARNING: this should be used only for some type of
+      * parameters, generally those who have a very large influence on the overall
+      * cost of a given configuration, without being correlated to other values.
+      * \note if isQuenched=true, then enableRestraint is \e ignored, and existing
+      * limits (if any) are considered as hard limits \e automatically.
       */
       void Init(const RefParType *type,
                 const REAL hardMin,
@@ -195,8 +217,8 @@ class Restraint
                 const bool hasMinLimit,
                 const bool hasMaxLimit,
                 const REAL softRange,
-                const REAL restraintWeigth=1,
-                const bool enableRestraint=false);
+                const bool enableRestraint=false,
+                const bool isQuenched=false);
       /// Get the current value.
       virtual REAL GetValue()const=0;
       /** Get the value of the penalty (cost) associated to the restraint.
@@ -204,13 +226,23 @@ class Restraint
       * If the parameter is within limits, the cost is null. If it is
       * below the min (and if there is a lower limit), the cost is equal
       * to:
-      * \f[ cost= weight\times\left(\frac{min_{hard}-value}{looseness \times range} \right)^2\f]
+      * \f[ cost= weight\times\left(\frac{min_{hard}-value}{range} \right)^2\f]
       * And if there is a higher limit and the value is above it:
-      * \f[ cost= weight\times\left(\frac{value-max_{hard}}{loosenes \times srange} \right)^2\f]
+      * \f[ cost= weight\times\left(\frac{value-max_{hard}}{range} \right)^2\f]
       *
-      * If restraints are disabled, the returned cost is always null.
+      * If the value is quenched, the the returned cost is equal to:
+      * \f[ cost= weight\times\left(\frac{value-QuenchingValue}{range} \right)^2\f]
+      *
+      * If restraints are disabled, and there is no quenching, the returned cost is always null.
       */
       virtual REAL GetRestraintCost()const;
+      /// Set restraint range.
+      void SetRestraintRange(const REAL range);
+      /// Enable quenching.
+      void SetQuenching(const bool enableQuenching);
+      /// Set current value as the quenching value (typically called during derived forms of
+      /// RefinableObj::TagNewBestConfig).
+      void SetQuenchingValue() const;
    protected:
       /// Type of value constrained/restrained.
       const RefParType *mpRefParType;
@@ -218,12 +250,16 @@ class Restraint
       REAL mMin,mMax;
       /// Has lower and/or upper limits ?
       bool mHasMin,mHasMax;
-      /// Soft lower and upper limits.
+      /// Range for restraint cost calculation.
       REAL mRestraintRange;
-      /// Is this restraint enabled ?
+      /// Enable restraint (i.e. go beyond limits) ? (ignored if mEnableQuenching==true)
       bool mEnableRestraint;
-      /// weight for the restraint. This shoud be set by the RefinableObj.
-      REAL mWeight;
+      /// Enable quenching ?
+      bool mEnableQuenching;
+      /// If quenched, this is the value away from which this should not go.
+      /// This is mutable since it is to be dynamically updated during global
+      /// optimizations.
+      mutable REAL mQuenchingValue;
 };
 
 /** Generic class for parameters of refinable objects.
@@ -1058,9 +1094,9 @@ class RefinableObj
       // Restraints
          /** Get the restraint cost (penalty)
          *
-         * \note by default this returns 0, so this \e must be overloaded by any
-         * object which actually uses retsraint.
-         * \todo Instead, we could return by default the sum of the restraints,
+         * By default this returns 0, so this \e must be overloaded by any
+         * object which actually uses restraint.
+         * \note Instead, we could return by default the sum of the restraints,
          * but this is dangerous since we need to have objects using restraints fully
          * responsible for them.
          */
@@ -1074,6 +1110,16 @@ class RefinableObj
          *void RemoveRestraint(Restraint *newRestraint);
          *void RemoveRestraint(const RefParType);
          */
+      /** During a global optimization, tell the object that the current config is
+      * the latest "best" config.
+      *
+      * This can be used by the object to make more intellingent random moves (use with
+      * caution !).
+      *
+      * The default behaviour (RefinableObj) is only to update dynamical restraints
+      * (quenching restraints).
+      */
+      virtual void TagNewBestConfig()const;
    protected:
       /// Find a refinable parameter with a given name
       long FindPar(const string &name) const;
