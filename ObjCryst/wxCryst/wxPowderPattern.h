@@ -243,6 +243,7 @@ class WXProfilePseudoVoigt: public WXCrystObj
 {
    public:
       WXProfilePseudoVoigt(wxWindow *parent, ReflectionProfilePseudoVoigt *prof);
+      virtual ~WXProfilePseudoVoigt();
       virtual bool OnChangeName(const int id);
    private:
       ReflectionProfilePseudoVoigt *mpProfile;
@@ -256,6 +257,7 @@ class WXProfileDoubleExponentialPseudoVoigt: public WXCrystObj
    public:
       WXProfileDoubleExponentialPseudoVoigt
          (wxWindow *parent, ReflectionProfileDoubleExponentialPseudoVoigt *prof);
+      virtual ~WXProfileDoubleExponentialPseudoVoigt();
       virtual bool OnChangeName(const int id);
    private:
       ReflectionProfileDoubleExponentialPseudoVoigt *mpProfile;

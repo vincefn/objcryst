@@ -1819,6 +1819,10 @@ WXCrystObj(parent),mpProfile(prof)
    this->CrystUpdate();
    VFN_DEBUG_EXIT("WXProfilePseudoVoigt::WXProfilePseudoVoigt()",6)
 }
+WXProfilePseudoVoigt::~WXProfilePseudoVoigt()
+{
+   mpProfile->WXNotifyDelete();
+}
 bool WXProfilePseudoVoigt::OnChangeName(const int id)
 {
    return false;
@@ -1885,6 +1889,10 @@ WXCrystObj(parent),mpProfile(prof)
    this->BottomLayout(0);
    this->CrystUpdate();
    VFN_DEBUG_EXIT("WXProfileDoubleExponentialPseudoVoigt::WXProfileDoubleExponentialPseudoVoigt()",6)
+}
+WXProfileDoubleExponentialPseudoVoigt::~WXProfileDoubleExponentialPseudoVoigt()
+{
+   mpProfile->WXNotifyDelete();
 }
 bool WXProfileDoubleExponentialPseudoVoigt::OnChangeName(const int id)
 {
