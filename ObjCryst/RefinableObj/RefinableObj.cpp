@@ -28,6 +28,7 @@
    #include "wxCryst/wxRefinableObj.h"
    #undef GetClassName // Conflict from wxMSW headers ? (cygwin)
 #endif
+#include <algorithm>
 namespace ObjCryst
 {
 //######################################################################
