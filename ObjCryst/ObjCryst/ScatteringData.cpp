@@ -199,6 +199,7 @@ RadiationType Radiation::GetRadiationType()const
 void Radiation::SetRadiationType(const RadiationType rad)
 {
    mRadiationType.SetChoice(rad);
+   if(rad == RAD_NEUTRON) mLinearPolarRate=0;
 }
 
 WavelengthType Radiation::GetWavelengthType()const
@@ -214,9 +215,11 @@ void Radiation::SetWavelength(const REAL l)
 void Radiation::SetWavelength(const string &XRayTubeElementName,
                               const REAL alpha2Alpha2ratio)
 {
+   VFN_DEBUG_MESSAGE("Radiation::SetWavelength(tubeName,ratio):",10)
    mXRayTubeName=XRayTubeElementName;
    mRadiationType.SetChoice(RAD_XRAY);
    mWavelength.resize(1);
+   mLinearPolarRate=0;
    
    if(XRayTubeElementName.length() >=3) //:KLUDGE:
    {
@@ -273,6 +276,10 @@ void Radiation::Print()const
       case WAVELENGTH_LAUE: cout<< "laue"<<" "<<endl;break;
    }
 }
+
+REAL Radiation::GetLinearPolarRate()const{return mLinearPolarRate;}
+
+void Radiation::SetLinearPolarRate(const REAL f){mLinearPolarRate=f;}
 
 void Radiation::InitOptions()
 {
@@ -676,6 +683,7 @@ const CrystVector_REAL& ScatteringData::GetSinThetaOverLambda()const
    VFN_DEBUG_EXIT("ScatteringData::GetSinThetaOverLambda()",1)
    return mSinThetaLambda;
 }
+
 const CrystVector_REAL& ScatteringData::GetTheta()const
 {
    VFN_DEBUG_ENTRY("ScatteringData::GetTheta()",1)
@@ -683,6 +691,12 @@ const CrystVector_REAL& ScatteringData::GetTheta()const
    VFN_DEBUG_EXIT("ScatteringData::GetTheta()",1)
    return mTheta;
 }
+
+const RefinableObjClock& ScatteringData::GetClockTheta()const
+{
+   return mClockTheta;
+}
+
 const CrystVector_REAL& ScatteringData::GetFhklCalcSq() const
 {
    VFN_DEBUG_ENTRY("ScatteringData::GetFhklCalcSq()",2)

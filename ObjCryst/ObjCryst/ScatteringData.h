@@ -151,6 +151,8 @@ class Radiation: public RefinableObj
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
       /// Print to screen/console the charcteristics of the radiation.
       void Print()const;
+      REAL GetLinearPolarRate()const;
+      void SetLinearPolarRate(const REAL f);
    private:
       void InitOptions();
       /// Neutron ? X-Ray ? (Electron: unimplemented)
@@ -169,6 +171,8 @@ class Radiation: public RefinableObj
       //Clocks
          RefinableObjClock mClockWavelength;
          RefinableObjClock mClockRadiation;
+      /// Linear Polarization Rate (default:0, X-Ray tube unmonochromatized)
+      REAL mLinearPolarRate;
    #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);
@@ -266,6 +270,8 @@ class ScatteringData: virtual public RefinableObj
       const CrystVector_REAL& GetSinThetaOverLambda()const;
       /// Return an array with theta values for all reflections
       const CrystVector_REAL& GetTheta()const;
+      /// Clock the last time the sin(theta)/lambda and theta arrays were re-computed
+      const RefinableObjClock& GetClockTheta()const;
    
       ///  Returns the Array of calculated |F(hkl)|^2 for all reflections.
       const CrystVector_REAL& GetFhklCalcSq() const;

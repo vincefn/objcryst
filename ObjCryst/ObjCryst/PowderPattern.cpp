@@ -277,10 +277,7 @@ PowderPatternDiffraction::PowderPatternDiffraction():
 mFullProfileWidthFactor(5.),
 mCagliotiU(0),mCagliotiV(0),mCagliotiW(3e-5),
 mPseudoVoigtEta0(0.5),mPseudoVoigtEta1(0.),mUseAsymmetricProfile(false),
-mNeedLorentzCorr(true),
-mNeedPolarCorr(true),
-mNeedSlitApertureCorr(true),
-mPolarAfactor(1.)
+mCorrLorentz(*this),mCorrPolar(*this),mCorrSlitAperture(*this)
 {
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::PowderPatternDiffraction()",10);
    mIsScalable=true;
@@ -295,10 +292,7 @@ mFullProfileWidthFactor(old.mFullProfileWidthFactor),
 mCagliotiU(old.mCagliotiU),mCagliotiV(old.mCagliotiV),mCagliotiW(old.mCagliotiW),
 mPseudoVoigtEta0(old.mPseudoVoigtEta0),mPseudoVoigtEta1(old.mPseudoVoigtEta1),
 mUseAsymmetricProfile(old.mUseAsymmetricProfile),
-mNeedLorentzCorr(old.mNeedLorentzCorr),
-mNeedPolarCorr(old.mNeedPolarCorr),
-mNeedSlitApertureCorr(old.mNeedSlitApertureCorr),
-mPolarAfactor(old.mPolarAfactor)
+mCorrLorentz(*this),mCorrPolar(*this),mCorrSlitAperture(*this)
 {}
 
 PowderPatternDiffraction::~PowderPatternDiffraction()
@@ -664,46 +658,45 @@ Computing all Profiles: Reflection #"<<i,2)
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile():finished",5)
 }
 
-void PowderPatternDiffraction::CalcLorentzPolarCorr()const
+void PowderPatternDiffraction::CalcIntensityCorr()const
 {
-   this->CalcSinThetaLambda();
+   bool needRecalc=false;
    
-   if(  (mClockLorentzPolarSlitCorrCalc>mClockLorentzPolarSlitCorrPar)
-      &&(mClockLorentzPolarSlitCorrCalc>mClockTheta) ) return;
-      
-   TAU_PROFILE("PowderPatternDiffraction::CalcLorentzPolarCorr()","void ()",TAU_DEFAULT);
-   VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcLorentzPolarCorr()",3)
+   this->CalcSinThetaLambda();
+   if(mClockIntensityCorr<mClockTheta) needRecalc=true;
+   
+   const CrystVector_REAL *mpCorr[3];
+   
+   mpCorr[0]=&(mCorrLorentz.GetCorr());
+   if(mClockIntensityCorr<mCorrLorentz.GetClockCorr()) needRecalc=true;
+   
+   if(this->GetRadiation().GetRadiationType()==RAD_XRAY)
+   {
+      mpCorr[1]=&(mCorrPolar.GetCorr());
+      if(mClockIntensityCorr<mCorrPolar.GetClockCorr()) needRecalc=true;
+   }
+   
+   mpCorr[2]=&(mCorrSlitAperture.GetCorr());
+   if(mClockIntensityCorr<mCorrSlitAperture.GetClockCorr()) needRecalc=true;
+   
+   if(needRecalc==false) return;
+   
+   TAU_PROFILE("PowderPatternDiffraction::CalcIntensityCorr()","void ()",TAU_DEFAULT);
+   VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcIntensityCorr()",10)
    mLorentzPolarSlitCorr.resize(this->GetNbRefl());
    mLorentzPolarSlitCorr=1.;
-   if(true==mNeedLorentzCorr)
-   {
-      VFN_DEBUG_MESSAGE("->Need Lorentz Corr",2)
-      for(long i=0;i<this->GetNbRefl();i++)
-         mLorentzPolarSlitCorr(i) /=sin(2*mTheta(i));
-   }
-   if(true==mNeedPolarCorr)
-   {
-      VFN_DEBUG_MESSAGE("->Need Polarization Corr: A="<<mPolarAfactor,2)
-      for(long i=0;i<this->GetNbRefl();i++)
-         mLorentzPolarSlitCorr(i) *=(1.+mPolarAfactor*cos(mTheta(i))*cos(mTheta(i)))
-                                 /(1.+mPolarAfactor);
-   }
-   if(true==mNeedSlitApertureCorr)
-   {
-      VFN_DEBUG_MESSAGE("->Need Slit Aperture Corr",2)
-      for(long i=0;i<this->GetNbRefl();i++)
-         mLorentzPolarSlitCorr(i) /= sin(mTheta(i));
-   }
-         
-   mClockLorentzPolarSlitCorrCalc.Click();
-   VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcLorentzPolarCorr():finished",0)
+   mLorentzPolarSlitCorr*=*(mpCorr[0]);
+   if(this->GetRadiation().GetRadiationType()==RAD_XRAY) mLorentzPolarSlitCorr*=*(mpCorr[1]);
+   mLorentzPolarSlitCorr*=*(mpCorr[2]);
+   mClockIntensityCorr.Click();
+   VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcIntensityCorr():finished",0)
 }
 
 void PowderPatternDiffraction::CalcIhkl() const
 {
    this->CalcStructFactor();
-   this->CalcLorentzPolarCorr();
-   if(  (mClockIhklCalc>mClockLorentzPolarSlitCorrCalc)
+   this->CalcIntensityCorr();
+   if(  (mClockIhklCalc>mClockIntensityCorr)
       &&(mClockIhklCalc>mClockStructFactor)
       &&(mClockIhklCalc>mClockNbReflUsed)) return;
       

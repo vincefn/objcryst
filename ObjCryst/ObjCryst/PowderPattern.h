@@ -25,7 +25,6 @@
 //#include "ObjCryst/ScatteringPower.h"
 //#include "ObjCryst/Scatterer.h"
 #include "ObjCryst/Crystal.h"
-
 #include "ObjCryst/ScatteringCorr.h"
 
 //#include <stdlib.h>
@@ -238,7 +237,7 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       /// \internal Calc reflection profiles for ALL reflections (powder diffraction)
       void CalcPowderReflProfile()const;
       /// \internal Calc Lorentz-Polarisation-APerture correction
-      void CalcLorentzPolarCorr()const;
+      void CalcIntensityCorr()const;
       /// \internal Compute the intensity for all reflections (taking into account
       /// corrections, but not the multiplicity)
       virtual void CalcIhkl() const;
@@ -253,7 +252,7 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
          RefinableObjClock mClockLorentzPolarSlitCorrPar;
       //Clocks (internal, mutable)
          /// Last time the Lorentz-Polar-Slit correction was computed
-         mutable RefinableObjClock mClockLorentzPolarSlitCorrCalc;
+         mutable RefinableObjClock mClockIntensityCorr;
          /// Last time the reflection profiles were computed
          mutable RefinableObjClock mClockProfileCalc;
          /// Last time intensities were computed
@@ -285,18 +284,18 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
          *if there is a monochromator : \f$ A = \cos^2(2\theta_{mono}) \f$
          *The factor \f$ SlitAp = \frac{1}{\sin(\theta)} \f$ takes into account the 
          *fraction of the diffracted cone which falls in the detector slit.
+         *
+         * \todo: store all corrections in a registry, so that other corrections
+         * can more easily be added (? Maybe not that useful, especially since these
+         * correction do not need to be displayed to the user ?).
          */
          mutable CrystVector_REAL mLorentzPolarSlitCorr;
-         /// Need to apply Lorentz correction ? 
-         bool mNeedLorentzCorr;
-         /// Need to apply Polarization correction ?
-         /// This should be false for (unpolarized) neutrons
-         bool mNeedPolarCorr;
-         /// Need to apply Slit aperture correction ?
-         bool mNeedSlitApertureCorr;
-         /// the A factor in the polarization correction. Default value=1, corresponding
-         /// to an X-Ray tube without monochromator.
-         REAL mPolarAfactor;
+         /// Lorentz correction
+         LorentzCorr mCorrLorentz;
+         /// Polarization correction
+         PolarizationCorr mCorrPolar;
+         /// Slit aperture correction
+         PowderSlitApertureCorr mCorrSlitAperture;
          
       /// Computed intensities for all reflections
          mutable CrystVector_REAL mIhklCalc;

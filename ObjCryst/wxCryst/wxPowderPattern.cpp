@@ -65,6 +65,11 @@ WXCrystObjBasic(parent),mpRadiation(rad),mpFieldWavelength(0)
                                    &(mpRadiation->GetPar(mpRadiation->mWavelength.data())));
    mpSizer->Add(mpFieldWavelength,0);
    mList.Add(mpFieldWavelength);
+
+   WXFieldPar<REAL> *polarRate=new WXFieldPar<REAL>(this,"Linear Polar Rate:",-1,
+                                            &(mpRadiation->mLinearPolarRate));
+   mpSizer->Add(polarRate,0,wxALIGN_LEFT);
+   mList.Add(polarRate);
    
    WXFieldPar<REAL> *xRayTubeDlambda=new WXFieldPar<REAL>(this,"Tube-DeltaLambda:",-1,
                                                 &(mpRadiation->mXRayTubeDeltaLambda));

@@ -1258,29 +1258,6 @@ void Radiation::XMLOutput(ostream &os,int indent)const
    XMLCrystTag tag("Radiation");
    if(WAVELENGTH_ALPHA12==this->GetWavelengthType())
       tag.AddAttribute("XRayTube",mXRayTubeName);
-   #if 0
-   switch(this->GetRadiationType())
-   {
-      case RAD_XRAY:  tag.AddAttribute("Type","X-Ray");break;
-      case RAD_NEUTRON:     tag.AddAttribute("Type","Neutron");break;
-      case RAD_ELECTRON: tag.AddAttribute("Type","Electron");break;
-   }
-   switch(this->GetWavelengthType())
-   {
-      case WAVELENGTH_MONOCHROMATIC:tag.AddAttribute("Spectrum","Monochromatic");
-      case WAVELENGTH_ALPHA12:
-      {
-         tag.AddAttribute("Spectrum","Tube");
-         tag.AddAttribute("Tube","mXRayTubeName");
-         stringstream ss;
-         ss << mXRayTubeAlpha2Alpha1Ratio;
-         tag.AddAttribute("Alpha12Ratio",ss.str());
-     }
-      case WAVELENGTH_MAD:  tag.AddAttribute("Spectrum","MAD");break;
-      case WAVELENGTH_DAFS: tag.AddAttribute("Spectrum","DAFS");break;
-      case WAVELENGTH_LAUE: tag.AddAttribute("Spectrum","Laue");break;
-   }
-   #endif
    for(int i=0;i<indent;i++) os << "  " ;
    os <<tag<<endl;
    indent++;
@@ -1290,6 +1267,12 @@ void Radiation::XMLOutput(ostream &os,int indent)const
    
    mWavelengthType.XMLOutput(os,indent);
    os<<endl;
+   
+   for(int i=0;i<indent;i++) os << "  " ;
+   XMLCrystTag tag2("LinearPolarRate");
+   os << tag2<< mLinearPolarRate;
+   tag2.SetIsEndTag(true);
+   os << tag2<<endl;
    
    switch(this->GetWavelengthType())
    {
@@ -1336,6 +1319,11 @@ void Radiation::XMLInput(istream &is,const XMLCrystTag &tagg)
                if("Radiation"==tag.GetAttributeValue(i)) mRadiationType.XMLInput(is,tag);
                if("Spectrum"==tag.GetAttributeValue(i)) mWavelengthType.XMLInput(is,tag);
             }
+      }
+      if("LinearPolarRate"==tag.GetName())
+      {
+         is>>mLinearPolarRate;
+         XMLCrystTag junk(is);
       }
       if("Par"==tag.GetName())
       {
@@ -1882,26 +1870,6 @@ void PowderPatternDiffraction::XMLOutput(ostream &os,int indent)const
    tag.AddAttribute("Crystal",this->GetCrystal().GetName());
    {
       stringstream ss;
-      ss<<mNeedLorentzCorr;
-      tag.AddAttribute("NeedLorentzCorr",ss.str());
-   }
-   {
-      stringstream ss;
-      ss<<mNeedPolarCorr;
-      tag.AddAttribute("NeedPolarCorr",ss.str());
-   }
-   {
-      stringstream ss;
-      ss<<mPolarAfactor;
-      tag.AddAttribute("Polar_AFactor",ss.str());
-   }
-   {
-      stringstream ss;
-      ss<<mNeedSlitApertureCorr;
-      tag.AddAttribute("NeedSlitApertureCorr",ss.str());
-   }
-   {
-      stringstream ss;
       ss<<this->IsIgnoringImagScattFact();
       tag.AddAttribute("IgnoreImagScattFact",ss.str());
    }
@@ -1949,32 +1917,32 @@ void PowderPatternDiffraction::XMLInput(istream &is,const XMLCrystTag &tagg)
          stringstream ss(tagg.GetAttributeValue(i));
          bool b;
          ss>>b;
-         mNeedLorentzCorr=b;
-         mClockLorentzPolarSlitCorrPar.Reset();
+         //mNeedLorentzCorr=b;
+         //mClockLorentzPolarSlitCorrPar.Reset();
       }
       if("NeedPolarCorr"==tagg.GetAttributeName(i))
       {
          stringstream ss(tagg.GetAttributeValue(i));
          bool b;
          ss>>b;
-         mNeedPolarCorr=b;
-         mClockLorentzPolarSlitCorrPar.Reset();
+         //mNeedPolarCorr=b;
+         //mClockLorentzPolarSlitCorrPar.Reset();
       }
       if("Polar_AFactor"==tagg.GetAttributeName(i))
       {
          stringstream ss(tagg.GetAttributeValue(i));
          float b;
          ss>>b;
-         mPolarAfactor=b;
-         mClockLorentzPolarSlitCorrPar.Reset();
+         //mPolarAfactor=b;
+         //mClockLorentzPolarSlitCorrPar.Reset();
       }
       if("NeedSlitApertureCorr"==tagg.GetAttributeName(i))
       {
          stringstream ss(tagg.GetAttributeValue(i));
          bool b;
          ss>>b;
-         mNeedSlitApertureCorr=b;
-         mClockLorentzPolarSlitCorrPar.Reset();
+         //mNeedSlitApertureCorr=b;
+         //mClockLorentzPolarSlitCorrPar.Reset();
       }
       if("IgnoreImagScattFact"==tagg.GetAttributeName(i))
       {
