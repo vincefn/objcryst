@@ -814,24 +814,24 @@ bool operator==(const string&str,const wxString&wx)
 #endif
 
 template<class T> ObjRegistry<T>::ObjRegistry():
-mpRegistry(0),mNbRegistered(0),mMaxNbRegistered(100)
+mpRegistry(0),mNbRegistered(0),mMaxNbRegistered(0)
 #ifdef __WX__CRYST__
 ,mpWXRegistry(0)
 #endif
 {
    VFN_DEBUG_MESSAGE("ObjRegistry::ObjRegistry()",5)
-   mpRegistry = new T* [mMaxNbRegistered];
+   //mpRegistry = new T* [mMaxNbRegistered];
    //this->Print();
 }
 
 template<class T> ObjRegistry<T>::ObjRegistry(const string &name):
-mpRegistry(0),mNbRegistered(0),mMaxNbRegistered(100),mName(name)
+mpRegistry(0),mNbRegistered(0),mMaxNbRegistered(0),mName(name)
 #ifdef __WX__CRYST__
 ,mpWXRegistry(0)
 #endif
 {
    VFN_DEBUG_MESSAGE("ObjRegistry::ObjRegistry(name):"<<mName,5)
-   mpRegistry = new T* [mMaxNbRegistered];
+   //mpRegistry = new T* [mMaxNbRegistered];
    //this->Print();
 }
 //:TODO: a copy constructor
@@ -852,9 +852,9 @@ template<class T> void ObjRegistry<T>::Register(T &obj)
    for(unsigned int i=0;i<mNbRegistered;i++) if(mpRegistry[i]==&obj) return;
    if(mNbRegistered==mMaxNbRegistered)
    {
-      T** newRegistry = new T* [mMaxNbRegistered+100];
+      T** newRegistry = new T* [mMaxNbRegistered+32];
       for(unsigned long i=0;i<mMaxNbRegistered;i++) newRegistry[i]=mpRegistry[i];
-      delete[] mpRegistry;
+      if(0!=mpRegistry) delete[] mpRegistry;
       mpRegistry=newRegistry;
       mMaxNbRegistered+=100;
    }
