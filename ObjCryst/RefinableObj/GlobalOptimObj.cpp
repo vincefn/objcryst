@@ -462,6 +462,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                         simAnnealTemp*=1.5;
                      if(simAnnealTemp>mTemperatureMax) simAnnealTemp=mTemperatureMax;
                      if(simAnnealTemp<mTemperatureMin) simAnnealTemp=mTemperatureMin;
+                     nbAcceptedMovesTemp=0;
 							break;
 						}
                   default: simAnnealTemp=mTemperatureMin;break;
