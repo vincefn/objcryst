@@ -197,20 +197,9 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
    	this->GrabCrystalGLDisplayList();
    	if(mCrystalGLDisplayList==0) mCrystalGLDisplayList=glGenLists(1);
       
-		// :KLUDGE: ? During a refinement (multi-threaded)
+		// During a refinement (multi-threaded)
 		// Wait until the display list has been updated by the main thread...
 		static bool cont;//:TODO: not static, but mutable member function (if >1 crystal,...)
-		#if 0
-		#ifdef __WINDOWS__
-		if(!wglGetCurrentContext())//we are not in the main thread
-		#else
-		  #ifdef __WXMAC__
-		  if(!aglGetCurrentContext())
-		  #else
-		  if(!glXGetCurrentContext())
-		  #endif
-		#endif
-		#endif
 		if(false==wxThread::IsMain())
 		{
 			this->ReleaseCrystalGLDisplayList();

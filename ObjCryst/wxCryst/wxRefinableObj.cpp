@@ -155,7 +155,8 @@ void WXFieldRefPar::CrystUpdate()
 {
    VFN_DEBUG_MESSAGE("WXFieldRefPar::CrystUpdate()",6)
    //cout << mpField <<endl;
-	if(mValue==mpRefPar->GetHumanValue()) return;
+	if(  (mValue==mpRefPar->GetHumanValue())
+	   &&(mpButtonFix->GetValue()!=mpRefPar->IsFixed())) return;
 	mValueOld=mValue;
    mValue=mpRefPar->GetHumanValue();
 	mNeedUpdateUI=true;
@@ -164,7 +165,6 @@ void WXFieldRefPar::CrystUpdate()
 void WXFieldRefPar::UpdateUI()
 {
    VFN_DEBUG_MESSAGE("WXFieldRefPar::UpdateUI()"<<mValue,3)
-   //The 'fix' state should not change during refinement so this should be safe
 	if(mNeedUpdateUI==false)return;
    if(false==mpRefPar->IsUsed()) this->Show(false);
    else this->Show(true);
@@ -530,9 +530,13 @@ bool WXRefinableObj::Layout()
 void WXRefinableObj::CrystUpdate()
 {
    VFN_DEBUG_MESSAGE("WXRefinableObj::CrystUpdate():"<<mpRefinableObj->GetName(),6)
-   wxUpdateUIEvent event(ID_CRYST_UPDATEUI);
-   wxPostEvent(this,event);
    this->WXCrystObj::CrystUpdate();
+	if(true==wxThread::IsMain()) this->UpdateUI();
+	else
+	{
+   	wxUpdateUIEvent event(ID_CRYST_UPDATEUI);
+   	wxPostEvent(this,event);
+	}
 }
 
 bool WXRefinableObj::OnChangeName(const int id)

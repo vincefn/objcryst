@@ -80,8 +80,12 @@ WXCrystObj(parent),mpGlobalOptimRunThread(0)
 void WXOptimizationObj::CrystUpdate()
 {
    this->WXCrystObj::CrystUpdate();
-   wxUpdateUIEvent event(ID_CRYST_UPDATEUI);
-   wxPostEvent(this,event);
+	if(true==wxThread::IsMain()) this->UpdateUI();
+	else
+	{
+   	wxUpdateUIEvent event(ID_CRYST_UPDATEUI);
+   	wxPostEvent(this,event);
+	}
 }
 
 bool WXOptimizationObj::OnChangeName(const int id)

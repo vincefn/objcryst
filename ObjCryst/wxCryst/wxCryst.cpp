@@ -339,9 +339,11 @@ WXFieldParBase(parent,label,id,hsize),mpValue(par),mValue(*par),mValueOld(*par)
 template<class T> void WXFieldPar<T>::CrystUpdate()
 {
    VFN_DEBUG_MESSAGE("WXFieldPar<T>::CrystUpdate()",6)
+	if(mValue==*mpValue) return;
 	mValueOld=mValue;
 	mValue=*mpValue;
 	mNeedUpdateUI=true;
+	if(true==wxThread::IsMain()) this->UpdateUI();
 }
 
 template<> void WXFieldPar<REAL>::UpdateUI()
@@ -387,6 +389,7 @@ template<class T> void WXFieldPar<T>::Revert()
    *mpValue=mValueOld;
 	mValue=mValueOld;
 	mNeedUpdateUI=true;
+	if(true==wxThread::IsMain()) this->UpdateUI();
 }
 
 template<> void WXFieldPar<REAL>::ReadNewValue()
