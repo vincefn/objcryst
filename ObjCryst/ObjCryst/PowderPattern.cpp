@@ -286,6 +286,12 @@ void PowderPatternBackground::OptimizeBayesianBackground()
                             mBackgroundInterpPointIntensity.max()/100.0);
    for(;;)
    {
+      {
+         char buf [200];
+         sprintf(buf,"Optimizing Background, Cycle %d, Chi^2(Background)=%f",
+                 (int)ct,(float)lastllk);
+         (*fpObjCrystInformUser)((string)buf);
+      }
       nbcycle=50*mBackgroundNbPoint;
       simplex.Optimize(nbcycle,true);
       this->GetParentPowderPattern().UpdateDisplay();
@@ -296,6 +302,11 @@ void PowderPatternBackground::OptimizeBayesianBackground()
       if(++ct>20) break;
    }
    this->SetGlobalOptimStep(gpRefParTypeScattDataBackground,10.0);
+   {
+      char buf [200];
+      sprintf(buf,"Done Optimizing Bayesian Background, Chi^2(Background)=%f",(float)lastllk);
+      (*fpObjCrystInformUser)((string)buf);
+   }
    VFN_DEBUG_EXIT("PowderPatternBackground::OptimizeBayesianBackground()",10);
 }
 
