@@ -223,6 +223,9 @@ template<class T> T& CrystVector<T>::operator()(const long i)
    #endif
    return mpData[i];
 }
+//######################################################################
+//  CrystVector functions
+//######################################################################
 
 template<class T> ostream& operator<<(ostream &os, CrystVector<T> &vect)
 {
@@ -520,12 +523,252 @@ template<class T> CrystMatrix<T> CrystMatrix<T>::transpose(const int dim1, const
    return newM;
 }
 
+//######################################################################
+//  CrystArray3D
+//######################################################################
+template<class T> CrystArray3D<T> ::CrystArray3D():
+mpData(0),mNumElements(0),mXSize(0),mYSize(0),mZSize(0),mIsAreference(false){}
+
+template<class T> CrystArray3D<T>::CrystArray3D(const long zSize,
+																  const long ySize,
+																  const long xSize):
+mNumElements(xSize*ySize*zSize),mXSize(xSize),mYSize(ySize),mZSize(zSize),
+mIsAreference(false)
+{
+   mpData=new T[mNumElements];
+}
+
+template<class T> CrystArray3D<T>::CrystArray3D(const CrystArray3D &old):
+mNumElements(old.numElements()),
+mXSize(old.cols()),mYSize(old.rows()),mZSize(old.depth()),
+mIsAreference(false)
+{
+   mpData=new T[mNumElements];
+   register T *p1=mpData;
+   register const T *p2=old.data();
+   for(long i=0;i<mNumElements;i++) *p1++=*p2++;
+}
+
+template<class T> CrystArray3D<T>::~CrystArray3D()
+{ if(!mIsAreference)delete[] mpData;}
+
+template<class T> void CrystArray3D<T>::operator=(const CrystArray3D<T> &old)
+{
+	mXSize=old.cols();
+	mYSize=old.rows();
+	mZSize=old.depth();
+	mIsAreference=false;
+	if(mNumElements!=old.numElements())
+   {
+      mNumElements=old.numElements();
+      if(mIsAreference==false)delete[] mpData ;
+      mpData=new T[mNumElements];
+   }
+   register T *p1=mpData;
+   register const T *p2=old.data();
+   for(long i=0;i<mNumElements;i++) *p1++=*p2++;
+}
+
+template<class T> void CrystArray3D<T>::reference(CrystArray3D<T> &old)
+{
+   if(mIsAreference==false) delete[] mpData ;
+	mIsAreference=true;
+   mNumElements=old.numElements();
+   mpData=old.data();
+}
+
+template<class T> long CrystArray3D<T>::numElements()const{return mNumElements;}
+
+template<class T> T CrystArray3D<T>::sum()const
+{
+   register T tmp=0;
+   register const T *p=this->data();
+   for(long i=0;i<this->numElements();i++) tmp += *p++ ;
+   return tmp;
+}
+
+template<class T> T CrystArray3D<T>::min()const
+{
+   register T tmp=0;
+   register const T *p=this->data();
+   tmp=*p++;
+   for(long i=1;i<this->numElements();i++)
+   {
+      if(tmp>*p) tmp=*p;
+      p++;
+   }
+   return tmp;
+}
+
+template<class T> T CrystArray3D<T>::max()const
+{
+   register T tmp=0;
+   register const T *p=this->data();
+   tmp=*p++;
+   for(long i=1;i<this->numElements();i++)
+   {
+      if(tmp<*p) tmp=*p;
+      p++;
+   }
+   return tmp;
+}
+
+template<class T> long CrystArray3D<T>::cols()const {return mXSize;}
+
+template<class T> long CrystArray3D<T>::rows()const {return mYSize;}
+
+template<class T> long CrystArray3D<T>::depth()const {return mZSize;}
+
+template<class T> T* CrystArray3D<T>::data() {return mpData;}
+template<class T> const T* CrystArray3D<T>::data() const {return mpData;}
+
+template<class T> void CrystArray3D<T>::resize(const long zSize,
+													         const long ySize,
+																const long xSize)
+{
+   mXSize=xSize;
+   mYSize=ySize;
+   mZSize=zSize;
+   if(xSize*ySize*zSize == mNumElements) return;
+   if(!mIsAreference)delete[] mpData ;
+   mpData=0;
+   mXSize=xSize;
+   mYSize=ySize;
+   mNumElements=xSize*ySize;
+   if(mNumElements>0) mpData=new T[mNumElements];
+}
+
+template<class T> void CrystArray3D<T>::resizeAndPreserve(const long zSize,
+																			  const long ySize,
+																			  const long xSize)
+{
+   mXSize=xSize;
+   mYSize=ySize;
+   mZSize=zSize;
+   if(xSize*ySize*zSize == mNumElements) return;
+   register T *p=mpData;
+   register T *p2,*p1;
+   mpData=new T[xSize*ySize*zSize];
+   p2=mpData;
+   p1=p;
+   long tmp= ( (xSize*ySize*zSize) > mNumElements) ? mNumElements : xSize*ySize*zSize;
+   for(long i=0;i<tmp;i++) *p2++ = *p1++ ;
+   mNumElements=xSize*ySize*zSize;
+   if(!mIsAreference)delete[] p ;
+   mIsAreference=false;
+}
+
+template<class T> void CrystArray3D<T>::operator*=(const T num)
+{
+   register T *p=mpData;
+   for(int i=0;i<mNumElements;i++) *p++ *= num;
+}
+
+template<class T> void CrystArray3D<T>::operator*=(const CrystArray3D<T> &vect)
+{
+   #ifdef __DEBUG__
+   if( this->numElements() != vect.numElements())
+   {
+      cout<<"CrystArray3D::operator*=(): Number of elements differ !"<<endl;
+      throw 0;
+   }
+   #endif
+   register T *p=mpData;
+   register const T *rhs=vect.data();
+   for(int i=0;i<mNumElements;i++) *p++ *= *rhs++;
+}
+
+template<class T> void CrystArray3D<T>::operator/=(const T num)
+{
+   register T *p=mpData;
+   for(int i=0;i<mNumElements;i++) *p++ /= num;
+}
+
+template<class T> void CrystArray3D<T>::operator+=(const T num)
+{
+   register T *p=mpData;
+   for(int i=0;i<mNumElements;i++) *p++ += num;
+}
+
+template<class T> void CrystArray3D<T>::operator-=(const T num)
+{
+   register T *p=mpData;
+   for(int i=0;i<mNumElements;i++) *p++ -= num;
+}
+
+template<class T> T CrystArray3D<T>::operator()(const long i) const
+{
+   #ifdef __DEBUG__
+   if( (i<0) || (i>=mNumElements))
+   {
+      cout<<"CrystArray3D::operator()(i): element out of bounds !"<<i<<endl;
+      throw 0;
+   }
+   #endif
+   return mpData[i];
+}
+
+template<class T> T CrystArray3D<T>::operator()(const long i,const long j,const long k) const
+{  
+   #ifdef __DEBUG__
+   if( (i<0) || (j<0) || (k<0) || (i>=mZSize) || (j>=mYSize) || (k>=mXSize))
+   {
+      cout<<"CrystArray3D::operator()(i,j,k): element out of bounds:"<<i<<","<<j<<","<<k<<endl;
+      cout<<"dimensions:"<<mZSize<<mYSize<<","<<mXSize<<endl;
+      throw 0;
+   }
+   #endif
+   return mpData[i*mYSize*mXSize+j*mXSize+k];
+}
+
+template<class T> T& CrystArray3D<T>::operator()(const long i)
+{
+   #ifdef __DEBUG__
+   if( (i<0) || (i>=mNumElements))
+   {
+      cout<<"CrystArray3D::operator()(i): element out of bounds !"<<i<<endl;
+      throw 0;
+   }
+   #endif
+   return mpData[i];
+}
+
+template<class T> T& CrystArray3D<T>::operator()(const long i,const long j,const long k) 
+{  
+   #ifdef __DEBUG__
+   if( (i<0) || (j<0) || (k<0) || (i>=mZSize) || (j>=mYSize) || (k>=mXSize))
+   {
+      cout<<"CrystArray3D::operator()(i,j): element out of bounds:"<<i<<","<<j<<endl;
+      throw 0;
+   }
+   #endif
+   return mpData[i*mYSize*mXSize+j*mXSize+k];
+}
+
+//######################################################################
+//  Other functions
+//######################################################################
+
 template<class T> ostream& operator<<(ostream &os, const CrystMatrix<T> &vect)
 {
    //return os << FormatHorizVector(vect);
    for(long i=0;i<vect.rows();i++) 
    {
       for(long j=0;j<vect.cols();j++) os << FormatFloat(vect(i,j)) ;
+      os << endl;
+   }
+   return os;
+}
+
+template<class T> ostream& operator<<(ostream &os, const CrystArray3D<T> &vect)
+{
+   for(long i=0;i<vect.depth();i++)
+	{
+   	for(long j=0;j<vect.rows();j++) 
+   	{
+      	for(long k=0;k<vect.cols();k++) os << FormatFloat(vect(i,j)) ;
+      	os << endl;
+   	}
       os << endl;
    }
    return os;
@@ -576,7 +819,10 @@ template<class T> CrystMatrix<T> product(const CrystMatrix<T> &a,const CrystMatr
    return ab;
 }
 
-//explicit instantiation
+//######################################################################
+//  explicit instantiation
+//######################################################################
+
 template class CrystVector<REAL>;
 template REAL MaxDifference(const CrystVector<REAL>&,const CrystVector<REAL>&);
 template ostream& operator<<(ostream &os, CrystVector<REAL> &vect);
@@ -591,6 +837,7 @@ template CrystVector<REAL> cos(const CrystVector<REAL>&);
 template CrystVector<REAL> sin(const CrystVector<REAL>&);
 template CrystVector<REAL> tan(const CrystVector<REAL>&);
 template CrystVector<REAL> sqrt(const CrystVector<REAL>&);
+template class CrystArray3D<REAL>;
 
 template class CrystVector<long>;
 template long MaxDifference(const CrystVector<long>&,const CrystVector<long>&);

@@ -25,6 +25,7 @@ using namespace blitz;
 #define CrystVector_int    Array<int,1>
 #define CrystVector_uint   Array<unsigned int,1>
 #define CrystVector_bool   Array<bool,1>
+
 #define CrystMatrix_REAL Array<REAL,2>
 #define CrystMatrix_float  Array<float,2>
 #define CrystMatrix_long   Array<long,2>
@@ -34,6 +35,7 @@ using namespace blitz;
 
 #define CrystVector_T    Array<T,1> 
 #define CrystMatrix_T    Array<T,2> 
+#define CrystArray3D_T    Array<T,3> 
 
 template<class T> T MaxDifference(const Array<T,1> &a,const Array<T,1> &b);
 
@@ -43,20 +45,26 @@ template<class T> T MaxDifference(const Array<T,2> &a,const Array<T,2> &b);
 
 
 #define CrystVector_REAL CrystVector<REAL>
+#define CrystVector_double  CrystVector<double>
 #define CrystVector_float  CrystVector<float>
 #define CrystVector_long   CrystVector<long>
 #define CrystVector_int    CrystVector<int>
 #define CrystVector_uint   CrystVector<unsigned int>
 #define CrystVector_bool   CrystVector<bool>
+
 #define CrystMatrix_REAL CrystMatrix<REAL>
+#define CrystMatrix_double CrystMatrix<double>
 #define CrystMatrix_float  CrystMatrix<float>
 #define CrystMatrix_long   CrystMatrix<long>
 #define CrystMatrix_int    CrystMatrix<int>
 #define CrystMatrix_uint   CrystMatrix<unsigned int>
 #define CrystMatrix_bool   CrystMatrix<bool>
 
+#define CrystArray3D_REAL CrystArray3D<REAL>
+
 #define CrystVector_T    CrystVector<T> 
 #define CrystMatrix_T    CrystMatrix<T> 
+#define CrystArray3D_T    CrystMatrix<T> 
 
 #define __VFN_GEOM_STRUCT_FACTOR_USE_POINTERS
 
@@ -415,6 +423,82 @@ template<class T> T MaxDifference(const CrystVector<T> &a,const CrystVector<T> &
 template<class T> T MaxDifference(const CrystMatrix<T> &a,const CrystMatrix<T> &b);
 
 template<class T> CrystMatrix<T> product(const CrystMatrix<T> &a,const CrystMatrix<T> &b);
+
+//######################################################################
+//  CrystArray3D
+//######################################################################
+/** \brief 3D Vector (Blitz++ mimic) for ObjCryst++
+*  
+*  The CrystVector library is not a new array computation library, despite
+* the appearances. ObjCryst++ should used the 
+*  <a href="http://www.oonumerics.org/blitz/"> Blitz++ array library</a> , which yields
+* excellent performance \e and simple array expressions. Unfortunately, the memory
+* required to \e compile the library using gcc is far too high to be reasonable
+* when using complex expressions and optimizing code. So until this has changed,
+* The CrystVector and CrystMatrix library have been created, and these emulate
+* (supposedly exactly) the Blitz++ interface (but not the smart handling of
+* mathematical expressions, so pointers must be used). For documentation about these
+* two libraries you should read the <a href="http://www.oonumerics.org/blitz/manual/"> 
+* Blitz++ documentation</a>. CrystVector and CrystMatrix use the same kind of storage
+* in memory.
+*
+* You can use CrystArray3D_REAL, CrystArray3D_long,etc... to declare 3D vectors. Macros
+* ensure (well, should) ensure compatibility with Blitz++. (as of april 2001 support of
+* blitz++ is broken).
+*/
+template<class T> class CrystArray3D
+{
+   public:
+   CrystArray3D();
+   //ySize : number of rows, xSize : number of columns
+   CrystArray3D(const long zSize,const long ySize,const long xSize);
+   
+   CrystArray3D(const CrystArray3D &old);
+   
+   ~CrystArray3D();
+   
+   void operator=(const CrystArray3D &old);
+
+   void reference(CrystArray3D &old);
+   long numElements()const;
+   T sum()const;
+   T min()const;
+   T max()const;
+   long rows()const;
+   long cols()const;
+   long depth()const;
+   
+   T * data();
+   const T * data() const;
+   
+   void resize(const long zSize,const long ySize,const long xSize);
+
+   void resizeAndPreserve(const long zSize,const long ySize,const long xSize);
+   
+   void operator*=(const T num);
+   void operator*=(const CrystArray3D &vect);
+   void operator/=(const T num);
+   void operator+=(const T num);
+   void operator-=(const T num);
+      
+	//void operator=(const T num);
+	
+   T operator()(const long i) const;
+
+   T operator()(const long depth,const long row,const long col) const;
+   
+   T& operator()(const long i);
+
+   T& operator()(const long depth,const long row,const long col);
+
+   protected:
+   private:
+   T *mpData;
+   long mNumElements;
+   long mXSize,mYSize,mZSize;
+   bool mIsAreference;//is a reference to another vector ?
+};
+template<class T> ostream& operator<<(ostream &os, const CrystArray3D<T> &vect);
 
 #endif // __LIBCRYST_VECTOR_USE_BLITZ__
 
