@@ -808,6 +808,7 @@ class PowderPattern : public RefinableObj
          mutable CrystVector_long mIntegratedPatternMin,mIntegratedPatternMax;
          mutable CrystVector_REAL mIntegratedObs;
          mutable CrystVector_REAL mIntegratedWeight;
+         mutable CrystVector_REAL mIntegratedWeightObs;
          mutable CrystVector_REAL mIntegratedVarianceObs;
          mutable RefinableObjClock mClockIntegratedFactorsPrep;
       // Statistical indicators
