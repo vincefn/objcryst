@@ -65,11 +65,13 @@ static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_AG=     WXCRYST_ID();
 static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_MO=     WXCRYST_ID(); 
 static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CU=     WXCRYST_ID(); 
 static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_FE=     WXCRYST_ID(); 
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CO=     WXCRYST_ID(); 
 static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CR=     WXCRYST_ID(); 
 static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_AGA1=   WXCRYST_ID(); 
 static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_MOA1=   WXCRYST_ID(); 
 static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CUA1=   WXCRYST_ID(); 
 static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_FEA1=   WXCRYST_ID(); 
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_COA1=   WXCRYST_ID(); 
 static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CRA1=   WXCRYST_ID(); 
 static long ID_DIFFSINGLECRYST_CRYSTAL=                    WXCRYST_ID(); 
   
@@ -95,11 +97,13 @@ BEGIN_EVENT_TABLE(WXDiffractionSingleCrystal, wxWindow)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_MO,  WXDiffractionSingleCrystal::OnMenuSetWavelength)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CU,  WXDiffractionSingleCrystal::OnMenuSetWavelength)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_FE,  WXDiffractionSingleCrystal::OnMenuSetWavelength)
+   EVT_MENU(ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CO,  WXDiffractionSingleCrystal::OnMenuSetWavelength)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CR,  WXDiffractionSingleCrystal::OnMenuSetWavelength)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_AGA1,WXDiffractionSingleCrystal::OnMenuSetWavelength)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_MOA1,WXDiffractionSingleCrystal::OnMenuSetWavelength)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CUA1,WXDiffractionSingleCrystal::OnMenuSetWavelength)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_FEA1,WXDiffractionSingleCrystal::OnMenuSetWavelength)
+   EVT_MENU(ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_COA1,WXDiffractionSingleCrystal::OnMenuSetWavelength)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CRA1,WXDiffractionSingleCrystal::OnMenuSetWavelength)
    EVT_UPDATE_UI(ID_CRYST_UPDATEUI,                     WXRefinableObj::OnUpdateUI)
 END_EVENT_TABLE()
@@ -163,6 +167,12 @@ WXRefinableObj(parent,data),mpData(data)
          mpMenuBar->AddMenuItem(ID_DIFFSINGLECRYST_MENU_WAVELENGTH,
                                 ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_FEA1,
                                 "X-Ray Tube Fe Ka1");
+         mpMenuBar->AddMenuItem(ID_DIFFSINGLECRYST_MENU_WAVELENGTH,
+                                ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CO,
+                                "X-Ray Tube Co Ka12");
+         mpMenuBar->AddMenuItem(ID_DIFFSINGLECRYST_MENU_WAVELENGTH,
+                                ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_COA1,
+                                "X-Ray Tube Co Ka1");
          mpMenuBar->AddMenuItem(ID_DIFFSINGLECRYST_MENU_WAVELENGTH,
                                 ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CR,
                                 "X-Ray Tube Cr Ka12");
@@ -346,6 +356,8 @@ void WXDiffractionSingleCrystal::OnMenuSetWavelength(wxCommandEvent &event)
       mpData->SetWavelength("Cu");
    if(event.GetId()== ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_FE)
       mpData->SetWavelength("Fe");
+   if(event.GetId()== ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CO)
+      mpData->SetWavelength("Co");
    if(event.GetId()== ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CR)
       mpData->SetWavelength("Cr");
    if(event.GetId()== ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_AGA1)
@@ -356,6 +368,8 @@ void WXDiffractionSingleCrystal::OnMenuSetWavelength(wxCommandEvent &event)
       mpData->SetWavelength("CuA1");
    if(event.GetId()== ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_FEA1)
       mpData->SetWavelength("FeA1");
+   if(event.GetId()== ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_COA1)
+      mpData->SetWavelength("CoA1");
    if(event.GetId()== ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CRA1)
       mpData->SetWavelength("CrA1");
    this->CrystUpdate();

@@ -150,11 +150,13 @@ static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_AG=         WXCRYST_ID()
 static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_MO=         WXCRYST_ID(); 
 static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CU=         WXCRYST_ID(); 
 static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_FE=         WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CO=         WXCRYST_ID(); 
 static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CR=         WXCRYST_ID(); 
 static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_AGA1=       WXCRYST_ID(); 
 static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_MOA1=       WXCRYST_ID(); 
 static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CUA1=       WXCRYST_ID(); 
 static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_FEA1=       WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_COA1=       WXCRYST_ID(); 
 static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CRA1=       WXCRYST_ID(); 
 static const long ID_POWDERSPECTRUM_MENU_ADD_2THETA_EXCLUDE=        WXCRYST_ID(); 
 static const long ID_POWDERSPECTRUMBACKGROUND_IMPORT=               WXCRYST_ID(); 
@@ -194,11 +196,13 @@ BEGIN_EVENT_TABLE(WXPowderPattern, wxWindow)
    EVT_MENU(ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_MO,  WXPowderPattern::OnMenuSetWavelength)
    EVT_MENU(ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CU,  WXPowderPattern::OnMenuSetWavelength)
    EVT_MENU(ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_FE,  WXPowderPattern::OnMenuSetWavelength)
+   EVT_MENU(ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CO,  WXPowderPattern::OnMenuSetWavelength)
    EVT_MENU(ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CR,  WXPowderPattern::OnMenuSetWavelength)
    EVT_MENU(ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_AGA1,WXPowderPattern::OnMenuSetWavelength)
    EVT_MENU(ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_MOA1,WXPowderPattern::OnMenuSetWavelength)
    EVT_MENU(ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CUA1,WXPowderPattern::OnMenuSetWavelength)
    EVT_MENU(ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_FEA1,WXPowderPattern::OnMenuSetWavelength)
+   EVT_MENU(ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_COA1,WXPowderPattern::OnMenuSetWavelength)
    EVT_MENU(ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CRA1,WXPowderPattern::OnMenuSetWavelength)
    EVT_MENU(ID_POWDERSPECTRUM_MENU_GRAPH,              WXPowderPattern::OnMenuShowGraph)
    EVT_MENU(ID_POWDERSPECTRUM_MENU_FITSCALE_R,         WXPowderPattern::OnMenuFitScaleForR)
@@ -283,6 +287,12 @@ WXRefinableObj(parent,pow),mpPowderPattern(pow),mpGraph(0)
          mpMenuBar->AddMenuItem(ID_POWDERSPECTRUM_MENU_WAVELENGTH,
                                 ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_FEA1,
                                 "X-Ray Tube Fe Ka1");
+         mpMenuBar->AddMenuItem(ID_POWDERSPECTRUM_MENU_WAVELENGTH,
+                                ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CO,
+                                "X-Ray Tube Co Ka12");
+         mpMenuBar->AddMenuItem(ID_POWDERSPECTRUM_MENU_WAVELENGTH,
+                                ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_COA1,
+                                "X-Ray Tube Co Ka1");
          mpMenuBar->AddMenuItem(ID_POWDERSPECTRUM_MENU_WAVELENGTH,
                                 ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CR,
                                 "X-Ray Tube Cr Ka12");
@@ -657,6 +667,8 @@ void WXPowderPattern::OnMenuSetWavelength(wxCommandEvent & event)
       mpPowderPattern->SetWavelength("Cu");
    if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_FE)
       mpPowderPattern->SetWavelength("Fe");
+   if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CO)
+      mpPowderPattern->SetWavelength("Co");
    if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CR)
       mpPowderPattern->SetWavelength("Cr");
    if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_AGA1)
@@ -667,6 +679,8 @@ void WXPowderPattern::OnMenuSetWavelength(wxCommandEvent & event)
       mpPowderPattern->SetWavelength("CuA1");
    if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_FEA1)
       mpPowderPattern->SetWavelength("FeA1");
+   if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_COA1)
+      mpPowderPattern->SetWavelength("CoA1");
    if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CRA1)
       mpPowderPattern->SetWavelength("CrA1");
    this->CrystUpdate();

@@ -1299,11 +1299,31 @@ void Radiation::XMLOutput(ostream &os,int indent)const
    os<<endl;
    
    for(int i=0;i<indent;i++) os << "  " ;
-   XMLCrystTag tag2("LinearPolarRate");
-   os << tag2<< mLinearPolarRate;
-   tag2.SetIsEndTag(true);
-   os << tag2<<endl;
+   {
+      XMLCrystTag tag2("LinearPolarRate");
+      os << tag2<< mLinearPolarRate;
+      tag2.SetIsEndTag(true);
+      os << tag2<<endl;
+   }
    
+   if(WAVELENGTH_ALPHA12==this->GetWavelengthType())
+   {
+      for(int i=0;i<indent;i++) os << "  " ;
+      {
+         XMLCrystTag tag2("XRayTubeDeltaLambda");
+         os << tag2<< mXRayTubeDeltaLambda;
+         tag2.SetIsEndTag(true);
+         os << tag2<<endl;
+      }
+      for(int i=0;i<indent;i++) os << "  " ;
+      {
+         XMLCrystTag tag2("XRayTubeAlpha2Alpha1Ratio");
+         os << tag2<< mXRayTubeAlpha2Alpha1Ratio;
+         tag2.SetIsEndTag(true);
+         os << tag2<<endl;
+      }
+   }
+
    switch(this->GetWavelengthType())
    {
       case WAVELENGTH_MONOCHROMATIC: this->GetPar(mWavelength.data()).XMLOutput(os,indent);break;
@@ -1353,6 +1373,16 @@ void Radiation::XMLInput(istream &is,const XMLCrystTag &tagg)
       if("LinearPolarRate"==tag.GetName())
       {
          is>>mLinearPolarRate;
+         XMLCrystTag junk(is);
+      }
+      if("XRayTubeDeltaLambda"==tag.GetName())
+      {
+         is>>mXRayTubeDeltaLambda;
+         XMLCrystTag junk(is);
+      }
+      if("XRayTubeAlpha2Alpha1Ratio"==tag.GetName())
+      {
+         is>>mXRayTubeAlpha2Alpha1Ratio;
          XMLCrystTag junk(is);
       }
       if("Par"==tag.GetName())

@@ -234,38 +234,53 @@ void Radiation::SetWavelength(const string &XRayTubeElementName,
    if(XRayTubeElementName.length() >=3) //:KLUDGE:
    {
       mWavelengthType.SetChoice(WAVELENGTH_MONOCHROMATIC);
-      const T_ChXrayWaveLength *xrayWaveLength;
-      if(xrayWaveLength==NULL)
+      if(XRayTubeElementName=="CoA1")
       {
-         cout << "WARNING: could not interpret X-Ray tube name:"<<XRayTubeElementName<<endl
-              << "         not modifying wavelength !"<<endl;
-         return;
+         mWavelength=1.78901;
       }
-      xrayWaveLength=ChXrayWaveLengthOf(mXRayTubeName.c_str());
-      mWavelength=xrayWaveLength->Length;
+      else
+      {
+         const T_ChXrayWaveLength *xrayWaveLength;
+         xrayWaveLength=ChXrayWaveLengthOf(mXRayTubeName.c_str());
+         if(xrayWaveLength==NULL)
+         {
+            cout << "WARNING: could not interpret X-Ray tube name:"<<XRayTubeElementName<<endl
+                 << "         not modifying wavelength !"<<endl;
+            return;
+         }
+         mWavelength=xrayWaveLength->Length;
+      }
    }
    else
    {
       mWavelengthType.SetChoice(WAVELENGTH_ALPHA12);
       mXRayTubeAlpha2Alpha1Ratio=alpha2Alpha2ratio;
-      const T_ChXrayWaveLength *xrayWaveLength;
       REAL lambda1,lambda2;
-      xrayWaveLength=ChXrayWaveLengthOf((mXRayTubeName+"A1").c_str());
-      if(xrayWaveLength==NULL)
+      if(XRayTubeElementName=="Co")
       {
-         cout << "WARNING: could not interpret X-Ray tube name:"<<XRayTubeElementName<<endl
-              << "         not modifying wavelength !"<<endl;
-         return;
+         lambda1=1.78901;
+         lambda2=1.79290;
       }
-      lambda1=xrayWaveLength->Length;
-      xrayWaveLength=ChXrayWaveLengthOf((mXRayTubeName+"A2").c_str());
-      if(xrayWaveLength==NULL)
+      else
       {
-         cout << "WARNING: could not interpret X-Ray tube name:"<<XRayTubeElementName<<endl
-              << "         not modifying wavelength !"<<endl;
-         return;
+         const T_ChXrayWaveLength *xrayWaveLength;
+         xrayWaveLength=ChXrayWaveLengthOf((mXRayTubeName+"A1").c_str());
+         if(xrayWaveLength==NULL)
+         {
+            cout << "WARNING: could not interpret X-Ray tube name:"<<XRayTubeElementName<<endl
+                 << "         not modifying wavelength !"<<endl;
+            return;
+         }
+         lambda1=xrayWaveLength->Length;
+         xrayWaveLength=ChXrayWaveLengthOf((mXRayTubeName+"A2").c_str());
+         if(xrayWaveLength==NULL)
+         {
+            cout << "WARNING: could not interpret X-Ray tube name:"<<XRayTubeElementName<<endl
+                 << "         not modifying wavelength !"<<endl;
+            return;
+         }
+         lambda2=xrayWaveLength->Length;
       }
-      lambda2=xrayWaveLength->Length;
       mXRayTubeDeltaLambda=lambda2-lambda1;
       mWavelength=lambda1
             +mXRayTubeDeltaLambda*mXRayTubeAlpha2Alpha1Ratio/(1.+mXRayTubeAlpha2Alpha1Ratio);
