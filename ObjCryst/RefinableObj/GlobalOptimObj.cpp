@@ -403,7 +403,8 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
 			if(!silent) cout << "Starting Simulated Annealing Optimization"<<endl;
 			if(!silent) this->DisplayReport();
          RESTART_OPTIMIZATION:
-
+   		mRefParList.EraseAllParamSet();
+			/*
          //Re-init History
             mHistoryNb=0;
             mHistoryTrialNumber=-1;
@@ -414,7 +415,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
             mHistoryCostFunction(mHistoryNb)=this->GetCostFunctionValue();
             mHistorySavedParamSetIndex(mHistoryNb)=mRefParList.CreateParamSet();
             mHistoryNb++;
-
+			*/
          mCurrentCost=this->GetCostFunctionValue();
 
          mBestCost=mCurrentCost;
@@ -503,10 +504,10 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                {
                   mBestCost=mCurrentCost;
                   mRefParList.SaveParamSet(mBestParSavedSetIndex);
-                  mHistoryTrialNumber(mHistoryNb)=mNbTrial;
-                  mHistoryCostFunction(mHistoryNb)=mCurrentCost;
-                  mHistorySavedParamSetIndex(mHistoryNb)=mRefParList.CreateParamSet();
-                  mHistoryNb++;
+                  //mHistoryTrialNumber(mHistoryNb)=mNbTrial;
+                  //mHistoryCostFunction(mHistoryNb)=mCurrentCost;
+                  //mHistorySavedParamSetIndex(mHistoryNb)=mRefParList.CreateParamSet();
+                  //mHistoryNb++;
                   if(!silent) cout << "Trial :" << mNbTrial 
                         			  << " Temp="<< simAnnealTemp
                         			  << " Mutation Ampl.: "<<mMutationAmplitude
