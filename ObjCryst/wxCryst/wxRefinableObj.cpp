@@ -206,8 +206,8 @@ void WXFieldRefPar::CrystUpdate()
    VFN_DEBUG_MESSAGE("WXFieldRefPar::CrystUpdate()",6)
    //cout << mpField <<endl;
    bool needUpdate=false;
-   if(mpRefPar->IsUsed()!=this->IsShown()) needUpdate=true;
    wxMutexLocker mlock(mMutex);
+   if(wxThread::IsMain()){if(mpRefPar->IsUsed()!=this->IsShown()) needUpdate=true;}
    if(mValue!=mpRefPar->GetHumanValue()) needUpdate=true;
    if(0!=mpButtonFix) if(mpButtonFix->GetValue()==mpRefPar->IsFixed()) needUpdate=true;
    if(0!=mpButtonLimited) if(mpButtonLimited->GetValue()==mpRefPar->IsLimited()) needUpdate=true;
