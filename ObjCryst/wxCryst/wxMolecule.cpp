@@ -754,7 +754,7 @@ void WXMolecule::OnMenuAddAtom(wxCommandEvent & WXUNUSED(event))
                mpMolecule->GetCrystal().GetScatteringPowerRegistry(),
                (wxWindow*)this,"Choose a new Scattering Power",choice);
    if(0==scatt) return;
-   long num=mpMolecule->GetAtomList().size()+1;
+   long num=mpMolecule->GetAtomList().size();
    if(num>0)
    {
       wxString lastAtom=mpMolecule->GetAtom(num-1).GetName().c_str();
@@ -764,14 +764,13 @@ void WXMolecule::OnMenuAddAtom(wxCommandEvent & WXUNUSED(event))
          if(lastAtom.IsNumber())
          {
             lastAtom.ToLong(&num);
-            num+=1;
             break;
          }
          lastAtom.erase(0,1);
       }
    }
    stringstream st;
-   st<<num;
+   st<<num+1;
    mpMolecule->AddAtom(0.,0.,0.,scatt,scatt->GetName()+st.str());
    VFN_DEBUG_EXIT("WXMolecule::OnMenuAddAtom()",6)
 }
