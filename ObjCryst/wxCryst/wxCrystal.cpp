@@ -1398,7 +1398,10 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
       REAL y=mY0;
       REAL z=mZ0;
       mpWXCrystal->GetCrystal().OrthonormalToFractionalCoords(x,y,z);
-      x-=0.5f;y-=0.5f;z-=0.5f;
+      const REAL xtmp=x;
+      x=0.5-x;
+      y=0.5-y;
+      z=0.5-z;
       statusText.sprintf("Center@(%5.3f,%5.3f,%5.3f)",x,y,z);
       for(unsigned int i=0;i<mvpUnitCellMapImport.size();++i)
       {
