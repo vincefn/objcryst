@@ -2294,7 +2294,9 @@ mpAtom1(&at1),mpAtom2(&at2)
 void Molecule::BuildRotorGroup()
 {
    if(  (mClockRotorGroup>mClockBondList)
-      &&(mClockRotorGroup>mClockAtomList)) return;
+      &&(mClockRotorGroup>mClockAtomList)
+      &&(mClockRotorGroup>mClockBondAngleList)
+      &&(mClockRotorGroup>mClockDihedralAngleList)) return;
    VFN_DEBUG_ENTRY("Molecule::BuildRotorGroup()",5)
    TAU_PROFILE("Molecule::BuildRotorGroup()","void ()",TAU_DEFAULT);
    this->BuildConnectivityTable();
@@ -2485,7 +2487,8 @@ void Molecule::BuildRotorGroup()
             const REAL angle=(REAL)j*M_PI/36.;
             this->RotateAtomGroup(*(pos->mpAtom1),*(pos->mpAtom2),
                                   pos->mvRotatedAtomList,angle);
-            llk += this->GetLogLikelihood() - llk0;
+            // use fabs in case we are not starting from the minimum of a restraint..
+            llk += fabs(this->GetLogLikelihood() - llk0);
             this->RestoreParamSet(mLocalParamSet);
          }
 
