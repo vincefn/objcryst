@@ -520,7 +520,7 @@ template<class T> void WXFieldPar<T>::CrystUpdate()
    mMutex.Lock();
    if(mValue==*mpValue)
    {
-      mMutex.UnLock();
+      mMutex.Unlock();
       return;
    }
    VFN_DEBUG_ENTRY("WXFieldPar<T>::CrystUpdate()",6)
