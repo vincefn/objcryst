@@ -671,7 +671,7 @@ void PowderPatternDiffraction::CalcIntensityCorr()const
    this->CalcSinThetaLambda();
    if(mClockIntensityCorr<mClockTheta) needRecalc=true;
    
-   const CrystVector_REAL *mpCorr[3];
+   const CrystVector_REAL *mpCorr[4];
    
    mpCorr[0]=&(mCorrLorentz.GetCorr());
    if(mClockIntensityCorr<mCorrLorentz.GetClockCorr()) needRecalc=true;

@@ -463,13 +463,12 @@ void TextureMarchDollase::GlobalOptRandomMove(const REAL mutationAmplitude)
                REAL ty=pK->GetValue();
                REAL tz=pL->GetValue();
                mpData->GetCrystal().MillerToOrthonormalCoords(tx,ty,tz);
-               REAL norm=sqrt(tx*tx+ty*ty+tz*tz);
 
-               tx += .01*2*(rand()/(REAL)RAND_MAX-0.5)*mutationAmplitude*norm;
-               ty += .01*2*(rand()/(REAL)RAND_MAX-0.5)*mutationAmplitude*norm;
-               tz += .01*2*(rand()/(REAL)RAND_MAX-0.5)*mutationAmplitude*norm;
+               tx += .01*2*(rand()/(REAL)RAND_MAX-0.5)*mutationAmplitude*mPhaseRegistry.GetObj(i).mNorm;
+               ty += .01*2*(rand()/(REAL)RAND_MAX-0.5)*mutationAmplitude*mPhaseRegistry.GetObj(i).mNorm;
+               tz += .01*2*(rand()/(REAL)RAND_MAX-0.5)*mutationAmplitude*mPhaseRegistry.GetObj(i).mNorm;
 
-               REAL factor=norm/sqrt(tx*tx+ty*ty+tz*tz);
+               const REAL factor=mPhaseRegistry.GetObj(i).mNorm/sqrt(tx*tx+ty*ty+tz*tz);
                tx *= factor;
                ty *= factor;
                tz *= factor;
@@ -500,7 +499,7 @@ REAL TextureMarchDollase::GetBiasingCost()const
       REAL tz=mPhaseRegistry.GetObj(i).mL-mPhaseRegistry.GetObj(i).mBiasL;
       mpData->GetCrystal().MillerToOrthonormalCoords(tx,ty,tz);
       
-      cost +=(tx*tx+ty*ty+tz*tz)/.04;
+      cost +=(tx*tx+ty*ty+tz*tz)/mPhaseRegistry.GetObj(i).mNorm/.04;
    }
    VFN_DEBUG_MESSAGE("TextureMarchDollase::GetBiasingCost()="<<cost<<"("<<mName<<")",1)
    return cost;
