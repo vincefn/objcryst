@@ -767,7 +767,7 @@ void PowderPatternDiffraction::InitOptions()
                         gpRefParTypeScattDataProfileWidth,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG*RAD2DEG);
       tmp.AssignClock(mClockProfilePar);
-      tmp.SetDerivStep(1e-5);
+      tmp.SetDerivStep(1e-7);
       this->AddPar(tmp);
    }
    {
@@ -775,7 +775,7 @@ void PowderPatternDiffraction::InitOptions()
                         gpRefParTypeScattDataProfileWidth,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG*RAD2DEG);
       tmp.AssignClock(mClockProfilePar);
-      tmp.SetDerivStep(1e-5);
+      tmp.SetDerivStep(1e-7);
       this->AddPar(tmp);
    }
    {
@@ -783,7 +783,7 @@ void PowderPatternDiffraction::InitOptions()
                         gpRefParTypeScattDataProfileWidth,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG*RAD2DEG);
       tmp.AssignClock(mClockProfilePar);
-      tmp.SetDerivStep(1e-5);
+      tmp.SetDerivStep(1e-7);
       this->AddPar(tmp);
    }
    {

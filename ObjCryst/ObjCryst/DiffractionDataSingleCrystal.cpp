@@ -452,7 +452,7 @@ double DiffractionDataSingleCrystal::GetBestRFactor()
       throw ObjCrystException("DiffractionData::GetBestRFactor() Cannot compute R \
          or scale factor: there is no observed data !");
    }
-   this->CalcBestScaleFactorForR();
+   this->FitScaleFactorForR();
    return this->GetR();
 }
 
@@ -601,8 +601,8 @@ double DiffractionDataSingleCrystal::GetCostFunctionValue(const unsigned int n)
    this->CalcIcalc();
    switch(n)
    {
-      case 0: this->CalcBestScaleFactorForR()  ;return this->GetR();
-      case 1: this->CalcBestScaleFactorForRw() ;return this->GetRw();
+      case 0: this->FitScaleFactorForR()  ;return this->GetR();
+      case 1: this->FitScaleFactorForRw() ;return this->GetRw();
       default:
       {
          cout << "DiffractionDataSingleCrystal::GetCostFunctionValue(): Not Found !" <<endl;
