@@ -53,11 +53,11 @@ void testPbSO4()
 	      ScatteringPowerAtom *ScattPowO1=new ScatteringPowerAtom("O1","O",1.87);
 	      ScatteringPowerAtom *ScattPowO2=new ScatteringPowerAtom("O2","O",1.76);
 	      ScatteringPowerAtom *ScattPowO3=new ScatteringPowerAtom("O3","O",1.34);
-         //cryst_orig.AddScatteringPower(ScattPowPb);
-         //cryst_orig.AddScatteringPower(ScattPowS);
-         //cryst_orig.AddScatteringPower(ScattPowO1);
-         //cryst_orig.AddScatteringPower(ScattPowO2);
-         //cryst_orig.AddScatteringPower(ScattPowO3);
+         cryst_orig.AddScatteringPower(ScattPowPb);
+         cryst_orig.AddScatteringPower(ScattPowS);
+         cryst_orig.AddScatteringPower(ScattPowO1);
+         cryst_orig.AddScatteringPower(ScattPowO2);
+         cryst_orig.AddScatteringPower(ScattPowO3);
 	      Atom *Pb=new Atom(.188,.250,.167,"Pb",ScattPowPb   ,1.);
 	      Atom *S=new Atom (.437,.750,.186,"S" ,ScattPowS    ,1.);
 	      Atom *O1=new Atom(.595,.750,.100,"O1",ScattPowO1   ,1.);
@@ -160,14 +160,12 @@ void testPbSO4()
       //cryst_orig.POVRayDescription(out2);
       //out2.close();
 }
-
 int main (int argc, char *argv[])
 {
    TAU_PROFILE_SET_NODE(0); // sequential code 
    TAU_PROFILE("main()","int()",TAU_DEFAULT);
 
 	cout << " Beginning PbSO4 example...." << endl ;
-   cout <<FormatFloat(5.0)<<endl;
    int level =10;
    if(argc==2)//debug level hase been supplied
    {
