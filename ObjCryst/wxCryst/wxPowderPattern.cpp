@@ -27,6 +27,7 @@
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
+#include "wx/dcbuffer.h"
 
 #include "wxCryst/wxPowderPattern.h"
 #include "wxCryst/wxRadiation.h"
@@ -771,7 +772,7 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint()",5)
    if(true==mCalcPatternIsLocked) return;
-   wxPaintDC dc(this);
+   wxBufferedPaintDC dc(this);
    PrepareDC(dc);
    mpParentFrame->PrepareDC(dc);
    
