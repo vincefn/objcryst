@@ -367,7 +367,7 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
       {
          mCrystalGLDisplayList=glGenLists(1);
          mCrystalGLNameDisplayList=glGenLists(1);
-         VFN_DEBUG_MESSAGE("WXCrystal::UpdateGL():created mCrystalGLDisplayList="<<mCrystalGLDisplayList,10)
+         VFN_DEBUG_MESSAGE("WXCrystal::UpdateGL():created mCrystalGLDisplayList="<<mCrystalGLDisplayList,7)
       }
       
       // During a refinement (multi-threaded)
@@ -1772,8 +1772,10 @@ void WXGLCrystalCanvas::OnUpdateUI(wxUpdateUIEvent& WXUNUSED(event))
 
 void WXGLCrystalCanvas::SetCurrent()
 {
-   sFontDisplayListBase=mGLFontDisplayListBase;
+   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::SetCurrent()",4)
    this->wxGLCanvas::SetCurrent();
+   this->BuildGLFont();
+   sFontDisplayListBase=mGLFontDisplayListBase;
 }
 
 void WXGLCrystalCanvas::InitGL()
@@ -1808,9 +1810,6 @@ void WXGLCrystalCanvas::InitGL()
    wxSizeEvent event;
    this->OnSize(event);
    
-   // Build font
-   this->BuildGLFont();
-
    //First display
    this->CrystUpdate();
    VFN_DEBUG_EXIT("WXGLCrystalCanvas::InitGL()",8)
@@ -2167,7 +2166,7 @@ void WXGLCrystalCanvas::UnProject(REAL &x, REAL &y, REAL &z)
    z= m[2][0]* vx + m[2][1]*vy + m[2][2]*vz -mZ0;
 	VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::UnProject():X Y Z = "<<x<<" , "<<y<<" , "<<z,5)
 }
-void WXGLCrystalCanvas::BuildGLFont()const
+void WXGLCrystalCanvas::BuildGLFont()
 {
    if(mIsGLFontBuilt) return;
    VFN_DEBUG_ENTRY("WXGLCrystalCanvas::BuildGLFont()-gldisplay",6)
@@ -2179,13 +2178,19 @@ void WXGLCrystalCanvas::BuildGLFont()const
 
       dpy = XOpenDisplay(NULL); 
 
-      fontInfo = XLoadQueryFont(dpy, "-adobe-helvetica-bold-*-*-*-10-*-*-*-*-*-*-*");
+      fontInfo = XLoadQueryFont(dpy, "-adobe-helvetica-bold-*-r-*-10-*-*-*-*-*-*-*");
       if (fontInfo == NULL)
-         fontInfo = XLoadQueryFont(dpy, "-adobe-times-bold-*-*-*-10-*-*-*-*-*-*-*");
+         fontInfo = XLoadQueryFont(dpy, "-adobe-helvetica-bold-*-*-*-10-*-*-*-*-*-*-*");
+      if (fontInfo == NULL)
+         fontInfo = XLoadQueryFont(dpy, "-adobe-times-bold-*-r-*-10-*-*-*-*-*-*-*");
       if (fontInfo == NULL)
          fontInfo = XLoadQueryFont(dpy, "-adobe-helvetica-medium-*-*-*-12-*-*-*-*-*-*-*");
       if (fontInfo == NULL)
          fontInfo = XLoadQueryFont(dpy, "-adobe-times-medium-*-*-*-12-*-*-*-*-*-*-*");
+      if (fontInfo == NULL)
+         fontInfo = XLoadQueryFont(dpy, "-adobe-helvetica-*-*-*-*-12-*-*-*-*-*-*-*");
+      if (fontInfo == NULL)
+         fontInfo = XLoadQueryFont(dpy, "-adobe-times-*-*-*-*-12-*-*-*-*-*-*-*");
       if (fontInfo == NULL)
          fontInfo = XLoadQueryFont(dpy, "fixed");
 	   if (fontInfo == NULL) cout <<"no X font available..."<<endl;
@@ -2197,6 +2202,8 @@ void WXGLCrystalCanvas::BuildGLFont()const
    #ifdef __WIN32__
       HFONT   font;
       HFONT   oldfont;
+      wxPaintDC dc(this);
+      HDC hDC = (HDC)dc.GetHDC();
       mGLFontDisplayListBase = glGenLists(96);
       font = CreateFont(-12,                       // Height of font
                         0,                         // Width of font

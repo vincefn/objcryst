@@ -258,7 +258,7 @@ class WXGLCrystalCanvas : public wxGLCanvas
       */
       void UnProject(REAL &x, REAL &y, REAL &z);
       /// Build the 96 display lists for the font
-      void BuildGLFont()const;
+      void BuildGLFont();
       /// Delete the 96 display lists for the font
       void DeleteGLFont()const;
       /// The parent wxFrame
