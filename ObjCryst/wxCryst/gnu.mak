@@ -2,7 +2,7 @@ include ../rules.mak
 DIR_CRYST := ..
 
 #wxGeneticAlgorithm.o
-OBJ= wxScatteringPowerSphere.o trackball.o wxDiffractionSingleCrystal.o wxCryst.o wxRefinableObj.o wxScatteringPower.o wxScatterer.o wxAtom.o wxCrystal.o wxZScatterer.o wxPowderPattern.o wxGlobalOptimObj.o
+OBJ= wxScatteringPowerSphere.o trackball.o wxDiffractionSingleCrystal.o wxCryst.o wxRefinableObj.o wxScatteringPower.o wxScatterer.o wxAtom.o wxCrystal.o wxZScatterer.o wxPowderPattern.o wxGlobalOptimObj.o mpVector.o MC.o
 
 %.o : %.c
 	@$(MAKEDEPEND)

@@ -19,7 +19,11 @@
 //#include <sstream> //for stringstream
 #include <fstream>
 
+#include <stdlib.h>
+
 #include "wx/wx.h"
+#include "wx/colordlg.h"
+#include "wx/progdlg.h"
 
 #include "wxCryst/wxCrystal.h"
 
@@ -838,6 +842,8 @@ void WXCrystal::UpdateUI()
    this->WXRefinableObj::UpdateUI();
    VFN_DEBUG_EXIT("WXCrystal::UpdateUI()",6)
 }
+Crystal& WXCrystal::GetCrystal(){return *mpCrystal;}
+const Crystal& WXCrystal::GetCrystal()const{return *mpCrystal;}
 
 #ifdef OBJCRYST_GL
 ////////////////////////////////////////////////////////////////////////
@@ -850,9 +856,15 @@ BEGIN_EVENT_TABLE(WXGLCrystalCanvas, wxGLCanvas)
    EVT_PAINT            (WXGLCrystalCanvas::OnPaint)
    EVT_ERASE_BACKGROUND (WXGLCrystalCanvas::OnEraseBackground)
    EVT_MOUSE_EVENTS     (WXGLCrystalCanvas::OnMouse)
-   EVT_MENU(ID_GLCRYSTAL_MENU_UPDATE,WXGLCrystalCanvas::OnUpdate)
-   EVT_MENU(ID_GLCRYSTAL_MENU_CHANGELIMITS,WXGLCrystalCanvas::OnChangeLimits)
-   EVT_CHAR             (WXGLCrystalCanvas::OnKeyDown)
+   EVT_MENU             (ID_GLCRYSTAL_MENU_UPDATE,              WXGLCrystalCanvas::OnUpdate)
+   EVT_MENU             (ID_GLCRYSTAL_MENU_CHANGELIMITS,        WXGLCrystalCanvas::OnChangeLimits)
+   EVT_MENU             (ID_GLCRYSTAL_MENU_SHOWCRYSTAL,         WXGLCrystalCanvas::OnShowCrystal)     //shows or hides the crystal
+   EVT_MENU             (ID_GLCRYSTAL_MENU_LOADFOURIER,         WXGLCrystalCanvas::OnLoadFourier)
+   EVT_MENU             (ID_GLCRYSTAL_MENU_CHANGECONTOUR,       WXGLCrystalCanvas::OnChangeContour)
+   EVT_MENU             (ID_GLCRYSTAL_MENU_SHOWFOURIER,         WXGLCrystalCanvas::OnShowFourier)
+   EVT_MENU             (ID_GLCRYSTAL_MENU_FOURIERCHANGECOLOR,  WXGLCrystalCanvas::OnFourierChangeColor)
+   EVT_MENU             (ID_GLCRYSTAL_MENU_SHOWWIRE,            WXGLCrystalCanvas::OnShowWire)
+   EVT_MENU             (ID_GLCRYSTAL_MENU_UNLOADFOURIER,       WXGLCrystalCanvas::OnUnloadFourier)   EVT_CHAR             (WXGLCrystalCanvas::OnKeyDown)
    EVT_KEY_DOWN         (WXGLCrystalCanvas::OnKeyDown)
    EVT_KEY_UP           (WXGLCrystalCanvas::OnKeyUp)
    EVT_UPDATE_UI(ID_GLCRYSTAL_UPDATEUI,WXGLCrystalCanvas::OnUpdateUI)
@@ -870,11 +882,35 @@ mXmin(-.1),mXmax(1.1),mYmin(-.1),mYmax(1.1),mZmin(-.1),mZmax(1.1)
    mpPopUpMenu=new wxMenu("Crystal");
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_UPDATE, "&Update");
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_CHANGELIMITS, "Change display &Limits");
+   
+   mcXmin = 0.0; mcXmax = 1.0; mcYmin = 0.0; mcYmax = 1.0; mcZmin = 0.0; mcZmax = 1.0;
+   minValue = 1.0;
+   mDistX = mDistY = 0.0;
+   showFourier = showWireMC = showCrystal = TRUE;
+   fcolor.Set(0xFF, 0, 0);
+   initMC = FALSE;
+   numOfTriangles = 0;
+   Triangles = NULL;
+   step[0] = step[1] = step[2] = 1.0;
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWCRYSTAL, "Hide Crystal");
+   mpPopUpMenu->AppendSeparator();
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_LOADFOURIER, "Load Fourier Map");	
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_CHANGECONTOUR, "Change Contour Value");
+   mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_CHANGECONTOUR, FALSE);	//disable it for now
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWFOURIER, "Hide Fourier Map");
+   mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_SHOWFOURIER, FALSE);
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_FOURIERCHANGECOLOR, "Change Fourier Color");
+   mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_FOURIERCHANGECOLOR, FALSE);
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWWIRE, "Show Filled");
+   mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_SHOWWIRE, FALSE);
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_UNLOADFOURIER, "Unload Fourier Map");
+   mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_UNLOADFOURIER, FALSE);
 }
 
 WXGLCrystalCanvas::~WXGLCrystalCanvas()
 {
    mpWXCrystal->NotifyCrystalGLDelete();
+   this->MCCleanUp();
 }
 
 void WXGLCrystalCanvas::OnExit(wxCommandEvent &event)
@@ -915,17 +951,67 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
    //Orientation using the trackball
    GLfloat m[4][4];
    glLoadIdentity();
-   glTranslatef( 0, 0, -mDist );
+   glTranslatef( mDistX, mDistY, -mDist );
    build_rotmatrix( m,mQuat);
    glMultMatrixf( &m[0][0] );
    
    //Draw
       // another update of the display list is being done, so...
-      if(true==mpWXCrystal->GLDisplayListIsLocked()) return;
+      if(true==mpWXCrystal->GLDisplayListIsLocked())
+      {
+         VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnPaint()",7)
+         return;
+      }
    
+   //drawing triangles returned by MC
+   glPushMatrix();
+   REAL xc=(mXmin+mXmax)/2.;  //this is also done in Crystal
+   REAL yc=(mYmin+mYmax)/2.;
+   REAL zc=(mZmin+mZmax)/2.;
+   mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(xc, yc, zc);
+   glTranslatef(-xc, -yc, -zc);
+   if(showFourier)
+   {
+      //if(Triangles==NULL) break;
+      if(showWireMC) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+      else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+      float mccolor[] = {  (float)fcolor.Red()/255.0, 
+                    (float)fcolor.Green()/255.0, 
+                    (float)fcolor.Blue()/255.0,    1.0};
+      glColor4fv(mccolor);
+      glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, mccolor);
+      glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mccolor);
+      glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 100.0);
+      glBegin(GL_TRIANGLES);
+         for(int i=0; i < numOfTriangles; i++)
+         {
+            for(int j=0; j < 3; j++)
+            {
+               //VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnPaint():MC1:"<<i<<" "<<j,5)
+               glNormal3f(Triangles[i].norm[j].x, Triangles[i].norm[j].y, Triangles[i].norm[j].z);
+               glVertex3f(Triangles[i].p[j].x,Triangles[i].p[j].y,Triangles[i].p[j].z);
+            }
+         }
+      glEnd();
+   }
+   if(initMC && cdial->IsShown())
+   {
+      glLineWidth(6.0);
+      float bound_color[] = {1.0, 0.2, 0.2, 1.0};
+      glColor4fv(bound_color);
+      glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, bound_color);
+      glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, bound_color);
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+      cdial->DrawBoundingBox();
+      glLineWidth(1.0);
+   }
+   glPopMatrix();
+  
+   if(showCrystal)
+   {
       glCallList(mpWXCrystal->GrabCrystalGLDisplayList());  //Draw Crystal
       mpWXCrystal->ReleaseCrystalGLDisplayList();
-   
+   }
    glFlush();
    SwapBuffers();
    VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnPaint():End",7)
@@ -991,6 +1077,10 @@ void WXGLCrystalCanvas::OnKeyDown(wxKeyEvent& event)
          Refresh(FALSE);
          break;
       }
+      case(WXK_INSERT): mDistY += 0.1; Refresh(FALSE); break;
+      case(WXK_DELETE): mDistY -= 0.1; Refresh(FALSE); break;
+      case(WXK_HOME): mDistX -= 0.1; Refresh(FALSE); break;
+      case(WXK_END): mDistX += 0.1; Refresh(FALSE); break;
       case(52):// 4
       {
          VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnKeyDown():rotate left",2)
@@ -1085,17 +1175,30 @@ void WXGLCrystalCanvas::OnMouse( wxMouseEvent& event )
       GetClientSize(& width, & height);
       if(event.LeftIsDown())
       {
-         VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnMouse():Dragging Left Button",2)
-         // drag in progress, simulate trackball
-         float spin_quat[4];
-         trackball(spin_quat,
-         (2.0*mTrackBallLastX -       width) / (width+.001),
-         (     height - 2.0*mTrackBallLastY) / (height+.001),
-         (     2.0*event.GetX() - width) / (width+.001),
-         (    height - 2.0*event.GetY()) / (height+.001));
+         if(event.ShiftDown())
+         {
+            VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnMouse():Dragging Left Button",2)
+            const float v= (mTrackBallLastY-event.GetY())/(float)height;
+            const float h= (mTrackBallLastX-event.GetX())/(float)width;
 
-         add_quats( spin_quat, mQuat, mQuat );
-         Refresh(FALSE);
+            mDistY += v*10;
+            mDistX -= h*10;
+            Refresh(FALSE);
+         }
+         else
+         {
+            VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnMouse():Dragging Left Button",2)
+            // drag in progress, simulate trackball
+            float spin_quat[4];
+            trackball(spin_quat,
+            (2.0*mTrackBallLastX -       width) / (width+.001),  //normalizing from -1 to 1
+            (     height - 2.0*mTrackBallLastY) / (height+.001),
+            (     2.0*event.GetX() - width) / (width+.001),
+            (    height - 2.0*event.GetY()) / (height+.001));
+
+            add_quats( spin_quat, mQuat, mQuat );
+            Refresh(FALSE);
+         }
       }
       if(event.MiddleIsDown())
       {
@@ -1283,5 +1386,375 @@ void WXGLCrystalCanvas::OnChangeLimits(wxCommandEvent & WXUNUSED(event))
    this->CrystUpdate();
 }
 #endif
+void WXGLCrystalCanvas::OnShowCrystal()
+{
+   if(showCrystal) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWCRYSTAL, "Show Crystal");
+   else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWCRYSTAL, "Hide Crystal");
+   showCrystal = !showCrystal;
+   this->CrystUpdate();
+}
+
+//read fourier map from 0.0 to 1.0 on all axis
+void WXGLCrystalCanvas::OnLoadFourier()
+{
+   wxFileDialog * fd = new wxFileDialog((wxWindow*)this, "Choose a file containing a Fourier Map",
+           "", "", "Fourier Map files (*.grd)|*.grd", wxOPEN | wxHIDE_READONLY | wxFILE_MUST_EXIST);
+   //if okay then read Fourier map, run MC on it and display the triangles
+   if(fd->ShowModal() == wxID_OK)
+   {
+      int err;
+      ifstream ffile(fd->GetFilename().c_str());
+      if(!ffile.is_open())
+      {     //if file could not be loaded for some reason then exit
+         wxMessageDialog * error_open = new wxMessageDialog((wxWindow*)this, "Error opening file " +
+                       fd->GetFilename(), "File Open Error");
+         err = error_open->ShowModal();
+         delete error_open;
+         return;
+      }
+      //message for reporting errors
+      wxMessageDialog * errmsg = new wxMessageDialog((wxWindow*)this, "Error reading    " + fd->GetFilename(), 
+                       "File Reading Error");
+      char buff[99];
+      ffile.getline(buff, 100);
+      float a, b, c, alpha, beta, gamma, n[3];
+      ffile >>a >>b >>c >>alpha >>beta >>gamma;
+      if(!ffile.good()) {  err = errmsg->ShowModal(); delete errmsg; ffile.close(); return; }
+      //compare dimensions with the original crystal and notify the user if not equal
+      float afac = 180/M_PI, limit = 0.0001;
+      if((a - mpWXCrystal->GetCrystal().GetLatticePar()(0)) > limit || (b - mpWXCrystal->GetCrystal().GetLatticePar()(1))> limit ||
+         (c - mpWXCrystal->GetCrystal().GetLatticePar()(2)) > limit || (alpha - mpWXCrystal->GetCrystal().GetLatticePar()(3)*afac) > limit || 
+         (beta - mpWXCrystal->GetCrystal().GetLatticePar()(4)*afac) > limit || (gamma - mpWXCrystal->GetCrystal().GetLatticePar()(5)*afac) > limit )
+         if(wxMessageBox(wxString::Format("Cell dimensions in the file do not match those of the crystal loaded:\n\n" +
+            wxString("These are the value:\n") + "  Crystal:                     File:\n   a = %f                  a = %f\n" 
+            "   b = %f                  b = %f\n   c = %f                   c = %f\n   alpha = %f             alpha = %f\n" +
+            "   beta =  %f            beta = %f\n   gamma = %f          gamma = %f\n\nPercent errors are:\n" +
+            "   a: %f\n   b: %f\n   c: %f\n   alpha: %f\n   beta:  %f\n   gamma: %f\n\n\n"+ 
+            "Continue loading " + fd->GetFilename() + " ?",
+            mpWXCrystal->GetCrystal().GetLatticePar()(0), a,    mpWXCrystal->GetCrystal().GetLatticePar()(1), b, 
+            mpWXCrystal->GetCrystal().GetLatticePar()(2), c,    mpWXCrystal->GetCrystal().GetLatticePar()(3)*afac, alpha, 
+            mpWXCrystal->GetCrystal().GetLatticePar()(4)*afac, beta,mpWXCrystal->GetCrystal().GetLatticePar()(5)*afac, gamma, 
+            fabs(a-mpWXCrystal->GetCrystal().GetLatticePar()(0)) / mpWXCrystal->GetCrystal().GetLatticePar()(0)*100, 
+            fabs(b-mpWXCrystal->GetCrystal().GetLatticePar()(1)) / mpWXCrystal->GetCrystal().GetLatticePar()(1)*100, 
+            fabs(c-mpWXCrystal->GetCrystal().GetLatticePar()(2)) / mpWXCrystal->GetCrystal().GetLatticePar()(2)*100,
+            fabs(alpha-mpWXCrystal->GetCrystal().GetLatticePar()(3)*afac) / mpWXCrystal->GetCrystal().GetLatticePar()(3)*afac*100,
+            fabs(beta-mpWXCrystal->GetCrystal().GetLatticePar()(4)*afac ) / mpWXCrystal->GetCrystal().GetLatticePar()(4)*afac*100,
+            fabs(gamma-mpWXCrystal->GetCrystal().GetLatticePar()(5)*afac) / mpWXCrystal->GetCrystal().GetLatticePar()(5)*afac*100 ),
+            "Cell Dimensions Notice", wxYES_NO | wxCENTRE, (wxWindow*)this) == wxNO) 
+          {
+            ffile.close();
+            return;
+          }
+      ffile >>n[0] >>n[1] >>n[2];
+      if(!ffile.good()) {  err = errmsg->ShowModal(); delete errmsg; ffile.close(); return; }
+      nx = (int)n[0]; ny = (int)n[1]; nz = (int)n[2];
+      int all = nx*ny*nz;              
+      if(initMC) delete [] mcPoints;                     //free space from last time
+      mcPoints = new float[all];
+      step[0] = 1/n[0]; step[1] = 1/n[1]; step[2] = 1/n[2]; //init stepsize
+      //READ POINTS
+      wxProgressDialog * prd = new wxProgressDialog("Reading Fourier Map from file " + fd->GetFilename(),
+         "Reading data... ", nx, (wxWindow*)this, 
+         wxPD_AUTO_HIDE | wxPD_APP_MODAL | wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME );
+      unsigned int ni, nj;
+      for(int i=0; i < nx; i++) {
+        ni = i*ny*nz;
+        for(int j=0; j < ny; j++) {
+           nj = j*nz;
+           for(int k=0; k < nz; k++) {
+              ffile >>mcPoints[ni + nj + k];      //reading rhos
+           }
+        }
+        prd->Update(i);
+      }
+      delete prd;
+      ffile.close();
+
+
+      //ask the user for contour value
+      //wxTextEntryDialog *cted = new wxTextEntryDialog((wxWindow*)this,"Enter value: ",
+      //    "Enter contour value for MC ", wxString::Format("%f", minValue), wxOK | wxCENTRE);
+      //err = cted->ShowModal();             //err == wxID_CANCEL should not happen: no cancel button
+      //minValue = (float)atof(cted->GetValue().c_str());
+      //delete cted;
+
+      if(initMC == FALSE) cdial = new ContourDialog(this);  //asks for contour value and runs MC
+      cdial->GetContour(FALSE);
+
+      //enable other options in the pop-up menu:
+      mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_CHANGECONTOUR, TRUE);
+      mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_SHOWFOURIER, TRUE);
+      mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_FOURIERCHANGECOLOR, TRUE);
+      mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_UNLOADFOURIER, TRUE);
+      mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_SHOWWIRE, TRUE);
+      initMC = TRUE;
+      this->CrystUpdate();
+   }
+}
+
+void WXGLCrystalCanvas::OnChangeContour()
+{
+   //ask the user for new contour value
+   cdial->GetContour(TRUE);
+}
+
+void WXGLCrystalCanvas::RunMC()
+{
+   VFN_DEBUG_ENTRY("WXGLCrystalCanvas::RunMC()",7)
+   //free memory -- this caused problems when changing contour values, but now it seems to work...
+   if(initMC && Triangles != NULL) { delete [] Triangles; Triangles=0;} 
+   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::RunMC():0",7)
+   int nxMin = (int)(mcXmin * nx), nxMax = (int)(mcXmax * nx);
+   int nyMin = (int)(mcYmin * ny), nyMax = (int)(mcYmax * ny);
+   int nzMin = (int)(mcZmin * nz), nzMax = (int)(mcZmax * nz);
+   int snx = nxMax-nxMin+1, sny = nyMax-nyMin+1, snz = nzMax-nzMin+1;
+   unsigned int ny_nz = ny*nz, sny_snz = sny*snz;
+   int i, j, k;
+   unsigned int ni, nj, si, sj, sk, sni, snj, sind;
+   float x, y, z;
+
+   //create new set of points
+   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::RunMC():1",7)
+   mp4Vector * subPoints = new mp4Vector[snx*sny*snz];
+   for(i=nxMin, si=0; i <= nxMax; i++, si++)
+   {
+      ni = ((nx + i % nx) % nx)*ny_nz;    //this will 'wrap' around any value (negative or positive)
+      sni = si*sny_snz;
+      for(j=nyMin, sj=0; j <= nyMax; j++, sj++)
+      {
+         nj = ((ny + j % ny) % ny)*nz;
+         snj = sj*snz;
+         for(k=nzMin, sk=0; k <= nzMax; k++, sk++)
+         {
+            sind = sni + snj + sk;
+            x = i*step[0]; y = j*step[1]; z = k*step[2];
+            mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(x, y, z);
+            subPoints[sind].x = x; subPoints[sind].y = y; subPoints[sind].z = z;
+            subPoints[sind].val = mcPoints[ni + nj + (nz + k % nz) % nz];
+         }
+      }
+   }
+   Triangles = MC(snx-1, sny-1, snz-1, step[0], step[1], step[2], minValue, subPoints, numOfTriangles);
+   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::RunMC():2",7)
+   delete [] subPoints; 
+   VFN_DEBUG_EXIT("WXGLCrystalCanvas::RunMC()",7)
+   this->CrystUpdate();
+}
+
+void WXGLCrystalCanvas::MCCleanUp()
+{
+   showFourier = showWireMC = showCrystal = TRUE;
+   nx = ny = nz = 0;
+   numOfTriangles = 0;
+   mcXmin = 0.0; mcXmax = 1.0; mcYmin = 0.0; mcYmax = 1.0; mcZmin = 0.0; mcZmax = 1.0;
+   minValue = 1.0;
+   if(initMC)
+   {
+      delete [] mcPoints;
+      delete [] Triangles;
+   }
+   initMC = FALSE;
+   mcPoints = NULL;
+   Triangles = NULL;
+   step[0] = step[1] = step[2] = 1.0;
+   mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWCRYSTAL, "Hide Crystal");
+   mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_CHANGECONTOUR, FALSE);      //disable all of these
+   mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_SHOWFOURIER, FALSE);
+   mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWFOURIER, "Hide Fourier Map");
+   mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_UNLOADFOURIER, FALSE);
+   mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_FOURIERCHANGECOLOR, FALSE);
+   mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWWIRE, "Show Filled");
+   mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_SHOWWIRE, FALSE);
+   fcolor.Set(0xFF, 0, 0);
+}
+
+void WXGLCrystalCanvas::OnShowFourier()
+{
+   if(showFourier == TRUE) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWFOURIER, "Show Fourier Map");
+   else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWFOURIER, "Hide Fourier Map");
+   showFourier = !showFourier;
+   this->CrystUpdate();
+}
+
+void WXGLCrystalCanvas::OnFourierChangeColor()
+{
+   wxColor ncolor;
+   ncolor = wxGetColourFromUser((wxWindow*)this, fcolor);   
+   if(ncolor.Ok()) 
+   { //if user pressed OK
+      fcolor = ncolor;
+      this->CrystUpdate();
+   }
+}
+
+void WXGLCrystalCanvas::OnUnloadFourier()
+{
+   wxMessageDialog * msure = new wxMessageDialog((wxWindow*)this,
+     "Are you sure you want to unload all Fourier Map Data?", "Unload Fourier Map", wxYES_NO | wxNO_DEFAULT |
+     wxICON_QUESTION );
+   if(msure->ShowModal() == wxID_YES)
+   {
+      MCCleanUp();
+      this->CrystUpdate();
+   }
+   delete msure;
+}
+
+void WXGLCrystalCanvas::OnShowWire()
+{
+   if(showWireMC == TRUE) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWWIRE, "Show as Wireframe");    
+   else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWWIRE, "Show Filled");
+   showWireMC = !showWireMC;
+   this->CrystUpdate();
+}
+
+///////////////////////////
+//class ContourDialog
+///////////////////////////
+
+enum {ID_BOUNDINGVOLUME_TEXT_CHANGE=1000};
+
+BEGIN_EVENT_TABLE(WXGLCrystalCanvas::ContourDialog, wxDialog)
+   EVT_BUTTON(wxOK, WXGLCrystalCanvas::ContourDialog::OnOk)
+   EVT_BUTTON(wxCANCEL, WXGLCrystalCanvas::ContourDialog::OnCancel)  
+   EVT_CLOSE(WXGLCrystalCanvas::ContourDialog::Closing)
+   EVT_TEXT(ID_BOUNDINGVOLUME_TEXT_CHANGE, WXGLCrystalCanvas::ContourDialog::BoundingTextChange)
+END_EVENT_TABLE()
+
+WXGLCrystalCanvas::ContourDialog::ContourDialog(WXGLCrystalCanvas * parent) : 
+   wxDialog((wxWindow*)parent, -1, "Enter Contour Value", wxDefaultPosition, 
+   wxSize(300, 300), wxCAPTION   ), shown(FALSE)
+{ 
+   this->parent = parent;
+   stText[0] = new wxStaticText((wxWindow*)this, -1, "Enter contour value", wxPoint(20, 10));
+   conValue = new wxTextCtrl((wxWindow*)this, -1, wxString::Format("%f",parent->minValue), wxPoint(20, 30));
+
+   boundBox = new wxStaticBox((wxWindow*)this, -1, "Enter bounding volume values", wxPoint(10, 60), wxSize(275, 160));
+
+   stText[1] = new wxStaticText((wxWindow*)this, -1, "X min:", wxPoint(20, 100));
+   bound[0] = new wxTextCtrl((wxWindow*)this,ID_BOUNDINGVOLUME_TEXT_CHANGE,
+                    wxString::Format("%f",parent->mcXmin),wxPoint(50,100),wxSize(70,20));
+   stText[2] = new wxStaticText((wxWindow*)this, -1, "X max:", wxPoint(130, 100));
+   bound[1] = new wxTextCtrl((wxWindow*)this,ID_BOUNDINGVOLUME_TEXT_CHANGE,
+                    wxString::Format("%f",parent->mcXmin),wxPoint(165,100),wxSize(70,20));
+   stText[3] = new wxStaticText((wxWindow*)this, -1, "Y min:", wxPoint(20, 140));
+   bound[2] = new wxTextCtrl((wxWindow*)this,ID_BOUNDINGVOLUME_TEXT_CHANGE,
+                    wxString::Format("%f",parent->mcXmin),wxPoint(50,140),wxSize(70,20));
+   stText[4] = new wxStaticText((wxWindow*)this, -1, "Y max:", wxPoint(130, 140));
+   bound[3] = new wxTextCtrl((wxWindow*)this,ID_BOUNDINGVOLUME_TEXT_CHANGE,
+                    wxString::Format("%f",parent->mcXmin),wxPoint(165,140),wxSize(70,20));
+   stText[5] = new wxStaticText((wxWindow*)this, -1, "Z min:", wxPoint(20, 180));
+   bound[4] = new wxTextCtrl((wxWindow*)this,ID_BOUNDINGVOLUME_TEXT_CHANGE,
+                    wxString::Format("%f",parent->mcXmin),wxPoint(50,180),wxSize(70,20));
+   stText[6] = new wxStaticText((wxWindow*)this, -1, "Z max:", wxPoint(130, 180));
+   bound[5] = new wxTextCtrl((wxWindow*)this,ID_BOUNDINGVOLUME_TEXT_CHANGE,
+                    wxString::Format("%f",parent->mcXmin),wxPoint(165,180),wxSize(70,20));
+
+   butOk = new wxButton((wxWindow*)this, wxOK, "OK", wxPoint(40, 230));
+   butCancel = new wxButton((wxWindow*)this, wxCANCEL, "Cancel", wxPoint(170, 230));
+   butCancel->Enable(FALSE);
+   CenterOnParent();
+}
+
+//use this instead of ShowModal()
+void WXGLCrystalCanvas::ContourDialog::GetContour(bool showCancelFlag)
+{
+   if(shown) { Show(TRUE); conValue->SetFocus(); return; }
+   butCancel->Enable(showCancelFlag);
+   conValue->SetValue(wxString::Format("%f", parent->minValue));
+   bound[0]->SetValue(wxString::Format("%f", parent->mcXmin));
+   bound[1]->SetValue(wxString::Format("%f", parent->mcXmax));
+   bound[2]->SetValue(wxString::Format("%f", parent->mcYmin));
+   bound[3]->SetValue(wxString::Format("%f", parent->mcYmax));
+   bound[4]->SetValue(wxString::Format("%f", parent->mcZmin));
+   bound[5]->SetValue(wxString::Format("%f", parent->mcZmax));
+   shown = TRUE;
+   conValue->SetFocus();                           //select the textbox with minValue
+   conValue->SetSelection(0, conValue->GetValue().Length());
+   for(int i=0; i < 6; i++)
+      bound[i]->SetSelection(0, bound[i]->GetValue().Length());
+   //parent->CrystUpdate();
+   Show(TRUE);
+}
+
+void WXGLCrystalCanvas::ContourDialog::OnOk()
+{ 
+   float minx = atof(bound[0]->GetValue().c_str()), maxx = atof(bound[1]->GetValue().c_str()),
+         miny = atof(bound[2]->GetValue().c_str()), maxy = atof(bound[3]->GetValue().c_str()),
+         minz = atof(bound[4]->GetValue().c_str()), maxz = atof(bound[5]->GetValue().c_str());
+   if(minx >= maxx || miny >= maxy || minz >= maxz)
+   {
+      wxMessageBox("Minimum value has to be less than the maximum!", "Bounding volume error");
+      return;
+   }
+   parent->minValue = atof(conValue->GetValue().c_str());
+   parent->mcXmin = minx; parent->mcXmax = maxx;
+   parent->mcYmin = miny; parent->mcYmax = maxy;
+   parent->mcZmin = minz; parent->mcZmax = maxz;
+   parent->RunMC();
+   //parent->CrystUpdate();
+   Show(FALSE);
+   shown = FALSE;
+}
+
+void WXGLCrystalCanvas::ContourDialog::OnCancel()
+{ 
+   Show(FALSE);
+   shown = FALSE;
+   //parent->CrystUpdate();
+}
+
+void WXGLCrystalCanvas::ContourDialog::Closing()
+{ /*  Does nothing so user cannot kill the window without pushing OK or Cancel  */ }
+
+void WXGLCrystalCanvas::ContourDialog::BoundingTextChange()
+{
+  //parent->CrystUpdate(); //everytime new value, update the window
+}
+
+bool WXGLCrystalCanvas::ContourDialog::IsShown() const
+{  return shown;  }
+
+//draws a box
+void WXGLCrystalCanvas::ContourDialog::DrawBoundingBox()
+{
+   float minx = atof(bound[0]->GetValue().c_str()), maxx = atof(bound[1]->GetValue().c_str()),
+         miny = atof(bound[2]->GetValue().c_str()), maxy = atof(bound[3]->GetValue().c_str()),
+         minz = atof(bound[4]->GetValue().c_str()), maxz = atof(bound[5]->GetValue().c_str());
+   float x, y, z;
+   glBegin(GL_QUADS);
+      x = minx; y = miny; z = minz; parent->mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(x,y,z); glVertex3f(x,y,z); 
+      x = maxx; y = miny; z = minz; parent->mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(x,y,z); glVertex3f(x,y,z); 
+      x = maxx; y = maxy; z = minz; parent->mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(x,y,z); glVertex3f(x,y,z); 
+      x = minx; y = maxy; z = minz; parent->mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(x,y,z); glVertex3f(x,y,z);      
+
+      x = minx; y = miny; z = maxz; parent->mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(x,y,z); glVertex3f(x,y,z); 
+      x = maxx; y = miny; z = maxz; parent->mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(x,y,z); glVertex3f(x,y,z); 
+      x = maxx; y = maxy; z = maxz; parent->mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(x,y,z); glVertex3f(x,y,z); 
+      x = minx; y = maxy; z = maxz; parent->mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(x,y,z); glVertex3f(x,y,z);   
+
+
+      x = minx; y = miny; z = minz; parent->mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(x,y,z); glVertex3f(x,y,z); 
+      x = minx; y = miny; z = maxz; parent->mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(x,y,z); glVertex3f(x,y,z); 
+      x = minx; y = maxy; z = maxz; parent->mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(x,y,z); glVertex3f(x,y,z); 
+      x = minx; y = maxy; z = minz; parent->mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(x,y,z); glVertex3f(x,y,z); 
+
+      x = maxx; y = miny; z = minz; parent->mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(x,y,z); glVertex3f(x,y,z); 
+      x = maxx; y = miny; z = maxz; parent->mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(x,y,z); glVertex3f(x,y,z); 
+      x = maxx; y = maxy; z = maxz; parent->mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(x,y,z); glVertex3f(x,y,z); 
+      x = maxx; y = maxy; z = minz; parent->mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(x,y,z); glVertex3f(x,y,z); 
+
+
+      x = minx; y = miny; z = minz; parent->mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(x,y,z); glVertex3f(x,y,z); 
+      x = maxx; y = miny; z = minz; parent->mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(x,y,z); glVertex3f(x,y,z); 
+      x = maxx; y = miny; z = maxz; parent->mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(x,y,z); glVertex3f(x,y,z); 
+      x = minx; y = miny; z = maxz; parent->mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(x,y,z); glVertex3f(x,y,z); 
+
+      x = minx; y = maxy; z = minz; parent->mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(x,y,z); glVertex3f(x,y,z); 
+      x = maxx; y = maxy; z = minz; parent->mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(x,y,z); glVertex3f(x,y,z); 
+      x = maxx; y = maxy; z = maxz; parent->mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(x,y,z); glVertex3f(x,y,z); 
+      x = minx; y = maxy; z = maxz; parent->mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(x,y,z); glVertex3f(x,y,z); 
+   glEnd();
+}
 }// namespace 
 

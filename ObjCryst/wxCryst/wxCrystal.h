@@ -31,6 +31,8 @@
 #include "wxCryst/wxRefinableObj.h"
 #include "ObjCryst/Crystal.h"
 
+#include "wxCryst/MC.h"
+
 namespace ObjCryst
 {
 class WXGLCrystalCanvas;
@@ -69,6 +71,8 @@ class WXCrystal: public WXRefinableObj
       void OnMenuSetRelativeXYZLimits(wxCommandEvent & WXUNUSED(event));
       bool OnChangeName(const int id);
       void UpdateUI();
+      Crystal& GetCrystal();
+      const Crystal& GetCrystal()const;
    private:
       Crystal* mpCrystal;
       /// SpaceGroup
@@ -115,6 +119,13 @@ class WXGLCrystalCanvas : public wxGLCanvas
       void OnChangeLimits(wxCommandEvent & WXUNUSED(event));
       /// Redraw the structure (special function to ensure complete redrawing under windows...)
       void OnUpdateUI(wxUpdateUIEvent& WXUNUSED(event));
+      void OnShowCrystal();
+      void OnLoadFourier();
+      void OnChangeContour();
+      void OnShowFourier();
+      void OnFourierChangeColor();
+      void OnUnloadFourier();
+      void OnShowWire();
    private:
       void InitGL();
       /// The owner WXCrystal
@@ -125,13 +136,58 @@ class WXGLCrystalCanvas : public wxGLCanvas
       float mQuat [4];
       /// \internal
       float mTrackBallLastX,mTrackBallLastY;
-      /// Distance from viewer to crystal
+      /// Distance from viewer to crystal (Z)
       float mDist;
+      float mDistX, mDistY;
       /// View Angle, in degrees
       float mViewAngle;
       /// Pop-up menu
       wxMenu* mpPopUpMenu;
       float mXmin,mXmax,mYmin,mYmax,mZmin,mZmax;
+      
+      /// To display Fourier map
+      float * mcPoints;
+      float minValue;
+      int numOfTriangles;
+      TRIANGLE * Triangles;
+      int nx, ny, nz;               //dimensions for M.C.
+      bool showFourier, showCrystal;
+      bool initMC;               //initMC = TRUE if M.C. was ran before
+      bool showWireMC;           //false then draws filled
+      float step[3];             //stepsize
+      wxColor fcolor;
+      float mcXmin, mcXmax, mcYmin, mcYmax, mcZmin, mcZmax;
+
+      void RunMC();
+      void MCCleanUp();
+
+      class ContourDialog : public wxDialog  //for getting the contour value as well as the bounding volume
+      {
+      public:
+         ContourDialog(WXGLCrystalCanvas * parent);
+
+         void GetContour(bool showCancelFlag);
+         void OnOk();
+         void OnCancel();
+         void Closing();
+         void BoundingTextChange();
+         virtual bool IsShown() const;
+         void DrawBoundingBox();
+      private:
+         WXGLCrystalCanvas * parent;
+         wxTextCtrl * conValue;     //input control value
+         wxStaticBox * boundBox;    //
+         wxTextCtrl * bound[6];     //input min/max for all axis
+         wxStaticText * stText[7];  //for the user
+         wxButton *butOk, *butCancel;
+         bool shown;
+         DECLARE_EVENT_TABLE()
+      };
+      ContourDialog * cdial;
+
+      friend class ContourDialog;
+    //MOD END
+
    DECLARE_EVENT_TABLE()
 };
 #endif
