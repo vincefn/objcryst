@@ -33,6 +33,7 @@
 #include "wxCryst/wxRadiation.h"
 #include "RefinableObj/Simplex.h"
 #include "ObjCryst/PowderPatternBackgroundBayesianMinimiser.h"
+#include "Quirks/VFNStreamFormat.h"
 
 //Fixes for Cygwin; where do those stupid macros come from ? Somewhere in wxMSW headers
 #ifdef max
@@ -144,11 +145,13 @@ static const long ID_POWDER_MENU_IMPORT_FULLPROF4=          WXCRYST_ID();
 static const long ID_POWDER_MENU_IMPORT_MULTIDETECTORLLBG42=WXCRYST_ID(); 
 static const long ID_POWDER_MENU_IMPORT_2THETAOBSSIGMA=     WXCRYST_ID(); 
 static const long ID_POWDER_MENU_IMPORT_2THETAOBS=          WXCRYST_ID(); 
+static const long ID_POWDER_MENU_IMPORT_TOFISISXYSIGMA=     WXCRYST_ID(); 
 static const long ID_POWDER_MENU_FITSCALE_R=                WXCRYST_ID(); 
 static const long ID_POWDER_MENU_FITSCALE_RW=               WXCRYST_ID(); 
 static const long ID_POWDER_MENU_WAVELENGTH=                WXCRYST_ID(); 
 static const long ID_POWDER_MENU_WAVELENGTH_XRAY=           WXCRYST_ID(); 
 static const long ID_POWDER_MENU_WAVELENGTH_NEUTRON=        WXCRYST_ID(); 
+static const long ID_POWDER_MENU_WAVELENGTH_NEUTRON_TOF=    WXCRYST_ID(); 
 static const long ID_POWDER_MENU_WAVELENGTH_SET=            WXCRYST_ID(); 
 static const long ID_POWDER_MENU_WAVELENGTH_SET_AG=         WXCRYST_ID(); 
 static const long ID_POWDER_MENU_WAVELENGTH_SET_MO=         WXCRYST_ID(); 
@@ -194,9 +197,11 @@ BEGIN_EVENT_TABLE(WXPowderPattern, wxWindow)
                                                 WXPowderPattern::OnMenuImportMultiDetectorLLBG42)
    EVT_MENU(ID_POWDER_MENU_IMPORT_2THETAOBSSIGMA,   WXPowderPattern::OnMenuImport2ThetaObsSigma)
    EVT_MENU(ID_POWDER_MENU_IMPORT_2THETAOBS,        WXPowderPattern::OnMenuImport2ThetaObs)    
+   EVT_MENU(ID_POWDER_MENU_IMPORT_TOFISISXYSIGMA,   WXPowderPattern::OnMenuImportTOF_ISIS_XYSigma)    
    EVT_MENU(ID_POWDER_MENU_WAVELENGTH_SET,          WXPowderPattern::OnMenuSetWavelength)      
    EVT_MENU(ID_POWDER_MENU_WAVELENGTH_XRAY,         WXPowderPattern::OnMenuSetWavelength)      
    EVT_MENU(ID_POWDER_MENU_WAVELENGTH_NEUTRON,      WXPowderPattern::OnMenuSetWavelength)      
+   EVT_MENU(ID_POWDER_MENU_WAVELENGTH_NEUTRON_TOF,  WXPowderPattern::OnMenuSetWavelength)      
    EVT_MENU(ID_POWDER_MENU_WAVELENGTH_SET_AG,       WXPowderPattern::OnMenuSetWavelength)      
    EVT_MENU(ID_POWDER_MENU_WAVELENGTH_SET_MO,       WXPowderPattern::OnMenuSetWavelength)      
    EVT_MENU(ID_POWDER_MENU_WAVELENGTH_SET_CU,       WXPowderPattern::OnMenuSetWavelength)      
@@ -249,6 +254,8 @@ WXRefinableObj(parent,pow),mpPowderPattern(pow),mpGraph(0)
                                  "Import 2Theta-Obs-Sigma Pattern");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_2THETAOBS,
                                  "Import 2Theta-Obs Pattern");
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_TOFISISXYSIGMA,
+                                 "Import ISIS TOF X Y Sigma");
       mpMenuBar->AddMenu("Parameters",ID_REFOBJ_MENU_PAR);
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_FIXALL,"Fix all");
          //mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_UNFIXALL,"Unfix all");
@@ -265,6 +272,9 @@ WXRefinableObj(parent,pow),mpPowderPattern(pow),mpGraph(0)
          mpMenuBar->AddMenuItem(ID_POWDER_MENU_WAVELENGTH,
                                 ID_POWDER_MENU_WAVELENGTH_NEUTRON,
                                 "Neutron");
+         mpMenuBar->AddMenuItem(ID_POWDER_MENU_WAVELENGTH,
+                                ID_POWDER_MENU_WAVELENGTH_NEUTRON_TOF,
+                                "Neutron Time Of Flight");
          mpMenuBar->AddMenuItem(ID_POWDER_MENU_WAVELENGTH,
                                 ID_POWDER_MENU_WAVELENGTH_XRAY,
                                 "X-Rays");
@@ -350,6 +360,19 @@ WXRefinableObj(parent,pow),mpPowderPattern(pow),mpGraph(0)
       mList.Add(fieldThetaDispl);
       mList.Add(fieldThetaTransp);
       mpSizer->Add(thetaCorrSizer);
+   // Time OF Flight parameters
+      wxBoxSizer* tofSizer=new wxBoxSizer(wxHORIZONTAL);
+      WXFieldRefPar* fieldDIFC    =new WXFieldRefPar(this,"DIFC:",
+                                   &(mpPowderPattern
+                                     ->GetPar(&(mpPowderPattern->mDIFC))),70 );
+      WXFieldRefPar* fieldDIFA    =new WXFieldRefPar(this,"DIFA:",
+                                   &(mpPowderPattern
+                                     ->GetPar(&(mpPowderPattern->mDIFA))),70 );
+      tofSizer->Add(fieldDIFC,0);
+      tofSizer->Add(fieldDIFA,0);
+      mList.Add(fieldDIFC);
+      mList.Add(fieldDIFA);
+      mpSizer->Add(tofSizer);
    // Max Sin(theta/Lambda)
       WXFieldPar<REAL> *maxSiThOvLa=
          new WXFieldPar<REAL>(this,"Max Sin(theta)/lambda:",-1,
@@ -454,31 +477,42 @@ void WXPowderPattern::OnMenuAddCompBackgdBayesian(wxCommandEvent & WXUNUSED(even
    if(nbPointSpline<=1)nbPointSpline=2;
    
    PowderPatternBackground *pBckgd= new PowderPatternBackground;
+   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompBackgdBayesian()",6)
    mpPowderPattern->AddPowderPatternComponent(*pBckgd);
+   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompBackgdBayesian()",6)
    {
       CrystVector_REAL x(nbPointSpline),backgd(nbPointSpline);
       const CrystVector_REAL *pObs=&(pBckgd->GetParentPowderPattern().GetPowderPatternObs());
       const unsigned long nbPoint=pBckgd->GetParentPowderPattern().GetNbPoint();
       for(int i=0;i<nbPointSpline;i++)
       {
-         x(i)=pBckgd->GetParentPowderPattern().GetPowderPatternX()(i*nbPoint/(nbPointSpline-1));
+         VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompBackgdBayesian():"<<i,6)
+         x(i)=pBckgd->GetParentPowderPattern().GetPowderPatternX()(i*(nbPoint-1)/(nbPointSpline-1));
+         VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompBackgdBayesian():"<<i,6)
          long n1=(long)((REAL)nbPoint/(REAL)nbPointSpline*((REAL)i-0.2));
          long n2=(long)((REAL)nbPoint/(REAL)nbPointSpline*((REAL)i+0.2));
          if(n1<0) n1=0;
          if(n2>(long)nbPoint)n2=nbPoint;
+         VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompBackgdBayesian():"<<i,6)
          backgd(i)=(*pObs)(n1);
+         VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompBackgdBayesian():"<<i,6)
          for(long j=n1;j<n2;j++)
             if((*pObs)(j)<backgd(i))backgd(i)=(*pObs)(j);
       }
       pBckgd->SetInterpPoints(x,backgd);
    }
+   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompBackgdBayesian()",6)
    if(mpGraph!=0) mpPowderPattern->Prepare();//else this will be done when opening the graph
+   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompBackgdBayesian()",6)
    
    pBckgd->UnFixAllPar();
    pBckgd->GetOption(0).SetChoice(0);//linear
+   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompBackgdBayesian()",6)
    pBckgd->OptimizeBayesianBackground();
+   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompBackgdBayesian()",6)
    pBckgd->GetOption(0).SetChoice(1);//spline
    pBckgd->OptimizeBayesianBackground();
+   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompBackgdBayesian()",6)
    pBckgd->FixAllPar();
 
    //this->Layout();
@@ -682,6 +716,16 @@ void WXPowderPattern::OnMenuImport2ThetaObs(wxCommandEvent & WXUNUSED(event))
    mpPowderPattern->ImportPowderPattern2ThetaObs(open->GetPath().c_str());
    open->Destroy();
 }
+void WXPowderPattern::OnMenuImportTOF_ISIS_XYSigma(wxCommandEvent & WXUNUSED(event))
+{
+   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuImportTOF_ISIS_XYSigma()",6)
+   wxFileDialog *open= new wxFileDialog(this,"Choose a file","","","*.*",
+                                        wxOPEN | wxFILE_MUST_EXIST);
+   if(open->ShowModal() != wxID_OK) return;
+   
+   mpPowderPattern->ImportPowderPatternTOF_ISIS_XYSigma(open->GetPath().c_str());
+   open->Destroy();
+}
 void WXPowderPattern::OnMenuFitScaleForR(wxCommandEvent & WXUNUSED(event))
 {
    if(0==mpGraph) return;
@@ -709,6 +753,11 @@ void WXPowderPattern::OnMenuSetWavelength(wxCommandEvent & event)
       mpPowderPattern->SetRadiationType(RAD_XRAY);
    if(event.GetId()== ID_POWDER_MENU_WAVELENGTH_NEUTRON)
       mpPowderPattern->SetRadiationType(RAD_NEUTRON);
+   if(event.GetId()== ID_POWDER_MENU_WAVELENGTH_NEUTRON_TOF)
+   {
+      mpPowderPattern->SetRadiationType(RAD_NEUTRON);
+      mpPowderPattern->GetRadiation().SetWavelengthType(WAVELENGTH_TOF);
+   }
    if(event.GetId()== ID_POWDER_MENU_WAVELENGTH_SET)
    {
       double lambda;
@@ -853,6 +902,8 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
    wxString fontInfo;
    dc.SetFont(*wxSMALL_FONT);
 
+   long nbPoint=mX.numElements();
+   
    // Get Window Size
    wxCoord width,height;
    this->GetSize(&width, &height);
@@ -866,21 +917,23 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
    mCalcPatternIsLocked=true;
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():2:"<<mObs.numElements(),5)
 
-   VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():3:mFirst="
-                     <<mFirst<<"("<<mX(mFirst)<<"),mLast="
-                     <<mLast<<"("<<mX(mLast)<<"),width="
+   VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():3:min="
+                     <<mMinX<<", max="<<mMaxX<<", width="
                      <<width<<",margin="<<mMargin,5)
    // Draw sigma bars
    {
       dc.SetPen(* wxLIGHT_GREY_PEN);
       wxCoord x,y1,y2;
-      for(long i=mFirst;i<=mLast;i++)
+      for(long i=0;i<nbPoint;i++)
       {
-         x=this->Point2ScreenX(i);
-         y1=this->Data2ScreenY(mObs(i)-mSigma(i)/2.);
-         y2=this->Data2ScreenY(mObs(i)+mSigma(i)/2.);
-         
-         dc.DrawLine(x,y1,x,y2);
+         if((mX(i)>mMinX)&&(mX(i)<mMaxX))
+         {
+            x=this->Point2ScreenX(i);
+            y1=this->Data2ScreenY(mObs(i)-mSigma(i)/2.);
+            y2=this->Data2ScreenY(mObs(i)+mSigma(i)/2.);
+
+            dc.DrawLine(x,y1,x,y2);
+         }
       }
    }
    // Draw Axis (sort of)
@@ -917,37 +970,46 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
          }
    }
    // Draw observed spectrum
+   VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():4:",5)
    {
       dc.SetPen(* wxCYAN_PEN);
       wxCoord x1,y1,x2,y2;
-      x2=this->Point2ScreenX(mFirst);
-      y2=this->Data2ScreenY(mObs(mFirst));
-      for(long i=mFirst+1;i<=mLast;i++)
+      x2=this->Point2ScreenX(0);
+      y2=this->Data2ScreenY(mObs(0));
+      for(long i=0;i<nbPoint;i++)
       {
-         x1=x2;
-         y1=y2;
-         x2=this->Point2ScreenX(i);
-         y2=this->Data2ScreenY(mObs(i));
-         dc.DrawLine(x1,y1,x2,y2);
+         if((mX(i)>mMinX)&&(mX(i)<mMaxX))
+         {
+            x1=x2;
+            y1=y2;
+            x2=this->Point2ScreenX(i);
+            y2=this->Data2ScreenY(mObs(i));
+            dc.DrawLine(x1,y1,x2,y2);
+         }
       }
    }
 
    // Draw calculated spectrum
+   VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():5:",5)
    {
       dc.SetPen(* wxRED_PEN);
       wxCoord x1,y1,x2,y2;
-      x2=this->Point2ScreenX(mFirst);
-      y2=this->Data2ScreenY(mCalc(mFirst));
-      for(long i=mFirst+1;i<=mLast;i++)
+      x2=this->Point2ScreenX(0);
+      y2=this->Data2ScreenY(mCalc(0));
+      for(long i=0;i<nbPoint;i++)
       {
-         x1=x2;
-         y1=y2;
-         x2=this->Point2ScreenX(i);
-         y2=this->Data2ScreenY(mCalc(i));
-         dc.DrawLine(x1,y1,x2,y2);
+         if((mX(i)>mMinX)&&(mX(i)<mMaxX))
+         {
+            x1=x2;
+            y1=y2;
+            x2=this->Point2ScreenX(i);
+            y2=this->Data2ScreenY(mCalc(i));
+            dc.DrawLine(x1,y1,x2,y2);
+         }
       }
    }
    // Draw labels
+   VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():5:",5)
    if(true==mDisplayLabel)
    {
       wxCoord x,y;
@@ -970,7 +1032,9 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
          unsigned long ct=0;
          for(pos=comp->begin();pos!=comp->end();++pos)
          {
-            const REAL point=pos->first*RAD2DEG;
+            REAL point=pos->first;
+            if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
+               point *= RAD2DEG;
             if((point>=mMinX)&&(point<=mMaxX))
             {
                if(++ct>500)
@@ -979,7 +1043,7 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
                   break;
                }
                x=this->Data2ScreenX(point);
-               const REAL pixel=mpPattern->GetPowderPattern().GetXPixel(pos->first);
+               const REAL pixel=mpPattern->GetPowderPattern().X2Pixel(pos->first);
                if(mCalc((long)pixel)>mObs((long)pixel)) yr=mCalc((long)pixel);
                else yr=mObs((long)pixel);
                y=this->Data2ScreenY(yr);
@@ -1028,7 +1092,7 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
 
       wxString str;
       const long pixel=
-         (long)(mpPattern->GetPowderPattern().GetXCorrPixel(ttheta*DEG2RAD));
+         (long)(mpPattern->GetPowderPattern().X2PixelCorr(ttheta*DEG2RAD));
       str.Printf("X=%6.2f    ,I=%12.2f.   pixel=#%ld",ttheta,intensity,pixel);
       mpParentFrame->SetStatusText(str);
 
@@ -1070,17 +1134,6 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
          mMinX=mDraggingX0;
          mMaxX=ttheta;
       }
-      const long nbpoints=mX.numElements();
-      bool flag=true;
-      for(long i=0;i<nbpoints;i++)
-      {
-         if(flag) if(mX(i)>=mMinX) {mFirst=i;flag=false;}
-         if(mX(i)>=mMaxX) {mLast=i;break;}
-      }
-      if(mFirst>=(nbpoints-1)) mFirst=nbpoints-2;
-      if(mLast>=nbpoints) mLast=nbpoints-1;
-      mMinX=mX(mFirst);
-      mMaxX=mX(mLast);
       mClockAxisLimits.Click();
       wxUpdateUIEvent event(ID_POWDER_GRAPH_NEW_PATTERN);
       wxPostEvent(this,event);
@@ -1106,23 +1159,34 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
 void WXPowderPatternGraph::OnMouseWheel(wxMouseEvent &event)
 {
    VFN_DEBUG_ENTRY("WXPowderPatternGraph::OnMouseWheel()",6)
+   const long nbPoint=mX.numElements();
    if(event.GetWheelRotation()>=event.GetWheelDelta())
    {
-      const long range=mLast-mFirst;
-      mLast += range/8;
-      if(mLast>=mX.numElements()) mLast=mX.numElements()-1;
-      mFirst=mLast-range;
-      mMinX=mX(mFirst);
-      mMaxX=mX(mLast);
+      const REAL range=mMaxX-mMinX;
+      mMaxX += range/8;
+      if(mX(nbPoint-1)>mX(0))
+      {
+         if(mMaxX>=mX(nbPoint-1)) mMaxX=mX(nbPoint-1);
+      }
+      else
+      {
+         if(mMaxX>=mX(0)) mMaxX=mX(0);
+      }
+      mMinX=mMaxX-range;
    }
    if(event.GetWheelRotation()<=(-event.GetWheelDelta()))
    {
-      const long range=mLast-mFirst;
-      mFirst -= range/8;
-      if(mFirst<0) mFirst=0;
-      mLast=mFirst+range;
-      mMinX=mX(mFirst);
-      mMaxX=mX(mLast);
+      const REAL range=mMaxX-mMinX;
+      mMinX -= range/8;
+      if(mX(nbPoint-1)>mX(0))
+      {
+         if(mMinX<mX(0)) mMinX=mX(0);
+      }
+      else 
+      {
+         if(mMinX<mX(nbPoint-1)) mMinX=mX(nbPoint-1);
+      }
+      mMaxX=mMinX+range;
    }
    mClockAxisLimits.Click();
    wxUpdateUIEvent ev(ID_POWDER_GRAPH_NEW_PATTERN);
@@ -1147,26 +1211,37 @@ void WXPowderPatternGraph::OnToggleLabel(wxCommandEvent & WXUNUSED(event))
 
 void WXPowderPatternGraph::OnKeyDown(wxKeyEvent& event)
 {
+   const long nbPoint=mX.numElements();
    switch(event.GetKeyCode())
    {
       case(WXK_LEFT):
       {
-         const long range=mLast-mFirst;
-         mFirst -= range/8;
-         if(mFirst<0) mFirst=0;
-         mLast=mFirst+range;
-         mMinX=mX(mFirst);
-         mMaxX=mX(mLast);
+         const REAL range=mMaxX-mMinX;
+         mMinX -= range/8;
+         if(mX(nbPoint-1)>mX(0))
+         {
+            if(mMinX<mX(0)) mMinX=mX(0);
+         }
+         else 
+         {
+            if(mMinX<mX(nbPoint-1)) mMinX=mX(nbPoint-1);
+         }
+         mMaxX=mMinX+range;
          break;
       }
       case(WXK_RIGHT):
       {
-         const long range=mLast-mFirst;
-         mLast += range/8;
-         if(mLast>=mX.numElements()) mLast=mX.numElements()-1;
-         mFirst=mLast-range;
-         mMinX=mX(mFirst);
-         mMaxX=mX(mLast);
+         const REAL range=mMaxX-mMinX;
+         mMaxX += range/8;
+         if(mX(nbPoint-1)>mX(0))
+         {
+            if(mMaxX>=mX(nbPoint-1)) mMaxX=mX(nbPoint-1);
+         }
+         else
+         {
+            if(mMaxX>=mX(0)) mMaxX=mX(0);
+         }
+         mMinX=mMaxX-range;
          break;
       }
       case(WXK_UP):
@@ -1185,24 +1260,28 @@ void WXPowderPatternGraph::OnKeyDown(wxKeyEvent& event)
       }
       case(43):// WXK_ADD ?
       {
-         const long halfrange=(mLast-mFirst)/2;
-         const long middle=(mLast+mFirst)/2;
-         mFirst= (long)(middle-halfrange*4./5.);
-         mLast = (long)(middle+halfrange*4./5.);
-         mMinX=mX(mFirst);
-         mMaxX=mX(mLast);
+         const REAL halfrange=(mMaxX-mMinX)/2;
+         const REAL middle=(mMaxX+mMinX)/2;
+         mMinX= (long)(middle-halfrange*4./5.);
+         mMaxX = (long)(middle+halfrange*4./5.);
          break;
       }
       case(45):// WXK_SUBTRACT ?
       {
-         const long halfrange=(mLast-mFirst)/2;
-         const long middle=(mLast+mFirst)/2;
-         mFirst= (long)(middle-halfrange*5./4.);
-         mLast = (long)(middle+halfrange*5./4.);
-         if(mFirst<0) mFirst=0;
-         if(mLast>=mX.numElements()) mLast=mX.numElements()-1;
-         mMinX=mX(mFirst);
-         mMaxX=mX(mLast);
+         const REAL halfrange=(mMaxX-mMinX)/2;
+         const REAL middle=(mMaxX+mMinX)/2;
+         mMinX= (long)(middle-halfrange*5./4.);
+         mMaxX = (long)(middle+halfrange*5./4.);
+         if(mX(nbPoint-1)>mX(0))
+         {
+            if(mMinX<mX(0)) mMinX=mX(0);
+            if(mMaxX>mX(nbPoint-1)) mMaxX=mX(nbPoint-1);
+         }
+         else
+         {
+            if(mMinX<mX(nbPoint-1)) mMinX=mX(nbPoint-1);
+            if(mMaxX>mX(0)) mMaxX=mX(0);
+         }
          break;
       }
       case(42):// WXK_MULTIPLY
@@ -1233,12 +1312,12 @@ void WXPowderPatternGraph::SetPattern(const CrystVector_REAL &obs,
                                       const REAL tthetaMin,const REAL tthetaStep,
                                       const CrystVector_REAL &sigma)
 {
-   VFN_DEBUG_MESSAGE("WXPowderPatternGraph::SetPattern()",5)
+   VFN_DEBUG_MESSAGE("WXPowderPatternGraph::SetPattern(obs,calc,step,sigma)",10)
    const long nbPoint=mObs.numElements();
    CrystVector_REAL x(nbPoint);
    for(long i=0;i<nbPoint;i++) x(i)=tthetaMin+i*tthetaStep;
    this->SetPattern(x,obs,calc,sigma);
-   VFN_DEBUG_MESSAGE("WXPowderPatternGraph::SetPattern():End",5)
+   VFN_DEBUG_MESSAGE("WXPowderPatternGraph::SetPattern():End",10)
 }
 
 void WXPowderPatternGraph::SetPattern(const CrystVector_REAL &x,
@@ -1246,9 +1325,8 @@ void WXPowderPatternGraph::SetPattern(const CrystVector_REAL &x,
                                       const CrystVector_REAL &calc,
                                       const CrystVector_REAL &sigma)
 {
-   VFN_DEBUG_MESSAGE("WXPowderPatternGraph::SetPattern()",5)
+   VFN_DEBUG_ENTRY("WXPowderPatternGraph::SetPattern(x,obs,calc,sigma)",10)
    //Make sure spectrum is not being used (for drawing)
-   while(mCalcPatternIsLocked) wxUsleep(1);
    while(mCalcPatternIsLocked) wxUsleep(1);
    mCalcPatternIsLocked=true;
    mX=x;
@@ -1280,7 +1358,8 @@ void WXPowderPatternGraph::SetPattern(const CrystVector_REAL &x,
       wxUpdateUIEvent event(ID_POWDER_GRAPH_NEW_PATTERN);
       wxPostEvent(this,event);
    }
-   VFN_DEBUG_MESSAGE("WXPowderPatternGraph::SetPattern():End",5)
+   //cout<<FormatVertVector<REAL>(x,obs,calc,sigma)<<endl;
+   VFN_DEBUG_EXIT("WXPowderPatternGraph::SetPattern(x,obs,calc,sigma)"<<mX.numElements()<<","<<mCalc.numElements()<<","<<mObs.numElements()<<","<<mSigma.numElements()<<",",10)
 }
 
 void WXPowderPatternGraph::OnRedrawNewPattern(wxUpdateUIEvent& WXUNUSED(event))
@@ -1299,9 +1378,8 @@ void WXPowderPatternGraph::ResetAxisLimits()
    if(mMinIntensity<0) mMinIntensity=0;
    mMaxX=mX.max();
    mMinX=mX.min();
-   mFirst=0;
-   mLast=mX.numElements()-1;
    mClockAxisLimits.Click();
+   VFN_DEBUG_MESSAGE("WXPowderPatternGraph::ResetAxisLimits():"<<mMinIntensity<<","<<mMaxIntensity<<","<<mMinX<<","<<mMaxX,10)
 }
 long WXPowderPatternGraph::Data2ScreenX(const REAL x)const
 {
@@ -1313,7 +1391,7 @@ long WXPowderPatternGraph::Point2ScreenX(const long x)const
 {
    wxCoord width,height;
    this->GetSize(&width, &height);
-   return (long)(mMargin+(mX(x)-mX(mFirst))*(width-mMargin)/(REAL)(mX(mLast)-mX(mFirst)));
+   return (long)(mMargin+(mX(x)-mMinX)*(width-mMargin)/(REAL)(mMaxX-mMinX));
 }
 long WXPowderPatternGraph::Data2ScreenY(const REAL y)const
 {
@@ -1608,6 +1686,24 @@ WXRefinableObj(parent,p),mpPowderPatternDiffraction(p)
       mList.Add(pFieldEta0);
       mList.Add(pFieldEta1);
       mpSizer->Add(profileSizer);
+   //Profile Parameters (TOF)
+      wxBoxSizer* profileSizerTOF=new wxBoxSizer(wxHORIZONTAL);
+      WXFieldRefPar* pFieldCagliotiW0    =new WXFieldRefPar(this,"W0:",
+                                   &(mpPowderPatternDiffraction
+                                     ->GetPar(&(mpPowderPatternDiffraction->mW0))),90 );
+      WXFieldRefPar* pFieldCagliotiW1    =new WXFieldRefPar(this,"W1:",
+                                   &(mpPowderPatternDiffraction
+                                     ->GetPar(&(mpPowderPatternDiffraction->mW1))),90 );
+      WXFieldRefPar* pFieldCagliotiW2    =new WXFieldRefPar(this,"W2:",
+                                   &(mpPowderPatternDiffraction
+                                     ->GetPar(&(mpPowderPatternDiffraction->mW2))),90 );
+      profileSizerTOF->Add(pFieldCagliotiW0,0);
+      profileSizerTOF->Add(pFieldCagliotiW1,0);
+      profileSizerTOF->Add(pFieldCagliotiW2,0);
+      mList.Add(pFieldCagliotiW0);
+      mList.Add(pFieldCagliotiW1);
+      mList.Add(pFieldCagliotiW2);
+      mpSizer->Add(profileSizerTOF);
    //Global Biso factor
       WXCrystObjBasic* fieldGlobalBiso
          =mpPowderPatternDiffraction->GetPar(&(mpPowderPatternDiffraction->mGlobalBiso))

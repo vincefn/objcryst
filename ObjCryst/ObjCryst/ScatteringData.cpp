@@ -217,6 +217,13 @@ void Radiation::SetRadiationType(const RadiationType rad)
    if(rad == RAD_NEUTRON) mLinearPolarRate=0;
 }
 
+void Radiation::SetWavelengthType(const WavelengthType &type)
+{
+   mWavelengthType.SetChoice((unsigned long) type);
+   if(type==WAVELENGTH_TOF) this->SetRadiationType(RAD_NEUTRON);
+   if(type==WAVELENGTH_ALPHA12) this->SetRadiationType(RAD_XRAY);
+}
+
 WavelengthType Radiation::GetWavelengthType()const
 {return (WavelengthType) mWavelengthType.GetChoice();}
 
@@ -232,7 +239,7 @@ void Radiation::SetWavelength(const string &XRayTubeElementName,
 {
    VFN_DEBUG_MESSAGE("Radiation::SetWavelength(tubeName,ratio):",5)
    mXRayTubeName=XRayTubeElementName;
-   mRadiationType.SetChoice(RAD_XRAY);
+   this->SetRadiationType(RAD_XRAY);
    mWavelength.resize(1);
    mLinearPolarRate=0;
    
@@ -322,6 +329,7 @@ void Radiation::Print()const
       case WAVELENGTH_MAD: cout<< "mad"<<" "<<endl;break;
       case WAVELENGTH_DAFS: cout<< "dafs"<<" "<<endl;break;
       case WAVELENGTH_LAUE: cout<< "laue"<<" "<<endl;break;
+      case WAVELENGTH_TOF: cout<< "Time Of Flight"<<" "<<endl;break;
    }
 }
 
@@ -334,7 +342,7 @@ void Radiation::InitOptions()
    static string RadiationTypeName;
    static string RadiationTypeChoices[2];
    static string WavelengthTypeName;
-   static string WavelengthTypeChoices[2];
+   static string WavelengthTypeChoices[3];
    
    static bool needInitNames=true;
    if(true==needInitNames)
@@ -346,6 +354,7 @@ void Radiation::InitOptions()
       WavelengthTypeName="Spectrum";
       WavelengthTypeChoices[0]="Monochromatic";
       WavelengthTypeChoices[1]="X-Ray Tube";
+      WavelengthTypeChoices[2]="Time Of Flight";
       //WavelengthTypeChoices[2]="MAD";
       //WavelengthTypeChoices[3]="DAFS";
       //WavelengthTypeChoices[4]="LAUE";
@@ -353,7 +362,7 @@ void Radiation::InitOptions()
       needInitNames=false;//Only once for the class
    }
    mRadiationType.Init(2,&RadiationTypeName,RadiationTypeChoices);
-   mWavelengthType.Init(2,&WavelengthTypeName,WavelengthTypeChoices);
+   mWavelengthType.Init(3,&WavelengthTypeName,WavelengthTypeChoices);
    this->AddOption(&mRadiationType);
    this->AddOption(&mWavelengthType);
    

@@ -198,5 +198,23 @@ class TextureMarchDollase:public ScatteringCorr,public RefinableObj
    friend class WXTextureMarchDollase;
    #endif
 };
+/** Time-Of-Flight Correction
+*
+* 
+* \f$ T = d^4\sin(\theta) \f$
+*
+* The \theta angle of the detector is ignored, as it is just a scale factor.
+*/
+class TOFCorr:public ScatteringCorr
+{
+   public:
+      TOFCorr(const ScatteringData & data);
+      virtual ~TOFCorr();
+      virtual const string & GetName() const;
+      virtual const string & GetClassName() const;
+   protected:
+      virtual void CalcCorr() const;
+};
+
 }//namespace
 #endif //_OBJCRYST_SCATTERING_CORR_H_

@@ -328,7 +328,8 @@ void PowderPatternBackground::CalcPowderPattern() const
       case POWDER_BACKGROUND_LINEAR:
       {
          VFN_DEBUG_MESSAGE("PowderPatternBackground::CalcPowderPattern()..Linear",2)
-         REAL t1,t2,b1,b2,t;
+         REAL p1,p2;
+         REAL b1,b2;
          const long nbPoint=mpParentPowderPattern->GetNbPoint();
          mPowderPatternCalc.resize(nbPoint);
          if(mBackgroundNbPoint==0)
@@ -339,26 +340,25 @@ void PowderPatternBackground::CalcPowderPattern() const
          VFN_DEBUG_MESSAGE("PowderPatternBackground::CalcPowderPattern()"<<nbPoint,2)
          //mPowderPatternCalc=0.;
          REAL *b=mPowderPatternCalc.data();
-         t1=mBackgroundInterpPointX(0);
-         t2=mBackgroundInterpPointX(1);
+         p1=this->GetParentPowderPattern().X2Pixel(mBackgroundInterpPointX(0));
+         p2=this->GetParentPowderPattern().X2Pixel(mBackgroundInterpPointX(1));
          b1=mBackgroundInterpPointIntensity(0);
          b2=mBackgroundInterpPointIntensity(1);
          long point=1;
          for(long i=0;i<nbPoint;i++)
          {
-            t=mpParentPowderPattern->GetPowderPatternX()(i);
-            if(t >= t2)
+            if(i >= p2)
             {
                if(point < mBackgroundNbPoint-1)
                {
                   b1=b2;
-                  t1=t2;
+                  p1=p2;
                   b2=mBackgroundInterpPointIntensity(point+1);
-                  t2=mBackgroundInterpPointX(point+1);
+                  p2=this->GetParentPowderPattern().X2Pixel(mBackgroundInterpPointX(point+1));
                   point++ ;
                }
             }
-            *b = (b1*(t2-t)+b2*(t-t1))/(t2-t1) ;
+            *b = (b1*(p2-i)+b2*(i-p1))/(p2-p1) ;
             b++;
          }
          break;
@@ -372,9 +372,14 @@ void PowderPatternBackground::CalcPowderPattern() const
             mPowderPatternCalc=0;
             break;
          }
-         CubicSpline spline(mBackgroundInterpPointX,mBackgroundInterpPointIntensity);
+         // we need an ascending array, so use pixels rather than the original X,
+         CrystVector_REAL vpixel(mBackgroundNbPoint);
+         for(long i=0;i<mBackgroundNbPoint;++i)
+            vpixel(i)=this->GetParentPowderPattern().X2Pixel(mBackgroundInterpPointX(i));
+         
+         CubicSpline spline(vpixel,mBackgroundInterpPointIntensity);
          for(unsigned long i=0;i<nb;++i) 
-            mPowderPatternCalc(i)=spline(mpParentPowderPattern->GetPowderPatternX()(i));
+            mPowderPatternCalc(i)=spline((REAL)i);
          break;
       }
    }
@@ -521,9 +526,10 @@ WXCrystObjBasic* PowderPatternBackground::WXCreate(wxWindow* parent)
 PowderPatternDiffraction::PowderPatternDiffraction():
 mFullProfileWidthFactor(5.),
 mCagliotiU(0),mCagliotiV(0),mCagliotiW(3e-5),
+mW0(20.0),mW1(20.0),mW2(0.0),
 mPseudoVoigtEta0(0.5),mPseudoVoigtEta1(0.),mUseAsymmetricProfile(false),
 mCorrLorentz(*this),mCorrPolar(*this),mCorrSlitAperture(*this),
-mCorrTextureMarchDollase(*this)
+mCorrTextureMarchDollase(*this),mCorrTOF(*this)
 {
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::PowderPatternDiffraction()",5)
    mIsScalable=true;
@@ -539,10 +545,11 @@ PowderPatternDiffraction::PowderPatternDiffraction(const PowderPatternDiffractio
 mReflectionProfileType(old.mReflectionProfileType),
 mFullProfileWidthFactor(old.mFullProfileWidthFactor),
 mCagliotiU(old.mCagliotiU),mCagliotiV(old.mCagliotiV),mCagliotiW(old.mCagliotiW),
+mW0(old.mW0),mW1(old.mW1),mW2(old.mW2),
 mPseudoVoigtEta0(old.mPseudoVoigtEta0),mPseudoVoigtEta1(old.mPseudoVoigtEta1),
 mUseAsymmetricProfile(old.mUseAsymmetricProfile),
 mCorrLorentz(*this),mCorrPolar(*this),mCorrSlitAperture(*this),
-mCorrTextureMarchDollase(*this)
+mCorrTextureMarchDollase(*this),mCorrTOF(*this)
 {
    this->AddSubRefObj(mCorrTextureMarchDollase);
    mClockMaster.AddChild(mClockProfilePar);
@@ -606,7 +613,12 @@ void PowderPatternDiffraction::SetReflectionProfilePar(const ReflectionProfileTy
 void PowderPatternDiffraction::GenHKLFullSpace()
 {
    VFN_DEBUG_ENTRY("PowderPatternDiffraction::GenHKLFullSpace():",3)
-   this->ScatteringData::GenHKLFullSpace(mpParentPowderPattern->GetPowderPatternXMax()/2,true);
+   if(this->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
+      this->ScatteringData::GenHKLFullSpace2
+         (mpParentPowderPattern->X2STOL(mpParentPowderPattern->GetPowderPatternXMin()),true);
+   else
+      this->ScatteringData::GenHKLFullSpace2
+         (mpParentPowderPattern->X2STOL(mpParentPowderPattern->GetPowderPatternXMax()),true);
    VFN_DEBUG_EXIT("PowderPatternDiffraction::GenHKLFullSpace():",3)
 }
 void PowderPatternDiffraction::BeginOptimization(const bool allowApproximations,
@@ -674,7 +686,7 @@ void PowderPatternDiffraction::CalcPowderPattern() const
    if(mClockPowderPatternCalc>mClockMaster) return;
    TAU_PROFILE("PowderPatternDiffraction::CalcPowderPattern()-Apply profiles","void (bool)",TAU_DEFAULT);
    
-   VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderPattern():",3)
+   VFN_DEBUG_ENTRY("PowderPatternDiffraction::CalcPowderPattern():",3)
 
    // :TODO: Can't do this as this is non-const
    //if(this->GetCrystal().GetSpaceGroup().GetClockSpaceGroup()>mClockHKL)
@@ -709,6 +721,7 @@ Applying profiles for "<<nbRefl<<" reflections",3)
 
       for(long i=0;i<mNbReflUsed;i += step)
       {
+         VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderPattern()#"<<i,2)
          REAL intensity=0.;
          REAL var=0.;
          //check if the next reflection is at the same theta. If this is true,
@@ -723,10 +736,12 @@ Applying profiles for "<<nbRefl<<" reflections",3)
          }
          VFN_DEBUG_MESSAGE("Apply profile(Monochromatic)Refl("<<i<<")"\
             <<mIntH(i)<<" "<<mIntK(i)<<" "<<mIntL(i)<<" "\
-            <<"  I="<<intensity<<"  2Theta="<<2*mTheta(i)*RAD2DEG\
+            <<"  I="<<intensity<<"  stol="<<mSinThetaLambda(i)\
             <<",pixel #"<<mvReflProfile[i].first<<"->"<<mvReflProfile[i].last,2)
          
          {
+            if(mvReflProfile[i].profile.numElements()==0)
+               continue; // no profile => reflection out of pattern
             const unsigned long first=mvReflProfile[i].first,last=mvReflProfile[i].last;
             const REAL *p2 = mvReflProfile[i].profile.data();
             REAL *p3 = mPowderPatternCalc.data()+first;
@@ -747,7 +762,7 @@ Applying profiles for "<<nbRefl<<" reflections",3)
          FAST option not yet implemented !");
    }
    mClockPowderPatternCalc.Click();
-   VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderPattern: End.",3)
+   VFN_DEBUG_EXIT("PowderPatternDiffraction::CalcPowderPattern: End.",3)
 }
 
 void PowderPatternDiffraction::CalcPowderPatternIntegrated() const
@@ -783,7 +798,7 @@ void PowderPatternDiffraction::CalcPowderPatternIntegrated() const
    pos=mIntegratedProfileFactor.begin();
    for(long i=0;i<mNbReflUsed;)
    {
-      //VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderPatternIntegrated():"<<i,10)
+      VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderPatternIntegrated():"<<i,2)
       REAL intensity=0.;
       REAL var=0.;
       const REAL thmax=*psith+1e-5;
@@ -798,7 +813,7 @@ void PowderPatternDiffraction::CalcPowderPatternIntegrated() const
          if( *(++psith) > thmax ) break;
       }
       --pos;
-      //VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderPatternIntegrated():"<<i,10)
+      VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderPatternIntegrated():"<<i,2)
       REAL *pData=mPowderPatternIntegratedCalc.data()+pos->first;
       const REAL *pFact=pos->second.data();
       const unsigned long nb=pos->second.numElements();
@@ -897,16 +912,22 @@ void PowderPatternDiffraction::CalcPowderReflProfile()const
                            /(1.+this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio());
          break;
       }
+      case WAVELENGTH_TOF:
+      {
+         spectrumDeltaLambdaOvLambda.resize(1);spectrumDeltaLambdaOvLambda=0.0;
+         spectrumFactor.resize(1);spectrumFactor=1.0;
+         break;
+      }
       default: throw ObjCrystException("PowderPatternDiffraction::PrepareIntegratedProfile():\
-Radiation must be either monochromatic or from an X-Ray Tube !!");
+Radiation must be either monochromatic, from an X-Ray Tube, or neutron TOF !!");
    }
    
    
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile():\
 Computing all Profiles",5)
-   REAL center,// center of current reflection (depends on line is several)
+   REAL center,// center of current reflection (depends on line if several)
         fwhm,  // fwhm of profile
-        x0;
+        x0;    // theoretical (uncorrected for zero's, etc..) position of center of line
    long first,last;// first & last point of the stored profile
    CrystVector_REAL vx,reflProfile,tmpV;
    mvReflProfile.resize(this->GetNbRefl());
@@ -914,23 +935,36 @@ Computing all Profiles",5)
    {
       for(long i=0;i<this->GetNbRefl();i++)
       {
-         VFN_DEBUG_ENTRY("PowderPatternDiffraction::CalcPowderReflProfile():\
-Computing all Profiles: Reflection #"<<i,5)
-         x0=mTheta(i);
-         fwhm=mCagliotiW + mCagliotiV*tan(x0) + mCagliotiU*tan(x0)*tan(x0);
-         if(fwhm<1e-10) fwhm=1e-10;
-         fwhm =sqrt(fwhm);
+         VFN_DEBUG_ENTRY("PowderPatternDiffraction::CalcPowderReflProfile()#"<<i,5)
+         x0=mpParentPowderPattern->STOL2X(mSinThetaLambda(i));
+         if(this->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
+         {
+            fwhm=mW0;
+            REAL d=mSinThetaLambda(i);
+            if(d>0)
+            {
+               d=1/(2.0*d);
+               fwhm += mW1*d + mW2*d*d;
+            }
+         }
+         else
+         {
+            fwhm=mCagliotiW + mCagliotiV*tan(x0/2.0) + mCagliotiU*tan(x0/2.0)*tan(x0/2.0);
+            fwhm =sqrt(fwhm);
+         }
+         if(fwhm<1e-5) fwhm=1e-5;
 
          REAL powderAsym=1.;
          //if(true == mUseAsymmetricProfile) 
          //   powderAsym=mPowderAsymA0+mPowderAsymA1/sin(tmp)+mPowderAsymA2/sin(tmp)/sin(tmp);
 
+         VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile()#"<<i<<",fwhm="<<fwhm<<",w="<<mCagliotiW,5)
          if(nbLine>1)
          {// we have several lines, not centered on the profile range
-            center = mpParentPowderPattern->GetXCorr(
-                        2*(x0+tan(x0)*spectrumDeltaLambdaOvLambda(line)));
+            center = mpParentPowderPattern->X2XCorr(
+                        x0+2*tan(x0/2.0)*spectrumDeltaLambdaOvLambda(line));
          }
-         else center=mpParentPowderPattern->GetXCorr(2*x0);
+         else center=mpParentPowderPattern->X2XCorr(x0);
          
          if(line==0)
          {
@@ -942,22 +976,36 @@ Computing all Profiles: Reflection #"<<i,5)
             if(this->GetRadiation().GetWavelengthType()==WAVELENGTH_ALPHA12)
             {// We need to shift the last point to include 2 lines in the profile
                spectrumwidth=2*this->GetRadiation().GetXRayTubeDeltaLambda()
-                              /this->GetRadiation().GetWavelength()(0)*tan(x0);
+                              /this->GetRadiation().GetWavelength()(0)*tan(x0/2.0);
             }
             if(mUseFastLessPreciseFunc)
             {
-               first=(long)(mpParentPowderPattern->GetXPixel(center-mFullProfileWidthFactor*fwhm/4.0))-1;
-               last =(long)(mpParentPowderPattern->GetXPixel(center+mFullProfileWidthFactor*fwhm/4.0+spectrumwidth))+1;
+               first=(long)(mpParentPowderPattern->X2Pixel(center-mFullProfileWidthFactor*fwhm/2.0));
+               last =(long)(mpParentPowderPattern->X2Pixel(center+mFullProfileWidthFactor*fwhm/2.0+spectrumwidth));
             }
             else
             {
-               first=(long)(mpParentPowderPattern->GetXPixel(center-mFullProfileWidthFactor*fwhm/1.0))-1;
-               last =(long)(mpParentPowderPattern->GetXPixel(center+mFullProfileWidthFactor*fwhm/1.0+spectrumwidth))+1;
+               first=(long)(mpParentPowderPattern->X2Pixel(center-mFullProfileWidthFactor*fwhm/1.0));
+               last =(long)(mpParentPowderPattern->X2Pixel(center+mFullProfileWidthFactor*fwhm/1.0+spectrumwidth));
             }
-            if(first<0) first=0;
-            if(last>=(long)(mpParentPowderPattern->GetNbPoint()))
-               last=mpParentPowderPattern->GetNbPoint()-1;
-            vx.resize(last-first+1);
+            if(this->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
+            {
+               const long f=first;
+               first=last;
+               last=f;
+            }
+            first -=1;
+            last+=1;
+            
+            VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile():"<<first<<","<<last<<","<<center,3)
+            if((last>=0)&&(first<(long)(mpParentPowderPattern->GetNbPoint())))
+            {
+               if(first<0) first=0;
+               if(last>=(long)(mpParentPowderPattern->GetNbPoint()))
+                  last=mpParentPowderPattern->GetNbPoint()-1;
+               vx.resize(last-first+1);
+            }
+            else vx.resize(0); // store no profile if reflection out of pattern
             mvReflProfile[i].first=first;
             mvReflProfile[i].last=last;
          }
@@ -965,73 +1013,83 @@ Computing all Profiles: Reflection #"<<i,5)
          {
             first=mvReflProfile[i].first;
             last=mvReflProfile[i].last;
+            if((last>=0)&&(first<(long)(mpParentPowderPattern->GetNbPoint())))
+               vx.resize(last-first+1);
+            else vx.resize(0);
             vx.resize(last-first+1);
          }
-         
+         if((last>=0)&&(first<(long)(mpParentPowderPattern->GetNbPoint())))
          {
-            const REAL *p0=mpParentPowderPattern->GetPowderPatternX().data()+first;
-            REAL *p1=vx.data();
-            for(long i=first;i<=last;i++) *p1++ = *p0++;
-            vx += -center;
-         }
-         
-         switch(mReflectionProfileType.GetChoice())
-         {
-            case PROFILE_GAUSSIAN:
             {
-               if(true == mUseAsymmetricProfile)
-                  reflProfile=PowderProfileGauss(vx,fwhm,powderAsym);
-               else reflProfile=PowderProfileGauss(vx,fwhm);
-               break;
+               const REAL *p0=mpParentPowderPattern->GetPowderPatternX().data()+first;
+               REAL *p1=vx.data();
+               for(long i=first;i<=last;i++) *p1++ = *p0++;
+               vx += -center;
             }
-            case PROFILE_LORENTZIAN:
-            {
-               if(true == mUseAsymmetricProfile)
-                  reflProfile=PowderProfileLorentz(vx,fwhm,powderAsym);
-               else reflProfile=PowderProfileLorentz(vx,fwhm);
-               break;
-            }
-            case PROFILE_PSEUDO_VOIGT:
-            {
-               if(true == mUseAsymmetricProfile)
-                  reflProfile=PowderProfileGauss(vx,fwhm,powderAsym);
-               else reflProfile=PowderProfileGauss(vx,fwhm);
-               reflProfile *= 1-(mPseudoVoigtEta0+2*x0*mPseudoVoigtEta1);
-               if(true == mUseAsymmetricProfile)
-                  tmpV=PowderProfileLorentz(vx,fwhm,powderAsym);
-               else tmpV=PowderProfileLorentz(vx,fwhm);
-               tmpV *= mPseudoVoigtEta0+2*x0*mPseudoVoigtEta1;
-               reflProfile += tmpV;
-               break;
-            }
-            case PROFILE_PSEUDO_VOIGT_FINGER_COX_JEPHCOAT:
-            {
-               throw ObjCrystException(
-                  "PROFILE_PSEUDO_VOIGT_FINGER_COX_JEPHCOAT Not implemented");
-               /*
-               tmp2theta*=180./M_PI;//Keep degrees:external library used
-               fwhm *=180./M_PI;
-               REAL eta=mPowderPseudoVoigtEta0+2*mTheta(i)*mPowderPseudoVoigtEta1;
-               REAL dPRdT, dPRdG, dPRdE , dPRdS, dPRdD;
-               bool useAsym=true;
-               if( (mPowderAsymSourceWidth < 1e-8) && (mPowderAsymSourceWidth < 1e-8) )
-                  useAsym=false;
 
-               for(long j=0;j<2*mSavedPowderReflProfileNbPoint+1;j++)
-                  reflProfile(j)=Profval( eta,fwhm,mPowderAsymSourceWidth,
-                                          mPowderAsymDetectorWidth,tmp2theta(j) ,
-                                          0.,&dPRdT,&dPRdG,&dPRdE,&dPRdS,&dPRdD,
-                                          useAsym);
-               break;
-               */
-            }
-            case PROFILE_PEARSON_VII: throw ObjCrystException("PEARSON_VII Not implemented yet");
+            VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile():"<<first<<","<<last<<","<<center,3)
+            switch(mReflectionProfileType.GetChoice())
+            {
+               case PROFILE_GAUSSIAN:
+               {
+                  if(true == mUseAsymmetricProfile)
+                     reflProfile=PowderProfileGauss(vx,fwhm,powderAsym);
+                  else reflProfile=PowderProfileGauss(vx,fwhm);
+                  break;
+               }
+               case PROFILE_LORENTZIAN:
+               {
+                  if(true == mUseAsymmetricProfile)
+                     reflProfile=PowderProfileLorentz(vx,fwhm,powderAsym);
+                  else reflProfile=PowderProfileLorentz(vx,fwhm);
+                  break;
+               }
+               case PROFILE_PSEUDO_VOIGT:
+               {
+                  if(true == mUseAsymmetricProfile)
+                     reflProfile=PowderProfileGauss(vx,fwhm,powderAsym);
+                  else reflProfile=PowderProfileGauss(vx,fwhm);
+                  reflProfile *= 1-(mPseudoVoigtEta0+x0*mPseudoVoigtEta1);
+                  if(true == mUseAsymmetricProfile)
+                     tmpV=PowderProfileLorentz(vx,fwhm,powderAsym);
+                  else tmpV=PowderProfileLorentz(vx,fwhm);
+                  tmpV *= mPseudoVoigtEta0+x0*mPseudoVoigtEta1;
+                  reflProfile += tmpV;
+                  break;
+               }
+               case PROFILE_PSEUDO_VOIGT_FINGER_COX_JEPHCOAT:
+               {
+                  throw ObjCrystException(
+                     "PROFILE_PSEUDO_VOIGT_FINGER_COX_JEPHCOAT Not implemented");
+                  /*
+                  tmp2theta*=180./M_PI;//Keep degrees:external library used
+                  fwhm *=180./M_PI;
+                  REAL eta=mPowderPseudoVoigtEta0+2*mTheta(i)*mPowderPseudoVoigtEta1;
+                  REAL dPRdT, dPRdG, dPRdE , dPRdS, dPRdD;
+                  bool useAsym=true;
+                  if( (mPowderAsymSourceWidth < 1e-8) && (mPowderAsymSourceWidth < 1e-8) )
+                     useAsym=false;
 
+                  for(long j=0;j<2*mSavedPowderReflProfileNbPoint+1;j++)
+                     reflProfile(j)=Profval( eta,fwhm,mPowderAsymSourceWidth,
+                                             mPowderAsymDetectorWidth,tmp2theta(j) ,
+                                             0.,&dPRdT,&dPRdG,&dPRdE,&dPRdS,&dPRdD,
+                                             useAsym);
+                  break;
+                  */
+               }
+               case PROFILE_PEARSON_VII: throw ObjCrystException("PEARSON_VII Not implemented yet");
+
+            }
+            VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile()",2)
+            if(nbLine>1) reflProfile *=spectrumFactor(line);
+            if(line==0) mvReflProfile[i].profile = reflProfile;
+            else mvReflProfile[i].profile += reflProfile;
          }
-         VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile()",2)
-         if(nbLine>1) reflProfile *=spectrumFactor(line);
-         if(line==0) mvReflProfile[i].profile = reflProfile;
-         else mvReflProfile[i].profile += reflProfile;
+         else
+         { // reflection is out of pattern, so store no profile
+            mvReflProfile[i].profile.resize(0);
+         }
          VFN_DEBUG_EXIT("PowderPatternDiffraction::CalcPowderReflProfile():\
 Computing all Profiles: Reflection #"<<i,5)
       }
@@ -1049,17 +1107,25 @@ void PowderPatternDiffraction::CalcIntensityCorr()const
    
    const CrystVector_REAL *mpCorr[4];
    
-   mpCorr[0]=&(mCorrLorentz.GetCorr());
-   if(mClockIntensityCorr<mCorrLorentz.GetClockCorr()) needRecalc=true;
-   
-   if(this->GetRadiation().GetRadiationType()==RAD_XRAY)
+   if(this->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
    {
-      mpCorr[1]=&(mCorrPolar.GetCorr());
-      if(mClockIntensityCorr<mCorrPolar.GetClockCorr()) needRecalc=true;
+      mpCorr[0]=&(mCorrTOF.GetCorr());
+      if(mClockIntensityCorr<mCorrTOF.GetClockCorr()) needRecalc=true;
    }
-   
-   mpCorr[2]=&(mCorrSlitAperture.GetCorr());
-   if(mClockIntensityCorr<mCorrSlitAperture.GetClockCorr()) needRecalc=true;
+   else
+   {
+      mpCorr[0]=&(mCorrLorentz.GetCorr());
+      if(mClockIntensityCorr<mCorrLorentz.GetClockCorr()) needRecalc=true;
+
+      if(this->GetRadiation().GetRadiationType()==RAD_XRAY)
+      {
+         mpCorr[1]=&(mCorrPolar.GetCorr());
+         if(mClockIntensityCorr<mCorrPolar.GetClockCorr()) needRecalc=true;
+      }
+
+      mpCorr[2]=&(mCorrSlitAperture.GetCorr());
+      if(mClockIntensityCorr<mCorrSlitAperture.GetClockCorr()) needRecalc=true;
+   }
    
    if(mCorrTextureMarchDollase.GetNbPhase()>0)
    {
@@ -1067,13 +1133,17 @@ void PowderPatternDiffraction::CalcIntensityCorr()const
       if(mClockIntensityCorr<mCorrTextureMarchDollase.GetClockCorr()) needRecalc=true;
    }
    
+   
    if(needRecalc==false) return;
    
    TAU_PROFILE("PowderPatternDiffraction::CalcIntensityCorr()","void ()",TAU_DEFAULT);
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcIntensityCorr()",2)
    mIntensityCorr = *(mpCorr[0]);
-   if(this->GetRadiation().GetRadiationType()==RAD_XRAY) mIntensityCorr *= *(mpCorr[1]);
-   mIntensityCorr *= *(mpCorr[2]);
+   if(this->GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
+   {
+      if(this->GetRadiation().GetRadiationType()==RAD_XRAY) mIntensityCorr *= *(mpCorr[1]);
+      mIntensityCorr *= *(mpCorr[2]);
+   }
    if(mCorrTextureMarchDollase.GetNbPhase()>0) mIntensityCorr *= *mpCorr[3];
    mClockIntensityCorr.Click();
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcIntensityCorr():finished",2)
@@ -1235,6 +1305,30 @@ void PowderPatternDiffraction::InitOptions()
       tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }
+   {
+      RefinablePar tmp("W0",&mW0,0,1e5,
+                        gpRefParTypeScattDataProfileWidth,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1.0);
+      tmp.AssignClock(mClockProfilePar);
+      tmp.SetDerivStep(1e-2);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("W1",&mW1,-1e5,1e5,
+                        gpRefParTypeScattDataProfileWidth,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1.0);
+      tmp.AssignClock(mClockProfilePar);
+      tmp.SetDerivStep(1e-2);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("W2",&mW2,-1e5,1e5,
+                        gpRefParTypeScattDataProfileWidth,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1.0);
+      tmp.AssignClock(mClockProfilePar);
+      tmp.SetDerivStep(1e-2);
+      this->AddPar(tmp);
+   }
 }
 void PowderPatternDiffraction::GetBraggLimits(CrystVector_long *&min,CrystVector_long *&max)const
 {
@@ -1257,12 +1351,8 @@ void PowderPatternDiffraction::GetBraggLimits(CrystVector_long *&min,CrystVector
       //REAL fwhm,tmp;
       for(long i=0;i<this->GetNbRefl();i++)
       {
-         //tmp=mTheta(i);
-         //fwhm=sqrt(mCagliotiW + mCagliotiV*tmp + mCagliotiU*tmp*tmp);
          mIntegratedReflMin(i)=mvReflProfile[i].first;
          mIntegratedReflMax(i)=mvReflProfile[i].last;
-         //mIntegratedReflMin(i)=mpParentPowderPattern->GetXCorrPixel(2*mTheta(i)-2*fwhm);
-         //mIntegratedReflMax(i)=mpParentPowderPattern->GetXCorrPixel(2*mTheta(i)+2*fwhm);
       }
       mClockBraggLimits.Click();
       VFN_DEBUG_EXIT("PowderPatternDiffraction::GetBraggLimits(*min,*max)",3)
@@ -1364,8 +1454,9 @@ ObjRegistry<PowderPattern>
    gPowderPatternRegistry("List of all PowderPattern objects");
 
 PowderPattern::PowderPattern():
-mNbPoint(0),
+mIsXAscending(true),mNbPoint(0),
 mXZero(0.),m2ThetaDisplacement(0.),m2ThetaTransparency(0.),
+mDIFC(48277.14),mDIFA(-6.7),
 mScaleFactor(20),mUseFastLessPreciseFunc(false),
 mStatisticsExcludeBackground(false),mMaxSinThetaOvLambda(10),mNbPointUsed(0)
 {
@@ -1381,10 +1472,11 @@ mStatisticsExcludeBackground(false),mMaxSinThetaOvLambda(10),mNbPointUsed(0)
 }
 
 PowderPattern::PowderPattern(const PowderPattern &old):
-mNbPoint(old.mNbPoint),
+mIsXAscending(old.mIsXAscending),mNbPoint(old.mNbPoint),
 mRadiation(old.mRadiation),
 mXZero(old.mXZero),m2ThetaDisplacement(old.m2ThetaDisplacement),
 m2ThetaTransparency(old.m2ThetaTransparency),
+mDIFC(old.mDIFC),mDIFA(old.mDIFA),
 mPowderPatternComponentRegistry(old.mPowderPatternComponentRegistry),
 mScaleFactor(old.mScaleFactor),
 mUseFastLessPreciseFunc(old.mUseFastLessPreciseFunc),
@@ -1490,8 +1582,14 @@ void PowderPattern::SetPowderPatternPar(const REAL min,
 void PowderPattern::SetPowderPatternX(const CrystVector_REAL &x)
 {
    mNbPoint=x.numElements();
-   mX=x;
+   if(&x != &mX) mX=x;
+   mPowderPatternObs.resizeAndPreserve(mNbPoint);
+   mPowderPatternObsSigma.resizeAndPreserve(mNbPoint);
+   mPowderPatternWeight.resizeAndPreserve(mNbPoint);
    mClockPowderPatternPar.Click();
+   if(mX(mNbPoint-1)>mX(0))mIsXAscending=true;
+   else mIsXAscending=false;
+   VFN_DEBUG_MESSAGE("PowderPattern::SetPowderPatternX() is ascending="<<mIsXAscending,10)
 }
 
 unsigned long PowderPattern::GetNbPoint()const {return mNbPoint;}
@@ -1502,6 +1600,8 @@ void PowderPattern::SetRadiation(const Radiation &radiation)
    mClockPowderPatternRadiation.Click();
 }
 const Radiation& PowderPattern::GetRadiation()const {return mRadiation;}
+
+Radiation& PowderPattern::GetRadiation() {return mRadiation;}
 
 void PowderPattern::SetRadiationType(const RadiationType rad)
 {
@@ -1549,14 +1649,18 @@ const CrystVector_REAL& PowderPattern::GetPowderPatternWeight()const
    return mPowderPatternWeight;
 }
 
-REAL PowderPattern::GetPowderPatternXMin()const {return mX(0);}
+REAL PowderPattern::GetPowderPatternXMin()const
+{
+   if(true==mIsXAscending) return mX(0);
+   return mX(mNbPoint-1);
+}
 
-REAL PowderPattern::GetPowderPatternXStep()const {return (mX(0)+mX(mNbPoint-1))/(mNbPoint-1);}
+REAL PowderPattern::GetPowderPatternXStep()const {return abs((mX(0)+mX(mNbPoint-1))/(mNbPoint-1));}
 
 REAL PowderPattern::GetPowderPatternXMax()const 
 {
-   VFN_DEBUG_MESSAGE("PowderPattern::Get2ThetaMax()="<<mX(mNbPoint-1),2)
-   return mX(mNbPoint-1);
+   if(true==mIsXAscending) return mX(mNbPoint-1);
+   return mX(0);
 }
 const CrystVector_REAL& PowderPattern::GetPowderPatternX()const 
 {
@@ -1593,57 +1697,112 @@ void PowderPattern::Set2ThetaTransparency(const REAL transparency)
    mClockPowderPatternPar.Click();
 }
 
-REAL PowderPattern::GetXCorr(const REAL x0)const
+REAL PowderPattern::X2XCorr(const REAL x0)const
 {
    REAL x=x0;
    if(  (mRadiation.GetWavelengthType()==WAVELENGTH_MONOCHROMATIC)
       ||(mRadiation.GetWavelengthType()==WAVELENGTH_ALPHA12))
-      x +=  mXZero +m2ThetaDisplacement/cos(x/2) +m2ThetaTransparency*sin(x);
-   else x +=  mXZero;
-   return x;
+      x += m2ThetaDisplacement/cos(x/2) +m2ThetaTransparency*sin(x);
+
+   return x+mXZero;
 }
 
-REAL PowderPattern::GetXCorrPixel(const REAL x0)const
+REAL PowderPattern::X2PixelCorr(const REAL x0)const
 {
-   return this->GetXPixel(this->GetXCorr(x0));
+   return this->X2Pixel(this->X2XCorr(x0));
 }
 
-REAL PowderPattern::GetXPixel(const REAL x)const
+REAL PowderPattern::X2Pixel(const REAL x)const
 {
    //:TODO: faster if the step is actually constant.
    // Step may not be constant, so we guess twice before step-search
-   long pix=(long)((x-this->GetPowderPatternXMin())/this->GetPowderPatternXStep());
-   if((pix>0)&&(pix<((long)mNbPoint-1)))
+   REAL pixx;
+   if(mIsXAscending==false)
    {
-      // Why floor() and ceil() don't return a bloody integer is beyond me
-      const REAL localStep=mX(pix+1)-mX(pix);
-      if(localStep>0) pix += (long)((x-mX(pix))/localStep);
-   }
-   if(pix<0) pix=0;
-   if(pix>((long)mNbPoint-2))pix=(long)mNbPoint-2;
-   if(mX(pix)>x)
-   {
-      for(;;pix--)
+      VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel()",3)
+      long pix=(long)(mNbPoint-1-(x-this->GetPowderPatternXMin())/this->GetPowderPatternXStep());
+      if((pix>0)&&(pix<((long)mNbPoint-1)))
       {
-         if(mX(pix)<=x)
-         {
-            pix++;
-            break;
-         }
-         if(pix==0) break;
+         // Why floor() and ceil() don't return a bloody integer is beyond me
+         const REAL localStep=mX(pix)-mX(pix+1);
+         if(localStep>0) pix -= (long)((x-mX(pix))/localStep);
       }
+      VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix,3)
+      if(pix<1) pix=1;
+      if(pix>((long)mNbPoint-2))pix=(long)mNbPoint-2;
+      VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix<<","<<mX(pix),3)
+      if(mX(pix)<x)
+      {
+         for(;;pix--)
+         {
+            VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix<<","<<mX(pix),3)
+            if(mX(pix)>=x)
+            {
+               pix++;
+               break;
+            }
+            if(pix==0) break;
+         }
+      }
+      else
+      {
+         for(;;pix++)
+         {
+            if(mX(pix)<=x) break;
+            if(pix==((long)mNbPoint-2)) break;
+         }
+      }
+      // This assumes step is at least localy constant...
+      VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix<<","<<mX(pix),3)
+      const REAL localStep=mX(pix)-mX(pix+1);
+      pixx = (REAL)pix-(x-mX(pix))/localStep;
+      VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix<<","<<mX(pix),3)
    }
    else
    {
-      for(;;pix++)
+      VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<this->GetPowderPatternXMin()<<","<<this->GetPowderPatternXMax(),3)
+      long pix=(long)((this->GetPowderPatternXMax()-x)/this->GetPowderPatternXStep());
+      if((pix>0)&&(pix<((long)mNbPoint-1)))
       {
-         if(mX(pix)>=x) break;
-         if(pix==((long)mNbPoint-2)) break;
+         // Why floor() and ceil() don't return a bloody integer is beyond me
+         const REAL localStep=mX(pix+1)-mX(pix);
+         if(localStep>0) pix += (long)((x-mX(pix))/localStep);
       }
+      VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix,3)
+      if(pix<1) pix=1;
+      if(pix>((long)mNbPoint-2))pix=(long)mNbPoint-2;
+      VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix<<","<<mX(pix),3)
+      if(x<mX(pix))
+      {
+         for(;;pix--)
+         {
+            VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix<<","<<mX(pix),3)
+            if(mX(pix)<=x)
+            {
+               pix++;
+               break;
+            }
+            if(pix==0) break;
+         }
+      }
+      else
+      {
+         for(;;pix++)
+         {
+            VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix<<","<<mX(pix),3)
+            if(mX(pix)>=x) break;
+            if(pix==((long)mNbPoint-2)) break;
+         }
+      }
+      VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix<<","<<mX(pix),3)
+      if(pix>((long)mNbPoint-2))pix=(long)mNbPoint-2;
+      // This assumes step is at least localy constant...
+      const REAL localStep=mX(pix+1)-mX(pix);
+      VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix<<","<<mX(pix)<<","<<localStep,3)
+      pixx = (REAL)pix+(x-mX(pix))/localStep;
    }
-   // This assumes step is at least localy constant...
-   const REAL localStep=mX(pix+1)-mX(pix);
-   return (REAL)pix+(x-mX(pix))/localStep;
+   VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pixx,3)
+   return pixx;
 }
 
 void PowderPattern::ImportPowderPatternFullprof(const string &filename)
@@ -2138,6 +2297,83 @@ Error opening file for input:"+filename);
    VFN_DEBUG_MESSAGE("PowderPattern::ImportFullProfPattern4():finished:"<<mNbPoint<<" points",5)
 }
 
+void PowderPattern::ImportPowderPatternTOF_ISIS_XYSigma(const string &filename)
+{
+   VFN_DEBUG_MESSAGE("DiffractionDataPowder::ImportPowderPatternTOF_ISIS_XYSigma():from:" \
+                           +filename,5)
+   ifstream fin (filename.c_str());
+   if(!fin)
+   {
+      throw ObjCrystException("PowderPattern::ImportPowderPatternTOF_ISIS_XYSigma():\
+Error opening file for input:"+filename);
+   }
+   {//Get rid of first line
+      char junk[400];
+      fin.getline(junk,150);
+   }
+   mPowderPatternObs.resize (500);
+   mPowderPatternObsSigma.resize(500);
+   mX.resize(500);
+   mNbPoint=0;
+   
+   do
+   {
+      fin >> mX              (mNbPoint);
+      fin >> mPowderPatternObs     (mNbPoint);
+      fin >> mPowderPatternObsSigma(mNbPoint);
+      //cout << mX              (mNbPoint)<<" "
+      //     << mPowderPatternObs     (mNbPoint)<<" "
+      //    << mPowderPatternObsSigma(mNbPoint)<<endl;
+      if(!fin) break;
+      mNbPoint++;
+      if( (mNbPoint%500)==0)
+      {
+         mX.resizeAndPreserve(mNbPoint+500);
+         mPowderPatternObs.resizeAndPreserve(mNbPoint+500);
+         mPowderPatternObsSigma.resizeAndPreserve(mNbPoint+500);
+      }
+   } while(fin.eof() == false);
+   fin.close();
+   
+   mX.resizeAndPreserve                    (mNbPoint);
+   mPowderPatternObs.resizeAndPreserve     (mNbPoint);
+   mPowderPatternObsSigma.resizeAndPreserve(mNbPoint);
+   mPowderPatternWeight.resize(mNbPoint);
+   
+   // Reverse order of arrays, so that we are in ascending order of sin(theta)/lambda
+   REAL tmp;
+   for(unsigned long i=0;i<(mNbPoint/2);i++)
+   {
+      tmp=mX(i);
+      mX(i)=mX(mNbPoint-1-i);
+      mX(mNbPoint-1-i)=tmp;
+
+      tmp=mPowderPatternObs(i);
+      mPowderPatternObs(i)=mPowderPatternObs(mNbPoint-1-i);
+      mPowderPatternObs(mNbPoint-1-i)=tmp;
+
+      tmp=mPowderPatternObsSigma(i);
+      mPowderPatternObsSigma(i)=mPowderPatternObsSigma(mNbPoint-1-i);
+      mPowderPatternObsSigma(mNbPoint-1-i)=tmp;
+   }
+   this->SetPowderPatternX(mX);
+   
+   this->SetWeightToInvSigmaSq();
+   this->SetRadiationType(RAD_NEUTRON);
+   this->GetRadiation().SetWavelengthType(WAVELENGTH_TOF);
+   mClockPowderPatternPar.Click();
+   this->UpdateDisplay();
+   {
+      char buf [200];
+      sprintf(buf,"Imported TOF powder pattern: %d points, TOF=%7.3f -> %7.3f",
+              (int)mNbPoint,this->GetPowderPatternXMin(),
+              this->GetPowderPatternXMax());
+      (*fpObjCrystInformUser)((string)buf);
+   }
+   VFN_DEBUG_MESSAGE("PowderPattern::ImportPowderPatternTOF_ISIS_XYSigma()\
+:finished: "<<mNbPoint<<" points",5)
+}
+
 void PowderPattern::SetPowderPatternObs(const CrystVector_REAL& obs)
 {
    VFN_DEBUG_MESSAGE("PowderPattern::ImportPowderPatternObs()",5)
@@ -2237,8 +2473,8 @@ REAL PowderPattern::GetR()const
          unsigned long i=0;
          for(int j=0;j<nbExclude;j++)
          {
-            min=(unsigned long)floor(this->GetXPixel(mExcludedRegionMinX(j)));
-            max=(unsigned long)ceil (this->GetXPixel(mExcludedRegionMaxX(j)));
+            min=(unsigned long)floor(this->X2Pixel(mExcludedRegionMinX(j)));
+            max=(unsigned long)ceil (this->X2Pixel(mExcludedRegionMaxX(j)));
             if(min>maxPoints) break;
             if(max>maxPoints)max=maxPoints;
             for(;i<min;i++)//! min is the *beginning* of the excluded region !
@@ -2285,8 +2521,8 @@ REAL PowderPattern::GetR()const
          unsigned long i=0;
          for(int j=0;j<nbExclude;j++)
          {
-            min=(unsigned long)floor(this->GetXPixel(mExcludedRegionMinX(j)));
-            max=(unsigned long)ceil (this->GetXPixel(mExcludedRegionMaxX(j)));
+            min=(unsigned long)floor(this->X2Pixel(mExcludedRegionMinX(j)));
+            max=(unsigned long)ceil (this->X2Pixel(mExcludedRegionMaxX(j)));
             if(min>maxPoints) break;
             if(max>maxPoints)max=maxPoints;
             for(;i<min;i++)//! min is the *beginning* of the excluded region !
@@ -2436,8 +2672,8 @@ REAL PowderPattern::GetRw()const
          unsigned long i=0;
          for(int j=0;j<nbExclude;j++)
          {
-            min=(unsigned long)floor(this->GetXPixel(mExcludedRegionMinX(j)));
-            max=(unsigned long)ceil (this->GetXPixel(mExcludedRegionMaxX(j)));
+            min=(unsigned long)floor(this->X2Pixel(mExcludedRegionMinX(j)));
+            max=(unsigned long)ceil (this->X2Pixel(mExcludedRegionMaxX(j)));
             if(min>maxPoints) break;
             if(max>maxPoints)max=maxPoints;
             for(;i<min;i++)//! min is the *beginning* of the excluded region !
@@ -2484,8 +2720,8 @@ REAL PowderPattern::GetRw()const
          unsigned long i=0;
          for(int j=0;j<nbExclude;j++)
          {
-            min=(unsigned long)floor(this->GetXPixel(mExcludedRegionMinX(j)));
-            max=(unsigned long)ceil (this->GetXPixel(mExcludedRegionMaxX(j)));
+            min=(unsigned long)floor(this->X2Pixel(mExcludedRegionMinX(j)));
+            max=(unsigned long)ceil (this->X2Pixel(mExcludedRegionMaxX(j)));
             if(min>maxPoints) break;
             if(max>maxPoints)max=maxPoints;
             for(;i<min;i++)//! min is the *beginning* of the excluded region !
@@ -2680,8 +2916,8 @@ REAL PowderPattern::GetChi2()const
          unsigned long i=0;
          for(int j=0;j<nbExclude;j++)
          {
-            min=(unsigned long)floor(this->GetXPixel(mExcludedRegionMinX(j)));
-            max=(unsigned long)ceil (this->GetXPixel(mExcludedRegionMaxX(j)));
+            min=(unsigned long)floor(this->X2Pixel(mExcludedRegionMinX(j)));
+            max=(unsigned long)ceil (this->X2Pixel(mExcludedRegionMaxX(j)));
             if(min>maxPoints) break;
             if(max>maxPoints)max=maxPoints;
             for(;i<min;i++)//! min is the *beginning* of the excluded region !
@@ -2794,8 +3030,8 @@ void PowderPattern::FitScaleFactorForR()const
             unsigned long l=0;
             for(int k=0;k<nbExclude;k++)
             {
-               min=(unsigned long)floor(this->GetXPixel(mExcludedRegionMinX(j)));
-               max=(unsigned long)ceil (this->GetXPixel(mExcludedRegionMaxX(j)));
+               min=(unsigned long)floor(this->X2Pixel(mExcludedRegionMinX(j)));
+               max=(unsigned long)ceil (this->X2Pixel(mExcludedRegionMaxX(j)));
                if(min>mNbPointUsed) break;
                if(max>mNbPointUsed)max=mNbPointUsed;
                //! min is the *beginning* of the excluded region
@@ -2821,8 +3057,8 @@ void PowderPattern::FitScaleFactorForR()const
          {
             for(int k=0;k<nbExclude;k++)
             {
-               min=(unsigned long)floor(this->GetXPixel(mExcludedRegionMinX(k)));
-               max=(unsigned long)ceil (this->GetXPixel(mExcludedRegionMaxX(k)));
+               min=(unsigned long)floor(this->X2Pixel(mExcludedRegionMinX(k)));
+               max=(unsigned long)ceil (this->X2Pixel(mExcludedRegionMaxX(k)));
                if(min>mNbPointUsed) break;
                if(max>mNbPointUsed)max=mNbPointUsed;
                //! min is the *beginning* of the excluded region
@@ -2838,8 +3074,8 @@ void PowderPattern::FitScaleFactorForR()const
             const REAL *p3=mPowderPatternBackgroundCalc.data();
             for(int k=0;k<nbExclude;k++)
             {
-               min=(unsigned long)floor(this->GetXPixel(mExcludedRegionMinX(k)));
-               max=(unsigned long)ceil (this->GetXPixel(mExcludedRegionMaxX(k)));
+               min=(unsigned long)floor(this->X2Pixel(mExcludedRegionMinX(k)));
+               max=(unsigned long)ceil (this->X2Pixel(mExcludedRegionMaxX(k)));
                if(min>mNbPointUsed) break;
                if(max>mNbPointUsed)max=mNbPointUsed;
                //! min is the *beginning* of the excluded region
@@ -3106,8 +3342,8 @@ void PowderPattern::FitScaleFactorForRw()const
             unsigned long l=0;
             for(int k=0;k<nbExclude;k++)
             {
-               min=(unsigned long)floor(this->GetXPixel(mExcludedRegionMinX(j)));
-               max=(unsigned long)ceil (this->GetXPixel(mExcludedRegionMaxX(j)));
+               min=(unsigned long)floor(this->X2Pixel(mExcludedRegionMinX(j)));
+               max=(unsigned long)ceil (this->X2Pixel(mExcludedRegionMaxX(j)));
                if(min>mNbPointUsed) break;
                if(max>mNbPointUsed)max=mNbPointUsed;
                //! min is the *beginning* of the excluded region
@@ -3135,8 +3371,8 @@ void PowderPattern::FitScaleFactorForRw()const
          {
             for(int k=0;k<nbExclude;k++)
             {
-               min=(unsigned long)floor(this->GetXPixel(mExcludedRegionMinX(k)));
-               max=(unsigned long)ceil (this->GetXPixel(mExcludedRegionMaxX(k)));
+               min=(unsigned long)floor(this->X2Pixel(mExcludedRegionMinX(k)));
+               max=(unsigned long)ceil (this->X2Pixel(mExcludedRegionMaxX(k)));
                if(min>mNbPointUsed) break;
                if(max>mNbPointUsed)max=mNbPointUsed;
                //! min is the *beginning* of the excluded region
@@ -3153,8 +3389,8 @@ void PowderPattern::FitScaleFactorForRw()const
             const REAL *p4=mPowderPatternBackgroundCalc.data();
             for(int k=0;k<nbExclude;k++)
             {
-               min=(unsigned long)floor(this->GetXPixel(mExcludedRegionMinX(k)));
-               max=(unsigned long)ceil (this->GetXPixel(mExcludedRegionMaxX(k)));
+               min=(unsigned long)floor(this->X2Pixel(mExcludedRegionMinX(k)));
+               max=(unsigned long)ceil (this->X2Pixel(mExcludedRegionMaxX(k)));
                if(min>mNbPointUsed) break;
                if(max>mNbPointUsed)max=mNbPointUsed;
                //! min is the *beginning* of the excluded region
@@ -3598,6 +3834,47 @@ const RefinableObjClock& PowderPattern::GetIntegratedProfileLimitsClock()const
    return mClockIntegratedFactorsPrep;
 }
 
+REAL PowderPattern::STOL2X(const REAL stol)const
+{
+   REAL x;
+   if(this->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
+   {
+      if(stol>0) x = 1.0/(2*stol); else return 0;
+      x = mDIFC*x+mDIFA*x*x;
+      VFN_DEBUG_MESSAGE("PowderPattern::STOL2X("<<stol<<","<<1.0/(2*stol)<<")="<<x,2)
+   }
+   else
+   {
+      x=stol*this->GetWavelength();
+      if(abs(x)<1.0) x=2*asin(x); else x=2*M_PI;
+   }
+   return x;
+}
+
+REAL PowderPattern::X2STOL(const REAL x)const
+{
+   REAL stol;
+   if(this->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
+   {
+      if(abs(mDIFA/mDIFC)>1e-6)
+      {
+         const REAL delta=mDIFC*mDIFC+4.0*mDIFA*x;
+         stol = (-mDIFC+sqrt(delta))/(2.0*mDIFA);
+         stol = 1/(2.0*stol);
+      }
+      else stol=mDIFC/(2.0*x);
+   }
+   else
+      stol=sin(x/2.0)/this->GetWavelength();
+   VFN_DEBUG_MESSAGE("PowderPattern::X2STOL("<<x<<")="<<stol,2)
+   return stol;
+}
+
+REAL PowderPattern::STOL2Pixel(const REAL stol)const
+{
+   return this->X2Pixel(this->STOL2X(stol));
+}
+
 void PowderPattern::CalcPowderPattern() const
 {
    this->CalcNbPointUsed();
@@ -3983,6 +4260,20 @@ void PowderPattern::Init()
       tmp.SetDerivStep(1e-6);
       this->AddPar(tmp);
    }
+   {
+      RefinablePar tmp("DIFC",&mDIFC,0,1e6,gpRefParTypeScattDataCorrPos,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1.0);
+      tmp.AssignClock(mClockPowderPatternXCorr);
+      tmp.SetDerivStep(1e-2);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("DIFA",&mDIFA,-1e4,1e4,gpRefParTypeScattDataCorrPos,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1.0);
+      tmp.AssignClock(mClockPowderPatternXCorr);
+      tmp.SetDerivStep(1e-4);
+      this->AddPar(tmp);
+   }
 }
 void PowderPattern::PrepareIntegratedRfactor()const
 {
@@ -4080,8 +4371,8 @@ void PowderPattern::PrepareIntegratedRfactor()const
          VFN_DEBUG_MESSAGE("PowderPattern::PrepareIntegratedRfactor():5:Excluded regions("<<nbExclude<<")",3);
          long j=0;
          long minExcl,maxExcl;
-         minExcl=(long)floor(this->GetXPixel(mExcludedRegionMinX(j)));
-         maxExcl=(long)ceil (this->GetXPixel(mExcludedRegionMaxX(j)));
+         minExcl=(long)floor(this->X2Pixel(mExcludedRegionMinX(j)));
+         maxExcl=(long)ceil (this->X2Pixel(mExcludedRegionMaxX(j)));
          for(int i=0;i<nbExclude;i++)
          {
             while(mIntegratedPatternMax(j)<minExcl)
@@ -4101,8 +4392,8 @@ void PowderPattern::PrepareIntegratedRfactor()const
                if(j==(numInterval-1)) break;
                j++;
             }
-            minExcl=(long)(this->GetXPixel(mExcludedRegionMinX(i)));
-            maxExcl=(long)(this->GetXPixel(mExcludedRegionMaxX(i)));
+            minExcl=(long)(this->X2Pixel(mExcludedRegionMinX(i)));
+            maxExcl=(long)(this->X2Pixel(mExcludedRegionMaxX(i)));
             //go back if one integration segment is concerned by several exclusion zones...
             if(j!=0)
                while(mIntegratedPatternMax(j)>=minExcl)
@@ -4156,9 +4447,16 @@ void PowderPattern::PrepareIntegratedRfactor()const
 }
 void PowderPattern::CalcNbPointUsed()const
 {
-   REAL sinth=mMaxSinThetaOvLambda*this->GetWavelength();
    unsigned long tmp;
-   if(1>fabs(sinth)) tmp=(unsigned long)(this->GetXCorrPixel(2*asin(sinth))); else tmp=mNbPoint;
+   if(this->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
+   {
+      tmp=(unsigned long)(this->X2PixelCorr(this->STOL2X(mMaxSinThetaOvLambda)));
+   }
+   else
+   {
+      REAL sinth=mMaxSinThetaOvLambda*this->GetWavelength();
+      if(1>fabs(sinth)) tmp=(unsigned long)(this->X2PixelCorr(2*asin(sinth))); else tmp=mNbPoint;
+   }
    if(tmp>mNbPoint) tmp= mNbPoint;
    if(tmp !=mNbPointUsed)
    {

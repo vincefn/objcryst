@@ -109,7 +109,9 @@ class Radiation: public RefinableObj
       RadiationType GetRadiationType()const;
       /// Set the radiation type (X-Rays, Neutron)
       void SetRadiationType(const RadiationType);
-      //Get the Wavelength type (monochromatic, Alpha1+Alpha2, ...)
+      /// Set the Wavelength type (monochromatic, Alpha1+Alpha2, Time Of Flight...)
+      void SetWavelengthType(const WavelengthType &type);
+      /// Get the Wavelength type (monochromatic, Alpha1+Alpha2, Time Of Flight...)
       WavelengthType GetWavelengthType()const;
       /// Get the wavelength(s) in Angstroems. Currently only
       /// monochromatic is used, so the vector should only return

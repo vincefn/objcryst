@@ -705,5 +705,39 @@ WXCrystObjBasic* TextureMarchDollase::WXCreate(wxWindow* parent)
    return mpWXCrystObj;
 }
 #endif
+////////////////////////////////////////////////////////////////////////
+//
+//        Time Of Flight correction
+//
+////////////////////////////////////////////////////////////////////////
+TOFCorr::TOFCorr(const ScatteringData & data):
+ScatteringCorr(data)
+{}
+
+TOFCorr::~TOFCorr()
+{}
+
+const string & TOFCorr::GetName() const
+{
+   //So far, we do not need a personalized name...
+   const static string mName="TOFCorr";
+   return mName;
+}
+
+const string & TOFCorr::GetClassName() const
+{
+   const static string className="TOFCorr";
+   return className;
+}
+
+void TOFCorr::CalcCorr() const
+{
+   const REAL *pstol=mpData->GetSinThetaOverLambda().data();
+   if(mpData->GetClockTheta()<mClockCorrCalc) return;
+   TAU_PROFILE("TOFCorr::CalcCorr()","void ()",TAU_DEFAULT);
+   mCorr.resize(mpData->GetNbRefl());
+   for(long i=0;i<mpData->GetNbRefl();i++) mCorr(i) = pow((float)(1.0/(2.0* *pstol++)),(int)4);
+   mClockCorrCalc.Click();
+}
 
 }//namespace

@@ -1343,6 +1343,7 @@ void Radiation::XMLOutput(ostream &os,int indent)const
          this->GetPar(mWavelength.data()).XMLOutput(os,"Wavelength",indent);
          break;
       }
+      case WAVELENGTH_TOF:break;
       default: throw ObjCrystException("This radiation is not implemented !!");
    }
    os<<endl;
@@ -1974,15 +1975,28 @@ void PowderPatternDiffraction::XMLOutput(ostream &os,int indent)const
    mReflectionProfileType.XMLOutput(os,indent);
    os<<endl;
    
-   this->GetPar(&mCagliotiU).XMLOutput(os,"U",indent);
-   os<<endl;
-   
-   this->GetPar(&mCagliotiV).XMLOutput(os,"V",indent);
-   os<<endl;
-   
-   this->GetPar(&mCagliotiW).XMLOutput(os,"W",indent);
-   os<<endl;
-   
+   if(this->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
+   {
+      this->GetPar(&mW0).XMLOutput(os,"W0",indent);
+      os<<endl;
+
+      this->GetPar(&mW1).XMLOutput(os,"W1",indent);
+      os<<endl;
+
+      this->GetPar(&mW2).XMLOutput(os,"W2",indent);
+      os<<endl;
+   }
+   else
+   {
+      this->GetPar(&mCagliotiU).XMLOutput(os,"U",indent);
+      os<<endl;
+
+      this->GetPar(&mCagliotiV).XMLOutput(os,"V",indent);
+      os<<endl;
+
+      this->GetPar(&mCagliotiW).XMLOutput(os,"W",indent);
+      os<<endl;
+   }
    this->GetPar(&mPseudoVoigtEta0).XMLOutput(os,"Eta0",indent);
    os<<endl;
    
@@ -2096,6 +2110,21 @@ void PowderPatternDiffraction::XMLInput(istream &is,const XMLCrystTag &tagg)
                if("globalBiso"==tag.GetAttributeValue(i))
                {
                   this->GetPar(&mGlobalBiso).XMLInput(is,tag);
+                  break;
+               }
+               if("W0"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar(&mW0).XMLInput(is,tag);
+                  break;
+               }
+               if("W1"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar(&mW1).XMLInput(is,tag);
+                  break;
+               }
+               if("W2"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar(&mW2).XMLInput(is,tag);
                   break;
                }
             }
@@ -2257,12 +2286,22 @@ void PowderPattern::XMLOutput(ostream &os,int indent)const
    
    this->GetPar(&mXZero).XMLOutput(os,"Zero",indent);
    os <<endl;
-   
-   this->GetPar(&m2ThetaDisplacement).XMLOutput(os,"2ThetaDisplacement",indent);
-   os <<endl;
-   
-   this->GetPar(&m2ThetaTransparency).XMLOutput(os,"2ThetaTransparency",indent);
-   os <<endl;
+   if(this->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
+   {
+      this->GetPar(&mDIFC).XMLOutput(os,"TOF-DIFC",indent);
+      os <<endl;
+
+      this->GetPar(&mDIFA).XMLOutput(os,"TOF-DIFA",indent);
+      os <<endl;
+   }
+   else
+   {
+      this->GetPar(&m2ThetaDisplacement).XMLOutput(os,"2ThetaDisplacement",indent);
+      os <<endl;
+
+      this->GetPar(&m2ThetaTransparency).XMLOutput(os,"2ThetaTransparency",indent);
+      os <<endl;
+   }
    
    for(unsigned int i=0;i<this->GetNbOption();i++)
    {
@@ -2384,6 +2423,16 @@ void PowderPattern::XMLInput(istream &is,const XMLCrystTag &tagg)
                if("2ThetaTransparency"==tag.GetAttributeValue(i))
                {
                   this->GetPar(&m2ThetaTransparency).XMLInput(is,tag);
+                  break;
+               }
+               if("TOF-DIFC"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar(&mDIFC).XMLInput(is,tag);
+                  break;
+               }
+               if("TOF-DIFA"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar(&mDIFA).XMLInput(is,tag);
                   break;
                }
             }
@@ -2531,9 +2580,10 @@ void PowderPattern::XMLInput(istream &is,const XMLCrystTag &tagg)
             while(0==isgraph(is.peek())) is.get();
          }
          while(is.peek()!='<');//until next tag
+         mX.resizeAndPreserve(mNbPoint);
          if(this->GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF) 
             mX*=DEG2RAD;
-         mClockPowderPatternPar.Click();
+         this->SetPowderPatternX(mX);
          
          XMLCrystTag junk(is);
          VFN_DEBUG_EXIT("Loading X-Iobs-Sigma-Weight List...",8);

@@ -343,6 +343,8 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
          REAL mFullProfileWidthFactor;
          ///FWHM parameters, following Caglioti's law
          REAL mCagliotiU,mCagliotiV,mCagliotiW;
+         ///FWHM for TOF (in progress...)
+         REAL mW0,mW1,mW2;
          ///Pseudo-Voigt mixing parameter : eta=eta0 +2*theta*eta1
          /// eta=1 -> pure Lorentzian ; eta=0 -> pure Gaussian
          REAL mPseudoVoigtEta0,mPseudoVoigtEta1;
@@ -378,6 +380,8 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
          PowderSlitApertureCorr mCorrSlitAperture;
          /// Preferred orientation (texture) correction following the March-Dollase model
          TextureMarchDollase mCorrTextureMarchDollase;
+         /// Time-Of-Flight intensity correction
+         TOFCorr mCorrTOF;
          
       /// Computed intensities for all reflections
          mutable CrystVector_REAL mIhklCalc;
@@ -487,6 +491,8 @@ class PowderPattern : public RefinableObj
          void SetRadiation(const Radiation &radiation);
          ///Neutron or x-ray experiment ?
          const Radiation& GetRadiation()const;
+         ///Neutron or x-ray experiment ?
+         Radiation& GetRadiation();
          
          /// Set the radiation type
          void SetRadiationType(const RadiationType radiation);
@@ -571,34 +577,6 @@ class PowderPattern : public RefinableObj
          ///Change transparency correction
          /// \f$ (2\theta)_{obs} = (2\theta)_{real} + b\sin(2\theta) \f$
          void Set2ThetaTransparency(const REAL transparency);
-         /// Get the experimental x (2theta, tof) from the theoretical value, taking
-         /// into account all corrections (zero, transparency,..).
-         /// \internal
-         /// \param ttheta: the theoretical x (2theta, tof) value.
-         /// \return the x (2theta, tof) value as it appears on the pattern.
-         REAL GetXCorr(const REAL x)const;
-         /// Get the pixel number on the experimental pattern, from the
-         /// theoretical (uncorrected) x coordinate, taking into account all corrections.
-         /// (zero, transparency,..).
-         /// \internal
-         /// \param x: the theoretical x (2theta, tof) value.
-         /// \return the x (2theta, tof) value as it appears on the pattern.
-         ///
-         /// \warning: this can be real slow, especially for non-fixed steps.
-         ///
-         /// \warning: this returns the exact pixel coordinate, as a floating-point
-         /// value, and \e not the closest pixel coordinate.
-         REAL GetXCorrPixel(const REAL x)const;
-         /// Get the pixel number on the experimental pattern, corresponding
-         /// to a given (experimental) x coordinate
-         /// \param x: the x (2theta, tof) value.
-         /// \return the x (2theta, tof) value as it appears on the pattern.
-         ///
-         /// \warning: this can be real slow, especially for non-fixed steps.
-         ///
-         /// \warning: this returns the exact pixel coordinate, as a floating-point
-         /// value, and \e not the closest pixel coordinate.
-         REAL GetXPixel(const REAL x)const;
 
       // Import & export powder pattern
          /** \brief Import fullprof-style diffraction data.
@@ -621,7 +599,6 @@ class PowderPattern : public RefinableObj
          */
          void ImportPowderPatternSietronicsCPI(const string &fileName);
          /** \brief Import file with 3 columns 2Theta Iobs Sigma.
-         *\warning the 2theta step is assumed to be constant !!!
          *\param fileName: the filename (surprise!)
          *\param nbSkip: the number of lines to skip at the beginning of the file (default=0)
          */
@@ -646,11 +623,14 @@ class PowderPattern : public RefinableObj
          void ImportPowderPatternMultiDetectorLLBG42(const string &fileName);
          /** \brief Import file with 2 columns 2Theta Iobs.
          *
-         *\warning the 2theta step is assumed to be constant !!!
          *\param fileName: the filename (surprise!)
          *\param nbSkip: the number of lines to skip at the beginning of the file (default=0)
          */
          void ImportPowderPattern2ThetaObs(const string &fileName,const int nbSkip=0);
+         /** \brief Import TOF file (ISIS type, 3 columns t, Iobs, sigma(Iobs))
+         *\param fileName: the filename
+         */
+         void ImportPowderPatternTOF_ISIS_XYSigma(const string &fileName);
          /** \brief Set observed powder pattern from vector array.
          *
          * Note: powder pattern parameters must have been set before calling this function,
@@ -751,6 +731,50 @@ class PowderPattern : public RefinableObj
          const CrystVector_long& GetIntegratedProfileMax()const;
          /// When were the integration intervals last changed ?
          const RefinableObjClock& GetIntegratedProfileLimitsClock()const;
+      /// Get the experimental x (2theta, tof) from the theoretical value, taking
+      /// into account all corrections (zero, transparency,..).
+      /// \internal
+      /// \param ttheta: the theoretical x (2theta, tof) value.
+      /// \return the x (2theta, tof) value as it appears on the pattern.
+      REAL X2XCorr(const REAL x)const;
+      /// Get the pixel number on the experimental pattern, from the
+      /// theoretical (uncorrected) x coordinate, taking into account all corrections.
+      /// (zero, transparency,..).
+      /// \internal
+      /// \param x: the theoretical x (2theta, tof) value.
+      /// \return the x (2theta, tof) value as it appears on the pattern.
+      ///
+      /// \warning: this can be real slow, especially for non-fixed steps.
+      ///
+      /// \warning: this returns the exact pixel coordinate, as a floating-point
+      /// value, and \e not the closest pixel coordinate.
+      REAL X2PixelCorr(const REAL x)const;
+      /// Get the pixel number on the experimental pattern, corresponding
+      /// to a given (experimental) x coordinate
+      /// \param x: the x (2theta, tof) value.
+      /// \return the x (2theta, tof) value as it appears on the pattern.
+      ///
+      /// \warning: this can be real slow, especially for non-fixed steps.
+      ///
+      /// \warning: this returns the exact pixel coordinate, as a floating-point
+      /// value, and \e not the closest pixel coordinate.
+      REAL X2Pixel(const REAL x)const;
+
+      /// Convert sin(theta)/lambda to X (i.e. either to 2theta or to TOF),
+      /// depending on the type of radiation.
+      ///
+      /// This does not take into account any zero/transparency, etc... correction
+         REAL STOL2X(const REAL stol)const;
+      /// Convert X (either 2theta or TOF) to sin(theta)/lambda,
+      /// depending on the type of radiation.
+      ///
+      /// This does not take into account any zero/transparency, etc... correction
+         REAL X2STOL(const REAL x)const;
+      /// Convert sin(theta)/lambda to pixel,
+      /// depending on the type of radiation.
+      ///
+      /// This does not take into account any zero/transparency, etc... correction
+         REAL STOL2Pixel(const REAL stol)const;
    protected:
       /// Calc the powder pattern
       void CalcPowderPattern() const;
@@ -790,8 +814,14 @@ class PowderPattern : public RefinableObj
       /// taking into account observation and model errors. Integrated.
       mutable CrystVector_REAL mPowderPatternVarianceIntegrated;
       
-      /// Vector of x coordinates (either 2theta or time-of-flight) for the pattern
+      /** Vector of x coordinates (either 2theta or time-of-flight) for the pattern
+      *
+      * Stored in ascending order for 2theta, and descending for TOF, i.e. always
+      * in ascending order for the corresponding sin(theta)/lambda.
+      */
       CrystVector_REAL mX;
+      /// Is the mX vector sorted in ascending order ? (true for 2theta, false for TOF)
+      bool mIsXAscending;
       /// Number of points in the pattern
       unsigned long mNbPoint;
       
@@ -829,6 +859,9 @@ class PowderPattern : public RefinableObj
          /// Transparency correction : 
          ///\f$ (2\theta)_{obs} = (2\theta)_{real} + b\sin(2\theta) \f$
          REAL m2ThetaTransparency;
+         /// Time Of Flight (TOF) parameters : 
+         ///\f$ t = DIFC*\frac{\sin(\theta)}{\lambda} + DIFA*\left(\frac{\sin(\theta)}{\lambda}\right)^2 + mXZero\f$
+         REAL mDIFC,mDIFA;
       // Components of the powder pattern
          /// The components (crystalline phases, background,...) of the powder pattern
          ObjRegistry<PowderPatternComponent> mPowderPatternComponentRegistry;

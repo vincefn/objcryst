@@ -48,6 +48,7 @@ class WXPowderPattern: public WXRefinableObj
       void OnMenuImportMultiDetectorLLBG42(wxCommandEvent & WXUNUSED(event));
       void OnMenuImport2ThetaObsSigma(wxCommandEvent & WXUNUSED(event));
       void OnMenuImport2ThetaObs(wxCommandEvent & WXUNUSED(event));
+      void OnMenuImportTOF_ISIS_XYSigma(wxCommandEvent & WXUNUSED(event));
       void OnMenuFitScaleForR(wxCommandEvent & WXUNUSED(event));
       void OnMenuFitScaleForRw(wxCommandEvent & WXUNUSED(event));
       void OnMenuSavePattern(wxCommandEvent & WXUNUSED(event));
@@ -135,8 +136,6 @@ class WXPowderPatternGraph: public wxWindow
       bool mIsDragging;
       /// Remember coordinates at the beginning of the dragging
       REAL mDraggingX0,mDraggingIntensity0;
-      /// Index of the first and last points drawn of the pattern
-      mutable long mFirst,mLast;
       /// Clock corresponding to when the graph limits where last changed. This
       /// is compared to PowderPattern::GetClockPowderPatternPar() to know if
       /// these parameter need to be reset.
