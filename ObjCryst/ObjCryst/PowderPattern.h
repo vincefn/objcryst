@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -56,14 +56,14 @@ class PowderPatternComponent : virtual public RefinableObj
       virtual const string& GetClassName() const;
       
       /// \internal
-		/// Set the PowderPattern object which uses this component.
+      /// Set the PowderPattern object which uses this component.
       /// This sets all necessary spectrum parameters (2theta range,
       /// wavelength, radiation type...) accordingly.
-		/// 
+      /// 
       virtual void SetParentPowderPattern(const PowderPattern&)=0;
       /// Get the calculated powder spectrum for this component.
       /// Note that the spectrum is \e not scaled.
-		/// 
+      /// 
       virtual const CrystVector_REAL& GetPowderPatternCalc()const=0;
       /** \brief Is this component scalable ?
       *
@@ -78,34 +78,34 @@ class PowderPatternComponent : virtual public RefinableObj
       const RefinableObjClock& GetClockPowderPatternCalc()const;
          
       /// Calc the powder spectrum. As always, recomputation is only
-		/// done if necessary (ie if a parameter has changed since the last
-		/// computation)
+      /// done if necessary (ie if a parameter has changed since the last
+      /// computation)
       virtual void CalcPowderPattern() const=0;
       
       /// \internal Set the radiation. This is called by PowderPattern
       virtual void SetRadiation(const Radiation &rad)=0;
       
-		/// Get the integration limits (first and last pixels) around each reflection,
-		/// if this component has Bragg reflections. Used for integrated R(w) factors.
-		/// The limits currently go from -2*FWHM to +2*FWHM.
-		/// returns a pointer to the min and max pixels arrays (null pointers if
-		/// no reflection for this phase).
-		virtual void GetBraggLimits(CrystVector_long *&min,CrystVector_long *&max)const=0;
-		/// Get last time the Bragg Limits were changed
-		const RefinableObjClock& GetClockBraggLimits()const;
-		
- 		/// Set the maximum value for sin(theta)/lambda. All data above still
-		/// exist but are ignored for all calculations.
-		virtual void SetMaxSinThetaOvLambda(const REAL max)=0;
-		
+      /// Get the integration limits (first and last pixels) around each reflection,
+      /// if this component has Bragg reflections. Used for integrated R(w) factors.
+      /// The limits currently go from -2*FWHM to +2*FWHM.
+      /// returns a pointer to the min and max pixels arrays (null pointers if
+      /// no reflection for this phase).
+      virtual void GetBraggLimits(CrystVector_long *&min,CrystVector_long *&max)const=0;
+      /// Get last time the Bragg Limits were changed
+      const RefinableObjClock& GetClockBraggLimits()const;
+      
+       /// Set the maximum value for sin(theta)/lambda. All data above still
+      /// exist but are ignored for all calculations.
+      virtual void SetMaxSinThetaOvLambda(const REAL max)=0;
+      
       /// The calculated component of a powder spectrum. It is mutable since it is
       /// completely defined by other parameters (eg it is not an 'independent parameter')
       mutable CrystVector_REAL mPowderPatternCalc;
       
       /// \internal
-		/// This will be called by the parent PowderPattern object, before
+      /// This will be called by the parent PowderPattern object, before
       /// calculating the first powder spectrum. Or maybe it should be called
-		/// automatically by the object itself...
+      /// automatically by the object itself...
       virtual void Prepare()=0;
       
       /// Scalable ? (crystal phase = scalable, background= not scalable)
@@ -118,9 +118,9 @@ class PowderPatternComponent : virtual public RefinableObj
       /// The PowderPattern object in which this component is included
       const PowderPattern *mpParentPowderPattern;
       /// Get last time the Bragg Limits were changed
-		mutable RefinableObjClock mClockBraggLimits;
-		
-		//Eventually this should be removed (?)
+      mutable RefinableObjClock mClockBraggLimits;
+      
+      //Eventually this should be removed (?)
       friend class PowderPattern;
 };
 /// Global registry for all PowderPatternComponent objects
@@ -147,15 +147,15 @@ class PowderPatternBackground : public PowderPatternComponent
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
-		virtual void GetGeneGroup(const RefinableObj &obj, 
-										  CrystVector_uint & groupIndex,
-										  unsigned int &firstGroup) const;
+      virtual void GetGeneGroup(const RefinableObj &obj, 
+                                CrystVector_uint & groupIndex,
+                                unsigned int &firstGroup) const;
    protected:
       virtual void CalcPowderPattern() const;
       virtual void SetRadiation(const Radiation &rad);
       virtual void Prepare();
-		virtual void GetBraggLimits(CrystVector_long *&min,CrystVector_long *&max)const;
-		virtual void SetMaxSinThetaOvLambda(const REAL max);
+      virtual void GetBraggLimits(CrystVector_long *&min,CrystVector_long *&max)const;
+      virtual void SetMaxSinThetaOvLambda(const REAL max);
       
       /// The kind of interpolation used
       PowderBackgroundInterpType mBackgroundType;
@@ -173,13 +173,13 @@ class PowderPatternBackground : public PowderPatternComponent
          /// Last time Splines were generated
          mutable RefinableObjClock mClockBackgroundSpline;
       
-		/** Maximum sin(theta)/lambda for all calculations (10 by default).
-		*
-		* This keeps all data in memory, but only the part which is below
-		* the max is calculated.
-		*/
-		REAL mMaxSinThetaOvLambda;
-		
+      /** Maximum sin(theta)/lambda for all calculations (10 by default).
+      *
+      * This keeps all data in memory, but only the part which is below
+      * the max is calculated.
+      */
+      REAL mMaxSinThetaOvLambda;
+      
       //To be removed
       friend class PowderPattern; 
    #ifdef __WX__CRYST__
@@ -227,11 +227,11 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
-		virtual void GetGeneGroup(const RefinableObj &obj, 
-										  CrystVector_uint & groupIndex,
-										  unsigned int &firstGroup) const;
+      virtual void GetGeneGroup(const RefinableObj &obj, 
+                                CrystVector_uint & groupIndex,
+                                unsigned int &firstGroup) const;
       virtual void BeginOptimization(const bool allowApproximations=false,
-												 const bool enableRestraints=false);
+                                     const bool enableRestraints=false);
       virtual void EndOptimization();
    protected:
       virtual void CalcPowderPattern() const;
@@ -246,8 +246,8 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       virtual void SetRadiation(const Radiation &rad);
       virtual void Prepare();
       virtual void InitOptions();
-		virtual void GetBraggLimits(CrystVector_long *&min,CrystVector_long *&max)const;
-		virtual void SetMaxSinThetaOvLambda(const REAL max);
+      virtual void GetBraggLimits(CrystVector_long *&min,CrystVector_long *&max)const;
+      virtual void SetMaxSinThetaOvLambda(const REAL max);
       //Clocks
          /// Last time the reflection parameters were changed
          RefinableObjClock mClockProfilePar;
@@ -310,8 +310,8 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
          mutable long mSavedPowderReflProfileNbPoint;
          /// \internal The 1st pixel for each reflection
          mutable CrystVector_long mReflectionProfileFirstPixel;
-			/// First and last pixel for integrated R-factors around each reflection
-			mutable CrystVector_long mIntegratedReflMin,mIntegratedReflMax;
+         /// First and last pixel for integrated R-factors around each reflection
+         mutable CrystVector_long mIntegratedReflMin,mIntegratedReflMax;
    #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);
@@ -357,10 +357,10 @@ class PowderPattern : public RefinableObj
       // Pattern parameters (2theta range, wavelength, radiation)
          /** \briefSet the powder spectrum angular range & resolution parameter.
          * this will affect all components (phases) of the spectrum.
-			*
-			*	Use this with caution, as the number of points must be correct with
-			* respect to the observed data (Iobs).
-			*
+         *
+         *   Use this with caution, as the number of points must be correct with
+         * respect to the observed data (Iobs).
+         *
          * \param tthetaMin: min 2theta value, in radians
          * \param tthetaStep: step (assumed constant) in 2theta.
          * \param nbPoints: number of points in the spectrum.
@@ -400,7 +400,7 @@ class PowderPattern : public RefinableObj
          *there are both Alpha1 and Alpha2, and thus automatically changes the WavelengthType 
          *to WAVELENGTH_ALPHA12. If instead either alpha1 or alpha2 (eg "CuA1") is asked for,
          *the WavelengthType is set to WAVELENGTH_MONOCHROMATIC. In both cases,
-			* the radiation type is set to X-Ray.
+         * the radiation type is set to X-Ray.
          */
          void SetWavelength(const string &XRayTubeElementName,const REAL alpha12ratio=0.5);
 
@@ -436,7 +436,7 @@ class PowderPattern : public RefinableObj
          /// When were the radiation parameter (radiation type, wavelength) changed ?
          const RefinableObjClock& GetClockPowderPatternRadiation()const;
          /// When were the parameters for 2theta correction (zero, transparency,
-			/// displacement) last changed ?
+         /// displacement) last changed ?
          const RefinableObjClock& GetClockPowderPattern2ThetaCorr()const;
       
       // Corrections to 2theta
@@ -456,7 +456,7 @@ class PowderPattern : public RefinableObj
          REAL Get2ThetaCorr(const REAL ttheta)const;
          /// Get the pixel number on the experimental spectrum, from the
          /// theoretical (uncorrected) value of 2theta, taking into account all corrections.
-			/// (zero, transparency,..).
+         /// (zero, transparency,..).
          /// \internal
          /// \param ttheta: the theoretical 2theta value.
          /// \return the 2theta value as it appears on the spectrum.
@@ -489,7 +489,7 @@ class PowderPattern : public RefinableObj
          */
          void ImportPowderPattern2ThetaObsSigma(const string &fileName,const int nbSkip=0);
          /** \brief Import file with 2 columns 2Theta Iobs.
-			*
+         *
          *\warning the 2theta step is assumed to be constant !!!
          *\param fileName: the filename (surprise!)
          *\param nbSkip: the number of lines to skip at the beginning of the file (default=0)
@@ -504,12 +504,12 @@ class PowderPattern : public RefinableObj
          
          ///Save powder spectrum to one file, text format, 3 columns theta Iobs Icalc.
          ///If Iobs is missing, the column is omitted.
-			///
-			/// \todo export in other formats (.prf,...), with a list of reflection
-			/// position for all phases...
+         ///
+         /// \todo export in other formats (.prf,...), with a list of reflection
+         /// position for all phases...
          void SavePowderPattern(const string &filename="powderPattern.out") const;
          /// Print to thee screen/console the observed and calculated spectrum (long,
-			/// mostly useful for debugging)
+         /// mostly useful for debugging)
          void PrintObsCalcData(ostream&os=cout)const;
          
       // Statistics..
@@ -541,23 +541,23 @@ class PowderPattern : public RefinableObj
          /// Set sigma=sqrt(Iobs)
          void SetSigmaToSqrtIobs();
          /// Set w = 1/sigma^2.
-			///
-			/// To filter too small or null intensities :If sigma< minRelatSigma* max(sigma),
-			/// then w=1/(minRelatSigma* max(sigma))^2
+         ///
+         /// To filter too small or null intensities :If sigma< minRelatSigma* max(sigma),
+         /// then w=1/(minRelatSigma* max(sigma))^2
          void SetWeightToInvSigmaSq(const REAL minRelatSigma=1e-3);
          /// Set w = sin(theta). Not really usful, huh ?
          void SetWeightToSinTheta(const REAL power=1.);
          /// Set w = 1
          void SetWeightToUnit();
          /// Set w = 1/(a+ Iobs + b*Iobs^2+c*Iobs^3)
-			///
-			/// To filter too small or null intensities:
-			/// if Iobs < [minRelatIobs * max(Iobs)], then use Iobs=minRelatIobs * max(Iobs)
-			/// to compute the weight.
-			///
-			/// Typical values: a=2*min(Iobs) b=2/max(Iobs) c=0
+         ///
+         /// To filter too small or null intensities:
+         /// if Iobs < [minRelatIobs * max(Iobs)], then use Iobs=minRelatIobs * max(Iobs)
+         /// to compute the weight.
+         ///
+         /// Typical values: a=2*min(Iobs) b=2/max(Iobs) c=0
          void SetWeightPolynomial(const REAL a, const REAL b, const REAL c,
-												 const REAL minRelatIobs=1e-3);
+                                     const REAL minRelatIobs=1e-3);
 
          /// Add an Exclusion region, in 2theta, which will be ignored when computing R's
          /// XMLInput values must be, as always, in radians. Does not work yet with
@@ -577,30 +577,30 @@ class PowderPattern : public RefinableObj
          virtual const CrystVector_REAL& GetLSQCalc(const unsigned int) const;
          virtual const CrystVector_REAL& GetLSQObs(const unsigned int) const;
          virtual const CrystVector_REAL& GetLSQWeight(const unsigned int) const;
-		// I/O	
-      	virtual void XMLOutput(ostream &os,int indent=0)const;
-      	virtual void XMLInput(istream &is,const XMLCrystTag &tag);
-      	//virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
-      	void Prepare();
-		virtual void GetGeneGroup(const RefinableObj &obj, 
-										  CrystVector_uint & groupIndex,
-										  unsigned int &firstGroup) const;
-		/// Set the maximum value for sin(theta)/lambda. All data (reflections,..) still
-		/// exist but are ignored for all calculations.
-		virtual void SetMaxSinThetaOvLambda(const REAL max);
-		/// Get the maximum value for sin(theta)/lambda.
-		REAL GetMaxSinThetaOvLambda()const;
+      // I/O   
+         virtual void XMLOutput(ostream &os,int indent=0)const;
+         virtual void XMLInput(istream &is,const XMLCrystTag &tag);
+         //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
+         void Prepare();
+      virtual void GetGeneGroup(const RefinableObj &obj, 
+                                CrystVector_uint & groupIndex,
+                                unsigned int &firstGroup) const;
+      /// Set the maximum value for sin(theta)/lambda. All data (reflections,..) still
+      /// exist but are ignored for all calculations.
+      virtual void SetMaxSinThetaOvLambda(const REAL max);
+      /// Get the maximum value for sin(theta)/lambda.
+      REAL GetMaxSinThetaOvLambda()const;
    protected:
       /// Calc the powder spectrum
       void CalcPowderPattern() const;
       /// Init parameters and options
       virtual void Init();
-		/// Prepare  the calculation of the integrated R-factors
-		void PrepareIntegratedRfactor()const;
-		/// Calculate the number of points of the pattern actually used, from the maximum
-		/// value of sin(theta)/lambda
-		void CalcNbPointUsed()const;
-		
+      /// Prepare  the calculation of the integrated R-factors
+      void PrepareIntegratedRfactor()const;
+      /// Calculate the number of points of the pattern actually used, from the maximum
+      /// value of sin(theta)/lambda
+      void CalcNbPointUsed()const;
+      
       /// The calculated powder spectrum. It is mutable since it is
       /// completely defined by other parameters (eg it is not an 'independent parameter')
       mutable CrystVector_REAL mPowderPatternCalc;
@@ -620,7 +620,7 @@ class PowderPattern : public RefinableObj
       unsigned long mNbPoint;
       
       /// The wavelength of the experiment, in Angstroems.
-		/// \warning This should be removed, as it is also available in mRadiation.
+      /// \warning This should be removed, as it is also available in mRadiation.
       REAL mWavelength;
       /// The wavelength of the experiment, in Angstroems.
       Radiation mRadiation;
@@ -658,7 +658,7 @@ class PowderPattern : public RefinableObj
          /// The components (crystalline phases, background,...) of the powder spectrum
          ObjRegistry<PowderPatternComponent> mPowderPatternComponentRegistry;
          /// The scale factors for each component. For unscalable phases,
-			/// this is set to 1 (constant).
+         /// this is set to 1 (constant).
          CrystVector_REAL mScaleFactor;
          
       /// Use faster, less precise functions ?
@@ -673,28 +673,28 @@ class PowderPattern : public RefinableObj
          /// \internal Used to fit the components' scale factors
          mutable CrystMatrix_REAL mFitScaleFactorM,mFitScaleFactorB,mFitScaleFactorX;
          
-		// Integrated R-factors
-			mutable CrystVector_long mIntegratedPatternMin,mIntegratedPatternMax;
-			mutable CrystVector_REAL mIntegratedObs;
-			mutable CrystVector_REAL mIntegratedWeight;
-			mutable RefinableObjClock mClockIntegratedFactorsPrep;
-		/** Maximum sin(theta)/lambda for all calculations (10 by default).
-		*
-		* This keeps all data in memory, but only the part which is below
-		* the max is calculated.
-		*/
-		REAL mMaxSinThetaOvLambda;
-		/// Number of points actually used, due to the maximum value of
-		/// sin(theta)/lambda.
-		mutable unsigned long mNbPointUsed;
-		/// Clock recording the last time the number of points used (PowderPattern::mNbPointUsed)
-		/// was changed.
-		mutable RefinableObjClock mClockNbPointUsed;
+      // Integrated R-factors
+         mutable CrystVector_long mIntegratedPatternMin,mIntegratedPatternMax;
+         mutable CrystVector_REAL mIntegratedObs;
+         mutable CrystVector_REAL mIntegratedWeight;
+         mutable RefinableObjClock mClockIntegratedFactorsPrep;
+      /** Maximum sin(theta)/lambda for all calculations (10 by default).
+      *
+      * This keeps all data in memory, but only the part which is below
+      * the max is calculated.
+      */
+      REAL mMaxSinThetaOvLambda;
+      /// Number of points actually used, due to the maximum value of
+      /// sin(theta)/lambda.
+      mutable unsigned long mNbPointUsed;
+      /// Clock recording the last time the number of points used (PowderPattern::mNbPointUsed)
+      /// was changed.
+      mutable RefinableObjClock mClockNbPointUsed;
    #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);
       friend class WXPowderPattern;
-		// This should be removed
+      // This should be removed
       friend class WXPowderPatternGraph;
    #endif
 };

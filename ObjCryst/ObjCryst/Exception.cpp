@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ void (*fpObjCrystInformUser)(const string &)=ObjCrystInformUserStdOut;
 
 void ObjCrystInformUserStdOut(const string &str)
 {
-	cout <<str<<endl;
+   cout <<str<<endl;
 }
 
 }//namespace

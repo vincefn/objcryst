@@ -32,18 +32,18 @@
 *     the spectrum. So far only linearly-interpolated background is available.
 *\par Intensity extraction from powder (*,***)
 *     Extract F(hkl) from a powder spectrum. Not so interesting, there already are
-*   	numerous programs to do this. But the advantage to have it embeded is the possibility
-*  	to refine and refresh (recycle) these extracted intensities during an optimization.
+*      numerous programs to do this. But the advantage to have it embeded is the possibility
+*     to refine and refresh (recycle) these extracted intensities during an optimization.
 *\par Multi-phase (****,**) - DONE
 *     Multiple phase for powder diffraction.
 *\par ZScatterer import(**,**)
 *     Import Z-Matrix from file. Add the possibility to link two existing ZScatterer by 
 *     linking terminal atoms.
 *\par Genetic Algorithm (****,***)
-*		And compare the 3 different algorithms on several structures.
+*      And compare the 3 different algorithms on several structures.
 *\par Texture (***,***)
-*		Include texture parameters in PowderPattern. Optionnaly, allow multiple
-*		textured patterns (that would more difficult).
+*      Include texture parameters in PowderPattern. Optionnaly, allow multiple
+*      textured patterns (that would more difficult).
 *
 *\section internal Internal Design of the Library
 *\par Vector & arrays (Blitz++ usage,...) (**,***)

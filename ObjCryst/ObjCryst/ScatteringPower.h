@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ extern const RefParType *gpRefParTypeScattPowTemperature;
 extern const RefParType *gpRefParTypeScattPowTemperatureIso;
 extern const RefParType *gpRefParTypeScattPowTemperatureAniso;
 
-	class ScatteringData;//forward declaration :KLUDGE: ?
+   class ScatteringData;//forward declaration :KLUDGE: ?
 //######################################################################
 //
 //      SCATTERING POWER
@@ -86,14 +86,14 @@ class ScatteringPower:virtual public RefinableObj
       * \param spgSymPosIndex: if the ScatteringPower is anisotropic, then the
       * different symmetrics will not have the same scattering power for all reflections.
       * This parameter is the index of the symmetric position in the Spacegroup.
-		* If spgSymPosIndex=-1, the isotropic values are returned.
+      * If spgSymPosIndex=-1, the isotropic values are returned.
       * \warning There is no anisotropic code yet, so spgSymPosIndex is simply ignored so far
       * , but the design of this function is general for any anisotropic scattering.
       */
       virtual CrystVector_REAL GetScatteringFactor(const ScatteringData &data,
                                                      const int spgSymPosIndex=-1) const=0;
-		/// Get the scattering factor at (0,0,0). Used for scatterer (electron, nucleus)
-		/// density generation.
+      /// Get the scattering factor at (0,0,0). Used for scatterer (electron, nucleus)
+      /// density generation.
       virtual REAL GetForwardScatteringFactor(const RadiationType) const=0;
       /** \brief Get the temperature factor for all reflections of a given 
       * ScatteringData object.
@@ -104,7 +104,7 @@ class ScatteringPower:virtual public RefinableObj
       * \param spgSymPosIndex: if the ScatteringPower is anisotropic, then the
       * different symmetrics will not have the same scattering power for all reflections.
       * This parameter is the index of the symmetric position in the Spacegroup.
-		* If spgSymPosIndex=-1, the isotropic values are returned.
+      * If spgSymPosIndex=-1, the isotropic values are returned.
       * \warning There is no anisotropic code yet, so spgSymPosIndex is simply ignored so far
       * , but the design of this function is general for any anisotropic scattering.
       */
@@ -121,7 +121,7 @@ class ScatteringPower:virtual public RefinableObj
       * \param spgSymPosIndex: if the ScatteringPower is anisotropic, then the
       * different symmetrics will not have the same scattering power for all reflections.
       * This parameter is the index of the symmetric position in the Spacegroup.
-		* If spgSymPosIndex=-1, the isotropic values are returned.
+      * If spgSymPosIndex=-1, the isotropic values are returned.
       * \warning There is no anisotropic code yet, so spgSymPosIndex is simply ignored so far
       * , but the design of this function is general for any anisotropic scattering.
       */
@@ -138,7 +138,7 @@ class ScatteringPower:virtual public RefinableObj
       * \param spgSymPosIndex: if the ScatteringPower is anisotropic, then the
       * different symmetrics will not have the same scattering power for all reflections.
       * This parameter is the index of the symmetric position in the Spacegroup.
-		* If spgSymPosIndex=-1, the isotropic values are returned.
+      * If spgSymPosIndex=-1, the isotropic values are returned.
       * \warning There is no anisotropic code yet, so spgSymPosIndex is simply ignored so far
       * , but the design of this function is general for any anisotropic scattering.
       */
@@ -190,9 +190,9 @@ class ScatteringPower:virtual public RefinableObj
       /// Return the physical radius of this type of scatterer (for 3D display purposes).
       /// \warning this may be removed later.
       virtual REAL GetRadius()const=0;
-		virtual void GetGeneGroup(const RefinableObj &obj, 
-										  CrystVector_uint & groupIndex,
-										  unsigned int &firstGroup) const;
+      virtual void GetGeneGroup(const RefinableObj &obj, 
+                                CrystVector_uint & groupIndex,
+                                unsigned int &firstGroup) const;
    protected:
       virtual void InitRefParList()=0;
       /// Initialization of the object, used by all constructors, and operator=.

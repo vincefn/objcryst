@@ -1,7 +1,7 @@
 /* 
 * ObjCryst++ : a Crystallographic computing library in C++
-*			http://objcryst.sourceforge.net
-*			http://www.ccp14.ac.uk/ccp/web-mirrors/objcryst/
+*         http://objcryst.sourceforge.net
+*         http://www.ccp14.ac.uk/ccp/web-mirrors/objcryst/
 *
 *  (c) 2000-2001 Vincent FAVRE-NICOLIN vincefn@users.sourceforge.net
 *
@@ -51,11 +51,11 @@ class DiffractionDataSingleCrystal:public ScatteringData
 {
    public:
       DiffractionDataSingleCrystal();
-		/** Constructor, with an assigned crystal structure.
-		*
-		*/
+      /** Constructor, with an assigned crystal structure.
+      *
+      */
       DiffractionDataSingleCrystal(Crystal &cryst);
-		/// Copy constructor
+      /// Copy constructor
       DiffractionDataSingleCrystal(const DiffractionDataSingleCrystal &old);
       ~DiffractionDataSingleCrystal();
       virtual DiffractionDataSingleCrystal* CreateCopy()const;
@@ -218,10 +218,10 @@ class DiffractionDataSingleCrystal:public ScatteringData
       /// Calc intensities
       void CalcIcalc() const;
       virtual CrystVector_long SortReflectionByTheta(const REAL maxTheta=-1.);
-		/// Init options (currently only twinning).
+      /// Init options (currently only twinning).
       void InitOptions();
       /// Determine the index of reflections to be summed because of twinning.
-		/// The reflections \e must have been sorted by increasing theta beforehand. 
+      /// The reflections \e must have been sorted by increasing theta beforehand. 
       void PrepareTwinningCalc() const;
       /// Are there observed intensities ?
       bool mHasObservedData;
@@ -241,29 +241,29 @@ class DiffractionDataSingleCrystal:public ScatteringData
       /// Scale factor. It is applied when computing intensities. The scale
       ///applies to intensities
       REAL mScaleFactor;
-		/// Last time Icalc was computed
+      /// Last time Icalc was computed
       mutable RefinableObjClock mClockIcalc;
       /// Last modification of the scale factor
       RefinableObjClock mClockScaleFactor;
-		// Twinning
-			/// Option for the type of twinning
-      	RefObjOpt mTwinningOption;
-			/// The observed intensities summed on all reflections that are (or could be) 
-			/// overlapped dur to a twinning
-			mutable CrystVector_REAL mTwinnedIobsSum;
-			/// The calculated intensities summed on all reflections that are (or could be) 
-			/// overlapped dur to a twinning
-			mutable CrystVector_REAL mTwinnedIcalcSum;
-			/// The weight on each reflection sum in case of twinning. The sum is the
-			/// inverse of the sum of all sigma^2
-			mutable CrystVector_REAL mTwinnedWeight;
-			/// The index of reflections which need to be summed. They must have been sorted
-			/// by increasing theta values. Each entry marks the beginning of a new batch
-			/// of reflections to be summed. 
-			mutable CrystVector_long mTwinnedGroupIndex;
-      	/// Clock for twinning, when the preparation of twiinning correction was last made.
-      	mutable RefinableObjClock mClockPrepareTwinningCorr;
-			
+      // Twinning
+         /// Option for the type of twinning
+         RefObjOpt mTwinningOption;
+         /// The observed intensities summed on all reflections that are (or could be) 
+         /// overlapped dur to a twinning
+         mutable CrystVector_REAL mTwinnedIobsSum;
+         /// The calculated intensities summed on all reflections that are (or could be) 
+         /// overlapped dur to a twinning
+         mutable CrystVector_REAL mTwinnedIcalcSum;
+         /// The weight on each reflection sum in case of twinning. The sum is the
+         /// inverse of the sum of all sigma^2
+         mutable CrystVector_REAL mTwinnedWeight;
+         /// The index of reflections which need to be summed. They must have been sorted
+         /// by increasing theta values. Each entry marks the beginning of a new batch
+         /// of reflections to be summed. 
+         mutable CrystVector_long mTwinnedGroupIndex;
+         /// Clock for twinning, when the preparation of twiinning correction was last made.
+         mutable RefinableObjClock mClockPrepareTwinningCorr;
+         
    #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);

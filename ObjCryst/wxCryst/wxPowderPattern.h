@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ class WXPowderPattern: public WXRefinableObj
       void OnMenuSetWavelength(wxCommandEvent &event);
       void OnMenuAdd2ThetaExclude(wxCommandEvent & WXUNUSED(event));
       void NotifyDeleteGraph();
-		const PowderPattern& GetPowderPattern()const;
+      const PowderPattern& GetPowderPattern()const;
       void UpdateUI();
    private:
       PowderPattern *mpPowderPattern;
@@ -84,8 +84,8 @@ class WXPowderPatternGraph: public wxWindow
       /// Redraw the pattern (special function to ensure complete redrawing under windows...)
       void OnRedrawNewPattern(wxUpdateUIEvent& WXUNUSED(event));
    private:
-		/// Reset the limits of the axis to full range.
-		void ResetAxisLimits();
+      /// Reset the limits of the axis to full range.
+      void ResetAxisLimits();
       WXPowderPattern *mpPattern;
       CrystVector_REAL mObs,mCalc,m2theta;
       const long mMargin;
@@ -95,12 +95,12 @@ class WXPowderPatternGraph: public wxWindow
       bool mCalcPatternIsLocked;
       /// Pop-up menu
       wxMenu* mpPopUpMenu;
-		/// Are we within a dragging event ?
-		bool mIsDragging;
-		/// Remember coordinates at the beginning of the dragging
-		REAL mDragging2Theta0,mDraggingIntensity0;
-		/// Index of the first and last points drawn of the pattern
-		mutable long mFirst,mLast;
+      /// Are we within a dragging event ?
+      bool mIsDragging;
+      /// Remember coordinates at the beginning of the dragging
+      REAL mDragging2Theta0,mDraggingIntensity0;
+      /// Index of the first and last points drawn of the pattern
+      mutable long mFirst,mLast;
       DECLARE_EVENT_TABLE()
 };
 
@@ -149,7 +149,7 @@ class WXPowderPatternDiffraction: public WXRefinableObj
    public:
       WXPowderPatternDiffraction(wxWindow *parent, PowderPatternDiffraction*);
       void OnChangeCrystal(wxCommandEvent & WXUNUSED(event));
-		void OnMenuSaveHKLFcalc(wxCommandEvent & WXUNUSED(event));
+      void OnMenuSaveHKLFcalc(wxCommandEvent & WXUNUSED(event));
       virtual void UpdateUI();
    private:
       PowderPatternDiffraction *mpPowderPatternDiffraction;

@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 namespace ObjCryst
 {
    class WXOptimizationObj;
-	class WXMonteCarloObj;
+   class WXMonteCarloObj;
 }
 #include "RefinableObj/GlobalOptimObj.h"
 namespace ObjCryst
@@ -48,11 +48,11 @@ class WXOptimizationObj: public WXCrystObj
       virtual void OnAddCostFunction();
       /// Added by the library
       virtual void AddCostFunction(RefinableObj &obj,const int costFuncNum);
-		/// Launches the optimization run
+      /// Launches the optimization run
       virtual void OnRunOptimization()=0;
       virtual void OnStopOptimization();
-		virtual OptimizationObj & GetOptimizationObj()=0;
-		virtual const OptimizationObj & GetOptimizationObj()const=0;
+      virtual OptimizationObj & GetOptimizationObj()=0;
+      virtual const OptimizationObj & GetOptimizationObj()const=0;
       virtual void OnUpdateUI(wxUpdateUIEvent& event);
    protected:
       WXCrystMenuBar* mpMenuBar;
@@ -72,9 +72,9 @@ class WXGlobalOptimRunThread: public wxThread
       OptimizationObj *mpGlobalOptObj;
       ///This points to the mNbTrial member in WXOptimizationObj
       long *mpNbTrial;
-		/// The value of the cost below which the optimization should stop
-		/// (0 by default) even if the desired number pf trial has not been reached.
-		const REAL mFinalCost;
+      /// The value of the cost below which the optimization should stop
+      /// (0 by default) even if the desired number pf trial has not been reached.
+      const REAL mFinalCost;
 };
 
 /** Class for Graphical interface to Monte-Carlo objects 
@@ -87,12 +87,12 @@ class WXMonteCarloObj: public WXOptimizationObj
       WXMonteCarloObj(wxWindow *parent, MonteCarloObj*);
       //virtual void CrystUpdate();
       virtual void OnRunOptimization();
-		/// Called during optimization, to show the user something's still going on...
+      /// Called during optimization, to show the user something's still going on...
       void UpdateDisplayNbTrial();
-		virtual OptimizationObj & GetOptimizationObj();
-		virtual const OptimizationObj & GetOptimizationObj()const;
+      virtual OptimizationObj & GetOptimizationObj();
+      virtual const OptimizationObj & GetOptimizationObj()const;
    protected:
-		/// The algorithm object
+      /// The algorithm object
       MonteCarloObj *mpMonteCarloObj;
       /// The number of trials asked by the user
       long mNbTrial;

@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -89,7 +89,7 @@ void WXCrystObjBasicList::Add(WXCrystObjBasic *win)
       for(unsigned int i=0;i<mNbWXCrystObj;i++) tmp[i]=mpWXCrystObj[i];
       delete[] mpWXCrystObj;
       mpWXCrystObj= tmp;
-		mMaxNbWXCrystObj+=16;
+      mMaxNbWXCrystObj+=16;
    }
    mpWXCrystObj[mNbWXCrystObj++]=win;
 }
@@ -161,12 +161,12 @@ WXField *spLastWXFieldInputNotValidated=0;
 
 void WXCrystValidateAllUserInput()
 {
-	if(0==spLastWXFieldInputNotValidated) return;
+   if(0==spLastWXFieldInputNotValidated) return;
    VFN_DEBUG_ENTRY("WXCrystValidateAllUserInput()...",6)
-	static WXField *pField;
-	pField=spLastWXFieldInputNotValidated;
-	spLastWXFieldInputNotValidated=0;//avoid loops
-	pField->ValidateUserInput();
+   static WXField *pField;
+   pField=spLastWXFieldInputNotValidated;
+   spLastWXFieldInputNotValidated=0;//avoid loops
+   pField->ValidateUserInput();
    VFN_DEBUG_EXIT("WXCrystValidateAllUserInput()...",6)
 }
 
@@ -213,8 +213,8 @@ bool WXField::SetForegroundColour(const wxColour& colour)
 //
 ////////////////////////////////////////////////////////////////////////
 BEGIN_EVENT_TABLE(WXFieldString,wxEvtHandler)
-   EVT_TEXT_ENTER(ID_WXFIELD, 		WXFieldString::OnEnter)
-   EVT_TEXT(		ID_WXFIELD, 		WXFieldString::OnText)
+   EVT_TEXT_ENTER(ID_WXFIELD,       WXFieldString::OnEnter)
+   EVT_TEXT(      ID_WXFIELD,       WXFieldString::OnText)
 END_EVENT_TABLE()
 
 WXFieldString::WXFieldString(wxWindow *parent,string& st,
@@ -239,25 +239,25 @@ WXField(parent,"",id),mpString(&st),mValue(st.c_str()),mIsSelfUpdating(false)
 void WXFieldString::OnEnter(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXFieldString::OnEnter()",6)
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
 }
 void WXFieldString::OnText(wxCommandEvent & WXUNUSED(event))
 {
-	if(true==mIsSelfUpdating) return;
+   if(true==mIsSelfUpdating) return;
    VFN_DEBUG_MESSAGE("WXFieldString::OnText():",6)
-	if(spLastWXFieldInputNotValidated!=this)
-	{
-		WXCrystValidateAllUserInput();
-		spLastWXFieldInputNotValidated=this;
-	}
+   if(spLastWXFieldInputNotValidated!=this)
+   {
+      WXCrystValidateAllUserInput();
+      spLastWXFieldInputNotValidated=this;
+   }
 }
 
 void WXFieldString::SetValue(const string&s)
 {
-	if(mValue==(wxString)(s.c_str()))return;
+   if(mValue==(wxString)(s.c_str()))return;
    VFN_DEBUG_MESSAGE("WXFieldString::SetValue()",3)
    mValue=s.c_str();
-	mNeedUpdateUI=true;
+   mNeedUpdateUI=true;
 }
 
 const string WXFieldString::GetValue() const
@@ -268,26 +268,26 @@ const string WXFieldString::GetValue() const
 void WXFieldString::CrystUpdate()
 {
    VFN_DEBUG_MESSAGE("WXFieldString::CrystUpdate()",3)
-	if(mValue.c_str()==mpString->c_str()) return;
-	mValueOld=mValue;
-	mValue=mpString->c_str();
-	mNeedUpdateUI=true;
-	if(true==wxThread::IsMain()) this->UpdateUI();
+   if(mValue.c_str()==mpString->c_str()) return;
+   mValueOld=mValue;
+   mValue=mpString->c_str();
+   mNeedUpdateUI=true;
+   if(true==wxThread::IsMain()) this->UpdateUI();
 }
 void WXFieldString::UpdateUI()
 {
-	if(mNeedUpdateUI==false) return;
+   if(mNeedUpdateUI==false) return;
    VFN_DEBUG_MESSAGE("WXFieldString::UpdateUI()",10)
-	mIsSelfUpdating=true;
+   mIsSelfUpdating=true;
    mpField->SetValue(mValue);
-	mIsSelfUpdating=false;
-	mNeedUpdateUI=false;
+   mIsSelfUpdating=false;
+   mNeedUpdateUI=false;
 }
 void WXFieldString::Revert()
 {
    VFN_DEBUG_MESSAGE("WXFieldString::Revert()",3)
    mValue=mValueOld;
-	mNeedUpdateUI=true;
+   mNeedUpdateUI=true;
 }
 void WXFieldString::ValidateUserInput()
 {
@@ -306,8 +306,8 @@ void WXFieldString::ValidateUserInput()
 //
 ////////////////////////////////////////////////////////////////////////
 BEGIN_EVENT_TABLE(WXFieldName,wxEvtHandler)
-   EVT_TEXT_ENTER(ID_WXFIELD, 		WXFieldName::OnEnter)
-   EVT_TEXT(		ID_WXFIELD, 		WXFieldName::OnText)
+   EVT_TEXT_ENTER(ID_WXFIELD,       WXFieldName::OnEnter)
+   EVT_TEXT(      ID_WXFIELD,       WXFieldName::OnText)
 END_EVENT_TABLE()
 
 WXFieldName::WXFieldName(wxWindow *parent,const string& label, WXCrystObj* owner,
@@ -332,25 +332,25 @@ WXField(parent,label,id),mpWXObj(owner),mValue(""),mIsSelfUpdating(false)
 void WXFieldName::OnEnter(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXFieldName::OnEnter()",6)
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
 }
 void WXFieldName::OnText(wxCommandEvent & WXUNUSED(event))
 {
-	if(true==mIsSelfUpdating) return;
+   if(true==mIsSelfUpdating) return;
    VFN_DEBUG_MESSAGE("WXFieldName::OnText():",6)
-	if(spLastWXFieldInputNotValidated!=this)
-	{
-		WXCrystValidateAllUserInput();
-		spLastWXFieldInputNotValidated=this;
-	}
+   if(spLastWXFieldInputNotValidated!=this)
+   {
+      WXCrystValidateAllUserInput();
+      spLastWXFieldInputNotValidated=this;
+   }
 }
 
 void WXFieldName::SetValue(const string&s)
 {
-	if(mValue==(wxString)(s.c_str()))return;
+   if(mValue==(wxString)(s.c_str()))return;
    VFN_DEBUG_MESSAGE("WXFieldName::SetValue()",3)
    mValue=s.c_str();
-	mNeedUpdateUI=true;
+   mNeedUpdateUI=true;
 }
 
 const string WXFieldName::GetValue() const
@@ -365,18 +365,18 @@ void WXFieldName::CrystUpdate()
 }
 void WXFieldName::UpdateUI()
 {
-	if(mNeedUpdateUI==false) return;
+   if(mNeedUpdateUI==false) return;
    VFN_DEBUG_MESSAGE("WXFieldName::UpdateUI()",10)
-	mIsSelfUpdating=true;
+   mIsSelfUpdating=true;
    mpField->SetValue(mValue);
-	mIsSelfUpdating=false;
-	mNeedUpdateUI=false;
+   mIsSelfUpdating=false;
+   mNeedUpdateUI=false;
 }
 void WXFieldName::Revert()
 {
    VFN_DEBUG_MESSAGE("WXFieldName::Revert()",3)
    mValue=mValueOld;
-	mNeedUpdateUI=true;
+   mNeedUpdateUI=true;
 }
 void WXFieldName::ValidateUserInput()
 {
@@ -394,8 +394,8 @@ void WXFieldName::ValidateUserInput()
 //
 ////////////////////////////////////////////////////////////////////////
 BEGIN_EVENT_TABLE(WXFieldParBase,wxWindow)
-   EVT_TEXT_ENTER(ID_WXFIELD, 		WXFieldParBase::OnEnter)
-   EVT_TEXT(		ID_WXFIELD, 		WXFieldParBase::OnText)
+   EVT_TEXT_ENTER(ID_WXFIELD,       WXFieldParBase::OnEnter)
+   EVT_TEXT(      ID_WXFIELD,       WXFieldParBase::OnText)
 END_EVENT_TABLE()
 
 WXFieldParBase::WXFieldParBase(wxWindow *parent,const string& label,
@@ -419,19 +419,19 @@ void WXFieldParBase::OnEnter(wxCommandEvent & WXUNUSED(event))
    WXCrystValidateAllUserInput();
 }
 void WXFieldParBase::OnText(wxCommandEvent & WXUNUSED(event))
-{	
-	if(true==mIsSelfUpdating) return;
+{   
+   if(true==mIsSelfUpdating) return;
    VFN_DEBUG_MESSAGE("WXFieldRefPar::OnText()",6)
-	if(spLastWXFieldInputNotValidated!=this)
-	{
-		WXCrystValidateAllUserInput();
-		spLastWXFieldInputNotValidated=this;
-	}
+   if(spLastWXFieldInputNotValidated!=this)
+   {
+      WXCrystValidateAllUserInput();
+      spLastWXFieldInputNotValidated=this;
+   }
 }
 void WXFieldParBase::ValidateUserInput()
 {
    VFN_DEBUG_MESSAGE("WXFieldRefPar::ValidateUserInput()",6)
-	this->ReadNewValue();
+   this->ReadNewValue();
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -449,47 +449,47 @@ WXFieldParBase(parent,label,id,hsize),mpValue(par),mValue(*par),mValueOld(*par)
 template<class T> void WXFieldPar<T>::CrystUpdate()
 {
    VFN_DEBUG_MESSAGE("WXFieldPar<T>::CrystUpdate()",6)
-	if(mValue==*mpValue) return;
-	mValueOld=mValue;
-	mValue=*mpValue;
-	mNeedUpdateUI=true;
-	if(true==wxThread::IsMain()) this->UpdateUI();
+   if(mValue==*mpValue) return;
+   mValueOld=mValue;
+   mValue=*mpValue;
+   mNeedUpdateUI=true;
+   if(true==wxThread::IsMain()) this->UpdateUI();
 }
 
 template<> void WXFieldPar<REAL>::UpdateUI()
 {
-	if(mNeedUpdateUI==false) return;
+   if(mNeedUpdateUI==false) return;
    VFN_DEBUG_MESSAGE("WXFieldPar<REAL>::UpdateUI()",6)
    wxString tmp;
    tmp.Printf("%f",mValue);
-	mIsSelfUpdating=true;
+   mIsSelfUpdating=true;
    mpField->SetValue(tmp);
-	mIsSelfUpdating=false;
-	mNeedUpdateUI=false;
+   mIsSelfUpdating=false;
+   mNeedUpdateUI=false;
 }
 
 template<> void WXFieldPar<long>::UpdateUI()
 {
-	if(mNeedUpdateUI==false) return;
+   if(mNeedUpdateUI==false) return;
    VFN_DEBUG_MESSAGE("WXFieldPar<long>::UpdateUI()",6)
    wxString tmp;
    tmp.Printf("%d",mValue);
-	mIsSelfUpdating=true;
+   mIsSelfUpdating=true;
    mpField->SetValue(tmp);
-	mIsSelfUpdating=false;
-	mNeedUpdateUI=false;
+   mIsSelfUpdating=false;
+   mNeedUpdateUI=false;
 }
 /*
 template<class T> void WXFieldPar<T>::UpdateUI()
 {
-	if(mNeedUpdateUI==false) return;
+   if(mNeedUpdateUI==false) return;
    stringstream s;
    s <<*mpValue;
-	mIsSelfUpdating=true;
+   mIsSelfUpdating=true;
    mpField->SetValue(s.str().c_str());;
    mpField->SetValue(wxString::Printf("%f",mValue));
-	mIsSelfUpdating=false;
-	mNeedUpdateUI=false;
+   mIsSelfUpdating=false;
+   mNeedUpdateUI=false;
 }
 */
 
@@ -497,9 +497,9 @@ template<class T> void WXFieldPar<T>::Revert()
 {
    VFN_DEBUG_MESSAGE("WXFieldPar<T>::Revert()",6)
    *mpValue=mValueOld;
-	mValue=mValueOld;
-	mNeedUpdateUI=true;
-	if(true==wxThread::IsMain()) this->UpdateUI();
+   mValue=mValueOld;
+   mNeedUpdateUI=true;
+   if(true==wxThread::IsMain()) this->UpdateUI();
 }
 
 template<> void WXFieldPar<REAL>::ReadNewValue()
@@ -507,9 +507,9 @@ template<> void WXFieldPar<REAL>::ReadNewValue()
    VFN_DEBUG_MESSAGE("WXFieldPar<REAL>::ReadNewValue()",6)
    mValueOld=*mpValue;
    wxString s=mpField->GetValue();
-	double tmp;
+   double tmp;
    s.ToDouble(&tmp);
-	*mpValue=tmp;
+   *mpValue=tmp;
 }
 template<> void WXFieldPar<long>::ReadNewValue()
 {
@@ -632,7 +632,7 @@ bool WXCrystObj::Layout()
    }
    //wxCommandEvent event(1758,-1);
    //wxPostEvent(this->GetParent(),event);
-	this->UpdateUI();
+   this->UpdateUI();
    mWXParent->Layout();
    return this->wxWindow::Layout();
 }
@@ -658,7 +658,7 @@ void WXCrystObj::CrystUpdate()
 void WXCrystObj::UpdateUI()
 {
    VFN_DEBUG_MESSAGE("WXCrystObj::UpdateUI()",6)
-	if(mpWXTitle!=0) mpWXTitle->UpdateUI();
+   if(mpWXTitle!=0) mpWXTitle->UpdateUI();
    mList.UpdateUI();
 }
 ////////////////////////////////////////////////////////////////////////

@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -131,58 +131,58 @@ void RefinableObjClock::PrintStatic()const
 //    Restraint
 //######################################################################
 Restraint::Restraint(const RefParType *type,
-               		const REAL hardMin,
-               		const REAL hardMax,
-               		const bool hasMinLimit,
-               		const bool hasMaxLimit,
-                		const REAL softRange,
-					 		const REAL restraintWeigth,
-							const bool enableRestraints)
+                     const REAL hardMin,
+                     const REAL hardMax,
+                     const bool hasMinLimit,
+                     const bool hasMaxLimit,
+                      const REAL softRange,
+                      const REAL restraintWeigth,
+                     const bool enableRestraints)
 {
-	this->Init(type,hardMin,hardMax,hasMinLimit,hasMaxLimit,
-				  softRange,restraintWeigth,enableRestraints);
+   this->Init(type,hardMin,hardMax,hasMinLimit,hasMaxLimit,
+              softRange,restraintWeigth,enableRestraints);
 }
 
 Restraint::~Restraint()
 {}
 
 void Restraint::Init(const RefParType *type,
-               		const REAL hardMin,
-               		const REAL hardMax,
-               		const bool hasMinLimit,
-               		const bool hasMaxLimit,
-               		const REAL softRange,
-					 		const REAL restraintWeigth,
-							const bool enableRestraints)
+                     const REAL hardMin,
+                     const REAL hardMax,
+                     const bool hasMinLimit,
+                     const bool hasMaxLimit,
+                     const REAL softRange,
+                      const REAL restraintWeigth,
+                     const bool enableRestraints)
 {
-	mpRefParType=type;
-	mMin=hardMin;
-	mMax=hardMax;
-	mHasMin=hasMinLimit;
-	mHasMax=hasMaxLimit;
-	mRestraintRange=softRange;
-	mWeight=restraintWeigth;
-	mEnableRestraint=enableRestraints;
+   mpRefParType=type;
+   mMin=hardMin;
+   mMax=hardMax;
+   mHasMin=hasMinLimit;
+   mHasMax=hasMaxLimit;
+   mRestraintRange=softRange;
+   mWeight=restraintWeigth;
+   mEnableRestraint=enableRestraints;
 }
 
 REAL Restraint::GetRestraintCost()const
 {
-	if((false==mEnableRestraint)|| ((mHasMin==false)&&(mHasMax==false))) return 0.;
-	else
-	{
-		REAL value=this->GetValue();
-		if((true==mHasMin)&&(value<mMin))
-		{
-			value= (mMin-value)/(mRestraintRange);
-			return value*value;
-		}
-		if((true==mHasMax)&&(value>mMax))
-		{
-			value= (value-mMax)/(mRestraintRange);
-			return value*value;
-		}
-	}
-	return 0.;
+   if((false==mEnableRestraint)|| ((mHasMin==false)&&(mHasMax==false))) return 0.;
+   else
+   {
+      REAL value=this->GetValue();
+      if((true==mHasMin)&&(value<mMin))
+      {
+         value= (mMin-value)/(mRestraintRange);
+         return value*value;
+      }
+      if((true==mHasMax)&&(value>mMax))
+      {
+         value= (value-mMax)/(mRestraintRange);
+         return value*value;
+      }
+   }
+   return 0.;
 }
 //######################################################################
 //    RefinablePar
@@ -234,7 +234,7 @@ void RefinablePar::Init(const string &name,
                         const REAL humanScale,
                         REAL period)
 {
-	this->Restraint::Init(type,min,max,hasLimits,hasLimits,max-min,false);
+   this->Restraint::Init(type,min,max,hasLimits,hasLimits,max-min,false);
    mName=name;
    mpValue=refPar;
    mHasLimits=hasLimits;
@@ -247,11 +247,11 @@ void RefinablePar::Init(const string &name,
    mRefParDerivStepModel=derivMode;
    mSigma=0.;
    mHumanScale=humanScale;
-	#if 0
+   #if 0
    mUseEquation=false;
    mEquationNbRefPar=0;
    mEquationCoeff=0;
-	#endif
+   #endif
    mHasAssignedClock=false;
    mpClock=0;
 }
@@ -260,7 +260,7 @@ void RefinablePar::Init(const string &name,
 
 REAL RefinablePar::GetValue()const
 {
-	#if 0
+   #if 0
    if(true==mUseEquation)
    {
       VFN_DEBUG_MESSAGE("RefinablePar::Value():Evaluating Equation",0)
@@ -269,7 +269,7 @@ REAL RefinablePar::GetValue()const
          tmp += mEquationCoeff(i+1) * mEquationRefPar[i]->GetValue();
       *mpValue = tmp;
    }
-	#endif
+   #endif
    return *mpValue;
 }
 
@@ -277,13 +277,13 @@ void RefinablePar::SetValue(const REAL value)
 {
    this->Click();
    VFN_DEBUG_MESSAGE("RefinablePar::SetValue()",2)
-	#if 0
+   #if 0
    if(true==mUseEquation)
    {
       cout << "RefinablePar::SetValue(): this parameter is defined by an equation !!" <<endl;
       throw 0;
    }
-	#endif
+   #endif
    *mpValue = value;
    /*
    if(this->IsLimited() ==true)
@@ -323,13 +323,13 @@ void RefinablePar::SetHumanValue(const REAL &value)
 {
    this->Click();
    VFN_DEBUG_MESSAGE("RefinablePar::SetHumanValue()",2)
-	#if 0
+   #if 0
    if(true==mUseEquation)
    {
       cout << "RefinablePar::SetValue(): this parameter is defined by an equation !!" <<endl;
       throw 0;
    }
-	#endif
+   #endif
    *mpValue = value/mHumanScale;
    /*
    if(this->IsLimited() ==true)
@@ -361,15 +361,15 @@ void RefinablePar::SetHumanValue(const REAL &value)
 void RefinablePar::Mutate(const REAL mutateValue)
 {
    VFN_DEBUG_MESSAGE("RefinablePar::Mutate():"<<this->GetName(),1)
-	if(true==mIsFixed) return;
+   if(true==mIsFixed) return;
    this->Click();
-	#if 0
+   #if 0
    if(true==mUseEquation)
    {
       cout << "RefinablePar::Mutate(): this parameter is defined by an equation !!" <<endl;
       throw 0;
    }
-	#endif
+   #endif
    *mpValue += mutateValue;
    /*
    if(this->IsLimited() ==true)
@@ -402,15 +402,15 @@ void RefinablePar::Mutate(const REAL mutateValue)
 void RefinablePar::MutateTo(const REAL mutateValue)
 {
    VFN_DEBUG_MESSAGE("RefinablePar::MutateTo()",2)
-	if(true==mIsFixed) return;
+   if(true==mIsFixed) return;
    this->Click();
-	#if 0
+   #if 0
    if(true==mUseEquation)
    {
       cout << "RefinablePar::Mutate(): this parameter is defined by an equation !!" <<endl;
       throw 0;
    }
-	#endif
+   #endif
    *mpValue = mutateValue;
    /*
    if(this->IsLimited() ==true)
@@ -449,9 +449,9 @@ void RefinablePar::SetType(const RefParType *type) { mpRefParType=type;}
 void RefinablePar::Print() const
 {
       cout << this->GetName() << " : " << this->GetHumanValue()
-			  << " Fixed:"<< mIsFixed <<" Periodic:"<<mIsPeriodic<<" Limited:"<<mHasLimits
+           << " Fixed:"<< mIsFixed <<" Periodic:"<<mIsPeriodic<<" Limited:"<<mHasLimits
            << " Min:" << this->GetHumanMin() << " Max:" << this->GetHumanMax()
-			  << " Step:" <<GetGlobalOptimStep()
+           << " Step:" <<GetGlobalOptimStep()
       #ifdef __DEBUG__
            << ",HasClock=" << mHasAssignedClock << " at " << mpClock
       #endif
@@ -793,7 +793,7 @@ template<class T> void ObjRegistry<T>::Register(T &obj)
       mMaxNbRegistered+=100;
    }
    mpRegistry[mNbRegistered++]=&obj;
-	mListClock.Click();
+   mListClock.Click();
    #ifdef __WX__CRYST__
    if(0!=mpWXRegistry) 
       mpWXRegistry->Add(obj.WXCreate(mpWXRegistry));
@@ -812,7 +812,7 @@ template<class T> void ObjRegistry<T>::DeRegister(T &obj)
    #endif
    if(i==(long)mNbRegistered) mNbRegistered--;
    else mpRegistry[i]=mpRegistry[--mNbRegistered];
-	mListClock.Click();
+   mListClock.Click();
 }
 
 template<class T> void ObjRegistry<T>::DeRegister(const string &objName)
@@ -825,19 +825,19 @@ template<class T> void ObjRegistry<T>::DeRegister(const string &objName)
    #endif
    if(i==((long)mNbRegistered)-1) mNbRegistered--;
    else mpRegistry[i]=mpRegistry[--mNbRegistered];
-	mListClock.Click();
+   mListClock.Click();
 }
 
 template<class T> void ObjRegistry<T>::DeRegisterAll()
 {
    VFN_DEBUG_ENTRY("ObjRegistry("<<mName<<")::DeRegisterAll():",5)
    #ifdef __WX__CRYST__
-	if(0!=mpWXRegistry)
-   	for(unsigned long i=0;i<mNbRegistered;i++)
-      	mpWXRegistry->Remove(mpRegistry[i]->WXGet());
+   if(0!=mpWXRegistry)
+      for(unsigned long i=0;i<mNbRegistered;i++)
+         mpWXRegistry->Remove(mpRegistry[i]->WXGet());
    #endif
    mNbRegistered=0;
-	mListClock.Click();
+   mListClock.Click();
    VFN_DEBUG_EXIT("ObjRegistry("<<mName<<")::DeRegisterAll():",5)
 }
 
@@ -852,7 +852,7 @@ template<class T> void ObjRegistry<T>::DeleteAll()
       delete mpRegistry[i];
    }
    mNbRegistered=0;
-	mListClock.Click();
+   mListClock.Click();
    VFN_DEBUG_EXIT("ObjRegistry("<<mName<<")::DeleteAll():",5)
 }
 
@@ -930,7 +930,7 @@ template<class T> long ObjRegistry<T>::Find(const string &objName) const
 
 template<class T> long ObjRegistry<T>::Find(const string &objName,
                                             const string &className,
-					 									  const bool nothrow) const
+                                             const bool nothrow) const
 {
    VFN_DEBUG_MESSAGE("ObjRegistry::Find(objName,className)",2)
    long index=-1;
@@ -949,8 +949,8 @@ template<class T> long ObjRegistry<T>::Find(const string &objName,
    //}
    cout << "ObjRegistry<T>::Find("<<objName<<","<<className<<"): Not found !!"<<endl;
    this->Print();
-	if(nothrow==false)
-   	throw ObjCrystException("ObjRegistry<T>::Find("+objName+","+className+"): Not found !!");
+   if(nothrow==false)
+      throw ObjCrystException("ObjRegistry<T>::Find("+objName+","+className+"): Not found !!");
    return index;
 }
 
@@ -1008,9 +1008,9 @@ template<class T> void RefObjRegisterRecursive(T &obj,ObjRegistry<T> &reg)
 
 void GetSubRefObjListClockRecursive(ObjRegistry<RefinableObj> &reg,RefinableObjClock &clock)
 {
-	if(reg.GetRegistryClock()>clock) clock=reg.GetRegistryClock();
-	for(int i=0;i<reg.GetNb();i++)
-		GetSubRefObjListClockRecursive(reg.GetObj(i).GetSubObjRegistry(),clock);
+   if(reg.GetRegistryClock()>clock) clock=reg.GetRegistryClock();
+   for(int i=0;i<reg.GetNb();i++)
+      GetSubRefObjListClockRecursive(reg.GetObj(i).GetSubObjRegistry(),clock);
 }
 
 //######################################################################
@@ -1086,8 +1086,8 @@ RefinableObj::~RefinableObj()
    VFN_DEBUG_MESSAGE("RefinableObj::~RefinableObj():"<<this->GetName(),5)
    if(mpRefPar!=0)
    {
-		if(true==mDeleteRefParInDestructor)
-      	for(int i=0;i<this->GetNbPar();i++) delete mpRefPar[i];
+      if(true==mDeleteRefParInDestructor)
+         for(int i=0;i<this->GetNbPar();i++) delete mpRefPar[i];
       delete[] mpRefPar;
    }
    for(long i=0;i<mMaxNbSavedSets;i++)
@@ -1109,8 +1109,8 @@ RefinableObj::~RefinableObj()
 
 const string& RefinableObj::GetClassName() const
 {
-	const static string className="RefinableObj";
-	return className;
+   const static string className="RefinableObj";
+   return className;
 }
 
 const string& RefinableObj::GetName() const {return mName;}
@@ -1302,7 +1302,7 @@ void RefinableObj::AddPar(const RefinablePar &newRefPar)
    }
    mpRefPar[mNbRefPar]=new RefinablePar(newRefPar);
    mNbRefPar++;
-	mRefParListClock.Click();
+   mRefParListClock.Click();
 }
 
 void RefinableObj::AddPar(RefinablePar *newRefPar)
@@ -1318,7 +1318,7 @@ void RefinableObj::AddPar(RefinablePar *newRefPar)
    }
    mpRefPar[mNbRefPar]=newRefPar;
    mNbRefPar++;
-	mRefParListClock.Click();
+   mRefParListClock.Click();
 }
 
 void RefinableObj::AddPar(RefinableObj &newRefParList)
@@ -1360,29 +1360,29 @@ long RefinableObj::CreateParamSet(const string name) const
    for(id=0;id<mMaxNbSavedSets;id++) if(false==mSavedValuesSetIsUsed(id)) break;
    if(mMaxNbSavedSets==id)
    {
-		const long newMaxNbSavedSets=(long)(mMaxNbSavedSets*1.1+10);
-   	CrystVector_REAL** newSavedValuesSet = new CrystVector_REAL* [newMaxNbSavedSets];
-   	string** newSavedValuesSetName = new string* [newMaxNbSavedSets];
-		
-   	mSavedValuesSetIsUsed.resizeAndPreserve(newMaxNbSavedSets);
-		
-		for(long i=0;i<mMaxNbSavedSets;i++)
-		{
-			newSavedValuesSet    [i]=mpSavedValuesSet[i];
-			newSavedValuesSetName[i]=mpSavedValuesSetName[i];
-		}
-		for(long i=mSavedValuesSetIsUsed.numElements();i>=mMaxNbSavedSets;i++)
-			mSavedValuesSetIsUsed(i)=false;
-		delete[] mpSavedValuesSet;
-		delete[] mpSavedValuesSetName;
-		mpSavedValuesSet    =newSavedValuesSet;
-		mpSavedValuesSetName=newSavedValuesSetName;
+      const long newMaxNbSavedSets=(long)(mMaxNbSavedSets*1.1+10);
+      CrystVector_REAL** newSavedValuesSet = new CrystVector_REAL* [newMaxNbSavedSets];
+      string** newSavedValuesSetName = new string* [newMaxNbSavedSets];
+      
+      mSavedValuesSetIsUsed.resizeAndPreserve(newMaxNbSavedSets);
+      
+      for(long i=0;i<mMaxNbSavedSets;i++)
+      {
+         newSavedValuesSet    [i]=mpSavedValuesSet[i];
+         newSavedValuesSetName[i]=mpSavedValuesSetName[i];
+      }
+      for(long i=mSavedValuesSetIsUsed.numElements();i>=mMaxNbSavedSets;i++)
+         mSavedValuesSetIsUsed(i)=false;
+      delete[] mpSavedValuesSet;
+      delete[] mpSavedValuesSetName;
+      mpSavedValuesSet    =newSavedValuesSet;
+      mpSavedValuesSetName=newSavedValuesSetName;
    }
    mSavedValuesSetIsUsed(id)=true;
    *(mpSavedValuesSetName+id)= new string;
    **(mpSavedValuesSetName+id) = name;
    *(mpSavedValuesSet+id)=new CrystVector_REAL;
-	this->SaveParamSet(id);
+   this->SaveParamSet(id);
    VFN_DEBUG_EXIT("RefinableObj::CreateParamSet()",3)
    return id;
 }
@@ -1467,7 +1467,7 @@ void RefinableObj::SetLimitsRelative(const RefParType *type,
    VFN_DEBUG_MESSAGE("RefinableObj::SetLimitsRelative(RefParType*):"<<this->GetName(),2)
    for(long i=0;i<mNbRefPar;i++)
    {
-   	VFN_DEBUG_MESSAGE("RefinableObj::SetLimitsRelative(RefParType*):par #"<<i,2)
+      VFN_DEBUG_MESSAGE("RefinableObj::SetLimitsRelative(RefParType*):par #"<<i,2)
       if(this->GetPar(i).GetType()->IsDescendantFromOrSameAs(type))
          this->GetPar(i).SetLimitsRelative(min,max);
    }
@@ -1512,7 +1512,7 @@ void RefinableObj::DeRegisterClient(RefinableObj &obj)const
 bool RefinableObj::IsBeingRefined()const {return mIsbeingRefined;}
 
 void RefinableObj::BeginOptimization(const bool allowApproximations,
-												 const bool enableRestraints)
+                                     const bool enableRestraints)
 {
    mIsbeingRefined=true;
    this->Prepare();
@@ -1521,7 +1521,7 @@ void RefinableObj::BeginOptimization(const bool allowApproximations,
    #ifdef __WX__CRYST__
    if(0!=mpWXCrystObj) mpWXCrystObj->Enable(false);
    #endif
-	
+   
 }
 
 void RefinableObj::EndOptimization()
@@ -1553,13 +1553,13 @@ void RefinableObj::RandomizeConfiguration()
          const REAL max=this->GetParNotFixed(j).GetMax();
          this->GetParNotFixed(j).MutateTo(min+(max-min)*(rand()/(REAL)RAND_MAX) );
       }
-		else
-      	if(true==this->GetParNotFixed(j).IsPeriodic())
-			{
+      else
+         if(true==this->GetParNotFixed(j).IsPeriodic())
+         {
 
-         	this->GetParNotFixed(j).MutateTo((rand()/(REAL)RAND_MAX)
-						* this->GetParNotFixed(j).GetPeriod());
-			}
+            this->GetParNotFixed(j).MutateTo((rand()/(REAL)RAND_MAX)
+                  * this->GetParNotFixed(j).GetPeriod());
+         }
    }
    for(int i=0;i<this->GetSubObjRegistry().GetNb();i++)
       this->GetSubObjRegistry().GetObj(i).RandomizeConfiguration();
@@ -1568,7 +1568,7 @@ void RefinableObj::RandomizeConfiguration()
 
 void RefinableObj::GlobalOptRandomMove(const REAL mutationAmplitude)
 {
-	if(mRandomMoveIsDone) return;
+   if(mRandomMoveIsDone) return;
    VFN_DEBUG_ENTRY("RefinableObj::GlobalOptRandomMove()",2)
    for(int j=0;j<this->GetNbParNotFixed();j++)
    {
@@ -1577,12 +1577,12 @@ void RefinableObj::GlobalOptRandomMove(const REAL mutationAmplitude)
    }
    for(int i=0;i<mSubObjRegistry.GetNb();i++)
       mSubObjRegistry.GetObj(i).GlobalOptRandomMove(mutationAmplitude);
-	mRandomMoveIsDone=true;
+   mRandomMoveIsDone=true;
    VFN_DEBUG_EXIT("RefinableObj::GlobalOptRandomMove()",2)
 }
 void RefinableObj::BeginGlobalOptRandomMove()
 {
-	mRandomMoveIsDone=false;
+   mRandomMoveIsDone=false;
    for(int i=0;i<mSubObjRegistry.GetNb();i++)
       mSubObjRegistry.GetObj(i).BeginGlobalOptRandomMove();
 }
@@ -1610,23 +1610,23 @@ unsigned int RefinableObj::GetNbLSQFunction()const{return 0;}
 
 const CrystVector_REAL& RefinableObj::GetLSQCalc(const unsigned int) const
 {
-	throw ObjCrystException("Error: called RefinableObj::GetLSQCalc()");
-	CrystVector_REAL *noWarning=new CrystVector_REAL;
-	return *noWarning;
+   throw ObjCrystException("Error: called RefinableObj::GetLSQCalc()");
+   CrystVector_REAL *noWarning=new CrystVector_REAL;
+   return *noWarning;
 }
 
 const CrystVector_REAL& RefinableObj::GetLSQObs(const unsigned int) const
 {
-	throw ObjCrystException("Error: called RefinableObj::GetLSQObs()");
-	CrystVector_REAL *noWarning=new CrystVector_REAL;
-	return *noWarning;
+   throw ObjCrystException("Error: called RefinableObj::GetLSQObs()");
+   CrystVector_REAL *noWarning=new CrystVector_REAL;
+   return *noWarning;
 }
 
 const CrystVector_REAL& RefinableObj::GetLSQWeight(const unsigned int) const
 {
-	throw ObjCrystException("Error: called RefinableObj::GetLSQWeight()");
-	CrystVector_REAL *noWarning=new CrystVector_REAL;
-	return *noWarning;
+   throw ObjCrystException("Error: called RefinableObj::GetLSQWeight()");
+   CrystVector_REAL *noWarning=new CrystVector_REAL;
+   return *noWarning;
 }
 
 void RefinableObj::ResetParList()
@@ -1634,8 +1634,8 @@ void RefinableObj::ResetParList()
    VFN_DEBUG_MESSAGE("RefinableObj::ResetParList()",3)
    if(mpRefPar!=0)
    {
-		if(true==mDeleteRefParInDestructor)
-      	for(int i=0;i<this->GetNbPar();i++) delete mpRefPar[i];
+      if(true==mDeleteRefParInDestructor)
+         for(int i=0;i<this->GetNbPar();i++) delete mpRefPar[i];
       delete[] mpRefPar;
    }
    mpRefPar = new RefinablePar*[mMaxNbRefPar];
@@ -1651,7 +1651,7 @@ void RefinableObj::ResetParList()
          delete *(mpSavedValuesSet+i);
       }
    mSavedValuesSetIsUsed=false;
-	mRefParListClock.Click();
+   mRefParListClock.Click();
    VFN_DEBUG_MESSAGE("RefinableObj::ResetParList():End.",3)
 }
 
@@ -1674,13 +1674,13 @@ const RefObjOpt& RefinableObj::GetOption(const unsigned int i)const
 }
 
 void RefinableObj::GetGeneGroup(const RefinableObj &obj,
-										  CrystVector_uint & groupIndex,
-										  unsigned int &first) const
+                                CrystVector_uint & groupIndex,
+                                unsigned int &first) const
 {
    VFN_DEBUG_MESSAGE("RefinableObj::GetGeneGroup()",4)
-	for(long i=0;i<obj.GetNbPar();i++)
-		for(long j=0;j<this->GetNbPar();j++)
-			if(&(obj.GetPar(i)) == &(this->GetPar(j))) groupIndex(i)= first++;
+   for(long i=0;i<obj.GetNbPar();i++)
+      for(long j=0;j<this->GetNbPar();j++)
+         if(&(obj.GetPar(i)) == &(this->GetPar(j))) groupIndex(i)= first++;
 }
 void RefinableObj::SetDeleteRefParInDestructor(const bool b) {mDeleteRefParInDestructor=b;}
 
@@ -1688,7 +1688,7 @@ const RefinableObjClock& RefinableObj::GetRefParListClock()const{return mRefParL
 
 REAL  RefinableObj::GetRestraintCost()const
 {
-	return 0;
+   return 0;
 }
 
 void RefinableObj::AddRestraint(Restraint *pNewRestraint)
@@ -1832,12 +1832,12 @@ void RefinableObj::WXNotifyDelete()
 
 void GetRefParListClockRecursive(ObjRegistry<RefinableObj> &reg,RefinableObjClock &clock)
 {
-	for(int i=0;i<reg.GetNb();i++)
-	{
-		if(reg.GetObj(i).GetRefParListClock()>clock) 
-			clock=reg.GetObj(i).GetRefParListClock();
-		GetRefParListClockRecursive(reg.GetObj(i).GetSubObjRegistry(),clock);
-	}
+   for(int i=0;i<reg.GetNb();i++)
+   {
+      if(reg.GetObj(i).GetRefParListClock()>clock) 
+         clock=reg.GetObj(i).GetRefParListClock();
+      GetRefParListClockRecursive(reg.GetObj(i).GetSubObjRegistry(),clock);
+   }
 }
 
 //***********EXPLICIT INSTANTIATION*******************//

@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ DiffractionDataSingleCrystal::DiffractionDataSingleCrystal():mScaleFactor(1.)
 {
    VFN_DEBUG_MESSAGE("DiffractionDataSingleCrystal::DiffractionDataSingleCrystal()",5)
    this->InitRefParList();
-	this->InitOptions();
+   this->InitOptions();
    gDiffractionDataSingleCrystalRegistry.Register(*this);
    gTopRefinableObjRegistry.Register(*this);
 }
@@ -57,8 +57,8 @@ DiffractionDataSingleCrystal::DiffractionDataSingleCrystal(Crystal &cryst):mScal
 {
    VFN_DEBUG_MESSAGE("DiffractionDataSingleCrystal::DiffractionDataSingleCrystal()",5)
    this->InitRefParList();
-	this->SetCrystal(cryst);
-	this->InitOptions();
+   this->SetCrystal(cryst);
+   this->InitOptions();
    gDiffractionDataSingleCrystalRegistry.Register(*this);
    gTopRefinableObjRegistry.Register(*this);
 }
@@ -67,13 +67,13 @@ DiffractionDataSingleCrystal::DiffractionDataSingleCrystal(const DiffractionData
 ScatteringData(old),
 mHasObservedData(old.mHasObservedData)
 {
-	mObsIntensity=old.mObsIntensity;
-	mObsSigma=old.mObsSigma;
-	mWeight=old.mWeight;
-	mCalcIntensity=old.mCalcIntensity;
-	mScaleFactor=old.mScaleFactor;
-	this->InitOptions();
-	mTwinningOption.SetChoice(old.mTwinningOption.GetChoice());
+   mObsIntensity=old.mObsIntensity;
+   mObsSigma=old.mObsSigma;
+   mWeight=old.mWeight;
+   mCalcIntensity=old.mCalcIntensity;
+   mScaleFactor=old.mScaleFactor;
+   this->InitOptions();
+   mTwinningOption.SetChoice(old.mTwinningOption.GetChoice());
    gDiffractionDataSingleCrystalRegistry.Register(*this);
    gTopRefinableObjRegistry.Register(*this);
 }
@@ -93,8 +93,8 @@ DiffractionDataSingleCrystal* DiffractionDataSingleCrystal::CreateCopy()const
 
 const string& DiffractionDataSingleCrystal::GetClassName() const
 {
-	const static string className="DiffractionDataSingleCrystal";
-	return className;
+   const static string className="DiffractionDataSingleCrystal";
+   return className;
 }
 
 void DiffractionDataSingleCrystal::SetHklIobs(const CrystVector_long &h,
@@ -127,10 +127,10 @@ void DiffractionDataSingleCrystal::SetHklIobs(const CrystVector_long &h,
    
    mHasObservedData=true;
    {
-		char buf [200];
+      char buf [200];
       sprintf(buf,"Changed HKL list, with %d reflections",(int)mNbRefl);
-		(*fpObjCrystInformUser)((string)buf);
-	}
+      (*fpObjCrystInformUser)((string)buf);
+   }
    VFN_DEBUG_EXIT("DiffractionDataSingleCrystal::SetHklIobs(h,k,l,i,s)",5)
 }
 
@@ -192,16 +192,16 @@ void DiffractionDataSingleCrystal::ImportHklIobs(const string &fileName,
       mObsSigma.resize(mNbRefl);
    
    //Import data
-   {	
+   {   
       //:TODO: Skip the lines if required !!!
-   	cout << "inputing reflections from file : "+fileName<<endl;
-		ifstream fin (fileName.c_str());
+      cout << "inputing reflections from file : "+fileName<<endl;
+      ifstream fin (fileName.c_str());
       if(!fin)
       {
          throw ObjCrystException("DiffractionDataSingleCrystal::ImportHklIobs() : \
 Error opening file for input:"+fileName);
       }
-		cout << "Number of reflections to import : " << nbRefl << endl ;
+      cout << "Number of reflections to import : " << nbRefl << endl ;
       for(long i=0;i<nbRefl;i++)
       { // :TODO: A little faster....
          //:TODO: Check for the end of the stream if(!fin.good()) {throw...}
@@ -217,10 +217,10 @@ Error opening file for input:"+fileName);
    }
   //Finish
    mWeight.resize(mNbRefl);
-	const REAL minIobs=mObsIntensity.max()*1e-6;
+   const REAL minIobs=mObsIntensity.max()*1e-6;
    for(int i=0;i<mNbRefl;i++) 
-		if(mObsIntensity(i)<minIobs) mWeight(i)=1./minIobs;
-		else mWeight(i)=1./mObsIntensity(i);
+      if(mObsIntensity(i)<minIobs) mWeight(i)=1./minIobs;
+      else mWeight(i)=1./mObsIntensity(i);
    mHasObservedData=true;
    
    mMultiplicity.resize(mNbRefl);
@@ -229,10 +229,10 @@ Error opening file for input:"+fileName);
    this->PrepareHKLarrays();
    this->SortReflectionByTheta();
    {
-		char buf [200];
+      char buf [200];
       sprintf(buf,"Imported HKLIobs, with %d reflections",(int)mNbRefl);
-		(*fpObjCrystInformUser)((string)buf);
-	}
+      (*fpObjCrystInformUser)((string)buf);
+   }
    
    cout << "Finished storing data..."<< endl ;
 }
@@ -250,9 +250,9 @@ void DiffractionDataSingleCrystal::ImportHklIobsSigma(const string &fileName,
       mObsSigma.resize(mNbRefl);
    
    //Import data
-   {	
-   	cout << "inputing reflections from file : "+fileName<<endl;
-		ifstream fin (fileName.c_str());
+   {   
+      cout << "inputing reflections from file : "+fileName<<endl;
+      ifstream fin (fileName.c_str());
       if(!fin)
       {
          throw ObjCrystException("DiffractionDataSingleCrystal::ImportHklIobsSigma() : \
@@ -263,7 +263,7 @@ Error opening file for input:"+fileName);
          char tmpComment[200];
          for(int i=0;i<skipLines;i++) fin.getline(tmpComment,150);
       }
-		cout << "Number of reflections to import : " << nbRefl << endl ;
+      cout << "Number of reflections to import : " << nbRefl << endl ;
       for(long i=0;i<nbRefl;i++)
       { // :TODO: A little faster....
          //:TODO: Check for the end of the stream if(!fin.good()) {throw...}
@@ -279,10 +279,10 @@ Error opening file for input:"+fileName);
    }
   //Finish
    mWeight.resize(mNbRefl);
-	const REAL minSigma=mObsSigma.max()*1e-3;
+   const REAL minSigma=mObsSigma.max()*1e-3;
    for(int i=0;i<mNbRefl;i++) 
-		if(mObsSigma(i)<minSigma) mWeight(i)=1./minSigma/minSigma;
-		else mWeight(i)=1./mObsSigma(i)/mObsSigma(i);
+      if(mObsSigma(i)<minSigma) mWeight(i)=1./minSigma/minSigma;
+      else mWeight(i)=1./mObsSigma(i)/mObsSigma(i);
    mHasObservedData=true;
 
    mMultiplicity.resize(mNbRefl);
@@ -291,10 +291,10 @@ Error opening file for input:"+fileName);
    this->PrepareHKLarrays();
    this->SortReflectionByTheta();
    {
-		char buf [200];
+      char buf [200];
       sprintf(buf,"Imported HKLIobsSigma, with %d reflections",(int)mNbRefl);
-		(*fpObjCrystInformUser)((string)buf);
-	}
+      (*fpObjCrystInformUser)((string)buf);
+   }
 
    cout << "Finished storing data..."<< endl ;
 
@@ -311,9 +311,9 @@ void DiffractionDataSingleCrystal::ImportHklIobsSigmaJanaM91(const string &fileN
       mObsSigma.resize(mNbRefl);
    
    //Import data
-   {	
-   	cout << "inputing reflections from Jana98 file : "+fileName<<endl;
-		ifstream fin (fileName.c_str());
+   {   
+      cout << "inputing reflections from Jana98 file : "+fileName<<endl;
+      ifstream fin (fileName.c_str());
       if(!fin)
       {
          throw ObjCrystException("DiffractionDataSingleCrystal::ImportHklIobsSigmaJanaM91() : \
@@ -370,10 +370,10 @@ Error opening file for input:"+fileName);
 
    mHasObservedData=true;
    {
-		char buf [200];
+      char buf [200];
       sprintf(buf,"Imported HKLIobsSigma from Jana, with %d reflections",(int)mNbRefl);
-		(*fpObjCrystInformUser)((string)buf);
-	}
+      (*fpObjCrystInformUser)((string)buf);
+   }
 }
 REAL DiffractionDataSingleCrystal::GetRw()const
 {
@@ -389,26 +389,26 @@ REAL DiffractionDataSingleCrystal::GetRw()const
    const REAL *p1;
    const REAL *p2;
    const REAL *p3;
-	long nb;
-	switch(mTwinningOption.GetChoice())
-	{
-   	case 0:
-		{
-			p1=mCalcIntensity.data();
-   		p2=mObsIntensity.data();
-   		p3=mWeight.data();
-			nb=mNbReflUsed;
-			break;
-		}
-		case 1:
-		{
-			p1=mTwinnedIcalcSum.data();
-   		p2=mTwinnedIobsSum.data();
-   		p3=mTwinnedWeight.data();
-			nb=mTwinnedIobsSum.numElements();
-			break;
-		}
-	}
+   long nb;
+   switch(mTwinningOption.GetChoice())
+   {
+      case 0:
+      {
+         p1=mCalcIntensity.data();
+         p2=mObsIntensity.data();
+         p3=mWeight.data();
+         nb=mNbReflUsed;
+         break;
+      }
+      case 1:
+      {
+         p1=mTwinnedIcalcSum.data();
+         p2=mTwinnedIobsSum.data();
+         p3=mTwinnedWeight.data();
+         nb=mTwinnedIobsSum.numElements();
+         break;
+      }
+   }
    for(long i=nb;i>0;i--)
    {
       tmp1 += *p3 * ( *p1 - *p2) * ( *p1 - *p2);
@@ -434,24 +434,24 @@ REAL DiffractionDataSingleCrystal::GetR()const
    REAL tmp2=0;
    const REAL *p1;
    const REAL *p2;
-	long nb;
-	switch(mTwinningOption.GetChoice())
-	{
-   	case 0:
-		{
-			p1=mCalcIntensity.data();
-   		p2=mObsIntensity.data();
-			nb=mNbReflUsed;
-			break;
-		}
-		case 1:
-		{
-			p1=mTwinnedIcalcSum.data();
-   		p2=mTwinnedIobsSum.data();
-			nb=mTwinnedIobsSum.numElements();
-			break;
-		}
-	}
+   long nb;
+   switch(mTwinningOption.GetChoice())
+   {
+      case 0:
+      {
+         p1=mCalcIntensity.data();
+         p2=mObsIntensity.data();
+         nb=mNbReflUsed;
+         break;
+      }
+      case 1:
+      {
+         p1=mTwinnedIcalcSum.data();
+         p2=mTwinnedIobsSum.data();
+         nb=mTwinnedIobsSum.numElements();
+         break;
+      }
+   }
    for(long i=nb;i>0;i--)
    {
       tmp1 += ( *p1 - *p2) * ( *p1 - *p2);
@@ -477,26 +477,26 @@ REAL DiffractionDataSingleCrystal::GetChi2()const
    const REAL *p1;
    const REAL *p2;
    const REAL *p3;
-	long nb;
-	switch(mTwinningOption.GetChoice())
-	{
-   	case 0:
-		{
-			p1=mCalcIntensity.data();
-   		p2=mObsIntensity.data();
-   		p3=mWeight.data();
-			nb=mNbReflUsed;
-			break;
-		}
-		case 1:
-		{
-			p1=mTwinnedIcalcSum.data();
-   		p2=mTwinnedIobsSum.data();
-   		p3=mTwinnedWeight.data();
-			nb=mTwinnedIobsSum.numElements();
-			break;
-		}
-	}
+   long nb;
+   switch(mTwinningOption.GetChoice())
+   {
+      case 0:
+      {
+         p1=mCalcIntensity.data();
+         p2=mObsIntensity.data();
+         p3=mWeight.data();
+         nb=mNbReflUsed;
+         break;
+      }
+      case 1:
+      {
+         p1=mTwinnedIcalcSum.data();
+         p2=mTwinnedIobsSum.data();
+         p3=mTwinnedWeight.data();
+         nb=mTwinnedIobsSum.numElements();
+         break;
+      }
+   }
    for(long i=nb;i>0;i--)
    {
       tmp1 += *p3++ * ( *p1 - *p2) * ( *p1 - *p2);
@@ -520,26 +520,26 @@ void DiffractionDataSingleCrystal::FitScaleFactorForRw()
    const REAL *p1;
    const REAL *p2;
    const REAL *p3;
-	long nb;
-	switch(mTwinningOption.GetChoice())
-	{
-   	case 0:
-		{
-			p1=mCalcIntensity.data();
-   		p2=mObsIntensity.data();
-   		p3=mWeight.data();
-			nb=mNbReflUsed;
-			break;
-		}
-		case 1:
-		{
-			p1=mTwinnedIcalcSum.data();
-   		p2=mTwinnedIobsSum.data();
-   		p3=mTwinnedWeight.data();
-			nb=mTwinnedIobsSum.numElements();
-			break;
-		}
-	}
+   long nb;
+   switch(mTwinningOption.GetChoice())
+   {
+      case 0:
+      {
+         p1=mCalcIntensity.data();
+         p2=mObsIntensity.data();
+         p3=mWeight.data();
+         nb=mNbReflUsed;
+         break;
+      }
+      case 1:
+      {
+         p1=mTwinnedIcalcSum.data();
+         p2=mTwinnedIobsSum.data();
+         p3=mTwinnedWeight.data();
+         nb=mTwinnedIobsSum.numElements();
+         break;
+      }
+   }
    for(long i=nb;i>0;i--)
    {
       tmp1 += *p3 * (*p1) * (*p2++);
@@ -550,8 +550,8 @@ void DiffractionDataSingleCrystal::FitScaleFactorForRw()
    mClockScaleFactor.Click();
 
    mCalcIntensity *= tmp1/tmp2;
-	if(1==mTwinningOption.GetChoice()) mTwinnedIcalcSum*= tmp1/tmp2;
-	mClockIcalc.Click();
+   if(1==mTwinningOption.GetChoice()) mTwinnedIcalcSum*= tmp1/tmp2;
+   mClockIcalc.Click();
 }
 
 void DiffractionDataSingleCrystal::FitScaleFactorForR()
@@ -567,24 +567,24 @@ void DiffractionDataSingleCrystal::FitScaleFactorForR()
    REAL tmp2=0;
    const REAL *p1;
    const REAL *p2;
-	long nb;
-	switch(mTwinningOption.GetChoice())
-	{
-   	case 0:
-		{
-			p1=mCalcIntensity.data();
-   		p2=mObsIntensity.data();
-			nb=mNbReflUsed;
-			break;
-		}
-		case 1:
-		{
-			p1=mTwinnedIcalcSum.data();
-   		p2=mTwinnedIobsSum.data();
-			nb=mTwinnedIobsSum.numElements();
-			break;
-		}
-	}
+   long nb;
+   switch(mTwinningOption.GetChoice())
+   {
+      case 0:
+      {
+         p1=mCalcIntensity.data();
+         p2=mObsIntensity.data();
+         nb=mNbReflUsed;
+         break;
+      }
+      case 1:
+      {
+         p1=mTwinnedIcalcSum.data();
+         p2=mTwinnedIobsSum.data();
+         nb=mTwinnedIobsSum.numElements();
+         break;
+      }
+   }
    for(long i=nb;i>0;i--)
    {
       tmp1 += (*p1) * (*p2++);
@@ -593,10 +593,10 @@ void DiffractionDataSingleCrystal::FitScaleFactorForR()
    }
    mScaleFactor      *= tmp1/tmp2;
    mClockScaleFactor.Click();
-	
+   
    mCalcIntensity *= tmp1/tmp2;
-	if(1==mTwinningOption.GetChoice()) mTwinnedIcalcSum*= tmp1/tmp2;
-	mClockIcalc.Click();
+   if(1==mTwinningOption.GetChoice()) mTwinnedIcalcSum*= tmp1/tmp2;
+   mClockIcalc.Click();
 }
 
 REAL DiffractionDataSingleCrystal::GetBestRFactor()
@@ -615,7 +615,7 @@ REAL DiffractionDataSingleCrystal::GetBestRFactor()
 void DiffractionDataSingleCrystal::SetSigmaToSqrtIobs()
 {
    for(long i=0;i<mObsIntensity.numElements();i++) mObsSigma(i)=sqrt(fabs(mObsIntensity(i)));
-	if(0!=mTwinningOption.GetChoice()) mClockPrepareTwinningCorr.Reset();
+   if(0!=mTwinningOption.GetChoice()) mClockPrepareTwinningCorr.Reset();
 }
 
 void DiffractionDataSingleCrystal::SetWeightToInvSigma2(const REAL minRelatSigma)
@@ -626,7 +626,7 @@ void DiffractionDataSingleCrystal::SetWeightToInvSigma2(const REAL minRelatSigma
    {
       if(mObsSigma(i)<min) mWeight(i)=0 ; else  mWeight(i) =1./mObsSigma(i)/mObsSigma(i);
    }
-	if(0!=mTwinningOption.GetChoice()) mClockPrepareTwinningCorr.Reset();
+   if(0!=mTwinningOption.GetChoice()) mClockPrepareTwinningCorr.Reset();
 }
 
 REAL DiffractionDataSingleCrystal::GetScaleFactor()const {return mScaleFactor;}
@@ -780,73 +780,73 @@ void DiffractionDataSingleCrystal::InitRefParList()
 }
 unsigned int DiffractionDataSingleCrystal::GetNbLSQFunction()const{return 1;}
 const CrystVector_REAL& 
-	DiffractionDataSingleCrystal::GetLSQCalc(const unsigned int) const
+   DiffractionDataSingleCrystal::GetLSQCalc(const unsigned int) const
 {return this->GetIcalc();}
 
 const CrystVector_REAL& 
-	DiffractionDataSingleCrystal::GetLSQObs(const unsigned int) const
+   DiffractionDataSingleCrystal::GetLSQObs(const unsigned int) const
 {return this->GetIobs();}
 
 const CrystVector_REAL& 
-	DiffractionDataSingleCrystal::GetLSQWeight(const unsigned int) const
+   DiffractionDataSingleCrystal::GetLSQWeight(const unsigned int) const
 {return this->GetWeight();}
 
 void DiffractionDataSingleCrystal::CalcIcalc() const
 {
    TAU_PROFILE("DiffractionData::CalcIcalc()","void ()",TAU_DEFAULT);
    VFN_DEBUG_MESSAGE("DiffractionData::CalcIcalc():"<<this->GetName(),3)
-	this->GetFhklCalcSq();
-	if( (mClockStructFactorSq<mClockIcalc) && (mClockScaleFactor<mClockIcalc)
-	     && ((0==mTwinningOption.GetChoice()) || (mClockPrepareTwinningCorr<mClockIcalc)) ) return;
-	
+   this->GetFhklCalcSq();
+   if( (mClockStructFactorSq<mClockIcalc) && (mClockScaleFactor<mClockIcalc)
+        && ((0==mTwinningOption.GetChoice()) || (mClockPrepareTwinningCorr<mClockIcalc)) ) return;
+   
    mCalcIntensity=mFhklCalcSq;
    mCalcIntensity*=mScaleFactor;
-	if(1==mTwinningOption.GetChoice())
-	{
-		this->PrepareTwinningCalc();
-		const long nbGroup=mTwinnedGroupIndex.numElements();
-		mTwinnedIcalcSum.resize(nbGroup);
-		mTwinnedIcalcSum=0;
-		long first=0;
-		for(long i=0;i<nbGroup;i++)
-		{
-			for(long j=first;j<mTwinnedGroupIndex(i);j++)
-			{
-				#if 0 //def __DEBUG__
-				cout <<endl << mIntH(j)<<" "<< mIntK(j)<<" "<< mIntL(j)<<" " << mObsIntensity(j);
-				#endif
-				mTwinnedIcalcSum(i)+=mCalcIntensity(j);
-			}
-			first=mTwinnedGroupIndex(i);
-			#if 0 //def __DEBUG__
-			cout  <<endl<< "         "<< mTwinnedIcalcSum(i) <<" "<< mTwinnedIobsSum(i)<<endl;
-			#endif
-		}
-	}
-	mClockIcalc.Click();
+   if(1==mTwinningOption.GetChoice())
+   {
+      this->PrepareTwinningCalc();
+      const long nbGroup=mTwinnedGroupIndex.numElements();
+      mTwinnedIcalcSum.resize(nbGroup);
+      mTwinnedIcalcSum=0;
+      long first=0;
+      for(long i=0;i<nbGroup;i++)
+      {
+         for(long j=first;j<mTwinnedGroupIndex(i);j++)
+         {
+            #if 0 //def __DEBUG__
+            cout <<endl << mIntH(j)<<" "<< mIntK(j)<<" "<< mIntL(j)<<" " << mObsIntensity(j);
+            #endif
+            mTwinnedIcalcSum(i)+=mCalcIntensity(j);
+         }
+         first=mTwinnedGroupIndex(i);
+         #if 0 //def __DEBUG__
+         cout  <<endl<< "         "<< mTwinnedIcalcSum(i) <<" "<< mTwinnedIobsSum(i)<<endl;
+         #endif
+      }
+   }
+   mClockIcalc.Click();
 }
 
 CrystVector_long DiffractionDataSingleCrystal::SortReflectionByTheta(const REAL maxTheta)
 {
    TAU_PROFILE("DiffractionDataSingleCrystal::SortReflectionByTheta()","void ()",TAU_DEFAULT);
    VFN_DEBUG_ENTRY("DiffractionDataSingleCrystal::SortReflectionByTheta()",5)
-	const CrystVector_long index=this->ScatteringData::SortReflectionByTheta(maxTheta);
-	CrystVector_REAL tmp;
-	
-	tmp=mObsIntensity;
-	mObsIntensity.resize(mNbRefl);
-	for(long i=0;i<mNbRefl;i++) mObsIntensity(i)=tmp(index(i));
-	
-	tmp=mObsSigma;
-	mObsSigma.resize(mNbRefl);
-	for(long i=0;i<mNbRefl;i++) mObsSigma(i)=tmp(index(i));
-	
-	tmp=mWeight;
-	mWeight.resize(mNbRefl);
-	for(long i=0;i<mNbRefl;i++) mWeight(i)=tmp(index(i));
-	
+   const CrystVector_long index=this->ScatteringData::SortReflectionByTheta(maxTheta);
+   CrystVector_REAL tmp;
+   
+   tmp=mObsIntensity;
+   mObsIntensity.resize(mNbRefl);
+   for(long i=0;i<mNbRefl;i++) mObsIntensity(i)=tmp(index(i));
+   
+   tmp=mObsSigma;
+   mObsSigma.resize(mNbRefl);
+   for(long i=0;i<mNbRefl;i++) mObsSigma(i)=tmp(index(i));
+   
+   tmp=mWeight;
+   mWeight.resize(mNbRefl);
+   for(long i=0;i<mNbRefl;i++) mWeight(i)=tmp(index(i));
+   
    VFN_DEBUG_EXIT("DiffractionDataSingleCrystal::SortReflectionByTheta()",5)
-	return index;
+   return index;
 }
 
 void DiffractionDataSingleCrystal::InitOptions()
@@ -868,45 +868,45 @@ void DiffractionDataSingleCrystal::InitOptions()
 
 void DiffractionDataSingleCrystal::PrepareTwinningCalc() const
 {
-	if(mClockPrepareTwinningCorr>mClockHKL) return;
+   if(mClockPrepareTwinningCorr>mClockHKL) return;
    VFN_DEBUG_ENTRY("DiffractionDataSingleCrystal::PrepareTwinningCalc()",5)
-	// first get the index of reflections which limit each block of summed reflections
-	long nbGroup=0;
-	{
-		const REAL dSiThOvLa=.0001;
-		mTwinnedGroupIndex.resize(mNbReflUsed);
-		this->CalcSinThetaLambda();
-		REAL sithol0=mSinThetaLambda(0)+dSiThOvLa;
-		for(long i=1;i<mNbReflUsed;i++)
-		{
-			if(mSinThetaLambda(i)>sithol0)
-			{
-				mTwinnedGroupIndex(nbGroup++)=i;
-				sithol0=mSinThetaLambda(i)+dSiThOvLa;
-			}
-		}
-		mTwinnedGroupIndex(nbGroup++)=mNbReflUsed;
-		mTwinnedGroupIndex.resizeAndPreserve(nbGroup);
-	}
-	// Calculate summed Iobs and weight
-	{
-		mTwinnedIobsSum.resize(nbGroup);
-		mTwinnedIobsSum=0;
-		mTwinnedWeight.resize(nbGroup);
-		mTwinnedWeight=0;
-		long first=0;
-		for(long i=0;i<nbGroup;i++)
-		{
-			for(long j=first;j<mTwinnedGroupIndex(i);j++) 
-			{
-				mTwinnedIobsSum(i)+=mObsIntensity(j);
-				mTwinnedWeight(i)+=mObsSigma(j)*mObsSigma(j);
-			}
-			mTwinnedWeight(i)=1./mTwinnedWeight(i);
-			first=mTwinnedGroupIndex(i);
-		}
-	}
-	mClockPrepareTwinningCorr.Click();
+   // first get the index of reflections which limit each block of summed reflections
+   long nbGroup=0;
+   {
+      const REAL dSiThOvLa=.0001;
+      mTwinnedGroupIndex.resize(mNbReflUsed);
+      this->CalcSinThetaLambda();
+      REAL sithol0=mSinThetaLambda(0)+dSiThOvLa;
+      for(long i=1;i<mNbReflUsed;i++)
+      {
+         if(mSinThetaLambda(i)>sithol0)
+         {
+            mTwinnedGroupIndex(nbGroup++)=i;
+            sithol0=mSinThetaLambda(i)+dSiThOvLa;
+         }
+      }
+      mTwinnedGroupIndex(nbGroup++)=mNbReflUsed;
+      mTwinnedGroupIndex.resizeAndPreserve(nbGroup);
+   }
+   // Calculate summed Iobs and weight
+   {
+      mTwinnedIobsSum.resize(nbGroup);
+      mTwinnedIobsSum=0;
+      mTwinnedWeight.resize(nbGroup);
+      mTwinnedWeight=0;
+      long first=0;
+      for(long i=0;i<nbGroup;i++)
+      {
+         for(long j=first;j<mTwinnedGroupIndex(i);j++) 
+         {
+            mTwinnedIobsSum(i)+=mObsIntensity(j);
+            mTwinnedWeight(i)+=mObsSigma(j)*mObsSigma(j);
+         }
+         mTwinnedWeight(i)=1./mTwinnedWeight(i);
+         first=mTwinnedGroupIndex(i);
+      }
+   }
+   mClockPrepareTwinningCorr.Click();
    VFN_DEBUG_EXIT("DiffractionDataSingleCrystal::PrepareTwinningCalc()",5)
 }
 

@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -44,19 +44,19 @@ template<class T> T MaxDifference(const Array<T,2> &a,const Array<T,2> &b)
 #include "Quirks/VFNStreamFormat.h"
 
 #ifdef __DEBUG__
-	#include "Quirks/Chronometer.h"
+   #include "Quirks/Chronometer.h"
    // count allocated memory, report from time to time
-	static Chronometer chrono;
+   static Chronometer chrono;
    static unsigned long gMemAllocVector=0;
    static unsigned long gMemAllocVectorMax=0;
    #define CRYSTVECTOR_MEM_CHANGE(s)\
-		gMemAllocVector+=s;\
-		if((chrono.seconds()>(float)2)&&(gVFNDebugMessageLevel<3)) \
-			{cout <<"vect-Alloc.Mem:"<<gMemAllocVector<<endl;chrono.start();}\
-		if(gMemAllocVectorMax<gMemAllocVector)\
-		{gMemAllocVectorMax=gMemAllocVector; cout <<"vect-Alloc.MAX:"<<gMemAllocVector<<endl;}
+      gMemAllocVector+=s;\
+      if((chrono.seconds()>(float)2)&&(gVFNDebugMessageLevel<3)) \
+         {cout <<"vect-Alloc.Mem:"<<gMemAllocVector<<endl;chrono.start();}\
+      if(gMemAllocVectorMax<gMemAllocVector)\
+      {gMemAllocVectorMax=gMemAllocVector; cout <<"vect-Alloc.MAX:"<<gMemAllocVector<<endl;}
 #else
-	#define CRYSTVECTOR_MEM_CHANGE(s)
+   #define CRYSTVECTOR_MEM_CHANGE(s)
 #endif
 
 //######################################################################
@@ -68,14 +68,14 @@ template<class T> CrystVector<T>::CrystVector(const long nbElements):
 mNumElements(nbElements),mIsAreference(false)
 {
    mpData=new T[mNumElements];
-	CRYSTVECTOR_MEM_CHANGE(mNumElements*sizeof(T))
+   CRYSTVECTOR_MEM_CHANGE(mNumElements*sizeof(T))
 }
    
 template<class T> CrystVector<T>::CrystVector(const CrystVector &old):
 mNumElements(old.numElements()),mIsAreference(false)
 {
    mpData=new T[mNumElements];
-	CRYSTVECTOR_MEM_CHANGE(mNumElements*sizeof(T))
+   CRYSTVECTOR_MEM_CHANGE(mNumElements*sizeof(T))
    T *p1=mpData;
    const T *p2=old.data();
    for(long i=0;i<mNumElements;i++) *p1++=*p2++;
@@ -83,17 +83,17 @@ mNumElements(old.numElements()),mIsAreference(false)
    
 template<class T> CrystVector<T>::~CrystVector()
 { 
-	if(!mIsAreference)
-	{
-		delete[] mpData;
-		CRYSTVECTOR_MEM_CHANGE(-mNumElements*sizeof(T))
-	}
+   if(!mIsAreference)
+   {
+      delete[] mpData;
+      CRYSTVECTOR_MEM_CHANGE(-mNumElements*sizeof(T))
+   }
 }
 template<class T> void CrystVector<T>::operator=(const CrystVector &old)
 {
    VFN_DEBUG_MESSAGE("CrystVector<T>::operator=()",0)
    this->resize(old.numElements());
-	mIsAreference=false;
+   mIsAreference=false;
    T *p1=mpData;
    const T *p2=old.data();
    for(long i=0;i<mNumElements;i++) *p1++=*p2++;
@@ -102,10 +102,10 @@ template<class T> void CrystVector<T>::operator=(const CrystVector &old)
 template<class T> void CrystVector<T>::reference(CrystVector &old)
 {
    if(!mIsAreference)
-	{
-		CRYSTVECTOR_MEM_CHANGE(-mNumElements*sizeof(T))
-		delete[] mpData ;
-	}
+   {
+      CRYSTVECTOR_MEM_CHANGE(-mNumElements*sizeof(T))
+      delete[] mpData ;
+   }
    mNumElements=old.numElements();
    mpData=old.data();
    mIsAreference=true;
@@ -154,17 +154,17 @@ template<class T> void CrystVector<T>::resize(const long newNbElements)
    VFN_DEBUG_MESSAGE("CrystVector<T>::resize():("<<mNumElements<<"->"
       <<newNbElements<<").",0)
    if((mIsAreference==false) && (mNumElements != 0))
-	{
-		delete[] mpData ;
-		CRYSTVECTOR_MEM_CHANGE(-mNumElements*sizeof(T))
-	}
+   {
+      delete[] mpData ;
+      CRYSTVECTOR_MEM_CHANGE(-mNumElements*sizeof(T))
+   }
    mpData=0;
    mNumElements=newNbElements;
    if(mNumElements>0)
-	{
-		mpData=new T[mNumElements];
-		CRYSTVECTOR_MEM_CHANGE(mNumElements*sizeof(T))
-	}
+   {
+      mpData=new T[mNumElements];
+      CRYSTVECTOR_MEM_CHANGE(mNumElements*sizeof(T))
+   }
    mIsAreference=false;
 }
 
@@ -176,16 +176,16 @@ template<class T> void CrystVector<T>::resizeAndPreserve(const long newNbElement
    register T *p2,*p1;
    mpData=0;
    mpData=new T[newNbElements];
-	CRYSTVECTOR_MEM_CHANGE(newNbElements*sizeof(T))
+   CRYSTVECTOR_MEM_CHANGE(newNbElements*sizeof(T))
    p2=mpData;
    p1=p;
    long tmp= (newNbElements > mNumElements) ? mNumElements : newNbElements ;
    for(long i=0;i<tmp;i++) *p2++ = *p1++ ;
    if(mIsAreference==false)
-	{
-		CRYSTVECTOR_MEM_CHANGE(-mNumElements*sizeof(T))
-		delete[] p ;
-	}
+   {
+      CRYSTVECTOR_MEM_CHANGE(-mNumElements*sizeof(T))
+      delete[] p ;
+   }
    mNumElements=newNbElements;
    mIsAreference=false;
 }
@@ -310,32 +310,32 @@ template<class T> long QuickSortSubs(CrystVector<T> &vect,
                                      CrystVector<long> &subscript,
                                      long last,long first, int depth)
 {
-	//assert(depth++ <50);//for up to 2^50 elements
-	static long count=0;
-	long low, high;
-	T tmpT, sepValeur ;
-	long tmpSubs;
-	low = first;
-	high = last;
-	sepValeur = vect( (first + last) / 2 );
-	do 
-	{
-		while( vect(low) < sepValeur ) low++;
-		while( vect(high) > sepValeur ) high--;
-		if( low <= high )
-		{
-			count++;
-			tmpT = vect(low);
-			vect(low) = vect(high);
-			vect(high) = tmpT;
-			tmpSubs = subscript(low);
-			subscript(low++) = subscript(high);
-			subscript(high--) = tmpSubs;
-		}
-	} while( low <= high);
-	if( first < high ) QuickSortSubs(vect,subscript, high, first,depth);
-	if( low < last ) QuickSortSubs(vect,subscript, last, low,depth);
-	return count ;
+   //assert(depth++ <50);//for up to 2^50 elements
+   static long count=0;
+   long low, high;
+   T tmpT, sepValeur ;
+   long tmpSubs;
+   low = first;
+   high = last;
+   sepValeur = vect( (first + last) / 2 );
+   do 
+   {
+      while( vect(low) < sepValeur ) low++;
+      while( vect(high) > sepValeur ) high--;
+      if( low <= high )
+      {
+         count++;
+         tmpT = vect(low);
+         vect(low) = vect(high);
+         vect(high) = tmpT;
+         tmpSubs = subscript(low);
+         subscript(low++) = subscript(high);
+         subscript(high--) = tmpSubs;
+      }
+   } while( low <= high);
+   if( first < high ) QuickSortSubs(vect,subscript, high, first,depth);
+   if( low < last ) QuickSortSubs(vect,subscript, last, low,depth);
+   return count ;
 }
 
 template<class T> CrystVector<T> cos(const CrystVector<T> &vect)
@@ -376,14 +376,14 @@ template<class T> CrystMatrix<T>::CrystMatrix(const long ySize,const long xSize)
 mNumElements(xSize*ySize),mXSize(xSize),mYSize(ySize),mIsAreference(false)
 {
    mpData=new T[mNumElements];
-	CRYSTVECTOR_MEM_CHANGE(mNumElements*sizeof(T))
+   CRYSTVECTOR_MEM_CHANGE(mNumElements*sizeof(T))
 }
 
 template<class T> CrystMatrix<T>::CrystMatrix(const CrystMatrix &old):
 mNumElements(old.numElements()),mXSize(old.cols()),mYSize(old.rows()),mIsAreference(false)
 {
    mpData=new T[mNumElements];
-	CRYSTVECTOR_MEM_CHANGE(mNumElements*sizeof(T))
+   CRYSTVECTOR_MEM_CHANGE(mNumElements*sizeof(T))
    register T *p1=mpData;
    register const T *p2=old.data();
    for(long i=0;i<mNumElements;i++) *p1++=*p2++;
@@ -391,28 +391,28 @@ mNumElements(old.numElements()),mXSize(old.cols()),mYSize(old.rows()),mIsArefere
 
 template<class T> CrystMatrix<T>::~CrystMatrix()
 {
-	if(!mIsAreference)
-	{
-		CRYSTVECTOR_MEM_CHANGE(-mNumElements*sizeof(T))
-		delete[] mpData;
-	}
+   if(!mIsAreference)
+   {
+      CRYSTVECTOR_MEM_CHANGE(-mNumElements*sizeof(T))
+      delete[] mpData;
+   }
 }
 
 template<class T> void CrystMatrix<T>::operator=(const CrystMatrix<T> &old)
 {
-	mXSize=old.cols();
-	mYSize=old.rows();
-	mIsAreference=false;
-	if(mNumElements!=old.numElements())
+   mXSize=old.cols();
+   mYSize=old.rows();
+   mIsAreference=false;
+   if(mNumElements!=old.numElements())
    {
       if(mIsAreference==false)
-		{
-			delete[] mpData ;
-			CRYSTVECTOR_MEM_CHANGE(-mNumElements*sizeof(T))
-		}
+      {
+         delete[] mpData ;
+         CRYSTVECTOR_MEM_CHANGE(-mNumElements*sizeof(T))
+      }
       mNumElements=old.numElements();
       mpData=new T[mNumElements];
-		CRYSTVECTOR_MEM_CHANGE(mNumElements*sizeof(T))
+      CRYSTVECTOR_MEM_CHANGE(mNumElements*sizeof(T))
    }
    register T *p1=mpData;
    register const T *p2=old.data();
@@ -422,11 +422,11 @@ template<class T> void CrystMatrix<T>::operator=(const CrystMatrix<T> &old)
 template<class T> void CrystMatrix<T>::reference(CrystMatrix<T> &old)
 {
    if(mIsAreference==false)
-	{
-		CRYSTVECTOR_MEM_CHANGE(-mNumElements*sizeof(T))
-		delete[] mpData ;
-	}
-	mIsAreference=true;
+   {
+      CRYSTVECTOR_MEM_CHANGE(-mNumElements*sizeof(T))
+      delete[] mpData ;
+   }
+   mIsAreference=true;
    mNumElements=old.numElements();
    mpData=old.data();
 }
@@ -480,19 +480,19 @@ template<class T> void CrystMatrix<T>::resize(const long ySize,const long xSize)
    mYSize=ySize;
    if(xSize*ySize == mNumElements) return;
    if(!mIsAreference)
-	{
-		CRYSTVECTOR_MEM_CHANGE(-mNumElements*sizeof(T))
-		delete[] mpData ;
-	}
+   {
+      CRYSTVECTOR_MEM_CHANGE(-mNumElements*sizeof(T))
+      delete[] mpData ;
+   }
    mpData=0;
    mXSize=xSize;
    mYSize=ySize;
    mNumElements=xSize*ySize;
    if(mNumElements>0)
-	{
-		mpData=new T[mNumElements];
-		CRYSTVECTOR_MEM_CHANGE(mNumElements*sizeof(T))
-	}
+   {
+      mpData=new T[mNumElements];
+      CRYSTVECTOR_MEM_CHANGE(mNumElements*sizeof(T))
+   }
 }
 
 template<class T> void CrystMatrix<T>::resizeAndPreserve(const long ySize,const long xSize)
@@ -504,16 +504,16 @@ template<class T> void CrystMatrix<T>::resizeAndPreserve(const long ySize,const 
    register T *p2,*p1;
    mpData=0;
    mpData=new T[xSize*ySize];
-	CRYSTVECTOR_MEM_CHANGE(xSize*ySize*sizeof(T))
+   CRYSTVECTOR_MEM_CHANGE(xSize*ySize*sizeof(T))
    p2=mpData;
    p1=p;
    long tmp= ( (xSize*ySize) > mNumElements) ? mNumElements : xSize*ySize;
    for(long i=0;i<tmp;i++) *p2++ = *p1++ ;
    if(!mIsAreference)
-	{
-		CRYSTVECTOR_MEM_CHANGE(-mNumElements*sizeof(T))
-		delete[] p ;
-	}
+   {
+      CRYSTVECTOR_MEM_CHANGE(-mNumElements*sizeof(T))
+      delete[] p ;
+   }
    mNumElements=xSize*ySize;
    mIsAreference=false;
 }
@@ -626,8 +626,8 @@ template<class T> CrystArray3D<T> ::CrystArray3D():
 mpData(0),mNumElements(0),mXSize(0),mYSize(0),mZSize(0),mIsAreference(false){}
 
 template<class T> CrystArray3D<T>::CrystArray3D(const long zSize,
-																  const long ySize,
-																  const long xSize):
+                                                  const long ySize,
+                                                  const long xSize):
 mNumElements(xSize*ySize*zSize),mXSize(xSize),mYSize(ySize),mZSize(zSize),
 mIsAreference(false)
 {
@@ -650,11 +650,11 @@ template<class T> CrystArray3D<T>::~CrystArray3D()
 
 template<class T> void CrystArray3D<T>::operator=(const CrystArray3D<T> &old)
 {
-	mXSize=old.cols();
-	mYSize=old.rows();
-	mZSize=old.depth();
-	mIsAreference=false;
-	if(mNumElements!=old.numElements())
+   mXSize=old.cols();
+   mYSize=old.rows();
+   mZSize=old.depth();
+   mIsAreference=false;
+   if(mNumElements!=old.numElements())
    {
       mNumElements=old.numElements();
       if(mIsAreference==false)delete[] mpData ;
@@ -668,7 +668,7 @@ template<class T> void CrystArray3D<T>::operator=(const CrystArray3D<T> &old)
 template<class T> void CrystArray3D<T>::reference(CrystArray3D<T> &old)
 {
    if(mIsAreference==false) delete[] mpData ;
-	mIsAreference=true;
+   mIsAreference=true;
    mNumElements=old.numElements();
    mpData=old.data();
 }
@@ -719,8 +719,8 @@ template<class T> T* CrystArray3D<T>::data() {return mpData;}
 template<class T> const T* CrystArray3D<T>::data() const {return mpData;}
 
 template<class T> void CrystArray3D<T>::resize(const long zSize,
-													         const long ySize,
-																const long xSize)
+                                                const long ySize,
+                                                const long xSize)
 {
    mXSize=xSize;
    mYSize=ySize;
@@ -733,8 +733,8 @@ template<class T> void CrystArray3D<T>::resize(const long zSize,
 }
 
 template<class T> void CrystArray3D<T>::resizeAndPreserve(const long zSize,
-																			  const long ySize,
-																			  const long xSize)
+                                                           const long ySize,
+                                                           const long xSize)
 {
    mXSize=xSize;
    mYSize=ySize;
@@ -863,12 +863,12 @@ template<class T> ostream& operator<<(ostream &os, const CrystMatrix<T> &vect)
 template<class T> ostream& operator<<(ostream &os, const CrystArray3D<T> &vect)
 {
    for(long i=0;i<vect.depth();i++)
-	{
-   	for(long j=0;j<vect.rows();j++) 
-   	{
+   {
+      for(long j=0;j<vect.rows();j++) 
+      {
        for(long k=0;k<vect.cols();k++) os << FormatFloat(vect(i,j,k)) ;
        os << endl;
-   	}
+      }
       os << endl;
    }
    return os;
@@ -905,7 +905,7 @@ template<class T> T MaxDifference(const CrystMatrix<T> &a,const CrystMatrix<T> &
 template<class T> CrystMatrix<T> product(const CrystMatrix<T> &a,const CrystMatrix<T> &b)
 {
    VFN_DEBUG_ENTRY("CrystMatrix<T> product()",2)
-	//:TODO: check a.cols()==b.rows()
+   //:TODO: check a.cols()==b.rows()
    CrystMatrix<T> ab(a.rows(),b.cols());
    for(long i=0;i<ab.rows();i++)
    {
@@ -993,7 +993,7 @@ template ostream& operator<<(ostream &os, const CrystMatrix<bool> &vect);
 CrystMatrix_REAL InvertMatrix(const CrystMatrix_REAL &m)
 {//:TODO: Check Pivoting...
    VFN_DEBUG_ENTRY("InvertMatrix()",2)
-	VFN_DEBUG_MESSAGE("->Matrix to invert :"<<endl<<m,1)
+   VFN_DEBUG_MESSAGE("->Matrix to invert :"<<endl<<m,1)
    REAL eps = 1e-8;
    //check matrix is square
       if( (m.rows() != m.cols()) || (m.rows() <2))
@@ -1083,7 +1083,7 @@ CrystMatrix_REAL InvertMatrix(const CrystMatrix_REAL &m)
       }
    }
    */
-	VFN_DEBUG_MESSAGE("->Inverted Matrix :"<<endl<<im,1)
+   VFN_DEBUG_MESSAGE("->Inverted Matrix :"<<endl<<im,1)
    VFN_DEBUG_EXIT("InvertMatrix()",2)
    return im;
 }

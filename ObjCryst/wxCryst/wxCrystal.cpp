@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -76,7 +76,7 @@ BEGIN_EVENT_TABLE(WXCrystal,wxEvtHandler)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDPRISMTRIGONAL,   WXCrystal::OnMenuAddScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDICOSAHEDRON,     WXCrystal::OnMenuAddScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_REMOVESCATTERER,    WXCrystal::OnMenuRemoveScatterer)
-   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, 						WXRefinableObj::OnUpdateUI)
+   EVT_UPDATE_UI(ID_CRYST_UPDATEUI,                   WXRefinableObj::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXCrystal::WXCrystal(wxWindow* parent, Crystal *obj):
@@ -207,48 +207,48 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
                          const REAL zMin,const REAL zMax)
 {
    VFN_DEBUG_ENTRY("WXCrystal::UpdateGL()",8)
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    #ifdef OBJCRYST_GL
    if(mpCrystalGL!=0)
    {
-   	VFN_DEBUG_MESSAGE("WXCrystal::UpdateGL():mpCrystalGL",7)
-   	this->GrabCrystalGLDisplayList();
-   	if(mCrystalGLDisplayList==0) mCrystalGLDisplayList=glGenLists(1);
+      VFN_DEBUG_MESSAGE("WXCrystal::UpdateGL():mpCrystalGL",7)
+      this->GrabCrystalGLDisplayList();
+      if(mCrystalGLDisplayList==0) mCrystalGLDisplayList=glGenLists(1);
       
-		// During a refinement (multi-threaded)
-		// Wait until the display list has been updated by the main thread...
-		static bool cont;//:TODO: not static, but mutable member function (if >1 crystal,...)
-		if(false==wxThread::IsMain())
-		{
-			this->ReleaseCrystalGLDisplayList();
-			cont=false;
-			wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_GLCRYSTAL_MENU_UPDATE);
-   		wxPostEvent(mpCrystalGL,event);
-			while(!cont) wxUsleep(10);
-   		VFN_DEBUG_EXIT("WXCrystal::UpdateGL()-Not in main thread :End",8)
-			return;
-		}
-   	mpCrystalGL->SetCurrent();
+      // During a refinement (multi-threaded)
+      // Wait until the display list has been updated by the main thread...
+      static bool cont;//:TODO: not static, but mutable member function (if >1 crystal,...)
+      if(false==wxThread::IsMain())
+      {
+         this->ReleaseCrystalGLDisplayList();
+         cont=false;
+         wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_GLCRYSTAL_MENU_UPDATE);
+         wxPostEvent(mpCrystalGL,event);
+         while(!cont) wxUsleep(10);
+         VFN_DEBUG_EXIT("WXCrystal::UpdateGL()-Not in main thread :End",8)
+         return;
+      }
+      mpCrystalGL->SetCurrent();
       glNewList(mCrystalGLDisplayList,GL_COMPILE);
          glPushMatrix();
             mpCrystal->GLInitDisplayList(onlyIndependentAtoms,xMin,xMax,yMin,yMax,zMin,zMax);
-				//ScatteringPowerMap map1(mpCrystal->GetScatteringPowerRegistry().GetObj(0),
-				//									 *mpCrystal,.02,.05,.05,RAD_XRAY);
-				//map1.GLInitDisplayList(xMin,xMax,yMin,yMax,zMin,zMax);
-				//UnitCellScattererDensityMap map2(*mpCrystal,21,21,21);
-				//cout << map2.GetMap3D()<<endl;
-				//map2.GLInitDisplayList(xMin,xMax,yMin,yMax,zMin,zMax);
+            //ScatteringPowerMap map1(mpCrystal->GetScatteringPowerRegistry().GetObj(0),
+            //                            *mpCrystal,.02,.05,.05,RAD_XRAY);
+            //map1.GLInitDisplayList(xMin,xMax,yMin,yMax,zMin,zMax);
+            //UnitCellScattererDensityMap map2(*mpCrystal,21,21,21);
+            //cout << map2.GetMap3D()<<endl;
+            //map2.GLInitDisplayList(xMin,xMax,yMin,yMax,zMin,zMax);
          glPopMatrix();
       glEndList();
       //#ifdef __WINDOWS__
       cont=true;
-		//#endif
+      //#endif
       this->ReleaseCrystalGLDisplayList();
       mpCrystalGL->CrystUpdate();
    }
    else
    {
-   	VFN_DEBUG_MESSAGE("WXCrystal::UpdateGL():No mpCrystalGL",7)
+      VFN_DEBUG_MESSAGE("WXCrystal::UpdateGL():No mpCrystalGL",7)
    }
    #endif
    VFN_DEBUG_EXIT("WXCrystal::UpdateGL():End",8)
@@ -291,7 +291,7 @@ void WXCrystal::NotifyCrystalGLDelete()
 
 void WXCrystal::OnMenuSaveCIF(wxCommandEvent & WXUNUSED(event))
 {
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    wxFileDialog save(this,"Choose a file","","","*.cif",wxSAVE | wxOVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
    
@@ -303,7 +303,7 @@ void WXCrystal::OnMenuSaveCIF(wxCommandEvent & WXUNUSED(event))
 
 void WXCrystal::OnMenuSaveText(wxCommandEvent & WXUNUSED(event))
 {
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    wxFileDialog save(this,"Choose a file","","","*.txt",wxSAVE | wxOVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
    
@@ -325,7 +325,7 @@ void WXCrystal::OnMenuAddScattPowAtom(wxCommandEvent & WXUNUSED(event))
 void WXCrystal::OnMenuRemoveScattPow(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXCrystal::OnButtonRemoveScattPow()",6)
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    int choice;
    ScatteringPower *scatt=
       WXDialogChooseFromRegistry(mpCrystal->GetScatteringPowerRegistry(),this,
@@ -340,7 +340,7 @@ void WXCrystal::OnMenuRemoveScattPow(wxCommandEvent & WXUNUSED(event))
 void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
 {
    VFN_DEBUG_ENTRY("WXCrystal::OnMenuAddScatterer()",6)
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    Scatterer *scatt;
    switch(event.GetId())
    {
@@ -664,7 +664,7 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
 void WXCrystal::OnMenuRemoveScatterer(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXCrystal::OnButtonRemoveScatterer()",6)
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    int choice;
    Scatterer *scatt=WXDialogChooseFromRegistry(mpCrystal->GetScattererRegistry(),this,
                                              "Select the Scatterer to remove:",choice);
@@ -677,7 +677,7 @@ void WXCrystal::OnMenuRemoveScatterer(wxCommandEvent & WXUNUSED(event))
 
 void WXCrystal::OnMenuAddAntiBumpDist(wxCommandEvent & WXUNUSED(event))
 {
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    int choice;
    //Scattering power 1
       const ScatteringPower *scattPow1=WXDialogChooseFromRegistry(
@@ -741,9 +741,9 @@ bool WXCrystal::OnChangeName(const int id)
 
 void WXCrystal::UpdateUI()
 {
-	mpFieldSpacegroup->SetValue(mpCrystal->GetSpaceGroup().GetName());
-	if(0!=mpCrystalGL) mpCrystalGL->GetParent()->SetTitle(mpCrystal->GetName().c_str());
-	this->WXRefinableObj::UpdateUI();
+   mpFieldSpacegroup->SetValue(mpCrystal->GetSpaceGroup().GetName());
+   if(0!=mpCrystalGL) mpCrystalGL->GetParent()->SetTitle(mpCrystal->GetName().c_str());
+   this->WXRefinableObj::UpdateUI();
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -790,9 +790,9 @@ void WXGLCrystalCanvas::OnExit(wxCommandEvent &event)
 void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
 {
    VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnPaint()",7)
-	// This means that another update of the display list is being done, so...
-	if(true==mpWXCrystal->GLDisplayListIsLocked()) return;
-	
+   // This means that another update of the display list is being done, so...
+   if(true==mpWXCrystal->GLDisplayListIsLocked()) return;
+   
    wxPaintDC dc(this);
    PrepareDC(dc);
    this->GetParent()->PrepareDC(dc);
@@ -825,11 +825,11 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
    glMultMatrixf( &m[0][0] );
    
    //Draw
-		// another update of the display list is being done, so...
-		if(true==mpWXCrystal->GLDisplayListIsLocked()) return;
-	
-   	glCallList(mpWXCrystal->GrabCrystalGLDisplayList());  //Draw Crystal
-   	mpWXCrystal->ReleaseCrystalGLDisplayList();
+      // another update of the display list is being done, so...
+      if(true==mpWXCrystal->GLDisplayListIsLocked()) return;
+   
+      glCallList(mpWXCrystal->GrabCrystalGLDisplayList());  //Draw Crystal
+      mpWXCrystal->ReleaseCrystalGLDisplayList();
    
    glFlush();
    SwapBuffers();
@@ -850,9 +850,9 @@ void WXGLCrystalCanvas::OnSize(wxSizeEvent& event)
       glViewport(0, 0, width, height);
       glMatrixMode(GL_PROJECTION);
       glLoadIdentity();
-   	VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnSize():"<<mViewAngle<<","<<width<<","<<height<<","<<mDist,2)
+      VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnSize():"<<mViewAngle<<","<<width<<","<<height<<","<<mDist,2)
       if( (width>0)&&(height>0)) //in case the window is docked...
-      	gluPerspective(mViewAngle,(float)width/(float)height,1.f,2.*mDist);	
+         gluPerspective(mViewAngle,(float)width/(float)height,1.f,2.*mDist);   
    }
    VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnSize():End",7)
 }
@@ -876,8 +876,8 @@ void WXGLCrystalCanvas::OnKeyDown(wxKeyEvent& event)
          glMatrixMode(GL_PROJECTION);
          glLoadIdentity();
          if( (width>0)&&(height>0)) //in case size is null...
-         	gluPerspective(mViewAngle,(float)width/(float)height,
-                        (mDist>100)?(mDist-100):1.,mDist+100);	
+            gluPerspective(mViewAngle,(float)width/(float)height,
+                        (mDist>100)?(mDist-100):1.,mDist+100);   
          Refresh(FALSE);
          break;
       }
@@ -891,8 +891,8 @@ void WXGLCrystalCanvas::OnKeyDown(wxKeyEvent& event)
          glMatrixMode(GL_PROJECTION);
          glLoadIdentity();
          if( (width>0)&&(height>0)) //in case size is null...
-         	gluPerspective(mViewAngle,(float)width/(float)height,
-                        (mDist>100)?(mDist-100):1.,mDist+100);	
+            gluPerspective(mViewAngle,(float)width/(float)height,
+                        (mDist>100)?(mDist-100):1.,mDist+100);   
          Refresh(FALSE);
          break;
       }
@@ -990,7 +990,7 @@ void WXGLCrystalCanvas::OnMouse( wxMouseEvent& event )
       GetClientSize(& width, & height);
       if(event.LeftIsDown())
       {
-   		VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnMouse():Dragging Left Button",2)
+         VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnMouse():Dragging Left Button",2)
          // drag in progress, simulate trackball
          float spin_quat[4];
          trackball(spin_quat,
@@ -1004,7 +1004,7 @@ void WXGLCrystalCanvas::OnMouse( wxMouseEvent& event )
       }
       if(event.MiddleIsDown())
       {
-   		VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnMouse():Dragging Middle Button",2)
+         VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnMouse():Dragging Middle Button",2)
          const float v= (mTrackBallLastY-event.GetY())/(float)height;
          const float h= (mTrackBallLastX-event.GetX())/(float)width;
          
@@ -1014,15 +1014,15 @@ void WXGLCrystalCanvas::OnMouse( wxMouseEvent& event )
          glMatrixMode(GL_PROJECTION);
          glLoadIdentity();
          if( (width>0)&&(height>0)) //in case size is null...
-         	gluPerspective(mViewAngle,(float)width/(float)height,
-                        (mDist>100)?(mDist-100):1.,mDist+100);	
+            gluPerspective(mViewAngle,(float)width/(float)height,
+                        (mDist>100)?(mDist-100):1.,mDist+100);   
          Refresh(FALSE);
          VFN_DEBUG_MESSAGE(mViewAngle <<" "<<mDist,2)
       }
    }
    if(event.RightIsDown())
    {
-   	VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnMouse():Right Button",2)
+      VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnMouse():Right Button",2)
       this->PopupMenu(mpPopUpMenu, event.GetX(), event.GetY() );
    }
 
@@ -1050,19 +1050,19 @@ void WXGLCrystalCanvas::InitGL()
     
    glEnable(GL_DEPTH_TEST);
       glEnable(GL_LIGHTING);
-		
+      
       const GLfloat color_Ambient [] = {0.3, 0.3, 0.3, 1.00}; 
       const GLfloat color_Diffuse [] = {0.6, 0.6, 0.6, 1.00}; 
       const GLfloat color_Specular[] = {0.8, 0.8, 0.8, 1.00}; 
-		
-		glLightfv( GL_LIGHT0, GL_AMBIENT,  color_Ambient); 
-		glLightfv( GL_LIGHT0, GL_DIFFUSE,  color_Diffuse); 
-		glLightfv( GL_LIGHT0, GL_SPECULAR, color_Specular); 
-		glLightModelf(GL_LIGHT_MODEL_TWO_SIDE, 1.0); 
+      
+      glLightfv( GL_LIGHT0, GL_AMBIENT,  color_Ambient); 
+      glLightfv( GL_LIGHT0, GL_DIFFUSE,  color_Diffuse); 
+      glLightfv( GL_LIGHT0, GL_SPECULAR, color_Specular); 
+      glLightModelf(GL_LIGHT_MODEL_TWO_SIDE, 1.0); 
 
-		glEnable( GL_LIGHT0 ); 
+      glEnable( GL_LIGHT0 ); 
 
-   	glEnable(GL_NORMALIZE);
+      glEnable(GL_NORMALIZE);
       glHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_FASTEST);
       glHint(GL_POLYGON_SMOOTH_HINT,GL_FASTEST);
    
@@ -1173,11 +1173,11 @@ void WXGLCrystalCanvas::OnChangeLimits(wxCommandEvent & WXUNUSED(event))
       dumbUser.ShowModal();
       return;
    }
-	mXmin=xMin;mXmax=xMax;
-	mYmin=yMin;mYmax=yMax;
-	mZmin=zMin;mZmax=zMax;
+   mXmin=xMin;mXmax=xMax;
+   mYmin=yMin;mYmax=yMax;
+   mZmin=zMin;mZmax=zMax;
    mpWXCrystal->UpdateGL(false,mXmin,mXmax,mYmin,mYmax,mZmin,mZmax);
-	this->CrystUpdate();
+   this->CrystUpdate();
 }
 
 }// namespace 

@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -68,11 +68,11 @@ BEGIN_EVENT_TABLE(WXDiffractionSingleCrystal, wxWindow)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CUA1,WXDiffractionSingleCrystal::OnMenuSetWavelength)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_FEA1,WXDiffractionSingleCrystal::OnMenuSetWavelength)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CRA1,WXDiffractionSingleCrystal::OnMenuSetWavelength)
-   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, 						  WXRefinableObj::OnUpdateUI)
+   EVT_UPDATE_UI(ID_CRYST_UPDATEUI,                     WXRefinableObj::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXDiffractionSingleCrystal::WXDiffractionSingleCrystal(wxWindow *parent,
-																		 DiffractionDataSingleCrystal* data):
+                                                       DiffractionDataSingleCrystal* data):
 WXRefinableObj(parent,data),mpData(data)
 {
    VFN_DEBUG_MESSAGE("WXDiffractionSingleCrystal::WXDiffractionSingleCrystal()",6)
@@ -147,7 +147,7 @@ WXRefinableObj(parent,data),mpData(data)
       mpFieldCrystal=new WXFieldChoice(this,ID_DIFFSINGLECRYST_CRYSTAL,"Crystal:",300);
       mpSizer->Add(mpFieldCrystal,0,wxALIGN_LEFT);
       mList.Add(mpFieldCrystal);
-	// Max Sin(theta/Lambda)
+   // Max Sin(theta/Lambda)
       WXFieldPar<REAL> *maxSiThOvLa=
          new WXFieldPar<REAL>(this,"Max Sin(theta)/lambda:",-1,&(mpData->mMaxSinThetaOvLambda));
       mpSizer->Add(maxSiThOvLa,0,wxALIGN_LEFT);
@@ -160,8 +160,8 @@ WXRefinableObj(parent,data),mpData(data)
 
 void WXDiffractionSingleCrystal::OnMenuSimulate(wxCommandEvent & WXUNUSED(event))
 {
-	WXCrystValidateAllUserInput();
-	double theta;
+   WXCrystValidateAllUserInput();
+   double theta;
    {
       wxTextEntryDialog dialog(this,"Theta Max",
                               "Enter maximum Theta (degrees)","50",wxOK | wxCANCEL);
@@ -176,78 +176,78 @@ void WXDiffractionSingleCrystal::OnMenuSimulate(wxCommandEvent & WXUNUSED(event)
    choices[0]="all reflections (keep Friedel&Bijvoet mates)";
    choices[1]="only unique reflections";
    wxSingleChoiceDialog dialog(this,"Choose method",
-										 "Choose method for Reflection generation",
-				                   2,choices,0,wxOK | wxCANCEL);
+                               "Choose method for Reflection generation",
+                               2,choices,0,wxOK | wxCANCEL);
    if(wxID_OK!=dialog.ShowModal()) return;
    const int choice=dialog.GetSelection();
-	if(0==choice) mpData->GenHKLFullSpace(theta*DEG2RAD,false);
-	else mpData->GenHKLFullSpace(theta*DEG2RAD,true);
-	
-	CrystVector_REAL iobs(mpData->GetNbRefl());
-	iobs=100.;
-	mpData->SetIobs(iobs);
+   if(0==choice) mpData->GenHKLFullSpace(theta*DEG2RAD,false);
+   else mpData->GenHKLFullSpace(theta*DEG2RAD,true);
+   
+   CrystVector_REAL iobs(mpData->GetNbRefl());
+   iobs=100.;
+   mpData->SetIobs(iobs);
 }
 void WXDiffractionSingleCrystal::OnMenuImport(wxCommandEvent & event)
 {
-	switch(event.GetId())
-	{
-		case ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBS:
-		{
-   		wxFileDialog open(this,"Choose file to import from",
+   switch(event.GetId())
+   {
+      case ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBS:
+      {
+         wxFileDialog open(this,"Choose file to import from",
                                         "","","*.*",wxOPEN | wxFILE_MUST_EXIST);
-   		if(open.ShowModal() != wxID_OK) return;
-			long nb=0;
-   		{
-      		wxTextEntryDialog dialog(this,"Number of reflections",
-                              		"Enter The number of reflections to import","50",
-												wxOK | wxCANCEL);
-      		if(wxID_OK!=dialog.ShowModal())
-      		{
-         		VFN_DEBUG_EXIT("WXDiffractionSingleCrystal::OnMenuImport():Cancelled",6)
-         		return;
-      		}
-      		dialog.GetValue().ToLong(&nb);
-   		}
-   		mpData->ImportHklIobs(open.GetPath().c_str(),nb);
-			return;
-		}
-		case ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBSSIGMA:
-		{
-   		wxFileDialog open(this,"Choose file to import from",
+         if(open.ShowModal() != wxID_OK) return;
+         long nb=0;
+         {
+            wxTextEntryDialog dialog(this,"Number of reflections",
+                                    "Enter The number of reflections to import","50",
+                                    wxOK | wxCANCEL);
+            if(wxID_OK!=dialog.ShowModal())
+            {
+               VFN_DEBUG_EXIT("WXDiffractionSingleCrystal::OnMenuImport():Cancelled",6)
+               return;
+            }
+            dialog.GetValue().ToLong(&nb);
+         }
+         mpData->ImportHklIobs(open.GetPath().c_str(),nb);
+         return;
+      }
+      case ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBSSIGMA:
+      {
+         wxFileDialog open(this,"Choose file to import from",
                                         "","","*.*",wxOPEN | wxFILE_MUST_EXIST);
-   		if(open.ShowModal() != wxID_OK) return;
-			long nb=0;
-   		{
-      		wxTextEntryDialog dialog(this,"Number of reflections",
-                              		"Enter The number of reflections to import","50",
-												wxOK | wxCANCEL);
-      		if(wxID_OK!=dialog.ShowModal())
-      		{
-         		VFN_DEBUG_EXIT("WXDiffractionSingleCrystal::OnMenuImport():Cancelled",6)
-         		return;
-      		}
-      		dialog.GetValue().ToLong(&nb);
-   		}
-   		mpData->ImportHklIobsSigma(open.GetPath().c_str(),nb);
-			return;
-		}
-		case ID_DIFFSINGLECRYST_MENU_IMPORT_JANAM91:
-		{
-		}
-	}
+         if(open.ShowModal() != wxID_OK) return;
+         long nb=0;
+         {
+            wxTextEntryDialog dialog(this,"Number of reflections",
+                                    "Enter The number of reflections to import","50",
+                                    wxOK | wxCANCEL);
+            if(wxID_OK!=dialog.ShowModal())
+            {
+               VFN_DEBUG_EXIT("WXDiffractionSingleCrystal::OnMenuImport():Cancelled",6)
+               return;
+            }
+            dialog.GetValue().ToLong(&nb);
+         }
+         mpData->ImportHklIobsSigma(open.GetPath().c_str(),nb);
+         return;
+      }
+      case ID_DIFFSINGLECRYST_MENU_IMPORT_JANAM91:
+      {
+      }
+   }
 }
 void WXDiffractionSingleCrystal::OnMenuSaveHKLIobsIcalc(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXDiffractionSingleCrystal::OnMenuSaveHKLIobsIcalc()",6)
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    wxFileDialog save(this,"Choose a file","","","*.txt",wxSAVE | wxOVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
    mpData->SaveHKLIobsIcalc(save.GetPath().c_str());
 }
 void WXDiffractionSingleCrystal::OnMenuSetWavelength(wxCommandEvent &event)
 {
-	WXCrystValidateAllUserInput();
-	//:TODO: Use wxRadiation instead
+   WXCrystValidateAllUserInput();
+   //:TODO: Use wxRadiation instead
    switch(event.GetId())
    {
       case ID_DIFFSINGLECRYST_MENU_WAVELENGTH_XRAY:
@@ -293,7 +293,7 @@ void WXDiffractionSingleCrystal::OnMenuSetWavelength(wxCommandEvent &event)
 void WXDiffractionSingleCrystal::OnChangeCrystal(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXDiffractionSingleCrystal::OnChangeCrystal()",6)
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    int choice;
    Crystal *cryst=dynamic_cast<Crystal*>
       (WXDialogChooseFromRegistry(gCrystalRegistry,(wxWindow*)this,
@@ -304,8 +304,8 @@ void WXDiffractionSingleCrystal::OnChangeCrystal(wxCommandEvent & WXUNUSED(event
 }
 void WXDiffractionSingleCrystal::UpdateUI()
 {
-	if(&(mpData->GetCrystal())!=0) mpFieldCrystal->SetValue(mpData->GetCrystal().GetName());
-	this->WXRefinableObj::UpdateUI();
+   if(&(mpData->GetCrystal())!=0) mpFieldCrystal->SetValue(mpData->GetCrystal().GetName());
+   this->WXRefinableObj::UpdateUI();
 }
 
 }//namespace

@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ namespace ObjCryst
 //
 ////////////////////////////////////////////////////////////////////////
 BEGIN_EVENT_TABLE(WXZAtom,wxWindow)
-   EVT_BUTTON(ID_ZATOM_SCATTPOW, 	WXZAtom::OnChangeScattPow)
+   EVT_BUTTON(ID_ZATOM_SCATTPOW,    WXZAtom::OnChangeScattPow)
 END_EVENT_TABLE()
 
 WXZAtom::WXZAtom(wxWindow* parent, ZAtom *obj):
@@ -108,7 +108,7 @@ void WXZAtom::CrystUpdate()
 
 void WXZAtom::UpdateUI()
 {
-	mList.UpdateUI();
+   mList.UpdateUI();
    mpFieldName->SetValue(mpZAtom->GetName().c_str());
    if(0!=mpZAtom->GetScatteringPower())
       mpFieldScattPower->SetValue(mpZAtom->GetScatteringPower()->GetName());
@@ -142,7 +142,7 @@ bool WXZAtom::Layout()
 void WXZAtom::OnChangeScattPow(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXAtom::OnChangeScattPow()",6)
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    int choice;
    const ScatteringPower *scatt=WXDialogChooseFromRegistry(
                mpZAtom->GetZScatterer().GetCrystal().GetScatteringPowerRegistry(),
@@ -150,7 +150,7 @@ void WXZAtom::OnChangeScattPow(wxCommandEvent & WXUNUSED(event))
    if(0==scatt) return;
    mpZAtom->SetScatteringPower(scatt);
    this->CrystUpdate();
-	this->UpdateUI();
+   this->UpdateUI();
 }
 ////////////////////////////////////////////////////////////////////////
 //
@@ -167,8 +167,8 @@ BEGIN_EVENT_TABLE(WXZScatterer,wxWindow)
    EVT_MENU(ID_ZSCATTERER_MENU_PAR_LIMITS_RELAT_DIHED, WXZScatterer::OnMenuSetLimits)
    EVT_MENU(ID_ZSCATTERER_MENU_ATOM_ADD,               WXZScatterer::OnMenuAddZAtom)
    EVT_MENU(ID_ZSCATTERER_MENU_ATOM_CHANGE_PIVOT,      WXZScatterer::OnMenuChangePivotAtom)
-   EVT_MENU(ID_ZSCATTERER_MENU_IMPORT_FHZ,      		 WXZScatterer::OnMenuImportZMatrix)
-   EVT_MENU(ID_ZSCATTERER_MENU_EXPORT_FHZ,      		 WXZScatterer::OnMenuExportZMatrix)
+   EVT_MENU(ID_ZSCATTERER_MENU_IMPORT_FHZ,             WXZScatterer::OnMenuImportZMatrix)
+   EVT_MENU(ID_ZSCATTERER_MENU_EXPORT_FHZ,             WXZScatterer::OnMenuExportZMatrix)
 END_EVENT_TABLE()
 
 WXZScatterer::WXZScatterer(wxWindow* parent, ZScatterer *obj):
@@ -178,11 +178,11 @@ WXScatterer(parent,obj),mpZScatterer(obj)
    //Menus
       mpMenuBar->AddMenu("File",ID_ZSCATTERER_MENU_FILE);
          mpMenuBar->AddMenuItem(ID_ZSCATTERER_MENU_FILE,
-										  ID_ZSCATTERER_MENU_IMPORT_FHZ,
-										  "Import Fenske-Hall Zmatrix");
+                                ID_ZSCATTERER_MENU_IMPORT_FHZ,
+                                "Import Fenske-Hall Zmatrix");
          mpMenuBar->AddMenuItem(ID_ZSCATTERER_MENU_FILE,
-										  ID_ZSCATTERER_MENU_EXPORT_FHZ,
-										  "Save as a Fenske-Hall Zmatrix");
+                                ID_ZSCATTERER_MENU_EXPORT_FHZ,
+                                "Save as a Fenske-Hall Zmatrix");
       mpMenuBar->AddMenu("Parameters",ID_REFOBJ_MENU_PAR);
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_FIXALL,"Fix all");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_UNFIXALL,"Unfix all");
@@ -231,7 +231,7 @@ WXScatterer(parent,obj),mpZScatterer(obj)
 void WXZScatterer::OnMenuAddZAtom(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXZScatterer::OnMenuAddZAtom()",6)
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    
    int choice;
    int bondAtomId=0;
@@ -342,7 +342,7 @@ void WXZScatterer::OnMenuAddZAtom(wxCommandEvent & WXUNUSED(event))
 void WXZScatterer::OnMenuSetLimits(wxCommandEvent & event)
 {//:TODO: Need to 
    VFN_DEBUG_ENTRY("WXZScatterer::OnMenuSetLimits()",6)
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    switch(event.GetId())
    {
       case ID_ZSCATTERER_MENU_PAR_LIMITS_RELAT_BOND:
@@ -415,7 +415,7 @@ void WXZScatterer::OnMenuSetLimits(wxCommandEvent & event)
 
 void WXZScatterer::OnMenuChangePivotAtom(wxCommandEvent &WXUNUSED(event))
 {
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    int pivot=mpZScatterer->mCenterAtomIndex;
    const ZAtom *atom=WXDialogChooseFromRegistry(mpZScatterer->GetZAtomRegistry(),
                                               this,"Choose the new Pivot atom",pivot);
@@ -439,8 +439,8 @@ void WXZScatterer::OnMenuImportZMatrix(wxCommandEvent &WXUNUSED(event))
       throw ObjCrystException("WXZScatterer::OnMenuImportZMatrix() : \
 Error opening file for input:"+string(open.GetPath().c_str()));
    }
-	mpZScatterer->ImportFenskeHallZMatrix(fin);
-	fin.close();
+   mpZScatterer->ImportFenskeHallZMatrix(fin);
+   fin.close();
 }
 void WXZScatterer::OnMenuExportZMatrix(wxCommandEvent &WXUNUSED(event))
 {
@@ -452,8 +452,8 @@ void WXZScatterer::OnMenuExportZMatrix(wxCommandEvent &WXUNUSED(event))
       throw ObjCrystException("WXZScatterer::OnMenuExportZMatrix() : \
 Error opening file for input:"+string(save.GetPath().c_str()));
    }
-	mpZScatterer->ExportFenskeHallZMatrix(fout);
-	fout.close();
+   mpZScatterer->ExportFenskeHallZMatrix(fout);
+   fout.close();
 }
 
 }// namespace 

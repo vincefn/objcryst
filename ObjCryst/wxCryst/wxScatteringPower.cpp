@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ namespace ObjCryst
 ////////////////////////////////////////////////////////////////////////
 BEGIN_EVENT_TABLE(WXScatteringPowerAtom, wxWindow)
    EVT_MENU(ID_SCATTPOWATOM_MENU_COLOUR_SETRGB, WXScatteringPowerAtom::OnChangeColour)
-   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, 				WXRefinableObj::OnUpdateUI)
+   EVT_UPDATE_UI(ID_CRYST_UPDATEUI,             WXRefinableObj::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXScatteringPowerAtom::WXScatteringPowerAtom(wxWindow* parent, ScatteringPowerAtom *obj):
@@ -145,7 +145,7 @@ void WXScatteringPowerAtom::OnChangeColour(wxCommandEvent & event)
 void WXScatteringPowerAtom::UpdateUI()
 {
    mpFieldSymbol->SetValue(mpScatteringPowerAtom->GetSymbol());
-	this->WXRefinableObj::UpdateUI();
+   this->WXRefinableObj::UpdateUI();
 }
 
 }// namespace 

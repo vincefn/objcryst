@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -393,7 +393,7 @@ unsigned int SpaceGroup::GetUniqueAxis()const{return mUniqueAxisId;}
 void SpaceGroup::InitSpaceGroup(const string &spgId)
 {
    VFN_DEBUG_MESSAGE("SpaceGroup::InitSpaceGroup():"<<spgId,5)
-	(*fpObjCrystInformUser)("Initializing spacegroup: "+spgId);
+   (*fpObjCrystInformUser)("Initializing spacegroup: "+spgId);
 #if 0
    mfpRealGeomStructFactor=0;
    mfpImagGeomStructFactor=0;
@@ -411,7 +411,7 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
          cout << "Cannot understand Spacegroup Symbol !" ;
          //:TODO: throw Exception
          this->InitSpaceGroup(mId);
-			(*fpObjCrystInformUser)("Could not understand spacegroup symbol: "+spgId);
+         (*fpObjCrystInformUser)("Could not understand spacegroup symbol: "+spgId);
          return;
          //throw 0;
       }
@@ -486,7 +486,7 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
    }else mUniqueAxisId=0;
    //this->Print();
    mClock.Click();
-	(*fpObjCrystInformUser)("Initializing spacegroup: "+spgId+"... Done");
+   (*fpObjCrystInformUser)("Initializing spacegroup: "+spgId+"... Done");
    VFN_DEBUG_MESSAGE("SpaceGroup::InitSpaceGroup():End",4)
 }
 

@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -80,10 +80,10 @@ extern unsigned int gVFNDebugMessageIndent;
 
 #else //__DEBUG__
 
-#define VFN_DEBUG_MESSAGE(level,message)
+#define VFN_DEBUG_MESSAGE(message,level)
 #define VFN_DEBUG_MESSAGE_SHORT(message,level)
-#define VFN_DEBUG_ENTRY(level,message)
-#define VFN_DEBUG_EXIT(level,message)
+#define VFN_DEBUG_ENTRY(message,level)
+#define VFN_DEBUG_EXIT(message,level)
 #define VFN_DEBUG_GLOBAL_LEVEL(level)
 #define VFN_DEBUG_LOCAL_LEVEL(level)
 

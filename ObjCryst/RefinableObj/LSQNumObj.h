@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,11 +29,11 @@
 
 #if 0
 #ifdef __WX__CRYST__
-	namespace ObjCryst
-	{
-		class LSQNumObj;
-	}
-	#include "wxCryst/wxLSQNumObj.h"
+   namespace ObjCryst
+   {
+      class LSQNumObj;
+   }
+   #include "wxCryst/wxLSQNumObj.h"
 #endif
 #endif
 
@@ -45,9 +45,9 @@ namespace ObjCryst
 */
 class LSQNumObj
 {
-	public:
-		LSQNumObj(string objName="Unnamed LSQ object");
-		~LSQNumObj();
+   public:
+      LSQNumObj(string objName="Unnamed LSQ object");
+      ~LSQNumObj();
       /// Fix one parameter
       void SetParIsFixed(const string& parName,const bool fix);
       /// Fix one family of parameters
@@ -59,24 +59,24 @@ class LSQNumObj
       /// Set a family of parameters to be used
       void SetParIsUsed(const RefParType *type,const bool use);
       
-		void Refine (int nbCycle=1,bool useLevenbergMarquardt=false);
-		CrystVector_REAL Sigma()const;
-		CrystMatrix_REAL CorrelMatrix()const;
-		REAL Rfactor()const;
-		REAL RwFactor()const;
-		REAL ChiSquare()const;	//uses the weight if specified
+      void Refine (int nbCycle=1,bool useLevenbergMarquardt=false);
+      CrystVector_REAL Sigma()const;
+      CrystMatrix_REAL CorrelMatrix()const;
+      REAL Rfactor()const;
+      REAL RwFactor()const;
+      REAL ChiSquare()const;   //uses the weight if specified
       ///Add an object to refine
-		void SetRefinedObj(RefinableObj &obj, const unsigned int LSQFuncIndex=0);
-		void SetUseSaveFileOnEachCycle(bool yesOrNo=true);
-		void SetSaveFile(string fileName="refine.save");
-		void PrintRefResults()const;
-		void SetDampingFactor(const REAL newDampFact);
-		void PurgeSaveFile();
-		void WriteReportToFile()const;
+      void SetRefinedObj(RefinableObj &obj, const unsigned int LSQFuncIndex=0);
+      void SetUseSaveFileOnEachCycle(bool yesOrNo=true);
+      void SetSaveFile(string fileName="refine.save");
+      void PrintRefResults()const;
+      void SetDampingFactor(const REAL newDampFact);
+      void PurgeSaveFile();
+      void WriteReportToFile()const;
       
-		void OptimizeDerivativeSteps();
-	protected:
-	private:
+      void OptimizeDerivativeSteps();
+   protected:
+   private:
       /// Prepare mRefParList for the refinement
       void PrepareRefParList();
       // Refined object
@@ -84,34 +84,34 @@ class LSQNumObj
          ObjRegistry<RefinableObj> mRecursiveRefinedObjList;
       /// The refinable par list used during refinement. Only a compilation
       /// of the parameters in RefinableObj and its sub-objects
-		mutable RefinableObj mRefParList;
+      mutable RefinableObj mRefParList;
       /// Damping factor for the refinement (unused yet...)
-		REAL mDampingFactor;
+      REAL mDampingFactor;
       ///Save result to file after each cycle ?
-		bool mSaveReportOnEachCycle;	
+      bool mSaveReportOnEachCycle;   
       /// Name of the refined object
-		string mName;
+      string mName;
       /// File name where refinement info is saved
-		string mSaveFileName;
-		REAL mR,mRw,mChiSq;
+      string mSaveFileName;
+      REAL mR,mRw,mChiSq;
       /// Correlation matrix between all refined parameters.
-		CrystMatrix_REAL mCorrelMatrix;
+      CrystMatrix_REAL mCorrelMatrix;
       /// Observed values.
-		CrystVector_REAL mObs;
+      CrystVector_REAL mObs;
       /// Weight corresponding to all observed values.
-		CrystVector_REAL mWeight;
+      CrystVector_REAL mWeight;
       /// Index of the set of saved values for all refinable parameters, before refinement
       /// and before the last cycle.
       int mIndexValuesSetInitial, mIndexValuesSetLast;
       /// If true, then stop at the end of the cycle. Used in multi-threading environment
       bool mStopAfterCycle;
-		/// The optimized object
-		RefinableObj *mpRefinedObj;
-		/// The index of the LSQ function in the refined object (if there are several...)
-		unsigned int mLSQFuncIndex;
+      /// The optimized object
+      RefinableObj *mpRefinedObj;
+      /// The index of the LSQ function in the refined object (if there are several...)
+      unsigned int mLSQFuncIndex;
 #if 0
 #ifdef __WX__CRYST__
-		friend class WXLSQNumObj;
+      friend class WXLSQNumObj;
 #endif
 #endif
 };

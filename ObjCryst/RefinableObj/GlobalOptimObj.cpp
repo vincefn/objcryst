@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -54,12 +54,12 @@ mNbCostFunction(0),mMaxNbCostFunction(20),
 mpCostFunctionId(mMaxNbCostFunction),mCostFunctionWeight(mMaxNbCostFunction)
 {
    VFN_DEBUG_ENTRY("OptimizationObj::OptimizationObj()",5)
-	// This must be done in a real class to avoid calling a pure virtual method
-	// if a graphical representation is automatically called upon registration.
+   // This must be done in a real class to avoid calling a pure virtual method
+   // if a graphical representation is automatically called upon registration.
    //  gOptimizationObjRegistry.Register(*this);
-	
-	// We only copy parameters, so do not delete them !
-	mRefParList.SetDeleteRefParInDestructor(false);
+   
+   // We only copy parameters, so do not delete them !
+   mRefParList.SetDeleteRefParInDestructor(false);
    VFN_DEBUG_EXIT("OptimizationObj::OptimizationObj()",5)
 }
 
@@ -80,9 +80,9 @@ void OptimizationObj::RandomizeStartingConfig()
          const REAL max=mRefParList.GetParNotFixed(j).GetMax();
          mRefParList.GetParNotFixed(j).MutateTo(min+(max-min)*(rand()/(REAL)RAND_MAX) );
       }
-		else if(true==mRefParList.GetParNotFixed(j).IsPeriodic())
-			    mRefParList.GetParNotFixed(j).
-				 	Mutate(mRefParList.GetParNotFixed(j).GetPeriod()*rand()/(REAL)RAND_MAX);
+      else if(true==mRefParList.GetParNotFixed(j).IsPeriodic())
+             mRefParList.GetParNotFixed(j).
+                Mutate(mRefParList.GetParNotFixed(j).GetPeriod()*rand()/(REAL)RAND_MAX);
    }
       //else cout << mRefParList.GetParNotFixed(j).Name() <<" Not limited :-(" <<endl;
    VFN_DEBUG_EXIT("OptimizationObj::RandomizeStartingConfig()",5)
@@ -91,68 +91,68 @@ void OptimizationObj::RandomizeStartingConfig()
 void OptimizationObj::FixAllPar()
 {
    VFN_DEBUG_ENTRY("OptimizationObj::FixAllPar()",5)
-	this->BuildRecursiveRefObjList();
+   this->BuildRecursiveRefObjList();
    for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
       mRecursiveRefinedObjList.GetObj(i).FixAllPar();
    VFN_DEBUG_EXIT("OptimizationObj::FixAllPar():End",5)
 }
 void OptimizationObj::SetParIsFixed(const string& parName,const bool fix)
 {
-	this->BuildRecursiveRefObjList();
+   this->BuildRecursiveRefObjList();
    for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
       mRecursiveRefinedObjList.GetObj(i).SetParIsFixed(parName,fix);
 }
 void OptimizationObj::SetParIsFixed(const RefParType *type,const bool fix)
 {
-	this->BuildRecursiveRefObjList();
+   this->BuildRecursiveRefObjList();
    for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
       mRecursiveRefinedObjList.GetObj(i).SetParIsFixed(type,fix);
 }
    
 void OptimizationObj::UnFixAllPar()
 {
-	this->BuildRecursiveRefObjList();
+   this->BuildRecursiveRefObjList();
    for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
       mRecursiveRefinedObjList.GetObj(i).UnFixAllPar();
 }
    
 void OptimizationObj::SetParIsUsed(const string& parName,const bool use)
 {
-	this->BuildRecursiveRefObjList();
+   this->BuildRecursiveRefObjList();
    for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
       mRecursiveRefinedObjList.GetObj(i).SetParIsUsed(parName,use);
 }
 void OptimizationObj::SetParIsUsed(const RefParType *type,const bool use)
 {
-	this->BuildRecursiveRefObjList();
+   this->BuildRecursiveRefObjList();
    for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
       mRecursiveRefinedObjList.GetObj(i).SetParIsUsed(type,use);
 }
 void OptimizationObj::SetLimitsRelative(const string &parName,
                                        const REAL min, const REAL max)
 {
-	this->BuildRecursiveRefObjList();
+   this->BuildRecursiveRefObjList();
    for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
       mRecursiveRefinedObjList.GetObj(i).SetLimitsRelative(parName,min,max);
 }
 void OptimizationObj::SetLimitsRelative(const RefParType *type,
                                        const REAL min, const REAL max)
 {
-	this->BuildRecursiveRefObjList();
+   this->BuildRecursiveRefObjList();
    for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
       mRecursiveRefinedObjList.GetObj(i).SetLimitsRelative(type,min,max);
 }
 void OptimizationObj::SetLimitsAbsolute(const string &parName,
                                        const REAL min, const REAL max)
 {
-	this->BuildRecursiveRefObjList();
+   this->BuildRecursiveRefObjList();
    for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
       mRecursiveRefinedObjList.GetObj(i).SetLimitsAbsolute(parName,min,max);
 }
 void OptimizationObj::SetLimitsAbsolute(const RefParType *type,
                                        const REAL min, const REAL max)
 {
-	this->BuildRecursiveRefObjList();
+   this->BuildRecursiveRefObjList();
    for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
       mRecursiveRefinedObjList.GetObj(i).SetLimitsAbsolute(type,min,max);
 }
@@ -162,9 +162,9 @@ REAL OptimizationObj::GetCostFunctionValue()
    TAU_PROFILE("OptimizationObj::GetCostFunctionValue()","void ()",TAU_DEFAULT);
    REAL cost =0.;
    for(unsigned int i=0;i<mNbCostFunction;i++)
-		if(mCostFunctionWeight(i)>0)
-      	cost += mCostFunctionWeight(i)*mpCostFunctionRefinableObj[i]
-						->GetCostFunctionValue(mpCostFunctionId(i));
+      if(mCostFunctionWeight(i)>0)
+         cost += mCostFunctionWeight(i)*mpCostFunctionRefinableObj[i]
+                  ->GetCostFunctionValue(mpCostFunctionId(i));
    return cost;
 }
 void OptimizationObj::StopAfterCycle() 
@@ -188,9 +188,9 @@ void OptimizationObj::DisplayReport()
 void OptimizationObj::AddRefinableObj(RefinableObj &obj)
 {
    VFN_DEBUG_MESSAGE("OptimizationObj::AddRefinableObj():"<<obj.GetName(),5)
-	//in case some object has been modified, to avoid rebuilding the entire list
-		this->BuildRecursiveRefObjList();
-		
+   //in case some object has been modified, to avoid rebuilding the entire list
+      this->BuildRecursiveRefObjList();
+      
    mRefinedObjList.Register(obj);
    RefObjRegisterRecursive(obj,mRecursiveRefinedObjList);
    #ifdef __WX__CRYST__
@@ -222,9 +222,9 @@ void OptimizationObj::Print()const {this->XMLOutput(cout);}
 
 void OptimizationObj::RestoreBestConfiguration()
 {
-	//:TODO: check list of refinableObj has not changed, and the list of
-	// RefPar has not changed in all sub-objects.
-	if(mBestParSavedSetIndex>0) mRefParList.RestoreParamSet(mBestParSavedSetIndex);
+   //:TODO: check list of refinableObj has not changed, and the list of
+   // RefPar has not changed in all sub-objects.
+   if(mBestParSavedSetIndex>0) mRefParList.RestoreParamSet(mBestParSavedSetIndex);
 }
 
 bool OptimizationObj::IsOptimizing()const{return mIsOptimizing;}
@@ -233,19 +233,19 @@ void OptimizationObj::PrepareRefParList()
 {
    VFN_DEBUG_ENTRY("OptimizationObj::PrepareRefParList()",6)
    
-	this->BuildRecursiveRefObjList();
+   this->BuildRecursiveRefObjList();
    // As any parameter been added in the recursive list of objects ?
-		RefinableObjClock clock;
-		GetRefParListClockRecursive(mRecursiveRefinedObjList,clock);
-	if(clock>mRefParList.GetRefParListClock())
-	{
-   	VFN_DEBUG_MESSAGE("OptimizationObj::PrepareRefParList():Rebuild list",6)
-   	mRefParList.ResetParList();
-   	for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
-      	mRefParList.AddPar(mRecursiveRefinedObjList.GetObj(i));
-	}
-	// Prepare for refinement, ie get the list of not fixed parameters,
-	// and prepare the objects...
+      RefinableObjClock clock;
+      GetRefParListClockRecursive(mRecursiveRefinedObjList,clock);
+   if(clock>mRefParList.GetRefParListClock())
+   {
+      VFN_DEBUG_MESSAGE("OptimizationObj::PrepareRefParList():Rebuild list",6)
+      mRefParList.ResetParList();
+      for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
+         mRefParList.AddPar(mRecursiveRefinedObjList.GetObj(i));
+   }
+   // Prepare for refinement, ie get the list of not fixed parameters,
+   // and prepare the objects...
    mRefParList.PrepareForRefinement();
    for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
       mRecursiveRefinedObjList.GetObj(i).PrepareForRefinement();
@@ -272,16 +272,16 @@ void OptimizationObj::UpdateDisplay()
 }
 void OptimizationObj::BuildRecursiveRefObjList()
 {
-	// First check if anything has changed (ie if a sub-object has been
-	// added or removed in the recursive refinable object list)
-	RefinableObjClock clock;
-	GetSubRefObjListClockRecursive(mRefinedObjList,clock);
-	if(clock>mRecursiveRefinedObjList.GetRegistryClock())
-	{
-		mRecursiveRefinedObjList.DeRegisterAll();
-		for(int i=0;i<mRefinedObjList.GetNb();i++)
-   		RefObjRegisterRecursive(mRefinedObjList.GetObj(i),mRecursiveRefinedObjList);
-	}
+   // First check if anything has changed (ie if a sub-object has been
+   // added or removed in the recursive refinable object list)
+   RefinableObjClock clock;
+   GetSubRefObjListClockRecursive(mRefinedObjList,clock);
+   if(clock>mRecursiveRefinedObjList.GetRegistryClock())
+   {
+      mRecursiveRefinedObjList.DeRegisterAll();
+      for(int i=0;i<mRefinedObjList.GetNb();i++)
+         RefObjRegisterRecursive(mRefinedObjList.GetObj(i),mRecursiveRefinedObjList);
+   }
 }
 
 //#################################################################################
@@ -411,11 +411,11 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
    {
       case GLOBAL_OPTIM_SIMULATED_ANNEALING:
       {
-			if(!silent) cout << "Starting Simulated Annealing Optimization"<<endl;
-			if(!silent) this->DisplayReport();
+         if(!silent) cout << "Starting Simulated Annealing Optimization"<<endl;
+         if(!silent) this->DisplayReport();
          RESTART_OPTIMIZATION:
-   		mRefParList.EraseAllParamSet();
-			/*
+         mRefParList.EraseAllParamSet();
+         /*
          //Re-init History
             mHistoryNb=0;
             mHistoryTrialNumber=-1;
@@ -426,7 +426,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
             mHistoryCostFunction(mHistoryNb)=this->GetCostFunctionValue();
             mHistorySavedParamSetIndex(mHistoryNb)=mRefParList.CreateParamSet();
             mHistoryNb++;
-			*/
+         */
          mCurrentCost=this->GetCostFunctionValue();
 
          mBestCost=mCurrentCost;
@@ -467,7 +467,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                                     *pow(mTemperatureMin/mTemperatureMax,
                                           mNbTrial/(REAL)nbSteps);break;
                   case ANNEALING_SMART:
-						{
+                  {
                      if((nbAcceptedMovesTemp/(REAL)nbTryPerTemp)>0.30)
                         simAnnealTemp/=1.5;
                      if((nbAcceptedMovesTemp/(REAL)nbTryPerTemp)<0.10)
@@ -475,8 +475,8 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                      if(simAnnealTemp>mTemperatureMax) simAnnealTemp=mTemperatureMax;
                      if(simAnnealTemp<mTemperatureMin) simAnnealTemp=mTemperatureMin;
                      nbAcceptedMovesTemp=0;
-							break;
-						}
+                     break;
+                  }
                   default: simAnnealTemp=mTemperatureMin;break;
                }
                switch(mAnnealingScheduleMutation.GetChoice())
@@ -496,9 +496,9 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                      if((nbAcceptedMovesTemp/(REAL)nbTryPerTemp)>0.3) mMutationAmplitude*=2.;
                      if((nbAcceptedMovesTemp/(REAL)nbTryPerTemp)<0.1) mMutationAmplitude/=2.;
                      if(mMutationAmplitude>mMutationAmplitudeMax) 
-								mMutationAmplitude=mMutationAmplitudeMax;
+                        mMutationAmplitude=mMutationAmplitudeMax;
                      if(mMutationAmplitude<mMutationAmplitudeMin) 
-								mMutationAmplitude=mMutationAmplitudeMax;
+                        mMutationAmplitude=mMutationAmplitudeMax;
                      nbAcceptedMovesTemp=0;
                      break;
                   default: mMutationAmplitude=mMutationAmplitudeMin;break;
@@ -520,8 +520,8 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                   //mHistorySavedParamSetIndex(mHistoryNb)=mRefParList.CreateParamSet();
                   //mHistoryNb++;
                   if(!silent) cout << "Trial :" << mNbTrial 
-                        			  << " Temp="<< simAnnealTemp
-                        			  << " Mutation Ampl.: "<<mMutationAmplitude
+                                   << " Temp="<< simAnnealTemp
+                                   << " Mutation Ampl.: "<<mMutationAmplitude
                                    << " NEW Best Cost="<<mBestCost<< endl;
                   nbTriesSinceBest=0;
                   this->UpdateDisplay();
@@ -554,7 +554,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
             }
             mNbTrial++;nbStep--;
             
-      		if((mBestCost<finalcost) || mStopAfterCycle) 
+            if((mBestCost<finalcost) || mStopAfterCycle) 
             {
                if(!silent) cout << endl <<endl << "Refinement Stopped."<<endl;
                break;
@@ -578,15 +578,15 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
          //Restore Best values
          mRefParList.RestoreParamSet(mBestParSavedSetIndex);
          mCurrentCost=this->GetCostFunctionValue();
-			if(!silent) this->DisplayReport();
+         if(!silent) this->DisplayReport();
          if(!silent) chrono.print();
          //mRefParList.Print();
          if(true==mHistorySaveAfterEachOptim) this->SaveOptimHistory();
-			break;
+         break;
       }//case GLOBAL_OPTIM_SIMULATED_ANNEALING
       case GLOBAL_OPTIM_PARALLEL_TEMPERING:
       {
-			if(!silent) cout << "Starting Parallel Tempering Optimization"<<endl;
+         if(!silent) cout << "Starting Parallel Tempering Optimization"<<endl;
          //Total number of parallel refinements,each is a 'World'. The most stable
          // world must be i=nbWorld-1, and the most changing World (high mutation,
          // high temperature) is i=0.
@@ -608,9 +608,9 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                                     *pow(mTemperatureMin/mTemperatureMax,
                                           i/(REAL)(nbWorld-1));break;
                   case ANNEALING_SMART:
-							simAnnealTemp(i)=sqrt(mTemperatureMin*mTemperatureMax);break;
+                     simAnnealTemp(i)=sqrt(mTemperatureMin*mTemperatureMax);break;
                   default:
-							simAnnealTemp(i)=sqrt(mTemperatureMin*mTemperatureMax);break;
+                     simAnnealTemp(i)=sqrt(mTemperatureMin*mTemperatureMax);break;
                }
             }
          //Init the different mutation rate parameters
@@ -631,12 +631,12 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                                     *pow(mMutationAmplitudeMin/mMutationAmplitudeMax,
                                           i/(REAL)(nbWorld-1));break;
                   case ANNEALING_SMART:
-							mutationAmplitude(i)=sqrt(mMutationAmplitudeMin*mMutationAmplitudeMax);break;
+                     mutationAmplitude(i)=sqrt(mMutationAmplitudeMin*mMutationAmplitudeMax);break;
                   default:
-							mutationAmplitude(i)=sqrt(mMutationAmplitudeMin*mMutationAmplitudeMax);break;
+                     mutationAmplitude(i)=sqrt(mMutationAmplitudeMin*mMutationAmplitudeMax);break;
                }
             }
-				cout << simAnnealTemp<<endl<<mutationAmplitude<<endl;
+            cout << simAnnealTemp<<endl<<mutationAmplitude<<endl;
          // Number of successive trials for each World. At the end of these trials
          // a swap is tried with the upper World (eg i-1). This number effectvely sets
          // the rate of swapping.
@@ -659,32 +659,32 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
             worldNbAcceptedMoves=0;
          //Do a report each... And check if mutation rate is OK (for annealing_smart)s
             const int nbTrialsReport=1000;
-			// TEST : allow GENETIC mating of configurations
-				//Get gene groups list :TODO: check for missing groups
-					CrystVector_uint refParGeneGroupIndex(mRefParList.GetNbPar());
-					unsigned int first=1;
-					for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
-						mRecursiveRefinedObjList.GetObj(i).GetGeneGroup(mRefParList,refParGeneGroupIndex,first);
-					for(int i=0;i<mRefParList.GetNbPar();i++)
-					{
-						if(!silent) cout << "Gene Group:"<<refParGeneGroupIndex(i)<<" :";
-						mRefParList.GetPar(i).Print();
-					}
-				// number of gene groups
-				// to select which gene groups are exchanged in the mating
-					//const unsigned int nbGeneGroup=refParGeneGroupIndex.max();
-					//CrystVector_int crossoverGroupIndex(nbGeneGroup);
-            	//const long parSetOffspringA=mRefParList.CreateParamSet("Offspring A");
-            	//const long parSetOffspringB=mRefParList.CreateParamSet("Offspring B");
-			// Used for automatic restart from minimum or randomization
-				long bestConfigNb=0;//when was the best config recorded ? (to restart if necessary)
-				long nbRestartFromMin=0;//Number of times we restarted from the minimum
-				REAL oldBestCost=-1;
-				long oldBestConfigIndex=mRefParList.CreateParamSet();
-			// record the statistical distribution n=f(cost function) for each World
-				//CrystMatrix_REAL trialsDensity(100,nbWorld+1);
-				//trialsDensity=0;
-				//for(int i=0;i<100;i++) trialsDensity(i,0)=i/(float)100;
+         // TEST : allow GENETIC mating of configurations
+            //Get gene groups list :TODO: check for missing groups
+               CrystVector_uint refParGeneGroupIndex(mRefParList.GetNbPar());
+               unsigned int first=1;
+               for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
+                  mRecursiveRefinedObjList.GetObj(i).GetGeneGroup(mRefParList,refParGeneGroupIndex,first);
+               for(int i=0;i<mRefParList.GetNbPar();i++)
+               {
+                  if(!silent) cout << "Gene Group:"<<refParGeneGroupIndex(i)<<" :";
+                  mRefParList.GetPar(i).Print();
+               }
+            // number of gene groups
+            // to select which gene groups are exchanged in the mating
+               //const unsigned int nbGeneGroup=refParGeneGroupIndex.max();
+               //CrystVector_int crossoverGroupIndex(nbGeneGroup);
+               //const long parSetOffspringA=mRefParList.CreateParamSet("Offspring A");
+               //const long parSetOffspringB=mRefParList.CreateParamSet("Offspring B");
+         // Used for automatic restart from minimum or randomization
+            long bestConfigNb=0;//when was the best config recorded ? (to restart if necessary)
+            long nbRestartFromMin=0;//Number of times we restarted from the minimum
+            REAL oldBestCost=-1;
+            long oldBestConfigIndex=mRefParList.CreateParamSet();
+         // record the statistical distribution n=f(cost function) for each World
+            //CrystMatrix_REAL trialsDensity(100,nbWorld+1);
+            //trialsDensity=0;
+            //for(int i=0;i<100;i++) trialsDensity(i,0)=i/(float)100;
          //Do the refinement
          bool makeReport=false;
          Chronometer chrono;
@@ -700,7 +700,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                   mRefParList.SaveParamSet(mLastParSavedSetIndex);
                   this->NewConfiguration();
                   REAL cost=this->GetCostFunctionValue();
-						//trialsDensity((long)(cost*100.),i+1)+=1;
+                  //trialsDensity((long)(cost*100.),i+1)+=1;
                   if(cost<currentCost(i))
                   {
                      currentCost(i)=cost;
@@ -714,7 +714,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                                          << " Temp="<< simAnnealTemp(i)
                                          << " Mutation Ampl.: "<<mMutationAmplitude
                                          << " NEW Best Cost="<<mBestCost<< endl;
-								bestConfigNb=mNbTrial;
+                        bestConfigNb=mNbTrial;
                         if(!silent) this->DisplayReport();
                         this->UpdateDisplay();
                         //for(int i=0;i<mRefinedObjList.GetNb();i++) 
@@ -751,126 +751,126 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                   }
                   */
                   mRefParList.GetParamSet(swapParSavedSetIndex)=
-                  	mRefParList.GetParamSet(worldCurrentSetIndex(i));
-						mRefParList.GetParamSet(worldCurrentSetIndex(i))=
-                  	mRefParList.GetParamSet(worldCurrentSetIndex(i-1));
+                     mRefParList.GetParamSet(worldCurrentSetIndex(i));
+                  mRefParList.GetParamSet(worldCurrentSetIndex(i))=
+                     mRefParList.GetParamSet(worldCurrentSetIndex(i-1));
                   mRefParList.GetParamSet(worldCurrentSetIndex(i-1))=
-							mRefParList.GetParamSet(swapParSavedSetIndex);
+                     mRefParList.GetParamSet(swapParSavedSetIndex);
                   const REAL tmp=currentCost(i);
                   currentCost(i)=currentCost(i-1);
                   currentCost(i-1)=tmp;
                }
             }
-				#if 0
+            #if 0
             //Try mating worlds- NEW !
-   			TAU_PROFILE_TIMER(timer1,\
-							"MonteCarloObj::Optimize (Try mating Worlds)"\
+            TAU_PROFILE_TIMER(timer1,\
+                     "MonteCarloObj::Optimize (Try mating Worlds)"\
                      ,"", TAU_FIELD);
-   			TAU_PROFILE_START(timer1);
-   			if( (rand()/(REAL)RAND_MAX)<.1)
+            TAU_PROFILE_START(timer1);
+            if( (rand()/(REAL)RAND_MAX)<.1)
             for(int k=nbWorld-1;k>nbWorld/2;k--)
-            	for(int i=k-nbWorld/3;i<k;i++)
-            	{
-						#if 0
-						// Random switching of gene groups
-						for(unsigned int j=0;j<nbGeneGroup;j++) 
-							crossoverGroupIndex(j)= (int) floor(rand()/((REAL)RAND_MAX-1)*2);
-						for(int j=0;j<mRefParList.GetNbPar();j++)
-						{
-							if(0==crossoverGroupIndex(refParGeneGroupIndex(j)-1))
-							{
-								mRefParList.GetParamSet(parSetOffspringA)(j)=
-									mRefParList.GetParamSet(worldCurrentSetIndex(i))(j);
-							   mRefParList.GetParamSet(parSetOffspringB)(j)=
-									mRefParList.GetParamSet(worldCurrentSetIndex(k))(j);
-							}
-							else
-							{
-								mRefParList.GetParamSet(parSetOffspringA)(j)=
-									mRefParList.GetParamSet(worldCurrentSetIndex(k))(j);
-								mRefParList.GetParamSet(parSetOffspringB)(j)=
-									mRefParList.GetParamSet(worldCurrentSetIndex(i))(j);
-							}
-						}
-						#endif
-						#if 1
-						// Switch gene groups in two parts
-						unsigned int crossoverPoint1=
-							(int)(1+floor(rand()/((REAL)RAND_MAX-1)*(nbGeneGroup)));
-						unsigned int crossoverPoint2=
-							(int)(1+floor(rand()/((REAL)RAND_MAX-1)*(nbGeneGroup)));
-						if(crossoverPoint2<crossoverPoint1)
-						{
-							int tmp=crossoverPoint1;
-							crossoverPoint1=crossoverPoint2;
-							crossoverPoint2=tmp;
-						}
-						if(crossoverPoint1==crossoverPoint2) crossoverPoint2+=1;
-						for(int j=0;j<mRefParList.GetNbPar();j++)
-						{
-							if((refParGeneGroupIndex(j)>crossoverPoint1)&&refParGeneGroupIndex(j)<crossoverPoint2)
-							{
-								mRefParList.GetParamSet(parSetOffspringA)(j)=
-									mRefParList.GetParamSet(worldCurrentSetIndex(i))(j);
-							   mRefParList.GetParamSet(parSetOffspringB)(j)=
-									mRefParList.GetParamSet(worldCurrentSetIndex(k))(j);
-							}
-							else
-							{
-								mRefParList.GetParamSet(parSetOffspringA)(j)=
-									mRefParList.GetParamSet(worldCurrentSetIndex(k))(j);
-								mRefParList.GetParamSet(parSetOffspringB)(j)=
-									mRefParList.GetParamSet(worldCurrentSetIndex(i))(j);
-							}
-						}
-						#endif
-						// Try both offspring
-						for(int junk=0;junk<2;junk++)
-						{
-                  	if(junk==0) mRefParList.RestoreParamSet(parSetOffspringA);
-							else mRefParList.RestoreParamSet(parSetOffspringB);
-                  	REAL cost=this->GetCostFunctionValue();
-               		//if(log((rand()+1)/(REAL)RAND_MAX)
-                     //	 < (-(cost-currentCost(k))/simAnnealTemp(k)))
-               		if(cost<currentCost(k))
-							{
-								// Also exchange genes for higher-temperature World ?
-								//if(junk==0) 
-								//	mRefParList.GetParamSet(worldCurrentSetIndex(i))=
-								//		mRefParList.GetParamSet(parSetOffspringB);
-								//else
-								//	mRefParList.GetParamSet(worldCurrentSetIndex(i))=
-								//		mRefParList.GetParamSet(parSetOffspringA);
-                  		currentCost(k)=cost;
-                  		mRefParList.SaveParamSet(worldCurrentSetIndex(k));
-                  		//worldNbAcceptedMoves(k)++;
-								if(!silent) cout << "Accepted mating :"<<k<<"(with"<<i<<")"
-								     <<" (crossoverGene1="<< crossoverPoint1<<","
-									  <<" crossoverGene2="<< crossoverPoint2<<")"
-							   	  <<endl; 
-                     	if(cost<mBestCost)
-                     	{
-                        	mBestCost=cost;
-                        	mRefParList.SaveParamSet(mBestParSavedSetIndex);
-                        	if(!silent) cout << "->Trial :" << mNbTrial 
-                           	  << " World="<< k
-                           	  << " Temp="<< simAnnealTemp(k)
-                           	  << " Mutation Ampl.: "<<mMutationAmplitude
-                           	  << " NEW Best Cost="<<mBestCost<< "(MATING !)"<<endl;
-									bestConfigNb=mNbTrial;
-                        	if(!silent) this->DisplayReport();
-                        	this->UpdateDisplay();
-                        	//for(int i=0;i<mRefinedObjList.GetNb();i++) 
-                        	//   mRefinedObjList.GetObj(i).Print();
-                     	}
-								i=k;//Don't test other Worlds
-								break;
-							}
-                  	//mNbTrial++;nbStep--;
-                  	//if((mNbTrial%nbTrialsReport)==0) makeReport=true;
-						}
-            	}
-   			TAU_PROFILE_STOP(timer1);
+               for(int i=k-nbWorld/3;i<k;i++)
+               {
+                  #if 0
+                  // Random switching of gene groups
+                  for(unsigned int j=0;j<nbGeneGroup;j++) 
+                     crossoverGroupIndex(j)= (int) floor(rand()/((REAL)RAND_MAX-1)*2);
+                  for(int j=0;j<mRefParList.GetNbPar();j++)
+                  {
+                     if(0==crossoverGroupIndex(refParGeneGroupIndex(j)-1))
+                     {
+                        mRefParList.GetParamSet(parSetOffspringA)(j)=
+                           mRefParList.GetParamSet(worldCurrentSetIndex(i))(j);
+                        mRefParList.GetParamSet(parSetOffspringB)(j)=
+                           mRefParList.GetParamSet(worldCurrentSetIndex(k))(j);
+                     }
+                     else
+                     {
+                        mRefParList.GetParamSet(parSetOffspringA)(j)=
+                           mRefParList.GetParamSet(worldCurrentSetIndex(k))(j);
+                        mRefParList.GetParamSet(parSetOffspringB)(j)=
+                           mRefParList.GetParamSet(worldCurrentSetIndex(i))(j);
+                     }
+                  }
+                  #endif
+                  #if 1
+                  // Switch gene groups in two parts
+                  unsigned int crossoverPoint1=
+                     (int)(1+floor(rand()/((REAL)RAND_MAX-1)*(nbGeneGroup)));
+                  unsigned int crossoverPoint2=
+                     (int)(1+floor(rand()/((REAL)RAND_MAX-1)*(nbGeneGroup)));
+                  if(crossoverPoint2<crossoverPoint1)
+                  {
+                     int tmp=crossoverPoint1;
+                     crossoverPoint1=crossoverPoint2;
+                     crossoverPoint2=tmp;
+                  }
+                  if(crossoverPoint1==crossoverPoint2) crossoverPoint2+=1;
+                  for(int j=0;j<mRefParList.GetNbPar();j++)
+                  {
+                     if((refParGeneGroupIndex(j)>crossoverPoint1)&&refParGeneGroupIndex(j)<crossoverPoint2)
+                     {
+                        mRefParList.GetParamSet(parSetOffspringA)(j)=
+                           mRefParList.GetParamSet(worldCurrentSetIndex(i))(j);
+                        mRefParList.GetParamSet(parSetOffspringB)(j)=
+                           mRefParList.GetParamSet(worldCurrentSetIndex(k))(j);
+                     }
+                     else
+                     {
+                        mRefParList.GetParamSet(parSetOffspringA)(j)=
+                           mRefParList.GetParamSet(worldCurrentSetIndex(k))(j);
+                        mRefParList.GetParamSet(parSetOffspringB)(j)=
+                           mRefParList.GetParamSet(worldCurrentSetIndex(i))(j);
+                     }
+                  }
+                  #endif
+                  // Try both offspring
+                  for(int junk=0;junk<2;junk++)
+                  {
+                     if(junk==0) mRefParList.RestoreParamSet(parSetOffspringA);
+                     else mRefParList.RestoreParamSet(parSetOffspringB);
+                     REAL cost=this->GetCostFunctionValue();
+                     //if(log((rand()+1)/(REAL)RAND_MAX)
+                     //    < (-(cost-currentCost(k))/simAnnealTemp(k)))
+                     if(cost<currentCost(k))
+                     {
+                        // Also exchange genes for higher-temperature World ?
+                        //if(junk==0) 
+                        //   mRefParList.GetParamSet(worldCurrentSetIndex(i))=
+                        //      mRefParList.GetParamSet(parSetOffspringB);
+                        //else
+                        //   mRefParList.GetParamSet(worldCurrentSetIndex(i))=
+                        //      mRefParList.GetParamSet(parSetOffspringA);
+                        currentCost(k)=cost;
+                        mRefParList.SaveParamSet(worldCurrentSetIndex(k));
+                        //worldNbAcceptedMoves(k)++;
+                        if(!silent) cout << "Accepted mating :"<<k<<"(with"<<i<<")"
+                             <<" (crossoverGene1="<< crossoverPoint1<<","
+                             <<" crossoverGene2="<< crossoverPoint2<<")"
+                             <<endl; 
+                        if(cost<mBestCost)
+                        {
+                           mBestCost=cost;
+                           mRefParList.SaveParamSet(mBestParSavedSetIndex);
+                           if(!silent) cout << "->Trial :" << mNbTrial 
+                                << " World="<< k
+                                << " Temp="<< simAnnealTemp(k)
+                                << " Mutation Ampl.: "<<mMutationAmplitude
+                                << " NEW Best Cost="<<mBestCost<< "(MATING !)"<<endl;
+                           bestConfigNb=mNbTrial;
+                           if(!silent) this->DisplayReport();
+                           this->UpdateDisplay();
+                           //for(int i=0;i<mRefinedObjList.GetNb();i++) 
+                           //   mRefinedObjList.GetObj(i).Print();
+                        }
+                        i=k;//Don't test other Worlds
+                        break;
+                     }
+                     //mNbTrial++;nbStep--;
+                     //if((mNbTrial%nbTrialsReport)==0) makeReport=true;
+                  }
+               }
+            TAU_PROFILE_STOP(timer1);
             #endif
             if(true==makeReport)
             {
@@ -898,9 +898,9 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                      if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)<0.10)
                         mutationAmplitude(i)/=2.;
                      if(mutationAmplitude(i)>mMutationAmplitudeMax) 
-								mutationAmplitude(i)=mMutationAmplitudeMax;
+                        mutationAmplitude(i)=mMutationAmplitudeMax;
                      if(mutationAmplitude(i)<mMutationAmplitudeMin)
-								mutationAmplitude(i)=mMutationAmplitudeMin;
+                        mutationAmplitude(i)=mMutationAmplitudeMin;
                   }
                }
                if(ANNEALING_SMART==mAnnealingScheduleTemp.GetChoice())
@@ -913,64 +913,64 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                         simAnnealTemp(i)/=2;
                      if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)>0.95)
                         simAnnealTemp(i)/=2;
-								
+                        
                      if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)<0.10)
                         simAnnealTemp(i)*=1.5;
                      if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)<0.04)
                         simAnnealTemp(i)*=2;
                      if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)<0.01)
                         simAnnealTemp(i)*=2;
-								
+                        
                      if(simAnnealTemp(i)>mTemperatureMax) simAnnealTemp(i)=mTemperatureMax;
                      if(simAnnealTemp(i)<mTemperatureMin) simAnnealTemp(i)=mTemperatureMin;
                   }
                }
                worldNbAcceptedMoves=0;
                //this->DisplayReport();
-					if(mMaxNbTrialSinceBest>0)
-						if((mNbTrial-bestConfigNb)>mMaxNbTrialSinceBest)
-						{
-							if(nbRestartFromMin==2)
-							{
-               			if(!silent)
-									cout << endl 
-									<< "More than "<< mMaxNbTrialSinceBest <<"trials since best!:"
-									<<" Again!!! Restart from random config"<<endl;
-								//restart everything
-								if((oldBestCost<0) || ( (oldBestCost>0) &&(mBestCost<oldBestCost)) )
-								{
-									oldBestCost=mBestCost;
-									mRefParList.GetParamSet(oldBestConfigIndex)=
-										mRefParList.GetParamSet(mBestParSavedSetIndex);
-								}
-								this->RandomizeStartingConfig();
-								mCurrentCost=this->GetCostFunctionValue();
-								mBestCost=this->GetCostFunctionValue();
-                  		for(int i=0;i<nbWorld;i++)
-                  		{
-									currentCost(i)=mCurrentCost;
-									mRefParList.SaveParamSet(worldCurrentSetIndex(i));
-								}
-								mRefParList.SaveParamSet(mBestParSavedSetIndex);
-							}
-							else
-							{
-               			if(!silent)
-									cout << endl 
-									<< "More than "<< mMaxNbTrialSinceBest <<"trials since best!:"
-									<<" reverting all worlds to best config"<<endl;
-               			for(int i=0;i<nbWorld;i++)
-									mRefParList.GetParamSet(worldCurrentSetIndex(i))=
-										mRefParList.GetParamSet(mBestParSavedSetIndex);
-								bestConfigNb=mNbTrial;
-								nbRestartFromMin++;
-							}
-						}
+               if(mMaxNbTrialSinceBest>0)
+                  if((mNbTrial-bestConfigNb)>mMaxNbTrialSinceBest)
+                  {
+                     if(nbRestartFromMin==2)
+                     {
+                        if(!silent)
+                           cout << endl 
+                           << "More than "<< mMaxNbTrialSinceBest <<"trials since best!:"
+                           <<" Again!!! Restart from random config"<<endl;
+                        //restart everything
+                        if((oldBestCost<0) || ( (oldBestCost>0) &&(mBestCost<oldBestCost)) )
+                        {
+                           oldBestCost=mBestCost;
+                           mRefParList.GetParamSet(oldBestConfigIndex)=
+                              mRefParList.GetParamSet(mBestParSavedSetIndex);
+                        }
+                        this->RandomizeStartingConfig();
+                        mCurrentCost=this->GetCostFunctionValue();
+                        mBestCost=this->GetCostFunctionValue();
+                        for(int i=0;i<nbWorld;i++)
+                        {
+                           currentCost(i)=mCurrentCost;
+                           mRefParList.SaveParamSet(worldCurrentSetIndex(i));
+                        }
+                        mRefParList.SaveParamSet(mBestParSavedSetIndex);
+                     }
+                     else
+                     {
+                        if(!silent)
+                           cout << endl 
+                           << "More than "<< mMaxNbTrialSinceBest <<"trials since best!:"
+                           <<" reverting all worlds to best config"<<endl;
+                        for(int i=0;i<nbWorld;i++)
+                           mRefParList.GetParamSet(worldCurrentSetIndex(i))=
+                              mRefParList.GetParamSet(mBestParSavedSetIndex);
+                        bestConfigNb=mNbTrial;
+                        nbRestartFromMin++;
+                     }
+                  }
                #ifdef __WX__CRYST__
                if(0!=mpWXCrystObj) mpWXCrystObj->UpdateDisplayNbTrial();
                #endif
             }
-      		if((mBestCost<finalcost) || mStopAfterCycle) 
+            if((mBestCost<finalcost) || mStopAfterCycle) 
             {
                if(!silent) cout << endl <<endl << "Refinement Stopped:"<<mBestCost<<endl;
                break;
@@ -979,15 +979,15 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
          //Restore Best values
             //mRefParList.Print();
             if(!silent) this->DisplayReport();
-				if((oldBestCost>0)&&(oldBestCost<mBestCost))
-            	mRefParList.RestoreParamSet(oldBestConfigIndex);
-				else
-            	mRefParList.RestoreParamSet(mBestParSavedSetIndex);
+            if((oldBestCost>0)&&(oldBestCost<mBestCost))
+               mRefParList.RestoreParamSet(oldBestConfigIndex);
+            else
+               mRefParList.RestoreParamSet(mBestParSavedSetIndex);
             //for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).Print();
             mCurrentCost=this->GetCostFunctionValue();
-				if(!silent) 
+            if(!silent) 
                for(unsigned int i=0;i<mNbCostFunction;i++)
-               	cout <<mpCostFunctionRefinableObj[i]->GetClassName()<<":"
+                  cout <<mpCostFunctionRefinableObj[i]->GetClassName()<<":"
                     <<mpCostFunctionRefinableObj[i]->GetName()<<":"
                     <<mpCostFunctionRefinableObj[i]
                         ->GetCostFunctionName(mpCostFunctionId(i))<<"="
@@ -997,10 +997,10 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
             if(!silent) cout<<"Overall cost:"<<mCurrentCost<<"("<<mBestCost<<")"<<endl;
             if(!silent) chrono.print();
             this->UpdateDisplay();
-			//Save density of states
-				//ofstream out("densityOfStates.txt");
-				//out << trialsDensity<<endl;
-				//out.close();
+         //Save density of states
+            //ofstream out("densityOfStates.txt");
+            //out << trialsDensity<<endl;
+            //out.close();
       }//case GLOBAL_OPTIM_PARALLEL_TEMPERING
       case GLOBAL_OPTIM_GENETIC: //:TODO:
       {

@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -135,7 +135,7 @@ template<class T> class CrystVector
          delete[] mpData;
          mpData=new T[mNumElements];
       };
-	   mIsAreference=false;
+      mIsAreference=false;
       T *p1=mpData;
       const U *p2=old.data();
       for(long i=0;i<mNumElements;i++) *p1++ = (T) *p2++;
@@ -262,7 +262,7 @@ template<class T> class CrystVector
       return ListInitializerSwitch(*this,num);
    }
 */
-	void operator=(const T num);
+   void operator=(const T num);
 
    T operator()(const long i) const;
 
@@ -347,7 +347,7 @@ template<class T> class CrystMatrix
 
    void resizeAndPreserve(const long ySize,const long xSize);
    
-	//void operator=(const T num);
+   //void operator=(const T num);
    void operator*=(const T num);
    void operator*=(const CrystMatrix &vect);
    void operator/=(const T num);
@@ -412,7 +412,7 @@ template<class T> class CrystMatrix
       return ListInitializerSwitch(*this,num);
    }
    
-	
+   
    T operator()(const long i) const;
 
    T operator()(const long row,const long col) const;
@@ -493,15 +493,15 @@ template<class T> class CrystArray3D
 
    void resizeAndPreserve(const long zSize,const long ySize,const long xSize);
    
-	void operator=(const T num);
+   void operator=(const T num);
    void operator*=(const T num);
    void operator*=(const CrystArray3D &vect);
    void operator/=(const T num);
    void operator+=(const T num);
    void operator-=(const T num);
       
-	//void operator=(const T num);
-	
+   //void operator=(const T num);
+   
    T operator()(const long i) const;
 
    T operator()(const long depth,const long row,const long col) const;

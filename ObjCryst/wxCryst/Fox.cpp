@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -71,7 +71,7 @@ public:
    void OnAddSingleCrystalData(wxCommandEvent& WXUNUSED(event));
    void OnAddGlobalOptimObj(wxCommandEvent& WXUNUSED(event));
    void OnAddGeneticAlgorithm(wxCommandEvent& WXUNUSED(event));
-	void OnDebugTest(wxCommandEvent& event);
+   void OnDebugTest(wxCommandEvent& event);
    void OnSetDebugLevel(wxCommandEvent& event);
    void OnUpdateUI(wxUpdateUIEvent& event);
 private:
@@ -85,7 +85,7 @@ wxFrame *pMainFrameForUserMessage;
 
 void WXCrystInformUserStdOut(const string &str)
 {
-	pMainFrameForUserMessage->SetStatusText((wxString)str.c_str());
+   pMainFrameForUserMessage->SetStatusText((wxString)str.c_str());
 }
 
 
@@ -162,17 +162,17 @@ IMPLEMENT_APP(MyApp)
 // 'Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-	//set locale settings to standard
-	setlocale(LC_NUMERIC,"C");
+   //set locale settings to standard
+   setlocale(LC_NUMERIC,"C");
 
    WXCrystMainFrame *frame ;
    
    frame = new WXCrystMainFrame("FOX: Free Objects for Xtal structures v1.1.2",
                                  wxPoint(50, 50), wxSize(550, 400));
-	// Use the main frame status bar to pass messages to the user
-		pMainFrameForUserMessage=frame;
-		fpObjCrystInformUser=&WXCrystInformUserStdOut;
-		
+   // Use the main frame status bar to pass messages to the user
+      pMainFrameForUserMessage=frame;
+      fpObjCrystInformUser=&WXCrystInformUserStdOut;
+      
    return TRUE;
 }
 
@@ -249,21 +249,21 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
       Crystal *cryst=new Crystal(8.482,5.398,6.959,"Pnma");
       cryst->SetName("PbSO4-(reference structure)");
       //Create 'real' PBSO4 structure (for reference only)
-	      ScatteringPowerAtom *ScattPowPb=new ScatteringPowerAtom("Pb","Pb",1.48);
-	      ScatteringPowerAtom *ScattPowS =new ScatteringPowerAtom("S" ,"S",0.74);
-	      ScatteringPowerAtom *ScattPowO1=new ScatteringPowerAtom("O1","O",1.87);
-	      ScatteringPowerAtom *ScattPowO2=new ScatteringPowerAtom("O2","O",1.76);
-	      ScatteringPowerAtom *ScattPowO3=new ScatteringPowerAtom("O3","O",1.34);
+         ScatteringPowerAtom *ScattPowPb=new ScatteringPowerAtom("Pb","Pb",1.48);
+         ScatteringPowerAtom *ScattPowS =new ScatteringPowerAtom("S" ,"S",0.74);
+         ScatteringPowerAtom *ScattPowO1=new ScatteringPowerAtom("O1","O",1.87);
+         ScatteringPowerAtom *ScattPowO2=new ScatteringPowerAtom("O2","O",1.76);
+         ScatteringPowerAtom *ScattPowO3=new ScatteringPowerAtom("O3","O",1.34);
          cryst->AddScatteringPower(ScattPowPb);
          cryst->AddScatteringPower(ScattPowS);
          cryst->AddScatteringPower(ScattPowO1);
          cryst->AddScatteringPower(ScattPowO2);
          cryst->AddScatteringPower(ScattPowO3);
-	      ObjCryst::Atom *Pb=new ObjCryst::Atom(.188,.250,.167,"Pb",ScattPowPb   ,.5);
-	      ObjCryst::Atom *S=new ObjCryst::Atom (.437,.750,.186,"S" ,ScattPowS    ,.5);
-	      ObjCryst::Atom *O1=new ObjCryst::Atom(.595,.750,.100,"O1",ScattPowO1   ,.5);
-	      ObjCryst::Atom *O2=new ObjCryst::Atom(.319,.750,.043,"O2",ScattPowO2   ,.5);
-	      ObjCryst::Atom *O3=new ObjCryst::Atom(.415,.974,.306,"O3",ScattPowO3   ,1.);
+         ObjCryst::Atom *Pb=new ObjCryst::Atom(.188,.250,.167,"Pb",ScattPowPb   ,.5);
+         ObjCryst::Atom *S=new ObjCryst::Atom (.437,.750,.186,"S" ,ScattPowS    ,.5);
+         ObjCryst::Atom *O1=new ObjCryst::Atom(.595,.750,.100,"O1",ScattPowO1   ,.5);
+         ObjCryst::Atom *O2=new ObjCryst::Atom(.319,.750,.043,"O2",ScattPowO2   ,.5);
+         ObjCryst::Atom *O3=new ObjCryst::Atom(.415,.974,.306,"O3",ScattPowO3   ,1.);
          cryst->AddScatterer(Pb);
          cryst->AddScatterer(S);
          cryst->AddScatterer(O1);
@@ -351,7 +351,7 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
       //win2->SetAutoLayout(true);
       gPowderPatternRegistry.WXCreate(mpWin2);
       notebook->AddPage(mpWin2,"Powder Diffraction",true);
-		
+      
    // Third window - SingleCrystal
       wxScrolledWindow *mpWin3 = new wxScrolledWindow(notebook, -1);
       mpWin3->SetScrollbars( 10, 10, 0, 500 );
@@ -359,7 +359,7 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
       //sizer3->Add(gPowderPatternRegistry.WXCreate(mpWin3));
       //mpWin3->SetSizer(sizer3);
       //win3->SetAutoLayout(true);
-		gDiffractionDataSingleCrystalRegistry.WXCreate(mpWin3);
+      gDiffractionDataSingleCrystalRegistry.WXCreate(mpWin3);
       notebook->AddPage(mpWin3,"Single Crystal Diffraction",true);
       
    // Fourth window - Global Optimization
@@ -371,7 +371,7 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
       //mpWin4->SetAutoLayout(true);
       gOptimizationObjRegistry.WXCreate(mpWin4);
       notebook->AddPage(mpWin4,"Global Optimization",true);
-		
+      
    this->Show(TRUE);
    this->Layout();
    //Splash Screen
@@ -406,7 +406,7 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
    wxFileDialog *open;
    switch(event.GetId())
    {
-		#if 0
+      #if 0
       case MENU_FILE_LOAD_OXY:
       {
          open= new wxFileDialog(this,"Choose File :",
@@ -415,7 +415,7 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
          IOCrystFileLoadAllObject(open->GetPath().c_str());
          break;
       }
-		#endif
+      #endif
       case MENU_FILE_LOAD:
       {
          open= new wxFileDialog(this,"Choose File :",
@@ -429,7 +429,7 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
 }
 void WXCrystMainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
 {
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    wxFileDialog *open= new wxFileDialog(this,"Choose File to save all objects:",
                                         "","","*.xml", wxSAVE | wxOVERWRITE_PROMPT);
    if(open->ShowModal() != wxID_OK) return;
@@ -451,7 +451,7 @@ void WXCrystMainFrame::OnAddPowderPattern(wxCommandEvent& WXUNUSED(event))
 
 void WXCrystMainFrame::OnAddSingleCrystalData(wxCommandEvent& WXUNUSED(event))
 {
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    int choice;
    Crystal *cryst=dynamic_cast<Crystal*>
       (WXDialogChooseFromRegistry(gCrystalRegistry,(wxWindow*)this,
@@ -474,51 +474,51 @@ void WXCrystMainFrame::OnAddGeneticAlgorithm(wxCommandEvent& WXUNUSED(event))
 }
 void WXCrystMainFrame::OnSetDebugLevel(wxCommandEvent& event)
 {
-	switch(event.GetId())
-	{
-		case MENU_DEBUG_LEVEL0 :VFN_DEBUG_GLOBAL_LEVEL(0);break;
-		case MENU_DEBUG_LEVEL1 :VFN_DEBUG_GLOBAL_LEVEL(1);break;
-		case MENU_DEBUG_LEVEL2 :VFN_DEBUG_GLOBAL_LEVEL(2);break;
-		case MENU_DEBUG_LEVEL3 :VFN_DEBUG_GLOBAL_LEVEL(3);break;
-		case MENU_DEBUG_LEVEL4 :VFN_DEBUG_GLOBAL_LEVEL(4);break;
-		case MENU_DEBUG_LEVEL5 :VFN_DEBUG_GLOBAL_LEVEL(5);break;
-		case MENU_DEBUG_LEVEL6 :VFN_DEBUG_GLOBAL_LEVEL(6);break;
-		case MENU_DEBUG_LEVEL7 :VFN_DEBUG_GLOBAL_LEVEL(7);break;
-		case MENU_DEBUG_LEVEL8 :VFN_DEBUG_GLOBAL_LEVEL(8);break;
-		case MENU_DEBUG_LEVEL9 :VFN_DEBUG_GLOBAL_LEVEL(9);break;
-		case MENU_DEBUG_LEVEL10:VFN_DEBUG_GLOBAL_LEVEL(10);break;
-	}
+   switch(event.GetId())
+   {
+      case MENU_DEBUG_LEVEL0 :VFN_DEBUG_GLOBAL_LEVEL(0);break;
+      case MENU_DEBUG_LEVEL1 :VFN_DEBUG_GLOBAL_LEVEL(1);break;
+      case MENU_DEBUG_LEVEL2 :VFN_DEBUG_GLOBAL_LEVEL(2);break;
+      case MENU_DEBUG_LEVEL3 :VFN_DEBUG_GLOBAL_LEVEL(3);break;
+      case MENU_DEBUG_LEVEL4 :VFN_DEBUG_GLOBAL_LEVEL(4);break;
+      case MENU_DEBUG_LEVEL5 :VFN_DEBUG_GLOBAL_LEVEL(5);break;
+      case MENU_DEBUG_LEVEL6 :VFN_DEBUG_GLOBAL_LEVEL(6);break;
+      case MENU_DEBUG_LEVEL7 :VFN_DEBUG_GLOBAL_LEVEL(7);break;
+      case MENU_DEBUG_LEVEL8 :VFN_DEBUG_GLOBAL_LEVEL(8);break;
+      case MENU_DEBUG_LEVEL9 :VFN_DEBUG_GLOBAL_LEVEL(9);break;
+      case MENU_DEBUG_LEVEL10:VFN_DEBUG_GLOBAL_LEVEL(10);break;
+   }
 }
 void WXCrystMainFrame::OnDebugTest(wxCommandEvent& event)
 {
-	WXCrystValidateAllUserInput();
-	static long saveId=-1;
-	static long saveId2=-1;
-	switch(event.GetId())
-	{
-		case MENU_DEBUG_TEST1:
-		{
-			if(saveId==-1) saveId=gScattererRegistry.GetObj(0).CreateParamSet();
-			else gScattererRegistry.GetObj(0).SaveParamSet(saveId);
-			gScattererRegistry.GetObj(0).GlobalOptRandomMove(1);
-			gCrystalRegistry.GetObj(0).UpdateDisplay();
-			if(saveId2==-1) saveId2=gScattererRegistry.GetObj(0).CreateParamSet();
-			else gScattererRegistry.GetObj(0).SaveParamSet(saveId2);
-			break;
-		}
-		case MENU_DEBUG_TEST2:
-		{
-			gScattererRegistry.GetObj(0).RestoreParamSet(saveId);
-			gCrystalRegistry.GetObj(0).UpdateDisplay();
-			break;
-		}
-		case MENU_DEBUG_TEST3:
-		{
-			gScattererRegistry.GetObj(0).RestoreParamSet(saveId2);
-			gCrystalRegistry.GetObj(0).UpdateDisplay();
-			break;
-		}
-	}
+   WXCrystValidateAllUserInput();
+   static long saveId=-1;
+   static long saveId2=-1;
+   switch(event.GetId())
+   {
+      case MENU_DEBUG_TEST1:
+      {
+         if(saveId==-1) saveId=gScattererRegistry.GetObj(0).CreateParamSet();
+         else gScattererRegistry.GetObj(0).SaveParamSet(saveId);
+         gScattererRegistry.GetObj(0).GlobalOptRandomMove(1);
+         gCrystalRegistry.GetObj(0).UpdateDisplay();
+         if(saveId2==-1) saveId2=gScattererRegistry.GetObj(0).CreateParamSet();
+         else gScattererRegistry.GetObj(0).SaveParamSet(saveId2);
+         break;
+      }
+      case MENU_DEBUG_TEST2:
+      {
+         gScattererRegistry.GetObj(0).RestoreParamSet(saveId);
+         gCrystalRegistry.GetObj(0).UpdateDisplay();
+         break;
+      }
+      case MENU_DEBUG_TEST3:
+      {
+         gScattererRegistry.GetObj(0).RestoreParamSet(saveId2);
+         gCrystalRegistry.GetObj(0).UpdateDisplay();
+         break;
+      }
+   }
 }
 
 void WXCrystMainFrame::OnUpdateUI(wxUpdateUIEvent& event)

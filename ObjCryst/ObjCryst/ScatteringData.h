@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -70,16 +70,16 @@ extern const RefParType *gpRefParTypeRadiationWavelength;
 class Radiation: public RefinableObj
 {
    public:
-		/// Default constructor
+      /// Default constructor
       Radiation();
-		/** \ brief Constructor
-		*
-		* \param rad the RadiationType used (X-Rays, neutrons)
-		* \param wavelength the wavelength (in Angstroems) of the monochromatic
-		* radiation.
-		*/
+      /** \ brief Constructor
+      *
+      * \param rad the RadiationType used (X-Rays, neutrons)
+      * \param wavelength the wavelength (in Angstroems) of the monochromatic
+      * radiation.
+      */
       Radiation(const RadiationType rad,const REAL wavelength);
-		/** \ brief Constructor for X-Ray tube radiation
+      /** \ brief Constructor for X-Ray tube radiation
       *
       *\param XRayTubeElementName : name of the anticathode element name. Known
       *ones are Cr, Fe, Cu, Mo, Ag. 
@@ -95,29 +95,29 @@ class Radiation: public RefinableObj
       *there are both Alpha1 and Alpha2, and thus automatically changes the WavelengthType 
       *to WAVELENGTH_ALPHA12. If instead either alpha1 or alpha2 (eg "CuA1") is asked for,
       *the WavelengthType is set to WAVELENGTH_MONOCHROMATIC. In both cases,
-		* the radiation type is set to X-Ray.
+      * the radiation type is set to X-Ray.
       */
       Radiation(const string &XRayTubeElementName,const REAL alpha2Alpha2ratio=0.5);
-		/// Copy constructor
+      /// Copy constructor
       Radiation(const Radiation&);
       ~Radiation();
       virtual const string& GetClassName() const;
       
       void operator=(const Radiation&);
       
-		/// Get the radiation type (X-Rays, Neutron)
+      /// Get the radiation type (X-Rays, Neutron)
       RadiationType GetRadiationType()const;
-		/// Set the radiation type (X-Rays, Neutron)
+      /// Set the radiation type (X-Rays, Neutron)
       void SetRadiationType(const RadiationType);
-		//Get the Wavelength type (monochromatic, Alpha1+Alpha2, ...)
+      //Get the Wavelength type (monochromatic, Alpha1+Alpha2, ...)
       WavelengthType GetWavelengthType()const;
       /// Get the wavelength(s) in Angstroems. Currently only
-		/// monochromatic is used, so the vector should only return
-		/// only one wavelength.
+      /// monochromatic is used, so the vector should only return
+      /// only one wavelength.
       const CrystVector_REAL& GetWavelength()const;
-		/// Set the (monochromatic) wavelength of the beam.
+      /// Set the (monochromatic) wavelength of the beam.
       void SetWavelength(const REAL );
-		/** \ brief Set X-Ray tube radiation.
+      /** \ brief Set X-Ray tube radiation.
       *
       *\param XRayTubeElementName : name of the anticathode element name. Known
       *ones are Cr, Fe, Cu, Mo, Ag. 
@@ -133,23 +133,23 @@ class Radiation: public RefinableObj
       *there are both Alpha1 and Alpha2, and thus automatically changes the WavelengthType 
       *to WAVELENGTH_ALPHA12. If instead either alpha1 or alpha2 (eg "CuA1") is asked for,
       *the WavelengthType is set to WAVELENGTH_MONOCHROMATIC. In both cases,
-		* the radiation type is set to X-Ray.
+      * the radiation type is set to X-Ray.
       */
       void SetWavelength(const string &XRayTubeElementName,const REAL alpha2Alpha2ratio=0.5);
       
       /// Get the wavelength difference for Alpha1 and Alpha2
-		REAL GetXRayTubeDeltaLambda()const;
-		/// Get the Kalpha2/Kalpha1 ratio
+      REAL GetXRayTubeDeltaLambda()const;
+      /// Get the Kalpha2/Kalpha1 ratio
       REAL GetXRayTubeAlpha2Alpha1Ratio()const;
       
       /// Last time the wavelength has been changed
-		const RefinableObjClock& GetClockWavelength()const ;
-		/// Last time the nature (X-Rays/Neutron, number of wavelengths)radiation has been changed
+      const RefinableObjClock& GetClockWavelength()const ;
+      /// Last time the nature (X-Rays/Neutron, number of wavelengths)radiation has been changed
       const RefinableObjClock& GetClockRadiation()const ;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
-		/// Print to screen/console the charcteristics of the radiation.
+      /// Print to screen/console the charcteristics of the radiation.
       void Print()const;
    private:
       void InitOptions();
@@ -321,13 +321,13 @@ class ScatteringData: virtual public RefinableObj
       virtual void PrintFhklCalc(ostream &os=cout)const;
 
       virtual void BeginOptimization(const bool allowApproximations=false,
-												 const bool enableRestraints=false);
+                                     const bool enableRestraints=false);
       virtual void EndOptimization();
-		/// Set the maximum value for sin(theta)/lambda. All data (reflections,..) still
-		/// exist but are ignored for all calculations.
-		virtual void SetMaxSinThetaOvLambda(const REAL max);
-		/// Get the maximum value for sin(theta)/lambda.
-		REAL GetMaxSinThetaOvLambda()const;
+      /// Set the maximum value for sin(theta)/lambda. All data (reflections,..) still
+      /// exist but are ignored for all calculations.
+      virtual void SetMaxSinThetaOvLambda(const REAL max);
+      /// Get the maximum value for sin(theta)/lambda.
+      REAL GetMaxSinThetaOvLambda()const;
    protected:
       /// \internal This function is called after H,K and L arrays have 
       /// been initialized or modified.
@@ -350,9 +350,9 @@ class ScatteringData: virtual public RefinableObj
          /// be recomputed to get the new structure factors. No calculation is made in
          /// this function. Just getting prepared...
          /// \todo Clean up the code, which is a really unbelievable mess (but working!)
-			///
-			/// Currently using flags to decide what should be recomputed, whereas
-			/// Clocks should be used. a LOT of cleaning is necessary
+         ///
+         /// Currently using flags to decide what should be recomputed, whereas
+         /// Clocks should be used. a LOT of cleaning is necessary
          virtual void PrepareCalcStructFactor()const;
          /// \internal Compute sin(theta)/lambda. 
          /// theta and tan(theta) values are also re-computed, provided a wavelength has
@@ -366,9 +366,9 @@ class ScatteringData: virtual public RefinableObj
          ///
          /// This \e could be specialized for multi-wavelength experiments...
          virtual void CalcResonantScattFactor()const;
-      	/**\brief Compute the overall temperature factor affecting all reflections
-      	*/
-      	void CalcGlobalTemperatureFactor() const;
+         /**\brief Compute the overall temperature factor affecting all reflections
+         */
+         void CalcGlobalTemperatureFactor() const;
          
       /**\brief Compute the overall structure factor (real \b and imaginary part).
       *This function is \e optimized \e for \e speed (geometrical structure factors are 
@@ -394,7 +394,7 @@ class ScatteringData: virtual public RefinableObj
                                 CrystVector_REAL* isf2,
                                 bool useFastTabulatedTrigFunctions=false) const;
       
-		
+      
       /// Number of H,K,L reflections
       long mNbRefl;
       ///H,K,L coordinates
@@ -415,28 +415,28 @@ class ScatteringData: virtual public RefinableObj
       /// Radiation
       Radiation mRadiation;
       
-		
+      
       /** Pointer to the crystal corresponding to this experiment.
       *
       *  This gives an access to the UB matrix for the crystal,
       * as well as to the list of Scatterer.
       */
       Crystal *mpCrystal;
-		
-		/** Global Biso, affecting the overall structure factor for all
-		* reflections (but not the structure factors of individual atoms or
-		* type of atomes).
-		*
-		*/
-		REAL mGlobalBiso;
+      
+      /** Global Biso, affecting the overall structure factor for all
+      * reflections (but not the structure factors of individual atoms or
+      * type of atomes).
+      *
+      */
+      REAL mGlobalBiso;
       /// Global Biso factor
       mutable CrystVector_REAL  mGlobalTemperatureFactor;
       
       ///Use faster, but less precise, approximations for functions? (integer
       ///approximations to compute sin and cos in structure factors, and also
       ///to compute interatomic distances).
-		/// This is activated by global optimization algortithms, only during the 
-		/// optimization.
+      /// This is activated by global optimization algortithms, only during the 
+      /// optimization.
       bool mUseFastLessPreciseFunc;
       
       //The Following members are only kept to avoid useless re-computation
@@ -484,7 +484,7 @@ class ScatteringData: virtual public RefinableObj
          mutable RefinableObjClock mClockGeomStructFact;
          /// Clock the last time temperature factors were computed
          mutable RefinableObjClock mClockThermicFact;
-			
+         
          /// last time the global Biso factor was modified
          RefinableObjClock mClockGlobalBiso;
          /// last time the global temperature factor was computed
@@ -524,26 +524,26 @@ class ScatteringData: virtual public RefinableObj
       */
       bool mIgnoreImagScattFact;
       
-		// Maximum sin(theta)/lambda 
-			/** Maximum sin(theta)/lambda for all calculations (10 by default).
-			*
-			* This keeps all data in memory, but only the part which is below
-			* the max is calculated.
-			*
-			* This affects the computing of structure factors, intensities (for single
-			* crystal and powder patterns), R and Rw.
-			*
-			* The reflections \b must be sorted by increasing sin(theta)/lambda for
-			* this to work correctly.
-			*/
-			REAL mMaxSinThetaOvLambda;
-			/// Number of reflections which are below the max. This is updated automatically
-			/// from ScatteringData::mMaxSinThetaOvLambda
-			mutable long mNbReflUsed;
-			/// Clock recording the last time the number of reflections used has increased.
-			mutable RefinableObjClock mClockNbReflUsed;
+      // Maximum sin(theta)/lambda 
+         /** Maximum sin(theta)/lambda for all calculations (10 by default).
+         *
+         * This keeps all data in memory, but only the part which is below
+         * the max is calculated.
+         *
+         * This affects the computing of structure factors, intensities (for single
+         * crystal and powder patterns), R and Rw.
+         *
+         * The reflections \b must be sorted by increasing sin(theta)/lambda for
+         * this to work correctly.
+         */
+         REAL mMaxSinThetaOvLambda;
+         /// Number of reflections which are below the max. This is updated automatically
+         /// from ScatteringData::mMaxSinThetaOvLambda
+         mutable long mNbReflUsed;
+         /// Clock recording the last time the number of reflections used has increased.
+         mutable RefinableObjClock mClockNbReflUsed;
    #ifdef __WX__CRYST__
-		//to access mMaxSinThetaOvLambda
+      //to access mMaxSinThetaOvLambda
       friend class WXDiffractionSingleCrystal;
       friend class WXPowderPattern;
    #endif

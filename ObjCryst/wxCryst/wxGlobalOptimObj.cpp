@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -89,7 +89,7 @@ WXCrystObj(parent),mpGlobalOptimRunThread(0)
       mList.Add(cf);
    }
    
-	// This will be done later
+   // This will be done later
    // this->CrystUpdate();
    // this->Layout();
    VFN_DEBUG_EXIT("WXOptimizationObj::WXOptimizationObj(wxWindow*,GlobalOptimObj*,)",7)
@@ -98,12 +98,12 @@ WXCrystObj(parent),mpGlobalOptimRunThread(0)
 void WXOptimizationObj::CrystUpdate()
 {
    this->WXCrystObj::CrystUpdate();
-	if(true==wxThread::IsMain()) this->UpdateUI();
-	else
-	{
-   	wxUpdateUIEvent event(ID_CRYST_UPDATEUI);
-   	wxPostEvent(this,event);
-	}
+   if(true==wxThread::IsMain()) this->UpdateUI();
+   else
+   {
+      wxUpdateUIEvent event(ID_CRYST_UPDATEUI);
+      wxPostEvent(this,event);
+   }
 }
 
 bool WXOptimizationObj::OnChangeName(const int id)
@@ -126,7 +126,7 @@ void WXOptimizationObj::OnLoad(){}
 
 void WXOptimizationObj::OnAddRefinedObject()
 {
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    int choice;
    RefinableObj *obj=
       WXDialogChooseFromRegistry(gTopRefinableObjRegistry,this,
@@ -137,7 +137,7 @@ void WXOptimizationObj::OnAddRefinedObject()
 
 void WXOptimizationObj::AddRefinedObject(RefinableObj &obj)
 {
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    WXFieldName *refobj=new WXFieldName(this,"Optimized object:",this,-1,300,false);
    refobj->SetValue(obj.GetClassName()+":"+obj.GetName());
    mpSizer->Add(refobj);
@@ -148,7 +148,7 @@ void WXOptimizationObj::AddRefinedObject(RefinableObj &obj)
 void WXOptimizationObj::OnAddCostFunction()
 {
    VFN_DEBUG_MESSAGE("WXOptimizationObj::OnAddCostFunction()",6)
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    const int nbObj=this->GetOptimizationObj().mRefinedObjList.GetNb();
    int nbCostFunc=0;
    for(int i=0;i<nbObj;i++)
@@ -188,7 +188,7 @@ VFN_DEBUG_MESSAGE(this->GetOptimizationObj().mRefinedObjList.GetObj(i).GetName()
 void WXOptimizationObj::AddCostFunction(RefinableObj &obj, const int costFunc)
 {
    VFN_DEBUG_MESSAGE("WXOptimizationObj::AddCostFunction()",6)
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    //:KLUDGE: Here we are assuming that this is the *last* function added
    WXCostFunction *cf=new
          WXCostFunction(this,&obj,-1,costFunc,
@@ -206,7 +206,7 @@ void WXOptimizationObj::OnStopOptimization()
 void WXOptimizationObj::OnUpdateUI(wxUpdateUIEvent& event)
 {
    mpWXTitle->SetValue(this->GetOptimizationObj().GetName());
-	this->WXCrystObj::UpdateUI();
+   this->WXCrystObj::UpdateUI();
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -215,7 +215,7 @@ void WXOptimizationObj::OnUpdateUI(wxUpdateUIEvent& event)
 //
 ////////////////////////////////////////////////////////////////////////
 WXGlobalOptimRunThread::WXGlobalOptimRunThread(OptimizationObj &globalOptObj,
-															  long &nbTrial,const REAL finalCost):
+                                               long &nbTrial,const REAL finalCost):
 wxThread(wxTHREAD_DETACHED),mpGlobalOptObj(&globalOptObj),mpNbTrial(&nbTrial),
 mFinalCost(finalCost)
 {
@@ -244,7 +244,7 @@ BEGIN_EVENT_TABLE(WXMonteCarloObj, wxWindow)
    EVT_MENU(ID_GLOBALOPT_MENU_GLOBAlOPT_ADDCOSTFUNC,   WXOptimizationObj::OnAddCostFunction)
    EVT_MENU(ID_GLOBALOPT_MENU_GLOBAlOPT_RUN,           WXOptimizationObj::OnRunOptimization)
    EVT_MENU(ID_GLOBALOPT_MENU_GLOBAlOPT_STOP,          WXOptimizationObj::OnStopOptimization)
-   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, 						 WXOptimizationObj::OnUpdateUI)
+   EVT_UPDATE_UI(ID_CRYST_UPDATEUI,                    WXOptimizationObj::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXMonteCarloObj::WXMonteCarloObj(wxWindow *parent, MonteCarloObj* obj):
@@ -287,7 +287,7 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(100000000)
       mpSizer->Add(sizerAmp);
       mList.Add(ampMax);
       mList.Add(ampMin);
-	// Number of trials to go
+   // Number of trials to go
       mpWXFieldNbTrial=new WXFieldPar<long>(this,"Number of trials to go:",-1,&mNbTrial,70);
       mpSizer->Add(mpWXFieldNbTrial);
       mList.Add(mpWXFieldNbTrial);
@@ -299,29 +299,29 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(100000000)
 void WXMonteCarloObj::OnRunOptimization()
 {
    VFN_DEBUG_ENTRY("WXGeneticAlgorithm::OnRunOptimization()",6)
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    if(true==this->GetOptimizationObj().IsOptimizing())
    {
       wxMessageDialog dumbUser(this,"The optimization is already running !","Huh ?",
                                wxOK|wxICON_EXCLAMATION);
       dumbUser.ShowModal();
-   	VFN_DEBUG_EXIT("WXGeneticAlgorithm::OnRunOptimization()",6)
+      VFN_DEBUG_EXIT("WXGeneticAlgorithm::OnRunOptimization()",6)
       return;
    }
-	
-	//Fix parameters than really should not be global-optimized
-		mpMonteCarloObj->SetParIsFixed(gpRefParTypeUnitCell,true);
-		mpMonteCarloObj->SetParIsFixed(gpRefParTypeScattData,true);
-		mpMonteCarloObj->UpdateDisplay();
-	
-	double finalCost=0;
-	if(mNbTrial<0)
-	{
-		mNbTrial = - mNbTrial;
+   
+   //Fix parameters than really should not be global-optimized
+      mpMonteCarloObj->SetParIsFixed(gpRefParTypeUnitCell,true);
+      mpMonteCarloObj->SetParIsFixed(gpRefParTypeScattData,true);
+      mpMonteCarloObj->UpdateDisplay();
+   
+   double finalCost=0;
+   if(mNbTrial<0)
+   {
+      mNbTrial = - mNbTrial;
       wxTextEntryDialog costDialog(this,"Enter desired cost for the optimization to stop",
                               "Goal Cost",".20",wxOK | wxCANCEL);
       if(wxID_OK==costDialog.ShowModal()) costDialog.GetValue().ToDouble(&finalCost);
-	}
+   }
    mpGlobalOptimRunThread = new WXGlobalOptimRunThread(this->GetOptimizationObj(),mNbTrial,finalCost);
    if(mpGlobalOptimRunThread->Create() != wxTHREAD_NO_ERROR) 
       wxLogError("Can't create optimization thread");
@@ -339,12 +339,12 @@ void WXMonteCarloObj::UpdateDisplayNbTrial()
 OptimizationObj & WXMonteCarloObj::GetOptimizationObj()
 {
    VFN_DEBUG_MESSAGE("WXMonteCarloObj::GetOptimizationObj()",2)
-	return *mpMonteCarloObj;
+   return *mpMonteCarloObj;
 }
 const OptimizationObj & WXMonteCarloObj::GetOptimizationObj()const
 {
    VFN_DEBUG_MESSAGE("WXMonteCarloObj::GetOptimizationObj() const",2)
-	return *mpMonteCarloObj;
+   return *mpMonteCarloObj;
 }
 
 

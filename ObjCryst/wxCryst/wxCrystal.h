@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ class WXCrystal: public WXRefinableObj
       /// not to be used any more. When finished, ReleaseCrystalGLDisplayList() must be called.
       int GrabCrystalGLDisplayList()const;
       void ReleaseCrystalGLDisplayList()const;
-		bool GLDisplayListIsLocked()const;
+      bool GLDisplayListIsLocked()const;
       /// Create OpenGL Display of the Crystal Structure
       void OnMenuCrystalGL(wxCommandEvent & WXUNUSED(event));
       /// Tell this object that its 3D OpenGL display has been destroyed
@@ -127,7 +127,7 @@ class WXGLCrystalCanvas : public wxGLCanvas
       float mViewAngle;
       /// Pop-up menu
       wxMenu* mpPopUpMenu;
-		float mXmin,mXmax,mYmin,mYmax,mZmin,mZmax;
+      float mXmin,mXmax,mYmin,mYmax,mZmin,mZmax;
    DECLARE_EVENT_TABLE()
 };
 

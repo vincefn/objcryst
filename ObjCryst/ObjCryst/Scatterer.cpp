@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -101,7 +101,7 @@ mOccupancy(old.mOccupancy),
 mColourName(old.mColourName),mpCryst(old.mpCryst)
 {
    VFN_DEBUG_MESSAGE("Scatterer::Scatterer(&old)",5)
-	mName=old.GetName();
+   mName=old.GetName();
    this->InitRGBColour();
    gScattererRegistry.Register(*this);
 }
@@ -114,8 +114,8 @@ Scatterer::~Scatterer()
 
 const string& Scatterer::GetClassName() const
 {
-	const static string className="Scatterer";
-	return className;
+   const static string className="Scatterer";
+   return className;
 }
 
 REAL Scatterer::GetX()    const {return mXYZ(0);}

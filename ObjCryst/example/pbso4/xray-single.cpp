@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -48,21 +48,21 @@ void testPbSO4()
       cryst_orig.GetSpaceGroup().Print();
       cryst_orig.Print();
       {//Create 'real' PBSO4 structure (for reference only)
-	      ScatteringPowerAtom *ScattPowPb=new ScatteringPowerAtom("Pb","Pb",1.48);
-	      ScatteringPowerAtom *ScattPowS =new ScatteringPowerAtom("S" ,"S",0.74);
-	      ScatteringPowerAtom *ScattPowO1=new ScatteringPowerAtom("O1","O",1.87);
-	      ScatteringPowerAtom *ScattPowO2=new ScatteringPowerAtom("O2","O",1.76);
-	      ScatteringPowerAtom *ScattPowO3=new ScatteringPowerAtom("O3","O",1.34);
+         ScatteringPowerAtom *ScattPowPb=new ScatteringPowerAtom("Pb","Pb",1.48);
+         ScatteringPowerAtom *ScattPowS =new ScatteringPowerAtom("S" ,"S",0.74);
+         ScatteringPowerAtom *ScattPowO1=new ScatteringPowerAtom("O1","O",1.87);
+         ScatteringPowerAtom *ScattPowO2=new ScatteringPowerAtom("O2","O",1.76);
+         ScatteringPowerAtom *ScattPowO3=new ScatteringPowerAtom("O3","O",1.34);
          cryst_orig.AddScatteringPower(ScattPowPb);
          cryst_orig.AddScatteringPower(ScattPowS);
          cryst_orig.AddScatteringPower(ScattPowO1);
          cryst_orig.AddScatteringPower(ScattPowO2);
          cryst_orig.AddScatteringPower(ScattPowO3);
-	      Atom *Pb=new Atom(.188,.250,.167,"Pb",ScattPowPb   ,1.);
-	      Atom *S=new Atom (.437,.750,.186,"S" ,ScattPowS    ,1.);
-	      Atom *O1=new Atom(.595,.750,.100,"O1",ScattPowO1   ,1.);
-	      Atom *O2=new Atom(.319,.750,.043,"O2",ScattPowO2   ,1.);
-	      Atom *O3=new Atom(.415,.974,.306,"O3",ScattPowO3   ,1.);
+         Atom *Pb=new Atom(.188,.250,.167,"Pb",ScattPowPb   ,1.);
+         Atom *S=new Atom (.437,.750,.186,"S" ,ScattPowS    ,1.);
+         Atom *O1=new Atom(.595,.750,.100,"O1",ScattPowO1   ,1.);
+         Atom *O2=new Atom(.319,.750,.043,"O2",ScattPowO2   ,1.);
+         Atom *O3=new Atom(.415,.974,.306,"O3",ScattPowO3   ,1.);
          cryst_orig.AddScatterer(Pb);
          cryst_orig.AddScatterer(S);
          cryst_orig.AddScatterer(O1);
@@ -77,14 +77,14 @@ void testPbSO4()
       Crystal cryst(8.482,5.398,6.959,"Pnma");
       cryst.SetName("PbSO4");
       {//create the refined crystal
-	      ScatteringPowerAtom *ScattPowPb=new ScatteringPowerAtom("Pb","Pb",1.5);
-	      ScatteringPowerAtom *ScattPowS =new ScatteringPowerAtom("S" ,"S" ,1);
-	      ScatteringPowerAtom *ScattPowO =new ScatteringPowerAtom("O" ,"O" ,1.5);
+         ScatteringPowerAtom *ScattPowPb=new ScatteringPowerAtom("Pb","Pb",1.5);
+         ScatteringPowerAtom *ScattPowS =new ScatteringPowerAtom("S" ,"S" ,1);
+         ScatteringPowerAtom *ScattPowO =new ScatteringPowerAtom("O" ,"O" ,1.5);
          cryst.AddScatteringPower(ScattPowPb);
          cryst.AddScatteringPower(ScattPowS);
          cryst.AddScatteringPower(ScattPowO);
-	      Atom *Pb=new Atom(.0,.0,.0,"Pb",ScattPowPb   ,1.);
-	      ZPolyhedron *SO4=new ZPolyhedron(TETRAHEDRON,cryst,.1,.2,.3,"SO4",
+         Atom *Pb=new Atom(.0,.0,.0,"Pb",ScattPowPb   ,1.);
+         ZPolyhedron *SO4=new ZPolyhedron(TETRAHEDRON,cryst,.1,.2,.3,"SO4",
                                           ScattPowS,ScattPowO,1.5,1);
          cryst.AddScatterer(Pb);
          //SO4.SetUseGlobalScatteringPower(true);
@@ -165,7 +165,7 @@ int main (int argc, char *argv[])
    TAU_PROFILE_SET_NODE(0); // sequential code 
    TAU_PROFILE("main()","int()",TAU_DEFAULT);
 
-	cout << " Beginning PbSO4 example...." << endl ;
+   cout << " Beginning PbSO4 example...." << endl ;
    int level =10;
    if(argc==2)//debug level hase been supplied
    {
@@ -175,7 +175,7 @@ int main (int argc, char *argv[])
    
    testPbSO4();
    
-	cout << " End of PbSO4 example." << endl ;
+   cout << " End of PbSO4 example." << endl ;
    TAU_REPORT_STATISTICS();
-	return 0;
+   return 0;
 }

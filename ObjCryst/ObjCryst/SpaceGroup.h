@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -108,9 +108,9 @@ class AsymmetricUnit
 class SpaceGroup
 {
    public:
-		/// Default Constructor (initializes in P1)
-		///
-		/// You can use later SpaceGroup::ChangeSpaceGroup() to set the spacegroup.
+      /// Default Constructor (initializes in P1)
+      ///
+      /// You can use later SpaceGroup::ChangeSpaceGroup() to set the spacegroup.
       SpaceGroup();
       /** \brief Constructor with a specified spacegroup symbol or number
       *
@@ -123,13 +123,13 @@ class SpaceGroup
       /// Change the Spacegroup
       void ChangeSpaceGroup(const string &spgId);
       /// Get the name of this spacegroup (its name, as supplied initially by
-		/// the calling program or user)
+      /// the calling program or user)
       const string& GetName()const;
       /// Test if a given scatterer at (x,y,z) is in the asymmetric unit.
       bool IsInAsymmetricUnit(const REAL x, const REAL y, const REAL z) const;
       /// Move (x,y,z) coordinates to their equivalent in the asym unit
       /// \warning Not implemented yet.
-		/// \todo SpaceGroup::IsInAsymmetricUnit()
+      /// \todo SpaceGroup::IsInAsymmetricUnit()
       void ChangeToAsymmetricUnit(REAL x, REAL y, REAL z) const;//:TODO:
       /// Get the AsymmetricUnit for this spacegroup
       const AsymmetricUnit& GetAsymUnit() const;
@@ -197,8 +197,8 @@ class SpaceGroup
       int GetNbSymmetrics(const bool noCenter=false,const bool noTransl=false)const;
       
       /// Prints a description of the spacegroup (symbol, properties).
-		///
-		/// \todo 
+      ///
+      /// \todo 
       void Print()const;
       /// Is centrosymmetric ?
       bool HasInversionCenter()const;
@@ -207,7 +207,7 @@ class SpaceGroup
       /// Get the SgOps structure. This will be removed when switching to cctbx.
       const T_SgOps& GetSgOps()const;
       /// Get the SpaceGroup Clock (corresponding to the time of the
-		/// initialization of the SpaceGroup)
+      /// initialization of the SpaceGroup)
       const RefinableObjClock& GetClockSpaceGroup() const;
       /// Access to the HM_As_Hall structure. This will be removed when switching to cctbx.
       const T_HM_as_Hall& GetHM_as_Hall()const;
@@ -224,8 +224,8 @@ class SpaceGroup
       void InitSpaceGroup(const string &spgId);
       
       /// Spacegroup's name ( 'I422', 'D2^8','230')
-		/// Maybe we should only store the Hermann-Mauguin symbol, rather than storing
-		/// the string which was initially given by the user/program for the initialization.
+      /// Maybe we should only store the Hermann-Mauguin symbol, rather than storing
+      /// the string which was initially given by the user/program for the initialization.
       string mId;
       
       /** \brief  SgOps structure for this spacegroup. (Symmetry operations)
@@ -259,7 +259,7 @@ class SpaceGroup
       
       /** Use geometrical structure factor ?
       *
-		* \deprecated
+      * \deprecated
       * when all atoms have an isotropic 
       * thermic factor, use a sophisticated formula to compute the structure 
       * factor for a given independent atom, instead of generating all symmetric 

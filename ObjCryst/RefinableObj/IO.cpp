@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -205,7 +205,7 @@ void RefinablePar::XMLOutput(ostream &os,const string &name,int indent)const
       tag.AddAttribute("Periodic",ss.str());
    }
    #endif
-	//the name of the parameter is saved last to enhance readability of saved files
+   //the name of the parameter is saved last to enhance readability of saved files
    tag.AddAttribute("Name",name);
    
    for(int i=0;i<indent;i++) os << "  " ;

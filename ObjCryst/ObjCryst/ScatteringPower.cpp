@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -109,8 +109,8 @@ ScatteringPower::~ScatteringPower()
 
 const string& ScatteringPower::GetClassName()const
 {
-	const static string className="ScatteringPower";
-	return className;
+   const static string className="ScatteringPower";
+   return className;
 }
 
 void ScatteringPower::operator=(const ScatteringPower& rhs)
@@ -150,19 +150,19 @@ void ScatteringPower::SetColour(const float r,const float g,const float b)
    mColourRGB[2]=b;
 }
 void ScatteringPower::GetGeneGroup(const RefinableObj &obj,
-										  CrystVector_uint & groupIndex,
-										  unsigned int &first) const
+                                CrystVector_uint & groupIndex,
+                                unsigned int &first) const
 {
-	// One group for all parameters
-	unsigned int index=0;
+   // One group for all parameters
+   unsigned int index=0;
    VFN_DEBUG_MESSAGE("ScatteringPower::GetGeneGroup()",4)
-	for(long i=0;i<obj.GetNbPar();i++)
-		for(long j=0;j<this->GetNbPar();j++)
-			if(&(obj.GetPar(i)) == &(this->GetPar(j)))
-			{
-				if(index==0) index=first++;
-				groupIndex(i)=index;
-			}
+   for(long i=0;i<obj.GetNbPar();i++)
+      for(long j=0;j<this->GetNbPar();j++)
+         if(&(obj.GetPar(i)) == &(this->GetPar(j)))
+         {
+            if(index==0) index=first++;
+            groupIndex(i)=index;
+         }
 }
 
 void ScatteringPower::Init()
@@ -257,8 +257,8 @@ ScatteringPowerAtom::~ScatteringPowerAtom()
 
 const string& ScatteringPowerAtom::GetClassName() const
 {
-	const static string className="ScatteringPowerAtom";
-	return className;
+   const static string className="ScatteringPowerAtom";
+   return className;
 }
 
 void ScatteringPowerAtom::Init(const string &name,const string &symbol,const REAL bIso)
@@ -464,7 +464,7 @@ CrystVector_REAL ScatteringPowerAtom::GetScatteringFactor(const ScatteringData &
 
 REAL ScatteringPowerAtom::GetForwardScatteringFactor(const RadiationType type) const
 {
-	REAL sf;
+   REAL sf;
    switch(type)
    {
       case(RAD_NEUTRON):

@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -35,10 +35,10 @@
    class wxWindow;
 namespace ObjCryst
 {
-	template<class T> class ObjRegistry;
-	class RefObjOpt;
-	template<class T> class RefObjOption;
-	class RefinableObj;
+   template<class T> class ObjRegistry;
+   class RefObjOpt;
+   template<class T> class RefObjOption;
+   class RefinableObj;
 }
 #include "wxCryst/wxRefinableObj.h"
 #endif
@@ -146,84 +146,84 @@ class RefinableObjClock
 */
 class Restraint
 {
-	public:
-		/** Constructor for the base Restrain class, setting hard&soft limits.
-		*
-		* \param type: the type of value which is constrained/restrained.
-		* \param hardMin,hardMax: the hard limits between which the value should
-		* ideally be.
-		* \param hasMinLimit,hasMaxLimit: set to 'true' if the parameter has 
-		* upper and/or lower limit.
-		* \param softRange: when the value goes below min or above max limits,
-		* the penalty will be equal to 1 at min-softRange and at max+softRange.
-		* Thus softRange must be strictly positive.
-		* \param enableRestraint: if true, then the value may go beyond the hard limits,
-		* with penalty defined by the soft limits. Else no value beyond the hard limits
-		* should be accepted.
-		* \param restraintWeigth: the weight associated to this restraint. This should
-		* be tuned by the RefinableObj owner.
-		*/
-		Restraint(const RefParType *type,
+   public:
+      /** Constructor for the base Restrain class, setting hard&soft limits.
+      *
+      * \param type: the type of value which is constrained/restrained.
+      * \param hardMin,hardMax: the hard limits between which the value should
+      * ideally be.
+      * \param hasMinLimit,hasMaxLimit: set to 'true' if the parameter has 
+      * upper and/or lower limit.
+      * \param softRange: when the value goes below min or above max limits,
+      * the penalty will be equal to 1 at min-softRange and at max+softRange.
+      * Thus softRange must be strictly positive.
+      * \param enableRestraint: if true, then the value may go beyond the hard limits,
+      * with penalty defined by the soft limits. Else no value beyond the hard limits
+      * should be accepted.
+      * \param restraintWeigth: the weight associated to this restraint. This should
+      * be tuned by the RefinableObj owner.
+      */
+      Restraint(const RefParType *type,
                 const REAL hardMin,
                 const REAL hardMax,
                 const bool hasMinLimit,
                 const bool hasMaxLimit,
                 const REAL softRange,
-					 const REAL restraintWeigth=1,
-					 const bool enableRestraint=false);
-		/// Destructor
-		virtual ~Restraint();
-		/** Initializer for the base Restrain class, setting hard&soft limits.
-		*
-		* \param type: the type of value which is constrained/restrained.
-		* \param hardMin,hardMax: the hard limits between which the value should
-		* ideally be.
-		* \param hasMinLimit,hasMaxLimit: set to 'true' if the parameter has 
-		* upper and/or lower limit.
-		* \param softRange: when the value goes below min or above max limits,
-		* the penalty will be equal to 1 at min-softRange and at max+softRange.
-		* Thus softRange must be strictly positive.
-		* \param enableRestraint: if true, then the value may go beyond the hard limits,
-		* with penalty defined by the soft limits. Else no value beyond the hard limits
-		* should be accepted.
-		* \param restraintWeigth: the weight associated to this restraint. This should
-		* be tuned by the RefinableObj owner.
-		*/
-		void Init(const RefParType *type,
-         		 const REAL hardMin,
-         		 const REAL hardMax,
-         		 const bool hasMinLimit,
-         		 const bool hasMaxLimit,
+                const REAL restraintWeigth=1,
+                const bool enableRestraint=false);
+      /// Destructor
+      virtual ~Restraint();
+      /** Initializer for the base Restrain class, setting hard&soft limits.
+      *
+      * \param type: the type of value which is constrained/restrained.
+      * \param hardMin,hardMax: the hard limits between which the value should
+      * ideally be.
+      * \param hasMinLimit,hasMaxLimit: set to 'true' if the parameter has 
+      * upper and/or lower limit.
+      * \param softRange: when the value goes below min or above max limits,
+      * the penalty will be equal to 1 at min-softRange and at max+softRange.
+      * Thus softRange must be strictly positive.
+      * \param enableRestraint: if true, then the value may go beyond the hard limits,
+      * with penalty defined by the soft limits. Else no value beyond the hard limits
+      * should be accepted.
+      * \param restraintWeigth: the weight associated to this restraint. This should
+      * be tuned by the RefinableObj owner.
+      */
+      void Init(const RefParType *type,
+                const REAL hardMin,
+                const REAL hardMax,
+                const bool hasMinLimit,
+                const bool hasMaxLimit,
                 const REAL softRange,
-					 const REAL restraintWeigth=1,
-					 const bool enableRestraint=false);
-		/// Get the current value.
-		virtual REAL GetValue()const=0;
-		/** Get the value of the penalty (cost) associated to the restraint.
-		*
-		* If the parameter is within limits, the cost is null. If it is
-		* below the min (and if there is a lower limit), the cost is equal
-		* to:
+                const REAL restraintWeigth=1,
+                const bool enableRestraint=false);
+      /// Get the current value.
+      virtual REAL GetValue()const=0;
+      /** Get the value of the penalty (cost) associated to the restraint.
+      *
+      * If the parameter is within limits, the cost is null. If it is
+      * below the min (and if there is a lower limit), the cost is equal
+      * to:
       * \f[ cost= weight\times\left(\frac{min_{hard}-value}{looseness \times range} \right)^2\f]
-		* And if there is a higher limit and the value is above it:
+      * And if there is a higher limit and the value is above it:
       * \f[ cost= weight\times\left(\frac{value-max_{hard}}{loosenes \times srange} \right)^2\f]
-		*
-		* If restraints are disabled, the returned cost is always null.
-		*/
-		virtual REAL GetRestraintCost()const;
-	protected:
-		/// Type of value constrained/restrained.
+      *
+      * If restraints are disabled, the returned cost is always null.
+      */
+      virtual REAL GetRestraintCost()const;
+   protected:
+      /// Type of value constrained/restrained.
       const RefParType *mpRefParType;
-		/// Hard lower and upper limits.
-		REAL mMin,mMax;
-		/// Has lower and/or upper limits ?
-		bool mHasMin,mHasMax;
-		/// Soft lower and upper limits.
-		REAL mRestraintRange;
-		/// Is this restraint enabled ?
-		bool mEnableRestraint;
-		/// weight for the restraint. This shoud be set by the RefinableObj.
-		REAL mWeight;
+      /// Hard lower and upper limits.
+      REAL mMin,mMax;
+      /// Has lower and/or upper limits ?
+      bool mHasMin,mHasMax;
+      /// Soft lower and upper limits.
+      REAL mRestraintRange;
+      /// Is this restraint enabled ?
+      bool mEnableRestraint;
+      /// weight for the restraint. This shoud be set by the RefinableObj.
+      REAL mWeight;
 };
 
 /** Generic class for parameters of refinable objects.
@@ -410,7 +410,7 @@ class RefinablePar:public Restraint
          REAL GetHumanMax()const;
          ///Get the maximum value allowed (if limited)
          void  SetHumanMax(const REAL);
-			
+         
          ///Get the period (if periodic)
          REAL GetPeriod()const;
          ///Set the period value (if periodic)
@@ -684,15 +684,15 @@ template<class T> class ObjRegistry
       /// Find the number of an object in the registry from its name (slow !)
       /// The search starts at the *end* of the registry.
       /// Also check the class of the object (inheritance...).
-		/// use nothrow=true to avoid having an exception thrown if no object
-		/// is found (instead the index returned will be -1)
+      /// use nothrow=true to avoid having an exception thrown if no object
+      /// is found (instead the index returned will be -1)
       long Find(const string &objName, const string& className,
-					 const bool nothrow=false)const;
+                const bool nothrow=false)const;
       /// Find the number of an object in the registry
       /// The search starts at the *end* of the registry.
       long Find(const T &obj)const;
       /// Last time an object was added or removed from the registry
-		const RefinableObjClock& GetRegistryClock()const;
+      const RefinableObjClock& GetRegistryClock()const;
    private:
       /// The registry
       T** mpRegistry;
@@ -702,9 +702,9 @@ template<class T> class ObjRegistry
       unsigned long mMaxNbRegistered;
       /// Name of this registry
       string mName;
-		/// Last time an object was added or removed
-		RefinableObjClock mListClock;
-		
+      /// Last time an object was added or removed
+      RefinableObjClock mListClock;
+      
    #ifdef __WX__CRYST__
    public:
       WXRegistry<T>* WXCreate(wxWindow *parent);
@@ -736,13 +736,13 @@ class RefinableObj
       /// Constructor
       RefinableObj();
       /// Constructor. Using internalUseOnly=true will avoid registering the
-		/// the object to any registry, and thus (for example) no display will be created,
-		/// nor will this object be automatically be saved.
+      /// the object to any registry, and thus (for example) no display will be created,
+      /// nor will this object be automatically be saved.
       RefinableObj(const bool internalUseOnly);
       /// Defined not implemented... Should never be called
-		/// (copying the refinable parameters would allow you to modify the 
-		/// input object).
-		/// Use the default constructor and RefinableObj::AddPar(RefinableObj&) instead.
+      /// (copying the refinable parameters would allow you to modify the 
+      /// input object).
+      /// Use the default constructor and RefinableObj::AddPar(RefinableObj&) instead.
       RefinableObj(const RefinableObj &old);
       /// Destructor
       virtual ~RefinableObj();
@@ -755,7 +755,7 @@ class RefinableObj
       /// Name of the object
       virtual void SetName(const string &name);
       /** Defined not implemented... Should never be called
-		*/
+      */
       void operator=(const RefinableObj &old);
       
       /// Find which parameters are used and \b not fixed, for a refinement /optimization.
@@ -804,26 +804,26 @@ class RefinableObj
       /// Access all parameters in the order they were inputed,
       /// skipping fixed parameters. Must call PrepareForRefinement() before !
       const RefinablePar& GetParNotFixed(const long i)const;
-		/** Add a refinable parameter. The parameter is copied, so 
-		* it need only be allocated temporarily.
-		*
-		* \deprecated Use the next function, which supplies the parameter as
-		* a pointer, and avoids a useless copy.
-		*/ 
+      /** Add a refinable parameter. The parameter is copied, so 
+      * it need only be allocated temporarily.
+      *
+      * \deprecated Use the next function, which supplies the parameter as
+      * a pointer, and avoids a useless copy.
+      */ 
       void AddPar(const RefinablePar &newRefPar);
-		/** Add a refinable parameter. The parameter is \e not copied, so 
-		* it should be allocated in the heap.
-		*
-		*/ 
+      /** Add a refinable parameter. The parameter is \e not copied, so 
+      * it should be allocated in the heap.
+      *
+      */ 
       void AddPar(RefinablePar *newRefPar);
-		/** Add all the parameters in another RefinableObj. Parameters
-		* are \not copied, so they should be allocated in the heap.
-		* 
-		* \warning If a copy of another RefinableObj parameter list is made,
-		* such as in the OptimizationObj class, make sure that upon deletion
-		* of this object the parameters will not be destroyed. To do this
-		* use RefinableObj::SetDeleteRefParInDestructor(false).
-		*/
+      /** Add all the parameters in another RefinableObj. Parameters
+      * are \not copied, so they should be allocated in the heap.
+      * 
+      * \warning If a copy of another RefinableObj parameter list is made,
+      * such as in the OptimizationObj class, make sure that upon deletion
+      * of this object the parameters will not be destroyed. To do this
+      * use RefinableObj::SetDeleteRefParInDestructor(false).
+      */
       void AddPar(RefinableObj &newRefParList);
       
       virtual void Print() const;
@@ -912,17 +912,17 @@ class RefinableObj
       * function. This also affects all sub-objects.
       * \note this may be called several time for some objects which are used by several
       * other objects.
-		*
-		* \param allowApproximations: if true, then the object can use faster
-		* but less precise functions during the optimization. This is useful for
-		* global optimization not using derivatives.
-		* \param enableRestraints: if true, then restrained parameters will be allowed
-		* to go beyond theur hard limits. This implies that the algorithm will take
-		* into account the cost (penalty) related to the restraints. Objects which do not
-		* use restraints will simply ignore this.
+      *
+      * \param allowApproximations: if true, then the object can use faster
+      * but less precise functions during the optimization. This is useful for
+      * global optimization not using derivatives.
+      * \param enableRestraints: if true, then restrained parameters will be allowed
+      * to go beyond theur hard limits. This implies that the algorithm will take
+      * into account the cost (penalty) related to the restraints. Objects which do not
+      * use restraints will simply ignore this.
       */
       virtual void BeginOptimization(const bool allowApproximations=false,
-												 const bool enableRestraints=false);
+                                     const bool enableRestraints=false);
       /** This should be called by any optimization class at the end of an optimization
       *
       * This also affects all sub-objects.
@@ -954,13 +954,13 @@ class RefinableObj
       *  for all parameters
       */
       virtual void GlobalOptRandomMove(const REAL mutationAmplitude);
-		/** Raise a flag, to be sure not to make a random change more than once
-		* in each RefinableObj. This calls recursively all sub-objects.
-		*
-		* This is necessary since one object may be included in several others.
-		* This must be called before making a random configuration change on
-		* a list of objects.
-		*/
+      /** Raise a flag, to be sure not to make a random change more than once
+      * in each RefinableObj. This calls recursively all sub-objects.
+      *
+      * This is necessary since one object may be included in several others.
+      * This must be called before making a random configuration change on
+      * a list of objects.
+      */
       void BeginGlobalOptRandomMove();
       
       //Cost functions
@@ -989,7 +989,7 @@ class RefinableObj
 
       /// Re-init the list of refinable parameters, removing all parameters.
       /// This does \e not delete the RefinablePar if 
-		/// RefinableObj::mDeleteRefParInDestructor is false
+      /// RefinableObj::mDeleteRefParInDestructor is false
       void ResetParList();
       
       /** \brief Output to stream in well-formed XML 
@@ -1017,63 +1017,63 @@ class RefinableObj
          RefObjOpt& GetOption(const unsigned int i);
          /// const access to the options
          const RefObjOpt& GetOption(const unsigned int i)const;
-		// Genetic
-			/** \brief Get the gene group assigned to each parameter.
-			*
-			* Each parameter (a \e gene in terms of genetic algorithms)
-			* can be assigned to a gene group. Thus when mating two configurations,
-			* genes will be exchanged by groups. By default (in the base RefinabeObj class),
-			* each parameter is alone in its group. Derived classes can group genes
-			* for a better s** life.
-			*
-			* The number identifying a gene group only has a meaning in a given
-			* object. It can also change on subsequent calls, and thus is not unique.
-			*
-			* \param obj the \RefinableObj, supplied by an algorithm class (OptimizationObj,..),
-			* which contains a list of parameters, some of which (but possibly all or none)
-			* are parameters belonging to this object.
-			* \param groupIndex a vector of unsigned integers, one for each parameter in the
-			* input object, giving an unsigned integer value as gene group index.
-			* At the beginning this vector should contain only zeros (no group assigned).
-			* \param firstGroup this is the number of groups which have already been assigned,
-			* plus one. The gene groups returned by this object will start from this
-			* value, and increment \b firstGroup for each gene group used, so that
-			* different RefinableObj cannot share a gene group.
-			* \note this function is not optimized, and should only be called at the beginning
-			* of a refinement.
-			*/
-			virtual void GetGeneGroup(const RefinableObj &obj, 
-											  CrystVector_uint & groupIndex,
-											  unsigned int &firstGroup) const;
-		/** Set this object not to delete its list of parameters when destroyed.
-		*
-		* This is used for the RefinableObj in algorithms objects (OptimizationObj),
-		* which only hold copies of parameters from the refined objects.
-		*/
-		void SetDeleteRefParInDestructor(const bool b);
-		/** What was the last time a RefinablePar was added/removed ?
-		*
-		*/
-		const RefinableObjClock& GetRefParListClock()const;
-		// Restraints
-			/** Get the restraint cost (penalty)
-			*
-			* \note by default this returns 0, so this \e must be overloaded by any
-			* object which actually uses retsraint.
-			* \todo Instead, we could return by default the sum of the restraints,
-			* but this is dangerous since we need to have objects using restraints fully
-			* responsible for them.
-			*/
-			virtual REAL GetRestraintCost()const;
-			/** Add a new restraint
-			*
-			*/
-			void AddRestraint(Restraint *pNewRestraint);
-			/* Remove a restraint
-			*
-			*void RemoveRestraint(Restraint *newRestraint);
-			*void RemoveRestraint(const RefParType);
-			*/
+      // Genetic
+         /** \brief Get the gene group assigned to each parameter.
+         *
+         * Each parameter (a \e gene in terms of genetic algorithms)
+         * can be assigned to a gene group. Thus when mating two configurations,
+         * genes will be exchanged by groups. By default (in the base RefinabeObj class),
+         * each parameter is alone in its group. Derived classes can group genes
+         * for a better s** life.
+         *
+         * The number identifying a gene group only has a meaning in a given
+         * object. It can also change on subsequent calls, and thus is not unique.
+         *
+         * \param obj the \RefinableObj, supplied by an algorithm class (OptimizationObj,..),
+         * which contains a list of parameters, some of which (but possibly all or none)
+         * are parameters belonging to this object.
+         * \param groupIndex a vector of unsigned integers, one for each parameter in the
+         * input object, giving an unsigned integer value as gene group index.
+         * At the beginning this vector should contain only zeros (no group assigned).
+         * \param firstGroup this is the number of groups which have already been assigned,
+         * plus one. The gene groups returned by this object will start from this
+         * value, and increment \b firstGroup for each gene group used, so that
+         * different RefinableObj cannot share a gene group.
+         * \note this function is not optimized, and should only be called at the beginning
+         * of a refinement.
+         */
+         virtual void GetGeneGroup(const RefinableObj &obj, 
+                                   CrystVector_uint & groupIndex,
+                                   unsigned int &firstGroup) const;
+      /** Set this object not to delete its list of parameters when destroyed.
+      *
+      * This is used for the RefinableObj in algorithms objects (OptimizationObj),
+      * which only hold copies of parameters from the refined objects.
+      */
+      void SetDeleteRefParInDestructor(const bool b);
+      /** What was the last time a RefinablePar was added/removed ?
+      *
+      */
+      const RefinableObjClock& GetRefParListClock()const;
+      // Restraints
+         /** Get the restraint cost (penalty)
+         *
+         * \note by default this returns 0, so this \e must be overloaded by any
+         * object which actually uses retsraint.
+         * \todo Instead, we could return by default the sum of the restraints,
+         * but this is dangerous since we need to have objects using restraints fully
+         * responsible for them.
+         */
+         virtual REAL GetRestraintCost()const;
+         /** Add a new restraint
+         *
+         */
+         void AddRestraint(Restraint *pNewRestraint);
+         /* Remove a restraint
+         *
+         *void RemoveRestraint(Restraint *newRestraint);
+         *void RemoveRestraint(const RefParType);
+         */
    protected:
       /// Find a refinable parameter with a given name
       long FindPar(const string &name) const;
@@ -1094,24 +1094,24 @@ class RefinableObj
       
       ///Name for this RefinableObject. Should be unique, at least in the same scope.+
       string mName;
-		// Parameters
-      	/// Array of pointers to the refinable parameters
-      	RefinablePar **mpRefPar;
-      	/// Number of refinable parameters
-      	long mNbRefPar;
-      	/// Maximum number of refinable parameters (array size-dynamically allocated)
-      	long mMaxNbRefPar;
+      // Parameters
+         /// Array of pointers to the refinable parameters
+         RefinablePar **mpRefPar;
+         /// Number of refinable parameters
+         long mNbRefPar;
+         /// Maximum number of refinable parameters (array size-dynamically allocated)
+         long mMaxNbRefPar;
       // Restraints
-      	/// Array of pointers to the restraints for this object. This excludes
-			/// all RefinableP.ar declared in RefinableObj::mpRefPar, which can also
-			/// be restrained.
-      	Restraint **mpRestraint;
-      	/// Number of refinable parameters (\e not including possible RefinablePar which
-			/// are also restrained)
-      	long mNbRestraint;
-      	/// Maximum number of restraints (dynamically allocated)
-      	long mMaxNbRestraint;
-			
+         /// Array of pointers to the restraints for this object. This excludes
+         /// all RefinableP.ar declared in RefinableObj::mpRefPar, which can also
+         /// be restrained.
+         Restraint **mpRestraint;
+         /// Number of refinable parameters (\e not including possible RefinablePar which
+         /// are also restrained)
+         long mNbRestraint;
+         /// Maximum number of restraints (dynamically allocated)
+         long mMaxNbRestraint;
+         
       //Saved sets of parameters
          ///Max number of saved sets (memory is dynamically allocated...)
          static const int mMaxNbSavedSets=1000;
@@ -1141,15 +1141,15 @@ class RefinableObj
          /// to options allocated by the object, to have a simple global access to 
          /// all options
          ObjRegistry<RefObjOpt> mOptionRegistry;
-		/// If true (the default), then all RefinablePar will be deleted when the 
-		/// the object is deleted. The opposite option (false) should only be used
-		/// in RefinableObj holding 'copies' of other objects, such as in algorithms.
+      /// If true (the default), then all RefinablePar will be deleted when the 
+      /// the object is deleted. The opposite option (false) should only be used
+      /// in RefinableObj holding 'copies' of other objects, such as in algorithms.
       bool mDeleteRefParInDestructor;
-		/// Last time the RefinableParList was modified (a parameter added or removed).
-		RefinableObjClock mRefParListClock;
-		/// \internal This true is false if RefinableObj::GlobalOptRandomMove() has been called
-		/// since RefinableObj::BeginGlobalOptRandomMove() was called.
-		bool mRandomMoveIsDone;
+      /// Last time the RefinableParList was modified (a parameter added or removed).
+      RefinableObjClock mRefParListClock;
+      /// \internal This true is false if RefinableObj::GlobalOptRandomMove() has been called
+      /// since RefinableObj::BeginGlobalOptRandomMove() was called.
+      bool mRandomMoveIsDone;
    #ifdef __WX__CRYST__
    public:
       /// Create a WXCrystObj for this object. Only a generic WXCrystObj pointer is kept.

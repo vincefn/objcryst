@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ class WXFieldRefPar:public WXField
       /// and directly changes the RefinablePar value (contrary to what happens
       /// for WXFieldName)by using RefinablePar::SetHumanValue().
       void OnEnter(wxCommandEvent & WXUNUSED(event));
-		/// Records when text is entered (either from self-updating or user input)
+      /// Records when text is entered (either from self-updating or user input)
       void OnText(wxCommandEvent & WXUNUSED(event));
       /// Toggle the 'fixed' status of the parameter.
       void OnToggleFix(wxCommandEvent & WXUNUSED(event));
@@ -77,7 +77,7 @@ class WXFieldRefPar:public WXField
       /// Get the RefinablePar associated to this field
       RefinablePar& GetRefPar();
       void Revert();
-		virtual void ValidateUserInput();
+      virtual void ValidateUserInput();
    protected:
       REAL mValue;
       wxCheckBox *mpButtonFix;
@@ -85,7 +85,7 @@ class WXFieldRefPar:public WXField
       RefinablePar *mpRefPar;
       REAL mValueOld;
       wxMenu *mpPopUpMenu;
-		bool mIsSelfUpdating;
+      bool mIsSelfUpdating;
    DECLARE_EVENT_TABLE()
 };
 
@@ -105,8 +105,8 @@ class WXFieldOption:public WXField
       virtual void CrystUpdate();
       virtual void UpdateUI();
       void Revert();
-		/// Does nothing. Any user input is directly validated (OnChoice).
-		virtual void ValidateUserInput();
+      /// Does nothing. Any user input is directly validated (OnChoice).
+      virtual void ValidateUserInput();
    protected:
       int mChoice;
       int mChoiceOld;
@@ -125,8 +125,8 @@ class WXCostFunction:public WXField
       virtual void CrystUpdate();
       virtual void UpdateUI();
       virtual void Revert();
-		/// Not used. Not an user input field.
-		virtual void ValidateUserInput();
+      /// Not used. Not an user input field.
+      virtual void ValidateUserInput();
    protected:
       wxTextCtrl *mpValue;
       REAL mValue;

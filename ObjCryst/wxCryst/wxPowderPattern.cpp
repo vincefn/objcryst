@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -118,7 +118,7 @@ BEGIN_EVENT_TABLE(WXPowderPattern, wxWindow)
    EVT_MENU(ID_POWDERSPECTRUM_MENU_FITSCALE_R,         WXPowderPattern::OnMenuFitScaleForR)
    EVT_MENU(ID_POWDERSPECTRUM_MENU_FITSCALE_RW,        WXPowderPattern::OnMenuFitScaleForRw)
    EVT_MENU(ID_POWDERSPECTRUM_MENU_ADD_2THETA_EXCLUDE, WXPowderPattern::OnMenuAdd2ThetaExclude)
-   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, 						 WXRefinableObj::OnUpdateUI)
+   EVT_UPDATE_UI(ID_CRYST_UPDATEUI,                    WXRefinableObj::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXPowderPattern::WXPowderPattern(wxWindow *parent, PowderPattern* pow):
@@ -232,10 +232,10 @@ mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUM_MENU_IMPORT_CPI,
       mList.Add(fieldThetaDispl);
       mList.Add(fieldThetaTransp);
       mpSizer->Add(thetaCorrSizer);
-	// Max Sin(theta/Lambda)
+   // Max Sin(theta/Lambda)
       WXFieldPar<REAL> *maxSiThOvLa=
          new WXFieldPar<REAL>(this,"Max Sin(theta)/lambda:",-1,
-			                     &(mpPowderPattern->mMaxSinThetaOvLambda));
+                              &(mpPowderPattern->mMaxSinThetaOvLambda));
       mpSizer->Add(maxSiThOvLa,0,wxALIGN_LEFT);
       mList.Add(maxSiThOvLa);
    // Components
@@ -243,7 +243,7 @@ mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUM_MENU_IMPORT_CPI,
                     ->mPowderPatternComponentRegistry.WXCreate(this);
       mpSizer->Add(mpWXComponent,0,wxALIGN_LEFT);
       mList.Add(mpWXComponent);
-	
+   
    VFN_DEBUG_MESSAGE("WXPowderPattern::WXPowderPattern():1",6)
    this->CrystUpdate();
    this->Layout();
@@ -253,13 +253,13 @@ mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUM_MENU_IMPORT_CPI,
 void WXPowderPattern::CrystUpdate()
 {
    VFN_DEBUG_MESSAGE("WXPowderPattern::CrystUpdate()",6)
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    this->WXRefinableObj::CrystUpdate();
-	
-	// Will force re-generating reflection list if the wavelength,
-	// or lattice par, or the spacegroup has changed.
-	mpPowderPattern->Prepare();
-	
+   
+   // Will force re-generating reflection list if the wavelength,
+   // or lattice par, or the spacegroup has changed.
+   mpPowderPattern->Prepare();
+   
    if(mpGraph!=0)
    {
       mpGraph->SetPattern( mpPowderPattern->GetPowderPatternObs(),
@@ -272,17 +272,17 @@ void WXPowderPattern::CrystUpdate()
 void WXPowderPattern::OnMenuAddCompBackgd(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompBackgd()",6)
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    PowderPatternBackground *backgdData= new PowderPatternBackground;
    mpPowderPattern->AddPowderPatternComponent(*backgdData);
-	if(mpGraph!=0) mpPowderPattern->Prepare();//else this will be done when opening the graph
+   if(mpGraph!=0) mpPowderPattern->Prepare();//else this will be done when opening the graph
    this->Layout();
 }
 
 void WXPowderPattern::OnMenuAddCompCryst(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompCryst()",6)
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    PowderPatternDiffraction * diffData=new PowderPatternDiffraction;
    int choice;
    Crystal *cryst=dynamic_cast<Crystal*>
@@ -291,7 +291,7 @@ void WXPowderPattern::OnMenuAddCompCryst(wxCommandEvent & WXUNUSED(event))
    if(0==cryst) return;
    diffData->SetCrystal(*cryst);
    mpPowderPattern->AddPowderPatternComponent(*diffData);
-	if(mpGraph!=0) mpPowderPattern->Prepare();//else this will be done when opening the graph
+   if(mpGraph!=0) mpPowderPattern->Prepare();//else this will be done when opening the graph
    this->Layout();
 }
 
@@ -299,7 +299,7 @@ void WXPowderPattern::OnMenuShowGraph(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuShowGraph()"<<mpGraph,6)
    if(mpGraph!=0) return;
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    mpPowderPattern->Prepare();
    wxFrame *frame= new wxFrame(this,-1,mpPowderPattern->GetName().c_str());
    mpGraph = new WXPowderPatternGraph(frame,this);
@@ -312,7 +312,7 @@ void WXPowderPattern::OnMenuShowGraph(wxCommandEvent & WXUNUSED(event))
 void WXPowderPattern::OnMenuSaveText(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuSaveText()",6)
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    wxFileDialog save(this,"Choose a file","","","*.txt",wxSAVE | wxOVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
    
@@ -325,7 +325,7 @@ void WXPowderPattern::OnMenuSaveText(wxCommandEvent & WXUNUSED(event))
 void WXPowderPattern::OnMenuSimulate(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXPowderPattern::OnMenuSimulate()",6)
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    double min=0.,max=120.;
    long nbPoints=6000;
    {
@@ -443,7 +443,7 @@ void WXPowderPattern::OnMenuImport2ThetaObs(wxCommandEvent & WXUNUSED(event))
 void WXPowderPattern::OnMenuFitScaleForR(wxCommandEvent & WXUNUSED(event))
 {
    if(0==mpGraph) return;
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    mpPowderPattern->FitScaleFactorForR();//FitScaleFactorForIntegratedR
    this->CrystUpdate();
 }
@@ -451,7 +451,7 @@ void WXPowderPattern::OnMenuFitScaleForR(wxCommandEvent & WXUNUSED(event))
 void WXPowderPattern::OnMenuFitScaleForRw(wxCommandEvent & WXUNUSED(event))
 {
    if(0==mpGraph) return;
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    mpPowderPattern->FitScaleFactorForRw();//FitScaleFactorForIntegratedRw
    this->CrystUpdate();
 }
@@ -459,7 +459,7 @@ void WXPowderPattern::OnMenuFitScaleForRw(wxCommandEvent & WXUNUSED(event))
 
 void WXPowderPattern::OnMenuSetWavelength(wxCommandEvent & event)
 {
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    // this looks stupid. In fact, if a user changed the wavelength in the
    // corresponding field, this is (unfortunately) not applied to the
    // components automagically. So we need this function to do the job...
@@ -508,7 +508,7 @@ void WXPowderPattern::OnMenuSetWavelength(wxCommandEvent & event)
 
 void WXPowderPattern::OnMenuAdd2ThetaExclude(wxCommandEvent & WXUNUSED(event))
 {
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    double min,max;
    //min
    {
@@ -547,9 +547,9 @@ void WXPowderPattern::UpdateUI()
 {
    if(mpGraph!=0)
    {
-		mpGraph->GetParent()->SetTitle(mpPowderPattern->GetName().c_str());
+      mpGraph->GetParent()->SetTitle(mpPowderPattern->GetName().c_str());
    }
-	this->WXRefinableObj::UpdateUI();
+   this->WXRefinableObj::UpdateUI();
 }
 ////////////////////////////////////////////////////////////////////////
 //
@@ -581,14 +581,14 @@ WXPowderPatternGraph::~WXPowderPatternGraph()
 void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint()",5)
-	if(true==mCalcPatternIsLocked) return;
+   if(true==mCalcPatternIsLocked) return;
    wxPaintDC dc(this);
    PrepareDC(dc);
    mpParentFrame->PrepareDC(dc);
    
    dc.BeginDrawing();
    
-	dc.DestroyClippingRegion();
+   dc.DestroyClippingRegion();
    dc.SetBackground(wxBrush("white", wxSOLID));
    dc.Clear();
 
@@ -688,104 +688,104 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
 }
 void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
 {
-	if(true==mCalcPatternIsLocked)
-	{
-		mIsDragging=false;
-		return;
-	}
+   if(true==mCalcPatternIsLocked)
+   {
+      mIsDragging=false;
+      return;
+   }
        VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnMouse()",5)
-	// Write mouse pointer coordinates
-   	wxClientDC dc(this);
-   	PrepareDC(dc);
-   	mpParentFrame->PrepareDC(dc);
+   // Write mouse pointer coordinates
+      wxClientDC dc(this);
+      PrepareDC(dc);
+      mpParentFrame->PrepareDC(dc);
 
-   	wxPoint pos=event.GetPosition();
-  	   const long x= dc.DeviceToLogicalX(pos.x);
+      wxPoint pos=event.GetPosition();
+        const long x= dc.DeviceToLogicalX(pos.x);
       const long y= dc.DeviceToLogicalY(pos.y);
  
-   	wxCoord width,height;
-   	this->GetSize(&width, &height);
+      wxCoord width,height;
+      this->GetSize(&width, &height);
 
-	if((x>width)||(y>height)) return;
-	//cout <<pos.x<<" "<<pos.y<<" "<<x<<" "<<y<<" "<<width<<" "<<height<<endl;
+   if((x>width)||(y>height)) return;
+   //cout <<pos.x<<" "<<pos.y<<" "<<x<<" "<<y<<" "<<width<<" "<<height<<endl;
 
-   	const REAL 
-      	ttheta=mMin2Theta+(x-mMargin)*(mMax2Theta-mMin2Theta)/(REAL)(width-mMargin);
-   	const REAL intensity=mMinIntensity+(height-mMargin-y)*(mMaxIntensity-mMinIntensity)
-                                          	/(REAL)(height-2*mMargin);
+      const REAL 
+         ttheta=mMin2Theta+(x-mMargin)*(mMax2Theta-mMin2Theta)/(REAL)(width-mMargin);
+      const REAL intensity=mMinIntensity+(height-mMargin-y)*(mMaxIntensity-mMinIntensity)
+                                             /(REAL)(height-2*mMargin);
 
-   	wxString str;
-		const long pixel=
-			mpPattern->GetPowderPattern().Get2ThetaCorrPixel(ttheta*DEG2RAD);
-   	str.Printf("2Theta=%6.2f    ,I=%12.2f.   pixel=#%d",ttheta,intensity,pixel);
-   	mpParentFrame->SetStatusText(str);
+      wxString str;
+      const long pixel=
+         mpPattern->GetPowderPattern().Get2ThetaCorrPixel(ttheta*DEG2RAD);
+      str.Printf("2Theta=%6.2f    ,I=%12.2f.   pixel=#%d",ttheta,intensity,pixel);
+      mpParentFrame->SetStatusText(str);
 
    if (event.Dragging() && event.LeftIsDown() && (!mIsDragging))
    {//Begin zooming
-		mIsDragging=true;
-		mDragging2Theta0=ttheta;
-		mDraggingIntensity0=intensity;
-		return;
-	}
-	if(event.LeftUp() && mIsDragging)
-	{//Finished zooming !
-   	VFN_DEBUG_MESSAGE("WXPowderPatternGraph::OnMouse():Finished zooming...",5)
-		mIsDragging=false;
-		
-		if( (abs(ttheta-mDragging2Theta0)<.3) || (abs(mDraggingIntensity0-intensity)< abs(mMaxIntensity*.05)) )
-		{
-			return;
-		}
-		if(mDraggingIntensity0>intensity)
-		{
-			if(mDraggingIntensity0<0.) return;
-			mMinIntensity=intensity;
-			mMaxIntensity=mDraggingIntensity0;
-		}
-		else
-		{
-			if(intensity<0.) return;
-			mMinIntensity=mDraggingIntensity0;
-			mMaxIntensity=intensity;
-		}
-		if(mDragging2Theta0>ttheta)
-		{
-			mMin2Theta=ttheta;
-			mMax2Theta=mDragging2Theta0;
-		}
-		else
-		{
-			mMin2Theta=mDragging2Theta0;
-			mMax2Theta=ttheta;
-		}
-		const long nbpoints=m2theta.numElements();
-		bool flag=true;
-		for(long i=0;i<nbpoints;i++)
-		{
-			if(flag) if(m2theta(i)>=mMin2Theta) {mFirst=i;flag=false;}
-			if(m2theta(i)>=mMax2Theta) {mLast=i;break;}
-		}
-		if(mFirst<0) mFirst=0;
-		if(mLast>=nbpoints) mLast=nbpoints-1;
-   	wxUpdateUIEvent event(ID_POWDERSPECTRUM_GRAPH_NEW_PATTERN);
-   	wxPostEvent(this,event);
-		return;
-	}
+      mIsDragging=true;
+      mDragging2Theta0=ttheta;
+      mDraggingIntensity0=intensity;
+      return;
+   }
+   if(event.LeftUp() && mIsDragging)
+   {//Finished zooming !
+      VFN_DEBUG_MESSAGE("WXPowderPatternGraph::OnMouse():Finished zooming...",5)
+      mIsDragging=false;
+      
+      if( (abs(ttheta-mDragging2Theta0)<.3) || (abs(mDraggingIntensity0-intensity)< abs(mMaxIntensity*.05)) )
+      {
+         return;
+      }
+      if(mDraggingIntensity0>intensity)
+      {
+         if(mDraggingIntensity0<0.) return;
+         mMinIntensity=intensity;
+         mMaxIntensity=mDraggingIntensity0;
+      }
+      else
+      {
+         if(intensity<0.) return;
+         mMinIntensity=mDraggingIntensity0;
+         mMaxIntensity=intensity;
+      }
+      if(mDragging2Theta0>ttheta)
+      {
+         mMin2Theta=ttheta;
+         mMax2Theta=mDragging2Theta0;
+      }
+      else
+      {
+         mMin2Theta=mDragging2Theta0;
+         mMax2Theta=ttheta;
+      }
+      const long nbpoints=m2theta.numElements();
+      bool flag=true;
+      for(long i=0;i<nbpoints;i++)
+      {
+         if(flag) if(m2theta(i)>=mMin2Theta) {mFirst=i;flag=false;}
+         if(m2theta(i)>=mMax2Theta) {mLast=i;break;}
+      }
+      if(mFirst<0) mFirst=0;
+      if(mLast>=nbpoints) mLast=nbpoints-1;
+      wxUpdateUIEvent event(ID_POWDERSPECTRUM_GRAPH_NEW_PATTERN);
+      wxPostEvent(this,event);
+      return;
+   }
 
-	if(false==event.Dragging()) mIsDragging=false;
+   if(false==event.Dragging()) mIsDragging=false;
 
-	if(event.LeftDClick())
-	{//Reset axis range
-		this->ResetAxisLimits();
-   	wxUpdateUIEvent event(ID_POWDERSPECTRUM_GRAPH_NEW_PATTERN);
-   	wxPostEvent(this,event);
-		return;
-	}
-	
+   if(event.LeftDClick())
+   {//Reset axis range
+      this->ResetAxisLimits();
+      wxUpdateUIEvent event(ID_POWDERSPECTRUM_GRAPH_NEW_PATTERN);
+      wxPostEvent(this,event);
+      return;
+   }
+   
    if(event.RightIsDown())
    {//popup menu
       this->PopupMenu(mpPopUpMenu, event.GetX(), event.GetY() );
-		return;
+      return;
    }
 }
 
@@ -810,7 +810,7 @@ void WXPowderPatternGraph::SetPattern(const CrystVector_REAL &obs,
    m2theta.resize(nbPoint);
    for(long i=0;i<nbPoint;i++) m2theta(i)=tthetaMin+i*tthetaStep;
    m2theta*=RAD2DEG;
-	this->ResetAxisLimits();
+   this->ResetAxisLimits();
    // If we only send an OnPaint event, only the parts which have been erased are redrawn
    // (under windows). SO we must force the complete Refresh of the window... in the
    // main thread of course...
@@ -835,8 +835,8 @@ void WXPowderPatternGraph::ResetAxisLimits()
    if(mMinIntensity<0) mMinIntensity=0;
    mMax2Theta=m2theta.max();
    mMin2Theta=m2theta.min();
-	mFirst=0;
-	mLast=m2theta.numElements()-1;
+   mFirst=0;
+   mLast=m2theta.numElements()-1;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -879,8 +879,8 @@ void WXPowderPatternBackground::OnMenuImportUserBackground(wxCommandEvent & WXUN
 BEGIN_EVENT_TABLE(WXPowderPatternDiffraction, wxWindow)
    EVT_BUTTON(ID_POWDERSPECTRUMDIFF_CRYSTAL,WXPowderPatternDiffraction::OnChangeCrystal)
    EVT_MENU(ID_POWDERSPECTRUMDIFF_SAVEHKLFCALC, 
-                     							  WXPowderPatternDiffraction::OnMenuSaveHKLFcalc)
-   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, 		  WXRefinableObj::OnUpdateUI)
+                                            WXPowderPatternDiffraction::OnMenuSaveHKLFcalc)
+   EVT_UPDATE_UI(ID_CRYST_UPDATEUI,         WXRefinableObj::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXPowderPatternDiffraction::WXPowderPatternDiffraction(wxWindow *parent,
@@ -891,7 +891,7 @@ WXRefinableObj(parent,p),mpPowderPatternDiffraction(p)
     //Menu
       mpMenuBar->AddMenu("Object",ID_REFOBJ_MENU_OBJ);
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUMDIFF_SAVEHKLFCALC,
-										  "Save HKL Fcalc");
+                                "Save HKL Fcalc");
     // Crystal Choice
       mpFieldCrystal=new WXFieldChoice(this,ID_POWDERSPECTRUMDIFF_CRYSTAL,"Crystal:",300);
       mpSizer->Add(mpFieldCrystal,0,wxALIGN_LEFT);
@@ -924,13 +924,13 @@ WXRefinableObj(parent,p),mpPowderPatternDiffraction(p)
       mList.Add(mpFieldEta0);
       mList.Add(mpFieldEta1);
       mpSizer->Add(profileSizer);
-	//Global Biso factor
+   //Global Biso factor
       WXFieldRefPar* fieldGlobalBiso    =new WXFieldRefPar(this,"Overall Temperature factor:",
                                    &(mpPowderPatternDiffraction
                                      ->GetPar(&(mpPowderPatternDiffraction->mGlobalBiso))),90 );
-   	mList.Add(fieldGlobalBiso);
-		mpSizer->Add(fieldGlobalBiso);
-		
+      mList.Add(fieldGlobalBiso);
+      mpSizer->Add(fieldGlobalBiso);
+      
    this->CrystUpdate();
    this->Layout();
 }
@@ -938,7 +938,7 @@ WXRefinableObj(parent,p),mpPowderPatternDiffraction(p)
 void WXPowderPatternDiffraction::OnChangeCrystal(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXPowderPatternDiffraction::OnChangeCrystal()",6)
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    int choice;
    Crystal *cryst=dynamic_cast<Crystal*>
       ( WXDialogChooseFromRegistry(gCrystalRegistry,(wxWindow*)this,
@@ -950,7 +950,7 @@ void WXPowderPatternDiffraction::OnChangeCrystal(wxCommandEvent & WXUNUSED(event
 void WXPowderPatternDiffraction::OnMenuSaveHKLFcalc(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXPowderPatternDiffraction::OnMenuSaveHKLFcalc()",6)
-	WXCrystValidateAllUserInput();
+   WXCrystValidateAllUserInput();
    wxFileDialog save(this,"Choose a file to save to","","","*.txt",wxSAVE | wxOVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
    
@@ -962,7 +962,7 @@ void WXPowderPatternDiffraction::OnMenuSaveHKLFcalc(wxCommandEvent & WXUNUSED(ev
 void WXPowderPatternDiffraction::UpdateUI()
 {
    mpFieldCrystal->SetValue(mpPowderPatternDiffraction->GetCrystal().GetName());
-	this->WXRefinableObj::UpdateUI();
+   this->WXRefinableObj::UpdateUI();
 }
 
 }// namespace 
