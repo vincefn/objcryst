@@ -35,6 +35,7 @@ class WXAtom: public WXScatterer
 {
    public:
       WXAtom(wxWindow *parent, Atom*);
+      virtual ~WXAtom();
       void OnChangeScattPow(wxCommandEvent & WXUNUSED(event));
       virtual void UpdateUI();
    private:

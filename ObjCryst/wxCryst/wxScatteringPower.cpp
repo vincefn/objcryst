@@ -77,18 +77,14 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpScatteringPowerAtom(obj)
 
       mpFieldSymbol=new WXFieldName
          (this,"Symbol:",this,ID_WXSCATTPOWATOM_SYMBOL);
-#if 1
-      WXFieldRefPar* pFieldBiso  =new WXFieldRefPar(this,"Biso:",
-            &(mpScatteringPowerAtom->GetPar(&(mpScatteringPowerAtom->mBiso))) );
-#else
+
       WXCrystObjBasic* pFieldBiso
          =mpScatteringPowerAtom->GetPar(&(mpScatteringPowerAtom->mBiso)).WXCreate(this);
-#endif            
+
       sizer->Add(mpFieldSymbol  ,0,wxALIGN_CENTER);
       sizer->Add(pFieldBiso    ,0,wxALIGN_CENTER);
       #if 0
-      WXFieldRefPar* pFieldError  =new WXFieldRefPar(this,"ML Error:",
-            &(mpScatteringPowerAtom->GetPar("ML Error") ));
+      WXCrystObjBasic* pFieldError  =mpScatteringPowerAtom->GetPar("ML Error").WXCreate(this);
       sizer->Add(pFieldError    ,0,wxALIGN_CENTER);
       mList.Add(pFieldError);
       #else
@@ -97,6 +93,11 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpScatteringPowerAtom(obj)
       mpSizer->Add(sizer,0,wxALIGN_LEFT);
       mList.Add(mpFieldSymbol);
       mList.Add(pFieldBiso);
+      
+      WXCrystObjBasic* pFieldValence  =mpScatteringPowerAtom->GetPar("Valence").WXCreate(this);
+      sizer->Add(pFieldValence    ,0,wxALIGN_CENTER);
+      mList.Add(pFieldValence);
+      
    this->BottomLayout(0);
    this->CrystUpdate();
 }

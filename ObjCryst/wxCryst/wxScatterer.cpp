@@ -56,16 +56,7 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpScatterer(obj)
    //Lattice
       wxBoxSizer* sizer=new wxBoxSizer(wxHORIZONTAL);
       mpScatterer->RefinableObj::Print();
-#if 1
-      WXFieldRefPar* pFieldX    =new WXFieldRefPar(this,"x:",
-                                     &(mpScatterer->GetPar(mpScatterer->mXYZ.data()+0)) );
-      WXFieldRefPar* pFieldY    =new WXFieldRefPar(this,"y:",
-                                     &(mpScatterer->GetPar(mpScatterer->mXYZ.data()+1)) );
-      WXFieldRefPar* pFieldZ    =new WXFieldRefPar(this,"z:",
-                                     &(mpScatterer->GetPar(mpScatterer->mXYZ.data()+2)) );
-      WXFieldRefPar* pFieldPopu    =new WXFieldRefPar(this,"Occup:",
-                                     &(mpScatterer->GetPar(&(mpScatterer->mOccupancy))) );
-#else
+
       WXCrystObjBasic* pFieldX
          =mpScatterer->GetPar(mpScatterer->mXYZ.data()+0).WXCreate(this);
       WXCrystObjBasic* pFieldY
@@ -74,7 +65,7 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpScatterer(obj)
          =mpScatterer->GetPar(mpScatterer->mXYZ.data()+2).WXCreate(this);
       WXCrystObjBasic* pFieldPopu 
          =mpScatterer->GetPar(&(mpScatterer->mOccupancy)).WXCreate(this);
-#endif
+
       sizer->Add(pFieldX    ,0,wxALIGN_CENTER);
       sizer->Add(pFieldY    ,0,wxALIGN_CENTER);
       sizer->Add(pFieldZ    ,0,wxALIGN_CENTER);

@@ -289,25 +289,7 @@ mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
       mList.Add(pAntiBumpScale);
    // Lattice
       wxBoxSizer* lattice=new wxBoxSizer(wxHORIZONTAL);
-#if 1
-      WXFieldRefPar* pFieldLatticeA    =new WXFieldRefPar(this,"a:",
-                                     &(mpCrystal->GetPar("a")) );
-          
-      WXFieldRefPar* pFieldLatticeB    =new WXFieldRefPar(this,"b:",
-                                     &(mpCrystal->GetPar("b")) );
-          
-      WXFieldRefPar* pFieldLatticeC    =new WXFieldRefPar(this,"c:",
-                                     &(mpCrystal->GetPar("c")) );
-          
-      WXFieldRefPar* pFieldLatticeAlpha=new WXFieldRefPar(this,"alpha:",
-                                     &(mpCrystal->GetPar("alpha")) );
-          
-      WXFieldRefPar* pFieldLatticeBeta =new WXFieldRefPar(this,"beta:",
-                                     &(mpCrystal->GetPar("beta")) );
-          
-      WXFieldRefPar* pFieldLatticeGamma=new WXFieldRefPar(this,"gamma:",
-                                     &(mpCrystal->GetPar("gamma")) );
-#else
+
       WXCrystObjBasic* pFieldLatticeA 
          =mpCrystal->GetPar("a").WXCreate(this);
       WXCrystObjBasic* pFieldLatticeB 
@@ -320,7 +302,7 @@ mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
          =mpCrystal->GetPar("beta").WXCreate(this);
       WXCrystObjBasic* pFieldLatticeGamma
          =mpCrystal->GetPar("gamma").WXCreate(this);
-#endif
+
       lattice->Add(pFieldLatticeA    ,0,wxALIGN_CENTER);
       lattice->Add(pFieldLatticeB    ,0,wxALIGN_CENTER);
       lattice->Add(pFieldLatticeC    ,0,wxALIGN_CENTER);

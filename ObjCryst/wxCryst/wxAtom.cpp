@@ -65,6 +65,10 @@ WXScatterer(parent,obj),mpAtom(obj)
    this->BottomLayout(0);
    this->CrystUpdate();
 }
+WXAtom::~WXAtom()
+{
+   mpAtom->WXNotifyDelete();
+}
 
 void WXAtom::OnChangeScattPow(wxCommandEvent & WXUNUSED(event))
 {

@@ -66,10 +66,10 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpScatteringPower(obj)
       mpMenuBar->AddMenu("Colour",ID_SCATTPOWATOM_MENU_COLOUR);
          mpMenuBar->AddMenuItem(ID_SCATTPOWATOM_MENU_COLOUR,
                                 ID_SCATTPOWATOM_MENU_COLOUR_SETRGB,"Set RGB Colour");
-      WXFieldRefPar* pFieldRadius  =new WXFieldRefPar(this,"Radius:",
-            &(mpScatteringPower->GetPar(&(mpScatteringPower->mRadius))) );
-      WXFieldRefPar* pFieldBiso  =new WXFieldRefPar(this,"Biso:",
-            &(mpScatteringPower->GetPar(&(mpScatteringPower->mBiso  ))) );
+      WXCrystObjBasic* pFieldRadius=
+         mpScatteringPower->GetPar(&(mpScatteringPower->mRadius)).WXCreate(this);
+      WXCrystObjBasic* pFieldBiso=
+         mpScatteringPower->GetPar(&(mpScatteringPower->mBiso  )).WXCreate(this);
       
       mpSizer->Add(pFieldRadius,0,wxALIGN_LEFT);
       mList.Add(pFieldRadius);

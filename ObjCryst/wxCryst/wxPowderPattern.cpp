@@ -74,13 +74,9 @@ WXCrystObjBasic(parent),mpRadiation(rad)
    mpFieldWavelengthType= new WXFieldOption(this,-1,&(mpRadiation->mWavelengthType));
    mpSizer->Add(mpFieldWavelengthType,0);
    mList.Add(mpFieldWavelengthType);
-#if 1
-   WXFieldRefPar* pFieldWavelength=new WXFieldRefPar(this,"Wavelength:",
-                                     &(mpRadiation->GetPar(mpRadiation->mWavelength.data())));
-#else
+
    WXCrystObjBasic* pFieldWavelength
       =mpRadiation->GetPar(mpRadiation->mWavelength.data()).WXCreate(this);
-#endif
    mpSizer->Add(pFieldWavelength,0);
    mList.Add(pFieldWavelength);
 
@@ -104,6 +100,10 @@ WXCrystObjBasic(parent),mpRadiation(rad)
    mpSizer->SetSizeHints(this);
    this->Layout();
    VFN_DEBUG_EXIT("WXRadiation::WXRadiation()",6)
+}
+WXRadiation::~WXRadiation()
+{
+   mpRadiation->WXNotifyDelete();
 }
 
 void WXRadiation::CrystUpdate()
@@ -335,24 +335,14 @@ WXRefinableObj(parent,pow),mpPowderPattern(pow),mpGraph(0)
       mList.Add(mpPowderPattern->mRadiation.WXGet());
    // Correction to 2Theta
       wxBoxSizer* thetaCorrSizer=new wxBoxSizer(wxHORIZONTAL);
-#if 1
-      WXFieldRefPar* fieldZero    =new WXFieldRefPar(this,"Zero:",
-                                   &(mpPowderPattern
-                                     ->GetPar(&(mpPowderPattern->mXZero))),70 );
-      WXFieldRefPar* fieldThetaDispl    =new WXFieldRefPar(this,"Displacement:",
-                                   &(mpPowderPattern
-                                     ->GetPar(&(mpPowderPattern->m2ThetaDisplacement))),70 );
-      WXFieldRefPar* fieldThetaTransp    =new WXFieldRefPar(this,"Transparency:",
-                                   &(mpPowderPattern
-                                     ->GetPar(&(mpPowderPattern->m2ThetaTransparency))),70 );
-#else
+
       WXCrystObjBasic* fieldZero    
          =mpPowderPattern->GetPar(&(mpPowderPattern->mXZero)).WXCreate(this);
       WXCrystObjBasic* fieldThetaDispl
          =mpPowderPattern->GetPar(&(mpPowderPattern->m2ThetaDisplacement)).WXCreate(this);
       WXCrystObjBasic* fieldThetaTransp
          =mpPowderPattern->GetPar(&(mpPowderPattern->m2ThetaTransparency)).WXCreate(this);
-#endif
+
       thetaCorrSizer->Add(fieldZero,0);
       thetaCorrSizer->Add(fieldThetaDispl,0);
       thetaCorrSizer->Add(fieldThetaTransp,0);
@@ -362,12 +352,8 @@ WXRefinableObj(parent,pow),mpPowderPattern(pow),mpGraph(0)
       mpSizer->Add(thetaCorrSizer);
    // Time OF Flight parameters
       wxBoxSizer* tofSizer=new wxBoxSizer(wxHORIZONTAL);
-      WXFieldRefPar* fieldDIFC    =new WXFieldRefPar(this,"DIFC:",
-                                   &(mpPowderPattern
-                                     ->GetPar(&(mpPowderPattern->mDIFC))),70 );
-      WXFieldRefPar* fieldDIFA    =new WXFieldRefPar(this,"DIFA:",
-                                   &(mpPowderPattern
-                                     ->GetPar(&(mpPowderPattern->mDIFA))),70 );
+      WXCrystObjBasic* fieldDIFC=mpPowderPattern->GetPar(&(mpPowderPattern->mDIFC)).WXCreate(this);
+      WXCrystObjBasic* fieldDIFA=mpPowderPattern->GetPar(&(mpPowderPattern->mDIFA)).WXCreate(this);
       tofSizer->Add(fieldDIFC,0);
       tofSizer->Add(fieldDIFA,0);
       mList.Add(fieldDIFC);
@@ -434,6 +420,7 @@ void WXPowderPattern::CrystUpdate()
    if(mpPowderPattern->mNbPointUsed>0)
       mGoF=mpPowderPattern->GetChi2()/mpPowderPattern->mNbPointUsed;
    else mGoF=0;
+   //cout<<"WXPowderPattern::CrystUpdate():"<<mpPowderPattern->GetChi2()<<"/"<<mpPowderPattern->mNbPointUsed<<"="<<mGoF<<endl;
    mRwp=mpPowderPattern->GetRw();
    mRp=mpPowderPattern->GetR();
    
@@ -1449,8 +1436,8 @@ WXRefinableObj(parent,b),mpPowderPatternBackground(b)
                            mpMenuBar->GetSize().GetHeight());
    
    #ifdef USE_BACKGROUND_MAXLIKE_ERROR
-   WXFieldRefPar* pFieldModelSigma  =new WXFieldRefPar(this,"Maximum Likelihood Error",
-            &(mpPowderPatternBackground->GetPar("ML Model Error")));
+   WXCrystObjBasic* pFieldModelSigma=mpPowderPatternBackground
+                                       ->GetPar("ML Model Error").wxCreate(this);
    mpSizer->Add(pFieldModelSigma,0,wxALIGN_LEFT);
    mList.Add(pFieldModelSigma);
    #endif
@@ -1535,28 +1522,23 @@ WXCrystObjBasic(parent),mpTexturePhaseMarchDollase(pObj)
    mpSizer=new wxBoxSizer(wxHORIZONTAL);
    this->SetSizer(mpSizer);
    pTex->Print();
-   WXFieldRefPar* pFieldFraction  =new WXFieldRefPar(this,"fraction",
-            &(pTex->GetPar(&(mpTexturePhaseMarchDollase->mFraction))));
+   WXCrystObjBasic* pFieldFraction=pTex->GetPar(&(pObj->mFraction)).WXCreate(this);
    mpSizer->Add(pFieldFraction,0,wxALIGN_LEFT);
    mList.Add(pFieldFraction);
 
-   WXFieldRefPar* pFieldMarch  =new WXFieldRefPar(this,"March Coeff.",
-            &(pTex->GetPar(&(mpTexturePhaseMarchDollase->mMarchCoeff))));
+   WXCrystObjBasic* pFieldMarch=pTex->GetPar(&(pObj->mMarchCoeff)).WXCreate(this);
    mpSizer->Add(pFieldMarch,0,wxALIGN_LEFT);
    mList.Add(pFieldMarch);
 
-   WXFieldRefPar* pFieldH  =new WXFieldRefPar(this,"H",
-            &(pTex->GetPar(&(mpTexturePhaseMarchDollase->mH))));
+   WXCrystObjBasic* pFieldH=pTex->GetPar(&(pObj->mH)).WXCreate(this);
    mpSizer->Add(pFieldH,0,wxALIGN_LEFT);
    mList.Add(pFieldH);
    
-   WXFieldRefPar* pFieldK  =new WXFieldRefPar(this,"K",
-            &(pTex->GetPar(&(mpTexturePhaseMarchDollase->mK))));
+   WXCrystObjBasic* pFieldK=pTex->GetPar(&(pObj->mK)).WXCreate(this);
    mpSizer->Add(pFieldK,0,wxALIGN_LEFT);
    mList.Add(pFieldK);
    
-   WXFieldRefPar* pFieldL  =new WXFieldRefPar(this,"L",
-            &(pTex->GetPar(&(mpTexturePhaseMarchDollase->mL))));
+   WXCrystObjBasic* pFieldL=pTex->GetPar(&(pObj->mL)).WXCreate(this);
    mpSizer->Add(pFieldL,0,wxALIGN_LEFT);
    mList.Add(pFieldL);
 
@@ -1784,15 +1766,9 @@ WXCrystObj(parent),mpProfile(prof)
    mpWXTitle->SetForegroundColour(wxColour(0,0,255));
    // Width
       wxBoxSizer* sizer1=new wxBoxSizer(wxHORIZONTAL);
-      WXFieldRefPar* pFieldCagliotiU    =new WXFieldRefPar(this,"Width: U:",
-                                   &(mpProfile
-                                     ->GetPar("U")),90 );
-      WXFieldRefPar* pFieldCagliotiV    =new WXFieldRefPar(this,"V:",
-                                   &(mpProfile
-                                     ->GetPar("V")),90 );
-      WXFieldRefPar* pFieldCagliotiW    =new WXFieldRefPar(this,"W:",
-                                   &(mpProfile
-                                     ->GetPar("W")),90 );
+      WXCrystObjBasic* pFieldCagliotiU=mpProfile->GetPar("U").WXCreate(this);
+      WXCrystObjBasic* pFieldCagliotiV=mpProfile->GetPar("V").WXCreate(this);
+      WXCrystObjBasic* pFieldCagliotiW=mpProfile->GetPar("W").WXCreate(this);;
       sizer1->Add(pFieldCagliotiU,0);
       sizer1->Add(pFieldCagliotiV,0);
       sizer1->Add(pFieldCagliotiW,0);
@@ -1802,10 +1778,8 @@ WXCrystObj(parent),mpProfile(prof)
       mpSizer->Add(sizer1);
    // Mixing parameter
       wxBoxSizer* sizer2=new wxBoxSizer(wxHORIZONTAL);
-      WXFieldRefPar* pFieldEta0    =new WXFieldRefPar(this,"Type: Eta0:",
-                                   &(mpProfile->GetPar("Eta0")),90 );
-      WXFieldRefPar* pFieldEta1   =new WXFieldRefPar(this,"Eta1:",
-                                   &(mpProfile->GetPar("Eta1")),90 );
+      WXCrystObjBasic* pFieldEta0=mpProfile->GetPar("Eta0").WXCreate(this);
+      WXCrystObjBasic* pFieldEta1=mpProfile->GetPar("Eta1").WXCreate(this);
       sizer2->Add(pFieldEta0,0);
       sizer2->Add(pFieldEta1,0);
       mList.Add(pFieldEta0);
@@ -1813,14 +1787,10 @@ WXCrystObj(parent),mpProfile(prof)
       mpSizer->Add(sizer2);
    // Asymmetry parameter
       wxBoxSizer* sizer3=new wxBoxSizer(wxHORIZONTAL);
-      WXFieldRefPar* pFieldAsymA0=new WXFieldRefPar(this,"Asymmetry: AsymA0:",
-                                   &(mpProfile->GetPar("AsymA0")),90 );
-      WXFieldRefPar* pFieldAsymA1=new WXFieldRefPar(this,"Asymmetry: AsymA1:",
-                                   &(mpProfile->GetPar("AsymA1")),90 );
-      WXFieldRefPar* pFieldAsymB0=new WXFieldRefPar(this,"Asymmetry: AsymB0:",
-                                   &(mpProfile->GetPar("AsymB0")),90 );
-      WXFieldRefPar* pFieldAsymB1=new WXFieldRefPar(this,"Asymmetry: AsymB1:",
-                                   &(mpProfile->GetPar("AsymB1")),90 );
+      WXCrystObjBasic* pFieldAsymA0=mpProfile->GetPar("AsymA0").WXCreate(this);
+      WXCrystObjBasic* pFieldAsymA1=mpProfile->GetPar("AsymA1").WXCreate(this);
+      WXCrystObjBasic* pFieldAsymB0=mpProfile->GetPar("AsymB0").WXCreate(this);
+      WXCrystObjBasic* pFieldAsymB1=mpProfile->GetPar("AsymB1").WXCreate(this);
       sizer3->Add(pFieldAsymA0,0);
       sizer3->Add(pFieldAsymA1,0);
       sizer3->Add(pFieldAsymB0,0);
@@ -1858,14 +1828,10 @@ WXCrystObj(parent),mpProfile(prof)
    mpWXTitle->BottomLayout(0);
    // Instrumental
       wxBoxSizer* sizer1=new wxBoxSizer(wxHORIZONTAL);
-      WXFieldRefPar* pFieldCagliotiA0   =new WXFieldRefPar(this,"Instrument: Alpha0:",
-                                   &(mpProfile->GetPar("Alpha0")),90 );
-      WXFieldRefPar* pFieldCagliotiA    =new WXFieldRefPar(this,"Alpha1:",
-                                   &(mpProfile->GetPar("Alpha1")),90 );
-      WXFieldRefPar* pFieldCagliotiB0   =new WXFieldRefPar(this,"Beta0:",
-                                   &(mpProfile->GetPar("Beta0")),90 );
-      WXFieldRefPar* pFieldCagliotiB1   =new WXFieldRefPar(this,"Beta1:",
-                                   &(mpProfile->GetPar("Beta1")),90 );
+      WXCrystObjBasic* pFieldCagliotiA0=mpProfile->GetPar("Alpha0").WXCreate(this);
+      WXCrystObjBasic* pFieldCagliotiA =mpProfile->GetPar("Alpha1").WXCreate(this);
+      WXCrystObjBasic* pFieldCagliotiB0=mpProfile->GetPar("Beta0").WXCreate(this);
+      WXCrystObjBasic* pFieldCagliotiB1=mpProfile->GetPar("Beta1").WXCreate(this);
       sizer1->Add(pFieldCagliotiA0,0);
       sizer1->Add(pFieldCagliotiA,0);
       sizer1->Add(pFieldCagliotiB0,0);
@@ -1877,12 +1843,9 @@ WXCrystObj(parent),mpProfile(prof)
       mpSizer->Add(sizer1);
    // Instrumental
       wxBoxSizer* sizer2=new wxBoxSizer(wxHORIZONTAL);
-      WXFieldRefPar* pFieldSigma0=new WXFieldRefPar(this,"Gaussian Width: Sigma0:",
-                           &(mpProfile->GetPar("GaussianSigma0")),90 );
-      WXFieldRefPar* pFieldSigma1=new WXFieldRefPar(this,"Sigma1:",
-                           &(mpProfile->GetPar("GaussianSigma1")),90 );
-      WXFieldRefPar* pFieldSigma2=new WXFieldRefPar(this,"Sigma2:",
-                                   &(mpProfile->GetPar("GaussianSigma2")),90 );
+      WXCrystObjBasic* pFieldSigma0=mpProfile->GetPar("GaussianSigma0").WXCreate(this);
+      WXCrystObjBasic* pFieldSigma1=mpProfile->GetPar("GaussianSigma1").WXCreate(this);
+      WXCrystObjBasic* pFieldSigma2=mpProfile->GetPar("GaussianSigma2").WXCreate(this);
       sizer2->Add(pFieldSigma0,0);
       sizer2->Add(pFieldSigma1,0);
       sizer2->Add(pFieldSigma2,0);
@@ -1892,12 +1855,9 @@ WXCrystObj(parent),mpProfile(prof)
       mpSizer->Add(sizer2);
    // Instrumental
       wxBoxSizer* sizer3=new wxBoxSizer(wxHORIZONTAL);
-      WXFieldRefPar* pFieldGamma0=new WXFieldRefPar(this,"Lorentzian Width: Gamma0:",
-                           &(mpProfile->GetPar("LorentzianGamma0")),90 );
-      WXFieldRefPar* pFieldGamma1=new WXFieldRefPar(this,"Gamma1:",
-                           &(mpProfile->GetPar("LorentzianGamma1")),90 );
-      WXFieldRefPar* pFieldGamma2=new WXFieldRefPar(this,"Gamma2:",
-                                   &(mpProfile->GetPar("LorentzianGamma2")),90 );
+      WXCrystObjBasic* pFieldGamma0=mpProfile->GetPar("LorentzianGamma0").WXCreate(this);
+      WXCrystObjBasic* pFieldGamma1=mpProfile->GetPar("LorentzianGamma1").WXCreate(this);
+      WXCrystObjBasic* pFieldGamma2=mpProfile->GetPar("LorentzianGamma2").WXCreate(this);
       sizer3->Add(pFieldGamma0,0);
       sizer3->Add(pFieldGamma1,0);
       sizer3->Add(pFieldGamma2,0);

@@ -138,23 +138,17 @@ WXCrystObjBasic(parent),mpMolAtom(obj)
          mpFieldScattPower->SetValue(mpMolAtom->GetScatteringPower().GetName());
    }
    {
-      WXFieldRefPar* pFieldX  =new WXFieldRefPar(this,"x",
-                               &(mpMolAtom->GetMolecule().GetPar(&(mpMolAtom->X()))),
-                               50,false,false);
+      WXCrystObjBasic* pFieldX=mpMolAtom->GetMolecule().GetPar(&(mpMolAtom->X())).WXCreate(this);
       mpSizer->Add(pFieldX,0,wxALIGN_CENTER);
       mList.Add(pFieldX);
    }
    {
-      WXFieldRefPar* pFieldY  =new WXFieldRefPar(this,"y",
-                               &(mpMolAtom->GetMolecule().GetPar(&(mpMolAtom->Y()))),
-                               50,false,false);
+      WXCrystObjBasic* pFieldY=mpMolAtom->GetMolecule().GetPar(&(mpMolAtom->Y())).WXCreate(this);
       mpSizer->Add(pFieldY,0,wxALIGN_CENTER);
       mList.Add(pFieldY);
    }
    {
-      WXFieldRefPar* pFieldZ  =new WXFieldRefPar(this,"z",
-                               &(mpMolAtom->GetMolecule().GetPar(&(mpMolAtom->Z()))),
-                               50,false,false);
+      WXCrystObjBasic* pFieldZ=mpMolAtom->GetMolecule().GetPar(&(mpMolAtom->Z())).WXCreate(this);
       mpSizer->Add(pFieldZ,0,wxALIGN_CENTER);
       mList.Add(pFieldZ);
    }

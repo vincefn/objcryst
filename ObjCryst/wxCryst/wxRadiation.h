@@ -30,6 +30,7 @@ class WXRadiation: public WXCrystObjBasic
 {
    public:
       WXRadiation(wxWindow *parent, Radiation*);
+      virtual ~WXRadiation();
       virtual void CrystUpdate();
       virtual void UpdateUI();
       virtual void OnUpdateUI(wxUpdateUIEvent & WXUNUSED(event));
