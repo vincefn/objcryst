@@ -70,7 +70,7 @@ class WXGlobalOptimRunThread: public wxThread
 {
    public:
       WXGlobalOptimRunThread(OptimizationObj &globalOptObj,long &nbTrial,
-                             const REAL finalCost=0,long &nbRun=-1,const bool multiple=true);
+                             const REAL finalCost,long &nbRun,const bool multiple=true);
       virtual void *Entry();
       virtual void OnExit();
    private:

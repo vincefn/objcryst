@@ -128,7 +128,7 @@ class OptimizationObj
       * \param maxTime: the optimization will stop after the given number of seconds has
       * been spent optimizing (ignored if <0).
       */
-      virtual void MultiRunOptimize(long &nbCycle=-1,long &nbSteps=1e6,const bool silent=false,const REAL finalcost=0,
+      virtual void MultiRunOptimize(long &nbCycle,long &nbSteps,const bool silent=false,const REAL finalcost=0,
                                     const REAL maxTime=-1)=0;
    //Set Refinable parameters status
       /// Fix all parameters
@@ -374,7 +374,7 @@ class MonteCarloObj:public OptimizationObj
       
       virtual void Optimize(long &nbSteps,const bool silent=false,const REAL finalcost=0,
                             const REAL maxTime=-1);
-      virtual void MultiRunOptimize(long &nbCycle=-1,long &nbSteps=1e6,const bool silent=false,const REAL finalcost=0,
+      virtual void MultiRunOptimize(long &nbCycle,long &nbSteps,const bool silent=false,const REAL finalcost=0,
                                     const REAL maxTime=-1);
       
       /** \internal Do a single simulated annealing run. This is called by Optimize(...) and
