@@ -152,7 +152,7 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
 #ifdef __WXMAC__
    // we need this in order to allow the about menu relocation, since ABOUT is
    // not the default id of the about menu
-   wxApp::s_macAboutMenuItemId = Minimal_About;
+   wxApp::s_macAboutMenuItemId = MENU_HELP_ABOUT;
 #endif
 
    // create a menu bar

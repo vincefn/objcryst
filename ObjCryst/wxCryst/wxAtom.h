@@ -18,11 +18,6 @@
 #ifndef _VFN_WX_ATOM_H_
 #define _VFN_WX_ATOM_H_
 
-#include "wx/glcanvas.h"
-extern "C" {
-#include "GL/glu.h"
-}
-
 #include "wxCryst/wxScatterer.h"
 #include "ObjCryst/Atom.h"
 namespace ObjCryst

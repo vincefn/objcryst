@@ -206,17 +206,13 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
 		static bool cont;//:TODO: not static, but mutable member function (if >1 crystal,...)
 		#ifdef __WINDOWS__
 		if(!wglGetCurrentContext())//we are not in the main thread
-		{
-			this->ReleaseCrystalGLDisplayList();
-			cont=false;
-			wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_GLCRYSTAL_MENU_UPDATE);
-   		wxPostEvent(mpCrystalGL,event);
-			while(!cont) wxUsleep(10);
-   		VFN_DEBUG_EXIT("WXCrystal::UpdateGL()-Not in main thread :End",8)
-			return;
-		}
 		#else
-		if(!glXGetCurrentContext())//we are not in the main thread
+		  #ifdef __WXMAC__
+		  if(!aglGetCurrentContext())
+		  #else
+		  if(!glXGetCurrentContext())
+		  #endif
+		#endif
 		{
 			this->ReleaseCrystalGLDisplayList();
 			cont=false;
@@ -226,7 +222,6 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
    		VFN_DEBUG_EXIT("WXCrystal::UpdateGL()-Not in main thread :End",8)
 			return;
 		}
-		#endif
       glNewList(mCrystalGLDisplayList,GL_COMPILE);
          glPushMatrix();
             mpCrystal->GLInitDisplayList(onlyIndependentAtoms,xMin,xMax,yMin,yMax,zMin,zMax);
