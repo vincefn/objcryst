@@ -542,7 +542,7 @@ END_EVENT_TABLE()
 WXPowderPatternGraph::WXPowderPatternGraph(wxFrame *frame, WXPowderPattern* parent):
 wxWindow(frame,-1,wxPoint(-1,-1),wxSize(-1,-1),wxRETAINED),
 mpPattern(parent),mMargin(50),mDiffPercentShift(.20),mpParentFrame(frame),
-mCalcPatternIsLocked(false)
+mCalcPatternIsLocked(false),mIsDragging(false)
 {
    mpPopUpMenu=new wxMenu("Crystal");
    mpPopUpMenu->Append(ID_POWDERSPECTRUMGRAPH_MENU_UPDATE, "&Update");
@@ -669,17 +669,22 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
 		mIsDragging=false;
 		return;
 	}
+       VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnMouse()",5)
 	// Write mouse pointer coordinates
    	wxClientDC dc(this);
    	PrepareDC(dc);
    	mpParentFrame->PrepareDC(dc);
 
    	wxPoint pos=event.GetPosition();
-   	const long x= dc.DeviceToLogicalX(pos.x);
-   	const long y= dc.DeviceToLogicalY(pos.y);
-
+  	   const long x= dc.DeviceToLogicalX(pos.x);
+      const long y= dc.DeviceToLogicalY(pos.y);
+ 
    	wxCoord width,height;
    	this->GetSize(&width, &height);
+
+	if((x>width)||(y>height)) return;
+	//cout <<pos.x<<" "<<pos.y<<" "<<x<<" "<<y<<" "<<width<<" "<<height<<endl;
+
    	const REAL 
       	ttheta=mMin2Theta+(x-mMargin)*(mMax2Theta-mMin2Theta)/(REAL)(width-mMargin);
    	const REAL intensity=mMinIntensity+(height-mMargin-y)*(mMaxIntensity-mMinIntensity)
@@ -690,7 +695,7 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
 			mpPattern->GetPowderPattern().Get2ThetaCorrPixel(ttheta*DEG2RAD);
    	str.Printf("2Theta=%6.2f    ,I=%12.2f.   pixel=#%d",ttheta,intensity,pixel);
    	mpParentFrame->SetStatusText(str);
-		
+
    if (event.Dragging() && event.LeftIsDown() && (!mIsDragging))
    {//Begin zooming
 		mIsDragging=true;
@@ -703,8 +708,10 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
    	VFN_DEBUG_MESSAGE("WXPowderPatternGraph::OnMouse():Finished zooming...",5)
 		mIsDragging=false;
 		
-		if(abs(ttheta-mDragging2Theta0)<.3) return;
-		if(abs(mDraggingIntensity0-intensity)< abs(mMaxIntensity*.05)) return;
+		if( (abs(ttheta-mDragging2Theta0)<.3) || (abs(mDraggingIntensity0-intensity)< abs(mMaxIntensity*.05)) )
+		{
+			return;
+		}
 		if(mDraggingIntensity0>intensity)
 		{
 			if(mDraggingIntensity0<0.) return;
@@ -740,6 +747,9 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
    	wxPostEvent(this,event);
 		return;
 	}
+
+	if(false==event.Dragging()) mIsDragging=false;
+
 	if(event.LeftDClick())
 	{//Reset axis range
 		this->ResetAxisLimits();
