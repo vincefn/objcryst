@@ -100,6 +100,7 @@ class WXPowderPatternGraph: public wxWindow
       void OnRedrawNewPattern(wxUpdateUIEvent& WXUNUSED(event));
       void OnToggleLabel(wxCommandEvent& WXUNUSED(event));
       void OnKeyDown(wxKeyEvent& event);
+      void OnSize(wxSizeEvent& event);
    private:
       /// Reset the limits of the axis to full range.
       void ResetAxisLimits();

@@ -787,6 +787,7 @@ BEGIN_EVENT_TABLE(WXPowderPatternGraph, wxWindow)
    EVT_UPDATE_UI(ID_POWDER_GRAPH_NEW_PATTERN,WXPowderPatternGraph::OnRedrawNewPattern)
    EVT_CHAR(                                    WXPowderPatternGraph::OnKeyDown)
    EVT_MOUSEWHEEL(                              WXPowderPatternGraph::OnMouseWheel)
+   EVT_SIZE(                                    WXPowderPatternGraph::OnSize)
 END_EVENT_TABLE()
 
 WXPowderPatternGraph::WXPowderPatternGraph(wxFrame *frame, WXPowderPattern* parent):
@@ -1227,6 +1228,11 @@ void WXPowderPatternGraph::OnKeyDown(wxKeyEvent& event)
    mClockAxisLimits.Click();
    wxUpdateUIEvent ev(ID_POWDER_GRAPH_NEW_PATTERN);
    wxPostEvent(this,ev);
+}
+
+void WXPowderPatternGraph::OnSize(wxSizeEvent& event)
+{
+   this->Refresh(false);
 }
 
 void WXPowderPatternGraph::SetPattern(const CrystVector_REAL &obs,
