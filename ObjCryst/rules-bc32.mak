@@ -1,5 +1,5 @@
 # Base ObjCryst directory
-DIR_CRYST=C:\Dev\Fox\src\ObjCryst
+DIR_CRYST=C:\Dev\Fox\ObjCryst
 # Borland Directory
 DIR_BORLAND=C:\Borland\BCC55
 # wxWindows Directory
