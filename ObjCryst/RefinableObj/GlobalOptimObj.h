@@ -34,6 +34,7 @@ namespace ObjCryst
 
 #include "RefinableObj/RefinableObj.h"
 #include "RefinableObj/IO.h"
+#include "RefinableObj/Tracker.h"
 #include <string>
 #include <iostream>
 #ifdef __WX__CRYST__
@@ -157,7 +158,7 @@ class OptimizationObj
       * This function is the weighted sum of the chosen Cost Functions for
       * the refined objects.
       */
-      virtual REAL GetLogLikelihood();
+      virtual REAL GetLogLikelihood()const;
 
       /// Stop after the current cycle. USed for interactive refinement.
       void StopAfterCycle();
@@ -247,7 +248,8 @@ class OptimizationObj
             REAL mTotalLogLikelihoodDeltaSq;
          };
          /// Statistics for each context
-         map <unsigned long, map<const RefinableObj*,LogLikelihoodStats> > mvContextObjStats;
+         /// (mutable for dynamic update during optimization)
+         mutable map <unsigned long, map<const RefinableObj*,LogLikelihoodStats> > mvContextObjStats;
       // Dynamic weights (EXPERIMENTAL!)
          struct DynamicObjWeight
          {
@@ -255,7 +257,8 @@ class OptimizationObj
             REAL mWeight;
          };
          /// Weights for each objects in each context
-         map<const RefinableObj*,DynamicObjWeight> mvObjWeight;
+         /// (mutable for dynamic update during optimization)
+         mutable map<const RefinableObj*,DynamicObjWeight> mvObjWeight;
 
          /// List of saved parameter sets. This is used to save possible
          /// solutions during the optimization, so that the user can check them
@@ -282,6 +285,9 @@ class OptimizationObj
       
       /// The time elapsed after the last optimization, in seconds
          REAL mLastOptimTime;
+      /// MainTracker object to track the evolution of cost functions, likelihood,
+      /// and individual parameters.
+      MainTracker mMainTracker;
    private:
    #ifdef __WX__CRYST__
    public:
@@ -398,7 +404,6 @@ class MonteCarloObj:public OptimizationObj
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
       virtual const string GetClassName()const;
-      virtual REAL GetLogLikelihood();
    protected:
       
       /** \brief Make a random change in the configuration.
@@ -428,11 +433,9 @@ class MonteCarloObj:public OptimizationObj
          REAL mCurrentCost;
          
       // History, for experimental purposes only !
-         /// Option to save the evolution of all optimized parameters (for testing only !
-         /// this is very slow...)
-         RefObjOpt mSaveDetailledHistory;
-         /// Save the evolution of refined parameters after optimization ?
-         string mHistorySaveFileName;
+         /// Option to save the evolution of tracked data (cost functions,
+         /// likelihhod, individual parameters,...)
+         RefObjOpt mSaveTrackedData;
          
       // Annealing parameters
          /// Current temperature for annealing

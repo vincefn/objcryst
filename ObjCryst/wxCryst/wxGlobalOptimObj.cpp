@@ -198,7 +198,7 @@ void WXOptimizationObj::OnBrowseParamSet(wxCommandEvent & WXUNUSED(event))
                                wxDefaultPosition,wxSize(250,200));
    const long nb=this->GetOptimizationObj().mvSavedParamSet.size();
    wxString *choices = new wxString[nb];
-   for(unsigned int i=0;i<nb;i++)
+   for(int i=0;i<nb;i++)
    {
       choices[i].sprintf("%d, cost= %f, %s",i,
                          this->GetOptimizationObj().mvSavedParamSet[i].second,
@@ -230,6 +230,9 @@ void WXOptimizationObj::OnSelectParamSet(wxCommandEvent &event)
       this->GetOptimizationObj().mRefParList
          .RestoreParamSet(this->GetOptimizationObj().mvSavedParamSet[n].first);
       this->GetOptimizationObj().UpdateDisplay();
+      cout <<"Param set #"<<this->GetOptimizationObj().mvSavedParamSet[n].first<<", cost="
+           <<this->GetOptimizationObj().mvSavedParamSet[n].second
+           <<", now cost="<<this->GetOptimizationObj().GetLogLikelihood()<<endl;
    }
 }
 
@@ -325,15 +328,23 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(10000000),mNbRun(-1)
       mList.Add(ampMin);
       mList.Add(ampGamma);
       
-      #if 0
-      // Only to evaluate how the algorithm works
-      opt=new WXFieldOption(this,-1,&(mpMonteCarloObj->mSaveDetailledHistory));
+      opt=new WXFieldOption(this,-1,&(mpMonteCarloObj->mSaveTrackedData));
       mpSizer->Add(opt,0,wxALIGN_LEFT);
       mList.Add(opt);
-      #endif
+      opt->SetToolTip(_T("Saved Tracked values (costs, Chi^2, parameters...)\n\n")
+                      _T("This is only useful for Test purposes.\n")
+                      _T("Data is saved in the file (Name)-Tracker(-Run#).dat"));
+
       opt=new WXFieldOption(this,-1,&(mpMonteCarloObj->mXMLAutoSave));
       mpSizer->Add(opt,0,wxALIGN_LEFT);
       mList.Add(opt);
+      opt->SetToolTip(_T("Periodically save the best configuration\n\n")
+                      _T("Recommended choice is : After Each Run\n")
+                      _T("File name is: (name)-(date)-(Run#)-cost.xml\n\n")
+                      _T("For Multiple Runs, Note that all choices\n")
+                      _T("save the *best* configuration overall, except for\n")
+                      _T("'After Each Run', for which the configuration\n")
+                      _T("saved are the best for each run."));
    // Number of trials to go
       mpWXFieldNbTrial=new WXFieldPar<long>(this,"Number of trials per run:",-1,&mNbTrial,70);
       mpSizer->Add(mpWXFieldNbTrial);

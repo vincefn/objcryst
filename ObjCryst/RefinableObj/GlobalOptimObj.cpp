@@ -23,6 +23,7 @@
 #include <iomanip>
 
 #include "RefinableObj/GlobalOptimObj.h"
+#include "ObjCryst/Crystal.h"
 #include "Quirks/VFNStreamFormat.h"
 #include "Quirks/VFNDebug.h"
 #include "Quirks/Chronometer.h"
@@ -176,7 +177,7 @@ void OptimizationObj::SetLimitsAbsolute(const RefParType *type,
       mRecursiveRefinedObjList.GetObj(i).SetLimitsAbsolute(type,min,max);
 }
 
-REAL OptimizationObj::GetLogLikelihood() 
+REAL OptimizationObj::GetLogLikelihood() const
 {
    TAU_PROFILE("OptimizationObj::GetLogLikelihood()","void ()",TAU_DEFAULT);
    REAL cost =0.;
@@ -246,6 +247,7 @@ void OptimizationObj::TagNewBestConfig()
 {
    for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
       mRecursiveRefinedObjList.GetObj(i).TagNewBestConfig();
+   mMainTracker.AppendValues(mNbTrial);
    this->UpdateDisplay();
 }
 
@@ -274,6 +276,33 @@ void OptimizationObj::PrepareRefParList()
       mvSavedParamSet.clear();
       mBestParSavedSetIndex=mRefParList.CreateParamSet("Best Configuration");
       mvSavedParamSet.push_back(make_pair(mBestParSavedSetIndex,mBestCost));
+      
+      mMainTracker.ClearTrackers();
+      for(long i=0;i<mRefinedObjList.GetNb();i++)
+      {
+         REAL (OptimizationObj::*fl)() const;
+         fl=&OptimizationObj::GetLogLikelihood;
+         mMainTracker.AddTracker(new TrackerObject<OptimizationObj>
+            (this->GetName()+"::Overall LogLikelihood",*this,fl));
+         
+         REAL (RefinableObj::*fp)() const;
+         fp=&RefinableObj::GetLogLikelihood;
+         mMainTracker.AddTracker(new TrackerObject<RefinableObj>
+            (mRefinedObjList.GetObj(i).GetName()+"::LogLikelihood",mRefinedObjList.GetObj(i),fp));
+         
+         if(mRefinedObjList.GetObj(i).GetClassName()=="Crystal")
+         {
+            REAL (Crystal::*fc)() const;
+            const Crystal *pCryst=dynamic_cast<const Crystal *>(&(mRefinedObjList.GetObj(i)));
+            fc=&Crystal::GetBumpMergeCost;
+            mMainTracker.AddTracker(new TrackerObject<Crystal>
+               (pCryst->GetName()+"::BumpMergeCost",*pCryst,fc));
+            fc=&Crystal::GetBondValenceCost;
+            mMainTracker.AddTracker(new TrackerObject<Crystal>
+               (pCryst->GetName()+"::BondValenceCost",*pCryst,fc));
+            
+         }
+      }
    }
    // Prepare for refinement, ie get the list of not fixed parameters,
    // and prepare the objects...
@@ -347,7 +376,6 @@ void OptimizationObj::BuildRecursiveRefObjList()
 MonteCarloObj::MonteCarloObj(const string name):
 OptimizationObj(name),
 mCurrentCost(-1),
-mHistorySaveFileName("GlobalOptim_history.out"),
 mTemperatureMax(1e6),mTemperatureMin(.001),mTemperatureGamma(1.0),
 mMutationAmplitudeMax(8.),mMutationAmplitudeMin(.125),mMutationAmplitudeGamma(1.0),
 mNbTrialRetry(0),mMinCostRetry(0)
@@ -369,7 +397,6 @@ mNbTrialRetry(0),mMinCostRetry(0)
 MonteCarloObj::MonteCarloObj(const bool internalUseOnly):
 OptimizationObj(""),
 mCurrentCost(-1),
-mHistorySaveFileName("GlobalOptim_history.out"),
 mTemperatureMax(.03),mTemperatureMin(.003),
 mMutationAmplitudeMax(16.),mMutationAmplitudeMin(.125),
 mNbTrialRetry(0),mMinCostRetry(0)
@@ -452,6 +479,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
    mCurrentCost=this->GetLogLikelihood();
    mBestCost=mCurrentCost;
    mvObjWeight.clear();
+   mMainTracker.ClearValues();
    switch(mGlobalOptimType.GetChoice())
    {
       case GLOBAL_OPTIM_SIMULATED_ANNEALING:
@@ -472,6 +500,16 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
    mStopAfterCycle=false;
       
    for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).EndOptimization();
+   
+   if(mSaveTrackedData.GetChoice()==1)
+   {
+      ofstream outTracker;
+      const string outTrackerName=this->GetName()+"-Tracker.dat";
+      outTracker.open(outTrackerName.c_str());
+      mMainTracker.SaveAll(outTracker);
+      outTracker.close();
+   }
+
    VFN_DEBUG_EXIT("MonteCarloObj::Optimize()",5)
 }
 void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silent,
@@ -500,6 +538,7 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
       if(!silent) cout <<"MonteCarloObj::MultiRunOptimize: Starting Run#"<<abs(nbCycle)<<endl;
       nbStep=nbStep0;
       for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).RandomizeConfiguration();
+      mMainTracker.ClearValues();
       switch(mGlobalOptimType.GetChoice())
       {
          case GLOBAL_OPTIM_SIMULATED_ANNEALING:
@@ -531,12 +570,22 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
          char strDate[40];
          strftime(strDate,sizeof(strDate),"%Y-%m-%d_%H-%M-%S",localtime(&date));//%Y-%m-%dT%H:%M:%S%Z
          char costAsChar[30];
-         sprintf(costAsChar,"-Run#%i-Cost-%f",abs(nbCycle),this->GetLogLikelihood());
+         sprintf(costAsChar,"-Run#%ld-Cost-%f",abs(nbCycle),this->GetLogLikelihood());
          saveFileName=saveFileName+(string)strDate+(string)costAsChar+(string)".xml";
          XMLCrystFileSaveGlobal(saveFileName);
       }
+      if(mSaveTrackedData.GetChoice()==1)
+      {
+         ofstream outTracker;
+         char runNum[40];
+         sprintf(runNum,"-Tracker-Run#%ld.dat",abs(nbCycle));
+         const string outTrackerName=this->GetName()+runNum;
+         outTracker.open(outTrackerName.c_str());
+         mMainTracker.SaveAll(outTracker);
+         outTracker.close();
+      }
       nbCycle--;
-      if((mStopAfterCycle)||(mBestCost<finalcost)) break;
+      if(mStopAfterCycle) break;
    }
    mIsOptimizing=false;
    mStopAfterCycle=false;
@@ -555,16 +604,6 @@ void MonteCarloObj::RunSimulatedAnnealing(long &nbStep,const bool silent,
    const long nbSteps=nbStep;
    unsigned int accept;// 1 if last trial was accepted? 2 if new best config ? else 0
    mNbTrial=0;
-   // If using history, open file
-      ofstream outHistory;
-      if(mSaveDetailledHistory.GetChoice()>0)
-      {
-         outHistory.open(mHistorySaveFileName.c_str());
-         outHistory << "Trial World origWorld Accept OverallCost ";
-         for(long j=0;j<mRefParList.GetNbParNotFixed();j++)
-            outHistory << mRefParList.GetParNotFixed(j).GetName() << " ";
-         outHistory <<endl;
-      }
    // time (in seconds) when last autoSave was made (if enabled)
       unsigned long secondsWhenAutoSave=0;
 
@@ -696,43 +735,6 @@ void MonteCarloObj::RunSimulatedAnnealing(long &nbStep,const bool silent,
             nbAcceptedMovesTemp++;
          }
       }
-      switch(mSaveDetailledHistory.GetChoice())
-      {
-         case 0:break;
-         case 1: 
-         {
-            if(accept==2)
-            {
-               outHistory << mNbTrial <<" 0 " <<accept<<" "
-                          <<this->GetLogLikelihood()<<" ";
-               for(long i=0;i<mRefParList.GetNbParNotFixed();i++) 
-                  outHistory << " "<< mRefParList.GetParNotFixed(i).GetHumanValue() ;
-               outHistory <<endl;
-            }
-            break;
-         }
-         case 2: 
-         {
-            if(accept>0)
-            {
-               outHistory << mNbTrial <<" 0 "<<accept<<" "
-                          <<this->GetLogLikelihood()<<" ";
-               for(long i=0;i<mRefParList.GetNbParNotFixed();i++) 
-                  outHistory << " "<< mRefParList.GetParNotFixed(i).GetHumanValue() ;
-               outHistory <<endl;
-            }
-            break;
-         }
-         case 3: 
-         {
-            outHistory << mNbTrial <<" 0 "<<accept<<" "
-                       <<this->GetLogLikelihood()<<" ";
-            for(long i=0;i<mRefParList.GetNbParNotFixed();i++) 
-               outHistory << " "<< mRefParList.GetParNotFixed(i).GetHumanValue() ;
-            outHistory <<endl;
-            break;
-         }
-      }
       if(accept==0) mRefParList.RestoreParamSet(lastParSavedSetIndex);
 
       if( (mNbTrial % nbTryReport) == 0)
@@ -778,7 +780,6 @@ void MonteCarloObj::RunSimulatedAnnealing(long &nbStep,const bool silent,
    mRefParList.RestoreParamSet(runBestIndex);
    mRefParList.ClearParamSet(lastParSavedSetIndex);
    mCurrentCost=this->GetLogLikelihood();
-   if(mSaveDetailledHistory.GetChoice()>0) outHistory.close();
    if(!silent) this->DisplayReport();
    if(!silent) chrono.print();
 }
@@ -790,16 +791,6 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
    const long nbSteps=nbStep;
    unsigned int accept;// 1 if last trial was accepted? 2 if new best config ? else 0
    mNbTrial=0;
-   // If using history, open file
-      ofstream outHistory;
-      if(mSaveDetailledHistory.GetChoice()>0)
-      {
-         outHistory.open(mHistorySaveFileName.c_str());
-         outHistory << "Trial World origWorld Accept OverallCost ";
-         for(long j=0;j<mRefParList.GetNbParNotFixed();j++)
-            outHistory << mRefParList.GetParNotFixed(j).GetName() << " ";
-         outHistory <<endl;
-      }
    // time (in seconds) when last autoSave was made (if enabled)
       unsigned long secondsWhenAutoSave=0;
 
@@ -969,43 +960,6 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
                   currentCost(i)=cost;
                   mRefParList.SaveParamSet(worldCurrentSetIndex(i));
                   worldNbAcceptedMoves(i)++;
-               }
-            }
-            switch(mSaveDetailledHistory.GetChoice())
-            {
-               case 0:break;
-               case 1: 
-               {
-                  if(accept==2)
-                  {
-                     outHistory << mNbTrial <<" "<<i<<" "<<worldSwapIndex(i)<<" "<<accept<<" "
-                                <<currentCost(i)<<" ";
-                     //for(long j=0;j<mRefParList.GetNbParNotFixed();j++) 
-                     //   outHistory << " "<< mRefParList.GetParNotFixed(j).GetHumanValue() ;
-                     outHistory <<endl;
-                  }
-                  break;
-               }
-               case 2: 
-               {
-                  if(accept>0)
-                  {
-                     outHistory << mNbTrial <<" "<<i<<" "<<worldSwapIndex(i)<<" "<<accept<<" "
-                                <<currentCost(i)<<" ";
-                     //for(long j=0;j<mRefParList.GetNbParNotFixed();j++) 
-                     //   outHistory << " "<< mRefParList.GetParNotFixed(j).GetHumanValue() ;
-                     outHistory <<endl;
-                  }
-                  break;
-               }
-               case 3: 
-               {
-                  outHistory << mNbTrial <<" "<<i<<" "<<worldSwapIndex(i)<<" "<<accept<<" "
-                             <<currentCost(i)<<" ";
-                  //for(long j=0;j<mRefParList.GetNbParNotFixed();j++) 
-                  //   outHistory << " "<< mRefParList.GetParNotFixed(j).GetHumanValue() ;
-                  outHistory <<endl;
-                  break;
                }
             }
             if(  ((mXMLAutoSave.GetChoice()==1)&&((chrono.seconds()-secondsWhenAutoSave)>86400))
@@ -1365,40 +1319,8 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
       }
       mRefParList.ClearParamSet(lastParSavedSetIndex);
       mRefParList.ClearParamSet(runBestIndex);
-   if(mSaveDetailledHistory.GetChoice()>0) outHistory.close();
 }
 
-/*
-void MonteCarloObj::SaveOptimHistory() const
-{
-   VFN_DEBUG_MESSAGE("MonteCarloObj::SaveOptimHistory()",5)
-   if(mHistoryNb<=0)
-   {
-      cout << "MonteCarloObj::SaveOptimHistory(): No History yet !!! "<<endl;
-      return;
-   }
-   
-   ofstream out(mHistorySaveFileName.c_str());
-   if(!out)
-   {
-      throw ObjCrystException("MonteCarloObj::SaveOptimHistory() : \
-Error opening file for output:"+mHistorySaveFileName);
-   }
-   out << "# Trial Cost";
-   for(long j=0;j<mRefParList.GetNbParNotFixed();j++)
-      out << mRefParList.GetParNotFixed(j).GetName() << " ";
-   out <<endl;
-   for(long i=0;i<mHistoryNb;i++)
-   {
-      const long saveSet=mHistorySavedParamSetIndex(i);
-      out << mHistoryTrialNumber(i) << " " << mHistoryCostFunction(i) ;
-      for(long j=0;j<mRefParList.GetNbParNotFixed();j++) 
-         out << " "<< mRefParList.GetParamSet_ParNotFixedHumanValue(saveSet,j) ;
-      out <<endl;
-   }
-   out.close();
-}
-*/
 void MonteCarloObj::XMLOutput(ostream &os,int indent)const
 {
    VFN_DEBUG_ENTRY("MonteCarloObj::XMLOutput():"<<this->GetName(),5)
@@ -1427,6 +1349,9 @@ void MonteCarloObj::XMLOutput(ostream &os,int indent)const
    }
 
    mAnnealingScheduleMutation.XMLOutput(os,indent);
+   os<<endl;
+   
+   mSaveTrackedData.XMLOutput(os,indent);
    os<<endl;
    
    {
@@ -1494,6 +1419,11 @@ void MonteCarloObj::XMLInput(istream &is,const XMLCrystTag &tagg)
                   mXMLAutoSave.XMLInput(is,tag);
                   break;
                }
+               if("Save Tracked Data"==tag.GetAttributeValue(i))
+               {
+                  mSaveTrackedData.XMLInput(is,tag);
+                  break;
+               }
             }
          continue;
       }
@@ -1526,18 +1456,6 @@ void MonteCarloObj::XMLInput(istream &is,const XMLCrystTag &tagg)
 
 const string MonteCarloObj::GetClassName()const { return "MonteCarloObj";}
 
-REAL MonteCarloObj::GetLogLikelihood()
-{
-   #if 0
-   const REAL mle=0.10;//+0.025*mMutationAmplitude;//*sqrt(mMutationAmplitude);
-   mRefParList.GetPar(7).SetValue(mle);
-   mRefParList.GetPar(9).SetValue(mle);
-   mRefParList.GetPar(11).SetValue(mle);
-   //if((rand()%1000)==0) mRefParList.Print();
-   #endif
-   return OptimizationObj::GetLogLikelihood();
-}
-
 void MonteCarloObj::NewConfiguration(const RefParType *type)
 {
    VFN_DEBUG_ENTRY("MonteCarloObj::NewConfiguration()",4)
@@ -1560,8 +1478,8 @@ void MonteCarloObj::InitOptions()
    static string AnnealingScheduleTempName;
    static string AnnealingScheduleMutationName;
    
-   static string saveDetailledHistoryName;
-   static string saveDetailledHistoryChoices[4];
+   static string saveTrackedDataName;
+   static string saveTrackedDataChoices[2];
 
    static bool needInitNames=true;
    if(true==needInitNames)
@@ -1580,18 +1498,16 @@ void MonteCarloObj::InitOptions()
       AnnealingScheduleChoices[4]="Smart";
       AnnealingScheduleChoices[5]="Gamma";
       
-      saveDetailledHistoryName="Save evolution of all parameters (for tests ONLY!!!)";
-      saveDetailledHistoryChoices[0]="No (highly recommended)";
-      saveDetailledHistoryChoices[1]="Every new best configuration";
-      saveDetailledHistoryChoices[2]="Every accepted configuration";
-      saveDetailledHistoryChoices[3]="Every configuration";
+      saveTrackedDataName="Save Tracked Data";
+      saveTrackedDataChoices[0]="No (recommended!)";
+      saveTrackedDataChoices[1]="Yes (for tests ONLY)";
 
       needInitNames=false;//Only once for the class
    }
    mGlobalOptimType.Init(2,&GlobalOptimTypeName,GlobalOptimTypeChoices);
    mAnnealingScheduleTemp.Init(6,&AnnealingScheduleTempName,AnnealingScheduleChoices);
    mAnnealingScheduleMutation.Init(6,&AnnealingScheduleMutationName,AnnealingScheduleChoices);
-   mSaveDetailledHistory.Init(4,&saveDetailledHistoryName,saveDetailledHistoryChoices);
+   mSaveTrackedData.Init(2,&saveTrackedDataName,saveTrackedDataChoices);
    VFN_DEBUG_MESSAGE("MonteCarloObj::InitOptions():End",5)
 }
 
