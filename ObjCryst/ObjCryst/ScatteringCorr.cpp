@@ -420,7 +420,7 @@ REAL TextureMarchDollase::GetPhaseL(const unsigned int i)const
 void TextureMarchDollase::GlobalOptRandomMove(const REAL mutationAmplitude)
 {
    if(mRandomMoveIsDone) return;
-   if((rand()/(REAL)RAND_MAX)<.3)//only 30% proba to make a random move
+   //if((rand()/(REAL)RAND_MAX)<.3)//only 30% proba to make a random move
    {
       VFN_DEBUG_MESSAGE("TextureMarchDollase::GlobalOptRandomMove()",1)
       for(unsigned int i=0;i<this->GetNbPhase();i++)
@@ -458,7 +458,7 @@ void TextureMarchDollase::GlobalOptRandomMove(const REAL mutationAmplitude)
          {
             if(pM->IsFixed()==false)
             {
-               pM->MutateTo(pM->GetValue()*(1.+.012*(rand()/(REAL)RAND_MAX-0.5)*mutationAmplitude));
+               pM->MutateTo(pM->GetValue()*(1.+.01*2*(rand()/(REAL)RAND_MAX-0.5)*mutationAmplitude));
             }
             if((pH->IsFixed()==false)||(pK->IsFixed()==false)||(pL->IsFixed()==false))
             {
@@ -483,6 +483,7 @@ void TextureMarchDollase::GlobalOptRandomMove(const REAL mutationAmplitude)
          }
       }
    }
+   //this->RefinableObj::Print();
    mRandomMoveIsDone=true;
 }
 REAL TextureMarchDollase::GetBiasingCost()const
@@ -614,37 +615,48 @@ void TextureMarchDollase::CalcCorr() const
             xx++;yy++;zz++;
          }
       }
+      CrystMatrix_REAL hkl;
       for(unsigned int i=0; i<this->GetNbPhase();i++)
       {
+         // We are using multiplicity for powder diffraction, therefore with only
+         // unique reflections. But Equivalent reflections do not have the same
+         // texture correction ! So we must use the symmetry oprators, and it is simpler
+         // to apply the symmetries to the texture vector than to all reflections
+         hkl=mpData->GetCrystal().GetSpaceGroup()
+               .GetAllEquivRefl(this->GetPhaseH(i),this->GetPhaseK(i),this->GetPhaseL(i),true);
          //coefficients
             const REAL march=1./this->GetMarchCoeff(i);
             const REAL march2=this->GetMarchCoeff(i)*this->GetMarchCoeff(i)-march;
-            const REAL frac=this->GetFraction(i)/fractionNorm;
-         // reflection coordinates
-            const REAL *xx=mpData->GetReflX().data();
-            const REAL *yy=mpData->GetReflY().data();
-            const REAL *zz=mpData->GetReflZ().data();
-            const REAL *xyznorm=reflNorm.data();
+            // Normalized by the number of symmetrical reflections
+            const REAL frac=this->GetFraction(i)/fractionNorm/hkl.rows();
          
-         //orthonormal coordinates for T (texture) vector
-            REAL tx=this->GetPhaseH(i),
-                 ty=this->GetPhaseK(i),
-                 tz=this->GetPhaseL(i);
-            {
-               mpData->GetCrystal().MillerToOrthonormalCoords(tx,ty,tz);
-               const REAL norm=sqrt(tx*tx+ty*ty+tz*tz);
-               tx/=norm;
-               ty/=norm;
-               tz/=norm;
-            }
-         // Calculation
-            REAL tmp;
-            for(long i=0;i<nbReflUsed;i++)
-            {
-               tmp=(tx * (*xx++) + ty * (*yy++) + tz * (*zz++))/ (*xyznorm++);
-               mCorr(i)+=frac*pow(march+march2*tmp*tmp,-1.5);
-            }
-            
+         for(long j=0;j<hkl.rows();j++)
+         {
+            //orthonormal coordinates for T (texture) vector
+               REAL tx=hkl(j,0),
+                    ty=hkl(j,1),
+                    tz=hkl(j,2);
+            // reflection coordinates
+               const REAL *xx=mpData->GetReflX().data();
+               const REAL *yy=mpData->GetReflY().data();
+               const REAL *zz=mpData->GetReflZ().data();
+               const REAL *xyznorm=reflNorm.data();
+               {
+                  mpData->GetCrystal().MillerToOrthonormalCoords(tx,ty,tz);
+                  const REAL norm=sqrt(tx*tx+ty*ty+tz*tz);
+                  tx/=norm;
+                  ty/=norm;
+                  tz/=norm;
+               }
+            // Calculation
+               REAL tmp;
+               for(long k=0;k<nbReflUsed;k++)
+               {
+                  tmp=(tx * (*xx++) + ty * (*yy++) + tz * (*zz++))/ (*xyznorm++);
+                  mCorr(k)+=frac*pow(march+march2*tmp*tmp,-1.5);
+               }
+         }
+         mCorr/=hkl.rows();
       }
    //if(mIsbeingRefined==false)
    //{
