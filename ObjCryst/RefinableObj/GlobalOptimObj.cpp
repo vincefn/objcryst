@@ -868,7 +868,8 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
       CrystVector_long worldCurrentSetIndex(nbWorld);
       for(int i=0;i<nbWorld;i++)
       {
-         if(i!=nbWorld)
+         mRefParList.RestoreParamSet(mBestParSavedSetIndex);
+         if((i!=(nbWorld-1))&&(i%2==0))
             for(int j=0;j<mRecursiveRefinedObjList.GetNb();j++)
                mRecursiveRefinedObjList.GetObj(j).RandomizeConfiguration();
          worldCurrentSetIndex(i)=mRefParList.CreateParamSet();
