@@ -163,6 +163,10 @@ class RefinableObjClock
       void AddParent(RefinableObjClock &)const;
       /// remove a parent clock
       void RemoveParent(RefinableObjClock &)const;
+      /// This will (i) set the clock to the same values as the rhs clock, but will not change
+      /// the list of children and parent clocks. This will afterwards Click() the clock
+      /// to notify parents.
+      void operator=(const RefinableObjClock &rhs);
    private:
       bool HasParent(const RefinableObjClock &) const;
       unsigned long mTick0, mTick1;

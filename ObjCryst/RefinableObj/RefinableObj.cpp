@@ -174,6 +174,13 @@ void RefinableObjClock::RemoveParent(RefinableObjClock &clock)const
    VFN_DEBUG_MESSAGE("RefinableObjClock::RemoveParent():"<<i,10)
 }
 
+void RefinableObjClock::operator=(const RefinableObjClock &rhs)
+{
+   mTick0=rhs.mTick0;
+   mTick1=rhs.mTick1;
+   this->Click();
+}
+
 bool RefinableObjClock::HasParent(const RefinableObjClock &clock) const
 {
    for(std::set<RefinableObjClock*>::iterator pos=mvParent.begin();
@@ -1230,9 +1237,12 @@ void RefinableObj::PrepareForRefinement() const
 
 void RefinableObj::FixAllPar()
 {
+   VFN_DEBUG_ENTRY("RefinableObj("<<this->GetClassName()<<":"
+                                  <<this->GetName()<<")::FixAllPar()",4)
    for(long i=0;i<this->GetNbPar();i++) this->GetPar(i).SetIsFixed(true);
    for(int i=0;i<this->GetSubObjRegistry().GetNb();i++)
       this->GetSubObjRegistry().GetObj(i).FixAllPar();
+   VFN_DEBUG_EXIT("RefinableObj("<<this->GetName()<<")::FixAllPar()",4)
 }
 
 void RefinableObj::UnFixAllPar()
