@@ -581,9 +581,14 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
 {
    VFN_DEBUG_ENTRY("Crystal::GLInitDisplayList()",5)
    #ifdef OBJCRYST_GL
-   glMaterialf (GL_FRONT, GL_SHININESS, 50);
-   GLfloat colour_axis[]= { 0.5, .5, .5, 1.0 };
-   glMaterialfv (GL_FRONT, GL_AMBIENT_AND_DIFFUSE,colour_axis);
+		const GLfloat colorAmbient [] = {0.50, 0.50, 0.50, 1.00}; 
+		const GLfloat colorDiffuse [] = {0.80, 0.80, 0.80, 1.00}; 
+		const GLfloat colorSpecular [] = {1.00, 1.00, 1.00, 1.00}; 
+		
+		glMaterialfv(GL_FRONT, GL_AMBIENT,   colorAmbient); 
+		glMaterialfv(GL_FRONT, GL_DIFFUSE,   colorDiffuse); 
+		glMaterialfv(GL_FRONT, GL_SPECULAR,  colorSpecular); 
+		glMaterialf( GL_FRONT, GL_SHININESS, 5.0); 
 	//cout << xMin << ":"<<xMax <<endl;
 	//cout << yMin << ":"<<yMax <<endl;
 	//cout << zMin << ":"<<zMax <<endl;
@@ -631,9 +636,6 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
 			xM*=2;yM*=2;zM*=2;
       glPushMatrix();
    	//Add Axis & axis names
-      	GLfloat colour_font[]= { 1.0,1.0,1.0, 1.0 };
-      	glMaterialfv (GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE,colour_font);
-      	//glMaterialfv (GL_FRONT, GL_EMISSION,colour_font);
       	REAL x,y,z;
 
       	x=1.2-xc;y=-yc;z=-zc;
@@ -653,7 +655,6 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
 		// Cell
       	this->FractionalToOrthonormalCoords(xc,yc,zc);
          glTranslatef(-xc, -yc, -zc);
-      	glColor3f(1.0f,1.0f,1.0f);	   // White
       	glBegin(GL_LINES);
 				//top
 				glNormal3f(x110+x010-xM,y110+y010-yM,z110+z010-zM);
@@ -708,6 +709,7 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
 
    	//Describe all Scatterers
    	VFN_DEBUG_MESSAGE("Crystal::GLView(bool):Scatterers...",5)
+      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
    	for(int i=0;i<mScattererRegistry.GetNb();i++) 
       	this->GetScatt(i).GLInitDisplayList(onlyIndependentAtoms,
                                           	xMin,xMax,yMin,yMax,zMin,zMax);
