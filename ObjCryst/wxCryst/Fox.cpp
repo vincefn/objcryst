@@ -34,6 +34,7 @@
     #include "wx/wx.h"
 #endif
 
+#include "wx/tooltip.h"
 #include "wx/notebook.h"
 
 #include <locale.h>
@@ -74,6 +75,7 @@ public:
    void OnDebugTest(wxCommandEvent& event);
    void OnSetDebugLevel(wxCommandEvent& event);
    void OnUpdateUI(wxUpdateUIEvent& event);
+   void OnToggleTooltips(wxCommandEvent& event);
 private:
    wxScrolledWindow *mpWin1,*mpWin2,*mpWin3,*mpWin4;
     DECLARE_EVENT_TABLE()
@@ -97,6 +99,7 @@ enum
    // menu items
    MENU_FILE_QUIT,
    MENU_HELP_ABOUT,
+   MENU_HELP_TOGGLETOOLTIP,
    MENU_FILE_LOAD,
    MENU_FILE_LOAD_OXY,
    MENU_FILE_SAVE,
@@ -128,6 +131,7 @@ enum
 BEGIN_EVENT_TABLE(WXCrystMainFrame, wxFrame)
    EVT_MENU(MENU_FILE_QUIT,  WXCrystMainFrame::OnQuit)
    EVT_MENU(MENU_HELP_ABOUT, WXCrystMainFrame::OnAbout)
+   EVT_MENU(MENU_HELP_TOGGLETOOLTIP, WXCrystMainFrame::OnToggleTooltips)
    EVT_MENU(MENU_FILE_LOAD, WXCrystMainFrame::OnLoad)
    EVT_MENU(MENU_FILE_LOAD_OXY, WXCrystMainFrame::OnLoad)
    EVT_MENU(MENU_FILE_SAVE, WXCrystMainFrame::OnSave)
@@ -210,6 +214,7 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
       
       wxMenu *helpMenu = new wxMenu;
          helpMenu->Append(MENU_HELP_ABOUT, "&About...", "About ObjCryst...");
+         helpMenu->Append(MENU_HELP_TOGGLETOOLTIP, "Toggle Tooltip", "Set Tooltips on/off");
 
       wxMenuBar *menuBar = new wxMenuBar();
          menuBar->Append(menuFile,  "&File");
@@ -377,6 +382,8 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
    //Splash Screen
       wxCommandEvent event;
       this->OnAbout(event);
+   // Set tooltip delay
+   wxToolTip::SetDelay(500);
 }
 
 void WXCrystMainFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
@@ -524,4 +531,11 @@ void WXCrystMainFrame::OnDebugTest(wxCommandEvent& event)
 void WXCrystMainFrame::OnUpdateUI(wxUpdateUIEvent& event)
 {
    VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnUpdateUI(): Uncaught event !!",10)
+}
+void WXCrystMainFrame::OnToggleTooltips(wxCommandEvent& event)
+{
+    static bool tooltip_enabled = true;
+    tooltip_enabled = !tooltip_enabled;
+    wxToolTip::Enable(tooltip_enabled);
+    VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnToggleTooltips(): Tooltips= "<<tooltip_enabled,10)
 }

@@ -74,7 +74,6 @@ WXFieldRefPar::WXFieldRefPar(wxWindow *parent,const string& label,
 WXField(parent,label,ID_WXFIELD_REFPAR),mValue(0.),mpRefPar(par),mIsSelfUpdating(false)
 {
    VFN_DEBUG_MESSAGE("WXFieldRefPar::WXFieldName():End",6)
-
    mpButtonFix=new wxCheckBox(this,ID_WXFIELD_REFPAR_FIXBUTTON,"");
    //mpButtonFix->PushEventHandler(this);
    mpSizer->Add(mpButtonFix,0,wxALIGN_CENTER);
@@ -89,6 +88,7 @@ WXField(parent,label,ID_WXFIELD_REFPAR),mValue(0.),mpRefPar(par),mIsSelfUpdating
    mpPopUpMenu->Append(ID_REFPAR_POPUP_SET_LIMITS, "Set Limits");
    mpPopUpMenu->Append(ID_REFPAR_POPUP_REMOVE_LIMITS, "Remove Limits");
    
+   this->SetToolTip("right-click label to change limits");
    this->Layout();
 }
 WXFieldRefPar::~WXFieldRefPar()
