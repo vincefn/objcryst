@@ -1421,6 +1421,7 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
    if(mIsSelfOptimizing) 
    {
       this->RefinableObj::GlobalOptRandomMove(mutationAmplitude,type);
+      mQuat.Normalize();
       VFN_DEBUG_EXIT("Molecule::GlobalOptRandomMove()",4)
       return;
    }

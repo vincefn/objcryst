@@ -123,6 +123,7 @@ class WXMolecule: public WXScatterer
       WXMolecule(wxWindow *parent, Molecule*);
       virtual ~WXMolecule();
       void OnMenuOptimizeConformation(wxCommandEvent & WXUNUSED(event));
+      void OnMenuPrintRestraintStatus(wxCommandEvent & WXUNUSED(event));
       void OnMenuAddAtom(wxCommandEvent & WXUNUSED(event));
       void OnMenuAddBond(wxCommandEvent & WXUNUSED(event));
       void OnMenuAddAngle(wxCommandEvent & WXUNUSED(event));
