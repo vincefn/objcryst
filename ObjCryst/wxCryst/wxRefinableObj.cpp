@@ -84,14 +84,22 @@ BEGIN_EVENT_TABLE(WXFieldRefPar,wxEvtHandler)
 END_EVENT_TABLE()
 
 WXFieldRefPar::WXFieldRefPar(wxWindow *parent,const string& label,
-                         RefinablePar *par, const int hsize):
+                             RefinablePar *par, const int hsize,
+                             const bool enableFixButton, const bool enableLimitedButton):
 WXField(parent,label+"R",ID_WXFIELD_REFPAR),mValue(0.),mpRefPar(par),mIsSelfUpdating(false)
 {
    VFN_DEBUG_MESSAGE("WXFieldRefPar::WXFieldName():End",6)
-   mpButtonFix=new wxCheckBox(this,ID_WXFIELD_REFPAR_FIXBUTTON,"L",wxDefaultPosition, wxSize(24,20));
-   mpSizer->Add(mpButtonFix,0,wxALIGN_CENTER);
-   mpButtonLimited=new wxCheckBox(this,ID_WXFIELD_REFPAR_LIMITEDBUTTON,"",wxDefaultPosition, wxSize(16,20));
-   mpSizer->Add(mpButtonLimited,0,wxALIGN_CENTER);
+   if(enableFixButton)
+   {
+      mpButtonFix=new wxCheckBox(this,ID_WXFIELD_REFPAR_FIXBUTTON,"L",wxDefaultPosition, wxSize(24,20));
+      mpSizer->Add(mpButtonFix,0,wxALIGN_CENTER);
+   }else mpButtonFix=0;
+   if(enableLimitedButton)
+   {
+      mpButtonLimited=new wxCheckBox(this,ID_WXFIELD_REFPAR_LIMITEDBUTTON,"",
+                                     wxDefaultPosition, wxSize(16,20));
+      mpSizer->Add(mpButtonLimited,0,wxALIGN_CENTER);
+   }else mpButtonLimited=0;
    
    mpField=new wxTextCtrl(this,ID_WXFIELD,"",
                             wxDefaultPosition,wxSize(hsize,-1),wxTE_PROCESS_ENTER,
@@ -130,14 +138,14 @@ void WXFieldRefPar::OnText(wxCommandEvent & WXUNUSED(event))
 void WXFieldRefPar::OnToggleFix(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXFieldRefPar::OnToggleFix()",6)
-   mpRefPar->SetIsFixed(!(mpButtonFix->GetValue()));
+   if(0!=mpButtonFix) mpRefPar->SetIsFixed(!(mpButtonFix->GetValue()));
    mpRefPar->Print();
 }
 
 void WXFieldRefPar::OnToggleLimited(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXFieldRefPar::OnToggleLimited()",6)
-   mpRefPar->SetIsLimited(mpButtonLimited->GetValue());
+   if(0!=mpButtonLimited) mpRefPar->SetIsLimited(mpButtonLimited->GetValue());
    mpRefPar->Print();
 }
 
@@ -195,9 +203,11 @@ void WXFieldRefPar::CrystUpdate()
    VFN_DEBUG_MESSAGE("WXFieldRefPar::CrystUpdate()",6)
    //cout << mpField <<endl;
    if(mpRefPar->IsUsed()!=this->IsShown()) mNeedUpdateUI=true;
-   if(  (mValue==mpRefPar->GetHumanValue())
-      &&(mpButtonFix->GetValue()!=mpRefPar->IsFixed())
-      &&(mpButtonLimited->GetValue()==mpRefPar->IsLimited())) return;
+   bool needUpdate=false;
+   if(mValue!=mpRefPar->GetHumanValue()) needUpdate=true;
+   if(0!=mpButtonFix) if(mpButtonFix->GetValue()==mpRefPar->IsFixed()) needUpdate=true;
+   if(0!=mpButtonLimited) if(mpButtonLimited->GetValue()==mpRefPar->IsLimited()) needUpdate=true;
+   if(!needUpdate) return;
    mValueOld=mValue;
    mValue=mpRefPar->GetHumanValue();
    mNeedUpdateUI=true;
@@ -218,8 +228,8 @@ void WXFieldRefPar::UpdateUI()
    mIsSelfUpdating=true;
    mpField->SetValue(tmp);
    mIsSelfUpdating=false;
-   mpButtonFix->SetValue(!(mpRefPar->IsFixed()));
-   mpButtonLimited->SetValue(mpRefPar->IsLimited());
+   if(0!=mpButtonFix) mpButtonFix->SetValue(!(mpRefPar->IsFixed()));
+   if(0!=mpButtonLimited) mpButtonLimited->SetValue(mpRefPar->IsLimited());
    mNeedUpdateUI=false;
 }
 
