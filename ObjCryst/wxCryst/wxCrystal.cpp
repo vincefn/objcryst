@@ -106,6 +106,8 @@ mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
                                 "Add Antiprism Tetragonal");
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_ADDPRISMTRIGONAL,
                                 "Add Prism Trigonal");
+         mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_ADDICOSAHEDRON,
+                                "Add Icosahedron");
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_REMOVESCATTERER,
                                 "Remove Scatterer");
       mpMenuBar->AddMenu("Display",ID_CRYSTAL_MENU_DISPLAY);
