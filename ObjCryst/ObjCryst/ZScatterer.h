@@ -244,6 +244,7 @@ class ZScatterer: public Scatterer
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
+      virtual void GlobalOptRandomMove(const double mutationAmplitude);
    protected:
       void Update() const;
       /** For 3D display of the structure, bonds, triangular and quadric

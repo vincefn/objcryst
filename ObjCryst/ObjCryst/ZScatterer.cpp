@@ -925,6 +925,58 @@ void ZScatterer::SetUseGlobalScatteringPower(const bool useIt)
    }
 }
 
+void ZScatterer::GlobalOptRandomMove(const double mutationAmplitude)
+{
+   VFN_DEBUG_MESSAGE("ZScatterer::GlobalOptRandomMove()",2)
+   // give a 30% chance of moving a single dihedral angle
+	// while keeping at a minimum the configuration change in the
+	// depending atoms.
+   if( (rand()/(double)RAND_MAX)<.3)
+   {
+		// find unfixed,  dihedral angles to play with //unlimited?
+		CrystVector_long dihed(mNbAtom);
+		dihed=0;
+		int nbDihed=0;
+		RefinablePar *par;
+		for(int i=0;i<mNbAtom;i++)
+		{
+			par=&(this->GetPar(&(mZAtomRegistry.GetObj(i).mDihed)));
+			if( !(par->IsFixed()) ) //&& !(par->IsLimited())
+				dihed(nbDihed++)=i;
+		}
+		if(nbDihed==0) //Can't play :-(
+			this->RefinableObj::GlobalOptRandomMove(mutationAmplitude);
+		// Pick one
+		const int atom=dihed((int) (rand()/((double)RAND_MAX+1)*nbDihed));
+   	VFN_DEBUG_MESSAGE("ZScatterer::GlobalOptRandomMove(): switching atom #"<<atom ,2)
+		// Get the old value
+		const double old=mZAtomRegistry.GetObj(atom).GetZDihedralAngle();
+		// Move it, with a max amplitude 8x greater than usual
+		par=&(this->GetPar(&(mZAtomRegistry.GetObj(atom).mDihed)));
+		par->Mutate( par->GetGlobalOptimStep()
+                    *2*(rand()/(double)RAND_MAX-0.5)*mutationAmplitude*8);
+		const double change=mZAtomRegistry.GetObj(atom).GetZDihedralAngle()-old;
+		// Now move all atoms using this changed bond as a reference
+		const int atom2=	mZAtomRegistry.GetObj(atom).GetZAngleAtom();
+		for(int i=atom;i<mNbAtom;i++)
+			if(  (mZAtomRegistry.GetObj(i).GetZBondAtom()==atom)
+				&&(mZAtomRegistry.GetObj(i).GetZAngleAtom()==atom2))
+					this->GetPar(&(mZAtomRegistry.GetObj(i).mDihed)).Mutate(-change);
+   	//cout <<"ZScatterer::GlobalOptRandomMove:"<<nbDihed
+		//	  <<" "<<atom
+		//	  <<" "<<atom2
+		//	  <<" "<<rand()
+		//	  <<endl
+		//	  <<" "<<FormatHorizVector<long>(dihed,4)
+		//	  <<endl;
+	}
+   else
+   {
+      this->RefinableObj::GlobalOptRandomMove(mutationAmplitude);
+   }
+   VFN_DEBUG_MESSAGE("Crystal::GlobalOptRandomMove():End",1)
+}
+
 void ZScatterer::Update() const
 {
    if(  (mClockScattCompList>mClockScatterer)
