@@ -43,6 +43,8 @@
 #include <fstream>
 #include <sstream>
 
+//#define USE_BACKGROUND_MAXLIKE_ERROR
+
 namespace ObjCryst
 {
 ////////////////////////////////////////////////////////////////////////
@@ -350,6 +352,10 @@ void ScatteringPowerAtom::XMLOutput(ostream &os,int indent)const
    if(true==this->mIsIsotropic)
       this->GetPar(&mBiso).XMLOutput(os,"Biso",0);
    os<<endl;
+
+   for(int i=0;i<=indent;i++) os << "  " ;
+   this->GetPar("ML Error").XMLOutput(os,"ML Error",indent);
+   os <<endl;
    
    for(int i=0;i<=indent;i++) os << "  " ;
    XMLCrystTag tag2("RGBColour");
@@ -396,8 +402,16 @@ void ScatteringPowerAtom::XMLInput(istream &is,const XMLCrystTag &tagg)
          {
             if("Name"==tag.GetAttributeName(i))
             {
-               if("Biso"==tag.GetAttributeValue(i)) this->GetPar(&mBiso).XMLInput(is,tag);
-               break;
+               if("Biso"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar(&mBiso).XMLInput(is,tag);
+                  break;
+               }
+               if("ML Error"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar("ML Error").XMLInput(is,tag);
+                  break;
+               }
             }
          }
          continue;
@@ -1678,7 +1692,11 @@ void PowderPatternBackground::XMLOutput(ostream &os,int indent)const
    for(int i=0;i<indent;i++) os << "  " ;
    os <<tag2<<endl;
    
-   
+   #ifdef USE_BACKGROUND_MAXLIKE_ERROR
+   this->GetPar("ML Model Error").XMLOutput(os,"ML Model Error",indent);
+   os <<endl;
+   #endif
+
    indent--;
    tag.SetIsEndTag(true);
    for(int i=0;i<indent;i++) os << "  " ;
@@ -1736,23 +1754,25 @@ void PowderPatternBackground::XMLInput(istream &is,const XMLCrystTag &tagg)
          mBackgroundInterpPoint2Theta *= DEG2RAD;
          mClockBackgroundPoint.Click();
 
-         //Rebuild parameter list
-         this->ResetParList();
-         char buf[25];
-         for(int j=0;j<mBackgroundNbPoint;j++)
-         {
-            sprintf(buf,"Background_Point_%d",j);
-            RefinablePar tmp(buf,
-                             mBackgroundInterpPointIntensity.data()+j,0.,1000.,
-                             gpRefParTypeScattDataBackground,REFPAR_DERIV_STEP_RELATIVE,
-                             false,true,true,false,1.);
-            tmp.AssignClock(mClockBackgroundPoint);
-            tmp.SetDerivStep(1e-3);
-            tmp.SetIsFixed(!fix(j));
-            this->AddPar(tmp);
-         }
+         this->InitRefParList();
          //read closing tag
          XMLCrystTag junkEndTag(is);
+      }
+      if("Par"==tag.GetName())
+      {
+         for(unsigned int i=0;i<tag.GetNbAttribute();i++)
+         {
+            if("Name"==tag.GetAttributeName(i))
+            {
+               if("ML Model Error"==tag.GetAttributeValue(i))
+               {
+                  #ifdef USE_BACKGROUND_MAXLIKE_ERROR
+                  this->GetPar("ML Model Error").XMLInput(is,tag);
+                  break;
+                  #endif
+               }
+            }
+         }
       }
    }
 }
@@ -2166,6 +2186,11 @@ void PowderPattern::XMLOutput(ostream &os,int indent)const
    this->GetPar(&m2ThetaTransparency).XMLOutput(os,"2ThetaTransparency",indent);
    os <<endl;
    
+   for(unsigned int i=0;i<this->GetNbOption();i++)
+   {
+      this->GetOption(i).XMLOutput(os,indent);
+      os <<endl<<endl;
+   }
    
    mRadiation.XMLOutput(os,indent);
    os <<endl;
@@ -2283,6 +2308,13 @@ void PowderPattern::XMLInput(istream &is,const XMLCrystTag &tagg)
                }
             }
          }
+         continue;
+      }
+      if("Option"==tag.GetName())
+      {
+         for(unsigned int i=0;i<tag.GetNbAttribute();i++)
+            if("Name"==tag.GetAttributeName(i)) 
+               mOptionRegistry.GetObj(tag.GetAttributeValue(i)).XMLInput(is,tag);
          continue;
       }
       if("PowderPatternBackground"==tag.GetName())

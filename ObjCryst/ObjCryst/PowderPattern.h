@@ -66,6 +66,16 @@ class PowderPatternComponent : virtual public RefinableObj
       /// Note that the pattern is \e not scaled.
       /// 
       virtual const CrystVector_REAL& GetPowderPatternCalc()const=0;
+      /** Get the integrated values of the powder pattern
+      *
+      * \note: the integration intervals are those given by the parent
+      *   PowderPattern, so that all PowderPatternComponent's intervals
+      *   are taken into account
+      *
+      *   This avoids explicitely calculating the full profile powder pattern.
+      */ 
+      virtual pair<const CrystVector_REAL*,const RefinableObjClock*>
+         GetPowderPatternIntegratedCalc()const=0;
       /** \brief Is this component scalable ?
       *
       * This is used by the PowderPattern class, which fits all
@@ -74,14 +84,38 @@ class PowderPatternComponent : virtual public RefinableObj
       * to be absolute.
       */
       bool IsScalable()const;
-   protected:
-      /// Last time the pattern was actually calculated.
+      /** Get the variance associated to each point of the 
+      * calculated powder pattern, for this component.
+      *
+      * \warning: this is experimental, with the aim of using Maximum Likelihood
+      * to improve structure determination.
+      */
+      virtual const CrystVector_REAL& GetPowderPatternCalcVariance()const=0;
+      /** Get the variance associated to each point of the 
+      * calculated powder pattern, for this component (integrated version).
+      *
+      * \warning: this is experimental, with the aim of using Maximum Likelihood
+      * to improve structure determination.
+      */
+      virtual pair<const CrystVector_REAL*,const RefinableObjClock*>
+         GetPowderPatternIntegratedCalcVariance() const=0;
+      /// Does this component have a variance associated with each calculated
+      /// point ? i.e., do we use maximum likelihood to take into account
+      /// incomplete models ?
+      virtual bool HasPowderPatternCalcVariance()const=0;
+      /// Last time the powder pattern was calculated.
       const RefinableObjClock& GetClockPowderPatternCalc()const;
+   protected:
+      /// Last time the variance on the pattern was actually calculated.
+      const RefinableObjClock& GetClockPowderPatternCalcVariance()const;
          
       /// Calc the powder pattern. As always, recomputation is only
       /// done if necessary (ie if a parameter has changed since the last
       /// computation)
       virtual void CalcPowderPattern() const=0;
+      /// Calc the integrated powder pattern. This should be optimized so that
+      /// the full powder pattern is not explicitely computed.
+      virtual void CalcPowderPatternIntegrated() const=0;
       
       /// Get the integration limits (first and last pixels) around each reflection,
       /// if this component has Bragg reflections. Used for integrated R(w) factors.
@@ -99,6 +133,13 @@ class PowderPatternComponent : virtual public RefinableObj
       /// The calculated component of a powder pattern. It is mutable since it is
       /// completely defined by other parameters (eg it is not an 'independent parameter')
       mutable CrystVector_REAL mPowderPatternCalc;
+      /// The calculated powder pattern, integrated. 
+      mutable CrystVector_REAL mPowderPatternIntegratedCalc;
+      
+      /// The variance associated to each point of the calculated powder pattern.
+      mutable CrystVector_REAL mPowderPatternCalcVariance;
+      /// The variance associated to each point of the calculated powder pattern, integrated
+      mutable CrystVector_REAL mPowderPatternIntegratedCalcVariance;
       
       /// \internal
       /// This will be called by the parent PowderPattern object, before
@@ -112,6 +153,12 @@ class PowderPatternComponent : virtual public RefinableObj
       //Clocks
          /// When was the powder pattern last computed ?
          mutable RefinableObjClock mClockPowderPatternCalc;
+         /// When was the 'integrated' powder pattern last computed ?
+         mutable RefinableObjClock mClockPowderPatternIntegratedCalc;
+         /// When was the powder pattern variance last computed ?
+         mutable RefinableObjClock mClockPowderPatternVarianceCalc;
+         /// When was the 'integrated' powder pattern variance last computed ?
+         mutable RefinableObjClock mClockPowderPatternIntegratedVarianceCalc;
       
       /// The PowderPattern object in which this component is included
       const PowderPattern *mpParentPowderPattern;
@@ -140,6 +187,8 @@ class PowderPatternBackground : public PowderPatternComponent
       
       virtual void SetParentPowderPattern(const PowderPattern&);
       virtual const CrystVector_REAL& GetPowderPatternCalc()const;
+      virtual pair<const CrystVector_REAL*,const RefinableObjClock*>
+         GetPowderPatternIntegratedCalc()const;
       /// Import background points from a file (with two columns 2theta, intensity)
       void ImportUserBackground(const string &filename);
       virtual void XMLOutput(ostream &os,int indent=0)const;
@@ -148,12 +197,18 @@ class PowderPatternBackground : public PowderPatternComponent
       virtual void GetGeneGroup(const RefinableObj &obj, 
                                 CrystVector_uint & groupIndex,
                                 unsigned int &firstGroup) const;
+      virtual const CrystVector_REAL& GetPowderPatternCalcVariance()const;
+      virtual pair<const CrystVector_REAL*,const RefinableObjClock*>
+         GetPowderPatternIntegratedCalcVariance() const;
+      virtual bool HasPowderPatternCalcVariance()const;
+      virtual void TagNewBestConfig()const;
    protected:
       virtual void CalcPowderPattern() const;
+      virtual void CalcPowderPatternIntegrated() const;
       virtual void Prepare();
       virtual void GetBraggLimits(CrystVector_long *&min,CrystVector_long *&max)const;
       virtual void SetMaxSinThetaOvLambda(const REAL max);
-      
+      void InitRefParList();
       /// The kind of interpolation used
       PowderBackgroundInterpType mBackgroundType;
       /// Number of fitting points for background
@@ -176,6 +231,10 @@ class PowderPatternBackground : public PowderPatternComponent
       * the max is calculated.
       */
       REAL mMaxSinThetaOvLambda;
+      
+      /// Constant error (sigma) on the calculated pattern, due to an incomplete
+      /// model
+      REAL mModelVariance;
       
       //To be removed
       friend class PowderPattern; 
@@ -203,6 +262,8 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       
       virtual void SetParentPowderPattern(const PowderPattern&);
       virtual const CrystVector_REAL& GetPowderPatternCalc()const;
+      virtual pair<const CrystVector_REAL*,const RefinableObjClock*>
+         GetPowderPatternIntegratedCalc()const;
       
       /** Set reflection profile parameters
       *
@@ -231,8 +292,13 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
                                      const bool enableRestraints=false);
       virtual void EndOptimization();
       virtual const Radiation& GetRadiation()const;
+      virtual const CrystVector_REAL& GetPowderPatternCalcVariance()const;
+      virtual pair<const CrystVector_REAL*,const RefinableObjClock*>
+         GetPowderPatternIntegratedCalcVariance() const;
+      virtual bool HasPowderPatternCalcVariance()const;
    protected:
       virtual void CalcPowderPattern() const;
+      virtual void CalcPowderPatternIntegrated() const;
       
       /// \internal Calc reflection profiles for ALL reflections (powder diffraction)
       void CalcPowderReflProfile()const;
@@ -245,6 +311,8 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       virtual void InitOptions();
       virtual void GetBraggLimits(CrystVector_long *&min,CrystVector_long *&max)const;
       virtual void SetMaxSinThetaOvLambda(const REAL max);
+      
+      void PrepareIntegratedProfile()const;
       //Clocks
          /// Last time the reflection parameters were changed
          RefinableObjClock mClockProfilePar;
@@ -303,6 +371,8 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
          
       /// Computed intensities for all reflections
          mutable CrystVector_REAL mIhklCalc;
+      /// Variance on computed intensities for all reflections
+         mutable CrystVector_REAL mIhklCalcVariance;
       
       // Saved arrays to speed-up computations
          ///Reflection profiles for ALL reflections during the last powder pattern generation
@@ -313,6 +383,17 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
          mutable CrystVector_long mReflectionProfileFirstPixel;
          /// First and last pixel for integrated R-factors around each reflection
          mutable CrystVector_long mIntegratedReflMin,mIntegratedReflMax;
+      
+      // When using integrated profiles
+         /** For each reflection, store the integrated value of the normalized
+         * profile over all integration intervals.
+         *
+         * the second value is the integrated factor, and the first is the number
+         * corresponding to the integration interval.
+         */
+         mutable vector< map<long, REAL> > mIntegratedProfileFactor;
+         /// Last time the integrated values of normalized profiles was calculated.
+         mutable RefinableObjClock mClockIntegratedProfileFactor;
    #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);
@@ -417,6 +498,8 @@ class PowderPattern : public RefinableObj
          const CrystVector_REAL& GetPowderPatternObs()const;
          /// Get the sigma for each point of the observed powder pattern 
          const CrystVector_REAL& GetPowderPatternObsSigma()const;
+         /// Get the variance (obs+model) for each point of the powder pattern
+         const CrystVector_REAL& GetPowderPatternVariance()const;
          /// Get the weight for each point of the powder pattern 
          const CrystVector_REAL& GetPowderPatternWeight()const;
          // Get the 2theta values corresponding to the powder pattern.
@@ -552,11 +635,11 @@ class PowderPattern : public RefinableObj
          */
          REAL GetChi2()const;
          /// Fit the scale(s) factor of each component to minimize R
-         void FitScaleFactorForR();
-         void FitScaleFactorForIntegratedR();
+         void FitScaleFactorForR()const;
+         void FitScaleFactorForIntegratedR()const;
          /// Fit the scale(s) factor of each component to minimize Rw
-         void FitScaleFactorForRw();
-         void FitScaleFactorForIntegratedRw();
+         void FitScaleFactorForRw()const;
+         void FitScaleFactorForIntegratedRw()const;
          /// Set sigma=sqrt(Iobs)
          void SetSigmaToSqrtIobs();
          /// Set w = 1/sigma^2.
@@ -608,9 +691,19 @@ class PowderPattern : public RefinableObj
       virtual void SetMaxSinThetaOvLambda(const REAL max);
       /// Get the maximum value for sin(theta)/lambda.
       REAL GetMaxSinThetaOvLambda()const;
+
+      // For integrated pattern calculations
+         /// Get the list of first pixels for the integration intervals
+         const CrystVector_long& GetIntegratedProfileMin()const;
+         /// Get the list of last pixels for the integration intervals
+         const CrystVector_long& GetIntegratedProfileMax()const;
+         /// When were the integration intervals last changed ?
+         const RefinableObjClock& GetIntegratedProfileLimitsClock()const;
    protected:
       /// Calc the powder pattern
       void CalcPowderPattern() const;
+      /// Calc the integrated powder pattern
+      void CalcPowderPatternIntegrated() const;
       /// Init parameters and options
       virtual void Init();
       /// Prepare  the calculation of the integrated R-factors
@@ -624,15 +717,26 @@ class PowderPattern : public RefinableObj
       /// The calculated powder pattern. It is mutable since it is
       /// completely defined by other parameters (eg it is not an 'independent parameter')
       mutable CrystVector_REAL mPowderPatternCalc;
+      /// The calculated powder pattern, integrated
+      mutable CrystVector_REAL mPowderPatternIntegratedCalc;
       /// The calculated powder pattern part which corresponds to 'background' 
       /// (eg non-scalable components). It is already included in mPowderPatternCalc
       mutable CrystVector_REAL mPowderPatternBackgroundCalc;
+      /// The calculated powder pattern part which corresponds to 'background' 
+      /// (eg non-scalable components), integrated
+      mutable CrystVector_REAL mPowderPatternBackgroundIntegratedCalc;
       /// The observed powder pattern.
       CrystVector_REAL mPowderPatternObs;
       /// The sigma of the observed pattern.
       CrystVector_REAL mPowderPatternObsSigma;
       /// The weight for each point of the pattern.
-      CrystVector_REAL mPowderPatternWeight;
+      mutable CrystVector_REAL mPowderPatternWeight;
+      /// The complete variance associated to each point of the powder pattern,
+      /// taking into account observation and model errors.
+      mutable CrystVector_REAL mPowderPatternVariance;
+      /// The complete variance associated to each point of the powder pattern,
+      /// taking into account observation and model errors. Integrated.
+      mutable CrystVector_REAL mPowderPatternVarianceIntegrated;
       
       /// 2theta min and step for the pattern
       REAL m2ThetaMin,m2ThetaStep;
@@ -652,10 +756,12 @@ class PowderPattern : public RefinableObj
          RefinableObjClock mClockPowderPatternRadiation;
          /// When was the powder pattern last computed ?
          mutable RefinableObjClock mClockPowderPatternCalc;
+         /// When was the powder pattern (integrated) last computed ?
+         mutable RefinableObjClock mClockPowderPatternIntegratedCalc;
          /// Corrections to 2Theta
          RefinableObjClock mClockPowderPattern2ThetaCorr;
          /// Last modification of the scale factor
-         RefinableObjClock mClockScaleFactor;
+         mutable RefinableObjClock mClockScaleFactor;
       
       //Excluded 2Theta regions in the powder pattern, for statistics.
          /// Min value for 2theta for all excluded regions
@@ -682,7 +788,7 @@ class PowderPattern : public RefinableObj
          ///
          /// This is mutable because generally we use the 'best' scale factor, but
          /// it should not be... 
-         CrystVector_REAL mScaleFactor;
+         mutable CrystVector_REAL mScaleFactor;
          
       /// Use faster, less precise functions ?
       bool mUseFastLessPreciseFunc;
@@ -703,6 +809,7 @@ class PowderPattern : public RefinableObj
          mutable CrystVector_long mIntegratedPatternMin,mIntegratedPatternMax;
          mutable CrystVector_REAL mIntegratedObs;
          mutable CrystVector_REAL mIntegratedWeight;
+         mutable CrystVector_REAL mIntegratedVarianceObs;
          mutable RefinableObjClock mClockIntegratedFactorsPrep;
       // Statistical indicators
          mutable REAL mChi2;
@@ -724,6 +831,9 @@ class PowderPattern : public RefinableObj
       /// Number of points actually used, due to the maximum value of
       /// sin(theta)/lambda.
       mutable unsigned long mNbPointUsed;
+      /// Number of integration intervals actually used, due to the maximum value of
+      /// sin(theta)/lambda.
+      mutable unsigned long mNbIntegrationUsed;
       /// Clock recording the last time the number of points used (PowderPattern::mNbPointUsed)
       /// was changed.
       mutable RefinableObjClock mClockNbPointUsed;

@@ -165,10 +165,17 @@ void ScatteringPower::GetGeneGroup(const RefinableObj &obj,
          }
 }
 
+REAL ScatteringPower::GetMaximumLikelihoodPositionError()const 
+{return mMaximumLikelihoodPositionError;}
+
+const RefinableObjClock& ScatteringPower::GetMaximumLikelihoodPositionErrorClock()const
+{return mMaximumLikelihoodPositionErrorClock;}
+
 void ScatteringPower::Init()
 {
    VFN_DEBUG_MESSAGE("ScatteringPower::Init():"<<mName,2)
    mColourName="White";
+   mMaximumLikelihoodPositionError=0;
    VFN_DEBUG_MESSAGE("ScatteringPower::Init():End",2)
 }
 void ScatteringPower::InitRGBColour()
@@ -738,6 +745,15 @@ void ScatteringPowerAtom::InitRefParList()
       tmp.SetDerivStep(1e-3);
       tmp.SetGlobalOptimStep(.5);
       tmp.AssignClock(mClock);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("ML Error",&mMaximumLikelihoodPositionError,0.,1.,
+                        gpRefParTypeScattPow,REFPAR_DERIV_STEP_ABSOLUTE,
+                        true,true,true,false);
+      tmp.SetDerivStep(1e-4);
+      tmp.SetGlobalOptimStep(.001);
+      tmp.AssignClock(mMaximumLikelihoodPositionErrorClock);
       this->AddPar(tmp);
    }
 }

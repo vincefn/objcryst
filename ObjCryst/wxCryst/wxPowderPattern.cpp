@@ -41,7 +41,9 @@
 #ifdef DrawText
 #undef DrawText
 #endif
- 
+
+//#define USE_BACKGROUND_MAXLIKE_ERROR
+
 namespace ObjCryst
 {
 ////////////////////////////////////////////////////////////////////////
@@ -343,10 +345,18 @@ void WXPowderPattern::CrystUpdate()
    
    if(mpGraph!=0)
    {
+      CrystVector_REAL tmp;
+      tmp=mpPowderPattern->GetPowderPatternVariance();
+      for(long i=0;i<tmp.numElements();i++)
+      {
+         if(tmp(i)<0) tmp(i)=0;
+         else tmp(i)=sqrt(tmp(i));
+      }
       mpGraph->SetPattern( mpPowderPattern->GetPowderPatternObs(),
                            mpPowderPattern->GetPowderPatternCalc(),
                            mpPowderPattern->Get2ThetaMin(),
-                           mpPowderPattern->Get2ThetaStep());
+                           mpPowderPattern->Get2ThetaStep(),
+                           tmp);
    }
    this->WXRefinableObj::CrystUpdate();
 } 
@@ -719,6 +729,21 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
    const long nbPoints=mLast-mFirst+1;
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():3",5)
 
+   // Draw sigma bars
+   {
+      dc.SetPen(* wxLIGHT_GREY_PEN);
+      wxCoord x,y1,y2;
+      for(long i=mFirst;i<=mLast;i++)
+      {
+         x=(wxCoord)(mMargin+ (i-mFirst)*(width-mMargin)/(REAL)nbPoints);
+         y1=(wxCoord)(height-mMargin-(mObs(i)-mSigma(i)/2.-mMinIntensity)*(height-2*mMargin)
+                        /(mMaxIntensity-mMinIntensity));
+         y2=(wxCoord)(height-mMargin-(mObs(i)+mSigma(i)/2.-mMinIntensity)*(height-2*mMargin)
+                        /(mMaxIntensity-mMinIntensity));
+         
+         dc.DrawLine(x,y1,x,y2);
+      }
+   }
    // Draw Axis (sort of)
    {
       wxCoord tmpW,tmpH;
@@ -788,6 +813,7 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
          dc.DrawLine(x1,y1,x2,y2);
       }
    }
+   
    mCalcPatternIsLocked=false;
    dc.EndDrawing();
 
@@ -908,8 +934,9 @@ void WXPowderPatternGraph::OnUpdate(wxCommandEvent & WXUNUSED(event))
 }
 
 void WXPowderPatternGraph::SetPattern(const CrystVector_REAL &obs,
-                                        const CrystVector_REAL &calc,
-                                        const REAL tthetaMin,const REAL tthetaStep)
+                                      const CrystVector_REAL &calc,
+                                      const REAL tthetaMin,const REAL tthetaStep,
+                                      const CrystVector_REAL &sigma)
 {
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph::SetPattern()",5)
    //Make sure spectrum is not being used (for drawing)
@@ -918,6 +945,7 @@ void WXPowderPatternGraph::SetPattern(const CrystVector_REAL &obs,
    mCalc=calc;
    mCalcPatternIsLocked=false;
    mObs=obs;
+   mSigma=sigma;
    const long nbPoint=mObs.numElements();
    m2theta.resize(nbPoint);
    for(long i=0;i<nbPoint;i++) m2theta(i)=tthetaMin+i*tthetaStep;
@@ -975,6 +1003,12 @@ WXRefinableObj(parent,b),mpPowderPatternBackground(b)
       mpMenuBar->AddMenu("Object",ID_REFOBJ_MENU_OBJ);
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUMBACKGROUND_IMPORT,"Import");
    
+   #ifdef USE_BACKGROUND_MAXLIKE_ERROR
+   WXFieldRefPar* pFieldModelSigma  =new WXFieldRefPar(this,"Maximum Likelihood Error",
+            &(mpPowderPatternBackground->GetPar("ML Model Error")));
+   mpSizer->Add(pFieldModelSigma,0,wxALIGN_LEFT);
+   mList.Add(pFieldModelSigma);
+   #endif
    //:TODO: Display points
    this->Layout();
 }

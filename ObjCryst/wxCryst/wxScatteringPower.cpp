@@ -79,6 +79,11 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpScatteringPowerAtom(obj)
       sizer->Add(mpFieldSymbol  ,0,wxALIGN_CENTER);
       sizer->Add(pFieldBiso    ,0,wxALIGN_CENTER);
       
+      WXFieldRefPar* pFieldError  =new WXFieldRefPar(this,"ML Error:",
+            &(mpScatteringPowerAtom->GetPar("ML Error") ));
+      sizer->Add(pFieldError    ,0,wxALIGN_CENTER);
+      mList.Add(pFieldError);
+      
       mpSizer->Add(sizer,0,wxALIGN_LEFT);
       mList.Add(mpFieldSymbol);
       mList.Add(pFieldBiso);
@@ -106,6 +111,7 @@ bool WXScatteringPowerAtom::OnChangeName(const int id)
 
 void WXScatteringPowerAtom::OnChangeColour(wxCommandEvent & event)
 {
+   VFN_DEBUG_ENTRY("WXScatteringPowerAtom::OnChangeColour()",6)
    const float* oldColour=mpScatteringPowerAtom->GetColourRGB();
    double r,g,b;
    r=oldColour[0];
@@ -151,11 +157,14 @@ void WXScatteringPowerAtom::OnChangeColour(wxCommandEvent & event)
       dialog.GetValue().ToDouble(&b);
    }
    mpScatteringPowerAtom->SetColour(r,g,b);
+   VFN_DEBUG_EXIT("WXScatteringPowerAtom::OnChangeColour()",6)
 }
 void WXScatteringPowerAtom::UpdateUI()
 {
+   VFN_DEBUG_ENTRY("WXScatteringPowerAtom::UpdateUI()",3)
    mpFieldSymbol->SetValue(mpScatteringPowerAtom->GetSymbol());
    this->WXRefinableObj::UpdateUI();
+   VFN_DEBUG_EXIT("WXScatteringPowerAtom::UpdateUI()",3)
 }
 
 }// namespace 

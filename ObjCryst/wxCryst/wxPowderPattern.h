@@ -87,15 +87,16 @@ class WXPowderPatternGraph: public wxWindow
       void OnUpdate(wxCommandEvent & WXUNUSED(event));
       /// Update the spectrum. This is called by the WXPowderPattern parent.
       void SetPattern(const CrystVector_REAL &obs,
-                       const CrystVector_REAL &calc,
-                       const REAL tthetaMin,const REAL tthetaStep);
+                      const CrystVector_REAL &calc,
+                      const REAL tthetaMin,const REAL tthetaStep,
+                      const CrystVector_REAL &sigma);
       /// Redraw the pattern (special function to ensure complete redrawing under windows...)
       void OnRedrawNewPattern(wxUpdateUIEvent& WXUNUSED(event));
    private:
       /// Reset the limits of the axis to full range.
       void ResetAxisLimits();
       WXPowderPattern *mpPattern;
-      CrystVector_REAL mObs,mCalc,m2theta;
+      CrystVector_REAL mObs,mCalc,m2theta,mSigma;
       const long mMargin;
       const REAL mDiffPercentShift;
       REAL mMaxIntensity,mMinIntensity,mMin2Theta,mMax2Theta;

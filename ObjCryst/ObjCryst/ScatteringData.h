@@ -385,7 +385,15 @@ class ScatteringData: virtual public RefinableObj
                                 CrystVector_REAL* rsf2,
                                 CrystVector_REAL* isf2,
                                 bool useFastTabulatedTrigFunctions=false) const;
-      
+      /** Calculate the Luzzati factor associated to each ScatteringPower and
+      * each reflection, for maximum likelihood optimization.
+      * 
+      */
+      void CalcLuzzatiFactor()const;
+      /** Calculate the variance associated to the calculated structure factor
+      *
+      */
+      void CalcStructFactVariance()const;
       
       /// Number of H,K,L reflections
       long mNbRefl;
@@ -400,6 +408,12 @@ class ScatteringData: virtual public RefinableObj
 
       ///Multiplicity for each reflections (mostly for powder diffraction)
       CrystVector_int mMultiplicity ;
+      
+      /** Expected intensity factor for all reflections.
+      *
+      * See SpaceGroup::GetExpectedIntensityFactor()
+      */
+      CrystVector_int mExpectedIntensityFactor;
       
       /// real &imaginary parts of F(HKL)calc
       mutable CrystVector_REAL mFhklCalcReal, mFhklCalcImag ;
@@ -528,6 +542,18 @@ class ScatteringData: virtual public RefinableObj
          mutable long mNbReflUsed;
          /// Clock recording the last time the number of reflections used has increased.
          mutable RefinableObjClock mClockNbReflUsed;
+      
+      // Maximum Likelihood
+         /// The Luzzati 'D' factor for each scattering power and each reflection
+         mutable vector<CrystVector_REAL> mvLuzzatiFactor;
+         /** The variance on all calculated structure factors, taking into account
+         * the positionnal errors and the expected intensity factor.
+         *
+         * Actually this is the variance on both real and imaginary parts.
+         */
+         mutable CrystVector_REAL mFhklCalcVariance;
+         mutable RefinableObjClock mClockLuzzatiFactor;
+         mutable RefinableObjClock mClockFhklCalcVariance;
    #ifdef __WX__CRYST__
       //to access mMaxSinThetaOvLambda
       friend class WXDiffractionSingleCrystal;

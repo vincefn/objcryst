@@ -193,6 +193,11 @@ class ScatteringPower:virtual public RefinableObj
       virtual void GetGeneGroup(const RefinableObj &obj, 
                                 CrystVector_uint & groupIndex,
                                 unsigned int &firstGroup) const;
+      /// Maximum Likelihood: get the estimated error (sigma) on the positions
+      /// for this kind of element.
+      virtual REAL GetMaximumLikelihoodPositionError()const;
+      /// Get the clock value for the last change on the positionnal errors.
+      virtual const RefinableObjClock& GetMaximumLikelihoodPositionErrorClock()const;
    protected:
       virtual void InitRefParList()=0;
       /// Initialization of the object, used by all constructors, and operator=.
@@ -224,6 +229,11 @@ class ScatteringPower:virtual public RefinableObj
       string mColourName;
       /// Colour for this ScatteringPower using RGB
       float mColourRGB[3];
+      // Maximum Likelihood
+         /// estimated error (sigma) on the positions for this type of element.
+         REAL mMaximumLikelihoodPositionError;
+         /// 
+         RefinableObjClock mMaximumLikelihoodPositionErrorClock;
    private:
       friend const ScatteringPower& GetScatteringPower(const long i);
 };
