@@ -21,6 +21,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 using namespace std;
 namespace ObjCryst
 {
@@ -75,9 +76,7 @@ class XMLCrystTag
       string mName;
       bool mIsEndTag;
       bool mIsEmptyTag;
-      unsigned int mNbAttribute;
-      string mAttributeName [20];
-      string mAttributeValue[20];
+      vector<pair<std::string,std::string> > mvAttribute;
       friend ostream& operator<< (ostream&, const XMLCrystTag&);
       friend istream& operator>> (istream&, XMLCrystTag&);
    #ifdef __WX__CRYST__

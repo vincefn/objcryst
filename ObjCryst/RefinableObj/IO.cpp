@@ -34,11 +34,10 @@ namespace ObjCryst
 //
 ////////////////////////////////////////////////////////////////////////
 XMLCrystTag::XMLCrystTag():
-mIsEndTag(false),mIsEmptyTag(false),mNbAttribute(0)
+mIsEndTag(false),mIsEmptyTag(false)
 {}
 
-XMLCrystTag::XMLCrystTag(istream &is):
-mNbAttribute(0)
+XMLCrystTag::XMLCrystTag(istream &is)
 {
    is >> *this;
 }
@@ -46,7 +45,7 @@ mNbAttribute(0)
 XMLCrystTag::XMLCrystTag(const string &tagName,
                          const bool isEndTag, 
                          const bool isEmptyTag):
-mName(tagName),mIsEndTag(isEndTag),mIsEmptyTag(isEmptyTag),mNbAttribute(0)
+mName(tagName),mIsEndTag(isEndTag),mIsEmptyTag(isEmptyTag)
 {}
 
 XMLCrystTag::~XMLCrystTag(){}
@@ -54,24 +53,25 @@ XMLCrystTag::~XMLCrystTag(){}
 const string& XMLCrystTag::GetName()const{return mName;}
 const string& XMLCrystTag::GetClassName()const{static string str="XMLCrystTag";return str;}
 
-unsigned int XMLCrystTag::GetNbAttribute()const{return mNbAttribute;}
+unsigned int XMLCrystTag::GetNbAttribute()const{return mvAttribute.size();}
 
 void XMLCrystTag::AddAttribute(const string &attName,const string &attValue)
 {
-   mAttributeName [mNbAttribute  ]=attName;
-   mAttributeValue[mNbAttribute++]=attValue;
+   VFN_DEBUG_ENTRY("XMLCrystTag::AddAttribute():"<<this->GetName(),4)
+   mvAttribute.push_back(make_pair(attName,attValue));
+   VFN_DEBUG_EXIT("XMLCrystTag::AddAttribute():"<<this->GetName(),4)
 }
 void XMLCrystTag::GetAttribute(const int attNum,string &attName,string &attValue)
 {
-   attName=mAttributeName  [attNum];
-   attValue=mAttributeValue[attNum];
+   attName=mvAttribute[attNum].first;
+   attValue=mvAttribute[attNum].second;
 }
 
 const string& XMLCrystTag::GetAttributeName(const int attNum)const
-{return mAttributeName[attNum];}
+{return mvAttribute[attNum].first;}
 
 const string& XMLCrystTag::GetAttributeValue(const int attNum)const
-{return mAttributeValue[attNum];}
+{return mvAttribute[attNum].second;}
 
 void XMLCrystTag::SetIsEndTag(const bool isEndTag){mIsEndTag=isEndTag;}
 bool XMLCrystTag::IsEndTag()const{return mIsEndTag;}
@@ -108,9 +108,9 @@ ostream& operator<< (ostream& os, const XMLCrystTag&tag)
       return os;
    }
    os <<"<"<<tag.mName;
-   for(unsigned int i=0;i<tag.mNbAttribute;i++)
+   for(unsigned int i=0;i<tag.GetNbAttribute();i++)
    {
-      os<<" "<<tag.mAttributeName[i]<<"=\""<<tag.mAttributeValue[i]<<"\"";
+      os<<" "<<tag.mvAttribute[i].first<<"=\""<<tag.mvAttribute[i].second<<"\"";
    }
    if(true==tag.mIsEmptyTag) os <<"/>";
    else os <<">";
