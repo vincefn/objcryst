@@ -296,14 +296,6 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(100000000)
       mpSizer->Add(opt,0,wxALIGN_LEFT);
       mList.Add(opt);
       
-      opt=new WXFieldOption(this,-1,&(mpMonteCarloObj->mSaveDetailledHistory));
-      mpSizer->Add(opt,0,wxALIGN_LEFT);
-      mList.Add(opt);
-
-      opt=new WXFieldOption(this,-1,&(mpMonteCarloObj->mXMLAutoSave));
-      mpSizer->Add(opt,0,wxALIGN_LEFT);
-      mList.Add(opt);
-      
       wxBoxSizer *sizerAmp=new wxBoxSizer(wxHORIZONTAL);
       WXFieldPar<REAL> *ampMax=
          new WXFieldPar<REAL>(this,"Amplitude Max:",-1,&(mpMonteCarloObj->mMutationAmplitudeMax));
@@ -314,6 +306,16 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(100000000)
       mpSizer->Add(sizerAmp);
       mList.Add(ampMax);
       mList.Add(ampMin);
+      
+      #if 0
+      // Only to evaluate how the algorithm works
+      opt=new WXFieldOption(this,-1,&(mpMonteCarloObj->mSaveDetailledHistory));
+      mpSizer->Add(opt,0,wxALIGN_LEFT);
+      mList.Add(opt);
+      #endif
+      opt=new WXFieldOption(this,-1,&(mpMonteCarloObj->mXMLAutoSave));
+      mpSizer->Add(opt,0,wxALIGN_LEFT);
+      mList.Add(opt);
    // Number of trials to go
       mpWXFieldNbTrial=new WXFieldPar<long>(this,"Number of trials to go:",-1,&mNbTrial,70);
       mpSizer->Add(mpWXFieldNbTrial);
