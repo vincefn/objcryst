@@ -1,4 +1,4 @@
-!include ..ObjCryst\rules.mak
+!include ..\ObjCryst\rules.mak
 
 TARGET= Fox
 
@@ -6,7 +6,8 @@ OBJECTS = $(TARGET).obj
 
 #build a wx application
 $(TARGET).exe: $(OBJECTS) $(TARGET).res libsglite libatominfo libnewmat libCrystVector libQuirks libRefinableObj libcryst libwxCryst
-	ilink32 $(LINKFLAGS) @&&!
+	cd ${DIR_CRYST}\..\src
+	ilink32 $(LINKFLAGS) -LC:${DIR_CRYST}\..\Fox\src @&&!
 c0w32.obj $(OBJECTS)
 $(TARGET)
 
