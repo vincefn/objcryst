@@ -2725,6 +2725,7 @@ void PowderPattern::CalcPowderPattern() const
    {
       mPowderPatternCalc.resize(mNbPoint);
       mPowderPatternCalc=0;
+   	VFN_DEBUG_EXIT("PowderPattern::CalcPowderPattern():no components!",3);
       return;
    }
    TAU_PROFILE_TIMER(timer1,"PowderPattern::CalcPowderPattern2(dummy)","", TAU_FIELD);
@@ -2747,7 +2748,11 @@ void PowderPattern::CalcPowderPattern() const
          	break;
       	}
       
-   if(false==b) return;
+   if(false==b)
+	{
+   	VFN_DEBUG_EXIT("PowderPattern::CalcPowderPattern():no need to recalc",3);
+		return;
+	}
    TAU_PROFILE_TIMER(timer2,"PowderPattern::CalcPowderPattern2(Add spectrums-scaled)"\
                      ,"", TAU_FIELD);
    TAU_PROFILE_TIMER(timer3,"PowderPattern::CalcPowderPattern2(Add spectrums-backgd)"\
@@ -2845,8 +2850,11 @@ void PowderPattern::PrepareIntegratedRfactor()const
 			break;
 		}
 	}
-   VFN_DEBUG_MESSAGE("PowderPattern::PrepareIntegratedRfactor():1",3);
-	if(false==needPrep) return;
+	if(false==needPrep)
+	{
+   	VFN_DEBUG_EXIT("PowderPattern::PrepareIntegratedRfactor():nothing to do",3);
+		return;
+	}
    TAU_PROFILE("PowderPattern::PrepareIntegratedRfactor()","void ()",TAU_DEFAULT);
 	
 	// First get all integration intervals and concatenate the arrays
