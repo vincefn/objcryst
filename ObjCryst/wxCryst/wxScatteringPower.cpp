@@ -62,16 +62,16 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpScatteringPowerAtom(obj)
       mpFieldSymbol=new WXFieldName
          (this,"Symbol:",this,ID_WXSCATTPOWATOM_SYMBOL);
 
-      mpFieldBiso  =new WXFieldRefPar(this,"Biso:",
-            &(mpScatteringPowerAtom->GetPar(&(mpScatteringPowerAtom->mBiso))) );
+      WXCrystObjBasic* pFieldBiso
+         =mpScatteringPowerAtom->GetPar(&(mpScatteringPowerAtom->mBiso)).WXCreate(this);
             
       
       sizer->Add(mpFieldSymbol  ,0,wxALIGN_CENTER);
-      sizer->Add(mpFieldBiso    ,0,wxALIGN_CENTER);
+      sizer->Add(pFieldBiso    ,0,wxALIGN_CENTER);
       
       mpSizer->Add(sizer,0,wxALIGN_LEFT);
       mList.Add(mpFieldSymbol);
-      mList.Add(mpFieldBiso);
+      mList.Add(pFieldBiso);
       this->CrystUpdate();
    this->Layout();
 }

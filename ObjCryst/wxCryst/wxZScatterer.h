@@ -40,9 +40,6 @@ class WXZAtom:public WXCrystObjBasic
       WXCrystObjBasicList mList;
       WXFieldString *mpFieldName;
       WXFieldChoice* mpFieldScattPower;
-      WXFieldRefPar* mpFieldBond;
-      WXFieldRefPar* mpFieldAngle;
-      WXFieldRefPar* mpFieldDihed;
    DECLARE_EVENT_TABLE()
 };
 

@@ -36,7 +36,6 @@ class WXScatteringPowerAtom: public WXRefinableObj
    protected:
       ScatteringPowerAtom* mpScatteringPowerAtom;
       WXFieldName *mpFieldSymbol;
-      WXFieldRefPar* mpFieldBiso;
    DECLARE_EVENT_TABLE()
 };
 

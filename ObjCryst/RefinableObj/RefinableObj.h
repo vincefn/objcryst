@@ -406,8 +406,10 @@ class RefinablePar:public Restraint
          const RefParType* GetType()const;
          ///Parameter type
          void SetType(const RefParType*);
-         ///Get the parameter's name
+         /// Get the parameter's name
          string GetName()const;
+         /// Set the name of the parameter. It should be unique in the RefinableObj.
+         void SetName(const string&);
       
          void Print() const;
          
@@ -576,6 +578,16 @@ class RefinablePar:public Restraint
          bool mHasAssignedClock;
          RefinableObjClock* mpClock;
          
+   #ifdef __WX__CRYST__
+   public:
+      /// Create a WXFieldRefPar representation of the parameter.
+      WXCrystObjBasic* WXCreate(wxWindow *parent);
+      WXCrystObjBasic* WXGet();
+      void             WXDelete();
+      void             WXNotifyDelete();
+   private:
+      WXFieldRefPar * mpWXFieldRefPar;
+   #endif
    friend class RefinableObj;
 };
 /** Base class for options

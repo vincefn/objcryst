@@ -151,6 +151,7 @@ Error opening file for input:"+filename);
    mBackgroundInterpPointIntensity=bckgd;
    //Init refinable parameters
    {
+      this->ResetParList();
       REAL *p=mBackgroundInterpPointIntensity.data();
       char buf [10];
       string str="Background_Point_";
@@ -173,7 +174,7 @@ Error opening file for input:"+filename);
       sprintf(buf,"Imported %d background points",(int)nbPoints);
       (*fpObjCrystInformUser)((string)buf);
    }
-   
+   this->UpdateDisplay();
    VFN_DEBUG_MESSAGE("PowderPatternBackground::ImportUserBackground():finished",5)
 }
 

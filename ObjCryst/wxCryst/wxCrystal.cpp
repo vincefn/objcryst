@@ -136,39 +136,34 @@ mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
                                 "3D Display");
    // Lattice
       wxBoxSizer* lattice=new wxBoxSizer(wxHORIZONTAL);
-      mpFieldLatticeA    =new WXFieldRefPar(this,"a:",
-                                     &(mpCrystal->GetPar(mpCrystal->mCellDim.data()+0)) );
-          
-      mpFieldLatticeB    =new WXFieldRefPar(this,"b:",
-                                     &(mpCrystal->GetPar(mpCrystal->mCellDim.data()+1)) );
-          
-      mpFieldLatticeC    =new WXFieldRefPar(this,"c:",
-                                     &(mpCrystal->GetPar(mpCrystal->mCellDim.data()+2)) );
-          
-      mpFieldLatticeAlpha=new WXFieldRefPar(this,"alpha:",
-                                     &(mpCrystal->GetPar(mpCrystal->mCellDim.data()+3)) );
-          
-      mpFieldLatticeBeta =new WXFieldRefPar(this,"beta:",
-                                     &(mpCrystal->GetPar(mpCrystal->mCellDim.data()+4)) );
-          
-      mpFieldLatticeGamma=new WXFieldRefPar(this,"gamma:",
-                                     &(mpCrystal->GetPar(mpCrystal->mCellDim.data()+5)) );
+      WXCrystObjBasic* pFieldLatticeA 
+         =mpCrystal->GetPar(mpCrystal->mCellDim.data()+0).WXCreate(this);
+      WXCrystObjBasic* pFieldLatticeB 
+         =mpCrystal->GetPar(mpCrystal->mCellDim.data()+1).WXCreate(this);
+      WXCrystObjBasic* pFieldLatticeC 
+         =mpCrystal->GetPar(mpCrystal->mCellDim.data()+2).WXCreate(this);
+      WXCrystObjBasic* pFieldLatticeAlpha 
+         =mpCrystal->GetPar(mpCrystal->mCellDim.data()+3).WXCreate(this);
+      WXCrystObjBasic* pFieldLatticeBeta 
+         =mpCrystal->GetPar(mpCrystal->mCellDim.data()+4).WXCreate(this);
+      WXCrystObjBasic* pFieldLatticeGamma
+         =mpCrystal->GetPar(mpCrystal->mCellDim.data()+5).WXCreate(this);
 
-      lattice->Add(mpFieldLatticeA    ,0,wxALIGN_CENTER);
-      lattice->Add(mpFieldLatticeB    ,0,wxALIGN_CENTER);
-      lattice->Add(mpFieldLatticeC    ,0,wxALIGN_CENTER);
-      lattice->Add(mpFieldLatticeAlpha,0,wxALIGN_CENTER);
-      lattice->Add(mpFieldLatticeBeta ,0,wxALIGN_CENTER);
-      lattice->Add(mpFieldLatticeGamma,0,wxALIGN_CENTER);
+      lattice->Add(pFieldLatticeA    ,0,wxALIGN_CENTER);
+      lattice->Add(pFieldLatticeB    ,0,wxALIGN_CENTER);
+      lattice->Add(pFieldLatticeC    ,0,wxALIGN_CENTER);
+      lattice->Add(pFieldLatticeAlpha,0,wxALIGN_CENTER);
+      lattice->Add(pFieldLatticeBeta ,0,wxALIGN_CENTER);
+      lattice->Add(pFieldLatticeGamma,0,wxALIGN_CENTER);
       lattice->Layout();
       
       mpSizer->Add(lattice,0,wxALIGN_LEFT);
-      mList.Add(mpFieldLatticeA);
-      mList.Add(mpFieldLatticeB);
-      mList.Add(mpFieldLatticeC);
-      mList.Add(mpFieldLatticeAlpha);
-      mList.Add(mpFieldLatticeBeta);
-      mList.Add(mpFieldLatticeGamma);
+      mList.Add(pFieldLatticeA);
+      mList.Add(pFieldLatticeB);
+      mList.Add(pFieldLatticeC);
+      mList.Add(pFieldLatticeAlpha);
+      mList.Add(pFieldLatticeBeta);
+      mList.Add(pFieldLatticeGamma);
       
    // SpaceGroup
       mpFieldSpacegroup=new WXFieldName(this,"SpaceGroup:",this,ID_CRYSTAL_SPACEGROUP);

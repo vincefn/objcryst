@@ -154,11 +154,6 @@ class WXPowderPatternDiffraction: public WXRefinableObj
    private:
       PowderPatternDiffraction *mpPowderPatternDiffraction;
       WXFieldChoice* mpFieldCrystal;
-      WXFieldRefPar* mpFieldCagliotiU;
-      WXFieldRefPar* mpFieldCagliotiV;
-      WXFieldRefPar* mpFieldCagliotiW;
-      WXFieldRefPar* mpFieldEta0;
-      WXFieldRefPar* mpFieldEta1;
    DECLARE_EVENT_TABLE()
 };
 

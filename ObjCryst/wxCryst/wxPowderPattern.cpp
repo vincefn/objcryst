@@ -244,15 +244,12 @@ mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUM_MENU_IMPORT_CPI,
       mList.Add(mpPowderPattern->mRadiation.WXGet());
    // Correction to 2Theta
       wxBoxSizer* thetaCorrSizer=new wxBoxSizer(wxHORIZONTAL);
-      WXFieldRefPar* fieldThetaZero    =new WXFieldRefPar(this,"2theta zero:",
-                                   &(mpPowderPattern
-                                     ->GetPar(&(mpPowderPattern->m2ThetaZero))),90 );
-      WXFieldRefPar* fieldThetaDispl    =new WXFieldRefPar(this,"2theta displacement:",
-                                   &(mpPowderPattern
-                                     ->GetPar(&(mpPowderPattern->m2ThetaDisplacement))),90 );
-      WXFieldRefPar* fieldThetaTransp    =new WXFieldRefPar(this,"2theta transparency:",
-                                   &(mpPowderPattern
-                                     ->GetPar(&(mpPowderPattern->m2ThetaTransparency))),90 );
+      WXCrystObjBasic* fieldThetaZero    
+         =mpPowderPattern->GetPar(&(mpPowderPattern->m2ThetaZero)).WXCreate(this);
+      WXCrystObjBasic* fieldThetaDispl
+         =mpPowderPattern->GetPar(&(mpPowderPattern->m2ThetaDisplacement)).WXCreate(this);
+      WXCrystObjBasic* fieldThetaTransp
+         =mpPowderPattern->GetPar(&(mpPowderPattern->m2ThetaTransparency)).WXCreate(this);
       thetaCorrSizer->Add(fieldThetaZero,0);
       thetaCorrSizer->Add(fieldThetaDispl,0);
       thetaCorrSizer->Add(fieldThetaTransp,0);
@@ -926,36 +923,36 @@ WXRefinableObj(parent,p),mpPowderPatternDiffraction(p)
       mList.Add(mpFieldCrystal);
    //Profile Parameters
       wxBoxSizer* profileSizer=new wxBoxSizer(wxHORIZONTAL);
-      mpFieldCagliotiU    =new WXFieldRefPar(this,"U:",
-                                   &(mpPowderPatternDiffraction
-                                     ->GetPar(&(mpPowderPatternDiffraction->mCagliotiU))),90 );
-      mpFieldCagliotiV    =new WXFieldRefPar(this,"V:",
-                                   &(mpPowderPatternDiffraction
-                                     ->GetPar(&(mpPowderPatternDiffraction->mCagliotiV))),90 );
-      mpFieldCagliotiW    =new WXFieldRefPar(this,"W:",
-                                   &(mpPowderPatternDiffraction
-                                     ->GetPar(&(mpPowderPatternDiffraction->mCagliotiW))),90 );
-      mpFieldEta0         =new WXFieldRefPar(this,"Eta0:",
-                                 &(mpPowderPatternDiffraction
-                                  ->GetPar(&(mpPowderPatternDiffraction->mPseudoVoigtEta0))));
-      mpFieldEta1         =new WXFieldRefPar(this,"Eta1:",
-                                 &(mpPowderPatternDiffraction
-                                  ->GetPar(&(mpPowderPatternDiffraction->mPseudoVoigtEta1))));
-      profileSizer->Add(mpFieldCagliotiU,0);
-      profileSizer->Add(mpFieldCagliotiV,0);
-      profileSizer->Add(mpFieldCagliotiW,0);
-      profileSizer->Add(mpFieldEta0,0);
-      profileSizer->Add(mpFieldEta1,0);
-      mList.Add(mpFieldCagliotiU);
-      mList.Add(mpFieldCagliotiV);
-      mList.Add(mpFieldCagliotiW);
-      mList.Add(mpFieldEta0);
-      mList.Add(mpFieldEta1);
+      WXCrystObjBasic* pFieldCagliotiU
+         =mpPowderPatternDiffraction->GetPar(&(mpPowderPatternDiffraction->mCagliotiU))
+            .WXCreate(this);
+      WXCrystObjBasic* pFieldCagliotiV
+         =mpPowderPatternDiffraction->GetPar(&(mpPowderPatternDiffraction->mCagliotiV))
+            .WXCreate(this);
+      WXCrystObjBasic* pFieldCagliotiW
+         =mpPowderPatternDiffraction->GetPar(&(mpPowderPatternDiffraction->mCagliotiW))
+            .WXCreate(this);
+      WXCrystObjBasic* pFieldEta0
+         =mpPowderPatternDiffraction->GetPar(&(mpPowderPatternDiffraction->mPseudoVoigtEta0))
+            .WXCreate(this);
+      WXCrystObjBasic* pFieldEta1=
+         mpPowderPatternDiffraction->GetPar(&(mpPowderPatternDiffraction->mPseudoVoigtEta1))
+            .WXCreate(this);
+      profileSizer->Add(pFieldCagliotiU,0);
+      profileSizer->Add(pFieldCagliotiV,0);
+      profileSizer->Add(pFieldCagliotiW,0);
+      profileSizer->Add(pFieldEta0,0);
+      profileSizer->Add(pFieldEta1,0);
+      mList.Add(pFieldCagliotiU);
+      mList.Add(pFieldCagliotiV);
+      mList.Add(pFieldCagliotiW);
+      mList.Add(pFieldEta0);
+      mList.Add(pFieldEta1);
       mpSizer->Add(profileSizer);
    //Global Biso factor
-      WXFieldRefPar* fieldGlobalBiso    =new WXFieldRefPar(this,"Overall Temperature factor:",
-                                   &(mpPowderPatternDiffraction
-                                     ->GetPar(&(mpPowderPatternDiffraction->mGlobalBiso))),90 );
+      WXCrystObjBasic* fieldGlobalBiso
+         =mpPowderPatternDiffraction->GetPar(&(mpPowderPatternDiffraction->mGlobalBiso))
+            .WXCreate(this);
       mList.Add(fieldGlobalBiso);
       mpSizer->Add(fieldGlobalBiso);
       

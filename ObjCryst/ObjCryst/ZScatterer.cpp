@@ -304,8 +304,10 @@ You are using the Global ScatteringPower approximation !!");
    if(mZAtomRegistry.GetNb()<1) usedBond=false;
    if(mZAtomRegistry.GetNb()<2) usedAngle=false;
    if(mZAtomRegistry.GetNb()<3) usedDihed=false;
+   char buf [10];
    {
-      RefinablePar tmp(name+(string)"_bondLength",&(zatom->mBondLength),
+      sprintf(buf,"%d-%d",(int)mNbAtom,(int)atomBond);
+      RefinablePar tmp("Length"+(string)buf,&(zatom->mBondLength),
                         1.,5.,
 //                        bondLength*.9,bondLength*1.1,
                         gpRefParTypeScattConformBondLength,
@@ -314,7 +316,8 @@ You are using the Global ScatteringPower approximation !!");
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp(name+(string)"_BondAngle",&(zatom->mAngle),
+      sprintf(buf,"%d-%d-%d",(int)mNbAtom,(int)atomBond,(int)atomAngle);
+      RefinablePar tmp("Angle"+(string)buf,&(zatom->mAngle),
                         0,2*M_PI,
 //                        zatom->mAngle-.2,zatom->mAngle+.2,
                         gpRefParTypeScattConformBondAngle,
@@ -323,7 +326,8 @@ You are using the Global ScatteringPower approximation !!");
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp(name+(string)"_DihedralAngle",&(zatom->mDihed),
+      sprintf(buf,"%d-%d-%d-%d",(int)mNbAtom,(int)atomBond,(int)atomAngle,(int)atomDihedral);
+      RefinablePar tmp("Dihed"+(string)buf,&(zatom->mDihed),
                         0,2*M_PI,
 //                        zatom->mDihed-.2,zatom->mDihed+.2,
                         gpRefParTypeScattConformDihedAngle,
@@ -332,7 +336,8 @@ You are using the Global ScatteringPower approximation !!");
       this->AddPar(tmp);
    }
    {//fixed by default
-      RefinablePar tmp(name+(string)"_popu", 
+      sprintf(buf,"%d",(int)mNbAtom);
+      RefinablePar tmp("Occupancy"+(string)buf, 
                         &(zatom->mOccupancy),0,1,
                         gpRefParTypeScattOccup,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1.,1.);
@@ -1752,28 +1757,28 @@ void ZScatterer::InitRefParList()
    //:TODO:
    this->ResetParList();
    {
-      RefinablePar tmp(this->GetName()+(string)"_x",&mXYZ(0),0.,1.,
+      RefinablePar tmp("x",&mXYZ(0),0.,1.,
                         gpRefParTypeScattTranslX,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,1.,1.);
       tmp.AssignClock(mClockScatterer);
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp(this->GetName()+(string)"_y",&mXYZ(1),0,1,
+      RefinablePar tmp("y",&mXYZ(1),0,1,
                         gpRefParTypeScattTranslY,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,1.,1.);
       tmp.AssignClock(mClockScatterer);
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp(this->GetName()+(string)"_z",&mXYZ(2),0,1,
+      RefinablePar tmp("z",&mXYZ(2),0,1,
                         gpRefParTypeScattTranslZ,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,1.,1.);
       tmp.AssignClock(mClockScatterer);
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp(this->GetName()+(string)"_popu",&mOccupancy,0,1,
+      RefinablePar tmp("Occupancy",&mOccupancy,0,1,
                         gpRefParTypeScattOccup,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1.,1.);
       tmp.AssignClock(mClockScatterer);
@@ -1782,32 +1787,32 @@ void ZScatterer::InitRefParList()
    if(false==mUseGlobalScattPow)
    {
       {
-         RefinablePar tmp(this->GetName()+(string)"_phi",&mPhi,0,2*M_PI,
+         RefinablePar tmp("Phi",&mPhi,0,2*M_PI,
                            gpRefParTypeScattOrient,
                            REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,RAD2DEG,2*M_PI);
          tmp.AssignClock(mClockScatterer);
          this->AddPar(tmp);
       }
       {
-         RefinablePar tmp(this->GetName()+(string)"_chi",&mChi,0,2*M_PI,
+         RefinablePar tmp("Chi",&mChi,0,2*M_PI,
                            gpRefParTypeScattOrient,
                            REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,RAD2DEG,2*M_PI);
          tmp.AssignClock(mClockScatterer);
          this->AddPar(tmp);
       }
       {
-         RefinablePar tmp(this->GetName()+(string)"_psi",&mPsi,0,2*M_PI,
+         RefinablePar tmp("Psi",&mPsi,0,2*M_PI,
                            gpRefParTypeScattOrient,
                            REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,RAD2DEG,2*M_PI);
          tmp.AssignClock(mClockScatterer);
          this->AddPar(tmp);
       }
-      char buf [5];
+      char buf [10];
       for(long i=0;i<mNbAtom;i++)
       {
-         sprintf(buf,"_%d",(int)i);
          {
-            RefinablePar tmp(this->GetName()+(string)buf+(string)"_bondLength",
+            sprintf(buf,"%d-%d",(int)i,(int)(mZAtomRegistry.GetObj(i).GetZBondAtom()));
+            RefinablePar tmp((string)"Length"+(string)buf,
                               &(mZAtomRegistry.GetObj(i).mBondLength),
                               mZAtomRegistry.GetObj(i).mBondLength*.9,
                               mZAtomRegistry.GetObj(i).mBondLength*1.1,
@@ -1817,7 +1822,9 @@ void ZScatterer::InitRefParList()
             this->AddPar(tmp);
          }
          {
-            RefinablePar tmp(this->GetName()+(string)buf+(string)"_BondAngle",
+            sprintf(buf,"%d-%d-%d",(int)i,(int)(mZAtomRegistry.GetObj(i).GetZBondAtom()),
+                                          (int)(mZAtomRegistry.GetObj(i).GetZAngleAtom()));
+            RefinablePar tmp("Angle"+(string)buf,
                               &(mZAtomRegistry.GetObj(i).mAngle),0,2*M_PI,
                               gpRefParTypeScattConformBondAngle,
                               REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,RAD2DEG,2*M_PI);
@@ -1825,7 +1832,10 @@ void ZScatterer::InitRefParList()
             this->AddPar(tmp);
          }
          {
-            RefinablePar tmp(this->GetName()+(string)buf+(string)"_DihedralAngle",
+            sprintf(buf,"%d-%d-%d-%d",(int)i,(int)(mZAtomRegistry.GetObj(i).GetZBondAtom()),
+                                      (int)(mZAtomRegistry.GetObj(i).GetZAngleAtom()),
+                                      (int)(mZAtomRegistry.GetObj(i).GetZDihedralAngleAtom()));
+            RefinablePar tmp("Dihed"+(string)buf,
                               &(mZAtomRegistry.GetObj(i).mDihed),0,2*M_PI,
                               gpRefParTypeScattConformDihedAngle,
                               REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,RAD2DEG,2*M_PI);
@@ -1834,7 +1844,8 @@ void ZScatterer::InitRefParList()
          }
          if(0!=mZAtomRegistry.GetObj(i).GetScatteringPower())
          {//fixed by default
-            RefinablePar tmp(this->GetName()+(string)buf+(string)"_popu", 
+            sprintf(buf,"%d",(int)i);
+            RefinablePar tmp("Occupancy"+(string)buf, 
                               &(mZAtomRegistry.GetObj(i).mOccupancy),0,1,
                               gpRefParTypeScattOccup,
                               REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1.,1.);

@@ -741,7 +741,7 @@ void ScatteringPowerAtom::InitRefParList()
 {
    VFN_DEBUG_MESSAGE("ScatteringPowerAtom::InitRefParList():"<<mName,5)
    {
-      RefinablePar tmp(this->GetName()+"_Biso",&mBiso,0.1,5.,
+      RefinablePar tmp("Biso",&mBiso,0.1,5.,
                         gpRefParTypeScattPowTemperatureIso,REFPAR_DERIV_STEP_ABSOLUTE,
                         true,true,true,false);
       tmp.SetDerivStep(1e-3);

@@ -1408,7 +1408,7 @@ void Crystal::InitRefParList()
    if(this->GetNbPar()==0)
    {//:KLUDGE:
       {
-         RefinablePar tmp(this->GetName()+"_A",pLatPar,1.,100.,
+         RefinablePar tmp("a",pLatPar,1.,100.,
                            gpRefParTypeUnitCellLength,REFPAR_DERIV_STEP_ABSOLUTE,
                            true,true,a,false,1.0);
          tmp.SetDerivStep(1e-4);
@@ -1416,7 +1416,7 @@ void Crystal::InitRefParList()
          this->AddPar(tmp);
       }
       {
-         RefinablePar tmp(this->GetName()+"_B",pLatPar+1,1.,100.,
+         RefinablePar tmp("b",pLatPar+1,1.,100.,
                            gpRefParTypeUnitCellLength,REFPAR_DERIV_STEP_ABSOLUTE,
                            true,true,b,false,1.0);
          tmp.SetDerivStep(1e-4);
@@ -1424,7 +1424,7 @@ void Crystal::InitRefParList()
          this->AddPar(tmp);
       }
       {
-         RefinablePar tmp(this->GetName()+"_C",pLatPar+2,1.,100.,
+         RefinablePar tmp("c",pLatPar+2,1.,100.,
                            gpRefParTypeUnitCellLength,REFPAR_DERIV_STEP_ABSOLUTE,
                            true,true,c,false,1.0);
          tmp.SetDerivStep(1e-4);
@@ -1432,7 +1432,7 @@ void Crystal::InitRefParList()
          this->AddPar(tmp);
       }
       {
-         RefinablePar tmp(this->GetName()+"_ALPHA",pLatPar+3,.5,3.,
+         RefinablePar tmp("alpha",pLatPar+3,.5,3.,
                            gpRefParTypeUnitCellAngle,REFPAR_DERIV_STEP_ABSOLUTE,
                            true,true,alpha,false,RAD2DEG);
          tmp.SetDerivStep(1e-4);
@@ -1440,7 +1440,7 @@ void Crystal::InitRefParList()
          this->AddPar(tmp);
       }
       {
-         RefinablePar tmp(this->GetName()+"_BETA",pLatPar+4,.5,3.,
+         RefinablePar tmp("beta",pLatPar+4,.5,3.,
                            gpRefParTypeUnitCellAngle,REFPAR_DERIV_STEP_ABSOLUTE,
                            true,true,beta,false,RAD2DEG);
          tmp.SetDerivStep(1e-4);
@@ -1448,7 +1448,7 @@ void Crystal::InitRefParList()
          this->AddPar(tmp);
       }
       {
-         RefinablePar tmp(this->GetName()+"_GAMMA",pLatPar+5,.5,3.,
+         RefinablePar tmp("gamma",pLatPar+5,.5,3.,
                            gpRefParTypeUnitCellAngle,REFPAR_DERIV_STEP_ABSOLUTE,
                            true,true,gamma,false,RAD2DEG);
          tmp.SetDerivStep(1e-4);

@@ -38,10 +38,6 @@ class WXScatterer: public WXRefinableObj
       WXScatterer(wxWindow *parent, Scatterer*);
    protected:
       Scatterer* mpScatterer;
-      WXFieldRefPar* mpFieldX;
-      WXFieldRefPar* mpFieldY;
-      WXFieldRefPar* mpFieldZ;
-      WXFieldRefPar* mpFieldPopu;
 };
 
 } //namespace

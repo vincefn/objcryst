@@ -801,8 +801,27 @@ void ZScatterer::XMLInput(istream &is,const XMLCrystTag &tagg)
             if("ScattPow"==tag.GetAttributeName(i))
                scattPow=&(this->GetCrystal().GetScatteringPowerRegistry()
                                                 .GetObj(tag.GetAttributeValue(i)));
+         const long nb=mZAtomRegistry.GetNb();
          this->AddAtom("",scattPow,0,0,0,0,0,1);
-         mZAtomRegistry.GetObj(mZAtomRegistry.GetNb()-1).XMLInput(is,tag);
+         mZAtomRegistry.GetObj(nb).XMLInput(is,tag);
+         // Update the name of refinable parameters
+         {
+            char buf [10];
+            sprintf(buf,"%d-%d",(int)nb,(int)(mZAtomRegistry.GetObj(nb).GetZBondAtom()));
+            this->GetPar(&(mZAtomRegistry.GetObj(nb).mBondLength))
+               .SetName("Length"+(string)buf);
+               
+            sprintf(buf,"%d-%d-%d",(int)nb,(int)(mZAtomRegistry.GetObj(nb).GetZBondAtom()),
+                                   (int)(mZAtomRegistry.GetObj(nb).GetZAngleAtom()));
+            this->GetPar(&(mZAtomRegistry.GetObj(nb).mAngle))
+               .SetName("Angle"+(string)buf);
+               
+            sprintf(buf,"%d-%d-%d-%d",(int)nb,(int)(mZAtomRegistry.GetObj(nb).GetZBondAtom()),
+                                      (int)(mZAtomRegistry.GetObj(nb).GetZAngleAtom()),
+                                      (int)(mZAtomRegistry.GetObj(nb).GetZDihedralAngleAtom()));
+            this->GetPar(&(mZAtomRegistry.GetObj(nb).mDihed))
+               .SetName("Dihed"+(string)buf);
+         }
       }
       if("PivotAtom"==tag.GetName())
       {

@@ -30,6 +30,7 @@ namespace ObjCryst
 {
 template<class T> class WXRegistry;
 class WXFieldOption;
+class WXFieldRefPar;
 } //namespace
 
 #include "wxCryst/wxCryst.h"

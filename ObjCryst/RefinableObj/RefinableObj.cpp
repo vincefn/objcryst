@@ -216,6 +216,9 @@ Restraint(0,0,0,false,false,1.,1.,false),
 mName(""),mpValue(0),
 mHasLimits(false),mIsFixed(true),mIsUsed(true),mIsPeriodic(false),
 mPeriod(0.),mHumanScale(1.),mHasAssignedClock(false),mpClock(0)
+#ifdef __WX__CRYST__
+,mpWXFieldRefPar(0)
+#endif
 {}
                      
 RefinablePar::RefinablePar(  const string &name,
@@ -239,10 +242,17 @@ mSigma(0.),mHumanScale(humanScale),
 mUseEquation(false),mEquationNbRefPar(0),mEquationCoeff(0),
 #endif
 mHasAssignedClock(false),mpClock(0)
+#ifdef __WX__CRYST__
+,mpWXFieldRefPar(0)
+#endif
 {}
 
 RefinablePar::~RefinablePar()
-{}
+{
+   #ifdef __WX__CRYST__
+   this->WXDelete();
+   #endif
+}
 
 void RefinablePar::Init(const string &name,
                         REAL *refPar,
@@ -483,6 +493,7 @@ void RefinablePar::Print() const
 }
 
 string RefinablePar::GetName()const {return mName;}
+void RefinablePar::SetName(const string &name) {mName=name;}
 
 bool RefinablePar::IsFixed()const {return mIsFixed;}
 void RefinablePar::SetIsFixed(const bool b)
@@ -637,6 +648,33 @@ void RefinablePar::SetLimitsProportional(const REAL min, const REAL max)
    mMax=this->GetValue()*max;
    this->SetIsLimited(true);
 }
+#ifdef __WX__CRYST__
+WXCrystObjBasic* RefinablePar::WXCreate(wxWindow *parent)
+{
+   VFN_DEBUG_MESSAGE("RefinablePar::WXCreate()",10)
+   mpWXFieldRefPar=new WXFieldRefPar (parent,this->GetName(),this);
+   return mpWXFieldRefPar;
+}
+WXCrystObjBasic* RefinablePar::WXGet()
+{
+   return mpWXFieldRefPar;
+}
+void RefinablePar::WXDelete()
+{
+   if(0!=mpWXFieldRefPar)
+   {
+      VFN_DEBUG_MESSAGE("RefinablePar::WXDelete()",5)
+      delete mpWXFieldRefPar;
+   }
+   mpWXFieldRefPar=0;
+}
+void RefinablePar::WXNotifyDelete()
+{
+   VFN_DEBUG_MESSAGE("RefinablePar::WXNotifyDelete():"<<mName,5)
+   mpWXFieldRefPar=0;
+}
+#endif
+
 //######################################################################
 //    RefObjOpt
 //######################################################################

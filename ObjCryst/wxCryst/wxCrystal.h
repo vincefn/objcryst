@@ -66,13 +66,6 @@ class WXCrystal: public WXRefinableObj
       void UpdateUI();
    private:
       Crystal* mpCrystal;
-      /// Lattice
-         WXFieldRefPar* mpFieldLatticeA;
-         WXFieldRefPar* mpFieldLatticeB;
-         WXFieldRefPar* mpFieldLatticeC;
-         WXFieldRefPar* mpFieldLatticeAlpha;
-         WXFieldRefPar* mpFieldLatticeBeta;
-         WXFieldRefPar* mpFieldLatticeGamma;
       /// SpaceGroup
          WXFieldName* mpFieldSpacegroup;
       /// Scatterers
