@@ -31,18 +31,18 @@ FC     := f77
 FFLAGS  = 
 # linker
 LINKER    := c++
-LDFLAGS   = -L/usr/lib -L/usr/local/lib -L$(DIR_ATOMINFO) -L$(DIR_CRYSTVECTOR) -L$(DIR_LIBCRYST) -L$(DIR_NEWMAT) -L$(DIR_BLITZ)/lib -L$(DIR_REFOBJ) -L$(DIR_SGLITE) -L$(DIR_VFNQUIRKS) -L$(DIR_WXWCRYST) -L$(DIR_TAU)/i386_linux/lib
+LDFLAGS   = -L/usr/lib -L/usr/local/lib -L$(DIR_ATOMINFO) -L$(DIR_CRYSTVECTOR) -L$(DIR_LIBCRYST) -L$(DIR_NEWMAT) -L$(DIR_REFOBJ) -L$(DIR_SGLITE) -L$(DIR_VFNQUIRKS) -L$(DIR_WXWCRYST) 
 
 #to automatically generate dependencies
 MAKEDEPEND = gcc -MM ${CPPFLAGS} ${CXXFLAGS} ${C_BLITZFLAG} $< > $*.dep
 
 # header files
-SEARCHDIRS = -I- -I${DIR_CRYST}/.. -I./ -I$(DIR_BLITZ)  -I$(DIR_TAU)/include -I$(DIR_NEWMAT) -I${DIR_CRYST}
+SEARCHDIRS = -I- -I${DIR_CRYST}/.. -I./  -I$(DIR_NEWMAT) -I${DIR_CRYST}
 
 #wxWindows flags
 ifeq ($(wxcryst),1)
    WXCRYSTFLAGS = -D__WX__CRYST__ `/usr/local/bin/wx-config --cxxflags`
-   WX_LDFLAGS = -L/usr/X11R6/lib -lwxcryst `/usr/local/bin/wx-config --libs` $(GL_WX_LIB)
+   WX_LDFLAGS = -lwxcryst `/usr/local/bin/wx-config --libs` $(GL_WX_LIB)
 else
    WXCRYSTFLAGS :=
    WX_LDFLAGS :=
@@ -59,7 +59,7 @@ endif
 
 #Using OpenGL ?
 ifeq ($(opengl),1)
-GL_WX_LIB = `/usr/local/bin/wx-config --gl-libs` -framework GLUT -framework AppKit
+GL_WX_LIB = `/usr/local/bin/wx-config --gl-libs` -framework GLUT -framework AppKit -framework Foundation
 GL_FLAGS := -DOBJCRYST_GL -IGL -DHAVE_GLUT 
 else
 GL_WX_LIB :=
@@ -76,7 +76,7 @@ else
 # do not use -fomit-frame-pointer, or throw() catch() does not work !! GCC BUG ?
    DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS}
    CPPFLAGS = -O3 -w -ffast-math
-   LOADLIBES = -s -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lsglite -latominfo ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS}
+   LOADLIBES = -s -lm -lRefinableObj -lcryst -lCrystVector -lQuirks -lsglite -latominfo ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS}
 endif
 
 # Add to statically link: -nodefaultlibs -lgcc /usr/lib/libstdc++.a
