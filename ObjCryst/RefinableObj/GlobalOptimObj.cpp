@@ -21,17 +21,18 @@
 *
 */
 #include <iomanip>
+#include <fstream>
+#include <sstream>
 
 #include "RefinableObj/GlobalOptimObj.h"
 #include "Quirks/VFNStreamFormat.h"
 #include "Quirks/VFNDebug.h"
 #include "Quirks/Chronometer.h"
+#include "ObjCryst/IO.h"
 #ifdef __WX__CRYST__
    #include "wxCryst/wxRefinableObj.h"
    #undef GetClassName // Conflict from wxMSW headers ? (cygwin)
 #endif
-#include <fstream>
-#include <sstream>
 
 namespace ObjCryst
 {
@@ -277,6 +278,27 @@ void OptimizationObj::InitRandomSeedFromTime()const
    srand((unsigned)( (*tmp).tm_sec+60* (*tmp).tm_min));
    //for(int i=0;i<20;i++) cout << rand() <<endl;
 }
+void OptimizationObj::InitOptions()
+{
+   VFN_DEBUG_MESSAGE("OptimizationObj::InitOptions()",5)
+   static string xmlAutoSaveName;
+   static string xmlAutoSaveChoices[5];
+   
+   static bool needInitNames=true;
+   if(true==needInitNames)
+   {
+      xmlAutoSaveName="Save Best Config Regularly";
+      xmlAutoSaveChoices[0]="No";
+      xmlAutoSaveChoices[1]="Every day";
+      xmlAutoSaveChoices[2]="Every hour";
+      xmlAutoSaveChoices[3]="Every 10mn";
+      xmlAutoSaveChoices[4]="Every new best config (a lot ! Not Recommended !)";
+      
+      needInitNames=false;//Only once for the class
+   }
+   mXMLAutoSave.Init(5,&xmlAutoSaveName,xmlAutoSaveChoices);
+   VFN_DEBUG_MESSAGE("OptimizationObj::InitOptions():End",5)
+}
 
 void OptimizationObj::UpdateDisplay()
 {
@@ -308,9 +330,7 @@ void OptimizationObj::BuildRecursiveRefObjList()
 MonteCarloObj::MonteCarloObj(const string name):
 OptimizationObj(name),
 mCurrentCost(-1),
-mHistoryNb(0),mHistoryTrialNumber(1000),mHistoryCostFunction(1000),
-mHistorySavedParamSetIndex(1000),
-mHistorySaveAfterEachOptim(false),mHistorySaveFileName("GlobalOptim_history.out"),
+mHistorySaveFileName("GlobalOptim_history.out"),
 mLastParSavedSetIndex(-1),
 mTemperatureMax(1),mTemperatureMin(.000001),
 mMutationAmplitudeMax(8.),mMutationAmplitudeMin(.125),
@@ -332,9 +352,7 @@ mNbTrialRetry(0),mMinCostRetry(0),mMaxNbTrialSinceBest(0)
 MonteCarloObj::MonteCarloObj(const bool internalUseOnly):
 OptimizationObj(""),
 mCurrentCost(-1),
-mHistoryNb(0),mHistoryTrialNumber(1000),mHistoryCostFunction(1000),
-mHistorySavedParamSetIndex(1000),
-mHistorySaveAfterEachOptim(false),mHistorySaveFileName("GlobalOptim_history.out"),
+mHistorySaveFileName("GlobalOptim_history.out"),
 mLastParSavedSetIndex(-1),
 mTemperatureMax(.03),mTemperatureMin(.003),
 mMutationAmplitudeMax(16.),mMutationAmplitudeMin(.125),
@@ -402,6 +420,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
 {
    //Keep a copy of the total number of steps, and decrement nbStep
    const long nbSteps=nbStep;
+   unsigned int accept;// 1 if last trial was accepted? 2 if new best config ? else 0
    //:TODO: Other algorithms !
    TAU_PROFILE("MonteCarloObj::Optimize()","void (long)",TAU_DEFAULT);
    VFN_DEBUG_ENTRY("MonteCarloObj::Optimize()",5)
@@ -412,18 +431,22 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
    mNbTrial=0;
    mRefParList.EraseAllParamSet();
    mIsOptimizing=true;
+   // If using history, open file
+      ofstream outHistory;
+      if(mSaveDetailledHistory.GetChoice()>0)
+      {
+         outHistory.open(mHistorySaveFileName.c_str());
+         outHistory << "Trial World OverallCost ";
+         for(unsigned int i=0;i<mNbCostFunction;i++) outHistory << "Cost ";
+         for(long j=0;j<mRefParList.GetNbParNotFixed();j++)
+            outHistory << mRefParList.GetParNotFixed(j).GetName() << " ";
+         outHistory <<endl;
+      }
+   // time (in seconds) when last autoSave was made (if enabled)
+      unsigned long secondsWhenAutoSave=0;
    // prepare all objects
    this->TagNewBestConfig();
-     
-   /*
-   if(mBestCost<.3)
-   {//:KLUDGE: :TODO: Remove this and do it interactively !!
-      this->UnFixPar("Width_CagliotiU");
-      this->UnFixPar("Width_CagliotiV");
-      this->UnFixPar("Width_CagliotiW");
-      this->UnFixPar("PseudoVoigt_Eta0");
-   }
-   */            
+   
    switch(mGlobalOptimType.GetChoice())
    {
       case GLOBAL_OPTIM_SIMULATED_ANNEALING:
@@ -432,18 +455,6 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
          if(!silent) this->DisplayReport();
          RESTART_OPTIMIZATION:
          mRefParList.EraseAllParamSet();
-         /*
-         //Re-init History
-            mHistoryNb=0;
-            mHistoryTrialNumber=-1;
-            mHistoryCostFunction=-1;
-            mHistorySavedParamSetIndex=-1;
-         //Save Starting point
-            mHistoryTrialNumber(mHistoryNb)=mNbTrial;
-            mHistoryCostFunction(mHistoryNb)=this->GetCostFunctionValue();
-            mHistorySavedParamSetIndex(mHistoryNb)=mRefParList.CreateParamSet();
-            mHistoryNb++;
-         */
          mCurrentCost=this->GetCostFunctionValue();
 
          mBestCost=mCurrentCost;
@@ -451,14 +462,14 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
          mLastParSavedSetIndex=mRefParList.CreateParamSet("MonteCarloObj:Last parameters");
 
          //Report each ... cycles
-            const int nbTryReport=1000;
+            const int nbTryReport=3000;
          // Keep record of the number of accepted moves
             long nbAcceptedMoves=0;//since last report
             long nbAcceptedMovesTemp=0;//since last temperature/mutation rate change
          // Number of tries since best configuration found
             long nbTriesSinceBest=0;
          // Change temperature (and mutation) every...
-            const int nbTryPerTemp=100;
+            const int nbTryPerTemp=300;
 
          mTemperature=sqrt(mTemperatureMin*mTemperatureMax);
          mMutationAmplitude=sqrt(mMutationAmplitudeMin*mMutationAmplitudeMax);
@@ -523,20 +534,19 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
             }
 
             this->NewConfiguration();
+            accept=0;
             REAL cost=this->GetCostFunctionValue();
             if(cost<mCurrentCost)
             {
+               accept=1;
                mCurrentCost=cost;
                mRefParList.SaveParamSet(mLastParSavedSetIndex);
                if(mCurrentCost<mBestCost)
                {
+                  accept=2;
                   mBestCost=mCurrentCost;
                   this->TagNewBestConfig();
                   mRefParList.SaveParamSet(mBestParSavedSetIndex);
-                  //mHistoryTrialNumber(mHistoryNb)=mNbTrial;
-                  //mHistoryCostFunction(mHistoryNb)=mCurrentCost;
-                  //mHistorySavedParamSetIndex(mHistoryNb)=mRefParList.CreateParamSet();
-                  //mHistoryNb++;
                   if(!silent) cout << "Trial :" << mNbTrial 
                                    << " Temp="<< mTemperature
                                    << " Mutation Ampl.: "<<mMutationAmplitude
@@ -551,13 +561,61 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
             {
                if( log((rand()+1)/(REAL)RAND_MAX) < (-(cost-mCurrentCost)/mTemperature) )
                {
+                  accept=1;
                   mCurrentCost=cost;
                   mRefParList.SaveParamSet(mLastParSavedSetIndex);
                   nbAcceptedMoves++;
                   nbAcceptedMovesTemp++;
                }
-               else mRefParList.RestoreParamSet(mLastParSavedSetIndex);
             }
+            switch(mSaveDetailledHistory.GetChoice())
+            {
+               case 0:break;
+               case 1: 
+               {
+                  if(accept==2)
+                  {
+                     outHistory << mNbTrial <<" 0 " <<accept<<" "
+                                <<this->GetCostFunctionValue()<<" ";
+                     for(unsigned int i=0;i<mNbCostFunction;i++)
+                        outHistory << mpCostFunctionRefinableObj[i]
+                                       ->GetCostFunctionValue(mpCostFunctionId(i))<<" ";
+                     for(long i=0;i<mRefParList.GetNbParNotFixed();i++) 
+                        outHistory << " "<< mRefParList.GetParNotFixed(i).GetHumanValue() ;
+                     outHistory <<endl;
+                  }
+                  break;
+               }
+               case 2: 
+               {
+                  if(accept>0)
+                  {
+                     outHistory << mNbTrial <<" 0 "<<accept<<" "
+                                <<this->GetCostFunctionValue()<<" ";
+                     for(unsigned int i=0;i<mNbCostFunction;i++)
+                        outHistory << mpCostFunctionRefinableObj[i]
+                                       ->GetCostFunctionValue(mpCostFunctionId(i))<<" ";
+                     for(long i=0;i<mRefParList.GetNbParNotFixed();i++) 
+                        outHistory << " "<< mRefParList.GetParNotFixed(i).GetHumanValue() ;
+                     outHistory <<endl;
+                  }
+                  break;
+               }
+               case 3: 
+               {
+                  outHistory << mNbTrial <<" 0 "<<accept<<" "
+                             <<this->GetCostFunctionValue()<<" ";
+                  for(unsigned int i=0;i<mNbCostFunction;i++)
+                     outHistory << mpCostFunctionRefinableObj[i]
+                                    ->GetCostFunctionValue(mpCostFunctionId(i))<<" ";
+                  for(long i=0;i<mRefParList.GetNbParNotFixed();i++) 
+                     outHistory << " "<< mRefParList.GetParNotFixed(i).GetHumanValue() ;
+                  outHistory <<endl;
+                  break;
+               }
+            }
+            if(accept==0) mRefParList.RestoreParamSet(mLastParSavedSetIndex);
+
             if( (mNbTrial % nbTryReport) == 0)
             {
                if(!silent) cout <<"Trial :" << mNbTrial << " Temp="<< mTemperature;
@@ -592,6 +650,23 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                goto RESTART_OPTIMIZATION;
             }
             nbTriesSinceBest++;
+            if(  ((mXMLAutoSave.GetChoice()==1)&&((chrono.seconds()-secondsWhenAutoSave)>86400))
+               ||((mXMLAutoSave.GetChoice()==2)&&((chrono.seconds()-secondsWhenAutoSave)>3600))
+               ||((mXMLAutoSave.GetChoice()==3)&&((chrono.seconds()-secondsWhenAutoSave)> 600))
+               ||((mXMLAutoSave.GetChoice()==4)&&(accept==2)) )
+            {
+               secondsWhenAutoSave=(unsigned long)chrono.seconds();
+               string saveFileName=this->GetName();
+               time_t date=time(0);
+               char strDate[40];
+               strftime(strDate,sizeof(strDate),"%Y-%m-%d_%H-%M-%S",gmtime(&date));//%Y-%m-%dT%H:%M:%S%Z
+               char costAsChar[30];
+               if(accept!=2) mRefParList.RestoreParamSet(mBestParSavedSetIndex);
+               sprintf(costAsChar,"-Cost-%f",this->GetCostFunctionValue());
+               saveFileName=saveFileName+(string)strDate+(string)costAsChar+(string)".xml";
+               XMLCrystFileSaveGlobal(saveFileName);
+               if(accept!=2) mRefParList.RestoreParamSet(mLastParSavedSetIndex);
+            }
          }
          //Restore Best values
          mRefParList.RestoreParamSet(mBestParSavedSetIndex);
@@ -599,7 +674,6 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
          if(!silent) this->DisplayReport();
          if(!silent) chrono.print();
          //mRefParList.Print();
-         if(true==mHistorySaveAfterEachOptim) this->SaveOptimHistory();
          break;
       }//case GLOBAL_OPTIM_SIMULATED_ANNEALING
       case GLOBAL_OPTIM_PARALLEL_TEMPERING:
@@ -718,14 +792,17 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                {
                   mRefParList.SaveParamSet(mLastParSavedSetIndex);
                   this->NewConfiguration();
+                  accept=0;
                   REAL cost=this->GetCostFunctionValue();
                   //trialsDensity((long)(cost*100.),i+1)+=1;
                   if(cost<currentCost(i))
                   {
+                     accept=1;
                      currentCost(i)=cost;
                      mRefParList.SaveParamSet(worldCurrentSetIndex(i));
                      if(cost<mBestCost)
                      {
+                        accept=2;
                         mBestCost=currentCost(i);
                         this->TagNewBestConfig();
                         mRefParList.SaveParamSet(mBestParSavedSetIndex);
@@ -746,12 +823,76 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                   {
                      if(log((rand()+1)/(REAL)RAND_MAX)<(-(cost-currentCost(i))/mTemperature) )
                      {
+                        accept=1;
                         currentCost(i)=cost;
                         mRefParList.SaveParamSet(worldCurrentSetIndex(i));
                         worldNbAcceptedMoves(i)++;
                      }
-                     else mRefParList.RestoreParamSet(mLastParSavedSetIndex);
                   }
+                  switch(mSaveDetailledHistory.GetChoice())
+                  {
+                     case 0:break;
+                     case 1: 
+                     {
+                        if(accept==2)
+                        {
+                           outHistory << mNbTrial <<" "<<i<<" "<<accept<<" "
+                                      <<this->GetCostFunctionValue()<<" ";
+                           for(unsigned int j=0;j<mNbCostFunction;j++)
+                              outHistory << mpCostFunctionRefinableObj[j]
+                                             ->GetCostFunctionValue(mpCostFunctionId(i))<<" ";
+                           for(long j=0;j<mRefParList.GetNbParNotFixed();j++) 
+                              outHistory << " "<< mRefParList.GetParNotFixed(j).GetHumanValue() ;
+                           outHistory <<endl;
+                        }
+                        break;
+                     }
+                     case 2: 
+                     {
+                        if(accept>0)
+                        {
+                           outHistory << mNbTrial <<" "<<i<<" "<<accept<<" "
+                                      <<this->GetCostFunctionValue()<<" ";
+                           for(unsigned int j=0;j<mNbCostFunction;j++)
+                              outHistory << mpCostFunctionRefinableObj[j]
+                                             ->GetCostFunctionValue(mpCostFunctionId(j))<<" ";
+                           for(long j=0;j<mRefParList.GetNbParNotFixed();j++) 
+                              outHistory << " "<< mRefParList.GetParNotFixed(j).GetHumanValue() ;
+                           outHistory <<endl;
+                        }
+                        break;
+                     }
+                     case 3: 
+                     {
+                        outHistory << mNbTrial <<" "<<i<<" "<<accept<<" "
+                                   <<this->GetCostFunctionValue()<<" ";
+                        for(unsigned int j=0;j<mNbCostFunction;j++)
+                           outHistory << mpCostFunctionRefinableObj[j]
+                                          ->GetCostFunctionValue(mpCostFunctionId(j))<<" ";
+                        for(long j=0;j<mRefParList.GetNbParNotFixed();j++) 
+                           outHistory << " "<< mRefParList.GetParNotFixed(j).GetHumanValue() ;
+                        outHistory <<endl;
+                        break;
+                     }
+                  }
+                  if(  ((mXMLAutoSave.GetChoice()==1)&&((chrono.seconds()-secondsWhenAutoSave)>86400))
+                     ||((mXMLAutoSave.GetChoice()==2)&&((chrono.seconds()-secondsWhenAutoSave)>3600))
+                     ||((mXMLAutoSave.GetChoice()==3)&&((chrono.seconds()-secondsWhenAutoSave)> 600))
+                     ||((mXMLAutoSave.GetChoice()==4)&&(accept==2)) )
+                  {
+                     secondsWhenAutoSave=(unsigned long)chrono.seconds();
+                     string saveFileName=this->GetName();
+                     time_t date=time(0);
+                     char strDate[40];
+                     strftime(strDate,sizeof(strDate),"%Y-%m-%d_%H-%M-%S",gmtime(&date));//%Y-%m-%dT%H:%M:%S%Z
+                     char costAsChar[30];
+                     if(accept!=2) mRefParList.RestoreParamSet(mBestParSavedSetIndex);
+                     sprintf(costAsChar,"-Cost-%f",this->GetCostFunctionValue());
+                     saveFileName=saveFileName+(string)strDate+(string)costAsChar+(string)".xml";
+                     XMLCrystFileSaveGlobal(saveFileName);
+                     if(accept!=2) mRefParList.RestoreParamSet(mLastParSavedSetIndex);
+                  }
+                  if(accept==0) mRefParList.RestoreParamSet(mLastParSavedSetIndex);
                   mNbTrial++;nbStep--;
                   if((mNbTrial%nbTrialsReport)==0) makeReport=true;
                }//nbTryPerWorld trials
@@ -1032,9 +1173,12 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
    }
    mIsOptimizing=false;
    mStopAfterCycle=false;
+   if(mSaveDetailledHistory.GetChoice()>0) outHistory.close();
+      
    for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).EndOptimization();
    VFN_DEBUG_EXIT("MonteCarloObj::Optimize()",5)
 }
+/*
 void MonteCarloObj::SaveOptimHistory() const
 {
    VFN_DEBUG_MESSAGE("MonteCarloObj::SaveOptimHistory()",5)
@@ -1064,7 +1208,7 @@ Error opening file for output:"+mHistorySaveFileName);
    }
    out.close();
 }
-
+*/
 void MonteCarloObj::XMLOutput(ostream &os,int indent)const
 {
    VFN_DEBUG_ENTRY("MonteCarloObj::XMLOutput():"<<this->GetName(),5)
@@ -1408,6 +1552,7 @@ void MonteCarloObj::NewConfiguration()
 void MonteCarloObj::InitOptions()
 {
    VFN_DEBUG_MESSAGE("MonteCarloObj::InitOptions()",5)
+   this->OptimizationObj::InitOptions();
    static string GlobalOptimTypeName;
    static string GlobalOptimTypeChoices[2];//:TODO: Add Genetic Algorithm
    
@@ -1416,6 +1561,9 @@ void MonteCarloObj::InitOptions()
    static string AnnealingScheduleTempName;
    static string AnnealingScheduleMutationName;
    
+   static string saveDetailledHistoryName;
+   static string saveDetailledHistoryChoices[4];
+
    static bool needInitNames=true;
    if(true==needInitNames)
    {
@@ -1432,12 +1580,18 @@ void MonteCarloObj::InitOptions()
       AnnealingScheduleChoices[3]="Exponential";
       AnnealingScheduleChoices[4]="Smart";
       
+      saveDetailledHistoryName="Save evolution of all parameters (for tests ONLY!!!)";
+      saveDetailledHistoryChoices[0]="No (highly recommended)";
+      saveDetailledHistoryChoices[1]="Every new best configuration";
+      saveDetailledHistoryChoices[2]="Every accepted configuration";
+      saveDetailledHistoryChoices[3]="Every configuration";
       
       needInitNames=false;//Only once for the class
    }
    mGlobalOptimType.Init(2,&GlobalOptimTypeName,GlobalOptimTypeChoices);
    mAnnealingScheduleTemp.Init(5,&AnnealingScheduleTempName,AnnealingScheduleChoices);
    mAnnealingScheduleMutation.Init(5,&AnnealingScheduleMutationName,AnnealingScheduleChoices);
+   mSaveDetailledHistory.Init(4,&saveDetailledHistoryName,saveDetailledHistoryChoices);
    VFN_DEBUG_MESSAGE("MonteCarloObj::InitOptions():End",5)
 }
 

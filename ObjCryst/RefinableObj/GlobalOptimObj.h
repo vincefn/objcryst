@@ -186,7 +186,7 @@ class OptimizationObj
       /// \internal Initialize random seed from time
       void InitRandomSeedFromTime()const;
       /// Initialization of options.
-      virtual void InitOptions()=0;
+      virtual void InitOptions();
       /// Update Display (if any display is available), when a new 'relevant' configuration
       /// is reached. This calls all RefinableObj::UpdateDisplay()
       virtual void UpdateDisplay();
@@ -233,6 +233,10 @@ class OptimizationObj
          CrystVector_int mpCostFunctionId;
          /// The weight associated with each cost function
          CrystVector_REAL mCostFunctionWeight;
+         
+      /// Periodic save of complete environment as an xml file
+         RefObjOpt mXMLAutoSave;
+      
    private:
    #ifdef __WX__CRYST__
    public:
@@ -332,10 +336,6 @@ class MonteCarloObj:public OptimizationObj
       // Print information about the current state of optimization (parameters value, 
       // characteristic figures...)
       //virtual ostream& operator<<(ostream& os)const;
-      /// Save history of the evolution of parameters to a file. Only non-fixed parameters
-      /// are saved. This saves a very crude array in which can bve found the value of
-      /// all non-fixed parameters for successive "best" configurations.
-      void SaveOptimHistory() const;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
@@ -367,23 +367,16 @@ class MonteCarloObj:public OptimizationObj
          /// Current value of the cost function
          REAL mCurrentCost;
          
-      //Keep an history with the evolution of optimization
-         /// Total number of saved configurations
-         long mHistoryNb;
-         /// Trials corresponding to each stored values
-         CrystVector_long mHistoryTrialNumber;
-         /// Evolution of cost function
-         CrystVector_REAL mHistoryCostFunction;
-         /// Index of saved parameters set in mRefParList for each saved trial
-         CrystVector_long mHistorySavedParamSetIndex;
-         /// Save the evolution of refined parameters after optimization ?
-         bool mHistorySaveAfterEachOptim;
+      // History, for experimental purposes only !
+         /// Option to save the evolution of all optimized parameters (for testing only !
+         /// this is very slow...)
+         RefObjOpt mSaveDetailledHistory;
          /// Save the evolution of refined parameters after optimization ?
          string mHistorySaveFileName;
          
          /// Index of the 'last' parameter set
          long mLastParSavedSetIndex;
-      
+         
       // Annealing parameters
          /// Current temperature for annealing
          REAL mTemperature;

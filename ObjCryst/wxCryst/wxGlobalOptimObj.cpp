@@ -270,7 +270,7 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(100000000)
       opt=new WXFieldOption(this,-1,&(mpMonteCarloObj->mAnnealingScheduleTemp));
       mpSizer->Add(opt,0,wxALIGN_LEFT);
       mList.Add(opt);
-      
+
       wxBoxSizer *sizerTemp=new wxBoxSizer(wxHORIZONTAL);
       WXFieldPar<REAL> *tempMax=
          new WXFieldPar<REAL>(this,"Temperature Max:",-1,&(mpMonteCarloObj->mTemperatureMax));
@@ -283,6 +283,14 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(100000000)
       mList.Add(tempMin);
       
       opt=new WXFieldOption(this,-1,&(mpMonteCarloObj->mAnnealingScheduleMutation));
+      mpSizer->Add(opt,0,wxALIGN_LEFT);
+      mList.Add(opt);
+      
+      opt=new WXFieldOption(this,-1,&(mpMonteCarloObj->mSaveDetailledHistory));
+      mpSizer->Add(opt,0,wxALIGN_LEFT);
+      mList.Add(opt);
+
+      opt=new WXFieldOption(this,-1,&(mpMonteCarloObj->mXMLAutoSave));
       mpSizer->Add(opt,0,wxALIGN_LEFT);
       mList.Add(opt);
       
