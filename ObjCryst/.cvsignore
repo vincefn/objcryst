@@ -15,3 +15,4 @@ profile.0.0.0
 *.pov
 Makefile
 rules.mak
+.xvpics
