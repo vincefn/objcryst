@@ -1119,6 +1119,20 @@ void Crystal::GetGeneGroup(const RefinableObj &obj,
 				//else //no parameters other than unit cell
 			}
 }
+void Crystal::BeginOptimization(const bool allowApproximations)
+{
+	for(int i=0;i<this->GetScattererRegistry().GetNb();i++)
+	{
+		this->GetScattererRegistry().GetObj(i).
+			SetGlobalOptimStep(gpRefParTypeScattTranslX,0.1/this->GetLatticePar(0));
+		this->GetScattererRegistry().GetObj(i).
+			SetGlobalOptimStep(gpRefParTypeScattTranslY,0.1/this->GetLatticePar(1));
+		this->GetScattererRegistry().GetObj(i).
+			SetGlobalOptimStep(gpRefParTypeScattTranslZ,0.1/this->GetLatticePar(2));
+	}
+	this->RefinableObj::BeginOptimization(allowApproximations);
+}
+
 
 void Crystal::Init(const REAL a, const REAL b, const REAL c, const REAL alpha,
                    const REAL beta, const REAL gamma,const string &SpaceGroupId,

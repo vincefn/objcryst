@@ -395,7 +395,7 @@ void Atom::GetGeneGroup(const RefinableObj &obj,
 		for(long j=0;j<this->GetNbPar();j++)
 			if(&(obj.GetPar(i)) == &(this->GetPar(j)))
 			{
-				if(this->GetPar(j).GetType()== gpRefParTypeScattTransl)
+				if(this->GetPar(j).GetType()->IsDescendantFromOrSameAs(gpRefParTypeScattTransl))
 				{
 					if(posIndex==0) posIndex=first++;
 					groupIndex(i)=posIndex;
@@ -411,19 +411,19 @@ void Atom::InitRefParList()
    this->ResetParList();
    //:TODO: Add thermic factors
    {
-      RefinablePar tmp("x",&mXYZ(0),0,1.,gpRefParTypeScattTransl,
+      RefinablePar tmp("x",&mXYZ(0),0,1.,gpRefParTypeScattTranslX,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,1.,1.);
       tmp.AssignClock(mClockScatterer);
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp("y",&mXYZ(1),0,1.,gpRefParTypeScattTransl,
+      RefinablePar tmp("y",&mXYZ(1),0,1.,gpRefParTypeScattTranslY,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,1.,1.);
       tmp.AssignClock(mClockScatterer);
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp("z",&mXYZ(2),0,1.,gpRefParTypeScattTransl,
+      RefinablePar tmp("z",&mXYZ(2),0,1.,gpRefParTypeScattTranslZ,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,1.,1.);
       tmp.AssignClock(mClockScatterer);
       this->AddPar(tmp);

@@ -322,6 +322,7 @@ class Crystal:public RefinableObj
 		virtual void GetGeneGroup(const RefinableObj &obj, 
 										  CrystVector_uint & groupIndex,
 										  unsigned int &firstGroup) const;
+      virtual void BeginOptimization(const bool allowApproximations=false);
    protected:
    
    private:

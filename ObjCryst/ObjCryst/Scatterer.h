@@ -14,6 +14,9 @@ namespace ObjCryst
 class Crystal ; //forward declaration.:KLUDGE: ?
 extern const RefParType *gpRefParTypeScatt;
 extern const RefParType *gpRefParTypeScattTransl;
+extern const RefParType *gpRefParTypeScattTranslX;
+extern const RefParType *gpRefParTypeScattTranslY;
+extern const RefParType *gpRefParTypeScattTranslZ;
 extern const RefParType *gpRefParTypeScattOrient;
 extern const RefParType *gpRefParTypeScattConform;
 extern const RefParType *gpRefParTypeScattConformBondLength;

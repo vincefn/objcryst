@@ -45,6 +45,12 @@ const RefParType *gpRefParTypeScatt=
    new RefParType(gpRefParTypeObjCryst,"Scatterer");
 const RefParType *gpRefParTypeScattTransl=
    new RefParType(gpRefParTypeScatt,"Translation");
+const RefParType *gpRefParTypeScattTranslX=
+   new RefParType(gpRefParTypeScatt,"Translation along X");
+const RefParType *gpRefParTypeScattTranslY=
+   new RefParType(gpRefParTypeScatt,"Translation along Y");
+const RefParType *gpRefParTypeScattTranslZ=
+   new RefParType(gpRefParTypeScatt,"Translation along Z");
 const RefParType *gpRefParTypeScattOrient=
    new RefParType(gpRefParTypeScatt,"Orientation");
 const RefParType *gpRefParTypeScattConform=

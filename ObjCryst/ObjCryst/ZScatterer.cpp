@@ -1230,7 +1230,7 @@ void ZScatterer::GlobalOptRandomMove(const REAL mutationAmplitude)
 	//
 	// Should try to do better by really minimizing the conformation
 	// changes
-   if((rand()/(REAL)RAND_MAX)<.01)//.01
+   if(false)//(rand()/(REAL)RAND_MAX)<.04)//.01
 	{
    	TAU_PROFILE_TIMER(timer1,\
 							"ZScatterer::GlobalOptRandomMoveSmart1(prepare ref par & mutate)"\
@@ -1732,21 +1732,21 @@ void ZScatterer::InitRefParList()
    this->ResetParList();
    {
       RefinablePar tmp(this->GetName()+(string)"_x",&mXYZ(0),0.,1.,
-                        gpRefParTypeScattTransl,
+                        gpRefParTypeScattTranslX,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,1.,1.);
       tmp.AssignClock(mClockScatterer);
       this->AddPar(tmp);
    }
    {
       RefinablePar tmp(this->GetName()+(string)"_y",&mXYZ(1),0,1,
-                        gpRefParTypeScattTransl,
+                        gpRefParTypeScattTranslY,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,1.,1.);
       tmp.AssignClock(mClockScatterer);
       this->AddPar(tmp);
    }
    {
       RefinablePar tmp(this->GetName()+(string)"_z",&mXYZ(2),0,1,
-                        gpRefParTypeScattTransl,
+                        gpRefParTypeScattTranslZ,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,1.,1.);
       tmp.AssignClock(mClockScatterer);
       this->AddPar(tmp);
