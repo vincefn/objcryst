@@ -83,6 +83,32 @@ namespace ObjCryst
 //    WXCrystal
 //
 ////////////////////////////////////////////////////////////////////////
+static const long ID_CRYSTAL_MENU_SAVECIF                       =WXCRYST_ID();
+static const long ID_CRYSTAL_MENU_SAVETEXT                      =WXCRYST_ID();
+static const long ID_CRYSTAL_MENU_DISPLAY                       =WXCRYST_ID();
+static const long ID_CRYSTAL_MENU_DISPLAY_3DVIEW                =WXCRYST_ID();
+static const long ID_CRYSTAL_MENU_SCATT                         =WXCRYST_ID();
+static const long ID_CRYSTAL_MENU_PAR_ADDANTIBUMP               =WXCRYST_ID();
+static const long ID_CRYSTAL_MENU_PAR_SETRELATIVEXYZLIMITS      =WXCRYST_ID();
+static const long ID_CRYSTAL_MENU_SCATT_REMOVESCATTPOW          =WXCRYST_ID();
+static const long ID_CRYSTAL_MENU_SCATT_ADDSCATTPOWATOM         =WXCRYST_ID();
+static const long ID_CRYSTAL_MENU_SCATT_ADDSCATTPOWSPHERE       =WXCRYST_ID();
+static const long ID_CRYSTAL_MENU_SCATT_ADDATOM                 =WXCRYST_ID();
+static const long ID_CRYSTAL_MENU_SCATT_ADDZSCATTERER           =WXCRYST_ID();
+static const long ID_CRYSTAL_MENU_SCATT_ADDMOLECULE             =WXCRYST_ID();
+static const long ID_CRYSTAL_MENU_SCATT_ADDTETRAHEDRON          =WXCRYST_ID();
+static const long ID_CRYSTAL_MENU_SCATT_ADDOCTAHEDRON           =WXCRYST_ID();
+static const long ID_CRYSTAL_MENU_SCATT_ADDTRIANGLE             =WXCRYST_ID();
+static const long ID_CRYSTAL_MENU_SCATT_ADDSQUAREPLANE          =WXCRYST_ID();
+static const long ID_CRYSTAL_MENU_SCATT_ADDCUBE                 =WXCRYST_ID();
+static const long ID_CRYSTAL_MENU_SCATT_ADDANTIPRISMTETRAGONAL  =WXCRYST_ID();
+static const long ID_CRYSTAL_MENU_SCATT_ADDPRISMTRIGONAL        =WXCRYST_ID();
+static const long ID_CRYSTAL_MENU_SCATT_ADDICOSAHEDRON          =WXCRYST_ID();
+static const long ID_CRYSTAL_MENU_SCATT_REMOVESCATTERER         =WXCRYST_ID();
+static const long ID_CRYSTAL_MENU_SCATT_DUPLICSCATTERER         =WXCRYST_ID();
+static const long ID_CRYSTAL_SPACEGROUP                         =WXCRYST_ID();
+static const long ID_GLCRYSTAL_MENU_UPDATE                      =WXCRYST_ID();
+
 BEGIN_EVENT_TABLE(WXCrystal,wxEvtHandler)
    EVT_BUTTON(ID_WXOBJ_COLLAPSE,                      WXCrystObj::OnToggleCollapse)
    EVT_MENU(ID_REFOBJ_MENU_OBJ_SAVE,                  WXRefinableObj::OnMenuSave)
@@ -445,322 +471,308 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
    VFN_DEBUG_ENTRY("WXCrystal::OnMenuAddScatterer()",6)
    WXCrystValidateAllUserInput();
    Scatterer *scatt;
-   switch(event.GetId())
+   if(event.GetId()== ID_CRYSTAL_MENU_SCATT_ADDATOM)
    {
-      case ID_CRYSTAL_MENU_SCATT_ADDATOM:
+      int choice;
+      ScatteringPower *scattPow=
+         WXDialogChooseFromRegistry(mpCrystal->GetScatteringPowerRegistry(),this,
+                                    "Choose an atom type (ScatteringPower):",choice);
+      if(0==scattPow)
       {
-         int choice;
-         ScatteringPower *scattPow=
-            WXDialogChooseFromRegistry(mpCrystal->GetScatteringPowerRegistry(),this,
-                                       "Choose an atom type (ScatteringPower):",choice);
-         if(0==scattPow)
+         VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
+         return;
+      }
+      scatt=new Atom(0,0,0,"Change Me!",scattPow);
+   }
+   if(event.GetId()== ID_CRYSTAL_MENU_SCATT_ADDZSCATTERER)
+   {
+      scatt=new ZScatterer("Change Me!",*mpCrystal);
+   }
+   if(event.GetId()== ID_CRYSTAL_MENU_SCATT_ADDMOLECULE)
+   {
+      scatt=new Molecule(*mpCrystal,"Molecule");
+   }
+   if(event.GetId()== ID_CRYSTAL_MENU_SCATT_ADDTETRAHEDRON)
+   {
+      int choice;
+      //Scattering power 1
+         const ScatteringPower *scattPow1=WXDialogChooseFromRegistry(
+                                    mpCrystal->GetScatteringPowerRegistry(),
+                                    this,"Central atom type (ScatteringPower):",choice);
+         if(0==scattPow1)
          {
             VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
             return;
          }
-         scatt=new Atom(0,0,0,"Change Me!",scattPow);
-         break;
-      }
-      case ID_CRYSTAL_MENU_SCATT_ADDZSCATTERER:
-      {
-         scatt=new ZScatterer("Change Me!",*mpCrystal);
-         break;
-      }
-      case ID_CRYSTAL_MENU_SCATT_ADDMOLECULE:
-      {
-         scatt=new Molecule(*mpCrystal,"Molecule");
-         break;
-      }
-      case ID_CRYSTAL_MENU_SCATT_ADDTETRAHEDRON:
-      {
-         int choice;
-         //Scattering power 1
-            const ScatteringPower *scattPow1=WXDialogChooseFromRegistry(
-                                       mpCrystal->GetScatteringPowerRegistry(),
-                                       this,"Central atom type (ScatteringPower):",choice);
-            if(0==scattPow1)
-            {
-               VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
-               return;
-            }
-         //Scattering power 2
-            const ScatteringPower *scattPow2=WXDialogChooseFromRegistry(
-                                       mpCrystal->GetScatteringPowerRegistry(),
-                                       this,"Corner atom type (ScatteringPower):",choice);
-            if(0==scattPow2)
-            {
-               VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
-               return;
-            }
-         //Bond length
-            wxTextEntryDialog bondLengthDialog(this,"Bond length",
-                                    "Enter bond length (Angstroems)","1",wxOK | wxCANCEL);
-            if(wxID_OK!=bondLengthDialog.ShowModal())
-            {
-               VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom():Cancelled",6)
-               return;
-            }
-            double bondLength;
-            bondLengthDialog.GetValue().ToDouble(&bondLength);
-            
-         scatt=new ZPolyhedron(TETRAHEDRON,*mpCrystal,0,0,0,"Change Me!",
-                               scattPow1,scattPow2,bondLength);
-         break;
-      }
-      case ID_CRYSTAL_MENU_SCATT_ADDOCTAHEDRON:
-      {
-         int choice;
-         //Scattering power 1
-            const ScatteringPower *scattPow1=WXDialogChooseFromRegistry(
-                                       mpCrystal->GetScatteringPowerRegistry(),
-                                       this,"Central atom type (ScatteringPower):",choice);
-            if(0==scattPow1)
-            {
-               VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
-               return;
-            }
-         //Scattering power 2
-            const ScatteringPower *scattPow2=WXDialogChooseFromRegistry(
-                                       mpCrystal->GetScatteringPowerRegistry(),
-                                       this,"Corner atom type (ScatteringPower):",choice);
-            if(0==scattPow2)
-            {
-               VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
-               return;
-            }
-         //Bond length
-            wxTextEntryDialog bondLengthDialog(this,"Bond length",
-                                    "Enter bond length (Angstroems)","1",wxOK | wxCANCEL);
-            if(wxID_OK!=bondLengthDialog.ShowModal())
-            {
-               VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom():Cancelled",6)
-               return;
-            }
-            double bondLength;
-            bondLengthDialog.GetValue().ToDouble(&bondLength);
-            
-         scatt=new ZPolyhedron(OCTAHEDRON,*mpCrystal,0,0,0,"Change Me!",
-                               scattPow1,scattPow2,bondLength);
-         break;
-      }
-      case ID_CRYSTAL_MENU_SCATT_ADDTRIANGLE:
-      {
-         VFN_DEBUG_MESSAGE("WXCrystal::OnMenuAddScatterer():Add triangle plane",6)
-         int choice;
-         //Scattering power 1
-            const ScatteringPower *scattPow1=WXDialogChooseFromRegistry(
-                                       mpCrystal->GetScatteringPowerRegistry(),
-                                       this,"Central atom type (ScatteringPower):",choice);
-            if(0==scattPow1)
-            {
-               VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
-               return;
-            }
-         //Scattering power 2
-            const ScatteringPower *scattPow2=WXDialogChooseFromRegistry(
-                                       mpCrystal->GetScatteringPowerRegistry(),
-                                       this,"Corner atom type (ScatteringPower):",choice);
-            if(0==scattPow2)
-            {
-               VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
-               return;
-            }
-         //Bond length
-            wxTextEntryDialog bondLengthDialog(this,"Bond length",
-                                    "Enter bond length (Angstroems)","1",wxOK | wxCANCEL);
-            if(wxID_OK!=bondLengthDialog.ShowModal())
-            {
-               VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom():Cancelled",6)
-               return;
-            }
-            double bondLength;
-            bondLengthDialog.GetValue().ToDouble(&bondLength);
-            
-         scatt=new ZPolyhedron(TRIANGLE_PLANE,*mpCrystal,0,0,0,"Change Me!",
-                               scattPow1,scattPow2,bondLength);
-         break;
-      }
-      case ID_CRYSTAL_MENU_SCATT_ADDSQUAREPLANE:
-      {
-         VFN_DEBUG_MESSAGE("WXCrystal::OnMenuAddScatterer():Add square plane",6)
-         int choice;
-         //Scattering power 1
-            const ScatteringPower *scattPow1=WXDialogChooseFromRegistry(
-                                       mpCrystal->GetScatteringPowerRegistry(),
-                                       this,"Central atom type (ScatteringPower):",choice);
-            if(0==scattPow1)
-            {
-               VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
-               return;
-            }
-         //Scattering power 2
-            const ScatteringPower *scattPow2=WXDialogChooseFromRegistry(
-                                       mpCrystal->GetScatteringPowerRegistry(),
-                                       this,"Corner atom type (ScatteringPower):",choice);
-            if(0==scattPow2)
-            {
-               VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
-               return;
-            }
-         //Bond length
-            wxTextEntryDialog bondLengthDialog(this,"Bond length",
-                                    "Enter bond length (Angstroems)","1",wxOK | wxCANCEL);
-            if(wxID_OK!=bondLengthDialog.ShowModal())
-            {
-               VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom():Cancelled",6)
-               return;
-            }
-            double bondLength;
-            bondLengthDialog.GetValue().ToDouble(&bondLength);
-            
-         scatt=new ZPolyhedron(SQUARE_PLANE,*mpCrystal,0,0,0,"Change Me!",
-                               scattPow1,scattPow2,bondLength);
-         break;
-      }
-      case ID_CRYSTAL_MENU_SCATT_ADDCUBE:
-      {
-         int choice;
-         //Scattering power 1
-            const ScatteringPower *scattPow1=WXDialogChooseFromRegistry(
-                                       mpCrystal->GetScatteringPowerRegistry(),
-                                       this,"Central atom type (ScatteringPower):",choice);
-            if(0==scattPow1)
-            {
-               VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
-               return;
-            }
-         //Scattering power 2
-            const ScatteringPower *scattPow2=WXDialogChooseFromRegistry(
-                                       mpCrystal->GetScatteringPowerRegistry(),
-                                       this,"Corner atom type (ScatteringPower):",choice);
-            if(0==scattPow2)
-            {
-               VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
-               return;
-            }
-         //Bond length
-            wxTextEntryDialog bondLengthDialog(this,"Bond length",
-                                    "Enter bond length (Angstroems)","1",wxOK | wxCANCEL);
-            if(wxID_OK!=bondLengthDialog.ShowModal())
-            {
-               VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom():Cancelled",6)
-               return;
-            }
-            double bondLength;
-            bondLengthDialog.GetValue().ToDouble(&bondLength);
-            
-         scatt=new ZPolyhedron(CUBE,*mpCrystal,0,0,0,"Change Me!",
-                               scattPow1,scattPow2,bondLength);
-         break;
-      }
-      case ID_CRYSTAL_MENU_SCATT_ADDANTIPRISMTETRAGONAL:
-      {
-         int choice;
-         //Scattering power 1
-            const ScatteringPower *scattPow1=WXDialogChooseFromRegistry(
-                                       mpCrystal->GetScatteringPowerRegistry(),
-                                       this,"Central atom type (ScatteringPower):",choice);
-            if(0==scattPow1)
-            {
-               VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
-               return;
-            }
-         //Scattering power 2
-            const ScatteringPower *scattPow2=WXDialogChooseFromRegistry(
-                                       mpCrystal->GetScatteringPowerRegistry(),
-                                       this,"Corner atom type (ScatteringPower):",choice);
-            if(0==scattPow2)
-            {
-               VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
-               return;
-            }
-         //Bond length
-            wxTextEntryDialog bondLengthDialog(this,"Bond length",
-                                    "Enter bond length (Angstroems)","1",wxOK | wxCANCEL);
-            if(wxID_OK!=bondLengthDialog.ShowModal())
-            {
-               VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom():Cancelled",6)
-               return;
-            }
-            double bondLength;
-            bondLengthDialog.GetValue().ToDouble(&bondLength);
-            
-         scatt=new ZPolyhedron(ANTIPRISM_TETRAGONAL,*mpCrystal,0,0,0,"Change Me!",
-                               scattPow1,scattPow2,bondLength);
-         break;
-      }
-      case ID_CRYSTAL_MENU_SCATT_ADDPRISMTRIGONAL:
-      {
-         int choice;
-         //Scattering power 1
-            const ScatteringPower *scattPow1=WXDialogChooseFromRegistry(
-                                       mpCrystal->GetScatteringPowerRegistry(),
-                                       this,"Central atom type (ScatteringPower):",choice);
-            if(0==scattPow1)
-            {
-               VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
-               return;
-            }
-         //Scattering power 2
-            const ScatteringPower *scattPow2=WXDialogChooseFromRegistry(
-                                       mpCrystal->GetScatteringPowerRegistry(),
-                                       this,"Corner atom type (ScatteringPower):",choice);
-            if(0==scattPow2)
-            {
-               VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
-               return;
-            }
-         //Bond length
-            wxTextEntryDialog bondLengthDialog(this,"Bond length",
-                                    "Enter bond length (Angstroems)","1",wxOK | wxCANCEL);
-            if(wxID_OK!=bondLengthDialog.ShowModal())
-            {
-               VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom():Cancelled",6)
-               return;
-            }
-            double bondLength;
-            bondLengthDialog.GetValue().ToDouble(&bondLength);
-            
-         scatt=new ZPolyhedron(PRISM_TRIGONAL,*mpCrystal,0,0,0,"Change Me!",
-                               scattPow1,scattPow2,bondLength);
-         break;
-      }
-      case ID_CRYSTAL_MENU_SCATT_ADDICOSAHEDRON:
-      {
-         int choice;
-         //Scattering power 1
-            const ScatteringPower *scattPow1=WXDialogChooseFromRegistry(
-                                       mpCrystal->GetScatteringPowerRegistry(),
-                                       this,"Central atom type (ScatteringPower):",choice);
-            if(0==scattPow1)
-            {
-               VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
-               return;
-            }
-         //Scattering power 2
-            const ScatteringPower *scattPow2=WXDialogChooseFromRegistry(
-                                       mpCrystal->GetScatteringPowerRegistry(),
-                                       this,"Corner atom type (ScatteringPower):",choice);
-            if(0==scattPow2)
-            {
-               VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
-               return;
-            }
-         //Bond length
-            wxTextEntryDialog bondLengthDialog(this,"Bond length",
-                                    "Enter bond length (Angstroems)","1",wxOK | wxCANCEL);
-            if(wxID_OK!=bondLengthDialog.ShowModal())
-            {
-               VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom():Cancelled",6)
-               return;
-            }
-            double bondLength;
-            bondLengthDialog.GetValue().ToDouble(&bondLength);
-            
-         scatt=new ZPolyhedron(ICOSAHEDRON,*mpCrystal,0,0,0,"Change Me!",
-                               scattPow1,scattPow2,bondLength);
-         break;
-      }
+      //Scattering power 2
+         const ScatteringPower *scattPow2=WXDialogChooseFromRegistry(
+                                    mpCrystal->GetScatteringPowerRegistry(),
+                                    this,"Corner atom type (ScatteringPower):",choice);
+         if(0==scattPow2)
+         {
+            VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
+            return;
+         }
+      //Bond length
+         wxTextEntryDialog bondLengthDialog(this,"Bond length",
+                                 "Enter bond length (Angstroems)","1",wxOK | wxCANCEL);
+         if(wxID_OK!=bondLengthDialog.ShowModal())
+         {
+            VFN_DEBUG_EXIT("WXZScatterer))OnMenuAddZAtom())Cancelled",6)
+            return;
+         }
+         double bondLength;
+         bondLengthDialog.GetValue().ToDouble(&bondLength);
+
+      scatt=new ZPolyhedron(TETRAHEDRON,*mpCrystal,0,0,0,"Change Me!",
+                            scattPow1,scattPow2,bondLength);
+   }
+   if(event.GetId()== ID_CRYSTAL_MENU_SCATT_ADDOCTAHEDRON)
+   {
+      int choice;
+      //Scattering power 1
+         const ScatteringPower *scattPow1=WXDialogChooseFromRegistry(
+                                    mpCrystal->GetScatteringPowerRegistry(),
+                                    this,"Central atom type (ScatteringPower):",choice);
+         if(0==scattPow1)
+         {
+            VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
+            return;
+         }
+      //Scattering power 2
+         const ScatteringPower *scattPow2=WXDialogChooseFromRegistry(
+                                    mpCrystal->GetScatteringPowerRegistry(),
+                                    this,"Corner atom type (ScatteringPower))",choice);
+         if(0==scattPow2)
+         {
+            VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
+            return;
+         }
+      //Bond length
+         wxTextEntryDialog bondLengthDialog(this,"Bond length",
+                                 "Enter bond length (Angstroems)","1",wxOK | wxCANCEL);
+         if(wxID_OK!=bondLengthDialog.ShowModal())
+         {
+            VFN_DEBUG_EXIT("WXZScatterer))OnMenuAddZAtom())Cancelled",6)
+            return;
+         }
+         double bondLength;
+         bondLengthDialog.GetValue().ToDouble(&bondLength);
+
+      scatt=new ZPolyhedron(OCTAHEDRON,*mpCrystal,0,0,0,"Change Me!",
+                            scattPow1,scattPow2,bondLength);
+   }
+   if(event.GetId()== ID_CRYSTAL_MENU_SCATT_ADDTRIANGLE)
+   {
+      VFN_DEBUG_MESSAGE("WXCrystal::OnMenuAddScatterer())Add triangle plane",6)
+      int choice;
+      //Scattering power 1
+         const ScatteringPower *scattPow1=WXDialogChooseFromRegistry(
+                                    mpCrystal->GetScatteringPowerRegistry(),
+                                    this,"Central atom type (ScatteringPower))",choice);
+         if(0==scattPow1)
+         {
+            VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
+            return;
+         }
+      //Scattering power 2
+         const ScatteringPower *scattPow2=WXDialogChooseFromRegistry(
+                                    mpCrystal->GetScatteringPowerRegistry(),
+                                    this,"Corner atom type (ScatteringPower))",choice);
+         if(0==scattPow2)
+         {
+            VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
+            return;
+         }
+      //Bond length
+         wxTextEntryDialog bondLengthDialog(this,"Bond length",
+                                 "Enter bond length (Angstroems)","1",wxOK | wxCANCEL);
+         if(wxID_OK!=bondLengthDialog.ShowModal())
+         {
+            VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom():Cancelled",6)
+            return;
+         }
+         double bondLength;
+         bondLengthDialog.GetValue().ToDouble(&bondLength);
+
+      scatt=new ZPolyhedron(TRIANGLE_PLANE,*mpCrystal,0,0,0,"Change Me!",
+                            scattPow1,scattPow2,bondLength);
+   }
+   if(event.GetId()== ID_CRYSTAL_MENU_SCATT_ADDSQUAREPLANE)
+   {
+      VFN_DEBUG_MESSAGE("WXCrystal::OnMenuAddScatterer():Add square plane",6)
+      int choice;
+      //Scattering power 1
+         const ScatteringPower *scattPow1=WXDialogChooseFromRegistry(
+                                    mpCrystal->GetScatteringPowerRegistry(),
+                                    this,"Central atom type (ScatteringPower))",choice);
+         if(0==scattPow1)
+         {
+            VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
+            return;
+         }
+      //Scattering power 2
+         const ScatteringPower *scattPow2=WXDialogChooseFromRegistry(
+                                    mpCrystal->GetScatteringPowerRegistry(),
+                                    this,"Corner atom type (ScatteringPower))",choice);
+         if(0==scattPow2)
+         {
+            VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
+            return;
+         }
+      //Bond length
+         wxTextEntryDialog bondLengthDialog(this,"Bond length",
+                                 "Enter bond length (Angstroems)","1",wxOK | wxCANCEL);
+         if(wxID_OK!=bondLengthDialog.ShowModal())
+         {
+            VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom():Cancelled",6)
+            return;
+         }
+         double bondLength;
+         bondLengthDialog.GetValue().ToDouble(&bondLength);
+
+      scatt=new ZPolyhedron(SQUARE_PLANE,*mpCrystal,0,0,0,"Change Me!",
+                            scattPow1,scattPow2,bondLength);
+   }
+   if(event.GetId()== ID_CRYSTAL_MENU_SCATT_ADDCUBE)
+   {
+      int choice;
+      //Scattering power 1
+         const ScatteringPower *scattPow1=WXDialogChooseFromRegistry(
+                                    mpCrystal->GetScatteringPowerRegistry(),
+                                    this,"Central atom type (ScatteringPower):",choice);
+         if(0==scattPow1)
+         {
+            VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
+            return;
+         }
+      //Scattering power 2
+         const ScatteringPower *scattPow2=WXDialogChooseFromRegistry(
+                                    mpCrystal->GetScatteringPowerRegistry(),
+                                    this,"Corner atom type (ScatteringPower))",choice);
+         if(0==scattPow2)
+         {
+            VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
+            return;
+         }
+      //Bond length
+         wxTextEntryDialog bondLengthDialog(this,"Bond length",
+                                 "Enter bond length (Angstroems)","1",wxOK | wxCANCEL);
+         if(wxID_OK!=bondLengthDialog.ShowModal())
+         {
+            VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom():Cancelled",6)
+            return;
+         }
+         double bondLength;
+         bondLengthDialog.GetValue().ToDouble(&bondLength);
+
+      scatt=new ZPolyhedron(CUBE,*mpCrystal,0,0,0,"Change Me!",
+                            scattPow1,scattPow2,bondLength);
+   }
+   if(event.GetId()== ID_CRYSTAL_MENU_SCATT_ADDANTIPRISMTETRAGONAL)
+   {
+      int choice;
+      //Scattering power 1
+         const ScatteringPower *scattPow1=WXDialogChooseFromRegistry(
+                                    mpCrystal->GetScatteringPowerRegistry(),
+                                    this,"Central atom type (ScatteringPower):",choice);
+         if(0==scattPow1)
+         {
+            VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
+            return;
+         }
+      //Scattering power 2
+         const ScatteringPower *scattPow2=WXDialogChooseFromRegistry(
+                                    mpCrystal->GetScatteringPowerRegistry(),
+                                    this,"Corner atom type (ScatteringPower))",choice);
+         if(0==scattPow2)
+         {
+            VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
+            return;
+         }
+      //Bond length
+         wxTextEntryDialog bondLengthDialog(this,"Bond length",
+                                 "Enter bond length (Angstroems)","1",wxOK | wxCANCEL);
+         if(wxID_OK!=bondLengthDialog.ShowModal())
+         {
+            VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom():Cancelled",6)
+            return;
+         }
+         double bondLength;
+         bondLengthDialog.GetValue().ToDouble(&bondLength);
+
+      scatt=new ZPolyhedron(ANTIPRISM_TETRAGONAL,*mpCrystal,0,0,0,"Change Me!",
+                            scattPow1,scattPow2,bondLength);
+   }
+   if(event.GetId()== ID_CRYSTAL_MENU_SCATT_ADDPRISMTRIGONAL)
+   {
+      int choice;
+      //Scattering power 1
+         const ScatteringPower *scattPow1=WXDialogChooseFromRegistry(
+                                    mpCrystal->GetScatteringPowerRegistry(),
+                                    this,"Central atom type (ScatteringPower))",choice);
+         if(0==scattPow1)
+         {
+            VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
+            return;
+         }
+      //Scattering power 2
+         const ScatteringPower *scattPow2=WXDialogChooseFromRegistry(
+                                    mpCrystal->GetScatteringPowerRegistry(),
+                                    this,"Corner atom type (ScatteringPower))",choice);
+         if(0==scattPow2)
+         {
+            VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
+            return;
+         }
+      //Bond length
+         wxTextEntryDialog bondLengthDialog(this,"Bond length",
+                                 "Enter bond length (Angstroems)","1",wxOK | wxCANCEL);
+         if(wxID_OK!=bondLengthDialog.ShowModal())
+         {
+            VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom())Cancelled",6)
+            return;
+         }
+         double bondLength;
+         bondLengthDialog.GetValue().ToDouble(&bondLength);
+
+      scatt=new ZPolyhedron(PRISM_TRIGONAL,*mpCrystal,0,0,0,"Change Me!",
+                            scattPow1,scattPow2,bondLength);
+   }
+   if(event.GetId()== ID_CRYSTAL_MENU_SCATT_ADDICOSAHEDRON)
+   {
+      int choice;
+      //Scattering power 1
+         const ScatteringPower *scattPow1=WXDialogChooseFromRegistry(
+                                    mpCrystal->GetScatteringPowerRegistry(),
+                                    this,"Central atom type (ScatteringPower):",choice);
+         if(0==scattPow1)
+         {
+            VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
+            return;
+         }
+      //Scattering power 2
+         const ScatteringPower *scattPow2=WXDialogChooseFromRegistry(
+                                    mpCrystal->GetScatteringPowerRegistry(),
+                                    this,"Corner atom type (ScatteringPower):",choice);
+         if(0==scattPow2)
+         {
+            VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():Canceled",6)
+            return;
+         }
+      //Bond length
+         wxTextEntryDialog bondLengthDialog(this,"Bond length",
+                                 "Enter bond length (Angstroems)","1",wxOK | wxCANCEL);
+         if(wxID_OK!=bondLengthDialog.ShowModal())
+         {
+            VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom():Cancelled",6)
+            return;
+         }
+         double bondLength;
+         bondLengthDialog.GetValue().ToDouble(&bondLength);
+
+      scatt=new ZPolyhedron(ICOSAHEDRON,*mpCrystal,0,0,0,"Change Me!",
+                            scattPow1,scattPow2,bondLength);
    }
    mpCrystal->AddScatterer(scatt);
    //mpCrystal->XMLOutput(cout);
@@ -867,23 +879,20 @@ bool WXCrystal::OnChangeName(const int id)
 {
    VFN_DEBUG_MESSAGE("WXCrystal::OnChangeName()",6)
    if(this->WXRefinableObj::OnChangeName(id)==true) return true;
-   switch(id)
+   if(id==ID_CRYSTAL_SPACEGROUP)
    {
-      case ID_CRYSTAL_SPACEGROUP:
-      {
-         VFN_DEBUG_MESSAGE("WXCrystal::OnChangeName():Changing SpaceGroup",6)
-         mpCrystal->Init(mpCrystal->GetLatticePar(0),
-                         mpCrystal->GetLatticePar(1),
-                         mpCrystal->GetLatticePar(2),
-                         mpCrystal->GetLatticePar(3),
-                         mpCrystal->GetLatticePar(4),
-                         mpCrystal->GetLatticePar(5),
-                         mpFieldSpacegroup->GetValue(),
-                         mpCrystal->GetName());
-         this->CrystUpdate();
-         this->Layout();
-         return true;
-      }
+      VFN_DEBUG_MESSAGE("WXCrystal::OnChangeName():Changing SpaceGroup",6)
+      mpCrystal->Init(mpCrystal->GetLatticePar(0),
+                      mpCrystal->GetLatticePar(1),
+                      mpCrystal->GetLatticePar(2),
+                      mpCrystal->GetLatticePar(3),
+                      mpCrystal->GetLatticePar(4),
+                      mpCrystal->GetLatticePar(5),
+                      mpFieldSpacegroup->GetValue(),
+                      mpCrystal->GetName());
+      this->CrystUpdate();
+      this->Layout();
+      return true;
    }
    return false;
 }
@@ -1155,7 +1164,18 @@ const string &UnitCellMapGLList::GetName()const
 //    WXGLCrystalCanvas
 //
 ////////////////////////////////////////////////////////////////////////
-WXCRYST_ID ID_GLCRYSTAL_MENU_SHOWATOMLABEL;
+static const long ID_GLCRYSTAL_MENU_SHOWATOMLABEL=     WXCRYST_ID(); 
+static const long ID_GLCRYSTAL_UPDATEUI=               WXCRYST_ID(); 
+static const long ID_GLCRYSTAL_MENU_CHANGELIMITS=      WXCRYST_ID(); 
+static const long ID_GLCRYSTAL_MENU_SHOWCRYSTAL=       WXCRYST_ID(); 
+static const long ID_GLCRYSTAL_MENU_LOADFOURIER=       WXCRYST_ID(); 
+static const long ID_GLCRYSTAL_MENU_CHANGECONTOUR=     WXCRYST_ID(); 
+static const long ID_GLCRYSTAL_MENU_ADDCONTOUR=        WXCRYST_ID(); 
+static const long ID_GLCRYSTAL_MENU_SHOWFOURIER=       WXCRYST_ID(); 
+static const long ID_GLCRYSTAL_MENU_FOURIERCHANGECOLOR=WXCRYST_ID(); 
+static const long ID_GLCRYSTAL_MENU_SHOWWIRE=          WXCRYST_ID(); 
+static const long ID_GLCRYSTAL_MENU_UNLOADFOURIER=     WXCRYST_ID(); 
+static const long ID_GLCRYSTAL_MENU_FOURIERCHANGEBBOX= WXCRYST_ID(); 
 
 BEGIN_EVENT_TABLE(WXGLCrystalCanvas, wxGLCanvas)
    EVT_SIZE             (WXGLCrystalCanvas::OnSize)

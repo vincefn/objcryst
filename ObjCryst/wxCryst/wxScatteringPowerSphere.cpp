@@ -48,6 +48,9 @@ namespace ObjCryst
 //    WXScatteringPowerSphere
 //
 ////////////////////////////////////////////////////////////////////////
+static const long ID_SCATTPOWATOM_MENU_COLOUR=WXCRYST_ID();
+static const long ID_SCATTPOWATOM_MENU_COLOUR_SETRGB=WXCRYST_ID();
+
 BEGIN_EVENT_TABLE(WXScatteringPowerSphere, wxWindow)
    EVT_MENU(ID_SCATTPOWATOM_MENU_COLOUR_SETRGB, WXScatteringPowerSphere::OnChangeColour)
    EVT_UPDATE_UI(ID_CRYST_UPDATEUI,             WXRefinableObj::OnUpdateUI)

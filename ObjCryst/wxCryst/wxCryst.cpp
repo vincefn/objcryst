@@ -54,8 +54,8 @@ namespace ObjCryst
 //
 ////////////////////////////////////////////////////////////////////////
 WXCRYST_ID::WXCRYST_ID(){mIndex=mCounter++;}
-WXCRYST_ID::operator unsigned long(){return mIndex;}
-unsigned long WXCRYST_ID::mCounter=1000;
+WXCRYST_ID::operator long(){return mIndex;}
+long WXCRYST_ID::mCounter=wxID_HIGHEST+100;
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXCrystObjBasic
@@ -709,16 +709,34 @@ void WXCrystObj::UpdateUI()
 //    WXCrystMenuBar
 //
 ////////////////////////////////////////////////////////////////////////
+WXCRYST_ID ID_CRYST_MENU1;
+WXCRYST_ID ID_CRYST_MENU2;
+WXCRYST_ID ID_CRYST_MENU3;
+WXCRYST_ID ID_CRYST_MENU4;
+WXCRYST_ID ID_CRYST_MENU5;
+WXCRYST_ID ID_CRYST_MENU6;
+WXCRYST_ID ID_CRYST_MENU7;
+WXCRYST_ID ID_CRYST_MENU8;
+WXCRYST_ID ID_CRYST_MENU9;
+WXCRYST_ID ID_CRYST_MENU10;
+WXCRYST_ID ID_CRYST_MENU11;
+WXCRYST_ID ID_CRYST_MENU12;
+WXCRYST_ID ID_CRYST_MENU13;
+WXCRYST_ID ID_CRYST_MENU14;
+WXCRYST_ID ID_CRYST_MENU15;
+WXCRYST_ID ID_CRYST_MENU16;
+
+
 BEGIN_EVENT_TABLE(WXCrystMenuBar,wxWindow)
-   EVT_BUTTON(ID_CRYST_MENU1,WXCrystMenuBar::OnPopupMenu)
-   EVT_BUTTON(ID_CRYST_MENU1+1 ,WXCrystMenuBar::OnPopupMenu)
-   EVT_BUTTON(ID_CRYST_MENU1+2 ,WXCrystMenuBar::OnPopupMenu)
-   EVT_BUTTON(ID_CRYST_MENU1+3 ,WXCrystMenuBar::OnPopupMenu)
-   EVT_BUTTON(ID_CRYST_MENU1+4 ,WXCrystMenuBar::OnPopupMenu)
-   EVT_BUTTON(ID_CRYST_MENU1+5 ,WXCrystMenuBar::OnPopupMenu)
-   EVT_BUTTON(ID_CRYST_MENU1+6 ,WXCrystMenuBar::OnPopupMenu)
-   EVT_BUTTON(ID_CRYST_MENU1+7 ,WXCrystMenuBar::OnPopupMenu)
-   EVT_BUTTON(ID_CRYST_MENU1+8 ,WXCrystMenuBar::OnPopupMenu)
+   EVT_BUTTON(ID_CRYST_MENU1 ,WXCrystMenuBar::OnPopupMenu)
+   EVT_BUTTON(ID_CRYST_MENU2 ,WXCrystMenuBar::OnPopupMenu)
+   EVT_BUTTON(ID_CRYST_MENU3 ,WXCrystMenuBar::OnPopupMenu)
+   EVT_BUTTON(ID_CRYST_MENU4 ,WXCrystMenuBar::OnPopupMenu)
+   EVT_BUTTON(ID_CRYST_MENU5 ,WXCrystMenuBar::OnPopupMenu)
+   EVT_BUTTON(ID_CRYST_MENU6 ,WXCrystMenuBar::OnPopupMenu)
+   EVT_BUTTON(ID_CRYST_MENU7 ,WXCrystMenuBar::OnPopupMenu)
+   EVT_BUTTON(ID_CRYST_MENU8 ,WXCrystMenuBar::OnPopupMenu)
+   EVT_BUTTON(ID_CRYST_MENU9 ,WXCrystMenuBar::OnPopupMenu)
 END_EVENT_TABLE()
 
 WXCrystMenuBar::WXCrystMenuBar(wxWindow *parent, WXCrystObj* owner):

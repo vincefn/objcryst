@@ -68,8 +68,8 @@ template<class T> T * WXDialogChooseFromVector(vector<T*> &reg,wxWindow*parent,
 //    WXMolAtom
 //
 ////////////////////////////////////////////////////////////////////////
-WXCRYST_ID ID_MOLATOM_SCATTPOW;
-WXCRYST_ID ID_MOLATOM_NAME;
+static const long ID_MOLATOM_SCATTPOW=WXCRYST_ID();
+static const long ID_MOLATOM_NAME=WXCRYST_ID();
 
 BEGIN_EVENT_TABLE(WXMolAtom,wxWindow)
    EVT_BUTTON(ID_MOLATOM_SCATTPOW,    WXMolAtom::OnChangeScattPow)

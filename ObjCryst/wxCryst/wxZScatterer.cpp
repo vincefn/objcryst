@@ -49,6 +49,12 @@ namespace ObjCryst
 //    WXZAtom
 //
 ////////////////////////////////////////////////////////////////////////
+static const long ID_ZATOM_NAME=    WXCRYST_ID();
+static const long ID_ZATOM_SCATTPOW=WXCRYST_ID();
+static const long ID_ZATOM_BOND=    WXCRYST_ID();
+static const long ID_ZATOM_ANGLE=   WXCRYST_ID();
+static const long ID_ZATOM_DIHED=   WXCRYST_ID();
+
 BEGIN_EVENT_TABLE(WXZAtom,wxWindow)
    EVT_BUTTON(ID_ZATOM_SCATTPOW,    WXZAtom::OnChangeScattPow)
 END_EVENT_TABLE()
@@ -202,6 +208,15 @@ void WXZAtom::OnChangeScattPow(wxCommandEvent & WXUNUSED(event))
 //    WXZScatterer
 //
 ////////////////////////////////////////////////////////////////////////
+static const long ID_ZSCATTERER_MENU_ATOM=                  WXCRYST_ID();
+static const long ID_ZSCATTERER_MENU_ATOM_ADD=              WXCRYST_ID();
+static const long ID_ZSCATTERER_MENU_ATOM_CHANGE_PIVOT=     WXCRYST_ID();
+static const long ID_ZSCATTERER_MENU_PAR_LIMITS_RELAT_BOND= WXCRYST_ID();
+static const long ID_ZSCATTERER_MENU_PAR_LIMITS_RELAT_ANGLE=WXCRYST_ID();
+static const long ID_ZSCATTERER_MENU_PAR_LIMITS_RELAT_DIHED=WXCRYST_ID();
+static const long ID_ZSCATTERER_MENU_FILE=                  WXCRYST_ID();
+static const long ID_ZSCATTERER_MENU_IMPORT_FHZ=            WXCRYST_ID();
+static const long ID_ZSCATTERER_MENU_EXPORT_FHZ=            WXCRYST_ID();
 BEGIN_EVENT_TABLE(WXZScatterer,wxWindow)
    EVT_BUTTON(ID_WXOBJ_COLLAPSE,                       WXCrystObj::OnToggleCollapse)
    EVT_MENU(ID_REFOBJ_MENU_PAR_FIXALL,                 WXRefinableObj::OnMenuFixAllPar)
@@ -391,73 +406,67 @@ void WXZScatterer::OnMenuSetLimits(wxCommandEvent & event)
 {//:TODO: Need to 
    VFN_DEBUG_ENTRY("WXZScatterer::OnMenuSetLimits()",6)
    WXCrystValidateAllUserInput();
-   switch(event.GetId())
+   if(event.GetId()==ID_ZSCATTERER_MENU_PAR_LIMITS_RELAT_BOND)
    {
-      case ID_ZSCATTERER_MENU_PAR_LIMITS_RELAT_BOND:
+      double limit=.1;
+      wxTextEntryDialog limitDialog(this,"Enter maximum shift in Angstroems\n The limits are taken symmetrically around current position:\n X0-l < X < X0+l ",
+                              "Set limits (relative) for bondlengths",".1",wxOK | wxCANCEL);
+      if(wxID_OK!=limitDialog.ShowModal())
       {
-         double limit=.1;
-         wxTextEntryDialog limitDialog(this,"Enter maximum shift in Angstroems\n The limits are taken symmetrically around current position:\n X0-l < X < X0+l ",
-                                 "Set limits (relative) for bondlengths",".1",wxOK | wxCANCEL);
-         if(wxID_OK!=limitDialog.ShowModal())
-         {
-            VFN_DEBUG_EXIT("WXZScatterer::OnMenuSetLimits():Cancelled",6)
-            return;
-         }
-         limitDialog.GetValue().ToDouble(&limit);
-         if(limit<=0)
-         {
-            wxMessageDialog dumbUser(this,"Limit must be > 0 !",
-                                     "Whooops",wxOK|wxICON_EXCLAMATION);
-            dumbUser.ShowModal();
-            return;
-         }
-         mpZScatterer->SetLimitsRelative(gpRefParTypeScattConformBondLength,-limit,limit);
-         break;
+         VFN_DEBUG_EXIT("WXZScatterer::OnMenuSetLimits():Cancelled",6)
+         return;
       }
-      case ID_ZSCATTERER_MENU_PAR_LIMITS_RELAT_ANGLE:
+      limitDialog.GetValue().ToDouble(&limit);
+      if(limit<=0)
       {
-         double limit=5;
-         wxTextEntryDialog limitDialog(this,"Enter maximum shift in Degrees\n The limits are taken symmetrically around current position:\n X0-l < X < X0+l ",
-                                 "Set limits (relative) for bond angles",".1",wxOK | wxCANCEL);
-         if(wxID_OK!=limitDialog.ShowModal())
-         {
-            VFN_DEBUG_EXIT("WXZScatterer::OnMenuSetLimits():Cancelled",6)
-            return;
-         }
-         limitDialog.GetValue().ToDouble(&limit);
-         if(limit<=0)
-         {
-            wxMessageDialog dumbUser(this,"Limit must be > 0 !",
-                                     "Whooops",wxOK|wxICON_EXCLAMATION);
-            dumbUser.ShowModal();
-            return;
-         }
-         limit *=DEG2RAD;
-         mpZScatterer->SetLimitsRelative(gpRefParTypeScattConformBondAngle,-limit,limit);
-         break;
+         wxMessageDialog dumbUser(this,"Limit must be > 0 !",
+                                  "Whooops",wxOK|wxICON_EXCLAMATION);
+         dumbUser.ShowModal();
+         return;
       }
-      case ID_ZSCATTERER_MENU_PAR_LIMITS_RELAT_DIHED:
+      mpZScatterer->SetLimitsRelative(gpRefParTypeScattConformBondLength,-limit,limit);
+   }
+   if(event.GetId()==ID_ZSCATTERER_MENU_PAR_LIMITS_RELAT_ANGLE)
+   {
+      double limit=5;
+      wxTextEntryDialog limitDialog(this,"Enter maximum shift in Degrees\n The limits are taken symmetrically around current position:\n X0-l < X < X0+l ",
+                              "Set limits (relative) for bond angles",".1",wxOK | wxCANCEL);
+      if(wxID_OK!=limitDialog.ShowModal())
       {
-         double limit=5;
-         wxTextEntryDialog limitDialog(this,"Enter maximum shift in Degrees\n The limits are taken symmetrically around current position:\n X0-l < X < X0+l ",
-                                 "Set limits (relative) for dihedral angles",".1",wxOK | wxCANCEL);
-         if(wxID_OK!=limitDialog.ShowModal())
-         {
-            VFN_DEBUG_EXIT("WXZScatterer::OnMenuSetLimits():Cancelled",6)
-            return;
-         }
-         limitDialog.GetValue().ToDouble(&limit);
-         if(limit<=0)
-         {
-            wxMessageDialog dumbUser(this,"Limit must be > 0 !",
-                                     "Whooops",wxOK|wxICON_EXCLAMATION);
-            dumbUser.ShowModal();
-            return;
-         }
-         limit *=DEG2RAD;
-         mpZScatterer->SetLimitsRelative(gpRefParTypeScattConformDihedAngle,-limit,limit);
-         break;
+         VFN_DEBUG_EXIT("WXZScatterer::OnMenuSetLimits():Cancelled",6)
+         return;
       }
+      limitDialog.GetValue().ToDouble(&limit);
+      if(limit<=0)
+      {
+         wxMessageDialog dumbUser(this,"Limit must be > 0 !",
+                                  "Whooops",wxOK|wxICON_EXCLAMATION);
+         dumbUser.ShowModal();
+         return;
+      }
+      limit *=DEG2RAD;
+      mpZScatterer->SetLimitsRelative(gpRefParTypeScattConformBondAngle,-limit,limit);
+   }
+   if(event.GetId()==ID_ZSCATTERER_MENU_PAR_LIMITS_RELAT_DIHED)
+   {
+      double limit=5;
+      wxTextEntryDialog limitDialog(this,"Enter maximum shift in Degrees\n The limits are taken symmetrically around current position:\n X0-l < X < X0+l ",
+                              "Set limits (relative) for dihedral angles",".1",wxOK | wxCANCEL);
+      if(wxID_OK!=limitDialog.ShowModal())
+      {
+         VFN_DEBUG_EXIT("WXZScatterer::OnMenuSetLimits():Cancelled",6)
+         return;
+      }
+      limitDialog.GetValue().ToDouble(&limit);
+      if(limit<=0)
+      {
+         wxMessageDialog dumbUser(this,"Limit must be > 0 !",
+                                  "Whooops",wxOK|wxICON_EXCLAMATION);
+         dumbUser.ShowModal();
+         return;
+      }
+      limit *=DEG2RAD;
+      mpZScatterer->SetLimitsRelative(gpRefParTypeScattConformDihedAngle,-limit,limit);
    }
 }
 

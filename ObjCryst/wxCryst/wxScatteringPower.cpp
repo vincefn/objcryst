@@ -48,6 +48,10 @@ namespace ObjCryst
 //    WXScatteringPowerAtom
 //
 ////////////////////////////////////////////////////////////////////////
+static const long ID_WXSCATTPOWATOM_SYMBOL          =WXCRYST_ID();
+static const long ID_SCATTPOWATOM_MENU_COLOUR       =WXCRYST_ID();
+static const long ID_SCATTPOWATOM_MENU_COLOUR_SETRGB=WXCRYST_ID();
+
 BEGIN_EVENT_TABLE(WXScatteringPowerAtom, wxWindow)
    EVT_MENU(ID_SCATTPOWATOM_MENU_COLOUR_SETRGB, WXScatteringPowerAtom::OnChangeColour)
    EVT_UPDATE_UI(ID_CRYST_UPDATEUI,             WXRefinableObj::OnUpdateUI)
@@ -95,16 +99,13 @@ bool WXScatteringPowerAtom::OnChangeName(const int id)
 {
    VFN_DEBUG_MESSAGE("WXScatteringPowerAtom::OnChangeName()",6)
    if(this->WXRefinableObj::OnChangeName(id)==true) return true;
-   switch(id)
+   if(id==ID_WXSCATTPOWATOM_SYMBOL)
    {
-      case ID_WXSCATTPOWATOM_SYMBOL:
-      {
-         VFN_DEBUG_MESSAGE("WXScatteringPowerAtom::OnChangeName():Changing Symbol",6)
-         mpScatteringPowerAtom->Init(mpScatteringPowerAtom->GetName(),
-                                     mpFieldSymbol->GetValue(),
-                                     mpScatteringPowerAtom->GetBiso());
-         return true;
-      }
+      VFN_DEBUG_MESSAGE("WXScatteringPowerAtom::OnChangeName():Changing Symbol",6)
+      mpScatteringPowerAtom->Init(mpScatteringPowerAtom->GetName(),
+                                  mpFieldSymbol->GetValue(),
+                                  mpScatteringPowerAtom->GetBiso());
+      return true;
    }
    return false;
 }

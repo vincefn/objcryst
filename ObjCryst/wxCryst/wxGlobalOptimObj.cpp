@@ -53,6 +53,15 @@ namespace ObjCryst
 //    WXOptimizationObj
 //
 ////////////////////////////////////////////////////////////////////////
+static long ID_GLOBALOPT_MENU_OBJECTS=               WXCRYST_ID(); 
+static long ID_GLOBALOPT_MENU_OBJECTS_ADDOBJ=        WXCRYST_ID(); 
+static long ID_GLOBALOPT_MENU_OBJECTS_REMOVEOBJ=     WXCRYST_ID(); 
+static long ID_GLOBALOPT_MENU_OBJECTS_ADDCOSTFUNC=   WXCRYST_ID(); 
+static long ID_GLOBALOPT_MENU_OBJECTS_REMOVECOSTFUNC=WXCRYST_ID(); 
+static long ID_GLOBALOPT_MENU_OPT=                   WXCRYST_ID(); 
+static long ID_GLOBALOPT_MENU_OPT_RUN=               WXCRYST_ID(); 
+static long ID_GLOBALOPT_MENU_OPT_STOP=              WXCRYST_ID(); 
+
 WXOptimizationObj::WXOptimizationObj(wxWindow* parent, OptimizationObj *obj):
 WXCrystObj(parent),mpGlobalOptimRunThread(0)
 {
@@ -106,14 +115,11 @@ void WXOptimizationObj::CrystUpdate()
 bool WXOptimizationObj::OnChangeName(const int id)
 {
    VFN_DEBUG_MESSAGE("WXOptimizationObj::OnChangeName()",6)
-   switch(id)
+   if(id==ID_WXOBJ_NAME)
    {
-      case ID_WXOBJ_NAME:
-      {
-      VFN_DEBUG_MESSAGE("WXOptimizationObj::OnChangeName():Changing GlobalOptimObj Name",6)
-         this->GetOptimizationObj().SetName(mpWXTitle->GetValue());
-         return true;
-      }
+   VFN_DEBUG_MESSAGE("WXOptimizationObj::OnChangeName():Changing GlobalOptimObj Name",6)
+      this->GetOptimizationObj().SetName(mpWXTitle->GetValue());
+      return true;
    }
    return false;
 }

@@ -47,6 +47,8 @@ namespace ObjCryst
 //    WXAtom
 //
 ////////////////////////////////////////////////////////////////////////
+static const long ID_ATOM_SCATTPOW=WXCRYST_ID();
+
 BEGIN_EVENT_TABLE(WXAtom,wxWindow)
    EVT_BUTTON(ID_ATOM_SCATTPOW,     WXAtom::OnChangeScattPow)
 END_EVENT_TABLE()

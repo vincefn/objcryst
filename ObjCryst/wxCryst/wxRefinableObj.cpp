@@ -67,6 +67,12 @@ extern WXField *spLastWXFieldInputNotValidated;
 //    WXFieldRefPar
 //
 ////////////////////////////////////////////////////////////////////////
+static const long ID_WXFIELD_REFPAR              =WXCRYST_ID();
+static const long ID_WXFIELD_REFPAR_FIXBUTTON    =WXCRYST_ID();
+static const long ID_WXFIELD_REFPAR_LIMITEDBUTTON=WXCRYST_ID();
+static const long ID_REFPAR_POPUP_SET_LIMITS     =WXCRYST_ID();
+static const long ID_REFPAR_POPUP_REMOVE_LIMITS  =WXCRYST_ID();
+
 BEGIN_EVENT_TABLE(WXFieldRefPar,wxEvtHandler)
    EVT_TEXT_ENTER(ID_WXFIELD,                   WXFieldRefPar::OnEnter)
    EVT_TEXT(ID_WXFIELD,                         WXFieldRefPar::OnText)
@@ -143,51 +149,45 @@ void WXFieldRefPar::OnPopupMenu(wxCommandEvent & WXUNUSED(event))
 void WXFieldRefPar::OnPopupMenuChoice(wxMenuEvent& event)
 {
    VFN_DEBUG_MESSAGE("WXFieldRefPar::OnPopupMenuChoice()",7)
-   switch(event.GetId())
+   if(event.GetId()== ID_REFPAR_POPUP_SET_LIMITS)
    {
-      case ID_REFPAR_POPUP_SET_LIMITS:
+      double min,max;
       {
-         double min,max;
+         wxString str;
+         str << mpRefPar->GetHumanMin();
+         wxTextEntryDialog limitDialog(this,"Enter the minimum value",
+                                 "Minimum",str,wxOK | wxCANCEL);
+         if(wxID_OK!=limitDialog.ShowModal())
          {
-            wxString str;
-            str << mpRefPar->GetHumanMin();
-            wxTextEntryDialog limitDialog(this,"Enter the minimum value",
-                                    "Minimum",str,wxOK | wxCANCEL);
-            if(wxID_OK!=limitDialog.ShowModal())
-            {
-               VFN_DEBUG_EXIT("WXZScatterer::OnMenuSetLimits():Cancelled",6)
-               return;
-            }
-            limitDialog.GetValue().ToDouble(&min);
-         }
-         {
-            wxString str;
-            str << mpRefPar->GetHumanMax();
-            wxTextEntryDialog limitDialog(this,"Enter the maximum value",
-                                    "Maximum",str,wxOK | wxCANCEL);
-            if(wxID_OK!=limitDialog.ShowModal())
-            {
-               VFN_DEBUG_EXIT("WXZScatterer::OnMenuSetLimits():Cancelled",6)
-               return;
-            }
-            limitDialog.GetValue().ToDouble(&max);
-         }
-         if(max<=min)
-         {
-            wxMessageDialog dumbUser(this,"max <= min !!!",
-                                     "Whooops",wxOK|wxICON_EXCLAMATION);
-            dumbUser.ShowModal();
+            VFN_DEBUG_EXIT("WXZScatterer::OnMenuSetLimits():Cancelled",6)
             return;
          }
-         mpRefPar->SetHumanMin(min);
-         mpRefPar->SetHumanMax(max);
-         mpRefPar->SetIsLimited(true);
-         mpRefPar->Print();
-         break;
+         limitDialog.GetValue().ToDouble(&min);
       }
-      //case ID_REFPAR_POPUP_REMOVE_LIMITS:mpRefPar->SetIsLimited(false);mpRefPar->Print();break;
+      {
+         wxString str;
+         str << mpRefPar->GetHumanMax();
+         wxTextEntryDialog limitDialog(this,"Enter the maximum value",
+                                 "Maximum",str,wxOK | wxCANCEL);
+         if(wxID_OK!=limitDialog.ShowModal())
+         {
+            VFN_DEBUG_EXIT("WXZScatterer::OnMenuSetLimits():Cancelled",6)
+            return;
+         }
+         limitDialog.GetValue().ToDouble(&max);
+      }
+      if(max<=min)
+      {
+         wxMessageDialog dumbUser(this,"max <= min !!!",
+                                  "Whooops",wxOK|wxICON_EXCLAMATION);
+         dumbUser.ShowModal();
+         return;
+      }
+      mpRefPar->SetHumanMin(min);
+      mpRefPar->SetHumanMax(max);
+      mpRefPar->SetIsLimited(true);
+      mpRefPar->Print();
    }
- 
 }
 
 void WXFieldRefPar::CrystUpdate()
@@ -342,13 +342,10 @@ template<class T> void WXRegistry<T>::Remove(WXCrystObjBasic *obj)
 template<class T> bool WXRegistry<T>::OnChangeName(const int id)
 {
    VFN_DEBUG_MESSAGE("WXRegistry<T>::OnChangeName()",6)
-   switch(id)
+   if(id==ID_WXOBJ_NAME)
    {
-      case ID_WXOBJ_NAME:
-      {
-         mpRegistry->SetName(mpWXTitle->GetValue());
-         return true;
-      }
+      mpRegistry->SetName(mpWXTitle->GetValue());
+      return true;
    }
    return false;
 }
@@ -479,7 +476,7 @@ BEGIN_EVENT_TABLE(WXRefinableObj,wxWindow)
    EVT_MENU(ID_REFOBJ_MENU_OBJ_LOAD,        WXRefinableObj::OnMenuLoad)
    EVT_MENU(ID_REFOBJ_MENU_PAR_FIXALL,      WXRefinableObj::OnMenuFixAllPar)
    EVT_MENU(ID_REFOBJ_MENU_PAR_UNFIXALL,    WXRefinableObj::OnMenuUnFixAllPar)
-   EVT_MENU(ID_REFOBJ_MENU_PAR_RANDOMIZE,   WXRefinableObj::OnMenuUnFixAllPar)
+   EVT_MENU(ID_REFOBJ_MENU_PAR_RANDOMIZE,   WXRefinableObj::OnMenuParRandomize)
    EVT_UPDATE_UI(ID_CRYST_UPDATEUI,         WXRefinableObj::OnUpdateUI)
 END_EVENT_TABLE()
 
@@ -543,14 +540,11 @@ void WXRefinableObj::CrystUpdate()
 bool WXRefinableObj::OnChangeName(const int id)
 {
    VFN_DEBUG_MESSAGE("WXRefinableObj::OnChangeName()",6)
-   switch(id)
+   if(id==ID_WXOBJ_NAME)
    {
-      case ID_WXOBJ_NAME:
-      {
-      VFN_DEBUG_MESSAGE("WXRefinableObj::OnChangeName():Changing RefinableObj Name",6)
-         mpRefinableObj->SetName(mpWXTitle->GetValue());
-         return true;
-      }
+   VFN_DEBUG_MESSAGE("WXRefinableObj::OnChangeName():Changing RefinableObj Name",6)
+      mpRefinableObj->SetName(mpWXTitle->GetValue());
+      return true;
    }
    return false;
 }

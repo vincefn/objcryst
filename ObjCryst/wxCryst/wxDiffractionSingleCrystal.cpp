@@ -49,6 +49,30 @@ namespace ObjCryst
 //    WXDiffractionSingleCrystal
 //
 ////////////////////////////////////////////////////////////////////////
+static long ID_DIFFSINGLECRYST_MENU_SAVEHKLIOBSICALC=      WXCRYST_ID(); 
+static long ID_DIFFSINGLECRYST_MENU_SAVEHKLFCALC=          WXCRYST_ID(); 
+static long ID_DIFFSINGLECRYST_MENU_SIMULATE=              WXCRYST_ID(); 
+static long ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBS=        WXCRYST_ID(); 
+static long ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBSSIGMA=   WXCRYST_ID(); 
+static long ID_DIFFSINGLECRYST_MENU_IMPORT_JANAM91=        WXCRYST_ID(); 
+static long ID_DIFFSINGLECRYST_MENU_FITSCALE_R=            WXCRYST_ID(); 
+static long ID_DIFFSINGLECRYST_MENU_FITSCALE_RW=           WXCRYST_ID(); 
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH=            WXCRYST_ID(); 
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_XRAY=       WXCRYST_ID(); 
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_NEUTRON=    WXCRYST_ID(); 
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET=        WXCRYST_ID(); 
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_AG=     WXCRYST_ID(); 
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_MO=     WXCRYST_ID(); 
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CU=     WXCRYST_ID(); 
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_FE=     WXCRYST_ID(); 
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CR=     WXCRYST_ID(); 
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_AGA1=   WXCRYST_ID(); 
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_MOA1=   WXCRYST_ID(); 
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CUA1=   WXCRYST_ID(); 
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_FEA1=   WXCRYST_ID(); 
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CRA1=   WXCRYST_ID(); 
+static long ID_DIFFSINGLECRYST_CRYSTAL=                    WXCRYST_ID(); 
+  
 BEGIN_EVENT_TABLE(WXDiffractionSingleCrystal, wxWindow)
    EVT_BUTTON(ID_WXOBJ_COLLAPSE,                        WXCrystObj::OnToggleCollapse)
    EVT_MENU(ID_REFOBJ_MENU_OBJ_SAVE,                    WXRefinableObj::OnMenuSave)
@@ -229,51 +253,48 @@ void WXDiffractionSingleCrystal::OnMenuSimulate(wxCommandEvent & WXUNUSED(event)
 }
 void WXDiffractionSingleCrystal::OnMenuImport(wxCommandEvent & event)
 {
-   switch(event.GetId())
+   if(event.GetId()== ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBS)
    {
-      case ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBS:
+      wxFileDialog open(this,"Choose file to import from",
+                                     "","","*.*",wxOPEN | wxFILE_MUST_EXIST);
+      if(open.ShowModal() != wxID_OK) return;
+      long nb=0;
       {
-         wxFileDialog open(this,"Choose file to import from",
-                                        "","","*.*",wxOPEN | wxFILE_MUST_EXIST);
-         if(open.ShowModal() != wxID_OK) return;
-         long nb=0;
+         wxTextEntryDialog dialog(this,"Number of reflections",
+                                 "Enter The number of reflections to import","50",
+                                 wxOK | wxCANCEL);
+         if(wxID_OK!=dialog.ShowModal())
          {
-            wxTextEntryDialog dialog(this,"Number of reflections",
-                                    "Enter The number of reflections to import","50",
-                                    wxOK | wxCANCEL);
-            if(wxID_OK!=dialog.ShowModal())
-            {
-               VFN_DEBUG_EXIT("WXDiffractionSingleCrystal::OnMenuImport():Cancelled",6)
-               return;
-            }
-            dialog.GetValue().ToLong(&nb);
+            VFN_DEBUG_EXIT("WXDiffractionSingleCrystal))OnMenuImport())Cancelled",6)
+            return;
          }
-         mpData->ImportHklIobs(open.GetPath().c_str(),nb);
-         return;
+         dialog.GetValue().ToLong(&nb);
       }
-      case ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBSSIGMA:
+      mpData->ImportHklIobs(open.GetPath().c_str(),nb);
+      return;
+   }
+   if(event.GetId()== ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBSSIGMA)
+   {
+      wxFileDialog open(this,"Choose file to import from",
+                                     "","","*.*",wxOPEN | wxFILE_MUST_EXIST);
+      if(open.ShowModal() != wxID_OK) return;
+      long nb=0;
       {
-         wxFileDialog open(this,"Choose file to import from",
-                                        "","","*.*",wxOPEN | wxFILE_MUST_EXIST);
-         if(open.ShowModal() != wxID_OK) return;
-         long nb=0;
+         wxTextEntryDialog dialog(this,"Number of reflections",
+                                 "Enter The number of reflections to import","50",
+                                 wxOK | wxCANCEL);
+         if(wxID_OK!=dialog.ShowModal())
          {
-            wxTextEntryDialog dialog(this,"Number of reflections",
-                                    "Enter The number of reflections to import","50",
-                                    wxOK | wxCANCEL);
-            if(wxID_OK!=dialog.ShowModal())
-            {
-               VFN_DEBUG_EXIT("WXDiffractionSingleCrystal::OnMenuImport():Cancelled",6)
-               return;
-            }
-            dialog.GetValue().ToLong(&nb);
+            VFN_DEBUG_EXIT("WXDiffractionSingleCrystal))OnMenuImport())Cancelled",6)
+            return;
          }
-         mpData->ImportHklIobsSigma(open.GetPath().c_str(),nb);
-         return;
+         dialog.GetValue().ToLong(&nb);
       }
-      case ID_DIFFSINGLECRYST_MENU_IMPORT_JANAM91:
-      {
-      }
+      mpData->ImportHklIobsSigma(open.GetPath().c_str(),nb);
+      return;
+   }
+   if(event.GetId()== ID_DIFFSINGLECRYST_MENU_IMPORT_JANAM91)
+   {
    }
 }
 void WXDiffractionSingleCrystal::OnMenuSaveHKLIobsIcalc(wxCommandEvent & WXUNUSED(event))
@@ -299,46 +320,43 @@ void WXDiffractionSingleCrystal::OnMenuSetWavelength(wxCommandEvent &event)
 {
    WXCrystValidateAllUserInput();
    //:TODO: Use wxRadiation instead
-   switch(event.GetId())
+   if(event.GetId()== ID_DIFFSINGLECRYST_MENU_WAVELENGTH_XRAY)
+      mpData->SetRadiationType(RAD_XRAY);
+   if(event.GetId()== ID_DIFFSINGLECRYST_MENU_WAVELENGTH_NEUTRON)
+      mpData->SetRadiationType(RAD_NEUTRON);
+   if(event.GetId()== ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET)
    {
-      case ID_DIFFSINGLECRYST_MENU_WAVELENGTH_XRAY:
-         mpData->SetRadiationType(RAD_XRAY);break;
-      case ID_DIFFSINGLECRYST_MENU_WAVELENGTH_NEUTRON:
-         mpData->SetRadiationType(RAD_NEUTRON);break;
-      case ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET:
+      double lambda;
+      wxTextEntryDialog dialog(this,"new Wavelength)",
+                              "Enter new Wavelength (Angstroems)","1",wxOK | wxCANCEL);
+      if(wxID_OK!=dialog.ShowModal())
       {
-         double lambda;
-         wxTextEntryDialog dialog(this,"new Wavelength:",
-                                 "Enter new Wavelength (Angstroems)","1",wxOK | wxCANCEL);
-         if(wxID_OK!=dialog.ShowModal())
-         {
-            VFN_DEBUG_EXIT("WXDiffractionSingleCrystal::OnMenuSetWavelength():Monochromatic:Cancelled",6)
-            return;
-         }
-         dialog.GetValue().ToDouble(&lambda);
-         mpData->SetWavelength(lambda);break;
+         VFN_DEBUG_EXIT("WXDiffractionSingleCrystal))OnMenuSetWavelength())Monochromatic)Cancelled",6)
+         return;
       }
-      case ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_AG:
-         mpData->SetWavelength("Ag");break;
-      case ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_MO:
-         mpData->SetWavelength("Mo");break;
-      case ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CU:
-         mpData->SetWavelength("Cu");break;
-      case ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_FE:
-         mpData->SetWavelength("Fe");break;
-      case ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CR:
-         mpData->SetWavelength("Cr");break;
-      case ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_AGA1:
-         mpData->SetWavelength("AgA1");break;
-      case ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_MOA1:
-         mpData->SetWavelength("MoA1");break;
-      case ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CUA1:
-         mpData->SetWavelength("CuA1");break;
-      case ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_FEA1:
-         mpData->SetWavelength("FeA1");break;
-      case ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CRA1:
-         mpData->SetWavelength("CrA1");break;
+      dialog.GetValue().ToDouble(&lambda);
+      mpData->SetWavelength(lambda);
    }
+   if(event.GetId()== ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_AG)
+      mpData->SetWavelength("Ag");
+   if(event.GetId()== ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_MO)
+      mpData->SetWavelength("Mo");
+   if(event.GetId()== ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CU)
+      mpData->SetWavelength("Cu");
+   if(event.GetId()== ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_FE)
+      mpData->SetWavelength("Fe");
+   if(event.GetId()== ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CR)
+      mpData->SetWavelength("Cr");
+   if(event.GetId()== ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_AGA1)
+      mpData->SetWavelength("AgA1");
+   if(event.GetId()== ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_MOA1)
+      mpData->SetWavelength("MoA1");
+   if(event.GetId()== ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CUA1)
+      mpData->SetWavelength("CuA1");
+   if(event.GetId()== ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_FEA1)
+      mpData->SetWavelength("FeA1");
+   if(event.GetId()== ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CRA1)
+      mpData->SetWavelength("CrA1");
    this->CrystUpdate();
 }
 void WXDiffractionSingleCrystal::OnChangeCrystal(wxCommandEvent & WXUNUSED(event))

@@ -126,6 +126,47 @@ void WXRadiation::OnUpdateUI(wxUpdateUIEvent& event)
 //    WXPowderPattern
 //
 ////////////////////////////////////////////////////////////////////////
+static const long ID_POWDERSPECTRUM_MENU_SCATT_ADDCOMPBACKGD=       WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_SCATT_ADDCOMPCRYST=        WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_GRAPH=                     WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_SAVETEXT=                  WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_SIMULATE=                  WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_IMPORT_FULLPROF=           WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_IMPORT_PSI_DMC=            WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_IMPORT_ILL_D1A5=           WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_IMPORT_XDD=                WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_IMPORT_CPI=                WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_IMPORT_FULLPROF4=          WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_IMPORT_MULTIDETECTORLLBG42=WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_IMPORT_2THETAOBSSIGMA=     WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_IMPORT_2THETAOBS=          WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_FITSCALE_R=                WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_FITSCALE_RW=               WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH=                WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_XRAY=           WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_NEUTRON=        WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET=            WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_AG=         WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_MO=         WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CU=         WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_FE=         WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CR=         WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_AGA1=       WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_MOA1=       WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CUA1=       WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_FEA1=       WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CRA1=       WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_MENU_ADD_2THETA_EXCLUDE=        WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUMGRAPH_MENU_UPDATE=               WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUMBACKGROUND_IMPORT=               WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUMDIFF_CRYSTAL=                    WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUMDIFF_SAVEHKLFCALC=               WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUM_GRAPH_NEW_PATTERN=              WXCRYST_ID(); 
+static const long ID_POWDERTEXTURE_MENU_ADDPHASE=                   WXCRYST_ID(); 
+static const long ID_POWDERTEXTURE_MENU_DELETEPHASE=                WXCRYST_ID(); 
+static const long ID_POWDERPATTERN_MENU_COMPONENTS=                 WXCRYST_ID(); 
+static const long ID_POWDERPATTERN_MENU_PATTERN=                    WXCRYST_ID(); 
+  
 BEGIN_EVENT_TABLE(WXPowderPattern, wxWindow)
    EVT_BUTTON(ID_WXOBJ_COLLAPSE,                       WXCrystObj::OnToggleCollapse)
    EVT_MENU(ID_REFOBJ_MENU_OBJ_SAVE,                   WXRefinableObj::OnMenuSave)
@@ -203,11 +244,11 @@ WXRefinableObj(parent,pow),mpPowderPattern(pow),mpGraph(0)
       mpMenuBar->AddMenu("Parameters",ID_REFOBJ_MENU_PAR);
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_FIXALL,"Fix all");
          //mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_UNFIXALL,"Unfix all");
-      mpMenuBar->AddMenu("Components",ID_CRYSTAL_MENU_SCATT);
-         mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,
+      mpMenuBar->AddMenu("Components",ID_POWDERPATTERN_MENU_COMPONENTS);
+         mpMenuBar->AddMenuItem(ID_POWDERPATTERN_MENU_COMPONENTS,
                                 ID_POWDERSPECTRUM_MENU_SCATT_ADDCOMPBACKGD,
                                 "Add Interpolated Background");
-         mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_POWDERSPECTRUM_MENU_SCATT_ADDCOMPCRYST,
+         mpMenuBar->AddMenuItem(ID_POWDERPATTERN_MENU_COMPONENTS,ID_POWDERSPECTRUM_MENU_SCATT_ADDCOMPCRYST,
                                 "Add Crystalline Phase");
       mpMenuBar->AddMenu("Radiation",ID_POWDERSPECTRUM_MENU_WAVELENGTH);
          mpMenuBar->AddMenuItem(ID_POWDERSPECTRUM_MENU_WAVELENGTH,
@@ -249,14 +290,14 @@ WXRefinableObj(parent,pow),mpPowderPattern(pow),mpGraph(0)
          mpMenuBar->AddMenuItem(ID_POWDERSPECTRUM_MENU_WAVELENGTH,
                                 ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CRA1,
                                 "X-Ray Tube Cr Ka1");
-      mpMenuBar->AddMenu("Pattern",ID_CRYSTAL_MENU_DISPLAY);
-         mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_DISPLAY,ID_POWDERSPECTRUM_MENU_GRAPH,
+      mpMenuBar->AddMenu("Pattern",ID_POWDERPATTERN_MENU_PATTERN);
+         mpMenuBar->AddMenuItem(ID_POWDERPATTERN_MENU_PATTERN,ID_POWDERSPECTRUM_MENU_GRAPH,
                                 "Show Graph");
-         mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_DISPLAY,ID_POWDERSPECTRUM_MENU_FITSCALE_R,
+         mpMenuBar->AddMenuItem(ID_POWDERPATTERN_MENU_PATTERN,ID_POWDERSPECTRUM_MENU_FITSCALE_R,
                                 "Fit Scale for R");
-         mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_DISPLAY,ID_POWDERSPECTRUM_MENU_FITSCALE_RW,
+         mpMenuBar->AddMenuItem(ID_POWDERPATTERN_MENU_PATTERN,ID_POWDERSPECTRUM_MENU_FITSCALE_RW,
                                 "Fit Scale for Rw");
-         mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_DISPLAY,
+         mpMenuBar->AddMenuItem(ID_POWDERPATTERN_MENU_PATTERN,
                                 ID_POWDERSPECTRUM_MENU_ADD_2THETA_EXCLUDE,
                                 "Add 2Theta excluded region");
    //Radiation
@@ -578,46 +619,43 @@ void WXPowderPattern::OnMenuSetWavelength(wxCommandEvent & event)
    // this looks stupid. In fact, if a user changed the wavelength in the
    // corresponding field, this is (unfortunately) not applied to the
    // components automagically. So we need this function to do the job...
-   switch(event.GetId())
+   if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_XRAY)
+      mpPowderPattern->SetRadiationType(RAD_XRAY);
+   if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_NEUTRON)
+      mpPowderPattern->SetRadiationType(RAD_NEUTRON);
+   if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET)
    {
-      case ID_POWDERSPECTRUM_MENU_WAVELENGTH_XRAY:
-         mpPowderPattern->SetRadiationType(RAD_XRAY);break;
-      case ID_POWDERSPECTRUM_MENU_WAVELENGTH_NEUTRON:
-         mpPowderPattern->SetRadiationType(RAD_NEUTRON);break;
-      case ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET:
+      double lambda;
+      wxTextEntryDialog dialog(this,"new Wavelength)",
+                              "Enter new Wavelength (Angstroems)","1",wxOK | wxCANCEL);
+      if(wxID_OK!=dialog.ShowModal())
       {
-         double lambda;
-         wxTextEntryDialog dialog(this,"new Wavelength:",
-                                 "Enter new Wavelength (Angstroems)","1",wxOK | wxCANCEL);
-         if(wxID_OK!=dialog.ShowModal())
-         {
-            VFN_DEBUG_EXIT("WXPowderPattern::OnMenuSetWavelength():Monochromatic:Cancelled",6)
-            return;
-         }
-         dialog.GetValue().ToDouble(&lambda);
-         mpPowderPattern->SetWavelength(lambda);break;
+         VFN_DEBUG_EXIT("WXPowderPattern))OnMenuSetWavelength())Monochromatic)Cancelled",6)
+         return;
       }
-      case ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_AG:
-         mpPowderPattern->SetWavelength("Ag");break;
-      case ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_MO:
-         mpPowderPattern->SetWavelength("Mo");break;
-      case ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CU:
-         mpPowderPattern->SetWavelength("Cu");break;
-      case ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_FE:
-         mpPowderPattern->SetWavelength("Fe");break;
-      case ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CR:
-         mpPowderPattern->SetWavelength("Cr");break;
-      case ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_AGA1:
-         mpPowderPattern->SetWavelength("AgA1");break;
-      case ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_MOA1:
-         mpPowderPattern->SetWavelength("MoA1");break;
-      case ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CUA1:
-         mpPowderPattern->SetWavelength("CuA1");break;
-      case ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_FEA1:
-         mpPowderPattern->SetWavelength("FeA1");break;
-      case ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CRA1:
-         mpPowderPattern->SetWavelength("CrA1");break;
+      dialog.GetValue().ToDouble(&lambda);
+      mpPowderPattern->SetWavelength(lambda);
    }
+   if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_AG)
+      mpPowderPattern->SetWavelength("Ag");
+   if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_MO)
+      mpPowderPattern->SetWavelength("Mo");
+   if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CU)
+      mpPowderPattern->SetWavelength("Cu");
+   if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_FE)
+      mpPowderPattern->SetWavelength("Fe");
+   if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CR)
+      mpPowderPattern->SetWavelength("Cr");
+   if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_AGA1)
+      mpPowderPattern->SetWavelength("AgA1");
+   if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_MOA1)
+      mpPowderPattern->SetWavelength("MoA1");
+   if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CUA1)
+      mpPowderPattern->SetWavelength("CuA1");
+   if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_FEA1)
+      mpPowderPattern->SetWavelength("FeA1");
+   if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CRA1)
+      mpPowderPattern->SetWavelength("CrA1");
    this->CrystUpdate();
 }
 
