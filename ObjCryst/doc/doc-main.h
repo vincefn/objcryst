@@ -22,6 +22,12 @@
 
 /*! \mainpage %ObjCryst++ Object-Oriented Crystallographic Library
 *
+*\section warning Warning- General documentation outdated
+* Most of the general text in this documentation (status, etc...) is really
+* outdated, but should be helpful to understand the general use about the
+* library. The detailed class documentation, however, is always up-to-date
+* (it can be incomplete, though).
+*
 *\section index Index
 *  \li <a href="http://objcryst.sourceforge.net/">ObjCryst++ Homepage</a>
 *  \li <a href="http://www.sourceforge.net/projects/objcryst/">Project page on SourceForge</a>
