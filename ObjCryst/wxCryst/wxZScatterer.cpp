@@ -91,6 +91,7 @@ Molecule *ZScatterer2Molecule(ZScatterer *scatt)
                                  mol->GetAtom(scatt->GetZAngleAtom(i)),
                                  (pAngle->GetMin()+pAngle->GetMax())/2.,.01,.05);
       }
+      #if 0 //Dihedral angles are too much constraints, prefer a combnation of bond angles
       if(i>2)
       {
          const RefinablePar* pDihed=&(scatt->GetPar(&(scatt->GetZAtomRegistry()
@@ -112,6 +113,7 @@ Molecule *ZScatterer2Molecule(ZScatterer *scatt)
                                         (pDihed->GetMin()+pDihed->GetMax())/2.,.01,.05);
          }
       }
+      #endif
       mol->GetAtom(i).SetOccupancy(scatt->GetZAtomRegistry().GetObj(i).GetOccupancy());
    }
    for(unsigned int i=0;i<nb;++i)
@@ -126,6 +128,29 @@ Molecule *ZScatterer2Molecule(ZScatterer *scatt)
              &&(pos==mol->GetBondList().end()))
             mol->AddBond(mol->GetAtom(i),mol->GetAtom(j),dist,.01,.05);
       }
+   
+   for(map<unsigned long,set<unsigned long> >::const_iterator pos=mol->GetConnectivityTable().begin();
+       pos!=mol->GetConnectivityTable().end();++pos)
+   {
+      for(set<unsigned long>::const_iterator pos1=pos->second.begin();
+          pos1!=pos->second.end();++pos1)
+      {
+         for(set<unsigned long>::const_iterator pos2=pos1;
+          pos2!=pos->second.end();++pos2)
+          {
+            if(pos2==pos1) continue;
+            if(mol->FindBondAngle(mol->GetAtom(*pos1),
+                                  mol->GetAtom(pos->first),
+                                  mol->GetAtom(*pos2)) == mol->GetBondAngleList().end())
+               mol->AddBondAngle(mol->GetAtom(*pos1),
+                                 mol->GetAtom(pos->first),
+                                 mol->GetAtom(*pos2),
+                                 GetBondAngle(mol->GetAtom(*pos1),
+                                              mol->GetAtom(pos->first),
+                                              mol->GetAtom(*pos2)),0.01,0.05);
+          }
+      }
+   }
    x0 /= nb;
    y0 /= nb;
    z0 /= nb;
