@@ -1391,7 +1391,7 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                }
                bool doneFlip=false;
                list<FlipGroup>::const_iterator posFlip;
-               if((rand()%20)==0)
+               if(((rand()%20)==0)&&(mvFlipGroup.size()>0))
                {// Try a flip from time to time
                   const unsigned long i=rand() % mvFlipGroup.size();
                   posFlip=mvFlipGroup.begin();
