@@ -1006,10 +1006,11 @@ void Crystal::AddBondValenceRo(const ScatteringPower *pow1,const ScatteringPower
 REAL Crystal::GetBondValenceCost() const
 {
    VFN_DEBUG_MESSAGE("Crystal::GetBondValenceCost()?",4)
+   if(mBondValenceCostScale<1e-5) return 0.0;
    if(mvBondValenceRo.size()==0)
    {
       mBondValenceCost=0.0;
-      return mBondValenceCost;
+      return mBondValenceCost*mBondValenceCostScale;
    }
    this->CalcBondValenceSum();
    if(  (mBondValenceCostClock>mBondValenceCalcClock)
@@ -1026,7 +1027,7 @@ REAL Crystal::GetBondValenceCost() const
                         <<"="<<pos->second,4)
    }
    mBondValenceCostClock.Click();
-   return mBondValenceCost;
+   return mBondValenceCost*mBondValenceCostScale;
 }
 
 void Crystal::CalcBondValenceSum()const
