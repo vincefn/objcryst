@@ -389,7 +389,7 @@ wxScrolledWindow(parent),mpChild((wxWindow*)0),mHeight(-1),mWidth(-1)
    mpSizer=new wxBoxSizer(wxHORIZONTAL);
    this->SetSizer(mpSizer);
    this->FitInside();
-   this->SetScrollRate(60,60);
+   this->SetScrollRate(10,10);
 }
 
 bool WXCrystScrolledWindow::Layout()
