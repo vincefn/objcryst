@@ -858,7 +858,7 @@ template<class T> void ObjRegistry<T>::DeRegisterAll()
    #ifdef __WX__CRYST__
    if(0!=mpWXRegistry)
    {
-      vector<T*>::iterator pos;
+      typename vector<T*>::iterator pos;
       for(pos=mvpRegistry.begin();pos!=mvpRegistry.end();++pos)
          mpWXRegistry->Remove((*pos)->WXGet());
    }
