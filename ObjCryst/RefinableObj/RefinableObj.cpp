@@ -1498,6 +1498,13 @@ const void RefinableObj::EraseAllParamSet()
    mvpSavedValuesSet.clear();
 }
 
+const string& RefinableObj::GetParamSetName(const unsigned long id)const
+{
+   VFN_DEBUG_MESSAGE("RefinableObj::GetParamSetName()",2)
+   map<unsigned long,pair<CrystVector_REAL,string> >::const_iterator pos=this->FindParamSet(id);
+   return pos->second.second;
+}
+
 void RefinableObj::SetLimitsAbsolute(const string &name,const REAL min,const REAL max)
 {
    const long i=this->FindPar(name);

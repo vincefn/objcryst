@@ -874,6 +874,11 @@ class RefinableObj
       *
       */
       const void EraseAllParamSet();
+      /** \brief Get the name associated to a refpar set
+      *
+      * \param setId : the number identifying the set.
+      */
+      const string& GetParamSetName(const unsigned long setId)const;
       
       /// Change the limits for a given parameter, giving absolute new limits
       void SetLimitsAbsolute(const string &parName, const REAL min, const REAL max);
