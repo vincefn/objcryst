@@ -355,6 +355,8 @@ extern ObjRegistry<ScatteringPowerAtom> gScatteringPowerAtomRegistry;
 //######################################################################
 struct ScatteringComponent
 {
+   // Default Constructor
+   ScatteringComponent();
    bool operator==(const ScatteringComponent& rhs)const;
    bool operator!=(const ScatteringComponent& rhs)const;
    ///Print  one line oabout this component

@@ -766,6 +766,9 @@ WXCrystObjBasic* ScatteringPowerAtom::WXCreate(wxWindow* parent)
 //      SCATTERING COMPONENT
 //
 //######################################################################
+ScatteringComponent::ScatteringComponent():
+mX(0),mY(0),mZ(0),mOccupancy(0),mpScattPow(0),mDynPopCorr(0)
+{}
 bool ScatteringComponent::operator==(const ScatteringComponent& rhs) const
 {
    return ((mX==rhs.mX) && (mY==rhs.mY) && (mZ==rhs.mZ) &&
