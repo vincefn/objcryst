@@ -1573,7 +1573,22 @@ unsigned int RefinableObj::GetNbLSQFunction()const{return 0;}
 
 REAL RefinableObj::GetLogLikelihood()const
 {
-   return 0;
+   VFN_DEBUG_ENTRY("RefinableObj::GetLogLikelihood()",3)
+   if(0==mvpRestraint.size())
+   {
+      VFN_DEBUG_EXIT("RefinableObj::GetLogLikelihood()=0",3)
+      return 0;
+   }
+   VFN_DEBUG_MESSAGE("RefinableObj::GetLogLikelihood()there are restraints...",2)
+   REAL loglike=0;
+   vector< Restraint * >::const_iterator pos;
+   for(pos=mvpRestraint.begin();pos!=mvpRestraint.end();pos++)
+   {
+      VFN_DEBUG_MESSAGE("RefinableObj::GetLogLikelihood()Restraint: "<<*pos,2)
+      loglike+= (*pos)->GetLogLikelihood();
+   }
+   VFN_DEBUG_EXIT("RefinableObj::GetLogLikelihood()="<<loglike,3)
+   return loglike;
 }
 
 const CrystVector_REAL& RefinableObj::GetLSQCalc(const unsigned int) const
