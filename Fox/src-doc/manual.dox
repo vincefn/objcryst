@@ -10,6 +10,12 @@
    </ul>
 </ul>
 <center><h1>Reference Manual</h1></center>
+<h2>Note About Parameters</h2>
+<ul>
+   <li>All the parameters that can be optimized in Fox have two checkboxes between the name and the field where you can read and enter the value for the parameter. The \e left checkbox (\b R) can trigger the "refinable" status of the parameter (unchecked= not optimized), and the right one (\b L) enables the limits for that parameter. 
+   <li>For some parameters (e.g. the atoms positions in a \e Molecule), you may not have access to these fix/limit buttons, because the functionnality to restrain the evolution parameters is provided at a higher level (e.g. in the Molecule object, atoms positions are limited relatively to each other through intelligent restraints, not individual limits).
+   <li>Also, some parameters who do have R/L checkboxes \e cannot be optimized by Fox, because it does not make sense to refine some parameters using a global optimization algorithms. See the <a href="faq.html">FAQ</a><br> for a few more details.
+</ul>
 \htmlinclude fox-top.map
 \anchor top_menus <h2>Main Menus</h2>
 <ul>
