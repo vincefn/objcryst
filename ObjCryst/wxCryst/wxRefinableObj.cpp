@@ -207,10 +207,13 @@ void WXFieldRefPar::CrystUpdate()
    //cout << mpField <<endl;
    bool needUpdate=false;
    wxMutexLocker mlock(mMutex);
-   if(wxThread::IsMain()){if(mpRefPar->IsUsed()!=this->IsShown()) needUpdate=true;}
+   if(wxThread::IsMain())
+   {
+      if(mpRefPar->IsUsed()!=this->IsShown()) needUpdate=true;
+      if(0!=mpButtonFix) if(mpButtonFix->GetValue()==mpRefPar->IsFixed()) needUpdate=true;
+      if(0!=mpButtonLimited) if(mpButtonLimited->GetValue()==mpRefPar->IsLimited()) needUpdate=true;
+   }
    if(mValue!=mpRefPar->GetHumanValue()) needUpdate=true;
-   if(0!=mpButtonFix) if(mpButtonFix->GetValue()==mpRefPar->IsFixed()) needUpdate=true;
-   if(0!=mpButtonLimited) if(mpButtonLimited->GetValue()==mpRefPar->IsLimited()) needUpdate=true;
    if(!needUpdate) return;
    mValueOld=mValue;
    mValue=mpRefPar->GetHumanValue();
