@@ -954,13 +954,13 @@ void ScatteringData::PrepareCalcStructFactor()const
          {
             if(   ((*mpScattCompList)(i).mX != mLastScattCompList(i).mX)
                 ||((*mpScattCompList)(i).mY != mLastScattCompList(i).mY)
-                ||((*mpScattCompList)(i).mZ != mLastScattCompList(i).mZ))
+                ||((*mpScattCompList)(i).mZ != mLastScattCompList(i).mZ)
+                ||((*mpScattCompList)(i).mOccupancy != mLastScattCompList(i).mOccupancy))
             {
                mGeomFhklCalcNeedRecalc=true;
                break;
             }
-            if(   ((*mpScattCompList)(i).mOccupancy != mLastScattCompList(i).mOccupancy)
-                ||((*mpScattCompList)(i).mpScattPow != mLastScattCompList(i).mpScattPow))
+            if( (*mpScattCompList)(i).mpScattPow != mLastScattCompList(i).mpScattPow)
                 mFhklCalcNeedRecalc=true;
          }
       }
