@@ -130,7 +130,7 @@ class Radiation: public RefinableObj
       const RefinableObjClock& GetClockRadiation()const ;
       virtual void Output(ostream &os,int indent=0)const;
       virtual void Input(istream &is,const XMLCrystTag &tag);
-      virtual void InputOld(istream &is,const IOCrystTag &tag);
+      //virtual void InputOld(istream &is,const IOCrystTag &tag);
 		/// Print to screen/console the charcteristics of the radiation.
       void Print()const;
    private:

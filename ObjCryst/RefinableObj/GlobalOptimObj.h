@@ -168,7 +168,7 @@ class GlobalOptimObj
       *
       */
       virtual void Input(istream &is,const XMLCrystTag &tag);
-      virtual void InputOld(istream &is,const IOCrystTag &tag);
+      //virtual void InputOld(istream &is,const IOCrystTag &tag);
       /// Get the name for this object
       const string& GetName()const;
       /// Set the name for this object

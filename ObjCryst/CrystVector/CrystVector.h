@@ -83,6 +83,8 @@ using namespace std;
 * You can use CrystVector_double, CrystVector_long,etc... to declare 1D vectors. Macros
 * ensure (well, should) ensure compatibility with Blitz++. (as of april 2001 support of
 * blitz++ is broken).
+*
+* \todo check again Blitz++ support in newer gcc versions.
 */
 template<class T> class CrystVector
 {
@@ -427,7 +429,7 @@ template<class T> T MinAbs(const CrystVector_T &vector);
 //######################################################################
 //  CubicSpline
 //######################################################################
-
+/// Cubic spline interpolation.
 class CubicSpline
 {
    public:

@@ -824,7 +824,7 @@ class RefinableObj
       * its parent (thus allowing overloading), etc...
       */
       virtual void Input(istream &is,const XMLCrystTag &tag);
-      virtual void InputOld(istream &is,const IOCrystTag &tag);
+      //virtual void InputOld(istream &is,const IOCrystTag &tag);
       /// If there is an interface, this should be automatically be called each
       /// time there is a 'new, significant' configuration to report.
       virtual void UpdateDisplay()const;

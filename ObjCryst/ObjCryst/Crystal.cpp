@@ -570,7 +570,7 @@ ostream& Crystal::POVRayDescription(ostream &os,bool onlyIndependentAtoms)const
    os << "   }" <<endl<<endl;
    
   for(int i=0;i<mScattererRegistry.GetNb();i++)
-      this->GetScatt(i).POVRayDescription(os,*this,onlyIndependentAtoms) ;
+      this->GetScatt(i).POVRayDescription(os,onlyIndependentAtoms) ;
    return os;
 }
 
@@ -584,9 +584,9 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
    glMaterialf (GL_FRONT, GL_SHININESS, 50);
    GLfloat colour_axis[]= { 0.5, .5, .5, 1.0 };
    glMaterialfv (GL_FRONT, GL_AMBIENT_AND_DIFFUSE,colour_axis);
-	cout << xMin << ":"<<xMax <<endl;
-	cout << yMin << ":"<<yMax <<endl;
-	cout << zMin << ":"<<zMax <<endl;
+	//cout << xMin << ":"<<xMax <<endl;
+	//cout << yMin << ":"<<yMax <<endl;
+	//cout << zMin << ":"<<zMax <<endl;
 	//Center of displayed unit
 		double xc=(xMin+xMax)/2.;
 		double yc=(yMin+yMax)/2.;
@@ -678,7 +678,7 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
    	//Describe all Scatterers
    	VFN_DEBUG_MESSAGE("Crystal::GLView(bool):Scatterers...",5)
    	for(int i=0;i<mScattererRegistry.GetNb();i++) 
-      	this->GetScatt(i).GLInitDisplayList(*this,onlyIndependentAtoms,
+      	this->GetScatt(i).GLInitDisplayList(onlyIndependentAtoms,
                                           	xMin,xMax,yMin,yMax,zMin,zMax);
 
    glPopMatrix();

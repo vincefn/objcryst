@@ -1,16 +1,15 @@
-/*
+/* 
 * ObjCryst++ : a Crystallographic computing library in C++
+*			http://objcryst.sourceforge.net
+*			http://www.ccp14.ac.uk/ccp/web-mirrors/objcryst/
 *
-*  (c) 2000 Vincent FAVRE-NICOLIN
-*           Laboratoire de Cristallographie
-*           24, quai Ernest-Ansermet, CH-1211 Geneva 4, Switzerland
-*  Contact: Vincent.Favre-Nicolin@cryst.unige.ch
-*           Radovan.Cerny@cryst.unige.ch
+*  (c) 2000-2001 Vincent FAVRE-NICOLIN vincefn@users.sourceforge.net
 *
 */
-//
-// source file for LibCryst++ Scatterer classes
-
+/*   Atom.cpp
+*  source file for the Atom scatterer
+*
+*/
 #include <cmath>
 #include <typeinfo>
 #include <stdio.h> //for sprintf()
@@ -172,15 +171,6 @@ void Atom::Print() const
    cout << endl;
 }
 
-void Atom::Update() const
-{
-   mScattCompList(0).mX=mXYZ(0);
-   mScattCompList(0).mY=mXYZ(1);
-   mScattCompList(0).mZ=mXYZ(2);
-   mScattCompList(0).mOccupancy=mOccupancy;
-   mClockScattCompList.Click();
-}
-
 double Atom::GetMass() const
 {
    if(true==this->IsDummy()) return 0;
@@ -193,8 +183,8 @@ double Atom::GetRadius() const
    return mpScattPowAtom->GetRadius();
 }
 
-ostream& Atom::POVRayDescription(ostream &os,const Crystal &cryst,
-                                 bool onlyIndependentAtoms)const
+ostream& Atom::POVRayDescription(ostream &os,
+                                 const bool onlyIndependentAtoms)const
 {
    if(this->IsDummy()) return os;
    if(true==onlyIndependentAtoms)
@@ -206,7 +196,7 @@ ostream& Atom::POVRayDescription(ostream &os,const Crystal &cryst,
       x = fmod((double)x,(int)1); if(x<0) x+=1.;
       y = fmod((double)y,(int)1); if(y<0) y+=1.;
       z = fmod((double)z,(int)1); if(z<0) z+=1.;
-      cryst.FractionalToOrthonormalCoords(x,y,z);
+      this->GetCrystal().FractionalToOrthonormalCoords(x,y,z);
       os << "// Description of Atom :" << this->GetName() <<endl;
       os << "   #declare colour_"<< this ->GetName() <<"="<< this ->mColourName<<";"<< endl;
       os << "   sphere " << endl;
@@ -222,7 +212,7 @@ ostream& Atom::POVRayDescription(ostream &os,const Crystal &cryst,
       y0=mXYZ(1);
       z0=mXYZ(2);
       CrystMatrix_double xyzCoords ;
-      xyzCoords=cryst.GetSpaceGroup().GetAllSymmetrics(x0,y0,z0,false,false,true);
+      xyzCoords=this->GetCrystal().GetSpaceGroup().GetAllSymmetrics(x0,y0,z0,false,false,true);
       int nbSymmetrics=xyzCoords.rows();
       os << "// Description of Atom :" << this->GetName();
       os << "(" << nbSymmetrics << " symmetric atoms)" << endl;
@@ -275,7 +265,7 @@ ostream& Atom::POVRayDescription(ostream &os,const Crystal &cryst,
                 &&(y>(-limit)) && (y<(1+limit))
                 &&(z>(-limit)) && (z<(1+limit)))
             {
-               cryst.FractionalToOrthonormalCoords(x,y,z);
+               this->GetCrystal().FractionalToOrthonormalCoords(x,y,z);
                os << "  // Symmetric #" << symNum++ <<endl;
                os << "   sphere " << endl;
                os << "   { <" << x << ","<< y << ","<< z << ">," << this->GetRadius()/3 <<endl;
@@ -290,7 +280,7 @@ ostream& Atom::POVRayDescription(ostream &os,const Crystal &cryst,
    return os;
 }
 
-void Atom::GLInitDisplayList(const Crystal &cryst,const bool onlyIndependentAtoms,
+void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
                              const double xMin,const double xMax,
                              const double yMin,const double yMax,
                              const double zMin,const double zMax)const
@@ -310,7 +300,7 @@ void Atom::GLInitDisplayList(const Crystal &cryst,const bool onlyIndependentAtom
       x = fmod((double)x,(int)1); if(x<0) x+=1.;
       y = fmod((double)y,(int)1); if(y<0) y+=1.;
       z = fmod((double)z,(int)1); if(z<0) z+=1.;
-      cryst.FractionalToOrthonormalCoords(x,y,z);
+      this->GetCrystal().FractionalToOrthonormalCoords(x,y,z);
       glPushMatrix();
          glTranslatef(x, y, z);
          gluSphere(pQuadric,this->GetRadius()/3,10,10);
@@ -323,7 +313,7 @@ void Atom::GLInitDisplayList(const Crystal &cryst,const bool onlyIndependentAtom
       y0=mXYZ(1);
       z0=mXYZ(2);
       CrystMatrix_double xyzCoords ;
-      xyzCoords=cryst.GetSpaceGroup().GetAllSymmetrics(x0,y0,z0,false,false,true);
+      xyzCoords=this->GetCrystal().GetSpaceGroup().GetAllSymmetrics(x0,y0,z0,false,false,true);
       int nbSymmetrics=xyzCoords.rows();
       for(int i=0;i<nbSymmetrics;i++)
       {
@@ -371,7 +361,7 @@ void Atom::GLInitDisplayList(const Crystal &cryst,const bool onlyIndependentAtom
                 &&(y>yMin) && (y<yMax)
                 &&(z>zMin) && (z<zMax))
             {
-               cryst.FractionalToOrthonormalCoords(x,y,z);
+               this->GetCrystal().FractionalToOrthonormalCoords(x,y,z);
                glPushMatrix();
                   glTranslatef(x, y, z);
                   gluSphere(pQuadric,this->GetRadius()/3,10,10);
@@ -389,6 +379,15 @@ bool Atom::IsDummy()const { if(0==mScattCompList(0).mpScattPow) return true; ret
 
 const ScatteringPowerAtom& Atom::GetScatteringPower()const
 { return *mpScattPowAtom;}
+
+void Atom::Update() const
+{
+   mScattCompList(0).mX=mXYZ(0);
+   mScattCompList(0).mY=mXYZ(1);
+   mScattCompList(0).mZ=mXYZ(2);
+   mScattCompList(0).mOccupancy=mOccupancy;
+   mClockScattCompList.Click();
+}
 
 void Atom::InitRefParList()
 {

@@ -2,13 +2,10 @@
 * ObjCryst++ : a Crystallographic computing library in C++
 *
 *  (c) 2000 Vincent FAVRE-NICOLIN
-*           Laboratoire de Cristallographie
-*           24, quai Ernest-Ansermet, CH-1211 Geneva 4, Switzerland
 *  Contact: vincefn@users.sourceforge.net
-*           Radovan.Cerny@cryst.unige.ch
 *
 */
-/*  libcryst-doc.h 
+/*  doc-main.h 
 *  This file includes only documentation, to be formatted automatically by doxygen.
 */
 
@@ -26,7 +23,7 @@
 *
 *\section news News
 *  The new version of ObjCryst++ is being added to Sourceforge. Currently its documentation
-* is not complete, so it cannot be downloaded as an archive. You can contact me or
+* is not complete, so it \b cannot be downloaded as an archive. You can contact me or
 * use the CVS repository to get the library (see \ref page_install)
 * The new version includes major changes for several classes (ScatteringPower, PowderPattern),
 * and includes the graphical classes associated with all objects using
@@ -40,6 +37,7 @@
 * focus of these tools is the analysis of diffraction data, with an emphasis
 * on speed optimization for repetitive calculations (for global refinement methods such
 * as simulated annealing, for example).
+*
 *\par 
 * Even if we intend to use this library mainly for the development of a global optimization
 * program from powder diffraction, this library is programmed in a general way so that
@@ -62,7 +60,7 @@
 *\par 
 * This project also makes use of some other programs or libraries. Most notable in this 
 * project are the spacegroup (SgLite) and atominfo packages from 
-* <a href="mailto:rwgk@cci.lbl.gov">Ralf Grosse-Kunstleve</a>
+* <a href="mailto:rwgk@cci.lbl.gov">R. Grosse-Kunstleve</a>
 * (see \ref page_legal).
 *
 *\par 
@@ -83,7 +81,7 @@
 *\par Included libraries
 * Software libraries distributed with this package (but not written by V. Favre-Nicolin)
 * do not fall under the terms of the above copyright and license:
-* these are the blitz++, atominfo, sglite and newmat package. You should
+* these are the atominfo, sglite and newmat package. You should
 * refer to the documentation and legal notes included in their respective directories:
 *\par 
 * <a href="newmat.htm">The newmat matrix library</a> (Robert B Davies).
@@ -110,7 +108,7 @@
 * is \e not used because of the huge memory requirements when compiling blitz++ expressions
 * using the gcc compiler. Instead the CrystVector and CrystMatrix are used, emulating 
 * the blitz interface, but without the smart handling of mathematical expressions.) Support
-* for the Blitz++ should come back some time soon...
+* for the Blitz++ should come back some time...
 */
 
 
@@ -133,7 +131,7 @@
 * is much better than having isolated functions or small classes, since not only
 * old code can be re-used, but the new code is compatible with the old because it has
 * a common interface.. (of course the base interface must be well written and that
-* is difficult to achieve... Hope I did not do a too bad job of it...).
+* is delicate to achieve... Hope I did not do too bad a job of it...).
 *
 *\par Performance 
 * Although it has long been considered that the price of OOP was a slower

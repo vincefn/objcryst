@@ -351,6 +351,7 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
    wxFileDialog *open;
    switch(event.GetId())
    {
+		#if 0
       case MENU_FILE_LOAD_OXY:
       {
          open= new wxFileDialog(this,"Choose File :",
@@ -359,6 +360,7 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
          IOCrystFileLoadAllObject(open->GetPath().c_str());
          break;
       }
+		#endif
       case MENU_FILE_LOAD:
       {
          open= new wxFileDialog(this,"Choose File :",

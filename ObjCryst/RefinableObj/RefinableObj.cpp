@@ -1594,7 +1594,7 @@ template class ObjRegistry<PowderPattern>;
 template class ObjRegistry<PowderPatternComponent>;
 template class ObjRegistry<DiffractionDataSingleCrystal>;
 template class ObjRegistry<GlobalOptimObj>;
-template class ObjRegistry<IOCrystTag>;//to be removed
+//template class ObjRegistry<IOCrystTag>;//to be removed
 template class ObjRegistry<XMLCrystTag>;
 template class ObjRegistry<ZAtom>;
 

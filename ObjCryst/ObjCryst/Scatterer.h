@@ -120,9 +120,9 @@ class Scatterer:virtual public RefinableObj
       
       /// Conversion function.-> returns the scatt name
 		///
-		/// \warning DO NOT USE.
+		/// \warning EXPERIMENTAL. DO NOT USE, as this may be removed.
       operator string()const;
-      /// Print some info about the scatterer (one line).
+      /// Print some info about the scatterer (ideally this should be one line...).
       virtual void Print() const=0;
             
       /** \brief Colour associated to this scatterer (using POVRay names)
@@ -134,16 +134,23 @@ class Scatterer:virtual public RefinableObj
       */
       virtual const float* GetColourRGB()const;
       
-      /** \brief Output a description of the scatterer for POVRay
+      /** \brief \internal Output a description of the scatterer for POVRay.
+		* This should only be called by the Crystal Object to which belongs this
+		* scatterer.
       *
       */
-      virtual ostream& POVRayDescription(ostream &os,const Crystal &cryst,
-                                         bool noSymmetrics=false)const=0;
-      /** Create an OpenGL Display List of the scatterer.
+      virtual ostream& POVRayDescription(ostream &os,
+                                         const bool noSymmetrics=false)const=0;
+      /** \internal Create an OpenGL Display List of the scatterer. This should only
+		* be called by a Crystal object.
       *
+		* \param noSymmetrics: if false (the default), then all symmetrics are shown in the
+		* 3D display, within the limits defined by the min/max parameters
+		* \ param xMin,xMax,yMin,yMax,zMin,zMax: in fractionnal coordinates, the region
+		* in which we want scaterrer to be displayed. The test is made on the center
+		* of the scatterer (eg a ZScatterer (molecule) will not be 'cut' on the border).
       */
-      virtual void GLInitDisplayList(const Crystal &cryst,
-                                     const bool noSymmetrics=false,
+      virtual void GLInitDisplayList(const bool noSymmetrics=false,
                                      const double xMin=-.1,const double xMax=1.1,
                                      const double yMin=-.1,const double yMax=1.1,
                                      const double zMin=-.1,const double zMax=1.1)const=0;
@@ -163,20 +170,25 @@ class Scatterer:virtual public RefinableObj
 		* This is automatically called each time GetScatteringComponentList() is used.
 		*
 		* As always, update is only made if nessary (ie if one parameter determining
-		* the atom positions has changed)
+		* the atom positions has changed).
       *
+		* \note This is not necessary in all Scatterer, so this could be removed from
+		* the base Scatterer class.
       **/
       virtual void Update() const=0;
       /// \internal Prepare refinable parameters for the scatterer object
       virtual void InitRefParList()=0;
-      /// Get RGB Colour coordinates from Colour Name
+      /** Get RGB Colour coordinates from Colour Name. Note that the colour
+		* used for display is usually that of the ScatteringPower, not that of the Scatterer
+		*
+		*/
       virtual void InitRGBColour();
       /// Last time the ScatteringComponentList was generated
       const RefinableObjClock& GetClockScattCompList()const;
       ///coordinates of the scatterer (or of its center..)
       CrystVector_double mXYZ;
       
-      /** \brief  Occupancy : 0 <=  <= 1
+      /** \brief  Occupancy : 0 <= occ <= 1
       * For a multi-atom scatterer (polyhedron,..), this is the \b overall occupancy
       * of the scatterer (affects all components of the scatterer).
       */

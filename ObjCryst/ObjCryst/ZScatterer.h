@@ -223,15 +223,11 @@ class ZScatterer: public Scatterer
 
       ///Access to the registry of ZAtoms
       const ObjRegistry<ZAtom>& GetZAtomRegistry()const;
+		/// \warning Not implemented for ZScatterer
+      virtual ostream& POVRayDescription(ostream &os,
+                                         const bool onlyIndependentAtoms=false)const;
 
-      /** \brief Output a description of the scatterer for POVRay
-      *
-      */
-      virtual ostream& POVRayDescription(ostream &os,const Crystal &cryst,
-                                         bool onlyIndependentAtoms=false)const;
-
-      virtual void GLInitDisplayList(const Crystal &cryst,
-                                     const bool onlyIndependentAtoms=false,
+      virtual void GLInitDisplayList(const bool onlyIndependentAtoms=false,
                                      const double xMin=-.1,const double xMax=1.1,
                                      const double yMin=-.1,const double yMax=1.1,
                                      const double zMin=-.1,const double zMax=1.1)const;
@@ -241,22 +237,29 @@ class ZScatterer: public Scatterer
       * approximated to an isotropic scattering power computed for this scatterer.
       * Of course, only use this if the "isotropic" approximation is reasonable for
       * this scatterer (typically true for 'large' polyhedra). See GlobalScatteringPower.
+		*
+		* \warning EXPERIMENTAL
       */
       virtual void SetUseGlobalScatteringPower(const bool useIt);
       virtual void Output(ostream &os,int indent=0)const;
       virtual void Input(istream &is,const XMLCrystTag &tag);
-      virtual void InputOld(istream &is,const IOCrystTag &tag);
+      //virtual void InputOld(istream &is,const IOCrystTag &tag);
    protected:
       void Update() const;
-      /// For OpenGL display of the structure, bonds, triangular and quadric
-      /// faces can be displayed. This matrix determines what is drawn.
-      /// This is a 5-column matrix. The first column indicates the type of
-      /// drawing (0: : nothing, 1: display the atom (a sphere),  2: bond, 
-      /// 3: triangular face, 4: quadric face)
-      /// the other columns indicate the index of the atoms involved in the 
-      /// drawing (2 atoms for a bond, 3 for....)
-      ///
-      /// If the matrix is empty only the individual atoms are displayed.
+      /** For 3D display of the structure, bonds, triangular and quadric
+      * faces can be displayed. This matrix determines what is drawn.
+      * This is a 5-column matrix. The first column indicates the type of
+      * drawing (0: : nothing, 1: display the atom (a sphere),  2: bond, 
+      * 3: triangular face, 4: quadric face)
+      * the other columns indicate the index of the atoms involved in the 
+      * drawing (2 atoms for a bond, 3 for....)
+      *
+      * If the matrix is empty only the individual atoms are displayed.
+		*
+		* \todo This is still experimental. This is only used for the display
+		* of ZPolyhedron, and should be more developped (and it should also
+		* be saved in XML files !)
+		*/
       CrystMatrix_long m3DDisplayIndex;
       /// The list of scattering components.
       mutable ScatteringComponentList mScattCompList;
@@ -278,7 +281,10 @@ class ZScatterer: public Scatterer
       
       /** \brief Angles giving the orientation of the ZScatterer (stored in radian)
       *
-      * The position of any atom (in orthonormal coordinates) is given by :      
+      * The position of any atom can be transformed from internal coordinates (orthonormal
+		* coordinates derived from the ZMatrix, with first atom at (0,0,0), second
+		* atom at (x,0,0), third atom at (x,y,0),...) to orthonormal coordinates in
+		* the crystal reference frame (ie with orientation of the ZScatterer) using :
       * \f[ \left[ \begin{array}{c} x(i) \\ y(i) \\ z(i) \end{array} \right]_{orthonormal}
               = \left[ \begin{array}{ccc} \cos(\chi) & 0 & -\sin(\chi) \\
                                            0 & 1 & 0 \\
@@ -292,7 +298,8 @@ class ZScatterer: public Scatterer
          \times \left[ \begin{array}{c} x_0(i) \\ y_0(i) \\ z_0(i) \end{array} \right]
       * \f]
       *, where x0(i), y0(i) and z0(i) describe the position for atom (i) in
-      * internal coordinates.
+      * internal coordinates, and x(i), y(i), z(i) are coordinates of the rotated ZScatterer.
+		*
       *
       * The rotation is performed around a 'pivot' atom (see ZScatterer::mPivotAtom)
       */
@@ -300,16 +307,19 @@ class ZScatterer: public Scatterer
       
       /// Registry for ZAtoms in this Scatterer.
       ObjRegistry<ZAtom> mZAtomRegistry;
-      /// Index of the atom used as a pivot (the scatterer is rotated around this atom)
+      /// Index of the atom used as a pivot (the scatterer is rotated around this atom).
+		/// This should more or less be at the center of the Scatterer.
       long mCenterAtomIndex;
       
-      ///Rotation matrix for the orientation of the scatterer
+      /// Rotation matrix for the orientation of the scatterer
       mutable CrystMatrix_double mPhiChiPsiMatrix;
       
       /// Does the ZScatterer use a global scattering power ?
+		/// \warning EXPERIMENTAL.
       bool mUseGlobalScattPow;
       
       /// the global scattering power used, if mUseGlobalScattPow=true
+		/// \warning EXPERIMENTAL.
       GlobalScatteringPower* mpGlobalScattPow;
       
       /// Storage for Cartesian coordinates. The (0,0,0) is on the central atom. This

@@ -15,7 +15,10 @@ class XMLCrystTag;
 namespace ObjCryst
 {
 #ifdef __WX__CRYST__
-///wxWindows representation of a XMLCrystTag (not implemented yet !)
+/** \brief wxWindows representation of a XMLCrystTag (not implemented yet !)
+*
+* This will be used to choose objects to import from a save file.
+*/
 class WXXMLCrystTag: public WXCrystObj
 {
    public:
@@ -28,7 +31,9 @@ class WXXMLCrystTag: public WXCrystObj
       XMLCrystTag* mpTag;
 };
 #endif
-
+/** \brief class to input or output a well-formatted xml beginning or ending tag.
+* 
+*/
 class XMLCrystTag
 {
    public:
@@ -69,10 +74,12 @@ class XMLCrystTag
    #endif
 };
 
+/// Output an XMLCrystTag to a stream
 ostream& operator<< (ostream&, const XMLCrystTag&);
+/// Input an XMLCrystTag from a stream
 istream& operator>> (istream&, XMLCrystTag&);
 
-
+#if 0
 //OLD
 
 void IOCrystExtractNameSpace(istream &is,string &str);
@@ -130,7 +137,7 @@ class IOCrystTag
       WXIOCrystTag *mpWXIOCrystTag;
    #endif
 };
-
+#endif 
 
 }//namespace ObjCryst
 

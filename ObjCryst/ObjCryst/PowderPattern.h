@@ -124,7 +124,7 @@ class PowderPatternBackground : public PowderPatternComponent
       virtual void SetUseOnlyLowAngleData(const bool useOnlyLowAngle,const double angle=0);
       virtual void Output(ostream &os,int indent=0)const;
       virtual void Input(istream &is,const XMLCrystTag &tag);
-      virtual void InputOld(istream &is,const IOCrystTag &tag);
+      //virtual void InputOld(istream &is,const IOCrystTag &tag);
    protected:
       virtual void CalcPowderPattern() const;
       virtual void SetRadiation(const Radiation &rad);
@@ -200,7 +200,7 @@ class PowderPatternDiffraction : public PowderPatternComponent,public Scattering
       virtual void GenHKLFullSpace();
       virtual void Output(ostream &os,int indent=0)const;
       virtual void Input(istream &is,const XMLCrystTag &tag);
-      virtual void InputOld(istream &is,const IOCrystTag &tag);
+      //virtual void InputOld(istream &is,const IOCrystTag &tag);
    protected:
       virtual void CalcPowderPattern() const;
       
@@ -566,7 +566,7 @@ class PowderPattern : public RefinableObj
 		// I/O	
       	virtual void Output(ostream &os,int indent=0)const;
       	virtual void Input(istream &is,const XMLCrystTag &tag);
-      	virtual void InputOld(istream &is,const IOCrystTag &tag);
+      	//virtual void InputOld(istream &is,const IOCrystTag &tag);
       	void Prepare();
    protected:
       /// Calc the powder spectrum

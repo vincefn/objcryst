@@ -187,6 +187,7 @@ void XMLCrystFileLoadAllObject(const string & filename)
    }
    VFN_DEBUG_EXIT("XMLCrystFileLoadAllObject(filename,IOCrystTag,T&)",5)
 }
+#if 0
 ////////////////////////////////////////////////////////////////////////
 //
 //    Global functions -OLD
@@ -321,7 +322,7 @@ void IOCrystFileLoadAllObject(const string & filename)
       tag.Input(is);
    }
 }
-
+#endif
 ////////////////////////////////////////////////////////////////////////
 //
 //    I/O ScatteringPowerAtom
@@ -394,6 +395,7 @@ void ScatteringPowerAtom::Input(istream &is,const XMLCrystTag &tagg)
       }
    }
 }
+#if 0
 void ScatteringPowerAtom::InputOld(istream &is,const IOCrystTag &tag)
 {
    VFN_DEBUG_MESSAGE("ScatteringPowerAtom::Input():"<<this->GetName(),5)
@@ -424,6 +426,7 @@ void ScatteringPowerAtom::InputOld(istream &is,const IOCrystTag &tag)
    }
    VFN_DEBUG_MESSAGE("ScatteringPowerAtom::Input():End",5)
 }
+#endif
 ////////////////////////////////////////////////////////////////////////
 //
 //    I/O Atom
@@ -513,6 +516,7 @@ void Atom::Input(istream &is,const XMLCrystTag &tagg)
       }
    }
 }
+#if 0
 void Atom::InputOld(istream &is,const IOCrystTag &tag)
 {
    VFN_DEBUG_MESSAGE("Atom::Input():"<<this->GetName(),5)
@@ -543,6 +547,7 @@ void Atom::InputOld(istream &is,const IOCrystTag &tag)
    }
    VFN_DEBUG_MESSAGE("Atom::Input():End",5)
 }
+#endif
 ////////////////////////////////////////////////////////////////////////
 //
 //    I/O ZAtom
@@ -798,7 +803,7 @@ void ZScatterer::Input(istream &is,const XMLCrystTag &tagg)
       }
    }
 }
-
+#if 0
 void ZScatterer::InputOld(istream &is,const IOCrystTag &tag)
 {
    VFN_DEBUG_ENTRY("ZScatterer::Input():"<<this->GetName(),5)
@@ -885,7 +890,7 @@ void ZScatterer::InputOld(istream &is,const IOCrystTag &tag)
    }
    VFN_DEBUG_EXIT("ZScatterer::Input():"<<this->GetName(),5)
 }
-
+#endif
 ////////////////////////////////////////////////////////////////////////
 //
 //    I/O Crystal
@@ -1112,6 +1117,7 @@ void Crystal::Input(istream &is,const XMLCrystTag &tagg)
       }
    }
 }
+#if 0
 void Crystal::InputOld(istream &is,const IOCrystTag &tagg)
 {
    VFN_DEBUG_MESSAGE("Crystal::Input():"<<this->GetName(),5)
@@ -1229,6 +1235,7 @@ void Crystal::InputOld(istream &is,const IOCrystTag &tagg)
       default: cout << "Unknown tag version !"<<endl;
    }
 }
+#endif
 ////////////////////////////////////////////////////////////////////////
 //
 //    I/O Radiation
@@ -1336,6 +1343,7 @@ void Radiation::Input(istream &is,const XMLCrystTag &tagg)
       }
    }
 }
+#if 0
 void Radiation::InputOld(istream &is,const IOCrystTag &tagg)
 {
    VFN_DEBUG_MESSAGE("Radiation::Input():"<<this->GetName(),5)
@@ -1406,6 +1414,7 @@ void Radiation::InputOld(istream &is,const IOCrystTag &tagg)
       default: cout << "Unknown tag version !"<<endl;
    }
 }
+#endif
 ////////////////////////////////////////////////////////////////////////
 //
 //    I/O DiffractionDataSingleCrystal
@@ -1507,7 +1516,7 @@ void DiffractionDataSingleCrystal::Input(istream &is,const XMLCrystTag &tagg)
       }
    }
 }
-
+#if 0
 void DiffractionDataSingleCrystal::InputOld(istream &is,const IOCrystTag &tagg)
 {
    VFN_DEBUG_MESSAGE("DiffractionDataSingleCrystal::Input():"<<this->GetName(),5)
@@ -1597,6 +1606,7 @@ void DiffractionDataSingleCrystal::InputOld(istream &is,const IOCrystTag &tagg)
       default: cout << "Unknown tag version !"<<endl;
    }
 }
+#endif
 ////////////////////////////////////////////////////////////////////////
 //
 //    I/O PowderPatternBackground
@@ -1711,6 +1721,7 @@ void PowderPatternBackground::Input(istream &is,const XMLCrystTag &tagg)
       }
    }
 }
+#if 0
 void PowderPatternBackground::InputOld(istream &is,const IOCrystTag &tagg)
 {
    VFN_DEBUG_MESSAGE("PowderPatternBackground::Input():"<<this->GetName(),5)
@@ -1805,6 +1816,7 @@ void PowderPatternBackground::InputOld(istream &is,const IOCrystTag &tagg)
    }
    VFN_DEBUG_MESSAGE("PowderPatternBackground::Input():End",5)
 }
+#endif
 ////////////////////////////////////////////////////////////////////////
 //
 //    I/O PowderPatternDiffraction
@@ -1973,7 +1985,7 @@ void PowderPatternDiffraction::Input(istream &is,const XMLCrystTag &tagg)
       }
    }
 }
-
+#if 0
 void PowderPatternDiffraction::InputOld(istream &is,const IOCrystTag &tagg)
 {
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::Input():"<<this->GetName(),5)
@@ -2097,6 +2109,7 @@ void PowderPatternDiffraction::InputOld(istream &is,const IOCrystTag &tagg)
    }
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::Input():End",5)
 }
+#endif
 ////////////////////////////////////////////////////////////////////////
 //
 //    I/O PowderPattern
@@ -2318,7 +2331,7 @@ void PowderPattern::Input(istream &is,const XMLCrystTag &tagg)
       }
    }
 }
-
+#if 0
 void PowderPattern::InputOld(istream &is,const IOCrystTag &tagg)
 {
    VFN_DEBUG_MESSAGE("PowderPattern::Input():"<<this->GetName(),5)
@@ -2453,5 +2466,5 @@ void PowderPattern::InputOld(istream &is,const IOCrystTag &tagg)
       default: cout << "Unknown tag version !"<<endl;
    }
 }
-
+#endif
 } //namespace

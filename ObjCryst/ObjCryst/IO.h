@@ -15,6 +15,8 @@
 
 #include "RefinableObj/IO.h"
 #include "RefinableObj/RefinableObj.h"
+
+
 namespace ObjCryst
 {
 /** \brief Save all Objcryst++ objects.
@@ -62,7 +64,7 @@ template<class T> void XMLCrystFileLoadObject(const string & file,
 */
 void XMLCrystFileLoadAllObject(const string & file);
 
-
+#if 0
 ///OBSOLETE
 void IOCrystFileSaveGlobal(const string & filename);
 ///OBSOLETE
@@ -71,5 +73,5 @@ ObjRegistry<IOCrystTag> IOCrystFileLoadObjectList(const string & filename);
 template<class T> void IOCrystFileLoadObject(const string & file,const IOCrystTag &tag, T*obj);
 ///OBSOLETE
 void IOCrystFileLoadAllObject(const string & file);
-
+#endif
 }

@@ -34,12 +34,12 @@ namespace ObjCryst
 
 //######################################################################
 //
-///    ATOM : the basic atom, within the crystal.
+/// The basic atom scatterer, in a crystal.
 ///
 /// This class records the position of the atom, and has a pointer to its
 /// ScatteringPowerAtom.
 ///
-/// Note that there can be 'Dummy' atoms, for which the used symbol is "X",
+/// \note there can be 'Dummy' atoms, for which the used symbol is "X",
 /// and which have no scattering power (use with caution: dummy atoms
 /// are only supposed to be used within ZScatterer)
 //######################################################################
@@ -54,8 +54,7 @@ class Atom: public Scatterer
       *  \param x,y,z : \e fractional coordinates of the atom
       *  \param pow : the ScatteringPower associated to this atom. Must be allocated separately.
       *  \param name : name of the atom ('Ta1','Sm2', 'Tungsten_1'...).
-      * The name can have \e any format but spaces should be avoided, since it
-      * will generate problems when reading the names from a file...
+      * The name can have \e any format but spaces should be avoided.
       */
       Atom( const double x, const double y, const double z,
             const string &name, const ScatteringPowerAtom *pow);
@@ -76,10 +75,8 @@ class Atom: public Scatterer
              const ScatteringPowerAtom *pow, const double popu);
       /// Copy constructor
       Atom(const Atom &old);
-      /// \internal so-called Virtual copy constructor, needed to make copies
-      /// of arrays of Scatterers
       virtual Atom* CreateCopy() const;
-      /// Atom desintegrator...
+      /// Destructor...
      ~Atom();
       virtual const string GetClassName() const;
       ///
@@ -99,8 +96,6 @@ class Atom: public Scatterer
       virtual string GetComponentName(const int i) const;
 
       virtual void Print() const;
-      /// \internal This should be (and soon will be) private.
-      virtual void Update() const;
 
       /** \brief Returns the molar mass of the atom.
       *
@@ -119,13 +114,9 @@ class Atom: public Scatterer
       /** \brief Output a description of the scatterer for POVRay
       *
       */
-      virtual ostream& POVRayDescription(ostream &os,const Crystal &cryst,
-                                         bool onlyIndependentAtoms=false)const;
-      /** Create the OpenGL Display List for this Atom.
-      *
-      */
-      virtual void GLInitDisplayList(const Crystal &cryst,
-                                     const bool onlyIndependentAtoms=false,
+      virtual ostream& POVRayDescription(ostream &os,
+                                         const bool onlyIndependentAtoms=false)const;
+      virtual void GLInitDisplayList(const bool onlyIndependentAtoms=false,
                                      const double xMin=-.1,const double xMax=1.1,
                                      const double yMin=-.1,const double yMax=1.1,
                                      const double zMin=-.1,const double zMax=1.1)const;
@@ -136,11 +127,12 @@ class Atom: public Scatterer
 
       virtual void Output(ostream &os,int indent=0)const;
       virtual void Input(istream &is,const XMLCrystTag &tag);
-      virtual void InputOld(istream &is,const IOCrystTag &tag);
+      //virtual void InputOld(istream &is,const IOCrystTag &tag);
 		/// Get the ScatteringPowerAtom corresponding to this atom.
       const ScatteringPowerAtom& GetScatteringPower()const;
    protected:
    private:
+      virtual void Update() const;
       /// Prepare refinable parameters for the scatterer object
       virtual void InitRefParList();
    

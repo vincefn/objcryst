@@ -343,7 +343,7 @@ template class WXRegistry<PowderPatternComponent>;
 template class WXRegistry<DiffractionDataSingleCrystal>;
 template class WXRegistry<GlobalOptimObj>;
 template class WXRegistry<XMLCrystTag>;
-template class WXRegistry<IOCrystTag>;//to be removed
+//template class WXRegistry<IOCrystTag>;//to be removed
 template class WXRegistry<ZAtom>;
 ////////////////////////////////////////////////////////////////////////
 //

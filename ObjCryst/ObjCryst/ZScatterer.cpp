@@ -1,15 +1,15 @@
-/*
+/* 
 * ObjCryst++ : a Crystallographic computing library in C++
+*			http://objcryst.sourceforge.net
+*			http://www.ccp14.ac.uk/ccp/web-mirrors/objcryst/
 *
-*  (c) 2000 Vincent FAVRE-NICOLIN
-*           Laboratoire de Cristallographie
-*           24, quai Ernest-Ansermet, CH-1211 Geneva 4, Switzerland
-*  Contact: Vincent.Favre-Nicolin@cryst.unige.ch
-*           Radovan.Cerny@cryst.unige.ch
+*  (c) 2000-2001 Vincent FAVRE-NICOLIN vincefn@users.sourceforge.net
 *
 */
-//
-// source file for LibCryst++ ZScatterer classes
+/*   Atom.h
+*  header file for the Atom scatterer
+*
+*/
 
 #include <cmath>
 #include <typeinfo>
@@ -334,21 +334,21 @@ void ZScatterer::SetZDihedralAngle(const int i,const double a)
 const ObjRegistry<ZAtom>& ZScatterer::GetZAtomRegistry()const
 {return mZAtomRegistry;}
 
-ostream& ZScatterer::POVRayDescription(ostream &os,const Crystal &cryst,
-                                         bool onlyIndependentAtoms)const
+ostream& ZScatterer::POVRayDescription(ostream &os,
+                                         const bool onlyIndependentAtoms)const
 {
    VFN_DEBUG_MESSAGE("ZScatterer::POVRayDescription()",5)
    //throw ObjCrystException("ZScatterer::POVRayDescription() not implemented! "+this->GetName());
    //:TODO:
    this->Update();
 
-   //for(long i=0;i<mNbAtom;i++) mpAtom[i]->POVRayDescription(os,cryst,onlyIndependentAtoms);
+   //for(long i=0;i<mNbAtom;i++) mpAtom[i]->POVRayDescription(os,onlyIndependentAtoms);
    os << "// Description of ZScatterer :" << this->GetName() <<endl;
    
 #if 0
    if(true==mUseGlobalScattPow) 
    {
-      mpAtom[mCenterAtomIndex]->POVRayDescription(os,cryst,onlyIndependentAtoms);
+      mpAtom[mCenterAtomIndex]->POVRayDescription(os,onlyIndependentAtoms);
       return os;
    }
    //Declare colours
@@ -366,7 +366,7 @@ ostream& ZScatterer::POVRayDescription(ostream &os,const Crystal &cryst,
          x(i)=mpAtom[i]->GetX();
          y(i)=mpAtom[i]->GetY();
          z(i)=mpAtom[i]->GetZ();
-         cryst.FractionalToOrthonormalCoords(x(i),y(i),z(i));
+         this->GetCrystal().FractionalToOrthonormalCoords(x(i),y(i),z(i));
       }
       for(int i=0;i<mNbAtom;i++)
       {
@@ -397,7 +397,7 @@ ostream& ZScatterer::POVRayDescription(ostream &os,const Crystal &cryst,
    {
       CrystMatrix_double* xyzCoords=new CrystMatrix_double[mNbAtom];
       for(int i=0;i<mNbAtom;i++)
-         *(xyzCoords+i)=cryst.GetSpaceGroup().GetAllSymmetrics(mpAtom[i]->GetX(),
+         *(xyzCoords+i)=this->GetCrystal().GetSpaceGroup().GetAllSymmetrics(mpAtom[i]->GetX(),
                                                             mpAtom[i]->GetY(),
                                                             mpAtom[i]->GetZ(),
                                                             false,false,false);
@@ -473,7 +473,7 @@ ostream& ZScatterer::POVRayDescription(ostream &os,const Crystal &cryst,
                 &&(z(0)>(-limit)) && (z(0)<(1+limit)))
             {
                for(int k=0;k<mNbAtom;k++)
-                  cryst.FractionalToOrthonormalCoords(x(k),y(k),z(k));
+                  this->GetCrystal().FractionalToOrthonormalCoords(x(k),y(k),z(k));
                os << "  // Symmetric&Translated #" << symNum++ <<endl;
                //:NOTE: The code below is the same as without symmetrics
                for(int i=0;i<mNbAtom;i++)
@@ -512,7 +512,7 @@ ostream& ZScatterer::POVRayDescription(ostream &os,const Crystal &cryst,
    return os;
 }
 
-void ZScatterer::GLInitDisplayList(const Crystal &cryst,const bool onlyIndependentAtoms,
+void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                                    const double xMin,const double xMax,
                                    const double yMin,const double yMax,
                                    const double zMin,const double zMax)const
@@ -520,11 +520,9 @@ void ZScatterer::GLInitDisplayList(const Crystal &cryst,const bool onlyIndepende
    #ifdef OBJCRYST_GL
    VFN_DEBUG_ENTRY("ZScatterer::GLInitDisplayList()",4)
    this->Update();
-   //for(long i=0;i<mNbAtom;i++) mpAtom[i]->GLInitDisplayList(cryst,onlyIndependentAtoms);
-   //return;
    if(true==mUseGlobalScattPow) 
    {
-      //mpAtom[mCenterAtomIndex]->GLInitDisplayList(cryst,onlyIndependentAtoms);
+      //mpAtom[mCenterAtomIndex]->GLInitDisplayList(onlyIndependentAtoms);
       return;
    }
    
@@ -705,8 +703,9 @@ void ZScatterer::GLInitDisplayList(const Crystal &cryst,const bool onlyIndepende
             x0=mXCoord(i);
             y0=mYCoord(i);
             z0=mZCoord(i);
-            cryst.OrthonormalToFractionalCoords(x0,y0,z0);
-            xyzCoords[i]=cryst.GetSpaceGroup().GetAllSymmetrics(x0,y0,z0,false,false,false);
+            this->GetCrystal().OrthonormalToFractionalCoords(x0,y0,z0);
+            xyzCoords[i]=this->GetCrystal().GetSpaceGroup().
+									GetAllSymmetrics(x0,y0,z0,false,false,false);
          }
       }
       CrystMatrix_int translate(27,3);
@@ -780,7 +779,7 @@ void ZScatterer::GLInitDisplayList(const Crystal &cryst,const bool onlyIndepende
                 &&(z(0)>zMin) && (z(0)<zMax))
             {
                for(int k=0;k<mNbAtom;k++)
-                  cryst.FractionalToOrthonormalCoords(x(k),y(k),z(k));
+                  this->GetCrystal().FractionalToOrthonormalCoords(x(k),y(k),z(k));
                //:NOTE: The code below is the same as without symmetrics
                if(m3DDisplayIndex.numElements()>0)
                {

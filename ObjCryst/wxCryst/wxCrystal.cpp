@@ -971,7 +971,7 @@ void WXGLCrystalCanvas::OnMouse( wxMouseEvent& event )
 
 void WXGLCrystalCanvas::OnUpdate(wxCommandEvent & WXUNUSED(event))
 {
-   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnUpdate()",10)
+   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnUpdate()",4)
    mpWXCrystal->UpdateGL(false,mXmin,mXmax,mYmin,mYmax,mZmin,mZmax);
    //This will call WXGLCrystalCanvas::CrystUpdate() after updating
    // the GL display list

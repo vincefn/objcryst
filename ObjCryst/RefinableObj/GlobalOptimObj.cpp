@@ -838,7 +838,7 @@ void GlobalOptimObj::Input(istream &is,const XMLCrystTag &tagg)
       }
    }
 }
-
+#if 0
 void GlobalOptimObj::InputOld(istream &is,const IOCrystTag &tagg)
 {
    VFN_DEBUG_MESSAGE("GlobalOptimObj::Input():"<<this->GetName(),5)
@@ -980,7 +980,7 @@ void GlobalOptimObj::InputOld(istream &is,const IOCrystTag &tagg)
       default: cout << "Unknown tag version !"<<endl;
    }
 }
-
+#endif
 const string& GlobalOptimObj::GetName()const { return mName;}
 void GlobalOptimObj::SetName(const string& name) {mName=name;}
 
