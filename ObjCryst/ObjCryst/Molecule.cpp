@@ -695,10 +695,11 @@ Quaternion Quaternion::RotationQuaternion(const REAL ang,
                                           const REAL v3)
 {
    VFN_DEBUG_MESSAGE("Quaternion::RotationQuaternion()",4)
+   const REAL norm=sqrt(v1*v1+v2*v2+v3*v3);
    return Quaternion(cos(ang/2.),
-                     sin(ang/2.)*v1,
-                     sin(ang/2.)*v2,
-                     sin(ang/2.)*v3,
+                     sin(ang/2.)*v1/norm,
+                     sin(ang/2.)*v2/norm,
+                     sin(ang/2.)*v3/norm,
                      true);
 }
 
@@ -907,7 +908,7 @@ mIsSelfOptimizing(false)
                         gpRefParTypeScattOrient,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
       tmp.AssignClock(mClockScatterer);
-      tmp.SetGlobalOptimStep(0.1);
+      tmp.SetGlobalOptimStep(0.04);
       this->AddPar(tmp);
    }
    mLocalParamSet=this->CreateParamSet("saved parameters for local minimization");
@@ -1095,6 +1096,9 @@ void Molecule::BeginOptimization(const bool allowApproximations,const bool enabl
 {
    this->BuildTorsionAtomGroupTable();
    this->RefinableObj::BeginOptimization(allowApproximations,enableRestraints);
+   mRandomConformChangeNbTest=0;
+   mRandomConformChangeNbTest=0;
+   mRandomConformChangeTemp=1.;//(REAL)this->GetNbComponent();
 }
 
 void Molecule::RandomizeConfiguration()
@@ -1103,6 +1107,7 @@ void Molecule::RandomizeConfiguration()
    this->BuildTorsionAtomGroupTable();
    for(unsigned long torsion=0;torsion<mvpBond.size();torsion++)
    {
+      const REAL angle=(REAL)rand()*2.*M_PI/(REAL)RAND_MAX;
       if((rand()%2)==0)
       {
          list<set<unsigned long> >::const_iterator pos;
@@ -1111,7 +1116,7 @@ void Molecule::RandomizeConfiguration()
              ++pos)
          {
             this->RotateAtomGroup(mvpBond[torsion]->GetAtom1(),mvpBond[torsion]->GetAtom2(),
-                                  *pos,(REAL)rand()*2.*M_PI/(REAL)RAND_MAX);
+                                  *pos,angle);
          }
       }
       else
@@ -1122,7 +1127,7 @@ void Molecule::RandomizeConfiguration()
              ++pos)
          {
             this->RotateAtomGroup(mvpBond[torsion]->GetAtom1(),mvpBond[torsion]->GetAtom2(),
-                                  *pos,(REAL)rand()*2.*M_PI/(REAL)RAND_MAX);
+                                  *pos,angle);
          }
       }
    }
@@ -1141,68 +1146,101 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
    {
       //case 0://Free atoms + restraints
       {
-      //#error faire tourner directement les coordonnées des atomes , sans garder comme membre un quaternion -> limiter le nombre de paramètres
-         //if(rand()<(0.2*RAND_MAX))
-         if(false)
          {//Rotate around an arbitrary vector
-            static const REAL amp=M_PI/1000./RAND_MAX;
-            mQuat *= Quaternion::RotationQuaternion((rand()-RAND_MAX/2)*amp*mutationAmplitude,
+            static const REAL amp=2*M_PI/100./RAND_MAX;
+            mQuat *= Quaternion::RotationQuaternion((2*rand()-RAND_MAX)*amp*mutationAmplitude,
                                                         (REAL)rand(),(REAL)rand(),(REAL)rand());
+            mQuat.Normalize();
             mClockOrientation.Click();
          }
-         
-         {//rotate around torsion bond
-            const unsigned long torsion=rand() % mvpBond.size();
-            const REAL angle=(rand()-RAND_MAX/2)*M_PI/50./RAND_MAX*mutationAmplitude;
-            if((rand()%2)==0)
-            {
-               list<set<unsigned long> >::const_iterator pos;
-               for(pos =mTorsionAtomGroupTable[torsion].first.begin();
-                   pos!=mTorsionAtomGroupTable[torsion].first.end();
-                   ++pos)
-               {
-                  this->RotateAtomGroup(mvpBond[torsion]->GetAtom1(),mvpBond[torsion]->GetAtom2(),
-                                        *pos,angle);
-               }
-            }
-            else
-            {
-               list<set<unsigned long> >::const_iterator pos;
-               for(pos =mTorsionAtomGroupTable[torsion].second.begin();
-                   pos!=mTorsionAtomGroupTable[torsion].second.end();
-                   ++pos)
-               {
-                  this->RotateAtomGroup(mvpBond[torsion]->GetAtom1(),mvpBond[torsion]->GetAtom2(),
-                                        *pos,angle);
-               }
-            }
-         }
+         if(gpRefParTypeScattTransl->IsDescendantFromOrSameAs(type))
+            this->RefinableObj::GlobalOptRandomMove(mutationAmplitude,gpRefParTypeScattTransl);
          #if 1
-         if(true)
+         if(gpRefParTypeScattConform->IsDescendantFromOrSameAs(type))
          {
             this->SaveParamSet(mLocalParamSet);
-            const REAL lastll=this->GetLogLikelihood();
+            REAL lastll=this->GetLogLikelihood();
             //cout <<mutationAmplitude <<"oldLL="<<lastll<<" NewLL= ";
             unsigned int ct=0;
             while(true)
             {
                ct++;
                mRandomMoveIsDone=false;
-               this->RefinableObj::GlobalOptRandomMove(mutationAmplitude,type);
+               for(unsigned long i=0;i<mTorsionBondIndex.size();i++)
+               {//rotate around torsion bonds
+                // :TODO: rotate single atom groups from time to time
+                  const unsigned long torsion=mTorsionBondIndex[i];
+                  const REAL angle=(2*rand()-RAND_MAX)*M_PI/25./RAND_MAX*mutationAmplitude;
+                  if((rand()%2)==0)
+                  {
+                     list<set<unsigned long> >::const_iterator pos;
+                     for(pos =mTorsionAtomGroupTable[torsion].first.begin();
+                         pos!=mTorsionAtomGroupTable[torsion].first.end();
+                         ++pos)
+                     {
+                        this->RotateAtomGroup(mvpBond[torsion]->GetAtom1(),mvpBond[torsion]->GetAtom2(),
+                                              *pos,angle);
+                        if((rand()%5)==0) break;// give 20% chance to rotate not all atom groups
+                     }
+                  }
+                  else
+                  {
+                     list<set<unsigned long> >::const_iterator pos;
+                     for(pos =mTorsionAtomGroupTable[torsion].second.begin();
+                         pos!=mTorsionAtomGroupTable[torsion].second.end();
+                         ++pos)
+                     {
+                        this->RotateAtomGroup(mvpBond[torsion]->GetAtom1(),mvpBond[torsion]->GetAtom2(),
+                                              *pos,angle);
+                        if((rand()%5)==0) break;// give 20% chance to rotate not all atom groups
+                     }
+                  }
+               }
+               this->RefinableObj::GlobalOptRandomMove(0.2,gpRefParTypeScattConform);
+               //this->RefinableObj::GlobalOptRandomMove(mutationAmplitude,gpRefParTypeScattConform);
+               mRandomConformChangeNbTest++;
                mQuat.Normalize();
                if(mIsSelfOptimizing) break;
                const REAL newll=this->GetLogLikelihood();
                //cout <<newll<<" ";
                if(newll<lastll) break;
                if( log((rand()+1)/(REAL)RAND_MAX) 
-                   < (-(newll-lastll)/(200.*(0.+mutationAmplitude)*(1+mutationAmplitude)) )) break;
+                   < (-(newll-lastll)/mRandomConformChangeTemp )) break;
+               //if( log((rand()+1)/(REAL)RAND_MAX) 
+               //    < (-(newll-lastll)/(mRandomConformChangeTemp*mutationAmplitude) )) break;
                this->RestoreParamSet(mLocalParamSet);
+               if(ct>20) break;
+            }
+            mRandomConformChangeNbAccept++;
+            if(mRandomConformChangeNbTest>=1000)
+            {
+               if(((REAL)mRandomConformChangeNbAccept/(REAL)mRandomConformChangeNbTest)<0.10)
+               {  
+                  cout<<"mRandomConformChangeTemp="<<mRandomConformChangeTemp<<endl;
+                  mRandomConformChangeTemp*=2.;
+               }
+               if(((REAL)mRandomConformChangeNbAccept/(REAL)mRandomConformChangeNbTest)<0.4)
+               {  
+                  cout<<"mRandomConformChangeTemp="<<mRandomConformChangeTemp<<endl;
+                  mRandomConformChangeTemp*=1.3;
+               }
+               if(((REAL)mRandomConformChangeNbAccept/(REAL)mRandomConformChangeNbTest)>0.6)
+               {
+                  mRandomConformChangeTemp/=1.3;
+                  cout<<"mRandomConformChangeTemp="<<mRandomConformChangeTemp<<endl;
+               }
+               if(((REAL)mRandomConformChangeNbAccept/(REAL)mRandomConformChangeNbTest)>0.9)
+               {
+                  mRandomConformChangeTemp/=2.;
+                  cout<<"mRandomConformChangeTemp="<<mRandomConformChangeTemp<<endl;
+               }
+               mRandomConformChangeNbTest=0;
+               mRandomConformChangeNbAccept=0;
             }
             //cout <<endl;
             //if(ct>20) cout<<"Molecule::GlobalOptRandomMove:"<<mutationAmplitude<<", ct="<<ct<<endl;
             //break;
          }
-         else this->RefinableObj::GlobalOptRandomMove(mutationAmplitude,type);
          #endif
          mClockScatterer.Click();
       }
@@ -1247,13 +1285,6 @@ REAL Molecule::GetLogLikelihood()const
    TAU_PROFILE("Molecule::GetLogLikelihood()","REAL ()",TAU_DEFAULT);
    mLogLikelihood=this->RefinableObj::GetLogLikelihood();
    mClockLogLikelihood.Click();
-   #if 0
-   const REAL nb=(REAL)this->GetNbComponent();
-   mLogLikelihood /=nb;
-   //:KLUDGE: avoid overflow
-   if(mLogLikelihood>30) mLogLikelihood= 2.8550185e25*(mLogLikelihood-29)*nb;
-   else mLogLikelihood= sinh(mLogLikelihood)*nb;
-   #endif
    return mLogLikelihood;
 }
 void Molecule::TagNewBestConfig()const
@@ -1781,6 +1812,35 @@ void Molecule::BuildTorsionAtomGroupTable()const
             cout<<endl;
          }
       }
+      #endif
+   }
+   // Determine free torsion bonds
+   mTorsionBondIndex.clear();
+   for(unsigned long i=0;i<mvpBond.size();++i)
+   {
+      if(mTorsionAtomGroupTable[i].first.size()==0) continue;// Terminal bond
+      if(mTorsionAtomGroupTable[i].second.size()==0) continue;
+      bool free=true;
+      list<set<unsigned long> >::const_iterator pos;
+      for(pos =mTorsionAtomGroupTable[i].first.begin();
+          pos!=mTorsionAtomGroupTable[i].first.end();
+          ++pos)
+      {
+         if(pos->find(index[&(mvpBond[i]->GetAtom2())]) != pos->end()) free=false;
+      }
+      if(!free) continue;
+      for(pos =mTorsionAtomGroupTable[i].second.begin();
+          pos!=mTorsionAtomGroupTable[i].second.end();
+          ++pos)
+      {
+         if(pos->find(index[&(mvpBond[i]->GetAtom1())]) != pos->end()) free=false;
+      }
+      if(!free) continue;
+      mTorsionBondIndex.push_back(i);
+      #if 1
+      cout<<"Free Torsion Bond:"
+          <<mvpBond[i]->GetAtom1().GetName()<<"-"
+          <<mvpBond[i]->GetAtom2().GetName()<<endl;
       #endif
    }
    mClockmTorsionAtomGroupTable.Click();

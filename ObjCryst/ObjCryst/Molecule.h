@@ -395,6 +395,11 @@ class Molecule: public Scatterer
       */
       void AddAtom(const REAL x, const REAL y, const REAL z,
                    const ScatteringPower *pPow,const string &name);
+      /** Remove an atom
+      *
+      * This also removes all corresponding bonds, bond angles, etc...
+      */
+      void RemoveAtom(const MolAtom&);
       /** Add a bond
       *
       *
@@ -402,18 +407,30 @@ class Molecule: public Scatterer
       void AddBond(MolAtom &atom1, MolAtom &atom2,
                    const REAL length, const REAL sigma, const REAL delta,
                    const REAL bondOrder=1.);
+      /** Remove a bond
+      *
+      */
+      void RemoveBond(const MolBond&);
       /** Add a bond angle restraint
       *
       *
       */
       void AddBondAngle(MolAtom &atom1, MolAtom &atom2, MolAtom &atom3,
                         const REAL angle, const REAL sigma, const REAL delta);
+      /** Remove a BondAngle
+      *
+      */
+      void RemoveBondAngle(const MolBondAngle&);
       /** Add a dihedral angle restraint
       *
       *
       */
       void AddDihedralAngle(MolAtom &atom1, MolAtom &atom2, MolAtom &atom3, MolAtom &atom4,
                             const REAL angle, const REAL sigma, const REAL delta);
+      /** Remove a dihedral angle
+      *
+      */
+      void RemoveDihedralAngle(const MolDihedralAngle&);
       MolAtom &GetAtom(unsigned int i);
       const MolAtom &GetAtom(unsigned int i)const;
       MolAtom &GetAtom(const string &name);
@@ -517,6 +534,9 @@ class Molecule: public Scatterer
          
       // For local minimization (EXPERIMENTAL)
          unsigned long mLocalParamSet;
+         mutable unsigned long mRandomConformChangeNbTest;
+         mutable unsigned long mRandomConformChangeNbAccept;
+         mutable REAL mRandomConformChangeTemp;
          REAL mLastLogLike;
          bool mIsSelfOptimizing;
       /// OPtion for the different types of flexibility possible for this
@@ -541,7 +561,10 @@ class Molecule: public Scatterer
       * end of the bond.
       */
       mutable map<unsigned long,pair<list<set<unsigned long> >,list<set<unsigned long> > > > mTorsionAtomGroupTable;
-
+      /** The index of bonds with free rotation
+      *
+      */
+      mutable vector<unsigned long> mTorsionBondIndex;
    /// The current log(likelihood)
    mutable REAL mLogLikelihood;
    #ifdef __WX__CRYST__
