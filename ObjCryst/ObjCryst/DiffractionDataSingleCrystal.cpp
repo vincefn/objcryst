@@ -45,7 +45,8 @@ namespace ObjCryst
 ObjRegistry<DiffractionDataSingleCrystal> 
    gDiffractionDataSingleCrystalRegistry("Global DiffractionDataSingleCrystal Registry");
 
-DiffractionDataSingleCrystal::DiffractionDataSingleCrystal():mScaleFactor(1.)
+DiffractionDataSingleCrystal::DiffractionDataSingleCrystal():
+mHasObservedData(false),mScaleFactor(1.)
 {
    VFN_DEBUG_MESSAGE("DiffractionDataSingleCrystal::DiffractionDataSingleCrystal()",5)
    this->InitRefParList();
@@ -53,7 +54,8 @@ DiffractionDataSingleCrystal::DiffractionDataSingleCrystal():mScaleFactor(1.)
    gDiffractionDataSingleCrystalRegistry.Register(*this);
    gTopRefinableObjRegistry.Register(*this);
 }
-DiffractionDataSingleCrystal::DiffractionDataSingleCrystal(Crystal &cryst):mScaleFactor(1.)
+DiffractionDataSingleCrystal::DiffractionDataSingleCrystal(Crystal &cryst):
+mHasObservedData(false),mScaleFactor(1.)
 {
    VFN_DEBUG_MESSAGE("DiffractionDataSingleCrystal::DiffractionDataSingleCrystal()",5)
    this->InitRefParList();
