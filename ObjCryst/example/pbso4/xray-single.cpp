@@ -50,10 +50,10 @@ void testPbSO4()
          //cryst_orig.AddScatteringPower(ScattPowO1);
          //cryst_orig.AddScatteringPower(ScattPowO2);
          //cryst_orig.AddScatteringPower(ScattPowO3);
-	      Atom *Pb=new Atom(.188,.250,.167,"Pb",ScattPowPb   ,.5);
-	      Atom *S=new Atom (.437,.750,.186,"S" ,ScattPowS    ,.5);
-	      Atom *O1=new Atom(.595,.750,.100,"O1",ScattPowO1   ,.5);
-	      Atom *O2=new Atom(.319,.750,.043,"O2",ScattPowO2   ,.5);
+	      Atom *Pb=new Atom(.188,.250,.167,"Pb",ScattPowPb   ,1.);
+	      Atom *S=new Atom (.437,.750,.186,"S" ,ScattPowS    ,1.);
+	      Atom *O1=new Atom(.595,.750,.100,"O1",ScattPowO1   ,1.);
+	      Atom *O2=new Atom(.319,.750,.043,"O2",ScattPowO2   ,1.);
 	      Atom *O3=new Atom(.415,.974,.306,"O3",ScattPowO3   ,1.);
          cryst_orig.AddScatterer(Pb);
          cryst_orig.AddScatterer(S);
