@@ -8,11 +8,11 @@
 \anchor intro <h2>Introduction</h2>
 The FOX program (for Linux and windows) was made for the <i><b> ab initio crystal structure solution from diffraction data </b></i> (mostly powder diffraction data). Its most interesting features for ab initio structure determination are:
 
-   - a <b><i>versatile description of the crystal contents</b></i>: either isolated <b>atoms , molecules</b> described using a bond length, bond angles and dihedral angles, and <b>polyhedra</b> for inorganic compounds. <i><b>You can describe your structure by using any combination of groups of atoms, using a chemist's or crystallographer knowledge about the connectivity in your sample 
-to constrain possible solutions.</i></b>.
-   - an <i><b>automatic correction for special positions and shared atoms between polyhedra</i></b>, suitable for global optimization algorithms.
-   - the ability to use simultaneously <i><b>multiple powder patterns</i></b> (X-rays, neutrons), as well as single crystal data (e.g. extracted from a powder pattern)
-   - <i><b>smart global optimization algorithms</i></b> which can get out of false minima.
+   - a <i><b>versatile description of the crystal contents</b></i>: either isolated <b>atoms , molecules</b> described using a bond length, bond angles and dihedral angles, and <b>polyhedra</b> for inorganic compounds. <i><b>You can describe your structure by using any combination of groups of atoms, using a chemist's or crystallographer knowledge about the connectivity in your sample 
+to constrain possible solutions.</b></i>.
+   - an <i><b>automatic correction for special positions and shared atoms between polyhedra</b></i>, suitable for global optimization algorithms.
+   - the ability to use simultaneously <i><b>multiple powder patterns</b></i> (X-rays, neutrons), as well as single crystal data (e.g. extracted from a powder pattern)
+   - <i><b>smart global optimization algorithms</b></i> which can get out of false minima.
    - a graphical interface with a 3D crystal structure view, with live updates during the optimization process.
 
 So, if you:
@@ -22,9 +22,9 @@ So, if you:
 
 Then Fox can help you.
 
-This program can be used also for <i><b>educational purposes</i></b>, to show a 3D display of Crystal structures, and the associated powder pattern(s) (see how adding atoms, changing the lattice, or changing the spacegroup affects the powder spectrum and the 3D structure).
+This program can be used also for <i><b>educational purposes</b></i>, to show a 3D display of Crystal structures, and the associated powder pattern(s) (see how adding atoms, changing the lattice, or changing the spacegroup affects the powder spectrum and the 3D structure).
 
-If you would also like to <i><b>choose your own criterion and algorithm</i></b> to solve the structure, then it will be even better : FOX is built on a very <i><b>customizable and expandable library (ObjCryst++)</i></b>, which allows you to evaluate your Crystal structure following a combination of criteria: currently there are only Chi^2 and an Anti-bump cost function, but it would be very easy to write a new criterion using (say) interatomic distances (energy of the configuration, analysis of the coordination). This, with a versatile way to describe the unit cell's contents, is what makes the algorithms used interesting. For example you can combine several datasets (X-Ray, Neutron...) for the same structure,...
+If you would also like to <i><b>choose your own criterion and algorithm</b></i> to solve the structure, then it will be even better : FOX is built on a very <i><b>customizable and expandable library (ObjCryst++)</b></i>, which allows you to evaluate your Crystal structure following a combination of criteria: currently there are only Chi^2 and an Anti-bump cost function, but it would be very easy to write a new criterion using (say) interatomic distances (energy of the configuration, analysis of the coordination). This, with a versatile way to describe the unit cell's contents, is what makes the algorithms used interesting. For example you can combine several datasets (X-Ray, Neutron...) for the same structure,...
 
 <h2>Author</h2>
 FOX was developped by Vincent Favre-Nicolin (http://v.favrenicolin.free.fr, vincefn@users.sf.net), in collaboration with Radovan Cerny (http://www.unige.ch/crystal/cerny/rcerny.htm) at the Laboratory of Crystallography in Geneva, Switzerland (http://www.unige.ch/crystal/lab.html), with support from the Swiss National Science Foundation (http://www.snf.ch/), project #21-53847.98. The development still goes on as a personal research project after my move to the ESRF and now to the CEA and the University of Grenoble (France).
@@ -64,7 +64,6 @@ For <b>Linux</b>, download the Fox-date.tar.bz2 (source code).
 
 As always, send me an email at vincefn@users.sf.net if you have any trouble with the installation.
 
-<ul>
    <h3>Quick demonstration</h3>
 
    As an easy demonstration (even for non-crystallographers!), you can launch Fox, then use the top menu File->Load and open the example file example/pbso4-joint.xml. This is a file showing the global optimization of a very simple and well-known structure, PbSO4 (lead sulfate). Then:
@@ -74,7 +73,6 @@ As always, send me an email at vincefn@users.sf.net if you have any trouble with
       <li> Click on the Crystal tab, and choose Parameters->Randomize Structure (it would be too easy to start from the solution)
       <li> Click on the Global Optimization tab. Then choose Optimize->Run . This will launch the global optimization running. You will see the structure evolve, as well as the Cost functions (the two Rws in that case).
    </ul>
-</ul>
 
 \anchor mailinglist <h2>Mailing Lists</h2>
 
@@ -83,11 +81,11 @@ To be kept informed about new releases, you are encouraged to subscribe to the l
 If you intend to use the ObjCryst++ / Fox source code for your own projects, it is highly recommended to subscribe to the ObjCryst++ mailing list at http://lists.sourceforge.net/mailman/listinfo/objcryst-devel, (the archives can be found at http://sourceforge.net/mailarchive/forum.php?forum_id=1689).
 
 <h2>Known Problems</h2>
-
+<ul>
     <li> In windows 95 and NT SP1 (not SP4), the 3D Crystal view (using OpenGL) can lead quickly to a crash when you rotate the structure. Solution: upgrade your version of windows (even better, switch to Linux).
     <li> Some users have reported crashes when opening the 3D view of the crystal structure. This was always with a video card of the Intel Extreme Graphics family. I have epxerimented a bit with such a video card, and it turns out other programs (not written by me) using OpenGL also crash (especially with winXP). The workaround is to decrease in window the level of hardware acceleration down to the point that no 3d (direct3D and OpenGL) is used.
     <li> Fow does not work correctly under Linux on multi-processor systems. The workaraound is to edit the structure using the gui, and then launch the optimization without the gui, using command-line options (see the main reference).
-      
+</ul>
 Note: If you have remarks about what could be done to improve the program (or the documentation), please send me an email.
 
 Note: if the program encounters an error, it will sometime manage to save the complete environment in a file which should be found in the directory where you launched Fox (or in your home directory under Linux, or along the Fox.exe application under windows), named "ObjCryst-date-time.xml", which you can then reload.
