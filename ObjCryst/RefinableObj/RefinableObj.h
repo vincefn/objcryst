@@ -210,7 +210,7 @@ class Restraint
 		*
 		* If restraints are disabled, the returned cost is always null.
 		*/
-		virtual REAL GetRestraintCost(const REAL looseness=1.)const;
+		virtual REAL GetRestraintCost()const;
 	protected:
 		/// Type of value constrained/restrained.
       const RefParType *mpRefParType;

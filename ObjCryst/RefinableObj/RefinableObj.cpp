@@ -165,7 +165,7 @@ void Restraint::Init(const RefParType *type,
 	mEnableRestraint=enableRestraints;
 }
 
-REAL Restraint::GetRestraintCost(const REAL looseness)const
+REAL Restraint::GetRestraintCost()const
 {
 	if((false==mEnableRestraint)|| ((mHasMin==false)&&(mHasMax==false))) return 0.;
 	else
@@ -173,12 +173,12 @@ REAL Restraint::GetRestraintCost(const REAL looseness)const
 		REAL value=this->GetValue();
 		if((true==mHasMin)&&(value<mMin))
 		{
-			value= (mMin-value)/(looseness*mRestraintRange);
+			value= (mMin-value)/(mRestraintRange);
 			return value*value;
 		}
 		if((true==mHasMax)&&(value>mMax))
 		{
-			value= (value-mMax)/(looseness*mRestraintRange);
+			value= (value-mMax)/(mRestraintRange);
 			return value*value;
 		}
 	}
