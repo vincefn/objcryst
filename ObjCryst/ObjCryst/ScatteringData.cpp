@@ -1224,8 +1224,6 @@ void ScatteringData::CalcStructFactor() const
    //TAU_PROFILE_START(timer1);
    
    const long nbRefl=this->GetNbRefl();
-   const ScatteringComponentList* pScattCompList=&(mpCrystal->GetScatteringComponentList());
-   const long nbScattComp=pScattCompList->GetNbComponent();
    this->CalcSinThetaLambda();
    //TAU_PROFILE_STOP(timer1);
    //TAU_PROFILE_START(timer2);
@@ -1262,10 +1260,11 @@ void ScatteringData::CalcStructFactor() const
       mFhklCalcReal=0;
       mFhklCalcImag=0;
    //Add all contributions
-   for(long i=mvRealGeomSF.size()-1;i>=0;i--)
+   for(map<const ScatteringPower*,CrystVector_REAL>::const_iterator pos=mvRealGeomSF.begin();
+       pos!=mvRealGeomSF.end();++pos)
    {
-      const ScatteringPower* pScattPow=&(mpCrystal->GetScatteringPowerRegistry().GetObj(i));
-      VFN_DEBUG_MESSAGE("ScatteringData::CalcStructFactor():Fhkl Recalc, comp#"<<i,2)
+      const ScatteringPower* pScattPow=pos->first;
+      VFN_DEBUG_MESSAGE("ScatteringData::CalcStructFactor():Fhkl Recalc, "<<pScattPow->GetName(),2)
       const REAL *pGeomR=mvRealGeomSF[pScattPow].data();
       const REAL *pGeomI=mvImagGeomSF[pScattPow].data();
       const REAL *pScatt=mvScatteringFactor[pScattPow].data();
@@ -1287,11 +1286,11 @@ void ScatteringData::CalcStructFactor() const
       VFN_DEBUG_MESSAGE("->   H      K      L   sin(t/l)     Re(F)      Im(F)      scatt      Temp",1)
 
       VFN_DEBUG_MESSAGE(FormatVertVectorHKLFloats<REAL>(mH,mK,mL,mSinThetaLambda,
-                                                         mvRealGeomSF[pScattPow],
-                                                         mvImagGeomSF[pScattPow],
-                                                         mvScatteringFactor[pScattPow],
-                                                         mvTemperatureFactor[pScattPow] 
-                                                         ),1);
+                                                        mvRealGeomSF[pScattPow],
+                                                        mvImagGeomSF[pScattPow],
+                                                        mvScatteringFactor[pScattPow],
+                                                        mvTemperatureFactor[pScattPow] 
+                                                        ),1);
       if(mvLuzzatiFactor[pScattPow].numElements()>0)
       {// using maximum likelihood
          const REAL* pLuzzati=mvLuzzatiFactor[pScattPow].data();
