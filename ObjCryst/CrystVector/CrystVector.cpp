@@ -37,6 +37,8 @@ template<class T> T MaxDifference(const Array<T,2> &a,const Array<T,2> &b)
 			{cout <<"vect-Alloc.Mem:"<<gMemAllocVector<<endl;chrono.start();}\
 		if(gMemAllocVectorMax<gMemAllocVector)\
 		{gMemAllocVectorMax=gMemAllocVector; cout <<"vect-Alloc.MAX:"<<gMemAllocVector<<endl;}
+#else
+	#define CRYSTVECTOR_MEM_CHANGE(s)
 #endif
 
 //######################################################################
