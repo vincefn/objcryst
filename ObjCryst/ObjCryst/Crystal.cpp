@@ -1046,7 +1046,7 @@ void Crystal::CalcDistTable(const bool fast, const REAL asymUnitMargin) const
                      if( (yl>yMinl) || (yl<yMaxl))
                      {
                         vPos.push_back(DistTableInternalPosition(i,j,xl,yl,zl));
-                        if((xl<xMax0l)&&(yl<yMax0l)&&(zl<zMax0l))
+                        if((xl<=xMax0l)&&(yl<=yMax0l)&&(zl<=zMax0l))
                         {
                            vUniqueIndex[i]=vPos.size()-1;
                            mvDistTableSq[i].mUniquePosSymmetryIndex=j;
@@ -1159,7 +1159,7 @@ void Crystal::CalcDistTable(const bool fast, const REAL asymUnitMargin) const
                      if( (y>yMin) || (y<yMax))
                      {
                         vPos.push_back(DistTableInternalPosition(i,j,x,y,z));
-                        if((x<xMax0)&&(y<yMax0)&&(z<zMax0))
+                        if((x<=xMax0)&&(y<=yMax0)&&(z<=zMax0))
                         {
                            vUniqueIndex[i]=vPos.size()-1;
                            mvDistTableSq[i].mUniquePosSymmetryIndex=j;
