@@ -583,7 +583,10 @@ template<class T> class ObjRegistry
       /// Find the number of an object in the registry from its name (slow !)
       /// The search starts at the *end* of the registry.
       /// Also check the class of the object (inheritance...).
-      long Find(const string &objName, const string& className)const;
+		/// use nothrow=true to avoid having an exception thrown if no object
+		/// is found (instead the index returned will be -1)
+      long Find(const string &objName, const string& className,
+					 const bool nothrow=false)const;
       /// Find the number of an object in the registry
       /// The search starts at the *end* of the registry.
       long Find(const T &obj)const;

@@ -846,7 +846,8 @@ template<class T> long ObjRegistry<T>::Find(const string &objName) const
 }
 
 template<class T> long ObjRegistry<T>::Find(const string &objName,
-                                               const string &className) const
+                                            const string &className,
+					 									  const bool nothrow) const
 {
    VFN_DEBUG_MESSAGE("ObjRegistry::Find(objName,className)",2)
    long index=-1;
@@ -865,7 +866,8 @@ template<class T> long ObjRegistry<T>::Find(const string &objName,
    //}
    cout << "ObjRegistry<T>::Find("<<objName<<","<<className<<"): Not found !!"<<endl;
    this->Print();
-   throw 0;
+	if(nothrow==false)
+   	throw ObjCrystException("ObjRegistry<T>::Find("+objName+","+className+"): Not found !!");
    return index;
 }
 
