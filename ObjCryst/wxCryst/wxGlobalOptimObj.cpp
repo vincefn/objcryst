@@ -156,6 +156,7 @@ VFN_DEBUG_MESSAGE(this->GetOptimizationObj().mRefinedObjList.GetObj(i).GetName()
    
    wxSingleChoiceDialog dialog
          (this,"Choose a new cost function","Choose",nbCostFunc,choices,0,wxOK | wxCANCEL);
+   dialog.SetSize(300,300);
    if(wxID_OK!=dialog.ShowModal()) return;
    int choice=dialog.GetSelection();
    this->GetOptimizationObj().AddCostFunction(

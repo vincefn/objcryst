@@ -387,6 +387,7 @@ template<class T> T* WXDialogChooseFromRegistry(ObjRegistry<T> &reg,wxWindow*par
       choices[i]=(reg.GetObj(i).GetClassName()+":"+reg.GetObj(i).GetName()).c_str();
    wxSingleChoiceDialog dialog
          (parent,message.c_str(),"Choose",reg.GetNb(),choices,0,wxOK | wxCANCEL);
+   dialog.SetSize(300,300);
    if(wxID_OK!=dialog.ShowModal()) return 0;
    choice=dialog.GetSelection();
    return &(reg.GetObj(choice));
