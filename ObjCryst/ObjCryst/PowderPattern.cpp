@@ -4213,7 +4213,11 @@ CrystVector_REAL PowderProfileGauss  (const CrystVector_REAL ttheta,const REAL f
       for(long i=middlePt;i<nbPoints;i++) *p++ *= c2;
    }
    p=result.data();
-   for(long i=0;i<nbPoints;i++) { *p = exp(*p) ; p++ ;}
+   #ifdef _MSC_VER
+   for(long i=0;i<nbPoints;i++) { *p = pow((float)2.71828182846,(float)*p) ; p++ ;}
+   #else
+   for(long i=0;i<nbPoints;i++) { *p = exp((float)*p) ; p++ ;}
+   #endif
    
    result *= 2. / fwhm * sqrt(log(2.)/M_PI);
    return result;
