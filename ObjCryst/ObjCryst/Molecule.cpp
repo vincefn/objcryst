@@ -1462,6 +1462,9 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
       mQuat.Normalize();
       mClockOrientation.Click();
    }
+   // Occupancy
+   if(gpRefParTypeScattOccup->IsDescendantFromOrSameAs(type))
+      this->RefinableObj::GlobalOptRandomMove(mutationAmplitude,gpRefParTypeScattOccup);
    //translation
    if(gpRefParTypeScattTransl->IsDescendantFromOrSameAs(type))
       this->RefinableObj::GlobalOptRandomMove(mutationAmplitude,gpRefParTypeScattTransl);
