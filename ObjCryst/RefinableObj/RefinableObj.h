@@ -774,6 +774,10 @@ class RefinableObj
       * use RefinableObj::SetDeleteRefParInDestructor(false).
       */
       void AddPar(RefinableObj &newRefParList);
+      /** Remove a refinable parameter. 
+      *
+      */ 
+      void RemovePar(RefinablePar *refPar);
       
       virtual void Print() const;
       

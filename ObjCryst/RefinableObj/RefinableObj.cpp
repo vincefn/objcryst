@@ -1326,6 +1326,18 @@ void RefinableObj::AddPar(RefinableObj &newRefParList)
    for(long i=0;i<newRefParList.GetNbPar();i++) this->AddPar(&(newRefParList.GetPar(i)));
 }
 
+void RefinableObj::RemovePar(RefinablePar *refPar)
+{
+   VFN_DEBUG_MESSAGE("RefinableObj::RemovePar(RefPar&)",2)
+   vector<RefinablePar *>::iterator pos=find(mvpRefPar.begin(),mvpRefPar.end(),refPar);
+   if(pos==mvpRefPar.end())
+   {
+      throw ObjCrystException("RefinableObj::RemovePar():"+refPar->GetName()
+                              +"is not in this object:"+this->GetName());
+   }
+   mvpRefPar.erase(pos);
+}
+
 void RefinableObj::Print() const
 {
    VFN_DEBUG_ENTRY("RefinableObj::Print()",2)
