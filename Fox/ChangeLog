@@ -1,4 +1,4 @@
-#### 1.6.0 - december 2003
+#### 1.6.1 - december 2003
 NEW FEATURES
    * Added the export to a POV-Ray file to create a Ray-traced
      view of the 3D Crystal window, with support for both Crystal
@@ -12,6 +12,8 @@ NEW FEATURES
         restraints, although users are HIGHLY advised not to change
         the default values unless they really know what they are doing
       Also, a Molecule will by default be less flexible than before
+   * Added import of DSN6 Fourier maps, which can be created by
+     forplot in GSAS.
    * Reverted to using GLUT under Linux to display atom labels in
      the OpenGL window, as some graphical drivers did not fare well
      with the new method.
@@ -23,6 +25,8 @@ NEW FEATURES
    * Fox now uses wxWindows 2.4.x (no support for versions <2.4).
    * Added support for Cobalt X-Ray tube. Also, correctly save
      X-Ray tube parameters when they have been entered manually.
+   * Fourier maps with negative contour values will now be highlighted
+     towards negative values, for Fobs-Fcalc maps display.
    
 BUG FIXES
    * The position of peaks on a powder pattern was randomly displaced
@@ -35,6 +39,8 @@ BUG FIXES
      overlapping with another identical element.
    * In the graphical display of powder patterns, improve the precison
      of the display.
+   * Correct center of view coordinates when the center of the displayed
+     structure is not at (0.5,0.5,0.5)
 
 
 #### 1.5 - june 2003
