@@ -1,10 +1,11 @@
 /*! \page index 
 
 \anchor news <h2>News</h2> (also read the <a href="ChangeLog">ChangeLog</a>)
-   - <b>13th of november 2002: The Fox article (<i>J. Appl. Cryst.</i> <b>35</b>, 734---743</a>) has been published. You can <a href="http://objcryst.sourceforge.net/JApplCryst35-2002-734-Fox.pdf">download the pdf reprint</a>, or get it from the IUCr journals web site: Copyright &copy; International Union of Crystallography, <a href="http://www.iucr.org/cgi-bin/paper?vi0168"> <i>J. Appl. Cryst.</i> <b>35</b>, 734---743</a>)
-   - <b>14th of Sept. 2002</b>: I hope you noticed the new web pages, auto-generated using doxygen (http://doxygen.org) !
-   - <b>12th of Sept. 2002</b>: <b>the windows zip file (precompiled) with Fox 1.2 was initially packaged with <i>only</i> the exe</b>, without any documentation, examples, or libraries... So please re-download it if necessary. (thanks Mohamed Bououdina for pointing out this).
-   - <b>9th of August 2002</b>: the latest version of Fox is 1.2: this version adds the ability to analyze data with preferred orientation (texture, searching ab initio the texture parameters), using the March-Dollase model. The 'live' update of the 3D view of the Crystal structure now also works on all windows versions.
+   - 16th of December 2002: <b>Fox version 1.3</b>: this version adds spherical scattering power (disordered fullerene), the option to use  pseudo-crystallographic symmetry, and command-line options for Fox (e.g. to run without the GUI). It also removes a serious bug which lead to missing reflections for (face|body)-centered reflections with a center of symmetry not at the origin...
+   - 13th of november 2002: The <b>Fox article</b> (<i>J. Appl. Cryst.</i> <b>35</b>, 734---743</a>) has been published. You can <a href="http://objcryst.sourceforge.net/JApplCryst35-2002-734-Fox.pdf">download the pdf reprint</a>, or get it from the IUCr journals web site: Copyright &copy; International Union of Crystallography, <a href="http://www.iucr.org/cgi-bin/paper?vi0168"> <i>J. Appl. Cryst.</i> <b>35</b>, 734---743</a>)
+   - 14th of Sept. 2002: I hope you noticed the <b>new web pages</b>, auto-generated using doxygen (http://doxygen.org) !
+   - 12th of Sept. 2002: <b>the windows zip file (precompiled) with Fox 1.2 was initially packaged with <i>only</i> the exe</b>, without any documentation, examples, or libraries... So please re-download it if necessary. (thanks Mohamed Bououdina for pointing out this).
+   - 9th of August 2002: <b>Fox version 1.2</b>: this version adds the ability to analyze data with preferred orientation (texture, searching ab initio the texture parameters), using the March-Dollase model. The 'live' update of the 3D view of the Crystal structure now also works on all windows versions.
 
 \anchor intro <h2>Introduction</h2>
 The FOX program (for Linux and windows) was made for the <i><b> ab initio crystal structure solution from diffraction data </b></i> (mostly powder diffraction data). Its most interesting features for ab initio structure determination are:
