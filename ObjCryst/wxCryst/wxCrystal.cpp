@@ -291,7 +291,11 @@ mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
                     ->GetScatteringPowerRegistry().WXCreate(this);
       mpSizer->Add(mpWXScatteringPowerRegistry,0,wxALIGN_LEFT);
       mList.Add(mpWXScatteringPowerRegistry);
-      
+   // AntiBump-ProMerge cost
+      WXFieldPar<REAL> *pWXFieldBumpMerge=new WXFieldPar<REAL>(this,"AntiBump",-1,&mBumpmergeCost,100);
+      mpSizer->Add(pWXFieldBumpMerge    ,0,wxALIGN_LEFT);
+      mList.Add(pWXFieldBumpMerge);
+   
    // Scatterers
       mpWXScattererRegistry=mpCrystal
                     ->GetScattererRegistry().WXCreate(this);
