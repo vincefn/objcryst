@@ -1056,7 +1056,6 @@ ObjRegistry<RefinableObj> gTopRefinableObjRegistry("Global Top RefinableObj regi
 
 RefinableObj::RefinableObj():
 mName(""),
-mpRefPar(0),mNbRefPar(0),mMaxNbRefPar(100),
 mSavedValuesSetIsUsed(mMaxNbSavedSets),
 mNbRefParNotFixed(-1),mIsbeingRefined(false),mDeleteRefParInDestructor(true)
 #ifdef __WX__CRYST__
@@ -1064,7 +1063,6 @@ mNbRefParNotFixed(-1),mIsbeingRefined(false),mDeleteRefParInDestructor(true)
 #endif
 {
    VFN_DEBUG_MESSAGE("RefinableObj::RefinableObj()",3)
-   mpRefPar = new RefinablePar*[mMaxNbRefPar];
    mpSavedValuesSet = new CrystVector_REAL* [mMaxNbSavedSets];
    mpSavedValuesSetName = new string* [mMaxNbSavedSets];
    mSavedValuesSetIsUsed=false;
@@ -1076,7 +1074,6 @@ mNbRefParNotFixed(-1),mIsbeingRefined(false),mDeleteRefParInDestructor(true)
 }
 RefinableObj::RefinableObj(const bool internalUseOnly):
 mName(""),
-mpRefPar(0),mNbRefPar(0),mMaxNbRefPar(100),
 mSavedValuesSetIsUsed(mMaxNbSavedSets),
 mNbRefParNotFixed(-1),mIsbeingRefined(false),mDeleteRefParInDestructor(true)
 #ifdef __WX__CRYST__
@@ -1084,7 +1081,6 @@ mNbRefParNotFixed(-1),mIsbeingRefined(false),mDeleteRefParInDestructor(true)
 #endif
 {
    VFN_DEBUG_MESSAGE("RefinableObj::RefinableObj(bool)",3)
-   mpRefPar = new RefinablePar*[mMaxNbRefPar];
    mpSavedValuesSet = new CrystVector_REAL* [mMaxNbSavedSets];
    mpSavedValuesSetName = new string* [mMaxNbSavedSets];
    mSavedValuesSetIsUsed=false;
@@ -1116,11 +1112,13 @@ mIsbeingRefined(false),mDeleteRefParInDestructor(true)
 RefinableObj::~RefinableObj()
 {
    VFN_DEBUG_MESSAGE("RefinableObj::~RefinableObj():"<<this->GetName(),5)
-   if(mpRefPar!=0)
+   if(mvpRefPar.size()>0)
    {
       if(true==mDeleteRefParInDestructor)
-         for(int i=0;i<this->GetNbPar();i++) delete mpRefPar[i];
-      delete[] mpRefPar;
+      {
+         vector<RefinablePar*>::iterator pos;
+         for(pos=mvpRefPar.begin();pos!=mvpRefPar.end();pos++) delete *pos;
+      }
    }
    for(long i=0;i<mMaxNbSavedSets;i++)
       if(true==mSavedValuesSetIsUsed(i))
@@ -1241,18 +1239,18 @@ void RefinableObj::SetParIsUsed(const RefParType *type,const bool use)
       this->GetSubObjRegistry().GetObj(i).SetParIsUsed(type,use);
 }
 
-long RefinableObj::GetNbPar()const { return mNbRefPar;}
+long RefinableObj::GetNbPar()const { return mvpRefPar.size();}
 
 long RefinableObj::GetNbParNotFixed()const {return mNbRefParNotFixed;}
 
 RefinablePar& RefinableObj::GetPar(const long i)
 {
-   return *mpRefPar[i];
+   return *(mvpRefPar.at(i));
 }
 
 const RefinablePar& RefinableObj::GetPar(const long i) const
 {
-   return *mpRefPar[i];
+   return *(mvpRefPar.at(i));
 }
 
 RefinablePar& RefinableObj::GetPar(const string & name)
@@ -1266,7 +1264,7 @@ RefinablePar& RefinableObj::GetPar(const string & name)
       return *p; //:KLUDGE: !
       //throw 0;
    }
-   return *mpRefPar[i];
+   return *(mvpRefPar.at(i));
 }
 
 const RefinablePar& RefinableObj::GetPar(const string & name) const
@@ -1280,7 +1278,7 @@ const RefinablePar& RefinableObj::GetPar(const string & name) const
       return *p; //:KLUDGE: !
       //throw 0;
    }
-   return *mpRefPar[i];
+   return *(mvpRefPar.at(i));
 }
 
 RefinablePar& RefinableObj::GetPar(const REAL *p)
@@ -1294,7 +1292,7 @@ RefinablePar& RefinableObj::GetPar(const REAL *p)
       return *p; //:KLUDGE: !
       //throw 0;
    }
-   return *mpRefPar[i];
+   return *(mvpRefPar.at(i));
 }
 
 const RefinablePar& RefinableObj::GetPar(const REAL *p) const
@@ -1308,48 +1306,30 @@ const RefinablePar& RefinableObj::GetPar(const REAL *p) const
       return *p; //:KLUDGE: !
       //throw 0;
    }
-   return *mpRefPar[i];
+   return *(mvpRefPar.at(i));
 }
 
 RefinablePar& RefinableObj::GetParNotFixed(const long i)
 {
-   return *mpRefPar[mRefparNotFixedIndex(i)];
+   return *(mvpRefPar.at(mRefparNotFixedIndex(i)));
 }
 
 const RefinablePar& RefinableObj::GetParNotFixed(const long i) const
 {
-   return *mpRefPar[mRefparNotFixedIndex(i)];
+   return *(mvpRefPar.at(mRefparNotFixedIndex(i)));
 }
 
 void RefinableObj::AddPar(const RefinablePar &newRefPar)
 {
    VFN_DEBUG_MESSAGE("RefinableObj::AddPar(RefPar&)",2)
-   if(mNbRefPar == mMaxNbRefPar)
-   {
-      mMaxNbRefPar+=100;
-      RefinablePar** oldmpRefPar=mpRefPar;
-      mpRefPar = new RefinablePar*[mMaxNbRefPar];
-      for(int i=0;i<this->GetNbPar();i++) mpRefPar[i]=oldmpRefPar[i];
-      delete[] oldmpRefPar;
-   }
-   mpRefPar[mNbRefPar]=new RefinablePar(newRefPar);
-   mNbRefPar++;
+   mvpRefPar.push_back(new RefinablePar(newRefPar));
    mRefParListClock.Click();
 }
 
 void RefinableObj::AddPar(RefinablePar *newRefPar)
 {
    VFN_DEBUG_MESSAGE("RefinableObj::AddPar(RefPar&)",2)
-   if(mNbRefPar == mMaxNbRefPar)
-   {
-      mMaxNbRefPar+=100;
-      RefinablePar** oldmpRefPar=mpRefPar;
-      mpRefPar = new RefinablePar*[mMaxNbRefPar];
-      for(int i=0;i<this->GetNbPar();i++) mpRefPar[i]=oldmpRefPar[i];
-      delete[] oldmpRefPar;
-   }
-   mpRefPar[mNbRefPar]=newRefPar;
-   mNbRefPar++;
+   mvpRefPar.push_back(newRefPar);
    mRefParListClock.Click();
 }
 
@@ -1427,16 +1407,16 @@ void RefinableObj::SaveParamSet(const long id)const
       cout << "RefinableObj::SaveRefParSet(long): Unknown saved set !" <<endl;
       throw 0;//:TODO: some more inteligent exception
    }
-   (*(mpSavedValuesSet+id))->resize(mNbRefPar);
+   (*(mpSavedValuesSet+id))->resize(mvpRefPar.size());
    REAL *p=(*(mpSavedValuesSet+id))->data();
-   for(long i=0;i<mNbRefPar;i++) *p++ = this->GetPar(i).GetValue();
+   for(long i=0;i<this->GetNbPar();i++) *p++ = this->GetPar(i).GetValue();
 }
 
 void RefinableObj::RestoreParamSet(const long id)
 {
    VFN_DEBUG_MESSAGE("RefinableObj::RestoreRefParSet()",2)
    const REAL *p=(*(mpSavedValuesSet+id))->data();
-   for(long i=0;i<mNbRefPar;i++)
+   for(long i=0;i<this->GetNbPar();i++)
    {
       if( !this->GetPar(i).IsFixed() && this->GetPar(i).IsUsed())
          this->GetPar(i).SetValue(*p);
@@ -1482,7 +1462,7 @@ void RefinableObj::SetLimitsAbsolute(const string &name,const REAL min,const REA
 void RefinableObj::SetLimitsAbsolute(const RefParType *type,
                                      const REAL min,const REAL max)
 {
-   for(long i=0;i<mNbRefPar;i++)
+   for(long i=0;i<this->GetNbPar();i++)
       if(this->GetPar(i).GetType()->IsDescendantFromOrSameAs(type))
          this->GetPar(i).SetLimitsAbsolute(min,max);
    for(int i=0;i<this->GetSubObjRegistry().GetNb();i++)
@@ -1497,7 +1477,7 @@ void RefinableObj::SetLimitsRelative(const RefParType *type,
                                      const REAL min, const REAL max)
 {
    VFN_DEBUG_MESSAGE("RefinableObj::SetLimitsRelative(RefParType*):"<<this->GetName(),2)
-   for(long i=0;i<mNbRefPar;i++)
+   for(long i=0;i<this->GetNbPar();i++)
    {
       VFN_DEBUG_MESSAGE("RefinableObj::SetLimitsRelative(RefParType*):par #"<<i,2)
       if(this->GetPar(i).GetType()->IsDescendantFromOrSameAs(type))
@@ -1514,7 +1494,7 @@ void RefinableObj::SetLimitsProportional(const string &name,const REAL min,const
 void RefinableObj::SetLimitsProportional(const RefParType *type, 
                                          const REAL min, const REAL max)
 {
-   for(long i=0;i<mNbRefPar;i++)
+   for(long i=0;i<this->GetNbPar();i++)
       if(this->GetPar(i).GetType()->IsDescendantFromOrSameAs(type)) 
          this->GetPar(i).SetLimitsProportional(min,max);
    for(int i=0;i<this->GetSubObjRegistry().GetNb();i++)
@@ -1522,7 +1502,7 @@ void RefinableObj::SetLimitsProportional(const RefParType *type,
 }
 void RefinableObj::SetGlobalOptimStep(const RefParType *type, const REAL step)
 {
-   for(long i=0;i<mNbRefPar;i++)
+   for(long i=0;i<this->GetNbPar();i++)
       if(this->GetPar(i).GetType()->IsDescendantFromOrSameAs(type)) 
          this->GetPar(i).SetGlobalOptimStep(step);
    for(int i=0;i<this->GetSubObjRegistry().GetNb();i++)
@@ -1678,14 +1658,14 @@ const CrystVector_REAL& RefinableObj::GetLSQDeriv(const unsigned int n, Refinabl
 void RefinableObj::ResetParList()
 {
    VFN_DEBUG_MESSAGE("RefinableObj::ResetParList()",3)
-   if(mpRefPar!=0)
+   if(mvpRefPar.size()>0)
    {
       if(true==mDeleteRefParInDestructor)
-         for(int i=0;i<this->GetNbPar();i++) delete mpRefPar[i];
-      delete[] mpRefPar;
+      {
+         vector<RefinablePar*>::iterator pos;
+         for(pos=mvpRefPar.begin();pos!=mvpRefPar.end();pos++) delete *pos;
+      }
    }
-   mpRefPar = new RefinablePar*[mMaxNbRefPar];
-   mNbRefPar=0;
    mNbRefParNotFixed=-1;
 
    VFN_DEBUG_MESSAGE("RefinableObj::ResetParList():Deleting Saved Sets....",2)
@@ -1805,7 +1785,7 @@ long RefinableObj::FindPar(const REAL *p) const
    long index=-1;
    bool warning=false;
    for(long i=this->GetNbPar()-1;i>=0;i--) 
-      if( p == mpRefPar[i]->mpValue ) //&(this->GetPar(i).GetValue())
+      if( p == mvpRefPar[i]->mpValue ) //&(this->GetPar(i).GetValue())
          if(-1 != index) warning=true ;else index=i;
    if(true == warning)
    {

@@ -1054,12 +1054,8 @@ class RefinableObj
       ///Name for this RefinableObject. Should be unique, at least in the same scope.+
       string mName;
       // Parameters
-         /// Array of pointers to the refinable parameters
-         RefinablePar **mpRefPar;
-         /// Number of refinable parameters
-         long mNbRefPar;
-         /// Maximum number of refinable parameters (array size-dynamically allocated)
-         long mMaxNbRefPar;
+         /// Vector of pointers to the refinable parameters
+         vector<RefinablePar *> mvpRefPar;
       // Restraints
          /// Vector of pointers to the restraints for this object. This excludes
          /// all RefinableP.ar declared in RefinableObj::mpRefPar, which can also
