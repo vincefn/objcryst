@@ -26,6 +26,7 @@ class WXZAtom:public WXCrystObjBasic
       virtual bool Layout();
       void OnChangeScattPow(wxCommandEvent & WXUNUSED(event));
       void OnChangeName(wxCommandEvent & WXUNUSED(event));
+      virtual void OnUpdateUI(wxUpdateUIEvent& event);
    private:
       ZAtom *mpZAtom;
       wxBoxSizer *mpSizer;
@@ -42,7 +43,6 @@ class WXZScatterer: public WXScatterer
 {
    public:
       WXZScatterer(wxWindow *parent, ZScatterer*);
-      virtual void CrystUpdate();
       void OnMenuAddZAtom(wxCommandEvent & WXUNUSED(event));
       void OnMenuSetLimits(wxCommandEvent &event);
       void OnMenuChangePivotAtom(wxCommandEvent &WXUNUSED(event));

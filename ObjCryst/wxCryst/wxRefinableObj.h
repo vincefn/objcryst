@@ -160,6 +160,7 @@ class WXRefinableObj: public WXCrystObj
       void OnMenuFixAllPar(wxCommandEvent & WXUNUSED(event));
       void OnMenuUnFixAllPar(wxCommandEvent & WXUNUSED(event));
       void OnMenuParRandomize(wxCommandEvent & WXUNUSED(event));
+      virtual void OnUpdateUI(wxUpdateUIEvent& event);
    protected:
       WXCrystMenuBar* mpMenuBar;
    private:

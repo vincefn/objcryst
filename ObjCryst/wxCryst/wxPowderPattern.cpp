@@ -95,6 +95,7 @@ BEGIN_EVENT_TABLE(WXPowderPattern, wxWindow)
    EVT_MENU(ID_POWDERSPECTRUM_MENU_FITSCALE_R,         WXPowderPattern::OnMenuFitScaleForR)
    EVT_MENU(ID_POWDERSPECTRUM_MENU_FITSCALE_RW,        WXPowderPattern::OnMenuFitScaleForRw)
    EVT_MENU(ID_POWDERSPECTRUM_MENU_ADD_2THETA_EXCLUDE, WXPowderPattern::OnMenuAdd2ThetaExclude)
+   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, 						 WXPowderPattern::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXPowderPattern::WXPowderPattern(wxWindow *parent, PowderPattern* pow):
@@ -224,7 +225,6 @@ void WXPowderPattern::CrystUpdate()
 {
    VFN_DEBUG_MESSAGE("WXPowderPattern::CrystUpdate()",6)
    this->WXRefinableObj::CrystUpdate();
-   //mList.CrystUpdate();
    if(mpGraph!=0)
    {
 		WXCrystValidateAllUserInput();
@@ -232,7 +232,6 @@ void WXPowderPattern::CrystUpdate()
                            mpPowderPattern->GetPowderPatternCalc(),
                            mpPowderPattern->Get2ThetaMin(),
                            mpPowderPattern->Get2ThetaStep());
-		//mpGraph->GetParent()->SetTitle(mpPowderPattern->GetName().c_str());
    }
 } 
 
@@ -250,18 +249,6 @@ void WXPowderPattern::OnMenuAddCompCryst(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompCryst()",6)
 	WXCrystValidateAllUserInput();
-	/*
-   bool hasCrystaPhase=false;
-   for(int i=0;(unsigned int)i<mpPowderPattern->GetNbPowderPatternComponent();i++)
-      if(mpPowderPattern->GetPowderPatternComponent(i).IsScalable()) hasCrystaPhase=true;
-   if(hasCrystaPhase)
-   {
-      wxMessageDialog sadUser(this,"You cannot have more than one crystalline phase (yet..) !",
-                               "Sorry ?",wxOK|wxICON_EXCLAMATION);
-      sadUser.ShowModal();
-      return;
-   }
-	*/
    PowderPatternDiffraction * diffData=new PowderPatternDiffraction;
    int choice;
    Crystal *cryst=dynamic_cast<Crystal*>
@@ -522,6 +509,14 @@ void WXPowderPattern::OnMenuAdd2ThetaExclude(wxCommandEvent & WXUNUSED(event))
 void WXPowderPattern::NotifyDeleteGraph() {mpGraph=0;}
 const PowderPattern& WXPowderPattern::GetPowderPattern()const
 { return *mpPowderPattern;}
+void WXPowderPattern::OnUpdateUI(wxUpdateUIEvent& event)
+{
+   if(mpGraph!=0)
+   {
+		mpGraph->GetParent()->SetTitle(mpPowderPattern->GetName().c_str());
+   }
+	this->WXRefinableObj::OnUpdateUI(event);
+}
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXPowderPatternGraph
@@ -840,7 +835,8 @@ void WXPowderPatternBackground::OnMenuImportUserBackground(wxCommandEvent & WXUN
 BEGIN_EVENT_TABLE(WXPowderPatternDiffraction, wxWindow)
    EVT_BUTTON(ID_POWDERSPECTRUMDIFF_CRYSTAL,WXPowderPatternDiffraction::OnChangeCrystal)
    EVT_MENU(ID_POWDERSPECTRUMDIFF_SAVEHKLFCALC, 
-                     WXPowderPatternDiffraction::OnMenuSaveHKLFcalc)
+                     							  WXPowderPatternDiffraction::OnMenuSaveHKLFcalc)
+   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, 		  WXPowderPatternDiffraction::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXPowderPatternDiffraction::WXPowderPatternDiffraction(wxWindow *parent,
@@ -894,13 +890,6 @@ WXRefinableObj(parent,p),mpPowderPatternDiffraction(p)
    this->CrystUpdate();
    this->Layout();
 }
-void WXPowderPatternDiffraction::CrystUpdate()
-{
-   VFN_DEBUG_MESSAGE("WXPowderPatternDiffraction::CrystUpdate()",6)
-   this->WXRefinableObj::CrystUpdate();
-   mpFieldCrystal->SetValue(mpPowderPatternDiffraction->GetCrystal().GetName());
-   //this->Layout();
-}
 
 void WXPowderPatternDiffraction::OnChangeCrystal(wxCommandEvent & WXUNUSED(event))
 {
@@ -925,6 +914,11 @@ void WXPowderPatternDiffraction::OnMenuSaveHKLFcalc(wxCommandEvent & WXUNUSED(ev
    if(!out) return;//:TODO:
    mpPowderPatternDiffraction->PrintFhklCalc(out);
    out.close();
+}
+void WXPowderPatternDiffraction::OnUpdateUI(wxUpdateUIEvent& event)
+{
+   mpFieldCrystal->SetValue(mpPowderPatternDiffraction->GetCrystal().GetName());
+	this->WXRefinableObj::OnUpdateUI(event);
 }
 
 }// namespace 

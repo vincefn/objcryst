@@ -22,7 +22,8 @@ namespace ObjCryst
 //
 ////////////////////////////////////////////////////////////////////////
 BEGIN_EVENT_TABLE(WXAtom,wxWindow)
-   EVT_BUTTON(ID_ATOM_SCATTPOW,WXAtom::OnChangeScattPow)
+   EVT_BUTTON(ID_ATOM_SCATTPOW,     WXAtom::OnChangeScattPow)
+   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, WXAtom::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXAtom::WXAtom(wxWindow* parent, Atom *obj):
@@ -37,13 +38,6 @@ WXScatterer(parent,obj),mpAtom(obj)
    this->CrystUpdate();
    this->Layout();
 }
-void WXAtom::CrystUpdate()
-{
-   VFN_DEBUG_MESSAGE("WXAtom::CrystUpdate()",6)
-   this->WXRefinableObj::CrystUpdate();
-   mpFieldScattPower->SetValue(mpAtom->GetScatteringPower().GetName());
-   //this->Layout();
-}
 
 void WXAtom::OnChangeScattPow(wxCommandEvent & WXUNUSED(event))
 {
@@ -57,6 +51,12 @@ void WXAtom::OnChangeScattPow(wxCommandEvent & WXUNUSED(event))
    mpAtom->Init(mpAtom->GetX(),mpAtom->GetY(),mpAtom->GetZ(),mpAtom->GetName(),
                 scatt,mpAtom->GetOccupancy());
    this->CrystUpdate();
+}
+
+void WXAtom::OnUpdateUI(wxUpdateUIEvent& event)
+{
+   mpFieldScattPower->SetValue(mpAtom->GetScatteringPower().GetName());
+	this->WXRefinableObj::OnUpdateUI(event);
 }
 
 

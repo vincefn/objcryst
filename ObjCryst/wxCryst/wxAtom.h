@@ -27,8 +27,8 @@ class WXAtom: public WXScatterer
 {
    public:
       WXAtom(wxWindow *parent, Atom*);
-      virtual void CrystUpdate();
       void OnChangeScattPow(wxCommandEvent & WXUNUSED(event));
+      virtual void OnUpdateUI(wxUpdateUIEvent& event);
    private:
       Atom* mpAtom;
       WXFieldChoice* mpFieldScattPower;

@@ -484,6 +484,7 @@ BEGIN_EVENT_TABLE(WXRefinableObj,wxWindow)
    EVT_MENU(ID_REFOBJ_MENU_PAR_FIXALL,      WXRefinableObj::OnMenuFixAllPar)
    EVT_MENU(ID_REFOBJ_MENU_PAR_UNFIXALL,    WXRefinableObj::OnMenuUnFixAllPar)
    EVT_MENU(ID_REFOBJ_MENU_PAR_RANDOMIZE,   WXRefinableObj::OnMenuUnFixAllPar)
+   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, 		  WXRefinableObj::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXRefinableObj::WXRefinableObj(wxWindow* parent, RefinableObj*obj):
@@ -533,7 +534,8 @@ bool WXRefinableObj::Layout()
 void WXRefinableObj::CrystUpdate()
 {
    VFN_DEBUG_MESSAGE("WXRefinableObj::CrystUpdate():"<<mpRefinableObj->GetName(),6)
-   mpWXTitle->SetValue(mpRefinableObj->GetName());
+   wxUpdateUIEvent event(ID_CRYST_UPDATEUI);
+   wxPostEvent(this,event);
    this->WXCrystObj::CrystUpdate();
 }
 
@@ -600,6 +602,11 @@ void WXRefinableObj::OnMenuParRandomize(wxCommandEvent & WXUNUSED(event))
    mpRefinableObj->RandomizeConfiguration();
    mpRefinableObj->RefinableObj::Print();
    this->CrystUpdate();
+}
+
+void WXRefinableObj::OnUpdateUI(wxUpdateUIEvent& event)
+{
+	mpWXTitle->SetValue(mpRefinableObj->GetName());
 }
 
 }// namespace 

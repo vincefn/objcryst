@@ -75,8 +75,9 @@ WXCrystObj(parent),mpGlobalOptimRunThread(0)
 
 void WXOptimizationObj::CrystUpdate()
 {
-   mpWXTitle->SetValue(this->GetOptimizationObj().GetName());
    this->WXCrystObj::CrystUpdate();
+   wxUpdateUIEvent event(ID_CRYST_UPDATEUI);
+   wxPostEvent(this,event);
 }
 
 bool WXOptimizationObj::OnChangeName(const int id)
@@ -175,6 +176,10 @@ void WXOptimizationObj::OnStopOptimization()
 {
    this->GetOptimizationObj().StopAfterCycle();
 }
+void WXOptimizationObj::OnUpdateUI(wxUpdateUIEvent& event)
+{
+   mpWXTitle->SetValue(this->GetOptimizationObj().GetName());
+}
 
 ////////////////////////////////////////////////////////////////////////
 //
@@ -211,6 +216,7 @@ BEGIN_EVENT_TABLE(WXMonteCarloObj, wxWindow)
    EVT_MENU(ID_GLOBALOPT_MENU_GLOBAlOPT_ADDCOSTFUNC,   WXOptimizationObj::OnAddCostFunction)
    EVT_MENU(ID_GLOBALOPT_MENU_GLOBAlOPT_RUN,           WXOptimizationObj::OnRunOptimization)
    EVT_MENU(ID_GLOBALOPT_MENU_GLOBAlOPT_STOP,          WXOptimizationObj::OnStopOptimization)
+   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, 						 WXOptimizationObj::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXMonteCarloObj::WXMonteCarloObj(wxWindow *parent, MonteCarloObj* obj):

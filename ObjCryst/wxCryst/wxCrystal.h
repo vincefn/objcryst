@@ -55,6 +55,7 @@ class WXCrystal: public WXRefinableObj
       void OnMenuRemoveScatterer(wxCommandEvent & WXUNUSED(event));
       void OnMenuAddAntiBumpDist(wxCommandEvent & WXUNUSED(event));
       bool OnChangeName(const int id);
+      void OnUpdateUI(wxUpdateUIEvent& event);
    private:
       Crystal* mpCrystal;
       /// Lattice

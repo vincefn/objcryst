@@ -50,6 +50,7 @@ BEGIN_EVENT_TABLE(WXDiffractionSingleCrystal, wxWindow)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CUA1,WXDiffractionSingleCrystal::OnMenuSetWavelength)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_FEA1,WXDiffractionSingleCrystal::OnMenuSetWavelength)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CRA1,WXDiffractionSingleCrystal::OnMenuSetWavelength)
+   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, 						  WXDiffractionSingleCrystal::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXDiffractionSingleCrystal::WXDiffractionSingleCrystal(wxWindow *parent,
@@ -134,12 +135,6 @@ WXRefinableObj(parent,data),mpData(data)
    VFN_DEBUG_MESSAGE("WXDiffractionSingleCrystal::WXDiffractionSingleCrystal():End",6)
 }
 
-void WXDiffractionSingleCrystal::CrystUpdate()
-{
-   VFN_DEBUG_MESSAGE("WXPowderPatternDiffraction::CrystUpdate()",6)
-   this->WXRefinableObj::CrystUpdate();
-	if(&(mpData->GetCrystal())!=0) mpFieldCrystal->SetValue(mpData->GetCrystal().GetName());
-}
 void WXDiffractionSingleCrystal::OnMenuSimulate(wxCommandEvent & WXUNUSED(event))
 {
 	WXCrystValidateAllUserInput();
@@ -283,6 +278,11 @@ void WXDiffractionSingleCrystal::OnChangeCrystal(wxCommandEvent & WXUNUSED(event
    if(0==cryst) return;
    mpData->SetCrystal(*cryst);
    this->CrystUpdate();
+}
+void WXDiffractionSingleCrystal::OnUpdateUI(wxUpdateUIEvent& event)
+{
+	if(&(mpData->GetCrystal())!=0) mpFieldCrystal->SetValue(mpData->GetCrystal().GetName());
+	this->WXRefinableObj::OnUpdateUI(event);
 }
 
 }//namespace

@@ -22,9 +22,9 @@ class WXScatteringPowerAtom: public WXRefinableObj
 {
    public:
       WXScatteringPowerAtom(wxWindow *parent, ScatteringPowerAtom*);
-      virtual void CrystUpdate();
       virtual bool OnChangeName(const int id);
       void OnChangeColour(wxCommandEvent & event);
+      virtual void OnUpdateUI(wxUpdateUIEvent& event);
    protected:
       ScatteringPowerAtom* mpScatteringPowerAtom;
       WXFieldName *mpFieldSymbol;

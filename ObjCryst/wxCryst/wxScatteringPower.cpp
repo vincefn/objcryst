@@ -23,7 +23,8 @@ namespace ObjCryst
 //
 ////////////////////////////////////////////////////////////////////////
 BEGIN_EVENT_TABLE(WXScatteringPowerAtom, wxWindow)
-   EVT_MENU(ID_SCATTPOWATOM_MENU_COLOUR_SETRGB,WXScatteringPowerAtom::OnChangeColour)
+   EVT_MENU(ID_SCATTPOWATOM_MENU_COLOUR_SETRGB, WXScatteringPowerAtom::OnChangeColour)
+   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, 				WXScatteringPowerAtom::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXScatteringPowerAtom::WXScatteringPowerAtom(wxWindow* parent, ScatteringPowerAtom *obj):
@@ -55,15 +56,6 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpScatteringPowerAtom(obj)
       mList.Add(mpFieldBiso);
       this->CrystUpdate();
    this->Layout();
-}
-
-void WXScatteringPowerAtom::CrystUpdate()
-{
-   VFN_DEBUG_MESSAGE("WXScatteringPowerAtom::CrystUpdate()",6)
-   this->WXRefinableObj::CrystUpdate();
-   //mpFieldBiso->CrystUpdate();
-   mpFieldSymbol->SetValue(mpScatteringPowerAtom->GetSymbol());
-   //this->Layout();
 }
 
 bool WXScatteringPowerAtom::OnChangeName(const int id)
@@ -131,6 +123,11 @@ void WXScatteringPowerAtom::OnChangeColour(wxCommandEvent & event)
       dialog.GetValue().ToDouble(&b);
    }
    mpScatteringPowerAtom->SetColour(r,g,b);
+}
+void WXScatteringPowerAtom::OnUpdateUI(wxUpdateUIEvent& event)
+{
+   mpFieldSymbol->SetValue(mpScatteringPowerAtom->GetSymbol());
+	this->WXRefinableObj::OnUpdateUI(event);
 }
 
 }// namespace 

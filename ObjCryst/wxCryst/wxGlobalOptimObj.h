@@ -42,6 +42,7 @@ class WXOptimizationObj: public WXCrystObj
       virtual void OnStopOptimization();
 		virtual OptimizationObj & GetOptimizationObj()=0;
 		virtual const OptimizationObj & GetOptimizationObj()const=0;
+      virtual void OnUpdateUI(wxUpdateUIEvent& event);
    protected:
       WXCrystMenuBar* mpMenuBar;
       WXGlobalOptimRunThread *mpGlobalOptimRunThread;

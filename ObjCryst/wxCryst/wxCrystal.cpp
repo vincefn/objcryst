@@ -58,6 +58,7 @@ BEGIN_EVENT_TABLE(WXCrystal,wxEvtHandler)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDPRISMTRIGONAL,   WXCrystal::OnMenuAddScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDICOSAHEDRON,     WXCrystal::OnMenuAddScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_REMOVESCATTERER,    WXCrystal::OnMenuRemoveScatterer)
+   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, 						WXCrystal::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXCrystal::WXCrystal(wxWindow* parent, Crystal *obj):
@@ -177,13 +178,6 @@ void WXCrystal::CrystUpdate()
 {
    VFN_DEBUG_ENTRY("WXCrystal::CrystUpdate()",7)
    this->WXRefinableObj::CrystUpdate();
-   //mpFieldLatticeA->CrystUpdate();
-   //mpFieldLatticeB->CrystUpdate();
-   //mpFieldLatticeC->CrystUpdate();
-   //mpFieldLatticeAlpha->CrystUpdate();
-   //mpFieldLatticeBeta->CrystUpdate();
-   //mpFieldLatticeGamma->CrystUpdate();
-   mpFieldSpacegroup->SetValue(mpCrystal->GetSpaceGroup().GetName());
    //mWXParent->Layout();
    this->UpdateGL();
    VFN_DEBUG_EXIT("WXCrystal::CrystUpdate():End",7)
@@ -224,6 +218,7 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
    		VFN_DEBUG_EXIT("WXCrystal::UpdateGL()-Not in main thread :End",8)
 			return;
 		}
+   	mpCrystalGL->SetCurrent();
       glNewList(mCrystalGLDisplayList,GL_COMPILE);
          glPushMatrix();
             mpCrystal->GLInitDisplayList(onlyIndependentAtoms,xMin,xMax,yMin,yMax,zMin,zMax);
@@ -239,7 +234,6 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
       cont=true;
 		//#endif
       this->ReleaseCrystalGLDisplayList();
-		mpCrystalGL->GetParent()->SetTitle(mpCrystal->GetName().c_str());
       mpCrystalGL->CrystUpdate();
    }
    else
@@ -735,6 +729,13 @@ bool WXCrystal::OnChangeName(const int id)
    return false;
 }
 
+void WXCrystal::OnUpdateUI(wxUpdateUIEvent& event)
+{
+	mpFieldSpacegroup->SetValue(mpCrystal->GetSpaceGroup().GetName());
+	if(0!=mpCrystalGL) mpCrystalGL->GetParent()->SetTitle(mpCrystal->GetName().c_str());
+	this->WXRefinableObj::OnUpdateUI(event);
+}
+
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXGLCrystalCanvas
@@ -1023,8 +1024,6 @@ void WXGLCrystalCanvas::OnUpdate(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnUpdate()",4)
    mpWXCrystal->UpdateGL(false,mXmin,mXmax,mYmin,mYmax,mZmin,mZmax);
-   //This will call WXGLCrystalCanvas::CrystUpdate() after updating
-   // the GL display list
 }
 
 void WXGLCrystalCanvas::CrystUpdate()
