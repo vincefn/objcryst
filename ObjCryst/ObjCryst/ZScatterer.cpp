@@ -238,17 +238,14 @@ mpZMoveMinimizer(0)
 ZScatterer::ZScatterer(const ZScatterer &old):
 Scatterer(old),m3DDisplayIndex(old.m3DDisplayIndex),
 mScattCompList(old.mScattCompList),
-mNbAtom(old.mNbAtom),mNbDummyAtom(old.mNbDummyAtom),
+mNbAtom(0),mNbDummyAtom(0),
 mPhi(old.mPhi),mChi(old.mChi),mPsi(old.mPsi),
 mCenterAtomIndex(old.mCenterAtomIndex),
 mPhiChiPsiMatrix(old.mPhiChiPsiMatrix),
 mUseGlobalScattPow(false),mpGlobalScattPow(0),
 mpZMoveMinimizer(0)
 {
-   VFN_DEBUG_MESSAGE("ZScatterer::ZScatterer(&old):("<<mName<<")",5)
-   
-   throw ObjCrystException("ZScatterer::ZScatterer(&old): the copy of all atoms has \
-   not been implemented yet...");
+   VFN_DEBUG_ENTRY("ZScatterer::ZScatterer(&old):("<<mName<<")",10)
    
    mName=old.GetName();
    mXYZ(0)=old.GetX();
@@ -261,7 +258,43 @@ mpZMoveMinimizer(0)
    
    this->InitRefParList();
    
+   VFN_DEBUG_MESSAGE("ZScatterer::ZScatterer(&old):Copying atoms",10)
+   for(long i=0; i<old.GetZAtomRegistry().GetNb();i++)
+      this->AddAtom(old.GetZAtomRegistry().GetObj(i).GetName(),
+                    old.GetZAtomRegistry().GetObj(i).GetScatteringPower(),
+                    old.GetZAtomRegistry().GetObj(i).GetZBondAtom(),
+                    old.GetZAtomRegistry().GetObj(i).GetZBondLength(),
+                    old.GetZAtomRegistry().GetObj(i).GetZAngleAtom(),
+                    old.GetZAtomRegistry().GetObj(i).GetZAngle(),
+                    old.GetZAtomRegistry().GetObj(i).GetZDihedralAngleAtom(),
+                    old.GetZAtomRegistry().GetObj(i).GetZDihedralAngle(),
+                    old.GetZAtomRegistry().GetObj(i).GetOccupancy());
+   
    this->SetUseGlobalScatteringPower(old.mUseGlobalScattPow);
+   
+   // Copy parameters attributes (limits, etc...)
+   VFN_DEBUG_MESSAGE("ZScatterer::ZScatterer(&old):Copying param attributes",10)
+      this->GetPar(mXYZ.data()).  CopyAttributes(old.GetPar(old.mXYZ.data()));
+      this->GetPar(mXYZ.data()+1).CopyAttributes(old.GetPar(old.mXYZ.data()+1));
+      this->GetPar(mXYZ.data()+2).CopyAttributes(old.GetPar(old.mXYZ.data()+2));
+      this->GetPar(&mOccupancy).  CopyAttributes(old.GetPar(&(old.mOccupancy)));
+      this->GetPar(&mPhi).        CopyAttributes(old.GetPar(&(old.mPhi)));
+      this->GetPar(&mChi).        CopyAttributes(old.GetPar(&(old.mChi)));
+      this->GetPar(&mPsi).        CopyAttributes(old.GetPar(&(old.mPsi)));
+   VFN_DEBUG_MESSAGE("ZScatterer::ZScatterer(&old):Copying atoms param attributes",10)
+   for(long i=0; i<old.GetZAtomRegistry().GetNb();i++)
+   {
+      this->GetPar(&(this->GetZAtomRegistry().GetObj(i).mBondLength)).
+        CopyAttributes(old.GetPar(&(old.GetZAtomRegistry().GetObj(i).mBondLength)));
+      this->GetPar(&(this->GetZAtomRegistry().GetObj(i).mAngle)).
+        CopyAttributes(old.GetPar(&(old.GetZAtomRegistry().GetObj(i).mAngle)));
+      this->GetPar(&(this->GetZAtomRegistry().GetObj(i).mDihed)).
+        CopyAttributes(old.GetPar(&(old.GetZAtomRegistry().GetObj(i).mDihed)));
+      this->GetPar(&(this->GetZAtomRegistry().GetObj(i).mOccupancy)).
+        CopyAttributes(old.GetPar(&(old.GetZAtomRegistry().GetObj(i).mOccupancy)));
+   }
+   
+   VFN_DEBUG_EXIT("ZScatterer::ZScatterer(&old):("<<mName<<")",10)
 }
 
 ZScatterer::~ZScatterer()
@@ -1811,6 +1844,10 @@ void ZScatterer::InitRefParList()
       char buf [20];
       for(long i=0;i<mNbAtom;i++)
       {
+         bool usedBond=true,usedAngle=true,usedDihed=true;
+         if(i<1) usedBond=false;
+         if(i<2) usedAngle=false;
+         if(i<3) usedDihed=false;
          {
             sprintf(buf,"%d-%d",(int)i,(int)(mZAtomRegistry.GetObj(i).GetZBondAtom()));
             RefinablePar tmp((string)"Length"+(string)buf,
@@ -1818,7 +1855,7 @@ void ZScatterer::InitRefParList()
                               mZAtomRegistry.GetObj(i).mBondLength*.9,
                               mZAtomRegistry.GetObj(i).mBondLength*1.1,
                               gpRefParTypeScattConformBondLength,
-                              REFPAR_DERIV_STEP_ABSOLUTE,true,false,true,false,1.);
+                              REFPAR_DERIV_STEP_ABSOLUTE,true,false,usedBond,false,1.);
             tmp.AssignClock(mClockScatterer);
             this->AddPar(tmp);
          }
@@ -1828,7 +1865,7 @@ void ZScatterer::InitRefParList()
             RefinablePar tmp("Angle"+(string)buf,
                               &(mZAtomRegistry.GetObj(i).mAngle),0,2*M_PI,
                               gpRefParTypeScattConformBondAngle,
-                              REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,RAD2DEG,2*M_PI);
+                              REFPAR_DERIV_STEP_ABSOLUTE,false,false,usedAngle,true,RAD2DEG,2*M_PI);
             tmp.AssignClock(mClockScatterer);
             this->AddPar(tmp);
          }
@@ -1839,7 +1876,7 @@ void ZScatterer::InitRefParList()
             RefinablePar tmp("Dihed"+(string)buf,
                               &(mZAtomRegistry.GetObj(i).mDihed),0,2*M_PI,
                               gpRefParTypeScattConformDihedAngle,
-                              REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,RAD2DEG,2*M_PI);
+                              REFPAR_DERIV_STEP_ABSOLUTE,false,false,usedDihed,true,RAD2DEG,2*M_PI);
             tmp.AssignClock(mClockScatterer);
             this->AddPar(tmp);
          }

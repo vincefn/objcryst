@@ -99,11 +99,15 @@ Atom::Atom(const Atom &old)
    this->Init(old.mXYZ(0),old.mXYZ(1),old.mXYZ(2),
               old.mName,mpScattPowAtom,
               old.mOccupancy);
+   this->GetPar(mXYZ.data()).  CopyAttributes(old.GetPar(old.mXYZ.data()));
+   this->GetPar(mXYZ.data()+1).CopyAttributes(old.GetPar(old.mXYZ.data()+1));
+   this->GetPar(mXYZ.data()+2).CopyAttributes(old.GetPar(old.mXYZ.data()+2));
+   this->GetPar(&mOccupancy).  CopyAttributes(old.GetPar(&(old.mOccupancy)));
 }
 
 Atom* Atom::CreateCopy() const
 {
-   VFN_DEBUG_MESSAGE("Atom::CreateCopy():/Name="<<mName,5)
+   VFN_DEBUG_MESSAGE("Atom::CreateCopy():/Name="<<mName,10)
    return new Atom(*this);
 }
 
@@ -129,6 +133,10 @@ void Atom::operator=(const Atom &rhs)
    this->Init(rhs.mXYZ(0),rhs.mXYZ(1),rhs.mXYZ(2),
               rhs.mName,rhs.mpScattPowAtom,
               rhs.mOccupancy);
+   this->GetPar(mXYZ.data()).  CopyAttributes(rhs.GetPar(rhs.mXYZ.data()));
+   this->GetPar(mXYZ.data()+1).CopyAttributes(rhs.GetPar(rhs.mXYZ.data()+1));
+   this->GetPar(mXYZ.data()+2).CopyAttributes(rhs.GetPar(rhs.mXYZ.data()+2));
+   this->GetPar(&mOccupancy).  CopyAttributes(rhs.GetPar(&(rhs.mOccupancy)));
 }
 
 void Atom::Init(const REAL x, const REAL y, const REAL z,
