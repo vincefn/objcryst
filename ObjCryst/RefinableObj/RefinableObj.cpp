@@ -155,7 +155,7 @@ void RefinableObjClock::AddChild(const RefinableObjClock &clock)
 void RefinableObjClock::RemoveChild(const RefinableObjClock &clock)
 {
    const unsigned int i=mvChild.erase(&clock);
-   VFN_DEBUG_MESSAGE("RefinableObjClock::RemoveChild():"<<i,10)
+   VFN_DEBUG_MESSAGE("RefinableObjClock::RemoveChild():"<<i,5)
    clock.RemoveParent(*this);
    this->Click();
 }
@@ -171,7 +171,7 @@ void RefinableObjClock::AddParent(RefinableObjClock &clock)const
 void RefinableObjClock::RemoveParent(RefinableObjClock &clock)const
 {
    const unsigned int i=mvParent.erase(&clock);
-   VFN_DEBUG_MESSAGE("RefinableObjClock::RemoveParent():"<<i,10)
+   VFN_DEBUG_MESSAGE("RefinableObjClock::RemoveParent():"<<i,5)
 }
 
 void RefinableObjClock::operator=(const RefinableObjClock &rhs)
@@ -692,7 +692,7 @@ void RefinablePar::WXDelete()
 {
    if(0!=mpWXFieldRefPar)
    {
-      VFN_DEBUG_MESSAGE("RefinablePar::WXDelete()",5)
+      VFN_DEBUG_MESSAGE("RefinablePar::WXDelete():"<<mName,5)
       delete mpWXFieldRefPar;
    }
    mpWXFieldRefPar=0;
@@ -790,7 +790,7 @@ void RefObjOpt::WXDelete()
 }
 void RefObjOpt::WXNotifyDelete()
 {
-   VFN_DEBUG_MESSAGE("RefObjOpt::WXNotifyDelete()",10)
+   VFN_DEBUG_MESSAGE("RefObjOpt::WXNotifyDelete()",5)
    mpWXFieldOption=0;
 }
 #endif
@@ -942,14 +942,9 @@ template<class T> void ObjRegistry<T>::DeRegisterAll()
 template<class T> void ObjRegistry<T>::DeleteAll()
 {
    VFN_DEBUG_ENTRY("ObjRegistry("<<mName<<")::DeleteAll():",5)
+   vector<T*> reg=mvpRegistry;//mvpRegistry will be modified as objects are deleted, so use a copy
    typename vector<T*>::iterator pos;
-   for(pos=mvpRegistry.begin();pos!=mvpRegistry.end();++pos)
-   {
-      #ifdef __WX__CRYST__
-      if(0!=mpWXRegistry) mpWXRegistry->Remove((*pos)->WXGet());
-      #endif
-      delete *pos;
-   }
+   for(pos=reg.begin();pos!=reg.end();++pos) delete *pos;
    mvpRegistry.clear();
    mListClock.Click();
    VFN_DEBUG_EXIT("ObjRegistry("<<mName<<")::DeleteAll():",5)
