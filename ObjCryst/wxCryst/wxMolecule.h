@@ -128,6 +128,7 @@ class WXMolecule: public WXScatterer
       void OnMenuAddBond(wxCommandEvent & WXUNUSED(event));
       void OnMenuAddAngle(wxCommandEvent & WXUNUSED(event));
       void OnMenuAddDihedralAngle(wxCommandEvent & WXUNUSED(event));
+      void OnMenuRigidfyWithDihedralAngles(wxCommandEvent & WXUNUSED(event));
       void OnMenuRemoveAtom(wxCommandEvent & WXUNUSED(event));
       void OnMenuRemoveBond(wxCommandEvent & WXUNUSED(event));
       void OnMenuRemoveAngle(wxCommandEvent & WXUNUSED(event));

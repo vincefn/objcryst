@@ -624,6 +624,7 @@ WXCRYST_ID ID_MOLECULE_MENU_FORMULA_ADD_ATOM;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_ADD_BOND;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_ADD_ANGLE;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_ADD_DIHEDRAL;
+WXCRYST_ID ID_MOLECULE_MENU_FORMULA_RIGIDIFY_WITH_DIHEDRALANGLES;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_TEST;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_REMOVE_ATOM;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_REMOVE_BOND;
@@ -643,6 +644,7 @@ BEGIN_EVENT_TABLE(WXMolecule,wxWindow)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_ADD_BOND,            WXMolecule::OnMenuAddBond)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_ADD_ANGLE,           WXMolecule::OnMenuAddAngle)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_ADD_DIHEDRAL,        WXMolecule::OnMenuAddDihedralAngle)
+   EVT_MENU(ID_MOLECULE_MENU_FORMULA_RIGIDIFY_WITH_DIHEDRALANGLES,WXMolecule::OnMenuRigidfyWithDihedralAngles)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_REMOVE_ATOM,         WXMolecule::OnMenuRemoveAtom)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_REMOVE_BOND,         WXMolecule::OnMenuRemoveBond)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_REMOVE_ANGLE,        WXMolecule::OnMenuRemoveAngle)
@@ -678,7 +680,9 @@ mpBondWin(0),mpAngleWin(0),mpDihedralAngleWin(0)
                                 "Add Bond Angle Restraint");
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_ADD_DIHEDRAL,
                                 "Add Dihedral Angle Restraint");
-         mpMenuBar->GetMenu(ID_MOLECULE_MENU_FORMULA).AppendSeparator();
+            mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_RIGIDIFY_WITH_DIHEDRALANGLES,
+                                "Rigidify with Dihedral Angles");
+      mpMenuBar->GetMenu(ID_MOLECULE_MENU_FORMULA).AppendSeparator();
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_REMOVE_ATOM,
                                 "Remove an Atom");
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_REMOVE_BOND,
@@ -1045,40 +1049,38 @@ void WXMolecule::CrystUpdate()
       if(needLayoutBond&&(0!=mpBondWin))
       {
          VFN_DEBUG_MESSAGE("WXMolecule::CrystUpdate(): BondWin Layout",6)
+         mpBondWin->Scroll(0,0);
          int width0,height0;
          mpBondWin->GetVirtualSize(&width0,&height0);
-         mpBondWin->GetSizer()->RecalcSizes();
-         mpBondWin->GetSizer()->Layout();
-         wxSize s=mpBondWin->GetSizer()->GetMinSize();
-         mpBondWin->Scroll(0,0);//workaround wxMSW 2.2.9 bug
+         mpSizerBondList->Layout();
+         wxSize s=mpSizerBondList->GetMinSize();
          if((height0!=s.GetHeight())||(width0!=s.GetWidth()))
-            mpBondWin->SetScrollbars(40,40,s.GetWidth()/40+1,s.GetHeight()/40+1,0,0);
+            mpBondWin->SetScrollbars(40,40,s.GetWidth()/40+1,s.GetHeight()/40+1);
          mpBondWin->GetParent()->SetSize(-1,s.GetWidth());
       }
       if(needLayoutAngle&&(0!=mpAngleWin))
       {
          VFN_DEBUG_MESSAGE("WXMolecule::CrystUpdate(): AngleWin Layout",6)
+         mpAngleWin->Scroll(0,0);
          int width0,height0;
          mpAngleWin->GetVirtualSize(&width0,&height0);
-         mpAngleWin->GetSizer()->RecalcSizes();
-         mpAngleWin->GetSizer()->Layout();
-         wxSize s=mpAngleWin->GetSizer()->GetMinSize();
-         mpAngleWin->Scroll(0,0);//workaround wxMSW 2.2.9 bug
+         //mpSizerAngleList->RecalcSizes();
+         mpSizerAngleList->Layout();
+         wxSize s=mpSizerAngleList->GetMinSize();
          if((height0!=s.GetHeight())||(width0!=s.GetWidth()))
-            mpAngleWin->SetScrollbars(40,40,s.GetWidth()/40+1,s.GetHeight()/40+1,0,0);
+            mpAngleWin->SetScrollbars(40,40,s.GetWidth()/40+1,s.GetHeight()/40+1);
          mpAngleWin->GetParent()->SetSize(-1,s.GetWidth());
       }
       if(needLayoutDihed&&(0!=mpDihedralAngleWin))
       {
          VFN_DEBUG_MESSAGE("WXMolecule::CrystUpdate(): DihedralAngleWin Layout",6)
+         mpDihedralAngleWin->Scroll(0,0);
          int width0,height0;
          mpDihedralAngleWin->GetVirtualSize(&width0,&height0);
-         mpDihedralAngleWin->GetSizer()->RecalcSizes();
-         mpDihedralAngleWin->GetSizer()->Layout();
-         wxSize s=mpDihedralAngleWin->GetSizer()->GetMinSize();
-         mpDihedralAngleWin->Scroll(0,0);//workaround wxMSW 2.2.9 bug
+         mpSizerDihedralAngleList->Layout();
+         wxSize s=mpSizerDihedralAngleList->GetMinSize();
          if((height0!=s.GetHeight())||(width0!=s.GetWidth()))
-            mpDihedralAngleWin->SetScrollbars(40,40,s.GetWidth()/40+1,s.GetHeight()/40+1,0,0);
+            mpDihedralAngleWin->SetScrollbars(40,40,s.GetWidth()/40+1,s.GetHeight()/40+1);
          mpDihedralAngleWin->GetParent()->SetSize(-1,s.GetWidth());
       }
    }
@@ -1091,7 +1093,6 @@ void WXMolecule::OnMenuShowBondList(wxCommandEvent &event)
    wxFrame *frame= new wxFrame(this,-1,("Bond List for: "+mpMolecule->GetName()).c_str());
    mpBondWin = new WXMolScrolledWindow(frame,this);
    mpSizerBondList= new wxBoxSizer(wxVERTICAL);
-   mpBondWin->SetSizer(mpSizerBondList);
    frame->Show(true);
    this->CrystUpdate();
 }
@@ -1101,7 +1102,6 @@ void WXMolecule::OnMenuShowBondAngleList(wxCommandEvent &event)
    wxFrame *frame= new wxFrame(this,-1,("Bond Angles list for: "+mpMolecule->GetName()).c_str());
    mpAngleWin = new WXMolScrolledWindow(frame,this);
    mpSizerAngleList= new wxBoxSizer(wxVERTICAL);
-   mpAngleWin->SetSizer(mpSizerAngleList);
    frame->Show(true);
    this->CrystUpdate();
 }
@@ -1111,23 +1111,53 @@ void WXMolecule::OnMenuShowDihedralAngleList(wxCommandEvent &event)
    wxFrame *frame= new wxFrame(this,-1,("Dihedral Angles list for: "+mpMolecule->GetName()).c_str());
    mpDihedralAngleWin = new WXMolScrolledWindow(frame,this);
    mpSizerDihedralAngleList= new wxBoxSizer(wxVERTICAL);
-   mpDihedralAngleWin->SetSizer(mpSizerDihedralAngleList);
    frame->Show(true);
    this->CrystUpdate();
 }
+
+void WXMolecule::OnMenuRigidfyWithDihedralAngles(wxCommandEvent & WXUNUSED(event))
+{
+   VFN_DEBUG_ENTRY("WXMolecule::OnMenuRigidfyWithDihedralAngles()",6)
+   wxString msg;
+   msg.Printf( _T("This will add all possible dihedral angles,\n")
+               _T("in practice making the Molecule rigid\n\n")
+               _T("Are you sure you want to proceed ?")
+              );
+
+   wxMessageDialog w(this,msg,"Warning !",wxYES_NO|wxNO_DEFAULT|wxICON_EXCLAMATION);
+   int result=w.ShowModal();
+   if(wxID_YES==result) mpMolecule->RigidifyWithDihedralAngles();
+   
+   VFN_DEBUG_EXIT("WXMolecule::OnMenuRigidfyWithDihedralAngles()",6)
+}
+
 void WXMolecule::NotifyDeleteListWin(WXMolScrolledWindow *win)
 {
    VFN_DEBUG_ENTRY("WXMolecule::NotifyDeleteListWin()",6)
    if(win==mpBondWin)
    {
-      VFN_DEBUG_MESSAGE("WXMolecule::NotifyDeleteListWin(): Bond List window",10)
+      VFN_DEBUG_MESSAGE("WXMolecule::NotifyDeleteListWin(): Bond List window",5)
       mpBondWin=0;
       for(vector<MolBond*>::iterator pos=mvpBond.begin();pos!=mvpBond.end();pos++)
          mList.Remove((*pos)->WXGet());
       mvpBond.clear();
    }
-   if(win==mpAngleWin)        {mpAngleWin=0;mvpBondAngle.clear();}
-   if(win==mpDihedralAngleWin){mpDihedralAngleWin=0;mvpDihedralAngle.clear();}
+   if(win==mpAngleWin)
+   {
+      VFN_DEBUG_MESSAGE("WXMolecule::NotifyDeleteListWin(): Angle List window",5)
+      mpAngleWin=0;
+      for(vector<MolBondAngle*>::iterator pos=mvpBondAngle.begin();
+          pos!=mvpBondAngle.end();pos++) mList.Remove((*pos)->WXGet());
+      mvpBondAngle.clear();
+   }
+   if(win==mpDihedralAngleWin)
+   {
+      VFN_DEBUG_MESSAGE("WXMolecule::NotifyDeleteListWin(): Dihedral Angle List window",5)
+      mpDihedralAngleWin=0;
+      for(vector<MolDihedralAngle*>::iterator pos=mvpDihedralAngle.begin();
+          pos!=mvpDihedralAngle.end();pos++) mList.Remove((*pos)->WXGet());
+      mvpDihedralAngle.clear();
+   }
    VFN_DEBUG_EXIT("WXMolecule::NotifyDeleteListWin()",6)
 }
 void WXMolecule::UpdateUI()

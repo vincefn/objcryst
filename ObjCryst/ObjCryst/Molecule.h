@@ -474,13 +474,23 @@ class Molecule: public Scatterer
       *
       *
       */
-      void AddDihedralAngle(MolAtom &atom1, MolAtom &atom2, MolAtom &atom3, MolAtom &atom4,
+      void AddDihedralAngle(const MolAtom &atom1, const MolAtom &atom2,
+                            const MolAtom &atom3, const MolAtom &atom4,
                             const REAL angle, const REAL sigma, const REAL delta,
                             const bool updateDisplay=true);
       /** Remove a dihedral angle
       *
       */
       vector<MolDihedralAngle*>::iterator RemoveDihedralAngle(const MolDihedralAngle&);
+      /** Searches whether a dihedral between four atoms already exists,
+      * searching for either (at1,at2,at3,at4) and (at4,at3,at2,at1), as these are equivalent.
+      *
+      * If no dihedral angle is found, returns Molecule::mvpDihedralAngle.end().
+      */
+      vector<MolDihedralAngle*>::const_iterator FindDihedralAngle(const MolAtom &at1,
+                                                                  const MolAtom &at2,
+                                                                  const MolAtom &at3,
+                                                                  const MolAtom &at4)const;
       MolAtom &GetAtom(unsigned int i);
       const MolAtom &GetAtom(unsigned int i)const;
       MolAtom &GetAtom(const string &name);
@@ -512,6 +522,14 @@ class Molecule: public Scatterer
       RefinableObjClock& GetBondListClock();
       /// get the clock associated to the list of bonds
       const RefinableObjClock& GetBondListClock()const;
+      /** Add dihedral angles so as to rigidify the Molecule.
+      *
+      * In practice, for every sequence of atoms A-B-C-D, add the dihedral angle
+      * defined by these 4 atoms, unless either ABC or BCD are aligned (angle below 10°).
+      *
+      * No duplicate dihedral angle is generated.
+      */
+      void RigidifyWithDihedralAngles();
    private:
       virtual void InitRefParList();
       /** Build the list of rings in the molecule.

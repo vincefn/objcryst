@@ -2010,7 +2010,8 @@ vector<MolBondAngle*>::const_iterator Molecule::FindBondAngle(const MolAtom &at1
    return mvpBondAngle.end();
 }
 
-void Molecule::AddDihedralAngle(MolAtom &atom1, MolAtom &atom2, MolAtom &atom3, MolAtom &atom4,
+void Molecule::AddDihedralAngle(const MolAtom &atom1, const MolAtom &atom2,
+                                const MolAtom &atom3, const MolAtom &atom4,
                                 const REAL angle, const REAL sigma, const REAL delta,
                                 const bool updateDisplay)
 {
@@ -2041,6 +2042,22 @@ vector<MolDihedralAngle*>::iterator Molecule::RemoveDihedralAngle(const MolDihed
    this->UpdateDisplay();
    VFN_DEBUG_ENTRY("Molecule::RemoveDihedralAngle():",6)
    return pos;
+}
+vector<MolDihedralAngle*>::const_iterator Molecule::FindDihedralAngle(const MolAtom &at1,
+                                                                      const MolAtom &at2,
+                                                                      const MolAtom &at3,
+                                                                      const MolAtom &at4)const
+{
+   for(vector<MolDihedralAngle*>::const_iterator pos=mvpDihedralAngle.begin();
+       pos!=mvpDihedralAngle.end();++pos)
+   {
+      if(  (  ((&((*pos)->GetAtom1())==&at1)&&(&((*pos)->GetAtom2())==&at2))
+            &&((&((*pos)->GetAtom3())==&at3)&&(&((*pos)->GetAtom4())==&at4)))
+         ||(  ((&((*pos)->GetAtom4())==&at1)&&(&((*pos)->GetAtom3())==&at2))
+            &&((&((*pos)->GetAtom2())==&at3)&&(&((*pos)->GetAtom1())==&at4))))
+         return pos;
+   }
+   return mvpDihedralAngle.end();
 }
 
 MolAtom &Molecule::GetAtom(unsigned int i){return *mvpAtom[i];}
@@ -2142,6 +2159,51 @@ const map<unsigned long,set<unsigned long> > &Molecule::GetConnectivityTable()co
 
 RefinableObjClock& Molecule::GetBondListClock(){return mClockBondList;}
 const RefinableObjClock& Molecule::GetBondListClock()const{return mClockBondList;}
+
+void Molecule::RigidifyWithDihedralAngles()
+{
+   this->BuildConnectivityTable();
+   // Relationship between MolAtom adress and order
+   map<const MolAtom*,unsigned long> index;
+   {
+      vector<MolAtom*>::const_iterator pos;
+      unsigned long i=0;
+      for(pos=mvpAtom.begin();pos<mvpAtom.end();++pos)
+      {
+         index[*pos]=i++;
+      }
+   }
+   
+   for(vector<MolBond*>::iterator bond=mvpBond.begin();bond!=mvpBond.end();++bond)
+   {
+      const MolAtom* at2=&((*bond)->GetAtom1());
+      const MolAtom* at3=&((*bond)->GetAtom2());
+      const unsigned long i2=index[at2];
+      const unsigned long i3=index[at3];
+      for(set<unsigned long>::const_iterator c2=mConnectivityTable[i2].begin();
+          c2!=mConnectivityTable[i2].end();++c2)
+      {
+         MolAtom* at1=mvpAtom[*c2];
+         if(at1==at3) continue;
+         if(GetBondAngle(*at1,*at2,*at3)<(10 *DEG2RAD)) continue;
+         if(GetBondAngle(*at1,*at2,*at3)>(180*DEG2RAD)) continue;
+         for(set<unsigned long>::const_iterator c3=mConnectivityTable[i3].begin();
+             c3!=mConnectivityTable[i3].end();++c3)
+         {
+            MolAtom* at4=mvpAtom[*c3];
+            if((at4==at2)||(at4==at1)) continue;
+            if(GetBondAngle(*at2,*at3,*at4)<(10 *DEG2RAD)) continue;
+            if(GetBondAngle(*at2,*at3,*at4)>(180*DEG2RAD)) continue;
+            if(this->FindDihedralAngle(*at1,*at2,*at3,*at4)==mvpDihedralAngle.end())
+            {
+               const REAL dihed=GetDihedralAngle(*at1,*at2,*at3,*at4);
+               this->AddDihedralAngle(*at1,*at2,*at3,*at4,dihed,.01,.05,false);
+            }
+         }
+      }
+   }
+   this->UpdateDisplay();
+}
 
 void Molecule::InitRefParList()
 {
