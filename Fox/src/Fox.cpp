@@ -63,6 +63,7 @@ class MyApp : public wxApp
 {
 public:
     virtual bool OnInit();
+    virtual int OnExit();
 };
 
 // WXCrystScr
@@ -181,6 +182,8 @@ IMPLEMENT_APP(MyApp)
 // 'Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
+   TAU_PROFILE_SET_NODE(0); // sequential code 
+   TAU_PROFILE("main()","int()",TAU_DEFAULT);
    //set locale settings to standard
    setlocale(LC_NUMERIC,"C");
    
@@ -299,7 +302,7 @@ bool MyApp::OnInit()
    
    WXCrystMainFrame *frame ;
    
-   frame = new WXCrystMainFrame("FOX: Free Objects for Xtal structures v1.5.0.2",
+   frame = new WXCrystMainFrame("FOX: Free Objects for Xtal structures v1.5.0.3",
                                  wxPoint(50, 50), wxSize(550, 400),!loadFourier);
    // Use the main frame status bar to pass messages to the user
       pMainFrameForUserMessage=frame;
@@ -322,6 +325,11 @@ bool MyApp::OnInit()
    }
    
    return TRUE;
+}
+int MyApp::OnExit()
+{
+   TAU_REPORT_STATISTICS();
+   return this->wxApp::OnExit();
 }
 
 // ----------------------------------------------------------------------------
@@ -473,7 +481,7 @@ void WXCrystMainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
    wxString msg;
    msg.Printf( _T("F.O.X. - Free Objects for Xtal structures\n")
-               _T("Version 1.5.0.2\n\n")
+               _T("Version 1.5.0.3\n\n")
                _T("(c) 2000-2003 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n")
                _T("    2000-2001 Radovan CERNY, University of Geneva\n\n")
                _T("http://objcryst.sourceforge.net\n")

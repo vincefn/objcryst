@@ -62,11 +62,13 @@
       <li> \anchor crystal_molecule<h4>Molecule (organic compound, inorganic polyhedron):</h4>
       <ul>
          <li>A Molecule is defined by a list of atoms with their xyz coordinates (in an orthonormal reference frame internal to the molecule), with the geometry of the Molecule set by a list of restraints: bond lengths, bond angles and dihedral angles. The orientation of the Molecule is defined internally by a quaternion, so its parameters are not directly accessible.
+         <li> Note that to see the list of bonds, bond angles and dihedral angles you can use the menu "Formula->Show Bond List" etc...
          <li> To create Manually a Molecule, use first the Scatterer menu of the Crystal, and then using the menus of the Molecule Object, you can add all the atoms, and then all the restraints (bond lengths, angles, dihedral angles). A few notes when creating Molecules:
          <ul>
             <li> Try to avoid dihedral angles as much as possible, as they tend to restrict a bit too much the movements of the Molecule during the global optimisation, and therefore hinder the progress towards the global minimum. Generally, several bond angles can replace very efficiently a dihedral angle.
             <li> Two atoms are not required to be bonded to be used in a bond/dihedral angle restraint (although it generally is the case, but you may want to do strange things..)
             <li> When you first add the atoms, they are all at (0,0,0) in the Molecule reference frame. You can use the menu to Optimize the initial conformation of the Molecule and see a more reasonable conformation, taking all restraints into account. If you do not do it, it will be automatically be done when you launch the global optimization.
+            <li> <b>"Rigid body"</b> mode: if you want to optimize your Molecule as a rigid body, the way to do this is to ask Fox to add every possible dihedral angle, with the menu "Formula->Rigidify with Dihedral Angles". Of course you must only do this once all your atoms are in the desired configuration ! The molecule will then not strictly be rigid, but the atomic displacements will be very limited.
          </ul>
       </ul>
    </ul>
