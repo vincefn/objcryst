@@ -1380,6 +1380,9 @@ void ScatteringData::CalcStructFactor() const
 
 void ScatteringData::CalcGeomStructFactor() const
 {
+   // This also updates the ScattCompList if necessary.
+   const ScatteringComponentList *pScattCompList
+      =&(this->GetCrystal().GetScatteringComponentList());
    if(  (mClockGeomStructFact>mpCrystal->GetClockScattCompList())
       &&(mClockGeomStructFact>mClockHKL)
       &&(mClockGeomStructFact<mpCrystal->GetMasterClockScatteringPower())) return;
@@ -1416,8 +1419,6 @@ void ScatteringData::CalcGeomStructFactor() const
    //else
    {  
       const SpaceGroup *pSpg=&(this->GetCrystal().GetSpaceGroup());
-      const ScatteringComponentList *pScattCompList
-         =&(this->GetCrystal().GetScatteringComponentList());
       
       const int nbSymmetrics=pSpg->GetNbSymmetrics(true,true);
       const int nbTranslationVectors=pSpg->GetNbTranslationVectors();
