@@ -6,13 +6,13 @@ This page describes how to get the source of Fox (Free Objects For Crystallograp
 
 Requirements:
 <ul>
-   <li><b>Linux</b>: gcc 2.95.3 or above, OpenGL &amp glut librairies
+   <li><b>Linux</b>: gcc 2.95.3 or above, OpenGL & glut librairies
    <li><b>windows</b>: win 98, NT4 or above (win95 will not have OpenGL (3D structures) working, but otherwise works)
 </ul>
 
 <h2>Getting & installing the compilers</h2>
 
-<li>For <b>Linux</b>, you should have nothing to do here, since your box certainly includes development libraries. Fox is developped under gcc 2.95.3 and "2.96". It should work under gcc 3.1 and above, but this has not been tested yet.
+<li>For <b>Linux</b>, you should have nothing to do here, since your box certainly includes development libraries. Fox is now developped under gcc 3.2, but should work down to gcc 2.95.3.
 
 <li>For <b>windows</b>:
 <ul>
@@ -79,7 +79,7 @@ Note: in all cases you may need to <b>edit the <tt>Fox/src/ObjCryst/rules.mak</t
 
    Then '<tt>make install</tt>' will copy Fox to /usr/local/bin/Fox.
 
-   Note that if you do "<tt>make debug=1</tt>", it will be compiled with debug messages which can be interesting (adds a debug menu in Fox, level 0 meaning a lot of messages, and 10 the minimu. Each time you change the debug=0 or debug=1 flag, make sure you do a "make clean" before rebuilding)
+   Note that if you do "<tt>make debug=1</tt>", it will be compiled with debug messages which can be interesting (adds a debug menu in Fox, level 0 meaning a lot of messages, and 10 the minimum. Each time you change the debug=0 or debug=1 flag, make sure you do a "make clean" before rebuilding)
 </ul>
 <li> For <b>windows</b>:
 <ul>
@@ -90,19 +90,19 @@ Note: in all cases you may need to <b>edit the <tt>Fox/src/ObjCryst/rules.mak</t
 Well, just try the examples, or your data while displaying both 3D structure and powder pattern(s). Optionnaly, run several optimizations (several examples) at the same time. Try new features... Change the structural/pattern parameters while graph windows are already shown and then update them... Run it overnight...
 
 <h2>Updating the Fox /ObjCryst++ source code using CVS</h2>
+<b>Quick version:</b> The source of Fox is distributed with the CVS information, so just typing '<tt>make update</tt>' in the Fox directory will do the cvs update for you, on both Linux and windows (for windows you need the CVS client application, see at the end of the page; any decent Linux installation will already have CVS).
+
 A word about CVS (concurent Version System): it is (in a nutshell), a way to store source code, update it from different places and by different people, and keep a complete story of the modifications. More info on http://www.cvshome.org.
 
 In the ObjCryst++ CVS (which includes Fox) (http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/objcryst/), there are 3 different development stages:
-
    - The latest version, with all most recent modifications. This can be unstable, as I tend to make a lot of small modifications.
    - The "TESTING" version, which includes all recent modifications which I deem stable enough on a few cases, but for which no thorough check has been made. This should not be more than a few modifications behind the latest version.
    - the "RELEASE" version, which corresponds to the latest released version of Fox or ObjCryst++, which should be stable.
 
 To test Fox, or get recent features, you should either get the TESTING version or the latest (not for the faint of heart, though).
 
-The cvs access is anonymous, with a blank password. See the CVS notes on sourceforge (http://sourceforge.net/cvs/?group_id=27546).
+The cvs access is anonymous, with a blank password. If you want to do the cvs update yourself, note that there are two modules, 'ObjCryst' and 'Fox' which you will need, as well as the See the CVS notes on sourceforge (http://sourceforge.net/cvs/?group_id=27546).
 
-<li> <b>Linux</b>: in the Fox/src/ObjCryst directory, simply type "<tt>cvs update</tt>" to get the latest version, or "<tt>cvs update -r TESTING</tt>" to get the slightly more stable version.
-<li> <b>windows</b>: you need a CVS client. The simplest is to get the command-line client which uses the same options as the linux one (see above), at http://www.cvshome.org/downloads.html.You may also use wincvs (http://www.wincvs.org), which I have not tested.
+<li> <b>client for windows</b>: you need a CVS client. The simplest is to get the command-line client which uses the same options as the linux one (see above), at http://www.cvshome.org/downloads.html.You may also use wincvs (http://www.wincvs.org), which I have not tested.
 
 */
