@@ -1481,6 +1481,7 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
    if(mShowCursor)
    {
       glLoadIdentity();
+      glTranslatef( 0, 0, -mDist);
       glMultMatrixf( &m[0][0] );
       const GLfloat colour0 [] = {0.00, 0.00, 0.00, 0.00}; 
       const GLfloat colour1 [] = {1.0f, 1.0f, 1.0f, 1.00}; 
