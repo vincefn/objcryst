@@ -1507,20 +1507,20 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                      for(list<FlipGroup>::const_iterator pos=mvFlipGroup.begin();
                          pos!=mvFlipGroup.end();++pos)
                      {
-                        cout <<"Flip group with respect to: "
-                             <<pos->mpAtom1->GetName()<<"-"
-                             <<pos->mpAtom0->GetName()<<"-"
-                             <<pos->mpAtom2->GetName()<<" : ";
-                        for(list<pair<const MolAtom *,set<unsigned long> > >::const_iterator 
-                            chain=pos->mvRotatedChainList.begin();
-                            chain!=pos->mvRotatedChainList.end();++chain)
-                        {
-                           cout<<"    -"<<chain->first->GetName()<<":";
-                           for(set<unsigned long>::iterator pos1=chain->second.begin();
-                               pos1!=chain->second.end();++pos1)
-                              cout<<mvpAtom[*pos1]->GetName()<<"  ";
-                        }
-                        cout<<"accept="<<pos->mNbAccept<<"/"<<pos->mNbTest<<endl;
+                        //cout <<"Flip group with respect to: "
+                        //     <<pos->mpAtom1->GetName()<<"-"
+                        //     <<pos->mpAtom0->GetName()<<"-"
+                        //     <<pos->mpAtom2->GetName()<<" : ";
+                        //for(list<pair<const MolAtom *,set<unsigned long> > >::const_iterator 
+                        //    chain=pos->mvRotatedChainList.begin();
+                        //    chain!=pos->mvRotatedChainList.end();++chain)
+                        //{
+                        //   cout<<"    -"<<chain->first->GetName()<<":";
+                        //   for(set<unsigned long>::iterator pos1=chain->second.begin();
+                        //       pos1!=chain->second.end();++pos1)
+                        //      cout<<mvpAtom[*pos1]->GetName()<<"  ";
+                        //}
+                        //cout<<"accept="<<pos->mNbAccept<<"/"<<pos->mNbTest<<endl;
                      }
                   #endif
                   this->FlipAtomGroup(*posFlip);
@@ -1554,29 +1554,29 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
             {
                if(((REAL)mRandomConformChangeNbAccept/(REAL)mRandomConformChangeNbTest)<0.20)
                {  
-                  cout<<"mRandomConformChangeTemp="<<mRandomConformChangeTemp<<endl;
-                  this->RestraintStatus(cout);
+                  //cout<<"mRandomConformChangeTemp="<<mRandomConformChangeTemp<<endl;
+                  //this->RestraintStatus(cout);
                   mRandomConformChangeTemp*=2.;
                }
                if(((REAL)mRandomConformChangeNbAccept/(REAL)mRandomConformChangeNbTest)<0.65)
                {  
-                  cout<<"mRandomConformChangeTemp="<<mRandomConformChangeTemp<<endl;
-                  this->RestraintStatus(cout);
+                  //cout<<"mRandomConformChangeTemp="<<mRandomConformChangeTemp<<endl;
+                  //this->RestraintStatus(cout);
                   mRandomConformChangeTemp*=1.3;
                }
                if(mRandomConformChangeTemp>0.1)
                {
                   if(((REAL)mRandomConformChangeNbAccept/(REAL)mRandomConformChangeNbTest)>0.75)
                   {
-                     this->RestraintStatus(cout);
+                     //this->RestraintStatus(cout);
                      mRandomConformChangeTemp/=1.3;
-                     cout<<"mRandomConformChangeTemp="<<mRandomConformChangeTemp<<endl;
+                     //cout<<"mRandomConformChangeTemp="<<mRandomConformChangeTemp<<endl;
                   }
                   if(((REAL)mRandomConformChangeNbAccept/(REAL)mRandomConformChangeNbTest)>0.90)
                   {
-                     this->RestraintStatus(cout);
+                     //this->RestraintStatus(cout);
                      mRandomConformChangeTemp/=2.;
-                     cout<<"mRandomConformChangeTemp="<<mRandomConformChangeTemp<<endl;
+                     //cout<<"mRandomConformChangeTemp="<<mRandomConformChangeTemp<<endl;
                   }
                }
                mRandomConformChangeNbTest=0;
@@ -2554,7 +2554,7 @@ void Molecule::BuildConnectivityTable()const
                  .insert(index[&(mvpBond[i]->GetAtom1())]);
    }
    
-   #if 1
+   #if 0
    {
       map<unsigned long,set<unsigned long> >::const_iterator pos;
       unsigned long at=0;
@@ -2756,6 +2756,7 @@ void Molecule::BuildRotorGroup()
                   }
                   if(ident)
                   {
+                     #if 0
                      cout<<"Identical groups:"<<endl;
                      cout<<"    G1:"
                          <<pos1->mpAtom1->GetName()<<"-"
@@ -2771,6 +2772,7 @@ void Molecule::BuildRotorGroup()
                          pos!=pos2->mvRotatedAtomList.end();++pos)
                         cout<<mvpAtom[*pos]->GetName()<<"  ";
                      cout<<endl;
+                     #endif
                      pos2=pRotorGroup2->erase(pos2);
                      --pos2;
                   }
@@ -2804,7 +2806,7 @@ void Molecule::BuildRotorGroup()
             llk += fabs(this->GetLogLikelihood() - llk0);
             this->RestoreParamSet(mLocalParamSet);
          }
-
+         #if 0
          switch(i)
          {
             case 1: cout<<"Rotation Group around bond :";break;
@@ -2817,18 +2819,18 @@ void Molecule::BuildRotorGroup()
              pos1!=pos->mvRotatedAtomList.end();++pos1)
             cout<<mvpAtom[*pos1]->GetName()<<"  ";
          cout<<"   <d(LLK)>="<< llk/36.;
-
+         #endif
          if((llk/50.)>100.)
          {
             pos = pRotorGroup1->erase(pos);
             --pos;
-            cout <<" -> NOT a free torsion"<<endl;
+            //cout <<" -> NOT a free torsion"<<endl;
          }
-         else
-            cout <<" -> free torsion"<<endl;
+         //else
+         //   cout <<" -> free torsion"<<endl;
       }
    }
-   cout<<endl;
+   //cout<<endl;
    
    // Label free torsions
    for(vector<MolBond*>::iterator pos=mvpBond.begin();pos!=mvpBond.end();++pos)
@@ -2961,6 +2963,7 @@ void Molecule::TuneGlobalOptimRotationAmplitude()
          for(list<RotorGroup>::iterator pos=pRotorGroup1->begin();
              pos!=pRotorGroup1->end();++pos)
          {
+            #if 0
             switch(k)
             {
                case 1: cout<<"Rotation Group around bond :";break;
@@ -2969,45 +2972,48 @@ void Molecule::TuneGlobalOptimRotationAmplitude()
             }
             cout <<pos->mpAtom1->GetName()<<"-"
                 <<pos->mpAtom2->GetName()<<" : ";
+            #endif
             const REAL d=vDisplacement[&(*pos)]/(REAL)(nbTest*this->GetNbComponent());
+            #if 0
             for(set<unsigned long>::iterator pos1=pos->mvRotatedAtomList.begin();
                 pos1!=pos->mvRotatedAtomList.end();++pos1)
                cout<<mvpAtom[*pos1]->GetName()<<"  ";
             cout<<", <d>="<< d;
+            #endif
             // We want an average displacement of 0.1 Angstroem, so...
             if(d>0) pos->mBaseRotationAmplitude *= 0.1/d;
             if(pos->mBaseRotationAmplitude<(0.02*M_PI/20.))
             {
                mBaseRotationAmplitude=0.02*M_PI/20.;
-               cout <<"WARNING - too low torsion BaseRotationAmplitude - setting to: "
-                    << pos->mBaseRotationAmplitude*RAD2DEG<< " °"<<endl;
+               //cout <<"WARNING - too low torsion BaseRotationAmplitude - setting to: "
+               //     << pos->mBaseRotationAmplitude*RAD2DEG<< " °"<<endl;
             }
             if(pos->mBaseRotationAmplitude>(0.02*M_PI*20.))
             {
                pos->mBaseRotationAmplitude=0.02*M_PI*20.;
-               cout <<"WARNING - too high Global BaseRotationAmplitude - setting to: "
-                    << pos->mBaseRotationAmplitude*RAD2DEG<< " °"<<endl;
+               //cout <<"WARNING - too high Global BaseRotationAmplitude - setting to: "
+               //     << pos->mBaseRotationAmplitude*RAD2DEG<< " °"<<endl;
             }
-            cout <<" -> Base rotation="<<pos->mBaseRotationAmplitude*RAD2DEG<<"°"<<endl;
+            //cout <<" -> Base rotation="<<pos->mBaseRotationAmplitude*RAD2DEG<<"°"<<endl;
          }
       }
       // Same for global rotation
          displacement/=(REAL)(10*nbTest*this->GetNbComponent());
-         cout<<"Overall Atomic Displacement for Global Rotation:<d>="<<displacement;
+         //cout<<"Overall Atomic Displacement for Global Rotation:<d>="<<displacement;
          if(displacement>0) mBaseRotationAmplitude*=0.1/displacement;
          if(mBaseRotationAmplitude<(0.02*M_PI/20.))
          {
             mBaseRotationAmplitude=0.02*M_PI/20.;
-            cout <<"WARNING - too low Global BaseRotationAmplitude - setting to: "
-                 << mBaseRotationAmplitude*RAD2DEG<< " °"<<endl;
+            //cout <<"WARNING - too low Global BaseRotationAmplitude - setting to: "
+            //     << mBaseRotationAmplitude*RAD2DEG<< " °"<<endl;
          }
          if(mBaseRotationAmplitude>(0.02*M_PI*20.))
          {
             mBaseRotationAmplitude=0.02*M_PI*20.;
-            cout <<"WARNING - too high Global BaseRotationAmplitude - setting to: "
-                 << mBaseRotationAmplitude*RAD2DEG<< " °"<<endl;
+            //cout <<"WARNING - too high Global BaseRotationAmplitude - setting to: "
+            //     << mBaseRotationAmplitude*RAD2DEG<< " °"<<endl;
          }
-         cout <<" -> Base rotation="<<mBaseRotationAmplitude*RAD2DEG<<"°"<<endl;
+         //cout <<" -> Base rotation="<<mBaseRotationAmplitude*RAD2DEG<<"°"<<endl;
       
       // Move back atoms to initial position
       this->RestoreParamSet(initialConfig);
@@ -3096,6 +3102,7 @@ void Molecule::BuildFlipGroup()
    #if 0
    const REAL llk0=this->GetLogLikelihood();
    #endif
+   #if 0
    for(list<FlipGroup>::iterator pos=mvFlipGroup.begin();
        pos!=mvFlipGroup.end();++pos)
    {
@@ -3142,6 +3149,7 @@ void Molecule::BuildFlipGroup()
       #endif
       cout<<endl;
    }
+   #endif
    mClockFlipGroup.Click();
    VFN_DEBUG_EXIT("Molecule::BuildFlipGroup()",5)
 }
