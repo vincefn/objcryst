@@ -1029,6 +1029,14 @@ class RefinableObj
          virtual const CrystVector_REAL& GetLSQObs(const unsigned int) const;
          /// Get the weight values for the LSQ function
          virtual const CrystVector_REAL& GetLSQWeight(const unsigned int) const;
+         /** Get the first derivative values for the LSQ function, for a given
+         * parameter. Note that the default method in the base RefinableObj
+         * class is to use numerical derivatives, so it should be
+         * overridden for better precision.
+         * 
+         * \todo This should be a const method, and the given RefPar should be const too...
+         */
+         virtual const CrystVector_REAL& GetLSQDeriv(const unsigned int, RefinablePar&);
 
       /// Re-init the list of refinable parameters, removing all parameters.
       /// This does \e not delete the RefinablePar if 
@@ -1212,6 +1220,9 @@ class RefinableObj
       /// \internal This true is false if RefinableObj::GlobalOptRandomMove() has been called
       /// since RefinableObj::BeginGlobalOptRandomMove() was called.
       bool mRandomMoveIsDone;
+      /// Temporary array used to return derivative values of the LSQ function for given
+      /// parameters.
+      mutable CrystVector_REAL mLSQDeriv;
    #ifdef __WX__CRYST__
    public:
       /// Create a WXCrystObj for this object. Only a generic WXCrystObj pointer is kept.

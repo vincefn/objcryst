@@ -143,6 +143,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
          tmpV1 /= mRefParList.GetParNotFixed(i).DerivStep();
          */
          
+         /*
          //centered derivative
          mRefParList.GetParNotFixed(i).Mutate(mRefParList.GetParNotFixed(i).GetDerivStep());
          calc=mpRefinedObj->GetLSQCalc(mLSQFuncIndex);
@@ -152,8 +153,8 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
          tmpV1 =  calc;
          tmpV1 -= calc1;
          tmpV1 /= mRefParList.GetParNotFixed(i).GetDerivStep()/2;
-         
-         
+         */
+         tmpV1=mpRefinedObj->GetLSQDeriv(mLSQFuncIndex,mRefParList.GetParNotFixed(i));
          pTmp1=tmpV1.data();
          for(j=0;j<nbObs;j++) *pTmp2++ = *pTmp1++;
       }

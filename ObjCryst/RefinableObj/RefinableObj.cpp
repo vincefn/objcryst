@@ -1653,6 +1653,18 @@ const CrystVector_REAL& RefinableObj::GetLSQWeight(const unsigned int) const
    return *noWarning;
 }
 
+const CrystVector_REAL& RefinableObj::GetLSQDeriv(const unsigned int n, RefinablePar&par)
+{
+   // By default, use numerical derivatives
+   par.Mutate(par.GetDerivStep());
+   mLSQDeriv  =this->GetLSQCalc(n);
+   par.Mutate(-2*par.GetDerivStep());
+   mLSQDeriv -=this->GetLSQCalc(n);
+   par.Mutate(par.GetDerivStep());
+   mLSQDeriv /= par.GetDerivStep()/2;
+   return mLSQDeriv;
+}
+
 void RefinableObj::ResetParList()
 {
    VFN_DEBUG_MESSAGE("RefinableObj::ResetParList()",3)
