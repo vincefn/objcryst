@@ -445,11 +445,11 @@ void WXCrystal::OnMenuCrystalGL(wxCommandEvent & WXUNUSED(event))
    wxFrame* frame= new wxFrame(this,-1,mpCrystal->GetName().c_str(),
                                wxDefaultPosition,wxSize(400,400));
    mpCrystalGL=new WXGLCrystalCanvas(this,frame,-1);
-   frame->Show(true);
    #if wxUSE_STATUSBAR
    frame->CreateStatusBar(1);
    frame->SetStatusText(mpCrystal->GetName().c_str());
    #endif
+   frame->Show(true);
    this->UpdateGL();
 }
 void WXCrystal::NotifyCrystalGLDelete()
@@ -1686,6 +1686,7 @@ void WXGLCrystalCanvas::OnEnterWindow( wxMouseEvent& event )
 
 void WXGLCrystalCanvas::OnMouse( wxMouseEvent& event )
 {
+   if(event.Leaving()) return;// wxMSW2.4 bug ?
    VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnMouse()",7)
    if (event.Dragging())
    {
@@ -1743,6 +1744,7 @@ void WXGLCrystalCanvas::OnMouse( wxMouseEvent& event )
          VFN_DEBUG_MESSAGE(mViewAngle <<" "<<mDist,2)
       }
    }
+   if(event.Leaving()) cout<<"Mouse is leaving window!!"<<endl;
    if(event.RightIsDown())
    {
       VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnMouse():Right Button",2)
