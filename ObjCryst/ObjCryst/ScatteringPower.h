@@ -193,7 +193,6 @@ class ScatteringPower:virtual public RefinableObj
       virtual void GetGeneGroup(const RefinableObj &obj, 
                                 CrystVector_uint & groupIndex,
                                 unsigned int &firstGroup) const;
-      virtual REAL GetBiasingCost()const;
    protected:
       virtual void InitRefParList()=0;
       /// Initialization of the object, used by all constructors, and operator=.

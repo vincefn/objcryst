@@ -394,6 +394,8 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
                glPushMatrix();
                   glTranslatef(x*en, y, z);
                   gluSphere(pQuadric,this->GetRadius()/3.,10,10);
+                  //glRasterPos3f(0,0,this->GetRadius()/2.);
+                  //glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,'T');
                glPopMatrix();
             }
          }
@@ -428,14 +430,6 @@ void Atom::GetGeneGroup(const RefinableObj &obj,
             else groupIndex(i)= first++;
          }
 }
-REAL Atom::GetBiasingCost()const
-{
-   REAL cost=0;
-   //for(int i=0;i<mNbRestraint;i++) cost+=mpRestraint[i]->GetRestraintCost();
-   for(int i=0;i<this->GetNbPar();i++) cost+=this->GetPar(i).GetBiasingCost();
-   VFN_DEBUG_MESSAGE("Atom::GetBiasingCost()="<<cost<<"("<<mName<<")",1)
-   return cost;
-}
 
 void Atom::InitRefParList()
 {
@@ -469,7 +463,6 @@ void Atom::InitRefParList()
          tmp.AssignClock(mClockScatterer);
          tmp.SetGlobalOptimStep(.2);
          tmp.SetRestraintRange(.1);
-         tmp.EnableBiasing(true);
          this->AddPar(tmp);
       }
    }

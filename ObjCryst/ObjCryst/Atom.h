@@ -144,7 +144,6 @@ class Atom: public Scatterer
       virtual void GetGeneGroup(const RefinableObj &obj, 
                                 CrystVector_uint & groupIndex,
                                 unsigned int &firstGroup) const;
-      virtual REAL GetBiasingCost()const;
    protected:
    private:
       /// Prepare refinable parameters for the scatterer object
