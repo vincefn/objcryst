@@ -683,9 +683,10 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
    }
    mpCrystal->AddScatterer(scatt);
    //mpCrystal->XMLOutput(cout);
+   VFN_DEBUG_MESSAGE("WXCrystal::OnMenuAddScatterer():calling Layout()",6)
    this->CrystUpdate();
    //this->Layout();
-   VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():End",6)
+   VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer()",6)
 }
 
 void WXCrystal::OnMenuRemoveScatterer(wxCommandEvent & WXUNUSED(event))
@@ -712,8 +713,8 @@ void WXCrystal::OnMenuDuplicateScatterer(wxCommandEvent & WXUNUSED(event))
    Scatterer *copy=scatt->CreateCopy();
    scatt->SetName(scatt->GetName()+(string)"(copy)");
    mpCrystal->AddScatterer(copy);
-   VFN_DEBUG_EXIT("WXCrystal::OnMenuDuplicateScatterer():End",6)
    this->Layout();
+   VFN_DEBUG_EXIT("WXCrystal::OnMenuDuplicateScatterer():End",6)
 }
 
 void WXCrystal::OnMenuAddAntiBumpDist(wxCommandEvent & WXUNUSED(event))

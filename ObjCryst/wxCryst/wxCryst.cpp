@@ -143,9 +143,10 @@ void WXCrystObjBasicList::CrystUpdate()
 }
 void WXCrystObjBasicList::UpdateUI()
 {
-   VFN_DEBUG_MESSAGE("WXCrystObjBasicList::UpdateUI()",3)
+   VFN_DEBUG_ENTRY("WXCrystObjBasicList::UpdateUI()",5)
    for(unsigned int i=0;i<mNbWXCrystObj;i++)
       mpWXCrystObj[i]->UpdateUI();
+   VFN_DEBUG_EXIT("WXCrystObjBasicList::UpdateUI()",5)
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -277,7 +278,7 @@ void WXFieldString::CrystUpdate()
 void WXFieldString::UpdateUI()
 {
    if(mNeedUpdateUI==false) return;
-   VFN_DEBUG_MESSAGE("WXFieldString::UpdateUI()",10)
+   VFN_DEBUG_MESSAGE("WXFieldString::UpdateUI()",4)
    mIsSelfUpdating=true;
    mpField->SetValue(mValue);
    mIsSelfUpdating=false;
@@ -366,7 +367,7 @@ void WXFieldName::CrystUpdate()
 void WXFieldName::UpdateUI()
 {
    if(mNeedUpdateUI==false) return;
-   VFN_DEBUG_MESSAGE("WXFieldName::UpdateUI()",10)
+   VFN_DEBUG_MESSAGE("WXFieldName::UpdateUI()",4)
    mIsSelfUpdating=true;
    mpField->SetValue(mValue);
    mIsSelfUpdating=false;
@@ -459,7 +460,7 @@ template<class T> void WXFieldPar<T>::CrystUpdate()
 template<> void WXFieldPar<REAL>::UpdateUI()
 {
    if(mNeedUpdateUI==false) return;
-   VFN_DEBUG_MESSAGE("WXFieldPar<REAL>::UpdateUI()",6)
+   VFN_DEBUG_MESSAGE("WXFieldPar<REAL>::UpdateUI()",4)
    wxString tmp;
    tmp.Printf("%f",mValue);
    mIsSelfUpdating=true;
@@ -471,7 +472,7 @@ template<> void WXFieldPar<REAL>::UpdateUI()
 template<> void WXFieldPar<long>::UpdateUI()
 {
    if(mNeedUpdateUI==false) return;
-   VFN_DEBUG_MESSAGE("WXFieldPar<long>::UpdateUI()",6)
+   VFN_DEBUG_MESSAGE("WXFieldPar<long>::UpdateUI()",4)
    wxString tmp;
    tmp.Printf("%d",mValue);
    mIsSelfUpdating=true;
@@ -607,7 +608,7 @@ WXCrystObj::~WXCrystObj(){}
 
 bool WXCrystObj::Layout()
 {
-   VFN_DEBUG_MESSAGE("WXCrystObj::Layout()",3)
+   VFN_DEBUG_ENTRY("WXCrystObj::Layout()",3)
    //There are probably easier ways to do this
    if(0!=mpWXTitle)
    {
@@ -634,6 +635,7 @@ bool WXCrystObj::Layout()
    //wxPostEvent(this->GetParent(),event);
    this->UpdateUI();
    mWXParent->Layout();
+   VFN_DEBUG_EXIT("WXCrystObj::Layout()",3)
    return this->wxWindow::Layout();
 }
 
@@ -657,9 +659,10 @@ void WXCrystObj::CrystUpdate()
 }
 void WXCrystObj::UpdateUI()
 {
-   VFN_DEBUG_MESSAGE("WXCrystObj::UpdateUI()",6)
+   VFN_DEBUG_ENTRY("WXCrystObj::UpdateUI()",6)
    if(mpWXTitle!=0) mpWXTitle->UpdateUI();
    mList.UpdateUI();
+   VFN_DEBUG_EXIT("WXCrystObj::UpdateUI()",6)
 }
 ////////////////////////////////////////////////////////////////////////
 //

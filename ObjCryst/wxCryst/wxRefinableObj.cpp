@@ -265,6 +265,7 @@ void WXFieldOption::CrystUpdate()
 
 void WXFieldOption::UpdateUI()
 {
+   VFN_DEBUG_MESSAGE("WXFieldOption::UpdateUI()",6)
    if(mNeedUpdateUI==false) return;
    mpList->SetSelection(mChoice);
    mNeedUpdateUI=false;
@@ -310,10 +311,12 @@ void WXCostFunction::CrystUpdate()
 
 void WXCostFunction::UpdateUI()
 {
+   VFN_DEBUG_ENTRY("WXCostFunction::UpdateUI()",6)
    wxString tmp;
    tmp.Printf("%f",mValue);
    mpValue->SetValue(tmp);
    mpWeight->UpdateUI();
+   VFN_DEBUG_EXIT("WXCostFunction::UpdateUI()",6)
 }
 
 void WXCostFunction::Revert()
@@ -544,11 +547,12 @@ WXRefinableObj::~WXRefinableObj()
 
 bool WXRefinableObj::Layout()
 {
-   VFN_DEBUG_MESSAGE("WXRefinableObj::Layout():"<<mpRefinableObj->GetName(),6)
+   VFN_DEBUG_ENTRY("WXRefinableObj::Layout():"<<mpRefinableObj->GetName(),6)
    mpMenuBar->Layout();
    mpSizer->SetItemMinSize(mpMenuBar,
                            mpMenuBar->GetSize().GetWidth(),
                            mpMenuBar->GetSize().GetHeight());
+   VFN_DEBUG_EXIT("WXRefinableObj::Layout():"<<mpRefinableObj->GetName(),6)
    return this->WXCrystObj::Layout();
 }
 
