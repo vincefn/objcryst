@@ -2149,18 +2149,6 @@ REAL PowderPattern::GetChi2()const
          }
       }
    }
-   
-   {
-      const REAL *p1, *p2, *p3;
-      p1=mPowderPatternCalc.data();
-      p2=mPowderPatternObs.data();
-      p3=mPowderPatternWeight.data();
-      for(unsigned long i=0;i<maxPoints;i++)
-      {
-         mChi2 += *p3 * ((*p1)-(*p2))*((*p1)-(*p2));
-         p1++;p2++;
-      }
-   }
    mClockChi2.Click();
    VFN_DEBUG_EXIT("PowderPattern::GetChi2()="<<mChi2,3);
    return mChi2;
