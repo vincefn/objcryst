@@ -39,6 +39,8 @@
    #include "wxCryst/wxMolecule.h"
 #endif
 
+//#include <xmmintrin.h>
+
 using namespace std;
 
 namespace ObjCryst
@@ -46,6 +48,32 @@ namespace ObjCryst
 REAL GetBondLength(const MolAtom&at1,const MolAtom&at2)
 {
    //TAU_PROFILE("GetBondLength()","REAL (...)",TAU_DEFAULT);
+   
+   /*
+   __m128 m128=_mm_set_ps(0.0f,
+                          at1.GetZ()-at2.GetZ(),
+                          at1.GetY()-at2.GetY(),
+                          at1.GetX()-at2.GetX());
+
+   __m128 a = _mm_mul_ps(m128,m128);
+
+   // horizontal add
+   __m128 b = _mm_add_ss(_mm_shuffle_ps(a, a, _MM_SHUFFLE(0,0,0,0)),
+                         _mm_add_ss(_mm_shuffle_ps(a, a, _MM_SHUFFLE(1,1,1,1)),
+                                    _mm_shuffle_ps(a, a, _MM_SHUFFLE(2,2,2,2))));
+   union m128_float
+   {
+      __m128 m128;
+      struct
+      {
+         float x, y, z, pad;
+      };
+   };
+   union m128_float l;
+   l.m128 = _mm_sqrt_ss(b);
+   
+   return l.x;
+   */
    return  sqrt( (at1.GetX()-at2.GetX())
                 *(at1.GetX()-at2.GetX())
                 +(at1.GetY()-at2.GetY())
@@ -62,9 +90,9 @@ REAL GetBondAngle(const MolAtom &at1,const MolAtom &at2,const MolAtom &at3)
    const REAL x23=at3.GetX()-at2.GetX();
    const REAL y23=at3.GetY()-at2.GetY();
    const REAL z23=at3.GetZ()-at2.GetZ();
-   const REAL norm21= x21*x21+y21*y21+z21*z21;
-   const REAL norm23= x23*x23+y23*y23+z23*z23;
-   const REAL angle=(x21*x23+y21*y23+z21*z23)/sqrt(norm21*norm23+1e-6);
+   const REAL norm21_norm23= sqrt( (x21*x21+y21*y21+z21*z21)
+                                  *(x23*x23+y23*y23+z23*z23)+1e-6);
+   const REAL angle=(x21*x23+y21*y23+z21*z23)/norm21_norm23;
    if(angle>=1)  return 0;
    if(angle<=-1) return M_PI;
    return acos(angle);
@@ -88,15 +116,16 @@ REAL GetDihedralAngle(const MolAtom &at1,const MolAtom &at2,const MolAtom &at3,c
    const REAL x123= y21*z23-z21*y23;
    const REAL y123= z21*x23-x21*z23;
    const REAL z123= x21*y23-y21*x23;
-   const REAL norm123= x123*x123+y123*y123+z123*z123;
    
    // v32 x v34 (= -v23 x v34)
    const REAL x234= -(y23*z34-z23*y34);
    const REAL y234= -(z23*x34-x23*z34);
    const REAL z234= -(x23*y34-y23*x34);
-   const REAL norm234= x234*x234+y234*y234+z234*z234;
+
+   const REAL norm123_norm234= sqrt( (x123*x123+y123*y123+z123*z123)
+                                    *(x234*x234+y234*y234+z234*z234)+1e-6);
    
-   REAL angle=(x123*x234+y123*y234+z123*z234)/sqrt(norm123*norm234+1e-6);
+   REAL angle=(x123*x234+y123*y234+z123*z234)/norm123_norm234;
    if(angle>= 1) angle=0;
    else 
    {
@@ -349,6 +378,7 @@ void MolBond::XMLInput(istream &is,const XMLCrystTag &tag)
 REAL MolBond::GetLogLikelihood()const
 {
    VFN_DEBUG_ENTRY("MolBond::GetLogLikelihood():",2)
+   //TAU_PROFILE("MolBond::GetLogLikelihood()","void ()",TAU_DEFAULT);
    const REAL length=this->GetLength();
    REAL tmp=length-(mLength0+mDelta);
    if(tmp>0)
@@ -533,6 +563,7 @@ REAL MolBondAngle::GetAngle()const
 REAL MolBondAngle::GetLogLikelihood()const
 {
    VFN_DEBUG_ENTRY("MolBondAngle::GetLogLikelihood():",2)
+   //TAU_PROFILE("MolBondAngle::GetLogLikelihood()","void ()",TAU_DEFAULT);
    const REAL angle=this->GetAngle();
    REAL tmp=angle-(mAngle0+mDelta);
    if(tmp>0)
@@ -702,6 +733,7 @@ REAL& MolDihedralAngle::AngleSigma(){return mSigma;}
 REAL MolDihedralAngle::GetLogLikelihood()const
 {
    VFN_DEBUG_ENTRY("MolDihedralAngle::GetLogLikelihood():",2)
+   //TAU_PROFILE("MolDihedralAngle::GetLogLikelihood()","void ()",TAU_DEFAULT);
    const REAL angle=this->GetAngle();
    REAL tmp=angle-(mAngle0+mDelta);
    if(fabs(tmp+2*M_PI)<fabs(tmp)) tmp += 2*M_PI;
@@ -2378,13 +2410,14 @@ void Molecule::RotateAtomGroup(const MolAtom &at,const REAL vx,const REAL vy,con
    const Quaternion quat=Quaternion::RotationQuaternion(angle,vx,vy,vz);
    for(set<unsigned long>::const_iterator pos=atoms.begin();pos!=atoms.end();++pos)
    {
-      mvpAtom[*pos]->X() -= x0;
-      mvpAtom[*pos]->Y() -= y0;
-      mvpAtom[*pos]->Z() -= z0;
-      quat.RotateVector(mvpAtom[*pos]->X(),mvpAtom[*pos]->Y(),mvpAtom[*pos]->Z());
-      mvpAtom[*pos]->X() += x0;
-      mvpAtom[*pos]->Y() += y0;
-      mvpAtom[*pos]->Z() += z0;
+      MolAtom*const pAtom= mvpAtom[*pos];
+      pAtom->X() -= x0;
+      pAtom->Y() -= y0;
+      pAtom->Z() -= z0;
+      quat.RotateVector(pAtom->X(),pAtom->Y(),pAtom->Z());
+      pAtom->X() += x0;
+      pAtom->Y() += y0;
+      pAtom->Z() += z0;
    }
    mClockAtomPosition.Click();
    mClockScatterer.Click();

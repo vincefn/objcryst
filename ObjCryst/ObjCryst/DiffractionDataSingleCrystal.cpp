@@ -37,6 +37,8 @@
 #include <iomanip>
 #include <stdio.h> //for sprintf()
 
+//#include <xmmintrin.h>
+
 namespace ObjCryst
 {
 //######################################################################
@@ -517,6 +519,38 @@ REAL DiffractionDataSingleCrystal::GetChi2()const
       mChi2 += *p3++ * ( *p1 - *p2) * ( *p1 - *p2);
       p1++;p2++;
    }
+   /*
+   // SSE code gives about 30% faster code on P3 (tested with 10000 reflections),
+   // but scarcely any improvement on athlon-xp
+   union sse4f
+   {
+      __m128 m128;
+      struct
+      {
+         float x, y, z, w;
+      };
+   } ;
+   const long nb=mNbReflUsed/4;
+   const float* p1=mCalcIntensity.data();
+   const float* p2=mObsIntensity.data();
+   const float* p3=mWeight.data();
+   for(long i=0;i<nb;i++)
+   {
+      //segfaults with _mm_load_ps() instead of _mm_loadu_ps? Alignment problem ?
+      __m128 a = _mm_sub_ps(_mm_loadu_ps(p1),_mm_loadu_ps(p2));
+      union sse4f b;
+      b.m128= _mm_mul_ps(_mm_loadu_ps(p3),_mm_mul_ps(a,a));
+      mChi2 += b.x+b.y+b.z+b.w;
+      p1+=4;p2+=4;p3+=4;
+   }
+   p1-=4;p2-=4;p3-=4;
+   for(long i=nb*4;i<mNbReflUsed;i++)
+   {
+      mChi2 += *p3++ * ( *p1 - *p2) * ( *p1 - *p2);
+      p1++;p2++;
+   }
+   */
+   
    mClockChi2.Click();
    VFN_DEBUG_EXIT("DiffractionData::Chi2()="<<mChi2,3);
    return mChi2;
