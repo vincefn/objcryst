@@ -108,6 +108,9 @@ class MolAtom
    public:
       WXCrystObjBasic *mpWXCrystObj;
       virtual WXCrystObjBasic* WXCreate(wxWindow*);
+      WXCrystObjBasic* WXGet();
+      void WXDelete();
+      void WXNotifyDelete();
    #endif
 };
 
@@ -145,6 +148,8 @@ class MolBond:public Restraint
       virtual ~MolBond();
       const Molecule& GetMolecule()const;
       Molecule& GetMolecule();
+      /// Name of the bond, e.g. "C3-O4"
+      string GetName()const;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       virtual REAL GetLogLikelihood()const;
@@ -178,6 +183,9 @@ class MolBond:public Restraint
    public:
       WXCrystObjBasic *mpWXCrystObj;
       virtual WXCrystObjBasic* WXCreate(wxWindow*);
+      WXCrystObjBasic* WXGet();
+      void WXDelete();
+      void WXNotifyDelete();
    #endif
 };
 
@@ -202,6 +210,7 @@ class MolBondAngle:public Restraint
       virtual ~MolBondAngle();
       const Molecule& GetMolecule()const;
       Molecule& GetMolecule();
+      string GetName()const;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       virtual REAL GetLogLikelihood()const;
@@ -226,6 +235,9 @@ class MolBondAngle:public Restraint
    public:
       WXCrystObjBasic *mpWXCrystObj;
       virtual WXCrystObjBasic* WXCreate(wxWindow*);
+      WXCrystObjBasic* WXGet();
+      void WXDelete();
+      void WXNotifyDelete();
    #endif
 };
 
@@ -251,6 +263,7 @@ class MolDihedralAngle:public Restraint
       virtual ~MolDihedralAngle();
       const Molecule& GetMolecule()const;
       Molecule& GetMolecule();
+      string GetName()const;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       virtual REAL GetLogLikelihood()const;
@@ -278,6 +291,9 @@ class MolDihedralAngle:public Restraint
    public:
       WXCrystObjBasic *mpWXCrystObj;
       virtual WXCrystObjBasic* WXCreate(wxWindow*);
+      WXCrystObjBasic* WXGet();
+      void WXDelete();
+      void WXNotifyDelete();
    #endif
 };
 
@@ -396,11 +412,11 @@ class Molecule: public Scatterer
       */
       void AddAtom(const REAL x, const REAL y, const REAL z,
                    const ScatteringPower *pPow,const string &name);
-      /** Remove an atom
+      /** Remove an atom. Returns the iterator to the next atom in the list.
       *
       * This also removes all corresponding bonds, bond angles, etc...
       */
-      void RemoveAtom(const MolAtom&);
+      vector<MolAtom*>::iterator RemoveAtom(const MolAtom&);
       /** Add a bond
       *
       *
@@ -408,10 +424,10 @@ class Molecule: public Scatterer
       void AddBond(MolAtom &atom1, MolAtom &atom2,
                    const REAL length, const REAL sigma, const REAL delta,
                    const REAL bondOrder=1.);
-      /** Remove a bond
+      /** Remove a bond. Returns the iterator to the next bond in the list.
       *
       */
-      void RemoveBond(const MolBond&);
+      vector<MolBond*>::iterator RemoveBond(const MolBond&);
       /** Add a bond angle restraint
       *
       *
@@ -421,7 +437,7 @@ class Molecule: public Scatterer
       /** Remove a BondAngle
       *
       */
-      void RemoveBondAngle(const MolBondAngle&);
+      vector<MolBondAngle*>::iterator RemoveBondAngle(const MolBondAngle&);
       /** Add a dihedral angle restraint
       *
       *
@@ -431,7 +447,7 @@ class Molecule: public Scatterer
       /** Remove a dihedral angle
       *
       */
-      void RemoveDihedralAngle(const MolDihedralAngle&);
+      vector<MolDihedralAngle*>::iterator RemoveDihedralAngle(const MolDihedralAngle&);
       MolAtom &GetAtom(unsigned int i);
       const MolAtom &GetAtom(unsigned int i)const;
       MolAtom &GetAtom(const string &name);

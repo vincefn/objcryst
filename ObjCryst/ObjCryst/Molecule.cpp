@@ -160,6 +160,9 @@ WXCrystObjBasic* MolAtom::WXCreate(wxWindow* parent)
    VFN_DEBUG_EXIT("MolAtom::WXCreate()",5)
    return mpWXCrystObj;
 }
+WXCrystObjBasic* MolAtom::WXGet(){return mpWXCrystObj;}
+void MolAtom::WXDelete(){if(0!=mpWXCrystObj) delete mpWXCrystObj;mpWXCrystObj=0;}
+void MolAtom::WXNotifyDelete(){mpWXCrystObj=0;}
 #endif
 //######################################################################
 //
@@ -179,6 +182,9 @@ MolBond::~MolBond()
 
 const Molecule& MolBond::GetMolecule()const{return *mpMol;}
       Molecule& MolBond::GetMolecule()     {return *mpMol;}
+
+string MolBond::GetName()const
+{return this->GetAtom1().GetName()+"-"+this->GetAtom2().GetName();}
 
 void MolBond::XMLOutput(ostream &os,int indent)const
 {
@@ -315,6 +321,9 @@ WXCrystObjBasic* MolBond::WXCreate(wxWindow* parent)
    VFN_DEBUG_EXIT("MolBond::WXCreate()",5)
    return mpWXCrystObj;
 }
+WXCrystObjBasic* MolBond::WXGet(){return mpWXCrystObj;}
+void MolBond::WXDelete(){if(0!=mpWXCrystObj) delete mpWXCrystObj;mpWXCrystObj=0;}
+void MolBond::WXNotifyDelete(){mpWXCrystObj=0;}
 #endif
 //######################################################################
 //
@@ -335,6 +344,13 @@ MolBondAngle::~MolBondAngle(){}
 
 const Molecule& MolBondAngle::GetMolecule()const{return *mpMol;}
       Molecule& MolBondAngle::GetMolecule()     {return *mpMol;}
+
+string MolBondAngle::GetName()const
+{
+   return this->GetAtom1().GetName()+"-"
+         +this->GetAtom2().GetName()+"-"
+         +this->GetAtom3().GetName();
+}
 
 void MolBondAngle::XMLOutput(ostream &os,int indent)const
 {
@@ -464,6 +480,9 @@ WXCrystObjBasic* MolBondAngle::WXCreate(wxWindow* parent)
    VFN_DEBUG_EXIT("MolBondAngle::WXCreate()",5)
    return mpWXCrystObj;
 }
+WXCrystObjBasic* MolBondAngle::WXGet(){return mpWXCrystObj;}
+void MolBondAngle::WXDelete(){if(0!=mpWXCrystObj) delete mpWXCrystObj;mpWXCrystObj=0;}
+void MolBondAngle::WXNotifyDelete(){mpWXCrystObj=0;}
 #endif
 //######################################################################
 //
@@ -490,6 +509,14 @@ MolDihedralAngle::~MolDihedralAngle(){}
 
 const Molecule& MolDihedralAngle::GetMolecule()const{return *mpMol;}
       Molecule& MolDihedralAngle::GetMolecule()     {return *mpMol;}
+
+string MolDihedralAngle::GetName()const
+{
+   return this->GetAtom1().GetName()+"-"
+         +this->GetAtom2().GetName()+"-"
+         +this->GetAtom3().GetName()+"-"
+         +this->GetAtom4().GetName();
+}
 
 void MolDihedralAngle::XMLOutput(ostream &os,int indent)const
 {
@@ -651,6 +678,9 @@ WXCrystObjBasic* MolDihedralAngle::WXCreate(wxWindow* parent)
    VFN_DEBUG_EXIT("MolDihedralAngle::WXCreate()",5)
    return mpWXCrystObj;
 }
+WXCrystObjBasic* MolDihedralAngle::WXGet(){return mpWXCrystObj;}
+void MolDihedralAngle::WXDelete(){if(0!=mpWXCrystObj) delete mpWXCrystObj;mpWXCrystObj=0;}
+void MolDihedralAngle::WXNotifyDelete(){mpWXCrystObj=0;}
 #endif
 //######################################################################
 //
@@ -1611,7 +1641,57 @@ void Molecule::AddAtom(const REAL x, const REAL y, const REAL z,
       this->AddPar(tmp);
    }
    mClockScatterer.Click();
+   this->UpdateDisplay();
    VFN_DEBUG_EXIT("Molecule::AddAtom()",5)
+}
+
+vector<MolAtom*>::iterator Molecule::RemoveAtom(const MolAtom &atom)
+{
+   VFN_DEBUG_ENTRY("Molecule::RemoveAtom():"<<atom.GetName(),6)
+   vector<MolAtom*>::iterator pos=find(mvpAtom.begin(),mvpAtom.end(),&atom);
+   if(pos==mvpAtom.end())
+   {
+      throw ObjCrystException("Molecule::RemoveAtom():"+atom.GetName()
+                        +" is not in this Molecule:"+this->GetName());
+   }
+   // Delete parameters
+      this->RemovePar(&(this->GetPar(&(atom.X()))));
+      this->RemovePar(&(this->GetPar(&(atom.Y()))));
+      this->RemovePar(&(this->GetPar(&(atom.Z()))));
+   // Delete relevant bonds, bond angles, dihedral angles...
+   for(vector<MolBond*>::iterator posb=mvpBond.begin();posb!=mvpBond.end();++posb)
+   {
+      if( (&atom==&((*posb)->GetAtom1())) || (&atom==&((*posb)->GetAtom2())) )
+      {
+         posb=this->RemoveBond(**posb);
+         --posb;
+      }
+   }
+   for(vector<MolBondAngle*>::iterator posb=mvpBondAngle.begin();posb!=mvpBondAngle.end();++posb)
+   {
+      if(  (&atom==&((*posb)->GetAtom1())) || (&atom==&((*posb)->GetAtom2()))
+         ||(&atom==&((*posb)->GetAtom3())))
+      {
+         posb=this->RemoveBondAngle(**posb);
+         --posb;
+      }
+   }
+   for(vector<MolDihedralAngle*>::iterator posb=mvpDihedralAngle.begin();
+       posb!=mvpDihedralAngle.end();++posb)
+   {
+      if(  (&atom==&((*posb)->GetAtom1())) || (&atom==&((*posb)->GetAtom2()))
+         ||(&atom==&((*posb)->GetAtom3())) || (&atom==&((*posb)->GetAtom4())))
+      {
+         posb=this->RemoveDihedralAngle(**posb);
+         --posb;
+      }
+   }
+   mClockAtomList.Click();
+   mClockScatterer.Click();
+   pos=mvpAtom.erase(pos);
+   this->UpdateDisplay();
+   VFN_DEBUG_EXIT("Molecule::RemoveAtom()",6)
+   return pos;
 }
 
 void Molecule::AddBond(MolAtom &atom1, MolAtom &atom2,
@@ -1621,7 +1701,27 @@ void Molecule::AddBond(MolAtom &atom1, MolAtom &atom2,
    VFN_DEBUG_ENTRY("Molecule::AddBond()",5)
    mvpBond.push_back(new MolBond(atom1,atom2,length,sigma,delta,*this,bondOrder));
    this->AddRestraint(mvpBond.back());
+   mClockBondList.Click();
+   this->UpdateDisplay();
    VFN_DEBUG_EXIT("Molecule::AddBond()",5)
+}
+
+vector<MolBond*>::iterator Molecule::RemoveBond(const MolBond &bond)
+{
+   VFN_DEBUG_ENTRY("Molecule::RemoveBond():"<<bond.GetName(),6)
+   vector<MolBond*>::iterator pos=find(mvpBond.begin(),mvpBond.end(),&bond);
+   if(pos==mvpBond.end())
+   {
+      throw ObjCrystException("Molecule::RemoveBond():"+bond.GetAtom1().GetName()
+                              +"-"+bond.GetAtom2().GetName()
+                              +" is not in this Molecule:"+this->GetName());
+   }
+   this->RemoveRestraint(*pos);
+   mClockBondList.Click();
+   pos= mvpBond.erase(pos);
+   this->UpdateDisplay();
+   VFN_DEBUG_EXIT("Molecule::RemoveBond():",6)
+   return pos;
 }
 
 void Molecule::AddBondAngle(MolAtom &atom1, MolAtom &atom2, MolAtom &atom3,
@@ -1630,7 +1730,27 @@ void Molecule::AddBondAngle(MolAtom &atom1, MolAtom &atom2, MolAtom &atom3,
    VFN_DEBUG_ENTRY("Molecule::AddBondAngle()",5)
    mvpBondAngle.push_back(new MolBondAngle(atom1,atom2,atom3,angle,sigma,delta,*this));
    this->AddRestraint(mvpBondAngle.back());
+   mClockBondAngleList.Click();
+   this->UpdateDisplay();
    VFN_DEBUG_EXIT("Molecule::AddBondAngle()",5)
+}
+
+vector<MolBondAngle*>::iterator Molecule::RemoveBondAngle(const MolBondAngle &angle)
+{
+   VFN_DEBUG_ENTRY("Molecule::RemoveBondAngle():"<<angle.GetName(),6)
+   vector<MolBondAngle*>::iterator pos=find(mvpBondAngle.begin(),mvpBondAngle.end(),&angle);
+   if(pos==mvpBondAngle.end())
+   {
+      throw ObjCrystException("Molecule::RemoveBondAngle():"+angle.GetAtom1().GetName()
+                              +"-"+angle.GetAtom2().GetName()+"-"+angle.GetAtom3().GetName()
+                              +" is not in this Molecule:"+this->GetName());
+   }
+   this->RemoveRestraint(*pos);
+   mClockBondAngleList.Click();
+   pos=mvpBondAngle.erase(pos);
+   this->UpdateDisplay();
+   VFN_DEBUG_EXIT("Molecule::RemoveBondAngle():",6)
+   return pos;
 }
 
 void Molecule::AddDihedralAngle(MolAtom &atom1, MolAtom &atom2, MolAtom &atom3, MolAtom &atom4,
@@ -1640,7 +1760,29 @@ void Molecule::AddDihedralAngle(MolAtom &atom1, MolAtom &atom2, MolAtom &atom3, 
    mvpDihedralAngle.push_back(new MolDihedralAngle(atom1,atom2,atom3,atom4,
                                                    angle,sigma,delta,*this));
    this->AddRestraint(mvpDihedralAngle.back());
+   mClockDihedralAngleList.Click();
+   this->UpdateDisplay();
    VFN_DEBUG_EXIT("Molecule::AddDihedralAngle()",5)
+}
+
+vector<MolDihedralAngle*>::iterator Molecule::RemoveDihedralAngle(const MolDihedralAngle &angle)
+{
+   VFN_DEBUG_ENTRY("Molecule::RemoveDihedralAngle():"<<angle.GetName(),6)
+   vector<MolDihedralAngle*>::iterator pos=find(mvpDihedralAngle.begin(),
+                                                mvpDihedralAngle.end(),&angle);
+   if(pos==mvpDihedralAngle.end())
+   {
+      throw ObjCrystException("Molecule::RemoveDihedralAngle():"+angle.GetAtom1().GetName()
+                              +"-"+angle.GetAtom2().GetName()+"-"+angle.GetAtom3().GetName()
+                              +"-"+angle.GetAtom4().GetName()
+                              +" is not in this Molecule:"+this->GetName());
+   }
+   this->RemoveRestraint(*pos);
+   mClockDihedralAngleList.Click();
+   pos=mvpDihedralAngle.erase(pos);
+   this->UpdateDisplay();
+   VFN_DEBUG_ENTRY("Molecule::RemoveDihedralAngle():",6)
+   return pos;
 }
 
 MolAtom &Molecule::GetAtom(unsigned int i){return *mvpAtom[i];}

@@ -112,6 +112,10 @@ class WXMolecule: public WXScatterer
       void OnMenuAddBond(wxCommandEvent & WXUNUSED(event));
       void OnMenuAddAngle(wxCommandEvent & WXUNUSED(event));
       void OnMenuAddDihedralAngle(wxCommandEvent & WXUNUSED(event));
+      void OnMenuRemoveAtom(wxCommandEvent & WXUNUSED(event));
+      void OnMenuRemoveBond(wxCommandEvent & WXUNUSED(event));
+      void OnMenuRemoveAngle(wxCommandEvent & WXUNUSED(event));
+      void OnMenuRemoveDihedralAngle(wxCommandEvent & WXUNUSED(event));
       void OnMenuSetLimits(wxCommandEvent &event);
       void OnMenuTest(wxCommandEvent &event);
       virtual void CrystUpdate();
@@ -124,16 +128,16 @@ class WXMolecule: public WXScatterer
       wxBoxSizer* mpSizerDihedralAngleList;
       /** Displayed list of atoms
       */
-      vector<const MolAtom*> mvpAtom;
+      vector<MolAtom*> mvpAtom;
       /** Displayed list of bonds
       */
-      vector<const MolBond*> mvpBond;
+      vector<MolBond*> mvpBond;
       /** Displayed list of bond angle
       */
-      vector<const MolBondAngle*> mvpBondAngle;
+      vector<MolBondAngle*> mvpBondAngle;
       /** Displayed list of Dihedral angles
       */
-      vector<const MolDihedralAngle*> mvpDihedralAngle;
+      vector<MolDihedralAngle*> mvpDihedralAngle;
    DECLARE_EVENT_TABLE()
 };
 

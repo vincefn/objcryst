@@ -596,19 +596,27 @@ WXCRYST_ID ID_MOLECULE_MENU_FORMULA_ADD_BOND;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_ADD_ANGLE;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_ADD_DIHEDRAL;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_TEST;
+WXCRYST_ID ID_MOLECULE_MENU_FORMULA_REMOVE_ATOM;
+WXCRYST_ID ID_MOLECULE_MENU_FORMULA_REMOVE_BOND;
+WXCRYST_ID ID_MOLECULE_MENU_FORMULA_REMOVE_ANGLE;
+WXCRYST_ID ID_MOLECULE_MENU_FORMULA_REMOVE_DIHEDRAL;
 
 BEGIN_EVENT_TABLE(WXMolecule,wxWindow)
-   EVT_BUTTON(ID_WXOBJ_COLLAPSE,                   WXCrystObj::OnToggleCollapse)
-   EVT_MENU(ID_REFOBJ_MENU_PAR_FIXALL,             WXRefinableObj::OnMenuFixAllPar)
-   EVT_MENU(ID_REFOBJ_MENU_PAR_UNFIXALL,           WXRefinableObj::OnMenuUnFixAllPar)
-   EVT_MENU(ID_REFOBJ_MENU_PAR_RANDOMIZE,          WXRefinableObj::OnMenuParRandomize)
+   EVT_BUTTON(ID_WXOBJ_COLLAPSE,                          WXCrystObj::OnToggleCollapse)
+   EVT_MENU(ID_REFOBJ_MENU_PAR_FIXALL,                    WXRefinableObj::OnMenuFixAllPar)
+   EVT_MENU(ID_REFOBJ_MENU_PAR_UNFIXALL,                  WXRefinableObj::OnMenuUnFixAllPar)
+   EVT_MENU(ID_REFOBJ_MENU_PAR_RANDOMIZE,                 WXRefinableObj::OnMenuParRandomize)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_OPTIMIZECONFORMATION,WXMolecule::OnMenuOptimizeConformation)
-   EVT_MENU(ID_MOLECULE_MENU_FORMULA_ADD_ATOM,     WXMolecule::OnMenuAddAtom)
-   EVT_MENU(ID_MOLECULE_MENU_FORMULA_ADD_BOND,     WXMolecule::OnMenuAddBond)
-   EVT_MENU(ID_MOLECULE_MENU_FORMULA_ADD_ANGLE,    WXMolecule::OnMenuAddAngle)
-   EVT_MENU(ID_MOLECULE_MENU_FORMULA_ADD_DIHEDRAL, WXMolecule::OnMenuAddDihedralAngle)
-   EVT_MENU(ID_MOLECULE_MENU_FORMULA_TEST        , WXMolecule::OnMenuTest)
-   EVT_MENU(ID_MENU_SETLIMITS,                     WXMolecule::OnMenuSetLimits)
+   EVT_MENU(ID_MOLECULE_MENU_FORMULA_ADD_ATOM,            WXMolecule::OnMenuAddAtom)
+   EVT_MENU(ID_MOLECULE_MENU_FORMULA_ADD_BOND,            WXMolecule::OnMenuAddBond)
+   EVT_MENU(ID_MOLECULE_MENU_FORMULA_ADD_ANGLE,           WXMolecule::OnMenuAddAngle)
+   EVT_MENU(ID_MOLECULE_MENU_FORMULA_ADD_DIHEDRAL,        WXMolecule::OnMenuAddDihedralAngle)
+   EVT_MENU(ID_MOLECULE_MENU_FORMULA_REMOVE_ATOM,         WXMolecule::OnMenuRemoveAtom)
+   EVT_MENU(ID_MOLECULE_MENU_FORMULA_REMOVE_BOND,         WXMolecule::OnMenuRemoveBond)
+   EVT_MENU(ID_MOLECULE_MENU_FORMULA_REMOVE_ANGLE,        WXMolecule::OnMenuRemoveAngle)
+   EVT_MENU(ID_MOLECULE_MENU_FORMULA_REMOVE_DIHEDRAL,     WXMolecule::OnMenuRemoveDihedralAngle)
+   EVT_MENU(ID_MOLECULE_MENU_FORMULA_TEST        ,        WXMolecule::OnMenuTest)
+   EVT_MENU(ID_MENU_SETLIMITS,                            WXMolecule::OnMenuSetLimits)
 END_EVENT_TABLE()
 
 WXMolecule::WXMolecule(wxWindow *parent, Molecule *mol):
@@ -633,6 +641,16 @@ WXScatterer(parent,mol),mpMolecule(mol)
                                 "Add Bond Angle Restraint");
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_ADD_DIHEDRAL,
                                 "Add Dihedral Angle Restraint");
+         mpMenuBar->GetMenu(ID_MOLECULE_MENU_FORMULA).AppendSeparator();
+         mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_REMOVE_ATOM,
+                                "Remove an Atom");
+         mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_REMOVE_BOND,
+                                "Remove a Bond Restraint");
+         mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_REMOVE_ANGLE,
+                                "Remove a Bond Angle Restraint");
+         mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_REMOVE_DIHEDRAL,
+                                "Remove a Dihedral Angle Restraint");
+         mpMenuBar->GetMenu(ID_MOLECULE_MENU_FORMULA).AppendSeparator();
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_TEST,
                                 "Test");
    
@@ -678,8 +696,6 @@ void WXMolecule::OnMenuAddAtom(wxCommandEvent & WXUNUSED(event))
    stringstream st;
    st<<"_"<<mpMolecule->GetAtomList().size();
    mpMolecule->AddAtom(0.,0.,0.,scatt,scatt->GetName()+st.str());
-   this->CrystUpdate();
-   this->UpdateUI();
    VFN_DEBUG_EXIT("WXMolecule::OnMenuAddAtom()",6)
 }
 
@@ -704,9 +720,6 @@ void WXMolecule::OnMenuAddBond(wxCommandEvent & WXUNUSED(event))
       return;
    }
    mpMolecule->AddBond(*at1,*at2,1.5,.01,.05,1.);
-   
-   this->CrystUpdate();
-   this->UpdateUI();
    VFN_DEBUG_EXIT("WXMolecule::OnMenuAddBond()",6)
 }
 
@@ -735,9 +748,6 @@ void WXMolecule::OnMenuAddAngle(wxCommandEvent & WXUNUSED(event))
       return;
    }
    mpMolecule->AddBondAngle(*at1,*at2,*at3,109*DEG2RAD,.01,0.05);
-   
-   this->CrystUpdate();
-   this->UpdateUI();
    VFN_DEBUG_EXIT("WXMolecule::OnMenuAddBond()",6)
 }
 
@@ -770,11 +780,61 @@ void WXMolecule::OnMenuAddDihedralAngle(wxCommandEvent & WXUNUSED(event))
       return;
    }
    mpMolecule->AddDihedralAngle(*at1,*at2,*at3,*at4,180*DEG2RAD,.01,.05);
-   
-   this->CrystUpdate();
-   this->UpdateUI();
    VFN_DEBUG_EXIT("WXMolecule::OnMenuAddDihedralAngle()",6)
 }
+
+void WXMolecule::OnMenuRemoveAtom(wxCommandEvent & WXUNUSED(event))
+{
+   VFN_DEBUG_ENTRY("WXMolecule::OnMenuRemoveAtom()",6)
+   vector<MolAtom*> v=mpMolecule->GetAtomList();
+   int choice;
+   MolAtom *at=WXDialogChooseFromVector(v,
+                               (wxWindow*)this,"Choose the Atom to be removed",choice);
+   if(0==at) return;
+   mpMolecule->RemoveAtom(*at);
+   this->CrystUpdate();
+   VFN_DEBUG_EXIT("WXMolecule::OnMenuRemoveAtom()",6)
+}
+
+void WXMolecule::OnMenuRemoveBond(wxCommandEvent & WXUNUSED(event))
+{
+   VFN_DEBUG_ENTRY("WXMolecule::OnMenuRemoveBond()",6)
+   vector<MolBond*> v=mpMolecule->GetBondList();
+   int choice;
+   MolBond *b=WXDialogChooseFromVector(v,
+                               (wxWindow*)this,"Choose the Bond to be removed",choice);
+   if(0==b) return;
+   mpMolecule->RemoveBond(*b);
+   this->CrystUpdate();
+   VFN_DEBUG_EXIT("WXMolecule::OnMenuRemoveBond()",6)
+}
+
+void WXMolecule::OnMenuRemoveAngle(wxCommandEvent & WXUNUSED(event))
+{
+   VFN_DEBUG_ENTRY("WXMolecule::OnMenuRemoveAngle()",6)
+   vector<MolBondAngle*> v=mpMolecule->GetBondAngleList();
+   int choice;
+   MolBondAngle *a=WXDialogChooseFromVector(v,
+                               (wxWindow*)this,"Choose the Bond Angle to be removed",choice);
+   if(0==a) return;
+   mpMolecule->RemoveBondAngle(*a);
+   this->CrystUpdate();
+   VFN_DEBUG_EXIT("WXMolecule::OnMenuRemoveAngle()",6)
+}
+
+void WXMolecule::OnMenuRemoveDihedralAngle(wxCommandEvent & WXUNUSED(event))
+{
+   VFN_DEBUG_ENTRY("WXMolecule::OnMenuRemoveDihedralAngle()",6)
+   vector<MolDihedralAngle*> v=mpMolecule->GetDihedralAngleList();
+   int choice;
+   MolDihedralAngle *a=WXDialogChooseFromVector(v,
+                               (wxWindow*)this,"Choose the Dihedral Angle to be removed",choice);
+   if(0==a) return;
+   mpMolecule->RemoveDihedralAngle(*a);
+   this->CrystUpdate();
+   VFN_DEBUG_EXIT("WXMolecule::OnMenuRemoveDihedralAngle()",6)
+}
+
 void WXMolecule::OnMenuTest(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXMolecule::OnMenuTest()",6)
@@ -792,12 +852,79 @@ void WXMolecule::CrystUpdate()
    VFN_DEBUG_ENTRY("WXMolecule::CrystUpdate()",6)
    if(false==mpMolecule->IsBeingRefined())
    {
-      //First add any atom, bond, bond angle or dihedral angle that could have been added
+      //Remove any atom, bond, bond angle or dihedral angle that could have been removed
+      {
+         vector<MolAtom*>::iterator pos;
+         for(pos=mvpAtom.begin();pos!=mvpAtom.end();pos++)
+         {
+            vector<MolAtom*>::const_iterator pos2=find(mpMolecule->GetAtomList().begin(),
+                                                       mpMolecule->GetAtomList().end(),*pos);
+            if(pos2==mpMolecule->GetAtomList().end())
+            {
+               mList.Remove((*pos)->WXGet());
+               mpSizerAtomList->Remove((*pos)->WXGet());
+               (*pos)->WXDelete();
+               pos=mvpAtom.erase(pos);
+               --pos;
+            }
+         }
+      }
+      {
+         vector<MolBond*>::iterator pos;
+         for(pos=mvpBond.begin();pos!=mvpBond.end();pos++)
+         {
+            vector<MolBond*>::const_iterator pos2=find(mpMolecule->GetBondList().begin(),
+                                                       mpMolecule->GetBondList().end(),*pos);
+            if(pos2==mpMolecule->GetBondList().end())
+            {
+               mList.Remove((*pos)->WXGet());
+               mpSizerBondList->Remove((*pos)->WXGet());
+               (*pos)->WXDelete();
+               pos=mvpBond.erase(pos);
+               --pos;
+            }
+         }
+      }
+      {
+         vector<MolBondAngle*>::iterator pos;
+         for(pos=mvpBondAngle.begin();pos!=mvpBondAngle.end();pos++)
+         {
+            vector<MolBondAngle*>::const_iterator pos2=
+                                    find(mpMolecule->GetBondAngleList().begin(),
+                                         mpMolecule->GetBondAngleList().end(),*pos);
+            if(pos2==mpMolecule->GetBondAngleList().end())
+            {
+               mList.Remove((*pos)->WXGet());
+               mpSizerAngleList->Remove((*pos)->WXGet());
+               (*pos)->WXDelete();
+               pos=mvpBondAngle.erase(pos);
+               --pos;
+            }
+         }
+      }
+      {
+         vector<MolDihedralAngle*>::iterator pos;
+         for(pos=mvpDihedralAngle.begin();pos!=mvpDihedralAngle.end();pos++)
+         {
+            vector<MolDihedralAngle*>::const_iterator pos2=
+                              find(mpMolecule->GetDihedralAngleList().begin(),
+                                   mpMolecule->GetDihedralAngleList().end(),*pos);
+            if(pos2==mpMolecule->GetDihedralAngleList().end())
+            {
+               mList.Remove((*pos)->WXGet());
+               mpSizerDihedralAngleList->Remove((*pos)->WXGet());
+               (*pos)->WXDelete();
+               pos=mvpDihedralAngle.erase(pos);
+               --pos;
+            }
+         }
+      }
+      //Add any atom, bond, bond angle or dihedral angle that could have been added
       {
          vector<MolAtom*>::iterator pos;
          for(pos=mpMolecule->GetAtomList().begin();pos!=mpMolecule->GetAtomList().end();pos++)
          {
-            vector<const MolAtom*>::const_iterator pos2=find(mvpAtom.begin(),mvpAtom.end(),*pos);
+            vector<MolAtom*>::const_iterator pos2=find(mvpAtom.begin(),mvpAtom.end(),*pos);
             if(pos2==mvpAtom.end())
             {
                VFN_DEBUG_MESSAGE("WXMolecule::CrystUpdate():Atom not found:"<<(*pos)->GetName(),5)
@@ -813,7 +940,7 @@ void WXMolecule::CrystUpdate()
          vector<MolBond*>::iterator pos;
          for(pos=mpMolecule->GetBondList().begin();pos!=mpMolecule->GetBondList().end();pos++)
          {
-            vector<const MolBond*>::const_iterator pos2=find(mvpBond.begin(),mvpBond.end(),*pos);
+            vector<MolBond*>::const_iterator pos2=find(mvpBond.begin(),mvpBond.end(),*pos);
             if(pos2==mvpBond.end())
             {
                VFN_DEBUG_MESSAGE("WXMolecule::CrystUpdate():Bond not found",5)
@@ -830,7 +957,7 @@ void WXMolecule::CrystUpdate()
          for(pos=mpMolecule->GetBondAngleList().begin();
              pos!=mpMolecule->GetBondAngleList().end();pos++)
          {
-            vector<const MolBondAngle*>::const_iterator pos2
+            vector<MolBondAngle*>::const_iterator pos2
                =find(mvpBondAngle.begin(),mvpBondAngle.end(),*pos);
             if(pos2==mvpBondAngle.end())
             {
@@ -848,7 +975,7 @@ void WXMolecule::CrystUpdate()
          for(pos=mpMolecule->GetDihedralAngleList().begin();
              pos!=mpMolecule->GetDihedralAngleList().end();pos++)
          {
-            vector<const MolDihedralAngle*>::const_iterator pos2
+            vector<MolDihedralAngle*>::const_iterator pos2
                =find(mvpDihedralAngle.begin(),mvpDihedralAngle.end(),*pos);
             if(pos2==mvpDihedralAngle.end())
             {
