@@ -97,6 +97,64 @@ class WXCrystal: public WXRefinableObj
 };
 
 #ifdef OBJCRYST_GL
+/// Class to store a Fourier map, imported from another package.
+/// This can also generate a 3d view (OpenGL display list) of the map.
+class UnitCellMapImport
+{
+   public:
+      /** Creator
+      *
+      * \param crystal: the crystal correponding to this map 
+      */
+      UnitCellMapImport(const Crystal&crystal);
+      ~UnitCellMapImport();
+      /// Perform the OpenGL drawing, to be stored in an OpenGL Display List.
+      /// Assumes the color and type of drawing (GL_LINE or GL_FILL) 
+      /// is chosen before calling this display list.
+      void GLInitDisplayList(const float contourValue,
+                             const REAL xMin=-.1,const REAL xMax=1.1,
+                             const REAL yMin=-.1,const REAL yMax=1.1,
+                             const REAL zMin=-.1,const REAL zMax=1.1) const;
+      /** Import map from a '.grd' GSAS/EXPGUI map.
+      *
+      * \param filename: the file with the fourier map
+      */ 
+      void ImportGRD(const string&filename);
+   private:
+      /// The crystal corresponding to this map
+      const Crystal *mpCrystal;
+      /// The map data points
+      CrystArray3D_REAL mPoints;
+};
+
+/// Class to store and execute OpenGL Display Lists of fourier maps
+class UnitCellMapGLList
+{
+   public:
+      UnitCellMapGLList(const UnitCellMapImport &map,
+                        const float contour=1.0,const bool swhowWire=true,
+                        const float r=1.0,const float g=0.0,const float b=0.0,
+                        const float t=1.0);
+      ~UnitCellMapGLList();
+      /// Change the contour value. Automatically updates the display list.
+      void SetContour(const float value);
+      /// Change the color.
+      void SetColour(const float r=1.0,const float g=0.0,const float b=0.0,
+                    const float t=1.0);
+      /// Perform the OpenGL drawing
+      void Draw()const;
+   private:
+      /// The map associated with this Display List.
+      const UnitCellMapImport* mpMap;
+      /// Contour level of the map
+      float mContourValue;
+      /// The index of the OpenGL display list
+      unsigned int mGLDisplayList;
+      /// The color to display the map
+      float mColour[4];
+      /// Show as wireframe (if true) or fill (if false).
+      bool mShowWire;
+};
 /// Class for 3D OpenGL display of Crystal structures
 class WXGLCrystalCanvas : public wxGLCanvas
 {
@@ -193,6 +251,7 @@ class WXGLCrystalCanvas : public wxGLCanvas
 
    DECLARE_EVENT_TABLE()
 };
+
 #endif
 
 

@@ -853,6 +853,189 @@ const Crystal& WXCrystal::GetCrystal()const{return *mpCrystal;}
 #ifdef OBJCRYST_GL
 ////////////////////////////////////////////////////////////////////////
 //
+//    UnitCellMapImport
+//
+////////////////////////////////////////////////////////////////////////
+UnitCellMapImport::UnitCellMapImport(const Crystal&crystal):
+mpCrystal(&crystal)
+{}
+UnitCellMapImport::~UnitCellMapImport(){}
+void UnitCellMapImport::GLInitDisplayList(const float minValue,
+                                          const REAL xMin,const REAL xMax,
+                                          const REAL yMin,const REAL yMax,
+                                          const REAL zMin,const REAL zMax) const
+{
+   VFN_DEBUG_ENTRY("UnitCellMapImport::GLInitDisplayList()",7)
+   // Generate triangles
+      VFN_DEBUG_MESSAGE("UnitCellMapImport::GLInitDisplayList(): Generate Triangles",7)
+      const int nx=mPoints.cols();
+      const int ny=mPoints.rows();
+      const int nz=mPoints.depth();
+      float step[3];
+      step[0]=1/(float)nx;
+      step[1]=1/(float)nx;
+      step[2]=1/(float)nx;
+      const int nxMin = (int)(xMin * nx), nxMax = (int)(xMax * nx);
+      const int nyMin = (int)(yMin * ny), nyMax = (int)(yMax * ny);
+      const int nzMin = (int)(zMin * nz), nzMax = (int)(zMax * nz);
+      const int snx = nxMax-nxMin+1, sny = nyMax-nyMin+1, snz = nzMax-nzMin+1;
+      const unsigned int ny_nz = ny*nz, sny_snz = sny*snz;
+      int i, j, k;
+      unsigned int ni, nj, si, sj, sk, sni, snj, sind;
+      float x, y, z;
+
+      //create new set of points
+      mp4Vector * subPoints = new mp4Vector[snx*sny*snz];
+      for(i=nxMin, si=0; i <= nxMax; i++, si++)
+      {
+         ni = ((nx + i % nx) % nx)*ny_nz;    //this will 'wrap' around any value (negative or positive)
+         sni = si*sny_snz;
+         for(j=nyMin, sj=0; j <= nyMax; j++, sj++)
+         {
+            nj = ((ny + j % ny) % ny)*nz;
+            snj = sj*snz;
+            for(k=nzMin, sk=0; k <= nzMax; k++, sk++)
+            {
+               sind = sni + snj + sk;
+               x = i*step[0]; y = j*step[1]; z = k*step[2];
+               mpCrystal->FractionalToOrthonormalCoords(x, y, z);
+               subPoints[sind].x = x; subPoints[sind].y = y; subPoints[sind].z = z;
+               subPoints[sind].val = mPoints(nz,nj,ni);
+            }
+         }
+      }
+      int numOfTriangles;
+      const TRIANGLE *pTriangles= MC(snx-1, sny-1, snz-1, step[0], step[1], step[2], minValue, subPoints, numOfTriangles);
+   // OpenGL drawing instructions
+      VFN_DEBUG_MESSAGE("UnitCellMapImport::GLInitDisplayList(): OpenGL instructions",7)
+      /*
+      if(showWire) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+      else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+      float mccolor[] = {  (float)fcolor.Red()/255.0, 
+                    (float)fcolor.Green()/255.0, 
+                    (float)fcolor.Blue()/255.0,    1.0};
+      glColor4fv(mccolor);
+      glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, mccolor);
+      glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mccolor);
+      glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 100.0);
+      */
+      glBegin(GL_TRIANGLES);
+         for(int i=0; i < numOfTriangles; i++)
+         {
+            for(int j=0; j < 3; j++)
+            {
+               //VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnPaint():MC1:"<<i<<" "<<j,5)
+               glNormal3f(pTriangles[i].norm[j].x, pTriangles[i].norm[j].y, pTriangles[i].norm[j].z);
+               glVertex3f(pTriangles[i].p[j].x    ,pTriangles[i].p[j].y    ,pTriangles[i].p[j].z);
+            }
+         }
+      glEnd();
+
+   delete [] subPoints; 
+   VFN_DEBUG_EXIT("UnitCellMapImport::GLInitDisplayList()",7)
+
+}
+void UnitCellMapImport::ImportGRD(const string&filename)
+{
+   ifstream ffile(filename.c_str());
+   if(!ffile.is_open())
+   {     //if file could not be loaded for some reason then exit
+      (*fpObjCrystInformUser)("Error opening file: "+filename);
+      return;
+   }
+   //message for reporting errors
+   char buff[99];
+   ffile.getline(buff, 100);
+   float a, b, c, alpha, beta, gamma;
+   ffile >>a >>b >>c >>alpha >>beta >>gamma;
+   if(!ffile.good()) {  (*fpObjCrystInformUser)("Error reading file: "+filename); return; }
+   //compare dimensions with the original crystal and notify the user if not equal
+   /*
+   float afac = 180/M_PI, limit = 0.0001;
+   if((a - mpWXCrystal->GetCrystal().GetLatticePar()(0)) > limit || (b - mpWXCrystal->GetCrystal().GetLatticePar()(1))> limit ||
+      (c - mpWXCrystal->GetCrystal().GetLatticePar()(2)) > limit || (alpha - mpWXCrystal->GetCrystal().GetLatticePar()(3)*afac) > limit || 
+      (beta - mpWXCrystal->GetCrystal().GetLatticePar()(4)*afac) > limit || (gamma - mpWXCrystal->GetCrystal().GetLatticePar()(5)*afac) > limit )
+      if(wxMessageBox(wxString::Format("Cell dimensions in the file do not match those of the crystal loaded:\n\n" +
+         wxString("These are the value:\n") + "  Crystal:                     File:\n   a = %f                  a = %f\n" 
+         "   b = %f                  b = %f\n   c = %f                   c = %f\n   alpha = %f             alpha = %f\n" +
+         "   beta =  %f            beta = %f\n   gamma = %f          gamma = %f\n\nPercent errors are:\n" +
+         "   a: %f\n   b: %f\n   c: %f\n   alpha: %f\n   beta:  %f\n   gamma: %f\n\n\n"+ 
+         "Continue loading " + filename.c_str() + " ?",
+         mpWXCrystal->GetCrystal().GetLatticePar()(0), a,    mpWXCrystal->GetCrystal().GetLatticePar()(1), b, 
+         mpWXCrystal->GetCrystal().GetLatticePar()(2), c,    mpWXCrystal->GetCrystal().GetLatticePar()(3)*afac, alpha, 
+         mpWXCrystal->GetCrystal().GetLatticePar()(4)*afac, beta,mpWXCrystal->GetCrystal().GetLatticePar()(5)*afac, gamma, 
+         fabs(a-mpWXCrystal->GetCrystal().GetLatticePar()(0)) / mpWXCrystal->GetCrystal().GetLatticePar()(0)*100, 
+         fabs(b-mpWXCrystal->GetCrystal().GetLatticePar()(1)) / mpWXCrystal->GetCrystal().GetLatticePar()(1)*100, 
+         fabs(c-mpWXCrystal->GetCrystal().GetLatticePar()(2)) / mpWXCrystal->GetCrystal().GetLatticePar()(2)*100,
+         fabs(alpha-mpWXCrystal->GetCrystal().GetLatticePar()(3)*afac) / mpWXCrystal->GetCrystal().GetLatticePar()(3)*afac*100,
+         fabs(beta-mpWXCrystal->GetCrystal().GetLatticePar()(4)*afac ) / mpWXCrystal->GetCrystal().GetLatticePar()(4)*afac*100,
+         fabs(gamma-mpWXCrystal->GetCrystal().GetLatticePar()(5)*afac) / mpWXCrystal->GetCrystal().GetLatticePar()(5)*afac*100 ),
+         "Cell Dimensions Notice", wxYES_NO | wxCENTRE, (wxWindow*)this) == wxNO) 
+       {
+         ffile.close();
+         return;
+       }
+   */
+   int nx,ny,nz;
+   ffile >>nx >>ny >>nz;
+   if(!ffile.good()) {  (*fpObjCrystInformUser)("Error reading file: "+filename); return; }
+   mPoints.resize(nz,ny,nx);
+   for(int i=0; i < nx; i++) {
+     for(int j=0; j < ny; j++) {
+        for(int k=0; k < nz; k++) {
+           ffile >>mPoints(k,j,i);      //reading rhos
+        }
+     }
+   }
+   ffile.close();
+}
+////////////////////////////////////////////////////////////////////////
+//
+//    UnitCellMapGLList
+//
+////////////////////////////////////////////////////////////////////////
+UnitCellMapGLList::UnitCellMapGLList(const UnitCellMapImport &map,
+                                     const float contour,const bool swhowWire,
+                                     const float r,const float g,const float b,
+                                     const float t):
+mpMap(&map),mGLDisplayList(0)
+{
+   this->SetColour(r,g,b,t);
+   this->SetContour(contour);
+}
+
+UnitCellMapGLList::~UnitCellMapGLList()
+{
+}
+
+void UnitCellMapGLList::SetContour(const float value)
+{
+   mContourValue=value;
+   if(0==mGLDisplayList) mGLDisplayList=glGenLists(1);
+}
+
+void UnitCellMapGLList::SetColour(const float r,const float g,const float b,
+                                 const float t)
+{
+   mColour[0]=r;
+   mColour[1]=g;
+   mColour[2]=b;
+   mColour[3]=t;
+}
+
+void UnitCellMapGLList::Draw()const
+{
+   if(mShowWire) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+   else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+   glColor4fv(mColour);
+   glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, mColour);
+   glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mColour);
+   glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 100.0);
+   glCallList(mGLDisplayList);
+}
+
+////////////////////////////////////////////////////////////////////////
+//
 //    WXGLCrystalCanvas
 //
 ////////////////////////////////////////////////////////////////////////
