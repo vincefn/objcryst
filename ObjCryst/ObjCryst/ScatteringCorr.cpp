@@ -347,7 +347,7 @@ void TextureMarchDollase::AddPhase(const REAL f, const REAL c,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1.);
       tmp.AssignClock(mClockTexturePar);
       tmp.SetDerivStep(1e-7);
-      tmp.SetGlobalOptimStep(.01);
+      tmp.SetGlobalOptimStep(.04);
       this->AddPar(tmp);
    }
    {
@@ -356,7 +356,7 @@ void TextureMarchDollase::AddPhase(const REAL f, const REAL c,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1.);
       tmp.AssignClock(mClockTexturePar);
       tmp.SetDerivStep(1e-7);
-      tmp.SetGlobalOptimStep(.01);
+      tmp.SetGlobalOptimStep(.1);
       this->AddPar(tmp);
    }
    {
@@ -440,9 +440,12 @@ void TextureMarchDollase::GlobalOptRandomMove(const REAL mutationAmplitude)
             REAL tz=pL->GetValue();
             mpData->GetCrystal().MillerToOrthonormalCoords(tx,ty,tz);
 
-            tx += .01*2*(rand()/(REAL)RAND_MAX-0.5)*mutationAmplitude*mPhaseRegistry.GetObj(i).mNorm;
-            ty += .01*2*(rand()/(REAL)RAND_MAX-0.5)*mutationAmplitude*mPhaseRegistry.GetObj(i).mNorm;
-            tz += .01*2*(rand()/(REAL)RAND_MAX-0.5)*mutationAmplitude*mPhaseRegistry.GetObj(i).mNorm;
+            tx += pH->GetGlobalOptimStep()*2*(rand()/(REAL)RAND_MAX-0.5)
+                     *mutationAmplitude*mPhaseRegistry.GetObj(i).mNorm;
+            ty += pK->GetGlobalOptimStep()*2*(rand()/(REAL)RAND_MAX-0.5)
+                     *mutationAmplitude*mPhaseRegistry.GetObj(i).mNorm;
+            tz += pL->GetGlobalOptimStep()*2*(rand()/(REAL)RAND_MAX-0.5)
+                     *mutationAmplitude*mPhaseRegistry.GetObj(i).mNorm;
 
             const REAL factor=mPhaseRegistry.GetObj(i).mNorm/sqrt(tx*tx+ty*ty+tz*tz);
             pM->MutateTo(pM->GetValue()/factor);
@@ -458,7 +461,8 @@ void TextureMarchDollase::GlobalOptRandomMove(const REAL mutationAmplitude)
          {
             if(pM->IsFixed()==false)
             {
-               pM->MutateTo(pM->GetValue()*(1.+.01*2*(rand()/(REAL)RAND_MAX-0.5)*mutationAmplitude));
+               pM->MutateTo(pM->GetValue()*(1.+pM->GetGlobalOptimStep()*2
+                                               *(rand()/(REAL)RAND_MAX-0.5)*mutationAmplitude));
             }
             if((pH->IsFixed()==false)||(pK->IsFixed()==false)||(pL->IsFixed()==false))
             {
@@ -467,9 +471,12 @@ void TextureMarchDollase::GlobalOptRandomMove(const REAL mutationAmplitude)
                REAL tz=pL->GetValue();
                mpData->GetCrystal().MillerToOrthonormalCoords(tx,ty,tz);
 
-               tx += .01*2*(rand()/(REAL)RAND_MAX-0.5)*mutationAmplitude*mPhaseRegistry.GetObj(i).mNorm;
-               ty += .01*2*(rand()/(REAL)RAND_MAX-0.5)*mutationAmplitude*mPhaseRegistry.GetObj(i).mNorm;
-               tz += .01*2*(rand()/(REAL)RAND_MAX-0.5)*mutationAmplitude*mPhaseRegistry.GetObj(i).mNorm;
+               tx += pH->GetGlobalOptimStep()*2*(rand()/(REAL)RAND_MAX-0.5)
+                        *mutationAmplitude*mPhaseRegistry.GetObj(i).mNorm;
+               ty += pK->GetGlobalOptimStep()*2*(rand()/(REAL)RAND_MAX-0.5)
+                        *mutationAmplitude*mPhaseRegistry.GetObj(i).mNorm;
+               tz += pL->GetGlobalOptimStep()*2*(rand()/(REAL)RAND_MAX-0.5)
+                        *mutationAmplitude*mPhaseRegistry.GetObj(i).mNorm;
 
                const REAL factor=mPhaseRegistry.GetObj(i).mNorm/sqrt(tx*tx+ty*ty+tz*tz);
                tx *= factor;
