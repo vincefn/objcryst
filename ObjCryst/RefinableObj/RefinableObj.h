@@ -218,6 +218,8 @@ class Restraint
                 const REAL softRange,
                 const bool enableRestraint=false,
                 const bool enableBiasing=false);
+      /// Copy all attributes (limits, flags, etc...) from another Restraint object
+      void CopyAttributes(const Restraint&);
       /// Get the current value.
       virtual REAL GetValue()const=0;
       /** Get the value of the penalty (cost) associated to the restraint.
@@ -355,6 +357,10 @@ class RefinablePar:public Restraint
                      const REAL humanScale=1.,
                      REAL period=1.);
                      
+      /// Copy all attributes (limits, flags, etc...) from another RefinablePar object.
+      /// This is useful in RefinableObj copy constructors. Everything is copied but the
+      /// pointer to the value refined, and the pointer to the clock.
+      void CopyAttributes(const RefinablePar&);
       //@}
       
       /// \name Access & change the current value of the parameter

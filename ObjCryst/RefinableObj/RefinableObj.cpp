@@ -164,6 +164,18 @@ void Restraint::Init(const RefParType *type,
    mEnableRestraint=enableRestraints;
    mEnableBiasing=enableBiasing;
 }
+void Restraint::CopyAttributes(const Restraint& old)
+{
+   mpRefParType=old.mpRefParType;
+   mMin=old.mMin;
+   mMax=old.mMax;
+   mHasMin=old.mHasMin;
+   mHasMax=old.mHasMax;
+   mRestraintRange=old.mRestraintRange;
+   mEnableRestraint=old.mEnableRestraint;
+   mEnableBiasing=old.mEnableBiasing;
+   mBiasingValue=old.mBiasingValue;
+}
 
 REAL Restraint::GetRestraintCost()const
 {
@@ -288,6 +300,26 @@ void RefinablePar::Init(const string &name,
    mHasAssignedClock=false;
    mpClock=0;
    this->SetBiasingValue();
+}
+void RefinablePar::CopyAttributes(const RefinablePar&old)
+{
+   this->Restraint::CopyAttributes(old);
+   mName=old.mName;
+   mHasLimits=old.mHasLimits;
+   mIsFixed=old.mIsFixed;
+   mIsUsed=old.mIsUsed;
+   mIsPeriodic=old.mIsPeriodic;
+   mPeriod=old.mPeriod;
+   mGlobalOptimStep=old.mGlobalOptimStep;
+   mDerivStep=old.mDerivStep;
+   mRefParDerivStepModel=old.mRefParDerivStepModel;
+   mSigma=old.mSigma;
+   mHumanScale=old.mHumanScale;
+   #if 0
+   mUseEquation=old.mUseEquation;
+   mEquationNbRefPar=old.mEquationNbRefPar;
+   mEquationCoeff=old.mEquationCoeff;
+   #endif
 }
 
       
