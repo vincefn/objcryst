@@ -27,7 +27,7 @@
 #endif
 
 #include <sstream>
-
+#include <algorithm>
 #include "wxCryst/wxMolecule.h"
 namespace ObjCryst
 {
