@@ -389,13 +389,18 @@ template class WXRegistry<TexturePhaseMarchDollase>;
 template<class T> T* WXDialogChooseFromRegistry(ObjRegistry<T> &reg,wxWindow*parent,
                                                 const string &message,int &choice)
 {
-   wxString choices[50];//:TODO: give correctt number...
+   wxString* choices=new wxString[reg.GetNb()];
    for(int i=0;i<reg.GetNb();i++) 
-      choices[i]=(reg.GetObj(i).GetClassName()+":"+reg.GetObj(i).GetName()).c_str();
+      *(choices+i)=(reg.GetObj(i).GetClassName()+":"+reg.GetObj(i).GetName()).c_str();
    wxSingleChoiceDialog dialog
          (parent,message.c_str(),"Choose",reg.GetNb(),choices,0,wxOK | wxCANCEL);
    dialog.SetSize(300,300);
-   if(wxID_OK!=dialog.ShowModal()) return 0;
+   if(wxID_OK!=dialog.ShowModal())
+   {
+      delete[] choices;
+      return 0;
+   }
+   delete[] choices;
    choice=dialog.GetSelection();
    return &(reg.GetObj(choice));
 }
@@ -431,12 +436,18 @@ template<class T> const T* WXDialogChooseFromRegistry(const ObjRegistry<T> &reg,
                                                       wxWindow*parent,const string &message
                                                       ,int &choice)
 {
-   wxString choices[50]; //:TODO: 
+   wxString* choices=new wxString[reg.GetNb()];
    for(int i=0;i<reg.GetNb();i++) 
-      choices[i]=(reg.GetObj(i).GetClassName()+":"+reg.GetObj(i).GetName()).c_str();
+      *(choices+i)=(reg.GetObj(i).GetClassName()+":"+reg.GetObj(i).GetName()).c_str();
    wxSingleChoiceDialog dialog
          (parent,message.c_str(),"Choose",reg.GetNb(),choices,0,wxOK | wxCANCEL);
-   if(wxID_OK!=dialog.ShowModal()) return 0;
+   dialog.SetSize(300,300);
+   if(wxID_OK!=dialog.ShowModal())
+   {
+      delete[] choices;
+      return 0;
+   }
+   delete[] choices;
    choice=dialog.GetSelection();
    return &(reg.GetObj(choice));
 }
