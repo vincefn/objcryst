@@ -95,19 +95,22 @@ WXCrystObjBasic(parent),mpMolAtom(obj)
    }
    {
       WXFieldRefPar* pFieldX  =new WXFieldRefPar(this,"x",
-                               &(mpMolAtom->GetMolecule().GetPar(&(mpMolAtom->X()))) );
+                               &(mpMolAtom->GetMolecule().GetPar(&(mpMolAtom->X()))),
+                               50,false,false);
       mpSizer->Add(pFieldX,0,wxALIGN_CENTER);
       mList.Add(pFieldX);
    }
    {
       WXFieldRefPar* pFieldY  =new WXFieldRefPar(this,"y",
-                               &(mpMolAtom->GetMolecule().GetPar(&(mpMolAtom->Y()))) );
+                               &(mpMolAtom->GetMolecule().GetPar(&(mpMolAtom->Y()))),
+                               50,false,false);
       mpSizer->Add(pFieldY,0,wxALIGN_CENTER);
       mList.Add(pFieldY);
    }
    {
       WXFieldRefPar* pFieldZ  =new WXFieldRefPar(this,"z",
-                               &(mpMolAtom->GetMolecule().GetPar(&(mpMolAtom->Z()))) );
+                               &(mpMolAtom->GetMolecule().GetPar(&(mpMolAtom->Z()))),
+                               50,false,false);
       mpSizer->Add(pFieldZ,0,wxALIGN_CENTER);
       mList.Add(pFieldZ);
    }
@@ -326,6 +329,7 @@ WXCrystObjBasic(parent),mpMolBondAngle(obj)
 
    WXFieldPar<REAL> *angle=
       new WXFieldPar<REAL>(this,"Angle:",WXCRYST_ID(),&(mpMolBondAngle->Angle0()));
+   angle->SetHumanValueScale(RAD2DEG);
    mpSizer->Add(angle,0,wxALIGN_CENTER);
    mList.Add(angle);
 
@@ -466,6 +470,7 @@ WXCrystObjBasic(parent),mpMolDihedralAngle(obj)
 
    WXFieldPar<REAL> *angle=
       new WXFieldPar<REAL>(this,"Angle:",-1,&(mpMolDihedralAngle->Angle0()));
+   angle->SetHumanValueScale(RAD2DEG);
    mpSizer->Add(angle,0,wxALIGN_CENTER);
    mList.Add(angle);
 

@@ -362,18 +362,17 @@ void MolBondAngle::XMLOutput(ostream &os,int indent)const
    tag.AddAttribute("Atom3",this->GetAtom3().GetName());
    {
       stringstream ss;
-      ss <<mAngle0;
+      ss <<mAngle0*RAD2DEG;
       tag.AddAttribute("Angle",ss.str());
    }
    {
       stringstream ss;
-      ss <<mDelta;
+      ss <<mDelta*RAD2DEG;
       tag.AddAttribute("Delta",ss.str());
    }
    {
       stringstream ss;
-      ss <<mSigma;
-      tag.AddAttribute("Sigma",ss.str());
+      ss <<mSigma*RAD2DEG;
    }
    os <<tag<<endl;
    VFN_DEBUG_EXIT("MolBondAngle::XMLOutput()",4)
@@ -381,7 +380,7 @@ void MolBondAngle::XMLOutput(ostream &os,int indent)const
 
 void MolBondAngle::XMLInput(istream &is,const XMLCrystTag &tag)
 {
-   VFN_DEBUG_ENTRY("MolBondAngle::XMLInput():",10)
+   VFN_DEBUG_ENTRY("MolBondAngle::XMLInput():",4)
    mvpAtom.resize(3);
    for(unsigned int i=0;i<tag.GetNbAttribute();i++)
    {
@@ -401,19 +400,22 @@ void MolBondAngle::XMLInput(istream &is,const XMLCrystTag &tag)
       {
          stringstream ss(tag.GetAttributeValue(i));
          ss >>mAngle0;
+         mAngle0*=DEG2RAD;
       }
       if("Delta"==tag.GetAttributeName(i))
       {
          stringstream ss(tag.GetAttributeValue(i));
          ss >>mDelta;
+         mDelta*=DEG2RAD;
       }
       if("Sigma"==tag.GetAttributeName(i))
       {
          stringstream ss(tag.GetAttributeValue(i));
          ss >>mSigma;
+         mSigma*=DEG2RAD;
       }
    }
-   VFN_DEBUG_EXIT("MolBondAngle::XMLInput():",10)
+   VFN_DEBUG_EXIT("MolBondAngle::XMLInput():",4)
 }
 REAL& MolBondAngle::Angle0()
 {
@@ -501,7 +503,6 @@ mAngle0(angle),mDelta(delta),mSigma(sigma),mpMol(&parent)
    mvpAtom.push_back(&atom3);
    mvpAtom.push_back(&atom4);
    vector<const MolAtom*>::iterator pos;
-   for(pos=mvpAtom.begin();pos!=mvpAtom.end();++pos) cout << (*pos)->GetName()<<endl;
    VFN_DEBUG_EXIT("MolDihedralAngle::MolDihedralAngle()",5)
 }
 
@@ -529,17 +530,17 @@ void MolDihedralAngle::XMLOutput(ostream &os,int indent)const
    tag.AddAttribute("Atom4",this->GetAtom4().GetName());
    {
       stringstream ss;
-      ss <<mAngle0;
+      ss <<mAngle0*RAD2DEG;
       tag.AddAttribute("Angle",ss.str());
    }
    {
       stringstream ss;
-      ss <<mDelta;
+      ss <<mDelta*RAD2DEG;
       tag.AddAttribute("Delta",ss.str());
    }
    {
       stringstream ss;
-      ss <<mSigma;
+      ss <<mSigma*RAD2DEG;
       tag.AddAttribute("Sigma",ss.str());
    }
    os <<tag<<endl;
@@ -572,16 +573,19 @@ void MolDihedralAngle::XMLInput(istream &is,const XMLCrystTag &tag)
       {
          stringstream ss(tag.GetAttributeValue(i));
          ss >>mAngle0;
+         mAngle0*=DEG2RAD;
       }
       if("Delta"==tag.GetAttributeName(i))
       {
          stringstream ss(tag.GetAttributeValue(i));
          ss >>mDelta;
+         mDelta*=DEG2RAD;
       }
       if("Sigma"==tag.GetAttributeName(i))
       {
          stringstream ss(tag.GetAttributeValue(i));
          ss >>mSigma;
+         mSigma*=DEG2RAD;
       }
    }
    VFN_DEBUG_EXIT("MolDihedralAngle::XMLInput():",5)
@@ -1058,7 +1062,7 @@ void Molecule::XMLInput(istream &is,const XMLCrystTag &tag)
       XMLCrystTag tagg(is);
       if(("Molecule"==tagg.GetName())&&tagg.IsEndTag())
       {
-         this->XMLOutput(cout);
+         //this->XMLOutput(cout);
          this->UpdateDisplay();
          VFN_DEBUG_EXIT("Molecule::XMLInput():"<<this->GetName(),5)
          return;
@@ -1075,9 +1079,7 @@ void Molecule::XMLInput(istream &is,const XMLCrystTag &tag)
       if("Bond"==tagg.GetName())
       {
          this->AddBond(this->GetAtom(0),this->GetAtom(1),1.5,.01,.05,1.);
-         mvpBond.back()->XMLOutput(cout);
          mvpBond.back()->XMLInput(is,tagg);
-         mvpBond.back()->XMLOutput(cout);
       }
       if("BondAngle"==tagg.GetName())
       {
