@@ -184,7 +184,6 @@ class WXTexturePhaseMarchDollase: public WXCrystObjBasic
       ~WXTexturePhaseMarchDollase();
       virtual void CrystUpdate();
       virtual void UpdateUI();
-      virtual bool Layout();
    private:
       wxBoxSizer *mpSizer;
       WXCrystObjBasicList mList;

@@ -93,9 +93,22 @@ class WXCrystObjBasic: public wxWindow
       virtual void CrystUpdate()=0;
       /// Update the User Interface, if necessary
       virtual void UpdateUI()=0;
+      /** Ask for a new Layout with recalculated size hints, because
+      * a child has been changed or added
+      *
+      * \param pChild: the modified child. If null, this will mean we are
+      * asking for a new layout of the window itself (useful when a sub-window
+      * is deleted).
+      */
+      virtual void BottomLayout(WXCrystObjBasic *pChild);
+      /// Notify that a new children has been added, also adding it to the
+      /// correct sizer (which can be the top sizer or not).
+      ///
+      /// \param doBottomLayout ask for a new Layout of the window and of its parents.
+      virtual void AddChild(WXCrystObjBasic *pChild, bool doBottomLayout=true);
    protected:
-      /// Parent 
-      wxWindow *mWXParent;
+      /// Parent, if a WXCrystObjBasic itself
+      WXCrystObjBasic *mWXCrystParent;
       /// Is the the window currently shown ?
       bool mIsShown;
       /// Do we need to update the display ?
@@ -155,8 +168,6 @@ class WXCrystObj: public WXCrystObjBasic
       /// Constructor, with a 
       WXCrystObj(wxWindow* parent,int orient=wxHORIZONTAL,bool showName=true);
       virtual ~WXCrystObj();
-      /// Fix the Layout of the window, resize if necessary.
-      bool Layout();
       /// Only display the title, and collapse everything else.
       /// \bug : the windows do collapse, but the size of the window is not
       /// changed, so it is pretty useless so far...
@@ -168,6 +179,8 @@ class WXCrystObj: public WXCrystObjBasic
       virtual void CrystUpdate();
       virtual void UpdateUI();
       virtual bool Enable(bool enable);
+      virtual void BottomLayout(WXCrystObjBasic *pChild);
+      virtual void AddChild(WXCrystObjBasic *pChild, bool doBottomLayout=true);
    protected:
       /// Top sizer including the title and WXCrystObj::mpSizer
       wxBoxSizer *mpTopSizer;
@@ -195,8 +208,6 @@ class WXField: public WXCrystObjBasic
       *
       */
       WXField(wxWindow *parent,const string& label,const int field_id);
-      /// Redo the layout of the field.
-      bool Layout();
       /// Change the field's label.
       void SetLabel(const string&);
       /// After a user entry, this allows to go back to the last value, if for some reason
@@ -373,7 +384,6 @@ class WXFieldChoice:public WXField
       /// Constructor
       WXFieldChoice(wxWindow *parent,const int field_id,
                             const string &name,const int hsize=80);
-      bool Layout();
       /// Does nothing
       virtual void CrystUpdate();
       /// Does nothing
@@ -394,8 +404,6 @@ class WXCrystMenuBar: public WXCrystObjBasic
    public:
       /// Ctor
       WXCrystMenuBar(wxWindow *parent, WXCrystObj* owner);
-      /// Redo the Layout
-      bool Layout();
       /// Add a menu
       void AddMenu(const string &name,const int menuId, const string& help="");
       /// Get access to a menu

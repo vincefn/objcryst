@@ -271,8 +271,8 @@ WXCrystObjBasic(parent),mpZAtom(obj)
 #endif   
    this->SetSizer(mpSizer);
    
+   this->BottomLayout(0);
    this->CrystUpdate();
-   this->Layout();
    VFN_DEBUG_EXIT("WXZAtom::WXZAtom()",6)
 }
 
@@ -293,29 +293,6 @@ void WXZAtom::UpdateUI()
    else
       mpFieldScattPower->SetValue("Dummy");
    VFN_DEBUG_EXIT("WXZAtom::UpdateUI()",6)
-}
-
-bool WXZAtom::Layout()
-{
-   VFN_DEBUG_ENTRY("WXZAtom::Layout()",3)
-   //:TODO: Cleeeeaaaaannnn thiiiisss !!!
-   for(unsigned int i=0;i<mList.GetNb();i++)
-      mpSizer->SetItemMinSize(mList.Get(i),
-                              mList.Get(i)->GetSize().GetWidth(),
-                              mList.Get(i)->GetSize().GetHeight());
-      
-   mpSizer->Layout();
-   mpSizer->Fit(this);
-   wxSizer* s=mWXParent->GetSizer();
-   if(s != 0)
-   {// Need to do it that way, in case  the parent is not a WXCrystObj
-    // with an adequate Layout() function
-      s->SetItemMinSize(this,this->GetSize().GetWidth(),this->GetSize().GetHeight());
-      s->Fit(mWXParent);
-   }
-   mWXParent->Layout();
-   VFN_DEBUG_EXIT("WXZAtom::Layout()",3)
-   return this->wxWindow::Layout();
 }
 
 void WXZAtom::OnChangeScattPow(wxCommandEvent & WXUNUSED(event))
@@ -392,6 +369,9 @@ WXScatterer(parent,obj),mpZScatterer(obj)
                                 "Add an Atom");
          mpMenuBar->AddMenuItem(ID_ZSCATTERER_MENU_ATOM,ID_ZSCATTERER_MENU_ATOM_CHANGE_PIVOT,
                                 "Change Pivot Atom");
+      mpSizer->SetItemMinSize(mpMenuBar,
+                              mpMenuBar->GetSize().GetWidth(),
+                              mpMenuBar->GetSize().GetHeight());
    //Orientation
       wxBoxSizer* sizer=new wxBoxSizer(wxHORIZONTAL);
       mpScatterer->RefinableObj::Print();
@@ -420,8 +400,8 @@ WXScatterer(parent,obj),mpZScatterer(obj)
       mpSizer->Add(mpWXZAtomRegistry,0,wxALIGN_LEFT);
       mList.Add(mpWXZAtomRegistry);
    
+   this->BottomLayout(0);
    this->CrystUpdate();
-   this->Layout();
 }
 
 void WXZScatterer::OnMenuAddZAtom(wxCommandEvent & WXUNUSED(event))

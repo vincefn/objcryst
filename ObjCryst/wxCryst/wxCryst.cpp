@@ -62,10 +62,9 @@ long WXCRYST_ID::mCounter=wxID_HIGHEST+100;
 //
 ////////////////////////////////////////////////////////////////////////
 WXCrystObjBasic::WXCrystObjBasic(wxWindow* parent):
-wxWindow(parent,-1),mWXParent(parent),mIsShown(true),mNeedUpdateUI(true)
+wxWindow(parent,-1),mWXCrystParent(0),mIsShown(true),mNeedUpdateUI(true)
 {
    VFN_DEBUG_MESSAGE("WXCrystObjBasic::WXCrystObjBasic() at "<<this,6)
-   //mWXParent->Layout();
    VFN_DEBUG_MESSAGE("WXCrystObjBasic::WXCrystObjBasic():End",6)
 }
 
@@ -73,14 +72,36 @@ WXCrystObjBasic::~WXCrystObjBasic()
 {
    if(this->GetContainingSizer()!=0) this->GetContainingSizer()->Remove(this);
 }
-//void WXCrystObjBasic::CrystUpdate()
-//{
-//   cout <<"Just called  WXCrystObjBasic::CrystUpdate(), which is pure virtual !!"<<endl;
-//   abort();
-//}
 
-//wxWindow* WXCrystObjBasic::GetParent(){return mWXParent;}
-
+void WXCrystObjBasic::BottomLayout(WXCrystObjBasic *pChild)
+{
+   VFN_DEBUG_ENTRY(this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
+   wxSizer *pSizer=this->GetSizer();
+   if(pSizer!=0) pSizer->SetSizeHints(this);
+   //if((pChild !=0) &&(pSizer!=0))
+   //{
+   //   pSizer->SetSizeHints(this);
+   //   pSizer->SetItemMinSize
+   //         (pChild, pChild->GetSize().GetWidth(),pChild->GetSize().GetHeight());
+   //}
+   this->Layout();
+   if(mWXCrystParent!=0)
+   {
+      mWXCrystParent->BottomLayout(this);
+   }
+   VFN_DEBUG_EXIT(this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
+}
+void WXCrystObjBasic::AddChild(WXCrystObjBasic *pChild, bool doBottomLayout)
+{
+   VFN_DEBUG_ENTRY(this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
+   wxSizer *pSizer=this->GetSizer();
+   if(pSizer!=0)
+   {
+      pSizer->Add(pChild);
+   }
+   if(doBottomLayout) this->BottomLayout(pChild);
+   VFN_DEBUG_EXIT(this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
+}
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXCrystObjBasicList
@@ -212,21 +233,19 @@ WXCrystObjBasic(parent),mId(id)
    #endif
    mpSizer->Add(mpLabel,0,wxALIGN_CENTER);
    this->SetSizer(mpSizer);
+   mpSizer->SetSizeHints(this);
    this->Layout();
-}
-bool WXField::Layout()
-{
-   VFN_DEBUG_MESSAGE("WXField::Layout()",3)
-   mpSizer->Layout();
-   mpSizer->Fit(this);
-   return this->wxWindow::Layout();
 }
 void WXField::SetLabel(const string& s)
 {
    VFN_DEBUG_MESSAGE("WXField::SetLabel()",3)
    mpLabel->SetLabel(s.c_str());
-   mpSizer->SetItemMinSize
-               (mpLabel, mpLabel->GetSize().GetWidth(),mpLabel->GetSize().GetHeight());
+   mpLabel->Layout();
+   mpSizer->SetItemMinSize(mpLabel,
+                           mpLabel->GetSize().GetWidth(),
+                           mpLabel->GetSize().GetHeight());
+   //mpSizer->SetSizeHints(this);
+   //this->Layout();
    this->Layout();
 }
 bool WXField::SetForegroundColour(const wxColour& colour)
@@ -261,6 +280,7 @@ WXField(parent,"",id),mpString(&st),mValue(st),mIsSelfUpdating(false)
                              wxTextValidator(wxFILTER_ASCII));
 
    mpSizer->Add(mpField,0,wxALIGN_CENTER);
+   mpSizer->SetSizeHints(this);
    this->Layout();
 }
 
@@ -360,6 +380,7 @@ WXField(parent,label,id),mpWXObj(owner),mValue(""),mIsSelfUpdating(false)
                              wxTextValidator(wxFILTER_ASCII));
 
    mpSizer->Add(mpField,0,wxALIGN_CENTER);
+   mpSizer->SetSizeHints(this);
    this->Layout();
 }
 
@@ -448,6 +469,7 @@ WXField(parent,label,id),mIsSelfUpdating(false)
                             wxTextValidator(wxFILTER_NUMERIC));
    mpSizer->Add(mpField,0,wxALIGN_CENTER);
    
+   mpSizer->SetSizeHints(this);
    this->Layout();
 }
 
@@ -584,17 +606,8 @@ WXField(parent,name,field_id)
 {
    mpButton=new wxButton(this,field_id,name.c_str(),wxDefaultPosition,wxSize(hsize,-1));
    mpSizer->Add(mpButton,0,wxALIGN_CENTER);
+   mpSizer->SetSizeHints(this);
    this->Layout();
-}
-
-
-bool WXFieldChoice::Layout()
-{
-   mpSizer->SetItemMinSize
-               (mpButton,mpButton->GetSize().GetWidth(),mpButton->GetSize().GetHeight());
-   mpSizer->Layout();
-   mpSizer->Fit(this);
-   return this->wxWindow::Layout();
 }
 
 void WXFieldChoice::CrystUpdate()
@@ -640,8 +653,6 @@ WXCrystObjBasic(parent),mIsExpanded(true)
    mpSizer=new wxBoxSizer(wxVERTICAL);
    mpTopSizer->Add(mpSizer,0, wxALIGN_TOP);
    
-   //wxStaticText* test=new wxStaticText(mWXParent,-1,"Test!!!");
-   //mpSizer->Add(test,0,wxALIGN_LEFT);
    if(showName)
    {
       mpWXTitle = new WXFieldName(this,"name:",this,ID_WXOBJ_NAME,200);
@@ -660,37 +671,6 @@ WXCrystObj::~WXCrystObj()
    }
    delete mpCollapseButton;
    //sizers are automatically deleted
-}
-
-bool WXCrystObj::Layout()
-{
-   VFN_DEBUG_ENTRY("WXCrystObj::Layout()",3)
-   //There are probably easier ways to do this
-   if(0!=mpWXTitle)
-   {
-      mpWXTitle->Layout();
-      mpSizer->SetItemMinSize
-               (mpWXTitle, mpWXTitle->GetSize().GetWidth(),mpWXTitle->GetSize().GetHeight());
-   }
-   for(unsigned int i=0;i<mList.GetNb();i++)
-      mpSizer->SetItemMinSize(mList.Get(i),
-                              mList.Get(i)->GetSize().GetWidth(),
-                              mList.Get(i)->GetSize().GetHeight());
-      
-   mpSizer->Layout();
-   mpTopSizer->Layout();
-   mpTopSizer->Fit(this);
-   wxSizer* s=mWXParent->GetSizer();
-   if(s != 0)
-   {// Need to do it that way, in case  the parent is not a WXCrystObj
-    // with an adequate Layout() function
-      s->SetItemMinSize(this,this->GetSize().GetWidth(),this->GetSize().GetHeight());
-      s->Fit(mWXParent);
-   }
-   mWXParent->Layout();
-   VFN_DEBUG_EXIT("WXCrystObj::Layout()",3)
-   return true;
-   //return this->wxWindow::Layout();
 }
 
 void WXCrystObj::OnToggleCollapse(wxCommandEvent & WXUNUSED(event))
@@ -724,6 +704,47 @@ bool WXCrystObj::Enable(bool enable)
    mList.Enable(enable);
    return this->wxWindow::Enable(enable);
 }
+
+void WXCrystObj::BottomLayout(WXCrystObjBasic *pChild)
+{
+   VFN_DEBUG_ENTRY(this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
+   if(mpSizer!=0) mpSizer->SetSizeHints(this);
+   //if((pChild !=0) &&(mpSizer!=0))
+   //{
+   //   pSizer->SetSizeHints(this);
+   //   pSizer->SetItemMinSize
+   //         (pChild, pChild->GetSize().GetWidth(),pChild->GetSize().GetHeight());
+   //}
+   if(0!=mpTopSizer)
+   {
+      mpTopSizer->SetSizeHints(this);
+   }
+   this->Fit();
+   this->Layout();
+   if(mWXCrystParent!=0)
+   {
+      mWXCrystParent->BottomLayout(this);
+   }
+   else
+   {
+      this->GetParent()->GetSizer()->SetItemMinSize
+         (this,this->GetSize().GetWidth(),this->GetSize().GetHeight());
+      this->GetParent()->Fit();
+      this->GetParent()->Layout();
+   }
+   VFN_DEBUG_EXIT(this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
+}
+void WXCrystObj::AddChild(WXCrystObjBasic *pChild, bool doBottomLayout)
+{
+   VFN_DEBUG_ENTRY(this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
+   if(mpSizer!=0)
+   {
+      mpSizer->Add(pChild);
+   }
+   if(doBottomLayout) this->BottomLayout(pChild);
+   VFN_DEBUG_EXIT(this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
+}
+
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXCrystMenuBar
@@ -768,15 +789,8 @@ WXCrystObjBasic(parent),mNbMenu(0),mMaxNbMenu(16),mpMenu(0),mpButton(0)
    mpMenu=new wxMenu*[16];//:TODO:
    mpButton=new wxButton*[16];
    this->SetSizer(mpSizer);
+   mpSizer->SetSizeHints(this);
    this->Layout();
-}
-
-bool WXCrystMenuBar::Layout()
-{
-   VFN_DEBUG_MESSAGE("WXCrystMenuBar::Layout()",3)
-   mpSizer->Layout();
-   mpSizer->Fit(this);
-   return this->wxWindow::Layout();
 }
 
 void WXCrystMenuBar::AddMenu(const string &name,const int menuId, const string& help)
@@ -790,6 +804,7 @@ void WXCrystMenuBar::AddMenu(const string &name,const int menuId, const string& 
    VFN_DEBUG_MESSAGE("WXCrystMenuBar::AddMenu():3",6)
    mMenuId(mNbMenu++)=menuId;
    this->Layout();
+   mpSizer->SetSizeHints(this);
    VFN_DEBUG_MESSAGE("WXCrystMenuBar::AddMenu():End",6)
 }
 

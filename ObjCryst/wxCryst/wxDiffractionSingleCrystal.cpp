@@ -184,6 +184,9 @@ WXRefinableObj(parent,data),mpData(data)
       //                          "Fit Scale for R");
       //   mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_DISPLAY,ID_DIFFSINGLECRYST_MENU_FITSCALE_RW,
       //                          "Fit Scale for Rw");
+      mpSizer->SetItemMinSize(mpMenuBar,
+                              mpMenuBar->GetSize().GetWidth(),
+                              mpMenuBar->GetSize().GetHeight());
    //Radiation
       mpSizer->Add(mpData->mRadiation.WXCreate(this),0);
       mList.Add(mpData->mRadiation.WXGet());
@@ -217,8 +220,8 @@ WXRefinableObj(parent,data),mpData(data)
       
       mpSizer->Add(pStats);
          
+   this->BottomLayout(0);
    this->CrystUpdate();
-   this->Layout();
    VFN_DEBUG_MESSAGE("WXDiffractionSingleCrystal::WXDiffractionSingleCrystal():End",6)
 }
 

@@ -32,7 +32,6 @@ class WXZAtom:public WXCrystObjBasic
       WXZAtom(wxWindow *parent, ZAtom*);
       virtual void CrystUpdate();
       virtual void UpdateUI();
-      virtual bool Layout();
       void OnChangeScattPow(wxCommandEvent & WXUNUSED(event));
    private:
       ZAtom *mpZAtom;

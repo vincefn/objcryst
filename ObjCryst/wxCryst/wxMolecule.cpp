@@ -160,8 +160,8 @@ WXCrystObjBasic(parent),mpMolAtom(obj)
    }
    
    this->SetSizer(mpSizer);
+   this->BottomLayout(0);
    this->CrystUpdate();
-   this->Layout();
    VFN_DEBUG_EXIT("WXMolAtom::WXMolAtom():"<<obj->GetName(),6)
 }
 
@@ -189,28 +189,6 @@ void WXMolAtom::UpdateUI()
    VFN_DEBUG_EXIT("WXMolAtom::UpdateUI()",5)
 }
 
-bool WXMolAtom::Layout()
-{
-   VFN_DEBUG_ENTRY("WXMolAtom::Layout()",3)
-   //:TODO: Cleeeeaaaaannnn thiiiisss !!!
-   for(unsigned int i=0;i<mList.GetNb();i++)
-      mpSizer->SetItemMinSize(mList.Get(i),
-                              mList.Get(i)->GetSize().GetWidth(),
-                              mList.Get(i)->GetSize().GetHeight());
-      
-   mpSizer->Layout();
-   mpSizer->Fit(this);
-   wxSizer* s=mWXParent->GetSizer();
-   if(s != 0)
-   {// Need to do it that way, in case  the parent is not a WXCrystObj
-    // with an adequate Layout() function
-      s->SetItemMinSize(this,this->GetSize().GetWidth(),this->GetSize().GetHeight());
-      s->Fit(mWXParent);
-   }
-   //mWXParent->Layout();
-   VFN_DEBUG_EXIT("WXMolAtom::Layout()",3)
-   return this->wxWindow::Layout();
-}
 void WXMolAtom::OnChangeScattPow(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXMolAtom::OnChangeScattPow()",6)
@@ -276,8 +254,8 @@ WXCrystObjBasic(parent),mpMolBond(obj),mpButtonFree(0)
    mList.Add(sigma);
 
    this->SetSizer(mpSizer);
+   this->BottomLayout(0);
    this->CrystUpdate();
-   this->Layout();
    VFN_DEBUG_EXIT("WXMolBond::WXMolBond():"<<obj->GetName(),6)
 }
 WXMolBond::~WXMolBond()
@@ -300,29 +278,6 @@ void WXMolBond::UpdateUI()
    mpFieldAtom1->SetValue(mpMolBond->GetAtom1().GetName().c_str());
    mpFieldAtom2->SetValue(mpMolBond->GetAtom2().GetName().c_str());
    VFN_DEBUG_EXIT("WXMolBond::UpdateUI()",5)
-}
-
-bool WXMolBond::Layout()
-{
-   VFN_DEBUG_ENTRY("WXMolBond::Layout()",5)
-   //:TODO: Cleeeeaaaaannnn thiiiisss !!!
-   for(unsigned int i=0;i<mList.GetNb();i++)
-      mpSizer->SetItemMinSize(mList.Get(i),
-                              mList.Get(i)->GetSize().GetWidth(),
-                              mList.Get(i)->GetSize().GetHeight());
-      
-   mpSizer->Layout();
-   mpSizer->Fit(this);
-   wxSizer* s=mWXParent->GetSizer();
-   if(s != 0)
-   {// Need to do it that way, in case  the parent is not a WXCrystObj
-    // with an adequate Layout() function
-      s->SetItemMinSize(this,this->GetSize().GetWidth(),this->GetSize().GetHeight());
-      s->Fit(mWXParent);
-   }
-   //mWXParent->Layout();
-   VFN_DEBUG_EXIT("WXMolBond::Layout()",5)
-   return this->wxWindow::Layout();
 }
 
 void WXMolBond::OnChangeAtom(wxCommandEvent &event)
@@ -422,8 +377,8 @@ WXCrystObjBasic(parent),mpMolBondAngle(obj)
    mList.Add(sigma);
 
    this->SetSizer(mpSizer);
+   this->BottomLayout(0);
    this->CrystUpdate();
-   this->Layout();
    VFN_DEBUG_EXIT("WXMolBondAngle::WXMolBond():"<<obj->GetName(),6)
 }
 
@@ -447,29 +402,6 @@ void WXMolBondAngle::UpdateUI()
    mpFieldAtom2->SetValue(mpMolBondAngle->GetAtom2().GetName().c_str());
    mpFieldAtom3->SetValue(mpMolBondAngle->GetAtom3().GetName().c_str());
    VFN_DEBUG_EXIT("WXMolBondAngle::UpdateUI()",5)
-}
-
-bool WXMolBondAngle::Layout()
-{
-   VFN_DEBUG_ENTRY("WXMolBond::Layout()",5)
-   //:TODO: Cleeeeaaaaannnn thiiiisss !!!
-   for(unsigned int i=0;i<mList.GetNb();i++)
-      mpSizer->SetItemMinSize(mList.Get(i),
-                              mList.Get(i)->GetSize().GetWidth(),
-                              mList.Get(i)->GetSize().GetHeight());
-      
-   mpSizer->Layout();
-   mpSizer->Fit(this);
-   wxSizer* s=mWXParent->GetSizer();
-   if(s != 0)
-   {// Need to do it that way, in case  the parent is not a WXCrystObj
-    // with an adequate Layout() function
-      s->SetItemMinSize(this,this->GetSize().GetWidth(),this->GetSize().GetHeight());
-      s->Fit(mWXParent);
-   }
-   //mWXParent->Layout();
-   VFN_DEBUG_EXIT("WXMolBondAngle::Layout()",5)
-   return this->wxWindow::Layout();
 }
 
 void WXMolBondAngle::OnChangeAtom(wxCommandEvent &event)
@@ -580,8 +512,8 @@ WXCrystObjBasic(parent),mpMolDihedralAngle(obj)
    mList.Add(sigma);
 
    this->SetSizer(mpSizer);
+   this->BottomLayout(0);
    this->CrystUpdate();
-   this->Layout();
    VFN_DEBUG_EXIT("WXMolDihedralAngle::WXMolBond():"<<obj->GetName(),6)
 }
 
@@ -605,29 +537,6 @@ void WXMolDihedralAngle::UpdateUI()
    mpFieldAtom2->SetValue(mpMolDihedralAngle->GetAtom2().GetName().c_str());
    mpFieldAtom3->SetValue(mpMolDihedralAngle->GetAtom3().GetName().c_str());
    VFN_DEBUG_EXIT("WXMolDihedralAngle::UpdateUI()",5)
-}
-
-bool WXMolDihedralAngle::Layout()
-{
-   VFN_DEBUG_ENTRY("WXMolBond::Layout()",5)
-   //:TODO: Cleeeeaaaaannnn thiiiisss !!!
-   for(unsigned int i=0;i<mList.GetNb();i++)
-      mpSizer->SetItemMinSize(mList.Get(i),
-                              mList.Get(i)->GetSize().GetWidth(),
-                              mList.Get(i)->GetSize().GetHeight());
-      
-   mpSizer->Layout();
-   mpSizer->Fit(this);
-   wxSizer* s=mWXParent->GetSizer();
-   if(s != 0)
-   {// Need to do it that way, in case  the parent is not a WXCrystObj
-    // with an adequate Layout() function
-      s->SetItemMinSize(this,this->GetSize().GetWidth(),this->GetSize().GetHeight());
-      s->Fit(mWXParent);
-   }
-   //mWXParent->Layout();
-   VFN_DEBUG_EXIT("WXMolDihedralAngle::Layout()",5)
-   return this->wxWindow::Layout();
 }
 
 void WXMolDihedralAngle::OnChangeAtom(wxCommandEvent &event)
@@ -790,13 +699,16 @@ mpBondWin(0),mpAngleWin(0),mpDihedralAngleWin(0)
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_SHOW_DIHEDRALANGLELIST,
                                 "Show Dihedral Angle List");
          //mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_TEST,"Test");
+      mpSizer->SetItemMinSize(mpMenuBar,
+                              mpMenuBar->GetSize().GetWidth(),
+                              mpMenuBar->GetSize().GetHeight());
    
    //sizers
    mpSizerAtomList= new wxBoxSizer(wxVERTICAL);
 
    mpSizer->Add(mpSizerAtomList,0,wxALIGN_LEFT);
+   this->BottomLayout(0);
    this->CrystUpdate();
-   this->Layout();
    VFN_DEBUG_EXIT("WXMolecule::WXMolecule():"<<mol->GetName(),6)
 }
 
@@ -1243,7 +1155,11 @@ void WXMolecule::CrystUpdate()
             }
          }
       }
-      if(needLayoutAtom) this->Layout();
+      if(needLayoutAtom)
+      {
+         mpTopSizer->SetSizeHints(this);
+         this->Layout();
+      }
       if(needLayoutBond&&(0!=mpBondWin))
       {
          VFN_DEBUG_MESSAGE("WXMolecule::CrystUpdate(): BondWin Layout",6)

@@ -32,7 +32,6 @@ class WXMolScrolledWindow:public wxScrolledWindow
    public:
       WXMolScrolledWindow(wxWindow* parent, WXMolecule* pWXMol);
       virtual ~WXMolScrolledWindow();
-      //virtual bool Layout();
    private:
       /// The WXMolecule window which created this window, and who should be told
       /// if it is destroyed.
@@ -47,7 +46,6 @@ class WXMolAtom:public WXCrystObjBasic
       virtual ~WXMolAtom();
       virtual void CrystUpdate();
       virtual void UpdateUI();
-      virtual bool Layout();
       void OnChangeScattPow(wxCommandEvent &);
    private:
       MolAtom *mpMolAtom;
@@ -66,7 +64,6 @@ class WXMolBond:public WXCrystObjBasic
       virtual ~WXMolBond();
       virtual void CrystUpdate();
       virtual void UpdateUI();
-      virtual bool Layout();
       void OnChangeAtom(wxCommandEvent &);
       /// Toggle the 'free' status of the bond.
       void OnToggleFree(wxCommandEvent & WXUNUSED(event));
@@ -88,7 +85,6 @@ class WXMolBondAngle:public WXCrystObjBasic
       virtual ~WXMolBondAngle();
       virtual void CrystUpdate();
       virtual void UpdateUI();
-      virtual bool Layout();
       void OnChangeAtom(wxCommandEvent &);
    private:
       MolBondAngle *mpMolBondAngle;
@@ -108,7 +104,6 @@ class WXMolDihedralAngle:public WXCrystObjBasic
       virtual ~WXMolDihedralAngle();
       virtual void CrystUpdate();
       virtual void UpdateUI();
-      virtual bool Layout();
       void OnChangeAtom(wxCommandEvent &);
    private:
       MolDihedralAngle *mpMolDihedralAngle;

@@ -62,8 +62,8 @@ WXScatterer(parent,obj),mpAtom(obj)
       mpSizer->Add(mpFieldScattPower,0,wxALIGN_LEFT);
       mList.Add(mpFieldScattPower);
    
+   this->BottomLayout(0);
    this->CrystUpdate();
-   this->Layout();
 }
 
 void WXAtom::OnChangeScattPow(wxCommandEvent & WXUNUSED(event))

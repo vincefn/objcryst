@@ -98,8 +98,8 @@ WXCrystObjBasic(parent),mpRadiation(rad)
       
    this->CrystUpdate();
    this->SetSizer(mpSizer);
-   mpSizer->Layout();
-   mpSizer->Fit(this);
+   mpSizer->SetSizeHints(this);
+   this->Layout();
    VFN_DEBUG_EXIT("WXRadiation::WXRadiation()",6)
 }
 
@@ -310,6 +310,9 @@ WXRefinableObj(parent,pow),mpPowderPattern(pow),mpGraph(0)
          mpMenuBar->AddMenuItem(ID_POWDERPATTERN_MENU_PATTERN,
                                 ID_POWDERSPECTRUM_MENU_ADD_2THETA_EXCLUDE,
                                 "Add 2Theta excluded region");
+      mpSizer->SetItemMinSize(mpMenuBar,
+                              mpMenuBar->GetSize().GetWidth(),
+                              mpMenuBar->GetSize().GetHeight());
    //Radiation
       mpSizer->Add(mpPowderPattern->mRadiation.WXCreate(this),0);
       mList.Add(mpPowderPattern->mRadiation.WXGet());
@@ -364,6 +367,8 @@ WXRefinableObj(parent,pow),mpPowderPattern(pow),mpGraph(0)
       WXFieldPar<REAL> *pWXFieldRp=new WXFieldPar<REAL>(this,"Rp",-1,&mRp,70);
       pStats->Add(pWXFieldRp    ,0,wxALIGN_CENTER);
       mList.Add(pWXFieldRp);
+      //pStats->SetSizeHints(this);
+      //pStats->Layout();
       
       mpSizer->Add(pStats);
    // Components
@@ -373,8 +378,8 @@ WXRefinableObj(parent,pow),mpPowderPattern(pow),mpGraph(0)
       mList.Add(mpWXComponent);
    
    VFN_DEBUG_MESSAGE("WXPowderPattern::WXPowderPattern():1",6)
+   this->BottomLayout(0);
    this->CrystUpdate();
-   this->Layout();
    VFN_DEBUG_MESSAGE("WXPowderPattern::WXPowderPattern():End",6)
 }
 
@@ -420,7 +425,7 @@ void WXPowderPattern::OnMenuAddCompBackgd(wxCommandEvent & WXUNUSED(event))
    PowderPatternBackground *backgdData= new PowderPatternBackground;
    mpPowderPattern->AddPowderPatternComponent(*backgdData);
    if(mpGraph!=0) mpPowderPattern->Prepare();//else this will be done when opening the graph
-   this->Layout();
+   //this->Layout();
 }
 
 void WXPowderPattern::OnMenuAddCompCryst(wxCommandEvent & WXUNUSED(event))
@@ -436,7 +441,7 @@ void WXPowderPattern::OnMenuAddCompCryst(wxCommandEvent & WXUNUSED(event))
    diffData->SetCrystal(*cryst);
    mpPowderPattern->AddPowderPatternComponent(*diffData);
    if(mpGraph!=0) mpPowderPattern->Prepare();//else this will be done when opening the graph
-   this->Layout();
+   //this->Layout();
 }
 
 void WXPowderPattern::OnMenuShowGraph(wxCommandEvent & WXUNUSED(event))
@@ -783,8 +788,7 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
    dc.Clear();
 
    wxString fontInfo;
-   //fontInfo.Printf("Powder Pattern : %s",mpData->GetName().c_str());
-   //dc.DrawText(fontInfo, 5, 5);
+   dc.SetFont(*wxSMALL_FONT);
 
    // Get Window Size
    wxCoord width,height;
@@ -799,10 +803,7 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
    mCalcPatternIsLocked=true;
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():2:"<<mObs.numElements(),5)
 
-   const long nbPoints=mLast-mFirst+1;
-   VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():3",5)
-
-   VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():4:mFirst="
+   VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():3:mFirst="
                      <<mFirst<<"("<<m2theta(mFirst)<<"),mLast="
                      <<mLast<<"("<<m2theta(mLast)<<"),width="
                      <<width<<",margin="<<mMargin,5)
@@ -1115,8 +1116,8 @@ void WXPowderPatternGraph::OnKeyDown(wxKeyEvent& event)
       {
          const long halfrange=(mLast-mFirst)/2;
          const long middle=(mLast+mFirst)/2;
-         mFirst= middle-halfrange*4./5.;
-         mLast = middle+halfrange*4./5.;
+         mFirst= (long)(middle-halfrange*4./5.);
+         mLast = (long)(middle+halfrange*4./5.);
          mMin2Theta=m2theta(mFirst);
          mMax2Theta=m2theta(mLast);
          break;
@@ -1125,8 +1126,8 @@ void WXPowderPatternGraph::OnKeyDown(wxKeyEvent& event)
       {
          const long halfrange=(mLast-mFirst)/2;
          const long middle=(mLast+mFirst)/2;
-         mFirst= middle-halfrange*5./4.;
-         mLast = middle+halfrange*5./4.;
+         mFirst= (long)(middle-halfrange*5./4.);
+         mLast = (long)(middle+halfrange*5./4.);
          if(mFirst<0) mFirst=0;
          if(mLast>=m2theta.numElements()) mLast=m2theta.numElements()-1;
          mMin2Theta=m2theta(mFirst);
@@ -1263,6 +1264,10 @@ WXRefinableObj(parent,b),mpPowderPatternBackground(b)
    //Menu
       mpMenuBar->AddMenu("Object",ID_REFOBJ_MENU_OBJ);
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUMBACKGROUND_IMPORT,"Import");
+   VFN_DEBUG_MESSAGE(mpMenuBar->GetSize().GetWidth()<<","<<mpMenuBar->GetSize().GetHeight(),10);
+   mpSizer->SetItemMinSize(mpMenuBar,
+                           mpMenuBar->GetSize().GetWidth(),
+                           mpMenuBar->GetSize().GetHeight());
    
    #ifdef USE_BACKGROUND_MAXLIKE_ERROR
    WXFieldRefPar* pFieldModelSigma  =new WXFieldRefPar(this,"Maximum Likelihood Error",
@@ -1270,8 +1275,9 @@ WXRefinableObj(parent,b),mpPowderPatternBackground(b)
    mpSizer->Add(pFieldModelSigma,0,wxALIGN_LEFT);
    mList.Add(pFieldModelSigma);
    #endif
-   //:TODO: Display points
+   mpTopSizer->SetSizeHints(this);
    this->Layout();
+   this->CrystUpdate();
 }
 void WXPowderPatternBackground::OnMenuImportUserBackground(wxCommandEvent & WXUNUSED(event))
 {
@@ -1320,11 +1326,9 @@ WXCrystObjBasic(parent),mpTexturePhaseMarchDollase(pObj)
    mpSizer->Add(pFieldL,0,wxALIGN_LEFT);
    mList.Add(pFieldL);
 
-   this->SetSizer(mpSizer);
-   
-   this->CrystUpdate();
+   mpSizer->SetSizeHints(this);
    this->Layout();
-   
+   this->CrystUpdate();
    VFN_DEBUG_EXIT("WXTexturePhaseMarchDollase::WXTexturePhaseMarchDollase()",5)
 }
 
@@ -1339,25 +1343,6 @@ void WXTexturePhaseMarchDollase::CrystUpdate()
 void WXTexturePhaseMarchDollase::UpdateUI()
 {
    mList.UpdateUI();
-}
-bool WXTexturePhaseMarchDollase::Layout()
-{
-   for(unsigned int i=0;i<mList.GetNb();i++)
-      mpSizer->SetItemMinSize(mList.Get(i),
-                              mList.Get(i)->GetSize().GetWidth(),
-                              mList.Get(i)->GetSize().GetHeight());
-      
-   mpSizer->Layout();
-   mpSizer->Fit(this);
-   wxSizer* s=mWXParent->GetSizer();
-   if(s != 0)
-   {// Need to do it that way, in case  the parent is not a WXCrystObj
-    // with an adequate Layout() function
-      s->SetItemMinSize(this,this->GetSize().GetWidth(),this->GetSize().GetHeight());
-      s->Fit(mWXParent);
-   }
-   mWXParent->Layout();
-   return this->wxWindow::Layout();
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -1379,12 +1364,17 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpTextureMarchDollase(obj)
       mpMenuBar->AddMenu("Phases",ID_REFOBJ_MENU_OBJ);
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERTEXTURE_MENU_ADDPHASE,
                                 "Add Phase");
+      mpSizer->SetItemMinSize(mpMenuBar,
+                              mpMenuBar->GetSize().GetWidth(),
+                              mpMenuBar->GetSize().GetHeight());
    //existing phases
       WXRegistry<TexturePhaseMarchDollase> *pWXPhaseRegistry
          =mpTextureMarchDollase->mPhaseRegistry.WXCreate(this);
       mpSizer->Add(pWXPhaseRegistry,0,wxALIGN_LEFT);
       mList.Add(pWXPhaseRegistry);
+   mpSizer->SetSizeHints(this);
    this->Layout();
+   this->CrystUpdate();
    VFN_DEBUG_EXIT("WXTextureMarchDollase::WXTextureMarchDollase()",5)
 }
 void WXTextureMarchDollase::OnAddTexturePhase(wxCommandEvent & WXUNUSED(event))
@@ -1418,6 +1408,9 @@ WXRefinableObj(parent,p),mpPowderPatternDiffraction(p)
       mpMenuBar->AddMenu("Object",ID_REFOBJ_MENU_OBJ);
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUMDIFF_SAVEHKLFCALC,
                                 "Save HKL Fcalc");
+      mpSizer->SetItemMinSize(mpMenuBar,
+                              mpMenuBar->GetSize().GetWidth(),
+                              mpMenuBar->GetSize().GetHeight());
     // Crystal Choice
       mpFieldCrystal=new WXFieldChoice(this,ID_POWDERSPECTRUMDIFF_CRYSTAL,"Crystal:",300);
       mpSizer->Add(mpFieldCrystal,0,wxALIGN_LEFT);
@@ -1480,8 +1473,9 @@ WXRefinableObj(parent,p),mpPowderPatternDiffraction(p)
       mList.Add(pTex);
       mpSizer->Add(pTex);
       
-   this->CrystUpdate();
+   mpTopSizer->SetSizeHints(this);
    this->Layout();
+   this->CrystUpdate();
 }
 
 void WXPowderPatternDiffraction::OnChangeCrystal(wxCommandEvent & WXUNUSED(event))

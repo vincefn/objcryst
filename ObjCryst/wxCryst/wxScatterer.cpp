@@ -85,12 +85,7 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpScatterer(obj)
       mList.Add(pFieldY);
       mList.Add(pFieldZ);
       mList.Add(pFieldPopu);
-   
-   //mWXParent->Layout();
-   mpSizer->Layout();
-   mpTopSizer->Layout();
-   mpTopSizer->Fit(this);
-   this->CrystUpdate();
+   //layout & update is done in derived objects
 }
 
 }// namespace 

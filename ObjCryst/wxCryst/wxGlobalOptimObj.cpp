@@ -85,7 +85,10 @@ WXCrystObj(parent),mpGlobalOptimRunThread(0)
                                 ID_GLOBALOPT_MENU_OPT_RUN,"Run Optimization");
          mpMenuBar->AddMenuItem(ID_GLOBALOPT_MENU_OPT,
                                 ID_GLOBALOPT_MENU_OPT_STOP,"Stop Optimization");
-      
+      mpMenuBar->Layout();
+      mpSizer->SetItemMinSize(mpMenuBar,
+                              mpMenuBar->GetSize().GetWidth(),
+                              mpMenuBar->GetSize().GetHeight());
     //Refined Objects
    for(int i=0;i<obj->mRefinedObjList.GetNb();i++)
    {
@@ -97,8 +100,7 @@ WXCrystObj(parent),mpGlobalOptimRunThread(0)
    }
    
    // This will be done later
-   // this->CrystUpdate();
-   // this->Layout();
+   //this->CrystUpdate();
    VFN_DEBUG_EXIT("WXOptimizationObj::WXOptimizationObj(wxWindow*,GlobalOptimObj*,)",7)
 }
 
@@ -265,8 +267,8 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(100000000)
       mpWXFieldNbTrial=new WXFieldPar<long>(this,"Number of trials to go:",-1,&mNbTrial,70);
       mpSizer->Add(mpWXFieldNbTrial);
       mList.Add(mpWXFieldNbTrial);
+   this->BottomLayout(0);
    this->CrystUpdate();
-   this->Layout();
    VFN_DEBUG_EXIT("WXMonteCarloObj::WXMonteCarloObj()",7)
 }
 

@@ -71,6 +71,10 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpScatteringPowerAtom(obj)
          mpMenuBar->AddMenuItem(ID_SCATTPOWATOM_MENU_COLOUR,
                                 ID_SCATTPOWATOM_MENU_COLOUR_SETRGB,"Set RGB Colour");
    
+      mpSizer->SetItemMinSize(mpMenuBar,
+                              mpMenuBar->GetSize().GetWidth(),
+                              mpMenuBar->GetSize().GetHeight());
+
       mpFieldSymbol=new WXFieldName
          (this,"Symbol:",this,ID_WXSCATTPOWATOM_SYMBOL);
 #if 1
@@ -93,8 +97,8 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpScatteringPowerAtom(obj)
       mpSizer->Add(sizer,0,wxALIGN_LEFT);
       mList.Add(mpFieldSymbol);
       mList.Add(pFieldBiso);
-      this->CrystUpdate();
-   this->Layout();
+   this->BottomLayout(0);
+   this->CrystUpdate();
 }
 
 bool WXScatteringPowerAtom::OnChangeName(const int id)

@@ -267,6 +267,10 @@ mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
       mpMenuBar->AddMenu("Display",ID_CRYSTAL_MENU_DISPLAY);
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_DISPLAY,ID_CRYSTAL_MENU_DISPLAY_3DVIEW,
                                 "3D Display");
+
+      mpSizer->SetItemMinSize(mpMenuBar,
+                              mpMenuBar->GetSize().GetWidth(),
+                              mpMenuBar->GetSize().GetHeight());
    // AntiBump-ProMerge cost
       wxBoxSizer* pAntiBumpSizer=new wxBoxSizer(wxHORIZONTAL);
       WXFieldPar<REAL> *pWXFieldBumpMerge=
@@ -344,9 +348,9 @@ mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
                     ->GetScattererRegistry().WXCreate(this);
       mpSizer->Add(mpWXScattererRegistry,0,wxALIGN_LEFT);
       mList.Add(mpWXScattererRegistry);
-      
+   
+   this->BottomLayout(0);
    this->CrystUpdate();
-   this->Layout();
    VFN_DEBUG_MESSAGE("WXCrystal::WXCrystal():End",6)
 }
 
@@ -1299,7 +1303,7 @@ int UnitCellMapImport::ImportGRD(const string&filename)
    {
       mStandardDeviation=0.0;
       const REAL *tmp=mPoints.data();
-      for(unsigned long i=0;i<mPoints.numElements();i++)
+      for(long i=0;i<mPoints.numElements();i++)
       {
          mStandardDeviation += (*tmp-mMean) * (*tmp-mMean);
          tmp++;
@@ -1366,9 +1370,9 @@ int UnitCellMapImport::ImportDSN6(const string&filename)
    const long xextent=header[3];
    const long yextent=header[4];
    const long zextent=header[5];
-   const long xsamplingrate=header[6];
-   const long ysamplingrate=header[7];
-   const long zsamplingrate=header[8];
+   const unsigned long xsamplingrate=header[6];
+   const unsigned long ysamplingrate=header[7];
+   const unsigned long zsamplingrate=header[8];
    const float celledgea=(float)header[ 9]/(float)header[17];
    const float celledgeb=(float)header[10]/(float)header[17];
    const float celledgec=(float)header[11]/(float)header[17];
@@ -1438,7 +1442,7 @@ int UnitCellMapImport::ImportDSN6(const string&filename)
    {
       mStandardDeviation=0.0;
       const REAL *tmp=mPoints.data();
-      for(unsigned long i=0;i<mPoints.numElements();i++)
+      for(long i=0;i<mPoints.numElements();i++)
       {
          mStandardDeviation += (*tmp-mMean) * (*tmp-mMean);
          tmp++;

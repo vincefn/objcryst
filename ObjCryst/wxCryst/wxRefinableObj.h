@@ -140,7 +140,6 @@ class WXRefinableObj: public WXCrystObj
    public:
       WXRefinableObj(wxWindow *parent, RefinableObj*);
       ~WXRefinableObj();
-      bool Layout();
       virtual void CrystUpdate();
       virtual void UpdateUI();
       virtual bool OnChangeName(const int id);

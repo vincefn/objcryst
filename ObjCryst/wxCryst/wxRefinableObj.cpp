@@ -104,11 +104,10 @@ WXField(parent,label,ID_WXFIELD_REFPAR),mValue(0.),mpRefPar(par),mIsSelfUpdating
    mpField=new wxTextCtrl(this,ID_WXFIELD,"",
                             wxDefaultPosition,wxSize(hsize,-1),wxTE_PROCESS_ENTER,
                             wxTextValidator(wxFILTER_NUMERIC));
-   //mpField->PushEventHandler(this);
    mpSizer->Add(mpField,0,wxALIGN_CENTER);
    if(enableFixButton)
       this->SetToolTip("right-click label to change limits");
-   this->Layout();
+   this->BottomLayout(0);
 }
 WXFieldRefPar::~WXFieldRefPar()
 {
@@ -273,7 +272,7 @@ mChoice(-1),mChoiceOld(-1),mpOption(option),mpList(0)
    mpList= new wxChoice(this,ID_WXFIELD,wxDefaultPosition,wxDefaultSize,
                         mpOption->GetNbChoice(),choices);
    mpSizer->Add(mpList,0,wxALIGN_CENTER);
-   this->Layout();
+   this->BottomLayout(0);
 }
 WXFieldOption::~WXFieldOption()
 {
@@ -326,10 +325,7 @@ WXCrystObj(parent,wxHORIZONTAL,false),mpRegistry(reg)
    mpSizer->Add(mpLabel,0,wxALIGN_LEFT);
    mpLabel->SetBackgroundColour(wxColour(250,250,200));
    mpLabel->SetForegroundColour(wxColour(0,0,255));
-
-   //mpWXTitle->SetValue(mpRegistry->GetName());
-   //mpWXTitle->SetBackgroundColour(wxColour(250,250,200));
-   this->Layout();
+   this->BottomLayout(0);
    VFN_DEBUG_MESSAGE("WXCrystRegistry::WXCrystRegistry(wxWindow*):End",6)
 }
 template<class T> WXRegistry<T>::~WXRegistry(){mpRegistry->WXNotifyDelete();}
@@ -337,10 +333,9 @@ template<class T> WXRegistry<T>::~WXRegistry(){mpRegistry->WXNotifyDelete();}
 template<class T> void WXRegistry<T>::Add(WXCrystObjBasic *obj)
 {
    VFN_DEBUG_MESSAGE("WXCrystRegistry::AddWXCrystObj(WXCrystObj*)",6)
-   mpSizer->Add(obj,0,wxALIGN_LEFT);
    mList.Add(obj);
    obj->Show(mIsExpanded);
-   this->Layout();
+   this->AddChild(obj);
 }
 template<class T> void WXRegistry<T>::Remove(WXCrystObjBasic *obj)
 {
@@ -349,7 +344,7 @@ template<class T> void WXRegistry<T>::Remove(WXCrystObjBasic *obj)
    mList.Remove(obj);
    mpSizer->Remove(obj);
    obj->Destroy();
-   this->Layout();
+   this->BottomLayout(0);
    VFN_DEBUG_EXIT("WXCrystRegistry::RemoveWXCrystObj(WXCrystObj*):End",6)
 }
 
@@ -510,11 +505,7 @@ WXCrystObj(parent,wxHORIZONTAL),mpRefinableObj(obj)
 {
    VFN_DEBUG_MESSAGE("WXRefinableObj::WXRefinableObj():"<<obj->GetName(),6)
    mpWXTitle->SetLabel(mpRefinableObj->GetClassName());
-   mpWXTitle->Layout();
-   //cout<<"0:"<<mpWXTitle->GetSize().GetWidth()<<":"<<mpWXTitle->GetSize().GetHeight()<<endl;
-   mpSizer->SetItemMinSize
-               (mpWXTitle, mpWXTitle->GetSize().GetWidth(),mpWXTitle->GetSize().GetHeight());
-   mpWXTitle->Layout();
+   
    // Menu
       mpMenuBar=new WXCrystMenuBar(this,this);
    
@@ -528,8 +519,8 @@ WXCrystObj(parent,wxHORIZONTAL),mpRefinableObj(obj)
       mpSizer->Add(opt,0,wxALIGN_LEFT);
       mList.Add(opt);
    }
+   this->BottomLayout(0);
    this->CrystUpdate();
-   this->Layout();
    VFN_DEBUG_MESSAGE("WXRefinableObj::WXRefinableObj():End",6)
 }
 
@@ -537,17 +528,6 @@ WXRefinableObj::~WXRefinableObj()
 {
    VFN_DEBUG_MESSAGE("WXRefinableObj::~WXRefinableObj():"<<mpRefinableObj->GetName(),6)
    mpRefinableObj->WXNotifyDelete();
-}
-
-bool WXRefinableObj::Layout()
-{
-   VFN_DEBUG_ENTRY("WXRefinableObj::Layout():"<<mpRefinableObj->GetName(),6)
-   mpMenuBar->Layout();
-   mpSizer->SetItemMinSize(mpMenuBar,
-                           mpMenuBar->GetSize().GetWidth(),
-                           mpMenuBar->GetSize().GetHeight());
-   VFN_DEBUG_EXIT("WXRefinableObj::Layout():"<<mpRefinableObj->GetName(),6)
-   return this->WXCrystObj::Layout();
 }
 
 void WXRefinableObj::CrystUpdate()
@@ -633,6 +613,9 @@ void WXRefinableObj::UpdateUI()
    VFN_DEBUG_ENTRY("WXRefinableObj::UpdateUI()",6)
    mpWXTitle->SetValue(mpRefinableObj->GetName());
    mpWXTitle->UpdateUI();
+   mpSizer->SetItemMinSize
+            (mpWXTitle, mpWXTitle->GetSize().GetWidth(),mpWXTitle->GetSize().GetHeight());
+   mpWXTitle->Layout();
    this->WXCrystObj::UpdateUI();
    VFN_DEBUG_EXIT("WXRefinableObj::UpdateUI()",6)
 }
