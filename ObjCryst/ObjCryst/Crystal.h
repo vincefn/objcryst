@@ -1,10 +1,20 @@
-/* 
-* ObjCryst++ : a Crystallographic computing library in C++
-*			http://objcryst.sourceforge.net
-*			http://www.ccp14.ac.uk/ccp/web-mirrors/objcryst/
-*
-*  (c) 2000-2001 Vincent FAVRE-NICOLIN vincefn@users.sourceforge.net
-*
+/*  ObjCryst++ Object-Oriented Crystallographic Library
+    (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
+	     2000-2001 University of Geneva (Switzerland)
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 /*   Crystal.h header file for the Crystal object
 *
@@ -282,9 +292,6 @@ class Crystal:public RefinableObj
       /** Get the Anti-bumping/pro-Merging cost function. Only works (ie returnes a non-null
 		* value) if you have added antibump distances using Crystal::SetBumpMergeDistance().
 		*
-		* \bug (?) The value of this function is not the same under Windows and Linux (??).
-		* Probably due to the optimization used (ie we are using a "fast" calculation
-		* of distances, which uses integers...)
 		*/
       REAL GetBumpMergeCostFunction() const;
       /** Set the Anti-bumping distance between two scattering types
@@ -373,9 +380,6 @@ class Crystal:public RefinableObj
       * is calculated between atom1 and the atom2 symmetric inside the asym unit).
       * \warning Crystal::GetScatteringComponentList() \b must be called beforehand,
 		* since this will not be done here.
-		*
-		* \bug (possible bug). Is the distance computed in "fast" mode the same under Windows
-		* and Linux ?
 		*
 		* \return see Crystal::mDistTableSq and Crystal::mDistTableIndex
 		* \todo sanitize the result distance table in a more usable structure than the currently

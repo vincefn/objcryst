@@ -3,55 +3,6 @@
 * If you have a question you can 
 * <a href="mailto:vincefn@users.sourceforge.net"> drop me an email</a>
 *
-*/
-/*\section status Current Status
-* The Library is moving along beta stage. The interface has been changed to
-* a better design, especially for the scattering/diffraction class. The RefinableObj
-* is also being improved to be more 'generic' and easier to use with varied algorithms.
-*\par Spacegroup
-*  Thanks to the sglite package, all SpaceGroup can be recognized from their symbol. 
-* An AsymmetricUnit is also generated for each spacegroup (actually it is a parallelepipedic
-* approximation). Only 3D spacegroup are allowed.
-* We will eventually (that is, when I find time... at the autumn 2001, move
-* to the <a href="http://cctbx.sourceforge.net/"> cctbx library </a>
-*\par Crystal
-* For a Crystal, definition of spacegroup and adding of various types of scatterers 
-* are working. Dynamical occupancy correction 
-* for global optimizations has been implemeted  (to correct overlap of identical
-* atoms due to sharing of corner atoms in polyhedra, or due to symmetry). An anti-bump
-* cost function (simple) is also implemented, and also enables atoms to merge continuously.
-* An output to povray file is provided, as well as an OpenGL display of the cystal structure
-* (only tested using Mesa under linux, with glut). Most important lacking features are
-* saving structure to CIF files.
-*\par Scatterer
-*  Various type of Scatterer are provided : simple Atom but also ZScatterer, using a
-* Z-Matrix Description, and derived form it are ZPolyedron (tetrahedron...icosahedron..).
-* other types of scatterer can easily be added. So far the scattering power and thermic
-* factor must be isotropic. Scattering factors for X-Rays (Thomson using the interpolated
-* values and resonant (anomalous using either Sasaki or Henke tables) and neutrons are
-* provided.
-*\par ScatteringData
-*  PowderPattern is the most developped class and its support is sufficient
-* for most Global Optimization work. DiffractionDataSingleCrystal is less being worked on,
-* but it can be used provided that the data has been corrected and merged beforehand.
-*\par Global optimization 
-*  GlobalOptimObj provides an algorithm for the so-called 'ab initio' structure determination
-* from diffraction data using either a simulated annealing or a parallel tempering
-* algorithm. Genetic algorithm may be added later.
-*\par Least Squares
-*  LSQObjNum class provides a rough least squares support, but it is definitely not
-* the purpose (as of yet, at least) of this library. The most important lack is
-* that numerical derivatives are systematicllay used. I wrote this only for testing
-* purposes and have not sed it for some time, so try it at your own risk !
-*\par Graphical user interface
-*  Most objects have a graphical counterpart, which has been created using the
-* <a href="http://www.wxWindows.org"> wxWindows</a> (linux,unix,windows,mac,...)
-* library. The result is the 
-* <a href="http://objcryst.sourceforge.net"> Fox program</a>, but the GUI
-* interface can be used for any other purpose. It is of course possible
-* to use ObjCryst++ without the wxObjCryst part.
-*/
-/**
 *
 *\section history History
 *\par 1.1 
@@ -176,4 +127,51 @@
 *\li Speed
 *     Computing of structure factors works with a fair speed. 
 *
+*/
+/*\section status Current Status
+* The Library is moving along beta stage. The interface has been changed to
+* a better design, especially for the scattering/diffraction class. The RefinableObj
+* is also being improved to be more 'generic' and easier to use with varied algorithms.
+*\par Spacegroup
+*  Thanks to the sglite package, all SpaceGroup can be recognized from their symbol. 
+* An AsymmetricUnit is also generated for each spacegroup (actually it is a parallelepipedic
+* approximation). Only 3D spacegroup are allowed.
+* We will eventually (that is, when I find time... at the autumn 2001, move
+* to the <a href="http://cctbx.sourceforge.net/"> cctbx library </a>
+*\par Crystal
+* For a Crystal, definition of spacegroup and adding of various types of scatterers 
+* are working. Dynamical occupancy correction 
+* for global optimizations has been implemeted  (to correct overlap of identical
+* atoms due to sharing of corner atoms in polyhedra, or due to symmetry). An anti-bump
+* cost function (simple) is also implemented, and also enables atoms to merge continuously.
+* An output to povray file is provided, as well as an OpenGL display of the cystal structure
+* (only tested using Mesa under linux, with glut). Most important lacking features are
+* saving structure to CIF files.
+*\par Scatterer
+*  Various type of Scatterer are provided : simple Atom but also ZScatterer, using a
+* Z-Matrix Description, and derived form it are ZPolyedron (tetrahedron...icosahedron..).
+* other types of scatterer can easily be added. So far the scattering power and thermic
+* factor must be isotropic. Scattering factors for X-Rays (Thomson using the interpolated
+* values and resonant (anomalous using either Sasaki or Henke tables) and neutrons are
+* provided.
+*\par ScatteringData
+*  PowderPattern is the most developped class and its support is sufficient
+* for most Global Optimization work. DiffractionDataSingleCrystal is less being worked on,
+* but it can be used provided that the data has been corrected and merged beforehand.
+*\par Global optimization 
+*  GlobalOptimObj provides an algorithm for the so-called 'ab initio' structure determination
+* from diffraction data using either a simulated annealing or a parallel tempering
+* algorithm. Genetic algorithm may be added later.
+*\par Least Squares
+*  LSQObjNum class provides a rough least squares support, but it is definitely not
+* the purpose (as of yet, at least) of this library. The most important lack is
+* that numerical derivatives are systematicllay used. I wrote this only for testing
+* purposes and have not sed it for some time, so try it at your own risk !
+*\par Graphical user interface
+*  Most objects have a graphical counterpart, which has been created using the
+* <a href="http://www.wxWindows.org"> wxWindows</a> (linux,unix,windows,mac,...)
+* library. The result is the 
+* <a href="http://objcryst.sourceforge.net"> Fox program</a>, but the GUI
+* interface can be used for any other purpose. It is of course possible
+* to use ObjCryst++ without the wxObjCryst part.
 */

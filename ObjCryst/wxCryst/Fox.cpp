@@ -1,3 +1,21 @@
+/*  ObjCryst++ Object-Oriented Crystallographic Library
+    (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
+	     2000-2001 University of Geneva (Switzerland)
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
 #ifdef __GNUG__
     #pragma implementation "minimal.cpp"
     #pragma interface "minimal.cpp"
@@ -372,14 +390,13 @@ void WXCrystMainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
    wxString msg;
    msg.Printf( _T("F.O.X. - Free Objects for Xtal structures\n")
                _T("Version 1.1.2\n\n")
-               _T("(c) 2000-2001 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n")
-               _T("            & Radovan CERNY, University of Geneva\n\n")
+               _T("(c) 2000-2002 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n")
+               _T("    2000-2001 Radovan CERNY, University of Geneva\n\n")
                _T("http://objcryst.sourceforge.net\n")
                _T("http://www.ccp14.ac.uk/ccp/web-mirrors/objcryst/ (Mirror)\n\n")
-               _T("Note: look for newer version on the above web sites,\n")
-               _T("      or subscribe, to the mailing-list at :\n")
-               _T("      http://lists.sourceforge.net/lists/listinfo/objcryst-foxx\n\n")
-               _T("Project supported by the Swiss National Science Foundation (#21-53847.98)")
+               _T("FOX comes with absolutely no warranty. It is free software, and you are\n")
+               _T("welcome to redistribute it under certain conditions. \n")
+               _T("See the General Public License (Fox/doc/license.txt) file for details.")
               );
 
    wxMessageBox(msg, "About Fox", wxOK | wxICON_INFORMATION, this);
