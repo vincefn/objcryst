@@ -218,7 +218,8 @@ void WXDiffractionSingleCrystal::CrystUpdate()
    WXCrystValidateAllUserInput();
 
    mChi2=mpData->GetChi2();
-   mGoF=mpData->GetChi2()/mpData->GetIobs().numElements();
+   if(0==mpData->GetIobs().numElements()) mGoF=0;
+   else mGoF=mpData->GetChi2()/mpData->GetIobs().numElements();
    mRwp=mpData->GetRw();
    mRp=mpData->GetR();
    

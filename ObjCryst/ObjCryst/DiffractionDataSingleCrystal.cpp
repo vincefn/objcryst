@@ -477,7 +477,7 @@ REAL DiffractionDataSingleCrystal::GetChi2()const
    TAU_PROFILE("DiffractionData::Chi2()"," REAL()",TAU_DEFAULT);
    VFN_DEBUG_ENTRY("DiffractionData::Chi2()",3);
    
-   REAL mChi2=0;
+   mChi2=0;
    const REAL *p1;
    const REAL *p2;
    const REAL *p3;
