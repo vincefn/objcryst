@@ -592,7 +592,12 @@ void PowderPatternDiffraction::SetReflectionProfilePar(const ReflectionProfileTy
                                                        const REAL eta0, const REAL eta1)
 {
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::SetReflectionProfilePar()",5)
-   if(mpReflectionProfile!=0) delete mpReflectionProfile;
+   if(mpReflectionProfile!=0)
+   {
+      this->RemoveSubRefObj(*mpReflectionProfile);
+      delete mpReflectionProfile;
+      mpReflectionProfile=0;
+   }
    ReflectionProfilePseudoVoigt* p=new ReflectionProfilePseudoVoigt();
    p->SetProfilePar(w,u,v,eta0,eta1);
    this->SetProfile(p);
@@ -2275,12 +2280,12 @@ void PowderPattern::SavePowderPattern(const string &filename) const
    ofstream out(filename.c_str());
    CrystVector_REAL ttheta;
    ttheta=mX;
-   ttheta *= RAD2DEG;
+   if(this->GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF) ttheta *= RAD2DEG;
    
    CrystVector_REAL diff;
    diff=mPowderPatternObs;
    diff-=mPowderPatternCalc;
-   out << "#    2Theta     Iobs       ICalc   Iobs-Icalc    Weight  Comp0" << endl;
+   out << "#    2Theta/TOF Iobs       ICalc   Iobs-Icalc    Weight  Comp0" << endl;
    out << FormatVertVector<REAL>(ttheta,
                     mPowderPatternObs,
                     mPowderPatternCalc,
@@ -2295,9 +2300,9 @@ void PowderPattern::PrintObsCalcData(ostream&os)const
    VFN_DEBUG_MESSAGE("DiffractionDataPowder::PrintObsCalcData()",5);
    CrystVector_REAL ttheta;
    ttheta=mX;
-   ttheta *= RAD2DEG;
+   if(this->GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF) ttheta *= RAD2DEG;
    os << "PowderPattern : " << mName <<endl;
-   os << "      2Theta      Obs          Sigma        Calc        Weight" <<endl;
+   os << "      2Theta/TOF  Obs          Sigma        Calc        Weight" <<endl;
    os << FormatVertVector<REAL>(ttheta,mPowderPatternObs,mPowderPatternObsSigma,
                mPowderPatternCalc,mPowderPatternWeight,12,4);
    //            mPowderPatternComponentRegistry.GetObj(0).mPowderPatternCalc,12,4);
