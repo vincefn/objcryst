@@ -377,48 +377,85 @@ void Crystal::PrintMinDistanceTable(const REAL minDistance,ostream &os) const
    VFN_DEBUG_MESSAGE("Crystal::PrintMinDistanceTable():End",3)
 }
 
-ostream& Crystal::POVRayDescription(ostream &os,bool onlyIndependentAtoms)const
+ostream& Crystal::POVRayDescription(ostream &os,const CrystalPOVRayOptions &options)const
 {
    VFN_DEBUG_MESSAGE("Crystal::POVRayDescription(os,bool)",5)
-   os << "#include \"colours.inc\"  " <<endl;
-   os << "// Description of Crystal :" << mName <<endl;
-   os << "global_settings { assumed_gamma 2.2 ambient_light rgb <2,2,2>}"<<endl;
-   os << "camera" <<endl;
-   os << "{"<<endl;
-   os << "    location  <200, 0, 0>"<<endl;
-   os << "    rotate  <0, -30, -30-clock>" <<endl;
-   os << "    sky   <0, 0, 1>"<<endl;
-   REAL x=0.5;
-   REAL y=0.5;
-   REAL z=0.5;
-   this->FractionalToOrthonormalCoords(x,y,z);
-   os << "    look_at   <" << x << "," << y << "," << z <<">"<<endl;
-   REAL maxDim=x;
-   if(y>maxDim) maxDim=y;
-   if(z>maxDim) maxDim=z;
-   os << "    angle   "<< 2.5*atan(2*maxDim/200.)*RAD2DEG <<endl;
-   os << "}"<<endl;
-   os << "light_source"<<endl;
-   os << "{" <<endl;
-   os << "   <100, 0, 0> " <<endl;
-   os << "   colour White" <<endl;
-   os << "   shadowless" <<endl;
-   os << "   rotate  <0, -60, -10-clock>" <<endl;
-   os << "}" <<endl;
-   os << "background { colour rgb <0.0, 0.0, 0.0> }"<<endl;
+   os <<"/////////////////////// MACROS////////////////////"<<endl;
    
-   os << endl <<"//Crystal Unit Cell" <<endl;
-   x=1;
-   y=1;
-   z=1;
+   os << "#macro ObjCrystAtom(atomx,atomy,atomz,atomr,atomc)"
+      << "   sphere"<<endl
+      << "   { <atomx,atomy,atomz>,atomr"<<endl
+      << "      finish {ambient 0.3 diffuse 0.7 phong 1 specular 0.2 roughness 0.02 metallic}"<<endl
+      << "      pigment { colour atomc }"<<endl
+      << "      no_shadow"<<endl
+      << "   }"<<endl
+      << "#end"<<endl<<endl;
+      
+   os << "#macro ObjCrystBond(x1,y1,z1,x2,y2,z2,bondradius,bondColour)"<<endl
+      << "   cylinder"<<endl
+      << "   {  <x1,y1,z1>,"<<endl
+      << "      <x2,y2,z2>,"<<endl
+      << "      bondradius"<<endl
+      << "      finish {ambient 0.3 diffuse 0.7 phong 1 specular 0.2 roughness 0.02 metallic}"<<endl
+      << "      pigment { colour bondColour}"<<endl
+      << "      no_shadow"<<endl
+      << "   }"<<endl
+      << "#end"<<endl<<endl;
+
+   os <<"//////////// Crystal Unit Cell /////////////////" <<endl;
+   REAL x=1,y=1,z=1;
    this->FractionalToOrthonormalCoords(x,y,z);
-   os << "   box{ <0,0,0>, <"<< x << "," << y << "," << z << ">" <<endl;
-   os << "         pigment {colour rgbf<1,1,0.9,0.5>}" << endl;
-   os << "         hollow" << endl;
-   os << "   }" <<endl<<endl;
+   os << "   //box{ <0,0,0>, <"<< x << "," << y << "," << z << ">" <<endl;
+   os << "   //      pigment {colour rgbf<1,1,1,0.9>}" << endl;
+   os << "   //      hollow" << endl;
+   os << "   //}" <<endl<<endl;
    
-  for(int i=0;i<mScattererRegistry.GetNb();i++)
-      this->GetScatt(i).POVRayDescription(os,onlyIndependentAtoms) ;
+   #define UNITCELL_EDGE(X0,Y0,Z0,X1,Y1,Z1)\
+   {\
+      REAL x0=X0,y0=Y0,z0=Z0,x1=X1,y1=Y1,z1=Z1;\
+      this->FractionalToOrthonormalCoords(x0,y0,z0);\
+      this->FractionalToOrthonormalCoords(x1,y1,z1);\
+      os << "    ObjCrystBond("\
+         <<x0<<","<<y0<<","<<z0<< ","\
+         <<x1<<","<<y1<<","<<z1<< ","\
+         << "0.05,rgb<1.0,1.0,1.0>)"<<endl;\
+   }
+   
+   UNITCELL_EDGE(0,0,0,1,0,0)
+   UNITCELL_EDGE(0,0,0,0,1,0)
+   UNITCELL_EDGE(0,0,0,0,0,1)
+   
+   UNITCELL_EDGE(1,1,1,0,1,1)
+   UNITCELL_EDGE(1,1,1,1,0,1)
+   UNITCELL_EDGE(1,1,1,1,1,0)
+   
+   UNITCELL_EDGE(1,0,0,1,1,0)
+   UNITCELL_EDGE(1,0,0,1,0,1)
+   
+   UNITCELL_EDGE(0,1,0,1,1,0)
+   UNITCELL_EDGE(0,1,0,0,1,1)
+   
+   UNITCELL_EDGE(0,0,1,1,0,1)
+   UNITCELL_EDGE(0,0,1,0,1,1)
+
+   os <<endl<<"/////////////// GLOBAL DECLARATIONS FOR ATOMS & BONDS ///////"<<endl;
+   os << "// Atom colours"<<endl;
+   for(int i=0;i<mScatteringPowerRegistry.GetNb();i++)
+   {
+      const float r=mScatteringPowerRegistry.GetObj(i).GetColourRGB()[0];
+      const float g=mScatteringPowerRegistry.GetObj(i).GetColourRGB()[1];
+      const float b=mScatteringPowerRegistry.GetObj(i).GetColourRGB()[2];
+      os << "   #declare colour_"<< mScatteringPowerRegistry.GetObj(i).GetName() 
+         <<"= rgb <"<< r<<","<<g<<","<<b<<">;"<< endl;
+   }
+   os << "// Bond colours"<<endl
+      << "   #declare colour_freebond   = rgb <0.7,0.7,0.7>;"<< endl
+      << "   #declare colour_nonfreebond= rgb <0.3,0.3,0.3>;"<< endl;
+
+   os<<endl;
+   os << "/////////////// SCATTERERS ///////"<<endl;
+   for(int i=0;i<mScattererRegistry.GetNb();i++)
+      this->GetScatt(i).POVRayDescription(os,options) ;
    return os;
 }
 

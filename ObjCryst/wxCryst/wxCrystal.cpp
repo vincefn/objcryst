@@ -1323,6 +1323,7 @@ static const long ID_GLCRYSTAL_MENU_FOURIERCHANGECOLOR=WXCRYST_ID();
 static const long ID_GLCRYSTAL_MENU_SHOWWIRE=          WXCRYST_ID(); 
 static const long ID_GLCRYSTAL_MENU_UNLOADFOURIER=     WXCRYST_ID(); 
 static const long ID_GLCRYSTAL_MENU_FOURIERCHANGEBBOX= WXCRYST_ID(); 
+static const long ID_GLCRYSTAL_MENU_POVRAY=            WXCRYST_ID(); 
 
 BEGIN_EVENT_TABLE(WXGLCrystalCanvas, wxGLCanvas)
    EVT_SIZE             (WXGLCrystalCanvas::OnSize)
@@ -1343,6 +1344,7 @@ BEGIN_EVENT_TABLE(WXGLCrystalCanvas, wxGLCanvas)
    EVT_MENU             (ID_GLCRYSTAL_MENU_SHOWWIRE,            WXGLCrystalCanvas::OnShowWire)
    EVT_MENU             (ID_GLCRYSTAL_MENU_UNLOADFOURIER,       WXGLCrystalCanvas::OnUnloadFourier)
    EVT_MENU             (ID_GLCRYSTAL_MENU_FOURIERCHANGEBBOX,   WXGLCrystalCanvas::OnFourierChangeBbox)
+   EVT_MENU             (ID_GLCRYSTAL_MENU_POVRAY,              WXGLCrystalCanvas::OnPOVRay)
    EVT_CHAR             (WXGLCrystalCanvas::OnKeyDown)
    EVT_KEY_DOWN         (WXGLCrystalCanvas::OnKeyDown)
    EVT_KEY_UP           (WXGLCrystalCanvas::OnKeyUp)
@@ -1373,6 +1375,7 @@ mIsGLFontBuilt(false),mGLFontDisplayListBase(0)
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, "Hide Atom Labels");
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWCURSOR, "Show Cursor");
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SETCURSOR, "Set view cntr and cursor pos.");
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_POVRAY, "Create POVRay file");
    mpPopUpMenu->AppendSeparator();
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_LOADFOURIER, "Load Fourier Map");	
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_CHANGECONTOUR, "Change Contour Value");
@@ -2103,6 +2106,79 @@ void WXGLCrystalCanvas::OnShowWire()
       pos->second->ToggleShowWire();
 
    this->CrystUpdate();
+}
+
+void WXGLCrystalCanvas::OnPOVRay()
+{
+   WXCrystValidateAllUserInput();
+   wxFileDialog save(this,"Choose filename","","","*.pov",wxSAVE | wxOVERWRITE_PROMPT);
+   if(save.ShowModal() != wxID_OK) return;
+   
+   ofstream os(save.GetPath().c_str());
+   //ofstream os("test.pov");
+   
+   os << "// Description of Crystal :" << mpWXCrystal->GetCrystal().GetName() <<endl;
+   os << "global_settings { assumed_gamma 2.2 ambient_light rgb <2,2,2>}"<<endl;
+   float m[4][4];
+   REAL xcam=0,ycam=0,zcam=mDist;
+   build_rotmatrix( m,mQuat);
+   
+   REAL x=mX0+(mcellbbox.xMin+mcellbbox.xMax)/2.;
+   REAL y=mY0+(mcellbbox.yMin+mcellbbox.yMax)/2.;
+   REAL z=mZ0+(mcellbbox.zMin+mcellbbox.zMax)/2.;
+   mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(x,y,z);
+   
+   {
+      const REAL q1=mQuat[0];const REAL q2=mQuat[1];
+      const REAL q3=mQuat[2];const REAL q4=mQuat[3];
+      REAL yaw  =atan( 2*(q1*q2+q4*q3) / (q4*q4 + q1*q1 - q2*q2 - q3*q3))*RAD2DEG;
+      const REAL pitch=asin(-2*(q1*q3-q4*q2))*RAD2DEG;
+      REAL roll =atan( 2*(q4*q1+q2*q3) / (q4*q4 - q1*q1 - q2*q2 + q3*q3))*RAD2DEG;
+      if((q4*q4 + q1*q1 - q2*q2 - q3*q3)<0) yaw  +=180;
+      if((q4*q4 - q1*q1 - q2*q2 + q3*q3)<0) roll +=180;
+      os<<endl;
+      os << "#declare OrientRoll="<<roll<<";"<<endl;
+      os << "#declare OrientPitch="<<pitch<<";"<<endl;
+      os << "#declare OrientYaw="<<yaw<<";"<<endl<<endl;
+   }
+   
+   os << "camera" <<endl;
+   os << "{"<<endl;
+   os << "    location  <"<<xcam+x<<","<<ycam+y<<","<<zcam+z<<">"<<endl
+      << "    look_at   <" << x << "," << y << "," << z <<">"<<endl
+      << "    angle   "<< mViewAngle*1.2 <<endl
+      << "    right  <-1.33,0,0> //change handedness as in OpenGL"<<endl
+      << "    translate   <" <<-x << "," <<-y << "," <<-z <<">"<<endl
+      << "    rotate  <OrientRoll,0,0>" <<endl
+      << "    rotate  <0,OrientPitch,0>" <<endl
+      << "    rotate  <0,0,OrientYaw>" <<endl
+      << "    translate   <" << x << "," << y << "," << z <<">"<<endl
+      << "}"<<endl;
+
+   REAL xlight=-1000,ylight=1000,zlight=1000;
+   os << "light_source"<<endl;
+   os << "{" <<endl
+      << "   <"<<xlight<<","<<ylight<<","<<zlight<<">"<<endl
+      << "   colour rgb <1.0,1.0,1.0>" <<endl
+      << "   //shadowless" <<endl
+      << "    translate   <" <<-x << "," <<-y << "," <<-z <<">"<<endl
+      << "    rotate  <OrientRoll,0,0>" <<endl
+      << "    rotate  <0,OrientPitch,0>" <<endl
+      << "    rotate  <0,0,OrientYaw>" <<endl
+      << "    translate   <" << x << "," << y << "," << z <<">"<<endl
+      << "}" <<endl<<endl;
+   
+   os << "background { colour rgb <0.0, 0.0, 0.0> }"<<endl<<endl;
+   
+   CrystalPOVRayOptions options;
+   options.mXmin=mcellbbox.xMin;
+   options.mXmax=mcellbbox.xMax;
+   options.mYmin=mcellbbox.yMin;
+   options.mYmax=mcellbbox.yMax;
+   options.mZmin=mcellbbox.zMin;
+   options.mZmax=mcellbbox.zMax;
+   options.mShowLabel=mShowAtomName;
+   mpWXCrystal->GetCrystal().POVRayDescription(os,options);
 }
 
 int WXGLCrystalCanvas::UserSelectUnitCellMapGLList()const

@@ -229,6 +229,8 @@ class WXGLCrystalCanvas : public wxGLCanvas
       void OnUnloadFourier();
       void OnShowWire();
       void OnFourierChangeBbox();
+      /// Save view as povray file
+      void OnPOVRay();
       // get bounding box for atoms display
       BBox GetCellBBox();
       // get bounding box for display of Fourier map

@@ -1671,8 +1671,173 @@ string Molecule::GetComponentName(const int i) const
    return mvpAtom[i]->GetName();
 } 
 
-ostream& Molecule::POVRayDescription(ostream &os,const bool noSymmetrics)const
+ostream& Molecule::POVRayDescription(ostream &os,const CrystalPOVRayOptions &options)const
 {
+   VFN_DEBUG_ENTRY("Molecule::POVRayDescription()",3)
+   const REAL xMin=options.mXmin; const REAL xMax=options.mXmax;
+   const REAL yMin=options.mYmin; const REAL yMax=options.mYmax;
+   const REAL zMin=options.mZmin; const REAL zMax=options.mZmax;
+   if(mvpAtom.size()==0)
+   {
+      VFN_DEBUG_EXIT("Molecule::POVRayDescription():No atom to display !",4)
+      return os;
+   }
+   REAL en=1;
+   this->UpdateScattCompList();
+   
+   const float colour_bondnonfree[]= { 0.3, .3, .3, 1.0 };
+   const float colour_bondfree[]= { 0.7, .7, .7, 1.0 };
+   const float colour0[] = {0.0f, 0.0f, 0.0f, 0.0f}; 
+   
+   os << "// Description of Molecule :" << this->GetName() <<endl;
+   vector<CrystMatrix_REAL> vXYZCoords;
+   {
+      this->GetScatteringComponentList();
+      REAL x0,y0,z0;
+      for(long i=0;i<mScattCompList.GetNbComponent();++i)
+      {
+         x0=mScattCompList(i).mX;
+         y0=mScattCompList(i).mY;
+         z0=mScattCompList(i).mZ;
+         vXYZCoords.push_back(this->GetCrystal().GetSpaceGroup().
+                        GetAllSymmetrics(x0,y0,z0,false,false,false));
+      }
+   }
+   CrystMatrix_int translate(27,3);
+   translate=  -1,-1,-1,
+               -1,-1, 0,
+               -1,-1, 1,
+               -1, 0,-1,
+               -1, 0, 0,
+               -1, 0, 1,
+               -1, 1,-1,
+               -1, 1, 0,
+               -1, 1, 1,
+                0,-1,-1,
+                0,-1, 0,
+                0,-1, 1,
+                0, 0,-1,
+                0, 0, 0,
+                0, 0, 1,
+                0, 1,-1,
+                0, 1, 0,
+                0, 1, 1,
+                1,-1,-1,
+                1,-1, 0,
+                1,-1, 1,
+                1, 0,-1,
+                1, 0, 0,
+                1, 0, 1,
+                1, 1,-1,
+                1, 1, 0,
+                1, 1, 1;
+   REAL dx,dy,dz;
+   CrystVector_REAL x(mvpAtom.size()),y(mvpAtom.size()),z(mvpAtom.size());
+   CrystVector_REAL xSave,ySave,zSave;
+   const int nbSymmetrics=vXYZCoords[0].rows();
+   unsigned int ct=0;
+   for(int i=0;i<nbSymmetrics;i++)
+   {
+      VFN_DEBUG_ENTRY("Molecule::POVRayDescription():Symmetric#"<<i,3)
+      for(unsigned int j=0;j<mvpAtom.size();j++)
+      {
+         x(j)=vXYZCoords[j](i,0);
+         y(j)=vXYZCoords[j](i,1);
+         z(j)=vXYZCoords[j](i,2);
+      }
+      //Bring back central atom in unit cell; move peripheral atoms with the same amount
+         dx=x(0);
+         dy=y(0);
+         dz=z(0);
+         x(0) = fmod((float) x(0),(float)1); if(x(0)<0) x(0)+=1.;
+         y(0) = fmod((float) y(0),(float)1); if(y(0)<0) y(0)+=1.;
+         z(0) = fmod((float) z(0),(float)1); if(z(0)<0) z(0)+=1.;
+         dx = x(0)-dx;
+         dy = y(0)-dy;
+         dz = z(0)-dz;
+         for(unsigned int j=1;j<mvpAtom.size();j++)
+         {
+            x(j) += dx;
+            y(j) += dy;
+            z(j) += dz;
+         }
+      //Generate also translated atoms near the unit cell
+      xSave=x;
+      ySave=y;
+      zSave=z;
+      for(int j=0;j<translate.rows();j++)
+      {
+         x += translate(j,0);
+         y += translate(j,1);
+         z += translate(j,2);
+         const REAL tmpxc=x.sum()/(REAL)x.numElements();
+         const REAL tmpyc=y.sum()/(REAL)y.numElements();
+         const REAL tmpzc=z.sum()/(REAL)z.numElements();
+         if(   (tmpxc>xMin) && (tmpxc<xMax)
+             &&(tmpyc>yMin) && (tmpyc<yMax)
+             &&(tmpzc>zMin) && (tmpzc<zMax))
+         {
+            os<<"  //Symetric#"<<++ct<<endl;
+            for(unsigned int k=0;k<mvpAtom.size();k++)
+            {
+               this->GetCrystal().FractionalToOrthonormalCoords(x(k),y(k),z(k));
+               if(mvpAtom[k]->IsDummy()) continue;
+               const float r=mvpAtom[k]->GetScatteringPower().GetColourRGB()[0];
+               const float g=mvpAtom[k]->GetScatteringPower().GetColourRGB()[1];
+               const float b=mvpAtom[k]->GetScatteringPower().GetColourRGB()[2];
+               if(options.mShowLabel)
+               {
+                  /*
+                  GLfloat colourChar [] = {1.0, 1.0, 1.0, 1.0}; 
+                  if((r>0.8)&&(g>0.8)&&(b>0.8))
+                  {
+                     colourChar[0] = 0.5;
+                     colourChar[1] = 0.5;
+                     colourChar[2] = 0.5;
+                  }
+                  glMaterialfv(GL_FRONT, GL_AMBIENT,  colour0); 
+                  glMaterialfv(GL_FRONT, GL_DIFFUSE,  colour0); 
+                  glMaterialfv(GL_FRONT, GL_SPECULAR, colour0); 
+                  glMaterialfv(GL_FRONT, GL_EMISSION, colourChar); 
+                  glMaterialfv(GL_FRONT, GL_SHININESS,colour0);
+                  glRasterPos3f(x(k)*en, y(k), z(k));
+                  crystGLPrint(mvpAtom[k]->GetName());
+                  */
+               }
+               os << "    ObjCrystAtom("
+                  <<x(k)<<","
+                  <<y(k)<<","
+                  <<z(k)<<","
+                  <<mvpAtom[k]->GetScatteringPower().GetRadius()/3<<","
+                  <<"colour_"+mvpAtom[k]->GetScatteringPower().GetName()
+                  <<")"<<endl;
+            }
+            for(unsigned int k=0;k<mvpBond.size();k++)
+            {
+               if(  (mvpBond[k]->GetAtom1().IsDummy())
+                  ||(mvpBond[k]->GetAtom2().IsDummy()) ) continue;
+               unsigned long n1,n2;
+               //:KLUDGE: Get the atoms
+               for(n1=0;n1<mvpAtom.size();n1++)
+                  if(mvpAtom[n1]==&(mvpBond[k]->GetAtom1())) break;
+               for(n2=0;n2<mvpAtom.size();n2++)
+                  if(mvpAtom[n2]==&(mvpBond[k]->GetAtom2())) break;
+               os << "    ObjCrystBond("
+                  <<x(n1)<<","<<y(n1)<<","<<z(n1)<< ","
+                  <<x(n2)<<","<<y(n2)<<","<<z(n2)<< ","
+                  << "0.1,";
+               if(mvpBond[k]->IsFreeTorsion()) os<<"colour_freebond)"<<endl;
+               else os<<"colour_nonfreebond)"<<endl;
+
+            }
+         }//if in limits
+         x=xSave;
+         y=ySave;
+         z=zSave;
+      }//for translation
+      VFN_DEBUG_EXIT("Molecule::POVRayDescription():Symmetric#"<<i,3)
+   }//for symmetrics
+   VFN_DEBUG_EXIT("Molecule::POVRayDescription()",3)
    return os;
 }
 
@@ -1794,7 +1959,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
       const int nbSymmetrics=vXYZCoords[0].rows();
       for(int i=0;i<nbSymmetrics;i++)
       {
-         VFN_DEBUG_ENTRY("ZScatterer::GLInitDisplayList():Symmetric#"<<i,3)
+         VFN_DEBUG_ENTRY("Molecule::GLInitDisplayList():Symmetric#"<<i,3)
          for(unsigned int j=0;j<mvpAtom.size();j++)
          {
             x(j)=vXYZCoords[j](i,0);
@@ -1826,9 +1991,12 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
             x += translate(j,0);
             y += translate(j,1);
             z += translate(j,2);
-            if(   (x(0)>xMin) && (x(0)<xMax)
-                &&(y(0)>yMin) && (y(0)<yMax)
-                &&(z(0)>zMin) && (z(0)<zMax))
+            const REAL tmpxc=x.sum()/(REAL)x.numElements();
+            const REAL tmpyc=y.sum()/(REAL)y.numElements();
+            const REAL tmpzc=z.sum()/(REAL)z.numElements();
+            if(   (tmpxc>xMin) && (tmpxc<xMax)
+                &&(tmpyc>yMin) && (tmpyc<yMax)
+                &&(tmpzc>zMin) && (tmpzc<zMax))
             {
                for(unsigned int k=0;k<mvpAtom.size();k++)
                {

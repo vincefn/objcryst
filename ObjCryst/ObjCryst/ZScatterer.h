@@ -271,7 +271,7 @@ class ZScatterer: public Scatterer
       const ObjRegistry<ZAtom>& GetZAtomRegistry()const;
       /// \warning Not implemented for ZScatterer
       virtual ostream& POVRayDescription(ostream &os,
-                                         const bool onlyIndependentAtoms=false)const;
+                                         const CrystalPOVRayOptions &options)const;
 
       virtual void GLInitDisplayList(const bool onlyIndependentAtoms=false,
                                      const REAL xMin=-.1,const REAL xMax=1.1,

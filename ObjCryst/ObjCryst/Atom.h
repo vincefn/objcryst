@@ -125,7 +125,7 @@ class Atom: public Scatterer
       *
       */
       virtual ostream& POVRayDescription(ostream &os,
-                                         const bool onlyIndependentAtoms=false)const;
+                                         const CrystalPOVRayOptions &options)const;
       virtual void GLInitDisplayList(const bool onlyIndependentAtoms=false,
                                      const REAL xMin=-.1,const REAL xMax=1.1,
                                      const REAL yMin=-.1,const REAL yMax=1.1,

@@ -180,6 +180,14 @@ template <class T> class SymmetricPairCompare
 void crystGLPrint(const string &);
 #endif
 
+/// Class to store POV-Ray output options
+struct CrystalPOVRayOptions
+{
+   /// Display limits in reduced coordinates
+   REAL mXmin, mXmax, mYmin, mYmax, mZmin, mZmax;
+   /// Show labels ?
+   bool mShowLabel;
+};
 }//Namespace
 
 #endif //_VFN_OBJCRYST_H_

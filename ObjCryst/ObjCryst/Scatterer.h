@@ -165,7 +165,7 @@ class Scatterer:virtual public RefinableObj
       *
       */
       virtual ostream& POVRayDescription(ostream &os,
-                                         const bool noSymmetrics=false)const=0;
+                                         const CrystalPOVRayOptions &options)const=0;
       /** \internal Create an OpenGL Display List of the scatterer. This should only
       * be called by a Crystal object.
       *

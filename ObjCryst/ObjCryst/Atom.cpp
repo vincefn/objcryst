@@ -211,96 +211,76 @@ REAL Atom::GetRadius() const
 }
 
 ostream& Atom::POVRayDescription(ostream &os,
-                                 const bool onlyIndependentAtoms)const
+                                 const CrystalPOVRayOptions &options)const
 {
    if(this->IsDummy()) return os;
-   if(true==onlyIndependentAtoms)
+   const REAL xMin=options.mXmin; const REAL xMax=options.mXmax;
+   const REAL yMin=options.mYmin; const REAL yMax=options.mYmax;
+   const REAL zMin=options.mZmin; const REAL zMax=options.mZmax;
+   REAL x0,y0,z0;
+   x0=mXYZ(0);
+   y0=mXYZ(1);
+   z0=mXYZ(2);
+   CrystMatrix_REAL xyzCoords ;
+   xyzCoords=this->GetCrystal().GetSpaceGroup().GetAllSymmetrics(x0,y0,z0,false,false,true);
+   int nbSymmetrics=xyzCoords.rows();
+   os << "// Description of Atom :" << this->GetName()<< endl;
+   int symNum=0;
+   for(int i=0;i<nbSymmetrics;i++)
    {
-      REAL x,y,z;
-      x=mXYZ(0);
-      y=mXYZ(1);
-      z=mXYZ(2);
-      x = fmod((float)x,(float)1); if(x<0) x+=1.;
-      y = fmod((float)y,(float)1); if(y<0) y+=1.;
-      z = fmod((float)z,(float)1); if(z<0) z+=1.;
-      this->GetCrystal().FractionalToOrthonormalCoords(x,y,z);
-      os << "// Description of Atom :" << this->GetName() <<endl;
-      os << "   #declare colour_"<< this ->GetName() <<"="<< this ->mColourName<<";"<< endl;
-      os << "   sphere " << endl;
-      os << "   { <" << x << ","<< y << ","<< z << ">," << this->GetRadius()/3 <<endl;
-      os << "        finish { ambient 0.2 diffuse 0.8 phong 1}" <<endl;
-      os << "        pigment { colour colour_"<< this->GetName() <<" }" << endl;
-      os << "   }" <<endl;
-   }
-   else
-   {
-      REAL x0,y0,z0;
-      x0=mXYZ(0);
-      y0=mXYZ(1);
-      z0=mXYZ(2);
-      CrystMatrix_REAL xyzCoords ;
-      xyzCoords=this->GetCrystal().GetSpaceGroup().GetAllSymmetrics(x0,y0,z0,false,false,true);
-      int nbSymmetrics=xyzCoords.rows();
-      os << "// Description of Atom :" << this->GetName();
-      os << "(" << nbSymmetrics << " symmetric atoms)" << endl;
-      os << "   #declare colour_"<< this ->GetName() <<"="<< this ->mColourName<<";"<< endl;
-      int symNum=0;
-      for(int i=0;i<nbSymmetrics;i++)
+      x0=xyzCoords(i,0);
+      y0=xyzCoords(i,1);
+      z0=xyzCoords(i,2);
+      x0 = fmod((float) x0,(float)1); if(x0<0) x0+=1.;
+      y0 = fmod((float) y0,(float)1); if(y0<0) y0+=1.;
+      z0 = fmod((float) z0,(float)1); if(z0<0) z0+=1.;
+      //Generate also translated atoms near the unit cell
+      const REAL limit =0.1;
+      CrystMatrix_int translate(27,3);
+      translate=  -1,-1,-1,
+                  -1,-1, 0,
+                  -1,-1, 1,
+                  -1, 0,-1,
+                  -1, 0, 0,
+                  -1, 0, 1,
+                  -1, 1,-1,
+                  -1, 1, 0,
+                  -1, 1, 1,
+                   0,-1,-1,
+                   0,-1, 0,
+                   0,-1, 1,
+                   0, 0,-1,
+                   0, 0, 0,
+                   0, 0, 1,
+                   0, 1,-1,
+                   0, 1, 0,
+                   0, 1, 1,
+                   1,-1,-1,
+                   1,-1, 0,
+                   1,-1, 1,
+                   1, 0,-1,
+                   1, 0, 0,
+                   1, 0, 1,
+                   1, 1,-1,
+                   1, 1, 0,
+                   1, 1, 1;
+      for(int j=0;j<translate.rows();j++)
       {
-         x0=xyzCoords(i,0);
-         y0=xyzCoords(i,1);
-         z0=xyzCoords(i,2);
-         x0 = fmod((float) x0,(float)1); if(x0<0) x0+=1.;
-         y0 = fmod((float) y0,(float)1); if(y0<0) y0+=1.;
-         z0 = fmod((float) z0,(float)1); if(z0<0) z0+=1.;
-         //Generate also translated atoms near the unit cell
-         const REAL limit =0.1;
-         CrystMatrix_int translate(27,3);
-         translate=  -1,-1,-1,
-                     -1,-1, 0,
-                     -1,-1, 1,
-                     -1, 0,-1,
-                     -1, 0, 0,
-                     -1, 0, 1,
-                     -1, 1,-1,
-                     -1, 1, 0,
-                     -1, 1, 1,
-                      0,-1,-1,
-                      0,-1, 0,
-                      0,-1, 1,
-                      0, 0,-1,
-                      0, 0, 0,
-                      0, 0, 1,
-                      0, 1,-1,
-                      0, 1, 0,
-                      0, 1, 1,
-                      1,-1,-1,
-                      1,-1, 0,
-                      1,-1, 1,
-                      1, 0,-1,
-                      1, 0, 0,
-                      1, 0, 1,
-                      1, 1,-1,
-                      1, 1, 0,
-                      1, 1, 1;
-         for(int j=0;j<translate.rows();j++)
+         REAL x=x0+translate(j,0);
+         REAL y=y0+translate(j,1);
+         REAL z=z0+translate(j,2);
+         if(   (x>xMin) && (x<xMax)
+             &&(y>yMin) && (y<yMax)
+             &&(z>zMin) && (z<zMax))
          {
-            REAL x=x0+translate(j,0);
-            REAL y=y0+translate(j,1);
-            REAL z=z0+translate(j,2);
-            if(   (x>(-limit)) && (x<(1+limit))
-                &&(y>(-limit)) && (y<(1+limit))
-                &&(z>(-limit)) && (z<(1+limit)))
-            {
-               this->GetCrystal().FractionalToOrthonormalCoords(x,y,z);
-               os << "  // Symmetric #" << symNum++ <<endl;
-               os << "   sphere " << endl;
-               os << "   { <" << x << ","<< y << ","<< z << ">," << this->GetRadius()/3 <<endl;
-               os << "        finish { ambient 0.2 diffuse 0.8 phong 1}" <<endl;
-               //os << "        pigment { colour red 1 green 0 blue 1 }" << endl;
-               os << "        pigment { colour colour_"<< this->GetName() <<" }" << endl;
-               os << "   }" <<endl;
-            }
+            this->GetCrystal().FractionalToOrthonormalCoords(x,y,z);
+            os << "   ObjCrystAtom("
+               <<x<<","
+               <<y<<","
+               <<z<<","
+               <<this->GetScatteringPower().GetRadius()/3<<","
+               <<"colour_"+this->GetScatteringPower().GetName()
+               <<")"<<endl;
          }
       }
    }

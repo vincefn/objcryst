@@ -196,7 +196,7 @@ class Crystal:public UnitCell
       *
       * \param os the stream to which the information is outputed (default=cout)
       */
-      ostream& POVRayDescription(ostream &os,bool onlyIndependentAtoms=false)const;
+      ostream& POVRayDescription(ostream &os,const CrystalPOVRayOptions &options)const;
       
       /** Create an OpenGL DisplayList of the crystal.
       * \param onlyIndependentAtoms if false (the default), then all symmetrics

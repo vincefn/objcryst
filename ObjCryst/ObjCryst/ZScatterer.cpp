@@ -468,7 +468,7 @@ const ObjRegistry<ZAtom>& ZScatterer::GetZAtomRegistry()const
 {return mZAtomRegistry;}
 
 ostream& ZScatterer::POVRayDescription(ostream &os,
-                                         const bool onlyIndependentAtoms)const
+                                       const CrystalPOVRayOptions &options)const
 {
    VFN_DEBUG_MESSAGE("ZScatterer::POVRayDescription()",5)
    //throw ObjCrystException("ZScatterer::POVRayDescription() not implemented! "+this->GetName());
