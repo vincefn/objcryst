@@ -29,6 +29,35 @@
 
 namespace ObjCryst
 {
+#if defined(_MSC_VER) || defined(__BORLANDC__)
+#undef min // Predefined macros.... (wx?)
+#undef max
+
+double erfc(const double x)// in C99, but not in VC++....
+{
+   if(x<0.0) return 2.0-erfc(-x);
+   if(x<3.8)
+   { // Series, Abramowitz & Stegun 7.1.6
+      double y=x,y0=x;
+      for(int i=1;i<=50;i++)
+      {
+         y0*=2*x*x/(2*i+1.0);
+         y+=y0;
+      }
+      static const double spi=2/sqrt(M_PI);
+      return 1-spi*exp(-x*x)*y;
+   }
+   double y=1.0,y0=1.0;
+   for(int i=1;i<=10;i++)
+   {// Asymptotic, Abramowitz & Stegun 7.1.23
+      y0*=-(2*i-1)/(2*x*x);
+      y+=y0;
+   }
+   static const double invsqrtpi=1.0/sqrt(M_PI);
+   return invsqrtpi*exp(-x*x)/x*y;
+}
+
+#endif
 extern const RefParType *gpRefParTypeScattDataProfile;
 extern const RefParType *gpRefParTypeScattDataProfileType;
 extern const RefParType *gpRefParTypeScattDataProfileWidth;
@@ -78,7 +107,15 @@ mAsymBerarBaldinozziB1(old.mAsymBerarBaldinozziB1)
 }
 
 ReflectionProfilePseudoVoigt::~ReflectionProfilePseudoVoigt()
-{}
+{
+   #ifdef __WX__CRYST__
+   if(mpWXCrystObj!=0)
+   {
+      delete mpWXCrystObj;
+      mpWXCrystObj=0;
+   }
+   #endif
+}
 
 ReflectionProfilePseudoVoigt* ReflectionProfilePseudoVoigt::CreateCopy()const
 {
@@ -412,7 +449,15 @@ mLorentzianGamma2(old.mLorentzianGamma2)
 }
 
 ReflectionProfileDoubleExponentialPseudoVoigt::~ReflectionProfileDoubleExponentialPseudoVoigt()
-{}
+{
+   #ifdef __WX__CRYST__
+   if(mpWXCrystObj!=0)
+   {
+      delete mpWXCrystObj;
+      mpWXCrystObj=0;
+   }
+   #endif
+}
 
 ReflectionProfileDoubleExponentialPseudoVoigt*
    ReflectionProfileDoubleExponentialPseudoVoigt::CreateCopy()const
