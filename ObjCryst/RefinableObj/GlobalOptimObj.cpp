@@ -69,7 +69,7 @@ void OptimizationObj::RandomizeStartingConfig()
          const double max=mRefParList.GetParNotFixed(j).GetMax();
          mRefParList.GetParNotFixed(j).MutateTo(min+(max-min)*(rand()/(double)RAND_MAX) );
       }
-		else if((true==mRefParList.GetParNotFixed(j).IsPeriodic())
+		else if(true==mRefParList.GetParNotFixed(j).IsPeriodic())
 			    mRefParList.GetParNotFixed(j).
 				 	Mutate(mRefParList.GetParNotFixed(j).GetPeriod()*rand()/(double)RAND_MAX);
    }
