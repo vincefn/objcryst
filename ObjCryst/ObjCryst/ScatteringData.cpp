@@ -885,7 +885,7 @@ long ScatteringData::GetNbReflBelowMaxSinThetaOvLambda()const
    if((mNbReflUsed>0)&&(mNbReflUsed<mNbRefl))
    {
       if(  (mSinThetaLambda(mNbReflUsed  )>mMaxSinThetaOvLambda)
-         ||(mSinThetaLambda(mNbReflUsed-1)<=mMaxSinThetaOvLambda)) return mNbReflUsed;
+         &&(mSinThetaLambda(mNbReflUsed-1)<=mMaxSinThetaOvLambda)) return mNbReflUsed;
    }
    
    if((mNbReflUsed==mNbRefl)&&(mSinThetaLambda(mNbRefl-1)<=mMaxSinThetaOvLambda))
