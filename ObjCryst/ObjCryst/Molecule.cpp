@@ -170,7 +170,7 @@ MolBond::MolBond(const MolAtom &atom1, const MolAtom &atom2,
                  Molecule &parent,const REAL bondOrder):
 mAtomPair(make_pair(&atom1,&atom2)),
 mLength0(length0),mDelta(delta),mSigma(sigma),
-mBondOrder(bondOrder),mIsInRing(false),mpMol(&parent)
+mBondOrder(bondOrder),mIsFreeTorsion(false),mpMol(&parent)
 {}
 
 MolBond::~MolBond()
@@ -255,6 +255,9 @@ REAL MolBond::GetLogLikelihood()const
    if(tmp>0)
    {
       tmp/=mSigma;
+      //tmp=abs(tmp)/mSigma;
+      //if(tmp>30) return 2.8550185e25*(tmp-29);
+      //tmp=sinh(tmp);
       VFN_DEBUG_EXIT("MolBond::GetLogLikelihood():",2)
       return tmp*tmp;
    }
@@ -262,6 +265,9 @@ REAL MolBond::GetLogLikelihood()const
    if(tmp<0)
    {
       tmp/=mSigma;
+      //tmp=abs(tmp)/mSigma;
+      //if(tmp>30) return 2.8550185e25*(tmp-29);
+      //tmp=sinh(tmp);
       VFN_DEBUG_EXIT("MolBond::GetLogLikelihood():",2)
       return tmp*tmp;
    }
@@ -298,8 +304,8 @@ void MolBond::SetLengthDelta(const REAL a){mDelta=a;}
 void MolBond::SetLengthSigma(const REAL a){mBondOrder=a;}
 void MolBond::SetBondOrder(const REAL a){mSigma=a;}
 
-bool MolBond::IsInRing()const{return mIsInRing;}
-void MolBond::SetInRing(const bool isInRing){mIsInRing=isInRing;}
+bool MolBond::IsFreeTorsion()const{return mIsFreeTorsion;}
+void MolBond::SetFreeTorsion(const bool isFreeTorsion){mIsFreeTorsion=isFreeTorsion;}
 #ifdef __WX__CRYST__
 WXCrystObjBasic* MolBond::WXCreate(wxWindow* parent)
 {
@@ -418,6 +424,9 @@ REAL MolBondAngle::GetLogLikelihood()const
    if(tmp>0)
    {
       tmp/=mSigma;
+      //tmp=abs(tmp)/mSigma;
+      //if(tmp>30) return 2.8550185e25*(tmp-29);
+      //tmp=sinh(tmp);
       VFN_DEBUG_EXIT("MolBondAngle::GetLogLikelihood():",2)
       return tmp*tmp;
    }
@@ -425,6 +434,9 @@ REAL MolBondAngle::GetLogLikelihood()const
    if(tmp<0)
    {
       tmp/=mSigma;
+      //tmp=abs(tmp)/mSigma;
+      //if(tmp>30) return 2.8550185e25*(tmp-29);
+      //tmp=sinh(tmp);
       VFN_DEBUG_EXIT("MolBondAngle::GetLogLikelihood():",2)
       return tmp*tmp;
    }
@@ -579,6 +591,9 @@ REAL MolDihedralAngle::GetLogLikelihood()const
    if(tmp>0)
    {
       tmp/=mSigma;
+      //tmp=abs(tmp)/mSigma;
+      //if(tmp>30) return 2.8550185e25*(tmp-29);
+      //tmp=sinh(tmp);
       VFN_DEBUG_EXIT("MolDihedralAngle::GetLogLikelihood():",2)
       return tmp*tmp;
    }
@@ -586,6 +601,9 @@ REAL MolDihedralAngle::GetLogLikelihood()const
    if(tmp<0)
    {
       tmp/=mSigma;
+      //tmp=abs(tmp)/mSigma;
+      //if(tmp>30) return 2.8550185e25*(tmp-29);
+      //tmp=sinh(tmp);
       VFN_DEBUG_EXIT("MolDihedralAngle::GetLogLikelihood():",2)
       return tmp*tmp;
    }
@@ -627,60 +645,78 @@ const vector<MolBond*>& MolRing::GetBondList()const
 {return mvpBond;}
 //######################################################################
 //
-//      UnitQuaternion
+//      Quaternion
 //
 //######################################################################
-UnitQuaternion::UnitQuaternion():
-mQ0(1),mQ1(0),mQ2(0),mQ3(0)
+Quaternion::Quaternion():
+mQ0(1),mQ1(0),mQ2(0),mQ3(0),mIsUniQuaternion(true)
 {
-   VFN_DEBUG_MESSAGE("UnitQuaternion::UnitQuaternion()",5)
+   VFN_DEBUG_MESSAGE("Quaternion::Quaternion()",5)
 }
 
-UnitQuaternion::UnitQuaternion(const REAL q0,
+Quaternion::Quaternion(const REAL q0,
                                const REAL q1,
                                const REAL q2,
-                               const REAL q3):
-mQ0(q0),mQ1(q1),mQ2(q2),mQ3(q3)
+                               const REAL q3,
+                               bool unit):
+mQ0(q0),mQ1(q1),mQ2(q2),mQ3(q3),mIsUniQuaternion(unit)
 {
-   VFN_DEBUG_MESSAGE("UnitQuaternion::UnitQuaternion()",5)
-   this->Normalize();
+   VFN_DEBUG_MESSAGE("Quaternion::Quaternion()",5)
+   if(unit) this->Normalize();
 }
 
-UnitQuaternion::~UnitQuaternion()
+Quaternion::~Quaternion()
 {
-   VFN_DEBUG_MESSAGE("UnitQuaternion::~RotationQuaternion()",5)
+   VFN_DEBUG_MESSAGE("Quaternion::~RotationQuaternion()",5)
 }
 
-UnitQuaternion UnitQuaternion::RotationQuaternion(const REAL ang,
-                                                  const REAL v1,
-                                                  const REAL v2,
-                                                  const REAL v3)
+Quaternion Quaternion::RotationQuaternion(const REAL ang,
+                                          const REAL v1,
+                                          const REAL v2,
+                                          const REAL v3)
 {
-   VFN_DEBUG_MESSAGE("UnitQuaternion::RotationQuaternion()",4)
-   return UnitQuaternion(cos(ang),
-                         sin(ang)*v1,
-                         sin(ang)*v2,
-                         sin(ang)*v3);
+   VFN_DEBUG_MESSAGE("Quaternion::RotationQuaternion()",4)
+   return Quaternion(cos(ang),
+                     sin(ang)*v1,
+                     sin(ang)*v2,
+                     sin(ang)*v3,
+                     true);
 }
 
-UnitQuaternion UnitQuaternion::GetConjugate()const
+Quaternion Quaternion::GetConjugate()const
 {
-   return UnitQuaternion(mQ0,-mQ1,-mQ2,mQ3);
+   return Quaternion(mQ0,-mQ1,-mQ2,-mQ3);
 }
-UnitQuaternion UnitQuaternion::operator*(const UnitQuaternion &q)const
+Quaternion Quaternion::operator*(const Quaternion &q)const
 {
-   return UnitQuaternion
+   // http://www.cs.berkeley.edu/~laura/cs184/quat/quaternion.html
+   return Quaternion
       (this->Q0()*q.Q0()-this->Q1()*q.Q1()-this->Q2()*q.Q2()-this->Q3()*q.Q3(),
        this->Q0()*q.Q1()+this->Q1()*q.Q0()+this->Q2()*q.Q3()-this->Q3()*q.Q2(),
-       this->Q0()*q.Q2()+this->Q2()*q.Q0()-this->Q1()*q.Q3()+this->Q3()*q.Q1(),
-       this->Q0()*q.Q3()+this->Q3()*q.Q0()+this->Q1()*q.Q2()-this->Q2()*q.Q1());
+       this->Q0()*q.Q2()-this->Q1()*q.Q3()+this->Q2()*q.Q0()+this->Q3()*q.Q1(),
+       this->Q0()*q.Q3()+this->Q1()*q.Q2()-this->Q2()*q.Q1()+this->Q3()*q.Q0(),false);
 }
 
-void UnitQuaternion::XMLOutput(ostream &os,int indent)const
+void Quaternion::operator*=(const Quaternion &q)
 {
-   VFN_DEBUG_ENTRY("UnitQuaternion::XMLOutput()",4)
+   //cout<<"Quaternion::operator*= before:";this->XMLOutput(cout);
+   //cout<<"Quaternion::operator*= by    :";q.XMLOutput(cout);
+   const REAL q1=this->Q0()*q.Q1()+this->Q1()*q.Q0()+this->Q2()*q.Q3()-this->Q3()*q.Q2();
+   const REAL q2=this->Q0()*q.Q2()+this->Q2()*q.Q0()-this->Q1()*q.Q3()+this->Q3()*q.Q1();
+   const REAL q3=this->Q0()*q.Q3()+this->Q3()*q.Q0()+this->Q1()*q.Q2()-this->Q2()*q.Q1();
+   this->Q0()=   this->Q0()*q.Q0()-this->Q1()*q.Q1()-this->Q2()*q.Q2()-this->Q3()*q.Q3();
+   this->Q1()=q1;
+   this->Q2()=q2;
+   this->Q3()=q3;
+   this->Normalize();
+   //cout<<"Quaternion::operator*= after :";this->XMLOutput(cout);
+}
+
+void Quaternion::XMLOutput(ostream &os,int indent)const
+{
+   VFN_DEBUG_ENTRY("Quaternion::XMLOutput()",4)
    for(int i=0;i<indent;i++) os << "  " ;
-   XMLCrystTag tag("UnitQuaternion",false,true);
+   XMLCrystTag tag("Quaternion",false,true);
    //#error "which atoms for this bond ?"
    {
       stringstream ss;
@@ -702,13 +738,18 @@ void UnitQuaternion::XMLOutput(ostream &os,int indent)const
       ss <<mQ3;
       tag.AddAttribute("Q3",ss.str());
    }
+   {
+      stringstream ss;
+      ss <<mIsUniQuaternion;
+      tag.AddAttribute("IsUnitQuaternion",ss.str());
+   }
    os <<tag<<endl;
-   VFN_DEBUG_EXIT("UnitQuaternion::XMLOutput()",4)
+   VFN_DEBUG_EXIT("Quaternion::XMLOutput()",4)
 }
 
-void UnitQuaternion::XMLInput(istream &is,const XMLCrystTag &tag)
+void Quaternion::XMLInput(istream &is,const XMLCrystTag &tag)
 {
-   VFN_DEBUG_ENTRY("UnitQuaternion::XMLInput()",5)
+   VFN_DEBUG_ENTRY("Quaternion::XMLInput()",5)
    for(unsigned int i=0;i<tag.GetNbAttribute();i++)
    {
       if("Q0"==tag.GetAttributeName(i))
@@ -731,20 +772,30 @@ void UnitQuaternion::XMLInput(istream &is,const XMLCrystTag &tag)
          stringstream ss(tag.GetAttributeValue(i));
          ss >>mQ3;
       }
+      if("IsUnitQuaternion"==tag.GetAttributeName(i))
+      {
+         stringstream ss(tag.GetAttributeValue(i));
+         ss >>mIsUniQuaternion;
+      }
    }
-   VFN_DEBUG_EXIT("UnitQuaternion::XMLInput()",5)
+   if(mIsUniQuaternion) this->Normalize();
+   VFN_DEBUG_EXIT("Quaternion::XMLInput()",5)
 }
 
-void UnitQuaternion::RotateVector(REAL &v1,REAL &v2, REAL &v3)const
+void Quaternion::RotateVector(REAL &v1,REAL &v2, REAL &v3)const
 {
-   UnitQuaternion P(0,v1,v2,v3);
+   //#error P should not be a _UNIT_ quaternion...
+   Quaternion P(0,v1,v2,v3,false);
+   //cout<<"RotQuat:(n="<<this->GetNorm()<<")";this->XMLOutput(cout);
+   //cout<<"before :(n="<<P.GetNorm()<<")";P.XMLOutput(cout);
    P= (*this)* P * this->GetConjugate();
+   //cout<<"rotated:(n="<<P.GetNorm()<<")";P.XMLOutput(cout);
    v1=P.Q1();
    v2=P.Q2();
    v3=P.Q3();
 }
 
-void UnitQuaternion::Normalize()
+void Quaternion::Normalize()
 {
    const REAL norm=sqrt( this->Q0()*this->Q0()
                         +this->Q1()*this->Q1()
@@ -755,15 +806,20 @@ void UnitQuaternion::Normalize()
    mQ2 /= norm;
    mQ3 /= norm;
 }
+REAL Quaternion::GetNorm()const
+{return sqrt( this->Q0()*this->Q0()
+             +this->Q1()*this->Q1()
+             +this->Q2()*this->Q2()
+             +this->Q3()*this->Q3());}
 
-const REAL& UnitQuaternion::Q0()const{return mQ0;}
-const REAL& UnitQuaternion::Q1()const{return mQ1;}
-const REAL& UnitQuaternion::Q2()const{return mQ2;}
-const REAL& UnitQuaternion::Q3()const{return mQ3;}
-REAL& UnitQuaternion::Q0(){return mQ0;}
-REAL& UnitQuaternion::Q1(){return mQ1;}
-REAL& UnitQuaternion::Q2(){return mQ2;}
-REAL& UnitQuaternion::Q3(){return mQ3;}
+const REAL& Quaternion::Q0()const{return mQ0;}
+const REAL& Quaternion::Q1()const{return mQ1;}
+const REAL& Quaternion::Q2()const{return mQ2;}
+const REAL& Quaternion::Q3()const{return mQ3;}
+REAL& Quaternion::Q0(){return mQ0;}
+REAL& Quaternion::Q1(){return mQ1;}
+REAL& Quaternion::Q2(){return mQ2;}
+REAL& Quaternion::Q3(){return mQ3;}
 //######################################################################
 //
 //      Molecule
@@ -802,6 +858,40 @@ Molecule::Molecule(Crystal &cryst, const string &name)
       tmp.AssignClock(mClockScatterer);
       this->AddPar(tmp);
    }
+   {
+      RefinablePar tmp(this->GetName()+"Q0",&(mQuat.Q0()),0,1,
+                        gpRefParTypeScattOrient,
+                        REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
+      tmp.AssignClock(mClockScatterer);
+      tmp.SetGlobalOptimStep(0.1);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp(this->GetName()+"Q1",&(mQuat.Q1()),0,1,
+                        gpRefParTypeScattOrient,
+                        REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
+      tmp.AssignClock(mClockScatterer);
+      tmp.SetGlobalOptimStep(0.1);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp(this->GetName()+"Q2",&(mQuat.Q2()),0,1,
+                        gpRefParTypeScattOrient,
+                        REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
+      tmp.AssignClock(mClockScatterer);
+      tmp.SetGlobalOptimStep(0.1);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp(this->GetName()+"Q3",&(mQuat.Q3()),0,1,
+                        gpRefParTypeScattOrient,
+                        REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
+      tmp.AssignClock(mClockScatterer);
+      tmp.SetGlobalOptimStep(0.1);
+      this->AddPar(tmp);
+   }
+   mLocalParamSet=this->CreateParamSet("saved parameters for local minimization");
+   this->InitOptions();
 }
 
 Molecule::Molecule(const Molecule &old)
@@ -911,7 +1001,7 @@ void Molecule::XMLInput(istream &is,const XMLCrystTag &tag)
          VFN_DEBUG_EXIT("Molecule::XMLInput():"<<this->GetName(),5)
          return;
       }
-      if("UnitQuaternion"==tagg.GetName())
+      if("Quaternion"==tagg.GetName())
       {
          mQuat.XMLInput(is,tagg);
       }
@@ -940,6 +1030,111 @@ void Molecule::XMLInput(istream &is,const XMLCrystTag &tag)
       }
    }
    VFN_DEBUG_EXIT("Molecule::XMLInput()",5)
+}
+void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
+                                       const RefParType *type)
+{
+   if(mRandomMoveIsDone) return;
+   VFN_DEBUG_ENTRY("Molecule::GlobalOptRandomMove()",4)
+   //:TODO: random moves using different models (free atoms, torsions, rigid body)
+   //switch(mFlexModel.GetChoice())
+   {
+      //case 0://Free atoms + restraints
+      {
+      //#error faire tourner directement les coordonnées des atomes , sans garder comme membre un quaternion -> limiter le nombre de paramètres
+         //if(rand()<(0.2*RAND_MAX))
+         if(false)
+         {//Rotate around an arbitrary vector
+            static const REAL amp=M_PI/1000./RAND_MAX;
+            mQuat *= Quaternion::RotationQuaternion((rand()-RAND_MAX/2)*amp*mutationAmplitude,
+                                                        (REAL)rand(),(REAL)rand(),(REAL)rand());
+            mClockOrientation.Click();
+         }
+         {
+            this->SaveParamSet(mLocalParamSet);
+            const REAL lastll=this->GetLogLikelihood();
+            while(true)
+            {
+               this->RefinableObj::GlobalOptRandomMove(mutationAmplitude,type);
+               mQuat.Normalize();
+               const REAL newll=this->GetLogLikelihood();
+               if(newll<lastll) break;
+               if( log((rand()+1)/(REAL)RAND_MAX) < (-(newll-lastll)/30.) ) break;
+               this->RestoreParamSet(mLocalParamSet);
+            }
+            //break;
+         }
+      }
+   }
+   #if 0
+   /* :TODO: steepest/SA descent if too high ?*/
+   REAL ll=this->GetLogLikelihood();
+   const REAL maxll=this->GetNbComponent()*500.;
+   this->SaveParamSet(mLocalParamSet);
+   while(ll>maxll)
+   {
+      mLastLogLike=ll;
+      mRandomMoveIsDone=false;
+      this->RefinableObj::GlobalOptRandomMove(1.,type);
+      ll=this->GetLogLikelihood();
+      cout<<ll<<","<<mLastLogLike<<","<<maxll<<endl;
+      if(ll>mLastLogLike)
+      {
+         if( log((rand()+1)/(REAL)RAND_MAX) < (-(ll-mLastLogLike)/100.) )
+            this->SaveParamSet(mLocalParamSet);
+         else
+         {
+            this->RestoreParamSet(mLocalParamSet);
+            ll=mLastLogLike;
+         }
+      }
+      else this->SaveParamSet(mLocalParamSet);
+   }
+   #endif
+   mRandomMoveIsDone=true;
+   VFN_DEBUG_EXIT("Molecule::GlobalOptRandomMove()",4)
+}
+
+REAL Molecule::GetLogLikelihood()const
+{
+   /*
+   return this->RefinableObj::GetLogLikelihood();
+   */
+   REAL ll=this->RefinableObj::GetLogLikelihood();
+   const REAL nb=(REAL)this->GetNbComponent();
+   ll /=nb;
+   if(ll>30) return 2.8550185e25*(ll-29)*nb;//:KLUDGE: avoid overflow
+   return sinh(ll)*nb;
+}
+void Molecule::TagNewBestConfig()const
+{
+   #if 0
+   cout<<"Molecule::TagNewBestConfig()"<<endl;
+   {
+      vector<MolBond*>::const_iterator pos;
+      for(pos=mvpBond.begin();pos!=mvpBond.end();++pos)
+      {
+         cout<<"BondLength="<<(*pos)->GetLength();
+         (*pos)->XMLOutput(cout);
+      }
+   }
+   {
+      vector<MolBondAngle*>::const_iterator pos;
+      for(pos=mvpBondAngle.begin();pos!=mvpBondAngle.end();++pos)
+      {
+         cout<<"BondAngle="<<(*pos)->GetAngle();
+         (*pos)->XMLOutput(cout);
+      }
+   }
+   {
+      vector<MolDihedralAngle*>::const_iterator pos;
+      for(pos=mvpDihedralAngle.begin();pos!=mvpDihedralAngle.end();++pos)
+      {
+         cout<<"DihedralAngle="<<(*pos)->GetAngle();
+         (*pos)->XMLOutput(cout);
+      }
+   }
+   #endif
 }
 
 int Molecule::GetNbComponent() const { return mvpAtom.size();}
@@ -984,7 +1179,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
    
    GLUquadricObj* pQuadric = gluNewQuadric();
    
-   if(true==onlyIndependentAtoms)
+   if(true==onlyIndependentAtoms)//
    {
       REAL xc=mXYZ(0),yc=mXYZ(1),zc=mXYZ(2);
       this->GetCrystal().FractionalToOrthonormalCoords(xc,yc,zc);
@@ -1007,16 +1202,15 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
       VFN_DEBUG_ENTRY("Molecule::GLInitDisplayList():Show all symmetrics",3)
       vector<CrystMatrix_REAL> vXYZCoords;
       {
+         this->GetScatteringComponentList();
          REAL x0,y0,z0;
-         vector<MolAtom*>::const_iterator pos;
-         for(pos=mvpAtom.begin();pos!=mvpAtom.end();pos++)
+         for(long i=0;i<mScattCompList.GetNbComponent();++i)
          {
-            x0=(*pos)->X();
-            y0=(*pos)->Y();
-            z0=(*pos)->Z();
-            this->GetCrystal().OrthonormalToFractionalCoords(x0,y0,z0);
+            x0=mScattCompList(i).mX;
+            y0=mScattCompList(i).mY;
+            z0=mScattCompList(i).mZ;
             vXYZCoords.push_back(this->GetCrystal().GetSpaceGroup().
-                           GetAllSymmetrics(x0+mXYZ(0),y0+mXYZ(1),z0+mXYZ(2),false,false,false));
+                           GetAllSymmetrics(x0,y0,z0,false,false,false));
          }
       }
       CrystMatrix_int translate(27,3);
@@ -1100,6 +1294,12 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                      gluSphere(pQuadric,
                         mvpAtom[k]->GetScatteringPower().GetRadius()/3.,10,10);
                   glPopMatrix();
+                  /*
+                  glPushMatrix();
+                     glRasterPos3f(x(k)*en+0.5, y(k), z(k));
+                     glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,*(mvpAtom[k]->GetName().c_str()+2));
+                  glPopMatrix();
+                  */
                }
                for(unsigned int k=0;k<mvpBond.size();k++)
                {
@@ -1250,8 +1450,9 @@ void Molecule::UpdateScattCompList()const
       &&(mClockAtomScattPow<mClockScattCompList)
       &&(mClockScatterer   <mClockScattCompList))return;
    VFN_DEBUG_ENTRY("Molecule::UpdateScattCompList()",5)
+   const long nb=this->GetNbComponent();
    // Get internal coords
-   for(long i=0;i<this->GetNbComponent();++i)
+   for(long i=0;i<nb;++i)
    {
       if(mvpAtom[i]->IsDummy()) mScattCompList(i).mpScattPow=0;
       else mScattCompList(i).mpScattPow=&(mvpAtom[i]->GetScatteringPower());
@@ -1263,36 +1464,38 @@ void Molecule::UpdateScattCompList()const
    // translate center to (0,0,0)
    {
       REAL x0=0,y0=0,z0=0;
-      for(long i;i<this->GetNbComponent();++i)
+      for(long i=0;i<nb;++i)
       {
          x0 += mScattCompList(i).mX;
          y0 += mScattCompList(i).mY;
          z0 += mScattCompList(i).mZ;
       }
-      x0 /= this->GetNbComponent();
-      y0 /= this->GetNbComponent();
-      z0 /= this->GetNbComponent();
-      for(long i;i<this->GetNbComponent();++i)
+      x0 /= nb;
+      y0 /= nb;
+      z0 /= nb;
+      for(long i=0;i<nb;++i)
       {
          mScattCompList(i).mX -= x0;
          mScattCompList(i).mY -= y0;
          mScattCompList(i).mZ -= z0;
       }
    }
+   //VFN_DEBUG_MESSAGE("Molecule::UpdateScattCompList()",10)
    // rotate
-   for(long i;i<this->GetNbComponent();++i)
+   for(long i=0;i<nb;++i)
    {
+      //#error the vector must not be normalized !
       mQuat.RotateVector(mScattCompList(i).mX,mScattCompList(i).mY,mScattCompList(i).mZ);
    }
    // Convert to fractionnal coordinates
-   for(long i;i<this->GetNbComponent();++i)
+   for(long i=0;i<nb;++i)
    {
       this->GetCrystal().OrthonormalToFractionalCoords(mScattCompList(i).mX,
                                                        mScattCompList(i).mY,
                                                        mScattCompList(i).mZ);
    }
-   // translate center to (0,0,0)
-   for(long i;i<this->GetNbComponent();++i)
+   // translate center to position in unit cell
+   for(long i=0;i<nb;++i)
    {
       mScattCompList(i).mX += mXYZ(0);
       mScattCompList(i).mY += mXYZ(1);
@@ -1321,6 +1524,30 @@ vector<MolAtom*>::const_reverse_iterator Molecule::FindAtom(const string &name)c
    for(rpos=mvpAtom.rbegin();rpos!=mvpAtom.rend();++rpos)
       if(name==(*rpos)->GetName()) return rpos;
    return rpos;
+}
+void Molecule::InitOptions()
+{
+   VFN_DEBUG_ENTRY("Molecule::InitOptions",10)
+   static string Flexname;
+   static string Flexchoices[5];
+   
+   static bool needInitNames=true;
+   if(true==needInitNames)
+   {
+      Flexname="Flexibility Model";
+      Flexchoices[0]="Free Atoms & Restraints";
+      Flexchoices[1]="Rigid Body";
+      Flexchoices[2]="Rigid body (relaxed)";
+      Flexchoices[3]="Torsion Angles";
+      Flexchoices[4]="Torsion Angles (relaxed)";
+      
+      needInitNames=false;
+   }
+   mFlexModel.Init(5,&Flexname,Flexchoices);
+   mFlexModel.SetChoice(0);
+   this->AddOption(&mFlexModel);
+   
+   VFN_DEBUG_EXIT("Molecule::InitOptions",10)
 }
 
 #ifdef __WX__CRYST__

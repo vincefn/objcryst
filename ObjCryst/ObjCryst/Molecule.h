@@ -163,13 +163,13 @@ class MolBond:public Restraint
       void SetLengthDelta(const REAL length);
       void SetLengthSigma(const REAL length);
       void SetBondOrder(const REAL length);
-      bool IsInRing()const;
-      void SetInRing(const bool isInRing);
+      bool IsFreeTorsion()const;
+      void SetFreeTorsion(const bool isInRing);
   private:
       pair<const MolAtom*,const MolAtom*> mAtomPair;
       REAL mLength0,mDelta,mSigma;
       REAL mBondOrder;
-      bool mIsInRing;
+      bool mIsFreeTorsion;
       /// Parent Molecule
       Molecule *mpMol;
    #ifdef __WX__CRYST__
@@ -294,24 +294,25 @@ class MolRing
       vector<MolBond*> mvpBond;
 };
 
-/** A unit quaternion class, used to represent the orientation of the molecule.
-*
+/** A quaternion class, used to represent the orientation of the molecule.
+* It may or may not be a unit quaternion.
 * 
 */
-class UnitQuaternion
+class Quaternion
 {
    public:
       /// Default constructor, yields q=(1,0,0,0)
-      UnitQuaternion();
+      Quaternion();
       /// Creates a unit quaternion from its components (normalized automatically)
-      UnitQuaternion(const REAL q0,const REAL q1,const REAL q2,const REAL q3);
-      ~UnitQuaternion();
+      Quaternion(const REAL q0,const REAL q1,const REAL q2,const REAL q3,bool unit=true);
+      ~Quaternion();
       /// Create a rotation quaternion around a given vector for a given angle 
-      static UnitQuaternion  RotationQuaternion(const REAL ang,const REAL v1,const REAL v2,const REAL v3);
-      /// Get the conjugate (inverse) of this quaternion
-      UnitQuaternion  GetConjugate()const;
+      static Quaternion  RotationQuaternion(const REAL ang,const REAL v1,const REAL v2,const REAL v3);
+      /// Get the conjugate of this quaternion (== the inverse if unit quaternion)
+      Quaternion  GetConjugate()const;
       /// Quaternion multiplication
-      UnitQuaternion operator*(const UnitQuaternion &q)const;
+      Quaternion operator*(const Quaternion &q)const;
+      void operator*=(const Quaternion &q);
       void XMLOutput(ostream &os,int indent=0)const;
       void XMLInput(istream &is,const XMLCrystTag &tag);
       /// Rotate vector v=(v1,v2,v3). The rotated components are directly written
@@ -320,6 +321,7 @@ class UnitQuaternion
       /// on individual component input, or after long calculations. And even
       /// if wrong, the rotation is independent of the norm of the quaternion.
       void Normalize();
+      REAL GetNorm()const;
       const REAL& Q0()const;
       const REAL& Q1()const;
       const REAL& Q2()const;
@@ -331,6 +333,7 @@ class UnitQuaternion
    private:
       /// The components of the quaternion z=(q0,v) with v=(q1,q2,q3)
       REAL mQ0,mQ1,mQ2,mQ3;
+      bool mIsUniQuaternion;
 };
 
 
@@ -368,6 +371,10 @@ class Molecule: public Scatterer
       virtual void Print()const;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
+      virtual void GlobalOptRandomMove(const REAL mutationAmplitude,
+                                       const RefParType *type);
+      virtual REAL GetLogLikelihood()const;
+      virtual void TagNewBestConfig()const;
       virtual int GetNbComponent() const;
       virtual const ScatteringComponentList& GetScatteringComponentList() const;
       virtual string GetComponentName(const int i) const;
@@ -442,7 +449,8 @@ class Molecule: public Scatterer
       /// Search a MolAtom from its name. Search begins at the end, and the
       /// first match is returned. returns mvAtom.rend() if no atom matches
       vector<MolAtom*>::const_reverse_iterator FindAtom(const string &name)const;
-      ///
+      /// Build options for this object
+      void InitOptions();
       /** The list of scattering components
       *
       * this is mutable since it only reflects the list of atoms.
@@ -478,7 +486,7 @@ class Molecule: public Scatterer
       /** The unit quaternion defining the orientation
       *
       */
-      UnitQuaternion mQuat;
+      Quaternion mQuat;
       // Clocks
          RefinableObjClock mClockAtomList;
          RefinableObjClock mClockBondList;
@@ -488,6 +496,14 @@ class Molecule: public Scatterer
          RefinableObjClock mClockAtomPosition;
          RefinableObjClock mClockAtomScattPow;
          RefinableObjClock mClockOrientation;
+         
+      // For local minimization (EXPERIMENTAL)
+         unsigned long mLocalParamSet;
+         REAL mLastLogLike;
+      /// OPtion for the different types of flexibility possible for this
+      /// molecule: rigid body, free atoms + restraints, torsion angles...
+      /// \warning still EXPERIMENTAL !
+      RefObjOpt mFlexModel;
    #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);
