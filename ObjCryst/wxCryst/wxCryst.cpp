@@ -685,9 +685,6 @@ bool WXCrystObj::Layout()
       s->SetItemMinSize(this,this->GetSize().GetWidth(),this->GetSize().GetHeight());
       s->Fit(mWXParent);
    }
-   //wxCommandEvent event(1758,-1);
-   //wxPostEvent(this->GetParent(),event);
-   this->UpdateUI();
    mWXParent->Layout();
    VFN_DEBUG_EXIT("WXCrystObj::Layout()",3)
    return true;
