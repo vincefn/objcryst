@@ -123,6 +123,7 @@ Error opening file for input:"+filename);
          bckgd.resizeAndPreserve(max);
       }
    } while(fin.eof() == false);
+   fin.close();
    bckgd2Theta.resizeAndPreserve(nbPoints);
    bckgd.resizeAndPreserve(nbPoints);
    //cout << bckgd << endl;
