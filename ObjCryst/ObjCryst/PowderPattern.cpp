@@ -3878,7 +3878,7 @@ void PowderPattern::CalcNbPointUsed()const
 {
    REAL sinth=mMaxSinThetaOvLambda*this->GetWavelength();
    unsigned long tmp;
-   if(1>abs(sinth)) tmp=this->Get2ThetaCorrPixel(2*asin(sinth)); else tmp=mNbPoint;
+   if(1>fabs(sinth)) tmp=this->Get2ThetaCorrPixel(2*asin(sinth)); else tmp=mNbPoint;
    if(tmp>mNbPoint) tmp= mNbPoint;
    if(tmp !=mNbPointUsed)
    {

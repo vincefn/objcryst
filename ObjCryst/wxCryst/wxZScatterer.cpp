@@ -100,10 +100,10 @@ Molecule *ZScatterer2Molecule(ZScatterer *scatt)
          MolAtom *p2=&(mol->GetAtom(scatt->GetZBondAtom(i)));
          MolAtom *p3=&(mol->GetAtom(scatt->GetZAngleAtom(i)));
          MolAtom *p4=&(mol->GetAtom(scatt->GetZDihedralAngleAtom(i)));
-         if(  (abs(GetBondAngle(*p1,*p2,*p3)-M_PI)>0.3)
-            &&(abs(GetBondAngle(*p1,*p2,*p4)-M_PI)>0.3)
-            &&(abs(GetBondAngle(*p1,*p3,*p4)-M_PI)>0.3)
-            &&(abs(GetBondAngle(*p2,*p3,*p4)-M_PI)>0.3))
+         if(  (fabs(GetBondAngle(*p1,*p2,*p3)-M_PI)>0.3)
+            &&(fabs(GetBondAngle(*p1,*p2,*p4)-M_PI)>0.3)
+            &&(fabs(GetBondAngle(*p1,*p3,*p4)-M_PI)>0.3)
+            &&(fabs(GetBondAngle(*p2,*p3,*p4)-M_PI)>0.3))
          {
             if(pDihed->IsFixed())
                mol->AddDihedralAngle(*p1,*p2,*p3,*p4,pDihed->GetValue(),.01,.05,false);

@@ -911,7 +911,7 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
       VFN_DEBUG_MESSAGE("WXPowderPatternGraph::OnMouse():Finished zooming...",5)
       mIsDragging=false;
       
-      if( (abs(ttheta-mDragging2Theta0)<.1) || (abs(mDraggingIntensity0-intensity)< abs(mMaxIntensity*.02)) )
+      if( (fabs(ttheta-mDragging2Theta0)<.1) || (fabs(mDraggingIntensity0-intensity)< fabs(mMaxIntensity*.02)) )
       {
          return;
       }

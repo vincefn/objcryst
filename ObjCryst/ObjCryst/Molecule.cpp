@@ -342,7 +342,7 @@ REAL MolBond::GetLogLikelihood()const
    if(tmp>0)
    {
       tmp/=mSigma;
-      //tmp=abs(tmp)/mSigma;
+      //tmp=fabs(tmp)/mSigma;
       //if(tmp>30) return 2.8550185e25*(tmp-29);
       //tmp=sinh(tmp);
       VFN_DEBUG_EXIT("MolBond::GetLogLikelihood():",2)
@@ -352,7 +352,7 @@ REAL MolBond::GetLogLikelihood()const
    if(tmp<0)
    {
       tmp/=mSigma;
-      //tmp=abs(tmp)/mSigma;
+      //tmp=fabs(tmp)/mSigma;
       //if(tmp>30) return 2.8550185e25*(tmp-29);
       //tmp=sinh(tmp);
       VFN_DEBUG_EXIT("MolBond::GetLogLikelihood():",2)
@@ -516,7 +516,7 @@ REAL MolBondAngle::GetLogLikelihood()const
    if(tmp>0)
    {
       tmp/=mSigma;
-      //tmp=abs(tmp)/mSigma;
+      //tmp=fabs(tmp)/mSigma;
       //if(tmp>30) return 2.8550185e25*(tmp-29);
       //tmp=sinh(tmp);
       VFN_DEBUG_EXIT("MolBondAngle::GetLogLikelihood():",2)
@@ -526,7 +526,7 @@ REAL MolBondAngle::GetLogLikelihood()const
    if(tmp<0)
    {
       tmp/=mSigma;
-      //tmp=abs(tmp)/mSigma;
+      //tmp=fabs(tmp)/mSigma;
       //if(tmp>30) return 2.8550185e25*(tmp-29);
       //tmp=sinh(tmp);
       VFN_DEBUG_EXIT("MolBondAngle::GetLogLikelihood():",2)
@@ -672,24 +672,24 @@ REAL MolDihedralAngle::GetLogLikelihood()const
    VFN_DEBUG_ENTRY("MolDihedralAngle::GetLogLikelihood():",2)
    const REAL angle=this->GetAngle();
    REAL tmp=angle-(mAngle0+mDelta);
-   if(abs(tmp+2*M_PI)<abs(tmp)) tmp += 2*M_PI;
-   if(abs(tmp-2*M_PI)<abs(tmp)) tmp -= 2*M_PI;
+   if(fabs(tmp+2*M_PI)<fabs(tmp)) tmp += 2*M_PI;
+   if(fabs(tmp-2*M_PI)<fabs(tmp)) tmp -= 2*M_PI;
    if(tmp>0)
    {
       tmp/=mSigma;
-      //tmp=abs(tmp)/mSigma;
+      //tmp=fabs(tmp)/mSigma;
       //if(tmp>30) return 2.8550185e25*(tmp-29);
       //tmp=sinh(tmp);
       VFN_DEBUG_EXIT("MolDihedralAngle::GetLogLikelihood():",2)
       return tmp*tmp;
    }
    tmp=angle-(mAngle0-mDelta);
-   if(abs(tmp+2*M_PI)<abs(tmp)) tmp=tmp+2*M_PI;
-   if(abs(tmp-2*M_PI)<abs(tmp)) tmp=tmp-2*M_PI;
+   if(fabs(tmp+2*M_PI)<fabs(tmp)) tmp=tmp+2*M_PI;
+   if(fabs(tmp-2*M_PI)<fabs(tmp)) tmp=tmp-2*M_PI;
    if(tmp<0)
    {
       tmp/=mSigma;
-      //tmp=abs(tmp)/mSigma;
+      //tmp=fabs(tmp)/mSigma;
       //if(tmp>30) return 2.8550185e25*(tmp-29);
       //tmp=sinh(tmp);
       VFN_DEBUG_EXIT("MolDihedralAngle::GetLogLikelihood():",2)
@@ -2112,7 +2112,7 @@ void Molecule::RotateAtomGroup(const MolAtom &at,const REAL vx,const REAL vy,con
    const REAL y0=at.Y();
    const REAL z0=at.Z();
    // :KLUDGE: ? Refuse to do anything if vector is not well defined
-   if((abs(vx)+abs(vy)+abs(vz))<1e-6) return;
+   if((fabs(vx)+fabs(vy)+fabs(vz))<1e-6) return;
    const Quaternion quat=Quaternion::RotationQuaternion(angle,vx,vy,vz);
    for(set<unsigned long>::const_iterator pos=atoms.begin();pos!=atoms.end();++pos)
    {
@@ -2807,7 +2807,7 @@ void Molecule::FlipAtomGroup(const FlipGroup& group)
       const REAL norm0m=sqrt(v0mx*v0mx+v0my*v0my+v0mz*v0mz);
       v0mx /= norm0m;v0my /= norm0m;v0mz /= norm0m;
 
-      if(abs(v01x*v02x+v01y*v02y+v01z*v02z)
+      if(fabs(v01x*v02x+v01y*v02y+v01z*v02z)
          >0.05*sqrt( (v01x*v01x+v01y*v01y+v01z*v01z)
                     *(v02x*v02x+v02y*v02y+v02z*v02z)))
       {
