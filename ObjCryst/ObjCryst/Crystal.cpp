@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -138,8 +138,8 @@ Crystal::~Crystal()
 
 const string& Crystal::GetClassName() const
 {
-	const static string className="Crystal";
-	return className;
+   const static string className="Crystal";
+   return className;
 }
 
 void Crystal::AddScatterer(Scatterer *scatt)
@@ -593,139 +593,146 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
 {
    VFN_DEBUG_ENTRY("Crystal::GLInitDisplayList()",5)
    #ifdef OBJCRYST_GL
-		const GLfloat colorAmbient [] = {0.50, 0.50, 0.50, 1.00}; 
-		const GLfloat colorDiffuse [] = {0.80, 0.80, 0.80, 1.00}; 
-		const GLfloat colorSpecular [] = {1.00, 1.00, 1.00, 1.00}; 
-		
-		glMaterialfv(GL_FRONT, GL_AMBIENT,   colorAmbient); 
-		glMaterialfv(GL_FRONT, GL_DIFFUSE,   colorDiffuse); 
-		glMaterialfv(GL_FRONT, GL_SPECULAR,  colorSpecular); 
-		glMaterialf( GL_FRONT, GL_SHININESS, 5.0); 
-	//cout << xMin << ":"<<xMax <<endl;
-	//cout << yMin << ":"<<yMax <<endl;
-	//cout << zMin << ":"<<zMax <<endl;
-	//Center of displayed unit
-		REAL xc=(xMin+xMax)/2.;
-		REAL yc=(yMin+yMax)/2.;
-		REAL zc=(zMin+zMax)/2.;
-   	//Describe Unit Cell
-      	REAL x111= 1.;
-      	REAL y111= 1.;
-      	REAL z111= 1.;
-      	this->FractionalToOrthonormalCoords(x111,y111,z111);
-      	REAL x110= 1.;
-      	REAL y110= 1.;
-      	REAL z110= 0.;
-      	this->FractionalToOrthonormalCoords(x110,y110,z110);
-      	REAL x101= 1.;
-      	REAL y101= 0.;
-      	REAL z101= 1.;
-      	this->FractionalToOrthonormalCoords(x101,y101,z101);
-      	REAL x100= 1.;
-      	REAL y100= 0.;
-      	REAL z100= 0.;
-      	this->FractionalToOrthonormalCoords(x100,y100,z100);
-      	REAL x011= 0.;
-      	REAL y011= 1.;
-      	REAL z011= 1.;
-      	this->FractionalToOrthonormalCoords(x011,y011,z011);
-      	REAL x010= 0.;
-      	REAL y010= 1.;
-      	REAL z010= 0.;
-      	this->FractionalToOrthonormalCoords(x010,y010,z010);
-      	REAL x001= 0.;
-      	REAL y001= 0.;
-      	REAL z001= 1.;
-      	this->FractionalToOrthonormalCoords(x001,y001,z001);
-      	REAL x000= 0.;
-      	REAL y000= 0.;
-      	REAL z000= 0.;
-      	this->FractionalToOrthonormalCoords(x000,y000,z000);
-      	REAL xM= 0.5;
-      	REAL yM= 0.5;
-      	REAL zM= 0.5;
-      	this->FractionalToOrthonormalCoords(xM,yM,zM);
-			xM*=2;yM*=2;zM*=2;
+      REAL en=1;// if -1, display enantiomeric structure
+      if(mDisplayEnantiomer.GetChoice()==1) en=-1;
+      
+      const GLfloat colorAmbient [] = {0.50, 0.50, 0.50, 1.00}; 
+      const GLfloat colorDiffuse [] = {0.80, 0.80, 0.80, 1.00}; 
+      const GLfloat colorSpecular [] = {1.00, 1.00, 1.00, 1.00}; 
+      
+      glMaterialfv(GL_FRONT, GL_AMBIENT,   colorAmbient); 
+      glMaterialfv(GL_FRONT, GL_DIFFUSE,   colorDiffuse); 
+      glMaterialfv(GL_FRONT, GL_SPECULAR,  colorSpecular); 
+      glMaterialf( GL_FRONT, GL_SHININESS, 5.0); 
+   //cout << xMin << ":"<<xMax <<endl;
+   //cout << yMin << ":"<<yMax <<endl;
+   //cout << zMin << ":"<<zMax <<endl;
+   //Center of displayed unit
+      REAL xc=(xMin+xMax)/2.;
+      REAL yc=(yMin+yMax)/2.;
+      REAL zc=(zMin+zMax)/2.;
+      //Describe Unit Cell
+         REAL x111= 1.;
+         REAL y111= 1.;
+         REAL z111= 1.;
+         this->FractionalToOrthonormalCoords(x111,y111,z111);
+         REAL x110= 1.;
+         REAL y110= 1.;
+         REAL z110= 0.;
+         this->FractionalToOrthonormalCoords(x110,y110,z110);
+         REAL x101= 1.;
+         REAL y101= 0.;
+         REAL z101= 1.;
+         this->FractionalToOrthonormalCoords(x101,y101,z101);
+         REAL x100= 1.;
+         REAL y100= 0.;
+         REAL z100= 0.;
+         this->FractionalToOrthonormalCoords(x100,y100,z100);
+         REAL x011= 0.;
+         REAL y011= 1.;
+         REAL z011= 1.;
+         this->FractionalToOrthonormalCoords(x011,y011,z011);
+         REAL x010= 0.;
+         REAL y010= 1.;
+         REAL z010= 0.;
+         this->FractionalToOrthonormalCoords(x010,y010,z010);
+         REAL x001= 0.;
+         REAL y001= 0.;
+         REAL z001= 1.;
+         this->FractionalToOrthonormalCoords(x001,y001,z001);
+         REAL x000= 0.;
+         REAL y000= 0.;
+         REAL z000= 0.;
+         this->FractionalToOrthonormalCoords(x000,y000,z000);
+         REAL xM= 0.5;
+         REAL yM= 0.5;
+         REAL zM= 0.5;
+         this->FractionalToOrthonormalCoords(xM,yM,zM);
+         xM*=2;yM*=2;zM*=2;
       glPushMatrix();
-   	//Add Axis & axis names
-      	REAL x,y,z;
+      //Add Axis & axis names
+         REAL x,y,z;
 
-      	x=1.2-xc;y=-yc;z=-zc;
-      	this->FractionalToOrthonormalCoords(x,y,z);
-      	glRasterPos3f(x,y,z);
-      	glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,'a');
+         x=1.2-xc;y=-yc;z=-zc;
+         this->FractionalToOrthonormalCoords(x,y,z);
+         glRasterPos3f(en*x,y,z);
+         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,'a');
 
-      	x=-xc;y=1.2-yc;z=-zc;
-      	this->FractionalToOrthonormalCoords(x,y,z);
-      	glRasterPos3f(x,y,z);
-      	glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,'b');
+         x=-xc;y=1.2-yc;z=-zc;
+         this->FractionalToOrthonormalCoords(x,y,z);
+         glRasterPos3f(en*x,y,z);
+         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,'b');
 
-      	x=-xc;y=-yc;z=1.2-zc;
-      	this->FractionalToOrthonormalCoords(x,y,z);
-      	glRasterPos3f(x,y,z);
-      	glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,'c');
-		// Cell
-      	this->FractionalToOrthonormalCoords(xc,yc,zc);
-         glTranslatef(-xc, -yc, -zc);
-      	glBegin(GL_LINES);
-				//top
-				glNormal3f(x110+x010-xM,y110+y010-yM,z110+z010-zM);
-         	glVertex3f(    x110,    y110,    z110);
-         	glVertex3f(    x010,    y010,    z010);
-			
-				glNormal3f(x011+x010-xM,y011+y010-yM,z011+z010-zM);
-         	glVertex3f(    x010,    y010,    z010);
-         	glVertex3f(    x011,    y011,    z011);
-				
-				glNormal3f(x011+x111-xM,y011+y111-yM,z011+z111-zM);
-         	glVertex3f(    x011,    y011,    z011);
-         	glVertex3f(    x111,    y111,    z111);
+         x=-xc;y=-yc;z=1.2-zc;
+         this->FractionalToOrthonormalCoords(x,y,z);
+         glRasterPos3f(en*x,y,z);
+         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,'c');
+      // Cell
+         this->FractionalToOrthonormalCoords(xc,yc,zc);
+         glTranslatef(-xc*en, -yc, -zc);
+         glBegin(GL_LINES);
+            //top    
+            glNormal3f((x110+x010-xM)*en,y110+y010-yM,z110+z010-zM);
+            glVertex3f(    x110*en,    y110,    z110);
+            glVertex3f(    x010*en,    y010,    z010);
+         
+            glNormal3f((x011+x010-xM)*en,y011+y010-yM,z011+z010-zM);
+            glVertex3f(    x010*en,    y010,    z010);
+            glVertex3f(    x011*en,    y011,    z011);
+            
+            glNormal3f((x011+x111-xM)*en,y011+y111-yM,z011+z111-zM);
+            glVertex3f(    x011*en,    y011,    z011);
+            glVertex3f(    x111*en,    y111,    z111);
 
-				glNormal3f(x110+x111-xM,y110+y111-yM,z110+z111-zM);
-         	glVertex3f(    x111,    y111,    z111);
-         	glVertex3f(    x110,    y110,    z110);
-				//bottom
-				glNormal3f(x101+x001-xM,y101+y001-yM,z101+z001-zM);
-         	glVertex3f(    x101,    y101,    z101);
-         	glVertex3f(    x001,    y001,    z001);
+            glNormal3f((x110+x111-xM)*en,y110+y111-yM,z110+z111-zM);
+            glVertex3f(    x111*en,    y111,    z111);
+            glVertex3f(    x110*en,    y110,    z110);
+            //bottom
+            glNormal3f((x101+x001-xM)*en,y101+y001-yM,z101+z001-zM);
+            glVertex3f(    x101*en,    y101,    z101);
+            glVertex3f(    x001*en,    y001,    z001);
 
-				glNormal3f(x000+x001-xM,y000+y001-yM,z000+z001-zM);
-         	glVertex3f(    x001,    y001,    z001);
-         	glVertex3f(    x000,    y000,    z000);
+            glNormal3f((x000+x001-xM)*en,y000+y001-yM,z000+z001-zM);
+            glVertex3f(    x001*en,    y001,    z001);
+            glVertex3f(    x000*en,    y000,    z000);
 
-				glNormal3f(x000+x100-xM,y000+y100-yM,z000+z100-zM);
-         	glVertex3f(    x000,    y000,    z000);
-         	glVertex3f(    x100,    y100,    z100);
+            glNormal3f((x000+x100-xM)*en,y000+y100-yM,z000+z100-zM);
+            glVertex3f(    x000*en,    y000,    z000);
+            glVertex3f(    x100*en,    y100,    z100);
 
-				glNormal3f(x101+x100-xM,y101+y100-yM,z101+z100-zM);
-         	glVertex3f(    x100,    y100,    z100);
-         	glVertex3f(    x101,    y101,    z101);
-				//sides
-				glNormal3f(x101+x111-xM,y101+y111-yM,z101+z111-zM);
-         	glVertex3f(    x101,    y101,    z101);
-         	glVertex3f(    x111,    y111,    z111);
-				
-				glNormal3f(x001+x011-xM,y001+y011-yM,z001+z011-zM);
-         	glVertex3f(    x001,    y001,     z001);
-         	glVertex3f(    x011,    y011,     z011);
-			
-				glNormal3f(x000+x010-xM,y000+y010-yM,z000+z010-zM);
-         	glVertex3f(    x000,    y000,    z000);
-         	glVertex3f(    x010,    y010,    z010);
-			
-				glNormal3f(x100+x110-xM,y100+y110-yM,z100+z110-zM);
-         	glVertex3f(    x100,    y100,    z100);
-         	glVertex3f(    x110,    y110,    z110);
-      	glEnd();
+            glNormal3f((x101+x100-xM)*en,y101+y100-yM,z101+z100-zM);
+            glVertex3f(    x100*en,    y100,    z100);
+            glVertex3f(    x101*en,    y101,    z101);
+            //sides
+            glNormal3f((x101+x111-xM)*en,y101+y111-yM,z101+z111-zM);
+            glVertex3f(    x101*en,    y101,    z101);
+            glVertex3f(    x111*en,    y111,    z111);
+            
+            glNormal3f((x001+x011-xM)*en,y001+y011-yM,z001+z011-zM);
+            glVertex3f(    x001*en,    y001,     z001);
+            glVertex3f(    x011*en,    y011,     z011);
+         
+            glNormal3f((x000+x010-xM)*en,y000+y010-yM,z000+z010-zM);
+            glVertex3f(    x000*en,    y000,    z000);
+            glVertex3f(    x010*en,    y010,    z010);
+         
+            glNormal3f((x100+x110-xM)*en,y100+y110-yM,z100+z110-zM);
+            glVertex3f(    x100*en,    y100,    z100);
+            glVertex3f(    x110*en,    y110,    z110);
+         glEnd();
 
 
-   	//Describe all Scatterers
-   	VFN_DEBUG_MESSAGE("Crystal::GLView(bool):Scatterers...",5)
+      //Describe all Scatterers
+      VFN_DEBUG_MESSAGE("Crystal::GLView(bool):Scatterers...",5)
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-   	for(int i=0;i<mScattererRegistry.GetNb();i++) 
-      	this->GetScatt(i).GLInitDisplayList(onlyIndependentAtoms,
-                                          	xMin,xMax,yMin,yMax,zMin,zMax);
-
+      {
+         bool displayEnantiomer=false;
+         if(mDisplayEnantiomer.GetChoice()==1) displayEnantiomer=true;
+         for(int i=0;i<mScattererRegistry.GetNb();i++) 
+            this->GetScatt(i).GLInitDisplayList(onlyIndependentAtoms,
+                                                xMin,xMax,yMin,yMax,zMin,zMax,
+                                                displayEnantiomer);
+      }
    glPopMatrix();
    #else
    cout << "Crystal::GLView(): Compiled without OpenGL support !" <<endl;
@@ -994,14 +1001,14 @@ REAL Crystal::GetCostFunctionValue(const unsigned int n)
 
 void Crystal::GlobalOptRandomMove(const REAL mutationAmplitude)
 {
-	if(mRandomMoveIsDone) return;
+   if(mRandomMoveIsDone) return;
    VFN_DEBUG_ENTRY("Crystal::GlobalOptRandomMove()",2)
    //Either a random move or a permutation of two scatterers
    const unsigned long nb=(unsigned long)this->GetNbScatterer();
    if( ((rand()/(REAL)RAND_MAX)<.02) && (nb>1))
    {
-		// This is safe even if one scatterer is partially fixed,
-		// since we the SetX/SetY/SetZ actually use the MutateTo() function.
+      // This is safe even if one scatterer is partially fixed,
+      // since we the SetX/SetY/SetZ actually use the MutateTo() function.
       const unsigned long n1=rand()%nb;
       const unsigned long n2=(  (rand()%(nb-1)) +n1+1) %nb;
       const float x1=this->GetScatt(n1).GetX();
@@ -1116,36 +1123,36 @@ void Crystal::CIFOutput(ostream &os)const
    VFN_DEBUG_EXIT("Crystal::OutputCIF()",5)
 }
 void Crystal::GetGeneGroup(const RefinableObj &obj,
-										  CrystVector_uint & groupIndex,
-										  unsigned int &first) const
+                                CrystVector_uint & groupIndex,
+                                unsigned int &first) const
 {
-	// One group for all lattice parameters
-	unsigned int latticeIndex=0;
+   // One group for all lattice parameters
+   unsigned int latticeIndex=0;
    VFN_DEBUG_MESSAGE("Crystal::GetGeneGroup()",4)
-	for(long i=0;i<obj.GetNbPar();i++)
-		for(long j=0;j<this->GetNbPar();j++)
-			if(&(obj.GetPar(i)) == &(this->GetPar(j)))
-			{
-				//if(this->GetPar(j).GetType()->IsDescendantFromOrSameAs(gpRefParTypeUnitCell))
-				//{
-					if(latticeIndex==0) latticeIndex=first++;
-					groupIndex(i)=latticeIndex;
-				//}
-				//else //no parameters other than unit cell
-			}
+   for(long i=0;i<obj.GetNbPar();i++)
+      for(long j=0;j<this->GetNbPar();j++)
+         if(&(obj.GetPar(i)) == &(this->GetPar(j)))
+         {
+            //if(this->GetPar(j).GetType()->IsDescendantFromOrSameAs(gpRefParTypeUnitCell))
+            //{
+               if(latticeIndex==0) latticeIndex=first++;
+               groupIndex(i)=latticeIndex;
+            //}
+            //else //no parameters other than unit cell
+         }
 }
 void Crystal::BeginOptimization(const bool allowApproximations,const bool enableRestraints)
 {
-	for(int i=0;i<this->GetScattererRegistry().GetNb();i++)
-	{
-		this->GetScattererRegistry().GetObj(i).
-			SetGlobalOptimStep(gpRefParTypeScattTranslX,0.1/this->GetLatticePar(0));
-		this->GetScattererRegistry().GetObj(i).
-			SetGlobalOptimStep(gpRefParTypeScattTranslY,0.1/this->GetLatticePar(1));
-		this->GetScattererRegistry().GetObj(i).
-			SetGlobalOptimStep(gpRefParTypeScattTranslZ,0.1/this->GetLatticePar(2));
-	}
-	this->RefinableObj::BeginOptimization(allowApproximations,enableRestraints);
+   for(int i=0;i<this->GetScattererRegistry().GetNb();i++)
+   {
+      this->GetScattererRegistry().GetObj(i).
+         SetGlobalOptimStep(gpRefParTypeScattTranslX,0.1/this->GetLatticePar(0));
+      this->GetScattererRegistry().GetObj(i).
+         SetGlobalOptimStep(gpRefParTypeScattTranslY,0.1/this->GetLatticePar(1));
+      this->GetScattererRegistry().GetObj(i).
+         SetGlobalOptimStep(gpRefParTypeScattTranslZ,0.1/this->GetLatticePar(2));
+   }
+   this->RefinableObj::BeginOptimization(allowApproximations,enableRestraints);
 }
 
 void Crystal::Init(const REAL a, const REAL b, const REAL c, const REAL alpha,
@@ -1175,18 +1182,29 @@ void Crystal::Init(const REAL a, const REAL b, const REAL c, const REAL alpha,
    
    static string UseDynPopCorrname;
    static string UseDynPopCorrchoices[2];
+   
+   static string DisplayEnantiomername;
+   static string DisplayEnantiomerchoices[2];
    static bool needInitNames=true;
    if(true==needInitNames)
    {
       UseDynPopCorrname="Use Dynamical Occupancy Correction";
       UseDynPopCorrchoices[0]="No";
       UseDynPopCorrchoices[1]="Yes";
+      
+      DisplayEnantiomername="Display Enantiomer";
+      DisplayEnantiomerchoices[0]="No";
+      DisplayEnantiomerchoices[1]="Yes";
       needInitNames=false;//Only once for the class
    }
    VFN_DEBUG_MESSAGE("Crystal::Init(a,b,c,alpha,beta,gamma,Sg,name):Init options",5)
    mUseDynPopCorr.Init(2,&UseDynPopCorrname,UseDynPopCorrchoices);
    mUseDynPopCorr.SetChoice(1);
    this->AddOption(&mUseDynPopCorr);
+
+   mDisplayEnantiomer.Init(2,&DisplayEnantiomername,DisplayEnantiomerchoices);
+   mDisplayEnantiomer.SetChoice(0);
+   this->AddOption(&mDisplayEnantiomer);
    
    this->InitRefParList();
    this->InitMatrices();
@@ -1243,9 +1261,9 @@ void Crystal::InitMatrices() const
    
    //Seems OK- NO !
    //mOrthMatrixInvert= 1/a, -1/tan(gamma)/a , -cos(beta)/a/v/sin(gamma)*(1+cos(alpha)*cos(gamma)),
-   //						 0  , 1/b/sin(gamma)  , bb*cos(alphaa),
-   //						 0  , 0  				 , cc;
-	mOrthMatrixInvert=InvertMatrix(mOrthMatrix);
+   //                   0  , 1/b/sin(gamma)  , bb*cos(alphaa),
+   //                   0  , 0               , cc;
+   mOrthMatrixInvert=InvertMatrix(mOrthMatrix);
    //cout << "Orth Matrix :"<<endl<<mOrthMatrix <<endl;
    //cout << "InvOrth Matrix :"<<endl<<mOrthMatrixInvert <<endl;
    //cout << "Orth * InvOrth matrix :"<<endl<<product(mOrthMatrix,mOrthMatrixInvert) <<endl;

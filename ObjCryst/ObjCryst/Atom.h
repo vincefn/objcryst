@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ class Atom: public Scatterer
 {
    public:
       /// Default constructor. The Atom \e must be initialized thereafter
-		/// using Atom::Init()
+      /// using Atom::Init()
       Atom();
       /**   \brief Atom constructor
       *  \param x,y,z : \e fractional coordinates of the atom
@@ -73,10 +73,10 @@ class Atom: public Scatterer
       *  \param popu : the population of the atom (0.0->1.0)
       * This should take into account the multiplicity of the atom. For
       * an atom in group P2 and on the 2 axis, this should be set to 0.5,
-		* \b unless you are using the dynamical occupancy correction (recommended
-		* for global optimizations). See Crystal::CalcDynPopCorr() and
-		* Crystal::mUseDynPopCorr
-		*
+      * \b unless you are using the dynamical occupancy correction (recommended
+      * for global optimizations). See Crystal::CalcDynPopCorr() and
+      * Crystal::mUseDynPopCorr
+      *
       *  \param pow : the ScatteringPower associated to this atom. Must be allocated separatly.
       *  \param name : name of the atom ('Ta1','Sm2', 'Tungsten_1'...).
       * The name can have \e any format but spaces should be avoided (just a precaution)
@@ -96,7 +96,7 @@ class Atom: public Scatterer
       *  \param x,y,z : \e fractional coordinates of the atom
       *  \param pow : the ScatteringPower associated to this atom. Must be allocated separately.
       *  \param name : name of the atom ('Ta1','Sm2', 'Tungsten_1'...).
-		*/
+      */
       void Init(const REAL x, const REAL y, const REAL z,
             const string &name, const ScatteringPowerAtom *pow,
             const REAL popu=1);
@@ -129,7 +129,8 @@ class Atom: public Scatterer
       virtual void GLInitDisplayList(const bool onlyIndependentAtoms=false,
                                      const REAL xMin=-.1,const REAL xMax=1.1,
                                      const REAL yMin=-.1,const REAL yMax=1.1,
-                                     const REAL zMin=-.1,const REAL zMax=1.1)const;
+                                     const REAL zMin=-.1,const REAL zMax=1.1,
+                                     const bool displayEnantiomer=false)const;
 
       /// Is this a dummy atom ? (ie no ScatteringPower)
       /// Dummy atoms should not exist !
@@ -138,11 +139,11 @@ class Atom: public Scatterer
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
-		/// Get the ScatteringPowerAtom corresponding to this atom.
+      /// Get the ScatteringPowerAtom corresponding to this atom.
       const ScatteringPowerAtom& GetScatteringPower()const;
-		virtual void GetGeneGroup(const RefinableObj &obj, 
-										  CrystVector_uint & groupIndex,
-										  unsigned int &firstGroup) const;
+      virtual void GetGeneGroup(const RefinableObj &obj, 
+                                CrystVector_uint & groupIndex,
+                                unsigned int &firstGroup) const;
    protected:
    private:
       /// Prepare refinable parameters for the scatterer object

@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -82,9 +82,9 @@ class Scatterer:virtual public RefinableObj
       virtual int GetNbComponent() const=0;
       
       /** \brief Get the list of all scattering components for this scatterer.
-		*
-		* This is the most important function of this class, giving the list of 
-		* scattering positions along with the associated ScatteringPower.
+      *
+      * This is the most important function of this class, giving the list of 
+      * scattering positions along with the associated ScatteringPower.
       *
       */
       virtual const ScatteringComponentList& GetScatteringComponentList() const=0;
@@ -99,16 +99,16 @@ class Scatterer:virtual public RefinableObj
       virtual string GetComponentName(const int i) const=0;
 
       /// X coordinate (fractionnal) of the scatterer (for complex scatterers,
-		/// this corresponds to the position of one atom of the Scatterer, ideally
-		/// it should be near the center of the Scatterer.
+      /// this corresponds to the position of one atom of the Scatterer, ideally
+      /// it should be near the center of the Scatterer.
       REAL GetX() const;
       /// Y coordinate (fractionnal) of the scatterer (for complex scatterers,
-		/// this corresponds to the position of one atom of the Scatterer, ideally
-		/// it should be near the center of the Scatterer.
+      /// this corresponds to the position of one atom of the Scatterer, ideally
+      /// it should be near the center of the Scatterer.
       REAL GetY() const;  
       /// Z coordinate (fractionnal) of the scatterer (for complex scatterers,
-		/// this corresponds to the position of one atom of the Scatterer, ideally
-		/// it should be near the center of the Scatterer.
+      /// this corresponds to the position of one atom of the Scatterer, ideally
+      /// it should be near the center of the Scatterer.
       REAL GetZ() const;
       
       /** \brief Get the occupancy of the scatterer (0. -> 1.0)
@@ -122,16 +122,16 @@ class Scatterer:virtual public RefinableObj
       REAL GetOccupancy() const ;
 
       /// X coordinate (fractionnal) of the scatterer (for complex scatterers,
-		/// this corresponds to the position of one atom of the Scatterer, ideally
-		/// it should be near the center of the Scatterer.
+      /// this corresponds to the position of one atom of the Scatterer, ideally
+      /// it should be near the center of the Scatterer.
       virtual void SetX(const REAL x);
       /// Y coordinate (fractionnal) of the scatterer (for complex scatterers,
-		/// this corresponds to the position of one atom of the Scatterer, ideally
-		/// it should be near the center of the Scatterer.
+      /// this corresponds to the position of one atom of the Scatterer, ideally
+      /// it should be near the center of the Scatterer.
       virtual void SetY(const REAL y);  
       /// Z coordinate (fractionnal) of the scatterer (for complex scatterers,
-		/// this corresponds to the position of one atom of the Scatterer, ideally
-		/// it should be near the center of the Scatterer.
+      /// this corresponds to the position of one atom of the Scatterer, ideally
+      /// it should be near the center of the Scatterer.
       virtual void SetZ(const REAL z);
       /** \brief Change the occupancy of the scatterer (0. -> 1.0)
       *
@@ -144,8 +144,8 @@ class Scatterer:virtual public RefinableObj
       virtual void SetOccupancy(const REAL occupancy) ;
       
       /// Conversion function.-> returns the scatt name
-		///
-		/// \warning EXPERIMENTAL. DO NOT USE, as this may be removed.
+      ///
+      /// \warning EXPERIMENTAL. DO NOT USE, as this may be removed.
       operator string()const;
       /// Print some info about the scatterer (ideally this should be one line...).
       virtual void Print() const=0;
@@ -160,25 +160,26 @@ class Scatterer:virtual public RefinableObj
       virtual const float* GetColourRGB()const;
       
       /** \brief \internal Output a description of the scatterer for POVRay.
-		* This should only be called by the Crystal Object to which belongs this
-		* scatterer.
+      * This should only be called by the Crystal Object to which belongs this
+      * scatterer.
       *
       */
       virtual ostream& POVRayDescription(ostream &os,
                                          const bool noSymmetrics=false)const=0;
       /** \internal Create an OpenGL Display List of the scatterer. This should only
-		* be called by a Crystal object.
+      * be called by a Crystal object.
       *
-		* \param noSymmetrics: if false (the default), then all symmetrics are shown in the
-		* 3D display, within the limits defined by the min/max parameters
-		* \ param xMin,xMax,yMin,yMax,zMin,zMax: in fractionnal coordinates, the region
-		* in which we want scaterrer to be displayed. The test is made on the center
-		* of the scatterer (eg a ZScatterer (molecule) will not be 'cut' on the border).
+      * \param noSymmetrics: if false (the default), then all symmetrics are shown in the
+      * 3D display, within the limits defined by the min/max parameters
+      * \ param xMin,xMax,yMin,yMax,zMin,zMax: in fractionnal coordinates, the region
+      * in which we want scaterrer to be displayed. The test is made on the center
+      * of the scatterer (eg a ZScatterer (molecule) will not be 'cut' on the border).
       */
       virtual void GLInitDisplayList(const bool noSymmetrics=false,
                                      const REAL xMin=-.1,const REAL xMax=1.1,
                                      const REAL yMin=-.1,const REAL yMax=1.1,
-                                     const REAL zMin=-.1,const REAL zMax=1.1)const=0;
+                                     const REAL zMin=-.1,const REAL zMax=1.1,
+                                     const bool displayEnantiomer=false)const=0;
       /// Last time anything in the scatterer was changed (atoms, positions, scattering power)
       const RefinableObjClock& GetClockScatterer()const;
       /// Set the crystal in which is included this Scatterer
@@ -189,9 +190,9 @@ class Scatterer:virtual public RefinableObj
       /// \internal Prepare refinable parameters for the scatterer object
       virtual void InitRefParList()=0;
       /** Get RGB Colour coordinates from Colour Name. Note that the colour
-		* used for display is usually that of the ScatteringPower, not that of the Scatterer
-		*
-		*/
+      * used for display is usually that of the ScatteringPower, not that of the Scatterer
+      *
+      */
       virtual void InitRGBColour();
       /// Last time the ScatteringComponentList was generated
       const RefinableObjClock& GetClockScattCompList()const;
@@ -215,8 +216,8 @@ class Scatterer:virtual public RefinableObj
       /// This is needed so that we can know which scattering powers are available
       /// in the crystal, and also to convert fractionnal to orthonormal
       /// coordinates (for some scatterers only).
-		/// It cannot be const since some scatterers may want to modify
-		/// the list of scattering powers of the crystal...
+      /// It cannot be const since some scatterers may want to modify
+      /// the list of scattering powers of the crystal...
       Crystal *mpCryst;
       
    private:

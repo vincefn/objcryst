@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -612,10 +612,13 @@ ostream& ZScatterer::POVRayDescription(ostream &os,
 void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                                    const REAL xMin,const REAL xMax,
                                    const REAL yMin,const REAL yMax,
-                                   const REAL zMin,const REAL zMax)const
+                                   const REAL zMin,const REAL zMax,
+                                   const bool displayEnantiomer)const
 {
    #ifdef OBJCRYST_GL
    VFN_DEBUG_ENTRY("ZScatterer::GLInitDisplayList()",4)
+   REAL en=1;
+   if(displayEnantiomer==true) en=-1;
    this->UpdateScattCompList();
    if(true==mUseGlobalScattPow) 
    {
@@ -649,7 +652,7 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                   glMaterialfv (GL_FRONT, GL_AMBIENT_AND_DIFFUSE,
                                 mZAtomRegistry.GetObj(n1).GetScatteringPower()->GetColourRGB());
                   glPushMatrix();
-                     glTranslatef(x(n1), y(n1), z(n1));
+                     glTranslatef(x(n1)*en, y(n1), z(n1));
                      //glutSolidSphere
                      gluSphere(pQuadric,mZAtomRegistry.GetObj(n1).GetScatteringPower()
                                        ->GetRadius()/3.,10,10);
@@ -661,14 +664,14 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                   n1=m3DDisplayIndex(k,1);
                   n2=m3DDisplayIndex(k,2);
                   glPushMatrix();
-                     glTranslatef(x(n1), y(n1), z(n1));
+                     glTranslatef(x(n1)*en, y(n1), z(n1));
                      glMaterialfv (GL_FRONT, GL_AMBIENT_AND_DIFFUSE,colour_bond);
                      GLUquadricObj *quadobj = gluNewQuadric();
                      glColor3f(1.0f,1.0f,1.0f);
                      const REAL height= sqrt( (x(n2)-x(n1))*(x(n2)-x(n1))
                                               +(y(n2)-y(n1))*(y(n2)-y(n1))
                                               +(z(n2)-z(n1))*(z(n2)-z(n1)));
-                     glRotatef(180,x(n2)-x(n1),y(n2)-y(n1),z(n2)-z(n1)+height);// ?!?!?!
+                     glRotatef(180,(x(n2)-x(n1))*en,y(n2)-y(n1),z(n2)-z(n1)+height);// ?!?!?!
                      gluCylinder(quadobj,.1,.1,height,10,1 );
                      gluDeleteQuadric(quadobj);
                   glPopMatrix();
@@ -701,17 +704,17 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                                 mZAtomRegistry.GetObj(0).GetScatteringPower()->GetColourRGB());
                   //glColor3f(1.0f,1.0f,1.0f);      // White
                   glBegin(GL_TRIANGLES);            // Bottom
-                     if((xn*xc+yn*yc+zn*zc)>0) glNormal3f(xn, yn, zn);
-                     else glNormal3f(-xn, -yn, -zn);
-                     glVertex3f(x(n1),y(n1),z(n1));
-                     glVertex3f(x(n2),y(n2),z(n2));
-                     glVertex3f(x(n3),y(n3),z(n3));
+                     if((xn*xc+yn*yc+zn*zc)>0) glNormal3f(xn*en, yn, zn);
+                     else glNormal3f(-xn*en, -yn, -zn);
+                     glVertex3f(x(n1)*en,y(n1),z(n1));
+                     glVertex3f(x(n2)*en,y(n2),z(n2));
+                     glVertex3f(x(n3)*en,y(n3),z(n3));
                   glEnd();
                   glMaterialfv (GL_FRONT, GL_AMBIENT_AND_DIFFUSE,colour_side);
                   glBegin(GL_LINE_LOOP);
-                     glVertex3f(x(n1),y(n1),z(n1));
-                     glVertex3f(x(n2),y(n2),z(n2));
-                     glVertex3f(x(n3),y(n3),z(n3));
+                     glVertex3f(x(n1)*en,y(n1),z(n1));
+                     glVertex3f(x(n2)*en,y(n2),z(n2));
+                     glVertex3f(x(n3)*en,y(n3),z(n3));
                   glEnd();
                }
                case 4: // Draw a quadric face
@@ -742,19 +745,19 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                                 mZAtomRegistry.GetObj(0).GetScatteringPower()->GetColourRGB());
                   //glColor3f(1.0f,1.0f,1.0f);      // White
                   glBegin(GL_TRIANGLES);            // Bottom
-                     if((xn*xc+yn*yc+zn*zc)>0) glNormal3f(xn, yn, zn);
-                     else glNormal3f(-xn, -yn, -zn);
-                     glVertex3f(x(n1),y(n1),z(n1));
-                     glVertex3f(x(n2),y(n2),z(n2));
-                     glVertex3f(x(n3),y(n3),z(n3));
-                     glVertex3f(x(n4),y(n4),z(n4));
+                     if((xn*xc+yn*yc+zn*zc)>0) glNormal3f(xn*en, yn, zn);
+                     else glNormal3f(-xn*en, -yn, -zn);
+                     glVertex3f(x(n1)*en,y(n1),z(n1));
+                     glVertex3f(x(n2)*en,y(n2),z(n2));
+                     glVertex3f(x(n3)*en,y(n3),z(n3));
+                     glVertex3f(x(n4)*en,y(n4),z(n4));
                   glEnd();
                   glMaterialfv (GL_FRONT, GL_AMBIENT_AND_DIFFUSE,colour_side);
                   glBegin(GL_LINE_LOOP);
-                     glVertex3f(x(n1),y(n1),z(n1));
-                     glVertex3f(x(n2),y(n2),z(n2));
-                     glVertex3f(x(n3),y(n3),z(n3));
-                     glVertex3f(x(n4),y(n4),z(n4));
+                     glVertex3f(x(n1)*en,y(n1),z(n1));
+                     glVertex3f(x(n2)*en,y(n2),z(n2));
+                     glVertex3f(x(n3)*en,y(n3),z(n3));
+                     glVertex3f(x(n4)*en,y(n4),z(n4));
                   glEnd();
                }
             }
@@ -768,7 +771,7 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
             glMaterialfv (GL_FRONT, GL_AMBIENT_AND_DIFFUSE,
                           mZAtomRegistry.GetObj(k).GetScatteringPower()->GetColourRGB());
             glPushMatrix();
-               glTranslatef(x(k), y(k), z(k));
+               glTranslatef(x(k)*en, y(k), z(k));
                gluSphere(pQuadric,
                   mZAtomRegistry.GetObj(k).GetScatteringPower()->GetRadius()/3.,10,10);
                //Draw the bond for this Atom,if it's not linked to a dummy
@@ -781,7 +784,7 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                   const REAL height= sqrt( (x(bond)-x(k))*(x(bond)-x(k))
                                            +(y(bond)-y(k))*(y(bond)-y(k))
                                            +(z(bond)-z(k))*(z(bond)-z(k)));
-                  glRotatef(180,x(bond)-x(k),y(bond)-y(k),z(bond)-z(k)+height);// !!!
+                  glRotatef(180,(x(bond)-x(k))*en,y(bond)-y(k),z(bond)-z(k)+height);// !!!
                   gluCylinder(quadobj,.1,.1,height,10,1 );
                   gluDeleteQuadric(quadobj);
                }
@@ -906,18 +909,18 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                      glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,
                                  mZAtomRegistry.GetObj(0).GetScatteringPower()->GetColourRGB());
                      glBegin(GL_TRIANGLES);
-                        if((xn*xc+yn*yc+zn*zc)>0) glNormal3f( xn,  yn,  zn);
-                        else                      glNormal3f(-xn, -yn, -zn);
+                        if((xn*xc+yn*yc+zn*zc)>0) glNormal3f( xn*en,  yn,  zn);
+                        else                      glNormal3f(-xn*en, -yn, -zn);
                         
-                        glVertex3f(x(n1),y(n1),z(n1));
-                        glVertex3f(x(n2),y(n2),z(n2));
-                        glVertex3f(x(n3),y(n3),z(n3));
+                        glVertex3f(x(n1)*en,y(n1),z(n1));
+                        glVertex3f(x(n2)*en,y(n2),z(n2));
+                        glVertex3f(x(n3)*en,y(n3),z(n3));
                      glEnd();
                      glMaterialfv (GL_FRONT, GL_AMBIENT_AND_DIFFUSE,colour_side);
                      glBegin(GL_LINE_LOOP);
-                        glVertex3f(x(n1),y(n1),z(n1));
-                        glVertex3f(x(n2),y(n2),z(n2));
-                        glVertex3f(x(n3),y(n3),z(n3));
+                        glVertex3f(x(n1)*en,y(n1),z(n1));
+                        glVertex3f(x(n2)*en,y(n2),z(n2));
+                        glVertex3f(x(n3)*en,y(n3),z(n3));
                      glEnd();
                   }
                }
@@ -929,7 +932,7 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                      glMaterialfv (GL_FRONT,GL_AMBIENT_AND_DIFFUSE,
                         mZAtomRegistry.GetObj(k).GetScatteringPower()->GetColourRGB());
                      glPushMatrix();
-                        glTranslatef(x(k), y(k), z(k));
+                        glTranslatef(x(k)*en, y(k), z(k));
                         gluSphere(pQuadric,
                            mZAtomRegistry.GetObj(k).GetScatteringPower()->GetRadius()/3.,10,10);
                         //Draw the bond for this Atom,if it's not linked to a dummy
@@ -942,7 +945,7 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                            const REAL height= sqrt( (x(bond)-x(k))*(x(bond)-x(k))
                                                     +(y(bond)-y(k))*(y(bond)-y(k))
                                                     +(z(bond)-z(k))*(z(bond)-z(k)));
-                           glRotatef(180,x(bond)-x(k),y(bond)-y(k),z(bond)-z(k)+height);// !!!
+                           glRotatef(180,(x(bond)-x(k))*en,y(bond)-y(k),z(bond)-z(k)+height);// !!!
                            gluCylinder(quadobj,.1,.1,height,10,1 );
                            gluDeleteQuadric(quadobj);
                         }
@@ -1236,17 +1239,17 @@ void ZScatterer::ExportFenskeHallZMatrix(ostream &os)
 
 void ZScatterer::GlobalOptRandomMove(const REAL mutationAmplitude)
 {
-	if(mRandomMoveIsDone) return;
+   if(mRandomMoveIsDone) return;
    VFN_DEBUG_ENTRY("ZScatterer::GlobalOptRandomMove()",3)
    TAU_PROFILE("ZScatterer::GlobalOptRandomMove()","void ()",TAU_DEFAULT);
    // give a 2% chance of either moving a single atom, or move
-	// all atoms before a given torsion angle.
-	// Only try this if there are more than 10 atoms (else it's not worth the speed cost)
-	
+   // all atoms before a given torsion angle.
+   // Only try this if there are more than 10 atoms (else it's not worth the speed cost)
+   
    if((mNbAtom>=10) && ((rand()/(REAL)RAND_MAX)<.02))//.01
-	{
-   	TAU_PROFILE_TIMER(timer1,\
-							"ZScatterer::GlobalOptRandomMoveSmart1(prepare ref par & mutate)"\
+   {
+      TAU_PROFILE_TIMER(timer1,\
+                     "ZScatterer::GlobalOptRandomMoveSmart1(prepare ref par & mutate)"\
                      ,"", TAU_FIELD);
       TAU_PROFILE_TIMER(timer2,\
                      "ZScatterer::GlobalOptRandomMoveSmart2(optimize if necessary)"\
@@ -1508,7 +1511,7 @@ void ZScatterer::GlobalOptRandomMove(const REAL mutationAmplitude)
    {
       this->RefinableObj::GlobalOptRandomMove(mutationAmplitude);
    }
-	mRandomMoveIsDone=true;
+   mRandomMoveIsDone=true;
    VFN_DEBUG_EXIT("ZScatterer::GlobalOptRandomMove():End",3)
 }
 

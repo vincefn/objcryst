@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -78,7 +78,7 @@ extern const RefParType *gpRefParTypeUnitCellAngle;
 class Crystal:public RefinableObj
 {
    public:
-		/// Default Constructor
+      /// Default Constructor
       Crystal();
       /** \brief Crystal Constructor (orthorombic)
       *  \param a,b,c : unit cell dimension, in angstroems
@@ -107,8 +107,8 @@ class Crystal:public RefinableObj
       * will be detroyed when removed or when the Crystal is destroyed.
       * \param scatt : the address of the scatterer to be included in the crystal
       * scatterer names \b must be unique in a given crystal.
-		* \note that the ScatteringPower used in the Scatterer should be one
-		* of the Crystal (see Crystal::AddScatteringPower())
+      * \note that the ScatteringPower used in the Scatterer should be one
+      * of the Crystal (see Crystal::AddScatteringPower())
       *
       */
       void AddScatterer(Scatterer *scatt);
@@ -157,7 +157,7 @@ class Crystal:public RefinableObj
       /** \brief Get the list of all scattering components
       * \param useDynPopCorr: if true, then the dynamical polpulation correction
       * will be computed and stored in the list for each component. Else the
-		* dynamical occupancy correction will be set to 1 for all components.
+      * dynamical occupancy correction will be set to 1 for all components.
       */
       virtual const ScatteringComponentList& GetScatteringComponentList()const;
       /// Lattice parameters (a,b,c,alpha,beta,gamma) as a 6-element vector in Angstroems 
@@ -199,7 +199,7 @@ class Crystal:public RefinableObj
       void OrthonormalToFractionalCoords(REAL &x,REAL &y,REAL &z) const;
       /// Prints some info about the crystal
       /// \todo one function to print on one line and a PrintLong() function
-		/// \param os the stream to which the information is outputed (default=cout)
+      /// \param os the stream to which the information is outputed (default=cout)
       void Print(ostream &os=cout) const;
             
       /// Access to the crystal SpaceGroup object
@@ -217,7 +217,7 @@ class Crystal:public RefinableObj
       * Note that the distance of a given atom with 'itself' is not generally equal
       * to 0 (except full special position), but equal to the min distance with its 
       * symmetrics.
-		* 
+      * 
       * \param minDistance : atoms who are less distant than (minDistance,in Angstroems) 
       * are considered equivalent. So the smallest distance between any atoms will
       * be at least minDistance.
@@ -225,28 +225,28 @@ class Crystal:public RefinableObj
       CrystMatrix_REAL GetMinDistanceTable(const REAL minDistance=0.1) const;
       /** \brief Print the minimum distance table between all scattering centers
       * (atoms) in the crystal.
-		* \param os the stream to which the information is outputed (default=cout)
+      * \param os the stream to which the information is outputed (default=cout)
       */
       void PrintMinDistanceTable(const REAL minDistance=0.1,ostream &os=cout) const;
 
       /** \brief XMLOutput POV-Ray Description for this Crystal
-		*
-		* \param onlyIndependentAtoms if false, all symmetrics are showed in the
-		* drawing.
-		*
-		* \warning This currently needs some fixing (ZScatterer does not work ?)
-		* Use rather the OpenGL 3D display which is more useful.
       *
-		* \param os the stream to which the information is outputed (default=cout)
+      * \param onlyIndependentAtoms if false, all symmetrics are showed in the
+      * drawing.
+      *
+      * \warning This currently needs some fixing (ZScatterer does not work ?)
+      * Use rather the OpenGL 3D display which is more useful.
+      *
+      * \param os the stream to which the information is outputed (default=cout)
       */
       ostream& POVRayDescription(ostream &os,bool onlyIndependentAtoms=false)const;
       
       /** Create an OpenGL DisplayList of the crystal.
       * \param onlyIndependentAtoms if false (the default), then all symmetrics
-		* are displayed within the given limits
-		* \ param xMin,xMax,yMin,yMax,zMin,zMax: in fractionnal coordinates, the region
-		* in which we want scaterrers to be displayed. The test is made on the center
-		* of the scatterer (eg a ZScatterer (molecule) will not be 'cut' on the border).
+      * are displayed within the given limits
+      * \ param xMin,xMax,yMin,yMax,zMin,zMax: in fractionnal coordinates, the region
+      * in which we want scaterrers to be displayed. The test is made on the center
+      * of the scatterer (eg a ZScatterer (molecule) will not be 'cut' on the border).
       */
       virtual void GLInitDisplayList(const bool onlyIndependentAtoms=false,
                                      const REAL xMin=-.1,const REAL xMax=1.1,
@@ -255,48 +255,48 @@ class Crystal:public RefinableObj
       
       /** \internal \brief Compute the 'Dynamical population correction for all atoms.
       * Atoms which are considered "equivalent" (ie currently with the same Z number)
-		* and which are overlapping see their Dynamical occupancy changed so that when they
-		* fully overlap, they are equivalent to 1 atom.
-		*
-		*
+      * and which are overlapping see their Dynamical occupancy changed so that when they
+      * fully overlap, they are equivalent to 1 atom.
+      *
+      *
       *\param overlapDist : distance below which atoms (ScatteringComponents, to be more precise)
-		* are considered overlapping and
+      * are considered overlapping and
       * should be corrected. The correction changes the dynamical occupancy from
-		* 1 to 1/nbAtomOverlapping, progressively as the distance falls from \e overlapDist
-		* to \e mergeDist.
+      * 1 to 1/nbAtomOverlapping, progressively as the distance falls from \e overlapDist
+      * to \e mergeDist.
       *\param mergeDist : distance below which atoms are considered fully overlapping.
       * If 3 atoms are 'fully' overlapping, then all have a dynamical population 
       * correction equal to 1/3
       *
       * This is const since ScatteringComponent::mDynPopCorr is mutable.
-		*
-		* \warning. Do not call this function, which will turn private. This is
-		* called by \e only Crystal::GetScatteringComponentList()
+      *
+      * \warning. Do not call this function, which will turn private. This is
+      * called by \e only Crystal::GetScatteringComponentList()
       */
       void CalcDynPopCorr(const REAL overlapDist=1., const REAL mergeDist=.0)const ;
       /// Reset Dynamical Population Correction factors (ie set it to 1)
       void ResetDynPopCorr()const ;
       /** Set the use of dynamical population correction (Crystal::mUseDynPopCorr).
       * Atoms which are considered "equivalent" (ie currently with the same Z number)
-		* and which are overlapping see their Dynamical occupancy changed so that when they
-		* fully overlap, they are equivalent to 1 atom.
-		*
-		* The Dynamical Occupancy correction will be performed in
-		* Crystal::GetScatteringComponentList() automatically.
-		*
+      * and which are overlapping see their Dynamical occupancy changed so that when they
+      * fully overlap, they are equivalent to 1 atom.
+      *
+      * The Dynamical Occupancy correction will be performed in
+      * Crystal::GetScatteringComponentList() automatically.
+      *
       * This \e seriously affects the speed of the calculation, since computing
       * interatomic distances is lenghty.
-		* \param use set to 1 to use, 0 not to use it.
-		*/
+      * \param use set to 1 to use, 0 not to use it.
+      */
       void SetUseDynPopCorr(const int use);
       /** Get the Anti-bumping/pro-Merging cost function. Only works (ie returnes a non-null
-		* value) if you have added antibump distances using Crystal::SetBumpMergeDistance().
-		*
-		*/
+      * value) if you have added antibump distances using Crystal::SetBumpMergeDistance().
+      *
+      */
       REAL GetBumpMergeCostFunction() const;
       /** Set the Anti-bumping distance between two scattering types
-		* 
-		*/
+      * 
+      */
       void SetBumpMergeDistance(const ScatteringPower &scatt1,
                                 const ScatteringPower &scatt2, const REAL dist=1.5);
       /// Set the Anti-bumping distance between two scattering types.
@@ -326,11 +326,11 @@ class Crystal:public RefinableObj
       */
       virtual void CIFOutput(ostream &os)const;
       
-		virtual void GetGeneGroup(const RefinableObj &obj, 
-										  CrystVector_uint & groupIndex,
-										  unsigned int &firstGroup) const;
+      virtual void GetGeneGroup(const RefinableObj &obj, 
+                                CrystVector_uint & groupIndex,
+                                unsigned int &firstGroup) const;
       virtual void BeginOptimization(const bool allowApproximations=false,
-												 const bool enableRestraints=false);
+                                     const bool enableRestraints=false);
    protected:
    
    private:
@@ -349,7 +349,7 @@ class Crystal:public RefinableObj
       int FindScatterer(const string &scattName)const;
       
       /// \internal.Init the (de)orthogonalization matrices. 
-		/// They are re-computed only if parameters have changed since last call.
+      /// They are re-computed only if parameters have changed since last call.
       void InitMatrices() const;
       /// \internal
       /// Update cell parameters for tetragonal, trigonal, hexagonal, cubic lattices.
@@ -361,7 +361,7 @@ class Crystal:public RefinableObj
       /** \brief Prepare the refinable parameters list
       *
       * This is called once when creating the crystal.
-		* OBSOLETE ?
+      * OBSOLETE ?
       */
       void InitRefParList();
       
@@ -379,14 +379,14 @@ class Crystal:public RefinableObj
       * could have an atom2 neighbor just outside the sym unit: if margin=0, then the distance
       * is calculated between atom1 and the atom2 symmetric inside the asym unit).
       * \warning Crystal::GetScatteringComponentList() \b must be called beforehand,
-		* since this will not be done here.
-		*
-		* \return see Crystal::mDistTableSq and Crystal::mDistTableIndex
-		* \todo sanitize the result distance table in a more usable structure than the currently
-		* used Crystal::mDistTableSq and Crystal::mDistTableIndex.
-		* \warning \e not using the fast option has not been very much tested...
-		* \todo optimize again. Test if recomputation is needed using Clocks.
-		* Use a global option instead of asymUnitMargin.
+      * since this will not be done here.
+      *
+      * \return see Crystal::mDistTableSq and Crystal::mDistTableIndex
+      * \todo sanitize the result distance table in a more usable structure than the currently
+      * used Crystal::mDistTableSq and Crystal::mDistTableIndex.
+      * \warning \e not using the fast option has not been very much tested...
+      * \todo optimize again. Test if recomputation is needed using Clocks.
+      * Use a global option instead of asymUnitMargin.
       */
       void CalcDistTable(const bool fast,const REAL asymUnitMargin=4)const;
             
@@ -428,11 +428,11 @@ class Crystal:public RefinableObj
       *
       * Matrix, in Angstroems^2 (the square root is not computed
       *for optimization purposes), with as many columns as there are components
-		* in Crystal::mScattCompList, and as many rows as necessary (to include
-		* symmetrics in and nearby the Asymmetric Unit). See Crystal::CalcDistTable()
-		*
-		* The order of columns follows the order in Crystal::mScattCompList. The order
-		* of rows is given in Crystal::mDistTableIndex
+      * in Crystal::mScattCompList, and as many rows as necessary (to include
+      * symmetrics in and nearby the Asymmetric Unit). See Crystal::CalcDistTable()
+      *
+      * The order of columns follows the order in Crystal::mScattCompList. The order
+      * of rows is given in Crystal::mDistTableIndex
       */
       mutable CrystMatrix_REAL mDistTableSq;
       /** \brief Index of scattering components for the Distance table
@@ -472,6 +472,12 @@ class Crystal:public RefinableObj
       mutable RefinableObjClock mClockLatticeParUpdate;
       /// \internal Last time the dynamical population correction was computed
       mutable RefinableObjClock mClockDynPopCorr;
+      
+      /// Display the enantiomeric (mirror along x) structure in 3D? This can
+      /// be helpful for non-centrosymmetric structure which have been solved using
+      /// powder diffraction (which only gives the relative configuration).
+      RefObjOpt mDisplayEnantiomer;
+      
    #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);

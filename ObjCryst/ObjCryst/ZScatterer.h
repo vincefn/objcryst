@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -165,21 +165,21 @@ class ZAtom
 //######################################################################
 class ZMoveMinimizer:public RefinableObj
 {
-	public:
-		ZMoveMinimizer(ZScatterer &scatt);
-		~ZMoveMinimizer();
+   public:
+      ZMoveMinimizer(ZScatterer &scatt);
+      ~ZMoveMinimizer();
       virtual unsigned int GetNbCostFunction()const;
       virtual const string& GetCostFunctionName(const unsigned int)const;
       virtual const string& GetCostFunctionDescription(const unsigned int)const;
       virtual REAL GetCostFunctionValue(const unsigned int);
-		void RecordConformation();
-		void SetZAtomWeight(const CrystVector_REAL weight);
-		void MinimizeChange(long nbTrial=10000);
-	private:
-		ZScatterer *mpZScatt;
-		MonteCarloObj mOptimObj;
-		CrystVector_REAL mXCoord0,mYCoord0,mZCoord0;
-		CrystVector_REAL mAtomWeight;
+      void RecordConformation();
+      void SetZAtomWeight(const CrystVector_REAL weight);
+      void MinimizeChange(long nbTrial=10000);
+   private:
+      ZScatterer *mpZScatt;
+      MonteCarloObj mOptimObj;
+      CrystVector_REAL mXCoord0,mYCoord0,mZCoord0;
+      CrystVector_REAL mAtomWeight;
 };
 
 //######################################################################
@@ -266,79 +266,80 @@ class ZScatterer: public Scatterer
 
       ///Access to the registry of ZAtoms
       const ObjRegistry<ZAtom>& GetZAtomRegistry()const;
-		/// \warning Not implemented for ZScatterer
+      /// \warning Not implemented for ZScatterer
       virtual ostream& POVRayDescription(ostream &os,
                                          const bool onlyIndependentAtoms=false)const;
 
       virtual void GLInitDisplayList(const bool onlyIndependentAtoms=false,
                                      const REAL xMin=-.1,const REAL xMax=1.1,
                                      const REAL yMin=-.1,const REAL yMax=1.1,
-                                     const REAL zMin=-.1,const REAL zMax=1.1)const;
+                                     const REAL zMin=-.1,const REAL zMax=1.1,
+                                     const bool displayEnantiomer=false)const;
       /** \brief use a Global scattering power for this scatterer ?
       *
       * If true, then the overall scattering power of this ZScatterer will be 
       * approximated to an isotropic scattering power computed for this scatterer.
       * Of course, only use this if the "isotropic" approximation is reasonable for
       * this scatterer (typically true for 'large' polyhedra). See GlobalScatteringPower.
-		*
-		* \warning EXPERIMENTAL
+      *
+      * \warning EXPERIMENTAL
       */
       virtual void SetUseGlobalScatteringPower(const bool useIt);
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
-		virtual void GetGeneGroup(const RefinableObj &obj, 
-										  CrystVector_uint & groupIndex,
-										  unsigned int &firstGroup) const;
+      virtual void GetGeneGroup(const RefinableObj &obj, 
+                                CrystVector_uint & groupIndex,
+                                unsigned int &firstGroup) const;
       virtual void GlobalOptRandomMove(const REAL mutationAmplitude);
-		/// Get the list of all ZAtom cartesian x coordinates.
-		const CrystVector_REAL& GetXCoord() const;
-		/// Get the list of all ZAtom cartesian x coordinates.
-		const CrystVector_REAL& GetYCoord() const;
-		/// Get the list of all ZAtom cartesian x coordinates.
-		const CrystVector_REAL& GetZCoord() const;
+      /// Get the list of all ZAtom cartesian x coordinates.
+      const CrystVector_REAL& GetXCoord() const;
+      /// Get the list of all ZAtom cartesian x coordinates.
+      const CrystVector_REAL& GetYCoord() const;
+      /// Get the list of all ZAtom cartesian x coordinates.
+      const CrystVector_REAL& GetZCoord() const;
       virtual void EndOptimization();
-		/** Import "Fenske-Hall" ZMatrix file (fhz in the babel
-		* program http://www.eyesopen.com/babel.html\
-		* example: use "./babel -ipdb foo.pdb -ofhz foo.fhz -d",
-		* to convert a pdb file to a Z-Matrix file (the -d removes
-		* hydrogen atoms)
-		*
-		* \warning: this should be called before any atom has been
-		* added (if there are already atoms, they should be removed
-		* but this has not been tested...)
-		*
-		* \note: this will search in the Crystal associated with this
-		* ZScatterer the relevant ScatteringPowerAtom, which should have
-		* the name of the corresponding symbol (eg 'H', 'C',...)
-		* if these are not found then they will be added to the Crystal
-		* with a default isotropic B-factor equal to 1.
-		* \note: this also sets relative limits of +/-.03 Angstroems
-		* for all bond distances, and +/-3.6 degress for bond and
-		* dihedral angles.
-		* \todo: identify which dihedral angles should \e not be limited,
-		* by analysing a coordination table.
-		*/
-		void ImportFenskeHallZMatrix(istream &is);
-		/** Export to Fenske-Hall ZMatrix file
-		* 
-		* \todo USe more strict formatting than space-delimited.
-		*/
-		void ExportFenskeHallZMatrix(ostream &os);
+      /** Import "Fenske-Hall" ZMatrix file (fhz in the babel
+      * program http://www.eyesopen.com/babel.html\
+      * example: use "./babel -ipdb foo.pdb -ofhz foo.fhz -d",
+      * to convert a pdb file to a Z-Matrix file (the -d removes
+      * hydrogen atoms)
+      *
+      * \warning: this should be called before any atom has been
+      * added (if there are already atoms, they should be removed
+      * but this has not been tested...)
+      *
+      * \note: this will search in the Crystal associated with this
+      * ZScatterer the relevant ScatteringPowerAtom, which should have
+      * the name of the corresponding symbol (eg 'H', 'C',...)
+      * if these are not found then they will be added to the Crystal
+      * with a default isotropic B-factor equal to 1.
+      * \note: this also sets relative limits of +/-.03 Angstroems
+      * for all bond distances, and +/-3.6 degress for bond and
+      * dihedral angles.
+      * \todo: identify which dihedral angles should \e not be limited,
+      * by analysing a coordination table.
+      */
+      void ImportFenskeHallZMatrix(istream &is);
+      /** Export to Fenske-Hall ZMatrix file
+      * 
+      * \todo USe more strict formatting than space-delimited.
+      */
+      void ExportFenskeHallZMatrix(ostream &os);
    protected:
-		/** Update the atom coordinates (in real units, in Angstroems).
-		*
-		* This takes into account the translation and global 
-		* rotation of the scatterer (ie this does not generate 'internal
-		* coordinates).
-		*/
+      /** Update the atom coordinates (in real units, in Angstroems).
+      *
+      * This takes into account the translation and global 
+      * rotation of the scatterer (ie this does not generate 'internal
+      * coordinates).
+      */
       void UpdateCoordinates() const;
-		/** Update the scattering component list, ie compute all atom
-		* positions from the bonds/angles/dihedral angles, and convert
-		* the coordinates to fractionnal coordinates of the Crystal.
-		*
-		* 
-		*/
+      /** Update the scattering component list, ie compute all atom
+      * positions from the bonds/angles/dihedral angles, and convert
+      * the coordinates to fractionnal coordinates of the Crystal.
+      *
+      * 
+      */
       void UpdateScattCompList() const;
       /** For 3D display of the structure, bonds, triangular and quadric
       * faces can be displayed. This matrix determines what is drawn.
@@ -349,11 +350,11 @@ class ZScatterer: public Scatterer
       * drawing (2 atoms for a bond, 3 for....)
       *
       * If the matrix is empty only the individual atoms are displayed.
-		*
-		* \todo This is still experimental. This is only used for the display
-		* of ZPolyhedron, and should be more developped (and it should also
-		* be saved in XML files !)
-		*/
+      *
+      * \todo This is still experimental. This is only used for the display
+      * of ZPolyhedron, and should be more developped (and it should also
+      * be saved in XML files !)
+      */
       CrystMatrix_long m3DDisplayIndex;
       /// The list of scattering components.
       mutable ScatteringComponentList mScattCompList;
@@ -376,9 +377,9 @@ class ZScatterer: public Scatterer
       /** \brief Angles giving the orientation of the ZScatterer (stored in radian)
       *
       * The position of any atom can be transformed from internal coordinates (orthonormal
-		* coordinates derived from the ZMatrix, with first atom at (0,0,0), second
-		* atom at (x,0,0), third atom at (x,y,0),...) to orthonormal coordinates in
-		* the crystal reference frame (ie with orientation of the ZScatterer) using :
+      * coordinates derived from the ZMatrix, with first atom at (0,0,0), second
+      * atom at (x,0,0), third atom at (x,y,0),...) to orthonormal coordinates in
+      * the crystal reference frame (ie with orientation of the ZScatterer) using :
       * \f[ \left[ \begin{array}{c} x(i) \\ y(i) \\ z(i) \end{array} \right]_{orthonormal}
               = \left[ \begin{array}{ccc} \cos(\chi) & 0 & -\sin(\chi) \\
                                            0 & 1 & 0 \\
@@ -393,7 +394,7 @@ class ZScatterer: public Scatterer
       * \f]
       *, where x0(i), y0(i) and z0(i) describe the position for atom (i) in
       * internal coordinates, and x(i), y(i), z(i) are coordinates of the rotated ZScatterer.
-		*
+      *
       *
       * The rotation is performed around a 'pivot' atom (see ZScatterer::mPivotAtom)
       */
@@ -402,26 +403,26 @@ class ZScatterer: public Scatterer
       /// Registry for ZAtoms in this Scatterer.
       ObjRegistry<ZAtom> mZAtomRegistry;
       /// Index of the atom used as a pivot (the scatterer is rotated around this atom).
-		/// This should more or less be at the center of the Scatterer.
+      /// This should more or less be at the center of the Scatterer.
       long mCenterAtomIndex;
       
       /// Rotation matrix for the orientation of the scatterer
       mutable CrystMatrix_REAL mPhiChiPsiMatrix;
       
       /// Does the ZScatterer use a global scattering power ?
-		/// \warning EXPERIMENTAL.
+      /// \warning EXPERIMENTAL.
       bool mUseGlobalScattPow;
       
       /// the global scattering power used, if mUseGlobalScattPow=true
-		/// \warning EXPERIMENTAL.
+      /// \warning EXPERIMENTAL.
       GlobalScatteringPower* mpGlobalScattPow;
       
       /// Storage for Cartesian coordinates. The (0,0,0) is on the central atom. This
       /// includes Dummy atoms.
       mutable CrystVector_REAL mXCoord,mYCoord,mZCoord;
-		/// Last time the cartesian coordinates were computed
+      /// Last time the cartesian coordinates were computed
       mutable RefinableObjClock mClockCoord;
-		ZMoveMinimizer *mpZMoveMinimizer;
+      ZMoveMinimizer *mpZMoveMinimizer;
    #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);
@@ -476,7 +477,7 @@ class ZPolyhedron: public ZScatterer
             const REAL ligandPopu=1,
             const REAL phi=0., const REAL chi=0., const REAL psi=0.);
       /// Copy Constructor
-		ZPolyhedron(const ZPolyhedron&);
+      ZPolyhedron(const ZPolyhedron&);
       /// \internal so-called Virtual copy constructor, needed to make copies
       ///of arrays of Scatterers
       virtual ZPolyhedron* CreateCopy() const;

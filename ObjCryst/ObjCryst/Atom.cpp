@@ -1,6 +1,6 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
     (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
-	     2000-2001 University of Geneva (Switzerland)
+        2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -115,8 +115,8 @@ Atom::~Atom()
 
 const string& Atom::GetClassName()const
 {
-	const static string className="Atom";
-	return className;
+   const static string className="Atom";
+   return className;
 }
 
 void Atom::operator=(const Atom &rhs)
@@ -301,10 +301,13 @@ ostream& Atom::POVRayDescription(ostream &os,
 void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
                              const REAL xMin,const REAL xMax,
                              const REAL yMin,const REAL yMax,
-                             const REAL zMin,const REAL zMax)const
+                             const REAL zMin,const REAL zMax,
+                             const bool displayEnantiomer)const
 {
    #ifdef OBJCRYST_GL
    VFN_DEBUG_MESSAGE("Atom::GLInitDisplayList():"<<this->GetName(),5)
+   REAL en=1;
+   if(displayEnantiomer==true) en=-1;
    glMaterialfv (GL_FRONT, GL_AMBIENT_AND_DIFFUSE, mpScattPowAtom->GetColourRGB());
    
    if(this->IsDummy()) return ;
@@ -320,7 +323,7 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
       z = fmod((REAL)z,(int)1); if(z<0) z+=1.;
       this->GetCrystal().FractionalToOrthonormalCoords(x,y,z);
       glPushMatrix();
-         glTranslatef(x, y, z);
+         glTranslatef(x*en, y, z);
          gluSphere(pQuadric,this->GetRadius()/3,10,10);
       glPopMatrix();
    }
@@ -381,7 +384,7 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
             {
                this->GetCrystal().FractionalToOrthonormalCoords(x,y,z);
                glPushMatrix();
-                  glTranslatef(x, y, z);
+                  glTranslatef(x*en, y, z);
                   gluSphere(pQuadric,this->GetRadius()/3.,10,10);
                glPopMatrix();
             }
@@ -399,23 +402,23 @@ const ScatteringPowerAtom& Atom::GetScatteringPower()const
 { return *mpScattPowAtom;}
 
 void Atom::GetGeneGroup(const RefinableObj &obj,
-										  CrystVector_uint & groupIndex,
-										  unsigned int &first) const
+                                CrystVector_uint & groupIndex,
+                                unsigned int &first) const
 {
-	//One group for all translation parameters
-	unsigned int posIndex=0;
+   //One group for all translation parameters
+   unsigned int posIndex=0;
    VFN_DEBUG_MESSAGE("Atom::GetGeneGroup()",4)
-	for(long i=0;i<obj.GetNbPar();i++)
-		for(long j=0;j<this->GetNbPar();j++)
-			if(&(obj.GetPar(i)) == &(this->GetPar(j)))
-			{
-				if(this->GetPar(j).GetType()->IsDescendantFromOrSameAs(gpRefParTypeScattTransl))
-				{
-					if(posIndex==0) posIndex=first++;
-					groupIndex(i)=posIndex;
-				}
-				else groupIndex(i)= first++;
-			}
+   for(long i=0;i<obj.GetNbPar();i++)
+      for(long j=0;j<this->GetNbPar();j++)
+         if(&(obj.GetPar(i)) == &(this->GetPar(j)))
+         {
+            if(this->GetPar(j).GetType()->IsDescendantFromOrSameAs(gpRefParTypeScattTransl))
+            {
+               if(posIndex==0) posIndex=first++;
+               groupIndex(i)=posIndex;
+            }
+            else groupIndex(i)= first++;
+         }
 }
 
 void Atom::InitRefParList()
