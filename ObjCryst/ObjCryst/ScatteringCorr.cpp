@@ -347,7 +347,7 @@ void TextureMarchDollase::AddPhase(const REAL f, const REAL c,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1.);
       tmp.AssignClock(mClockTexturePar);
       tmp.SetDerivStep(1e-7);
-      tmp.SetGlobalOptimStep(.04);
+      tmp.SetGlobalOptimStep(.1);
       this->AddPar(tmp);
    }
    {
@@ -356,7 +356,7 @@ void TextureMarchDollase::AddPhase(const REAL f, const REAL c,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1.);
       tmp.AssignClock(mClockTexturePar);
       tmp.SetDerivStep(1e-7);
-      tmp.SetGlobalOptimStep(.1);
+      tmp.SetGlobalOptimStep(.25);
       this->AddPar(tmp);
    }
    {
@@ -425,30 +425,58 @@ void TextureMarchDollase::GlobalOptRandomMove(const REAL mutationAmplitude)
       VFN_DEBUG_MESSAGE("TextureMarchDollase::GlobalOptRandomMove()",1)
       for(unsigned int i=0;i<this->GetNbPhase();i++)
       {
+         // :TODO: Give some probability (1% ?) to invert the March coefficient
+         // with a direction perpendicular to the current one ?
+         
          RefinablePar *pF=&(this->GetPar(&(mPhaseRegistry.GetObj(i).mFraction)));
          RefinablePar *pM=&(this->GetPar(&(mPhaseRegistry.GetObj(i).mMarchCoeff)));
          RefinablePar *pH=&(this->GetPar(&(mPhaseRegistry.GetObj(i).mH)));
          RefinablePar *pK=&(this->GetPar(&(mPhaseRegistry.GetObj(i).mK)));
          RefinablePar *pL=&(this->GetPar(&(mPhaseRegistry.GetObj(i).mL)));
          if(pF->IsFixed()==false)
-            pF->Mutate(pF->GetGlobalOptimStep()*2*(rand()/(REAL)RAND_MAX-0.5)*mutationAmplitude);
-         if((pM->IsFixed()==false) &&
-            ((pH->IsFixed()==false)||(pK->IsFixed()==false)||(pL->IsFixed()==false)))
+         {
+            const REAL delta=pF->GetGlobalOptimStep()*mutationAmplitude;
+            const REAL sig=4*delta;
+            const REAL y0=mPhaseRegistry.GetObj(i).mBiasFraction;
+            REAL y,ymin,ymax;
+            y=pF->GetValue();
+            
+            ymax=.5+1/M_PI*atan((y+delta-y0)/(2.*sig));
+            ymin=.5+1/M_PI*atan((y-delta-y0)/(2.*sig));
+            y=ymin+rand()/(REAL)RAND_MAX*(ymax-ymin);
+            pF->MutateTo(y0+2*sig*tan(M_PI*(y-.5)));
+         }
+         if((pH->IsFixed()==false)||(pK->IsFixed()==false)||(pL->IsFixed()==false))
          {
             REAL tx=pH->GetValue();
             REAL ty=pK->GetValue();
             REAL tz=pL->GetValue();
             mpData->GetCrystal().MillerToOrthonormalCoords(tx,ty,tz);
+            {
+               REAL tx0=mPhaseRegistry.GetObj(i).mBiasH;
+               REAL ty0=mPhaseRegistry.GetObj(i).mBiasK;
+               REAL tz0=mPhaseRegistry.GetObj(i).mBiasL;
+               mpData->GetCrystal().MillerToOrthonormalCoords(tx0,ty0,tz0);
+               const REAL delta=pH->GetGlobalOptimStep()*mutationAmplitude*mPhaseRegistry.GetObj(i).mNorm;
+               const REAL sig=2*delta;
+               REAL y,ymin,ymax;
 
-            tx += pH->GetGlobalOptimStep()*2*(rand()/(REAL)RAND_MAX-0.5)
-                     *mutationAmplitude*mPhaseRegistry.GetObj(i).mNorm;
-            ty += pK->GetGlobalOptimStep()*2*(rand()/(REAL)RAND_MAX-0.5)
-                     *mutationAmplitude*mPhaseRegistry.GetObj(i).mNorm;
-            tz += pL->GetGlobalOptimStep()*2*(rand()/(REAL)RAND_MAX-0.5)
-                     *mutationAmplitude*mPhaseRegistry.GetObj(i).mNorm;
+               ymax=.5+1/M_PI*atan((tx+delta-tx0)/(2.*sig));
+               ymin=.5+1/M_PI*atan((tx-delta-tx0)/(2.*sig));
+               y=ymin+rand()/(REAL)RAND_MAX*(ymax-ymin);
+               tx=tx0+2*sig*tan(M_PI*(y-.5));
 
+               ymax=.5+1/M_PI*atan((ty+delta-ty0)/(2.*sig));
+               ymin=.5+1/M_PI*atan((ty-delta-ty0)/(2.*sig));
+               y=ymin+rand()/(REAL)RAND_MAX*(ymax-ymin);
+               ty=ty0+2*sig*tan(M_PI*(y-.5));
+
+               ymax=.5+1/M_PI*atan((tz+delta-tz0)/(2.*sig));
+               ymin=.5+1/M_PI*atan((tz-delta-tz0)/(2.*sig));
+               y=ymin+rand()/(REAL)RAND_MAX*(ymax-ymin);
+               tz=tz0+2*sig*tan(M_PI*(y-.5));
+            }
             const REAL factor=mPhaseRegistry.GetObj(i).mNorm/sqrt(tx*tx+ty*ty+tz*tz);
-            pM->MutateTo(pM->GetValue()/factor);
             tx *= factor;
             ty *= factor;
             tz *= factor;
@@ -457,36 +485,19 @@ void TextureMarchDollase::GlobalOptRandomMove(const REAL mutationAmplitude)
             pK->MutateTo(ty);
             pL->MutateTo(tz);
          }
-         else
+         if(pM->IsFixed()==false)
          {
-            if(pM->IsFixed()==false)
-            {
-               pM->MutateTo(pM->GetValue()*(1.+pM->GetGlobalOptimStep()*2
-                                               *(rand()/(REAL)RAND_MAX-0.5)*mutationAmplitude));
-            }
-            if((pH->IsFixed()==false)||(pK->IsFixed()==false)||(pL->IsFixed()==false))
-            {
-               REAL tx=pH->GetValue();
-               REAL ty=pK->GetValue();
-               REAL tz=pL->GetValue();
-               mpData->GetCrystal().MillerToOrthonormalCoords(tx,ty,tz);
+            // Given the nature of this param, we use a proportionnal max step
+            const REAL delta=pM->GetGlobalOptimStep()*mutationAmplitude;
+            const REAL sig=2*delta;
+            REAL y,ymin,ymax;
+            y=log(pM->GetValue());
+            const REAL y0=log(mPhaseRegistry.GetObj(i).mBiasMarchCoeff);
 
-               tx += pH->GetGlobalOptimStep()*2*(rand()/(REAL)RAND_MAX-0.5)
-                        *mutationAmplitude*mPhaseRegistry.GetObj(i).mNorm;
-               ty += pK->GetGlobalOptimStep()*2*(rand()/(REAL)RAND_MAX-0.5)
-                        *mutationAmplitude*mPhaseRegistry.GetObj(i).mNorm;
-               tz += pL->GetGlobalOptimStep()*2*(rand()/(REAL)RAND_MAX-0.5)
-                        *mutationAmplitude*mPhaseRegistry.GetObj(i).mNorm;
-
-               const REAL factor=mPhaseRegistry.GetObj(i).mNorm/sqrt(tx*tx+ty*ty+tz*tz);
-               tx *= factor;
-               ty *= factor;
-               tz *= factor;
-               mpData->GetCrystal().OrthonormalToMillerCoords(tx,ty,tz);
-               pH->MutateTo(tx);
-               pK->MutateTo(ty);
-               pL->MutateTo(tz);
-            }
+            ymin=.5+1/M_PI*atan((y-delta-y0)/(2.*sig));
+            ymax=.5+1/M_PI*atan((y+delta-y0)/(2.*sig));
+            y=ymin+rand()/(REAL)RAND_MAX*(ymax-ymin);
+            pM->MutateTo(exp(y0+2*sig*tan(M_PI*(y-.5))));
          }
       }
    }
