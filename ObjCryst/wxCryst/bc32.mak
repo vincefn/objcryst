@@ -3,8 +3,7 @@
 #!include $(DIR_WXWINDOWS)\src\makeprog.b32
 
 lib : trackball.obj wxAtom.obj wxCryst.obj wxCrystal.obj wxGlobalOptimObj.obj wxPowderPattern.obj wxRefinableObj.obj wxScatterer.obj wxScatteringPower.obj wxZScatterer.obj wxDiffractionSingleCrystal.obj
-	del libwxCryst.lib
-	tlib "libwxCryst.lib" +trackball.obj +wxAtom.obj +wxCryst.obj +wxCrystal.obj +wxGlobalOptimObj.obj +wxPowderPattern.obj +wxRefinableObj.obj +wxScatterer.obj +wxScatteringPower.obj +wxZScatterer.obj +wxDiffractionSingleCrystal.obj
+	tlib "libwxCryst.lib" -+trackball.obj -+wxAtom.obj -+wxCryst.obj -+wxCrystal.obj -+wxGlobalOptimObj.obj -+wxPowderPattern.obj -+wxRefinableObj.obj -+wxScatterer.obj -+wxScatteringPower.obj -+wxZScatterer.obj -+wxDiffractionSingleCrystal.obj
 
 TARGET= Fox
 
