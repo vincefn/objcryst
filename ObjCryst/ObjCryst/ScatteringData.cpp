@@ -286,7 +286,7 @@ void Radiation::InitOptions()
    static string RadiationTypeName;
    static string RadiationTypeChoices[2];
    static string WavelengthTypeName;
-   static string WavelengthTypeChoices[5];
+   static string WavelengthTypeChoices[2];
    
    static bool needInitNames=true;
    if(true==needInitNames)
@@ -675,6 +675,28 @@ const CrystVector_REAL& ScatteringData::GetL() const {return mL;}
 const CrystVector_REAL& ScatteringData::GetH2Pi() const {return mH2Pi;}
 const CrystVector_REAL& ScatteringData::GetK2Pi() const {return mK2Pi;}
 const CrystVector_REAL& ScatteringData::GetL2Pi() const {return mH2Pi;}
+
+const CrystVector_REAL& ScatteringData::GetReflX() const
+{
+   VFN_DEBUG_ENTRY("ScatteringData::GetReflX()",1)
+   this->CalcSinThetaLambda();
+   VFN_DEBUG_EXIT("ScatteringData::GetReflX()",1)
+   return mX;
+}
+const CrystVector_REAL& ScatteringData::GetReflY() const
+{
+   VFN_DEBUG_ENTRY("ScatteringData::GetReflY()",1)
+   this->CalcSinThetaLambda();
+   VFN_DEBUG_EXIT("ScatteringData::GetReflY()",1)
+   return mY;
+}
+const CrystVector_REAL& ScatteringData::GetReflZ() const
+{
+   VFN_DEBUG_ENTRY("ScatteringData::GetReflZ()",1)
+   this->CalcSinThetaLambda();
+   VFN_DEBUG_EXIT("ScatteringData::GetReflZ()",1)
+   return mZ;
+}
 
 const CrystVector_REAL& ScatteringData::GetSinThetaOverLambda()const
 {
@@ -1129,17 +1151,18 @@ void ScatteringData::CalcSinThetaLambda()const
    mSinThetaLambda.resize(mNbRefl);
    
    const CrystMatrix_REAL bMatrix= mpCrystal->GetBMatrix();
-   CrystMatrix_REAL xyz(this->GetNbRefl(),3);
+   mX.resize(this->GetNbRefl());
+   mY.resize(this->GetNbRefl());
+   mZ.resize(this->GetNbRefl());
    for(int i=0;i<this->GetNbRefl();i++)
-   {  //:TODO: faster,nicer (implement a bloody matrix product !)
-      // bMatrix(row,column)
-      xyz(i,0)=bMatrix(0,0)*mH(i)+bMatrix(0,1)*mK(i)+bMatrix(0,2)*mL(i);
-      xyz(i,1)=bMatrix(1,0)*mH(i)+bMatrix(1,1)*mK(i)+bMatrix(1,2)*mL(i);
-      xyz(i,2)=bMatrix(2,0)*mH(i)+bMatrix(2,1)*mK(i)+bMatrix(2,2)*mL(i);
+   {  //:TODO: faster,nicer 
+      mX(i)=bMatrix(0,0)*mH(i)+bMatrix(0,1)*mK(i)+bMatrix(0,2)*mL(i);
+      mY(i)=bMatrix(1,0)*mH(i)+bMatrix(1,1)*mK(i)+bMatrix(1,2)*mL(i);
+      mZ(i)=bMatrix(2,0)*mH(i)+bMatrix(2,1)*mK(i)+bMatrix(2,2)*mL(i);
    }
    //cout << bMatrix << endl << xyz<<endl;
    for(int i=0;i< (this->GetNbRefl());i++)
-      mSinThetaLambda(i)=sqrt(pow(xyz(i,0),2)+pow(xyz(i,1),2)+pow(xyz(i,2),2))/2;
+      mSinThetaLambda(i)=sqrt(pow(mX(i),2)+pow(mY(i),2)+pow(mZ(i),2))/2;
    
    if(this->GetRadiation().GetWavelength()(0) > 0)
    {

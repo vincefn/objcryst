@@ -251,9 +251,9 @@ class ScatteringData: virtual public RefinableObj
       long GetNbRefl() const;
       ///Return the 1D array of H coordinates for all reflections
       const CrystVector_REAL& GetH() const;
-      ///Return the 1D array of K coordinates
+      ///Return the 1D array of K coordinates for all reflections
       const CrystVector_REAL& GetK() const;
-      ///Return the 1D array of L coordinates
+      ///Return the 1D array of L coordinates for all reflections
       const CrystVector_REAL& GetL() const;
       /// Return the 1D array of H coordinates for all reflections, multiplied by 2*pi
       /// \internal  Should be private
@@ -264,6 +264,12 @@ class ScatteringData: virtual public RefinableObj
       ///Return the 1D array of L coordinates for all reflections, multiplied by 2*pi
       /// \internal  Should be private
       const CrystVector_REAL& GetL2Pi() const;
+      ///Return the 1D array of orthonormal x coordinates for all reflections (recipr. space)
+      const CrystVector_REAL& GetReflX() const;
+      ///Return the 1D array of orthonormal y coordinates for all reflections (recipr. space)
+      const CrystVector_REAL& GetReflY() const;
+      ///Return the 1D array of orthonormal z coordinates for all reflections (recipr. space)
+      const CrystVector_REAL& GetReflZ() const;
       
       /// Return an array with \f$ \frac{sin(\theta)}{\lambda} = \frac{1}{2d_{hkl}}\f$ 
       ///for all reflections
@@ -335,9 +341,9 @@ class ScatteringData: virtual public RefinableObj
          /// Currently using flags to decide what should be recomputed, whereas
          /// Clocks should be used. a LOT of cleaning is necessary
          virtual void PrepareCalcStructFactor()const;
-         /// \internal Compute sin(theta)/lambda. 
-         /// theta and tan(theta) values are also re-computed, provided a wavelength has
-         /// been supplied.
+         /// \internal Compute sin(theta)/lambda as well a orthonormal coordinates 
+         /// for all reflections. theta and tan(theta), 
+         /// are also re-computed, provided a wavelength has been supplied.
          virtual void CalcSinThetaLambda()const;
          /// \internal Get scattering factors for all ScatteringPower & reflections
          void CalcScattFactor()const;
@@ -378,12 +384,14 @@ class ScatteringData: virtual public RefinableObj
       
       /// Number of H,K,L reflections
       long mNbRefl;
-      ///H,K,L coordinates
+      /// H,K,L coordinates
       CrystVector_REAL mH, mK, mL ;
-      ///H,K,L integer coordinates
+      /// H,K,L integer coordinates
       mutable CrystVector_long mIntH, mIntK, mIntL ;
-      ///H,K,L coordinates, multiplied by 2PI
+      /// H,K,L coordinates, multiplied by 2PI
       mutable CrystVector_REAL mH2Pi, mK2Pi, mL2Pi ;
+      /// reflection coordinates in an orthonormal base
+      mutable CrystVector_REAL mX, mY, mZ ;
 
       ///Multiplicity for each reflections (mostly for powder diffraction)
       CrystVector_int mMultiplicity ;
