@@ -309,6 +309,19 @@ SpaceGroup & UnitCell::GetSpaceGroup()  {return mSpaceGroup;}
 const RefinableObjClock& UnitCell::GetClockLatticePar()const {return mClockLatticePar;}
 const RefinableObjClock& UnitCell::GetClockMetricMatrix()const {return mClockMetricMatrix;}
 
+REAL UnitCell::GetVolume()const
+{
+   const REAL a=this->GetLatticePar(0);
+   const REAL b=this->GetLatticePar(1);
+   const REAL c=this->GetLatticePar(2);
+   const REAL alpha=this->GetLatticePar(3);
+   const REAL beta=this->GetLatticePar(4);
+   const REAL gamma=this->GetLatticePar(5);
+   
+   return a*b*c*sqrt(1-cos(alpha)*cos(alpha)-cos(beta)*cos(beta)-cos(gamma)*cos(gamma)
+            +2*cos(alpha)*cos(beta)*cos(gamma));
+}
+
 void UnitCell::Init(const REAL a, const REAL b, const REAL c, const REAL alpha,
                     const REAL beta, const REAL gamma,const string &SpaceGroupId,
                     const string& name)

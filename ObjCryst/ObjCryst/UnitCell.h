@@ -137,6 +137,9 @@ class UnitCell:public RefinableObj
       // :TODO: ?
       //virtual void XMLOutput(ostream &os,int indent=0)const;
       //virtual void XMLInput(istream &is,const XMLCrystTag &tag);
+      
+      /// Volume of Unit Cell (in Angstroems)
+      REAL GetVolume()const;
    protected:
       /** \brief Init all UnitCell parameters
       *  \param a,b,c : unit cell dimension, in angstroems
