@@ -48,7 +48,7 @@ void WXTrackerGraph::UpdateDisplay()
             mClockGraphList.Click();
          }
    }
-   long nbxMax=0;
+   unsigned long nbxMax=0;
    // Add new graphs and update data for all
    if(  (mClockGraphList  <mpMainTracker->GetClockTrackerList())
       ||(mClockGraphValues<mpMainTracker->GetClockValues()))
@@ -87,7 +87,7 @@ void WXTrackerGraph::DeleteGraph(const unsigned long id)
    std::map<Tracker*,long>::iterator pos;
    for(pos=mvId.begin();pos!=mvId.end();++pos)
    {
-      if(id==pos->second)
+      if((long)id==pos->second)
       {
          mvId.erase(pos);
          break;

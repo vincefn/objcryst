@@ -143,7 +143,7 @@ WXMultiGraph::~WXMultiGraph()
 
 unsigned long WXMultiGraph::AddGraph(const string &name)
 {
-   mMutexData.Lock();
+   wxMutexLocker mlock(mMutexData);
    unsigned long id;
    for(id=mvData.size();id>=0;id--)
       if(mvData.end()==mvData.find(id)) break;
@@ -152,7 +152,6 @@ unsigned long WXMultiGraph::AddGraph(const string &name)
    mvData[id].xmax=-1.0;
    mvData[id].ymin=0.0;
    mvData[id].ymax=-1.0;
-   mMutexData.Unlock();
    return id;
 }
 
@@ -161,8 +160,8 @@ void WXMultiGraph::SetGraphData
     const std::valarray<float> &vy)
 {
    bool rescale=false;
-   if(mvData[id].xmin>mvData[id].xmax)rescale=true;// A new graph has been added
    mMutexData.Lock();
+   if(mvData[id].xmin>mvData[id].xmax)rescale=true;// A new graph has been added
    mvData[id].vx.resize(vx.size());
    mvData[id].vy.resize(vx.size());
    mvData[id].vx=vx;
@@ -191,8 +190,8 @@ void WXMultiGraph::DeleteGraph(const unsigned long id)
 
 void WXMultiGraph::OnPaint(wxPaintEvent &event)
 {
+   wxMutexLocker mlock(mMutexData);
    if(mvData.size()<1) return;
-   if(wxMUTEX_NO_ERROR!=mMutexData.TryLock()) return;
    VFN_DEBUG_ENTRY("WXMultiGraph::OnPaint()",4)
    wxBufferedPaintDC dc(this);
    this->PrepareDC(dc);
@@ -216,15 +215,20 @@ void WXMultiGraph::OnPaint(wxPaintEvent &event)
       wxCoord tmpW,tmpH;
       dc.SetPen(*wxBLACK_PEN);
       dc.SetTextForeground(*wxBLACK);
-      const int nbTick=10;//approx.
+      int nbTick=10;//approx.
       float xs,ys;
       // X & Y margins.
-         float yStep=pow((float)10,(float)floor(log10((mMaxY-mMinY)/nbTick)));
-         yStep *= floor((mMaxY-mMinY)/yStep/nbTick);
+         float yStep,xStep,dx,dy;
+         dx=mMaxX-mMinX;
+         dy=mMaxY-mMinY;
+         if(dx<1e-6)dx=1e-6;
+         if(dy<1e-6)dy=1e-6;
+         yStep=pow((float)10,(float)floor(log10(dy/nbTick)));
+         yStep *= floor((dy/yStep+0.1)/nbTick);
          
-         float xStep=pow((float)10,(float)floor(log10((mMaxX-mMinX)/nbTick)));
-         xStep *= floor((mMaxX-mMinX)/xStep/nbTick);
-         
+         xStep=pow((float)10,(float)floor(log10(dx/nbTick)));
+         xStep *= floor((dx/xStep+0.1)/nbTick);
+
          mLeft=0;
          for(float y=yStep*ceil(mMinY/yStep);y<mMaxY;y+=yStep)
          {//get left margin from tick labels
@@ -240,9 +244,10 @@ void WXMultiGraph::OnPaint(wxPaintEvent &event)
       //Y axis
          dc.DrawLine(mLeft,height-mBottom,mLeft,mTop);
          VFN_DEBUG_MESSAGE("WXMultiGraph::OnPaint():AxisStep="<<yStep<<","<<mMinY<<","<<mMaxY,3)
-         
-         for(float y=yStep*ceil(mMinY/yStep);y<mMaxY;y+=yStep)
+         nbTick=int(dy/yStep);
+         for(int i=0;i<nbTick;i++)
          {
+            float y=yStep*ceil(mMinY/yStep)+i*yStep;
             xs=mMinX;
             ys=y;
             this->Data2Screen(xs,ys);
@@ -254,8 +259,10 @@ void WXMultiGraph::OnPaint(wxPaintEvent &event)
          }
       //X axis
          dc.DrawLine(mLeft,height-mBottom,width-mRight,height-mBottom);
-         for(float x=xStep*ceil(mMinX/xStep);x<mMaxX;x+=xStep)
+         nbTick=int(dx/xStep);
+         for(int i=0;i<nbTick;i++)
          {
+            float x=xStep*ceil(mMinX/xStep)+i*xStep;
             xs=x;
             ys=mMinY;
             this->Data2Screen(xs,ys);
@@ -289,8 +296,8 @@ void WXMultiGraph::OnPaint(wxPaintEvent &event)
          x2=pos->second.vx[i];
          y2=pos->second.vy[i];
          this->Data2Screen(x2,y2);
-         if(  ((x1>mLeft)&&(x1<(width-mRight))&&(y1>mBottom)&&(y1<(height-mTop)))
-            ||((x2>mLeft)&&(x2<(width-mRight))&&(y2>mBottom)&&(y2<(height-mTop))))
+         if(  ((x1>=mLeft)&&(x1<=(width-mRight))&&(y1>=mBottom)&&(y1<=(height-mTop)))
+            ||((x2>=mLeft)&&(x2<=(width-mRight))&&(y2>=mBottom)&&(y2<=(height-mTop))))
             dc.DrawLine(wxCoord(x1),wxCoord(y1),wxCoord(x2),wxCoord(y2));
       }
       // Print Name
@@ -302,18 +309,13 @@ void WXMultiGraph::OnPaint(wxPaintEvent &event)
       dc.DrawText(fontInfo,wxCoord(width-tmpW-2),wxCoord(tmpH*(ix)+2));
    }
 
-   mMutexData.Unlock();
    VFN_DEBUG_EXIT("WXMultiGraph::OnPaint()",4)
 }
 
 void WXMultiGraph::OnMouse(wxMouseEvent &event)
 {
    if(event.Leaving()) return;// ?
-   if(wxMUTEX_NO_ERROR!=mMutexData.TryLock())
-   {
-      mIsDragging=false;
-      return;
-   }
+   mMutexData.Lock();
    wxCoord width,height;
    this->GetSize(&width, &height);
    // Write mouse pointer coordinates
@@ -337,8 +339,8 @@ void WXMultiGraph::OnMouse(wxMouseEvent &event)
 
    if(event.RightIsDown())
    {
-      this->PopupMenu(mpPopUpMenu, event.GetX(), event.GetY() );
       mMutexData.Unlock();
+      this->PopupMenu(mpPopUpMenu, event.GetX(), event.GetY() );
       return;
    }
    if (event.Dragging() && event.LeftIsDown() && (!mIsDragging))
@@ -382,10 +384,6 @@ void WXMultiGraph::OnMouse(wxMouseEvent &event)
 
    if(event.LeftDClick())
    {//Reset axis range
-      cout<<"LeftDClick="<<event.LeftDClick()
-          <<", MiddleDClick="<<event.MiddleDClick()
-          <<", RightDClick="<<event.RightDClick()
-          <<endl;
       mMutexData.Unlock();
       this->AutoScale();
       this->UpdateDisplay();
@@ -414,8 +412,8 @@ void WXMultiGraph::OnMouseWheel(wxMouseEvent &event)
 void WXMultiGraph::AutoScale(const long id,const bool xmin,const bool xmax,
                                            const bool ymin,const bool ymax)
 {
+   wxMutexLocker mlock(mMutexData);
    if(mvData.size()==0) return;
-   mMutexData.Lock();
    std::map<unsigned long, GraphData>::const_iterator pos;
    if(id<0)pos=mvData.end();
    else pos=mvData.find((unsigned long)id);
@@ -445,7 +443,6 @@ void WXMultiGraph::AutoScale(const long id,const bool xmin,const bool xmax,
    if(mMaxX<=mMinX) mMaxX=mMinX+1e-6;
    if(mMaxY<=mMinY) mMaxY=mMinY+1e-6;
    //cout<<"Autoscale to:"<<mMinX<<"->"<<mMaxX<<" , "<<mMinY<<"->"<<mMaxY<<endl;
-   mMutexData.Unlock();
 }
 
 void WXMultiGraph::OnKeyDown(wxKeyEvent& event)
@@ -511,7 +508,6 @@ void WXMultiGraph::OnKeyDown(wxKeyEvent& event)
       default: 
       {
          VFN_DEBUG_MESSAGE("WXMultiGraph::OnKeyDown(): no command for key #"<<event.GetKeyCode(),5);
-         cout<<"WXMultiGraph::OnKeyDown(): no command for key #"<<event.GetKeyCode()<<endl;
       }
    }
    this->UpdateDisplay();
@@ -531,8 +527,12 @@ void WXMultiGraph::OnSize(wxSizeEvent &event)
 void WXMultiGraph::UpdateDisplay()
 {
    VFN_DEBUG_ENTRY("WXMultiGraph::UpdateDisplay()",4)
-   wxUpdateUIEvent event(ID_UPDATEUI);
-   wxPostEvent(this,event);
+   if(wxThread::IsMain()) this->Refresh(false);
+   else
+   {
+      wxUpdateUIEvent event(ID_UPDATEUI);
+      wxPostEvent(this,event);
+   }
    VFN_DEBUG_EXIT("WXMultiGraph::UpdateDisplay()",4)
 }
 
