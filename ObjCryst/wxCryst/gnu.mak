@@ -1,5 +1,6 @@
 include ../rules.mak
 DIR_CRYST := ..
+
 #wxGeneticAlgorithm.o
 OBJ= trackball.o wxDiffractionSingleCrystal.o wxCryst.o wxRefinableObj.o wxScatteringPower.o wxScatterer.o wxAtom.o wxCrystal.o wxZScatterer.o wxPowderPattern.o wxGlobalOptimObj.o
 
@@ -11,31 +12,18 @@ OBJ= trackball.o wxDiffractionSingleCrystal.o wxCryst.o wxRefinableObj.o wxScatt
 	@$(MAKEDEPEND)
 	${CXX} ${CPPFLAGS} ${CXXFLAGS} -c $< -o $@
 
-%.o : %.rc
-	windres -i $< -o $@ --include-dir ${DIR_WXWINDOWS}/include
-	
--include $(OBJ:.o=.dep) Fox.dep
+-include $(OBJ:.o=.dep)
 
 #wxCryst librarry
 libwxcryst.a : $(OBJ)
 	@${RM} $@
 	${AR} crs $@ ${filter-out %.a %.so, $^}
 
-#wxCryst Application ( wxCrystApp_resource.o for cygwin)
-Fox: Fox.o libCrystVector libQuirks libRefinableObj libsglite libatominfo libCryst libwxCryst
-	${LINKER} ${LDFLAGS} -o $@ ${filter-out %.a %.so lib%, $^} ${LOADLIBES} 
-
-fox: Fox
-
 lib: libwxcryst.a
-
-#install Fox in /usr/local/bin
-install:
-	install -m 755 Fox /usr/local/bin
 
 # target for making everything
 .PHONY : all
-all: lib Fox
+all: lib
 
 # target for removing all object files
 .PHONY : tidy
@@ -45,7 +33,7 @@ tidy::
 # target for removing all object files and libraries
 .PHONY : clean
 clean:: tidy
-	@${RM} *.a Fox
+	@${RM} *.a
 
 cvsignore:
 	cp -f ${DIR_CRYST}/.cvsignore ./
