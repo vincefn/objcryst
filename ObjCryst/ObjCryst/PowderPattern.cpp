@@ -862,7 +862,7 @@ PowderPattern::PowderPattern():
 m2ThetaMin(0),m2ThetaStep(0),mNbPoint(0),mWavelength(1.),
 m2ThetaZero(0.),m2ThetaDisplacement(0.),m2ThetaTransparency(0.),
 mScaleFactor(20),mUseFastLessPreciseFunc(false),
-mStatisticsExcludeBackground(false),mMaxSinThetaOvLambda(10)
+mStatisticsExcludeBackground(false),mMaxSinThetaOvLambda(10),mNbPointUsed(0)
 {
    mScaleFactor=1;
    mSubObjRegistry.SetName("SubObjRegistry for a PowderPattern object");
@@ -882,7 +882,7 @@ mPowderPatternComponentRegistry(old.mPowderPatternComponentRegistry),
 mScaleFactor(old.mScaleFactor),
 mUseFastLessPreciseFunc(old.mUseFastLessPreciseFunc),
 mStatisticsExcludeBackground(old.mStatisticsExcludeBackground),
-mMaxSinThetaOvLambda(old.mMaxSinThetaOvLambda)
+mMaxSinThetaOvLambda(old.mMaxSinThetaOvLambda),mNbPointUsed(old.mNbPointUsed)
 {
    mSubObjRegistry.SetName("SubObjRegistry for a PowderPattern :"+mName);
    gPowderPatternRegistry.Register(*this);
