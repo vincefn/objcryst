@@ -12,9 +12,11 @@ doc:
 
 clean:
 	$(MAKE) -f gnu.mak -C src clean
+	$(MAKE) -f gnu.mak -C ${DIR_CRYST} clean
 
 tidy:
 	$(MAKE) -f gnu.mak -C src tidy
+	$(MAKE) -f gnu.mak -C ${DIR_CRYST} tidy
 
 #install Fox in /usr/local/bin
 install:
