@@ -440,6 +440,7 @@ void RefinablePar::Print() const
       cout << this->GetName() << " : " << this->GetHumanValue()
 			  << " Fixed:"<< mIsFixed <<" Periodic:"<<mIsPeriodic<<" Limited:"<<mHasLimits
            << " Min:" << this->GetHumanMin() << " Max:" << this->GetHumanMax()
+			  << " Step:" <<GetGlobalOptimStep()
       #ifdef __DEBUG__
            << ",HasClock=" << mHasAssignedClock << " at " << mpClock
       #endif

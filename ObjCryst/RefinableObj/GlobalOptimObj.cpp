@@ -337,9 +337,6 @@ void MonteCarloObj::SetAlgorithmSimulAnnealing(const AnnealingSchedule scheduleT
                            const long maxNbTrialSinceBest)
 {
    VFN_DEBUG_MESSAGE("MonteCarloObj::SetAlgorithmSimulAnnealing()",5)
-   if(mAnnealingScheduleTemp.GetChoice()==ANNEALING_SMART)
-      throw ObjCrystException("MonteCarloObj::SetAlgorithmSimulAnnealing() : \
-Cannot use ANNEALING_SMART for the Temperature schedule (yet).");
    mGlobalOptimType.SetChoice(GLOBAL_OPTIM_SIMULATED_ANNEALING);
    mTemperatureMax=tMax;
    mTemperatureMin=tMin;
@@ -361,9 +358,6 @@ void MonteCarloObj::SetAlgorithmParallTempering(const AnnealingSchedule schedule
                                  const REAL mutMax, const REAL mutMin)
 {
    VFN_DEBUG_MESSAGE("MonteCarloObj::SetAlgorithmParallTempering()",5)
-   if(mAnnealingScheduleTemp.GetChoice()==ANNEALING_SMART)
-      throw ObjCrystException("MonteCarloObj::SetAlgorithmParallTempering() : \
-Cannot use ANNEALING_SMART for the Temperature schedule (yet).");
    mGlobalOptimType.SetChoice(GLOBAL_OPTIM_PARALLEL_TEMPERING);
    mTemperatureMax=tMax;
    mTemperatureMin=tMin;
@@ -460,7 +454,16 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                      simAnnealTemp=mTemperatureMax
                                     *pow(mTemperatureMin/mTemperatureMax,
                                           mNbTrial/(REAL)nbSteps);break;
-                  case ANNEALING_SMART:break;//:TODO:
+                  case ANNEALING_SMART:
+						{
+                     if((nbAcceptedMovesTemp/(REAL)nbTrialsReport)>0.30)
+                        simAnnealTemp/=1.5;
+                     if((nbAcceptedMovesTemp/(REAL)nbTrialsReport)<0.10)
+                        simAnnealTemp*=1.5;
+                     if(simAnnealTemp>mTemperatureMax) simAnnealTemp=mTemperatureMax;
+                     if(simAnnealTemp<mTemperatureMin) simAnnealTemp=mTemperatureMin;
+							break;
+						}
                   default: simAnnealTemp=mTemperatureMin;break;
                }
                switch(mAnnealingScheduleMutation.GetChoice())
