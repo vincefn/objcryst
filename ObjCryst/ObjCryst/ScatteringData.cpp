@@ -1135,6 +1135,11 @@ void ScatteringData::PrepareCalcStructFactor()const
       mAnomalousNeedRecalc=true;
       mScattFactNeedRecalc=true;
    }
+   if(mClockScattFactorResonant<this->GetRadiation().GetClockWavelength())
+   {
+      VFN_DEBUG_MESSAGE("Wavelength has changed !",2)
+      mAnomalousNeedRecalc=true;
+   }
    if(mClockStructFactor<mClockHKL) mGeomFhklCalcNeedRecalc=true;
    mLastScattCompList=*mpScattCompList;
    
