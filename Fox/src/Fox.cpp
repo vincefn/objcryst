@@ -476,7 +476,7 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
 
    // First window -Crystals
       wxScrolledWindow *mpWin1 = new wxScrolledWindow(notebook, -1);
-      mpWin1->SetScrollbars( 10, 10, 0, 1000 );
+      mpWin1->SetScrollbars( 10, 10, 0, 2000 );
       //wxBoxSizer * sizer1=new wxBoxSizer(wxVERTICAL);
       //sizer1->Add(gCrystalRegistry.WXCreate(mpWin1));
       //mpWin1->SetSizer(sizer1);
