@@ -190,12 +190,30 @@ mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUM_MENU_IMPORT_CPI,
       //:TODO: when all objects will use the same radiation object
       //mpSizer->Add(mpPowderPattern->mRadiation.WXCreate(this),0);
       //mList.Add(mpPowderPattern->mRadiation.WXGet());
-   // Scattering Powers
+   // Correction to 2Theta
+      wxBoxSizer* thetaCorrSizer=new wxBoxSizer(wxHORIZONTAL);
+      WXFieldRefPar* fieldThetaZero    =new WXFieldRefPar(this,"2theta zero:",
+                                   &(mpPowderPattern
+                                     ->GetPar(&(mpPowderPattern->m2ThetaZero))),90 );
+      WXFieldRefPar* fieldThetaDispl    =new WXFieldRefPar(this,"2theta displacement:",
+                                   &(mpPowderPattern
+                                     ->GetPar(&(mpPowderPattern->m2ThetaDisplacement))),90 );
+      WXFieldRefPar* fieldThetaTransp    =new WXFieldRefPar(this,"2theta transparency:",
+                                   &(mpPowderPattern
+                                     ->GetPar(&(mpPowderPattern->m2ThetaTransparency))),90 );
+      thetaCorrSizer->Add(fieldThetaZero,0);
+      thetaCorrSizer->Add(fieldThetaDispl,0);
+      thetaCorrSizer->Add(fieldThetaTransp,0);
+      mList.Add(fieldThetaZero);
+      mList.Add(fieldThetaDispl);
+      mList.Add(fieldThetaTransp);
+      mpSizer->Add(thetaCorrSizer);
+   // Components
       mpWXComponent=mpPowderPattern
                     ->mPowderPatternComponentRegistry.WXCreate(this);
       mpSizer->Add(mpWXComponent,0,wxALIGN_LEFT);
       mList.Add(mpWXComponent);
-   
+	
    VFN_DEBUG_MESSAGE("WXPowderPattern::WXPowderPattern():1",6)
    this->CrystUpdate();
    this->Layout();

@@ -449,6 +449,9 @@ class PowderPattern : public RefinableObj
          const RefinableObjClock& GetClockPowderPatternPar()const;
          /// When were the radiation parameter (radiation type, wavelength) changed ?
          const RefinableObjClock& GetClockPowderPatternRadiation()const;
+         /// When were the parameters for 2theta correction (zero, transparency,
+			/// displacement) last changed ?
+         const RefinableObjClock& GetClockPowderPattern2ThetaCorr()const;
       
       // Corrections to 2theta
          ///Change Zero in 2Theta

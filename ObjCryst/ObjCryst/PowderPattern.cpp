@@ -588,6 +588,7 @@ void PowderPatternDiffraction::CalcPowderReflProfile()const
       &&(mClockProfileCalc>mReflectionProfileType.GetClock())
       &&(mClockProfileCalc>mClockTheta)
       &&(mClockProfileCalc>mRadiation.GetClockWavelength())
+      &&(mClockProfileCalc>mpParentPowderPattern->GetClockPowderPattern2ThetaCorr())
       &&(mClockProfileCalc>mClockHKL)) return;
    
    TAU_PROFILE("PowderPatternDiffraction::CalcPowderReflProfile()","void (bool)",TAU_DEFAULT);
@@ -905,9 +906,9 @@ mUseOnlyLowAngleData(false),mUseOnlyLowAngleDataLimit(0)
    mScaleFactor=1;
    mSubObjRegistry.SetName("SubObjRegistry for a PowderPattern object");
    mPowderPatternComponentRegistry.SetName("Powder Pattern Components");
+   this->Init();
    gPowderPatternRegistry.Register(*this);
    gTopRefinableObjRegistry.Register(*this);
-   this->Init();
 }
 
 PowderPattern::PowderPattern(const PowderPattern &old):
@@ -1094,6 +1095,9 @@ const RefinableObjClock& PowderPattern::GetClockPowderPatternPar()const
 
 const RefinableObjClock& PowderPattern::GetClockPowderPatternRadiation()const
 {  return mClockPowderPatternRadiation;}
+
+const RefinableObjClock& PowderPattern::GetClockPowderPattern2ThetaCorr()const
+{  return mClockPowderPattern2ThetaCorr;}
 
 void PowderPattern::Set2ThetaZero(const REAL newZero)
 {
