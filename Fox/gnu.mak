@@ -2,7 +2,7 @@ DIR_CRYST := ObjCryst
 
 default: all
 
-all: Fox doc
+all: Fox
 
 Fox:
 	$(MAKE) -f gnu.mak wxcryst=1 opengl=1 debug=$(debug) -C src all
