@@ -106,12 +106,14 @@ WXField(parent,label+"R",ID_WXFIELD_REFPAR),mValue(0.),mpRefPar(par),mIsSelfUpda
                             wxTextValidator(wxFILTER_NUMERIC));
    //mpField->PushEventHandler(this);
    mpSizer->Add(mpField,0,wxALIGN_CENTER);
-
-   mpPopUpMenu=new wxMenu("Refinable Parameter");
-   mpPopUpMenu->Append(ID_REFPAR_POPUP_SET_LIMITS, "Set Limits");
-   //mpPopUpMenu->Append(ID_REFPAR_POPUP_REMOVE_LIMITS, "Remove Limits");
-   
-   this->SetToolTip("right-click label to change limits");
+   if(enableFixButton)
+   {
+      mpPopUpMenu=new wxMenu("Refinable Parameter");
+      mpPopUpMenu->Append(ID_REFPAR_POPUP_SET_LIMITS, "Set Limits");
+      //mpPopUpMenu->Append(ID_REFPAR_POPUP_REMOVE_LIMITS, "Remove Limits");
+      this->SetToolTip("right-click label to change limits");
+   }
+   else mpPopUpMenu=0;
    this->Layout();
 }
 WXFieldRefPar::~WXFieldRefPar()
@@ -151,7 +153,7 @@ void WXFieldRefPar::OnToggleLimited(wxCommandEvent & WXUNUSED(event))
 
 void WXFieldRefPar::OnPopupMenu(wxCommandEvent & WXUNUSED(event))
 {
-   this->PopupMenu(mpPopUpMenu,0,0);
+   if(mpPopUpMenu!=0) this->PopupMenu(mpPopUpMenu,0,0);
 }
 
 void WXFieldRefPar::OnPopupMenuChoice(wxMenuEvent& event)
