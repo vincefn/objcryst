@@ -2117,28 +2117,74 @@ void WXGLCrystalCanvas::OnPOVRay()
    ofstream os(save.GetPath().c_str());
    //ofstream os("test.pov");
    
+   os << "// This File was created by FOX/ObjCryst++ (http://objcryst.sf.net)"<<endl
+      << "//"<<endl
+      << "// You can produce a ray-traced image using POV-Ray, freely available"<<endl
+      << "//from http://www.povray.org"<<endl
+      << "//"<<endl
+      << "// Example command line to produce an anti-aliase 640x480 image: "<<endl
+      << "//      povray +Ifile.pov +.pov +W640 +H480 +A +Q11"<<endl
+      << "//   You can add '+UA' at the end to have a transparent background"<<endl
+      << "//   You can add '+kff10' to generate 10 rotated images for an animation"<<endl
+      << "//   (see the 'clock' in the 'OrientPitch' definition below)"<<endl
+      << "//"<<endl
+      << "// Notes:"<<endl
+      << "//  - This POVRay file is written to produce a 4/3 image, e.g. 640x480"<<endl
+      << "//    If your image in the FOX 3D view was not 4/3, some parts may be cut"<<endl
+      << "//    You can then get the full structure by increasing the 'angle' "<<endl
+      << "//    (viewing angle) in the camera settings below."<<endl
+      << "//    You can change the aspect ratio (e.g. to produce a square image)"<<endl
+      << "//    by changing the 'right  <-1.33,0,0>' statement in the camera definition"<<endl
+      << "//  - You can change the orientation of the view by changing the"<<endl
+      << "//    OrientRoll, OrientPitch and OrientYaw angles just below (in degrees)"<<endl
+      << "//  - You can change the aspects of atoms by altering the macros below."<<endl
+      << "//    The radius of atoms is by default 1/3 of their tabulated atomic radius,"<<endl
+      << "//    i.e. as in the FOX/ObjCryst++ 3D Crystal view. To modify this you can"<<endl
+      << "//    change the second line of the 'ObjCrystAtom' macro to (e.g. for full radius):"<<endl
+      << "//    '{ <atomx,atomy,atomz>,atomr*1.0'"<<endl
+      << "//  - The colour of atoms, bonds (free and non-free torsions) can be changed"<<endl
+      << "//    in the 'GLOBAL DECLARATIONS FOR ATOMS & BONDS' section"<<endl
+      << "//  - Just for fun, you can try getting *very close* to one of the atoms,"<<endl
+      << "//    and, in the 'ObjCrystAtom' macro at the end of the 'finish'"<<endl
+      << "//    statement, change the 'reflection' value to 1.0, "<<endl
+      << "//    to get a mirror effect on the atoms..."<<endl
+      << "//"<<endl
+      << "// See http://povray.org/documentation/ for more options"<<endl
+      << "//"<<endl<<endl;
+   
    os << "// Description of Crystal :" << mpWXCrystal->GetCrystal().GetName() <<endl;
    os << "global_settings { assumed_gamma 2.2 ambient_light rgb <2,2,2>}"<<endl;
    float m[4][4];
    REAL xcam=0,ycam=0,zcam=mDist;
    build_rotmatrix( m,mQuat);
    
-   REAL x=mX0+(mcellbbox.xMin+mcellbbox.xMax)/2.;
-   REAL y=mY0+(mcellbbox.yMin+mcellbbox.yMax)/2.;
-   REAL z=mZ0+(mcellbbox.zMin+mcellbbox.zMax)/2.;
+   REAL x=(mcellbbox.xMin+mcellbbox.xMax)/2.;
+   REAL y=(mcellbbox.yMin+mcellbbox.yMax)/2.;
+   REAL z=(mcellbbox.zMin+mcellbbox.zMax)/2.;
    mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(x,y,z);
-   
+   x-=mX0;
+   y-=mY0;
+   z-=mZ0;
    {
       const REAL q1=mQuat[0];const REAL q2=mQuat[1];
       const REAL q3=mQuat[2];const REAL q4=mQuat[3];
-      REAL yaw  =atan( 2*(q1*q2+q4*q3) / (q4*q4 + q1*q1 - q2*q2 - q3*q3))*RAD2DEG;
+      
+      REAL yaw =(q4*q4 + q1*q1 - q2*q2 - q3*q3);
+      if(abs(yaw)>1e-6)  yaw  =atan( 2*(q1*q2+q4*q3) /yaw )*RAD2DEG;
+      else { if((q1*q2+q4*q3)>0) yaw =90.; else yaw =-90;}
+      
       const REAL pitch=asin(-2*(q1*q3-q4*q2))*RAD2DEG;
-      REAL roll =atan( 2*(q4*q1+q2*q3) / (q4*q4 - q1*q1 - q2*q2 + q3*q3))*RAD2DEG;
+      
+      REAL roll=(q4*q4 - q1*q1 - q2*q2 + q3*q3);
+      if(abs(roll)>1e-6) roll =atan( 2*(q4*q1+q2*q3) /roll)*RAD2DEG;
+      else { if((q4*q1+q2*q3)>0) roll=90.; else roll=-90;}
+      
       if((q4*q4 + q1*q1 - q2*q2 - q3*q3)<0) yaw  +=180;
       if((q4*q4 - q1*q1 - q2*q2 + q3*q3)<0) roll +=180;
+      
       os<<endl;
       os << "#declare OrientRoll="<<roll<<";"<<endl;
-      os << "#declare OrientPitch="<<pitch<<";"<<endl;
+      os << "#declare OrientPitch="<<pitch<<"+360*clock;"<<endl;
       os << "#declare OrientYaw="<<yaw<<";"<<endl<<endl;
    }
    
@@ -2147,7 +2193,7 @@ void WXGLCrystalCanvas::OnPOVRay()
    os << "    location  <"<<xcam+x<<","<<ycam+y<<","<<zcam+z<<">"<<endl
       << "    look_at   <" << x << "," << y << "," << z <<">"<<endl
       << "    angle   "<< mViewAngle*1.2 <<endl
-      << "    right  <-1.33,0,0> //change handedness as in OpenGL"<<endl
+      << "    right  <-1.33,0,0> //change handedness as in OpenGL, aspect ratio=4/3"<<endl
       << "    translate   <" <<-x << "," <<-y << "," <<-z <<">"<<endl
       << "    rotate  <OrientRoll,0,0>" <<endl
       << "    rotate  <0,OrientPitch,0>" <<endl

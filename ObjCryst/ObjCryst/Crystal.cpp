@@ -384,8 +384,9 @@ ostream& Crystal::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opti
    
    os << "#macro ObjCrystAtom(atomx,atomy,atomz,atomr,atomc)"
       << "   sphere"<<endl
-      << "   { <atomx,atomy,atomz>,atomr"<<endl
-      << "      finish {ambient 0.3 diffuse 0.7 phong 1 specular 0.2 roughness 0.02 metallic}"<<endl
+      << "   { <atomx,atomy,atomz>,atomr/3.0"<<endl
+      << "      finish {ambient 0.3 diffuse 0.7 phong 1 specular 0.2 "
+      << "roughness 0.02 metallic reflection 0.0}"<<endl
       << "      pigment { colour atomc }"<<endl
       << "      no_shadow"<<endl
       << "   }"<<endl
@@ -396,7 +397,8 @@ ostream& Crystal::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opti
       << "   {  <x1,y1,z1>,"<<endl
       << "      <x2,y2,z2>,"<<endl
       << "      bondradius"<<endl
-      << "      finish {ambient 0.3 diffuse 0.7 phong 1 specular 0.2 roughness 0.02 metallic}"<<endl
+      << "      finish {ambient 0.3 diffuse 0.7 phong 1 specular 0.2 "
+      << "roughness 0.02 metallic reflection 0.0}"<<endl
       << "      pigment { colour bondColour}"<<endl
       << "      no_shadow"<<endl
       << "   }"<<endl
@@ -418,7 +420,7 @@ ostream& Crystal::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opti
       os << "    ObjCrystBond("\
          <<x0<<","<<y0<<","<<z0<< ","\
          <<x1<<","<<y1<<","<<z1<< ","\
-         << "0.05,rgb<1.0,1.0,1.0>)"<<endl;\
+         << "0.02,rgb<1.0,1.0,1.0>)"<<endl;\
    }
    
    UNITCELL_EDGE(0,0,0,1,0,0)

@@ -1808,7 +1808,7 @@ ostream& Molecule::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opt
                   <<x(k)<<","
                   <<y(k)<<","
                   <<z(k)<<","
-                  <<mvpAtom[k]->GetScatteringPower().GetRadius()/3<<","
+                  <<mvpAtom[k]->GetScatteringPower().GetRadius()<<","
                   <<"colour_"+mvpAtom[k]->GetScatteringPower().GetName()
                   <<")"<<endl;
             }
