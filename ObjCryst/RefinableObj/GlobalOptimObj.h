@@ -185,7 +185,7 @@ class OptimizationObj
       /** During a global optimization, tell all objects that the current config is
       * the latest "best" config.
       */
-      void TagNewBestConfig()const;
+      void TagNewBestConfig();
       /// Get the elapsed time (in seconds) during the last optimization
       REAL GetLastOptimElapsedTime()const;
    protected:

@@ -229,7 +229,7 @@ void OptimizationObj::RestoreBestConfiguration()
 
 bool OptimizationObj::IsOptimizing()const{return mIsOptimizing;}
 
-void OptimizationObj::TagNewBestConfig()const
+void OptimizationObj::TagNewBestConfig()
 {
    for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
       mRecursiveRefinedObjList.GetObj(i).TagNewBestConfig();
