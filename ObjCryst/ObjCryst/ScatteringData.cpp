@@ -47,37 +47,24 @@ extern "C"
 //AtomInfo (c) 1994-96 Ralf W. Grosse-Kunstleve 
 #include "atominfo/atominfo.h"
 }
-const RefParType *gpRefParTypeScattData
-   = new RefParType(gpRefParTypeObjCryst,"Scattering Data");
-const RefParType *gpRefParTypeScattDataScale
-   = new RefParType(gpRefParTypeObjCryst,"Scale Factor");
-const RefParType *gpRefParTypeScattDataProfile
-   = new RefParType(gpRefParTypeScattData,"Profile");
-const RefParType *gpRefParTypeScattDataProfileType
-   = new RefParType(gpRefParTypeScattDataProfile,"Type");
-const RefParType *gpRefParTypeScattDataProfileWidth
-   = new RefParType(gpRefParTypeScattDataProfile,"Width");
-const RefParType *gpRefParTypeScattDataProfileAsym
-   = new RefParType(gpRefParTypeScattDataProfile,"Asymmetry");
-const RefParType *gpRefParTypeScattDataCorr
-   = new RefParType(gpRefParTypeScattData,"Correction");
-const RefParType *gpRefParTypeScattDataCorrInt
-   = new RefParType(gpRefParTypeScattDataCorr,"Intensities");
-const RefParType *gpRefParTypeScattDataCorrIntAbsorp
-   = new RefParType(gpRefParTypeScattDataCorrInt,"Absorption");
-const RefParType *gpRefParTypeScattDataCorrIntPolar
-   = new RefParType(gpRefParTypeScattDataCorrInt,"Polarization");
-const RefParType *gpRefParTypeScattDataCorrIntExtinc
-   = new RefParType(gpRefParTypeScattDataCorrInt,"Extinction");
-const RefParType *gpRefParTypeScattDataCorrPos
-   = new RefParType(gpRefParTypeScattDataCorr,"Reflections Positions");
-const RefParType *gpRefParTypeScattDataBackground
-   = new RefParType(gpRefParTypeScattData,"Background");
+const RefParType *gpRefParTypeScattData= 0;
+const RefParType *gpRefParTypeScattDataScale=0;
+const RefParType *gpRefParTypeScattDataProfile=0;
+const RefParType *gpRefParTypeScattDataProfileType=0;
+const RefParType *gpRefParTypeScattDataProfileWidth=0;
+const RefParType *gpRefParTypeScattDataProfileAsym=0;
+const RefParType *gpRefParTypeScattDataCorr=0;
+const RefParType *gpRefParTypeScattDataCorrInt=0;
+const RefParType *gpRefParTypeScattDataCorrIntAbsorp=0;
+const RefParType *gpRefParTypeScattDataCorrIntPolar=0;
+const RefParType *gpRefParTypeScattDataCorrIntExtinc=0;
+const RefParType *gpRefParTypeScattDataCorrPos=0;
+const RefParType *gpRefParTypeScattDataBackground=0;
 
-const RefParType *gpRefParTypeRadiation
-   = new RefParType(gpRefParTypeObjCryst,"Radiation");
-const RefParType *gpRefParTypeRadiationWavelength
-   = new RefParType(gpRefParTypeRadiation,"Wavelength");
+const RefParType *gpRefParTypeRadiation=0;
+const RefParType *gpRefParTypeRadiationWavelength=0;
+
+long NiftyStaticGlobalObjectsInitializer_ScatteringData::mCount=0;
 //######################################################################
 //    Tabulated math functions for faster (&less precise) F(hkl) calculation
 //These function are defined and used in cristallo-spacegroup.cpp

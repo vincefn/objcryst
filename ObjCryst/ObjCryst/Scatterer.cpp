@@ -43,35 +43,21 @@
 namespace ObjCryst
 {
 
-const RefParType *gpRefParTypeScatt=
-   new RefParType(gpRefParTypeObjCryst,"Scatterer");
-const RefParType *gpRefParTypeScattTransl=
-   new RefParType(gpRefParTypeScatt,"Translation");
-const RefParType *gpRefParTypeScattTranslX=
-   new RefParType(gpRefParTypeScattTransl,"Translation along X");
-const RefParType *gpRefParTypeScattTranslY=
-   new RefParType(gpRefParTypeScattTransl,"Translation along Y");
-const RefParType *gpRefParTypeScattTranslZ=
-   new RefParType(gpRefParTypeScattTransl,"Translation along Z");
-const RefParType *gpRefParTypeScattOrient=
-   new RefParType(gpRefParTypeScatt,"Orientation");
-const RefParType *gpRefParTypeScattConform=
-   new RefParType(gpRefParTypeScatt,"Conformation");
-const RefParType *gpRefParTypeScattConformBondLength=
-   new RefParType(gpRefParTypeScattConform,"BondLengths");
-const RefParType *gpRefParTypeScattConformBondAngle=
-   new RefParType(gpRefParTypeScattConform,"Bond Angles");
-const RefParType *gpRefParTypeScattConformDihedAngle=
-   new RefParType(gpRefParTypeScattConform,"Dihedral Angles ");
-const RefParType *gpRefParTypeScattConformX=
-   new RefParType(gpRefParTypeScattConform,"Orth. X coordinates");
-const RefParType *gpRefParTypeScattConformY=
-   new RefParType(gpRefParTypeScattConform,"Orth. Y coordinates");
-const RefParType *gpRefParTypeScattConformZ=
-   new RefParType(gpRefParTypeScattConform,"Orth. Z coordinates");
-const RefParType *gpRefParTypeScattOccup=
-   new RefParType(gpRefParTypeScatt,"Occupancy");
-
+const RefParType *gpRefParTypeScatt=0;
+const RefParType *gpRefParTypeScattTransl=0;
+const RefParType *gpRefParTypeScattTranslX=0;
+const RefParType *gpRefParTypeScattTranslY=0;
+const RefParType *gpRefParTypeScattTranslZ=0;
+const RefParType *gpRefParTypeScattOrient=0;
+const RefParType *gpRefParTypeScattConform=0;
+const RefParType *gpRefParTypeScattConformBondLength=0;
+const RefParType *gpRefParTypeScattConformBondAngle=0;
+const RefParType *gpRefParTypeScattConformDihedAngle=0;
+const RefParType *gpRefParTypeScattConformX=0;
+const RefParType *gpRefParTypeScattConformY=0;
+const RefParType *gpRefParTypeScattConformZ=0;
+const RefParType *gpRefParTypeScattOccup=0;
+long NiftyStaticGlobalObjectsInitializer_Scatterer::mCount=0;
 ////////////////////////////////////////////////////////////////////////
 //
 //      SCATTERER : generic type of scatterer

@@ -71,8 +71,8 @@ void RefParType::InitId()
    mId=nbRefParType++;
 }
 
-const RefParType *gpRefParTypeObjCryst=new RefParType("ObjCryst++");
-
+const RefParType *gpRefParTypeObjCryst=0;
+long NiftyStaticGlobalObjectsInitializer_RefinableObj::mCount=0;
 //######################################################################
 //
 //      

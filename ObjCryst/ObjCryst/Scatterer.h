@@ -44,6 +44,69 @@ extern const RefParType *gpRefParTypeScattConformX;
 extern const RefParType *gpRefParTypeScattConformY;
 extern const RefParType *gpRefParTypeScattConformZ;
 extern const RefParType *gpRefParTypeScattOccup;
+class NiftyStaticGlobalObjectsInitializer_Scatterer
+{
+   public:
+      NiftyStaticGlobalObjectsInitializer_Scatterer()
+      {
+         if (mCount++ == 0)
+         {
+            gpRefParTypeScatt=new RefParType(gpRefParTypeObjCryst,"Scatterer");
+            gpRefParTypeScattTransl=new RefParType(gpRefParTypeScatt,"Translation");
+            gpRefParTypeScattTranslX=new RefParType(gpRefParTypeScattTransl,"Translation along X");
+            gpRefParTypeScattTranslY=new RefParType(gpRefParTypeScattTransl,"Translation along Y");
+            gpRefParTypeScattTranslZ=new RefParType(gpRefParTypeScattTransl,"Translation along Z");
+            gpRefParTypeScattOrient=new RefParType(gpRefParTypeScatt,"Orientation");
+            gpRefParTypeScattConform=new RefParType(gpRefParTypeScatt,"Conformation");
+            gpRefParTypeScattConformBondLength=new RefParType(gpRefParTypeScattConform,"BondLengths");
+            gpRefParTypeScattConformBondAngle=new RefParType(gpRefParTypeScattConform,"Bond Angles");
+            gpRefParTypeScattConformDihedAngle=new RefParType(gpRefParTypeScattConform,"Dihedral Angles ");
+            gpRefParTypeScattConformX=new RefParType(gpRefParTypeScattConform,"Orth. X coordinates");
+            gpRefParTypeScattConformY=new RefParType(gpRefParTypeScattConform,"Orth. Y coordinates");
+            gpRefParTypeScattConformZ=new RefParType(gpRefParTypeScattConform,"Orth. Z coordinates");
+            gpRefParTypeScattOccup=new RefParType(gpRefParTypeScatt,"Occupancy");
+         }
+      }
+      ~NiftyStaticGlobalObjectsInitializer_Scatterer()
+      {
+         if (--mCount == 0)
+         {
+            delete gpRefParTypeScatt;
+            delete gpRefParTypeScattTransl;
+            delete gpRefParTypeScattTranslX;
+            delete gpRefParTypeScattTranslY;
+            delete gpRefParTypeScattTranslZ;
+            delete gpRefParTypeScattOrient;
+            delete gpRefParTypeScattConform;
+            delete gpRefParTypeScattConformBondLength;
+            delete gpRefParTypeScattConformBondAngle;
+            delete gpRefParTypeScattConformDihedAngle;
+            delete gpRefParTypeScattConformX;
+            delete gpRefParTypeScattConformY;
+            delete gpRefParTypeScattConformZ;
+            delete gpRefParTypeScattOccup;
+            gpRefParTypeScatt=0;
+            gpRefParTypeScattTransl=0;
+            gpRefParTypeScattTranslX=0;
+            gpRefParTypeScattTranslY=0;
+            gpRefParTypeScattTranslZ=0;
+            gpRefParTypeScattOrient=0;
+            gpRefParTypeScattConform=0;
+            gpRefParTypeScattConformBondLength=0;
+            gpRefParTypeScattConformBondAngle=0;
+            gpRefParTypeScattConformDihedAngle=0;
+            gpRefParTypeScattConformX=0;
+            gpRefParTypeScattConformY=0;
+            gpRefParTypeScattConformZ=0;
+            gpRefParTypeScattOccup=0;
+         }
+      }
+   private:
+      static long mCount;
+};
+static NiftyStaticGlobalObjectsInitializer_Scatterer NiftyStaticGlobalObjectsInitializer_Scatterer_counter;
+
+
 //######################################################################
 //
 //      SCATTERER

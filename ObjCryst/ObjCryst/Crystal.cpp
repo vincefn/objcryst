@@ -39,9 +39,8 @@
 
 namespace ObjCryst
 {
-const RefParType *gpRefParTypeCrystal=
-   new RefParType (gpRefParTypeObjCryst,"Crystal");
-
+const RefParType *gpRefParTypeCrystal=0;
+long NiftyStaticGlobalObjectsInitializer_Crystal::mCount=0;
 ////////////////////////////////////////////////////////////////////////
 //
 //    CRYSTAL : the crystal (Unit cell, spaceGroup, scatterers)

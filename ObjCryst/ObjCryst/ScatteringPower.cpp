@@ -51,17 +51,12 @@ extern "C"
 #include "atominfo/atominfo.h"
 }
 
-const RefParType *gpRefParTypeScattPow
-   =new RefParType(gpRefParTypeObjCryst,"Scattering Power");
-const RefParType *gpRefParTypeScattPowResonant
-   =new RefParType(gpRefParTypeScattPow,"Resonant Scatt.");
-const RefParType *gpRefParTypeScattPowTemperature
-   =new RefParType(gpRefParTypeScattPow,"Temperature");
-const RefParType *gpRefParTypeScattPowTemperatureIso
-   =new RefParType(gpRefParTypeScattPowTemperature,"Isotropic");
-const RefParType *gpRefParTypeScattPowTemperatureAniso
-   =new RefParType(gpRefParTypeScattPowTemperatureIso,"Anisotropic");
-
+const RefParType *gpRefParTypeScattPow=0;
+const RefParType *gpRefParTypeScattPowResonant=0;
+const RefParType *gpRefParTypeScattPowTemperature=0;
+const RefParType *gpRefParTypeScattPowTemperatureIso=0;
+const RefParType *gpRefParTypeScattPowTemperatureAniso=0;
+long NiftyStaticGlobalObjectsInitializer_ScatteringPower::mCount=0;
 //######################################################################
 //
 //      SCATTERING POWER

@@ -39,6 +39,40 @@ extern const RefParType *gpRefParTypeScattPowResonant;
 extern const RefParType *gpRefParTypeScattPowTemperature;
 extern const RefParType *gpRefParTypeScattPowTemperatureIso;
 extern const RefParType *gpRefParTypeScattPowTemperatureAniso;
+class NiftyStaticGlobalObjectsInitializer_ScatteringPower
+{
+   public:
+      NiftyStaticGlobalObjectsInitializer_ScatteringPower()
+      {
+         if (mCount++ == 0)
+         {
+            gpRefParTypeScattPow=new RefParType(gpRefParTypeObjCryst,"Scattering Power");
+            gpRefParTypeScattPowResonant=new RefParType(gpRefParTypeScattPow,"Resonant Scatt.");
+            gpRefParTypeScattPowTemperature=new RefParType(gpRefParTypeScattPow,"Temperature");
+            gpRefParTypeScattPowTemperatureIso=new RefParType(gpRefParTypeScattPowTemperature,"Isotropic");
+            gpRefParTypeScattPowTemperatureAniso=new RefParType(gpRefParTypeScattPowTemperatureIso,"Anisotropic");
+         }
+      }
+      ~NiftyStaticGlobalObjectsInitializer_ScatteringPower()
+      {
+         if (--mCount == 0)
+         {
+            delete gpRefParTypeScattPow;
+            delete gpRefParTypeScattPowResonant;
+            delete gpRefParTypeScattPowTemperature;
+            delete gpRefParTypeScattPowTemperatureIso;
+            delete gpRefParTypeScattPowTemperatureAniso;
+            gpRefParTypeScattPow;
+            gpRefParTypeScattPowResonant;
+            gpRefParTypeScattPowTemperature;
+            gpRefParTypeScattPowTemperatureIso;
+            gpRefParTypeScattPowTemperatureAniso;
+         }
+      }
+   private:
+      static long mCount;
+};
+static NiftyStaticGlobalObjectsInitializer_ScatteringPower NiftyStaticGlobalObjectsInitializer_ScatteringPower_counter;
 
    class ScatteringData;//forward declaration :KLUDGE: ?
 //######################################################################

@@ -42,6 +42,28 @@ namespace ObjCryst
 {
 class Scatterer; //forward declaration of another header's class :KLUDGE:
 extern const RefParType *gpRefParTypeCrystal;
+class NiftyStaticGlobalObjectsInitializer_Crystal
+{
+   public:
+      NiftyStaticGlobalObjectsInitializer_Crystal()
+      {
+         if (mCount++ == 0)
+         {
+            gpRefParTypeCrystal=new RefParType (gpRefParTypeObjCryst,"Crystal");
+         }
+      }
+      ~NiftyStaticGlobalObjectsInitializer_Crystal()
+      {
+         if (--mCount == 0)
+         {
+            delete gpRefParTypeCrystal;
+            gpRefParTypeCrystal=0;
+         }
+      }
+   private:
+      static long mCount;
+};
+static NiftyStaticGlobalObjectsInitializer_Crystal NiftyStaticGlobalObjectsInitializer_Crystal_counter;
 
 //######################################################################
 /** \brief Crystal class: Unit cell, spacegroup, scatterers

@@ -25,12 +25,10 @@
 
 namespace ObjCryst
 {
-const RefParType *gpRefParTypeUnitCell=
-   new RefParType (gpRefParTypeCrystal,"Unit Cell");
-const RefParType *gpRefParTypeUnitCellLength=
-   new RefParType (gpRefParTypeUnitCell,"Length");
-const RefParType *gpRefParTypeUnitCellAngle=
-   new RefParType (gpRefParTypeUnitCell,"Angle");
+const RefParType *gpRefParTypeUnitCell=0;
+const RefParType *gpRefParTypeUnitCellLength=0;
+const RefParType *gpRefParTypeUnitCellAngle=0;
+long NiftyStaticGlobalObjectsInitializer_UnitCell::mCount=0;
 
 UnitCell::UnitCell():
 mCellDim(6),

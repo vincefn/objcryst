@@ -104,6 +104,28 @@ class RefParType
 
 /// Top RefParType for the ObjCryst++ library.
 extern const RefParType *gpRefParTypeObjCryst;
+class NiftyStaticGlobalObjectsInitializer_RefinableObj
+{
+   public:
+      NiftyStaticGlobalObjectsInitializer_RefinableObj()
+      {
+         if (mCount++ == 0)
+         {
+            gpRefParTypeObjCryst=new RefParType("ObjCryst++");
+         }
+      }
+      ~NiftyStaticGlobalObjectsInitializer_RefinableObj()
+      {
+         if (--mCount == 0)
+         {
+            delete gpRefParTypeObjCryst;
+            gpRefParTypeObjCryst=0;
+         }
+      }
+   private:
+      static long mCount;
+};
+static NiftyStaticGlobalObjectsInitializer_RefinableObj NiftyStaticGlobalObjectsInitializer_RefinableObj_counter;
 
 /// We need to record exactly when refinable objects 
 /// have been modified for the last time (to avoid re-computation),

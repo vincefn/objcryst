@@ -55,6 +55,71 @@ extern const RefParType *gpRefParTypeScattDataBackground;
 extern const RefParType *gpRefParTypeRadiation;
 extern const RefParType *gpRefParTypeRadiationWavelength;
 
+class NiftyStaticGlobalObjectsInitializer_ScatteringData
+{
+   public:
+      NiftyStaticGlobalObjectsInitializer_ScatteringData()
+      {
+         if (mCount++ == 0)
+         {
+            gpRefParTypeScattData= new RefParType(gpRefParTypeObjCryst,"Scattering Data");
+            gpRefParTypeScattDataScale= new RefParType(gpRefParTypeObjCryst,"Scale Factor");
+            gpRefParTypeScattDataProfile= new RefParType(gpRefParTypeScattData,"Profile");
+            gpRefParTypeScattDataProfileType= new RefParType(gpRefParTypeScattDataProfile,"Type");
+            gpRefParTypeScattDataProfileWidth= new RefParType(gpRefParTypeScattDataProfile,"Width");
+            gpRefParTypeScattDataProfileAsym= new RefParType(gpRefParTypeScattDataProfile,"Asymmetry");
+            gpRefParTypeScattDataCorr= new RefParType(gpRefParTypeScattData,"Correction");
+            gpRefParTypeScattDataCorrInt= new RefParType(gpRefParTypeScattDataCorr,"Intensities");
+            gpRefParTypeScattDataCorrIntAbsorp= new RefParType(gpRefParTypeScattDataCorrInt,"Absorption");
+            gpRefParTypeScattDataCorrIntPolar= new RefParType(gpRefParTypeScattDataCorrInt,"Polarization");
+            gpRefParTypeScattDataCorrIntExtinc= new RefParType(gpRefParTypeScattDataCorrInt,"Extinction");
+            gpRefParTypeScattDataCorrPos= new RefParType(gpRefParTypeScattDataCorr,"Reflections Positions");
+            gpRefParTypeScattDataBackground= new RefParType(gpRefParTypeScattData,"Background");
+            gpRefParTypeRadiation= new RefParType(gpRefParTypeObjCryst,"Radiation");
+            gpRefParTypeRadiationWavelength= new RefParType(gpRefParTypeRadiation,"Wavelength");
+         }
+      }
+      ~NiftyStaticGlobalObjectsInitializer_ScatteringData()
+      {
+         if (--mCount == 0)
+         {
+            delete gpRefParTypeScattData;
+            delete gpRefParTypeScattDataScale;
+            delete gpRefParTypeScattDataProfile;
+            delete gpRefParTypeScattDataProfileType;
+            delete gpRefParTypeScattDataProfileWidth;
+            delete gpRefParTypeScattDataProfileAsym;
+            delete gpRefParTypeScattDataCorr;
+            delete gpRefParTypeScattDataCorrInt;
+            delete gpRefParTypeScattDataCorrIntAbsorp;
+            delete gpRefParTypeScattDataCorrIntPolar;
+            delete gpRefParTypeScattDataCorrIntExtinc;
+            delete gpRefParTypeScattDataCorrPos;
+            delete gpRefParTypeScattDataBackground;
+            delete gpRefParTypeRadiation;
+            delete gpRefParTypeRadiationWavelength;
+            gpRefParTypeScattData=0;
+            gpRefParTypeScattDataScale=0;
+            gpRefParTypeScattDataProfile=0;
+            gpRefParTypeScattDataProfileType=0;
+            gpRefParTypeScattDataProfileWidth=0;
+            gpRefParTypeScattDataProfileAsym=0;
+            gpRefParTypeScattDataCorr=0;
+            gpRefParTypeScattDataCorrInt=0;
+            gpRefParTypeScattDataCorrIntAbsorp=0;
+            gpRefParTypeScattDataCorrIntPolar=0;
+            gpRefParTypeScattDataCorrIntExtinc=0;
+            gpRefParTypeScattDataCorrPos=0;
+            gpRefParTypeScattDataBackground=0;
+            gpRefParTypeRadiation=0;
+            gpRefParTypeRadiationWavelength=0;
+         }
+      }
+   private:
+      static long mCount;
+};
+static NiftyStaticGlobalObjectsInitializer_ScatteringData NiftyStaticGlobalObjectsInitializer_ScatteringData_counter;
+
 //######################################################################
 /** \brief Class to define the radiation (type, monochromaticity, wavelength(s)) of an experiment
 *

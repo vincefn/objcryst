@@ -35,6 +35,34 @@ extern const RefParType *gpRefParTypeCrystal;// Defined in Crystal.cpp
 extern const RefParType *gpRefParTypeUnitCell;
 extern const RefParType *gpRefParTypeUnitCellLength;
 extern const RefParType *gpRefParTypeUnitCellAngle;
+class NiftyStaticGlobalObjectsInitializer_UnitCell
+{
+   public:
+      NiftyStaticGlobalObjectsInitializer_UnitCell()
+      {
+         if (mCount++ == 0)
+         {
+            gpRefParTypeUnitCell=new RefParType (gpRefParTypeCrystal,"Unit Cell");
+            gpRefParTypeUnitCellLength=new RefParType (gpRefParTypeUnitCell,"Unit Cell Length");
+            gpRefParTypeUnitCellAngle=new RefParType (gpRefParTypeUnitCell,"Unit Cell Angle");
+         }
+      }
+      ~NiftyStaticGlobalObjectsInitializer_UnitCell()
+      {
+         if (--mCount == 0)
+         {
+            delete gpRefParTypeUnitCell;
+            delete gpRefParTypeUnitCellLength;
+            delete gpRefParTypeUnitCellAngle;
+            gpRefParTypeUnitCell=0;
+            gpRefParTypeUnitCellLength=0;
+            gpRefParTypeUnitCellAngle=0;
+         }
+      }
+   private:
+      static long mCount;
+};
+static NiftyStaticGlobalObjectsInitializer_UnitCell NiftyStaticGlobalObjectsInitializer_UnitCell_counter;
 
 //######################################################################
 /** \brief Unit Cell class: Unit cell with  spacegroup information.
