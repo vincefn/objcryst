@@ -127,6 +127,21 @@ void ScatteringPower::SetColour(const float r,const float g,const float b)
    mColourRGB[1]=g;
    mColourRGB[2]=b;
 }
+void ScatteringPower::GetGeneGroup(const RefinableObj &obj,
+										  CrystVector_uint & groupIndex,
+										  unsigned int &first) const
+{
+	// One group for all parameters
+	unsigned int index=0;
+   VFN_DEBUG_MESSAGE("ScatteringPower::GetGeneGroup()",4)
+	for(long i=0;i<obj.GetNbPar();i++)
+		for(long j=0;j<this->GetNbPar();j++)
+			if(&(obj.GetPar(i)) == &(this->GetPar(j)))
+			{
+				if(index==0) index=first++;
+				groupIndex(i)=index;
+			}
+}
 
 void ScatteringPower::Init()
 {

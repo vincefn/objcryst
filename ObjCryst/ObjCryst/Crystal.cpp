@@ -1068,6 +1068,25 @@ void Crystal::CIFOutput(ostream &os)const
    
    VFN_DEBUG_EXIT("Crystal::OutputCIF()",5)
 }
+void Crystal::GetGeneGroup(const RefinableObj &obj,
+										  CrystVector_uint & groupIndex,
+										  unsigned int &first) const
+{
+	// One group for all lattice parameters
+	unsigned int latticeIndex=0;
+   VFN_DEBUG_MESSAGE("Crystal::GetGeneGroup()",4)
+	for(long i=0;i<obj.GetNbPar();i++)
+		for(long j=0;j<this->GetNbPar();j++)
+			if(&(obj.GetPar(i)) == &(this->GetPar(j)))
+			{
+				//if(this->GetPar(j).GetType()->IsDescendantFromOrSameAs(gpRefParTypeUnitCell))
+				//{
+					if(latticeIndex==0) latticeIndex=first++;
+					groupIndex(i)=latticeIndex;
+				//}
+				//else //no parameters other than unit cell
+			}
+}
 
 void Crystal::Init(const double a, const double b, const double c, const double alpha,
                    const double beta, const double gamma,const string &SpaceGroupId,

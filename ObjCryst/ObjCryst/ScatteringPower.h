@@ -168,6 +168,9 @@ class ScatteringPower:virtual public RefinableObj
       /// Return the physical radius of this type of scatterer (for 3D display purposes).
       /// \warning this may be removed later.
       virtual double GetRadius()const=0;
+		virtual void GetGeneGroup(const RefinableObj &obj, 
+										  CrystVector_uint & groupIndex,
+										  unsigned int &firstGroup) const;
    protected:
       virtual void InitRefParList()=0;
       /// Initialization of the object, used by all constructors, and operator=.

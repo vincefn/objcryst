@@ -2,10 +2,7 @@
 * ObjCryst++ : a Crystallographic computing library in C++
 *
 *  (c) 2000 Vincent FAVRE-NICOLIN
-*           Laboratoire de Cristallographie
-*           24, quai Ernest-Ansermet, CH-1211 Geneva 4, Switzerland
-*  Contact: Vincent.Favre-Nicolin@cryst.unige.ch
-*           Radovan.Cerny@cryst.unige.ch
+*           vincefn@users.sourceforge.net
 *
 */
 /*
@@ -205,7 +202,7 @@ double RefinablePar::GetValue()const
 void RefinablePar::SetValue(const double value)
 {
    this->Click();
-   VFN_DEBUG_MESSAGE("RefinablePar::MutateTo()",2)
+   VFN_DEBUG_MESSAGE("RefinablePar::SetValue()",2)
    if(true==mUseEquation)
    {
       cout << "RefinablePar::SetValue(): this parameter is defined by an equation !!" <<endl;
@@ -249,7 +246,7 @@ const double& RefinablePar::GetHumanValue() const
 void RefinablePar::SetHumanValue(const double &value)
 {
    this->Click();
-   VFN_DEBUG_MESSAGE("RefinablePar::MutateTo()",2)
+   VFN_DEBUG_MESSAGE("RefinablePar::SetHumanValue()",2)
    if(true==mUseEquation)
    {
       cout << "RefinablePar::SetValue(): this parameter is defined by an equation !!" <<endl;
@@ -286,6 +283,7 @@ void RefinablePar::SetHumanValue(const double &value)
 void RefinablePar::Mutate(const double mutateValue)
 {
    VFN_DEBUG_MESSAGE("RefinablePar::Mutate():"<<this->GetName(),1)
+	if(true==mIsFixed) return;
    this->Click();
    if(true==mUseEquation)
    {
@@ -324,6 +322,7 @@ void RefinablePar::Mutate(const double mutateValue)
 void RefinablePar::MutateTo(const double mutateValue)
 {
    VFN_DEBUG_MESSAGE("RefinablePar::MutateTo()",2)
+	if(true==mIsFixed) return;
    this->Click();
    if(true==mUseEquation)
    {
@@ -710,6 +709,7 @@ template<class T> void ObjRegistry<T>::Register(T &obj)
       mMaxNbRegistered+=100;
    }
    mpRegistry[mNbRegistered++]=&obj;
+	mListClock.Click();
    #ifdef __WX__CRYST__
    if(0!=mpWXRegistry) 
       mpWXRegistry->Add(obj.WXCreate(mpWXRegistry));
@@ -728,6 +728,7 @@ template<class T> void ObjRegistry<T>::DeRegister(T &obj)
    #endif
    if(i==(long)mNbRegistered) mNbRegistered--;
    else mpRegistry[i]=mpRegistry[--mNbRegistered];
+	mListClock.Click();
 }
 
 template<class T> void ObjRegistry<T>::DeRegister(const string &objName)
@@ -740,11 +741,25 @@ template<class T> void ObjRegistry<T>::DeRegister(const string &objName)
    #endif
    if(i==((long)mNbRegistered)-1) mNbRegistered--;
    else mpRegistry[i]=mpRegistry[--mNbRegistered];
+	mListClock.Click();
+}
+
+template<class T> void ObjRegistry<T>::DeRegisterAll()
+{
+   VFN_DEBUG_ENTRY("ObjRegistry("<<mName<<")::DeRegisterAll():",5)
+   #ifdef __WX__CRYST__
+	if(0!=mpWXRegistry)
+   	for(unsigned long i=0;i<mNbRegistered;i++)
+      	mpWXRegistry->Remove(mpRegistry[i]->WXGet());
+   #endif
+   mNbRegistered=0;
+	mListClock.Click();
+   VFN_DEBUG_EXIT("ObjRegistry("<<mName<<")::DeRegisterAll():",5)
 }
 
 template<class T> void ObjRegistry<T>::DeleteAll()
 {
-   VFN_DEBUG_MESSAGE("ObjRegistry("<<mName<<")::DeleteAll():",5)
+   VFN_DEBUG_ENTRY("ObjRegistry("<<mName<<")::DeleteAll():",5)
    for(unsigned long i=0;i<mNbRegistered;i++)
    {
       #ifdef __WX__CRYST__
@@ -753,6 +768,8 @@ template<class T> void ObjRegistry<T>::DeleteAll()
       delete mpRegistry[i];
    }
    mNbRegistered=0;
+	mListClock.Click();
+   VFN_DEBUG_EXIT("ObjRegistry("<<mName<<")::DeleteAll():",5)
 }
 
 template<class T> T& ObjRegistry<T>::GetObj(const unsigned int i)
@@ -859,6 +876,9 @@ template<class T> long ObjRegistry<T>::Find(const T &obj) const
    //:TODO: throw something
    return -1;
 }
+
+template<class T> const RefinableObjClock& ObjRegistry<T>::GetRegistryClock()const{return mListClock;}
+
 #ifdef __WX__CRYST__
 template<class T> WXRegistry<T>* ObjRegistry<T>::WXCreate(wxWindow *parent)
 {
@@ -896,7 +916,16 @@ template<class T> void RefObjRegisterRecursive(T &obj,ObjRegistry<T> &reg)
       RefObjRegisterRecursive(pObjReg->GetObj(i),reg);
    return;
 }
+//######################################################################
+//    function RefObjRegisterRecursive
+//######################################################################
 
+void GetSubRefObjListClockRecursive(ObjRegistry<RefinableObj> &reg,RefinableObjClock &clock)
+{
+	if(reg.GetRegistryClock()>clock) clock=reg.GetRegistryClock();
+	for(int i=0;i<reg.GetNb();i++)
+		GetSubRefObjListClockRecursive(reg.GetObj(i).GetSubObjRegistry(),clock);
+}
 
 //######################################################################
 //    RefinableObj
@@ -922,6 +951,24 @@ mNbRefParNotFixed(-1),mIsbeingRefined(false),mDeleteRefParInDestructor(true)
    mClientObjRegistry.SetName("Registry for Clients");
    
    VFN_DEBUG_MESSAGE("RefinableObj::RefinableObj():End",2)
+}
+RefinableObj::RefinableObj(const bool internalUseOnly):
+mName(""),mNbRefPar(0),mMaxNbRefPar(100),mSavedValuesSetIsUsed(mMaxNbSavedSets),
+mNbRefParNotFixed(-1),mIsbeingRefined(false),mDeleteRefParInDestructor(true)
+#ifdef __WX__CRYST__
+,mpWXCrystObj(0)
+#endif
+{
+   VFN_DEBUG_MESSAGE("RefinableObj::RefinableObj(bool)",3)
+   mpRefPar = new RefinablePar*[mMaxNbRefPar];
+   mpSavedValuesSet = new CrystVector_double* [mMaxNbSavedSets];
+   mpSavedValuesSetName = new string* [mMaxNbSavedSets];
+   mSavedValuesSetIsUsed=false;
+   if(false==internalUseOnly) gRefinableObjRegistry.Register(*this);
+   mSubObjRegistry.SetName("Registry for sub-objects");
+   mClientObjRegistry.SetName("Registry for Clients");
+   
+   VFN_DEBUG_MESSAGE("RefinableObj::RefinableObj(bool):End",2)
 }
 /*
 RefinableObj::RefinableObj(const RefinableObj &old):
@@ -1159,6 +1206,7 @@ void RefinableObj::AddPar(const RefinablePar &newRefPar)
    }
    mpRefPar[mNbRefPar]=new RefinablePar(newRefPar);
    mNbRefPar++;
+	mRefParListClock.Click();
 }
 
 void RefinableObj::AddPar(RefinablePar *newRefPar)
@@ -1174,6 +1222,7 @@ void RefinableObj::AddPar(RefinablePar *newRefPar)
    }
    mpRefPar[mNbRefPar]=newRefPar;
    mNbRefPar++;
+	mRefParListClock.Click();
 }
 
 void RefinableObj::AddPar(RefinableObj &newRefParList)
@@ -1222,9 +1271,7 @@ long RefinableObj::CreateParamSet(const string name) const
    *(mpSavedValuesSetName+id)= new string;
    **(mpSavedValuesSetName+id) = name;
    *(mpSavedValuesSet+id)=new CrystVector_double;
-   (*(mpSavedValuesSet+id))->resize(mNbRefPar);
-   double *p=(*(mpSavedValuesSet+id))->data();
-   for(long i=0;i<mNbRefPar;i++) *p++ = this->GetPar(i).GetValue();
+	this->SaveParamSet(id);
    return id;
 }
 
@@ -1255,7 +1302,13 @@ void RefinableObj::RestoreParamSet(const long id)
 
 const CrystVector_double & RefinableObj::GetParamSet(const long id)const
 {
-   VFN_DEBUG_MESSAGE("RefinableObj::RefParSet()",0)
+   VFN_DEBUG_MESSAGE("RefinableObj::GetParamSet() const",2)
+   return **(mpSavedValuesSet+id);
+}
+
+CrystVector_double & RefinableObj::GetParamSet(const long id)
+{
+   VFN_DEBUG_MESSAGE("RefinableObj::GetParamSet()",2)
    return **(mpSavedValuesSet+id);
 }
 
@@ -1423,6 +1476,28 @@ double RefinableObj::GetCostFunctionValue(const unsigned int)
    cout << "RefinableObj::GetCostFunctionValue(): no cost functions !" <<endl;
    throw 0;
 }
+unsigned int RefinableObj::GetNbLSQFunction()const{return 0;}
+
+const CrystVector_double& RefinableObj::GetLSQCalc(const unsigned int) const
+{
+	throw ObjCrystException("Error: called RefinableObj::GetLSQCalc()");
+	CrystVector_double *noWarning=new CrystVector_double;
+	return *noWarning;
+}
+
+const CrystVector_double& RefinableObj::GetLSQObs(const unsigned int) const
+{
+	throw ObjCrystException("Error: called RefinableObj::GetLSQObs()");
+	CrystVector_double *noWarning=new CrystVector_double;
+	return *noWarning;
+}
+
+const CrystVector_double& RefinableObj::GetLSQWeight(const unsigned int) const
+{
+	throw ObjCrystException("Error: called RefinableObj::GetLSQWeight()");
+	CrystVector_double *noWarning=new CrystVector_double;
+	return *noWarning;
+}
 
 void RefinableObj::ResetParList()
 {
@@ -1446,6 +1521,7 @@ void RefinableObj::ResetParList()
          delete *(mpSavedValuesSet+i);
       }
    mSavedValuesSetIsUsed=false;
+	mRefParListClock.Click();
    VFN_DEBUG_MESSAGE("RefinableObj::ResetParList():End.",3)
 }
 
@@ -1462,15 +1538,17 @@ RefObjOpt& RefinableObj::GetOption(const unsigned int i)
 }
 
 void RefinableObj::GetGeneGroup(const RefinableObj &obj,
-														  CrystVector_uint & groupIndex,
-											           unsigned int &first) const
+										  CrystVector_uint & groupIndex,
+										  unsigned int &first) const
 {
    VFN_DEBUG_MESSAGE("RefinableObj::GetGeneGroup()",4)
 	for(long i=0;i<obj.GetNbPar();i++)
 		for(long j=0;j<this->GetNbPar();j++)
-			if(obj.mpRefPar[i]->mValue == mpRefPar[j]->mValue) groupIndex(i)= first++;
+			if(&(obj.GetPar(i)) == &(this->GetPar(j))) groupIndex(i)= first++;
 }
 void RefinableObj::SetDeleteRefParInDestructor(const bool b) {mDeleteRefParInDestructor=b;}
+
+const RefinableObjClock& RefinableObj::GetRefParListClock()const{return mRefParListClock;}
 
 const RefObjOpt& RefinableObj::GetOption(const unsigned int i)const
 {
@@ -1539,11 +1617,13 @@ long RefinableObj::FindPar(const double *p) const
 
 void RefinableObj::AddSubRefObj(RefinableObj &obj)
 {
+   VFN_DEBUG_MESSAGE("RefinableObj::AddSubRefObj()",3)
    mSubObjRegistry.Register(obj);
 }
 
 void RefinableObj::RemoveSubRefObj(RefinableObj &obj)
 {
+   VFN_DEBUG_MESSAGE("RefinableObj::RemoveSubRefObj()",3)
    mSubObjRegistry.DeRegister(obj);
 }
 
@@ -1597,6 +1677,19 @@ void RefinableObj::WXNotifyDelete()
    mpWXCrystObj=0;
 }
 #endif
+//######################################################################
+//    function GetRefParListClockRecursive
+//######################################################################
+
+void GetRefParListClockRecursive(ObjRegistry<RefinableObj> &reg,RefinableObjClock &clock)
+{
+	for(int i=0;i<reg.GetNb();i++)
+	{
+		if(reg.GetObj(i).GetRefParListClock()>clock) 
+			clock=reg.GetObj(i).GetRefParListClock();
+		GetRefParListClockRecursive(reg.GetObj(i).GetSubObjRegistry(),clock);
+	}
+}
 
 //***********EXPLICIT INSTANTIATION*******************//
 template void RefObjRegisterRecursive(RefinableObj &obj,ObjRegistry<RefinableObj> &reg);

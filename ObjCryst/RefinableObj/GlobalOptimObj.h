@@ -96,7 +96,8 @@ class OptimizationObj
       /// Launch optimization for N steps
       /// \param nbSteps: the number of steps to go. This number is modified (decreases!)
       /// as the refinement goes on.
-      virtual void Optimize(long &nbSteps)=0;
+		/// \param silent : if true, absolutely no message should be printed (except debugging)
+      virtual void Optimize(long &nbSteps,const bool silent=false,const double finalcost=0)=0;
    //Set Refinable parameters status
       /// Fix all parameters
       void FixAllPar();
@@ -160,6 +161,10 @@ class OptimizationObj
       virtual const string GetClassName()const;
       /// Print some information about this object
       virtual void Print()const;
+		/// Restore the Best configuration
+		void RestoreBestConfiguration();
+		/// Are we busy optimizing ?
+		bool IsOptimizing()const;
 	protected:
       /// \internal Prepare mRefParList for the refinement
       void PrepareRefParList();
@@ -171,6 +176,10 @@ class OptimizationObj
       /// Update Display (if any display is available), when a new 'relevant' configuration
       /// is reached. This calls all RefinableObj::UpdateDisplay()
       virtual void UpdateDisplay();
+		/// (Re)build OptimizationObj::mRecursiveRefinedObjList, if an
+		/// object has been added or modified. If no object has been
+		/// added and no sub-object has been added/removed, then nothing is done.
+      void BuildRecursiveRefObjList();
       /// The refinable par list used during refinement. Only a condensed version
       /// of all objects. This is useful to keep an history of modifications, and to
       /// restore previous values.
@@ -197,8 +206,9 @@ class OptimizationObj
       // Refined objects
          /// The refined objects
          ObjRegistry<RefinableObj> mRefinedObjList;
-         /// The refined objects, recursively including all sub-objects
-         ObjRegistry<RefinableObj> mRecursiveRefinedObjList;
+         /// The refined objects, recursively including all sub-objects.
+			/// This is mutable, since it is a function of mRefinedObjList only.
+         mutable ObjRegistry<RefinableObj> mRecursiveRefinedObjList;
          /// Number of Cost Functions used
          unsigned int mNbCostFunction;
          /// Max number of Cost Functions (dynamically adjusted)
@@ -214,12 +224,14 @@ class OptimizationObj
    public:
       /// Create a WXCrystObj for this object.
       virtual WXCrystObjBasic* WXCreate(wxWindow*)=0;
-      WXCrystObjBasic* WXGet();
-      void WXDelete();
-      void WXNotifyDelete();
+      virtual WXOptimizationObj* WXGet()=0;
+      virtual void WXDelete()=0;
+      virtual void WXNotifyDelete()=0;
    protected:
-      WXGlobalOptimObj* mpWXCrystObj;
-      friend class ObjCryst::WXGlobalOptimObj;
+		//:TODO: remove this !
+      friend class ObjCryst::WXOptimizationObj;
+      //friend class ObjCryst::WXMonteCarloObj;
+      //friend class ObjCryst::WXGeneticAlgorithm;
    #endif
 };
 
@@ -235,6 +247,10 @@ class MonteCarloObj:public OptimizationObj
 	public:
 		/// Constructor
 		MonteCarloObj(const string name="");
+		/// Constructor. Using internalUseOnly=true will avoid registering the
+		/// the object to any registry, and thus (for example) no display will be created,
+		/// nor will this object be automatically be saved.
+		MonteCarloObj(const bool internalUseOnly);
 		/// Destructor
 		virtual ~MonteCarloObj();
       
@@ -294,7 +310,7 @@ class MonteCarloObj:public OptimizationObj
                                  const AnnealingSchedule scheduleMutation=ANNEALING_CONSTANT,
                                  const double mutMax=16., const double mutMin=.125);
       
-      virtual void Optimize(long &nbSteps);
+      virtual void Optimize(long &nbSteps,const bool silent=false,const double finalcost=0);
       
       //Parameter Access by name
       //RefinablePar& GetPar(const string& parName);
@@ -389,8 +405,12 @@ class MonteCarloObj:public OptimizationObj
    #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);
+      virtual WXOptimizationObj* WXGet();
+      virtual void WXDelete();
+      virtual void WXNotifyDelete();
    protected:
-      friend class ObjCryst::WXGlobalOptimObj;
+      WXMonteCarloObj* mpWXCrystObj;
+      friend class ObjCryst::WXMonteCarloObj;
    #endif
 };
 

@@ -125,6 +125,9 @@ class PowderPatternBackground : public PowderPatternComponent
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
+		virtual void GetGeneGroup(const RefinableObj &obj, 
+										  CrystVector_uint & groupIndex,
+										  unsigned int &firstGroup) const;
    protected:
       virtual void CalcPowderPattern() const;
       virtual void SetRadiation(const Radiation &rad);
@@ -201,6 +204,9 @@ class PowderPatternDiffraction : public PowderPatternComponent,public Scattering
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
+		virtual void GetGeneGroup(const RefinableObj &obj, 
+										  CrystVector_uint & groupIndex,
+										  unsigned int &firstGroup) const;
    protected:
       virtual void CalcPowderPattern() const;
       
@@ -565,11 +571,19 @@ class PowderPattern : public RefinableObj
          const string& GetCostFunctionName(const unsigned int)const;
          const string& GetCostFunctionDescription(const unsigned int)const;
          virtual double GetCostFunctionValue(const unsigned int);
+      //LSQ functions
+         virtual unsigned int GetNbLSQFunction()const;
+         virtual const CrystVector_double& GetLSQCalc(const unsigned int) const;
+         virtual const CrystVector_double& GetLSQObs(const unsigned int) const;
+         virtual const CrystVector_double& GetLSQWeight(const unsigned int) const;
 		// I/O	
       	virtual void XMLOutput(ostream &os,int indent=0)const;
       	virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       	//virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
       	void Prepare();
+		virtual void GetGeneGroup(const RefinableObj &obj, 
+										  CrystVector_uint & groupIndex,
+										  unsigned int &firstGroup) const;
    protected:
       /// Calc the powder spectrum
       void CalcPowderPattern() const;

@@ -204,6 +204,11 @@ class DiffractionDataSingleCrystal:public ScatteringData
          const string& GetCostFunctionName(const unsigned int)const;
          const string& GetCostFunctionDescription(const unsigned int)const;
          virtual double GetCostFunctionValue(const unsigned int);
+      //LSQ functions
+         virtual unsigned int GetNbLSQFunction()const;
+         virtual const CrystVector_double& GetLSQCalc(const unsigned int) const;
+         virtual const CrystVector_double& GetLSQObs(const unsigned int) const;
+         virtual const CrystVector_double& GetLSQWeight(const unsigned int) const;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);

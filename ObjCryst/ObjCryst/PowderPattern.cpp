@@ -163,6 +163,21 @@ void PowderPatternBackground::SetUseOnlyLowAngleData(const bool useOnlyLowAngle,
    mUseOnlyLowAngleData=useOnlyLowAngle;
    mUseOnlyLowAngleDataLimit=angle;
 }
+void PowderPatternBackground::GetGeneGroup(const RefinableObj &obj,
+										  CrystVector_uint & groupIndex,
+										  unsigned int &first) const
+{
+	// One group for all background points
+	unsigned int index=0;
+   VFN_DEBUG_MESSAGE("PowderPatternBackground::GetGeneGroup()",4)
+	for(long i=0;i<obj.GetNbPar();i++)
+		for(long j=0;j<this->GetNbPar();j++)
+			if(&(obj.GetPar(i)) == &(this->GetPar(j)))
+			{
+				if(index==0) index=first++;
+				groupIndex(i)=index;
+			}
+}
 
 void PowderPatternBackground::CalcPowderPattern() const
 {
@@ -377,6 +392,25 @@ void PowderPatternDiffraction::GenHKLFullSpace()
 {
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::GenHKLFullSpace():",3)
    this->ScatteringData::GenHKLFullSpace(mpParentPowderPattern->Get2ThetaMax()/2,true);
+}
+void PowderPatternDiffraction::GetGeneGroup(const RefinableObj &obj,
+										  CrystVector_uint & groupIndex,
+										  unsigned int &first) const
+{
+	// One group for all profile parameters
+	unsigned int index=0;
+   VFN_DEBUG_MESSAGE("PowderPatternDiffraction::GetGeneGroup()",4)
+	for(long i=0;i<obj.GetNbPar();i++)
+		for(long j=0;j<this->GetNbPar();j++)
+			if(&(obj.GetPar(i)) == &(this->GetPar(j)))
+			{
+				//if(this->GetPar(j).GetType()->IsDescendantFromOrSameAs())
+				//{
+					if(index==0) index=first++;
+					groupIndex(i)=index;
+				//}
+				//else //no parameters other than unit cell
+			}
 }
 
 void PowderPatternDiffraction::CalcPowderPattern() const
@@ -882,7 +916,7 @@ void PowderPattern::AddPowderPatternComponent(PowderPatternComponent &comp)
 	if(comp.IsScalable())
    {//Init refinable parameter
       RefinablePar tmp("Scale_"+comp.GetName(),mScaleFactor.data()+mPowderPatternComponentRegistry.GetNb()-1,
-                        0.,0.,gpRefParTypeScattDataScale,REFPAR_DERIV_STEP_RELATIVE,
+                        1e-10,1e10,gpRefParTypeScattDataScale,REFPAR_DERIV_STEP_RELATIVE,
                         false,true,true,false,1.);
       tmp.AssignClock(mClockScaleFactor);
       tmp.SetDerivStep(1e-4);
@@ -2229,12 +2263,49 @@ double PowderPattern::GetCostFunctionValue(const unsigned int n)
       }
    }
 }
+unsigned int PowderPattern::GetNbLSQFunction()const{return 1;}
+
+const CrystVector_double& 
+	PowderPattern::GetLSQCalc(const unsigned int) const
+{return this->GetPowderPatternCalc();}
+
+const CrystVector_double& 
+	PowderPattern::GetLSQObs(const unsigned int) const
+{return this->GetPowderPatternObs();}
+
+const CrystVector_double& 
+	PowderPattern::GetLSQWeight(const unsigned int) const
+{return this->GetPowderPatternWeight();}
 
 void PowderPattern::Prepare()
 {
    VFN_DEBUG_MESSAGE("PowderPattern::Prepare()",5);
    for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++)
       mPowderPatternComponentRegistry.GetObj(i).Prepare();
+}
+void PowderPattern::GetGeneGroup(const RefinableObj &obj,
+										  CrystVector_uint & groupIndex,
+										  unsigned int &first) const
+{
+	// One group for scales, one for theta error parameters
+	unsigned int scaleIndex=0;
+	unsigned int thetaIndex=0;
+   VFN_DEBUG_MESSAGE("PowderPattern::GetGeneGroup()",4)
+	for(long i=0;i<obj.GetNbPar();i++)
+		for(long j=0;j<this->GetNbPar();j++)
+			if(&(obj.GetPar(i)) == &(this->GetPar(j)))
+			{
+				if(this->GetPar(j).GetType()->IsDescendantFromOrSameAs(gpRefParTypeScattDataScale))
+				{
+					if(scaleIndex==0) scaleIndex=first++;
+					groupIndex(i)=scaleIndex;
+				}
+				else //gpRefParTypeScattDataCorrPos
+				{
+					if(thetaIndex==0) thetaIndex=first++;
+					groupIndex(i)=thetaIndex;
+				}
+			}
 }
 
 void PowderPattern::CalcPowderPattern() const
@@ -2309,21 +2380,21 @@ void PowderPattern::Init()
       RefinablePar tmp("2Theta0",&m2ThetaZero,-.05,.05,gpRefParTypeScattDataCorrPos,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG);
       tmp.AssignClock(mClockPowderPattern2ThetaCorr);
-      tmp.SetDerivStep(1e-4);
+      tmp.SetDerivStep(1e-6);
       this->AddPar(tmp);
    }
    {
       RefinablePar tmp("2ThetaDispl",&m2ThetaDisplacement,-.05,.05,gpRefParTypeScattDataCorrPos,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG);
       tmp.AssignClock(mClockPowderPattern2ThetaCorr);
-      tmp.SetDerivStep(1e-4);
+      tmp.SetDerivStep(1e-6);
       this->AddPar(tmp);
    }
    {
       RefinablePar tmp("2ThetaTransp",&m2ThetaTransparency,-.05,.05,gpRefParTypeScattDataCorrPos,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG);
       tmp.AssignClock(mClockPowderPattern2ThetaCorr);
-      tmp.SetDerivStep(1e-4);
+      tmp.SetDerivStep(1e-6);
       this->AddPar(tmp);
    }
 }

@@ -22,18 +22,13 @@ using namespace std;
 using namespace ObjCryst;
 /** \brief (Quick & dirty) Least-Squares Refinement Object with Numerical derivatives
 *
-* This is is very quick& dirty (slow), written one day for tests... Do not expect anything
-* from it yet... I'm not sure it currently works !
+* This is still highly experimental !
 */
 class LSQNumObj
 {
 	public:
-		LSQNumObj(CrystVector_double (*pRefinedFunc)(),
-                                  string objName="Unnamed LSQ object");
+		LSQNumObj(string objName="Unnamed LSQ object");
 		~LSQNumObj();
-		void Init(const CrystVector_double&obs,const CrystVector_double&weight);
-		void Init(const CrystVector_double&obs);//using unit weight
-      
       /// Fix one parameter
       void SetParIsFixed(const string& parName,const bool fix);
       /// Fix one family of parameters
@@ -52,7 +47,7 @@ class LSQNumObj
 		double RwFactor()const;
 		double ChiSquare()const;	//uses the weight if specified
       ///Add an object to refine
-		void AddRefinableObj(RefinableObj &obj);
+		void SetRefinedObj(RefinableObj &obj, const unsigned int LSQFuncIndex=0);
 		void SetUseSaveFileOnEachCycle(bool yesOrNo=true);
 		void SetSaveFile(string fileName="refine.save");
 		void PrintRefResults()const;
@@ -65,17 +60,12 @@ class LSQNumObj
 	private:
       /// Prepare mRefParList for the refinement
       void PrepareRefParList();
-      // Refined objects
-         /// The refined objects
-         ObjRegistry<RefinableObj> mRefinedObjList;
-         /// The refined objects, recursively including all sub-objects
+      // Refined object
+         /// The recursive list of all refined sub-objects
          ObjRegistry<RefinableObj> mRecursiveRefinedObjList;
       /// The refinable par list used during refinement. Only a compilation
-      /// of the parameters in RefinableObj
+      /// of the parameters in RefinableObj and its sub-objects
 		mutable RefinableObj mRefParList;
-		//The minimised function
-		//	Obs and Calc values are stored into Obs and Calc arrays
-		CrystVector_double (*mpRefinedFunc) ();
       /// Damping factor for the refinement (unused yet...)
 		double mDampingFactor;
       ///Save result to file after each cycle ?
@@ -96,6 +86,10 @@ class LSQNumObj
       int mIndexValuesSetInitial, mIndexValuesSetLast;
       /// If true, then stop at the end of the cycle. Used in multi-threading environment
       bool mStopAfterCycle;
+		/// The opitimized object
+		RefinableObj *mpRefinedObj;
+		/// The index of the LSQ function in the refined object (if there are several...)
+		unsigned int mLSQFuncIndex;
 };
 
 #endif //_LSQOBJNUM_H

@@ -1,11 +1,8 @@
 /*
-* LibCryst++ : a Crystallographic computing library in C++
+* ObjCryst++ : a Crystallographic computing library in C++
 *
 *  (c) 2000 Vincent FAVRE-NICOLIN
-*           Laboratoire de Cristallographie
-*           24, quai Ernest-Ansermet, CH-1211 Geneva 4, Switzerland
-*  Contact: Vincent.Favre-Nicolin@cryst.unige.ch
-*           Radovan.Cerny@cryst.unige.ch
+*       vincefn@users.sourceforge.net
 *
 */
 
@@ -15,7 +12,8 @@
 #include "wxCryst/wxCryst.h"
 namespace ObjCryst
 {
-   class WXGlobalOptimObj;
+   class WXOptimizationObj;
+	class WXMonteCarloObj;
 }
 #include "RefinableObj/GlobalOptimObj.h"
 namespace ObjCryst
@@ -23,48 +21,71 @@ namespace ObjCryst
 class WXGlobalOptimRunThread;
 
 /// WX Class for a Global Optimization objects
-class WXGlobalOptimObj: public WXCrystObj
+class WXOptimizationObj: public WXCrystObj
 {
    public:
-      WXGlobalOptimObj(wxWindow *parent, MonteCarloObj*);
+      WXOptimizationObj(wxWindow *parent, OptimizationObj*);
       virtual void CrystUpdate();
-      ///Update the number of trials to go, to show the user something's still going on...
-      virtual void UpdateDisplayNbTrial();
       virtual bool OnChangeName(const int id);
       virtual void OnSave();
       virtual void OnLoad();
-      ///From the menu
+      /// From the menu
       virtual void OnAddRefinedObject();
-      ///Added by the library
+      /// Added by the library
       virtual void AddRefinedObject(RefinableObj &obj);
-      ///From the menu
+      /// From the menu
       virtual void OnAddCostFunction();
-      ///Added by the library
+      /// Added by the library
       virtual void AddCostFunction(RefinableObj &obj,const int costFuncNum);
-      virtual void OnRunOptimization();
+		/// Launches the optimization run
+      virtual void OnRunOptimization()=0;
       virtual void OnStopOptimization();
-   private:
-      MonteCarloObj *mpGlobalOptimObj;
+		virtual OptimizationObj & GetOptimizationObj()=0;
+		virtual const OptimizationObj & GetOptimizationObj()const=0;
+   protected:
       WXCrystMenuBar* mpMenuBar;
       WXGlobalOptimRunThread *mpGlobalOptimRunThread;
-      /// The number of trials asked by the user
-      long mNbTrial;
       WXFieldPar<long> *mpWXFieldNbTrial;
-   DECLARE_EVENT_TABLE()
 };
 
-/// Class for a GlobalOPtimization thread
+/// Class for a GlobalOptimization thread
 class WXGlobalOptimRunThread: public wxThread
 {
    public:
-      WXGlobalOptimRunThread(OptimizationObj *globalOptObj,long &nbTrial);
+      WXGlobalOptimRunThread(OptimizationObj &globalOptObj,long &nbTrial,const double finalCost=0);
       
       virtual void *Entry();
       virtual void OnExit();
    private:
       OptimizationObj *mpGlobalOptObj;
-      ///This points to the mNbTrial member in WXGlobalOptimObj
+      ///This points to the mNbTrial member in WXOptimizationObj
       long *mpNbTrial;
+		/// The value of the cost below which the optimization should stop
+		/// (0 by default) even if the desired number pf trial has not been reached.
+		const double mFinalCost;
+};
+
+/** Class for Graphical interface to Monte-Carlo objects 
+* (Simulated Annealing, Parallel Tempering)
+*
+*/
+class WXMonteCarloObj: public WXOptimizationObj
+{
+   public:
+      WXMonteCarloObj(wxWindow *parent, MonteCarloObj*);
+      //virtual void CrystUpdate();
+      virtual void OnRunOptimization();
+		/// Called during optimization, to show the user something's still going on...
+      void UpdateDisplayNbTrial();
+		virtual OptimizationObj & GetOptimizationObj();
+		virtual const OptimizationObj & GetOptimizationObj()const;
+   protected:
+		/// The algorithm object
+      MonteCarloObj *mpMonteCarloObj;
+      /// The number of trials asked by the user
+      long mNbTrial;
+      WXFieldPar<long> *mpWXFieldNbTrial;
+   DECLARE_EVENT_TABLE()
 };
 
 

@@ -130,9 +130,11 @@ class Atom: public Scatterer
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
 		/// Get the ScatteringPowerAtom corresponding to this atom.
       const ScatteringPowerAtom& GetScatteringPower()const;
+		virtual void GetGeneGroup(const RefinableObj &obj, 
+										  CrystVector_uint & groupIndex,
+										  unsigned int &firstGroup) const;
    protected:
    private:
-      virtual void Update() const;
       /// Prepare refinable parameters for the scatterer object
       virtual void InitRefParList();
    

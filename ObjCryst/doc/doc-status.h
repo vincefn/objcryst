@@ -54,8 +54,19 @@
 *
 *
 *\section history History
+*\par 1.? 
+*\li ZScatterer: worked a bit on ZScatterer::GlobalOptimiRandomMove(),
+* to give the possibility of making not-so-random moves, especially for
+* small molecules.
+* \li Scatterer: removed the ZScatterer::Update() function from the base
+* Scatterer class, as previously scheduled.
+* \li OptimizationObj: Forked the algorithms classes, with a base OptimizationObj
+* class, derived (currently) to a MonteCarloObj class (which replaces the
+* old GlobalOptimiObj class, for simulated annealing and parallel
+* tempering). Also added a tentative GeneticAlgorithm class, still
+* in very early development and not usable yet for the common mortal.
 *
-*\par 1.0(2001-??)
+*\par 1.02(2001-nov 12th)
 * \li PowderPattern: Added the input format for Sietronics (.cpi) files.
 * Now importing data will allow null points without crashing. Also
 * when no phase (background, crystal) has been added to the pattern,

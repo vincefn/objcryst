@@ -115,6 +115,67 @@ void ZAtom::WXNotifyDelete()
 #endif
 //######################################################################
 //
+//     ZMoveMinimizer
+//
+//
+//######################################################################
+ZMoveMinimizer::ZMoveMinimizer(ZScatterer &scatt):
+RefinableObj(true),
+mpZScatt(&scatt),mOptimObj(true)
+{
+	mOptimObj.SetAlgorithmSimulAnnealing(ANNEALING_EXPONENTIAL,1,.001,
+														  ANNEALING_EXPONENTIAL,16,.25);
+	mOptimObj.AddRefinableObj(*this);
+	mOptimObj.AddCostFunction(*this,0);
+}
+ZMoveMinimizer::~ZMoveMinimizer(){}
+unsigned int ZMoveMinimizer::GetNbCostFunction()const {return 1;}
+const string& ZMoveMinimizer::GetCostFunctionName(const unsigned int)const
+{ 
+	static const string *str= new string("Conformation change");
+	return *str;
+}
+const string& ZMoveMinimizer::GetCostFunctionDescription(const unsigned int)const
+{ 
+	static const string *str= new string("Conformation change distances squared");
+	return *str;
+}
+double ZMoveMinimizer::GetCostFunctionValue(const unsigned int)
+{
+	const CrystVector_double *pXcoord=&(mpZScatt->GetXCoord());
+	const CrystVector_double *pYcoord=&(mpZScatt->GetYCoord());
+	const CrystVector_double *pZcoord=&(mpZScatt->GetZCoord());
+	double dist=0;
+	double norm=0;
+	for(int i=pXcoord->numElements()-1;i>=0;i--)
+	{
+		dist+=mAtomWeight(i)*( ((*pXcoord)(i)-mXCoord0(i))*((*pXcoord)(i)-mXCoord0(i))
+									 +((*pYcoord)(i)-mYCoord0(i))*((*pYcoord)(i)-mYCoord0(i))
+									 +((*pZcoord)(i)-mZCoord0(i))*((*pZcoord)(i)-mZCoord0(i)));
+		norm+=mAtomWeight(i);
+	}
+	return dist/norm;
+}
+void ZMoveMinimizer::RecordConformation()
+{
+	mXCoord0=mpZScatt->GetXCoord();
+	mYCoord0=mpZScatt->GetYCoord();
+	mZCoord0=mpZScatt->GetZCoord();
+	if(mAtomWeight.numElements() != mXCoord0.numElements())
+	{
+		mAtomWeight.resize(mXCoord0.numElements());
+		mAtomWeight=1;
+	}
+}
+void ZMoveMinimizer::SetZAtomWeight(const CrystVector_double weight) {mAtomWeight=weight;}
+void ZMoveMinimizer::MinimizeChange(long nbTrial=10000)
+{
+	if(mAtomWeight.max()<1e-3) return;
+	mOptimObj.Optimize(nbTrial,true);
+}
+
+//######################################################################
+//
 //  ZScatterer   
 //
 //
@@ -128,7 +189,8 @@ mPhi(0),mChi(0),mPsi(0),
 mZAtomRegistry("List of ZAtoms"),
 mCenterAtomIndex(0),
 mPhiChiPsiMatrix(3,3),
-mUseGlobalScattPow(false),mpGlobalScattPow(0)
+mUseGlobalScattPow(false),mpGlobalScattPow(0),
+mpZMoveMinimizer(0)
 {
    VFN_DEBUG_MESSAGE("ZScatterer::ZScatterer():("<<mName<<")",5)
    mName=name;
@@ -150,7 +212,8 @@ mNbAtom(old.mNbAtom),mNbDummyAtom(old.mNbDummyAtom),
 mPhi(old.mPhi),mChi(old.mChi),mPsi(old.mPsi),
 mCenterAtomIndex(old.mCenterAtomIndex),
 mPhiChiPsiMatrix(old.mPhiChiPsiMatrix),
-mUseGlobalScattPow(false),mpGlobalScattPow(0)
+mUseGlobalScattPow(false),mpGlobalScattPow(0),
+mpZMoveMinimizer(0)
 {
    VFN_DEBUG_MESSAGE("ZScatterer::ZScatterer(&old):("<<mName<<")",5)
    
@@ -280,7 +343,7 @@ int ZScatterer::GetNbComponent() const
 }
 const ScatteringComponentList& ZScatterer::GetScatteringComponentList() const
 {
-   this->Update();
+   this->UpdateScattCompList();
    
    return mScattCompList;
 }
@@ -294,7 +357,7 @@ void ZScatterer::Print() const
 {
    VFN_DEBUG_MESSAGE("ZScatterer::Print()",5)
    //:TODO: 
-   //this->Update();
+   //this->UpdateScattCompList();
    //for(int i=0;i<this->mNbAtom;i++) ??;
 }
 
@@ -340,7 +403,7 @@ ostream& ZScatterer::POVRayDescription(ostream &os,
    VFN_DEBUG_MESSAGE("ZScatterer::POVRayDescription()",5)
    //throw ObjCrystException("ZScatterer::POVRayDescription() not implemented! "+this->GetName());
    //:TODO:
-   this->Update();
+   this->UpdateScattCompList();
 
    //for(long i=0;i<mNbAtom;i++) mpAtom[i]->POVRayDescription(os,onlyIndependentAtoms);
    os << "// Description of ZScatterer :" << this->GetName() <<endl;
@@ -519,7 +582,7 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
 {
    #ifdef OBJCRYST_GL
    VFN_DEBUG_ENTRY("ZScatterer::GLInitDisplayList()",4)
-   this->Update();
+   this->UpdateScattCompList();
    if(true==mUseGlobalScattPow) 
    {
       //mpAtom[mCenterAtomIndex]->GLInitDisplayList(onlyIndependentAtoms);
@@ -925,37 +988,280 @@ void ZScatterer::SetUseGlobalScatteringPower(const bool useIt)
    }
 }
 
+void ZScatterer::GetGeneGroup(const RefinableObj &obj,
+										  CrystVector_uint & groupIndex,
+										  unsigned int &first) const
+{
+	// One group for all translation parameters, another for orientation.
+	// All conformation parameters (bond, angle,torsion) are in individual groups.
+	unsigned int posIndex=0;
+	unsigned int orientIndex=0;
+   VFN_DEBUG_MESSAGE("ZScatterer::GetGeneGroup()",4)
+	for(long i=0;i<obj.GetNbPar();i++)
+		for(long j=0;j<this->GetNbPar();j++)
+			if(&(obj.GetPar(i)) == &(this->GetPar(j)))
+			{
+				if(this->GetPar(j).GetType()->IsDescendantFromOrSameAs(gpRefParTypeScattTransl))
+				{
+					if(posIndex==0) posIndex=first++;
+					groupIndex(i)=posIndex;
+				}
+				else 
+					if(this->GetPar(j).GetType()->IsDescendantFromOrSameAs(gpRefParTypeScattOrient))
+					{
+						if(orientIndex==0) orientIndex=first++;
+						groupIndex(i)=orientIndex;
+					}
+					else groupIndex(i)= first++;
+			}
+}
+const CrystVector_double& ZScatterer::GetXCoord() const
+{
+	this->UpdateCoordinates();
+	return mXCoord;
+}
+const CrystVector_double& ZScatterer::GetYCoord() const
+{
+	this->UpdateCoordinates();
+	return mYCoord;
+}
+const CrystVector_double& ZScatterer::GetZCoord() const
+{
+	this->UpdateCoordinates();
+	return mZCoord;
+}
+
+void ZScatterer::EndOptimization()
+{
+	if(0!=mpZMoveMinimizer) delete mpZMoveMinimizer;
+	mpZMoveMinimizer=0;
+	this->RefinableObj::EndOptimization();
+}
+
 void ZScatterer::GlobalOptRandomMove(const double mutationAmplitude)
 {
-   VFN_DEBUG_MESSAGE("ZScatterer::GlobalOptRandomMove()",2)
+   VFN_DEBUG_ENTRY("ZScatterer::GlobalOptRandomMove()",3)
    // give a 30% chance of moving a single dihedral angle
 	// while keeping at a minimum the configuration change in the
 	// depending atoms.
 	//
 	// Should try to do better by really minimizing the conformation
 	// changes
-   if( (rand()/(double)RAND_MAX)<.3)
+   if( (rand()/(double)RAND_MAX)<.01)//.01
+	{
+		// Build mpZMoveMinimizer object
+		if(0==mpZMoveMinimizer)
+		{
+			mpZMoveMinimizer=new ZMoveMinimizer(*this);
+			// copy all parameters (and not reference them, we will change the fix status..
+			// we could remove all popu parameters...
+			for(int i=0; i<this->GetNbPar();i++) mpZMoveMinimizer->AddPar(this->GetPar(i));
+		}
+		// Do we have *any* dihedral angle to really move ?
+			CrystVector_long dihed(mNbAtom);
+			dihed=0;
+			int nbDihed=0;
+			RefinablePar *par;
+			dihed(nbDihed++)=2;//This is the Psi angle, in fact. Should Chi be added, too ?
+			for(int i=3;i<mNbAtom;i++)
+			{
+				par=&(this->GetPar(&(mZAtomRegistry.GetObj(i).mDihed)));
+				if( !(par->IsFixed()) ) //&& !(par->IsLimited())
+					dihed(nbDihed++)=i;
+			}
+			if(nbDihed<2) //Can't play :-(
+				this->RefinableObj::GlobalOptRandomMove(mutationAmplitude);
+		// Pick one to move and get the relevant parameter
+		// (maybe we should random-move also the associated bond lengths an angles,
+		// but for now we'll concentrate on dihedral (torsion) angles.
+			const int atom=dihed((int) (rand()/((double)RAND_MAX+1)*nbDihed));
+			//cout<<endl;
+   		VFN_DEBUG_MESSAGE("ZScatterer::GlobalOptRandomMove(): Changing atom #"<<atom ,3)
+			if(atom==2)
+				par=&(this->GetPar(&mPsi));
+			else
+				par=&(this->GetPar(&(mZAtomRegistry.GetObj(atom).mDihed)));
+   		VFN_DEBUG_MESSAGE("ZScatterer::GlobalOptRandomMove(): initial value:"<<par->GetHumanValue() ,3)
+		// Record the current conformation
+			mpZMoveMinimizer->RecordConformation();
+		// Set up
+			const int moveType= rand()%3;
+			mpZMoveMinimizer->FixAllPar();
+			double x0,y0,z0;
+			//cout << " Move Type:"<<moveType<<endl;
+			CrystVector_double weight(mNbAtom);
+			switch(moveType)
+			{// :TODO: rather build a connectivity table, to include more atoms
+				case 0:// (0) Try to move only one atom
+				{
+   				VFN_DEBUG_MESSAGE("ZScatterer::GlobalOptRandomMove():Move only one atom",3)
+					weight=1;
+					weight(atom)=0;
+					for(int i=0;i<mNbAtom;i++)
+						if(  (i==this->GetZBondAtom(atom))
+							||(i==this->GetZAngleAtom(atom))
+							||(i==this->GetZDihedralAngleAtom(atom))
+							||(atom==this->GetZBondAtom(i))
+							||(atom==this->GetZAngleAtom(i))
+							||(atom==this->GetZDihedralAngleAtom(i)))
+						{
+							if(!(this->GetPar(&(mZAtomRegistry.GetObj(i).mBondLength)).IsFixed()))
+								mpZMoveMinimizer->GetPar(&(mZAtomRegistry.GetObj(i).mBondLength)).SetIsFixed(false);
+							if(!(this->GetPar(&(mZAtomRegistry.GetObj(i).mAngle)).IsFixed()))
+								mpZMoveMinimizer->GetPar(&(mZAtomRegistry.GetObj(i).mAngle)).SetIsFixed(false);
+							if(!(this->GetPar(&(mZAtomRegistry.GetObj(i).mDihed)).IsFixed()))
+								mpZMoveMinimizer->GetPar(&(mZAtomRegistry.GetObj(i).mDihed)).SetIsFixed(false);
+						}
+					if(!(this->GetPar(&mPhi).IsFixed()))
+						mpZMoveMinimizer->GetPar(&mPhi).SetIsFixed(false);
+					if(!(this->GetPar(&mChi).IsFixed()))
+						mpZMoveMinimizer->GetPar(&mChi).SetIsFixed(false);
+					if( !(this->GetPar(&mPsi).IsFixed()) && (atom!=2))
+						mpZMoveMinimizer->GetPar(&mPsi).SetIsFixed(false);
+					if(!(this->GetPar(&mXYZ(0)).IsFixed()))
+						mpZMoveMinimizer->GetPar(&mXYZ(0)).SetIsFixed(false);
+					if(!(this->GetPar(&mXYZ(1)).IsFixed()))
+						mpZMoveMinimizer->GetPar(&mXYZ(1)).SetIsFixed(false);
+					if(!(this->GetPar(&mXYZ(2)).IsFixed()))
+						mpZMoveMinimizer->GetPar(&mXYZ(2)).SetIsFixed(false);
+					break;
+				}
+				case 1:// (1) Try to move the atoms *before* the rotated bond
+				{
+   				VFN_DEBUG_MESSAGE("ZScatterer::GlobalOptRandomMove():Move before the rotated bond",3)
+					const int atom1=this->GetZBondAtom(atom);
+					const int atom2=this->GetZAngleAtom(atom);
+					weight=0;
+					weight(atom1)=1;
+					for(int i=0;i<mNbAtom;i++) if(weight(this->GetZBondAtom(i))>.1) weight(i)=1;
+					weight(atom2)=1;
+					for(int i=0;i<mNbAtom;i++)
+						if(  (atom2 ==this->GetZAngleAtom(i))
+							&&(atom1 !=this->GetZBondAtom(i)) 
+							&&(i != atom) )
+						{
+							if(!(this->GetPar(&(mZAtomRegistry.GetObj(i).mBondLength)).IsFixed()))
+								mpZMoveMinimizer->GetPar(&(mZAtomRegistry.GetObj(i).mBondLength)).SetIsFixed(false);
+							if(!(this->GetPar(&(mZAtomRegistry.GetObj(i).mAngle)).IsFixed()))
+								mpZMoveMinimizer->GetPar(&(mZAtomRegistry.GetObj(i).mAngle)).SetIsFixed(false);
+							if(!(this->GetPar(&(mZAtomRegistry.GetObj(i).mDihed)).IsFixed()))
+								mpZMoveMinimizer->GetPar(&(mZAtomRegistry.GetObj(i).mDihed)).SetIsFixed(false);
+						}
+					if(!(this->GetPar(&mPhi).IsFixed()))
+						mpZMoveMinimizer->GetPar(&mPhi).SetIsFixed(false);
+					if(!(this->GetPar(&mChi).IsFixed()))
+						mpZMoveMinimizer->GetPar(&mChi).SetIsFixed(false);
+					if( !(this->GetPar(&mPsi).IsFixed()) && (atom!=2))
+						mpZMoveMinimizer->GetPar(&mPsi).SetIsFixed(false);
+						
+					if(!(this->GetPar(&mXYZ(0)).IsFixed()))
+						mpZMoveMinimizer->GetPar(&mXYZ(0)).SetIsFixed(false);
+					if(!(this->GetPar(&mXYZ(1)).IsFixed()))
+						mpZMoveMinimizer->GetPar(&mXYZ(1)).SetIsFixed(false);
+					if(!(this->GetPar(&mXYZ(2)).IsFixed()))
+						mpZMoveMinimizer->GetPar(&mXYZ(2)).SetIsFixed(false);
+						
+					if(!(this->GetPar(&(mZAtomRegistry.GetObj(atom).mBondLength)).IsFixed()))
+						mpZMoveMinimizer->GetPar(&(mZAtomRegistry.GetObj(atom).mBondLength)).SetIsFixed(false);
+					if(!(this->GetPar(&(mZAtomRegistry.GetObj(atom).mAngle)).IsFixed()))
+						mpZMoveMinimizer->GetPar(&(mZAtomRegistry.GetObj(atom).mAngle)).SetIsFixed(false);
+					
+					break;
+				}
+				case 2:// (2) Try to move the atoms *after* the rotated bond
+				{
+					if(mCenterAtomIndex>=atom)
+					{
+   				VFN_DEBUG_MESSAGE("ZScatterer::GlobalOptRandomMove():Move after the bond (translate)",3)
+						x0=this->GetXCoord()(0);
+						y0=this->GetYCoord()(0);
+						z0=this->GetZCoord()(0);
+					}
+					else
+					{
+   					VFN_DEBUG_MESSAGE("ZScatterer::GlobalOptRandomMove():Move after the bond(nothing to do)",3)
+					}
+					break;
+				}
+			}
+		// Move it, and with some probability use flipping to some
+		// not-so-random angles., and then minimize the conformation change
+			mpZMoveMinimizer->SetZAtomWeight(weight);
+			double change;
+			if( (rand()%3)==0)
+			{
+				switch(rand()%5)
+				{
+					case 0: change=-120*DEG2RAD;break;
+					case 1: change= -90*DEG2RAD;break;
+					case 2: change=  90*DEG2RAD;break;
+					case 3: change= 120*DEG2RAD;break;
+					default:change= 180*DEG2RAD;break;
+				}
+			}
+			else
+			{
+				change= par->GetGlobalOptimStep()
+                     	 *2*(rand()/(double)RAND_MAX-0.5)*mutationAmplitude*16;
+			}
+   		VFN_DEBUG_MESSAGE("ZScatterer::GlobalOptRandomMove(): mutation:"<<change*RAD2DEG,10)
+			par->Mutate(change);
+			if(2==moveType)
+			{
+				if(mCenterAtomIndex>=atom)
+				{
+					this->UpdateCoordinates();
+					x0 -= this->GetXCoord()(0);
+					y0 -= this->GetYCoord()(0);
+					z0 -= this->GetZCoord()(0);
+         		mpCryst->OrthonormalToFractionalCoords(x0,y0,z0);
+					this->GetPar(mXYZ.data()).Mutate(x0);
+					this->GetPar(mXYZ.data()+1).Mutate(y0);
+					this->GetPar(mXYZ.data()+2).Mutate(z0);
+				}
+			}
+			else
+			{
+				//cout <<"ZMoveMinimizer(flip):cost="<<mpZMoveMinimizer->GetCostFunctionValue(0);
+				const double tmp=mpZMoveMinimizer->GetCostFunctionValue(0);
+				if(tmp>.05)
+				{
+					if(tmp<1) mpZMoveMinimizer->MinimizeChange(500);
+					else if(tmp<5) mpZMoveMinimizer->MinimizeChange(1000);
+						  else mpZMoveMinimizer->MinimizeChange(5000);
+				}
+				//cout <<" -> "<<mpZMoveMinimizer->GetCostFunctionValue(0)<<endl;
+			}
+   		VFN_DEBUG_MESSAGE("ZScatterer::GlobalOptRandomMove(): final value:"<<par->GetHumanValue(),10)
+		//
+	}
+	#if 0
    {
 		// find unfixed,  dihedral angles to play with //unlimited?
 		CrystVector_long dihed(mNbAtom);
 		dihed=0;
 		int nbDihed=0;
 		RefinablePar *par;
-		for(int i=0;i<mNbAtom;i++)
+		dihed(nbDihed++)=2;
+		for(int i=3;i<mNbAtom;i++)
 		{
 			par=&(this->GetPar(&(mZAtomRegistry.GetObj(i).mDihed)));
 			if( !(par->IsFixed()) ) //&& !(par->IsLimited())
 				dihed(nbDihed++)=i;
 		}
-		if(nbDihed==0) //Can't play :-(
+		if(nbDihed<2) //Can't play :-(
 			this->RefinableObj::GlobalOptRandomMove(mutationAmplitude);
 		// Pick one
 		const int atom=dihed((int) (rand()/((double)RAND_MAX+1)*nbDihed));
-   	VFN_DEBUG_MESSAGE("ZScatterer::GlobalOptRandomMove(): switching atom #"<<atom ,2)
+   	VFN_DEBUG_MESSAGE("ZScatterer::GlobalOptRandomMove(): "<<FormatHorizVector<long>(dihed) ,10)
+   	VFN_DEBUG_MESSAGE("ZScatterer::GlobalOptRandomMove(): Changing atom #"<<atom ,10)
+		if(atom==2)
+			par=&(this->GetPar(&mPsi));
+		else
+			par=&(this->GetPar(&(mZAtomRegistry.GetObj(atom).mDihed)));
 		// Get the old value
-		const double old=mZAtomRegistry.GetObj(atom).GetZDihedralAngle();
+		const double old=par->GetValue();
 		// Move it, with a max amplitude 8x greater than usual
-		par=&(this->GetPar(&(mZAtomRegistry.GetObj(atom).mDihed)));
 		if( (rand()/(double)RAND_MAX)<.1)
 		{// give some probability to use certain angles: -120,-90,90,120,180
 			switch(rand()%5)
@@ -972,10 +1278,12 @@ void ZScatterer::GlobalOptRandomMove(const double mutationAmplitude)
                       *2*(rand()/(double)RAND_MAX-0.5)*mutationAmplitude*8);
 		const double change=mZAtomRegistry.GetObj(atom).GetZDihedralAngle()-old;
 		// Now move all atoms using this changed bond as a reference
-		const int atom2=	mZAtomRegistry.GetObj(atom).GetZAngleAtom();
+		//const int atom2=	mZAtomRegistry.GetObj(atom).GetZAngleAtom();
 		for(int i=atom;i<mNbAtom;i++)
-			if(  (mZAtomRegistry.GetObj(i).GetZBondAtom()==atom)
-				&&(mZAtomRegistry.GetObj(i).GetZAngleAtom()==atom2))
+			//if(  (mZAtomRegistry.GetObj(i).GetZBondAtom()==atom)
+			//	&&(mZAtomRegistry.GetObj(i).GetZAngleAtom()==atom2))
+			//		this->GetPar(&(mZAtomRegistry.GetObj(i).mDihed)).Mutate(-change);
+			if(mZAtomRegistry.GetObj(i).GetZAngleAtom()==atom)
 					this->GetPar(&(mZAtomRegistry.GetObj(i).mDihed)).Mutate(-change);
    	//cout <<"ZScatterer::GlobalOptRandomMove:"<<nbDihed
 		//	  <<" "<<atom
@@ -985,44 +1293,23 @@ void ZScatterer::GlobalOptRandomMove(const double mutationAmplitude)
 		//	  <<" "<<FormatHorizVector<long>(dihed,4)
 		//	  <<endl;
 	}
+	#endif
    else
    {
       this->RefinableObj::GlobalOptRandomMove(mutationAmplitude);
    }
-   VFN_DEBUG_MESSAGE("Crystal::GlobalOptRandomMove():End",1)
+   VFN_DEBUG_EXIT("Crystal::GlobalOptRandomMove():End",3)
 }
 
-void ZScatterer::Update() const
+void ZScatterer::UpdateCoordinates() const
 {
-   if(  (mClockScattCompList>mClockScatterer)
-      &&(mClockScattCompList>mpCryst->GetClockLatticePar())) return;
+   if(mClockCoord>mClockScatterer) return;
 
-   VFN_DEBUG_ENTRY("ZScatterer::Update(bool)"<<this->GetName(),3)
-   TAU_PROFILE("ZScatterer::Update()","void ()",TAU_DEFAULT);
+   VFN_DEBUG_ENTRY("ZScatterer::UpdateCoordinates():"<<this->GetName(),3)
+   TAU_PROFILE("ZScatterer::UpdateCoordinates()","void ()",TAU_DEFAULT);
    //if(0==mNbAtom) throw ObjCrystException("ZScatterer::Update() No Atoms in Scatterer !");
    if(0==mNbAtom) return;
    
-   if(true==mUseGlobalScattPow)
-   {
-      mScattCompList(0).mX=mXYZ(0);
-      mScattCompList(0).mY=mXYZ(1);
-      mScattCompList(0).mZ=mXYZ(2);
-      mScattCompList(0).mOccupancy=mOccupancy;
-      mScattCompList(0).mpScattPow=mpGlobalScattPow;
-      
-      // Update central atom for Display.
-      //mXCoord(mCenterAtomIndex)=this->GetX();
-      //mYCoord(mCenterAtomIndex)=this->GetY();
-      //mZCoord(mCenterAtomIndex)=this->GetZ();
-      //mpCryst->FractionalToOrthonormalCoords(mXCoord(mCenterAtomIndex),
-      //                                       mXCoord(mCenterAtomIndex),
-      //                                       mXCoord(mCenterAtomIndex));
-      
-      mClockScattCompList.Click();
-      VFN_DEBUG_MESSAGE("ZScatterer::Update()->Global Scatterer:End",3)
-      return;
-   }
-
    {
       CrystMatrix_double phiMatrix(3,3),chiMatrix(3,3),psiMatrix(3,3);
       phiMatrix= cos(mPhi)   , -sin(mPhi)   , 0,
@@ -1188,10 +1475,41 @@ void ZScatterer::Update() const
       mYCoord(i) += y0;
       mZCoord(i) += z0;
    }
-   
-   //Now update the ScatteringComponentList
+	mClockCoord.Click();
+   VFN_DEBUG_EXIT("ZScatterer::UpdateCoordinates()"<<this->GetName(),3)
+}
+	
+void ZScatterer::UpdateScattCompList() const
+{
+   VFN_DEBUG_ENTRY("ZScatterer::UpdateScattCompList()"<<this->GetName(),3)
+	this->UpdateCoordinates();
+   if(  (mClockScattCompList>mClockCoord)
+      &&(mClockScattCompList>mpCryst->GetClockLatticePar())) return;
+
+   if(true==mUseGlobalScattPow)
+   {
+      mScattCompList(0).mX=mXYZ(0);
+      mScattCompList(0).mY=mXYZ(1);
+      mScattCompList(0).mZ=mXYZ(2);
+      mScattCompList(0).mOccupancy=mOccupancy;
+      mScattCompList(0).mpScattPow=mpGlobalScattPow;
+      
+      // Update central atom for Display.
+      //mXCoord(mCenterAtomIndex)=this->GetX();
+      //mYCoord(mCenterAtomIndex)=this->GetY();
+      //mZCoord(mCenterAtomIndex)=this->GetZ();
+      //mpCryst->FractionalToOrthonormalCoords(mXCoord(mCenterAtomIndex),
+      //                                       mXCoord(mCenterAtomIndex),
+      //                                       mXCoord(mCenterAtomIndex));
+      
+      mClockScattCompList.Click();
+      VFN_DEBUG_MESSAGE("ZScatterer::UpdateScattCompList()->Global Scatterer:End",3)
+      return;
+   }
+
    long j=0;
-   VFN_DEBUG_MESSAGE("ZScatterer::Update(bool):Finishing"<<mNbAtom<<","<<mNbDummyAtom,3)
+	double x,y,z;
+   VFN_DEBUG_MESSAGE("ZScatterer::UpdateScattCompList(bool):Finishing"<<mNbAtom<<","<<mNbDummyAtom,3)
    for(long i=0;i<mNbAtom;i++)
    {
       if(0!=mZAtomRegistry.GetObj(i).GetScatteringPower())
@@ -1210,7 +1528,7 @@ void ZScatterer::Update() const
    if(gVFNDebugMessageLevel<3) mScattCompList.Print();
    #endif
    mClockScattCompList.Click();
-   VFN_DEBUG_EXIT("ZScatterer::Update(bool)"<<this->GetName(),3)
+   VFN_DEBUG_EXIT("ZScatterer::UpdateScattCompList()"<<this->GetName(),3)
 }
 
 void ZScatterer::InitRefParList()

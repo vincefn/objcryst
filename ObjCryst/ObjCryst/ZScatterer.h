@@ -7,7 +7,7 @@
 
 #include "ObjCryst/ScatteringPower.h"
 #include "ObjCryst/Scatterer.h"
-//#include "ObjCryst/Atom.h"
+#include "RefinableObj/GlobalOptimObj.h"
 
 #include <string>
 
@@ -138,6 +138,30 @@ class ZAtom
       friend class WXZAtom;
    #endif
 };
+//######################################################################
+/**  \brief Class to minimize conformation changes for random moves. Very
+* experimental !!!
+* \internal Only used within ZScatterer.
+*/
+//######################################################################
+class ZMoveMinimizer:public RefinableObj
+{
+	public:
+		ZMoveMinimizer(ZScatterer &scatt);
+		~ZMoveMinimizer();
+      virtual unsigned int GetNbCostFunction()const;
+      virtual const string& GetCostFunctionName(const unsigned int)const;
+      virtual const string& GetCostFunctionDescription(const unsigned int)const;
+      virtual double GetCostFunctionValue(const unsigned int);
+		void RecordConformation();
+		void SetZAtomWeight(const CrystVector_double weight);
+		void MinimizeChange(long nbTrial=10000);
+	private:
+		ZScatterer *mpZScatt;
+		MonteCarloObj mOptimObj;
+		CrystVector_double mXCoord0,mYCoord0,mZCoord0;
+		CrystVector_double mAtomWeight;
+};
 
 //######################################################################
 ///  ZScatterer: the basic type of complex scatterers, where atom positions
@@ -244,9 +268,32 @@ class ZScatterer: public Scatterer
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
+		virtual void GetGeneGroup(const RefinableObj &obj, 
+										  CrystVector_uint & groupIndex,
+										  unsigned int &firstGroup) const;
       virtual void GlobalOptRandomMove(const double mutationAmplitude);
+		/// Get the list of all ZAtom cartesian x coordinates.
+		const CrystVector_double& GetXCoord() const;
+		/// Get the list of all ZAtom cartesian x coordinates.
+		const CrystVector_double& GetYCoord() const;
+		/// Get the list of all ZAtom cartesian x coordinates.
+		const CrystVector_double& GetZCoord() const;
+      virtual void EndOptimization();
    protected:
-      void Update() const;
+		/** Update the atom coordinates (in real units, in Angstroems).
+		*
+		* This takes into account the translation and global 
+		* rotation of the scatterer (ie this does not generate 'internal
+		* coordinates).
+		*/
+      void UpdateCoordinates() const;
+		/** Update the scattering component list, ie compute all atom
+		* positions from the bonds/angles/dihedral angles, and convert
+		* the coordinates to fractionnal coordinates of the Crystal.
+		*
+		* 
+		*/
+      void UpdateScattCompList() const;
       /** For 3D display of the structure, bonds, triangular and quadric
       * faces can be displayed. This matrix determines what is drawn.
       * This is a 5-column matrix. The first column indicates the type of
@@ -326,6 +373,9 @@ class ZScatterer: public Scatterer
       /// Storage for Cartesian coordinates. The (0,0,0) is on the central atom. This
       /// includes Dummy atoms.
       mutable CrystVector_double mXCoord,mYCoord,mZCoord;
+		/// Last time the cartesian coordinates were computed
+      mutable RefinableObjClock mClockCoord;
+		ZMoveMinimizer *mpZMoveMinimizer;
    #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);

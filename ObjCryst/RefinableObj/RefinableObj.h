@@ -92,7 +92,7 @@ extern const RefParType *gpRefParTypeObjCryst;
 /// which records the number of events in the program which uses the library.
 /// This is purely internal, so don't worry about it...
 ///
-/// The clock values have nothing to do with 'time' as any normal person undestands it.
+/// The clock values have nothing to do with 'time' as any normal person undertands it.
 class RefinableObjClock
 {
    public:
@@ -122,6 +122,9 @@ class RefinableObjClock
 * \todo: define parameters using equations between parameters.
 * \todo: define some sort of soft constraint, with the possibility
 * of involving several parameters (complex).
+* \todo: for complex objects with lots of parameters, give the 
+* possibility to define vectors of parameters, all with the same 
+* properties, to reduce memory usage.
 */
 class RefinablePar
 {
@@ -511,18 +514,17 @@ template<class T> class RefObjOption:public RefObjOpt
       void (T::*mfpSetNewValue)(const int);
 };
 
-/** Refinable Object Registry
+/** Object Registry
 *
 *  This class is used to keep a list of all object of a given class at the global
-*  level. This is primarily aimed for the derivative of the RefinableObj class but it
-*  can be used for any class that has GetName() and GetClassName() function.
-*  Finding an object in the registry from its name will be slow, since it uses string
-*  (case-sensitive) comparison.
+*  level, or inside another object. This is primarily aimed for the derivative
+*  of the RefinableObj class but it
+*  can be used for \e any class that has GetName() and GetClassName() function.
 *
 *  \warning the order of the objects in the registry can change (every time an object
 *  is de-registered).
 *
-* \todo create two derived classes with the same interface, one which is a const
+* \todo (?) create two derived classes with the same interface, one which is a const
 * registry (the 'client' registry for RefinableObj), and one which has a non-const
 * access to the registered objects (the 'sub-objects' in RefinableObj).
 */
@@ -538,6 +540,8 @@ template<class T> class ObjRegistry
       void DeRegister(T &obj);
       /// De-register an object from its name.
       void DeRegister(const string &objName);
+      /// De-register \e all objects from the list.
+      void DeRegisterAll();
       /// Delete all objects in the registry.. Use with caution !!
       void DeleteAll();
       /** Get object #i in the registry.
@@ -572,16 +576,18 @@ template<class T> class ObjRegistry
       void Print()const;
       void SetName(const string &);
       const string& GetName()const;
-      /// Find the number of an object in the registry from its name
+      /// Find the number of an object in the registry from its name (slow !)
       /// The search starts at the *end* of the registry.
       long Find(const string &objName)const;
-      /// Find the number of an object in the registry from its name
+      /// Find the number of an object in the registry from its name (slow !)
       /// The search starts at the *end* of the registry.
-      /// Also check the class of the object.
+      /// Also check the class of the object (inheritance...).
       long Find(const string &objName, const string& className)const;
       /// Find the number of an object in the registry
       /// The search starts at the *end* of the registry.
       long Find(const T &obj)const;
+      /// Last time an object was added or removed from the registry
+		const RefinableObjClock& GetRegistryClock()const;
    private:
       /// The registry
       T** mpRegistry;
@@ -591,6 +597,9 @@ template<class T> class ObjRegistry
       unsigned long mMaxNbRegistered;
       /// Name of this registry
       string mName;
+		/// Last time an object was added or removed
+		RefinableObjClock mListClock;
+		
    #ifdef __WX__CRYST__
    public:
       WXRegistry<T>* WXCreate(wxWindow *parent);
@@ -604,7 +613,8 @@ template<class T> class ObjRegistry
 /// Register a new object in a registry, and recursively
 /// include all included (sub)objects. 
 template<class T> void RefObjRegisterRecursive(T &obj,ObjRegistry<T> &reg);
-
+/// Get the last time any object was added in the recursive list of objects.
+void GetSubRefObjListClockRecursive(ObjRegistry<RefinableObj> &reg,RefinableObjClock &clock);
 
 /** \brief Generic Refinable Object
 *
@@ -620,6 +630,10 @@ class RefinableObj
    public:
       /// Constructor
       RefinableObj();
+      /// Constructor. Using internalUseOnly=true will avoid registering the
+		/// the object to any registry, and thus (for example) no display will be created,
+		/// nor will this object be automatically be saved.
+      RefinableObj(const bool internalUseOnly);
       /// Defined not implemented... Should never be called
 		/// (copying the refinable parameters would allow you to modify the 
 		/// input object).
@@ -732,6 +746,11 @@ class RefinableObj
       * \param setId : the number identifying the set.
       */
       const CrystVector_double& GetParamSet(const long setId)const;
+      /** \brief Access one save refpar set
+      *
+      * \param setId : the number identifying the set.
+      */
+      CrystVector_double& GetParamSet(const long setId);
       /** \brief Access the (human) value of one refined parameter in a saved set of parameters
       *
       * \internal
@@ -830,9 +849,22 @@ class RefinableObj
          /// Get the current value of a cost function
          /// this should be const...
          virtual double GetCostFunctionValue(const unsigned int);
+      //LSQ functions
+         /// Number of LSQ functions
+         virtual unsigned int GetNbLSQFunction()const;
+         // Get a Cost function name from its id#.
+         //virtual const string& GetLSQFunctionName(const unsigned int)const;
+         // Get the (short) description of a cost function
+         //virtual const string& GetLSQFunctionDescription(const unsigned int)const;
+         /// Get the current calculated value for the LSQ function
+         virtual const CrystVector_double& GetLSQCalc(const unsigned int) const;
+         /// Get the observed values for the LSQ function
+         virtual const CrystVector_double& GetLSQObs(const unsigned int) const;
+         /// Get the weight values for the LSQ function
+         virtual const CrystVector_double& GetLSQWeight(const unsigned int) const;
 
       /// Re-init the list of refinable parameters, removing all parameters.
-      /// This does \not delete the RefinablePar if 
+      /// This does \e not delete the RefinablePar if 
 		/// RefinableObj::mDeleteRefParInDestructor is false
       void ResetParList();
       
@@ -889,12 +921,16 @@ class RefinableObj
 			virtual void GetGeneGroup(const RefinableObj &obj, 
 											  CrystVector_uint & groupIndex,
 											  unsigned int &firstGroup) const;
-			/** Set this object not to delete its list of parameters when destroyed.
-			*
-			* This is used for the RefinableObj in algorithms objects (OptimizationObj),
-			* which only hold copies of parameters from the refined objects.
-			*/
-			void SetDeleteRefParInDestructor(const bool b);
+		/** Set this object not to delete its list of parameters when destroyed.
+		*
+		* This is used for the RefinableObj in algorithms objects (OptimizationObj),
+		* which only hold copies of parameters from the refined objects.
+		*/
+		void SetDeleteRefParInDestructor(const bool b);
+		/** What was the last time a RefinablePar was added/removed ?
+		*
+		*/
+		const RefinableObjClock& GetRefParListClock()const;
    protected:
       /// Find a refinable parameter with a given name
       long FindPar(const string &name) const;
@@ -951,8 +987,12 @@ class RefinableObj
          /// to options allocated by the object, to have a simple global access to 
          /// all options
          ObjRegistry<RefObjOpt> mOptionRegistry;
-		
+		/// If true (the default), then all RefinablePar will be deleted when the 
+		/// the object is deleted. The opposite option (false) should only be used
+		/// in RefinableObj holding 'copies' of other objects, such as in algorithms.
       bool mDeleteRefParInDestructor;
+		/// Last time the RefinableParList was modified (a parameter added or removed).
+		RefinableObjClock mRefParListClock;
    #ifdef __WX__CRYST__
    public:
       /// Create a WXCrystObj for this object. Only a generic WXCrystObj pointer is kept.
@@ -964,6 +1004,8 @@ class RefinableObj
       WXCrystObjBasic *mpWXCrystObj;
    #endif
 };
+/// Get the last time any RefinablePar was added in a recursive list of objects.
+void GetRefParListClockRecursive(ObjRegistry<RefinableObj> &reg,RefinableObjClock &clock);
 
 /// Global Registry for all RefinableObj
 extern ObjRegistry<RefinableObj> gRefinableObjRegistry;

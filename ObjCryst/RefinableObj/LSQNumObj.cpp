@@ -8,10 +8,8 @@ using namespace NEWMAT;
 
 #include <iomanip>
 
-LSQNumObj::LSQNumObj(CrystVector_double (*pFunc)(),
-                     string objName)
+LSQNumObj::LSQNumObj(string objName)
 {
-	mpRefinedFunc=pFunc;
 	mDampingFactor=1.;
 	mSaveReportOnEachCycle=false;
 	mName=objName;
@@ -26,19 +24,6 @@ LSQNumObj::LSQNumObj(CrystVector_double (*pFunc)(),
 
 LSQNumObj::~LSQNumObj()
 {
-}
-
-void LSQNumObj::Init(const CrystVector_double &obs,const CrystVector_double&w)
-{
-	mObs=obs;
-	mWeight=w;
-}
-
-void LSQNumObj::Init(const CrystVector_double &obs)
-{
-	CrystVector_double tmp(obs.numElements());
-	tmp=1.;
-	this->Init(obs,tmp);
 }
 
 void LSQNumObj::SetParIsFixed(const string& parName,const bool fix)
@@ -71,6 +56,8 @@ void LSQNumObj::SetParIsUsed(const RefParType *type,const bool use)
 
 void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt)
 {
+	mObs=mpRefinedObj->GetLSQObs(mLSQFuncIndex);
+	mWeight=mpRefinedObj->GetLSQWeight(mLSQFuncIndex);
 
 	//Check if we are ready for the refinement
 	//:TODO:
@@ -93,8 +80,8 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt)
 		double R_ini,Rw_ini;
       double *pTmp1,*pTmp2;
       
-      double marquardt=1e-3;
-      const double marquardtMult=10.;
+      double marquardt=1e-2;
+      const double marquardtMult=4.;
 	//store old values
    mIndexValuesSetInitial=mRefParList.CreateParamSet("LSQ Refinement-Initial Values");
    mIndexValuesSetLast=mRefParList.CreateParamSet("LSQ Refinement-Last Cycle Values");
@@ -105,7 +92,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt)
       cout << "LSQNumObj::Refine():Cycle#"<< cycle <<endl;
       cout << "LSQNumObj::Refine():Computing initial values" <<endl;
 		//initial value of function
-			calc0=(*mpRefinedFunc)();
+			calc0=mpRefinedObj->GetLSQCalc(mLSQFuncIndex);
          //R
             tmpV1 =  mObs;
             tmpV1 -= calc0;
@@ -131,7 +118,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt)
          /*
          //Forward derivative
 			mRefParList.GetParNotFixed(i).Value() += mRefParList.GetParNotFixed(i).DerivStep();
-			tmpV1=(*mpRefinedFunc)();
+			tmpV1=mpRefinedObj->GetLSQCalc(mLSQFuncIndex);
 			mRefParList.GetParNotFixed(i).Value() -= mRefParList.GetParNotFixed(i).DerivStep();
          tmpV1 -= calc0;
          tmpV1 /= mRefParList.GetParNotFixed(i).DerivStep();
@@ -139,9 +126,9 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt)
          
          //centered derivative
 			mRefParList.GetParNotFixed(i).Mutate(mRefParList.GetParNotFixed(i).GetDerivStep());
-			calc=(*mpRefinedFunc)();
+			calc=mpRefinedObj->GetLSQCalc(mLSQFuncIndex);
 			mRefParList.GetParNotFixed(i).Mutate(-2*mRefParList.GetParNotFixed(i).GetDerivStep());
-			calc1=(*mpRefinedFunc)();
+			calc1=mpRefinedObj->GetLSQCalc(mLSQFuncIndex);
 			mRefParList.GetParNotFixed(i).Mutate(mRefParList.GetParNotFixed(i).GetDerivStep());
          tmpV1 =  calc;
          tmpV1 -= calc1;
@@ -189,7 +176,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt)
          {
             if( M(i,i) < 1e-10) //:TODO: Check what value to use as a limit
             {  
-               cout << "LSQNumObj::Refine()Singular parameter";
+               cout << "LSQNumObj::Refine() Singular parameter !";
                cout << "(null derivate in all points) : ";
                cout << mRefParList.GetParNotFixed(i).GetName() << endl;
                cout << "LSQNumObj::Refine(): Automatically fixing parameter";
@@ -482,15 +469,15 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt)
       cout << "LSQNumObj::Refine():Computing statistics for last cycle..." <<endl;
 		//for statistics...
          //mRefParList.Print();
-			calc=(*mpRefinedFunc)();
+			calc=mpRefinedObj->GetLSQCalc(mLSQFuncIndex);
          //Chi^2
       cout << "LSQNumObj::Refine():Computing Chi^2 for last cycle..." <<endl;
          {
             double oldChiSq=mChiSq;
             tmpV1 = mObs;
             tmpV1 -= calc;
-            tmpV1 *= mWeight;
             tmpV1 *= tmpV1;
+            tmpV1 *= mWeight;
 			   mChiSq=tmpV1.sum()/(nbObs-nbVar);
             if(true==useLevenbergMarquardt)
             {
@@ -503,6 +490,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt)
                   goto LSQNumObj_Refine_Restart;
                }
                else marquardt /= marquardtMult;
+					if(marquardt<1e-2) marquardt=1e-2;
                cout << "LSQNumObj::Refine():new Levenberg-Marquardt factor :" ;
                cout << FormatFloat(marquardt,18,14) <<endl;
             }
@@ -522,16 +510,11 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt)
             tmpV2 *= tmpV2;
 			   mR=sqrt(tmpV1.sum()/tmpV2.sum());
          //Rw-factor
-            tmpV1 = mObs;
-            tmpV1 -= calc;
             tmpV1 *= mWeight;
-            tmpV1 *= tmpV1;
-            tmpV2 = mObs;
             tmpV2 *= mWeight;
-            tmpV2 *= tmpV2;
 			   mRw=sqrt(tmpV1.sum()/tmpV2.sum());
 		//OK, finished
-			cout << "finished cycle #"<<cycle <<"/"<<nbCycle <<". R="<<R_ini<<"->"<<mR<<endl;
+			cout << "finished cycle #"<<cycle <<"/"<<nbCycle <<". Rw="<<Rw_ini<<"->"<<mRw<<endl;
 			if (mSaveReportOnEachCycle) this->WriteReportToFile();
       
       this->PrintRefResults();
@@ -546,9 +529,10 @@ double LSQNumObj::RwFactor()const{return mRw;};
 
 double LSQNumObj::ChiSquare()const{return mChiSq;};
 
-void LSQNumObj::AddRefinableObj(RefinableObj &obj)
+void LSQNumObj::SetRefinedObj(RefinableObj &obj, const unsigned int LSQFuncIndex)
 {
-   mRefinedObjList.Register(obj);
+   mpRefinedObj=&obj;
+	mLSQFuncIndex=LSQFuncIndex;
    RefObjRegisterRecursive(obj,mRecursiveRefinedObjList);
 }
 

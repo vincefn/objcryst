@@ -25,6 +25,7 @@
 #include "ObjCryst/PowderPattern.h"
 #include "ObjCryst/DiffractionDataSingleCrystal.h"
 #include "RefinableObj/GlobalOptimObj.h"
+#include "RefinableObj/GeneticAlgorithm.h"
 
 using namespace ObjCryst;
 using namespace std;
@@ -51,17 +52,9 @@ public:
    void OnAddPowderPattern(wxCommandEvent& WXUNUSED(event));
    void OnAddSingleCrystalData(wxCommandEvent& WXUNUSED(event));
    void OnAddGlobalOptimObj(wxCommandEvent& WXUNUSED(event));
-   void OnSetDebugLevel0(wxCommandEvent& WXUNUSED(event));
-   void OnSetDebugLevel1(wxCommandEvent& WXUNUSED(event));
-   void OnSetDebugLevel2(wxCommandEvent& WXUNUSED(event));
-   void OnSetDebugLevel3(wxCommandEvent& WXUNUSED(event));
-   void OnSetDebugLevel4(wxCommandEvent& WXUNUSED(event));
-   void OnSetDebugLevel5(wxCommandEvent& WXUNUSED(event));
-   void OnSetDebugLevel6(wxCommandEvent& WXUNUSED(event));
-   void OnSetDebugLevel7(wxCommandEvent& WXUNUSED(event));
-   void OnSetDebugLevel8(wxCommandEvent& WXUNUSED(event));
-   void OnSetDebugLevel9(wxCommandEvent& WXUNUSED(event));
-   void OnSetDebugLevel10(wxCommandEvent& WXUNUSED(event));
+   void OnAddGeneticAlgorithm(wxCommandEvent& WXUNUSED(event));
+	void OnDebugTest(wxCommandEvent& event);
+   void OnSetDebugLevel(wxCommandEvent& event);
 private:
    wxScrolledWindow *mpWin1,*mpWin2,*mpWin3,*mpWin4;
     DECLARE_EVENT_TABLE()
@@ -81,6 +74,7 @@ enum
    MENU_OBJECT_CREATE_POWDERSPECTRUM,
    MENU_OBJECT_CREATE_SINGLECRYSTALDATA,
    MENU_OBJECT_CREATE_GLOBALOPTOBJ,
+   MENU_OBJECT_CREATE_GENETICALGORITHM,
    MENU_DEBUG_LEVEL0,
    MENU_DEBUG_LEVEL1,
    MENU_DEBUG_LEVEL2,
@@ -91,7 +85,10 @@ enum
    MENU_DEBUG_LEVEL7,
    MENU_DEBUG_LEVEL8,
    MENU_DEBUG_LEVEL9,
-   MENU_DEBUG_LEVEL10
+   MENU_DEBUG_LEVEL10,
+   MENU_DEBUG_TEST1,
+   MENU_DEBUG_TEST2,
+   MENU_DEBUG_TEST3
 };
 
 // ----------------------------------------------------------------------------
@@ -108,17 +105,21 @@ BEGIN_EVENT_TABLE(WXCrystMainFrame, wxFrame)
    EVT_MENU(MENU_OBJECT_CREATE_POWDERSPECTRUM, WXCrystMainFrame::OnAddPowderPattern)
    EVT_MENU(MENU_OBJECT_CREATE_SINGLECRYSTALDATA, WXCrystMainFrame::OnAddSingleCrystalData)
    EVT_MENU(MENU_OBJECT_CREATE_GLOBALOPTOBJ, WXCrystMainFrame::OnAddGlobalOptimObj)
-   EVT_MENU(MENU_DEBUG_LEVEL0, WXCrystMainFrame::OnSetDebugLevel0)
-   EVT_MENU(MENU_DEBUG_LEVEL1, WXCrystMainFrame::OnSetDebugLevel1)
-   EVT_MENU(MENU_DEBUG_LEVEL2, WXCrystMainFrame::OnSetDebugLevel2)
-   EVT_MENU(MENU_DEBUG_LEVEL3, WXCrystMainFrame::OnSetDebugLevel3)
-   EVT_MENU(MENU_DEBUG_LEVEL4, WXCrystMainFrame::OnSetDebugLevel4)
-   EVT_MENU(MENU_DEBUG_LEVEL5, WXCrystMainFrame::OnSetDebugLevel5)
-   EVT_MENU(MENU_DEBUG_LEVEL6, WXCrystMainFrame::OnSetDebugLevel6)
-   EVT_MENU(MENU_DEBUG_LEVEL7, WXCrystMainFrame::OnSetDebugLevel7)
-   EVT_MENU(MENU_DEBUG_LEVEL8, WXCrystMainFrame::OnSetDebugLevel8)
-   EVT_MENU(MENU_DEBUG_LEVEL9, WXCrystMainFrame::OnSetDebugLevel9)
-   EVT_MENU(MENU_DEBUG_LEVEL10,WXCrystMainFrame::OnSetDebugLevel10)
+   EVT_MENU(MENU_OBJECT_CREATE_GENETICALGORITHM, WXCrystMainFrame::OnAddGeneticAlgorithm)
+   EVT_MENU(MENU_DEBUG_LEVEL0, WXCrystMainFrame::OnSetDebugLevel)
+   EVT_MENU(MENU_DEBUG_LEVEL1, WXCrystMainFrame::OnSetDebugLevel)
+   EVT_MENU(MENU_DEBUG_LEVEL2, WXCrystMainFrame::OnSetDebugLevel)
+   EVT_MENU(MENU_DEBUG_LEVEL3, WXCrystMainFrame::OnSetDebugLevel)
+   EVT_MENU(MENU_DEBUG_LEVEL4, WXCrystMainFrame::OnSetDebugLevel)
+   EVT_MENU(MENU_DEBUG_LEVEL5, WXCrystMainFrame::OnSetDebugLevel)
+   EVT_MENU(MENU_DEBUG_LEVEL6, WXCrystMainFrame::OnSetDebugLevel)
+   EVT_MENU(MENU_DEBUG_LEVEL7, WXCrystMainFrame::OnSetDebugLevel)
+   EVT_MENU(MENU_DEBUG_LEVEL8, WXCrystMainFrame::OnSetDebugLevel)
+   EVT_MENU(MENU_DEBUG_LEVEL9, WXCrystMainFrame::OnSetDebugLevel)
+   EVT_MENU(MENU_DEBUG_LEVEL10,WXCrystMainFrame::OnSetDebugLevel)
+   EVT_MENU(MENU_DEBUG_TEST1,  WXCrystMainFrame::OnDebugTest)
+   EVT_MENU(MENU_DEBUG_TEST2,  WXCrystMainFrame::OnDebugTest)
+   EVT_MENU(MENU_DEBUG_TEST3,  WXCrystMainFrame::OnDebugTest)
 END_EVENT_TABLE()
 
 IMPLEMENT_APP(MyApp)
@@ -135,7 +136,7 @@ bool MyApp::OnInit()
 
    WXCrystMainFrame *frame ;
    
-   frame = new WXCrystMainFrame("FOX: Free Objects for Xtal structures v1.0.3 (dev)",
+   frame = new WXCrystMainFrame("FOX: Free Objects for Xtal structures v1.1 (dev)",
                                  wxPoint(50, 50), wxSize(550, 400));
 
    return TRUE;
@@ -170,6 +171,8 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
                            "Add a new Single Crystal Diffraction Object");
          objectMenu->Append(MENU_OBJECT_CREATE_GLOBALOPTOBJ, "New Monte-Carlo Object",
                            "Add a new Monte-Carlo Object");
+         objectMenu->Append(MENU_OBJECT_CREATE_GENETICALGORITHM, "New Genetic Algorithm Object",
+                           "Add a new Genetic Algorithm Object");
       
       wxMenu *helpMenu = new wxMenu;
          helpMenu->Append(MENU_HELP_ABOUT, "&About...", "About ObjCryst...");
@@ -179,6 +182,9 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
          menuBar->Append(objectMenu,"&Objects");
          #ifdef __DEBUG__
          wxMenu *debugMenu = new wxMenu;
+            debugMenu->Append(MENU_DEBUG_TEST1, "Test #1");
+            debugMenu->Append(MENU_DEBUG_TEST2, "Test #2");
+            debugMenu->Append(MENU_DEBUG_TEST3, "Test #2");
             debugMenu->Append(MENU_DEBUG_LEVEL0, "Debug level 0 (lots of messages)");
             debugMenu->Append(MENU_DEBUG_LEVEL1, "Debug level 1");
             debugMenu->Append(MENU_DEBUG_LEVEL2, "Debug level 2");
@@ -427,47 +433,55 @@ void WXCrystMainFrame::OnAddGlobalOptimObj(wxCommandEvent& WXUNUSED(event))
    MonteCarloObj* obj;
    obj=new MonteCarloObj("Change Me!");
 }
-void WXCrystMainFrame::OnSetDebugLevel0(wxCommandEvent& WXUNUSED(event))
+void WXCrystMainFrame::OnAddGeneticAlgorithm(wxCommandEvent& WXUNUSED(event))
 {
-   VFN_DEBUG_GLOBAL_LEVEL(0);
+   GeneticAlgorithm* obj;
+   obj=new GeneticAlgorithm("Change Me!");
 }
-void WXCrystMainFrame::OnSetDebugLevel1(wxCommandEvent& WXUNUSED(event))
+void WXCrystMainFrame::OnSetDebugLevel(wxCommandEvent& event)
 {
-   VFN_DEBUG_GLOBAL_LEVEL(1);
+	switch(event.GetId())
+	{
+		case MENU_DEBUG_LEVEL0 :VFN_DEBUG_GLOBAL_LEVEL(0);break;
+		case MENU_DEBUG_LEVEL1 :VFN_DEBUG_GLOBAL_LEVEL(1);break;
+		case MENU_DEBUG_LEVEL2 :VFN_DEBUG_GLOBAL_LEVEL(2);break;
+		case MENU_DEBUG_LEVEL3 :VFN_DEBUG_GLOBAL_LEVEL(3);break;
+		case MENU_DEBUG_LEVEL4 :VFN_DEBUG_GLOBAL_LEVEL(4);break;
+		case MENU_DEBUG_LEVEL5 :VFN_DEBUG_GLOBAL_LEVEL(5);break;
+		case MENU_DEBUG_LEVEL6 :VFN_DEBUG_GLOBAL_LEVEL(6);break;
+		case MENU_DEBUG_LEVEL7 :VFN_DEBUG_GLOBAL_LEVEL(7);break;
+		case MENU_DEBUG_LEVEL8 :VFN_DEBUG_GLOBAL_LEVEL(8);break;
+		case MENU_DEBUG_LEVEL9 :VFN_DEBUG_GLOBAL_LEVEL(9);break;
+		case MENU_DEBUG_LEVEL10:VFN_DEBUG_GLOBAL_LEVEL(10);break;
+	}
 }
-void WXCrystMainFrame::OnSetDebugLevel2(wxCommandEvent& WXUNUSED(event))
+void WXCrystMainFrame::OnDebugTest(wxCommandEvent& event)
 {
-   VFN_DEBUG_GLOBAL_LEVEL(2);
-}
-void WXCrystMainFrame::OnSetDebugLevel3(wxCommandEvent& WXUNUSED(event))
-{
-   VFN_DEBUG_GLOBAL_LEVEL(3);
-}
-void WXCrystMainFrame::OnSetDebugLevel4(wxCommandEvent& WXUNUSED(event))
-{
-   VFN_DEBUG_GLOBAL_LEVEL(4);
-}
-void WXCrystMainFrame::OnSetDebugLevel5(wxCommandEvent& WXUNUSED(event))
-{
-   VFN_DEBUG_GLOBAL_LEVEL(5);
-}
-void WXCrystMainFrame::OnSetDebugLevel6(wxCommandEvent& WXUNUSED(event))
-{
-   VFN_DEBUG_GLOBAL_LEVEL(6);
-}
-void WXCrystMainFrame::OnSetDebugLevel7(wxCommandEvent& WXUNUSED(event))
-{
-   VFN_DEBUG_GLOBAL_LEVEL(7);
-}
-void WXCrystMainFrame::OnSetDebugLevel8(wxCommandEvent& WXUNUSED(event))
-{
-   VFN_DEBUG_GLOBAL_LEVEL(8);
-}
-void WXCrystMainFrame::OnSetDebugLevel9(wxCommandEvent& WXUNUSED(event))
-{
-   VFN_DEBUG_GLOBAL_LEVEL(9);
-}
-void WXCrystMainFrame::OnSetDebugLevel10(wxCommandEvent& WXUNUSED(event))
-{
-   VFN_DEBUG_GLOBAL_LEVEL(10);
+	static long saveId=-1;
+	static long saveId2=-1;
+	switch(event.GetId())
+	{
+		case MENU_DEBUG_TEST1:
+		{
+			if(saveId==-1) saveId=gScattererRegistry.GetObj(0).CreateParamSet();
+			else gScattererRegistry.GetObj(0).SaveParamSet(saveId);
+			gScattererRegistry.GetObj(0).GlobalOptRandomMove(1);
+			gCrystalRegistry.GetObj(0).UpdateDisplay();
+			if(saveId2==-1) saveId2=gScattererRegistry.GetObj(0).CreateParamSet();
+			else gScattererRegistry.GetObj(0).SaveParamSet(saveId2);
+			break;
+		}
+		case MENU_DEBUG_TEST2:
+		{
+			gScattererRegistry.GetObj(0).RestoreParamSet(saveId);
+			gCrystalRegistry.GetObj(0).UpdateDisplay();
+			break;
+		}
+		case MENU_DEBUG_TEST3:
+		{
+			gScattererRegistry.GetObj(0).RestoreParamSet(saveId2);
+			gCrystalRegistry.GetObj(0).UpdateDisplay();
+			break;
+		}
+	}
 }

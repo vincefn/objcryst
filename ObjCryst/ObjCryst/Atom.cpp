@@ -146,7 +146,11 @@ void Atom::Init(const double x, const double y, const double z,
 int Atom::GetNbComponent() const {return 1;}
 const ScatteringComponentList& Atom::GetScatteringComponentList() const
 {
-   this->Update();
+   mScattCompList(0).mX=mXYZ(0);
+   mScattCompList(0).mY=mXYZ(1);
+   mScattCompList(0).mZ=mXYZ(2);
+   mScattCompList(0).mOccupancy=mOccupancy;
+   mClockScattCompList.Click();
    return mScattCompList;
 }
 
@@ -380,13 +384,24 @@ bool Atom::IsDummy()const { if(0==mScattCompList(0).mpScattPow) return true; ret
 const ScatteringPowerAtom& Atom::GetScatteringPower()const
 { return *mpScattPowAtom;}
 
-void Atom::Update() const
+void Atom::GetGeneGroup(const RefinableObj &obj,
+										  CrystVector_uint & groupIndex,
+										  unsigned int &first) const
 {
-   mScattCompList(0).mX=mXYZ(0);
-   mScattCompList(0).mY=mXYZ(1);
-   mScattCompList(0).mZ=mXYZ(2);
-   mScattCompList(0).mOccupancy=mOccupancy;
-   mClockScattCompList.Click();
+	//One group for all translation parameters
+	unsigned int posIndex=0;
+   VFN_DEBUG_MESSAGE("Atom::GetGeneGroup()",4)
+	for(long i=0;i<obj.GetNbPar();i++)
+		for(long j=0;j<this->GetNbPar();j++)
+			if(&(obj.GetPar(i)) == &(this->GetPar(j)))
+			{
+				if(this->GetPar(j).GetType()== gpRefParTypeScattTransl)
+				{
+					if(posIndex==0) posIndex=first++;
+					groupIndex(i)=posIndex;
+				}
+				else groupIndex(i)= first++;
+			}
 }
 
 void Atom::InitRefParList()

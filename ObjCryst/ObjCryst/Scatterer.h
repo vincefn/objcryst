@@ -161,21 +161,6 @@ class Scatterer:virtual public RefinableObj
       /// In which crystal is this Scatterer included ?
       const Crystal& GetCrystal()const;
    protected:
-      /** \brief  Update the scatterer's parameters (scattering positions, occupancy)
-      *
-      * This is necessary for composite scatterers (eg not atoms), which include
-      * more than a single scattering center. The coordinates of all scattering
-      * points are updated from the scatterer's parameters.
-		*
-		* This is automatically called each time GetScatteringComponentList() is used.
-		*
-		* As always, update is only made if nessary (ie if one parameter determining
-		* the atom positions has changed).
-      *
-		* \note This is not necessary in all Scatterer, so this could be removed from
-		* the base Scatterer class.
-      **/
-      virtual void Update() const=0;
       /// \internal Prepare refinable parameters for the scatterer object
       virtual void InitRefParList()=0;
       /** Get RGB Colour coordinates from Colour Name. Note that the colour

@@ -169,8 +169,6 @@ void DiffractionDataSingleCrystal::ImportHklIobs(const string &fileName,
       mL.resize(mNbRefl);
       mObsIntensity.resize(mNbRefl);
       mObsSigma.resize(mNbRefl);
-      mWeight.resize(mNbRefl);
-      mWeight=1;
    
    //Import data
    {	
@@ -190,7 +188,6 @@ Error opening file for input:"+fileName);
          fin >> mK(i);
          fin >> mL(i);
          fin >> mObsIntensity(i);
-         mWeight(i)=1./mObsIntensity(i);
          mObsSigma(i)=sqrt(mObsIntensity(i));
          //cout << mObsIntensity(i) <<endl;
       }
@@ -199,9 +196,10 @@ Error opening file for input:"+fileName);
    }
   //Finish
    mWeight.resize(mNbRefl);
-   mWeight=1;
-   mObsSigma.resize(mNbRefl);
-   mObsSigma=0;
+	const double minIobs=mObsIntensity.max()*1e-6;
+   for(int i=0;i<mNbRefl;i++) 
+		if(mObsIntensity(i)<minIobs) mWeight(i)=1./minIobs;
+		else mWeight(i)=1./mObsIntensity(i);
    mHasObservedData=true;
    
    mMultiplicity.resize(mNbRefl);
@@ -223,8 +221,6 @@ void DiffractionDataSingleCrystal::ImportHklIobsSigma(const string &fileName,
       mL.resize(mNbRefl);
       mObsIntensity.resize(mNbRefl);
       mObsSigma.resize(mNbRefl);
-      mWeight.resize(mNbRefl);
-      mWeight=1;
    
    //Import data
    {	
@@ -256,7 +252,10 @@ Error opening file for input:"+fileName);
    }
   //Finish
    mWeight.resize(mNbRefl);
-   mWeight=1;
+	const double minSigma=mObsSigma.max()*1e-3;
+   for(int i=0;i<mNbRefl;i++) 
+		if(mObsSigma(i)<minSigma) mWeight(i)=1./minSigma/minSigma;
+		else mWeight(i)=1./mObsSigma(i)/mObsSigma(i);
    mHasObservedData=true;
 
    mMultiplicity.resize(mNbRefl);
@@ -645,6 +644,18 @@ void DiffractionDataSingleCrystal::InitRefParList()
    this->ResetParList();
    cout << "DiffractionDataSingleCrystal::InitRefParList():no parameters !" <<endl;
 }
+unsigned int DiffractionDataSingleCrystal::GetNbLSQFunction()const{return 1;}
+const CrystVector_double& 
+	DiffractionDataSingleCrystal::GetLSQCalc(const unsigned int) const
+{return this->GetIcalc();}
+
+const CrystVector_double& 
+	DiffractionDataSingleCrystal::GetLSQObs(const unsigned int) const
+{return this->GetIobs();}
+
+const CrystVector_double& 
+	DiffractionDataSingleCrystal::GetLSQWeight(const unsigned int) const
+{return this->GetWeight();}
 
 void DiffractionDataSingleCrystal::CalcIcalc() const
 {

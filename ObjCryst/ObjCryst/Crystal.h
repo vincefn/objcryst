@@ -318,6 +318,9 @@ class Crystal:public RefinableObj
       */
       virtual void CIFOutput(ostream &os)const;
       
+		virtual void GetGeneGroup(const RefinableObj &obj, 
+										  CrystVector_uint & groupIndex,
+										  unsigned int &firstGroup) const;
    protected:
    
    private:
