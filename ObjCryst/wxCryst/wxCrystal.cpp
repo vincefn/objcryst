@@ -56,12 +56,13 @@ BEGIN_EVENT_TABLE(WXCrystal,wxEvtHandler)
    EVT_BUTTON(ID_WXOBJ_COLLAPSE,                      WXCrystObj::OnToggleCollapse)
    EVT_MENU(ID_REFOBJ_MENU_OBJ_SAVE,                  WXRefinableObj::OnMenuSave)
    EVT_MENU(ID_REFOBJ_MENU_OBJ_LOAD,                  WXRefinableObj::OnMenuLoad)
-   EVT_MENU(ID_CRYSTAL_MENU_SAVECIF,                WXCrystal::OnMenuSaveCIF)
-   EVT_MENU(ID_CRYSTAL_MENU_SAVETEXT,                WXCrystal::OnMenuSaveText)
+   EVT_MENU(ID_CRYSTAL_MENU_SAVECIF,                  WXCrystal::OnMenuSaveCIF)
+   EVT_MENU(ID_CRYSTAL_MENU_SAVETEXT,                 WXCrystal::OnMenuSaveText)
    EVT_MENU(ID_REFOBJ_MENU_PAR_FIXALL,                WXRefinableObj::OnMenuFixAllPar)
    EVT_MENU(ID_REFOBJ_MENU_PAR_UNFIXALL,              WXRefinableObj::OnMenuUnFixAllPar)
    EVT_MENU(ID_REFOBJ_MENU_PAR_RANDOMIZE,             WXRefinableObj::OnMenuParRandomize)
    EVT_MENU(ID_CRYSTAL_MENU_PAR_ADDANTIBUMP,          WXCrystal::OnMenuAddAntiBumpDist)
+   EVT_MENU(ID_CRYSTAL_MENU_PAR_SETRELATIVEXYZLIMITS, WXCrystal::OnMenuSetRelativeXYZLimits)
 #ifdef OBJCRYST_GL
    EVT_MENU(ID_CRYSTAL_MENU_DISPLAY_3DVIEW,           WXCrystal::OnMenuCrystalGL)
 #endif
@@ -108,6 +109,8 @@ mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_UNFIXALL,"Unfix all");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_RANDOMIZE,
                                 "Randomize Configuration");
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_CRYSTAL_MENU_PAR_SETRELATIVEXYZLIMITS,
+                                "Set Relative Limits On All XYZ Parameters");
       mpMenuBar->AddMenu("Scatterers",ID_CRYSTAL_MENU_SCATT);
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_ADDSCATTPOWATOM,
                                 "Add Atomic Scattering Power");
@@ -752,6 +755,34 @@ void WXCrystal::OnMenuAddAntiBumpDist(wxCommandEvent & WXUNUSED(event))
       bondLengthDialog.GetValue().ToDouble(&bondLength);
       
    mpCrystal->SetBumpMergeDistance(*scattPow1,*scattPow2,bondLength);
+}
+
+void WXCrystal::OnMenuSetRelativeXYZLimits(wxCommandEvent & WXUNUSED(event))
+{
+   VFN_DEBUG_ENTRY("WXCrystal::OnMenuSetRelativeXYZLimits():Cancelled",6)
+   WXCrystValidateAllUserInput();
+   wxTextEntryDialog limitDialog(this,"Relative limits",
+                           "Enter relative limits for x,y,z (Angstroems)",
+                           "0.5",wxOK | wxCANCEL);
+   if(wxID_OK!=limitDialog.ShowModal())
+   {
+      VFN_DEBUG_EXIT("WXCrystal::OnMenuSetRelativeXYZLimits():Cancelled",6)
+      return;
+   }
+   double limit;
+   limitDialog.GetValue().ToDouble(&limit);
+   limit=fabs(limit);
+ 
+   mpCrystal->SetLimitsRelative(gpRefParTypeScattTranslX,
+                                -limit/mpCrystal->GetLatticePar(0),
+                                limit/mpCrystal->GetLatticePar(0));
+   mpCrystal->SetLimitsRelative(gpRefParTypeScattTranslY,
+                                -limit/mpCrystal->GetLatticePar(1),
+                                limit/mpCrystal->GetLatticePar(1));
+   mpCrystal->SetLimitsRelative(gpRefParTypeScattTranslZ,
+                                -limit/mpCrystal->GetLatticePar(2),
+                                limit/mpCrystal->GetLatticePar(2));
+   VFN_DEBUG_EXIT("WXCrystal::OnMenuSetRelativeXYZLimits()",6)
 }
 
 bool WXCrystal::OnChangeName(const int id)
