@@ -2515,7 +2515,8 @@ REAL PowderPattern::GetChi2()const
       for(unsigned long i=0;i<mNbIntegrationUsed;i++)
       {
          mChi2 += *p3 * ((*p1)-(*p2))*((*p1)-(*p2));
-         mChi2LikeNorm -= log(*p3++);
+         if(*p3<=0) p3++;
+         else mChi2LikeNorm -= log(*p3++);
          p1++;p2++;
       }
    }
@@ -2532,7 +2533,8 @@ REAL PowderPattern::GetChi2()const
          for(unsigned long i=0;i<maxPoints;i++)
          {
             mChi2 += *p3 * ((*p1)-(*p2))*((*p1)-(*p2));
-            mChi2LikeNorm -= log(*p3++);
+            if(*p3<=0) p3++;
+            else mChi2LikeNorm -= log(*p3++);
             p1++;p2++;
          }
       }
@@ -2551,7 +2553,8 @@ REAL PowderPattern::GetChi2()const
             for(;i<min;i++)//! min is the *beginning* of the excluded region !
             {
                mChi2 += *p3 * ((*p1)-(*p2))*((*p1)-(*p2));
-               mChi2LikeNorm -= log(*p3++);
+               if(*p3<=0) p3++;
+               else mChi2LikeNorm -= log(*p3++);
                p1++;p2++;
             }
             p1 += max-i;
@@ -2562,7 +2565,8 @@ REAL PowderPattern::GetChi2()const
          for(;i<maxPoints;i++)
          {
             mChi2 += *p3 * ((*p1)-(*p2))*((*p1)-(*p2));
-            mChi2LikeNorm -= log(*p3++);
+            if(*p3<=0) p3++;
+            else mChi2LikeNorm -= log(*p3++);
             p1++;p2++;
          }
       }
