@@ -65,6 +65,7 @@ mScatteringPowerRegistry("List of Crystal ScatteringPowers")
 {
    VFN_DEBUG_MESSAGE("Crystal::Crystal()",10)
    this->Init(10,11,12,M_PI/2+.1,M_PI/2+.2,M_PI/2+.3,"P1","");
+   this->InitOptions();
    gCrystalRegistry.Register(*this);
    gTopRefinableObjRegistry.Register(*this);
 }
@@ -76,6 +77,7 @@ mScatteringPowerRegistry("List of Crystal ScatteringPowers")
 {
    VFN_DEBUG_MESSAGE("Crystal::Crystal(a,b,c,Sg)",10)
    this->Init(a,b,c,M_PI/2,M_PI/2,M_PI/2,SpaceGroupId,"");
+   this->InitOptions();
    gCrystalRegistry.Register(*this);
    gTopRefinableObjRegistry.Register(*this);
 }
@@ -88,6 +90,7 @@ mScatteringPowerRegistry("List of Crystal ScatteringPowers")
 {
    VFN_DEBUG_MESSAGE("Crystal::Crystal(a,b,c,alpha,beta,gamma,Sg)",10)
    this->Init(a,b,c,alpha,beta,gamma,SpaceGroupId,"");
+   this->InitOptions();
    gCrystalRegistry.Register(*this);
    gTopRefinableObjRegistry.Register(*this);
 }
@@ -106,6 +109,8 @@ mScatteringPowerRegistry(old.mScatteringPowerRegistry)
    }
    
    mUseDynPopCorr.SetChoice(old.mUseDynPopCorr.GetChoice());
+   mDisplayEnantiomer.SetChoice(old.mDisplayEnantiomer.GetChoice());
+   mConstrainLatticeToSpaceGroup.SetChoice(old.mConstrainLatticeToSpaceGroup.GetChoice());
    
    this->InitMatrices();
    this->UpdateLatticePar();
@@ -258,7 +263,7 @@ CrystVector_REAL Crystal::GetLatticePar() const
       //:NOTE: cannot use this->UpdateLatticePar() because it is not a const member function
       int num = mSpaceGroup.GetSpaceGroupNumber();
       CrystVector_REAL cellDim=mCellDim;
-      if(num <=2) return cellDim;
+      if((num <=2)||(mConstrainLatticeToSpaceGroup.GetChoice()!=0)) return cellDim;
       if((num <=15) && (0==mSpaceGroup.GetUniqueAxis()))
       {
          cellDim(4)=M_PI/2.;
@@ -322,7 +327,7 @@ REAL Crystal::GetLatticePar(int whichPar)const
 
       static CrystVector_REAL cellDim;
       cellDim=mCellDim;
-      if(num <=2)
+      if((num <=2)||(mConstrainLatticeToSpaceGroup.GetChoice()!=0))
          return cellDim(whichPar);
       if((num <=15) && (0==mSpaceGroup.GetUniqueAxis()))
       {
@@ -1203,12 +1208,26 @@ void Crystal::Init(const REAL a, const REAL b, const REAL c, const REAL alpha,
    
    mClockLatticePar.Click();
    VFN_DEBUG_MESSAGE("Crystal::Init(a,b,c,alpha,beta,gamma,Sg,name)2",5)
+      
+   this->InitRefParList();
+   this->InitMatrices();
+   this->SetName(name);
    
+   VFN_DEBUG_MESSAGE("Crystal::Init(a,b,c,alpha,beta,gamma,Sg,name):End",10)
+}
+
+void Crystal::InitOptions()
+{
+   VFN_DEBUG_ENTRY("Crystal::InitOptions",10)
    static string UseDynPopCorrname;
    static string UseDynPopCorrchoices[2];
    
    static string DisplayEnantiomername;
    static string DisplayEnantiomerchoices[2];
+
+   static string ConstrainLatticeToSpaceGroupName;
+   static string ConstrainLatticeToSpaceGroupChoices[2];
+   
    static bool needInitNames=true;
    if(true==needInitNames)
    {
@@ -1219,6 +1238,11 @@ void Crystal::Init(const REAL a, const REAL b, const REAL c, const REAL alpha,
       DisplayEnantiomername="Display Enantiomer";
       DisplayEnantiomerchoices[0]="No";
       DisplayEnantiomerchoices[1]="Yes";
+
+      ConstrainLatticeToSpaceGroupName="Constrain Lattice to SpaceGroup Symmetry";
+      ConstrainLatticeToSpaceGroupChoices[0]="Yes (Default)";
+      ConstrainLatticeToSpaceGroupChoices[1]="No (Allow Crystallographic Pseudo-Symmetry)";
+
       needInitNames=false;//Only once for the class
    }
    VFN_DEBUG_MESSAGE("Crystal::Init(a,b,c,alpha,beta,gamma,Sg,name):Init options",5)
@@ -1226,15 +1250,15 @@ void Crystal::Init(const REAL a, const REAL b, const REAL c, const REAL alpha,
    mUseDynPopCorr.SetChoice(1);
    this->AddOption(&mUseDynPopCorr);
 
+   mConstrainLatticeToSpaceGroup.Init(2,&ConstrainLatticeToSpaceGroupName,
+                                        ConstrainLatticeToSpaceGroupChoices);
+   mConstrainLatticeToSpaceGroup.SetChoice(0);
+   this->AddOption(&mConstrainLatticeToSpaceGroup);
+   
    mDisplayEnantiomer.Init(2,&DisplayEnantiomername,DisplayEnantiomerchoices);
    mDisplayEnantiomer.SetChoice(0);
    this->AddOption(&mDisplayEnantiomer);
-   
-   this->InitRefParList();
-   this->InitMatrices();
-   this->SetName(name);
-   
-   VFN_DEBUG_MESSAGE("Crystal::Init(a,b,c,alpha,beta,gamma,Sg,name):End",10)
+   VFN_DEBUG_EXIT("Crystal::InitOptions",10)
 }
 
 void Crystal::InitMatrices() const
@@ -1303,8 +1327,9 @@ void Crystal::UpdateLatticePar()
       &&(mClockLatticeParUpdate>mClockLatticePar)) return;
    VFN_DEBUG_MESSAGE("Crystal::UpdateLatticePar().",3)
 
+   cout << "ConstrainLatticeToSpaceGroup::"<<mConstrainLatticeToSpaceGroup.GetChoice()<<endl;
    int num = mSpaceGroup.GetSpaceGroupNumber();
-   if(num <=2)
+   if((num <=2)||(mConstrainLatticeToSpaceGroup.GetChoice()!=0))
    {
       mClockLatticeParUpdate.Click();
       return;
@@ -1376,58 +1401,61 @@ void Crystal::InitRefParList()
    bool alpha=true;
    bool beta=true;
    bool gamma=true;
-   if(num <=2)
+   if(mConstrainLatticeToSpaceGroup.GetChoice()==0)
    {
-   }
-   else if((num <=15) && (0==mSpaceGroup.GetUniqueAxis()))
-   {
-      beta=false;
-      gamma=false;
-   }
-   else if((num <=15) && (1==mSpaceGroup.GetUniqueAxis()))
-   {
-      alpha=false;
-      gamma=false;
-   }
-   else if((num <=15) && (2==mSpaceGroup.GetUniqueAxis()))
-   {
-      alpha=false;
-      beta=false;
-   }
-   else if(num <=74)
-   {
-      alpha=false;
-      beta=false;
-      gamma=false;
-   }
-   else if(num <= 142) 
-   {
-      b=false;
-      alpha=false;
-      beta=false;
-      gamma=false;
-   }
-   else if(num <= 167)
-   {//Hexagonal axes !
-      b=false;
-      alpha=false;
-      beta=false;
-      gamma=false;
-   }
-   else if(num <= 194) 
-   {
-      b=false;
-      alpha=false;
-      beta=false;
-      gamma=false;
-   }
-   else
-   {
-      b=false;
-      c=false;
-      alpha=false;
-      beta=false;
-      gamma=false;
+      if(num <=2)
+      {
+      }
+      else if((num <=15) && (0==mSpaceGroup.GetUniqueAxis()))
+      {
+         beta=false;
+         gamma=false;
+      }
+      else if((num <=15) && (1==mSpaceGroup.GetUniqueAxis()))
+      {
+         alpha=false;
+         gamma=false;
+      }
+      else if((num <=15) && (2==mSpaceGroup.GetUniqueAxis()))
+      {
+         alpha=false;
+         beta=false;
+      }
+      else if(num <=74)
+      {
+         alpha=false;
+         beta=false;
+         gamma=false;
+      }
+      else if(num <= 142) 
+      {
+         b=false;
+         alpha=false;
+         beta=false;
+         gamma=false;
+      }
+      else if(num <= 167)
+      {//Hexagonal axes !
+         b=false;
+         alpha=false;
+         beta=false;
+         gamma=false;
+      }
+      else if(num <= 194) 
+      {
+         b=false;
+         alpha=false;
+         beta=false;
+         gamma=false;
+      }
+      else
+      {
+         b=false;
+         c=false;
+         alpha=false;
+         beta=false;
+         gamma=false;
+      }
    }
    REAL *pLatPar=mCellDim.data();
    if(this->GetNbPar()==0)

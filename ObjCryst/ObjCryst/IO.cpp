@@ -960,6 +960,9 @@ void Crystal::XMLOutput(ostream &os,int indent)const
    
    mUseDynPopCorr.XMLOutput(os,indent);
    os <<endl<<endl;
+
+   mConstrainLatticeToSpaceGroup.XMLOutput(os,indent);
+   os <<endl<<endl;
    
    for(int i=0;i<mScatteringPowerRegistry.GetNb();i++) 
       mScatteringPowerRegistry.GetObj(i).XMLOutput(os,indent);
@@ -1083,6 +1086,7 @@ void Crystal::XMLInput(istream &is,const XMLCrystTag &tagg)
          for(unsigned int i=0;i<tag.GetNbAttribute();i++)
             if("Name"==tag.GetAttributeName(i)) 
                mOptionRegistry.GetObj(tag.GetAttributeValue(i)).XMLInput(is,tag);
+         this->InitRefParList();// Fix the "used" tag of refinable par after options
          continue;
       }
       if("AntiBumpDistance"==tag.GetName())

@@ -356,6 +356,11 @@ class Crystal:public RefinableObj
       void Init(const REAL a, const REAL b, const REAL c, const REAL alpha,
                 const REAL beta, const REAL gamma,const string &SpaceGroupId,
                 const string& name);
+      /** Init options.
+      *
+      * Need only be done once per Crystal.
+      */
+      void InitOptions();
       
       /// Find a scatterer (its index # in mpScatterrer[]) with a given name
       /// \warning There should be no duplicate names !!! :TODO: test in AddScatterer()
@@ -492,6 +497,22 @@ class Crystal:public RefinableObj
       /// be helpful for non-centrosymmetric structure which have been solved using
       /// powder diffraction (which only gives the relative configuration).
       RefObjOpt mDisplayEnantiomer;
+
+      /** Option to override lattice parameters constraints from spacegroup choice.
+      *
+      * \warning EXPERIMENTAL
+      *
+      * Normally lattice parameters are constrained by the space group choice
+      * (e.g. a=b=c and angles =90° for cubic spacegroups). Using this option
+      * allows you to override this, and choose any lattice parameter. THis works
+      * as long as symmetry operations are applied to fractionnal coordinates.
+      *
+      * This is useful duting global optimization when searching the structure in a crystal
+      * which has (or is expected to have) a known pseudo-crystallographic
+      * symmetry, to reduce dramatically the number of parameters. Of course
+      * for final refinement the 'real' symmetry should be imposed.
+      */
+      RefObjOpt mConstrainLatticeToSpaceGroup;
       
    #ifdef __WX__CRYST__
    public:
