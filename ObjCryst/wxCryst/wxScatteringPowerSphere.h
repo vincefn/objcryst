@@ -17,24 +17,24 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef _VFN_WX_SCATTERINGPOWERFULLERENE_OBJ_H_
-#define _VFN_WX_SCATTERINGPOWERFULLERENE_OBJ_H_
+#ifndef _VFN_WX_SCATTERINGPOWERSPHERE_OBJ_H_
+#define _VFN_WX_SCATTERINGPOWERSPHERE_OBJ_H_
 
 #include "wxCryst/wxRefinableObj.h"
-#include "ObjCryst/ScatteringPowerFullerene.h"
+#include "ObjCryst/ScatteringPowerSphere.h"
 
 namespace ObjCryst
 {
-/// wxCryst class for ScatteringPowerFullerene
-class WXScatteringPowerFullerene: public WXRefinableObj
+/// wxCryst class for ScatteringPowerSphere
+class WXScatteringPowerSphere: public WXRefinableObj
 {
    public:
-      WXScatteringPowerFullerene(wxWindow *parent, ScatteringPowerFullerene*);
+      WXScatteringPowerSphere(wxWindow *parent, ScatteringPowerSphere*);
       virtual bool OnChangeName(const int id);
       void OnChangeColour(wxCommandEvent & event);
       virtual void UpdateUI();
    protected:
-      ScatteringPowerFullerene* mpScatteringPower;
+      ScatteringPowerSphere* mpScatteringPower;
    DECLARE_EVENT_TABLE()
 };
 

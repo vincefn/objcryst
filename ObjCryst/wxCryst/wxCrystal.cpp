@@ -25,7 +25,7 @@
 
 #include "ObjCryst/Atom.h"
 #include "ObjCryst/ZScatterer.h"
-#include "ObjCryst/ScatteringPowerFullerene.h"
+#include "ObjCryst/ScatteringPowerSphere.h"
 
 extern "C" {
 #include "GL/glu.h"
@@ -68,7 +68,7 @@ BEGIN_EVENT_TABLE(WXCrystal,wxEvtHandler)
    EVT_MENU(ID_CRYSTAL_MENU_DISPLAY_3DVIEW,           WXCrystal::OnMenuCrystalGL)
 #endif
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDSCATTPOWATOM,    WXCrystal::OnMenuAddScattPowAtom)
-   EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDSCATTPOWFULLERENE,WXCrystal::OnMenuAddScattPowFullerene)
+   EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDSCATTPOWSPHERE,  WXCrystal::OnMenuAddScattPowSphere)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_REMOVESCATTPOW,     WXCrystal::OnMenuRemoveScattPow)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDATOM,            WXCrystal::OnMenuAddScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDZSCATTERER,      WXCrystal::OnMenuAddScatterer)
@@ -116,8 +116,8 @@ mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
       mpMenuBar->AddMenu("Scatterers",ID_CRYSTAL_MENU_SCATT);
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_ADDSCATTPOWATOM,
                                 "Add Atomic Scattering Power");
-         mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_ADDSCATTPOWFULLERENE,
-                                "Add Fullerene Scattering Power");
+         mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_ADDSCATTPOWSPHERE,
+                                "Add Sphere Scattering Power");
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_REMOVESCATTPOW,
                                 "Remove Scattering Power");
          //mpMenuBar->AppendSeparator();
@@ -355,13 +355,13 @@ void WXCrystal::OnMenuAddScattPowAtom(wxCommandEvent & WXUNUSED(event))
    this->Layout();
 }
 
-void WXCrystal::OnMenuAddScattPowFullerene(wxCommandEvent & WXUNUSED(event))
+void WXCrystal::OnMenuAddScattPowSphere(wxCommandEvent & WXUNUSED(event))
 {
-   VFN_DEBUG_ENTRY("WXCrystal::OnMenuAddScattPowFullerene()",6)
-   ScatteringPower *scatt= new ScatteringPowerFullerene;
+   VFN_DEBUG_ENTRY("WXCrystal::OnMenuAddScattSphere()",6)
+   ScatteringPower *scatt= new ScatteringPowerSphere;
    mpCrystal->AddScatteringPower(scatt);
    this->Layout();
-   VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScattPowFullerene()",6)
+   VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScattPowSphere()",6)
 }
 
 void WXCrystal::OnMenuRemoveScattPow(wxCommandEvent & WXUNUSED(event))

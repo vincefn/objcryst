@@ -16,32 +16,33 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-/*   ScatteringPowerFullerene.h
-*  header file for the Fullerene-type scattering power
+/*   ScatteringPowerSphere.h
+*  header file for the Spherical scattering power (fullerenes, etc..)
 *
 */
 
-#ifndef _OBJCRYST_SCATTPOWERFULLERENE_H_
-#define _OBJCRYST_SCATTPOWERFULLERENE_H_
+#ifndef _OBJCRYST_SCATTPOWERSPHERE_H_
+#define _OBJCRYST_SCATTPOWERSPHERE_H_
 
 #include "CrystVector/CrystVector.h"
 #include "ObjCryst/ScatteringPower.h"
 
 namespace ObjCryst
 {
-/** \ brief ScatteringPower for a fullerene-type particule (spherical or
-* ellipsoidal.
+/** \ brief ScatteringPower for a spherical particule
 *
 * This can be used to modelize the form factor of disordered (or low-resolution)
-* of fullerene-type compounds, where all atoms are located on an ellipsoid
-* or sphere.
+* of fullerene-type compounds, where all atoms are located on a
+* sphere.
 *
+* This actually modelizes a spherical distribution of a \e single electron, so to modelize
+* C60 the occupancy must be set to 60*6.
 */
-class ScatteringPowerFullerene: public ScatteringPower
+class ScatteringPowerSphere: public ScatteringPower
 {
    public:
       /// Default constructor
-      ScatteringPowerFullerene();
+      ScatteringPowerSphere();
       /**   \brief constructor
       *  \param name : name of the ScatteringPower ('C60','France 98'...).
       *The name can have \e any format 
@@ -52,22 +53,10 @@ class ScatteringPowerFullerene: public ScatteringPower
       * \param symbol: the symbol of the element associated to this fullerene. By
       * default it is assumed to be carbon
       */
-      ScatteringPowerFullerene(const string &name,
-                               const unsigned int nbAtom,
-                               const REAL axisLengthX,
-                               const REAL axisLengthY,
-                               const REAL axisLengthZ,
-                               const REAL bIso=1.0,
-                               const string symbol="C");
-      ScatteringPowerFullerene(const ScatteringPowerFullerene& old);
-      ~ScatteringPowerFullerene();
-      void Init(const string &name,
-                const unsigned int nbAtom,
-                const REAL axisLengthX,
-                const REAL axisLengthY,
-                const REAL axisLengthZ,
-                const REAL bIso=1.0,
-                const string symbol="C");
+      ScatteringPowerSphere(const string &name,const REAL radius,const REAL bIso=1.0);
+      ScatteringPowerSphere(const ScatteringPowerSphere& old);
+      ~ScatteringPowerSphere();
+      void Init(const string &name,const REAL radius,const REAL bIso=1.0);
       virtual const string& GetClassName() const;
       virtual CrystVector_REAL GetScatteringFactor(const ScatteringData &data,
                                                      const int spgSymPosIndex=0) const;
@@ -78,44 +67,21 @@ class ScatteringPowerFullerene: public ScatteringPower
                                                      const int spgSymPosIndex=0) const;
       virtual CrystMatrix_REAL GetResonantScattFactImag(const ScatteringData &data,
                                                      const int spgSymPosIndex=0) const;
-      REAL GetAxisLengthX() const;
-      REAL GetAxisLengthY() const;
-      REAL GetAxisLengthZ() const;
-      virtual REAL GetRadius()const;
+      REAL GetRadius()const;
       virtual void Print()const;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
    private:
       virtual void InitRefParList();
-      /// Number of atoms on the ellipsoid
-      REAL mNbAtom;
-      /** Lengths of the ellipsoid 3 axis
-      * The X,Y,Z axis correspond to the XYZ directions when the orientation
-      * angles are equal to 0.
+      /// Isotropic temperature B-factor.
+      REAL mBiso;
+      /** Radius of the sphere.
       */
-      REAL mAxisLengthX,mAxisLengthY,mAxisLengthZ;
-      /** \brief Angles giving the orientation of the ellipsoid (stored in radian)
-      *
-      * \f[     \left[ \begin{array}{ccc} \cos(\chi) & 0 & -\sin(\chi) \\
-                                           0 & 1 & 0 \\
-                                           \sin(\chi) & 0 & \cos(\chi) \end{array} \right]
-         \times \left[ \begin{array}{ccc} \cos(\phi) & -\sin(\phi) & 0 \\
-                                           \sin(\phi) & \cos(\phi) & 0 \\
-                                           0 & 0 & 1 \end{array} \right]
-         \times \left[ \begin{array}{ccc} 1 & 0 & 0 \\
-                                           0 & \cos(\psi) & -\sin(\psi) \\
-                                           0 & \sin(\psi) & \cos(\psi) \end{array} \right]
-      * \f]
-      *
-      *
-      */
-      REAL mPhi,mChi,mPsi;
-      /// The scattering power of a single element
-      ScatteringPower *mpScatteringPower;
+      REAL mRadius;
    #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);
-   friend class WXScatteringPowerFullerene;
+   friend class WXScatteringPowerSphere;
    #endif
 };
 

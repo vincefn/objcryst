@@ -20,7 +20,7 @@
 #include <fstream>
 
 #include "wx/wx.h"
-#include "wxCryst/wxScatteringPowerFullerene.h"
+#include "wxCryst/wxScatteringPowerSphere.h"
 
 //Fixes for Cygwin; where do those stupid macros come from ? Somewhere in wxMSW headers
 #ifdef max
@@ -37,76 +37,45 @@ namespace ObjCryst
 {
 ////////////////////////////////////////////////////////////////////////
 //
-//    WXScatteringPowerFullerene
+//    WXScatteringPowerSphere
 //
 ////////////////////////////////////////////////////////////////////////
-BEGIN_EVENT_TABLE(WXScatteringPowerFullerene, wxWindow)
-   EVT_MENU(ID_SCATTPOWATOM_MENU_COLOUR_SETRGB, WXScatteringPowerFullerene::OnChangeColour)
+BEGIN_EVENT_TABLE(WXScatteringPowerSphere, wxWindow)
+   EVT_MENU(ID_SCATTPOWATOM_MENU_COLOUR_SETRGB, WXScatteringPowerSphere::OnChangeColour)
    EVT_UPDATE_UI(ID_CRYST_UPDATEUI,             WXRefinableObj::OnUpdateUI)
 END_EVENT_TABLE()
 
-WXScatteringPowerFullerene::WXScatteringPowerFullerene(wxWindow* parent, 
-                                                       ScatteringPowerFullerene *obj):
+WXScatteringPowerSphere::WXScatteringPowerSphere(wxWindow* parent, 
+                                                       ScatteringPowerSphere *obj):
 WXRefinableObj(parent,(RefinableObj*)obj),mpScatteringPower(obj)
 {
-   VFN_DEBUG_MESSAGE("WXScatteringPowerFullerene::WXScatteringPowerAtom()",6)
+   VFN_DEBUG_MESSAGE("WXScatteringPowerSphere::ScatteringPowerSphere()",6)
    mpWXTitle->SetForegroundColour(wxColour(0,200,0));
    //Lattice
       mpMenuBar->AddMenu("Colour",ID_SCATTPOWATOM_MENU_COLOUR);
          mpMenuBar->AddMenuItem(ID_SCATTPOWATOM_MENU_COLOUR,
                                 ID_SCATTPOWATOM_MENU_COLOUR_SETRGB,"Set RGB Colour");
-      #if 1
-      WXFieldRefPar* pFieldRadiusX  =new WXFieldRefPar(this,"Radius:",
-            &(mpScatteringPower->GetPar(&(mpScatteringPower->mAxisLengthX))) );
-      #else //Anisotropic
-      WXFieldRefPar* pFieldRadiusX  =new WXFieldRefPar(this,"XRadius:",
-            &(mpScatteringPower->GetPar(&(mpScatteringPower->mAxisLengthX))) );
-      WXFieldRefPar* pFieldRadiusY  =new WXFieldRefPar(this,"YRadius:",
-            &(mpScatteringPower->GetPar(&(mpScatteringPower->mAxisLengthY))) );
-      WXFieldRefPar* pFieldRadiusZ  =new WXFieldRefPar(this,"ZRadius:",
-            &(mpScatteringPower->GetPar(&(mpScatteringPower->mAxisLengthZ))) );
-      WXFieldRefPar* pFieldPhi  =new WXFieldRefPar(this,"Phi:",
-            &(mpScatteringPower->GetPar(&(mpScatteringPower->mPhi))) );
-      WXFieldRefPar* pFieldChi  =new WXFieldRefPar(this,"Chi:",
-            &(mpScatteringPower->GetPar(&(mpScatteringPower->mChi))) );
-      WXFieldRefPar* pFieldPsi  =new WXFieldRefPar(this,"Psi:",
-            &(mpScatteringPower->GetPar(&(mpScatteringPower->mPsi))) );
-      #endif
-      WXFieldRefPar* pFieldNbAtom  =new WXFieldRefPar(this,"Number of atoms:",
-            &(mpScatteringPower->GetPar(&(mpScatteringPower->mNbAtom))) );
+      WXFieldRefPar* pFieldRadius  =new WXFieldRefPar(this,"Radius:",
+            &(mpScatteringPower->GetPar(&(mpScatteringPower->mRadius))) );
       WXFieldRefPar* pFieldBiso  =new WXFieldRefPar(this,"Biso:",
-            &(mpScatteringPower->mpScatteringPower->GetPar(&(mpScatteringPower->mpScatteringPower->GetBiso()))) );
+            &(mpScatteringPower->GetPar(&(mpScatteringPower->mBiso  ))) );
       
-      mpSizer->Add(pFieldRadiusX,0,wxALIGN_LEFT);
-      mList.Add(pFieldRadiusX);
-      #if 0
-      mpSizer->Add(pFieldRadiusY,0,wxALIGN_LEFT);
-      mList.Add(pFieldRadiusY);
-      mpSizer->Add(pFieldRadiusZ,0,wxALIGN_LEFT);
-      mList.Add(pFieldRadiusZ);
-      mpSizer->Add(pFieldPhi,0,wxALIGN_LEFT);
-      mList.Add(pFieldPhi);
-      mpSizer->Add(pFieldChi,0,wxALIGN_LEFT);
-      mList.Add(pFieldChi);
-      mpSizer->Add(pFieldPsi,0,wxALIGN_LEFT);
-      mList.Add(pFieldPsi);
-      #endif
-      mpSizer->Add(pFieldNbAtom,0,wxALIGN_LEFT);
-      mList.Add(pFieldNbAtom);
+      mpSizer->Add(pFieldRadius,0,wxALIGN_LEFT);
+      mList.Add(pFieldRadius);
       mpSizer->Add(pFieldBiso,0,wxALIGN_LEFT);
       mList.Add(pFieldBiso);
       this->CrystUpdate();
    this->Layout();
 }
 
-bool WXScatteringPowerFullerene::OnChangeName(const int id)
+bool WXScatteringPowerSphere::OnChangeName(const int id)
 {
-   VFN_DEBUG_MESSAGE("WXScatteringPowerFullerene::OnChangeName()",6)
+   VFN_DEBUG_MESSAGE("WXScatteringPowerSphere::OnChangeName()",6)
    if(this->WXRefinableObj::OnChangeName(id)==true) return true;
    return false;
 }
 
-void WXScatteringPowerFullerene::OnChangeColour(wxCommandEvent & event)
+void WXScatteringPowerSphere::OnChangeColour(wxCommandEvent & event)
 {
    const float* oldColour=mpScatteringPower->GetColourRGB();
    double r,g,b;
@@ -121,7 +90,7 @@ void WXScatteringPowerFullerene::OnChangeColour(wxCommandEvent & event)
                               "Enter Red component (0.<r<1.)",str,wxOK | wxCANCEL);
       if(wxID_OK!=dialog.ShowModal())
       {
-         VFN_DEBUG_EXIT("WXScatteringPowerFullerene::OnChangeColour():Cancelled",6)
+         VFN_DEBUG_EXIT("WXScatteringPowerSphere::OnChangeColour():Cancelled",6)
          return;
       }
       dialog.GetValue().ToDouble(&r);
@@ -134,7 +103,7 @@ void WXScatteringPowerFullerene::OnChangeColour(wxCommandEvent & event)
                               "Enter Green component (0.<g<1.)",str,wxOK | wxCANCEL);
       if(wxID_OK!=dialog.ShowModal())
       {
-         VFN_DEBUG_EXIT("WXScatteringPowerFullerene::OnChangeColour():Cancelled",6)
+         VFN_DEBUG_EXIT("WXScatteringPowerSphere::OnChangeColour():Cancelled",6)
          return;
       }
       dialog.GetValue().ToDouble(&g);
@@ -147,7 +116,7 @@ void WXScatteringPowerFullerene::OnChangeColour(wxCommandEvent & event)
                               "Enter Blue component (0.<b<1.)",str,wxOK | wxCANCEL);
       if(wxID_OK!=dialog.ShowModal())
       {
-         VFN_DEBUG_EXIT("WXScatteringPowerFullerene::OnChangeColour():Cancelled",6)
+         VFN_DEBUG_EXIT("WXScatteringPowerSphere::OnChangeColour():Cancelled",6)
          return;
       }
       dialog.GetValue().ToDouble(&b);
@@ -155,7 +124,7 @@ void WXScatteringPowerFullerene::OnChangeColour(wxCommandEvent & event)
    mpScatteringPower->SetColour(r,g,b);
 }
 
-void WXScatteringPowerFullerene::UpdateUI()
+void WXScatteringPowerSphere::UpdateUI()
 {
    this->WXRefinableObj::UpdateUI();
 }
