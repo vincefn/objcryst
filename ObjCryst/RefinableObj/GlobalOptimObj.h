@@ -378,12 +378,12 @@ class MonteCarloObj:public OptimizationObj
                                     const REAL maxTime=-1);
       
       /** \internal Do a single simulated annealing run. This is called by Optimize(...) and
-      /* MultiRunOptimize(), which must also prepare the optimization (PrepareRefParList(), etc..).
+      * MultiRunOptimize(), which must also prepare the optimization (PrepareRefParList(), etc..).
       */
       void RunSimulatedAnnealing(long &nbSteps,const bool silent=false,const REAL finalcost=0,
                                  const REAL maxTime=-1);
       /** \internal Do a single Parallel Tempering run. This is called by Optimize(...) and
-      /* MultiRunOptimize(), which must also prepare the optimization (PrepareRefParList(), etc..).
+      * MultiRunOptimize(), which must also prepare the optimization (PrepareRefParList(), etc..).
       */
       void RunParallelTempering(long &nbSteps,const bool silent=false,const REAL finalcost=0,
                                 const REAL maxTime=-1);

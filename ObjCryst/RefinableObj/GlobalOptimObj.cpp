@@ -296,7 +296,7 @@ void OptimizationObj::InitOptions()
 {
    VFN_DEBUG_MESSAGE("OptimizationObj::InitOptions()",5)
    static string xmlAutoSaveName;
-   static string xmlAutoSaveChoices[5];
+   static string xmlAutoSaveChoices[6];
    
    static bool needInitNames=true;
    if(true==needInitNames)
@@ -307,10 +307,11 @@ void OptimizationObj::InitOptions()
       xmlAutoSaveChoices[2]="Every hour";
       xmlAutoSaveChoices[3]="Every 10mn";
       xmlAutoSaveChoices[4]="Every new best config (a lot ! Not Recommended !)";
+      xmlAutoSaveChoices[5]="Every Run (Recommended)";
       
       needInitNames=false;//Only once for the class
    }
-   mXMLAutoSave.Init(5,&xmlAutoSaveName,xmlAutoSaveChoices);
+   mXMLAutoSave.Init(6,&xmlAutoSaveName,xmlAutoSaveChoices);
    VFN_DEBUG_MESSAGE("OptimizationObj::InitOptions():End",5)
 }
 
@@ -359,6 +360,7 @@ mNbTrialRetry(0),mMinCostRetry(0)
    mGlobalOptimType.SetChoice(GLOBAL_OPTIM_PARALLEL_TEMPERING);
    mAnnealingScheduleTemp.SetChoice(ANNEALING_SMART);
    mAnnealingScheduleMutation.SetChoice(ANNEALING_EXPONENTIAL);
+   mXMLAutoSave.SetChoice(5);//Save after each Run
    gOptimizationObjRegistry.Register(*this);
    this->InitRandomSeedFromTime();
    VFN_DEBUG_EXIT("MonteCarloObj::MonteCarloObj()",5)
@@ -380,6 +382,7 @@ mNbTrialRetry(0),mMinCostRetry(0)
    mGlobalOptimType.SetChoice(GLOBAL_OPTIM_PARALLEL_TEMPERING);
    mAnnealingScheduleTemp.SetChoice(ANNEALING_SMART);
    mAnnealingScheduleMutation.SetChoice(ANNEALING_EXPONENTIAL);
+   mXMLAutoSave.SetChoice(5);//Save after each Run
    if(false==internalUseOnly) gOptimizationObjRegistry.Register(*this);
    this->InitRandomSeedFromTime();
    VFN_DEBUG_EXIT("MonteCarloObj::MonteCarloObj(bool)",5)
@@ -521,8 +524,19 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
       if(!silent) cout <<"MonteCarloObj::MultiRunOptimize: Finished Run#"
                        <<abs(nbCycle)<<", Run Best Cost:"<<mCurrentCost
                        <<", Overall Best Cost:"<<mBestCost<<endl;
-      if((mStopAfterCycle)||(mBestCost<finalcost)) break;
+      if(mXMLAutoSave.GetChoice()==5)
+      {
+         string saveFileName=this->GetName();
+         time_t date=time(0);
+         char strDate[40];
+         strftime(strDate,sizeof(strDate),"%Y-%m-%d_%H-%M-%S",localtime(&date));//%Y-%m-%dT%H:%M:%S%Z
+         char costAsChar[30];
+         sprintf(costAsChar,"-Run#%i-Cost-%f",abs(nbCycle),this->GetLogLikelihood());
+         saveFileName=saveFileName+(string)strDate+(string)costAsChar+(string)".xml";
+         XMLCrystFileSaveGlobal(saveFileName);
+      }
       nbCycle--;
+      if((mStopAfterCycle)||(mBestCost<finalcost)) break;
    }
    mIsOptimizing=false;
    mStopAfterCycle=false;
