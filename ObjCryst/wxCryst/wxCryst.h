@@ -179,16 +179,20 @@ class WXCrystObjBasic: public wxWindow
       WXCrystObjBasic(wxWindow* parent);
 		/// Destructor
       virtual ~WXCrystObjBasic();
-      /// Update the display, by getting new values from the object. 
-      /// New values should be grabbed from the object, and then a
-      /// wxUpdateUI event should be posted (this for multi-thread, since
-		/// only one thread should do graphical changes)
+      /// Get new values to be displayed from the underlying object,
+		/// and raise flag if an UI update is necessary.
+		/// The actual GUI update is not made here. UpdateUI() should be
+		/// called separately, from the main thread.
       virtual void CrystUpdate()=0;
+		/// Update the User Interface, if necessary
+      virtual void UpdateUI()=0;
    protected:
 		/// Parent 
       wxWindow *mWXParent;
 		/// Is the the window currently shown ?
       bool mIsShown;
+		/// Do we need to update the display ?
+		bool mNeedUpdateUI;
 };
 
 /// A List of WXCrystObjBasic.
@@ -212,6 +216,8 @@ class WXCrystObjBasicList
       bool Show(bool);
       /// Forces all objects in the list to update. See WXCrystObjBasic::CrystUpdate()
       void CrystUpdate();
+      /// Forces all objects in the list to update the UI. See WXCrystObjBasic::UpdateUI()
+      void UpdateUI();
    private:
       /// Number of objects.
       unsigned int mNbWXCrystObj;
@@ -252,6 +258,7 @@ class WXCrystObj: public WXCrystObjBasic
       /// purposes).
       virtual bool OnChangeName(const int id)=0;
       virtual void CrystUpdate();
+      virtual void UpdateUI();
    protected:
 		/// Top sizer including the title and WXCrystObj::mpSizer
       wxBoxSizer *mpTopSizer;
@@ -314,9 +321,6 @@ class WXFieldName:public WXField
    public:
       WXFieldName(wxWindow *parent,const string& label, WXCrystObj* owner,const int field_id,
                   const int hsize=50, bool isEditable=true);
-      /// UpdateUI does not grab new values in the underlying object,
-      /// but only updates the values which have been supplied.
-      void OnUpdateUI(wxUpdateUIEvent & WXUNUSED(event));
       /// When a new value is entered (must type it and then hit the 'enter' key).
       /// The Field reads the new value, then
       /// forwards the event to its owner, who will take care of anything
@@ -332,6 +336,7 @@ class WXFieldName:public WXField
       /// This does nothing. Updates should be done by the owner in the particular
       /// case of names.
       virtual void CrystUpdate();
+      virtual void UpdateUI();
       void Revert();
 		virtual void ValidateUserInput();
    protected:
@@ -359,9 +364,6 @@ class WXFieldParBase:public WXField
 		/// Constructor
       WXFieldParBase(wxWindow *parent,const string& label, const int field_id,
                      const int hsize=50);
-      /// UpdateUI does not grab new values in the underlying object,
-      /// but only updates the values which have been supplied.
-      void OnUpdateUI(wxUpdateUIEvent & WXUNUSED(event));
       /// When a new value is entered (must type it and then hit the 'enter' key).
       /// The Field reads the new value, 
       /// and directly changes the RefinablePar value (contrary to what happens
@@ -371,14 +373,11 @@ class WXFieldParBase:public WXField
       void OnText(wxCommandEvent & WXUNUSED(event));
       /// This gets a new value from the parameter.
       virtual void CrystUpdate()=0;
-      /// Revert to the previous value
       virtual void Revert()=0;
 		virtual void ValidateUserInput();
    protected:
       /// Reads the new value when the Enter key is hit
       virtual void ReadNewValue()=0;
-		/// Apply a new value
-      virtual void ApplyNewValue()=0;
 		/// The field in which the value is written.
       wxTextCtrl *mpField;
 		/// Set to true if the Field is being updated, so that no 
@@ -397,16 +396,16 @@ template<class T>class WXFieldPar:public WXFieldParBase
                     T *par,const int hsize=50);
       /// This gets a new value from the parameter.
       virtual void CrystUpdate();
-      /// Revert to the previous value
+      virtual void UpdateUI();
       virtual void Revert();
    protected:
       /// Reads the new value when the Enter key is hit
       virtual void ReadNewValue();
-      /// Applies a new value and shows it.
-      virtual void ApplyNewValue();
 		/// A pointer to the value displayed
       T* mpValue;
-		/// The last value displayed, before it was changed by the user.
+		/// The value displayed
+      T mValue;
+		/// Last value
       T mValueOld;
 };
 
@@ -420,12 +419,10 @@ class WXFieldChoice:public WXField
       WXFieldChoice(wxWindow *parent,const int field_id,
                             const string &name,const int hsize=80);
       bool Layout();
-      /// UpdateUI does not grab new values in the underlying object,
-      /// but only updates the values which have been supplied.
-      void OnUpdateUI(wxUpdateUIEvent & WXUNUSED(event));
       /// Does nothing
       virtual void CrystUpdate();
       /// Does nothing
+      virtual void UpdateUI();
       void Revert();
       /// Used by the owner to change the name of the choice
       void SetValue(const string&);
@@ -453,6 +450,7 @@ class WXCrystMenuBar: public WXCrystObjBasic
       void AddMenuItem(const int menuId,int id, const wxString&  item,
                        wxMenu *subMenu, const wxString& helpString = "");
       virtual void CrystUpdate();
+      virtual void UpdateUI();
 		/// Event handler to popu the menu when the button is clicked.
       void OnPopupMenu(wxCommandEvent & event);
    protected:

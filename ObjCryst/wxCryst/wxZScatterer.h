@@ -23,10 +23,10 @@ class WXZAtom:public WXCrystObjBasic
    public:
       WXZAtom(wxWindow *parent, ZAtom*);
       virtual void CrystUpdate();
+      virtual void UpdateUI();
       virtual bool Layout();
       void OnChangeScattPow(wxCommandEvent & WXUNUSED(event));
       void OnChangeName(wxCommandEvent & WXUNUSED(event));
-      virtual void OnUpdateUI(wxUpdateUIEvent& event);
    private:
       ZAtom *mpZAtom;
       wxBoxSizer *mpSizer;
@@ -39,6 +39,7 @@ class WXZAtom:public WXCrystObjBasic
    DECLARE_EVENT_TABLE()
 };
 
+/// wxCryst class for ZScatterer objects
 class WXZScatterer: public WXScatterer
 {
    public:

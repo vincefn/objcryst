@@ -40,7 +40,7 @@ class WXPowderPattern: public WXRefinableObj
       void OnMenuAdd2ThetaExclude(wxCommandEvent & WXUNUSED(event));
       void NotifyDeleteGraph();
 		const PowderPattern& GetPowderPattern()const;
-      void OnUpdateUI(wxUpdateUIEvent& event);
+      void UpdateUI();
    private:
       PowderPattern *mpPowderPattern;
       WXRegistry<PowderPatternComponent> *mpWXComponent;
@@ -139,7 +139,7 @@ class WXPowderPatternDiffraction: public WXRefinableObj
       WXPowderPatternDiffraction(wxWindow *parent, PowderPatternDiffraction*);
       void OnChangeCrystal(wxCommandEvent & WXUNUSED(event));
 		void OnMenuSaveHKLFcalc(wxCommandEvent & WXUNUSED(event));
-      void OnUpdateUI(wxUpdateUIEvent& event);
+      virtual void UpdateUI();
    private:
       PowderPatternDiffraction *mpPowderPatternDiffraction;
       WXFieldChoice* mpFieldCrystal;

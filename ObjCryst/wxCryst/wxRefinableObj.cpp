@@ -46,7 +46,6 @@ BEGIN_EVENT_TABLE(WXFieldRefPar,wxEvtHandler)
    EVT_TEXT(ID_WXFIELD,                   		WXFieldRefPar::OnText)
    EVT_CHECKBOX(ID_WXFIELD_REFPAR_FIXBUTTON,    WXFieldRefPar::OnToggleFix)
    EVT_RIGHT_DOWN(                              WXFieldRefPar::OnPopupMenu)
-   EVT_UPDATE_UI(ID_WXFIELD_REFPAR,             WXFieldRefPar::OnUpdateUI)
    EVT_MENU(ID_REFPAR_POPUP_SET_LIMITS,         WXFieldRefPar::OnPopupMenuChoice)
    EVT_MENU(ID_REFPAR_POPUP_REMOVE_LIMITS,      WXFieldRefPar::OnPopupMenuChoice)
 END_EVENT_TABLE()
@@ -72,25 +71,6 @@ WXField(parent,label,ID_WXFIELD_REFPAR),mValue(0.),mpRefPar(par),mIsSelfUpdating
    mpPopUpMenu->Append(ID_REFPAR_POPUP_REMOVE_LIMITS, "Remove Limits");
    
    this->Layout();
-}
-
-void WXFieldRefPar::OnUpdateUI(wxUpdateUIEvent & WXUNUSED(event))
-{
-   VFN_DEBUG_MESSAGE("WXFieldRefPar::OnUpdateUI()"<<mValue,3)
-   //The 'fix' state should not change during refinement so this should be safe
-   if(false==mpRefPar->IsUsed()) this->Show(false);
-   else this->Show(true);
-   
-   if(mpField==0) return;
-   
-   //mpField->SetValue(wxString::Printf("%f",mValue));
-   wxString tmp;
-   tmp.Printf("%f",mValue);
-	mIsSelfUpdating=true;
-   mpField->SetValue(tmp);
-	mIsSelfUpdating=false;
-   mpButtonFix->SetValue(!(mpRefPar->IsFixed()));
-   VFN_DEBUG_MESSAGE("WXFieldRefPar::OnUpdateUI():End",2)
 }
 
 void WXFieldRefPar::OnEnter(wxCommandEvent & WXUNUSED(event))
@@ -175,16 +155,37 @@ void WXFieldRefPar::CrystUpdate()
 {
    VFN_DEBUG_MESSAGE("WXFieldRefPar::CrystUpdate()",6)
    //cout << mpField <<endl;
+	if(mValue==mpRefPar->GetHumanValue()) return;
+	mValueOld=mValue;
    mValue=mpRefPar->GetHumanValue();
-   wxUpdateUIEvent event(ID_WXFIELD_REFPAR);
-   wxPostEvent(this,event);
+	mNeedUpdateUI=true;
 }
+
+void WXFieldRefPar::UpdateUI()
+{
+   VFN_DEBUG_MESSAGE("WXFieldRefPar::UpdateUI()"<<mValue,3)
+   //The 'fix' state should not change during refinement so this should be safe
+	if(mNeedUpdateUI==false)return;
+   if(false==mpRefPar->IsUsed()) this->Show(false);
+   else this->Show(true);
+   
+   if(mpField==0) return;
+   
+   //mpField->SetValue(wxString::Printf("%f",mValue));
+   wxString tmp;
+   tmp.Printf("%f",mValue);
+	mIsSelfUpdating=true;
+   mpField->SetValue(tmp);
+	mIsSelfUpdating=false;
+   mpButtonFix->SetValue(!(mpRefPar->IsFixed()));
+	mNeedUpdateUI=false;
+}
+
 void WXFieldRefPar::Revert()
 {
    VFN_DEBUG_MESSAGE("WXFieldRefPar::Revert()",6)
    mValue=mValueOld;
-   wxUpdateUIEvent event(ID_WXFIELD_REFPAR);
-   wxPostEvent(this,event);
+	mNeedUpdateUI=true;
 }
 void WXFieldRefPar::ValidateUserInput()
 {
@@ -203,7 +204,6 @@ void WXFieldRefPar::ValidateUserInput()
 ////////////////////////////////////////////////////////////////////////
 BEGIN_EVENT_TABLE(WXFieldOption,wxEvtHandler)
    EVT_CHOICE(ID_WXFIELD,WXFieldOption::OnChoice)
-   EVT_UPDATE_UI(ID_WXFIELD_OPTION,WXFieldOption::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXFieldOption::WXFieldOption(wxWindow *parent,
@@ -223,11 +223,6 @@ WXFieldOption::~WXFieldOption()
 {
    mpOption->WXNotifyDelete();
 }
-void WXFieldOption::OnUpdateUI(wxUpdateUIEvent & WXUNUSED(event))
-{
-   mpList->SetSelection(mChoice);
-}
-
 void WXFieldOption::OnChoice(wxCommandEvent & WXUNUSED(event))
 {
    if(mChoice==mpList->GetSelection()) return;
@@ -239,17 +234,22 @@ void WXFieldOption::OnChoice(wxCommandEvent & WXUNUSED(event))
 void WXFieldOption::CrystUpdate()
 {
    VFN_DEBUG_MESSAGE("WXFieldOption::CrystUpdate()",6)
-   // The list of choices cannot change once initialized
+	if(mChoice==mpOption->GetChoice()) return;
    mChoice=mpOption->GetChoice();
-   wxUpdateUIEvent event(ID_WXFIELD_OPTION);
-   wxPostEvent(this,event);
+	mNeedUpdateUI=true;
+}
+
+void WXFieldOption::UpdateUI()
+{
+	if(mNeedUpdateUI==false) return;
+   mpList->SetSelection(mChoice);
+	mNeedUpdateUI=false;
 }
 
 void WXFieldOption::Revert()
 {
    mChoice=mChoiceOld;
-   wxUpdateUIEvent event(ID_WXFIELD_OPTION);
-   wxPostEvent(this,event);
+	mNeedUpdateUI=true;
 }
 void WXFieldOption::ValidateUserInput()
 {
@@ -259,10 +259,6 @@ void WXFieldOption::ValidateUserInput()
 //    WXCostFunction
 //
 ////////////////////////////////////////////////////////////////////////
-BEGIN_EVENT_TABLE(WXCostFunction,wxWindow)
-   EVT_UPDATE_UI(ID_WXFIELD_COSTFUNC,WXCostFunction::OnUpdateUI)
-END_EVENT_TABLE()
-
 WXCostFunction::WXCostFunction(wxWindow *parent,RefinableObj *obj, const int field_id,
                const int funcNum,REAL * weight):
 WXField(parent,obj->GetName()+":"+obj->GetCostFunctionName(funcNum)+"=",-1),
@@ -278,13 +274,6 @@ mpObj(obj),mFuncNum(funcNum)
    this->Layout();
 }
 
-void WXCostFunction::OnUpdateUI(wxUpdateUIEvent & WXUNUSED(event))
-{
-   wxString tmp;
-   tmp.Printf("%f",mValue);
-   mpValue->SetValue(tmp);
-}
-
 void WXCostFunction::OnEnter(wxCommandEvent & WXUNUSED(event))
 {
    //Nothing to do here (will never happen, value is not editable)
@@ -293,8 +282,14 @@ void WXCostFunction::OnEnter(wxCommandEvent & WXUNUSED(event))
 void WXCostFunction::CrystUpdate()
 {
    mValue=mpObj->GetCostFunctionValue(mFuncNum);
-   wxUpdateUIEvent event(ID_WXFIELD_COSTFUNC);
-   wxPostEvent(this,event);
+}
+
+void WXCostFunction::UpdateUI()
+{
+   wxString tmp;
+   tmp.Printf("%f",mValue);
+   mpValue->SetValue(tmp);
+	mpWeight->UpdateUI();
 }
 
 void WXCostFunction::Revert()
@@ -607,7 +602,13 @@ void WXRefinableObj::OnMenuParRandomize(wxCommandEvent & WXUNUSED(event))
 
 void WXRefinableObj::OnUpdateUI(wxUpdateUIEvent& event)
 {
+	this->UpdateUI();
+}
+void WXRefinableObj::UpdateUI()
+{
 	mpWXTitle->SetValue(mpRefinableObj->GetName());
+	mpWXTitle->UpdateUI();
+	this->WXCrystObj::UpdateUI();
 }
 
 }// namespace 

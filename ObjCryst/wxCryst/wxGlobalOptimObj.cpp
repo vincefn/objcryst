@@ -184,6 +184,7 @@ void WXOptimizationObj::OnStopOptimization()
 void WXOptimizationObj::OnUpdateUI(wxUpdateUIEvent& event)
 {
    mpWXTitle->SetValue(this->GetOptimizationObj().GetName());
+	this->WXCrystObj::UpdateUI();
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -272,6 +273,7 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(100000000)
    this->Layout();
    VFN_DEBUG_EXIT("WXMonteCarloObj::WXMonteCarloObj()",7)
 }
+
 void WXMonteCarloObj::OnRunOptimization()
 {
    VFN_DEBUG_ENTRY("WXGeneticAlgorithm::OnRunOptimization()",6)

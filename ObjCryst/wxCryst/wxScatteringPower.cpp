@@ -24,7 +24,7 @@ namespace ObjCryst
 ////////////////////////////////////////////////////////////////////////
 BEGIN_EVENT_TABLE(WXScatteringPowerAtom, wxWindow)
    EVT_MENU(ID_SCATTPOWATOM_MENU_COLOUR_SETRGB, WXScatteringPowerAtom::OnChangeColour)
-   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, 				WXScatteringPowerAtom::OnUpdateUI)
+   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, 				WXRefinableObj::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXScatteringPowerAtom::WXScatteringPowerAtom(wxWindow* parent, ScatteringPowerAtom *obj):
@@ -124,10 +124,10 @@ void WXScatteringPowerAtom::OnChangeColour(wxCommandEvent & event)
    }
    mpScatteringPowerAtom->SetColour(r,g,b);
 }
-void WXScatteringPowerAtom::OnUpdateUI(wxUpdateUIEvent& event)
+void WXScatteringPowerAtom::UpdateUI()
 {
    mpFieldSymbol->SetValue(mpScatteringPowerAtom->GetSymbol());
-	this->WXRefinableObj::OnUpdateUI(event);
+	this->WXRefinableObj::UpdateUI();
 }
 
 }// namespace 

@@ -28,7 +28,7 @@ namespace ObjCryst
 //
 ////////////////////////////////////////////////////////////////////////
 WXCrystObjBasic::WXCrystObjBasic(wxWindow* parent):
-wxWindow(parent,-1),mWXParent(parent),mIsShown(true)
+wxWindow(parent,-1),mWXParent(parent),mIsShown(true),mNeedUpdateUI(true)
 {
    VFN_DEBUG_MESSAGE("WXCrystObjBasic::WXCrystObjBasic() at "<<this,6)
    //mWXParent->Layout();
@@ -119,9 +119,15 @@ WXCrystObjBasic* WXCrystObjBasicList::Get(const unsigned int i)
 
 void WXCrystObjBasicList::CrystUpdate()
 {
-   VFN_DEBUG_MESSAGE("WXCrystObjBasicList::CrystUpdate(bool)",3)
+   VFN_DEBUG_MESSAGE("WXCrystObjBasicList::CrystUpdate()",3)
    for(unsigned int i=0;i<mNbWXCrystObj;i++)
       mpWXCrystObj[i]->CrystUpdate();
+}
+void WXCrystObjBasicList::UpdateUI()
+{
+   VFN_DEBUG_MESSAGE("WXCrystObjBasicList::UpdateUI()",3)
+   for(unsigned int i=0;i<mNbWXCrystObj;i++)
+      mpWXCrystObj[i]->UpdateUI();
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -192,7 +198,6 @@ bool WXField::SetForegroundColour(const wxColour& colour)
 BEGIN_EVENT_TABLE(WXFieldName,wxEvtHandler)
    EVT_TEXT_ENTER(ID_WXFIELD, 		WXFieldName::OnEnter)
    EVT_TEXT(		ID_WXFIELD, 		WXFieldName::OnText)
-   EVT_UPDATE_UI( ID_WXFIELD_REFPAR,WXFieldName::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXFieldName::WXFieldName(wxWindow *parent,const string& label, WXCrystObj* owner,
@@ -214,15 +219,6 @@ WXField(parent,label,id),mpWXObj(owner),mValue(""),mIsSelfUpdating(false)
    this->Layout();
 }
 
-void WXFieldName::OnUpdateUI(wxUpdateUIEvent & WXUNUSED(event))
-{
-   VFN_DEBUG_MESSAGE("WXFieldName::OnUpdateUI()",6)
-	mIsSelfUpdating=true;
-   mpField->SetValue(mValue);
-	mIsSelfUpdating=false;
-   //mpSizer->SetItemMinSize(mpField, mpField->GetSize().GetWidth(),
-   //                     mpField->GetSize().GetHeight());
-}
 void WXFieldName::OnEnter(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXFieldName::OnEnter()",6)
@@ -241,12 +237,10 @@ void WXFieldName::OnText(wxCommandEvent & WXUNUSED(event))
 
 void WXFieldName::SetValue(const string&s)
 {
+	if(mValue==(wxString)(s.c_str()))return;
    VFN_DEBUG_MESSAGE("WXFieldName::SetValue()",3)
    mValue=s.c_str();
-   VFN_DEBUG_MESSAGE("WXFieldName::SetValue():1",2)
-   wxUpdateUIEvent event(ID_WXFIELD_REFPAR);
-   wxPostEvent(this,event);
-   VFN_DEBUG_MESSAGE("WXFieldName::SetValue():End",2)
+	mNeedUpdateUI=true;
 }
 
 const string WXFieldName::GetValue() const
@@ -259,12 +253,20 @@ void WXFieldName::CrystUpdate()
    VFN_DEBUG_MESSAGE("WXFieldName::CrystUpdate()",3)
    // The name must be updated by the owner
 }
+void WXFieldName::UpdateUI()
+{
+	if(mNeedUpdateUI==false) return;
+   VFN_DEBUG_MESSAGE("WXFieldName::UpdateUI()",10)
+	mIsSelfUpdating=true;
+   mpField->SetValue(mValue);
+	mIsSelfUpdating=false;
+	mNeedUpdateUI=false;
+}
 void WXFieldName::Revert()
 {
    VFN_DEBUG_MESSAGE("WXFieldName::Revert()",3)
    mValue=mValueOld;
-   wxUpdateUIEvent event(ID_WXFIELD_REFPAR);
-   wxPostEvent(this,event);
+	mNeedUpdateUI=true;
 }
 void WXFieldName::ValidateUserInput()
 {
@@ -284,7 +286,6 @@ void WXFieldName::ValidateUserInput()
 BEGIN_EVENT_TABLE(WXFieldParBase,wxWindow)
    EVT_TEXT_ENTER(ID_WXFIELD, 		WXFieldParBase::OnEnter)
    EVT_TEXT(		ID_WXFIELD, 		WXFieldParBase::OnText)
-   EVT_UPDATE_UI( ID_WXFIELD_REFPAR,WXFieldParBase::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXFieldParBase::WXFieldParBase(wxWindow *parent,const string& label,
@@ -301,13 +302,6 @@ WXField(parent,label,id),mIsSelfUpdating(false)
    this->Layout();
 }
 
-void WXFieldParBase::OnUpdateUI(wxUpdateUIEvent & WXUNUSED(event))
-{
-   VFN_DEBUG_MESSAGE("WXFieldRefPar::OnUpdateUI()",6)
-   // This is very much a :KLUDGE:, but really needed. Only the base class
-   // can receive events, but only the derived knows what to do...
-   this->ApplyNewValue();
-}
 
 void WXFieldParBase::OnEnter(wxCommandEvent & WXUNUSED(event))
 {
@@ -337,7 +331,7 @@ void WXFieldParBase::ValidateUserInput()
 ////////////////////////////////////////////////////////////////////////
 template<class T> WXFieldPar<T>::WXFieldPar(wxWindow *parent,const string& label, 
                                             const int id,T *par,const int hsize):
-WXFieldParBase(parent,label,id,hsize),mpValue(par),mValueOld(*par)
+WXFieldParBase(parent,label,id,hsize),mpValue(par),mValue(*par),mValueOld(*par)
 {
    this->CrystUpdate();
 }
@@ -345,16 +339,54 @@ WXFieldParBase(parent,label,id,hsize),mpValue(par),mValueOld(*par)
 template<class T> void WXFieldPar<T>::CrystUpdate()
 {
    VFN_DEBUG_MESSAGE("WXFieldPar<T>::CrystUpdate()",6)
-   wxUpdateUIEvent event(ID_WXFIELD_REFPAR);
-   wxPostEvent(this,event);
+	mValueOld=mValue;
+	mValue=*mpValue;
+	mNeedUpdateUI=true;
 }
+
+template<> void WXFieldPar<REAL>::UpdateUI()
+{
+	if(mNeedUpdateUI==false) return;
+   VFN_DEBUG_MESSAGE("WXFieldPar<REAL>::UpdateUI()",6)
+   wxString tmp;
+   tmp.Printf("%f",mValue);
+	mIsSelfUpdating=true;
+   mpField->SetValue(tmp);
+	mIsSelfUpdating=false;
+	mNeedUpdateUI=false;
+}
+
+template<> void WXFieldPar<long>::UpdateUI()
+{
+	if(mNeedUpdateUI==false) return;
+   VFN_DEBUG_MESSAGE("WXFieldPar<long>::UpdateUI()",6)
+   wxString tmp;
+   tmp.Printf("%d",mValue);
+	mIsSelfUpdating=true;
+   mpField->SetValue(tmp);
+	mIsSelfUpdating=false;
+	mNeedUpdateUI=false;
+}
+/*
+template<class T> void WXFieldPar<T>::UpdateUI()
+{
+	if(mNeedUpdateUI==false) return;
+   stringstream s;
+   s <<*mpValue;
+	mIsSelfUpdating=true;
+   mpField->SetValue(s.str().c_str());;
+   mpField->SetValue(wxString::Printf("%f",mValue));
+	mIsSelfUpdating=false;
+	mNeedUpdateUI=false;
+}
+*/
 
 template<class T> void WXFieldPar<T>::Revert()
 {
    VFN_DEBUG_MESSAGE("WXFieldPar<T>::Revert()",6)
    *mpValue=mValueOld;
-   wxUpdateUIEvent event(ID_WXFIELD_REFPAR);
-   wxPostEvent(this,event);
+	mValue=mValueOld;
+	mNeedUpdateUI=true;
 }
 
 template<> void WXFieldPar<REAL>::ReadNewValue()
@@ -374,35 +406,6 @@ template<> void WXFieldPar<long>::ReadNewValue()
    s.ToLong(mpValue);
 }
 
-template<> void WXFieldPar<REAL>::ApplyNewValue()
-{
-   VFN_DEBUG_MESSAGE("WXFieldPar<REAL>::ApplyNewValue()",6)
-   wxString tmp;
-   tmp.Printf("%f",*mpValue);
-	mIsSelfUpdating=true;
-   mpField->SetValue(tmp);
-	mIsSelfUpdating=false;
-}
-template<> void WXFieldPar<long>::ApplyNewValue()
-{
-   VFN_DEBUG_MESSAGE("WXFieldPar<long>::ApplyNewValue()",6)
-   wxString tmp;
-   tmp.Printf("%d",*mpValue);
-	mIsSelfUpdating=true;
-   mpField->SetValue(tmp);
-	mIsSelfUpdating=false;
-}
-/*
-template<class T> void WXFieldPar<T>::ApplyNewValue()
-{
-   stringstream s;
-   s <<*mpValue;
-	mIsSelfUpdating=true;
-   mpField->SetValue(s.str().c_str());;
-   mpField->SetValue(wxString::Printf("%f",*mpValue));
-	mIsSelfUpdating=false;
-}
-*/
 
 template class WXFieldPar<REAL>;
 template class WXFieldPar<long>;
@@ -432,11 +435,11 @@ bool WXFieldChoice::Layout()
    return this->wxWindow::Layout();
 }
 
-void WXFieldChoice::OnUpdateUI(wxUpdateUIEvent & WXUNUSED(event))
-{
-}
-
 void WXFieldChoice::CrystUpdate()
+{
+   //Nothing to do. This should be done by the owner
+}
+void WXFieldChoice::UpdateUI()
 {
    //Nothing to do. This should be done by the owner
 }
@@ -516,6 +519,7 @@ bool WXCrystObj::Layout()
    }
    //wxCommandEvent event(1758,-1);
    //wxPostEvent(this->GetParent(),event);
+	this->UpdateUI();
    mWXParent->Layout();
    return this->wxWindow::Layout();
 }
@@ -537,6 +541,12 @@ void WXCrystObj::CrystUpdate()
 {
    VFN_DEBUG_MESSAGE("WXCrystObj::CrystUpdate()",6)
    mList.CrystUpdate();
+}
+void WXCrystObj::UpdateUI()
+{
+   VFN_DEBUG_MESSAGE("WXCrystObj::UpdateUI()",6)
+	if(mpWXTitle!=0) mpWXTitle->UpdateUI();
+   mList.UpdateUI();
 }
 ////////////////////////////////////////////////////////////////////////
 //
@@ -610,7 +620,9 @@ void WXCrystMenuBar::AddMenuItem(const int menuId,int id, const wxString&  item,
 
 void WXCrystMenuBar::CrystUpdate()
 {
-   //Nothing to do here
+}
+void WXCrystMenuBar::UpdateUI()
+{
 }
 
 void WXCrystMenuBar::OnPopupMenu(wxCommandEvent & event)

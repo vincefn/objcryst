@@ -23,7 +23,6 @@ namespace ObjCryst
 ////////////////////////////////////////////////////////////////////////
 BEGIN_EVENT_TABLE(WXAtom,wxWindow)
    EVT_BUTTON(ID_ATOM_SCATTPOW,     WXAtom::OnChangeScattPow)
-   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, WXAtom::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXAtom::WXAtom(wxWindow* parent, Atom *obj):
@@ -53,10 +52,10 @@ void WXAtom::OnChangeScattPow(wxCommandEvent & WXUNUSED(event))
    this->CrystUpdate();
 }
 
-void WXAtom::OnUpdateUI(wxUpdateUIEvent& event)
+void WXAtom::UpdateUI()
 {
    mpFieldScattPower->SetValue(mpAtom->GetScatteringPower().GetName());
-	this->WXRefinableObj::OnUpdateUI(event);
+	this->WXRefinableObj::UpdateUI();
 }
 
 

@@ -22,7 +22,7 @@ class WXDiffractionSingleCrystal: public WXRefinableObj
 {
    public:
       WXDiffractionSingleCrystal(wxWindow *parent, DiffractionDataSingleCrystal*);
-      virtual void OnUpdateUI(wxUpdateUIEvent& event);
+      virtual void UpdateUI();
    private:
       void OnMenuSimulate(wxCommandEvent & WXUNUSED(event));
       void OnMenuImport(wxCommandEvent & event);

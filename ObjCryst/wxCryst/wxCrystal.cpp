@@ -58,7 +58,7 @@ BEGIN_EVENT_TABLE(WXCrystal,wxEvtHandler)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDPRISMTRIGONAL,   WXCrystal::OnMenuAddScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDICOSAHEDRON,     WXCrystal::OnMenuAddScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_REMOVESCATTERER,    WXCrystal::OnMenuRemoveScatterer)
-   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, 						WXCrystal::OnUpdateUI)
+   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, 						WXRefinableObj::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXCrystal::WXCrystal(wxWindow* parent, Crystal *obj):
@@ -729,11 +729,11 @@ bool WXCrystal::OnChangeName(const int id)
    return false;
 }
 
-void WXCrystal::OnUpdateUI(wxUpdateUIEvent& event)
+void WXCrystal::UpdateUI()
 {
 	mpFieldSpacegroup->SetValue(mpCrystal->GetSpaceGroup().GetName());
 	if(0!=mpCrystalGL) mpCrystalGL->GetParent()->SetTitle(mpCrystal->GetName().c_str());
-	this->WXRefinableObj::OnUpdateUI(event);
+	this->WXRefinableObj::UpdateUI();
 }
 
 ////////////////////////////////////////////////////////////////////////

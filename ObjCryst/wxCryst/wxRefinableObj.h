@@ -51,9 +51,6 @@ class WXFieldRefPar:public WXField
    public:
       WXFieldRefPar(wxWindow *parent,const string& label, 
                     RefinablePar *refpar,const int hsize=50);
-      /// UpdateUI does not grab new values in the underlying object,
-      /// but only updates the values which have been supplied.
-      void OnUpdateUI(wxUpdateUIEvent & WXUNUSED(event));
       /// When a new value is entered (must type it and then hit the 'enter' key).
       /// The Field reads the new value, 
       /// and directly changes the RefinablePar value (contrary to what happens
@@ -67,9 +64,8 @@ class WXFieldRefPar:public WXField
       void OnPopupMenu(wxCommandEvent & event);
       /// Opens the popu menu, to allow changing limits
       void OnPopupMenuChoice(wxMenuEvent& event);
-      /// This gets a new value from the RefinablePar, and then posts an
-      /// OnUpdateUI event. (never immediately update the GUI)
-      void CrystUpdate();
+      virtual void CrystUpdate();
+      virtual void UpdateUI();
       /// Get the RefinablePar associated to this field
       RefinablePar& GetRefPar();
       void Revert();
@@ -99,6 +95,7 @@ class WXFieldOption:public WXField
       /// that must be done.
       void OnChoice(wxCommandEvent & WXUNUSED(event));
       virtual void CrystUpdate();
+      virtual void UpdateUI();
       void Revert();
 		/// Does nothing. Any user input is directly validated (OnChoice).
 		virtual void ValidateUserInput();
@@ -116,9 +113,9 @@ class WXCostFunction:public WXField
    public:
       WXCostFunction(wxWindow *parent,RefinableObj *obj, const int field_id,
                      const int funcNum,REAL * weight);
-      void OnUpdateUI(wxUpdateUIEvent & WXUNUSED(event));
       void OnEnter(wxCommandEvent & WXUNUSED(event));
       virtual void CrystUpdate();
+      virtual void UpdateUI();
       virtual void Revert();
 		/// Not used. Not an user input field.
 		virtual void ValidateUserInput();
@@ -128,7 +125,6 @@ class WXCostFunction:public WXField
       RefinableObj *mpObj;
       const int mFuncNum;
       WXFieldPar<REAL> *mpWeight;
-   DECLARE_EVENT_TABLE()
 };
 
 
@@ -154,6 +150,7 @@ class WXRefinableObj: public WXCrystObj
       ~WXRefinableObj();
       bool Layout();
       virtual void CrystUpdate();
+      virtual void UpdateUI();
       virtual bool OnChangeName(const int id);
       void OnMenuSave(wxCommandEvent & WXUNUSED(event));
       void OnMenuLoad(wxCommandEvent & WXUNUSED(event));

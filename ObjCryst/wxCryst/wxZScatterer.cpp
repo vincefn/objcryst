@@ -25,7 +25,6 @@ namespace ObjCryst
 BEGIN_EVENT_TABLE(WXZAtom,wxWindow)
    EVT_TEXT_ENTER(ID_ZATOM_NAME, 	WXZAtom::OnChangeName)
    EVT_BUTTON(ID_ZATOM_SCATTPOW, 	WXZAtom::OnChangeScattPow)
-   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, WXZAtom::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXZAtom::WXZAtom(wxWindow* parent, ZAtom *obj):
@@ -83,13 +82,21 @@ WXCrystObjBasic(parent),mpZAtom(obj)
    this->Layout();
    VFN_DEBUG_EXIT("WXZAtom::WXZAtom()",6)
 }
+
 void WXZAtom::CrystUpdate()
 {
    VFN_DEBUG_ENTRY("WXZAtom::CrystUpdate()",6)
    mList.CrystUpdate();
-   wxUpdateUIEvent event(ID_CRYST_UPDATEUI);
-   wxPostEvent(this,event);
-   VFN_DEBUG_EXIT("WXZAtom::CrystUpdate()",6)
+}
+
+void WXZAtom::UpdateUI()
+{
+	mList.UpdateUI();
+   mpFieldName->SetValue(mpZAtom->GetName().c_str());
+   if(0!=mpZAtom->GetScatteringPower())
+      mpFieldScattPower->SetValue(mpZAtom->GetScatteringPower()->GetName());
+   else
+      mpFieldScattPower->SetValue("Dummy");
 }
 
 bool WXZAtom::Layout()
@@ -132,14 +139,6 @@ void WXZAtom::OnChangeScattPow(wxCommandEvent & WXUNUSED(event))
    if(0==scatt) return;
    mpZAtom->SetScatteringPower(scatt);
    this->CrystUpdate();
-}
-void WXZAtom::OnUpdateUI(wxUpdateUIEvent& event)
-{
-   mpFieldName->SetValue(mpZAtom->GetName().c_str());
-   if(0!=mpZAtom->GetScatteringPower())
-      mpFieldScattPower->SetValue(mpZAtom->GetScatteringPower()->GetName());
-   else
-      mpFieldScattPower->SetValue("Dummy");
 }
 ////////////////////////////////////////////////////////////////////////
 //

@@ -20,6 +20,7 @@ class WXRadiation: public WXCrystObjBasic
    public:
       WXRadiation(wxWindow *parent, Radiation*);
       virtual void CrystUpdate();
+      virtual void UpdateUI();
    private:
       Radiation *mpRadiation;
       WXFieldOption *mpFieldRadType;

@@ -54,6 +54,11 @@ void WXRadiation::CrystUpdate()
    //mpFieldWavelength->CrystUpdate();
    //:TODO: if using an X-Ray tube, lock or hide the wavelength
 }
+void WXRadiation::UpdateUI()
+{
+   mpFieldRadType->UpdateUI();
+   //mpFieldWavelength->UpdateUI();
+}
 
 ////////////////////////////////////////////////////////////////////////
 //
@@ -95,7 +100,7 @@ BEGIN_EVENT_TABLE(WXPowderPattern, wxWindow)
    EVT_MENU(ID_POWDERSPECTRUM_MENU_FITSCALE_R,         WXPowderPattern::OnMenuFitScaleForR)
    EVT_MENU(ID_POWDERSPECTRUM_MENU_FITSCALE_RW,        WXPowderPattern::OnMenuFitScaleForRw)
    EVT_MENU(ID_POWDERSPECTRUM_MENU_ADD_2THETA_EXCLUDE, WXPowderPattern::OnMenuAdd2ThetaExclude)
-   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, 						 WXPowderPattern::OnUpdateUI)
+   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, 						 WXRefinableObj::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXPowderPattern::WXPowderPattern(wxWindow *parent, PowderPattern* pow):
@@ -514,13 +519,13 @@ void WXPowderPattern::OnMenuAdd2ThetaExclude(wxCommandEvent & WXUNUSED(event))
 void WXPowderPattern::NotifyDeleteGraph() {mpGraph=0;}
 const PowderPattern& WXPowderPattern::GetPowderPattern()const
 { return *mpPowderPattern;}
-void WXPowderPattern::OnUpdateUI(wxUpdateUIEvent& event)
+void WXPowderPattern::UpdateUI()
 {
    if(mpGraph!=0)
    {
 		mpGraph->GetParent()->SetTitle(mpPowderPattern->GetName().c_str());
    }
-	this->WXRefinableObj::OnUpdateUI(event);
+	this->WXRefinableObj::UpdateUI();
 }
 ////////////////////////////////////////////////////////////////////////
 //
@@ -731,6 +736,8 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
 			if(flag) if(m2theta(i)>=mMin2Theta) {mFirst=i;flag=false;}
 			if(m2theta(i)>=mMax2Theta) {mLast=i;break;}
 		}
+		if(mFirst<0) mFirst=0;
+		if(mLast>=nbpoints) mLast=nbpoints-1;
    	wxUpdateUIEvent event(ID_POWDERSPECTRUM_GRAPH_NEW_PATTERN);
    	wxPostEvent(this,event);
 		return;
@@ -841,7 +848,7 @@ BEGIN_EVENT_TABLE(WXPowderPatternDiffraction, wxWindow)
    EVT_BUTTON(ID_POWDERSPECTRUMDIFF_CRYSTAL,WXPowderPatternDiffraction::OnChangeCrystal)
    EVT_MENU(ID_POWDERSPECTRUMDIFF_SAVEHKLFCALC, 
                      							  WXPowderPatternDiffraction::OnMenuSaveHKLFcalc)
-   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, 		  WXPowderPatternDiffraction::OnUpdateUI)
+   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, 		  WXRefinableObj::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXPowderPatternDiffraction::WXPowderPatternDiffraction(wxWindow *parent,
@@ -920,10 +927,10 @@ void WXPowderPatternDiffraction::OnMenuSaveHKLFcalc(wxCommandEvent & WXUNUSED(ev
    mpPowderPatternDiffraction->PrintFhklCalc(out);
    out.close();
 }
-void WXPowderPatternDiffraction::OnUpdateUI(wxUpdateUIEvent& event)
+void WXPowderPatternDiffraction::UpdateUI()
 {
    mpFieldCrystal->SetValue(mpPowderPatternDiffraction->GetCrystal().GetName());
-	this->WXRefinableObj::OnUpdateUI(event);
+	this->WXRefinableObj::UpdateUI();
 }
 
 }// namespace 

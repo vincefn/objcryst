@@ -50,7 +50,7 @@ BEGIN_EVENT_TABLE(WXDiffractionSingleCrystal, wxWindow)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CUA1,WXDiffractionSingleCrystal::OnMenuSetWavelength)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_FEA1,WXDiffractionSingleCrystal::OnMenuSetWavelength)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CRA1,WXDiffractionSingleCrystal::OnMenuSetWavelength)
-   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, 						  WXDiffractionSingleCrystal::OnUpdateUI)
+   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, 						  WXRefinableObj::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXDiffractionSingleCrystal::WXDiffractionSingleCrystal(wxWindow *parent,
@@ -279,10 +279,10 @@ void WXDiffractionSingleCrystal::OnChangeCrystal(wxCommandEvent & WXUNUSED(event
    mpData->SetCrystal(*cryst);
    this->CrystUpdate();
 }
-void WXDiffractionSingleCrystal::OnUpdateUI(wxUpdateUIEvent& event)
+void WXDiffractionSingleCrystal::UpdateUI()
 {
 	if(&(mpData->GetCrystal())!=0) mpFieldCrystal->SetValue(mpData->GetCrystal().GetName());
-	this->WXRefinableObj::OnUpdateUI(event);
+	this->WXRefinableObj::UpdateUI();
 }
 
 }//namespace
