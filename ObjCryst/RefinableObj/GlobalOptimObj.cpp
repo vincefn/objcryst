@@ -515,7 +515,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
             }
             else
             {
-               if( (rand()/(REAL)RAND_MAX) < exp(-(cost-mCurrentCost)/simAnnealTemp) )
+               if( log((rand()+1)/(REAL)RAND_MAX) < (-(cost-mCurrentCost)/simAnnealTemp) )
                {
                   mCurrentCost=cost;
                   mRefParList.SaveParamSet(mLastParSavedSetIndex);
@@ -703,7 +703,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                   }
                   else
                   {
-                     if((rand()/(REAL)RAND_MAX)<exp(-(cost-currentCost(i))/simAnnealTemp(i)) )
+                     if(log((rand()+1)/(REAL)RAND_MAX)<(-(cost-currentCost(i))/simAnnealTemp(i)) )
                      {
                         currentCost(i)=cost;
                         mRefParList.SaveParamSet(worldCurrentSetIndex(i));
@@ -719,9 +719,8 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
             //Try swapping worlds
             for(int i=1;i<nbWorld;i++)
             {
-               
-               if((rand()/(REAL)RAND_MAX)
-                      < exp(-(currentCost(i-1)-currentCost(i))/simAnnealTemp(i)))
+               if( log((rand()+1)/(REAL)RAND_MAX)
+                      < (-(currentCost(i-1)-currentCost(i))/simAnnealTemp(i)))
                {  
                /*
                   if(i>2)
@@ -810,8 +809,8 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                   	if(junk==0) mRefParList.RestoreParamSet(parSetOffspringA);
 							else mRefParList.RestoreParamSet(parSetOffspringB);
                   	REAL cost=this->GetCostFunctionValue();
-               		//if((rand()/(REAL)RAND_MAX)
-                     //	 < exp(-(cost-currentCost(k))/simAnnealTemp(k)))
+               		//if(log((rand()+1)/(REAL)RAND_MAX)
+                     //	 < (-(cost-currentCost(k))/simAnnealTemp(k)))
                		if(cost<currentCost(k))
 							{
 								// Also exchange genes for higher-temperature World ?
