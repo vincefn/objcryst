@@ -61,6 +61,17 @@ private:
     DECLARE_EVENT_TABLE()
 };
 // ----------------------------------------------------------------------------
+// For messaging the user
+// ----------------------------------------------------------------------------
+wxFrame *pMainFrameForUserMessage;
+
+void WXCrystInformUserStdOut(const string &str)
+{
+	pMainFrameForUserMessage->SetStatusText((wxString)str.c_str());
+}
+
+
+// ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
 enum
@@ -140,7 +151,10 @@ bool MyApp::OnInit()
    
    frame = new WXCrystMainFrame("FOX: Free Objects for Xtal structures v1.1.2",
                                  wxPoint(50, 50), wxSize(550, 400));
-
+	// Use the main frame status bar to pass messages to the user
+		pMainFrameForUserMessage=frame;
+		fpObjCrystInformUser=&WXCrystInformUserStdOut;
+		
    return TRUE;
 }
 

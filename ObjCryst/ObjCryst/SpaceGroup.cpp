@@ -385,6 +385,7 @@ unsigned int SpaceGroup::GetUniqueAxis()const{return mUniqueAxisId;}
 void SpaceGroup::InitSpaceGroup(const string &spgId)
 {
    VFN_DEBUG_MESSAGE("SpaceGroup::InitSpaceGroup():"<<spgId,5)
+	(*fpObjCrystInformUser)("Initializing spacegroup: "+spgId);
 #if 0
    mfpRealGeomStructFactor=0;
    mfpImagGeomStructFactor=0;
@@ -402,6 +403,7 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
          cout << "Cannot understand Spacegroup Symbol !" ;
          //:TODO: throw Exception
          this->InitSpaceGroup(mId);
+			(*fpObjCrystInformUser)("Could not understand spacegroup symbol: "+spgId);
          return;
          //throw 0;
       }
@@ -476,6 +478,7 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
    }else mUniqueAxisId=0;
    //this->Print();
    mClock.Click();
+	(*fpObjCrystInformUser)("Initializing spacegroup: "+spgId+"... Done");
    VFN_DEBUG_MESSAGE("SpaceGroup::InitSpaceGroup():End",4)
 }
 

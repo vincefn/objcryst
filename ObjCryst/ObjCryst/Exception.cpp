@@ -52,5 +52,14 @@ ObjCrystException::ObjCrystException(const string & message)
 
 ObjCrystException::~ObjCrystException(){}
 
+//######################################################################
+void (*fpObjCrystInformUser)(const string &)=ObjCrystInformUserStdOut;
+
+void ObjCrystInformUserStdOut(const string &str)
+{
+	cout <<str<<endl;
+}
 
 }//namespace
+
+

@@ -27,6 +27,7 @@
 
 #include <fstream>
 #include <iomanip>
+#include <stdio.h> //for sprintf()
 
 namespace ObjCryst
 {
@@ -113,6 +114,11 @@ void DiffractionDataSingleCrystal::SetHklIobs(const CrystVector_long &h,
    this->CalcSinThetaLambda();
    
    mHasObservedData=true;
+   {
+		char buf [200];
+      sprintf(buf,"Changed HKL list, with %d reflections",(int)mNbRefl);
+		(*fpObjCrystInformUser)((string)buf);
+	}
    VFN_DEBUG_EXIT("DiffractionDataSingleCrystal::SetHklIobs(h,k,l,i,s)",5)
 }
 
@@ -209,6 +215,11 @@ Error opening file for input:"+fileName);
    mMultiplicity=1;
    
    this->PrepareHKLarrays();
+   {
+		char buf [200];
+      sprintf(buf,"Imported HKLIobs, with %d reflections",(int)mNbRefl);
+		(*fpObjCrystInformUser)((string)buf);
+	}
    
    cout << "Finished storing data..."<< endl ;
 }
@@ -265,6 +276,11 @@ Error opening file for input:"+fileName);
    mMultiplicity=1;
 
    this->PrepareHKLarrays();
+   {
+		char buf [200];
+      sprintf(buf,"Imported HKLIobsSigma, with %d reflections",(int)mNbRefl);
+		(*fpObjCrystInformUser)((string)buf);
+	}
 
    cout << "Finished storing data..."<< endl ;
 
@@ -339,6 +355,11 @@ Error opening file for input:"+fileName);
    cout << "Finished storing data..."<< endl ;
 
    mHasObservedData=true;
+   {
+		char buf [200];
+      sprintf(buf,"Imported HKLIobsSigma from Jana, with %d reflections",(int)mNbRefl);
+		(*fpObjCrystInformUser)((string)buf);
+	}
 }
 REAL DiffractionDataSingleCrystal::GetRw()const
 {

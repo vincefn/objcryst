@@ -17,8 +17,6 @@
 
 #include <typeinfo>
 #include <stdio.h> //for sprintf()
-#include <typeinfo>
-#include <stdio.h> //for sprintf()
 #include "ObjCryst/PowderPattern.h"
 #include "Quirks/VFNDebug.h"
 #include "Quirks/VFNStreamFormat.h"
@@ -160,6 +158,11 @@ Error opening file for input:"+filename);
    }
    
    mClockBackgroundPoint.Click();
+   {
+		char buf [200];
+      sprintf(buf,"Imported %d background points",(int)nbPoints);
+		(*fpObjCrystInformUser)((string)buf);
+	}
    
    VFN_DEBUG_MESSAGE("PowderPatternBackground::ImportUserBackground():finished",5)
 }
@@ -1190,6 +1193,13 @@ Error opening file for input:"+filename);
    fin.close();
 	this->SetSigmaToSqrtIobs();
 	this->SetWeightToInvSigmaSq();
+   {
+		char buf [200];
+      sprintf(buf,"Imported powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
+		        (int)mNbPoint,m2ThetaMin*RAD2DEG,(m2ThetaMin+m2ThetaStep*(mNbPoint-1))*RAD2DEG,
+				  m2ThetaStep*RAD2DEG);
+		(*fpObjCrystInformUser)((string)buf);
+	}
    VFN_DEBUG_MESSAGE("PowderPattern::ImportFullProfPattern():finished:"<<mNbPoint<<" points",5)
 }
 
@@ -1229,6 +1239,13 @@ Error opening file for input:"+filename);
    for(unsigned long i=0;i<mNbPoint;i++) fin >> mPowderPatternObsSigma(i);
    fin.close();
 	this->SetWeightToInvSigmaSq();
+   {
+		char buf [200];
+      sprintf(buf,"Imported powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
+		        (int)mNbPoint,m2ThetaMin*RAD2DEG,(m2ThetaMin+m2ThetaStep*(mNbPoint-1))*RAD2DEG,
+				  m2ThetaStep*RAD2DEG);
+		(*fpObjCrystInformUser)((string)buf);
+	}
    VFN_DEBUG_MESSAGE("PowderPattern::ImportPowderPatternPSI_DMC():finished",5)
 }
 
@@ -1267,6 +1284,13 @@ Error opening file for input:"+filename);
    for(unsigned long i=0;i<mNbPoint;i++) fin >> mPowderPatternObsSigma(i);
    fin.close();
 	this->SetWeightToInvSigmaSq();
+   {
+		char buf [200];
+      sprintf(buf,"Imported powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
+		        (int)mNbPoint,m2ThetaMin*RAD2DEG,(m2ThetaMin+m2ThetaStep*(mNbPoint-1))*RAD2DEG,
+				  m2ThetaStep*RAD2DEG);
+		(*fpObjCrystInformUser)((string)buf);
+	}
    VFN_DEBUG_MESSAGE("PowderPattern::ImportPowderPatternILL_D1AD2B():finished",5)
 }
 
@@ -1305,6 +1329,13 @@ Error opening file for input:"+filename);
    fin.close();
 	this->SetSigmaToSqrtIobs();
 	this->SetWeightToInvSigmaSq();
+   {
+		char buf [200];
+      sprintf(buf,"Imported powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
+		        (int)mNbPoint,m2ThetaMin*RAD2DEG,(m2ThetaMin+m2ThetaStep*(mNbPoint-1))*RAD2DEG,
+				  m2ThetaStep*RAD2DEG);
+		(*fpObjCrystInformUser)((string)buf);
+	}
    VFN_DEBUG_MESSAGE("DiffractionDataPowder::ImportXddPattern() :finished",5)
 }
 
@@ -1347,6 +1378,13 @@ Error opening file for input:"+filename);
    fin.close();
 	this->SetSigmaToSqrtIobs();
 	this->SetWeightToInvSigmaSq();
+   {
+		char buf [200];
+      sprintf(buf,"Imported powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
+		        (int)mNbPoint,m2ThetaMin*RAD2DEG,(m2ThetaMin+m2ThetaStep*(mNbPoint-1))*RAD2DEG,
+				  m2ThetaStep*RAD2DEG);
+		(*fpObjCrystInformUser)((string)buf);
+	}
    VFN_DEBUG_EXIT("DiffractionDataPowder::ImportPowderPatternSietronicsCPI()",5)
 }
 
@@ -1400,6 +1438,13 @@ Error opening file for input:"+filename);
    m2ThetaStep *= DEG2RAD;
 	
 	this->SetWeightToInvSigmaSq();
+   {
+		char buf [200];
+      sprintf(buf,"Imported powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
+		        (int)mNbPoint,m2ThetaMin*RAD2DEG,(m2ThetaMin+m2ThetaStep*(mNbPoint-1))*RAD2DEG,
+				  m2ThetaStep*RAD2DEG);
+		(*fpObjCrystInformUser)((string)buf);
+	}
    VFN_DEBUG_MESSAGE("PowderPattern::ImportPowderPattern2ThetaObsSigma()\
 :finished: "<<mNbPoint<<" points",5)
 }
@@ -1453,6 +1498,13 @@ Error opening file for input:"+filename);
 	this->SetSigmaToSqrtIobs();
 	this->SetWeightToInvSigmaSq();
 
+   {
+		char buf [200];
+      sprintf(buf,"Imported powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
+		        (int)mNbPoint,m2ThetaMin*RAD2DEG,(m2ThetaMin+m2ThetaStep*(mNbPoint-1))*RAD2DEG,
+				  m2ThetaStep*RAD2DEG);
+		(*fpObjCrystInformUser)((string)buf);
+	}
    VFN_DEBUG_MESSAGE("PowderPattern::ImportPowderPattern2ThetaObs():finished",5)
 }
 
@@ -1473,6 +1525,13 @@ supplied vector of observed intensities does not have the expected number of poi
 	this->SetSigmaToSqrtIobs();
 	this->SetWeightToInvSigmaSq();
 	mClockIntegratedFactorsPrep.Reset();
+   {
+		char buf [200];
+      sprintf(buf,"Changed powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
+		        (int)mNbPoint,m2ThetaMin*RAD2DEG,(m2ThetaMin+m2ThetaStep*(mNbPoint-1))*RAD2DEG,
+				  m2ThetaStep*RAD2DEG);
+		(*fpObjCrystInformUser)((string)buf);
+	}
 }
 void PowderPattern::SavePowderPattern(const string &filename) const
 {

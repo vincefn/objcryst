@@ -28,6 +28,7 @@
 
 #include <fstream>
 #include <iomanip>
+#include <stdio.h> //for sprintf()
 
 namespace ObjCryst
 {
@@ -406,6 +407,7 @@ void ScatteringData::SetHKL(const CrystVector_REAL &h,
 
 void ScatteringData::GenHKLFullSpace(const REAL maxTheta,const bool useMultiplicity)
 {
+	(*fpObjCrystInformUser)("Generating Full HKL list...");
    VFN_DEBUG_ENTRY("ScatteringData::GenHKLFullSpace()",5)
    TAU_PROFILE("ScatteringData::GenHKLFullSpace()","void (REAL,bool)",TAU_DEFAULT);
    if(mRadiation.GetWavelength()(0) <=.01)
@@ -626,6 +628,11 @@ void ScatteringData::GenHKLFullSpace(const REAL maxTheta,const bool useMultiplic
    	this->EliminateExtinctReflections();
    }
 	mClockHKL.Click();
+   {
+		char buf [200];
+      sprintf(buf,"Generating Full HKL list...Done (kept %d reflections)",(int)mNbRefl);
+		(*fpObjCrystInformUser)((string)buf);
+	}
    VFN_DEBUG_EXIT("ScatteringData::GenHKLFullSpace():End",5)
 }
 

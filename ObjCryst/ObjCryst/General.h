@@ -133,6 +133,23 @@ class ObjCrystException
    private:
 };
 
+//######################################################################
+/** Print some information for the user during long processes.
+*/
+void ObjCrystInformUserStdOut(const string &);
+
+//######################################################################
+/** \brief Pointer to a function for passing info to the user during or
+* after long/important processes (use scarcely!)
+*
+* This function pointer is by default assigned to ObjCrystInformUserStdOut,
+* which outputs the message to the standard output. If a user interface is
+* used (eg in Fox), this pointer should be reassigned at the beginning of the
+* application to a more user-suitable function. 
+*/
+extern void (*fpObjCrystInformUser)(const string &);
+
+
 }//Namespace
 
 #endif //_VFN_OBJCRYST_H_
