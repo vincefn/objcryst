@@ -347,7 +347,7 @@ void TextureMarchDollase::AddPhase(const REAL f, const REAL c,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1.);
       tmp.AssignClock(mClockTexturePar);
       tmp.SetDerivStep(1e-7);
-      tmp.SetGlobalOptimStep(.1);
+      tmp.SetGlobalOptimStep(.05);
       this->AddPar(tmp);
    }
    {
@@ -356,7 +356,7 @@ void TextureMarchDollase::AddPhase(const REAL f, const REAL c,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1.);
       tmp.AssignClock(mClockTexturePar);
       tmp.SetDerivStep(1e-7);
-      tmp.SetGlobalOptimStep(.25);
+      tmp.SetGlobalOptimStep(.1);
       this->AddPar(tmp);
    }
    {
@@ -365,7 +365,7 @@ void TextureMarchDollase::AddPhase(const REAL f, const REAL c,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,true,true,false,1.);
       tmp.AssignClock(mClockTexturePar);
       tmp.SetDerivStep(1e-7);
-      tmp.SetGlobalOptimStep(.1);
+      tmp.SetGlobalOptimStep(.01);
       this->AddPar(tmp);
    }
    {
@@ -374,7 +374,7 @@ void TextureMarchDollase::AddPhase(const REAL f, const REAL c,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,true,true,false,1.);
       tmp.AssignClock(mClockTexturePar);
       tmp.SetDerivStep(1e-7);
-      tmp.SetGlobalOptimStep(.1);
+      tmp.SetGlobalOptimStep(.01);
       this->AddPar(tmp);
    }
    {
@@ -383,7 +383,7 @@ void TextureMarchDollase::AddPhase(const REAL f, const REAL c,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,true,true,false,1.);
       tmp.AssignClock(mClockTexturePar);
       tmp.SetDerivStep(1e-7);
-      tmp.SetGlobalOptimStep(.1);
+      tmp.SetGlobalOptimStep(.01);
       this->AddPar(tmp);
    }
    this->Print();
