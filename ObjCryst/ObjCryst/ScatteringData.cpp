@@ -142,6 +142,8 @@ mXRayTubeAlpha2Alpha1Ratio(0.5),mLinearPolarRate(0)
    this->InitOptions();
    mRadiationType.SetChoice(RAD_XRAY);
    mWavelengthType.SetChoice(WAVELENGTH_MONOCHROMATIC);
+   mClockMaster.AddChild(mClockWavelength);
+   mClockMaster.AddChild(mClockRadiation);
 }
 
 Radiation::Radiation(const RadiationType rad,const REAL wavelength)
@@ -154,12 +156,16 @@ Radiation::Radiation(const RadiationType rad,const REAL wavelength)
    mXRayTubeDeltaLambda=0.;//useless here
    mXRayTubeAlpha2Alpha1Ratio=0.5;//useless here
    mLinearPolarRate=0.95;//assume it's synchrotron ?
+   mClockMaster.AddChild(mClockWavelength);
+   mClockMaster.AddChild(mClockRadiation);
 }
 
 Radiation::Radiation(const string &XRayTubeElementName,const REAL alpha2Alpha2ratio)
 {
    this->InitOptions();
    this->SetWavelength(XRayTubeElementName,alpha2Alpha2ratio);
+   mClockMaster.AddChild(mClockWavelength);
+   mClockMaster.AddChild(mClockRadiation);
 }
 
 Radiation::Radiation(const Radiation &old):
@@ -172,6 +178,8 @@ mXRayTubeAlpha2Alpha1Ratio(old.mXRayTubeAlpha2Alpha1Ratio),
 mLinearPolarRate(old.mLinearPolarRate)
 {
    mClockWavelength.Click();
+   mClockMaster.AddChild(mClockWavelength);
+   mClockMaster.AddChild(mClockRadiation);
 }
 
 Radiation::~Radiation()
@@ -378,6 +386,9 @@ mIgnoreImagScattFact(false),mMaxSinThetaOvLambda(10)
       tmp.AssignClock(mClockGlobalBiso);
       this->AddPar(tmp);
    }
+   mClockMaster.AddChild(mClockHKL);
+   mClockMaster.AddChild(mClockGlobalBiso);
+   mClockMaster.AddChild(mClockNbReflUsed);
 }
 
 ScatteringData::ScatteringData(const ScatteringData &old):
@@ -415,6 +426,9 @@ mMaxSinThetaOvLambda(old.mMaxSinThetaOvLambda)
       tmp.AssignClock(mClockGlobalBiso);
       this->AddPar(tmp);
    }
+   mClockMaster.AddChild(mClockHKL);
+   mClockMaster.AddChild(mClockGlobalBiso);
+   mClockMaster.AddChild(mClockNbReflUsed);
 }
 
 ScatteringData::~ScatteringData()
@@ -482,8 +496,10 @@ void ScatteringData::GenHKLFullSpace(const REAL maxTheta,const bool useMultiplic
          }
    VFN_DEBUG_MESSAGE("ScatteringData::GenHKLFullSpace():Finished setting h, k and l...",3)
    this->SetHKL(H,K,L);
+   VFN_DEBUG_MESSAGE("ScatteringData::GenHKLFullSpace()",1)
    //this->CalcSinThetaLambda();//calc theta
    this->SortReflectionByTheta(maxTheta);
+   VFN_DEBUG_MESSAGE("ScatteringData::GenHKLFullSpace()",1)
    #if 0
    {
       REAL h,k,l;
@@ -655,7 +671,7 @@ void ScatteringData::SetCrystal(Crystal &crystal)
 {
    VFN_DEBUG_MESSAGE("ScatteringData::SetCrystal()",5)
    mpCrystal=&crystal;
-   mSubObjRegistry.Register(crystal);
+   this->AddSubRefObj(crystal);
    crystal.RegisterClient(*this);
    mClockGeomStructFact.Reset();
    mClockStructFactor.Reset();
@@ -856,7 +872,7 @@ void ScatteringData::EndOptimization()
 
 void ScatteringData::PrepareHKLarrays()
 {
-   VFN_DEBUG_ENTRY("ScatteringData::PrepareHKLarrays()",5)
+   VFN_DEBUG_ENTRY("ScatteringData::PrepareHKLarrays()"<<mNbRefl<<" reflections",5)
    mFhklCalcReal.resize(mNbRefl);
    mFhklCalcImag.resize(mNbRefl);
    mFhklCalcSq.resize(mNbRefl);
@@ -891,7 +907,7 @@ void ScatteringData::PrepareHKLarrays()
    */
 
    mClockHKL.Click();
-   VFN_DEBUG_EXIT("ScatteringData::PrepareHKLarrays()",5)
+   VFN_DEBUG_EXIT("ScatteringData::PrepareHKLarrays()"<<mNbRefl<<" reflections",5)
 }
 
 void ScatteringData::SetMaxSinThetaOvLambda(const REAL max){mMaxSinThetaOvLambda=max;}
@@ -955,6 +971,7 @@ CrystVector_long ScatteringData::SortReflectionByTheta(const REAL maxTheta)
       mK(i)=oldK(subs);
       mL(i)=oldL(subs);
    }
+   mClockHKL.Click();
    VFN_DEBUG_MESSAGE("ScatteringData::SortReflectionByTheta() 3",2)
    this->PrepareHKLarrays();
    this->CalcSinThetaLambda();
@@ -963,17 +980,27 @@ CrystVector_long ScatteringData::SortReflectionByTheta(const REAL maxTheta)
    if(0<maxTheta)
    {
       REAL maxsithsl=sin(maxTheta)/this->GetRadiation().GetWavelength()(0);
+      VFN_DEBUG_MESSAGE("ScatteringData::SortReflectionByTheta() 5"<<maxsithsl,2)
       long maxSubs;
-      for(maxSubs=0;(mSinThetaLambda(maxSubs)<maxsithsl) && (maxSubs<mNbRefl) ;maxSubs++);
-      if(maxSubs==mNbRefl) return sortedSubs;
+      VFN_DEBUG_MESSAGE("  "<< mIntH(maxSubs)<<" "<< mIntK(maxSubs)<<" "<< mIntL(maxSubs)<<" "<<mSinThetaLambda(maxSubs),1)
+      for(maxSubs=0;(mSinThetaLambda(maxSubs)<maxsithsl) && (maxSubs<mNbRefl) ;maxSubs++)
+      {
+         VFN_DEBUG_MESSAGE("  "<< mIntH(maxSubs)<<" "<< mIntK(maxSubs)<<" "<< mIntL(maxSubs)<<" "<<mSinThetaLambda(maxSubs),1)
+      }
+      if(maxSubs==mNbRefl)
+      {
+         VFN_DEBUG_EXIT("ScatteringData::SortReflectionByTheta():"<<mNbRefl<<" reflections",5)
+         return sortedSubs;
+      }
       mNbRefl=maxSubs;
       mH.resizeAndPreserve(mNbRefl);
       mK.resizeAndPreserve(mNbRefl);
       mL.resizeAndPreserve(mNbRefl);
       sortedSubs.resizeAndPreserve(mNbRefl);
+      mClockHKL.Click();
       this->PrepareHKLarrays();
    }
-   VFN_DEBUG_EXIT("ScatteringData::SortReflectionByTheta()",5)
+   VFN_DEBUG_EXIT("ScatteringData::SortReflectionByTheta():"<<mNbRefl<<" reflections",5)
    return sortedSubs;
 }
 
@@ -1178,6 +1205,7 @@ void ScatteringData::PrepareCalcStructFactor()const
 
 void ScatteringData::CalcSinThetaLambda()const
 {
+   if(mClockTheta>mClockMaster) return;
    if( 0 == mpCrystal) throw ObjCrystException("ScatteringData::CalcSinThetaLambda() \
       Cannot compute sin(theta)/lambda : there is no crystal affected to this \
       ScatteringData object yet.");
@@ -1246,6 +1274,7 @@ void ScatteringData::CalcSinThetaLambda()const
 
 void ScatteringData::CalcScattFactor()const
 {
+   if(mClockScattFactor>mClockMaster) return;
    //check if the number of ScatteringPower has changed, and if
    bool force=false;
    if(true == mScattFactNeedRecalc) force=true;
@@ -1288,6 +1317,7 @@ void ScatteringData::CalcScattFactor()const
 
 void ScatteringData::CalcTemperatureFactor()const
 {
+   if(mClockThermicFact>mClockMaster) return;
    bool force=false;
    //check if the number of atoms has changed, and if the thermic factors
    //are unchanged
@@ -1321,6 +1351,7 @@ void ScatteringData::CalcTemperatureFactor()const
 
 void ScatteringData::CalcResonantScattFactor()const
 {
+   if(mClockScattFactorResonant>mClockMaster) return;
    bool force=false;
    //check if the number of atoms has changed, and if the atomic numbers
    //are unchanged (a change of wavelength automatically calls this function, 
@@ -1363,7 +1394,8 @@ void ScatteringData::CalcResonantScattFactor()const
 
 void ScatteringData::CalcGlobalTemperatureFactor() const
 {
-   this->CalcSinThetaLambda();
+   this->GetNbReflBelowMaxSinThetaOvLambda();//update mNbReflUsed, also recalc sin(theta)/lambda
+   if(mClockGlobalTemperatureFact>mClockMaster) return;
    if(  (mClockGlobalBiso<mClockGlobalTemperatureFact)
       &&(mClockTheta     <mClockGlobalTemperatureFact)
       &&(mClockNbReflUsed<mClockGlobalTemperatureFact)) return;
@@ -1378,7 +1410,6 @@ void ScatteringData::CalcGlobalTemperatureFactor() const
    {
       const REAL *stol=this->GetSinThetaOverLambda().data();
       REAL *fact=mGlobalTemperatureFactor.data();
-      this->GetNbReflBelowMaxSinThetaOvLambda();//update mNbReflUsed
       for(long i=0;i<mNbReflUsed;i++) {*fact++ = exp(-mGlobalBiso * *stol * *stol);stol++;}
    }
    mClockGlobalTemperatureFact.Click();
@@ -1386,6 +1417,9 @@ void ScatteringData::CalcGlobalTemperatureFactor() const
 
 void ScatteringData::CalcStructFactor() const
 {
+   this->GetNbReflBelowMaxSinThetaOvLambda();//check mNbReflUsed, also recalc sin(theta)/lambda
+   if(mClockStructFactor>mClockMaster) return;
+   
    TAU_PROFILE("ScatteringData::CalcStructFactor()","void ()",TAU_DEFAULT);
    VFN_DEBUG_ENTRY("ScatteringData::CalcStructFactor()",3)
    //:TODO: Anisotropic Thermic factors

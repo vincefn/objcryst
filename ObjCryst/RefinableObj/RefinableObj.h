@@ -29,6 +29,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <set>
 
 #include "CrystVector/CrystVector.h"
 #include "ObjCryst/General.h"
@@ -126,9 +127,26 @@ class RefinableObjClock
       void Print()const;
       /// Print current general clock value. Only for debugging purposes.
       void PrintStatic()const;
+      /// Add a 'child' clock. Whenever a child clock is clicked, it will also click its parent.
+      /// This function takes care of adding itself to the list of parent in the children clock.
+      void AddChild(const RefinableObjClock &);
+      /// remove a child clock. This also tells the child clock to remove the parent.
+      void RemoveChild(const RefinableObjClock &);
+      /// Add a 'parent' clock. Whenever a clock is clicked, all parent clocks
+      /// also are.
+      void AddParent(RefinableObjClock &)const;
+      /// remove a parent clock
+      void RemoveParent(RefinableObjClock &)const;
    private:
+      bool HasParent(const RefinableObjClock &) const;
       unsigned long mTick0, mTick1;
       static unsigned long msTick0,msTick1;
+      /// List of 'child' clocks, which will click this clock whenever they are clicked.
+      std::set<const RefinableObjClock*> mvChild;
+      /// List of parent clocks, which will be clicked whenever this one is. This
+      /// is a mutable list since reporting to parent clocks does not change
+      /// the vlaue of the clock.
+      mutable std::set<RefinableObjClock*> mvParent;
 };
 
 /** Restraint: generic class for a restraint of a given model. This 
@@ -1059,6 +1077,8 @@ class RefinableObj
       * caution: highly experimental !).
       */
       virtual void TagNewBestConfig()const;
+      /// This clocks records _any_ change in the object. See refinableObj::mClockMaster
+      const RefinableObjClock& GetClockMaster()const;
    protected:
       /// Find a refinable parameter with a given name
       long FindPar(const string &name) const;
@@ -1130,6 +1150,10 @@ class RefinableObj
       /// Temporary array used to return derivative values of the LSQ function for given
       /// parameters.
       mutable CrystVector_REAL mLSQDeriv;
+      
+      /// Master clock, which is changed whenever the object has been altered.
+      /// It should be parent to all clocks recording changes in derived classes.
+      RefinableObjClock mClockMaster;
    #ifdef __WX__CRYST__
    public:
       /// Create a WXCrystObj for this object. Only a generic WXCrystObj pointer is kept.

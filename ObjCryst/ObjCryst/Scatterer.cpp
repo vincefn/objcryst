@@ -86,6 +86,7 @@ Scatterer::Scatterer():mXYZ(3),mOccupancy(1.0),mColourName("White"),mpCryst(0)
    mXYZ=0;
    this->InitRGBColour();
    gScattererRegistry.Register(*this);
+   mClockMaster.AddChild(mClockScatterer);
 }
 
 Scatterer::Scatterer(const Scatterer &old):
@@ -98,6 +99,7 @@ mColourName(old.mColourName),mpCryst(old.mpCryst)
    mName=old.GetName();
    this->InitRGBColour();
    gScattererRegistry.Register(*this);
+   mClockMaster.AddChild(mClockScatterer);
 }
 
 Scatterer::~Scatterer()

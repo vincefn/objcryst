@@ -53,6 +53,8 @@ mHasObservedData(false),mScaleFactor(1.)
    this->InitOptions();
    gDiffractionDataSingleCrystalRegistry.Register(*this);
    gTopRefinableObjRegistry.Register(*this);
+   mClockMaster.AddChild(mClockScaleFactor);
+   this->AddSubRefObj(mRadiation);
 }
 DiffractionDataSingleCrystal::DiffractionDataSingleCrystal(Crystal &cryst):
 mHasObservedData(false),mScaleFactor(1.)
@@ -63,6 +65,8 @@ mHasObservedData(false),mScaleFactor(1.)
    this->InitOptions();
    gDiffractionDataSingleCrystalRegistry.Register(*this);
    gTopRefinableObjRegistry.Register(*this);
+   mClockMaster.AddChild(mClockScaleFactor);
+   this->AddSubRefObj(mRadiation);
 }
 
 DiffractionDataSingleCrystal::DiffractionDataSingleCrystal(const DiffractionDataSingleCrystal &old):
@@ -78,6 +82,8 @@ mHasObservedData(old.mHasObservedData),mRadiation(old.mRadiation)
    mTwinningOption.SetChoice(old.mTwinningOption.GetChoice());
    gDiffractionDataSingleCrystalRegistry.Register(*this);
    gTopRefinableObjRegistry.Register(*this);
+   mClockMaster.AddChild(mClockScaleFactor);
+   this->AddSubRefObj(mRadiation);
 }
 
 DiffractionDataSingleCrystal::~DiffractionDataSingleCrystal()
@@ -167,6 +173,7 @@ void DiffractionDataSingleCrystal::SetWeight(const CrystVector_REAL& weight)
 {
    VFN_DEBUG_MESSAGE("DiffractionDataSingleCrystal::SetWeight(w)",5)
    mWeight=weight;
+   mClockMaster.Click();
 }
 
 void DiffractionDataSingleCrystal::SetIobsToIcalc()
@@ -178,6 +185,7 @@ void DiffractionDataSingleCrystal::SetIobsToIcalc()
    mWeight=1;
    mObsSigma=0;
    mHasObservedData=true;
+   mClockMaster.Click();
 }
 
 
@@ -466,6 +474,9 @@ REAL DiffractionDataSingleCrystal::GetR()const
 
 REAL DiffractionDataSingleCrystal::GetChi2()const
 {
+   this->GetNbReflBelowMaxSinThetaOvLambda();
+   if(mClockChi2>mClockMaster) return mChi2;
+   
    if(mHasObservedData==false)
    {
       mChi2=0;

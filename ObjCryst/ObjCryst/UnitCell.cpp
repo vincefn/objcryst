@@ -39,6 +39,8 @@ mBMatrix(3,3),mOrthMatrix(3,3),mOrthMatrixInvert(3,3)
    VFN_DEBUG_MESSAGE("UnitCell::UnitCell()",10)
    this->InitOptions();
    this->Init(10,11,12,M_PI/2+.1,M_PI/2+.2,M_PI/2+.3,"P1","");
+   mClockMaster.AddChild(mClockLatticePar);
+   mClockMaster.AddChild(this->GetSpaceGroup().GetClockSpaceGroup());
 }
 
 UnitCell::UnitCell(const REAL a, const REAL b, const REAL c, const string &SpaceGroupId):
@@ -48,6 +50,8 @@ mBMatrix(3,3),mOrthMatrix(3,3),mOrthMatrixInvert(3,3)
    VFN_DEBUG_MESSAGE("UnitCell::UnitCell(a,b,c,Sg)",10)
    this->Init(a,b,c,M_PI/2,M_PI/2,M_PI/2,SpaceGroupId,"");
    this->InitOptions();
+   mClockMaster.AddChild(mClockLatticePar);
+   mClockMaster.AddChild(this->GetSpaceGroup().GetClockSpaceGroup());
 }
 
 UnitCell::UnitCell(const REAL a, const REAL b, const REAL c, const REAL alpha,
@@ -58,6 +62,8 @@ mBMatrix(3,3),mOrthMatrix(3,3),mOrthMatrixInvert(3,3)
    VFN_DEBUG_MESSAGE("UnitCell::UnitCell(a,b,c,alpha,beta,gamma,Sg)",10)
    this->Init(a,b,c,alpha,beta,gamma,SpaceGroupId,"");
    this->InitOptions();
+   mClockMaster.AddChild(mClockLatticePar);
+   mClockMaster.AddChild(this->GetSpaceGroup().GetClockSpaceGroup());
 }
 
 UnitCell::UnitCell(const UnitCell &old):
@@ -69,6 +75,8 @@ mBMatrix(3,3),mOrthMatrix(3,3),mOrthMatrixInvert(3,3)
    mConstrainLatticeToSpaceGroup.SetChoice(old.mConstrainLatticeToSpaceGroup.GetChoice());
    this->InitMatrices();
    this->UpdateLatticePar();
+   mClockMaster.AddChild(mClockLatticePar);
+   mClockMaster.AddChild(this->GetSpaceGroup().GetClockSpaceGroup());
 }
 
 UnitCell::~UnitCell()

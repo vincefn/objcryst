@@ -59,6 +59,9 @@ mScatteringPowerRegistry("List of Crystal ScatteringPowers")
    this->Init(10,11,12,M_PI/2+.1,M_PI/2+.2,M_PI/2+.3,"P1","");
    gCrystalRegistry.Register(*this);
    gTopRefinableObjRegistry.Register(*this);
+   mClockMaster.AddChild(mLatticeClock);
+   mClockMaster.AddChild(this->mScattererRegistry.GetRegistryClock());
+   mClockMaster.AddChild(this->mScatteringPowerRegistry.GetRegistryClock());
 }
 
 Crystal::Crystal(const REAL a, const REAL b, const REAL c, const string &SpaceGroupId):
@@ -71,6 +74,9 @@ mScatteringPowerRegistry("List of Crystal ScatteringPowers")
    this->InitOptions();
    gCrystalRegistry.Register(*this);
    gTopRefinableObjRegistry.Register(*this);
+   mClockMaster.AddChild(mLatticeClock);
+   mClockMaster.AddChild(this->mScattererRegistry.GetRegistryClock());
+   mClockMaster.AddChild(this->mScatteringPowerRegistry.GetRegistryClock());
 }
 
 Crystal::Crystal(const REAL a, const REAL b, const REAL c, const REAL alpha,
@@ -84,6 +90,9 @@ mScatteringPowerRegistry("List of Crystal ScatteringPowers")
    this->InitOptions();
    gCrystalRegistry.Register(*this);
    gTopRefinableObjRegistry.Register(*this);
+   mClockMaster.AddChild(mLatticeClock);
+   mClockMaster.AddChild(this->mScattererRegistry.GetRegistryClock());
+   mClockMaster.AddChild(this->mScatteringPowerRegistry.GetRegistryClock());
 }
 
 Crystal::Crystal(const Crystal &old):
@@ -102,6 +111,9 @@ mScatteringPowerRegistry(old.mScatteringPowerRegistry)
    
    gCrystalRegistry.Register(*this);
    gTopRefinableObjRegistry.Register(*this);
+   mClockMaster.AddChild(mLatticeClock);
+   mClockMaster.AddChild(this->mScattererRegistry.GetRegistryClock());
+   mClockMaster.AddChild(this->mScatteringPowerRegistry.GetRegistryClock());
 }
 
 Crystal::~Crystal()

@@ -78,7 +78,13 @@ RefinableObjClock::RefinableObjClock()
    mTick0=0;
    mTick1=0;
 }
-RefinableObjClock::~RefinableObjClock(){}
+RefinableObjClock::~RefinableObjClock()
+{
+   for(std::set<const RefinableObjClock*>::iterator pos=mvChild.begin();
+       pos!=mvChild.end();++pos) (*pos)->RemoveParent(*this);
+   for(std::set<RefinableObjClock*>::iterator pos=mvParent.begin();
+       pos!=mvParent.end();++pos) (*pos)->RemoveChild(*this);
+}
 
 bool RefinableObjClock::operator< (const RefinableObjClock &rhs)const
 {
@@ -110,6 +116,8 @@ void RefinableObjClock::Click()
    if(++msTick0==0) ++msTick1;//Update ObjCryst++ static event counter
    mTick0=msTick0;
    mTick1=msTick1;
+   for(std::set<RefinableObjClock*>::iterator pos=mvParent.begin();
+       pos!=mvParent.end();++pos) (*pos)->Click();
    VFN_DEBUG_MESSAGE("RefinableObjClock::Click():"<<mTick1<<":"<<mTick0<<"(at "<<this<<")",0)
    //this->Print();
 }
@@ -128,6 +136,33 @@ void RefinableObjClock::PrintStatic()const
 {
    cout <<"RefinableObj class Clock():"<<msTick1<<":"<<msTick0<<endl;
 }
+void RefinableObjClock::AddChild(const RefinableObjClock &clock)
+{mvChild.insert(&clock);clock.AddParent(*this);this->Click();}
+void RefinableObjClock::RemoveChild(const RefinableObjClock &clock)
+{mvChild.erase(&clock);clock.RemoveParent(*this);this->Click();}
+void RefinableObjClock::AddParent(RefinableObjClock &clock)const
+{
+   // First check for loop
+   if(&clock==this)
+      throw ObjCrystException("RefinableObjClock::AddParent(..) child == Parent !!");
+   if(clock.HasParent(*this)==true)
+      throw ObjCrystException("RefinableObjClock::AddParent(..) Loop in clock tree !!");
+   mvParent.insert(&clock);
+}
+void RefinableObjClock::RemoveParent(RefinableObjClock &clock)const
+{mvParent.erase(&clock);}
+
+bool RefinableObjClock::HasParent(const RefinableObjClock &clock) const
+{
+   for(std::set<RefinableObjClock*>::iterator pos=mvParent.begin();
+       pos!=mvParent.end();++pos)
+   {
+      if((*pos)==&clock) return true;
+      if((*pos)->HasParent(clock)) return true;
+   }
+   return false;
+}
+
 //######################################################################
 //    Restraint
 //######################################################################
@@ -1726,6 +1761,8 @@ vector<Restraint*>::iterator RefinableObj::RemoveRestraint(Restraint *pRestraint
 void RefinableObj::TagNewBestConfig()const
 {
 }
+const RefinableObjClock& RefinableObj::GetClockMaster()const{return mClockMaster;}
+
 
 void RefinableObj::UpdateDisplay()const
 {
@@ -1790,12 +1827,14 @@ void RefinableObj::AddSubRefObj(RefinableObj &obj)
 {
    VFN_DEBUG_MESSAGE("RefinableObj::AddSubRefObj()",3)
    mSubObjRegistry.Register(obj);
+   mClockMaster.AddChild(obj.GetClockMaster());
 }
 
 void RefinableObj::RemoveSubRefObj(RefinableObj &obj)
 {
    VFN_DEBUG_MESSAGE("RefinableObj::RemoveSubRefObj()",3)
    mSubObjRegistry.DeRegister(obj);
+   mClockMaster.RemoveChild(obj.GetClockMaster());
 }
 
 void RefinableObj::InitRandomSeedFromTime()const
@@ -1812,6 +1851,7 @@ void RefinableObj::AddOption(RefObjOpt *opt)
    VFN_DEBUG_MESSAGE("RefinableObj::AddOption()",5)
    //:TODO: automagically resize the option array if necessary
    mOptionRegistry.Register(*opt);
+   mClockMaster.AddChild(opt->GetClock());
    VFN_DEBUG_MESSAGE("RefinableObj::AddOption():End",5)
 }
 

@@ -995,6 +995,14 @@ mIsSelfOptimizing(false)
    }
    mLocalParamSet=this->CreateParamSet("saved parameters for local minimization");
    this->InitOptions();
+   mClockScatterer.AddChild(mClockAtomList);
+   mClockScatterer.AddChild(mClockBondList);
+   mClockScatterer.AddChild(mClockBondAngleList);
+   mClockScatterer.AddChild(mClockDihedralAngleList);
+   mClockScatterer.AddChild(mClockRingList);
+   mClockScatterer.AddChild(mClockAtomPosition);
+   mClockScatterer.AddChild(mClockAtomScattPow);
+   mClockScatterer.AddChild(mClockOrientation);
 }
 
 Molecule::Molecule(const Molecule &old):
@@ -1065,6 +1073,14 @@ mIsSelfOptimizing(false)
    }
    mLocalParamSet=this->CreateParamSet("saved parameters for local minimization");
    this->InitOptions();
+   mClockScatterer.AddChild(mClockAtomList);
+   mClockScatterer.AddChild(mClockBondList);
+   mClockScatterer.AddChild(mClockBondAngleList);
+   mClockScatterer.AddChild(mClockDihedralAngleList);
+   mClockScatterer.AddChild(mClockRingList);
+   mClockScatterer.AddChild(mClockAtomPosition);
+   mClockScatterer.AddChild(mClockAtomScattPow);
+   mClockScatterer.AddChild(mClockOrientation);
 
    stringstream str;
    old.XMLOutput(str);

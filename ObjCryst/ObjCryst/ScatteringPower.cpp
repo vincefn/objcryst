@@ -86,6 +86,8 @@ mScatteringPowerId(mNbScatteringPower)
    mNbScatteringPower++;
    gScatteringPowerRegistry.Register(*this);
    this->Init();
+   mClockMaster.AddChild(mClock);
+   mClockMaster.AddChild(mMaximumLikelihoodPositionErrorClock);
 }
 ScatteringPower::ScatteringPower(const ScatteringPower& old):
 mDynPopCorrIndex(old.mDynPopCorrIndex),mBiso(old.mBiso),mIsIsotropic(old.mIsIsotropic),
@@ -99,6 +101,8 @@ mBeta(old.mBeta),mScatteringPowerId(mNbScatteringPower)
    mNbScatteringPower++;
    gScatteringPowerRegistry.Register(*this);
    this->Init();
+   mClockMaster.AddChild(mClock);
+   mClockMaster.AddChild(mMaximumLikelihoodPositionErrorClock);
 }
 ScatteringPower::~ScatteringPower()
 {

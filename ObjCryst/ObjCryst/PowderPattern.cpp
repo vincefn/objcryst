@@ -53,12 +53,15 @@ PowderPatternComponent::PowderPatternComponent():
 mIsScalable(false),mpParentPowderPattern(0)
 {
    gPowderPatternComponentRegistry.Register(*this);
+   mClockMaster.AddChild(mClockBraggLimits);
 }
 
 PowderPatternComponent::PowderPatternComponent(const PowderPatternComponent &old):
 mIsScalable(old.mIsScalable),
 mpParentPowderPattern(old.mpParentPowderPattern)
-{}
+{
+   mClockMaster.AddChild(mClockBraggLimits);
+}
 
 PowderPatternComponent::~PowderPatternComponent()
 {
@@ -95,14 +98,18 @@ const list<pair<const REAL, const string> >& PowderPatternComponent::GetPatternL
 PowderPatternBackground::PowderPatternBackground():
 mBackgroundType(POWDER_BACKGROUND_LINEAR),mBackgroundNbPoint(0),
 mMaxSinThetaOvLambda(10),mModelVariance(0)
-{}
+{
+   mClockMaster.AddChild(mClockBackgroundPoint);
+}
 
 PowderPatternBackground::PowderPatternBackground(const  PowderPatternBackground &old):
 mBackgroundType(old.mBackgroundType),mBackgroundNbPoint(old.mBackgroundNbPoint),
 mBackgroundInterpPoint2Theta(old.mBackgroundInterpPoint2Theta),
 mBackgroundInterpPointIntensity(old.mBackgroundInterpPointIntensity),
 mMaxSinThetaOvLambda(10),mModelVariance(0)
-{}
+{
+   mClockMaster.AddChild(mClockBackgroundPoint);
+}
 
 PowderPatternBackground::~PowderPatternBackground(){}
 const string& PowderPatternBackground::GetClassName() const
@@ -113,7 +120,10 @@ const string& PowderPatternBackground::GetClassName() const
 
 void PowderPatternBackground::SetParentPowderPattern(const PowderPattern &s)
 {
+   if(mpParentPowderPattern!=0) 
+      mClockMaster.RemoveChild(mpParentPowderPattern->GetIntegratedProfileLimitsClock());
    mpParentPowderPattern = &s;
+   mClockMaster.AddChild(mpParentPowderPattern->GetIntegratedProfileLimitsClock());
 }
 const CrystVector_REAL& PowderPatternBackground::GetPowderPatternCalc()const
 {
@@ -222,6 +232,8 @@ void PowderPatternBackground::TagNewBestConfig()const
 
 void PowderPatternBackground::CalcPowderPattern() const
 {
+   if(mClockPowderPatternCalc>mClockMaster) return;
+   
    //:TODO: This needs serious optimization !
    if(   (mClockPowderPatternCalc>mClockBackgroundPoint)
        &&(mClockPowderPatternCalc>mpParentPowderPattern->GetClockPowderPatternPar())) return;
@@ -293,6 +305,8 @@ void PowderPatternBackground::CalcPowderPattern() const
 
 void PowderPatternBackground::CalcPowderPatternIntegrated() const
 {
+   if(mClockPowderPatternCalc>mClockMaster) return;
+
    this->CalcPowderPattern();// :TODO: Optimize
    if(  (mClockPowderPatternIntegratedCalc>mClockPowderPatternCalc)
       &&(mClockPowderPatternIntegratedCalc>mpParentPowderPattern->GetIntegratedProfileLimitsClock()))
@@ -343,6 +357,7 @@ void PowderPatternBackground::GetBraggLimits(CrystVector_long *&min,CrystVector_
 void PowderPatternBackground::SetMaxSinThetaOvLambda(const REAL max)
 {
    mMaxSinThetaOvLambda=max;
+   mClockMaster.Click();
 }
 
 void PowderPatternBackground::InitRefParList()
@@ -403,6 +418,8 @@ mCorrTextureMarchDollase(*this)
    mReflectionProfileType.SetChoice(PROFILE_PSEUDO_VOIGT);
    this->SetIsIgnoringImagScattFact(true);
    this->AddSubRefObj(mCorrTextureMarchDollase);
+   mClockMaster.AddChild(mClockProfilePar);
+   mClockMaster.AddChild(mClockLorentzPolarSlitCorrPar);
 }
 
 PowderPatternDiffraction::PowderPatternDiffraction(const PowderPatternDiffraction &old):
@@ -415,6 +432,8 @@ mCorrLorentz(*this),mCorrPolar(*this),mCorrSlitAperture(*this),
 mCorrTextureMarchDollase(*this)
 {
    this->AddSubRefObj(mCorrTextureMarchDollase);
+   mClockMaster.AddChild(mClockProfilePar);
+   mClockMaster.AddChild(mClockLorentzPolarSlitCorrPar);
 }
 
 PowderPatternDiffraction::~PowderPatternDiffraction()
@@ -432,7 +451,10 @@ PowderPatternDiffraction* PowderPatternDiffraction::CreateCopy()const
 
 void PowderPatternDiffraction::SetParentPowderPattern(const PowderPattern &s)
 {
-    mpParentPowderPattern = &s;
+   if(mpParentPowderPattern!=0) 
+      mClockMaster.RemoveChild(mpParentPowderPattern->GetIntegratedProfileLimitsClock());
+   mpParentPowderPattern = &s;
+   mClockMaster.AddChild(mpParentPowderPattern->GetIntegratedProfileLimitsClock());
 }
 
 const CrystVector_REAL& PowderPatternDiffraction::GetPowderPatternCalc()const
@@ -531,6 +553,9 @@ const Radiation& PowderPatternDiffraction::GetRadiation()const
 
 void PowderPatternDiffraction::CalcPowderPattern() const
 {
+   this->GetNbReflBelowMaxSinThetaOvLambda();
+   if(mClockPowderPatternCalc>mClockMaster) return;
+   
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderPattern():",3)
 
    // :TODO: Can't do this as this is non-const
@@ -700,6 +725,9 @@ Beam must either be monochromatic or from an XRay Tube !!");
 
 void PowderPatternDiffraction::CalcPowderPatternIntegrated() const
 {
+   this->GetNbReflBelowMaxSinThetaOvLambda();
+   if(mClockPowderPatternIntegratedCalc>mClockMaster) return;
+
    this->CalcIhkl();
    this->PrepareIntegratedProfile();
    
@@ -1294,6 +1322,8 @@ mStatisticsExcludeBackground(false),mMaxSinThetaOvLambda(10),mNbPointUsed(0)
    this->Init();
    gPowderPatternRegistry.Register(*this);
    gTopRefinableObjRegistry.Register(*this);
+   mClockMaster.AddChild(mClockPowderPatternPar);
+   mClockMaster.AddChild(mClockNbPointUsed);
 }
 
 PowderPattern::PowderPattern(const PowderPattern &old):
@@ -1312,6 +1342,8 @@ mMaxSinThetaOvLambda(old.mMaxSinThetaOvLambda),mNbPointUsed(old.mNbPointUsed)
    gPowderPatternRegistry.Register(*this);
    gTopRefinableObjRegistry.Register(*this);
    this->AddSubRefObj(mRadiation);
+   mClockMaster.AddChild(mClockPowderPatternPar);
+   mClockMaster.AddChild(mClockNbPointUsed);
 }
 
 PowderPattern::~PowderPattern()
@@ -1319,7 +1351,7 @@ PowderPattern::~PowderPattern()
    for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++)
    {
       mPowderPatternComponentRegistry.GetObj(i).DeRegisterClient(*this);
-      mSubObjRegistry.DeRegister(mPowderPatternComponentRegistry.GetObj(i));
+      this->RemoveSubRefObj(mPowderPatternComponentRegistry.GetObj(i));
       delete &(mPowderPatternComponentRegistry.GetObj(i));
    }
    gPowderPatternRegistry.DeRegister(*this);
@@ -1335,7 +1367,7 @@ void PowderPattern::AddPowderPatternComponent(PowderPatternComponent &comp)
 {
    VFN_DEBUG_ENTRY("PowderPattern::AddPowderPatternComponent():"<<comp.GetName(),5)
    comp.SetParentPowderPattern(*this);
-   mSubObjRegistry.Register(comp);
+   this->AddSubRefObj(comp);
    comp.RegisterClient(*this);
    mClockPowderPatternCalc.Reset();
    mClockIntegratedFactorsPrep.Reset();
@@ -2492,6 +2524,8 @@ REAL PowderPattern::GetIntegratedRw()const
 
 REAL PowderPattern::GetChi2()const
 {
+   this->CalcNbPointUsed();
+   if(mClockChi2>mClockMaster) return mChi2;
    if(  (0==this->GetPowderPatternObs().numElements())
       ||(0==GetNbPowderPatternComponent()))
    {
@@ -2532,13 +2566,21 @@ REAL PowderPattern::GetChi2()const
       p1=mPowderPatternIntegratedCalc.data();
       p2=mIntegratedObs.data();
       p3=mIntegratedWeight.data();
+      double weightProd=1.;
       VFN_DEBUG_MESSAGE("PowderPattern::GetIntegratedRw()",4);
-      for(unsigned long i=0;i<mNbIntegrationUsed;i++)
+      for(unsigned long i=0;i<mNbIntegrationUsed;)
       {
-         mChi2 += *p3 * ((*p1)-(*p2))*((*p1)-(*p2));
-         if(*p3<=0) p3++;
-         else mChi2LikeNorm -= log(*p3++);
-         p1++;p2++;
+         // group weights to avoid computing too many log()
+         // group only a limited number to avoid underflow...
+         for(unsigned long j=0;j<32;++j)
+         {
+            mChi2 += *p3 * ((*p1)-(*p2))*((*p1)-(*p2));
+            if(*p3>0) weightProd *= *p3++;
+            p1++;p2++;p3++;
+            if(++i == mNbIntegrationUsed) break;
+         }
+         mChi2LikeNorm -= log(weightProd);
+         weightProd=1.;
       }
    }
    else
@@ -3355,6 +3397,9 @@ const RefinableObjClock& PowderPattern::GetIntegratedProfileLimitsClock()const
 
 void PowderPattern::CalcPowderPattern() const
 {
+   this->CalcNbPointUsed();
+   if(mClockPowderPatternCalc>mClockMaster) return;
+   
    TAU_PROFILE("PowderPattern::CalcPowderPattern()","void ()",TAU_DEFAULT);
    VFN_DEBUG_ENTRY("PowderPattern::CalcPowderPattern()",3);
    if(mPowderPatternComponentRegistry.GetNb()==0)
@@ -3516,6 +3561,9 @@ void PowderPattern::CalcPowderPattern() const
 
 void PowderPattern::CalcPowderPatternIntegrated() const
 {
+   this->CalcNbPointUsed();
+   if(mClockPowderPatternIntegratedCalc>mClockMaster) return;
+   
    this->PrepareIntegratedRfactor();
    TAU_PROFILE("PowderPattern::CalcPowderPatternIntegrated()","void ()",TAU_DEFAULT);
    VFN_DEBUG_ENTRY("PowderPattern::CalcPowderPatternIntegrated()",4);
