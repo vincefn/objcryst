@@ -1,0 +1,173 @@
+#### 1.3 - december 2002
+NEW FEATURES
+   * Added scattering power for a sphere, e.g. to modelize a
+     disordered fullerene.
+   * Added the option to use pseudo-crystallographic symmetry in a
+     Crystal structure (i.e. use a spacegroup which is not allowed
+     by the unit cell). Could be useful for phase transitions.
+   * Added data format for FullProf formats 4 (synchrotron) and 
+     6 (multi-detector, LLB G42)
+   * Now more than 100 atoms can be displayed in a ZScatterer unit.
+   * Added the ability to set relative limits on all scatterer
+     translations from their current positions.
+   * Added the ability to run Fox without the graphical interface,
+     once all objects to be optimized have been setup and saved in
+     a xml file.
+   
+BUG FIXES
+   * Fix serious bug in the dtermination of systematic extinctions,
+     which lead to missing reflections for (body|face)-centered
+     spacegroups with a center of symmetry not on the origin
+     (e.g. for Fd3m (Si,...))
+   * Fixed various bugs in the display and update of powder patterns
+   
+#### 1.2 - august 2002
+NEW FEATURES
+   * FOX now supports Preferred Orientation, using the March-Dollase
+     model. The texture parameters can be searched ab initio.
+   * The 3D display of the crystal structure is now also refreshed
+     automatically under WinNT and above (still much less responsive
+     than under Linux -hint,hint).
+   * The default size of crystal structure and powder pattern are more
+     reasonable under windows.
+   * New atoms in ZScatterer are now given a sensible default name,
+     ScattPowName+number of the atom.
+   * The wavelength is now directly displayed in the window, rather
+     than exclusively through a menu.
+   * Added ability to duplicate scatterers in Crystal.
+   * Powder diffraction pattern keeps zoomed during optimization.
+     
+BUG FIXES
+   * The atom names in ZScatterer are now validated without the
+     'enter' key being hit.
+   * Adding atoms in a z-matrix scatterer does not crash anymore.
+   * removing a scatterer (or any object...) after running an 
+     optimisation, does not crash any more when optimization is 
+     relaunched (the parameter list is now correctly rebuilt).
+   * Now correctly zooming when the dragged area goes beyond 
+     2theta limits.
+     
+#### 1.1.2 - 2002/02/18
+License changed to the GNU General Public License.
+NEW FEATURES
+   * Added a maximum value of sin(theta)/lambda for diffraction
+     data objects. All data above is ignored.
+   * Added an *experimental* option in single crystal data for
+     twinned data, to work on the sum of metrically-equivalent
+     reflections. Entirely untested (contact me to use it !)
+	* Some parameter are automatically fixed for global optimizations
+	  (unit cell, background & profile parameters).
+   * Fox will write a few messages for some key events
+     (importing data, creating spacegroup,...)
+
+BUG FIXES
+   * The dynamical occupancy correction now begins for interatomic
+     distances below 1A, and proceeds to full correction for .1A
+     (before that 2 and .8A where used (why?))
+   * Spacegroup and Unit Cell values can now be changed even if
+     scattering data has already been computed, without crash.
+   * Importing a Z-Matrix would give the 3rd and 4th atoms the same
+	  number, and if atoms were of the same type, both atoms would
+	  have the same name in the .xml saved file, and would crash
+     on reloading. Molecules thus created need to be re-imported.
+	  
+#### 1.1.1 - 2002/01/17
+BUG FIXES
+   * Under windows, the global optimization lead to a crash after
+     some random time.
+   * Under windows, clicking on some part of a powder pattern graph 
+     would make Fox crash
+
+#### 1.1 - 2002/01/8
+NEW FEATURES
+   * Now it is possible to import Z-matrices to build a molecule 
+     structure (eg a Z-matrix file can be generated from a .pdb file
+     using babel, and then imported into Fox)
+   * Added integrated R and RW factors as new cost functions (thus
+     less sensitive to badly defined profiles). Unless you have *very*
+     good profile parameters, I recommend using the integrated Rw as
+     a cost function.
+   * Now it is recommended to choose an "exponential" schedule for
+     the amplitude, from 8 to .125, and a "smart" schedule for the
+     temperature. This should be optimized for *all* experiments,
+     so that users don't have to guess the right choices.
+   * It is no longer necessary to validate all input by hitting the
+     'return' key (which was *very* annoying)
+   * Ability to zoom on the powder pattern graph, using the left button
+     (double-click to unzoom)
+   * Possibility to reduce the part of the displayed unit cell in 3D 
+     view (use the popup menu with right-click)
+   * Significant speed improvement.
+   * The Parallel Tempering algorithm has been tuned to yield a higher
+     success ratio.
+   * Possibility to used single-crystal data (eg extracted intensities)
+     for crystal structure optimization (honest crystallographer's note:
+     if you have high quality extracted intensities, try direct methods
+     first...)
+   * Added interface for 2theta zero/displacement/transparency
+     parameters in a Powder Pattern object
+   * Added an overall temperature factor (Biso) for each crystalline 
+     phase in powder diffraction (also available in single crystal).
+   * new examples for organic molecules (potassium tartrate and 
+     cimetidine with powder & extracted pseud-single crystal
+     intensities)
+   * The program now forbids to check lattice or profile parameters
+     for a global optimization.
+
+-LINUX:
+   * Now using a distribution from source using the wxWindows RPM, which
+   * should make things easier under Linux.
+
+-BUG FIX:
+   * under linux, the antibump cost function was not properly restored
+	  from an xml file (preventing merging of identical atoms)
+	* Changing the spacegroup (and thus extinction rules) will now
+	  will re-generate the list of reflections for powder diffraction.
+	  Same if the lattice parameters or the wavelength has changed.
+   * a number of minor bugfixes...
+
+#### 1.0.1 - 2001/10/15
+-BUG FIX: 
+   * corrected minimum FWHM for profiles from .001 to .00001 radians
+
+#### 1.0 - 2001/10/15
+-NEW FEATURES
+   * support for multiple crystalline phases in Powder Diffraction (you
+      can refine several phases from one pattern ...provided you can 
+      index them)
+   * the Windows version now displays a console to give a better idea
+     about what the program is doing.
+   * Import of Sietronics data files (.cpi)
+   * Linux binary version also available for glibc 2.1
+   
+-BUG FIXES:
+   * removed another bug in ZMatrix interpretation, which prevented the  
+     correct coordinates to be generated when using mono/triclinic unit
+     cells (thanks Mark Edgar).
+   * the program will no longer crash when importing data with null or 
+     negative points.
+   * U,V and W parameters leading to negative profile width will no
+     longer crash the program (profile forced to be strictly positive)
+   * various cosmetic bugs
+   
+#### 0.9.1 Beta - 2001/09/20
+-NEW FEATURES
+   * Added menus to change limits globally in a ZScatterer(bond,angles)
+   * Now the pivot atom (around which the ZScatterer is rotated, and
+     which corresponds to the displayed x,y,z position of the 
+     ZScatterer) is saved in the .xml file. It can also be changed 
+     from a menu.
+   * Limits can be changed individually for all parameters, using a 
+     popu menu: right-click on the parameter name to get the local menu
+
+-BUG FIXES:
+   * removed a nasty bug in ZMatrix interpretation, which prevented  
+     the correct coordinates to be generated  for chains longer than 3 
+     atoms. Did not affect polyhedras... (thanks Yuri Andreev)
+
+#### 0.9   Beta - 2001/09/18
+   Initial Public release
+   
+#### 0.5-0.9
+   Internal release only... Thanks to Laure Guenee, 
+   Guillaume Renaudin and Radovan Cerny for testing !

@@ -42,20 +42,17 @@ Requirements:
 
 <li> For <b>Linux</b>:
 <ul>
-   It is easier to use the RPM. To avoid any possible conflicts due to different versions of wxWindows, please <b>recompile the wxGTK source rpm</b> (which you can get at http://www.wxwindows.org/) on your machine (rpm --rebuild wxGTK-***.src.rpm), and then install the recompiled RPM (wxGTK, wxGTK-gl and wxGTK-devel)
+   It is easier to use the RPM. To avoid any possible conflicts due to different versions of wxWindows, please <b>recompile the wxGTK source rpm</b> (which you can get at http://www.wxwindows.org/) on your machine (rpm --rebuild wxGTK-***.src.rpm), and then install the recompiled RPM (wxGTK, wxGTK-gl and wxGTK-devel). Fow has been tested with wxWindows 2.2.9 and 2.3.4.
 
-   Then you will need to do the following for wxGTK 2.2.9 (nothing to do for wxGTK 2.2.7):
-   <ul>
-      <li>Copy <tt>/usr/lib/wx/include/wx/gtk/setup.h</tt> to <tt>/usr/include/wx/gtk/setup.h</tt>
-      <li><tt>ln -s /usr/lib/libwx_gtk-2.2.so /usr/lib/libwx_gtk.so</tt>
-      <li><tt>ln -s /usr/lib/libwx_gtk_gl-2.2.so /usr/lib/libwx_gtk_gl.s</tt>
-   </ul>
+   Then you will need to do the following for wxGTK 2.3.* (nothing to do for wxGTK 2.2.*):
+   <ul><tt>ln -s /usr/bin/wxgtk-2.3-config /usr/bin/wx-config</tt></ul>
+   
    If you want to install from the source rather than install the rpm, do not forget to configure with --enable-opengl. By default shared libraries are produced (*.so), which is what Fox now uses (no static libraries).
 </ul>
 
 <li>For <b>windows</b>:
 <ul>
-   Get the wxWindows installer (wxMSW 2.2.7 or 2.2.9, not 2.3.*) at  http://www.wxwindows.org/, then run the wx installer to put everything in the directory of you choice (I'll assume it is <tt>C:\dev\wxWindows</tt>)
+   Get the wxWindows installer (wxMSW 2.2.7 or 2.2.9, \b not 2.3.*) at  http://www.wxwindows.org/, then run the wx installer to put everything in the directory of you choice (I'll assume it is <tt>C:\dev\wxWindows</tt>)
 
    For wxMSW 2.2.9 <i>only</i> , you need to remove the contents of the wxWindows\include\wx\setup.h file, and replace it by a single line : <tt>#include "wx/msw/setup.h"</tt>
 
@@ -90,19 +87,25 @@ Note: in all cases you may need to <b>edit the <tt>Fox/src/ObjCryst/rules.mak</t
 Well, just try the examples, or your data while displaying both 3D structure and powder pattern(s). Optionnaly, run several optimizations (several examples) at the same time. Try new features... Change the structural/pattern parameters while graph windows are already shown and then update them... Run it overnight...
 
 <h2>Updating the Fox /ObjCryst++ source code using CVS</h2>
-<b>Quick version:</b> The source of Fox is distributed with the CVS information, so just typing '<tt>make update</tt>' in the Fox directory will do the cvs update for you, on both Linux and windows (for windows you need the CVS client application, see at the end of the page; any decent Linux installation will already have CVS).
+<b>Quick version:</b>
+<ul>
+   The source of Fox is distributed with the CVS information, so just typing '<tt>make update</tt>' in the Fox directory will do the cvs update for you, on both Linux and windows (for windows you need the CVS client application, see at the end of the page; any decent Linux installation will already have CVS).
 
-A word about CVS (concurent Version System): it is (in a nutshell), a way to store source code, update it from different places and by different people, and keep a complete story of the modifications. More info on http://www.cvshome.org.
+   To know what changes have been recently made and get a readable changelog, I recommend using the <a href="http://www.red-bean.com/cvs2cl/">cvs2cl</a> Perl script.
+</ul>
+<b>Longer version:</b>
+<ul>
+   A word about CVS (concurent Version System): it is (in a nutshell), a way to store source code, update it from different places and by different people, and keep a complete story of the modifications. More info on http://www.cvshome.org.
 
-In the ObjCryst++ CVS (which includes Fox) (http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/objcryst/), there are 3 different development stages:
-   - The latest version, with all most recent modifications. This can be unstable, as I tend to make a lot of small modifications.
-   - The "TESTING" version, which includes all recent modifications which I deem stable enough on a few cases, but for which no thorough check has been made. This should not be more than a few modifications behind the latest version.
-   - the "RELEASE" version, which corresponds to the latest released version of Fox or ObjCryst++, which should be stable.
+   In the ObjCryst++ CVS (which includes Fox) (http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/objcryst/), there are 3 different development stages (The '<tt>make update</tt>' command gets the latest version):
+      <ul>- The latest version ("HEAD"), with all most recent modifications. This can be unstable, as I tend to make a lot of small modifications.</ul>
+      <ul>- The "TESTING" version, which includes all recent modifications which I deem stable enough on a few cases, but for which no thorough check has been made. This should not be more than a few modifications behind the latest version.</ul>
+      <ul>- the "RELEASE" version, which corresponds to the latest released version of Fox or ObjCryst++.</ul>
 
-To test Fox, or get recent features, you should either get the TESTING version or the latest (not for the faint of heart, though).
+   To test Fox, or get recent features, you should either get the TESTING version or the latest (not for the faint of heart, though).
 
-The cvs access is anonymous, with a blank password. If you want to do the cvs update yourself, note that there are two modules, 'ObjCryst' and 'Fox' which you will need, as well as the See the CVS notes on sourceforge (http://sourceforge.net/cvs/?group_id=27546).
+   The cvs access is anonymous, with a blank password. If you want to do the cvs update yourself, note that there are two modules, 'ObjCryst' and 'Fox' which you will need, as well as the See the CVS notes on sourceforge (http://sourceforge.net/cvs/?group_id=27546).
 
-<li> <b>client for windows</b>: you need a CVS client. The simplest is to get the command-line client which uses the same options as the linux one (see above), at http://www.cvshome.org/downloads.html.You may also use wincvs (http://www.wincvs.org), which I have not tested.
-
+   <li> <b>client for windows</b>: you need a CVS client. The simplest is to get the command-line client which uses the same options as the linux one (see above), at http://www.cvshome.org/downloads.html.You may also use wincvs (http://www.wincvs.org), which I have not tested.
+</ul>
 */

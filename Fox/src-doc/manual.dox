@@ -1,4 +1,13 @@
 /*! \page manual
+<center>\anchor command_line <h1>Command-Line options</h1></center>
+<ul>
+   It is possible to use command-line arguments for Fox (use <tt>Fox -h</tt> to get all options), e.g.:
+   <ul>
+      <li>"<tt>Fox -i silicon.xml</tt>" will load the silicon.xml file and launch the GUI.
+      <li>"<tt>Fox -i silicon.xml -nogui -n 10000 -o out.xml</tt>" will load the silicon.xml file, and run the optimization without GUI for 10000 trials, then output to out.xml.
+      <li>"<tt>Fox -i example/pbso4-joint.xml -nogui -randomize -n 100000 -finalcost 0.2 -o test.xml</tt>" will run Fox (without GUI) on the PbSO4 example for at most 100000 trials after first randomizing the structure (useful for tests), and stop the optimization when the overall cost falls below 0.2, then output the result to test.xml . You can run that one from the main Fox directory.
+   </ul>
+</ul>
 <center><h1>Reference Manual</h1></center>
 \htmlinclude fox-top.map
 \anchor top_menus <h2>Main Menus</h2>
@@ -25,9 +34,10 @@
    <li> The unit cell parameters can be entered in Angstroem and degrees. Only the relevant fields will be displayed after the spacegroup has been entered and processed (e.g. only the 'a' parameter for cubic spg). Note that the cell parameters cannot be optimized using the available algorithms.
    \anchor crystal_scattpow<h3>Crystal Scattering Powers (atom types)</h3>
    <li> For each element you want to use in your structure you must first declare the "atom type", which corresponds to the scattering factor (Thomson and resonant parts) and the temperature factor (currently only Biso is available). Normally, you will declare only one ScatteringPower by type of atom, unless you want, e.g., 2 oxygens with very different Biso. You can add (and remove) ScatteringPowers using the Crystal menu 'Scatterer'->'Add(Remove) ScatteringPower'.
+   <li> Note that you can also add a "spherical scattering power", which can be used to modelize a disordered fullerene. The total scattering power corresponds to only one electron, so that you must change the atom occupancy to correct that (e.g. for C60, use occupancy= 60*6 electrons). You will need to change the limits on the occupancy before doing that (right-click on the occupancy name, and change the default limits which are [0;1]).
    <li> \anchor crystal_name The name of the Scattering power is free format, but the symbol must correspond to one entry of the scattering factors tables in the international tables for Crystallography, i.e. the standard name for an atom or ion: 'C', 'O', 'Se', 'Cu2+',...
-   <li> Finally, you can change the colour displayed for each type of atom by using the 'Colour' menu and entering the RGB (red, green blue) components (all between 0.0 and 1.0).
-   <li> Finally, you can optimize the Biso value, although as long as you are far away from the good configuration it is a bad idea (useless, and slowing down a lot the algorithm). You should give approximate Biso values that you guess from other similar compounds. Since the algorithm is focused on low-angle, the sensitivity to Biso is fairly low.
+   <li> You can change the colour displayed for each type of atom by using the 'Colour' menu and entering the RGB (red, green blue) components (all between 0.0 and 1.0).
+   <li> You can optimize the Biso value, although as long as you are far away from the good configuration it is a bad idea (useless, and slowing down a lot the algorithm). You should give approximate Biso values that you guess from other similar compounds. Since the algorithm is focused on low-angle, the sensitivity to Biso is fairly low.
    \anchor crystal_scatterers<h3>Crystal Scatterers</h3>
    The Scatterers in each Crystal structure can be either individual atoms or ZScatterers (molecules, polyhedra).
    <ul>

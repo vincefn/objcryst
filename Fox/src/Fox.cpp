@@ -189,7 +189,7 @@ bool MyApp::OnInit()
                  <<"   -o out.xml  : output in 'out.xml' (use with -nogui)"<<endl
                  <<"   -randomize  : randomize initial configuration (use with -nogui)"<<endl
                  <<"   -silent     : (almost) no text output (use with -nogui)"<<endl
-                 <<"   -finalcost  : run optimization until finalcost is reached (use with -nogui)"<<endl
+                 <<"   -finalcost 0.15 : run optimization until cost < 0.15 (use with -nogui)"<<endl
                  <<endl;
             exit(1);  
          }
@@ -235,6 +235,7 @@ bool MyApp::OnInit()
          }
          if(string("-o")==string(this->argv[i]))
          {
+            ++i;
             outfilename=string(this->argv[i]);
             continue;
          }
@@ -256,7 +257,7 @@ bool MyApp::OnInit()
    
    WXCrystMainFrame *frame ;
    
-   frame = new WXCrystMainFrame("FOX: Free Objects for Xtal structures v1.5CVS",
+   frame = new WXCrystMainFrame("FOX: Free Objects for Xtal structures v1.3",
                                  wxPoint(50, 50), wxSize(550, 400));
    // Use the main frame status bar to pass messages to the user
       pMainFrameForUserMessage=frame;
@@ -481,14 +482,14 @@ void WXCrystMainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
    wxString msg;
    msg.Printf( _T("F.O.X. - Free Objects for Xtal structures\n")
-               _T("Version 1.5CVS\n\n")
+               _T("Version 1.3\n\n")
                _T("(c) 2000-2002 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n")
                _T("    2000-2001 Radovan CERNY, University of Geneva\n\n")
                _T("http://objcryst.sourceforge.net\n")
                _T("http://www.ccp14.ac.uk/ccp/web-mirrors/objcryst/ (Mirror)\n\n")
-               _T("FOX comes with absolutely no warranty. It is free software, and you are\n")
+               _T("FOX comes with ABSOLUTELY NO WARRANTY. It is free software, and you are\n")
                _T("welcome to redistribute it under certain conditions. \n")
-               _T("See the General Public License (Fox/doc/license.txt) file for details.")
+               _T("See the LICENSE file for details.")
               );
 
    wxMessageBox(msg, "About Fox", wxOK | wxICON_INFORMATION, this);

@@ -1,10 +1,10 @@
 /*! \page index 
 
-\anchor news <h2>News</h2>
+\anchor news <h2>News</h2> (also read the <a href="ChangeLog">ChangeLog</a>)
    - <b>13th of november 2002: The Fox article (<i>J. Appl. Cryst.</i> <b>35</b>, 734---743</a>) has been published. You can <a href="http://objcryst.sourceforge.net/JApplCryst35-2002-734-Fox.pdf">download the pdf reprint</a>, or get it from the IUCr journals web site: Copyright &copy; International Union of Crystallography, <a href="http://www.iucr.org/cgi-bin/paper?vi0168"> <i>J. Appl. Cryst.</i> <b>35</b>, 734---743</a>)
    - <b>14th of Sept. 2002</b>: I hope you noticed the new web pages, auto-generated using doxygen (http://doxygen.org) !
    - <b>12th of Sept. 2002</b>: <b>the windows zip file (precompiled) with Fox 1.2 was initially packaged with <i>only</i> the exe</b>, without any documentation, examples, or libraries... So please re-download it if necessary. (thanks Mohamed Bououdina for pointing out this).
-   - <b>9th of August 2002</b>: the latest version of Fox is 1.2: this version adds the ability to analyze data with preferred orientation (texture, searching ab initio the texture parameters), using the March-Dollase model. The 'live' update of the 3D view of the Crystal structure now also works on all windows versions. See the full <a href="changes.txt">changelog</a>.
+   - <b>9th of August 2002</b>: the latest version of Fox is 1.2: this version adds the ability to analyze data with preferred orientation (texture, searching ab initio the texture parameters), using the March-Dollase model. The 'live' update of the 3D view of the Crystal structure now also works on all windows versions.
 
 \anchor intro <h2>Introduction</h2>
 The FOX program (for Linux and windows) was made for the <i><b> ab initio crystal structure solution from diffraction data </b></i> (mostly powder diffraction data). Its most interesting features for ab initio structure determination are:
@@ -34,7 +34,7 @@ See the ObjCryst++ homepage (http://objcryst.sf.net) for more details about the 
 <i>Note</i>: This is a free, open-source project. If there is something that you would like to see in it, you can contribute to it by submitting bugs, new code, help improving the documentation.
 
 <h2>Reference for Fox</h2>
-The reference for Fox is: <i>V.Favre-Nicolin and R. Cerny, J. Appl. Cryst (2002, in press)</i>, http://objcryst.sourceforge.net. 
+The reference for Fox is: <i>V.Favre-Nicolin and R. Cerny, J. Appl. Cryst.</i> <b>35</b>, 734---743</a>, http://objcryst.sourceforge.net. 
 
 \anchor download <h2>Download</h2> 
 FOX is available in precompiled form or as source code for <b>windows</b> (tested on 98, NT4 SP4, 2000, XP) and <b>Linux</b>. You can download from several sites:
@@ -55,10 +55,8 @@ For <b>Linux</b>, download the Fox-date.tar.bz2 (source code).
       - You will need valid libraries and development files for <b>OpenGL</b>. You may require a specific library for your card (NVidia,...), and the <b>Mesa</b>, <b>Mesa-devel</b>, <b>Xfree-devel</b> packages (for Redhat, also <b>glut</b> and <b>glut-devel</b>).
       - First you need to also download and install the wxWindows for GTK+ shared libraries (you need the <b>wxGTK</b>, <b>wxGTK-gl</b> and <b>wxGTK-devel</b>).
          - If you are using <b>wxGTK-2.2.7</b>, just install the 3 RPM.
-         - With <b>wxGTK-2.2.9</b>, install the 3 RPM, and then (still as root):
-            - ln -s /usr/lib/libwx_gtk-2.2.so /usr/lib/libwx_gtk.so
-            - ln -s /usr/lib/libwx_gtk_gl-2.2.so /usr/lib/libwx_gtk_gl.so
-            - ln -s /usr/lib/wx/include/gtk-2.2/wx/setup.h /usr/include/wx/setup.h
+         - With <b>wxGTK-2.3.*</b>, after the install you must do:
+            - <tt>ln -s /usr/bin/wxgtk-2.3-config /usr/bin/wx-config</tt>
       - Then uncompress the Fox tar.bz2 archive. Then do <tt> make</tt> and (as root) <tt>make install</tt>. The install will put Fox in <tt>/usr/local/bin/Fox</tt>. (otherwise it is in Fox/src/ObjCryst/wxCryst/Fox)             
       - <b>NOTE</b>: if Fox crashes when loading an example file, rebuild the wxGTK libraries from the src.rpm (rpm --rebuild) or the tar.gz (with opengl enabled). It (probably) means there is a conflict between your compiler and the one used to compile the RPM (lousy 2.96 compilers....).
 
@@ -96,13 +94,10 @@ Note: if the program encounters an error, it will sometime manage to save the co
 
 The FOX Program is copyright (2000-2002) Vincent FAVRE-NICOLIN, (2000-2001) Radovan CERNY and the University of Geneva.
 
-This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+This program is (essentially) free software; you can redistribute and/or modify the ObjCryst++ code under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
 
-It also uses other libraries (among which R. Grosse-Kunstleve library used to interpret spacegroup symbols), see the corresponding ObjCryst++ page for details.
+Fox also uses other libraries (among which R. Grosse-Kunstleve library used to interpret spacegroup symbols). For a complete licensing information, please read http://objcryst.sourceforge.net/ObjCryst/page_legal.html .
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
-
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the detailed licensing information at http://objcryst.sourceforge.net/ObjCryst/page_legal.html .
 */
 
