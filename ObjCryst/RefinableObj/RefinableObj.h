@@ -922,16 +922,6 @@ class RefinableObj
       */
       void BeginGlobalOptRandomMove();
       
-      //Cost functions
-         /// Number of Cost functions
-         virtual unsigned int GetNbCostFunction()const;
-         /// Get a Cost function name from its id#.
-         virtual const string& GetCostFunctionName(const unsigned int)const;
-         /// Get the (short) description of a cost function
-         virtual const string& GetCostFunctionDescription(const unsigned int)const;
-         /// Get the current value of a cost function
-         /// this should be const...
-         virtual REAL GetCostFunctionValue(const unsigned int);
       // Likelihood
          /** Get -log(likelihood) of the current configuration for the object.
          *

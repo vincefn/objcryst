@@ -120,27 +120,6 @@ class WXFieldOption:public WXField
    DECLARE_EVENT_TABLE()
 };
 
-/// Field for a RefinableObj cost function
-class WXCostFunction:public WXField
-{
-   public:
-      WXCostFunction(wxWindow *parent,RefinableObj *obj, const int field_id,
-                     const int funcNum,REAL * weight);
-      void OnEnter(wxCommandEvent & WXUNUSED(event));
-      virtual void CrystUpdate();
-      virtual void UpdateUI();
-      virtual void Revert();
-      /// Not used. Not an user input field.
-      virtual void ValidateUserInput();
-   protected:
-      wxTextCtrl *mpValue;
-      REAL mValue;
-      RefinableObj *mpObj;
-      const int mFuncNum;
-      WXFieldPar<REAL> *mpWeight;
-};
-
-
 /// This displays all components of a ObjCryst++ Registry.
 template<class T> class WXRegistry:public WXCrystObj
 {

@@ -136,23 +136,13 @@ mpZScatt(&scatt),mOptimObj(true)
    mOptimObj.SetAlgorithmSimulAnnealing(ANNEALING_EXPONENTIAL,.1,.001,
                                             ANNEALING_EXPONENTIAL,16,.25);
    mOptimObj.AddRefinableObj(*this);
-   //mOptimObj.AddCostFunction(*this,0);
 }
 ZMoveMinimizer::~ZMoveMinimizer(){}
-unsigned int ZMoveMinimizer::GetNbCostFunction()const {return 1;}
-const string& ZMoveMinimizer::GetCostFunctionName(const unsigned int)const
-{ 
-   static const string *str= new string("Conformation change");
-   return *str;
-}
-const string& ZMoveMinimizer::GetCostFunctionDescription(const unsigned int)const
-{ 
-   static const string *str= new string("Conformation change distances squared");
-   return *str;
-}
-REAL ZMoveMinimizer::GetCostFunctionValue(const unsigned int)
+
+
+REAL ZMoveMinimizer::GetLogLikelihood() const
 {
-   TAU_PROFILE("ZMoveMinimizer::GetCostFunctionValue()","void ()",TAU_DEFAULT);
+   TAU_PROFILE("ZMoveMinimizer::GetLogLikelihood()","void ()",TAU_DEFAULT);
    const REAL *pX1=mpZScatt->GetXCoord().data();
    const REAL *pY1=mpZScatt->GetYCoord().data();
    const REAL *pZ1=mpZScatt->GetZCoord().data();
@@ -1466,8 +1456,7 @@ void ZScatterer::GlobalOptRandomMove(const REAL mutationAmplitude,
          }
          else
          {
-            //cout <<"ZMoveMinimizer(flip):cost="<<mpZMoveMinimizer->GetCostFunctionValue(0);
-            const REAL tmp=mpZMoveMinimizer->GetCostFunctionValue(0);
+            const REAL tmp=mpZMoveMinimizer->GetLogLikelihood();
             if(tmp>.05)
             {
                TAU_PROFILE_START(timer2);
@@ -1476,7 +1465,6 @@ void ZScatterer::GlobalOptRandomMove(const REAL mutationAmplitude,
                     else mpZMoveMinimizer->MinimizeChange(500);
                TAU_PROFILE_STOP(timer2);
             }
-            //cout <<" -> "<<mpZMoveMinimizer->GetCostFunctionValue(0)<<endl;
          }
          VFN_DEBUG_MESSAGE("ZScatterer::GlobalOptRandomMove(): final value:"<<par->GetHumanValue(),3)
       //

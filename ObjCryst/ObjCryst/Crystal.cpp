@@ -709,59 +709,6 @@ void Crystal::SetBumpMergeDistance(const ScatteringPower &scatt1,
 
 const RefinableObjClock& Crystal::GetClockScattererList()const {return mClockScattererList;}
 
-unsigned int Crystal::GetNbCostFunction()const {return 1;}
-
-const string& Crystal::GetCostFunctionName(const unsigned int id)const
-{
-   static string costFunctionName[2];
-   if(0==costFunctionName[0].length())
-   {
-      costFunctionName[0]="BumpMergeCost()";
-   }
-   switch(id)
-   {
-      case 0: return costFunctionName[0];
-      default:
-      {
-         cout << "Crystal::GetCostFunctionName(): Not Found !" <<endl;
-         throw 0;
-      }
-   }
-}
-
-const string& Crystal::GetCostFunctionDescription(const unsigned int id)const
-{
-   static string costFunctionDescription[2];
-   if(0==costFunctionDescription[0].length())
-   {
-      costFunctionDescription[0]="Anti-bump, pro-merge cost function";
-   }
-   switch(id)
-   {
-      case 0: return costFunctionDescription[0];
-      default:
-      {
-         cout << "Crystal::GetCostFunctionDescription(): Not Found !" 
-              <<endl;
-         throw 0;
-      }
-   }
-}
-
-REAL Crystal::GetCostFunctionValue(const unsigned int n)
-{
-   VFN_DEBUG_MESSAGE("Crystal::GetCostFunctionValue():"<<mName,4)
-   switch(n)
-   {
-      case 0: return this->GetBumpMergeCost();
-      default:
-      {
-         cout << "Crystal::GetCostFunctionValue(): Not Found !" <<endl;
-         throw 0;
-      }
-   }
-}
-
 void Crystal::GlobalOptRandomMove(const REAL mutationAmplitude,
                                   const RefParType *type)
 {

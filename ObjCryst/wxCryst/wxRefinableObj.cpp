@@ -298,53 +298,6 @@ void WXFieldOption::Revert()
 void WXFieldOption::ValidateUserInput()
 {
 }
-////////////////////////////////////////////////////////////////////////
-//
-//    WXCostFunction
-//
-////////////////////////////////////////////////////////////////////////
-WXCostFunction::WXCostFunction(wxWindow *parent,RefinableObj *obj, const int field_id,
-               const int funcNum,REAL * weight):
-WXField(parent,obj->GetName()+":"+obj->GetCostFunctionName(funcNum)+"=",-1),
-mpObj(obj),mFuncNum(funcNum)
-{
-   mpValue=new wxTextCtrl(this,ID_WXFIELD,"",wxDefaultPosition,wxDefaultSize,wxTE_READONLY);
-   mpSizer->Add(mpValue,0,wxALIGN_CENTER);
-   
-   mpWeight=new WXFieldPar<REAL>(this,",weight=",-1,weight);
-   mpSizer->Add(mpWeight,0,wxALIGN_CENTER);
-   
-   this->CrystUpdate();
-   this->Layout();
-}
-
-void WXCostFunction::OnEnter(wxCommandEvent & WXUNUSED(event))
-{
-   //Nothing to do here (will never happen, value is not editable)
-}
-
-void WXCostFunction::CrystUpdate()
-{
-   mValue=mpObj->GetCostFunctionValue(mFuncNum);
-}
-
-void WXCostFunction::UpdateUI()
-{
-   VFN_DEBUG_ENTRY("WXCostFunction::UpdateUI()",6)
-   wxString tmp;
-   tmp.Printf("%f",mValue);
-   mpValue->SetValue(tmp);
-   mpWeight->UpdateUI();
-   VFN_DEBUG_EXIT("WXCostFunction::UpdateUI()",6)
-}
-
-void WXCostFunction::Revert()
-{
-   //Nothing to do here
-}
-void WXCostFunction::ValidateUserInput()
-{
-}
 
 ////////////////////////////////////////////////////////////////////////
 //

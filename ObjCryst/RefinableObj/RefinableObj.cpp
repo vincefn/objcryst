@@ -1569,25 +1569,6 @@ void RefinableObj::BeginGlobalOptRandomMove()
       mSubObjRegistry.GetObj(i).BeginGlobalOptRandomMove();
 }
 
-unsigned int RefinableObj::GetNbCostFunction()const {return 0;}
-
-const string& RefinableObj::GetCostFunctionName(const unsigned int id)const
-{
-   cout << "RefinableObj::GetCostFunctionName(): Not Found !" <<endl;
-   throw 0;
-}
-
-const string& RefinableObj::GetCostFunctionDescription(const unsigned int id)const
-{
-   cout << "RefinableObj::GetCostFunctionDescription(): Not Found !" <<endl;
-   throw 0;
-}
-
-REAL RefinableObj::GetCostFunctionValue(const unsigned int)
-{
-   cout << "RefinableObj::GetCostFunctionValue(): no cost functions !" <<endl;
-   throw 0;
-}
 unsigned int RefinableObj::GetNbLSQFunction()const{return 0;}
 
 REAL RefinableObj::GetLogLikelihood()const

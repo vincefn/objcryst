@@ -260,11 +260,6 @@ class Crystal:public UnitCell
                                 const bool allowMerge);
       /// When was the list of scatterers last changed ?
       const RefinableObjClock& GetClockScattererList()const;
-      //Cost functions
-         unsigned int GetNbCostFunction()const;
-         const string& GetCostFunctionName(const unsigned int)const;
-         const string& GetCostFunctionDescription(const unsigned int)const;
-         virtual REAL GetCostFunctionValue(const unsigned int);
          
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);

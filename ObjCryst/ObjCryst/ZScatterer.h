@@ -168,10 +168,7 @@ class ZMoveMinimizer:public RefinableObj
    public:
       ZMoveMinimizer(ZScatterer &scatt);
       ~ZMoveMinimizer();
-      virtual unsigned int GetNbCostFunction()const;
-      virtual const string& GetCostFunctionName(const unsigned int)const;
-      virtual const string& GetCostFunctionDescription(const unsigned int)const;
-      virtual REAL GetCostFunctionValue(const unsigned int);
+      virtual REAL GetLogLikelihood()const;
       void RecordConformation();
       void SetZAtomWeight(const CrystVector_REAL weight);
       void MinimizeChange(long nbTrial=10000);
