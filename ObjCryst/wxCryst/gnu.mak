@@ -30,8 +30,8 @@ fox: Fox
 lib: libwxcryst.a
 
 #install Fox in /usr/local/bin
-install: Fox
-	/sbin/install -m 755 Fox /usr/local/bin
+install:
+	install -m 755 Fox /usr/local/bin
 
 # target for making everything
 .PHONY : all

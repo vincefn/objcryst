@@ -1,5 +1,17 @@
 /*! \page page_install ObjCryst++ Download & Installation Notes
 *
+*	This project is still in active development. If you encounter some problem
+*  with part of the library, please contact me at vincefn@users.sourceforge.net
+*  and I'll try to help.
+*
+*  Also note that if you want to develop something using ObjCryst++, I recommend 
+*  to contact me so that I can help you and avoid possible incompatibilities.
+*  There are numerous things I want to implement, so an incompatibility is always
+*  possible...
+*
+*  YOu should also subscribe to the mailing-lists at: http://sourceforge.net/mail/?group_id=27546
+*  and most especially the "objcryst-devel" and "objcryst-announce".
+*
 *\section download Download
 *     You can download the ObjCryst library on the 
 *     <a href="http://www.sourceforge.net/projects/objcryst/">ObjCryst project page</a>
@@ -12,8 +24,8 @@
 *		archive, until the next version is available. You can use the CVS (see next section)
 *		to get the current version, or contact me.
 *
-*		If you want to use the Graphical Interface part of the library (wxCryst, for
-*		example if you want to compile Fox), you will also need to download wxWindows
+*		If you want to use the Graphical Interface part of the library (wxCryst), e.g.
+*	   if you want to compile Fox, you will also need to download wxWindows
 *		from http://www.wxwindows.org. Depending on your OS, you will need wxGTK-2.2.7
 *		(for Linux), or wxMSW-2.2.7 (for Windows).
 *
@@ -39,26 +51,26 @@
 *     The ObjCryst++ library makes use of some (relatively) recent C++ features, such as
 *     templates, exceptions, mutable members. This implies that you need a compiler with
 *     reasonable C++ compliance in order to use this library. Currently tested are the
-*		GNU Compiler gcc on Linux, the Free Borland C++ compiler v5.5 under Windows,
-*		and Metrowerks Codewarrior Pro 6 on MacOS.
+*		GNU Compiler gcc on Linux and the Free Borland C++ compiler v5.5 under Windows
+*		(Metrowerks Codewarrior Pro 6 on MacOS should work, too, but has not been
+*      tested recently).
 *\par Makefiles
 *     Under linux (resp. windows), copy the rules-gnu.mak (resp. rules-bc32.mak)
 *  	to rules.mak at the root of the ObjCryst directory. You can edit this file
-*		to check the paths and some compiling options.
+*		to check the paths and (for Windows) some compiling options.
 *
 *\section platform Platforms
 *\par Linux
 *     The library is developped on a Linux computer, using the <a href="http://gcc.gnu.org">
 *     GNU compiler gcc </a>, version 2.95.3 (release) or more recent (not tested yet on
-*		gcc 3.01).
+*		gcc 3.0+).
 *\par Windows
 *     The library has been tested under windows (NT,98) using the free Borland C++
 *		compiler.
 *\par Macintosh
 *     The library can also be compiled on MacOS, using <a href="http://www.metrowerks.com">
-*     Metrowerks Codewarrior Pro 6 </a> (version 5 should work, too). Note that the Blitz++
-*     may not compile in its current form with Codewarrior (untested), but Blitz++ is not
-*     used by the library currently, so... I don't provide a project file yet.
+*     Metrowerks Codewarrior Pro 6 </a> (version 5 should work, too). Note that no tests have
+*		been made recently on the macintosh.
 *
 *\par wxWindows
 *		To use the graphical part of ObjCryst++ (wxCryst), you must first compile
@@ -68,11 +80,13 @@
 *		make FINAL=1    (this will take some time)
 *
 *		Under windows, follow the compile instruction in wxWindows doc, and make sure
-*  	you activate opengl support, and deactivate the debug-context in setup.h.
+*  	you (i) activate opengl support and (ii) deactivate debug-context in setup.h.
+*     you can leave all other options at default values.
 *		
 *\section example Example
-*     There is a short example in the ObjCryst/example/pbso4 directory. Under linux/unix,
-*     change to the directory and simply type (under windows, replace "gnu" by "bc32"):
+*		There is a short example in the ObjCryst/example/pbso4 directory. 
+*\par Linux
+*     Under linux, change to the ObjCryst/example/pbso4 directoryand simply type:
 *
 *		'make -f gnu.mak wxcryst=1 opengl=1 debug=0 all'.
 *
@@ -85,6 +99,11 @@
 *     You can try the different example programs, running on PbSO4, on neutron
 *		and X-Ray powder diffraction, as well as X-Ray single crystal 
 *		(in fact, extracted intensities)
+*\par Windows
+*     Under Windows (a DOS command prompt), change to the ObjCryst/example/pbso4 and do:
+*
+*		make -f bc32.mak all'.
+*
 *     \subsection example_result
 *     On a 500 Mhz linux box, pbso4-xray2 (using only the first 80 reflections and no
 *     dynamical occupancy correction),
@@ -99,4 +118,11 @@
 *     of two factor, the first (1.0 here) is the 'real' occupancy of the site, and the
 *     second is the dynamical correction due to the fact that several identical atoms
 *     overlap (For PbSo4, all atoms should be at 0.5 dyn corr).
+*
+*\section fox Fox
+*		To compile Fox, simply go to the ObjCryst/wxCryst directory and do:
+*		- under Linux  : make -f gnu.mak wxcryst=1 opengl=1 debug=0 all
+*		- under windows: make -f bc32.mak all
+*
+*		For both, you will of course need to have compiled wxWindows beforehand.
 */

@@ -67,11 +67,12 @@ class ScatteringPower:virtual public RefinableObj
       * \param spgSymPosIndex: if the ScatteringPower is anisotropic, then the
       * different symmetrics will not have the same scattering power for all reflections.
       * This parameter is the index of the symmetric position in the Spacegroup.
+		* If spgSymPosIndex=-1, the isotropic values are returned.
       * \warning There is no anisotropic code yet, so spgSymPosIndex is simply ignored so far
       * , but the design of this function is general for any anisotropic scattering.
       */
       virtual CrystVector_double GetScatteringFactor(const ScatteringData &data,
-                                                     const int spgSymPosIndex=0) const=0;
+                                                     const int spgSymPosIndex=-1) const=0;
       /** \brief Get the temperature factor for all reflections of a given 
       * ScatteringData object.
       *
@@ -81,11 +82,12 @@ class ScatteringPower:virtual public RefinableObj
       * \param spgSymPosIndex: if the ScatteringPower is anisotropic, then the
       * different symmetrics will not have the same scattering power for all reflections.
       * This parameter is the index of the symmetric position in the Spacegroup.
+		* If spgSymPosIndex=-1, the isotropic values are returned.
       * \warning There is no anisotropic code yet, so spgSymPosIndex is simply ignored so far
       * , but the design of this function is general for any anisotropic scattering.
       */
       virtual CrystVector_double GetTemperatureFactor(const ScatteringData &data,
-                                                      const int spgSymPosIndex=0) const=0;
+                                                      const int spgSymPosIndex=-1) const=0;
       /** \brief Get the real part of the resonant scattering factor.
       *
       * \return a matrix where each row corresponds to each wavelength (currently only
@@ -97,11 +99,12 @@ class ScatteringPower:virtual public RefinableObj
       * \param spgSymPosIndex: if the ScatteringPower is anisotropic, then the
       * different symmetrics will not have the same scattering power for all reflections.
       * This parameter is the index of the symmetric position in the Spacegroup.
+		* If spgSymPosIndex=-1, the isotropic values are returned.
       * \warning There is no anisotropic code yet, so spgSymPosIndex is simply ignored so far
       * , but the design of this function is general for any anisotropic scattering.
       */
       virtual CrystMatrix_double GetResonantScattFactReal(const ScatteringData &data,
-                                                          const int spgSymPosIndex=0) const=0;
+                                                          const int spgSymPosIndex=-1) const=0;
       /** \brief Get the imaginary part of the resonant scattering factor.
       *
       * \return a matrix where each row corresponds to each wavelength (currently only
@@ -113,11 +116,12 @@ class ScatteringPower:virtual public RefinableObj
       * \param spgSymPosIndex: if the ScatteringPower is anisotropic, then the
       * different symmetrics will not have the same scattering power for all reflections.
       * This parameter is the index of the symmetric position in the Spacegroup.
+		* If spgSymPosIndex=-1, the isotropic values are returned.
       * \warning There is no anisotropic code yet, so spgSymPosIndex is simply ignored so far
       * , but the design of this function is general for any anisotropic scattering.
       */
       virtual CrystMatrix_double GetResonantScattFactImag(const ScatteringData &data,
-                                                          const int spgSymPosIndex=0) const=0;
+                                                          const int spgSymPosIndex=-1) const=0;
       /// Is the scattering factor anisotropic ?
       virtual bool IsScatteringFactorAnisotropic()const;
       /// Is the thermic factor anisotropic ?

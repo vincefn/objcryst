@@ -53,11 +53,11 @@ clean::
 #target to make documentation (requires doxygen)
 #also makes tags file, although it is not related to doxygen
 doc:
-	$(MAKE) -f gnu.mak -C ${DIR_DOC} doc
+	cd ${DIR_DOC}; $(MAKE) -f gnu.mak doc
 
 #target to make distribution archive of libcryst++
 dist:
-	tar -czf ../archives/ObjCryst.tar.gz  -C .. --exclude='*.o' --exclude='.systemG.Desktop' --exclude='profile.0.0.0' --exclude='*.a' --exclude='*.pov' --exclude='latex' --exclude='*.exe' --exclude='*.out' --exclude='ObjCryst/wxCryst' --exclude='tags' --exclude='CVS' --exclude='Makefile' ObjCryst --dereference
+	tar -czf ../archives/ObjCryst.tar.gz  -C .. --exclude='*.o' --exclude='.systemG.Desktop' --exclude='profile.0.0.0' --exclude='*.a' --exclude='*.pov' --exclude='latex' --exclude='*.exe' --exclude='*.out' --exclude='tags' --exclude='wxCryst/Fox' --exclude='Makefile' ObjCryst --dereference
 
 #these are libraries/programs used by ObjCryst but developped by other people.
 #These are needed to use ObjCryst, but not modified-so only get it once.
