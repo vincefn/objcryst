@@ -1436,30 +1436,11 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
    if(mOptimizeOrientation.GetChoice()==0)
    {//Rotate around an arbitrary vector
       static const REAL amp=mBaseRotationAmplitude/(REAL)RAND_MAX;
-      switch(mFlexModel.GetChoice())
-      {// With the flexible approach, use a smaller rotation amplitude
-         case 0://Free atoms + restraints
-         {
-            mQuat *= Quaternion::RotationQuaternion
-                        ((2.*(REAL)rand()-(REAL)RAND_MAX)*amp*mutationAmplitude,
-                         (REAL)rand(),(REAL)rand(),(REAL)rand());
-            break;
-         }
-         case 1://Rigid body
-         {
-            mQuat *= Quaternion::RotationQuaternion
-                        ((2.*(REAL)rand()-(REAL)RAND_MAX)*amp*mutationAmplitude*2.,
-                         (REAL)rand(),(REAL)rand(),(REAL)rand());
-            break;
-         }
-         case 2://user-chosen free torsion
-         {
-            mQuat *= Quaternion::RotationQuaternion
-                        ((2.*(REAL)rand()-(REAL)RAND_MAX)*amp*mutationAmplitude,
-                         (REAL)rand(),(REAL)rand(),(REAL)rand());
-            break;
-         }
-      }
+      REAL mult=1.0;
+      if((1==mFlexModel.GetChoice())||(mvRotorGroupTorsion.size()<2)) mult=2.0;
+      mQuat *= Quaternion::RotationQuaternion
+                  ((2.*(REAL)rand()-(REAL)RAND_MAX)*amp*mutationAmplitude*mult,
+                   (REAL)rand(),(REAL)rand(),(REAL)rand());
       mQuat.Normalize();
       mClockOrientation.Click();
    }
