@@ -49,7 +49,7 @@ class NiftyStaticGlobalObjectsInitializer_Crystal
       {
          if (mCount++ == 0)
          {
-            gpRefParTypeCrystal=new RefParType (gpRefParTypeObjCryst,"Crystal");
+            gpRefParTypeCrystal=new RefParType (gpRefParTypeUnitCell,"Crystal");
          }
       }
       ~NiftyStaticGlobalObjectsInitializer_Crystal()
