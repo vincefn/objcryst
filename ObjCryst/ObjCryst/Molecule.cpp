@@ -1621,8 +1621,8 @@ const ScatteringComponentList& Molecule::GetScatteringComponentList() const
 
 string Molecule::GetComponentName(const int i) const
 {
-   if(mvpAtom[i]->IsDummy()) return "Dummy";
-   return mvpAtom[i]->GetScatteringPower().GetName();
+   //if(mvpAtom[i]->IsDummy()) return "Dummy";
+   return mvpAtom[i]->GetName();
 } 
 
 ostream& Molecule::POVRayDescription(ostream &os,const bool noSymmetrics)const
