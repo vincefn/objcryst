@@ -47,6 +47,14 @@ typedef struct
   }
   BBox;
 
+typedef struct
+  {
+    float       x;
+    float       y;
+    float       z;
+  }
+  Triple;
+
 class WXGLCrystalCanvas;
 
 /// wxCryst class for Crystals
@@ -212,6 +220,7 @@ class WXGLCrystalCanvas : public wxGLCanvas
       void OnShowCrystal();
       void OnShowAtomLabel();
       void OnShowCursor();
+      void OnSetCursor();
       void OnLoadFourier();
       void LoadFourier(const string&filename);
       void OnAddContour();
@@ -270,6 +279,9 @@ class WXGLCrystalCanvas : public wxGLCanvas
       BBox mcellbbox;
       // bounding box for display of Fourier map
       BBox mmapbbox;
+      // position to use as center
+      Triple mViewCntr;
+
       /** Imported fourier maps
       *
       * :TODO: use an auto_ptr<UnitCellMapGLList>

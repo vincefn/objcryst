@@ -77,6 +77,21 @@ namespace ObjCryst
       DECLARE_EVENT_TABLE()
   };
 
+// dialog to get a triplet of values box
+  class UserXYZBox : public wxDialog {
+  public:
+    UserXYZBox(wxWindow * parent, char * title, Triple xyz);
+    ~UserXYZBox ();
+    Triple GetXYZ ();
+  private:
+      void OnOk (void);
+      wxTextCtrl * mpXCtrl;
+      wxTextCtrl * mpYCtrl;
+      wxTextCtrl * mpZCtrl;
+      Triple mXYZ;
+      DECLARE_EVENT_TABLE()
+  };
+
 
 ////////////////////////////////////////////////////////////////////////
 //
@@ -1196,6 +1211,7 @@ const string &UnitCellMapGLList::GetName()const
 ////////////////////////////////////////////////////////////////////////
 static const long ID_GLCRYSTAL_MENU_SHOWATOMLABEL=     WXCRYST_ID(); 
 static const long ID_GLCRYSTAL_MENU_SHOWCURSOR=        WXCRYST_ID(); 
+static const long ID_GLCRYSTAL_MENU_SETCURSOR=        WXCRYST_ID(); 
 static const long ID_GLCRYSTAL_UPDATEUI=               WXCRYST_ID(); 
 static const long ID_GLCRYSTAL_MENU_CHANGELIMITS=      WXCRYST_ID(); 
 static const long ID_GLCRYSTAL_MENU_SHOWCRYSTAL=       WXCRYST_ID(); 
@@ -1218,6 +1234,7 @@ BEGIN_EVENT_TABLE(WXGLCrystalCanvas, wxGLCanvas)
    EVT_MENU             (ID_GLCRYSTAL_MENU_SHOWCRYSTAL,         WXGLCrystalCanvas::OnShowCrystal)
    EVT_MENU             (ID_GLCRYSTAL_MENU_SHOWATOMLABEL,       WXGLCrystalCanvas::OnShowAtomLabel)
    EVT_MENU             (ID_GLCRYSTAL_MENU_SHOWCURSOR,          WXGLCrystalCanvas::OnShowCursor)
+   EVT_MENU             (ID_GLCRYSTAL_MENU_SETCURSOR,           WXGLCrystalCanvas::OnSetCursor)
    EVT_MENU             (ID_GLCRYSTAL_MENU_LOADFOURIER,         WXGLCrystalCanvas::OnLoadFourier)
    EVT_MENU             (ID_GLCRYSTAL_MENU_CHANGECONTOUR,       WXGLCrystalCanvas::OnChangeContour)
    EVT_MENU             (ID_GLCRYSTAL_MENU_ADDCONTOUR,          WXGLCrystalCanvas::OnAddContour)
@@ -1254,6 +1271,7 @@ mShowFourier(true),mShowCrystal(true),mShowAtomName(true),mShowCursor(false)
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWCRYSTAL, "Hide Crystal");
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, "Hide Atom Labels");
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWCURSOR, "Show Cursor");
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SETCURSOR, "Set view cntr and cursor pos.");
    mpPopUpMenu->AppendSeparator();
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_LOADFOURIER, "Load Fourier Map");	
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_CHANGECONTOUR, "Change Contour Value");
@@ -1398,7 +1416,6 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
       REAL y=mY0;
       REAL z=mZ0;
       mpWXCrystal->GetCrystal().OrthonormalToFractionalCoords(x,y,z);
-      const REAL xtmp=x;
       x=0.5-x;
       y=0.5-y;
       z=0.5-z;
@@ -1745,6 +1762,33 @@ void WXGLCrystalCanvas::OnShowCursor()
    else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWCURSOR, "Hide Cursor");
    mShowCursor= !mShowCursor;
    this->CrystUpdate();
+}
+
+void WXGLCrystalCanvas::OnSetCursor()
+{
+  VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnSetCursor",1)
+  REAL x=mX0;
+  REAL y=mY0;
+  REAL z=mZ0;
+  mpWXCrystal->GetCrystal().OrthonormalToFractionalCoords(x,y,z);
+
+  mViewCntr.x = 0.5 - x;
+  mViewCntr.y = 0.5 - y;
+  mViewCntr.z = 0.5 - z;
+  UserXYZBox *BoxDlg = new UserXYZBox(this,
+       "Set position for view center and cursor\nposition (fractional coordinates)",
+			 mViewCntr);
+  if (BoxDlg->ShowModal() == wxID_OK ) {
+     mViewCntr =  BoxDlg->GetXYZ();
+     VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnSetCursor (frac) = " <<
+		 mViewCntr.x << "," << mViewCntr.y << "," << mViewCntr.z,1)
+     mX0 = 0.5 - mViewCntr.x;
+     mY0 = 0.5 - mViewCntr.y;
+     mZ0 = 0.5 - mViewCntr.z;
+     mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(mX0, mY0, mZ0);
+     VFN_DEBUG_MESSAGE("...ortho" << mX0 << "," << mY0 << "," << mZ0,1)
+     Refresh(FALSE);
+  }
 }
 
 void WXGLCrystalCanvas::OnLoadFourier()
@@ -2149,6 +2193,86 @@ void UserSelectBoundingBox::OnOk () {
 BBox UserSelectBoundingBox::GetBBox () {
   return mbbox;
 }
+
+
+////////////////////////////////////////////////////////////////////////
+//
+//    UserXYZBox
+//
+////////////////////////////////////////////////////////////////////////
+BEGIN_EVENT_TABLE(UserXYZBox, wxDialog)
+   EVT_BUTTON(wxID_OK, UserXYZBox::OnOk)
+END_EVENT_TABLE()
+
+  UserXYZBox::UserXYZBox (wxWindow *parent, char * title,
+					      const Triple xyz)
+  : wxDialog((wxWindow *)parent, -1, "Set position", wxDefaultPosition,
+  	     wxSize(250, 250), wxDEFAULT_DIALOG_STYLE) 
+{
+  wxBoxSizer *dialogSizer = new wxBoxSizer(wxVERTICAL);
+  wxFlexGridSizer *inputSizer = new wxFlexGridSizer(3, 2, 10, 10);
+  // 1st row
+  inputSizer->Add(new wxStaticText(this, -1, "x"), 0, wxALIGN_CENTRE_VERTICAL);
+  inputSizer->Add(mpXCtrl = new wxTextCtrl(this, -1, 
+					   wxString::Format("%.3f",xyz.x)), 
+					   0, wxALIGN_CENTRE_VERTICAL);
+  // 2nd row
+  inputSizer->Add(new wxStaticText(this, -1, "y"), 0, wxALIGN_CENTRE_VERTICAL);
+  inputSizer->Add(mpYCtrl = new wxTextCtrl(this, -1, 
+					   wxString::Format("%.3f",xyz.y)), 
+					   0, wxALIGN_CENTRE_VERTICAL);
+  // 3rd row
+  inputSizer->Add(new wxStaticText(this, -1, "z"), 0, wxALIGN_CENTRE_VERTICAL);
+  inputSizer->Add(mpZCtrl = new wxTextCtrl(this, -1, 
+					   wxString::Format("%.3f",xyz.z)), 
+					   0, wxALIGN_CENTRE_VERTICAL);
+  // button section
+  wxFlexGridSizer *buttonSizer = new wxFlexGridSizer(1, 2, 10, 10);
+  buttonSizer->Add(new wxButton(this, wxID_OK, "OK"), 
+		   0, wxALIGN_CENTRE_VERTICAL);
+  buttonSizer->Add(new wxButton(this, wxID_CANCEL, "Cancel"), 
+		   0, wxALIGN_CENTRE_VERTICAL);
+
+  dialogSizer->Add(10, 10);
+  dialogSizer->Add(new wxStaticText(this, -1, title), 0, 
+		   wxALIGN_CENTER);
+  dialogSizer->Add(10, 10);
+  dialogSizer->Add(inputSizer, 0, wxALIGN_CENTER);
+  dialogSizer->Add(20, 20);
+  dialogSizer->Add(buttonSizer, 0, wxALIGN_CENTER);
+
+  SetSizer(dialogSizer);
+  SetAutoLayout(TRUE);
+  Layout();
+}
+
+UserXYZBox::~UserXYZBox () {
+};
+
+void UserXYZBox::OnOk () {
+  char * strptr;
+  const char * val;
+
+  val = mpXCtrl->GetValue().c_str();
+  mXYZ.x = strtod(val, &strptr);
+  if (val == strptr) {wxMessageBox("Invalid value for X!", "Position error", wxOK, this); return;}
+
+  val = mpYCtrl->GetValue().c_str();
+  mXYZ.y = strtod(val, &strptr);
+  if (val == strptr) {wxMessageBox("Invalid value for Y!", "Position error", wxOK, this); return;}
+
+  val = mpZCtrl->GetValue().c_str();
+  mXYZ.z = strtod(val, &strptr);
+  if (val == strptr) {wxMessageBox("Invalid value for Z!", "Position error", wxOK, this); return;}
+
+    // close the dialog
+    EndModal(wxID_OK);
+}
+
+Triple UserXYZBox::GetXYZ () {
+  return mXYZ;
+}
+
 
 #endif // #ifdef OBJCRYST_GL
 
