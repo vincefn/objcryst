@@ -98,6 +98,12 @@ SpeedTestReport SpeedTest(const unsigned int nbAtom, const int nbAtomType,const 
 
          PowderPatternBackground *backgdData= new PowderPatternBackground;
          backgdData->SetName("PbSo4-background");
+         {
+            CrystVector_REAL tth(2),backgd(2);
+            tth(0)=0.;tth(1)=3.14;
+            backgd(0)=1.;backgd(1)=9.;
+            backgdData->SetInterpPoints(tth,backgd);
+         }
          pDataTmp->AddPowderPatternComponent(*backgdData);
          
          PowderPatternDiffraction * diffData=new PowderPatternDiffraction;

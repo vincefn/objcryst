@@ -102,19 +102,22 @@ const list<pair<const REAL, const string> >& PowderPatternComponent::GetPatternL
 //
 ////////////////////////////////////////////////////////////////////////
 PowderPatternBackground::PowderPatternBackground():
-mBackgroundType(POWDER_BACKGROUND_LINEAR),mBackgroundNbPoint(0),
+mBackgroundNbPoint(0),
 mMaxSinThetaOvLambda(10),mModelVariance(0)
 {
    mClockMaster.AddChild(mClockBackgroundPoint);
+   this->InitOptions();
 }
 
 PowderPatternBackground::PowderPatternBackground(const  PowderPatternBackground &old):
-mBackgroundType(old.mBackgroundType),mBackgroundNbPoint(old.mBackgroundNbPoint),
+mBackgroundNbPoint(old.mBackgroundNbPoint),
 mBackgroundInterpPoint2Theta(old.mBackgroundInterpPoint2Theta),
 mBackgroundInterpPointIntensity(old.mBackgroundInterpPointIntensity),
 mMaxSinThetaOvLambda(10),mModelVariance(0)
 {
    mClockMaster.AddChild(mClockBackgroundPoint);
+   this->InitOptions();
+   mInterpolationModel.SetChoice(old.mInterpolationModel.GetChoice());
 }
 
 PowderPatternBackground::~PowderPatternBackground(){}
@@ -181,7 +184,6 @@ Error opening file for input:"+filename);
    bckgd.resizeAndPreserve(nbPoints);
    //cout << bckgd << endl;
    mBackgroundNbPoint=nbPoints;
-   mBackgroundType=POWDER_BACKGROUND_LINEAR;
    mBackgroundInterpPoint2Theta=bckgd2Theta;
    mBackgroundInterpPoint2Theta*= DEG2RAD;
    mBackgroundInterpPointIntensity=bckgd;
@@ -194,6 +196,24 @@ Error opening file for input:"+filename);
    }
    this->UpdateDisplay();
    VFN_DEBUG_MESSAGE("PowderPatternBackground::ImportUserBackground():finished",5)
+}
+void PowderPatternBackground::SetInterpPoints(const CrystVector_REAL tth,
+                                              const CrystVector_REAL backgd)
+{
+   VFN_DEBUG_ENTRY("PowderPatternBackground::SetInterpPoints():",5)
+   if(  (tth.numElements()!=backgd.numElements())
+      ||(tth.numElements()<2))
+   {
+      throw ObjCrystException("PowderPatternBackground::SetInterpPoints() : \
+number of points differ or less than 2 points !");
+   }
+   mBackgroundNbPoint=tth.numElements();
+   mBackgroundInterpPoint2Theta=tth;
+   mBackgroundInterpPointIntensity=backgd;
+   this->InitRefParList();
+   mClockBackgroundPoint.Click();
+   this->UpdateDisplay();
+   VFN_DEBUG_EXIT("PowderPatternBackground::SetInterpPoints()",5)
 }
 
 void PowderPatternBackground::GetGeneGroup(const RefinableObj &obj,
@@ -245,11 +265,12 @@ void PowderPatternBackground::CalcPowderPattern() const
    
    //:TODO: This needs serious optimization !
    if(   (mClockPowderPatternCalc>mClockBackgroundPoint)
-       &&(mClockPowderPatternCalc>mpParentPowderPattern->GetClockPowderPatternPar())) return;
+       &&(mClockPowderPatternCalc>mpParentPowderPattern->GetClockPowderPatternPar())
+       &&(mClockPowderPatternCalc>mInterpolationModel.GetClock())) return;
    TAU_PROFILE("PowderPatternBackground::CalcPowderPattern()","void ()",TAU_DEFAULT);
    VFN_DEBUG_MESSAGE("PowderPatternBackground::CalcPowderPattern()",3);
    
-   switch(mBackgroundType)
+   switch(mInterpolationModel.GetChoice())
    {
       case POWDER_BACKGROUND_LINEAR:
       {
@@ -292,7 +313,12 @@ void PowderPatternBackground::CalcPowderPattern() const
       }
       case POWDER_BACKGROUND_CUBIC_SPLINE:
       {
-         //:TODO:
+         const unsigned long nb=mpParentPowderPattern->GetNbPoint();
+         const REAL tth0=mpParentPowderPattern->Get2ThetaMin();
+         const REAL tths=mpParentPowderPattern->Get2ThetaStep();
+         CubicSpline spline(mBackgroundInterpPoint2Theta,mBackgroundInterpPointIntensity);
+         mPowderPatternCalc.resize(nb);
+         for(unsigned long i=0;i<nb;++i) mPowderPatternCalc(i)=spline(tth0+i*tths);
          break;
       }
    }
@@ -401,6 +427,27 @@ void PowderPatternBackground::InitRefParList()
    #endif
 }
 
+void PowderPatternBackground::InitOptions()
+{
+   VFN_DEBUG_MESSAGE("PowderPatternBackground::InitOptions()",5)
+   static string InterpolationModelName;
+   static string InterpolationModelChoices[2];
+   
+   static bool needInitNames=true;
+   if(true==needInitNames)
+   {
+      InterpolationModelName="Interpolation Model";
+      InterpolationModelChoices[0]="Linear";
+      InterpolationModelChoices[1]="Spline";
+      //InterpolationModelChoices[2]="Chebyshev";
+      
+      needInitNames=false;//Only once for the class
+   }
+   mInterpolationModel.Init(2,&InterpolationModelName,InterpolationModelChoices);
+   this->AddOption(&mInterpolationModel);
+   mClockMaster.AddChild(mInterpolationModel.GetClock());
+   mInterpolationModel.SetChoice(1);
+}
 #ifdef __WX__CRYST__
 WXCrystObjBasic* PowderPatternBackground::WXCreate(wxWindow* parent)
 {

@@ -1718,14 +1718,12 @@ void PowderPatternBackground::XMLOutput(ostream &os,int indent)const
    for(int i=0;i<indent;i++) os << "  " ;
    XMLCrystTag tag("PowderPatternBackground");
    tag.AddAttribute("Name",this->GetName());
-   switch(mBackgroundType)
-   {
-      case POWDER_BACKGROUND_CUBIC_SPLINE: tag.AddAttribute("Interpolation","Spline");break;
-      case POWDER_BACKGROUND_LINEAR: tag.AddAttribute("Interpolation","Linear");break;
-   }
    os <<tag<<endl;
    indent++;
    
+   mInterpolationModel.XMLOutput(os,indent);
+   os<<endl;
+
    XMLCrystTag tag2("TThetaIntensityList");
    for(int i=0;i<indent;i++) os << "  " ;
    os <<tag2<<endl;
@@ -1762,9 +1760,9 @@ void PowderPatternBackground::XMLInput(istream &is,const XMLCrystTag &tagg)
    {
       if("Name"==tagg.GetAttributeName(i)) this->SetName(tagg.GetAttributeValue(i));
       if("Interpolation"==tagg.GetAttributeName(i))
-      {
-         if("Spline"==tagg.GetAttributeValue(i)) mBackgroundType=POWDER_BACKGROUND_CUBIC_SPLINE;
-         if("Linear"==tagg.GetAttributeValue(i)) mBackgroundType=POWDER_BACKGROUND_LINEAR;
+      {// Obsolete, but we must still read this
+         if("Linear"==tagg.GetAttributeValue(i)) mInterpolationModel.SetChoice(0);
+         if("Spline"==tagg.GetAttributeValue(i)) mInterpolationModel.SetChoice(1);
       }
    }
    while(true)
@@ -1824,6 +1822,13 @@ void PowderPatternBackground::XMLInput(istream &is,const XMLCrystTag &tagg)
                }
             }
          }
+      }
+      if("Option"==tag.GetName())
+      {
+         for(unsigned int i=0;i<tag.GetNbAttribute();i++)
+            if("Name"==tag.GetAttributeName(i)) 
+               mOptionRegistry.GetObj(tag.GetAttributeValue(i)).XMLInput(is,tag);
+         continue;
       }
    }
 }

@@ -190,6 +190,7 @@ class PowderPatternBackground : public PowderPatternComponent
          GetPowderPatternIntegratedCalc()const;
       /// Import background points from a file (with two columns 2theta, intensity)
       void ImportUserBackground(const string &filename);
+      void SetInterpPoints(const CrystVector_REAL tth, const CrystVector_REAL backgd);
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
@@ -208,8 +209,7 @@ class PowderPatternBackground : public PowderPatternComponent
       virtual void GetBraggLimits(CrystVector_long *&min,CrystVector_long *&max)const;
       virtual void SetMaxSinThetaOvLambda(const REAL max);
       void InitRefParList();
-      /// The kind of interpolation used
-      PowderBackgroundInterpType mBackgroundType;
+      void InitOptions();
       /// Number of fitting points for background
       int mBackgroundNbPoint;
       /// Vector of 2theta values for the fitting points of the background
@@ -220,9 +220,6 @@ class PowderPatternBackground : public PowderPatternComponent
       // Clocks
          /// Modification of the interpolated points
          RefinableObjClock mClockBackgroundPoint;
-      // mutable clocks
-         /// Last time Splines were generated
-         mutable RefinableObjClock mClockBackgroundSpline;
       
       /** Maximum sin(theta)/lambda for all calculations (10 by default).
       *
@@ -235,6 +232,8 @@ class PowderPatternBackground : public PowderPatternComponent
       /// model
       REAL mModelVariance;
       
+      /// Type of interpolation performed: linear or cubic spline
+      RefObjOpt mInterpolationModel;
       //To be removed
       friend class PowderPattern; 
    #ifdef __WX__CRYST__
