@@ -42,7 +42,7 @@ SEARCHDIRS = -I- -I/usr/local/include -I${DIR_CRYST}/.. -I./ -I$(DIR_BLITZ)  -I$
 #wxWindows flags
 ifeq ($(wxcryst),1)
    WXCRYSTFLAGS = -D__WX__CRYST__ -D__WXGTK__ -D__USE_WXCONFIG__ -DGTK_NO_CHECK_CASTS
-   WX_LDFLAGS =  -L/usr/lib -L/usr/local/lib -L/usr/X11/lib -lwxcryst -lwx_gtk -lgtk -lgdk -rdynamic -lgmodule -lgthread -lglib -lpthread -ldl -lXi -lXext -lX11 -lXmu ${GL_WX_LIB} 
+   WX_LDFLAGS =  -L/usr/lib -L/usr/local/lib -L/usr/X11R6/lib -lwxcryst -lwx_gtk -lgtk -lgdk -rdynamic -lgmodule -lgthread -lglib -lpthread -ldl -lXi -lXext -lX11 -lXmu ${GL_WX_LIB} 
 else
    WXCRYSTFLAGS :=
    WX_LDFLAGS :=
