@@ -295,8 +295,8 @@ mNbTrialRetry(0),mMinCostRetry(0),mMaxNbTrialSinceBest(0)
    VFN_DEBUG_ENTRY("MonteCarloObj::MonteCarloObj()",5)
    this->InitOptions();
    mGlobalOptimType.SetChoice(GLOBAL_OPTIM_PARALLEL_TEMPERING);
-   mAnnealingScheduleTemp.SetChoice(ANNEALING_EXPONENTIAL);
-   mAnnealingScheduleMutation.SetChoice(ANNEALING_SMART);
+   mAnnealingScheduleTemp.SetChoice(ANNEALING_SMART);
+   mAnnealingScheduleMutation.SetChoice(ANNEALING_EXPONENTIAL);
    gOptimizationObjRegistry.Register(*this);
    this->InitRandomSeedFromTime();
    VFN_DEBUG_EXIT("MonteCarloObj::MonteCarloObj()",5)
@@ -319,8 +319,8 @@ mNbTrialRetry(0),mMinCostRetry(0),mMaxNbTrialSinceBest(0)
    VFN_DEBUG_ENTRY("MonteCarloObj::MonteCarloObj(bool)",5)
    this->InitOptions();
    mGlobalOptimType.SetChoice(GLOBAL_OPTIM_PARALLEL_TEMPERING);
-   mAnnealingScheduleTemp.SetChoice(ANNEALING_EXPONENTIAL);
-   mAnnealingScheduleMutation.SetChoice(ANNEALING_SMART);
+   mAnnealingScheduleTemp.SetChoice(ANNEALING_SMART);
+   mAnnealingScheduleMutation.SetChoice(ANNEALING_EXPONENTIAL);
    if(false==internalUseOnly) gOptimizationObjRegistry.Register(*this);
    this->InitRandomSeedFromTime();
    VFN_DEBUG_EXIT("MonteCarloObj::MonteCarloObj(bool)",5)
