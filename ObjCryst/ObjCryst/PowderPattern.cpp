@@ -26,6 +26,8 @@
 #include <typeinfo>
 #include <stdio.h> //for sprintf()
 #include "ObjCryst/PowderPattern.h"
+#include "ObjCryst/PowderPatternBackgroundBayesianMinimiser.h"
+#include "RefinableObj/Simplex.h"
 #include "Quirks/VFNDebug.h"
 #include "Quirks/VFNStreamFormat.h"
 #ifdef __WX__CRYST__
@@ -78,6 +80,11 @@ const string& PowderPatternComponent::GetClassName() const
 {
    const static string className="PowderPatternComponent";
    return className;
+}
+
+const PowderPattern& PowderPatternComponent::GetParentPowderPattern()const
+{
+   return *mpParentPowderPattern;
 }
 
 bool PowderPatternComponent::IsScalable()const {return mIsScalable;}
@@ -259,6 +266,34 @@ void PowderPatternBackground::TagNewBestConfig()const
 {
 }
 
+void PowderPatternBackground::OptimizeBayesianBackground()
+{
+   VFN_DEBUG_ENTRY("PowderPatternBackground::OptimizeBayesianBackground()",10);
+   PowderPatternBackgroundBayesianMinimiser min(*this);
+   SimplexObj simplex("Simplex Test");
+   simplex.AddRefinableObj(min);
+   long nbcycle;
+   REAL lastllk=simplex.GetLogLikelihood();
+   long ct=0;
+   cout<<ct<<"Chi^2(BayesianBackground)="<<lastllk<<endl;
+   this->GetParentPowderPattern().UpdateDisplay();
+   this->SetGlobalOptimStep(gpRefParTypeScattDataBackground,
+                            mBackgroundInterpPointIntensity.max()/100.0);
+   for(;;)
+   {
+      nbcycle=50*mBackgroundNbPoint;
+      simplex.Optimize(nbcycle,true);
+      this->GetParentPowderPattern().UpdateDisplay();
+      const REAL tmp=simplex.GetLogLikelihood();
+      cout<<ct<<"Chi^2(BayesianBackground)="<<tmp<<endl;
+      if((lastllk-tmp)<1e-4*lastllk) {lastllk=tmp ;break;}
+      lastllk=tmp;
+      if(++ct>20) break;
+   }
+   this->SetGlobalOptimStep(gpRefParTypeScattDataBackground,10.0);
+   VFN_DEBUG_EXIT("PowderPatternBackground::OptimizeBayesianBackground()",10);
+}
+
 void PowderPatternBackground::CalcPowderPattern() const
 {
    if(mClockPowderPatternCalc>mClockMaster) return;
@@ -413,6 +448,7 @@ void PowderPatternBackground::InitRefParList()
       RefinablePar tmp(str+(string)buf,p++,
                         0.,1000.,gpRefParTypeScattDataBackground,REFPAR_DERIV_STEP_RELATIVE,
                         false,true,true,false,1.);
+      tmp.SetGlobalOptimStep(10.);
       tmp.AssignClock(mClockBackgroundPoint);
       tmp.SetDerivStep(1e-3);
       this->AddPar(tmp);
@@ -1339,7 +1375,7 @@ ObjRegistry<PowderPattern>
    gPowderPatternRegistry("List of all PowderPattern objects");
 
 PowderPattern::PowderPattern():
-m2ThetaMin(0),m2ThetaStep(0),mNbPoint(0),mWavelength(1.),
+m2ThetaMin(0),m2ThetaStep(0),mNbPoint(0),
 m2ThetaZero(0.),m2ThetaDisplacement(0.),m2ThetaTransparency(0.),
 mScaleFactor(20),mUseFastLessPreciseFunc(false),
 mStatisticsExcludeBackground(false),mMaxSinThetaOvLambda(10),mNbPointUsed(0)
@@ -1357,7 +1393,7 @@ mStatisticsExcludeBackground(false),mMaxSinThetaOvLambda(10),mNbPointUsed(0)
 
 PowderPattern::PowderPattern(const PowderPattern &old):
 m2ThetaMin(old.m2ThetaMin),m2ThetaStep(old.m2ThetaStep),mNbPoint(old.mNbPoint),
-mWavelength(old.mWavelength),mRadiation(old.mRadiation),
+mRadiation(old.mRadiation),
 m2ThetaZero(old.m2ThetaZero),m2ThetaDisplacement(old.m2ThetaDisplacement),
 m2ThetaTransparency(old.m2ThetaTransparency),
 mPowderPatternComponentRegistry(old.mPowderPatternComponentRegistry),
@@ -4213,11 +4249,7 @@ CrystVector_REAL PowderProfileGauss  (const CrystVector_REAL ttheta,const REAL f
       for(long i=middlePt;i<nbPoints;i++) *p++ *= c2;
    }
    p=result.data();
-   #ifdef _MSC_VER
-   for(long i=0;i<nbPoints;i++) { *p = pow((float)2.71828182846,(float)*p) ; p++ ;}
-   #else
-   for(long i=0;i<nbPoints;i++) { *p = exp((float)*p) ; p++ ;}
-   #endif
+   for(long i=0;i<nbPoints;i++) { *p = exp(*p) ; p++ ;}
    
    result *= 2. / fwhm * sqrt(log(2.)/M_PI);
    return result;

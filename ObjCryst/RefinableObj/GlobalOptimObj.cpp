@@ -207,6 +207,12 @@ void OptimizationObj::AddRefinableObj(RefinableObj &obj)
    #endif
 }
 
+RefinableObj& OptimizationObj::GetFullRefinableObj(const bool rebuild)
+{
+   if(rebuild) this->PrepareRefParList();
+   return mRefParList;
+}
+
 const string& OptimizationObj::GetName()const { return mName;}
 void OptimizationObj::SetName(const string& name) {mName=name;}
 
@@ -881,8 +887,22 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
             //Try swapping worlds
             for(int i=1;i<nbWorld;i++)
             {
+               #if 0
+               mRefParList.RestoreParamSet(worldCurrentSetIndex(i));
+               mMutationAmplitude=mutationAmplitude(i);
+               cout<<i<<":"<<currentCost(i)<<":"<<this->GetLogLikelihood()<<endl;
+               #endif
+               #if 1
                if( log((rand()+1)/(REAL)RAND_MAX)
                       < (-(currentCost(i-1)-currentCost(i))/simAnnealTemp(i)))
+               #else
+               // Compare World (i-1) and World (i) with the same amplitude,
+               // hence the same max likelihood error
+               mRefParList.RestoreParamSet(worldCurrentSetIndex(i-1));
+               mMutationAmplitude=mutationAmplitude(i);
+               if( log((rand()+1)/(REAL)RAND_MAX)
+                      < (-(this->GetLogLikelihood()-currentCost(i))/simAnnealTemp(i)))
+               #endif
                {  
                /*
                   if(i>2)
@@ -903,6 +923,16 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                   const long tmpIndex=worldSwapIndex(i);
                   worldSwapIndex(i)=worldSwapIndex(i-1);
                   worldSwapIndex(i-1)=tmpIndex;
+                  #if 0
+                  // Compute correct costs in the case we use maximum likelihood
+                  mRefParList.RestoreParamSet(worldCurrentSetIndex(i));
+                  mMutationAmplitude=mutationAmplitude(i);
+                  currentCost(i)=this->GetLogLikelihood();
+                  
+                  mRefParList.RestoreParamSet(worldCurrentSetIndex(i-1));
+                  mMutationAmplitude=mutationAmplitude(i-1);
+                  currentCost(i-1)=this->GetLogLikelihood();
+                  #endif
                }
             }
             #if 0
@@ -1386,6 +1416,18 @@ void MonteCarloObj::XMLInput(istream &is,const XMLCrystTag &tagg)
 }
 
 const string MonteCarloObj::GetClassName()const { return "MonteCarloObj";}
+
+REAL MonteCarloObj::GetLogLikelihood()
+{
+   #if 0
+   const REAL mle=0.10;//+0.025*mMutationAmplitude;//*sqrt(mMutationAmplitude);
+   mRefParList.GetPar(7).SetValue(mle);
+   mRefParList.GetPar(9).SetValue(mle);
+   mRefParList.GetPar(11).SetValue(mle);
+   //if((rand()%1000)==0) mRefParList.Print();
+   #endif
+   return OptimizationObj::GetLogLikelihood();
+}
 
 void MonteCarloObj::NewConfiguration(const RefParType *type)
 {

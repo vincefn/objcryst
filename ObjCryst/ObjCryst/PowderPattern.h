@@ -49,7 +49,10 @@ class PowderPatternComponent : virtual public RefinableObj
       virtual ~PowderPatternComponent();
       virtual const string& GetClassName() const;
       
-      /// \internal
+      /// Get the PowderPattern object which uses this component.
+      /// This allows to know the observed powder pattern to evaluate
+      /// the background.
+      const PowderPattern& GetParentPowderPattern()const;
       /// Set the PowderPattern object which uses this component.
       /// This sets all necessary pattern parameters (2theta range,
       /// wavelength, radiation type...) accordingly.
@@ -202,6 +205,15 @@ class PowderPatternBackground : public PowderPatternComponent
          GetPowderPatternIntegratedCalcVariance() const;
       virtual bool HasPowderPatternCalcVariance()const;
       virtual void TagNewBestConfig()const;
+      /** Optimize the background using a Bayesian approach. The background parameters
+      * must be un-fixed before.
+      *
+      * The minimization will a maximum of 50 Simplex runs (see the SimplexObj documentation),
+      * each with 200 cycles.
+      *
+      * See the class documentation for PowderPatternBackgroundBayesianMinimiser.
+      */
+      void OptimizeBayesianBackground();
    protected:
       virtual void CalcPowderPattern() const;
       virtual void CalcPowderPatternIntegrated() const;
@@ -737,15 +749,14 @@ class PowderPattern : public RefinableObj
       /// taking into account observation and model errors. Integrated.
       mutable CrystVector_REAL mPowderPatternVarianceIntegrated;
       
-      /// 2theta min and step for the pattern
+      /// 2theta min and max for a monochromatic diffraction pattern
       REAL m2ThetaMin,m2ThetaStep;
+      /// min and max time for a TOF experiment
+      REAL mTOFMin,mTOFMax;
       /// Number of points in the pattern
       unsigned long mNbPoint;
       
-      /// The wavelength of the experiment, in Angstroems.
-      /// \warning This should be removed, as it is also available in mRadiation.
-      REAL mWavelength;
-      /// The wavelength of the experiment, in Angstroems.
+      /// The Radiation corresponding to this experiment
       Radiation mRadiation;
       
       // Clocks

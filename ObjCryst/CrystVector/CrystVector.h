@@ -546,13 +546,20 @@ class CubicSpline
       /// Spline with given extremum derivatives
       CubicSpline(const CrystVector_REAL &x, const CrystVector_REAL &y, 
                   const REAL yp1, const REAL ypn);
+      /// Spline with given extremum derivatives
+      CubicSpline(const REAL *px, const REAL *py, const unsigned long nbPoints,
+                  const REAL yp1, const REAL ypn);
       /// Natural cubic spline
       CubicSpline(const CrystVector_REAL &x, const CrystVector_REAL &y);
+      /// Natural cubic spline
+      CubicSpline(const REAL *px, const REAL *py, const unsigned long nbPoints);
       ~CubicSpline();
       REAL operator()(const REAL x) const;
    private:
-      const CrystVector_REAL mX;
-      const CrystVector_REAL mY;
+      void InitSpline(const REAL yp1, const REAL ypn);
+      void InitNaturalSpline();
+      CrystVector_REAL mX;
+      CrystVector_REAL mY;
       CrystVector_REAL mYsecond;
 };
 

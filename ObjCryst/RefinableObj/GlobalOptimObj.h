@@ -140,7 +140,7 @@ class OptimizationObj
       * This function is the weighted sum of the chosen Cost Functions for
       * the refined objects.
       */
-      REAL GetLogLikelihood();
+      virtual REAL GetLogLikelihood();
 
       /// Stop after the current cycle. USed for interactive refinement.
       void StopAfterCycle();
@@ -149,6 +149,9 @@ class OptimizationObj
 
       /// Add a refined object. All sub-objects are also added
       void AddRefinableObj(RefinableObj &);
+      /// Get the RefinableObj with all the parameters from all refined objects.
+      /// If rebuild=true, prepare again the list of objects/parameters.
+      RefinableObj& GetFullRefinableObj(const bool rebuild=true);
       /** \brief Output a description of the object in XML format to a stream.
       *
       * This saves the list of refined object and the cost functions, as well as options
@@ -359,6 +362,7 @@ class MonteCarloObj:public OptimizationObj
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
       virtual const string GetClassName()const;
+      virtual REAL GetLogLikelihood();
    protected:
       
       /** \brief Make a random change in the configuration.

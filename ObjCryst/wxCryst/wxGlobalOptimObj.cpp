@@ -148,7 +148,8 @@ void WXOptimizationObj::AddRefinedObject(RefinableObj &obj)
    refobj->SetValue(obj.GetClassName()+":"+obj.GetName());
    mpSizer->Add(refobj);
    mList.Add(refobj);
-   this->Layout();
+   this->BottomLayout(0);
+   refobj->UpdateUI();
 }
 
 void WXOptimizationObj::OnRemoveRefinedObject(wxCommandEvent & WXUNUSED(event))

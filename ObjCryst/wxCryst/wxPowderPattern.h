@@ -34,6 +34,7 @@ class WXPowderPattern: public WXRefinableObj
       WXPowderPattern(wxWindow *parent, PowderPattern*);
       virtual void CrystUpdate();
       void OnMenuAddCompBackgd(wxCommandEvent & WXUNUSED(event));
+      void OnMenuAddCompBackgdBayesian(wxCommandEvent & WXUNUSED(event));
       void OnMenuAddCompCryst(wxCommandEvent & WXUNUSED(event));
       void OnMenuShowGraph(wxCommandEvent & WXUNUSED(event));
       void OnMenuSaveText(wxCommandEvent & WXUNUSED(event));
@@ -169,6 +170,8 @@ class WXPowderPatternBackground: public WXRefinableObj
    public:
       WXPowderPatternBackground(wxWindow *parent, PowderPatternBackground*);
       void OnMenuImportUserBackground(wxCommandEvent & WXUNUSED(event));
+      void OnMenuOptimizeBayesianBackground(wxCommandEvent & WXUNUSED(event));
+      void OnMenuAutomaticBayesianBackground(wxCommandEvent & WXUNUSED(event));
    private:
       PowderPatternBackground *mpPowderPatternBackground;
    DECLARE_EVENT_TABLE()

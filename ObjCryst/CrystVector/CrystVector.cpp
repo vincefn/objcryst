@@ -1154,7 +1154,72 @@ CubicSpline::CubicSpline(const CrystVector_REAL &x, const CrystVector_REAL &y,
 mX(x),mY(y),mYsecond(x.numElements())
 {
    VFN_DEBUG_MESSAGE("CubicSpline::CubicSpline(x,y,yp0,ypn)",5)
-   const long n=x.numElements();
+   this->InitSpline(yp0,ypn);
+   VFN_DEBUG_MESSAGE("CubicSpline::CubicSpline(x,y,yp0,ypn):End",5)
+}
+
+CubicSpline::CubicSpline(const REAL *px, const REAL *py, const unsigned long nbPoints, 
+            const REAL yp0, const REAL ypn):
+mX(nbPoints),mY(nbPoints),mYsecond(nbPoints)
+{
+   VFN_DEBUG_MESSAGE("CubicSpline::CubicSpline(x,y,yp0,ypn)",5)
+   for(unsigned long i=0;i<nbPoints;i++)
+   {
+      mX(i)=px[i];
+      mY(i)=py[i];
+   }
+   this->InitSpline(yp0,ypn);
+   VFN_DEBUG_MESSAGE("CubicSpline::CubicSpline(x,y,yp0,ypn):End",5)
+}
+
+CubicSpline::CubicSpline(const CrystVector_REAL &x, const CrystVector_REAL &y):
+mX(x),mY(y),mYsecond(x.numElements())
+{
+   VFN_DEBUG_MESSAGE("CubicSpline::CubicSpline(x,y)",5)
+   this->InitNaturalSpline();
+   VFN_DEBUG_MESSAGE("CubicSpline::CubicSpline(x,y):End",5)
+}
+
+CubicSpline::CubicSpline(const REAL *px, const REAL *py, const unsigned long nbPoints):
+mX(nbPoints),mY(nbPoints),mYsecond(nbPoints)
+{
+   VFN_DEBUG_MESSAGE("CubicSpline::CubicSpline(x,y,yp0,ypn)",5)
+   for(unsigned long i=0;i<nbPoints;i++)
+   {
+      mX(i)=px[i];
+      mY(i)=py[i];
+   }
+   this->InitNaturalSpline();
+   VFN_DEBUG_MESSAGE("CubicSpline::CubicSpline(x,y,yp0,ypn):End",5)
+}
+
+CubicSpline::~CubicSpline()
+{
+}
+
+REAL CubicSpline::operator()(const REAL x) const
+{
+   //:TODO: faster!
+   //:TODO: take into account beginning and end derivatives for out-of-bounds points
+   long i;
+   if(x<mX(0)) return mY(0);
+   for(i=0;i<(mX.numElements()-1);i++)
+      if(x<mX(i+1))
+      {
+         VFN_DEBUG_MESSAGE("CubicSpline::operator()(x):"<<x<<":"<<mX(i+1)<<":"<<i,0)
+         const REAL e=mX(i+1)-mX(i);
+         const REAL a=(mX(i+1)-x)/e;
+         const REAL b=1.-a;
+         const REAL c=1./6.*(a*a*a-a)*e*e;
+         const REAL d=1./6.*(b*b*b-b)*e*e;
+         return a*mY(i)+b*mY(i+1)+c*mYsecond(i)+d*mYsecond(i+1);
+      }
+   return mY(mY.numElements()-1);
+}
+
+void CubicSpline::InitSpline(const REAL yp0, const REAL ypn)
+{
+   const long n=mX.numElements();
    CrystVector_REAL u(mX.numElements());
    mYsecond(0)=-0.5;
    u(0)=(3/(mX(1)-mX(0)))*((mY(1)-mY(0))/(mX(1)-mX(0))-yp0);
@@ -1170,14 +1235,11 @@ mX(x),mY(y),mYsecond(x.numElements())
    const REAL c=(3./(mX(n-1)-mX(n-2)))*(ypn-(mY(n-1)-mY(n-2))/(mX(n-1)-mX(n-2)));
    mYsecond(n-1)=(c-.5*u(n-2))/(0.5*mYsecond(n-2)+1);
    for(long i=(n-2);i>=0;i--) mYsecond(i)=mYsecond(i)*mYsecond(i+1)+u(i);
-   VFN_DEBUG_MESSAGE("CubicSpline::CubicSpline(x,y,yp0,ypn):End",5)
 }
 
-CubicSpline::CubicSpline(const CrystVector_REAL &x, const CrystVector_REAL &y):
-mX(x),mY(y),mYsecond(x.numElements())
+void CubicSpline::InitNaturalSpline()
 {
-   VFN_DEBUG_MESSAGE("CubicSpline::CubicSpline(x,y)",5)
-   const long n=x.numElements();
+   const long n=mX.numElements();
    CrystVector_REAL u(mX.numElements());
    mYsecond(0)=0;
    u(0)=0;
@@ -1192,28 +1254,4 @@ mX(x),mY(y),mYsecond(x.numElements())
    }
    mYsecond(n-1)=0;
    for(long i=(n-2);i>=0;i--) mYsecond(i)=mYsecond(i)*mYsecond(i+1)+u(i);
-   VFN_DEBUG_MESSAGE("CubicSpline::CubicSpline(x,y):End",5)
-}
-
-CubicSpline::~CubicSpline()
-{
-}
-
-REAL CubicSpline::operator()(const REAL x) const
-{
-   //:TODO: faster!
-   long i;
-   if(x<mX(0)) return mY(0);
-   for(i=0;i<(mX.numElements()-1);i++)
-      if(x<mX(i+1))
-      {
-         VFN_DEBUG_MESSAGE("CubicSpline::operator()(x):"<<x<<":"<<mX(i+1)<<":"<<i,0)
-         const REAL e=mX(i+1)-mX(i);
-         const REAL a=(mX(i+1)-x)/e;
-         const REAL b=1.-a;
-         const REAL c=1./6.*(a*a*a-a)*e*e;
-         const REAL d=1./6.*(b*b*b-b)*e*e;
-         return a*mY(i)+b*mY(i+1)+c*mYsecond(i)+d*mYsecond(i+1);
-      }
-   return mY(mY.numElements()-1);
 }

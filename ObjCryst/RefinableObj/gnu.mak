@@ -1,7 +1,7 @@
 include ../rules.mak
 DIR_CRYST = ..
-# GeneticAlgorithm.o 
-OBJ= RefinableObj.o GlobalOptimObj.o IO.o LSQNumObj.o 
+# GeneticAlgorithm.o Powell.o ConjugateGradient.o 
+OBJ= Simplex.o RefinableObj.o GlobalOptimObj.o IO.o LSQNumObj.o 
 
 %.o : %.cpp
 	@$(MAKEDEPEND)

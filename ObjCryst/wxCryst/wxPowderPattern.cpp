@@ -16,7 +16,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-//#include <sstream> //for stringstream
+#include <sstream> //for stringstream
 #include <fstream>
 
 // wx headers, with or without precompilation
@@ -31,6 +31,8 @@
 
 #include "wxCryst/wxPowderPattern.h"
 #include "wxCryst/wxRadiation.h"
+#include "RefinableObj/Simplex.h"
+#include "ObjCryst/PowderPatternBackgroundBayesianMinimiser.h"
 
 //Fixes for Cygwin; where do those stupid macros come from ? Somewhere in wxMSW headers
 #ifdef max
@@ -127,89 +129,91 @@ void WXRadiation::OnUpdateUI(wxUpdateUIEvent& event)
 //    WXPowderPattern
 //
 ////////////////////////////////////////////////////////////////////////
-static const long ID_POWDERSPECTRUM_MENU_SCATT_ADDCOMPBACKGD=       WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_SCATT_ADDCOMPCRYST=        WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_GRAPH=                     WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_SAVETEXT=                  WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_SIMULATE=                  WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_IMPORT_FULLPROF=           WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_IMPORT_PSI_DMC=            WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_IMPORT_ILL_D1A5=           WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_IMPORT_XDD=                WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_IMPORT_CPI=                WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_IMPORT_FULLPROF4=          WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_IMPORT_MULTIDETECTORLLBG42=WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_IMPORT_2THETAOBSSIGMA=     WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_IMPORT_2THETAOBS=          WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_FITSCALE_R=                WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_FITSCALE_RW=               WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH=                WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_XRAY=           WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_NEUTRON=        WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET=            WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_AG=         WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_MO=         WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CU=         WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_FE=         WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CO=         WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CR=         WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_AGA1=       WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_MOA1=       WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CUA1=       WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_FEA1=       WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_COA1=       WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CRA1=       WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_MENU_ADD_2THETA_EXCLUDE=        WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUMBACKGROUND_IMPORT=               WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUMDIFF_CRYSTAL=                    WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUMDIFF_SAVEHKLFCALC=               WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUM_GRAPH_NEW_PATTERN=              WXCRYST_ID(); 
+static const long ID_POWDER_MENU_COMP_ADDBACKGD_BAYESIAN=WXCRYST_ID(); 
+static const long ID_POWDER_MENU_COMP_ADDBACKGD=       WXCRYST_ID(); 
+static const long ID_POWDER_MENU_COMP_ADDCRYST=        WXCRYST_ID(); 
+static const long ID_POWDER_MENU_GRAPH=                     WXCRYST_ID(); 
+static const long ID_POWDER_MENU_SAVETEXT=                  WXCRYST_ID(); 
+static const long ID_POWDER_MENU_SIMULATE=                  WXCRYST_ID(); 
+static const long ID_POWDER_MENU_IMPORT_FULLPROF=           WXCRYST_ID(); 
+static const long ID_POWDER_MENU_IMPORT_PSI_DMC=            WXCRYST_ID(); 
+static const long ID_POWDER_MENU_IMPORT_ILL_D1A5=           WXCRYST_ID(); 
+static const long ID_POWDER_MENU_IMPORT_XDD=                WXCRYST_ID(); 
+static const long ID_POWDER_MENU_IMPORT_CPI=                WXCRYST_ID(); 
+static const long ID_POWDER_MENU_IMPORT_FULLPROF4=          WXCRYST_ID(); 
+static const long ID_POWDER_MENU_IMPORT_MULTIDETECTORLLBG42=WXCRYST_ID(); 
+static const long ID_POWDER_MENU_IMPORT_2THETAOBSSIGMA=     WXCRYST_ID(); 
+static const long ID_POWDER_MENU_IMPORT_2THETAOBS=          WXCRYST_ID(); 
+static const long ID_POWDER_MENU_FITSCALE_R=                WXCRYST_ID(); 
+static const long ID_POWDER_MENU_FITSCALE_RW=               WXCRYST_ID(); 
+static const long ID_POWDER_MENU_WAVELENGTH=                WXCRYST_ID(); 
+static const long ID_POWDER_MENU_WAVELENGTH_XRAY=           WXCRYST_ID(); 
+static const long ID_POWDER_MENU_WAVELENGTH_NEUTRON=        WXCRYST_ID(); 
+static const long ID_POWDER_MENU_WAVELENGTH_SET=            WXCRYST_ID(); 
+static const long ID_POWDER_MENU_WAVELENGTH_SET_AG=         WXCRYST_ID(); 
+static const long ID_POWDER_MENU_WAVELENGTH_SET_MO=         WXCRYST_ID(); 
+static const long ID_POWDER_MENU_WAVELENGTH_SET_CU=         WXCRYST_ID(); 
+static const long ID_POWDER_MENU_WAVELENGTH_SET_FE=         WXCRYST_ID(); 
+static const long ID_POWDER_MENU_WAVELENGTH_SET_CO=         WXCRYST_ID(); 
+static const long ID_POWDER_MENU_WAVELENGTH_SET_CR=         WXCRYST_ID(); 
+static const long ID_POWDER_MENU_WAVELENGTH_SET_AGA1=       WXCRYST_ID(); 
+static const long ID_POWDER_MENU_WAVELENGTH_SET_MOA1=       WXCRYST_ID(); 
+static const long ID_POWDER_MENU_WAVELENGTH_SET_CUA1=       WXCRYST_ID(); 
+static const long ID_POWDER_MENU_WAVELENGTH_SET_FEA1=       WXCRYST_ID(); 
+static const long ID_POWDER_MENU_WAVELENGTH_SET_COA1=       WXCRYST_ID(); 
+static const long ID_POWDER_MENU_WAVELENGTH_SET_CRA1=       WXCRYST_ID(); 
+static const long ID_POWDER_MENU_ADD_2THETA_EXCLUDE=        WXCRYST_ID(); 
+static const long ID_POWDERBACKGROUND_IMPORT=               WXCRYST_ID(); 
+static const long ID_POWDERBACKGROUND_OPTIMIZEBAYESIAN=     WXCRYST_ID(); 
+static const long ID_POWDERDIFF_CRYSTAL=                    WXCRYST_ID(); 
+static const long ID_POWDERDIFF_SAVEHKLFCALC=               WXCRYST_ID(); 
+static const long ID_POWDER_GRAPH_NEW_PATTERN=              WXCRYST_ID(); 
 static const long ID_POWDERTEXTURE_MENU_ADDPHASE=                   WXCRYST_ID(); 
 static const long ID_POWDERTEXTURE_MENU_DELETEPHASE=                WXCRYST_ID(); 
 static const long ID_POWDERPATTERN_MENU_COMPONENTS=                 WXCRYST_ID(); 
 static const long ID_POWDERPATTERN_MENU_PATTERN=                    WXCRYST_ID(); 
   
 BEGIN_EVENT_TABLE(WXPowderPattern, wxWindow)
-   EVT_BUTTON(ID_WXOBJ_COLLAPSE,                       WXCrystObj::OnToggleCollapse)
-   EVT_MENU(ID_REFOBJ_MENU_OBJ_SAVE,                   WXRefinableObj::OnMenuSave)
-   EVT_MENU(ID_REFOBJ_MENU_OBJ_LOAD,                   WXRefinableObj::OnMenuLoad)
-   EVT_MENU(ID_REFOBJ_MENU_PAR_FIXALL,                 WXRefinableObj::OnMenuFixAllPar)
-   EVT_MENU(ID_REFOBJ_MENU_PAR_UNFIXALL,               WXRefinableObj::OnMenuUnFixAllPar)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_SCATT_ADDCOMPBACKGD,WXPowderPattern::OnMenuAddCompBackgd)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_SCATT_ADDCOMPCRYST, WXPowderPattern::OnMenuAddCompCryst)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_SAVETEXT,           WXPowderPattern::OnMenuSaveText)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_SIMULATE,           WXPowderPattern::OnMenuSimulate)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_IMPORT_FULLPROF,    WXPowderPattern::OnMenuImportFullProf)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_IMPORT_PSI_DMC,     WXPowderPattern::OnMenuImportPSI)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_IMPORT_ILL_D1A5,    WXPowderPattern::OnMenuImportILL)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_IMPORT_XDD,         WXPowderPattern::OnMenuImportXdd)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_IMPORT_CPI,         WXPowderPattern::OnMenuImportCPI)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_IMPORT_FULLPROF4,   WXPowderPattern::OnMenuImportFullProf4)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_IMPORT_MULTIDETECTORLLBG42,         
+   EVT_BUTTON(ID_WXOBJ_COLLAPSE,                    WXCrystObj::OnToggleCollapse)                
+   EVT_MENU(ID_REFOBJ_MENU_OBJ_SAVE,                WXRefinableObj::OnMenuSave)                  
+   EVT_MENU(ID_REFOBJ_MENU_OBJ_LOAD,                WXRefinableObj::OnMenuLoad)                  
+   EVT_MENU(ID_REFOBJ_MENU_PAR_FIXALL,              WXRefinableObj::OnMenuFixAllPar)             
+   EVT_MENU(ID_REFOBJ_MENU_PAR_UNFIXALL,            WXRefinableObj::OnMenuUnFixAllPar)           
+   EVT_MENU(ID_POWDER_MENU_COMP_ADDBACKGD,          WXPowderPattern::OnMenuAddCompBackgd)        
+   EVT_MENU(ID_POWDER_MENU_COMP_ADDBACKGD_BAYESIAN, WXPowderPattern::OnMenuAddCompBackgdBayesian)   
+   EVT_MENU(ID_POWDER_MENU_COMP_ADDCRYST,           WXPowderPattern::OnMenuAddCompCryst)         
+   EVT_MENU(ID_POWDER_MENU_SAVETEXT,                WXPowderPattern::OnMenuSaveText)             
+   EVT_MENU(ID_POWDER_MENU_SIMULATE,                WXPowderPattern::OnMenuSimulate)             
+   EVT_MENU(ID_POWDER_MENU_IMPORT_FULLPROF,         WXPowderPattern::OnMenuImportFullProf)       
+   EVT_MENU(ID_POWDER_MENU_IMPORT_PSI_DMC,          WXPowderPattern::OnMenuImportPSI)            
+   EVT_MENU(ID_POWDER_MENU_IMPORT_ILL_D1A5,         WXPowderPattern::OnMenuImportILL)            
+   EVT_MENU(ID_POWDER_MENU_IMPORT_XDD,              WXPowderPattern::OnMenuImportXdd)            
+   EVT_MENU(ID_POWDER_MENU_IMPORT_CPI,              WXPowderPattern::OnMenuImportCPI)            
+   EVT_MENU(ID_POWDER_MENU_IMPORT_FULLPROF4,        WXPowderPattern::OnMenuImportFullProf4)      
+   EVT_MENU(ID_POWDER_MENU_IMPORT_MULTIDETECTORLLBG42,         
                                                 WXPowderPattern::OnMenuImportMultiDetectorLLBG42)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_IMPORT_2THETAOBSSIGMA,
-                                                WXPowderPattern::OnMenuImport2ThetaObsSigma)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_IMPORT_2THETAOBS,   WXPowderPattern::OnMenuImport2ThetaObs)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET,     WXPowderPattern::OnMenuSetWavelength)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_WAVELENGTH_XRAY,    WXPowderPattern::OnMenuSetWavelength)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_WAVELENGTH_NEUTRON, WXPowderPattern::OnMenuSetWavelength)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_AG,  WXPowderPattern::OnMenuSetWavelength)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_MO,  WXPowderPattern::OnMenuSetWavelength)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CU,  WXPowderPattern::OnMenuSetWavelength)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_FE,  WXPowderPattern::OnMenuSetWavelength)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CO,  WXPowderPattern::OnMenuSetWavelength)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CR,  WXPowderPattern::OnMenuSetWavelength)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_AGA1,WXPowderPattern::OnMenuSetWavelength)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_MOA1,WXPowderPattern::OnMenuSetWavelength)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CUA1,WXPowderPattern::OnMenuSetWavelength)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_FEA1,WXPowderPattern::OnMenuSetWavelength)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_COA1,WXPowderPattern::OnMenuSetWavelength)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CRA1,WXPowderPattern::OnMenuSetWavelength)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_GRAPH,              WXPowderPattern::OnMenuShowGraph)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_FITSCALE_R,         WXPowderPattern::OnMenuFitScaleForR)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_FITSCALE_RW,        WXPowderPattern::OnMenuFitScaleForRw)
-   EVT_MENU(ID_POWDERSPECTRUM_MENU_ADD_2THETA_EXCLUDE, WXPowderPattern::OnMenuAdd2ThetaExclude)
-   EVT_UPDATE_UI(ID_CRYST_UPDATEUI,                    WXRefinableObj::OnUpdateUI)
+   EVT_MENU(ID_POWDER_MENU_IMPORT_2THETAOBSSIGMA,   WXPowderPattern::OnMenuImport2ThetaObsSigma)
+   EVT_MENU(ID_POWDER_MENU_IMPORT_2THETAOBS,        WXPowderPattern::OnMenuImport2ThetaObs)    
+   EVT_MENU(ID_POWDER_MENU_WAVELENGTH_SET,          WXPowderPattern::OnMenuSetWavelength)      
+   EVT_MENU(ID_POWDER_MENU_WAVELENGTH_XRAY,         WXPowderPattern::OnMenuSetWavelength)      
+   EVT_MENU(ID_POWDER_MENU_WAVELENGTH_NEUTRON,      WXPowderPattern::OnMenuSetWavelength)      
+   EVT_MENU(ID_POWDER_MENU_WAVELENGTH_SET_AG,       WXPowderPattern::OnMenuSetWavelength)      
+   EVT_MENU(ID_POWDER_MENU_WAVELENGTH_SET_MO,       WXPowderPattern::OnMenuSetWavelength)      
+   EVT_MENU(ID_POWDER_MENU_WAVELENGTH_SET_CU,       WXPowderPattern::OnMenuSetWavelength)      
+   EVT_MENU(ID_POWDER_MENU_WAVELENGTH_SET_FE,       WXPowderPattern::OnMenuSetWavelength)      
+   EVT_MENU(ID_POWDER_MENU_WAVELENGTH_SET_CO,       WXPowderPattern::OnMenuSetWavelength)      
+   EVT_MENU(ID_POWDER_MENU_WAVELENGTH_SET_CR,       WXPowderPattern::OnMenuSetWavelength)      
+   EVT_MENU(ID_POWDER_MENU_WAVELENGTH_SET_AGA1,     WXPowderPattern::OnMenuSetWavelength)      
+   EVT_MENU(ID_POWDER_MENU_WAVELENGTH_SET_MOA1,     WXPowderPattern::OnMenuSetWavelength)      
+   EVT_MENU(ID_POWDER_MENU_WAVELENGTH_SET_CUA1,     WXPowderPattern::OnMenuSetWavelength)      
+   EVT_MENU(ID_POWDER_MENU_WAVELENGTH_SET_FEA1,     WXPowderPattern::OnMenuSetWavelength)      
+   EVT_MENU(ID_POWDER_MENU_WAVELENGTH_SET_COA1,     WXPowderPattern::OnMenuSetWavelength)      
+   EVT_MENU(ID_POWDER_MENU_WAVELENGTH_SET_CRA1,     WXPowderPattern::OnMenuSetWavelength)      
+   EVT_MENU(ID_POWDER_MENU_GRAPH,                   WXPowderPattern::OnMenuShowGraph)          
+   EVT_MENU(ID_POWDER_MENU_FITSCALE_R,              WXPowderPattern::OnMenuFitScaleForR)       
+   EVT_MENU(ID_POWDER_MENU_FITSCALE_RW,             WXPowderPattern::OnMenuFitScaleForRw)      
+   EVT_MENU(ID_POWDER_MENU_ADD_2THETA_EXCLUDE,      WXPowderPattern::OnMenuAdd2ThetaExclude)   
+   EVT_UPDATE_UI(ID_CRYST_UPDATEUI,                 WXRefinableObj::OnUpdateUI)                
 END_EVENT_TABLE()
 
 WXPowderPattern::WXPowderPattern(wxWindow *parent, PowderPattern* pow):
@@ -222,93 +226,96 @@ WXRefinableObj(parent,pow),mpPowderPattern(pow),mpGraph(0)
          //:TODO: reactivate & test those menus
          //mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_REFOBJ_MENU_OBJ_SAVE,"Save");
          //mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_REFOBJ_MENU_OBJ_LOAD,"Load");
-         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUM_MENU_SAVETEXT,
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_SAVETEXT,
                                 "Save spectrum (text)");
-         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUM_MENU_SIMULATE,
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_SIMULATE,
                                 "Simulation mode (no obs. spectrum)");
          //mpMenuBar->AppendSeparator();
-         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUM_MENU_IMPORT_FULLPROF,
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_FULLPROF,
                                  "Import Fullprof Pattern");
-         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUM_MENU_IMPORT_PSI_DMC,
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_PSI_DMC,
                                  "Import PSI(DMC) Pattern");
-         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUM_MENU_IMPORT_ILL_D1A5,
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_ILL_D1A5,
                                  "Import ILL(D1A-D1B) Pattern (D1A5)");
-         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUM_MENU_IMPORT_XDD,
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_XDD,
                                  "Import Xdd Pattern");
-         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUM_MENU_IMPORT_CPI,
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_CPI,
                                  "Import Sietronics CPI Pattern");
-         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUM_MENU_IMPORT_FULLPROF4,
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_FULLPROF4,
                                  "Import FullProf format #4");
-         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUM_MENU_IMPORT_MULTIDETECTORLLBG42,
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_MULTIDETECTORLLBG42,
                                  "Import Multi-Detector Format (LLB G42)");
-         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUM_MENU_IMPORT_2THETAOBSSIGMA,
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_2THETAOBSSIGMA,
                                  "Import 2Theta-Obs-Sigma Pattern");
-         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUM_MENU_IMPORT_2THETAOBS,
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_2THETAOBS,
                                  "Import 2Theta-Obs Pattern");
       mpMenuBar->AddMenu("Parameters",ID_REFOBJ_MENU_PAR);
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_FIXALL,"Fix all");
          //mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_UNFIXALL,"Unfix all");
       mpMenuBar->AddMenu("Components",ID_POWDERPATTERN_MENU_COMPONENTS);
          mpMenuBar->AddMenuItem(ID_POWDERPATTERN_MENU_COMPONENTS,
-                                ID_POWDERSPECTRUM_MENU_SCATT_ADDCOMPBACKGD,
-                                "Add Interpolated Background");
-         mpMenuBar->AddMenuItem(ID_POWDERPATTERN_MENU_COMPONENTS,ID_POWDERSPECTRUM_MENU_SCATT_ADDCOMPCRYST,
+                                ID_POWDER_MENU_COMP_ADDBACKGD_BAYESIAN,
+                                "Add Bayesian Background (automatic)");
+         mpMenuBar->AddMenuItem(ID_POWDERPATTERN_MENU_COMPONENTS,
+                                ID_POWDER_MENU_COMP_ADDBACKGD,
+                                "Add user-supplied Background ");
+         mpMenuBar->AddMenuItem(ID_POWDERPATTERN_MENU_COMPONENTS,ID_POWDER_MENU_COMP_ADDCRYST,
                                 "Add Crystalline Phase");
-      mpMenuBar->AddMenu("Radiation",ID_POWDERSPECTRUM_MENU_WAVELENGTH);
-         mpMenuBar->AddMenuItem(ID_POWDERSPECTRUM_MENU_WAVELENGTH,
-                                ID_POWDERSPECTRUM_MENU_WAVELENGTH_NEUTRON,
+      mpMenuBar->AddMenu("Radiation",ID_POWDER_MENU_WAVELENGTH);
+         mpMenuBar->AddMenuItem(ID_POWDER_MENU_WAVELENGTH,
+                                ID_POWDER_MENU_WAVELENGTH_NEUTRON,
                                 "Neutron");
-         mpMenuBar->AddMenuItem(ID_POWDERSPECTRUM_MENU_WAVELENGTH,
-                                ID_POWDERSPECTRUM_MENU_WAVELENGTH_XRAY,
+         mpMenuBar->AddMenuItem(ID_POWDER_MENU_WAVELENGTH,
+                                ID_POWDER_MENU_WAVELENGTH_XRAY,
                                 "X-Rays");
-         mpMenuBar->AddMenuItem(ID_POWDERSPECTRUM_MENU_WAVELENGTH,
-                                ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET,
+         mpMenuBar->AddMenuItem(ID_POWDER_MENU_WAVELENGTH,
+                                ID_POWDER_MENU_WAVELENGTH_SET,
                                 "Monochromatic Wavelength");
-         mpMenuBar->AddMenuItem(ID_POWDERSPECTRUM_MENU_WAVELENGTH,
-                                ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_AG,
+         mpMenuBar->AddMenuItem(ID_POWDER_MENU_WAVELENGTH,
+                                ID_POWDER_MENU_WAVELENGTH_SET_AG,
                                 "X-Ray Tube Ag Ka12");
-         mpMenuBar->AddMenuItem(ID_POWDERSPECTRUM_MENU_WAVELENGTH,
-                                ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_AGA1,
+         mpMenuBar->AddMenuItem(ID_POWDER_MENU_WAVELENGTH,
+                                ID_POWDER_MENU_WAVELENGTH_SET_AGA1,
                                 "X-Ray Tube Ag Ka1");
-         mpMenuBar->AddMenuItem(ID_POWDERSPECTRUM_MENU_WAVELENGTH,
-                                ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_MO,
+         mpMenuBar->AddMenuItem(ID_POWDER_MENU_WAVELENGTH,
+                                ID_POWDER_MENU_WAVELENGTH_SET_MO,
                                 "X-Ray Tube Mo Ka12");
-         mpMenuBar->AddMenuItem(ID_POWDERSPECTRUM_MENU_WAVELENGTH,
-                                ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_MOA1,
+         mpMenuBar->AddMenuItem(ID_POWDER_MENU_WAVELENGTH,
+                                ID_POWDER_MENU_WAVELENGTH_SET_MOA1,
                                 "X-Ray Tube Mo Ka1");
-         mpMenuBar->AddMenuItem(ID_POWDERSPECTRUM_MENU_WAVELENGTH,
-                                ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CU,
+         mpMenuBar->AddMenuItem(ID_POWDER_MENU_WAVELENGTH,
+                                ID_POWDER_MENU_WAVELENGTH_SET_CU,
                                 "X-Ray Tube Cu Ka12");
-         mpMenuBar->AddMenuItem(ID_POWDERSPECTRUM_MENU_WAVELENGTH,
-                                ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CUA1,
+         mpMenuBar->AddMenuItem(ID_POWDER_MENU_WAVELENGTH,
+                                ID_POWDER_MENU_WAVELENGTH_SET_CUA1,
                                 "X-Ray Tube Cu Ka1");
-         mpMenuBar->AddMenuItem(ID_POWDERSPECTRUM_MENU_WAVELENGTH,
-                                ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_FE,
+         mpMenuBar->AddMenuItem(ID_POWDER_MENU_WAVELENGTH,
+                                ID_POWDER_MENU_WAVELENGTH_SET_FE,
                                 "X-Ray Tube Fe Ka12");
-         mpMenuBar->AddMenuItem(ID_POWDERSPECTRUM_MENU_WAVELENGTH,
-                                ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_FEA1,
+         mpMenuBar->AddMenuItem(ID_POWDER_MENU_WAVELENGTH,
+                                ID_POWDER_MENU_WAVELENGTH_SET_FEA1,
                                 "X-Ray Tube Fe Ka1");
-         mpMenuBar->AddMenuItem(ID_POWDERSPECTRUM_MENU_WAVELENGTH,
-                                ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CO,
+         mpMenuBar->AddMenuItem(ID_POWDER_MENU_WAVELENGTH,
+                                ID_POWDER_MENU_WAVELENGTH_SET_CO,
                                 "X-Ray Tube Co Ka12");
-         mpMenuBar->AddMenuItem(ID_POWDERSPECTRUM_MENU_WAVELENGTH,
-                                ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_COA1,
+         mpMenuBar->AddMenuItem(ID_POWDER_MENU_WAVELENGTH,
+                                ID_POWDER_MENU_WAVELENGTH_SET_COA1,
                                 "X-Ray Tube Co Ka1");
-         mpMenuBar->AddMenuItem(ID_POWDERSPECTRUM_MENU_WAVELENGTH,
-                                ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CR,
+         mpMenuBar->AddMenuItem(ID_POWDER_MENU_WAVELENGTH,
+                                ID_POWDER_MENU_WAVELENGTH_SET_CR,
                                 "X-Ray Tube Cr Ka12");
-         mpMenuBar->AddMenuItem(ID_POWDERSPECTRUM_MENU_WAVELENGTH,
-                                ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CRA1,
+         mpMenuBar->AddMenuItem(ID_POWDER_MENU_WAVELENGTH,
+                                ID_POWDER_MENU_WAVELENGTH_SET_CRA1,
                                 "X-Ray Tube Cr Ka1");
       mpMenuBar->AddMenu("Pattern",ID_POWDERPATTERN_MENU_PATTERN);
-         mpMenuBar->AddMenuItem(ID_POWDERPATTERN_MENU_PATTERN,ID_POWDERSPECTRUM_MENU_GRAPH,
+         mpMenuBar->AddMenuItem(ID_POWDERPATTERN_MENU_PATTERN,ID_POWDER_MENU_GRAPH,
                                 "Show Graph");
-         mpMenuBar->AddMenuItem(ID_POWDERPATTERN_MENU_PATTERN,ID_POWDERSPECTRUM_MENU_FITSCALE_R,
+         mpMenuBar->AddMenuItem(ID_POWDERPATTERN_MENU_PATTERN,ID_POWDER_MENU_FITSCALE_R,
                                 "Fit Scale for R");
-         mpMenuBar->AddMenuItem(ID_POWDERPATTERN_MENU_PATTERN,ID_POWDERSPECTRUM_MENU_FITSCALE_RW,
+         mpMenuBar->AddMenuItem(ID_POWDERPATTERN_MENU_PATTERN,ID_POWDER_MENU_FITSCALE_RW,
                                 "Fit Scale for Rw");
          mpMenuBar->AddMenuItem(ID_POWDERPATTERN_MENU_PATTERN,
-                                ID_POWDERSPECTRUM_MENU_ADD_2THETA_EXCLUDE,
+                                ID_POWDER_MENU_ADD_2THETA_EXCLUDE,
                                 "Add 2Theta excluded region");
       mpSizer->SetItemMinSize(mpMenuBar,
                               mpMenuBar->GetSize().GetWidth(),
@@ -319,15 +326,15 @@ WXRefinableObj(parent,pow),mpPowderPattern(pow),mpGraph(0)
    // Correction to 2Theta
       wxBoxSizer* thetaCorrSizer=new wxBoxSizer(wxHORIZONTAL);
 #if 1
-      WXFieldRefPar* fieldThetaZero    =new WXFieldRefPar(this,"2theta zero:",
+      WXFieldRefPar* fieldThetaZero    =new WXFieldRefPar(this,"Zero:",
                                    &(mpPowderPattern
-                                     ->GetPar(&(mpPowderPattern->m2ThetaZero))),90 );
-      WXFieldRefPar* fieldThetaDispl    =new WXFieldRefPar(this,"2theta displacement:",
+                                     ->GetPar(&(mpPowderPattern->m2ThetaZero))),70 );
+      WXFieldRefPar* fieldThetaDispl    =new WXFieldRefPar(this,"Displacement:",
                                    &(mpPowderPattern
-                                     ->GetPar(&(mpPowderPattern->m2ThetaDisplacement))),90 );
-      WXFieldRefPar* fieldThetaTransp    =new WXFieldRefPar(this,"2theta transparency:",
+                                     ->GetPar(&(mpPowderPattern->m2ThetaDisplacement))),70 );
+      WXFieldRefPar* fieldThetaTransp    =new WXFieldRefPar(this,"Transparency:",
                                    &(mpPowderPattern
-                                     ->GetPar(&(mpPowderPattern->m2ThetaTransparency))),90 );
+                                     ->GetPar(&(mpPowderPattern->m2ThetaTransparency))),70 );
 #else
       WXCrystObjBasic* fieldThetaZero    
          =mpPowderPattern->GetPar(&(mpPowderPattern->m2ThetaZero)).WXCreate(this);
@@ -426,6 +433,58 @@ void WXPowderPattern::OnMenuAddCompBackgd(wxCommandEvent & WXUNUSED(event))
    mpPowderPattern->AddPowderPatternComponent(*backgdData);
    if(mpGraph!=0) mpPowderPattern->Prepare();//else this will be done when opening the graph
    //this->Layout();
+}
+
+void WXPowderPattern::OnMenuAddCompBackgdBayesian(wxCommandEvent & WXUNUSED(event))
+{
+   VFN_DEBUG_ENTRY("WXPowderPattern::OnMenuAddCompBackgdBayesian()",6)
+   WXCrystValidateAllUserInput();
+
+   long nbPointSpline=20;
+   string mes="Number of Interpolation Points";
+   stringstream s;
+   s<<nbPointSpline;
+   wxTextEntryDialog dialog(this,mes.c_str(),"Automatic Bayesian (David-Sivia) Background",
+                            s.str().c_str(),wxOK | wxCANCEL);
+   if(wxID_OK!=dialog.ShowModal())
+   {
+      VFN_DEBUG_EXIT("WXPowderPattern::OnMenuAddCompBackgdBayesian():Canceled",6)
+      return;
+   }
+   dialog.GetValue().ToLong(&nbPointSpline);
+   
+   PowderPatternBackground *pBckgd= new PowderPatternBackground;
+   mpPowderPattern->AddPowderPatternComponent(*pBckgd);
+   {
+      CrystVector_REAL tth(nbPointSpline),backgd(nbPointSpline);
+      const REAL tthstep=(pBckgd->GetParentPowderPattern().Get2ThetaMax()
+                          -pBckgd->GetParentPowderPattern().Get2ThetaMin())/(REAL)nbPointSpline;
+      const CrystVector_REAL *pObs=&(pBckgd->GetParentPowderPattern().GetPowderPatternObs());
+      const unsigned long nbPoint=pBckgd->GetParentPowderPattern().GetNbPoint();
+      for(int i=0;i<nbPointSpline;i++)
+      {
+         tth(i)=tthstep*(REAL)i+pBckgd->GetParentPowderPattern().Get2ThetaMin();
+         long n1=(long)((REAL)nbPoint/(REAL)nbPointSpline*((REAL)i-0.2));
+         long n2=(long)((REAL)nbPoint/(REAL)nbPointSpline*((REAL)i+0.2));
+         if(n1<0) n1=0;
+         if(n2>(long)nbPoint)n2=nbPoint;
+         backgd(i)=(*pObs)(n1);
+         for(long j=n1;j<n2;j++)
+            if((*pObs)(j)<backgd(i))backgd(i)=(*pObs)(j);
+      }
+      pBckgd->SetInterpPoints(tth,backgd);
+   }
+   if(mpGraph!=0) mpPowderPattern->Prepare();//else this will be done when opening the graph
+   
+   pBckgd->UnFixAllPar();
+   pBckgd->GetOption(0).SetChoice(0);//linear
+   pBckgd->OptimizeBayesianBackground();
+   pBckgd->GetOption(0).SetChoice(1);//spline
+   pBckgd->OptimizeBayesianBackground();
+   pBckgd->FixAllPar();
+
+   //this->Layout();
+   VFN_DEBUG_EXIT("WXPowderPattern::OnMenuAddCompBackgdBayesian()",6)
 }
 
 void WXPowderPattern::OnMenuAddCompCryst(wxCommandEvent & WXUNUSED(event))
@@ -648,11 +707,11 @@ void WXPowderPattern::OnMenuSetWavelength(wxCommandEvent & event)
    // this looks stupid. In fact, if a user changed the wavelength in the
    // corresponding field, this is (unfortunately) not applied to the
    // components automagically. So we need this function to do the job...
-   if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_XRAY)
+   if(event.GetId()== ID_POWDER_MENU_WAVELENGTH_XRAY)
       mpPowderPattern->SetRadiationType(RAD_XRAY);
-   if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_NEUTRON)
+   if(event.GetId()== ID_POWDER_MENU_WAVELENGTH_NEUTRON)
       mpPowderPattern->SetRadiationType(RAD_NEUTRON);
-   if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET)
+   if(event.GetId()== ID_POWDER_MENU_WAVELENGTH_SET)
    {
       double lambda;
       wxTextEntryDialog dialog(this,"new Wavelength)",
@@ -665,29 +724,29 @@ void WXPowderPattern::OnMenuSetWavelength(wxCommandEvent & event)
       dialog.GetValue().ToDouble(&lambda);
       mpPowderPattern->SetWavelength(lambda);
    }
-   if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_AG)
+   if(event.GetId()== ID_POWDER_MENU_WAVELENGTH_SET_AG)
       mpPowderPattern->SetWavelength("Ag");
-   if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_MO)
+   if(event.GetId()== ID_POWDER_MENU_WAVELENGTH_SET_MO)
       mpPowderPattern->SetWavelength("Mo");
-   if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CU)
+   if(event.GetId()== ID_POWDER_MENU_WAVELENGTH_SET_CU)
       mpPowderPattern->SetWavelength("Cu");
-   if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_FE)
+   if(event.GetId()== ID_POWDER_MENU_WAVELENGTH_SET_FE)
       mpPowderPattern->SetWavelength("Fe");
-   if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CO)
+   if(event.GetId()== ID_POWDER_MENU_WAVELENGTH_SET_CO)
       mpPowderPattern->SetWavelength("Co");
-   if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CR)
+   if(event.GetId()== ID_POWDER_MENU_WAVELENGTH_SET_CR)
       mpPowderPattern->SetWavelength("Cr");
-   if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_AGA1)
+   if(event.GetId()== ID_POWDER_MENU_WAVELENGTH_SET_AGA1)
       mpPowderPattern->SetWavelength("AgA1");
-   if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_MOA1)
+   if(event.GetId()== ID_POWDER_MENU_WAVELENGTH_SET_MOA1)
       mpPowderPattern->SetWavelength("MoA1");
-   if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CUA1)
+   if(event.GetId()== ID_POWDER_MENU_WAVELENGTH_SET_CUA1)
       mpPowderPattern->SetWavelength("CuA1");
-   if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_FEA1)
+   if(event.GetId()== ID_POWDER_MENU_WAVELENGTH_SET_FEA1)
       mpPowderPattern->SetWavelength("FeA1");
-   if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_COA1)
+   if(event.GetId()== ID_POWDER_MENU_WAVELENGTH_SET_COA1)
       mpPowderPattern->SetWavelength("CoA1");
-   if(event.GetId()== ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CRA1)
+   if(event.GetId()== ID_POWDER_MENU_WAVELENGTH_SET_CRA1)
       mpPowderPattern->SetWavelength("CrA1");
    this->CrystUpdate();
 }
@@ -742,15 +801,15 @@ void WXPowderPattern::UpdateUI()
 //    WXPowderPatternGraph
 //
 ////////////////////////////////////////////////////////////////////////
-static const long ID_POWDERSPECTRUMGRAPH_MENU_UPDATE=               WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUMGRAPH_MENU_TOGGLELABEL=          WXCRYST_ID(); 
+static const long ID_POWDERGRAPH_MENU_UPDATE=               WXCRYST_ID(); 
+static const long ID_POWDERGRAPH_MENU_TOGGLELABEL=          WXCRYST_ID(); 
 
 BEGIN_EVENT_TABLE(WXPowderPatternGraph, wxWindow)
    EVT_PAINT(                                   WXPowderPatternGraph::OnPaint)
    EVT_MOUSE_EVENTS(                            WXPowderPatternGraph::OnMouse)
-   EVT_MENU(ID_POWDERSPECTRUMGRAPH_MENU_UPDATE, WXPowderPatternGraph::OnUpdate)
-   EVT_MENU(ID_POWDERSPECTRUMGRAPH_MENU_TOGGLELABEL, WXPowderPatternGraph::OnToggleLabel)
-   EVT_UPDATE_UI(ID_POWDERSPECTRUM_GRAPH_NEW_PATTERN,WXPowderPatternGraph::OnRedrawNewPattern)
+   EVT_MENU(ID_POWDERGRAPH_MENU_UPDATE, WXPowderPatternGraph::OnUpdate)
+   EVT_MENU(ID_POWDERGRAPH_MENU_TOGGLELABEL, WXPowderPatternGraph::OnToggleLabel)
+   EVT_UPDATE_UI(ID_POWDER_GRAPH_NEW_PATTERN,WXPowderPatternGraph::OnRedrawNewPattern)
    EVT_CHAR(                                    WXPowderPatternGraph::OnKeyDown)
    EVT_MOUSEWHEEL(                              WXPowderPatternGraph::OnMouseWheel)
 END_EVENT_TABLE()
@@ -763,8 +822,8 @@ mpParentFrame(frame),
 mCalcPatternIsLocked(false),mIsDragging(false),mDisplayLabel(true)
 {
    mpPopUpMenu=new wxMenu("Powder Pattern");
-   mpPopUpMenu->Append(ID_POWDERSPECTRUMGRAPH_MENU_UPDATE, "&Update");
-   mpPopUpMenu->Append(ID_POWDERSPECTRUMGRAPH_MENU_TOGGLELABEL, "&Hide Labels");
+   mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_UPDATE, "&Update");
+   mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_TOGGLELABEL, "&Hide Labels");
    mpPattern->CrystUpdate();
 }
 
@@ -887,15 +946,23 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
    // Draw labels
    if(true==mDisplayLabel)
    {
-      dc.SetPen(* wxBLACK_PEN);
       wxCoord x,y;
       wxCoord tmpW,tmpH;
       int loop=1;
       REAL yr;
       list<list<pair<const REAL ,const string > > >::const_iterator comp;
       list<pair<const REAL ,const string > >::const_iterator pos;
+      unsigned int pen=0;
       for(comp=mvLabelList.begin();comp!=mvLabelList.end();++comp)
       {
+         switch(pen++)
+         {
+            case 0: dc.SetPen(*wxBLACK_PEN);dc.SetTextForeground(*wxBLACK);break;
+            case 1: dc.SetPen(*wxCYAN_PEN );dc.SetTextForeground(*wxCYAN );break;
+            case 2: dc.SetPen(*wxGREEN_PEN);dc.SetTextForeground(*wxGREEN);break;
+            case 3: dc.SetPen(*wxRED_PEN  );dc.SetTextForeground(*wxRED  );break;
+            default:dc.SetPen(*wxGREY_PEN );dc.SetTextForeground(*wxLIGHT_GREY );break;
+         }
          unsigned long ct=0;
          for(pos=comp->begin();pos!=comp->end();++pos)
          {
@@ -1011,7 +1078,7 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
       mMin2Theta=m2theta(mFirst);
       mMax2Theta=m2theta(mLast);
       mClockAxisLimits.Click();
-      wxUpdateUIEvent event(ID_POWDERSPECTRUM_GRAPH_NEW_PATTERN);
+      wxUpdateUIEvent event(ID_POWDER_GRAPH_NEW_PATTERN);
       wxPostEvent(this,event);
       return;
    }
@@ -1021,7 +1088,7 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
    if(event.LeftDClick())
    {//Reset axis range
       this->ResetAxisLimits();
-      wxUpdateUIEvent event(ID_POWDERSPECTRUM_GRAPH_NEW_PATTERN);
+      wxUpdateUIEvent event(ID_POWDER_GRAPH_NEW_PATTERN);
       wxPostEvent(this,event);
       return;
    }
@@ -1054,7 +1121,7 @@ void WXPowderPatternGraph::OnMouseWheel(wxMouseEvent &event)
       mMax2Theta=m2theta(mLast);
    }
    mClockAxisLimits.Click();
-   wxUpdateUIEvent ev(ID_POWDERSPECTRUM_GRAPH_NEW_PATTERN);
+   wxUpdateUIEvent ev(ID_POWDER_GRAPH_NEW_PATTERN);
    wxPostEvent(this,ev);
    VFN_DEBUG_EXIT("WXPowderPatternGraph::OnMouseWheel()",6)
 }
@@ -1070,8 +1137,8 @@ void WXPowderPatternGraph::OnToggleLabel(wxCommandEvent & WXUNUSED(event))
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph::OnToggleLabel()",6)
    mDisplayLabel = !mDisplayLabel;
    this->Refresh(false);
-   if(mDisplayLabel) mpPopUpMenu->SetLabel(ID_POWDERSPECTRUMGRAPH_MENU_TOGGLELABEL, "Hide Labels");
-   else mpPopUpMenu->SetLabel(ID_POWDERSPECTRUMGRAPH_MENU_TOGGLELABEL, "Show Labels");
+   if(mDisplayLabel) mpPopUpMenu->SetLabel(ID_POWDERGRAPH_MENU_TOGGLELABEL, "Hide Labels");
+   else mpPopUpMenu->SetLabel(ID_POWDERGRAPH_MENU_TOGGLELABEL, "Show Labels");
 }
 
 void WXPowderPatternGraph::OnKeyDown(wxKeyEvent& event)
@@ -1153,7 +1220,7 @@ void WXPowderPatternGraph::OnKeyDown(wxKeyEvent& event)
       }
    }
    mClockAxisLimits.Click();
-   wxUpdateUIEvent ev(ID_POWDERSPECTRUM_GRAPH_NEW_PATTERN);
+   wxUpdateUIEvent ev(ID_POWDER_GRAPH_NEW_PATTERN);
    wxPostEvent(this,ev);
 }
 
@@ -1189,8 +1256,15 @@ void WXPowderPatternGraph::SetPattern(const CrystVector_REAL &obs,
    // If we only send an OnPaint event, only the parts which have been erased are redrawn
    // (under windows). SO we must force the complete Refresh of the window... in the
    // main thread of course...
-   wxUpdateUIEvent event(ID_POWDERSPECTRUM_GRAPH_NEW_PATTERN);
-   wxPostEvent(this,event);
+   if(true==wxThread::IsMain())
+   {
+      this->Refresh(false);
+   }
+   else
+   {
+      wxUpdateUIEvent event(ID_POWDER_GRAPH_NEW_PATTERN);
+      wxPostEvent(this,event);
+   }
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph::SetPattern():End",5)
 }
 
@@ -1252,8 +1326,10 @@ REAL WXPowderPatternGraph::Screen2DataY(const long y)const
 //
 ////////////////////////////////////////////////////////////////////////
 BEGIN_EVENT_TABLE(WXPowderPatternBackground, wxWindow)
-   EVT_MENU(ID_POWDERSPECTRUMBACKGROUND_IMPORT, 
+   EVT_MENU(ID_POWDERBACKGROUND_IMPORT, 
                      WXPowderPatternBackground::OnMenuImportUserBackground)
+   EVT_MENU(ID_POWDERBACKGROUND_OPTIMIZEBAYESIAN, 
+                     WXPowderPatternBackground::OnMenuOptimizeBayesianBackground)
 END_EVENT_TABLE()
 
 WXPowderPatternBackground::WXPowderPatternBackground(wxWindow *parent, 
@@ -1263,7 +1339,9 @@ WXRefinableObj(parent,b),mpPowderPatternBackground(b)
    mpWXTitle->SetForegroundColour(wxColour(0,255,0));
    //Menu
       mpMenuBar->AddMenu("Object",ID_REFOBJ_MENU_OBJ);
-         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUMBACKGROUND_IMPORT,"Import");
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERBACKGROUND_IMPORT,"Import");
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERBACKGROUND_OPTIMIZEBAYESIAN,
+         "Bayesian Optimization");
    VFN_DEBUG_MESSAGE(mpMenuBar->GetSize().GetWidth()<<","<<mpMenuBar->GetSize().GetHeight(),10);
    mpSizer->SetItemMinSize(mpMenuBar,
                            mpMenuBar->GetSize().GetWidth(),
@@ -1287,6 +1365,61 @@ void WXPowderPatternBackground::OnMenuImportUserBackground(wxCommandEvent & WXUN
    if(open->ShowModal() != wxID_OK) return;
    mpPowderPatternBackground->ImportUserBackground(open->GetPath().c_str());
    open->Destroy();
+}
+void WXPowderPatternBackground::OnMenuOptimizeBayesianBackground(wxCommandEvent & WXUNUSED(event))
+{
+   VFN_DEBUG_ENTRY("WXPowderPatternBackground::OnMenuOptimizeBayesianBackground()",6)
+   mpPowderPatternBackground->UnFixAllPar();
+   mpPowderPatternBackground->OptimizeBayesianBackground();
+   mpPowderPatternBackground->FixAllPar();
+   VFN_DEBUG_EXIT("WXPowderPatternBackground::OnMenuOptimizeBayesianBackground()",6)
+}
+void WXPowderPatternBackground::OnMenuAutomaticBayesianBackground(wxCommandEvent & WXUNUSED(event))
+{
+   VFN_DEBUG_ENTRY("WXPowderPatternBackground::OnMenuAutomaticBayesianBackground()",6)
+   WXCrystValidateAllUserInput();
+
+   long nbPointSpline=20;
+   string mes="Number of Interpolation Points";
+   stringstream s;
+   s<<nbPointSpline;
+   wxTextEntryDialog dialog(this,mes.c_str(),"Automatic Bayesian (David-Sivia) Background",
+                            s.str().c_str(),wxOK | wxCANCEL);
+   if(wxID_OK!=dialog.ShowModal())
+   {
+      VFN_DEBUG_EXIT("WXPowderPatternBackground::OnMenuAutomaticBayesianBackground():Canceled",6)
+      return;
+   }
+   dialog.GetValue().ToLong(&nbPointSpline);
+   
+   {
+      CrystVector_REAL tth(nbPointSpline),backgd(nbPointSpline);
+      const REAL tthstep=(mpPowderPatternBackground->GetParentPowderPattern().Get2ThetaMax()
+                          -mpPowderPatternBackground->GetParentPowderPattern().Get2ThetaMin())/(REAL)nbPointSpline;
+      const CrystVector_REAL *pObs=&(mpPowderPatternBackground->GetParentPowderPattern().GetPowderPatternObs());
+      const unsigned long nbPoint=mpPowderPatternBackground->GetParentPowderPattern().GetNbPoint();
+      for(int i=0;i<nbPointSpline;i++)
+      {
+         tth(i)=tthstep*(REAL)i+mpPowderPatternBackground->GetParentPowderPattern().Get2ThetaMin();
+         long n1=(long)((REAL)nbPoint/(REAL)nbPointSpline*((REAL)i-0.2));
+         long n2=(long)((REAL)nbPoint/(REAL)nbPointSpline*((REAL)i+0.2));
+         if(n1<0) n1=0;
+         if(n2>(long)nbPoint)n2=nbPoint;
+         backgd(i)=(*pObs)(n1);
+         for(long j=n1;j<n2;j++)
+            if((*pObs)(j)<backgd(i))backgd(i)=(*pObs)(j);
+      }
+      mpPowderPatternBackground->SetInterpPoints(tth,backgd);
+   }
+   //mpPowderPatternBackground->GetParentPowderPattern().Prepare();
+   mpPowderPatternBackground->UnFixAllPar();
+   mpPowderPatternBackground->GetOption(0).SetChoice(0);//linear
+   mpPowderPatternBackground->OptimizeBayesianBackground();
+   mpPowderPatternBackground->GetOption(0).SetChoice(1);//spline
+   mpPowderPatternBackground->OptimizeBayesianBackground();
+   mpPowderPatternBackground->FixAllPar();
+
+   VFN_DEBUG_EXIT("WXPowderPatternBackground::OnMenuAutomaticBayesianBackground()",6)
 }
 ////////////////////////////////////////////////////////////////////////
 //
@@ -1393,8 +1526,8 @@ void WXTextureMarchDollase::OnDeleteTexturePhase(wxCommandEvent & WXUNUSED(event
 //
 ////////////////////////////////////////////////////////////////////////
 BEGIN_EVENT_TABLE(WXPowderPatternDiffraction, wxWindow)
-   EVT_BUTTON(ID_POWDERSPECTRUMDIFF_CRYSTAL,WXPowderPatternDiffraction::OnChangeCrystal)
-   EVT_MENU(ID_POWDERSPECTRUMDIFF_SAVEHKLFCALC, 
+   EVT_BUTTON(ID_POWDERDIFF_CRYSTAL,WXPowderPatternDiffraction::OnChangeCrystal)
+   EVT_MENU(ID_POWDERDIFF_SAVEHKLFCALC, 
                                             WXPowderPatternDiffraction::OnMenuSaveHKLFcalc)
    EVT_UPDATE_UI(ID_CRYST_UPDATEUI,         WXRefinableObj::OnUpdateUI)
 END_EVENT_TABLE()
@@ -1406,13 +1539,13 @@ WXRefinableObj(parent,p),mpPowderPatternDiffraction(p)
    mpWXTitle->SetForegroundColour(wxColour(0,255,0));
     //Menu
       mpMenuBar->AddMenu("Object",ID_REFOBJ_MENU_OBJ);
-         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUMDIFF_SAVEHKLFCALC,
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERDIFF_SAVEHKLFCALC,
                                 "Save HKL Fcalc");
       mpSizer->SetItemMinSize(mpMenuBar,
                               mpMenuBar->GetSize().GetWidth(),
                               mpMenuBar->GetSize().GetHeight());
     // Crystal Choice
-      mpFieldCrystal=new WXFieldChoice(this,ID_POWDERSPECTRUMDIFF_CRYSTAL,"Crystal:",300);
+      mpFieldCrystal=new WXFieldChoice(this,ID_POWDERDIFF_CRYSTAL,"Crystal:",300);
       mpSizer->Add(mpFieldCrystal,0,wxALIGN_LEFT);
       mList.Add(mpFieldCrystal);
    //Profile Parameters
