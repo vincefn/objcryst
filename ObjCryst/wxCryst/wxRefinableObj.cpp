@@ -178,6 +178,7 @@ void WXFieldRefPar::CrystUpdate()
 {
    VFN_DEBUG_MESSAGE("WXFieldRefPar::CrystUpdate()",6)
    //cout << mpField <<endl;
+   if(mpRefPar->IsUsed()!=this->IsShown()) mNeedUpdateUI=true;
    if(  (mValue==mpRefPar->GetHumanValue())
       &&(mpButtonFix->GetValue()!=mpRefPar->IsFixed())) return;
    mValueOld=mValue;
