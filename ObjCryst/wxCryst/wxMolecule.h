@@ -137,6 +137,7 @@ class WXMolecule: public WXScatterer
       void OnMenuShowBondList(wxCommandEvent &event);
       void OnMenuShowBondAngleList(wxCommandEvent &event);
       void OnMenuShowDihedralAngleList(wxCommandEvent &event);
+      void OnMenuSetDeltaSigma(wxCommandEvent &event);
       void OnMenuTest(wxCommandEvent &event);
       /// Notify that either the bond, bond angle or dihedral angle list window has
       /// been destroyed

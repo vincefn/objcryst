@@ -259,6 +259,16 @@ WXCrystObjBasic(parent),mpMolBond(obj),mpButtonFree(0)
       new WXFieldPar<REAL>(this,"Length:",-1,&(mpMolBond->Length0()));
    mpSizer->Add(length,0,wxALIGN_CENTER);
    mList.Add(length);
+   
+   WXFieldPar<REAL> *delta=
+      new WXFieldPar<REAL>(this,",delta=",-1,&(mpMolBond->LengthDelta()));
+   mpSizer->Add(delta,0,wxALIGN_CENTER);
+   mList.Add(delta);
+
+   WXFieldPar<REAL> *sigma=
+      new WXFieldPar<REAL>(this,",sigma=",-1,&(mpMolBond->LengthSigma()));
+   mpSizer->Add(sigma,0,wxALIGN_CENTER);
+   mList.Add(sigma);
 
    this->SetSizer(mpSizer);
    this->CrystUpdate();
@@ -389,6 +399,18 @@ WXCrystObjBasic(parent),mpMolBondAngle(obj)
    angle->SetHumanValueScale(RAD2DEG);
    mpSizer->Add(angle,0,wxALIGN_CENTER);
    mList.Add(angle);
+
+   WXFieldPar<REAL> *delta=
+      new WXFieldPar<REAL>(this,",delta=",WXCRYST_ID(),&(mpMolBondAngle->AngleDelta()));
+   delta->SetHumanValueScale(RAD2DEG);
+   mpSizer->Add(delta,0,wxALIGN_CENTER);
+   mList.Add(delta);
+
+   WXFieldPar<REAL> *sigma=
+      new WXFieldPar<REAL>(this,",sigma=",WXCRYST_ID(),&(mpMolBondAngle->AngleSigma()));
+   delta->SetHumanValueScale(RAD2DEG);
+   mpSizer->Add(sigma,0,wxALIGN_CENTER);
+   mList.Add(sigma);
 
    this->SetSizer(mpSizer);
    this->CrystUpdate();
@@ -531,6 +553,18 @@ WXCrystObjBasic(parent),mpMolDihedralAngle(obj)
    mpSizer->Add(angle,0,wxALIGN_CENTER);
    mList.Add(angle);
 
+   WXFieldPar<REAL> *delta=
+      new WXFieldPar<REAL>(this,",delta=",-1,&(mpMolDihedralAngle->AngleDelta()));
+   delta->SetHumanValueScale(RAD2DEG);
+   mpSizer->Add(delta,0,wxALIGN_CENTER);
+   mList.Add(delta);
+
+   WXFieldPar<REAL> *sigma=
+      new WXFieldPar<REAL>(this,",sigma=",-1,&(mpMolDihedralAngle->AngleSigma()));
+   sigma->SetHumanValueScale(RAD2DEG);
+   mpSizer->Add(sigma,0,wxALIGN_CENTER);
+   mList.Add(sigma);
+
    this->SetSizer(mpSizer);
    this->CrystUpdate();
    this->Layout();
@@ -666,6 +700,7 @@ WXCRYST_ID ID_MOLECULE_MENU_FORMULA_REMOVE_DIHEDRAL;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_SHOW_BONDLIST;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_SHOW_BONDANGLELIST;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_SHOW_DIHEDRALANGLELIST;
+WXCRYST_ID ID_MOLECULE_MENU_FORMULA_SET_DELTA_SIGMA;
 
 BEGIN_EVENT_TABLE(WXMolecule,wxWindow)
    EVT_BUTTON(ID_WXOBJ_COLLAPSE,                          WXCrystObj::OnToggleCollapse)
@@ -687,6 +722,7 @@ BEGIN_EVENT_TABLE(WXMolecule,wxWindow)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_SHOW_BONDLIST,       WXMolecule::OnMenuShowBondList)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_SHOW_BONDANGLELIST,  WXMolecule::OnMenuShowBondAngleList)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_SHOW_DIHEDRALANGLELIST,WXMolecule::OnMenuShowDihedralAngleList)
+   EVT_MENU(ID_MOLECULE_MENU_FORMULA_SET_DELTA_SIGMA     ,WXMolecule::OnMenuSetDeltaSigma)
 END_EVENT_TABLE()
 
 WXMolecule::WXMolecule(wxWindow *parent, Molecule *mol):
@@ -705,6 +741,9 @@ mpBondWin(0),mpAngleWin(0),mpDihedralAngleWin(0)
       mpMenuBar->AddMenu("Formula",ID_MOLECULE_MENU_FORMULA);
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_OPTIMIZECONFORMATION,
                                 "Optimize Starting Conformation");
+         mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_SET_DELTA_SIGMA,
+                                "Set Restraints delta && sigma for all bonds && angles");
+         mpMenuBar->GetMenu(ID_MOLECULE_MENU_FORMULA).AppendSeparator();
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_ADD_ATOM,
                                 "Add an Atom");
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_ADD_BOND,
@@ -713,9 +752,9 @@ mpBondWin(0),mpAngleWin(0),mpDihedralAngleWin(0)
                                 "Add Bond Angle Restraint");
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_ADD_DIHEDRAL,
                                 "Add Dihedral Angle Restraint");
-            mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_RIGIDIFY_WITH_DIHEDRALANGLES,
+         mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_RIGIDIFY_WITH_DIHEDRALANGLES,
                                 "Rigidify with Dihedral Angles");
-      mpMenuBar->GetMenu(ID_MOLECULE_MENU_FORMULA).AppendSeparator();
+         mpMenuBar->GetMenu(ID_MOLECULE_MENU_FORMULA).AppendSeparator();
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_REMOVE_ATOM,
                                 "Remove an Atom");
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_REMOVE_BOND,
@@ -811,7 +850,7 @@ void WXMolecule::OnMenuAddBond(wxCommandEvent & WXUNUSED(event))
    }
    dialog.GetValue().ToDouble(&d);
    
-   mpMolecule->AddBond(*at1,*at2,d,.01,.05,1.);
+   mpMolecule->AddBond(*at1,*at2,d,.01,.02,1.);
    VFN_DEBUG_EXIT("WXMolecule::OnMenuAddBond()",6)
 }
 
@@ -855,7 +894,7 @@ void WXMolecule::OnMenuAddAngle(wxCommandEvent & WXUNUSED(event))
    }
    dialog.GetValue().ToDouble(&a);
    
-   mpMolecule->AddBondAngle(*at1,*at2,*at3,a*DEG2RAD,.01,0.05);
+   mpMolecule->AddBondAngle(*at1,*at2,*at3,a*DEG2RAD,.01,0.02);
    VFN_DEBUG_EXIT("WXMolecule::OnMenuAddBond()",6)
 }
 
@@ -904,7 +943,7 @@ void WXMolecule::OnMenuAddDihedralAngle(wxCommandEvent & WXUNUSED(event))
    }
    dialog.GetValue().ToDouble(&a);
 
-   mpMolecule->AddDihedralAngle(*at1,*at2,*at3,*at4,a*DEG2RAD,.01,.05);
+   mpMolecule->AddDihedralAngle(*at1,*at2,*at3,*at4,a*DEG2RAD,.01,.02);
    VFN_DEBUG_EXIT("WXMolecule::OnMenuAddDihedralAngle()",6)
 }
 
@@ -1272,6 +1311,76 @@ void WXMolecule::OnMenuRigidfyWithDihedralAngles(wxCommandEvent & WXUNUSED(event
    if(wxID_YES==result) mpMolecule->RigidifyWithDihedralAngles();
    
    VFN_DEBUG_EXIT("WXMolecule::OnMenuRigidfyWithDihedralAngles()",6)
+}
+
+void WXMolecule::OnMenuSetDeltaSigma(wxCommandEvent &event)
+{
+   VFN_DEBUG_ENTRY("WXMolecule::OnMenuSetDeltaSigma()",6)
+   WXCrystValidateAllUserInput();
+   double sigma=0.01,delta=0.02;
+   {
+      stringstream s;
+      s<<delta;
+      string title="Choose 'delta' value";
+      wxString info;
+      info.Printf(_T("The 'delta' value is the allowed range \n")
+                  _T("(without penalty) around the expected value.\n\n")
+                  _T("It is by default equal to 0.02, in Angstroems for bond lengths,\n")
+                  _T("and in radians for angles (0.02rad = 1.15°)\n\n")
+                  _T("DO NOT TRY TO CHANGE THE DEFAULT VALUE\n")
+                  _T("UNLESS YOU REALLY KNOW WHAT YOU ARE DOING\n")
+                  _T("Fox has been optimized with the default values...")
+                 );
+      wxTextEntryDialog dialog(this,info,title.c_str(),s.str().c_str(),wxOK|wxCANCEL);
+      if(wxID_OK!=dialog.ShowModal())
+      {
+         VFN_DEBUG_EXIT("WXMolecule::OnMenuSetDeltaSigma():Canceled",6)
+         return;
+      }
+      dialog.GetValue().ToDouble(&delta);
+   }
+   {
+      stringstream s;
+      s<<sigma;
+      string title="Choose 'sigma' value";
+      wxString info;
+      info.Printf(_T("The 'sigma' value is used to compute \n")
+                  _T("penalty)around the expected value\n\n")
+                  _T("It is by default equal to 0.01, in Angstroems for bond angles,\n")
+                  _T("and in radians for angles (0.01rad = 0.57°)\n\n")
+                  _T("DO NOT TRY TO CHANGE THE DEFAULT VALUE\n")
+                  _T("UNLESS YOU REALLY KNOW WHAT YOU ARE DOING\n")
+                  _T("Fox has been optimized with the default values...")
+                 );
+      wxTextEntryDialog dialog(this,info,title.c_str(),s.str().c_str(),wxOK|wxCANCEL);
+      if(wxID_OK!=dialog.ShowModal())
+      {
+         VFN_DEBUG_EXIT("WXMolecule::OnMenuSetDeltaSigma():Canceled",6)
+         return;
+      }
+      dialog.GetValue().ToDouble(&sigma);
+   }
+   for(vector<MolBond*>::iterator pos=mpMolecule->GetBondList().begin();
+       pos != mpMolecule->GetBondList().end();++pos)
+   {
+      (*pos)->SetLengthDelta(delta);
+      (*pos)->SetLengthSigma(sigma);
+   }
+   for(vector<MolBondAngle*>::iterator pos=mpMolecule->GetBondAngleList().begin();
+       pos != mpMolecule->GetBondAngleList().end();++pos)
+   {
+      (*pos)->AngleDelta()=delta;
+      (*pos)->AngleSigma()=sigma;
+   }
+   for(vector<MolDihedralAngle*>::iterator pos=mpMolecule->GetDihedralAngleList().begin();
+       pos != mpMolecule->GetDihedralAngleList().end();++pos)
+   {
+      (*pos)->AngleDelta()=delta;
+      (*pos)->AngleSigma()=sigma;
+   }
+   mpMolecule->GetBondListClock().Click();
+   this->CrystUpdate();
+   VFN_DEBUG_EXIT("WXMolecule::OnMenuSetDeltaSigma()",6)
 }
 
 void WXMolecule::NotifyDeleteListWin(WXMolScrolledWindow *win)
