@@ -69,6 +69,9 @@ void OptimizationObj::RandomizeStartingConfig()
          const double max=mRefParList.GetParNotFixed(j).GetMax();
          mRefParList.GetParNotFixed(j).MutateTo(min+(max-min)*(rand()/(double)RAND_MAX) );
       }
+		else if((true==mRefParList.GetParNotFixed(j).IsPeriodic())
+			    mRefParList.GetParNotFixed(j).
+				 	Mutate(mRefParList.GetParNotFixed(j).GetPeriod()*rand()/(double)RAND_MAX);
    }
       //else cout << mRefParList.GetParNotFixed(j).Name() <<" Not limited :-(" <<endl;
    VFN_DEBUG_EXIT("OptimizationObj::RandomizeStartingConfig()",5)
