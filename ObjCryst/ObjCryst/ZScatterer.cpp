@@ -548,9 +548,9 @@ ostream& ZScatterer::POVRayDescription(ostream &os,
             dx=x(0);
             dy=y(0);
             dz=z(0);
-            x(0) = fmod((REAL) x(0),(int)1); if(x(0)<0) x(0)+=1.;
-            y(0) = fmod((REAL) y(0),(int)1); if(y(0)<0) y(0)+=1.;
-            z(0) = fmod((REAL) z(0),(int)1); if(z(0)<0) z(0)+=1.;
+            x(0) = fmod((float) x(0),(float)1); if(x(0)<0) x(0)+=1.;
+            y(0) = fmod((float) y(0),(float)1); if(y(0)<0) y(0)+=1.;
+            z(0) = fmod((float) z(0),(float)1); if(z(0)<0) z(0)+=1.;
             dx = x(0)-dx;
             dy = y(0)-dy;
             dz = z(0)-dz;
@@ -858,9 +858,9 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
             dx=x(0);
             dy=y(0);
             dz=z(0);
-            x(0) = fmod((REAL) x(0),(int)1); if(x(0)<0) x(0)+=1.;
-            y(0) = fmod((REAL) y(0),(int)1); if(y(0)<0) y(0)+=1.;
-            z(0) = fmod((REAL) z(0),(int)1); if(z(0)<0) z(0)+=1.;
+            x(0) = fmod((float) x(0),(float)1); if(x(0)<0) x(0)+=1.;
+            y(0) = fmod((float) y(0),(float)1); if(y(0)<0) y(0)+=1.;
+            z(0) = fmod((float) z(0),(float)1); if(z(0)<0) z(0)+=1.;
             dx = x(0)-dx;
             dy = y(0)-dy;
             dz = z(0)-dz;

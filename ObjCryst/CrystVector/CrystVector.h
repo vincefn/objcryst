@@ -166,9 +166,9 @@ template<class T> class CrystVector
       vect=*this;
       return vect;
    }
-   operator CrystVector<REAL>() const
+   operator CrystVector<double>() const
    {
-      CrystVector<REAL> vect;
+      CrystVector<double> vect;
       vect=*this;
       return vect;
    }

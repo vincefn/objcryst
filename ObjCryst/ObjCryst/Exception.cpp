@@ -24,7 +24,7 @@
 #include "ObjCryst/General.h"
 #include <iostream>
 #include <ctime>
-#include <ObjCryst/IO.h>
+#include "ObjCryst/IO.h"
 
 namespace ObjCryst
 {

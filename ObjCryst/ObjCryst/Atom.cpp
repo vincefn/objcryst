@@ -211,9 +211,9 @@ ostream& Atom::POVRayDescription(ostream &os,
       x=mXYZ(0);
       y=mXYZ(1);
       z=mXYZ(2);
-      x = fmod((REAL)x,(int)1); if(x<0) x+=1.;
-      y = fmod((REAL)y,(int)1); if(y<0) y+=1.;
-      z = fmod((REAL)z,(int)1); if(z<0) z+=1.;
+      x = fmod((float)x,(float)1); if(x<0) x+=1.;
+      y = fmod((float)y,(float)1); if(y<0) y+=1.;
+      z = fmod((float)z,(float)1); if(z<0) z+=1.;
       this->GetCrystal().FractionalToOrthonormalCoords(x,y,z);
       os << "// Description of Atom :" << this->GetName() <<endl;
       os << "   #declare colour_"<< this ->GetName() <<"="<< this ->mColourName<<";"<< endl;
@@ -241,9 +241,9 @@ ostream& Atom::POVRayDescription(ostream &os,
          x0=xyzCoords(i,0);
          y0=xyzCoords(i,1);
          z0=xyzCoords(i,2);
-         x0 = fmod((REAL) x0,(int)1); if(x0<0) x0+=1.;
-         y0 = fmod((REAL) y0,(int)1); if(y0<0) y0+=1.;
-         z0 = fmod((REAL) z0,(int)1); if(z0<0) z0+=1.;
+         x0 = fmod((float) x0,(float)1); if(x0<0) x0+=1.;
+         y0 = fmod((float) y0,(float)1); if(y0<0) y0+=1.;
+         z0 = fmod((float) z0,(float)1); if(z0<0) z0+=1.;
          //Generate also translated atoms near the unit cell
          const REAL limit =0.1;
          CrystMatrix_int translate(27,3);

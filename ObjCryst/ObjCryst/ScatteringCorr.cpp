@@ -660,7 +660,7 @@ void TextureMarchDollase::CalcCorr() const
                for(long k=0;k<nbReflUsed;k++)
                {
                   tmp=(tx * (*xx++) + ty * (*yy++) + tz * (*zz++))/ (*xyznorm++);
-                  mCorr(k)+=frac*pow(march+march2*tmp*tmp,-1.5);
+                  mCorr(k)+=frac*pow((float)(march+march2*tmp*tmp),(float)-1.5);
                }
          }
       }
