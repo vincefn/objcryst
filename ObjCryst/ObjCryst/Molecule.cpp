@@ -1288,7 +1288,7 @@ void Molecule::BeginOptimization(const bool allowApproximations,const bool enabl
    }
    this->RefinableObj::BeginOptimization(allowApproximations,enableRestraints);
    mRandomConformChangeNbTest=0;
-   mRandomConformChangeNbTest=0;
+   mRandomConformChangeNbAccept=0;
    mRandomConformChangeTemp=1.;//(REAL)this->GetNbComponent();
 }
 

@@ -2575,7 +2575,7 @@ REAL PowderPattern::GetChi2()const
          for(unsigned long j=0;j<32;++j)
          {
             mChi2 += *p3 * ((*p1)-(*p2))*((*p1)-(*p2));
-            if(*p3>0) weightProd *= *p3++;
+            if(*p3>0) weightProd *= *p3;
             p1++;p2++;p3++;
             if(++i == mNbIntegrationUsed) break;
          }
