@@ -355,7 +355,7 @@ void WXCrystMainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
    wxString msg;
    msg.Printf( _T("F.O.X. - Free Objects for Xtal structures\n")
-               _T("Version 1.0.2 - (dev)\n\n")
+               _T("Version 1.1 - (dev)\n\n")
                _T("(c) 2000-2001 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n")
                _T("            & Radovan CERNY, University of Geneva\n\n")
                _T("http://objcryst.sourceforge.net\n")

@@ -398,14 +398,14 @@ void WXPowderPattern::OnMenuImport2ThetaObs(wxCommandEvent & WXUNUSED(event))
 void WXPowderPattern::OnMenuFitScaleForR(wxCommandEvent & WXUNUSED(event))
 {
    if(0==mpGraph) return;
-   mpPowderPattern->FitScaleFactorForR();
+   mpPowderPattern->FitScaleFactorForR();//FitScaleFactorForIntegratedR
    this->CrystUpdate();
 }
 
 void WXPowderPattern::OnMenuFitScaleForRw(wxCommandEvent & WXUNUSED(event))
 {
    if(0==mpGraph) return;
-   mpPowderPattern->FitScaleFactorForRw();
+   mpPowderPattern->FitScaleFactorForRw();//FitScaleFactorForIntegratedRw
    this->CrystUpdate();
 }
 
