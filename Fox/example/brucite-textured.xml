@@ -1,4 +1,4 @@
-<ObjCryst Date="2002-07-09T19:01:02GMT">
+<ObjCryst Date="2003-11-29T22:59:09GMT">
   <Crystal Name="Brucite" SpaceGroup="P-3m1">
     <Par Refined="0" Limited="1" Min="1" Max="100" Name="a">3.148</Par>
     <Par Refined="0" Limited="1" Min="1" Max="100" Name="b">10</Par>
@@ -6,39 +6,48 @@
     <Par Refined="0" Limited="1" Min="28.6479" Max="171.887" Name="alpha">90</Par>
     <Par Refined="0" Limited="1" Min="28.6479" Max="171.887" Name="beta">90</Par>
     <Par Refined="0" Limited="1" Min="28.6479" Max="171.887" Name="gamma">120</Par>
+    <Option Name="Constrain Lattice to SpaceGroup Symmetry" Choice="0" ChoiceName="Yes (Default)"/>
+
     <Option Name="Use Dynamical Occupancy Correction" Choice="1" ChoiceName="Yes"/>
 
+    <Option Name="Display Enantiomer" Choice="0" ChoiceName="No"/>
+
     <ScatteringPowerAtom Name="Mg" Symbol="Mg">
-      <Par Refined="1" Limited="1" Min="0.1" Max="2" Name="Biso">1.88638</Par>
+      <Par Refined="1" Limited="1" Min="0.1" Max="2" Name="Biso">0.507281</Par>
+          <Par Refined="0" Limited="1" Min="0" Max="1" Name="ML Error">0</Par>
       <RGBColour>1 1 1</RGBColour>
     </ScatteringPowerAtom>
     <ScatteringPowerAtom Name="O" Symbol="O">
-      <Par Refined="1" Limited="1" Min="0.1" Max="2" Name="Biso">0.1</Par>
+      <Par Refined="1" Limited="1" Min="0.1" Max="2" Name="Biso">0.631011</Par>
+          <Par Refined="0" Limited="1" Min="0" Max="1" Name="ML Error">0</Par>
       <RGBColour>1 0 0</RGBColour>
     </ScatteringPowerAtom>
     <ScatteringPowerAtom Name="H" Symbol="H">
       <Par Refined="0" Limited="1" Min="0.1" Max="5" Name="Biso">2</Par>
+          <Par Refined="0" Limited="1" Min="0" Max="1" Name="ML Error">0</Par>
       <RGBColour>1 1 1</RGBColour>
     </ScatteringPowerAtom>
 
     <Atom Name="Mg" ScattPow="Mg">
-      <Par Refined="1" Limited="0" Min="0" Max="1" Name="x">0.995408</Par>
-      <Par Refined="1" Limited="0" Min="0" Max="1" Name="y">0.998382</Par>
-      <Par Refined="1" Limited="0" Min="0" Max="1" Name="z">0.990134</Par>
+      <Par Refined="1" Limited="0" Min="0" Max="1" Name="x">0.999233</Par>
+      <Par Refined="1" Limited="0" Min="0" Max="1" Name="y">0.996437</Par>
+      <Par Refined="1" Limited="0" Min="0" Max="1" Name="z">0.0108367</Par>
       <Par Refined="0" Limited="1" Min="0.01" Max="1" Name="Occup">1</Par>
     </Atom>
     <Atom Name="O" ScattPow="O">
-      <Par Refined="1" Limited="0" Min="0" Max="1" Name="x">0.666186</Par>
-      <Par Refined="1" Limited="0" Min="0" Max="1" Name="y">0.334228</Par>
-      <Par Refined="1" Limited="0" Min="0" Max="1" Name="z">0.785246</Par>
+      <Par Refined="1" Limited="0" Min="0" Max="1" Name="x">0.665259</Par>
+      <Par Refined="1" Limited="0" Min="0" Max="1" Name="y">0.332723</Par>
+      <Par Refined="1" Limited="0" Min="0" Max="1" Name="z">0.785773</Par>
       <Par Refined="0" Limited="1" Min="0.01" Max="1" Name="Occup">1</Par>
     </Atom>
 
   </Crystal>
   <PowderPattern Name="Brucite X-Ray">
-    <Par Refined="0" Limited="1" Min="-2.86479" Max="2.86479" Name="2ThetaZero">0</Par>
+    <Par Refined="0" Limited="1" Min="-2.86479" Max="2.86479" Name="2ThetaZero">-0.037</Par>
     <Par Refined="0" Limited="1" Min="-2.86479" Max="2.86479" Name="2ThetaDisplacement">0</Par>
     <Par Refined="0" Limited="1" Min="-2.86479" Max="2.86479" Name="2ThetaTransparency">0</Par>
+    <Option Name="Use Integrated Profiles" Choice="0" ChoiceName="Yes (recommended)"/>
+
     <Radiation XRayTube="Cu">
       <Option Name="Radiation" Choice="1" ChoiceName="X-Ray"/>
       <Option Name="Spectrum" Choice="1" ChoiceName="X-Ray Tube"/>

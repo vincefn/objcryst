@@ -49,7 +49,11 @@
       <li> "File" allows you to save all the atom positions and occupancies in a text file. The output also lists the interatomic distances to help deciding which atoms should be removed/merged. It is currently the only output possible (besides xml) of the crystal structure.
       <li> "Parameters" allows you to:
       <ul>   
-         <li> Add an antibump distance: you will be prompted to select the two atom types (scattering powers) between which you want to set up an antibump distance, and the corresponding distance. Note1: you can select the two identical atom types to declare, e.g., an O-O antibump. Note2: the antibump distance is not activated unless you select the Crystals Antibump cost function in the Global Optimization algorithm ! Note3: for same element (e.g. O-O) antibump, the antibump penalty diminishes to 0 to enable merging of these atoms (so that the dynamical occupancy correction can fully work).
+         <li> \anchor crystal_antibump Add an <b>antibump distance</b>: you will be prompted to select the two atom types (scattering powers) between which you want to set up an antibump distance, and the corresponding distance.
+         <ul>
+            <li> Note1: you can select the two identical atom types to declare, e.g., an O-O antibump. For same element antibump, the antibump penalty diminishes to 0 to enable merging of these atoms so that the dynamical occupancy correction can fully work; the antibump is then actually maximum at half the given the antibump distance.
+            <li> Note2: the antibump cost is displayed just above the Unit Cell parameters. It is multiplied by the "Scale" field beside. You may need to increase this scale factor if you want to give a larger weight to the antibump restraint, relatively to the diffraction data Chi^2. Alternatively, you can set the scale to zero to deactivate the use of the antibump (and thus compute faster).
+         </ul>
          <li> Fix or un-fix all parameters of the structure. Also see the FAQ "What parameters can/should I optimize".
          <li> randomize the configuration. This does not affect fixed parameters, and takes into account the limits set for the parameters.
       </ul>

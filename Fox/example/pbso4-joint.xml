@@ -1,4 +1,4 @@
-<ObjCryst Date="2003-06-21T16:36:04GMT">
+<ObjCryst Date="2003-11-29T22:56:59GMT">
   <Crystal Name="PbSO4-Tetrahedron" SpaceGroup="Pnma">
     <Par Refined="0" Limited="1" Min="1" Max="100" Name="a">8.482</Par>
     <Par Refined="0" Limited="1" Min="1" Max="100" Name="b">5.398</Par>
@@ -29,26 +29,31 @@
     </ScatteringPowerAtom>
 
     <Atom Name="Pb" ScattPow="Pb">
-      <Par Refined="1" Limited="1" Min="0" Max="1" Name="x">0.187279</Par>
-      <Par Refined="1" Limited="1" Min="0" Max="1" Name="y">0.231874</Par>
-      <Par Refined="1" Limited="1" Min="0" Max="1" Name="z">0.667824</Par>
+      <Par Refined="1" Limited="1" Min="0" Max="1" Name="x">0.187226</Par>
+      <Par Refined="1" Limited="1" Min="0" Max="1" Name="y">0.23145</Par>
+      <Par Refined="1" Limited="1" Min="0" Max="1" Name="z">0.668473</Par>
       <Par Refined="0" Limited="1" Min="0.01" Max="1" Name="Occup">1</Par>
     </Atom>
     <Molecule Name="SO4">
-      <Quaternion Q0="-0.727029" Q1="-0.457108" Q2="-0.0225845" Q3="-0.511831" IsUnitQuaternion="1"/>
-      <Par Refined="1" Limited="0" Min="0" Max="1" Name="x">0.563165</Par>
-      <Par Refined="1" Limited="0" Min="0" Max="1" Name="y">0.24606</Par>
-      <Par Refined="1" Limited="0" Min="0" Max="1" Name="z">0.310745</Par>
+      <Quaternion Q0="-0.727304" Q1="-0.457055" Q2="-0.0224971" Q3="-0.51149" IsUnitQuaternion="1"/>
+      <Par Refined="1" Limited="0" Min="0" Max="1" Name="x">0.564399</Par>
+      <Par Refined="1" Limited="0" Min="0" Max="1" Name="y">0.24464</Par>
+      <Par Refined="1" Limited="0" Min="0" Max="1" Name="z">0.312678</Par>
       <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
-      <Atom Name="S" ScattPow="S" x="-0.0231314" y="0.0719502" z="0.0625368" Occup="1"/>
-      <Atom Name="O1" ScattPow="O" x="-0.233193" y="1.43145" z="-0.331537" Occup="1"/>
-      <Atom Name="O2" ScattPow="O" x="-1.30334" y="-0.606595" z="0.423981" Occup="1"/>
-      <Atom Name="O3" ScattPow="O" x="0.550278" y="-0.630866" z="-1.1696" Occup="1"/>
-      <Atom Name="O4" ScattPow="O" x="0.975505" y="-0.00218918" z="1.08834" Occup="1"/>
-      <Bond Atom1="S" Atom2="O1" Length="1.5" Delta="0.05" Sigma="0.01" BondOrder="1"/>
-      <Bond Atom1="S" Atom2="O2" Length="1.5" Delta="0.05" Sigma="0.01" BondOrder="1"/>
-      <Bond Atom1="S" Atom2="O3" Length="1.5" Delta="0.05" Sigma="0.01" BondOrder="1"/>
-      <Bond Atom1="S" Atom2="O4" Length="1.5" Delta="0.05" Sigma="0.01" BondOrder="1"/>
+
+      <Option Name="Flexibility Model" Choice="0" ChoiceName="Automatic from  Bond and Angle Restraints (recommended)"/>
+      <Option Name="Auto Optimize Starting Conformation" Choice="1" ChoiceName="No"/>
+      <Option Name="Optimize Orientation" Choice="0" ChoiceName="Yes"/>
+
+      <Atom Name="S" ScattPow="S" x="-0.0138278" y="0.0764278" z="0.0712667" Occup="1"/>
+      <Atom Name="O1" ScattPow="O" x="-0.228343" y="1.44055" z="-0.330812" Occup="1"/>
+      <Atom Name="O2" ScattPow="O" x="-1.29963" y="-0.611199" z="0.420462" Occup="1"/>
+      <Atom Name="O3" ScattPow="O" x="0.551721" y="-0.638381" z="-1.17741" Occup="1"/>
+      <Atom Name="O4" ScattPow="O" x="0.976626" y="-0.0120837" z="1.09461" Occup="1"/>
+      <Bond Atom1="S" Atom2="O1" Length="1.5" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="0"/>
+      <Bond Atom1="S" Atom2="O2" Length="1.5" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="0"/>
+      <Bond Atom1="S" Atom2="O3" Length="1.5" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="0"/>
+      <Bond Atom1="S" Atom2="O4" Length="1.5" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="0"/>
       <BondAngle Atom1="O1" Atom2="S" Atom3="O2" Angle="109.5" Delta="2.86479" Sigma="0.572958"/>
       <BondAngle Atom1="O1" Atom2="S" Atom3="O3" Angle="109.5" Delta="2.86479" Sigma="0.572958"/>
       <BondAngle Atom1="O1" Atom2="S" Atom3="O4" Angle="109.5" Delta="2.86479" Sigma="0.572958"/>
@@ -59,7 +64,7 @@
 
   </Crystal>
   <PowderPattern Name="PbSO4-XRay">
-    <Par Refined="0" Limited="1" Min="-2.86479" Max="2.86479" Name="2ThetaZero">-0.02</Par>
+    <Par Refined="0" Limited="1" Min="-2.86479" Max="2.86479" Name="2ThetaZero">-0.043</Par>
     <Par Refined="0" Limited="1" Min="-2.86479" Max="2.86479" Name="2ThetaDisplacement">0</Par>
     <Par Refined="0" Limited="1" Min="-2.86479" Max="2.86479" Name="2ThetaTransparency">0</Par>
     <Option Name="Use Integrated Profiles" Choice="0" ChoiceName="Yes (recommended)"/>
@@ -68,6 +73,8 @@
       <Option Name="Radiation" Choice="1" ChoiceName="X-Ray"/>
       <Option Name="Spectrum" Choice="1" ChoiceName="X-Ray Tube"/>
       <LinearPolarRate>0</LinearPolarRate>
+      <XRayTubeDeltaLambda>0.00382996</XRayTubeDeltaLambda>
+      <XRayTubeAlpha2Alpha1Ratio>0.5</XRayTubeAlpha2Alpha1Ratio>
       <Par Refined="0" Limited="1" Min="0.05" Max="20" Name="Wavelength">1.54184</Par>
     </Radiation>
     <MaxSinThetaOvLambda>0.3</MaxSinThetaOvLambda>
@@ -95,7 +102,7 @@
       <Par Refined="0" Limited="1" Min="-1" Max="1" Name="globalBiso">0</Par>
     </PowderPatternCrystal>
 
-    <PowderPatternComponent Scale="1.47172e-05" Name=""/>
+    <PowderPatternComponent Scale="1.7077e-05" Name=""/>
 
     <IobsSigmaWeightList TThetaMin="10" TThetaStep="0.025">
       179 13.3791 0.00558658 
@@ -2828,7 +2835,7 @@
     </IobsSigmaWeightList>
   </PowderPattern>
   <PowderPattern Name="PbSO4-Neutron">
-    <Par Refined="0" Limited="1" Min="-2.86479" Max="2.86479" Name="2ThetaZero">0</Par>
+    <Par Refined="0" Limited="1" Min="-2.86479" Max="2.86479" Name="2ThetaZero">-0.051</Par>
     <Par Refined="0" Limited="1" Min="-2.86479" Max="2.86479" Name="2ThetaDisplacement">0</Par>
     <Par Refined="0" Limited="1" Min="-2.86479" Max="2.86479" Name="2ThetaTransparency">0</Par>
     <Option Name="Use Integrated Profiles" Choice="0" ChoiceName="Yes (recommended)"/>
@@ -2866,7 +2873,7 @@
       <Par Refined="0" Limited="1" Min="-1" Max="1" Name="globalBiso">0</Par>
     </PowderPatternCrystal>
 
-    <PowderPatternComponent Scale="0.000232291" Name=""/>
+    <PowderPatternComponent Scale="0.000231968" Name=""/>
 
     <IobsSigmaWeightList TThetaMin="10" TThetaStep="0.05">
       220 14.8324 0.00454545 

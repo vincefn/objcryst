@@ -7,6 +7,7 @@
 <!-- #$VERSION:1.4 -->
 <!-- #$AUTHOR:Vincent Favre-Nicolin-->
 <area shape="rect" coords="27,74,348,99" alt="Crystal Menus" href="#crystal_menus" />
+<area shape="rect" coords="25,196,280,222" alt="Crystal AntiBump" href="#crystal_antibump" />
 <area shape="rect" coords="27,223,382,251" alt="Unit Cell parameters" href="#crystal_unitcell" />
 <area shape="rect" coords="25,102,460,199" alt="Crystal Options" href="#crystal_options" />
 <area shape="rect" coords="27,274,294,524" alt="Scattering Powers (atom types)" href="#crystal_scattpow" />

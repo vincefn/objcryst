@@ -1,4 +1,4 @@
-<ObjCryst Date="2003-06-05T20:28:35GMT">
+<ObjCryst Date="2003-11-29T22:49:43GMT">
   <Crystal Name="Cimetidine" SpaceGroup="P121/a1">
     <Par Refined="0" Limited="1" Min="1" Max="100" Name="a">10.3941</Par>
     <Par Refined="0" Limited="1" Min="1" Max="100" Name="b">18.8189</Par>
@@ -29,45 +29,50 @@
     </ScatteringPowerAtom>
 
     <Molecule Name="Cimetidine">
-      <Quaternion Q0="-0.217823" Q1="0.637488" Q2="-0.736163" Q3="0.0650182" IsUnitQuaternion="1"/>
-      <Par Refined="1" Limited="0" Min="0" Max="1" Name="x">0.274009</Par>
-      <Par Refined="1" Limited="0" Min="0" Max="1" Name="y">0.370539</Par>
-      <Par Refined="1" Limited="0" Min="0" Max="1" Name="z">0.316191</Par>
+      <Quaternion Q0="-0.2182" Q1="0.63524" Q2="-0.737648" Q3="0.0688142" IsUnitQuaternion="1"/>
+      <Par Refined="1" Limited="0" Min="0" Max="1" Name="x">0.274864</Par>
+      <Par Refined="1" Limited="0" Min="0" Max="1" Name="y">0.370816</Par>
+      <Par Refined="1" Limited="0" Min="0" Max="1" Name="z">0.31696</Par>
       <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
-      <Atom Name="C1" ScattPow="C" x="8.28865" y="21.1326" z="48.0458" Occup="1"/>
-      <Atom Name="N2" ScattPow="N" x="7.81864" y="22.2621" z="47.1871" Occup="1"/>
-      <Atom Name="C3" ScattPow="C" x="6.90424" y="21.9695" z="46.252" Occup="1"/>
-      <Atom Name="N4" ScattPow="N" x="6.70791" y="20.7557" z="45.9408" Occup="1"/>
-      <Atom Name="C5" ScattPow="C" x="5.58969" y="20.4108" z="45.1295" Occup="1"/>
-      <Atom Name="N6" ScattPow="N" x="4.69677" y="20.0477" z="44.4796" Occup="1"/>
-      <Atom Name="N7" ScattPow="N" x="6.19421" y="23.0789" z="45.5428" Occup="1"/>
-      <Atom Name="C8" ScattPow="C" x="6.35246" y="24.4066" z="46.2549" Occup="1"/>
-      <Atom Name="C9" ScattPow="C" x="7.64858" y="25.1375" z="45.3456" Occup="1"/>
-      <Atom Name="S10" ScattPow="S" x="7.65862" y="26.7218" z="46.1982" Occup="1"/>
-      <Atom Name="C11" ScattPow="C" x="8.11025" y="26.4871" z="48.0875" Occup="1"/>
-      <Atom Name="C12" ScattPow="C" x="9.39955" y="25.7249" z="48.2356" Occup="1"/>
-      <Atom Name="N13" ScattPow="N" x="9.5021" y="24.5018" z="47.7339" Occup="1"/>
-      <Atom Name="C14" ScattPow="C" x="10.6585" y="23.9907" z="48.0643" Occup="1"/>
-      <Atom Name="N15" ScattPow="N" x="11.3638" y="25.0065" z="48.7275" Occup="1"/>
-      <Atom Name="C16" ScattPow="C" x="10.6014" y="26.1662" z="48.7631" Occup="1"/>
-      <Atom Name="C17" ScattPow="C" x="10.9377" y="27.4673" z="49.337" Occup="1"/>
-      <Bond Atom1="C1" Atom2="N2" Length="1.47" Delta="0.05" Sigma="0.01" BondOrder="1"/>
-      <Bond Atom1="N2" Atom2="C3" Length="1.4" Delta="0.05" Sigma="0.01" BondOrder="1"/>
-      <Bond Atom1="C3" Atom2="N4" Length="1.4" Delta="0.05" Sigma="0.01" BondOrder="2"/>
-      <Bond Atom1="N4" Atom2="C5" Length="1.37" Delta="0.05" Sigma="0.01" BondOrder="1"/>
-      <Bond Atom1="C5" Atom2="N6" Length="1.13" Delta="0.05" Sigma="0.01" BondOrder="3"/>
-      <Bond Atom1="C3" Atom2="N7" Length="1.4" Delta="0.05" Sigma="0.01" BondOrder="1"/>
-      <Bond Atom1="N7" Atom2="C8" Length="1.47" Delta="0.05" Sigma="0.01" BondOrder="1"/>
-      <Bond Atom1="C8" Atom2="C9" Length="1.54" Delta="0.05" Sigma="0.01" BondOrder="1"/>
-      <Bond Atom1="C9" Atom2="S10" Length="1.82" Delta="0.05" Sigma="0.01" BondOrder="1"/>
-      <Bond Atom1="S10" Atom2="C11" Length="1.82" Delta="0.05" Sigma="0.01" BondOrder="1"/>
-      <Bond Atom1="C11" Atom2="C12" Length="1.5" Delta="0.05" Sigma="0.01" BondOrder="1"/>
-      <Bond Atom1="C12" Atom2="N13" Length="1.37" Delta="0.05" Sigma="0.01" BondOrder="1.5"/>
-      <Bond Atom1="N13" Atom2="C14" Length="1.37" Delta="0.05" Sigma="0.01" BondOrder="1.5"/>
-      <Bond Atom1="C14" Atom2="N15" Length="1.37" Delta="0.05" Sigma="0.01" BondOrder="1.5"/>
-      <Bond Atom1="N15" Atom2="C16" Length="1.37" Delta="0.05" Sigma="0.01" BondOrder="1.5"/>
-      <Bond Atom1="C16" Atom2="C17" Length="1.5" Delta="0.05" Sigma="0.01" BondOrder="1"/>
-      <Bond Atom1="C16" Atom2="C12" Length="1.45" Delta="0.05" Sigma="0.01" BondOrder="1.5"/>
+
+      <Option Name="Flexibility Model" Choice="0" ChoiceName="Automatic from  Bond and Angle Restraints (recommended)"/>
+      <Option Name="Auto Optimize Starting Conformation" Choice="1" ChoiceName="No"/>
+      <Option Name="Optimize Orientation" Choice="0" ChoiceName="Yes"/>
+
+      <Atom Name="C1" ScattPow="C" x="8.23145" y="21.0356" z="48.0837" Occup="1"/>
+      <Atom Name="N2" ScattPow="N" x="7.81139" y="22.2159" z="47.2472" Occup="1"/>
+      <Atom Name="C3" ScattPow="C" x="6.90829" y="21.9941" z="46.2705" Occup="1"/>
+      <Atom Name="N4" ScattPow="N" x="6.6501" y="20.7309" z="46.0126" Occup="1"/>
+      <Atom Name="C5" ScattPow="C" x="5.59425" y="20.3974" z="45.1343" Occup="1"/>
+      <Atom Name="N6" ScattPow="N" x="4.69686" y="20.0953" z="44.4668" Occup="1"/>
+      <Atom Name="N7" ScattPow="N" x="6.20238" y="23.0823" z="45.5743" Occup="1"/>
+      <Atom Name="C8" ScattPow="C" x="6.33619" y="24.3821" z="46.2209" Occup="1"/>
+      <Atom Name="C9" ScattPow="C" x="7.63217" y="25.1231" z="45.3571" Occup="1"/>
+      <Atom Name="S10" ScattPow="S" x="7.64458" y="26.7287" z="46.181" Occup="1"/>
+      <Atom Name="C11" ScattPow="C" x="8.10405" y="26.5502" z="48.0686" Occup="1"/>
+      <Atom Name="C12" ScattPow="C" x="9.28433" y="25.74" z="48.2025" Occup="1"/>
+      <Atom Name="N13" ScattPow="N" x="9.39713" y="24.478" z="47.7865" Occup="1"/>
+      <Atom Name="C14" ScattPow="C" x="10.6061" y="23.9951" z="48.0925" Occup="1"/>
+      <Atom Name="N15" ScattPow="N" x="11.2914" y="24.988" z="48.7963" Occup="1"/>
+      <Atom Name="C16" ScattPow="C" x="10.5791" y="26.1236" z="48.7537" Occup="1"/>
+      <Atom Name="C17" ScattPow="C" x="10.9349" y="27.4803" z="49.3711" Occup="1"/>
+      <Bond Atom1="C1" Atom2="N2" Length="1.47" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="0"/>
+      <Bond Atom1="N2" Atom2="C3" Length="1.4" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="1"/>
+      <Bond Atom1="C3" Atom2="N4" Length="1.4" Delta="0.05" Sigma="0.01" BondOrder="2" FreeTorsion="1"/>
+      <Bond Atom1="N4" Atom2="C5" Length="1.37" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="1"/>
+      <Bond Atom1="C5" Atom2="N6" Length="1.13" Delta="0.05" Sigma="0.01" BondOrder="3" FreeTorsion="0"/>
+      <Bond Atom1="C3" Atom2="N7" Length="1.4" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="1"/>
+      <Bond Atom1="N7" Atom2="C8" Length="1.47" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="1"/>
+      <Bond Atom1="C8" Atom2="C9" Length="1.54" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="1"/>
+      <Bond Atom1="C9" Atom2="S10" Length="1.82" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="1"/>
+      <Bond Atom1="S10" Atom2="C11" Length="1.82" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="1"/>
+      <Bond Atom1="C11" Atom2="C12" Length="1.5" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="1"/>
+      <Bond Atom1="C12" Atom2="N13" Length="1.37" Delta="0.05" Sigma="0.01" BondOrder="1.5" FreeTorsion="0"/>
+      <Bond Atom1="N13" Atom2="C14" Length="1.37" Delta="0.05" Sigma="0.01" BondOrder="1.5" FreeTorsion="0"/>
+      <Bond Atom1="C14" Atom2="N15" Length="1.37" Delta="0.05" Sigma="0.01" BondOrder="1.5" FreeTorsion="0"/>
+      <Bond Atom1="N15" Atom2="C16" Length="1.37" Delta="0.05" Sigma="0.01" BondOrder="1.5" FreeTorsion="0"/>
+      <Bond Atom1="C16" Atom2="C17" Length="1.5" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="0"/>
+      <Bond Atom1="C16" Atom2="C12" Length="1.45" Delta="0.05" Sigma="0.01" BondOrder="1.5" FreeTorsion="0"/>
       <BondAngle Atom1="C1" Atom2="N2" Atom3="C3" Angle="108.862" Delta="2.86479" Sigma="0.572958"/>
       <BondAngle Atom1="N2" Atom2="C3" Atom3="N4" Angle="119.748" Delta="2.86479" Sigma="0.572958"/>
       <BondAngle Atom1="C3" Atom2="N4" Atom3="C5" Angle="119.748" Delta="2.86479" Sigma="0.572958"/>
@@ -95,7 +100,7 @@
 
   </Crystal>
   <PowderPattern Name="Cimetidine-XRay pattern">
-    <Par Refined="0" Limited="1" Min="-2.86479" Max="2.86479" Name="2ThetaZero">0.0094</Par>
+    <Par Refined="0" Limited="1" Min="-2.86479" Max="2.86479" Name="2ThetaZero">0.0037</Par>
     <Par Refined="0" Limited="1" Min="-2.86479" Max="2.86479" Name="2ThetaDisplacement">0</Par>
     <Par Refined="0" Limited="1" Min="-2.86479" Max="2.86479" Name="2ThetaTransparency">0</Par>
     <Option Name="Use Integrated Profiles" Choice="0" ChoiceName="Yes (recommended)"/>
@@ -144,7 +149,7 @@
       <Par Refined="0" Limited="1" Min="-1" Max="1" Name="globalBiso">0</Par>
     </PowderPatternCrystal>
 
-    <PowderPatternComponent Scale="0.000108749" Name=""/>
+    <PowderPatternComponent Scale="0.000110384" Name=""/>
 
     <IobsSigmaWeightList TThetaMin="8.01" TThetaStep="0.01">
       2707 52.0288 0.000369413 

@@ -1,4 +1,4 @@
-<ObjCryst Date="2003-06-21T16:24:16GMT">
+<ObjCryst Date="2003-11-29T22:53:44GMT">
   <Crystal Name="K-tartrate" SpaceGroup="P212121">
     <Par Refined="0" Limited="1" Min="1" Max="100" Name="a">7.78621</Par>
     <Par Refined="0" Limited="1" Min="1" Max="100" Name="b">10.6465</Par>
@@ -29,36 +29,41 @@
     </ScatteringPowerAtom>
 
     <Atom Name="K" ScattPow="K">
-      <Par Refined="1" Limited="0" Min="0" Max="1" Name="x">0.820773</Par>
-      <Par Refined="1" Limited="0" Min="0" Max="1" Name="y">0.464358</Par>
-      <Par Refined="1" Limited="0" Min="0" Max="1" Name="z">0.830432</Par>
+      <Par Refined="1" Limited="0" Min="0" Max="1" Name="x">0.822707</Par>
+      <Par Refined="1" Limited="0" Min="0" Max="1" Name="y">0.463981</Par>
+      <Par Refined="1" Limited="0" Min="0" Max="1" Name="z">0.832299</Par>
       <Par Refined="0" Limited="1" Min="0.01" Max="1" Name="Occup">1</Par>
     </Atom>
     <Molecule Name="K Tartrate">
-      <Quaternion Q0="-0.219489" Q1="-0.0235614" Q2="0.973065" Q3="-0.0664305" IsUnitQuaternion="1"/>
-      <Par Refined="1" Limited="0" Min="0" Max="1" Name="x">0.845659</Par>
-      <Par Refined="1" Limited="0" Min="0" Max="1" Name="y">0.197464</Par>
-      <Par Refined="1" Limited="0" Min="0" Max="1" Name="z">0.217267</Par>
+      <Quaternion Q0="-0.223513" Q1="-0.0347984" Q2="0.972386" Q3="-0.0574207" IsUnitQuaternion="1"/>
+      <Par Refined="1" Limited="0" Min="0" Max="1" Name="x">0.846273</Par>
+      <Par Refined="1" Limited="0" Min="0" Max="1" Name="y">0.197078</Par>
+      <Par Refined="1" Limited="0" Min="0" Max="1" Name="z">0.215669</Par>
       <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
-      <Atom Name="C1" ScattPow="C" x="0.697043" y="0.144608" z="-1.76546" Occup="1"/>
-      <Atom Name="C2" ScattPow="C" x="-0.256723" y="0.245878" z="-0.685334" Occup="1"/>
-      <Atom Name="C3" ScattPow="C" x="0.0738394" y="-0.573152" z="0.498366" Occup="1"/>
-      <Atom Name="C4" ScattPow="C" x="-0.928634" y="-0.468767" z="1.5215" Occup="1"/>
-      <Atom Name="O1a" ScattPow="O" x="1.00461" y="-0.988383" z="-2.28369" Occup="1"/>
-      <Atom Name="O1b" ScattPow="O" x="1.3505" y="1.19426" z="-2.19578" Occup="1"/>
-      <Atom Name="O2" ScattPow="O" x="-0.605894" y="1.57193" z="-0.222789" Occup="1"/>
-      <Atom Name="O3" ScattPow="O" x="1.31687" y="-0.235979" z="0.910616" Occup="1"/>
-      <Atom Name="O4a" ScattPow="O" x="-2.01789" y="-0.922515" z="1.31494" Occup="1"/>
-      <Atom Name="O4b" ScattPow="O" x="-0.708716" y="-0.00703965" z="2.7125" Occup="1"/>
-      <Bond Atom1="C1" Atom2="C2" Length="1.5" Delta="0.05" Sigma="0.01" BondOrder="1"/>
-      <Bond Atom1="C2" Atom2="C3" Length="1.5" Delta="0.05" Sigma="0.01" BondOrder="1"/>
-      <Bond Atom1="C3" Atom2="C4" Length="1.5" Delta="0.05" Sigma="0.01" BondOrder="1"/>
-      <Bond Atom1="C1" Atom2="O1a" Length="1.21" Delta="0.05" Sigma="0.01" BondOrder="2"/>
-      <Bond Atom1="C1" Atom2="O1b" Length="1.42" Delta="0.05" Sigma="0.01" BondOrder="1"/>
-      <Bond Atom1="C2" Atom2="O2" Length="1.42" Delta="0.05" Sigma="0.01" BondOrder="1"/>
-      <Bond Atom1="C3" Atom2="O3" Length="1.42" Delta="0.05" Sigma="0.01" BondOrder="1"/>
-      <Bond Atom1="C4" Atom2="O4a" Length="1.21" Delta="0.05" Sigma="0.01" BondOrder="2"/>
-      <Bond Atom1="C4" Atom2="O4b" Length="1.42" Delta="0.05" Sigma="0.01" BondOrder="1"/>
+
+      <Option Name="Flexibility Model" Choice="0" ChoiceName="Automatic from  Bond and Angle Restraints (recommended)"/>
+      <Option Name="Auto Optimize Starting Conformation" Choice="1" ChoiceName="No"/>
+      <Option Name="Optimize Orientation" Choice="0" ChoiceName="Yes"/>
+
+      <Atom Name="C1" ScattPow="C" x="0.700772" y="0.216318" z="-1.75592" Occup="1"/>
+      <Atom Name="C2" ScattPow="C" x="-0.343371" y="0.265117" z="-0.614156" Occup="1"/>
+      <Atom Name="C3" ScattPow="C" x="-0.0146158" y="-0.570841" z="0.517673" Occup="1"/>
+      <Atom Name="C4" ScattPow="C" x="-0.970987" y="-0.45931" z="1.55122" Occup="1"/>
+      <Atom Name="O1a" ScattPow="O" x="1.36925" y="1.15871" z="-2.10445" Occup="1"/>
+      <Atom Name="O1b" ScattPow="O" x="0.987685" y="-0.947058" z="-2.31844" Occup="1"/>
+      <Atom Name="O2" ScattPow="O" x="-0.673681" y="1.60277" z="-0.204674" Occup="1"/>
+      <Atom Name="O3" ScattPow="O" x="1.25408" y="-0.269999" z="0.915085" Occup="1"/>
+      <Atom Name="O4a" ScattPow="O" x="-2.09919" y="-0.940987" z="1.30992" Occup="1"/>
+      <Atom Name="O4b" ScattPow="O" x="-0.719538" y="-0.109551" z="2.72639" Occup="1"/>
+      <Bond Atom1="C1" Atom2="C2" Length="1.5" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="1"/>
+      <Bond Atom1="C2" Atom2="C3" Length="1.5" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="1"/>
+      <Bond Atom1="C3" Atom2="C4" Length="1.5" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="1"/>
+      <Bond Atom1="C1" Atom2="O1a" Length="1.21" Delta="0.05" Sigma="0.01" BondOrder="2" FreeTorsion="0"/>
+      <Bond Atom1="C1" Atom2="O1b" Length="1.42" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="0"/>
+      <Bond Atom1="C2" Atom2="O2" Length="1.42" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="0"/>
+      <Bond Atom1="C3" Atom2="O3" Length="1.42" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="0"/>
+      <Bond Atom1="C4" Atom2="O4a" Length="1.21" Delta="0.05" Sigma="0.01" BondOrder="2" FreeTorsion="0"/>
+      <Bond Atom1="C4" Atom2="O4b" Length="1.42" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="0"/>
       <BondAngle Atom1="C1" Atom2="C2" Atom3="C3" Angle="109" Delta="2.86479" Sigma="0.572958"/>
       <BondAngle Atom1="C2" Atom2="C3" Atom3="C4" Angle="109" Delta="2.86479" Sigma="0.572958"/>
       <BondAngle Atom1="O1a" Atom2="C1" Atom3="C2" Angle="119.748" Delta="2.86479" Sigma="0.572958"/>
@@ -75,7 +80,7 @@
 
   </Crystal>
   <PowderPattern Name="K-tartrate textured">
-    <Par Refined="0" Limited="1" Min="-2.86479" Max="2.86479" Name="2ThetaZero">0.01</Par>
+    <Par Refined="0" Limited="1" Min="-2.86479" Max="2.86479" Name="2ThetaZero">-0.001</Par>
     <Par Refined="0" Limited="1" Min="-2.86479" Max="2.86479" Name="2ThetaDisplacement">0</Par>
     <Par Refined="0" Limited="1" Min="-2.86479" Max="2.86479" Name="2ThetaTransparency">0</Par>
     <Option Name="Use Integrated Profiles" Choice="0" ChoiceName="Yes (recommended)"/>
@@ -144,8 +149,8 @@
       <Par Refined="0" Limited="1" Min="-1" Max="1" Name="globalBiso">0</Par>
       <TextureMarchDollase>
         <TexturePhaseMarchDollase>
-          <Par Refined="1" Limited="1" Min="0" Max="1" Name="Fraction">0.399199</Par>
-          <Par Refined="1" Limited="1" Min="0.01" Max="100" Name="MarchCoeff">0.289316</Par>
+          <Par Refined="1" Limited="1" Min="0" Max="1" Name="Fraction">0.349907</Par>
+          <Par Refined="1" Limited="1" Min="0.01" Max="100" Name="MarchCoeff">0.276008</Par>
           <Par Refined="0" Limited="0" Min="-10" Max="10" Name="H">0</Par>
           <Par Refined="0" Limited="0" Min="-10" Max="10" Name="K">1</Par>
           <Par Refined="0" Limited="0" Min="-10" Max="10" Name="L">0</Par>
@@ -153,7 +158,7 @@
       </TextureMarchDollase>
     </PowderPatternCrystal>
 
-    <PowderPatternComponent Scale="0.000234396" Name="K-tartrate textured"/>
+    <PowderPatternComponent Scale="0.000225731" Name="K-tartrate textured"/>
 
     <IobsSigmaWeightList TThetaMin="4.9265" TThetaStep="0.0072">
       4118 64.1716 0.000242837 
@@ -7119,7 +7124,7 @@
       589 24.2693 0.0016978 
       608 24.6577 0.00164473 
       643 25.3574 0.00155522 
-      688 26.2298 0.00145349 
+      688 26.2298 0.00145348 
       668 25.8457 0.00149701 
       692 26.3059 0.00144509 
       693 26.3249 0.001443 
