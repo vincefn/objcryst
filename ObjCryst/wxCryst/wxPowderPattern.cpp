@@ -232,7 +232,7 @@ void WXPowderPattern::CrystUpdate()
                            mpPowderPattern->GetPowderPatternCalc(),
                            mpPowderPattern->Get2ThetaMin(),
                            mpPowderPattern->Get2ThetaStep());
-		mpGraph->GetParent()->SetTitle(mpPowderPattern->GetName().c_str());
+		//mpGraph->GetParent()->SetTitle(mpPowderPattern->GetName().c_str());
    }
 } 
 
@@ -552,6 +552,7 @@ WXPowderPatternGraph::~WXPowderPatternGraph()
 void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint()",5)
+	if(true==mCalcPatternIsLocked) return;
    wxPaintDC dc(this);
    PrepareDC(dc);
    mpParentFrame->PrepareDC(dc);
@@ -658,6 +659,11 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
 }
 void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
 {
+	if(true==mCalcPatternIsLocked)
+	{
+		mIsDragging=false;
+		return;
+	}
 	// Write mouse pointer coordinates
    	wxClientDC dc(this);
    	PrepareDC(dc);
