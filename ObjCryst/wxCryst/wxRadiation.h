@@ -37,7 +37,6 @@ class WXRadiation: public WXCrystObjBasic
       Radiation *mpRadiation;
       WXFieldOption *mpFieldRadType;
       WXFieldOption *mpFieldWavelengthType;
-      WXFieldRefPar *mpFieldWavelength;
       wxBoxSizer *mpSizer;
       WXCrystObjBasicList mList;
    DECLARE_EVENT_TABLE()

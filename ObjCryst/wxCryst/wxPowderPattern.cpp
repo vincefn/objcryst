@@ -46,7 +46,7 @@ BEGIN_EVENT_TABLE(WXRadiation, wxWindow)
 END_EVENT_TABLE()
 
 WXRadiation::WXRadiation(wxWindow *parent, Radiation* rad):
-WXCrystObjBasic(parent),mpRadiation(rad),mpFieldWavelength(0)
+WXCrystObjBasic(parent),mpRadiation(rad)
 {
    VFN_DEBUG_ENTRY("WXRadiation::WXRadiation()",6)
    // :TODO: Add a choice for the wavlength type, with 'monochromatic', and a list
@@ -61,10 +61,10 @@ WXCrystObjBasic(parent),mpRadiation(rad),mpFieldWavelength(0)
    mpSizer->Add(mpFieldWavelengthType,0);
    mList.Add(mpFieldWavelengthType);
    
-   mpFieldWavelength=new WXFieldRefPar(this,"Wavelength:",
-                                   &(mpRadiation->GetPar(mpRadiation->mWavelength.data())));
-   mpSizer->Add(mpFieldWavelength,0);
-   mList.Add(mpFieldWavelength);
+   WXCrystObjBasic* pFieldWavelength
+      =mpRadiation->GetPar(mpRadiation->mWavelength.data()).WXCreate(this);
+   mpSizer->Add(pFieldWavelength,0);
+   mList.Add(pFieldWavelength);
 
    WXFieldPar<REAL> *polarRate=new WXFieldPar<REAL>(this,"Linear Polar Rate:",-1,
                                             &(mpRadiation->mLinearPolarRate));
