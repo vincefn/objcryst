@@ -133,28 +133,27 @@ SpeedTestReport SpeedTest(const unsigned int nbAtom, const int nbAtomType,const 
    }
    
    //Create the global optimization object
-      MonteCarloObj globalOptObj;
-      globalOptObj.AddRefinableObj(*pData);
-      globalOptObj.AddRefinableObj(cryst);
+      MonteCarloObj *pGlobalOptObj=new MonteCarloObj;
+      pGlobalOptObj->AddRefinableObj(*pData);
+      pGlobalOptObj->AddRefinableObj(cryst);
 
    //Refine only positionnal parameters
-      globalOptObj.FixAllPar();
-      globalOptObj.SetParIsFixed(gpRefParTypeScattTransl,false);
-      globalOptObj.SetParIsFixed(gpRefParTypeScattOrient,false);
+      pGlobalOptObj->FixAllPar();
+      pGlobalOptObj->SetParIsFixed(gpRefParTypeScattTransl,false);
+      pGlobalOptObj->SetParIsFixed(gpRefParTypeScattOrient,false);
 
    //Don't cheat ;-)
-      globalOptObj.RandomizeStartingConfig();
+      pGlobalOptObj->RandomizeStartingConfig();
    
    //Annealing parameters (schedule, Tmax, Tmin, displacement schedule, 
-      globalOptObj.SetAlgorithmParallTempering(ANNEALING_SMART,1e8,1e-8,
+      pGlobalOptObj->SetAlgorithmParallTempering(ANNEALING_SMART,1e8,1e-8,
                                                ANNEALING_EXPONENTIAL,8,.125);      
       
    //Global Optimization
       //The real job-first test
       long nbTrial=50000000;
-      globalOptObj.Optimize(nbTrial,true,0,time);
+      pGlobalOptObj->Optimize(nbTrial,true,0,time);
       
-   delete pData;
    
    SpeedTestReport report;
    report.mNbAtom=nbAtom;
@@ -164,11 +163,13 @@ SpeedTestReport SpeedTest(const unsigned int nbAtom, const int nbAtomType,const 
    report.mNbReflections=nbReflections;
    report.mDataType=dataType;
    report.mBogoMRAPS=(REAL)nbAtom*cryst.GetSpaceGroup().GetNbSymmetrics()*(REAL)nbReflections
-                     *(50000000-nbTrial)/globalOptObj.GetLastOptimElapsedTime()/1e6;
+                     *(50000000-nbTrial)/pGlobalOptObj->GetLastOptimElapsedTime()/1e6;
    report.mBogoMRAPS_reduced=(REAL)nbAtom*cryst.GetSpaceGroup().GetNbSymmetrics(true,true)
                              *(REAL)nbReflections
-                             *(50000000-nbTrial)/globalOptObj.GetLastOptimElapsedTime()/1e6;
-   report.mBogoSPS=(50000000-nbTrial)/globalOptObj.GetLastOptimElapsedTime();
+                             *(50000000-nbTrial)/pGlobalOptObj->GetLastOptimElapsedTime()/1e6;
+   report.mBogoSPS=(50000000-nbTrial)/pGlobalOptObj->GetLastOptimElapsedTime();
+   delete pGlobalOptObj;
+   delete pData;
    return report;
 }
 }
