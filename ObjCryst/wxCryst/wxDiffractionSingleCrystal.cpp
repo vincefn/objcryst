@@ -56,6 +56,7 @@ BEGIN_EVENT_TABLE(WXDiffractionSingleCrystal, wxWindow)
    EVT_MENU(ID_REFOBJ_MENU_PAR_FIXALL,                  WXRefinableObj::OnMenuFixAllPar)
    EVT_MENU(ID_REFOBJ_MENU_PAR_UNFIXALL,                WXRefinableObj::OnMenuUnFixAllPar)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_SAVEHKLIOBSICALC,   WXDiffractionSingleCrystal::OnMenuSaveHKLIobsIcalc)
+   EVT_MENU(ID_DIFFSINGLECRYST_MENU_SAVEHKLFCALC,       WXDiffractionSingleCrystal::OnMenuSaveHKLFcalc)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_SIMULATE,           WXDiffractionSingleCrystal::OnMenuSimulate)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBS,     WXDiffractionSingleCrystal::OnMenuImport)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBSSIGMA,WXDiffractionSingleCrystal::OnMenuImport)
@@ -92,6 +93,8 @@ WXRefinableObj(parent,data),mpData(data)
          //mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_REFOBJ_MENU_OBJ_LOAD,"Load");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_DIFFSINGLECRYST_MENU_SAVEHKLIOBSICALC,
                                 "Save HKL Iobs Icalc (text)");
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_DIFFSINGLECRYST_MENU_SAVEHKLFCALC,
+                                "Save HKL Fcalc (text)");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_DIFFSINGLECRYST_MENU_SIMULATE,
                                 "Simulation mode (generate HKL list)");
          //mpMenuBar->AppendSeparator();
@@ -280,6 +283,17 @@ void WXDiffractionSingleCrystal::OnMenuSaveHKLIobsIcalc(wxCommandEvent & WXUNUSE
    wxFileDialog save(this,"Choose a file","","","*.txt",wxSAVE | wxOVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
    mpData->SaveHKLIobsIcalc(save.GetPath().c_str());
+}
+void WXDiffractionSingleCrystal::OnMenuSaveHKLFcalc(wxCommandEvent & WXUNUSED(event))
+{
+   VFN_DEBUG_MESSAGE("WXDiffractionSingleCrystal::OnMenuSaveHKLFcalc()",6)
+   WXCrystValidateAllUserInput();
+   wxFileDialog save(this,"Choose a file","","","*.txt",wxSAVE | wxOVERWRITE_PROMPT);
+   if(save.ShowModal() != wxID_OK) return;
+   ofstream os(save.GetPath().c_str());
+   mpData->PrintFhklCalcDetail(os);
+   os.close();
+   mpData->GetCrystal().GetScatteringComponentList().Print();
 }
 void WXDiffractionSingleCrystal::OnMenuSetWavelength(wxCommandEvent &event)
 {

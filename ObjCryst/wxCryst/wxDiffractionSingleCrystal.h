@@ -39,6 +39,7 @@ class WXDiffractionSingleCrystal: public WXRefinableObj
       void OnMenuSimulate(wxCommandEvent & WXUNUSED(event));
       void OnMenuImport(wxCommandEvent & event);
       void OnMenuSaveHKLIobsIcalc(wxCommandEvent & WXUNUSED(event));
+      void OnMenuSaveHKLFcalc(wxCommandEvent & WXUNUSED(event));
       void OnMenuSetWavelength(wxCommandEvent &event);
       void OnChangeCrystal(wxCommandEvent & WXUNUSED(event));
       WXFieldChoice* mpFieldCrystal;

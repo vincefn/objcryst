@@ -769,6 +769,51 @@ void ScatteringData::PrintFhklCalc(ostream &os)const
                (mH,mK,mL,mFhklCalcSq,mFhklCalcReal,mFhklCalcImag,theta,mSinThetaLambda,12,4);
    VFN_DEBUG_EXIT("ScatteringData::PrintFhklCalc()",5)
 }
+
+void ScatteringData::PrintFhklCalcDetail(ostream &os)const
+{
+   VFN_DEBUG_ENTRY("ScatteringData::PrintFhklCalcDetail()",5)
+   this->GetFhklCalcSq();
+   CrystVector_REAL theta;
+   theta=mTheta;
+   theta *= RAD2DEG;
+   vector<const CrystVector_REAL *> v;
+   v.push_back(&mH);
+   v.push_back(&mK);
+   v.push_back(&mL);
+   v.push_back(&mSinThetaLambda);
+   v.push_back(&theta);
+   v.push_back(&mFhklCalcSq);
+   v.push_back(&mFhklCalcReal);
+   v.push_back(&mFhklCalcImag);
+   os <<" Number of reflections:"<<mNbRefl<<endl;
+   os <<"       H        K        L       1/2d        Theta       F(hkl)^2";
+   os <<"     Re(F)         Im(F)       ";
+   vector<CrystVector_REAL> sf;
+   sf.resize(mNbScatteringPower*2);
+   for(int i=0;i<mNbScatteringPower;i++)
+   {
+      const long index=mScatteringPowerIndex2(i);
+      os << FormatString("Re(F)_"+GetScatteringPower(index).GetName(),14)
+         << FormatString("Im(F)_"+GetScatteringPower(index).GetName(),14);
+      cout<<GetScatteringPower(index).GetName()<<":"<<GetScatteringPower(index).GetForwardScatteringFactor(RAD_XRAY)<<endl;
+      sf[2*i]  = *(mpRealGeomSF+i);
+      sf[2*i] *= *(mpScatteringFactor+i);
+      sf[2*i] *= *(mpTemperatureFactor+i);
+      sf[2*i+1]  = *(mpImagGeomSF+i);
+      sf[2*i+1] *= *(mpScatteringFactor+i);
+      sf[2*i+1] *= *(mpTemperatureFactor+i);
+      v.push_back(&(sf[2*i]));
+      v.push_back(&(sf[2*i+1]));
+      //v.push_back(mpRealGeomSF+i);
+      //v.push_back(mpImagGeomSF+i);
+      //v.push_back(mpScatteringFactor+i);
+   }
+   os<<endl;
+   os << FormatVertVectorHKLFloats<REAL>(v,12,4);
+   VFN_DEBUG_EXIT("ScatteringData::PrintFhklCalcDetail()",5)
+}
+
 void ScatteringData::BeginOptimization(const bool allowApproximations,
                                        const bool enableRestraints)
 {

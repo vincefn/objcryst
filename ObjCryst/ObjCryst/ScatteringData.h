@@ -306,6 +306,11 @@ class ScatteringData: virtual public RefinableObj
       *
       */
       virtual void PrintFhklCalc(ostream &os=cout)const;
+      /** \brief Print H, K, L sin(theta)/lambda theta F^2 Re(F) Im(F) [Re(F) Im(F)]_i,
+      * where [Re(F) Im(F)]_i are the real and imaginary contribution of the different
+      * scattering powers to the overall structure factor
+      */
+      virtual void PrintFhklCalcDetail(ostream &os=cout)const;
 
       virtual void BeginOptimization(const bool allowApproximations=false,
                                      const bool enableRestraints=false);

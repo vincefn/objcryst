@@ -23,6 +23,7 @@
 
 #include <string>
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
@@ -282,11 +283,13 @@ template<class T>class FormatVertVectorHKLFloats
                                  const CrystVector<T> &u,
                                  const int width=10,
                                  const int precision=4);
+      FormatVertVectorHKLFloats( vector<const CrystVector<T> *>& v,
+                                 const int width=10,
+                                 const int precision=4);
       ~FormatVertVectorHKLFloats();
       //int length() const;
    //private:
-      const CrystVector<T> *mpVectors[20];
-      const int mNbVectors;
+      vector<const CrystVector<T> *>mvpVectors;
       const int mWidth;
       const int mPrecision;
    
