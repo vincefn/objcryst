@@ -262,6 +262,9 @@ class RefinablePar:public Restraint
                      const bool isPeriodic=false,
                      const REAL humanScale=1.,
                      REAL period=1.);
+      /** Copy Constructor
+      */
+      RefinablePar(const RefinablePar &ref);
       ~RefinablePar();
       /** \brief Constructor
       *\par name: the name of the parameter

@@ -293,6 +293,17 @@ void RefinablePar::Init(const string &name,
    mHasAssignedClock=false;
    mpClock=0;
 }
+RefinablePar::RefinablePar(const RefinablePar &old):
+Restraint(old)
+{
+   mpValue=old.mpValue;
+   #ifdef __WX__CRYST__
+   mpWXFieldRefPar=0;
+   #endif
+   this->CopyAttributes(old);
+   mHasAssignedClock=old.mHasAssignedClock;
+   mpClock=old.mpClock;
+}
 
 void RefinablePar::CopyAttributes(const RefinablePar&old)
 {
@@ -681,9 +692,8 @@ WXCrystObjBasic* RefinablePar::WXCreate(wxWindow *parent)
    {
       throw ObjCrystException((string)"RefinablePar::WXCreate():"+this->GetName()+(string)" WXFieldRefPar already exists !");
    }
-   //mpWXFieldRefPar=new WXFieldRefPar (parent,this->GetName(),this);
-   WXCrystObjBasic *tmp=new WXFieldRefPar (parent,this->GetName(),this);
-   return (WXCrystObjBasic*) tmp;
+   mpWXFieldRefPar=new WXFieldRefPar (parent,this->GetName(),this);
+   return (WXCrystObjBasic*) mpWXFieldRefPar;
 }
 WXCrystObjBasic* RefinablePar::WXGet()
 {
