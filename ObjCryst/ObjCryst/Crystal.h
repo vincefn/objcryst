@@ -1,3 +1,14 @@
+/* 
+* ObjCryst++ : a Crystallographic computing library in C++
+*			http://objcryst.sourceforge.net
+*			http://www.ccp14.ac.uk/ccp/web-mirrors/objcryst/
+*
+*  (c) 2000-2001 Vincent FAVRE-NICOLIN vincefn@users.sourceforge.net
+*
+*/
+/*   Crystal.h header file for the Crystal object
+*
+*/
 #ifndef _OBJCRYST_CRYSTAL_H_
 #define _OBJCRYST_CRYSTAL_H_
 
@@ -25,7 +36,7 @@ extern const RefParType *gpRefParTypeUnitCellLength;
 extern const RefParType *gpRefParTypeUnitCellAngle;
 
 //######################################################################
-/** \brief Crystal class: Unit cell, spaceGroup, scatterers
+/** \brief Crystal class: Unit cell, spacegroup, scatterers
 *
 * A  Crystal object has several main characteristics : (1) a unit cell,
 * (2) a Spacegroup and (3) a list of Scatterer. Also stored in the Crystal
@@ -33,21 +44,30 @@ extern const RefParType *gpRefParTypeUnitCellAngle;
 *
 * The crystal is capable of giving a list of all scattering components
 * (ie the list of all unique scattering 'points' (ScatteringComponent, ie atoms) 
-* in the unit cell, each associated to a ScatteringPower). When those
-* scattering components are on a special position or oevrlapping with
+* in the unit cell, each associated to a ScatteringPower).
+*
+* When those scattering components are on a special position or overlapping with
 * another component of the same type, it is possible to correct
 * dynamically the occupancy of this/these components to effectively have
-* only one component instead of several due to the overlapping.
+* only one component instead of several due to the overlapping. This
+* method is interesting for global optimization where atoms must not be "locked"
+* on a special position. If this "Dynamical Occupancy Correction"
+* is used then no occupancy should be corrected for special positions, since
+* this will be done dynamically.
 *
 * A crystal structure can be viewed in 3D using OpenGL.
 *
-* Currently only 3D crystal structures can be handled (no magnetic
+* \todo exporting (and importing) crystal structures to/from other files
+* format than ObjCryst's XML (eg CIF, and format used by refinement software)
+*
+* Currently only 3D crystal structures can be handled, with no magnetic
 * structure (that may be done later) and no incommensurate structure.
 */
 //######################################################################
 class Crystal:public RefinableObj
 {
    public:
+		/// Default Constructor
       Crystal();
       /** \brief Crystal Constructor (orthorombic)
       *  \param a,b,c : unit cell dimension, in angstroems
@@ -57,25 +77,27 @@ class Crystal:public RefinableObj
               const string &SpaceGroupId);
       /** \brief Crystal Constructor (triclinic)
       *  \param a,b,c : unit cell dimension, in angstroems
-      *  \param alpha,beta,gamma : unit cell angles
+      *  \param alpha,beta,gamma : unit cell angles, in radians.
       *  \param SpaceGroupId: space group symbol or number
       */
       Crystal(const double a, const double b, const double c, const double alpha,
               const double beta, const double gamma,const string &SpaceGroupId);
               
-      ///Crystal copy constructor
+      /// Crystal copy constructor
       Crystal(const Crystal &oldCryst);
-      ///Crystal destructor
+      /// Crystal destructor
       ~Crystal();
       virtual const string GetClassName() const;
       
       /** \brief Add a scatterer to the crystal.
       *
       * \warning the scatterer \e must be allocated in the heap, since the scatterer
-      * will not be copied but used directly. A Scatterer can only belong to one Crystal. It
+      * will \e not be copied but used directly. A Scatterer can only belong to one Crystal. It
       * will be detroyed when removed or when the Crystal is destroyed.
       * \param scatt : the address of the scatterer to be included in the crystal
       * scatterer names \b must be unique in a given crystal.
+		* Note that the ScatteringPower used in the Scatterer should be one
+		* of the Crystal (see Crystal::AddScatteringPower())
       *
       */
       void AddScatterer(Scatterer *scatt);
@@ -123,14 +145,15 @@ class Crystal:public RefinableObj
       
       /** \brief Get the list of all scattering components
       * \param useDynPopCorr: if true, then the dynamical polpulation correction
-      * will be computed and stored in the list for each component.
+      * will be computed and stored in the list for each component. Else the
+		* dynamical occupancy correction will be set to 1 for all components.
       */
       virtual const ScatteringComponentList& GetScatteringComponentList()const;
       /// Lattice parameters (a,b,c,alpha,beta,gamma) as a 6-element vector in Angstroems 
       /// and radians.
       CrystVector_double GetLatticePar() const;
       /// Return one of the 6 Lattice parameters, 0<= whichPar <6 (a,b,c,alpha,beta,gamma),
-      /// returned in Angstroems. 
+      /// returned in Angstroems and radians. 
       double GetLatticePar(const int whichPar)const;
       /** \brief Get the 'B' matrix (Crystal::mBMatrix)for the crystal (orthogonalization 
       * matrix for the given lattice, in the reciprocal space)
@@ -148,40 +171,42 @@ class Crystal:public RefinableObj
       */
       CrystVector_double GetOrthonormalCoords(const double x,const double y,const double z) const;
       /** \brief Get orthonormal cartesian coordinates for a set of (x,y,z)
-      *fractional coordinates.
+      * fractional coordinates.
       *
       * X,y and z input are changed to Amgstroems values
       * The convention is taken following :
-      *e1 is chosen along a, e2 in the (a,b) plane, then e3 is along c*
+      * e1 is chosen along a, e2 in the (a,b) plane, then e3 is along c*
       */
       void FractionalToOrthonormalCoords(double &x,double &y,double &z) const;
       /** \brief Get fractional cartesian coordinates for a set of (x,y,z)
-      *orthonormal coordinates.
+      * orthonormal coordinates.
       *
-      *Result is stored into x,y and z
-      *The convention is taken following :
-      *e1 is chosen along a, e2 in the (a,b) plane, then e3 is along c*
+      * Result is stored into x,y and z
+      * The convention is taken following :
+      * e1 is chosen along a, e2 in the (a,b) plane, then e3 is along c*
       */
       void OrthonormalToFractionalCoords(double &x,double &y,double &z) const;
       /// Prints some info about the crystal
       /// \todo one function to print on one line and a PrintLong() function
+		/// \param os the stream to which the information is outputed (default=cout)
       void Print(ostream &os=cout) const;
             
       /// Access to the crystal SpaceGroup object
       const SpaceGroup & GetSpaceGroup()const;
-      /// Access to the crystal SpaceGroup object
+      /// Access to the crystal SpaceGroup object.
       SpaceGroup & GetSpaceGroup();
       
       /** \brief Minimum interatomic distance between all scattering components (atoms) in
       * the crystal.
       *
-      * This will return a symetrical matrix with NbComp rows and cols, where 
+      * This will return a symmetrical matrix with NbComp rows and cols, where 
       * NbComp is the number of independent scattering components in the unit cell. 
       * All distances are given in Angstroems.
       *
       * Note that the distance of a given atom with 'itself' is not generally equal
       * to 0 (except full special position), but equal to the min distance with its 
-      * symetrics.
+      * symmetrics.
+		* 
       * \param minDistance : atoms who are less distant than (minDistance,in Angstroems) 
       * are considered equivalent. So the smallest distance between any atoms will
       * be at least minDistance.
@@ -189,12 +214,19 @@ class Crystal:public RefinableObj
       CrystMatrix_double GetMinDistanceTable(const double minDistance=0.1) const;
       /** \brief Print the minimum distance table between all scattering centers
       * (atoms) in the crystal.
+		* \param os the stream to which the information is outputed (default=cout)
       */
       void PrintMinDistanceTable(const double minDistance=0.1,ostream &os=cout) const;
 
       /** \brief Output POV-Ray Description for this Crystal
+		*
+		* \param onlyIndependentAtoms if false, all symmetrics are showed in the
+		* drawing.
+		*
+		* \warning This currently needs some fixing (ZScatterer does not work ?)
+		* Use rather the OpenGL 3D display which is more useful.
       *
-      *
+		* \param os the stream to which the information is outputed (default=cout)
       */
       ostream& POVRayDescription(ostream &os,bool onlyIndependentAtoms=false)const;
       
@@ -206,7 +238,7 @@ class Crystal:public RefinableObj
                                      const double yMin=-.1,const double yMax=1.1,
                                      const double zMin=-.1,const double zMax=1.1)const;
       
-      /** \brief Compute the 'Dynamical population correction for all atoms.
+      /** \internal \brief Compute the 'Dynamical population correction for all atoms.
       *
       *\param overlapDist : distance below which atoms are considered overlapping and
       * should be corrected. 
@@ -214,14 +246,17 @@ class Crystal:public RefinableObj
       * If 3 atoms are 'fully' overlapping, then all have a dynamical population 
       * correction equal to 1/3
       *
-      *\note This is const as long as ScatteringComponent::mDynPopCorr is mutable.
+      * This is const since ScatteringComponent::mDynPopCorr is mutable.
+		*
+		* \warning. Do not call this function, which will turn private. This is
+		* called by Crystal::GetScatteringComponentList()
       */
       void CalcDynPopCorr(const double overlapDist=1., const double mergeDist=.0)const ;
-      /// Reset Dynamical Population Correction factors
+      /// Reset Dynamical Population Correction factors (ie set it to 1)
       void ResetDynPopCorr()const ;
       /// Set the use of dynamical population correction (Crystal::mUseDynPopCorr).
       /// This \e seriously affects the speed of the calculation, since computing
-      /// distances is lenghty.
+      /// interatomic distances is lenghty.
       void SetUseDynPopCorr(const int use);
       /// Get the Anti-bumping/pro-Merging cost function
       double GetBumpMergeCostFunction() const;
@@ -232,7 +267,7 @@ class Crystal:public RefinableObj
       void SetBumpMergeDistance(const ScatteringPower &scatt1,
                                 const ScatteringPower &scatt2, const double dist,
                                 const bool allowMerge);
-      /// When were lattice parameters changed ?
+      /// When were lattice parameters last changed ?
       const RefinableObjClock& GetClockLatticePar()const;
       /// When was the list of scatterers last changed ?
       const RefinableObjClock& GetClockScattererList()const;
@@ -247,11 +282,11 @@ class Crystal:public RefinableObj
       virtual void InputOld(istream &is,const IOCrystTag &tag);
       
       virtual void GlobalOptRandomMove(const double mutationAmplitude);
-      /** \brief output Crystal structure as a cif file (crude !)
+      /** \brief output Crystal structure as a cif file (EXPERIMENTAL !)
       *
-      * This is very crude so far: only isotropic scattering power
+      * \warning This is very crude so far: only isotropic scattering power
       * are supported, and there is not much information beside atom
-      * positions... Still a lot to do !!!
+      * positions... 
       */
       virtual void OutputCIF(ostream &os)const;
       
@@ -272,26 +307,24 @@ class Crystal:public RefinableObj
       /// \warning There should be no duplicate names !!! :TODO: test in AddScatterer()
       int FindScatterer(const string &scattName)const;
       
-      /// Init the UBMatrix and EuclMatrix. They are re-computed only if parameters
-      /// have changed since last call.
-      
+      /// \internal.Init the (de)orthogonalization matrices. 
+		/// They are re-computed only if parameters have changed since last call.
       void InitMatrices() const;
       /// \internal
       /// Update cell parameters for tetragonal, trigonal, hexagonal, cubic lattices.
       /// Also set angular parameters for those group which need it. This is needed during
       /// Refinement, since for example in a quadratic spg, only a is refined and
-      /// we need to have b=a updated very often...
+      /// we need to have b=a...
       void UpdateLatticePar();
 
       /** \brief Prepare the refinable parameters list
       *
-      *This is called once when creating the crystal. Scatterers parameters
-      *are added by  Crystal::AddScatterer()
+      * This is called once when creating the crystal.
 		* OBSOLETE ?
       */
       void InitRefParList();
       
-      /** \brief Compute the distance Table (mDistTable) for all scattering components
+      /** \internal \brief Compute the distance Table (mDistTable) for all scattering components
       * \param fast : if true, the distance calculations will be made using
       * integers, thus with a lower precision but faster. Less atoms will also
       * be involved (using the AsymmetricUnit) to make it even faster.
@@ -303,8 +336,9 @@ class Crystal:public RefinableObj
       * (typically for dynamical population correction). Using a too short  margin will
       * result in having some distances calculated wrongly (ie one atom1 in the unit cell
       * could have an atom2 neighbor just outside the sym unit: if margin=0, then the distance
-      * is calculated between atom1 and the atom2 symetric inside the asym unit).
-      * \warning Crystal::GetScatteringComponentList() \b must be called beforehand.
+      * is calculated between atom1 and the atom2 symmetric inside the asym unit).
+      * \warning Crystal::GetScatteringComponentList() \b must be called beforehand,
+		* since this will not be done here.
       */
       void CalcDistTable(const bool fast,const double asymUnitMargin=4)const;
             
@@ -344,14 +378,14 @@ class Crystal:public RefinableObj
             
       /** \brief Distance table (squared) between all scattering components in the crystal
       *
-      *Symetrical matrix, in Angstroems^2 (the square root is not computed
+      *Symmetrical matrix, in Angstroems^2 (the square root is not computed
       *for optimization purposes).
       */
       mutable CrystMatrix_double mDistTableSq;
       /** \brief Index of scattering components for the Distance table
       *
       * These are the index of the scattering components corresponding to each row/column in
-      * the distance table. Each component has as many entries as its number of symetrics.
+      * the distance table. Each component has as many entries as its number of symmetrics.
       * \note (kludge) this will only be valid if the order of components does not change...
       */
       mutable CrystVector_long  mDistTableIndex;

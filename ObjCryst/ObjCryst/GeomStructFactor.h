@@ -19,7 +19,7 @@ namespace ObjCryst
 {
 
 // This is the default fonction, which does *not* use
-//the geometrical structure factor, but calculates all the symetric
+//the geometrical structure factor, but calculates all the symmetric
 //positions of the atom. This is done for SpaceGroups which
 //do not yet have a coded Geom Structure factor, or for those
 //where it does not make much difference

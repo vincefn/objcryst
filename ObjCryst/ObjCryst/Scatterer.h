@@ -22,8 +22,7 @@ extern const RefParType *gpRefParTypeScattOccup;
 //######################################################################
 //
 //      SCATTERER
-/** \brief Generic type of scatterer
-* Scatterers can be an atom, or a more complex assembly of atoms.
+/** \brief Generic type of scatterer: can be an atom, or a more complex assembly of atoms.
 *
 * A Scatterer is able to give its position (in fractionnal coordinates)
 * in the unit cell, and more generally the position of all point
@@ -34,6 +33,8 @@ extern const RefParType *gpRefParTypeScattOccup;
 * scattering power (scattering factor, anomalous, thermic). For complex
 * scatterers (molecules: ZScatterer) there are as many positions as atoms.
 *
+* A scatterer also has a few functions to display itself in 3D
+*
 * This is an abstract base class.
 */
 //######################################################################
@@ -41,14 +42,14 @@ extern const RefParType *gpRefParTypeScattOccup;
 class Scatterer:virtual public RefinableObj
 {
    public:
-      ///Constructor
+      /// Constructor
       Scatterer();
-      ///Copy Constructor
+      /// Copy Constructor
       Scatterer(const Scatterer &old);
-      ///Destructor
+      /// Destructor
       virtual ~Scatterer();
       /// \internal so-called Virtual copy constructor, needed to make copies
-      ///of arrays of Scatterers
+      /// of arrays of Scatterers
       virtual Scatterer* CreateCopy() const=0;
       virtual const string GetClassName() const;
             
@@ -87,11 +88,11 @@ class Scatterer:virtual public RefinableObj
       
       /** \brief Get the occupancy of the scatterer (0. -> 1.0)
       *
-      *The occupancy is given in %, and must take into account the
-      *'special position' character of atoms (ie an atom on a 2fold axis
-      *should have at most a .5 population, etc...).
-      *For a multi-atom scatterer (polyhedra), this is the \b overall occupancy
-      *of the scatterer, affecting all atoms.
+      * The occupancy is given in %, and must take into account the
+      * 'special position' character of atoms (ie an atom on a 2fold axis
+      * should have at most a .5 population, etc...).
+      * For a multi-atom scatterer (polyhedra), this is the \b overall occupancy
+      * of the scatterer, affecting all atoms.
       */
       double GetOccupancy() const ;
 
@@ -109,11 +110,11 @@ class Scatterer:virtual public RefinableObj
       virtual void SetZ(const double z);
       /** \brief Change the occupancy of the scatterer (0. -> 1.0)
       *
-      *The occupancy is given in %, and must take into account the
-      *'special position' character of atoms (ie an atom on a 2fold axis
-      *should have at most a .5 population, etc...).
-      *For a multi-atom scatterer (polyhedra), this is the \b overall occupancy
-      *of the scatterer, affecting all atoms.
+      * The occupancy is given in %, and must take into account the
+      * 'special position' character of atoms (ie an atom on a 2fold axis
+      * should have at most a .5 population, etc...).
+      * For a multi-atom scatterer (polyhedra), this is the \b overall occupancy
+      * of the scatterer, affecting all atoms.
       */
       virtual void SetOccupancy(const double occupancy) ;
       
@@ -137,12 +138,12 @@ class Scatterer:virtual public RefinableObj
       *
       */
       virtual ostream& POVRayDescription(ostream &os,const Crystal &cryst,
-                                         bool noSymetrics=false)const=0;
+                                         bool noSymmetrics=false)const=0;
       /** Create an OpenGL Display List of the scatterer.
       *
       */
       virtual void GLInitDisplayList(const Crystal &cryst,
-                                     const bool noSymetrics=false,
+                                     const bool noSymmetrics=false,
                                      const double xMin=-.1,const double xMax=1.1,
                                      const double yMin=-.1,const double yMax=1.1,
                                      const double zMin=-.1,const double zMax=1.1)const=0;
@@ -176,8 +177,8 @@ class Scatterer:virtual public RefinableObj
       CrystVector_double mXYZ;
       
       /** \brief  Occupancy : 0 <=  <= 1
-      *For a multi-atom scatterer (polyhedron,..), this is the \b overall occupancy
-      *of the scatterer (affects all components of the scatterer).
+      * For a multi-atom scatterer (polyhedron,..), this is the \b overall occupancy
+      * of the scatterer (affects all components of the scatterer).
       */
       double mOccupancy; 
       /// Colour for this scatterer (from POVRay)

@@ -181,7 +181,7 @@ class PowderPatternDiffraction : public PowderPatternComponent,public Scattering
       
       /** Set reflection profile parameters
       *
-      * :TODO: assymetric profiles
+      * :TODO: assymmetric profiles
       * \param fwhmCagliotiW,fwhmCagliotiU,fwhmCagliotiV : these are the U,V and W
       * parameters in the Caglioti's law :
       * \f$ fwhm^2= U \tan^2(\theta) + V \tan(\theta) +W \f$

@@ -1,3 +1,15 @@
+/* 
+* ObjCryst++ : a Crystallographic computing library in C++
+*			http://objcryst.sourceforge.net
+*			http://www.ccp14.ac.uk/ccp/web-mirrors/objcryst/
+*
+*  (c) 2000-2001 Vincent FAVRE-NICOLIN vincefn@users.sourceforge.net
+*
+*/
+/*   DiffractionDataSingleCrystal.h header file for single-crystal
+* diffraction objects.
+*
+*/
 #ifndef _OBJCRYST_DIFFDATA_SINGLECRYSTAL_H_
 #define _OBJCRYST_DIFFDATA_SINGLECRYSTAL_H_
 

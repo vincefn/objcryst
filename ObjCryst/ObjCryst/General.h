@@ -1,19 +1,19 @@
 /* 
 * ObjCryst++ : a Crystallographic computing library in C++
+*			http://objcryst.sourceforge.net
+*			http://www.ccp14.ac.uk/ccp/web-mirrors/objcryst/
 *
-*  (c) 2000 Vincent FAVRE-NICOLIN
-*           Laboratoire de Cristallographie
-*           24, quai Ernest-Ansermet, CH-1211 Geneva 4, Switzerland
-*  Contact: vincefn@users.sourceforge.net
+*  (c) 2000-2001 Vincent FAVRE-NICOLIN vincefn@users.sourceforge.net
 *
 */
 /*   General.h
-*  header file for various global definitions
+*  header file for various global declaration. Most of these declarations
+* should be moved to other headers, and this file could eventually disappear.
 *
 */
 
-#ifndef _VFN_LIBCRYST_H_
-#define _VFN_LIBCRYST_H_
+#ifndef _VFN_OBJCRYST_H_
+#define _VFN_OBJCRYST_H_
 
 
 //#include <stdlib.h>
@@ -89,19 +89,21 @@ namespace ObjCryst
 
 //######################################################################
 
-//:NOTE: Only single wavelength is used yet !!
-
+/// Type of radiation used. Only neutrons and X-Rays are used so far,
+/// electrons would require a very different treatment.
 enum RadiationType { RAD_NEUTRON, RAD_XRAY, RAD_ELECTRON};
+/// Sample type (not used yet)
 enum SampleType { SAMPLE_SINGLE_CRYSTAL, SAMPLE_POWDER};
 /// Incident beam characteristics : monochromatic, X-Ray tube with Alpha1 and alpha2,
-///MAD (a few wavelengths-UNUSED YET), DAFS (continuous wavelength range-UNUSED YET)
-///LAUE (UNUSED YET)
+/// MAD (a few wavelengths-UNUSED YET), DAFS (continuous wavelength range-UNUSED YET)
+/// LAUE (UNUSED YET)
 enum WavelengthType { WAVELENGTH_MONOCHROMATIC, WAVELENGTH_ALPHA12, WAVELENGTH_MAD,
                       WAVELENGTH_DAFS , WAVELENGTH_LAUE};
+/// Profile type for powder (could it be used fopr single crystals on 2D detectors ?)
 enum ReflectionProfileType { PROFILE_GAUSSIAN, PROFILE_LORENTZIAN, PROFILE_PSEUDO_VOIGT,
                              PROFILE_PSEUDO_VOIGT_FINGER_COX_JEPHCOAT,
                              PROFILE_PEARSON_VII };
-                             
+
 enum PowderBackgroundInterpType{ POWDER_BACKGROUND_LINEAR,
                                  POWDER_BACKGROUND_CUBIC_SPLINE};
 
@@ -109,9 +111,7 @@ enum PowderBackgroundInterpType{ POWDER_BACKGROUND_LINEAR,
 
 //######################################################################
 //  Exception.
-/**
-*
-* \brief Exception class for LibCryst++ library
+/** \brief Exception class for ObjCryst++ library
 *
 */
 //######################################################################
@@ -128,4 +128,4 @@ class ObjCrystException
 
 }//Namespace
 
-#endif //_VFN_LIBCRYST_H_
+#endif //_VFN_OBJCRYST_H_

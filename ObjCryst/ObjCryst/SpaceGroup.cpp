@@ -66,7 +66,7 @@ void AsymmetricUnit::SetSpaceGroup(const SpaceGroup &spg)
    mZmax=1.;
    if(1==spg.GetSpaceGroupNumber()) return;//no need to search an asymmetric unit
    // Test points=reular grid of points inside the unit cell
-   // All points must be or have at least a symetric in the asymmetric unit
+   // All points must be or have at least a symmetric in the asymmetric unit
    const long nbPoints=13;
    CrystMatrix_double testPoints(nbPoints*nbPoints*nbPoints,3);
    {
@@ -103,11 +103,11 @@ void AsymmetricUnit::SetSpaceGroup(const SpaceGroup &spg)
             allPtsInAsym=true;
             for(int i=0;i<testPoints.rows();i++)
             {
-               coords=spg.GetAllSymetrics(testPoints(i,0),testPoints(i,1),testPoints(i,2));
+               coords=spg.GetAllSymmetrics(testPoints(i,0),testPoints(i,1),testPoints(i,2));
                for(long j=0;j<coords.numElements();j++) coords(j)=modf(coords(j)+10.,junk) ;
                tmp=false;
                for(long j=0;j<coords.rows();j++)
-               {//Test if at least one of the symetrics is in the parallelepiped
+               {//Test if at least one of the symmetrics is in the parallelepiped
                   if(  (coords(j,0) < vert(nx))
                      &&(coords(j,1) < vert(ny))
                      &&(coords(j,2) < vert(nz)))
@@ -227,12 +227,12 @@ CrystMatrix_double SpaceGroup::GetTranslationVectors()const
 }
 
 
-CrystMatrix_double SpaceGroup::GetAllSymetrics(const double x, const double y, const double z,
+CrystMatrix_double SpaceGroup::GetAllSymmetrics(const double x, const double y, const double z,
                                 const bool noCenter,const bool noTransl,
                                 const bool noIdentical)const
 {
-   TAU_PROFILE("SpaceGroup::GetAllSymetrics()","Matrix (x,y,z)",TAU_DEFAULT);
-   VFN_DEBUG_MESSAGE("SpaceGroup::GetAllSymetrics()",0)
+   TAU_PROFILE("SpaceGroup::GetAllSymmetrics()","Matrix (x,y,z)",TAU_DEFAULT);
+   VFN_DEBUG_MESSAGE("SpaceGroup::GetAllSymmetrics()",0)
    int nbMatrix, nbTrans,coeffInvert,i,j,k;
    nbMatrix=mSgOps.nSMx;
    nbTrans=this->GetNbTranslationVectors();
@@ -292,7 +292,7 @@ CrystMatrix_double SpaceGroup::GetAllSymetrics(const double x, const double y, c
    
    if(true==noIdentical)
    {
-      VFN_DEBUG_MESSAGE("SpaceGroup::GetAllSymetrics():Removing identical atoms",5)
+      VFN_DEBUG_MESSAGE("SpaceGroup::GetAllSymmetrics():Removing identical atoms",5)
       //Bring back all coordinates to [0;1[
       double *p=coords.data();
       double junk;
@@ -325,11 +325,11 @@ CrystMatrix_double SpaceGroup::GetAllSymetrics(const double x, const double y, c
       newCoords.resizeAndPreserve(nbKeep,3);
       return newCoords;
    }
-   VFN_DEBUG_MESSAGE("SpaceGroup::GetAllSymetrics():End",0)
+   VFN_DEBUG_MESSAGE("SpaceGroup::GetAllSymmetrics():End",0)
    return coords;
 }
 
-int SpaceGroup::GetNbSymetrics(const bool noCenter,const bool noTransl)const
+int SpaceGroup::GetNbSymmetrics(const bool noCenter,const bool noTransl)const
 {
    int nbMatrix, nbTrans,coeffInvert;
    nbMatrix=mSgOps.nSMx;

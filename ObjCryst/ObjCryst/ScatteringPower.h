@@ -60,8 +60,8 @@ class ScatteringPower:virtual public RefinableObj
       * type (X-Ray, neutron..).
       * \param data: the ScatteringData object, giving access to all the reflections.
       * \param spgSymPosIndex: if the ScatteringPower is anisotropic, then the
-      * different symetrics will not have the same scattering power for all reflections.
-      * This parameter is the index of the symetric position in the Spacegroup.
+      * different symmetrics will not have the same scattering power for all reflections.
+      * This parameter is the index of the symmetric position in the Spacegroup.
       * \warning There is no anisotropic code yet, so spgSymPosIndex is simply ignored so far
       * , but the design of this function is general for any anisotropic scattering.
       */
@@ -74,8 +74,8 @@ class ScatteringPower:virtual public RefinableObj
       * order as in the ScatteringData object.
       * \param data: the ScatteringData object, giving access to all the reflections.
       * \param spgSymPosIndex: if the ScatteringPower is anisotropic, then the
-      * different symetrics will not have the same scattering power for all reflections.
-      * This parameter is the index of the symetric position in the Spacegroup.
+      * different symmetrics will not have the same scattering power for all reflections.
+      * This parameter is the index of the symmetric position in the Spacegroup.
       * \warning There is no anisotropic code yet, so spgSymPosIndex is simply ignored so far
       * , but the design of this function is general for any anisotropic scattering.
       */
@@ -90,8 +90,8 @@ class ScatteringPower:virtual public RefinableObj
       * \param data: the ScatteringData object, giving access to all the reflections and
       * a list of wavelengths).
       * \param spgSymPosIndex: if the ScatteringPower is anisotropic, then the
-      * different symetrics will not have the same scattering power for all reflections.
-      * This parameter is the index of the symetric position in the Spacegroup.
+      * different symmetrics will not have the same scattering power for all reflections.
+      * This parameter is the index of the symmetric position in the Spacegroup.
       * \warning There is no anisotropic code yet, so spgSymPosIndex is simply ignored so far
       * , but the design of this function is general for any anisotropic scattering.
       */
@@ -106,8 +106,8 @@ class ScatteringPower:virtual public RefinableObj
       * \param data: the ScatteringData object, giving access to all the reflections,
       * and a list of wavelengths.
       * \param spgSymPosIndex: if the ScatteringPower is anisotropic, then the
-      * different symetrics will not have the same scattering power for all reflections.
-      * This parameter is the index of the symetric position in the Spacegroup.
+      * different symmetrics will not have the same scattering power for all reflections.
+      * This parameter is the index of the symmetric position in the Spacegroup.
       * \warning There is no anisotropic code yet, so spgSymPosIndex is simply ignored so far
       * , but the design of this function is general for any anisotropic scattering.
       */

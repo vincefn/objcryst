@@ -222,13 +222,13 @@ ostream& Atom::POVRayDescription(ostream &os,const Crystal &cryst,
       y0=mXYZ(1);
       z0=mXYZ(2);
       CrystMatrix_double xyzCoords ;
-      xyzCoords=cryst.GetSpaceGroup().GetAllSymetrics(x0,y0,z0,false,false,true);
-      int nbSymetrics=xyzCoords.rows();
+      xyzCoords=cryst.GetSpaceGroup().GetAllSymmetrics(x0,y0,z0,false,false,true);
+      int nbSymmetrics=xyzCoords.rows();
       os << "// Description of Atom :" << this->GetName();
-      os << "(" << nbSymetrics << " symetric atoms)" << endl;
+      os << "(" << nbSymmetrics << " symmetric atoms)" << endl;
       os << "   #declare colour_"<< this ->GetName() <<"="<< this ->mColourName<<";"<< endl;
       int symNum=0;
-      for(int i=0;i<nbSymetrics;i++)
+      for(int i=0;i<nbSymmetrics;i++)
       {
          x0=xyzCoords(i,0);
          y0=xyzCoords(i,1);
@@ -276,7 +276,7 @@ ostream& Atom::POVRayDescription(ostream &os,const Crystal &cryst,
                 &&(z>(-limit)) && (z<(1+limit)))
             {
                cryst.FractionalToOrthonormalCoords(x,y,z);
-               os << "  // Symetric #" << symNum++ <<endl;
+               os << "  // Symmetric #" << symNum++ <<endl;
                os << "   sphere " << endl;
                os << "   { <" << x << ","<< y << ","<< z << ">," << this->GetRadius()/3 <<endl;
                os << "        finish { ambient 0.2 diffuse 0.8 phong 1}" <<endl;
@@ -323,9 +323,9 @@ void Atom::GLInitDisplayList(const Crystal &cryst,const bool onlyIndependentAtom
       y0=mXYZ(1);
       z0=mXYZ(2);
       CrystMatrix_double xyzCoords ;
-      xyzCoords=cryst.GetSpaceGroup().GetAllSymetrics(x0,y0,z0,false,false,true);
-      int nbSymetrics=xyzCoords.rows();
-      for(int i=0;i<nbSymetrics;i++)
+      xyzCoords=cryst.GetSpaceGroup().GetAllSymmetrics(x0,y0,z0,false,false,true);
+      int nbSymmetrics=xyzCoords.rows();
+      for(int i=0;i<nbSymmetrics;i++)
       {
          x0=xyzCoords(i,0);
          y0=xyzCoords(i,1);

@@ -1366,7 +1366,7 @@ void ScatteringData::CalcGeomStructFactor(const ScatteringComponentList &scattCo
    VFN_DEBUG_MESSAGE("-->Number of translation vectors:"<<spg.GetNbTranslationVectors()-1,2)
    VFN_DEBUG_MESSAGE("-->Has an inversion Center:"<<spg.HasInversionCenter(),2)
    VFN_DEBUG_MESSAGE("-->Number of symetry operations (w/o transl&inv cent.):"\
-                     <<spg.GetNbSymetrics(true,true),2)
+                     <<spg.GetNbSymmetrics(true,true),2)
    VFN_DEBUG_MESSAGE("-->Number of Scattering Components :"<<scattCompList.GetNbComponent(),2)
    VFN_DEBUG_MESSAGE("-->Number of reflections:"<<this->GetNbRefl(),2)
    #ifdef __DEBUG__
@@ -1388,14 +1388,14 @@ void ScatteringData::CalcGeomStructFactor(const ScatteringComponentList &scattCo
    //}
    //else
    {  
-      const int nbSymetrics=spg.GetNbSymetrics(true,true);
+      const int nbSymmetrics=spg.GetNbSymmetrics(true,true);
       const int nbTranslationVectors=spg.GetNbTranslationVectors();
       const long nbComp=scattCompList.GetNbComponent();
       const int nbRefl=this->GetNbRefl();
                   
       CrystMatrix_double transVect(nbTranslationVectors,3);
       transVect=spg.GetTranslationVectors();
-      CrystMatrix_double allCoords(nbSymetrics,3);
+      CrystMatrix_double allCoords(nbSymmetrics,3);
       CrystVector_double tmpVect(nbRefl);
       
       if(useFastTabulatedTrigFunctions==true)
@@ -1444,10 +1444,10 @@ void ScatteringData::CalcGeomStructFactor(const ScatteringComponentList &scattCo
          const long *intH,*intK,*intL;
          register double * tmp;
          
-         allCoords=spg.GetAllSymetrics(x,y,z,true,true);
+         allCoords=spg.GetAllSymmetrics(x,y,z,true,true);
          if((true==spg.HasInversionCenter()) && (false==spg.IsInversionCenterAtOrigin()))
          {
-            for(int j=0;j<nbSymetrics;j++)
+            for(int j=0;j<nbSymmetrics;j++)
             {
                //The phase of the structure factor will be wrong
                //This is fixed a bit further...
@@ -1456,7 +1456,7 @@ void ScatteringData::CalcGeomStructFactor(const ScatteringComponentList &scattCo
                allCoords(j,2) -= ((double)spg.GetSgOps().InvT[2])/STBF/2.;
             }
          }
-         for(int j=0;j<nbSymetrics;j++)
+         for(int j=0;j<nbSymmetrics;j++)
          {
             
             if(useFastTabulatedTrigFunctions==true)

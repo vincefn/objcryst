@@ -397,11 +397,11 @@ ostream& ZScatterer::POVRayDescription(ostream &os,const Crystal &cryst,
    {
       CrystMatrix_double* xyzCoords=new CrystMatrix_double[mNbAtom];
       for(int i=0;i<mNbAtom;i++)
-         *(xyzCoords+i)=cryst.GetSpaceGroup().GetAllSymetrics(mpAtom[i]->GetX(),
+         *(xyzCoords+i)=cryst.GetSpaceGroup().GetAllSymmetrics(mpAtom[i]->GetX(),
                                                             mpAtom[i]->GetY(),
                                                             mpAtom[i]->GetZ(),
                                                             false,false,false);
-      const int nbSymetrics=(xyzCoords+0)->rows();
+      const int nbSymmetrics=(xyzCoords+0)->rows();
       int symNum=0;
       CrystMatrix_int translate(27,3);
       translate=  -1,-1,-1,
@@ -434,7 +434,7 @@ ostream& ZScatterer::POVRayDescription(ostream &os,const Crystal &cryst,
       double dx,dy,dz;
       CrystVector_double x(mNbAtom),y(mNbAtom),z(mNbAtom);
       CrystVector_double xSave,ySave,zSave;
-      for(int i=0;i<nbSymetrics;i++)
+      for(int i=0;i<nbSymmetrics;i++)
       {
          for(int j=0;j<mNbAtom;j++)
          {
@@ -474,8 +474,8 @@ ostream& ZScatterer::POVRayDescription(ostream &os,const Crystal &cryst,
             {
                for(int k=0;k<mNbAtom;k++)
                   cryst.FractionalToOrthonormalCoords(x(k),y(k),z(k));
-               os << "  // Symetric&Translated #" << symNum++ <<endl;
-               //:NOTE: The code below is the same as without symetrics
+               os << "  // Symmetric&Translated #" << symNum++ <<endl;
+               //:NOTE: The code below is the same as without symmetrics
                for(int i=0;i<mNbAtom;i++)
                {
                   if(mpAtom[i]->IsDummy())
@@ -505,7 +505,7 @@ ostream& ZScatterer::POVRayDescription(ostream &os,const Crystal &cryst,
             y=ySave;
             z=zSave;
          }//for translation
-      }//for symetrics
+      }//for symmetrics
       delete[] xyzCoords;
    }//else
 #endif
@@ -696,7 +696,7 @@ void ZScatterer::GLInitDisplayList(const Crystal &cryst,const bool onlyIndepende
    }//Only independent atoms ?
    else
    {
-      VFN_DEBUG_ENTRY("ZScatterer::GLInitDisplayList():Show all symetrics",3)
+      VFN_DEBUG_ENTRY("ZScatterer::GLInitDisplayList():Show all symmetrics",3)
       CrystMatrix_double xyzCoords[100]; //:TODO:
       {
          double x0,y0,z0;
@@ -706,7 +706,7 @@ void ZScatterer::GLInitDisplayList(const Crystal &cryst,const bool onlyIndepende
             y0=mYCoord(i);
             z0=mZCoord(i);
             cryst.OrthonormalToFractionalCoords(x0,y0,z0);
-            xyzCoords[i]=cryst.GetSpaceGroup().GetAllSymetrics(x0,y0,z0,false,false,false);
+            xyzCoords[i]=cryst.GetSpaceGroup().GetAllSymmetrics(x0,y0,z0,false,false,false);
          }
       }
       CrystMatrix_int translate(27,3);
@@ -740,10 +740,10 @@ void ZScatterer::GLInitDisplayList(const Crystal &cryst,const bool onlyIndepende
       double dx,dy,dz;
       CrystVector_double x(mNbAtom),y(mNbAtom),z(mNbAtom);
       CrystVector_double xSave,ySave,zSave;
-      const int nbSymetrics=xyzCoords[0].rows();
-      for(int i=0;i<nbSymetrics;i++)
+      const int nbSymmetrics=xyzCoords[0].rows();
+      for(int i=0;i<nbSymmetrics;i++)
       {
-         VFN_DEBUG_ENTRY("ZScatterer::GLInitDisplayList():Symetric#"<<i,3)
+         VFN_DEBUG_ENTRY("ZScatterer::GLInitDisplayList():Symmetric#"<<i,3)
          for(int j=0;j<mNbAtom;j++)
          {
             x(j)=xyzCoords[j](i,0);
@@ -781,7 +781,7 @@ void ZScatterer::GLInitDisplayList(const Crystal &cryst,const bool onlyIndepende
             {
                for(int k=0;k<mNbAtom;k++)
                   cryst.FractionalToOrthonormalCoords(x(k),y(k),z(k));
-               //:NOTE: The code below is the same as without symetrics
+               //:NOTE: The code below is the same as without symmetrics
                if(m3DDisplayIndex.numElements()>0)
                {
                   long n1,n2,n3;
@@ -887,8 +887,8 @@ void ZScatterer::GLInitDisplayList(const Crystal &cryst,const bool onlyIndepende
             y=ySave;
             z=zSave;
          }//for translation
-      }//for symetrics
-      VFN_DEBUG_EXIT("ZScatterer::GLInitDisplayList():Show all symetrics",3)
+      }//for symmetrics
+      VFN_DEBUG_EXIT("ZScatterer::GLInitDisplayList():Show all symmetrics",3)
    }//else
    gluDeleteQuadric(pQuadric);
    VFN_DEBUG_EXIT("ZScatterer::GLInitDisplayList()",4)

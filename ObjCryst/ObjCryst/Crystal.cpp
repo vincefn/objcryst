@@ -451,7 +451,7 @@ void Crystal::Print(ostream &os)const
       << "                               -> OR 2 atoms strictly overlapping)"<< endl 
       <<endl;
    double nbAtoms=0;
-   const long genMult=mSpaceGroup.GetNbSymetrics();
+   const long genMult=mSpaceGroup.GetNbSymmetrics();
    for(int i=0;i<mScattCompList.GetNbComponent();i++) 
       nbAtoms += genMult * mScattCompList(i).mOccupancy * mScattCompList(i).mDynPopCorr;
    os << " Total number of components (atoms) in one unit cell : " << nbAtoms<<endl<<endl;
@@ -697,8 +697,8 @@ void Crystal::CalcDynPopCorr(const double overlapDist, const double mergeDist) c
    if(mClockDynPopCorr>mClockNeighborTable) return;
    
    const long nbComponent=mScattCompList.GetNbComponent();
-   const int nbSymetrics=mSpaceGroup.GetNbSymetrics();
-   CrystVector_double neighborsDist(nbComponent*nbSymetrics);
+   const int nbSymmetrics=mSpaceGroup.GetNbSymmetrics();
+   CrystVector_double neighborsDist(nbComponent*nbSymmetrics);
    long nbNeighbors=0;
    double corr;
    
@@ -779,7 +779,7 @@ double Crystal::GetBumpMergeCostFunction() const
    this->GetScatteringComponentList();//update list if necessary
    
    const long nbComponent=mScattCompList.GetNbComponent();
-   //const int nbSymetrics=mSpaceGroup.GetNbSymetrics();
+   //const int nbSymmetrics=mSpaceGroup.GetNbSymmetrics();
    long nbNeighbors=0;
    
    //this->CalcDistTable(true,overlapDist);//:KLUDGE: Assume computing has already been done
@@ -796,7 +796,7 @@ double Crystal::GetBumpMergeCostFunction() const
    // const double v=a*b*c*sqrt(1-cos(alpha)*cos(alpha)-cos(beta)*cos(beta)-cos(gamma)*cos(gamma)
    //            +2*cos(alpha)*cos(beta)*cos(gamma));
    // const double m=3;//sqrt(mBumpDistanceMatrix.max());
-   // avNbNeighbor=nbComponent*nbSymetrics*4./3.*M_PI*m*m*m/v;
+   // avNbNeighbor=nbComponent*nbSymmetrics*4./3.*M_PI*m*m*m/v;
    //}
    
    const long nbAtomSym=mDistTableIndex.numElements();
@@ -1392,35 +1392,35 @@ void Crystal::CalcDistTable(const bool fast, const double asymUnitMargin) const
       TAU_PROFILE_START(timer1);
       const long intScale=16384;//Do not change this. Used later with AND (&)
       const long intScale2=8192;
-      const int nbSymetrics=mSpaceGroup.GetNbSymetrics();
+      const int nbSymmetrics=mSpaceGroup.GetNbSymmetrics();
       long nbAtoms=0;
-      CrystVector_long xCoords(nbComponent*nbSymetrics);
-      CrystVector_long yCoords(nbComponent*nbSymetrics);
-      CrystVector_long zCoords(nbComponent*nbSymetrics);
+      CrystVector_long xCoords(nbComponent*nbSymmetrics);
+      CrystVector_long yCoords(nbComponent*nbSymmetrics);
+      CrystVector_long zCoords(nbComponent*nbSymmetrics);
       CrystVector_long xCoords2(nbComponent);
       CrystVector_long yCoords2(nbComponent);
       CrystVector_long zCoords2(nbComponent);
-      CrystMatrix_double symetricsCoords;
-      mDistTableIndex.resize(nbComponent*nbSymetrics);
+      CrystMatrix_double symmetricsCoords;
+      mDistTableIndex.resize(nbComponent*nbSymmetrics);
       long *pIndex=mDistTableIndex.data();
-      //get the reduced coordinates of all atoms
+      //get the fractionnal coordinates of all atoms
       double junk;
       for(long i=0;i<nbComponent;i++)
       {
-         symetricsCoords=mSpaceGroup.GetAllSymetrics(mScattCompList(i).mX,
-                                                     mScattCompList(i).mY,
-                                                     mScattCompList(i).mZ);
+         symmetricsCoords=mSpaceGroup.GetAllSymmetrics(mScattCompList(i).mX,
+                                                       mScattCompList(i).mY,
+                                                       mScattCompList(i).mZ);
          
          //:KLUDGE: Ensure that all coordinates are >0. This assumes that fractional
          //coordinates are > -8.
-         symetricsCoords += 8;
+         symmetricsCoords += 8;
          
          // Ensure that coords are all between 0 and 1
-         for(int j=0;j<nbSymetrics;j++)
+         for(int j=0;j<nbSymmetrics;j++)
          {//'Optimizing' this loop with pointers is useless
-            xCoords(nbAtoms)=(long)(modf(symetricsCoords(j,0),&junk) * intScale);
-            yCoords(nbAtoms)=(long)(modf(symetricsCoords(j,1),&junk) * intScale);
-            zCoords(nbAtoms)=(long)(modf(symetricsCoords(j,2),&junk) * intScale);
+            xCoords(nbAtoms)=(long)(modf(symmetricsCoords(j,0),&junk) * intScale);
+            yCoords(nbAtoms)=(long)(modf(symmetricsCoords(j,1),&junk) * intScale);
+            zCoords(nbAtoms)=(long)(modf(symmetricsCoords(j,2),&junk) * intScale);
             nbAtoms++;
             *pIndex++ = i;
          }
@@ -1446,7 +1446,7 @@ void Crystal::CalcDistTable(const bool fast, const double asymUnitMargin) const
          *mSpaceGroup.GetAsymUnit().Zmax() < 0.6) 
       {
          // Get rid of atoms outside asymmetric unit+3 Angstroems
-         // Make sure that the list of independent atoms contains only atoms
+         // Make sure that the list of independant atoms contains only atoms
          // inside the Asymmetric unit (else shit happens).
          
          // Prepare
@@ -1600,25 +1600,25 @@ void Crystal::CalcDistTable(const bool fast, const double asymUnitMargin) const
    {
       VFN_DEBUG_MESSAGE("Crystal::CalcDistTable(fast=false)",3)
       TAU_PROFILE("Crystal::CalcDistTable(fast=false)","Matrix (string&)",TAU_DEFAULT);
-      const int nbSymetrics=mSpaceGroup.GetNbSymetrics();
-      CrystVector_double xCoords(nbComponent*nbSymetrics);
-      CrystVector_double yCoords(nbComponent*nbSymetrics);
-      CrystVector_double zCoords(nbComponent*nbSymetrics);
+      const int nbSymmetrics=mSpaceGroup.GetNbSymmetrics();
+      CrystVector_double xCoords(nbComponent*nbSymmetrics);
+      CrystVector_double yCoords(nbComponent*nbSymmetrics);
+      CrystVector_double zCoords(nbComponent*nbSymmetrics);
       long nbAtoms=0;
-      CrystMatrix_double symetricsCoords(nbSymetrics,3);
-      mDistTableIndex.resize(nbComponent*nbSymetrics);
+      CrystMatrix_double symmetricsCoords(nbSymmetrics,3);
+      mDistTableIndex.resize(nbComponent*nbSymmetrics);
       long *pIndex=mDistTableIndex.data();
       //get the reduced coordinates of all atoms
       for(long i=0;i<nbComponent;i++)
       {
-         symetricsCoords=mSpaceGroup.GetAllSymetrics(mScattCompList(i).mX,
+         symmetricsCoords=mSpaceGroup.GetAllSymmetrics(mScattCompList(i).mX,
                                                      mScattCompList(i).mY,
                                                      mScattCompList(i).mZ);
-         for(int j=0;j<nbSymetrics;j++)
+         for(int j=0;j<nbSymmetrics;j++)
          {
-            xCoords(nbAtoms)=symetricsCoords(j,0);
-            yCoords(nbAtoms)=symetricsCoords(j,1);
-            zCoords(nbAtoms)=symetricsCoords(j,2);
+            xCoords(nbAtoms)=symmetricsCoords(j,0);
+            yCoords(nbAtoms)=symmetricsCoords(j,1);
+            zCoords(nbAtoms)=symmetricsCoords(j,2);
             nbAtoms++;
             *pIndex++ = i;
          }

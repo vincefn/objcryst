@@ -1,3 +1,15 @@
+/* 
+* ObjCryst++ : a Crystallographic computing library in C++
+*			http://objcryst.sourceforge.net
+*			http://www.ccp14.ac.uk/ccp/web-mirrors/objcryst/
+*
+*  (c) 2000-2001 Vincent FAVRE-NICOLIN vincefn@users.sourceforge.net
+*
+*/
+/*   Atom.h
+*  header file for the Atom scatterer
+*
+*/
 #ifndef _OBJCRYST_ATOM_H_
 #define _OBJCRYST_ATOM_H_
 
@@ -22,15 +34,21 @@ namespace ObjCryst
 
 //######################################################################
 //
-///    ATOM : the basic atom, within the crystal
+///    ATOM : the basic atom, within the crystal.
 ///
-/// Note that there can be 'Dummy' atoms, for which the used symbol is "X".
+/// This class records the position of the atom, and has a pointer to its
+/// ScatteringPowerAtom.
+///
+/// Note that there can be 'Dummy' atoms, for which the used symbol is "X",
+/// and which have no scattering power (use with caution: dummy atoms
+/// are only supposed to be used within ZScatterer)
 //######################################################################
 
 class Atom: public Scatterer
 {
    public:
-      ///Default constructor
+      /// Default constructor. The Atom \e must be initialized thereafter
+		/// using Atom::Init()
       Atom();
       /**   \brief Atom constructor
       *  \param x,y,z : \e fractional coordinates of the atom
@@ -45,17 +63,21 @@ class Atom: public Scatterer
       *  \param x,y,z : \e fractional coordinates of the atom
       *  \param popu : the population of the atom (0.0->1.0)
       * This should take into account the multiplicity of the atom. For
-      * an atom in group P2 and on the 2 axis, this should be set to 0.5
+      * an atom in group P2 and on the 2 axis, this should be set to 0.5,
+		* \b unless you are using the dynamical occupancy correction (recommended
+		* for global optimizations). See Crystal::CalcDynPopCorr() and
+		* Crystal::mUseDynPopCorr
+		*
       *  \param pow : the ScatteringPower associated to this atom. Must be allocated separatly.
       *  \param name : name of the atom ('Ta1','Sm2', 'Tungsten_1'...).
-      * The name can have \e any format but spaces should be avoided
+      * The name can have \e any format but spaces should be avoided (just a precaution)
       */
       Atom( const double x, const double y, const double z,const string &name,
              const ScatteringPowerAtom *pow, const double popu);
-      ///Copy constructor
+      /// Copy constructor
       Atom(const Atom &old);
       /// \internal so-called Virtual copy constructor, needed to make copies
-      ///of arrays of Scatterers
+      /// of arrays of Scatterers
       virtual Atom* CreateCopy() const;
       /// Atom desintegrator...
      ~Atom();
@@ -63,32 +85,35 @@ class Atom: public Scatterer
       ///
       virtual void operator=(const Atom & rhs);
 
-      ///Re-initialize atom (used for arrays of atoms). popu
-      /// is set to 1 by default.
+      /** initialize the atom (used for arrays of atoms).
+      *  \param x,y,z : \e fractional coordinates of the atom
+      *  \param pow : the ScatteringPower associated to this atom. Must be allocated separately.
+      *  \param name : name of the atom ('Ta1','Sm2', 'Tungsten_1'...).
+		*/
       void Init(const double x, const double y, const double z,
             const string &name, const ScatteringPowerAtom *pow,
             const double popu=1);
-            
+      
       virtual int GetNbComponent() const;
       virtual const ScatteringComponentList& GetScatteringComponentList() const;
       virtual string GetComponentName(const int i) const;
 
-      void Print() const;
+      virtual void Print() const;
       /// \internal This should be (and soon will be) private.
       virtual void Update() const;
 
       /** \brief Returns the molar mass of the atom.
       *
-      *  Values are extracted form Grosse-Kunstleve 'atominfo' package,
+      *  Values are extracted from the 'atominfo' package,
       * which uses data from the CRC Handbook of Chemistry & Physics, 63rd & 70th editions
-      * The Mass is extracted from the ScatteringPower.
+      * The Mass is actually extracted from the ScatteringPowerAtom.
       */
       double GetMass() const;
       /** \brief Returns the radius (in Angstroems) of the atom.
       *
-      *  Values are extracted form Grosse-Kunstleve 'atominfo' package,
-      *which uses data from the ICSD/CRYSTIN Manual
-      * The Radius is extracted from the ScatteringPower.
+      *  Values are extracted from the 'atominfo' package,
+      * which uses data from the ICSD/CRYSTIN Manual
+      * The Radius is extracted from the ScatteringPowerAtom.
       */
       double GetRadius() const;
       /** \brief Output a description of the scatterer for POVRay
@@ -112,10 +137,11 @@ class Atom: public Scatterer
       virtual void Output(ostream &os,int indent=0)const;
       virtual void Input(istream &is,const XMLCrystTag &tag);
       virtual void InputOld(istream &is,const IOCrystTag &tag);
+		/// Get the ScatteringPowerAtom corresponding to this atom.
       const ScatteringPowerAtom& GetScatteringPower()const;
    protected:
    private:
-      ///Prepare refinable parameters for the scatterer object
+      /// Prepare refinable parameters for the scatterer object
       virtual void InitRefParList();
    
       /// The list of scattering components.
