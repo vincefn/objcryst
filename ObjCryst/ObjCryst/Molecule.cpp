@@ -1154,12 +1154,14 @@ void Molecule::XMLInput(istream &is,const XMLCrystTag &tag)
 
 void Molecule::BeginOptimization(const bool allowApproximations,const bool enableRestraints)
 {
+   #if 1 // Is doing this automatically too dangerous ?
    if((!mIsSelfOptimizing) &&(this->GetLogLikelihood()>(mvpRestraint.size()*500)))
    {
       (*fpObjCrystInformUser)("Optimizing initial conformation of Molecule:"+this->GetName());
       this->OptimizeConformation(100000,(REAL)(mvpRestraint.size()));
       (*fpObjCrystInformUser)("");
    }
+   #endif
    if(!mIsSelfOptimizing)
    {
       this->BuildRotorGroup();
@@ -1368,6 +1370,25 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
             //break;
          }
          #endif
+      }
+   }
+   if((rand()%100)==0)
+   {// From time to time, bring back average position to 0
+      REAL x0=0,y0=0,z0=0;
+      for(vector<MolAtom*>::iterator pos=mvpAtom.begin();pos!=mvpAtom.end();++pos)
+      {
+         x0 += (*pos)->X();
+         y0 += (*pos)->Y();
+         z0 += (*pos)->Z();
+      }
+      x0 /= mvpAtom.size();
+      y0 /= mvpAtom.size();
+      z0 /= mvpAtom.size();
+      for(vector<MolAtom*>::iterator pos=mvpAtom.begin();pos!=mvpAtom.end();++pos)
+      {
+         (*pos)->X() -= x0;
+         (*pos)->Y() -= y0;
+         (*pos)->Z() -= z0;
       }
    }
    mRandomMoveIsDone=true;
