@@ -35,6 +35,7 @@
 //For some reason, with wxWindows this must be placed after wx headers (Borland c++)
 #include <fstream>
 #include <sstream>
+#include <stdio.h>
 
 namespace ObjCryst
 {
