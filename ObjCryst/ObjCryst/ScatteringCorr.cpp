@@ -351,7 +351,7 @@ void TextureMarchDollase::AddPhase(const REAL f, const REAL c,
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp("MarchCoeff_"+(string)buf,&(phase->mMarchCoeff),.01,100.,
+      RefinablePar tmp("MarchCoeff_"+(string)buf,&(phase->mMarchCoeff),.1,10.,
                         gpRefParTypeScattDataCorrInt,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1.);
       tmp.AssignClock(mClockTexturePar);
@@ -663,7 +663,6 @@ void TextureMarchDollase::CalcCorr() const
                   mCorr(k)+=frac*pow(march+march2*tmp*tmp,-1.5);
                }
          }
-         mCorr/=hkl.rows();
       }
    //if(mIsbeingRefined==false)
    //{
