@@ -120,40 +120,54 @@ class UnitCellMapImport
       * \param filename: the file with the fourier map
       */ 
       void ImportGRD(const string&filename);
+      /// Name associated to this map (the filename)
+      const string & GetName()const;
    private:
       /// The crystal corresponding to this map
       const Crystal *mpCrystal;
       /// The map data points
       CrystArray3D_REAL mPoints;
+      /// Name associated to this map (the filename)
+      string mName;
 };
 
-/// Class to store and execute OpenGL Display Lists of fourier maps
+/// Class to store and execute OpenGL Display Lists of fourier maps.
+/// Only display information is kept here.
 class UnitCellMapGLList
 {
    public:
-      UnitCellMapGLList(const UnitCellMapImport &map,
-                        const float contour=1.0,const bool swhowWire=true,
+      UnitCellMapGLList(const bool showWire=true,
                         const float r=1.0,const float g=0.0,const float b=0.0,
-                        const float t=1.0);
+                        const float t=0.5);
       ~UnitCellMapGLList();
-      /// Change the contour value. Automatically updates the display list.
-      void SetContour(const float value);
+      /// Generates, or changes the display list.
+      void GenList(const UnitCellMapImport &ucmap,
+                   const float contourValue=1.,
+                   const REAL xMin=-.1,const REAL xMax=1.1,
+                   const REAL yMin=-.1,const REAL yMax=1.1,
+                   const REAL zMin=-.1,const REAL zMax=1.1);
+      /// Change name for this map
+      void SetName(const string &name);
+      /// Name for this map
+      const string &GetName()const;
       /// Change the color.
       void SetColour(const float r=1.0,const float g=0.0,const float b=0.0,
                     const float t=1.0);
+      /// Get the color, as a float[4] array
+      const float* GetColour()const;
+      /// Toggle show Wire/Filled
+      void ToggleShowWire();
       /// Perform the OpenGL drawing
       void Draw()const;
    private:
-      /// The map associated with this Display List.
-      const UnitCellMapImport* mpMap;
-      /// Contour level of the map
-      float mContourValue;
       /// The index of the OpenGL display list
       unsigned int mGLDisplayList;
       /// The color to display the map
       float mColour[4];
       /// Show as wireframe (if true) or fill (if false).
       bool mShowWire;
+      /// The name associated with this map display
+      string mName;
 };
 /// Class for 3D OpenGL display of Crystal structures
 class WXGLCrystalCanvas : public wxGLCanvas
@@ -182,6 +196,7 @@ class WXGLCrystalCanvas : public wxGLCanvas
       void OnShowCrystal();
       void OnLoadFourier();
       void LoadFourier(const string&filename);
+      void OnAddContour();
       void OnChangeContour();
       void OnShowFourier();
       void OnFourierChangeColor();
@@ -189,6 +204,12 @@ class WXGLCrystalCanvas : public wxGLCanvas
       void OnShowWire();
    private:
       void InitGL();
+      /// Shows a dialog to choose a displayed fourier map from one of those
+      /// available.
+      int UserSelectUnitCellMapGLList()const;
+      /// Shows a dialog to choose a fourier map from one of those
+      /// available.
+      int UserSelectUnitCellMapImport()const;
       /// The owner WXCrystal
       WXCrystal* mpWXCrystal;
       /// \internal
@@ -207,48 +228,21 @@ class WXGLCrystalCanvas : public wxGLCanvas
       float mXmin,mXmax,mYmin,mYmax,mZmin,mZmax;
       
       /// To display Fourier map
-      float * mcPoints;
-      float minValue;
-      int numOfTriangles;
-      TRIANGLE * Triangles;
-      int nx, ny, nz;               //dimensions for M.C.
-      bool showFourier, showCrystal;
-      bool initMC;               //initMC = TRUE if M.C. was ran before
-      bool showWireMC;           //false then draws filled
-      float step[3];             //stepsize
-      wxColor fcolor;
-      float mcXmin, mcXmax, mcYmin, mcYmax, mcZmin, mcZmax;
-
-      void RunMC();
-      void MCCleanUp();
-
-      class ContourDialog : public wxDialog  //for getting the contour value as well as the bounding volume
-      {
-      public:
-         ContourDialog(WXGLCrystalCanvas * parent);
-
-         void GetContour(bool showCancelFlag);
-         void OnOk();
-         void OnCancel();
-         void Closing();
-         void BoundingTextChange();
-         virtual bool IsShown() const;
-         void DrawBoundingBox();
-      private:
-         WXGLCrystalCanvas * parent;
-         wxTextCtrl * conValue;     //input control value
-         wxStaticBox * boundBox;    //
-         wxTextCtrl * bound[6];     //input min/max for all axis
-         wxStaticText * stText[7];  //for the user
-         wxButton *butOk, *butCancel;
-         bool shown;
-         DECLARE_EVENT_TABLE()
-      };
-      ContourDialog * cdial;
-
-      friend class ContourDialog;
-    //MOD END
-
+      bool mShowFourier, mShowCrystal;
+      /** Imported fourier maps
+      *
+      * :TODO: use an auto_ptr<UnitCellMapGLList>
+      */
+      vector<UnitCellMapImport* > mvpUnitCellMapImport;
+      /** OpenGL display lists corresponding to Fourier maps.
+      *
+      * We store 3 things in this list, a const pointer to the imported map,
+      * the contour level used, and a pointer to the display list used.
+      *
+      * :TODO: use an auto_ptr<UnitCellMapGLList>
+      */
+      vector<pair<pair<const UnitCellMapImport*,float>,UnitCellMapGLList* > > mvpUnitCellMapGLList;
+      
    DECLARE_EVENT_TABLE()
 };
 
