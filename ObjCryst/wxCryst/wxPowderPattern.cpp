@@ -4,6 +4,7 @@
 #include "wx/wx.h"
 #include "wxCryst/wxPowderPattern.h"
 #include "wxCryst/wxRadiation.h"
+#include "Quirks/Chronometer.h"
 
 //Fixes for Cygwin; where do those stupid macros come from ? Somewhere in wxMSW headers
 #ifdef max
@@ -690,21 +691,22 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
 			mpPattern->GetPowderPattern().Get2ThetaCorrPixel(ttheta*DEG2RAD);
    	str.Printf("2Theta=%6.2f    ,I=%12.2f.   pixel=#%d",ttheta,intensity,pixel);
    	mpParentFrame->SetStatusText(str);
-   
+		
+   static Chronometer sChrono;
    if (event.Dragging() && event.LeftIsDown() && (!mIsDragging))
    {//Begin zooming
 		mIsDragging=true;
 		mDragging2Theta0=ttheta;
 		mDraggingIntensity0=intensity;
+		sChrono.start();
 		return;
 	}
 	if(event.LeftUp() && mIsDragging)
 	{//Finished zooming !
    	VFN_DEBUG_MESSAGE("WXPowderPatternGraph::OnMouse():Finished zooming...",5)
 		mIsDragging=false;
-		#ifdef __WINDOWS__
-		//return;
-		#endif
+		sChrono.print();
+		if((sChrono.seconds()<.5) || ((sChrono.seconds()>5))) return;
 		if(abs(ttheta-mDragging2Theta0)<.3) return;
 		if(abs(mDraggingIntensity0-intensity)< abs(mMaxIntensity*.05)) return;
 		if(mDraggingIntensity0>intensity)
