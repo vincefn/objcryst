@@ -39,6 +39,11 @@
 
 //#include <xmmintrin.h>
 
+#ifdef _MSC_VER // MS VC++ predefined macros....
+#undef min
+#undef max
+#endif
+
 namespace ObjCryst
 {
 //######################################################################

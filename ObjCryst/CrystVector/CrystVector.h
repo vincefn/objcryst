@@ -90,6 +90,11 @@ template<class T> T MaxDifference(const Array<T,2> &a,const Array<T,2> &b);
 #include <cmath>
 using namespace std;
 
+#ifdef _MSC_VER // MS VC++ predefined macros....
+#undef min
+#undef max
+#endif
+
 //######################################################################
 //  CrystVector
 //######################################################################
