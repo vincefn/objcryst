@@ -1228,16 +1228,14 @@ void ZScatterer::GlobalOptRandomMove(const REAL mutationAmplitude)
 {
    VFN_DEBUG_ENTRY("ZScatterer::GlobalOptRandomMove()",3)
    TAU_PROFILE("ZScatterer::GlobalOptRandomMove()","void ()",TAU_DEFAULT);
-   // give a 30% chance of moving a single dihedral angle
-   // while keeping at a minimum the configuration change in the
-   // depending atoms.
-   //
-   // Should try to do better by really minimizing the conformation
-   // changes
-   if((rand()/(REAL)RAND_MAX)<.02)//.01
-   {
-      TAU_PROFILE_TIMER(timer1,\
-                     "ZScatterer::GlobalOptRandomMoveSmart1(prepare ref par & mutate)"\
+   // give a 2% chance of either moving a single atom, or move
+	// all atoms before a given torsion angle.
+	// Only try this if there are more than 10 atoms (else it's not worth the speed cost)
+	
+   if((mNbAtom>=10) && ((rand()/(REAL)RAND_MAX)<.02))//.01
+	{
+   	TAU_PROFILE_TIMER(timer1,\
+							"ZScatterer::GlobalOptRandomMoveSmart1(prepare ref par & mutate)"\
                      ,"", TAU_FIELD);
       TAU_PROFILE_TIMER(timer2,\
                      "ZScatterer::GlobalOptRandomMoveSmart2(optimize if necessary)"\
