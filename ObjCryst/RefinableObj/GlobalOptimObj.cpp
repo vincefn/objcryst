@@ -21,8 +21,6 @@
 *
 */
 #include <iomanip>
-#include <fstream>
-#include <sstream>
 
 #include "RefinableObj/GlobalOptimObj.h"
 #include "Quirks/VFNStreamFormat.h"
@@ -33,6 +31,10 @@
    #include "wxCryst/wxRefinableObj.h"
    #undef GetClassName // Conflict from wxMSW headers ? (cygwin)
 #endif
+
+//For some reason, with wxWindows this must be placed after wx headers (Borland c++)
+#include <fstream>
+#include <sstream>
 
 namespace ObjCryst
 {
