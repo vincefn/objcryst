@@ -294,6 +294,7 @@ void WXMonteCarloObj::OnRunOptimization()
 	//Fix parameters than really should not be global-optimized
 		mpMonteCarloObj->SetParIsFixed(gpRefParTypeUnitCell,true);
 		mpMonteCarloObj->SetParIsFixed(gpRefParTypeScattDataProfile,true);
+		mpMonteCarloObj->UpdateDisplay();
 	
 	double finalCost=0;
 	if(mNbTrial<0)
