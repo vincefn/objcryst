@@ -171,8 +171,8 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
                            "Add a new Single Crystal Diffraction Object");
          objectMenu->Append(MENU_OBJECT_CREATE_GLOBALOPTOBJ, "New Monte-Carlo Object",
                            "Add a new Monte-Carlo Object");
-         objectMenu->Append(MENU_OBJECT_CREATE_GENETICALGORITHM, "New Genetic Algorithm Object",
-                           "Add a new Genetic Algorithm Object");
+         //objectMenu->Append(MENU_OBJECT_CREATE_GENETICALGORITHM, "New Genetic Algorithm Object",
+         //                  "Add a new Genetic Algorithm Object");
       
       wxMenu *helpMenu = new wxMenu;
          helpMenu->Append(MENU_HELP_ABOUT, "&About...", "About ObjCryst...");
@@ -433,7 +433,7 @@ void WXCrystMainFrame::OnAddSingleCrystalData(wxCommandEvent& WXUNUSED(event))
 void WXCrystMainFrame::OnAddGlobalOptimObj(wxCommandEvent& WXUNUSED(event))
 {
    MonteCarloObj* obj;
-   obj=new MonteCarloObj("Change Me!");
+   obj=new MonteCarloObj((string)"Change Me!");
 }
 void WXCrystMainFrame::OnAddGeneticAlgorithm(wxCommandEvent& WXUNUSED(event))
 {

@@ -52,7 +52,7 @@ WXCrystObjBasic::~WXCrystObjBasic(){}
 WXCrystObjBasicList::WXCrystObjBasicList():
 mNbWXCrystObj(0),mMaxNbWXCrystObj(32),mpWXCrystObj(0)
 {
-   mpWXCrystObj= new WXCrystObjBasic*[32];
+   mpWXCrystObj= new WXCrystObjBasic*[mMaxNbWXCrystObj];
 }
 
 WXCrystObjBasicList::~WXCrystObjBasicList()
@@ -67,12 +67,11 @@ void WXCrystObjBasicList::Add(WXCrystObjBasic *win)
    VFN_DEBUG_MESSAGE("WXCrystObjBasicList::Add()",6)
    if(mNbWXCrystObj==mMaxNbWXCrystObj)
    {
-   	cout <<"Exceeding maximum number of WXCrystObjBasic"<<endl;
-   	abort();
-      //WXCrystObjBasic** tmp= new (WXCrystObjBasic*)[mMaxNbWXCrystObj+32];
-      //for(unsigned int i=0;i<mNbWXCrystObj;i++) tmp[i]=mpWXCrystObj[i];
-      //delete[] mpWXCrystObj;
-      //mpWXCrystObj= tmp;
+      WXCrystObjBasic** tmp= new WXCrystObjBasic*[mMaxNbWXCrystObj+16];
+      for(unsigned int i=0;i<mNbWXCrystObj;i++) tmp[i]=mpWXCrystObj[i];
+      delete[] mpWXCrystObj;
+      mpWXCrystObj= tmp;
+		mMaxNbWXCrystObj+=16;
    }
    mpWXCrystObj[mNbWXCrystObj++]=win;
 }
