@@ -207,6 +207,98 @@ bool WXField::SetForegroundColour(const wxColour& colour)
    mpLabel->SetForegroundColour(colour);
    return this->wxWindow::SetForegroundColour(colour);
 }
+////////////////////////////////////////////////////////////////////////
+//
+//    WXFieldString
+//
+////////////////////////////////////////////////////////////////////////
+BEGIN_EVENT_TABLE(WXFieldString,wxEvtHandler)
+   EVT_TEXT_ENTER(ID_WXFIELD, 		WXFieldString::OnEnter)
+   EVT_TEXT(		ID_WXFIELD, 		WXFieldString::OnText)
+END_EVENT_TABLE()
+
+WXFieldString::WXFieldString(wxWindow *parent,string& st,
+                         const int id,const int hsize, bool isEditable):
+WXField(parent,"",id),mpString(&st),mValue(st.c_str()),mIsSelfUpdating(false)
+{
+   VFN_DEBUG_MESSAGE("WXFieldString::WXFieldName():End",6)
+
+   if(true==isEditable)
+      mpField=new wxTextCtrl(this,ID_WXFIELD,mValue,
+                             wxDefaultPosition,wxSize(hsize,-1),wxTE_PROCESS_ENTER,
+                             wxTextValidator(wxFILTER_ASCII));
+   else
+      mpField=new wxTextCtrl(this,ID_WXFIELD,mValue,
+                             wxDefaultPosition,wxSize(hsize,-1),wxTE_READONLY,
+                             wxTextValidator(wxFILTER_ASCII));
+
+   mpSizer->Add(mpField,0,wxALIGN_CENTER);
+   this->Layout();
+}
+
+void WXFieldString::OnEnter(wxCommandEvent & WXUNUSED(event))
+{
+   VFN_DEBUG_MESSAGE("WXFieldString::OnEnter()",6)
+	WXCrystValidateAllUserInput();
+}
+void WXFieldString::OnText(wxCommandEvent & WXUNUSED(event))
+{
+	if(true==mIsSelfUpdating) return;
+   VFN_DEBUG_MESSAGE("WXFieldString::OnText():",6)
+	if(spLastWXFieldInputNotValidated!=this)
+	{
+		WXCrystValidateAllUserInput();
+		spLastWXFieldInputNotValidated=this;
+	}
+}
+
+void WXFieldString::SetValue(const string&s)
+{
+	if(mValue==(wxString)(s.c_str()))return;
+   VFN_DEBUG_MESSAGE("WXFieldString::SetValue()",3)
+   mValue=s.c_str();
+	mNeedUpdateUI=true;
+}
+
+const string WXFieldString::GetValue() const
+{
+   VFN_DEBUG_MESSAGE("WXFieldString::GetValue()"<<mValue<<":"<<mpField->GetValue(),6)
+   return mValue.c_str();
+}
+void WXFieldString::CrystUpdate()
+{
+   VFN_DEBUG_MESSAGE("WXFieldString::CrystUpdate()",3)
+	if(mValue.c_str()==mpString->c_str()) return;
+	mValueOld=mValue;
+	mValue=mpString->c_str();
+	mNeedUpdateUI=true;
+	if(true==wxThread::IsMain()) this->UpdateUI();
+}
+void WXFieldString::UpdateUI()
+{
+	if(mNeedUpdateUI==false) return;
+   VFN_DEBUG_MESSAGE("WXFieldString::UpdateUI()",10)
+	mIsSelfUpdating=true;
+   mpField->SetValue(mValue);
+	mIsSelfUpdating=false;
+	mNeedUpdateUI=false;
+}
+void WXFieldString::Revert()
+{
+   VFN_DEBUG_MESSAGE("WXFieldString::Revert()",3)
+   mValue=mValueOld;
+	mNeedUpdateUI=true;
+}
+void WXFieldString::ValidateUserInput()
+{
+   VFN_DEBUG_MESSAGE("WXFieldString::ValidateUserInput()",6)
+   //:TODO: Check that the object is not busy (input should be frozen)
+   mValueOld=mValue;
+   wxString s=mpField->GetValue();
+   mValue=s.c_str();
+   *mpString=mValue.c_str();
+}
+
 
 ////////////////////////////////////////////////////////////////////////
 //

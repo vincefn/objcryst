@@ -320,8 +320,48 @@ class WXField: public WXCrystObjBasic
 /// functions using data stored in fields (basically all functions !)
 void WXCrystValidateAllUserInput();
 
-/** A field with the name of a WXCrystObj. Updating must be done by the WXCrystObj owner.
+/** A field which directly links to a string.
 *
+* 
+*/
+class WXFieldString:public WXField
+{
+   public:
+      WXFieldString(wxWindow *parent,string& st,const int field_id,
+                  const int hsize=50, bool isEditable=true);
+      /// When a new value is entered (must type it and then hit the 'enter' key).
+      /// The Field reads the new value, then
+      /// forwards the event to its owner, who will take care of anything
+      /// that must be done.
+      void OnEnter(wxCommandEvent & event);
+		/// Records when text is entered (either from self-updating or user input)
+      void OnText(wxCommandEvent & WXUNUSED(event));
+      /// This actually posts an UpdateUI event, so that it is safe to call it
+		/// from a non-graphic thread.
+      void SetValue(const string&);
+		/// Get the current name.
+      const string GetValue() const;
+      virtual void CrystUpdate();
+      virtual void UpdateUI();
+      void Revert();
+		virtual void ValidateUserInput();
+   protected:
+		/// The WXCrystObj whose name is shown here
+      string* mpString;
+		/// Last name displayed.
+      wxString mValue;
+		/// The text window
+      wxTextCtrl *mpField;
+		/// Last name displayed, before the value was changed by the user. Not used yet,
+		/// could be useful for undo.
+      wxString mValueOld;
+		/// Set to true if the Field is being updated, so that no 
+		/// 'EVT_TEXT' is understood as user input.
+		bool mIsSelfUpdating;
+   DECLARE_EVENT_TABLE()
+};
+/** A field with the name of a WXCrystObj. Updating must be done by the WXCrystObj owner.
+* For a simple string field linked directly to a string, use ObjCryst::WXFieldString
 * 
 */
 class WXFieldName:public WXField

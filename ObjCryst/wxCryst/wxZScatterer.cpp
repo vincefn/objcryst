@@ -16,7 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-//#include <sstream> //for stringstream
+
+#include <stdio.h> //for sprintf()
 #include <fstream>
 
 #include "wx/wx.h"
@@ -41,7 +42,6 @@ namespace ObjCryst
 //
 ////////////////////////////////////////////////////////////////////////
 BEGIN_EVENT_TABLE(WXZAtom,wxWindow)
-   EVT_TEXT_ENTER(ID_ZATOM_NAME, 	WXZAtom::OnChangeName)
    EVT_BUTTON(ID_ZATOM_SCATTPOW, 	WXZAtom::OnChangeScattPow)
 END_EVENT_TABLE()
 
@@ -51,11 +51,9 @@ WXCrystObjBasic(parent),mpZAtom(obj)
    VFN_DEBUG_ENTRY("WXZAtom::WXZAtom()",6)
    mpSizer=new wxBoxSizer(wxHORIZONTAL);
       
-   mpFieldName=new wxTextCtrl(this,ID_ZATOM_NAME,mpZAtom->GetName().c_str(),
-                              wxDefaultPosition,wxSize(100,-1),wxTE_PROCESS_ENTER,
-                              wxTextValidator(wxFILTER_ASCII));
+   mpFieldName=new WXFieldString(this, mpZAtom->mName,ID_ZATOM_NAME,80,true);
    mpSizer->Add(mpFieldName,0,wxALIGN_LEFT);
-   mpFieldScattPower=new WXFieldChoice(this,ID_ZATOM_SCATTPOW,"ScatterPow:",60);
+   mpFieldScattPower=new WXFieldChoice(this,ID_ZATOM_SCATTPOW,"Type:",60);
    mpSizer->Add(mpFieldScattPower,0,wxALIGN_LEFT);
    mList.Add(mpFieldScattPower);
 
@@ -139,12 +137,6 @@ bool WXZAtom::Layout()
    mWXParent->Layout();
    VFN_DEBUG_EXIT("WXZAtom::Layout()",3)
    return this->wxWindow::Layout();
-}
-
-void WXZAtom::OnChangeName(wxCommandEvent & WXUNUSED(event))
-{
-   VFN_DEBUG_MESSAGE("WXAtom::OnChangeName()",6)
-   mpZAtom->SetName(mpFieldName->GetValue().c_str());
 }
 
 void WXZAtom::OnChangeScattPow(wxCommandEvent & WXUNUSED(event))
@@ -335,7 +327,9 @@ void WXZScatterer::OnMenuAddZAtom(wxCommandEvent & WXUNUSED(event))
          dumbUser.ShowModal();
          return;
       }
-   mpZScatterer->AddAtom ("Change Me",
+   char buf [5];
+   sprintf(buf,"%d",mpZScatterer->GetNbComponent()+1);
+   mpZScatterer->AddAtom (scattPow->GetName()+(string)buf,
                            scattPow,
                            bondAtomId,bondLength,
                            angleAtomId,angle*DEG2RAD,

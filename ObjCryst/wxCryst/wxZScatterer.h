@@ -34,12 +34,11 @@ class WXZAtom:public WXCrystObjBasic
       virtual void UpdateUI();
       virtual bool Layout();
       void OnChangeScattPow(wxCommandEvent & WXUNUSED(event));
-      void OnChangeName(wxCommandEvent & WXUNUSED(event));
    private:
       ZAtom *mpZAtom;
       wxBoxSizer *mpSizer;
       WXCrystObjBasicList mList;
-      wxTextCtrl *mpFieldName;
+      WXFieldString *mpFieldName;
       WXFieldChoice* mpFieldScattPower;
       WXFieldRefPar* mpFieldBond;
       WXFieldRefPar* mpFieldAngle;
