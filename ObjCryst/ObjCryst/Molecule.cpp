@@ -1178,13 +1178,14 @@ void Molecule::XMLOutput(ostream &os,int indent)const
    os <<endl;
    
    this->GetPar(&mOccupancy).XMLOutput(os,"Occup",indent);
-   os <<endl;
+   os <<endl<<endl;
    
    for(unsigned int i=0;i<this->GetNbOption();i++)
    {
       this->GetOption(i).XMLOutput(os,indent);
-      os <<endl<<endl;
+      os <<endl;
    }
+   os <<endl;
    
    {
       vector<MolAtom*>::const_iterator pos;
@@ -1259,11 +1260,11 @@ void Molecule::XMLInput(istream &is,const XMLCrystTag &tag)
                                 this->GetAtom(2),this->GetAtom(3),1.5,.01,.05,false);
          mvpDihedralAngle.back()->XMLInput(is,tagg);
       }
-      if("Option"==tag.GetName())
+      if("Option"==tagg.GetName())
       {
-         for(unsigned int i=0;i<tag.GetNbAttribute();i++)
-            if("Name"==tag.GetAttributeName(i)) 
-               mOptionRegistry.GetObj(tag.GetAttributeValue(i)).XMLInput(is,tag);
+         for(unsigned int i=0;i<tagg.GetNbAttribute();i++)
+            if("Name"==tagg.GetAttributeName(i)) 
+               mOptionRegistry.GetObj(tagg.GetAttributeValue(i)).XMLInput(is,tagg);
          continue;
       }
       if("Par"==tagg.GetName())
@@ -1361,6 +1362,7 @@ void Molecule::RandomizeConfiguration()
       }
    // this will only change limited parameters i.e. translation
    this->RefinableObj::RandomizeConfiguration();
+   if(mOptimizeOrientation.GetChoice()==0)
    {//Rotate around an arbitrary vector
       const REAL amp=M_PI/RAND_MAX;
       mQuat *= Quaternion::RotationQuaternion
@@ -1390,6 +1392,7 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
    TAU_PROFILE_START(timer1);
    VFN_DEBUG_ENTRY("Molecule::GlobalOptRandomMove()",4)
    mClockScatterer.Click();
+   if(mOptimizeOrientation.GetChoice()==0)
    {//Rotate around an arbitrary vector
       static const REAL amp=2.*M_PI/100./RAND_MAX;
       mQuat *= Quaternion::RotationQuaternion
@@ -2803,6 +2806,9 @@ void Molecule::InitOptions()
 
    static string autoOptimizeConformationName;
    static string autoOptimizeConformationChoices[2];
+
+   static string optimizeOrientationName;
+   static string optimizeOrientationChoices[2];
    
    static bool needInitNames=true;
    if(true==needInitNames)
@@ -2817,16 +2823,23 @@ void Molecule::InitOptions()
       autoOptimizeConformationName="Auto Optimize Starting Conformation";
       autoOptimizeConformationChoices[0]="Yes";
       autoOptimizeConformationChoices[1]="No";
+
+      optimizeOrientationName="Optimize Orientation";
+      optimizeOrientationChoices[0]="Yes";
+      optimizeOrientationChoices[1]="No";
       
       needInitNames=false;
    }
    mFlexModel.Init(3,&Flexname,Flexchoices);
    mFlexModel.SetChoice(0);
-   //this->AddOption(&mFlexModel);
+   this->AddOption(&mFlexModel);
    
    mAutoOptimizeConformation.Init(2,&autoOptimizeConformationName,
                                   autoOptimizeConformationChoices);
    this->AddOption(&mAutoOptimizeConformation);
+
+   mOptimizeOrientation.Init(2,&optimizeOrientationName,optimizeOrientationChoices);
+   this->AddOption(&mOptimizeOrientation);
    
    VFN_DEBUG_EXIT("Molecule::InitOptions",10)
 }

@@ -639,6 +639,11 @@ class Molecule: public Scatterer
       * supply a good starting conformation for their molecule.
       */
       RefObjOpt mAutoOptimizeConformation;
+
+      /** Option to optimize the Molecule's orientation. Useful to completely
+      * fix the Molecule.
+      */
+      RefObjOpt mOptimizeOrientation;
       
       /// Connectivity table: for each atom, keep the list of atoms
       /// bonded to it. All atoms are referenced from their index.

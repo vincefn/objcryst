@@ -240,7 +240,7 @@ WXCrystObjBasic(parent),mpMolBond(obj),mpButtonFree(0)
 {
    VFN_DEBUG_ENTRY("WXMolBond::WXMolBond():"<<obj->GetName(),6)
    mpSizer=new wxBoxSizer(wxHORIZONTAL);
-   #if 0
+   #if 1
    mpButtonFree=new wxCheckBox(this,ID_MOLBOND_FREEBUTTON,"",wxDefaultPosition, wxDefaultSize);
    mpButtonFree->Fit();
    mpSizer->Add(mpButtonFree,0,wxALIGN_CENTER);
