@@ -165,6 +165,11 @@ void WXCrystObjBasicList::UpdateUI()
       mpWXCrystObj[i]->UpdateUI();
    VFN_DEBUG_EXIT("WXCrystObjBasicList::UpdateUI()",5)
 }
+void WXCrystObjBasicList::Enable(bool enable)
+{
+   for(unsigned int i=0;i<mNbWXCrystObj;i++)
+      mpWXCrystObj[i]->Enable(enable);
+}
 
 ////////////////////////////////////////////////////////////////////////
 //
@@ -711,6 +716,11 @@ void WXCrystObj::UpdateUI()
    if(mpWXTitle!=0) mpWXTitle->UpdateUI();
    mList.UpdateUI();
    VFN_DEBUG_EXIT("WXCrystObj::UpdateUI()",6)
+}
+bool WXCrystObj::Enable(bool enable)
+{
+   mList.Enable(enable);
+   return this->wxWindow::Enable(enable);
 }
 ////////////////////////////////////////////////////////////////////////
 //

@@ -125,6 +125,7 @@ class WXCrystObjBasicList
       void CrystUpdate();
       /// Forces all objects in the list to update the UI. See WXCrystObjBasic::UpdateUI()
       void UpdateUI();
+      void Enable(bool enable);
    private:
       /// Number of objects.
       unsigned int mNbWXCrystObj;
@@ -166,6 +167,7 @@ class WXCrystObj: public WXCrystObjBasic
       virtual bool OnChangeName(const int id)=0;
       virtual void CrystUpdate();
       virtual void UpdateUI();
+      virtual bool Enable(bool enable);
    protected:
       /// Top sizer including the title and WXCrystObj::mpSizer
       wxBoxSizer *mpTopSizer;
