@@ -241,21 +241,19 @@ void WXFieldRefPar::UpdateUI()
 void WXFieldRefPar::Revert()
 {
    VFN_DEBUG_MESSAGE("WXFieldRefPar::Revert()",6)
-   mMutex.Lock();
+   wxMutexLocker mlock(mMutex);
    mValue=mValueOld;
    mNeedUpdateUI=true;
-   mMutex.Unlock();
 }
 void WXFieldRefPar::ValidateUserInput()
 {
    VFN_DEBUG_MESSAGE("WXFieldRefPar::ValidateUserInput()",6)
+   wxMutexLocker mlock(mMutex);
    mValueOld=mValue;
    wxString s=mpField->GetValue();
    double tmp;
    s.ToDouble(&tmp);
-   mMutex.Lock();
    mValue=tmp;
-   mMutex.Unlock();
    mpRefPar->SetHumanValue(mValue);
 }
 ////////////////////////////////////////////////////////////////////////
@@ -296,11 +294,10 @@ void WXFieldOption::OnChoice(wxCommandEvent & WXUNUSED(event))
 void WXFieldOption::CrystUpdate()
 {
    VFN_DEBUG_MESSAGE("WXFieldOption::CrystUpdate()",6)
+   wxMutexLocker mlock(mMutex);
    if(mChoice==mpOption->GetChoice()) return;
-   mMutex.Lock();
    mChoice=mpOption->GetChoice();
    mNeedUpdateUI=true;
-   mMutex.Unlock();
 }
 
 void WXFieldOption::UpdateUI()
@@ -310,15 +307,13 @@ void WXFieldOption::UpdateUI()
    if(mNeedUpdateUI==false) return;
    mpList->SetSelection(mChoice);
    mNeedUpdateUI=false;
-   mMutex.Unlock();
 }
 
 void WXFieldOption::Revert()
 {
-   mMutex.Lock();
+   wxMutexLocker mlock(mMutex);
    mChoice=mChoiceOld;
    mNeedUpdateUI=true;
-   mMutex.Unlock();
 }
 void WXFieldOption::ValidateUserInput()
 {

@@ -293,15 +293,14 @@ void WXFieldString::OnText(wxCommandEvent & WXUNUSED(event))
 void WXFieldString::SetValue(const string&s)
 {
    VFN_DEBUG_ENTRY("WXFieldString::SetValue()",3)
+   wxMutexLocker mlock(mMutex);
    if(mValue==s)
    {
       VFN_DEBUG_EXIT("WXFieldString::SetValue(): string unchanged",3)
       return;
    }
-   mMutex.Lock();
    mValue=s;
    mNeedUpdateUI=true;
-   mMutex.Unlock();
    VFN_DEBUG_EXIT("WXFieldString::SetValue()",3)
 }
 
@@ -313,9 +312,13 @@ const string WXFieldString::GetValue() const
 void WXFieldString::CrystUpdate()
 {
    VFN_DEBUG_ENTRY("WXFieldString::CrystUpdate()",3)
-   if(mValue==*mpString) return;
-   mValueOld=mValue;
    mMutex.Lock();
+   if(mValue==*mpString)
+   {
+      mMutex.Unlock();
+      return;
+   }
+   mValueOld=mValue;
    mValue=*mpString;
    mNeedUpdateUI=true;
    mMutex.Unlock();
@@ -324,32 +327,29 @@ void WXFieldString::CrystUpdate()
 }
 void WXFieldString::UpdateUI()
 {
+   wxMutexLocker mlock(mMutex);
    if(mNeedUpdateUI==false) return;
    VFN_DEBUG_ENTRY("WXFieldString::UpdateUI()",4)
    mIsSelfUpdating=true;
    mpField->SetValue(mValue.c_str());
    mIsSelfUpdating=false;
-   mMutex.Lock();
    mNeedUpdateUI=false;
-   mMutex.Unlock();
    VFN_DEBUG_EXIT("WXFieldString::UpdateUI()",4)
 }
 void WXFieldString::Revert()
 {
    VFN_DEBUG_MESSAGE("WXFieldString::Revert()",3)
-   mMutex.Lock();
+   wxMutexLocker mlock(mMutex);
    mValue=mValueOld;
    mNeedUpdateUI=true;
-   mMutex.Unlock();
 }
 void WXFieldString::ValidateUserInput()
 {
    VFN_DEBUG_MESSAGE("WXFieldString::ValidateUserInput()",6)
    //:TODO: Check that the object is not busy (input should be frozen)
+   wxMutexLocker mlock(mMutex);
    mValueOld=mValue;
-   mMutex.Lock();
    mValue=mpField->GetValue();
-   mMutex.Unlock();
    *mpString=mValue;
 }
 
@@ -403,15 +403,14 @@ void WXFieldName::OnText(wxCommandEvent & WXUNUSED(event))
 void WXFieldName::SetValue(const string&s)
 {
    VFN_DEBUG_ENTRY("WXFieldName::SetValue()",3)
+   wxMutexLocker mlock(mMutex);
    if(mValue==s)
    {
       VFN_DEBUG_EXIT("WXFieldName::SetValue():name unchanged",3)
       return;
    }
-   mMutex.Lock();
    mValue=s;
    mNeedUpdateUI=true;
-   mMutex.Unlock();
    VFN_DEBUG_EXIT("WXFieldName::SetValue()",3)
 }
 
@@ -427,32 +426,29 @@ void WXFieldName::CrystUpdate()
 }
 void WXFieldName::UpdateUI()
 {
+   wxMutexLocker mlock(mMutex);
    if(mNeedUpdateUI==false) return;
    VFN_DEBUG_ENTRY("WXFieldName::UpdateUI()",4)
    mIsSelfUpdating=true;
    mpField->SetValue(mValue.c_str());
    mIsSelfUpdating=false;
-   mMutex.Lock();
    mNeedUpdateUI=false;
-   mMutex.Unlock();
    VFN_DEBUG_EXIT("WXFieldName::UpdateUI()",4)
 }
 void WXFieldName::Revert()
 {
    VFN_DEBUG_MESSAGE("WXFieldName::Revert()",3)
-   mMutex.Lock();
+   wxMutexLocker mlock(mMutex);
    mValue=mValueOld;
    mNeedUpdateUI=true;
-   mMutex.Unlock();
 }
 void WXFieldName::ValidateUserInput()
 {
    VFN_DEBUG_MESSAGE("WXFieldName::ValidateUserInput()",6)
    //:TODO: Check that the object is not busy (input should be frozen)
+   wxMutexLocker mlock(mMutex);
    mValueOld=mValue;
-   mMutex.Lock();
    mValue=mpField->GetValue();
-   mMutex.Unlock();
    mpWXObj->OnChangeName(mId);
 }
 
@@ -527,6 +523,7 @@ template<class T> void WXFieldPar<T>::CrystUpdate()
    mValueOld=mValue;
    mValue=*mpValue;
    mNeedUpdateUI=true;
+   mMutex.Unlock();
    if(true==wxThread::IsMain()) this->UpdateUI();
    VFN_DEBUG_EXIT("WXFieldPar<T>::CrystUpdate()",6)
 }
@@ -591,6 +588,7 @@ template<class T> void WXFieldPar<T>::SetHumanValueScale(const T s)
 template<> void WXFieldPar<REAL>::ReadNewValue()
 {
    VFN_DEBUG_MESSAGE("WXFieldPar<REAL>::ReadNewValue()",6)
+   wxMutexLocker mlock(mMutex);
    mValueOld=*mpValue;
    wxString s=mpField->GetValue();
    double tmp;
@@ -601,6 +599,7 @@ template<> void WXFieldPar<REAL>::ReadNewValue()
 template<> void WXFieldPar<long>::ReadNewValue()
 {
    VFN_DEBUG_MESSAGE("WXFieldPar<long>::ReadNewValue()",6)
+   wxMutexLocker mlock(mMutex);
    mValueOld=*mpValue;
    wxString s=mpField->GetValue();
    s.ToLong(mpValue);
