@@ -12,7 +12,7 @@ doc:
 
 clean:
 	$(MAKE) -f macosx.mak -C src clean
-	$(MAKE) -f macosx.mak -C ${DIR_CRYST} clean
+	$(MAKE) -f gnu.mak -C ${DIR_CRYST} clean
 
 tidy:
 	$(MAKE) -f macosx.mak -C src tidy
