@@ -456,7 +456,7 @@ class Molecule: public Scatterer
       * and dihedral angles). Useful when adding manually atoms to get an initial
       * reasonable configuration. 
       */
-      void OptimizeConformation(const long nbTrial=10000);
+      void OptimizeConformation(const long nbTrial=10000,const REAL stopCost=0.);
       const vector<MolAtom*>& GetAtomList()const;
       const vector<MolBond*>& GetBondList()const;
       const vector<MolBondAngle*>& GetBondAngleList()const;

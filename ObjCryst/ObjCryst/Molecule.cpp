@@ -373,6 +373,7 @@ void MolBondAngle::XMLOutput(ostream &os,int indent)const
    {
       stringstream ss;
       ss <<mSigma*RAD2DEG;
+      tag.AddAttribute("Sigma",ss.str());
    }
    os <<tag<<endl;
    VFN_DEBUG_EXIT("MolBondAngle::XMLOutput()",4)
@@ -502,7 +503,6 @@ mAngle0(angle),mDelta(delta),mSigma(sigma),mpMol(&parent)
    mvpAtom.push_back(&atom2);
    mvpAtom.push_back(&atom3);
    mvpAtom.push_back(&atom4);
-   vector<const MolAtom*>::iterator pos;
    VFN_DEBUG_EXIT("MolDihedralAngle::MolDihedralAngle()",5)
 }
 
@@ -1127,6 +1127,12 @@ void Molecule::XMLInput(istream &is,const XMLCrystTag &tag)
 
 void Molecule::BeginOptimization(const bool allowApproximations,const bool enableRestraints)
 {
+   if((!mIsSelfOptimizing) &&(this->GetLogLikelihood()>(mvpRestraint.size()*50)))
+   {
+      (*fpObjCrystInformUser)("Optimizing initial conformation of Molecule:"+this->GetName());
+      this->OptimizeConformation(100000,(REAL)(mvpRestraint.size()));
+      (*fpObjCrystInformUser)("");
+   }
    this->BuildTorsionAtomGroupTable();
    this->RefinableObj::BeginOptimization(allowApproximations,enableRestraints);
    mRandomConformChangeNbTest=0;
@@ -1137,6 +1143,13 @@ void Molecule::BeginOptimization(const bool allowApproximations,const bool enabl
 void Molecule::RandomizeConfiguration()
 {
    VFN_DEBUG_ENTRY("Molecule::RandomizeConfiguration()",4)
+   if((!mIsSelfOptimizing) &&(this->GetLogLikelihood()>(mvpRestraint.size()*50)))
+   {
+      (*fpObjCrystInformUser)("Optimizing initial conformation of Molecule:"+this->GetName());
+      this->OptimizeConformation(100000,(REAL)(mvpRestraint.size()));
+      (*fpObjCrystInformUser)("");
+   }
+
    this->BuildTorsionAtomGroupTable();
    for(unsigned long torsion=0;torsion<mvpBond.size();torsion++)
    {
@@ -1174,6 +1187,13 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
    if(mRandomMoveIsDone) return;
    TAU_PROFILE("Molecule::GlobalOptRandomMove()","void (REAL,RefParType*)",TAU_DEFAULT);
    VFN_DEBUG_ENTRY("Molecule::GlobalOptRandomMove()",4)
+   if(mIsSelfOptimizing) 
+   {
+      this->RefinableObj::GlobalOptRandomMove(mutationAmplitude,type);
+      VFN_DEBUG_EXIT("Molecule::GlobalOptRandomMove()",4)
+      return;
+   }
+
    //:TODO: random moves using different models (free atoms, torsions, rigid body)
    //switch(mFlexModel.GetChoice())
    {
@@ -1233,7 +1253,6 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                //this->RefinableObj::GlobalOptRandomMove(mutationAmplitude,gpRefParTypeScattConform);
                mRandomConformChangeNbTest++;
                mQuat.Normalize();
-               if(mIsSelfOptimizing) break;
                const REAL newll=this->GetLogLikelihood();
                //cout <<newll<<" ";
                if(newll<lastll) break;
@@ -1278,31 +1297,6 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
          mClockScatterer.Click();
       }
    }
-   #if 0
-   /* :TODO: steepest/SA descent if too high ?*/
-   REAL ll=this->GetLogLikelihood();
-   const REAL maxll=this->GetNbComponent()*500.;
-   this->SaveParamSet(mLocalParamSet);
-   while(ll>maxll)
-   {
-      mLastLogLike=ll;
-      mRandomMoveIsDone=false;
-      this->RefinableObj::GlobalOptRandomMove(1.,type);
-      ll=this->GetLogLikelihood();
-      cout<<ll<<","<<mLastLogLike<<","<<maxll<<endl;
-      if(ll>mLastLogLike)
-      {
-         if( log((rand()+1)/(REAL)RAND_MAX) < (-(ll-mLastLogLike)/100.) )
-            this->SaveParamSet(mLocalParamSet);
-         else
-         {
-            this->RestoreParamSet(mLocalParamSet);
-            ll=mLastLogLike;
-         }
-      }
-      else this->SaveParamSet(mLocalParamSet);
-   }
-   #endif
    mRandomMoveIsDone=true;
    VFN_DEBUG_EXIT("Molecule::GlobalOptRandomMove()",4)
 }
@@ -1795,7 +1789,7 @@ MolAtom &Molecule::GetAtom(const string &name){return **(this->FindAtom(name));}
 
 const MolAtom &Molecule::GetAtom(const string &name)const{return **(this->FindAtom(name));}
 
-void Molecule::OptimizeConformation(const long nbTrial)
+void Molecule::OptimizeConformation(const long nbTrial,const REAL stopCost)
 {
    VFN_DEBUG_ENTRY("Molecule::OptimizeConformation()",5)
    MonteCarloObj globalOptObj(true);
@@ -1805,7 +1799,7 @@ void Molecule::OptimizeConformation(const long nbTrial)
 
    long nb=nbTrial;
    mIsSelfOptimizing=true;
-   globalOptObj.Optimize(nb);
+   globalOptObj.Optimize(nb,false,stopCost);
    mIsSelfOptimizing=false;
    VFN_DEBUG_EXIT("Molecule::OptimizeConformation()",5)
 }
@@ -1830,6 +1824,9 @@ void Molecule::RotateAtomGroup(const MolAtom &at1,const MolAtom &at2,
    const REAL vx=at2.X()-at1.X();
    const REAL vy=at2.Y()-at1.Y();
    const REAL vz=at2.Z()-at1.Z();
+   // :KLUDGE: ? Refuse to do anything if atomes are superposed
+   if((abs(vx)+abs(vy)+abs(vz))<1e-6) return;
+   
    const Quaternion quat=Quaternion::RotationQuaternion(angle,vx,vy,vz);
    //quat.XMLOutput(cout);
    set<unsigned long>::const_iterator pos;
