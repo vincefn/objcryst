@@ -205,7 +205,7 @@ WXScatterer(parent,obj),mpZScatterer(obj)
                                 "Import Fenske-Hall Zmatrix");
          mpMenuBar->AddMenuItem(ID_ZSCATTERER_MENU_FILE,
                                 ID_ZSCATTERER_MENU_EXPORT_FHZ,
-                                "Save as a Fenske-Hall Zmatrix");
+                                "Save as Fenske-Hall Zmatrix");
       mpMenuBar->AddMenu("Parameters",ID_REFOBJ_MENU_PAR);
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_FIXALL,"Fix all");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_UNFIXALL,"Unfix all");

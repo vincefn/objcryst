@@ -78,6 +78,7 @@ BEGIN_EVENT_TABLE(WXCrystal,wxEvtHandler)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDPRISMTRIGONAL,   WXCrystal::OnMenuAddScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDICOSAHEDRON,     WXCrystal::OnMenuAddScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_REMOVESCATTERER,    WXCrystal::OnMenuRemoveScatterer)
+   EVT_MENU(ID_CRYSTAL_MENU_SCATT_DUPLICSCATTERER,    WXCrystal::OnMenuDuplicateScatterer)
    EVT_UPDATE_UI(ID_CRYST_UPDATEUI,                   WXRefinableObj::OnUpdateUI)
 END_EVENT_TABLE()
 
@@ -95,11 +96,11 @@ mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
    //mpWXTitle->SetBackgroundColour(wxColour(255,200,200));
    mpWXTitle->SetForegroundColour(wxColour(255,0,0));
    // Menu
-      mpMenuBar->AddMenu("Object",ID_REFOBJ_MENU_OBJ);
+      mpMenuBar->AddMenu("File",ID_REFOBJ_MENU_OBJ);
          //mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_REFOBJ_MENU_OBJ_LOAD,"Load");
          //mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_REFOBJ_MENU_OBJ_SAVE,"Save");
          //mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_CRYSTAL_MENU_SAVECIF,"Save (CIF)");
-         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_CRYSTAL_MENU_SAVETEXT,"Save (Text)");
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_CRYSTAL_MENU_SAVETEXT,"Save as text");
       mpMenuBar->AddMenu("Parameters",ID_REFOBJ_MENU_PAR);
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_CRYSTAL_MENU_PAR_ADDANTIBUMP,
                                 "Add Antibump distance");
@@ -135,6 +136,8 @@ mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
                                 "Add Icosahedron");
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_REMOVESCATTERER,
                                 "Remove Scatterer");
+         mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_DUPLICSCATTERER,
+                                "Duplicate Scatterer");
       mpMenuBar->AddMenu("Display",ID_CRYSTAL_MENU_DISPLAY);
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_DISPLAY,ID_CRYSTAL_MENU_DISPLAY_3DVIEW,
                                 "3D Display");
@@ -691,7 +694,21 @@ void WXCrystal::OnMenuRemoveScatterer(wxCommandEvent & WXUNUSED(event))
    if(0==scatt) return;
    mpCrystal->RemoveScatterer(scatt);
    VFN_DEBUG_MESSAGE("WXCrystal::OnButtonRemoveScatterer():End",6)
-   mpCrystal->XMLOutput(cout);
+   this->Layout();
+}
+
+void WXCrystal::OnMenuDuplicateScatterer(wxCommandEvent & WXUNUSED(event))
+{
+   VFN_DEBUG_ENTRY("WXCrystal::OnMenuDuplicateScatterer()",6)
+   WXCrystValidateAllUserInput();
+   int choice;
+   Scatterer *scatt=WXDialogChooseFromRegistry(mpCrystal->GetScattererRegistry(),this,
+                                             "Select the Scatterer to duplicate:",choice);
+   if(0==scatt) return;
+   Scatterer *copy=scatt->CreateCopy();
+   scatt->SetName(scatt->GetName()+(string)"(copy)");
+   mpCrystal->AddScatterer(copy);
+   VFN_DEBUG_EXIT("WXCrystal::OnMenuDuplicateScatterer():End",6)
    this->Layout();
 }
 

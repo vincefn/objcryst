@@ -63,6 +63,7 @@ class WXCrystal: public WXRefinableObj
       void OnMenuRemoveScattPow(wxCommandEvent & WXUNUSED(event));
       void OnMenuAddScatterer(wxCommandEvent & event);
       void OnMenuRemoveScatterer(wxCommandEvent & WXUNUSED(event));
+      void OnMenuDuplicateScatterer(wxCommandEvent & WXUNUSED(event));
       void OnMenuAddAntiBumpDist(wxCommandEvent & WXUNUSED(event));
       bool OnChangeName(const int id);
       void UpdateUI();

@@ -59,15 +59,16 @@ WXCrystObj(parent),mpGlobalOptimRunThread(0)
       //mpMenuBar->AddMenu("Object",ID_REFOBJ_MENU_OBJ);
          //mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_REFOBJ_MENU_OBJ_SAVE,"Save");
          //mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_REFOBJ_MENU_OBJ_LOAD,"Load");
-      mpMenuBar->AddMenu("Optimize",ID_GLOBALOPT_MENU_GLOBAlOPT);
-         mpMenuBar->AddMenuItem(ID_GLOBALOPT_MENU_GLOBAlOPT,ID_GLOBALOPT_MENU_GLOBAlOPT_ADDOBJ,
+      mpMenuBar->AddMenu("Objects && Cost Functions",ID_GLOBALOPT_MENU_OBJECTS);
+         mpMenuBar->AddMenuItem(ID_GLOBALOPT_MENU_OBJECTS,ID_GLOBALOPT_MENU_OBJECTS_ADDOBJ,
                                 "Add object to optimize");
-         mpMenuBar->AddMenuItem(ID_GLOBALOPT_MENU_GLOBAlOPT,
-                                ID_GLOBALOPT_MENU_GLOBAlOPT_ADDCOSTFUNC,"Add Cost Function");
-         mpMenuBar->AddMenuItem(ID_GLOBALOPT_MENU_GLOBAlOPT,
-                                ID_GLOBALOPT_MENU_GLOBAlOPT_RUN,"Run Optimization");
-         mpMenuBar->AddMenuItem(ID_GLOBALOPT_MENU_GLOBAlOPT,
-                                ID_GLOBALOPT_MENU_GLOBAlOPT_STOP,"Stop Optimization");
+         mpMenuBar->AddMenuItem(ID_GLOBALOPT_MENU_OBJECTS,
+                                ID_GLOBALOPT_MENU_OBJECTS_ADDCOSTFUNC,"Add Cost Function");
+      mpMenuBar->AddMenu("Run/Stop",ID_GLOBALOPT_MENU_OPT);
+         mpMenuBar->AddMenuItem(ID_GLOBALOPT_MENU_OPT,
+                                ID_GLOBALOPT_MENU_OPT_RUN,"Run Optimization");
+         mpMenuBar->AddMenuItem(ID_GLOBALOPT_MENU_OPT,
+                                ID_GLOBALOPT_MENU_OPT_STOP,"Stop Optimization");
       
     //Refined Objects
    for(int i=0;i<obj->mRefinedObjList.GetNb();i++)
@@ -145,6 +146,10 @@ void WXOptimizationObj::AddRefinedObject(RefinableObj &obj)
    this->Layout();
 }
 
+void WXOptimizationObj::OnRemoveRefinedObject()
+{
+}
+
 void WXOptimizationObj::OnAddCostFunction()
 {
    VFN_DEBUG_MESSAGE("WXOptimizationObj::OnAddCostFunction()",6)
@@ -199,6 +204,10 @@ void WXOptimizationObj::AddCostFunction(RefinableObj &obj, const int costFunc)
    this->Layout();
 }
 
+void WXOptimizationObj::OnRemoveCostFunction()
+{
+}
+
 void WXOptimizationObj::OnStopOptimization()
 {
    this->GetOptimizationObj().StopAfterCycle();
@@ -240,10 +249,10 @@ BEGIN_EVENT_TABLE(WXMonteCarloObj, wxWindow)
    EVT_BUTTON(ID_WXOBJ_COLLAPSE,                       WXCrystObj::OnToggleCollapse)
    //EVT_MENU(ID_REFOBJ_MENU_OBJ_SAVE,                   WXOptimizationObj::OnSave)
    //EVT_MENU(ID_REFOBJ_MENU_OBJ_LOAD,                   WXOptimizationObj::OnLoad)
-   EVT_MENU(ID_GLOBALOPT_MENU_GLOBAlOPT_ADDOBJ,        WXOptimizationObj::OnAddRefinedObject)
-   EVT_MENU(ID_GLOBALOPT_MENU_GLOBAlOPT_ADDCOSTFUNC,   WXOptimizationObj::OnAddCostFunction)
-   EVT_MENU(ID_GLOBALOPT_MENU_GLOBAlOPT_RUN,           WXOptimizationObj::OnRunOptimization)
-   EVT_MENU(ID_GLOBALOPT_MENU_GLOBAlOPT_STOP,          WXOptimizationObj::OnStopOptimization)
+   EVT_MENU(ID_GLOBALOPT_MENU_OBJECTS_ADDOBJ,        WXOptimizationObj::OnAddRefinedObject)
+   EVT_MENU(ID_GLOBALOPT_MENU_OBJECTS_ADDCOSTFUNC,   WXOptimizationObj::OnAddCostFunction)
+   EVT_MENU(ID_GLOBALOPT_MENU_OPT_RUN,           WXOptimizationObj::OnRunOptimization)
+   EVT_MENU(ID_GLOBALOPT_MENU_OPT_STOP,          WXOptimizationObj::OnStopOptimization)
    EVT_UPDATE_UI(ID_CRYST_UPDATEUI,                    WXOptimizationObj::OnUpdateUI)
 END_EVENT_TABLE()
 
