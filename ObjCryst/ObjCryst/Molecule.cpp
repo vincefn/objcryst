@@ -27,6 +27,7 @@
 #include <GL/glut.h>
 #endif
 
+#include "Quirks/VFNStreamFormat.h"
 #include "ObjCryst/Molecule.h"
 #include "RefinableObj/GlobalOptimObj.h"
 #ifdef __WX__CRYST__
@@ -37,6 +38,67 @@ using namespace std;
 
 namespace ObjCryst
 {
+REAL GetBondLength(const MolAtom&at1,const MolAtom&at2)
+{
+   return  sqrt( (at1.GetX()-at2.GetX())
+                *(at1.GetX()-at2.GetX())
+                +(at1.GetY()-at2.GetY())
+                *(at1.GetY()-at2.GetY())
+                +(at1.GetZ()-at2.GetZ())
+                *(at1.GetZ()-at2.GetZ()) );
+}
+REAL GetBondAngle(const MolAtom &at1,const MolAtom &at2,const MolAtom &at3)
+{
+   const REAL x21=at1.GetX()-at2.GetX();
+   const REAL y21=at1.GetY()-at2.GetY();
+   const REAL z21=at1.GetZ()-at2.GetZ();
+   const REAL x23=at3.GetX()-at2.GetX();
+   const REAL y23=at3.GetY()-at2.GetY();
+   const REAL z23=at3.GetZ()-at2.GetZ();
+   const REAL norm21= x21*x21+y21*y21+z21*z21;
+   const REAL norm23= x23*x23+y23*y23+z23*z23;
+   const REAL angle=(x21*x23+y21*y23+z21*z23)/sqrt(norm21*norm23+1e-6);
+   if(angle>=1)  return 0;
+   if(angle<=-1) return M_PI;
+   return acos(angle);
+}
+REAL GetDihedralAngle(const MolAtom &at1,const MolAtom &at2,const MolAtom &at3,const MolAtom &at4)
+{
+   const REAL x21=at1.GetX()-at2.GetX();
+   const REAL y21=at1.GetY()-at2.GetY();
+   const REAL z21=at1.GetZ()-at2.GetZ();
+   
+   const REAL x34=at4.GetX()-at3.GetX();
+   const REAL y34=at4.GetY()-at3.GetY();
+   const REAL z34=at4.GetZ()-at3.GetZ();
+   
+   const REAL x23=at3.GetX()-at2.GetX();
+   const REAL y23=at3.GetY()-at2.GetY();
+   const REAL z23=at3.GetZ()-at2.GetZ();
+   
+   // v21 x v23
+   const REAL x123= y21*z23-z21*y23;
+   const REAL y123= z21*x23-x21*z23;
+   const REAL z123= x21*y23-y21*x23;
+   const REAL norm123= x123*x123+y123*y123+z123*z123;
+   
+   // v32 x v34 (= -v23 x v34)
+   const REAL x234= -(y23*z34-z23*y34);
+   const REAL y234= -(z23*x34-x23*z34);
+   const REAL z234= -(x23*y34-y23*x34);
+   const REAL norm234= x234*x234+y234*y234+z234*z234;
+   
+   REAL angle=(x123*x234+y123*y234+z123*z234)/sqrt(norm123*norm234+1e-6);
+   if(angle>= 1) angle=0;
+   else 
+   {
+      if(angle<=-1) angle=M_PI;
+      else angle=acos(angle);
+   }
+   if((x21*x34 + y21*y34 + z21*z34)<0) return -angle;
+   return angle;
+}
+
 //######################################################################
 //
 //      MolAtom
@@ -90,7 +152,7 @@ void MolAtom::XMLOutput(ostream &os,int indent)const
    for(int i=0;i<indent;i++) os << "  " ;
    XMLCrystTag tag("Atom",false,true);
    tag.AddAttribute("Name",this->GetName());
-   tag.AddAttribute("ScattPow",this->GetScatteringPower().GetName());
+   if(!this->IsDummy())tag.AddAttribute("ScattPow",this->GetScatteringPower().GetName());
    {
       stringstream ss;
       ss <<mX;
@@ -288,12 +350,7 @@ void MolBond::SetAtom1(const MolAtom &at){mAtomPair.first =&at;}
 void MolBond::SetAtom2(const MolAtom &at){mAtomPair.second=&at;}
 REAL MolBond::GetLength()const
 {
-   return  sqrt( (this->GetAtom1().GetX()-this->GetAtom2().GetX())
-                 *(this->GetAtom1().GetX()-this->GetAtom2().GetX())
-                +(this->GetAtom1().GetY()-this->GetAtom2().GetY())
-                 *(this->GetAtom1().GetY()-this->GetAtom2().GetY())
-                +(this->GetAtom1().GetZ()-this->GetAtom2().GetZ())
-                 *(this->GetAtom1().GetZ()-this->GetAtom2().GetZ()) );
+   return GetBondLength(GetAtom1(),this->GetAtom2());
 }
 
 REAL MolBond::GetLength0()const{return mLength0;}
@@ -425,18 +482,7 @@ REAL& MolBondAngle::Angle0()
 
 REAL MolBondAngle::GetAngle()const
 {
-   const REAL x21=this->GetAtom1().GetX()-this->GetAtom2().GetX();
-   const REAL y21=this->GetAtom1().GetY()-this->GetAtom2().GetY();
-   const REAL z21=this->GetAtom1().GetZ()-this->GetAtom2().GetZ();
-   const REAL x23=this->GetAtom3().GetX()-this->GetAtom2().GetX();
-   const REAL y23=this->GetAtom3().GetY()-this->GetAtom2().GetY();
-   const REAL z23=this->GetAtom3().GetZ()-this->GetAtom2().GetZ();
-   const REAL norm21= x21*x21+y21*y21+z21*z21;
-   const REAL norm23= x23*x23+y23*y23+z23*z23;
-   const REAL angle=(x21*x23+y21*y23+z21*z23)/sqrt(norm21*norm23+1e-6);
-   if(angle>=1)  return 0;
-   if(angle<=-1) return M_PI;
-   return acos(angle);
+   return GetBondAngle(this->GetAtom1(),this->GetAtom2(),this->GetAtom3());
 }
 
 REAL MolBondAngle::GetLogLikelihood()const
@@ -593,39 +639,7 @@ void MolDihedralAngle::XMLInput(istream &is,const XMLCrystTag &tag)
 
 REAL MolDihedralAngle::GetAngle()const
 {
-   const REAL x21=this->GetAtom1().GetX()-this->GetAtom2().GetX();
-   const REAL y21=this->GetAtom1().GetY()-this->GetAtom2().GetY();
-   const REAL z21=this->GetAtom1().GetZ()-this->GetAtom2().GetZ();
-   
-   const REAL x34=this->GetAtom4().GetX()-this->GetAtom3().GetX();
-   const REAL y34=this->GetAtom4().GetY()-this->GetAtom3().GetY();
-   const REAL z34=this->GetAtom4().GetZ()-this->GetAtom3().GetZ();
-   
-   const REAL x23=this->GetAtom3().GetX()-this->GetAtom2().GetX();
-   const REAL y23=this->GetAtom3().GetY()-this->GetAtom2().GetY();
-   const REAL z23=this->GetAtom3().GetZ()-this->GetAtom2().GetZ();
-   
-   // v21 x v23
-   const REAL x123= y21*z23-z21*y23;
-   const REAL y123= z21*x23-x21*z23;
-   const REAL z123= x21*y23-y21*x23;
-   const REAL norm123= x123*x123+y123*y123+z123*z123;
-   
-   // v32 x v34 (= -v23 x v34)
-   const REAL x234= -(y23*z34-z23*y34);
-   const REAL y234= -(z23*x34-x23*z34);
-   const REAL z234= -(x23*y34-y23*x34);
-   const REAL norm234= x234*x234+y234*y234+z234*z234;
-   
-   REAL angle=(x123*x234+y123*y234+z123*z234)/sqrt(norm123*norm234+1e-6);
-   if(angle>= 1) angle=0;
-   else 
-   {
-      if(angle<=-1) angle=M_PI;
-      else angle=acos(angle);
-   }
-   if((x21*x34 + y21*y34 + z21*z34)<0) return -angle;
-   return angle;
+   return GetDihedralAngle(this->GetAtom1(),this->GetAtom2(),this->GetAtom3(),this->GetAtom4());
 }
 
 REAL& MolDihedralAngle::Angle0(){return mAngle0;}
@@ -1722,6 +1736,17 @@ vector<MolBond*>::iterator Molecule::RemoveBond(const MolBond &bond)
    return pos;
 }
 
+vector<MolBond*>::const_iterator Molecule::FindBond(const MolAtom &at1,const MolAtom &at2)const
+{
+   for(vector<MolBond*>::const_iterator pos=mvpBond.begin();pos!=mvpBond.end();++pos)
+   {
+      if(  ((&((*pos)->GetAtom1())==&at1)&&(&((*pos)->GetAtom2())==&at2))
+         ||((&((*pos)->GetAtom1())==&at2)&&(&((*pos)->GetAtom2())==&at1)))
+         return pos;
+   }
+   return mvpBond.end();
+}
+
 void Molecule::AddBondAngle(MolAtom &atom1, MolAtom &atom2, MolAtom &atom3,
                   const REAL angle, const REAL sigma, const REAL delta)
 {
@@ -1849,6 +1874,29 @@ void Molecule::RotateAtomGroup(const MolAtom &at1,const MolAtom &at2,
    }
    mClockAtomPosition.Click();
    mClockScatterer.Click();
+}
+
+void Molecule::RestraintStatus(ostream &os)const
+{
+   VFN_DEBUG_ENTRY("Molecule::RestraintStatus()",5)
+   for(vector<MolBond*>::const_iterator pos=mvpBond.begin();pos!=mvpBond.end();++pos)
+      cout <<"Bond "<<(*pos)->GetName()
+           <<"IdealLength="<<FormatFloat((*pos)->GetLength0())
+           <<", Length="<<FormatFloat((*pos)->GetLength())
+           <<", log(likelihood)="<<FormatFloat((*pos)->GetLogLikelihood())<<endl;
+   for(vector<MolBondAngle*>::const_iterator pos=mvpBondAngle.begin();
+       pos!=mvpBondAngle.end();++pos)
+      cout <<"Bond Angle "<<(*pos)->GetName()
+           <<"IdealAngle="<<FormatFloat((*pos)->Angle0()*180/M_PI)
+           <<", Angle="<<FormatFloat((*pos)->GetAngle()*180/M_PI)
+           <<", log(likelihood)="<<FormatFloat((*pos)->GetLogLikelihood())<<endl;
+   for(vector<MolDihedralAngle*>::const_iterator pos=mvpDihedralAngle.begin();
+       pos!=mvpDihedralAngle.end();++pos)
+      cout <<"Dihedral Angle "<<(*pos)->GetName()
+           <<"IdealAngle="<<FormatFloat((*pos)->Angle0()*180/M_PI)
+           <<", Angle="<<FormatFloat((*pos)->GetAngle()*180/M_PI)
+           <<", log(likelihood)="<<FormatFloat((*pos)->GetLogLikelihood())<<endl;
+   VFN_DEBUG_EXIT("Molecule::RestraintStatus()",5)
 }
 
 void Molecule::InitRefParList()

@@ -30,6 +30,7 @@
 #endif
 
 #include "wxCryst/wxZScatterer.h"
+#include "ObjCryst/Molecule.h"
 
 //Fixes for Cygwin; where do those stupid macros come from ? Somewhere in wxMSW headers
 #ifdef max
@@ -44,6 +45,98 @@
  
 namespace ObjCryst
 {
+/// Conversion from ZScatterer to the newer Molecule object.
+Molecule *ZScatterer2Molecule(ZScatterer *scatt);
+
+Molecule *ZScatterer2Molecule(ZScatterer *scatt)
+{
+   VFN_DEBUG_ENTRY("ZScatterer2Molecule()",6)
+   Molecule *mol=new Molecule(scatt->GetCrystal(),scatt->GetName());
+   const unsigned long nb=scatt->GetZAtomRegistry().GetNb();
+   const ScatteringComponentList *l=&(scatt->GetScatteringComponentList());
+   REAL x,y,z;
+   REAL x0=0,y0=0,z0=0;
+   for(unsigned int i=0;i<nb;++i)
+   {
+      x=(*l)(i).mX;
+      y=(*l)(i).mY;
+      z=(*l)(i).mZ;
+      x0+=x;
+      y0+=y;
+      z0+=z;
+      scatt->GetCrystal().FractionalToOrthonormalCoords(x,y,z);
+      mol->AddAtom(x,y,z,scatt->GetZAtomRegistry().GetObj(i).GetScatteringPower(),
+                   scatt->GetComponentName(i));
+      
+      if(i>0)
+      {
+         const RefinablePar* pLength=&(scatt->GetPar(&(scatt->GetZAtomRegistry()
+                                                       .GetObj(i).GetZBondLength())));
+         if(pLength->IsFixed())
+            mol->AddBond(mol->GetAtom(i),mol->GetAtom(scatt->GetZBondAtom(i)),
+                         pLength->GetValue(),.01,.05);
+         else
+            if(pLength->IsLimited())
+               mol->AddBond(mol->GetAtom(i),mol->GetAtom(scatt->GetZBondAtom(i)),
+                            (pLength->GetMin()+pLength->GetMax())/2.,.01,.05);
+      }
+      if(i>1)
+      {
+         const RefinablePar* pAngle=&(scatt->GetPar(&(scatt->GetZAtomRegistry()
+                                                      .GetObj(i).GetZAngle())));
+         if(pAngle->IsFixed())
+            mol->AddBondAngle(mol->GetAtom(i),mol->GetAtom(scatt->GetZBondAtom(i)),
+                              mol->GetAtom(scatt->GetZAngleAtom(i)),
+                              pAngle->GetValue(),.01,.05);
+         else
+            if(pAngle->IsLimited())
+               mol->AddBondAngle(mol->GetAtom(i),mol->GetAtom(scatt->GetZBondAtom(i)),
+                                 mol->GetAtom(scatt->GetZAngleAtom(i)),
+                                 (pAngle->GetMin()+pAngle->GetMax())/2.,.01,.05);
+      }
+      if(i>2)
+      {
+         const RefinablePar* pDihed=&(scatt->GetPar(&(scatt->GetZAtomRegistry()
+                                                      .GetObj(i).GetZDihedralAngle())));
+         MolAtom *p1=&(mol->GetAtom(i));
+         MolAtom *p2=&(mol->GetAtom(scatt->GetZBondAtom(i)));
+         MolAtom *p3=&(mol->GetAtom(scatt->GetZAngleAtom(i)));
+         MolAtom *p4=&(mol->GetAtom(scatt->GetZDihedralAngleAtom(i)));
+         if(  (abs(GetBondAngle(*p1,*p2,*p3)-M_PI)>0.3)
+            &&(abs(GetBondAngle(*p1,*p2,*p4)-M_PI)>0.3)
+            &&(abs(GetBondAngle(*p1,*p3,*p4)-M_PI)>0.3)
+            &&(abs(GetBondAngle(*p2,*p3,*p4)-M_PI)>0.3))
+         {
+            if(pDihed->IsFixed())
+               mol->AddDihedralAngle(*p1,*p2,*p3,*p4,pDihed->GetValue(),.01,.05);
+            else
+               if(((pDihed->GetMax()-pDihed->GetMax())<0.3)&&(i>2)&&(pDihed->IsLimited()))
+                  mol->AddDihedralAngle(*p1,*p2,*p3,*p4,
+                                        (pDihed->GetMin()+pDihed->GetMax())/2.,.01,.05);
+         }
+      }
+      mol->GetAtom(i).SetOccupancy(scatt->GetZAtomRegistry().GetObj(i).GetOccupancy());
+      
+   }
+   for(unsigned int i=0;i<nb;++i)
+      for(unsigned int j=i+1;j<nb;++j)
+      {
+         const REAL dist=GetBondLength(mol->GetAtom(i),mol->GetAtom(j));
+         const vector<MolBond*>::const_iterator pos=mol->FindBond(mol->GetAtom(i),mol->GetAtom(j));
+         
+         if(   (dist<(1.10*( mol->GetAtom(i).GetScatteringPower().GetRadius()
+                            +mol->GetAtom(j).GetScatteringPower().GetRadius())))
+             &&(pos==mol->GetBondList().end()))
+            mol->AddBond(mol->GetAtom(i),mol->GetAtom(j),dist,.01,.05);
+      }
+
+   mol->SetX(x0/nb);
+   mol->SetY(y0/nb);
+   mol->SetZ(z0/nb);
+   return mol;
+   VFN_DEBUG_EXIT("ZScatterer2Molecule()",6)
+}
+
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXZAtom
@@ -217,6 +310,7 @@ static const long ID_ZSCATTERER_MENU_PAR_LIMITS_RELAT_DIHED=WXCRYST_ID();
 static const long ID_ZSCATTERER_MENU_FILE=                  WXCRYST_ID();
 static const long ID_ZSCATTERER_MENU_IMPORT_FHZ=            WXCRYST_ID();
 static const long ID_ZSCATTERER_MENU_EXPORT_FHZ=            WXCRYST_ID();
+static const long ID_ZSCATTERER_MENU_CONVERT2MOLECULE=     WXCRYST_ID();
 BEGIN_EVENT_TABLE(WXZScatterer,wxWindow)
    EVT_BUTTON(ID_WXOBJ_COLLAPSE,                       WXCrystObj::OnToggleCollapse)
    EVT_MENU(ID_REFOBJ_MENU_PAR_FIXALL,                 WXRefinableObj::OnMenuFixAllPar)
@@ -229,6 +323,7 @@ BEGIN_EVENT_TABLE(WXZScatterer,wxWindow)
    EVT_MENU(ID_ZSCATTERER_MENU_ATOM_CHANGE_PIVOT,      WXZScatterer::OnMenuChangePivotAtom)
    EVT_MENU(ID_ZSCATTERER_MENU_IMPORT_FHZ,             WXZScatterer::OnMenuImportZMatrix)
    EVT_MENU(ID_ZSCATTERER_MENU_EXPORT_FHZ,             WXZScatterer::OnMenuExportZMatrix)
+   EVT_MENU(ID_ZSCATTERER_MENU_CONVERT2MOLECULE,       WXZScatterer::OnMenuConvert2Molecule)
 END_EVENT_TABLE()
 
 WXZScatterer::WXZScatterer(wxWindow* parent, ZScatterer *obj):
@@ -236,13 +331,16 @@ WXScatterer(parent,obj),mpZScatterer(obj)
 {
    VFN_DEBUG_MESSAGE("WXZScatterer::WXZScatterer()",6)
    //Menus
-      mpMenuBar->AddMenu("File",ID_ZSCATTERER_MENU_FILE);
+      mpMenuBar->AddMenu("Import/Export",ID_ZSCATTERER_MENU_FILE);
          mpMenuBar->AddMenuItem(ID_ZSCATTERER_MENU_FILE,
                                 ID_ZSCATTERER_MENU_IMPORT_FHZ,
                                 "Import Fenske-Hall Zmatrix");
          mpMenuBar->AddMenuItem(ID_ZSCATTERER_MENU_FILE,
                                 ID_ZSCATTERER_MENU_EXPORT_FHZ,
                                 "Save as Fenske-Hall Zmatrix");
+         mpMenuBar->AddMenuItem(ID_ZSCATTERER_MENU_FILE,
+                                ID_ZSCATTERER_MENU_CONVERT2MOLECULE,
+                                "Convert to Molecule");
       mpMenuBar->AddMenu("Parameters",ID_REFOBJ_MENU_PAR);
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_FIXALL,"Fix all");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_UNFIXALL,"Unfix all");
@@ -511,6 +609,14 @@ Error opening file for input:"+string(save.GetPath().c_str()));
    }
    mpZScatterer->ExportFenskeHallZMatrix(fout);
    fout.close();
+}
+
+void WXZScatterer::OnMenuConvert2Molecule(wxCommandEvent &WXUNUSED(event))
+{
+   Molecule *mol=ZScatterer2Molecule(mpZScatterer);
+   mpZScatterer->GetCrystal().RemoveScatterer(mpZScatterer);
+   mol->GetCrystal().AddScatterer(mol);
+   mol->GetCrystal().UpdateDisplay();
 }
 
 }// namespace 

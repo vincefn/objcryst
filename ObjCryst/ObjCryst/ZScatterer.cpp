@@ -85,10 +85,10 @@ void ZAtom::SetName(const string& name) {mName=name;}
 long ZAtom::GetZBondAtom()const {return mAtomBond;}
 long ZAtom::GetZAngleAtom()const {return mAtomAngle;}
 long ZAtom::GetZDihedralAngleAtom()const {return mAtomDihed;}
-REAL ZAtom::GetZBondLength()const {return mBondLength;}
-REAL ZAtom::GetZAngle()const {return mAngle;}
-REAL ZAtom::GetZDihedralAngle()const {return mDihed;}
-REAL ZAtom::GetOccupancy()const {return mOccupancy;}
+const REAL& ZAtom::GetZBondLength()const {return mBondLength;}
+const REAL& ZAtom::GetZAngle()const {return mAngle;}
+const REAL& ZAtom::GetZDihedralAngle()const {return mDihed;}
+const REAL& ZAtom::GetOccupancy()const {return mOccupancy;}
 const ScatteringPower* ZAtom::GetScatteringPower()const{return mpScattPow;}
 //:TODO: fix the following so that their clocks are clicked accordingly
 void ZAtom::SetZBondLength(const REAL bond) {mBondLength=bond;mpScatt->GetClockScatterer().Click();}

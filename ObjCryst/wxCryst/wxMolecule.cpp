@@ -843,8 +843,7 @@ void WXMolecule::OnMenuRemoveDihedralAngle(wxCommandEvent & WXUNUSED(event))
 void WXMolecule::OnMenuTest(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXMolecule::OnMenuTest()",6)
-   mpMolecule->BeginOptimization();
-   mpMolecule->EndOptimization();
+   mpMolecule->RestraintStatus(cout);
    VFN_DEBUG_EXIT("WXMolecule::OnMenuTest()",6)
 }
 

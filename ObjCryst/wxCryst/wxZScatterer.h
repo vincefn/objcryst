@@ -53,6 +53,7 @@ class WXZScatterer: public WXScatterer
       void OnMenuChangePivotAtom(wxCommandEvent &WXUNUSED(event));
       void OnMenuImportZMatrix(wxCommandEvent &WXUNUSED(event));
       void OnMenuExportZMatrix(wxCommandEvent &WXUNUSED(event));
+      void OnMenuConvert2Molecule(wxCommandEvent &WXUNUSED(event));
    private:
       ZScatterer* mpZScatterer;
       WXRegistry<ZAtom> *mpWXZAtomRegistry;

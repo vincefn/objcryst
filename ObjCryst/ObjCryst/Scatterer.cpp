@@ -153,6 +153,7 @@ RefinableObjClock& Scatterer::GetClockScatterer() {return mClockScatterer;}
 
 void Scatterer::SetCrystal(Crystal &cryst){mpCryst=&cryst;}
 const Crystal& Scatterer::GetCrystal()const{return *mpCryst;}
+Crystal& Scatterer::GetCrystal(){return *mpCryst;}
 
 void Scatterer::InitRGBColour()
 {

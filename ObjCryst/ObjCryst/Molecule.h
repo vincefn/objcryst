@@ -114,6 +114,13 @@ class MolAtom
    #endif
 };
 
+/// Get The Bond Length between two atoms
+REAL GetBondLength(const MolAtom&,const MolAtom&);
+/// Get The Bond Angle of 3 atoms
+REAL GetBondAngle(const MolAtom&,const MolAtom&,const MolAtom&);
+/// Get The dihedral angle defined by 4 atoms
+REAL GetDihedralAngle(const MolAtom&,const MolAtom&,const MolAtom&,const MolAtom&);
+
 /** Bond between two atoms, also a restraint on the associated bond length.
 *
 */
@@ -428,6 +435,11 @@ class Molecule: public Scatterer
       *
       */
       vector<MolBond*>::iterator RemoveBond(const MolBond&);
+      /** Searches whether a bond between two atoms already exists.
+      *
+      * If no bond is found, returns Molecule::mvpAtom.end().
+      */
+      vector<MolBond*>::const_iterator FindBond(const MolAtom&,const MolAtom&)const;
       /** Add a bond angle restraint
       *
       *
@@ -468,6 +480,8 @@ class Molecule: public Scatterer
       /// Rotate a group of atoms around an axis defined by two atoms
       void RotateAtomGroup(const MolAtom &at1,const MolAtom &at2,
                            const set<unsigned long> &atoms, const REAL angle);
+      /// Print the status of all restraints (bond length, angles...)
+      void RestraintStatus(ostream &os)const;
    private:
       virtual void InitRefParList();
       /** Build the list of rings in the molecule.

@@ -830,8 +830,7 @@ void Crystal::CIFOutput(ostream &os)const
    
    CrystMatrix_REAL minDistTable;
    minDistTable=this->GetMinDistanceTable(-1.);
-   const long nbComponent=mScattCompList.GetNbComponent();
-   long k=0;
+   unsigned long k=0;
    for(int i=0;i<mScattererRegistry.GetNb();i++) 
    {
       //mpScatterrer[i]->Print();

@@ -192,6 +192,8 @@ class Scatterer:virtual public RefinableObj
       void SetCrystal(Crystal&);
       /// In which crystal is this Scatterer included ?
       const Crystal& GetCrystal()const;
+      /// In which crystal is this Scatterer included ?
+      Crystal& GetCrystal();
    protected:
       /// \internal Prepare refinable parameters for the scatterer object
       virtual void InitRefParList()=0;

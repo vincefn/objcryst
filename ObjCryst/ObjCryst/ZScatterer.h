@@ -109,13 +109,13 @@ class ZAtom
       long GetZDihedralAngleAtom()const;
       
       ///Const access to bondlength parameter.
-      REAL GetZBondLength()const;
+      const REAL& GetZBondLength()const;
       ///Const access to the angle parameter.
-      REAL GetZAngle()const;
+      const REAL& GetZAngle()const;
       ///Const access to the dihedral angle parameter.
-      REAL GetZDihedralAngle()const;
+      const REAL& GetZDihedralAngle()const;
       ///Const access to the ocupancy parameter.
-      REAL GetOccupancy()const;
+      const REAL& GetOccupancy()const;
       ///ScatteringPower for this atom.
       const ScatteringPower* GetScatteringPower()const;
       
