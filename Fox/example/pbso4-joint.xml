@@ -1,4 +1,4 @@
-<ObjCryst Date="2003-11-29T22:56:59GMT">
+<ObjCryst Date="2003-12-02T22:28:51GMT">
   <Crystal Name="PbSO4-Tetrahedron" SpaceGroup="Pnma">
     <Par Refined="0" Limited="1" Min="1" Max="100" Name="a">8.482</Par>
     <Par Refined="0" Limited="1" Min="1" Max="100" Name="b">5.398</Par>
@@ -35,7 +35,7 @@
       <Par Refined="0" Limited="1" Min="0.01" Max="1" Name="Occup">1</Par>
     </Atom>
     <Molecule Name="SO4">
-      <Quaternion Q0="-0.727304" Q1="-0.457055" Q2="-0.0224971" Q3="-0.51149" IsUnitQuaternion="1"/>
+      <Quaternion Q0="-0.727305" Q1="-0.457055" Q2="-0.0224971" Q3="-0.51149" IsUnitQuaternion="1"/>
       <Par Refined="1" Limited="0" Min="0" Max="1" Name="x">0.564399</Par>
       <Par Refined="1" Limited="0" Min="0" Max="1" Name="y">0.24464</Par>
       <Par Refined="1" Limited="0" Min="0" Max="1" Name="z">0.312678</Par>
@@ -50,16 +50,16 @@
       <Atom Name="O2" ScattPow="O" x="-1.29963" y="-0.611199" z="0.420462" Occup="1"/>
       <Atom Name="O3" ScattPow="O" x="0.551721" y="-0.638381" z="-1.17741" Occup="1"/>
       <Atom Name="O4" ScattPow="O" x="0.976626" y="-0.0120837" z="1.09461" Occup="1"/>
-      <Bond Atom1="S" Atom2="O1" Length="1.5" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="0"/>
-      <Bond Atom1="S" Atom2="O2" Length="1.5" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="0"/>
-      <Bond Atom1="S" Atom2="O3" Length="1.5" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="0"/>
-      <Bond Atom1="S" Atom2="O4" Length="1.5" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="0"/>
-      <BondAngle Atom1="O1" Atom2="S" Atom3="O2" Angle="109.5" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="O1" Atom2="S" Atom3="O3" Angle="109.5" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="O1" Atom2="S" Atom3="O4" Angle="109.5" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="O2" Atom2="S" Atom3="O3" Angle="109.5" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="O2" Atom2="S" Atom3="O4" Angle="109.5" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="O3" Atom2="S" Atom3="O4" Angle="109.5" Delta="2.86479" Sigma="0.572958"/>
+      <Bond Atom1="S" Atom2="O1" Length="1.5" Delta="0.02" Sigma="0.01" BondOrder="0.01" FreeTorsion="0"/>
+      <Bond Atom1="S" Atom2="O2" Length="1.5" Delta="0.02" Sigma="0.01" BondOrder="0.01" FreeTorsion="0"/>
+      <Bond Atom1="S" Atom2="O3" Length="1.5" Delta="0.02" Sigma="0.01" BondOrder="0.01" FreeTorsion="0"/>
+      <Bond Atom1="S" Atom2="O4" Length="1.5" Delta="0.02" Sigma="0.01" BondOrder="0.01" FreeTorsion="0"/>
+      <BondAngle Atom1="O1" Atom2="S" Atom3="O2" Angle="109.5" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="O1" Atom2="S" Atom3="O3" Angle="109.5" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="O1" Atom2="S" Atom3="O4" Angle="109.5" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="O2" Atom2="S" Atom3="O3" Angle="109.5" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="O2" Atom2="S" Atom3="O4" Angle="109.5" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="O3" Atom2="S" Atom3="O4" Angle="109.5" Delta="1.14592" Sigma="0.572958"/>
     </Molecule>
 
   </Crystal>
@@ -102,7 +102,7 @@
       <Par Refined="0" Limited="1" Min="-1" Max="1" Name="globalBiso">0</Par>
     </PowderPatternCrystal>
 
-    <PowderPatternComponent Scale="1.7077e-05" Name=""/>
+    <PowderPatternComponent Scale="1.7005e-05" Name=""/>
 
     <IobsSigmaWeightList TThetaMin="10" TThetaStep="0.025">
       179 13.3791 0.00558658 
@@ -2873,7 +2873,7 @@
       <Par Refined="0" Limited="1" Min="-1" Max="1" Name="globalBiso">0</Par>
     </PowderPatternCrystal>
 
-    <PowderPatternComponent Scale="0.000231968" Name=""/>
+    <PowderPatternComponent Scale="0.000230653" Name=""/>
 
     <IobsSigmaWeightList TThetaMin="10" TThetaStep="0.05">
       220 14.8324 0.00454545 

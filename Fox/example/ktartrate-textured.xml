@@ -1,4 +1,4 @@
-<ObjCryst Date="2003-11-29T22:53:44GMT">
+<ObjCryst Date="2003-12-02T22:28:17GMT">
   <Crystal Name="K-tartrate" SpaceGroup="P212121">
     <Par Refined="0" Limited="1" Min="1" Max="100" Name="a">7.78621</Par>
     <Par Refined="0" Limited="1" Min="1" Max="100" Name="b">10.6465</Par>
@@ -55,27 +55,27 @@
       <Atom Name="O3" ScattPow="O" x="1.25408" y="-0.269999" z="0.915085" Occup="1"/>
       <Atom Name="O4a" ScattPow="O" x="-2.09919" y="-0.940987" z="1.30992" Occup="1"/>
       <Atom Name="O4b" ScattPow="O" x="-0.719538" y="-0.109551" z="2.72639" Occup="1"/>
-      <Bond Atom1="C1" Atom2="C2" Length="1.5" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="1"/>
-      <Bond Atom1="C2" Atom2="C3" Length="1.5" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="1"/>
-      <Bond Atom1="C3" Atom2="C4" Length="1.5" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="1"/>
-      <Bond Atom1="C1" Atom2="O1a" Length="1.21" Delta="0.05" Sigma="0.01" BondOrder="2" FreeTorsion="0"/>
-      <Bond Atom1="C1" Atom2="O1b" Length="1.42" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="0"/>
-      <Bond Atom1="C2" Atom2="O2" Length="1.42" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="0"/>
-      <Bond Atom1="C3" Atom2="O3" Length="1.42" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="0"/>
-      <Bond Atom1="C4" Atom2="O4a" Length="1.21" Delta="0.05" Sigma="0.01" BondOrder="2" FreeTorsion="0"/>
-      <Bond Atom1="C4" Atom2="O4b" Length="1.42" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="0"/>
-      <BondAngle Atom1="C1" Atom2="C2" Atom3="C3" Angle="109" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="C2" Atom2="C3" Atom3="C4" Angle="109" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="O1a" Atom2="C1" Atom3="C2" Angle="119.748" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="O1b" Atom2="C1" Atom3="C2" Angle="119.748" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="O1a" Atom2="C1" Atom3="O1b" Angle="119.748" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="C1" Atom2="C2" Atom3="O2" Angle="109" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="C3" Atom2="C2" Atom3="O2" Angle="109" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="C2" Atom2="C3" Atom3="O3" Angle="109" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="O3" Atom2="C3" Atom3="C4" Angle="109" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="C3" Atom2="C4" Atom3="O4a" Angle="119.748" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="C3" Atom2="C4" Atom3="O4b" Angle="119.748" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="O4a" Atom2="C4" Atom3="O4b" Angle="119.748" Delta="2.86479" Sigma="0.572958"/>
+      <Bond Atom1="C1" Atom2="C2" Length="1.5" Delta="0.02" Sigma="0.01" BondOrder="0.01" FreeTorsion="1"/>
+      <Bond Atom1="C2" Atom2="C3" Length="1.5" Delta="0.02" Sigma="0.01" BondOrder="0.01" FreeTorsion="1"/>
+      <Bond Atom1="C3" Atom2="C4" Length="1.5" Delta="0.02" Sigma="0.01" BondOrder="0.01" FreeTorsion="1"/>
+      <Bond Atom1="C1" Atom2="O1a" Length="1.21" Delta="0.02" Sigma="0.01" BondOrder="0.01" FreeTorsion="0"/>
+      <Bond Atom1="C1" Atom2="O1b" Length="1.42" Delta="0.02" Sigma="0.01" BondOrder="0.01" FreeTorsion="0"/>
+      <Bond Atom1="C2" Atom2="O2" Length="1.42" Delta="0.02" Sigma="0.01" BondOrder="0.01" FreeTorsion="0"/>
+      <Bond Atom1="C3" Atom2="O3" Length="1.42" Delta="0.02" Sigma="0.01" BondOrder="0.01" FreeTorsion="0"/>
+      <Bond Atom1="C4" Atom2="O4a" Length="1.21" Delta="0.02" Sigma="0.01" BondOrder="0.01" FreeTorsion="0"/>
+      <Bond Atom1="C4" Atom2="O4b" Length="1.42" Delta="0.02" Sigma="0.01" BondOrder="0.01" FreeTorsion="0"/>
+      <BondAngle Atom1="C1" Atom2="C2" Atom3="C3" Angle="109" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="C2" Atom2="C3" Atom3="C4" Angle="109" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="O1a" Atom2="C1" Atom3="C2" Angle="119.748" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="O1b" Atom2="C1" Atom3="C2" Angle="119.748" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="O1a" Atom2="C1" Atom3="O1b" Angle="119.748" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="C1" Atom2="C2" Atom3="O2" Angle="109" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="C3" Atom2="C2" Atom3="O2" Angle="109" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="C2" Atom2="C3" Atom3="O3" Angle="109" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="O3" Atom2="C3" Atom3="C4" Angle="109" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="C3" Atom2="C4" Atom3="O4a" Angle="119.748" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="C3" Atom2="C4" Atom3="O4b" Angle="119.748" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="O4a" Atom2="C4" Atom3="O4b" Angle="119.748" Delta="1.14592" Sigma="0.572958"/>
     </Molecule>
 
   </Crystal>

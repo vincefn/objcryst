@@ -1,4 +1,4 @@
-<ObjCryst Date="2003-11-29T22:49:43GMT">
+<ObjCryst Date="2003-12-02T22:25:21GMT">
   <Crystal Name="Cimetidine" SpaceGroup="P121/a1">
     <Par Refined="0" Limited="1" Min="1" Max="100" Name="a">10.3941</Par>
     <Par Refined="0" Limited="1" Min="1" Max="100" Name="b">18.8189</Par>
@@ -56,46 +56,46 @@
       <Atom Name="N15" ScattPow="N" x="11.2914" y="24.988" z="48.7963" Occup="1"/>
       <Atom Name="C16" ScattPow="C" x="10.5791" y="26.1236" z="48.7537" Occup="1"/>
       <Atom Name="C17" ScattPow="C" x="10.9349" y="27.4803" z="49.3711" Occup="1"/>
-      <Bond Atom1="C1" Atom2="N2" Length="1.47" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="0"/>
-      <Bond Atom1="N2" Atom2="C3" Length="1.4" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="1"/>
-      <Bond Atom1="C3" Atom2="N4" Length="1.4" Delta="0.05" Sigma="0.01" BondOrder="2" FreeTorsion="1"/>
-      <Bond Atom1="N4" Atom2="C5" Length="1.37" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="1"/>
-      <Bond Atom1="C5" Atom2="N6" Length="1.13" Delta="0.05" Sigma="0.01" BondOrder="3" FreeTorsion="0"/>
-      <Bond Atom1="C3" Atom2="N7" Length="1.4" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="1"/>
-      <Bond Atom1="N7" Atom2="C8" Length="1.47" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="1"/>
-      <Bond Atom1="C8" Atom2="C9" Length="1.54" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="1"/>
-      <Bond Atom1="C9" Atom2="S10" Length="1.82" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="1"/>
-      <Bond Atom1="S10" Atom2="C11" Length="1.82" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="1"/>
-      <Bond Atom1="C11" Atom2="C12" Length="1.5" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="1"/>
-      <Bond Atom1="C12" Atom2="N13" Length="1.37" Delta="0.05" Sigma="0.01" BondOrder="1.5" FreeTorsion="0"/>
-      <Bond Atom1="N13" Atom2="C14" Length="1.37" Delta="0.05" Sigma="0.01" BondOrder="1.5" FreeTorsion="0"/>
-      <Bond Atom1="C14" Atom2="N15" Length="1.37" Delta="0.05" Sigma="0.01" BondOrder="1.5" FreeTorsion="0"/>
-      <Bond Atom1="N15" Atom2="C16" Length="1.37" Delta="0.05" Sigma="0.01" BondOrder="1.5" FreeTorsion="0"/>
-      <Bond Atom1="C16" Atom2="C17" Length="1.5" Delta="0.05" Sigma="0.01" BondOrder="1" FreeTorsion="0"/>
-      <Bond Atom1="C16" Atom2="C12" Length="1.45" Delta="0.05" Sigma="0.01" BondOrder="1.5" FreeTorsion="0"/>
-      <BondAngle Atom1="C1" Atom2="N2" Atom3="C3" Angle="108.862" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="N2" Atom2="C3" Atom3="N4" Angle="119.748" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="C3" Atom2="N4" Atom3="C5" Angle="119.748" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="N4" Atom2="C5" Atom3="N6" Angle="180" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="N2" Atom2="C3" Atom3="N7" Angle="119.748" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="N4" Atom2="C3" Atom3="N7" Angle="119.748" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="C3" Atom2="N7" Atom3="C8" Angle="108.862" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="N7" Atom2="C8" Atom3="C9" Angle="108.862" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="C8" Atom2="C9" Atom3="S10" Angle="108.862" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="C9" Atom2="S10" Atom3="C11" Angle="108.862" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="S10" Atom2="C11" Atom3="C12" Angle="108.862" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="C11" Atom2="C12" Atom3="N13" Angle="119.748" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="C12" Atom2="N13" Atom3="C14" Angle="108.003" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="N13" Atom2="C14" Atom3="N15" Angle="108.003" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="C14" Atom2="N15" Atom3="C16" Angle="108.003" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="N15" Atom2="C16" Atom3="C17" Angle="119.748" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="N15" Atom2="C16" Atom3="C12" Angle="108.003" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="C16" Atom2="C12" Atom3="N13" Angle="108.003" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="C11" Atom2="C12" Atom3="C16" Angle="119.748" Delta="2.86479" Sigma="0.572958"/>
-      <BondAngle Atom1="C12" Atom2="C16" Atom3="C17" Angle="119.748" Delta="2.86479" Sigma="0.572958"/>
-      <DihedralAngle Atom1="N7" Atom2="C3" Atom3="N4" Atom4="N2" Angle="180" Delta="2.86479" Sigma="0.572958"/>
-      <DihedralAngle Atom1="C11" Atom2="C12" Atom3="N13" Atom4="C14" Angle="180" Delta="2.86479" Sigma="0.572958"/>
-      <DihedralAngle Atom1="C11" Atom2="C12" Atom3="C16" Atom4="C17" Angle="0" Delta="2.86479" Sigma="0.572958"/>
+      <Bond Atom1="C1" Atom2="N2" Length="1.47" Delta="0.02" Sigma="0.01" BondOrder="0.01" FreeTorsion="0"/>
+      <Bond Atom1="N2" Atom2="C3" Length="1.4" Delta="0.02" Sigma="0.01" BondOrder="0.01" FreeTorsion="1"/>
+      <Bond Atom1="C3" Atom2="N4" Length="1.4" Delta="0.02" Sigma="0.01" BondOrder="0.01" FreeTorsion="1"/>
+      <Bond Atom1="N4" Atom2="C5" Length="1.37" Delta="0.02" Sigma="0.01" BondOrder="0.01" FreeTorsion="1"/>
+      <Bond Atom1="C5" Atom2="N6" Length="1.13" Delta="0.02" Sigma="0.01" BondOrder="0.01" FreeTorsion="0"/>
+      <Bond Atom1="C3" Atom2="N7" Length="1.4" Delta="0.02" Sigma="0.01" BondOrder="0.01" FreeTorsion="1"/>
+      <Bond Atom1="N7" Atom2="C8" Length="1.47" Delta="0.02" Sigma="0.01" BondOrder="0.01" FreeTorsion="1"/>
+      <Bond Atom1="C8" Atom2="C9" Length="1.54" Delta="0.02" Sigma="0.01" BondOrder="0.01" FreeTorsion="1"/>
+      <Bond Atom1="C9" Atom2="S10" Length="1.82" Delta="0.02" Sigma="0.01" BondOrder="0.01" FreeTorsion="1"/>
+      <Bond Atom1="S10" Atom2="C11" Length="1.82" Delta="0.02" Sigma="0.01" BondOrder="0.01" FreeTorsion="1"/>
+      <Bond Atom1="C11" Atom2="C12" Length="1.5" Delta="0.02" Sigma="0.01" BondOrder="0.01" FreeTorsion="1"/>
+      <Bond Atom1="C12" Atom2="N13" Length="1.37" Delta="0.02" Sigma="0.01" BondOrder="0.01" FreeTorsion="0"/>
+      <Bond Atom1="N13" Atom2="C14" Length="1.37" Delta="0.02" Sigma="0.01" BondOrder="0.01" FreeTorsion="0"/>
+      <Bond Atom1="C14" Atom2="N15" Length="1.37" Delta="0.02" Sigma="0.01" BondOrder="0.01" FreeTorsion="0"/>
+      <Bond Atom1="N15" Atom2="C16" Length="1.37" Delta="0.02" Sigma="0.01" BondOrder="0.01" FreeTorsion="0"/>
+      <Bond Atom1="C16" Atom2="C17" Length="1.5" Delta="0.02" Sigma="0.01" BondOrder="0.01" FreeTorsion="0"/>
+      <Bond Atom1="C16" Atom2="C12" Length="1.45" Delta="0.02" Sigma="0.01" BondOrder="0.01" FreeTorsion="0"/>
+      <BondAngle Atom1="C1" Atom2="N2" Atom3="C3" Angle="108.862" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="N2" Atom2="C3" Atom3="N4" Angle="119.748" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="C3" Atom2="N4" Atom3="C5" Angle="119.748" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="N4" Atom2="C5" Atom3="N6" Angle="180" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="N2" Atom2="C3" Atom3="N7" Angle="119.748" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="N4" Atom2="C3" Atom3="N7" Angle="119.748" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="C3" Atom2="N7" Atom3="C8" Angle="108.862" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="N7" Atom2="C8" Atom3="C9" Angle="108.862" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="C8" Atom2="C9" Atom3="S10" Angle="108.862" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="C9" Atom2="S10" Atom3="C11" Angle="108.862" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="S10" Atom2="C11" Atom3="C12" Angle="108.862" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="C11" Atom2="C12" Atom3="N13" Angle="119.748" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="C12" Atom2="N13" Atom3="C14" Angle="108.003" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="N13" Atom2="C14" Atom3="N15" Angle="108.003" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="C14" Atom2="N15" Atom3="C16" Angle="108.003" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="N15" Atom2="C16" Atom3="C17" Angle="119.748" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="N15" Atom2="C16" Atom3="C12" Angle="108.003" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="C16" Atom2="C12" Atom3="N13" Angle="108.003" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="C11" Atom2="C12" Atom3="C16" Angle="119.748" Delta="1.14592" Sigma="0.572958"/>
+      <BondAngle Atom1="C12" Atom2="C16" Atom3="C17" Angle="119.748" Delta="1.14592" Sigma="0.572958"/>
+      <DihedralAngle Atom1="N7" Atom2="C3" Atom3="N4" Atom4="N2" Angle="180" Delta="1.14592" Sigma="0.572958"/>
+      <DihedralAngle Atom1="C11" Atom2="C12" Atom3="N13" Atom4="C14" Angle="180" Delta="1.14592" Sigma="0.572958"/>
+      <DihedralAngle Atom1="C11" Atom2="C12" Atom3="C16" Atom4="C17" Angle="0" Delta="1.14592" Sigma="0.572958"/>
     </Molecule>
 
   </Crystal>
@@ -149,7 +149,7 @@
       <Par Refined="0" Limited="1" Min="-1" Max="1" Name="globalBiso">0</Par>
     </PowderPatternCrystal>
 
-    <PowderPatternComponent Scale="0.000110384" Name=""/>
+    <PowderPatternComponent Scale="0.000110383" Name=""/>
 
     <IobsSigmaWeightList TThetaMin="8.01" TThetaStep="0.01">
       2707 52.0288 0.000369413 
