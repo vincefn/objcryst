@@ -59,7 +59,7 @@ endif
 
 #Using OpenGL ?
 ifeq ($(opengl),1)
-GL_WX_LIB = `/usr/local/bin/wx-config --gl-libs` -framework GLUT -framework AppKit -framework Foundation
+GL_WX_LIB = `/usr/local/bin/wx-config --gl-libs` -framework GLUT -framework OpenGL -framework AGL -framework AppKit -framework Foundation
 GL_FLAGS := -DOBJCRYST_GL -IGL -DHAVE_GLUT 
 else
 GL_WX_LIB :=
@@ -76,7 +76,7 @@ else
 # do not use -fomit-frame-pointer, or throw() catch() does not work !! GCC BUG ?
    DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS}
    CPPFLAGS = -O3 -w -ffast-math -mcpu=G3 -funroll-all-loops -pipe -fomit-frame-pointer
-   LOADLIBES = -s -lm -lRefinableObj -lcryst -lCrystVector -lQuirks -lsglite -latominfo ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS}
+   LOADLIBES = -s -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lsglite -latominfo ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS}
 endif
 
 # Add to statically link: -nodefaultlibs -lgcc /usr/lib/libstdc++.a
