@@ -675,7 +675,7 @@ Applying profiles for "<<nbRefl<<" reflections",3)
             first =0;
          } else shift =0;
          last=thetaPt+mSavedPowderReflProfileNbPoint;
-         if( last > specNbPoints) last=specNbPoints-1;
+         if( last >= specNbPoints) last=specNbPoints-1;
          
          VFN_DEBUG_MESSAGE("Apply profile(Monochromatic)Refl("<<i<<")"\
             <<mIntH(i)<<" "<<mIntK(i)<<" "<<mIntL(i)<<" "\
