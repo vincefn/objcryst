@@ -471,6 +471,7 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
    this->SetIcon(wxICON(Fox));
    this->Show(TRUE);
    this->Layout();
+   notebook->SetSelection(0);
    //Splash Screen
    if(true==splashscreen)
    {
