@@ -644,6 +644,11 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
 {
    #ifdef OBJCRYST_GL
    VFN_DEBUG_ENTRY("ZScatterer::GLInitDisplayList()",4)
+   if(mZAtomRegistry.GetNb()==0)
+   {
+      VFN_DEBUG_EXIT("ZScatterer::GLInitDisplayList():No ZAtom to display !",4)
+      return;
+   }
    REAL en=1;
    if(displayEnantiomer==true) en=-1;
    this->UpdateScattCompList();
@@ -1293,6 +1298,7 @@ void ZScatterer::GlobalOptRandomMove(const REAL mutationAmplitude,
          if(nbDihed<2) //Can't play :-(
          {
             this->RefinableObj::GlobalOptRandomMove(mutationAmplitude);
+            TAU_PROFILE_STOP(timer1);
             VFN_DEBUG_EXIT("ZScatterer::GlobalOptRandomMove():End",3)
             return;
          }
@@ -1578,8 +1584,8 @@ void ZScatterer::UpdateCoordinates() const
       mXCoord(1)=GetZBondLength(1);
       mYCoord(1)=0.;
       mZCoord(1)=0.;
+      VFN_DEBUG_MESSAGE("->Atom #1:"<<mXCoord(1)<<" : "<<mYCoord(1)<<" : "<<mZCoord(1),1)
    }
-   VFN_DEBUG_MESSAGE("->Atom #1:"<<mXCoord(1)<<" : "<<mYCoord(1)<<" : "<<mZCoord(1),1)
    if(mNbAtom>2)
    {// Atom 2
       if(0==GetZBondAtom(2)) //Linked with Atom 1
@@ -1588,17 +1594,17 @@ void ZScatterer::UpdateCoordinates() const
          mXCoord(2)=mXCoord(1)-GetZBondLength(2)*cos(GetZAngle(2));
       mYCoord(2)=GetZBondLength(2)*sin(GetZAngle(2));
       mZCoord(2)=0.;
+      VFN_DEBUG_MESSAGE("->Atom #2:"<<mXCoord(2)<<" : "<<mYCoord(2)<<" : "<<mZCoord(2),1)
    }
-   VFN_DEBUG_MESSAGE("->Atom #2:"<<mXCoord(2)<<" : "<<mYCoord(2)<<" : "<<mZCoord(2),1)
    for(int i=1;i<3;i++)// Global rotation of scatterer
    {
+      if(mNbAtom==i)break;
       const REAL x=mXCoord(i);
       const REAL y=mYCoord(i);
       const REAL z=mZCoord(i);
       mXCoord(i)=mPhiChiPsiMatrix(0,0)*x+mPhiChiPsiMatrix(0,1)*y+mPhiChiPsiMatrix(0,2)*z;
       mYCoord(i)=mPhiChiPsiMatrix(1,0)*x+mPhiChiPsiMatrix(1,1)*y+mPhiChiPsiMatrix(1,2)*z;
       mZCoord(i)=mPhiChiPsiMatrix(2,0)*x+mPhiChiPsiMatrix(2,1)*y+mPhiChiPsiMatrix(2,2)*z;
-      if(i==mNbAtom-1) break;
    }
    if(mNbAtom>3)
    {
