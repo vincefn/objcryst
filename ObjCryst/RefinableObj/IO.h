@@ -21,7 +21,7 @@
 
 #include <iostream>
 #include <string>
-
+using namespace std;
 namespace ObjCryst
 {
 class XMLCrystTag;
