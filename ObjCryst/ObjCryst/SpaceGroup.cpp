@@ -146,10 +146,10 @@ void AsymmetricUnit::SetSpaceGroup(const SpaceGroup &spg)
                break;//no need to grow any more along z
             }
          }
-   VFN_DEBUG_MESSAGE("->Finished Generating Asymmetric Unit, with:",5)
-   VFN_DEBUG_MESSAGE("     0 <= x <= "<< mXmax,10)
-   VFN_DEBUG_MESSAGE("     0 <= y <= "<< mYmax,10)
-   VFN_DEBUG_MESSAGE("     0 <= z <= "<< mZmax,10)
+   cout<<"->Finished Generating (pseudo) Asymmetric Unit, with:"<<endl
+       <<"     0 <= x <= "<< mXmax<<endl
+       <<"     0 <= y <= "<< mYmax<<endl
+       <<"     0 <= z <= "<< mZmax<<endl<<endl;
 }
 
 bool AsymmetricUnit::IsInAsymmetricUnit(const REAL x, const REAL y, const REAL z)const
