@@ -21,6 +21,15 @@
 
 #include <stdlib.h>
 
+// wx headers, with or without precompilation
+#include "wx/wxprec.h"
+#ifdef __BORLANDC__
+    #pragma hdrstop
+#endif
+#ifndef WX_PRECOMP
+    #include "wx/wx.h"
+#endif
+
 #include "wxCryst/wxCrystal.h"
 
 #include "wx/colordlg.h"

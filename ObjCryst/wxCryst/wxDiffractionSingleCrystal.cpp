@@ -19,6 +19,15 @@
 //#include <sstream> //for stringstream
 #include <fstream>
 
+// wx headers, with or without precompilation
+#include "wx/wxprec.h"
+#ifdef __BORLANDC__
+    #pragma hdrstop
+#endif
+#ifndef WX_PRECOMP
+    #include "wx/wx.h"
+#endif
+
 #include "wxCryst/wxDiffractionSingleCrystal.h"
 #include "wxCryst/wxRadiation.h"
 

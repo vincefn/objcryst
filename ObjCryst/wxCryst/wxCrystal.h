@@ -26,9 +26,10 @@
 #ifndef _VFN_WX_CRYSTAL_H_
 #define _VFN_WX_CRYSTAL_H_
 
+#include "wxCryst/wxRefinableObj.h"
+
 #include "wx/glcanvas.h"
 
-#include "wxCryst/wxRefinableObj.h"
 #include "ObjCryst/Crystal.h"
 
 #include "wxCryst/MC.h"
