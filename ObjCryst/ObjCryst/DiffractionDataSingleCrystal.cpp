@@ -227,6 +227,7 @@ Error opening file for input:"+fileName);
    mMultiplicity=1;
    
    this->PrepareHKLarrays();
+   this->SortReflectionByTheta();
    {
 		char buf [200];
       sprintf(buf,"Imported HKLIobs, with %d reflections",(int)mNbRefl);
@@ -288,6 +289,7 @@ Error opening file for input:"+fileName);
    mMultiplicity=1;
 
    this->PrepareHKLarrays();
+   this->SortReflectionByTheta();
    {
 		char buf [200];
       sprintf(buf,"Imported HKLIobsSigma, with %d reflections",(int)mNbRefl);
@@ -363,7 +365,7 @@ Error opening file for input:"+fileName);
    mMultiplicity=1;
 
    this->PrepareHKLarrays();
-   
+   this->SortReflectionByTheta();
    cout << "Finished storing data..."<< endl ;
 
    mHasObservedData=true;
