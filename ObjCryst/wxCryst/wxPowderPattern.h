@@ -39,6 +39,7 @@ class WXPowderPattern: public WXRefinableObj
       void OnMenuSetWavelength(wxCommandEvent &event);
       void OnMenuAdd2ThetaExclude(wxCommandEvent & WXUNUSED(event));
       void NotifyDeleteGraph();
+		const PowderPattern& GetPowderPattern()const;
    private:
       PowderPattern *mpPowderPattern;
       WXRegistry<PowderPatternComponent> *mpWXComponent;

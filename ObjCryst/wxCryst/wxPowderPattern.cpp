@@ -502,6 +502,8 @@ void WXPowderPattern::OnMenuAdd2ThetaExclude(wxCommandEvent & WXUNUSED(event))
 }
 
 void WXPowderPattern::NotifyDeleteGraph() {mpGraph=0;}
+const PowderPattern& WXPowderPattern::GetPowderPattern()const
+{ return *mpPowderPattern;}
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXPowderPatternGraph
@@ -655,7 +657,9 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
                                           	/(double)(height-2*mMargin);
 
    	wxString str;
-   	str.Printf("2Theta=%6.2f    ,I=%12.2f",ttheta,intensity);
+		const long pixel=
+			mpPattern->GetPowderPattern().Get2ThetaCorrPixel(ttheta*DEG2RAD);
+   	str.Printf("2Theta=%6.2f    ,I=%12.2f.   pixel=#%d",ttheta,intensity,pixel);
    	mpParentFrame->SetStatusText(str);
    
    if (event.Dragging() && event.LeftIsDown() && (!mIsDragging))

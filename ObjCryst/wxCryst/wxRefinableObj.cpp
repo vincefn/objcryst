@@ -96,7 +96,7 @@ void WXFieldRefPar::OnUpdateUI(wxUpdateUIEvent & WXUNUSED(event))
 void WXFieldRefPar::OnEnter(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXFieldRefPar::OnEnter()",6)
-   this->ValidateUserInput();
+   WXCrystValidateAllUserInput();
 }
 void WXFieldRefPar::OnText(wxCommandEvent & WXUNUSED(event))
 {	

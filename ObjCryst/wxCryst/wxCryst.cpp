@@ -139,10 +139,12 @@ WXField *spLastWXFieldInputNotValidated=0;
 void WXCrystValidateAllUserInput()
 {
 	if(0==spLastWXFieldInputNotValidated) return;
-   VFN_DEBUG_ENTRY("WXCrystValidateAllUserInput()...",10)
-	spLastWXFieldInputNotValidated->ValidateUserInput();
-	spLastWXFieldInputNotValidated=0;
-   VFN_DEBUG_EXIT("WXCrystValidateAllUserInput()...",10)
+   VFN_DEBUG_ENTRY("WXCrystValidateAllUserInput()...",6)
+	static WXField *pField;
+	pField=spLastWXFieldInputNotValidated;
+	spLastWXFieldInputNotValidated=0;//avoid loops
+	pField->ValidateUserInput();
+   VFN_DEBUG_EXIT("WXCrystValidateAllUserInput()...",6)
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -225,7 +227,7 @@ void WXFieldName::OnUpdateUI(wxUpdateUIEvent & WXUNUSED(event))
 void WXFieldName::OnEnter(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXFieldName::OnEnter()",6)
-	this->ValidateUserInput();
+	WXCrystValidateAllUserInput();
 }
 void WXFieldName::OnText(wxCommandEvent & WXUNUSED(event))
 {
@@ -311,7 +313,7 @@ void WXFieldParBase::OnUpdateUI(wxUpdateUIEvent & WXUNUSED(event))
 void WXFieldParBase::OnEnter(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXFieldRefPar::OnEnter()",6)
-   this->ReadNewValue();
+   WXCrystValidateAllUserInput();
 }
 void WXFieldParBase::OnText(wxCommandEvent & WXUNUSED(event))
 {	
