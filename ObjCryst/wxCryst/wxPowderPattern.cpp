@@ -828,7 +828,7 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
       wxCoord xc,yc;
       //Y axis
          xc=(wxCoord)mMargin;
-         REAL yStep=pow(10,floor(log10((mMaxIntensity-mMinIntensity)/nbTick)));
+         REAL yStep=pow((float)10,(float)floor(log10((mMaxIntensity-mMinIntensity)/nbTick)));
          yStep *= floor((mMaxIntensity-mMinIntensity)/yStep/nbTick);
          for(REAL y=yStep*ceil(mMinIntensity/yStep);y<mMaxIntensity;y+=yStep)
          {
@@ -840,7 +840,7 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
          }
       //X axis
          yc=(wxCoord)(height-mMargin);
-         REAL xStep=pow(10,floor(log10((mMax2Theta-mMin2Theta)/nbTick)));
+         REAL xStep=pow((float)10,(float)floor(log10((mMax2Theta-mMin2Theta)/nbTick)));
          xStep *= floor((mMax2Theta-mMin2Theta)/xStep/nbTick);
          for(REAL x=xStep*ceil(mMin2Theta/xStep);x<mMax2Theta;x+=xStep)
          {
