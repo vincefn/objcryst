@@ -1,0 +1,17 @@
+/*! \page screenshot
+<center>
+<h3>
+Fox working on an aluminimium methyl-phosphonate structure, solved using Fox by Mark Edgar at the
+University of St Andrews (Scotland).
+\image html AlMePO.png
+<br>
+Fox working on the new hydride structure LaMg<sub>2</sub>NiD<sub>7</sub>, solved using Fox by
+Guillaume Renaudin at the University of Geneva (Switzerland). 22 atoms in general position, solved
+by using X-Ray and neutron powder patterns.
+\image html LaMg2NiD7.png
+<br>
+Fox tested on the TriphenylPhosphite structure.
+\image html TriPhenylPhosphite.png
+</h3>
+</center>
+*/

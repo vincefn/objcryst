@@ -1,0 +1,27 @@
+/*! \page example
+<h2>Running the examples</h2>
+
+   - first open the .xml file by using the Fox 'File->Load' menu
+   - go to the Crystals tab, and use the menu Display->3D display to view the structure
+   - for a powder pattern, go to the Powder Diffraction tab and use the Pattern->Show Graph menu, on which you can zoom by dragging the left mouse button (and double-click to un-zoom)
+   - Go back to the Crystals tab, and select Parameters->Randomize Configuration to do a truly 'ab initio' optimization.
+   - Then go to the Global Optimization tab and use Optimize->Run . Wait until the cost functions (Rwp,...) are back to their original values (roughly).
+
+<h2>Example 1 : Lead Sulfate (PbSO4)</h2>
+This example solves the lead sulfate structure, using both an X-Ray and a neutron powder pattern. This is only to quickly (<30s) demonstrate that Fox can solve a structure using multiple patterns. Clearly, as there are only 9 parameters the structure does not require these two patterns. Note that we use a combination of one atom (Pb) plus one SO4 tetrahedron, thus taking advantage of the known connectivity of sulfur and oxygen atoms.
+The solution should be reached in 5000-50000 trial configurations, from 6 to 60s depending on you computer speed.
+<h2>Example 2 : Potassium Tartrate (K+ -OOC-CHOH-CHOH-COOH)</h2>
+This is the salt of an organic molecule with 14 degrees of freedom (3+6 positionnal & orientational, and 5 torsion angles). Hydrogens have not been put since they can hardly be seen by X-Ray powder diffraction.
+The optimization from a random configuration leads to a correct structure in more than 95% of attempts (in less than 5 million tests). It requires (in average) about 1.2 million trials (about 12' on a 1.4 GHz athlon processor).
+<h2>Example 3 : Cimetidine (C<sub>10</sub>N<sub>6</sub>SH<sub>15</sub>)</h2>
+This molecule has been used to test ab initio structure determination from powder diffraction [Cernik et al., J. Appl. Cryst 24 (1991), 222]. It has also 14 degrees of freedom (6 orientational & positional, and 8 torsion angles).
+
+Here you can choose either the powder data which uses the integrated weighted R-factor as a criterion, or the extracted intensities treated as single crystal data.
+
+Although it has the same number of degrees of freedom than the potassium tartrate example, it is  harder to solve because there are more torsion angles within the molecule, so that the 8 internal parameters are not explored independently (this is inherent to the current parametrization used for molecules using a Z-Matrix). This is especially true since there are many torsion angles in the middle of the molecule.
+
+Nevertheless, the correct solution is found in 85% of runs in less than 10 million trials. It requires on average about 4 to 5 million trial configurations, which takes about 45' for the powder pattern optimization, and less than half an hour for the pseudo-single crystal data (on a 1.4 GHz athlon).
+<h2>Example 3bis : Cimetidine (C<sub>10</sub>N<sub>6</sub>SH<sub>15</sub>), with preferred orientation</h2>
+Same as example 3, but with a (strong) preferred orientation. Difficult to find if you do not know the preferred orientation parameters (or at least the direction). Example 4 : Brucite Mg(OH)2
+This demonstrates the use of texture parameters (see them at the bottom of the powder pattern object). Not that if you do not impose the correct orientation or force the March coefficient to be lower than 1, you can easily end up with a inverted March coefficient and a preferred orientation direction perpendicular to [001].
+*/

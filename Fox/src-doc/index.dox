@@ -1,0 +1,107 @@
+/*! \page index 
+
+\anchor news <h2>News</h2>
+   - <b>14th of Sept. 2002</b>: I hope you noticed the new web pages, auto-generated using doxygen (http://doxygen.org) !
+   - <b>12th of Sept. 2002</b>: <b>the windows zip file (precompiled) with Fox 1.2 was initially packaged with <i>only</i> the exe</b>, without any documentation, examples, or libraries... So please re-download it if necessary. (thanks Mohamed Bououdina for pointing out this).
+   - <b>9th of August 2002</b>: the latest version of Fox is 1.2: this version adds the ability to analyze data with preferred orientation (texture, searching ab initio the texture parameters), using the March-Dollase model. The 'live' update of the 3D view of the Crystal structure now also works on all windows versions. See the full <a href="changes.txt">changelog</a>.
+
+\anchor intro <h2>Introduction</h2>
+The FOX program (for Linux and windows) was made for the <i><b> ab initio crystal structure solution from diffraction data </b></i> (mostly powder diffraction data). Its most interesting features for ab initio structure determination are:
+
+   - a <b><i>versatile description of the crystal contents</b></i>: either isolated <b>atoms , molecules</b> described using a bond length, bond angles and dihedral angles, and <b>polyhedra</b> for inorganic compounds. <i><b>You can describe your structure by using any combination of groups of atoms, using a chemist's or crystallographer knowledge about the connectivity in your sample</i></b>.
+   - an <i><b>automatic correction for special positions and shared atoms between polyhedra</i></b>, suitable for a global optimization algorithms.
+   - the ability to use <i> <b>multiple powder patterns</i> </b> (X-rays, neutrons), as well as single crystal data (eg extracted from a powder pattern)
+   - <i><b>smart global optimization algorithms</i></b> which can get out of false minima.
+   - a graphical interface with a 3D crystal structure view, live updated during the optimization process.
+
+So, if you:
+   - have an unknown compound but with (approximately) known composition.
+   - have a powder pattern (X-Ray or Neutron or both), which you have already indexed (with the refined unit cell), and for which you have some idea of the possible spacegroup(s) (using systematic extinctions).
+   - would like to solve the structure (ie find the atom -or group of atoms- positions, before refining them with another package).
+
+Then Fox can help you.
+
+This program can be used also for <i><b>educational purposes</i></b>, to show a 3D display of Crystal structures, and the associated powder pattern(s) (see how adding atoms, changing the lattice, or changing the spacegroup affects the powder spectrum and the 3D structure).
+
+If you would also like to <i><b>choose your own criterion and algorithm</i></b> to solve the structure, then it will be even better : FOX is built on a very <i><b>customizable and expandable library (ObjCryst++)</i></b>, which allows you to evaluate your Crystal structure following a combination of criteria: currently there are only R, Rw factors and an Anti-bump cost function, but it would be very easy to write a new criterion using (say) interatomic distances (energy of the configuration, analysis of the coordination). This, with a versatile way to describe the unit cell's contents, is what makes the algorithms used interesting. For example you can combine several datasets (X-Ray, Neutron...) for the same structure,...
+
+<h2>Author</h2>
+FOX was developped by Vincent Favre-Nicolin (http://v.favrenicolin.free.fr, vincefn@users.sf.net), in collaboration with Radovan Cerny (http://www.unige.ch/crystal/cerny/rcerny.htm) at the Laboratory of Crystallography in Geneva, Switzerland (http://www.unige.ch/crystal/lab.html), with support from the Swiss National Science Foundation (http://www.snf.ch/), project #21-53847.98. The development still goes on as a personal research project after my move to the ESRF and now to the CEA and the University of Grenoble (France).
+
+See the ObjCryst++ homepage (http://objcryst.sf.net) for more details about the source code.
+
+<i>Note</i>: This is a free, open-source project. If there is something that you would like to see in it, you can contribute to it by submitting bugs, new code, help improving the documentation.
+
+<h2>Reference for Fox</h2>
+The reference for Fox is: <i>V.Favre-Nicolin and R. Cerny, J. Appl. Cryst (2002, in press)</i>, http://objcryst.sourceforge.net. 
+
+\anchor download <h2>Download</h2> 
+FOX is available in precompiled form or as source code for <b>windows</b> (tested on 98, NT4 SP4, 2000, XP) and <b>Linux</b>. You can download from several sites:
+
+   - <a href="http://sourceforge.net/project/showfiles.php?group_id=27546&release_id=104399">Sourceforge</a>
+   - <a href="ftp://ftp.unige.ch/pub/soft/crystal/fox/">University of Geneva</a> 
+   - <a href="ftp://ftp.ccp14.ac.uk/ccp14/ftp-mirror/objcryst/">CCP14 (UK)</a> 
+   - <a href="http://ccp14.sims.nrc.ca/ccp/ccp14/ftp-mirror/objcryst/">CCP14 (Canada)</a> 
+   - <a href="http://ccp14.semo.edu/ccp/ccp14/ftp-mirror/objcryst/">CCP14 (USA)</a> 
+
+For <b>windows</b>, download the <b>Fox-<i>date</i>.zip</b> file (precompiled), or the <b>Fox-<i>date</i>-src.zip</b> if you want to compile Fox yourself (gives you access to more recent versions, and the ability to help me !).
+
+For <b>Linux</b>, download the Fox-date.tar.bz2 (source code).
+
+\anchor install <h2>Installation</h2> 
+
+   - For <b>Linux</b>:
+      - You will need valid libraries and development files for <b>OpenGL</b>. You may require a specific library for your card (NVidia,...), and the <b>Mesa</b>, <b>Mesa-devel</b>, <b>Xfree-devel</b> packages (for Redhat, also <b>glut</b> and <b>glut-devel</b>).
+      - First you need to also download and install the wxWindows for GTK+ shared libraries (you need the <b>wxGTK</b>, <b>wxGTK-gl</b> and <b>wxGTK-devel</b>).
+         - If you are using <b>wxGTK-2.2.7</b>, just install the 3 RPM.
+         - With <b>wxGTK-2.2.9</b>, install the 3 RPM, and then (still as root):
+            - ln -s /usr/lib/libwx_gtk-2.2.so /usr/lib/libwx_gtk.so
+            - ln -s /usr/lib/libwx_gtk_gl-2.2.so /usr/lib/libwx_gtk_gl.so
+            - ln -s /usr/lib/wx/include/gtk-2.2/wx/setup.h /usr/include/wx/setup.h
+      - Then uncompress the Fox tar.bz2 archive. Then do <tt> make</tt> and (as root) <tt>make install</tt>. The install will put Fox in <tt>/usr/local/bin/Fox</tt>. (otherwise it is in Fox/src/ObjCryst/wxCryst/Fox)             
+      - <b>NOTE</b>: if Fox crashes when loading an example file, rebuild the wxGTK libraries from the src.rpm (rpm --rebuild) or the tar.gz (with opengl enabled). It (probably) means there is a conflict between your compiler and the one used to compile the RPM (lousy 2.96 compilers....).
+
+    - For <b>windows</b>, unzip the file, which will also create a folder with the Fox program. This program uses the glut library, which is distributed along the Fox program, you do not need to move the glut32.dll to your System directory, as long as the 'Fox.exe' application remains along the glut32.dll file (you may not see it if your windows explorer is configured to hide sytem files such as dll's).
+
+As always, send me an email at vincefn@users.sf.net if you have any trouble with the installation.
+
+<ul>
+   <h3>Quick demonstration</h3>
+
+   As a demonstration (even if you are not a crystallographer you can try that !), you can launch Fox, then use the top menu File->Load and open the example file example/pbso4-joint.xml. This is a file showing the global optimization of a very simple and well-known structure, PbSO4 (lead sulfate). Then:
+   <ul>
+      <li> Click on the Crystal tab, and in the window, choose the menu Display->3D Display. This opens a window with the crystal structure. You can click& drag with the mouse to rotate the structure
+      <li> Click on the Powder Diffraction tab, and for the two PowderPattern objects, choose the menu Pattern->Show Graph. This will show you the current observed (blue) and calculated (red) patterns.
+      <li> Click on the Crystal tab, and choose Parameters->Randomize Structure (it would be too easy to start from the solution)
+      <li> Click on the Global Optimization tab. Then choose Optimize->Run . This will launch the global optimization running. You will see the structure evolve, as well as the Cost functions (the two Rws in that case).
+   </ul>
+</ul>
+
+\anchor mailinglist <h2>Mailing Lists</h2>
+
+To be kept informed about new releases, you are encouraged to subscribe to the low-volume FOX mailing list at http://lists.sourceforge.net/mailman/listinfo/objcryst-foxx (the archives can be found at http://sourceforge.net/mailarchive/forum.php?forum_id=654).
+
+If you intend to use the ObjCryst++ / Fox source code for your own projects, it is highly recommended to subscribe to the ObjCryst++ mailing list at http://lists.sourceforge.net/mailman/listinfo/objcryst-devel, (the archives can be found at http://sourceforge.net/mailarchive/forum.php?forum_id=1689).
+
+<h2>Known Problems</h2>
+
+    - In windows 95 and NT SP1 (not SP4), the 3D Crystal view (using OpenGL) can lead quickly to a crash when you rotate the structure. Solution: upgrade your version of windows (even better, switch to Linux).
+    - In windows NT (not 98), it takes a lot of time for the application to respond. This seems to be related to NT giving all its time to the background optimization, and is otherwise not a problem.
+      Problems have been reported with the OpenGL (3D) display of the Crystal structure with window$ XP. This seems related to the OpenGL drivers, and you may want to update them (other users reported WinXP working fine). This seems to be an issue with XP which depends on the graphic card used. If updating the driver does not work, only workaround is to get a real OS (better, a free one -hint,hint).Note1: If you have remarks about what could be done to improve the program (or the documentation), feel free to send me an email .
+
+Note: if the program encounters an error, it will sometime manage to save the complete environment in a file which should be where you launched Fox (or in your home directory under Linux, or along the Fox.exe application under windows), named "ObjCryst-date-time.xml", which you can then reload.
+
+\anchor license <h2>License and legal information</h2>
+
+The FOX Program is copyright (2000-2002) Vincent FAVRE-NICOLIN, (2000-2001) Radovan CERNY and the University of Geneva.
+
+This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+
+It also uses other libraries (among which R. Grosse-Kunstleve library used to interpret spacegroup symbols), see the corresponding ObjCryst++ page for details.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
+
+*/
+

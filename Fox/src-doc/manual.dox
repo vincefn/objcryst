@@ -1,0 +1,196 @@
+/*! \page manual
+<center><h1>Reference Manual</h1></center>
+\htmlinclude fox-top.map
+\anchor top_menus <h2>Main Menus</h2>
+<ul>
+   <li> The "File" menu allows to save or load a sort of "project" file in which are saved Crystal structures, diffraction data, algorithms... In fact everything which can be seen in the Fox main window is saved. It is saved in an XML format specific to Fox/ObjCryst++. You can also exit (but don't forget to save before, because Fox will not query you if you have not saved before !)The "Objects" menu can be used to create new Crystal, PowderPattern, DiffractionDataSingleCrystal and algorithms objects. Remember that you can create several of these objects simultaneously (no limit over than the scrollbars !).
+   <li> The "Help" menu gives you access to the "about box" of Fox, and you can toggle the use of tooltips (which are not much used yet...).
+</ul>
+\anchor crystal<h2>Crystal Structure</h2>
+\htmlinclude crystal.map
+<ul>
+   \anchor crystal_menus<h3>Crystal Menus</h3>
+   <li> "File" allows you to save all the atom positions and occupancies in a text file. The output also lists the interatomic distances to help deciding which atoms should be removed/merged. It is currently the only output possible (besides xml) of the crystal structure.
+   <li> "Parameters" allows you to:
+   <ul>   
+      <li> Add an antibump distance: you will be prompted to select the two atom types (scattering powers) between which you want to set up an antibump distance, and the corresponding distance. Note1: you can select the two identical atom types to declare, e.g., an O-O antibump. Note2: the antibump distance is not activated unless you select the Crystals Antibump cost function in the Global Optimization algorithm ! Note3: for same element (e.g. O-O) antibump, the antibump penalty diminishes to 0 to enable merging of these atoms (so that the dynamical occupancy correction can fully work).
+      <li> Fix or un-fix all parameters of the structure. Also see the FAQ "What parameters can/should I optimize".
+      <li> randomize the configuration. This does not affect fixed parameters, and takes into account the limits set for the parameters.
+   </ul>
+   \anchor crystal_options<h3>Crystal Options</h3>
+   <li> "Use Dynamical Occupancy Correction": this is an important feature of Fox: basically, you should use "yes" for inorganic compounds and "no" for organic ones. This allows to dynamically (without any a priori information or user intervention) take into account atoms on special positions and atoms shared between building blocks (one oxygen of a PO4 tetrahedron overlapped with another from a WO6 octahedron). The idea is to change the "dynamical" occupancy of the atoms during the calculations, so that if n atoms of the same type are overlapping, their occupancies are set to 1/n, and therefore they look like a single atom. This is transparent to the user, and you can know what the value of this "dynamical occupancy" is when saving the crystal structure in a text file.
+   <li> "Display Enantiomer": this can be used to display the enantiomeric structure in the 3D Crystal structure window, and can be useful to compare structures. It does not affect in any way the structural parameters, or the calculation of structure factors.
+   \anchor crystal_unitcell<h3>Crystal Unit Cell & Spacegroup</h3>
+   <li> You can enter the spacegroup using either symbol or spacegroup number. The spacegroup field will revert to the previous entry if the value was not understood. In doubt (when not using a standard setting), you can use the full Hermann-Mauguin symbol (eg '-I 4bd 2c 3', 'P1121/a',...).
+   <li> The unit cell parameters can be entered in Angstroem and degrees. Only the relevant fields will be displayed after the spacegroup has been entered and processed (e.g. only the 'a' parameter for cubic spg). Note that the cell parameters cannot be optimized using the available algorithms.
+   \anchor crystal_scattpow<h3>Crystal Scattering Powers (atom types)</h3>
+   <li> For each element you want to use in your structure you must first declare the "atom type", which corresponds to the scattering factor (Thomson and resonant parts) and the temperature factor (currently only Biso is available). Normally, you will declare only one ScatteringPower by type of atom, unless you want, e.g., 2 oxygens with very different Biso. You can add (and remove) ScatteringPowers using the Crystal menu 'Scatterer'->'Add(Remove) ScatteringPower'.
+   <li> \anchor crystal_name The name of the Scattering power is free format, but the symbol must correspond to one entry of the scattering factors tables in the international tables for Crystallography, i.e. the standard name for an atom or ion: 'C', 'O', 'Se', 'Cu2+',...
+   <li> Finally, you can change the colour displayed for each type of atom by using the 'Colour' menu and entering the RGB (red, green blue) components (all between 0.0 and 1.0).
+   <li> Finally, you can optimize the Biso value, although as long as you are far away from the good configuration it is a bad idea (useless, and slowing down a lot the algorithm). You should give approximate Biso values that you guess from other similar compounds. Since the algorithm is focused on low-angle, the sensitivity to Biso is fairly low.
+   \anchor crystal_scatterers<h3>Crystal Scatterers</h3>
+   The Scatterers in each Crystal structure can be either individual atoms or ZScatterers (molecules, polyhedra).
+   <ul>
+      <li> \anchor crystal_atom<h4>Atom:</h4>
+      <ul>
+         This is the most basic Scatterer. You should try as much as possible to use large building blocks (see below the ZScatterer), since that will greatly reduce the number of parameters ( W+6O as atoms is 21 parameters, whereas a WO6 octahedron is 6 parameters).
+
+         To add one atom, use the Crystal 'Scatterer'->'Add an Atom'. You will be prompted to choose the ScatteringPower for this atom from those that you have declared. You can fix /unfix all parameters (xyz, occupancy) through the GUI, as well as change the limits by right-clicking on the parameter's name.
+      </ul>
+      <li> \anchor crystal_zscatterer<h4>Z-Scatterer(molecule, polyhedron):</h4>
+      <ul>
+         In this scatterer, a group of atoms is defined starting from one atom, and defining the positions of other atoms by using bond lengths, bond angles and dihedral angles in a 'z-matrix'. You can find pages with examples of z-matrices here, and here.
+
+         <li><b>Creating a ZScatterer</b>: there are several ways to do this:
+         <ul>
+            <li>If you want to input a polyhedron, you can use the built-in declarations with the Crystal menu, e.g. 'Scatterers'->'Add Tetrahedron'. You will be prompted to choose the two atom types making the ZScatterer. This also sets tight limits around the original values for all bond length & angles.
+            <li>You can just create an empty scatterer, and then add all atoms one by one, specifying the atom type, and the bond length/angle/dihedral angles for each additional atoms. You can see what's going on by displaying the crystal structure and updating it after each addition (hint: use P1 symmetry to simplify the view, and revert to the true spacegroup when you are finished).
+            <li>Finally, you can import a Fenske-Hall z-matrix (this is probably the easiest way for organic molecules) This is a text file listing all atoms, for example for cimetidine it will be:
+            <ul><tt>
+               17<br>
+               C 1<br>
+               N 1 1.465<br>
+               C 2 1.366 1 119.987<br>
+               N 3 1.321 2 120.030 1 6.0<br>
+               C 4 1.355 3 119.982 2 6.8<br>
+               N 5 1.136 4 180.000 3 46.3<br>
+               N 3 1.366 2 120.022 1 186.0<br>
+               C 7 1.466 3 119.988 2 354.9<br>
+               C 8 1.529 7 109.482 3 185.0<br>
+               S 9 1.814 8 109.456 7 180.0<br>
+               C 10 1.815 9 99.984 8 180.0<br>
+               C 11 1.507 10 109.466 9 180.0<br>
+               N 12 1.341 11 126.014 10 90.0<br>
+               C 13 1.305 12 109.239 11 180.0<br>
+               N 14 1.349 13 108.723 12 360.0<br>
+               C 12 1.347 11 125.981 10 269.7<br>
+               C 16 1.507 12 126.567 11 0.2<br><br>
+            </tt>
+                     To import such a matrix, you must first create an empty ZScatterer, then use the ZScatterer 'File'->'Import Fenske-Hall Z-Matrix'.
+
+                     The easiest way to generate this file is to use <b>babel</b> () or <b>openbabel</b>, to convert another format (pdb) to this Fenske-Hall Z-matrix. For example, use "babel -ipdb cime.pdb -ofhz cime.fhz -d" to convert the 'cime.pdb' file to 'cime.fhz', while removing all hydrogens.
+
+                     Note1: that you do not need to declare the ScatteringPowers first, they will be automatically added if necessary.
+
+               Note2: after importing, all parameters are set with tight limits, so that the molecule is almost rigid.
+            </ul>
+         </ul>
+         <li> <b>Modifying a ZScatterer</b>:
+         <ul>
+              <li> You can modify all parameters by changing the values in the fields
+              <li> You can change the type of atoms by clicking on the atom type.
+              <li> It is important to choose correct limits for all parameters. To do this, you can either change globally all limits by using the ZScatterer menu  'Parameters'->'Set limits (relative) on ...'. Alternatively, you can right-click on each parameter to choose the limits you want to use, or to remove altogether the limits (as for free torsion angles).
+         </ul>
+      </ul>
+   </ul>
+</ul>
+
+\anchor powder<h2>Powder Pattern</h2>
+\htmlinclude powder.map
+<ul>
+   \anchor powder_menus<h3>Powder Menus</h3>
+   <ul>
+      <li> "Data" allows to import several types of data. If you wish to add another format, send an email to me with an example data, and saying why you think it is important that this format is supported. You can also save the calculated and observed spectra, and use the 'simulation mode', which will use a dummy observed pattern (I=1. in all points).
+      <li> "Parameters" allows you to fix all parameters. Note that only preferred orientation parameters and the global temperature factor are refinable anyway.
+      <li> "Components" is the menu to describe your powder pattern in terms of the sum of components, which can be one interpolated background, and any number of crystalline phases.
+      <li> "Radiation" allows you to choose the radiation for your experiment. It is also possible to use the radiation interface just below the menus, but to choose an X-Ray tube it is easier that way (unless you know by heart the delta-lambda !). Do not forget to input the correct polarization rate (0.95 typically for a synchrotron experiment).
+      <li> "Pattern" allows you to open the graph window with the observed and calculated patterns, and to fit the scale factor. It is also possible to add "excluded 2-theta zones" which will be ignored during global optimization: you will be prompted for the minimum and maximum 2theta values of the region to ignore (to remove thos region, you have to edit the xml file).
+   </ul>
+   \anchor powder_radiation<h3>Radiation</h3>
+   Here you can describe the radiation corresponding to your experiment (neutron, X-Ray, tube,...). The wavelength is in Angstroem as usual. Set the polarization rate between 0.95 and 1 for synchrotron experiments, and 0 for an X-Ray tube (actually if you use a monochromator it should be above 0, but a precise value is not critical for a global optimization).
+
+   \anchor powder_2thetacorr<h3>2theta correction parameters</h3>
+   These parameters allow to correct for experimental errors in the 2theta positions of reflections, due to a wrong zero, or a misplacement of the sample holder or its transparency. Practically, using the 2theta zero is sufficient (note that it does not necessary correspond to the convention used by other programs, you may have to change the sign and/or to multiply by 2 the value). After each change, you can right-click on the powder pattern graph to update it.
+
+   \anchor powder_maxsithsl<h3>Maximum sin(theta)/lambda</h3>
+   Use this field to limit the extent of the calculations on the powder pattern. It is usually a very good idea to do that, since for a global optimization, high-angle data is useless. A good value is 0.25 Angstroem-1 (corresponding to a resolution of 2 Angstroems), although you can go higher to 0.4 A-1 if you feel there are not enough reflections...
+
+   \anchor powder_background<h3>Powder Pattern Background</h3>
+   So far the background can only modelized using linear interpolation between at user-chosen 2theta values. To input the (2theta, intensity) points you must create a text file with a list of "2theta intensity" on each line (2theta in degrees), and load it using the menu. See the tutorials for examples.
+
+   If you want to change the points, just change the values in the text file, and reload it from the menu.
+
+   There is currently no limit to the number of points, but even for complex backgrounds 10 should be enough.
+
+   \anchor powder_diffraction<h3>PowderPatternDiffraction: Crystalline contribution to the powder pattern</h3>
+   <ul>
+      This allows to describe the contribution of a crystalline phase to the powder pattern.
+      It is possible to save the calculated structure factors using the menu (note that structure factors above the chosen sin(theta)/lambda limit are not calculated).
+      \anchor powder_diffraction_profile<h3>Profile parameters</h3>
+      These are the usual profile parameters:
+      <ul>
+         <li> A pull-down menu allows you to xhoose between Gaussian, Lorentzian and pseudo-Voigt.
+         <li> U V W defining the width using Caglioti's law (W is the constant width, which is generally sufficient if you are using integrated Rfactors as recommended)
+         <li> Eta0 (constant) and Eta1 (theta-dependant) define the mixing parameter for a pseudo-Voigt profile.
+      </ul>
+      \anchor powder_diffraction_crystal<h3>Crystal choice</h3>
+      You are asked to choose a crystal structure upon creation of the PowderPatternDiffraction object. You can change it afterwards by clicking on the crystal name.
+      \anchor powder_diffraction_biso<h3>Global Biso</h3>
+      This can be used as a global temperature factor for this crystalline phase (affects all atoms). This is refinable, although it slows the optimization without helping a lot.
+      \anchor powder_diffraction_texture<h3>Texture (Preferred Orientation) using the March-Dollase Model</h3>
+      FOX supports optimization of Preferred orientation, usign the March-Dollase model. To add one phase, use the "Phases" local menu. You can then enter the fraction, March coefficient (>1 for needles, <1 for plate-like crystallites), and HKL coordinates for the preferred orientation.
+
+      Note: it is very important to use this only as a last resort, or if you know for sure that you have preferred orientation. Taking one more day to prepare carefully a non-textured sample is definitely worth it, since even if a solution is found, it will be much slower - preferred orientation reduces the information available in some direction of the crystal.
+
+      If you finally decide to search for preferred orientation parameters, it is recommended to input as much information as possible. For example, you should be able to know what kind of preferred orientation to expect (plates or needles), so that you can restrict the March coefficient to be either >1 or <1 (e.g. use limits [.1;1] or [1;10] - never go below .1 or above 10, that would just slow things). If you know what the preferred orientation vector is, that's even better.
+
+      Note that it is possible to use several preferred orientations, but I strongly discourage to do this for a global optimization.
+   </ul>
+</ul>
+
+\anchor singlecrystal<h2>Single Crystal Diffraction Data</h2>
+\htmlinclude diffractionsinglecrystal.map
+<ul>
+   \anchor singlecrystal_menus<h3>Menus</h3>
+   You can use the menus to load data from a text file (either four columns H K L Iobs, or five columns H K L Iobs sigma). If you do not have data, you can also use the "simulation mode" and generate a full list of H K L up to a given 2theta value.
+   Finally, you can export the structure factors in a text file.
+
+   \anchor singlecrystal_twinopt<h3>Twinning option</h3>
+   This is a "trick" to have a very basic handling of twinned single crystal data. If selected, comparison between observed and calculated intensities will not be made on individual reflections, but on the sum of intensities of reflections with approximately identical 2theta angle (i.e. not only equivalent reflections).
+   This allows to search for a crystal structure without any knowledge on the type of twinning, effectively handling the data as "powder data", but without any computing penalty.
+
+   \anchor singlecrystal_radiation<h3>Radiation</h3>
+   Same as for powder pattern...
+   \anchor singlecrystal_crystal<h3>Crystal</h3>
+   You can click on the crystal name to change the crystal structure associated to this data.
+   \anchor singlecrystal_maxsithsl<h3>Maximum sin(theta)/lambda</h3>
+   Same as for powder pattern...
+</ul>
+
+\anchor algo<h2>Global Optimization Algorithms</h2>
+\htmlinclude algorithm.map
+<ul>
+   \anchor algo_menus<h3>Menus</h3>
+   <ul>
+      <li> Use the "Objects & Cost Functions" to define the objects that you want to use (i.e. the crystal structure and the associated diffraction dataset(s) ), and -only after defining the objects- to choose the Cost Function(s) that you want to use as a criterion: for powder diffraction, it is recommended to use the "Best Rw, integrated" which is faster than the standard Rwp, and is insensitive to the profile parameters.
+      <li> Use the "Run/Stop" to launch and thereafter to stop the optimization.
+   </ul>
+   \anchor algo_algo<h3>Algorithm</h3>
+   You can choose between Parallel Tempering (highly recommended) and Simulated Annealing (use this only if you know how... you'd have to carefully choose the number of trials). Normally, the default choice (Parallel Tempering) should not be changed.
+
+   \anchor algo_temperature<h3>Temperature</h3>
+   These are the minimum and maximum temperatures to ensure that the algorithm will search all possible configurations, while insisting on the best configurations. It is highly recommended not to change the default choices, with a "smart" temperature schedule which will be tuned by the algorithm.
+
+   \anchor algo_amplitude<h3>Displacement amplitude</h3>
+   These are used to define the amplitude of displacements of all parameters during random moves. Again, you should not change the default parameters which should be fine for any optimization, with an exponential schedule.
+
+   \anchor algo_autosave<h3>Autosave</h3>
+   This allows you to save regularly the "best" configuration reached by Fox. Note that the saved xml files will always be in the working directory (i.e. the one from which you launched FOX, or the directory of the FOX application).
+
+   \anchor algo_trials<h3>Trial</h3>
+   Put here the total number of trials that you want to make. For Parallel tempering, you can put a large number (100 000 000), and then stop manually the algorithm when it seems to have converged (the algorithm has the advantage of being invariant with the number of trials). (for simulated annealing, you need to more carefully evaluate the number of trials for your specific configuration...).
+
+   \anchor algo_objects<h3>Objects</h3>
+   This is the list of the objects optimized, which have een added through the menu.
+
+   \anchor algo_costfunction<h3>Cost function(s)</h3>
+   Here is displayed the cost function name and the associated value, and the weight associated to it. The overall cost function is the weighted sum of all cost functions. Note if you are using an antibump cost function, you may have to reduce its weight so that it does not make the Rw cost function negligeable.
+   
+   A cost function which as a weight equal to 0 is only computed for each new best configuration, and does not affect the algorithm speed.
+</ul>
+
+
+ 
+ 
+  
+*/

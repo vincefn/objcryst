@@ -1,0 +1,108 @@
+/*! \page compile
+<center><h1>Getting & Testing development versions of Fox</h1></center>
+
+<h2>Introduction</h2>
+This page describes how to get the source of Fox (Free Objects For Crystallography), and compile it under Linux and windows. It also describes how to get up-to-date versions of Fox from the development tree.
+
+Requirements:
+<ul>
+   <li><b>Linux</b>: gcc 2.95.3 or above, OpenGL &amp glut librairies
+   <li><b>windows</b>: win 98, NT4 or above (win95 will not have OpenGL (3D structures) working, but otherwise works)
+</ul>
+
+<h2>Getting & installing the compilers</h2>
+
+<li>For <b>Linux</b>, you should have nothing to do here, since your box certainly includes development libraries. Fox is developped under gcc 2.95.3 and "2.96". It should work under gcc 3.1 and above, but this has not been tested yet.
+
+<li>For <b>windows</b>:
+<ul>
+   you will need the free Borland compiler (command-line-tools) 5.5.1, which you can get at: http://www.borland.com/bcppbuilder/freecompiler/ You will need to register first, but it's free. To install the tools, just run the installer. I'll assume that they are in C:/Borland/ (it may be required not to be installed in a path including spaces such as "../Program Files/..", according to the  the wxWindows installation program).
+
+   Then create the following two files in the same directory where you have the compiler and linker (e.g., <tt>c:\Borland\Bcc55\bin</tt>, replace <tt>c:\Borland\Bcc55</tt> with the actual path where you installed Borland C++ 5.5.1):
+   <ul>
+      <b><tt>bcc32.cfg</tt></b>, text file containing the following two lines:
+      <ul>
+         <tt>-I"c:\Borland\Bcc55\include"</tt><br>
+         <tt>-L"c:\Borland\Bcc55\lib"</tt>
+      </ul>
+      <b><tt>ilink32.cfg</tt></b>  ,text file containing the following line:
+      <ul>
+         <tt>-L"c:\Borland\Bcc55\lib"</tt>
+      </ul>
+   </ul>
+
+   You will also need to add the <tt>c:\Borland\Bcc55\bin</tt> to your PATH, and to add the following variable to your environment: set BCCDIR=c:\Borland\Bcc55 You may need to restart after changing these environment variables, depending on windows version.
+</ul>
+<h2>Check you have OpenGL and glut installed</h2>
+
+<li> For <b>Linux</b>, you need Mesa libraries. Check you have <tt>gl.h</tt>, <tt>glu.h</tt> and <tt>glut.h</tt> in /usr/include/GL/, and the corresponding libraries (libGL, libGLU) These are generally installed by default. NVidia users will need the nVidia drivers.
+<li> For <b>windows</b>, you can use the glut library (glut32.dll) which is along Fox (nothing to do about the dll as long as it is aside Fox.exe), you need to copy the glut32.lib (inside the Fox/src/glut directory) to the borland\bcc55\lib\ directory, and the glut.h (inside the Fox/src/glut directory) header to Borland\bcc55\include\GL\
+
+<h2>Getting & installing the wxWindows Library</h2>
+
+<li> For <b>Linux</b>:
+<ul>
+   It is easier to use the RPM. To avoid any possible conflicts due to different versions of wxWindows, please <b>recompile the wxGTK source rpm</b> (which you can get at http://www.wxwindows.org/) on your machine (rpm --rebuild wxGTK-***.src.rpm), and then install the recompiled RPM (wxGTK, wxGTK-gl and wxGTK-devel)
+
+   Then you will need to do the following for wxGTK 2.2.9 (nothing to do for wxGTK 2.2.7):
+   <ul>
+      <li>Copy <tt>/usr/lib/wx/include/wx/gtk/setup.h</tt> to <tt>/usr/include/wx/gtk/setup.h</tt>
+      <li><tt>ln -s /usr/lib/libwx_gtk-2.2.so /usr/lib/libwx_gtk.so</tt>
+      <li><tt>ln -s /usr/lib/libwx_gtk_gl-2.2.so /usr/lib/libwx_gtk_gl.s</tt>
+   </ul>
+   If you want to install from the source rather than install the rpm, do not forget to configure with --enable-opengl. By default shared libraries are produced (*.so), which is what Fox now uses (no static libraries).
+</ul>
+
+<li>For <b>windows</b>:
+<ul>
+   Get the wxWindows installer (wxMSW 2.2.7 or 2.2.9, not 2.3.*) at  http://www.wxwindows.org/, then run the wx installer to put everything in the directory of you choice (I'll assume it is <tt>C:\dev\wxWindows</tt>)
+
+   For wxMSW 2.2.9 <i>only</i> , you need to remove the contents of the wxWindows\include\wx\setup.h file, and replace it by a single line : <tt>#include "wx/msw/setup.h"</tt>
+
+   Edit the <tt>C:\dev\wxWindows\include\wx\msw\setup.h</tt> and search for "Opengl" and enable it:<tt>#define wxUSE_GLCANVAS 1</tt>
+      
+   Add the WXWIN variable to your environment (<tt>set WXWIN=C:\dev\wxWindows</tt>)
+
+   then (in a DOS/Command prompt) go to the <tt>C:\dev\wxWindows\src\msw\</tt> directory, and type: <tt>make -f makefile.b32 FINAL=1</tt>
+</ul>
+<h2>Get the source of Fox</h2>
+
+<li> For <b>Linux</b>, just get the regular Fox-***.tar.bz2 and uncompress (tar -xjf or tar-xIf depending on tar version) wherever you want. It will create a Fox directory with everything in it.
+<li> For <b>windows</b>, get the Fox-***-src.zip and unzip it wherever you want (preferably in the same directory as wxWindows). It creates a Fox subdirectory with everything in it.
+
+<h2>Compile Fox</h2>
+Note: in all cases you may need to <b>edit the <tt>Fox/src/ObjCryst/rules.mak</tt> file</b>, which includes at the very beginning some paths. For Linux it should be OK, but for windows you will need to correct the wxWindows directories
+
+<li> <b>Linux</b>:
+<ul>
+   In the Fox directory, just type '<tt>make</tt>', which creates Fox in fox/src/ObjCryst/wxCryst/.
+
+   Then '<tt>make install</tt>' will copy Fox to /usr/local/bin/Fox.
+
+   Note that if you do "<tt>make debug=1</tt>", it will be compiled with debug messages which can be interesting (adds a debug menu in Fox, level 0 meaning a lot of messages, and 10 the minimu. Each time you change the debug=0 or debug=1 flag, make sure you do a "make clean" before rebuilding)
+</ul>
+<li> For <b>windows</b>:
+<ul>
+   In the Fox directory, just type '<tt>make</tt>'. This will create Fox in the same directory. You can activate the debug version by changing to "<tt>debug=1</tt>" in the <tt>src/ObjCryst/rules.mak</tt> file (you have to do a "make clean" each time you rebuild while changing the debug status).
+</ul>
+<h2>Testing</h2>
+
+Well, just try the examples, or your data while displaying both 3D structure and powder pattern(s). Optionnaly, run several optimizations (several examples) at the same time. Try new features... Change the structural/pattern parameters while graph windows are already shown and then update them... Run it overnight...
+
+<h2>Updating the Fox /ObjCryst++ source code using CVS</h2>
+A word about CVS (concurent Version System): it is (in a nutshell), a way to store source code, update it from different places and by different people, and keep a complete story of the modifications. More info on http://www.cvshome.org.
+
+In the ObjCryst++ CVS (which includes Fox) (http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/objcryst/), there are 3 different development stages:
+
+   - The latest version, with all most recent modifications. This can be unstable, as I tend to make a lot of small modifications.
+   - The "TESTING" version, which includes all recent modifications which I deem stable enough on a few cases, but for which no thorough check has been made. This should not be more than a few modifications behind the latest version.
+   - the "RELEASE" version, which corresponds to the latest released version of Fox or ObjCryst++, which should be stable.
+
+To test Fox, or get recent features, you should either get the TESTING version or the latest (not for the faint of heart, though).
+
+The cvs access is anonymous, with a blank password. See the CVS notes on sourceforge (http://sourceforge.net/cvs/?group_id=27546).
+
+<li> <b>Linux</b>: in the Fox/src/ObjCryst directory, simply type "<tt>cvs update</tt>" to get the latest version, or "<tt>cvs update -r TESTING</tt>" to get the slightly more stable version.
+<li> <b>windows</b>: you need a CVS client. The simplest is to get the command-line client which uses the same options as the linux one (see above), at http://www.cvshome.org/downloads.html.You may also use wincvs (http://www.wincvs.org), which I have not tested.
+
+*/

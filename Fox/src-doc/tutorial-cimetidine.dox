@@ -1,0 +1,76 @@
+/*! \page tutorial-cimetidine
+<center>
+<h1>Using FOX for Ab Initio Structure Determination: cimetidine tutorial<h1>
+</center>
+<h2>Prerequisite</h2>
+<ul>
+   <li> The refined unit cell parameters, and a possible spacegroup
+   <li> The molecule formula (ideally a z-matrix or pdb file)
+   <li> one or several diffraction data sets. <b>They are in the Fox/examples/tutorial-cimetidine directory</b>.
+
+   If you have all this, you can launch Fox !
+</ul>
+
+
+<h2>First step: create your Crystal Structure</h2>
+<ul>
+   <li> From the top menu 'Objects', <b>create a new Crystal Object</b>.
+   <li> Click on the 'Crystals' tab to see your created crystal.
+   <li> You can already display you crystal structure: in the Crystal, use the 'Display' menu-> <b>3D Display</b>. You can use the mouse to change the display:
+<ul>
+      <li> drag with the left mouse button down to change the orientation
+      <li> drag with the middle button to change the distance/aspect ratio. You can also use the '+' and '-' keys to change the distance, if you have a two-mouse button.
+      <li> right-button click will display a popup menu to update the Crystal Display when you have changed some parameter (sometimes the program will try to do it by itself).
+</ul>
+   <li> You should <b>give your Crystal a name</b> ("Cimetidine" or "My beautiful Molecule", "Napoleon 1er"...) in the Field just after 'Crystal' (where it is written 'Change Me!'). This will be useful to choose your Crystal Structures thereafter (nota that if you have several Crsyatl structures, they <b>must</b> all have different names).
+   <li> You can <b>change the spacegroup</b> by entering either a symbol or the spacegroup number in the SpaceGroup Field (in our case, "P121/a1" will do). (for high symmetries it can take a few seconds to find the asymmetric unit). [Note: If (after validation), the symbol reverts to the old entry, it means that it has not been understood. In doubt (when using not standard settings), use the full Hermann-Mauguin Symbol (eg '-I 4bd 2c 3',...)]
+   <li> You can set the <b>lattice parameters</b> (10.394, 18.819, 6.825, beta=106.44). Use the right-button menu to update the 3D Display of the structure.
+   <li> Generally before adding atoms you must first <b>create the atom types</b>, what is called <b>'ScatteringPower'</b> in the program (see the PbSO4 tutorial for that). As we will be importing the molecule structure from a pdb file, this will be doe automatically.
+   <li> <b>Creating the molecule</b>: The molecule is described using a <b>Z-matrix</b> which describes all atom positions from a first atom and bond distance, bond angles and dihedral angles with the other atoms (see http://chemistry.umeche.maine.edu/Modeling/GGZmat.html for a description). First use the Crystal "Scatterer-> Add Z-Matrix Scatterer" menu, and give it a sensible name like "cime". There are then two possibilities to add the atoms: either add them one by one (long), or import the structure from another format. FOX can only import Fenske-Hall Z-matrices, but it is possible to transform a wide range of molecule structures to this type of files using either babel (http://www.eyesopen.com/babel.html) or openbabel (http://openbabel.sourceforge.net). To do this just use: "<tt>babel -ipdb cime.pdb -ofhz cime.fhz -d</tt>" (the -d option will get rid of the hydrogens). You can see the cime.pdb and cime.fhz files in the example/tutorial-cimetidine directory.
+   <li> Use the Z-Scatterer "File-> Import Fenske-Hall Z-Matrix" menu to import the molecule structure.
+   <li> <b>Setting up limits</b> (constraints) within the molecule. This is vital, especially to keep the cycle (as Fox does not -yet- automatically recognize it).
+<ul>
+      <li> First you can set relative limits for all bond lengths (+/- .05 A) and bond angles (+/- 10°), by using the "Parameters -> Set limits (relative) on..." menu
+      <li> Then you can remove the limits on all dihedral angles which are free torsion angles (right-click on the dihedral angle name and "Remove Limits". For dihedral angles which are fixed (generally either 180 or 0°, in the cycle or for multiple bonds), just un-push the button which toggles the refinement. To decide which dihedral angles needs to be fixed, making a drawing is a good idea ! In this case all dihedral angles should have their limits removed save those corresponding to atoms 7, 14, 15, 16 and 17.
+</ul>
+       <li> Once the correct dihedral angles have been fixed and freed, the molecule should have the expected flexibility. NOTE: since you probably don't have special positions nor atoms overlapping between two molecules, you can turn off the 'Use Dynamical Occupancy Correction".
+
+   You're done with the Crystal structure. You can (should) save using the top Fox menu 'File'->'Save'. This will save everythoing as an xml file, using a specific format to ObjCryst++/Fox.
+</ul>
+
+
+<h2>Second  step: create the PowderPattern object (X-Ray)</h2>
+<ul>
+   <li> Go to the next tab 'Powder Diffraction', and then use the top 'Object' menu to <b>create a PowderPattern object</b>. You can give this one a name, e.g. "Cimetidine X-ray"
+   <li> You can <b>import the X-Ray data</b> using the PowderPattern object 'Data'->'Import Fullprof Pattern', and select the cime.dat file in the Fox/example/tutorial-cimetidine directory.
+   <li> You can <b>display the powder pattern</b> using the 'Pattern'->'Show Graph' menu. You can click &amp drag with the left button to zoom in (double-click to unzoom). You can right-click on the graph to update the graph if you have changed manually a parameter. The coordinates (2theta, intensity of the mouse pointer is displayed at the bottom).
+   <li> By using the zoom and the displayed, <b>prepare a 2-column text file with the points you want to use to interpolate the background</b> (see the backgd.txt file for example). This is free-format, as long as the two columns are separated by spaces, and using a dot '.' as a decimal as separator (not a comma).
+   <li> Then <b>add a background phase</b>, using the 'Component'->'Add Interpolated Background' menu. In the newly appeared 'PowderPatternBackground' part, use the 'Object'->'Import' menu to import this 2-column file you have just created. If you update the powder pattern (right-click on the graph), you should see the base calculated graph change.
+   <li> Now <b>add the Crystalline phase</b>, using the 'Component'->'Add Crystalline Phase', which will prompt you to choose one crystal structure available (the one you have already defined) from its name. (NOTE: for multi-phased powders, you can add several crystalline phases)
+   <li> Now would be a good time to <b>set the correct wavelength</b>: just input 1.52904 in the wavelength field. This is synchrotron data, so you should put 0.98 in the <b>linear polarization</b> rate field.
+   <li> OK, to obtain reasonable fit you need to <b>choose adequate profile parameters</b>. Approximate parameters will be sufficient for our needs, so using a W parameter of .001 with U=V=0, a pseudo-Voigt profile with Eta0=0.5 and Eta1 will do. (you can change the values and update the graph to choose the values). Of course, if you did profile fitting, you can use these values.
+   <li> Now if you want to scale the calculated powder pattern to the obs one, use the powder pattern menu "Pattern -> Fit Scale Factor For R(w)".
+   <li> You can also see that a <b>2theta zero (shift)</b> of 0.02 is necessary (again, this is approximate but sufficient)
+   <li> Finally, for a global optimization it is not necessary to use the entire pattern, so <b>put 0.25 in the max sin(theta)/lambda</b>. (this discards a lot of information but as you'll see it was useless information).
+
+   Maybe you should save now ?
+</ul>
+
+
+<h2>Third step: create the Global Optimization object</h2>
+<ul>
+   <li> Go to the last tab of the Fox window 'Global Optimization', and use the main window's 'Objects' to <b>create a new Monte-Carlo Object</b>.
+   <li> Then we need to tell the algorithm what it is going to optimize (which objects), so we need to <b>declare the powder pattern and the Crystal Structure</b>. So use the 'Objects & Cost Functions'->'Add object to optimize' menu, and add both objects (one at a time). (This is where you see it is useful to set meaningful names for all objects).
+   <li> Then we must <b>tell the algorithm which criterion we want to choose to validate the structure, the 'Cost Functions'</b>. To be unsensitive to profile parameters (which are not too important for structure solution), it is VERY recommended to use the <b>integrated Rwp factors</b>. So use the 'Objects & Cost Functions'->'Add cost function' and choose the 'Best Rw, integrated' function for the X-ray pattern.
+   <li> OK, you're all set ! Normmaly, you should never change the choice of algorithm (<b>Parallel Tempering</b> is better than Simulated Annealing), nor the temperature or displacement amplitude parameters. They are supposed to work with any structure and combination of data.
+
+   Now would be a good time to save using the top 'File'->'Save' menu. You can activate the auto-save option (every hour is a fine setting if you think it's going to take a long time).
+   <li> Now you can <b>Launch the Optimization</b>, using the 'Run'->'Run Optimization' menu of the Monte-Carlo object. If you have left the 3D Crystal structure window and the powder pattern graphs opened, they should be live-updated. Convergence is slow in this case, on average 4 million trials, which can take 30 minutes to a few hours depending on your computer speed.
+   <li> When satisfactory, use the menu to stop the optimization. You can compare to the optimized results in the fox examples.
+</ul>
+
+<h2>Last step: export the crystal Structure</h2>
+<ul>
+   <li> You can export the atomic coordinates by going to the Crystal structure, and use the 'File'->'Save as text' menu. this will save a file with all atom fractionnal coordinates and occupancies. You can compare the structure obtained with the one already refined in the fox example directory.
+</ul>
+*/

@@ -1,0 +1,17 @@
+<IMG SRC="algorithm.png" WIDTH=534 HEIGHT=384 BORDER=0 USEMAP="#map_algorithms">
+
+<MAP NAME="map_algorithms">
+<!-- #$-:Image Map file created by GIMP Imagemap Plugin -->
+<!-- #$-:GIMP Imagemap Plugin by Maurits Rijk -->
+<!-- #$-:Please do not edit lines starting with "#$" -->
+<!-- #$VERSION:1.3 -->
+<!-- #$AUTHOR:Vincent Favre-Nicolin -->
+<AREA SHAPE="RECT" COORDS="28,97,265,118" HREF="#algo_menus">
+<AREA SHAPE="RECT" COORDS="28,119,240,143" HREF="#algo_algo">
+<AREA SHAPE="RECT" COORDS="28,144,329,192" HREF="#algo_temperature">
+<AREA SHAPE="RECT" COORDS="27,194,330,239" HREF="#algo_amplitude">
+<AREA SHAPE="RECT" COORDS="27,240,511,262" HREF="#algo_autosave">
+<AREA SHAPE="RECT" COORDS="27,262,224,286" HREF="#algo_trials">
+<AREA SHAPE="RECT" COORDS="27,286,427,330" HREF="#algo_objects">
+<AREA SHAPE="RECT" COORDS="27,330,426,352" HREF="#algo_costfunction">
+</MAP>
