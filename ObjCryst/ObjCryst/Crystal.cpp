@@ -201,6 +201,8 @@ void Crystal::AddScatteringPower(ScatteringPower *scattPow)
    mScatteringPowerRegistry.Register(*scattPow);
    scattPow->RegisterClient(*this);//:TODO: Should register as (unique) 'owner'.
    this->AddSubRefObj(*scattPow);
+   mClockMaster.AddChild(scattPow->GetClockMaster());
+   mMasterClockScatteringPower.AddChild(scattPow->GetClockMaster());
 }
 
 void Crystal::RemoveScatteringPower(ScatteringPower *scattPow)
@@ -208,6 +210,8 @@ void Crystal::RemoveScatteringPower(ScatteringPower *scattPow)
    VFN_DEBUG_ENTRY("Crystal::RemoveScatteringPower()",2)
    mScatteringPowerRegistry.DeRegister(*scattPow);
    this->RemoveSubRefObj(*scattPow);
+   mClockMaster.RemoveChild(scattPow->GetClockMaster());
+   mMasterClockScatteringPower.RemoveChild(scattPow->GetClockMaster());
    delete scattPow;
    VFN_DEBUG_EXIT("Crystal::RemoveScatteringPower()",2)
 }
@@ -221,6 +225,9 @@ const ScatteringPower& Crystal::GetScatteringPower(const string &name)const
 {
    return mScatteringPowerRegistry.GetObj(name);
 }
+
+const RefinableObjClock& Crystal::GetMasterClockScatteringPower()const
+{ return mMasterClockScatteringPower;}
 
 const ScatteringComponentList& Crystal::GetScatteringComponentList()const
 {

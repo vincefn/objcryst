@@ -152,6 +152,8 @@ class Crystal:public UnitCell
       ScatteringPower& GetScatteringPower(const string &name);
       /// Find a ScatteringPower from its name. Names must be unique in a given Crystal.
       const ScatteringPower& GetScatteringPower(const string &name)const;
+      /// Get the clock which reports all changes in ScatteringPowers
+      const RefinableObjClock& GetMasterClockScatteringPower()const;
       
       /** \brief Get the list of all scattering components
       */
@@ -420,6 +422,8 @@ class Crystal:public UnitCell
       mutable RefinableObjClock mClockNeighborTable;
       /// \internal Last time the dynamical population correction was computed
       mutable RefinableObjClock mClockDynPopCorr;
+      /// master clock recording every change in Scattering Powers
+      RefinableObjClock mMasterClockScatteringPower;
       
       /// Display the enantiomeric (mirror along x) structure in 3D? This can
       /// be helpful for non-centrosymmetric structure which have been solved using
