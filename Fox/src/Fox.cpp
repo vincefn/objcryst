@@ -302,7 +302,7 @@ bool MyApp::OnInit()
    
    WXCrystMainFrame *frame ;
    
-   frame = new WXCrystMainFrame("FOX: Free Objects for Xtal structures v1.5.0.4",
+   frame = new WXCrystMainFrame("FOX: Free Objects for Xtal structures v1.5.1CVS",
                                  wxPoint(50, 50), wxSize(550, 400),!loadFourier);
    // Use the main frame status bar to pass messages to the user
       pMainFrameForUserMessage=frame;
@@ -426,7 +426,6 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
       wxNotebook *notebook = new wxNotebook(this, -1);
 
       wxLayoutConstraints* c = new wxLayoutConstraints;
-      c = new wxLayoutConstraints;
       c->left.SameAs(this, wxLeft, 2);
       c->right.SameAs(this, wxRight, 2);
       c->top.SameAs(this, wxTop, 2);
@@ -481,7 +480,7 @@ void WXCrystMainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
    wxString msg;
    msg.Printf( _T("F.O.X. - Free Objects for Xtal structures\n")
-               _T("Version 1.5.0.4\n\n")
+               _T("Version 1.5.1CVS\n\n")
                _T("(c) 2000-2003 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n")
                _T("    2000-2001 Radovan CERNY, University of Geneva\n\n")
                _T("http://objcryst.sourceforge.net\n")
