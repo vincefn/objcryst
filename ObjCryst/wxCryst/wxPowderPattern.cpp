@@ -893,11 +893,18 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
       list<list<pair<const REAL ,const string > > >::const_iterator comp;
       list<pair<const REAL ,const string > >::const_iterator pos;
       for(comp=mvLabelList.begin();comp!=mvLabelList.end();++comp)
+      {
+         unsigned long ct=0;
          for(pos=comp->begin();pos!=comp->end();++pos)
          {
             const REAL point=pos->first*RAD2DEG;
             if((point>=mMin2Theta)&&(point<=mMax2Theta))
             {
+               if(++ct>500)
+               {
+                  cout <<"Too many labels (>500): displaying only first 500"<<endl;
+                  break;
+               }
                x=this->Data2ScreenX(point);
                const REAL pixel=(pos->first-m2theta(0)*DEG2RAD)/(REAL)m2ThetaStep;
                if(mCalc((long)pixel)>mObs((long)pixel)) yr=mCalc((long)pixel);
@@ -911,6 +918,7 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
                if(loop==5) loop=1;
             }
          }
+      }
    }
    
    mCalcPatternIsLocked=false;
