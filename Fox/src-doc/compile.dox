@@ -36,7 +36,7 @@ Requirements:
 <h2>Check you have OpenGL and glut installed</h2>
 
 <li> For <b>Linux</b>, you need Mesa libraries. Check you have <tt>gl.h</tt>, <tt>glu.h</tt> and <tt>glut.h</tt> in /usr/include/GL/, and the corresponding libraries (libGL, libGLU) These are generally installed by default. NVidia users will need the nVidia drivers.
-<li> For <b>windows</b>, you can use the glut library (glut32.dll) which is along Fox (nothing to do about the dll as long as it is aside Fox.exe), you need to copy the glut32.lib (inside the Fox/src/glut directory) to the borland\bcc55\lib\ directory, and the glut.h (inside the Fox/src/glut directory) header to Borland\bcc55\include\GL\
+<li> For <b>windows</b>, you can use the glut library (glut32.dll) which is along Fox (nothing to do about the dll as long as it is aside Fox.exe), you need to copy the glut32.lib (inside the Fox/glut-win32 directory) to the borland\bcc55\lib\ directory, and the glut.h (inside the Fox/glut-win32 directory) header to Borland\bcc55\include\GL\
 
 <h2>Getting & installing the wxWindows Library</h2>
 
