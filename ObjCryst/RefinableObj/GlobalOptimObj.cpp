@@ -76,6 +76,12 @@ mLastOptimTime(0)
    // if a graphical representation is automatically called upon registration.
    //  gOptimizationObjRegistry.Register(*this);
    
+   static bool need_initRandomSeed=true;
+   if(need_initRandomSeed==true)
+   {
+      srand(time(NULL));
+      need_initRandomSeed=false;
+   }
    // We only copy parameters, so do not delete them !
    mRefParList.SetDeleteRefParInDestructor(false);
    VFN_DEBUG_EXIT("OptimizationObj::OptimizationObj()",5)
@@ -316,15 +322,6 @@ void OptimizationObj::PrepareRefParList()
    VFN_DEBUG_EXIT("OptimizationObj::PrepareRefParList()",6)
 }
 
-void OptimizationObj::InitRandomSeedFromTime()const
-{
-   VFN_DEBUG_MESSAGE("OptimizationObj::InitRandomSeedFromTime()",3)
-   time_t junk;
-   time(&junk);
-   tm *tmp=localtime(&junk);
-   srand((unsigned)( (*tmp).tm_sec+60* (*tmp).tm_min));
-   //for(int i=0;i<20;i++) cout << rand() <<endl;
-}
 void OptimizationObj::InitOptions()
 {
    VFN_DEBUG_MESSAGE("OptimizationObj::InitOptions()",5)
@@ -395,7 +392,6 @@ mNbTrialRetry(0),mMinCostRetry(0)
    mAnnealingScheduleMutation.SetChoice(ANNEALING_EXPONENTIAL);
    mXMLAutoSave.SetChoice(5);//Save after each Run
    gOptimizationObjRegistry.Register(*this);
-   this->InitRandomSeedFromTime();
    VFN_DEBUG_EXIT("MonteCarloObj::MonteCarloObj()",5)
 }
 
@@ -416,7 +412,6 @@ mNbTrialRetry(0),mMinCostRetry(0)
    mAnnealingScheduleMutation.SetChoice(ANNEALING_EXPONENTIAL);
    mXMLAutoSave.SetChoice(5);//Save after each Run
    if(false==internalUseOnly) gOptimizationObjRegistry.Register(*this);
-   this->InitRandomSeedFromTime();
    VFN_DEBUG_EXIT("MonteCarloObj::MonteCarloObj(bool)",5)
 }
 

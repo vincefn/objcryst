@@ -210,8 +210,6 @@ class OptimizationObj
       /// \internal Prepare mRefParList for the refinement
       void PrepareRefParList();
       
-      /// \internal Initialize random seed from time
-      void InitRandomSeedFromTime()const;
       /// Initialization of options.
       virtual void InitOptions();
       /// Update Display (if any display is available), when a new 'relevant' configuration

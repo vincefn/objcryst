@@ -1125,8 +1125,6 @@ class RefinableObj
       /// \internal Remove an object in the registry of used objects.
       void RemoveSubRefObj(RefinableObj &);
       
-      /// \internal Init the seed for random number generation from current time.
-      void InitRandomSeedFromTime()const;
       /// \internal Add an option for this parameter
       void AddOption(RefObjOpt *opt);
       /// \internal Prepare everything (if necessary) for an optimization/calculation.

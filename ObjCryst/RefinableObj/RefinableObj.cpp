@@ -681,8 +681,9 @@ WXCrystObjBasic* RefinablePar::WXCreate(wxWindow *parent)
    {
       throw ObjCrystException((string)"RefinablePar::WXCreate():"+this->GetName()+(string)" WXFieldRefPar already exists !");
    }
-   mpWXFieldRefPar=new WXFieldRefPar (parent,this->GetName(),this);
-   return (WXCrystObjBasic*) mpWXFieldRefPar;
+   //mpWXFieldRefPar=new WXFieldRefPar (parent,this->GetName(),this);
+   WXCrystObjBasic *tmp=new WXFieldRefPar (parent,this->GetName(),this);
+   return (WXCrystObjBasic*) tmp;
 }
 WXCrystObjBasic* RefinablePar::WXGet()
 {
@@ -1623,12 +1624,6 @@ void RefinableObj::EndOptimization()
 void RefinableObj::RandomizeConfiguration()
 {
    VFN_DEBUG_ENTRY("RefinableObj::RandomizeConfiguration():"<<mName,5)
-   static bool need_initRandomSeed=true;
-   if(need_initRandomSeed==true)
-   {
-      this->InitRandomSeedFromTime();
-      need_initRandomSeed=false;
-   }
    this->PrepareForRefinement();
    for(int j=0;j<this->GetNbParNotFixed();j++)
    {
@@ -1888,15 +1883,6 @@ void RefinableObj::RemoveSubRefObj(RefinableObj &obj)
    VFN_DEBUG_MESSAGE("RefinableObj::RemoveSubRefObj()",3)
    mSubObjRegistry.DeRegister(obj);
    mClockMaster.RemoveChild(obj.GetClockMaster());
-}
-
-void RefinableObj::InitRandomSeedFromTime()const
-{
-   VFN_DEBUG_MESSAGE("RefinableObj::InitRandomSeedFromTime()",3)
-   time_t junk;
-   time(&junk);
-   tm *tmp=localtime(&junk);
-   srand((unsigned)( (*tmp).tm_sec+60* (*tmp).tm_min));
 }
 
 void RefinableObj::AddOption(RefObjOpt *opt)
