@@ -62,6 +62,39 @@ template<class T> T * WXDialogChooseFromVector(vector<T*> &reg,wxWindow*parent,
    delete[] choices;
    return reg[choice];
 }
+
+template<class T> list<T *> WXDialogChooseMultipleFromVector(vector<T*> &reg,wxWindow*parent,
+                                                const string &message)
+{
+   wxString *choices = new wxString[reg.size()];
+   for(unsigned int i=0;i<reg.size();i++) 
+      choices[i]=(reg[i]->GetName()).c_str();
+   wxMultiChoiceDialog dialog
+         (parent,message.c_str(),"Choose",reg.size(),choices,wxOK | wxCANCEL);
+   dialog.SetSize(300,300);
+   dialog.ShowModal();
+   wxArrayInt choice=dialog.GetSelections();
+   list<T*> vChoice;
+   for(unsigned int i=0;i<choice.GetCount();++i) vChoice.push_back(reg[choice.Item(i)]);
+   delete[] choices;
+   return vChoice;
+}
+template<class T> list<T const*> WXDialogChooseMultipleFromVector(const vector<T*> &reg,wxWindow*parent,
+                                                const string &message)
+{
+   wxString *choices = new wxString[reg.size()];
+   for(unsigned int i=0;i<reg.size();i++) 
+      choices[i]=(reg[i]->GetName()).c_str();
+   wxMultiChoiceDialog dialog
+         (parent,message.c_str(),"Choose",reg.size(),choices,wxOK | wxCANCEL);
+   dialog.SetSize(300,300);
+   dialog.ShowModal();
+   wxArrayInt choice=dialog.GetSelections();
+   list<T const*> vChoice;
+   for(unsigned int i=0;i<choice.GetCount();++i) vChoice.push_back(reg[choice.Item(i)]);
+   delete[] choices;
+   return vChoice;
+}
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXMolScrolledWindow
@@ -879,11 +912,18 @@ void WXMolecule::OnMenuRemoveAtom(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXMolecule::OnMenuRemoveAtom()",6)
    vector<MolAtom*> v=mpMolecule->GetAtomList();
+   #if 0
    int choice;
    MolAtom *at=WXDialogChooseFromVector(v,
                                (wxWindow*)this,"Choose the Atom to be removed",choice);
    if(0==at) return;
    mpMolecule->RemoveAtom(*at);
+   #else
+   list<MolAtom*> vAt=WXDialogChooseMultipleFromVector(v,(wxWindow*)this,
+                                                       "Choose the Atom(s) to be removed");
+   if(0==vAt.size()) return;
+   for(list<MolAtom*>::iterator pos=vAt.begin();pos!=vAt.end();++pos) mpMolecule->RemoveAtom(**pos);
+   #endif
    this->CrystUpdate();
    VFN_DEBUG_EXIT("WXMolecule::OnMenuRemoveAtom()",6)
 }
@@ -892,11 +932,18 @@ void WXMolecule::OnMenuRemoveBond(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXMolecule::OnMenuRemoveBond()",6)
    vector<MolBond*> v=mpMolecule->GetBondList();
+   #if 0
    int choice;
    MolBond *b=WXDialogChooseFromVector(v,
                                (wxWindow*)this,"Choose the Bond to be removed",choice);
    if(0==b) return;
    mpMolecule->RemoveBond(*b);
+   #else
+   list<MolBond*> vBond=WXDialogChooseMultipleFromVector(v,(wxWindow*)this,
+                                                         "Choose the Bond(s) to be removed");
+   if(0==vBond.size()) return;
+   for(list<MolBond*>::iterator pos=vBond.begin();pos!=vBond.end();++pos) mpMolecule->RemoveBond(**pos);
+   #endif
    this->CrystUpdate();
    VFN_DEBUG_EXIT("WXMolecule::OnMenuRemoveBond()",6)
 }
@@ -905,11 +952,19 @@ void WXMolecule::OnMenuRemoveAngle(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXMolecule::OnMenuRemoveAngle()",6)
    vector<MolBondAngle*> v=mpMolecule->GetBondAngleList();
+   #if 0
    int choice;
    MolBondAngle *a=WXDialogChooseFromVector(v,
                                (wxWindow*)this,"Choose the Bond Angle to be removed",choice);
    if(0==a) return;
    mpMolecule->RemoveBondAngle(*a);
+   #else
+   list<MolBondAngle*> vAngle=WXDialogChooseMultipleFromVector(v,(wxWindow*)this,
+                                                              "Choose the Bond Angle(s) to be removed");
+   if(0==vAngle.size()) return;
+   for(list<MolBondAngle*>::iterator pos=vAngle.begin();pos!=vAngle.end();++pos)
+      mpMolecule->RemoveBondAngle(**pos);
+   #endif
    this->CrystUpdate();
    VFN_DEBUG_EXIT("WXMolecule::OnMenuRemoveAngle()",6)
 }
@@ -918,11 +973,19 @@ void WXMolecule::OnMenuRemoveDihedralAngle(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXMolecule::OnMenuRemoveDihedralAngle()",6)
    vector<MolDihedralAngle*> v=mpMolecule->GetDihedralAngleList();
+   #if 0
    int choice;
    MolDihedralAngle *a=WXDialogChooseFromVector(v,
                                (wxWindow*)this,"Choose the Dihedral Angle to be removed",choice);
    if(0==a) return;
    mpMolecule->RemoveDihedralAngle(*a);
+   #else
+   list<MolDihedralAngle*> vAngle=WXDialogChooseMultipleFromVector(v,(wxWindow*)this,
+                                     "Choose the Dihedral Angle(s) to be removed");
+   if(0==vAngle.size()) return;
+   for(list<MolDihedralAngle*>::iterator pos=vAngle.begin();pos!=vAngle.end();++pos)
+      mpMolecule->RemoveDihedralAngle(**pos);
+   #endif
    this->CrystUpdate();
    VFN_DEBUG_EXIT("WXMolecule::OnMenuRemoveDihedralAngle()",6)
 }
