@@ -11,7 +11,7 @@ Fox:
 clean:
 	cd src
 	$(MAKE) -f bc32.mak clean
-	cd ..\..\ObjCryst
+	cd ..\ObjCryst
 	$(MAKE) -f bc32.mak cleanall
 
 update:
