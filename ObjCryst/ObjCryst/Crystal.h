@@ -152,11 +152,11 @@ class Crystal:public UnitCell
       ScatteringPower& GetScatteringPower(const string &name);
       
       /** \brief Get the list of all scattering components
-      * \param useDynPopCorr: if true, then the dynamical polpulation correction
-      * will be computed and stored in the list for each component. Else the
-      * dynamical occupancy correction will be set to 1 for all components.
       */
       virtual const ScatteringComponentList& GetScatteringComponentList()const;
+      /** \brief Get the list of all scattering components
+      */
+      const RefinableObjClock& GetClockScattCompList()const;
       /// Prints some info about the crystal
       /// \todo one function to print on one line and a PrintLong() function
       /// \param os the stream to which the information is outputed (default=cout)

@@ -238,6 +238,11 @@ const ScatteringComponentList& Crystal::GetScatteringComponentList()const
    return mScattCompList;
 }
 
+const RefinableObjClock& Crystal::GetClockScattCompList()const
+{
+   return mClockScattCompList;
+}
+
 void Crystal::Print(ostream &os)const
 {
    VFN_DEBUG_MESSAGE("Crystal::Print()",5)
