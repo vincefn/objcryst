@@ -25,7 +25,7 @@
 #include "ObjCryst/PowderPattern.h"
 #include "ObjCryst/DiffractionDataSingleCrystal.h"
 #include "RefinableObj/GlobalOptimObj.h"
-#include "RefinableObj/GeneticAlgorithm.h"
+//#include "RefinableObj/GeneticAlgorithm.h"
 
 using namespace ObjCryst;
 using namespace std;
@@ -435,8 +435,8 @@ void WXCrystMainFrame::OnAddGlobalOptimObj(wxCommandEvent& WXUNUSED(event))
 }
 void WXCrystMainFrame::OnAddGeneticAlgorithm(wxCommandEvent& WXUNUSED(event))
 {
-   GeneticAlgorithm* obj;
-   obj=new GeneticAlgorithm("Change Me!");
+   //GeneticAlgorithm* obj;
+   //obj=new GeneticAlgorithm("Change Me!");
 }
 void WXCrystMainFrame::OnSetDebugLevel(wxCommandEvent& event)
 {

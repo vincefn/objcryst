@@ -412,8 +412,8 @@ void ScatteringData::GenHKLFullSpace(const double maxTheta,const bool useMultipl
          //tmp=mTheta;
          //cout << FormatVertVectorHKLFloats<double>(mH,mK,mL,tmp,12,4);
       }
-      //generate 20 random atom positions, to check which reflections are equivalent
-         int nbTestPositions=20;
+      //generate 10 random atom positions, to check which reflections are equivalent
+         int nbTestPositions=3;
          {//Init pseudo-random number generator
             time_t junk;
             time(&junk);
@@ -468,7 +468,7 @@ void ScatteringData::GenHKLFullSpace(const double maxTheta,const bool useMultipl
             bool test;
             do
             {
-      			VFN_DEBUG_MESSAGE("...Multiplicity 3",1)
+      			VFN_DEBUG_MESSAGE("...Multiplicity 3, IgnoreImagScattFact="<<mIgnoreImagScattFact,10)
                compare=0;
                if(true==mIgnoreImagScattFact) //Friedel pairs are equivalent.
                   for(int i=0;i<nbTestPositions;i++) 
@@ -694,17 +694,17 @@ void ScatteringData::SetIsIgnoringImagScattFact(const bool b)
 }
 bool ScatteringData::IsIgnoringImagScattFact() const {return mIgnoreImagScattFact;}
 
-void ScatteringData::PrintFhklCalc()const
+void ScatteringData::PrintFhklCalc(ostream &os)const
 {
    VFN_DEBUG_ENTRY("ScatteringData::PrintFhklCalc()",5)
    this->GetFhklCalcSq();
    CrystVector_double theta;
    theta=mTheta;
    theta *= RAD2DEG;
-   cout <<" Number of reflections:"<<mNbRefl<<endl;
-   cout <<"       H        K        L     F(hkl)^2     Re(F)         Im(F)";
-   cout <<"        Theta       1/2d"<<endl;
-   cout << FormatVertVectorHKLFloats<double>
+   os <<" Number of reflections:"<<mNbRefl<<endl;
+   os <<"       H        K        L     F(hkl)^2     Re(F)         Im(F)";
+   os <<"        Theta       1/2d"<<endl;
+   os << FormatVertVectorHKLFloats<double>
                (mH,mK,mL,mFhklCalcSq,mFhklCalcReal,mFhklCalcImag,theta,mSinThetaLambda,12,4);
    VFN_DEBUG_EXIT("ScatteringData::PrintFhklCalc()",5)
 }

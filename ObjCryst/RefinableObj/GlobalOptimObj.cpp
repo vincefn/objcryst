@@ -279,7 +279,7 @@ OptimizationObj(name),
 mCurrentCost(-1),
 mHistoryNb(0),mHistoryTrialNumber(1000),mHistoryCostFunction(1000),
 mHistorySavedParamSetIndex(1000),
-mHistorySaveAfterEachOptim(true),mHistorySaveFileName("GlobalOptim_history.out"),
+mHistorySaveAfterEachOptim(false),mHistorySaveFileName("GlobalOptim_history.out"),
 mLastParSavedSetIndex(-1),
 mTemperatureMax(.03),mTemperatureMin(.003),
 mMutationAmplitudeMax(16.),mMutationAmplitudeMin(.125)
@@ -471,8 +471,8 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
                                     *pow(mMutationAmplitudeMin/mMutationAmplitudeMax,
                                           mNbTrial/(double)nbSteps);break;
                   case ANNEALING_SMART:
-                     if((nbAcceptedMovesTemp/(double)nbTryPerTemp)>0.7) mMutationAmplitude*=2.;
-                     if((nbAcceptedMovesTemp/(double)nbTryPerTemp)<0.3) mMutationAmplitude/=2.;
+                     if((nbAcceptedMovesTemp/(double)nbTryPerTemp)>0.3) mMutationAmplitude*=2.;
+                     if((nbAcceptedMovesTemp/(double)nbTryPerTemp)<0.1) mMutationAmplitude/=2.;
                      if(mMutationAmplitude>mMutationAmplitudeMax) 
 								mMutationAmplitude=mMutationAmplitudeMax;
                      if(mMutationAmplitude<mMutationAmplitudeMin) 
@@ -568,7 +568,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
          //Total number of parallel refinements,each is a 'World'. The most stable
          // world must be i=nbWorld-1, and the most changing World (high mutation,
          // high temperature) is i=0.
-            const long nbWorld=10;
+            const long nbWorld=30;
          // Init the different temperatures
             CrystVector_double simAnnealTemp(nbWorld);
             for(int i=0;i<nbWorld;i++)
@@ -585,7 +585,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
                      simAnnealTemp(i)=mTemperatureMax
                                     *pow(mTemperatureMin/mTemperatureMax,
                                           i/(double)(nbWorld-1));break;
-                  case ANNEALING_SMART:break;//:TODO:
+                  case ANNEALING_SMART:simAnnealTemp(i)=.1;//will be updated later
                   default: simAnnealTemp(i)=mTemperatureMin;break;
                }
             }
@@ -728,8 +728,8 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
 				#if 1
             //Try mating worlds- NEW !
    			if( (rand()/(double)RAND_MAX)<.1)
-            for(int k=nbWorld-1;k>0;k--)
-            	for(int i=0;i<k;i++)
+            for(int k=nbWorld-1;k>nbWorld/2;k--)
+            	for(int i=k-nbWorld/3;i<k;i++)
             	{
 						#if 0
 						// Random switching of gene groups
@@ -852,14 +852,26 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const double finalco
                {
                   for(int i=0;i<nbWorld;i++)
                   {
-                     if((worldNbAcceptedMoves(i)/(double)nbTrialsReport)>0.7)
+                     if((worldNbAcceptedMoves(i)/(double)nbTrialsReport)>0.30)
                         mutationAmplitude(i)*=2.;
-                     if((worldNbAcceptedMoves(i)/(double)nbTrialsReport)<0.3)
+                     if((worldNbAcceptedMoves(i)/(double)nbTrialsReport)<0.10)
                         mutationAmplitude(i)/=2.;
                      if(mutationAmplitude(i)>mMutationAmplitudeMax) 
 								mutationAmplitude(i)=mMutationAmplitudeMax;
                      if(mutationAmplitude(i)<mMutationAmplitudeMin)
 								mutationAmplitude(i)=mMutationAmplitudeMin;
+                  }
+               }
+               if(ANNEALING_SMART==mAnnealingScheduleTemp.GetChoice())
+               {
+                  for(int i=0;i<nbWorld;i++)
+                  {
+                     if((worldNbAcceptedMoves(i)/(double)nbTrialsReport)>0.30)
+                        simAnnealTemp(i)/=1.5;
+                     if((worldNbAcceptedMoves(i)/(double)nbTrialsReport)<0.10)
+                        simAnnealTemp(i)*=1.5;
+                     if(simAnnealTemp(i)>mTemperatureMax) simAnnealTemp(i)=mTemperatureMax;
+                     if(simAnnealTemp(i)<mTemperatureMin) simAnnealTemp(i)=mTemperatureMin;
                   }
                }
                worldNbAcceptedMoves=0;

@@ -1047,7 +1047,7 @@ void ZScatterer::GlobalOptRandomMove(const double mutationAmplitude)
 	//
 	// Should try to do better by really minimizing the conformation
 	// changes
-   if( (rand()/(double)RAND_MAX)<.01)//.01
+   if( (rand()/(double)RAND_MAX)<.02)//.01
 	{
 		// Build mpZMoveMinimizer object
 		if(0==mpZMoveMinimizer)
@@ -1226,9 +1226,9 @@ void ZScatterer::GlobalOptRandomMove(const double mutationAmplitude)
 				const double tmp=mpZMoveMinimizer->GetCostFunctionValue(0);
 				if(tmp>.05)
 				{
-					if(tmp<1) mpZMoveMinimizer->MinimizeChange(500);
-					else if(tmp<5) mpZMoveMinimizer->MinimizeChange(1000);
-						  else mpZMoveMinimizer->MinimizeChange(5000);
+					if(tmp<1) mpZMoveMinimizer->MinimizeChange(200);
+					else if(tmp<5) mpZMoveMinimizer->MinimizeChange(400);
+						  else mpZMoveMinimizer->MinimizeChange(1000);
 				}
 				//cout <<" -> "<<mpZMoveMinimizer->GetCostFunctionValue(0)<<endl;
 			}

@@ -657,20 +657,22 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
 	}
 	if(event.LeftUp() && mIsDragging)
 	{//Finished zooming !
+   	VFN_DEBUG_MESSAGE("WXPowderPatternGraph::OnMouse():Finished zooming...",5)
 		mIsDragging=false;
 		#ifdef __WINDOWS__
-		return;
+		//return;
 		#endif
-		if(abs(ttheta-mDragging2Theta0)<.01) return;
+		if(abs(ttheta-mDragging2Theta0)<.3) return;
+		if(abs(mDraggingIntensity0-intensity)< abs(mMaxIntensity*.05)) return;
 		if(mDraggingIntensity0>intensity)
 		{
-			if((mDraggingIntensity0-intensity)<(mDraggingIntensity0*.01)) return;
+			if(mDraggingIntensity0<0.) return;
 			mMinIntensity=intensity;
 			mMaxIntensity=mDraggingIntensity0;
 		}
 		else
 		{
-			if((intensity-mDraggingIntensity0)<(intensity*.01)) return;
+			if(intensity<0.) return;
 			mMinIntensity=mDraggingIntensity0;
 			mMaxIntensity=intensity;
 		}
@@ -799,6 +801,8 @@ void WXPowderPatternBackground::OnMenuImportUserBackground(wxCommandEvent & WXUN
 ////////////////////////////////////////////////////////////////////////
 BEGIN_EVENT_TABLE(WXPowderPatternDiffraction, wxWindow)
    EVT_BUTTON(ID_POWDERSPECTRUMDIFF_CRYSTAL,WXPowderPatternDiffraction::OnChangeCrystal)
+   EVT_MENU(ID_POWDERSPECTRUMDIFF_SAVEHKLFCALC, 
+                     WXPowderPatternDiffraction::OnMenuSaveHKLFcalc)
 END_EVENT_TABLE()
 
 WXPowderPatternDiffraction::WXPowderPatternDiffraction(wxWindow *parent,
@@ -807,6 +811,9 @@ WXRefinableObj(parent,p),mpPowderPatternDiffraction(p)
 {
    mpWXTitle->SetForegroundColour(wxColour(0,255,0));
     //Menu
+      mpMenuBar->AddMenu("Object",ID_REFOBJ_MENU_OBJ);
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUMDIFF_SAVEHKLFCALC,
+										  "Save HKL Fcalc");
     // Crystal Choice
       mpFieldCrystal=new WXFieldChoice(this,ID_POWDERSPECTRUMDIFF_CRYSTAL,"Crystal:",300);
       mpSizer->Add(mpFieldCrystal,0,wxALIGN_LEFT);
@@ -861,6 +868,17 @@ void WXPowderPatternDiffraction::OnChangeCrystal(wxCommandEvent & WXUNUSED(event
    if(0==cryst) return;
    mpPowderPatternDiffraction->SetCrystal(*cryst);
    this->CrystUpdate();
+}
+void WXPowderPatternDiffraction::OnMenuSaveHKLFcalc(wxCommandEvent & WXUNUSED(event))
+{
+   VFN_DEBUG_MESSAGE("WXPowderPatternDiffraction::OnMenuSaveHKLFcalc()",6)
+   wxFileDialog save(this,"Choose a file to save to","","","*.txt",wxSAVE | wxOVERWRITE_PROMPT);
+   if(save.ShowModal() != wxID_OK) return;
+   
+   ofstream out(save.GetPath().c_str());
+   if(!out) return;//:TODO:
+   mpPowderPatternDiffraction->PrintFhklCalc(out);
+   out.close();
 }
 
 }// namespace 

@@ -263,9 +263,11 @@ mPolarAfactor(1.),
 mUseOnlyLowAngleData(false),
 mUseOnlyLowAngleDataLimit(0.)
 {
+   VFN_DEBUG_MESSAGE("PowderPatternDiffraction::PowderPatternDiffraction()",10);
    mIsScalable=true;
    this->InitOptions();
    mReflectionProfileType.SetChoice(PROFILE_PSEUDO_VOIGT);
+	this->SetIsIgnoringImagScattFact(true);
 }
 
 PowderPatternDiffraction::PowderPatternDiffraction(const PowderPatternDiffraction &old):

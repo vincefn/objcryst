@@ -303,7 +303,7 @@ class ScatteringData: virtual public RefinableObj
       /** \brief Print H, K, L F^2 Re(F) Im(F) theta sin(theta)/lambda for all reflections
       *
       */
-      virtual void PrintFhklCalc()const;
+      virtual void PrintFhklCalc(ostream &os=cout)const;
 
    protected:
       /// \internal This function is called after H,K and L arrays have 

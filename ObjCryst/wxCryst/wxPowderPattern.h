@@ -137,6 +137,7 @@ class WXPowderPatternDiffraction: public WXRefinableObj
       WXPowderPatternDiffraction(wxWindow *parent, PowderPatternDiffraction*);
       void CrystUpdate();
       void OnChangeCrystal(wxCommandEvent & WXUNUSED(event));
+		void OnMenuSaveHKLFcalc(wxCommandEvent & WXUNUSED(event));
    private:
       PowderPatternDiffraction *mpPowderPatternDiffraction;
       WXFieldChoice* mpFieldCrystal;
