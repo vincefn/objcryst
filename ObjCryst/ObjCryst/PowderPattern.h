@@ -54,7 +54,7 @@ class PowderPatternComponent : virtual public RefinableObj
       /// the background.
       const PowderPattern& GetParentPowderPattern()const;
       /// Set the PowderPattern object which uses this component.
-      /// This sets all necessary pattern parameters (2theta range,
+      /// This sets all necessary pattern parameters (2theta/tof range,
       /// wavelength, radiation type...) accordingly.
       /// 
       virtual void SetParentPowderPattern(const PowderPattern&)=0;
@@ -191,7 +191,7 @@ class PowderPatternBackground : public PowderPatternComponent
       virtual const CrystVector_REAL& GetPowderPatternCalc()const;
       virtual pair<const CrystVector_REAL*,const RefinableObjClock*>
          GetPowderPatternIntegratedCalc()const;
-      /// Import background points from a file (with two columns 2theta, intensity)
+      /// Import background points from a file (with two columns 2theta (or tof), intensity)
       void ImportUserBackground(const string &filename);
       void SetInterpPoints(const CrystVector_REAL tth, const CrystVector_REAL backgd);
       virtual void XMLOutput(ostream &os,int indent=0)const;
@@ -225,7 +225,7 @@ class PowderPatternBackground : public PowderPatternComponent
       /// Number of fitting points for background
       int mBackgroundNbPoint;
       /// Vector of 2theta values for the fitting points of the background
-      CrystVector_REAL mBackgroundInterpPoint2Theta;
+      CrystVector_REAL mBackgroundInterpPointX;
       /// Values of background at interpolating points
       CrystVector_REAL mBackgroundInterpPointIntensity;
       
@@ -385,12 +385,18 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
          mutable CrystVector_REAL mIhklCalcVariance;
       
       // Saved arrays to speed-up computations
+         /// Profile of a single reflection
+         struct ReflProfile
+         {
+            /// First point of the pattern for which the profile is calculated
+            unsigned long first;
+            /// Last point of the pattern for which the profile is calculated
+            unsigned long last;
+            /// The profile
+            CrystVector_REAL profile;
+         };
          ///Reflection profiles for ALL reflections during the last powder pattern generation
-         mutable CrystMatrix_REAL mSavedPowderReflProfile;
-         /// \internal Number of points used to describe each individual profile
-         mutable long mSavedPowderReflProfileNbPoint;
-         /// \internal The 1st pixel for each reflection
-         mutable CrystVector_long mReflectionProfileFirstPixel;
+         mutable vector<ReflProfile> mvReflProfile;
          /// First and last pixel for integrated R-factors around each reflection
          mutable CrystVector_long mIntegratedReflMin,mIntegratedReflMax;
       
@@ -400,7 +406,7 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
          *
          * The first field is the first integration interval to which the reflection
          * contributes, and the second field is a vector with all the integrated
-         * values for the intervals, listed in ascending 2theta order.
+         * values for the intervals, listed in ascending 2theta(tof) order.
          */
          mutable vector< pair<unsigned long, CrystVector_REAL> > mIntegratedProfileFactor;
          /// Last time the integrated values of normalized profiles was calculated.
@@ -454,13 +460,26 @@ class PowderPattern : public RefinableObj
          *   Use this with caution, as the number of points must be correct with
          * respect to the observed data (Iobs).
          *
-         * \param tthetaMin: min 2theta value, in radians
-         * \param tthetaStep: step (assumed constant) in 2theta.
+         * \param min: min 2theta (in radians) or time-of-flight 
+         *(in microseconds) value, 
+         * \param step: step (assumed constant) in 2theta or time-of-flight 
+         * (in microseconds).
          * \param nbPoints: number of points in the pattern.
+         *
+         * \warning : use only this for constant-step patterns. Otherwise, use
+         * PowderPattern::SetPowderPatternX()
          */
-         void SetPowderPatternPar(const REAL tthetaMin,
-                                           const REAL tthetaStep,
-                                           unsigned long nbPoint);
+         void SetPowderPatternPar(const REAL min,
+                                  const REAL step,
+                                  unsigned long nbPoint);
+         /** Set the x coordinate of the powder pattern : either the
+         * 2theta or time-of-flight values for each recorded point. The 
+         * step need not be constant, but the variation must be strictly 
+         * monotonous.
+         *
+         * 2theta must be in radians and time-of-flight in microseconds
+         */
+         void SetPowderPatternX(const CrystVector_REAL &x);
          ///Number of points ?
          unsigned long GetNbPoint()const;
          
@@ -473,7 +492,11 @@ class PowderPattern : public RefinableObj
          void SetRadiationType(const RadiationType radiation);
          ///Neutron or x-ray experiment ?
          RadiationType GetRadiationType()const;
-         ///Set the wavelength of the experiment (in Angstroems).
+         /** Set the wavelength of the experiment (in Angstroems).
+         *
+         * \note: this is only useful for a monochromatic (X-Ray or neutron)
+         * powder pattern.
+         */
          void SetWavelength(const REAL lambda);
 
          /** \brief Set the wavelength of the experiment to that of an X-Ray tube.
@@ -513,15 +536,20 @@ class PowderPattern : public RefinableObj
          const CrystVector_REAL& GetPowderPatternVariance()const;
          /// Get the weight for each point of the powder pattern 
          const CrystVector_REAL& GetPowderPatternWeight()const;
-         // Get the 2theta values corresponding to the powder pattern.
-         //Values are returned in radian, and are experimental 2theta values.
-         //CrystVector_REAL Get2Theta()const;
          /// Get the Minimum 2theta
-         REAL Get2ThetaMin()const;
-         /// Get the step in 2theta
-         REAL Get2ThetaStep()const;
+         REAL GetPowderPatternXMin()const;
+         /** Get the average step in 2theta
+         *
+         *  \warning : this will only return (2ThetaMax-2ThetaMin)/(nbPoints-1),
+         * so this is the 2theta step only if the step is fixed.
+         *
+         * \deprecated
+         */
+         REAL GetPowderPatternXStep()const;
          /// Get the maximum 2theta
-         REAL Get2ThetaMax()const;
+         REAL GetPowderPatternXMax()const;
+         /// Get the vector of X (2theta or time-of-flight) coordinates 
+         const CrystVector_REAL& GetPowderPatternX()const;
       
       // Clocks
          /// Last time the pattern was calculated
@@ -530,32 +558,47 @@ class PowderPattern : public RefinableObj
          const RefinableObjClock& GetClockPowderPatternPar()const;
          /// When were the radiation parameter (radiation type, wavelength) changed ?
          const RefinableObjClock& GetClockPowderPatternRadiation()const;
-         /// When were the parameters for 2theta correction (zero, transparency,
+         /// When were the parameters for 2theta/TOF correction (zero, transparency,
          /// displacement) last changed ?
-         const RefinableObjClock& GetClockPowderPattern2ThetaCorr()const;
+         const RefinableObjClock& GetClockPowderPatternXCorr()const;
       
-      // Corrections to 2theta
-         ///Change Zero in 2Theta
-         void Set2ThetaZero(const REAL newZero);
+      // Corrections to the x (2theta, tof) coordinate
+         ///Change Zero in x (2theta,tof)
+         void SetXZero(const REAL newZero);
          /// Change displacement correction
          /// \f$ (2\theta)_{obs} = (2\theta)_{real} + \frac{a}{\cos(\theta)} \f$
          void Set2ThetaDisplacement(const REAL displacement);
          ///Change transparency correction
          /// \f$ (2\theta)_{obs} = (2\theta)_{real} + b\sin(2\theta) \f$
          void Set2ThetaTransparency(const REAL transparency);
-         /// Get the experimental 2theta from the theoretical value, taking
+         /// Get the experimental x (2theta, tof) from the theoretical value, taking
          /// into account all corrections (zero, transparency,..).
          /// \internal
-         /// \param ttheta: the theoretical 2theta value.
-         /// \return the 2theta value as it appears on the pattern.
-         REAL Get2ThetaCorr(const REAL ttheta)const;
+         /// \param ttheta: the theoretical x (2theta, tof) value.
+         /// \return the x (2theta, tof) value as it appears on the pattern.
+         REAL GetXCorr(const REAL x)const;
          /// Get the pixel number on the experimental pattern, from the
-         /// theoretical (uncorrected) value of 2theta, taking into account all corrections.
+         /// theoretical (uncorrected) x coordinate, taking into account all corrections.
          /// (zero, transparency,..).
          /// \internal
-         /// \param ttheta: the theoretical 2theta value.
-         /// \return the 2theta value as it appears on the pattern.
-         long Get2ThetaCorrPixel(const REAL ttheta)const;
+         /// \param x: the theoretical x (2theta, tof) value.
+         /// \return the x (2theta, tof) value as it appears on the pattern.
+         ///
+         /// \warning: this can be real slow, especially for non-fixed steps.
+         ///
+         /// \warning: this returns the exact pixel coordinate, as a floating-point
+         /// value, and \e not the closest pixel coordinate.
+         REAL GetXCorrPixel(const REAL x)const;
+         /// Get the pixel number on the experimental pattern, corresponding
+         /// to a given (experimental) x coordinate
+         /// \param x: the x (2theta, tof) value.
+         /// \return the x (2theta, tof) value as it appears on the pattern.
+         ///
+         /// \warning: this can be real slow, especially for non-fixed steps.
+         ///
+         /// \warning: this returns the exact pixel coordinate, as a floating-point
+         /// value, and \e not the closest pixel coordinate.
+         REAL GetXPixel(const REAL x)const;
 
       // Import & export powder pattern
          /** \brief Import fullprof-style diffraction data.
@@ -658,8 +701,6 @@ class PowderPattern : public RefinableObj
          /// To filter too small or null intensities :If sigma< minRelatSigma* max(sigma),
          /// then w=1/(minRelatSigma* max(sigma))^2
          void SetWeightToInvSigmaSq(const REAL minRelatSigma=1e-3);
-         /// Set w = sin(theta). Not really usful, huh ?
-         void SetWeightToSinTheta(const REAL power=1.);
          /// Set w = 1
          void SetWeightToUnit();
          /// Set w = 1/(a+ Iobs + b*Iobs^2+c*Iobs^3)
@@ -677,7 +718,7 @@ class PowderPattern : public RefinableObj
          /// integrated R factors.
          /// Note that the pattern is still computed in these regions. They are only ignored
          /// by statistics functions (R, Rws).
-         void Add2ThetaExcludedRegion(const REAL min2Theta,const REAL max2theta);
+         void AddExcludedRegion(const REAL min2Theta,const REAL max2theta);
          
       virtual void BeginOptimization(const bool allowApproximations=false,
                                      const bool enableRestraints=false);
@@ -749,10 +790,8 @@ class PowderPattern : public RefinableObj
       /// taking into account observation and model errors. Integrated.
       mutable CrystVector_REAL mPowderPatternVarianceIntegrated;
       
-      /// 2theta min and max for a monochromatic diffraction pattern
-      REAL m2ThetaMin,m2ThetaStep;
-      /// min and max time for a TOF experiment
-      REAL mTOFMin,mTOFMax;
+      /// Vector of x coordinates (either 2theta or time-of-flight) for the pattern
+      CrystVector_REAL mX;
       /// Number of points in the pattern
       unsigned long mNbPoint;
       
@@ -760,7 +799,7 @@ class PowderPattern : public RefinableObj
       Radiation mRadiation;
       
       // Clocks
-         /// When were the pattern parameters (2theta range, step) changed ?
+         /// When were the pattern parameters (2theta or time-of-flight range) changed ?
          RefinableObjClock mClockPowderPatternPar;
          /// When were the radiation parameter (radiation type, wavelength) changed ?
          RefinableObjClock mClockPowderPatternRadiation;
@@ -769,21 +808,21 @@ class PowderPattern : public RefinableObj
          /// When was the powder pattern (integrated) last computed ?
          mutable RefinableObjClock mClockPowderPatternIntegratedCalc;
          /// Corrections to 2Theta
-         RefinableObjClock mClockPowderPattern2ThetaCorr;
+         RefinableObjClock mClockPowderPatternXCorr;
          /// Last modification of the scale factor
          mutable RefinableObjClock mClockScaleFactor;
       
-      //Excluded 2Theta regions in the powder pattern, for statistics.
-         /// Min value for 2theta for all excluded regions
-         CrystVector_REAL mExcludedRegionMin2Theta;
-         /// Max value for 2theta for all excluded regions
-         CrystVector_REAL mExcludedRegionMax2Theta;
+      //Excluded regions in the powder pattern, for statistics.
+         /// Min coordinate for for all excluded regions
+         CrystVector_REAL mExcludedRegionMinX;
+         /// Max coordinate for 2theta for all excluded regions
+         CrystVector_REAL mExcludedRegionMaxX;
   
       //Various corrections to 2theta-to be used by the components
          /// Zero correction :
          /// \f$ (2\theta)_{obs} = (2\theta)_{real} +(2\theta)_{0}\f$
          ///Thus mPowderPattern2ThetaMin=(mPowderPattern2ThetaMin-m2ThetaZero)
-         REAL m2ThetaZero;
+         REAL mXZero;
          /// Displacement correction :
          ///\f$ (2\theta)_{obs} = (2\theta)_{real} + \frac{a}{\cos(\theta)} \f$
          REAL m2ThetaDisplacement;

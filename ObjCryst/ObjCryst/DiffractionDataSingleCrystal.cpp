@@ -244,7 +244,7 @@ Error opening file for input:"+fileName);
    mMultiplicity=1;
    
    this->PrepareHKLarrays();
-   this->SortReflectionByTheta();
+   this->SortReflectionBySinThetaOverLambda();
    {
       char buf [200];
       sprintf(buf,"Imported HKLIobs, with %d reflections",(int)mNbRefl);
@@ -306,7 +306,7 @@ Error opening file for input:"+fileName);
    mMultiplicity=1;
 
    this->PrepareHKLarrays();
-   this->SortReflectionByTheta();
+   this->SortReflectionBySinThetaOverLambda();
    {
       char buf [200];
       sprintf(buf,"Imported HKLIobsSigma, with %d reflections",(int)mNbRefl);
@@ -382,7 +382,7 @@ Error opening file for input:"+fileName);
    mMultiplicity=1;
 
    this->PrepareHKLarrays();
-   this->SortReflectionByTheta();
+   this->SortReflectionBySinThetaOverLambda();
    cout << "Finished storing data..."<< endl ;
 
    mHasObservedData=true;
@@ -857,11 +857,11 @@ void DiffractionDataSingleCrystal::CalcIcalc() const
    mClockIcalc.Click();
 }
 
-CrystVector_long DiffractionDataSingleCrystal::SortReflectionByTheta(const REAL maxTheta)
+CrystVector_long DiffractionDataSingleCrystal::SortReflectionBySinThetaOverLambda(const REAL maxSTOL)
 {
-   TAU_PROFILE("DiffractionDataSingleCrystal::SortReflectionByTheta()","void ()",TAU_DEFAULT);
-   VFN_DEBUG_ENTRY("DiffractionDataSingleCrystal::SortReflectionByTheta()",5)
-   const CrystVector_long index=this->ScatteringData::SortReflectionByTheta(maxTheta);
+   TAU_PROFILE("DiffractionDataSingleCrystal::SortReflectionBySinThetaOverLambda()","void ()",TAU_DEFAULT);
+   VFN_DEBUG_ENTRY("DiffractionDataSingleCrystal::SortReflectionBySinThetaOverLambda()",5)
+   const CrystVector_long index=this->ScatteringData::SortReflectionBySinThetaOverLambda(maxSTOL);
    
    if(mObsIntensity.numElements()==mNbRefl)
    {
@@ -887,7 +887,7 @@ CrystVector_long DiffractionDataSingleCrystal::SortReflectionByTheta(const REAL 
       mObsSigma=1.;
       mWeight=1.;
    }
-   VFN_DEBUG_EXIT("DiffractionDataSingleCrystal::SortReflectionByTheta()",5)
+   VFN_DEBUG_EXIT("DiffractionDataSingleCrystal::SortReflectionBySinThetaOverLambda()",5)
    return index;
 }
 

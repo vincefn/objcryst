@@ -109,9 +109,9 @@ enum RadiationType { RAD_NEUTRON, RAD_XRAY, RAD_ELECTRON};
 enum SampleType { SAMPLE_SINGLE_CRYSTAL, SAMPLE_POWDER};
 /// Incident beam characteristics : monochromatic, X-Ray tube with Alpha1 and alpha2,
 /// MAD (a few wavelengths-UNUSED YET), DAFS (continuous wavelength range-UNUSED YET)
-/// LAUE (UNUSED YET)
+/// LAUE (UNUSED YET), WAVELENGTH_TOF (neutron Time Of Flight)
 enum WavelengthType { WAVELENGTH_MONOCHROMATIC, WAVELENGTH_ALPHA12, WAVELENGTH_MAD,
-                      WAVELENGTH_DAFS , WAVELENGTH_LAUE};
+                      WAVELENGTH_DAFS , WAVELENGTH_LAUE, WAVELENGTH_TOF};
 /// Profile type for powder (could it be used fopr single crystals on 2D detectors ?)
 enum ReflectionProfileType { PROFILE_GAUSSIAN, PROFILE_LORENTZIAN, PROFILE_PSEUDO_VOIGT,
                              PROFILE_PSEUDO_VOIGT_FINGER_COX_JEPHCOAT,

@@ -212,7 +212,7 @@ BEGIN_EVENT_TABLE(WXPowderPattern, wxWindow)
    EVT_MENU(ID_POWDER_MENU_GRAPH,                   WXPowderPattern::OnMenuShowGraph)          
    EVT_MENU(ID_POWDER_MENU_FITSCALE_R,              WXPowderPattern::OnMenuFitScaleForR)       
    EVT_MENU(ID_POWDER_MENU_FITSCALE_RW,             WXPowderPattern::OnMenuFitScaleForRw)      
-   EVT_MENU(ID_POWDER_MENU_ADD_2THETA_EXCLUDE,      WXPowderPattern::OnMenuAdd2ThetaExclude)   
+   EVT_MENU(ID_POWDER_MENU_ADD_2THETA_EXCLUDE,      WXPowderPattern::OnMenuAddExclude)   
    EVT_UPDATE_UI(ID_CRYST_UPDATEUI,                 WXRefinableObj::OnUpdateUI)                
 END_EVENT_TABLE()
 
@@ -316,7 +316,7 @@ WXRefinableObj(parent,pow),mpPowderPattern(pow),mpGraph(0)
                                 "Fit Scale for Rw");
          mpMenuBar->AddMenuItem(ID_POWDERPATTERN_MENU_PATTERN,
                                 ID_POWDER_MENU_ADD_2THETA_EXCLUDE,
-                                "Add 2Theta excluded region");
+                                "Add excluded region");
       mpSizer->SetItemMinSize(mpMenuBar,
                               mpMenuBar->GetSize().GetWidth(),
                               mpMenuBar->GetSize().GetHeight());
@@ -326,9 +326,9 @@ WXRefinableObj(parent,pow),mpPowderPattern(pow),mpGraph(0)
    // Correction to 2Theta
       wxBoxSizer* thetaCorrSizer=new wxBoxSizer(wxHORIZONTAL);
 #if 1
-      WXFieldRefPar* fieldThetaZero    =new WXFieldRefPar(this,"Zero:",
+      WXFieldRefPar* fieldZero    =new WXFieldRefPar(this,"Zero:",
                                    &(mpPowderPattern
-                                     ->GetPar(&(mpPowderPattern->m2ThetaZero))),70 );
+                                     ->GetPar(&(mpPowderPattern->mXZero))),70 );
       WXFieldRefPar* fieldThetaDispl    =new WXFieldRefPar(this,"Displacement:",
                                    &(mpPowderPattern
                                      ->GetPar(&(mpPowderPattern->m2ThetaDisplacement))),70 );
@@ -336,17 +336,17 @@ WXRefinableObj(parent,pow),mpPowderPattern(pow),mpGraph(0)
                                    &(mpPowderPattern
                                      ->GetPar(&(mpPowderPattern->m2ThetaTransparency))),70 );
 #else
-      WXCrystObjBasic* fieldThetaZero    
-         =mpPowderPattern->GetPar(&(mpPowderPattern->m2ThetaZero)).WXCreate(this);
+      WXCrystObjBasic* fieldZero    
+         =mpPowderPattern->GetPar(&(mpPowderPattern->mXZero)).WXCreate(this);
       WXCrystObjBasic* fieldThetaDispl
          =mpPowderPattern->GetPar(&(mpPowderPattern->m2ThetaDisplacement)).WXCreate(this);
       WXCrystObjBasic* fieldThetaTransp
          =mpPowderPattern->GetPar(&(mpPowderPattern->m2ThetaTransparency)).WXCreate(this);
 #endif
-      thetaCorrSizer->Add(fieldThetaZero,0);
+      thetaCorrSizer->Add(fieldZero,0);
       thetaCorrSizer->Add(fieldThetaDispl,0);
       thetaCorrSizer->Add(fieldThetaTransp,0);
-      mList.Add(fieldThetaZero);
+      mList.Add(fieldZero);
       mList.Add(fieldThetaDispl);
       mList.Add(fieldThetaTransp);
       mpSizer->Add(thetaCorrSizer);
@@ -416,10 +416,9 @@ void WXPowderPattern::CrystUpdate()
          if(tmp(i)<0) tmp(i)=0;
          else tmp(i)=sqrt(tmp(i));
       }
-      mpGraph->SetPattern( mpPowderPattern->GetPowderPatternObs(),
+      mpGraph->SetPattern( mpPowderPattern->GetPowderPatternX(),
+                           mpPowderPattern->GetPowderPatternObs(),
                            mpPowderPattern->GetPowderPatternCalc(),
-                           mpPowderPattern->Get2ThetaMin(),
-                           mpPowderPattern->Get2ThetaStep(),
                            tmp);
    }
    this->WXRefinableObj::CrystUpdate();
@@ -452,18 +451,17 @@ void WXPowderPattern::OnMenuAddCompBackgdBayesian(wxCommandEvent & WXUNUSED(even
       return;
    }
    dialog.GetValue().ToLong(&nbPointSpline);
+   if(nbPointSpline<=1)nbPointSpline=2;
    
    PowderPatternBackground *pBckgd= new PowderPatternBackground;
    mpPowderPattern->AddPowderPatternComponent(*pBckgd);
    {
-      CrystVector_REAL tth(nbPointSpline),backgd(nbPointSpline);
-      const REAL tthstep=(pBckgd->GetParentPowderPattern().Get2ThetaMax()
-                          -pBckgd->GetParentPowderPattern().Get2ThetaMin())/(REAL)nbPointSpline;
+      CrystVector_REAL x(nbPointSpline),backgd(nbPointSpline);
       const CrystVector_REAL *pObs=&(pBckgd->GetParentPowderPattern().GetPowderPatternObs());
       const unsigned long nbPoint=pBckgd->GetParentPowderPattern().GetNbPoint();
       for(int i=0;i<nbPointSpline;i++)
       {
-         tth(i)=tthstep*(REAL)i+pBckgd->GetParentPowderPattern().Get2ThetaMin();
+         x(i)=pBckgd->GetParentPowderPattern().GetPowderPatternX()(i*nbPoint/(nbPointSpline-1));
          long n1=(long)((REAL)nbPoint/(REAL)nbPointSpline*((REAL)i-0.2));
          long n2=(long)((REAL)nbPoint/(REAL)nbPointSpline*((REAL)i+0.2));
          if(n1<0) n1=0;
@@ -472,7 +470,7 @@ void WXPowderPattern::OnMenuAddCompBackgdBayesian(wxCommandEvent & WXUNUSED(even
          for(long j=n1;j<n2;j++)
             if((*pObs)(j)<backgd(i))backgd(i)=(*pObs)(j);
       }
-      pBckgd->SetInterpPoints(tth,backgd);
+      pBckgd->SetInterpPoints(x,backgd);
    }
    if(mpGraph!=0) mpPowderPattern->Prepare();//else this will be done when opening the graph
    
@@ -751,38 +749,44 @@ void WXPowderPattern::OnMenuSetWavelength(wxCommandEvent & event)
    this->CrystUpdate();
 }
 
-void WXPowderPattern::OnMenuAdd2ThetaExclude(wxCommandEvent & WXUNUSED(event))
+void WXPowderPattern::OnMenuAddExclude(wxCommandEvent & WXUNUSED(event))
 {
    WXCrystValidateAllUserInput();
    double min,max;
    //min
    {
-      wxTextEntryDialog dialog(this,"Min 2Theta",
-                              "Enter Min 2Theta to exclude (degrees):","0",wxOK | wxCANCEL);
+      string txt="Enter Min 2theta to exclude (degrees):";
+      if(mpPowderPattern->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
+         txt="Enter Min 2theta to exclude (microseconds):";
+      wxTextEntryDialog dialog(this,"Min",txt.c_str(),"0",wxOK | wxCANCEL);
       if(wxID_OK!=dialog.ShowModal())
       {
-         VFN_DEBUG_EXIT("WXPowderPattern::OnMenuAdd2ThetaExclude():Cancelled",6)
+         VFN_DEBUG_EXIT("WXPowderPattern::OnMenuAddExclude():Cancelled",6)
          return;
       }
       dialog.GetValue().ToDouble(&min);
    }
    //max
    {
-      wxTextEntryDialog dialog(this,"Max 2Theta",
-                              "Enter Max 2Theta to exclude (degrees):","5",wxOK | wxCANCEL);
+      string txt="Enter Max 2theta to exclude (degrees):";
+      if(mpPowderPattern->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
+         txt="Enter Max 2theta to exclude (microseconds):";
+      wxTextEntryDialog dialog(this,"Max",txt.c_str(),"5",wxOK | wxCANCEL);
       if(wxID_OK!=dialog.ShowModal())
       {
-         VFN_DEBUG_EXIT("WXPowderPattern::OnMenuAdd2ThetaExclude():Cancelled",6)
+         VFN_DEBUG_EXIT("WXPowderPattern::OnMenuAddExclude():Cancelled",6)
          return;
       }
       dialog.GetValue().ToDouble(&max);
    }
    if(max<min)
    {
-      VFN_DEBUG_EXIT("WXPowderPattern::OnMenuAdd2ThetaExclude():Stupid user.",6)
+      VFN_DEBUG_EXIT("WXPowderPattern::OnMenuAddExclude():Stupid user.",6)
       return;
    }
-   mpPowderPattern->Add2ThetaExcludedRegion(min*DEG2RAD,max*DEG2RAD);
+   if(mpPowderPattern->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
+      mpPowderPattern->AddExcludedRegion(min,max);
+   else mpPowderPattern->AddExcludedRegion(min*DEG2RAD,max*DEG2RAD);
 }
 
 void WXPowderPattern::NotifyDeleteGraph() {mpGraph=0;}
@@ -817,7 +821,7 @@ END_EVENT_TABLE()
 WXPowderPatternGraph::WXPowderPatternGraph(wxFrame *frame, WXPowderPattern* parent):
 wxWindow(frame,-1,wxPoint(-1,-1),wxSize(-1,-1)),
 mpPattern(parent),mMargin(50),mDiffPercentShift(.20),
-mMaxIntensity(-1),mMinIntensity(-1),mMin2Theta(-1),mMax2Theta(-1),
+mMaxIntensity(-1),mMinIntensity(-1),mMinX(-1),mMaxX(-1),
 mpParentFrame(frame),
 mCalcPatternIsLocked(false),mIsDragging(false),mDisplayLabel(true)
 {
@@ -863,8 +867,8 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():2:"<<mObs.numElements(),5)
 
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():3:mFirst="
-                     <<mFirst<<"("<<m2theta(mFirst)<<"),mLast="
-                     <<mLast<<"("<<m2theta(mLast)<<"),width="
+                     <<mFirst<<"("<<mX(mFirst)<<"),mLast="
+                     <<mLast<<"("<<mX(mLast)<<"),width="
                      <<width<<",margin="<<mMargin,5)
    // Draw sigma bars
    {
@@ -901,9 +905,9 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
          }
       //X axis
          yc=(wxCoord)(height-mMargin);
-         REAL xStep=pow((float)10,(float)floor(log10((mMax2Theta-mMin2Theta)/nbTick)));
-         xStep *= floor((mMax2Theta-mMin2Theta)/xStep/nbTick);
-         for(REAL x=xStep*ceil(mMin2Theta/xStep);x<mMax2Theta;x+=xStep)
+         REAL xStep=pow((float)10,(float)floor(log10((mMaxX-mMinX)/nbTick)));
+         xStep *= floor((mMaxX-mMinX)/xStep/nbTick);
+         for(REAL x=xStep*ceil(mMinX/xStep);x<mMaxX;x+=xStep)
          {
             xc=this->Data2ScreenX(x);
             dc.DrawLine(xc,yc-3,xc,yc+3);
@@ -967,7 +971,7 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
          for(pos=comp->begin();pos!=comp->end();++pos)
          {
             const REAL point=pos->first*RAD2DEG;
-            if((point>=mMin2Theta)&&(point<=mMax2Theta))
+            if((point>=mMinX)&&(point<=mMaxX))
             {
                if(++ct>500)
                {
@@ -975,7 +979,7 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
                   break;
                }
                x=this->Data2ScreenX(point);
-               const REAL pixel=(pos->first-m2theta(0)*DEG2RAD)/(REAL)m2ThetaStep;
+               const REAL pixel=mpPattern->GetPowderPattern().GetXPixel(pos->first);
                if(mCalc((long)pixel)>mObs((long)pixel)) yr=mCalc((long)pixel);
                else yr=mObs((long)pixel);
                y=this->Data2ScreenY(yr);
@@ -1024,14 +1028,14 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
 
       wxString str;
       const long pixel=
-         mpPattern->GetPowderPattern().Get2ThetaCorrPixel(ttheta*DEG2RAD);
-      str.Printf("2Theta=%6.2f    ,I=%12.2f.   pixel=#%ld",ttheta,intensity,pixel);
+         (long)(mpPattern->GetPowderPattern().GetXCorrPixel(ttheta*DEG2RAD));
+      str.Printf("X=%6.2f    ,I=%12.2f.   pixel=#%ld",ttheta,intensity,pixel);
       mpParentFrame->SetStatusText(str);
 
    if (event.Dragging() && event.LeftIsDown() && (!mIsDragging))
    {//Begin zooming
       mIsDragging=true;
-      mDragging2Theta0=ttheta;
+      mDraggingX0=ttheta;
       mDraggingIntensity0=intensity;
       return;
    }
@@ -1040,7 +1044,7 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
       VFN_DEBUG_MESSAGE("WXPowderPatternGraph::OnMouse():Finished zooming...",5)
       mIsDragging=false;
       
-      if( (fabs(ttheta-mDragging2Theta0)<.1) || (fabs(mDraggingIntensity0-intensity)< fabs(mMaxIntensity*.02)) )
+      if( (fabs(ttheta-mDraggingX0)<.1) || (fabs(mDraggingIntensity0-intensity)< fabs(mMaxIntensity*.02)) )
       {
          return;
       }
@@ -1056,27 +1060,27 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
          mMinIntensity=mDraggingIntensity0;
          mMaxIntensity=intensity;
       }
-      if(mDragging2Theta0>ttheta)
+      if(mDraggingX0>ttheta)
       {
-         mMin2Theta=ttheta;
-         mMax2Theta=mDragging2Theta0;
+         mMinX=ttheta;
+         mMaxX=mDraggingX0;
       }
       else
       {
-         mMin2Theta=mDragging2Theta0;
-         mMax2Theta=ttheta;
+         mMinX=mDraggingX0;
+         mMaxX=ttheta;
       }
-      const long nbpoints=m2theta.numElements();
+      const long nbpoints=mX.numElements();
       bool flag=true;
       for(long i=0;i<nbpoints;i++)
       {
-         if(flag) if(m2theta(i)>=mMin2Theta) {mFirst=i;flag=false;}
-         if(m2theta(i)>=mMax2Theta) {mLast=i;break;}
+         if(flag) if(mX(i)>=mMinX) {mFirst=i;flag=false;}
+         if(mX(i)>=mMaxX) {mLast=i;break;}
       }
       if(mFirst>=(nbpoints-1)) mFirst=nbpoints-2;
       if(mLast>=nbpoints) mLast=nbpoints-1;
-      mMin2Theta=m2theta(mFirst);
-      mMax2Theta=m2theta(mLast);
+      mMinX=mX(mFirst);
+      mMaxX=mX(mLast);
       mClockAxisLimits.Click();
       wxUpdateUIEvent event(ID_POWDER_GRAPH_NEW_PATTERN);
       wxPostEvent(this,event);
@@ -1106,10 +1110,10 @@ void WXPowderPatternGraph::OnMouseWheel(wxMouseEvent &event)
    {
       const long range=mLast-mFirst;
       mLast += range/8;
-      if(mLast>=m2theta.numElements()) mLast=m2theta.numElements()-1;
+      if(mLast>=mX.numElements()) mLast=mX.numElements()-1;
       mFirst=mLast-range;
-      mMin2Theta=m2theta(mFirst);
-      mMax2Theta=m2theta(mLast);
+      mMinX=mX(mFirst);
+      mMaxX=mX(mLast);
    }
    if(event.GetWheelRotation()<=(-event.GetWheelDelta()))
    {
@@ -1117,8 +1121,8 @@ void WXPowderPatternGraph::OnMouseWheel(wxMouseEvent &event)
       mFirst -= range/8;
       if(mFirst<0) mFirst=0;
       mLast=mFirst+range;
-      mMin2Theta=m2theta(mFirst);
-      mMax2Theta=m2theta(mLast);
+      mMinX=mX(mFirst);
+      mMaxX=mX(mLast);
    }
    mClockAxisLimits.Click();
    wxUpdateUIEvent ev(ID_POWDER_GRAPH_NEW_PATTERN);
@@ -1151,18 +1155,18 @@ void WXPowderPatternGraph::OnKeyDown(wxKeyEvent& event)
          mFirst -= range/8;
          if(mFirst<0) mFirst=0;
          mLast=mFirst+range;
-         mMin2Theta=m2theta(mFirst);
-         mMax2Theta=m2theta(mLast);
+         mMinX=mX(mFirst);
+         mMaxX=mX(mLast);
          break;
       }
       case(WXK_RIGHT):
       {
          const long range=mLast-mFirst;
          mLast += range/8;
-         if(mLast>=m2theta.numElements()) mLast=m2theta.numElements()-1;
+         if(mLast>=mX.numElements()) mLast=mX.numElements()-1;
          mFirst=mLast-range;
-         mMin2Theta=m2theta(mFirst);
-         mMax2Theta=m2theta(mLast);
+         mMinX=mX(mFirst);
+         mMaxX=mX(mLast);
          break;
       }
       case(WXK_UP):
@@ -1185,8 +1189,8 @@ void WXPowderPatternGraph::OnKeyDown(wxKeyEvent& event)
          const long middle=(mLast+mFirst)/2;
          mFirst= (long)(middle-halfrange*4./5.);
          mLast = (long)(middle+halfrange*4./5.);
-         mMin2Theta=m2theta(mFirst);
-         mMax2Theta=m2theta(mLast);
+         mMinX=mX(mFirst);
+         mMaxX=mX(mLast);
          break;
       }
       case(45):// WXK_SUBTRACT ?
@@ -1196,9 +1200,9 @@ void WXPowderPatternGraph::OnKeyDown(wxKeyEvent& event)
          mFirst= (long)(middle-halfrange*5./4.);
          mLast = (long)(middle+halfrange*5./4.);
          if(mFirst<0) mFirst=0;
-         if(mLast>=m2theta.numElements()) mLast=m2theta.numElements()-1;
-         mMin2Theta=m2theta(mFirst);
-         mMax2Theta=m2theta(mLast);
+         if(mLast>=mX.numElements()) mLast=mX.numElements()-1;
+         mMinX=mX(mFirst);
+         mMaxX=mX(mLast);
          break;
       }
       case(42):// WXK_MULTIPLY
@@ -1230,21 +1234,32 @@ void WXPowderPatternGraph::SetPattern(const CrystVector_REAL &obs,
                                       const CrystVector_REAL &sigma)
 {
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph::SetPattern()",5)
+   const long nbPoint=mObs.numElements();
+   CrystVector_REAL x(nbPoint);
+   for(long i=0;i<nbPoint;i++) x(i)=tthetaMin+i*tthetaStep;
+   this->SetPattern(x,obs,calc,sigma);
+   VFN_DEBUG_MESSAGE("WXPowderPatternGraph::SetPattern():End",5)
+}
+
+void WXPowderPatternGraph::SetPattern(const CrystVector_REAL &x,
+                                      const CrystVector_REAL &obs,
+                                      const CrystVector_REAL &calc,
+                                      const CrystVector_REAL &sigma)
+{
+   VFN_DEBUG_MESSAGE("WXPowderPatternGraph::SetPattern()",5)
    //Make sure spectrum is not being used (for drawing)
    while(mCalcPatternIsLocked) wxUsleep(1);
+   while(mCalcPatternIsLocked) wxUsleep(1);
    mCalcPatternIsLocked=true;
+   mX=x;
+   if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF) mX*=RAD2DEG;
    mCalc=calc;
-   mCalcPatternIsLocked=false;
    mObs=obs;
    mSigma=sigma;
-   m2ThetaStep=tthetaStep;
-   const long nbPoint=mObs.numElements();
-   m2theta.resize(nbPoint);
-   for(long i=0;i<nbPoint;i++) m2theta(i)=tthetaMin+i*tthetaStep;
-   m2theta*=RAD2DEG;
+   mCalcPatternIsLocked=false;
    // Reset the zoom parameters, only for the first display or if the limits of the
    // full pattern have changed
-   if(  (mMax2Theta<0)
+   if(  (mMaxX<0)
       ||(mpPattern->GetPowderPattern().GetClockPowderPatternPar()>mClockAxisLimits)) 
       this->ResetAxisLimits();
    
@@ -1282,23 +1297,23 @@ void WXPowderPatternGraph::ResetAxisLimits()
    if(max>mMaxIntensity) mMaxIntensity=max;
    if(min<mMinIntensity) mMinIntensity=min;
    if(mMinIntensity<0) mMinIntensity=0;
-   mMax2Theta=m2theta.max();
-   mMin2Theta=m2theta.min();
+   mMaxX=mX.max();
+   mMinX=mX.min();
    mFirst=0;
-   mLast=m2theta.numElements()-1;
+   mLast=mX.numElements()-1;
    mClockAxisLimits.Click();
 }
 long WXPowderPatternGraph::Data2ScreenX(const REAL x)const
 {
    wxCoord width,height;
    this->GetSize(&width, &height);
-   return (long)(mMargin+(x-mMin2Theta)*(width-mMargin)/(mMax2Theta-mMin2Theta));
+   return (long)(mMargin+(x-mMinX)*(width-mMargin)/(mMaxX-mMinX));
 }
 long WXPowderPatternGraph::Point2ScreenX(const long x)const
 {
    wxCoord width,height;
    this->GetSize(&width, &height);
-   return (long)(mMargin+(x-mFirst)*(width-mMargin)/(REAL)(mLast-mFirst));
+   return (long)(mMargin+(mX(x)-mX(mFirst))*(width-mMargin)/(REAL)(mX(mLast)-mX(mFirst)));
 }
 long WXPowderPatternGraph::Data2ScreenY(const REAL y)const
 {
@@ -1311,7 +1326,7 @@ REAL WXPowderPatternGraph::Screen2DataX(const long x)const
 {
    wxCoord width,height;
    this->GetSize(&width, &height);
-   return mMin2Theta+(x-mMargin)*(mMax2Theta-mMin2Theta)/(REAL)(width-mMargin);
+   return mMinX+(x-mMargin)*(mMaxX-mMinX)/(REAL)(width-mMargin);
 }
 REAL WXPowderPatternGraph::Screen2DataY(const long y)const
 {
@@ -1391,16 +1406,15 @@ void WXPowderPatternBackground::OnMenuAutomaticBayesianBackground(wxCommandEvent
       return;
    }
    dialog.GetValue().ToLong(&nbPointSpline);
-   
+   if(nbPointSpline<=1) nbPointSpline=1;
    {
       CrystVector_REAL tth(nbPointSpline),backgd(nbPointSpline);
-      const REAL tthstep=(mpPowderPatternBackground->GetParentPowderPattern().Get2ThetaMax()
-                          -mpPowderPatternBackground->GetParentPowderPattern().Get2ThetaMin())/(REAL)nbPointSpline;
       const CrystVector_REAL *pObs=&(mpPowderPatternBackground->GetParentPowderPattern().GetPowderPatternObs());
       const unsigned long nbPoint=mpPowderPatternBackground->GetParentPowderPattern().GetNbPoint();
       for(int i=0;i<nbPointSpline;i++)
       {
-         tth(i)=tthstep*(REAL)i+mpPowderPatternBackground->GetParentPowderPattern().Get2ThetaMin();
+         tth(i)=mpPowderPatternBackground->GetParentPowderPattern()
+                  .GetPowderPatternX()(i*nbPoint/(nbPointSpline-1));
          long n1=(long)((REAL)nbPoint/(REAL)nbPointSpline*((REAL)i-0.2));
          long n2=(long)((REAL)nbPoint/(REAL)nbPointSpline*((REAL)i+0.2));
          if(n1<0) n1=0;

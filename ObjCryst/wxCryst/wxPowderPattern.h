@@ -52,7 +52,7 @@ class WXPowderPattern: public WXRefinableObj
       void OnMenuFitScaleForRw(wxCommandEvent & WXUNUSED(event));
       void OnMenuSavePattern(wxCommandEvent & WXUNUSED(event));
       void OnMenuSetWavelength(wxCommandEvent &event);
-      void OnMenuAdd2ThetaExclude(wxCommandEvent & WXUNUSED(event));
+      void OnMenuAddExclude(wxCommandEvent & WXUNUSED(event));
       void NotifyDeleteGraph();
       const PowderPattern& GetPowderPattern()const;
       void UpdateUI();
@@ -88,10 +88,21 @@ class WXPowderPatternGraph: public wxWindow
       /// Update the powder spectrum, at the user's request. This calls
       /// the WXPowderPattern::CrystUpdate().
       void OnUpdate(wxCommandEvent & WXUNUSED(event));
-      /// Update the spectrum. This is called by the WXPowderPattern parent.
+      /** Update the pattern. This is called by the WXPowderPattern parent.
+      *
+      * \deprecated Rather, use the new WXPowderPatternGraph::SetPattern() which
+      * takes a full vector of x coordinates rather than min & step
+      */
       void SetPattern(const CrystVector_REAL &obs,
                       const CrystVector_REAL &calc,
                       const REAL tthetaMin,const REAL tthetaStep,
+                      const CrystVector_REAL &sigma);
+      /** Update the pattern. This is called by the WXPowderPattern parent.
+      *
+      */
+      void SetPattern(const CrystVector_REAL &x,
+                      const CrystVector_REAL &obs,
+                      const CrystVector_REAL &calc,
                       const CrystVector_REAL &sigma);
       /// Redraw the pattern (special function to ensure complete redrawing under windows...)
       void OnRedrawNewPattern(wxUpdateUIEvent& WXUNUSED(event));
@@ -111,13 +122,11 @@ class WXPowderPatternGraph: public wxWindow
       /// Convert Y screen coordinate (pixel) to data (intensity) coordinate
       REAL Screen2DataY(const long y)const;
       WXPowderPattern *mpPattern;
-      /// Data vectors (Note that m2theta is currently stored in degrees, which may be changed)
-      CrystVector_REAL mObs,mCalc,m2theta,mSigma;
-      /// 2theta step (radians)
-      REAL m2ThetaStep;
+      /// Data vectors (Note that when x coordinates are 2theta, they are stored in degrees here)
+      CrystVector_REAL mX,mObs,mCalc,m2theta,mSigma;
       const long mMargin;
       const REAL mDiffPercentShift;
-      REAL mMaxIntensity,mMinIntensity,mMin2Theta,mMax2Theta;
+      REAL mMaxIntensity,mMinIntensity,mMinX,mMaxX;
       wxFrame *mpParentFrame;
       bool mCalcPatternIsLocked;
       /// Pop-up menu
@@ -125,7 +134,7 @@ class WXPowderPatternGraph: public wxWindow
       /// Are we within a dragging event ?
       bool mIsDragging;
       /// Remember coordinates at the beginning of the dragging
-      REAL mDragging2Theta0,mDraggingIntensity0;
+      REAL mDraggingX0,mDraggingIntensity0;
       /// Index of the first and last points drawn of the pattern
       mutable long mFirst,mLast;
       /// Clock corresponding to when the graph limits where last changed. This

@@ -243,7 +243,7 @@ class DiffractionDataSingleCrystal:public ScatteringData
       virtual void InitRefParList();
       /// Calc intensities
       void CalcIcalc() const;
-      virtual CrystVector_long SortReflectionByTheta(const REAL maxTheta=-1.);
+      virtual CrystVector_long SortReflectionBySinThetaOverLambda(const REAL maxTheta=-1.);
       /// Init options (currently only twinning).
       void InitOptions();
       /// Determine the index of reflections to be summed because of twinning.

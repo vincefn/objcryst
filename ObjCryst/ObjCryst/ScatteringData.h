@@ -230,6 +230,28 @@ class ScatteringData: virtual public RefinableObj
       * \todo smarter generation, using spacegroup information to remove extinct reflection
       * rather than brute-force computation.
       */
+      virtual void GenHKLFullSpace2(const REAL maxsithsl,
+                                   const bool useMultiplicity=false);
+      /** \brief Generate a list of h,k,l to describe a full reciprocal space, 
+      * up to a given maximum theta value
+      *
+      * \param maxsithsl:maximum sin(theta)/lambda=1/2d value
+      * \param useMultiplicity: if set to true, equivalent reflections will be removed.
+      * Bijvoet (Friedel) pairs
+      * are NOT merged, for 'anomalous' reasons, unless you have chosen to ignore the
+      * imaginary part of the scattering factor. If true, then multiplicity is stored
+      * in the mMultiplicity data member.
+      *
+      * \warning The ScatteringData object must already have been assigned 
+      * a crystal object using SetCrystal(), and the experimental wavelength 
+      * must also have been set before calling this function.
+      *
+      * \todo smarter generation, using spacegroup information to remove extinct reflection
+      * rather than brute-force computation.
+      *
+      * \deprecated Rather use PowderPattern::GenHKLFullSpace2,
+      * with a maximum sin(theta)/lambda value, which also works for dispersive experiments.
+      */
       virtual void GenHKLFullSpace(const REAL maxTheta,
                                    const bool useMultiplicity=false);
       
@@ -330,9 +352,9 @@ class ScatteringData: virtual public RefinableObj
       /// been initialized or modified.
       virtual void PrepareHKLarrays() ;
       /// \internal sort reflections by theta values (also get rid of [0,0,0] if present)
-      /// If maxTheta >0, then only reflections where theta<maxTheta are kept
+      /// If maxSTOL >0, then only reflections where sin(theta)/lambda<maxSTOL are kept
       /// \return an array with the subscript of the kept reflections (for inherited classes)
-      virtual CrystVector_long SortReflectionByTheta(const REAL maxTheta=-1.);
+      virtual CrystVector_long SortReflectionBySinThetaOverLambda(const REAL maxSTOL=-1.);
       /// \internal Get rid of extinct reflections. Useful after GenHKLFullSpace().
       /// Do not use this if you have a list of observed reflections !
       ///

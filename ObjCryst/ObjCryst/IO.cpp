@@ -1621,7 +1621,7 @@ void DiffractionDataSingleCrystal::XMLInput(istream &is,const XMLCrystTag &tagg)
          weight.resizeAndPreserve(nbrefl);
          this->SetHklIobs(h,k,l,iobs,sigma);
          this->SetWeight(weight);
-         this->SortReflectionByTheta();
+         this->SortReflectionBySinThetaOverLambda();
          this->CalcIcalc();
          this->FitScaleFactorForRw();
       }
@@ -1735,14 +1735,19 @@ void PowderPatternBackground::XMLOutput(ostream &os,int indent)const
    mInterpolationModel.XMLOutput(os,indent);
    os<<endl;
 
-   XMLCrystTag tag2("TThetaIntensityList");
+   XMLCrystTag tag2("XIntensityList");
    for(int i=0;i<indent;i++) os << "  " ;
    os <<tag2<<endl;
    
+   REAL scale=1.0;
+   if(this->GetParentPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
+      scale=RAD2DEG;
+
    for(long j=0;j<mBackgroundNbPoint;j++)
    {
+   
       for(int i=0;i<=indent;i++) os << "  " ;
-      os << mBackgroundInterpPoint2Theta(j)*RAD2DEG <<" "
+      os << mBackgroundInterpPointX(j)*scale <<" "
          << mBackgroundInterpPointIntensity(j) <<" "
          << !this->GetPar(mBackgroundInterpPointIntensity.data()+j).IsFixed()<<" "
          <<endl;
@@ -1785,21 +1790,22 @@ void PowderPatternBackground::XMLInput(istream &is,const XMLCrystTag &tagg)
          VFN_DEBUG_EXIT("PowderPatternBackground::Exit():"<<this->GetName(),5)
          return;
       }
-      if("TThetaIntensityList"==tag.GetName())
+      if(("TThetaIntensityList"==tag.GetName())||("XIntensityList"==tag.GetName()))
       {
          mBackgroundNbPoint=0;
-         mBackgroundInterpPoint2Theta.resize(100);
+         mBackgroundInterpPointX.resize(100);
          mBackgroundInterpPointIntensity.resize(100);
          CrystVector_bool fix(100);
          do
          {
-            is >>mBackgroundInterpPoint2Theta(mBackgroundNbPoint)
+            VFN_DEBUG_MESSAGE("PowderPatternBackground::XMLInput():"<<mBackgroundNbPoint,1)
+            is >>mBackgroundInterpPointX(mBackgroundNbPoint)
                >>mBackgroundInterpPointIntensity(mBackgroundNbPoint)
                >>fix(mBackgroundNbPoint);
             mBackgroundNbPoint++;
-            if(mBackgroundNbPoint==mBackgroundInterpPoint2Theta.numElements())
+            if(mBackgroundNbPoint==mBackgroundInterpPointX.numElements())
             {
-               mBackgroundInterpPoint2Theta.
+               mBackgroundInterpPointX.
                         resizeAndPreserve(mBackgroundNbPoint+100);
                mBackgroundInterpPointIntensity.
                         resizeAndPreserve(mBackgroundNbPoint+100);
@@ -1809,12 +1815,17 @@ void PowderPatternBackground::XMLInput(istream &is,const XMLCrystTag &tagg)
             //cout << is.peek()<<" "<<nbrefl<<endl;
          }
          while(is.peek()!='<');//until next tag
-         mBackgroundInterpPoint2Theta.resizeAndPreserve(mBackgroundNbPoint);
+         VFN_DEBUG_MESSAGE("PowderPatternBackground::XMLInput():",2)
+         mBackgroundInterpPointX.resizeAndPreserve(mBackgroundNbPoint);
          mBackgroundInterpPointIntensity.resizeAndPreserve(mBackgroundNbPoint);
-         mBackgroundInterpPoint2Theta *= DEG2RAD;
+         VFN_DEBUG_MESSAGE("PowderPatternBackground::XMLInput():",2)
+         if(this->GetParentPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF) 
+            mBackgroundInterpPointX*= DEG2RAD;
          mClockBackgroundPoint.Click();
+         VFN_DEBUG_MESSAGE("PowderPatternBackground::XMLInput():",2)
 
          this->InitRefParList();
+         VFN_DEBUG_MESSAGE("PowderPatternBackground::XMLInput():",2)
          //read closing tag
          XMLCrystTag junkEndTag(is);
       }
@@ -2244,7 +2255,7 @@ void PowderPattern::XMLOutput(ostream &os,int indent)const
    os <<tag<<endl;
    indent++;
    
-   this->GetPar(&m2ThetaZero).XMLOutput(os,"2ThetaZero",indent);
+   this->GetPar(&mXZero).XMLOutput(os,"Zero",indent);
    os <<endl;
    
    this->GetPar(&m2ThetaDisplacement).XMLOutput(os,"2ThetaDisplacement",indent);
@@ -2283,26 +2294,19 @@ void PowderPattern::XMLOutput(ostream &os,int indent)const
       for(int i=0;i<indent;i++) os << "  " ;
       os<<tagg<<endl<<endl;
    }
-   
-   XMLCrystTag tag2("IobsSigmaWeightList");
-      {
-         stringstream ss;
-         ss<<m2ThetaMin*RAD2DEG;
-         tag2.AddAttribute("TThetaMin",ss.str());
-      }
-      {
-         stringstream ss;
-         ss<<m2ThetaStep*RAD2DEG;
-         tag2.AddAttribute("TThetaStep",ss.str());
-      }
+   XMLCrystTag tag2("XIobsSigmaWeightList");
       for(int i=0;i<indent;i++) os << "  " ;
       os<<tag2<<endl;
 
+      REAL scale=1.0;
+      if(this->GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF) 
+         scale=RAD2DEG;
 
       for(unsigned long j=0;j<this->GetNbPoint();j++)
       {
          for(int i=0;i<=indent;i++) os << "  " ;
-         os << mPowderPatternObs(j) <<" "
+         os << scale*mX(j) <<" "
+            << mPowderPatternObs(j) <<" "
             << mPowderPatternObsSigma(j) <<" "
             << mPowderPatternWeight(j) <<" "
             <<endl;
@@ -2311,13 +2315,22 @@ void PowderPattern::XMLOutput(ostream &os,int indent)const
       for(int i=0;i<indent;i++) os << "  " ;
       os<<tag2<<endl;
    
-   for(int j=0;j<mExcludedRegionMin2Theta.numElements();j++)
+   for(int j=0;j<mExcludedRegionMinX.numElements();j++)
    {
-      XMLCrystTag tag3("Exclude2Theta");
+      XMLCrystTag tag3("ExcludeX");
       for(int i=0;i<indent;i++) os << "  " ;
-      os << tag3 
-         << mExcludedRegionMin2Theta(j)*RAD2DEG <<" "
-         << mExcludedRegionMax2Theta(j)*RAD2DEG ;
+      if(this->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
+      {
+         os << tag3 
+            << mExcludedRegionMinX(j) <<" "
+            << mExcludedRegionMaxX(j) ;
+      }
+      else
+      {
+         os << tag3 
+            << mExcludedRegionMinX(j)*RAD2DEG <<" "
+            << mExcludedRegionMaxX(j)*RAD2DEG ;
+      }
       tag3.SetIsEndTag(true);
       os<<tag3<<endl;
    }
@@ -2358,9 +2371,9 @@ void PowderPattern::XMLInput(istream &is,const XMLCrystTag &tagg)
          {
             if("Name"==tag.GetAttributeName(i))
             {
-               if("2ThetaZero"==tag.GetAttributeValue(i))
+               if(("2ThetaZero"==tag.GetAttributeValue(i)) ||("Zero"==tag.GetAttributeValue(i)))
                {
-                  this->GetPar(&m2ThetaZero).XMLInput(is,tag);
+                  this->GetPar(&mXZero).XMLInput(is,tag);
                   break;
                }
                if("2ThetaDisplacement"==tag.GetAttributeValue(i))
@@ -2387,12 +2400,14 @@ void PowderPattern::XMLInput(istream &is,const XMLCrystTag &tagg)
       if("PowderPatternBackground"==tag.GetName())
       {
          PowderPatternBackground *comp=new PowderPatternBackground;
+         comp->SetParentPowderPattern(*this);
          comp->XMLInput(is,tag);
          continue;
       }
       if("PowderPatternCrystal"==tag.GetName())
       {
          PowderPatternDiffraction *comp=new PowderPatternDiffraction;
+         comp->SetParentPowderPattern(*this);
          comp->XMLInput(is,tag);
          continue;
       }
@@ -2415,32 +2430,36 @@ void PowderPattern::XMLInput(istream &is,const XMLCrystTag &tagg)
          VFN_DEBUG_MESSAGE("->Adding Component :"<<name<<"with scale="<<scale,8);
          continue;
       }
-      if("Exclude2Theta"==tag.GetName())
+      if("ExcludeX"==tag.GetName())
       {
          float min,max;
          is>>min>>max;
-         this->Add2ThetaExcludedRegion(min*DEG2RAD,max*DEG2RAD);
+         if(this->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
+            this->AddExcludedRegion(min,max);
+         else this->AddExcludedRegion(min*DEG2RAD,max*DEG2RAD);
          XMLCrystTag end(is);
          continue;
       }
       if("IobsSigmaWeightList"==tag.GetName())
       {
+         // Old version, just for 2theta-intensity pattern (no TOF)
          VFN_DEBUG_ENTRY("Loading Iobs-Sigma-Weight List...",8);
+         REAL min,step;
          for(unsigned int i=0;i<tag.GetNbAttribute();i++)
          {
             if("TThetaMin"==tag.GetAttributeName(i))
             {
                stringstream ss(tag.GetAttributeValue(i));
-               ss>>m2ThetaMin;
-               VFN_DEBUG_MESSAGE("2Theta min="<<m2ThetaMin,8);
-               m2ThetaMin*=DEG2RAD;
+               ss>>min;
+               VFN_DEBUG_MESSAGE("2Theta min="<<min,8);
+               min*=DEG2RAD;
             }
             if("TThetaStep"==tag.GetAttributeName(i))
             {
                stringstream ss(tag.GetAttributeValue(i));
-               ss>>m2ThetaStep;
-               VFN_DEBUG_MESSAGE("2Theta step="<<m2ThetaStep<<tag.GetAttributeValue(i),8);
-               m2ThetaStep*=DEG2RAD;
+               ss>>step;
+               VFN_DEBUG_MESSAGE("2Theta step="<<step<<tag.GetAttributeValue(i),8);
+               step*=DEG2RAD;
             }
          }
          while(0==isgraph(is.peek())) is.get();
@@ -2471,15 +2490,53 @@ void PowderPattern::XMLInput(istream &is,const XMLCrystTag &tagg)
             while(0==isgraph(is.peek())) is.get();
          }
          while(is.peek()!='<');//until next tag
-
-         mPowderPatternObs.resizeAndPreserve(mNbPoint);
-         //cout << mPowderPatternObs.numElements()<<" "<<mNbPoint<<" "<<this<<endl;
-         mPowderPatternObsSigma.resizeAndPreserve(mNbPoint);
-         mPowderPatternWeight.resizeAndPreserve(mNbPoint);
+         this->SetPowderPatternPar(min,step,mNbPoint);
          mClockPowderPatternPar.Click();
          
          XMLCrystTag junk(is);
          VFN_DEBUG_EXIT("Loading Iobs-Sigma-Weight List...",8);
+         continue;
+      }
+      if("XIobsSigmaWeightList"==tag.GetName())
+      {
+         VFN_DEBUG_ENTRY("Loading X-Iobs-Sigma-Weight List...",8);
+         while(0==isgraph(is.peek())) is.get();
+         if(is.peek()=='<')
+         {
+            cout <<"PowderPattern::XMLInput(): no data point in the powder pattern !"<<endl;
+            XMLCrystTag junk(is);
+            VFN_DEBUG_EXIT("Loading Iobs-Sigma-Weight List...",8);
+            continue;
+         }
+         mNbPoint=0;
+         mX.resize(500);
+         mPowderPatternObs.resize(500);
+         mPowderPatternObsSigma.resize(500);
+         mPowderPatternWeight.resize(500);
+         do
+         {
+            is >>mX(mNbPoint)
+               >>mPowderPatternObs(mNbPoint)
+               >>mPowderPatternObsSigma(mNbPoint)
+               >>mPowderPatternWeight(mNbPoint);
+            mNbPoint++;
+            VFN_DEBUG_MESSAGE("Point #"<<mNbPoint,5);
+            if(mNbPoint==(unsigned long)mPowderPatternObs.numElements())
+            {
+               mX.resizeAndPreserve(mNbPoint+500);
+               mPowderPatternObs.resizeAndPreserve(mNbPoint+500);
+               mPowderPatternObsSigma.resizeAndPreserve(mNbPoint+500);
+               mPowderPatternWeight.resizeAndPreserve(mNbPoint+500);
+            }
+            while(0==isgraph(is.peek())) is.get();
+         }
+         while(is.peek()!='<');//until next tag
+         if(this->GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF) 
+            mX*=DEG2RAD;
+         mClockPowderPatternPar.Click();
+         
+         XMLCrystTag junk(is);
+         VFN_DEBUG_EXIT("Loading X-Iobs-Sigma-Weight List...",8);
          continue;
       }
    }

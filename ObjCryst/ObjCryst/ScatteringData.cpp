@@ -449,30 +449,24 @@ void ScatteringData::SetHKL(const CrystVector_REAL &h,
    VFN_DEBUG_EXIT("ScatteringData::SetHKL(h,k,l):End",5)
 }
 
-void ScatteringData::GenHKLFullSpace(const REAL maxTheta,const bool useMultiplicity)
+void ScatteringData::GenHKLFullSpace2(const REAL maxSTOL,const bool useMultiplicity)
 {
    (*fpObjCrystInformUser)("Generating Full HKL list...");
-   VFN_DEBUG_ENTRY("ScatteringData::GenHKLFullSpace()",5)
-   TAU_PROFILE("ScatteringData::GenHKLFullSpace()","void (REAL,bool)",TAU_DEFAULT);
-   if(this->GetRadiation().GetWavelength()(0) <=.01)
-   {
-      throw ObjCrystException("ScatteringData::GenHKLFullSpace() \
-      no wavelength assigned yet to this ScatteringData object.");;
-   }
+   VFN_DEBUG_ENTRY("ScatteringData::GenHKLFullSpace2()",5)
+   TAU_PROFILE("ScatteringData::GenHKLFullSpace2()","void (REAL,bool)",TAU_DEFAULT);
    if(0==mpCrystal)
    {
-      throw ObjCrystException("ScatteringData::GenHKLFullSpace() \
+      throw ObjCrystException("ScatteringData::GenHKLFullSpace2() \
       no crystal assigned yet to this ScatteringData object.");;
    }
-   VFN_DEBUG_MESSAGE(" ->Max theta="<<maxTheta \
+   VFN_DEBUG_MESSAGE(" ->Max sin(theta)/lambda="<<maxSTOL \
    << " Using Multiplicity : "<<useMultiplicity,3)
-   VFN_DEBUG_MESSAGE("-> wavelength:"<< this->GetRadiation().GetWavelength()(0)<<"a,b,c:"\
-                     <<mpCrystal->GetLatticePar(0)<<","<<mpCrystal->GetLatticePar(1)\
-                     <<","<<mpCrystal->GetLatticePar(2)<<",",3)
+   VFN_DEBUG_MESSAGE("a,b,c:"<<mpCrystal->GetLatticePar(0)\
+                     <<","<<mpCrystal->GetLatticePar(1)<<","<<mpCrystal->GetLatticePar(2)<<",",3)
    long maxH,maxK,maxL;
-   maxH=(int) (sin(maxTheta)/this->GetRadiation().GetWavelength()(0) * mpCrystal->GetLatticePar(0)*2+1);
-   maxK=(int) (sin(maxTheta)/this->GetRadiation().GetWavelength()(0) * mpCrystal->GetLatticePar(1)*2+1);
-   maxL=(int) (sin(maxTheta)/this->GetRadiation().GetWavelength()(0) * mpCrystal->GetLatticePar(2)*2+1);
+   maxH=(int) (maxSTOL * mpCrystal->GetLatticePar(0)*2+1);
+   maxK=(int) (maxSTOL * mpCrystal->GetLatticePar(1)*2+1);
+   maxL=(int) (maxSTOL * mpCrystal->GetLatticePar(2)*2+1);
    VFN_DEBUG_MESSAGE("->maxH : " << maxH << "  maxK : " << maxK << "maxL : " << maxL,5)
    mNbRefl=(2*maxH+1)*(2*maxK+1)*(2*maxL+1);
    CrystVector_long H(mNbRefl);
@@ -488,12 +482,11 @@ void ScatteringData::GenHKLFullSpace(const REAL maxTheta,const bool useMultiplic
             L(i)=l;
             i++;
          }
-   VFN_DEBUG_MESSAGE("ScatteringData::GenHKLFullSpace():Finished setting h, k and l...",3)
+   VFN_DEBUG_MESSAGE("ScatteringData::GenHKLFullSpace2():Finished setting h, k and l...",3)
    this->SetHKL(H,K,L);
-   VFN_DEBUG_MESSAGE("ScatteringData::GenHKLFullSpace()",1)
-   //this->CalcSinThetaLambda();//calc theta
-   this->SortReflectionByTheta(maxTheta);
-   VFN_DEBUG_MESSAGE("ScatteringData::GenHKLFullSpace()",1)
+   VFN_DEBUG_MESSAGE("ScatteringData::GenHKLFullSpace2()",1)
+   this->SortReflectionBySinThetaOverLambda(maxSTOL);
+   VFN_DEBUG_MESSAGE("ScatteringData::GenHKLFullSpace2()",1)
    #if 0
    {
       REAL h,k,l;
@@ -521,26 +514,26 @@ void ScatteringData::GenHKLFullSpace(const REAL maxTheta,const bool useMultiplic
    #endif
    if(true==useMultiplicity)
    {
-      VFN_DEBUG_MESSAGE("ScatteringData::GenHKLFullSpace():Multiplicity...",3)
+      VFN_DEBUG_MESSAGE("ScatteringData::GenHKLFullSpace2():Multiplicity...",3)
       //OK, now sort reflections to keep or remove
          long nbKeptRefl=0;
          CrystVector_long subscriptKeptRefl(mNbRefl);
          mMultiplicity.resize(mNbRefl);
          CrystVector_bool treatedRefl(mNbRefl);
          long currentBaseRefl=0,testedRefl=0;
-         REAL currentTheta=0;
+         REAL currentSTOL=0;
          REAL h,k,l,h1,k1,l1;
          subscriptKeptRefl=0;
          mMultiplicity=0;
          treatedRefl=false;
-      VFN_DEBUG_MESSAGE("ScatteringData::GenHKLFullSpace():Multiplicity 1",2)
+      VFN_DEBUG_MESSAGE("ScatteringData::GenHKLFullSpace2():Multiplicity 1",2)
          do
          {
             VFN_DEBUG_MESSAGE("...Multiplicity 2",1)
             if(true==treatedRefl(currentBaseRefl)) continue;
             subscriptKeptRefl(nbKeptRefl)=currentBaseRefl;
             mMultiplicity(nbKeptRefl)=1;
-            currentTheta=mTheta(currentBaseRefl);
+            currentSTOL=mSinThetaLambda(currentBaseRefl);
             treatedRefl(currentBaseRefl)=true;
             h=mH(currentBaseRefl);
             k=mK(currentBaseRefl);
@@ -596,7 +589,7 @@ void ScatteringData::GenHKLFullSpace(const REAL maxTheta,const bool useMultiplic
                         }
                      }
                   }
-                  //cout << currentTheta*RAD2DEG << "  " <<
+                  //cout << currentSTOL*RAD2DEG << "  " <<
                   //       mIntH(subscriptKeptRefl(nbKeptRefl))<<"  "<<
                   //       mIntK(subscriptKeptRefl(nbKeptRefl))<<"  "<<
                   //       mIntL(subscriptKeptRefl(nbKeptRefl))<<"  ";
@@ -607,14 +600,14 @@ void ScatteringData::GenHKLFullSpace(const REAL maxTheta,const bool useMultiplic
                testedRefl++;
                if(testedRefl<mNbRefl)
                {
-                  if(fabs(currentTheta-mTheta(testedRefl)) < .002) test=true;
+                  if(fabs(currentSTOL-mSinThetaLambda(testedRefl)) < .002) test=true;
                   else test=false;
                }
                else test=false;
             } while(test);
             nbKeptRefl++;
          } while( ++currentBaseRefl < mNbRefl);
-      VFN_DEBUG_MESSAGE("ScatteringData::GenHKLFullSpace():Multiplicity 2",2)
+      VFN_DEBUG_MESSAGE("ScatteringData::GenHKLFullSpace2():Multiplicity 2",2)
       //Keep only the elected reflections
          mNbRefl=nbKeptRefl;
          {
@@ -656,7 +649,19 @@ void ScatteringData::GenHKLFullSpace(const REAL maxTheta,const bool useMultiplic
       sprintf(buf,"Generating Full HKL list...Done (kept %d reflections)",(int)mNbRefl);
       (*fpObjCrystInformUser)((string)buf);
    }
-   VFN_DEBUG_EXIT("ScatteringData::GenHKLFullSpace():End",5)
+   VFN_DEBUG_EXIT("ScatteringData::GenHKLFullSpace2():End",5)
+}
+
+void ScatteringData::GenHKLFullSpace(const REAL maxTheta,const bool useMultiplicity)
+{
+   VFN_DEBUG_ENTRY("ScatteringData::GenHKLFullSpace()",5)
+   if(this->GetRadiation().GetWavelength()(0) <=.01)
+   {
+      throw ObjCrystException("ScatteringData::GenHKLFullSpace() \
+      no wavelength assigned yet to this ScatteringData object.");;
+   }
+   this->GenHKLFullSpace2(sin(maxTheta)/this->GetRadiation().GetWavelength()(0),useMultiplicity);
+   VFN_DEBUG_EXIT("ScatteringData::GenHKLFullSpace()",5)
 }
 
 RadiationType ScatteringData::GetRadiationType()const {return this->GetRadiation().GetRadiationType();}
@@ -937,10 +942,10 @@ long ScatteringData::GetNbReflBelowMaxSinThetaOvLambda()const
 const RefinableObjClock& ScatteringData::GetClockNbReflBelowMaxSinThetaOvLambda()const
 {return mClockNbReflUsed;}
 
-CrystVector_long ScatteringData::SortReflectionByTheta(const REAL maxTheta)
+CrystVector_long ScatteringData::SortReflectionBySinThetaOverLambda(const REAL maxSTOL)
 {
-   TAU_PROFILE("ScatteringData::SortReflectionByTheta()","void ()",TAU_DEFAULT);
-   VFN_DEBUG_ENTRY("ScatteringData::SortReflectionByTheta()",5)
+   TAU_PROFILE("ScatteringData::SortReflectionBySinThetaOverLambda()","void ()",TAU_DEFAULT);
+   VFN_DEBUG_ENTRY("ScatteringData::SortReflectionBySinThetaOverLambda()",5)
    this->CalcSinThetaLambda();
    CrystVector_long sortedSubs;
    sortedSubs=SortSubs(mSinThetaLambda);
@@ -952,7 +957,7 @@ CrystVector_long ScatteringData::SortReflectionByTheta(const REAL maxTheta)
    long shift=0;
    
    //get rid of [0,0,0] reflection
-   VFN_DEBUG_MESSAGE("ScatteringData::SortReflectionByTheta() 1",2)
+   VFN_DEBUG_MESSAGE("ScatteringData::SortReflectionBySinThetaOverLambda() 1",2)
    if(0==mSinThetaLambda(sortedSubs(0)))
    {
       shift=1;
@@ -961,7 +966,7 @@ CrystVector_long ScatteringData::SortReflectionByTheta(const REAL maxTheta)
       mK.resize(mNbRefl);
       mL.resize(mNbRefl);
    }
-   VFN_DEBUG_MESSAGE("ScatteringData::SortReflectionByTheta() 2",2)
+   VFN_DEBUG_MESSAGE("ScatteringData::SortReflectionBySinThetaOverLambda() 2",2)
    for(long i=0;i<mNbRefl;i++)
    {
       subs=sortedSubs(i+shift);
@@ -970,24 +975,23 @@ CrystVector_long ScatteringData::SortReflectionByTheta(const REAL maxTheta)
       mL(i)=oldL(subs);
    }
    mClockHKL.Click();
-   VFN_DEBUG_MESSAGE("ScatteringData::SortReflectionByTheta() 3",2)
+   VFN_DEBUG_MESSAGE("ScatteringData::SortReflectionBySinThetaOverLambda() 3",2)
    this->PrepareHKLarrays();
    this->CalcSinThetaLambda();
    
-   VFN_DEBUG_MESSAGE("ScatteringData::SortReflectionByTheta() 4",2)
-   if(0<maxTheta)
+   VFN_DEBUG_MESSAGE("ScatteringData::SortReflectionBySinThetaOverLambda() 4",2)
+   if(0<maxSTOL)
    {
-      REAL maxsithsl=sin(maxTheta)/this->GetRadiation().GetWavelength()(0);
-      VFN_DEBUG_MESSAGE("ScatteringData::SortReflectionByTheta() 5"<<maxsithsl,2)
-      long maxSubs;
+      VFN_DEBUG_MESSAGE("ScatteringData::SortReflectionBySinThetaOverLambda() 5"<<maxSTOL,2)
+      long maxSubs=0;
       VFN_DEBUG_MESSAGE("  "<< mIntH(maxSubs)<<" "<< mIntK(maxSubs)<<" "<< mIntL(maxSubs)<<" "<<mSinThetaLambda(maxSubs),1)
-      for(maxSubs=0;(mSinThetaLambda(maxSubs)<maxsithsl) && (maxSubs<mNbRefl) ;maxSubs++)
+      for(maxSubs=0;(mSinThetaLambda(maxSubs)<maxSTOL) && (maxSubs<mNbRefl) ;maxSubs++)
       {
          VFN_DEBUG_MESSAGE("  "<< mIntH(maxSubs)<<" "<< mIntK(maxSubs)<<" "<< mIntL(maxSubs)<<" "<<mSinThetaLambda(maxSubs),1)
       }
       if(maxSubs==mNbRefl)
       {
-         VFN_DEBUG_EXIT("ScatteringData::SortReflectionByTheta():"<<mNbRefl<<" reflections",5)
+         VFN_DEBUG_EXIT("ScatteringData::SortReflectionBySinThetaOverLambda():"<<mNbRefl<<" reflections",5)
          return sortedSubs;
       }
       mNbRefl=maxSubs;
@@ -998,7 +1002,7 @@ CrystVector_long ScatteringData::SortReflectionByTheta(const REAL maxTheta)
       mClockHKL.Click();
       this->PrepareHKLarrays();
    }
-   VFN_DEBUG_EXIT("ScatteringData::SortReflectionByTheta():"<<mNbRefl<<" reflections",5)
+   VFN_DEBUG_EXIT("ScatteringData::SortReflectionBySinThetaOverLambda():"<<mNbRefl<<" reflections",5)
    return sortedSubs;
 }
 
@@ -1076,40 +1080,43 @@ void ScatteringData::CalcSinThetaLambda()const
    //cout << bMatrix << endl << xyz<<endl;
    for(int i=0;i< (this->GetNbRefl());i++)
       mSinThetaLambda(i)=sqrt(pow(mX(i),2)+pow(mY(i),2)+pow(mZ(i),2))/2;
-   
-   if(this->GetRadiation().GetWavelength()(0) > 0)
+   if(this->GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
    {
-      mTheta.resize(mNbRefl);
-      for(int i=0;i< (this->GetNbRefl());i++) 
-      {  
-         if( (mSinThetaLambda(i)*this->GetRadiation().GetWavelength()(0))>1)
-         {
-            //:KLUDGE: :TODO:
-            mTheta(i)=M_PI;
-            /*
-            ofstream out("log.txt");
-            out << "Error when computing Sin(theta) :"
-                << "i="<<i<<" ,mSinThetaLambda(i)="<<mSinThetaLambda(i)
-                << " ,this->GetRadiation().GetWavelength()(0)="
-                << this->GetRadiation().GetWavelength()(0) 
-                << " ,H="<<mH(i)
-                << " ,K="<<mK(i)
-                << " ,L="<<mL(i)
-                <<endl;
-            out.close();
-            abort();
-            */
+      if(this->GetRadiation().GetWavelength()(0) > 0)
+      {
+         mTheta.resize(mNbRefl);
+         for(int i=0;i< (this->GetNbRefl());i++) 
+         {  
+            if( (mSinThetaLambda(i)*this->GetRadiation().GetWavelength()(0))>1)
+            {
+               //:KLUDGE: :TODO:
+               mTheta(i)=M_PI;
+               /*
+               ofstream out("log.txt");
+               out << "Error when computing Sin(theta) :"
+                   << "i="<<i<<" ,mSinThetaLambda(i)="<<mSinThetaLambda(i)
+                   << " ,this->GetRadiation().GetWavelength()(0)="
+                   << this->GetRadiation().GetWavelength()(0) 
+                   << " ,H="<<mH(i)
+                   << " ,K="<<mK(i)
+                   << " ,L="<<mL(i)
+                   <<endl;
+               out.close();
+               abort();
+               */
+            }
+            else 
+            {
+               mTheta(i)=asin(mSinThetaLambda(i)*this->GetRadiation().GetWavelength()(0));
+            }
          }
-         else 
-         {
-            mTheta(i)=asin(mSinThetaLambda(i)*this->GetRadiation().GetWavelength()(0));
-         }
+      } else 
+      {
+         cout << "Wavelength not given in ScatteringData::CalcSinThetaLambda() !" <<endl;
+         throw 0;
       }
-   } else 
-   {
-      cout << "Wavelength not given in ScatteringData::CalcSinThetaLambda() !" <<endl;
-      throw 0;
    }
+   else mTheta.resize(0);
       
    mClockTheta.Click();
    VFN_DEBUG_EXIT("ScatteringData::CalcSinThetaLambda()",3)

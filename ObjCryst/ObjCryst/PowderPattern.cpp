@@ -71,7 +71,7 @@ mpParentPowderPattern(old.mpParentPowderPattern)
    if(mpParentPowderPattern!=0)
    {
       mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPatternPar());
-      mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPattern2ThetaCorr());
+      mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPatternXCorr());
       mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPatternRadiation());
    }
 }
@@ -123,7 +123,7 @@ mMaxSinThetaOvLambda(10),mModelVariance(0)
 
 PowderPatternBackground::PowderPatternBackground(const  PowderPatternBackground &old):
 mBackgroundNbPoint(old.mBackgroundNbPoint),
-mBackgroundInterpPoint2Theta(old.mBackgroundInterpPoint2Theta),
+mBackgroundInterpPointX(old.mBackgroundInterpPointX),
 mBackgroundInterpPointIntensity(old.mBackgroundInterpPointIntensity),
 mMaxSinThetaOvLambda(10),mModelVariance(0)
 {
@@ -146,7 +146,7 @@ void PowderPatternBackground::SetParentPowderPattern(const PowderPattern &s)
    mpParentPowderPattern = &s;
    mClockMaster.AddChild(mpParentPowderPattern->GetIntegratedProfileLimitsClock());
    mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPatternPar());
-   mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPattern2ThetaCorr());
+   mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPatternXCorr());
    mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPatternRadiation());
 }
 const CrystVector_REAL& PowderPatternBackground::GetPowderPatternCalc()const
@@ -196,8 +196,10 @@ Error opening file for input:"+filename);
    bckgd.resizeAndPreserve(nbPoints);
    //cout << bckgd << endl;
    mBackgroundNbPoint=nbPoints;
-   mBackgroundInterpPoint2Theta=bckgd2Theta;
-   mBackgroundInterpPoint2Theta*= DEG2RAD;
+   mBackgroundInterpPointX=bckgd2Theta;
+   if((this->GetParentPowderPattern().GetRadiation().GetWavelengthType()==WAVELENGTH_MONOCHROMATIC)
+      ||(this->GetParentPowderPattern().GetRadiation().GetWavelengthType()==WAVELENGTH_ALPHA12))
+      mBackgroundInterpPointX*= DEG2RAD;
    mBackgroundInterpPointIntensity=bckgd;
    this->InitRefParList();
    mClockBackgroundPoint.Click();
@@ -220,7 +222,7 @@ void PowderPatternBackground::SetInterpPoints(const CrystVector_REAL tth,
 number of points differ or less than 2 points !");
    }
    mBackgroundNbPoint=tth.numElements();
-   mBackgroundInterpPoint2Theta=tth;
+   mBackgroundInterpPointX=tth;
    mBackgroundInterpPointIntensity=backgd;
    this->InitRefParList();
    mClockBackgroundPoint.Click();
@@ -337,14 +339,14 @@ void PowderPatternBackground::CalcPowderPattern() const
          VFN_DEBUG_MESSAGE("PowderPatternBackground::CalcPowderPattern()"<<nbPoint,2)
          //mPowderPatternCalc=0.;
          REAL *b=mPowderPatternCalc.data();
-         t1=mBackgroundInterpPoint2Theta(0);
-         t2=mBackgroundInterpPoint2Theta(1);
+         t1=mBackgroundInterpPointX(0);
+         t2=mBackgroundInterpPointX(1);
          b1=mBackgroundInterpPointIntensity(0);
          b2=mBackgroundInterpPointIntensity(1);
-         t=mpParentPowderPattern->Get2ThetaMin();
          long point=1;
          for(long i=0;i<nbPoint;i++)
          {
+            t=mpParentPowderPattern->GetPowderPatternX()(i);
             if(t >= t2)
             {
                if(point < mBackgroundNbPoint-1)
@@ -352,13 +354,12 @@ void PowderPatternBackground::CalcPowderPattern() const
                   b1=b2;
                   t1=t2;
                   b2=mBackgroundInterpPointIntensity(point+1);
-                  t2=mBackgroundInterpPoint2Theta(point+1);
+                  t2=mBackgroundInterpPointX(point+1);
                   point++ ;
                }
             }
             *b = (b1*(t2-t)+b2*(t-t1))/(t2-t1) ;
             b++;
-            t+=mpParentPowderPattern->Get2ThetaStep();
          }
          break;
       }
@@ -371,10 +372,9 @@ void PowderPatternBackground::CalcPowderPattern() const
             mPowderPatternCalc=0;
             break;
          }
-         const REAL tth0=mpParentPowderPattern->Get2ThetaMin();
-         const REAL tths=mpParentPowderPattern->Get2ThetaStep();
-         CubicSpline spline(mBackgroundInterpPoint2Theta,mBackgroundInterpPointIntensity);
-         for(unsigned long i=0;i<nb;++i) mPowderPatternCalc(i)=spline(tth0+i*tths);
+         CubicSpline spline(mBackgroundInterpPointX,mBackgroundInterpPointIntensity);
+         for(unsigned long i=0;i<nb;++i) 
+            mPowderPatternCalc(i)=spline(mpParentPowderPattern->GetPowderPatternX()(i));
          break;
       }
    }
@@ -569,7 +569,7 @@ void PowderPatternDiffraction::SetParentPowderPattern(const PowderPattern &s)
    mpParentPowderPattern = &s;
    mClockMaster.AddChild(mpParentPowderPattern->GetIntegratedProfileLimitsClock());
    mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPatternPar());
-   mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPattern2ThetaCorr());
+   mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPatternXCorr());
    mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPatternRadiation());
 }
 
@@ -605,8 +605,9 @@ void PowderPatternDiffraction::SetReflectionProfilePar(const ReflectionProfileTy
 
 void PowderPatternDiffraction::GenHKLFullSpace()
 {
-   VFN_DEBUG_MESSAGE("PowderPatternDiffraction::GenHKLFullSpace():",3)
-   this->ScatteringData::GenHKLFullSpace(mpParentPowderPattern->Get2ThetaMax()/2,true);
+   VFN_DEBUG_ENTRY("PowderPatternDiffraction::GenHKLFullSpace():",3)
+   this->ScatteringData::GenHKLFullSpace(mpParentPowderPattern->GetPowderPatternXMax()/2,true);
+   VFN_DEBUG_EXIT("PowderPatternDiffraction::GenHKLFullSpace():",3)
 }
 void PowderPatternDiffraction::BeginOptimization(const bool allowApproximations,
                                                  const bool enableRestraints)
@@ -690,14 +691,10 @@ void PowderPatternDiffraction::CalcPowderPattern() const
    
    if(true) //:TODO: false == mUseFastLessPreciseFunc
    {
-      REAL theta;
-      long thetaPt,first,last,shift;
-      const long nbPoints=2*mSavedPowderReflProfileNbPoint+1;
-      long step;
       const long nbRefl=this->GetNbRefl();
       VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderPattern\
 Applying profiles for "<<nbRefl<<" reflections",3)
-
+      long step; // number of reflections at the same place and with the same (assumed) profile
       const long  specNbPoints=mpParentPowderPattern->GetNbPoint();
       mPowderPatternCalc.resize(specNbPoints);
       mPowderPatternCalc=0;
@@ -722,37 +719,24 @@ Applying profiles for "<<nbRefl<<" reflections",3)
             if(useML) var += mIhklCalcVariance(i + step);
             step++;
             if( (i+step) >= nbRefl) break;
-            if(mTheta(i+step) > (mTheta(i)+1e-5) ) break;
+            if(mSinThetaLambda(i+step) > (mSinThetaLambda(i)+1e-5) ) break;
          }
-         theta =  mpParentPowderPattern->Get2ThetaCorr(2*mTheta(i));
-         thetaPt= mpParentPowderPattern->Get2ThetaCorrPixel(2*mTheta(i));
-
-         first=thetaPt-mSavedPowderReflProfileNbPoint;
-
-         if( first >= specNbPoints) continue;
-         if( first < 0)
-         {
-            shift = -first;
-            first =0;
-         } else shift =0;
-         last=thetaPt+mSavedPowderReflProfileNbPoint;
-         if( last >= specNbPoints) last=specNbPoints-1;
-         
          VFN_DEBUG_MESSAGE("Apply profile(Monochromatic)Refl("<<i<<")"\
             <<mIntH(i)<<" "<<mIntK(i)<<" "<<mIntL(i)<<" "\
             <<"  I="<<intensity<<"  2Theta="<<2*mTheta(i)*RAD2DEG\
-            <<",pixel #"<<first<<"->"<<last,2)
+            <<",pixel #"<<mvReflProfile[i].first<<"->"<<mvReflProfile[i].last,2)
          
          {
-            const REAL *p2 = mSavedPowderReflProfile.data() + i*nbPoints +shift;
+            const unsigned long first=mvReflProfile[i].first,last=mvReflProfile[i].last;
+            const REAL *p2 = mvReflProfile[i].profile.data();
             REAL *p3 = mPowderPatternCalc.data()+first;
-            for(long j=first;j<=last;j++) *p3++ += *p2++ * intensity;
-         }
-         if(useML)
-         {
-            const REAL *p2 = mSavedPowderReflProfile.data() + i*nbPoints +shift;
-            REAL *p3 = mPowderPatternCalcVariance.data()+first;
-            for(long j=first;j<=last;j++) *p3++ += *p2++ * var;
+            for(unsigned long j=first;j<=last;j++) *p3++ += *p2++ * intensity;
+            if(useML)
+            {
+               const REAL *p2 = mvReflProfile[i].profile.data();
+               REAL *p3 = mPowderPatternCalcVariance.data()+first;
+               for(unsigned long j=first;j<=last;j++) *p3++ += *p2++ * var;
+            }
          }
       }
    }
@@ -792,7 +776,7 @@ void PowderPatternDiffraction::CalcPowderPatternIntegrated() const
       mPowderPatternIntegratedCalcVariance=0;
    }
    else mPowderPatternIntegratedCalcVariance.resize(0);
-   const REAL *pth=mTheta.data();
+   const REAL *psith=mSinThetaLambda.data();
    const REAL *pI=mIhklCalc.data();
    const REAL *pIvar=mIhklCalcVariance.data();
    vector< pair<unsigned long, CrystVector_REAL> >::const_iterator pos;
@@ -802,7 +786,7 @@ void PowderPatternDiffraction::CalcPowderPatternIntegrated() const
       //VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderPatternIntegrated():"<<i,10)
       REAL intensity=0.;
       REAL var=0.;
-      const REAL thmax=*pth+1e-5;
+      const REAL thmax=*psith+1e-5;
       //check if the next reflection is at the same theta. If this is true,
       //Then assume that the profile is exactly the same.
       for(;;)
@@ -811,7 +795,7 @@ void PowderPatternDiffraction::CalcPowderPatternIntegrated() const
          if(useML) var += *pIvar++;
          ++pos;
          if( ++i >= nbRefl) break;
-         if( *(++pth) > thmax ) break;
+         if( *(++psith) > thmax ) break;
       }
       --pos;
       //VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderPatternIntegrated():"<<i,10)
@@ -872,61 +856,12 @@ void PowderPatternDiffraction::CalcPowderReflProfile()const
       &&(mClockProfileCalc>mReflectionProfileType.GetClock())
       &&(mClockProfileCalc>mClockTheta)
       &&(mClockProfileCalc>this->GetRadiation().GetClockWavelength())
-      &&(mClockProfileCalc>mpParentPowderPattern->GetClockPowderPattern2ThetaCorr())
+      &&(mClockProfileCalc>mpParentPowderPattern->GetClockPowderPatternXCorr())
       &&(mClockProfileCalc>mClockHKL)) return;
    
    TAU_PROFILE("PowderPatternDiffraction::CalcPowderReflProfile()","void (bool)",TAU_DEFAULT);
    VFN_DEBUG_ENTRY("PowderPatternDiffraction::CalcPowderReflProfile()",5)
 
-   const REAL specMin     =mpParentPowderPattern->Get2ThetaMin();
-   //const REAL specMax     =mpParentPowderPattern->Get2ThetaMax();
-   const REAL specStep    =mpParentPowderPattern->Get2ThetaStep();
-   const long  specNbPoints=mpParentPowderPattern->GetNbPoint();
-   
-   long thetaPt;
-   REAL fwhm,tmp;
-   REAL *p1,*p2;
-   CrystVector_REAL ttheta,tmp2theta,reflProfile,tmpV;
-   //Width of calc profiles
-   VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile():\
-Computing Widths",5)
-   {
-      tmp = specMin+specStep*specNbPoints;
-      tmp/= 2;
-      fwhm=      mCagliotiW + mCagliotiV*tmp + mCagliotiU*tmp*tmp;
-      if(fwhm<1e-10) fwhm=1e-10;
-      fwhm=sqrt(fwhm);
-      if(true==mUseFastLessPreciseFunc)
-         mSavedPowderReflProfileNbPoint =(long)(mFullProfileWidthFactor
-                                             *fwhm/specStep/2);
-      else
-         mSavedPowderReflProfileNbPoint =(long)(mFullProfileWidthFactor
-                                       *fwhm/specStep);
-      switch(this->GetRadiation().GetWavelengthType())
-      {
-         case WAVELENGTH_MONOCHROMATIC:break;
-         case WAVELENGTH_ALPHA12:
-         {
-            mSavedPowderReflProfileNbPoint
-               +=(long)( tan(mpParentPowderPattern->Get2ThetaMax())
-                        *this->GetRadiation().GetXRayTubeDeltaLambda()
-                        /this->GetRadiation().GetWavelength()(0));
-            break;
-         }
-         default: throw ObjCrystException("PowderPatternDiffraction::PrepareIntegratedProfile():\
-Radiation must be either monochromatic or from an X-Ray Tube !!");
-      }
-      VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile():"<<\
-      "Profiles half-width="<<mFullProfileWidthFactor*fwhm*RAD2DEG<<" ("<<\
-      mSavedPowderReflProfileNbPoint<<" points)",5)
-   }
-   //Prepare arrays
-      ttheta.resize(2*mSavedPowderReflProfileNbPoint+1);
-      reflProfile.resize(2*mSavedPowderReflProfileNbPoint+1);
-      p2=ttheta.data();
-      for(REAL i=-mSavedPowderReflProfileNbPoint;i<=mSavedPowderReflProfileNbPoint;i++)
-         *p2++ = i * specStep;
-      mSavedPowderReflProfile.resize(this->GetNbRefl(),2*mSavedPowderReflProfileNbPoint+1);
    //Calc all profiles
    mvLabel.clear();
    stringstream label;
@@ -969,66 +904,103 @@ Radiation must be either monochromatic or from an X-Ray Tube !!");
    
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile():\
 Computing all Profiles",5)
+   REAL center,// center of current reflection (depends on line is several)
+        fwhm,  // fwhm of profile
+        x0;
+   long first,last;// first & last point of the stored profile
+   CrystVector_REAL vx,reflProfile,tmpV;
+   mvReflProfile.resize(this->GetNbRefl());
    for(unsigned int line=0;line<nbLine;line++)
    {
-      p1=mSavedPowderReflProfile.data();
       for(long i=0;i<this->GetNbRefl();i++)
       {
-         VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile():\
+         VFN_DEBUG_ENTRY("PowderPatternDiffraction::CalcPowderReflProfile():\
 Computing all Profiles: Reflection #"<<i,5)
-         tmp=mTheta(i);
-         fwhm=mCagliotiW + mCagliotiV*tmp + mCagliotiU*tmp*tmp;
+         x0=mTheta(i);
+         fwhm=mCagliotiW + mCagliotiV*tan(x0) + mCagliotiU*tan(x0)*tan(x0);
          if(fwhm<1e-10) fwhm=1e-10;
          fwhm =sqrt(fwhm);
-         tmp=mpParentPowderPattern->Get2ThetaCorr(2*tmp);
 
          REAL powderAsym=1.;
          //if(true == mUseAsymmetricProfile) 
          //   powderAsym=mPowderAsymA0+mPowderAsymA1/sin(tmp)+mPowderAsymA2/sin(tmp)/sin(tmp);
 
-         //:KLUDGE: Need to use the same 'thetaPt' when calculating the complete powder spectrum
-         thetaPt =(long) ((tmp-specMin)/specStep);
-         tmp2theta = ttheta;
          if(nbLine>1)
          {// we have several lines, not centered on the profile range
-            tmp=mTheta(i);
-            tmp = mpParentPowderPattern->Get2ThetaCorr(
-                        2*(tmp+tan(tmp)*spectrumDeltaLambdaOvLambda(line)));
+            center = mpParentPowderPattern->GetXCorr(
+                        2*(x0+tan(x0)*spectrumDeltaLambdaOvLambda(line)));
          }
-         tmp2theta += (specMin + thetaPt * specStep)-tmp;
+         else center=mpParentPowderPattern->GetXCorr(2*x0);
+         
          if(line==0)
-         {// For an X-Ray tube, label on first (strongest) of reflections lines (Kalpha1)
+         {
+            // For an X-Ray tube, label on first (strongest) of reflections lines (Kalpha1)
             label.str("");
             label<<mIntH(i)<<" "<<mIntK(i)<<" "<<mIntL(i);
-            mvLabel.push_back(make_pair(tmp,label.str()));
+            mvLabel.push_back(make_pair(center,label.str()));
+            REAL spectrumwidth=0.0;
+            if(this->GetRadiation().GetWavelengthType()==WAVELENGTH_ALPHA12)
+            {// We need to shift the last point to include 2 lines in the profile
+               spectrumwidth=2*this->GetRadiation().GetXRayTubeDeltaLambda()
+                              /this->GetRadiation().GetWavelength()(0)*tan(x0);
+            }
+            if(mUseFastLessPreciseFunc)
+            {
+               first=(long)(mpParentPowderPattern->GetXPixel(center-mFullProfileWidthFactor*fwhm/4.0))-1;
+               last =(long)(mpParentPowderPattern->GetXPixel(center+mFullProfileWidthFactor*fwhm/4.0+spectrumwidth))+1;
+            }
+            else
+            {
+               first=(long)(mpParentPowderPattern->GetXPixel(center-mFullProfileWidthFactor*fwhm/1.0))-1;
+               last =(long)(mpParentPowderPattern->GetXPixel(center+mFullProfileWidthFactor*fwhm/1.0+spectrumwidth))+1;
+            }
+            if(first<0) first=0;
+            if(last>=(long)(mpParentPowderPattern->GetNbPoint()))
+               last=mpParentPowderPattern->GetNbPoint()-1;
+            vx.resize(last-first+1);
+            mvReflProfile[i].first=first;
+            mvReflProfile[i].last=last;
          }
-
+         else
+         {
+            first=mvReflProfile[i].first;
+            last=mvReflProfile[i].last;
+            vx.resize(last-first+1);
+         }
+         
+         {
+            const REAL *p0=mpParentPowderPattern->GetPowderPatternX().data()+first;
+            REAL *p1=vx.data();
+            for(long i=first;i<=last;i++) *p1++ = *p0++;
+            vx += -center;
+         }
+         
          switch(mReflectionProfileType.GetChoice())
          {
             case PROFILE_GAUSSIAN:
             {
                if(true == mUseAsymmetricProfile)
-                  reflProfile=PowderProfileGauss(tmp2theta,fwhm,powderAsym);
-               else reflProfile=PowderProfileGauss(tmp2theta,fwhm);
+                  reflProfile=PowderProfileGauss(vx,fwhm,powderAsym);
+               else reflProfile=PowderProfileGauss(vx,fwhm);
                break;
             }
             case PROFILE_LORENTZIAN:
             {
                if(true == mUseAsymmetricProfile)
-                  reflProfile=PowderProfileLorentz(tmp2theta,fwhm,powderAsym);
-               else reflProfile=PowderProfileLorentz(tmp2theta,fwhm);
+                  reflProfile=PowderProfileLorentz(vx,fwhm,powderAsym);
+               else reflProfile=PowderProfileLorentz(vx,fwhm);
                break;
             }
             case PROFILE_PSEUDO_VOIGT:
             {
                if(true == mUseAsymmetricProfile)
-                  reflProfile=PowderProfileGauss(tmp2theta,fwhm,powderAsym);
-               else reflProfile=PowderProfileGauss(tmp2theta,fwhm);
-               reflProfile *= 1-(mPseudoVoigtEta0+2*mTheta(i)*mPseudoVoigtEta1);
+                  reflProfile=PowderProfileGauss(vx,fwhm,powderAsym);
+               else reflProfile=PowderProfileGauss(vx,fwhm);
+               reflProfile *= 1-(mPseudoVoigtEta0+2*x0*mPseudoVoigtEta1);
                if(true == mUseAsymmetricProfile)
-                  tmpV=PowderProfileLorentz(tmp2theta,fwhm,powderAsym);
-               else tmpV=PowderProfileLorentz(tmp2theta,fwhm);
-               tmpV *= mPseudoVoigtEta0+2*mTheta(i)*mPseudoVoigtEta1;
+                  tmpV=PowderProfileLorentz(vx,fwhm,powderAsym);
+               else tmpV=PowderProfileLorentz(vx,fwhm);
+               tmpV *= mPseudoVoigtEta0+2*x0*mPseudoVoigtEta1;
                reflProfile += tmpV;
                break;
             }
@@ -1056,10 +1028,12 @@ Computing all Profiles: Reflection #"<<i,5)
             case PROFILE_PEARSON_VII: throw ObjCrystException("PEARSON_VII Not implemented yet");
 
          }
+         VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile()",2)
          if(nbLine>1) reflProfile *=spectrumFactor(line);
-         p2=reflProfile.data();
-         if(line==0)for(int j=0;j<2*mSavedPowderReflProfileNbPoint+1;j++) *p1++  = *p2++;
-         else       for(int j=0;j<2*mSavedPowderReflProfileNbPoint+1;j++) *p1++ += *p2++;
+         if(line==0) mvReflProfile[i].profile = reflProfile;
+         else mvReflProfile[i].profile += reflProfile;
+         VFN_DEBUG_EXIT("PowderPatternDiffraction::CalcPowderReflProfile():\
+Computing all Profiles: Reflection #"<<i,5)
       }
    }
    mClockProfileCalc.Click();
@@ -1264,10 +1238,10 @@ void PowderPatternDiffraction::InitOptions()
 }
 void PowderPatternDiffraction::GetBraggLimits(CrystVector_long *&min,CrystVector_long *&max)const
 {
-   VFN_DEBUG_ENTRY("PowderPatternDiffraction::GetBraggLimits(*min,*max)",3)
    this->CalcPowderReflProfile();
    if(mClockProfileCalc>mClockBraggLimits)
    {
+      VFN_DEBUG_ENTRY("PowderPatternDiffraction::GetBraggLimits(*min,*max)",3)
       REAL fwhmRatio;//integrate from -fwhmRatio*fwhm to -fwhmRatio*fwhm
       switch(mReflectionProfileType.GetChoice())
       {
@@ -1280,20 +1254,22 @@ void PowderPatternDiffraction::GetBraggLimits(CrystVector_long *&min,CrystVector
       VFN_DEBUG_MESSAGE("PowderPatternDiffraction::GetBraggLimits(*min,*max):Recalc",3)
       mIntegratedReflMin.resize(this->GetNbRefl());
       mIntegratedReflMax.resize(this->GetNbRefl());
-      REAL fwhm,tmp;
+      //REAL fwhm,tmp;
       for(long i=0;i<this->GetNbRefl();i++)
       {
-         tmp=mTheta(i);
-         fwhm=sqrt(mCagliotiW + mCagliotiV*tmp + mCagliotiU*tmp*tmp);
-         mIntegratedReflMin(i)=mpParentPowderPattern->Get2ThetaCorrPixel(2*mTheta(i)-2*fwhm);
-         mIntegratedReflMax(i)=mpParentPowderPattern->Get2ThetaCorrPixel(2*mTheta(i)+2*fwhm);
+         //tmp=mTheta(i);
+         //fwhm=sqrt(mCagliotiW + mCagliotiV*tmp + mCagliotiU*tmp*tmp);
+         mIntegratedReflMin(i)=mvReflProfile[i].first;
+         mIntegratedReflMax(i)=mvReflProfile[i].last;
+         //mIntegratedReflMin(i)=mpParentPowderPattern->GetXCorrPixel(2*mTheta(i)-2*fwhm);
+         //mIntegratedReflMax(i)=mpParentPowderPattern->GetXCorrPixel(2*mTheta(i)+2*fwhm);
       }
       mClockBraggLimits.Click();
+      VFN_DEBUG_EXIT("PowderPatternDiffraction::GetBraggLimits(*min,*max)",3)
    }
    //cout << FormatVertVector<long>(mIntegratedReflMin,mIntegratedReflMax)<<endl;
    min=&mIntegratedReflMin;
    max=&mIntegratedReflMax;
-   VFN_DEBUG_EXIT("PowderPatternDiffraction::GetBraggLimits(*min,*max)",3)
 }
 
 void PowderPatternDiffraction::SetMaxSinThetaOvLambda(const REAL max)
@@ -1313,7 +1289,6 @@ void PowderPatternDiffraction::PrepareIntegratedProfile()const
    const CrystVector_long *pMax=&(mpParentPowderPattern->GetIntegratedProfileMax());
 
    const long numInterval=pMin->numElements();
-   const long nbPoints=2*mSavedPowderReflProfileNbPoint+1;
    
    vector< map<long, REAL> > vIntegratedProfileFactor;
    vIntegratedProfileFactor.resize(mNbReflUsed);
@@ -1329,18 +1304,16 @@ void PowderPatternDiffraction::PrepareIntegratedProfile()const
       long firstInterval=numInterval;
       for(long j=0;j<numInterval;j++)
       {
-         const long thetaPt= mpParentPowderPattern->Get2ThetaCorrPixel(2*mTheta(i));
-         const long first0 = thetaPt - mSavedPowderReflProfileNbPoint;
-         const long last0  = thetaPt + mSavedPowderReflProfileNbPoint;
-               long first= first0>(*pMin)(j) ? first0:(*pMin)(j);
+         const long first0 = mvReflProfile[i].first;
+         const long last0  = mvReflProfile[i].last ;
+         const long first= first0>(*pMin)(j) ? first0:(*pMin)(j);
          const long last = last0 <(*pMax)(j) ? last0 :(*pMax)(j);
          if(first<=last)
          {
             if(firstInterval>j) firstInterval=j;
             if(pos1->find(j) == pos1->end()) (*pos1)[j]=0.;
             REAL *fact = &((*pos1)[j]);//this creates the 'j' entry if necessary
-            const long shift=first-first0;
-            const REAL *p2 = mSavedPowderReflProfile.data() + i*nbPoints +shift;
+            const REAL *p2 = mvReflProfile[i].profile.data()+(first-first0);
             for(int k=first;k<=last;k++) *fact += *p2++;
             //cout << i<<","<<j<<","<<first<<","<<last<<":"<<*fact<<endl;
          }
@@ -1391,8 +1364,8 @@ ObjRegistry<PowderPattern>
    gPowderPatternRegistry("List of all PowderPattern objects");
 
 PowderPattern::PowderPattern():
-m2ThetaMin(0),m2ThetaStep(0),mNbPoint(0),
-m2ThetaZero(0.),m2ThetaDisplacement(0.),m2ThetaTransparency(0.),
+mNbPoint(0),
+mXZero(0.),m2ThetaDisplacement(0.),m2ThetaTransparency(0.),
 mScaleFactor(20),mUseFastLessPreciseFunc(false),
 mStatisticsExcludeBackground(false),mMaxSinThetaOvLambda(10),mNbPointUsed(0)
 {
@@ -1408,9 +1381,9 @@ mStatisticsExcludeBackground(false),mMaxSinThetaOvLambda(10),mNbPointUsed(0)
 }
 
 PowderPattern::PowderPattern(const PowderPattern &old):
-m2ThetaMin(old.m2ThetaMin),m2ThetaStep(old.m2ThetaStep),mNbPoint(old.mNbPoint),
+mNbPoint(old.mNbPoint),
 mRadiation(old.mRadiation),
-m2ThetaZero(old.m2ThetaZero),m2ThetaDisplacement(old.m2ThetaDisplacement),
+mXZero(old.mXZero),m2ThetaDisplacement(old.m2ThetaDisplacement),
 m2ThetaTransparency(old.m2ThetaTransparency),
 mPowderPatternComponentRegistry(old.mPowderPatternComponentRegistry),
 mScaleFactor(old.mScaleFactor),
@@ -1418,6 +1391,7 @@ mUseFastLessPreciseFunc(old.mUseFastLessPreciseFunc),
 mStatisticsExcludeBackground(old.mStatisticsExcludeBackground),
 mMaxSinThetaOvLambda(old.mMaxSinThetaOvLambda),mNbPointUsed(old.mNbPointUsed)
 {
+   mX=old.mX;
    this->Init();
    mSubObjRegistry.SetName("SubObjRegistry for a PowderPattern :"+mName);
    gPowderPatternRegistry.Register(*this);
@@ -1500,13 +1474,23 @@ PowderPatternComponent& PowderPattern::GetPowderPatternComponent
    return mPowderPatternComponentRegistry.GetObj(i);
 }
 
-void PowderPattern::SetPowderPatternPar(const REAL tthetaMin,
-                                          const REAL tthetaStep,
-                                          unsigned long nbPoint)
+void PowderPattern::SetPowderPatternPar(const REAL min,
+                                        const REAL step,
+                                        unsigned long nbPoint)
 {
-   m2ThetaMin=tthetaMin;
-   m2ThetaStep=tthetaStep;
+   VFN_DEBUG_MESSAGE("PowderPattern::SetPowderPatternPar():"<<min<<","<<step<<","<<nbPoint,3)
    mNbPoint=nbPoint;
+   mX.resize(mNbPoint);
+   for(unsigned long i=0;i<mNbPoint;i++) mX(i)=min+step*i;
+   mPowderPatternObs.resizeAndPreserve(mNbPoint);
+   mPowderPatternObsSigma.resizeAndPreserve(mNbPoint);
+   mPowderPatternWeight.resizeAndPreserve(mNbPoint);
+   mClockPowderPatternPar.Click();
+}
+void PowderPattern::SetPowderPatternX(const CrystVector_REAL &x)
+{
+   mNbPoint=x.numElements();
+   mX=x;
    mClockPowderPatternPar.Click();
 }
 
@@ -1565,16 +1549,18 @@ const CrystVector_REAL& PowderPattern::GetPowderPatternWeight()const
    return mPowderPatternWeight;
 }
 
-//CrystVector_REAL PowderPattern::Get2Theta()const
+REAL PowderPattern::GetPowderPatternXMin()const {return mX(0);}
 
-REAL PowderPattern::Get2ThetaMin()const {return m2ThetaMin;}
+REAL PowderPattern::GetPowderPatternXStep()const {return (mX(0)+mX(mNbPoint-1))/(mNbPoint-1);}
 
-REAL PowderPattern::Get2ThetaStep()const {return m2ThetaStep;}
-
-REAL PowderPattern::Get2ThetaMax()const 
+REAL PowderPattern::GetPowderPatternXMax()const 
 {
-   VFN_DEBUG_MESSAGE("PowderPattern::Get2ThetaMax()",2)
-   return m2ThetaMin+m2ThetaStep*mNbPoint;
+   VFN_DEBUG_MESSAGE("PowderPattern::Get2ThetaMax()="<<mX(mNbPoint-1),2)
+   return mX(mNbPoint-1);
+}
+const CrystVector_REAL& PowderPattern::GetPowderPatternX()const 
+{
+   return mX;
 }
 
 const RefinableObjClock& PowderPattern::GetClockPowderPatternCalc()const
@@ -1586,12 +1572,12 @@ const RefinableObjClock& PowderPattern::GetClockPowderPatternPar()const
 const RefinableObjClock& PowderPattern::GetClockPowderPatternRadiation()const
 {  return mClockPowderPatternRadiation;}
 
-const RefinableObjClock& PowderPattern::GetClockPowderPattern2ThetaCorr()const
-{  return mClockPowderPattern2ThetaCorr;}
+const RefinableObjClock& PowderPattern::GetClockPowderPatternXCorr()const
+{  return mClockPowderPatternXCorr;}
 
-void PowderPattern::Set2ThetaZero(const REAL newZero)
+void PowderPattern::SetXZero(const REAL newZero)
 {
-   m2ThetaZero=newZero;
+   mXZero=newZero;
    mClockPowderPatternPar.Click();
 }
 
@@ -1607,19 +1593,59 @@ void PowderPattern::Set2ThetaTransparency(const REAL transparency)
    mClockPowderPatternPar.Click();
 }
 
-REAL PowderPattern::Get2ThetaCorr(const REAL ttheta)const
+REAL PowderPattern::GetXCorr(const REAL x0)const
 {
-   REAL t=ttheta;
-   t +=  m2ThetaZero +m2ThetaDisplacement/cos(t/2) +m2ThetaTransparency*sin(t);
-   return t;
+   REAL x=x0;
+   if(  (mRadiation.GetWavelengthType()==WAVELENGTH_MONOCHROMATIC)
+      ||(mRadiation.GetWavelengthType()==WAVELENGTH_ALPHA12))
+      x +=  mXZero +m2ThetaDisplacement/cos(x/2) +m2ThetaTransparency*sin(x);
+   else x +=  mXZero;
+   return x;
 }
 
-long PowderPattern::Get2ThetaCorrPixel(const REAL ttheta)const
+REAL PowderPattern::GetXCorrPixel(const REAL x0)const
 {
-   REAL t=ttheta;
-   t +=  m2ThetaZero +m2ThetaDisplacement/cos(t/2) +m2ThetaTransparency*sin(t);
-   return (long) ((t-m2ThetaMin)/m2ThetaStep);
+   return this->GetXPixel(this->GetXCorr(x0));
 }
+
+REAL PowderPattern::GetXPixel(const REAL x)const
+{
+   //:TODO: faster if the step is actually constant.
+   // Step may not be constant, so we guess twice before step-search
+   long pix=(long)((x-this->GetPowderPatternXMin())/this->GetPowderPatternXStep());
+   if((pix>0)&&(pix<((long)mNbPoint-1)))
+   {
+      // Why floor() and ceil() don't return a bloody integer is beyond me
+      const REAL localStep=mX(pix+1)-mX(pix);
+      if(localStep>0) pix += (long)((x-mX(pix))/localStep);
+   }
+   if(pix<0) pix=0;
+   if(pix>((long)mNbPoint-2))pix=(long)mNbPoint-2;
+   if(mX(pix)>x)
+   {
+      for(;;pix--)
+      {
+         if(mX(pix)<=x)
+         {
+            pix++;
+            break;
+         }
+         if(pix==0) break;
+      }
+   }
+   else
+   {
+      for(;;pix++)
+      {
+         if(mX(pix)>=x) break;
+         if(pix==((long)mNbPoint-2)) break;
+      }
+   }
+   // This assumes step is at least localy constant...
+   const REAL localStep=mX(pix+1)-mX(pix);
+   return (REAL)pix+(x-mX(pix))/localStep;
+}
+
 void PowderPattern::ImportPowderPatternFullprof(const string &filename)
 {
    //15.000   0.030  70.000 LANI4FE#1 REC 800ø 4JRS                                 
@@ -1633,16 +1659,15 @@ from file : "+filename,5)
       throw ObjCrystException("PowderPattern::ImportPowderPatternFullprof() : \
 Error opening file for input:"+filename);
    }
-   fin >> m2ThetaMin;
-   fin >> m2ThetaStep;
-   REAL tmp;
-   fin >> tmp;
-   mNbPoint=(long)((tmp-m2ThetaMin)/m2ThetaStep+1.001);
+   REAL min,max,step;
+   fin >> min >> step >> max;
+   min  *= DEG2RAD;
+   max  *= DEG2RAD;
+   step *= DEG2RAD;
+   this->SetPowderPatternPar(min,step,(long)((max-min)/step+1.001));
    VFN_DEBUG_MESSAGE("PowderPattern::ImportPowderPatternFullprof() :"\
-      << " 2Theta min=" << m2ThetaMin << " 2Theta max=" << tmp \
+      << " 2Theta min=" << min*RAD2DEG << " 2Theta max=" << max*RAD2DEG \
       << " NbPoints=" << mNbPoint,5)
-   m2ThetaMin  *= DEG2RAD;
-   m2ThetaStep *= DEG2RAD;
    mPowderPatternObs.resize (mNbPoint);
    mPowderPatternObsSigma.resize (mNbPoint);
    mPowderPatternWeight.resize(mNbPoint);
@@ -1660,8 +1685,7 @@ Error opening file for input:"+filename);
    {
       char buf [200];
       sprintf(buf,"Imported powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
-              (int)mNbPoint,m2ThetaMin*RAD2DEG,(m2ThetaMin+m2ThetaStep*(mNbPoint-1))*RAD2DEG,
-              m2ThetaStep*RAD2DEG);
+              (int)mNbPoint,min*RAD2DEG,max*RAD2DEG,step*RAD2DEG);
       (*fpObjCrystInformUser)((string)buf);
    }
    VFN_DEBUG_MESSAGE("PowderPattern::ImportFullProfPattern():finished:"<<mNbPoint<<" points",5)
@@ -1681,17 +1705,15 @@ Error opening file for input:"+filename);
       char tmpComment[200];
       fin.getline(tmpComment,190);
       fin.getline(tmpComment,190);
-   
-   fin >> m2ThetaMin;
-   fin >> m2ThetaStep;
-   REAL tmp;
-   fin >> tmp;
-   mNbPoint=(long)((tmp-m2ThetaMin+.001)/m2ThetaStep)+1;
+   REAL min,max,step;
+   fin >> min >> step >> max;
+   min  *= DEG2RAD;
+   max  *= DEG2RAD;
+   step *= DEG2RAD;
+   this->SetPowderPatternPar(min,step,(unsigned long)((max-min)/step+1.001));
    VFN_DEBUG_MESSAGE("PowderPattern::ImportPowderPatternPSI_DMC() :"\
-      << " 2Theta min=" << m2ThetaMin << " 2Theta max=" << tmp \
+      << " 2Theta min=" << min*RAD2DEG << " 2Theta max=" << max*RAD2DEG \
       << " NbPoints=" << mNbPoint,5)
-   m2ThetaMin  *= DEG2RAD;
-   m2ThetaStep *= DEG2RAD;
    mPowderPatternObs.resize (mNbPoint);
    mPowderPatternObsSigma.resize (mNbPoint);
    mPowderPatternWeight.resize(mNbPoint);
@@ -1708,8 +1730,7 @@ Error opening file for input:"+filename);
    {
       char buf [200];
       sprintf(buf,"Imported powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
-              (int)mNbPoint,m2ThetaMin*RAD2DEG,(m2ThetaMin+m2ThetaStep*(mNbPoint-1))*RAD2DEG,
-              m2ThetaStep*RAD2DEG);
+              (int)mNbPoint,min*RAD2DEG,max*RAD2DEG,step*RAD2DEG);
       (*fpObjCrystInformUser)((string)buf);
    }
    VFN_DEBUG_MESSAGE("PowderPattern::ImportPowderPatternPSI_DMC():finished",5)
@@ -1733,13 +1754,14 @@ Error opening file for input:"+filename);
    
    fin >> mNbPoint;
    fin.getline(tmpComment,190);
-   fin >> m2ThetaMin;
-   fin >> m2ThetaStep;
+   REAL min,step;
+   fin >> min >> step;
+   min  *= DEG2RAD;
+   step *= DEG2RAD;
+   this->SetPowderPatternPar(min,step,mNbPoint);
    VFN_DEBUG_MESSAGE("PowderPattern::ImportPowderPatternILL_D1AD2B() :"\
-      << " 2Theta min=" << m2ThetaMin << " 2Theta max=" << m2ThetaMin+mNbPoint*m2ThetaStep \
+      << " 2Theta min=" << min*RAD2DEG << " 2Theta max=" << min*RAD2DEG+mNbPoint*step*RAD2DEG \
       << " NbPoints=" << mNbPoint,5)
-   m2ThetaMin  *= DEG2RAD;
-   m2ThetaStep *= DEG2RAD;
    mPowderPatternObs.resize (mNbPoint);
    mPowderPatternObsSigma.resize (mNbPoint);
    mPowderPatternWeight.resize(mNbPoint);
@@ -1755,8 +1777,8 @@ Error opening file for input:"+filename);
    {
       char buf [200];
       sprintf(buf,"Imported powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
-              (int)mNbPoint,m2ThetaMin*RAD2DEG,(m2ThetaMin+m2ThetaStep*(mNbPoint-1))*RAD2DEG,
-              m2ThetaStep*RAD2DEG);
+              (int)mNbPoint,min*RAD2DEG,(min+step*(mNbPoint-1))*RAD2DEG,
+              step*RAD2DEG);
       (*fpObjCrystInformUser)((string)buf);
    }
    VFN_DEBUG_MESSAGE("PowderPattern::ImportPowderPatternILL_D1AD2B():finished",5)
@@ -1775,14 +1797,12 @@ Error opening file for input:"+filename);
    char tmpComment[200];
    fin.getline(tmpComment,100);
    //if(""==mName) mName.append(tmpComment);
-   
-   fin >> m2ThetaMin;
-   fin >> m2ThetaStep;
-   REAL tmp;
-   fin >> tmp;
-   mNbPoint=(long)((tmp-m2ThetaMin)/m2ThetaStep+1);
-   m2ThetaMin  *= DEG2RAD;
-   m2ThetaStep *= DEG2RAD;
+   REAL min,max,step,tmp;
+   fin >> min >> step >> max;
+   min  *= DEG2RAD;
+   max *= DEG2RAD;
+   step *= DEG2RAD;
+   this->SetPowderPatternPar(min,step,(long)((max-min)/step+1.001));
    mPowderPatternObs.resize (mNbPoint);
    mPowderPatternObsSigma.resize(mNbPoint);
    mPowderPatternCalc.resize(mNbPoint);
@@ -1801,8 +1821,7 @@ Error opening file for input:"+filename);
    {
       char buf [200];
       sprintf(buf,"Imported powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
-              (int)mNbPoint,m2ThetaMin*RAD2DEG,(m2ThetaMin+m2ThetaStep*(mNbPoint-1))*RAD2DEG,
-              m2ThetaStep*RAD2DEG);
+              (int)mNbPoint,min*RAD2DEG,max*RAD2DEG,step*RAD2DEG);
       (*fpObjCrystInformUser)((string)buf);
    }
    VFN_DEBUG_MESSAGE("DiffractionDataPowder::ImportXddPattern() :finished",5)
@@ -1821,14 +1840,12 @@ Error opening file for input:"+filename);
    char tmpComment[300];
    fin.getline(tmpComment,100);
    VFN_DEBUG_MESSAGE(" ->Discarded comment :"<<tmpComment,1)
-   
-   fin >> m2ThetaMin;
-   REAL tmp;
-   fin >> tmp;//2Theta Max
-   fin >> m2ThetaStep;
-   mNbPoint=(long)((tmp-m2ThetaMin)/m2ThetaStep+1);
-   m2ThetaMin  *= DEG2RAD;
-   m2ThetaStep *= DEG2RAD;
+   REAL min,max,step;
+   fin >> min >> max >> step;
+   min  *= DEG2RAD;
+   max *= DEG2RAD;
+   step *= DEG2RAD;
+   this->SetPowderPatternPar(min,step,(long)((max-min)/step+1.001));
    mPowderPatternObs.resize (mNbPoint);
    mPowderPatternObsSigma.resize(mNbPoint);
    mPowderPatternCalc.resize(mNbPoint);
@@ -1852,8 +1869,7 @@ Error opening file for input:"+filename);
    {
       char buf [200];
       sprintf(buf,"Imported powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
-              (int)mNbPoint,m2ThetaMin*RAD2DEG,(m2ThetaMin+m2ThetaStep*(mNbPoint-1))*RAD2DEG,
-              m2ThetaStep*RAD2DEG);
+              (int)mNbPoint,min*RAD2DEG,max*RAD2DEG,step*RAD2DEG);
       (*fpObjCrystInformUser)((string)buf);
    }
    VFN_DEBUG_EXIT("DiffractionDataPowder::ImportPowderPatternSietronicsCPI()",5)
@@ -1875,38 +1891,34 @@ Error opening file for input:"+filename);
    }
    mPowderPatternObs.resize (500);
    mPowderPatternObsSigma.resize(500);
-   CrystVector_REAL tmp2Theta(500);
+   mX.resize(500);
    mNbPoint=0;
    
    do
    {
-      fin >> tmp2Theta              (mNbPoint);
+      fin >> mX              (mNbPoint);
       fin >> mPowderPatternObs     (mNbPoint);
       fin >> mPowderPatternObsSigma(mNbPoint);
-      //cout << tmp2Theta              (mNbPoint)<<" "
+      //cout << mX              (mNbPoint)<<" "
       //     << mPowderPatternObs     (mNbPoint)<<" "
       //    << mPowderPatternObsSigma(mNbPoint)<<endl;
       if(!fin) break;
       mNbPoint++;
       if( (mNbPoint%500)==0)
       {
-         tmp2Theta.resizeAndPreserve(mNbPoint+500);
+         mX.resizeAndPreserve(mNbPoint+500);
          mPowderPatternObs.resizeAndPreserve(mNbPoint+500);
          mPowderPatternObsSigma.resizeAndPreserve(mNbPoint+500);
       }
    } while(fin.eof() == false);
    fin.close();
    
-   tmp2Theta.resizeAndPreserve              (mNbPoint);
+   mX.resizeAndPreserve                    (mNbPoint);
    mPowderPatternObs.resizeAndPreserve     (mNbPoint);
    mPowderPatternObsSigma.resizeAndPreserve(mNbPoint);
    mPowderPatternWeight.resize(mNbPoint);
    
-   m2ThetaMin=tmp2Theta(0);
-   m2ThetaStep=(tmp2Theta(mNbPoint-1)-tmp2Theta(0))
-                                 /(mNbPoint-1);
-   m2ThetaMin  *= DEG2RAD;
-   m2ThetaStep *= DEG2RAD;
+   mX *= DEG2RAD;
    
    this->SetWeightToInvSigmaSq();
    mClockPowderPatternPar.Click();
@@ -1914,8 +1926,9 @@ Error opening file for input:"+filename);
    {
       char buf [200];
       sprintf(buf,"Imported powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
-              (int)mNbPoint,m2ThetaMin*RAD2DEG,(m2ThetaMin+m2ThetaStep*(mNbPoint-1))*RAD2DEG,
-              m2ThetaStep*RAD2DEG);
+              (int)mNbPoint,this->GetPowderPatternXMin()*RAD2DEG,
+              this->GetPowderPatternXMax()*RAD2DEG,
+              this->GetPowderPatternXStep()*RAD2DEG);
       (*fpObjCrystInformUser)((string)buf);
    }
    VFN_DEBUG_MESSAGE("PowderPattern::ImportPowderPattern2ThetaObsSigma()\
@@ -1938,12 +1951,12 @@ Error opening file for input:"+filename);
    }
    mPowderPatternObs.resize (500);
    mPowderPatternObsSigma.resize(500);
-   CrystVector_REAL tmp2Theta(500);
+   mX.resize(500);
    mNbPoint=0;
    
    do
    {
-      fin >> tmp2Theta              (mNbPoint);
+      fin >> mX(mNbPoint);
       fin >> mPowderPatternObs     (mNbPoint);
       mPowderPatternObsSigma(mNbPoint)
          =sqrt(mPowderPatternObs(mNbPoint));
@@ -1951,22 +1964,19 @@ Error opening file for input:"+filename);
       mNbPoint++;
       if( (mNbPoint%500)==0)
       {
-         tmp2Theta.resizeAndPreserve(mNbPoint+500);
+         mX.resizeAndPreserve(mNbPoint+500);
          mPowderPatternObs.resizeAndPreserve(mNbPoint+500);
          mPowderPatternObsSigma.resizeAndPreserve(mNbPoint+500);
       }
    } while(fin.eof() == false);
    fin.close();
    
-   tmp2Theta.resizeAndPreserve              (mNbPoint);
+   mX.resizeAndPreserve              (mNbPoint);
    mPowderPatternObs.resizeAndPreserve     (mNbPoint);
    mPowderPatternObsSigma.resizeAndPreserve(mNbPoint);
    mPowderPatternWeight.resize(mNbPoint);
 
-   m2ThetaMin=tmp2Theta(0);
-   m2ThetaStep=(tmp2Theta(mNbPoint-1)-tmp2Theta(0))/(mNbPoint-1);
-   m2ThetaMin  *= DEG2RAD;
-   m2ThetaStep *= DEG2RAD;
+   mX *= DEG2RAD;
 
    this->SetSigmaToSqrtIobs();
    this->SetWeightToInvSigmaSq();
@@ -1975,8 +1985,9 @@ Error opening file for input:"+filename);
    {
       char buf [200];
       sprintf(buf,"Imported powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
-              (int)mNbPoint,m2ThetaMin*RAD2DEG,(m2ThetaMin+m2ThetaStep*(mNbPoint-1))*RAD2DEG,
-              m2ThetaStep*RAD2DEG);
+              (int)mNbPoint,this->GetPowderPatternXMin()*RAD2DEG,
+              this->GetPowderPatternXMax()*RAD2DEG,
+              this->GetPowderPatternXStep()*RAD2DEG);
       (*fpObjCrystInformUser)((string)buf);
    }
    VFN_DEBUG_MESSAGE("PowderPattern::ImportPowderPattern2ThetaObs():finished",5)
@@ -2011,23 +2022,14 @@ Error opening file for input:"+filename);
    string str;
    getline(fin,str);
    float junk;
-   fin >> junk;
-   fin >> junk;
-   fin >> m2ThetaStep;
-   fin >> junk;
-   fin >> junk;
-   fin >> junk;
-   fin >> m2ThetaMin;
-   fin >> junk;
-   fin >> junk;
-   fin >> junk;
-   fin >> junk;
+   REAL min,step;
+   fin >>junk>>junk>>step>>junk>>junk>>junk>>min>>junk>>junk>>junk>>junk;
+   min  *= DEG2RAD;
+   step *= DEG2RAD;
    VFN_DEBUG_MESSAGE("PowderPattern::ImportPowderPatternMultiDetectorLLBG42() :"\
-      << " 2Theta min=" << m2ThetaMin << " 2Theta step=" <<  m2ThetaStep,5)
-   m2ThetaMin  *= DEG2RAD;
-   m2ThetaStep *= DEG2RAD;
-   mPowderPatternObs.resize (1000);
-   mPowderPatternObsSigma.resize (1000);
+      << " 2Theta min=" << min*RAD2DEG << " 2Theta step=" <<  step*RAD2DEG,5)
+   mPowderPatternObs.resize (500);
+   mPowderPatternObsSigma.resize (500);
    
    getline(fin,str);//finish reading line
    
@@ -2045,8 +2047,8 @@ Error opening file for input:"+filename);
       {
          if(mNbPoint==(unsigned int)mPowderPatternObs.numElements())
          {
-            mPowderPatternObs.resizeAndPreserve(mNbPoint+100);
-            mPowderPatternObsSigma.resizeAndPreserve(mNbPoint+100);
+            mPowderPatternObs.resizeAndPreserve(mNbPoint+500);
+            mPowderPatternObsSigma.resizeAndPreserve(mNbPoint+500);
          }
          sub=str.substr(i*8,8);
          sscanf(sub.c_str(),"%2f%6f",&ct,&iobs);
@@ -2054,6 +2056,7 @@ Error opening file for input:"+filename);
          mPowderPatternObsSigma(mNbPoint++)=sqrt(iobs/ct);
       }
    }
+   this->SetPowderPatternPar(min,step,mNbPoint);
    //exit(1);
    mPowderPatternObs.resizeAndPreserve (mNbPoint);
    mPowderPatternObsSigma.resizeAndPreserve (mNbPoint);
@@ -2066,8 +2069,7 @@ Error opening file for input:"+filename);
    {
       char buf [200];
       sprintf(buf,"Imported powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
-              (int)mNbPoint,m2ThetaMin*RAD2DEG,(m2ThetaMin+m2ThetaStep*(mNbPoint-1))*RAD2DEG,
-              m2ThetaStep*RAD2DEG);
+              (int)mNbPoint,min*RAD2DEG,mX(mNbPoint-1)*RAD2DEG,step*RAD2DEG);
       (*fpObjCrystInformUser)((string)buf);
    }
    VFN_DEBUG_MESSAGE("PowderPattern::ImportPowderPatternMultiDetectorLLBG42():finished:"<<mNbPoint<<" points",5)
@@ -2088,16 +2090,15 @@ from file : "+filename,5)
       throw ObjCrystException("PowderPattern::ImportPowderPatternFullprof4() : \
 Error opening file for input:"+filename);
    }
-   fin >> m2ThetaMin;
-   fin >> m2ThetaStep;
-   REAL tmp;
-   fin >> tmp;
-   mNbPoint=(long)((tmp-m2ThetaMin)/m2ThetaStep+1.0001);
+   REAL min,step,max;
+   fin >> min >> step >> max;
+   min *= DEG2RAD;
+   max *= DEG2RAD;
+   step *= DEG2RAD;
+   this->SetPowderPatternPar(min,step,(long)((max-min)/step+1.001));
    VFN_DEBUG_MESSAGE("PowderPattern::ImportPowderPatternFullprof4() :"\
-      << " 2Theta min=" << m2ThetaMin << " 2Theta max=" << tmp \
+      << " 2Theta min=" << min*RAD2DEG << " 2Theta max=" << max*RAD2DEG \
       << " NbPoints=" << mNbPoint,5)
-   m2ThetaMin  *= DEG2RAD;
-   m2ThetaStep *= DEG2RAD;
    mPowderPatternObs.resize (mNbPoint);
    mPowderPatternObsSigma.resize (mNbPoint);
    mPowderPatternWeight.resize(mNbPoint);
@@ -2130,8 +2131,8 @@ Error opening file for input:"+filename);
    {
       char buf [200];
       sprintf(buf,"Imported powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
-              (int)mNbPoint,m2ThetaMin*RAD2DEG,(m2ThetaMin+m2ThetaStep*(mNbPoint-1))*RAD2DEG,
-              m2ThetaStep*RAD2DEG);
+              (int)mNbPoint,min*RAD2DEG,max*RAD2DEG,
+              step*RAD2DEG);
       (*fpObjCrystInformUser)((string)buf);
    }
    VFN_DEBUG_MESSAGE("PowderPattern::ImportFullProfPattern4():finished:"<<mNbPoint<<" points",5)
@@ -2157,8 +2158,8 @@ supplied vector of observed intensities does not have the expected number of poi
    {
       char buf [200];
       sprintf(buf,"Changed powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
-              (int)mNbPoint,m2ThetaMin*RAD2DEG,(m2ThetaMin+m2ThetaStep*(mNbPoint-1))*RAD2DEG,
-              m2ThetaStep*RAD2DEG);
+              (int)mNbPoint,mX(0)*RAD2DEG,mX(mNbPoint-1)*RAD2DEG,
+              (mX(mNbPoint-1)-mX(0))/(mNbPoint-1)*RAD2DEG);
       (*fpObjCrystInformUser)((string)buf);
    }
 }
@@ -2167,10 +2168,8 @@ void PowderPattern::SavePowderPattern(const string &filename) const
    VFN_DEBUG_MESSAGE("PowderPattern::SavePowderPattern",5)
    this->CalcPowderPattern();
    ofstream out(filename.c_str());
-   CrystVector_REAL ttheta(mNbPoint);
-   //REAL *p=ttheta.data();
-   for(unsigned long i=0;i<mNbPoint;i++) 
-      ttheta(i) = m2ThetaMin+ i * m2ThetaStep;
+   CrystVector_REAL ttheta;
+   ttheta=mX;
    ttheta *= RAD2DEG;
    
    CrystVector_REAL diff;
@@ -2189,10 +2188,8 @@ void PowderPattern::SavePowderPattern(const string &filename) const
 void PowderPattern::PrintObsCalcData(ostream&os)const
 {
    VFN_DEBUG_MESSAGE("DiffractionDataPowder::PrintObsCalcData()",5);
-   CrystVector_REAL ttheta(mNbPoint);
-   //REAL *p=ttheta.data();
-   for(unsigned long i=0;i<mNbPoint;i++) 
-      ttheta(i) = m2ThetaMin+ i * m2ThetaStep;
+   CrystVector_REAL ttheta;
+   ttheta=mX;
    ttheta *= RAD2DEG;
    os << "PowderPattern : " << mName <<endl;
    os << "      2Theta      Obs          Sigma        Calc        Weight" <<endl;
@@ -2222,7 +2219,7 @@ REAL PowderPattern::GetR()const
       p1=mPowderPatternCalc.data();
       p2=mPowderPatternObs.data();
       p3=mPowderPatternBackgroundCalc.data();
-      const long nbExclude=mExcludedRegionMin2Theta.numElements();
+      const long nbExclude=mExcludedRegionMinX.numElements();
       if(0==nbExclude)
       {
          VFN_DEBUG_MESSAGE("PowderPattern::GetR():Exclude Backgd",4);
@@ -2240,10 +2237,8 @@ REAL PowderPattern::GetR()const
          unsigned long i=0;
          for(int j=0;j<nbExclude;j++)
          {
-            min=(long)floor((mExcludedRegionMin2Theta(j)-m2ThetaMin)
-                                 /m2ThetaStep);
-            max=(long)ceil((mExcludedRegionMax2Theta(j)-m2ThetaMin)
-                                 /m2ThetaStep);
+            min=(unsigned long)floor(this->GetXPixel(mExcludedRegionMinX(j)));
+            max=(unsigned long)ceil (this->GetXPixel(mExcludedRegionMaxX(j)));
             if(min>maxPoints) break;
             if(max>maxPoints)max=maxPoints;
             for(;i<min;i++)//! min is the *beginning* of the excluded region !
@@ -2271,7 +2266,7 @@ REAL PowderPattern::GetR()const
       const REAL *p1, *p2;
       p1=mPowderPatternCalc.data();
       p2=mPowderPatternObs.data();
-      const long nbExclude=mExcludedRegionMin2Theta.numElements();
+      const long nbExclude=mExcludedRegionMinX.numElements();
       if(0==nbExclude)
       {
          VFN_DEBUG_MESSAGE("PowderPattern::GetR()",4);
@@ -2290,10 +2285,8 @@ REAL PowderPattern::GetR()const
          unsigned long i=0;
          for(int j=0;j<nbExclude;j++)
          {
-            min=(long)floor((mExcludedRegionMin2Theta(j)-m2ThetaMin)
-                                 /m2ThetaStep);
-            max=(long)ceil((mExcludedRegionMax2Theta(j)-m2ThetaMin)
-                                 /m2ThetaStep);
+            min=(unsigned long)floor(this->GetXPixel(mExcludedRegionMinX(j)));
+            max=(unsigned long)ceil (this->GetXPixel(mExcludedRegionMaxX(j)));
             if(min>maxPoints) break;
             if(max>maxPoints)max=maxPoints;
             for(;i<min;i++)//! min is the *beginning* of the excluded region !
@@ -2427,7 +2420,7 @@ REAL PowderPattern::GetRw()const
       p2=mPowderPatternObs.data();
       p3=mPowderPatternBackgroundCalc.data();
       p4=mPowderPatternWeight.data();
-      const long nbExclude=mExcludedRegionMin2Theta.numElements();
+      const long nbExclude=mExcludedRegionMinX.numElements();
       if(0==nbExclude)
       {
          for(unsigned long i=0;i<maxPoints;i++)
@@ -2443,10 +2436,8 @@ REAL PowderPattern::GetRw()const
          unsigned long i=0;
          for(int j=0;j<nbExclude;j++)
          {
-            min=(long)floor((mExcludedRegionMin2Theta(j)-m2ThetaMin)
-                                 /m2ThetaStep);
-            max=(long)ceil((mExcludedRegionMax2Theta(j)-m2ThetaMin)
-                                 /m2ThetaStep);
+            min=(unsigned long)floor(this->GetXPixel(mExcludedRegionMinX(j)));
+            max=(unsigned long)ceil (this->GetXPixel(mExcludedRegionMaxX(j)));
             if(min>maxPoints) break;
             if(max>maxPoints)max=maxPoints;
             for(;i<min;i++)//! min is the *beginning* of the excluded region !
@@ -2477,7 +2468,7 @@ REAL PowderPattern::GetRw()const
       p1=mPowderPatternCalc.data();
       p2=mPowderPatternObs.data();
       p4=mPowderPatternWeight.data();
-      const long nbExclude=mExcludedRegionMin2Theta.numElements();
+      const long nbExclude=mExcludedRegionMinX.numElements();
       if(0==nbExclude)
       {
          for(unsigned long i=0;i<maxPoints;i++)
@@ -2493,10 +2484,8 @@ REAL PowderPattern::GetRw()const
          unsigned long i=0;
          for(int j=0;j<nbExclude;j++)
          {
-            min=(long)floor((mExcludedRegionMin2Theta(j)-m2ThetaMin)
-                                 /m2ThetaStep);
-            max=(long)ceil((mExcludedRegionMax2Theta(j)-m2ThetaMin)
-                                 /m2ThetaStep);
+            min=(unsigned long)floor(this->GetXPixel(mExcludedRegionMinX(j)));
+            max=(unsigned long)ceil (this->GetXPixel(mExcludedRegionMaxX(j)));
             if(min>maxPoints) break;
             if(max>maxPoints)max=maxPoints;
             for(;i<min;i++)//! min is the *beginning* of the excluded region !
@@ -2674,7 +2663,7 @@ REAL PowderPattern::GetChi2()const
       p1=mPowderPatternCalc.data();
       p2=mPowderPatternObs.data();
       p3=mPowderPatternWeight.data();
-      const long nbExclude=mExcludedRegionMin2Theta.numElements();
+      const long nbExclude=mExcludedRegionMinX.numElements();
       if(0==nbExclude)
       {
          for(unsigned long i=0;i<maxPoints;i++)
@@ -2691,10 +2680,8 @@ REAL PowderPattern::GetChi2()const
          unsigned long i=0;
          for(int j=0;j<nbExclude;j++)
          {
-            min=(long)floor((mExcludedRegionMin2Theta(j)-m2ThetaMin)
-                                 /m2ThetaStep);
-            max=(long)ceil((mExcludedRegionMax2Theta(j)-m2ThetaMin)
-                                 /m2ThetaStep);
+            min=(unsigned long)floor(this->GetXPixel(mExcludedRegionMinX(j)));
+            max=(unsigned long)ceil (this->GetXPixel(mExcludedRegionMaxX(j)));
             if(min>maxPoints) break;
             if(max>maxPoints)max=maxPoints;
             for(;i<min;i++)//! min is the *beginning* of the excluded region !
@@ -2755,7 +2742,7 @@ void PowderPattern::FitScaleFactorForR()const
       mFitScaleFactorB.resize(nbScale,1);
       mFitScaleFactorX.resize(nbScale,1);
    // Build Matrix & Vector for LSQ
-   const long nbExclude=mExcludedRegionMin2Theta.numElements();
+   const long nbExclude=mExcludedRegionMinX.numElements();
    if(0==nbExclude)
    {
       for(int i=0;i<nbScale;i++)
@@ -2807,10 +2794,8 @@ void PowderPattern::FitScaleFactorForR()const
             unsigned long l=0;
             for(int k=0;k<nbExclude;k++)
             {
-               min=(unsigned long)floor((mExcludedRegionMin2Theta(k)-m2ThetaMin)
-                                    /m2ThetaStep);
-               max=(unsigned long)ceil((mExcludedRegionMax2Theta(k)-m2ThetaMin)
-                                    /m2ThetaStep);
+               min=(unsigned long)floor(this->GetXPixel(mExcludedRegionMinX(j)));
+               max=(unsigned long)ceil (this->GetXPixel(mExcludedRegionMaxX(j)));
                if(min>mNbPointUsed) break;
                if(max>mNbPointUsed)max=mNbPointUsed;
                //! min is the *beginning* of the excluded region
@@ -2836,10 +2821,8 @@ void PowderPattern::FitScaleFactorForR()const
          {
             for(int k=0;k<nbExclude;k++)
             {
-               min=(long)floor((mExcludedRegionMin2Theta(k)-m2ThetaMin)
-                                    /m2ThetaStep);
-               max=(long)ceil((mExcludedRegionMax2Theta(k)-m2ThetaMin)
-                                    /m2ThetaStep);
+               min=(unsigned long)floor(this->GetXPixel(mExcludedRegionMinX(k)));
+               max=(unsigned long)ceil (this->GetXPixel(mExcludedRegionMaxX(k)));
                if(min>mNbPointUsed) break;
                if(max>mNbPointUsed)max=mNbPointUsed;
                //! min is the *beginning* of the excluded region
@@ -2855,10 +2838,8 @@ void PowderPattern::FitScaleFactorForR()const
             const REAL *p3=mPowderPatternBackgroundCalc.data();
             for(int k=0;k<nbExclude;k++)
             {
-               min=(long)floor((mExcludedRegionMin2Theta(k)-m2ThetaMin)
-                                    /m2ThetaStep);
-               max=(long)ceil((mExcludedRegionMax2Theta(k)-m2ThetaMin)
-                                    /m2ThetaStep);
+               min=(unsigned long)floor(this->GetXPixel(mExcludedRegionMinX(k)));
+               max=(unsigned long)ceil (this->GetXPixel(mExcludedRegionMaxX(k)));
                if(min>mNbPointUsed) break;
                if(max>mNbPointUsed)max=mNbPointUsed;
                //! min is the *beginning* of the excluded region
@@ -3069,7 +3050,7 @@ void PowderPattern::FitScaleFactorForRw()const
       mFitScaleFactorB.resize(nbScale,1);
       mFitScaleFactorX.resize(nbScale,1);
    // Build Matrix & Vector for LSQ
-   const long nbExclude=mExcludedRegionMin2Theta.numElements();
+   const long nbExclude=mExcludedRegionMinX.numElements();
    if(0==nbExclude)
    {
       for(int i=0;i<nbScale;i++)
@@ -3125,10 +3106,8 @@ void PowderPattern::FitScaleFactorForRw()const
             unsigned long l=0;
             for(int k=0;k<nbExclude;k++)
             {
-               min=(unsigned long)floor((mExcludedRegionMin2Theta(k)-m2ThetaMin)
-                                    /m2ThetaStep);
-               max=(unsigned long)ceil((mExcludedRegionMax2Theta(k)-m2ThetaMin)
-                                    /m2ThetaStep);
+               min=(unsigned long)floor(this->GetXPixel(mExcludedRegionMinX(j)));
+               max=(unsigned long)ceil (this->GetXPixel(mExcludedRegionMaxX(j)));
                if(min>mNbPointUsed) break;
                if(max>mNbPointUsed)max=mNbPointUsed;
                //! min is the *beginning* of the excluded region
@@ -3156,10 +3135,8 @@ void PowderPattern::FitScaleFactorForRw()const
          {
             for(int k=0;k<nbExclude;k++)
             {
-               min=(long)floor((mExcludedRegionMin2Theta(k)-m2ThetaMin)
-                                    /m2ThetaStep);
-               max=(long)ceil((mExcludedRegionMax2Theta(k)-m2ThetaMin)
-                                    /m2ThetaStep);
+               min=(unsigned long)floor(this->GetXPixel(mExcludedRegionMinX(k)));
+               max=(unsigned long)ceil (this->GetXPixel(mExcludedRegionMaxX(k)));
                if(min>mNbPointUsed) break;
                if(max>mNbPointUsed)max=mNbPointUsed;
                //! min is the *beginning* of the excluded region
@@ -3176,10 +3153,8 @@ void PowderPattern::FitScaleFactorForRw()const
             const REAL *p4=mPowderPatternBackgroundCalc.data();
             for(int k=0;k<nbExclude;k++)
             {
-               min=(long)floor((mExcludedRegionMin2Theta(k)-m2ThetaMin)
-                                    /m2ThetaStep);
-               max=(long)ceil((mExcludedRegionMax2Theta(k)-m2ThetaMin)
-                                    /m2ThetaStep);
+               min=(unsigned long)floor(this->GetXPixel(mExcludedRegionMinX(k)));
+               max=(unsigned long)ceil (this->GetXPixel(mExcludedRegionMaxX(k)));
                if(min>mNbPointUsed) break;
                if(max>mNbPointUsed)max=mNbPointUsed;
                //! min is the *beginning* of the excluded region
@@ -3477,13 +3452,6 @@ void PowderPattern::SetWeightToInvSigmaSq(const REAL minRelatSigma)
       else  mPowderPatternWeight(i) =1./tmp/tmp;
    }
 }
-void PowderPattern::SetWeightToSinTheta(const REAL power)
-{
-   VFN_DEBUG_MESSAGE("PowderPattern::SetWeightToSinTheta()",5);
-   //mPowderPatternWeight.resize(mPowderPatternObs.numElements());
-   for(long i=0;i<mPowderPatternWeight.numElements();i++) 
-      mPowderPatternWeight(i) =pow(sin((m2ThetaMin+ i * m2ThetaStep)/2),power);
-}
 void PowderPattern::SetWeightToUnit()
 {
    VFN_DEBUG_MESSAGE("PowderPattern::SetWeightToSinTheta()",5);
@@ -3522,35 +3490,35 @@ void PowderPattern::GlobalOptRandomMove(const REAL mutationAmplitude,
    this->RefinableObj::GlobalOptRandomMove(mutationAmplitude,type);
 }
 
-void PowderPattern::Add2ThetaExcludedRegion(const REAL min2Theta,const REAL max2Theta)
+void PowderPattern::AddExcludedRegion(const REAL min,const REAL max)
 {
-   VFN_DEBUG_MESSAGE("PowderPattern::Add2ThetaExcludedRegion()",5)
-   const int num=mExcludedRegionMin2Theta.numElements();
+   VFN_DEBUG_MESSAGE("PowderPattern::AddExcludedRegion()",5)
+   const int num=mExcludedRegionMinX.numElements();
    if(num>0)
    {
-      mExcludedRegionMin2Theta.resizeAndPreserve(num+1);
-      mExcludedRegionMax2Theta.resizeAndPreserve(num+1);
+      mExcludedRegionMinX.resizeAndPreserve(num+1);
+      mExcludedRegionMaxX.resizeAndPreserve(num+1);
    }
    else
    {
-      mExcludedRegionMin2Theta.resize(1);
-      mExcludedRegionMax2Theta.resize(1);
+      mExcludedRegionMinX.resize(1);
+      mExcludedRegionMaxX.resize(1);
    }
-   mExcludedRegionMin2Theta(num)=min2Theta;
-   mExcludedRegionMax2Theta(num)=max2Theta;
+   mExcludedRegionMinX(num)=min;
+   mExcludedRegionMaxX(num)=max;
    
    //ensure regions are sorted by ascending 2thetamin
    CrystVector_long subs;
-   subs=SortSubs(mExcludedRegionMin2Theta);
+   subs=SortSubs(mExcludedRegionMinX);
    CrystVector_REAL tmp1,tmp2;
-   tmp1=mExcludedRegionMin2Theta;
-   tmp2=mExcludedRegionMax2Theta;
-   for(int i=0;i<mExcludedRegionMin2Theta.numElements();i++)
+   tmp1=mExcludedRegionMinX;
+   tmp2=mExcludedRegionMaxX;
+   for(int i=0;i<mExcludedRegionMinX.numElements();i++)
    {
-      mExcludedRegionMin2Theta(i)=tmp1(subs(i));
-      mExcludedRegionMax2Theta(i)=tmp2(subs(i));
+      mExcludedRegionMinX(i)=tmp1(subs(i));
+      mExcludedRegionMaxX(i)=tmp2(subs(i));
    }
-   VFN_DEBUG_MESSAGE(FormatVertVector<REAL>(mExcludedRegionMin2Theta,mExcludedRegionMax2Theta),5)
+   VFN_DEBUG_MESSAGE(FormatVertVector<REAL>(mExcludedRegionMinX,mExcludedRegionMaxX),5)
    VFN_DEBUG_MESSAGE("PowderPattern::Add2ThetaExcludedRegion():End",5)
 }
 
@@ -3995,30 +3963,29 @@ void PowderPattern::Init()
 {
    this->InitOptions();
    {
-      RefinablePar tmp("2Theta0",&m2ThetaZero,-.05,.05,gpRefParTypeScattDataCorrPos,
+      RefinablePar tmp("Zero",&mXZero,-.05,.05,gpRefParTypeScattDataCorrPos,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG);
-      tmp.AssignClock(mClockPowderPattern2ThetaCorr);
+      tmp.AssignClock(mClockPowderPatternXCorr);
       tmp.SetDerivStep(1e-6);
       this->AddPar(tmp);
    }
    {
       RefinablePar tmp("2ThetaDispl",&m2ThetaDisplacement,-.05,.05,gpRefParTypeScattDataCorrPos,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG);
-      tmp.AssignClock(mClockPowderPattern2ThetaCorr);
+      tmp.AssignClock(mClockPowderPatternXCorr);
       tmp.SetDerivStep(1e-6);
       this->AddPar(tmp);
    }
    {
       RefinablePar tmp("2ThetaTransp",&m2ThetaTransparency,-.05,.05,gpRefParTypeScattDataCorrPos,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG);
-      tmp.AssignClock(mClockPowderPattern2ThetaCorr);
+      tmp.AssignClock(mClockPowderPatternXCorr);
       tmp.SetDerivStep(1e-6);
       this->AddPar(tmp);
    }
 }
 void PowderPattern::PrepareIntegratedRfactor()const
 {
-   VFN_DEBUG_ENTRY("PowderPattern::PrepareIntegratedRfactor()",3);
    bool needPrep=false;
    CrystVector_long *min,*max;
    for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++)
@@ -4036,11 +4003,8 @@ void PowderPattern::PrepareIntegratedRfactor()const
       this->CalcNbPointUsed();
       if(mClockIntegratedFactorsPrep<mClockNbPointUsed) needPrep=true;
    
-   if(false==needPrep)
-   {
-      VFN_DEBUG_EXIT("PowderPattern::PrepareIntegratedRfactor():nothing to do",3);
-      return;
-   }
+   if(false==needPrep)return;
+   VFN_DEBUG_ENTRY("PowderPattern::PrepareIntegratedRfactor()",3);
    TAU_PROFILE("PowderPattern::PrepareIntegratedRfactor()","void ()",TAU_DEFAULT);
    
    // First get all integration intervals and concatenate the arrays
@@ -4051,10 +4015,10 @@ void PowderPattern::PrepareIntegratedRfactor()const
       min=0;
       max=0;
       mPowderPatternComponentRegistry.GetObj(i).GetBraggLimits(min,max);
-      //cout << "Component #"<<i<<"  "<<min <<" "<<max<<endl;
+      VFN_DEBUG_MESSAGE("Component #"<<i<<"  "<<min <<" "<<max,3)
       if(0==min) continue;
-      //cout <<" : num intervals:"<< min->numElements()<<endl
-      //     <<FormatVertVector<long>(*min,*max)<<endl;
+      VFN_DEBUG_MESSAGE(" : num intervals:"<< min->numElements()<<endl \
+                        <<FormatVertVector<long>(*min,*max),3)
       numNewInterval=min->numElements();
       mIntegratedPatternMin.resizeAndPreserve(numInterval+numNewInterval);
       for(int j=0;j<numNewInterval;j++) mIntegratedPatternMin(numInterval+j)=(*min)(j);
@@ -4110,14 +4074,14 @@ void PowderPattern::PrepareIntegratedRfactor()const
       }
    // Take care of excluded regions (change integration areas accordingly)
    // regions are sorted by ascending theta
-      const long nbExclude=mExcludedRegionMin2Theta.numElements();
+      const long nbExclude=mExcludedRegionMinX.numElements();
       if(nbExclude>0)
       {
          VFN_DEBUG_MESSAGE("PowderPattern::PrepareIntegratedRfactor():5:Excluded regions("<<nbExclude<<")",3);
          long j=0;
          long minExcl,maxExcl;
-         minExcl=this->Get2ThetaCorrPixel(mExcludedRegionMin2Theta(0));
-         maxExcl=this->Get2ThetaCorrPixel(mExcludedRegionMax2Theta(0));
+         minExcl=(long)floor(this->GetXPixel(mExcludedRegionMinX(j)));
+         maxExcl=(long)ceil (this->GetXPixel(mExcludedRegionMaxX(j)));
          for(int i=0;i<nbExclude;i++)
          {
             while(mIntegratedPatternMax(j)<minExcl)
@@ -4137,8 +4101,8 @@ void PowderPattern::PrepareIntegratedRfactor()const
                if(j==(numInterval-1)) break;
                j++;
             }
-            minExcl=this->Get2ThetaCorrPixel(mExcludedRegionMin2Theta(i));
-            maxExcl=this->Get2ThetaCorrPixel(mExcludedRegionMax2Theta(i));
+            minExcl=(long)(this->GetXPixel(mExcludedRegionMinX(i)));
+            maxExcl=(long)(this->GetXPixel(mExcludedRegionMaxX(i)));
             //go back if one integration segment is concerned by several exclusion zones...
             if(j!=0)
                while(mIntegratedPatternMax(j)>=minExcl)
@@ -4194,7 +4158,7 @@ void PowderPattern::CalcNbPointUsed()const
 {
    REAL sinth=mMaxSinThetaOvLambda*this->GetWavelength();
    unsigned long tmp;
-   if(1>fabs(sinth)) tmp=this->Get2ThetaCorrPixel(2*asin(sinth)); else tmp=mNbPoint;
+   if(1>fabs(sinth)) tmp=(unsigned long)(this->GetXCorrPixel(2*asin(sinth))); else tmp=mNbPoint;
    if(tmp>mNbPoint) tmp= mNbPoint;
    if(tmp !=mNbPointUsed)
    {
