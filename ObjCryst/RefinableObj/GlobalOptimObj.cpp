@@ -504,6 +504,8 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
    mIsOptimizing=false;
    mStopAfterCycle=false;
       
+   mRefParList.RestoreParamSet(mBestParSavedSetIndex);
+   this->UpdateDisplay();
    for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).EndOptimization();
    
    if(mSaveTrackedData.GetChoice()==1)
