@@ -762,7 +762,23 @@ void WXMolecule::OnMenuAddBond(wxCommandEvent & WXUNUSED(event))
       dumbUser.ShowModal();
       return;
    }
-   mpMolecule->AddBond(*at1,*at2,1.5,.01,.05,1.);
+   
+   double d;
+   if((at1->IsDummy())||(at2->IsDummy())) d=1.5;
+   else d= (at1->GetScatteringPower().GetRadius()+at2->GetScatteringPower().GetRadius())*0.9;
+   stringstream s;
+   s<<d;
+   string mes="Enter bond distance (Angstroems) for "+at1->GetName()+"-"+at2->GetName();
+   wxTextEntryDialog dialog(this,mes.c_str(),
+                           "Bond distance",s.str().c_str(),wxOK | wxCANCEL);
+   if(wxID_OK!=dialog.ShowModal())
+   {
+      VFN_DEBUG_EXIT("WXMolecule::OnMenuAddBond():Canceled",6)
+      return;
+   }
+   dialog.GetValue().ToDouble(&d);
+   
+   mpMolecule->AddBond(*at1,*at2,d,.01,.05,1.);
    VFN_DEBUG_EXIT("WXMolecule::OnMenuAddBond()",6)
 }
 
@@ -790,7 +806,23 @@ void WXMolecule::OnMenuAddAngle(wxCommandEvent & WXUNUSED(event))
       dumbUser.ShowModal();
       return;
    }
-   mpMolecule->AddBondAngle(*at1,*at2,*at3,109*DEG2RAD,.01,0.05);
+   
+   double a=109.5;
+   stringstream s;
+   s<<a;
+   string mes="Enter bond angle (degrees) for "+at1->GetName()
+                                           +"-"+at2->GetName()
+                                           +"-"+at3->GetName();
+   wxTextEntryDialog dialog(this,mes.c_str(),
+                           "Bond angle",s.str().c_str(),wxOK | wxCANCEL);
+   if(wxID_OK!=dialog.ShowModal())
+   {
+      VFN_DEBUG_EXIT("WXMolecule::OnMenuAddAngle():Canceled",6)
+      return;
+   }
+   dialog.GetValue().ToDouble(&a);
+   
+   mpMolecule->AddBondAngle(*at1,*at2,*at3,a*DEG2RAD,.01,0.05);
    VFN_DEBUG_EXIT("WXMolecule::OnMenuAddBond()",6)
 }
 
@@ -822,7 +854,24 @@ void WXMolecule::OnMenuAddDihedralAngle(wxCommandEvent & WXUNUSED(event))
       dumbUser.ShowModal();
       return;
    }
-   mpMolecule->AddDihedralAngle(*at1,*at2,*at3,*at4,180*DEG2RAD,.01,.05);
+
+   double a=180;
+   stringstream s;
+   s<<a;
+   string mes="Enter dihedral angle (degrees) for "+at1->GetName()
+                                               +"-"+at2->GetName()
+                                               +"-"+at3->GetName()
+                                               +"-"+at4->GetName();
+   wxTextEntryDialog dialog(this,"Enter dihedral angle (degrees)",
+                           "Bond angle",s.str().c_str(),wxOK | wxCANCEL);
+   if(wxID_OK!=dialog.ShowModal())
+   {
+      VFN_DEBUG_EXIT("WXMolecule::OnMenuAddDihedralAngle():Canceled",6)
+      return;
+   }
+   dialog.GetValue().ToDouble(&a);
+
+   mpMolecule->AddDihedralAngle(*at1,*at2,*at3,*at4,a*DEG2RAD,.01,.05);
    VFN_DEBUG_EXIT("WXMolecule::OnMenuAddDihedralAngle()",6)
 }
 
@@ -1090,7 +1139,8 @@ void WXMolecule::CrystUpdate()
 void WXMolecule::OnMenuShowBondList(wxCommandEvent &event)
 {
    if(0!=mpBondWin) return;
-   wxFrame *frame= new wxFrame(this,-1,("Bond List for: "+mpMolecule->GetName()).c_str());
+   wxFrame *frame= new wxFrame(this,-1,("Bond List for: "+mpMolecule->GetName()).c_str(),
+                               wxDefaultPosition,wxSize(250,200));
    mpBondWin = new WXMolScrolledWindow(frame,this);
    mpSizerBondList= new wxBoxSizer(wxVERTICAL);
    frame->Show(true);
@@ -1099,7 +1149,8 @@ void WXMolecule::OnMenuShowBondList(wxCommandEvent &event)
 void WXMolecule::OnMenuShowBondAngleList(wxCommandEvent &event)
 {
    if(0!=mpAngleWin) return;
-   wxFrame *frame= new wxFrame(this,-1,("Bond Angles list for: "+mpMolecule->GetName()).c_str());
+   wxFrame *frame= new wxFrame(this,-1,("Bond Angles list for: "+mpMolecule->GetName()).c_str(),
+                               wxDefaultPosition,wxSize(250,200));
    mpAngleWin = new WXMolScrolledWindow(frame,this);
    mpSizerAngleList= new wxBoxSizer(wxVERTICAL);
    frame->Show(true);
@@ -1108,7 +1159,8 @@ void WXMolecule::OnMenuShowBondAngleList(wxCommandEvent &event)
 void WXMolecule::OnMenuShowDihedralAngleList(wxCommandEvent &event)
 {
    if(0!=mpDihedralAngleWin) return;
-   wxFrame *frame= new wxFrame(this,-1,("Dihedral Angles list for: "+mpMolecule->GetName()).c_str());
+   wxFrame *frame= new wxFrame(this,-1,("Dihedral Angles list for: "+mpMolecule->GetName()).c_str(),
+                               wxDefaultPosition,wxSize(250,200));
    mpDihedralAngleWin = new WXMolScrolledWindow(frame,this);
    mpSizerDihedralAngleList= new wxBoxSizer(wxVERTICAL);
    frame->Show(true);
