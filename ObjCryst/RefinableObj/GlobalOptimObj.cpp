@@ -432,8 +432,8 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
          // Change temperature (and mutation) every...
             const int nbTryPerTemp=100;
 
-         REAL simAnnealTemp=-1;
-         mMutationAmplitude=1.;
+         REAL simAnnealTemp=sqrt(mTemperatureMin*mTemperatureMax);
+         mMutationAmplitude=sqrt(mMutationAmplitudeMin*mMutationAmplitudeMax);
 
          Chronometer chrono;
          chrono.start();
@@ -596,8 +596,10 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                      simAnnealTemp(i)=mTemperatureMax
                                     *pow(mTemperatureMin/mTemperatureMax,
                                           i/(REAL)(nbWorld-1));break;
-                  case ANNEALING_SMART:simAnnealTemp(i)=.1;//will be updated later
-                  default: simAnnealTemp(i)=mTemperatureMin;break;
+                  case ANNEALING_SMART:
+							simAnnealTemp(i)=sqrt(mTemperatureMin*mTemperatureMax);break;
+                  default:
+							simAnnealTemp(i)=sqrt(mTemperatureMin*mTemperatureMax);break;
                }
             }
          //Init the different mutation rate parameters
@@ -617,10 +619,13 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                      mutationAmplitude(i)=mMutationAmplitudeMax
                                     *pow(mMutationAmplitudeMin/mMutationAmplitudeMax,
                                           i/(REAL)(nbWorld-1));break;
-                  case ANNEALING_SMART:mutationAmplitude(i)=1.;//will be updated later
-                  default: mMutationAmplitude=mMutationAmplitudeMin;break;
+                  case ANNEALING_SMART:
+							mutationAmplitude(i)=sqrt(mMutationAmplitudeMin*mMutationAmplitudeMax);break;
+                  default:
+							mutationAmplitude(i)=sqrt(mMutationAmplitudeMin*mMutationAmplitudeMax);break;
                }
             }
+				cout << simAnnealTemp<<endl<<mutationAmplitude<<endl;
          // Number of successive trials for each World. At the end of these trials
          // a swap is tried with the upper World (eg i-1). This number effectvely sets
          // the rate of swapping.
