@@ -814,7 +814,7 @@ template<class T> T CrystArray3D<T>::operator()(const long i,const long j,const 
    if( (i<0) || (j<0) || (k<0) || (i>=mZSize) || (j>=mYSize) || (k>=mXSize))
    {
       cout<<"CrystArray3D::operator()(i,j,k): element out of bounds:"<<i<<","<<j<<","<<k<<endl;
-      cout<<"dimensions:"<<mZSize<<mYSize<<","<<mXSize<<endl;
+      cout<<"dimensions:"<<mZSize<<","<<mYSize<<","<<mXSize<<endl;
       throw 0;
    }
    #endif
@@ -838,7 +838,8 @@ template<class T> T& CrystArray3D<T>::operator()(const long i,const long j,const
    #ifdef __DEBUG__
    if( (i<0) || (j<0) || (k<0) || (i>=mZSize) || (j>=mYSize) || (k>=mXSize))
    {
-      cout<<"CrystArray3D::operator()(i,j): element out of bounds:"<<i<<","<<j<<endl;
+      cout<<"CrystArray3D::operator()(i,j,k): element out of bounds:"<<i<<","<<j<<","<<k<<endl;
+      cout<<"dimensions:"<<mZSize<<","<<mYSize<<","<<mXSize<<endl;
       throw 0;
    }
    #endif
