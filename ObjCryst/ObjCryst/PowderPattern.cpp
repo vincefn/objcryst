@@ -2991,7 +2991,9 @@ void PowderPattern::PrepareIntegratedRfactor()const
 }
 void PowderPattern::CalcNbPointUsed()const
 {
-	unsigned long tmp=this->Get2ThetaCorrPixel(2*asin(mMaxSinThetaOvLambda*this->GetWavelength()));
+	REAL sinth=mMaxSinThetaOvLambda*this->GetWavelength();
+	unsigned long tmp;
+	if(1>abs(sinth)) tmp=this->Get2ThetaCorrPixel(2*asin(sinth)); else tmp=mNbPoint;
 	if(tmp>mNbPoint) tmp= mNbPoint;
 	if(tmp !=mNbPointUsed)
 	{
