@@ -1,0 +1,138 @@
+<ObjCryst Date="2002-08-09T20:53:54GMT">
+  <Crystal Name="Change Me!" SpaceGroup="P121/a1">
+    <Par Refined="0" Limited="1" Min="1" Max="100" Name="a">10.394</Par>
+    <Par Refined="0" Limited="1" Min="1" Max="100" Name="b">18.819</Par>
+    <Par Refined="0" Limited="1" Min="1" Max="100" Name="c">6.825</Par>
+    <Par Refined="0" Limited="1" Min="28.6479" Max="171.887" Name="alpha">90</Par>
+    <Par Refined="0" Limited="1" Min="28.6479" Max="171.887" Name="beta">106.44</Par>
+    <Par Refined="0" Limited="1" Min="28.6479" Max="171.887" Name="gamma">90</Par>
+    <Option Name="Use Dynamical Occupancy Correction" Choice="1" ChoiceName="Yes"/>
+
+    <ScatteringPowerAtom Name="C" Symbol="C">
+      <Par Refined="0" Limited="1" Min="0.1" Max="5" Name="Biso">1</Par>
+      <RGBColour>0.5 0.5 0.5</RGBColour>
+    </ScatteringPowerAtom>
+    <ScatteringPowerAtom Name="N" Symbol="N">
+      <Par Refined="0" Limited="1" Min="0.1" Max="5" Name="Biso">1</Par>
+      <RGBColour>0.184314 0.309804 0.184314</RGBColour>
+    </ScatteringPowerAtom>
+    <ScatteringPowerAtom Name="S" Symbol="S">
+      <Par Refined="0" Limited="1" Min="0.1" Max="5" Name="Biso">1</Par>
+      <RGBColour>1 1 0</RGBColour>
+    </ScatteringPowerAtom>
+
+    <ZScatterer Name="Change Me!">
+      <Par Refined="1" Limited="0" Min="0" Max="1" Name="x">0.921428</Par>
+      <Par Refined="1" Limited="0" Min="0" Max="1" Name="y">0.984361</Par>
+      <Par Refined="1" Limited="0" Min="0" Max="1" Name="z">0.853072</Par>
+      <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
+      <Par Refined="1" Limited="0" Min="0" Max="360" Name="Phi">168.501</Par>
+      <Par Refined="1" Limited="0" Min="0" Max="360" Name="Chi">260.308</Par>
+      <Par Refined="1" Limited="0" Min="0" Max="360" Name="Psi">231.468</Par>
+      <ZAtom Name="C1" ScattPow="C" BondAtom="C1" AngleAtom="C1" DihedAtom="C1">
+        <Par Refined="1" Limited="1" Min="-0.03" Max="0.03" Name="BondLength">0</Par>
+        <Par Refined="1" Limited="1" Min="-0.572958" Max="0.572958" Name="Angle">0</Par>
+        <Par Refined="1" Limited="1" Min="-0.572958" Max="0.572958" Name="DihedAng">0</Par>
+        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
+      </ZAtom>
+      <ZAtom Name="N2" ScattPow="N" BondAtom="C1" AngleAtom="C1" DihedAtom="C1">
+        <Par Refined="1" Limited="1" Min="1.435" Max="1.495" Name="BondLength">1.43916</Par>
+        <Par Refined="1" Limited="1" Min="-0.572958" Max="0.572958" Name="Angle">0</Par>
+        <Par Refined="1" Limited="1" Min="-0.572958" Max="0.572958" Name="DihedAng">0</Par>
+        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
+      </ZAtom>
+      <ZAtom Name="C3" ScattPow="C" BondAtom="N2" AngleAtom="C1" DihedAtom="C1">
+        <Par Refined="1" Limited="1" Min="1.336" Max="1.396" Name="BondLength">1.38064</Par>
+        <Par Refined="1" Limited="1" Min="119.414" Max="120.56" Name="Angle">120.103</Par>
+        <Par Refined="1" Limited="1" Min="-0.572958" Max="0.572958" Name="DihedAng">0</Par>
+        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
+      </ZAtom>
+      <ZAtom Name="N4" ScattPow="N" BondAtom="C3" AngleAtom="N2" DihedAtom="C1">
+        <Par Refined="1" Limited="1" Min="1.291" Max="1.351" Name="BondLength">1.3471</Par>
+        <Par Refined="1" Limited="1" Min="119.457" Max="120.603" Name="Angle">119.932</Par>
+        <Par Refined="1" Limited="0" Min="5.42704" Max="6.57296" Name="DihedAng">5.80882</Par>
+        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
+      </ZAtom>
+      <ZAtom Name="C5" ScattPow="C" BondAtom="N4" AngleAtom="C3" DihedAtom="N2">
+        <Par Refined="1" Limited="1" Min="1.325" Max="1.385" Name="BondLength">1.34751</Par>
+        <Par Refined="1" Limited="1" Min="119.409" Max="120.555" Name="Angle">120.061</Par>
+        <Par Refined="1" Limited="0" Min="6.22704" Max="7.37296" Name="DihedAng">6.42035</Par>
+        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
+      </ZAtom>
+      <ZAtom Name="N6" ScattPow="N" BondAtom="C5" AngleAtom="N4" DihedAtom="C3">
+        <Par Refined="1" Limited="1" Min="1.106" Max="1.166" Name="BondLength">1.13461</Par>
+        <Par Refined="1" Limited="1" Min="179.427" Max="180.573" Name="Angle">179.983</Par>
+        <Par Refined="1" Limited="0" Min="45.727" Max="46.873" Name="DihedAng">45.8767</Par>
+        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
+      </ZAtom>
+      <ZAtom Name="N7" ScattPow="N" BondAtom="C3" AngleAtom="N2" DihedAtom="C1">
+        <Par Refined="1" Limited="1" Min="1.336" Max="1.396" Name="BondLength">1.38209</Par>
+        <Par Refined="1" Limited="1" Min="119.449" Max="120.595" Name="Angle">119.715</Par>
+        <Par Refined="0" Limited="1" Min="185.427" Max="186.573" Name="DihedAng">185.427</Par>
+        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
+      </ZAtom>
+      <ZAtom Name="C8" ScattPow="C" BondAtom="N7" AngleAtom="C3" DihedAtom="N2">
+        <Par Refined="1" Limited="1" Min="1.436" Max="1.496" Name="BondLength">1.44879</Par>
+        <Par Refined="1" Limited="1" Min="119.415" Max="120.561" Name="Angle">120.076</Par>
+        <Par Refined="1" Limited="0" Min="354.327" Max="355.473" Name="DihedAng">354.806</Par>
+        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
+      </ZAtom>
+      <ZAtom Name="C9" ScattPow="C" BondAtom="C8" AngleAtom="N7" DihedAtom="C3">
+        <Par Refined="1" Limited="1" Min="1.499" Max="1.559" Name="BondLength">1.5566</Par>
+        <Par Refined="1" Limited="1" Min="108.909" Max="110.055" Name="Angle">109.7</Par>
+        <Par Refined="1" Limited="0" Min="184.427" Max="185.573" Name="DihedAng">184.603</Par>
+        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
+      </ZAtom>
+      <ZAtom Name="S10" ScattPow="S" BondAtom="C9" AngleAtom="C8" DihedAtom="N7">
+        <Par Refined="1" Limited="1" Min="1.784" Max="1.844" Name="BondLength">1.82647</Par>
+        <Par Refined="1" Limited="1" Min="108.883" Max="110.029" Name="Angle">109.428</Par>
+        <Par Refined="1" Limited="0" Min="179.427" Max="180.573" Name="DihedAng">180</Par>
+        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
+      </ZAtom>
+      <ZAtom Name="C11" ScattPow="C" BondAtom="S10" AngleAtom="C9" DihedAtom="C8">
+        <Par Refined="1" Limited="1" Min="1.785" Max="1.845" Name="BondLength">1.8064</Par>
+        <Par Refined="1" Limited="1" Min="99.411" Max="100.557" Name="Angle">99.8324</Par>
+        <Par Refined="1" Limited="0" Min="179.427" Max="180.573" Name="DihedAng">180</Par>
+        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
+      </ZAtom>
+      <ZAtom Name="C12" ScattPow="C" BondAtom="C11" AngleAtom="S10" DihedAtom="C9">
+        <Par Refined="1" Limited="1" Min="1.477" Max="1.537" Name="BondLength">1.50081</Par>
+        <Par Refined="1" Limited="1" Min="108.893" Max="110.039" Name="Angle">109.284</Par>
+        <Par Refined="1" Limited="0" Min="179.427" Max="180.573" Name="DihedAng">180</Par>
+        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
+      </ZAtom>
+      <ZAtom Name="N13" ScattPow="N" BondAtom="C12" AngleAtom="C11" DihedAtom="S10">
+        <Par Refined="1" Limited="1" Min="1.311" Max="1.371" Name="BondLength">1.32425</Par>
+        <Par Refined="1" Limited="1" Min="125.441" Max="126.587" Name="Angle">126.432</Par>
+        <Par Refined="1" Limited="0" Min="89.427" Max="90.573" Name="DihedAng">89.5005</Par>
+        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
+      </ZAtom>
+      <ZAtom Name="C14" ScattPow="C" BondAtom="N13" AngleAtom="C12" DihedAtom="C11">
+        <Par Refined="1" Limited="1" Min="1.275" Max="1.335" Name="BondLength">1.32682</Par>
+        <Par Refined="1" Limited="1" Min="108.666" Max="109.812" Name="Angle">109.737</Par>
+        <Par Refined="0" Limited="1" Min="179.427" Max="180.573" Name="DihedAng">180.353</Par>
+        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
+      </ZAtom>
+      <ZAtom Name="N15" ScattPow="N" BondAtom="C14" AngleAtom="N13" DihedAtom="C12">
+        <Par Refined="1" Limited="1" Min="1.319" Max="1.379" Name="BondLength">1.34687</Par>
+        <Par Refined="1" Limited="1" Min="108.15" Max="109.296" Name="Angle">109.146</Par>
+        <Par Refined="0" Limited="1" Min="359.427" Max="360.573" Name="DihedAng">360</Par>
+        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
+      </ZAtom>
+      <ZAtom Name="C16" ScattPow="C" BondAtom="C12" AngleAtom="C11" DihedAtom="S10">
+        <Par Refined="1" Limited="1" Min="1.317" Max="1.377" Name="BondLength">1.36486</Par>
+        <Par Refined="1" Limited="1" Min="125.408" Max="126.554" Name="Angle">125.688</Par>
+        <Par Refined="1" Limited="0" Min="269.127" Max="270.273" Name="DihedAng">270.034</Par>
+        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
+      </ZAtom>
+      <ZAtom Name="C17" ScattPow="C" BondAtom="C16" AngleAtom="C12" DihedAtom="C11">
+        <Par Refined="1" Limited="1" Min="1.477" Max="1.537" Name="BondLength">1.53499</Par>
+        <Par Refined="1" Limited="1" Min="125.994" Max="127.14" Name="Angle">126.82</Par>
+        <Par Refined="0" Limited="1" Min="-0.372958" Max="0.772958" Name="DihedAng">0</Par>
+        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
+      </ZAtom>
+        <PivotAtom Name="C1"/>
+    </ZScatterer>
+
+  </Crystal>
+</ObjCryst>
