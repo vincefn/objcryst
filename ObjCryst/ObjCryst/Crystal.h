@@ -26,7 +26,7 @@
 
 #include "ObjCryst/General.h"
 #include "RefinableObj/RefinableObj.h"
-#include "ObjCryst/SpaceGroup.h"
+#include "ObjCryst/UnitCell.h"
 #include "ObjCryst/ScatteringPower.h"
 #include "ObjCryst/Scatterer.h"
 
@@ -42,9 +42,6 @@ namespace ObjCryst
 {
 class Scatterer; //forward declaration of another header's class :KLUDGE:
 extern const RefParType *gpRefParTypeCrystal;
-extern const RefParType *gpRefParTypeUnitCell;
-extern const RefParType *gpRefParTypeUnitCellLength;
-extern const RefParType *gpRefParTypeUnitCellAngle;
 
 //######################################################################
 /** \brief Crystal class: Unit cell, spacegroup, scatterers
@@ -75,7 +72,7 @@ extern const RefParType *gpRefParTypeUnitCellAngle;
 * structure (that may be done later) and no incommensurate structure.
 */
 //######################################################################
-class Crystal:public RefinableObj
+class Crystal:public UnitCell
 {
    public:
       /// Default Constructor
@@ -160,65 +157,11 @@ class Crystal:public RefinableObj
       * dynamical occupancy correction will be set to 1 for all components.
       */
       virtual const ScatteringComponentList& GetScatteringComponentList()const;
-      /// Lattice parameters (a,b,c,alpha,beta,gamma) as a 6-element vector in Angstroems 
-      /// and radians.
-      CrystVector_REAL GetLatticePar() const;
-      /// Return one of the 6 Lattice parameters, 0<= whichPar <6 (a,b,c,alpha,beta,gamma),
-      /// returned in Angstroems and radians. 
-      REAL GetLatticePar(const int whichPar)const;
-      /** \brief Get the 'B' matrix (Crystal::mBMatrix)for the crystal (orthogonalization 
-      * matrix for the given lattice, in the reciprocal space)
-      *
-      * The convention is taken following Giacovazzo, "Fundamentals of Crystallography", p.69
-      * "e1 is chosen along a*, e2 in the (a*,b*) plane, then e3 is along c".
-      */
-      const CrystMatrix_REAL& GetBMatrix() const;
-      /** \brief Get orthonormal cartesian coordinates for a set of (x,y,z)
-      * fractional coordinates.
-      *
-      * Results are given in Amgstroems.
-      * The convention is taken following :
-      * e1 is chosen along a, e2 in the (a,b) plane, then e3 is along c*
-      */
-      CrystVector_REAL GetOrthonormalCoords(const REAL x,const REAL y,const REAL z) const;
-      /** \brief Get orthonormal cartesian coordinates for a set of (x,y,z)
-      * fractional coordinates.
-      *
-      * X,y and z input are changed to Amgstroems values
-      * The convention is taken following :
-      * e1 is chosen along a, e2 in the (a,b) plane, then e3 is along c*
-      */
-      void FractionalToOrthonormalCoords(REAL &x,REAL &y,REAL &z) const;
-      /** \brief Get fractional cartesian coordinates for a set of (x,y,z)
-      * orthonormal coordinates.
-      *
-      * Result is stored into x,y and z
-      * The convention is taken following :
-      * e1 is chosen along a, e2 in the (a,b) plane, then e3 is along c*
-      */
-      void OrthonormalToFractionalCoords(REAL &x,REAL &y,REAL &z) const;
-      /** \brief Get Miller H,K, L indices from orthonormal coordinates 
-      * in reciprocal space.
-      *
-      * Result is stored into x,y and z
-      */
-      void MillerToOrthonormalCoords(REAL &x,REAL &y,REAL &z) const;
-      /** \brief Get orthonormal coordinates given a set of H,K, L indices
-      * in reciprocal space.
-      *
-      * Result is stored into x,y and z
-      */
-      void OrthonormalToMillerCoords(REAL &x,REAL &y,REAL &z) const;
       /// Prints some info about the crystal
       /// \todo one function to print on one line and a PrintLong() function
       /// \param os the stream to which the information is outputed (default=cout)
       void Print(ostream &os=cout) const;
             
-      /// Access to the crystal SpaceGroup object
-      const SpaceGroup & GetSpaceGroup()const;
-      /// Access to the crystal SpaceGroup object.
-      SpaceGroup & GetSpaceGroup();
-      
       /** \brief Minimum interatomic distance between all scattering components (atoms) in
       * the crystal.
       *
@@ -315,8 +258,6 @@ class Crystal:public RefinableObj
       void SetBumpMergeDistance(const ScatteringPower &scatt1,
                                 const ScatteringPower &scatt2, const REAL dist,
                                 const bool allowMerge);
-      /// When were lattice parameters last changed ?
-      const RefinableObjClock& GetClockLatticePar()const;
       /// When was the list of scatterers last changed ?
       const RefinableObjClock& GetClockScattererList()const;
       //Cost functions
@@ -366,24 +307,7 @@ class Crystal:public RefinableObj
       /// Find a scatterer (its index # in mpScatterrer[]) with a given name
       /// \warning There should be no duplicate names !!! :TODO: test in AddScatterer()
       int FindScatterer(const string &scattName)const;
-      
-      /// \internal.Init the (de)orthogonalization matrices. 
-      /// They are re-computed only if parameters have changed since last call.
-      void InitMatrices() const;
-      /// \internal
-      /// Update cell parameters for tetragonal, trigonal, hexagonal, cubic lattices.
-      /// Also set angular parameters for those group which need it. This is needed during
-      /// Refinement, since for example in a quadratic spg, only a is refined and
-      /// we need to have b=a...
-      void UpdateLatticePar();
-
-      /** \brief Prepare the refinable parameters list
-      *
-      * This is called once when creating the crystal.
-      * OBSOLETE ?
-      */
-      void InitRefParList();
-      
+            
       /** \internal \brief Compute the distance Table (mDistTable) for all scattering components
       * \param fast : if true, the distance calculations will be made using
       * integers, thus with a lower precision but faster. Less atoms will also
@@ -409,42 +333,9 @@ class Crystal:public RefinableObj
       */
       void CalcDistTable(const bool fast,const REAL asymUnitMargin=4)const;
             
-      /// a,b and c in Angstroems, angles (stored) in radians
-      /// For cubic, rhomboedric crystals, only the 'a' parameter is relevant.
-      /// For quadratic and hexagonal crystals, only a and c parameters are relevant.
-      /// The MUTABLE is temporary ! It should not be !
-      CrystVector_REAL mCellDim;
-      /// The space group of the crystal
-      SpaceGroup mSpaceGroup ;
-      /// The registry of scatterers for this crystal
+      /// The registry of scatterers for this UnitCell
       ObjRegistry<Scatterer> mScattererRegistry ;
-      
-      /** \brief B Matrix (Orthogonalization matrix for reciprocal space)
-      * \f[ B= \left[ \begin {array}{ccc} a^* & b^*\cos(\gamma^*) & c^*\cos(\beta^*) \\
-      *                            0 & b^*\sin(\gamma^*) & -c^*\sin(\beta^*)\cos(\alpha) \\
-      *                            0 & 0 & \frac{1}{c}\end{array} \right]\f]
-      *\f[ \left[ \begin{array}{c} k_x \\ k_y \\ k_z \end{array} \right]_{orthonormal}  
-      *  = B \times \left[ \begin{array}{c} h \\ k \\ l \end{array}\right]_{integer} \f]
-      * \note this matrix is and must remain upper triangular. this is assumed for
-      * some optimizations.
-      */
-      mutable CrystMatrix_REAL mBMatrix;
-      /// inverse of B Matrix (i.e. inverse of orthogonalization matrix for direct space)
-      mutable CrystMatrix_REAL mBMatrixInvert;
-      /** \brief Eucl Matrix (Orthogonalization matrix for direct space)
-      * \f[ M_{orth}= \left[ \begin {array}{ccc} a & b\cos(\gamma) & c\cos(\beta) \\
-      *                            0 & b\sin(\gamma) & -c\sin(\beta)\cos(\alpha^*) \\
-      *                            0 & 0 & \frac{1}{c^*}\end{array} \right]\f]
-      * \f[ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right]_{orthonormal}  
-      *  = M_{orth} \times \left[ \begin{array}{c} x \\ y \\ z \end{array}
-      *                    \right]_{fractional coords}\f]
-      * \note this matrix is and must remain upper triangular. this is assumed for
-      * some optimizations.
-      */
-      mutable CrystMatrix_REAL mOrthMatrix;
-      /// inverse of Eucl Matrix (i.e. inverse of de-orthogonalization matrix for direct space)
-      mutable CrystMatrix_REAL mOrthMatrixInvert;
-   // Interatomice distance & Anti-bump
+
       /// Storage for anti-bump/merge parameters
       struct BumpMergePar
       {
@@ -520,16 +411,10 @@ class Crystal:public RefinableObj
       //Clocks
       /// Last time the list of Scatterers was changed
       RefinableObjClock mClockScattererList;
-      /// Last time lattice parameters were changed
-      RefinableObjClock mClockLatticePar;
-      /// \internal Last time metric matrices were computed
-      mutable RefinableObjClock mClockMetricMatrix;
       /// \internal Last time the ScatteringComponentList was generated
       mutable RefinableObjClock mClockScattCompList;
       /// \internal Last time the Neighbor Table was generated
       mutable RefinableObjClock mClockNeighborTable;
-      /// \internal Last time the lattice parameters whre updated
-      mutable RefinableObjClock mClockLatticeParUpdate;
       /// \internal Last time the dynamical population correction was computed
       mutable RefinableObjClock mClockDynPopCorr;
       
@@ -538,22 +423,6 @@ class Crystal:public RefinableObj
       /// powder diffraction (which only gives the relative configuration).
       RefObjOpt mDisplayEnantiomer;
 
-      /** Option to override lattice parameters constraints from spacegroup choice.
-      *
-      * \warning EXPERIMENTAL
-      *
-      * Normally lattice parameters are constrained by the space group choice
-      * (e.g. a=b=c and angles =90° for cubic spacegroups). Using this option
-      * allows you to override this, and choose any lattice parameter. THis works
-      * as long as symmetry operations are applied to fractionnal coordinates.
-      *
-      * This is useful duting global optimization when searching the structure in a crystal
-      * which has (or is expected to have) a known pseudo-crystallographic
-      * symmetry, to reduce dramatically the number of parameters. Of course
-      * for final refinement the 'real' symmetry should be imposed.
-      */
-      RefObjOpt mConstrainLatticeToSpaceGroup;
-      
    #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);

@@ -181,35 +181,35 @@ mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
       wxBoxSizer* lattice=new wxBoxSizer(wxHORIZONTAL);
 #if 1
       WXFieldRefPar* pFieldLatticeA    =new WXFieldRefPar(this,"a:",
-                                     &(mpCrystal->GetPar(mpCrystal->mCellDim.data()+0)) );
+                                     &(mpCrystal->GetPar("a")) );
           
       WXFieldRefPar* pFieldLatticeB    =new WXFieldRefPar(this,"b:",
-                                     &(mpCrystal->GetPar(mpCrystal->mCellDim.data()+1)) );
+                                     &(mpCrystal->GetPar("b")) );
           
       WXFieldRefPar* pFieldLatticeC    =new WXFieldRefPar(this,"c:",
-                                     &(mpCrystal->GetPar(mpCrystal->mCellDim.data()+2)) );
+                                     &(mpCrystal->GetPar("c")) );
           
       WXFieldRefPar* pFieldLatticeAlpha=new WXFieldRefPar(this,"alpha:",
-                                     &(mpCrystal->GetPar(mpCrystal->mCellDim.data()+3)) );
+                                     &(mpCrystal->GetPar("alpha")) );
           
       WXFieldRefPar* pFieldLatticeBeta =new WXFieldRefPar(this,"beta:",
-                                     &(mpCrystal->GetPar(mpCrystal->mCellDim.data()+4)) );
+                                     &(mpCrystal->GetPar("beta")) );
           
       WXFieldRefPar* pFieldLatticeGamma=new WXFieldRefPar(this,"gamma:",
-                                     &(mpCrystal->GetPar(mpCrystal->mCellDim.data()+5)) );
+                                     &(mpCrystal->GetPar("gamma")) );
 #else
       WXCrystObjBasic* pFieldLatticeA 
-         =mpCrystal->GetPar(mpCrystal->mCellDim.data()+0).WXCreate(this);
+         =mpCrystal->GetPar("a").WXCreate(this);
       WXCrystObjBasic* pFieldLatticeB 
-         =mpCrystal->GetPar(mpCrystal->mCellDim.data()+1).WXCreate(this);
+         =mpCrystal->GetPar("b").WXCreate(this);
       WXCrystObjBasic* pFieldLatticeC 
-         =mpCrystal->GetPar(mpCrystal->mCellDim.data()+2).WXCreate(this);
+         =mpCrystal->GetPar("c").WXCreate(this);
       WXCrystObjBasic* pFieldLatticeAlpha 
-         =mpCrystal->GetPar(mpCrystal->mCellDim.data()+3).WXCreate(this);
+         =mpCrystal->GetPar("alpha").WXCreate(this);
       WXCrystObjBasic* pFieldLatticeBeta 
-         =mpCrystal->GetPar(mpCrystal->mCellDim.data()+4).WXCreate(this);
+         =mpCrystal->GetPar("beta").WXCreate(this);
       WXCrystObjBasic* pFieldLatticeGamma
-         =mpCrystal->GetPar(mpCrystal->mCellDim.data()+5).WXCreate(this);
+         =mpCrystal->GetPar("gamma").WXCreate(this);
 #endif
       lattice->Add(pFieldLatticeA    ,0,wxALIGN_CENTER);
       lattice->Add(pFieldLatticeB    ,0,wxALIGN_CENTER);
@@ -855,8 +855,6 @@ bool WXCrystal::OnChangeName(const int id)
                          mpCrystal->GetLatticePar(5),
                          mpFieldSpacegroup->GetValue(),
                          mpCrystal->GetName());
-         mpCrystal->UpdateLatticePar();
-         //Update the lattice parameters
          this->CrystUpdate();
          this->Layout();
          return true;
@@ -1993,4 +1991,3 @@ BBox UserSelectBoundingBox::GetBBox () {
 #endif // #ifdef OBJCRYST_GL
 
 }// namespace 
-

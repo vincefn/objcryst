@@ -937,33 +937,34 @@ void Crystal::XMLOutput(ostream &os,int indent)const
    for(int i=0;i<indent;i++) os << "  " ;
    XMLCrystTag tag("Crystal");
    tag.AddAttribute("Name",mName);
-   tag.AddAttribute("SpaceGroup",mSpaceGroup.GetName());
+   tag.AddAttribute("SpaceGroup",this->GetSpaceGroup().GetName());
    os <<tag<<endl;
    indent++;
    
-   this->GetPar(mCellDim.data()+0).XMLOutput(os,"a",indent);
+   // :TODO: 
+   this->GetPar("a").XMLOutput(os,"a",indent);
    os <<endl;
    
-   this->GetPar(mCellDim.data()+1).XMLOutput(os,"b",indent);
+   this->GetPar("b").XMLOutput(os,"b",indent);
    os <<endl;
    
-   this->GetPar(mCellDim.data()+2).XMLOutput(os,"c",indent);
+   this->GetPar("c").XMLOutput(os,"c",indent);
    os <<endl;
    
-   this->GetPar(mCellDim.data()+3).XMLOutput(os,"alpha",indent);
+   this->GetPar("alpha").XMLOutput(os,"alpha",indent);
    os <<endl;
    
-   this->GetPar(mCellDim.data()+4).XMLOutput(os,"beta",indent);
+   this->GetPar("beta").XMLOutput(os,"beta",indent);
    os <<endl;
    
-   this->GetPar(mCellDim.data()+5).XMLOutput(os,"gamma",indent);
+   this->GetPar("gamma").XMLOutput(os,"gamma",indent);
    os <<endl;
    
-   mUseDynPopCorr.XMLOutput(os,indent);
-   os <<endl<<endl;
-
-   mConstrainLatticeToSpaceGroup.XMLOutput(os,indent);
-   os <<endl<<endl;
+   for(int i=0;i<this->GetNbOption();i++)
+   {
+      this->GetOption(i).XMLOutput(os,indent);
+      os <<endl<<endl;
+   }
    
    for(int i=0;i<mScatteringPowerRegistry.GetNb();i++) 
       mScatteringPowerRegistry.GetObj(i).XMLOutput(os,indent);
@@ -1037,36 +1038,7 @@ void Crystal::XMLInput(istream &is,const XMLCrystTag &tagg)
          {
             if("Name"==tag.GetAttributeName(i))
             {
-               if("a"==tag.GetAttributeValue(i))
-               {
-                  this->GetPar(mCellDim.data()+0).XMLInput(is,tag);
-                  break;
-               }
-               if("b"==tag.GetAttributeValue(i))
-               {
-                  this->GetPar(mCellDim.data()+1).XMLInput(is,tag);
-                  break;
-               }
-               if("c"==tag.GetAttributeValue(i))
-               {
-                  this->GetPar(mCellDim.data()+2).XMLInput(is,tag);
-                  break;
-               }
-               if("alpha"==tag.GetAttributeValue(i))
-               {
-                  this->GetPar(mCellDim.data()+3).XMLInput(is,tag);
-                  break;
-               }
-               if("beta"==tag.GetAttributeValue(i))
-               {
-                  this->GetPar(mCellDim.data()+4).XMLInput(is,tag);
-                  break;
-               }
-               if("gamma"==tag.GetAttributeValue(i))
-               {
-                  this->GetPar(mCellDim.data()+5).XMLInput(is,tag);
-                  break;
-               }
+               this->GetPar(tag.GetAttributeValue(i)).XMLInput(is,tag);
             }
          }
          continue;

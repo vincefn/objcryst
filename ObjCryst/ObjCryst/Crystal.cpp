@@ -44,12 +44,6 @@ namespace ObjCryst
 {
 const RefParType *gpRefParTypeCrystal=
    new RefParType (gpRefParTypeObjCryst,"Crystal");
-const RefParType *gpRefParTypeUnitCell=
-   new RefParType (gpRefParTypeCrystal,"Unit Cell");
-const RefParType *gpRefParTypeUnitCellLength=
-   new RefParType (gpRefParTypeUnitCell,"Length");
-const RefParType *gpRefParTypeUnitCellAngle=
-   new RefParType (gpRefParTypeUnitCell,"Angle");
 
 ////////////////////////////////////////////////////////////////////////
 //
@@ -59,8 +53,7 @@ const RefParType *gpRefParTypeUnitCellAngle=
 ObjRegistry<Crystal> gCrystalRegistry("List of all Crystals");
 
 Crystal::Crystal():
-mCellDim(6),mScattererRegistry("List of Crystal Scatterers"),
-mBMatrix(3,3),mOrthMatrix(3,3),mOrthMatrixInvert(3,3),
+mScattererRegistry("List of Crystal Scatterers"),
 mScatteringPowerRegistry("List of Crystal ScatteringPowers")
 {
    VFN_DEBUG_MESSAGE("Crystal::Crystal()",10)
@@ -71,8 +64,7 @@ mScatteringPowerRegistry("List of Crystal ScatteringPowers")
 }
 
 Crystal::Crystal(const REAL a, const REAL b, const REAL c, const string &SpaceGroupId):
-mCellDim(6),mScattererRegistry("List of Crystal Scatterers"),
-mBMatrix(3,3),mOrthMatrix(3,3),mOrthMatrixInvert(3,3),
+mScattererRegistry("List of Crystal Scatterers"),
 mScatteringPowerRegistry("List of Crystal ScatteringPowers")
 {
    VFN_DEBUG_MESSAGE("Crystal::Crystal(a,b,c,Sg)",10)
@@ -84,8 +76,7 @@ mScatteringPowerRegistry("List of Crystal ScatteringPowers")
 
 Crystal::Crystal(const REAL a, const REAL b, const REAL c, const REAL alpha,
               const REAL beta, const REAL gamma,const string &SpaceGroupId):
-mCellDim(6),mScattererRegistry("List of Crystal Scatterers"),
-mBMatrix(3,3),mOrthMatrix(3,3),mOrthMatrixInvert(3,3),
+mScattererRegistry("List of Crystal Scatterers"),
 mScatteringPowerRegistry("List of Crystal ScatteringPowers")
 {
    VFN_DEBUG_MESSAGE("Crystal::Crystal(a,b,c,alpha,beta,gamma,Sg)",10)
@@ -96,13 +87,10 @@ mScatteringPowerRegistry("List of Crystal ScatteringPowers")
 }
 
 Crystal::Crystal(const Crystal &old):
-mCellDim(old.mCellDim),mSpaceGroup(old.GetSpaceGroup()),
 mScattererRegistry(old.mScattererRegistry),
-mBMatrix(3,3),mOrthMatrix(3,3),mOrthMatrixInvert(3,3),
 mScatteringPowerRegistry(old.mScatteringPowerRegistry)
 {
    VFN_DEBUG_MESSAGE("Crystal::Crystal(&oldCrystal)",10)
-   this ->InitRefParList();
    for(long i=0;i<old.GetNbScatterer();i++)
    {
       mScattererRegistry.Register(*(old.GetScatt(i).CreateCopy()));
@@ -110,10 +98,7 @@ mScatteringPowerRegistry(old.mScatteringPowerRegistry)
    
    mUseDynPopCorr.SetChoice(old.mUseDynPopCorr.GetChoice());
    mDisplayEnantiomer.SetChoice(old.mDisplayEnantiomer.GetChoice());
-   mConstrainLatticeToSpaceGroup.SetChoice(old.mConstrainLatticeToSpaceGroup.GetChoice());
    
-   this->InitMatrices();
-   this->UpdateLatticePar();
    gCrystalRegistry.Register(*this);
    gTopRefinableObjRegistry.Register(*this);
 }
@@ -253,210 +238,10 @@ const ScatteringComponentList& Crystal::GetScatteringComponentList()const
    return mScattCompList;
 }
 
-CrystVector_REAL Crystal::GetLatticePar() const
-{
-   VFN_DEBUG_MESSAGE("Crystal::GetLatticePar()",0)
-   
-   if(mClockLatticeParUpdate>mClockLatticePar) return mCellDim;
-   else
-   {
-      //:NOTE: cannot use this->UpdateLatticePar() because it is not a const member function
-      int num = mSpaceGroup.GetSpaceGroupNumber();
-      CrystVector_REAL cellDim=mCellDim;
-      if((num <=2)||(mConstrainLatticeToSpaceGroup.GetChoice()!=0)) return cellDim;
-      if((num <=15) && (0==mSpaceGroup.GetUniqueAxis()))
-      {
-         cellDim(4)=M_PI/2.;
-         cellDim(5)=M_PI/2.;
-         return cellDim;
-      }
-      if((num <=15) && (1==mSpaceGroup.GetUniqueAxis()))
-      {
-         cellDim(3)=M_PI/2.;
-         cellDim(5)=M_PI/2.;
-         return cellDim;
-      }
-      if((num <=15) && (2==mSpaceGroup.GetUniqueAxis()))
-      {
-         cellDim(3)=M_PI/2.;
-         cellDim(4)=M_PI/2.;
-         return cellDim;
-      }
-      if(num <=74)
-      {
-         cellDim(3)=M_PI/2.;
-         cellDim(4)=M_PI/2.;
-         cellDim(5)=M_PI/2.;
-         return cellDim;
-      }
-      if(num <= 142) 
-      {
-         cellDim(3)=M_PI/2.;
-         cellDim(4)=M_PI/2.;
-         cellDim(5)=M_PI/2.;
-         cellDim(1) = mCellDim(0) ;
-         return cellDim;
-      }
-      if(num <= 194) //Trigonal & Hexagonal
-      {
-         cellDim(3) = M_PI/2.;
-         cellDim(4) = M_PI/2.;
-         cellDim(5) = M_PI*2./3.;
-         cellDim(1) = mCellDim(0) ;
-         return cellDim;
-      }
-      cellDim(3)=M_PI/2.;
-      cellDim(4)=M_PI/2.;
-      cellDim(5)=M_PI/2.;
-      cellDim(1) = mCellDim(0) ;
-      cellDim(2) = mCellDim(0) ;
-      return cellDim;
-   }
-}
-
-REAL Crystal::GetLatticePar(int whichPar)const
-{
-   VFN_DEBUG_MESSAGE("Crystal::LatticePar(i)",0)
-   if( (whichPar<0) || (whichPar>5))
-      throw ObjCrystException("Crystal::LatticePar(int) :trying to access parameter>5!");
-      
-   if(mClockLatticeParUpdate>mClockLatticePar) return mCellDim(whichPar);
-   else
-   {
-      const int num = mSpaceGroup.GetSpaceGroupNumber();
-
-      static CrystVector_REAL cellDim;
-      cellDim=mCellDim;
-      if((num <=2)||(mConstrainLatticeToSpaceGroup.GetChoice()!=0))
-         return cellDim(whichPar);
-      if((num <=15) && (0==mSpaceGroup.GetUniqueAxis()))
-      {
-         cellDim(4)=M_PI/2.;
-         cellDim(5)=M_PI/2.;
-         return cellDim(whichPar);
-      }
-      if((num <=15) && (1==mSpaceGroup.GetUniqueAxis()))
-      {
-         cellDim(3)=M_PI/2.;
-         cellDim(5)=M_PI/2.;
-         return cellDim(whichPar);
-      }
-      if((num <=15) && (2==mSpaceGroup.GetUniqueAxis()))
-      {
-         cellDim(3)=M_PI/2.;
-         cellDim(4)=M_PI/2.;
-         return cellDim(whichPar);
-      }
-
-      if(num <=74)
-      {
-         cellDim(3)=M_PI/2.;
-         cellDim(4)=M_PI/2.;
-         cellDim(5)=M_PI/2.;
-         return cellDim(whichPar);
-      }
-      if(num <= 142) 
-      {
-         cellDim(3)=M_PI/2.;
-         cellDim(4)=M_PI/2.;
-         cellDim(5)=M_PI/2.;
-         cellDim(1) = mCellDim(0) ;
-         return cellDim(whichPar);
-      }
-      if(num <= 194) 
-      {
-         cellDim(3) = M_PI/2.;
-         cellDim(4) = M_PI/2.;
-         cellDim(5) = M_PI*2./3.;
-         cellDim(1) = mCellDim(0) ;
-         return cellDim(whichPar);
-      }
-      cellDim(3)=M_PI/2.;
-      cellDim(4)=M_PI/2.;
-      cellDim(5)=M_PI/2.;
-      cellDim(1) = mCellDim(0) ;
-      cellDim(2) = mCellDim(0) ;
-      return cellDim(whichPar);
-   }
-}
-
-const CrystMatrix_REAL& Crystal::GetBMatrix()const
-{
-   VFN_DEBUG_MESSAGE("Crystal::GetBMatrix()",0)
-   this->InitMatrices();
-   return mBMatrix;
-}
-
-CrystVector_REAL Crystal::GetOrthonormalCoords(const REAL x,
-                                                const REAL y,
-                                                const REAL z) const
-{
-   this->InitMatrices();
-   CrystVector_REAL coords(3);
-   coords(0)=mOrthMatrix(0,0)*x+mOrthMatrix(0,1)*y+mOrthMatrix(0,2)*z;
-   coords(1)=mOrthMatrix(1,0)*x+mOrthMatrix(1,1)*y+mOrthMatrix(1,2)*z;
-   coords(2)=mOrthMatrix(2,0)*x+mOrthMatrix(2,1)*y+mOrthMatrix(2,2)*z;
-   return coords;
-}
-
-void Crystal::FractionalToOrthonormalCoords(REAL &x,REAL &y,REAL &z) const
-{
-   this->InitMatrices();
-   const REAL oldx=x;
-   const REAL oldy=y;
-   x=mOrthMatrix(0,0)*oldx+mOrthMatrix(0,1)*oldy+mOrthMatrix(0,2)*z;
-   y=mOrthMatrix(1,0)*oldx+mOrthMatrix(1,1)*oldy+mOrthMatrix(1,2)*z;
-   z=mOrthMatrix(2,0)*oldx+mOrthMatrix(2,1)*oldy+mOrthMatrix(2,2)*z;
-}
-
-void Crystal::OrthonormalToFractionalCoords(REAL &x,REAL &y,REAL &z) const
-{
-   //cout << x << " " << y << " " << z <<endl;
-   //cout << endl << mOrthMatrixInvert <<endl;
-   this->InitMatrices();
-   const REAL oldx=x;
-   const REAL oldy=y;
-   x=mOrthMatrixInvert(0,0)*oldx+mOrthMatrixInvert(0,1)*oldy+mOrthMatrixInvert(0,2)*z;
-   y=mOrthMatrixInvert(1,0)*oldx+mOrthMatrixInvert(1,1)*oldy+mOrthMatrixInvert(1,2)*z;
-   z=mOrthMatrixInvert(2,0)*oldx+mOrthMatrixInvert(2,1)*oldy+mOrthMatrixInvert(2,2)*z;
-   //cout << x << " " << y << " " << z <<endl;
-}
-
-void Crystal::MillerToOrthonormalCoords(REAL &x,REAL &y,REAL &z) const
-{
-   this->InitMatrices();
-   const REAL oldx=x;
-   const REAL oldy=y;
-   x=mBMatrix(0,0)*oldx+mBMatrix(0,1)*oldy+mBMatrix(0,2)*z;
-   y=mBMatrix(1,0)*oldx+mBMatrix(1,1)*oldy+mBMatrix(1,2)*z;
-   z=mBMatrix(2,0)*oldx+mBMatrix(2,1)*oldy+mBMatrix(2,2)*z;
-}
-
-void Crystal::OrthonormalToMillerCoords(REAL &x,REAL &y,REAL &z) const
-{
-   this->InitMatrices();
-   const REAL oldx=x;
-   const REAL oldy=y;
-   x=mBMatrixInvert(0,0)*oldx+mBMatrixInvert(0,1)*oldy+mBMatrixInvert(0,2)*z;
-   y=mBMatrixInvert(1,0)*oldx+mBMatrixInvert(1,1)*oldy+mBMatrixInvert(1,2)*z;
-   z=mBMatrixInvert(2,0)*oldx+mBMatrixInvert(2,1)*oldy+mBMatrixInvert(2,2)*z;
-}
-
 void Crystal::Print(ostream &os)const
 {
    VFN_DEBUG_MESSAGE("Crystal::Print()",5)
-   this->InitMatrices();
-   int width =8 ;
-   os << "crystal : " << mName <<"("<<this->GetSpaceGroup().GetName()<<")"<< endl;
-   os.width(width);
-   os   << "    Cell dimensions : " 
-        << FormatFloat(mCellDim(0),8,5) << "  " 
-        << FormatFloat(mCellDim(1),8,5) << "  " 
-        << FormatFloat(mCellDim(2),8,5) << "  "
-        << FormatFloat(mCellDim(3)*RAD2DEG,8,5) << "  " 
-        << FormatFloat(mCellDim(4)*RAD2DEG,8,5) << "  " 
-        << FormatFloat(mCellDim(5)*RAD2DEG,8,5) << endl ;
-   //mSpaceGroup.Print();
+   this->UnitCell::Print(os);
    
    this->GetScatteringComponentList();
    
@@ -490,7 +275,7 @@ void Crystal::Print(ostream &os)const
       << "                               -> OR 2 atoms strictly overlapping)"<< endl 
       <<endl;
    REAL nbAtoms=0;
-   const long genMult=mSpaceGroup.GetNbSymmetrics();
+   const long genMult=this->GetSpaceGroup().GetNbSymmetrics();
    for(int i=0;i<mScattCompList.GetNbComponent();i++) 
       nbAtoms += genMult * mScattCompList(i).mOccupancy * mScattCompList(i).mDynPopCorr;
    os << " Total number of components (atoms) in one unit cell : " << nbAtoms<<endl<<endl;
@@ -498,9 +283,6 @@ void Crystal::Print(ostream &os)const
    VFN_DEBUG_MESSAGE("Crystal::Print():End",5)
 }
 
-const SpaceGroup & Crystal::GetSpaceGroup() const {return mSpaceGroup;}
-SpaceGroup & Crystal::GetSpaceGroup()  {return mSpaceGroup;}
- 
 CrystMatrix_REAL Crystal::GetMinDistanceTable(const REAL minDistance) const
 {
    VFN_DEBUG_MESSAGE("Crystal::MinDistanceTable()",5)
@@ -779,7 +561,7 @@ void Crystal::CalcDynPopCorr(const REAL overlapDist, const REAL mergeDist) const
    if(mClockDynPopCorr>mDistTableClock) return;
    
    const long nbComponent=mScattCompList.GetNbComponent();
-   const int nbSymmetrics=mSpaceGroup.GetNbSymmetrics();
+   const int nbSymmetrics=this->GetSpaceGroup().GetNbSymmetrics();
    CrystVector_REAL neighborsDist(nbComponent*nbSymmetrics);
    long nbNeighbors=0;
    REAL corr;
@@ -902,7 +684,7 @@ REAL Crystal::GetBumpMergeCost() const
          mBumpMergeCost += tmp*tmp;
       }
    }
-   mBumpMergeCost *= mSpaceGroup.GetNbSymmetrics();
+   mBumpMergeCost *= this->GetSpaceGroup().GetNbSymmetrics();
    mBumpMergeCostClock.Click();
    VFN_DEBUG_EXIT("Crystal::GetBumpMergeCost():"<<mBumpMergeCost,4)
    return mBumpMergeCost;
@@ -925,7 +707,6 @@ void Crystal::SetBumpMergeDistance(const ScatteringPower &scatt1,
                                            BumpMergePar(dist,allowMerge)));
 }
 
-const RefinableObjClock& Crystal::GetClockLatticePar()const {return mClockLatticePar;}
 const RefinableObjClock& Crystal::GetClockScattererList()const {return mClockScattererList;}
 
 unsigned int Crystal::GetNbCostFunction()const {return 1;}
@@ -1020,7 +801,6 @@ REAL Crystal::GetLogLikelihood()const
 void Crystal::CIFOutput(ostream &os)const
 {
    VFN_DEBUG_ENTRY("Crystal::OutputCIF()",5)
-   this->InitMatrices();
    //Program
    os <<"_computing_structure_solution     'FOX http://objcryst.sourceforge.net'"<<endl<<endl;
 
@@ -1044,12 +824,12 @@ void Crystal::CIFOutput(ostream &os)const
       << this->GetSpaceGroup().GetHM_as_Hall().Hall<<"'"<<endl;
    os <<endl;
       
-   os << "_cell_length_a "   << FormatFloat(mCellDim(0),8,5) << endl
-      << "_cell_length_b "   << FormatFloat(mCellDim(1),8,5) << endl
-      << "_cell_length_c "   << FormatFloat(mCellDim(2),8,5) << endl
-      << "_cell_angle_alpha "<< FormatFloat(mCellDim(3)*RAD2DEG,8,5) << endl 
-      << "_cell_angle_beta " << FormatFloat(mCellDim(4)*RAD2DEG,8,5) << endl 
-      << "_cell_angle_gamma "<< FormatFloat(mCellDim(5)*RAD2DEG,8,5) << endl ;
+   os << "_cell_length_a "   << FormatFloat(this->GetLatticePar(0),8,5) << endl
+      << "_cell_length_b "   << FormatFloat(this->GetLatticePar(1),8,5) << endl
+      << "_cell_length_c "   << FormatFloat(this->GetLatticePar(2),8,5) << endl
+      << "_cell_angle_alpha "<< FormatFloat(this->GetLatticePar(3)*RAD2DEG,8,5) << endl 
+      << "_cell_angle_beta " << FormatFloat(this->GetLatticePar(4)*RAD2DEG,8,5) << endl 
+      << "_cell_angle_gamma "<< FormatFloat(this->GetLatticePar(5)*RAD2DEG,8,5) << endl ;
    os <<endl;
    
    this->GetScatteringComponentList();
@@ -1149,29 +929,10 @@ void Crystal::Init(const REAL a, const REAL b, const REAL c, const REAL alpha,
                    const string& name)
 {
    VFN_DEBUG_MESSAGE("Crystal::Init(a,b,c,alpha,beta,gamma,Sg,name)",10)
-   //mSpaceGroup.Print();
-   mSpaceGroup.ChangeSpaceGroup(SpaceGroupId);
-   VFN_DEBUG_MESSAGE("Crystal::Init(a,b,c,alpha,beta,gamma,Sg,name)1",5)
-   //mSpaceGroup.Print();
-   mCellDim(0)=a;
-   mCellDim(1)=b;
-   mCellDim(2)=c;
-   mCellDim(3)=alpha;
-   mCellDim(4)=beta;
-   mCellDim(5)=gamma;
-   
-   mClockMetricMatrix.Reset();
+   this->UnitCell::Init(a,b,c,alpha,beta,gamma,SpaceGroupId,name);
    mClockScattCompList.Reset();
    mClockNeighborTable.Reset();
-   mClockLatticeParUpdate.Reset();
    mClockDynPopCorr.Reset();
-   
-   mClockLatticePar.Click();
-   VFN_DEBUG_MESSAGE("Crystal::Init(a,b,c,alpha,beta,gamma,Sg,name)2",5)
-      
-   this->InitRefParList();
-   this->InitMatrices();
-   this->SetName(name);
    
    VFN_DEBUG_MESSAGE("Crystal::Init(a,b,c,alpha,beta,gamma,Sg,name):End",10)
 }
@@ -1185,9 +946,6 @@ void Crystal::InitOptions()
    static string DisplayEnantiomername;
    static string DisplayEnantiomerchoices[2];
 
-   static string ConstrainLatticeToSpaceGroupName;
-   static string ConstrainLatticeToSpaceGroupChoices[2];
-   
    static bool needInitNames=true;
    if(true==needInitNames)
    {
@@ -1199,287 +957,17 @@ void Crystal::InitOptions()
       DisplayEnantiomerchoices[0]="No";
       DisplayEnantiomerchoices[1]="Yes";
 
-      ConstrainLatticeToSpaceGroupName="Constrain Lattice to SpaceGroup Symmetry";
-      ConstrainLatticeToSpaceGroupChoices[0]="Yes (Default)";
-      ConstrainLatticeToSpaceGroupChoices[1]="No (Allow Crystallographic Pseudo-Symmetry)";
-
       needInitNames=false;//Only once for the class
    }
    VFN_DEBUG_MESSAGE("Crystal::Init(a,b,c,alpha,beta,gamma,Sg,name):Init options",5)
    mUseDynPopCorr.Init(2,&UseDynPopCorrname,UseDynPopCorrchoices);
    mUseDynPopCorr.SetChoice(1);
    this->AddOption(&mUseDynPopCorr);
-
-   mConstrainLatticeToSpaceGroup.Init(2,&ConstrainLatticeToSpaceGroupName,
-                                        ConstrainLatticeToSpaceGroupChoices);
-   mConstrainLatticeToSpaceGroup.SetChoice(0);
-   this->AddOption(&mConstrainLatticeToSpaceGroup);
    
    mDisplayEnantiomer.Init(2,&DisplayEnantiomername,DisplayEnantiomerchoices);
    mDisplayEnantiomer.SetChoice(0);
    this->AddOption(&mDisplayEnantiomer);
    VFN_DEBUG_EXIT("Crystal::InitOptions",10)
-}
-
-void Crystal::InitMatrices() const
-{
-   //:NOTE: The Matrices must remain upper triangular, since this is assumed for
-   //optimization purposes in some procedures.
-   if(mClockMetricMatrix>mClockLatticePar) return;//no need to update
-   //this->UpdateLatticePar(); we should be able to do this...
-   
-   VFN_DEBUG_MESSAGE("Crystal::InitMatrices() for crystal : "+this->GetName(),5)
-   //mClockMetricMatrix.Print();
-   //mClockLatticePar.Print();
-
-   REAL a,b,c,alpha,beta,gamma;//direct space parameters
-   REAL aa,bb,cc,alphaa,betaa,gammaa;//reciprocal space parameters
-   REAL v;//volume of the unit cell
-   a=GetLatticePar(0);
-   b=GetLatticePar(1);
-   c=GetLatticePar(2);
-   alpha=GetLatticePar(3);
-   beta=GetLatticePar(4);
-   gamma=GetLatticePar(5);
-   
-   //cout <<a<<" "<<b<<" "<<c<<" "<<alpha<<" "<<beta<<" "<<gamma<<endl;
-   
-   v=sqrt(1-cos(alpha)*cos(alpha)-cos(beta)*cos(beta)-cos(gamma)*cos(gamma)
-            +2*cos(alpha)*cos(beta)*cos(gamma));
-            
-   aa=sin(alpha)/a/v;
-   bb=sin(beta )/b/v;
-   cc=sin(gamma)/c/v;
-   
-   alphaa=acos( (cos(beta )*cos(gamma)-cos(alpha))/sin(beta )/sin(gamma) );
-   betaa =acos( (cos(alpha)*cos(gamma)-cos(beta ))/sin(alpha)/sin(gamma) );
-   gammaa=acos( (cos(alpha)*cos(beta )-cos(gamma))/sin(alpha)/sin(beta ) );
-   
-   //cout <<aa<<" "<<bb<<" "<<cc<<" "<<alphaa<<" "<<betaa<<" "<<gammaa<<endl;
-
-   // Formula is OK
-   mBMatrix = aa ,  bb*cos(gammaa) , cc*cos(betaa) ,
-               0  , bb*sin(gammaa) ,-cc*sin(betaa)*cos(alpha),
-               0  , 0              ,1/c;
-   //cout <<"B Matrix :"<<endl<< mBMatrix <<endl;
-   // Formula is OK
-   mOrthMatrix = a  , b*cos(gamma) , c*cos(beta) ,
-                 0  , b*sin(gamma) ,-c*sin(beta)*cos(alphaa),
-                 0  , 0              ,1/cc;
-   
-   //Seems OK- NO !
-   //mOrthMatrixInvert= 1/a, -1/tan(gamma)/a , -cos(beta)/a/v/sin(gamma)*(1+cos(alpha)*cos(gamma)),
-   //                   0  , 1/b/sin(gamma)  , bb*cos(alphaa),
-   //                   0  , 0               , cc;
-   mOrthMatrixInvert=InvertMatrix(mOrthMatrix);
-   mBMatrixInvert=InvertMatrix(mBMatrix);
-   //cout << "Orth Matrix :"<<endl<<mOrthMatrix <<endl;
-   //cout << "InvOrth Matrix :"<<endl<<mOrthMatrixInvert <<endl;
-   //cout << "Orth * InvOrth matrix :"<<endl<<product(mOrthMatrix,mOrthMatrixInvert) <<endl;
-   //cout << "InvOrth * Orth Matrix :"<<endl<<product(mOrthMatrixInvert,mOrthMatrix) <<endl;
-   mClockMetricMatrix.Click();
-   VFN_DEBUG_MESSAGE("Crystal::InitMatrices():End.",5)
-}
-
-void Crystal::UpdateLatticePar()
-{
-   if(  (mClockLatticeParUpdate>mSpaceGroup.GetClockSpaceGroup())
-      &&(mClockLatticeParUpdate>mClockLatticePar)) return;
-   VFN_DEBUG_MESSAGE("Crystal::UpdateLatticePar().",3)
-
-   cout << "ConstrainLatticeToSpaceGroup::"<<mConstrainLatticeToSpaceGroup.GetChoice()<<endl;
-   int num = mSpaceGroup.GetSpaceGroupNumber();
-   if((num <=2)||(mConstrainLatticeToSpaceGroup.GetChoice()!=0))
-   {
-      mClockLatticeParUpdate.Click();
-      return;
-   }
-   if((num <=15) && (0==mSpaceGroup.GetUniqueAxis()))
-   {
-      mCellDim(4)=M_PI/2.;
-      mCellDim(5)=M_PI/2.;
-      mClockLatticeParUpdate.Click();
-      return;
-   }
-   if((num <=15) && (1==mSpaceGroup.GetUniqueAxis()))
-   {
-      mCellDim(3)=M_PI/2.;
-      mCellDim(5)=M_PI/2.;
-      mClockLatticeParUpdate.Click();
-      return;
-   }
-   if((num <=15) && (2==mSpaceGroup.GetUniqueAxis()))
-   {
-      mCellDim(3)=M_PI/2.;
-      mCellDim(4)=M_PI/2.;
-      mClockLatticeParUpdate.Click();
-      return;
-   }
-   if(num <=74)
-   {
-      mCellDim(3)=M_PI/2.;
-      mCellDim(4)=M_PI/2.;
-      mCellDim(5)=M_PI/2.;
-      mClockLatticeParUpdate.Click();
-      return;
-   }
-   if(num <= 142) 
-   {
-      mCellDim(3)=M_PI/2.;
-      mCellDim(4)=M_PI/2.;
-      mCellDim(5)=M_PI/2.;
-      mCellDim(1) = mCellDim(0) ;
-      mClockLatticeParUpdate.Click();
-      return;
-   }
-   if(num <= 194) 
-   {
-      mCellDim(3) = M_PI/2.;
-      mCellDim(4) = M_PI/2.;
-      mCellDim(5) = M_PI*2./3.;
-      mCellDim(1) = mCellDim(0) ;
-      mClockLatticeParUpdate.Click();
-      return;
-   }
-   mCellDim(3)=M_PI/2.;
-   mCellDim(4)=M_PI/2.;
-   mCellDim(5)=M_PI/2.;
-   mCellDim(1) = mCellDim(0) ;
-   mCellDim(2) = mCellDim(0) ;
-   mClockLatticeParUpdate.Click();
-   return;
-}
-
-void Crystal::InitRefParList()
-{
-   VFN_DEBUG_MESSAGE("Crystal::InitRefParList()",5)
-   //this->ResetParList();
-   int num = mSpaceGroup.GetSpaceGroupNumber();
-   bool a=true;
-   bool b=true;
-   bool c=true;
-   bool alpha=true;
-   bool beta=true;
-   bool gamma=true;
-   if(mConstrainLatticeToSpaceGroup.GetChoice()==0)
-   {
-      if(num <=2)
-      {
-      }
-      else if((num <=15) && (0==mSpaceGroup.GetUniqueAxis()))
-      {
-         beta=false;
-         gamma=false;
-      }
-      else if((num <=15) && (1==mSpaceGroup.GetUniqueAxis()))
-      {
-         alpha=false;
-         gamma=false;
-      }
-      else if((num <=15) && (2==mSpaceGroup.GetUniqueAxis()))
-      {
-         alpha=false;
-         beta=false;
-      }
-      else if(num <=74)
-      {
-         alpha=false;
-         beta=false;
-         gamma=false;
-      }
-      else if(num <= 142) 
-      {
-         b=false;
-         alpha=false;
-         beta=false;
-         gamma=false;
-      }
-      else if(num <= 167)
-      {//Hexagonal axes !
-         b=false;
-         alpha=false;
-         beta=false;
-         gamma=false;
-      }
-      else if(num <= 194) 
-      {
-         b=false;
-         alpha=false;
-         beta=false;
-         gamma=false;
-      }
-      else
-      {
-         b=false;
-         c=false;
-         alpha=false;
-         beta=false;
-         gamma=false;
-      }
-   }
-   REAL *pLatPar=mCellDim.data();
-   if(this->GetNbPar()==0)
-   {//:KLUDGE:
-      {
-         RefinablePar tmp("a",pLatPar,1.,100.,
-                           gpRefParTypeUnitCellLength,REFPAR_DERIV_STEP_ABSOLUTE,
-                           true,true,a,false,1.0);
-         tmp.SetDerivStep(1e-4);
-         tmp.AssignClock(mClockLatticePar);
-         this->AddPar(tmp);
-      }
-      {
-         RefinablePar tmp("b",pLatPar+1,1.,100.,
-                           gpRefParTypeUnitCellLength,REFPAR_DERIV_STEP_ABSOLUTE,
-                           true,true,b,false,1.0);
-         tmp.SetDerivStep(1e-4);
-         tmp.AssignClock(mClockLatticePar);
-         this->AddPar(tmp);
-      }
-      {
-         RefinablePar tmp("c",pLatPar+2,1.,100.,
-                           gpRefParTypeUnitCellLength,REFPAR_DERIV_STEP_ABSOLUTE,
-                           true,true,c,false,1.0);
-         tmp.SetDerivStep(1e-4);
-         tmp.AssignClock(mClockLatticePar);
-         this->AddPar(tmp);
-      }
-      {
-         RefinablePar tmp("alpha",pLatPar+3,.5,3.,
-                           gpRefParTypeUnitCellAngle,REFPAR_DERIV_STEP_ABSOLUTE,
-                           true,true,alpha,false,RAD2DEG);
-         tmp.SetDerivStep(1e-4);
-         tmp.AssignClock(mClockLatticePar);
-         this->AddPar(tmp);
-      }
-      {
-         RefinablePar tmp("beta",pLatPar+4,.5,3.,
-                           gpRefParTypeUnitCellAngle,REFPAR_DERIV_STEP_ABSOLUTE,
-                           true,true,beta,false,RAD2DEG);
-         tmp.SetDerivStep(1e-4);
-         tmp.AssignClock(mClockLatticePar);
-         this->AddPar(tmp);
-      }
-      {
-         RefinablePar tmp("gamma",pLatPar+5,.5,3.,
-                           gpRefParTypeUnitCellAngle,REFPAR_DERIV_STEP_ABSOLUTE,
-                           true,true,gamma,false,RAD2DEG);
-         tmp.SetDerivStep(1e-4);
-         tmp.AssignClock(mClockLatticePar);
-         this->AddPar(tmp);
-      }
-   }
-   else
-   {//Just Fix the 'used' status
-      this->GetPar(pLatPar+0).SetIsUsed(a);
-      this->GetPar(pLatPar+1).SetIsUsed(b);
-      this->GetPar(pLatPar+2).SetIsUsed(c);
-      this->GetPar(pLatPar+3).SetIsUsed(alpha);
-      this->GetPar(pLatPar+4).SetIsUsed(beta);
-      this->GetPar(pLatPar+5).SetIsUsed(gamma);
-   }
-
-   VFN_DEBUG_MESSAGE("Crystal::InitRefParList():Finished",5)
 }
 
 Crystal::Neighbour::Neighbour(const unsigned long neighbourIndex,const int sym,
@@ -1506,14 +994,13 @@ struct DistTableInternalPosition
 void Crystal::CalcDistTable(const bool fast, const REAL asymUnitMargin) const
 {
    this->GetScatteringComponentList();
-   this->InitMatrices();
    
    if(  (mDistTableClock>mClockScattCompList)
-      &&(mDistTableClock>mClockMetricMatrix)) return;
+      &&(mDistTableClock>this->GetClockMetricMatrix())) return;
    VFN_DEBUG_ENTRY("Crystal::CalcDistTable()",4)
       
    const long nbComponent=mScattCompList.GetNbComponent();
-   const int nbSymmetrics=mSpaceGroup.GetNbSymmetrics();
+   const int nbSymmetrics=this->GetSpaceGroup().GetNbSymmetrics();
    
    mvDistTableSq.resize(nbComponent);
    {
@@ -1525,14 +1012,14 @@ void Crystal::CalcDistTable(const bool fast, const REAL asymUnitMargin) const
    
    // Get limits of the (pseudo) asymmetric unit
       // strict limits
-      const REAL xMax0=mSpaceGroup.GetAsymUnit().Xmax();
-      const REAL yMax0=mSpaceGroup.GetAsymUnit().Ymax();
-      const REAL zMax0=mSpaceGroup.GetAsymUnit().Zmax();
+      const REAL xMax0=this->GetSpaceGroup().GetAsymUnit().Xmax();
+      const REAL yMax0=this->GetSpaceGroup().GetAsymUnit().Ymax();
+      const REAL zMax0=this->GetSpaceGroup().GetAsymUnit().Zmax();
    
       // limits with a margin, within [0;1[
-      const REAL xMax=mSpaceGroup.GetAsymUnit().Xmax()+asymUnitMargin/GetLatticePar(0);
-      const REAL yMax=mSpaceGroup.GetAsymUnit().Ymax()+asymUnitMargin/GetLatticePar(1);
-      const REAL zMax=mSpaceGroup.GetAsymUnit().Zmax()+asymUnitMargin/GetLatticePar(2);
+      const REAL xMax=this->GetSpaceGroup().GetAsymUnit().Xmax()+asymUnitMargin/GetLatticePar(0);
+      const REAL yMax=this->GetSpaceGroup().GetAsymUnit().Ymax()+asymUnitMargin/GetLatticePar(1);
+      const REAL zMax=this->GetSpaceGroup().GetAsymUnit().Zmax()+asymUnitMargin/GetLatticePar(2);
       const REAL xMin=1.-asymUnitMargin/GetLatticePar(0);
       const REAL yMin=1.-asymUnitMargin/GetLatticePar(1);
       const REAL zMin=1.-asymUnitMargin/GetLatticePar(2);
@@ -1581,9 +1068,9 @@ void Crystal::CalcDistTable(const bool fast, const REAL asymUnitMargin) const
       for(long i=0;i<nbComponent;i++)
       {
          VFN_DEBUG_MESSAGE("Crystal::CalcDistTable(fast):3:component "<<i,0)
-         symmetricsCoords=mSpaceGroup.GetAllSymmetrics(mScattCompList(i).mX,
-                                                       mScattCompList(i).mY,
-                                                       mScattCompList(i).mZ);
+         symmetricsCoords=this->GetSpaceGroup().GetAllSymmetrics(mScattCompList(i).mX,
+                                                                 mScattCompList(i).mY,
+                                                                 mScattCompList(i).mZ);
          mvDistTableSq[i].mIndex=i;//USELESS ?
          for(int j=0;j<nbSymmetrics;j++)
          {
@@ -1622,15 +1109,16 @@ void Crystal::CalcDistTable(const bool fast, const REAL asymUnitMargin) const
       // Compute interatomic vectors & distance 
       // between (i) unique atoms and (ii) all remaining atoms
       
-      const REAL M00=mOrthMatrix(0,0)/(REAL)FRAC2LONG;
-      const REAL M01=mOrthMatrix(0,1)/(REAL)FRAC2LONG;
-      const REAL M02=mOrthMatrix(0,2)/(REAL)FRAC2LONG;
-      //const REAL M10=mOrthMatrix(1,0)/(REAL)FRAC2LONG;
-      const REAL M11=mOrthMatrix(1,1)/(REAL)FRAC2LONG;
-      const REAL M12=mOrthMatrix(1,2)/(REAL)FRAC2LONG;
-      //const REAL M20=mOrthMatrix(2,0)/(REAL)FRAC2LONG;
-      //const REAL M21=mOrthMatrix(2,1)/(REAL)FRAC2LONG;
-      const REAL M22=mOrthMatrix(2,2)/(REAL)FRAC2LONG;
+      const CrystMatrix_REAL* pOrthMatrix=&(this->GetOrthMatrix());
+      const REAL M00=(*pOrthMatrix)(0,0)/(REAL)FRAC2LONG;
+      const REAL M01=(*pOrthMatrix)(0,1)/(REAL)FRAC2LONG;
+      const REAL M02=(*pOrthMatrix)(0,2)/(REAL)FRAC2LONG;
+      //const REAL M10=(*pOrthMatrix)(1,0)/(REAL)FRAC2LONG;
+      const REAL M11=(*pOrthMatrix)(1,1)/(REAL)FRAC2LONG;
+      const REAL M12=(*pOrthMatrix)(1,2)/(REAL)FRAC2LONG;
+      //const REAL M20=(*pOrthMatrix)(2,0)/(REAL)FRAC2LONG;
+      //const REAL M21=(*pOrthMatrix)(2,1)/(REAL)FRAC2LONG;
+      const REAL M22=(*pOrthMatrix)(2,2)/(REAL)FRAC2LONG;
       
       for(long i=0;i<nbComponent;i++)
       {
@@ -1694,9 +1182,9 @@ void Crystal::CalcDistTable(const bool fast, const REAL asymUnitMargin) const
       for(long i=0;i<nbComponent;i++)
       {
          VFN_DEBUG_MESSAGE("Crystal::CalcDistTable(fast):3:component "<<i,3)
-         symmetricsCoords=mSpaceGroup.GetAllSymmetrics(mScattCompList(i).mX,
-                                                       mScattCompList(i).mY,
-                                                       mScattCompList(i).mZ);
+         symmetricsCoords=this->GetSpaceGroup().GetAllSymmetrics(mScattCompList(i).mX,
+                                                                 mScattCompList(i).mY,
+                                                                 mScattCompList(i).mZ);
          mvDistTableSq[i].mIndex=i;//USELESS ?
          for(int j=0;j<nbSymmetrics;j++)
          {
