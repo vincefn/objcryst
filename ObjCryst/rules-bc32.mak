@@ -142,7 +142,7 @@ LINKFLAGS= ${WX_LDFLAGS} -L$(DIR_ATOMINFO) -L$(DIR_CRYSTVECTOR) -L$(DIR_LIBCRYST
 	-L$(DIR_BORLAND)\lib;$(DIR_BORLAND)\lib\psdk
 
 LINKSTARTUP= c0d32.obj
-LINKLIBS= import32.lib cw32$(LIBSUF).lib libatominfo.lib libsglite.lib libcrystvector.lib libquirks.lib librefinableobj.lib libcryst.lib $(WX_LIBS) glut32.lib
+LINKLIBS= import32.lib cw32$(LIBSUF).lib libatominfo.lib libsglite.lib libcrystvector.lib libquirks.lib librefinableobj.lib libcryst.lib $(WX_LIBS)
 RCFLAGS= -r -i$(MAKEDIR)\..\include;$(MAKEDIR)\..\include\windows
 
 

@@ -42,8 +42,18 @@
 #include "ObjCryst/ScatteringPowerSphere.h"
 #include "ObjCryst/Polyhedron.h"
 
+#ifdef OBJCRYST_GL
+   #include "GL/glu.h"
+
+   #ifdef __LINUX__
+      #include "GL/glx.h"
+   #endif
+   #ifdef __WIN32__
+     #include "gl/glaux.h"
+   #endif
+#endif
+
 extern "C" {
-#include "GL/glu.h"
 #include "wxCryst/trackball.h"
 }
 
@@ -62,6 +72,23 @@ extern "C" {
 
 namespace ObjCryst
 {
+// This must be changed for each GL world to the correct first display list,
+// i.e. in SetCurrent().
+static int sFontDisplayListBase=0;
+
+GLvoid crystGLPrint(const string &s)
+{
+   #if 0
+   for(unsigned int l=0;l<s.size();l++)
+      glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12,*(s.c_str()+l));
+   #else
+   glPushAttrib(GL_LIST_BIT);
+      glListBase(sFontDisplayListBase - 32);
+      glCallLists(s.size(), GL_UNSIGNED_BYTE, s.c_str());
+   glPopAttrib();
+   #endif
+}
+
 /// Conversion from ZScatterer to the newer Molecule object. (in WXZScatterer.cpp)
 Molecule *ZScatterer2Molecule(ZScatterer *scatt);
 
@@ -1317,7 +1344,8 @@ WXGLCrystalCanvas::WXGLCrystalCanvas(WXCrystal *wxcryst,
                                      const wxSize &size):
 wxGLCanvas(parent,id,pos,size,wxDEFAULT_FRAME_STYLE),mpParentFrame(parent),
 mpWXCrystal(wxcryst),mIsGLInit(false),mDist(60),mX0(0),mY0(0),mZ0(0),mViewAngle(15),
-mShowFourier(true),mShowCrystal(true),mShowAtomName(true),mShowCursor(false)
+mShowFourier(true),mShowCrystal(true),mShowAtomName(true),mShowCursor(false),
+mIsGLFontBuilt(false),mGLFontDisplayListBase(0)
 {
    VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::WXGLCrystalCanvas()",3)
      // N.B. xMin=xMax so that the previous cell bbox is used for Maps 
@@ -1367,6 +1395,7 @@ WXGLCrystalCanvas::~WXGLCrystalCanvas()
          delete pos->second;
       mvpUnitCellMapGLList.clear();
    }
+   this->DeleteGLFont();
 }
 
 void WXGLCrystalCanvas::OnExit(wxCommandEvent &event)
@@ -1416,6 +1445,7 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
          VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnPaint()",7)
          return;
       }
+   
    if(mShowFourier)
    {
       glPushMatrix();
@@ -1451,7 +1481,6 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
    if(mShowCursor)
    {
       glLoadIdentity();
-      glTranslatef( 0, 0, -mDist);
       glMultMatrixf( &m[0][0] );
       const GLfloat colour0 [] = {0.00, 0.00, 0.00, 0.00}; 
       const GLfloat colour1 [] = {1.0f, 1.0f, 1.0f, 1.00}; 
@@ -1741,6 +1770,12 @@ void WXGLCrystalCanvas::OnUpdateUI(wxUpdateUIEvent& WXUNUSED(event))
    VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnUpdateUI()",5)
 }
 
+void WXGLCrystalCanvas::SetCurrent()
+{
+   sFontDisplayListBase=mGLFontDisplayListBase;
+   this->wxGLCanvas::SetCurrent();
+}
+
 void WXGLCrystalCanvas::InitGL()
 {
    VFN_DEBUG_ENTRY("WXGLCrystalCanvas::InitGL()",8)
@@ -1773,6 +1808,9 @@ void WXGLCrystalCanvas::InitGL()
    wxSizeEvent event;
    this->OnSize(event);
    
+   // Build font
+   this->BuildGLFont();
+
    //First display
    this->CrystUpdate();
    VFN_DEBUG_EXIT("WXGLCrystalCanvas::InitGL()",8)
@@ -2129,6 +2167,70 @@ void WXGLCrystalCanvas::UnProject(REAL &x, REAL &y, REAL &z)
    z= m[2][0]* vx + m[2][1]*vy + m[2][2]*vz -mZ0;
 	VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::UnProject():X Y Z = "<<x<<" , "<<y<<" , "<<z,5)
 }
+void WXGLCrystalCanvas::BuildGLFont()const
+{
+   if(mIsGLFontBuilt) return;
+   VFN_DEBUG_ENTRY("WXGLCrystalCanvas::BuildGLFont()-gldisplay",6)
+   #ifdef __LINUX__
+      Display *dpy;
+      XFontStruct *fontInfo=NULL;
+
+      mGLFontDisplayListBase = glGenLists(96);
+
+      dpy = XOpenDisplay(NULL); 
+
+      fontInfo = XLoadQueryFont(dpy, "-adobe-helvetica-bold-*-*-*-10-*-*-*-*-*-*-*");
+      if (fontInfo == NULL)
+         fontInfo = XLoadQueryFont(dpy, "-adobe-times-bold-*-*-*-10-*-*-*-*-*-*-*");
+      if (fontInfo == NULL)
+         fontInfo = XLoadQueryFont(dpy, "-adobe-helvetica-medium-*-*-*-12-*-*-*-*-*-*-*");
+      if (fontInfo == NULL)
+         fontInfo = XLoadQueryFont(dpy, "-adobe-times-medium-*-*-*-12-*-*-*-*-*-*-*");
+      if (fontInfo == NULL)
+         fontInfo = XLoadQueryFont(dpy, "fixed");
+	   if (fontInfo == NULL) cout <<"no X font available..."<<endl;
+
+      glXUseXFont(fontInfo->fid, 32, 96, mGLFontDisplayListBase);
+      XFreeFont(dpy, fontInfo);
+      XCloseDisplay(dpy);
+   #endif
+   #ifdef __WIN32__
+      HFONT   font;
+      HFONT   oldfont;
+      mGLFontDisplayListBase = glGenLists(96);
+      font = CreateFont(-12,                       // Height of font
+                        0,                         // Width of font
+                        0,                         // Angle of escapement
+                        0,                         // Orientation angle
+                        FW_BOLD,                   // Font weight
+                        FALSE,                     // Italic
+                        FALSE,                     // Underline
+                        FALSE,                     // Strikeout
+                        ANSI_CHARSET,              // Character set identifier
+                        OUT_TT_PRECIS,             // Output precision
+                        CLIP_DEFAULT_PRECIS,       // Clipping precision
+                        ANTIALIASED_QUALITY,       // Output quality
+                        FF_DONTCARE|DEFAULT_PITCH, // Family and pitch
+                        "Helvetica");              // Font name
+
+      oldfont = (HFONT)SelectObject(hDC, font);
+      wglUseFontBitmaps(hDC, 32, 96, mGLFontDisplayListBase);
+      SelectObject(hDC, oldfont);
+      DeleteObject(font);
+   #endif
+   mIsGLFontBuilt=true;
+   sFontDisplayListBase=mGLFontDisplayListBase;
+   VFN_DEBUG_EXIT("WXGLCrystalCanvas::BuildGLFont()",6)
+}
+
+void WXGLCrystalCanvas::DeleteGLFont() const
+{
+   if(!mIsGLFontBuilt) return;
+   glDeleteLists(mGLFontDisplayListBase, 96);
+   mIsGLFontBuilt=false;
+   mGLFontDisplayListBase=0;
+}
+
 
 
 ////////////////////////////////////////////////////////////////////////

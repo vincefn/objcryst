@@ -30,10 +30,7 @@
 #include "Quirks/VFNDebug.h"
 
 #ifdef OBJCRYST_GL
-extern "C"
-{
-#include <GL/glut.h>
-}
+   #include <GL/glu.h>
 #endif
 
 #ifdef __WX__CRYST__
@@ -354,8 +351,7 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
             glMaterialfv(GL_FRONT, GL_EMISSION,  colourChar); 
             glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
             glRasterPos3f(0,0,0);
-            for(unsigned int l=0;l<this->GetName().size();l++)
-               glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12,*(this->GetName().c_str()+l));
+            crystGLPrint(this->GetName());
          }
          else
          {
@@ -434,8 +430,7 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
                      glMaterialfv(GL_FRONT, GL_EMISSION,  colourChar); 
                      glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
                      glRasterPos3f(0,0,0);
-                     for(unsigned int l=0;l<this->GetName().size();l++)
-                        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12,*(this->GetName().c_str()+l));
+                     crystGLPrint(this->GetName());
                   }
                   else
                   {

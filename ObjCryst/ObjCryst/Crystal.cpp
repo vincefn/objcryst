@@ -30,9 +30,6 @@
 #include "Quirks/VFNStreamFormat.h" //simple formatting of integers, REALs..
 #include "Quirks/VFNDebug.h"
 
-#ifdef OBJCRYST_GL
-#include <GL/glut.h>
-#endif
 #ifdef __WX__CRYST__
    #include "wxCryst/wxCrystal.h"
 #endif
@@ -477,17 +474,17 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
             x=1.2-xc;y=-yc;z=-zc;
             this->FractionalToOrthonormalCoords(x,y,z);
             glRasterPos3f(en*x,y,z);
-            glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,'a');
+            crystGLPrint("a");
 
             x=-xc;y=1.2-yc;z=-zc;
             this->FractionalToOrthonormalCoords(x,y,z);
             glRasterPos3f(en*x,y,z);
-            glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,'b');
+            crystGLPrint("b");
 
             x=-xc;y=-yc;z=1.2-zc;
             this->FractionalToOrthonormalCoords(x,y,z);
             glRasterPos3f(en*x,y,z);
-            glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,'c');
+            crystGLPrint("c");
          // Cell
             glMaterialfv(GL_FRONT, GL_AMBIENT,   colour1); 
             glMaterialfv(GL_FRONT, GL_DIFFUSE,   colour2); 

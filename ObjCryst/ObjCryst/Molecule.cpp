@@ -23,13 +23,14 @@
 #include <iterator>
 #include <algorithm>
 
-#ifdef OBJCRYST_GL
-#include <GL/glut.h>
-#endif
-
 #include "Quirks/VFNStreamFormat.h"
 #include "ObjCryst/Molecule.h"
 #include "RefinableObj/GlobalOptimObj.h"
+
+#ifdef OBJCRYST_GL
+   #include <GL/glu.h>
+#endif
+
 #ifdef __WX__CRYST__
    #include "wxCryst/wxMolecule.h"
 #endif
@@ -1583,8 +1584,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                glMaterialfv(GL_FRONT, GL_EMISSION,  colourChar); 
                glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
                glTranslatef((*pos)->X()*en+xc, (*pos)->Y()+yc, (*pos)->Z()+zc);
-               for(unsigned int l=0;l<(*pos)->GetName().size();l++)
-                  glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12,*((*pos)->GetName().c_str()+l));
+               crystGLPrint((*pos)->GetName());
             }
             else
             {
@@ -1709,8 +1709,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                         glMaterialfv(GL_FRONT, GL_EMISSION, colourChar); 
                         glMaterialfv(GL_FRONT, GL_SHININESS,colour0);
                         glRasterPos3f(x(k)*en, y(k), z(k));
-                        for(unsigned int l=0;l<mvpAtom[k]->GetName().size();l++)
-                           glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12,*(mvpAtom[k]->GetName().c_str()+l));
+                        crystGLPrint(mvpAtom[k]->GetName());
                      }
                      else
                      {

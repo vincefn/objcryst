@@ -174,6 +174,11 @@ template <class T> class SymmetricPairCompare
       }
 };
 
+#ifdef OBJCRYST_GL
+/// Print a string in 2D at the current OpenGL position
+/// This is actually implemented in wxCryst/wxCrystal.cpp
+void crystGLPrint(const string &);
+#endif
 
 }//Namespace
 

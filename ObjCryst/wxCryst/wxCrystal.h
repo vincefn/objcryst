@@ -235,6 +235,7 @@ class WXGLCrystalCanvas : public wxGLCanvas
       BBox GetCellBBox();
       // get bounding box for display of Fourier map
       BBox GetMapBBox();
+      virtual void SetCurrent();
    private:
       void InitGL();
       /// Shows a dialog to choose a displayed fourier map from one of those
@@ -256,6 +257,10 @@ class WXGLCrystalCanvas : public wxGLCanvas
       * which are not const-correct...
       */
       void UnProject(REAL &x, REAL &y, REAL &z);
+      /// Build the 96 display lists for the font
+      void BuildGLFont()const;
+      /// Delete the 96 display lists for the font
+      void DeleteGLFont()const;
       /// The parent wxFrame
       wxFrame* mpParentFrame;
       /// The owner WXCrystal
@@ -297,6 +302,9 @@ class WXGLCrystalCanvas : public wxGLCanvas
       */
       vector<pair<pair<const UnitCellMapImport*,float>,UnitCellMapGLList* > > mvpUnitCellMapGLList;
       
+      // Display lists for the font used to display strings
+      mutable bool mIsGLFontBuilt;
+      mutable int mGLFontDisplayListBase;
    DECLARE_EVENT_TABLE()
 };
 #endif

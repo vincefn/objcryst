@@ -35,12 +35,13 @@
 #include "Quirks/VFNStreamFormat.h" //simple formatting of integers, REALs..
 
 #include "Quirks/VFNDebug.h"
-#ifdef OBJCRYST_GL
-#include <GL/glut.h>
-#endif
 
 #include <fstream>
 #include <iomanip>
+
+#ifdef OBJCRYST_GL
+   #include <GL/glu.h>
+#endif
 
 #ifdef __WX__CRYST__
    #include "wxCryst/wxZScatterer.h"
@@ -690,7 +691,6 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                                 mZAtomRegistry.GetObj(n1).GetScatteringPower()->GetColourRGB());
                   glPushMatrix();
                      glTranslatef(x(n1)*en, y(n1), z(n1));
-                     //glutSolidSphere
                      gluSphere(pQuadric,mZAtomRegistry.GetObj(n1).GetScatteringPower()
                                        ->GetRadius()/3.,10,10);
                   glPopMatrix();
@@ -825,9 +825,7 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                glMaterialfv(GL_FRONT, GL_EMISSION, colourChar); 
                glMaterialfv(GL_FRONT, GL_SHININESS,colour0);
                glRasterPos3f(0.0f, 0.0f, 0.0f);
-               for(unsigned int l=0;l<mZAtomRegistry.GetObj(k).GetName().size();l++)
-                  glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12,
-                                      *(mZAtomRegistry.GetObj(k).GetName().c_str()+l));
+               crystGLPrint(mZAtomRegistry.GetObj(k).GetName());
             }
             else
             {
@@ -1015,9 +1013,7 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                         glMaterialfv(GL_FRONT, GL_EMISSION, colourChar); 
                         glMaterialfv(GL_FRONT, GL_SHININESS,colour0);
                         glRasterPos3f(0.0f, 0.0f, 0.0f);
-                        for(unsigned int l=0;l<mZAtomRegistry.GetObj(k).GetName().size();l++)
-                           glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12,
-                                               *(mZAtomRegistry.GetObj(k).GetName().c_str()+l));
+                        crystGLPrint(mZAtomRegistry.GetObj(k).GetName());
                      }
                      else
                      {

@@ -30,12 +30,6 @@
 #include "Quirks/VFNStreamFormat.h" //simple formatting of integers, REALs..
 
 #include "Quirks/VFNDebug.h"
-#ifdef OBJCRYST_GL
-extern "C"
-{
-#include <GL/glut.h>
-}
-#endif
 
 #ifdef __WX__CRYST__
    #include "wxCryst/wxScatterer.h"
