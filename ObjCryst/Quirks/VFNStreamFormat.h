@@ -154,7 +154,7 @@ template<class T> class FormatVertVector
       const int mWidth;
       const int mPrecision;
    
-   friend ostream& operator<< <T>(ostream&, const FormatVertVector<T>&);
+   //friend ostream& operator<< <T>(ostream&, const FormatVertVector<T>&);
 };
 
 template<class T> ostream& operator<< (ostream &os, const FormatVertVector<T> &fVect);
@@ -176,7 +176,7 @@ template<class T> class FormatHorizVector
       const int mWidth;
       const int mPrecision;
    
-   friend ostream& operator<< <T>(ostream&, const FormatHorizVector<T>&);
+   //friend ostream& operator<< <T>(ostream&, const FormatHorizVector<T>&);
 };
 
 template<class T> ostream& operator<< (ostream &os, const FormatHorizVector<T> &fVect);
@@ -293,7 +293,7 @@ template<class T>class FormatVertVectorHKLFloats
       const int mWidth;
       const int mPrecision;
    
-   friend ostream& operator<< <T>(ostream&, const FormatVertVectorHKLFloats<T>&);
+   //friend ostream& operator<< <T>(ostream&, const FormatVertVectorHKLFloats<T>&);
 };
 
 template<class T> ostream& operator<< (ostream& os, const FormatVertVectorHKLFloats<T> &fStr);
