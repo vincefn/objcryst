@@ -782,11 +782,13 @@ bool WXCrystal::OnChangeName(const int id)
 
 void WXCrystal::UpdateUI()
 {
+   VFN_DEBUG_ENTRY("WXCrystal::UpdateUI()",6)
    mpFieldSpacegroup->SetValue(mpCrystal->GetSpaceGroup().GetName());
    #ifdef OBJCRYST_GL
    if(0!=mpCrystalGL) mpCrystalGL->GetParent()->SetTitle(mpCrystal->GetName().c_str());
    #endif
    this->WXRefinableObj::UpdateUI();
+   VFN_DEBUG_EXIT("WXCrystal::UpdateUI()",6)
 }
 
 #ifdef OBJCRYST_GL
@@ -834,7 +836,7 @@ void WXGLCrystalCanvas::OnExit(wxCommandEvent &event)
 
 void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
 {
-   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnPaint()",7)
+   VFN_DEBUG_ENTRY("WXGLCrystalCanvas::OnPaint()",7)
    // This means that another update of the display list is being done, so...
    if(true==mpWXCrystal->GLDisplayListIsLocked()) return;
    
@@ -878,7 +880,7 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
    
    glFlush();
    SwapBuffers();
-   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnPaint():End",7)
+   VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnPaint():End",7)
 }
 
 void WXGLCrystalCanvas::OnSize(wxSizeEvent& event)
@@ -1077,8 +1079,9 @@ void WXGLCrystalCanvas::OnMouse( wxMouseEvent& event )
 
 void WXGLCrystalCanvas::OnUpdate(wxCommandEvent & WXUNUSED(event))
 {
-   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnUpdate()",4)
+   VFN_DEBUG_ENTRY("WXGLCrystalCanvas::OnUpdate()",4)
    mpWXCrystal->UpdateGL(false,mXmin,mXmax,mYmin,mYmax,mZmin,mZmax);
+   VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnUpdate()",4)
 }
 
 void WXGLCrystalCanvas::CrystUpdate()
@@ -1090,13 +1093,14 @@ void WXGLCrystalCanvas::CrystUpdate()
 
 void WXGLCrystalCanvas::OnUpdateUI(wxUpdateUIEvent& WXUNUSED(event))
 {
-   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnUpdateUI()",5)
+   VFN_DEBUG_ENTRY("WXGLCrystalCanvas::OnUpdateUI()",5)
    this->Refresh(false);
+   VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnUpdateUI()",5)
 }
 
 void WXGLCrystalCanvas::InitGL()
 {
-   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::InitGL()",8)
+   VFN_DEBUG_ENTRY("WXGLCrystalCanvas::InitGL()",8)
    this->SetCurrent();
     
    glEnable(GL_DEPTH_TEST);
@@ -1125,7 +1129,7 @@ void WXGLCrystalCanvas::InitGL()
    
    //First display
    this->CrystUpdate();
-   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::InitGL():End",10)
+   VFN_DEBUG_EXIT("WXGLCrystalCanvas::InitGL()",8)
 }
 void WXGLCrystalCanvas::OnChangeLimits(wxCommandEvent & WXUNUSED(event))
 {

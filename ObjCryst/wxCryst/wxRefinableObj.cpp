@@ -635,9 +635,11 @@ void WXRefinableObj::OnUpdateUI(wxUpdateUIEvent& event)
 }
 void WXRefinableObj::UpdateUI()
 {
+   VFN_DEBUG_ENTRY("WXRefinableObj::UpdateUI()",6)
    mpWXTitle->SetValue(mpRefinableObj->GetName());
    mpWXTitle->UpdateUI();
    this->WXCrystObj::UpdateUI();
+   VFN_DEBUG_EXIT("WXRefinableObj::UpdateUI()",6)
 }
 
 }// namespace 

@@ -131,12 +131,14 @@ void WXZAtom::CrystUpdate()
 
 void WXZAtom::UpdateUI()
 {
+   VFN_DEBUG_ENTRY("WXZAtom::UpdateUI()",6)
    mList.UpdateUI();
    mpFieldName->SetValue(mpZAtom->GetName().c_str());
    if(0!=mpZAtom->GetScatteringPower())
       mpFieldScattPower->SetValue(mpZAtom->GetScatteringPower()->GetName());
    else
       mpFieldScattPower->SetValue("Dummy");
+   VFN_DEBUG_EXIT("WXZAtom::UpdateUI()",6)
 }
 
 bool WXZAtom::Layout()
