@@ -314,10 +314,15 @@ void PowderPatternBackground::CalcPowderPattern() const
       case POWDER_BACKGROUND_CUBIC_SPLINE:
       {
          const unsigned long nb=mpParentPowderPattern->GetNbPoint();
+         mPowderPatternCalc.resize(nb);
+         if(mBackgroundNbPoint==0)
+         {
+            mPowderPatternCalc=0;
+            break;
+         }
          const REAL tth0=mpParentPowderPattern->Get2ThetaMin();
          const REAL tths=mpParentPowderPattern->Get2ThetaStep();
          CubicSpline spline(mBackgroundInterpPoint2Theta,mBackgroundInterpPointIntensity);
-         mPowderPatternCalc.resize(nb);
          for(unsigned long i=0;i<nb;++i) mPowderPatternCalc(i)=spline(tth0+i*tths);
          break;
       }
