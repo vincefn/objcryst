@@ -1127,9 +1127,9 @@ void UnitCellMapImport::GLInitDisplayList(const float minValue,
                {
                   //VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnPaint():MC1:"<<i<<" "<<j,5)
                   //:TODO: Fix normals
-                  normx=pTriangles[i].norm[j].x;
-                  normy=pTriangles[i].norm[j].y;
-                  normz=pTriangles[i].norm[j].z;
+                  normx=-pTriangles[i].norm[j].x;
+                  normy=-pTriangles[i].norm[j].y;
+                  normz=-pTriangles[i].norm[j].z;
                   //mpCrystal->FractionalToOrthonormalCoords(normx, normy, normz);
                   //mpCrystal->OrthonormalToFractionalCoords(normx, normy, normz);
                   glNormal3f(normx, normy, normz);
