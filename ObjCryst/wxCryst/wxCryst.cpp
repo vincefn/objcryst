@@ -69,7 +69,10 @@ wxWindow(parent,-1),mWXParent(parent),mIsShown(true),mNeedUpdateUI(true)
    VFN_DEBUG_MESSAGE("WXCrystObjBasic::WXCrystObjBasic():End",6)
 }
 
-WXCrystObjBasic::~WXCrystObjBasic(){}
+WXCrystObjBasic::~WXCrystObjBasic()
+{
+   if(this->GetContainingSizer()!=0) this->GetContainingSizer()->Remove(this);
+}
 //void WXCrystObjBasic::CrystUpdate()
 //{
 //   cout <<"Just called  WXCrystObjBasic::CrystUpdate(), which is pure virtual !!"<<endl;

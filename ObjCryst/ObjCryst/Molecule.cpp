@@ -123,7 +123,12 @@ mName(name),mX(x),mY(y),mZ(z),mOccupancy(1.),mpScattPow(pPow),mpMol(&parent)
    VFN_DEBUG_MESSAGE("MolAtom::MolAtom()",4)
 }
 
-MolAtom::~MolAtom(){}
+MolAtom::~MolAtom()
+{
+#ifdef __WX__CRYST__
+this->WXDelete();
+#endif
+}
 
 void MolAtom::SetName(const string &name){mName=name;}
 const string& MolAtom::GetName()const{return mName;}
@@ -248,7 +253,11 @@ mBondOrder(bondOrder),mIsFreeTorsion(false),mpMol(&parent)
 {}
 
 MolBond::~MolBond()
-{}
+{
+#ifdef __WX__CRYST__
+this->WXDelete();
+#endif
+}
 
 const Molecule& MolBond::GetMolecule()const{return *mpMol;}
       Molecule& MolBond::GetMolecule()     {return *mpMol;}
@@ -420,7 +429,12 @@ mAngle0(angle),mDelta(delta),mSigma(sigma),mpMol(&parent)
    mvpAtom.push_back(&atom3);
 }
 
-MolBondAngle::~MolBondAngle(){}
+MolBondAngle::~MolBondAngle()
+{
+#ifdef __WX__CRYST__
+this->WXDelete();
+#endif
+}
 
 const Molecule& MolBondAngle::GetMolecule()const{return *mpMol;}
       Molecule& MolBondAngle::GetMolecule()     {return *mpMol;}
@@ -575,7 +589,12 @@ mAngle0(angle),mDelta(delta),mSigma(sigma),mpMol(&parent)
    VFN_DEBUG_EXIT("MolDihedralAngle::MolDihedralAngle()",5)
 }
 
-MolDihedralAngle::~MolDihedralAngle(){}
+MolDihedralAngle::~MolDihedralAngle()
+{
+#ifdef __WX__CRYST__
+this->WXDelete();
+#endif
+}
 
 const Molecule& MolDihedralAngle::GetMolecule()const{return *mpMol;}
       Molecule& MolDihedralAngle::GetMolecule()     {return *mpMol;}
@@ -1923,6 +1942,7 @@ vector<MolAtom*>::iterator Molecule::RemoveAtom(const MolAtom &atom)
    }
    mClockAtomList.Click();
    mClockScatterer.Click();
+   delete *pos;
    pos=mvpAtom.erase(pos);
    this->UpdateDisplay();
    VFN_DEBUG_EXIT("Molecule::RemoveAtom()",6)
@@ -1954,6 +1974,7 @@ vector<MolBond*>::iterator Molecule::RemoveBond(const MolBond &bond)
    }
    this->RemoveRestraint(*pos);
    mClockBondList.Click();
+   delete *pos;
    pos= mvpBond.erase(pos);
    this->UpdateDisplay();
    VFN_DEBUG_EXIT("Molecule::RemoveBond():",6)
@@ -2005,6 +2026,7 @@ vector<MolBondAngle*>::iterator Molecule::RemoveBondAngle(const MolBondAngle &an
    }
    this->RemoveRestraint(*pos);
    mClockBondAngleList.Click();
+   delete *pos;
    pos=mvpBondAngle.erase(pos);
    this->UpdateDisplay();
    VFN_DEBUG_EXIT("Molecule::RemoveBondAngle():",6)
@@ -2054,6 +2076,7 @@ vector<MolDihedralAngle*>::iterator Molecule::RemoveDihedralAngle(const MolDihed
    }
    this->RemoveRestraint(*pos);
    mClockDihedralAngleList.Click();
+   delete *pos;
    pos=mvpDihedralAngle.erase(pos);
    this->UpdateDisplay();
    VFN_DEBUG_ENTRY("Molecule::RemoveDihedralAngle():",6)

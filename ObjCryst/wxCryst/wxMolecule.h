@@ -154,16 +154,16 @@ class WXMolecule: public WXScatterer
       WXMolScrolledWindow* mpDihedralAngleWin;
       /** Displayed list of atoms
       */
-      vector<MolAtom*> mvpAtom;
+      map<MolAtom*,WXCrystObjBasic*> mvpAtom;
       /** Displayed list of bonds
       */
-      vector<MolBond*> mvpBond;
+      map<MolBond*,WXCrystObjBasic*> mvpBond;
       /** Displayed list of bond angle
       */
-      vector<MolBondAngle*> mvpBondAngle;
+      map<MolBondAngle*,WXCrystObjBasic*> mvpBondAngle;
       /** Displayed list of Dihedral angles
       */
-      vector<MolDihedralAngle*> mvpDihedralAngle;
+      map<MolDihedralAngle*,WXCrystObjBasic*> mvpDihedralAngle;
    DECLARE_EVENT_TABLE()
 };
 

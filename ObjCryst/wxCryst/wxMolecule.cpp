@@ -963,8 +963,8 @@ void WXMolecule::OnMenuRemoveBond(wxCommandEvent & WXUNUSED(event))
                --posb;
             }
          }
-         for(vector<MolDihedralAngle*>::iterator posb=mvpDihedralAngle.begin();
-             posb!=mvpDihedralAngle.end();++posb)
+         for(vector<MolDihedralAngle*>::iterator posb=mpMolecule->GetDihedralAngleList().begin();
+             posb!=mpMolecule->GetDihedralAngleList().end();++posb)
          {
             if(  ( (pAtom1==&((*posb)->GetAtom1())) && (pAtom2==&((*posb)->GetAtom2())) )
                ||( (pAtom1==&((*posb)->GetAtom2())) && (pAtom2==&((*posb)->GetAtom1())) )
@@ -1050,76 +1050,68 @@ void WXMolecule::CrystUpdate()
       bool needLayoutDihed=false;
       //Remove any atom, bond, bond angle or dihedral angle that could have been removed
       {
-         vector<MolAtom*>::iterator pos;
-         for(pos=mvpAtom.begin();pos!=mvpAtom.end();pos++)
+         map<MolAtom*,WXCrystObjBasic*>::iterator pos;
+         for(pos=mvpAtom.begin();pos!=mvpAtom.end();)
          {
             vector<MolAtom*>::const_iterator pos2=find(mpMolecule->GetAtomList().begin(),
-                                                       mpMolecule->GetAtomList().end(),*pos);
+                                                       mpMolecule->GetAtomList().end(),pos->first);
             if(pos2==mpMolecule->GetAtomList().end())
             {
-               mList.Remove((*pos)->WXGet());
-               mpSizerAtomList->Remove((*pos)->WXGet());
-               (*pos)->WXDelete();
-               pos=mvpAtom.erase(pos);
-               --pos;
+               mList.Remove(pos->second);
+               mvpAtom.erase(pos);
+               pos=mvpAtom.begin();
                needLayoutAtom=true;
-            }
+            }else ++pos;
          }
       }
       if(0!=mpBondWin)
       {
-         vector<MolBond*>::iterator pos;
-         for(pos=mvpBond.begin();pos!=mvpBond.end();pos++)
+         map<MolBond*,WXCrystObjBasic*>::iterator pos;
+         for(pos=mvpBond.begin();pos!=mvpBond.end();)
          {
             vector<MolBond*>::const_iterator pos2=find(mpMolecule->GetBondList().begin(),
-                                                       mpMolecule->GetBondList().end(),*pos);
+                                                       mpMolecule->GetBondList().end(),pos->first);
             if(pos2==mpMolecule->GetBondList().end())
             {
-               mList.Remove((*pos)->WXGet());
-               mpSizerBondList->Remove((*pos)->WXGet());
-               (*pos)->WXDelete();
-               pos=mvpBond.erase(pos);
-               --pos;
+               mList.Remove(pos->second);
+               mvpBond.erase(pos);
+               pos=mvpBond.begin();
                needLayoutBond=true;
-            }
+            }else ++pos;
          }
       }
       if(0!=mpAngleWin)
       {
-         vector<MolBondAngle*>::iterator pos;
-         for(pos=mvpBondAngle.begin();pos!=mvpBondAngle.end();pos++)
+         map<MolBondAngle*,WXCrystObjBasic*>::iterator pos;
+         for(pos=mvpBondAngle.begin();pos!=mvpBondAngle.end();)
          {
             vector<MolBondAngle*>::const_iterator pos2=
                                     find(mpMolecule->GetBondAngleList().begin(),
-                                         mpMolecule->GetBondAngleList().end(),*pos);
+                                         mpMolecule->GetBondAngleList().end(),pos->first);
             if(pos2==mpMolecule->GetBondAngleList().end())
             {
-               mList.Remove((*pos)->WXGet());
-               mpSizerAngleList->Remove((*pos)->WXGet());
-               (*pos)->WXDelete();
-               pos=mvpBondAngle.erase(pos);
-               --pos;
+               mList.Remove(pos->second);
+               mvpBondAngle.erase(pos);
+               pos=mvpBondAngle.begin();
                needLayoutAngle=true;
-            }
+            }else ++pos;
          }
       }
       if(0!=mpDihedralAngleWin)
       {
-         vector<MolDihedralAngle*>::iterator pos;
-         for(pos=mvpDihedralAngle.begin();pos!=mvpDihedralAngle.end();pos++)
+         map<MolDihedralAngle*,WXCrystObjBasic*>::iterator pos;
+         for(pos=mvpDihedralAngle.begin();pos!=mvpDihedralAngle.end();)
          {
             vector<MolDihedralAngle*>::const_iterator pos2=
                               find(mpMolecule->GetDihedralAngleList().begin(),
-                                   mpMolecule->GetDihedralAngleList().end(),*pos);
+                                   mpMolecule->GetDihedralAngleList().end(),pos->first);
             if(pos2==mpMolecule->GetDihedralAngleList().end())
             {
-               mList.Remove((*pos)->WXGet());
-               mpSizerDihedralAngleList->Remove((*pos)->WXGet());
-               (*pos)->WXDelete();
-               pos=mvpDihedralAngle.erase(pos);
-               --pos;
+               mList.Remove(pos->second);
+               mvpDihedralAngle.erase(pos);
+               pos=mvpDihedralAngle.begin();
                needLayoutDihed=true;
-            }
+            }else ++pos;
          }
       }
       //Add any atom, bond, bond angle or dihedral angle that could have been added
@@ -1127,14 +1119,14 @@ void WXMolecule::CrystUpdate()
          vector<MolAtom*>::iterator pos;
          for(pos=mpMolecule->GetAtomList().begin();pos!=mpMolecule->GetAtomList().end();pos++)
          {
-            vector<MolAtom*>::const_iterator pos2=find(mvpAtom.begin(),mvpAtom.end(),*pos);
+            map<MolAtom*,WXCrystObjBasic*>::const_iterator pos2=mvpAtom.find(*pos);
             if(pos2==mvpAtom.end())
             {
                VFN_DEBUG_MESSAGE("WXMolecule::CrystUpdate():Atom not found:"<<(*pos)->GetName(),5)
                WXCrystObjBasic *at=(*pos)->WXCreate(this);
                mpSizerAtomList->Add(at);
                mList.Add(at);
-               mvpAtom.push_back(*pos);
+               mvpAtom.insert(make_pair(*pos,(*pos)->WXGet()));
                needLayoutAtom=true;
             }
          }
@@ -1144,14 +1136,14 @@ void WXMolecule::CrystUpdate()
          vector<MolBond*>::iterator pos;
          for(pos=mpMolecule->GetBondList().begin();pos!=mpMolecule->GetBondList().end();pos++)
          {
-            vector<MolBond*>::const_iterator pos2=find(mvpBond.begin(),mvpBond.end(),*pos);
+            map<MolBond*,WXCrystObjBasic*>::const_iterator pos2=mvpBond.find(*pos);
             if(pos2==mvpBond.end())
             {
                VFN_DEBUG_MESSAGE("WXMolecule::CrystUpdate():Bond not found",10)
                WXCrystObjBasic *b=(*pos)->WXCreate(mpBondWin);
                mpSizerBondList->Add(b);
                mList.Add(b);
-               mvpBond.push_back(*pos);
+               mvpBond.insert(make_pair(*pos,(*pos)->WXGet()));
                needLayoutBond=true;
             }
          }
@@ -1162,15 +1154,14 @@ void WXMolecule::CrystUpdate()
          for(pos=mpMolecule->GetBondAngleList().begin();
              pos!=mpMolecule->GetBondAngleList().end();pos++)
          {
-            vector<MolBondAngle*>::const_iterator pos2
-               =find(mvpBondAngle.begin(),mvpBondAngle.end(),*pos);
+            map<MolBondAngle*,WXCrystObjBasic*>::const_iterator pos2=mvpBondAngle.find(*pos);
             if(pos2==mvpBondAngle.end())
             {
                VFN_DEBUG_MESSAGE("WXMolecule::CrystUpdate():Bond Angle not found",5)
                WXCrystObjBasic *b=(*pos)->WXCreate(mpAngleWin);
                mpSizerAngleList->Add(b);
                mList.Add(b);
-               mvpBondAngle.push_back(*pos);
+               mvpBondAngle.insert(make_pair(*pos,(*pos)->WXGet()));
                needLayoutAngle=true;
             }
          }
@@ -1181,15 +1172,15 @@ void WXMolecule::CrystUpdate()
          for(pos=mpMolecule->GetDihedralAngleList().begin();
              pos!=mpMolecule->GetDihedralAngleList().end();pos++)
          {
-            vector<MolDihedralAngle*>::const_iterator pos2
-               =find(mvpDihedralAngle.begin(),mvpDihedralAngle.end(),*pos);
+            map<MolDihedralAngle*,WXCrystObjBasic*>::const_iterator pos2
+                                                         =mvpDihedralAngle.find(*pos);
             if(pos2==mvpDihedralAngle.end())
             {
                VFN_DEBUG_MESSAGE("WXMolecule::CrystUpdate():Bond not found",5)
                WXCrystObjBasic *b=(*pos)->WXCreate(mpDihedralAngleWin);
                mpSizerDihedralAngleList->Add(b);
                mList.Add(b);
-               mvpDihedralAngle.push_back(*pos);
+               mvpDihedralAngle.insert(make_pair(*pos,(*pos)->WXGet()));
                needLayoutDihed=true;
             }
          }
@@ -1290,24 +1281,24 @@ void WXMolecule::NotifyDeleteListWin(WXMolScrolledWindow *win)
    {
       VFN_DEBUG_MESSAGE("WXMolecule::NotifyDeleteListWin(): Bond List window",5)
       mpBondWin=0;
-      for(vector<MolBond*>::iterator pos=mvpBond.begin();pos!=mvpBond.end();pos++)
-         mList.Remove((*pos)->WXGet());
+      for(map<MolBond*,WXCrystObjBasic*>::iterator pos=mvpBond.begin();pos!=mvpBond.end();pos++)
+         mList.Remove(pos->second);
       mvpBond.clear();
    }
    if(win==mpAngleWin)
    {
       VFN_DEBUG_MESSAGE("WXMolecule::NotifyDeleteListWin(): Angle List window",5)
       mpAngleWin=0;
-      for(vector<MolBondAngle*>::iterator pos=mvpBondAngle.begin();
-          pos!=mvpBondAngle.end();pos++) mList.Remove((*pos)->WXGet());
+      for(map<MolBondAngle*,WXCrystObjBasic*>::iterator pos=mvpBondAngle.begin();
+          pos!=mvpBondAngle.end();pos++) mList.Remove(pos->second);
       mvpBondAngle.clear();
    }
    if(win==mpDihedralAngleWin)
    {
       VFN_DEBUG_MESSAGE("WXMolecule::NotifyDeleteListWin(): Dihedral Angle List window",5)
       mpDihedralAngleWin=0;
-      for(vector<MolDihedralAngle*>::iterator pos=mvpDihedralAngle.begin();
-          pos!=mvpDihedralAngle.end();pos++) mList.Remove((*pos)->WXGet());
+      for(map<MolDihedralAngle*,WXCrystObjBasic*>::iterator pos=mvpDihedralAngle.begin();
+          pos!=mvpDihedralAngle.end();pos++) mList.Remove(pos->second);
       mvpDihedralAngle.clear();
    }
    VFN_DEBUG_EXIT("WXMolecule::NotifyDeleteListWin()",6)
