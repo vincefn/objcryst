@@ -444,8 +444,14 @@ void WXPowderPattern::OnMenuShowGraph(wxCommandEvent & WXUNUSED(event))
    wxFrame *frame= new wxFrame(this,-1,mpPowderPattern->GetName().c_str(),
                                wxDefaultPosition,wxSize(500,300));
    mpGraph = new WXPowderPatternGraph(frame,this);
-   frame->Show(true);
+   
+   wxSizer *ps=new wxBoxSizer(wxHORIZONTAL);
+   ps->Add(mpGraph,1,wxEXPAND);
+   frame->SetSizer(ps);
+   frame->SetAutoLayout(true);
+   
    frame->CreateStatusBar(2);
+   frame->Show(true);
    this->CrystUpdate();
    //frame->SetStatusText("");
 }
@@ -728,7 +734,7 @@ BEGIN_EVENT_TABLE(WXPowderPatternGraph, wxWindow)
 END_EVENT_TABLE()
 
 WXPowderPatternGraph::WXPowderPatternGraph(wxFrame *frame, WXPowderPattern* parent):
-wxWindow(frame,-1,wxPoint(-1,-1),wxSize(-1,-1),wxRETAINED),
+wxWindow(frame,-1,wxPoint(-1,-1),wxSize(-1,-1)),
 mpPattern(parent),mMargin(50),mDiffPercentShift(.20),
 mMaxIntensity(-1),mMinIntensity(-1),mMin2Theta(-1),mMax2Theta(-1),
 mpParentFrame(frame),
@@ -900,6 +906,7 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
 }
 void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
 {
+   if(event.Leaving()) return;// wxMSW2.4 bug ?
    if(true==mCalcPatternIsLocked)
    {
       mIsDragging=false;
