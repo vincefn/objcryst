@@ -25,9 +25,11 @@
 *  \li \ref page_design
 *
 *\section news News
-*  A new version of the Library should be available in the second half of September,2001.
-* It will include major changes for several classes (ScatteringPower, PowderPattern),
-* and will include the graphical classes associated with all objects using
+*  The new version of ObjCryst++ is being added to Sourceforge. Currently its documentation
+* is not complete, so it cannot be downloaded as an archive. You can contact me or
+* use the CVS repository to get the library (see \ref page_install)
+* The new version includes major changes for several classes (ScatteringPower, PowderPattern),
+* and includes the graphical classes associated with all objects using
 * <a href="http://www.wxWindows.org">wxWindows</a>, and saving all objects using a new,
 * more expandable <a href="http://www.w3.org/XML/">XML</a>-based format.
 *

@@ -584,77 +584,104 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
    glMaterialf (GL_FRONT, GL_SHININESS, 50);
    GLfloat colour_axis[]= { 0.5, .5, .5, 1.0 };
    glMaterialfv (GL_FRONT, GL_AMBIENT_AND_DIFFUSE,colour_axis);
-   //Describe Unit Cell
-      double x111= .5;
-      double y111= .5;
-      double z111= .5;
-      this->FractionalToOrthonormalCoords(x111,y111,z111);
-      double x110= .5;
-      double y110= .5;
-      double z110=-.5;
-      this->FractionalToOrthonormalCoords(x110,y110,z110);
-      double x101= .5;
-      double y101=-.5;
-      double z101= .5;
-      this->FractionalToOrthonormalCoords(x101,y101,z101);
-      double x100= .5;
-      double y100=-.5;
-      double z100=-.5;
-      this->FractionalToOrthonormalCoords(x100,y100,z100);
-      glColor3f(1.0f,1.0f,1.0f);	   // White
-      glBegin(GL_LINE_LOOP);				// Bottom
-         glVertex3f(    x110,    y110,   z110);
-         glVertex3f(   -x101,   -y101,   -z101);
-         glVertex3f(   -x100,   -y100,   -z100);
-         glVertex3f(    x111,    y111,    z111);
-      glEnd();	
-      glBegin(GL_LINE_LOOP);				// Top
-         glVertex3f(    x101,    y101,    z101);
-         glVertex3f(   -x110,   -y110,   -z110);
-         glVertex3f(   -x111,   -y111,   -z111);
-         glVertex3f(    x100,    y100,    z100);
-      glEnd();
-      glBegin(GL_LINES);				// Top
-         glVertex3f(    x101,    y101,    z101);
-         glVertex3f(    x111,    y111,    z111);
+	cout << xMin << ":"<<xMax <<endl;
+	cout << yMin << ":"<<yMax <<endl;
+	cout << zMin << ":"<<zMax <<endl;
+	//Center of displayed unit
+		double xc=(xMin+xMax)/2.;
+		double yc=(yMin+yMax)/2.;
+		double zc=(zMin+zMax)/2.;
+   	//Describe Unit Cell
+      	double x111= 1.;
+      	double y111= 1.;
+      	double z111= 1.;
+      	this->FractionalToOrthonormalCoords(x111,y111,z111);
+      	double x110= 1.;
+      	double y110= 1.;
+      	double z110= 0.;
+      	this->FractionalToOrthonormalCoords(x110,y110,z110);
+      	double x101= 1.;
+      	double y101= 0.;
+      	double z101= 1.;
+      	this->FractionalToOrthonormalCoords(x101,y101,z101);
+      	double x100= 1.;
+      	double y100= 0.;
+      	double z100= 0.;
+      	this->FractionalToOrthonormalCoords(x100,y100,z100);
+      	double x011= 0.;
+      	double y011= 1.;
+      	double z011= 1.;
+      	this->FractionalToOrthonormalCoords(x011,y011,z011);
+      	double x010= 0.;
+      	double y010= 1.;
+      	double z010= 0.;
+      	this->FractionalToOrthonormalCoords(x010,y010,z010);
+      	double x001= 0.;
+      	double y001= 0.;
+      	double z001= 1.;
+      	this->FractionalToOrthonormalCoords(x001,y001,z001);
+      	double x000= 0.;
+      	double y000= 0.;
+      	double z000= 0.;
+      	this->FractionalToOrthonormalCoords(x000,y000,z000);
+      this->FractionalToOrthonormalCoords(xc,yc,zc);
+      glPushMatrix();
+         glTranslatef(-xc, -yc, -zc);
+      	glColor3f(1.0f,1.0f,1.0f);	   // White
+      	glBegin(GL_LINE_LOOP);				// Bottom
+         	glVertex3f(    x110,    y110,    z110);
+         	glVertex3f(    x010,    y010,    z010);
+         	glVertex3f(    x011,    y011,    z011);
+         	glVertex3f(    x111,    y111,    z111);
+      	glEnd();	
+      	glBegin(GL_LINE_LOOP);				// Top
+         	glVertex3f(    x101,    y101,    z101);
+         	glVertex3f(    x001,    y001,    z001);
+         	glVertex3f(    x000,    y000,    z000);
+         	glVertex3f(    x100,    y100,    z100);
+      	glEnd();
+      	glBegin(GL_LINES);				// Top
+         	glVertex3f(    x101,    y101,    z101);
+         	glVertex3f(    x111,    y111,    z111);
 
-         glVertex3f(   -x110,   -y110,    -z110);
-         glVertex3f(   -x100,   -y100,    -z100);
+         	glVertex3f(    x001,    y001,     z001);
+         	glVertex3f(    x011,    y011,     z011);
 
-         glVertex3f(   -x111,   -y111,   -z111);
-         glVertex3f(   -x101,   -y101,   -z101);
+         	glVertex3f(    x000,    y000,    z000);
+         	glVertex3f(    x010,    y010,    z010);
 
-         glVertex3f(    x100,    y100,    z100);
-         glVertex3f(    x110,    y110,    z110);
-      glEnd();
-   //Add Axis & axis names
-      GLfloat colour_font[]= { 1.0,1.0,1.0, 1.0 };
-      glMaterialfv (GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE,colour_font);
-      //glMaterialfv (GL_FRONT, GL_EMISSION,colour_font);
-      double x,y,z;
-      
-      x=0.7;y=-.5;z=-.5;
-      this->FractionalToOrthonormalCoords(x,y,z);
-      glRasterPos3f(x,y,z);
-      glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,'a');
-      
-      x=-.5;y=0.7;z=-.5;
-      this->FractionalToOrthonormalCoords(x,y,z);
-      glRasterPos3f(x,y,z);
-      glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,'b');
-      
-      x=-.5;y=-.5;z=0.7;
-      this->FractionalToOrthonormalCoords(x,y,z);
-      glRasterPos3f(x,y,z);
-      glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,'c');
-   
-      
-   //Describe all Scatterers
-   VFN_DEBUG_MESSAGE("Crystal::GLView(bool):Scatterers...",5)
-   for(int i=0;i<mScattererRegistry.GetNb();i++) 
-      this->GetScatt(i).GLInitDisplayList(*this,onlyIndependentAtoms,
-                                          xMin,xMax,yMin,yMax,zMin,zMax);
-      
+         	glVertex3f(    x100,    y100,    z100);
+         	glVertex3f(    x110,    y110,    z110);
+      	glEnd();
+   	//Add Axis & axis names
+      	GLfloat colour_font[]= { 1.0,1.0,1.0, 1.0 };
+      	glMaterialfv (GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE,colour_font);
+      	//glMaterialfv (GL_FRONT, GL_EMISSION,colour_font);
+      	double x,y,z;
+
+      	x=0.7;y=-.5;z=-.5;
+      	this->FractionalToOrthonormalCoords(x,y,z);
+      	glRasterPos3f(x,y,z);
+      	glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,'a');
+
+      	x=-.5;y=0.7;z=-.5;
+      	this->FractionalToOrthonormalCoords(x,y,z);
+      	glRasterPos3f(x,y,z);
+      	glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,'b');
+
+      	x=-.5;y=-.5;z=0.7;
+      	this->FractionalToOrthonormalCoords(x,y,z);
+      	glRasterPos3f(x,y,z);
+      	glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,'c');
+
+
+   	//Describe all Scatterers
+   	VFN_DEBUG_MESSAGE("Crystal::GLView(bool):Scatterers...",5)
+   	for(int i=0;i<mScattererRegistry.GetNb();i++) 
+      	this->GetScatt(i).GLInitDisplayList(*this,onlyIndependentAtoms,
+                                          	xMin,xMax,yMin,yMax,zMin,zMax);
+
+   glPopMatrix();
    #else
    cout << "Crystal::GLView(): Compiled without OpenGL support !" <<endl;
    #endif

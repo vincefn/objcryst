@@ -310,9 +310,6 @@ void Atom::GLInitDisplayList(const Crystal &cryst,const bool onlyIndependentAtom
       x = fmod((double)x,(int)1); if(x<0) x+=1.;
       y = fmod((double)y,(int)1); if(y<0) y+=1.;
       z = fmod((double)z,(int)1); if(z<0) z+=1.;
-      x -=0.5;
-      y -=0.5;
-      z -=0.5;
       cryst.FractionalToOrthonormalCoords(x,y,z);
       glPushMatrix();
          glTranslatef(x, y, z);
@@ -374,9 +371,6 @@ void Atom::GLInitDisplayList(const Crystal &cryst,const bool onlyIndependentAtom
                 &&(y>yMin) && (y<yMax)
                 &&(z>zMin) && (z<zMax))
             {
-               x -=0.5;
-               y -=0.5;
-               z -=0.5;
                cryst.FractionalToOrthonormalCoords(x,y,z);
                glPushMatrix();
                   glTranslatef(x, y, z);

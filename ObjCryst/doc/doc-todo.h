@@ -14,17 +14,9 @@
 *\par Check Results (****,*) (in constant progress)
 *     Compare Structure Factors with the results of other programs (Jana,...)
 *     for a number of different spacegroups.
-*\par Save & restore objects (******,***) Mostly Done
-*     We really need to be able to save and restore all objects of the library !!
-*\par Special positions (**,****) Done
-*     Modify SgLite package to determine special positions.
-*     ObjCryst includes a 'dynamical occupancy correction' which takes care of this during
-*     the refinement. And R, Grosse-Kunstleve has added a function in cctbx to analyze
-*     special positions from a strict crystallographic point of view.
-*\par Asymmetric unit (*,***) \e done
-*     Do some work on the 'Asymmetric unit' object. This could help to gain some time
-*     during thew computation of interatomic distances. Will probably use
-*     a parallelepipedic unit (0-Xmax,0-Ymax,0-Zmax), generated numerically
+*\par Save & restore objects (******,***) Done, using XML
+*\par Move from atominfo+sglite to cctbx (******,***)
+*  Change to the newest R. Grosse-Kunstleve library.
 *\par CIF Import & Export (****,*****)
 *     Ability to export (and import) Crystallographic Info Files. The importing will
 *     be much harder, and is not a priority.
@@ -38,9 +30,9 @@
 *\par Powder Diffraction Background(**,**)
 *     Use splines to interpolate background. Automagically determine background by filtering
 *     the spectrum. So far only linearly-interpolated background is available.
-*\par Intensity extraction from powder (**,***)
+*\par Intensity extraction from powder (*,***)
 *     Extract F(hkl) from a powder spectrum.
-*\par Multi-phase (****,**)
+*\par Multi-phase (****,**) - Done
 *     Multiple phase for powder diffraction.
 *\par ZScatterer import(**,**)
 *     Import Z-Matrix from file. Add the possibility to link two existing ZScatterer by 

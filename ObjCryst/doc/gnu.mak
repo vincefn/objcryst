@@ -15,3 +15,9 @@ ctags:
 
 clean:
 	@${RM} html/* latex/*
+
+sourceforge:
+	mv html ObjCryst
+	scp -C -r html vincefn@shell.sourceforge.net:/home/groups/o/ob/objcryst/htdocs/ObjCryst
+	mv ObjCryst html
+	

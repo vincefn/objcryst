@@ -540,13 +540,6 @@ void ZScatterer::GLInitDisplayList(const Crystal &cryst,const bool onlyIndepende
       x=mXCoord;
       y=mYCoord;
       z=mZCoord;
-      {
-         double x0=-.5,y0=-.5,z0=-.5;
-         cryst.OrthonormalToFractionalCoords(x0,y0,z0);
-         x += x0;
-         y += y0;
-         z += z0;
-      }
       if(m3DDisplayIndex.numElements()>0)
       {
          for(long k=0;k<m3DDisplayIndex.rows();k++)
@@ -786,9 +779,6 @@ void ZScatterer::GLInitDisplayList(const Crystal &cryst,const bool onlyIndepende
                 &&(y(0)>yMin) && (y(0)<yMax)
                 &&(z(0)>zMin) && (z(0)<zMax))
             {
-               x += -0.5;
-               y += -0.5;
-               z += -0.5;
                for(int k=0;k<mNbAtom;k++)
                   cryst.FractionalToOrthonormalCoords(x(k),y(k),z(k));
                //:NOTE: The code below is the same as without symetrics

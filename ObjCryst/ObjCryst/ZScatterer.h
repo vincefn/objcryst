@@ -18,7 +18,6 @@ namespace ObjCryst
 //
 //      GLOBAL SCATTERING POWER
 /**
-* \class GlobalScatteringPower include.h ObjCryst/ZScatterer.h
 * \brief Global Scattering Power. Used to approximate the scattering
 * power of a multi-atom ZScatterer (polyhedron,...) to an isotropic
 * scattering power.
@@ -58,7 +57,6 @@ class GlobalScatteringPower:virtual public ScatteringPower
 };
 
 //######################################################################
-///  \class ZAtom include.h ObjCryst/ZScatterer.h
 ///  Class for individual atoms in a ZScatterer Object. This class
 ///  is \e purely \e internal to ZScatterer, so should not be used
 ///  for any other purpose...
@@ -142,7 +140,6 @@ class ZAtom
 };
 
 //######################################################################
-///  \class ZScatterer include.h ObjCryst/ZScatterer.h
 ///  ZScatterer: the basic type of complex scatterers, where atom positions
 ///  are defined using a standard "Z-Matrix" description. This is used
 /// to describe inorganic polyhedras, as well as molecules.
@@ -279,11 +276,10 @@ class ZScatterer: public Scatterer
       /// take the mComponentIndex(i) atom in the ZAtom Registry.
       CrystVector_int mComponentIndex;
       
-      /** \brief Angles giving the orientation of the Scatterer (stored in radian)
-      * this is only used in multiple-atom scatterers (non isotropic)
+      /** \brief Angles giving the orientation of the ZScatterer (stored in radian)
       *
-      * The position of any atom (in orthonormal, angstroem coordinates)is given by :      
-      * \f[ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right]_{orthonormal}
+      * The position of any atom (in orthonormal coordinates) is given by :      
+      * \f[ \left[ \begin{array}{c} x(i) \\ y(i) \\ z(i) \end{array} \right]_{orthonormal}
               = \left[ \begin{array}{ccc} \cos(\chi) & 0 & -\sin(\chi) \\
                                            0 & 1 & 0 \\
                                            \sin(\chi) & 0 & \cos(\chi) \end{array} \right]
@@ -294,10 +290,9 @@ class ZScatterer: public Scatterer
                                            0 & \cos(\psi) & -\sin(\psi) \\
                                            0 & \sin(\psi) & \cos(\psi) \end{array} \right]
          \times \left[ \begin{array}{c} x_0(i) \\ y_0(i) \\ z_0(i) \end{array} \right]
-         \times mBondLength
       * \f]
-      *, where x0(i), y0(i) and z0(i) describe the position for every atom (i) in
-      *the polyhedra.
+      *, where x0(i), y0(i) and z0(i) describe the position for atom (i) in
+      * internal coordinates.
       *
       * The rotation is performed around a 'pivot' atom (see ZScatterer::mPivotAtom)
       */
