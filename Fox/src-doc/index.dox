@@ -1,11 +1,9 @@
 /*! \page index 
 
 \anchor news <h2>News</h2> (also read the <a href="ChangeLog">ChangeLog</a>)
+   - july 2003: <b>Fox version 1.5</b>: this version now uses <i>log(likelihood)</i> as a criterion for convergence (i.e. Chi^2 in practice). A new <i><b>Molecule</b></i> object has been added, which supersedes the z-matrix approach: atoms can now be linked together using a set of bond lengths and bond angles restraints, and is therefore much more flexible. <i>Convergence has increased roughly by a factor 2 for organic compounds</i>. A basic <i>CIF output</i> is now available. 3D display now can show atom labels, and several Fourier maps from GSAS/EXPGUI can now be displayed simultaneously.
    - january 2003: <b>Fox version 1.3</b>: this version adds <i>spherical scattering power</i> (disordered fullerene), the option to use  <b>pseudo-crystallographic symmetry</b>, and <i>command-line options</i> for Fox (e.g. to run without the GUI). It also <i>removes a serious bug</i> which lead to missing reflections for (face|body)-centered structures with a center of symmetry not at the origin (e.g. diamond). The ability to <i>display fourier maps from GSAS/EXPGUI</i> along the crystal structure has also been added (<a href="screenshot.html#fourier">screenshot</a>), thanks to Michael Y. Polyakov and Brian Toby (the fourier '.grd' files can be generated using <tt>forgrid</tt> which you can get from <a href="ftp://ftp.ncnr.nist.gov/pub/cryst/gsas/">ftp://ftp.ncnr.nist.gov/pub/cryst/gsas/</a> (precompiled binaries in the exe_{linux|sgi|win} directories).
    - 13th of november 2002: The <b>Fox article</b> (<i>J. Appl. Cryst.</i> <b>35</b>, 734---743</a>) has been published. You can <a href="http://objcryst.sourceforge.net/JApplCryst35-2002-734-Fox.pdf">download the pdf reprint</a>, or get it from the IUCr journals web site: Copyright &copy; International Union of Crystallography, <a href="http://www.iucr.org/cgi-bin/paper?vi0168"> <i>J. Appl. Cryst.</i> <b>35</b>, 734---743</a>)
-   - 14th of Sept. 2002: I hope you noticed the <b>new web pages</b>, auto-generated using doxygen (http://doxygen.org) !
-   - 12th of Sept. 2002: <b>the windows zip file (precompiled) with Fox 1.2 was initially packaged with <i>only</i> the exe</b>, without any documentation, examples, or libraries... So please re-download it if necessary. (thanks Mohamed Bououdina for pointing out this).
-   - 9th of August 2002: <b>Fox version 1.2</b>: this version adds the ability to analyze data with preferred orientation (texture, searching ab initio the texture parameters), using the March-Dollase model. The 'live' update of the 3D view of the Crystal structure now also works on all windows versions.
 
 \anchor intro <h2>Introduction</h2>
 The FOX program (for Linux and windows) was made for the <i><b> ab initio crystal structure solution from diffraction data </b></i> (mostly powder diffraction data). Its most interesting features for ab initio structure determination are:
@@ -26,7 +24,7 @@ Then Fox can help you.
 
 This program can be used also for <i><b>educational purposes</i></b>, to show a 3D display of Crystal structures, and the associated powder pattern(s) (see how adding atoms, changing the lattice, or changing the spacegroup affects the powder spectrum and the 3D structure).
 
-If you would also like to <i><b>choose your own criterion and algorithm</i></b> to solve the structure, then it will be even better : FOX is built on a very <i><b>customizable and expandable library (ObjCryst++)</i></b>, which allows you to evaluate your Crystal structure following a combination of criteria: currently there are only R, Rw factors and an Anti-bump cost function, but it would be very easy to write a new criterion using (say) interatomic distances (energy of the configuration, analysis of the coordination). This, with a versatile way to describe the unit cell's contents, is what makes the algorithms used interesting. For example you can combine several datasets (X-Ray, Neutron...) for the same structure,...
+If you would also like to <i><b>choose your own criterion and algorithm</i></b> to solve the structure, then it will be even better : FOX is built on a very <i><b>customizable and expandable library (ObjCryst++)</i></b>, which allows you to evaluate your Crystal structure following a combination of criteria: currently there are only Chi^2 and an Anti-bump cost function, but it would be very easy to write a new criterion using (say) interatomic distances (energy of the configuration, analysis of the coordination). This, with a versatile way to describe the unit cell's contents, is what makes the algorithms used interesting. For example you can combine several datasets (X-Ray, Neutron...) for the same structure,...
 
 <h2>Author</h2>
 FOX was developped by Vincent Favre-Nicolin (http://v.favrenicolin.free.fr, vincefn@users.sf.net), in collaboration with Radovan Cerny (http://www.unige.ch/crystal/cerny/rcerny.htm) at the Laboratory of Crystallography in Geneva, Switzerland (http://www.unige.ch/crystal/lab.html), with support from the Swiss National Science Foundation (http://www.snf.ch/), project #21-53847.98. The development still goes on as a personal research project after my move to the ESRF and now to the CEA and the University of Grenoble (France).
@@ -56,10 +54,10 @@ For <b>Linux</b>, download the Fox-date.tar.bz2 (source code).
    - For <b>Linux</b>:
       - You will need valid libraries and development files for <b>OpenGL</b>. You may require a specific library for your card (NVidia,...), and the <b>Mesa</b>, <b>Mesa-devel</b>, <b>Xfree-devel</b> packages (for Redhat, also <b>glut</b> and <b>glut-devel</b>).
       - First you need to also download and install the wxWindows for GTK+ shared libraries (you need the <b>wxGTK</b>, <b>wxGTK-gl</b> and <b>wxGTK-devel</b>).
-         - If you are using <b>wxGTK-2.2.7</b>, just install the 3 RPM.
-         - With <b>wxGTK-2.3.*</b>, after the install you must do:
-            - <tt>ln -s /usr/bin/wxgtk-2.3-config /usr/bin/wx-config</tt>
-      - Then uncompress the Fox tar.bz2 archive. Then do <tt> make</tt> and (as root) <tt>make install</tt>. The install will put Fox in <tt>/usr/local/bin/Fox</tt>. (otherwise it is in Fox/src/ObjCryst/wxCryst/Fox)             
+         - If you are using <b>wxGTK-2.2.*</b>, just install the 3 RPM.
+         - With <b>wxGTK-2.4.*</b>, after the install you must do:
+            - <tt>ln -s /usr/bin/wxgtk-2.4-config /usr/bin/wx-config</tt>
+      - Then uncompress the Fox tar.bz2 archive. Then do <tt>make</tt> and (as root) <tt>make install</tt>. The install will put Fox in <tt>/usr/local/bin/Fox</tt>. (otherwise the compiled file is in Fox/src/ObjCryst/wxCryst/Fox)             
       - <b>NOTE</b>: if Fox crashes when loading an example file, rebuild the wxGTK libraries from the src.rpm (rpm --rebuild) or the tar.gz (with opengl enabled). It (probably) means there is a conflict between your compiler and the one used to compile the RPM (lousy 2.96 compilers....).
 
     - For <b>windows</b>, unzip the file, which will also create a folder with the Fox program. This program uses the glut library, which is distributed along the Fox program, you do not need to move the glut32.dll to your System directory, as long as the 'Fox.exe' application remains along the glut32.dll file (you may not see it if your windows explorer is configured to hide sytem files such as dll's).
@@ -94,9 +92,9 @@ Note: if the program encounters an error, it will sometime manage to save the co
 
 \anchor license <h2>License and legal information</h2>
 
-The FOX Program is copyright (2000-2002) Vincent FAVRE-NICOLIN, (2000-2001) Radovan CERNY and the University of Geneva.
+The FOX Program is copyright (2000-2003) Vincent FAVRE-NICOLIN, (2000-2001) Radovan CERNY and the Université de Genève.
 
-This program is (essentially) free software; you can redistribute and/or modify the ObjCryst++ code under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+This program is free software; you can redistribute and/or modify the ObjCryst++ code under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
 
 Fox also uses other libraries (among which R. Grosse-Kunstleve library used to interpret spacegroup symbols). For a complete licensing information, please read http://objcryst.sourceforge.net/ObjCryst/page_legal.html .
 

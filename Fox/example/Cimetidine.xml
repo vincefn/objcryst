@@ -1,4 +1,4 @@
-<ObjCryst Date="2002-01-02T21:21:39GMT">
+<ObjCryst Date="2003-06-21T16:16:19GMT">
   <Crystal Name="Cimetidine" SpaceGroup="P121/a1">
     <Par Refined="0" Limited="1" Min="1" Max="100" Name="a">10.3941</Par>
     <Par Refined="0" Limited="1" Min="1" Max="100" Name="b">18.8189</Par>
@@ -6,146 +6,110 @@
     <Par Refined="0" Limited="1" Min="28.6479" Max="171.887" Name="alpha">90</Par>
     <Par Refined="0" Limited="1" Min="28.6479" Max="171.887" Name="beta">106.437</Par>
     <Par Refined="0" Limited="1" Min="28.6479" Max="171.887" Name="gamma">90</Par>
+    <Option Name="Constrain Lattice to SpaceGroup Symmetry" Choice="0" ChoiceName="Yes (Default)"/>
+
     <Option Name="Use Dynamical Occupancy Correction" Choice="0" ChoiceName="No"/>
+
+    <Option Name="Display Enantiomer" Choice="0" ChoiceName="No"/>
 
     <ScatteringPowerAtom Name="C" Symbol="C">
       <Par Refined="0" Limited="1" Min="0.1" Max="5" Name="Biso">3</Par>
+          <Par Refined="0" Limited="1" Min="0" Max="1" Name="ML Error">0</Par>
       <RGBColour>0.5 0.5 0.5</RGBColour>
     </ScatteringPowerAtom>
     <ScatteringPowerAtom Name="N" Symbol="N">
       <Par Refined="0" Limited="1" Min="0.1" Max="5" Name="Biso">3</Par>
+          <Par Refined="0" Limited="1" Min="0" Max="1" Name="ML Error">0</Par>
       <RGBColour>0.184314 0.309804 0.184314</RGBColour>
     </ScatteringPowerAtom>
     <ScatteringPowerAtom Name="S" Symbol="S">
       <Par Refined="0" Limited="1" Min="0.1" Max="5" Name="Biso">3</Par>
+          <Par Refined="0" Limited="1" Min="0" Max="1" Name="ML Error">0</Par>
       <RGBColour>1 1 0</RGBColour>
     </ScatteringPowerAtom>
     <ScatteringPowerAtom Name="H" Symbol="H">
       <Par Refined="0" Limited="1" Min="0.1" Max="5" Name="Biso">2</Par>
+          <Par Refined="0" Limited="1" Min="0" Max="1" Name="ML Error">0</Par>
       <RGBColour>1 1 1</RGBColour>
     </ScatteringPowerAtom>
 
-    <ZScatterer Name="ZCimetidine">
-      <Par Refined="1" Limited="0" Min="0" Max="1" Name="x">0.989811</Par>
-      <Par Refined="1" Limited="0" Min="0" Max="1" Name="y">0.412437</Par>
-      <Par Refined="1" Limited="0" Min="0" Max="1" Name="z">0.784226</Par>
+    <Molecule Name="Cimetidine">
+      <Quaternion Q0="-0.219674" Q1="0.649734" Q2="-0.726398" Q3="0.0439879" IsUnitQuaternion="1"/>
+      <Par Refined="1" Limited="0" Min="0" Max="1" Name="x">0.275701</Par>
+      <Par Refined="1" Limited="0" Min="0" Max="1" Name="y">0.370108</Par>
+      <Par Refined="1" Limited="0" Min="0" Max="1" Name="z">0.324847</Par>
       <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
-      <Par Refined="1" Limited="0" Min="0" Max="360" Name="Phi">165.935</Par>
-      <Par Refined="1" Limited="0" Min="0" Max="360" Name="Chi">43.8206</Par>
-      <Par Refined="1" Limited="0" Min="0" Max="360" Name="Psi">44.7796</Par>
-      <ZAtom Name="N7" ScattPow="N" BondAtom="N7" AngleAtom="N7" DihedAtom="N7">
-        <Par Refined="0" Limited="1" Min="-2.02008" Max="-1.96008" Name="BondLength">-1.99008</Par>
-        <Par Refined="0" Limited="1" Min="-8" Max="8" Name="Angle">0</Par>
-        <Par Refined="0" Limited="0" Min="0" Max="360" Name="DihedAng">0</Par>
-        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
-      </ZAtom>
-      <ZAtom Name="C8" ScattPow="C" BondAtom="N7" AngleAtom="N7" DihedAtom="N7">
-        <Par Refined="1" Limited="1" Min="1.44" Max="1.5" Name="BondLength">1.47535</Par>
-        <Par Refined="0" Limited="1" Min="-8" Max="8" Name="Angle">0</Par>
-        <Par Refined="0" Limited="0" Min="0" Max="360" Name="DihedAng">0</Par>
-        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
-      </ZAtom>
-      <ZAtom Name="C9" ScattPow="C" BondAtom="C8" AngleAtom="N7" DihedAtom="N7">
-        <Par Refined="1" Limited="1" Min="1.51" Max="1.57" Name="BondLength">1.5486</Par>
-        <Par Refined="1" Limited="1" Min="102" Max="118" Name="Angle">112.673</Par>
-        <Par Refined="1" Limited="0" Min="0" Max="360" Name="DihedAng">0</Par>
-        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
-      </ZAtom>
-      <ZAtom Name="S10" ScattPow="S" BondAtom="C9" AngleAtom="C8" DihedAtom="N7">
-        <Par Refined="1" Limited="1" Min="1.79" Max="1.85" Name="BondLength">1.85</Par>
-        <Par Refined="1" Limited="1" Min="102" Max="118" Name="Angle">117.235</Par>
-        <Par Refined="1" Limited="0" Min="0" Max="360" Name="DihedAng">194.715</Par>
-        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
-      </ZAtom>
-      <ZAtom Name="C11" ScattPow="C" BondAtom="S10" AngleAtom="C9" DihedAtom="C8">
-        <Par Refined="1" Limited="1" Min="1.79" Max="1.85" Name="BondLength">1.82811</Par>
-        <Par Refined="1" Limited="1" Min="112" Max="128" Name="Angle">112</Par>
-        <Par Refined="1" Limited="0" Min="0" Max="360" Name="DihedAng">45.651</Par>
-        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
-      </ZAtom>
-      <ZAtom Name="C12" ScattPow="C" BondAtom="C11" AngleAtom="S10" DihedAtom="C9">
-        <Par Refined="1" Limited="1" Min="1.47" Max="1.53" Name="BondLength">1.52584</Par>
-        <Par Refined="1" Limited="1" Min="102" Max="118" Name="Angle">116.879</Par>
-        <Par Refined="1" Limited="0" Min="0" Max="360" Name="DihedAng">64.7793</Par>
-        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
-      </ZAtom>
-      <ZAtom Name="C17" ScattPow="C" BondAtom="C12" AngleAtom="C11" DihedAtom="S10">
-        <Par Refined="1" Limited="1" Min="1.41" Max="1.47" Name="BondLength">1.41262</Par>
-        <Par Refined="1" Limited="1" Min="112" Max="128" Name="Angle">128</Par>
-        <Par Refined="1" Limited="0" Min="0" Max="360" Name="DihedAng">118.373</Par>
-        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
-      </ZAtom>
-      <ZAtom Name="C18" ScattPow="C" BondAtom="C17" AngleAtom="C12" DihedAtom="C11">
-        <Par Refined="1" Limited="1" Min="1.47" Max="1.53" Name="BondLength">1.50996</Par>
-        <Par Refined="1" Limited="1" Min="112" Max="128" Name="Angle">127.17</Par>
-        <Par Refined="0" Limited="0" Min="0" Max="360" Name="DihedAng">0</Par>
-        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
-      </ZAtom>
-      <ZAtom Name="N13" ScattPow="N" BondAtom="C12" AngleAtom="C11" DihedAtom="C17">
-        <Par Refined="1" Limited="1" Min="1.34" Max="1.4" Name="BondLength">1.35555</Par>
-        <Par Refined="0" Limited="1" Min="112" Max="128" Name="Angle">112</Par>
-        <Par Refined="0" Limited="0" Min="0" Max="360" Name="DihedAng">180</Par>
-        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
-      </ZAtom>
-      <ZAtom Name="C14" ScattPow="C" BondAtom="N13" AngleAtom="C12" DihedAtom="C17">
-        <Par Refined="1" Limited="1" Min="1.34" Max="1.4" Name="BondLength">1.35225</Par>
-        <Par Refined="0" Limited="1" Min="100" Max="116" Name="Angle">108</Par>
-        <Par Refined="0" Limited="0" Min="0" Max="360" Name="DihedAng">0</Par>
-        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
-      </ZAtom>
-      <ZAtom Name="N15" ScattPow="N" BondAtom="C14" AngleAtom="N13" DihedAtom="C12">
-        <Par Refined="1" Limited="1" Min="1.34" Max="1.4" Name="BondLength">1.37802</Par>
-        <Par Refined="0" Limited="1" Min="100" Max="116" Name="Angle">108</Par>
-        <Par Refined="0" Limited="0" Min="0" Max="360" Name="DihedAng">0</Par>
-        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
-      </ZAtom>
-      <ZAtom Name="C3" ScattPow="C" BondAtom="N7" AngleAtom="C8" DihedAtom="C9">
-        <Par Refined="1" Limited="1" Min="0.97" Max="1.03" Name="BondLength">1.02965</Par>
-        <Par Refined="1" Limited="1" Min="102" Max="118" Name="Angle">118</Par>
-        <Par Refined="1" Limited="0" Min="0" Max="360" Name="DihedAng">110.916</Par>
-        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
-      </ZAtom>
-      <ZAtom Name="N4" ScattPow="N" BondAtom="C3" AngleAtom="N7" DihedAtom="C8">
-        <Par Refined="1" Limited="1" Min="1.44" Max="1.5" Name="BondLength">1.4522</Par>
-        <Par Refined="1" Limited="1" Min="112" Max="128" Name="Angle">119.652</Par>
-        <Par Refined="1" Limited="0" Min="0" Max="360" Name="DihedAng">161.124</Par>
-        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
-      </ZAtom>
-      <ZAtom Name="C5" ScattPow="C" BondAtom="N4" AngleAtom="C3" DihedAtom="N7">
-        <Par Refined="1" Limited="1" Min="1.34" Max="1.4" Name="BondLength">1.35678</Par>
-        <Par Refined="1" Limited="1" Min="112" Max="128" Name="Angle">117.848</Par>
-        <Par Refined="1" Limited="0" Min="0" Max="360" Name="DihedAng">350.457</Par>
-        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
-      </ZAtom>
-      <ZAtom Name="N6" ScattPow="N" BondAtom="C5" AngleAtom="N4" DihedAtom="C3">
-        <Par Refined="1" Limited="1" Min="1.1" Max="1.16" Name="BondLength">1.1</Par>
-        <Par Refined="0" Limited="1" Min="172" Max="188" Name="Angle">180</Par>
-        <Par Refined="0" Limited="0" Min="0" Max="360" Name="DihedAng">180</Par>
-        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
-      </ZAtom>
-      <ZAtom Name="N2" ScattPow="N" BondAtom="C3" AngleAtom="N7" DihedAtom="N4">
-        <Par Refined="1" Limited="1" Min="1.34" Max="1.4" Name="BondLength">1.34887</Par>
-        <Par Refined="1" Limited="1" Min="112" Max="128" Name="Angle">126.692</Par>
-        <Par Refined="0" Limited="0" Min="0" Max="360" Name="DihedAng">180</Par>
-        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
-      </ZAtom>
-      <ZAtom Name="C1" ScattPow="C" BondAtom="N2" AngleAtom="C3" DihedAtom="N4">
-        <Par Refined="1" Limited="1" Min="1.44" Max="1.5" Name="BondLength">1.47096</Par>
-        <Par Refined="1" Limited="1" Min="102" Max="118" Name="Angle">117.816</Par>
-        <Par Refined="1" Limited="0" Min="0" Max="360" Name="DihedAng">351.491</Par>
-        <Par Refined="0" Limited="1" Min="0" Max="1" Name="Occup">1</Par>
-      </ZAtom>
-        <PivotAtom Name="S10"/>
-    </ZScatterer>
+      <Atom Name="C1" ScattPow="C" x="0.280884" y="-2.88564" z="0.756058" Occup="1"/>
+      <Atom Name="N2" ScattPow="N" x="-0.131504" y="-1.67305" z="0.122663" Occup="1"/>
+      <Atom Name="C3" ScattPow="C" x="-1.12244" y="-1.86143" z="-0.698163" Occup="1"/>
+      <Atom Name="N4" ScattPow="N" x="-1.45019" y="-3.17405" z="-1.10489" Occup="1"/>
+      <Atom Name="C5" ScattPow="C" x="-2.50448" y="-3.42662" z="-1.94197" Occup="1"/>
+      <Atom Name="N6" ScattPow="N" x="-3.45774" y="-3.69457" z="-2.72068" Occup="1"/>
+      <Atom Name="N7" ScattPow="N" x="-1.83724" y="-0.827034" z="-1.23848" Occup="1"/>
+      <Atom Name="C8" ScattPow="C" x="-1.65481" y="0.535063" z="-0.653266" Occup="1"/>
+      <Atom Name="C9" ScattPow="C" x="-0.61355" y="1.32842" z="-1.50995" Occup="1"/>
+      <Atom Name="S10" ScattPow="S" x="-0.547314" y="3.00052" z="-0.723886" Occup="1"/>
+      <Atom Name="C11" ScattPow="C" x="-0.12732" y="2.67266" z="1.14062" Occup="1"/>
+      <Atom Name="C12" ScattPow="C" x="1.26298" y="1.85199" z="1.1047" Occup="1"/>
+      <Atom Name="N13" ScattPow="N" x="1.39276" y="0.531081" z="0.793856" Occup="1"/>
+      <Atom Name="C14" ScattPow="C" x="2.63963" y="0.141938" z="1.1822" Occup="1"/>
+      <Atom Name="N15" ScattPow="N" x="3.27437" y="1.24928" z="1.6306" Occup="1"/>
+      <Atom Name="C16" ScattPow="C" x="2.45667" y="2.31531" z="1.5549" Occup="1"/>
+      <Atom Name="C17" ScattPow="C" x="2.72195" y="3.69723" z="2.35375" Occup="1"/>
+      <Bond Atom1="C1" Atom2="N2" Length="1.47" Delta="0.05" Sigma="0.01" BondOrder="1"/>
+      <Bond Atom1="N2" Atom2="C3" Length="1.4" Delta="0.05" Sigma="0.01" BondOrder="1"/>
+      <Bond Atom1="C3" Atom2="N4" Length="1.4" Delta="0.05" Sigma="0.01" BondOrder="2"/>
+      <Bond Atom1="N4" Atom2="C5" Length="1.37" Delta="0.05" Sigma="0.01" BondOrder="1"/>
+      <Bond Atom1="C5" Atom2="N6" Length="1.13" Delta="0.05" Sigma="0.01" BondOrder="3"/>
+      <Bond Atom1="C3" Atom2="N7" Length="1.4" Delta="0.05" Sigma="0.01" BondOrder="1"/>
+      <Bond Atom1="N7" Atom2="C8" Length="1.47" Delta="0.05" Sigma="0.01" BondOrder="1"/>
+      <Bond Atom1="C8" Atom2="C9" Length="1.54" Delta="0.05" Sigma="0.01" BondOrder="1"/>
+      <Bond Atom1="C9" Atom2="S10" Length="1.82" Delta="0.05" Sigma="0.01" BondOrder="1"/>
+      <Bond Atom1="S10" Atom2="C11" Length="1.82" Delta="0.05" Sigma="0.01" BondOrder="1"/>
+      <Bond Atom1="C11" Atom2="C12" Length="1.5" Delta="0.05" Sigma="0.01" BondOrder="1"/>
+      <Bond Atom1="C12" Atom2="N13" Length="1.37" Delta="0.05" Sigma="0.01" BondOrder="1.5"/>
+      <Bond Atom1="N13" Atom2="C14" Length="1.37" Delta="0.05" Sigma="0.01" BondOrder="1.5"/>
+      <Bond Atom1="C14" Atom2="N15" Length="1.37" Delta="0.05" Sigma="0.01" BondOrder="1.5"/>
+      <Bond Atom1="N15" Atom2="C16" Length="1.37" Delta="0.05" Sigma="0.01" BondOrder="1.5"/>
+      <Bond Atom1="C16" Atom2="C17" Length="1.5" Delta="0.05" Sigma="0.01" BondOrder="1"/>
+      <Bond Atom1="C16" Atom2="C12" Length="1.45" Delta="0.05" Sigma="0.01" BondOrder="1.5"/>
+      <BondAngle Atom1="C1" Atom2="N2" Atom3="C3" Angle="108.862" Delta="2.86479" Sigma="0.572958"/>
+      <BondAngle Atom1="N2" Atom2="C3" Atom3="N4" Angle="119.748" Delta="2.86479" Sigma="0.572958"/>
+      <BondAngle Atom1="C3" Atom2="N4" Atom3="C5" Angle="119.748" Delta="2.86479" Sigma="0.572958"/>
+      <BondAngle Atom1="N4" Atom2="C5" Atom3="N6" Angle="180" Delta="2.86479" Sigma="0.572958"/>
+      <BondAngle Atom1="N2" Atom2="C3" Atom3="N7" Angle="119.748" Delta="2.86479" Sigma="0.572958"/>
+      <BondAngle Atom1="N4" Atom2="C3" Atom3="N7" Angle="119.748" Delta="2.86479" Sigma="0.572958"/>
+      <BondAngle Atom1="C3" Atom2="N7" Atom3="C8" Angle="108.862" Delta="2.86479" Sigma="0.572958"/>
+      <BondAngle Atom1="N7" Atom2="C8" Atom3="C9" Angle="108.862" Delta="2.86479" Sigma="0.572958"/>
+      <BondAngle Atom1="C8" Atom2="C9" Atom3="S10" Angle="108.862" Delta="2.86479" Sigma="0.572958"/>
+      <BondAngle Atom1="C9" Atom2="S10" Atom3="C11" Angle="108.862" Delta="2.86479" Sigma="0.572958"/>
+      <BondAngle Atom1="S10" Atom2="C11" Atom3="C12" Angle="108.862" Delta="2.86479" Sigma="0.572958"/>
+      <BondAngle Atom1="C11" Atom2="C12" Atom3="N13" Angle="119.748" Delta="2.86479" Sigma="0.572958"/>
+      <BondAngle Atom1="C12" Atom2="N13" Atom3="C14" Angle="108.003" Delta="2.86479" Sigma="0.572958"/>
+      <BondAngle Atom1="N13" Atom2="C14" Atom3="N15" Angle="108.003" Delta="2.86479" Sigma="0.572958"/>
+      <BondAngle Atom1="C14" Atom2="N15" Atom3="C16" Angle="108.003" Delta="2.86479" Sigma="0.572958"/>
+      <BondAngle Atom1="N15" Atom2="C16" Atom3="C17" Angle="119.748" Delta="2.86479" Sigma="0.572958"/>
+      <BondAngle Atom1="N15" Atom2="C16" Atom3="C12" Angle="108.003" Delta="2.86479" Sigma="0.572958"/>
+      <BondAngle Atom1="C16" Atom2="C12" Atom3="N13" Angle="108.003" Delta="2.86479" Sigma="0.572958"/>
+      <BondAngle Atom1="C11" Atom2="C12" Atom3="C16" Angle="119.748" Delta="2.86479" Sigma="0.572958"/>
+      <BondAngle Atom1="C12" Atom2="C16" Atom3="C17" Angle="119.748" Delta="2.86479" Sigma="0.572958"/>
+      <DihedralAngle Atom1="N7" Atom2="C3" Atom3="N4" Atom4="N2" Angle="180" Delta="2.86479" Sigma="0.572958"/>
+      <DihedralAngle Atom1="C11" Atom2="C12" Atom3="N13" Atom4="C14" Angle="180" Delta="2.86479" Sigma="0.572958"/>
+      <DihedralAngle Atom1="C11" Atom2="C12" Atom3="C16" Atom4="C17" Angle="0" Delta="2.86479" Sigma="0.572958"/>
+    </Molecule>
 
   </Crystal>
   <DiffractionDataSingleCrystal Name="Cimetidine-Extracted Powder Intensities" Crystal="Cimetidine">
     <Radiation>
       <Option Name="Radiation" Choice="1" ChoiceName="X-Ray"/>
       <Option Name="Spectrum" Choice="0" ChoiceName="Monochromatic"/>
+      <LinearPolarRate>0</LinearPolarRate>
       <Par Refined="0" Limited="1" Min="0.05" Max="20" Name="Wavelength">1.5209</Par>
     </Radiation>
     <Par Refined="0" Limited="1" Min="-1" Max="1" Name="globalBiso">0</Par>
+    <Option Name="Twinning correction" Choice="0" ChoiceName="None"/>
+    <MaxSinThetaOvLambda>10</MaxSinThetaOvLambda>
+
     <HKLIobsSigmaWeightList>
       0 2 0 65.01 0.65 2.36686 
       1 1 0 7.45 0.074 182.615 
@@ -302,11 +266,11 @@
   <GlobalOptimObj Name="Change Me!">
     <Option Name="Algorithm" Choice="1" ChoiceName="Parallel Tempering"/>
     <Option Name="Temperature Schedule" Choice="4" ChoiceName="Smart"/>
+    <Option Name="Save Best Config Regularly" Choice="0" ChoiceName="No"/>
     <TempMaxMin>1 1e-04</TempMaxMin>
     <Option Name="Displacement Amplitude Schedule" Choice="3" ChoiceName="Exponential"/>
     <MutationMaxMin>8 0.125</MutationMaxMin>
     <RefinedObject ObjectType="Crystal" ObjectName="Cimetidine"/>
     <RefinedObject ObjectType="DiffractionDataSingleCrystal" ObjectName="Cimetidine-Extracted Powder Intensities"/>
-    <CostFunction ObjectType="DiffractionDataSingleCrystal" ObjectName="Cimetidine-Extracted Powder Intensities" FunctionId="0" FunctionName="Crystallographic, unweighted R-factor with best scale" Weight="1"/>
   </GlobalOptimObj>
 </ObjCryst>

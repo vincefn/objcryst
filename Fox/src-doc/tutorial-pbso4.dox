@@ -3,7 +3,7 @@
 <h1>Using FOX for Ab Initio Structure Determination: PbSO<sub>4</sub> tutorial</h1>
 </center>
 
-<h2>Prerequisite</h2>
+<h2>Prerequisites</h2>
 <ul>
    <li> The refined unit cell parameters, and a possible spacegroup
    <li> Some information about the unit cell contents (stoechiometry, possible building blocks)
@@ -26,7 +26,7 @@
    <li> You can change the <b>lattice parameters</b> (8.482 5.398 6.959). Use the right-button menu to update the 3D Display of the structure.
    <li> To add atoms to your structure, you must first <b>create the atom types</b>, what is called '<b>ScatteringPower</b>' in the program. Go to the 'Scatterers' menu of the Crystal, and choose 'Add Atomic Scattering Power'. This will add a 'SccatteringPowerAtom' a bit lower. You should change the name (eg 'Lead' or 'Pb'-this is free format, you can call it 'George' if you want) of this atom type, as well as the symbol corresponding to the atom - the symbol must correspond to a "standard" symbol or ion (e.g. "Pb" or "Pb2+"). Do this until you have the scattering powers for Pb, S and O.
    <li> Then <b>add a Pb Atom</b> to the structure, using the 'Scatterers'->'Add Atom' menu of the Crystal object. You will be prompted to choose one atom type from those you have entered (choose the lead atom type). The atom will be put by default at (0,0,0), which you can see by updating the 3D view (right-click...)
-   <li> Then <b>add a SO4 tetrahedron</b>: to do this use the 'Scatterers'->'Add Tetrahedron' menu of the Crystal Object. You will be prompted for the central atom type (the sulphur), the peripheral one (oxygen), and then the distance (roughly 1.5 Angstroem). a 'ZScatterer' will appear in the list of scatterers of the Crystal Structure. You should then change the name of the tetrahedron to something sensible (SO4), as well as the names of the atoms (this is not mandatory, but nicer). Note that the parameters (bond lengths, bond angles and dihedral angles) are not fixed (the refinement buttons are pushed for all parameters), but set with tight limits which should be fine in this example (they can be changed globally using the ZScatterer 'parameters' menu, or individually by right-clicking on the parameter's name).
+   <li> Then <b>add a SO4 tetrahedron</b>: to do this use the 'Scatterers'->'Add Tetrahedron' menu of the Crystal Object. You will be prompted for the central atom type (the sulphur), the peripheral one (oxygen), and then the distance (roughly 1.5 Angstroem). a 'Molecule' will appear in the list of scatterers of the Crystal Structure. You can then change the name of the tetrahedron, as well as the names of the atoms, at your convenience. The geometry of the tetrahedron is set using bond lengths and bond angles restraints (it gives to the polyhedron limited flexibility).
    <li> NOTE: <b>you have nothing to do for special positions</b>, as long as the 'Use Dynamical Occupancy Correction' field is set to 'Yes' (the default).
 
    You're done with the Crystal structure. You can (should) <b>save</b> using the top Fox menu 'File'->'Save'. This will save everythoing as an xml file, using a specific format to ObjCryst++/Fox.
@@ -57,19 +57,21 @@
 <h2>Third step: create the Global Optimization object</h2>
 <ul>
    <li> Go to the last tab of the Fox window 'Global Optimization', and use the main window's 'Objects' to <b>create a new Monte-Carlo Object</b>.
-   <li> Then we need to tell the algorithm what it is going to optimize (which objects), so we need to <b>declare both Powder Patterns and the Crystal Structure</b>. So use the 'Objects & Cost Functions'->'Add object to optimize' menu, and add all three objects (one at a time). (This is where you see it is useful to set meaning ful names for all objects).
-   <li> Then we must <b>tell the algorithm which criterion we want to choose to validate the structure, the 'Cost Functions'</b>. In this case we will use the agreement factors for both powder patterns. To be unsensitive to profile parameters (which are not too important for structure solution), it is VERY recommended to use the integrated Rwp factors. So use the 'Objects & Cost Functions'->'Add cost function' and choose the '<b>Best Rw, integrated</b>' function for the X-ray pattern. Then do the same for the neutron data. You shoud see two fields appear with the value of these cost functions.
-   <li> OK, you're all set ! Normmaly, you should not change the choice of algorithm (<b>Parallel Tempering</b> is better than Simulated Annealing), nor the temperature or displacement amplitude parameters. They are supposed to work with any structure and combination of data.
+   <li> Then we need to tell the algorithm what it is going to optimize (which objects), so we need to <b>declare both Powder Patterns and the Crystal Structure</b>. So use the 'Optimized Objects'->'Add object to optimize' menu, and add all three objects (one at a time). (This is where you see it is useful to set meaning ful names for all objects !).
+   <li> As of Fox 1.5, it is not necessary any more to tell the algorithm what criterion it should use to test the configurations: it will automatically take the -log(Likelihood) of all added objects, in this case the sum of all Chi^2.
+   <li> OK, you're all set ! Normmaly, you should not change the choice of algorithm (<b>Parallel Tempering</b> is \e much better than Simulated Annealing), nor the temperature or displacement amplitude parameters. They should work with any structure and combination of data.
 
    Now would be a good time to save using the top 'File'->'Save' menu.
 
    <li> So <b>Launch the optimization</b>, using the 'Run'->'Run Optimization' menu of the Monte-Carlo object. If you have left the 3D Crystal structure window and the powder pattern graphs opened, they should be live-updated. Convergence is quick in this case, normally less than 50 000 trials.
+   <li> You can also follow the progression of the Chi^2 statistics, GoodnessOfFit (=Chi^2/nbObs), Rwp and Rp in the powder pattern objects. But there's nothing better than the eye to tell whether the fit is good or not.
    <li> Once the algorithm has converged, if you change the max sin(theta)/lambda fields in both powder patterns, and update the graphs (right-click...), you should see that the part of the pattern which was not used as a criterion is relatively well fitting (not great at high angle for the neutron, but that's what Rietveld is for !).
 </ul>
 
 <h2>Last step: export the crystal Structure</h2>
 <ul>
    <li> You can <b>export the atomic coordinates</b> by going to the Crystal structure, and use the 'File'->'Save as text' menu. this will save a file with all atom fractionnal coordinates and occupancies. You should see that all atoms have a 'dynamical occupancy' of 0.5, which is due to the fact that they are all (except two oxygens) on a special position. The other two oxygens are in fact equivalent, as the distance table included in the output shows.
+   <li> You can also export to a CIF file using the same menu. Normally, atoms which are fully overlapping are taken care of so that only a single atom remains.
 </ul>
 
 

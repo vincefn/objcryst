@@ -12,7 +12,7 @@ This example solves the lead sulfate structure, using both an X-Ray and a neutro
 The solution should be reached in 5000-50000 trial configurations, from 6 to 60s depending on your computer speed.
 <h2>Example 2 : Potassium Tartrate (K+ -OOC-CHOH-CHOH-COOH)</h2>
 This is the salt of an organic molecule with 14 degrees of freedom (3+6 positionnal & orientational, and 5 torsion angles). Hydrogens have not been put since they can hardly be seen by X-Ray powder diffraction.
-The optimization from a random configuration leads to a correct structure in more than 95% of attempts (in less than 5 million tests). It requires (on average) about 1.2 million trials (about 12 min. on a 1.4 GHz athlon processor).
+The optimization from a random configuration leads to a correct structure in more than 95% of attempts (in less than 5 million tests). It requires (on average) about 400 000 trials (about 100 seconds on a 1.4 GHz athlon processor).
 <h2>Example 2bis : Potassium Tartrate (K+ -OOC-CHOH-CHOH-COOH), with preferred orientation</h2>
 Same as example 2, but with a (strong) preferred orientation. The solution id difficult to find if you do not know the preferred orientation parameters (or at least the direction).
 <h2>Example 3 : Cimetidine (C<sub>10</sub>N<sub>6</sub>SH<sub>15</sub>)</h2>
@@ -20,9 +20,9 @@ This molecule has been used to test <i>ab initio</i> structure determination fro
 
 Here you can choose either the powder data, in which case you should select the integrated weighted R-factor as a criterion, or choose to use the extracted intensities to treat as single crystal data.
 
-Although it has the same number of degrees of freedom than the potassium tartrate example, it is  harder to solve because there are more torsion angles within the molecule, so that the 8 internal parameters are not explored independently (this is inherent to the current parametrization used for molecules using a Z-Matrix). This is especially true since there are many torsion angles in the middle of the molecule.
+Although it has the same number of degrees of freedom than the potassium tartrate example, it is  harder to solve because there are more torsion angles within the molecule, so that the 8 internal parameters are not explored completely independently. This is especially true since there are many torsion angles in the middle of the molecule.
 
-Nevertheless, the correct solution is found in 85% of runs in less than 10 million trials. It requires on average about 4 to 5 million trial configurations, which takes about 45 min. for the powder pattern optimization, and less than half an hour for the pseudo-single crystal data (on a 1.4 GHz athlon).
+Nevertheless, the correct solution is found in 95% of runs in less than 5 million trials. It requires on average about 1.8 million trial configurations, which takes about 12 min. for the powder pattern optimization, and less than 10 minutes for the pseudo-single crystal data (on a 1.4 GHz athlon).
 <h2>Example 4 : Brucite Mg(OH)<sub>2</sub></h2>
 This demonstrates the use of texture parameters (see them at the bottom of the powder pattern object). Note that if you do not impose the correct orientation or force the March coefficient to be lower than 1, you can easily end up with a inverted March coefficient and a preferred orientation direction perpendicular to [001].
 */

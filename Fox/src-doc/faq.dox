@@ -22,6 +22,8 @@ Almost everything (Crystal, PowderPattern, Scatterer, ScatteringPower, Optimizat
 <b><i>I know 'Simulated Annealing' (SA), why do you recommend to use "Parallel Tempering" (PT) ?</i></b>
 <ul>
 In SA, the 'temperature' of the algorithm (think: high 'temperatures' allows for more improbable configurations, allowing to get of local minima) is decreased slowly following a predetermined law. If the decrease is too fast, you can easily be trapped in a local minimum.With PT, all temperatures are optimized in parallel, so that you can get of a local minimum at all times. The algorithm is invariant with time and therefore does not require from the user to choose the number of trial and the temperature schedule.General Idea: keep the default algorithm and optimization schedule & parameters (temperature and displacement), they are made to work with any structure or data.
+
+In other words, \b always use Parallel Tempering, unless you are interested in algorithms and want to play with SA.
 </ul>
 
 <b><i>My optimization has reached [enter cost here]. Has it converged enough ?</i></b>
@@ -47,10 +49,11 @@ You may activate the optimization of occupancies after a first optimization if y
 
 And do not activate texture parameters unless (i) you have a strong feeling it is necessary and (ii) you have not been able to obtain an un-textured data set. Having strong texture will significantly reduce the probability of finding the structure solution.
 </ul>
-<b><i>What objects & Cost Functions should I add in the Optimization object ?</i></b>
+<b><i>What objects should I add in the Optimization object ?</i></b>
 <ul>
-If you are optimizing a Crystal structure with a single Powder Pattern, you should add these two objects, and then add the "integrated Rwp" cost function. If you have several data sets, you must add all objects, and one cost function for each data object. How can I remove a Cost Function or an object from an Optimization ?
-You cannot do it from the interface. However, you can set the "weight" of the cost function to 0. It will then only be updated when a new "best configuration" (using the other cost functions) is found (i.e. it does not slow the computation).
+If you are optimizing a Crystal structure with a single Powder Pattern, you should add these two objects. If you have several data sets, you must add all diffraction data objects.
+
+How can I remove an object from an Optimization ?
 
 The only way to remove an object or cost function is to edit an xml file, and look at the very end: just remove the line corresponding to the object/cost function you want to remove, and voila !
 NOTE: do not remove an object if you are still using on of its cost functions !!
@@ -87,19 +90,9 @@ For identical types of atoms, the antibump penalty vanishes to zero when the ato
 Note that you cannot use different antibump parameters for (say) two different oxygen types: as the antibump evaluation currently uses the atomic number, all oxygens will necessary have the same antibump parameters.
 </ul>
 
-<b><i>Should I restrict the positionnal parameters (fractionnal coordinates) to [0;1] using the parameter's limits ? Same for dihedral angles ?</i></b>
+<b><i>Should I restrict the positionnal parameters (fractionnal coordinates) to [0;1] using the parameter's limits ? Same for angles  in [0,2pi]?</i></b>
 <ul>
-No, these are "periodic" parameters, and are automatically corrected, e.g. set to 0.01 if they get to 1.01 (using limits is then a bad idea, as it restricts movements).
-</ul>
-<b><i>When I view the structure with my polyhedra, it does not display anymore the facets, only 'ball & sticks' :-(( !</i></b>
-<ul>
-Yep, so far the notion of 'facets' is not stored in the xml file, so you loose the display.
-</ul>
-<b><i>I have difficulties describing my molecule with a cycle in it: how can I make appear the missing bond ?</i></b>
-<ul>
-Defining correctly cycles is currently limited in Fox, as it is not possible to define a completely closed cycle. It is still possible to deifine cycles, but these must be more or less rigid. You have  first to define your cycle (entering the z-matrix or importing it), and then you need to make sure that all the dihedral angles that could 'break the cycle are fixed or with tight limits. You can see the cimetidine example to see how this can be done. As long as the cycle is approximately rigid, it works very well.
-
-Modification to better handle this (flexible cycles) is high on my todo list.
+No, these are "periodic" parameters, and are automatically corrected, e.g. changed to 0.01 if they get to 1.01 (using limits is then a bad idea, as it restricts movements).
 </ul>
 <h2>IV Diffraction data</h2>
 
@@ -130,7 +123,7 @@ First of all, a clear distinction should be made between (i) structure solution 
 <li> "Structure solution" consists in starting from relatively little information about the structure (one data set, and chemical composition), and one way or another to determine the approximate (0.1-0.5 Angstroem) position of all atoms.
 <li> "Structure refinement" consist in starting from known approximate atoms positions, and to determine these positions, as well as temperature factors, occupancies, with the best precision possible.
 </ul>
-Fox only targets (i), and therefore only requires enough data to find these "approximate" positions, which obviously is low-angle data (for a low-resolution structure determination). You should then use sin(theta)/lambda limits of between 0.25 (2 Angstroem) and 0.4 (1.25 Angstroem). I suggest you try the examples to convince yourself. After the optimization, you can change the sin(theta)/lambda limit to check that it is indeed the correct solution.
+Fox only targets (i), and therefore only requires enough data to find these "approximate" positions, which obviously is low-angle data (for a low-resolution structure determination). You should then use sin(theta)/lambda limits of between 0.25 (2 Angstroem) and 0.5 (1. Angstroem). I suggest you try the examples to convince yourself. After the optimization, you can change the sin(theta)/lambda limit to check that it is indeed the correct solution.
 
 Using too high-angle data will slow the structure solution by two factors, (a) because the number of reflections is proportionnal to the cubic power of sin(theta)/lambda (and therefore much slower), and (b) because high-angle data will only contribute to confuse the algorithm with useless information (to make a simple analogy, our goal consists to drive by car from Paris, to find a street in Geneva ; although all we want is to find the correct street, having the "high resolution data" is equivalent to know the color of the phone booth in that street, which is perfectly useless).
 

@@ -1,3 +1,50 @@
+#### 1.5 - june 2003
+NEW FEATURES-MAJOR CHANGES
+   * The optimization will now use log(likelihood) as a criterion:
+     in practice, this means that the Chi^2 statistics are used
+     rather than the user-chosen cost functions. The likelihood
+     can sometimes be parametrized in the objects (crystal, pattern),
+     but not any more in the Global Optimization objects.
+   * Added a Molecule class, which suprsedes the ZScatterer approach
+     The scatterer is defined by a list of atoms, and restraints
+     (bond lengths, angles and dihedral angles) to specify the
+     geometry. This gives more flexibility, allows a better 
+     convergence and allows to correctly define cyclic molecules.
+   * Added the ability to define a statistical positionnal error
+     for atoms, which will be taken into account following Maximum
+     Likelihood principles (ML field in ScatteringPowers), of course
+     with a significant amount of approximations to be computationnaly
+     friendly.
+   * CIF output (with the help of Brian Toby).
+
+OTHER NEW FEATURES
+   * Faster computation when using integrated profiles for powder
+     pattern objects
+   * Error bars are now displayed on the Powder Pattern graphical 
+     display.
+   * Further improvements of the Fourier maps display (mostly from
+     Brian Toby)
+   * A cursor can be displayed in the center of the 3D Crystal view,
+     its coordinates are displayed at the bottom of the window, with
+     the value of Fourier maps (if any)
+   * Added atom labels in 3D Crystal view (right-click menu to
+     deactivate)
+   * In OpenGL view of a Crystal structure, shift-dragging with left
+     mouse button now correctly changes the center of the view without
+     changing the rotation center.
+   * Changed lighting model in 3D Crystal view
+   * Added the ability to save structure factors from a
+     DiffractionSingleCrystal object, including detailed contributions
+     from different elements (useful for anomalous diffraction
+     experiments)
+     
+BUG FIXES
+   * Fixed bug when exporting to a Fenske-Hall z-matrix, the 4th atom
+     was always repeated twice
+   * Overall ZScatterer occupancy is now correctly taken into account.
+   * Auto-save of xml files will now use local time rather than gmt.
+
+
 #### 1.3 - december 2002
 NEW FEATURES
    * Added a contribution from Michael Y. Polyakov, (working with
