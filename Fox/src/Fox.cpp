@@ -580,6 +580,8 @@ void WXCrystMainFrame::OnAddPowderPattern(wxCommandEvent& WXUNUSED(event))
    PowderPattern* obj;
    obj=new PowderPattern;
    obj->SetName("Change Me!");
+   obj->SetMaxSinThetaOvLambda(0.4);
+   obj->UpdateDisplay();
 }
 
 void WXCrystMainFrame::OnAddSingleCrystalData(wxCommandEvent& WXUNUSED(event))
@@ -594,6 +596,8 @@ void WXCrystMainFrame::OnAddSingleCrystalData(wxCommandEvent& WXUNUSED(event))
    DiffractionDataSingleCrystal* obj;
    obj=new DiffractionDataSingleCrystal(*cryst);
    obj->SetName("Change Me!");
+   obj->SetMaxSinThetaOvLambda(0.4);
+   obj->UpdateDisplay();
 }
 void WXCrystMainFrame::OnAddGlobalOptimObj(wxCommandEvent& WXUNUSED(event))
 {
