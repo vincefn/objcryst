@@ -225,9 +225,14 @@ void WXPowderPattern::CrystUpdate()
 {
    VFN_DEBUG_MESSAGE("WXPowderPattern::CrystUpdate()",6)
    this->WXRefinableObj::CrystUpdate();
+	
+	// Will force re-generating reflection list if the wavelength,
+	// or lattice par, or the spacegroup has changed.
+	WXCrystValidateAllUserInput();
+	mpPowderPattern->Prepare();
+	
    if(mpGraph!=0)
    {
-		WXCrystValidateAllUserInput();
       mpGraph->SetPattern( mpPowderPattern->GetPowderPatternObs(),
                            mpPowderPattern->GetPowderPatternCalc(),
                            mpPowderPattern->Get2ThetaMin(),

@@ -622,6 +622,7 @@ void ScatteringData::GenHKLFullSpace(const REAL maxTheta,const bool useMultiplic
       mMultiplicity=1;
    	this->EliminateExtinctReflections();
    }
+	mClockHKL.Click();
    VFN_DEBUG_EXIT("ScatteringData::GenHKLFullSpace():End",5)
 }
 

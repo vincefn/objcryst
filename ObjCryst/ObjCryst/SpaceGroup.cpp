@@ -475,7 +475,7 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
       }
    }else mUniqueAxisId=0;
    //this->Print();
-   //mClock.Click();
+   mClock.Click();
    VFN_DEBUG_MESSAGE("SpaceGroup::InitSpaceGroup():End",4)
 }
 

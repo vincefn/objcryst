@@ -456,6 +456,10 @@ void PowderPatternDiffraction::CalcPowderPattern() const
    //   >mRadiation.GetClockWavelength())
    //      mRadiation.SetWavelength(mpParentPowderPattern->GetRadiation().GetWavelength()(0));
 
+	// :TODO: Can't do this as this is non-const
+	//if(this->GetCrystal().GetSpaceGroup().GetClockSpaceGroup()>mClockHKL)
+	//	this->GenHKLFullSpace();
+
    this->CalcIhkl();
    this->CalcPowderReflProfile();
    
@@ -798,7 +802,11 @@ void PowderPatternDiffraction::SetRadiation(const Radiation& rad)
 
 void PowderPatternDiffraction::Prepare()
 {
-   if(0==this->GetNbRefl()) this->GenHKLFullSpace();
+	if(  (this->GetCrystal().GetSpaceGroup().GetClockSpaceGroup()>mClockHKL)
+	   ||(this->GetCrystal().GetClockLatticePar()>mClockHKL)
+	   ||(mRadiation.GetClockWavelength()>mClockHKL))
+			this->GenHKLFullSpace();
+   //if(0==this->GetNbRefl()) this->GenHKLFullSpace();
 }
 void PowderPatternDiffraction::InitOptions()
 {
