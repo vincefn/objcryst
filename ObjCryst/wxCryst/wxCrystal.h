@@ -224,6 +224,19 @@ class WXGLCrystalCanvas : public wxGLCanvas
       /// Shows a dialog to choose a fourier map from one of those
       /// available.
       int UserSelectUnitCellMapImport()const;
+      /** Transform (x,y) window coordinates to (x,y,z) coordinates in the
+      * Crystal's orthonormal frame (with the origin at the center of the Unit Cell).
+      *
+      * \param x,y: on input, these contain the mouse screen coordinates,
+      * and in return these are the x and y coordinates in the Crystal orthonormal
+      * frame.
+      * \param z: ignored on input (the z coordinate taken is that of the 
+      * center of rotation).
+      *
+      * \note: this should be const, but we use SetCurrent() and build_rotmatrix( ,mQuat)...
+      * which are not const-correct...
+      */
+      void UnProject(REAL &x, REAL &y, REAL &z);
       /// The owner WXCrystal
       WXCrystal* mpWXCrystal;
       /// \internal

@@ -170,13 +170,13 @@ mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
                                 "3D Display");
    // AntiBump
       wxBoxSizer* pStats=new wxBoxSizer(wxHORIZONTAL);
-      
+
       WXFieldPar<REAL> *pWXFieldAntibump=new WXFieldPar<REAL>(this,"Antibump cost",-1,&mBumpmergeCost,70);
       pStats->Add(pWXFieldAntibump    ,0,wxALIGN_CENTER);
       mList.Add(pWXFieldAntibump);
-      
+
       mpSizer->Add(pStats);
-      
+
    // Lattice
       wxBoxSizer* lattice=new wxBoxSizer(wxHORIZONTAL);
 #if 1
@@ -237,6 +237,7 @@ mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
                     ->GetScatteringPowerRegistry().WXCreate(this);
       mpSizer->Add(mpWXScatteringPowerRegistry,0,wxALIGN_LEFT);
       mList.Add(mpWXScatteringPowerRegistry);
+      
    // Scatterers
       mpWXScattererRegistry=mpCrystal
                     ->GetScattererRegistry().WXCreate(this);
@@ -1443,16 +1444,18 @@ void WXGLCrystalCanvas::OnMouse( wxMouseEvent& event )
          if(event.ShiftDown())
          {
             VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnMouse():Dragging Left Button",2)
-            const float v= (mTrackBallLastY-event.GetY())/(float)height;
-            const float h= (mTrackBallLastX-event.GetX())/(float)width;
-            GLfloat m[4][4];
-            build_rotmatrix( m,mQuat);
-            const float dx=-h*10,dy=v*10;
-            mX0 += m[0][0]* dx +m[0][1]*dy;
-            mY0 += m[1][0]* dx +m[1][1]*dy;
-            mZ0 += m[2][0]* dx +m[2][1]*dy;
-	    VFN_DEBUG_MESSAGE("Origin (ortho) = "<<mX0<<", "<<mY0<<", "<<mZ0,10)
+            
+            REAL vx1=mTrackBallLastX,vy1=mTrackBallLastY,vz1,
+                 vx2=event.GetX(),   vy2=event.GetY(),   vz2;
+            
+            this->UnProject(vx1,vy1,vz1);
+            this->UnProject(vx2,vy2,vz2);
 
+            mX0 += vx2-vx1;
+            mY0 += vy2-vy1;
+            mZ0 += vz2-vz1;
+
+	         VFN_DEBUG_MESSAGE("Origin (ortho) = "<<mX0<<", "<<mY0<<", "<<mZ0,2)
             Refresh(FALSE);
          }
          else
@@ -1483,7 +1486,7 @@ void WXGLCrystalCanvas::OnMouse( wxMouseEvent& event )
          glLoadIdentity();
          if( (width>0)&&(height>0)) //in case size is null...
             gluPerspective(mViewAngle,(float)width/(float)height,
-                        (mDist>100)?(mDist-100):1.,mDist+100);   
+                        (mDist>101)?(mDist-100):1.,mDist+100);   
          Refresh(FALSE);
          VFN_DEBUG_MESSAGE(mViewAngle <<" "<<mDist,2)
       }
@@ -1829,7 +1832,37 @@ BBox WXGLCrystalCanvas::GetCellBBox() {
 BBox WXGLCrystalCanvas::GetMapBBox() {
   return mmapbbox;
 }
+void WXGLCrystalCanvas::UnProject(REAL &x, REAL &y, REAL &z)
+{
+   GLdouble vx,vy,vz,junk;
+   GLdouble z0;
+   GLdouble modelMatrix[16];
+   GLdouble projMatrix[16];
+   GLint viewport[4];
 
+   this->SetCurrent();
+   glMatrixMode( GL_MODELVIEW );
+   glLoadIdentity();
+   glTranslatef( 0, 0, -mDist );
+
+   glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);
+   glGetDoublev(GL_PROJECTION_MATRIX,projMatrix);
+   glGetIntegerv(GL_VIEWPORT,viewport);
+
+   // First, get the z depth of where we want to translate
+   gluProject(0, 0, 0 ,modelMatrix,projMatrix,viewport,&junk,&junk,&z0);
+   // Get the orthonormal coordinates 
+   gluUnProject(x,y,z0,modelMatrix,projMatrix,viewport,&vx,&vy,&vz);
+   vy = -vy;
+   // Use Quaternion to get the correct position
+   GLfloat m[4][4];
+   build_rotmatrix( m,mQuat);
+
+   x= m[0][0]* vx + m[0][1]*vy + m[0][2]*vz -mX0;
+   y= m[1][0]* vx + m[1][1]*vy + m[1][2]*vz -mY0;
+   z= m[2][0]* vx + m[2][1]*vy + m[2][2]*vz -mZ0;
+	VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::UnProject():X Y Z = "<<x<<" , "<<y<<" , "<<z,5)
+}
 
 
 ////////////////////////////////////////////////////////////////////////
