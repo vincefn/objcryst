@@ -1230,7 +1230,7 @@ void ZScatterer::GlobalOptRandomMove(const REAL mutationAmplitude)
 	//
 	// Should try to do better by really minimizing the conformation
 	// changes
-   if(false)// (rand()/(REAL)RAND_MAX)<.01)//.01
+   if((rand()/(REAL)RAND_MAX)<.01)//.01
 	{
    	TAU_PROFILE_TIMER(timer1,\
 							"ZScatterer::GlobalOptRandomMoveSmart1(prepare ref par & mutate)"\
@@ -2532,6 +2532,14 @@ CrystVector_REAL GlobalScatteringPower::
    VFN_DEBUG_MESSAGE("GlobalScatteringPower::GetScatteringFactor():"<<mName<<":End.",10)
    delete pData;
    return sf;
+}
+REAL GlobalScatteringPower::GetForwardScatteringFactor(const RadiationType type) const
+{
+	REAL sf=0;
+	const ScatteringComponentList *pList=&(mpZScatterer->GetScatteringComponentList());
+	for(int i=0;i<pList->GetNbComponent();i++)
+		sf += (*pList)(i).mpScattPow->GetForwardScatteringFactor(type);
+	return sf;
 }
 CrystVector_REAL GlobalScatteringPower::
    GetTemperatureFactor(const ScatteringData &data,

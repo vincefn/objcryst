@@ -436,6 +436,30 @@ CrystVector_REAL ScatteringPowerAtom::GetScatteringFactor(const ScatteringData &
    return sf;
 }
 
+REAL ScatteringPowerAtom::GetForwardScatteringFactor(const RadiationType type) const
+{
+	REAL sf;
+   switch(type)
+   {
+      case(RAD_NEUTRON):
+      {
+         sf=mNeutronScattLengthReal;
+         break;
+      }
+      case(RAD_XRAY):
+      {
+         sf=  mScattAi.sum();
+         break;
+      }
+      case(RAD_ELECTRON):
+      {
+         throw ObjCrystException("ScatteringPowerAtom::GetForwardScatteringFactor(data): Scattering factors not implemented for electrons yet !!!:");
+      }
+   }
+   VFN_DEBUG_MESSAGE("ScatteringPower::GetScatteringFactor(&data):End",3)
+   return sf;
+}
+
 CrystVector_REAL ScatteringPowerAtom::GetTemperatureFactor(const ScatteringData &data,
                                                              const int spgSymPosIndex) const
 {

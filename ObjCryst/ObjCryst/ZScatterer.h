@@ -42,6 +42,7 @@ class GlobalScatteringPower:virtual public ScatteringPower
       void Init(const ZScatterer &scatt);
       virtual CrystVector_REAL GetScatteringFactor(const ScatteringData &data,
                                                      const int spgSymPosIndex=0) const;
+      virtual REAL GetForwardScatteringFactor(const RadiationType) const;
       virtual CrystVector_REAL GetTemperatureFactor(const ScatteringData &data,
                                                           const int spgSymPosIndex=0) const;
       virtual CrystMatrix_REAL GetResonantScattFactReal(const ScatteringData &data,

@@ -474,7 +474,7 @@ void Atom::XMLInput(istream &is,const XMLCrystTag &tagg)
    }
    const ScatteringPower* scattPow=
          &(this->GetCrystal().GetScatteringPowerRegistry().GetObj(scattPowName));
-   cout<< scattPow<<endl;
+   VFN_DEBUG_MESSAGE("Found Scattering Power:"<< scattPowName<<" at "<<scattPow,4);
    this->Init(0,0,0,mName,dynamic_cast<const ScatteringPowerAtom*>(scattPow),1);
    while(true)
    {

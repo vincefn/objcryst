@@ -74,6 +74,9 @@ class ScatteringPower:virtual public RefinableObj
       */
       virtual CrystVector_REAL GetScatteringFactor(const ScatteringData &data,
                                                      const int spgSymPosIndex=-1) const=0;
+		/// Get the scattering factor at (0,0,0). Used for scatterer (electron, nucleus)
+		/// density generation.
+      virtual REAL GetForwardScatteringFactor(const RadiationType) const=0;
       /** \brief Get the temperature factor for all reflections of a given 
       * ScatteringData object.
       *
@@ -242,6 +245,7 @@ class ScatteringPowerAtom:virtual public ScatteringPower
       void Init(const string &name,const string &symbol,const REAL bIso=1.0);
       virtual CrystVector_REAL GetScatteringFactor(const ScatteringData &data,
                                                      const int spgSymPosIndex=0) const;
+      virtual REAL GetForwardScatteringFactor(const RadiationType) const;
       virtual CrystVector_REAL GetTemperatureFactor(const ScatteringData &data,
                                                      const int spgSymPosIndex=0) const;
       virtual CrystMatrix_REAL GetResonantScattFactReal(const ScatteringData &data,
