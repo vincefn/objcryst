@@ -232,12 +232,18 @@ class MolBondAngle:public Restraint
       //MolAtom& GetAtom1();
       //MolAtom& GetAtom2();
       //MolAtom& GetAtom3();
+      bool IsFlexible()const;
+      void SetFlexible(const bool isInRing);
    private:
       /// The vector of the 3 atoms involved in the bond angle.
       vector<const MolAtom*> mvpAtom;
       REAL mAngle0,mDelta,mSigma;
       /// Parent Molecule
       Molecule *mpMol;
+      /// When using the user-chosen flexibility model, this allows
+      /// some flexibility for this bond angle, i.e. the bond angle
+      /// does not remain strictly rigid, and is still restrained.
+      bool mIsFlexible;
    #ifdef __WX__CRYST__
    public:
       WXCrystObjBasic *mpWXCrystObj;
@@ -442,6 +448,11 @@ class Molecule: public Scatterer
       * If no bond is found, returns Molecule::mvpAtom.end().
       */
       vector<MolBond*>::const_iterator FindBond(const MolAtom&,const MolAtom&)const;
+      /** Searches whether a bond between two atoms already exists.
+      *
+      * If no bond is found, returns Molecule::mvpAtom.end().
+      */
+      vector<MolBond*>::iterator FindBond(const MolAtom&,const MolAtom&);
       /** Add a bond angle restraint
       *
       *
@@ -497,6 +508,10 @@ class Molecule: public Scatterer
       void RestraintStatus(ostream &os)const;
       /// Get the connectivity table
       const map<unsigned long,set<unsigned long> > & GetConnectivityTable()const;
+      /// get the clock associated to the list of bonds
+      RefinableObjClock& GetBondListClock();
+      /// get the clock associated to the list of bonds
+      const RefinableObjClock& GetBondListClock()const;
    private:
       virtual void InitRefParList();
       /** Build the list of rings in the molecule.

@@ -62,7 +62,18 @@ template<class T> T * WXDialogChooseFromVector(vector<T*> &reg,wxWindow*parent,
    delete[] choices;
    return reg[choice];
 }
-
+////////////////////////////////////////////////////////////////////////
+//
+//    WXMolScrolledWindow
+//
+////////////////////////////////////////////////////////////////////////
+WXMolScrolledWindow::WXMolScrolledWindow(wxWindow* parent, WXMolecule* pWXMol):
+wxScrolledWindow(parent),mpWXMolecule(pWXMol)
+{}
+WXMolScrolledWindow::~WXMolScrolledWindow()
+{
+   mpWXMolecule->NotifyDeleteListWin(this);
+}
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXMolAtom
@@ -183,18 +194,24 @@ void WXMolAtom::OnChangeScattPow(wxCommandEvent & WXUNUSED(event))
 ////////////////////////////////////////////////////////////////////////
 WXCRYST_ID ID_MOLBOND_ATOM1;
 WXCRYST_ID ID_MOLBOND_ATOM2;
+WXCRYST_ID ID_MOLBOND_FREEBUTTON;
 
 BEGIN_EVENT_TABLE(WXMolBond,wxWindow)
    EVT_BUTTON(ID_MOLBOND_ATOM1,    WXMolBond::OnChangeAtom)
    EVT_BUTTON(ID_MOLBOND_ATOM2,    WXMolBond::OnChangeAtom)
+   EVT_CHECKBOX(ID_MOLBOND_FREEBUTTON,    WXMolBond::OnToggleFree)
 END_EVENT_TABLE()
 
 WXMolBond::WXMolBond(wxWindow *parent, MolBond*obj):
-WXCrystObjBasic(parent),mpMolBond(obj)
+WXCrystObjBasic(parent),mpMolBond(obj),mpButtonFree(0)
 {
    VFN_DEBUG_ENTRY("WXMolBond::WXMolBond():"<<obj->GetName(),6)
    mpSizer=new wxBoxSizer(wxHORIZONTAL);
-
+   #if 0
+   mpButtonFree=new wxCheckBox(this,ID_MOLBOND_FREEBUTTON,"",wxDefaultPosition, wxDefaultSize);
+   mpButtonFree->Fit();
+   mpSizer->Add(mpButtonFree,0,wxALIGN_CENTER);
+   #endif
    mpFieldAtom1=new WXFieldChoice(this,ID_MOLBOND_ATOM1,"Bond:",60);
    mpFieldAtom1->SetValue(mpMolBond->GetAtom1().GetName());
    mpSizer->Add(mpFieldAtom1,0,wxALIGN_CENTER);
@@ -226,6 +243,7 @@ void WXMolBond::CrystUpdate()
 void WXMolBond::UpdateUI()
 {
    VFN_DEBUG_ENTRY("WXMolBond::UpdateUI()",5)
+   if(0!=mpButtonFree) mpButtonFree->SetValue(mpMolBond->IsFreeTorsion());
    mList.UpdateUI();
    mpFieldAtom1->SetValue(mpMolBond->GetAtom1().GetName().c_str());
    mpFieldAtom2->SetValue(mpMolBond->GetAtom2().GetName().c_str());
@@ -289,6 +307,12 @@ void WXMolBond::OnChangeAtom(wxCommandEvent &event)
    this->CrystUpdate();
    this->UpdateUI();
    VFN_DEBUG_EXIT("WXMolBond::OnChangeScattPow()",6)
+}
+
+void WXMolBond::OnToggleFree(wxCommandEvent & WXUNUSED(event))
+{
+   VFN_DEBUG_MESSAGE("WXMolBond::OnToggleFree()",6)
+   if(0!=mpButtonFree) mpMolBond->SetFreeTorsion(mpButtonFree->GetValue()); 
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -605,6 +629,9 @@ WXCRYST_ID ID_MOLECULE_MENU_FORMULA_REMOVE_ATOM;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_REMOVE_BOND;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_REMOVE_ANGLE;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_REMOVE_DIHEDRAL;
+WXCRYST_ID ID_MOLECULE_MENU_FORMULA_SHOW_BONDLIST;
+WXCRYST_ID ID_MOLECULE_MENU_FORMULA_SHOW_BONDANGLELIST;
+WXCRYST_ID ID_MOLECULE_MENU_FORMULA_SHOW_DIHEDRALANGLELIST;
 
 BEGIN_EVENT_TABLE(WXMolecule,wxWindow)
    EVT_BUTTON(ID_WXOBJ_COLLAPSE,                          WXCrystObj::OnToggleCollapse)
@@ -622,10 +649,15 @@ BEGIN_EVENT_TABLE(WXMolecule,wxWindow)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_REMOVE_DIHEDRAL,     WXMolecule::OnMenuRemoveDihedralAngle)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_TEST        ,        WXMolecule::OnMenuTest)
    EVT_MENU(ID_MENU_SETLIMITS,                            WXMolecule::OnMenuSetLimits)
+   EVT_MENU(ID_MOLECULE_MENU_FORMULA_SHOW_BONDLIST,       WXMolecule::OnMenuShowBondList)
+   EVT_MENU(ID_MOLECULE_MENU_FORMULA_SHOW_BONDANGLELIST,  WXMolecule::OnMenuShowBondAngleList)
+   EVT_MENU(ID_MOLECULE_MENU_FORMULA_SHOW_DIHEDRALANGLELIST,WXMolecule::OnMenuShowDihedralAngleList)
 END_EVENT_TABLE()
 
 WXMolecule::WXMolecule(wxWindow *parent, Molecule *mol):
-WXScatterer(parent,mol),mpMolecule(mol)
+WXScatterer(parent,mol),mpMolecule(mol),
+mpSizerBondList(0),mpSizerAngleList(0),mpSizerDihedralAngleList(0),
+mpBondWin(0),mpAngleWin(0),mpDihedralAngleWin(0)
 {
    VFN_DEBUG_ENTRY("WXMolecule::WXMolecule():"<<mol->GetName(),6)
    //Menus
@@ -655,19 +687,19 @@ WXScatterer(parent,mol),mpMolecule(mol)
                                 "Remove a Bond Angle Restraint");
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_REMOVE_DIHEDRAL,
                                 "Remove a Dihedral Angle Restraint");
-         //mpMenuBar->GetMenu(ID_MOLECULE_MENU_FORMULA).AppendSeparator();
+         mpMenuBar->GetMenu(ID_MOLECULE_MENU_FORMULA).AppendSeparator();
+         mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_SHOW_BONDLIST,
+                                "Show Bond List");
+         mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_SHOW_BONDANGLELIST,
+                                "Show Bond Angle List");
+         mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_SHOW_DIHEDRALANGLELIST,
+                                "Show Dihedral Angle List");
          //mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_TEST,"Test");
    
    //sizers
    mpSizerAtomList= new wxBoxSizer(wxVERTICAL);
-   mpSizerBondList= new wxBoxSizer(wxVERTICAL);
-   mpSizerAngleList= new wxBoxSizer(wxVERTICAL);
-   mpSizerDihedralAngleList= new wxBoxSizer(wxVERTICAL);
 
    mpSizer->Add(mpSizerAtomList,0,wxALIGN_LEFT);
-   mpSizer->Add(mpSizerBondList,0,wxALIGN_LEFT);
-   mpSizer->Add(mpSizerAngleList,0,wxALIGN_LEFT);
-   mpSizer->Add(mpSizerDihedralAngleList,0,wxALIGN_LEFT);
    this->CrystUpdate();
    this->Layout();
    VFN_DEBUG_EXIT("WXMolecule::WXMolecule():"<<mol->GetName(),6)
@@ -676,6 +708,9 @@ WXScatterer(parent,mol),mpMolecule(mol)
 WXMolecule::~WXMolecule()
 {
    VFN_DEBUG_ENTRY("WXMolecule::~WXMolecule()",10)
+   if(0!=mpBondWin) mpBondWin->Destroy();
+   if(0!=mpAngleWin) mpAngleWin->Destroy();
+   if(0!=mpDihedralAngleWin) mpDihedralAngleWin->Destroy();
    VFN_DEBUG_EXIT("WXMolecule::~WXMolecule()",10)
 }
 
@@ -856,7 +891,10 @@ void WXMolecule::CrystUpdate()
    VFN_DEBUG_ENTRY("WXMolecule::CrystUpdate()",6)
    if(false==mpMolecule->IsBeingRefined())
    {
-      bool needLayout=false;
+      bool needLayoutAtom=false;
+      bool needLayoutBond=false;
+      bool needLayoutAngle=false;
+      bool needLayoutDihed=false;
       //Remove any atom, bond, bond angle or dihedral angle that could have been removed
       {
          vector<MolAtom*>::iterator pos;
@@ -871,10 +909,11 @@ void WXMolecule::CrystUpdate()
                (*pos)->WXDelete();
                pos=mvpAtom.erase(pos);
                --pos;
-               needLayout=true;
+               needLayoutAtom=true;
             }
          }
       }
+      if(0!=mpBondWin)
       {
          vector<MolBond*>::iterator pos;
          for(pos=mvpBond.begin();pos!=mvpBond.end();pos++)
@@ -888,10 +927,11 @@ void WXMolecule::CrystUpdate()
                (*pos)->WXDelete();
                pos=mvpBond.erase(pos);
                --pos;
-               needLayout=true;
+               needLayoutBond=true;
             }
          }
       }
+      if(0!=mpAngleWin)
       {
          vector<MolBondAngle*>::iterator pos;
          for(pos=mvpBondAngle.begin();pos!=mvpBondAngle.end();pos++)
@@ -906,10 +946,11 @@ void WXMolecule::CrystUpdate()
                (*pos)->WXDelete();
                pos=mvpBondAngle.erase(pos);
                --pos;
-               needLayout=true;
+               needLayoutAngle=true;
             }
          }
       }
+      if(0!=mpDihedralAngleWin)
       {
          vector<MolDihedralAngle*>::iterator pos;
          for(pos=mvpDihedralAngle.begin();pos!=mvpDihedralAngle.end();pos++)
@@ -924,7 +965,7 @@ void WXMolecule::CrystUpdate()
                (*pos)->WXDelete();
                pos=mvpDihedralAngle.erase(pos);
                --pos;
-               needLayout=true;
+               needLayoutDihed=true;
             }
          }
       }
@@ -941,10 +982,11 @@ void WXMolecule::CrystUpdate()
                mpSizerAtomList->Add(at);
                mList.Add(at);
                mvpAtom.push_back(*pos);
-               needLayout=true;
+               needLayoutAtom=true;
             }
          }
       }
+      if(0!=mpBondWin)
       {
          vector<MolBond*>::iterator pos;
          for(pos=mpMolecule->GetBondList().begin();pos!=mpMolecule->GetBondList().end();pos++)
@@ -952,15 +994,16 @@ void WXMolecule::CrystUpdate()
             vector<MolBond*>::const_iterator pos2=find(mvpBond.begin(),mvpBond.end(),*pos);
             if(pos2==mvpBond.end())
             {
-               VFN_DEBUG_MESSAGE("WXMolecule::CrystUpdate():Bond not found",5)
-               WXCrystObjBasic *b=(*pos)->WXCreate(this);
+               VFN_DEBUG_MESSAGE("WXMolecule::CrystUpdate():Bond not found",10)
+               WXCrystObjBasic *b=(*pos)->WXCreate(mpBondWin);
                mpSizerBondList->Add(b);
                mList.Add(b);
                mvpBond.push_back(*pos);
-               needLayout=true;
+               needLayoutBond=true;
             }
          }
       }
+      if(0!=mpAngleWin)
       {
          vector<MolBondAngle*>::iterator pos;
          for(pos=mpMolecule->GetBondAngleList().begin();
@@ -970,15 +1013,16 @@ void WXMolecule::CrystUpdate()
                =find(mvpBondAngle.begin(),mvpBondAngle.end(),*pos);
             if(pos2==mvpBondAngle.end())
             {
-               VFN_DEBUG_MESSAGE("WXMolecule::CrystUpdate():Bond not found",5)
-               WXCrystObjBasic *b=(*pos)->WXCreate(this);
+               VFN_DEBUG_MESSAGE("WXMolecule::CrystUpdate():Bond Angle not found",5)
+               WXCrystObjBasic *b=(*pos)->WXCreate(mpAngleWin);
                mpSizerAngleList->Add(b);
                mList.Add(b);
                mvpBondAngle.push_back(*pos);
-               needLayout=true;
+               needLayoutAngle=true;
             }
          }
       }
+      if(0!=mpDihedralAngleWin)
       {
          vector<MolDihedralAngle*>::iterator pos;
          for(pos=mpMolecule->GetDihedralAngleList().begin();
@@ -989,25 +1033,102 @@ void WXMolecule::CrystUpdate()
             if(pos2==mvpDihedralAngle.end())
             {
                VFN_DEBUG_MESSAGE("WXMolecule::CrystUpdate():Bond not found",5)
-               WXCrystObjBasic *b=(*pos)->WXCreate(this);
+               WXCrystObjBasic *b=(*pos)->WXCreate(mpDihedralAngleWin);
                mpSizerDihedralAngleList->Add(b);
                mList.Add(b);
                mvpDihedralAngle.push_back(*pos);
-               needLayout=true;
+               needLayoutDihed=true;
             }
          }
       }
-      if(needLayout)
+      if(needLayoutAtom) this->Layout();
+      if(needLayoutBond&&(0!=mpBondWin))
       {
-         //mpSizerAtomList->Layout();
-         //mpSizerBondList->Layout();
-         //mpSizerAngleList->Layout();
-         //mpSizerDihedralAngleList->Layout();
-         this->Layout();
+         VFN_DEBUG_MESSAGE("WXMolecule::CrystUpdate(): BondWin Layout",6)
+         int width0,height0;
+         mpBondWin->GetVirtualSize(&width0,&height0);
+         mpBondWin->GetSizer()->RecalcSizes();
+         mpBondWin->GetSizer()->Layout();
+         wxSize s=mpBondWin->GetSizer()->GetMinSize();
+         mpBondWin->Scroll(0,0);//workaround wxMSW 2.2.9 bug
+         if((height0!=s.GetHeight())||(width0!=s.GetWidth()))
+            mpBondWin->SetScrollbars(40,40,s.GetWidth()/40+1,s.GetHeight()/40+1,0,0);
+         mpBondWin->GetParent()->SetSize(-1,s.GetWidth());
+      }
+      if(needLayoutAngle&&(0!=mpAngleWin))
+      {
+         VFN_DEBUG_MESSAGE("WXMolecule::CrystUpdate(): AngleWin Layout",6)
+         int width0,height0;
+         mpAngleWin->GetVirtualSize(&width0,&height0);
+         mpAngleWin->GetSizer()->RecalcSizes();
+         mpAngleWin->GetSizer()->Layout();
+         wxSize s=mpAngleWin->GetSizer()->GetMinSize();
+         mpAngleWin->Scroll(0,0);//workaround wxMSW 2.2.9 bug
+         if((height0!=s.GetHeight())||(width0!=s.GetWidth()))
+            mpAngleWin->SetScrollbars(40,40,s.GetWidth()/40+1,s.GetHeight()/40+1,0,0);
+         mpAngleWin->GetParent()->SetSize(-1,s.GetWidth());
+      }
+      if(needLayoutDihed&&(0!=mpDihedralAngleWin))
+      {
+         VFN_DEBUG_MESSAGE("WXMolecule::CrystUpdate(): DihedralAngleWin Layout",6)
+         int width0,height0;
+         mpDihedralAngleWin->GetVirtualSize(&width0,&height0);
+         mpDihedralAngleWin->GetSizer()->RecalcSizes();
+         mpDihedralAngleWin->GetSizer()->Layout();
+         wxSize s=mpDihedralAngleWin->GetSizer()->GetMinSize();
+         mpDihedralAngleWin->Scroll(0,0);//workaround wxMSW 2.2.9 bug
+         if((height0!=s.GetHeight())||(width0!=s.GetWidth()))
+            mpDihedralAngleWin->SetScrollbars(40,40,s.GetWidth()/40+1,s.GetHeight()/40+1,0,0);
+         mpDihedralAngleWin->GetParent()->SetSize(-1,s.GetWidth());
       }
    }
    this->WXRefinableObj::CrystUpdate();
    VFN_DEBUG_EXIT("WXMolecule::CrystUpdate()",6)
+}
+void WXMolecule::OnMenuShowBondList(wxCommandEvent &event)
+{
+   if(0!=mpBondWin) return;
+   wxFrame *frame= new wxFrame(this,-1,("Bond List for: "+mpMolecule->GetName()).c_str());
+   mpBondWin = new WXMolScrolledWindow(frame,this);
+   mpSizerBondList= new wxBoxSizer(wxVERTICAL);
+   mpBondWin->SetSizer(mpSizerBondList);
+   frame->Show(true);
+   this->CrystUpdate();
+}
+void WXMolecule::OnMenuShowBondAngleList(wxCommandEvent &event)
+{
+   if(0!=mpAngleWin) return;
+   wxFrame *frame= new wxFrame(this,-1,("Bond Angles list for: "+mpMolecule->GetName()).c_str());
+   mpAngleWin = new WXMolScrolledWindow(frame,this);
+   mpSizerAngleList= new wxBoxSizer(wxVERTICAL);
+   mpAngleWin->SetSizer(mpSizerAngleList);
+   frame->Show(true);
+   this->CrystUpdate();
+}
+void WXMolecule::OnMenuShowDihedralAngleList(wxCommandEvent &event)
+{
+   if(0!=mpDihedralAngleWin) return;
+   wxFrame *frame= new wxFrame(this,-1,("Dihedral Angles list for: "+mpMolecule->GetName()).c_str());
+   mpDihedralAngleWin = new WXMolScrolledWindow(frame,this);
+   mpSizerDihedralAngleList= new wxBoxSizer(wxVERTICAL);
+   mpDihedralAngleWin->SetSizer(mpSizerDihedralAngleList);
+   frame->Show(true);
+   this->CrystUpdate();
+}
+void WXMolecule::NotifyDeleteListWin(WXMolScrolledWindow *win)
+{
+   VFN_DEBUG_ENTRY("WXMolecule::NotifyDeleteListWin()",6)
+   if(win==mpBondWin)
+   {
+      VFN_DEBUG_MESSAGE("WXMolecule::NotifyDeleteListWin(): Bond List window",10)
+      mpBondWin=0;
+      for(vector<MolBond*>::iterator pos=mvpBond.begin();pos!=mvpBond.end();pos++)
+         mList.Remove((*pos)->WXGet());
+      mvpBond.clear();
+   }
+   if(win==mpAngleWin)        {mpAngleWin=0;mvpBondAngle.clear();}
+   if(win==mpDihedralAngleWin){mpDihedralAngleWin=0;mvpDihedralAngle.clear();}
+   VFN_DEBUG_EXIT("WXMolecule::NotifyDeleteListWin()",6)
 }
 void WXMolecule::UpdateUI()
 {

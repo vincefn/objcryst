@@ -283,6 +283,11 @@ void MolBond::XMLOutput(ostream &os,int indent)const
       ss <<mBondOrder;
       tag.AddAttribute("BondOrder",ss.str());
    }
+   {
+      stringstream ss;
+      ss <<mIsFreeTorsion;
+      tag.AddAttribute("FreeTorsion",ss.str());
+   }
    os <<tag<<endl;
    VFN_DEBUG_EXIT("MolBond::XMLOutput()",4)
 }
@@ -319,6 +324,11 @@ void MolBond::XMLInput(istream &is,const XMLCrystTag &tag)
       {
          stringstream ss(tag.GetAttributeValue(i));
          ss >>mBondOrder;
+      }
+      if("FreeTorsion"==tag.GetAttributeName(i))
+      {
+         stringstream ss(tag.GetAttributeValue(i));
+         ss >>mIsFreeTorsion;
       }
    }
    VFN_DEBUG_EXIT("MolBond::XMLInput():",10)
@@ -377,7 +387,12 @@ void MolBond::SetLengthSigma(const REAL a){mBondOrder=a;}
 void MolBond::SetBondOrder(const REAL a){mSigma=a;}
 
 bool MolBond::IsFreeTorsion()const{return mIsFreeTorsion;}
-void MolBond::SetFreeTorsion(const bool isFreeTorsion){mIsFreeTorsion=isFreeTorsion;}
+void MolBond::SetFreeTorsion(const bool isFreeTorsion)
+{
+   if(mIsFreeTorsion==isFreeTorsion) return;
+   mIsFreeTorsion=isFreeTorsion;
+   mpMol->GetBondListClock().Click();
+}
 #ifdef __WX__CRYST__
 WXCrystObjBasic* MolBond::WXCreate(wxWindow* parent)
 {
@@ -1121,6 +1136,12 @@ void Molecule::XMLOutput(ostream &os,int indent)const
    this->GetPar(&mOccupancy).XMLOutput(os,"Occup",indent);
    os <<endl;
    
+   for(unsigned int i=0;i<this->GetNbOption();i++)
+   {
+      this->GetOption(i).XMLOutput(os,indent);
+      os <<endl<<endl;
+   }
+   
    {
       vector<MolAtom*>::const_iterator pos;
       for(pos=mvpAtom.begin();pos!=mvpAtom.end();++pos)
@@ -1194,6 +1215,13 @@ void Molecule::XMLInput(istream &is,const XMLCrystTag &tag)
                                 this->GetAtom(2),this->GetAtom(3),1.5,.01,.05,false);
          mvpDihedralAngle.back()->XMLInput(is,tagg);
       }
+      if("Option"==tag.GetName())
+      {
+         for(unsigned int i=0;i<tag.GetNbAttribute();i++)
+            if("Name"==tag.GetAttributeName(i)) 
+               mOptionRegistry.GetObj(tag.GetAttributeValue(i)).XMLInput(is,tag);
+         continue;
+      }
       if("Par"==tagg.GetName())
       {
          for(unsigned int i=0;i<tagg.GetNbAttribute();i++)
@@ -1259,28 +1287,40 @@ void Molecule::RandomizeConfiguration()
    }
 
    this->BuildRotorGroup();
-   for(list<RotorGroup>::const_iterator pos=mvRotorGroupTorsion.begin();
-       pos!=mvRotorGroupTorsion.end();++pos)
-   {
-      const REAL angle=(REAL)rand()*2.*M_PI/(REAL)RAND_MAX;
-      this->RotateAtomGroup(*(pos->mpAtom1),*(pos->mpAtom2),
-                            pos->mvRotatedAtomList,angle);
-   }
-   for(list<RotorGroup>::const_iterator pos=mvRotorGroupTorsionSingleChain.begin();
-       pos!=mvRotorGroupTorsionSingleChain.end();++pos)
-   {
-      const REAL angle=(REAL)rand()*2.*M_PI/(REAL)RAND_MAX;
-      this->RotateAtomGroup(*(pos->mpAtom1),*(pos->mpAtom2),
-                            pos->mvRotatedAtomList,angle);
-   }
-   for(list<RotorGroup>::const_iterator pos=mvRotorGroupInternal.begin();
-       pos!=mvRotorGroupInternal.end();++pos)
-   {
-      const REAL angle=(REAL)rand()*2.*M_PI/(REAL)RAND_MAX;
-      this->RotateAtomGroup(*(pos->mpAtom1),*(pos->mpAtom2),
-                            pos->mvRotatedAtomList,angle);
-   }
+   if((mFlexModel.GetChoice()==0)||(mFlexModel.GetChoice()==2))
+      for(list<RotorGroup>::const_iterator pos=mvRotorGroupTorsion.begin();
+          pos!=mvRotorGroupTorsion.end();++pos)
+      {
+         const REAL angle=(REAL)rand()*2.*M_PI/(REAL)RAND_MAX;
+         this->RotateAtomGroup(*(pos->mpAtom1),*(pos->mpAtom2),
+                               pos->mvRotatedAtomList,angle);
+      }
+   if(mFlexModel.GetChoice()==0)
+      for(list<RotorGroup>::const_iterator pos=mvRotorGroupTorsionSingleChain.begin();
+          pos!=mvRotorGroupTorsionSingleChain.end();++pos)
+      {
+         const REAL angle=(REAL)rand()*2.*M_PI/(REAL)RAND_MAX;
+         this->RotateAtomGroup(*(pos->mpAtom1),*(pos->mpAtom2),
+                               pos->mvRotatedAtomList,angle);
+      }
+   if(mFlexModel.GetChoice()==0)
+      for(list<RotorGroup>::const_iterator pos=mvRotorGroupInternal.begin();
+          pos!=mvRotorGroupInternal.end();++pos)
+      {
+         const REAL angle=(REAL)rand()*2.*M_PI/(REAL)RAND_MAX;
+         this->RotateAtomGroup(*(pos->mpAtom1),*(pos->mpAtom2),
+                               pos->mvRotatedAtomList,angle);
+      }
+   // this will only change limited parameters i.e. translation
    this->RefinableObj::RandomizeConfiguration();
+   {//Rotate around an arbitrary vector
+      const REAL amp=M_PI/RAND_MAX;
+      mQuat *= Quaternion::RotationQuaternion
+                  ((2.*(REAL)rand()-(REAL)RAND_MAX)*amp,
+                   (REAL)rand(),(REAL)rand(),(REAL)rand());
+      mQuat.Normalize();
+      mClockOrientation.Click();
+   }
    VFN_DEBUG_EXIT("Molecule::RandomizeConfiguration()",4)
 }
 
@@ -1302,24 +1342,23 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
    TAU_PROFILE_START(timer1);
    VFN_DEBUG_ENTRY("Molecule::GlobalOptRandomMove()",4)
    mClockScatterer.Click();
-   //:TODO: random moves using different models (free atoms, torsions, rigid body)
-   //switch(mFlexModel.GetChoice())
+   {//Rotate around an arbitrary vector
+      static const REAL amp=2.*M_PI/100./RAND_MAX;
+      mQuat *= Quaternion::RotationQuaternion
+                  ((2.*(REAL)rand()-(REAL)RAND_MAX)*amp*mutationAmplitude,
+                   (REAL)rand(),(REAL)rand(),(REAL)rand());
+      mQuat.Normalize();
+      mClockOrientation.Click();
+   }
+   //translation
+   if(gpRefParTypeScattTransl->IsDescendantFromOrSameAs(type))
+      this->RefinableObj::GlobalOptRandomMove(mutationAmplitude,gpRefParTypeScattTransl);
+   TAU_PROFILE_STOP(timer1);
+   if(gpRefParTypeScattConform->IsDescendantFromOrSameAs(type))
    {
-      //case 0://Free atoms + restraints
+      switch(mFlexModel.GetChoice())
       {
-         {//Rotate around an arbitrary vector
-            static const REAL amp=2.*M_PI/100./RAND_MAX;
-            mQuat *= Quaternion::RotationQuaternion
-                        ((2.*(REAL)rand()-(REAL)RAND_MAX)*amp*mutationAmplitude,
-                         (REAL)rand(),(REAL)rand(),(REAL)rand());
-            mQuat.Normalize();
-            mClockOrientation.Click();
-         }
-         if(gpRefParTypeScattTransl->IsDescendantFromOrSameAs(type))
-            this->RefinableObj::GlobalOptRandomMove(mutationAmplitude,gpRefParTypeScattTransl);
-         TAU_PROFILE_STOP(timer1);
-         #if 1
-         if(gpRefParTypeScattConform->IsDescendantFromOrSameAs(type))
+         case 0://Free atoms + restraints
          {
             TAU_PROFILE_START(timer2);
             this->SaveParamSet(mLocalParamSet);
@@ -1442,11 +1481,21 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                mRandomConformChangeNbTest=0;
                mRandomConformChangeNbAccept=0;
             }
-            //cout <<endl;
-            //if(ct>20) cout<<"Molecule::GlobalOptRandomMove:"<<mutationAmplitude<<", ct="<<ct<<endl;
-            //break;
+            break;
          }
-         #endif
+         case 1:break;//Rigid body
+         case 2:// user-chosen torsion bonds
+         {
+            for(list<RotorGroup>::const_iterator pos=mvRotorGroupTorsion.begin();
+                pos!=mvRotorGroupTorsion.end();++pos)
+            {//rotate around torsion bonds
+               const REAL angle=(2.*(REAL)rand()-(REAL)RAND_MAX)
+                                *M_PI/50./(REAL)RAND_MAX*mutationAmplitude;
+               this->RotateAtomGroup(*(pos->mpAtom1),*(pos->mpAtom2),
+                                     pos->mvRotatedAtomList,angle);
+            }
+            break;
+         }
       }
    }
    if((rand()%100)==0)
@@ -1555,7 +1604,8 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
    if(displayEnantiomer==true) en=-1;
    this->UpdateScattCompList();
    
-   const GLfloat colour_bond[]= { 0.5, .5, .5, 1.0 };
+   const GLfloat colour_bondnonfree[]= { 0.3, .3, .3, 1.0 };
+   const GLfloat colour_bondfree[]= { 0.7, .7, .7, 1.0 };
    const GLfloat colour0[] = {0.0f, 0.0f, 0.0f, 0.0f}; 
    
    GLUquadricObj* pQuadric = gluNewQuadric();
@@ -1741,7 +1791,10 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                         if(mvpAtom[n1]==&(mvpBond[k]->GetAtom1())) break;
                      for(n2=0;n2<mvpAtom.size();n2++)
                         if(mvpAtom[n2]==&(mvpBond[k]->GetAtom2())) break;
-                     glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,colour_bond);
+                     if(mvpBond[k]->IsFreeTorsion())
+                        glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,colour_bondfree);
+                     else
+                        glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,colour_bondnonfree);
                      glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0); 
                      glMaterialfv(GL_FRONT, GL_EMISSION,  colour0); 
                      glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
@@ -1894,6 +1947,16 @@ vector<MolBond*>::iterator Molecule::RemoveBond(const MolBond &bond)
 vector<MolBond*>::const_iterator Molecule::FindBond(const MolAtom &at1,const MolAtom &at2)const
 {
    for(vector<MolBond*>::const_iterator pos=mvpBond.begin();pos!=mvpBond.end();++pos)
+   {
+      if(  ((&((*pos)->GetAtom1())==&at1)&&(&((*pos)->GetAtom2())==&at2))
+         ||((&((*pos)->GetAtom1())==&at2)&&(&((*pos)->GetAtom2())==&at1)))
+         return pos;
+   }
+   return mvpBond.end();
+}
+vector<MolBond*>::iterator Molecule::FindBond(const MolAtom &at1,const MolAtom &at2)
+{
+   for(vector<MolBond*>::iterator pos=mvpBond.begin();pos!=mvpBond.end();++pos)
    {
       if(  ((&((*pos)->GetAtom1())==&at1)&&(&((*pos)->GetAtom2())==&at2))
          ||((&((*pos)->GetAtom1())==&at2)&&(&((*pos)->GetAtom2())==&at1)))
@@ -2077,6 +2140,9 @@ const map<unsigned long,set<unsigned long> > &Molecule::GetConnectivityTable()co
    return mConnectivityTable;
 }
 
+RefinableObjClock& Molecule::GetBondListClock(){return mClockBondList;}
+const RefinableObjClock& Molecule::GetBondListClock()const{return mClockBondList;}
+
 void Molecule::InitRefParList()
 {
 }
@@ -2187,7 +2253,7 @@ void Molecule::BuildRotorGroup()
    // Build Rotation groups around bonds
    for(unsigned long i=0;i<mvpBond.size();++i)
    {
-      
+      if((mFlexModel.GetChoice()!=0)&&(false==mvpBond[i]->IsFreeTorsion())) continue;
       const unsigned long atom1=index[&(mvpBond[i]->GetAtom1())];
       const unsigned long atom2=index[&(mvpBond[i]->GetAtom2())];
       for(unsigned int j=1;j<=2;++j)
@@ -2233,34 +2299,37 @@ void Molecule::BuildRotorGroup()
    #if 1
    // Build 'internal' rotation groups between random atoms
    //:TODO: This should be tried for *random* configuration of free torsion angles...
-   for(unsigned long atom1=0;atom1<this->GetAtomList().size();++atom1)
+   if(mFlexModel.GetChoice()==0)
    {
-      const set<unsigned long> *pConn=&(mConnectivityTable[atom1]);
-      for(unsigned long atom2=atom1+1;atom2<this->GetAtomList().size();++atom2)
+      for(unsigned long atom1=0;atom1<this->GetAtomList().size();++atom1)
       {
-         for(set<unsigned long>::const_iterator pos=pConn->begin();pos!=pConn->end();++pos)
+         const set<unsigned long> *pConn=&(mConnectivityTable[atom1]);
+         for(unsigned long atom2=atom1+1;atom2<this->GetAtomList().size();++atom2)
          {
-            if(*pos==atom2) continue;
-            mvRotorGroupInternal.push_back(RotorGroup(*(this->GetAtomList()[atom1]),
-                                                      *(this->GetAtomList()[atom2])));
-            mvRotorGroupInternal.back().mvRotatedAtomList.insert(atom1);
-            ExpandAtomGroupRecursive(*pos,mConnectivityTable,
-                                     mvRotorGroupInternal.back().mvRotatedAtomList,
-                                     atom2);
-            //Check if this chains leads to atom2
-            set<unsigned long>::const_iterator check
-                  =find(mvRotorGroupInternal.back().mvRotatedAtomList.begin(),
-                        mvRotorGroupInternal.back().mvRotatedAtomList.end(),atom2);
-            if(  (check==mvRotorGroupInternal.back().mvRotatedAtomList.end())
-               ||(mvRotorGroupInternal.back().mvRotatedAtomList.size()<3)
-               ||(mvRotorGroupInternal.back().mvRotatedAtomList.size()>=((mvpAtom.size()+1)/2)))
+            for(set<unsigned long>::const_iterator pos=pConn->begin();pos!=pConn->end();++pos)
             {
-               mvRotorGroupInternal.pop_back();
-            }
-            else
-            {
-               mvRotorGroupInternal.back().mvRotatedAtomList.erase(atom1);
-               mvRotorGroupInternal.back().mvRotatedAtomList.erase(atom2);
+               if(*pos==atom2) continue;
+               mvRotorGroupInternal.push_back(RotorGroup(*(this->GetAtomList()[atom1]),
+                                                         *(this->GetAtomList()[atom2])));
+               mvRotorGroupInternal.back().mvRotatedAtomList.insert(atom1);
+               ExpandAtomGroupRecursive(*pos,mConnectivityTable,
+                                        mvRotorGroupInternal.back().mvRotatedAtomList,
+                                        atom2);
+               //Check if this chains leads to atom2
+               set<unsigned long>::const_iterator check
+                     =find(mvRotorGroupInternal.back().mvRotatedAtomList.begin(),
+                           mvRotorGroupInternal.back().mvRotatedAtomList.end(),atom2);
+               if(  (check==mvRotorGroupInternal.back().mvRotatedAtomList.end())
+                  ||(mvRotorGroupInternal.back().mvRotatedAtomList.size()<3)
+                  ||(mvRotorGroupInternal.back().mvRotatedAtomList.size()>=((mvpAtom.size()+1)/2)))
+               {
+                  mvRotorGroupInternal.pop_back();
+               }
+               else
+               {
+                  mvRotorGroupInternal.back().mvRotatedAtomList.erase(atom1);
+                  mvRotorGroupInternal.back().mvRotatedAtomList.erase(atom2);
+               }
             }
          }
       }
@@ -2377,9 +2446,20 @@ void Molecule::BuildRotorGroup()
             --pos;
             cout <<" -> NOT a free torsion"<<endl;
          }
-         else cout <<" -> free torsion"<<endl;
+         else
+            cout <<" -> free torsion"<<endl;
       }
    }
+   // Label free torsions
+   for(vector<MolBond*>::iterator pos=mvpBond.begin();pos!=mvpBond.end();++pos)
+      (*pos)->SetFreeTorsion(false);
+   for(list<RotorGroup>::iterator pos=mvRotorGroupTorsion.begin();
+       pos!=mvRotorGroupTorsion.end();++pos)
+   {
+      vector<MolBond*>::iterator  bd=this->FindBond((*pos->mpAtom1),(*pos->mpAtom2));
+      if(bd!=mvpBond.end()) (*bd)->SetFreeTorsion(true);
+   }
+   
    mClockRotorGroup.Click();
    VFN_DEBUG_EXIT("Molecule::BuildRotorGroup()",5)
 }
@@ -2413,36 +2493,38 @@ void Molecule::BuildFlipGroup()
          for(set<unsigned long>::const_iterator pos2=pos1;pos2!=pConn->end();++pos2)
          {
             if(pos2==pos1) continue;
-            mvFlipGroup.push_back(FlipGroup(*mvpAtom[atom0],*mvpAtom[*pos1],*mvpAtom[*pos2]));
-            bool foundRing=false;
-            for(set<unsigned long>::const_iterator pos=pConn->begin();pos!=pConn->end();++pos)
+            if(mFlexModel.GetChoice()==0)
             {
-               if((pos==pos1)||(pos==pos2)) continue;
-               mvFlipGroup.back().mvRotatedChainList.push_back(
-                  make_pair(mvpAtom[*pos],set<unsigned long>()));
-               mvFlipGroup.back().mvRotatedChainList.back().second.insert(atom0);
-               ExpandAtomGroupRecursive(*pos,mConnectivityTable,
-                                        mvFlipGroup.back().mvRotatedChainList.back().second);
-               mvFlipGroup.back().mvRotatedChainList.back().second.erase(atom0);
-               set<unsigned long>::const_iterator ringdetect1,ringdetect2;
-               ringdetect1=find(mvFlipGroup.back().mvRotatedChainList.back().second.begin(),
-                                mvFlipGroup.back().mvRotatedChainList.back().second.end(),
-                                *pos1);
-               ringdetect2=find(mvFlipGroup.back().mvRotatedChainList.back().second.begin(),
-                                mvFlipGroup.back().mvRotatedChainList.back().second.end(),
-                                *pos2);
-               if(  (ringdetect1!=mvFlipGroup.back().mvRotatedChainList.back().second.end())
-                  ||(ringdetect2!=mvFlipGroup.back().mvRotatedChainList.back().second.end()))
-                  foundRing=true;
+               mvFlipGroup.push_back(FlipGroup(*mvpAtom[atom0],*mvpAtom[*pos1],*mvpAtom[*pos2]));
+               bool foundRing=false;
+               for(set<unsigned long>::const_iterator pos=pConn->begin();pos!=pConn->end();++pos)
+               {
+                  if((pos==pos1)||(pos==pos2)) continue;
+                  mvFlipGroup.back().mvRotatedChainList.push_back(
+                     make_pair(mvpAtom[*pos],set<unsigned long>()));
+                  mvFlipGroup.back().mvRotatedChainList.back().second.insert(atom0);
+                  ExpandAtomGroupRecursive(*pos,mConnectivityTable,
+                                           mvFlipGroup.back().mvRotatedChainList.back().second);
+                  mvFlipGroup.back().mvRotatedChainList.back().second.erase(atom0);
+                  set<unsigned long>::const_iterator ringdetect1,ringdetect2;
+                  ringdetect1=find(mvFlipGroup.back().mvRotatedChainList.back().second.begin(),
+                                   mvFlipGroup.back().mvRotatedChainList.back().second.end(),
+                                   *pos1);
+                  ringdetect2=find(mvFlipGroup.back().mvRotatedChainList.back().second.begin(),
+                                   mvFlipGroup.back().mvRotatedChainList.back().second.end(),
+                                   *pos2);
+                  if(  (ringdetect1!=mvFlipGroup.back().mvRotatedChainList.back().second.end())
+                     ||(ringdetect2!=mvFlipGroup.back().mvRotatedChainList.back().second.end()))
+                     foundRing=true;
+               }
+               unsigned long flipSize=0;
+               for(list<pair<const MolAtom *,set<unsigned long> > >::const_iterator 
+                   chain=mvFlipGroup.back().mvRotatedChainList.begin();
+                   chain!=mvFlipGroup.back().mvRotatedChainList.end();++chain)
+                   flipSize+=chain->second.size();
+
+               if(((flipSize*2)>mvpAtom.size())||foundRing) mvFlipGroup.pop_back();
             }
-            unsigned long flipSize=0;
-            for(list<pair<const MolAtom *,set<unsigned long> > >::const_iterator 
-                chain=mvFlipGroup.back().mvRotatedChainList.begin();
-                chain!=mvFlipGroup.back().mvRotatedChainList.end();++chain)
-                flipSize+=chain->second.size();
-            
-            if(((flipSize*2)>mvpAtom.size())||foundRing) mvFlipGroup.pop_back();
-            
             // Add the entry which will exchange atom1 and atom2 (this entry can be a ring)
             mvFlipGroup.push_back(FlipGroup(*mvpAtom[atom0],*mvpAtom[*pos1],*mvpAtom[*pos2]));
             mvFlipGroup.back().mvRotatedChainList.push_back(
@@ -2600,21 +2682,21 @@ void Molecule::InitOptions()
 {
    VFN_DEBUG_ENTRY("Molecule::InitOptions",10)
    static string Flexname;
-   static string Flexchoices[5];
+   static string Flexchoices[3];
    
    static bool needInitNames=true;
    if(true==needInitNames)
    {
       Flexname="Flexibility Model";
-      Flexchoices[0]="Free Atoms & Restraints";
+      Flexchoices[0]="Automatic from  Bond and Angle Restraints (recommended)";
       Flexchoices[1]="Rigid Body";
-      Flexchoices[2]="Rigid body (relaxed)";
-      Flexchoices[3]="Torsion Angles";
-      Flexchoices[4]="Torsion Angles (relaxed)";
+      Flexchoices[2]="User-Chosen Free Torsions";
+      //Flexchoices[3]="Rigid body (relaxed)";
+      //Flexchoices[4]="Torsion Angles (relaxed)";
       
       needInitNames=false;
    }
-   mFlexModel.Init(5,&Flexname,Flexchoices);
+   mFlexModel.Init(3,&Flexname,Flexchoices);
    mFlexModel.SetChoice(0);
    //this->AddOption(&mFlexModel);
    

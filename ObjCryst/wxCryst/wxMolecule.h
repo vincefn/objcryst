@@ -25,6 +25,19 @@
 
 namespace ObjCryst
 {
+class WXMolecule;
+// Scrolled window for bonds, bond angles and dihedral angles
+class WXMolScrolledWindow:public wxScrolledWindow
+{
+   public:
+      WXMolScrolledWindow(wxWindow* parent, WXMolecule* pWXMol);
+      virtual ~WXMolScrolledWindow();
+      //virtual bool Layout();
+   private:
+      /// The WXMolecule window which created this window, and who should be told
+      /// if it is destroyed.
+      WXMolecule* mpWXMolecule;
+};
 
 /// wx class for MolAtom objects
 class WXMolAtom:public WXCrystObjBasic
@@ -53,12 +66,15 @@ class WXMolBond:public WXCrystObjBasic
       virtual void UpdateUI();
       virtual bool Layout();
       void OnChangeAtom(wxCommandEvent &);
+      /// Toggle the 'free' status of the bond.
+      void OnToggleFree(wxCommandEvent & WXUNUSED(event));
    private:
       MolBond *mpMolBond;
       wxBoxSizer *mpSizer;
       WXCrystObjBasicList mList;
       WXFieldChoice* mpFieldAtom1;
       WXFieldChoice* mpFieldAtom2;
+      wxCheckBox *mpButtonFree;
    DECLARE_EVENT_TABLE()
 };
 
@@ -117,7 +133,13 @@ class WXMolecule: public WXScatterer
       void OnMenuRemoveAngle(wxCommandEvent & WXUNUSED(event));
       void OnMenuRemoveDihedralAngle(wxCommandEvent & WXUNUSED(event));
       void OnMenuSetLimits(wxCommandEvent &event);
+      void OnMenuShowBondList(wxCommandEvent &event);
+      void OnMenuShowBondAngleList(wxCommandEvent &event);
+      void OnMenuShowDihedralAngleList(wxCommandEvent &event);
       void OnMenuTest(wxCommandEvent &event);
+      /// Notify that either the bond, bond angle or dihedral angle list window has
+      /// been destroyed
+      void NotifyDeleteListWin(WXMolScrolledWindow *win);
       virtual void CrystUpdate();
       virtual void UpdateUI();
    private:
@@ -126,6 +148,9 @@ class WXMolecule: public WXScatterer
       wxBoxSizer* mpSizerBondList;
       wxBoxSizer* mpSizerAngleList;
       wxBoxSizer* mpSizerDihedralAngleList;
+      WXMolScrolledWindow* mpBondWin;
+      WXMolScrolledWindow* mpAngleWin;
+      WXMolScrolledWindow* mpDihedralAngleWin;
       /** Displayed list of atoms
       */
       vector<MolAtom*> mvpAtom;
