@@ -250,6 +250,9 @@ MolBond::MolBond(const MolAtom &atom1, const MolAtom &atom2,
 mAtomPair(make_pair(&atom1,&atom2)),
 mLength0(length0),mDelta(delta),mSigma(sigma),
 mBondOrder(bondOrder),mIsFreeTorsion(false),mpMol(&parent)
+#ifdef __WX__CRYST__
+,mpWXCrystObj(0)
+#endif
 {}
 
 MolBond::~MolBond()
@@ -423,6 +426,9 @@ MolBondAngle::MolBondAngle(const MolAtom &atom1,const  MolAtom &atom2,const  Mol
                            const REAL angle, const REAL sigma, const REAL delta,
                            Molecule &parent):
 mAngle0(angle),mDelta(delta),mSigma(sigma),mpMol(&parent)
+#ifdef __WX__CRYST__
+,mpWXCrystObj(0)
+#endif
 {
    mvpAtom.push_back(&atom1);
    mvpAtom.push_back(&atom2);
@@ -580,6 +586,9 @@ MolDihedralAngle::MolDihedralAngle(const MolAtom &atom1, const MolAtom &atom2,
                                    const REAL angle, const REAL sigma, const REAL delta,
                                    Molecule &parent):
 mAngle0(angle),mDelta(delta),mSigma(sigma),mpMol(&parent)
+#ifdef __WX__CRYST__
+,mpWXCrystObj(0)
+#endif
 {
    VFN_DEBUG_ENTRY("MolDihedralAngle::MolDihedralAngle()",5)
    mvpAtom.push_back(&atom1);
