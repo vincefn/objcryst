@@ -416,16 +416,9 @@ class ScatteringComponentList
       void operator++();
       /// Print the list of Scattering components. For debugging
       void Print() const;
-      /// Manually change the maximum number of scattering components 
-      /// (should be done automagically)
-      void ChangeMaxNbComponent(const long num);
    protected:
-      /// Number of components so far
-      long mNbComponent;
-      /// The array of components
-      ScatteringComponent* mpScattComp;
-      /// Max number of components to be allocated before increasing array size
-      long mMaxNbComponent;
+      /// The vector of components
+      vector<ScatteringComponent>  mvScattComp;
 };
 
 }//namespace

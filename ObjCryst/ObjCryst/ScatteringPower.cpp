@@ -770,8 +770,9 @@ bool ScatteringComponent::operator!=(const ScatteringComponent& rhs) const
 }
 void ScatteringComponent::Print()const
 {
-   cout <<mX<<" "<<mY<<" "<<mZ<<" "<<mOccupancy<<" "<<mDynPopCorr<<" "<<mpScattPow
-        <<" "<<mpScattPow->GetScatteringPowerId()<<" "<<mpScattPow->GetName()<<endl;
+   cout <<mX<<" "<<mY<<" "<<mZ<<" "<<mOccupancy<<" "<<mDynPopCorr<<" "<<mpScattPow;
+   if(0!=mpScattPow) cout <<" "<<mpScattPow->GetScatteringPowerId()<<" "<<mpScattPow->GetName();
+   cout<<endl;
 }
 
 //######################################################################
@@ -780,83 +781,58 @@ void ScatteringComponent::Print()const
 //
 //######################################################################
 
-ScatteringComponentList::ScatteringComponentList():
-mNbComponent(0),mpScattComp(0),mMaxNbComponent(0)
+ScatteringComponentList::ScatteringComponentList()
 {
 }
 
-ScatteringComponentList::ScatteringComponentList(const long nbComponent):
-mNbComponent(nbComponent),mpScattComp(0),mMaxNbComponent(nbComponent)
+ScatteringComponentList::ScatteringComponentList(const long nbComponent)
 {
-   mpScattComp=new ScatteringComponent[mMaxNbComponent];
+   mvScattComp.resize(nbComponent);
 }
 
 ScatteringComponentList::ScatteringComponentList(const ScatteringComponentList &old):
-mNbComponent(old.mNbComponent),mMaxNbComponent(old.mMaxNbComponent)
+mvScattComp(old.mvScattComp)
 {
-   mpScattComp=new ScatteringComponent[mMaxNbComponent];
-   for(long i=0;i<mNbComponent;i++) *(mpScattComp+i) = old(i);
 }
 
 ScatteringComponentList::~ScatteringComponentList()
 {
-   if(0 != mpScattComp) delete[] mpScattComp;
 }
 void ScatteringComponentList::Reset()
 {
-   mNbComponent=0;
+   mvScattComp.clear();
 }
 
 const ScatteringComponent& ScatteringComponentList::operator()(const long i) const
 {
    VFN_DEBUG_MESSAGE("ScatteringComponentList::operator()("<<i<<")",1)
-   if(i>=mNbComponent)
+   if(i>=this->GetNbComponent())
    {
       this->Print();
-      throw ObjCrystException("ScatteringComponentList::operator()(i)::\
- i>mNbComponent!!");
+      throw ObjCrystException("ScatteringComponentList::operator()(i)::i>mNbComponent!!");
    }
-   if(i<0) throw ObjCrystException("ScatteringComponentList::operator()&(i)::\
- i<0!!");
-   return *(mpScattComp+i);
+   if(i<0) throw ObjCrystException("ScatteringComponentList::operator()&(i)::i<0!!");
+   return mvScattComp.at(i);
 }
 
 ScatteringComponent& ScatteringComponentList::operator()(const long i)
 {
    VFN_DEBUG_MESSAGE("ScatteringComponentList::operator()&("<<i<<")",1)
-   if(i>=mNbComponent)
+   if(i>=this->GetNbComponent())
    {
       this->Print();
-      if(i>=mNbComponent) throw ObjCrystException("ScatteringComponentList::operator()&(i)::\
- i>mNbComponent!!");
+      throw ObjCrystException("ScatteringComponentList::operator()&(i)::i>mNbComponent!!");
    }
-   if(i<0) throw ObjCrystException("ScatteringComponentList::operator()&(i)::\
- i<0!!");
-   return *(mpScattComp+i);
+   if(i<0) throw ObjCrystException("ScatteringComponentList::operator()&(i):: i<0!!");
+   return mvScattComp.at(i);
 }
 
-long ScatteringComponentList::GetNbComponent() const {return mNbComponent;}
+long ScatteringComponentList::GetNbComponent() const {return mvScattComp.size();}
 
 void ScatteringComponentList::operator=(const ScatteringComponentList &rhs)
 {
    VFN_DEBUG_MESSAGE("ScatteringComponentList::operator=()",1)
-   this->Reset();
-   const long newNbComp=rhs.GetNbComponent();
-   if(newNbComp > mMaxNbComponent)
-   {//need to resize
-      mMaxNbComponent=newNbComp;
-      if(mpScattComp!=0) delete[] mpScattComp;
-      //VFN_DEBUG_MESSAGE("ScatteringComponentList::operator=():1",2)
-      mpScattComp=new ScatteringComponent[mMaxNbComponent];
-      //VFN_DEBUG_MESSAGE("ScatteringComponentList::operator=():2",2)
-   }
-   mNbComponent=newNbComp;
-   for(long i=0;i<mNbComponent;i++)
-   {
-      VFN_DEBUG_MESSAGE(".."<<i,0)
-      *(mpScattComp+i) = rhs(i);
-      //*(mpScattComp+i) = rhs(i-mNbComponent);
-   }
+   mvScattComp=rhs.mvScattComp;
    VFN_DEBUG_MESSAGE("ScatteringComponentList::operator=():End",0)
 }
 bool ScatteringComponentList::operator==(const ScatteringComponentList &rhs)const
@@ -869,46 +845,19 @@ bool ScatteringComponentList::operator==(const ScatteringComponentList &rhs)cons
 
 void ScatteringComponentList::operator+=(const ScatteringComponentList &rhs)
 {
-   const long newNbComp=mNbComponent+rhs.GetNbComponent();
-   if(newNbComp >= mMaxNbComponent)
-   {//need to resize
-      ScatteringComponent* pScattComp=mpScattComp;
-      //:TODO: Check this works all right (error messages in window$ to this line, among others)
-      mpScattComp=new ScatteringComponent[newNbComp];
-      mMaxNbComponent=newNbComp;
-      if(pScattComp!=0)
-      {
-         for(long i=0;i<mNbComponent;i++) *(mpScattComp+i) = *(pScattComp+i);
-         delete[] pScattComp;
-      }
-   }
-   for(long i=mNbComponent;i<newNbComp;i++) 
-      *(mpScattComp+i) = rhs(i-mNbComponent);
-   mNbComponent=newNbComp;
+   for(long i=0;i<rhs.GetNbComponent();i++) 
+      mvScattComp.push_back(rhs(i));
 }
 void ScatteringComponentList::operator+=(const ScatteringComponent &rhs)
 {
    VFN_DEBUG_MESSAGE("ScatteringComponentList::operator+=()",1)
-   ++(*this);
-   *(mpScattComp + mNbComponent-1) = rhs;
+   mvScattComp.push_back(rhs);
 }
 
 void ScatteringComponentList::operator++()
 {
    VFN_DEBUG_MESSAGE("ScatteringComponentList::operator++()",1)
-   const long newNbComp=mNbComponent+1;
-   if(newNbComp >= mMaxNbComponent)
-   {//need to resize
-      ScatteringComponent* pScattComp=mpScattComp;
-      mpScattComp=new ScatteringComponent[newNbComp];
-      mMaxNbComponent=newNbComp;
-      if(pScattComp!=0)
-      {
-         for(long i=0;i<mNbComponent;i++) *(mpScattComp+i) = *(pScattComp+i);
-         delete[] pScattComp;
-      }
-   }
-   mNbComponent++;
+   mvScattComp.resize(this->GetNbComponent()+1);
 }
 
 void ScatteringComponentList::Print()const
@@ -918,25 +867,9 @@ void ScatteringComponentList::Print()const
    for(long i=0;i<this->GetNbComponent();i++)
    {
       cout << i<<":";
-      (mpScattComp+i)->Print();
+      (*this)(i).Print();
    }
    VFN_DEBUG_EXIT("ScatteringComponentList::Print()",5)
-}
-
-void ScatteringComponentList::ChangeMaxNbComponent(const long num)
-{
-   VFN_DEBUG_MESSAGE("ScatteringComponentList::ChangeMaxNbComponents(num)",2)
-   if(num >= mMaxNbComponent)
-   {//need to resize
-      mMaxNbComponent=num;
-      ScatteringComponent* pScattComp=mpScattComp;
-      mpScattComp=new ScatteringComponent[mMaxNbComponent];
-      if(pScattComp!=0)
-      {
-         for(long i=0;i<mNbComponent;i++) *(mpScattComp+i) = *(pScattComp+i);
-         delete[] pScattComp;
-      }
-   }
 }
 
 }//namespace
