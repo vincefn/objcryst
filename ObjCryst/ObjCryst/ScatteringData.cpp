@@ -351,9 +351,9 @@ ScatteringData::~ScatteringData()
    //if(0 != mpCrystal) mpCrystal->DeRegisterClient(*this);
 }
 
-void ScatteringData::SetHKL( CrystVector_REAL const &h,
-                     CrystVector_REAL const &k,
-                     CrystVector_REAL const &l)
+void ScatteringData::SetHKL(const CrystVector_REAL &h,
+                     		 const CrystVector_REAL &k,
+                     		 const CrystVector_REAL &l)
 {
    VFN_DEBUG_ENTRY("ScatteringData::SetHKL(h,k,l)",5)
    mNbRefl=h.numElements();

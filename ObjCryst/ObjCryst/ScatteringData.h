@@ -188,9 +188,9 @@ class ScatteringData: virtual public RefinableObj
       * \param h,k,l: REAL arrays (vectors with NbRefl elements -same size),
       *with the h, k and l coordinates of all reflections.
       */
-      virtual void SetHKL( CrystVector_REAL const &h,
-                           CrystVector_REAL const &k,
-                           CrystVector_REAL const &l);
+      virtual void SetHKL( const CrystVector_REAL &h,
+                           const CrystVector_REAL &k,
+                           const CrystVector_REAL &l);
       /** \brief Generate a list of h,k,l to describe a full reciprocal space, 
       * up to a given maximum theta value
       *

@@ -81,11 +81,11 @@ DiffractionDataSingleCrystal* DiffractionDataSingleCrystal::CreateCopy()const
 const string DiffractionDataSingleCrystal::GetClassName() const
 {return "DiffractionDataSingleCrystal";}
 
-void DiffractionDataSingleCrystal::SetHklIobs(CrystVector_long const &h,
-                                              CrystVector_long const &k,
-                                              CrystVector_long const &l,
-                                              CrystVector_REAL const &iObs,
-                                              CrystVector_REAL const &sigma)
+void DiffractionDataSingleCrystal::SetHklIobs(const CrystVector_long &h,
+                                              const CrystVector_long &k,
+                                              const CrystVector_long &l,
+                                              const CrystVector_REAL &iObs,
+                                              const CrystVector_REAL &sigma)
 {
    VFN_DEBUG_ENTRY("DiffractionDataSingleCrystal::SetHklIobs(h,k,l,i,s)",5)
    mNbRefl=h.numElements();

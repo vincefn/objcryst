@@ -95,11 +95,11 @@ class DiffractionDataSingleCrystal:public ScatteringData
       *with the Observed intensity and sigma for all reflections.
       *
       */
-      void SetHklIobs(  CrystVector_long const &h,
-                        CrystVector_long const &k,
-                        CrystVector_long const &l,
-                        CrystVector_REAL const &iObs,
-                        CrystVector_REAL const &sigma);
+      void SetHklIobs(const CrystVector_long &h,
+                      const CrystVector_long &k,
+                      const CrystVector_long &l,
+                      const CrystVector_REAL &iObs,
+                      const CrystVector_REAL &sigma);
       
       /** \brief Import h,k,l,I form a file
       *
