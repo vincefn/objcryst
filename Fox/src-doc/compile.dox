@@ -63,6 +63,13 @@ Requirements:
    Add the WXWIN variable to your environment (<tt>set WXWIN=C:\dev\wxWindows</tt>)
 
    then (in a DOS/Command prompt) go to the <tt>C:\dev\wxWindows\src\msw\ </tt> directory, and type: <tt>make -f makefile.b32 FINAL=1</tt>
+   
+   \b NOTE: if you want to use <b>wxWindows 2.4.1</b> (works, but not very well with Fox presently, there are a few graphical glitches), you will need several changes \e after compiling wxWindows, \e before compiling Fox:
+   <ul>
+      <li>copy <tt>wxWindows/src/msw/wxw32.cfg</tt> to <tt>wxWindows/src/msw/wxwin32.cfg</tt>
+      <li>copy <tt>wxWindows/lib/wx24s_bcc.lib</tt> to <tt>wxWindows/lib/wx32.lib</tt>
+      <li>edit <tt>Fox/ObjCryst/rules.mak</tt>, search for <tt>xpm.lib</tt> and remove it.
+   </ul>
 </ul>
 <h2>Get the source of Fox</h2>
 
