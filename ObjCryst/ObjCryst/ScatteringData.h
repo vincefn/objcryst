@@ -343,14 +343,6 @@ class ScatteringData: virtual public RefinableObj
       CrystVector_long EliminateExtinctReflections();
       
       //The following functions are used during the calculation of structure factors,
-         /// \internal Get the list of scattering components, and check what needs to
-         /// be recomputed to get the new structure factors. No calculation is made in
-         /// this function. Just getting prepared...
-         /// \todo Clean up the code, which is a really unbelievable mess (but working!)
-         ///
-         /// Currently using flags to decide what should be recomputed, whereas
-         /// Clocks should be used. a LOT of cleaning is necessary
-         virtual void PrepareCalcStructFactor()const;
          /// \internal Compute sin(theta)/lambda as well a orthonormal coordinates 
          /// for all reflections. theta and tan(theta), 
          /// are also re-computed, provided a wavelength has been supplied.
@@ -376,7 +368,7 @@ class ScatteringData: virtual public RefinableObj
       *uses the corresponding scattering factor/length.
       *
       *  \return the result (real and imaginary part of the structure factor)
-      * (mRealFhklCalc, mImagFhklCalc) are stored within ScatteringData.
+      * (mRealFhklCalc, mImagFhklCalc) are stored in ScatteringData.
       */
       void CalcStructFactor() const;
 
@@ -384,12 +376,7 @@ class ScatteringData: virtual public RefinableObj
       * of the Crystal
       *
       */
-      void CalcGeomStructFactor(const ScatteringComponentList &scattCompList,
-                                const SpaceGroup &spg,
-                                const CrystVector_long &structFactorIndex,
-                                CrystVector_REAL* rsf2,
-                                CrystVector_REAL* isf2,
-                                bool useFastTabulatedTrigFunctions=false) const;
+      void CalcGeomStructFactor() const;
       /** Calculate the Luzzati factor associated to each ScatteringPower and
       * each reflection, for maximum likelihood optimization.
       * 
@@ -459,17 +446,19 @@ class ScatteringData: virtual public RefinableObj
          mutable CrystVector_REAL mTheta;
 
          /// Anomalous X-Ray scattering term f' and f" are stored here for each ScatteringPower 
-         /// We assume yet that data is monochromatic, but this could be specialized.
-         mutable CrystVector_REAL mFprime,mFsecond;
+         /// We store here only a value. For multi-wavelength support this should be changed
+         /// to a vector... or to a matrix to take into account anisotropy of anomalous
+         /// scattering...
+         mutable map<const ScatteringPower*,REAL> mvFprime,mvFsecond;
 
-         ///Thermic factors as mNbScatteringPower vectors with NbRefl elements
-         mutable CrystVector_REAL* mpTemperatureFactor;
+         /// Thermic factors for each ScatteringPower, as vectors with NbRefl elements
+         mutable map<const ScatteringPower*,CrystVector_REAL> mvTemperatureFactor;
 
-         ///Scattering factors as mNbScatteringPower vectors with NbRefl elements
-         mutable CrystVector_REAL* mpScatteringFactor;
+         /// Scattering factors for each ScatteringPower, as vectors with NbRefl elements
+         mutable map<const ScatteringPower*,CrystVector_REAL> mvScatteringFactor;
       
-         ///Geometrical Structure factor for all reflection and ScatteringPower
-         mutable CrystVector_REAL* mpRealGeomSF,*mpImagGeomSF;
+         /// Geometrical Structure factor for each ScatteringPower, as vectors with NbRefl elements
+         mutable map<const ScatteringPower*,CrystVector_REAL> mvRealGeomSF,mvImagGeomSF;
       
       //Public Clocks
          /// Clock for the list of hkl
@@ -495,26 +484,6 @@ class ScatteringData: virtual public RefinableObj
          /// last time the global temperature factor was computed
          mutable RefinableObjClock mClockGlobalTemperatureFact;
       
-      // Info about the Scattering components and powers
-         /// Pointer to the ScatteringComponentList of the crystal.
-         mutable const ScatteringComponentList* mpScattCompList;
-         /// Index of the storage for scattering information. This array as the same size as
-         /// the total number of ScatteringPower, and for each we give the index of where
-         /// their scattering, temperature and resonant factors are stored.
-         /// THIS IS AWFULLY KLUDGE-ESQUE !!!
-         mutable CrystVector_long mScatteringPowerIndex;
-         /// This is the reverse index. KLUDGEEEEEEEE !!!
-         mutable CrystVector_long mScatteringPowerIndex2;
-         /// Total number os ScatteringPower used for this DiffractionData
-         mutable long mNbScatteringPower;
-      // :TODO: This must be replaced by Clocks...
-         mutable ScatteringComponentList mLastScattCompList;
-         mutable bool mAnomalousNeedRecalc;
-         mutable bool mThermicNeedRecalc;
-         mutable bool mScattFactNeedRecalc;
-         mutable bool mGeomFhklCalcNeedRecalc;
-         mutable bool mFhklCalcNeedRecalc;
-
       /** \brief Ignore imaginary part of scattering factor.
       *
       * This can be used either to speed up computation, or when f"
@@ -550,7 +519,7 @@ class ScatteringData: virtual public RefinableObj
       
       // Maximum Likelihood
          /// The Luzzati 'D' factor for each scattering power and each reflection
-         mutable vector<CrystVector_REAL> mvLuzzatiFactor;
+         mutable map<const ScatteringPower*,CrystVector_REAL> mvLuzzatiFactor;
          /** The variance on all calculated structure factors, taking into account
          * the positionnal errors and the expected intensity factor.
          *
