@@ -3837,7 +3837,8 @@ void PowderPattern::PrepareIntegratedRfactor()const
          mIntegratedObs   (i)+=mPowderPatternObs(j);
          mIntegratedVarianceObs(i)+=mPowderPatternObsSigma(j)*mPowderPatternObsSigma(j);
       }
-      mIntegratedWeight(i)=1./mIntegratedVarianceObs(i);
+      if(mIntegratedVarianceObs(i) <= 0) mIntegratedWeight(i)=0;
+      else mIntegratedWeight(i)=1./mIntegratedVarianceObs(i);
    }
    
 
