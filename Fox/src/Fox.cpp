@@ -100,6 +100,7 @@ public:
    void OnQuit(wxCommandEvent& WXUNUSED(event));
    void OnAbout(wxCommandEvent& WXUNUSED(event));
    void OnLoad(wxCommandEvent& event);
+   void OnClose(wxCommandEvent& event);
    void OnSave(wxCommandEvent& WXUNUSED(event));
    void OnAddCrystal(wxCommandEvent& WXUNUSED(event));
    void OnAddPowderPattern(wxCommandEvent& WXUNUSED(event));
@@ -112,6 +113,7 @@ public:
    void OnToggleTooltips(wxCommandEvent& event);
 private:
     DECLARE_EVENT_TABLE()
+    RefinableObjClock mClockLastSave;
 };
 // ----------------------------------------------------------------------------
 // For messaging the user
@@ -130,7 +132,7 @@ static const long MENU_FILE_QUIT=                      WXCRYST_ID();
 static const long MENU_HELP_ABOUT=                     WXCRYST_ID();
 static const long MENU_HELP_TOGGLETOOLTIP=             WXCRYST_ID();
 static const long MENU_FILE_LOAD=                      WXCRYST_ID();
-static const long MENU_FILE_LOAD_OXY=                  WXCRYST_ID();
+static const long MENU_FILE_CLOSE=                     WXCRYST_ID();
 static const long MENU_FILE_SAVE=                      WXCRYST_ID();
 static const long MENU_OBJECT_CREATE_CRYSTAL=          WXCRYST_ID();
 static const long MENU_OBJECT_CREATE_POWDERSPECTRUM=   WXCRYST_ID();
@@ -161,7 +163,7 @@ BEGIN_EVENT_TABLE(WXCrystMainFrame, wxFrame)
    EVT_MENU(MENU_HELP_ABOUT, WXCrystMainFrame::OnAbout)
    EVT_MENU(MENU_HELP_TOGGLETOOLTIP, WXCrystMainFrame::OnToggleTooltips)
    EVT_MENU(MENU_FILE_LOAD, WXCrystMainFrame::OnLoad)
-   EVT_MENU(MENU_FILE_LOAD_OXY, WXCrystMainFrame::OnLoad)
+   EVT_MENU(MENU_FILE_CLOSE, WXCrystMainFrame::OnClose)
    EVT_MENU(MENU_FILE_SAVE, WXCrystMainFrame::OnSave)
    EVT_MENU(MENU_OBJECT_CREATE_CRYSTAL, WXCrystMainFrame::OnAddCrystal)
    EVT_MENU(MENU_OBJECT_CREATE_POWDERSPECTRUM, WXCrystMainFrame::OnAddPowderPattern)
@@ -264,7 +266,7 @@ int main (int argc, char *argv[])
             outfilename=string(argv[i]);
             filenameInsertCost = outfilename.find("#cost",0);
             cout <<"Fox:#cost, pos="<<filenameInsertCost<<","<<string::npos<<endl;
-            if(string::npos==filenameInsertCost) filenameInsertCost=-1;
+            if((long)(string::npos)==filenameInsertCost) filenameInsertCost=-1;
             continue;
          }
          if(string("--loadfouriergrd")==string(argv[i]))
@@ -349,7 +351,7 @@ int main (int argc, char *argv[])
    
    WXCrystMainFrame *frame ;
    
-   frame = new WXCrystMainFrame("FOX: Free Objects for Xtal structures v1.6.1CVS",
+   frame = new WXCrystMainFrame("FOX: Free Objects for Xtal structures v1.6.2CVS",
                                  wxPoint(50, 50), wxSize(550, 400),
                                  !(loadFourierGRD||loadFourierDSN6));
    // Use the main frame status bar to pass messages to the user
@@ -450,10 +452,10 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
 
    // create a menu bar
       wxMenu *menuFile = new wxMenu;//
-         menuFile->Append(MENU_FILE_LOAD, "Load", "Load some objects");
-         //menuFile->Append(MENU_FILE_LOAD_OXY,"Load OLD .OXY","Load using the old .oxy format");
-         menuFile->Append(MENU_FILE_SAVE, "Save", "Save Everything...");
-         menuFile->Append(MENU_FILE_QUIT, "E&xit\tAlt-Q", "Quit ");
+         menuFile->Append(MENU_FILE_LOAD, "&Open\tCtrl-O", "Open .xml file");
+         menuFile->Append(MENU_FILE_CLOSE, "Close\tCtrl-W", "Close all");
+         menuFile->Append(MENU_FILE_SAVE, "&Save\tCtrl-S", "Save Everything...");
+         menuFile->Append(MENU_FILE_QUIT, "E&xit\tCtrl-Q", "Quit ");
       
       wxMenu *objectMenu = new wxMenu("", wxMENU_TEAROFF);
          objectMenu->Append(MENU_OBJECT_CREATE_CRYSTAL, "New Crystal",
@@ -551,6 +553,22 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
 
 void WXCrystMainFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
+   bool saved=true;
+   for(int i=0;i<gRefinableObjRegistry.GetNb();i++)
+      if(gRefinableObjRegistry.GetObj(i).GetClockMaster()>mClockLastSave)
+      {
+         saved=false;
+         break;
+      }
+   if(!saved)
+   {
+      wxString msg;
+      msg.Printf( _T("Some objects have not been saved\n")
+               _T("Do you really want to exit ?"));
+
+      wxMessageDialog d(this,msg, "Are you sure ?", wxOK | wxCANCEL);
+      if(wxID_OK!=d.ShowModal()) return;
+   }
    // TRUE is to force the frame to close
    Close(TRUE);
 }
@@ -559,8 +577,8 @@ void WXCrystMainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
    wxString msg;
    msg.Printf( _T("F.O.X. - Free Objects for Xtal structures\n")
-               _T("Version 1.6.1CVS\n\n")
-               _T("(c) 2000-2003 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n")
+               _T("Version 1.6.2CVS\n\n")
+               _T("(c) 2000-2005 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n")
                _T("    2000-2001 Radovan CERNY, University of Geneva\n\n")
                _T("http://objcryst.sourceforge.net\n")
                _T("http://www.ccp14.ac.uk/ccp/web-mirrors/objcryst/ (Mirror)\n\n")
@@ -583,6 +601,33 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
    }
    open->Destroy();
 }
+void WXCrystMainFrame::OnClose(wxCommandEvent& event)
+{
+   bool saved=true;
+   for(int i=0;i<gRefinableObjRegistry.GetNb();i++)
+      if(gRefinableObjRegistry.GetObj(i).GetClockMaster()>mClockLastSave)
+      {
+         saved=false;
+         break;
+      }
+   if(!saved)
+   {
+      wxString msg;
+      msg.Printf( _T("Some objects have not been saved\n")
+               _T("Do you really want to close all objects ?"));
+
+      wxMessageDialog d(this,msg, "Are you sure ?", wxOK | wxCANCEL);
+      if(wxID_OK!=d.ShowModal()) return;
+   }
+   cout<<"Removing all Optimization objects..."<<endl;
+   gOptimizationObjRegistry.DeleteAll();
+   cout<<"Removing all DiffractionDataSingleCrystal objects..."<<endl;
+   gDiffractionDataSingleCrystalRegistry.DeleteAll();
+   cout<<"Removing all PowderPattern objects..."<<endl;
+   gPowderPatternRegistry.DeleteAll();
+   cout<<"Removing all Crystal objects..."<<endl;
+   gCrystalRegistry.DeleteAll();
+}
 void WXCrystMainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
 {
    WXCrystValidateAllUserInput();
@@ -591,6 +636,7 @@ void WXCrystMainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
    if(open->ShowModal() != wxID_OK) return;
    XMLCrystFileSaveGlobal(open->GetPath().c_str());
    open->Destroy();
+   mClockLastSave.Click();
 }
 void WXCrystMainFrame::OnAddCrystal(wxCommandEvent& WXUNUSED(event))
 {
