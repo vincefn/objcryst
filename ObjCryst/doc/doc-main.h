@@ -9,7 +9,7 @@
 *  This file includes only documentation, to be formatted automatically by doxygen.
 */
 
-/*! \mainpage ObjCryst++ Object-Oriented Crystallographic Library
+/*! \mainpage %ObjCryst++ Object-Oriented Crystallographic Library
 *
 *\section index Index
 *  \li <a href="http://objcryst.sourceforge.net/">ObjCryst++ Homepage</a>
@@ -47,14 +47,14 @@
 * the object-oriented design of this library and why it is good for its expandability.
 * 
 *\par Contributors
-* Programmation: Vincent Favre-Nicolin (http://www.unige.ch/crystal/favrev/),
+* Programmation: Vincent Favre-Nicolin (http://v.favrenicolin.free.fr/),
 * <a href="mailto:vincefn@users.sourceforge.net">vincefn@users.sourceforge.net</a>
 *\par 
-* This project is being done in the laboratory of Crystallography of the University
+* This project has been initiated in the laboratory of Crystallography of the University
 * of Geneva (http://www.unige.ch/crystal/), and is part of the development of a global
 * optimization program with Radovan Cerny (http://www.unige.ch/crystal/cerny/rcerny.htm).
 * \par
-* This project is supported by the <a href="http://www.snf.ch/">Swiss
+* This project has been supported by the <a href="http://www.snf.ch/">Swiss
 * National Science Foundation</a>.
 * 
 *\par 

@@ -3,8 +3,8 @@
 * If you have a question you can 
 * <a href="mailto:vincefn@users.sourceforge.net"> drop me an email</a>
 *
-*
-*\section status Current Status
+*/
+/*\section status Current Status
 * The Library is moving along beta stage. The interface has been changed to
 * a better design, especially for the scattering/diffraction class. The RefinableObj
 * is also being improved to be more 'generic' and easier to use with varied algorithms.
@@ -50,14 +50,22 @@
 * <a href="http://objcryst.sourceforge.net"> Fox program</a>, but the GUI
 * interface can be used for any other purpose. It is of course possible
 * to use ObjCryst++ without the wxObjCryst part.
-*
-*
+*/
+/**
 *
 *\section history History
-*\par 1.? 
-*\li ZScatterer: worked a bit on ZScatterer::GlobalOptimiRandomMove(),
-* to give the possibility of making not-so-random moves, especially for
-* small molecules.
+*\par 1.1 
+* \li INCOMPATIBLE CHANGES:GlobalOptimObj has been replaced by MonteCarloObj,
+* RefinableObj::GetClassName now returns a "const string&", and 
+* RefinableObj::BeginOptimization has two parameters, to enable
+* approximations and restraints
+* \li now one can choose either float or double for precision. The default
+* is float for global optimization.
+* \li Changed RefinableObj::BeginOptimization to pass two flags to enable
+* approximations (faster) and restraints before beginning an optimization.
+* \li ZScatterer: worked on ZScatterer::GlobalOptimRandomMove(),
+* to give the possibility of making 'smart' moves, especially for
+* molecules.
 * \li Scatterer: removed the ZScatterer::Update() function from the base
 * Scatterer class, as previously scheduled.
 * \li OptimizationObj: Forked the algorithms classes, with a base OptimizationObj
@@ -65,7 +73,10 @@
 * old GlobalOptimiObj class, for simulated annealing and parallel
 * tempering). Also added a tentative GeneticAlgorithm class, still
 * in very early development and not usable yet for the common mortal.
-*
+* \li restraints: added base Restraint class, not really used so far.
+* \li cleaned up a bit wxCryst classes in the hope to remove any GUI
+* bugs. Still some crashes under windows, unfortunately...
+* 
 *\par 1.02(2001-nov 12th)
 * \li PowderPattern: Added the input format for Sietronics (.cpi) files.
 * Now importing data will allow null points without crashing. Also
