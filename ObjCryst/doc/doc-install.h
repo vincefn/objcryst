@@ -67,8 +67,9 @@
 *     GNU compiler gcc </a>, version 2.95.3 (release) or more recent (not tested yet on
 *		gcc 3.0+).
 *\par Windows
-*     The library has been tested under windows (NT,98) using the free Borland C++
-*		compiler. As for the cygwin gcc port, I encountered a few
+*     The library has been tested under windows (NT,98) using the 
+*		<a href="http://www.borland.com/bcppbuilder/freecompiler/"> 
+*		free Borland C++ compiler 5.5</a>. As for the cygwin gcc port, I encountered a few
 *		problems with the standard library packaged with it so it does not work now.
 *\par Macintosh
 *     The library can also be compiled on MacOS, using <a href="http://www.metrowerks.com">
@@ -83,9 +84,10 @@
 *		make FINAL=1
 *		\endcode (this will take some time)
 *
-*		Under windows, follow the compile instruction in wxWindows doc, and make sure
+*		Under windows, follow the compile instruction for Borland C++ 5.5
+*		in the wxWindows documentation, and make sure
 *  	you (i) activate opengl support and (ii) deactivate debug-context in setup.h.
-*     you can leave all other options at default values.
+*     You can leave all other options at default values.
 *		
 *\section example Example
 *		There is a short example in the ObjCryst/example/pbso4 directory. 
