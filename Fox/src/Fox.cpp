@@ -46,6 +46,7 @@
 #include "ObjCryst/Crystal.h"
 #include "ObjCryst/PowderPattern.h"
 #include "ObjCryst/DiffractionDataSingleCrystal.h"
+#include "ObjCryst/Polyhedron.h"
 #include "RefinableObj/GlobalOptimObj.h"
 //#include "RefinableObj/GeneticAlgorithm.h"
 #include "wxCryst/wxCrystal.h"
@@ -279,9 +280,10 @@ bool MyApp::OnInit()
    
    if(!useGUI)
    {
-      for(int i=0;i<gOptimizationObjRegistry.GetNb();i++)
-         for(int j=0;j<5;j++)
-            gOptimizationObjRegistry.GetObj(i).Optimize(nbTrial,silent,finalCost);
+      if(nbTrial!=0)
+         for(int i=0;i<gOptimizationObjRegistry.GetNb();i++)
+            for(int j=0;j<5;j++)
+               gOptimizationObjRegistry.GetObj(i).Optimize(nbTrial,silent,finalCost);
       XMLCrystFileSaveGlobal(outfilename);
       cout <<"End of Fox execution. Bye !"<<endl;
       exit (1);
@@ -289,7 +291,7 @@ bool MyApp::OnInit()
    
    WXCrystMainFrame *frame ;
    
-   frame = new WXCrystMainFrame("FOX: Free Objects for Xtal structures v1.5CVS",
+   frame = new WXCrystMainFrame("FOX: Free Objects for Xtal structures v1.5",
                                  wxPoint(50, 50), wxSize(550, 400),!loadFourier);
    // Use the main frame status bar to pass messages to the user
       pMainFrameForUserMessage=frame;
@@ -358,7 +360,7 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
          wxMenu *debugMenu = new wxMenu;
             debugMenu->Append(MENU_DEBUG_TEST1, "Test #1");
             debugMenu->Append(MENU_DEBUG_TEST2, "Test #2");
-            debugMenu->Append(MENU_DEBUG_TEST3, "Test #2");
+            debugMenu->Append(MENU_DEBUG_TEST3, "Test #3");
             debugMenu->Append(MENU_DEBUG_LEVEL0, "Debug level 0 (lots of messages)");
             debugMenu->Append(MENU_DEBUG_LEVEL1, "Debug level 1");
             debugMenu->Append(MENU_DEBUG_LEVEL2, "Debug level 2");
@@ -534,8 +536,8 @@ void WXCrystMainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
    wxString msg;
    msg.Printf( _T("F.O.X. - Free Objects for Xtal structures\n")
-               _T("Version 1.5CVS\n\n")
-               _T("(c) 2000-2002 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n")
+               _T("Version 1.5\n\n")
+               _T("(c) 2000-2003 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n")
                _T("    2000-2001 Radovan CERNY, University of Geneva\n\n")
                _T("http://objcryst.sourceforge.net\n")
                _T("http://www.ccp14.ac.uk/ccp/web-mirrors/objcryst/ (Mirror)\n\n")
@@ -638,8 +640,40 @@ void WXCrystMainFrame::OnDebugTest(wxCommandEvent& event)
    }
    if(event.GetId()== MENU_DEBUG_TEST3)
    {
-      gScattererRegistry.GetObj(0).RestoreParamSet(saveId2);
-      gCrystalRegistry.GetObj(0).UpdateDisplay();
+      Crystal *cryst=new Crystal(25.,30.,35.,"P1");
+      ScatteringPowerAtom *ScattPowS=new ScatteringPowerAtom("S" ,"S",0.74);
+      ScatteringPowerAtom *ScattPowO=new ScatteringPowerAtom("O","O",1.87);
+      cryst->AddScatteringPower(ScattPowS);
+      cryst->AddScatteringPower(ScattPowO);
+      Molecule *mol;
+      mol=MakeTetrahedron(*cryst,"SO4",ScattPowS,ScattPowO,1.5);
+      mol->RestraintStatus(cout);cryst->AddScatterer(mol);
+      
+      mol=MakeOctahedron(*cryst,"SO6",ScattPowS,ScattPowO,1.5);
+      mol->RestraintStatus(cout);cryst->AddScatterer(mol);
+      
+      mol=MakeSquarePlane(*cryst,"SO6",ScattPowS,ScattPowO,1.5);
+      mol->RestraintStatus(cout);cryst->AddScatterer(mol);
+      
+      mol=MakeCube(*cryst,"SO8",ScattPowS,ScattPowO,1.5);
+      mol->RestraintStatus(cout);cryst->AddScatterer(mol);
+      
+      mol=MakePrismTrigonal(*cryst,"SO6",ScattPowS,ScattPowO,1.5);
+      mol->RestraintStatus(cout);cryst->AddScatterer(mol);
+      
+      mol=MakeIcosahedron(*cryst,"SO12",ScattPowS,ScattPowO,1.5);
+      mol->RestraintStatus(cout);cryst->AddScatterer(mol);
+      
+      mol=MakeTriangle(*cryst,"SO3",ScattPowS,ScattPowO,1.5);
+      mol->RestraintStatus(cout);cryst->AddScatterer(mol);
+      
+      mol=MakeAntiPrismTetragonal(*cryst,"SO8",ScattPowS,ScattPowO,1.5);
+      mol->RestraintStatus(cout);cryst->AddScatterer(mol);
+
+      cryst->RandomizeConfiguration();
+      WXCrystal *pWXCryst=dynamic_cast<WXCrystal*> (gCrystalRegistry.GetObj(0).WXGet());
+      wxCommandEvent com;
+      pWXCryst->OnMenuCrystalGL(com);
    }
 }
 
