@@ -323,6 +323,11 @@ void WXCrystal::NotifyCrystalGLDelete()
    VFN_DEBUG_MESSAGE("WXCrystal::NotifyCrystalGLDelete()",7)
    mpCrystalGL=0;
 }
+WXGLCrystalCanvas * WXCrystal::GetCrystalGL()
+{
+   VFN_DEBUG_MESSAGE("WXCrystal::GetCrystalGL()",7)
+   return mpCrystalGL;
+}
 #endif
 
 void WXCrystal::OnMenuSaveCIF(wxCommandEvent & WXUNUSED(event))
@@ -1397,99 +1402,101 @@ void WXGLCrystalCanvas::OnShowCrystal()
 //read fourier map from 0.0 to 1.0 on all axis
 void WXGLCrystalCanvas::OnLoadFourier()
 {
-   wxFileDialog * fd = new wxFileDialog((wxWindow*)this, "Choose a file containing a Fourier Map",
+   wxFileDialog fd((wxWindow*)this, "Choose a file containing a Fourier Map",
            "", "", "Fourier Map files (*.grd)|*.grd", wxOPEN | wxHIDE_READONLY | wxFILE_MUST_EXIST);
    //if okay then read Fourier map, run MC on it and display the triangles
-   if(fd->ShowModal() == wxID_OK)
+   if(fd.ShowModal() == wxID_OK)
    {
-      int err;
-      ifstream ffile(fd->GetFilename().c_str());
-      if(!ffile.is_open())
-      {     //if file could not be loaded for some reason then exit
-         wxMessageDialog * error_open = new wxMessageDialog((wxWindow*)this, "Error opening file " +
-                       fd->GetFilename(), "File Open Error");
-         err = error_open->ShowModal();
-         delete error_open;
-         return;
-      }
-      //message for reporting errors
-      wxMessageDialog * errmsg = new wxMessageDialog((wxWindow*)this, "Error reading    " + fd->GetFilename(), 
-                       "File Reading Error");
-      char buff[99];
-      ffile.getline(buff, 100);
-      float a, b, c, alpha, beta, gamma, n[3];
-      ffile >>a >>b >>c >>alpha >>beta >>gamma;
-      if(!ffile.good()) {  err = errmsg->ShowModal(); delete errmsg; ffile.close(); return; }
-      //compare dimensions with the original crystal and notify the user if not equal
-      float afac = 180/M_PI, limit = 0.0001;
-      if((a - mpWXCrystal->GetCrystal().GetLatticePar()(0)) > limit || (b - mpWXCrystal->GetCrystal().GetLatticePar()(1))> limit ||
-         (c - mpWXCrystal->GetCrystal().GetLatticePar()(2)) > limit || (alpha - mpWXCrystal->GetCrystal().GetLatticePar()(3)*afac) > limit || 
-         (beta - mpWXCrystal->GetCrystal().GetLatticePar()(4)*afac) > limit || (gamma - mpWXCrystal->GetCrystal().GetLatticePar()(5)*afac) > limit )
-         if(wxMessageBox(wxString::Format("Cell dimensions in the file do not match those of the crystal loaded:\n\n" +
-            wxString("These are the value:\n") + "  Crystal:                     File:\n   a = %f                  a = %f\n" 
-            "   b = %f                  b = %f\n   c = %f                   c = %f\n   alpha = %f             alpha = %f\n" +
-            "   beta =  %f            beta = %f\n   gamma = %f          gamma = %f\n\nPercent errors are:\n" +
-            "   a: %f\n   b: %f\n   c: %f\n   alpha: %f\n   beta:  %f\n   gamma: %f\n\n\n"+ 
-            "Continue loading " + fd->GetFilename() + " ?",
-            mpWXCrystal->GetCrystal().GetLatticePar()(0), a,    mpWXCrystal->GetCrystal().GetLatticePar()(1), b, 
-            mpWXCrystal->GetCrystal().GetLatticePar()(2), c,    mpWXCrystal->GetCrystal().GetLatticePar()(3)*afac, alpha, 
-            mpWXCrystal->GetCrystal().GetLatticePar()(4)*afac, beta,mpWXCrystal->GetCrystal().GetLatticePar()(5)*afac, gamma, 
-            fabs(a-mpWXCrystal->GetCrystal().GetLatticePar()(0)) / mpWXCrystal->GetCrystal().GetLatticePar()(0)*100, 
-            fabs(b-mpWXCrystal->GetCrystal().GetLatticePar()(1)) / mpWXCrystal->GetCrystal().GetLatticePar()(1)*100, 
-            fabs(c-mpWXCrystal->GetCrystal().GetLatticePar()(2)) / mpWXCrystal->GetCrystal().GetLatticePar()(2)*100,
-            fabs(alpha-mpWXCrystal->GetCrystal().GetLatticePar()(3)*afac) / mpWXCrystal->GetCrystal().GetLatticePar()(3)*afac*100,
-            fabs(beta-mpWXCrystal->GetCrystal().GetLatticePar()(4)*afac ) / mpWXCrystal->GetCrystal().GetLatticePar()(4)*afac*100,
-            fabs(gamma-mpWXCrystal->GetCrystal().GetLatticePar()(5)*afac) / mpWXCrystal->GetCrystal().GetLatticePar()(5)*afac*100 ),
-            "Cell Dimensions Notice", wxYES_NO | wxCENTRE, (wxWindow*)this) == wxNO) 
-          {
-            ffile.close();
-            return;
-          }
-      ffile >>n[0] >>n[1] >>n[2];
-      if(!ffile.good()) {  err = errmsg->ShowModal(); delete errmsg; ffile.close(); return; }
-      nx = (int)n[0]; ny = (int)n[1]; nz = (int)n[2];
-      int all = nx*ny*nz;              
-      if(initMC) delete [] mcPoints;                     //free space from last time
-      mcPoints = new float[all];
-      step[0] = 1/n[0]; step[1] = 1/n[1]; step[2] = 1/n[2]; //init stepsize
-      //READ POINTS
-      wxProgressDialog * prd = new wxProgressDialog("Reading Fourier Map from file " + fd->GetFilename(),
-         "Reading data... ", nx, (wxWindow*)this, 
-         wxPD_AUTO_HIDE | wxPD_APP_MODAL | wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME );
-      unsigned int ni, nj;
-      for(int i=0; i < nx; i++) {
-        ni = i*ny*nz;
-        for(int j=0; j < ny; j++) {
-           nj = j*nz;
-           for(int k=0; k < nz; k++) {
-              ffile >>mcPoints[ni + nj + k];      //reading rhos
-           }
-        }
-        prd->Update(i);
-      }
-      delete prd;
-      ffile.close();
-
-
-      //ask the user for contour value
-      //wxTextEntryDialog *cted = new wxTextEntryDialog((wxWindow*)this,"Enter value: ",
-      //    "Enter contour value for MC ", wxString::Format("%f", minValue), wxOK | wxCENTRE);
-      //err = cted->ShowModal();             //err == wxID_CANCEL should not happen: no cancel button
-      //minValue = (float)atof(cted->GetValue().c_str());
-      //delete cted;
-
-      if(initMC == FALSE) cdial = new ContourDialog(this);  //asks for contour value and runs MC
-      cdial->GetContour(FALSE);
-
-      //enable other options in the pop-up menu:
-      mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_CHANGECONTOUR, TRUE);
-      mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_SHOWFOURIER, TRUE);
-      mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_FOURIERCHANGECOLOR, TRUE);
-      mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_UNLOADFOURIER, TRUE);
-      mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_SHOWWIRE, TRUE);
-      initMC = TRUE;
-      this->CrystUpdate();
+      this->LoadFourier((string)(fd.GetFilename().c_str()));
    }
+}
+void WXGLCrystalCanvas::LoadFourier(const string&filename)
+{
+   int err;
+   ifstream ffile(filename.c_str());
+   if(!ffile.is_open())
+   {     //if file could not be loaded for some reason then exit
+      wxMessageDialog error_open((wxWindow*)this, "Error opening file " +
+                    wxString(filename.c_str()), "File Open Error");
+      err = error_open.ShowModal();
+      return;
+   }
+   //message for reporting errors
+   wxMessageDialog errmsg((wxWindow*)this, "Error reading    ", 
+                    "File Reading Error");
+   char buff[99];
+   ffile.getline(buff, 100);
+   float a, b, c, alpha, beta, gamma, n[3];
+   ffile >>a >>b >>c >>alpha >>beta >>gamma;
+   if(!ffile.good()) {  err = errmsg.ShowModal(); ffile.close(); return; }
+   //compare dimensions with the original crystal and notify the user if not equal
+   float afac = 180/M_PI, limit = 0.0001;
+   if((a - mpWXCrystal->GetCrystal().GetLatticePar()(0)) > limit || (b - mpWXCrystal->GetCrystal().GetLatticePar()(1))> limit ||
+      (c - mpWXCrystal->GetCrystal().GetLatticePar()(2)) > limit || (alpha - mpWXCrystal->GetCrystal().GetLatticePar()(3)*afac) > limit || 
+      (beta - mpWXCrystal->GetCrystal().GetLatticePar()(4)*afac) > limit || (gamma - mpWXCrystal->GetCrystal().GetLatticePar()(5)*afac) > limit )
+      if(wxMessageBox(wxString::Format("Cell dimensions in the file do not match those of the crystal loaded:\n\n" +
+         wxString("These are the value:\n") + "  Crystal:                     File:\n   a = %f                  a = %f\n" 
+         "   b = %f                  b = %f\n   c = %f                   c = %f\n   alpha = %f             alpha = %f\n" +
+         "   beta =  %f            beta = %f\n   gamma = %f          gamma = %f\n\nPercent errors are:\n" +
+         "   a: %f\n   b: %f\n   c: %f\n   alpha: %f\n   beta:  %f\n   gamma: %f\n\n\n"+ 
+         "Continue loading " + filename.c_str() + " ?",
+         mpWXCrystal->GetCrystal().GetLatticePar()(0), a,    mpWXCrystal->GetCrystal().GetLatticePar()(1), b, 
+         mpWXCrystal->GetCrystal().GetLatticePar()(2), c,    mpWXCrystal->GetCrystal().GetLatticePar()(3)*afac, alpha, 
+         mpWXCrystal->GetCrystal().GetLatticePar()(4)*afac, beta,mpWXCrystal->GetCrystal().GetLatticePar()(5)*afac, gamma, 
+         fabs(a-mpWXCrystal->GetCrystal().GetLatticePar()(0)) / mpWXCrystal->GetCrystal().GetLatticePar()(0)*100, 
+         fabs(b-mpWXCrystal->GetCrystal().GetLatticePar()(1)) / mpWXCrystal->GetCrystal().GetLatticePar()(1)*100, 
+         fabs(c-mpWXCrystal->GetCrystal().GetLatticePar()(2)) / mpWXCrystal->GetCrystal().GetLatticePar()(2)*100,
+         fabs(alpha-mpWXCrystal->GetCrystal().GetLatticePar()(3)*afac) / mpWXCrystal->GetCrystal().GetLatticePar()(3)*afac*100,
+         fabs(beta-mpWXCrystal->GetCrystal().GetLatticePar()(4)*afac ) / mpWXCrystal->GetCrystal().GetLatticePar()(4)*afac*100,
+         fabs(gamma-mpWXCrystal->GetCrystal().GetLatticePar()(5)*afac) / mpWXCrystal->GetCrystal().GetLatticePar()(5)*afac*100 ),
+         "Cell Dimensions Notice", wxYES_NO | wxCENTRE, (wxWindow*)this) == wxNO) 
+       {
+         ffile.close();
+         return;
+       }
+   ffile >>n[0] >>n[1] >>n[2];
+   if(!ffile.good()) {  err = errmsg.ShowModal(); ffile.close(); return; }
+   nx = (int)n[0]; ny = (int)n[1]; nz = (int)n[2];
+   int all = nx*ny*nz;              
+   if(initMC) delete [] mcPoints;                     //free space from last time
+   mcPoints = new float[all];
+   step[0] = 1/n[0]; step[1] = 1/n[1]; step[2] = 1/n[2]; //init stepsize
+   //READ POINTS
+   wxProgressDialog prd("Reading Fourier Map from file " + wxString(filename.c_str()),
+      "Reading data... ", nx, (wxWindow*)this, 
+      wxPD_AUTO_HIDE | wxPD_APP_MODAL | wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME );
+   unsigned int ni, nj;
+   for(int i=0; i < nx; i++) {
+     ni = i*ny*nz;
+     for(int j=0; j < ny; j++) {
+        nj = j*nz;
+        for(int k=0; k < nz; k++) {
+           ffile >>mcPoints[ni + nj + k];      //reading rhos
+        }
+     }
+     prd.Update(i);
+   }
+   ffile.close();
+
+
+   //ask the user for contour value
+   //wxTextEntryDialog *cted = new wxTextEntryDialog((wxWindow*)this,"Enter value: ",
+   //    "Enter contour value for MC ", wxString::Format("%f", minValue), wxOK | wxCENTRE);
+   //err = cted->ShowModal();             //err == wxID_CANCEL should not happen: no cancel button
+   //minValue = (float)atof(cted->GetValue().c_str());
+   //delete cted;
+
+   if(initMC == FALSE) cdial = new ContourDialog(this);  //asks for contour value and runs MC
+   cdial->GetContour(FALSE);
+
+   //enable other options in the pop-up menu:
+   mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_CHANGECONTOUR, TRUE);
+   mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_SHOWFOURIER, TRUE);
+   mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_FOURIERCHANGECOLOR, TRUE);
+   mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_UNLOADFOURIER, TRUE);
+   mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_SHOWWIRE, TRUE);
+   initMC = TRUE;
+   this->CrystUpdate();
 }
 
 void WXGLCrystalCanvas::OnChangeContour()

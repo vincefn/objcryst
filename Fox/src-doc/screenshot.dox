@@ -12,6 +12,9 @@ by using X-Ray and neutron powder patterns.
 <br>
 Fox tested on the TriphenylPhosphite structure.
 \image html TriPhenylPhosphite.png
+<br>
+\anchor fourier Fox displaying the Alumina structure with the GSAS/EXPGUI Fourier map.
+\image html Alumina-Fourier.png
 </h3>
 </center>
 */

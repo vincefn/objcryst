@@ -58,6 +58,8 @@ class WXCrystal: public WXRefinableObj
       void OnMenuCrystalGL(wxCommandEvent & WXUNUSED(event));
       /// Tell this object that its 3D OpenGL display has been destroyed
       void NotifyCrystalGLDelete();
+      /// get a pointer to the 3D OpenGL display object
+      WXGLCrystalCanvas * GetCrystalGL();
       #endif
       void OnMenuSaveCIF(wxCommandEvent & WXUNUSED(event));
       void OnMenuSaveText(wxCommandEvent & WXUNUSED(event));
@@ -121,6 +123,7 @@ class WXGLCrystalCanvas : public wxGLCanvas
       void OnUpdateUI(wxUpdateUIEvent& WXUNUSED(event));
       void OnShowCrystal();
       void OnLoadFourier();
+      void LoadFourier(const string&filename);
       void OnChangeContour();
       void OnShowFourier();
       void OnFourierChangeColor();

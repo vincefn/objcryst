@@ -47,6 +47,7 @@
 #include "ObjCryst/DiffractionDataSingleCrystal.h"
 #include "RefinableObj/GlobalOptimObj.h"
 //#include "RefinableObj/GeneticAlgorithm.h"
+#include "wxCryst/wxCrystal.h"
 
 #if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__) || defined(__WXMGL__) || defined(__WXX11__)
    #include "Fox.xpm"
@@ -69,7 +70,8 @@ public:
 class WXCrystMainFrame : public wxFrame
 {
 public:
-   WXCrystMainFrame(const wxString& title, const wxPoint& pos, const wxSize& size);
+   WXCrystMainFrame(const wxString& title, const wxPoint& pos, const wxSize& size,
+                    const bool splashscreen=true);
    void OnQuit(wxCommandEvent& WXUNUSED(event));
    void OnAbout(wxCommandEvent& WXUNUSED(event));
    void OnLoad(wxCommandEvent& event);
@@ -182,42 +184,32 @@ bool MyApp::OnInit()
    bool silent=false;
    string outfilename("Fox-out.xml");
    bool randomize(false);
+   bool only3D(false);
+   bool loadFourier(false);
+   string fourierFilename;
    for(int i=1;i<this->argc;i++)
    {
       if('-'==this->argv[i][0])
       {
-         if(string("-h")==string(this->argv[i]))
-         {
-            cout <<"command-line arguments:"<<endl
-                 <<"   -i in.xml   : input 'in.xml' file"<<endl
-                 <<"   -nogui      : run without GUI, automatically launches optimization"<<endl
-                 <<"   -n 10000    : run for 10000 trials at most (use with -nogui)"<<endl
-                 <<"   -o out.xml  : output in 'out.xml' (use with -nogui)"<<endl
-                 <<"   -randomize  : randomize initial configuration (use with -nogui)"<<endl
-                 <<"   -silent     : (almost) no text output (use with -nogui)"<<endl
-                 <<"   -finalcost 0.15 : run optimization until cost < 0.15 (use with -nogui)"<<endl
-                 <<endl;
-            exit(1);  
-         }
-         if(string("-nogui")==string(this->argv[i]))
+         if(string("--nogui")==string(this->argv[i]))
          {
             useGUI=false;
             cout << "Running Fox without GUI"<<endl;
             continue;  
          }
-         if(string("-randomize")==string(this->argv[i]))
+         if(string("--randomize")==string(this->argv[i]))
          {
             randomize=true;
             cout << "Randomizing parameters before running"<<endl;
             continue;  
          }
-         if(string("-silent")==string(this->argv[i]))
+         if(string("--silent")==string(this->argv[i]))
          {
             silent=true;
             cout << "Running Fox quietly"<<endl;
             continue;  
          }
-         if(string("-finalcost")==string(this->argv[i]))
+         if(string("--finalcost")==string(this->argv[i]))
          {
             ++i;
             stringstream sstr(this->argv[i]);
@@ -245,9 +237,34 @@ bool MyApp::OnInit()
             outfilename=string(this->argv[i]);
             continue;
          }
+         if(string("--loadfouriergrd")==string(this->argv[i]))
+         {
+            ++i;
+            loadFourier=true;
+            fourierFilename=string(this->argv[i]);
+            continue;
+         }
+         if(string("--only3d")==string(this->argv[i]))
+         {
+            only3D=true;
+            continue;
+         }
+         cout <<"command-line arguments:"<<endl
+              <<"   -i input.xml: input 'in.xml' file"<<endl
+              <<"   --loadfouriergrd map.grd: load and display 'map.grd' fourier map with (first) crystal structure"<<endl
+              <<"   --nogui: run without GUI, automatically launches optimization"<<endl
+              <<"      options with --nogui:
+              <<"         -n 10000     : run for 10000 trials at most (default: 1000000)"<<endl
+              <<"         -o out.xml   : output in 'out.xml'"<<endl
+              <<"         --randomize  : randomize initial configuration"<<endl
+              <<"         --silent     : (almost) no text output"<<endl
+              <<"         --finalcost 0.15 : run optimization until cost < 0.15"<<endl
+              <<endl;
+         exit(1);  
       }
    }
-   cout <<useGUI<<endl;
+   
+   
    if(randomize)
       for(int i=0;i<gOptimizationObjRegistry.GetNb();i++)
          gOptimizationObjRegistry.GetObj(i).RandomizeStartingConfig();
@@ -264,11 +281,23 @@ bool MyApp::OnInit()
    WXCrystMainFrame *frame ;
    
    frame = new WXCrystMainFrame("FOX: Free Objects for Xtal structures v1.3",
-                                 wxPoint(50, 50), wxSize(550, 400));
+                                 wxPoint(50, 50), wxSize(550, 400),!loadFourier);
    // Use the main frame status bar to pass messages to the user
       pMainFrameForUserMessage=frame;
       fpObjCrystInformUser=&WXCrystInformUserStdOut;
       
+   if(loadFourier)
+   {
+      //wxFrame *pWXFrame= new wxFrame((wxFrame *)NULL, -1, "FOX", wxPoint(50, 50), wxSize(550, 400));
+      //wxScrolledWindow *pWXScWin=new wxScrolledWindow(pWXFrame,-1);
+      //WXCrystal * pWXCrystal=new WXCrystal(pWXScWin,&(gCrystalRegistry.GetObj(0)));
+      WXCrystal *pWXCryst=dynamic_cast<WXCrystal*> (gCrystalRegistry.GetObj(0).WXGet());
+      wxCommandEvent com;
+      pWXCryst->OnMenuCrystalGL(com);
+      pWXCryst->GetCrystalGL()->LoadFourier(fourierFilename);
+      return true;
+   }
+   
    return TRUE;
 }
 
@@ -276,7 +305,8 @@ bool MyApp::OnInit()
 // main frame
 // ----------------------------------------------------------------------------
 
-WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
+WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, const wxSize& size,
+                                   const bool splashscreen)
        : wxFrame((wxFrame *)NULL, -1, title, pos, size)
 {
 #ifdef __WXMAC__
@@ -472,8 +502,11 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
    this->Show(TRUE);
    this->Layout();
    //Splash Screen
+   if(true==splashscreen)
+   {
       wxCommandEvent event;
       this->OnAbout(event);
+   }
    // Set tooltip delay
    wxToolTip::SetDelay(500);
 }
