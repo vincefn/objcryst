@@ -116,14 +116,68 @@ void RefinableObjClock::PrintStatic()const
 {
    cout <<"RefinableObj class Clock():"<<msTick1<<":"<<msTick0<<endl;
 }
+//######################################################################
+//    Restraint
+//######################################################################
+Restraint::Restraint(const RefParType *type,
+               		const REAL hardMin,
+               		const REAL hardMax,
+               		const bool hasMinLimit,
+               		const bool hasMaxLimit,
+                		const REAL softRange,
+							const bool enableRestraints)
+{
+	this->Init(type,hardMin,hardMax,hasMinLimit,hasMaxLimit,softRange,enableRestraints);
+}
 
+Restraint::~Restraint()
+{}
+
+void Restraint::Init(const RefParType *type,
+               		const REAL hardMin,
+               		const REAL hardMax,
+               		const bool hasMinLimit,
+               		const bool hasMaxLimit,
+               		const REAL softRange,
+							const bool enableRestraints)
+{
+	mpRefParType=type;
+	mMin=hardMin;
+	mMax=hardMax;
+	mHasMin=hasMinLimit;
+	mHasMax=hasMaxLimit;
+	mRestraintRange=softRange;
+	mEnableRestraint=enableRestraints;
+}
+
+REAL Restraint::GetRestraintCost(const REAL looseness)const
+{
+	if((false==mEnableRestraint)|| ((mHasMin==false)&&(mHasMax==false))) return 0.;
+	else
+	{
+		REAL value=this->GetValue();
+		if((true==mHasMin)&&(value<mMin))
+		{
+			value= (mMin-value)/mRestraintRange;
+			return value*value;
+		}
+		if((true==mHasMax)&&(value>mMax))
+		{
+			value= (value-mMax)/mRestraintRange;
+			return value*value;
+		}
+	}
+	return 0.;
+}
 //######################################################################
 //    RefinablePar
 //######################################################################
 
-RefinablePar::RefinablePar():mName(""),mpRefParType(0),mValue(0),mMin(0),mMax(0),
-                     mHasLimits(false),mIsFixed(true),mIsUsed(true),mIsPeriodic(false),
-                     mPeriod(0.),mHumanScale(1.),mHasAssignedClock(false),mpClock(0)
+RefinablePar::RefinablePar():
+Restraint(0,0,0,false,false,1.,false),
+mName(""),mpValue(0),
+mHasLimits(false),mIsFixed(true),mIsUsed(true),mIsPeriodic(false),
+mPeriod(0.),mHumanScale(1.),mHasAssignedClock(false),mpClock(0)
 {}
                      
 RefinablePar::RefinablePar(  const string &name,
@@ -138,11 +192,14 @@ RefinablePar::RefinablePar(  const string &name,
                      const bool isPeriodic,
                      const REAL humanScale,
                      REAL period):
-mName(name),mpRefParType(type),mValue(refPar),mMin(min),mMax(max),
+Restraint(type,min,max,hasLimits,hasLimits,max-min,false),
+mName(name),mpValue(refPar),
 mHasLimits(hasLimits),mIsFixed(isFixed),mIsUsed(isUsed),mIsPeriodic(isPeriodic),mPeriod(period),
 mGlobalOptimStep((max-min)/100.),mDerivStep(1e-5),mRefParDerivStepModel(derivMode),
 mSigma(0.),mHumanScale(humanScale),
+#if 0
 mUseEquation(false),mEquationNbRefPar(0),mEquationCoeff(0),
+#endif
 mHasAssignedClock(false),mpClock(0)
 {}
 
@@ -162,11 +219,9 @@ void RefinablePar::Init(const string &name,
                         const REAL humanScale,
                         REAL period)
 {
+	this->Restraint::Init(type,min,max,hasLimits,hasLimits,max-min,false);
    mName=name;
-   mpRefParType=type;
-   mValue=refPar;
-   mMin=min;
-   mMax=max;
+   mpValue=refPar;
    mHasLimits=hasLimits;
    mIsFixed=isFixed;
    mIsUsed=isUsed;
@@ -177,9 +232,11 @@ void RefinablePar::Init(const string &name,
    mRefParDerivStepModel=derivMode;
    mSigma=0.;
    mHumanScale=humanScale;
+	#if 0
    mUseEquation=false;
    mEquationNbRefPar=0;
    mEquationCoeff=0;
+	#endif
    mHasAssignedClock=false;
    mpClock=0;
 }
@@ -188,59 +245,62 @@ void RefinablePar::Init(const string &name,
 
 REAL RefinablePar::GetValue()const
 {
-   if(false==mUseEquation) return *mValue;
-   else
+	#if 0
+   if(true==mUseEquation)
    {
       VFN_DEBUG_MESSAGE("RefinablePar::Value():Evaluating Equation",0)
       REAL tmp=mEquationCoeff(0);
       for(int i=0;i<mEquationNbRefPar;i++) 
          tmp += mEquationCoeff(i+1) * mEquationRefPar[i]->GetValue();
-      *mValue = tmp;
+      *mpValue = tmp;
    }
-   return *mValue;
+	#endif
+   return *mpValue;
 }
 
 void RefinablePar::SetValue(const REAL value)
 {
    this->Click();
    VFN_DEBUG_MESSAGE("RefinablePar::SetValue()",2)
+	#if 0
    if(true==mUseEquation)
    {
       cout << "RefinablePar::SetValue(): this parameter is defined by an equation !!" <<endl;
       throw 0;
    }
-   *mValue = value;
+	#endif
+   *mpValue = value;
    /*
    if(this->IsLimited() ==true)
    {
       if(true==this->IsPeriodic())
       {
-         if(*mValue > this->GetMax()) *mValue -= this->GetMax()-this->GetMin();
-         if(*mValue < this->GetMin()) *mValue += this->GetMax()-this->GetMin();
+         if(*mpValue > this->GetMax()) *mpValue -= this->GetMax()-this->GetMin();
+         if(*mpValue < this->GetMin()) *mpValue += this->GetMax()-this->GetMin();
       }
       else
       {
-         if(*mValue > this->GetMax()) *mValue=this->GetMax();
-         if(*mValue < this->GetMin()) *mValue=this->GetMin();
+         if(*mpValue > this->GetMax()) *mpValue=this->GetMax();
+         if(*mpValue < this->GetMin()) *mpValue=this->GetMin();
       }
    }
    */
    if(this->IsLimited() ==true)
    {
-      if(*mValue > this->GetMax()) *mValue=this->GetMax();
-      if(*mValue < this->GetMin()) *mValue=this->GetMin();
+      if(*mpValue > this->GetMax()) *mpValue=this->GetMax();
+      if(*mpValue < this->GetMin()) *mpValue=this->GetMin();
    }
    else if(true==this->IsPeriodic())
    {
-      if(*mValue > mPeriod) *mValue -= mPeriod;
-      if(*mValue < 0) *mValue += mPeriod;
+      if(*mpValue > mPeriod) *mpValue -= mPeriod;
+      if(*mpValue < 0) *mpValue += mPeriod;
    }
 }
 
 const REAL& RefinablePar::GetHumanValue() const
 {
    static REAL val;
-   val = *mValue * mHumanScale;
+   val = *mpValue * mHumanScale;
    return val;
 }
 
@@ -248,36 +308,38 @@ void RefinablePar::SetHumanValue(const REAL &value)
 {
    this->Click();
    VFN_DEBUG_MESSAGE("RefinablePar::SetHumanValue()",2)
+	#if 0
    if(true==mUseEquation)
    {
       cout << "RefinablePar::SetValue(): this parameter is defined by an equation !!" <<endl;
       throw 0;
    }
-   *mValue = value/mHumanScale;
+	#endif
+   *mpValue = value/mHumanScale;
    /*
    if(this->IsLimited() ==true)
    {
       if(true==this->IsPeriodic())
       {
-         if(*mValue > this->GetMax()) *mValue -= this->GetMax()-this->GetMin();
-         if(*mValue < this->GetMin()) *mValue += this->GetMax()-this->GetMin();
+         if(*mpValue > this->GetMax()) *mpValue -= this->GetMax()-this->GetMin();
+         if(*mpValue < this->GetMin()) *mpValue += this->GetMax()-this->GetMin();
       }
       else
       {
-         if(*mValue > this->GetMax()) *mValue=this->GetMax();
-         if(*mValue < this->GetMin()) *mValue=this->GetMin();
+         if(*mpValue > this->GetMax()) *mpValue=this->GetMax();
+         if(*mpValue < this->GetMin()) *mpValue=this->GetMin();
       }
    }
    */
    if(this->IsLimited() ==true)
    {
-      if(*mValue > this->GetMax()) *mValue=this->GetMax();
-      if(*mValue < this->GetMin()) *mValue=this->GetMin();
+      if(*mpValue > this->GetMax()) *mpValue=this->GetMax();
+      if(*mpValue < this->GetMin()) *mpValue=this->GetMin();
    }
    else if(true==this->IsPeriodic())
    {
-      if(*mValue > mPeriod) *mValue -= mPeriod;
-      if(*mValue < 0) *mValue += mPeriod;
+      if(*mpValue > mPeriod) *mpValue -= mPeriod;
+      if(*mpValue < 0) *mpValue += mPeriod;
    }
 }
 
@@ -286,36 +348,38 @@ void RefinablePar::Mutate(const REAL mutateValue)
    VFN_DEBUG_MESSAGE("RefinablePar::Mutate():"<<this->GetName(),1)
 	if(true==mIsFixed) return;
    this->Click();
+	#if 0
    if(true==mUseEquation)
    {
       cout << "RefinablePar::Mutate(): this parameter is defined by an equation !!" <<endl;
       throw 0;
    }
-   *mValue += mutateValue;
+	#endif
+   *mpValue += mutateValue;
    /*
    if(this->IsLimited() ==true)
    {
       if(true==this->IsPeriodic())
       {
-         if(*mValue > this->GetMax()) *mValue -= this->GetMax()-this->GetMin();
-         if(*mValue < this->GetMin()) *mValue += this->GetMax()-this->GetMin();
+         if(*mpValue > this->GetMax()) *mpValue -= this->GetMax()-this->GetMin();
+         if(*mpValue < this->GetMin()) *mpValue += this->GetMax()-this->GetMin();
       }
       else
       {
-         if(*mValue > this->GetMax()) *mValue=this->GetMax();
-         if(*mValue < this->GetMin()) *mValue=this->GetMin();
+         if(*mpValue > this->GetMax()) *mpValue=this->GetMax();
+         if(*mpValue < this->GetMin()) *mpValue=this->GetMin();
       }
    }
    */
    if(this->IsLimited() ==true)
    {
-      if(*mValue > this->GetMax()) *mValue=this->GetMax();
-      if(*mValue < this->GetMin()) *mValue=this->GetMin();
+      if(*mpValue > this->GetMax()) *mpValue=this->GetMax();
+      if(*mpValue < this->GetMin()) *mpValue=this->GetMin();
    }
    else if(true==this->IsPeriodic())
    {
-      if(*mValue > mPeriod) *mValue -= mPeriod;
-      if(*mValue < 0) *mValue += mPeriod;
+      if(*mpValue > mPeriod) *mpValue -= mPeriod;
+      if(*mpValue < 0) *mpValue += mPeriod;
    }
    VFN_DEBUG_MESSAGE("RefinablePar::Mutate():End",0)
 }
@@ -325,36 +389,38 @@ void RefinablePar::MutateTo(const REAL mutateValue)
    VFN_DEBUG_MESSAGE("RefinablePar::MutateTo()",2)
 	if(true==mIsFixed) return;
    this->Click();
+	#if 0
    if(true==mUseEquation)
    {
       cout << "RefinablePar::Mutate(): this parameter is defined by an equation !!" <<endl;
       throw 0;
    }
-   *mValue = mutateValue;
+	#endif
+   *mpValue = mutateValue;
    /*
    if(this->IsLimited() ==true)
    {
       if(true==this->IsPeriodic())
       {
-         if(*mValue > this->GetMax()) *mValue -= this->GetMax()-this->GetMin();
-         if(*mValue < this->GetMin()) *mValue += this->GetMax()-this->GetMin();
+         if(*mpValue > this->GetMax()) *mpValue -= this->GetMax()-this->GetMin();
+         if(*mpValue < this->GetMin()) *mpValue += this->GetMax()-this->GetMin();
       }
       else
       {
-         if(*mValue > this->GetMax()) *mValue=this->GetMax();
-         if(*mValue < this->GetMin()) *mValue=this->GetMin();
+         if(*mpValue > this->GetMax()) *mpValue=this->GetMax();
+         if(*mpValue < this->GetMin()) *mpValue=this->GetMin();
       }
    }
    */
    if(this->IsLimited() ==true)
    {
-      if(*mValue > this->GetMax()) *mValue=this->GetMax();
-      if(*mValue < this->GetMin()) *mValue=this->GetMin();
+      if(*mpValue > this->GetMax()) *mpValue=this->GetMax();
+      if(*mpValue < this->GetMin()) *mpValue=this->GetMin();
    }
    else if(true==this->IsPeriodic())
    {
-      if(*mValue > mPeriod) *mValue -= mPeriod;
-      if(*mValue < 0) *mValue += mPeriod;
+      if(*mpValue > mPeriod) *mpValue -= mPeriod;
+      if(*mpValue < 0) *mpValue += mPeriod;
    }
 }
 
@@ -386,7 +452,7 @@ void RefinablePar::SetIsFixed(const bool b)
 }
 
 bool RefinablePar::IsLimited()const {return mHasLimits;}
-void RefinablePar::SetIsLimited(const bool b) {mHasLimits=b;this->Click();}
+void RefinablePar::SetIsLimited(const bool b) {mHasLimits=b;mHasMin=b;mHasMax=b;this->Click();}
 
 bool RefinablePar::IsUsed()const {return mIsUsed;}
 void RefinablePar::SetIsUsed(const bool b) {mIsUsed=b;this->Click();}
@@ -413,7 +479,7 @@ void  RefinablePar::SetPeriod(const REAL period)
 REAL  RefinablePar::GetDerivStep()const
 {
    if(REFPAR_DERIV_STEP_ABSOLUTE==mRefParDerivStepModel) return mDerivStep;
-   REAL d=mDerivStep* (*mValue);
+   REAL d=mDerivStep* (*mpValue);
    
    //:KLUDGE: Parameter will probably has a singular value, so it should not matter..
    if(d == 0.) return 1e-8;
@@ -431,7 +497,7 @@ void  RefinablePar::SetGlobalOptimStep(const REAL step) {mGlobalOptimStep=step;}
 
 REAL RefinablePar::GetHumanScale()const {return mHumanScale;}
 void  RefinablePar::SetHumanScale(const REAL scale) {mHumanScale=scale;}
-
+#if 0
 void RefinablePar::SetUseEquation(const bool useItOrNot,const REAL c0)
 {
    this->Click();
@@ -493,6 +559,7 @@ void RefinablePar::SetUseEquation(const bool useItOrNot,const REAL c0,
       mEquationRefPar[2]=&refpar2;
    }
 }
+#endif
 void RefinablePar::AssignClock(RefinableObjClock &clock)
 {
    VFN_DEBUG_MESSAGE("RefinablePar::AssignClock() for "<<this->GetName()<< "at "<<&clock,4)
@@ -521,14 +588,14 @@ void RefinablePar::SetLimitsRelative(const REAL min, const REAL max)
    //:TODO: check limits
    mMin=this->GetValue()+min;
    mMax=this->GetValue()+max;
-   mHasLimits=true;
+   this->SetIsLimited(true);
 }
 void RefinablePar::SetLimitsProportional(const REAL min, const REAL max)
 {
    //:TODO: check limits
    mMin=this->GetValue()*min;
    mMax=this->GetValue()*max;
-   mHasLimits=true;
+   this->SetIsLimited(true);
 }
 //######################################################################
 //    RefObjOpt
@@ -1252,7 +1319,7 @@ void RefinableObj::Print() const
                  <<this->GetPar(i).GetHumanMax()<<")";
             if(true == this->GetPar(i).IsPeriodic()) cout << ",Periodic" ;
          }
-      VFN_DEBUG_MESSAGE_SHORT(" (at "<<this->GetPar(i).mValue<<")",5)
+      VFN_DEBUG_MESSAGE_SHORT(" (at "<<this->GetPar(i).mpValue<<")",5)
       if(true == this->GetPar(i).mHasAssignedClock)
          VFN_DEBUG_MESSAGE_SHORT(" (Clock at "<<this->GetPar(i).mpClock<<")",5)
       cout << endl;
@@ -1606,7 +1673,7 @@ long RefinableObj::FindPar(const REAL *p) const
    long index=-1;
    bool warning=false;
    for(long i=this->GetNbPar()-1;i>=0;i--) 
-      if( p == mpRefPar[i]->mValue ) //&(this->GetPar(i).GetValue())
+      if( p == mpRefPar[i]->mpValue ) //&(this->GetPar(i).GetValue())
          if(-1 != index) warning=true ;else index=i;
    if(true == warning)
    {

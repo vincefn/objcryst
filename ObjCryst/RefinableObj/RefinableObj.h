@@ -117,17 +117,105 @@ class RefinableObjClock
       static unsigned long msTick0,msTick1;
 };
 
+/** Restraint: generic class defining both hard (constraints) and soft (restraints)
+* limits associated with a RefinableObj. These can be restrictions on a single
+* parameter (see RefinablePar), but inheritance allows involving several parameters.
+*
+* There are two kind of restrictions: first, the 'hard' limits [hardmin,hardmax] in which the
+* value should be ideally located. And the soft limits, which correspond to penalty
+* applied beyond the 'hard' limits. There is no restriction within hard limits,
+* and \e if the optimization algorithm allows restraints, then the value may go outside
+* this range, but with a cost (penalty) which is taken into account by the algorithm
+* when evaluating the configuration.
+*
+* It is the duty of the algorithm to enable or disable restraints, and to evaluate
+* them (more or less loosely).
+*
+* This is an abstract base class
+*/
+class Restraint
+{
+	public:
+		/** Constructor for the base Restrain class, setting hard&soft limits.
+		*
+		* \param type: the type of value which is constrained/restrained.
+		* \param hardMin,hardMax: the hard limits between which the value should
+		* ideally be.
+		* \param hasMinLimit,hasMaxLimit: set to 'true' if the parameter has 
+		* upper and/or lower limit.
+		* \param softRange: when the value goes below min or above max limits,
+		* the penalty will be equal to 1 at min-softRange and at max+softRange.
+		* Thus softRange must be strictly positive.
+		* enableRestraints: if true, then the value may go beyond the hard limits,
+		* with penalty defined by the soft limits. Else no value beyond the hard limits
+		* should be accepted.
+		*/
+		Restraint(const RefParType *type,
+                const REAL hardMin,
+                const REAL hardMax,
+                const bool hasMinLimit,
+                const bool hasMaxLimit,
+                const REAL softRange,
+					 const bool enableRestraints=false);
+		/// Destructor
+		virtual ~Restraint();
+		/** Initializer for the base Restrain class, setting hard&soft limits.
+		*
+		* \param type: the type of value which is constrained/restrained.
+		* \param hardMin,hardMax: the hard limits between which the value should
+		* ideally be.
+		* \param hasMinLimit,hasMaxLimit: set to 'true' if the parameter has 
+		* upper and/or lower limit.
+		* \param softRange: when the value goes below min or above max limits,
+		* the penalty will be equal to 1 at min-softRange and at max+softRange.
+		* Thus softRange must be strictly positive.
+		* enableRestraints: if true, then the value may go beyond the hard limits,
+		* with penalty defined by the soft limits. Else no value beyond the hard limits
+		* should be accepted.
+		*/
+		void Init(const RefParType *type,
+         		 const REAL hardMin,
+         		 const REAL hardMax,
+         		 const bool hasMinLimit,
+         		 const bool hasMaxLimit,
+                const REAL softRange,
+					 const bool enableRestraints=false);
+		/// Get the current value.
+		virtual REAL GetValue()const=0;
+		/** Get the value of the penalty (cost) associated to the restraint.
+		*
+		* If the parameter is within limits, the cost is null. If it is
+		* below the min (and if there is a lower limit), the cost is equal
+		* to:
+      * \f[ cost= \left( \frac{min_{hard}-value}{looseness \times range} \right)^2\f]
+		* And if there is a higher limit and the value is above it:
+      * \f[ cost= \left( \frac{value-max_{hard}}{loosenes \times srange} \right)^2\f]
+		*
+		* If restraints are disabled, the returned cost is always null.
+		*/
+		virtual REAL GetRestraintCost(const REAL looseness)const;
+	protected:
+		/// Type of value constrained/restrained.
+      const RefParType *mpRefParType;
+		/// Hard lower and upper limits.
+		REAL mMin,mMax;
+		/// Has lower and/or upper limits ?
+		bool mHasMin,mHasMax;
+		/// Soft lower and upper limits.
+		REAL mRestraintRange;
+		/// Is this restraint enabled ?
+		bool mEnableRestraint;
+};
+
 /** Generic class for parameters of refinable objects.
 * These must be continuous.
 *
 * \todo: define parameters using equations between parameters.
-* \todo: define some sort of soft constraint, with the possibility
-* of involving several parameters (complex).
 * \todo: for complex objects with lots of parameters, give the 
 * possibility to define vectors of parameters, all with the same 
 * properties, to reduce memory usage.
 */
-class RefinablePar
+class RefinablePar:public Restraint
 {
    public:
       /// \name Destructor & Constructors
@@ -324,7 +412,7 @@ class RefinablePar
       //@}
 
       
-      
+      #if 0
       /// \name Equations-In development ! ->do not use or even look.
       //@{
          void SetUseEquation(const bool useItOrNot,const REAL c0=0.);
@@ -339,7 +427,7 @@ class RefinablePar
                              const REAL c2, const RefinablePar &refpar2,
                              const REAL c3, const RefinablePar &refpar3);
       //@}
-             
+      #endif
       /// \name Parameter's Clock
       //@{
       /// \internal
@@ -382,15 +470,9 @@ class RefinablePar
       void Click();
       ///name of the refinable parameter
       string mName;
-      ///Type of refined variable
-      const RefParType *mpRefParType;
       /// Pointer to the refinable value
-      REAL *mValue;
-      /// Min value
-      REAL mMin;
-      /// Max value
-      REAL mMax;
-      /// Does the refinable parameter need limits (min,max) ?
+      REAL *mpValue;
+      /// Does the refinable parameter need limits (min and max) ?
       bool mHasLimits;
       /// is the parameter currently fixed ?
       bool mIsFixed;
@@ -414,8 +496,8 @@ class RefinablePar
       /// stores values in radians, whil the user only understands degrees. So a scale
       /// factor of 180/pi is necessary.
       REAL mHumanScale;
-      
-      // Parameter defined by equations ?
+      #if 0
+      // Parameter defined by equations ? :TODO:
          ///Is this parameter deined by an equation ? eg: mValue= c0 +c1*par1.Value+...
          bool mUseEquation;
          /// Max number of other ref. parameters involved in the equation evaluation
@@ -426,7 +508,7 @@ class RefinablePar
          CrystVector_REAL mEquationCoeff;
          /// Array of pointers to the RefinablePar used in the equation
          const RefinablePar *mEquationRefPar[10];
-      
+      #endif
       /// Is there a clock associated with this parameter ? If yes, then it must Click() it
       /// each time it is modified
          bool mHasAssignedClock;

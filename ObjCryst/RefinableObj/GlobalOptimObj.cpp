@@ -650,11 +650,11 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
 						mRefParList.GetPar(i).Print();
 					}
 				// number of gene groups
-				const unsigned int nbGeneGroup=refParGeneGroupIndex.max();
 				// to select which gene groups are exchanged in the mating
-				CrystVector_int crossoverGroupIndex(nbGeneGroup);
-            const long parSetOffspringA=mRefParList.CreateParamSet("Offspring A");
-            const long parSetOffspringB=mRefParList.CreateParamSet("Offspring B");
+					//const unsigned int nbGeneGroup=refParGeneGroupIndex.max();
+					//CrystVector_int crossoverGroupIndex(nbGeneGroup);
+            	//const long parSetOffspringA=mRefParList.CreateParamSet("Offspring A");
+            	//const long parSetOffspringB=mRefParList.CreateParamSet("Offspring B");
 			// Used for automatic restart from minimum or randomization
 				long bestConfigNb=0;//when was the best config recorded ? (to restart if necessary)
 				long nbRestartFromMin=0;//Number of times we restarted from the minimum
