@@ -1161,11 +1161,7 @@ void WXMolecule::CrystUpdate()
             }
          }
       }
-      if(needLayoutAtom)
-      {
-         mpTopSizer->SetSizeHints(this);
-         this->Layout();
-      }
+      if(needLayoutAtom)this->BottomLayout(0);
       if(needLayoutBond&&(0!=mpBondWin))
       {
          VFN_DEBUG_MESSAGE("WXMolecule::CrystUpdate(): BondWin Layout",6)
