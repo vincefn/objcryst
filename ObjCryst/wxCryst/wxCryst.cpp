@@ -19,8 +19,8 @@
 //#include <sstream> //for stringstream
 #include <fstream>
 
-#include "wxCryst/wxCryst.h"
 #include "wx/wx.h"
+#include "wxCryst/wxCryst.h"
 
 //#include "Quirks/VFNStreamFormat.h"
 #include "Quirks/VFNDebug.h"
