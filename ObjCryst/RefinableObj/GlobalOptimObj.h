@@ -46,7 +46,7 @@ namespace ObjCryst
 *
 * For the 'smart' schedule, it is only supported so far for the mutation amplitude:
 * it is modulated so that for each temperature between 30 and 70% of trial
-* configurations are accepted.
+* configurations are accepted, within the limits for the mutation.
 */
 enum AnnealingSchedule
 {
@@ -128,7 +128,7 @@ class GlobalOptimObj
       void SetAlgorithmSimulAnnealing(const AnnealingSchedule scheduleTemp,
                                  const double tMax, const double tMin,
                                  const AnnealingSchedule scheduleMutation=ANNEALING_CONSTANT,
-                                 const double mutMax=1., const double mutMin=1.,
+                                 const double mutMax=16., const double mutMin=.125,
                                  const long nbTrialRetry=0,const double minCostRetry=0.,
                                  const long maxNbTrialSinceBest=0);
       /** \brief  Set the refinement method to Parallel Tempering.
@@ -152,7 +152,7 @@ class GlobalOptimObj
       void SetAlgorithmParallTempering(const AnnealingSchedule scheduleTemp,
                                  const double tMax, const double tMin,
                                  const AnnealingSchedule scheduleMutation=ANNEALING_CONSTANT,
-                                 const double mutMax=1., const double mutMin=1.);
+                                 const double mutMax=16., const double mutMin=.125);
       
       /// Launch optimization for N steps
       /// \param nbSteps: the number of steps to go. This number is modified (decreases!)
@@ -322,9 +322,9 @@ class GlobalOptimObj
          /// refinement (high temeratures).
          double mMutationAmplitude;
          /// Mutation amplitude at the beginning of the optimization.
-         double mMutationAmplitudeBegin;
+         double mMutationAmplitudeMax;
          /// Mutation amplitude at the end of the optimization.
-         double mMutationAmplitudeEnd;
+         double mMutationAmplitudeMin;
          /// Schedule for the annealing
          RefObjOpt mAnnealingScheduleMutation;
       //Automatic retry 

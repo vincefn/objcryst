@@ -42,8 +42,8 @@ mHistoryNb(0),mHistoryTrialNumber(1000),mHistoryCostFunction(1000),
 mHistorySavedParamSetIndex(1000),
 mHistorySaveAfterEachOptim(true),mHistorySaveFileName("GlobalOptim_history.out"),
 mBestParSavedSetIndex(-1),mLastParSavedSetIndex(-1),
-mTemperatureMax(.1),mTemperatureMin(.001),
-mMutationAmplitudeBegin(1.),mMutationAmplitudeEnd(1.),
+mTemperatureMax(.03),mTemperatureMin(.003),
+mMutationAmplitudeMax(16.),mMutationAmplitudeMin(.125),
 mNbTrialRetry(0),mMinCostRetry(0.),mMaxNbTrialSinceBest(0),
 mIsOptimizing(false),mStopAfterCycle(false),
 mRefinedObjList("GlobalOptimObj: "+mName+" RefinableObj registry"),
@@ -102,8 +102,8 @@ Cannot use ANNEALING_SMART for the Temperature schedule (yet).");
    mAnnealingScheduleTemp.SetChoice(scheduleTemp);
 
 
-   mMutationAmplitudeBegin=mutMax;
-   mMutationAmplitudeEnd=mutMin;
+   mMutationAmplitudeMax=mutMax;
+   mMutationAmplitudeMin=mutMin;
    mAnnealingScheduleMutation.SetChoice(scheduleMutation);
    mNbTrialRetry=nbTrialRetry;
    mMinCostRetry=minCostRetry;
@@ -125,8 +125,8 @@ Cannot use ANNEALING_SMART for the Temperature schedule (yet).");
    mTemperatureMin=tMin;
    mAnnealingScheduleTemp.SetChoice(scheduleTemp);
 
-   mMutationAmplitudeBegin=mutMax;
-   mMutationAmplitudeEnd=mutMin;
+   mMutationAmplitudeMax=mutMax;
+   mMutationAmplitudeMin=mutMin;
    mAnnealingScheduleMutation.SetChoice(scheduleMutation);
    //mNbTrialRetry=nbTrialRetry;
    //mMinCostRetry=minCostRetry;
@@ -222,23 +222,25 @@ void GlobalOptimObj::Optimize(long &nbStep)
                {
                   case ANNEALING_BOLTZMANN:
                      mMutationAmplitude=
-                        mMutationAmplitudeEnd*log((double)nbSteps)/log((double)(mNbTrial+1));
+                        mMutationAmplitudeMin*log((double)nbSteps)/log((double)(mNbTrial+1));
                      break;
                   case ANNEALING_CAUCHY:
-                     mMutationAmplitude=mMutationAmplitudeEnd*nbSteps/mNbTrial;break;
+                     mMutationAmplitude=mMutationAmplitudeMin*nbSteps/mNbTrial;break;
                   //case ANNEALING_QUENCHING:
                   case ANNEALING_EXPONENTIAL:
-                     mMutationAmplitude=mMutationAmplitudeBegin
-                                    *pow(mMutationAmplitudeEnd/mMutationAmplitudeBegin,
+                     mMutationAmplitude=mMutationAmplitudeMax
+                                    *pow(mMutationAmplitudeMin/mMutationAmplitudeMax,
                                           mNbTrial/(double)nbSteps);break;
                   case ANNEALING_SMART:
                      if((nbAcceptedMovesTemp/(double)nbTryPerTemp)>0.7) mMutationAmplitude*=2.;
                      if((nbAcceptedMovesTemp/(double)nbTryPerTemp)<0.3) mMutationAmplitude/=2.;
-                     if(mMutationAmplitude>16.) mMutationAmplitude=16.;
-                     if(mMutationAmplitude<(1./16.)) mMutationAmplitude=1./16.;
+                     if(mMutationAmplitude>mMutationAmplitudeMax) 
+								mMutationAmplitude=mMutationAmplitudeMax;
+                     if(mMutationAmplitude<mMutationAmplitudeMin) 
+								mMutationAmplitude=mMutationAmplitudeMax;
                      nbAcceptedMovesTemp=0;
                      break;
-                  default: mMutationAmplitude=mMutationAmplitudeEnd;break;
+                  default: mMutationAmplitude=mMutationAmplitudeMin;break;
                }
             }
 
@@ -354,17 +356,17 @@ void GlobalOptimObj::Optimize(long &nbStep)
                {
                   case ANNEALING_BOLTZMANN:
                      mutationAmplitude(i)=
-                        mMutationAmplitudeEnd*log((double)(nbWorld-1))/log((double)(i+1));
+                        mMutationAmplitudeMin*log((double)(nbWorld-1))/log((double)(i+1));
                      break;
                   case ANNEALING_CAUCHY:
-                     mutationAmplitude(i)=mMutationAmplitudeEnd*(double)(nbWorld-1)/i;break;
+                     mutationAmplitude(i)=mMutationAmplitudeMin*(double)(nbWorld-1)/i;break;
                   //case ANNEALING_QUENCHING:
                   case ANNEALING_EXPONENTIAL:
-                     mutationAmplitude(i)=mMutationAmplitudeBegin
-                                    *pow(mMutationAmplitudeEnd/mMutationAmplitudeBegin,
+                     mutationAmplitude(i)=mMutationAmplitudeMax
+                                    *pow(mMutationAmplitudeMin/mMutationAmplitudeMax,
                                           i/(double)(nbWorld-1));break;
                   case ANNEALING_SMART:mutationAmplitude(i)=1.;//will be updated later
-                  default: mMutationAmplitude=mMutationAmplitudeEnd;break;
+                  default: mMutationAmplitude=mMutationAmplitudeMin;break;
                }
             }
          // Number of successive trials for each World. At the end of these trials
@@ -491,8 +493,10 @@ void GlobalOptimObj::Optimize(long &nbStep)
                         mutationAmplitude(i)*=2.;
                      if((worldNbAcceptedMoves(i)/(double)nbTrialsReport)<0.3)
                         mutationAmplitude(i)/=2.;
-                     if(mutationAmplitude(i)>65.) mutationAmplitude(i)=64.;
-                     if(mutationAmplitude(i)<(1./9.)) mutationAmplitude(i)=1./8.;
+                     if(mutationAmplitude(i)>mMutationAmplitudeMax) 
+								mutationAmplitude(i)=mMutationAmplitudeMax;
+                     if(mutationAmplitude(i)<mMutationAmplitudeMin)
+								mutationAmplitude(i)=mMutationAmplitudeMin;
                   }
                }
                worldNbAcceptedMoves=0;
@@ -711,7 +715,7 @@ void GlobalOptimObj::XMLOutput(ostream &os,int indent)const
    {
       XMLCrystTag tag2("MutationMaxMin");
       for(int i=0;i<indent;i++) os << "  " ;
-      os<<tag2<<mMutationAmplitudeBegin << " "<< mMutationAmplitudeEnd;
+      os<<tag2<<mMutationAmplitudeMax << " "<< mMutationAmplitudeMin;
       tag2.SetIsEndTag(true);
       os<<tag2<<endl;
    }
@@ -797,7 +801,7 @@ void GlobalOptimObj::XMLInput(istream &is,const XMLCrystTag &tagg)
       }
       if("MutationMaxMin"==tag.GetName())
       {
-         is>>mMutationAmplitudeBegin>>mMutationAmplitudeEnd;
+         is>>mMutationAmplitudeMax>>mMutationAmplitudeMin;
          if(false==tag.IsEmptyTag()) XMLCrystTag junk(is);//:KLUDGE: for first release
          continue;
       }
@@ -914,7 +918,7 @@ void GlobalOptimObj::XMLInputOld(istream &is,const IOCrystTag &tagg)
                {
                   string mut;
                   IOCrystExtractNameSpace(is,mut);
-                  is >> mMutationAmplitudeBegin>>mMutationAmplitudeEnd;
+                  is >> mMutationAmplitudeMax>>mMutationAmplitudeMin;
                   if(mut=="Constant")
                   {
                      mAnnealingScheduleMutation.SetChoice(ANNEALING_CONSTANT);
