@@ -1527,6 +1527,7 @@ WXCrystObjBasic(parent),mpTexturePhaseMarchDollase(pObj)
 {
    VFN_DEBUG_ENTRY("WXTexturePhaseMarchDollase::WXTexturePhaseMarchDollase()",5)
    mpSizer=new wxBoxSizer(wxHORIZONTAL);
+   this->SetSizer(mpSizer);
    pTex->Print();
    WXFieldRefPar* pFieldFraction  =new WXFieldRefPar(this,"fraction",
             &(pTex->GetPar(&(mpTexturePhaseMarchDollase->mFraction))));
@@ -1553,8 +1554,7 @@ WXCrystObjBasic(parent),mpTexturePhaseMarchDollase(pObj)
    mpSizer->Add(pFieldL,0,wxALIGN_LEFT);
    mList.Add(pFieldL);
 
-   mpSizer->SetSizeHints(this);
-   this->Layout();
+   this->BottomLayout(0);
    this->CrystUpdate();
    VFN_DEBUG_EXIT("WXTexturePhaseMarchDollase::WXTexturePhaseMarchDollase()",5)
 }
@@ -1591,16 +1591,12 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpTextureMarchDollase(obj)
       mpMenuBar->AddMenu("Phases",ID_REFOBJ_MENU_OBJ);
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERTEXTURE_MENU_ADDPHASE,
                                 "Add Phase");
-      mpSizer->SetItemMinSize(mpMenuBar,
-                              mpMenuBar->GetSize().GetWidth(),
-                              mpMenuBar->GetSize().GetHeight());
    //existing phases
       WXRegistry<TexturePhaseMarchDollase> *pWXPhaseRegistry
          =mpTextureMarchDollase->mPhaseRegistry.WXCreate(this);
       mpSizer->Add(pWXPhaseRegistry,0,wxALIGN_LEFT);
       mList.Add(pWXPhaseRegistry);
-   mpSizer->SetSizeHints(this);
-   this->Layout();
+   this->BottomLayout(0);
    this->CrystUpdate();
    VFN_DEBUG_EXIT("WXTextureMarchDollase::WXTextureMarchDollase()",5)
 }
@@ -1718,8 +1714,7 @@ WXRefinableObj(parent,p),mpPowderPatternDiffraction(p)
       mList.Add(pTex);
       mpSizer->Add(pTex);
       
-   mpTopSizer->SetSizeHints(this);
-   this->Layout();
+   this->BottomLayout(0);
    this->CrystUpdate();
 }
 

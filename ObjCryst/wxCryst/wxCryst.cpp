@@ -79,14 +79,14 @@ WXCrystObjBasic::~WXCrystObjBasic()
 
 void WXCrystObjBasic::BottomLayout(WXCrystObjBasic *pChild)
 {
-   VFN_DEBUG_ENTRY(this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
+   VFN_DEBUG_ENTRY("WXCrystObjBasic::BottomLayout(...)"<<this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
    wxSizer *pSizer=this->GetSizer();
-   if(pSizer!=0) pSizer->SetSizeHints(this);
    if((pChild !=0) &&(pSizer!=0))
    {
       pSizer->SetItemMinSize
             (pChild, pChild->GetSize().GetWidth(),pChild->GetSize().GetHeight());
    }
+   if(pSizer!=0) pSizer->SetSizeHints(this);
    this->Layout();
    if(mWXCrystParent!=0)
    {
@@ -103,18 +103,18 @@ void WXCrystObjBasic::BottomLayout(WXCrystObjBasic *pChild)
       }
       this->GetParent()->Layout();
    }
-   VFN_DEBUG_EXIT(this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
+   VFN_DEBUG_EXIT("WXCrystObjBasic::BottomLayout(...)"<<this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
 }
 void WXCrystObjBasic::AddChild(WXCrystObjBasic *pChild, bool doBottomLayout)
 {
-   VFN_DEBUG_ENTRY(this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
+   VFN_DEBUG_ENTRY("WXCrystObjBasic::AddChild(...)"<<this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
    wxSizer *pSizer=this->GetSizer();
    if(pSizer!=0)
    {
       pSizer->Add(pChild);
    }
    if(doBottomLayout) this->BottomLayout(pChild);
-   VFN_DEBUG_EXIT(this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
+   VFN_DEBUG_EXIT("WXCrystObjBasic::AddChild(...)"<<this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
 }
 ////////////////////////////////////////////////////////////////////////
 //
@@ -620,6 +620,9 @@ WXField(parent,name,field_id)
 {
    mpButton=new wxButton(this,field_id,name.c_str(),wxDefaultPosition,wxSize(hsize,-1));
    mpSizer->Add(mpButton,0,wxALIGN_CENTER);
+   mpSizer->SetItemMinSize(mpButton,
+                           mpButton->GetSize().GetWidth(),
+                           mpButton->GetSize().GetHeight()+2);
    mpSizer->SetSizeHints(this);
    this->Layout();
 }
@@ -721,7 +724,7 @@ bool WXCrystObj::Enable(bool enable)
 
 void WXCrystObj::BottomLayout(WXCrystObjBasic *pChild)
 {
-   VFN_DEBUG_ENTRY(this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
+   VFN_DEBUG_ENTRY("WXCrystObj::BottomLayout(..)"<<this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
    if(mpSizer!=0) mpSizer->SetSizeHints(this);
    if((pChild !=0) &&(mpSizer!=0))
    {
@@ -749,17 +752,17 @@ void WXCrystObj::BottomLayout(WXCrystObjBasic *pChild)
       }
       this->GetParent()->Layout();
    }
-   VFN_DEBUG_EXIT(this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
+   VFN_DEBUG_EXIT("WXCrystObj::BottomLayout(..)"<<this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
 }
 void WXCrystObj::AddChild(WXCrystObjBasic *pChild, bool doBottomLayout)
 {
-   VFN_DEBUG_ENTRY(this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
+   VFN_DEBUG_ENTRY("WXCrystObj::AddChild(..)"<<this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
    if(mpSizer!=0)
    {
       mpSizer->Add(pChild);
    }
    if(doBottomLayout) this->BottomLayout(pChild);
-   VFN_DEBUG_EXIT(this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
+   VFN_DEBUG_EXIT("WXCrystObj::AddChild(..)"<<this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -806,8 +809,7 @@ WXCrystObjBasic(parent),mNbMenu(0),mMaxNbMenu(16),mpMenu(0),mpButton(0)
    mpMenu=new wxMenu*[16];//:TODO:
    mpButton=new wxButton*[16];
    this->SetSizer(mpSizer);
-   mpSizer->SetSizeHints(this);
-   this->Layout();
+   this->BottomLayout(0);
 }
 
 void WXCrystMenuBar::AddMenu(const string &name,const int menuId, const string& help)
@@ -817,11 +819,14 @@ void WXCrystMenuBar::AddMenu(const string &name,const int menuId, const string& 
    VFN_DEBUG_MESSAGE("WXCrystMenuBar::AddMenu():1",6)
    mpButton[mNbMenu]= new wxButton(this,ID_CRYST_MENU1+mNbMenu,name.c_str());
    VFN_DEBUG_MESSAGE("WXCrystMenuBar::AddMenu():2",6)
-   mpSizer->Add(mpButton[mNbMenu],0);
+   mpButton[mNbMenu]->Layout();
+   mpSizer->Add(mpButton[mNbMenu],0,wxALIGN_CENTER);
+   mpSizer->SetItemMinSize(mpButton[mNbMenu],
+                           mpButton[mNbMenu]->GetSize().GetWidth(),
+                           mpButton[mNbMenu]->GetSize().GetHeight()+2);
    VFN_DEBUG_MESSAGE("WXCrystMenuBar::AddMenu():3",6)
    mMenuId(mNbMenu++)=menuId;
-   this->Layout();
-   mpSizer->SetSizeHints(this);
+   this->BottomLayout(0);
    VFN_DEBUG_MESSAGE("WXCrystMenuBar::AddMenu():End",6)
 }
 
