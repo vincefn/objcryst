@@ -312,7 +312,7 @@ class ScatteringData: virtual public RefinableObj
       /// \internal sort reflections by theta values (also get rid of [0,0,0] if present)
       /// If maxTheta >0, then only reflections where theta<maxTheta are kept
       /// \return an array with the subscript of the kept reflections (for inherited classes)
-      CrystVector_long SortReflectionByTheta(const REAL maxTheta=-1.);
+      virtual CrystVector_long SortReflectionByTheta(const REAL maxTheta=-1.);
       /// \internal Get rid of extinct reflections. Useful after GenHKLFullSpace().
       /// Do not use this if you have a list of observed reflections !
       ///

@@ -1439,6 +1439,9 @@ void DiffractionDataSingleCrystal::XMLOutput(ostream &os,int indent)const
    this->GetPar(&mGlobalBiso).XMLOutput(os,"globalBiso",indent);
    os <<endl;
 	
+   mTwinningOption.XMLOutput(os,indent);
+   os <<endl;
+   
    XMLCrystTag tag2("HKLIobsSigmaWeightList");
    for(int i=0;i<indent;i++) os << "  " ;
    os <<tag2<<endl;
@@ -1484,6 +1487,13 @@ void DiffractionDataSingleCrystal::XMLInput(istream &is,const XMLCrystTag &tagg)
          this->UpdateDisplay();
          VFN_DEBUG_EXIT("DiffractionDataSingleCrystal::Exit():"<<this->GetName(),5)
          return;
+      }
+      if("Option"==tag.GetName())
+      {
+         for(unsigned int i=0;i<tag.GetNbAttribute();i++)
+            if("Name"==tag.GetAttributeName(i)) 
+               mOptionRegistry.GetObj(tag.GetAttributeValue(i)).XMLInput(is,tag);
+         continue;
       }
       if("Radiation"==tag.GetName()) mRadiation.XMLInput(is,tag);
       if("Par"==tag.GetName())
@@ -1533,6 +1543,7 @@ void DiffractionDataSingleCrystal::XMLInput(istream &is,const XMLCrystTag &tagg)
          weight.resizeAndPreserve(nbrefl);
          this->SetHklIobs(h,k,l,iobs,sigma);
          this->SetWeight(weight);
+			this->SortReflectionByTheta();
       }
    }
 }
