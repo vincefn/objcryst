@@ -19,6 +19,10 @@
 #ifndef _WX_WXMULTIGRAPH_H_
 #define _WX_WXMULTIGRAPH_H_
 
+#ifdef _MSC_VER // MS VC++ predefined macros....
+#undef min
+#undef max
+#endif
 #include <valarray>
 #include <map>
 #include <string>

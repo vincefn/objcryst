@@ -18,6 +18,14 @@
 
 #include <iostream>
 
+// wx headers, with or without precompilation
+#include "wx/wxprec.h"
+#ifdef __BORLANDC__
+    #pragma hdrstop
+#endif
+#ifndef WX_PRECOMP
+    #include "wx/wx.h"
+#endif
 #include "wx/dcbuffer.h"
 #include "wx/gdicmn.h"
 #include "ObjCryst/General.h"
