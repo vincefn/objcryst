@@ -75,6 +75,8 @@ WXCrystObjBasic::~WXCrystObjBasic()
    // Every time we destroy a widget, validate all input to make sure the destroyed
    // widget does not have some unread info.
    WXCrystValidateAllUserInput();
+   for(set<WXCrystObjBasicList*>::iterator pos=mvpList.begin();pos!=mvpList.end();++pos)
+      (*pos)->Remove(this);
 }
 
 void WXCrystObjBasic::BottomLayout(WXCrystObjBasic *pChild)
@@ -116,97 +118,62 @@ void WXCrystObjBasic::AddChild(WXCrystObjBasic *pChild, bool doBottomLayout)
    if(doBottomLayout) this->BottomLayout(pChild);
    VFN_DEBUG_EXIT("WXCrystObjBasic::AddChild(...)"<<this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
 }
+
+void WXCrystObjBasic::AddedToList(WXCrystObjBasicList* list){mvpList.insert(list);}
+void WXCrystObjBasic::RemovedFromList(WXCrystObjBasicList* list){mvpList.erase(list);}
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXCrystObjBasicList
 //
 ////////////////////////////////////////////////////////////////////////
-WXCrystObjBasicList::WXCrystObjBasicList():
-mNbWXCrystObj(0),mMaxNbWXCrystObj(32),mpWXCrystObj(0)
-{
-   mpWXCrystObj= new WXCrystObjBasic*[mMaxNbWXCrystObj];
-}
+WXCrystObjBasicList::WXCrystObjBasicList()
+{}
 
 WXCrystObjBasicList::~WXCrystObjBasicList()
-{
-   delete[] mpWXCrystObj;
-}
+{}
 
-unsigned int WXCrystObjBasicList::GetNb()const {return mNbWXCrystObj;}
+unsigned int WXCrystObjBasicList::GetNb()const {return mvpWXCrystObj.size();}
 
 void WXCrystObjBasicList::Add(WXCrystObjBasic *win)
 {
    VFN_DEBUG_MESSAGE("WXCrystObjBasicList::Add()",6)
-   if(mNbWXCrystObj==mMaxNbWXCrystObj)
-   {
-      WXCrystObjBasic** tmp= new WXCrystObjBasic*[mMaxNbWXCrystObj+16];
-      for(unsigned int i=0;i<mNbWXCrystObj;i++) tmp[i]=mpWXCrystObj[i];
-      delete[] mpWXCrystObj;
-      mpWXCrystObj= tmp;
-      mMaxNbWXCrystObj+=16;
-   }
-   mpWXCrystObj[mNbWXCrystObj++]=win;
+   mvpWXCrystObj.insert(win);
 }
 
-void WXCrystObjBasicList::Remove(const WXCrystObjBasic *win)
+void WXCrystObjBasicList::Remove(WXCrystObjBasic *win)
 {
    VFN_DEBUG_MESSAGE("WXCrystObjBasicList::Remove():"<<win,6)
-   unsigned int i;
-   for(i=0;i<mNbWXCrystObj;i++) if(mpWXCrystObj[i]==win) break;
-   if(i<(mNbWXCrystObj-1)) mpWXCrystObj[i]=mpWXCrystObj[--mNbWXCrystObj];
-   else
-   {
-      if(i==(mNbWXCrystObj-1)) mNbWXCrystObj--;
-      else
-      {
-         if(i==mNbWXCrystObj)
-         {
-            cout << "Trying to remove a non-existing window...aborting"<<endl;
-            for(i=0;i<mNbWXCrystObj;i++) cout <<i<<":"<<mpWXCrystObj[i]<<endl;
-            abort();
-         }
-      }
-   }
+   mvpWXCrystObj.erase(win);
 }
 
 bool WXCrystObjBasicList::Show(bool show)
 {
    VFN_DEBUG_MESSAGE("WXCrystObjBasicList::Show(bool)",3)
-   for(unsigned int i=0;i<mNbWXCrystObj;i++)
-      mpWXCrystObj[i]->Show(show);
+   for(set<WXCrystObjBasic*>::iterator pos=mvpWXCrystObj.begin();pos!=mvpWXCrystObj.end();pos++)
+      (*pos)->Show(show);
    //this->CrystUpdate();
    VFN_DEBUG_MESSAGE("WXCrystObjBasicList::Show(bool):End",3)
    return true;
 }
 
-WXCrystObjBasic* WXCrystObjBasicList::Get(const unsigned int i)
-{
-   if(i>= mNbWXCrystObj)
-   {
-      cout << "WXCrystObjBasicList::Get(i): i out of range !" <<endl;
-      throw 0;
-   }
-   return mpWXCrystObj[i];
-}
-
 void WXCrystObjBasicList::CrystUpdate()
 {
    VFN_DEBUG_ENTRY("WXCrystObjBasicList::CrystUpdate()",3)
-   for(unsigned int i=0;i<mNbWXCrystObj;i++)
-      mpWXCrystObj[i]->CrystUpdate();
+   for(set<WXCrystObjBasic*>::iterator pos=mvpWXCrystObj.begin();pos!=mvpWXCrystObj.end();pos++)
+      (*pos)->CrystUpdate();
    VFN_DEBUG_EXIT("WXCrystObjBasicList::CrystUpdate()",3)
 }
 void WXCrystObjBasicList::UpdateUI()
 {
    VFN_DEBUG_ENTRY("WXCrystObjBasicList::UpdateUI()",5)
-   for(unsigned int i=0;i<mNbWXCrystObj;i++)
-      mpWXCrystObj[i]->UpdateUI();
+   for(set<WXCrystObjBasic*>::iterator pos=mvpWXCrystObj.begin();pos!=mvpWXCrystObj.end();pos++)
+      (*pos)->UpdateUI();
    VFN_DEBUG_EXIT("WXCrystObjBasicList::UpdateUI()",5)
 }
 void WXCrystObjBasicList::Enable(bool enable)
 {
-   for(unsigned int i=0;i<mNbWXCrystObj;i++)
-      mpWXCrystObj[i]->Enable(enable);
+   for(set<WXCrystObjBasic*>::iterator pos=mvpWXCrystObj.begin();pos!=mvpWXCrystObj.end();pos++)
+      (*pos)->Enable(enable);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -836,13 +803,10 @@ BEGIN_EVENT_TABLE(WXCrystMenuBar,wxWindow)
 END_EVENT_TABLE()
 
 WXCrystMenuBar::WXCrystMenuBar(wxWindow *parent, WXCrystObj* owner):
-WXCrystObjBasic(parent),mNbMenu(0),mMaxNbMenu(16),mpMenu(0),mpButton(0)
+WXCrystObjBasic(parent)
 {
    VFN_DEBUG_MESSAGE("WXCrystMenuBar::WXCrystMenuBar():",6)
-   mMenuId.resize(mMaxNbMenu);
    mpSizer=new wxBoxSizer(wxHORIZONTAL);
-   mpMenu=new wxMenu*[16];//:TODO:
-   mpButton=new wxButton*[16];
    this->SetSizer(mpSizer);
    this->BottomLayout(0);
 }
@@ -850,17 +814,16 @@ WXCrystObjBasic(parent),mNbMenu(0),mMaxNbMenu(16),mpMenu(0),mpButton(0)
 void WXCrystMenuBar::AddMenu(const string &name,const int menuId, const string& help)
 {
    VFN_DEBUG_MESSAGE("WXCrystMenuBar::AddMenu()",6)
-   mpMenu[mNbMenu]= new wxMenu(name.c_str());
-   VFN_DEBUG_MESSAGE("WXCrystMenuBar::AddMenu():1",6)
-   mpButton[mNbMenu]= new wxButton(this,ID_CRYST_MENU1+mNbMenu,name.c_str());
+   const long id=ID_CRYST_MENU1+mvpMenu.size();
+   mvpMenu[menuId]=make_pair(new wxMenu(name.c_str()),
+                             new wxButton(this,id,name.c_str()));
    VFN_DEBUG_MESSAGE("WXCrystMenuBar::AddMenu():2",6)
-   mpButton[mNbMenu]->Layout();
-   mpSizer->Add(mpButton[mNbMenu],0,wxALIGN_CENTER);
-   mpSizer->SetItemMinSize(mpButton[mNbMenu],
-                           mpButton[mNbMenu]->GetSize().GetWidth(),
-                           mpButton[mNbMenu]->GetSize().GetHeight()+2);
+   mvpMenu[menuId].second->Layout();
+   mpSizer->Add(mvpMenu[menuId].second,0,wxALIGN_CENTER);
+   mpSizer->SetItemMinSize(mvpMenu[menuId].second,
+                           mvpMenu[menuId].second->GetSize().GetWidth(),
+                           mvpMenu[menuId].second->GetSize().GetHeight()+2);
    VFN_DEBUG_MESSAGE("WXCrystMenuBar::AddMenu():3",6)
-   mMenuId(mNbMenu++)=menuId;
    this->BottomLayout(0);
    VFN_DEBUG_MESSAGE("WXCrystMenuBar::AddMenu():End",6)
 }
@@ -868,18 +831,14 @@ void WXCrystMenuBar::AddMenu(const string &name,const int menuId, const string& 
 wxMenu& WXCrystMenuBar::GetMenu(const int menuId)
 {
    //:TODO: Check we found the correct menu
-   unsigned int i;
-   for(i=0;i<mNbMenu;i++) if(menuId==mMenuId(i)) break;
-   return *mpMenu[i];
+   return *(mvpMenu[menuId].first);
 }
 
 void WXCrystMenuBar::AddMenuItem(const int menuId, int id, const string& item, const string& help,const bool checkable)
 {
    VFN_DEBUG_MESSAGE("WXCrystMenuBar::AddMenuItem():",6)
    //:TODO: Check we found the correct menu
-   unsigned int i;
-   for(i=0;i<mNbMenu;i++) if(menuId==mMenuId(i)) break;
-   mpMenu[i]->Append(id,item.c_str(),help.c_str(),checkable);
+   this->GetMenu(menuId).Append(id,item.c_str(),help.c_str(),checkable);
 }
 
 void WXCrystMenuBar::AddMenuItem(const int menuId,int id, const wxString&  item,
@@ -887,9 +846,7 @@ void WXCrystMenuBar::AddMenuItem(const int menuId,int id, const wxString&  item,
 {
    VFN_DEBUG_MESSAGE("WXCrystMenuBar::AddMenuItem():",6)
    //:TODO: Check we found the correct menu
-   unsigned int i;
-   for(i=0;i<mNbMenu;i++) if(menuId==mMenuId(i)) break;
-   mpMenu[i]->Append(id,item.c_str(),subMenu,helpString.c_str());
+   this->GetMenu(menuId).Append(id,item.c_str(),subMenu,helpString.c_str());
 }
 
 void WXCrystMenuBar::CrystUpdate()
@@ -902,8 +859,14 @@ void WXCrystMenuBar::UpdateUI()
 void WXCrystMenuBar::OnPopupMenu(wxCommandEvent & event)
 {
    VFN_DEBUG_MESSAGE("WXCrystMenuBar::OnPopupMenu():",6)
-   const int i=event.GetId()-ID_CRYST_MENU1;
-   this->PopupMenu(mpMenu[i],mpButton[i]->GetPosition());
+   // The ID of the button is not the same as the ID of the menu,
+   // so look it up. (to have the same ID we'd need to delegate event handling,
+   // which would be a pain.
+   std::map<long,pair<wxMenu *,wxButton*> >::iterator pos;
+   const int i=event.GetId();
+   for(pos=mvpMenu.begin();pos!=mvpMenu.end();++pos) if(i==pos->second.second->GetId()) break;
+   if(pos!=mvpMenu.end())
+      this->PopupMenu(pos->second.first,pos->second.second->GetPosition());
 }
 
 }//namespace

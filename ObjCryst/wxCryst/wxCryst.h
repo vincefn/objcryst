@@ -27,6 +27,8 @@
 
 #include <string>
 #include <iostream>
+#include <set>
+#include <map>
 
 // wx headers, with or without precompilation
 #include "wx/wxprec.h"
@@ -80,6 +82,9 @@ enum
    ID_WXFIELD
 };
 #endif
+// Forward declaration
+class WXCrystObjBasicList;
+
 /// Abstract base class for all objects in wxCryst
 class WXCrystObjBasic: public wxWindow
 {
@@ -108,6 +113,10 @@ class WXCrystObjBasic: public wxWindow
       ///
       /// \param doBottomLayout ask for a new Layout of the window and of its parents.
       virtual void AddChild(WXCrystObjBasic *pChild, bool doBottomLayout=true);
+      /// \internal Tell the object it has been added to a list
+      void AddedToList(WXCrystObjBasicList* list);
+      /// \internal Tell the object it has been removed from a list
+      void RemovedFromList(WXCrystObjBasicList* list);
    protected:
       /// Parent, if a WXCrystObjBasic itself
       WXCrystObjBasic *mWXCrystParent;
@@ -117,6 +126,9 @@ class WXCrystObjBasic: public wxWindow
       bool mNeedUpdateUI;
       /// Mutex used to lock data when preparing to update the UI in non-main thread
       wxMutex mMutex;
+      /// WXCrystObjBasicList which are aware of this object, 
+      /// and which should be told on destruction.
+      std::set<WXCrystObjBasicList*> mvpList;
 };
 
 /// A List of WXCrystObjBasic.
@@ -133,9 +145,7 @@ class WXCrystObjBasicList
       /// not copied.
       void Add(WXCrystObjBasic *);
       /// remove an object from the list
-      void Remove(const WXCrystObjBasic *);
-      /// Get an object from the list
-      WXCrystObjBasic* Get(const unsigned int i);
+      void Remove(WXCrystObjBasic *);
       /// Show or hide all of the windows
       bool Show(bool);
       /// Forces all objects in the list to update. See WXCrystObjBasic::CrystUpdate()
@@ -144,12 +154,8 @@ class WXCrystObjBasicList
       void UpdateUI();
       void Enable(bool enable);
    private:
-      /// Number of objects.
-      unsigned int mNbWXCrystObj;
-      /// \internal Maximum number of objects
-      unsigned int mMaxNbWXCrystObj;
-      /// Array of pointers to the objects.
-      WXCrystObjBasic** mpWXCrystObj;
+      /// List of pointers to the objects.
+      std::set<WXCrystObjBasic*> mvpWXCrystObj;
 };
 
 class WXFieldName;
@@ -426,16 +432,9 @@ class WXCrystMenuBar: public WXCrystObjBasic
    protected:
       /// The sizer of the menu
       wxBoxSizer* mpSizer;
-      /// The list of menu IDs
-      CrystVector_int mMenuId;
-      /// Number of menus
-      unsigned int mNbMenu;
-      /// Max number of menus
-      unsigned int mMaxNbMenu;
-      /// Array of menus
-      wxMenu **mpMenu;
-      /// The buttons corresponding to each menu
-      wxButton **mpButton;
+      /// List of menus, first is the menu Id and second is a pair of
+      /// <pointer to the menu, pointer to the button of the menu>
+      std::map<long,pair<wxMenu *,wxButton*> > mvpMenu;
    DECLARE_EVENT_TABLE()
 };
 
