@@ -60,7 +60,7 @@ Requirements:
       
    Add the WXWIN variable to your environment (<tt>set WXWIN=C:\dev\wxWindows</tt>)
 
-   then (in a DOS/Command prompt) go to the <tt>C:\dev\wxWindows\src\msw\</tt> directory, and type: <tt>make -f makefile.b32 FINAL=1</tt>
+   then (in a DOS/Command prompt) go to the <tt>C:\dev\wxWindows\src\msw\ </tt> directory, and type: <tt>make -f makefile.b32 FINAL=1</tt>
 </ul>
 <h2>Get the source of Fox</h2>
 
@@ -84,7 +84,7 @@ Note: in all cases you may need to <b>edit the <tt>Fox/src/ObjCryst/rules.mak</t
 </ul>
 <h2>Testing</h2>
 
-Well, just try the examples, or your data while displaying both 3D structure and powder pattern(s). Optionnaly, run several optimizations (several examples) at the same time. Try new features... Change the structural/pattern parameters while graph windows are already shown and then update them... Run it overnight...
+Well, just try the examples, or your data while displaying both 3D structure and powder pattern(s). Optionally, run several optimizations (several examples) at the same time. Try new features... Change the structural/pattern parameters while graph windows are already shown and then update them... Run it overnight...
 
 <h2>Updating the Fox /ObjCryst++ source code using CVS</h2>
 <b>Quick version:</b>

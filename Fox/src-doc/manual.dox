@@ -13,7 +13,7 @@
 \htmlinclude fox-top.map
 \anchor top_menus <h2>Main Menus</h2>
 <ul>
-   <li> The "File" menu allows to save or load a sort of "project" file in which are saved Crystal structures, diffraction data, algorithms... In fact everything which can be seen in the Fox main window is saved. It is saved in an XML format specific to Fox/ObjCryst++. You can also exit (but don't forget to save before, because Fox will not query you if you have not saved before !)The "Objects" menu can be used to create new Crystal, PowderPattern, DiffractionDataSingleCrystal and algorithms objects. Remember that you can create several of these objects simultaneously (no limit over than the scrollbars !).
+   <li> The "File" menu allows to save or load a sort of "project" file in which are saved Crystal structures, diffraction data, algorithms... In fact everything which can be seen in the Fox main window is saved. It is saved in an XML format specific to Fox/ObjCryst++. You can also exit (but don't forget to save before, because Fox will not query you if you have not saved before !)The "Objects" menu can be used to create new Crystal, PowderPattern, DiffractionDataSingleCrystal and algorithms objects. Remember that you can create several of these objects simultaneously (limited only by scrollbar lengths!).
    <li> The "Help" menu gives you access to the "about box" of Fox, and you can toggle the use of tooltips (which are not much used yet...).
 </ul>
 \anchor crystal<h2>Crystal Structure</h2>
@@ -193,12 +193,12 @@
    Put here the total number of trials that you want to make. For Parallel tempering, you can put a large number (100 000 000), and then stop manually the algorithm when it seems to have converged (the algorithm has the advantage of being invariant with the number of trials). (for simulated annealing, you need to more carefully evaluate the number of trials for your specific configuration...).
 
    \anchor algo_objects<h3>Objects</h3>
-   This is the list of the objects optimized, which have een added through the menu.
+   This is the list of the objects to be optimized, which have been added through the menu.
 
    \anchor algo_costfunction<h3>Cost function(s)</h3>
-   Here is displayed the cost function name and the associated value, and the weight associated to it. The overall cost function is the weighted sum of all cost functions. Note if you are using an antibump cost function, you may have to reduce its weight so that it does not make the Rw cost function negligeable.
+   Here are displayed the cost function name(s) and their associated values and weights. The overall cost function is the weighted sum of all cost functions. Note if you are using an antibump cost function, you may have to reduce its weight so that it does not make the Rw cost function negligible.
    
-   A cost function which as a weight equal to 0 is only computed for each new best configuration, and does not affect the algorithm speed.
+   A cost function with a weight set to 0 is computed only for each new best configuration, and thus does not affect the algorithm speed.
 </ul>
 
 

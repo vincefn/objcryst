@@ -10,16 +10,17 @@
 \anchor intro <h2>Introduction</h2>
 The FOX program (for Linux and windows) was made for the <i><b> ab initio crystal structure solution from diffraction data </b></i> (mostly powder diffraction data). Its most interesting features for ab initio structure determination are:
 
-   - a <b><i>versatile description of the crystal contents</b></i>: either isolated <b>atoms , molecules</b> described using a bond length, bond angles and dihedral angles, and <b>polyhedra</b> for inorganic compounds. <i><b>You can describe your structure by using any combination of groups of atoms, using a chemist's or crystallographer knowledge about the connectivity in your sample</i></b>.
-   - an <i><b>automatic correction for special positions and shared atoms between polyhedra</i></b>, suitable for a global optimization algorithms.
-   - the ability to use <i> <b>multiple powder patterns</i> </b> (X-rays, neutrons), as well as single crystal data (eg extracted from a powder pattern)
+   - a <b><i>versatile description of the crystal contents</b></i>: either isolated <b>atoms , molecules</b> described using a bond length, bond angles and dihedral angles, and <b>polyhedra</b> for inorganic compounds. <i><b>You can describe your structure by using any combination of groups of atoms, using a chemist's or crystallographer knowledge about the connectivity in your sample 
+to constrain possible solutions.</i></b>.
+   - an <i><b>automatic correction for special positions and shared atoms between polyhedra</i></b>, suitable for global optimization algorithms.
+   - the ability to use simultaneously <i><b>multiple powder patterns</i></b> (X-rays, neutrons), as well as single crystal data (e.g. extracted from a powder pattern)
    - <i><b>smart global optimization algorithms</i></b> which can get out of false minima.
-   - a graphical interface with a 3D crystal structure view, live updated during the optimization process.
+   - a graphical interface with a 3D crystal structure view, with live updates during the optimization process.
 
 So, if you:
    - have an unknown compound but with (approximately) known composition.
-   - have a powder pattern (X-Ray or Neutron or both), which you have already indexed (with the refined unit cell), and for which you have some idea of the possible spacegroup(s) (using systematic extinctions).
-   - would like to solve the structure (ie find the atom -or group of atoms- positions, before refining them with another package).
+   - have a powder pattern (X-Ray or neutron or both), which you have already indexed (with the refined unit cell), and for which you have some idea of the possible spacegroup(s) (using systematic extinctions).
+   - would like to solve the structure (i.e. find the atom -or group of atoms- positions, before refining them with another package).
 
 Then Fox can help you.
 
@@ -68,7 +69,7 @@ As always, send me an email at vincefn@users.sf.net if you have any trouble with
 <ul>
    <h3>Quick demonstration</h3>
 
-   As a demonstration (even if you are not a crystallographer you can try that !), you can launch Fox, then use the top menu File->Load and open the example file example/pbso4-joint.xml. This is a file showing the global optimization of a very simple and well-known structure, PbSO4 (lead sulfate). Then:
+   As an easy demonstration (even for non-crystallographers!), you can launch Fox, then use the top menu File->Load and open the example file example/pbso4-joint.xml. This is a file showing the global optimization of a very simple and well-known structure, PbSO4 (lead sulfate). Then:
    <ul>
       <li> Click on the Crystal tab, and in the window, choose the menu Display->3D Display. This opens a window with the crystal structure. You can click& drag with the mouse to rotate the structure
       <li> Click on the Powder Diffraction tab, and for the two PowderPattern objects, choose the menu Pattern->Show Graph. This will show you the current observed (blue) and calculated (red) patterns.
@@ -89,7 +90,7 @@ If you intend to use the ObjCryst++ / Fox source code for your own projects, it 
     - In windows NT (not 98), it takes a lot of time for the application to respond. This seems to be related to NT giving all its time to the background optimization, and is otherwise not a problem.
       Problems have been reported with the OpenGL (3D) display of the Crystal structure with window$ XP. This seems related to the OpenGL drivers, and you may want to update them (other users reported WinXP working fine). This seems to be an issue with XP which depends on the graphic card used. If updating the driver does not work, only workaround is to get a real OS (better, a free one -hint,hint).Note1: If you have remarks about what could be done to improve the program (or the documentation), feel free to send me an email .
 
-Note: if the program encounters an error, it will sometime manage to save the complete environment in a file which should be where you launched Fox (or in your home directory under Linux, or along the Fox.exe application under windows), named "ObjCryst-date-time.xml", which you can then reload.
+Note: if the program encounters an error, it will sometime manage to save the complete environment in a file which should be found in the directory where you launched Fox (or in your home directory under Linux, or along the Fox.exe application under windows), named "ObjCryst-date-time.xml", which you can then reload.
 
 \anchor license <h2>License and legal information</h2>
 

@@ -1,9 +1,11 @@
 /*! \page tricks
+<center><h1>Hints and Tricks for working with FOX</h1></center>
+
 <h2>Use anisotropic building blocks</h2>
 It can be difficult to place a building block which is almost isotropic (e.g. an octahedron), because all orientations will be almost equivalent. So it is a good idea to modelize in an anisotropic way, i.e. with a building block longer than larger. This is especially useful for hybrid  (metal-organic) samples, where this kind of trick can be used.
 <h2>Avoid Preferred Orientation</h2>
-This goes without saying, but even if Fox allows ab initio structure solution with Preferred Orientation, it is always much more difficult to find it. So try to avoid texture (do not close-pack powders, etc...). For a strong preferred orientation, it will easily take 10 times longer, and with a low success rate.
+This goes without saying, but even if Fox allows <i>ab initio</i> structure solution with Preferred Orientation, it is always much more difficult to find it. So try to avoid texture (do not close-pack powders, etc...). For a strong preferred orientation, it will easily take 10 times longer, and with a low success rate.
 
-At the very least, try to put as much information as you can, e.g. fix the preferred orientation vector, or limit the March coefficient to values from 0.1 to 1 if you know the crystallites are needle-like , and to values from from 1 to 10 if they are platey-like).
+At the very least, try to put as much information as you can, e.g. fix the preferred orientation vector, or limit the March coefficient to values from 0.1 to 1 if you know the crystallites are needle-like, and to values from from 1 to 10 if they are platey-like).
 
 */
