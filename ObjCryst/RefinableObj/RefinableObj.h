@@ -27,6 +27,8 @@
 
 #include <string>
 #include <iostream>
+#include <vector>
+
 #include "CrystVector/CrystVector.h"
 #include "ObjCryst/General.h"
 #include "RefinableObj/IO.h"
@@ -128,102 +130,27 @@ class RefinableObjClock
       static unsigned long msTick0,msTick1;
 };
 
-/** Restraint: generic class defining both hard (constraints) and soft (restraints)
-* limits associated with a RefinableObj. These can be restrictions on a single
-* parameter (see RefinablePar), but inheritance allows involving several parameters.
+/** Restraint: generic class for a restraint of a given model. This 
+* defines only the category (RefParType) of restraint, and the function
+* to access the likelihood associated to this restraint and the current model.
 *
-* There are three behaviour for restraints:
-* - no limits whatsoever.
-* - hard min and/or max limits (constraint), beyond which the parameter cannot go at all.
-* - soft limits (restraint): if the restraint has a min and/or a max, then this time the
-*  value can go beyond the given limits, but with a penalty.
-*
-* All penalties for restraints are calculated under the form of a cost (strictly
-* positive number, weighted).
-*
-* This is an abstract base class.
+* By default, the likelihood is equal to 100%, and the function must be overloaded
+* for "real" restraints.
 */
 class Restraint
 {
    public:
-      /** Constructor for the base Restrain class, setting hard&soft limits.
-      *
-      * \param type: the type of value which is constrained/restrained.
-      * \param hardMin,hardMax: the hard limits between which the value should
-      * ideally be.
-      * \param hasMinLimit,hasMaxLimit: set to 'true' if the parameter has 
-      * upper and/or lower limit.
-      * \param softRange: when the value goes below min or above max limits,
-      * (resp. away from the "quenching" value)
-      * the penalty will be equal to 1 at min-softRange and at max+softRange
-      * (resp. at 1-QuenchingValue) SoftRange must be strictly positive.
-      * \param enableRestraint: if true, then the value may go beyond the hard limits,
-      * with penalty defined by the soft limits. Else no value beyond the hard limits
-      * should be accepted.
-      */
-      Restraint(const RefParType *type,
-                const REAL hardMin,
-                const REAL hardMax,
-                const bool hasMinLimit,
-                const bool hasMaxLimit,
-                const REAL softRange,
-                const bool enableRestraint=false);
-      /// Destructor
+      /// Default constructor, sets RefParType to gpRefParTypeObjCryst
+      Restraint();
+      ///constructor specifying the type
+      Restraint(const RefParType *type);
       virtual ~Restraint();
-      /** Constructor for the base Restrain class, setting hard&soft limits.
-      *
-      * \param type: the type of value which is constrained/restrained.
-      * \param hardMin,hardMax: the hard limits between which the value should
-      * ideally be.
-      * \param hasMinLimit,hasMaxLimit: set to 'true' if the parameter has 
-      * upper and/or lower limit.
-      * \param softRange: when the value goes below min or above max limits,
-      * (resp. away from the "quenching" value)
-      * the penalty will be equal to 1 at min-softRange and at max+softRange
-      * (resp. at 1-QuenchingValue) SoftRange must be strictly positive.
-      * \param enableRestraint: if true, then the value may go beyond the hard limits,
-      * with penalty defined by the soft limits. Else no value beyond the hard limits
-      * should be accepted.
-      */
-      void Init(const RefParType *type,
-                const REAL hardMin,
-                const REAL hardMax,
-                const bool hasMinLimit,
-                const bool hasMaxLimit,
-                const REAL softRange,
-                const bool enableRestraint=false);
-      /// Copy all attributes (limits, flags, etc...) from another Restraint object
-      void CopyAttributes(const Restraint&);
-      /// Get the current value.
-      virtual REAL GetValue()const=0;
-      /** Get the value of the penalty (cost) associated to the restraint.
-      *
-      * If the parameter is within limits, the cost is null. If it is
-      * below the min (and if there is a lower limit), the cost is equal
-      * to:
-      * \f[ cost= weight\times\left(\frac{min_{hard}-value}{range} \right)^2\f]
-      * And if there is a higher limit and the value is above it:
-      * \f[ cost= weight\times\left(\frac{value-max_{hard}}{range} \right)^2\f]
-      *
-      * If the value is quenched, the the returned cost is equal to:
-      * \f[ cost= weight\times\left(\frac{value-QuenchingValue}{range} \right)^2\f]
-      *
-      * If restraints are disabled, and there is no quenching, the returned cost is always null.
-      */
-      virtual REAL GetRestraintCost()const;
-      /// Set restraint range.
-      void SetRestraintRange(const REAL range);
-   protected:
-      /// Type of value constrained/restrained.
+      virtual const RefParType* GetType()const;
+      virtual void SetType(const RefParType *type);
+      /// Get -ln(likelihood) for this restraint
+      virtual REAL GetLogLikelihood()const;
+   private:
       const RefParType *mpRefParType;
-      /// Hard lower and upper limits.
-      REAL mMin,mMax;
-      /// Has lower and/or upper limits ?
-      bool mHasMin,mHasMax;
-      /// Range for restraint cost calculation.
-      REAL mRestraintRange;
-      /// Enable restraint (i.e. go beyond limits) ? (ignored if mEnableQuenching==true)
-      bool mEnableRestraint;
 };
 
 /** Generic class for parameters of refinable objects.
@@ -363,10 +290,6 @@ class RefinablePar:public Restraint
       
       /// \name General info 
       //@{
-         ///Parameter type
-         const RefParType* GetType()const;
-         ///Parameter type
-         void SetType(const RefParType*);
          /// Get the parameter's name
          string GetName()const;
          /// Set the name of the parameter. It should be unique in the RefinableObj.
@@ -497,6 +420,8 @@ class RefinablePar:public Restraint
       string mName;
       /// Pointer to the refinable value
       REAL *mpValue;
+      /// Hard lower and upper limits.
+      REAL mMin,mMax;
       /// Does the refinable parameter need limits (min and max) ?
       bool mHasLimits;
       /// is the parameter currently fixed ?
@@ -935,7 +860,8 @@ class RefinableObj
       * \param enableRestraints: if true, then restrained parameters will be allowed
       * to go beyond theur hard limits. This implies that the algorithm will take
       * into account the cost (penalty) related to the restraints. Objects which do not
-      * use restraints will simply ignore this.
+      * use restraints will simply ignore this. WARNING: this parameter may be removed 
+      * with the new likelihood scheme.
       */
       virtual void BeginOptimization(const bool allowApproximations=false,
                                      const bool enableRestraints=false);
@@ -1096,19 +1022,15 @@ class RefinableObj
          *
          */
          void AddRestraint(Restraint *pNewRestraint);
-         /* Remove a restraint
-         *
-         *void RemoveRestraint(Restraint *newRestraint);
-         *void RemoveRestraint(const RefParType);
+         /** Remove a restraint from the list of known restraints. This does not
+         * delete the Restraint object.
          */
-      /** During a global optimization, tell the object that the current config is
+         void RemoveRestraint(Restraint *pRestraint);
+      /** During a global optimization, tells the object that the current config is
       * the latest "best" config.
       *
       * This can be used by the object to make more intellingent random moves (use with
-      * caution !).
-      *
-      * The default behaviour (RefinableObj) is only to update dynamical restraints
-      * (quenching restraints).
+      * caution: highly experimental !).
       */
       virtual void TagNewBestConfig()const;
    protected:
@@ -1139,15 +1061,10 @@ class RefinableObj
          /// Maximum number of refinable parameters (array size-dynamically allocated)
          long mMaxNbRefPar;
       // Restraints
-         /// Array of pointers to the restraints for this object. This excludes
+         /// Vector of pointers to the restraints for this object. This excludes
          /// all RefinableP.ar declared in RefinableObj::mpRefPar, which can also
          /// be restrained.
-         Restraint **mpRestraint;
-         /// Number of refinable parameters (\e not including possible RefinablePar which
-         /// are also restrained)
-         long mNbRestraint;
-         /// Maximum number of restraints (dynamically allocated)
-         long mMaxNbRestraint;
+         vector<Restraint*> mvpRestraint;
          
       //Saved sets of parameters
          ///Max number of saved sets (memory is dynamically allocated...)

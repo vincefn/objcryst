@@ -738,7 +738,6 @@ void ScatteringPowerAtom::InitRefParList()
       tmp.SetDerivStep(1e-3);
       tmp.SetGlobalOptimStep(.5);
       tmp.AssignClock(mClock);
-      tmp.SetRestraintRange(.2);
       this->AddPar(tmp);
    }
 }

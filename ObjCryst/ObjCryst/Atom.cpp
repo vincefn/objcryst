@@ -462,7 +462,6 @@ void Atom::InitRefParList()
                            gpRefParTypeScattOccup,REFPAR_DERIV_STEP_ABSOLUTE,true,true);
          tmp.AssignClock(mClockScatterer);
          tmp.SetGlobalOptimStep(.2);
-         tmp.SetRestraintRange(.1);
          this->AddPar(tmp);
       }
    }

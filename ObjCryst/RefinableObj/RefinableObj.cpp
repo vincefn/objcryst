@@ -130,78 +130,30 @@ void RefinableObjClock::PrintStatic()const
 //######################################################################
 //    Restraint
 //######################################################################
-Restraint::Restraint(const RefParType *type,
-                     const REAL hardMin,
-                     const REAL hardMax,
-                     const bool hasMinLimit,
-                     const bool hasMaxLimit,
-                     const REAL softRange,
-                     const bool enableRestraints)
-{
-   this->Init(type,hardMin,hardMax,hasMinLimit,hasMaxLimit,
-              softRange,enableRestraints);
-}
+Restraint::Restraint():
+mpRefParType(gpRefParTypeObjCryst)
+{}
+
+Restraint::Restraint(const RefParType *type):
+mpRefParType(type)
+{}
 
 Restraint::~Restraint()
 {}
 
-void Restraint::Init(const RefParType *type,
-                     const REAL hardMin,
-                     const REAL hardMax,
-                     const bool hasMinLimit,
-                     const bool hasMaxLimit,
-                     const REAL softRange,
-                     const bool enableRestraints)
-{
-   mpRefParType=type;
-   mMin=hardMin;
-   mMax=hardMax;
-   mHasMin=hasMinLimit;
-   mHasMax=hasMaxLimit;
-   mRestraintRange=softRange;
-   mEnableRestraint=enableRestraints;
-}
-void Restraint::CopyAttributes(const Restraint& old)
-{
-   mpRefParType=old.mpRefParType;
-   mMin=old.mMin;
-   mMax=old.mMax;
-   mHasMin=old.mHasMin;
-   mHasMax=old.mHasMax;
-   mRestraintRange=old.mRestraintRange;
-   mEnableRestraint=old.mEnableRestraint;
-}
+const RefParType* Restraint::GetType()const{return mpRefParType;}
 
-REAL Restraint::GetRestraintCost()const
-{
-   if( (true==mEnableRestraint) && ((mHasMin==true)||(mHasMax==true)))
-   {
-      REAL value=this->GetValue();
-      if((true==mHasMin)&&(value<mMin))
-      {
-         value= (mMin-value)/(mRestraintRange);
-         return value*value;
-      }
-      if((true==mHasMax)&&(value>mMax))
-      {
-         value= (value-mMax)/(mRestraintRange);
-         return value*value;
-      }
-   }
-   return 0.;
-}
+void Restraint::SetType(const RefParType *type){mpRefParType=type;}
+      
+REAL Restraint::GetLogLikelihood()const{return 0.;}
 
-void Restraint::SetRestraintRange(const REAL range)
-{
-   mRestraintRange=range;
-}
 //######################################################################
 //    RefinablePar
 //######################################################################
 
 RefinablePar::RefinablePar():
-Restraint(0,0,0,false,false,1.,1.),
-mName(""),mpValue(0),
+Restraint(),
+mName(""),mpValue(0),mMin(0),mMax(0),
 mHasLimits(false),mIsFixed(true),mIsUsed(true),mIsPeriodic(false),
 mPeriod(0.),mHumanScale(1.),mHasAssignedClock(false),mpClock(0)
 #ifdef __WX__CRYST__
@@ -221,8 +173,8 @@ RefinablePar::RefinablePar(  const string &name,
                      const bool isPeriodic,
                      const REAL humanScale,
                      REAL period):
-Restraint(type,min,max,hasLimits,hasLimits,max-min,false),
-mName(name),mpValue(refPar),
+Restraint(type),
+mName(name),mpValue(refPar),mMin(min),mMax(max),
 mHasLimits(hasLimits),mIsFixed(isFixed),mIsUsed(isUsed),mIsPeriodic(isPeriodic),mPeriod(period),
 mGlobalOptimStep((max-min)/100.),mDerivStep(1e-5),mRefParDerivStepModel(derivMode),
 mSigma(0.),mHumanScale(humanScale),
@@ -255,9 +207,10 @@ void RefinablePar::Init(const string &name,
                         const REAL humanScale,
                         REAL period)
 {
-   this->Restraint::Init(type,min,max,hasLimits,hasLimits,max-min,false);
    mName=name;
    mpValue=refPar;
+   mMin=min;
+   mMax=max;
    mHasLimits=hasLimits;
    mIsFixed=isFixed;
    mIsUsed=isUsed;
@@ -276,10 +229,12 @@ void RefinablePar::Init(const string &name,
    mHasAssignedClock=false;
    mpClock=0;
 }
+
 void RefinablePar::CopyAttributes(const RefinablePar&old)
 {
-   this->Restraint::CopyAttributes(old);
    mName=old.mName;
+   mMin=old.GetMin();
+   mMax=old.GetMax();
    mHasLimits=old.mHasLimits;
    mIsFixed=old.mIsFixed;
    mIsUsed=old.mIsUsed;
@@ -296,8 +251,6 @@ void RefinablePar::CopyAttributes(const RefinablePar&old)
    mEquationCoeff=old.mEquationCoeff;
    #endif
 }
-
-      
 
 REAL RefinablePar::GetValue()const
 {
@@ -485,9 +438,6 @@ REAL  RefinablePar::GetSigma()const {return mSigma;}
 REAL  RefinablePar::GetHumanSigma()const {return mSigma*mHumanScale;}
 void   RefinablePar::SetSigma(const REAL sigma) {mSigma=sigma; this->Click();}
 
-const RefParType*  RefinablePar::GetType()const {return mpRefParType;}
-void RefinablePar::SetType(const RefParType *type) { mpRefParType=type;}
-
 void RefinablePar::Print() const
 {
       cout << this->GetName() << " : " << this->GetHumanValue()
@@ -511,7 +461,7 @@ void RefinablePar::SetIsFixed(const bool b)
 }
 
 bool RefinablePar::IsLimited()const {return mHasLimits;}
-void RefinablePar::SetIsLimited(const bool b) {mHasLimits=b;mHasMin=b;mHasMax=b;this->Click();}
+void RefinablePar::SetIsLimited(const bool b) {mHasLimits=b;this->Click();}
 
 bool RefinablePar::IsUsed()const {return mIsUsed;}
 void RefinablePar::SetIsUsed(const bool b) {mIsUsed=b;this->Click();}
@@ -1107,7 +1057,6 @@ ObjRegistry<RefinableObj> gTopRefinableObjRegistry("Global Top RefinableObj regi
 RefinableObj::RefinableObj():
 mName(""),
 mpRefPar(0),mNbRefPar(0),mMaxNbRefPar(100),
-mpRestraint(0),mNbRestraint(0),mMaxNbRestraint(10),
 mSavedValuesSetIsUsed(mMaxNbSavedSets),
 mNbRefParNotFixed(-1),mIsbeingRefined(false),mDeleteRefParInDestructor(true)
 #ifdef __WX__CRYST__
@@ -1128,7 +1077,6 @@ mNbRefParNotFixed(-1),mIsbeingRefined(false),mDeleteRefParInDestructor(true)
 RefinableObj::RefinableObj(const bool internalUseOnly):
 mName(""),
 mpRefPar(0),mNbRefPar(0),mMaxNbRefPar(100),
-mpRestraint(0),mNbRestraint(0),mMaxNbRestraint(10),
 mSavedValuesSetIsUsed(mMaxNbSavedSets),
 mNbRefParNotFixed(-1),mIsbeingRefined(false),mDeleteRefParInDestructor(true)
 #ifdef __WX__CRYST__
@@ -1786,21 +1734,32 @@ const RefinableObjClock& RefinableObj::GetRefParListClock()const{return mRefParL
 
 REAL  RefinableObj::GetRestraintCost()const
 {
+   vector<Restraint*>::const_iterator pos;
+   REAL cost(0);
+   for(pos=mvpRestraint.begin();pos != mvpRestraint.end();++pos)
+      cost += (*pos)->GetLogLikelihood();
    return 0;
 }
 
 void RefinableObj::AddRestraint(Restraint *pNewRestraint)
 {
-   VFN_DEBUG_MESSAGE("RefinableObj::AddPar(RefPar&)",2)
-   if(mNbRestraint == mMaxNbRestraint)
+   VFN_DEBUG_MESSAGE("RefinableObj::AddRestraint(Restraint*)",2)
+   mvpRestraint.push_back(pNewRestraint);
+}
+
+void RefinableObj::RemoveRestraint(Restraint *pRestraint)
+{
+   VFN_DEBUG_MESSAGE("RefinableObj::RemoveRestraint(Restraint*)",2)
+   vector<Restraint*>::iterator pos=find(mvpRestraint.begin(),mvpRestraint.end(),pRestraint);
+   if(mvpRestraint.end() != pos)
    {
-      mMaxNbRestraint+=10;
-      Restraint** oldmpRestraint=mpRestraint;
-      mpRestraint = new Restraint*[mMaxNbRestraint];
-      for(int i=0;i<mNbRestraint;i++) mpRestraint[i]=oldmpRestraint[i];
-      delete[] oldmpRestraint;
+      mvpRestraint.erase(pos);
    }
-   mpRestraint[mNbRestraint++]=pNewRestraint;
+   else
+   {
+      cout <<"RefinableObj::RemoveRestraint(..)"
+           <<" Whoops... tried to remove a Restraint which does not exist..."<<endl;
+   }
 }
 
 void RefinableObj::TagNewBestConfig()const
