@@ -880,7 +880,7 @@ WXGLCrystalCanvas::WXGLCrystalCanvas(WXCrystal *wxcryst,
                                      const wxPoint &pos,
                                      const wxSize &size):
 wxGLCanvas(parent,id,pos,size,wxDEFAULT_FRAME_STYLE),//
-mpWXCrystal(wxcryst),mIsGLInit(false),mDist(60),mViewAngle(15),
+mpWXCrystal(wxcryst),mIsGLInit(false),mDist(60),mX0(0),mY0(0),mZ0(0),mViewAngle(15),
 mXmin(-.1),mXmax(1.1),mYmin(-.1),mYmax(1.1),mZmin(-.1),mZmax(1.1)
 {
    VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::WXGLCrystalCanvas()",3)
@@ -890,7 +890,6 @@ mXmin(-.1),mXmax(1.1),mYmin(-.1),mYmax(1.1),mZmin(-.1),mZmax(1.1)
    
    mcXmin = 0.0; mcXmax = 1.0; mcYmin = 0.0; mcYmax = 1.0; mcZmin = 0.0; mcZmax = 1.0;
    minValue = 1.0;
-   mDistX = mDistY = 0.0;
    showFourier = showWireMC = showCrystal = TRUE;
    fcolor.Set(0xFF, 0, 0);
    initMC = FALSE;
@@ -956,9 +955,10 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
    //Orientation using the trackball
    GLfloat m[4][4];
    glLoadIdentity();
-   glTranslatef( mDistX, mDistY, -mDist );
+   glTranslatef( 0, 0, -mDist );
    build_rotmatrix( m,mQuat);
    glMultMatrixf( &m[0][0] );
+   glTranslatef( mX0, mY0, mZ0 );
    
    //Draw
       // another update of the display list is being done, so...
@@ -1082,10 +1082,12 @@ void WXGLCrystalCanvas::OnKeyDown(wxKeyEvent& event)
          Refresh(FALSE);
          break;
       }
-      case(WXK_INSERT): mDistY += 0.1; Refresh(FALSE); break;
-      case(WXK_DELETE): mDistY -= 0.1; Refresh(FALSE); break;
-      case(WXK_HOME): mDistX -= 0.1; Refresh(FALSE); break;
-      case(WXK_END): mDistX += 0.1; Refresh(FALSE); break;
+      case(WXK_INSERT): mY0 += 0.1; Refresh(FALSE); break;
+      case(WXK_DELETE): mY0 -= 0.1; Refresh(FALSE); break;
+      case(WXK_HOME): mX0 -= 0.1; Refresh(FALSE); break;
+      case(WXK_END): mX0 += 0.1; Refresh(FALSE); break;
+      case(WXK_PRIOR): mZ0 -= 0.1; Refresh(FALSE); break;
+      case(WXK_NEXT): mZ0 += 0.1; Refresh(FALSE); break;
       case(52):// 4
       {
          VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnKeyDown():rotate left",2)
@@ -1185,9 +1187,12 @@ void WXGLCrystalCanvas::OnMouse( wxMouseEvent& event )
             VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnMouse():Dragging Left Button",2)
             const float v= (mTrackBallLastY-event.GetY())/(float)height;
             const float h= (mTrackBallLastX-event.GetX())/(float)width;
-
-            mDistY += v*10;
-            mDistX -= h*10;
+            GLfloat m[4][4];
+            build_rotmatrix( m,mQuat);
+            const float dx=-h*10,dy=v*10;
+            mX0 += m[0][0]* dx +m[0][1]*dy;
+            mY0 += m[1][0]* dx +m[1][1]*dy;
+            mZ0 += m[2][0]* dx +m[2][1]*dy;
             Refresh(FALSE);
          }
          else
