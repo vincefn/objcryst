@@ -86,12 +86,14 @@ END_EVENT_TABLE()
 WXFieldRefPar::WXFieldRefPar(wxWindow *parent,const string& label,
                              RefinablePar *par, const int hsize,
                              const bool enableFixButton, const bool enableLimitedButton):
-WXField(parent,label+"R",ID_WXFIELD_REFPAR),mValue(0.),mpRefPar(par),mIsSelfUpdating(false)
+WXField(parent,label,ID_WXFIELD_REFPAR),mValue(0.),mpRefPar(par),mIsSelfUpdating(false)
 {
    VFN_DEBUG_MESSAGE("WXFieldRefPar::WXFieldName():End",6)
    if(enableFixButton)
    {
-      mpButtonFix=new wxCheckBox(this,ID_WXFIELD_REFPAR_FIXBUTTON,"L",wxDefaultPosition, wxSize(24,20));
+      this->SetLabel(label+"R");
+      mpButtonFix=new wxCheckBox(this,ID_WXFIELD_REFPAR_FIXBUTTON,"L",wxDefaultPosition, wxDefaultSize);
+      mpButtonFix->Fit();
       mpSizer->Add(mpButtonFix,0,wxALIGN_CENTER);
    }else mpButtonFix=0;
    if(enableLimitedButton)
