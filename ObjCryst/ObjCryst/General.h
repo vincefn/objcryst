@@ -159,6 +159,25 @@ void ObjCrystInformUserStdOut(const string &);
 */
 extern void (*fpObjCrystInformUser)(const string &);
 
+/** Class to compare pairs of objects, with the two objects playing a
+* symmetric role.
+*/
+template <class T> class SymmetricPairCompare
+{
+   public:
+      bool operator()(const pair<T,T> &p1, const pair<T,T> &p2) const
+      {
+         const T* p1f= &(p1.first);
+         const T* p1s= &(p1.second);
+         const T* p2f= &(p2.first);
+         const T* p2s= &(p2.second);
+         if(*p1f < *p1s) { p1s= &(p1.first); p1f= &(p1.second);}
+         if(*p2f < *p2s) { p2s= &(p2.first); p2f= &(p2.second);}
+         if(*p1f != *p2f) return *p1f < *p2f;
+         else return *p1s < *p2s;
+      }
+};
+
 
 }//Namespace
 
