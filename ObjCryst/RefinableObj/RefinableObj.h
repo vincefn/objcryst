@@ -28,6 +28,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <map>
 
 #include "CrystVector/CrystVector.h"
 #include "ObjCryst/General.h"
@@ -563,6 +564,7 @@ template<class T> class RefObjOption:public RefObjOpt
 *  level, or inside another object. This is primarily aimed for the derivative
 *  of the RefinableObj class but it
 *  can be used for \e any class that has GetName() and GetClassName() function.
+*  This class now uses a vector<> approach from the STL.
 *
 *  \warning the order of the objects in the registry can change (every time an object
 *  is de-registered).
@@ -635,12 +637,8 @@ template<class T> class ObjRegistry
       /// Last time an object was added or removed from the registry
       const RefinableObjClock& GetRegistryClock()const;
    private:
-      /// The registry
-      T** mpRegistry;
-      /// Number of registered objects
-      unsigned long mNbRegistered;
-      /// Max number of registered objects. Dynamically allocated
-      unsigned long mMaxNbRegistered;
+      /// The registry of objects
+      vector<T*> mvpRegistry;
       /// Name of this registry
       string mName;
       /// Last time an object was added or removed
@@ -773,30 +771,36 @@ class RefinableObj
       *
       * \param name : the name associated to this set of values. Names should be unique.
       * \return an number identifying the set of saved values.
+      *
+      * \warning: there is no limit to the number of parameters sets, so try to
+      * release them when you don't need them.
       */
-      long CreateParamSet(const string name="") const;
+      unsigned long CreateParamSet(const string name="") const;
+      /** \brief Erase the param set with the given id, releasing memory.
+      */
+      void ClearParamSet(const unsigned long id)const;
       /** \brief Save the current set of refined values over a previously-created set
       *of saved values.
       * \param id the number identifying the set of saved values.
       */
-      void SaveParamSet(const long id)const;
+      void SaveParamSet(const unsigned long id)const;
       /** \brief Restore a saved set of values.
       *
       * \param id : the number identifying the set.
       * \warning this only affects parameters which are used and not fixed. Others 
       * remain unchanged.
       */
-      void RestoreParamSet(const long id);
+      void RestoreParamSet(const unsigned long id);
       /** \brief Access one save refpar set
       *
       * \param setId : the number identifying the set.
       */
-      const CrystVector_REAL& GetParamSet(const long setId)const;
+      const CrystVector_REAL& GetParamSet(const unsigned long setId)const;
       /** \brief Access one save refpar set
       *
       * \param setId : the number identifying the set.
       */
-      CrystVector_REAL& GetParamSet(const long setId);
+      CrystVector_REAL& GetParamSet(const unsigned long setId);
       /** \brief Access the (human) value of one refined parameter in a saved set of parameters
       *
       * \internal
@@ -806,7 +810,7 @@ class RefinableObj
       * \return if parNumber=5 and setId=37, then the returned value will be the value (scaled
       *if it is an angle) value of the 5th not-fixed parameter in the saved set #37.
       */
-      REAL GetParamSet_ParNotFixedHumanValue(const long setId,const long parNumber)const;
+      REAL GetParamSet_ParNotFixedHumanValue(const unsigned long setId,const long parNumber)const;
       /** \brief Erase all saved refpar sets
       *
       */
@@ -1051,6 +1055,9 @@ class RefinableObj
       /// \internal Prepare everything (if necessary) for an optimization/calculation.
       virtual void Prepare();
       
+      /// Find a parameter set with a given id (and check if it is there)
+      map<unsigned long,pair<CrystVector_REAL,string> >::iterator FindParamSet(unsigned long id)const;
+
       ///Name for this RefinableObject. Should be unique, at least in the same scope.+
       string mName;
       // Parameters
@@ -1058,19 +1065,17 @@ class RefinableObj
          vector<RefinablePar *> mvpRefPar;
       // Restraints
          /// Vector of pointers to the restraints for this object. This excludes
-         /// all RefinableP.ar declared in RefinableObj::mpRefPar, which can also
-         /// be restrained.
+         /// all RefinablePar declared in RefinableObj::mpRefPar, which also
+         /// are Restraint.
          vector<Restraint*> mvpRestraint;
          
       //Saved sets of parameters
-         ///Max number of saved sets (memory is dynamically allocated...)
-         static const int mMaxNbSavedSets=1000;
-         ///Array of pointers to arrays used to save sets of values for all parameters
-         mutable CrystVector_REAL **mpSavedValuesSet;
-         ///Names associated to the saved values sets
-         mutable string **mpSavedValuesSetName;
-         ///Is the set associated with (id) currently used ?
-         mutable CrystVector_bool mSavedValuesSetIsUsed;
+         /// Map of (index,pointers to arrays) used to save sets of values for all parameters.
+         /// Currently there is no limit to the number of saved sets.
+         ///
+         /// This is mutable since creating/storing a param set does not affect the
+         /// 'real' part of the object.
+         mutable map<unsigned long,pair<CrystVector_REAL,string> >  mvpSavedValuesSet;
       
       // Used during refinements, initialized by PrepareForRefinement()
          /// Total of not-fixed parameters

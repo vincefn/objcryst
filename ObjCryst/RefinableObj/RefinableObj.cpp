@@ -772,51 +772,38 @@ bool operator==(const string&str,const wxString&wx)
 #endif
 
 template<class T> ObjRegistry<T>::ObjRegistry():
-mpRegistry(0),mNbRegistered(0),mMaxNbRegistered(0)
+mName("")
 #ifdef __WX__CRYST__
 ,mpWXRegistry(0)
 #endif
 {
    VFN_DEBUG_MESSAGE("ObjRegistry::ObjRegistry()",5)
-   //mpRegistry = new T* [mMaxNbRegistered];
-   //this->Print();
 }
 
 template<class T> ObjRegistry<T>::ObjRegistry(const string &name):
-mpRegistry(0),mNbRegistered(0),mMaxNbRegistered(0),mName(name)
+mName(name)
 #ifdef __WX__CRYST__
 ,mpWXRegistry(0)
 #endif
 {
    VFN_DEBUG_MESSAGE("ObjRegistry::ObjRegistry(name):"<<mName,5)
-   //mpRegistry = new T* [mMaxNbRegistered];
-   //this->Print();
 }
+
 //:TODO: a copy constructor
 template<class T> ObjRegistry<T>::~ObjRegistry()
 {
    VFN_DEBUG_MESSAGE("ObjRegistry::~ObjRegistry():"<<mName,5)
-   //this->Print();
-   if(mpRegistry!=0) delete[] mpRegistry;
-   mpRegistry=0;
-   //VFN_DEBUG_MESSAGE("ObjRegistry::~ObjRegistry():End",5)
    #ifdef __WX__CRYST__
    this->WXDelete();
    #endif
 }
+
 template<class T> void ObjRegistry<T>::Register(T &obj)
 {
    VFN_DEBUG_MESSAGE("ObjRegistry("<<mName<<")::Register():"<<obj.GetName(),2)
-   for(unsigned int i=0;i<mNbRegistered;i++) if(mpRegistry[i]==&obj) return;
-   if(mNbRegistered==mMaxNbRegistered)
-   {
-      T** newRegistry = new T* [mMaxNbRegistered+32];
-      for(unsigned long i=0;i<mMaxNbRegistered;i++) newRegistry[i]=mpRegistry[i];
-      if(0!=mpRegistry) delete[] mpRegistry;
-      mpRegistry=newRegistry;
-      mMaxNbRegistered+=32;
-   }
-   mpRegistry[mNbRegistered++]=&obj;
+   typename vector<T*>::iterator pos=find(mvpRegistry.begin(),mvpRegistry.end(),&obj);
+   if(pos!=mvpRegistry.end()) return; // already registered
+   mvpRegistry.push_back(&obj);
    mListClock.Click();
    #ifdef __WX__CRYST__
    if(0!=mpWXRegistry) 
@@ -829,8 +816,8 @@ template<class T> void ObjRegistry<T>::DeRegister(T &obj)
 {
    VFN_DEBUG_ENTRY("ObjRegistry("<<mName<<")::Deregister(&obj)",2)
    //this->Print();
-   const long i=this->Find(obj);
-   if(-1==i)
+   typename vector<T*>::iterator pos=find(mvpRegistry.begin(),mvpRegistry.end(),&obj);
+   if(pos==mvpRegistry.end())
    {
       VFN_DEBUG_EXIT("ObjRegistry("<<mName<<")::Deregister(&obj):NOT FOUND !!!",2)
       return; //:TODO: throw something ?
@@ -838,8 +825,7 @@ template<class T> void ObjRegistry<T>::DeRegister(T &obj)
    #ifdef __WX__CRYST__
    if(0!=mpWXRegistry) mpWXRegistry->Remove(obj.WXGet());
    #endif
-   if(i==(long)mNbRegistered) mNbRegistered--;
-   else mpRegistry[i]=mpRegistry[--mNbRegistered];
+   mvpRegistry.erase(pos);
    mListClock.Click();
    VFN_DEBUG_EXIT("ObjRegistry("<<mName<<")::Deregister(&obj)",2)
 }
@@ -847,17 +833,20 @@ template<class T> void ObjRegistry<T>::DeRegister(T &obj)
 template<class T> void ObjRegistry<T>::DeRegister(const string &objName)
 {
    VFN_DEBUG_ENTRY("ObjRegistry("<<mName<<")::Deregister(name):"<<objName,2)
+   
    const long i=this->Find(objName);
    if(-1==i)
    {
       VFN_DEBUG_EXIT("ObjRegistry("<<mName<<")::Deregister(name): NOT FOUND !!!",2)
       return; //:TODO: throw something ?
    }
+   //:KLUDGE: should directly do an iterator search on the name...
+   typename vector<T*>::iterator pos=find(mvpRegistry.begin(),mvpRegistry.end(),mvpRegistry[i]);
+   
    #ifdef __WX__CRYST__
-   if(0!=mpWXRegistry) mpWXRegistry->Remove(mpRegistry[i]->WXGet());
+   if(0!=mpWXRegistry) mpWXRegistry->Remove((*pos)->WXGet());
    #endif
-   if(i==((long)mNbRegistered)-1) mNbRegistered--;
-   else mpRegistry[i]=mpRegistry[--mNbRegistered];
+   mvpRegistry.erase(pos);
    mListClock.Click();
    VFN_DEBUG_EXIT("ObjRegistry("<<mName<<")::Deregister(name):",2)
 }
@@ -867,10 +856,13 @@ template<class T> void ObjRegistry<T>::DeRegisterAll()
    VFN_DEBUG_ENTRY("ObjRegistry("<<mName<<")::DeRegisterAll():",5)
    #ifdef __WX__CRYST__
    if(0!=mpWXRegistry)
-      for(unsigned long i=0;i<mNbRegistered;i++)
-         mpWXRegistry->Remove(mpRegistry[i]->WXGet());
+   {
+      vector<T*>::iterator pos;
+      for(pos=mvpRegistry.begin();pos!=mvpRegistry.end();++pos)
+         mpWXRegistry->Remove((*pos)->WXGet());
+   }
    #endif
-   mNbRegistered=0;
+   mvpRegistry.clear();
    mListClock.Click();
    VFN_DEBUG_EXIT("ObjRegistry("<<mName<<")::DeRegisterAll():",5)
 }
@@ -878,62 +870,64 @@ template<class T> void ObjRegistry<T>::DeRegisterAll()
 template<class T> void ObjRegistry<T>::DeleteAll()
 {
    VFN_DEBUG_ENTRY("ObjRegistry("<<mName<<")::DeleteAll():",5)
-   for(unsigned long i=0;i<mNbRegistered;i++)
+   typename vector<T*>::iterator pos;
+   for(pos=mvpRegistry.begin();pos!=mvpRegistry.end();++pos)
    {
       #ifdef __WX__CRYST__
-      if(0!=mpWXRegistry) mpWXRegistry->Remove(mpRegistry[i]->WXGet());
+      if(0!=mpWXRegistry) mpWXRegistry->Remove((*pos)->WXGet());
       #endif
-      delete mpRegistry[i];
+      delete *pos;
    }
-   mNbRegistered=0;
+   mvpRegistry.clear();
    mListClock.Click();
    VFN_DEBUG_EXIT("ObjRegistry("<<mName<<")::DeleteAll():",5)
 }
 
 template<class T> T& ObjRegistry<T>::GetObj(const unsigned int i)
 {
-   return *mpRegistry[i];
+   return *(mvpRegistry.at(i));
 }
 
 template<class T> const T& ObjRegistry<T>::GetObj(const unsigned int i) const
 {
-   return *mpRegistry[i];
+   return *(mvpRegistry.at(i));
 }
 
 template<class T> T& ObjRegistry<T>::GetObj(const string &objName)
 {
    const long i=this->Find(objName);
-   return *mpRegistry[i];
+   return *(mvpRegistry.at(i));
 }
 
 template<class T> const T& ObjRegistry<T>::GetObj(const string &objName) const
 {
    const long i=this->Find(objName);
-   return *mpRegistry[i];
+   return *(mvpRegistry.at(i));
 }
 
 template<class T> T& ObjRegistry<T>::GetObj(const string &objName,
                                                   const string& className)
 {
    const long i=this->Find(objName,className);
-   return *mpRegistry[i];
+   return *(mvpRegistry.at(i));
 }
 
 template<class T> const T& ObjRegistry<T>::GetObj(const string &objName,
                                                         const string& className) const
 {
    const long i=this->Find(objName,className);
-   return *mpRegistry[i];
+   return *(mvpRegistry.at(i));
 }
 
-template<class T> long ObjRegistry<T>::GetNb()const{return (long)mNbRegistered;}
+template<class T> long ObjRegistry<T>::GetNb()const{return (long)mvpRegistry.size();}
 
 template<class T> void ObjRegistry<T>::Print()const
 {
    VFN_DEBUG_MESSAGE("ObjRegistry::Print():",2)
-   cout <<mName<<" :"<<mNbRegistered<<" object registered:" <<endl;
-   for(unsigned int i=0;i<mNbRegistered;i++) 
-      cout <<i<<"("<<mpRegistry[i]->GetName()<<")"<<endl;
+   cout <<mName<<" :"<<this->GetNb()<<" object registered:" <<endl;
+   
+   for(long i=0;i<this->GetNb();++i)
+      cout <<i<<"("<<this->GetObj(i).GetName()<<")"<<endl;
 }
 
 template<class T> void ObjRegistry<T>::SetName(const string &name){ mName=name;}
@@ -946,7 +940,7 @@ template<class T> long ObjRegistry<T>::Find(const string &objName) const
    long index=-1;
    //bool error=false;
    for(long i=this->GetNb()-1;i>=0;i--) 
-      if( mpRegistry[i]->GetName() == objName) return i;
+      if( mvpRegistry.at(i)->GetName() == objName) return i;
    //      if(-1 != index) error=true ;else index=i;
    //if(true == error)
    //{
@@ -970,8 +964,8 @@ template<class T> long ObjRegistry<T>::Find(const string &objName,
    long index=-1;
    //bool error=false;
    for(long i=this->GetNb()-1;i>=0;i--) 
-      if( mpRegistry[i]->GetName() == objName) 
-         if(className==mpRegistry[i]->GetClassName()) return i;
+      if( mvpRegistry.at(i)->GetName() == objName) 
+         if(className==mvpRegistry.at(i)->GetClassName()) return i;
    //      if(-1 != index) error=true ;else index=i;
    //if(true == error)
    //{
@@ -992,7 +986,7 @@ template<class T> long ObjRegistry<T>::Find(const T &obj) const
 {
    VFN_DEBUG_MESSAGE("ObjRegistry::Find(&obj)",2)
    for(long i=this->GetNb()-1;i>=0;i--) 
-      if( mpRegistry[i]== &obj)  return i;
+      if( mvpRegistry.at(i)== &obj)  return i;
    //:TODO: throw something
    return -1;
 }
@@ -1054,18 +1048,17 @@ void GetSubRefObjListClockRecursive(ObjRegistry<RefinableObj> &reg,RefinableObjC
 ObjRegistry<RefinableObj> gRefinableObjRegistry("Global RefinableObj registry");
 ObjRegistry<RefinableObj> gTopRefinableObjRegistry("Global Top RefinableObj registry");
 
+/// Maximum number of saved sets of parameters
+const unsigned long MaxNbSavedSets(1000);
+
 RefinableObj::RefinableObj():
 mName(""),
-mSavedValuesSetIsUsed(mMaxNbSavedSets),
 mNbRefParNotFixed(-1),mIsbeingRefined(false),mDeleteRefParInDestructor(true)
 #ifdef __WX__CRYST__
 ,mpWXCrystObj(0)
 #endif
 {
    VFN_DEBUG_MESSAGE("RefinableObj::RefinableObj()",3)
-   mpSavedValuesSet = new CrystVector_REAL* [mMaxNbSavedSets];
-   mpSavedValuesSetName = new string* [mMaxNbSavedSets];
-   mSavedValuesSetIsUsed=false;
    gRefinableObjRegistry.Register(*this);
    mSubObjRegistry.SetName("Registry for sub-objects");
    mClientObjRegistry.SetName("Registry for Clients");
@@ -1074,16 +1067,12 @@ mNbRefParNotFixed(-1),mIsbeingRefined(false),mDeleteRefParInDestructor(true)
 }
 RefinableObj::RefinableObj(const bool internalUseOnly):
 mName(""),
-mSavedValuesSetIsUsed(mMaxNbSavedSets),
 mNbRefParNotFixed(-1),mIsbeingRefined(false),mDeleteRefParInDestructor(true)
 #ifdef __WX__CRYST__
 ,mpWXCrystObj(0)
 #endif
 {
    VFN_DEBUG_MESSAGE("RefinableObj::RefinableObj(bool)",3)
-   mpSavedValuesSet = new CrystVector_REAL* [mMaxNbSavedSets];
-   mpSavedValuesSetName = new string* [mMaxNbSavedSets];
-   mSavedValuesSetIsUsed=false;
    if(false==internalUseOnly) gRefinableObjRegistry.Register(*this);
    mSubObjRegistry.SetName("Registry for sub-objects");
    mClientObjRegistry.SetName("Registry for Clients");
@@ -1120,14 +1109,6 @@ RefinableObj::~RefinableObj()
          for(pos=mvpRefPar.begin();pos!=mvpRefPar.end();pos++) delete *pos;
       }
    }
-   for(long i=0;i<mMaxNbSavedSets;i++)
-      if(true==mSavedValuesSetIsUsed(i))
-      {
-         delete *(mpSavedValuesSetName+i);
-         delete *(mpSavedValuesSet+i);
-      }
-   delete[] mpSavedValuesSet;
-   delete[] mpSavedValuesSetName;
    gRefinableObjRegistry.DeRegister(*this);
    for(int i=0;i<mSubObjRegistry.GetNb();i++)
       mSubObjRegistry.GetObj(i).DeRegisterClient(*this);
@@ -1365,57 +1346,44 @@ void RefinableObj::Print() const
    VFN_DEBUG_EXIT("RefinableObj::Print()",2)
 }
 
-long RefinableObj::CreateParamSet(const string name) const
+unsigned long RefinableObj::CreateParamSet(const string name) const
 {
    VFN_DEBUG_ENTRY("RefinableObj::CreateParamSet()",3)
-   long id;
-   for(id=0;id<mMaxNbSavedSets;id++) if(false==mSavedValuesSetIsUsed(id)) break;
-   if(mMaxNbSavedSets==id)
-   {
-      const long newMaxNbSavedSets=(long)(mMaxNbSavedSets*1.1+10);
-      CrystVector_REAL** newSavedValuesSet = new CrystVector_REAL* [newMaxNbSavedSets];
-      string** newSavedValuesSetName = new string* [newMaxNbSavedSets];
+   unsigned long id;
+   for(id=0;id<=mvpSavedValuesSet.size();id++)
+      if(mvpSavedValuesSet.end()==mvpSavedValuesSet.find(id)) break;
       
-      mSavedValuesSetIsUsed.resizeAndPreserve(newMaxNbSavedSets);
-      
-      for(long i=0;i<mMaxNbSavedSets;i++)
-      {
-         newSavedValuesSet    [i]=mpSavedValuesSet[i];
-         newSavedValuesSetName[i]=mpSavedValuesSetName[i];
-      }
-      for(long i=mSavedValuesSetIsUsed.numElements();i>=mMaxNbSavedSets;i++)
-         mSavedValuesSetIsUsed(i)=false;
-      delete[] mpSavedValuesSet;
-      delete[] mpSavedValuesSetName;
-      mpSavedValuesSet    =newSavedValuesSet;
-      mpSavedValuesSetName=newSavedValuesSetName;
-   }
-   mSavedValuesSetIsUsed(id)=true;
-   *(mpSavedValuesSetName+id)= new string;
-   **(mpSavedValuesSetName+id) = name;
-   *(mpSavedValuesSet+id)=new CrystVector_REAL;
+   pair< CrystVector_REAL ,string> p;
+   p.second=name;
+   mvpSavedValuesSet.insert(make_pair(id,p));
+   
    this->SaveParamSet(id);
+   VFN_DEBUG_MESSAGE("RefinableObj::CreateParamSet(): new parameter set with id="<<id<<" and name:"<<name,2)
    VFN_DEBUG_EXIT("RefinableObj::CreateParamSet()",3)
    return id;
 }
 
-void RefinableObj::SaveParamSet(const long id)const
+void RefinableObj::ClearParamSet(const unsigned long id)const
+{
+   VFN_DEBUG_ENTRY("RefinableObj::ClearParamSet()",2)
+   mvpSavedValuesSet.erase(this->FindParamSet(id));
+   VFN_DEBUG_EXIT("RefinableObj::ClearParamSet()",2)
+}
+
+void RefinableObj::SaveParamSet(const unsigned long id)const
 {
    VFN_DEBUG_MESSAGE("RefinableObj::SaveRefParSet()",2)
-   if(true != mSavedValuesSetIsUsed(id))
-   {//throw up
-      cout << "RefinableObj::SaveRefParSet(long): Unknown saved set !" <<endl;
-      throw 0;//:TODO: some more inteligent exception
-   }
-   (*(mpSavedValuesSet+id))->resize(mvpRefPar.size());
-   REAL *p=(*(mpSavedValuesSet+id))->data();
+   map<unsigned long,pair<CrystVector_REAL,string> >::iterator pos=this->FindParamSet(id);
+   pos->second.first.resize(mvpRefPar.size());
+   REAL *p=pos->second.first.data();
    for(long i=0;i<this->GetNbPar();i++) *p++ = this->GetPar(i).GetValue();
 }
 
-void RefinableObj::RestoreParamSet(const long id)
+void RefinableObj::RestoreParamSet(const unsigned long id)
 {
    VFN_DEBUG_MESSAGE("RefinableObj::RestoreRefParSet()",2)
-   const REAL *p=(*(mpSavedValuesSet+id))->data();
+   map<unsigned long,pair<CrystVector_REAL,string> >::iterator pos=this->FindParamSet(id);
+   REAL *p=pos->second.first.data();
    for(long i=0;i<this->GetNbPar();i++)
    {
       if( !this->GetPar(i).IsFixed() && this->GetPar(i).IsUsed())
@@ -1424,34 +1392,31 @@ void RefinableObj::RestoreParamSet(const long id)
    }
 }
 
-const CrystVector_REAL & RefinableObj::GetParamSet(const long id)const
+const CrystVector_REAL & RefinableObj::GetParamSet(const unsigned long id)const
 {
    VFN_DEBUG_MESSAGE("RefinableObj::GetParamSet() const",2)
-   return **(mpSavedValuesSet+id);
+   map<unsigned long,pair<CrystVector_REAL,string> >::const_iterator pos=this->FindParamSet(id);
+   return pos->second.first;
 }
 
-CrystVector_REAL & RefinableObj::GetParamSet(const long id)
+CrystVector_REAL & RefinableObj::GetParamSet(const unsigned long id)
 {
    VFN_DEBUG_MESSAGE("RefinableObj::GetParamSet()",2)
-   return **(mpSavedValuesSet+id);
+   map<unsigned long,pair<CrystVector_REAL,string> >::iterator pos=this->FindParamSet(id);
+   return pos->second.first;
 }
 
-REAL RefinableObj::GetParamSet_ParNotFixedHumanValue(const long id,
+REAL RefinableObj::GetParamSet_ParNotFixedHumanValue(const unsigned long id,
                                                       const long par)const
 {
    VFN_DEBUG_MESSAGE("RefinableObj::RefParSetNotFixedHumanValue()",0)
-   return (**(mpSavedValuesSet+id))(mRefparNotFixedIndex(par));
+   map<unsigned long,pair<CrystVector_REAL,string> >::iterator pos=this->FindParamSet(id);
+   return pos->second.first(mRefparNotFixedIndex(par));
 }
 
 const void RefinableObj::EraseAllParamSet()
 {
-   for(long i=0;i<mMaxNbSavedSets;i++)
-      if(true==mSavedValuesSetIsUsed(i))
-      {
-         delete *(mpSavedValuesSetName+i);
-         delete *(mpSavedValuesSet+i);
-      }
-   mSavedValuesSetIsUsed=false;
+   mvpSavedValuesSet.clear();
 }
 
 void RefinableObj::SetLimitsAbsolute(const string &name,const REAL min,const REAL max)
@@ -1670,14 +1635,7 @@ void RefinableObj::ResetParList()
    mNbRefParNotFixed=-1;
 
    VFN_DEBUG_MESSAGE("RefinableObj::ResetParList():Deleting Saved Sets....",2)
-   for(long i=0;i<mMaxNbSavedSets;i++)
-      if(true==mSavedValuesSetIsUsed(i))
-      {
-   VFN_DEBUG_MESSAGE("RefinableObj::ResetParList():Deleting Saved Set "<<i,2)
-         delete *(mpSavedValuesSetName+i);
-         delete *(mpSavedValuesSet+i);
-      }
-   mSavedValuesSetIsUsed=false;
+   this->EraseAllParamSet();
    mRefParListClock.Click();
    VFN_DEBUG_MESSAGE("RefinableObj::ResetParList():End.",3)
 }
@@ -1840,6 +1798,21 @@ void RefinableObj::Prepare()
    VFN_DEBUG_MESSAGE("RefinableObj::Prepare()",5)
    for(int i=0;i<this->GetSubObjRegistry().GetNb();i++)
       this->GetSubObjRegistry().GetObj(i).Prepare();
+}
+
+map<unsigned long,pair<CrystVector_REAL,string> >::iterator
+   RefinableObj:: FindParamSet(const unsigned long id)const
+{
+   VFN_DEBUG_ENTRY("RefinableObj::FindParamSet()",2)
+   map<unsigned long,pair<CrystVector_REAL,string> >::iterator pos;
+   pos=mvpSavedValuesSet.find(id);
+   if(mvpSavedValuesSet.end() == pos)
+   {//throw up
+      cout << "RefinableObj::FindParamSet(long): Unknown saved set !" <<endl;
+      exit(EXIT_FAILURE);//:TODO: some more inteligent exception
+   }
+   VFN_DEBUG_EXIT("RefinableObj::FindParamSet()",2)
+   return pos;
 }
 
 #ifdef __WX__CRYST__
