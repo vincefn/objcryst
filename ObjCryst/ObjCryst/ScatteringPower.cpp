@@ -481,7 +481,7 @@ REAL ScatteringPowerAtom::GetForwardScatteringFactor(const RadiationType type) c
       }
       case(RAD_XRAY):
       {
-         sf=  mScattAi.sum();
+         sf=  mScattAi.sum()+mScattC;
          break;
       }
       case(RAD_ELECTRON):
