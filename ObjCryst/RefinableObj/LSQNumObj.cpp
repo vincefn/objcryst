@@ -101,6 +101,15 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
       
       REAL marquardt=1e-2;
       const REAL marquardtMult=4.;
+   //initial Chi^2, needed for Levenberg-Marquardt
+   {
+      calc=mpRefinedObj->GetLSQCalc(mLSQFuncIndex);
+      tmpV1 = mObs;
+      tmpV1 -= calc;
+      tmpV1 *= tmpV1;
+      tmpV1 *= mWeight;
+      mChiSq=tmpV1.sum();
+   }
    //store old values
    mIndexValuesSetInitial=mRefParList.CreateParamSet("LSQ Refinement-Initial Values");
    mIndexValuesSetLast=mRefParList.CreateParamSet("LSQ Refinement-Last Cycle Values");
@@ -127,35 +136,17 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
       if(!silent) cout << "LSQNumObj::Refine():Computing derivatives" <<endl;
       designMatrix=0.;
       pTmp2=designMatrix.data();
+      //cout <<"obs:"<<FormatHorizVector<REAL>(calc0,10,8);
+      //cout <<"calc:"<<FormatHorizVector<REAL>(mObs,10,8);
+      //cout <<"weight:"<<FormatHorizVector<REAL>(mWeight,10,8);
       for(i=0;i<nbVar;i++)
       {
          //:NOTE: Real design matrix is the transposed of the one computed here
-         
          if(!silent) cout << "........." << mRefParList.GetParNotFixed(i).GetName() <<endl;
-         //cout << mRefParList.GetParNotFixed(i).DerivStep() <<endl;
          
-         /*
-         //Forward derivative
-         mRefParList.GetParNotFixed(i).Value() += mRefParList.GetParNotFixed(i).DerivStep();
-         tmpV1=mpRefinedObj->GetLSQCalc(mLSQFuncIndex);
-         mRefParList.GetParNotFixed(i).Value() -= mRefParList.GetParNotFixed(i).DerivStep();
-         tmpV1 -= calc0;
-         tmpV1 /= mRefParList.GetParNotFixed(i).DerivStep();
-         */
-         
-         /*
-         //centered derivative
-         mRefParList.GetParNotFixed(i).Mutate(mRefParList.GetParNotFixed(i).GetDerivStep());
-         calc=mpRefinedObj->GetLSQCalc(mLSQFuncIndex);
-         mRefParList.GetParNotFixed(i).Mutate(-2*mRefParList.GetParNotFixed(i).GetDerivStep());
-         calc1=mpRefinedObj->GetLSQCalc(mLSQFuncIndex);
-         mRefParList.GetParNotFixed(i).Mutate(mRefParList.GetParNotFixed(i).GetDerivStep());
-         tmpV1 =  calc;
-         tmpV1 -= calc1;
-         tmpV1 /= mRefParList.GetParNotFixed(i).GetDerivStep()/2;
-         */
          tmpV1=mpRefinedObj->GetLSQDeriv(mLSQFuncIndex,mRefParList.GetParNotFixed(i));
          pTmp1=tmpV1.data();
+         //cout <<"deriv#"<<i<<":"<<FormatHorizVector<REAL>(tmpV1,10,8);
          for(j=0;j<nbObs;j++) *pTmp2++ = *pTmp1++;
       }
          //cout << designMatrix;
@@ -194,11 +185,19 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
        // Check for singular values
          for(i=0;i<nbVar;i++)
          {
-            if( M(i,i) < 1e-10) //:TODO: Check what value to use as a limit
+            if( M(i,i) < 1e-20) //:TODO: Check what value to use as a limit
             {  
                if(!silent) cout << "LSQNumObj::Refine() Singular parameter !";
                if(!silent) cout << "(null derivate in all points) : ";
                if(!silent) cout << mRefParList.GetParNotFixed(i).GetName() << endl;
+               if(!silent)
+               {
+                  for(i=0;i<nbVar;i++)
+                  {
+                     tmpV1=mpRefinedObj->GetLSQDeriv(mLSQFuncIndex,mRefParList.GetParNotFixed(i));
+                     cout <<"deriv#"<<i<<":"<<FormatHorizVector<REAL>(tmpV1,10,8);
+                  }
+               }
                if(!silent) cout << "LSQNumObj::Refine(): Automatically fixing parameter";
                if(!silent) cout << " and re-start cycle..";
                if(!silent) cout << endl;
@@ -482,10 +481,15 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
             //cout << deltaVar  << endl;
          }
          */
+      /// Applying new computed values :TODO: & Check if a limit has been hit
          if(!silent) cout << "LSQNumObj::Refine():Computing new values for variables" <<endl;
-         
-
-         for(i=0;i<nbVar;i++) mRefParList.GetParNotFixed(i).Mutate(deltaVar(i));
+         for(i=0;i<nbVar;i++)
+         {
+            //const REAL oldvalue=mRefParList.GetParNotFixed(i).GetValue();
+            //const REAL expected=oldvalue+deltaVar(i);
+            mRefParList.GetParNotFixed(i).Mutate(deltaVar(i));
+            //const REAL newvalue=mRefParList.GetParNotFixed(i).GetValue();
+         }
          
       if(!silent) cout << "LSQNumObj::Refine():Computing statistics for last cycle..." <<endl;
       //for statistics...
@@ -502,12 +506,18 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
             mChiSq=tmpV1.sum();
             if(true==useLevenbergMarquardt)
             {
-               if(mChiSq > oldChiSq)
+               if(mChiSq > (oldChiSq*1.0001))
                {
+                  mRefParList.RestoreParamSet(mIndexValuesSetLast);
                   marquardt *= marquardtMult;
-                  if(!silent) cout << "LSQNumObj::Refine():new Levenberg-Marquardt factor :" ;
-                  cout << FormatFloat(marquardt,18,14) <<endl;
+                  if(!silent)
+                  {
+                     cout << "LSQNumObj::Refine(Chi^2="<<oldChiSq<<"->"<<mChiSq
+                          <<")=>new Levenberg-Marquardt factor :"
+                          << FormatFloat(marquardt,18,14) <<endl;
+                  }
                   mChiSq=oldChiSq;
+                  if(marquardt>1e8) throw ObjCrystException("LSQNumObj::Refine():Levenberg-Marquardt diverging !");
                   goto LSQNumObj_Refine_Restart;
                }
                else marquardt /= marquardtMult;
