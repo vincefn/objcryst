@@ -64,7 +64,7 @@ class LSQNumObj
 	protected:
 	private:
       /// Prepare mRefParList for the refinement
-      void PrepareRefParList()const;
+      void PrepareRefParList();
       // Refined objects
          /// The refined objects
          ObjRegistry<RefinableObj> mRefinedObjList;

@@ -620,7 +620,10 @@ class RefinableObj
    public:
       /// Constructor
       RefinableObj();
-      /// Copy Constructor
+      /// Defined not implemented... Should never be called
+		/// (copying the refinable parameters would allow you to modify the 
+		/// input object).
+		/// Use the default constructor and RefinableObj::AddPar(RefinableObj&) instead.
       RefinableObj(const RefinableObj &old);
       /// Destructor
       virtual ~RefinableObj();
@@ -632,7 +635,8 @@ class RefinableObj
       virtual const string& GetName() const;
       /// Name of the object
       virtual void SetName(const string &name);
-      /// Making copies... This does not copy saved RefParSets
+      /** Defined not implemented... Should never be called
+		*/
       void operator=(const RefinableObj &old);
       
       /// Find which parameters are used and \b not fixed, for a refinement /optimization.
@@ -681,10 +685,27 @@ class RefinableObj
       /// Access all parameters in the order they were inputed,
       /// skipping fixed parameters. Must call PrepareForRefinement() before !
       const RefinablePar& GetParNotFixed(const long i)const;
-
+		/** Add a refinable parameter. The parameter is copied, so 
+		* it need only be allocated temporarily.
+		*
+		* \deprecated Use the next function, which supplies the parameter as
+		* a pointer, and avoids a useless copy.
+		*/ 
       void AddPar(const RefinablePar &newRefPar);
-      
-      void AddPar(const RefinableObj &newRefParList);
+		/** Add a refinable parameter. The parameter is \e not copied, so 
+		* it should be allocated in the heap.
+		*
+		*/ 
+      void AddPar(RefinablePar *newRefPar);
+		/** Add all the parameters in another RefinableObj. Parameters
+		* are \not copied, so they should be allocated in the heap.
+		* 
+		* \warning If a copy of another RefinableObj parameter list is made,
+		* such as in the OptimizationObj class, make sure that upon deletion
+		* of this object the parameters will not be destroyed. To do this
+		* use RefinableObj::SetDeleteRefParInDestructor(false).
+		*/
+      void AddPar(RefinableObj &newRefParList);
       
       virtual void Print() const;
       
@@ -811,7 +832,8 @@ class RefinableObj
          virtual double GetCostFunctionValue(const unsigned int);
 
       /// Re-init the list of refinable parameters, removing all parameters.
-      /// This should never be used...
+      /// This does \not delete the RefinablePar if 
+		/// RefinableObj::mDeleteRefParInDestructor is false
       void ResetParList();
       
       /** \brief Output to stream in well-formed XML 
@@ -839,6 +861,40 @@ class RefinableObj
          RefObjOpt& GetOption(const unsigned int i);
          /// const access to the options
          const RefObjOpt& GetOption(const unsigned int i)const;
+		// Genetic
+			/** \brief Get the gene group assigned to each parameter.
+			*
+			* Each parameter (a \e gene in terms of genetic algorithms)
+			* can be assigned to a gene group. Thus when mating two configurations,
+			* genes will be exchanged by groups. By default (in the base RefinabeObj class),
+			* each parameter is alone in its group. Derived classes can group genes
+			* for a better s** life.
+			*
+			* The number identifying a gene group only has a meaning in a given
+			* object. It can also change on subsequent calls, and thus is not unique.
+			*
+			* \param obj the \RefinableObj, supplied by an algorithm class (OptimizationObj,..),
+			* which contains a list of parameters, some of which (but possibly all or none)
+			* are parameters belonging to this object.
+			* \param groupIndex a vector of unsigned integers, one for each parameter in the
+			* input object, giving an unsigned integer value as gene group index.
+			* At the beginning this vector should contain only zeros (no group assigned).
+			* \param firstGroup this is the number of groups which have already been assigned,
+			* plus one. The gene groups returned by this object will start from this
+			* value, and increment \b firstGroup for each gene group used, so that
+			* different RefinableObj cannot share a gene group.
+			* \note this function is not optimized, and should only be called at the beginning
+			* of a refinement.
+			*/
+			virtual void GetGeneGroup(const RefinableObj &obj, 
+											  CrystVector_uint & groupIndex,
+											  unsigned int &firstGroup) const;
+			/** Set this object not to delete its list of parameters when destroyed.
+			*
+			* This is used for the RefinableObj in algorithms objects (OptimizationObj),
+			* which only hold copies of parameters from the refined objects.
+			*/
+			void SetDeleteRefParInDestructor(const bool b);
    protected:
       /// Find a refinable parameter with a given name
       long FindPar(const string &name) const;
@@ -895,7 +951,8 @@ class RefinableObj
          /// to options allocated by the object, to have a simple global access to 
          /// all options
          ObjRegistry<RefObjOpt> mOptionRegistry;
-      
+		
+      bool mDeleteRefParInDestructor;
    #ifdef __WX__CRYST__
    public:
       /// Create a WXCrystObj for this object. Only a generic WXCrystObj pointer is kept.

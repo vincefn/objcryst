@@ -75,12 +75,13 @@ Scatterer::Scatterer():mXYZ(3),mOccupancy(1.0),mColourName("White"),mpCryst(0)
 }
 
 Scatterer::Scatterer(const Scatterer &old):
-RefinableObj(old),
+//RefinableObj(),
 mXYZ(old.mXYZ),
 mOccupancy(old.mOccupancy),
 mColourName(old.mColourName),mpCryst(old.mpCryst)
 {
    VFN_DEBUG_MESSAGE("Scatterer::Scatterer(&old)",5)
+	mName=old.GetName();
    this->InitRGBColour();
    gScattererRegistry.Register(*this);
 }

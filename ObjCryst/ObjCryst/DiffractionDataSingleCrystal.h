@@ -55,6 +55,8 @@ class DiffractionDataSingleCrystal:public ScatteringData
 		*
 		*/
       DiffractionDataSingleCrystal(Crystal &cryst);
+		/// Copy constructor
+      DiffractionDataSingleCrystal(const DiffractionDataSingleCrystal &old);
       ~DiffractionDataSingleCrystal();
       virtual DiffractionDataSingleCrystal* CreateCopy()const;
       virtual const string GetClassName() const;

@@ -907,7 +907,7 @@ ObjRegistry<RefinableObj> gTopRefinableObjRegistry("Global Top RefinableObj regi
 
 RefinableObj::RefinableObj():
 mName(""),mNbRefPar(0),mMaxNbRefPar(100),mSavedValuesSetIsUsed(mMaxNbSavedSets),
-mNbRefParNotFixed(-1),mIsbeingRefined(false)
+mNbRefParNotFixed(-1),mIsbeingRefined(false),mDeleteRefParInDestructor(true)
 #ifdef __WX__CRYST__
 ,mpWXCrystObj(0)
 #endif
@@ -923,10 +923,10 @@ mNbRefParNotFixed(-1),mIsbeingRefined(false)
    
    VFN_DEBUG_MESSAGE("RefinableObj::RefinableObj():End",2)
 }
-
+/*
 RefinableObj::RefinableObj(const RefinableObj &old):
 mName(old.mName),mMaxNbRefPar(old.mMaxNbRefPar),mSavedValuesSetIsUsed(mMaxNbSavedSets),
-mIsbeingRefined(false)
+mIsbeingRefined(false),mDeleteRefParInDestructor(true)
 #ifdef __WX__CRYST__
 ,mpWXCrystObj(0)
 #endif
@@ -941,13 +941,14 @@ mIsbeingRefined(false)
    mClientObjRegistry.SetName("Registry for Clients of "+mName);
    gRefinableObjRegistry.Register(*this);
 }
-
+*/
 RefinableObj::~RefinableObj()
 {
    VFN_DEBUG_MESSAGE("RefinableObj::~RefinableObj():"<<this->GetName(),5)
    if(mpRefPar!=0)
    {
-      for(int i=0;i<this->GetNbPar();i++) delete mpRefPar[i];
+		if(true==mDeleteRefParInDestructor)
+      	for(int i=0;i<this->GetNbPar();i++) delete mpRefPar[i];
       delete[] mpRefPar;
    }
    for(long i=0;i<mMaxNbSavedSets;i++)
@@ -976,12 +977,12 @@ void RefinableObj::SetName(const string &name)
    mName=name;
    mSubObjRegistry.SetName("Registry for sub-objects of "+mName);
 }
-
+/*
 void RefinableObj::operator=(const RefinableObj &old)
 {
    VFN_DEBUG_MESSAGE("RefinableObj::operator=(RefinableObj&)",3)
    this->ResetParList();
-   this->AddPar(old);
+   //this->AddPar(old);
    // Do not copy old saved sets
    //... but erase any that may be stored
    for(long i=0;i<mMaxNbSavedSets;i++)
@@ -992,7 +993,7 @@ void RefinableObj::operator=(const RefinableObj &old)
       }
    mSavedValuesSetIsUsed=false;
 }
-
+*/
 void RefinableObj::PrepareForRefinement() const
 {
    VFN_DEBUG_MESSAGE("RefinableObj::PrepareForRefinement()",5)
@@ -1153,25 +1154,37 @@ void RefinableObj::AddPar(const RefinablePar &newRefPar)
       mMaxNbRefPar+=100;
       RefinablePar** oldmpRefPar=mpRefPar;
       mpRefPar = new RefinablePar*[mMaxNbRefPar];
-      for(int i=0;i<this->GetNbPar();i++)
-      {
-         mpRefPar[i]=new RefinablePar(*oldmpRefPar[i]);
-         delete oldmpRefPar[i];
-      }
+      for(int i=0;i<this->GetNbPar();i++) mpRefPar[i]=oldmpRefPar[i];
       delete[] oldmpRefPar;
    }
    mpRefPar[mNbRefPar]=new RefinablePar(newRefPar);
    mNbRefPar++;
 }
 
-void RefinableObj::AddPar(const RefinableObj &newRefParList)
+void RefinableObj::AddPar(RefinablePar *newRefPar)
+{
+   VFN_DEBUG_MESSAGE("RefinableObj::AddPar(RefPar&)",2)
+   if(mNbRefPar == mMaxNbRefPar)
+   {
+      mMaxNbRefPar+=100;
+      RefinablePar** oldmpRefPar=mpRefPar;
+      mpRefPar = new RefinablePar*[mMaxNbRefPar];
+      for(int i=0;i<this->GetNbPar();i++) mpRefPar[i]=oldmpRefPar[i];
+      delete[] oldmpRefPar;
+   }
+   mpRefPar[mNbRefPar]=newRefPar;
+   mNbRefPar++;
+}
+
+void RefinableObj::AddPar(RefinableObj &newRefParList)
 {
    VFN_DEBUG_MESSAGE("RefinableObj::AddPar(RefParList&)" <<newRefParList.GetNbPar() ,2)
-   for(long i=0;i<newRefParList.GetNbPar();i++) this->AddPar(newRefParList.GetPar(i));
+   for(long i=0;i<newRefParList.GetNbPar();i++) this->AddPar(&(newRefParList.GetPar(i)));
 }
 
 void RefinableObj::Print() const
 {
+   VFN_DEBUG_ENTRY("RefinableObj::Print()",2)
    cout << "Refinable Object:"<<this->GetName()
         <<", with " << this->GetNbPar() << " parameters" <<endl;
    for(int i=0;i<this->GetNbPar();i++)
@@ -1192,6 +1205,7 @@ void RefinableObj::Print() const
          VFN_DEBUG_MESSAGE_SHORT(" (Clock at "<<this->GetPar(i).mpClock<<")",5)
       cout << endl;
    }
+   VFN_DEBUG_EXIT("RefinableObj::Print()",2)
 }
 
 long RefinableObj::CreateParamSet(const string name) const
@@ -1415,7 +1429,8 @@ void RefinableObj::ResetParList()
    VFN_DEBUG_MESSAGE("RefinableObj::ResetParList()",3)
    if(mpRefPar!=0)
    {
-      for(int i=0;i<this->GetNbPar();i++) delete mpRefPar[i];
+		if(true==mDeleteRefParInDestructor)
+      	for(int i=0;i<this->GetNbPar();i++) delete mpRefPar[i];
       delete[] mpRefPar;
    }
    mpRefPar = new RefinablePar*[mMaxNbRefPar];
@@ -1445,6 +1460,17 @@ RefObjOpt& RefinableObj::GetOption(const unsigned int i)
    //:TODO: Check
    return mOptionRegistry.GetObj(i);
 }
+
+void RefinableObj::GetGeneGroup(const RefinableObj &obj,
+														  CrystVector_uint & groupIndex,
+											           unsigned int &first) const
+{
+   VFN_DEBUG_MESSAGE("RefinableObj::GetGeneGroup()",4)
+	for(long i=0;i<obj.GetNbPar();i++)
+		for(long j=0;j<this->GetNbPar();j++)
+			if(obj.mpRefPar[i]->mValue == mpRefPar[j]->mValue) groupIndex(i)= first++;
+}
+void RefinableObj::SetDeleteRefParInDestructor(const bool b) {mDeleteRefParInDestructor=b;}
 
 const RefObjOpt& RefinableObj::GetOption(const unsigned int i)const
 {

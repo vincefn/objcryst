@@ -20,6 +20,8 @@ LSQNumObj::LSQNumObj(CrystVector_double (*pFunc)(),
    mRw=0;
    mChiSq=0;
    mStopAfterCycle=false;
+	//We only use copies of parameters.
+	mRefParList.SetDeleteRefParInDestructor(false);
 }
 
 LSQNumObj::~LSQNumObj()
@@ -607,7 +609,7 @@ void LSQNumObj::OptimizeDerivativeSteps()
    //:TODO:
 }
 
-void LSQNumObj::PrepareRefParList() const
+void LSQNumObj::PrepareRefParList()
 {
    //:TODO: instead of resetting the list every time, check if it is necessary !
    mRefParList.ResetParList();

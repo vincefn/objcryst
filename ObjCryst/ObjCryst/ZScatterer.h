@@ -378,7 +378,8 @@ class ZPolyhedron: public ZScatterer
             const ScatteringPower *periphAtomPow,const double centralPeriphDist,
             const double ligandPopu=1,
             const double phi=0., const double chi=0., const double psi=0.);
-            
+      /// Copy Constructor
+		ZPolyhedron(const ZPolyhedron&);
       /// \internal so-called Virtual copy constructor, needed to make copies
       ///of arrays of Scatterers
       virtual ZPolyhedron* CreateCopy() const;

@@ -52,6 +52,19 @@ DiffractionDataSingleCrystal::DiffractionDataSingleCrystal(Crystal &cryst):mScal
    gTopRefinableObjRegistry.Register(*this);
 }
 
+DiffractionDataSingleCrystal::DiffractionDataSingleCrystal(const DiffractionDataSingleCrystal &old):
+ScatteringData(old),
+mHasObservedData(old.mHasObservedData)
+{
+	mObsIntensity=old.mObsIntensity;
+	mObsSigma=old.mObsSigma;
+	mWeight=old.mWeight;
+	mCalcIntensity=old.mCalcIntensity;
+	mScaleFactor=old.mScaleFactor;
+   gDiffractionDataSingleCrystalRegistry.Register(*this);
+   gTopRefinableObjRegistry.Register(*this);
+}
+
 DiffractionDataSingleCrystal::~DiffractionDataSingleCrystal()
 {
    VFN_DEBUG_MESSAGE("DiffractionDataSingleCrystal::~DiffractionDataSingleCrystal()",5)

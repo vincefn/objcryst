@@ -48,7 +48,10 @@ mpCostFunctionId(mMaxNbCostFunction),mCostFunctionWeight(mMaxNbCostFunction)
    VFN_DEBUG_ENTRY("OptimizationObj::OptimizationObj()",5)
 	// This must be done in a real class to avoid calling a pure virtual method
 	// if a graphical representation is automatically called upon registration.
-   //gOptimizationObjRegistry.Register(*this);
+   //  gOptimizationObjRegistry.Register(*this);
+	
+	// We only copy parameters, so do not delete them !
+	mRefParList.SetDeleteRefParInDestructor(false);
    VFN_DEBUG_EXIT("OptimizationObj::OptimizationObj()",5)
 }
 
@@ -59,7 +62,7 @@ OptimizationObj::~OptimizationObj()
 
 void OptimizationObj::RandomizeStartingConfig()
 {
-   VFN_DEBUG_MESSAGE("OptimizationObj::RandomizeStartingConfig()",5)
+   VFN_DEBUG_ENTRY("OptimizationObj::RandomizeStartingConfig()",5)
    this->PrepareRefParList();
    this->InitRandomSeedFromTime();
    for(int j=0;j<mRefParList.GetNbParNotFixed();j++)
@@ -72,15 +75,15 @@ void OptimizationObj::RandomizeStartingConfig()
       }
    }
       //else cout << mRefParList.GetParNotFixed(j).Name() <<" Not limited :-(" <<endl;
-   VFN_DEBUG_MESSAGE("OptimizationObj::RandomizeStartingConfig():Finished",5)
+   VFN_DEBUG_EXIT("OptimizationObj::RandomizeStartingConfig()",5)
 }
 
 void OptimizationObj::FixAllPar()
 {
-   VFN_DEBUG_MESSAGE("OptimizationObj::FixAllPar()",5)
+   VFN_DEBUG_ENTRY("OptimizationObj::FixAllPar()",5)
    for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
       mRecursiveRefinedObjList.GetObj(i).FixAllPar();
-   VFN_DEBUG_MESSAGE("OptimizationObj::FixAllPar():End",5)
+   VFN_DEBUG_EXIT("OptimizationObj::FixAllPar():End",5)
 }
 void OptimizationObj::SetParIsFixed(const string& parName,const bool fix)
 {
@@ -195,7 +198,7 @@ void OptimizationObj::Print()const {this->XMLOutput(cout);}
       
 void OptimizationObj::PrepareRefParList()
 {
-   VFN_DEBUG_MESSAGE("OptimizationObj::PrepareRefParList()",5)
+   VFN_DEBUG_ENTRY("OptimizationObj::PrepareRefParList()",5)
    
    //:TODO: instead of resetting the list every time, check if it is necessary.
    mRefParList.ResetParList();
@@ -204,6 +207,7 @@ void OptimizationObj::PrepareRefParList()
    mRefParList.PrepareForRefinement();
    for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
       mRecursiveRefinedObjList.GetObj(i).PrepareForRefinement();
+   VFN_DEBUG_EXIT("OptimizationObj::PrepareRefParList()",5)
 }
 
 void OptimizationObj::InitRandomSeedFromTime()const
@@ -321,7 +325,8 @@ void MonteCarloObj::Optimize(long &nbStep)
    const long nbSteps=nbStep;
    //:TODO: Other algorithms !
    TAU_PROFILE("MonteCarloObj::Optimize()","void (long)",TAU_DEFAULT);
-   VFN_DEBUG_MESSAGE("MonteCarloObj::Optimize()",5)
+   VFN_DEBUG_ENTRY("MonteCarloObj::Optimize()",5)
+   mRefParList.Print();
    for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).BeginOptimization();
    this->PrepareRefParList();
    mRefParList.Print();
@@ -716,7 +721,7 @@ void MonteCarloObj::Optimize(long &nbStep)
    mIsOptimizing=false;
    mStopAfterCycle=false;
    for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).EndOptimization();
-   VFN_DEBUG_MESSAGE("MonteCarloObj::Optimize():End.",5)
+   VFN_DEBUG_EXIT("MonteCarloObj::Optimize()",5)
 }
 void MonteCarloObj::SaveOptimHistory() const
 {

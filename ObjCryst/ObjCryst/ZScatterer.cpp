@@ -1841,6 +1841,9 @@ ZScatterer(name,cryst,x,y,z,phi,chi,psi),mPolyhedraType(type)
    VFN_DEBUG_MESSAGE("ZPolyhedron::ZPolyhedron():End:"<<mName<<")",5)
 }
 
+ZPolyhedron::ZPolyhedron(const ZPolyhedron &old):
+ZScatterer(old){}
+
 ZPolyhedron* ZPolyhedron::CreateCopy() const
 {
    VFN_DEBUG_MESSAGE("ZPolyhedron::CreateCopy()"<<mName<<")",5)
