@@ -207,7 +207,9 @@ WXCrystObjBasic(parent),mId(id)
    VFN_DEBUG_MESSAGE("WXField::WXField()",6)
    mpSizer = new wxBoxSizer(wxHORIZONTAL);
    mpLabel=new wxStaticText(this,-1,label.c_str());
+   #ifndef __DARWIN__   // *KLUDGE*
    mpLabel->SetEventHandler(this);
+   #endif
    mpSizer->Add(mpLabel,0,wxALIGN_CENTER);
    this->SetSizer(mpSizer);
    this->Layout();
