@@ -1006,6 +1006,11 @@ void Crystal::XMLOutput(ostream &os,int indent)const
          tagBump.SetIsEndTag(true);
          os<<sqrt(pos->second.mDist2)<<tagBump<<endl;
       }
+      for(int k=0;k<=indent;k++) os << "  " ;
+      XMLCrystTag tag2("AntiBumpScale");
+      os << tag2<< mBumpMergeScale;
+      tag2.SetIsEndTag(true);
+      os << tag2<<endl;
    }
    
    indent--;
@@ -1095,6 +1100,11 @@ void Crystal::XMLInput(istream &is,const XMLCrystTag &tagg)
                                     mScatteringPowerRegistry.GetObj(scattPow2),
                                     dist);
          continue;
+      }
+      if("AntiBumpScale"==tag.GetName())
+      {
+         is>>mBumpMergeScale;
+         XMLCrystTag junk(is);
       }
       if("Atom"==tag.GetName())
       {

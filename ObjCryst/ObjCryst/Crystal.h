@@ -363,6 +363,8 @@ class Crystal:public UnitCell
       mutable RefinableObjClock mBumpMergeCostClock;
       /// Current bump-merge cost
       mutable REAL mBumpMergeCost;
+      /// Bump-merge scale factor
+      REAL mBumpMergeScale;
 
       
       /// Interatomic distance for a given neighbour

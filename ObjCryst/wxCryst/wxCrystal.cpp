@@ -261,15 +261,17 @@ mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
       mpMenuBar->AddMenu("Display",ID_CRYSTAL_MENU_DISPLAY);
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_DISPLAY,ID_CRYSTAL_MENU_DISPLAY_3DVIEW,
                                 "3D Display");
-   // AntiBump
-      wxBoxSizer* pStats=new wxBoxSizer(wxHORIZONTAL);
-
-      WXFieldPar<REAL> *pWXFieldAntibump=new WXFieldPar<REAL>(this,"Antibump cost",-1,&mBumpmergeCost,70);
-      pStats->Add(pWXFieldAntibump    ,0,wxALIGN_CENTER);
-      mList.Add(pWXFieldAntibump);
-
-      mpSizer->Add(pStats);
-
+   // AntiBump-ProMerge cost
+      wxBoxSizer* pAntiBumpSizer=new wxBoxSizer(wxHORIZONTAL);
+      WXFieldPar<REAL> *pWXFieldBumpMerge=
+         new WXFieldPar<REAL>(this,"AntiBump",-1,&(mpCrystal->mBumpMergeCost),100);
+      WXFieldPar<REAL> *pAntiBumpScale=
+         new WXFieldPar<REAL>(this,"Scale",-1,&(mpCrystal->mBumpMergeScale));
+      pAntiBumpSizer->Add(pWXFieldBumpMerge);
+      pAntiBumpSizer->Add(pAntiBumpScale);
+      mpSizer->Add(pAntiBumpSizer,0,wxALIGN_LEFT);
+      mList.Add(pWXFieldBumpMerge);
+      mList.Add(pAntiBumpScale);
    // Lattice
       wxBoxSizer* lattice=new wxBoxSizer(wxHORIZONTAL);
 #if 1
@@ -330,10 +332,6 @@ mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
                     ->GetScatteringPowerRegistry().WXCreate(this);
       mpSizer->Add(mpWXScatteringPowerRegistry,0,wxALIGN_LEFT);
       mList.Add(mpWXScatteringPowerRegistry);
-   // AntiBump-ProMerge cost
-      WXFieldPar<REAL> *pWXFieldBumpMerge=new WXFieldPar<REAL>(this,"AntiBump",-1,&mBumpmergeCost,100);
-      mpSizer->Add(pWXFieldBumpMerge    ,0,wxALIGN_LEFT);
-      mList.Add(pWXFieldBumpMerge);
    
    // Scatterers
       mpWXScattererRegistry=mpCrystal
@@ -349,7 +347,7 @@ mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
 void WXCrystal::CrystUpdate()
 {
    VFN_DEBUG_ENTRY("WXCrystal::CrystUpdate()",7)
-   mBumpmergeCost=mpCrystal->GetBumpMergeCost();
+   mpCrystal->GetBumpMergeCost();
    this->WXRefinableObj::CrystUpdate();
    //mWXParent->Layout();
    #ifdef OBJCRYST_GL
@@ -960,6 +958,7 @@ void WXCrystal::OnMenuAddAntiBumpDist(wxCommandEvent & WXUNUSED(event))
       bondLengthDialog.GetValue().ToDouble(&bondLength);
       
    mpCrystal->SetBumpMergeDistance(*scattPow1,*scattPow2,bondLength);
+   mpCrystal->UpdateDisplay();
 }
 
 void WXCrystal::OnMenuSetRelativeXYZLimits(wxCommandEvent & WXUNUSED(event))

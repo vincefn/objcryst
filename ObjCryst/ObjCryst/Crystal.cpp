@@ -51,6 +51,7 @@ ObjRegistry<Crystal> gCrystalRegistry("List of all Crystals");
 
 Crystal::Crystal():
 mScattererRegistry("List of Crystal Scatterers"),
+mBumpMergeScale(1.0),
 mScatteringPowerRegistry("List of Crystal ScatteringPowers")
 {
    VFN_DEBUG_MESSAGE("Crystal::Crystal()",10)
@@ -62,6 +63,7 @@ mScatteringPowerRegistry("List of Crystal ScatteringPowers")
 
 Crystal::Crystal(const REAL a, const REAL b, const REAL c, const string &SpaceGroupId):
 mScattererRegistry("List of Crystal Scatterers"),
+mBumpMergeScale(1.0),
 mScatteringPowerRegistry("List of Crystal ScatteringPowers")
 {
    VFN_DEBUG_MESSAGE("Crystal::Crystal(a,b,c,Sg)",10)
@@ -74,6 +76,7 @@ mScatteringPowerRegistry("List of Crystal ScatteringPowers")
 Crystal::Crystal(const REAL a, const REAL b, const REAL c, const REAL alpha,
               const REAL beta, const REAL gamma,const string &SpaceGroupId):
 mScattererRegistry("List of Crystal Scatterers"),
+mBumpMergeScale(1.0),
 mScatteringPowerRegistry("List of Crystal ScatteringPowers")
 {
    VFN_DEBUG_MESSAGE("Crystal::Crystal(a,b,c,alpha,beta,gamma,Sg)",10)
@@ -85,6 +88,7 @@ mScatteringPowerRegistry("List of Crystal ScatteringPowers")
 
 Crystal::Crystal(const Crystal &old):
 mScattererRegistry(old.mScattererRegistry),
+mBumpMergeScale(old.mBumpMergeScale),
 mScatteringPowerRegistry(old.mScatteringPowerRegistry)
 {
    VFN_DEBUG_MESSAGE("Crystal::Crystal(&oldCrystal)",10)
@@ -657,7 +661,7 @@ REAL Crystal::GetBumpMergeCost() const
    this->CalcDistTable(true,3);
    VFN_DEBUG_ENTRY("Crystal::GetBumpMergeCost()",4)
    if(  (mBumpMergeCostClock>mBumpMergeParClock)
-      &&(mBumpMergeCostClock>mDistTableClock)) return mBumpMergeCost;
+      &&(mBumpMergeCostClock>mDistTableClock)) return mBumpMergeCost*mBumpMergeScale;
    TAU_PROFILE("Crystal::GetBumpMergeCost()","REAL (REAL)",TAU_DEFAULT);
    
    mBumpMergeCost=0;
@@ -701,14 +705,14 @@ REAL Crystal::GetBumpMergeCost() const
          if(true==mvBumpMergePar[par].second.mCanOverlap)
             tmp = 0.5*sin(M_PI*(1.-sqrt(neigh->mDist2/mvBumpMergePar[par].second.mDist2)))/0.1;
          else
-            tmp = tan(M_PI*0.5*(1.-sqrt(neigh->mDist2/mvBumpMergePar[par].second.mDist2)))/0.1;
+            tmp = tan(M_PI*0.49999*(1.-sqrt(neigh->mDist2/mvBumpMergePar[par].second.mDist2)))/0.1;
          mBumpMergeCost += tmp*tmp;
       }
    }
    mBumpMergeCost *= this->GetSpaceGroup().GetNbSymmetrics();
    mBumpMergeCostClock.Click();
    VFN_DEBUG_EXIT("Crystal::GetBumpMergeCost():"<<mBumpMergeCost,4)
-   return mBumpMergeCost;
+   return mBumpMergeCost*mBumpMergeScale;
 }
 
 void Crystal::SetBumpMergeDistance(const ScatteringPower &scatt1,
