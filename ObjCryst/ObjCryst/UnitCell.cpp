@@ -295,12 +295,12 @@ void UnitCell::Print(ostream &os)const
    os << "UnitCell : " << mName <<"("<<this->GetSpaceGroup().GetName()<<")"<< endl;
    os.width(width);
    os   << "    Cell dimensions : " 
-        << FormatFloat(mCellDim(0),8,5) << "  " 
-        << FormatFloat(mCellDim(1),8,5) << "  " 
-        << FormatFloat(mCellDim(2),8,5) << "  "
-        << FormatFloat(mCellDim(3)*RAD2DEG,8,5) << "  " 
-        << FormatFloat(mCellDim(4)*RAD2DEG,8,5) << "  " 
-        << FormatFloat(mCellDim(5)*RAD2DEG,8,5) << endl ;
+        << FormatFloat(this->GetLatticePar(0),8,5) << "  " 
+        << FormatFloat(this->GetLatticePar(1),8,5) << "  " 
+        << FormatFloat(this->GetLatticePar(2),8,5) << "  "
+        << FormatFloat(this->GetLatticePar(3)*RAD2DEG,8,5) << "  " 
+        << FormatFloat(this->GetLatticePar(4)*RAD2DEG,8,5) << "  " 
+        << FormatFloat(this->GetLatticePar(5)*RAD2DEG,8,5) << endl ;
 }
 
 const SpaceGroup & UnitCell::GetSpaceGroup() const {return mSpaceGroup;}
