@@ -32,6 +32,8 @@ Requirements:
    </ul>
 
    You will also need to add the <tt>c:\Borland\Bcc55\bin</tt> to your PATH, and to add the following variable to your environment: set BCCDIR=c:\Borland\Bcc55 You may need to restart after changing these environment variables, depending on windows version.
+   
+   Note that updates to the Borland compiler can be found at http://www.borland.com/devsupport/bcppbuilder/patches/#freecompiler55 .
 </ul>
 <h2>Check you have OpenGL and glut installed</h2>
 
@@ -54,7 +56,7 @@ Requirements:
 <ul>
    Get the wxWindows installer (wxMSW 2.2.7 or 2.2.9, \b not 2.3.*) at  http://www.wxwindows.org/, then run the wx installer to put everything in the directory of you choice (I'll assume it is <tt>C:\dev\wxWindows</tt>)
 
-   For wxMSW 2.2.9 <i>only</i> , you need to remove the contents of the wxWindows\include\wx\setup.h file, and replace it by a single line : <tt>#include "wx/msw/setup.h"</tt>
+   For wxMSW 2.2.9 <i>only</i> , you need to remove the contents of the wxWindows\include\wx\setup.h file, and replace it by a single line : <tt>\#include "wx/msw/setup.h"</tt>
 
    Edit the <tt>C:\dev\wxWindows\include\wx\msw\setup.h</tt> and search for "Opengl" and enable it:<tt>#define wxUSE_GLCANVAS 1</tt>
       

@@ -153,6 +153,8 @@
 \anchor singlecrystal<h2>Single Crystal Diffraction Data</h2>
 \htmlinclude diffractionsinglecrystal.map
 <ul>
+   Note that the support for single crystal data is very limited, as generally direct methods will do a quick job out of any good single crystal data. This is nevertheless provided, since in some cases the robustness of direct-space methods can make a difference. The 'intensities' which are to be imported into Fox must be fully corrected (absorption & Lorentz-Polarization), so that you actually need |F(hkl)|^2.
+   
    \anchor singlecrystal_menus<h3>Menus</h3>
    You can use the menus to load data from a text file (either four columns H K L Iobs, or five columns H K L Iobs sigma). If you do not have data, you can also use the "simulation mode" and generate a full list of H K L up to a given 2theta value.
    Finally, you can export the structure factors in a text file.
