@@ -1200,9 +1200,10 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
       //case 0://Free atoms + restraints
       {
          {//Rotate around an arbitrary vector
-            static const REAL amp=2*M_PI/100./RAND_MAX;
-            mQuat *= Quaternion::RotationQuaternion((2*rand()-RAND_MAX)*amp*mutationAmplitude,
-                                                        (REAL)rand(),(REAL)rand(),(REAL)rand());
+            static const REAL amp=2.*M_PI/100./RAND_MAX;
+            mQuat *= Quaternion::RotationQuaternion
+                        ((2.*(REAL)rand()-(REAL)RAND_MAX)*amp*mutationAmplitude,
+                         (REAL)rand(),(REAL)rand(),(REAL)rand());
             mQuat.Normalize();
             mClockOrientation.Click();
          }
@@ -1223,7 +1224,8 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                {//rotate around torsion bonds
                 // :TODO: rotate single atom groups from time to time
                   const unsigned long torsion=mTorsionBondIndex[i];
-                  const REAL angle=(2*rand()-RAND_MAX)*M_PI/25./RAND_MAX*mutationAmplitude;
+                  const REAL angle=(2.*(REAL)rand()-(REAL)RAND_MAX)
+                                   *M_PI/25./(REAL)RAND_MAX*mutationAmplitude;
                   if((rand()%2)==0)
                   {
                      list<set<unsigned long> >::const_iterator pos;
@@ -1954,10 +1956,14 @@ void Molecule::BuildTorsionAtomGroupTable()const
             bool foundring=false;
             for(pos1=pList->begin();pos1!=pList->end();++pos1)
             {
-               if(pos1->find(*pos)!=pos1->end()) foundring=true;
+               set<unsigned long>::const_iterator postmp=pos1->find(*pos);
+               if(postmp!=pos1->end()) foundring=true;
             }
             if(foundring) continue;
-            pList->push_back();
+            {
+               set<unsigned long> tmpset;
+               pList->push_back(tmpset);
+            }
             pList->back().insert(atom);
             ExpandAtomGroupRecursive(*pos,mConnectivityTable,pList->back());
          }
@@ -1975,10 +1981,14 @@ void Molecule::BuildTorsionAtomGroupTable()const
             bool foundring=false;
             for(pos1=pList->begin();pos1!=pList->end();++pos1)
             {
-               if(pos1->find(*pos)!=pos1->end()) foundring=true;
+               set<unsigned long>::const_iterator postmp=pos1->find(*pos);
+               if(postmp!=pos1->end()) foundring=true;
             }
             if(foundring) continue;
-            pList->push_back();
+            {
+               set<unsigned long> tmpset;
+               pList->push_back(tmpset);
+            }
             pList->back().insert(atom);
             ExpandAtomGroupRecursive(*pos,mConnectivityTable,pList->back());
          }
@@ -2026,14 +2036,16 @@ void Molecule::BuildTorsionAtomGroupTable()const
           pos!=mTorsionAtomGroupTable[i].first.end();
           ++pos)
       {
-         if(pos->find(index[&(mvpBond[i]->GetAtom2())]) != pos->end()) free=false;
+         set<unsigned long>::const_iterator postmp=pos->find(index[&(mvpBond[i]->GetAtom2())]);
+         if(postmp != pos->end()) free=false;
       }
       if(!free) continue;
       for(pos =mTorsionAtomGroupTable[i].second.begin();
           pos!=mTorsionAtomGroupTable[i].second.end();
           ++pos)
       {
-         if(pos->find(index[&(mvpBond[i]->GetAtom1())]) != pos->end()) free=false;
+         set<unsigned long>::const_iterator postmp=pos->find(index[&(mvpBond[i]->GetAtom1())]);
+         if(postmp != pos->end()) free=false;
       }
       if(!free) continue;
       mTorsionBondIndex.push_back(i);
