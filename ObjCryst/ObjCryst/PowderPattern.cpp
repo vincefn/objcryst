@@ -3349,12 +3349,17 @@ void PowderPattern::CalcPowderPattern() const
       mPowderPatternCalc=0;
 
       mPowderPatternVariance.resize(mNbPoint);
-      REAL *p0 = mPowderPatternWeight.data();
-      const REAL *p1=mPowderPatternVariance.data();
+      mPowderPatternVariance  = mPowderPatternObsSigma;
+      mPowderPatternVariance *= mPowderPatternObsSigma;
+      
+      const REAL *p0 = mPowderPatternVariance.data();
+      REAL *p1=mPowderPatternWeight.data();
       for(unsigned long j=0;j<mNbPoint;j++)
-         if(*p1 <=0) {*p0++ =0;p1++;}
-         else *p0++ = 1. / *p1++;
-
+      {
+         if(*p0 <=0) {*p1 =0.;}
+         else *p1 = 1. / *p0;
+         p0++;p1++;
+      }
       VFN_DEBUG_EXIT("PowderPattern::CalcPowderPattern():no components!",3);
       return;
    }
