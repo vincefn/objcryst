@@ -706,6 +706,11 @@ class PowderPattern : public RefinableObj
          mutable RefinableObjClock mClockIntegratedFactorsPrep;
       // Statistical indicators
          mutable REAL mChi2;
+         /// This is the logarithm of the part of log(Likelihood) which corresponds
+         /// to the normalization terms of gaussian distribution for each obs/calc
+         /// point. In practice, this is the sum of 1/2*log(2pi*sig(i)^2), although
+         /// we discard the 2pi terms.
+         mutable REAL mChi2LikeNorm;
          mutable REAL mR;
          mutable REAL mRw;
          ///Clock the last time Chi^2 was computed

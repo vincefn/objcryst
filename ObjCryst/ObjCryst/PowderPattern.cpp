@@ -2079,6 +2079,7 @@ REAL PowderPattern::GetChi2()const
    const unsigned long maxPoints=mNbPointUsed;
 
    mChi2=0.;
+   mChi2LikeNorm=0.;
    if(0 == mOptProfileIntegration.GetChoice())
    {// Integrated profiles
       VFN_DEBUG_MESSAGE("PowderPattern::GetChi2():Integrated profiles",3);
@@ -2100,7 +2101,8 @@ REAL PowderPattern::GetChi2()const
       VFN_DEBUG_MESSAGE("PowderPattern::GetIntegratedRw()",4);
       for(long i=0;i<numInterval;i++)
       {
-         mChi2 += *p3++ * ((*p1)-(*p2))*((*p1)-(*p2));
+         mChi2 += *p3 * ((*p1)-(*p2))*((*p1)-(*p2));
+         mChi2LikeNorm -= log(*p3++);
          p1++;p2++;
       }
    }
@@ -2116,7 +2118,8 @@ REAL PowderPattern::GetChi2()const
       {
          for(unsigned long i=0;i<maxPoints;i++)
          {
-            mChi2 += *p3++ * ((*p1)-(*p2))*((*p1)-(*p2));
+            mChi2 += *p3 * ((*p1)-(*p2))*((*p1)-(*p2));
+            mChi2LikeNorm -= log(*p3++);
             p1++;p2++;
          }
       }
@@ -2134,7 +2137,8 @@ REAL PowderPattern::GetChi2()const
             if(max>maxPoints)max=maxPoints;
             for(;i<min;i++)//! min is the *beginning* of the excluded region !
             {
-               mChi2 += *p3++ * ((*p1)-(*p2))*((*p1)-(*p2));
+               mChi2 += *p3 * ((*p1)-(*p2))*((*p1)-(*p2));
+               mChi2LikeNorm -= log(*p3++);
                p1++;p2++;
             }
             p1 += max-i;
@@ -2144,13 +2148,15 @@ REAL PowderPattern::GetChi2()const
          }
          for(;i<maxPoints;i++)
          {
-            mChi2 += *p3++ * ((*p1)-(*p2))*((*p1)-(*p2));
+            mChi2 += *p3 * ((*p1)-(*p2))*((*p1)-(*p2));
+            mChi2LikeNorm -= log(*p3++);
             p1++;p2++;
          }
       }
    }
+   VFN_DEBUG_MESSAGE("Chi^2="<<mChi2<<", log(norm)="<<mChi2LikeNorm,10)
    mClockChi2.Click();
-   VFN_DEBUG_EXIT("PowderPattern::GetChi2()="<<mChi2,3);
+   VFN_DEBUG_EXIT("PowderPattern::GetChi2()="<<mChi2,10);
    return mChi2;
 }
 
@@ -2870,7 +2876,9 @@ void PowderPattern::Add2ThetaExcludedRegion(const REAL min2Theta,const REAL max2
 
 REAL PowderPattern::GetLogLikelihood()const
 {
-   return this->GetChi2();
+   REAL tmp=this->GetChi2();
+   tmp+=mChi2LikeNorm;
+   return tmp;
 }
 
 unsigned int PowderPattern::GetNbLSQFunction()const{return 1;}
