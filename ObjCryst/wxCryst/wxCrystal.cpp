@@ -210,7 +210,7 @@ WXCrystal::WXCrystal(wxWindow* parent, Crystal *obj):
 WXRefinableObj(parent,(RefinableObj*)obj),mpCrystal(obj)
 #ifdef OBJCRYST_GL
 ,mCrystalGLDisplayList(0),mCrystalGLNameDisplayList(0),
-mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
+mpCrystalGL(0)
 #endif
 {
    VFN_DEBUG_MESSAGE("WXCrystal::WXCrystal()",6)
@@ -352,25 +352,34 @@ mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
       mList.Add(mpWXScattererRegistry);
    
    this->BottomLayout(0);
-   this->CrystUpdate();
+   this->CrystUpdate(true);
    VFN_DEBUG_MESSAGE("WXCrystal::WXCrystal():End",6)
 }
 
-void WXCrystal::CrystUpdate()
+void WXCrystal::CrystUpdate(const bool uui,const bool lock)
 {
-   VFN_DEBUG_ENTRY("WXCrystal::CrystUpdate()",7)
+   VFN_DEBUG_ENTRY("WXCrystal::CrystUpdate()",10)
+   if(lock) mMutex.Lock();
+   VFN_DEBUG_MESSAGE("WXCrystal::CrystUpdate()",10)
    mpCrystal->GetBumpMergeCost();
+   VFN_DEBUG_MESSAGE("WXCrystal::CrystUpdate()",10)
    mpCrystal->GetBondValenceCost();
-   this->WXRefinableObj::CrystUpdate();
+   VFN_DEBUG_MESSAGE("WXCrystal::CrystUpdate()",10)
    //mWXParent->Layout();
+   if(lock) mMutex.Unlock();
+   VFN_DEBUG_MESSAGE("WXCrystal::CrystUpdate()",10)
    #ifdef OBJCRYST_GL
    if(mpCrystalGL!=0)
    {
+   VFN_DEBUG_MESSAGE("WXCrystal::CrystUpdate()",10)
       BBox box=mpCrystalGL->GetCellBBox();
       this->UpdateGL(false,box.xMin,box.xMax,box.yMin,box.yMax,box.zMin,box.zMax);
    }
    #endif
-   VFN_DEBUG_EXIT("WXCrystal::CrystUpdate():End",7)
+   VFN_DEBUG_MESSAGE("WXCrystal::CrystUpdate()",10)
+   this->WXRefinableObj::CrystUpdate(uui,lock);
+   VFN_DEBUG_MESSAGE("WXCrystal::CrystUpdate()",10)
+   VFN_DEBUG_EXIT("WXCrystal::CrystUpdate():End",10)
 }
 
 #ifdef OBJCRYST_GL
@@ -385,26 +394,24 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
    if(mpCrystalGL!=0)
    {
       VFN_DEBUG_MESSAGE("WXCrystal::UpdateGL():mpCrystalGL",7)
-      this->GrabCrystalGLDisplayList();
-      if(mCrystalGLDisplayList==0)
-      {
-         mCrystalGLDisplayList=glGenLists(1);
-         mCrystalGLNameDisplayList=glGenLists(1);
-         VFN_DEBUG_MESSAGE("WXCrystal::UpdateGL():created mCrystalGLDisplayList="<<mCrystalGLDisplayList,7)
-      }
       
       // During a refinement (multi-threaded)
       // Wait until the display list has been updated by the main thread...
       static bool cont;//:TODO: not static, but mutable member function (if >1 crystal,...)
       if(false==wxThread::IsMain())
       {
-         this->ReleaseCrystalGLDisplayList();
          cont=false;
          wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_GLCRYSTAL_MENU_UPDATE);
          wxPostEvent(mpCrystalGL,event);
          while(!cont) wxUsleep(10);
          VFN_DEBUG_EXIT("WXCrystal::UpdateGL()-Not in main thread :End",8)
          return;
+      }
+      if(mCrystalGLDisplayList==0)
+      {
+         mCrystalGLDisplayList=glGenLists(1);
+         mCrystalGLNameDisplayList=glGenLists(1);
+         VFN_DEBUG_MESSAGE("WXCrystal::UpdateGL():created mCrystalGLDisplayList="<<mCrystalGLDisplayList,7)
       }
       mpCrystalGL->SetCurrent();
       glNewList(mCrystalGLDisplayList,GL_COMPILE);
@@ -426,7 +433,6 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
       //#ifdef __WINDOWS__
       cont=true;
       //#endif
-      this->ReleaseCrystalGLDisplayList();
       mpCrystalGL->CrystUpdate();
    }
    else
@@ -436,24 +442,11 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
    VFN_DEBUG_EXIT("WXCrystal::UpdateGL():End",8)
 }
 
-int WXCrystal::GrabCrystalGLDisplayList(const bool atomName)const
+int WXCrystal::GetCrystalGLDisplayList(const bool atomName)const
 {
-   VFN_DEBUG_MESSAGE("WXCrystal::GrabCrystalGLDisplayList()",7)
-   //:KLUDGE: ? or OK ?
-   while(mCrystalGLDisplayListIsLocked) wxUsleep(5);
-   mCrystalGLDisplayListIsLocked=true;
-   VFN_DEBUG_MESSAGE("WXCrystal::GrabCrystalGLDisplayList():"<<mCrystalGLDisplayList,7)
+   VFN_DEBUG_MESSAGE("WXCrystal::GetCrystalGLDisplayList()",7)
    if(atomName) return mCrystalGLNameDisplayList;
    return mCrystalGLDisplayList;
-}
-void WXCrystal::ReleaseCrystalGLDisplayList()const
-{
-   VFN_DEBUG_MESSAGE("WXCrystal::ReleaseCrystalGLDisplayList()",7)
-   mCrystalGLDisplayListIsLocked=false;
-}
-bool WXCrystal::GLDisplayListIsLocked()const
-{
-   return mCrystalGLDisplayListIsLocked;
 }
 
 void WXCrystal::OnMenuCrystalGL(wxCommandEvent & WXUNUSED(event))
@@ -892,7 +885,7 @@ void WXCrystal::OnMenuRemoveScatterer(wxCommandEvent & WXUNUSED(event))
    mpCrystal->RemoveScatterer(scatt);
    VFN_DEBUG_MESSAGE("WXCrystal::OnButtonRemoveScatterer():End",6)
    this->Layout();
-   this->CrystUpdate();
+   this->CrystUpdate(true);
 }
 
 void WXCrystal::OnMenuDuplicateScatterer(wxCommandEvent & WXUNUSED(event))
@@ -941,7 +934,7 @@ Error opening file for input:"+string(open.GetPath().c_str()));
    scatt.ImportFenskeHallZMatrix(fin);
    fin.close();
    mpCrystal->AddScatterer(ZScatterer2Molecule(&scatt));
-   this->CrystUpdate();
+   this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXCrystal::OnMenuImportFenskeHallZMatrix()",6)
 }
 
@@ -1030,7 +1023,7 @@ void WXCrystal::OnMenuManageBondValence(wxCommandEvent &event)
       stringstream s;
       s<<ro;
       stringstream mes;
-      mes<<"Enter Ro for ("<<pow1->GetName()<<","<<pow1->GetFormalCharge()<<") and "
+      mes<<"Enter Ro for ("<<pow1->GetName()<<","<<pow1->GetFormalCharge()<<") and ("
                            <<pow2->GetName()<<","<<pow2->GetFormalCharge()<<")";
       wxTextEntryDialog dialog(this,mes.str().c_str(),
                               "Bond Valence Ro",s.str().c_str(),wxOK | wxCANCEL);
@@ -1076,21 +1069,23 @@ bool WXCrystal::OnChangeName(const int id)
                       mpCrystal->GetLatticePar(5),
                       mpFieldSpacegroup->GetValue(),
                       mpCrystal->GetName());
-      this->CrystUpdate();
+      this->CrystUpdate(true);
       this->Layout();
       return true;
    }
    return false;
 }
 
-void WXCrystal::UpdateUI()
+void WXCrystal::UpdateUI(const bool lock)
 {
    VFN_DEBUG_ENTRY("WXCrystal::UpdateUI()",6)
+   if(lock) mMutex.Lock();
    mpFieldSpacegroup->SetValue(mpCrystal->GetSpaceGroup().GetName());
    #ifdef OBJCRYST_GL
    if(0!=mpCrystalGL) mpCrystalGL->GetParent()->SetTitle(mpCrystal->GetName().c_str());
    #endif
-   this->WXRefinableObj::UpdateUI();
+   this->WXRefinableObj::UpdateUI(false);
+   if(lock) mMutex.Unlock();
    VFN_DEBUG_EXIT("WXCrystal::UpdateUI()",6)
 }
 Crystal& WXCrystal::GetCrystal(){return *mpCrystal;}
@@ -1769,8 +1764,6 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
 {
    VFN_DEBUG_ENTRY("WXGLCrystalCanvas::OnPaint()",7)
    // This means that another update of the display list is being done, so...
-   if(true==mpWXCrystal->GLDisplayListIsLocked()) return;
-   
    wxPaintDC dc(this);
    PrepareDC(dc);
    this->GetParent()->PrepareDC(dc);
@@ -1801,12 +1794,6 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
    glTranslatef( mX0, mY0, mZ0 );
 
    //Draw
-      // another update of the display list is being done, so...
-      if(true==mpWXCrystal->GLDisplayListIsLocked())
-      {
-         VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnPaint()",7)
-         return;
-      }
    
    if(mShowFourier)
    {
@@ -1827,16 +1814,14 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
    }
    if(mShowCrystal)
    {
-      glCallList(mpWXCrystal->GrabCrystalGLDisplayList());  //Draw Crystal
-      mpWXCrystal->ReleaseCrystalGLDisplayList();
+      glCallList(mpWXCrystal->GetCrystalGLDisplayList());  //Draw Crystal
       if(mShowAtomName)
       {
          glLoadIdentity();
          glTranslatef( -0.3, 0, -mDist+1. );// Put labels in front of the atom position
          glMultMatrixf( &m[0][0] );
          glTranslatef( mX0, mY0, mZ0 );
-         glCallList(mpWXCrystal->GrabCrystalGLDisplayList(true));  //Draw Atom Names
-         mpWXCrystal->ReleaseCrystalGLDisplayList();
+         glCallList(mpWXCrystal->GetCrystalGLDisplayList(true));  //Draw Atom Names
       }
          
    }
@@ -1907,6 +1892,7 @@ void WXGLCrystalCanvas::OnSize(wxSizeEvent& event)
       if( (width>0)&&(height>0)) //in case the window is docked...
          gluPerspective(mViewAngle,(float)width/(float)height,1.f,2.*mDist);   
    }
+   this->Refresh(false);
    VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnSize():End",7)
 }
 

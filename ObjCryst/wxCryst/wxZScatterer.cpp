@@ -239,26 +239,30 @@ WXCrystObjBasic(parent),mpZAtom(obj)
    this->SetSizer(mpSizer);
    
    this->BottomLayout(0);
-   this->CrystUpdate();
+   this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXZAtom::WXZAtom()",6)
 }
 
-void WXZAtom::CrystUpdate()
+void WXZAtom::CrystUpdate(const bool uui,const bool lock)
 {
    VFN_DEBUG_ENTRY("WXZAtom::CrystUpdate()",6)
-   mList.CrystUpdate();
+   if(lock) mMutex.Lock();
+   mList.CrystUpdate(uui,false);
+   if(lock) mMutex.Unlock();
    VFN_DEBUG_EXIT("WXZAtom::CrystUpdate()",6)
 }
 
-void WXZAtom::UpdateUI()
+void WXZAtom::UpdateUI(const bool lock)
 {
    VFN_DEBUG_ENTRY("WXZAtom::UpdateUI()",6)
-   mList.UpdateUI();
+   if(lock) mMutex.Lock();
+   mList.UpdateUI(false);
    mpFieldName->SetValue(mpZAtom->GetName().c_str());
    if(0!=mpZAtom->GetScatteringPower())
       mpFieldScattPower->SetValue(mpZAtom->GetScatteringPower()->GetName());
    else
       mpFieldScattPower->SetValue("Dummy");
+   if(lock) mMutex.Unlock();
    VFN_DEBUG_EXIT("WXZAtom::UpdateUI()",6)
 }
 
@@ -272,8 +276,8 @@ void WXZAtom::OnChangeScattPow(wxCommandEvent & WXUNUSED(event))
                (wxWindow*)this,"Choose a new Scattering Power",choice);
    if(0==scatt) return;
    mpZAtom->SetScatteringPower(scatt);
-   this->CrystUpdate();
-   this->UpdateUI();
+   this->CrystUpdate(true);
+   this->UpdateUI(true);
 }
 ////////////////////////////////////////////////////////////////////////
 //
@@ -361,7 +365,7 @@ WXScatterer(parent,obj),mpZScatterer(obj)
       mList.Add(mpWXZAtomRegistry);
    
    this->BottomLayout(0);
-   this->CrystUpdate();
+   this->CrystUpdate(true);
 }
 
 void WXZScatterer::OnMenuAddZAtom(wxCommandEvent & WXUNUSED(event))
@@ -471,7 +475,7 @@ void WXZScatterer::OnMenuAddZAtom(wxCommandEvent & WXUNUSED(event))
                            angleAtomId,angle*DEG2RAD,
                            dihedAtomId,dihed*DEG2RAD,
                            1.);
-   this->CrystUpdate();
+   this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom()",6)
 }
 

@@ -44,8 +44,8 @@ class WXMolAtom:public WXCrystObjBasic
    public:
       WXMolAtom(wxWindow *parent, MolAtom*);
       virtual ~WXMolAtom();
-      virtual void CrystUpdate();
-      virtual void UpdateUI();
+      virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false);
+      virtual void UpdateUI(const bool mutexlock=false);
       void OnChangeScattPow(wxCommandEvent &);
    private:
       MolAtom *mpMolAtom;
@@ -62,8 +62,8 @@ class WXMolBond:public WXCrystObjBasic
    public:
       WXMolBond(wxWindow *parent, MolBond*);
       virtual ~WXMolBond();
-      virtual void CrystUpdate();
-      virtual void UpdateUI();
+      virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false);
+      virtual void UpdateUI(const bool mutexlock=false);
       void OnChangeAtom(wxCommandEvent &);
       /// Toggle the 'free' status of the bond.
       void OnToggleFree(wxCommandEvent & WXUNUSED(event));
@@ -83,8 +83,8 @@ class WXMolBondAngle:public WXCrystObjBasic
    public:
       WXMolBondAngle(wxWindow *parent, MolBondAngle*);
       virtual ~WXMolBondAngle();
-      virtual void CrystUpdate();
-      virtual void UpdateUI();
+      virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false);
+      virtual void UpdateUI(const bool mutexlock=false);
       void OnChangeAtom(wxCommandEvent &);
    private:
       MolBondAngle *mpMolBondAngle;
@@ -102,8 +102,8 @@ class WXMolDihedralAngle:public WXCrystObjBasic
    public:
       WXMolDihedralAngle(wxWindow *parent, MolDihedralAngle*);
       virtual ~WXMolDihedralAngle();
-      virtual void CrystUpdate();
-      virtual void UpdateUI();
+      virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false);
+      virtual void UpdateUI(const bool mutexlock=false);
       void OnChangeAtom(wxCommandEvent &);
    private:
       MolDihedralAngle *mpMolDihedralAngle;
@@ -142,8 +142,8 @@ class WXMolecule: public WXScatterer
       /// Notify that either the bond, bond angle or dihedral angle list window has
       /// been destroyed
       void NotifyDeleteListWin(WXMolScrolledWindow *win);
-      virtual void CrystUpdate();
-      virtual void UpdateUI();
+      virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false);
+      virtual void UpdateUI(const bool mutexlock=false);
    private:
       Molecule* mpMolecule;
       wxBoxSizer* mpSizerAtomList;

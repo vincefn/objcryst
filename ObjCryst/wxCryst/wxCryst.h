@@ -63,6 +63,24 @@ class WXCRYST_ID
 extern const long ID_WXOBJ_ENABLE; //These are used in ObjCryst/RefinableObj.cpp
 extern const long ID_WXOBJ_DISABLE;// and defined in wxCryst/wxCryst.cpp
 
+#undef VFN_CRYST_MUTEX
+#ifdef VFN_CRYST_MUTEX
+/** Derived Mutex class, to keep track of Mutexes
+*
+*/
+class CrystMutex:public wxMutex
+{
+   public:
+      CrystMutex();
+      ~CrystMutex();
+      wxMutexError Lock();
+      wxMutexError Unlock();
+   private:
+      unsigned long mNbLock;
+};
+#else
+#define CrystMutex wxMutex
+#endif
 #ifndef DOXYGEN_SKIP_THIS
 // constants that are shared between several classes must
 // be defined here. Constants declared as "extern..." are
@@ -93,13 +111,33 @@ class WXCrystObjBasic: public wxWindow
       WXCrystObjBasic(wxWindow* parent);
       /// Destructor
       virtual ~WXCrystObjBasic();
-      /// Get new values to be displayed from the underlying object,
-      /// and raise flag if an UI update is necessary.
-      /// The actual GUI update is not made here. UpdateUI() should be
-      /// called separately, from the main thread.
-      virtual void CrystUpdate()=0;
-      /// Update the User Interface, if necessary
-      virtual void UpdateUI()=0;
+      /** Get new values to be displayed from the underlying object,
+      * and raise flag if an UI update is necessary.
+      * The actual GUI update is not made here. UpdateUI() should be
+      * called separately, from the main thread.
+      *
+      * \param updateUI: if true, this will call UpdateUI, either directly
+      *(if in the main thread), or by sending a message.
+      * \param mutexlock: if true, a Mutex will be used to lock the data shared
+      * between main and background thread. The idea is to only use a few Mutexes
+      * to lock data from the top objects (wxRefinableObj,...), when
+      * calling CrystUpdate() and UpdateUI(). As sub-objects (WXField,...)
+      * are only updated from within a top object, the mutex lock in the top object
+      * will also lock the data in the sub-objects.
+      */
+      virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false)=0;
+      /** Update the User Interface, if necessary
+      *
+      * \param mutexlock: if true, a Mutex will be used to lock the data shared
+      * between main and background thread.
+      *
+      * The idea is to only use a few Mutexes
+      * to lock data from the top objects (wxRefinableObj,...), when
+      * calling CrystUpdate() and UpdateUI(). As sub-objects (WXField,...)
+      * are only updated from within a top object, the mutex lock in the top object
+      * will also lock the data in the sub-objects.
+      */
+      virtual void UpdateUI(const bool mutexlock=false)=0;
       /** Ask for a new Layout with recalculated size hints, because
       * a child has been changed or added
       *
@@ -125,7 +163,7 @@ class WXCrystObjBasic: public wxWindow
       /// Do we need to update the display ?
       bool mNeedUpdateUI;
       /// Mutex used to lock data when preparing to update the UI in non-main thread
-      wxMutex mMutex;
+      CrystMutex mMutex;
       /// WXCrystObjBasicList which are aware of this object, 
       /// and which should be told on destruction.
       std::set<WXCrystObjBasicList*> mvpList;
@@ -148,10 +186,22 @@ class WXCrystObjBasicList
       void Remove(WXCrystObjBasic *);
       /// Show or hide all of the windows
       bool Show(bool);
-      /// Forces all objects in the list to update. See WXCrystObjBasic::CrystUpdate()
-      void CrystUpdate();
-      /// Forces all objects in the list to update the UI. See WXCrystObjBasic::UpdateUI()
-      void UpdateUI();
+      /** Forces all objects in the list to update. See WXCrystObjBasic::CrystUpdate()
+      *
+      * see WXCrystObjBasic::CrystUpdate() on the use of updateUI and mutexlock
+      *
+      * Normally WXCrystObjBasicList::CrystUpdate() should never be used with mutexlock=true,
+      * as the mutex locking should be done from the calling object.
+      */
+      void CrystUpdate(const bool updateUI=false,const bool mutexlock=false);
+      /** Forces all objects in the list to update. See WXCrystObjBasic::CrystUpdate()
+      *
+      * see WXCrystObjBasic::UpdateUI() on the use of updateUI and mutexlock.
+      *
+      * Normally WXCrystObjBasicList::UpdateUI() should never be used with mutexlock=true,
+      * as the mutex locking should be done from the calling object.
+      */
+      void UpdateUI(const bool mutexlock=false);
       void Enable(bool enable);
    private:
       /// List of pointers to the objects.
@@ -186,8 +236,8 @@ class WXCrystObj: public WXCrystObjBasic
       /// here. This returns true if the value has been handled (for inheritance
       /// purposes).
       virtual bool OnChangeName(const int id)=0;
-      virtual void CrystUpdate();
-      virtual void UpdateUI();
+      virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false);
+      virtual void UpdateUI(const bool mutexlock=false);
       virtual void OnEnable(wxUpdateUIEvent &event);
       virtual bool Enable(bool enable);
       virtual void BottomLayout(WXCrystObjBasic *pChild);
@@ -211,6 +261,10 @@ class WXCrystObj: public WXCrystObjBasic
 /** This is the abstract base class for all fields, wether they contain
 * a floating-point parameter, or a string,... All WXField have a title
 * and an entry field.
+*
+* Note that WXField::CrystUpdate() and WXField::UpdateUI() should be done 
+* from the parent object. Notably using WXField::CrystUpdate(updateui=true)
+* will not trigger an update of the UI.
 */
 class WXField: public WXCrystObjBasic
 {
@@ -264,8 +318,8 @@ class WXFieldString:public WXField
       void SetValue(const string&);
       /// Get the current name.
       const string GetValue() const;
-      virtual void CrystUpdate();
-      virtual void UpdateUI();
+      virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false);
+      virtual void UpdateUI(const bool mutexlock=false);
       void Revert();
       virtual void ValidateUserInput();
    protected:
@@ -306,8 +360,8 @@ class WXFieldName:public WXField
       const string GetValue() const;
       /// This does nothing. Updates should be done by the owner in the particular
       /// case of names.
-      virtual void CrystUpdate();
-      virtual void UpdateUI();
+      virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false);
+      virtual void UpdateUI(const bool mutexlock=false);
       void Revert();
       virtual void ValidateUserInput();
    protected:
@@ -343,7 +397,7 @@ class WXFieldParBase:public WXField
       /// Records when text is entered (either from self-updating or user input)
       void OnText(wxCommandEvent & WXUNUSED(event));
       /// This gets a new value from the parameter.
-      virtual void CrystUpdate()=0;
+      virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false)=0;
       virtual void Revert()=0;
       virtual void ValidateUserInput();
    protected:
@@ -366,8 +420,8 @@ template<class T>class WXFieldPar:public WXFieldParBase
       WXFieldPar(wxWindow *parent,const string& label, const int field_id,
                     T *par,const int hsize=50);
       /// This gets a new value from the parameter.
-      virtual void CrystUpdate();
-      virtual void UpdateUI();
+      virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false);
+      virtual void UpdateUI(const bool mutexlock=false);
       virtual void Revert();
       /// Set Coefficient between the value used by ObjCryst++ and the one
       /// to be displayed to the user. Typically, 180/pi
@@ -396,9 +450,9 @@ class WXFieldChoice:public WXField
       WXFieldChoice(wxWindow *parent,const int field_id,
                             const string &name,const int hsize=80);
       /// Does nothing
-      virtual void CrystUpdate();
+      virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false);
       /// Does nothing
-      virtual void UpdateUI();
+      virtual void UpdateUI(const bool mutexlock=false);
       void Revert();
       /// Used by the owner to change the name of the choice
       void SetValue(const string&);
@@ -425,8 +479,8 @@ class WXCrystMenuBar: public WXCrystObjBasic
       /// Add a sub-menu to a menu
       void AddMenuItem(const int menuId,int id, const wxString&  item,
                        wxMenu *subMenu, const wxString& helpString = "");
-      virtual void CrystUpdate();
-      virtual void UpdateUI();
+      virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false);
+      virtual void UpdateUI(const bool mutexlock=false);
       /// Event handler to popu the menu when the button is clicked.
       void OnPopupMenu(wxCommandEvent & event);
    protected:

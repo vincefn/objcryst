@@ -348,7 +348,7 @@ void OptimizationObj::InitOptions()
 void OptimizationObj::UpdateDisplay()
 {
    #ifdef __WX__CRYST__
-   if(0!=this->WXGet()) this->WXGet()->CrystUpdate();
+   if(0!=this->WXGet()) this->WXGet()->CrystUpdate(true,true);
    #endif
    for(int i=0;i<mRefinedObjList.GetNb();i++) 
       mRefinedObjList.GetObj(i).UpdateDisplay();

@@ -77,8 +77,8 @@ class WXFieldRefPar:public WXField
       void OnPopupMenu(wxMouseEvent & event);
       /// Opens the popu menu, to allow changing limits
       void OnPopupMenuChoice(wxCommandEvent& event);
-      virtual void CrystUpdate();
-      virtual void UpdateUI();
+      virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false);
+      virtual void UpdateUI(const bool mutexlock=false);
       /// Get the RefinablePar associated to this field
       RefinablePar& GetRefPar();
       void Revert();
@@ -107,8 +107,8 @@ class WXFieldOption:public WXField
       /// forwards the event to its owner, who will take care of anything
       /// that must be done.
       void OnChoice(wxCommandEvent & WXUNUSED(event));
-      virtual void CrystUpdate();
-      virtual void UpdateUI();
+      virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false);
+      virtual void UpdateUI(const bool mutexlock=false);
       void Revert();
       /// Does nothing. Any user input is directly validated (OnChoice).
       virtual void ValidateUserInput();
@@ -140,8 +140,8 @@ class WXRefinableObj: public WXCrystObj
    public:
       WXRefinableObj(wxWindow *parent, RefinableObj*);
       ~WXRefinableObj();
-      virtual void CrystUpdate();
-      virtual void UpdateUI();
+      virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false);
+      virtual void UpdateUI(const bool mutexlock=false);
       virtual bool OnChangeName(const int id);
       void OnMenuSave(wxCommandEvent & WXUNUSED(event));
       void OnMenuLoad(wxCommandEvent & WXUNUSED(event));

@@ -201,12 +201,11 @@ void WXFieldRefPar::OnPopupMenuChoice(wxCommandEvent& event)
    }
 }
 
-void WXFieldRefPar::CrystUpdate()
+void WXFieldRefPar::CrystUpdate(const bool uui,const bool lock)
 {
    VFN_DEBUG_MESSAGE("WXFieldRefPar::CrystUpdate()",6)
-   //cout << mpField <<endl;
+   if(lock) mMutex.Lock();
    bool needUpdate=false;
-   wxMutexLocker mlock(mMutex);
    if(wxThread::IsMain())
    {
       if(mpRefPar->IsUsed()!=this->IsShown()) needUpdate=true;
@@ -214,21 +213,34 @@ void WXFieldRefPar::CrystUpdate()
       if(0!=mpButtonLimited) if(mpButtonLimited->GetValue()==mpRefPar->IsLimited()) needUpdate=true;
    }
    if(mValue!=mpRefPar->GetHumanValue()) needUpdate=true;
-   if(!needUpdate) return;
+   if(!needUpdate)
+   {
+      if(lock) mMutex.Unlock();
+      return;
+   }
    mValueOld=mValue;
    mValue=mpRefPar->GetHumanValue();
    mNeedUpdateUI=true;
+   if(lock) mMutex.Unlock();
 }
 
-void WXFieldRefPar::UpdateUI()
+void WXFieldRefPar::UpdateUI(const bool lock)
 {
    VFN_DEBUG_MESSAGE("WXFieldRefPar::UpdateUI()"<<mValue,3)
-   wxMutexLocker mlock(mMutex);
-   if(mNeedUpdateUI==false)return;
+   if(lock) mMutex.Lock();
+   if(mNeedUpdateUI==false)
+   {
+      if(lock) mMutex.Unlock();
+      return;
+   }
    if(false==mpRefPar->IsUsed()) this->Show(false);
    else this->Show(true);
    
-   if(mpField==0) return;
+   if(mpField==0)
+   {
+      if(lock) mMutex.Unlock();
+      return;
+   }
    
    //mpField->SetValue(wxString::Printf("%f",mValue));
    wxString tmp;
@@ -239,6 +251,7 @@ void WXFieldRefPar::UpdateUI()
    if(0!=mpButtonFix) mpButtonFix->SetValue(!(mpRefPar->IsFixed()));
    if(0!=mpButtonLimited) mpButtonLimited->SetValue(mpRefPar->IsLimited());
    mNeedUpdateUI=false;
+   if(lock) mMutex.Unlock();
 }
 
 void WXFieldRefPar::Revert()
@@ -294,22 +307,27 @@ void WXFieldOption::OnChoice(wxCommandEvent & WXUNUSED(event))
    mpOption->SetChoice(mChoice);
 }
 
-void WXFieldOption::CrystUpdate()
+void WXFieldOption::CrystUpdate(const bool uui,const bool lock)
 {
    VFN_DEBUG_MESSAGE("WXFieldOption::CrystUpdate()",6)
-   wxMutexLocker mlock(mMutex);
+   if(lock) mMutex.Lock();
    if(mChoice==mpOption->GetChoice()) return;
    mChoice=mpOption->GetChoice();
    mNeedUpdateUI=true;
 }
 
-void WXFieldOption::UpdateUI()
+void WXFieldOption::UpdateUI(const bool lock)
 {
    VFN_DEBUG_MESSAGE("WXFieldOption::UpdateUI()",6)
    wxMutexLocker mlock(mMutex);
-   if(mNeedUpdateUI==false) return;
+   if(mNeedUpdateUI==false)
+   {
+      if(lock) mMutex.Unlock();
+      return;
+   }
    mpList->SetSelection(mChoice);
    mNeedUpdateUI=false;
+   if(lock) mMutex.Unlock();
 }
 
 void WXFieldOption::Revert()
@@ -332,14 +350,22 @@ template<class T> WXRegistry<T>::WXRegistry(wxWindow *parent,ObjRegistry<T>* reg
 WXCrystObj(parent,wxHORIZONTAL,false),mpRegistry(reg)
 {
    VFN_DEBUG_MESSAGE("WXCrystRegistry::WXCrystRegistry(wxWindow*)",6)
+   #ifdef VFN_CRYST_MUTEX
+   cout <<"new CrystMutex("<<&mMutex<<")for WXCrystRegistry:"<<reg->GetName()<<endl;
+   #endif
    wxStaticText* mpLabel=new wxStaticText(this,-1,reg->GetName().c_str());
    mpSizer->Add(mpLabel,0,wxALIGN_LEFT);
    mpLabel->SetForegroundColour(wxColour(0,0,255));
    this->BottomLayout(0);
    VFN_DEBUG_MESSAGE("WXCrystRegistry::WXCrystRegistry(wxWindow*):End",6)
 }
-template<class T> WXRegistry<T>::~WXRegistry(){mpRegistry->WXNotifyDelete();}
-
+template<class T> WXRegistry<T>::~WXRegistry()
+{
+   mpRegistry->WXNotifyDelete();
+   #ifdef VFN_CRYST_MUTEX
+   cout <<"Deleting CrystMutex("<<&mMutex<<")for WXCrystRegistry:"<<mpRegistry->GetName()<<endl;
+   #endif
+}
 template<class T> void WXRegistry<T>::Add(WXCrystObjBasic *obj)
 {
    VFN_DEBUG_MESSAGE("WXCrystRegistry::AddWXCrystObj(WXCrystObj*)",6)
@@ -515,6 +541,9 @@ WXRefinableObj::WXRefinableObj(wxWindow* parent, RefinableObj*obj):
 WXCrystObj(parent,wxHORIZONTAL),mpRefinableObj(obj)
 {
    VFN_DEBUG_MESSAGE("WXRefinableObj::WXRefinableObj():"<<obj->GetName(),6)
+   #ifdef VFN_CRYST_MUTEX
+   cout <<"new CrystMutex("<<&mMutex<<")for :"<<obj->GetClassName()<<":"<<obj->GetName()<<endl;
+   #endif
    mpWXTitle->SetLabel(mpRefinableObj->GetClassName());
    
    // Menu
@@ -531,7 +560,7 @@ WXCrystObj(parent,wxHORIZONTAL),mpRefinableObj(obj)
       mList.Add(opt);
    }
    this->BottomLayout(0);
-   this->CrystUpdate();
+   this->CrystUpdate(true);
    VFN_DEBUG_MESSAGE("WXRefinableObj::WXRefinableObj():End",6)
 }
 
@@ -539,18 +568,28 @@ WXRefinableObj::~WXRefinableObj()
 {
    VFN_DEBUG_MESSAGE("WXRefinableObj::~WXRefinableObj():"<<mpRefinableObj->GetName(),6)
    mpRefinableObj->WXNotifyDelete();
+   #ifdef VFN_CRYST_MUTEX
+   cout <<"Deleting CrystMutex("<<&mMutex<<")for :"<<mpRefinableObj->GetClassName()
+        <<":"<<mpRefinableObj->GetName()<<endl;
+   #endif
 }
 
-void WXRefinableObj::CrystUpdate()
+void WXRefinableObj::CrystUpdate(const bool uui,const bool lock)
 {
-   VFN_DEBUG_MESSAGE("WXRefinableObj::CrystUpdate():"<<mpRefinableObj->GetName(),6)
-   this->WXCrystObj::CrystUpdate();
-   if(true==wxThread::IsMain()) this->UpdateUI();
-   else
+   VFN_DEBUG_ENTRY("WXRefinableObj::CrystUpdate("<<uui<<lock<<"):"<<mpRefinableObj->GetName(),10)
+   if(lock) mMutex.Lock();
+   this->WXCrystObj::CrystUpdate(false,false);
+   if(lock) mMutex.Unlock();
+   if(uui)
    {
-      wxUpdateUIEvent event(ID_CRYST_UPDATEUI);
-      wxPostEvent(this,event);
+      if(true==wxThread::IsMain()) this->UpdateUI(lock);
+      else
+      {
+         wxUpdateUIEvent event(ID_CRYST_UPDATEUI);
+         wxPostEvent(this,event);
+      }
    }
+   VFN_DEBUG_EXIT("WXRefinableObj::CrystUpdate():"<<mpRefinableObj->GetName(),10)
 }
 
 bool WXRefinableObj::OnChangeName(const int id)
@@ -599,36 +638,38 @@ void WXRefinableObj::OnMenuLoad(wxCommandEvent & WXUNUSED(event))
 void WXRefinableObj::OnMenuFixAllPar(wxCommandEvent & WXUNUSED(event))
 {
    mpRefinableObj->FixAllPar();
-   this->CrystUpdate();
+   this->CrystUpdate(true);
 }
 
 void WXRefinableObj::OnMenuUnFixAllPar(wxCommandEvent & WXUNUSED(event))
 {
    mpRefinableObj->UnFixAllPar();
-   this->CrystUpdate();
+   this->CrystUpdate(true);
 }
 
 void WXRefinableObj::OnMenuParRandomize(wxCommandEvent & WXUNUSED(event))
 {
    mpRefinableObj->RandomizeConfiguration();
    mpRefinableObj->RefinableObj::Print();
-   this->CrystUpdate();
+   this->CrystUpdate(true);
 }
 
 void WXRefinableObj::OnUpdateUI(wxUpdateUIEvent& event)
 {
-   this->UpdateUI();
+   this->UpdateUI(true);
 }
-void WXRefinableObj::UpdateUI()
+void WXRefinableObj::UpdateUI(const bool lock)
 {
-   VFN_DEBUG_ENTRY("WXRefinableObj::UpdateUI()",6)
+   VFN_DEBUG_ENTRY("WXRefinableObj::UpdateUI("<<lock<<")"<<mpRefinableObj->GetName(),10)
+   if(lock) mMutex.Lock();
    mpWXTitle->SetValue(mpRefinableObj->GetName());
-   mpWXTitle->UpdateUI();
+   mpWXTitle->UpdateUI(false);
    mpSizer->SetItemMinSize
             (mpWXTitle, mpWXTitle->GetSize().GetWidth(),mpWXTitle->GetSize().GetHeight());
    mpWXTitle->Layout();
-   this->WXCrystObj::UpdateUI();
-   VFN_DEBUG_EXIT("WXRefinableObj::UpdateUI()",6)
+   this->WXCrystObj::UpdateUI(false);
+   if(lock) mMutex.Unlock();
+   VFN_DEBUG_EXIT("WXRefinableObj::UpdateUI()"<<mpRefinableObj->GetName(),10)
 }
 
 }// namespace 

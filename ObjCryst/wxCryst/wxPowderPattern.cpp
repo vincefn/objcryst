@@ -95,7 +95,7 @@ WXCrystObjBasic(parent),mpRadiation(rad)
    mpSizer->Add(xRayTubeAlpha2Alpha1,0,wxALIGN_LEFT);
    mList.Add(xRayTubeAlpha2Alpha1);
       
-   this->CrystUpdate();
+   this->CrystUpdate(true);
    this->SetSizer(mpSizer);
    mpSizer->SetSizeHints(this);
    this->Layout();
@@ -106,23 +106,28 @@ WXRadiation::~WXRadiation()
    mpRadiation->WXNotifyDelete();
 }
 
-void WXRadiation::CrystUpdate()
+void WXRadiation::CrystUpdate(const bool uui,const bool lock)
 {
-   mList.CrystUpdate();
-   if(true==wxThread::IsMain()) this->UpdateUI();
-   else
+   if(lock) mMutex.Lock();
+   mList.CrystUpdate(false,false);
+   if(lock) mMutex.Unlock();
+   if(uui)
    {
-      wxUpdateUIEvent event(ID_CRYST_UPDATEUI);
-      wxPostEvent(this,event);
+      if(true==wxThread::IsMain()) this->UpdateUI(lock);
+      else
+      {
+         wxUpdateUIEvent event(ID_CRYST_UPDATEUI);
+         wxPostEvent(this,event);
+      }
    }
 }
-void WXRadiation::UpdateUI()
+void WXRadiation::UpdateUI(const bool lock)
 {
-   mList.UpdateUI();
+   mList.UpdateUI(lock);
 }
 void WXRadiation::OnUpdateUI(wxUpdateUIEvent& event)
 {
-   this->UpdateUI();
+   this->UpdateUI(true);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -405,16 +410,21 @@ mChi2(0.0),mGoF(0.0),mRwp(0.0),mRp(0.0)
    
    VFN_DEBUG_MESSAGE("WXPowderPattern::WXPowderPattern():1",6)
    this->BottomLayout(0);
-   this->CrystUpdate();
+   this->CrystUpdate(true);
    VFN_DEBUG_MESSAGE("WXPowderPattern::WXPowderPattern():End",6)
 }
 
-void WXPowderPattern::CrystUpdate()
+void WXPowderPattern::CrystUpdate(const bool uui,const bool lock)
 {
    VFN_DEBUG_MESSAGE("WXPowderPattern::CrystUpdate()",6)
+   if(lock) mMutex.Lock();
    WXCrystValidateAllUserInput();
    
-   if(mpPowderPattern->GetNbPoint()<=0) return;// nothing to display yet
+   if(mpPowderPattern->GetNbPoint()<=0)
+   {
+      if(lock) mMutex.Unlock();
+      return;// nothing to display yet
+   }
    
    // Will force re-generating reflection list if the wavelength,
    // or lattice par, or the spacegroup has changed.
@@ -443,7 +453,8 @@ void WXPowderPattern::CrystUpdate()
                            mpPowderPattern->GetPowderPatternCalc(),
                            tmp);
    }
-   this->WXRefinableObj::CrystUpdate();
+   if(lock) mMutex.Unlock();
+   this->WXRefinableObj::CrystUpdate(uui,lock);
 } 
 
 void WXPowderPattern::OnMenuAddCompBackgd(wxCommandEvent & WXUNUSED(event))
@@ -558,7 +569,7 @@ void WXPowderPattern::OnMenuShowGraph(wxCommandEvent & WXUNUSED(event))
    
    frame->CreateStatusBar(2);
    frame->Show(true);
-   this->CrystUpdate();
+   this->CrystUpdate(true);
    //frame->SetStatusText("");
 }
 
@@ -653,7 +664,7 @@ void WXPowderPattern::OnMenuFitScaleForR(wxCommandEvent & WXUNUSED(event))
    if(0==mpGraph) return;
    WXCrystValidateAllUserInput();
    mpPowderPattern->FitScaleFactorForR();//FitScaleFactorForIntegratedR
-   this->CrystUpdate();
+   this->CrystUpdate(true);
 }
 
 void WXPowderPattern::OnMenuFitScaleForRw(wxCommandEvent & WXUNUSED(event))
@@ -661,7 +672,7 @@ void WXPowderPattern::OnMenuFitScaleForRw(wxCommandEvent & WXUNUSED(event))
    if(0==mpGraph) return;
    WXCrystValidateAllUserInput();
    mpPowderPattern->FitScaleFactorForRw();//FitScaleFactorForIntegratedRw
-   this->CrystUpdate();
+   this->CrystUpdate(true);
 }
 
 
@@ -717,7 +728,7 @@ void WXPowderPattern::OnMenuSetWavelength(wxCommandEvent & event)
       mpPowderPattern->SetWavelength("CoA1");
    if(event.GetId()== ID_POWDER_MENU_WAVELENGTH_SET_CRA1)
       mpPowderPattern->SetWavelength("CrA1");
-   this->CrystUpdate();
+   this->CrystUpdate(true);
 }
 
 void WXPowderPattern::OnMenuAddExclude(wxCommandEvent & WXUNUSED(event))
@@ -763,13 +774,15 @@ void WXPowderPattern::OnMenuAddExclude(wxCommandEvent & WXUNUSED(event))
 void WXPowderPattern::NotifyDeleteGraph() {mpGraph=0;}
 const PowderPattern& WXPowderPattern::GetPowderPattern()const
 { return *mpPowderPattern;}
-void WXPowderPattern::UpdateUI()
+void WXPowderPattern::UpdateUI(const bool lock)
 {
+   if(lock)mMutex.Lock();
    if(mpGraph!=0)
    {
       mpGraph->GetParent()->SetTitle(mpPowderPattern->GetName().c_str());
    }
-   this->WXRefinableObj::UpdateUI();
+   this->WXRefinableObj::UpdateUI(false);
+   if(lock)mMutex.Unlock();
 }
 ////////////////////////////////////////////////////////////////////////
 //
@@ -795,23 +808,27 @@ wxWindow(frame,-1,wxPoint(-1,-1),wxSize(-1,-1)),
 mpPattern(parent),mMargin(50),mDiffPercentShift(.20),
 mMaxIntensity(-1),mMinIntensity(-1),mMinX(-1),mMaxX(-1),
 mpParentFrame(frame),
-mCalcPatternIsLocked(false),mIsDragging(false),mDisplayLabel(true)
+mIsDragging(false),mDisplayLabel(true)
 {
+   cout <<"new CrystMutex("<<&mMutex<<")for WXPowderPatternGraph:"<<this<<endl;
    mpPopUpMenu=new wxMenu("Powder Pattern");
    mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_UPDATE, "&Update");
    mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_TOGGLELABEL, "&Hide Labels");
-   mpPattern->CrystUpdate();
+   mpPattern->CrystUpdate(true);
 }
 
 WXPowderPatternGraph::~WXPowderPatternGraph()
 {
    mpPattern->NotifyDeleteGraph();
+   #ifdef VFN_CRYST_MUTEX
+   cout <<"Deleting CrystMutex("<<&mMutex<<")for WXPowderPatternGraph:"<<this<<endl;
+   #endif
 }
 
 void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint()",5)
-   if(true==mCalcPatternIsLocked) return;
+   wxMutexLocker mlock(mMutex);
    wxBufferedPaintDC dc(this);
    PrepareDC(dc);
    mpParentFrame->PrepareDC(dc);
@@ -836,8 +853,6 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():1",5)
 
    //Check spectrum is not being updated
-   while(mCalcPatternIsLocked) wxUsleep(10);
-   mCalcPatternIsLocked=true;
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():2:"<<mObs.numElements(),5)
 
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():3:min="
@@ -981,15 +996,13 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
       }
    }
    
-   mCalcPatternIsLocked=false;
    dc.EndDrawing();
-
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():End",5)
 }
 void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
 {
    if(event.Leaving()) return;// wxMSW2.4 bug ?
-   if(true==mCalcPatternIsLocked)
+   if(wxMUTEX_NO_ERROR!=mMutex.TryLock())
    {
       mIsDragging=false;
       return;
@@ -1007,7 +1020,11 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
       wxCoord width,height;
       this->GetSize(&width, &height);
 
-   if((x>width)||(y>height)) return;
+   if((x>width)||(y>height))
+   {
+      mMutex.Unlock();
+      return;
+   }
    //cout <<pos.x<<" "<<pos.y<<" "<<x<<" "<<y<<" "<<width<<" "<<height<<endl;
 
       const REAL ttheta=this->Screen2DataX(x);
@@ -1024,6 +1041,7 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
       mIsDragging=true;
       mDraggingX0=ttheta;
       mDraggingIntensity0=intensity;
+      mMutex.Unlock();
       return;
    }
    if(event.LeftUp() && mIsDragging)
@@ -1033,17 +1051,26 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
       
       if( (fabs(ttheta-mDraggingX0)<.1) || (fabs(mDraggingIntensity0-intensity)< fabs(mMaxIntensity*.02)) )
       {
+         mMutex.Unlock();
          return;
       }
       if(mDraggingIntensity0>intensity)
       {
-         if(mDraggingIntensity0<0.) return;
+         if(mDraggingIntensity0<0.)
+         {
+            mMutex.Unlock();
+            return;
+         }
          mMinIntensity=intensity;
          mMaxIntensity=mDraggingIntensity0;
       }
       else
       {
-         if(intensity<0.) return;
+         if(intensity<0.)
+         {
+            mMutex.Unlock();
+            return;
+         }
          mMinIntensity=mDraggingIntensity0;
          mMaxIntensity=intensity;
       }
@@ -1058,6 +1085,7 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
          mMaxX=ttheta;
       }
       mClockAxisLimits.Click();
+      mMutex.Unlock();
       wxUpdateUIEvent event(ID_POWDER_GRAPH_NEW_PATTERN);
       wxPostEvent(this,event);
       return;
@@ -1067,6 +1095,7 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
 
    if(event.LeftDClick())
    {//Reset axis range
+      mMutex.Unlock();
       this->ResetAxisLimits();
       wxUpdateUIEvent event(ID_POWDER_GRAPH_NEW_PATTERN);
       wxPostEvent(this,event);
@@ -1075,13 +1104,16 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
    
    if(event.RightIsDown())
    {//popup menu
+      mMutex.Unlock();
       this->PopupMenu(mpPopUpMenu, event.GetX(), event.GetY() );
       return;
    }
+   mMutex.Unlock();
 }
 void WXPowderPatternGraph::OnMouseWheel(wxMouseEvent &event)
 {
    VFN_DEBUG_ENTRY("WXPowderPatternGraph::OnMouseWheel()",6)
+   wxMutexLocker mlock(mMutex);
    const long nbPoint=mX.numElements();
    if(event.GetWheelRotation()>=event.GetWheelDelta())
    {
@@ -1120,7 +1152,7 @@ void WXPowderPatternGraph::OnMouseWheel(wxMouseEvent &event)
 void WXPowderPatternGraph::OnUpdate(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph::OnUpdate()",6)
-   mpPattern->CrystUpdate();
+   mpPattern->CrystUpdate(true,true);
 }
 
 void WXPowderPatternGraph::OnToggleLabel(wxCommandEvent & WXUNUSED(event))
@@ -1134,6 +1166,7 @@ void WXPowderPatternGraph::OnToggleLabel(wxCommandEvent & WXUNUSED(event))
 
 void WXPowderPatternGraph::OnKeyDown(wxKeyEvent& event)
 {
+   wxMutexLocker mlock(mMutex);
    const long nbPoint=mX.numElements();
    switch(event.GetKeyCode())
    {
@@ -1254,26 +1287,28 @@ void WXPowderPatternGraph::SetPattern(const CrystVector_REAL &x,
                                       const CrystVector_REAL &sigma)
 {
    VFN_DEBUG_ENTRY("WXPowderPatternGraph::SetPattern(x,obs,calc,sigma)",10)
-   //Make sure spectrum is not being used (for drawing)
-   while(mCalcPatternIsLocked) wxUsleep(1);
-   mCalcPatternIsLocked=true;
+   mMutex.Lock();
    mX=x;
    if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF) mX*=RAD2DEG;
    mCalc=calc;
    mObs=obs;
    mSigma=sigma;
-   mCalcPatternIsLocked=false;
    // Reset the zoom parameters, only for the first display or if the limits of the
    // full pattern have changed
    if(  (mMaxX<0)
       ||(mpPattern->GetPowderPattern().GetClockPowderPatternPar()>mClockAxisLimits)) 
+   {
+      mMutex.Unlock();
       this->ResetAxisLimits();
+      mMutex.Lock();
+   }
    
    mvLabelList.clear();
    for(unsigned int i=0;i<mpPattern->GetPowderPattern().GetNbPowderPatternComponent();++i)
       mvLabelList.push_back(mpPattern->GetPowderPattern()
                               .GetPowderPatternComponent(i).GetPatternLabelList());
 
+   mMutex.Unlock();
    // If we only send an OnPaint event, only the parts which have been erased are redrawn
    // (under windows). SO we must force the complete Refresh of the window... in the
    // main thread of course...
@@ -1297,6 +1332,7 @@ void WXPowderPatternGraph::OnRedrawNewPattern(wxUpdateUIEvent& WXUNUSED(event))
 }
 void WXPowderPatternGraph::ResetAxisLimits()
 {
+   wxMutexLocker mlock(mMutex);
    mMaxIntensity=mCalc.max();
    mMinIntensity=mCalc.min();
    const float max=mObs.max();
@@ -1376,7 +1412,7 @@ WXRefinableObj(parent,b),mpPowderPatternBackground(b)
    #endif
    mpTopSizer->SetSizeHints(this);
    this->Layout();
-   this->CrystUpdate();
+   this->CrystUpdate(true);
 }
 void WXPowderPatternBackground::OnMenuImportUserBackground(wxCommandEvent & WXUNUSED(event))
 {
@@ -1476,7 +1512,7 @@ WXCrystObjBasic(parent),mpTexturePhaseMarchDollase(pObj)
    mList.Add(pFieldL);
 
    this->BottomLayout(0);
-   this->CrystUpdate();
+   this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXTexturePhaseMarchDollase::WXTexturePhaseMarchDollase()",5)
 }
 
@@ -1484,13 +1520,17 @@ WXTexturePhaseMarchDollase::~WXTexturePhaseMarchDollase()
 {
    mpTexturePhaseMarchDollase->WXNotifyDelete();
 }
-void WXTexturePhaseMarchDollase::CrystUpdate()
+void WXTexturePhaseMarchDollase::CrystUpdate(const bool uui,const bool lock)
 {
-   mList.CrystUpdate();
+   if(lock) mMutex.Lock();
+   mList.CrystUpdate(uui,false);
+   if(lock) mMutex.Unlock();
 }
-void WXTexturePhaseMarchDollase::UpdateUI()
+void WXTexturePhaseMarchDollase::UpdateUI(const bool lock)
 {
-   mList.UpdateUI();
+   if(lock) mMutex.Lock();
+   mList.UpdateUI(false);
+   if(lock) mMutex.Unlock();
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -1518,7 +1558,7 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpTextureMarchDollase(obj)
       mpSizer->Add(pWXPhaseRegistry,0,wxALIGN_LEFT);
       mList.Add(pWXPhaseRegistry);
    this->BottomLayout(0);
-   this->CrystUpdate();
+   this->CrystUpdate(true);
    this->SetToolTip(_T("Texture for this crystalline phase.\n")
                     _T("You can describe the preferred orientation using ")
                     _T("the March-Dollase model (use the menu).\n\n")
@@ -1603,7 +1643,7 @@ WXRefinableObj(parent,p),mpPowderPatternDiffraction(p)
       }
       
    this->BottomLayout(0);
-   this->CrystUpdate();
+   this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXPowderPatternDiffraction::WXPowderPatternDiffraction()",6)
 }
 
@@ -1617,7 +1657,7 @@ void WXPowderPatternDiffraction::OnChangeCrystal(wxCommandEvent & WXUNUSED(event
          "Choose a Crystal Structure:",choice));
    if(0==cryst) return;
    mpPowderPatternDiffraction->SetCrystal(*cryst);
-   this->CrystUpdate();
+   this->CrystUpdate(true);
 }
 void WXPowderPatternDiffraction::OnMenuSaveHKLFcalc(wxCommandEvent & WXUNUSED(event))
 {
@@ -1631,10 +1671,12 @@ void WXPowderPatternDiffraction::OnMenuSaveHKLFcalc(wxCommandEvent & WXUNUSED(ev
    mpPowderPatternDiffraction->PrintFhklCalc(out);
    out.close();
 }
-void WXPowderPatternDiffraction::UpdateUI()
+void WXPowderPatternDiffraction::UpdateUI(const bool lock)
 {
+   if(lock) mMutex.Lock();
    mpFieldCrystal->SetValue(mpPowderPatternDiffraction->GetCrystal().GetName());
-   this->WXRefinableObj::UpdateUI();
+   if(lock) mMutex.Unlock();
+   this->WXRefinableObj::UpdateUI(lock);
 }
 void WXPowderPatternDiffraction::OnChangeProfile(wxCommandEvent & event)
 {
@@ -1682,7 +1724,7 @@ void WXPowderPatternDiffraction::OnChangeProfile(wxCommandEvent & event)
       mList.Add(mpPowderPatternDiffraction->mpReflectionProfile->WXGet());
       mpSizer->Add(mpPowderPatternDiffraction->mpReflectionProfile->WXGet());
       this->BottomLayout(mpPowderPatternDiffraction->mpReflectionProfile->WXGet());
-      this->CrystUpdate();
+      this->CrystUpdate(true);
    }
    VFN_DEBUG_EXIT("WXPowderPatternDiffraction::OnChangeProfile()",6)
 }
@@ -1763,7 +1805,7 @@ WXCrystObj(parent),mpProfile(prof)
                               _T("A=A0+A1/sin(2theta)+A2/sin^2(2theta) "));
    
    this->BottomLayout(0);
-   this->CrystUpdate();
+   this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXProfilePseudoVoigt::WXProfilePseudoVoigt()",6)
 }
 WXProfilePseudoVoigt::~WXProfilePseudoVoigt()
@@ -1828,7 +1870,7 @@ WXCrystObj(parent),mpProfile(prof)
       mpSizer->Add(sizer3);
    
    this->BottomLayout(0);
-   this->CrystUpdate();
+   this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXProfileDoubleExponentialPseudoVoigt::WXProfileDoubleExponentialPseudoVoigt()",6)
 }
 WXProfileDoubleExponentialPseudoVoigt::~WXProfileDoubleExponentialPseudoVoigt()

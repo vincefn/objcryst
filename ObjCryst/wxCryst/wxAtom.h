@@ -37,7 +37,7 @@ class WXAtom: public WXScatterer
       WXAtom(wxWindow *parent, Atom*);
       virtual ~WXAtom();
       void OnChangeScattPow(wxCommandEvent & WXUNUSED(event));
-      virtual void UpdateUI();
+      virtual void UpdateUI(const bool mutexlock=false);
    private:
       Atom* mpAtom;
       WXFieldChoice* mpFieldScattPower;

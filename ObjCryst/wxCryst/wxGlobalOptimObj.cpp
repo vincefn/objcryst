@@ -71,6 +71,9 @@ WXOptimizationObj::WXOptimizationObj(wxWindow* parent, OptimizationObj *obj):
 WXCrystObj(parent),mpGlobalOptimRunThread(0)
 {
    VFN_DEBUG_ENTRY("WXOptimizationObj::WXOptimizationObj(wxWindow*,GlobalOptimObj*,)",7)
+   #ifdef VFN_CRYST_MUTEX
+   cout <<"new CrystMutex("<<&mMutex<<")for WXOptimizationObj:"<<obj->GetName()<<endl;
+   #endif
    mpWXTitle->SetForegroundColour(wxColour(255,0,0));
    mpWXTitle->SetLabel("Global Optimization:");
    // Menu
@@ -113,15 +116,22 @@ WXCrystObj(parent),mpGlobalOptimRunThread(0)
    VFN_DEBUG_EXIT("WXOptimizationObj::WXOptimizationObj(wxWindow*,GlobalOptimObj*,)",7)
 }
 
-void WXOptimizationObj::CrystUpdate()
+void WXOptimizationObj::CrystUpdate(const bool uui,const bool lock)
 {
-   this->WXCrystObj::CrystUpdate();
-   if(true==wxThread::IsMain()) this->UpdateUI();
-   else
+   VFN_DEBUG_ENTRY("WXOptimizationObj::CrystUpdate("<<uui<<lock<<")",7)
+   if(lock)mMutex.Lock();
+   this->WXCrystObj::CrystUpdate(false,false);
+   if(lock)mMutex.Unlock();
+   if(uui)
    {
-      wxUpdateUIEvent event(ID_CRYST_UPDATEUI);
-      wxPostEvent(this,event);
+      if(true==wxThread::IsMain()) this->UpdateUI(lock);
+      else
+      {
+         wxUpdateUIEvent event(ID_CRYST_UPDATEUI);
+         wxPostEvent(this,event);
+      }
    }
+   VFN_DEBUG_EXIT("WXOptimizationObj::CrystUpdate("<<uui<<lock<<")",7)
 }
 
 bool WXOptimizationObj::OnChangeName(const int id)
@@ -158,7 +168,7 @@ void WXOptimizationObj::AddRefinedObject(RefinableObj &obj)
    mpSizer->Add(refobj);
    mList.Add(refobj);
    this->BottomLayout(0);
-   refobj->UpdateUI();
+   refobj->UpdateUI(true);
 }
 
 void WXOptimizationObj::OnRemoveRefinedObject(wxCommandEvent & WXUNUSED(event))
@@ -172,16 +182,18 @@ void WXOptimizationObj::OnStopOptimization(wxCommandEvent & WXUNUSED(event))
 void WXOptimizationObj::OnUpdateUI(wxUpdateUIEvent& event)
 {
    VFN_DEBUG_ENTRY("WXOptimizationObj::OnUpdateUI()",5)
-   this->UpdateUI();
+   this->UpdateUI(true);
    VFN_DEBUG_EXIT("WXOptimizationObj::OnUpdateUI()",5)
 }
 
-void WXOptimizationObj::UpdateUI()
+void WXOptimizationObj::UpdateUI(const bool lock)
 {
    VFN_DEBUG_ENTRY("WXOptimizationObj::UpdateUI()",5)
+   if(lock) mMutex.Lock();
    mpWXTitle->SetValue(this->GetOptimizationObj().GetName());
-   mpWXTitle->UpdateUI();
-   this->WXCrystObj::UpdateUI();
+   mpWXTitle->UpdateUI(false);
+   this->WXCrystObj::UpdateUI(false);
+   if(lock) mMutex.Unlock();
    VFN_DEBUG_EXIT("WXOptimizationObj::UpdateUI()",5)
 }
 
@@ -364,7 +376,7 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(10000000),mNbRun(-1)
                                 _T("Use -1 (the default) to run an infinite number of Runs.\n\n")
                                 _T("The model will be randomized at the beginning of each run.\n"));
    this->BottomLayout(0);
-   this->CrystUpdate();
+   this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXMonteCarloObj::WXMonteCarloObj()",7)
 }
 
@@ -427,13 +439,17 @@ void WXMonteCarloObj::OnRunOptimization(wxCommandEvent & event)
    
    VFN_DEBUG_EXIT("WXMonteCarloObj::OnRunOptimization()",6)
 }
+
 void WXMonteCarloObj::UpdateDisplayNbTrial()
 {
    VFN_DEBUG_MESSAGE("WXMonteCarloObj::UpdateDisplayNbTrial()",5)
-   mList.CrystUpdate();
+   mMutex.Lock();
+   mList.CrystUpdate(false);
+   mMutex.Unlock();
    wxUpdateUIEvent event(ID_CRYST_UPDATEUI);
    wxPostEvent(this,event);
 }
+
 OptimizationObj & WXMonteCarloObj::GetOptimizationObj()
 {
    VFN_DEBUG_MESSAGE("WXMonteCarloObj::GetOptimizationObj()",2)

@@ -37,7 +37,7 @@ class WXOptimizationObj: public WXCrystObj
 {
    public:
       WXOptimizationObj(wxWindow *parent, OptimizationObj*);
-      virtual void CrystUpdate();
+      virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false);
       virtual bool OnChangeName(const int id);
       virtual void OnSave();
       virtual void OnLoad();
@@ -53,7 +53,7 @@ class WXOptimizationObj: public WXCrystObj
       virtual OptimizationObj & GetOptimizationObj()=0;
       virtual const OptimizationObj & GetOptimizationObj()const=0;
       virtual void OnUpdateUI(wxUpdateUIEvent& event);
-      virtual void UpdateUI();
+      virtual void UpdateUI(const bool mutexlock=false);
       /// Opens a window where the stored parameter set can be selected
       virtual void OnBrowseParamSet(wxCommandEvent & WXUNUSED(event));
       /// Restore one parameter set

@@ -32,7 +32,7 @@ class WXScatteringPowerSphere: public WXRefinableObj
       WXScatteringPowerSphere(wxWindow *parent, ScatteringPowerSphere*);
       virtual bool OnChangeName(const int id);
       void OnChangeColour(wxCommandEvent & event);
-      virtual void UpdateUI();
+      virtual void UpdateUI(const bool mutexlock=false);
    protected:
       ScatteringPowerSphere* mpScatteringPower;
    DECLARE_EVENT_TABLE()

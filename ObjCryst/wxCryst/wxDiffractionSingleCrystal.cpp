@@ -221,13 +221,14 @@ WXRefinableObj(parent,data),mpData(data)
       mpSizer->Add(pStats);
          
    this->BottomLayout(0);
-   this->CrystUpdate();
+   this->CrystUpdate(true);
    VFN_DEBUG_MESSAGE("WXDiffractionSingleCrystal::WXDiffractionSingleCrystal():End",6)
 }
 
-void WXDiffractionSingleCrystal::CrystUpdate()
+void WXDiffractionSingleCrystal::CrystUpdate(const bool uui,const bool lock)
 {
    VFN_DEBUG_ENTRY("WXDiffractionSingleCrystal::CrystUpdate()",6)
+   if(lock) mMutex.Lock();
    WXCrystValidateAllUserInput();
 
    mChi2=mpData->GetChi2();
@@ -236,7 +237,8 @@ void WXDiffractionSingleCrystal::CrystUpdate()
    mRwp=mpData->GetRw();
    mRp=mpData->GetR();
    
-   this->WXRefinableObj::CrystUpdate();
+   if(lock) mMutex.Unlock();
+   this->WXRefinableObj::CrystUpdate(uui,lock);
    VFN_DEBUG_EXIT("WXDiffractionSingleCrystal::CrystUpdate()",6)
 } 
 
@@ -375,7 +377,7 @@ void WXDiffractionSingleCrystal::OnMenuSetWavelength(wxCommandEvent &event)
       mpData->SetWavelength("CoA1");
    if(event.GetId()== ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CRA1)
       mpData->SetWavelength("CrA1");
-   this->CrystUpdate();
+   this->CrystUpdate(true,true);
 }
 void WXDiffractionSingleCrystal::OnChangeCrystal(wxCommandEvent & WXUNUSED(event))
 {
@@ -387,12 +389,14 @@ void WXDiffractionSingleCrystal::OnChangeCrystal(wxCommandEvent & WXUNUSED(event
          "Choose a Crystal Structure:",choice));
    if(0==cryst) return;
    mpData->SetCrystal(*cryst);
-   this->CrystUpdate();
+   this->CrystUpdate(true,true);
 }
-void WXDiffractionSingleCrystal::UpdateUI()
+void WXDiffractionSingleCrystal::UpdateUI(const bool lock)
 {
+   if(lock) mMutex.Lock();
    if(&(mpData->GetCrystal())!=0) mpFieldCrystal->SetValue(mpData->GetCrystal().GetName());
-   this->WXRefinableObj::UpdateUI();
+   this->WXRefinableObj::UpdateUI(false);
+   if(lock) mMutex.Unlock();
 }
 
 }//namespace

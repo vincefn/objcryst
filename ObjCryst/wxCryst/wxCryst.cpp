@@ -56,6 +56,49 @@ namespace ObjCryst
 WXCRYST_ID::WXCRYST_ID(){mIndex=mCounter++;}
 WXCRYST_ID::operator long(){return mIndex;}
 long WXCRYST_ID::mCounter=wxID_HIGHEST+100;
+
+#ifdef VFN_CRYST_MUTEX
+////////////////////////////////////////////////////////////////////////
+//
+// Mutex
+//
+////////////////////////////////////////////////////////////////////////
+CrystMutex::CrystMutex():mNbLock(0){}
+CrystMutex::~CrystMutex()
+{
+   cout <<"~CrystMutex("<<this<<"), Total number of Locks="<<mNbLock<<endl;
+}
+wxMutexError CrystMutex::Lock()
+{
+   #if 1
+   return this->wxMutex::Lock();
+   #else
+   cout <<"Thread:"<<wxThread::IsMain()<<":CrystMutex("<<this<<")::Lock() ?"<<endl;
+   wxMutexError res=this->wxMutex::TryLock();
+   if(res==wxMUTEX_NO_ERROR)
+      cout <<"Thread:"<<wxThread::IsMain()<<":CrystMutex("<<this<<")::Lock()-OK"<<endl;
+   if(res==wxMUTEX_DEAD_LOCK)
+   {
+      cout <<"Thread:"<<wxThread::IsMain()<<":CrystMutex("<<this<<")::Lock()-DEADLOCK!"<<endl;
+      exit(0);
+   }
+   if(res==wxMUTEX_BUSY)
+   {
+      cout <<"Thread:"<<wxThread::IsMain()<<":CrystMutex("<<this<<")::Lock()-Busy?"<<endl;
+      res=this->wxMutex::Lock();
+      cout <<"Thread:"<<wxThread::IsMain()<<":CrystMutex("<<this<<")::Lock()-OK2"<<endl;
+   }
+   return res;
+   #endif
+}
+wxMutexError CrystMutex::Unlock()
+{
+   //cout <<"Thread:"<<wxThread::IsMain()<<":CrystMutex("<<this<<"::Unlock()"<<endl;
+   mNbLock++;
+   return this->wxMutex::Unlock();
+}
+#endif
+
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXCrystObjBasic
@@ -165,18 +208,18 @@ bool WXCrystObjBasicList::Show(bool show)
    return true;
 }
 
-void WXCrystObjBasicList::CrystUpdate()
+void WXCrystObjBasicList::CrystUpdate(const bool updateUI,const bool mutexlock)
 {
    VFN_DEBUG_ENTRY("WXCrystObjBasicList::CrystUpdate()",3)
    for(set<WXCrystObjBasic*>::iterator pos=mvpWXCrystObj.begin();pos!=mvpWXCrystObj.end();pos++)
-      (*pos)->CrystUpdate();
+      (*pos)->CrystUpdate(updateUI,mutexlock);
    VFN_DEBUG_EXIT("WXCrystObjBasicList::CrystUpdate()",3)
 }
-void WXCrystObjBasicList::UpdateUI()
+void WXCrystObjBasicList::UpdateUI(const bool mutexlock)
 {
    VFN_DEBUG_ENTRY("WXCrystObjBasicList::UpdateUI()",5)
    for(set<WXCrystObjBasic*>::iterator pos=mvpWXCrystObj.begin();pos!=mvpWXCrystObj.end();pos++)
-      (*pos)->UpdateUI();
+      (*pos)->UpdateUI(mutexlock);
    VFN_DEBUG_EXIT("WXCrystObjBasicList::UpdateUI()",5)
 }
 void WXCrystObjBasicList::Enable(bool enable)
@@ -309,31 +352,36 @@ const string WXFieldString::GetValue() const
    VFN_DEBUG_MESSAGE("WXFieldString::GetValue()"<<mValue<<":"<<mpField->GetValue(),6)
    return mValue;
 }
-void WXFieldString::CrystUpdate()
+void WXFieldString::CrystUpdate(const bool uui,const bool lock)
 {
    VFN_DEBUG_ENTRY("WXFieldString::CrystUpdate()",3)
-   mMutex.Lock();
+   if(lock) mMutex.Lock();
    if(mValue==*mpString)
    {
-      mMutex.Unlock();
+      if(lock)mMutex.Unlock();
       return;
    }
    mValueOld=mValue;
    mValue=*mpString;
    mNeedUpdateUI=true;
-   mMutex.Unlock();
-   if(true==wxThread::IsMain()) this->UpdateUI();
+   if(uui) if(true==wxThread::IsMain()) this->UpdateUI(false);
+   if(lock) mMutex.Unlock();
    VFN_DEBUG_EXIT("WXFieldString::CrystUpdate()",3)
 }
-void WXFieldString::UpdateUI()
+void WXFieldString::UpdateUI(const bool lock)
 {
-   wxMutexLocker mlock(mMutex);
-   if(mNeedUpdateUI==false) return;
+   if(lock) mMutex.Lock();
+   if(mNeedUpdateUI==false)
+   {
+      if(lock) mMutex.Unlock();
+      return;
+   }
    VFN_DEBUG_ENTRY("WXFieldString::UpdateUI()",4)
    mIsSelfUpdating=true;
    mpField->SetValue(mValue.c_str());
    mIsSelfUpdating=false;
    mNeedUpdateUI=false;
+   if(lock) mMutex.Unlock();
    VFN_DEBUG_EXIT("WXFieldString::UpdateUI()",4)
 }
 void WXFieldString::Revert()
@@ -419,20 +467,25 @@ const string WXFieldName::GetValue() const
    VFN_DEBUG_MESSAGE("WXFieldName::GetValue()"<<mValue<<":"<<mpField->GetValue(),6)
    return mValue;
 }
-void WXFieldName::CrystUpdate()
+void WXFieldName::CrystUpdate(const bool updateUI,const bool lock)
 {
    VFN_DEBUG_MESSAGE("WXFieldName::CrystUpdate()",3)
    // The name must be updated by the owner
 }
-void WXFieldName::UpdateUI()
+void WXFieldName::UpdateUI(const bool lock)
 {
-   wxMutexLocker mlock(mMutex);
-   if(mNeedUpdateUI==false) return;
+   if(lock) mMutex.Lock();
+   if(mNeedUpdateUI==false)
+   {
+      if(lock) mMutex.Unlock();
+      return;
+   }
    VFN_DEBUG_ENTRY("WXFieldName::UpdateUI()",4)
    mIsSelfUpdating=true;
    mpField->SetValue(mValue.c_str());
    mIsSelfUpdating=false;
    mNeedUpdateUI=false;
+   if(lock) mMutex.Unlock();
    VFN_DEBUG_EXIT("WXFieldName::UpdateUI()",4)
 }
 void WXFieldName::Revert()
@@ -508,30 +561,34 @@ template<class T> WXFieldPar<T>::WXFieldPar(wxWindow *parent,const string& label
                                             const int id,T *par,const int hsize):
 WXFieldParBase(parent,label,id,hsize),mpValue(par),mValue(*par),mValueOld(*par),mHumanScale(1)
 {
-   this->CrystUpdate();
+   this->CrystUpdate(true,true);
 }
 
-template<class T> void WXFieldPar<T>::CrystUpdate()
+template<class T> void WXFieldPar<T>::CrystUpdate(const bool uui,const bool lock)
 {
-   mMutex.Lock();
+   if(lock) mMutex.Lock();
    if(mValue==*mpValue)
    {
-      mMutex.Unlock();
+      if(lock) mMutex.Unlock();
       return;
    }
    VFN_DEBUG_ENTRY("WXFieldPar<T>::CrystUpdate()",6)
    mValueOld=mValue;
    mValue=*mpValue;
    mNeedUpdateUI=true;
-   mMutex.Unlock();
-   if(true==wxThread::IsMain()) this->UpdateUI();
+   if(uui) if(true==wxThread::IsMain()) this->UpdateUI(false);
+   if(lock) mMutex.Unlock();
    VFN_DEBUG_EXIT("WXFieldPar<T>::CrystUpdate()",6)
 }
 
-template<> void WXFieldPar<REAL>::UpdateUI()
+template<> void WXFieldPar<REAL>::UpdateUI(const bool lock)
 {
-   wxMutexLocker mlock(mMutex);
-   if(mNeedUpdateUI==false) return;
+   if(lock)mMutex.Lock();
+   if(mNeedUpdateUI==false)
+   {
+      if(lock)mMutex.Unlock();
+      return;
+   }
    VFN_DEBUG_ENTRY("WXFieldPar<REAL>::UpdateUI()",4)
    wxString tmp;
    tmp.Printf("%f",mValue*mHumanScale);
@@ -539,13 +596,18 @@ template<> void WXFieldPar<REAL>::UpdateUI()
    mpField->SetValue(tmp);
    mIsSelfUpdating=false;
    mNeedUpdateUI=false;
+   if(lock)mMutex.Unlock();
    VFN_DEBUG_EXIT("WXFieldPar<REAL>::UpdateUI()",4)
 }
 
-template<> void WXFieldPar<long>::UpdateUI()
+template<> void WXFieldPar<long>::UpdateUI(const bool lock)
 {
-   wxMutexLocker mlock(mMutex);
-   if(mNeedUpdateUI==false) return;
+   if(lock)mMutex.Lock();
+   if(mNeedUpdateUI==false)
+   {
+      if(lock)mMutex.Unlock();
+      return;
+   }
    VFN_DEBUG_ENTRY("WXFieldPar<long>::UpdateUI()",4)
    wxString tmp;
    tmp.Printf("%ld",mValue*mHumanScale);
@@ -553,12 +615,18 @@ template<> void WXFieldPar<long>::UpdateUI()
    mpField->SetValue(tmp);
    mIsSelfUpdating=false;
    mNeedUpdateUI=false;
+   if(lock)mMutex.Unlock();
    VFN_DEBUG_EXIT("WXFieldPar<long>::UpdateUI()",4)
 }
 /*
-template<class T> void WXFieldPar<T>::UpdateUI()
+template<class T> void WXFieldPar<T>::UpdateUI(const bool lock)
 {
-   if(mNeedUpdateUI==false) return;
+   if(lock)mMutex.Lock();
+   if(mNeedUpdateUI==false)
+   {
+      if(lock)mMutex.Unlock();
+      return;
+   }
    stringstream s;
    s <<*mpValue;
    mIsSelfUpdating=true;
@@ -566,6 +634,7 @@ template<class T> void WXFieldPar<T>::UpdateUI()
    mpField->SetValue(wxString::Printf("%f",mValue));
    mIsSelfUpdating=false;
    mNeedUpdateUI=false;
+   if(lock)mMutex.Unlock();
 }
 */
 
@@ -577,7 +646,7 @@ template<class T> void WXFieldPar<T>::Revert()
    mValue=mValueOld;
    mNeedUpdateUI=true;
    mMutex.Unlock();
-   if(true==wxThread::IsMain()) this->UpdateUI();
+   if(true==wxThread::IsMain()) this->UpdateUI(true);
 }
 
 template<class T> void WXFieldPar<T>::SetHumanValueScale(const T s)
@@ -629,11 +698,11 @@ WXField(parent,name,field_id)
    this->Layout();
 }
 
-void WXFieldChoice::CrystUpdate()
+void WXFieldChoice::CrystUpdate(const bool uui,const bool lock)
 {
    //Nothing to do. This should be done by the owner
 }
-void WXFieldChoice::UpdateUI()
+void WXFieldChoice::UpdateUI(const bool lock)
 {
    //Nothing to do. This should be done by the owner
 }
@@ -709,18 +778,22 @@ void WXCrystObj::OnToggleCollapse(wxCommandEvent & WXUNUSED(event))
    #endif
 }
 
-void WXCrystObj::CrystUpdate()
+void WXCrystObj::CrystUpdate(const bool uui,const bool lock)
 {
-   VFN_DEBUG_ENTRY("WXCrystObj::CrystUpdate()",6)
-   mList.CrystUpdate();
-   VFN_DEBUG_EXIT("WXCrystObj::CrystUpdate()",6)
+   VFN_DEBUG_ENTRY("WXCrystObj::CrystUpdate("<<uui<<lock<<")",10)
+   if(lock) mMutex.Lock();
+   mList.CrystUpdate(uui,false);
+   if(lock) mMutex.Unlock();
+   VFN_DEBUG_EXIT("WXCrystObj::CrystUpdate()",10)
 }
-void WXCrystObj::UpdateUI()
+void WXCrystObj::UpdateUI(const bool lock)
 {
-   VFN_DEBUG_ENTRY("WXCrystObj::UpdateUI()",6)
-   if(mpWXTitle!=0) mpWXTitle->UpdateUI();
-   mList.UpdateUI();
-   VFN_DEBUG_EXIT("WXCrystObj::UpdateUI()",6)
+   VFN_DEBUG_ENTRY("WXCrystObj::UpdateUI("<<lock<<")",10)
+   if(lock) mMutex.Lock();
+   if(mpWXTitle!=0) mpWXTitle->UpdateUI(false);
+   mList.UpdateUI(false);
+   if(lock) mMutex.Unlock();
+   VFN_DEBUG_EXIT("WXCrystObj::UpdateUI()",10)
 }
 void WXCrystObj::OnEnable(wxUpdateUIEvent &event)
 {
@@ -859,10 +932,10 @@ void WXCrystMenuBar::AddMenuItem(const int menuId,int id, const wxString&  item,
    this->GetMenu(menuId).Append(id,item.c_str(),subMenu,helpString.c_str());
 }
 
-void WXCrystMenuBar::CrystUpdate()
+void WXCrystMenuBar::CrystUpdate(const bool updateUI,const bool mutexlock)
 {
 }
-void WXCrystMenuBar::UpdateUI()
+void WXCrystMenuBar::UpdateUI(const bool mutexlock)
 {
 }
 

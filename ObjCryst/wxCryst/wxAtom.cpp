@@ -63,7 +63,7 @@ WXScatterer(parent,obj),mpAtom(obj)
       mList.Add(mpFieldScattPower);
    
    this->BottomLayout(0);
-   this->CrystUpdate();
+   this->CrystUpdate(true,true);
 }
 WXAtom::~WXAtom()
 {
@@ -81,10 +81,10 @@ void WXAtom::OnChangeScattPow(wxCommandEvent & WXUNUSED(event))
    if(0==scatt) return;
    mpAtom->Init(mpAtom->GetX(),mpAtom->GetY(),mpAtom->GetZ(),mpAtom->GetName(),
                 scatt,mpAtom->GetOccupancy());
-   this->CrystUpdate();
+   this->CrystUpdate(true,true);
 }
 
-void WXAtom::UpdateUI()
+void WXAtom::UpdateUI(const bool lock)
 {
    mpFieldScattPower->SetValue(mpAtom->GetScatteringPower().GetName());
    this->WXRefinableObj::UpdateUI();

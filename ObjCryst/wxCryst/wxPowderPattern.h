@@ -32,7 +32,7 @@ class WXPowderPattern: public WXRefinableObj
 {
    public:
       WXPowderPattern(wxWindow *parent, PowderPattern*);
-      virtual void CrystUpdate();
+      virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false);
       void OnMenuAddCompBackgd(wxCommandEvent & WXUNUSED(event));
       void OnMenuAddCompBackgdBayesian(wxCommandEvent & WXUNUSED(event));
       void OnMenuAddCompCryst(wxCommandEvent & WXUNUSED(event));
@@ -47,7 +47,7 @@ class WXPowderPattern: public WXRefinableObj
       void OnMenuAddExclude(wxCommandEvent & WXUNUSED(event));
       void NotifyDeleteGraph();
       const PowderPattern& GetPowderPattern()const;
-      void UpdateUI();
+      void UpdateUI(const bool mutexlock=false);
    private:
       PowderPattern *mpPowderPattern;
       WXRegistry<PowderPatternComponent> *mpWXComponent;
@@ -121,7 +121,8 @@ class WXPowderPatternGraph: public wxWindow
       const REAL mDiffPercentShift;
       REAL mMaxIntensity,mMinIntensity,mMinX,mMaxX;
       wxFrame *mpParentFrame;
-      bool mCalcPatternIsLocked;
+      /// Mutex to lock the pattern and associated data
+      CrystMutex mMutex;
       /// Pop-up menu
       wxMenu* mpPopUpMenu;
       /// Are we within a dragging event ?
@@ -185,8 +186,8 @@ class WXTexturePhaseMarchDollase: public WXCrystObjBasic
    public:
       WXTexturePhaseMarchDollase(wxWindow *parent, TexturePhaseMarchDollase*,TextureMarchDollase*);
       ~WXTexturePhaseMarchDollase();
-      virtual void CrystUpdate();
-      virtual void UpdateUI();
+      virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false);
+      virtual void UpdateUI(const bool mutexlock=false);
    private:
       wxBoxSizer *mpSizer;
       WXCrystObjBasicList mList;
@@ -221,7 +222,7 @@ class WXPowderPatternDiffraction: public WXRefinableObj
       void OnChangeCrystal(wxCommandEvent & WXUNUSED(event));
       void OnMenuSaveHKLFcalc(wxCommandEvent & WXUNUSED(event));
       void OnChangeProfile(wxCommandEvent & event);
-      virtual void UpdateUI();
+      virtual void UpdateUI(const bool mutexlock=false);
    private:
       PowderPatternDiffraction *mpPowderPatternDiffraction;
       WXFieldChoice* mpFieldCrystal;

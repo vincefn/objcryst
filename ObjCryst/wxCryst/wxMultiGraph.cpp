@@ -130,6 +130,9 @@ mMinX(0.0),mMaxX(1.0),mMinY(0.0),mMaxY(1.0),
 mLeft(40),mRight(10),mTop(10),mBottom(25),
 mIsDragging(false),mpParentFrame(frame)
 {
+   #ifdef VFN_CRYST_MUTEX
+   cout <<"new CrystMutex("<<&mMutexData<<")for WXMultiGraph:"<<this<<endl;
+   #endif
    mpPopUpMenu=new wxMenu("Graph");
    mpPopUpMenu->Append(ID_MENU_AUTOSCALE, "&AutoScale");
    //mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_TOGGLELABEL, "&Hide Labels");
@@ -139,6 +142,9 @@ WXMultiGraph::~WXMultiGraph()
 {
    VFN_DEBUG_MESSAGE("WXMultiGraph::~WXMultiGraph():",4)
    delete mpPopUpMenu;
+   #ifdef VFN_CRYST_MUTEX
+   cout <<"Deleting CrystMutex("<<&mMutexData<<")for WXMultiGraph:"<<this<<endl;
+   #endif
 }
 
 unsigned long WXMultiGraph::AddGraph(const string &name)
@@ -315,7 +321,6 @@ void WXMultiGraph::OnPaint(wxPaintEvent &event)
 void WXMultiGraph::OnMouse(wxMouseEvent &event)
 {
    if(event.Leaving()) return;// ?
-   mMutexData.Lock();
    wxCoord width,height;
    this->GetSize(&width, &height);
    // Write mouse pointer coordinates
@@ -329,7 +334,6 @@ void WXMultiGraph::OnMouse(wxMouseEvent &event)
 
       if((x>width)||(y>height))
       {
-         mMutexData.Unlock();
          return;
       }
       this->Screen2Data(x,y);
@@ -339,7 +343,6 @@ void WXMultiGraph::OnMouse(wxMouseEvent &event)
 
    if(event.RightIsDown())
    {
-      mMutexData.Unlock();
       this->PopupMenu(mpPopUpMenu, event.GetX(), event.GetY() );
       return;
    }
@@ -348,11 +351,11 @@ void WXMultiGraph::OnMouse(wxMouseEvent &event)
       mIsDragging=true;
       mDragX0=x;
       mDragY0=y;
-      mMutexData.Unlock();
       return;
    }
    if(event.LeftUp() && mIsDragging)
    {//Finished zooming !
+      mMutexData.Lock();
       mIsDragging=false;
       if(x>mDragX0)
       {
@@ -384,12 +387,10 @@ void WXMultiGraph::OnMouse(wxMouseEvent &event)
 
    if(event.LeftDClick())
    {//Reset axis range
-      mMutexData.Unlock();
       this->AutoScale();
       this->UpdateDisplay();
       return;
    }
-   mMutexData.Unlock();
 }
 
 void WXMultiGraph::OnMouseWheel(wxMouseEvent &event)

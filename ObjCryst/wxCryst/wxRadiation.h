@@ -31,8 +31,8 @@ class WXRadiation: public WXCrystObjBasic
    public:
       WXRadiation(wxWindow *parent, Radiation*);
       virtual ~WXRadiation();
-      virtual void CrystUpdate();
-      virtual void UpdateUI();
+      virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false);
+      virtual void UpdateUI(const bool mutexlock=false);
       virtual void OnUpdateUI(wxUpdateUIEvent & WXUNUSED(event));
    private:
       Radiation *mpRadiation;

@@ -32,7 +32,7 @@ class WXScatteringPowerAtom: public WXRefinableObj
       WXScatteringPowerAtom(wxWindow *parent, ScatteringPowerAtom*);
       virtual bool OnChangeName(const int id);
       void OnChangeColour(wxCommandEvent & event);
-      virtual void UpdateUI();
+      virtual void UpdateUI(const bool mutexlock=false);
    protected:
       ScatteringPowerAtom* mpScatteringPowerAtom;
       WXFieldName *mpFieldSymbol;

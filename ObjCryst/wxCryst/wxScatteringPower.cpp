@@ -100,7 +100,7 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpScatteringPowerAtom(obj)
       mList.Add(pFieldFormalCharge);
       
    this->BottomLayout(0);
-   this->CrystUpdate();
+   this->CrystUpdate(true);
 }
 
 bool WXScatteringPowerAtom::OnChangeName(const int id)
@@ -168,11 +168,13 @@ void WXScatteringPowerAtom::OnChangeColour(wxCommandEvent & event)
    mpScatteringPowerAtom->SetColour(r,g,b);
    VFN_DEBUG_EXIT("WXScatteringPowerAtom::OnChangeColour()",6)
 }
-void WXScatteringPowerAtom::UpdateUI()
+void WXScatteringPowerAtom::UpdateUI(const bool lock)
 {
    VFN_DEBUG_ENTRY("WXScatteringPowerAtom::UpdateUI()",3)
+   if(lock) mMutex.Lock();
    mpFieldSymbol->SetValue(mpScatteringPowerAtom->GetSymbol());
-   this->WXRefinableObj::UpdateUI();
+   this->WXRefinableObj::UpdateUI(false);
+   if(lock) mMutex.Unlock();
    VFN_DEBUG_EXIT("WXScatteringPowerAtom::UpdateUI()",3)
 }
 

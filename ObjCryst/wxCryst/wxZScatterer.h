@@ -30,8 +30,8 @@ class WXZAtom:public WXCrystObjBasic
 {
    public:
       WXZAtom(wxWindow *parent, ZAtom*);
-      virtual void CrystUpdate();
-      virtual void UpdateUI();
+      virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false);
+      virtual void UpdateUI(const bool mutexlock=false);
       void OnChangeScattPow(wxCommandEvent & WXUNUSED(event));
    private:
       ZAtom *mpZAtom;

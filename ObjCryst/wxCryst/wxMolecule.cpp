@@ -155,7 +155,7 @@ WXCrystObjBasic(parent),mpMolAtom(obj)
    
    this->SetSizer(mpSizer);
    this->BottomLayout(0);
-   this->CrystUpdate();
+   this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXMolAtom::WXMolAtom():"<<obj->GetName(),6)
 }
 
@@ -164,22 +164,26 @@ WXMolAtom::~WXMolAtom()
    mpMolAtom->WXNotifyDelete();
 }
 
-void WXMolAtom::CrystUpdate()
+void WXMolAtom::CrystUpdate(const bool uui,const bool lock)
 {
    VFN_DEBUG_ENTRY("WXMolAtom::CrystUpdate()",5)
-   mList.CrystUpdate();
+   if(lock) mMutex.Lock();
+   mList.CrystUpdate(uui,false);
+   if(lock) mMutex.Unlock();
    VFN_DEBUG_EXIT("WXMolAtom::CrystUpdate()",5)
 }
 
-void WXMolAtom::UpdateUI()
+void WXMolAtom::UpdateUI(const bool lock)
 {
    VFN_DEBUG_ENTRY("WXMolAtom::UpdateUI()",5)
-   mList.UpdateUI();
+   if(lock) mMutex.Lock();
+   mList.UpdateUI(false);
    mpFieldName->SetValue(mpMolAtom->GetName().c_str());
    if(mpMolAtom->IsDummy())
       mpFieldScattPower->SetValue("Dummy");
    else
       mpFieldScattPower->SetValue(mpMolAtom->GetScatteringPower().GetName());
+   if(lock) mMutex.Unlock();
    VFN_DEBUG_EXIT("WXMolAtom::UpdateUI()",5)
 }
 
@@ -193,8 +197,8 @@ void WXMolAtom::OnChangeScattPow(wxCommandEvent & WXUNUSED(event))
                (wxWindow*)this,"Choose a new Scattering Power",choice);
    if(0==scatt) return;
    mpMolAtom->SetScatteringPower(*scatt);
-   this->CrystUpdate();
-   this->UpdateUI();
+   this->CrystUpdate(true);
+   this->UpdateUI(true);
    VFN_DEBUG_EXIT("WXMolAtom::OnChangeScattPow()",6)
 }
 ////////////////////////////////////////////////////////////////////////
@@ -249,7 +253,7 @@ WXCrystObjBasic(parent),mpMolBond(obj),mpButtonFree(0)
 
    this->SetSizer(mpSizer);
    this->BottomLayout(0);
-   this->CrystUpdate();
+   this->CrystUpdate(true,true);
    VFN_DEBUG_EXIT("WXMolBond::WXMolBond():"<<obj->GetName(),6)
 }
 WXMolBond::~WXMolBond()
@@ -257,20 +261,24 @@ WXMolBond::~WXMolBond()
    mpMolBond->WXNotifyDelete();
 }
 
-void WXMolBond::CrystUpdate()
+void WXMolBond::CrystUpdate(const bool uui,const bool lock)
 {
    VFN_DEBUG_ENTRY("WXMolBond::CrystUpdate()",5)
-   mList.CrystUpdate();
+   if(lock) mMutex.Lock();
+   mList.CrystUpdate(uui,false);
+   if(lock) mMutex.Unlock();
    VFN_DEBUG_EXIT("WXMolBond::CrystUpdate()",5)
 }
 
-void WXMolBond::UpdateUI()
+void WXMolBond::UpdateUI(const bool lock)
 {
    VFN_DEBUG_ENTRY("WXMolBond::UpdateUI()",5)
+   if(lock) mMutex.Lock();
    if(0!=mpButtonFree) mpButtonFree->SetValue(mpMolBond->IsFreeTorsion());
-   mList.UpdateUI();
+   mList.UpdateUI(false);
    mpFieldAtom1->SetValue(mpMolBond->GetAtom1().GetName().c_str());
    mpFieldAtom2->SetValue(mpMolBond->GetAtom2().GetName().c_str());
+   if(lock) mMutex.Unlock();
    VFN_DEBUG_EXIT("WXMolBond::UpdateUI()",5)
 }
 
@@ -305,8 +313,8 @@ void WXMolBond::OnChangeAtom(wxCommandEvent &event)
       mpMolBond->SetAtom2(*at);
    }
    
-   this->CrystUpdate();
-   this->UpdateUI();
+   this->CrystUpdate(true);
+   this->UpdateUI(true);
    VFN_DEBUG_EXIT("WXMolBond::OnChangeScattPow()",6)
 }
 
@@ -372,7 +380,7 @@ WXCrystObjBasic(parent),mpMolBondAngle(obj)
 
    this->SetSizer(mpSizer);
    this->BottomLayout(0);
-   this->CrystUpdate();
+   this->CrystUpdate(true,true);
    VFN_DEBUG_EXIT("WXMolBondAngle::WXMolBond():"<<obj->GetName(),6)
 }
 
@@ -381,20 +389,24 @@ WXMolBondAngle::~WXMolBondAngle()
    mpMolBondAngle->WXNotifyDelete();
 }
 
-void WXMolBondAngle::CrystUpdate()
+void WXMolBondAngle::CrystUpdate(const bool uui,const bool lock)
 {
    VFN_DEBUG_ENTRY("WXMolBondAngle::CrystUpdate()",5)
-   mList.CrystUpdate();
+   if(lock) mMutex.Lock();
+   mList.CrystUpdate(uui,false);
+   if(lock) mMutex.Unlock();
    VFN_DEBUG_EXIT("WXMolBondAngle::CrystUpdate()",5)
 }
 
-void WXMolBondAngle::UpdateUI()
+void WXMolBondAngle::UpdateUI(const bool lock)
 {
    VFN_DEBUG_ENTRY("WXMolBondAngle::UpdateUI()",5)
-   mList.UpdateUI();
+   if(lock) mMutex.Lock();
+   mList.UpdateUI(false);
    mpFieldAtom1->SetValue(mpMolBondAngle->GetAtom1().GetName().c_str());
    mpFieldAtom2->SetValue(mpMolBondAngle->GetAtom2().GetName().c_str());
    mpFieldAtom3->SetValue(mpMolBondAngle->GetAtom3().GetName().c_str());
+   if(lock) mMutex.Unlock();
    VFN_DEBUG_EXIT("WXMolBondAngle::UpdateUI()",5)
 }
 
@@ -440,8 +452,8 @@ void WXMolBondAngle::OnChangeAtom(wxCommandEvent &event)
       mpMolBondAngle->SetAtom3(*at);
    }
    
-   this->CrystUpdate();
-   this->UpdateUI();
+   this->CrystUpdate(true);
+   this->UpdateUI(true);
    VFN_DEBUG_EXIT("WXMolBondAngle::OnChangeScattPow()",6)
 }
 ////////////////////////////////////////////////////////////////////////
@@ -507,7 +519,7 @@ WXCrystObjBasic(parent),mpMolDihedralAngle(obj)
 
    this->SetSizer(mpSizer);
    this->BottomLayout(0);
-   this->CrystUpdate();
+   this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXMolDihedralAngle::WXMolBond():"<<obj->GetName(),6)
 }
 
@@ -516,20 +528,24 @@ WXMolDihedralAngle::~WXMolDihedralAngle()
    mpMolDihedralAngle->WXNotifyDelete();
 }
 
-void WXMolDihedralAngle::CrystUpdate()
+void WXMolDihedralAngle::CrystUpdate(const bool uui,const bool lock)
 {
    VFN_DEBUG_ENTRY("WXMolDihedralAngle::CrystUpdate()",5)
-   mList.CrystUpdate();
+   if(lock) mMutex.Lock();
+   mList.CrystUpdate(uui,false);
+   if(lock) mMutex.Unlock();
    VFN_DEBUG_EXIT("WXMolDihedralAngle::CrystUpdate()",5)
 }
 
-void WXMolDihedralAngle::UpdateUI()
+void WXMolDihedralAngle::UpdateUI(const bool lock)
 {
    VFN_DEBUG_ENTRY("WXMolDihedralAngle::UpdateUI()",5)
-   mList.UpdateUI();
+   if(lock) mMutex.Lock();
+   mList.UpdateUI(false);
    mpFieldAtom1->SetValue(mpMolDihedralAngle->GetAtom1().GetName().c_str());
    mpFieldAtom2->SetValue(mpMolDihedralAngle->GetAtom2().GetName().c_str());
    mpFieldAtom3->SetValue(mpMolDihedralAngle->GetAtom3().GetName().c_str());
+   if(lock) mMutex.Unlock();
    VFN_DEBUG_EXIT("WXMolDihedralAngle::UpdateUI()",5)
 }
 
@@ -594,8 +610,8 @@ void WXMolDihedralAngle::OnChangeAtom(wxCommandEvent &event)
       mpMolDihedralAngle->SetAtom4(*at);
    }
    
-   this->CrystUpdate();
-   this->UpdateUI();
+   this->CrystUpdate(true);
+   this->UpdateUI(true);
    VFN_DEBUG_EXIT("WXMolDihedralAngle::OnChangeScattPow()",6)
 }
 ////////////////////////////////////////////////////////////////////////
@@ -708,7 +724,7 @@ mpBondWin(0),mpAngleWin(0),mpDihedralAngleWin(0)
 
    mpSizer->Add(mpSizerAtomList,0,wxALIGN_LEFT);
    this->BottomLayout(0);
-   this->CrystUpdate();
+   this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXMolecule::WXMolecule():"<<mol->GetName(),6)
 }
 
@@ -918,7 +934,7 @@ void WXMolecule::OnMenuRemoveAtom(wxCommandEvent & WXUNUSED(event))
    if(0==vAt.size()) return;
    for(list<MolAtom*>::iterator pos=vAt.begin();pos!=vAt.end();++pos) mpMolecule->RemoveAtom(**pos);
    #endif
-   this->CrystUpdate();
+   this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXMolecule::OnMenuRemoveAtom()",6)
 }
 
@@ -975,7 +991,7 @@ void WXMolecule::OnMenuRemoveBond(wxCommandEvent & WXUNUSED(event))
       mpMolecule->RemoveBond(**pos);
    }
    #endif
-   this->CrystUpdate();
+   this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXMolecule::OnMenuRemoveBond()",6)
 }
 
@@ -996,7 +1012,7 @@ void WXMolecule::OnMenuRemoveAngle(wxCommandEvent & WXUNUSED(event))
    for(list<MolBondAngle*>::iterator pos=vAngle.begin();pos!=vAngle.end();++pos)
       mpMolecule->RemoveBondAngle(**pos);
    #endif
-   this->CrystUpdate();
+   this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXMolecule::OnMenuRemoveAngle()",6)
 }
 
@@ -1017,7 +1033,7 @@ void WXMolecule::OnMenuRemoveDihedralAngle(wxCommandEvent & WXUNUSED(event))
    for(list<MolDihedralAngle*>::iterator pos=vAngle.begin();pos!=vAngle.end();++pos)
       mpMolecule->RemoveDihedralAngle(**pos);
    #endif
-   this->CrystUpdate();
+   this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXMolecule::OnMenuRemoveDihedralAngle()",6)
 }
 
@@ -1037,9 +1053,10 @@ void WXMolecule::OnMenuSetLimits(wxCommandEvent &event)
 {
 }
 
-void WXMolecule::CrystUpdate()
+void WXMolecule::CrystUpdate(const bool uui,const bool lock)
 {
    VFN_DEBUG_ENTRY("WXMolecule::CrystUpdate()",6)
+   if(lock) mMutex.Lock();
    if(false==mpMolecule->IsBeingRefined())
    {
       bool needLayoutAtom=false;
@@ -1222,7 +1239,8 @@ void WXMolecule::CrystUpdate()
          mpDihedralAngleWin->GetParent()->SetSize(-1,s.GetWidth());
       }
    }
-   this->WXRefinableObj::CrystUpdate();
+   this->WXRefinableObj::CrystUpdate(uui,false);
+   if(lock) mMutex.Unlock();
    VFN_DEBUG_EXIT("WXMolecule::CrystUpdate()",6)
 }
 void WXMolecule::OnMenuShowBondList(wxCommandEvent &event)
@@ -1233,7 +1251,7 @@ void WXMolecule::OnMenuShowBondList(wxCommandEvent &event)
    mpBondWin = new WXMolScrolledWindow(frame,this);
    mpSizerBondList= new wxBoxSizer(wxVERTICAL);
    frame->Show(true);
-   this->CrystUpdate();
+   this->CrystUpdate(true);
 }
 void WXMolecule::OnMenuShowBondAngleList(wxCommandEvent &event)
 {
@@ -1243,7 +1261,7 @@ void WXMolecule::OnMenuShowBondAngleList(wxCommandEvent &event)
    mpAngleWin = new WXMolScrolledWindow(frame,this);
    mpSizerAngleList= new wxBoxSizer(wxVERTICAL);
    frame->Show(true);
-   this->CrystUpdate();
+   this->CrystUpdate(true);
 }
 void WXMolecule::OnMenuShowDihedralAngleList(wxCommandEvent &event)
 {
@@ -1253,7 +1271,7 @@ void WXMolecule::OnMenuShowDihedralAngleList(wxCommandEvent &event)
    mpDihedralAngleWin = new WXMolScrolledWindow(frame,this);
    mpSizerDihedralAngleList= new wxBoxSizer(wxVERTICAL);
    frame->Show(true);
-   this->CrystUpdate();
+   this->CrystUpdate(true);
 }
 
 void WXMolecule::OnMenuRigidfyWithDihedralAngles(wxCommandEvent & WXUNUSED(event))
@@ -1338,7 +1356,7 @@ void WXMolecule::OnMenuSetDeltaSigma(wxCommandEvent &event)
       (*pos)->AngleSigma()=sigma;
    }
    mpMolecule->GetBondListClock().Click();
-   this->CrystUpdate();
+   this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXMolecule::OnMenuSetDeltaSigma()",6)
 }
 
@@ -1371,10 +1389,10 @@ void WXMolecule::NotifyDeleteListWin(WXMolScrolledWindow *win)
    }
    VFN_DEBUG_EXIT("WXMolecule::NotifyDeleteListWin()",6)
 }
-void WXMolecule::UpdateUI()
+void WXMolecule::UpdateUI(const bool lock)
 {
    VFN_DEBUG_ENTRY("WXMolecule::UpdateUI()",5)
-   this->WXRefinableObj::UpdateUI();
+   this->WXRefinableObj::UpdateUI(lock);
    VFN_DEBUG_EXIT("WXMolecule::UpdateUI()",5)
 }
 } //namespace

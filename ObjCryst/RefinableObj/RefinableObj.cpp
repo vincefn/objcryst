@@ -1826,7 +1826,7 @@ void RefinableObj::UpdateDisplay()const
 {
    #ifdef __WX__CRYST__
    VFN_DEBUG_ENTRY("RefinableObj::UpdateDisplay()",3)
-      if(0!=mpWXCrystObj) mpWXCrystObj->CrystUpdate();;
+      if(0!=mpWXCrystObj) mpWXCrystObj->CrystUpdate(true,true);
    VFN_DEBUG_EXIT("RefinableObj::UpdateDisplay()",3)
    #endif
 }

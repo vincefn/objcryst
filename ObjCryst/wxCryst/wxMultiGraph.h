@@ -34,6 +34,7 @@
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
+#include "wxCryst/wxCryst.h"
 
 /* WX
 
@@ -105,7 +106,7 @@ class WXMultiGraph:public wxWindow
       /// dragging origin (in reduced coordinates)
       float mDragX0,mDragY0;
       /// Mutex for the data
-      wxMutex mMutexData;
+      CrystMutex mMutexData;
       /// parent frame
       wxFrame *mpParentFrame;
    DECLARE_EVENT_TABLE()

@@ -62,7 +62,7 @@ class WXCrystal: public WXRefinableObj
 {
    public:
       WXCrystal(wxWindow *parent, Crystal*);
-      virtual void CrystUpdate();
+      virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false);
       #ifdef OBJCRYST_GL
       /// Update the OpenGL Display List
       void UpdateGL(const bool onlyIndependentAtoms=false,
@@ -72,9 +72,7 @@ class WXCrystal: public WXRefinableObj
       /// Gets the integer index of the OpenGL display list. Wait, if necessary, for the list
       /// not to be used any more. When finished, ReleaseCrystalGLDisplayList() must be called.
       /// if AtomName=true, then the display list returned is the one with the atom names.
-      int GrabCrystalGLDisplayList(const bool atomName=false)const;
-      void ReleaseCrystalGLDisplayList()const;
-      bool GLDisplayListIsLocked()const;
+      int GetCrystalGLDisplayList(const bool atomName=false)const;
       /// Create OpenGL Display of the Crystal Structure
       void OnMenuCrystalGL(wxCommandEvent & WXUNUSED(event));
       /// Tell this object that its 3D OpenGL display has been destroyed
@@ -95,7 +93,7 @@ class WXCrystal: public WXRefinableObj
       void OnMenuSetRelativeXYZLimits(wxCommandEvent & WXUNUSED(event));
       void OnMenuManageBondValence(wxCommandEvent & WXUNUSED(event));
       bool OnChangeName(const int id);
-      void UpdateUI();
+      void UpdateUI(const bool mutexlock=false);
       Crystal& GetCrystal();
       const Crystal& GetCrystal()const;
    private:
@@ -114,8 +112,6 @@ class WXCrystal: public WXRefinableObj
          /// OpenGL Display of the Crystal-Display List. Updated each time CrystUpdate() is called.
          /// This is the list with all the scatterer (atoms) names
          unsigned int mCrystalGLNameDisplayList;
-         /// This is true when the display list is being used
-         mutable bool mCrystalGLDisplayListIsLocked;
          /// the frame in which the crystal is displayed. There can only be one...
          WXGLCrystalCanvas* mpCrystalGL;
       #endif

@@ -75,7 +75,7 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpScatteringPower(obj)
       mList.Add(pFieldRadius);
       mpSizer->Add(pFieldBiso,0,wxALIGN_LEFT);
       mList.Add(pFieldBiso);
-      this->CrystUpdate();
+   this->CrystUpdate(true);
    this->Layout();
 }
 
@@ -135,9 +135,9 @@ void WXScatteringPowerSphere::OnChangeColour(wxCommandEvent & event)
    mpScatteringPower->SetColour(r,g,b);
 }
 
-void WXScatteringPowerSphere::UpdateUI()
+void WXScatteringPowerSphere::UpdateUI(const bool lock)
 {
-   this->WXRefinableObj::UpdateUI();
+   this->WXRefinableObj::UpdateUI(lock);
 }
 
 }// namespace 
