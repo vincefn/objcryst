@@ -120,6 +120,7 @@ BEGIN_EVENT_TABLE(WXMultiGraph, wxWindow)
    EVT_CHAR(                                    WXMultiGraph::OnKeyDown)
    EVT_MOUSEWHEEL(                              WXMultiGraph::OnMouseWheel)
    EVT_UPDATE_UI(ID_UPDATEUI,                   WXMultiGraph::OnUpdateUI)
+   EVT_SIZE(                                    WXMultiGraph::OnSize)
 END_EVENT_TABLE()
 
 
@@ -175,10 +176,11 @@ void WXMultiGraph::SetGraphData
       VFN_DEBUG_MESSAGE("WXMultiGraph::SetGraphData():"<<mvData[id].vx.size()<<":"
                         << mvData[id].xmin<<","<< mvData[id].xmax<<","
                         << mvData[id].ymin<<","<< mvData[id].ymax<<",",3)
+      mMutexData.Unlock();
       if(rescale)
          this->AutoScale(id);
    }
-   mMutexData.Unlock();
+   else mMutexData.Unlock();
 }
 
 
@@ -264,7 +266,6 @@ void WXMultiGraph::OnPaint(wxPaintEvent &event)
          }
    }
    // Draw data
-   //mMutexData.Lock();
    map<unsigned long, GraphData >::const_iterator pos;
    long ix=-1;
    for(pos=mvData.begin();pos!=mvData.end();++pos)
@@ -385,9 +386,9 @@ void WXMultiGraph::OnMouse(wxMouseEvent &event)
           <<", MiddleDClick="<<event.MiddleDClick()
           <<", RightDClick="<<event.RightDClick()
           <<endl;
+      mMutexData.Unlock();
       this->AutoScale();
       this->UpdateDisplay();
-      mMutexData.Unlock();
       return;
    }
    mMutexData.Unlock();
@@ -414,6 +415,7 @@ void WXMultiGraph::AutoScale(const long id,const bool xmin,const bool xmax,
                                            const bool ymin,const bool ymax)
 {
    if(mvData.size()==0) return;
+   mMutexData.Lock();
    std::map<unsigned long, GraphData>::const_iterator pos;
    if(id<0)pos=mvData.end();
    else pos=mvData.find((unsigned long)id);
@@ -443,6 +445,7 @@ void WXMultiGraph::AutoScale(const long id,const bool xmin,const bool xmax,
    if(mMaxX<=mMinX) mMaxX=mMinX+1e-6;
    if(mMaxY<=mMinY) mMaxY=mMinY+1e-6;
    //cout<<"Autoscale to:"<<mMinX<<"->"<<mMaxX<<" , "<<mMinY<<"->"<<mMaxY<<endl;
+   mMutexData.Unlock();
 }
 
 void WXMultiGraph::OnKeyDown(wxKeyEvent& event)
@@ -519,6 +522,12 @@ void WXMultiGraph::OnUpdateUI(wxUpdateUIEvent &event)
    VFN_DEBUG_MESSAGE("WXMultiGraph::OnUpdateUI()",4)
    this->Refresh(false);
 }
+
+void WXMultiGraph::OnSize(wxSizeEvent &event)
+{
+   this->Refresh(false);
+}
+
 void WXMultiGraph::UpdateDisplay()
 {
    VFN_DEBUG_ENTRY("WXMultiGraph::UpdateDisplay()",4)

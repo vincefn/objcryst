@@ -79,6 +79,7 @@ class WXMultiGraph:public wxWindow
       void AutoScale(const long id=-1,const bool xmin=true,const bool xmax=true,
                                       const bool ymin=true,const bool ymax=true);
       void OnUpdateUI(wxUpdateUIEvent &event);
+      void OnSize(wxSizeEvent &event);
       virtual void UpdateDisplay();
    private:
       /// Convert data to screen (pixel) coordinates
