@@ -202,6 +202,10 @@ class OptimizationObj
       void TagNewBestConfig();
       /// Get the elapsed time (in seconds) during the last optimization
       REAL GetLastOptimElapsedTime()const;
+      /// Get the MainTracker
+      MainTracker& GetMainTracker();
+      /// Get the MainTracker
+      const MainTracker& GetMainTracker()const;
    protected:
       /// \internal Prepare mRefParList for the refinement
       void PrepareRefParList();

@@ -256,6 +256,10 @@ REAL OptimizationObj::GetLastOptimElapsedTime()const
    return mLastOptimTime;
 }
 
+MainTracker& OptimizationObj::GetMainTracker(){return mMainTracker;}
+
+const MainTracker& OptimizationObj::GetMainTracker()const{return mMainTracker;}
+
 void OptimizationObj::PrepareRefParList()
 {
    VFN_DEBUG_ENTRY("OptimizationObj::PrepareRefParList()",6)
@@ -278,13 +282,14 @@ void OptimizationObj::PrepareRefParList()
       mvSavedParamSet.push_back(make_pair(mBestParSavedSetIndex,mBestCost));
       
       mMainTracker.ClearTrackers();
+      
+      REAL (OptimizationObj::*fl)() const;
+      fl=&OptimizationObj::GetLogLikelihood;
+      mMainTracker.AddTracker(new TrackerObject<OptimizationObj>
+         (this->GetName()+"::Overall LogLikelihood",*this,fl));
+
       for(long i=0;i<mRefinedObjList.GetNb();i++)
       {
-         REAL (OptimizationObj::*fl)() const;
-         fl=&OptimizationObj::GetLogLikelihood;
-         mMainTracker.AddTracker(new TrackerObject<OptimizationObj>
-            (this->GetName()+"::Overall LogLikelihood",*this,fl));
-         
          REAL (RefinableObj::*fp)() const;
          fp=&RefinableObj::GetLogLikelihood;
          mMainTracker.AddTracker(new TrackerObject<RefinableObj>
@@ -300,7 +305,6 @@ void OptimizationObj::PrepareRefParList()
             fc=&Crystal::GetBondValenceCost;
             mMainTracker.AddTracker(new TrackerObject<Crystal>
                (pCryst->GetName()+"::BondValenceCost",*pCryst,fc));
-            
          }
       }
    }
@@ -351,6 +355,7 @@ void OptimizationObj::UpdateDisplay()
    #endif
    for(int i=0;i<mRefinedObjList.GetNb();i++) 
       mRefinedObjList.GetObj(i).UpdateDisplay();
+   mMainTracker.UpdateDisplay();
 }
 void OptimizationObj::BuildRecursiveRefObjList()
 {

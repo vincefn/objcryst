@@ -57,32 +57,53 @@ std::map<long,REAL>& Tracker::GetValues(){return mvValues;}
 //
 ////////////////////////////////////////////////////////////////////////
 
-MainTracker::MainTracker(){}
-MainTracker::~MainTracker(){this->ClearTrackers();}
-void MainTracker::AddTracker(Tracker *t){mvpTracker.push_back(t);}
+MainTracker::MainTracker()
+{
+   #ifdef __WX__CRYST__
+   mpWXTrackerGraph=0;
+   #endif
+}
+
+MainTracker::~MainTracker()
+{
+   this->WXDelete();
+   this->ClearTrackers();
+}
+void MainTracker::AddTracker(Tracker *t)
+{
+   mvpTracker.insert(t);
+   mClockTrackerList.Click();
+   this->UpdateDisplay();
+}
 
 void MainTracker::AppendValues(const long nb)
 {
-   for(std::list<Tracker*>::iterator pos=mvpTracker.begin(); pos!=mvpTracker.end();++pos)
+   for(std::set<Tracker*>::iterator pos=mvpTracker.begin(); pos!=mvpTracker.end();++pos)
       (*pos)->AppendValue(nb);
+   mClockValues.Click();
+   this->UpdateDisplay();
 }
 
 void MainTracker::ClearTrackers()
 {
-   std::list<Tracker*>::iterator pos;
+   std::set<Tracker*>::iterator pos;
    for(pos=mvpTracker.begin();pos!=mvpTracker.end();++pos) delete *pos;
    mvpTracker.clear();
+   mClockTrackerList.Click();
+   this->UpdateDisplay();
 }
 
 void MainTracker::ClearValues()
 {
-   std::list<Tracker*>::iterator pos;
+   std::set<Tracker*>::iterator pos;
    for(pos=mvpTracker.begin();pos!=mvpTracker.end();++pos) (*pos)->Clear();
+   mClockValues.Click();
+   this->UpdateDisplay();
 }
 
 void MainTracker::SaveAll(std::ostream &os)const
 {
-   std::list<Tracker*>::const_iterator posT,posT0;
+   std::set<Tracker*>::const_iterator posT,posT0;
    os<<"#Trial ";
    for(posT=mvpTracker.begin();posT!=mvpTracker.end();++posT) os<<(*posT)->GetName()<<" ";
    os<<endl;
@@ -102,6 +123,40 @@ void MainTracker::SaveAll(std::ostream &os)const
       os<<endl;
    }
 }
+
+const std::set<Tracker*> &MainTracker::GetTrackerList()const
+{
+   return mvpTracker;
+}
+
+void MainTracker::UpdateDisplay()const
+{
+   #ifdef __WX__CRYST__
+   if(0!=mpWXTrackerGraph)mpWXTrackerGraph->UpdateDisplay();
+   #endif
+}
+const RefinableObjClock& MainTracker::GetClockTrackerList()const{return mClockTrackerList;}
+const RefinableObjClock& MainTracker::GetClockValues()const{ return mClockValues;}
+#ifdef __WX__CRYST__
+WXTrackerGraph* MainTracker::WXCreate(wxFrame *frame)
+{
+   if(0==mpWXTrackerGraph) mpWXTrackerGraph=new WXTrackerGraph(frame,this);
+   return mpWXTrackerGraph;
+}
+WXTrackerGraph* MainTracker::WXGet(){return mpWXTrackerGraph;}
+void MainTracker::WXDelete()
+{
+   if(0!=mpWXTrackerGraph)
+   {
+      delete mpWXTrackerGraph;
+      mpWXTrackerGraph=0;
+   }
+}
+void MainTracker::WXNotifyDelete()
+{
+   mpWXTrackerGraph=0;
+}
+#endif
 
 
 }//namespace

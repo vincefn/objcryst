@@ -23,19 +23,19 @@
 #ifndef _REFINABLEOBJ_TRACKER_H_
 #define _REFINABLEOBJ_TRACKER_H_
 
-#include <list>
+#include <set>
 #include <vector>
 #include <utility>
 #include "RefinableObj/RefinableObj.h"
-#include "wx/wxprec.h"
 
-#ifdef __BORLANDC__
-    #pragma hdrstop
+#ifdef __WX__CRYST__
+namespace ObjCryst
+{
+class MainTracker;
+class Tracker;
+}
+#include "wxCryst/wxTrackerGraph.h"
 #endif
-#ifndef WX_PRECOMP
-    #include "wx/wx.h"
-#endif
-
 namespace ObjCryst
 {
 
@@ -79,8 +79,28 @@ class MainTracker
       /// Will save to a single file if all recorded trial numbers are the same
       /// Otherwise ?
       void SaveAll(std::ostream &out)const;
+      const std::set<Tracker*> &GetTrackerList()const;
+      /// Update display, if any
+      void UpdateDisplay()const;
+      /// Get last time a tracker was added
+      const RefinableObjClock& GetClockTrackerList()const;
+      /// Get last time values were whanged
+      const RefinableObjClock& GetClockValues()const;
    private:
-      std::list<Tracker*> mvpTracker;
+      std::set<Tracker*> mvpTracker;
+      /// Last time a tracker was added
+      RefinableObjClock mClockTrackerList;
+      /// Last time values were whanged
+      RefinableObjClock mClockValues;
+   #ifdef __WX__CRYST__
+   public:
+      WXTrackerGraph* WXCreate(wxFrame*);
+      WXTrackerGraph* WXGet();
+      void WXDelete();
+      void WXNotifyDelete();
+   protected:
+      WXTrackerGraph *mpWXTrackerGraph;
+   #endif
 };
 
 /** Tracker for objects (RefinableObj, Crystal, PowderPattern, RefPar,...) 
@@ -96,61 +116,6 @@ template <class T> class TrackerObject:public Tracker
       const T *mpObj;
       REAL (T::*mfp)() const;
       REAL ReadValue(){return (mpObj->*mfp)();}
-};
-
-/* WX
-
-Select colour using wxColourDatabase (wxTheColourDatabase
-
-All display is normalized to max-min, i.e. each tracked value has
-its own scale. Zooming is therefore relative to [0.0-1.0]
-
-Choose displayed Y values using a wxChoice, for both Y axis
-
-The list of values to be displayed can be chosen from a wxListBox
-
-*/
-
-class WXMainTracker
-{
-};
-
-template<class T,class U> class WXMultiGraph:public wxWindow
-{
-   public:
-      void OnPaint(wxPaintEvent &event);
-      void OnMouse(wxMouseEvent &event);
-      void OnMouseWheel(wxMouseEvent &event);
-      void SetData(const std::vector<const string> &vName,
-                   const std::vector<std::list<pair<U,T> > > &data);
-   private:
-      /// Convert (screen) pixel coordinates to reduced coordinates between 0 and 1
-      void Screen2Reduced(float &x,float &y);
-      /// Convert (screen) pixel coordinates to reduced coordinates between 0 and 1
-      void Reduced2Screen(float &x,float &y);
-      /// Convert data #i to reduced coordinates (i.e. coordinates between 0 and 1.0)
-      void Data2Reduced(unsigned long i,float &x,float &y);
-      /// Convert reduced to data #i coordinates
-      void Reduced2Data(unsigned long i,float &x,float &y);
-      /// Convert data #i to screen (pixel) coordinates
-      void Data2Screen(unsigned long i,float &x,float &y);
-      /// Convert screen (pixel) to data #i coordinates
-      void Screen2Data(unsigned long i,float &x,float &y);
-      std::vector<const std::string*> mvName;
-      std::vector<std::list<pair<T,U> > > mvData;
-      mutable std::vector<T> mvMinX,mvMaxX;
-      mutable std::vector<U> mvMinY,mvMaxY;
-      /// The \e current min & max values along x and y, for reduced coordinates.
-      /// This means that graph #i will have xmin=mvMinX[i]+mMinX*(mvMaxX[i]-mvMinX[i]),
-      /// etc...
-      float mMinX,mMaxX,mMinY,mMaxY;
-      /// Pop-up menu
-      wxMenu* mpPopUpMenu;
-      /// Are we within a dragging event ?
-      bool mIsDragging;
-      /// dragging origin (in reduced coordinates)
-      float mDragX0,mDragY0;
-      DECLARE_EVENT_TABLE()
 };
 
 }//namespace

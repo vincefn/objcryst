@@ -107,7 +107,7 @@ WXCrystObj(parent),mpGlobalOptimRunThread(0)
       mpSizer->Add(refobj);
       mList.Add(refobj);
    }
-   
+      
    // This will be done later
    //this->CrystUpdate();
    VFN_DEBUG_EXIT("WXOptimizationObj::WXOptimizationObj(wxWindow*,GlobalOptimObj*,)",7)
@@ -407,6 +407,20 @@ void WXMonteCarloObj::OnRunOptimization(wxCommandEvent & event)
    else
       mpGlobalOptimRunThread = new WXGlobalOptimRunThread(this->GetOptimizationObj(),
                                                           mNbTrial,finalCost,mNbRun,false);
+   // Tracker window
+   if(this->GetOptimizationObj().GetMainTracker().WXGet()==0)
+   {
+      wxFrame *frame= new wxFrame(this,-1,"Tracked data",
+                                  wxDefaultPosition,wxSize(300,200));
+      wxWindow* pwxTrackerGraph = this->GetOptimizationObj().GetMainTracker().WXCreate(frame);
+
+      wxSizer *ps=new wxBoxSizer(wxHORIZONTAL);
+      ps->Add(pwxTrackerGraph,1,wxEXPAND);
+      frame->CreateStatusBar(2);
+      frame->SetSizer(ps);
+      frame->SetAutoLayout(true);
+      frame->Show(true);
+   }
    if(mpGlobalOptimRunThread->Create() != wxTHREAD_NO_ERROR) 
       wxLogError("Can't create optimization thread");
    else mpGlobalOptimRunThread->Run();

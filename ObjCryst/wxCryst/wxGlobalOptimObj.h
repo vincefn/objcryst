@@ -21,6 +21,7 @@
 #define _VFN_WX_GLOBALOPTIM_OBJ_H_
 
 #include "wxCryst/wxCryst.h"
+#include "wxCryst/wxMultiGraph.h"
 namespace ObjCryst
 {
    class WXOptimizationObj;
