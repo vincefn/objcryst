@@ -411,151 +411,159 @@ ostream& Crystal::POVRayDescription(ostream &os,bool onlyIndependentAtoms)const
 void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
                                 const REAL xMin,const REAL xMax,
                                 const REAL yMin,const REAL yMax,
-                                const REAL zMin,const REAL zMax)const
+                                const REAL zMin,const REAL zMax,
+                                const bool displayNames)const
 {
    VFN_DEBUG_ENTRY("Crystal::GLInitDisplayList()",5)
    #ifdef OBJCRYST_GL
       REAL en=1;// if -1, display enantiomeric structure
       if(mDisplayEnantiomer.GetChoice()==1) en=-1;
       
-      const GLfloat colorAmbient [] = {0.50, 0.50, 0.50, 1.00}; 
-      const GLfloat colorDiffuse [] = {0.80, 0.80, 0.80, 1.00}; 
-      const GLfloat colorSpecular [] = {1.00, 1.00, 1.00, 1.00}; 
-      
-      glMaterialfv(GL_FRONT, GL_AMBIENT,   colorAmbient); 
-      glMaterialfv(GL_FRONT, GL_DIFFUSE,   colorDiffuse); 
-      glMaterialfv(GL_FRONT, GL_SPECULAR,  colorSpecular); 
-      glMaterialf( GL_FRONT, GL_SHININESS, 5.0); 
-   //cout << xMin << ":"<<xMax <<endl;
-   //cout << yMin << ":"<<yMax <<endl;
-   //cout << zMin << ":"<<zMax <<endl;
-   //Center of displayed unit
-      REAL xc=(xMin+xMax)/2.;
-      REAL yc=(yMin+yMax)/2.;
-      REAL zc=(zMin+zMax)/2.;
-      //Describe Unit Cell
-         REAL x111= 1.;
-         REAL y111= 1.;
-         REAL z111= 1.;
-         this->FractionalToOrthonormalCoords(x111,y111,z111);
-         REAL x110= 1.;
-         REAL y110= 1.;
-         REAL z110= 0.;
-         this->FractionalToOrthonormalCoords(x110,y110,z110);
-         REAL x101= 1.;
-         REAL y101= 0.;
-         REAL z101= 1.;
-         this->FractionalToOrthonormalCoords(x101,y101,z101);
-         REAL x100= 1.;
-         REAL y100= 0.;
-         REAL z100= 0.;
-         this->FractionalToOrthonormalCoords(x100,y100,z100);
-         REAL x011= 0.;
-         REAL y011= 1.;
-         REAL z011= 1.;
-         this->FractionalToOrthonormalCoords(x011,y011,z011);
-         REAL x010= 0.;
-         REAL y010= 1.;
-         REAL z010= 0.;
-         this->FractionalToOrthonormalCoords(x010,y010,z010);
-         REAL x001= 0.;
-         REAL y001= 0.;
-         REAL z001= 1.;
-         this->FractionalToOrthonormalCoords(x001,y001,z001);
-         REAL x000= 0.;
-         REAL y000= 0.;
-         REAL z000= 0.;
-         this->FractionalToOrthonormalCoords(x000,y000,z000);
-         REAL xM= 0.5;
-         REAL yM= 0.5;
-         REAL zM= 0.5;
-         this->FractionalToOrthonormalCoords(xM,yM,zM);
-         xM*=2;yM*=2;zM*=2;
-      glPushMatrix();
-      //Add Axis & axis names
-         REAL x,y,z;
+      //Center of displayed unit
+         REAL xc=(xMin+xMax)/2.;
+         REAL yc=(yMin+yMax)/2.;
+         REAL zc=(zMin+zMax)/2.;
+      if(false==displayNames)
+      {
+         //Describe Unit Cell
+            REAL x111= 1.;
+            REAL y111= 1.;
+            REAL z111= 1.;
+            this->FractionalToOrthonormalCoords(x111,y111,z111);
+            REAL x110= 1.;
+            REAL y110= 1.;
+            REAL z110= 0.;
+            this->FractionalToOrthonormalCoords(x110,y110,z110);
+            REAL x101= 1.;
+            REAL y101= 0.;
+            REAL z101= 1.;
+            this->FractionalToOrthonormalCoords(x101,y101,z101);
+            REAL x100= 1.;
+            REAL y100= 0.;
+            REAL z100= 0.;
+            this->FractionalToOrthonormalCoords(x100,y100,z100);
+            REAL x011= 0.;
+            REAL y011= 1.;
+            REAL z011= 1.;
+            this->FractionalToOrthonormalCoords(x011,y011,z011);
+            REAL x010= 0.;
+            REAL y010= 1.;
+            REAL z010= 0.;
+            this->FractionalToOrthonormalCoords(x010,y010,z010);
+            REAL x001= 0.;
+            REAL y001= 0.;
+            REAL z001= 1.;
+            this->FractionalToOrthonormalCoords(x001,y001,z001);
+            REAL x000= 0.;
+            REAL y000= 0.;
+            REAL z000= 0.;
+            this->FractionalToOrthonormalCoords(x000,y000,z000);
+            REAL xM= 0.5;
+            REAL yM= 0.5;
+            REAL zM= 0.5;
+            this->FractionalToOrthonormalCoords(xM,yM,zM);
+            xM*=2;yM*=2;zM*=2;
+         glPushMatrix();
+         //Add Axis & axis names
+            const GLfloat colour0 [] = {0.00, 0.00, 0.00, 0.00}; 
+            const GLfloat colour1 [] = {0.50, 0.50, 0.50, 1.00}; 
+            const GLfloat colour2 [] = {1.00, 1.00, 1.00, 1.00}; 
+            glMaterialfv(GL_FRONT, GL_AMBIENT,   colour2); 
+            glMaterialfv(GL_FRONT, GL_DIFFUSE,   colour0); 
+            glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0); 
+            glMaterialfv(GL_FRONT, GL_EMISSION,  colour2); 
+            glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
+            REAL x,y,z;
+            x=1.2-xc;y=-yc;z=-zc;
+            this->FractionalToOrthonormalCoords(x,y,z);
+            glRasterPos3f(en*x,y,z);
+            glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,'a');
 
-         x=1.2-xc;y=-yc;z=-zc;
-         this->FractionalToOrthonormalCoords(x,y,z);
-         glRasterPos3f(en*x,y,z);
-         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,'a');
+            x=-xc;y=1.2-yc;z=-zc;
+            this->FractionalToOrthonormalCoords(x,y,z);
+            glRasterPos3f(en*x,y,z);
+            glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,'b');
 
-         x=-xc;y=1.2-yc;z=-zc;
-         this->FractionalToOrthonormalCoords(x,y,z);
-         glRasterPos3f(en*x,y,z);
-         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,'b');
+            x=-xc;y=-yc;z=1.2-zc;
+            this->FractionalToOrthonormalCoords(x,y,z);
+            glRasterPos3f(en*x,y,z);
+            glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,'c');
+         // Cell
+            glMaterialfv(GL_FRONT, GL_AMBIENT,   colour1); 
+            glMaterialfv(GL_FRONT, GL_DIFFUSE,   colour2); 
+            glMaterialfv(GL_FRONT, GL_SPECULAR,  colour2); 
+            glMaterialfv(GL_FRONT, GL_EMISSION,  colour0); 
+            glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
+            this->FractionalToOrthonormalCoords(xc,yc,zc);
+            glTranslatef(-xc*en, -yc, -zc);
+            glBegin(GL_LINES);
+               //top    
+               glNormal3f((x110+x010-xM)*en,y110+y010-yM,z110+z010-zM);
+               glVertex3f(    x110*en,    y110,    z110);
+               glVertex3f(    x010*en,    y010,    z010);
 
-         x=-xc;y=-yc;z=1.2-zc;
-         this->FractionalToOrthonormalCoords(x,y,z);
-         glRasterPos3f(en*x,y,z);
-         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,'c');
-      // Cell
-         this->FractionalToOrthonormalCoords(xc,yc,zc);
-         glTranslatef(-xc*en, -yc, -zc);
-         glBegin(GL_LINES);
-            //top    
-            glNormal3f((x110+x010-xM)*en,y110+y010-yM,z110+z010-zM);
-            glVertex3f(    x110*en,    y110,    z110);
-            glVertex3f(    x010*en,    y010,    z010);
-         
-            glNormal3f((x011+x010-xM)*en,y011+y010-yM,z011+z010-zM);
-            glVertex3f(    x010*en,    y010,    z010);
-            glVertex3f(    x011*en,    y011,    z011);
-            
-            glNormal3f((x011+x111-xM)*en,y011+y111-yM,z011+z111-zM);
-            glVertex3f(    x011*en,    y011,    z011);
-            glVertex3f(    x111*en,    y111,    z111);
+               glNormal3f((x011+x010-xM)*en,y011+y010-yM,z011+z010-zM);
+               glVertex3f(    x010*en,    y010,    z010);
+               glVertex3f(    x011*en,    y011,    z011);
 
-            glNormal3f((x110+x111-xM)*en,y110+y111-yM,z110+z111-zM);
-            glVertex3f(    x111*en,    y111,    z111);
-            glVertex3f(    x110*en,    y110,    z110);
-            //bottom
-            glNormal3f((x101+x001-xM)*en,y101+y001-yM,z101+z001-zM);
-            glVertex3f(    x101*en,    y101,    z101);
-            glVertex3f(    x001*en,    y001,    z001);
+               glNormal3f((x011+x111-xM)*en,y011+y111-yM,z011+z111-zM);
+               glVertex3f(    x011*en,    y011,    z011);
+               glVertex3f(    x111*en,    y111,    z111);
 
-            glNormal3f((x000+x001-xM)*en,y000+y001-yM,z000+z001-zM);
-            glVertex3f(    x001*en,    y001,    z001);
-            glVertex3f(    x000*en,    y000,    z000);
+               glNormal3f((x110+x111-xM)*en,y110+y111-yM,z110+z111-zM);
+               glVertex3f(    x111*en,    y111,    z111);
+               glVertex3f(    x110*en,    y110,    z110);
+               //bottom
+               glNormal3f((x101+x001-xM)*en,y101+y001-yM,z101+z001-zM);
+               glVertex3f(    x101*en,    y101,    z101);
+               glVertex3f(    x001*en,    y001,    z001);
 
-            glNormal3f((x000+x100-xM)*en,y000+y100-yM,z000+z100-zM);
-            glVertex3f(    x000*en,    y000,    z000);
-            glVertex3f(    x100*en,    y100,    z100);
+               glNormal3f((x000+x001-xM)*en,y000+y001-yM,z000+z001-zM);
+               glVertex3f(    x001*en,    y001,    z001);
+               glVertex3f(    x000*en,    y000,    z000);
 
-            glNormal3f((x101+x100-xM)*en,y101+y100-yM,z101+z100-zM);
-            glVertex3f(    x100*en,    y100,    z100);
-            glVertex3f(    x101*en,    y101,    z101);
-            //sides
-            glNormal3f((x101+x111-xM)*en,y101+y111-yM,z101+z111-zM);
-            glVertex3f(    x101*en,    y101,    z101);
-            glVertex3f(    x111*en,    y111,    z111);
-            
-            glNormal3f((x001+x011-xM)*en,y001+y011-yM,z001+z011-zM);
-            glVertex3f(    x001*en,    y001,     z001);
-            glVertex3f(    x011*en,    y011,     z011);
-         
-            glNormal3f((x000+x010-xM)*en,y000+y010-yM,z000+z010-zM);
-            glVertex3f(    x000*en,    y000,    z000);
-            glVertex3f(    x010*en,    y010,    z010);
-         
-            glNormal3f((x100+x110-xM)*en,y100+y110-yM,z100+z110-zM);
-            glVertex3f(    x100*en,    y100,    z100);
-            glVertex3f(    x110*en,    y110,    z110);
-         glEnd();
+               glNormal3f((x000+x100-xM)*en,y000+y100-yM,z000+z100-zM);
+               glVertex3f(    x000*en,    y000,    z000);
+               glVertex3f(    x100*en,    y100,    z100);
 
+               glNormal3f((x101+x100-xM)*en,y101+y100-yM,z101+z100-zM);
+               glVertex3f(    x100*en,    y100,    z100);
+               glVertex3f(    x101*en,    y101,    z101);
+               //sides
+               glNormal3f((x101+x111-xM)*en,y101+y111-yM,z101+z111-zM);
+               glVertex3f(    x101*en,    y101,    z101);
+               glVertex3f(    x111*en,    y111,    z111);
+
+               glNormal3f((x001+x011-xM)*en,y001+y011-yM,z001+z011-zM);
+               glVertex3f(    x001*en,    y001,     z001);
+               glVertex3f(    x011*en,    y011,     z011);
+
+               glNormal3f((x000+x010-xM)*en,y000+y010-yM,z000+z010-zM);
+               glVertex3f(    x000*en,    y000,    z000);
+               glVertex3f(    x010*en,    y010,    z010);
+
+               glNormal3f((x100+x110-xM)*en,y100+y110-yM,z100+z110-zM);
+               glVertex3f(    x100*en,    y100,    z100);
+               glVertex3f(    x110*en,    y110,    z110);
+            glEnd();
+         glPopMatrix();
+      }
 
       //Describe all Scatterers
       VFN_DEBUG_MESSAGE("Crystal::GLView(bool):Scatterers...",5)
-      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-      {
-         bool displayEnantiomer=false;
-         if(mDisplayEnantiomer.GetChoice()==1) displayEnantiomer=true;
-         for(int i=0;i<mScattererRegistry.GetNb();i++) 
-            this->GetScatt(i).GLInitDisplayList(onlyIndependentAtoms,
-                                                xMin,xMax,yMin,yMax,zMin,zMax,
-                                                displayEnantiomer);
-      }
-   glPopMatrix();
+      glPushMatrix();
+         if(displayNames) this->FractionalToOrthonormalCoords(xc,yc,zc);
+         glTranslatef(-xc*en, -yc, -zc);
+         //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+         {
+            bool displayEnantiomer=false;
+            if(mDisplayEnantiomer.GetChoice()==1) displayEnantiomer=true;
+            for(int i=0;i<mScattererRegistry.GetNb();i++) 
+               this->GetScatt(i).GLInitDisplayList(onlyIndependentAtoms,
+                                                   xMin,xMax,yMin,yMax,zMin,zMax,
+                                                   displayEnantiomer,displayNames);
+         }
+      glPopMatrix();
    #else
    cout << "Crystal::GLView(): Compiled without OpenGL support !" <<endl;
    #endif

@@ -204,11 +204,15 @@ class Crystal:public UnitCell
       * \ param xMin,xMax,yMin,yMax,zMin,zMax: in fractionnal coordinates, the region
       * in which we want scaterrers to be displayed. The test is made on the center
       * of the scatterer (eg a ZScatterer (molecule) will not be 'cut' on the border).
+      * \param displayNames: if true, only the names of the scatterers will be displayed,
+      * at the position of the scatterers (to actually see them, they will have to
+      * be translated with respect to the drawing of the scatterers).
       */
       virtual void GLInitDisplayList(const bool onlyIndependentAtoms=false,
                                      const REAL xMin=-.1,const REAL xMax=1.1,
                                      const REAL yMin=-.1,const REAL yMax=1.1,
-                                     const REAL zMin=-.1,const REAL zMax=1.1)const;
+                                     const REAL zMin=-.1,const REAL zMax=1.1,
+                                     const bool displayNames=false)const;
       
       /** \internal \brief Compute the 'Dynamical population correction for all atoms.
       * Atoms which are considered "equivalent" (ie currently with the same Z number)

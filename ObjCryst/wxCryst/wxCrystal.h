@@ -63,7 +63,8 @@ class WXCrystal: public WXRefinableObj
                     const REAL zMin=-.1,const REAL zMax=1.1);
       /// Gets the integer index of the OpenGL display list. Wait, if necessary, for the list
       /// not to be used any more. When finished, ReleaseCrystalGLDisplayList() must be called.
-      int GrabCrystalGLDisplayList()const;
+      /// if AtomName=true, then the display list returned is the one with the atom names.
+      int GrabCrystalGLDisplayList(const bool atomName=false)const;
       void ReleaseCrystalGLDisplayList()const;
       bool GLDisplayListIsLocked()const;
       /// Create OpenGL Display of the Crystal Structure
@@ -102,6 +103,9 @@ class WXCrystal: public WXRefinableObj
       //OpenGl
          /// OpenGL Display of the Crystal-Display List. Updated each time CrystUpdate() is called.
          unsigned int mCrystalGLDisplayList;
+         /// OpenGL Display of the Crystal-Display List. Updated each time CrystUpdate() is called.
+         /// This is the list with all the scatterer (atoms) names
+         unsigned int mCrystalGLNameDisplayList;
          /// This is true when the display list is being used
          mutable bool mCrystalGLDisplayListIsLocked;
          /// the frame in which the crystal is displayed. There can only be one...
@@ -204,6 +208,7 @@ class WXGLCrystalCanvas : public wxGLCanvas
       /// Redraw the structure (special function to ensure complete redrawing under windows...)
       void OnUpdateUI(wxUpdateUIEvent& WXUNUSED(event));
       void OnShowCrystal();
+      void OnShowAtomLabel();
       void OnLoadFourier();
       void LoadFourier(const string&filename);
       void OnAddContour();
@@ -255,7 +260,7 @@ class WXGLCrystalCanvas : public wxGLCanvas
       wxMenu* mpPopUpMenu;
       
       /// To display Fourier map
-      bool mShowFourier, mShowCrystal;
+      bool mShowFourier, mShowCrystal, mShowAtomName;
       // bounding box for atoms to be included
       BBox mcellbbox;
       // bounding box for display of Fourier map

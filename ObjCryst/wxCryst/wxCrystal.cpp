@@ -119,7 +119,7 @@ END_EVENT_TABLE()
 WXCrystal::WXCrystal(wxWindow* parent, Crystal *obj):
 WXRefinableObj(parent,(RefinableObj*)obj),mpCrystal(obj)
 #ifdef OBJCRYST_GL
-,mCrystalGLDisplayList(0),
+,mCrystalGLDisplayList(0),mCrystalGLNameDisplayList(0),
 mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
 #endif
 {
@@ -289,6 +289,7 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
       if(mCrystalGLDisplayList==0)
       {
          mCrystalGLDisplayList=glGenLists(1);
+         mCrystalGLNameDisplayList=glGenLists(1);
          VFN_DEBUG_MESSAGE("WXCrystal::UpdateGL():created mCrystalGLDisplayList="<<mCrystalGLDisplayList,10)
       }
       
@@ -317,6 +318,11 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
             //map2.GLInitDisplayList(xMin,xMax,yMin,yMax,zMin,zMax);
          glPopMatrix();
       glEndList();
+      glNewList(mCrystalGLNameDisplayList,GL_COMPILE);
+         glPushMatrix();
+            mpCrystal->GLInitDisplayList(onlyIndependentAtoms,xMin,xMax,yMin,yMax,zMin,zMax,true);
+         glPopMatrix();
+      glEndList();
       //#ifdef __WINDOWS__
       cont=true;
       //#endif
@@ -330,13 +336,14 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
    VFN_DEBUG_EXIT("WXCrystal::UpdateGL():End",8)
 }
 
-int WXCrystal::GrabCrystalGLDisplayList()const
+int WXCrystal::GrabCrystalGLDisplayList(const bool atomName)const
 {
    VFN_DEBUG_MESSAGE("WXCrystal::GrabCrystalGLDisplayList()",7)
    //:KLUDGE: ? or OK ?
    while(mCrystalGLDisplayListIsLocked) wxUsleep(5);
    mCrystalGLDisplayListIsLocked=true;
    VFN_DEBUG_MESSAGE("WXCrystal::GrabCrystalGLDisplayList():"<<mCrystalGLDisplayList,7)
+   if(atomName) return mCrystalGLNameDisplayList;
    return mCrystalGLDisplayList;
 }
 void WXCrystal::ReleaseCrystalGLDisplayList()const
@@ -1115,6 +1122,8 @@ void UnitCellMapGLList::Draw()const
       glMaterialfv(GL_FRONT, GL_AMBIENT, mColour);
       glMaterialfv(GL_FRONT, GL_DIFFUSE, mColour);
       glMaterialfv(GL_FRONT, GL_SPECULAR, mColour);
+      const GLfloat colour0[] = {0.0f, 0.0f, 0.0f, 0.0f}; 
+      glMaterialfv(GL_FRONT, GL_EMISSION, colour0); 
       // :TODO: 
       // Disabled Shininess as there is a problem with normals 
       // and non-orthogonal unit cells
@@ -1146,6 +1155,8 @@ const string &UnitCellMapGLList::GetName()const
 //    WXGLCrystalCanvas
 //
 ////////////////////////////////////////////////////////////////////////
+WXCRYST_ID ID_GLCRYSTAL_MENU_SHOWATOMLABEL;
+
 BEGIN_EVENT_TABLE(WXGLCrystalCanvas, wxGLCanvas)
    EVT_SIZE             (WXGLCrystalCanvas::OnSize)
    EVT_PAINT            (WXGLCrystalCanvas::OnPaint)
@@ -1154,6 +1165,7 @@ BEGIN_EVENT_TABLE(WXGLCrystalCanvas, wxGLCanvas)
    EVT_MENU             (ID_GLCRYSTAL_MENU_UPDATE,              WXGLCrystalCanvas::OnUpdate)
    EVT_MENU             (ID_GLCRYSTAL_MENU_CHANGELIMITS,        WXGLCrystalCanvas::OnChangeLimits)
    EVT_MENU             (ID_GLCRYSTAL_MENU_SHOWCRYSTAL,         WXGLCrystalCanvas::OnShowCrystal)     //shows or hides the crystal
+   EVT_MENU             (ID_GLCRYSTAL_MENU_SHOWATOMLABEL,       WXGLCrystalCanvas::OnShowAtomLabel)     //shows or hides the crystal
    EVT_MENU             (ID_GLCRYSTAL_MENU_LOADFOURIER,         WXGLCrystalCanvas::OnLoadFourier)
    EVT_MENU             (ID_GLCRYSTAL_MENU_CHANGECONTOUR,       WXGLCrystalCanvas::OnChangeContour)
    EVT_MENU             (ID_GLCRYSTAL_MENU_ADDCONTOUR,          WXGLCrystalCanvas::OnAddContour)
@@ -1174,7 +1186,7 @@ WXGLCrystalCanvas::WXGLCrystalCanvas(WXCrystal *wxcryst,
                                      const wxSize &size):
 wxGLCanvas(parent,id,pos,size,wxDEFAULT_FRAME_STYLE),//
 mpWXCrystal(wxcryst),mIsGLInit(false),mDist(60),mX0(0),mY0(0),mZ0(0),mViewAngle(15),
-mShowFourier(true),mShowCrystal(true)
+mShowFourier(true),mShowCrystal(true),mShowAtomName(true)
 {
    VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::WXGLCrystalCanvas()",3)
      // N.B. xMin=xMax so that the previous cell bbox is used for Maps 
@@ -1188,6 +1200,7 @@ mShowFourier(true),mShowCrystal(true)
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_CHANGELIMITS, "Change display &Limits");
    
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWCRYSTAL, "Hide Crystal");
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, "Hide Atom Labels");
    mpPopUpMenu->AppendSeparator();
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_LOADFOURIER, "Load Fourier Map");	
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_CHANGECONTOUR, "Change Contour Value");
@@ -1249,9 +1262,6 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
       this->InitGL();
    }
 
-   //glMatrixMode( GL_PROJECTION );
-   //glLoadIdentity();
-   //gluPerspective( 15, .5, 1, 100 );
    glMatrixMode( GL_MODELVIEW );
 
    //clear
@@ -1265,7 +1275,7 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
    build_rotmatrix( m,mQuat);
    glMultMatrixf( &m[0][0] );
    glTranslatef( mX0, mY0, mZ0 );
-   
+
    //Draw
       // another update of the display list is being done, so...
       if(true==mpWXCrystal->GLDisplayListIsLocked())
@@ -1294,6 +1304,16 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
    {
       glCallList(mpWXCrystal->GrabCrystalGLDisplayList());  //Draw Crystal
       mpWXCrystal->ReleaseCrystalGLDisplayList();
+      if(mShowAtomName)
+      {
+         glLoadIdentity();
+         glTranslatef( -0.3, 0, -mDist+1. );// Put labels in front of the atom position
+         glMultMatrixf( &m[0][0] );
+         glTranslatef( mX0, mY0, mZ0 );
+         glCallList(mpWXCrystal->GrabCrystalGLDisplayList(true));  //Draw Atom Names
+         mpWXCrystal->ReleaseCrystalGLDisplayList();
+      }
+         
    }
    glFlush();
    SwapBuffers();
@@ -1550,22 +1570,25 @@ void WXGLCrystalCanvas::InitGL()
    this->SetCurrent();
     
    glEnable(GL_DEPTH_TEST);
-      glEnable(GL_LIGHTING);
-      
-      const GLfloat color_Ambient [] = {0.3, 0.3, 0.3, 1.00}; 
-      const GLfloat color_Diffuse [] = {0.6, 0.6, 0.6, 1.00}; 
-      const GLfloat color_Specular[] = {0.8, 0.8, 0.8, 1.00}; 
-      
-      glLightfv( GL_LIGHT0, GL_AMBIENT,  color_Ambient); 
-      glLightfv( GL_LIGHT0, GL_DIFFUSE,  color_Diffuse); 
-      glLightfv( GL_LIGHT0, GL_SPECULAR, color_Specular); 
-      glLightModelf(GL_LIGHT_MODEL_TWO_SIDE, 1.0); 
+   glEnable(GL_LIGHTING);
+   
+   const GLfloat colour_Ambient [] = {0.4, 0.4, 0.4, 1.00}; 
+   const GLfloat colour_Diffuse [] = {0.6, 0.6, 0.6, 1.00}; 
+   const GLfloat colour_Specular[] = {0.2, 0.2, 0.2, 1.00}; 
 
-      glEnable( GL_LIGHT0 ); 
+   glLightModelf(GL_LIGHT_MODEL_TWO_SIDE, 1.0); 
 
-      glEnable(GL_NORMALIZE);
-      glHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_FASTEST);
-      glHint(GL_POLYGON_SMOOTH_HINT,GL_FASTEST);
+   const GLfloat LightPosition[]= { -10.0f, 10.0f, 10.0f, 0.0f };   
+   glLightfv(GL_LIGHT1, GL_AMBIENT,  colour_Ambient); 
+   glLightfv(GL_LIGHT1, GL_DIFFUSE,  colour_Diffuse); 
+   glLightfv(GL_LIGHT1, GL_SPECULAR, colour_Specular);  
+   glLightfv(GL_LIGHT1, GL_SHININESS,colour_Specular);  
+   glLightfv(GL_LIGHT1, GL_POSITION,LightPosition);
+   glEnable(GL_LIGHT1);  
+
+   glEnable(GL_NORMALIZE);
+   glHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);//GL_FASTEST
+   glHint(GL_POLYGON_SMOOTH_HINT,GL_NICEST);//GL_FASTEST
    
    //Initialize Trackball
    trackball(mQuat,0.,0.,0.,0.);
@@ -1607,6 +1630,14 @@ void WXGLCrystalCanvas::OnShowCrystal()
    if(mShowCrystal) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWCRYSTAL, "Show Crystal");
    else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWCRYSTAL, "Hide Crystal");
    mShowCrystal = !mShowCrystal;
+   this->CrystUpdate();
+}
+
+void WXGLCrystalCanvas::OnShowAtomLabel()
+{
+   if(mShowCrystal) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, "Show Atom Labels");
+   else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, "Hide Atom Labels");
+   mShowAtomName= !mShowAtomName;
    this->CrystUpdate();
 }
 

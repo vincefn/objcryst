@@ -310,14 +310,28 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
                              const REAL xMin,const REAL xMax,
                              const REAL yMin,const REAL yMax,
                              const REAL zMin,const REAL zMax,
-                             const bool displayEnantiomer)const
+                             const bool displayEnantiomer,
+                             const bool displayNames)const
 {
    #ifdef OBJCRYST_GL
    VFN_DEBUG_MESSAGE("Atom::GLInitDisplayList():"<<this->GetName(),5)
    REAL en=1;
    if(displayEnantiomer==true) en=-1;
-   glMaterialfv (GL_FRONT, GL_AMBIENT_AND_DIFFUSE, mpScattPowAtom->GetColourRGB());
+
+      const float r=mpScattPowAtom->GetColourRGB()[0];
+      const float g=mpScattPowAtom->GetColourRGB()[1];
+      const float b=mpScattPowAtom->GetColourRGB()[2];
    
+      const GLfloat colour0[] = {.0, .0, .0, 0.0}; 
+      const GLfloat colourAtom [] = {r, g, b, 1.0}; 
+      GLfloat colourChar [] = {1.0, 1.0, 1.0, 1.0}; 
+      if((r>0.8)&&(g>0.8)&&(b>0.8))
+      {
+         colourChar[0] = 0.2;
+         colourChar[1] = 0.2;
+         colourChar[2] = 0.2;
+      }
+
    if(this->IsDummy()) return ;
    GLUquadricObj* pQuadric = gluNewQuadric();
    if(true==onlyIndependentAtoms)
@@ -332,7 +346,26 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
       this->GetCrystal().FractionalToOrthonormalCoords(x,y,z);
       glPushMatrix();
          glTranslatef(x*en, y, z);
-         gluSphere(pQuadric,this->GetRadius()/3,10,10);
+         if(displayNames)
+         {
+            glMaterialfv(GL_FRONT, GL_AMBIENT,   colour0); 
+            glMaterialfv(GL_FRONT, GL_DIFFUSE,   colour0); 
+            glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0); 
+            glMaterialfv(GL_FRONT, GL_EMISSION,  colourChar); 
+            glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
+            glRasterPos3f(0,0,0);
+            for(unsigned int l=0;l<this->GetName().size();l++)
+               glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12,*(this->GetName().c_str()+l));
+         }
+         else
+         {
+            glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE,   colourAtom); 
+            glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0); 
+            glMaterialfv(GL_FRONT, GL_EMISSION,  colour0); 
+            glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
+            glPolygonMode(GL_FRONT, GL_FILL);
+            gluSphere(pQuadric,this->GetRadius()/3.,10,10);
+         }
       glPopMatrix();
    }
    else
@@ -393,9 +426,26 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
                this->GetCrystal().FractionalToOrthonormalCoords(x,y,z);
                glPushMatrix();
                   glTranslatef(x*en, y, z);
-                  gluSphere(pQuadric,this->GetRadius()/3.,10,10);
-                  //glRasterPos3f(0,0,this->GetRadius()/2.);
-                  //glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,'T');
+                  if(displayNames)
+                  {
+                     glMaterialfv(GL_FRONT, GL_AMBIENT,   colour0); 
+                     glMaterialfv(GL_FRONT, GL_DIFFUSE,   colour0); 
+                     glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0); 
+                     glMaterialfv(GL_FRONT, GL_EMISSION,  colourChar); 
+                     glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
+                     glRasterPos3f(0,0,0);
+                     for(unsigned int l=0;l<this->GetName().size();l++)
+                        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12,*(this->GetName().c_str()+l));
+                  }
+                  else
+                  {
+                     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE,   colourAtom); 
+                     glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0); 
+                     glMaterialfv(GL_FRONT, GL_EMISSION,  colour0); 
+                     glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
+                     glPolygonMode(GL_FRONT, GL_FILL);
+                     gluSphere(pQuadric,this->GetRadius()/3.,10,10);
+                  }
                glPopMatrix();
             }
          }

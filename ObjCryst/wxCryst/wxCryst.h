@@ -41,6 +41,24 @@
 
 namespace ObjCryst
 {
+////////////////////////////////////////////////////////////////////////
+//
+// Unique ID for menus incrementer
+//
+////////////////////////////////////////////////////////////////////////
+/** Class to automatically assign a unique wxID to each window
+*
+*/
+class WXCRYST_ID
+{
+   public:
+      WXCRYST_ID();
+      operator unsigned long();
+   private:
+      unsigned long mIndex;
+      static unsigned long mCounter;
+};
+
 #ifndef DOXYGEN_SKIP_THIS
 enum
 {

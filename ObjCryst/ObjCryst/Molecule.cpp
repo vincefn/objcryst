@@ -21,6 +21,7 @@
 */
 #include <sstream>
 #include <iterator>
+#include <algorithm>
 
 #ifdef OBJCRYST_GL
 #include <GL/glut.h>
@@ -1343,7 +1344,8 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                                const REAL xMin,const REAL xMax,
                                const REAL yMin,const REAL yMax,
                                const REAL zMin,const REAL zMax,
-                               const bool displayEnantiomer)const
+                               const bool displayEnantiomer,
+                               const bool displayNames)const
 {
    #ifdef OBJCRYST_GL
    VFN_DEBUG_ENTRY("Molecule::GLInitDisplayList()",3)
@@ -1357,6 +1359,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
    this->UpdateScattCompList();
    
    const GLfloat colour_bond[]= { 0.5, .5, .5, 1.0 };
+   const GLfloat colour0[] = {0.0f, 0.0f, 0.0f, 0.0f}; 
    
    GLUquadricObj* pQuadric = gluNewQuadric();
    
@@ -1369,12 +1372,39 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
       {
          
          if((*pos)->IsDummy())continue;
-         glMaterialfv (GL_FRONT, GL_AMBIENT_AND_DIFFUSE,
-                       (*pos)->GetScatteringPower().GetColourRGB());
+         const float r=(*pos)->GetScatteringPower().GetColourRGB()[0];
+         const float g=(*pos)->GetScatteringPower().GetColourRGB()[1];
+         const float b=(*pos)->GetScatteringPower().GetColourRGB()[2];
          glPushMatrix();
-            glTranslatef((*pos)->X()*en+xc, (*pos)->Y()+yc, (*pos)->Z()+zc);
-            gluSphere(pQuadric,
-               (*pos)->GetScatteringPower().GetRadius()/3.,10,10);
+            if(displayNames)
+            {
+               GLfloat colourChar [] = {1.0, 1.0, 1.0, 1.0}; 
+               if((r>0.8)&&(g>0.8)&&(b>0.8))
+               {
+                  colourChar[0] = 0.2;
+                  colourChar[1] = 0.2;
+                  colourChar[2] = 0.2;
+               }
+               glMaterialfv(GL_FRONT, GL_AMBIENT,   colour0); 
+               glMaterialfv(GL_FRONT, GL_DIFFUSE,   colour0); 
+               glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0); 
+               glMaterialfv(GL_FRONT, GL_EMISSION,  colourChar); 
+               glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
+               glTranslatef((*pos)->X()*en+xc, (*pos)->Y()+yc, (*pos)->Z()+zc);
+               for(unsigned int l=0;l<(*pos)->GetName().size();l++)
+                  glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12,*((*pos)->GetName().c_str()+l));
+            }
+            else
+            {
+               const GLfloat colourAtom [] = {r, g, b, 1.0}; 
+               glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE,   colourAtom); 
+               glMaterialfv(GL_FRONT, GL_SPECULAR,              colour0); 
+               glMaterialfv(GL_FRONT, GL_EMISSION,              colour0); 
+               glMaterialfv(GL_FRONT, GL_SHININESS,             colour0);
+               glPolygonMode(GL_FRONT, GL_FILL);
+               glTranslatef((*pos)->X()*en+xc, (*pos)->Y()+yc, (*pos)->Z()+zc);
+               gluSphere(pQuadric,(*pos)->GetScatteringPower().GetRadius()/3.,10,10);
+            }
          glPopMatrix();
       }
    }//Only independent atoms ?
@@ -1468,42 +1498,71 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                {
                   this->GetCrystal().FractionalToOrthonormalCoords(x(k),y(k),z(k));
                   if(mvpAtom[k]->IsDummy()) continue;
-                  glMaterialfv (GL_FRONT,GL_AMBIENT_AND_DIFFUSE,
-                     mvpAtom[k]->GetScatteringPower().GetColourRGB());
                   glPushMatrix();
-                     glTranslatef(x(k)*en, y(k), z(k));
-                     gluSphere(pQuadric,
-                        mvpAtom[k]->GetScatteringPower().GetRadius()/3.,10,10);
+                     const float r=mvpAtom[k]->GetScatteringPower().GetColourRGB()[0];
+                     const float g=mvpAtom[k]->GetScatteringPower().GetColourRGB()[1];
+                     const float b=mvpAtom[k]->GetScatteringPower().GetColourRGB()[2];
+                     if(displayNames)
+                     {
+                        GLfloat colourChar [] = {1.0, 1.0, 1.0, 1.0}; 
+                        if((r>0.8)&&(g>0.8)&&(b>0.8))
+                        {
+                           colourChar[0] = 0.2;
+                           colourChar[1] = 0.2;
+                           colourChar[2] = 0.2;
+                        }
+                        glMaterialfv(GL_FRONT, GL_AMBIENT,  colour0); 
+                        glMaterialfv(GL_FRONT, GL_DIFFUSE,  colour0); 
+                        glMaterialfv(GL_FRONT, GL_SPECULAR, colour0); 
+                        glMaterialfv(GL_FRONT, GL_EMISSION, colourChar); 
+                        glMaterialfv(GL_FRONT, GL_SHININESS,colour0);
+                        glRasterPos3f(x(k)*en, y(k), z(k));
+                        for(unsigned int l=0;l<mvpAtom[k]->GetName().size();l++)
+                           glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12,*(mvpAtom[k]->GetName().c_str()+l));
+                     }
+                     else
+                     {
+                        const GLfloat colourAtom [] = {r, g, b, 1.0}; 
+                        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE,colourAtom); 
+                        glMaterialfv(GL_FRONT, GL_SPECULAR,           colour0); 
+                        glMaterialfv(GL_FRONT, GL_EMISSION,           colour0); 
+                        glMaterialfv(GL_FRONT, GL_SHININESS,          colour0);
+                        glPolygonMode(GL_FRONT, GL_FILL);
+                        glTranslatef(x(k)*en, y(k), z(k));
+                        gluSphere(pQuadric,
+                           mvpAtom[k]->GetScatteringPower().GetRadius()/3.,10,10);
+                     }
                   glPopMatrix();
-                  /*
-                  glPushMatrix();
-                     glRasterPos3f(x(k)*en+0.5, y(k), z(k));
-                     glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,*(mvpAtom[k]->GetName().c_str()+2));
-                  glPopMatrix();
-                  */
                }
-               for(unsigned int k=0;k<mvpBond.size();k++)
+               if(displayNames==false)
                {
-                  if(  (mvpBond[k]->GetAtom1().IsDummy())
-                     ||(mvpBond[k]->GetAtom2().IsDummy()) ) continue;
-                  unsigned long n1,n2;
-                  //:KLUDGE: Get the atoms
-                  for(n1=0;n1<mvpAtom.size();n1++)
-                     if(mvpAtom[n1]==&(mvpBond[k]->GetAtom1())) break;
-                  for(n2=0;n2<mvpAtom.size();n2++)
-                     if(mvpAtom[n2]==&(mvpBond[k]->GetAtom2())) break;
-                  glMaterialfv (GL_FRONT,GL_AMBIENT_AND_DIFFUSE,colour_bond);
-                  glPushMatrix();
-                     glTranslatef(x(n1)*en, y(n1), z(n1));
-                     GLUquadricObj *quadobj = gluNewQuadric();
-                     glColor3f(1.0f,1.0f,1.0f);
-                     const REAL height= sqrt(  (x(n2)-x(n1))*(x(n2)-x(n1))
-                                              +(y(n2)-y(n1))*(y(n2)-y(n1))
-                                              +(z(n2)-z(n1))*(z(n2)-z(n1)));
-                     glRotatef(180,(x(n2)-x(n1))*en,y(n2)-y(n1),z(n2)-z(n1)+height);// ?!?!?!
-                     gluCylinder(quadobj,.1,.1,height,10,1 );
-                     gluDeleteQuadric(quadobj);
-                  glPopMatrix();
+                  for(unsigned int k=0;k<mvpBond.size();k++)
+                  {
+                     if(  (mvpBond[k]->GetAtom1().IsDummy())
+                        ||(mvpBond[k]->GetAtom2().IsDummy()) ) continue;
+                     unsigned long n1,n2;
+                     //:KLUDGE: Get the atoms
+                     for(n1=0;n1<mvpAtom.size();n1++)
+                        if(mvpAtom[n1]==&(mvpBond[k]->GetAtom1())) break;
+                     for(n2=0;n2<mvpAtom.size();n2++)
+                        if(mvpAtom[n2]==&(mvpBond[k]->GetAtom2())) break;
+                     glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,colour_bond);
+                     glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0); 
+                     glMaterialfv(GL_FRONT, GL_EMISSION,  colour0); 
+                     glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
+                     glPolygonMode(GL_FRONT, GL_FILL);
+                     glPushMatrix();
+                        glTranslatef(x(n1)*en, y(n1), z(n1));
+                        GLUquadricObj *quadobj = gluNewQuadric();
+                        //glColor4f(1.0f,1.0f,1.0f,1.0);
+                        const REAL height= sqrt(  (x(n2)-x(n1))*(x(n2)-x(n1))
+                                                 +(y(n2)-y(n1))*(y(n2)-y(n1))
+                                                 +(z(n2)-z(n1))*(z(n2)-z(n1)));
+                        glRotatef(180,(x(n2)-x(n1))*en,y(n2)-y(n1),z(n2)-z(n1)+height);// ?!?!?!
+                        gluCylinder(quadobj,.1,.1,height,10,1 );
+                        gluDeleteQuadric(quadobj);
+                     glPopMatrix();
+                  }
                }
             }//if in limits
             x=xSave;

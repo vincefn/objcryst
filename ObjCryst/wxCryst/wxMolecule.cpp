@@ -63,23 +63,6 @@ template<class T> T * WXDialogChooseFromVector(vector<T*> &reg,wxWindow*parent,
    return reg[choice];
 }
 
-
-////////////////////////////////////////////////////////////////////////
-//
-// Unique ID for menus incrementer
-//
-////////////////////////////////////////////////////////////////////////
-class WXCRYST_ID
-{
-   public:
-      WXCRYST_ID(){mIndex=mCounter++;}
-      operator unsigned long(){return mIndex;}
-   private:
-      unsigned long mIndex;
-      static unsigned long mCounter;
-};
-unsigned long WXCRYST_ID::mCounter=0;
-
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXMolAtom

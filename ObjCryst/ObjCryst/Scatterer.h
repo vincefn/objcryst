@@ -174,12 +174,16 @@ class Scatterer:virtual public RefinableObj
       * \ param xMin,xMax,yMin,yMax,zMin,zMax: in fractionnal coordinates, the region
       * in which we want scaterrer to be displayed. The test is made on the center
       * of the scatterer (eg a ZScatterer (molecule) will not be 'cut' on the border).
+      * \param displayNames: if true, only the names of the scatterers will be displayed,
+      * at the position of the scatterers (to actually see them, they will have to
+      * be translated with respect to the drawing of the scatterers).
       */
       virtual void GLInitDisplayList(const bool noSymmetrics=false,
                                      const REAL xMin=-.1,const REAL xMax=1.1,
                                      const REAL yMin=-.1,const REAL yMax=1.1,
                                      const REAL zMin=-.1,const REAL zMax=1.1,
-                                     const bool displayEnantiomer=false)const=0;
+                                     const bool displayEnantiomer=false,
+                                     const bool displayNames=false)const=0;
       /// Last time anything in the scatterer was changed (atoms, positions, scattering power)
       const RefinableObjClock& GetClockScatterer()const;
       /// Last time anything in the scatterer was changed (atoms, positions, scattering power)

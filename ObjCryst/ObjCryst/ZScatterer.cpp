@@ -640,7 +640,8 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                                    const REAL xMin,const REAL xMax,
                                    const REAL yMin,const REAL yMax,
                                    const REAL zMin,const REAL zMax,
-                                   const bool displayEnantiomer)const
+                                   const bool displayEnantiomer,
+                                   const bool displayNames)const
 {
    #ifdef OBJCRYST_GL
    VFN_DEBUG_ENTRY("ZScatterer::GLInitDisplayList()",4)
@@ -660,6 +661,7 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
    
    GLfloat colour_bond[]= { 0.5, .5, .5, 1.0 };
    GLfloat colour_side[]= { 0.0, .0, .0, 1.0 };
+   const GLfloat colour0[] = {0.0f, 0.0f, 0.0f, 0.0f}; 
    
    GLUquadricObj* pQuadric = gluNewQuadric();
    
@@ -800,17 +802,45 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
          for(int k=0;k<mNbAtom;k++)
          {
             if(0==mZAtomRegistry.GetObj(k).GetScatteringPower())continue;
-            glMaterialfv (GL_FRONT, GL_AMBIENT_AND_DIFFUSE,
-                          mZAtomRegistry.GetObj(k).GetScatteringPower()->GetColourRGB());
+            const float r=mZAtomRegistry.GetObj(k).GetScatteringPower()->GetColourRGB()[0];
+            const float g=mZAtomRegistry.GetObj(k).GetScatteringPower()->GetColourRGB()[1];
+            const float b=mZAtomRegistry.GetObj(k).GetScatteringPower()->GetColourRGB()[2];
             glPushMatrix();
-               glTranslatef(x(k)*en, y(k), z(k));
+            glTranslatef(x(k)*en, y(k), z(k));
+            if(displayNames)
+            {
+               GLfloat colourChar [] = {1.0, 1.0, 1.0, 1.0}; 
+               if((r>0.8)&&(g>0.8)&&(b>0.8))
+               {
+                  colourChar[0] = 0.2;
+                  colourChar[1] = 0.2;
+                  colourChar[2] = 0.2;
+               }
+               glMaterialfv(GL_FRONT, GL_AMBIENT,  colour0); 
+               glMaterialfv(GL_FRONT, GL_DIFFUSE,  colour0); 
+               glMaterialfv(GL_FRONT, GL_SPECULAR, colour0); 
+               glMaterialfv(GL_FRONT, GL_EMISSION, colourChar); 
+               glMaterialfv(GL_FRONT, GL_SHININESS,colour0);
+               glRasterPos3f(0.0f, 0.0f, 0.0f);
+               for(unsigned int l=0;l<mZAtomRegistry.GetObj(k).GetName().size();l++)
+                  glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12,
+                                      *(mZAtomRegistry.GetObj(k).GetName().c_str()+l));
+            }
+            else
+            {
+               const GLfloat colourAtom [] = {r, g, b, 1.0}; 
+               glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE,colourAtom); 
+               glMaterialfv(GL_FRONT, GL_SPECULAR,           colour0); 
+               glMaterialfv(GL_FRONT, GL_EMISSION,           colour0); 
+               glMaterialfv(GL_FRONT, GL_SHININESS,          colour0);
+               glPolygonMode(GL_FRONT, GL_FILL);
                gluSphere(pQuadric,
                   mZAtomRegistry.GetObj(k).GetScatteringPower()->GetRadius()/3.,10,10);
                //Draw the bond for this Atom,if it's not linked to a dummy
                int bond=this->GetZBondAtom(k);
                if((0!=mZAtomRegistry.GetObj(bond).GetScatteringPower()) && (k>0))
                {
-                  glMaterialfv (GL_FRONT, GL_AMBIENT_AND_DIFFUSE,colour_bond);
+                  glMaterialfv(GL_FRONT,GL_AMBIENT_AND_DIFFUSE,colour_bond);
                   GLUquadricObj *quadobj = gluNewQuadric();
                   glColor3f(1.0f,1.0f,1.0f);
                   const REAL height= sqrt( (x(bond)-x(k))*(x(bond)-x(k))
@@ -820,6 +850,7 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                   gluCylinder(quadobj,.1,.1,height,10,1 );
                   gluDeleteQuadric(quadobj);
                }
+            }
             glPopMatrix();
          }
       }//Use triangle faces ?
@@ -961,17 +992,46 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                   for(int k=0;k<mNbAtom;k++)
                   {
                      if(0==mZAtomRegistry.GetObj(k).GetScatteringPower())continue;
-                     glMaterialfv (GL_FRONT,GL_AMBIENT_AND_DIFFUSE,
-                        mZAtomRegistry.GetObj(k).GetScatteringPower()->GetColourRGB());
+                     const float r=mZAtomRegistry.GetObj(k).GetScatteringPower()->GetColourRGB()[0];
+                     const float g=mZAtomRegistry.GetObj(k).GetScatteringPower()->GetColourRGB()[1];
+                     const float b=mZAtomRegistry.GetObj(k).GetScatteringPower()->GetColourRGB()[2];
                      glPushMatrix();
-                        glTranslatef(x(k)*en, y(k), z(k));
+                     glTranslatef(x(k)*en, y(k), z(k));
+                     if(displayNames)
+                     {
+                        GLfloat colourChar [] = {1.0, 1.0, 1.0, 1.0}; 
+                        if((r>0.8)&&(g>0.8)&&(b>0.8))
+                        {
+                           colourChar[0] = 0.2;
+                           colourChar[1] = 0.2;
+                           colourChar[2] = 0.2;
+                        }
+                        glMaterialfv(GL_FRONT, GL_AMBIENT,  colour0); 
+                        glMaterialfv(GL_FRONT, GL_DIFFUSE,  colour0); 
+                        glMaterialfv(GL_FRONT, GL_SPECULAR, colour0); 
+                        glMaterialfv(GL_FRONT, GL_EMISSION, colourChar); 
+                        glMaterialfv(GL_FRONT, GL_SHININESS,colour0);
+                        glRasterPos3f(0.0f, 0.0f, 0.0f);
+                        for(unsigned int l=0;l<mZAtomRegistry.GetObj(k).GetName().size();l++)
+                           glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12,
+                                               *(mZAtomRegistry.GetObj(k).GetName().c_str()+l));
+                     }
+                     else
+                     {
+                        const GLfloat colourAtom [] = {r, g, b, 1.0}; 
+                        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE,colourAtom); 
+                        glMaterialfv(GL_FRONT, GL_SPECULAR,           colour0); 
+                        glMaterialfv(GL_FRONT, GL_EMISSION,           colour0); 
+                        glMaterialfv(GL_FRONT, GL_SHININESS,          colour0);
+                        glPolygonMode(GL_FRONT, GL_FILL);
                         gluSphere(pQuadric,
                            mZAtomRegistry.GetObj(k).GetScatteringPower()->GetRadius()/3.,10,10);
+                        glRasterPos3f(0,0,0);
                         //Draw the bond for this Atom,if it's not linked to a dummy
                         int bond=this->GetZBondAtom(k);
                         if((0!=mZAtomRegistry.GetObj(bond).GetScatteringPower()) && (k>0))
                         {
-                           glMaterialfv (GL_FRONT, GL_AMBIENT_AND_DIFFUSE,colour_bond);
+                           glMaterialfv(GL_FRONT,GL_AMBIENT_AND_DIFFUSE,colour_bond);
                            GLUquadricObj *quadobj = gluNewQuadric();
                            glColor3f(1.0f,1.0f,1.0f);
                            const REAL height= sqrt( (x(bond)-x(k))*(x(bond)-x(k))
@@ -981,38 +1041,10 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                            gluCylinder(quadobj,.1,.1,height,10,1 );
                            gluDeleteQuadric(quadobj);
                         }
+                     }
                      glPopMatrix();
                   }
                }//Use triangle faces ?
-
-               /*
-               for(int k=0;k<1;k++)//mNbAtom
-               {
-                  if(0==mZAtomRegistry.GetObj(k).GetScatteringPower())continue;
-                  glColor3f(0.8f,0.4f,0.4f);      // Red
-                  glMaterialfv (GL_FRONT, GL_AMBIENT_AND_DIFFUSE,
-                                mZAtomRegistry.GetObj(k).GetScatteringPower()->GetColourRGB());
-                  glPushMatrix();
-                     glTranslatef(x(k), y(k), z(k));
-                     glutSolidSphere(
-                        mZAtomRegistry.GetObj(k).GetScatteringPower()->GetRadius()/3.,10,10);
-                     //Draw the bond for this Atom,if it's not linked to a dummy
-                     const int bond=ZBondAtom(k);
-                     if((0!=mZAtomRegistry.GetObj(bond).GetScatteringPower()->) && (k>0))
-                     {
-                        glMaterialfv (GL_FRONT, GL_AMBIENT_AND_DIFFUSE,colour_bond);
-                        GLUquadricObj *quadobj = gluNewQuadric();
-                        glColor3f(1.0f,1.0f,1.0f);      // Red
-                        const REAL height= sqrt( (x(bond)-x(k))*(x(bond)-x(k))
-                                                 +(y(bond)-y(k))*(y(bond)-y(k))
-                                                 +(z(bond)-z(k))*(z(bond)-z(k)));
-                        glRotatef(180,x(bond)-x(k),y(bond)-y(k),z(bond)-z(k)+height);// !!!
-                        gluCylinder(quadobj,.1,.1,height,10,1 );
-                        gluDeleteQuadric(quadobj);
-                     }
-                     glPopMatrix();
-               }
-               */
             }//if in limits
             x=xSave;
             y=ySave;
