@@ -315,7 +315,8 @@ CrystMatrix_REAL Crystal::GetMinDistanceTable(const REAL minDistance) const
    CrystMatrix_REAL minDistTable(nbComponent,nbComponent);
    REAL dist;
    REAL tmp;
-   const REAL min=minDistance*minDistance;
+   REAL min=minDistance*minDistance;
+   if(minDistance<0) min = -1.;// no min distance
    minDistTable=10000.;
    for(int i=0;i<nbComponent;i++)
    {
