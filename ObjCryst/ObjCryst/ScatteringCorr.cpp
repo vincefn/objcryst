@@ -279,7 +279,7 @@ REAL TextureMarchDollase::GetBiasingCost()const
    VFN_DEBUG_MESSAGE("TextureMarchDollase::GetBiasingCost()="<<cost<<"("<<mName<<")",1)
    return cost;
 }
-void TextureMarchDollase::XMLOutput(ostream &os,int indent=0)const
+void TextureMarchDollase::XMLOutput(ostream &os,int indent)const
 {
 }
 void TextureMarchDollase::XMLInput(istream &is,const XMLCrystTag &tag)
