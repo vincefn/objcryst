@@ -1183,7 +1183,7 @@ void ZScatterer::ImportFenskeHallZMatrix(istream &is)
          scattPow=mpCryst->GetScatteringPowerRegistry().Find
                      (symbol,"ScatteringPowerAtom");
          cout<<
-            sprintf(buf,"%d",i);
+            sprintf(buf,"%d",i+1);
          this->AddAtom(symbol+(string)buf,
                        &(mpCryst->GetScatteringPowerRegistry().GetObj(scattPow)),
                        bondAtom-1,bond,
