@@ -548,21 +548,8 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
    mCalcPatternIsLocked=true;
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():2:"<<mObs.numElements(),5)
 
-   const long nbPoints=mObs.numElements();
-   mMaxIntensity=mCalc.max();
-   mMinIntensity=mCalc.min();
-   {
-      const float max=mObs.max();
-      const float min=mObs.min();
-      if(max>mMaxIntensity) mMaxIntensity=max;
-      if(min<mMinIntensity) mMinIntensity=min;
-      if(mMinIntensity<0) mMinIntensity=0;
-  }
-   mMax2Theta=m2theta.max();
-   mMin2Theta=m2theta.min();
+   const long nbPoints=mLast-mFirst+1;
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():3",5)
-
-   //dc.SetUserScale( 1, 1 );
 
    // Draw Axis (sort of)
    {
@@ -602,14 +589,14 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
    {
       dc.SetPen(* wxCYAN_PEN);
       wxCoord x1,y1,x2,y2;
-      x2=(wxCoord)(mMargin+ 0.    *(width-mMargin)/(double)nbPoints);
-      y2=(wxCoord)(height-mMargin-(mObs(0)-mMinIntensity)*(height-2*mMargin)
+      x2=(wxCoord)(mMargin+ 0. *(width-mMargin)/(double)nbPoints);
+      y2=(wxCoord)(height-mMargin-(mObs(mFirst)-mMinIntensity)*(height-2*mMargin)
                      /(mMaxIntensity-mMinIntensity));
-      for(long i=1;i<nbPoints;i++)
+      for(long i=mFirst+1;i<=mLast;i++)
       {
          x1=x2;
          y1=y2;
-         x2=(wxCoord)(mMargin+ i     *(width-mMargin)/(double)nbPoints);
+         x2=(wxCoord)(mMargin+ (i-mFirst)*(width-mMargin)/(double)nbPoints);
          y2=(wxCoord)(height-mMargin-(mObs(i)-mMinIntensity)*(height-2*mMargin)
                         /(mMaxIntensity-mMinIntensity));
          dc.DrawLine(x1,y1,x2,y2);
@@ -621,13 +608,13 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
       dc.SetPen(* wxRED_PEN);
       wxCoord x1,y1,x2,y2;
       x2=(wxCoord)(mMargin+ 0.     *(width-mMargin)/(double)nbPoints);
-      y2=(wxCoord)(height-mMargin- (mCalc(0)-mMinIntensity)*(height-2*mMargin)
+      y2=(wxCoord)(height-mMargin- (mCalc(mFirst)-mMinIntensity)*(height-2*mMargin)
                      /(mMaxIntensity-mMinIntensity));
-      for(long i=1;i<nbPoints;i++)
+      for(long i=mFirst+1;i<=mLast;i++)
       {
          x1=x2;
          y1=y2;
-         x2=(wxCoord)(mMargin+ i      *(width-mMargin)/(double)nbPoints);
+         x2=(wxCoord)(mMargin+ (i-mFirst)*(width-mMargin)/(double)nbPoints);
          y2=(wxCoord)(height-mMargin-(mCalc(i)-mMinIntensity)*(height-2*mMargin)
                         /(mMaxIntensity-mMinIntensity));
          dc.DrawLine(x1,y1,x2,y2);
@@ -640,28 +627,79 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
 }
 void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
 {
-   wxClientDC dc(this);
-   PrepareDC(dc);
-   mpParentFrame->PrepareDC(dc);
+	// Write mouse pointer coordinates
+   	wxClientDC dc(this);
+   	PrepareDC(dc);
+   	mpParentFrame->PrepareDC(dc);
 
-   wxPoint pos=event.GetPosition();
-   const long x= dc.DeviceToLogicalX(pos.x);
-   const long y= dc.DeviceToLogicalY(pos.y);
+   	wxPoint pos=event.GetPosition();
+   	const long x= dc.DeviceToLogicalX(pos.x);
+   	const long y= dc.DeviceToLogicalY(pos.y);
 
-   wxCoord width,height;
-   this->GetSize(&width, &height);
-   const double 
-      ttheta=mMin2Theta+(x-mMargin)*(mMax2Theta-mMin2Theta)/(double)(width-mMargin);
-   const double intensity=mMinIntensity+(height-mMargin-y)*(mMaxIntensity-mMinIntensity)
-                                          /(double)(height-2*mMargin);
+   	wxCoord width,height;
+   	this->GetSize(&width, &height);
+   	const double 
+      	ttheta=mMin2Theta+(x-mMargin)*(mMax2Theta-mMin2Theta)/(double)(width-mMargin);
+   	const double intensity=mMinIntensity+(height-mMargin-y)*(mMaxIntensity-mMinIntensity)
+                                          	/(double)(height-2*mMargin);
 
-   wxString str;
-   str.Printf("2Theta=%6.2f    ,I=%12.2f",ttheta,intensity);
-   mpParentFrame->SetStatusText(str);
+   	wxString str;
+   	str.Printf("2Theta=%6.2f    ,I=%12.2f",ttheta,intensity);
+   	mpParentFrame->SetStatusText(str);
    
+   if (event.Dragging() && event.LeftIsDown() && (!mIsDragging))
+   {//Begin zooming
+		mIsDragging=true;
+		mDragging2Theta0=ttheta;
+		mDraggingIntensity0=intensity;
+		return;
+	}
+	if(event.LeftUp() && mIsDragging)
+	{//Finished zooming !
+		mIsDragging=false;
+		if(mDraggingIntensity0>intensity)
+		{
+			mMinIntensity=intensity;
+			mMaxIntensity=mDraggingIntensity0;
+		}
+		else
+		{
+			mMinIntensity=mDraggingIntensity0;
+			mMaxIntensity=intensity;
+		}
+		if(mDragging2Theta0>ttheta)
+		{
+			mMin2Theta=ttheta;
+			mMax2Theta=mDragging2Theta0;
+		}
+		else
+		{
+			mMin2Theta=mDragging2Theta0;
+			mMax2Theta=ttheta;
+		}
+		const long nbpoints=m2theta.numElements();
+		bool flag=true;
+		for(long i=0;i<nbpoints;i++)
+		{
+			if(flag) if(m2theta(i)>=mMin2Theta) {mFirst=i;flag=false;}
+			if(m2theta(i)>=mMax2Theta) {mLast=i;break;}
+		}
+   	wxUpdateUIEvent event(ID_POWDERSPECTRUM_GRAPH_NEW_PATTERN);
+   	wxPostEvent(this,event);
+		return;
+	}
+	if(event.LeftDClick())
+	{//Reset axis range
+		this->ResetAxisLimits();
+   	wxUpdateUIEvent event(ID_POWDERSPECTRUM_GRAPH_NEW_PATTERN);
+   	wxPostEvent(this,event);
+		return;
+	}
+	
    if(event.RightIsDown())
-   {
+   {//popup menu
       this->PopupMenu(mpPopUpMenu, event.GetX(), event.GetY() );
+		return;
    }
 }
 
@@ -686,6 +724,7 @@ void WXPowderPatternGraph::SetPattern(const CrystVector_double &obs,
    m2theta.resize(nbPoint);
    for(long i=0;i<nbPoint;i++) m2theta(i)=tthetaMin+i*tthetaStep;
    m2theta*=RAD2DEG;
+	this->ResetAxisLimits();
    // If we only send an OnPaint event, only the parts which have been erased are redrawn
    // (under windows). SO we must force the complete Refresh of the window... in the
    // main thread of course...
@@ -698,6 +737,20 @@ void WXPowderPatternGraph::OnRedrawNewPattern(wxUpdateUIEvent& WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph::SetPattern()",5)
    this->Refresh(false);
+}
+void WXPowderPatternGraph::ResetAxisLimits()
+{
+   mMaxIntensity=mCalc.max();
+   mMinIntensity=mCalc.min();
+   const float max=mObs.max();
+   const float min=mObs.min();
+   if(max>mMaxIntensity) mMaxIntensity=max;
+   if(min<mMinIntensity) mMinIntensity=min;
+   if(mMinIntensity<0) mMinIntensity=0;
+   mMax2Theta=m2theta.max();
+   mMin2Theta=m2theta.min();
+	mFirst=0;
+	mLast=m2theta.numElements()-1;
 }
 
 ////////////////////////////////////////////////////////////////////////

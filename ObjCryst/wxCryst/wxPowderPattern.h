@@ -61,7 +61,12 @@ class WXPowderPattern: public WXRefinableObj
       WXPowderPatternGraph *mpGraph;
    DECLARE_EVENT_TABLE()
 };
-/// Class to display a Powder Pattern (calc,obs, diff...).
+/** Class to display a Powder Pattern (calc,obs) in a graphic window.
+*
+* So far only displays calc and obs patterns.
+* \todo display the difference pattern. Allow to zoom. Display
+* reflection positions for crystalline phases.
+*/
 class WXPowderPatternGraph: public wxWindow
 {
    public:
@@ -82,6 +87,8 @@ class WXPowderPatternGraph: public wxWindow
       /// Redraw the pattern (special function to ensure complete redrawing under windows...)
       void OnRedrawNewPattern(wxUpdateUIEvent& WXUNUSED(event));
    private:
+		/// Reset the limits of the axis to full range.
+		void ResetAxisLimits();
       WXPowderPattern *mpPattern;
       CrystVector_double mObs,mCalc,m2theta;
       const long mMargin;
@@ -91,6 +98,12 @@ class WXPowderPatternGraph: public wxWindow
       bool mCalcPatternIsLocked;
       /// Pop-up menu
       wxMenu* mpPopUpMenu;
+		/// Are we within a dragging event ?
+		bool mIsDragging;
+		/// Remember coordinates at the beginning of the dragging
+		double mDragging2Theta0,mDraggingIntensity0;
+		/// Index of the first and last points drawn of the pattern
+		mutable long mFirst,mLast;
       DECLARE_EVENT_TABLE()
 };
 
@@ -112,7 +125,13 @@ class WXFieldRefParBackground:public WXFieldRefPar
 }
 #endif
 
-/// Class to display a Powder Pattern Background
+/** Class to display a Powder Pattern Background
+*
+* Still very limited ! Only allows to import a list of background
+* points...
+* \todo Display the list of background points with the refinable 
+* intensity. Add th possibility to change the points.
+*/
 class WXPowderPatternBackground: public WXRefinableObj
 {
    public:
@@ -123,7 +142,11 @@ class WXPowderPatternBackground: public WXRefinableObj
    DECLARE_EVENT_TABLE()
 };
 
-/// Class to display a Powder Pattern for a crystalline phase
+/** Class to display a Powder Pattern for a crystalline phase
+*
+* Allows to choose the Crystal, as well as the profile
+* associated to this crystalline phase.
+*/
 class WXPowderPatternDiffraction: public WXRefinableObj
 {
    public:

@@ -34,7 +34,7 @@ BEGIN_EVENT_TABLE(WXGlobalOptimObj, wxWindow)
 END_EVENT_TABLE()
 
 WXGlobalOptimObj::WXGlobalOptimObj(wxWindow* parent, GlobalOptimObj*obj):
-WXCrystObj(parent),mpGlobalOptimObj(obj),mpGlobalOptimRunThread(0),mNbTrial(100000)
+WXCrystObj(parent),mpGlobalOptimObj(obj),mpGlobalOptimRunThread(0),mNbTrial(100000000)
 {
    VFN_DEBUG_MESSAGE("WXGlobalOptimObj::WXGlobalOptimObj(wxWindow*,GlobalOptimObj*,)",6)
    mpWXTitle->SetForegroundColour(wxColour(255,0,0));
@@ -84,9 +84,9 @@ WXCrystObj(parent),mpGlobalOptimObj(obj),mpGlobalOptimRunThread(0),mNbTrial(1000
       
       wxBoxSizer *sizerAmp=new wxBoxSizer(wxHORIZONTAL);
       WXFieldPar<double> *ampMax=
-         new WXFieldPar<double>(this,"Amplitude Max:",-1,&(mpGlobalOptimObj->mMutationAmplitudeBegin));
+         new WXFieldPar<double>(this,"Amplitude Max:",-1,&(mpGlobalOptimObj->mMutationAmplitudeMax));
       WXFieldPar<double> *ampMin=
-         new WXFieldPar<double>(this,"Amplitude Min:",-1,&(mpGlobalOptimObj->mMutationAmplitudeEnd));
+         new WXFieldPar<double>(this,"Amplitude Min:",-1,&(mpGlobalOptimObj->mMutationAmplitudeMin));
       sizerAmp->Add(ampMax);
       sizerAmp->Add(ampMin);
       mpSizer->Add(sizerAmp);
