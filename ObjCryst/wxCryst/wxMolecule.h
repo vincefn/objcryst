@@ -44,6 +44,7 @@ class WXMolAtom:public WXCrystObjBasic
 {
    public:
       WXMolAtom(wxWindow *parent, MolAtom*);
+      virtual ~WXMolAtom();
       virtual void CrystUpdate();
       virtual void UpdateUI();
       virtual bool Layout();
@@ -62,6 +63,7 @@ class WXMolBond:public WXCrystObjBasic
 {
    public:
       WXMolBond(wxWindow *parent, MolBond*);
+      virtual ~WXMolBond();
       virtual void CrystUpdate();
       virtual void UpdateUI();
       virtual bool Layout();
@@ -83,6 +85,7 @@ class WXMolBondAngle:public WXCrystObjBasic
 {
    public:
       WXMolBondAngle(wxWindow *parent, MolBondAngle*);
+      virtual ~WXMolBondAngle();
       virtual void CrystUpdate();
       virtual void UpdateUI();
       virtual bool Layout();
@@ -102,6 +105,7 @@ class WXMolDihedralAngle:public WXCrystObjBasic
 {
    public:
       WXMolDihedralAngle(wxWindow *parent, MolDihedralAngle*);
+      virtual ~WXMolDihedralAngle();
       virtual void CrystUpdate();
       virtual void UpdateUI();
       virtual bool Layout();

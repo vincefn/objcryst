@@ -165,6 +165,11 @@ WXCrystObjBasic(parent),mpMolAtom(obj)
    VFN_DEBUG_EXIT("WXMolAtom::WXMolAtom():"<<obj->GetName(),6)
 }
 
+WXMolAtom::~WXMolAtom()
+{
+   mpMolAtom->WXNotifyDelete();
+}
+
 void WXMolAtom::CrystUpdate()
 {
    VFN_DEBUG_ENTRY("WXMolAtom::CrystUpdate()",5)
@@ -274,6 +279,10 @@ WXCrystObjBasic(parent),mpMolBond(obj),mpButtonFree(0)
    this->CrystUpdate();
    this->Layout();
    VFN_DEBUG_EXIT("WXMolBond::WXMolBond():"<<obj->GetName(),6)
+}
+WXMolBond::~WXMolBond()
+{
+   mpMolBond->WXNotifyDelete();
 }
 
 void WXMolBond::CrystUpdate()
@@ -416,6 +425,11 @@ WXCrystObjBasic(parent),mpMolBondAngle(obj)
    this->CrystUpdate();
    this->Layout();
    VFN_DEBUG_EXIT("WXMolBondAngle::WXMolBond():"<<obj->GetName(),6)
+}
+
+WXMolBondAngle::~WXMolBondAngle()
+{
+   mpMolBondAngle->WXNotifyDelete();
 }
 
 void WXMolBondAngle::CrystUpdate()
@@ -569,6 +583,11 @@ WXCrystObjBasic(parent),mpMolDihedralAngle(obj)
    this->CrystUpdate();
    this->Layout();
    VFN_DEBUG_EXIT("WXMolDihedralAngle::WXMolBond():"<<obj->GetName(),6)
+}
+
+WXMolDihedralAngle::~WXMolDihedralAngle()
+{
+   mpMolDihedralAngle->WXNotifyDelete();
 }
 
 void WXMolDihedralAngle::CrystUpdate()
