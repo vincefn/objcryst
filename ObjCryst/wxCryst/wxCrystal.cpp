@@ -775,6 +775,7 @@ BEGIN_EVENT_TABLE(WXGLCrystalCanvas, wxGLCanvas)
    EVT_CHAR             (WXGLCrystalCanvas::OnKeyDown)
    EVT_KEY_DOWN         (WXGLCrystalCanvas::OnKeyDown)
    EVT_KEY_UP           (WXGLCrystalCanvas::OnKeyUp)
+   EVT_UPDATE_UI(ID_GLCRYSTAL_UPDATEUI,WXGLCrystalCanvas::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXGLCrystalCanvas::WXGLCrystalCanvas(WXCrystal *wxcryst,
@@ -1053,8 +1054,14 @@ void WXGLCrystalCanvas::OnUpdate(wxCommandEvent & WXUNUSED(event))
 void WXGLCrystalCanvas::CrystUpdate()
 {
    VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::CrystUpdate()",7)
-   wxPaintEvent event;
+   wxUpdateUIEvent event(ID_GLCRYSTAL_UPDATEUI);
    wxPostEvent(this,event);
+}
+
+void WXGLCrystalCanvas::OnUpdateUI(wxUpdateUIEvent& WXUNUSED(event))
+{
+   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnUpdateUI()",5)
+   this->Refresh(false);
 }
 
 void WXGLCrystalCanvas::InitGL()

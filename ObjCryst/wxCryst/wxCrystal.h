@@ -102,8 +102,11 @@ class WXGLCrystalCanvas : public wxGLCanvas
       void OnMouse( wxMouseEvent& event );
       /// This forces a new Display List (user-asked)
       void OnUpdate(wxCommandEvent & WXUNUSED(event));
+      /// This is called by the Crystal in WXCrystal::UpdateGL().
       void CrystUpdate();
       void OnChangeLimits(wxCommandEvent & WXUNUSED(event));
+      /// Redraw the structure (special function to ensure complete redrawing under windows...)
+      void OnUpdateUI(wxUpdateUIEvent& WXUNUSED(event));
    private:
       void InitGL();
       /// The owner WXCrystal
