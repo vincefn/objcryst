@@ -1,5 +1,8 @@
 #### 1.3 - december 2002
 NEW FEATURES
+   * Added a contribution from Michael Y. Polyakov, (working with
+     Brian Toby) to display Fourier maps exported from GSAS in 
+     Fox (use right-click when displaying 3D structure to import).
    * Added scattering power for a sphere, e.g. to modelize a
      disordered fullerene.
    * Added the option to use pseudo-crystallographic symmetry in a
@@ -13,6 +16,8 @@ NEW FEATURES
    * Added the ability to run Fox without the graphical interface,
      once all objects to be optimized have been setup and saved in
      a xml file.
+   * shift-dragging with left mouse button allows to change center of
+     the 3D Crystal view.
    
 BUG FIXES
    * Fix serious bug in the dtermination of systematic extinctions,
