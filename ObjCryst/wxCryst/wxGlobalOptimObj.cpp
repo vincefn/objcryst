@@ -214,8 +214,18 @@ void WXOptimizationObj::OnStopOptimization()
 }
 void WXOptimizationObj::OnUpdateUI(wxUpdateUIEvent& event)
 {
+   VFN_DEBUG_ENTRY("WXOptimizationObj::OnUpdateUI()",5)
+   this->UpdateUI();
+   VFN_DEBUG_EXIT("WXOptimizationObj::OnUpdateUI()",5)
+}
+
+void WXOptimizationObj::UpdateUI()
+{
+   VFN_DEBUG_ENTRY("WXOptimizationObj::UpdateUI()",5)
    mpWXTitle->SetValue(this->GetOptimizationObj().GetName());
+   mpWXTitle->UpdateUI();
    this->WXCrystObj::UpdateUI();
+   VFN_DEBUG_EXIT("WXOptimizationObj::UpdateUI()",5)
 }
 
 ////////////////////////////////////////////////////////////////////////
