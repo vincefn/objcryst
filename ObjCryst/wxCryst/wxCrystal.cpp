@@ -1885,12 +1885,14 @@ END_EVENT_TABLE()
   SetSizer(dialogSizer);
   SetAutoLayout(TRUE);
   Layout();
-  delete dialogSizer;
-  delete inputSizer;
-  delete buttonSizer;
 }
 
-UserSelectBoundingBox::~UserSelectBoundingBox () {};
+UserSelectBoundingBox::~UserSelectBoundingBox () {
+  // if the sizers must be deleted, put them in the class and delete them here
+  //delete dialogSizer;
+  //delete inputSizer;
+  //delete buttonSizer;
+};
 
 void UserSelectBoundingBox::OnOk () {
   char * strptr;
