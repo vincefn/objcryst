@@ -655,9 +655,8 @@ WXScatterer(parent,mol),mpMolecule(mol)
                                 "Remove a Bond Angle Restraint");
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_REMOVE_DIHEDRAL,
                                 "Remove a Dihedral Angle Restraint");
-         mpMenuBar->GetMenu(ID_MOLECULE_MENU_FORMULA).AppendSeparator();
-         mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_TEST,
-                                "Test");
+         //mpMenuBar->GetMenu(ID_MOLECULE_MENU_FORMULA).AppendSeparator();
+         //mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_TEST,"Test");
    
    //sizers
    mpSizerAtomList= new wxBoxSizer(wxVERTICAL);
@@ -684,7 +683,7 @@ void WXMolecule::OnMenuOptimizeConformation(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXMolecule::OnMenuOptimizeConformation()",5)
    WXCrystValidateAllUserInput();
-   mpMolecule->OptimizeConformation();
+   mpMolecule->OptimizeConformation(100000,mpMolecule->GetAtomList().size());
    mpMolecule->GetCrystal().UpdateDisplay();
    VFN_DEBUG_EXIT("WXMolecule::OnMenuOptimizeConformation()",5)
 }
@@ -844,6 +843,7 @@ void WXMolecule::OnMenuTest(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXMolecule::OnMenuTest()",6)
    mpMolecule->RestraintStatus(cout);
+   mpMolecule->OptimizeConformation();
    VFN_DEBUG_EXIT("WXMolecule::OnMenuTest()",6)
 }
 

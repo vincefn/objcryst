@@ -480,6 +480,9 @@ class Molecule: public Scatterer
       /// Rotate a group of atoms around an axis defined by two atoms
       void RotateAtomGroup(const MolAtom &at1,const MolAtom &at2,
                            const set<unsigned long> &atoms, const REAL angle);
+      /// Rotate a group of atoms around an axis defined by one atom and a vector
+      void RotateAtomGroup(const MolAtom &at,const REAL vx,const REAL vy,const REAL vz,
+                           const set<unsigned long> &atoms, const REAL angle);
       /// Print the status of all restraints (bond length, angles...)
       void RestraintStatus(ostream &os)const;
    private:
@@ -498,10 +501,18 @@ class Molecule: public Scatterer
       *
       */
       void BuildConnectivityTable()const;
-      /** Build the groups of atoms around each bond
+      /** Build the groups of atoms that will be rotated during global optimization.
       *
+      * This is not const because we temporarily modify the molecule conformation
+      * to test which RotorGroups are forbidden by restraints (but it should be const).
       */
-      void BuildTorsionAtomGroupTable()const;
+      void BuildRotorGroup();
+      /** Build the groups of atoms that can be flipped.
+      *
+      * This is not const because we temporarily modify the molecule conformation
+      * to test which FlipGroups are forbidden by restraints (but it should be const).
+      */
+      void BuildFlipGroup();
       /** Update the Molecule::mScattCompList from the cartesian coordinates
       * of all atoms, and the orientation parameters.
       */
@@ -561,7 +572,8 @@ class Molecule: public Scatterer
          RefinableObjClock mClockOrientation;
          mutable RefinableObjClock mClockLogLikelihood;
          mutable RefinableObjClock mClockConnectivityTable;
-         mutable RefinableObjClock mClockmTorsionAtomGroupTable;
+         mutable RefinableObjClock mClockRotorGroup;
+         mutable RefinableObjClock mClockFlipGroup;
          
       // For local minimization (EXPERIMENTAL)
          unsigned long mLocalParamSet;
@@ -578,24 +590,85 @@ class Molecule: public Scatterer
       /// Connectivity table: for each atom, keep the list of atoms
       /// bonded to it. All atoms are referenced from their index.
       mutable map<unsigned long,set<unsigned long> > mConnectivityTable;
-      /** Groups of atoms around each bond: for each bond, keep a list of group of atoms
-      * on each side of the bond.
-      *
-      * The map runs on all bonds, referenced from their index in the bond list. For each bond,
-      * there are two lists of group of atoms, corresponding to the two ends of the bond.
-      * Each list references all the group of atoms starting from one end of the bond.
-      * e.g. if A-B make one bond, and A is directly connected to 3 atoms A1 A2 A3, then
-      * there are 3 atom groups listed for A, (A,A1,...), (A,A2,...) and (A,A3,...).
-      *
-      * This is useful to rotate atoms around a torsion bond, with the ability to rotate
-      * all atoms on one side of the bond, or only one group of atoms starting from one
-      * end of the bond.
+      /** Defines a group of atoms which can be rotated around an axis defined
+      * by two other atoms.
       */
-      mutable map<unsigned long,pair<list<set<unsigned long> >,list<set<unsigned long> > > > mTorsionAtomGroupTable;
-      /** The index of bonds with free rotation
+      struct RotorGroup
+      {
+         /** Constructor, with the two atoms around which the rotation
+         * shall be made. The list of atoms to be rotated is initially empty.
+         */
+         RotorGroup(const MolAtom &at1,const MolAtom &at2);
+         /// The first atom defining the rotation axis
+         const MolAtom * mpAtom1;
+         /// The second atom defining the rotation axis
+         const MolAtom * mpAtom2;
+         /// The set of atoms that are to be rotated
+         set<unsigned long> mvRotatedAtomList;
+      };
+      /** List of RotorGroups corresponding to free torsion bonds.
+      *
+      * In this list are list of atoms on one side of a bond, that can be rotated
+      * freely around this bond. Each bond is listed only once, with
+      * the side which has the smallest number of atoms.
+      */
+      mutable list<RotorGroup> mvRotorGroupTorsion;
+      /** List of RotorGroups corresponding to free torsion bonds, but with only
+      * one chain of atoms listed.
+      *
+      * The difference with Molecule::mRotorGroupTorsion is that if the bond is
+      * A-B, with atom A linked with atoms A1,A2,A3, in this list only one chain
+      * (starting either from A1, A2 or A3) will be rotated, instead of the 3 chains.
+      * This is useful when searching for the absolute configuration of atoms.
+      */
+      mutable list<RotorGroup> mvRotorGroupTorsionSingleChain;
+      /** List of RotorGroups for internal rotations. This lists groups of atoms
+      * that can be rotated \e between two given atoms. This is useful to alter
+      * the conformation of large rings, where no free torsion bonds exists, and
+      * also for long flexible chains.
+      */
+      mutable list<RotorGroup> mvRotorGroupInternal;
+      /** When 3(A1..1n) or more atoms are connected to a same atom A, it defines
+      * a 'flip' group, where it is possible to rotate bonds to their symmetric
+      * with respect to one plane defined by atoms Ai-A-Aj. This is useful to
+      * flip the absolute configuration for asymmetric centers. Note that the bond
+      * is only rotated, so that the entire group is not mirrored (no absolute configuration 
+      * is broken in the group).
+      *
+      * Also, a FlipGroup can correspond to a 180° rotation exchanging Ai and Aj
+      * (rotating the two chains around the bissecting angle of bonds A-Ai and A-Aj)
+      */
+      struct FlipGroup
+      {
+         /** Constructor, with the central atom.
+         */
+         FlipGroup(const MolAtom &at0,const MolAtom &at1,const MolAtom &at2);
+         /// The atom which is an asymmetric center
+         const MolAtom * mpAtom0;
+         /// The first atom defining the rotation axis
+         const MolAtom * mpAtom1;
+         /// The second atom defining the rotation axis
+         const MolAtom * mpAtom2;
+         /// The set of atoms that are to be rotated during the flip. The first
+         /// atom is the one bonded to the central atom, whose bond will be flipped
+         /// with respect to the plane defined by (at1,at0,at2).
+         ///
+         /// However, if this atom is identical to mpAtom0, then this indicates that
+         /// a 180° rotation exchanging atom1 and atom2 is to be performed.
+         list<pair<const MolAtom *,set<unsigned long> > > mvRotatedChainList;
+         /// Number of times this flip has been tried, and the number of times
+         /// it has been accepted. Used in Molecule::GlobalOptRandomMove,
+         /// to avoid flips that break some restraint (and deciding which flips
+         /// break some restraint is difficult before having a real conformation).
+         mutable unsigned long mNbTest,mNbAccept;
+      };
+      /// Flip a group of atom. See Molecule::FlipGroup.
+      void FlipAtomGroup(const FlipGroup&);
+      /** The list of FlipGroups.
       *
       */
-      mutable vector<unsigned long> mTorsionBondIndex;
+      mutable list<FlipGroup> mvFlipGroup;
+      
    /// The current log(likelihood)
    mutable REAL mLogLikelihood;
    #ifdef __WX__CRYST__
