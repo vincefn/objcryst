@@ -25,6 +25,8 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
+#include <list>
 
 #include "ObjCryst/General.h"
 #include "ObjCryst/ScatteringPower.h"
@@ -371,6 +373,8 @@ class Molecule: public Scatterer
       virtual void Print()const;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
+      virtual void BeginOptimization(const bool allowApproximations=false,const bool enableRestraints=false);
+      virtual void RandomizeConfiguration();
       virtual void GlobalOptRandomMove(const REAL mutationAmplitude,
                                        const RefParType *type);
       virtual REAL GetLogLikelihood()const;
@@ -427,6 +431,9 @@ class Molecule: public Scatterer
       vector<MolBond*>& GetBondList();
       vector<MolBondAngle*>& GetBondAngleList();
       vector<MolDihedralAngle*>& GetDihedralAngleList();
+      /// Rotate a group of atoms around an axis defined by two atoms
+      void RotateAtomGroup(const MolAtom &at1,const MolAtom &at2,
+                           const set<unsigned long> &atoms, const REAL angle);
    private:
       virtual void InitRefParList();
       /** Build the list of rings in the molecule.
@@ -439,6 +446,14 @@ class Molecule: public Scatterer
       * change...
       */
       void BuildRingList()const;
+      /** Build the Connectivity table
+      *
+      */
+      void BuildConnectivityTable()const;
+      /** Build the groups of atoms around each bond
+      *
+      */
+      void BuildTorsionAtomGroupTable()const;
       /** Update the Molecule::mScattCompList from the cartesian coordinates
       * of all atoms, and the orientation parameters.
       */
@@ -496,14 +511,39 @@ class Molecule: public Scatterer
          RefinableObjClock mClockAtomPosition;
          RefinableObjClock mClockAtomScattPow;
          RefinableObjClock mClockOrientation;
+         mutable RefinableObjClock mClockLogLikelihood;
+         mutable RefinableObjClock mClockConnectivityTable;
+         mutable RefinableObjClock mClockmTorsionAtomGroupTable;
          
       // For local minimization (EXPERIMENTAL)
          unsigned long mLocalParamSet;
          REAL mLastLogLike;
+         bool mIsSelfOptimizing;
       /// OPtion for the different types of flexibility possible for this
       /// molecule: rigid body, free atoms + restraints, torsion angles...
       /// \warning still EXPERIMENTAL !
       RefObjOpt mFlexModel;
+      
+      /// Connectivity table: for each atom, keep the list of atoms
+      /// bonded to it. All atoms are referenced from their index.
+      mutable map<unsigned long,set<unsigned long> > mConnectivityTable;
+      /** Groups of atoms around each bond: for each bond, keep a list of group of atoms
+      * on each side of the bond.
+      *
+      * The map runs on all bonds, referenced from their index in the bond list. For each bond,
+      * there are two lists of group of atoms, corresponding to the two ends of the bond.
+      * Each list references all the group of atoms starting from one end of the bond.
+      * e.g. if A-B make one bond, and A is directly connected to 3 atoms A1 A2 A3, then
+      * there are 3 atom groups listed for A, (A,A1,...), (A,A2,...) and (A,A3,...).
+      *
+      * This is useful to rotate atoms around a torsion bond, with the ability to rotate
+      * all atoms on one side of the bond, or only one group of atoms starting from one
+      * end of the bond.
+      */
+      mutable map<unsigned long,pair<list<set<unsigned long> >,list<set<unsigned long> > > > mTorsionAtomGroupTable;
+
+   /// The current log(likelihood)
+   mutable REAL mLogLikelihood;
    #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);

@@ -676,10 +676,10 @@ Quaternion Quaternion::RotationQuaternion(const REAL ang,
                                           const REAL v3)
 {
    VFN_DEBUG_MESSAGE("Quaternion::RotationQuaternion()",4)
-   return Quaternion(cos(ang),
-                     sin(ang)*v1,
-                     sin(ang)*v2,
-                     sin(ang)*v3,
+   return Quaternion(cos(ang/2.),
+                     sin(ang/2.)*v1,
+                     sin(ang/2.)*v2,
+                     sin(ang/2.)*v3,
                      true);
 }
 
@@ -825,7 +825,8 @@ REAL& Quaternion::Q3(){return mQ3;}
 //      Molecule
 //
 //######################################################################
-Molecule::Molecule(Crystal &cryst, const string &name)
+Molecule::Molecule(Crystal &cryst, const string &name):
+mIsSelfOptimizing(false)
 {
    VFN_DEBUG_MESSAGE("Molecule::Molecule()",5)
    this->SetName(name);
@@ -863,7 +864,7 @@ Molecule::Molecule(Crystal &cryst, const string &name)
                         gpRefParTypeScattOrient,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
       tmp.AssignClock(mClockScatterer);
-      tmp.SetGlobalOptimStep(0.1);
+      tmp.SetGlobalOptimStep(0.04);
       this->AddPar(tmp);
    }
    {
@@ -871,7 +872,7 @@ Molecule::Molecule(Crystal &cryst, const string &name)
                         gpRefParTypeScattOrient,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
       tmp.AssignClock(mClockScatterer);
-      tmp.SetGlobalOptimStep(0.1);
+      tmp.SetGlobalOptimStep(0.04);
       this->AddPar(tmp);
    }
    {
@@ -879,7 +880,7 @@ Molecule::Molecule(Crystal &cryst, const string &name)
                         gpRefParTypeScattOrient,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
       tmp.AssignClock(mClockScatterer);
-      tmp.SetGlobalOptimStep(0.1);
+      tmp.SetGlobalOptimStep(0.04);
       this->AddPar(tmp);
    }
    {
@@ -951,8 +952,18 @@ void Molecule::XMLOutput(ostream &os,int indent)const
    
    mQuat.XMLOutput(os,indent);
    
-   //this->GetPar(...).XMLOutput(os,"a",indent);
-   //os <<endl;
+   this->GetPar(mXYZ.data()+0).XMLOutput(os,"x",indent);
+   os <<endl;
+   
+   this->GetPar(mXYZ.data()+1).XMLOutput(os,"y",indent);
+   os <<endl;
+   
+   this->GetPar(mXYZ.data()+2).XMLOutput(os,"z",indent);
+   os <<endl;
+   
+   this->GetPar(&mOccupancy).XMLOutput(os,"Occup",indent);
+   os <<endl;
+   
    {
       vector<MolAtom*>::const_iterator pos;
       for(pos=mvpAtom.begin();pos!=mvpAtom.end();++pos)
@@ -1028,13 +1039,83 @@ void Molecule::XMLInput(istream &is,const XMLCrystTag &tag)
                                 this->GetAtom(2),this->GetAtom(3),1.5,.01,.05);
          mvpDihedralAngle.back()->XMLInput(is,tagg);
       }
+      if("Par"==tagg.GetName())
+      {
+         for(unsigned int i=0;i<tagg.GetNbAttribute();i++)
+         {
+            if("Name"==tagg.GetAttributeName(i))
+            {
+               if("x"==tagg.GetAttributeValue(i))
+               {
+                  this->GetPar(mXYZ.data()+0).XMLInput(is,tagg);
+                  break;
+               }
+               if("y"==tagg.GetAttributeValue(i))
+               {
+                  this->GetPar(mXYZ.data()+1).XMLInput(is,tagg);
+                  break;
+               }
+               if("z"==tagg.GetAttributeValue(i))
+               {
+                  this->GetPar(mXYZ.data()+2).XMLInput(is,tagg);
+                  break;
+               }
+               if("Occup"==tagg.GetAttributeValue(i))
+               {
+                  this->GetPar(&mOccupancy).XMLInput(is,tagg);
+                  break;
+               }
+            }
+         }
+      }
    }
    VFN_DEBUG_EXIT("Molecule::XMLInput()",5)
 }
+
+void Molecule::BeginOptimization(const bool allowApproximations,const bool enableRestraints)
+{
+   this->BuildTorsionAtomGroupTable();
+   this->RefinableObj::BeginOptimization(allowApproximations,enableRestraints);
+}
+
+void Molecule::RandomizeConfiguration()
+{
+   VFN_DEBUG_ENTRY("Molecule::RandomizeConfiguration()",4)
+   this->BuildTorsionAtomGroupTable();
+   for(unsigned long torsion=0;torsion<mvpBond.size();torsion++)
+   {
+      if((rand()%2)==0)
+      {
+         list<set<unsigned long> >::const_iterator pos;
+         for(pos =mTorsionAtomGroupTable[torsion].first.begin();
+             pos!=mTorsionAtomGroupTable[torsion].first.end();
+             ++pos)
+         {
+            this->RotateAtomGroup(mvpBond[torsion]->GetAtom1(),mvpBond[torsion]->GetAtom2(),
+                                  *pos,(REAL)rand()*2.*M_PI/(REAL)RAND_MAX);
+         }
+      }
+      else
+      {
+         list<set<unsigned long> >::const_iterator pos;
+         for(pos =mTorsionAtomGroupTable[torsion].second.begin();
+             pos!=mTorsionAtomGroupTable[torsion].second.end();
+             ++pos)
+         {
+            this->RotateAtomGroup(mvpBond[torsion]->GetAtom1(),mvpBond[torsion]->GetAtom2(),
+                                  *pos,(REAL)rand()*2.*M_PI/(REAL)RAND_MAX);
+         }
+      }
+   }
+   this->RefinableObj::RandomizeConfiguration();
+   VFN_DEBUG_EXIT("Molecule::RandomizeConfiguration()",4)
+}
+
 void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                                        const RefParType *type)
 {
    if(mRandomMoveIsDone) return;
+   TAU_PROFILE("Molecule::GlobalOptRandomMove()","void (REAL,RefParType*)",TAU_DEFAULT);
    VFN_DEBUG_ENTRY("Molecule::GlobalOptRandomMove()",4)
    //:TODO: random moves using different models (free atoms, torsions, rigid body)
    //switch(mFlexModel.GetChoice())
@@ -1050,20 +1131,61 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                                                         (REAL)rand(),(REAL)rand(),(REAL)rand());
             mClockOrientation.Click();
          }
+         
+         {//rotate around torsion bond
+            const unsigned long torsion=rand() % mvpBond.size();
+            const REAL angle=(rand()-RAND_MAX/2)*M_PI/50./RAND_MAX*mutationAmplitude;
+            if((rand()%2)==0)
+            {
+               list<set<unsigned long> >::const_iterator pos;
+               for(pos =mTorsionAtomGroupTable[torsion].first.begin();
+                   pos!=mTorsionAtomGroupTable[torsion].first.end();
+                   ++pos)
+               {
+                  this->RotateAtomGroup(mvpBond[torsion]->GetAtom1(),mvpBond[torsion]->GetAtom2(),
+                                        *pos,angle);
+               }
+            }
+            else
+            {
+               list<set<unsigned long> >::const_iterator pos;
+               for(pos =mTorsionAtomGroupTable[torsion].second.begin();
+                   pos!=mTorsionAtomGroupTable[torsion].second.end();
+                   ++pos)
+               {
+                  this->RotateAtomGroup(mvpBond[torsion]->GetAtom1(),mvpBond[torsion]->GetAtom2(),
+                                        *pos,angle);
+               }
+            }
+         }
+         #if 1
+         if(true)
          {
             this->SaveParamSet(mLocalParamSet);
             const REAL lastll=this->GetLogLikelihood();
+            //cout <<mutationAmplitude <<"oldLL="<<lastll<<" NewLL= ";
+            unsigned int ct=0;
             while(true)
             {
+               ct++;
+               mRandomMoveIsDone=false;
                this->RefinableObj::GlobalOptRandomMove(mutationAmplitude,type);
                mQuat.Normalize();
+               if(mIsSelfOptimizing) break;
                const REAL newll=this->GetLogLikelihood();
+               //cout <<newll<<" ";
                if(newll<lastll) break;
-               if( log((rand()+1)/(REAL)RAND_MAX) < (-(newll-lastll)/30.) ) break;
+               if( log((rand()+1)/(REAL)RAND_MAX) 
+                   < (-(newll-lastll)/(200.*(0.+mutationAmplitude)*(1+mutationAmplitude)) )) break;
                this->RestoreParamSet(mLocalParamSet);
             }
+            //cout <<endl;
+            //if(ct>20) cout<<"Molecule::GlobalOptRandomMove:"<<mutationAmplitude<<", ct="<<ct<<endl;
             //break;
          }
+         else this->RefinableObj::GlobalOptRandomMove(mutationAmplitude,type);
+         #endif
+         mClockScatterer.Click();
       }
    }
    #if 0
@@ -1097,14 +1219,23 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
 
 REAL Molecule::GetLogLikelihood()const
 {
-   /*
-   return this->RefinableObj::GetLogLikelihood();
-   */
-   REAL ll=this->RefinableObj::GetLogLikelihood();
+   if(  (mClockLogLikelihood>mClockAtomList)
+      &&(mClockLogLikelihood>mClockBondList)
+      &&(mClockLogLikelihood>mClockBondAngleList)
+      &&(mClockLogLikelihood>mClockDihedralAngleList)
+      &&(mClockLogLikelihood>mClockAtomPosition)
+      &&(mClockLogLikelihood>mClockScatterer)) return mLogLikelihood;
+   TAU_PROFILE("Molecule::GetLogLikelihood()","REAL ()",TAU_DEFAULT);
+   mLogLikelihood=this->RefinableObj::GetLogLikelihood();
+   mClockLogLikelihood.Click();
+   #if 0
    const REAL nb=(REAL)this->GetNbComponent();
-   ll /=nb;
-   if(ll>30) return 2.8550185e25*(ll-29)*nb;//:KLUDGE: avoid overflow
-   return sinh(ll)*nb;
+   mLogLikelihood /=nb;
+   //:KLUDGE: avoid overflow
+   if(mLogLikelihood>30) mLogLikelihood= 2.8550185e25*(mLogLikelihood-29)*nb;
+   else mLogLikelihood= sinh(mLogLikelihood)*nb;
+   #endif
+   return mLogLikelihood;
 }
 void Molecule::TagNewBestConfig()const
 {
@@ -1348,28 +1479,29 @@ void Molecule::AddAtom(const REAL x, const REAL y, const REAL z,
    ++mScattCompList;
    {
       RefinablePar tmp(name+"_x",&(mvpAtom.back()->X()),0.,1.,
-                        gpRefParTypeScattTranslX,
+                        gpRefParTypeScattConformX,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
       tmp.AssignClock(mClockAtomPosition);
-      tmp.SetGlobalOptimStep(0.1);
+      tmp.SetGlobalOptimStep(0.05);
       this->AddPar(tmp);
    }
    {
       RefinablePar tmp(name+"_y",&(mvpAtom.back()->Y()),0.,1.,
-                        gpRefParTypeScattTranslX,
+                        gpRefParTypeScattConformY,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
       tmp.AssignClock(mClockAtomPosition);
-      tmp.SetGlobalOptimStep(0.1);
+      tmp.SetGlobalOptimStep(0.05);
       this->AddPar(tmp);
    }
    {
       RefinablePar tmp(name+"_z",&(mvpAtom.back()->Z()),0.,1.,
-                        gpRefParTypeScattTranslX,
+                        gpRefParTypeScattConformZ,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
       tmp.AssignClock(mClockAtomPosition);
-      tmp.SetGlobalOptimStep(0.1);
+      tmp.SetGlobalOptimStep(0.05);
       this->AddPar(tmp);
    }
+   mClockScatterer.Click();
    VFN_DEBUG_EXIT("Molecule::AddAtom()",5)
 }
 
@@ -1415,11 +1547,13 @@ void Molecule::OptimizeConformation(const long nbTrial)
    VFN_DEBUG_ENTRY("Molecule::OptimizeConformation()",5)
    MonteCarloObj globalOptObj(true);
    globalOptObj.AddRefinableObj(*this);
-   globalOptObj.SetAlgorithmParallTempering(ANNEALING_EXPONENTIAL,1000.,1.,
+   globalOptObj.SetAlgorithmParallTempering(ANNEALING_EXPONENTIAL,10000.,1.,
                                             ANNEALING_EXPONENTIAL,10,.1);      
 
    long nb=nbTrial;
+   mIsSelfOptimizing=true;
    globalOptObj.Optimize(nb);
+   mIsSelfOptimizing=false;
    VFN_DEBUG_EXIT("Molecule::OptimizeConformation()",5)
 }
 
@@ -1433,6 +1567,38 @@ vector<MolBond*>& Molecule::GetBondList(){return mvpBond;}
 vector<MolBondAngle*>& Molecule::GetBondAngleList(){return mvpBondAngle;}
 vector<MolDihedralAngle*>& Molecule::GetDihedralAngleList(){return mvpDihedralAngle;}
 
+void Molecule::RotateAtomGroup(const MolAtom &at1,const MolAtom &at2,
+                               const set<unsigned long> &atoms, const REAL angle)
+{
+   TAU_PROFILE("Molecule::RotateAtomGroup()","void (...)",TAU_DEFAULT);
+   const REAL x0=at1.X();
+   const REAL y0=at1.Y();
+   const REAL z0=at1.Z();
+   const REAL vx=at2.X()-at1.X();
+   const REAL vy=at2.Y()-at1.Y();
+   const REAL vz=at2.Z()-at1.Z();
+   const Quaternion quat=Quaternion::RotationQuaternion(angle,vx,vy,vz);
+   //quat.XMLOutput(cout);
+   set<unsigned long>::const_iterator pos;
+   //cout<<"Center of rotation @"<<x0<<" "<<y0<<" "<<z0<<endl;
+   for(pos=atoms.begin();pos!=atoms.end();++pos)
+   {
+      //cout<<"Rotating:"<<mvpAtom[*pos]->X()<<" "<<mvpAtom[*pos]->Y()<<" "<<mvpAtom[*pos]->Z()<<endl;
+      mvpAtom[*pos]->X() -= x0;
+      mvpAtom[*pos]->Y() -= y0;
+      mvpAtom[*pos]->Z() -= z0;
+      //cout<<"      ->"<<mvpAtom[*pos]->X()<<" "<<mvpAtom[*pos]->Y()<<" "<<mvpAtom[*pos]->Z()<<endl;
+      quat.RotateVector(mvpAtom[*pos]->X(),mvpAtom[*pos]->Y(),mvpAtom[*pos]->Z());
+      //cout<<"      ->"<<mvpAtom[*pos]->X()<<" "<<mvpAtom[*pos]->Y()<<" "<<mvpAtom[*pos]->Z()<<endl;
+      mvpAtom[*pos]->X() += x0;
+      mvpAtom[*pos]->Y() += y0;
+      mvpAtom[*pos]->Z() += z0;
+      //cout<<"      ->"<<mvpAtom[*pos]->X()<<" "<<mvpAtom[*pos]->Y()<<" "<<mvpAtom[*pos]->Z()<<endl;
+   }
+   mClockAtomPosition.Click();
+   mClockScatterer.Click();
+}
+
 void Molecule::InitRefParList()
 {
 }
@@ -1443,6 +1609,165 @@ void Molecule::BuildRingList()const
    VFN_DEBUG_EXIT("Molecule::BuildRingList()",5)
 }
 
+void Molecule::BuildConnectivityTable()const
+{
+   if(  (mClockConnectivityTable>mClockBondList)
+      &&(mClockConnectivityTable>mClockAtomList)) return;
+   VFN_DEBUG_ENTRY("Molecule::BuildConnectivityTable()",5)
+   TAU_PROFILE("Molecule::BuildConnectivityTable()","void ()",TAU_DEFAULT);
+   // Relationship between MolAtom adress and order
+   map<const MolAtom*,unsigned long> index;
+   {
+      vector<MolAtom*>::const_iterator pos;
+      unsigned long i=0;
+      for(pos=mvpAtom.begin();pos<mvpAtom.end();++pos)
+      {
+         index[*pos]=i++;
+      }
+   }
+   
+   mConnectivityTable.clear();
+   for(unsigned long i=0;i<mvpBond.size();++i)
+   {
+      mConnectivityTable[index[&(mvpBond[i]->GetAtom1())]]
+                 .insert(index[&(mvpBond[i]->GetAtom2())]);
+      mConnectivityTable[index[&(mvpBond[i]->GetAtom2())]]
+                 .insert(index[&(mvpBond[i]->GetAtom1())]);
+   }
+   
+   #if 1
+   {
+      map<unsigned long,set<unsigned long> >::const_iterator pos;
+      unsigned long at=0;
+      for(pos=mConnectivityTable.begin();pos!=mConnectivityTable.end();++pos)
+      {
+         cout<<"Atom "<<mvpAtom[at++]->GetName()<<" is connected to atoms: ";
+         set<unsigned long>::const_iterator pos1;
+         for(pos1=pos->second.begin();pos1!=pos->second.end();++pos1)
+         {
+            cout<<mvpAtom[*pos1]->GetName()<<"  ";
+         }
+         cout<<endl;
+      }
+   }
+   #endif
+   mClockConnectivityTable.Click();
+   VFN_DEBUG_EXIT("Molecule::BuildConnectivityTable()",5)
+}
+
+void ExpandAtomGroupRecursive(const unsigned long atom,
+                              const map<unsigned long,set<unsigned long> > &connect,
+                              set<unsigned long> &atomlist)
+{
+   const pair<set<unsigned long>::iterator,bool> status=atomlist.insert(atom);
+   if(false==status.second) return;
+   map<unsigned long,set<unsigned long> >::const_iterator c=connect.find(atom);
+   set<unsigned long>::const_iterator pos;
+   for(pos=c->second.begin();pos!=c->second.end();++pos)
+   {
+      ExpandAtomGroupRecursive(*pos,connect,atomlist);
+   }
+}
+
+void Molecule::BuildTorsionAtomGroupTable()const
+{
+   if(  (mClockmTorsionAtomGroupTable>mClockBondList)
+      &&(mClockmTorsionAtomGroupTable>mClockAtomList)) return;
+   VFN_DEBUG_ENTRY("Molecule::BuildTorsionAtomGroupTable()",5)
+   TAU_PROFILE("Molecule::BuildTorsionAtomGroupTable()","void ()",TAU_DEFAULT);
+   this->BuildConnectivityTable();
+   mTorsionAtomGroupTable.clear();
+   
+   // Relationship between MolAtom adress and order
+   map<const MolAtom*,unsigned long> index;
+   {
+      vector<MolAtom*>::const_iterator pos;
+      unsigned long i=0;
+      for(pos=mvpAtom.begin();pos<mvpAtom.end();++pos)
+      {
+         index[*pos]=i++;
+      }
+   }
+
+   for(unsigned long i=0;i<mvpBond.size();++i)
+   {
+      // First atom
+      {
+         const unsigned long atom=index[&(mvpBond[i]->GetAtom1())];
+         list<set<unsigned long> > *pList=&(mTorsionAtomGroupTable[i].first);
+         const set<unsigned long> *pConn=&(mConnectivityTable[atom]);
+         set<unsigned long>::const_iterator pos;
+         for(pos=pConn->begin();pos!=pConn->end();++pos)
+         {
+            if(*pos==index[&(mvpBond[i]->GetAtom2())]) continue;
+            list<set<unsigned long> >::const_iterator pos1;
+            bool foundring=false;
+            for(pos1=pList->begin();pos1!=pList->end();++pos1)
+            {
+               if(pos1->find(*pos)!=pos1->end()) foundring=true;
+            }
+            if(foundring) continue;
+            pList->push_back();
+            pList->back().insert(atom);
+            ExpandAtomGroupRecursive(*pos,mConnectivityTable,pList->back());
+         }
+      }
+      // Second atom
+      {
+         const unsigned long atom=index[&(mvpBond[i]->GetAtom2())];
+         list<set<unsigned long> > *pList=&(mTorsionAtomGroupTable[i].second);
+         const set<unsigned long> *pConn=&(mConnectivityTable[atom]);
+         set<unsigned long>::const_iterator pos;
+         for(pos=pConn->begin();pos!=pConn->end();++pos)
+         {
+            if(*pos==index[&(mvpBond[i]->GetAtom1())]) continue;
+            list<set<unsigned long> >::const_iterator pos1;
+            bool foundring=false;
+            for(pos1=pList->begin();pos1!=pList->end();++pos1)
+            {
+               if(pos1->find(*pos)!=pos1->end()) foundring=true;
+            }
+            if(foundring) continue;
+            pList->push_back();
+            pList->back().insert(atom);
+            ExpandAtomGroupRecursive(*pos,mConnectivityTable,pList->back());
+         }
+      }
+      #if 1
+      {
+         cout<<"Atom groups around bond:"
+             <<mvpBond[i]->GetAtom1().GetName()<<"-"
+             <<mvpBond[i]->GetAtom2().GetName()<<endl;
+         list<set<unsigned long> >::const_iterator pos;
+         for(pos=mTorsionAtomGroupTable[i].first.begin();
+             pos!=mTorsionAtomGroupTable[i].first.end();++pos)
+         {
+            cout<<"   Atom1 group:";
+            set<unsigned long>::const_iterator pos1;
+            for(pos1=pos->begin();pos1!=pos->end();++pos1)
+            {
+               cout<<mvpAtom[*pos1]->GetName()<<"  ";
+            }
+            cout<<endl;
+         }
+         for(pos=mTorsionAtomGroupTable[i].second.begin();
+             pos!=mTorsionAtomGroupTable[i].second.end();++pos)
+         {
+            cout<<"   Atom2 group:";
+            set<unsigned long>::const_iterator pos1;
+            for(pos1=pos->begin();pos1!=pos->end();++pos1)
+            {
+               cout<<mvpAtom[*pos1]->GetName()<<"  ";
+            }
+            cout<<endl;
+         }
+      }
+      #endif
+   }
+   mClockmTorsionAtomGroupTable.Click();
+   VFN_DEBUG_EXIT("Molecule::BuildTorsionAtomGroupTable()",5)
+}
+
 void Molecule::UpdateScattCompList()const
 {
    if(  (mClockAtomPosition<mClockScattCompList)
@@ -1450,6 +1775,7 @@ void Molecule::UpdateScattCompList()const
       &&(mClockAtomScattPow<mClockScattCompList)
       &&(mClockScatterer   <mClockScattCompList))return;
    VFN_DEBUG_ENTRY("Molecule::UpdateScattCompList()",5)
+   TAU_PROFILE("Molecule::UpdateScattCompList()","void ()",TAU_DEFAULT);
    const long nb=this->GetNbComponent();
    // Get internal coords
    for(long i=0;i<nb;++i)

@@ -113,6 +113,7 @@ class WXMolecule: public WXScatterer
       void OnMenuAddAngle(wxCommandEvent & WXUNUSED(event));
       void OnMenuAddDihedralAngle(wxCommandEvent & WXUNUSED(event));
       void OnMenuSetLimits(wxCommandEvent &event);
+      void OnMenuTest(wxCommandEvent &event);
       virtual void CrystUpdate();
       virtual void UpdateUI();
    private:

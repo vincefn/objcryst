@@ -612,6 +612,7 @@ WXCRYST_ID ID_MOLECULE_MENU_FORMULA_ADD_ATOM;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_ADD_BOND;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_ADD_ANGLE;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_ADD_DIHEDRAL;
+WXCRYST_ID ID_MOLECULE_MENU_FORMULA_TEST;
 
 BEGIN_EVENT_TABLE(WXMolecule,wxWindow)
    EVT_BUTTON(ID_WXOBJ_COLLAPSE,                   WXCrystObj::OnToggleCollapse)
@@ -623,6 +624,7 @@ BEGIN_EVENT_TABLE(WXMolecule,wxWindow)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_ADD_BOND,     WXMolecule::OnMenuAddBond)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_ADD_ANGLE,    WXMolecule::OnMenuAddAngle)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_ADD_DIHEDRAL, WXMolecule::OnMenuAddDihedralAngle)
+   EVT_MENU(ID_MOLECULE_MENU_FORMULA_TEST        , WXMolecule::OnMenuTest)
    EVT_MENU(ID_MENU_SETLIMITS,                     WXMolecule::OnMenuSetLimits)
 END_EVENT_TABLE()
 
@@ -648,6 +650,8 @@ WXScatterer(parent,mol),mpMolecule(mol)
                                 "Add Bond Angle Restraint");
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_ADD_DIHEDRAL,
                                 "Add Dihedral Angle Restraint");
+         mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_TEST,
+                                "Test");
    
    //sizers
    mpSizerAtomList= new wxBoxSizer(wxVERTICAL);
@@ -788,6 +792,13 @@ void WXMolecule::OnMenuAddDihedralAngle(wxCommandEvent & WXUNUSED(event))
    this->UpdateUI();
    VFN_DEBUG_EXIT("WXMolecule::OnMenuAddDihedralAngle()",6)
 }
+void WXMolecule::OnMenuTest(wxCommandEvent & WXUNUSED(event))
+{
+   VFN_DEBUG_ENTRY("WXMolecule::OnMenuTest()",6)
+   mpMolecule->BeginOptimization();
+   mpMolecule->EndOptimization();
+   VFN_DEBUG_EXIT("WXMolecule::OnMenuTest()",6)
+}
 
 void WXMolecule::OnMenuSetLimits(wxCommandEvent &event)
 {
@@ -796,76 +807,79 @@ void WXMolecule::OnMenuSetLimits(wxCommandEvent &event)
 void WXMolecule::CrystUpdate()
 {
    VFN_DEBUG_ENTRY("WXMolecule::CrystUpdate()",6)
-   //First add any atom, bond, bond angle or dihedral angle that could have been added
+   if(false==mpMolecule->IsBeingRefined())
    {
-      vector<MolAtom*>::iterator pos;
-      for(pos=mpMolecule->GetAtomList().begin();pos!=mpMolecule->GetAtomList().end();pos++)
+      //First add any atom, bond, bond angle or dihedral angle that could have been added
       {
-         vector<const MolAtom*>::const_iterator pos2=find(mvpAtom.begin(),mvpAtom.end(),*pos);
-         if(pos2==mvpAtom.end())
+         vector<MolAtom*>::iterator pos;
+         for(pos=mpMolecule->GetAtomList().begin();pos!=mpMolecule->GetAtomList().end();pos++)
          {
-            VFN_DEBUG_MESSAGE("WXMolecule::CrystUpdate():Atom not found:"<<(*pos)->GetName(),5)
-            WXCrystObjBasic *at=(*pos)->WXCreate(this);
-            mpSizerAtomList->Add(at);
-            mList.Add(at);
-            mpSizerAtomList->Layout();
-            mvpAtom.push_back(*pos);
+            vector<const MolAtom*>::const_iterator pos2=find(mvpAtom.begin(),mvpAtom.end(),*pos);
+            if(pos2==mvpAtom.end())
+            {
+               VFN_DEBUG_MESSAGE("WXMolecule::CrystUpdate():Atom not found:"<<(*pos)->GetName(),5)
+               WXCrystObjBasic *at=(*pos)->WXCreate(this);
+               mpSizerAtomList->Add(at);
+               mList.Add(at);
+               mpSizerAtomList->Layout();
+               mvpAtom.push_back(*pos);
+            }
          }
       }
-   }
-   {
-      vector<MolBond*>::iterator pos;
-      for(pos=mpMolecule->GetBondList().begin();pos!=mpMolecule->GetBondList().end();pos++)
       {
-         vector<const MolBond*>::const_iterator pos2=find(mvpBond.begin(),mvpBond.end(),*pos);
-         if(pos2==mvpBond.end())
+         vector<MolBond*>::iterator pos;
+         for(pos=mpMolecule->GetBondList().begin();pos!=mpMolecule->GetBondList().end();pos++)
          {
-            VFN_DEBUG_MESSAGE("WXMolecule::CrystUpdate():Bond not found",5)
-            WXCrystObjBasic *b=(*pos)->WXCreate(this);
-            mpSizerBondList->Add(b);
-            mList.Add(b);
-            mpSizerBondList->Layout();
-            mvpBond.push_back(*pos);
+            vector<const MolBond*>::const_iterator pos2=find(mvpBond.begin(),mvpBond.end(),*pos);
+            if(pos2==mvpBond.end())
+            {
+               VFN_DEBUG_MESSAGE("WXMolecule::CrystUpdate():Bond not found",5)
+               WXCrystObjBasic *b=(*pos)->WXCreate(this);
+               mpSizerBondList->Add(b);
+               mList.Add(b);
+               mpSizerBondList->Layout();
+               mvpBond.push_back(*pos);
+            }
          }
       }
-   }
-   {
-      vector<MolBondAngle*>::iterator pos;
-      for(pos=mpMolecule->GetBondAngleList().begin();
-          pos!=mpMolecule->GetBondAngleList().end();pos++)
       {
-         vector<const MolBondAngle*>::const_iterator pos2
-            =find(mvpBondAngle.begin(),mvpBondAngle.end(),*pos);
-         if(pos2==mvpBondAngle.end())
+         vector<MolBondAngle*>::iterator pos;
+         for(pos=mpMolecule->GetBondAngleList().begin();
+             pos!=mpMolecule->GetBondAngleList().end();pos++)
          {
-            VFN_DEBUG_MESSAGE("WXMolecule::CrystUpdate():Bond not found",5)
-            WXCrystObjBasic *b=(*pos)->WXCreate(this);
-            mpSizerAngleList->Add(b);
-            mList.Add(b);
-            mpSizerAngleList->Layout();
-            mvpBondAngle.push_back(*pos);
+            vector<const MolBondAngle*>::const_iterator pos2
+               =find(mvpBondAngle.begin(),mvpBondAngle.end(),*pos);
+            if(pos2==mvpBondAngle.end())
+            {
+               VFN_DEBUG_MESSAGE("WXMolecule::CrystUpdate():Bond not found",5)
+               WXCrystObjBasic *b=(*pos)->WXCreate(this);
+               mpSizerAngleList->Add(b);
+               mList.Add(b);
+               mpSizerAngleList->Layout();
+               mvpBondAngle.push_back(*pos);
+            }
          }
       }
-   }
-   {
-      vector<MolDihedralAngle*>::iterator pos;
-      for(pos=mpMolecule->GetDihedralAngleList().begin();
-          pos!=mpMolecule->GetDihedralAngleList().end();pos++)
       {
-         vector<const MolDihedralAngle*>::const_iterator pos2
-            =find(mvpDihedralAngle.begin(),mvpDihedralAngle.end(),*pos);
-         if(pos2==mvpDihedralAngle.end())
+         vector<MolDihedralAngle*>::iterator pos;
+         for(pos=mpMolecule->GetDihedralAngleList().begin();
+             pos!=mpMolecule->GetDihedralAngleList().end();pos++)
          {
-            VFN_DEBUG_MESSAGE("WXMolecule::CrystUpdate():Bond not found",5)
-            WXCrystObjBasic *b=(*pos)->WXCreate(this);
-            mpSizerDihedralAngleList->Add(b);
-            mList.Add(b);
-            mpSizerDihedralAngleList->Layout();
-            mvpDihedralAngle.push_back(*pos);
+            vector<const MolDihedralAngle*>::const_iterator pos2
+               =find(mvpDihedralAngle.begin(),mvpDihedralAngle.end(),*pos);
+            if(pos2==mvpDihedralAngle.end())
+            {
+               VFN_DEBUG_MESSAGE("WXMolecule::CrystUpdate():Bond not found",5)
+               WXCrystObjBasic *b=(*pos)->WXCreate(this);
+               mpSizerDihedralAngleList->Add(b);
+               mList.Add(b);
+               mpSizerDihedralAngleList->Layout();
+               mvpDihedralAngle.push_back(*pos);
+            }
          }
       }
+      this->Layout();
    }
-   this->Layout();
    this->WXRefinableObj::CrystUpdate();
    VFN_DEBUG_EXIT("WXMolecule::CrystUpdate()",6)
 }
