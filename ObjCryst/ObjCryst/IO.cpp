@@ -2387,6 +2387,14 @@ void PowderPattern::XMLInput(istream &is,const XMLCrystTag &tagg)
                m2ThetaStep*=DEG2RAD;
             }
          }
+         while(0==isgraph(is.peek())) is.get();
+         if(is.peek()=='<')
+         {
+            cout <<"PowderPattern::XMLInput(): no data point in the powder pattern !"<<endl;
+            XMLCrystTag junk(is);
+            VFN_DEBUG_EXIT("Loading Iobs-Sigma-Weight List...",8);
+            continue;
+         }
          mNbPoint=0;
          mPowderPatternObs.resize(500);
          mPowderPatternObsSigma.resize(500);
