@@ -960,7 +960,7 @@ void Crystal::XMLOutput(ostream &os,int indent)const
    this->GetPar("gamma").XMLOutput(os,"gamma",indent);
    os <<endl;
    
-   for(int i=0;i<this->GetNbOption();i++)
+   for(unsigned int i=0;i<this->GetNbOption();i++)
    {
       this->GetOption(i).XMLOutput(os,indent);
       os <<endl<<endl;
