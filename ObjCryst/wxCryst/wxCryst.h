@@ -257,7 +257,9 @@ class WXField: public WXCrystObjBasic
 		*
 		*/
       WXField(wxWindow *parent,const string& label,const int field_id);
+		/// Redo the layout of the field.
       bool Layout();
+		/// Change the field's label.
       void SetLabel(const string&);
       /// After a user entry, this allows to go back to the last value, if for some reason
       /// the entry was rejected (because the object is currently busy, ...)
@@ -300,19 +302,25 @@ class WXFieldName:public WXField
       virtual void CrystUpdate();
       void Revert();
    protected:
+		/// The WXCrystObj whose name is shown here
       WXCrystObj* mpWXObj;
+		/// Last name displayed.
       wxString mValue;
+		/// The text window
       wxTextCtrl *mpField;
+		/// Last name displayed, before the value was changed by the user. Not used yet,
+		/// could be useful for undo.
       wxString mValueOld;
    DECLARE_EVENT_TABLE()
 };
 
-/// A field for an (isolated) parameter. This is a an abstract bas class, which can
+/// A field for a parameter. This is a an abstract bas class, which can
 /// handle events (the real classes to use is the templated WXFieldPar class).
-/// If the parameter is a RefinablePar, use WXFieldRefPar instead.
+/// If the parameter is a RefinablePar, use WXFieldRefPar.
 class WXFieldParBase:public WXField
 {
    public:
+		/// Constructor
       WXFieldParBase(wxWindow *parent,const string& label, const int field_id,
                      const int hsize=50);
       /// UpdateUI does not grab new values in the underlying object,
@@ -330,16 +338,19 @@ class WXFieldParBase:public WXField
    protected:
       /// Reads the new value when the Enter key is hit
       virtual void ReadNewValue()=0;
+		/// Apply a new value
       virtual void ApplyNewValue()=0;
+		/// The field in which the value is written.
       wxTextCtrl *mpField;
    DECLARE_EVENT_TABLE()
 };
 
-/// A field for an (isolated) parameter. Template version.
+/// A field for a parameter. Template version.
 /// If the parameter is a RefinablePar, use WXFieldRefPar instead.
 template<class T>class WXFieldPar:public WXFieldParBase
 {
    public:
+		/// Constructor
       WXFieldPar(wxWindow *parent,const string& label, const int field_id,
                     T *par,const int hsize=50);
       /// This gets a new value from the parameter.
@@ -351,15 +362,19 @@ template<class T>class WXFieldPar:public WXFieldParBase
       virtual void ReadNewValue();
       /// Applies a new value and shows it.
       virtual void ApplyNewValue();
+		/// A pointer to the value displayed
       T* mpValue;
+		/// The last value displayed, before it was changed by the user.
       T mValueOld;
 };
 
 /// Class to pick one choice... Choice change/update is handled by the WXCrystObj owner, who
 /// should grab the incoming event.
+/// Useful, for example, to change the scattering power associated to an atom.
 class WXFieldChoice:public WXField
 {
    public:
+		/// Constructor
       WXFieldChoice(wxWindow *parent,const int field_id,
                             const string &name,const int hsize=80);
       bool Layout();
@@ -373,6 +388,7 @@ class WXFieldChoice:public WXField
       /// Used by the owner to change the name of the choice
       void SetValue(const string&);
    protected:
+		/// The button to be clicked to change the value.
       wxButton *mpButton;
 };
 
@@ -380,21 +396,33 @@ class WXFieldChoice:public WXField
 class WXCrystMenuBar: public WXCrystObjBasic
 {
    public:
+		/// Ctor
       WXCrystMenuBar(wxWindow *parent, WXCrystObj* owner);
+		/// Redo the Layout
       bool Layout();
+		/// Add a menu
       void AddMenu(const string &name,const int menuId, const string& help="");
+		/// Add an entry to a menu
       void AddMenuItem(const int menuId, int id, const string& item, const string& help="",
                        const bool checkable= false);
+		/// Add a sub-menu to a menu
       void AddMenuItem(const int menuId,int id, const wxString&  item,
                        wxMenu *subMenu, const wxString& helpString = "");
       virtual void CrystUpdate();
+		/// Event handler to popu the menu when the button is clicked.
       void OnPopupMenu(wxCommandEvent & event);
    protected:
+		/// The sizer of the menu
       wxBoxSizer* mpSizer;
+		/// The list of menu IDs
       CrystVector_int mMenuId;
+		/// Number of menus
       unsigned int mNbMenu;
+		/// Max number of menus
       unsigned int mMaxNbMenu;
+		/// Array of menus
       wxMenu **mpMenu;
+		/// The buttons corresponding to each menu
       wxButton **mpButton;
    DECLARE_EVENT_TABLE()
 };
