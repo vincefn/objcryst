@@ -2524,14 +2524,14 @@ REAL PowderPattern::GetIntegratedRw()const
 
 REAL PowderPattern::GetChi2()const
 {
-   this->CalcNbPointUsed();
-   if(mClockChi2>mClockMaster) return mChi2;
    if(  (0==this->GetPowderPatternObs().numElements())
       ||(0==GetNbPowderPatternComponent()))
    {
       mChi2=0.;
       return mChi2;
    }
+   this->CalcNbPointUsed();
+   if(mClockChi2>mClockMaster) return mChi2;
    
    if(0 == mOptProfileIntegration.GetChoice())
    {
@@ -2659,8 +2659,13 @@ void PowderPattern::FitScaleFactorForR()const
          if(mPowderPatternComponentRegistry.GetObj(i).IsScalable())
             mScalableComponentIndex(nbScale++)=i;
       }
-      mScalableComponentIndex.resizeAndPreserve(nbScale);
    VFN_DEBUG_MESSAGE("-> Number of Scale Factors:"<<nbScale<<":Index:"<<endl<<mScalableComponentIndex,3);
+   if(0==nbScale)
+   {
+      VFN_DEBUG_EXIT("PowderPattern::FitScaleFactorForR(): No scalable component!",3);
+      return;
+   }
+   mScalableComponentIndex.resizeAndPreserve(nbScale);
    // prepare matrices
       mFitScaleFactorM.resize(nbScale,nbScale);
       mFitScaleFactorB.resize(nbScale,1);
@@ -2822,8 +2827,13 @@ void PowderPattern::FitScaleFactorForIntegratedR()const
          if(mPowderPatternComponentRegistry.GetObj(i).IsScalable())
             mScalableComponentIndex(nbScale++)=i;
       }
-      mScalableComponentIndex.resizeAndPreserve(nbScale);
    VFN_DEBUG_MESSAGE("-> Number of Scale Factors:"<<nbScale<<":Index:"<<endl<<mScalableComponentIndex,2);
+   if(0==nbScale)
+   {
+      VFN_DEBUG_EXIT("PowderPattern::FitScaleFactorForIntegratedR(): No scalable component!",3);
+      return;
+   }
+   mScalableComponentIndex.resizeAndPreserve(nbScale);
    // prepare matrices
       mFitScaleFactorM.resize(nbScale,nbScale);
       mFitScaleFactorB.resize(nbScale,1);
@@ -2963,8 +2973,13 @@ void PowderPattern::FitScaleFactorForRw()const
          if(mPowderPatternComponentRegistry.GetObj(i).IsScalable())
             mScalableComponentIndex(nbScale++)=i;
       }
-      mScalableComponentIndex.resizeAndPreserve(nbScale);
    VFN_DEBUG_MESSAGE("-> Number of Scale Factors:"<<nbScale<<":Index:"<<endl<<mScalableComponentIndex,2);
+   if(0==nbScale)
+   {
+      VFN_DEBUG_EXIT("PowderPattern::FitScaleFactorForRw(): No scalable component!",3);
+      return;
+   }
+   mScalableComponentIndex.resizeAndPreserve(nbScale);
    // prepare matrices
       mFitScaleFactorM.resize(nbScale,nbScale);
       mFitScaleFactorB.resize(nbScale,1);
@@ -3134,8 +3149,13 @@ void PowderPattern::FitScaleFactorForIntegratedRw()const
          if(mPowderPatternComponentRegistry.GetObj(i).IsScalable())
             mScalableComponentIndex(nbScale++)=i;
       }
-      mScalableComponentIndex.resizeAndPreserve(nbScale);
    VFN_DEBUG_MESSAGE("-> Number of Scale Factors:"<<nbScale<<":Index:"<<endl<<mScalableComponentIndex,2);
+   if(0==nbScale)
+   {
+      VFN_DEBUG_EXIT("PowderPattern::FitScaleFactorForIntegratedRw(): No scalable component!",3);
+      return;
+   }
+   mScalableComponentIndex.resizeAndPreserve(nbScale);
    // prepare matrices
       mFitScaleFactorM.resize(nbScale,nbScale);
       mFitScaleFactorB.resize(nbScale,1);

@@ -474,14 +474,14 @@ REAL DiffractionDataSingleCrystal::GetR()const
 
 REAL DiffractionDataSingleCrystal::GetChi2()const
 {
-   this->GetNbReflBelowMaxSinThetaOvLambda();
-   if(mClockChi2>mClockMaster) return mChi2;
-   
    if(mHasObservedData==false)
    {
       mChi2=0;
       return mChi2;
    }
+   this->GetNbReflBelowMaxSinThetaOvLambda();
+   if(mClockChi2>mClockMaster) return mChi2;
+   
    this->CalcIcalc();
    if(mClockChi2>mClockIcalc) return mChi2;
    
