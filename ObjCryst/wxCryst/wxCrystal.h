@@ -90,6 +90,7 @@ class WXCrystal: public WXRefinableObj
       void OnMenuAddScatterer(wxCommandEvent & event);
       void OnMenuRemoveScatterer(wxCommandEvent & WXUNUSED(event));
       void OnMenuDuplicateScatterer(wxCommandEvent & WXUNUSED(event));
+      void OnMenuImportMoleculeFromFenskeHallZMatrix(wxCommandEvent &event);
       void OnMenuAddAntiBumpDist(wxCommandEvent & WXUNUSED(event));
       void OnMenuSetRelativeXYZLimits(wxCommandEvent & WXUNUSED(event));
       bool OnChangeName(const int id);
