@@ -175,7 +175,8 @@ class TextureMarchDollase:public ScatteringCorr,public RefinableObj
       REAL GetPhaseH(const unsigned int i)const;
       REAL GetPhaseK(const unsigned int i)const;
       REAL GetPhaseL(const unsigned int i)const;
-      virtual void GlobalOptRandomMove(const REAL mutationAmplitude);
+      virtual void GlobalOptRandomMove(const REAL mutationAmplitude,
+                                       const RefParType *type=gpRefParTypeObjCryst);
       virtual REAL GetBiasingCost()const;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);

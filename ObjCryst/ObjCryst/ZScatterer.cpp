@@ -1276,7 +1276,8 @@ void ZScatterer::ExportFenskeHallZMatrix(ostream &os)
          <<endl;
 }
 
-void ZScatterer::GlobalOptRandomMove(const REAL mutationAmplitude)
+void ZScatterer::GlobalOptRandomMove(const REAL mutationAmplitude,
+                                     const RefParType *type)
 {
    if(mRandomMoveIsDone) return;
    VFN_DEBUG_ENTRY("ZScatterer::GlobalOptRandomMove()",3)
@@ -1284,8 +1285,8 @@ void ZScatterer::GlobalOptRandomMove(const REAL mutationAmplitude)
    // give a 2% chance of either moving a single atom, or move
    // all atoms before a given torsion angle.
    // Only try this if there are more than 10 atoms (else it's not worth the speed cost)
-   
-   if((mNbAtom>=10) && ((rand()/(REAL)RAND_MAX)<.02))//.01
+   if((mNbAtom>=10) && ((rand()/(REAL)RAND_MAX)<.02) 
+      && (gpRefParTypeScattConform->IsDescendantFromOrSameAs(type)))//.01
    {
       TAU_PROFILE_TIMER(timer1,\
                      "ZScatterer::GlobalOptRandomMoveSmart1(prepare ref par & mutate)"\
@@ -1548,7 +1549,7 @@ void ZScatterer::GlobalOptRandomMove(const REAL mutationAmplitude)
    #endif
    else
    {
-      this->RefinableObj::GlobalOptRandomMove(mutationAmplitude);
+      this->RefinableObj::GlobalOptRandomMove(mutationAmplitude,type);
    }
    mRandomMoveIsDone=true;
    VFN_DEBUG_EXIT("ZScatterer::GlobalOptRandomMove():End",3)

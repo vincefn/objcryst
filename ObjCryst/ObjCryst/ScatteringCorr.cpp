@@ -417,9 +417,15 @@ REAL TextureMarchDollase::GetPhaseK(const unsigned int i)const
 REAL TextureMarchDollase::GetPhaseL(const unsigned int i)const
 {return mPhaseRegistry.GetObj(i).mL;}
 
-void TextureMarchDollase::GlobalOptRandomMove(const REAL mutationAmplitude)
+void TextureMarchDollase::GlobalOptRandomMove(const REAL mutationAmplitude,
+                                              const RefParType *type)
 {
    if(mRandomMoveIsDone) return;
+   if(!(gpRefParTypeScattDataCorrInt->IsDescendantFromOrSameAs(type)))
+   {
+      mRandomMoveIsDone=true;
+      return;
+   }
    //if((rand()/(REAL)RAND_MAX)<.3)//only 30% proba to make a random move
    {
       VFN_DEBUG_MESSAGE("TextureMarchDollase::GlobalOptRandomMove()",1)

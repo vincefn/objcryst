@@ -291,7 +291,8 @@ class ZScatterer: public Scatterer
       virtual void GetGeneGroup(const RefinableObj &obj, 
                                 CrystVector_uint & groupIndex,
                                 unsigned int &firstGroup) const;
-      virtual void GlobalOptRandomMove(const REAL mutationAmplitude);
+      virtual void GlobalOptRandomMove(const REAL mutationAmplitude,
+                                       const RefParType *type=gpRefParTypeObjCryst);
       /// Get the list of all ZAtom cartesian x coordinates.
       const CrystVector_REAL& GetXCoord() const;
       /// Get the list of all ZAtom cartesian x coordinates.

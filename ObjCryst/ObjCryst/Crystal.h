@@ -329,7 +329,8 @@ class Crystal:public RefinableObj
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
       
-      virtual void GlobalOptRandomMove(const REAL mutationAmplitude);
+      virtual void GlobalOptRandomMove(const REAL mutationAmplitude,
+                                       const RefParType *type=gpRefParTypeObjCryst);
       /** \brief output Crystal structure as a cif file (EXPERIMENTAL !)
       *
       * \warning This is very crude and EXPERIMENTAL so far: only isotropic scattering power

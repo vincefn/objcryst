@@ -354,8 +354,10 @@ class MonteCarloObj:public OptimizationObj
       * Random moves are made by the objects and not by this function,
       * because the new configuration can be specific
       * (like, for example, permutations between some of the parameters (atoms)).
+      * 
+      * \param type: can be used to restrict the move to a given category of parameters.
       */
-      virtual void NewConfiguration();
+      virtual void NewConfiguration(const RefParType *type=gpRefParTypeObjCryst);
       
       virtual void InitOptions();
             

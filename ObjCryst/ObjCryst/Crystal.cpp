@@ -1019,7 +1019,8 @@ REAL Crystal::GetCostFunctionValue(const unsigned int n)
    }
 }
 
-void Crystal::GlobalOptRandomMove(const REAL mutationAmplitude)
+void Crystal::GlobalOptRandomMove(const REAL mutationAmplitude,
+                                  const RefParType *type)
 {
    if(mRandomMoveIsDone) return;
    VFN_DEBUG_ENTRY("Crystal::GlobalOptRandomMove()",2)
@@ -1043,8 +1044,9 @@ void Crystal::GlobalOptRandomMove(const REAL mutationAmplitude)
    }
    else
    {
-      this->RefinableObj::GlobalOptRandomMove(mutationAmplitude);
+      this->RefinableObj::GlobalOptRandomMove(mutationAmplitude,type);
    }
+   mRandomMoveIsDone=true;
    VFN_DEBUG_EXIT("Crystal::GlobalOptRandomMove()",2)
 }
 

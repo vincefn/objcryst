@@ -1516,43 +1516,14 @@ void MonteCarloObj::XMLInputOld(istream &is,const IOCrystTag &tagg)
 #endif
 const string MonteCarloObj::GetClassName()const { return "MonteCarloObj";}
 
-void MonteCarloObj::NewConfiguration()
+void MonteCarloObj::NewConfiguration(const RefParType *type)
 {
    VFN_DEBUG_ENTRY("MonteCarloObj::NewConfiguration()",4)
-   static unsigned long nbNewConfig=0;
-   static unsigned long nbNewConfigRejectedFromBias=0;
-   REAL biasCost0=0;
-   REAL biasCost1;
-   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
-      biasCost0 += mRecursiveRefinedObjList.GetObj(i).GetBiasingCost();
-   for(;;)
-   {
-      /*if(mMutationAmplitude>7)*/nbNewConfig++;
-      for(int i=0;i<mRefinedObjList.GetNb();i++)
-         mRefinedObjList.GetObj(i).BeginGlobalOptRandomMove();
-      for(int i=0;i<mRefinedObjList.GetNb();i++)
-         mRefinedObjList.GetObj(i).GlobalOptRandomMove(mMutationAmplitude);
-      
-      biasCost1=0;
-      for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
-         biasCost1 += mRecursiveRefinedObjList.GetObj(i).GetBiasingCost();
-      //if(log((rand()+1)/(REAL)RAND_MAX)< ((biasCost0-biasCost1)/mTemperature))
-      //if(log((rand()+1)/(REAL)RAND_MAX)< (-biasCost1/mTemperature))
-      if(true)
-      {
-         VFN_DEBUG_EXIT("MonteCarloObj::NewConfiguration()",4)
-         return;
-      }
-      /*if(mMutationAmplitude>7)*/nbNewConfigRejectedFromBias++;
-      if((rand()/(REAL)RAND_MAX)<.0001) 
-         cout <<endl<<"MonteCarloObj::NewConfiguration()rejected:"
-              <<nbNewConfigRejectedFromBias/(float)nbNewConfig*100.<<"%"<<endl<<endl;
-      #ifdef __DEBUG__
-      if((rand()/(REAL)RAND_MAX)<.01)
-         VFN_DEBUG_MESSAGE("MonteCarloObj::NewConfiguration()rejected:"<<nbNewConfigRejectedFromBias/(float)nbNewConfig*100.<<"%",10)
-      #endif
-      mRefParList.RestoreParamSet(mLastParSavedSetIndex);  
-   }
+   for(int i=0;i<mRefinedObjList.GetNb();i++)
+      mRefinedObjList.GetObj(i).BeginGlobalOptRandomMove();
+   for(int i=0;i<mRefinedObjList.GetNb();i++)
+      mRefinedObjList.GetObj(i).GlobalOptRandomMove(mMutationAmplitude,type);
+   VFN_DEBUG_EXIT("MonteCarloObj::NewConfiguration()",4)
 }
 
 void MonteCarloObj::InitOptions()

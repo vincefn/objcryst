@@ -136,11 +136,10 @@ Restraint::Restraint(const RefParType *type,
                      const bool hasMinLimit,
                      const bool hasMaxLimit,
                      const REAL softRange,
-                     const bool enableRestraints,
-                     const bool enableBiasing)
+                     const bool enableRestraints)
 {
    this->Init(type,hardMin,hardMax,hasMinLimit,hasMaxLimit,
-              softRange,enableRestraints,enableBiasing);
+              softRange,enableRestraints);
 }
 
 Restraint::~Restraint()
@@ -152,8 +151,7 @@ void Restraint::Init(const RefParType *type,
                      const bool hasMinLimit,
                      const bool hasMaxLimit,
                      const REAL softRange,
-                     const bool enableRestraints,
-                     const bool enableBiasing)
+                     const bool enableRestraints)
 {
    mpRefParType=type;
    mMin=hardMin;
@@ -162,7 +160,6 @@ void Restraint::Init(const RefParType *type,
    mHasMax=hasMaxLimit;
    mRestraintRange=softRange;
    mEnableRestraint=enableRestraints;
-   mEnableBiasing=enableBiasing;
 }
 void Restraint::CopyAttributes(const Restraint& old)
 {
@@ -173,8 +170,6 @@ void Restraint::CopyAttributes(const Restraint& old)
    mHasMax=old.mHasMax;
    mRestraintRange=old.mRestraintRange;
    mEnableRestraint=old.mEnableRestraint;
-   mEnableBiasing=old.mEnableBiasing;
-   mBiasingValue=old.mBiasingValue;
 }
 
 REAL Restraint::GetRestraintCost()const
@@ -195,36 +190,17 @@ REAL Restraint::GetRestraintCost()const
    }
    return 0.;
 }
-REAL Restraint::GetBiasingCost()const
-{
-   if(true==mEnableBiasing)
-   {
-      REAL value=this->GetValue();
-      value= (value-mBiasingValue)/(mRestraintRange);
-      return value*value;
-   }
-   return 0;
-}
 
 void Restraint::SetRestraintRange(const REAL range)
 {
    mRestraintRange=range;
-}
-void Restraint::EnableBiasing(const bool enable)
-{
-   mEnableBiasing=enable;
-   this->SetBiasingValue();
-}
-void Restraint::SetBiasingValue() const
-{
-   mBiasingValue=this->GetValue();
 }
 //######################################################################
 //    RefinablePar
 //######################################################################
 
 RefinablePar::RefinablePar():
-Restraint(0,0,0,false,false,1.,1.,false),
+Restraint(0,0,0,false,false,1.,1.),
 mName(""),mpValue(0),
 mHasLimits(false),mIsFixed(true),mIsUsed(true),mIsPeriodic(false),
 mPeriod(0.),mHumanScale(1.),mHasAssignedClock(false),mpClock(0)
@@ -245,7 +221,7 @@ RefinablePar::RefinablePar(  const string &name,
                      const bool isPeriodic,
                      const REAL humanScale,
                      REAL period):
-Restraint(type,min,max,hasLimits,hasLimits,max-min,false,false),
+Restraint(type,min,max,hasLimits,hasLimits,max-min,false),
 mName(name),mpValue(refPar),
 mHasLimits(hasLimits),mIsFixed(isFixed),mIsUsed(isUsed),mIsPeriodic(isPeriodic),mPeriod(period),
 mGlobalOptimStep((max-min)/100.),mDerivStep(1e-5),mRefParDerivStepModel(derivMode),
@@ -279,7 +255,7 @@ void RefinablePar::Init(const string &name,
                         const REAL humanScale,
                         REAL period)
 {
-   this->Restraint::Init(type,min,max,hasLimits,hasLimits,max-min,false,false);
+   this->Restraint::Init(type,min,max,hasLimits,hasLimits,max-min,false);
    mName=name;
    mpValue=refPar;
    mHasLimits=hasLimits;
@@ -299,7 +275,6 @@ void RefinablePar::Init(const string &name,
    #endif
    mHasAssignedClock=false;
    mpClock=0;
-   this->SetBiasingValue();
 }
 void RefinablePar::CopyAttributes(const RefinablePar&old)
 {
@@ -1665,17 +1640,19 @@ void RefinableObj::RandomizeConfiguration()
    VFN_DEBUG_EXIT("RefinableObj::RandomizeConfiguration():Finished",5)
 }
 
-void RefinableObj::GlobalOptRandomMove(const REAL mutationAmplitude)
+void RefinableObj::GlobalOptRandomMove(const REAL mutationAmplitude,
+                                       const RefParType *type)
 {
    if(mRandomMoveIsDone) return;
    VFN_DEBUG_ENTRY("RefinableObj::GlobalOptRandomMove()",2)
    for(int j=0;j<this->GetNbParNotFixed();j++)
    {
-      this->GetParNotFixed(j).Mutate( this->GetParNotFixed(j).GetGlobalOptimStep()
-                  *2*(rand()/(REAL)RAND_MAX-0.5)*mutationAmplitude);
+      if(this->GetParNotFixed(j).GetType()->IsDescendantFromOrSameAs(type))
+         this->GetParNotFixed(j).Mutate( this->GetParNotFixed(j).GetGlobalOptimStep()
+                     *2*(rand()/(REAL)RAND_MAX-0.5)*mutationAmplitude);
    }
    for(int i=0;i<mSubObjRegistry.GetNb();i++)
-      mSubObjRegistry.GetObj(i).GlobalOptRandomMove(mutationAmplitude);
+      mSubObjRegistry.GetObj(i).GlobalOptRandomMove(mutationAmplitude,type);
    mRandomMoveIsDone=true;
    VFN_DEBUG_EXIT("RefinableObj::GlobalOptRandomMove()",2)
 }
@@ -1802,11 +1779,6 @@ REAL  RefinableObj::GetRestraintCost()const
    return 0;
 }
 
-REAL  RefinableObj::GetBiasingCost()const
-{
-   return 0;
-}
-
 void RefinableObj::AddRestraint(Restraint *pNewRestraint)
 {
    VFN_DEBUG_MESSAGE("RefinableObj::AddPar(RefPar&)",2)
@@ -1823,8 +1795,6 @@ void RefinableObj::AddRestraint(Restraint *pNewRestraint)
 
 void RefinableObj::TagNewBestConfig()const
 {
-   for(int i=0;i<mNbRestraint;i++) mpRestraint[i]->SetBiasingValue();
-   for(int i=0;i<this->GetNbPar();i++) this->GetPar(i).SetBiasingValue();
 }
 
 void RefinableObj::UpdateDisplay()const
