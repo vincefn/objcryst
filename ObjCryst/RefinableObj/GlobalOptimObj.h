@@ -23,6 +23,7 @@
 #ifndef _GLOBALOPTIMOBJ_H
 #define _GLOBALOPTIMOBJ_H
 
+#include <map>
 #include "ObjCryst/General.h"
 
 namespace ObjCryst
@@ -206,6 +207,30 @@ class OptimizationObj
          REAL mBestCost;
          /// Index of the 'best' saved parameter set
          long mBestParSavedSetIndex;
+         /// The current 'context', in the case the optimization is run in different
+         /// parallel contexts
+         unsigned long mContext;
+         /// Statistics about each object contributing to the overall Log(likelihood)
+         struct LogLikelihoodStats
+         {
+            /// Previous log(likelihood)
+            REAL mLastLogLikelihood;
+            /// Total Log(Likelihood), to compute the average
+            REAL mTotalLogLikelihood;
+            /// total of (Delta(Log(Likelihood)))^2 between successive trials
+            REAL mTotalLogLikelihoodDeltaSq;
+         };
+         /// Statistics for each context
+         map <unsigned long, map<const RefinableObj*,LogLikelihoodStats> > mvContextObjStats;
+      // Dynamic weights (EXPERIMENTAL!)
+         struct DynamicObjWeight
+         {
+            DynamicObjWeight():mWeight(1.){};
+            REAL mWeight;
+         };
+         /// Weights for each objects in each context
+         map<const RefinableObj*,DynamicObjWeight> mvObjWeight;
+         
          
       /// True if a refinement is being done. For multi-threaded environment
       bool mIsOptimizing;

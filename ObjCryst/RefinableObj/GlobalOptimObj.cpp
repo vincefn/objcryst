@@ -51,6 +51,7 @@ OptimizationObj::OptimizationObj(const string name):
 mName(name),mSaveFileName("GlobalOptim.save"),
 mNbTrial(0),mBestCost(-1),
 mBestParSavedSetIndex(-1),
+mContext(0),
 mIsOptimizing(false),mStopAfterCycle(false),
 mRefinedObjList("OptimizationObj: "+mName+" RefinableObj registry"),
 mRecursiveRefinedObjList("OptimizationObj: "+mName+" recursive RefinableObj registry")
@@ -165,8 +166,20 @@ REAL OptimizationObj::GetLogLikelihood()
 {
    TAU_PROFILE("OptimizationObj::GetLogLikelihood()","void ()",TAU_DEFAULT);
    REAL cost =0.;
-   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
-      cost += mRecursiveRefinedObjList.GetObj(i).GetLogLikelihood();
+   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
+   {
+      const REAL tmp=mRecursiveRefinedObjList.GetObj(i).GetLogLikelihood();
+      if(tmp!=0.)
+      {
+         LogLikelihoodStats* st=&((mvContextObjStats[mContext])
+                                    [&(mRecursiveRefinedObjList.GetObj(i))]);
+         st->mTotalLogLikelihood += tmp;
+         st->mTotalLogLikelihoodDeltaSq +=
+            (tmp-st->mLastLogLikelihood)*(tmp-st->mLastLogLikelihood);
+         st->mLastLogLikelihood=tmp;
+      }
+      cost += mvObjWeight[&(mRecursiveRefinedObjList.GetObj(i))].mWeight * tmp;
+   }
    return cost;
 }
 void OptimizationObj::StopAfterCycle() 
@@ -420,7 +433,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
       unsigned long secondsWhenAutoSave=0;
    // prepare all objects
    this->TagNewBestConfig();
-   
+   mvObjWeight.clear();
    switch(mGlobalOptimType.GetChoice())
    {
       case GLOBAL_OPTIM_SIMULATED_ANNEALING:
@@ -750,6 +763,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
          {
             for(int i=0;i<nbWorld;i++)
             {
+               mContext=i;
                mRefParList.RestoreParamSet(worldCurrentSetIndex(i));
                mMutationAmplitude=mutationAmplitude(i);
                mTemperature=simAnnealTemp(i);
@@ -994,9 +1008,81 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
             {
                makeReport=false;
                worldNbAcceptedMoves*=nbWorld;
-               if(!silent) cout <<"Trial :" << mNbTrial << " Best Cost=" << mBestCost<< " ";
-               if(!silent) chrono.print();
                if(!silent)
+               {
+                  #if 0
+                  {// Experimental, dynamical weighting
+                     REAL max=0.;
+                     map<const RefinableObj*,REAL> ll,llvar;
+                     map<const RefinableObj*,LogLikelihoodStats>::iterator pos;
+                     for(pos=mvContextObjStats[0].begin();pos!=mvContextObjStats[0].end();++pos)
+                     {
+                        ll   [pos->first]=0.;
+                        llvar[pos->first]=0.;
+                     }
+                     for(int i=0;i<nbWorld;i++)
+                     {
+                        for(pos=mvContextObjStats[0].begin();pos!=mvContextObjStats[0].end();++pos)
+                        {
+                           ll   [pos->first] += pos->second.mTotalLogLikelihood;
+                           llvar[pos->first] += pos->second.mTotalLogLikelihoodDeltaSq;
+                        }
+                     }
+                     for(pos=mvContextObjStats[0].begin();pos!=mvContextObjStats[0].end();++pos)
+                     {
+                        cout << pos->first->GetName()
+                             << " " << llvar[pos->first]
+                             << " " << mvObjWeight[pos->first].mWeight
+                             << " " << max<<endl;
+                        llvar[pos->first] *= mvObjWeight[pos->first].mWeight;
+                        if(llvar[pos->first]>max) max=llvar[pos->first];
+                     }
+                     map<const RefinableObj*,REAL>::iterator pos2;
+                     for(pos2=llvar.begin();pos2!=llvar.end();++pos2)
+                     {
+                        const REAL d=pos2->second;
+                        if(d<(max/mvObjWeight.size()/10.))
+                        {
+                           if(d<1) continue;
+                           mvObjWeight[pos2->first].mWeight *=2;
+                        }
+                     }
+                     REAL ll1=0;
+                     REAL llt=0;
+                     for(pos2=ll.begin();pos2!=ll.end();++pos2)
+                     {
+                        llt += pos2->second;
+                        ll1 += pos2->second * mvObjWeight[pos2->first].mWeight;
+                     }
+                     map<const RefinableObj*,DynamicObjWeight>::iterator posw;
+                     for(posw=mvObjWeight.begin();posw!=mvObjWeight.end();++posw)
+                     {
+                        posw->second.mWeight *= llt/ll1;
+                     }
+                  }
+                  #endif //Experimental dynamical weighting
+                  #if 1 //def __DEBUG__
+                  for(int i=0;i<nbWorld;i++)
+                  {
+                     cout<<"   World :"<<i<<":";
+                     map<const RefinableObj*,LogLikelihoodStats>::iterator pos;
+                     for(pos=mvContextObjStats[i].begin();pos!=mvContextObjStats[i].end();++pos)
+                     {
+                        cout << pos->first->GetName() 
+                             << "(LLK="
+                             << pos->second.mLastLogLikelihood
+                             //<< "(<LLK>="
+                             //<< pos->second.mTotalLogLikelihood/nbTrialsReport
+                             //<< ", <delta(LLK)^2>="
+                             //<< pos->second.mTotalLogLikelihoodDeltaSq/nbTrialsReport
+                             << ", w="<<mvObjWeight[pos->first].mWeight
+                             <<")  ";
+                        pos->second.mTotalLogLikelihood=0;
+                        pos->second.mTotalLogLikelihoodDeltaSq=0;
+                     }
+                     cout << endl;
+                  }
+                  #endif
                   for(int i=0;i<nbWorld;i++)
                   {
                      //mRefParList.RestoreParamSet(worldCurrentSetIndex(i));
@@ -1009,6 +1095,9 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                           <<"% moves " <<endl;
                      //     <<"% moves " << mRefParList.GetPar("Pboccup").GetValue()<<endl;
                   }
+               }
+               if(!silent) cout <<"Trial :" << mNbTrial << " Best Cost=" << mBestCost<< " ";
+               if(!silent) chrono.print();
                //Change the mutation rate if necessary for each world
                if(ANNEALING_SMART==mAnnealingScheduleMutation.GetChoice())
                {
