@@ -637,7 +637,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                string saveFileName=this->GetName();
                time_t date=time(0);
                char strDate[40];
-               strftime(strDate,sizeof(strDate),"%Y-%m-%d_%H-%M-%S",gmtime(&date));//%Y-%m-%dT%H:%M:%S%Z
+               strftime(strDate,sizeof(strDate),"%Y-%m-%d_%H-%M-%S",localtime(&date));//%Y-%m-%dT%H:%M:%S%Z
                char costAsChar[30];
                if(accept!=2) mRefParList.RestoreParamSet(mBestParSavedSetIndex);
                sprintf(costAsChar,"-Cost-%f",this->GetLogLikelihood());
@@ -854,7 +854,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                      string saveFileName=this->GetName();
                      time_t date=time(0);
                      char strDate[40];
-                     strftime(strDate,sizeof(strDate),"%Y-%m-%d_%H-%M-%S",gmtime(&date));//%Y-%m-%dT%H:%M:%S%Z
+                     strftime(strDate,sizeof(strDate),"%Y-%m-%d_%H-%M-%S",localtime(&date));//%Y-%m-%dT%H:%M:%S%Z
                      char costAsChar[30];
                      if(accept!=2) mRefParList.RestoreParamSet(mBestParSavedSetIndex);
                      sprintf(costAsChar,"-Cost-%f",this->GetLogLikelihood());
