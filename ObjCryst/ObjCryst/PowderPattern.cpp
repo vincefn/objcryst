@@ -2275,7 +2275,6 @@ Error opening file for input:"+filename);
    float bcoeff[4];
    //string line;
    char line[81];
-   line[80]='\0';
    char bank[5];
    do
    {
@@ -2319,23 +2318,23 @@ Could not find BANK statement !! In file: "+filename);
       this->SetPowderPatternPar(bcoeff[0]*DEG2RAD/100,bcoeff[1]*DEG2RAD/100,mNbPoint);
       string sub;
       unsigned long point=0;
-      REAL iobs[5],isig[5];
+      REAL iobs,isig;
+      string substr;
       for(long i=0;i<nbRecords;i++)
       {
          fin.read(line,80);
-         //line[80]='\0';
-         //cout<<line<<endl;
+         line[80]='\0';
          while(isprint(fin.peek())==false)
          {
             if(fin.eof()) break;
             fin.get();
          }
-         sscanf(line,"%8f%8f%8f%8f%8f%8f%8f%8f%8f%8f",&iobs[0],&isig[0],
-                &iobs[1],&isig[1],&iobs[2],&isig[2],&iobs[3],&isig[3],&iobs[4],&isig[1]);
          for(unsigned int j=0;j<5;j++)
          {
-            mPowderPatternObs(point)=iobs[j];
-            mPowderPatternObsSigma(point++)=isig[j];
+            substr=string(line).substr(j*16,16);
+            sscanf(substr.c_str(),"%8f%8f",&iobs,&isig);
+            mPowderPatternObs(point)=iobs;
+            mPowderPatternObsSigma(point++)=isig;
             if(point==mNbPoint) break;
          }
       }
@@ -2344,28 +2343,33 @@ Could not find BANK statement !! In file: "+filename);
    if((binType=="CONS") && (type=="STD"))
    {
       this->SetPowderPatternPar(bcoeff[0]*DEG2RAD/100,bcoeff[1]*DEG2RAD/100,mNbPoint);
-      string sub;
       unsigned long point=0;
-      REAL iobs[10];
+      REAL iobs;
+      int nc;
+      string substr;
       for(long i=0;i<nbRecords;i++)
       {
          fin.read(line,80);
-         //line[80]='\0';
-         //cout<<line<<endl;
+         line[80]='\0';
          while(isprint(fin.peek())==false)
          {
             if(fin.eof()) break;
             fin.get();
          }
-         sscanf(line,"%8f%8f%8f%8f%8f%8f%8f%8f%8f%8f",&iobs[0],&iobs[1],
-                &iobs[2],&iobs[3],&iobs[4],&iobs[5],&iobs[6],&iobs[7],&iobs[8],&iobs[9]);
          for(unsigned int j=0;j<10;j++)
          {
-            mPowderPatternObs(point++)=iobs[j];
+            substr=string(line).substr(j*8,8);
+            if(substr.substr(0,2)==string("  "))
+            {
+               nc=1;
+               sscanf(substr.c_str(),"%8f",&iobs);
+            }
+            else sscanf(substr.c_str(),"%2d%6f",&nc,&iobs);
+            mPowderPatternObs(point)=iobs;
+            mPowderPatternObsSigma(point++)=sqrt(iobs)/sqrt((REAL)nc);
             if(point==mNbPoint) break;
          }
       }
-      this->SetSigmaToSqrtIobs();
       importOK=true;
    }
    fin.close();
