@@ -136,7 +136,7 @@ void InitLibCrystTabulExp()
 ////////////////////////////////////////////////////////////////////////
 Radiation::Radiation():
 mWavelength(1),mXRayTubeName(""),mXRayTubeDeltaLambda(0.),
-mXRayTubeAlpha2Alpha1Ratio(0.5)
+mXRayTubeAlpha2Alpha1Ratio(0.5),mLinearPolarRate(0)
 {
    mWavelength=1;
    this->InitOptions();
@@ -153,6 +153,7 @@ Radiation::Radiation(const RadiationType rad,const REAL wavelength)
    mXRayTubeName="";
    mXRayTubeDeltaLambda=0.;//useless here
    mXRayTubeAlpha2Alpha1Ratio=0.5;//useless here
+   mLinearPolarRate=0.95;//assume it's synchrotron ?
 }
 
 Radiation::Radiation(const string &XRayTubeElementName,const REAL alpha2Alpha2ratio)
@@ -167,7 +168,8 @@ mWavelengthType(old.mWavelengthType),
 mWavelength(old.mWavelength),
 mXRayTubeName(old.mXRayTubeName),
 mXRayTubeDeltaLambda(old.mXRayTubeDeltaLambda),
-mXRayTubeAlpha2Alpha1Ratio(old.mXRayTubeAlpha2Alpha1Ratio)
+mXRayTubeAlpha2Alpha1Ratio(old.mXRayTubeAlpha2Alpha1Ratio),
+mLinearPolarRate(old.mLinearPolarRate)
 {
    mClockWavelength.Click();
 }
@@ -1281,6 +1283,7 @@ void ScatteringData::CalcGlobalTemperatureFactor() const
    {
       const REAL *stol=this->GetSinThetaOverLambda().data();
       REAL *fact=mGlobalTemperatureFactor.data();
+      this->GetNbReflBelowMaxSinThetaOvLambda();//update mNbReflUsed
       for(long i=0;i<mNbReflUsed;i++) {*fact++ = exp(-mGlobalBiso * *stol * *stol);stol++;}
    }
    mClockGlobalTemperatureFact.Click();
@@ -1440,9 +1443,20 @@ void ScatteringData::CalcStructFactor() const
       mFhklCalcNeedRecalc=false;
       mGeomFhklCalcNeedRecalc=false;
       
-      this->CalcGlobalTemperatureFactor();
-      mFhklCalcReal*=mGlobalTemperatureFactor;
-      mFhklCalcImag*=mGlobalTemperatureFactor;
+      {
+         this->CalcGlobalTemperatureFactor();
+         if(mGlobalTemperatureFactor.numElements()>0)
+         {//else for some reason it's useless
+            pReal=mFhklCalcReal.data();
+            pImag=mFhklCalcImag.data();
+            pTemp=mGlobalTemperatureFactor.data();
+            for(long j=0;j<mNbReflUsed;j++)
+            {
+               *pReal++ *= *pTemp;
+               *pImag++ *= *pTemp++;
+            }
+         }
+      }
       mClockStructFactor.Click();
    }
    
