@@ -58,6 +58,8 @@ class WXCRYST_ID
       long mIndex;
       static long mCounter;
 };
+extern const long ID_WXOBJ_ENABLE; //These are used in ObjCryst/RefinableObj.cpp
+extern const long ID_WXOBJ_DISABLE;// and defined in wxCryst/wxCryst.cpp
 
 #ifndef DOXYGEN_SKIP_THIS
 // constants that are shared between several classes must
@@ -113,6 +115,8 @@ class WXCrystObjBasic: public wxWindow
       bool mIsShown;
       /// Do we need to update the display ?
       bool mNeedUpdateUI;
+      /// Mutex used to lock data when preparing to update the UI in non-main thread
+      wxMutex mMutex;
 };
 
 /// A List of WXCrystObjBasic.
@@ -178,6 +182,7 @@ class WXCrystObj: public WXCrystObjBasic
       virtual bool OnChangeName(const int id)=0;
       virtual void CrystUpdate();
       virtual void UpdateUI();
+      virtual void OnEnable(wxUpdateUIEvent &event);
       virtual bool Enable(bool enable);
       virtual void BottomLayout(WXCrystObjBasic *pChild);
       virtual void AddChild(WXCrystObjBasic *pChild, bool doBottomLayout=true);

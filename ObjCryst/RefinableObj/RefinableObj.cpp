@@ -1567,6 +1567,8 @@ void RefinableObj::DeRegisterClient(RefinableObj &obj)const
 
 bool RefinableObj::IsBeingRefined()const {return mIsbeingRefined;}
 
+extern const long ID_WXOBJ_ENABLE; //These are defined in wxCryst/wxCryst.cpp
+extern const long ID_WXOBJ_DISABLE; 
 void RefinableObj::BeginOptimization(const bool allowApproximations,
                                      const bool enableRestraints)
 {
@@ -1575,9 +1577,16 @@ void RefinableObj::BeginOptimization(const bool allowApproximations,
    for(int i=0;i<mSubObjRegistry.GetNb();i++)
       mSubObjRegistry.GetObj(i).BeginOptimization(allowApproximations);
    #ifdef __WX__CRYST__
-   if(0!=mpWXCrystObj) mpWXCrystObj->Enable(false);
+   if(0!=mpWXCrystObj)
+   {
+      if(true==wxThread::IsMain()) mpWXCrystObj->Enable(false);
+      else
+      {
+         wxUpdateUIEvent event(ID_WXOBJ_DISABLE);
+         wxPostEvent(mpWXCrystObj,event);
+      }
+   }
    #endif
-   
 }
 
 void RefinableObj::EndOptimization()
@@ -1587,7 +1596,15 @@ void RefinableObj::EndOptimization()
    for(int i=0;i<mSubObjRegistry.GetNb();i++)
       mSubObjRegistry.GetObj(i).EndOptimization();
    #ifdef __WX__CRYST__
-   if(0!=mpWXCrystObj) mpWXCrystObj->Enable(true);
+   if(0!=mpWXCrystObj)
+   {
+      if(true==wxThread::IsMain()) mpWXCrystObj->Enable(true);
+      else
+      {
+         wxUpdateUIEvent event(ID_WXOBJ_ENABLE);
+         wxPostEvent(mpWXCrystObj,event);
+      }
+   }
    #endif
 }
 

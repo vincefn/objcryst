@@ -322,8 +322,10 @@ void WXFieldString::SetValue(const string&s)
       VFN_DEBUG_EXIT("WXFieldString::SetValue(): string unchanged",3)
       return;
    }
+   mMutex.Lock();
    mValue=s;
    mNeedUpdateUI=true;
+   mMutex.Unlock();
    VFN_DEBUG_EXIT("WXFieldString::SetValue()",3)
 }
 
@@ -337,8 +339,10 @@ void WXFieldString::CrystUpdate()
    VFN_DEBUG_ENTRY("WXFieldString::CrystUpdate()",3)
    if(mValue==*mpString) return;
    mValueOld=mValue;
+   mMutex.Lock();
    mValue=*mpString;
    mNeedUpdateUI=true;
+   mMutex.Unlock();
    if(true==wxThread::IsMain()) this->UpdateUI();
    VFN_DEBUG_EXIT("WXFieldString::CrystUpdate()",3)
 }
@@ -349,21 +353,27 @@ void WXFieldString::UpdateUI()
    mIsSelfUpdating=true;
    mpField->SetValue(mValue.c_str());
    mIsSelfUpdating=false;
+   mMutex.Lock();
    mNeedUpdateUI=false;
+   mMutex.Unlock();
    VFN_DEBUG_EXIT("WXFieldString::UpdateUI()",4)
 }
 void WXFieldString::Revert()
 {
    VFN_DEBUG_MESSAGE("WXFieldString::Revert()",3)
+   mMutex.Lock();
    mValue=mValueOld;
    mNeedUpdateUI=true;
+   mMutex.Unlock();
 }
 void WXFieldString::ValidateUserInput()
 {
    VFN_DEBUG_MESSAGE("WXFieldString::ValidateUserInput()",6)
    //:TODO: Check that the object is not busy (input should be frozen)
    mValueOld=mValue;
+   mMutex.Lock();
    mValue=mpField->GetValue();
+   mMutex.Unlock();
    *mpString=mValue;
 }
 
@@ -422,8 +432,10 @@ void WXFieldName::SetValue(const string&s)
       VFN_DEBUG_EXIT("WXFieldName::SetValue():name unchanged",3)
       return;
    }
+   mMutex.Lock();
    mValue=s;
    mNeedUpdateUI=true;
+   mMutex.Unlock();
    VFN_DEBUG_EXIT("WXFieldName::SetValue()",3)
 }
 
@@ -444,21 +456,27 @@ void WXFieldName::UpdateUI()
    mIsSelfUpdating=true;
    mpField->SetValue(mValue.c_str());
    mIsSelfUpdating=false;
+   mMutex.Lock();
    mNeedUpdateUI=false;
+   mMutex.Unlock();
    VFN_DEBUG_EXIT("WXFieldName::UpdateUI()",4)
 }
 void WXFieldName::Revert()
 {
    VFN_DEBUG_MESSAGE("WXFieldName::Revert()",3)
+   mMutex.Lock();
    mValue=mValueOld;
    mNeedUpdateUI=true;
+   mMutex.Unlock();
 }
 void WXFieldName::ValidateUserInput()
 {
    VFN_DEBUG_MESSAGE("WXFieldName::ValidateUserInput()",6)
    //:TODO: Check that the object is not busy (input should be frozen)
    mValueOld=mValue;
+   mMutex.Lock();
    mValue=mpField->GetValue();
+   mMutex.Unlock();
    mpWXObj->OnChangeName(mId);
 }
 
@@ -526,8 +544,10 @@ template<class T> void WXFieldPar<T>::CrystUpdate()
    if(mValue==*mpValue) return;
    VFN_DEBUG_ENTRY("WXFieldPar<T>::CrystUpdate()",6)
    mValueOld=mValue;
+   mMutex.Lock();
    mValue=*mpValue;
    mNeedUpdateUI=true;
+   mMutex.Unlock();
    if(true==wxThread::IsMain()) this->UpdateUI();
    VFN_DEBUG_EXIT("WXFieldPar<T>::CrystUpdate()",6)
 }
@@ -541,7 +561,9 @@ template<> void WXFieldPar<REAL>::UpdateUI()
    mIsSelfUpdating=true;
    mpField->SetValue(tmp);
    mIsSelfUpdating=false;
+   mMutex.Lock();
    mNeedUpdateUI=false;
+   mMutex.Unlock();
    VFN_DEBUG_EXIT("WXFieldPar<REAL>::UpdateUI()",4)
 }
 
@@ -554,7 +576,9 @@ template<> void WXFieldPar<long>::UpdateUI()
    mIsSelfUpdating=true;
    mpField->SetValue(tmp);
    mIsSelfUpdating=false;
+   mMutex.Lock();
    mNeedUpdateUI=false;
+   mMutex.Unlock();
    VFN_DEBUG_EXIT("WXFieldPar<long>::UpdateUI()",4)
 }
 /*
@@ -574,9 +598,11 @@ template<class T> void WXFieldPar<T>::UpdateUI()
 template<class T> void WXFieldPar<T>::Revert()
 {
    VFN_DEBUG_MESSAGE("WXFieldPar<T>::Revert()",6)
+   mMutex.Lock();
    *mpValue=mValueOld;
    mValue=mValueOld;
    mNeedUpdateUI=true;
+   mMutex.Unlock();
    if(true==wxThread::IsMain()) this->UpdateUI();
 }
 
@@ -651,8 +677,12 @@ void WXFieldChoice::ValidateUserInput(){}
 //    WXCrystObj
 //
 ////////////////////////////////////////////////////////////////////////
+const long ID_WXOBJ_ENABLE=WXCRYST_ID(); //These are used in ObjCryst/RefinableObj.cpp
+const long ID_WXOBJ_DISABLE=WXCRYST_ID();
 BEGIN_EVENT_TABLE(WXCrystObj,wxEvtHandler)
    EVT_BUTTON(ID_WXOBJ_COLLAPSE,WXCrystObj::OnToggleCollapse)
+   EVT_UPDATE_UI(ID_WXOBJ_ENABLE,WXCrystObj::OnEnable)                
+   EVT_UPDATE_UI(ID_WXOBJ_DISABLE,WXCrystObj::OnEnable)                
 END_EVENT_TABLE()
 
 WXCrystObj::WXCrystObj(wxWindow* parent,int orient,bool showName):
@@ -715,6 +745,11 @@ void WXCrystObj::UpdateUI()
    if(mpWXTitle!=0) mpWXTitle->UpdateUI();
    mList.UpdateUI();
    VFN_DEBUG_EXIT("WXCrystObj::UpdateUI()",6)
+}
+void WXCrystObj::OnEnable(wxUpdateUIEvent &event)
+{
+   if(ID_WXOBJ_ENABLE==event.GetId()) this->Enable(true);
+   else this->Enable(false);
 }
 bool WXCrystObj::Enable(bool enable)
 {
