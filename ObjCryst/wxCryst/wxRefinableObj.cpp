@@ -231,7 +231,8 @@ END_EVENT_TABLE()
 
 WXFieldOption::WXFieldOption(wxWindow *parent,
                              const int field_id,RefObjOpt* option):
-WXField(parent,option->GetName(),field_id),mpOption(option)
+WXField(parent,option->GetName(),field_id),
+mChoice(-1),mChoiceOld(-1),mpOption(option),mpList(0)
 {
    wxString choices[20];//:TODO: dynamically choose correct number
    for(int i=0;i<mpOption->GetNbChoice();i++)
