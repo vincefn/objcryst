@@ -1,3 +1,39 @@
+#### 1.5.1 - december 2003
+NEW FEATURES
+   * Added more user control on the fexibility of a Molecule:
+      - Added "Rigid Body" and "User-Chosen Free Torsion" choices
+        for the flexibility model of the Molecule.
+      - Also added an option to disable the optimisation of the
+        orientation of the Molecule (only useful for "Rigid Body" mode)
+      - Give access to the delta and sigma parameters to calculate
+        restraints, although users are HIGHLY advised not to change
+        the default values unless they really know what they are doing
+      Also, a Molecule will by default be less flexible than before
+   * Reverted to using GLUT under Linux to display atom labels in
+     the OpenGL window, as some graphical drivers did not fare well
+     with the new method.
+   * Ability to remove several atoms/bonds/angles at the same time.
+     When removing a bond, offer to remove the bond angles and
+     dihedral angles using that bond.
+   * Added reflection labels on the powder pattern graphical display.
+   * Speed improvements by avoiding (more) recomputations.
+   * Fox now uses wxWindows 2.4.x (no support for versions <2.4).
+   * Added support for Cobalt X-Ray tube. Also, correctly save
+     X-Ray tube parameters when they have been entered manually.
+   
+BUG FIXES
+   * The position of peaks on a powder pattern was randomly displaced
+     by up to +/-2 pixels for each reflection. This could be serious
+     for patterns recorded with a low resolution relatively to the
+     peak widths, although the use of "integrated" Chi^2 and R-factors
+     reduced the gravity of this bug. (thanks Michal Husak for
+     serious testing and reporting)
+   * In the CIF output, some atoms were wrongly labeled as being 
+     overlapping with another identical element.
+   * In the graphical display of powder patterns, improve the precison
+     of the display.
+
+
 #### 1.5 - june 2003
 NEW FEATURES-MAJOR CHANGES
    * The optimization will now use log(likelihood) as a criterion:
