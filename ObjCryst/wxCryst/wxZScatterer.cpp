@@ -201,29 +201,37 @@ WXCrystObjBasic(parent),mpZAtom(obj)
 
    if(0<mpZAtom->GetZScatterer().GetZAtomRegistry().Find(*mpZAtom))
    {
-      WXCrystObjBasic* pFieldBond 
-         =mpZAtom->GetZScatterer().GetPar(&(mpZAtom->mBondLength)).WXCreate(this);
+      RefinablePar *par=&(mpZAtom->GetZScatterer().GetPar(&(mpZAtom->mBondLength)));
+      par->SetName("Bond(w/"+(mpZAtom->GetZScatterer().GetZAtomRegistry()
+                     .GetObj(mpZAtom->GetZBondAtom())).GetName()+")");
+      WXCrystObjBasic* pFieldBond=par->WXCreate(this);
       mpSizer->Add(pFieldBond,0,wxALIGN_LEFT);
       mList.Add(pFieldBond);
    }
    
    if(1<mpZAtom->GetZScatterer().GetZAtomRegistry().Find(*mpZAtom))
    {
+      RefinablePar *par=&(mpZAtom->GetZScatterer().GetPar(&(mpZAtom->mAngle)));
+      par->SetName("Angle(w/"+(mpZAtom->GetZScatterer().GetZAtomRegistry()
+                     .GetObj(mpZAtom->GetZAngleAtom())).GetName()+")");
        WXCrystObjBasic* pFieldAngle
-          =mpZAtom->GetZScatterer().GetPar(&(mpZAtom->mAngle)).WXCreate(this);
+          =par->WXCreate(this);
       mpSizer->Add(pFieldAngle,0,wxALIGN_LEFT);
       mList.Add(pFieldAngle);
    }
    if(2<mpZAtom->GetZScatterer().GetZAtomRegistry().Find(*mpZAtom))
    {
-       WXCrystObjBasic* pFieldDihed 
-       =mpZAtom->GetZScatterer().GetPar(&(mpZAtom->mDihed)).WXCreate(this);
+      RefinablePar *par=&(mpZAtom->GetZScatterer().GetPar(&(mpZAtom->mDihed)));
+      par->SetName("DihedralAngle(w/"+(mpZAtom->GetZScatterer().GetZAtomRegistry()
+                     .GetObj(mpZAtom->GetZDihedralAngleAtom())).GetName()+")");
+      WXCrystObjBasic* pFieldDihed=par->WXCreate(this);
       mpSizer->Add(pFieldDihed,0,wxALIGN_LEFT);
       mList.Add(pFieldDihed);
    }
    {
-      WXCrystObjBasic* pFieldOccup
-         =mpZAtom->GetZScatterer().GetPar(&(mpZAtom->mOccupancy)).WXCreate(this);
+      RefinablePar *par=&(mpZAtom->GetZScatterer().GetPar(&(mpZAtom->mOccupancy)));
+      par->SetName("Occup.");
+      WXCrystObjBasic* pFieldOccup=par->WXCreate(this);
       mpSizer->Add(pFieldOccup,0,wxALIGN_LEFT);
       mList.Add(pFieldOccup);
    }
