@@ -323,7 +323,7 @@ bool MyApp::OnInit()
    
    WXCrystMainFrame *frame ;
    
-   frame = new WXCrystMainFrame("FOX: Free Objects for Xtal structures v1.6.0.2",
+   frame = new WXCrystMainFrame("FOX: Free Objects for Xtal structures v1.6.1CVS",
                                  wxPoint(50, 50), wxSize(550, 400),
                                  !(loadFourierGRD||loadFourierDSN6));
    // Use the main frame status bar to pass messages to the user
@@ -528,7 +528,7 @@ void WXCrystMainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
    wxString msg;
    msg.Printf( _T("F.O.X. - Free Objects for Xtal structures\n")
-               _T("Version 1.6.0.2\n\n")
+               _T("Version 1.6.1CVS\n\n")
                _T("(c) 2000-2003 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n")
                _T("    2000-2001 Radovan CERNY, University of Geneva\n\n")
                _T("http://objcryst.sourceforge.net\n")
@@ -690,23 +690,23 @@ void standardSpeedTest()
 	cout << " Beginning Speed tests" << endl ;
    
    std::list<SpeedTestReport> vReport;
-   vReport.push_back(SpeedTest(10,2,"P1"  ,RAD_NEUTRON,100,0,5.));
-   vReport.push_back(SpeedTest(10,2,"P-1" ,RAD_NEUTRON,100,0,5.));
-   vReport.push_back(SpeedTest(10,4,"Pnma",RAD_NEUTRON,100,0,5.));
-   vReport.push_back(SpeedTest(10,4,"Ia3d",RAD_NEUTRON,100,0,5.));
-   vReport.push_back(SpeedTest(10,2,"P1"  ,RAD_XRAY   ,100,0,5.));
-   vReport.push_back(SpeedTest(10,2,"P-1" ,RAD_XRAY   ,100,0,5.));
-   vReport.push_back(SpeedTest(10,4,"Pnma",RAD_XRAY   ,100,0,5.));
-   vReport.push_back(SpeedTest(10,4,"Ia3d",RAD_XRAY   ,100,0,5.));
+   vReport.push_back(SpeedTest(20,4,"P1"  ,RAD_NEUTRON,100,0,5.));
+   vReport.push_back(SpeedTest(20,4,"P-1" ,RAD_NEUTRON,100,0,5.));
+   vReport.push_back(SpeedTest(20,4,"Pnma",RAD_NEUTRON,100,0,5.));
+   vReport.push_back(SpeedTest(20,4,"Ia3d",RAD_NEUTRON,100,0,5.));
+   vReport.push_back(SpeedTest(20,4,"P1"  ,RAD_XRAY   ,100,0,5.));
+   vReport.push_back(SpeedTest(20,4,"P-1" ,RAD_XRAY   ,100,0,5.));
+   vReport.push_back(SpeedTest(20,4,"Pnma",RAD_XRAY   ,100,0,5.));
+   vReport.push_back(SpeedTest(20,4,"Ia3d",RAD_XRAY   ,100,0,5.));
 
-   vReport.push_back(SpeedTest(10,2,"P1"  ,RAD_NEUTRON,100,1,5.));
-   vReport.push_back(SpeedTest(10,2,"P-1" ,RAD_NEUTRON,100,1,5.));
-   vReport.push_back(SpeedTest(10,4,"Pnma",RAD_NEUTRON,100,1,5.));
-   vReport.push_back(SpeedTest(10,4,"Ia3d",RAD_NEUTRON,100,1,5.));
-   vReport.push_back(SpeedTest(10,2,"P1"  ,RAD_XRAY   ,100,1,5.));
-   vReport.push_back(SpeedTest(10,2,"P-1" ,RAD_XRAY   ,100,1,5.));
-   vReport.push_back(SpeedTest(10,4,"Pnma",RAD_XRAY   ,100,1,5.));
-   vReport.push_back(SpeedTest(10,4,"Ia3d",RAD_XRAY   ,100,1,5.));
+   vReport.push_back(SpeedTest(20,4,"P1"  ,RAD_NEUTRON,100,1,5.));
+   vReport.push_back(SpeedTest(20,4,"P-1" ,RAD_NEUTRON,100,1,5.));
+   vReport.push_back(SpeedTest(20,4,"Pnma",RAD_NEUTRON,100,1,5.));
+   vReport.push_back(SpeedTest(20,4,"Ia3d",RAD_NEUTRON,100,1,5.));
+   vReport.push_back(SpeedTest(20,4,"P1"  ,RAD_XRAY   ,100,1,5.));
+   vReport.push_back(SpeedTest(20,4,"P-1" ,RAD_XRAY   ,100,1,5.));
+   vReport.push_back(SpeedTest(20,4,"Pnma",RAD_XRAY   ,100,1,5.));
+   vReport.push_back(SpeedTest(20,4,"Ia3d",RAD_XRAY   ,100,1,5.));
 
    // Results from november 2003 on Vincent's Athlon TB 1.4 GHz,
    //with gcc 3.3.1 with -O3 -ffast-math -march=athlon -funroll-all-loops
