@@ -931,6 +931,9 @@ void ZScatterer::GlobalOptRandomMove(const double mutationAmplitude)
    // give a 30% chance of moving a single dihedral angle
 	// while keeping at a minimum the configuration change in the
 	// depending atoms.
+	//
+	// Should try to do better by really minimizing the conformation
+	// changes
    if( (rand()/(double)RAND_MAX)<.3)
    {
 		// find unfixed,  dihedral angles to play with //unlimited?
@@ -953,8 +956,20 @@ void ZScatterer::GlobalOptRandomMove(const double mutationAmplitude)
 		const double old=mZAtomRegistry.GetObj(atom).GetZDihedralAngle();
 		// Move it, with a max amplitude 8x greater than usual
 		par=&(this->GetPar(&(mZAtomRegistry.GetObj(atom).mDihed)));
-		par->Mutate( par->GetGlobalOptimStep()
-                    *2*(rand()/(double)RAND_MAX-0.5)*mutationAmplitude*8);
+		if( (rand()/(double)RAND_MAX)<.1)
+		{// give some probability to use certain angles: -120,-90,90,120,180
+			switch(rand()%5)
+			{
+				case 0: par->Mutate(-120*!DEG2RAD);break;
+				case 1: par->Mutate( -90*!DEG2RAD);break;
+				case 2: par->Mutate(  90*!DEG2RAD);break;
+				case 3: par->Mutate( 120*!DEG2RAD);break;
+				default:par->Mutate( 180*!DEG2RAD);break;
+			}
+		}
+		else
+			par->Mutate( par->GetGlobalOptimStep()
+                      *2*(rand()/(double)RAND_MAX-0.5)*mutationAmplitude*8);
 		const double change=mZAtomRegistry.GetObj(atom).GetZDihedralAngle()-old;
 		// Now move all atoms using this changed bond as a reference
 		const int atom2=	mZAtomRegistry.GetObj(atom).GetZAngleAtom();
