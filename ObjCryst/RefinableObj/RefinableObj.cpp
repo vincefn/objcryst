@@ -1665,6 +1665,7 @@ void RefinableObj::ResetParList()
          vector<RefinablePar*>::iterator pos;
          for(pos=mvpRefPar.begin();pos!=mvpRefPar.end();pos++) delete *pos;
       }
+      mvpRefPar.clear();
    }
    mNbRefParNotFixed=-1;
 
