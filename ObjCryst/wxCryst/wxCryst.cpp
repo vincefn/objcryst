@@ -72,6 +72,9 @@ wxWindow(parent,-1),mWXCrystParent(0),mIsShown(true),mNeedUpdateUI(true)
 WXCrystObjBasic::~WXCrystObjBasic()
 {
    if(this->GetContainingSizer()!=0) this->GetContainingSizer()->Remove(this);
+   // Every time we destroy a widget, validate all input to make sure the destroyed
+   // widget does not have some unread info.
+   WXCrystValidateAllUserInput();
 }
 
 void WXCrystObjBasic::BottomLayout(WXCrystObjBasic *pChild)
