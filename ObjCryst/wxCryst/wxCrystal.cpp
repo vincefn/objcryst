@@ -863,16 +863,15 @@ mpCrystal(&crystal)
 {}
 UnitCellMapImport::~UnitCellMapImport(){}
 void UnitCellMapImport::GLInitDisplayList(const float minValue,
-                                          const REAL xMin,const REAL xMax,
-                                          const REAL yMin,const REAL yMax,
-                                          const REAL zMin,const REAL zMax) const
+					  WXGLCrystalCanvas * parentCrystal) const
 {
    VFN_DEBUG_ENTRY("UnitCellMapImport::GLInitDisplayList()",7)
    // Generate triangles
       VFN_DEBUG_MESSAGE("UnitCellMapImport::GLInitDisplayList(): Generate Triangles",7)
-      REAL xc=(xMin+xMax)/2.;  //this is also done in Crystal
-      REAL yc=(yMin+yMax)/2.;
-      REAL zc=(zMin+zMax)/2.;
+     //this is also done in Crystal
+      REAL xc=(parentCrystal->mXmin+parentCrystal->mXmax)/2.;  
+      REAL yc=(parentCrystal->mYmin+parentCrystal->mYmax)/2.; 
+      REAL zc=(parentCrystal->mZmin+parentCrystal->mZmax)/2.; 
       mpCrystal->FractionalToOrthonormalCoords(xc, yc, zc);
       glTranslatef(-xc, -yc, -zc);
 
@@ -883,9 +882,22 @@ void UnitCellMapImport::GLInitDisplayList(const float minValue,
       step[0]=1/(float)nx;
       step[1]=1/(float)ny;
       step[2]=1/(float)nz;
-      const int nxMin = (int)(xMin * nx), nxMax = (int)(xMax * nx);
-      const int nyMin = (int)(yMin * ny), nyMax = (int)(yMax * ny);
-      const int nzMin = (int)(zMin * nz), nzMax = (int)(zMax * nz);
+      int nxMin, nxMax, nyMin, nyMax, nzMin, nzMax;
+      if (parentCrystal->mXminF == parentCrystal->mXmaxF) {
+	nxMin = (int)(parentCrystal->mXmin * nx);
+	nxMax = (int)(parentCrystal->mXmax * nx);
+	nyMin = (int)(parentCrystal->mYmin * ny);
+	nyMax = (int)(parentCrystal->mYmax * ny);
+	nzMin = (int)(parentCrystal->mZmin * nz);
+	nzMax = (int)(parentCrystal->mZmax * nz);
+      } else {
+	nxMin = (int)(parentCrystal->mXminF * nx);
+	nxMax = (int)(parentCrystal->mXmaxF * nx);
+	nyMin = (int)(parentCrystal->mYminF * ny);
+	nyMax = (int)(parentCrystal->mYmaxF * ny);
+	nzMin = (int)(parentCrystal->mZminF * nz);
+	nzMax = (int)(parentCrystal->mZmaxF * nz);
+      }
       const int snx = nxMax-nxMin+1, sny = nyMax-nyMin+1, snz = nzMax-nzMin+1;
       const unsigned int sny_snz = sny*snz;
       int i, j, k;
@@ -941,21 +953,22 @@ void UnitCellMapImport::GLInitDisplayList(const float minValue,
    VFN_DEBUG_EXIT("UnitCellMapImport::GLInitDisplayList()",7)
 
 }
-void UnitCellMapImport::ImportGRD(const string&filename)
+int UnitCellMapImport::ImportGRD(const string&filename)
 {
    VFN_DEBUG_ENTRY("UnitCellMapImport::ImportGRD()",7)
    ifstream ffile(filename.c_str());
    if(!ffile.is_open())
    {     //if file could not be loaded for some reason then exit
+     VFN_DEBUG_MESSAGE("UnitCellMapImport::ImportGRD() error opening "<<filename.c_str(),10)
       (*fpObjCrystInformUser)("Error opening file: "+filename);
-      return;
+      return 0;
    }
    //message for reporting errors
    char buff[99];
    ffile.getline(buff, 100);
    float a, b, c, alpha, beta, gamma;
    ffile >>a >>b >>c >>alpha >>beta >>gamma;
-   if(!ffile.good()) {  (*fpObjCrystInformUser)("Error reading file: "+filename); return; }
+   if(!ffile.good()) {  (*fpObjCrystInformUser)("Error reading file: "+filename); return 0; }
    //compare dimensions with the original crystal and notify the user if not equal
    /*
    float afac = 180/M_PI, limit = 0.0001;
@@ -985,7 +998,7 @@ void UnitCellMapImport::ImportGRD(const string&filename)
    */
    int nx,ny,nz;
    ffile >>nx >>ny >>nz;
-   if(!ffile.good()) {  (*fpObjCrystInformUser)("Error reading file: "+filename); return; }
+   if(!ffile.good()) {  (*fpObjCrystInformUser)("Error reading file: "+filename); return 0; }
    mPoints.resize(nz,ny,nx);
    for(int i=0; i < nx; i++) {
      for(int j=0; j < ny; j++) {
@@ -998,6 +1011,7 @@ void UnitCellMapImport::ImportGRD(const string&filename)
    
    mName=filename;
    VFN_DEBUG_EXIT("UnitCellMapImport::ImportGRD()",7)
+     return 1;
 }
 
 const string & UnitCellMapImport::GetName()const
@@ -1025,16 +1039,15 @@ UnitCellMapGLList::~UnitCellMapGLList()
    if(0!=mGLDisplayList) glDeleteLists(mGLDisplayList,1);
 }
 void UnitCellMapGLList::GenList(const UnitCellMapImport &ucmap,
-                                const float contourValue,
-                                const REAL xMin,const REAL xMax,
-                                const REAL yMin,const REAL yMax,
-                                const REAL zMin,const REAL zMax)
+				WXGLCrystalCanvas * parent,
+                                const float contourValue)
 {
    VFN_DEBUG_ENTRY("UnitCellMapGLList::GenList()",7)
    if(0==mGLDisplayList) mGLDisplayList=glGenLists(1);
    glNewList(mGLDisplayList,GL_COMPILE);
       glPushMatrix();
-         ucmap.GLInitDisplayList(contourValue,xMin,xMax,yMin,yMax,zMin,zMax);
+      //ucmap.GLInitDisplayList(contourValue,xMin,xMax,yMin,yMax,zMin,zMax);
+      ucmap.GLInitDisplayList(contourValue, parent);
       glPopMatrix();
    glEndList();
    VFN_DEBUG_EXIT("UnitCellMapGLList::GenList()",7)
@@ -1119,6 +1132,7 @@ BEGIN_EVENT_TABLE(WXGLCrystalCanvas, wxGLCanvas)
    EVT_MENU             (ID_GLCRYSTAL_MENU_FOURIERCHANGECOLOR,  WXGLCrystalCanvas::OnFourierChangeColor)
    EVT_MENU             (ID_GLCRYSTAL_MENU_SHOWWIRE,            WXGLCrystalCanvas::OnShowWire)
    EVT_MENU             (ID_GLCRYSTAL_MENU_UNLOADFOURIER,       WXGLCrystalCanvas::OnUnloadFourier)
+   EVT_MENU             (ID_GLCRYSTAL_MENU_FOURIERCHANGEBBOX,   WXGLCrystalCanvas::OnFourierChangeBbox)
    EVT_CHAR             (WXGLCrystalCanvas::OnKeyDown)
    EVT_KEY_DOWN         (WXGLCrystalCanvas::OnKeyDown)
    EVT_KEY_UP           (WXGLCrystalCanvas::OnKeyUp)
@@ -1132,6 +1146,8 @@ WXGLCrystalCanvas::WXGLCrystalCanvas(WXCrystal *wxcryst,
 wxGLCanvas(parent,id,pos,size,wxDEFAULT_FRAME_STYLE),//
 mpWXCrystal(wxcryst),mIsGLInit(false),mDist(60),mX0(0),mY0(0),mZ0(0),mViewAngle(15),
 mXmin(-.1),mXmax(1.1),mYmin(-.1),mYmax(1.1),mZmin(-.1),mZmax(1.1),
+// N.B. mXminF=mXmaxF so that the previous values are used for Maps until changed
+mXminF(0.0),mXmaxF(0.0),mYminF(0.0),mYmaxF(1.0),mZminF(0.0),mZmaxF(1.0),
 mShowFourier(true),mShowCrystal(true)
 {
    VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::WXGLCrystalCanvas()",3)
@@ -1154,6 +1170,8 @@ mShowFourier(true),mShowCrystal(true)
    mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_SHOWWIRE, FALSE);
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_UNLOADFOURIER, "Unload Fourier Map(s)");
    mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_UNLOADFOURIER, FALSE);
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_FOURIERCHANGEBBOX, "Change Fourier Limits");
+   mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_FOURIERCHANGEBBOX, FALSE);	//disable it for now
 }
 
 WXGLCrystalCanvas::~WXGLCrystalCanvas()
@@ -1411,6 +1429,8 @@ void WXGLCrystalCanvas::OnMouse( wxMouseEvent& event )
             mX0 += m[0][0]* dx +m[0][1]*dy;
             mY0 += m[1][0]* dx +m[1][1]*dy;
             mZ0 += m[2][0]* dx +m[2][1]*dy;
+	    VFN_DEBUG_MESSAGE("Origin (ortho) = "<<mX0<<", "<<mY0<<", "<<mZ0,10)
+
             Refresh(FALSE);
          }
          else
@@ -1512,107 +1532,25 @@ void WXGLCrystalCanvas::InitGL()
 }
 void WXGLCrystalCanvas::OnChangeLimits(wxCommandEvent & WXUNUSED(event))
 {
-   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnChangeLimits():End",10)
-   double xMin,xMax,yMin,yMax,zMin,zMax;
-   {
-      wxString str;
-      str << mXmin;
-      wxTextEntryDialog limitDialog(this,"Enter the minimum x value (reduced coords)",
-                              "x min",str,wxOK | wxCANCEL);
-      if(wxID_OK!=limitDialog.ShowModal())
-      {
-         VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnChangeLimits():Cancelled",6)
-         return;
-      }
-      limitDialog.GetValue().ToDouble(&xMin);
-   }
-   {
-      wxString str;
-      str << mXmax;
-      wxTextEntryDialog limitDialog(this,"Enter the maximum x value (reduced coords)",
-                              "x max",str,wxOK | wxCANCEL);
-      if(wxID_OK!=limitDialog.ShowModal())
-      {
-         VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnChangeLimits():Cancelled",6)
-         return;
-      }
-      limitDialog.GetValue().ToDouble(&xMax);
-   }
-   if(xMax<=xMin)
-   {
-      wxMessageDialog dumbUser(this,"max <= min !!!",
-                               "Whooops",wxOK|wxICON_EXCLAMATION);
-      dumbUser.ShowModal();
-      return;
-   }
-   {
-      wxString str;
-      str << mYmin;
-      wxTextEntryDialog limitDialog(this,"Enter the minimum y value (reduced coords)",
-                              "y min",str,wxOK | wxCANCEL);
-      if(wxID_OK!=limitDialog.ShowModal())
-      {
-         VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnChangeLimits():Cancelled",6)
-         return;
-      }
-      limitDialog.GetValue().ToDouble(&yMin);
-   }
-   {
-      wxString str;
-      str << mYmax;
-      wxTextEntryDialog limitDialog(this,"Enter the maximum y value (reduced coords)",
-                              "y max",str,wxOK | wxCANCEL);
-      if(wxID_OK!=limitDialog.ShowModal())
-      {
-         VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnChangeLimits():Cancelled",6)
-         return;
-      }
-      limitDialog.GetValue().ToDouble(&yMax);
-   }
-   if(yMax<=yMin)
-   {
-      wxMessageDialog dumbUser(this,"max <= min !!!",
-                               "Whooops",wxOK|wxICON_EXCLAMATION);
-      dumbUser.ShowModal();
-      return;
-   }
-   {
-      wxString str;
-      str << mZmin;
-      wxTextEntryDialog limitDialog(this,"Enter the minimum z value (reduced coords)",
-                              "z min",str,wxOK | wxCANCEL);
-      if(wxID_OK!=limitDialog.ShowModal())
-      {
-         VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnChangeLimits():Cancelled",6)
-         return;
-      }
-      limitDialog.GetValue().ToDouble(&zMin);
-   }
-   {
-      wxString str;
-      str << mZmax;
-      wxTextEntryDialog limitDialog(this,"Enter the maximum z value (reduced coords)",
-                              "z max",str,wxOK | wxCANCEL);
-      if(wxID_OK!=limitDialog.ShowModal())
-      {
-         VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnChangeLimits():Cancelled",6)
-         return;
-      }
-      limitDialog.GetValue().ToDouble(&zMax);
-   }
-   if(zMax<=zMin)
-   {
-      wxMessageDialog dumbUser(this,"max <= min !!!",
-                               "Whooops",wxOK|wxICON_EXCLAMATION);
-      dumbUser.ShowModal();
-      return;
-   }
-   mXmin=xMin;mXmax=xMax;
-   mYmin=yMin;mYmax=yMax;
-   mZmin=zMin;mZmax=zMax;
-   mpWXCrystal->UpdateGL(false,mXmin,mXmax,mYmin,mYmax,mZmin,mZmax);
-   this->CrystUpdate();
+  VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnChangeLimits()",10)
+  UserSelectBoundingBox *BoxDlg = new UserSelectBoundingBox(this,
+	    "Set bounding box for display of\natoms (fractional coordinates)",
+	     mXmin,mXmax,mYmin,mYmax,mZmin,mZmax);
+  if (BoxDlg->ShowModal() == wxID_OK ) {
+    mXmin =  BoxDlg->mxMin;
+    mXmax =  BoxDlg->mxMax;
+    mYmin =  BoxDlg->myMin;
+    mYmax =  BoxDlg->myMax;
+    mZmin =  BoxDlg->mzMin;
+    mZmax =  BoxDlg->mzMax;
+    mpWXCrystal->UpdateGL(false,mXmin,mXmax,mYmin,mYmax,mZmin,mZmax);
+    this->CrystUpdate();
+    VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnChangeLimits X: " << mXmin << mXmax << " Y:" << mYmin<< mYmax << " Z: " << mZmin << mZmax,10)
+  } 
+  BoxDlg->Destroy();
+  VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnChangeLimits():UserSelectBoundingBox done",10)
 }
+
 void WXGLCrystalCanvas::OnShowCrystal()
 {
    if(mShowCrystal) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWCRYSTAL, "Show Crystal");
@@ -1628,7 +1566,8 @@ void WXGLCrystalCanvas::OnLoadFourier()
    //if okay then read Fourier map, run MC on it and display the triangles
    if(fd.ShowModal() == wxID_OK)
    {
-      this->LoadFourier((string)(fd.GetFilename().c_str()));
+     VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnLoadFourier opening "<<fd.GetPath().c_str(),10)
+      this->LoadFourier((string)(fd.GetPath().c_str()));
    }
 }
 
@@ -1638,7 +1577,12 @@ void WXGLCrystalCanvas::LoadFourier(const string&filename)
    {
       //auto_ptr<UnitCellMapImport> ptr(new UnitCellMapImport(mpWXCrystal->GetCrystal()));
       mvpUnitCellMapImport.push_back(new UnitCellMapImport(mpWXCrystal->GetCrystal()));
-      mvpUnitCellMapImport.back()->ImportGRD(filename);
+      // load the map; exit on error
+      if (mvpUnitCellMapImport.back()->ImportGRD(filename) == 0) {
+	// how can I insert filename into this message?
+	wxMessageBox("Error reading Fourier file", "File error", wxOK, this);
+	return;
+      }
    }
    {
       //auto_ptr<UnitCellMapGLList> ptr(new UnitCellMapGLList);
@@ -1648,8 +1592,7 @@ void WXGLCrystalCanvas::LoadFourier(const string&filename)
       mvpUnitCellMapGLList.back().second->SetColour(1.,0,0,1);
       this->SetCurrent();
       mvpUnitCellMapGLList.back().second->GenList(*(mvpUnitCellMapImport.back()),
-                                          mvpUnitCellMapGLList.back().first.second,
-                                          mXmin,mXmax,mYmin,mYmax,mZmin,mZmax);
+		     this, mvpUnitCellMapGLList.back().first.second);
    }
 
    mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_CHANGECONTOUR, TRUE);
@@ -1658,6 +1601,7 @@ void WXGLCrystalCanvas::LoadFourier(const string&filename)
    mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_FOURIERCHANGECOLOR, TRUE);
    mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_UNLOADFOURIER, TRUE);
    mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_SHOWWIRE, TRUE);
+   mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_FOURIERCHANGEBBOX, TRUE);
    this->CrystUpdate();
 }
 
@@ -1678,8 +1622,7 @@ void WXGLCrystalCanvas::OnChangeContour()
    contourValueDialog.GetValue().ToDouble(&contourValue);
    mvpUnitCellMapGLList[mapgl].first.second = (float) contourValue;
    mvpUnitCellMapGLList[mapgl].second->GenList(*(mvpUnitCellMapImport.back()),
-                                       mvpUnitCellMapGLList[mapgl].first.second,
-                                       mXmin,mXmax,mYmin,mYmax,mZmin,mZmax);
+					       this, mvpUnitCellMapGLList[mapgl].first.second);
    this->CrystUpdate();
 }
 
@@ -1709,9 +1652,8 @@ void WXGLCrystalCanvas::OnAddContour()
          ->SetColour(ncolor.Red()/255.0,ncolor.Green()/255.0,ncolor.Blue()/255.0,0.5);
       this->SetCurrent();
       mvpUnitCellMapGLList.back().second->GenList(*mvpUnitCellMapImport[map],
-                                          mvpUnitCellMapGLList.back().first.second,
-                                          mXmin,mXmax,mYmin,mYmax,mZmin,mZmax);
-   this->CrystUpdate();
+						  this, mvpUnitCellMapGLList.back().first.second);
+      this->CrystUpdate();
 }
 
 void WXGLCrystalCanvas::OnShowFourier()
@@ -1735,6 +1677,37 @@ void WXGLCrystalCanvas::OnFourierChangeColor()
          ->SetColour(ncolor.Red()/255.0,ncolor.Green()/255.0,ncolor.Blue()/255.0,0.5);
       this->CrystUpdate();
    }
+}
+
+void WXGLCrystalCanvas::OnFourierChangeBbox()
+{
+  VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnFourierChangeBbox()",10)
+  // change mXmaxF if in default mode
+  float xmaxtmp = mXmaxF;
+  if (mXminF == mXmaxF) xmaxtmp += 1.0;
+  UserSelectBoundingBox *BoxDlg = new UserSelectBoundingBox(this,
+      "Set bounding box for display of\nFourier map (fractional coordinates)",
+       mXminF,xmaxtmp,mYminF,mYmaxF,mZminF,mZmaxF);
+  if (BoxDlg->ShowModal() == wxID_OK ) {
+    mXminF =  BoxDlg->mxMin;
+    mXmaxF =  BoxDlg->mxMax;
+    mYminF =  BoxDlg->myMin;
+    mYmaxF =  BoxDlg->myMax;
+    mZminF =  BoxDlg->mzMin;
+    mZmaxF =  BoxDlg->mzMax;
+    vector<pair<pair<const UnitCellMapImport*,float>,UnitCellMapGLList* > >::iterator pos;
+    for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();pos++)
+      pos->second->GenList(*(mvpUnitCellMapImport.back()),
+			   this, pos->first.second);
+
+    this->CrystUpdate();
+    VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnFourierChangeBbox X: " << 
+		      mXminF << mXmaxF << " Y: " << 
+		      mYminF << mYmaxF << " Z: " << 
+		      mZminF << mZmaxF, 10)
+  }
+  BoxDlg->Destroy();
+  VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnFourierChangeBbox done",10)
 }
 
 void WXGLCrystalCanvas::OnUnloadFourier()
@@ -1765,6 +1738,7 @@ void WXGLCrystalCanvas::OnUnloadFourier()
       mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_FOURIERCHANGECOLOR, FALSE);
       mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWWIRE, "Show Filled");
       mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_SHOWWIRE, FALSE);
+      mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_FOURIERCHANGEBBOX, FALSE);
 
       this->CrystUpdate();
    }
@@ -1821,6 +1795,128 @@ int WXGLCrystalCanvas::UserSelectUnitCellMapImport()const
    }
    return map;
 }
+
+BEGIN_EVENT_TABLE(UserSelectBoundingBox, wxDialog)
+   EVT_BUTTON(wxID_OK, UserSelectBoundingBox::OnOk)
+END_EVENT_TABLE()
+
+  UserSelectBoundingBox::UserSelectBoundingBox (wxWindow *parent, char * title,
+					      const float xMin=.0, const float xMax=1.,
+					      const float yMin=.0, const float yMax=1.,
+					      const float zMin=.0, const float zMax=1.)
+  : wxDialog((wxWindow *)parent, -1, "Set bounding box", wxDefaultPosition,
+  	     wxSize(250, 250), wxDEFAULT_DIALOG_STYLE) 
+{
+  wxBoxSizer *dialogSizer = new wxBoxSizer(wxVERTICAL);
+  wxFlexGridSizer *inputSizer = new wxFlexGridSizer(4, 3, 10, 10);
+  // headers
+  inputSizer->Add(new wxStaticText(this, -1, ""), 0, wxALIGN_CENTRE_VERTICAL);
+  inputSizer->Add(new wxStaticText(this, -1, "minimum"), 0, wxALIGN_CENTER);
+  inputSizer->Add(new wxStaticText(this, -1, "maximum"), 0, wxALIGN_CENTER);
+  // 1st row
+  inputSizer->Add(new wxStaticText(this, -1, "a"), 0, wxALIGN_CENTRE_VERTICAL);
+  inputSizer->Add(pXminCtrl = new wxTextCtrl(this, -1, 
+					      wxString::Format("%f",xMin)), 
+					      0, wxALIGN_CENTRE_VERTICAL);
+  inputSizer->Add(pXmaxCtrl = new wxTextCtrl(this, -1, 
+					      wxString::Format("%f",xMax)), 
+					      0, wxALIGN_CENTRE_VERTICAL);
+  // 2nd row
+  inputSizer->Add(new wxStaticText(this, -1, "b"), 0, wxALIGN_CENTRE_VERTICAL);
+  inputSizer->Add(pYminCtrl = new wxTextCtrl(this, -1, 
+					      wxString::Format("%f",yMin)), 
+					      0, wxALIGN_CENTRE_VERTICAL);
+  inputSizer->Add(pYmaxCtrl = new wxTextCtrl(this, -1, 
+					      wxString::Format("%f",yMax)), 
+					      0, wxALIGN_CENTRE_VERTICAL);
+  // 3rd row
+  inputSizer->Add(new wxStaticText(this, -1, "c"), 0, wxALIGN_CENTRE_VERTICAL);
+  inputSizer->Add(pZminCtrl = new wxTextCtrl(this, -1, 
+					      wxString::Format("%f",zMin)), 
+					      0, wxALIGN_CENTRE_VERTICAL);
+  inputSizer->Add(pZmaxCtrl = new wxTextCtrl(this, -1, 
+					      wxString::Format("%f",zMax)), 
+					      0, wxALIGN_CENTRE_VERTICAL);
+  // button section
+  wxFlexGridSizer *buttonSizer = new wxFlexGridSizer(1, 2, 10, 10);
+  buttonSizer->Add(new wxButton(this, wxID_OK, "OK"), 
+		   0, wxALIGN_CENTRE_VERTICAL);
+  buttonSizer->Add(new wxButton(this, wxID_CANCEL, "Cancel"), 
+		   0, wxALIGN_CENTRE_VERTICAL);
+
+  dialogSizer->Add(10, 10);
+  dialogSizer->Add(new wxStaticText(this, -1, title), 0, 
+		   wxALIGN_CENTER);
+  dialogSizer->Add(10, 10);
+  dialogSizer->Add(inputSizer, 0, wxALIGN_CENTER);
+  dialogSizer->Add(20, 20);
+  dialogSizer->Add(buttonSizer, 0, wxALIGN_CENTER);
+
+  SetSizer(dialogSizer);
+  SetAutoLayout(TRUE);
+  Layout();
+}
+
+UserSelectBoundingBox::~UserSelectBoundingBox () {};
+
+void UserSelectBoundingBox::OnOk () {
+  char * strptr;
+  const char * val;
+
+  val = pXminCtrl->GetValue().c_str();
+  float Xmin = strtod(val, &strptr);
+  if (val == strptr) {wxMessageBox("Invalid value for Xmin!", "Bounding volume error", wxOK, this); return;}
+  val = pXmaxCtrl->GetValue().c_str();
+  float Xmax = strtod(val, &strptr);
+  if (val == strptr) {wxMessageBox("Invalid value for Xmax!", "Bounding volume error", wxOK, this); return;}
+  if (Xmin == Xmax) {wxMessageBox("Sorry, Xmin must be less than Xmax!", "Zero bounding volume", wxOK, this); return;}
+  if (Xmin > Xmax) {
+    float tmp = Xmax;
+    Xmax = Xmin;
+    Xmin = tmp;
+  }
+  VFN_DEBUG_MESSAGE("Xmin " << Xmin << " Xmax " << Xmax,10)
+
+  val = pYminCtrl->GetValue().c_str();
+  float Ymin = strtod(val, &strptr);
+  if (val == strptr) {wxMessageBox("Invalid value for Ymin!", "Bounding volume error", wxOK, this); return;}
+  val = pYmaxCtrl->GetValue().c_str();
+  float Ymax = strtod(val, &strptr);
+  if (val == strptr) {wxMessageBox("Invalid value for Ymax!", "Bounding volume error", wxOK, this); return;}
+  if (Ymin == Ymax) {wxMessageBox("Sorry, Ymin must be less than Ymax!", "Zero bounding volume", wxOK, this); return;}
+  if (Ymin > Ymax) {
+    float tmp = Ymax;
+    Ymax = Ymin;
+    Ymin = tmp;
+  }
+  VFN_DEBUG_MESSAGE("Ymin " << Ymin << " Ymax " << Ymax,10)
+
+  val = pZminCtrl->GetValue().c_str();
+  float Zmin = strtod(val, &strptr);
+  if (val == strptr) {wxMessageBox("Invalid value for Zmin!", "Bounding volume error", wxOK, this); return;}
+  val = pZmaxCtrl->GetValue().c_str();
+  float Zmax = strtod(val, &strptr);
+  if (val == strptr) {wxMessageBox("Invalid value for Zmax!", "Bounding volume error", wxOK, this); return;}
+  if (Zmin == Zmax) {wxMessageBox("Sorry, Zmin must be less than Zmax!", "Zero bounding volume", wxOK, this); return;}
+  if (Zmin > Zmax) {
+    float tmp = Zmax;
+    Zmax = Zmin;
+    Zmin = tmp;
+  }
+  VFN_DEBUG_MESSAGE("Zmin " << Zmin << " Zmax " << Zmax,10)
+    
+    // now save the values for future retrieval
+    mxMin = Xmin; 
+    mxMax = Xmax;
+    myMin = Ymin; 
+    myMax = Ymax;
+    mzMin = Zmin; 
+    mzMax = Zmax;
+
+    // close the dialog
+    EndModal(wxID_OK);
+};
+
 #endif // #ifdef OBJCRYST_GL
 
 }// namespace 
