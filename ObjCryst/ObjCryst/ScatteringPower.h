@@ -232,8 +232,8 @@ class ScatteringPower:virtual public RefinableObj
       virtual REAL GetMaximumLikelihoodPositionError()const;
       /// Get the clock value for the last change on the positionnal errors.
       virtual const RefinableObjClock& GetMaximumLikelihoodPositionErrorClock()const;
-      virtual REAL GetValence()const;
-      virtual void SetValence(const REAL valence);
+      virtual REAL GetFormalCharge()const;
+      virtual void SetFormalCharge(const REAL charge);
    protected:
       virtual void InitRefParList()=0;
       /// Initialization of the object, used by all constructors, and operator=.
@@ -270,11 +270,12 @@ class ScatteringPower:virtual public RefinableObj
          REAL mMaximumLikelihoodPositionError;
          /// 
          RefinableObjClock mMaximumLikelihoodPositionErrorClock;
-      /** Expected Valence. This can be used for bond valence analysis.
+      /** Formal Charge. This can be used for bond valence analysis,
+      * or energy calculations.
       *
       * Default value is 0.
       */
-      REAL mValence;
+      REAL mFormalCharge;
    private:
       friend const ScatteringPower& GetScatteringPower(const long i);
 };

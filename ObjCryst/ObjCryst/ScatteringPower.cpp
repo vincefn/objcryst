@@ -70,7 +70,7 @@ CrystVector_bool ScatteringPower::mspScatteringPowerGlobalListIsUsed(1000);
 
 
 ScatteringPower::ScatteringPower():mDynPopCorrIndex(0),mBiso(1.0),mIsIsotropic(true),
-mScatteringPowerId(mNbScatteringPower),mValence(0.0)
+mScatteringPowerId(mNbScatteringPower),mFormalCharge(0.0)
 {
    VFN_DEBUG_MESSAGE("ScatteringPower::ScatteringPower():"<<mName,5)
    if(mNbScatteringPower>1000) throw ObjCrystException("ScatteringPower::ScatteringPower() \
@@ -87,7 +87,7 @@ mScatteringPowerId(mNbScatteringPower),mValence(0.0)
 ScatteringPower::ScatteringPower(const ScatteringPower& old):
 mDynPopCorrIndex(old.mDynPopCorrIndex),mBiso(old.mBiso),mIsIsotropic(old.mIsIsotropic),
 mBeta(old.mBeta),mScatteringPowerId(mNbScatteringPower),
-mValence(old.mValence)
+mFormalCharge(old.mFormalCharge)
 {
    VFN_DEBUG_MESSAGE("ScatteringPower::ScatteringPower(&old):"<<mName,5)
    if(mNbScatteringPower>1000) throw ObjCrystException("ScatteringPower::ScatteringPower() \
@@ -171,9 +171,9 @@ REAL ScatteringPower::GetMaximumLikelihoodPositionError()const
 const RefinableObjClock& ScatteringPower::GetMaximumLikelihoodPositionErrorClock()const
 {return mMaximumLikelihoodPositionErrorClock;}
 
-REAL ScatteringPower::GetValence()const{return mValence;}
-void ScatteringPower::SetValence(const REAL valence)
-{mValence=valence;}
+REAL ScatteringPower::GetFormalCharge()const{return mFormalCharge;}
+void ScatteringPower::SetFormalCharge(const REAL charge)
+{mFormalCharge=charge;}
 
 void ScatteringPower::Init()
 {
@@ -761,7 +761,7 @@ void ScatteringPowerAtom::InitRefParList()
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp("Valence",&mValence,-10.,10.,
+      RefinablePar tmp("Formal Charge",&mFormalCharge,-10.,10.,
                         gpRefParTypeScattPow,REFPAR_DERIV_STEP_ABSOLUTE,
                         true,true,true,false);
       tmp.SetDerivStep(1e-3);

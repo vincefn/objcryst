@@ -359,6 +359,10 @@ void ScatteringPowerAtom::XMLOutput(ostream &os,int indent)const
    os <<endl;
    
    for(int i=0;i<=indent;i++) os << "  " ;
+   this->GetPar("Formal Charge").XMLOutput(os,"Formal Charge",indent);
+   os <<endl;
+   
+   for(int i=0;i<=indent;i++) os << "  " ;
    XMLCrystTag tag2("RGBColour");
    os << tag2
       << mColourRGB[0]<<" "
@@ -411,6 +415,11 @@ void ScatteringPowerAtom::XMLInput(istream &is,const XMLCrystTag &tagg)
                if("ML Error"==tag.GetAttributeValue(i))
                {
                   this->GetPar("ML Error").XMLInput(is,tag);
+                  break;
+               }
+               if("Formal Charge"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar("Formal Charge").XMLInput(is,tag);
                   break;
                }
             }
@@ -1023,6 +1032,25 @@ void Crystal::XMLOutput(ostream &os,int indent)const
       tag2.SetIsEndTag(true);
       os << tag2<<endl;
    }
+   if(mvBondValenceRo.size()>0)
+   {
+      map<pair<const ScatteringPower*,const ScatteringPower*>, REAL>::const_iterator pos;
+      for(pos=mvBondValenceRo.begin();pos!=mvBondValenceRo.end();pos++)
+      {
+         for(int k=0;k<=indent;k++) os << "  " ;
+         XMLCrystTag tagBVRo("BondValenceRo");
+         tagBVRo.AddAttribute("ScattPow1",pos->first.first->GetName());
+         tagBVRo.AddAttribute("ScattPow2",pos->first.second->GetName());
+         os<<tagBVRo;
+         tagBVRo.SetIsEndTag(true);
+         os<<pos->second<<tagBVRo<<endl;
+      }
+      for(int k=0;k<=indent;k++) os << "  " ;
+      XMLCrystTag tag2("BondValenceCostScale");
+      os << tag2<< mBondValenceCostScale;
+      tag2.SetIsEndTag(true);
+      os << tag2<<endl;
+   }
    
    indent--;
    tag.SetIsEndTag(true);
@@ -1112,9 +1140,30 @@ void Crystal::XMLInput(istream &is,const XMLCrystTag &tagg)
                                     dist);
          continue;
       }
+      if("BondValenceRo"==tag.GetName())
+      {
+         float ro;
+         string scattPow1;
+         string scattPow2;
+         for(unsigned int i=0;i<tag.GetNbAttribute();i++)
+         {
+            if("ScattPow1"==tag.GetAttributeName(i)) scattPow1=tag.GetAttributeValue(i);
+            if("ScattPow2"==tag.GetAttributeName(i)) scattPow2=tag.GetAttributeValue(i);
+         }
+         is>>ro;
+         XMLCrystTag junk(is);//end tag
+         this->AddBondValenceRo(&(mScatteringPowerRegistry.GetObj(scattPow1)),
+                                &(mScatteringPowerRegistry.GetObj(scattPow2)),ro);
+         continue;
+      }
       if("AntiBumpScale"==tag.GetName())
       {
          is>>mBumpMergeScale;
+         XMLCrystTag junk(is);
+      }
+      if("BondValenceCostScale"==tag.GetName())
+      {
+         is>>mBondValenceCostScale;
          XMLCrystTag junk(is);
       }
       if("Atom"==tag.GetName())

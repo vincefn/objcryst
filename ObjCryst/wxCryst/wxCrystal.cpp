@@ -1030,8 +1030,8 @@ void WXCrystal::OnMenuManageBondValence(wxCommandEvent &event)
       stringstream s;
       s<<ro;
       stringstream mes;
-      mes<<"Enter Ro for ("<<pow1->GetName()<<","<<pow1->GetValence()<<") and "
-                           <<pow2->GetName()<<","<<pow2->GetValence()<<")";
+      mes<<"Enter Ro for ("<<pow1->GetName()<<","<<pow1->GetFormalCharge()<<") and "
+                           <<pow2->GetName()<<","<<pow2->GetFormalCharge()<<")";
       wxTextEntryDialog dialog(this,mes.str().c_str(),
                               "Bond Valence Ro",s.str().c_str(),wxOK | wxCANCEL);
       if(wxID_OK!=dialog.ShowModal())
@@ -1053,7 +1053,7 @@ void WXCrystal::OnMenuManageBondValence(wxCommandEvent &event)
             if(pos==mpCrystal->mvBondValenceCalc.end()) continue;
             cout<<mpCrystal->GetScatt(i).GetComponentName(j)
                 <<": Valence="<<pos->second<<", expected="
-                << mpCrystal->mScattCompList(l).mpScattPow->GetValence()<<endl;
+                << mpCrystal->mScattCompList(l).mpScattPow->GetFormalCharge()<<endl;
             l++;
       }
    }

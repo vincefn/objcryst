@@ -94,9 +94,10 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpScatteringPowerAtom(obj)
       mList.Add(mpFieldSymbol);
       mList.Add(pFieldBiso);
       
-      WXCrystObjBasic* pFieldValence  =mpScatteringPowerAtom->GetPar("Valence").WXCreate(this);
-      sizer->Add(pFieldValence    ,0,wxALIGN_CENTER);
-      mList.Add(pFieldValence);
+      WXCrystObjBasic* pFieldFormalCharge 
+         =mpScatteringPowerAtom->GetPar("Formal Charge").WXCreate(this);
+      sizer->Add(pFieldFormalCharge    ,0,wxALIGN_CENTER);
+      mList.Add(pFieldFormalCharge);
       
    this->BottomLayout(0);
    this->CrystUpdate();

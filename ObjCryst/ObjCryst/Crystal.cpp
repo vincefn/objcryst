@@ -1019,7 +1019,7 @@ REAL Crystal::GetBondValenceCost() const
    std::map<long, REAL>::const_iterator pos;
    for(pos=mvBondValenceCalc.begin();pos!=mvBondValenceCalc.end();++pos)
    {
-      const REAL a=pos->second-mScattCompList(pos->first).mpScattPow->GetValence();
+      const REAL a=pos->second-mScattCompList(pos->first).mpScattPow->GetFormalCharge();
       mBondValenceCost += a*a;
       VFN_DEBUG_MESSAGE("Crystal::GetBondValenceCost():"
                         <<mScattCompList(pos->first).mpScattPow->GetName()
@@ -1066,45 +1066,6 @@ void Crystal::CalcBondValenceSum()const
       if(nb!=0) mvBondValenceCalc[i]=val;
    }
    mBondValenceCalcClock.Click();
-   /*
-   this->Print(cout);
-   long l=0;
-   for(long i=0;i<mScattererRegistry.GetNb();i++)
-      for(long j=0;j<this->GetScatt(i).GetNbComponent();j++)
-      {
-         const ScatteringPower *pow1=mScattCompList(l).mpScattPow;
-         if(pow1->GetValence()<-0.0001)
-         {
-            cout<<pow1->GetName()<<"has valence<0..skipping"<<endl;
-         }
-         else
-         {
-            cout<<"Calculating Bond Valence sum for :"
-                <<this->GetScatt(i).GetComponentName(j)<<endl;
-            REAL val=0.0;
-            std::vector<Crystal::Neighbour>::const_iterator pos;
-            for(pos=mvDistTableSq[l].mvNeighbour.begin();
-                pos<mvDistTableSq[l].mvNeighbour.end();pos++)
-            {
-               const REAL dist=sqrt(pos->mDist2);
-               const REAL occup= mScattCompList(pos->mNeighbourIndex).mOccupancy
-                                *mScattCompList(pos->mNeighbourIndex).mDynPopCorr;
-               const ScatteringPower *pow2=mScattCompList(pos->mNeighbourIndex).mpScattPow;
-               map<pair<const ScatteringPower*,const ScatteringPower*>,REAL>::const_iterator pos;
-               pos=mvBondValenceRo.find(make_pair(pow1,pow2));
-               if(pos!=mvBondValenceRo.end())
-               {
-                  const REAL v=exp((pos->second-dist)/0.37);
-                  cout <<"  BondValence("<<pow1->GetName()<<","<<pow2->GetName()<<")="
-                       <<v<<", occup="<<occup<<endl;
-                  val += occup * v;
-               }
-            }
-            cout<<this->GetScatt(i).GetComponentName(j)<<": Valence="<<val<<endl;
-         }
-         l++;
-   }
-   */
 }
 
 void Crystal::Init(const REAL a, const REAL b, const REAL c, const REAL alpha,
