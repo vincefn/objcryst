@@ -61,6 +61,12 @@ mIsScalable(old.mIsScalable),
 mpParentPowderPattern(old.mpParentPowderPattern)
 {
    mClockMaster.AddChild(mClockBraggLimits);
+   if(mpParentPowderPattern!=0)
+   {
+      mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPatternPar());
+      mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPattern2ThetaCorr());
+      mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPatternRadiation());
+   }
 }
 
 PowderPatternComponent::~PowderPatternComponent()
@@ -124,6 +130,9 @@ void PowderPatternBackground::SetParentPowderPattern(const PowderPattern &s)
       mClockMaster.RemoveChild(mpParentPowderPattern->GetIntegratedProfileLimitsClock());
    mpParentPowderPattern = &s;
    mClockMaster.AddChild(mpParentPowderPattern->GetIntegratedProfileLimitsClock());
+   mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPatternPar());
+   mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPattern2ThetaCorr());
+   mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPatternRadiation());
 }
 const CrystVector_REAL& PowderPatternBackground::GetPowderPatternCalc()const
 {
@@ -455,6 +464,9 @@ void PowderPatternDiffraction::SetParentPowderPattern(const PowderPattern &s)
       mClockMaster.RemoveChild(mpParentPowderPattern->GetIntegratedProfileLimitsClock());
    mpParentPowderPattern = &s;
    mClockMaster.AddChild(mpParentPowderPattern->GetIntegratedProfileLimitsClock());
+   mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPatternPar());
+   mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPattern2ThetaCorr());
+   mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPatternRadiation());
 }
 
 const CrystVector_REAL& PowderPatternDiffraction::GetPowderPatternCalc()const
@@ -869,7 +881,7 @@ Computing all Profiles: Reflection #"<<i,2)
       fwhm=mCagliotiW + mCagliotiV*tmp + mCagliotiU*tmp*tmp;
       if(fwhm<1e-10) fwhm=1e-10;
       fwhm =sqrt(fwhm);
-                 
+   
       REAL powderAsym=1.;
       //if(true == mUseAsymmetricProfile) 
       //   powderAsym=mPowderAsymA0+mPowderAsymA1/sin(tmp)+mPowderAsymA2/sin(tmp)/sin(tmp);
