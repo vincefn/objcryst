@@ -3340,6 +3340,14 @@ void PowderPattern::CalcPowderPattern() const
    {
       mPowderPatternCalc.resize(mNbPoint);
       mPowderPatternCalc=0;
+
+      mPowderPatternVariance.resize(mNbPoint);
+      REAL *p0 = mPowderPatternWeight.data();
+      const REAL *p1=mPowderPatternVariance.data();
+      for(unsigned long j=0;j<mNbPoint;j++)
+         if(*p1 <=0) {*p0++ =0;p1++;}
+         else *p0++ = 1. / *p1++;
+
       VFN_DEBUG_EXIT("PowderPattern::CalcPowderPattern():no components!",3);
       return;
    }

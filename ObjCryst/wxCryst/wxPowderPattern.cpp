@@ -387,6 +387,7 @@ void WXPowderPattern::CrystUpdate()
    if(mpGraph!=0)
    {
       CrystVector_REAL tmp;
+      mpPowderPattern->CalcPowderPattern();
       tmp=mpPowderPattern->GetPowderPatternVariance();
       for(long i=0;i<tmp.numElements();i++)
       {
@@ -431,6 +432,13 @@ void WXPowderPattern::OnMenuAddCompCryst(wxCommandEvent & WXUNUSED(event))
 void WXPowderPattern::OnMenuShowGraph(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuShowGraph()"<<mpGraph,6)
+   if(mpPowderPattern->GetPowderPatternObs().numElements()==0)
+   {
+      wxMessageDialog dumbUser(this,"Import a powder pattern or use simulation",
+                               "No observed pattern !",wxOK|wxICON_EXCLAMATION);
+      dumbUser.ShowModal();
+      return;
+   }
    if(mpGraph!=0) return;
    WXCrystValidateAllUserInput();
    mpPowderPattern->Prepare();
