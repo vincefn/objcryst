@@ -137,9 +137,10 @@ WXCrystObjBasic* WXCrystObjBasicList::Get(const unsigned int i)
 
 void WXCrystObjBasicList::CrystUpdate()
 {
-   VFN_DEBUG_MESSAGE("WXCrystObjBasicList::CrystUpdate()",3)
+   VFN_DEBUG_ENTRY("WXCrystObjBasicList::CrystUpdate()",3)
    for(unsigned int i=0;i<mNbWXCrystObj;i++)
       mpWXCrystObj[i]->CrystUpdate();
+   VFN_DEBUG_EXIT("WXCrystObjBasicList::CrystUpdate()",3)
 }
 void WXCrystObjBasicList::UpdateUI()
 {
@@ -220,16 +221,16 @@ END_EVENT_TABLE()
 
 WXFieldString::WXFieldString(wxWindow *parent,string& st,
                          const int id,const int hsize, bool isEditable):
-WXField(parent,"",id),mpString(&st),mValue(st.c_str()),mIsSelfUpdating(false)
+WXField(parent,"",id),mpString(&st),mValue(st),mIsSelfUpdating(false)
 {
    VFN_DEBUG_MESSAGE("WXFieldString::WXFieldName():End",6)
 
    if(true==isEditable)
-      mpField=new wxTextCtrl(this,ID_WXFIELD,mValue,
+      mpField=new wxTextCtrl(this,ID_WXFIELD,mValue.c_str(),
                              wxDefaultPosition,wxSize(hsize,-1),wxTE_PROCESS_ENTER,
                              wxTextValidator(wxFILTER_ASCII));
    else
-      mpField=new wxTextCtrl(this,ID_WXFIELD,mValue,
+      mpField=new wxTextCtrl(this,ID_WXFIELD,mValue.c_str(),
                              wxDefaultPosition,wxSize(hsize,-1),wxTE_READONLY,
                              wxTextValidator(wxFILTER_ASCII));
 
@@ -255,34 +256,41 @@ void WXFieldString::OnText(wxCommandEvent & WXUNUSED(event))
 
 void WXFieldString::SetValue(const string&s)
 {
-   if(mValue==(wxString)(s.c_str()))return;
-   VFN_DEBUG_MESSAGE("WXFieldString::SetValue()",3)
-   mValue=s.c_str();
+   VFN_DEBUG_ENTRY("WXFieldString::SetValue()",3)
+   if(mValue==s)
+   {
+      VFN_DEBUG_EXIT("WXFieldString::SetValue(): string unchanged",3)
+      return;
+   }
+   mValue=s;
    mNeedUpdateUI=true;
+   VFN_DEBUG_EXIT("WXFieldString::SetValue()",3)
 }
 
 const string WXFieldString::GetValue() const
 {
    VFN_DEBUG_MESSAGE("WXFieldString::GetValue()"<<mValue<<":"<<mpField->GetValue(),6)
-   return mValue.c_str();
+   return mValue;
 }
 void WXFieldString::CrystUpdate()
 {
-   VFN_DEBUG_MESSAGE("WXFieldString::CrystUpdate()",3)
-   if(mValue.c_str()==mpString->c_str()) return;
+   VFN_DEBUG_ENTRY("WXFieldString::CrystUpdate()",3)
+   if(mValue==*mpString) return;
    mValueOld=mValue;
-   mValue=mpString->c_str();
+   mValue=*mpString;
    mNeedUpdateUI=true;
    if(true==wxThread::IsMain()) this->UpdateUI();
+   VFN_DEBUG_EXIT("WXFieldString::CrystUpdate()",3)
 }
 void WXFieldString::UpdateUI()
 {
    if(mNeedUpdateUI==false) return;
-   VFN_DEBUG_MESSAGE("WXFieldString::UpdateUI()",4)
+   VFN_DEBUG_ENTRY("WXFieldString::UpdateUI()",4)
    mIsSelfUpdating=true;
-   mpField->SetValue(mValue);
+   mpField->SetValue(mValue.c_str());
    mIsSelfUpdating=false;
    mNeedUpdateUI=false;
+   VFN_DEBUG_EXIT("WXFieldString::UpdateUI()",4)
 }
 void WXFieldString::Revert()
 {
@@ -295,9 +303,8 @@ void WXFieldString::ValidateUserInput()
    VFN_DEBUG_MESSAGE("WXFieldString::ValidateUserInput()",6)
    //:TODO: Check that the object is not busy (input should be frozen)
    mValueOld=mValue;
-   wxString s=mpField->GetValue();
-   mValue=s.c_str();
-   *mpString=mValue.c_str();
+   mValue=mpField->GetValue();
+   *mpString=mValue;
 }
 
 
@@ -318,11 +325,11 @@ WXField(parent,label,id),mpWXObj(owner),mValue(""),mIsSelfUpdating(false)
    VFN_DEBUG_MESSAGE("WXFieldName::WXFieldName():End",6)
 
    if(true==isEditable)
-      mpField=new wxTextCtrl(this,ID_WXFIELD,mValue,
+      mpField=new wxTextCtrl(this,ID_WXFIELD,mValue.c_str(),
                              wxDefaultPosition,wxSize(hsize,-1),wxTE_PROCESS_ENTER,
                              wxTextValidator(wxFILTER_ASCII));
    else
-      mpField=new wxTextCtrl(this,ID_WXFIELD,mValue,
+      mpField=new wxTextCtrl(this,ID_WXFIELD,mValue.c_str(),
                              wxDefaultPosition,wxSize(hsize,-1),wxTE_READONLY,
                              wxTextValidator(wxFILTER_ASCII));
 
@@ -348,16 +355,21 @@ void WXFieldName::OnText(wxCommandEvent & WXUNUSED(event))
 
 void WXFieldName::SetValue(const string&s)
 {
-   if(mValue==(wxString)(s.c_str()))return;
-   VFN_DEBUG_MESSAGE("WXFieldName::SetValue()",3)
-   mValue=s.c_str();
+   VFN_DEBUG_ENTRY("WXFieldName::SetValue()",3)
+   if(mValue==s)
+   {
+      VFN_DEBUG_EXIT("WXFieldName::SetValue():name unchanged",3)
+      return;
+   }
+   mValue=s;
    mNeedUpdateUI=true;
+   VFN_DEBUG_EXIT("WXFieldName::SetValue()",3)
 }
 
 const string WXFieldName::GetValue() const
 {
    VFN_DEBUG_MESSAGE("WXFieldName::GetValue()"<<mValue<<":"<<mpField->GetValue(),6)
-   return mValue.c_str();
+   return mValue;
 }
 void WXFieldName::CrystUpdate()
 {
@@ -367,11 +379,12 @@ void WXFieldName::CrystUpdate()
 void WXFieldName::UpdateUI()
 {
    if(mNeedUpdateUI==false) return;
-   VFN_DEBUG_MESSAGE("WXFieldName::UpdateUI()",4)
+   VFN_DEBUG_ENTRY("WXFieldName::UpdateUI()",4)
    mIsSelfUpdating=true;
-   mpField->SetValue(mValue);
+   mpField->SetValue(mValue.c_str());
    mIsSelfUpdating=false;
    mNeedUpdateUI=false;
+   VFN_DEBUG_EXIT("WXFieldName::UpdateUI()",4)
 }
 void WXFieldName::Revert()
 {
@@ -384,8 +397,7 @@ void WXFieldName::ValidateUserInput()
    VFN_DEBUG_MESSAGE("WXFieldName::ValidateUserInput()",6)
    //:TODO: Check that the object is not busy (input should be frozen)
    mValueOld=mValue;
-   wxString s=mpField->GetValue();
-   mValue=s.c_str();
+   mValue=mpField->GetValue();
    mpWXObj->OnChangeName(mId);
 }
 
@@ -449,36 +461,39 @@ WXFieldParBase(parent,label,id,hsize),mpValue(par),mValue(*par),mValueOld(*par)
 
 template<class T> void WXFieldPar<T>::CrystUpdate()
 {
-   VFN_DEBUG_MESSAGE("WXFieldPar<T>::CrystUpdate()",6)
    if(mValue==*mpValue) return;
+   VFN_DEBUG_ENTRY("WXFieldPar<T>::CrystUpdate()",6)
    mValueOld=mValue;
    mValue=*mpValue;
    mNeedUpdateUI=true;
    if(true==wxThread::IsMain()) this->UpdateUI();
+   VFN_DEBUG_EXIT("WXFieldPar<T>::CrystUpdate()",6)
 }
 
 template<> void WXFieldPar<REAL>::UpdateUI()
 {
    if(mNeedUpdateUI==false) return;
-   VFN_DEBUG_MESSAGE("WXFieldPar<REAL>::UpdateUI()",4)
+   VFN_DEBUG_ENTRY("WXFieldPar<REAL>::UpdateUI()",4)
    wxString tmp;
    tmp.Printf("%f",mValue);
    mIsSelfUpdating=true;
    mpField->SetValue(tmp);
    mIsSelfUpdating=false;
    mNeedUpdateUI=false;
+   VFN_DEBUG_EXIT("WXFieldPar<REAL>::UpdateUI()",4)
 }
 
 template<> void WXFieldPar<long>::UpdateUI()
 {
    if(mNeedUpdateUI==false) return;
-   VFN_DEBUG_MESSAGE("WXFieldPar<long>::UpdateUI()",4)
+   VFN_DEBUG_ENTRY("WXFieldPar<long>::UpdateUI()",4)
    wxString tmp;
-   tmp.Printf("%d",mValue);
+   tmp.Printf("%ld",mValue);
    mIsSelfUpdating=true;
    mpField->SetValue(tmp);
    mIsSelfUpdating=false;
    mNeedUpdateUI=false;
+   VFN_DEBUG_EXIT("WXFieldPar<long>::UpdateUI()",4)
 }
 /*
 template<class T> void WXFieldPar<T>::UpdateUI()
@@ -654,8 +669,9 @@ void WXCrystObj::OnToggleCollapse(wxCommandEvent & WXUNUSED(event))
 
 void WXCrystObj::CrystUpdate()
 {
-   VFN_DEBUG_MESSAGE("WXCrystObj::CrystUpdate()",6)
+   VFN_DEBUG_ENTRY("WXCrystObj::CrystUpdate()",6)
    mList.CrystUpdate();
+   VFN_DEBUG_EXIT("WXCrystObj::CrystUpdate()",6)
 }
 void WXCrystObj::UpdateUI()
 {

@@ -368,12 +368,12 @@ class WXFieldString:public WXField
       /// The WXCrystObj whose name is shown here
       string* mpString;
       /// Last name displayed.
-      wxString mValue;
+      string mValue;
       /// The text window
       wxTextCtrl *mpField;
       /// Last name displayed, before the value was changed by the user. Not used yet,
       /// could be useful for undo.
-      wxString mValueOld;
+      string mValueOld;
       /// Set to true if the Field is being updated, so that no 
       /// 'EVT_TEXT' is understood as user input.
       bool mIsSelfUpdating;
@@ -410,12 +410,12 @@ class WXFieldName:public WXField
       /// The WXCrystObj whose name is shown here
       WXCrystObj* mpWXObj;
       /// Last name displayed.
-      wxString mValue;
+      string mValue;
       /// The text window
       wxTextCtrl *mpField;
       /// Last name displayed, before the value was changed by the user. Not used yet,
       /// could be useful for undo.
-      wxString mValueOld;
+      string mValueOld;
       /// Set to true if the Field is being updated, so that no 
       /// 'EVT_TEXT' is understood as user input.
       bool mIsSelfUpdating;
