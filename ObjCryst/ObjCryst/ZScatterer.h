@@ -301,6 +301,11 @@ class ZScatterer: public Scatterer
 		* by analysing a coordination table.
 		*/
 		void ImportFenskeHallZMatrix(istream &is);
+		/** Export to Fenske-Hall ZMatrix file
+		* 
+		* \todo USe more strict formatting than space-delimited.
+		*/
+		void ExportFenskeHallZMatrix(ostream &os);
    protected:
 		/** Update the atom coordinates (in real units, in Angstroems).
 		*

@@ -1191,6 +1191,34 @@ void ZScatterer::ImportFenskeHallZMatrix(istream &is)
 	this->SetLimitsRelative(gpRefParTypeScattConformBondAngle,-.01,.01);
 	this->SetLimitsRelative(gpRefParTypeScattConformDihedAngle,-.01,.01);
 }
+void ZScatterer::ExportFenskeHallZMatrix(ostream &os)
+{
+	if(mNbAtom<1) return;
+	os << mNbAtom<<endl;
+	os << this->GetZAtomRegistry().GetObj(0).mpScattPow->GetName()
+		<< " 1"<<endl;
+	if(mNbAtom<2) return;
+	os << this->GetZAtomRegistry().GetObj(1).mpScattPow->GetName()
+		<< " "<<this->GetZBondAtom(1)+1<< " "<<this->GetZBondLength(1)
+		<<endl;
+	if(mNbAtom<3) return;
+	os << this->GetZAtomRegistry().GetObj(2).mpScattPow->GetName()
+		<< " "<<this->GetZBondAtom(2)+1 << " "<<this->GetZBondLength(2)
+		<< " "<<this->GetZAngleAtom(2)+1<< " "<<this->GetZAngle(2)*RAD2DEG
+		<<endl;
+	if(mNbAtom<3) return;
+	os << this->GetZAtomRegistry().GetObj(3).mpScattPow->GetName()
+		<< " "<<this->GetZBondAtom(3)+1 << " "<<this->GetZBondLength(3)
+		<< " "<<this->GetZAngleAtom(3)+1<< " "<<this->GetZAngle(3)*RAD2DEG
+		<< " "<<this->GetZDihedralAngleAtom(3)+1<< " "<<this->GetZDihedralAngle(3)*RAD2DEG
+		<<endl;
+	for(int i=3;i<mNbAtom;i++)
+		os << this->GetZAtomRegistry().GetObj(i).mpScattPow->GetName()
+			<< " "<<this->GetZBondAtom(i)+1 << " "<<this->GetZBondLength(i)
+			<< " "<<this->GetZAngleAtom(i)+1<< " "<<this->GetZAngle(i)*RAD2DEG
+			<< " "<<this->GetZDihedralAngleAtom(i)+1<< " "<<this->GetZDihedralAngle(i)*RAD2DEG
+			<<endl;
+}
 
 void ZScatterer::GlobalOptRandomMove(const REAL mutationAmplitude)
 {

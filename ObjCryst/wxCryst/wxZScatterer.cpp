@@ -152,6 +152,7 @@ BEGIN_EVENT_TABLE(WXZScatterer,wxWindow)
    EVT_MENU(ID_ZSCATTERER_MENU_ATOM_ADD,               WXZScatterer::OnMenuAddZAtom)
    EVT_MENU(ID_ZSCATTERER_MENU_ATOM_CHANGE_PIVOT,      WXZScatterer::OnMenuChangePivotAtom)
    EVT_MENU(ID_ZSCATTERER_MENU_IMPORT_FHZ,      		 WXZScatterer::OnMenuImportZMatrix)
+   EVT_MENU(ID_ZSCATTERER_MENU_EXPORT_FHZ,      		 WXZScatterer::OnMenuExportZMatrix)
 END_EVENT_TABLE()
 
 WXZScatterer::WXZScatterer(wxWindow* parent, ZScatterer *obj):
@@ -159,8 +160,13 @@ WXScatterer(parent,obj),mpZScatterer(obj)
 {
    VFN_DEBUG_MESSAGE("WXZScatterer::WXZScatterer()",6)
    //Menus
-      mpMenuBar->AddMenu("Import",ID_ZSCATTERER_MENU_IMPORT);
-         mpMenuBar->AddMenuItem(ID_ZSCATTERER_MENU_IMPORT,ID_ZSCATTERER_MENU_IMPORT_FHZ,"Import Fenske-Hall Zmatrix");
+      mpMenuBar->AddMenu("File",ID_ZSCATTERER_MENU_FILE);
+         mpMenuBar->AddMenuItem(ID_ZSCATTERER_MENU_FILE,
+										  ID_ZSCATTERER_MENU_IMPORT_FHZ,
+										  "Import Fenske-Hall Zmatrix");
+         mpMenuBar->AddMenuItem(ID_ZSCATTERER_MENU_FILE,
+										  ID_ZSCATTERER_MENU_EXPORT_FHZ,
+										  "Save as a Fenske-Hall Zmatrix");
       mpMenuBar->AddMenu("Parameters",ID_REFOBJ_MENU_PAR);
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_FIXALL,"Fix all");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_UNFIXALL,"Unfix all");
@@ -424,6 +430,19 @@ Error opening file for input:"+string(open.GetPath().c_str()));
    }
 	mpZScatterer->ImportFenskeHallZMatrix(fin);
 	fin.close();
+}
+void WXZScatterer::OnMenuExportZMatrix(wxCommandEvent &WXUNUSED(event))
+{
+   wxFileDialog save(this,"Choose a file","","","*.fhz",wxSAVE);
+   if(save.ShowModal() != wxID_OK) return;
+   ofstream fout (save.GetPath().c_str());
+   if(!fout)
+   {
+      throw ObjCrystException("WXZScatterer::OnMenuExportZMatrix() : \
+Error opening file for input:"+string(save.GetPath().c_str()));
+   }
+	mpZScatterer->ExportFenskeHallZMatrix(fout);
+	fout.close();
 }
 
 }// namespace 

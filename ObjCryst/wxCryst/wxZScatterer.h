@@ -47,6 +47,7 @@ class WXZScatterer: public WXScatterer
       void OnMenuSetLimits(wxCommandEvent &event);
       void OnMenuChangePivotAtom(wxCommandEvent &WXUNUSED(event));
       void OnMenuImportZMatrix(wxCommandEvent &WXUNUSED(event));
+      void OnMenuExportZMatrix(wxCommandEvent &WXUNUSED(event));
    private:
       ZScatterer* mpZScatterer;
       WXRegistry<ZAtom> *mpWXZAtomRegistry;
