@@ -181,10 +181,6 @@ void WXDiffractionSingleCrystal::OnMenuSimulate(wxCommandEvent & WXUNUSED(event)
    const int choice=dialog.GetSelection();
    if(0==choice) mpData->GenHKLFullSpace(theta*DEG2RAD,false);
    else mpData->GenHKLFullSpace(theta*DEG2RAD,true);
-   
-   CrystVector_REAL iobs(mpData->GetNbRefl());
-   iobs=100.;
-   mpData->SetIobs(iobs);
 }
 void WXDiffractionSingleCrystal::OnMenuImport(wxCommandEvent & event)
 {

@@ -857,20 +857,31 @@ CrystVector_long DiffractionDataSingleCrystal::SortReflectionByTheta(const REAL 
    TAU_PROFILE("DiffractionDataSingleCrystal::SortReflectionByTheta()","void ()",TAU_DEFAULT);
    VFN_DEBUG_ENTRY("DiffractionDataSingleCrystal::SortReflectionByTheta()",5)
    const CrystVector_long index=this->ScatteringData::SortReflectionByTheta(maxTheta);
-   CrystVector_REAL tmp;
    
-   tmp=mObsIntensity;
-   mObsIntensity.resize(mNbRefl);
-   for(long i=0;i<mNbRefl;i++) mObsIntensity(i)=tmp(index(i));
-   
-   tmp=mObsSigma;
-   mObsSigma.resize(mNbRefl);
-   for(long i=0;i<mNbRefl;i++) mObsSigma(i)=tmp(index(i));
-   
-   tmp=mWeight;
-   mWeight.resize(mNbRefl);
-   for(long i=0;i<mNbRefl;i++) mWeight(i)=tmp(index(i));
-   
+   if(mObsIntensity.numElements()==mNbRefl)
+   {
+      CrystVector_REAL tmp;
+      tmp=mObsIntensity;
+      mObsIntensity.resize(mNbRefl);
+      for(long i=0;i<mNbRefl;i++) mObsIntensity(i)=tmp(index(i));
+
+      tmp=mObsSigma;
+      mObsSigma.resize(mNbRefl);
+      for(long i=0;i<mNbRefl;i++) mObsSigma(i)=tmp(index(i));
+
+      tmp=mWeight;
+      mWeight.resize(mNbRefl);
+      for(long i=0;i<mNbRefl;i++) mWeight(i)=tmp(index(i));
+   }
+   else
+   {// if there are no observed values, enter dummy ones
+      mObsIntensity.resize(mNbRefl);
+      mObsSigma.resize(mNbRefl);
+      mWeight.resize(mNbRefl);
+      mObsIntensity=100.;
+      mObsSigma=1.;
+      mWeight=1.;
+   }
    VFN_DEBUG_EXIT("DiffractionDataSingleCrystal::SortReflectionByTheta()",5)
    return index;
 }
