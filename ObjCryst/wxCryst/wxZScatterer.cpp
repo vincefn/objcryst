@@ -71,11 +71,11 @@ Molecule *ZScatterer2Molecule(ZScatterer *scatt)
                                                        .GetObj(i).GetZBondLength())));
          if(pLength->IsFixed())
             mol->AddBond(mol->GetAtom(i),mol->GetAtom(scatt->GetZBondAtom(i)),
-                         pLength->GetValue(),.01,.05);
+                         pLength->GetValue(),.01,.05,false);
          else
             if(pLength->IsLimited())
                mol->AddBond(mol->GetAtom(i),mol->GetAtom(scatt->GetZBondAtom(i)),
-                            (pLength->GetMin()+pLength->GetMax())/2.,.01,.05);
+                            (pLength->GetMin()+pLength->GetMax())/2.,.01,.05,false);
       }
       if(i>1)
       {
@@ -84,12 +84,12 @@ Molecule *ZScatterer2Molecule(ZScatterer *scatt)
          if(pAngle->IsFixed())
             mol->AddBondAngle(mol->GetAtom(i),mol->GetAtom(scatt->GetZBondAtom(i)),
                               mol->GetAtom(scatt->GetZAngleAtom(i)),
-                              pAngle->GetValue(),.01,.05);
+                              pAngle->GetValue(),.01,.05,false);
          else
             if(pAngle->IsLimited())
                mol->AddBondAngle(mol->GetAtom(i),mol->GetAtom(scatt->GetZBondAtom(i)),
                                  mol->GetAtom(scatt->GetZAngleAtom(i)),
-                                 (pAngle->GetMin()+pAngle->GetMax())/2.,.01,.05);
+                                 (pAngle->GetMin()+pAngle->GetMax())/2.,.01,.05,false);
       }
       #if 0 //Dihedral angles are too much constraints, prefer a combnation of bond angles
       if(i>2)
@@ -106,11 +106,11 @@ Molecule *ZScatterer2Molecule(ZScatterer *scatt)
             &&(abs(GetBondAngle(*p2,*p3,*p4)-M_PI)>0.3))
          {
             if(pDihed->IsFixed())
-               mol->AddDihedralAngle(*p1,*p2,*p3,*p4,pDihed->GetValue(),.01,.05);
+               mol->AddDihedralAngle(*p1,*p2,*p3,*p4,pDihed->GetValue(),.01,.05,false);
             else
                if(((pDihed->GetMax()-pDihed->GetMax())<0.3)&&(i>2)&&(pDihed->IsLimited()))
                   mol->AddDihedralAngle(*p1,*p2,*p3,*p4,
-                                        (pDihed->GetMin()+pDihed->GetMax())/2.,.01,.05);
+                                        (pDihed->GetMin()+pDihed->GetMax())/2.,.01,.05,false);
          }
       }
       #endif
@@ -126,7 +126,7 @@ Molecule *ZScatterer2Molecule(ZScatterer *scatt)
          if(   (dist<(1.10*( mol->GetAtom(i).GetScatteringPower().GetRadius()
                             +mol->GetAtom(j).GetScatteringPower().GetRadius())))
              &&(pos==mol->GetBondList().end()))
-            mol->AddBond(mol->GetAtom(i),mol->GetAtom(j),dist,.01,.05);
+            mol->AddBond(mol->GetAtom(i),mol->GetAtom(j),dist,.01,.05,false);
       }
    
    for(map<unsigned long,set<unsigned long> >::const_iterator pos=mol->GetConnectivityTable().begin();
@@ -147,7 +147,7 @@ Molecule *ZScatterer2Molecule(ZScatterer *scatt)
                                  mol->GetAtom(*pos2),
                                  GetBondAngle(mol->GetAtom(*pos1),
                                               mol->GetAtom(pos->first),
-                                              mol->GetAtom(*pos2)),0.01,0.05);
+                                              mol->GetAtom(*pos2)),0.01,0.05,false);
           }
       }
    }
@@ -158,6 +158,7 @@ Molecule *ZScatterer2Molecule(ZScatterer *scatt)
    mol->SetX(x0);
    mol->SetY(y0);
    mol->SetZ(z0);
+   mol->UpdateDisplay();
    return mol;
    VFN_DEBUG_EXIT("ZScatterer2Molecule()",6)
 }
@@ -641,7 +642,7 @@ void WXZScatterer::OnMenuConvert2Molecule(wxCommandEvent &WXUNUSED(event))
    Molecule *mol=ZScatterer2Molecule(mpZScatterer);
    mpZScatterer->GetCrystal().RemoveScatterer(mpZScatterer);
    mol->GetCrystal().AddScatterer(mol);
-   mol->GetCrystal().UpdateDisplay();
+   //mol->GetCrystal().UpdateDisplay();
 }
 
 }// namespace 

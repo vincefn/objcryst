@@ -849,8 +849,8 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
    mpCrystal->AddScatterer(scatt);
    //mpCrystal->XMLOutput(cout);
    VFN_DEBUG_MESSAGE("WXCrystal::OnMenuAddScatterer():calling Layout()",6)
-   this->CrystUpdate();
-   //this->Layout();
+   //this->CrystUpdate();
+   this->Layout();
    VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer()",6)
 }
 

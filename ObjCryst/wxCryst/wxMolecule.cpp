@@ -78,7 +78,7 @@ END_EVENT_TABLE()
 WXMolAtom::WXMolAtom(wxWindow *parent, MolAtom*obj):
 WXCrystObjBasic(parent),mpMolAtom(obj)
 {
-   VFN_DEBUG_ENTRY("WXMolAtom::WXMolAtom()",6)
+   VFN_DEBUG_ENTRY("WXMolAtom::WXMolAtom():"<<obj->GetName(),6)
    mpSizer=new wxBoxSizer(wxHORIZONTAL);
    wxStaticText* label=new wxStaticText(this,-1,"Atom");
    mpSizer->Add(label);
@@ -118,7 +118,7 @@ WXCrystObjBasic(parent),mpMolAtom(obj)
    this->SetSizer(mpSizer);
    this->CrystUpdate();
    this->Layout();
-   VFN_DEBUG_EXIT("WXMolAtom::WXMolAtom()",6)
+   VFN_DEBUG_EXIT("WXMolAtom::WXMolAtom():"<<obj->GetName(),6)
 }
 
 void WXMolAtom::CrystUpdate()
@@ -158,7 +158,7 @@ bool WXMolAtom::Layout()
       s->SetItemMinSize(this,this->GetSize().GetWidth(),this->GetSize().GetHeight());
       s->Fit(mWXParent);
    }
-   mWXParent->Layout();
+   //mWXParent->Layout();
    VFN_DEBUG_EXIT("WXMolAtom::Layout()",3)
    return this->wxWindow::Layout();
 }
@@ -192,7 +192,7 @@ END_EVENT_TABLE()
 WXMolBond::WXMolBond(wxWindow *parent, MolBond*obj):
 WXCrystObjBasic(parent),mpMolBond(obj)
 {
-   VFN_DEBUG_ENTRY("WXMolBond::WXMolBond()",6)
+   VFN_DEBUG_ENTRY("WXMolBond::WXMolBond():"<<obj->GetName(),6)
    mpSizer=new wxBoxSizer(wxHORIZONTAL);
 
    mpFieldAtom1=new WXFieldChoice(this,ID_MOLBOND_ATOM1,"Bond:",60);
@@ -213,7 +213,7 @@ WXCrystObjBasic(parent),mpMolBond(obj)
    this->SetSizer(mpSizer);
    this->CrystUpdate();
    this->Layout();
-   VFN_DEBUG_EXIT("WXMolBond::WXMolBond()",6)
+   VFN_DEBUG_EXIT("WXMolBond::WXMolBond():"<<obj->GetName(),6)
 }
 
 void WXMolBond::CrystUpdate()
@@ -250,7 +250,7 @@ bool WXMolBond::Layout()
       s->SetItemMinSize(this,this->GetSize().GetWidth(),this->GetSize().GetHeight());
       s->Fit(mWXParent);
    }
-   mWXParent->Layout();
+   //mWXParent->Layout();
    VFN_DEBUG_EXIT("WXMolBond::Layout()",5)
    return this->wxWindow::Layout();
 }
@@ -309,7 +309,7 @@ END_EVENT_TABLE()
 WXMolBondAngle::WXMolBondAngle(wxWindow *parent, MolBondAngle*obj):
 WXCrystObjBasic(parent),mpMolBondAngle(obj)
 {
-   VFN_DEBUG_ENTRY("WXMolBondAngle::WXMolBond()",6)
+   VFN_DEBUG_ENTRY("WXMolBondAngle::WXMolBond():"<<obj->GetName(),6)
    mpSizer=new wxBoxSizer(wxHORIZONTAL);
 
    mpFieldAtom1=new WXFieldChoice(this,ID_MOLBONDANGLE_ATOM1,"Bond Angle:",60);
@@ -336,7 +336,7 @@ WXCrystObjBasic(parent),mpMolBondAngle(obj)
    this->SetSizer(mpSizer);
    this->CrystUpdate();
    this->Layout();
-   VFN_DEBUG_EXIT("WXMolBondAngle::WXMolBond()",6)
+   VFN_DEBUG_EXIT("WXMolBondAngle::WXMolBond():"<<obj->GetName(),6)
 }
 
 void WXMolBondAngle::CrystUpdate()
@@ -374,7 +374,7 @@ bool WXMolBondAngle::Layout()
       s->SetItemMinSize(this,this->GetSize().GetWidth(),this->GetSize().GetHeight());
       s->Fit(mWXParent);
    }
-   mWXParent->Layout();
+   //mWXParent->Layout();
    VFN_DEBUG_EXIT("WXMolBondAngle::Layout()",5)
    return this->wxWindow::Layout();
 }
@@ -477,7 +477,7 @@ WXCrystObjBasic(parent),mpMolDihedralAngle(obj)
    this->SetSizer(mpSizer);
    this->CrystUpdate();
    this->Layout();
-   VFN_DEBUG_EXIT("WXMolDihedralAngle::WXMolBond()",6)
+   VFN_DEBUG_EXIT("WXMolDihedralAngle::WXMolBond():"<<obj->GetName(),6)
 }
 
 void WXMolDihedralAngle::CrystUpdate()
@@ -515,7 +515,7 @@ bool WXMolDihedralAngle::Layout()
       s->SetItemMinSize(this,this->GetSize().GetWidth(),this->GetSize().GetHeight());
       s->Fit(mWXParent);
    }
-   mWXParent->Layout();
+   //mWXParent->Layout();
    VFN_DEBUG_EXIT("WXMolDihedralAngle::Layout()",5)
    return this->wxWindow::Layout();
 }
@@ -627,7 +627,7 @@ END_EVENT_TABLE()
 WXMolecule::WXMolecule(wxWindow *parent, Molecule *mol):
 WXScatterer(parent,mol),mpMolecule(mol)
 {
-   VFN_DEBUG_ENTRY("WXMolecule::WXMolecule()",6)
+   VFN_DEBUG_ENTRY("WXMolecule::WXMolecule():"<<mol->GetName(),6)
    //Menus
       mpMenuBar->AddMenu("File",ID_MOLECULE_MENU_FILE);
       mpMenuBar->AddMenu("Parameters",ID_REFOBJ_MENU_PAR);
@@ -670,7 +670,7 @@ WXScatterer(parent,mol),mpMolecule(mol)
    mpSizer->Add(mpSizerDihedralAngleList,0,wxALIGN_LEFT);
    this->CrystUpdate();
    this->Layout();
-   VFN_DEBUG_EXIT("WXMolecule::WXMolecule()",6)
+   VFN_DEBUG_EXIT("WXMolecule::WXMolecule():"<<mol->GetName(),6)
 }
 
 WXMolecule::~WXMolecule()
@@ -856,6 +856,7 @@ void WXMolecule::CrystUpdate()
    VFN_DEBUG_ENTRY("WXMolecule::CrystUpdate()",6)
    if(false==mpMolecule->IsBeingRefined())
    {
+      bool needLayout=false;
       //Remove any atom, bond, bond angle or dihedral angle that could have been removed
       {
          vector<MolAtom*>::iterator pos;
@@ -870,6 +871,7 @@ void WXMolecule::CrystUpdate()
                (*pos)->WXDelete();
                pos=mvpAtom.erase(pos);
                --pos;
+               needLayout=true;
             }
          }
       }
@@ -886,6 +888,7 @@ void WXMolecule::CrystUpdate()
                (*pos)->WXDelete();
                pos=mvpBond.erase(pos);
                --pos;
+               needLayout=true;
             }
          }
       }
@@ -903,6 +906,7 @@ void WXMolecule::CrystUpdate()
                (*pos)->WXDelete();
                pos=mvpBondAngle.erase(pos);
                --pos;
+               needLayout=true;
             }
          }
       }
@@ -920,6 +924,7 @@ void WXMolecule::CrystUpdate()
                (*pos)->WXDelete();
                pos=mvpDihedralAngle.erase(pos);
                --pos;
+               needLayout=true;
             }
          }
       }
@@ -935,8 +940,8 @@ void WXMolecule::CrystUpdate()
                WXCrystObjBasic *at=(*pos)->WXCreate(this);
                mpSizerAtomList->Add(at);
                mList.Add(at);
-               mpSizerAtomList->Layout();
                mvpAtom.push_back(*pos);
+               needLayout=true;
             }
          }
       }
@@ -951,8 +956,8 @@ void WXMolecule::CrystUpdate()
                WXCrystObjBasic *b=(*pos)->WXCreate(this);
                mpSizerBondList->Add(b);
                mList.Add(b);
-               mpSizerBondList->Layout();
                mvpBond.push_back(*pos);
+               needLayout=true;
             }
          }
       }
@@ -969,8 +974,8 @@ void WXMolecule::CrystUpdate()
                WXCrystObjBasic *b=(*pos)->WXCreate(this);
                mpSizerAngleList->Add(b);
                mList.Add(b);
-               mpSizerAngleList->Layout();
                mvpBondAngle.push_back(*pos);
+               needLayout=true;
             }
          }
       }
@@ -987,12 +992,19 @@ void WXMolecule::CrystUpdate()
                WXCrystObjBasic *b=(*pos)->WXCreate(this);
                mpSizerDihedralAngleList->Add(b);
                mList.Add(b);
-               mpSizerDihedralAngleList->Layout();
                mvpDihedralAngle.push_back(*pos);
+               needLayout=true;
             }
          }
       }
-      this->Layout();
+      if(needLayout)
+      {
+         //mpSizerAtomList->Layout();
+         //mpSizerBondList->Layout();
+         //mpSizerAngleList->Layout();
+         //mpSizerDihedralAngleList->Layout();
+         this->Layout();
+      }
    }
    this->WXRefinableObj::CrystUpdate();
    VFN_DEBUG_EXIT("WXMolecule::CrystUpdate()",6)

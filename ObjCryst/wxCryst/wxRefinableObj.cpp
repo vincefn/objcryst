@@ -343,6 +343,7 @@ template<class T> void WXRegistry<T>::Add(WXCrystObjBasic *obj)
 }
 template<class T> void WXRegistry<T>::Remove(WXCrystObjBasic *obj)
 {
+   if(obj==0) return;
    VFN_DEBUG_ENTRY("WXCrystRegistry::RemoveWXCrystObj(WXCrystObj*)",6)
    mList.Remove(obj);
    mpSizer->Remove(obj);

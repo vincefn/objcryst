@@ -418,7 +418,8 @@ class Molecule: public Scatterer
       *
       */
       void AddAtom(const REAL x, const REAL y, const REAL z,
-                   const ScatteringPower *pPow,const string &name);
+                   const ScatteringPower *pPow,const string &name,
+                   const bool updateDisplay=true);
       /** Remove an atom. Returns the iterator to the next atom in the list.
       *
       * This also removes all corresponding bonds, bond angles, etc...
@@ -430,7 +431,8 @@ class Molecule: public Scatterer
       */
       void AddBond(MolAtom &atom1, MolAtom &atom2,
                    const REAL length, const REAL sigma, const REAL delta,
-                   const REAL bondOrder=1.);
+                   const REAL bondOrder=1.,
+                   const bool updateDisplay=true);
       /** Remove a bond. Returns the iterator to the next bond in the list.
       *
       */
@@ -445,7 +447,8 @@ class Molecule: public Scatterer
       *
       */
       void AddBondAngle(MolAtom &atom1, MolAtom &atom2, MolAtom &atom3,
-                        const REAL angle, const REAL sigma, const REAL delta);
+                        const REAL angle, const REAL sigma, const REAL delta,
+                        const bool updateDisplay=true);
       /** Remove a BondAngle
       *
       */
@@ -461,7 +464,8 @@ class Molecule: public Scatterer
       *
       */
       void AddDihedralAngle(MolAtom &atom1, MolAtom &atom2, MolAtom &atom3, MolAtom &atom4,
-                            const REAL angle, const REAL sigma, const REAL delta);
+                            const REAL angle, const REAL sigma, const REAL delta,
+                            const bool updateDisplay=true);
       /** Remove a dihedral angle
       *
       */

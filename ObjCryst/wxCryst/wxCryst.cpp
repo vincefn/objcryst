@@ -682,7 +682,8 @@ bool WXCrystObj::Layout()
    this->UpdateUI();
    mWXParent->Layout();
    VFN_DEBUG_EXIT("WXCrystObj::Layout()",3)
-   return this->wxWindow::Layout();
+   return true;
+   //return this->wxWindow::Layout();
 }
 
 void WXCrystObj::OnToggleCollapse(wxCommandEvent & WXUNUSED(event))

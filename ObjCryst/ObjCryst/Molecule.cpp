@@ -1171,23 +1171,23 @@ void Molecule::XMLInput(istream &is,const XMLCrystTag &tag)
       }
       if("Atom"==tagg.GetName())
       {
-         this->AddAtom(0.,0.,0.,(ScatteringPower *)0,"");
+         this->AddAtom(0.,0.,0.,(ScatteringPower *)0,"",false);
          mvpAtom.back()->XMLInput(is,tagg);
       }
       if("Bond"==tagg.GetName())
       {
-         this->AddBond(this->GetAtom(0),this->GetAtom(1),1.5,.01,.05,1.);
+         this->AddBond(this->GetAtom(0),this->GetAtom(1),1.5,.01,.05,1.,false);
          mvpBond.back()->XMLInput(is,tagg);
       }
       if("BondAngle"==tagg.GetName())
       {
-         this->AddBondAngle(this->GetAtom(0),this->GetAtom(1),this->GetAtom(2),1.5,.01,.05);
+         this->AddBondAngle(this->GetAtom(0),this->GetAtom(1),this->GetAtom(2),1.5,.01,.05,false);
          mvpBondAngle.back()->XMLInput(is,tagg);
       }
       if("DihedralAngle"==tagg.GetName())
       {
          this->AddDihedralAngle(this->GetAtom(0),this->GetAtom(1),
-                                this->GetAtom(2),this->GetAtom(3),1.5,.01,.05);
+                                this->GetAtom(2),this->GetAtom(3),1.5,.01,.05,false);
          mvpDihedralAngle.back()->XMLInput(is,tagg);
       }
       if("Par"==tagg.GetName())
@@ -1770,7 +1770,8 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
 }
 
 void Molecule::AddAtom(const REAL x, const REAL y, const REAL z,
-             const ScatteringPower *pPow, const string &name)
+                       const ScatteringPower *pPow, const string &name,
+                       const bool updateDisplay)
 {
    VFN_DEBUG_ENTRY("Molecule::AddAtom():"<<name,5)
    mvpAtom.push_back(new MolAtom(x,y,z,pPow,name,*this));
@@ -1802,7 +1803,7 @@ void Molecule::AddAtom(const REAL x, const REAL y, const REAL z,
       this->AddPar(tmp);
    }
    mClockScatterer.Click();
-   this->UpdateDisplay();
+   if(updateDisplay) this->UpdateDisplay();
    VFN_DEBUG_EXIT("Molecule::AddAtom()",5)
 }
 
@@ -1856,14 +1857,15 @@ vector<MolAtom*>::iterator Molecule::RemoveAtom(const MolAtom &atom)
 }
 
 void Molecule::AddBond(MolAtom &atom1, MolAtom &atom2,
-             const REAL length, const REAL sigma, const REAL delta,
-             const REAL bondOrder)
+                       const REAL length, const REAL sigma, const REAL delta,
+                       const REAL bondOrder,
+                       const bool updateDisplay)
 {
    VFN_DEBUG_ENTRY("Molecule::AddBond()",5)
    mvpBond.push_back(new MolBond(atom1,atom2,length,sigma,delta,*this,bondOrder));
    this->AddRestraint(mvpBond.back());
    mClockBondList.Click();
-   this->UpdateDisplay();
+   if(updateDisplay) this->UpdateDisplay();
    VFN_DEBUG_EXIT("Molecule::AddBond()",5)
 }
 
@@ -1897,13 +1899,14 @@ vector<MolBond*>::const_iterator Molecule::FindBond(const MolAtom &at1,const Mol
 }
 
 void Molecule::AddBondAngle(MolAtom &atom1, MolAtom &atom2, MolAtom &atom3,
-                  const REAL angle, const REAL sigma, const REAL delta)
+                            const REAL angle, const REAL sigma, const REAL delta,
+                            const bool updateDisplay)
 {
    VFN_DEBUG_ENTRY("Molecule::AddBondAngle()",5)
    mvpBondAngle.push_back(new MolBondAngle(atom1,atom2,atom3,angle,sigma,delta,*this));
    this->AddRestraint(mvpBondAngle.back());
    mClockBondAngleList.Click();
-   this->UpdateDisplay();
+   if(updateDisplay) this->UpdateDisplay();
    VFN_DEBUG_EXIT("Molecule::AddBondAngle()",5)
 }
 
@@ -1941,14 +1944,15 @@ vector<MolBondAngle*>::const_iterator Molecule::FindBondAngle(const MolAtom &at1
 }
 
 void Molecule::AddDihedralAngle(MolAtom &atom1, MolAtom &atom2, MolAtom &atom3, MolAtom &atom4,
-                      const REAL angle, const REAL sigma, const REAL delta)
+                                const REAL angle, const REAL sigma, const REAL delta,
+                                const bool updateDisplay)
 {
    VFN_DEBUG_ENTRY("Molecule::AddDihedralAngle()",5)
    mvpDihedralAngle.push_back(new MolDihedralAngle(atom1,atom2,atom3,atom4,
                                                    angle,sigma,delta,*this));
    this->AddRestraint(mvpDihedralAngle.back());
    mClockDihedralAngleList.Click();
-   this->UpdateDisplay();
+   if(updateDisplay) this->UpdateDisplay();
    VFN_DEBUG_EXIT("Molecule::AddDihedralAngle()",5)
 }
 
