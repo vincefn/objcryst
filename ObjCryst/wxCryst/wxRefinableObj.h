@@ -90,7 +90,6 @@ class WXFieldRefPar:public WXField
       wxTextCtrl *mpField;
       RefinablePar *mpRefPar;
       REAL mValueOld;
-      wxMenu *mpPopUpMenu;
       bool mIsSelfUpdating;
    DECLARE_EVENT_TABLE()
 };

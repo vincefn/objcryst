@@ -71,7 +71,6 @@ static const long ID_WXFIELD_REFPAR              =WXCRYST_ID();
 static const long ID_WXFIELD_REFPAR_FIXBUTTON    =WXCRYST_ID();
 static const long ID_WXFIELD_REFPAR_LIMITEDBUTTON=WXCRYST_ID();
 static const long ID_REFPAR_POPUP_SET_LIMITS     =WXCRYST_ID();
-static const long ID_REFPAR_POPUP_REMOVE_LIMITS  =WXCRYST_ID();
 
 BEGIN_EVENT_TABLE(WXFieldRefPar,wxEvtHandler)
    EVT_TEXT_ENTER(ID_WXFIELD,                   WXFieldRefPar::OnEnter)
@@ -80,7 +79,6 @@ BEGIN_EVENT_TABLE(WXFieldRefPar,wxEvtHandler)
    EVT_CHECKBOX(ID_WXFIELD_REFPAR_LIMITEDBUTTON,WXFieldRefPar::OnToggleLimited)
    EVT_RIGHT_DOWN(                              WXFieldRefPar::OnPopupMenu)
    EVT_MENU(ID_REFPAR_POPUP_SET_LIMITS,         WXFieldRefPar::OnPopupMenuChoice)
-   EVT_MENU(ID_REFPAR_POPUP_REMOVE_LIMITS,      WXFieldRefPar::OnPopupMenuChoice)
 END_EVENT_TABLE()
 
 WXFieldRefPar::WXFieldRefPar(wxWindow *parent,const string& label,
@@ -109,13 +107,7 @@ WXField(parent,label,ID_WXFIELD_REFPAR),mValue(0.),mpRefPar(par),mIsSelfUpdating
    //mpField->PushEventHandler(this);
    mpSizer->Add(mpField,0,wxALIGN_CENTER);
    if(enableFixButton)
-   {
-      mpPopUpMenu=new wxMenu("Refinable Parameter");
-      mpPopUpMenu->Append(ID_REFPAR_POPUP_SET_LIMITS, "Set Limits");
-      //mpPopUpMenu->Append(ID_REFPAR_POPUP_REMOVE_LIMITS, "Remove Limits");
       this->SetToolTip("right-click label to change limits");
-   }
-   else mpPopUpMenu=0;
    this->Layout();
 }
 WXFieldRefPar::~WXFieldRefPar()
@@ -155,7 +147,14 @@ void WXFieldRefPar::OnToggleLimited(wxCommandEvent & WXUNUSED(event))
 
 void WXFieldRefPar::OnPopupMenu(wxCommandEvent & WXUNUSED(event))
 {
-   if(mpPopUpMenu!=0) this->PopupMenu(mpPopUpMenu,0,0);
+   static wxMenu sWXFieldRefParPopupMenu;//("Refinable Parameter");
+   static bool needInitMenu=true;
+   if(needInitMenu)
+   {
+      needInitMenu=false;
+      sWXFieldRefParPopupMenu.Append(ID_REFPAR_POPUP_SET_LIMITS, "Change Limits");
+   }
+   this->PopupMenu(&sWXFieldRefParPopupMenu,0,0);
 }
 
 void WXFieldRefPar::OnPopupMenuChoice(wxMenuEvent& event)
