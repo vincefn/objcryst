@@ -230,6 +230,12 @@ void PowderPatternBackground::CalcPowderPattern() const
          REAL t1,t2,b1,b2,t;
          const long nbPoint=mpParentPowderPattern->GetNbPoint();
          mPowderPatternCalc.resize(nbPoint);
+         if(mBackgroundNbPoint==0)
+         {
+            mPowderPatternCalc=0;
+            break;
+         }
+         VFN_DEBUG_MESSAGE("PowderPatternBackground::CalcPowderPattern()"<<nbPoint,2)
          //mPowderPatternCalc=0.;
          REAL *b=mPowderPatternCalc.data();
          t1=mBackgroundInterpPoint2Theta(0);
@@ -1318,6 +1324,7 @@ void PowderPattern::AddPowderPatternComponent(PowderPatternComponent &comp)
    mSubObjRegistry.Register(comp);
    comp.RegisterClient(*this);
    mClockPowderPatternCalc.Reset();
+   mClockIntegratedFactorsPrep.Reset();
    mPowderPatternComponentRegistry.Register(comp);
    //:TODO: check if there are enough scale factors
    //mScaleFactor.resizeAndPreserve(mPowderPatternComponentRegistry.GetNb());
@@ -3140,7 +3147,7 @@ void PowderPattern::FitScaleFactorForIntegratedRw()const
    VFN_DEBUG_MESSAGE("PowderPattern::FitScaleFactorForIntegratedRw():5",2);
    
    if(1==nbScale) mFitScaleFactorX=mFitScaleFactorB(0)/mFitScaleFactorM(0);
-   else
+   else if(1<nbScale)
       mFitScaleFactorX=product(InvertMatrix(mFitScaleFactorM),mFitScaleFactorB);
    VFN_DEBUG_MESSAGE("B, M, X"<<endl<<mFitScaleFactorB<<endl<<mFitScaleFactorM<<endl<<mFitScaleFactorX,3)
    for(int i=0;i<nbScale;i++)
@@ -3490,6 +3497,7 @@ void PowderPattern::CalcPowderPattern() const
 
 void PowderPattern::CalcPowderPatternIntegrated() const
 {
+   this->PrepareIntegratedRfactor();
    TAU_PROFILE("PowderPattern::CalcPowderPatternIntegrated()","void ()",TAU_DEFAULT);
    VFN_DEBUG_ENTRY("PowderPattern::CalcPowderPatternIntegrated()",4);
    if(mPowderPatternComponentRegistry.GetNb()==0)
@@ -3737,7 +3745,7 @@ void PowderPattern::PrepareIntegratedRfactor()const
    //sort the arrays USELESS ?
    {
       CrystVector_long index,tmp;
-      index=SortSubs(mIntegratedPatternMin);
+      if(mIntegratedPatternMin.numElements()>0) index=SortSubs(mIntegratedPatternMin);
       tmp=mIntegratedPatternMin;
       for(int i=0;i<numInterval;i++) mIntegratedPatternMin(i)=tmp(index(i));
       tmp=mIntegratedPatternMax;
