@@ -96,6 +96,16 @@ class WXPowderPatternGraph: public wxWindow
    private:
       /// Reset the limits of the axis to full range.
       void ResetAxisLimits();
+      /// Convert X data (2theta) coordinate to screen coordinate (pixel)
+      long Data2ScreenX(const REAL x)const;
+      /// Convert X data (as data point index) to screen coordinate (pixel)
+      long Point2ScreenX(const long x)const;
+      /// Convert Y data (intensity) coordinate to screen coordinate (pixel)
+      long Data2ScreenY(const REAL y)const;
+      /// Convert X screen coordinate (pixel) to data (2theta) coordinate
+      REAL Screen2DataX(const long x)const;
+      /// Convert Y screen coordinate (pixel) to data (intensity) coordinate
+      REAL Screen2DataY(const long y)const;
       WXPowderPattern *mpPattern;
       /// Data vectors (Note that m2theta is currently stored in degrees, which may be changed)
       CrystVector_REAL mObs,mCalc,m2theta,mSigma;

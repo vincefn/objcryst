@@ -799,17 +799,19 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
    const long nbPoints=mLast-mFirst+1;
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():3",5)
 
+   VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():4:mFirst="
+                     <<mFirst<<"("<<m2theta(mFirst)<<"),mLast="
+                     <<mLast<<"("<<m2theta(mLast)<<"),width="
+                     <<width<<",margin="<<mMargin,5)
    // Draw sigma bars
    {
       dc.SetPen(* wxLIGHT_GREY_PEN);
       wxCoord x,y1,y2;
       for(long i=mFirst;i<=mLast;i++)
       {
-         x=(wxCoord)(mMargin+ (i-mFirst)*(width-mMargin)/(REAL)nbPoints);
-         y1=(wxCoord)(height-mMargin-(mObs(i)-mSigma(i)/2.-mMinIntensity)*(height-2*mMargin)
-                        /(mMaxIntensity-mMinIntensity));
-         y2=(wxCoord)(height-mMargin-(mObs(i)+mSigma(i)/2.-mMinIntensity)*(height-2*mMargin)
-                        /(mMaxIntensity-mMinIntensity));
+         x=this->Point2ScreenX(i);
+         y1=this->Data2ScreenY(mObs(i)-mSigma(i)/2.);
+         y2=this->Data2ScreenY(mObs(i)+mSigma(i)/2.);
          
          dc.DrawLine(x,y1,x,y2);
       }
@@ -826,10 +828,9 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
          xc=(wxCoord)mMargin;
          REAL yStep=pow(10,floor(log10((mMaxIntensity-mMinIntensity)/nbTick)));
          yStep *= floor((mMaxIntensity-mMinIntensity)/yStep/nbTick);
-         for(REAL y=yStep*floor(mMinIntensity/yStep);y<mMaxIntensity;y+=yStep)
+         for(REAL y=yStep*ceil(mMinIntensity/yStep);y<mMaxIntensity;y+=yStep)
          {
-            yc=(wxCoord) (height-mMargin-(y-mMinIntensity)*(height-2*mMargin)
-                           /(mMaxIntensity-mMinIntensity));
+            yc=this->Data2ScreenY(y);
             dc.DrawLine(xc-3,yc,xc+3,yc);
             fontInfo.Printf("%g",y);
             dc.GetTextExtent(fontInfo, &tmpW, &tmpH);
@@ -839,9 +840,9 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
          yc=(wxCoord)(height-mMargin);
          REAL xStep=pow(10,floor(log10((mMax2Theta-mMin2Theta)/nbTick)));
          xStep *= floor((mMax2Theta-mMin2Theta)/xStep/nbTick);
-         for(REAL x=xStep*floor(mMin2Theta/xStep);x<mMax2Theta;x+=xStep)
+         for(REAL x=xStep*ceil(mMin2Theta/xStep);x<mMax2Theta;x+=xStep)
          {
-            xc=(wxCoord)(mMargin+(x-mMin2Theta)*(width-mMargin)/(mMax2Theta-mMin2Theta));
+            xc=this->Data2ScreenX(x);
             dc.DrawLine(xc,yc-3,xc,yc+3);
             fontInfo.Printf("%g",x);
             dc.GetTextExtent(fontInfo, &tmpW, &tmpH);
@@ -852,16 +853,14 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
    {
       dc.SetPen(* wxCYAN_PEN);
       wxCoord x1,y1,x2,y2;
-      x2=(wxCoord)(mMargin+ 0. *(width-mMargin)/(REAL)nbPoints);
-      y2=(wxCoord)(height-mMargin-(mObs(mFirst)-mMinIntensity)*(height-2*mMargin)
-                     /(mMaxIntensity-mMinIntensity));
+      x2=this->Point2ScreenX(mFirst);
+      y2=this->Data2ScreenY(mObs(mFirst));
       for(long i=mFirst+1;i<=mLast;i++)
       {
          x1=x2;
          y1=y2;
-         x2=(wxCoord)(mMargin+ (i-mFirst)*(width-mMargin)/(REAL)nbPoints);
-         y2=(wxCoord)(height-mMargin-(mObs(i)-mMinIntensity)*(height-2*mMargin)
-                        /(mMaxIntensity-mMinIntensity));
+         x2=this->Point2ScreenX(i);
+         y2=this->Data2ScreenY(mObs(i));
          dc.DrawLine(x1,y1,x2,y2);
       }
    }
@@ -870,16 +869,14 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
    {
       dc.SetPen(* wxRED_PEN);
       wxCoord x1,y1,x2,y2;
-      x2=(wxCoord)(mMargin+ 0.     *(width-mMargin)/(REAL)nbPoints);
-      y2=(wxCoord)(height-mMargin- (mCalc(mFirst)-mMinIntensity)*(height-2*mMargin)
-                     /(mMaxIntensity-mMinIntensity));
+      x2=this->Point2ScreenX(mFirst);
+      y2=this->Data2ScreenY(mCalc(mFirst));
       for(long i=mFirst+1;i<=mLast;i++)
       {
          x1=x2;
          y1=y2;
-         x2=(wxCoord)(mMargin+ (i-mFirst)*(width-mMargin)/(REAL)nbPoints);
-         y2=(wxCoord)(height-mMargin-(mCalc(i)-mMinIntensity)*(height-2*mMargin)
-                        /(mMaxIntensity-mMinIntensity));
+         x2=this->Point2ScreenX(i);
+         y2=this->Data2ScreenY(mCalc(i));
          dc.DrawLine(x1,y1,x2,y2);
       }
    }
@@ -896,13 +893,14 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
       for(comp=mvLabelList.begin();comp!=mvLabelList.end();++comp)
          for(pos=comp->begin();pos!=comp->end();++pos)
          {
-            const long point=(unsigned long)((pos->first-m2theta(0)*DEG2RAD)/m2ThetaStep);
-            if((point>=mFirst)&&(point<=mLast))
+            const REAL point=pos->first*RAD2DEG;
+            if((point>=mMin2Theta)&&(point<=mMax2Theta))
             {
-               x=(wxCoord)(mMargin+ (point-mFirst)*(width-mMargin)/(REAL)nbPoints);
-               if(mCalc(point)>mObs(point)) yr=mCalc(point); else yr=mObs(point);
-               y=(wxCoord)(height-mMargin-(yr-mMinIntensity)*(height-2*mMargin)
-                        /(mMaxIntensity-mMinIntensity));
+               x=this->Data2ScreenX(point);
+               const REAL pixel=(pos->first-m2theta(0)*DEG2RAD)/(REAL)m2ThetaStep;
+               if(mCalc((long)pixel)>mObs((long)pixel)) yr=mCalc((long)pixel);
+               else yr=mObs((long)pixel);
+               y=this->Data2ScreenY(yr);
                
                dc.DrawLine(x,y-5,x,y-10);
                fontInfo.Printf("%s",pos->second.c_str());
@@ -942,10 +940,8 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
    if((x>width)||(y>height)) return;
    //cout <<pos.x<<" "<<pos.y<<" "<<x<<" "<<y<<" "<<width<<" "<<height<<endl;
 
-      const REAL 
-         ttheta=mMin2Theta+(x-mMargin)*(mMax2Theta-mMin2Theta)/(REAL)(width-mMargin);
-      const REAL intensity=mMinIntensity+(height-mMargin-y)*(mMaxIntensity-mMinIntensity)
-                                             /(REAL)(height-2*mMargin);
+      const REAL ttheta=this->Screen2DataX(x);
+      const REAL intensity=this->Screen2DataY(y);
 
       wxString str;
       const long pixel=
@@ -998,12 +994,10 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
          if(flag) if(m2theta(i)>=mMin2Theta) {mFirst=i;flag=false;}
          if(m2theta(i)>=mMax2Theta) {mLast=i;break;}
       }
-      if(mMin2Theta<m2theta.min()) mMin2Theta=m2theta.min();
-      if(mMax2Theta>m2theta.max())
-      {
-         mLast=nbpoints-1;
-         mMax2Theta=m2theta.max();
-      }
+      if(mFirst>=(nbpoints-1)) mFirst=nbpoints-2;
+      if(mLast>=nbpoints) mLast=nbpoints-1;
+      mMin2Theta=m2theta(mFirst);
+      mMax2Theta=m2theta(mLast);
       mClockAxisLimits.Click();
       wxUpdateUIEvent event(ID_POWDERSPECTRUM_GRAPH_NEW_PATTERN);
       wxPostEvent(this,event);
@@ -1098,6 +1092,37 @@ void WXPowderPatternGraph::ResetAxisLimits()
    mFirst=0;
    mLast=m2theta.numElements()-1;
    mClockAxisLimits.Click();
+}
+long WXPowderPatternGraph::Data2ScreenX(const REAL x)const
+{
+   wxCoord width,height;
+   this->GetSize(&width, &height);
+   return (long)(mMargin+(x-mMin2Theta)*(width-mMargin)/(mMax2Theta-mMin2Theta));
+}
+long WXPowderPatternGraph::Point2ScreenX(const long x)const
+{
+   wxCoord width,height;
+   this->GetSize(&width, &height);
+   return (long)(mMargin+(x-mFirst)*(width-mMargin)/(REAL)(mLast-mFirst));
+}
+long WXPowderPatternGraph::Data2ScreenY(const REAL y)const
+{
+   wxCoord width,height;
+   this->GetSize(&width, &height);
+   return (long)(height-mMargin-(y-mMinIntensity)*(height-2*mMargin)
+                        /(mMaxIntensity-mMinIntensity));
+}
+REAL WXPowderPatternGraph::Screen2DataX(const long x)const
+{
+   wxCoord width,height;
+   this->GetSize(&width, &height);
+   return mMin2Theta+(x-mMargin)*(mMax2Theta-mMin2Theta)/(REAL)(width-mMargin);
+}
+REAL WXPowderPatternGraph::Screen2DataY(const long y)const
+{
+   wxCoord width,height;
+   this->GetSize(&width, &height);
+   return mMinIntensity+(height-mMargin-y)*(mMaxIntensity-mMinIntensity)/(REAL)(height-2*mMargin);
 }
 
 ////////////////////////////////////////////////////////////////////////
