@@ -30,6 +30,7 @@
 
 #include "wxCryst/wxGlobalOptimObj.h"
 
+#include "ObjCryst/IO.h"
 // Next two just to fix some parameters during global optimization
 #include "ObjCryst/Crystal.h"
 #include "ObjCryst/ScatteringData.h"
@@ -193,6 +194,7 @@ void *WXGlobalOptimRunThread::Entry()
 void WXGlobalOptimRunThread::OnExit()
 {
    cout <<endl<<"Exiting refinement thread "<<endl<<endl;
+   XMLCrystFileSaveGlobal("Fox-LastOptimizationStop.xml");
 }
 ////////////////////////////////////////////////////////////////////////
 //
