@@ -54,7 +54,8 @@ mBestParSavedSetIndex(-1),
 mContext(0),
 mIsOptimizing(false),mStopAfterCycle(false),
 mRefinedObjList("OptimizationObj: "+mName+" RefinableObj registry"),
-mRecursiveRefinedObjList("OptimizationObj: "+mName+" recursive RefinableObj registry")
+mRecursiveRefinedObjList("OptimizationObj: "+mName+" recursive RefinableObj registry"),
+mLastOptimTime(0)
 {
    VFN_DEBUG_ENTRY("OptimizationObj::OptimizationObj()",5)
    // This must be done in a real class to avoid calling a pure virtual method
@@ -226,6 +227,11 @@ void OptimizationObj::TagNewBestConfig()const
 {
    for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
       mRecursiveRefinedObjList.GetObj(i).TagNewBestConfig();
+}
+
+REAL OptimizationObj::GetLastOptimElapsedTime()const
+{
+   return mLastOptimTime;
 }
 
 void OptimizationObj::PrepareRefParList()
@@ -405,7 +411,8 @@ void MonteCarloObj::SetAlgorithmParallTempering(const AnnealingSchedule schedule
    //mMaxNbTrialSinceBest=maxNbTrialSinceBest;
    VFN_DEBUG_MESSAGE("MonteCarloObj::SetAlgorithmParallTempering():End",3)
 }
-void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost)
+void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost,
+                             const REAL maxTime)
 {
    //Keep a copy of the total number of steps, and decrement nbStep
    const long nbSteps=nbStep;
@@ -460,7 +467,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
 
          mTemperature=sqrt(mTemperatureMin*mTemperatureMax);
          mMutationAmplitude=sqrt(mMutationAmplitudeMin*mMutationAmplitudeMax);
-
+         
          Chronometer chrono;
          chrono.start();
          for(mNbTrial=1;mNbTrial<=nbSteps;)
@@ -608,7 +615,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
             }
             mNbTrial++;nbStep--;
             
-            if((mBestCost<finalcost) || mStopAfterCycle) 
+            if((mBestCost<finalcost) || mStopAfterCycle ||( (maxTime>0)&&(chrono.seconds()>maxTime))) 
             {
                if(!silent) cout << endl <<endl << "Refinement Stopped."<<endl;
                break;
@@ -646,6 +653,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                if(accept!=2) mRefParList.RestoreParamSet(mLastParSavedSetIndex);
             }
          }
+         mLastOptimTime=chrono.seconds();
          //Restore Best values
          mRefParList.RestoreParamSet(mBestParSavedSetIndex);
          mCurrentCost=this->GetLogLikelihood();
@@ -1186,12 +1194,13 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                if(0!=mpWXCrystObj) mpWXCrystObj->UpdateDisplayNbTrial();
                #endif
             }
-            if((mBestCost<finalcost) || mStopAfterCycle) 
+            if((mBestCost<finalcost) || mStopAfterCycle ||( (maxTime>0)&&(chrono.seconds()>maxTime))) 
             {
                if(!silent) cout << endl <<endl << "Refinement Stopped:"<<mBestCost<<endl;
                break;
             }
          }//Trials
+         mLastOptimTime=chrono.seconds();
          //Restore Best values
             //mRefParList.Print();
             if(!silent) this->DisplayReport();

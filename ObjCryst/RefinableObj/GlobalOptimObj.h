@@ -108,7 +108,11 @@ class OptimizationObj
       /// \param nbSteps: the number of steps to go. This number is modified (decreases!)
       /// as the refinement goes on.
       /// \param silent : if true, absolutely no message should be printed (except debugging)
-      virtual void Optimize(long &nbSteps,const bool silent=false,const REAL finalcost=0)=0;
+      /// \param finalcost: the optimization will stop if overall cost fallse below this value
+      /// \param maxTime: the optimization will stop after the given number of seconds has
+      /// been spent optimizing (ignored if <0).
+      virtual void Optimize(long &nbSteps,const bool silent=false,const REAL finalcost=0,
+                            const REAL maxTime=-1)=0;
    //Set Refinable parameters status
       /// Fix all parameters
       void FixAllPar();
@@ -175,6 +179,8 @@ class OptimizationObj
       * the latest "best" config.
       */
       void TagNewBestConfig()const;
+      /// Get the elapsed time (in seconds) during the last optimization
+      REAL GetLastOptimElapsedTime()const;
    protected:
       /// \internal Prepare mRefParList for the refinement
       void PrepareRefParList();
@@ -247,6 +253,8 @@ class OptimizationObj
       /// Periodic save of complete environment as an xml file
          RefObjOpt mXMLAutoSave;
       
+      /// The time elapsed after the last optimization, in seconds
+         REAL mLastOptimTime;
    private:
    #ifdef __WX__CRYST__
    public:
@@ -329,7 +337,7 @@ class MonteCarloObj:public OptimizationObj
       *\param mutMax,mutMin: Max and Min mutation amplitudes. 
       * \warning do not use the 'smart' option for the temperature schedule, it is not yet 
       * implemented. Later it will be used to set the temperatures as a function of 
-      * the amplitude schedule, so that we keep accepeted move between 30% and 70%.
+      * the amplitude schedule, so that we keep accepted move between 30% and 70%.
       * \note this will be removed when we separate the different algorithms in different
       * classes.
       */
@@ -338,7 +346,8 @@ class MonteCarloObj:public OptimizationObj
                                  const AnnealingSchedule scheduleMutation=ANNEALING_CONSTANT,
                                  const REAL mutMax=16., const REAL mutMin=.125);
       
-      virtual void Optimize(long &nbSteps,const bool silent=false,const REAL finalcost=0);
+      virtual void Optimize(long &nbSteps,const bool silent=false,const REAL finalcost=0,
+                            const REAL maxTime=-1);
       
       //Parameter Access by name
       //RefinablePar& GetPar(const string& parName);
