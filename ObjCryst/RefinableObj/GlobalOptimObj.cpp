@@ -377,7 +377,7 @@ Cannot use ANNEALING_SMART for the Temperature schedule (yet).");
    //mMaxNbTrialSinceBest=maxNbTrialSinceBest;
    VFN_DEBUG_MESSAGE("MonteCarloObj::SetAlgorithmParallTempering():End",3)
 }
-void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost=0)
+void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost)
 {
    //Keep a copy of the total number of steps, and decrement nbStep
    const long nbSteps=nbStep;

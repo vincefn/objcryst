@@ -2084,7 +2084,7 @@ void PowderPattern::FitScaleFactorForIntegratedR()
    // Build Matrix & Vector for LSQ
    VFN_DEBUG_MESSAGE("PowderPattern::FitScaleFactorForIntegratedR():1",2);
 		const long numInterval=mIntegratedPatternMin.numElements();
-		CrystVector_REAL integratedCalc[nbScale];
+		CrystVector_REAL *integratedCalc= new CrystVector_REAL[nbScale];
    	for(int i=0;i<nbScale;i++)
    	{
 			integratedCalc[i].resize(numInterval);
@@ -2192,6 +2192,7 @@ void PowderPattern::FitScaleFactorForIntegratedR()
 		mClockScaleFactor.Click();
 		mClockPowderPatternCalc.Click();//we *did* correct the spectrum
    }
+	delete[] integratedCalc;
    VFN_DEBUG_EXIT("PowderPattern::FitScaleFactorForIntegratedR():End",3);
 }
 
@@ -2386,7 +2387,7 @@ void PowderPattern::FitScaleFactorForIntegratedRw()
    // Build Matrix & Vector for LSQ
    VFN_DEBUG_MESSAGE("PowderPattern::FitScaleFactorForIntegratedRw():1",2);
 		const long numInterval=mIntegratedPatternMin.numElements();
-		CrystVector_REAL integratedCalc[nbScale];
+		CrystVector_REAL* integratedCalc=new CrystVector_REAL[nbScale];
    	for(int i=0;i<nbScale;i++)
    	{
 			integratedCalc[i].resize(numInterval);
@@ -2496,6 +2497,7 @@ void PowderPattern::FitScaleFactorForIntegratedRw()
 		mClockScaleFactor.Click();
 		mClockPowderPatternCalc.Click();//we *did* correct the spectrum
    }
+	delete[] integratedCalc;
    VFN_DEBUG_EXIT("PowderPattern::FitScaleFactorForIntegratedRw():End",3);
 }
 

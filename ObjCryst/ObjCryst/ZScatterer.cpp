@@ -188,7 +188,7 @@ void ZMoveMinimizer::RecordConformation()
 	}
 }
 void ZMoveMinimizer::SetZAtomWeight(const CrystVector_REAL weight) {mAtomWeight=weight;}
-void ZMoveMinimizer::MinimizeChange(long nbTrial=10000)
+void ZMoveMinimizer::MinimizeChange(long nbTrial)
 {
 	if(mAtomWeight.max()<1e-3) return;
 	mOptimObj.Optimize(nbTrial,true);
