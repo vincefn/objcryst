@@ -2070,8 +2070,8 @@ REAL PowderPattern::GetChi2()const
       return mChi2;
    } 
    this->CalcPowderPattern();
-   if(  (mClockChi2<mClockPowderPatternPar)
-      &&(mClockChi2<mClockPowderPatternCalc)) return mChi2;
+   if(  (mClockChi2>mClockPowderPatternPar)
+      &&(mClockChi2>mClockPowderPatternCalc)) return mChi2;
       TAU_PROFILE("PowderPattern::GetChi2()","void ()",TAU_DEFAULT);
    
    VFN_DEBUG_ENTRY("PowderPattern::GetChi2()",3);
@@ -2081,6 +2081,7 @@ REAL PowderPattern::GetChi2()const
    mChi2=0.;
    if(0 == mOptProfileIntegration.GetChoice())
    {// Integrated profiles
+      VFN_DEBUG_MESSAGE("PowderPattern::GetChi2():Integrated profiles",3);
       const long numInterval=mIntegratedPatternMin.numElements();
       const REAL *p1, *p2, *p3;
       CrystVector_REAL integratedCalc(numInterval);
@@ -2105,7 +2106,7 @@ REAL PowderPattern::GetChi2()const
    }
    else
    {// "Full" profiles
-      VFN_DEBUG_MESSAGE("PowderPattern::GetChi2()",3);
+      VFN_DEBUG_MESSAGE("PowderPattern::GetChi2()Integrated profiles",3);
       const REAL *p1, *p2, *p3;
       p1=mPowderPatternCalc.data();
       p2=mPowderPatternObs.data();
@@ -2772,7 +2773,7 @@ void PowderPattern::FitScaleFactorForIntegratedRw()
       const REAL s = mFitScaleFactorX(i)
                        -mScaleFactor(mScalableComponentIndex(i));
       for(unsigned long j=0;j<mNbPointUsed;j++) *p0++ += s * *p1++;
-      VFN_DEBUG_MESSAGE("-> Old:"<<mScaleFactor(mScalableComponentIndex(i)) <<" New:"<<mFitScaleFactorX(i),3);
+      VFN_DEBUG_MESSAGE("->log(scale) Old :"<<log(mScaleFactor(mScalableComponentIndex(i))) <<" New:"<<log(mFitScaleFactorX(i)),3);
       mScaleFactor(mScalableComponentIndex(i)) = mFitScaleFactorX(i);
       mClockScaleFactor.Click();
       mClockPowderPatternCalc.Click();//we *did* correct the spectrum
@@ -2828,6 +2829,15 @@ void PowderPattern::SetWeightPolynomial(const REAL a, const REAL b,
          mPowderPatternWeight(i) =   1./(a+min+b*min*min+c*min*min*min);
       else mPowderPatternWeight(i) = 1./(a+tmp+b*tmp*tmp+c*tmp*tmp*tmp);
    }
+}
+
+void PowderPattern::BeginOptimization(const bool allowApproximations,
+                                      const bool enableRestraints)
+{
+   this->Prepare();
+   if(0 == mOptProfileIntegration.GetChoice()) this->FitScaleFactorForIntegratedRw();
+   else this->FitScaleFactorForRw();
+   this->RefinableObj::BeginOptimization(allowApproximations,enableRestraints);
 }
 
 void PowderPattern::GlobalOptRandomMove(const REAL mutationAmplitude,

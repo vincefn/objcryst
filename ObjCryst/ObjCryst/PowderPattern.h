@@ -585,6 +585,8 @@ class PowderPattern : public RefinableObj
          /// by statistics functions (R, Rws).
          void Add2ThetaExcludedRegion(const REAL min2Theta,const REAL max2theta);
          
+      virtual void BeginOptimization(const bool allowApproximations=false,
+                                     const bool enableRestraints=false);
       virtual void GlobalOptRandomMove(const REAL mutationAmplitude,
                                        const RefParType *type=gpRefParTypeObjCryst);
       virtual REAL GetLogLikelihood()const;
