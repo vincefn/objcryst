@@ -81,6 +81,7 @@ void LorentzCorr::CalcCorr() const
 {
    const CrystVector_REAL *theta=&(mpData->GetTheta());
    if(mpData->GetClockTheta()<mClockCorrCalc) return;
+   TAU_PROFILE("LorentzCorr::CalcCorr()","void ()",TAU_DEFAULT);
    mCorr.resize(mpData->GetNbRefl());
    for(long i=0;i<mpData->GetNbRefl();i++)mCorr(i) =1/sin(2*(*theta)(i));
    mClockCorrCalc.Click();
@@ -118,6 +119,7 @@ void PolarizationCorr::CalcCorr() const
    if(    (mpData->GetClockTheta()<mClockCorrCalc)
        && ((mPolarAfactor-((1-f)/(1+f))) <(mPolarAfactor*.0001)) ) return;
    VFN_DEBUG_MESSAGE("PolarizationCorr::CalcCorr()",10)
+   TAU_PROFILE("PolarizationCorr::CalcCorr()","void ()",TAU_DEFAULT);
    mPolarAfactor=((1-f)/(1+f));
    mCorr.resize(mpData->GetNbRefl());
    for(long i=0;i<mpData->GetNbRefl();i++)
@@ -155,6 +157,7 @@ void PowderSlitApertureCorr::CalcCorr() const
 {
    const CrystVector_REAL *theta=&(mpData->GetTheta());
    if(mpData->GetClockTheta()<mClockCorrCalc) return;
+   TAU_PROFILE("PowderSlitApertureCorr::CalcCorr()","void ()",TAU_DEFAULT);
    mCorr.resize(mpData->GetNbRefl());
    for(long i=0;i<mpData->GetNbRefl();i++)mCorr(i) =1/sin((*theta)(i));
    mClockCorrCalc.Click();
@@ -306,7 +309,7 @@ void TexturePhaseMarchDollase::WXNotifyDelete(){mpWXCrystObj=0;}
 //
 ////////////////////////////////////////////////////////////////////////
 TextureMarchDollase::TextureMarchDollase(const ScatteringData & data):
-ScatteringCorr(data)
+ScatteringCorr(data),mNbReflUsed(0)
 {}
 
 TextureMarchDollase::~TextureMarchDollase()
@@ -580,8 +583,11 @@ void TextureMarchDollase::TagNewBestConfig()const
 
 void TextureMarchDollase::CalcCorr() const
 {
-   if(mClockTexturePar<mClockCorrCalc) return;
+   const long nbReflUsed=mpData->GetNbReflBelowMaxSinThetaOvLambda();
+   if(  (mClockTexturePar<mClockCorrCalc)
+      &&(mpData->GetClockNbReflBelowMaxSinThetaOvLambda()<mClockCorrCalc)) return;
    VFN_DEBUG_ENTRY("TextureMarchDollase::CalcCorr()",3)
+   TAU_PROFILE("TextureMarchDollase::CalcCorr()","void ()",TAU_DEFAULT);
    // normalizer for the sum of fractions, and non-texture fraction
    // (the sum of fractions must be equal to 1, but we cannot
    // modify fractions here since this is a const function)
@@ -602,7 +608,7 @@ void TextureMarchDollase::CalcCorr() const
          const REAL *xx=mpData->GetReflX().data();
          const REAL *yy=mpData->GetReflY().data();
          const REAL *zz=mpData->GetReflZ().data();
-         for(long i=0;i<nbRefl;i++)
+         for(long i=0;i<nbReflUsed;i++)
          {
             reflNorm(i)= sqrt(*xx * *xx + *yy * *yy + *zz * *zz);
             xx++;yy++;zz++;
@@ -633,22 +639,22 @@ void TextureMarchDollase::CalcCorr() const
             }
          // Calculation
             REAL tmp;
-            for(long i=0;i<nbRefl;i++)
+            for(long i=0;i<nbReflUsed;i++)
             {
                tmp=(tx * (*xx++) + ty * (*yy++) + tz * (*zz++))/ (*xyznorm++);
                mCorr(i)+=frac*pow(march+march2*tmp*tmp,-1.5);
             }
             
       }
-   if(mIsbeingRefined==false)
-   {
-      cout <<FormatVertVectorHKLFloats<REAL>(mpData->GetH(),
-                                             mpData->GetK(),
-                                             mpData->GetL(),
-                                             mpData->GetSinThetaOverLambda(),
-                                             mCorr)<<endl;
-      this->Print();
-   }
+   //if(mIsbeingRefined==false)
+   //{
+   //   cout <<FormatVertVectorHKLFloats<REAL>(mpData->GetH(),
+   //                                          mpData->GetK(),
+   //                                          mpData->GetL(),
+   //                                          mpData->GetSinThetaOverLambda(),
+   //                                          mCorr)<<endl;
+   //   this->Print();
+   //}
    mClockCorrCalc.Click();
    VFN_DEBUG_EXIT("TextureMarchDollase::CalcCorr()",3)
 }

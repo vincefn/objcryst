@@ -402,7 +402,7 @@ void PowderPatternDiffraction::CalcPowderPattern() const
    
    if(  (mClockPowderPatternCalc>mClockIhklCalc)
       &&(mClockPowderPatternCalc>mClockProfileCalc)) return;
-   TAU_PROFILE("PowderPatternDiffraction::CalcPowderPattern()","void (bool)",TAU_DEFAULT);
+   TAU_PROFILE("PowderPatternDiffraction::CalcPowderPattern()-Apply profiles","void (bool)",TAU_DEFAULT);
    
    //mpCrystal->Print();
    if(true) //:TODO: false == mUseFastLessPreciseFunc
@@ -2697,16 +2697,16 @@ void PowderPattern::CalcPowderPattern() const
       VFN_DEBUG_EXIT("PowderPattern::CalcPowderPattern():no components!",3);
       return;
    }
-   TAU_PROFILE_TIMER(timer1,"PowderPattern::CalcPowderPattern2(dummy)","", TAU_FIELD);
+   TAU_PROFILE_TIMER(timer1,"PowderPattern::CalcPowderPattern1()Calc components","", TAU_FIELD);
+   TAU_PROFILE_START(timer1);
    for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++)
       mPowderPatternComponentRegistry.GetObj(i).CalcPowderPattern();
+   TAU_PROFILE_STOP(timer1);
    VFN_DEBUG_MESSAGE("PowderPattern::CalcPowderPattern():Calculated components..",3);
    bool b=false;
    if(mClockPowderPatternCalc<mClockScaleFactor)
    {
-      TAU_PROFILE_START(timer1);
       b=true;
-      TAU_PROFILE_STOP(timer1);
    }
    else
       for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++) 
@@ -2725,21 +2725,26 @@ void PowderPattern::CalcPowderPattern() const
    this->CalcNbPointUsed();
    TAU_PROFILE_TIMER(timer2,"PowderPattern::CalcPowderPattern2(Add spectrums-scaled)"\
                      ,"", TAU_FIELD);
-   TAU_PROFILE_TIMER(timer3,"PowderPattern::CalcPowderPattern2(Add spectrums-backgd)"\
+   TAU_PROFILE_TIMER(timer3,"PowderPattern::CalcPowderPattern2(Add spectrums-backgd1)"\
+                     ,"", TAU_FIELD);
+   TAU_PROFILE_TIMER(timer4,"PowderPattern::CalcPowderPattern2(Add spectrums-backgd2)"\
                      ,"", TAU_FIELD);
    mPowderPatternCalc.resize(mNbPoint);
    int nbBackgd=0;//count number of background phases
    for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++)
-   {
+   {//THIS SHOULD GO FASTER (PRE-FETCHING ARRAY DATA?)
       VFN_DEBUG_MESSAGE("PowderPattern::CalcPowderPattern():Adding "<< mPowderPatternComponentRegistry.GetObj(i).GetName(),3);
       if(true==mPowderPatternComponentRegistry.GetObj(i).IsScalable())
       {
          TAU_PROFILE_START(timer2);
          if(0==i)
          {
-            mPowderPatternCalc=mPowderPatternComponentRegistry.GetObj(i)
-                              .mPowderPatternCalc;
-            mPowderPatternCalc *= mScaleFactor(i);
+            const REAL * p1=mPowderPatternComponentRegistry.GetObj(i)
+                                 .mPowderPatternCalc.data();
+            REAL * p0 = mPowderPatternCalc.data();
+            const REAL s = mScaleFactor(i);
+            for(unsigned long j=0;j<mNbPointUsed;j++) *p0++ = s * *p1++;
+            if(!mIsbeingRefined) for(unsigned long j=mNbPointUsed;j<mNbPoint;j++) *p0++ = 0;
          }
          else
          {
@@ -2750,12 +2755,18 @@ void PowderPattern::CalcPowderPattern() const
             for(unsigned long j=0;j<mNbPointUsed;j++) *p0++ += s * *p1++;
          }
           TAU_PROFILE_STOP (timer2);
-     }
+      }
       else
-      {
+      {// This is a background phase
          TAU_PROFILE_START(timer3);
-         if(0==i) mPowderPatternCalc=mPowderPatternComponentRegistry.GetObj(i)
-                              .mPowderPatternCalc;
+         if(0==i)
+         {
+            const REAL * p1=mPowderPatternComponentRegistry.GetObj(i)
+                                 .mPowderPatternCalc.data();
+            REAL * p0 = mPowderPatternCalc.data();
+            for(unsigned long j=0;j<mNbPointUsed;j++) *p0++ = *p1++;
+            if(!mIsbeingRefined) for(unsigned long j=mNbPointUsed;j<mNbPoint;j++) *p0++ = 0;
+         }
          else
          {
             const REAL * p1=mPowderPatternComponentRegistry.GetObj(i)
@@ -2764,8 +2775,18 @@ void PowderPattern::CalcPowderPattern() const
             for(unsigned long j=0;j<mNbPointUsed;j++) *p0++ += *p1++;
 
          }
-         if(0==nbBackgd) mPowderPatternBackgroundCalc=mPowderPatternComponentRegistry.GetObj(i)
-                           .mPowderPatternCalc;
+         TAU_PROFILE_STOP(timer3);
+         TAU_PROFILE_START(timer4);
+         // The following is useless if there is only one background phase...
+         if(0==nbBackgd)
+         {
+            mPowderPatternBackgroundCalc.resize(mNbPoint);
+            REAL *p0 = mPowderPatternBackgroundCalc.data();
+            const REAL *p1=mPowderPatternComponentRegistry.GetObj(i)
+                              .mPowderPatternCalc.data();
+            for(unsigned long j=0;j<mNbPointUsed;j++) *p0++ = *p1++;
+            if(!mIsbeingRefined) for(unsigned long j=mNbPointUsed;j<mNbPoint;j++) *p0++ = 0;
+         }
          else
          {
             REAL *p0 = mPowderPatternBackgroundCalc.data();
@@ -2774,7 +2795,7 @@ void PowderPattern::CalcPowderPattern() const
             for(unsigned long j=0;j<mNbPointUsed;j++) *p0++ += *p1++;
          }
          nbBackgd++;
-         TAU_PROFILE_STOP(timer3);
+         TAU_PROFILE_STOP(timer4);
       }
    }
    if(0==nbBackgd) mPowderPatternBackgroundCalc.resize(0);//:KLUDGE:

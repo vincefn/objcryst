@@ -187,6 +187,10 @@ class TextureMarchDollase:public ScatteringCorr,public RefinableObj
       void DeleteAllPhase();
       ObjRegistry<TexturePhaseMarchDollase> mPhaseRegistry;
       RefinableObjClock mClockTexturePar;
+      /// Number of reflexion for which the calculation is actually done.
+      /// This is automaticaly updated during CalcCorr, from the parent
+      /// ScatteringData::GetMaxSinThetaOvLambda()
+      mutable unsigned long mNbReflUsed;
    #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);

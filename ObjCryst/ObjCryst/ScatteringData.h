@@ -315,6 +315,11 @@ class ScatteringData: virtual public RefinableObj
       virtual void SetMaxSinThetaOvLambda(const REAL max);
       /// Get the maximum value for sin(theta)/lambda.
       REAL GetMaxSinThetaOvLambda()const;
+      /// Recalc, and get the number of reflections which should be actually used, 
+      /// due to the maximuml sin(theta)/lambda value set.
+      long GetNbReflBelowMaxSinThetaOvLambda()const;
+      /// Clock the last time the number of reflections used was changed
+      const RefinableObjClock& GetClockNbReflBelowMaxSinThetaOvLambda()const;
    protected:
       /// \internal This function is called after H,K and L arrays have 
       /// been initialized or modified.

@@ -838,6 +838,23 @@ void ScatteringData::PrepareHKLarrays()
 
 void ScatteringData::SetMaxSinThetaOvLambda(const REAL max){mMaxSinThetaOvLambda=max;}
 REAL ScatteringData::GetMaxSinThetaOvLambda()const{return mMaxSinThetaOvLambda;}
+long ScatteringData::GetNbReflBelowMaxSinThetaOvLambda()const
+{
+   this->CalcSinThetaLambda();
+   long i;
+   for(i=0;i<mNbRefl;i++) if(mSinThetaLambda(i)>mMaxSinThetaOvLambda) break;
+   if(i==mNbRefl) mNbReflUsed=mNbRefl;
+   if((i<mNbRefl) && (i!=mNbReflUsed))
+   {
+      mNbReflUsed=i;
+      mClockNbReflUsed.Click();
+      VFN_DEBUG_MESSAGE("->Changed Max sin(theta)/lambda="<<mMaxSinThetaOvLambda\
+                        <<" nb refl="<<mNbReflUsed,5)
+   }
+   return mNbReflUsed;
+}
+const RefinableObjClock& ScatteringData::GetClockNbReflBelowMaxSinThetaOvLambda()const
+{return mClockNbReflUsed;}
 
 CrystVector_long ScatteringData::SortReflectionByTheta(const REAL maxTheta)
 {
@@ -1108,22 +1125,10 @@ void ScatteringData::PrepareCalcStructFactor()const
    mLastScattCompList=*mpScattCompList;
    
    //mClockScattFactor.Click();// What's this ?
-   
-   // Determine which reflections are below maxSin(theta)/lambda
-   {
-      this->CalcSinThetaLambda();
-      long i;
-      for(i=0;i<mNbRefl;i++) if(mSinThetaLambda(i)>mMaxSinThetaOvLambda) break;
-      if(i!=mNbReflUsed) mGeomFhklCalcNeedRecalc=true;
-      if(i==mNbRefl) mNbReflUsed=mNbRefl;
-      if((i<mNbRefl) && (i!=mNbReflUsed))
-      {
-         mNbReflUsed=i;
-         mClockNbReflUsed.Click();
-         VFN_DEBUG_MESSAGE("->Changed Max sin(theta)/lambda="<<mMaxSinThetaOvLambda\
-                           <<" nb refl="<<mNbReflUsed,5)
-      }
-   }
+   this->GetNbReflBelowMaxSinThetaOvLambda();
+   if(mClockGeomStructFact<this->GetClockNbReflBelowMaxSinThetaOvLambda())
+      mGeomFhklCalcNeedRecalc=true;
+
    VFN_DEBUG_MESSAGE("->Number of reflections:"<<mNbRefl<<\
                      ", below max sin(theta)/lambda="<<mMaxSinThetaOvLambda<< ":"<<mNbReflUsed,2)
    VFN_DEBUG_MESSAGE("->mGeomFhklCalcNeedRecalc:"<<mGeomFhklCalcNeedRecalc,2)
@@ -1324,8 +1329,8 @@ void ScatteringData::CalcGlobalTemperatureFactor() const
    TAU_PROFILE("ScatteringData::CalcGlobalTemperatureFactor()","void ()",TAU_DEFAULT);
    this->CalcSinThetaLambda();
    if(  (mClockGlobalBiso<mClockGlobalTemperatureFact)
-      &&(mClockGlobalBiso>mClockTheta)
-      &&(mClockGlobalBiso>mClockNbReflUsed)) return;
+      &&(mClockTheta     <mClockGlobalTemperatureFact)
+      &&(mClockNbReflUsed<mClockGlobalTemperatureFact)) return;
    VFN_DEBUG_MESSAGE("ScatteringData::CalcGlobalTemperatureFactor()",2)
    
    mGlobalTemperatureFactor.resize(mNbRefl);
@@ -1747,6 +1752,7 @@ void ScatteringData::CalcGeomStructFactor(const ScatteringComponentList &scattCo
 
    }
    //cout << FormatVertVector<REAL>(*rsf2,*isf2)<<endl;
+   mClockGeomStructFact.Click();
    VFN_DEBUG_EXIT("ScatteringData::GeomStructFactor(Vx,Vy,Vz,...)",3)
 }
 
