@@ -204,6 +204,11 @@ ScatteringPower& Crystal::GetScatteringPower(const string &name)
    return mScatteringPowerRegistry.GetObj(name);
 }
 
+const ScatteringPower& Crystal::GetScatteringPower(const string &name)const
+{
+   return mScatteringPowerRegistry.GetObj(name);
+}
+
 const ScatteringComponentList& Crystal::GetScatteringComponentList()const
 {
    //:TODO: only update when necessary..

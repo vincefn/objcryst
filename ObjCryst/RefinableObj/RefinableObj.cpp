@@ -801,9 +801,13 @@ template<class T> ObjRegistry<T>::~ObjRegistry()
 
 template<class T> void ObjRegistry<T>::Register(T &obj)
 {
-   VFN_DEBUG_MESSAGE("ObjRegistry("<<mName<<")::Register():"<<obj.GetName(),2)
+   VFN_DEBUG_ENTRY("ObjRegistry("<<mName<<")::Register():"<<obj.GetName(),2)
    typename vector<T*>::iterator pos=find(mvpRegistry.begin(),mvpRegistry.end(),&obj);
-   if(pos!=mvpRegistry.end()) return; // already registered
+   if(pos!=mvpRegistry.end())
+   {
+      VFN_DEBUG_EXIT("ObjRegistry("<<mName<<")::Register():"<<obj.GetName()<<"Already registered!",2)
+      return;
+   }
    mvpRegistry.push_back(&obj);
    mListClock.Click();
    #ifdef __WX__CRYST__
@@ -811,6 +815,7 @@ template<class T> void ObjRegistry<T>::Register(T &obj)
       mpWXRegistry->Add(obj.WXCreate(mpWXRegistry));
    #endif
    //this->Print();
+   VFN_DEBUG_EXIT("ObjRegistry("<<mName<<")::Register():"<<obj.GetName(),2)
 }
 
 template<class T> void ObjRegistry<T>::DeRegister(T &obj)

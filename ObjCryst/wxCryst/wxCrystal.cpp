@@ -38,6 +38,7 @@
 
 #include "ObjCryst/Atom.h"
 #include "ObjCryst/ZScatterer.h"
+#include "ObjCryst/Molecule.h"
 #include "ObjCryst/ScatteringPowerSphere.h"
 
 extern "C" {
@@ -101,6 +102,7 @@ BEGIN_EVENT_TABLE(WXCrystal,wxEvtHandler)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_REMOVESCATTPOW,     WXCrystal::OnMenuRemoveScattPow)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDATOM,            WXCrystal::OnMenuAddScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDZSCATTERER,      WXCrystal::OnMenuAddScatterer)
+   EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDMOLECULE,        WXCrystal::OnMenuAddScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDTETRAHEDRON,     WXCrystal::OnMenuAddScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDOCTAHEDRON,      WXCrystal::OnMenuAddScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDTRIANGLE,        WXCrystal::OnMenuAddScatterer)
@@ -152,6 +154,8 @@ mCrystalGLDisplayListIsLocked(false),mpCrystalGL(0)
                                 "Add Atom");
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_ADDZSCATTERER,
                                 "Add Z-Matrix Scatterer");
+         mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_ADDMOLECULE,
+                                "Add Molecule");
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_ADDTETRAHEDRON,
                                 "Add Tetrahedron");
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_ADDOCTAHEDRON,
@@ -453,6 +457,11 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
       case ID_CRYSTAL_MENU_SCATT_ADDZSCATTERER:
       {
          scatt=new ZScatterer("Change Me!",*mpCrystal);
+         break;
+      }
+      case ID_CRYSTAL_MENU_SCATT_ADDMOLECULE:
+      {
+         scatt=new Molecule(*mpCrystal,"Molecule");
          break;
       }
       case ID_CRYSTAL_MENU_SCATT_ADDTETRAHEDRON:

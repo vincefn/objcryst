@@ -52,13 +52,25 @@ class MolAtom
       /** Constructor for a MolAtom
       *
       */
-      MolAtom(const REAL x=0, const REAL y=0, const REAL z=0,
-              const ScatteringPower *pPow=0);
+      MolAtom(const REAL x, const REAL y, const REAL z,
+              const ScatteringPower *pPow, const string &name,
+              Molecule &parent);
       /** Destructor
       *
       * Tells the parent Molecule and all Bond that it is being destroyed.
       */
       virtual ~MolAtom();
+      void SetName(const string &name);
+      const string& GetName()const;
+      string& GetName();
+      const Molecule& GetMolecule()const;
+      Molecule& GetMolecule();
+      const REAL& X()const;
+      const REAL& Y()const;
+      const REAL& Z()const;
+      REAL& X();
+      REAL& Y();
+      REAL& Z();
       REAL GetX()const;
       REAL GetY()const;
       REAL GetZ()const;
@@ -67,20 +79,34 @@ class MolAtom
       void SetY(const REAL);
       void SetZ(const REAL);
       void SetOccupancy(const REAL);
+      /** Returns true if this is a dummy atom, i.e. without an associated scattering power.
+      *
+      * Dummy atoms can be used to mark positions, or for restraints.
+      */
+      bool IsDummy()const;
       const ScatteringPower& GetScatteringPower()const;
       void SetScatteringPower(const ScatteringPower&);
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
    private:
-      /** Get the atom at the other end of bond #i
-      */
+      /// Name for this atom
+      string mName;
+      /* Get the atom at the other end of bond #i
       MolAtom & GetBondedAtom(unsigned int i);
+      */
       /// Cartesian oordinates in the Molecule reference frame.
       REAL mX,mY,mZ;
       /// Occupancy
       REAL mOccupancy;
       /// ScatteringPower
       const ScatteringPower* mpScattPow;
+      /// Parent Molecule
+      Molecule *mpMol;
+   #ifdef __WX__CRYST__
+   public:
+      WXCrystObjBasic *mpWXCrystObj;
+      virtual WXCrystObjBasic* WXCreate(wxWindow*);
+   #endif
 };
 
 /** Bond between two atoms, also a restraint on the associated bond length.
@@ -95,37 +121,45 @@ class MolBond:public Restraint
       * they can keep a list of bonds they are involved in.
       *
       * \param atom1, atom2: the atoms of the bond
-      * \param length: the expected ideal bond length
+      * \param length: the expected bond length
       * \param sigma,delta: depending on the calculated length, the log(likelihood) is equal to:
-      * - within \f$[length_{ideal}-\delta;length_{ideal}+\delta]\f$:
+      * - within \f$[length_{0}-\delta;length_{0}+\delta]\f$:
       * \f$ -\log(likelihood)= \log\left(2\delta+\sqrt{2\pi\sigma^2}\right)\f$
-      * - if \f$length > length_{ideal}+\delta\f$:
+      * - if \f$length > length_{0}+\delta\f$:
       * \f$ -\log(likelihood)= \log\left(2\delta+\sqrt{2\pi\sigma^2}\right)
-      * + \left(\frac{(length-\delta)-length_{ideal}}{\sigma} \right)^2\f$
-      * - if \f$length < length_{ideal}-\delta\f$:
+      * + \left(\frac{(length-\delta)-length_{0}}{\sigma} \right)^2\f$
+      * - if \f$length < length_{0}-\delta\f$:
       * \f$ -\log(likelihood)= \log\left(2\delta+\sqrt{2\pi\sigma^2}\right)
-      * + \left(\frac{(length+\delta)-length_{ideal}}{\sigma} \right)^2\f$
+      * + \left(\frac{(length+\delta)-length_{0}}{\sigma} \right)^2\f$
       * 
       */
       MolBond(const MolAtom &atom1, const MolAtom &atom2,
-           const REAL length, const REAL sigma, const REAL delta,
-           const REAL bondOrder=1.);
+              const REAL length, const REAL sigma, const REAL delta,
+              Molecule &parent,const REAL bondOrder=1.);
       /** Destructor
       *
       * Notifies the atoms that the bond has disappeared.
       */
       virtual ~MolBond();
+      const Molecule& GetMolecule()const;
+      Molecule& GetMolecule();
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       virtual REAL GetLogLikelihood()const;
       const MolAtom& GetAtom1()const;
       const MolAtom& GetAtom2()const;
+      void SetAtom1(const MolAtom &at1);
+      void SetAtom2(const MolAtom &at2);
       REAL GetLength()const;
-      REAL GetIdealLength()const;
+      REAL GetLength0()const;
       REAL GetLengthDelta()const;
       REAL GetLengthSigma()const;
       REAL GetBondOrder()const;
-      void SetIdealLength(const REAL length);
+      REAL& Length0();
+      REAL& LengthDelta();
+      REAL& LengthSigma();
+      REAL& BondOrder();
+      void SetLength0(const REAL length);
       void SetLengthDelta(const REAL length);
       void SetLengthSigma(const REAL length);
       void SetBondOrder(const REAL length);
@@ -133,9 +167,16 @@ class MolBond:public Restraint
       void SetInRing(const bool isInRing);
   private:
       pair<const MolAtom*,const MolAtom*> mAtomPair;
-      REAL mLengthIdeal,mDelta,mSigma;
+      REAL mLength0,mDelta,mSigma;
       REAL mBondOrder;
       bool mIsInRing;
+      /// Parent Molecule
+      Molecule *mpMol;
+   #ifdef __WX__CRYST__
+   public:
+      WXCrystObjBasic *mpWXCrystObj;
+      virtual WXCrystObjBasic* WXCreate(wxWindow*);
+   #endif
 };
 
 /** Bond angle restraint between 3 atoms.
@@ -151,25 +192,39 @@ class MolBondAngle:public Restraint
       *
       */
       MolBondAngle(const MolAtom &atom1,const  MolAtom &atom2,const  MolAtom &atom3,
-           const REAL angle, const REAL sigma, const REAL delta);
+                   const REAL angle, const REAL sigma, const REAL delta,
+                   Molecule &parent);
       /** Destructor
       *
       */
       virtual ~MolBondAngle();
+      const Molecule& GetMolecule()const;
+      Molecule& GetMolecule();
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       virtual REAL GetLogLikelihood()const;
       REAL GetAngle()const;
+      REAL& Angle0();
       const MolAtom& GetAtom1()const;
       const MolAtom& GetAtom2()const;
       const MolAtom& GetAtom3()const;
+      void SetAtom1(const MolAtom &at);
+      void SetAtom2(const MolAtom &at);
+      void SetAtom3(const MolAtom &at);
       //MolAtom& GetAtom1();
       //MolAtom& GetAtom2();
       //MolAtom& GetAtom3();
    private:
       /// The vector of the 3 atoms involved in the bond angle.
       vector<const MolAtom*> mvpAtom;
-      REAL mAngleIdeal,mDelta,mSigma;
+      REAL mAngle0,mDelta,mSigma;
+      /// Parent Molecule
+      Molecule *mpMol;
+   #ifdef __WX__CRYST__
+   public:
+      WXCrystObjBasic *mpWXCrystObj;
+      virtual WXCrystObjBasic* WXCreate(wxWindow*);
+   #endif
 };
 
 /** Dihedral angle restraint between 4 atoms.
@@ -184,20 +239,29 @@ class MolDihedralAngle:public Restraint
       /** Constructor 
       *
       */
-      MolDihedralAngle(MolAtom &atom1, MolAtom &atom2, MolAtom &atom3, MolAtom &atom4,
-           const REAL angle, const REAL sigma, const REAL delta);
+      MolDihedralAngle(const MolAtom &atom1, const MolAtom &atom2,
+                       const MolAtom &atom3, const MolAtom &atom4,
+                       const REAL angle, const REAL sigma, const REAL delta,
+                       Molecule &parent);
       /** Destructor
       *
       */
       virtual ~MolDihedralAngle();
+      const Molecule& GetMolecule()const;
+      Molecule& GetMolecule();
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       virtual REAL GetLogLikelihood()const;
       REAL GetAngle()const;
+      REAL& Angle0();
       const MolAtom& GetAtom1()const;
       const MolAtom& GetAtom2()const;
       const MolAtom& GetAtom3()const;
       const MolAtom& GetAtom4()const;
+      void SetAtom1(const MolAtom& at);
+      void SetAtom2(const MolAtom& at);
+      void SetAtom3(const MolAtom& at);
+      void SetAtom4(const MolAtom& at);
       //MolAtom& GetAtom1();
       //MolAtom& GetAtom2();
       //MolAtom& GetAtom3();
@@ -205,7 +269,14 @@ class MolDihedralAngle:public Restraint
    private:
       /// The vector of the 4 atoms involved in the bond angle.
       vector<const MolAtom*> mvpAtom;
-      REAL mAngle,mAngleIdeal,mDelta,mSigma;
+      REAL mAngle,mAngle0,mDelta,mSigma;
+      /// Parent Molecule
+      Molecule *mpMol;
+   #ifdef __WX__CRYST__
+   public:
+      WXCrystObjBasic *mpWXCrystObj;
+      virtual WXCrystObjBasic* WXCreate(wxWindow*);
+   #endif
 };
 
 /** Ring class
@@ -312,7 +383,7 @@ class Molecule: public Scatterer
       *
       */
       void AddAtom(const REAL x, const REAL y, const REAL z,
-                   const ScatteringPower *pPow=0);
+                   const ScatteringPower *pPow,const string &name);
       /** Add a bond
       *
       *
@@ -334,11 +405,21 @@ class Molecule: public Scatterer
                             const REAL angle, const REAL sigma, const REAL delta);
       MolAtom &GetAtom(unsigned int i);
       const MolAtom &GetAtom(unsigned int i)const;
+      MolAtom &GetAtom(const string &name);
+      const MolAtom &GetAtom(const string &name)const;
       /** Minimize configuration from internal restraints (bond lengths, angles
       * and dihedral angles). Useful when adding manually atoms to get an initial
       * reasonable configuration. 
       */
-      void MinimizeConfiguration();
+      void OptimizeConformation(const long nbTrial=10000);
+      const vector<MolAtom*>& GetAtomList()const;
+      const vector<MolBond*>& GetBondList()const;
+      const vector<MolBondAngle*>& GetBondAngleList()const;
+      const vector<MolDihedralAngle*>& GetDihedralAngleList()const;
+      vector<MolAtom*>& GetAtomList();
+      vector<MolBond*>& GetBondList();
+      vector<MolBondAngle*>& GetBondAngleList();
+      vector<MolDihedralAngle*>& GetDihedralAngleList();
    private:
       virtual void InitRefParList();
       /** Build the list of rings in the molecule.
@@ -355,6 +436,13 @@ class Molecule: public Scatterer
       * of all atoms, and the orientation parameters.
       */
       void UpdateScattCompList()const;
+      /// Search a MolAtom from its name. Search begins at the end, and the
+      /// first match is returned. returns mvAtom.rend() if no atom matches
+      vector<MolAtom*>::reverse_iterator FindAtom(const string &name);
+      /// Search a MolAtom from its name. Search begins at the end, and the
+      /// first match is returned. returns mvAtom.rend() if no atom matches
+      vector<MolAtom*>::const_reverse_iterator FindAtom(const string &name)const;
+      ///
       /** The list of scattering components
       *
       * this is mutable since it only reflects the list of atoms.
@@ -363,19 +451,19 @@ class Molecule: public Scatterer
       /** The list of atoms
       *
       */
-      vector<MolAtom> mvAtom;
+      vector<MolAtom*> mvpAtom;
       /** The list of bonds
       *
       */
-      vector<MolBond> mvBond;
-      /** The list of bond angle
+      vector<MolBond*> mvpBond;
+      /** The list of bond angles
       *
       */
-      vector<MolBondAngle> mvBondAngle;
-      /** The list of atoms
+      vector<MolBondAngle*> mvpBondAngle;
+      /** The list of dihedral angles
       *
       */
-      vector<MolDihedralAngle> mvDihedralAngle;
+      vector<MolDihedralAngle*> mvpDihedralAngle;
       /** List of Bonds for each atom.
       *
       * This duplicates the information in Molecule::mvBond
@@ -400,6 +488,10 @@ class Molecule: public Scatterer
          RefinableObjClock mClockAtomPosition;
          RefinableObjClock mClockAtomScattPow;
          RefinableObjClock mClockOrientation;
+   #ifdef __WX__CRYST__
+   public:
+      virtual WXCrystObjBasic* WXCreate(wxWindow*);
+   #endif
 };
 
 }//namespace

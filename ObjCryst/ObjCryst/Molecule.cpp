@@ -20,7 +20,17 @@
 *
 */
 #include <sstream>
+#include <iterator>
+
+#ifdef OBJCRYST_GL
+#include <GL/glut.h>
+#endif
+
 #include "ObjCryst/Molecule.h"
+#include "RefinableObj/GlobalOptimObj.h"
+#ifdef __WX__CRYST__
+   #include "wxCryst/wxMolecule.h"
+#endif
 
 using namespace std;
 
@@ -33,12 +43,31 @@ namespace ObjCryst
 //######################################################################
 
 MolAtom::MolAtom(const REAL x, const REAL y, const REAL z,
-              const ScatteringPower *pPow):
-mX(x),mY(y),mZ(z),mOccupancy(1.),mpScattPow(pPow)
+                 const ScatteringPower *pPow, const string &name, Molecule &parent):
+mName(name),mX(x),mY(y),mZ(z),mOccupancy(1.),mpScattPow(pPow),mpMol(&parent)
+#ifdef __WX__CRYST__
+,mpWXCrystObj(0)
+#endif
 {
+   VFN_DEBUG_MESSAGE("MolAtom::MolAtom()",4)
 }
 
 MolAtom::~MolAtom(){}
+
+void MolAtom::SetName(const string &name){mName=name;}
+const string& MolAtom::GetName()const{return mName;}
+      string& MolAtom::GetName()     {return mName;}
+      
+const Molecule& MolAtom::GetMolecule()const{return *mpMol;}
+      Molecule& MolAtom::GetMolecule()     {return *mpMol;}
+
+const REAL& MolAtom::X()const{return mX;}
+const REAL& MolAtom::Y()const{return mY;}
+const REAL& MolAtom::Z()const{return mZ;}
+
+REAL& MolAtom::X(){return mX;}
+REAL& MolAtom::Y(){return mY;}
+REAL& MolAtom::Z(){return mZ;}
 
 REAL MolAtom::GetX()const{return mX;}
 REAL MolAtom::GetY()const{return mY;}
@@ -50,6 +79,7 @@ void MolAtom::SetY(const REAL a){ mY=a;}
 void MolAtom::SetZ(const REAL a){ mZ=a;}
 void MolAtom::SetOccupancy(const REAL a){ mOccupancy=a;}
 
+bool MolAtom::IsDummy()const{return mpScattPow==0;}
 const ScatteringPower& MolAtom::GetScatteringPower()const{return *mpScattPow;}
 void MolAtom::SetScatteringPower(const ScatteringPower& pow){mpScattPow=&pow;}
 
@@ -58,6 +88,7 @@ void MolAtom::XMLOutput(ostream &os,int indent)const
    VFN_DEBUG_ENTRY("MolAtom::XMLOutput()",4)
    for(int i=0;i<indent;i++) os << "  " ;
    XMLCrystTag tag("Atom",false,true);
+   tag.AddAttribute("Name",this->GetName());
    tag.AddAttribute("ScattPow",this->GetScatteringPower().GetName());
    {
       stringstream ss;
@@ -84,33 +115,80 @@ void MolAtom::XMLOutput(ostream &os,int indent)const
 }
 
 void MolAtom::XMLInput(istream &is,const XMLCrystTag &tag)
-{}
+{
+   VFN_DEBUG_ENTRY("MolAtom::XMLInput()",10)
+   for(unsigned int i=0;i<tag.GetNbAttribute();i++)
+   {
+      if("Name"==tag.GetAttributeName(i))
+      {
+         mName=tag.GetAttributeValue(i);
+      }
+      if("ScattPow"==tag.GetAttributeName(i))
+      {
+         mpScattPow=&(mpMol->GetCrystal().GetScatteringPower(tag.GetAttributeValue(i)));
+      }
+      if("x"==tag.GetAttributeName(i))
+      {
+         stringstream ss(tag.GetAttributeValue(i));
+         ss >>mX;
+      }
+      if("y"==tag.GetAttributeName(i))
+      {
+         stringstream ss(tag.GetAttributeValue(i));
+         ss >>mY;
+      }
+      if("z"==tag.GetAttributeName(i))
+      {
+         stringstream ss(tag.GetAttributeValue(i));
+         ss >>mZ;
+      }
+      if("Occup"==tag.GetAttributeName(i))
+      {
+         stringstream ss(tag.GetAttributeValue(i));
+         ss >>mOccupancy;
+      }
+   }
+   VFN_DEBUG_EXIT("MolAtom::XMLInput()",10)
+}
 
+#ifdef __WX__CRYST__
+WXCrystObjBasic* MolAtom::WXCreate(wxWindow* parent)
+{
+   VFN_DEBUG_ENTRY("MolAtom::WXCreate()",5)
+   mpWXCrystObj=new WXMolAtom(parent,this);
+   VFN_DEBUG_EXIT("MolAtom::WXCreate()",5)
+   return mpWXCrystObj;
+}
+#endif
 //######################################################################
 //
 //      MolBond
 //
 //######################################################################
 MolBond::MolBond(const MolAtom &atom1, const MolAtom &atom2,
-     const REAL length0, const REAL sigma, const REAL delta,
-     const REAL bondOrder):
+                 const REAL length0, const REAL sigma, const REAL delta,
+                 Molecule &parent,const REAL bondOrder):
 mAtomPair(make_pair(&atom1,&atom2)),
-mLengthIdeal(length0),mDelta(delta),mSigma(sigma),
-mBondOrder(bondOrder),mIsInRing(false)
+mLength0(length0),mDelta(delta),mSigma(sigma),
+mBondOrder(bondOrder),mIsInRing(false),mpMol(&parent)
 {}
 
 MolBond::~MolBond()
 {}
+
+const Molecule& MolBond::GetMolecule()const{return *mpMol;}
+      Molecule& MolBond::GetMolecule()     {return *mpMol;}
 
 void MolBond::XMLOutput(ostream &os,int indent)const
 {
    VFN_DEBUG_ENTRY("MolBond::XMLOutput()",4)
    for(int i=0;i<indent;i++) os << "  " ;
    XMLCrystTag tag("Bond",false,true);
-   //#error "which atoms for this bond ?"
+   tag.AddAttribute("Atom1",mAtomPair.first->GetName());
+   tag.AddAttribute("Atom2",mAtomPair.second->GetName());
    {
       stringstream ss;
-      ss <<mLengthIdeal;
+      ss <<mLength0;
       tag.AddAttribute("Length",ss.str());
    }
    {
@@ -134,13 +212,21 @@ void MolBond::XMLOutput(ostream &os,int indent)const
 
 void MolBond::XMLInput(istream &is,const XMLCrystTag &tag)
 {
-   VFN_DEBUG_ENTRY("MolBond::XMLInput():",5)
+   VFN_DEBUG_ENTRY("MolBond::XMLInput():",10)
    for(unsigned int i=0;i<tag.GetNbAttribute();i++)
    {
+      if("Atom1"==tag.GetAttributeName(i))
+      {
+         mAtomPair.first=&(mpMol->GetAtom(tag.GetAttributeValue(i)));
+      }
+      if("Atom2"==tag.GetAttributeName(i))
+      {
+         mAtomPair.second=&(mpMol->GetAtom(tag.GetAttributeValue(i)));
+      }
       if("Length"==tag.GetAttributeName(i))
       {
          stringstream ss(tag.GetAttributeValue(i));
-         ss >>mLengthIdeal;
+         ss >>mLength0;
       }
       if("Delta"==tag.GetAttributeName(i))
       {
@@ -158,29 +244,35 @@ void MolBond::XMLInput(istream &is,const XMLCrystTag &tag)
          ss >>mBondOrder;
       }
    }
-   VFN_DEBUG_EXIT("MolBond::XMLInput():",5)
+   VFN_DEBUG_EXIT("MolBond::XMLInput():",10)
 }
 
 REAL MolBond::GetLogLikelihood()const
 {
+   VFN_DEBUG_ENTRY("MolBond::GetLogLikelihood():",2)
    const REAL length=this->GetLength();
-   REAL tmp=length-(mLengthIdeal+mDelta);
+   REAL tmp=length-(mLength0+mDelta);
    if(tmp>0)
    {
       tmp/=mSigma;
+      VFN_DEBUG_EXIT("MolBond::GetLogLikelihood():",2)
       return tmp*tmp;
    }
-   tmp=length-(mLengthIdeal-mDelta);
+   tmp=length-(mLength0-mDelta);
    if(tmp<0)
    {
       tmp/=mSigma;
+      VFN_DEBUG_EXIT("MolBond::GetLogLikelihood():",2)
       return tmp*tmp;
    }
+   VFN_DEBUG_EXIT("MolBond::GetLogLikelihood():",2)
    return 0;
 }
 
 const MolAtom& MolBond::GetAtom1()const{return *(mAtomPair.first);}
 const MolAtom& MolBond::GetAtom2()const{return *(mAtomPair.second);}
+void MolBond::SetAtom1(const MolAtom &at){mAtomPair.first =&at;}
+void MolBond::SetAtom2(const MolAtom &at){mAtomPair.second=&at;}
 REAL MolBond::GetLength()const
 {
    return  sqrt( (this->GetAtom1().GetX()-this->GetAtom2().GetX())
@@ -191,26 +283,41 @@ REAL MolBond::GetLength()const
                  *(this->GetAtom1().GetZ()-this->GetAtom2().GetZ()) );
 }
 
-REAL MolBond::GetIdealLength()const{return mLengthIdeal;}
+REAL MolBond::GetLength0()const{return mLength0;}
 REAL MolBond::GetLengthDelta()const{return mDelta;}
 REAL MolBond::GetLengthSigma()const{return mSigma;}
 REAL MolBond::GetBondOrder()const{return mBondOrder;}
 
-void MolBond::SetIdealLength(const REAL a){mLengthIdeal=a;}
+REAL& MolBond::Length0(){return mLength0;}
+REAL& MolBond::LengthDelta(){return mDelta;}
+REAL& MolBond::LengthSigma(){return mSigma;}
+REAL& MolBond::BondOrder(){return mBondOrder;}
+
+void MolBond::SetLength0(const REAL a){mLength0=a;}
 void MolBond::SetLengthDelta(const REAL a){mDelta=a;}
 void MolBond::SetLengthSigma(const REAL a){mBondOrder=a;}
 void MolBond::SetBondOrder(const REAL a){mSigma=a;}
 
 bool MolBond::IsInRing()const{return mIsInRing;}
 void MolBond::SetInRing(const bool isInRing){mIsInRing=isInRing;}
+#ifdef __WX__CRYST__
+WXCrystObjBasic* MolBond::WXCreate(wxWindow* parent)
+{
+   VFN_DEBUG_ENTRY("MolBond::WXCreate()",5)
+   mpWXCrystObj=new WXMolBond(parent,this);
+   VFN_DEBUG_EXIT("MolBond::WXCreate()",5)
+   return mpWXCrystObj;
+}
+#endif
 //######################################################################
 //
 //      MolBondAngle
 //
 //######################################################################
 MolBondAngle::MolBondAngle(const MolAtom &atom1,const  MolAtom &atom2,const  MolAtom &atom3,
-     const REAL angle, const REAL sigma, const REAL delta):
-mAngleIdeal(angle),mDelta(delta),mSigma(sigma)
+                           const REAL angle, const REAL sigma, const REAL delta,
+                           Molecule &parent):
+mAngle0(angle),mDelta(delta),mSigma(sigma),mpMol(&parent)
 {
    mvpAtom.push_back(&atom1);
    mvpAtom.push_back(&atom2);
@@ -219,15 +326,20 @@ mAngleIdeal(angle),mDelta(delta),mSigma(sigma)
 
 MolBondAngle::~MolBondAngle(){}
 
+const Molecule& MolBondAngle::GetMolecule()const{return *mpMol;}
+      Molecule& MolBondAngle::GetMolecule()     {return *mpMol;}
+
 void MolBondAngle::XMLOutput(ostream &os,int indent)const
 {
    VFN_DEBUG_ENTRY("MolBondAngle::XMLOutput()",4)
    for(int i=0;i<indent;i++) os << "  " ;
    XMLCrystTag tag("BondAngle",false,true);
-   //#error "which atoms for this bond ?"
+   tag.AddAttribute("Atom1",this->GetAtom1().GetName());
+   tag.AddAttribute("Atom2",this->GetAtom2().GetName());
+   tag.AddAttribute("Atom3",this->GetAtom3().GetName());
    {
       stringstream ss;
-      ss <<mAngleIdeal;
+      ss <<mAngle0;
       tag.AddAttribute("Angle",ss.str());
    }
    {
@@ -246,13 +358,26 @@ void MolBondAngle::XMLOutput(ostream &os,int indent)const
 
 void MolBondAngle::XMLInput(istream &is,const XMLCrystTag &tag)
 {
-   VFN_DEBUG_ENTRY("MolBondAngle::XMLInput():",5)
+   VFN_DEBUG_ENTRY("MolBondAngle::XMLInput():",10)
+   mvpAtom.resize(3);
    for(unsigned int i=0;i<tag.GetNbAttribute();i++)
    {
+      if("Atom1"==tag.GetAttributeName(i))
+      {
+         mvpAtom[0]=&(mpMol->GetAtom(tag.GetAttributeValue(i)));
+      }
+      if("Atom2"==tag.GetAttributeName(i))
+      {
+         mvpAtom[1]=&(mpMol->GetAtom(tag.GetAttributeValue(i)));
+      }
+      if("Atom3"==tag.GetAttributeName(i))
+      {
+         mvpAtom[2]=&(mpMol->GetAtom(tag.GetAttributeValue(i)));
+      }
       if("Angle"==tag.GetAttributeName(i))
       {
          stringstream ss(tag.GetAttributeValue(i));
-         ss >>mAngleIdeal;
+         ss >>mAngle0;
       }
       if("Delta"==tag.GetAttributeName(i))
       {
@@ -265,7 +390,11 @@ void MolBondAngle::XMLInput(istream &is,const XMLCrystTag &tag)
          ss >>mSigma;
       }
    }
-   VFN_DEBUG_EXIT("MolBondAngle::XMLInput():",5)
+   VFN_DEBUG_EXIT("MolBondAngle::XMLInput():",10)
+}
+REAL& MolBondAngle::Angle0()
+{
+   return mAngle0;
 }
 
 REAL MolBondAngle::GetAngle()const
@@ -276,61 +405,88 @@ REAL MolBondAngle::GetAngle()const
    const REAL x23=this->GetAtom3().GetX()-this->GetAtom2().GetX();
    const REAL y23=this->GetAtom3().GetY()-this->GetAtom2().GetY();
    const REAL z23=this->GetAtom3().GetZ()-this->GetAtom2().GetZ();
-   const REAL norm21=sqrt( (x21*x21+y21*y21+z21*z21)*(x21*x21+y21*y21+z21*z21));
-   const REAL norm23=sqrt( (x23*x23+y23*y23+z23*z23)*(x23*x23+y23*y23+z23*z23));
-   return acos( (x21*x23+y21*y23+z21*z23)/(norm21*norm23));
-   
+   const REAL norm21= x21*x21+y21*y21+z21*z21;
+   const REAL norm23= x23*x23+y23*y23+z23*z23;
+   return acos( (x21*x23+y21*y23+z21*z23)/sqrt(norm21*norm23));
 }
 
 REAL MolBondAngle::GetLogLikelihood()const
 {
+   VFN_DEBUG_ENTRY("MolBondAngle::GetLogLikelihood():",2)
    const REAL angle=this->GetAngle();
-   REAL tmp=angle-(mAngleIdeal+mDelta);
+   REAL tmp=angle-(mAngle0+mDelta);
    if(tmp>0)
    {
       tmp/=mSigma;
+      VFN_DEBUG_EXIT("MolBondAngle::GetLogLikelihood():",2)
       return tmp*tmp;
    }
-   tmp=angle-(mAngleIdeal-mDelta);
+   tmp=angle-(mAngle0-mDelta);
    if(tmp<0)
    {
       tmp/=mSigma;
+      VFN_DEBUG_EXIT("MolBondAngle::GetLogLikelihood():",2)
       return tmp*tmp;
    }
+   VFN_DEBUG_EXIT("MolBondAngle::GetLogLikelihood():",2)
    return 0;
 }
 const MolAtom& MolBondAngle::GetAtom1()const{return *(mvpAtom[0]);}
 const MolAtom& MolBondAngle::GetAtom2()const{return *(mvpAtom[1]);}
 const MolAtom& MolBondAngle::GetAtom3()const{return *(mvpAtom[2]);}
+void MolBondAngle::SetAtom1(const MolAtom& at){mvpAtom[0]=&at;}
+void MolBondAngle::SetAtom2(const MolAtom& at){mvpAtom[1]=&at;}
+void MolBondAngle::SetAtom3(const MolAtom& at){mvpAtom[2]=&at;}
 //MolAtom& MolBondAngle::GetAtom1(){return *(mvpAtom[0]);}
 //MolAtom& MolBondAngle::GetAtom2(){return *(mvpAtom[1]);}
 //MolAtom& MolBondAngle::GetAtom3(){return *(mvpAtom[2]);}
+#ifdef __WX__CRYST__
+WXCrystObjBasic* MolBondAngle::WXCreate(wxWindow* parent)
+{
+   VFN_DEBUG_ENTRY("MolBondAngle::WXCreate()",5)
+   mpWXCrystObj=new WXMolBondAngle(parent,this);
+   VFN_DEBUG_EXIT("MolBondAngle::WXCreate()",5)
+   return mpWXCrystObj;
+}
+#endif
 //######################################################################
 //
 //      MolDihedralAngle
 //
 //######################################################################
-MolDihedralAngle::MolDihedralAngle(MolAtom &atom1, MolAtom &atom2, MolAtom &atom3, MolAtom &atom4,
-     const REAL angle, const REAL sigma, const REAL delta):
-mAngleIdeal(angle),mDelta(delta),mSigma(sigma)
+MolDihedralAngle::MolDihedralAngle(const MolAtom &atom1, const MolAtom &atom2,
+                                   const MolAtom &atom3, const MolAtom &atom4,
+                                   const REAL angle, const REAL sigma, const REAL delta,
+                                   Molecule &parent):
+mAngle0(angle),mDelta(delta),mSigma(sigma),mpMol(&parent)
 {
+   VFN_DEBUG_ENTRY("MolDihedralAngle::MolDihedralAngle()",5)
    mvpAtom.push_back(&atom1);
    mvpAtom.push_back(&atom2);
    mvpAtom.push_back(&atom3);
    mvpAtom.push_back(&atom4);
+   vector<const MolAtom*>::iterator pos;
+   for(pos=mvpAtom.begin();pos!=mvpAtom.end();++pos) cout << (*pos)->GetName()<<endl;
+   VFN_DEBUG_EXIT("MolDihedralAngle::MolDihedralAngle()",5)
 }
 
 MolDihedralAngle::~MolDihedralAngle(){}
+
+const Molecule& MolDihedralAngle::GetMolecule()const{return *mpMol;}
+      Molecule& MolDihedralAngle::GetMolecule()     {return *mpMol;}
 
 void MolDihedralAngle::XMLOutput(ostream &os,int indent)const
 {
    VFN_DEBUG_ENTRY("MolDihedralAngle::XMLOutput()",4)
    for(int i=0;i<indent;i++) os << "  " ;
    XMLCrystTag tag("DihedralAngle",false,true);
-   //#error "which atoms for this bond ?"
+   tag.AddAttribute("Atom1",this->GetAtom1().GetName());
+   tag.AddAttribute("Atom2",this->GetAtom2().GetName());
+   tag.AddAttribute("Atom3",this->GetAtom3().GetName());
+   tag.AddAttribute("Atom4",this->GetAtom4().GetName());
    {
       stringstream ss;
-      ss <<mAngleIdeal;
+      ss <<mAngle0;
       tag.AddAttribute("DihedralAngle",ss.str());
    }
    {
@@ -350,12 +506,29 @@ void MolDihedralAngle::XMLOutput(ostream &os,int indent)const
 void MolDihedralAngle::XMLInput(istream &is,const XMLCrystTag &tag)
 {
    VFN_DEBUG_ENTRY("MolDihedralAngle::XMLInput():",5)
+   mvpAtom.resize(4);
    for(unsigned int i=0;i<tag.GetNbAttribute();i++)
    {
+      if("Atom1"==tag.GetAttributeName(i))
+      {
+         mvpAtom[0]=&(mpMol->GetAtom(tag.GetAttributeValue(i)));
+      }
+      if("Atom2"==tag.GetAttributeName(i))
+      {
+         mvpAtom[1]=&(mpMol->GetAtom(tag.GetAttributeValue(i)));
+      }
+      if("Atom3"==tag.GetAttributeName(i))
+      {
+         mvpAtom[2]=&(mpMol->GetAtom(tag.GetAttributeValue(i)));
+      }
+      if("Atom4"==tag.GetAttributeName(i))
+      {
+         mvpAtom[3]=&(mpMol->GetAtom(tag.GetAttributeValue(i)));
+      }
       if("Angle"==tag.GetAttributeName(i))
       {
          stringstream ss(tag.GetAttributeValue(i));
-         ss >>mAngleIdeal;
+         ss >>mAngle0;
       }
       if("Delta"==tag.GetAttributeName(i))
       {
@@ -379,9 +552,9 @@ REAL MolDihedralAngle::GetAngle()const
    const REAL x34=this->GetAtom4().GetX()-this->GetAtom3().GetX();
    const REAL y34=this->GetAtom4().GetY()-this->GetAtom3().GetY();
    const REAL z34=this->GetAtom4().GetZ()-this->GetAtom3().GetZ();
-   const REAL norm21=sqrt( (x21*x21+y21*y21+z21*z21)*(x21*x21+y21*y21+z21*z21));
-   const REAL norm34=sqrt( (x34*x34+y34*y34+z34*z34)*(x34*x34+y34*y34+z34*z34));
-   const REAL angle=acos( (x21*x34+y21*y34+z21*z34)/(norm21*norm34));
+   const REAL norm21= x21*x21+y21*y21+z21*z21;
+   const REAL norm34= x34*x34+y34*y34+z34*z34;
+   const REAL angle=acos( (x21*x34+y21*y34+z21*z34)/sqrt(norm21*norm34));
    
    const REAL x23=this->GetAtom3().GetX()-this->GetAtom2().GetX();
    const REAL y23=this->GetAtom3().GetY()-this->GetAtom2().GetY();
@@ -396,21 +569,27 @@ REAL MolDihedralAngle::GetAngle()const
    return angle;
 }
 
+REAL& MolDihedralAngle::Angle0(){return mAngle0;}
+
 REAL MolDihedralAngle::GetLogLikelihood()const
 {
+   VFN_DEBUG_ENTRY("MolDihedralAngle::GetLogLikelihood():",2)
    const REAL angle=this->GetAngle();
-   REAL tmp=angle-(mAngleIdeal+mDelta);
+   REAL tmp=angle-(mAngle0+mDelta);
    if(tmp>0)
    {
       tmp/=mSigma;
+      VFN_DEBUG_EXIT("MolDihedralAngle::GetLogLikelihood():",2)
       return tmp*tmp;
    }
-   tmp=angle-(mAngleIdeal-mDelta);
+   tmp=angle-(mAngle0-mDelta);
    if(tmp<0)
    {
       tmp/=mSigma;
+      VFN_DEBUG_EXIT("MolDihedralAngle::GetLogLikelihood():",2)
       return tmp*tmp;
    }
+   VFN_DEBUG_EXIT("MolDihedralAngle::GetLogLikelihood():",2)
    return 0;
 }
 
@@ -418,10 +597,23 @@ const MolAtom& MolDihedralAngle::GetAtom1()const{return *(mvpAtom[0]);}
 const MolAtom& MolDihedralAngle::GetAtom2()const{return *(mvpAtom[1]);}
 const MolAtom& MolDihedralAngle::GetAtom3()const{return *(mvpAtom[2]);}
 const MolAtom& MolDihedralAngle::GetAtom4()const{return *(mvpAtom[3]);}
+void MolDihedralAngle::SetAtom1(const MolAtom& at){mvpAtom[0]=&at;}
+void MolDihedralAngle::SetAtom2(const MolAtom& at){mvpAtom[1]=&at;}
+void MolDihedralAngle::SetAtom3(const MolAtom& at){mvpAtom[2]=&at;}
+void MolDihedralAngle::SetAtom4(const MolAtom& at){mvpAtom[3]=&at;}
 //MolAtom& MolDihedralAngle::GetAtom1();
 //MolAtom& MolDihedralAngle::GetAtom2();
 //MolAtom& MolDihedralAngle::GetAtom3();
 //MolAtom& MolDihedralAngle::GetAtom4();
+#ifdef __WX__CRYST__
+WXCrystObjBasic* MolDihedralAngle::WXCreate(wxWindow* parent)
+{
+   VFN_DEBUG_ENTRY("MolDihedralAngle::WXCreate()",5)
+   mpWXCrystObj=new WXMolDihedralAngle(parent,this);
+   VFN_DEBUG_EXIT("MolDihedralAngle::WXCreate()",5)
+   return mpWXCrystObj;
+}
+#endif
 //######################################################################
 //
 //      MolRing
@@ -516,7 +708,7 @@ void UnitQuaternion::XMLOutput(ostream &os,int indent)const
 
 void UnitQuaternion::XMLInput(istream &is,const XMLCrystTag &tag)
 {
-   VFN_DEBUG_ENTRY("UnitQuaternion::XMLInput()",4)
+   VFN_DEBUG_ENTRY("UnitQuaternion::XMLInput()",5)
    for(unsigned int i=0;i<tag.GetNbAttribute();i++)
    {
       if("Q0"==tag.GetAttributeName(i))
@@ -540,7 +732,7 @@ void UnitQuaternion::XMLInput(istream &is,const XMLCrystTag &tag)
          ss >>mQ3;
       }
    }
-   VFN_DEBUG_EXIT("UnitQuaternion::XMLInput()",4)
+   VFN_DEBUG_EXIT("UnitQuaternion::XMLInput()",5)
 }
 
 void UnitQuaternion::RotateVector(REAL &v1,REAL &v2, REAL &v3)const
@@ -577,12 +769,39 @@ REAL& UnitQuaternion::Q3(){return mQ3;}
 //      Molecule
 //
 //######################################################################
-Molecule::Molecule(Crystal &cryst, const string &name):
-Scatterer()
+Molecule::Molecule(Crystal &cryst, const string &name)
 {
-   VFN_DEBUG_MESSAGE("Molecule::XMLOutput()",5)
+   VFN_DEBUG_MESSAGE("Molecule::Molecule()",5)
    this->SetName(name);
    mpCryst=&cryst;
+   {
+      RefinablePar tmp(this->GetName()+"_x",&mXYZ(0),0.,1.,
+                        gpRefParTypeScattTranslX,
+                        REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,1.,1.);
+      tmp.AssignClock(mClockScatterer);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp(this->GetName()+"_y",&mXYZ(1),0,1,
+                        gpRefParTypeScattTranslY,
+                        REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,1.,1.);
+      tmp.AssignClock(mClockScatterer);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp(this->GetName()+"_z",&mXYZ(2),0,1,
+                        gpRefParTypeScattTranslZ,
+                        REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,1.,1.);
+      tmp.AssignClock(mClockScatterer);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp(this->GetName()+"_Occ",&mOccupancy,0,1,
+                        gpRefParTypeScattOccup,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1.,1.);
+      tmp.AssignClock(mClockScatterer);
+      this->AddPar(tmp);
+   }
 }
 
 Molecule::Molecule(const Molecule &old)
@@ -593,7 +812,24 @@ Molecule::Molecule(const Molecule &old)
 
 Molecule::~Molecule()
 {
-   VFN_DEBUG_MESSAGE("Molecule::~Molecule()",5)
+   VFN_DEBUG_ENTRY("Molecule::~Molecule()",5)
+   {
+      vector<MolAtom*>::iterator pos;
+      for(pos=mvpAtom.begin();pos!=mvpAtom.end();pos++) delete *pos;
+   }
+   {
+      vector<MolBond*>::iterator pos;
+      for(pos=mvpBond.begin();pos!=mvpBond.end();pos++) delete *pos;
+   }
+   {
+      vector<MolBondAngle*>::iterator pos;
+      for(pos=mvpBondAngle.begin();pos!=mvpBondAngle.end();pos++) delete *pos;
+   }
+   {
+      vector<MolDihedralAngle*>::iterator pos;
+      for(pos=mvpDihedralAngle.begin();pos!=mvpDihedralAngle.end();pos++) delete *pos;
+   }
+   VFN_DEBUG_EXIT("Molecule::~Molecule()",5)
 }
 
 Molecule* Molecule::CreateCopy() const
@@ -628,24 +864,24 @@ void Molecule::XMLOutput(ostream &os,int indent)const
    //this->GetPar(...).XMLOutput(os,"a",indent);
    //os <<endl;
    {
-      vector<MolAtom>::const_iterator pos;
-      for(pos=mvAtom.begin();pos!=mvAtom.end();++pos)
-         pos->XMLOutput(os,indent);
+      vector<MolAtom*>::const_iterator pos;
+      for(pos=mvpAtom.begin();pos!=mvpAtom.end();++pos)
+         (*pos)->XMLOutput(os,indent);
    }
    {
-      vector<MolBond>::const_iterator pos;
-      for(pos=mvBond.begin();pos!=mvBond.end();++pos)
-         pos->XMLOutput(os,indent);
+      vector<MolBond*>::const_iterator pos;
+      for(pos=mvpBond.begin();pos!=mvpBond.end();++pos)
+         (*pos)->XMLOutput(os,indent);
    }
    {
-      vector<MolBondAngle>::const_iterator pos;
-      for(pos=mvBondAngle.begin();pos!=mvBondAngle.end();++pos)
-         pos->XMLOutput(os,indent);
+      vector<MolBondAngle*>::const_iterator pos;
+      for(pos=mvpBondAngle.begin();pos!=mvpBondAngle.end();++pos)
+         (*pos)->XMLOutput(os,indent);
    }
    {
-      vector<MolDihedralAngle>::const_iterator pos;
-      for(pos=mvDihedralAngle.begin();pos!=mvDihedralAngle.end();++pos)
-         pos->XMLOutput(os,indent);
+      vector<MolDihedralAngle*>::const_iterator pos;
+      for(pos=mvpDihedralAngle.begin();pos!=mvpDihedralAngle.end();++pos)
+         (*pos)->XMLOutput(os,indent);
    }
    
    indent--;
@@ -657,11 +893,56 @@ void Molecule::XMLOutput(ostream &os,int indent)const
 
 void Molecule::XMLInput(istream &is,const XMLCrystTag &tag)
 {
-   VFN_DEBUG_ENTRY("Molecule::XMLInput()",4)
-   VFN_DEBUG_EXIT("Molecule::XMLInput()",4)
+   VFN_DEBUG_ENTRY("Molecule::XMLInput()",5)
+   for(unsigned int i=0;i<tag.GetNbAttribute();i++)
+   {
+      if("Name"==tag.GetAttributeName(i))
+      {
+         mName=tag.GetAttributeValue(i);
+      }
+   }
+   while(true)
+   {
+      XMLCrystTag tagg(is);
+      if(("Molecule"==tagg.GetName())&&tagg.IsEndTag())
+      {
+         this->XMLOutput(cout);
+         this->UpdateDisplay();
+         VFN_DEBUG_EXIT("Molecule::XMLInput():"<<this->GetName(),5)
+         return;
+      }
+      if("UnitQuaternion"==tagg.GetName())
+      {
+         mQuat.XMLInput(is,tagg);
+      }
+      if("Atom"==tagg.GetName())
+      {
+         this->AddAtom(0.,0.,0.,(ScatteringPower *)0,"");
+         mvpAtom.back()->XMLInput(is,tagg);
+      }
+      if("Bond"==tagg.GetName())
+      {
+         this->AddBond(this->GetAtom(0),this->GetAtom(1),1.5,.01,.05,1.);
+         mvpBond.back()->XMLOutput(cout);
+         mvpBond.back()->XMLInput(is,tagg);
+         mvpBond.back()->XMLOutput(cout);
+      }
+      if("BondAngle"==tagg.GetName())
+      {
+         this->AddBondAngle(this->GetAtom(0),this->GetAtom(1),this->GetAtom(2),1.5,.01,.05);
+         mvpBondAngle.back()->XMLInput(is,tagg);
+      }
+      if("DihedralAngle"==tagg.GetName())
+      {
+         this->AddDihedralAngle(this->GetAtom(0),this->GetAtom(1),
+                                this->GetAtom(2),this->GetAtom(3),1.5,.01,.05);
+         mvpDihedralAngle.back()->XMLInput(is,tagg);
+      }
+   }
+   VFN_DEBUG_EXIT("Molecule::XMLInput()",5)
 }
 
-int Molecule::GetNbComponent() const { return mvAtom.size();}
+int Molecule::GetNbComponent() const { return mvpAtom.size();}
 
 const ScatteringComponentList& Molecule::GetScatteringComponentList() const
 {
@@ -673,7 +954,8 @@ const ScatteringComponentList& Molecule::GetScatteringComponentList() const
 
 string Molecule::GetComponentName(const int i) const
 {
-   return mvAtom[i].GetScatteringPower().GetName();
+   if(mvpAtom[i]->IsDummy()) return "Dummy";
+   return mvpAtom[i]->GetScatteringPower().GetName();
 } 
 
 ostream& Molecule::POVRayDescription(ostream &os,const bool noSymmetrics)const
@@ -687,16 +969,207 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                                const REAL zMin,const REAL zMax,
                                const bool displayEnantiomer)const
 {
+   #ifdef OBJCRYST_GL
    VFN_DEBUG_ENTRY("Molecule::GLInitDisplayList()",3)
+   if(mvpAtom.size()==0)
+   {
+      VFN_DEBUG_EXIT("Molecule::GLInitDisplayList():No atom to display !",4)
+      return;
+   }
+   REAL en=1;
+   if(displayEnantiomer==true) en=-1;
+   this->UpdateScattCompList();
+   
+   const GLfloat colour_bond[]= { 0.5, .5, .5, 1.0 };
+   
+   GLUquadricObj* pQuadric = gluNewQuadric();
+   
+   if(true==onlyIndependentAtoms)
+   {
+      REAL xc=mXYZ(0),yc=mXYZ(1),zc=mXYZ(2);
+      this->GetCrystal().FractionalToOrthonormalCoords(xc,yc,zc);
+      vector<MolAtom*>::const_iterator pos;
+      for(pos=mvpAtom.begin();pos!=mvpAtom.end();pos++)
+      {
+         
+         if((*pos)->IsDummy())continue;
+         glMaterialfv (GL_FRONT, GL_AMBIENT_AND_DIFFUSE,
+                       (*pos)->GetScatteringPower().GetColourRGB());
+         glPushMatrix();
+            glTranslatef((*pos)->X()*en+xc, (*pos)->Y()+yc, (*pos)->Z()+zc);
+            gluSphere(pQuadric,
+               (*pos)->GetScatteringPower().GetRadius()/3.,10,10);
+         glPopMatrix();
+      }
+   }//Only independent atoms ?
+   else
+   {
+      VFN_DEBUG_ENTRY("Molecule::GLInitDisplayList():Show all symmetrics",3)
+      vector<CrystMatrix_REAL> vXYZCoords;
+      {
+         REAL x0,y0,z0;
+         vector<MolAtom*>::const_iterator pos;
+         for(pos=mvpAtom.begin();pos!=mvpAtom.end();pos++)
+         {
+            x0=(*pos)->X();
+            y0=(*pos)->Y();
+            z0=(*pos)->Z();
+            this->GetCrystal().OrthonormalToFractionalCoords(x0,y0,z0);
+            vXYZCoords.push_back(this->GetCrystal().GetSpaceGroup().
+                           GetAllSymmetrics(x0+mXYZ(0),y0+mXYZ(1),z0+mXYZ(2),false,false,false));
+         }
+      }
+      CrystMatrix_int translate(27,3);
+      translate=  -1,-1,-1,
+                  -1,-1, 0,
+                  -1,-1, 1,
+                  -1, 0,-1,
+                  -1, 0, 0,
+                  -1, 0, 1,
+                  -1, 1,-1,
+                  -1, 1, 0,
+                  -1, 1, 1,
+                   0,-1,-1,
+                   0,-1, 0,
+                   0,-1, 1,
+                   0, 0,-1,
+                   0, 0, 0,
+                   0, 0, 1,
+                   0, 1,-1,
+                   0, 1, 0,
+                   0, 1, 1,
+                   1,-1,-1,
+                   1,-1, 0,
+                   1,-1, 1,
+                   1, 0,-1,
+                   1, 0, 0,
+                   1, 0, 1,
+                   1, 1,-1,
+                   1, 1, 0,
+                   1, 1, 1;
+      REAL dx,dy,dz;
+      CrystVector_REAL x(mvpAtom.size()),y(mvpAtom.size()),z(mvpAtom.size());
+      CrystVector_REAL xSave,ySave,zSave;
+      const int nbSymmetrics=vXYZCoords[0].rows();
+      for(int i=0;i<nbSymmetrics;i++)
+      {
+         VFN_DEBUG_ENTRY("ZScatterer::GLInitDisplayList():Symmetric#"<<i,3)
+         for(unsigned int j=0;j<mvpAtom.size();j++)
+         {
+            x(j)=vXYZCoords[j](i,0);
+            y(j)=vXYZCoords[j](i,1);
+            z(j)=vXYZCoords[j](i,2);
+         }
+         //Bring back central atom in unit cell; move peripheral atoms with the same amount
+            dx=x(0);
+            dy=y(0);
+            dz=z(0);
+            x(0) = fmod((float) x(0),(float)1); if(x(0)<0) x(0)+=1.;
+            y(0) = fmod((float) y(0),(float)1); if(y(0)<0) y(0)+=1.;
+            z(0) = fmod((float) z(0),(float)1); if(z(0)<0) z(0)+=1.;
+            dx = x(0)-dx;
+            dy = y(0)-dy;
+            dz = z(0)-dz;
+            for(unsigned int j=1;j<mvpAtom.size();j++)
+            {
+               x(j) += dx;
+               y(j) += dy;
+               z(j) += dz;
+            }
+         //Generate also translated atoms near the unit cell
+         xSave=x;
+         ySave=y;
+         zSave=z;
+         for(int j=0;j<translate.rows();j++)
+         {
+            x += translate(j,0);
+            y += translate(j,1);
+            z += translate(j,2);
+            if(   (x(0)>xMin) && (x(0)<xMax)
+                &&(y(0)>yMin) && (y(0)<yMax)
+                &&(z(0)>zMin) && (z(0)<zMax))
+            {
+               for(unsigned int k=0;k<mvpAtom.size();k++)
+               {
+                  this->GetCrystal().FractionalToOrthonormalCoords(x(k),y(k),z(k));
+                  if(mvpAtom[k]->IsDummy()) continue;
+                  glMaterialfv (GL_FRONT,GL_AMBIENT_AND_DIFFUSE,
+                     mvpAtom[k]->GetScatteringPower().GetColourRGB());
+                  glPushMatrix();
+                     glTranslatef(x(k)*en, y(k), z(k));
+                     gluSphere(pQuadric,
+                        mvpAtom[k]->GetScatteringPower().GetRadius()/3.,10,10);
+                  glPopMatrix();
+               }
+               for(unsigned int k=0;k<mvpBond.size();k++)
+               {
+                  if(  (mvpBond[k]->GetAtom1().IsDummy())
+                     ||(mvpBond[k]->GetAtom2().IsDummy()) ) continue;
+                  unsigned long n1,n2;
+                  //:KLUDGE: Get the atoms
+                  for(n1=0;n1<mvpAtom.size();n1++)
+                     if(mvpAtom[n1]==&(mvpBond[k]->GetAtom1())) break;
+                  for(n2=0;n2<mvpAtom.size();n2++)
+                     if(mvpAtom[n2]==&(mvpBond[k]->GetAtom2())) break;
+                  glMaterialfv (GL_FRONT,GL_AMBIENT_AND_DIFFUSE,colour_bond);
+                  glPushMatrix();
+                     glTranslatef(x(n1)*en, y(n1), z(n1));
+                     GLUquadricObj *quadobj = gluNewQuadric();
+                     glColor3f(1.0f,1.0f,1.0f);
+                     const REAL height= sqrt(  (x(n2)-x(n1))*(x(n2)-x(n1))
+                                              +(y(n2)-y(n1))*(y(n2)-y(n1))
+                                              +(z(n2)-z(n1))*(z(n2)-z(n1)));
+                     glRotatef(180,(x(n2)-x(n1))*en,y(n2)-y(n1),z(n2)-z(n1)+height);// ?!?!?!
+                     gluCylinder(quadobj,.1,.1,height,10,1 );
+                     gluDeleteQuadric(quadobj);
+                  glPopMatrix();
+               }
+            }//if in limits
+            x=xSave;
+            y=ySave;
+            z=zSave;
+         }//for translation
+         VFN_DEBUG_EXIT("Molecule::GLInitDisplayList():Symmetric#"<<i,3)
+      }//for symmetrics
+      VFN_DEBUG_EXIT("Molecule::GLInitDisplayList():Show all symmetrics",3)
+   }//else
+   gluDeleteQuadric(pQuadric);
    VFN_DEBUG_EXIT("Molecule::GLInitDisplayList()",3)
+   #endif //GLCryst
 }
 
 void Molecule::AddAtom(const REAL x, const REAL y, const REAL z,
-             const ScatteringPower *pPow)
+             const ScatteringPower *pPow, const string &name)
 {
-   VFN_DEBUG_ENTRY("Molecule::AddAtom()",5)
-   mvAtom.push_back(MolAtom(x,y,z,pPow));
+   VFN_DEBUG_ENTRY("Molecule::AddAtom():"<<name,5)
+   mvpAtom.push_back(new MolAtom(x,y,z,pPow,name,*this));
+   mClockAtomPosition.Click();
+   mClockAtomScattPow.Click();
    ++mScattCompList;
+   {
+      RefinablePar tmp(name+"_x",&(mvpAtom.back()->X()),0.,1.,
+                        gpRefParTypeScattTranslX,
+                        REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
+      tmp.AssignClock(mClockAtomPosition);
+      tmp.SetGlobalOptimStep(0.1);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp(name+"_y",&(mvpAtom.back()->Y()),0.,1.,
+                        gpRefParTypeScattTranslX,
+                        REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
+      tmp.AssignClock(mClockAtomPosition);
+      tmp.SetGlobalOptimStep(0.1);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp(name+"_z",&(mvpAtom.back()->Z()),0.,1.,
+                        gpRefParTypeScattTranslX,
+                        REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
+      tmp.AssignClock(mClockAtomPosition);
+      tmp.SetGlobalOptimStep(0.1);
+      this->AddPar(tmp);
+   }
    VFN_DEBUG_EXIT("Molecule::AddAtom()",5)
 }
 
@@ -705,7 +1178,8 @@ void Molecule::AddBond(MolAtom &atom1, MolAtom &atom2,
              const REAL bondOrder)
 {
    VFN_DEBUG_ENTRY("Molecule::AddBond()",5)
-   mvBond.push_back(MolBond(atom1,atom2,length,sigma,delta,bondOrder));
+   mvpBond.push_back(new MolBond(atom1,atom2,length,sigma,delta,*this,bondOrder));
+   this->AddRestraint(mvpBond.back());
    VFN_DEBUG_EXIT("Molecule::AddBond()",5)
 }
 
@@ -713,7 +1187,8 @@ void Molecule::AddBondAngle(MolAtom &atom1, MolAtom &atom2, MolAtom &atom3,
                   const REAL angle, const REAL sigma, const REAL delta)
 {
    VFN_DEBUG_ENTRY("Molecule::AddBondAngle()",5)
-   mvBondAngle.push_back(MolBondAngle(atom1,atom2,atom3,angle,sigma,delta));
+   mvpBondAngle.push_back(new MolBondAngle(atom1,atom2,atom3,angle,sigma,delta,*this));
+   this->AddRestraint(mvpBondAngle.back());
    VFN_DEBUG_EXIT("Molecule::AddBondAngle()",5)
 }
 
@@ -721,17 +1196,42 @@ void Molecule::AddDihedralAngle(MolAtom &atom1, MolAtom &atom2, MolAtom &atom3, 
                       const REAL angle, const REAL sigma, const REAL delta)
 {
    VFN_DEBUG_ENTRY("Molecule::AddDihedralAngle()",5)
-   mvDihedralAngle.push_back(MolDihedralAngle(atom1,atom2,atom3,atom4,angle,sigma,delta));
+   mvpDihedralAngle.push_back(new MolDihedralAngle(atom1,atom2,atom3,atom4,
+                                                   angle,sigma,delta,*this));
+   this->AddRestraint(mvpDihedralAngle.back());
    VFN_DEBUG_EXIT("Molecule::AddDihedralAngle()",5)
 }
 
-MolAtom &Molecule::GetAtom(unsigned int i){return mvAtom[i];}
+MolAtom &Molecule::GetAtom(unsigned int i){return *mvpAtom[i];}
 
-const MolAtom &Molecule::GetAtom(unsigned int i)const{return mvAtom[i];}
+const MolAtom &Molecule::GetAtom(unsigned int i)const{return *mvpAtom[i];}
 
-void MinimizeConfiguration()
+MolAtom &Molecule::GetAtom(const string &name){return **(this->FindAtom(name));}
+
+const MolAtom &Molecule::GetAtom(const string &name)const{return **(this->FindAtom(name));}
+
+void Molecule::OptimizeConformation(const long nbTrial)
 {
+   VFN_DEBUG_ENTRY("Molecule::OptimizeConformation()",5)
+   MonteCarloObj globalOptObj(true);
+   globalOptObj.AddRefinableObj(*this);
+   globalOptObj.SetAlgorithmParallTempering(ANNEALING_EXPONENTIAL,1000.,1.,
+                                            ANNEALING_EXPONENTIAL,10,.1);      
+
+   long nb=nbTrial;
+   globalOptObj.Optimize(nb);
+   VFN_DEBUG_EXIT("Molecule::OptimizeConformation()",5)
 }
+
+const vector<MolAtom*>& Molecule::GetAtomList()const{return mvpAtom;}
+const vector<MolBond*>& Molecule::GetBondList()const{return mvpBond;}
+const vector<MolBondAngle*>& Molecule::GetBondAngleList()const{return mvpBondAngle;}
+const vector<MolDihedralAngle*>& Molecule::GetDihedralAngleList()const{return mvpDihedralAngle;}
+
+vector<MolAtom*>& Molecule::GetAtomList(){return mvpAtom;}
+vector<MolBond*>& Molecule::GetBondList(){return mvpBond;}
+vector<MolBondAngle*>& Molecule::GetBondAngleList(){return mvpBondAngle;}
+vector<MolDihedralAngle*>& Molecule::GetDihedralAngleList(){return mvpDihedralAngle;}
 
 void Molecule::InitRefParList()
 {
@@ -747,16 +1247,18 @@ void Molecule::UpdateScattCompList()const
 {
    if(  (mClockAtomPosition<mClockScattCompList)
       &&(mClockOrientation <mClockScattCompList)
-      &&(mClockAtomScattPow<mClockScattCompList))return;
+      &&(mClockAtomScattPow<mClockScattCompList)
+      &&(mClockScatterer   <mClockScattCompList))return;
    VFN_DEBUG_ENTRY("Molecule::UpdateScattCompList()",5)
    // Get internal coords
-   for(long i;i<this->GetNbComponent();++i)
+   for(long i=0;i<this->GetNbComponent();++i)
    {
-      mScattCompList(i).mpScattPow=&(mvAtom[i].GetScatteringPower());
-      mScattCompList(i).mX=mvAtom[i].GetX();
-      mScattCompList(i).mY=mvAtom[i].GetX();
-      mScattCompList(i).mZ=mvAtom[i].GetX();
-      mScattCompList(i).mOccupancy=mvAtom[i].GetOccupancy();
+      if(mvpAtom[i]->IsDummy()) mScattCompList(i).mpScattPow=0;
+      else mScattCompList(i).mpScattPow=&(mvpAtom[i]->GetScatteringPower());
+      mScattCompList(i).mX=mvpAtom[i]->GetX();
+      mScattCompList(i).mY=mvpAtom[i]->GetY();
+      mScattCompList(i).mZ=mvpAtom[i]->GetZ();
+      mScattCompList(i).mOccupancy=mvpAtom[i]->GetOccupancy()*mOccupancy;
    }
    // translate center to (0,0,0)
    {
@@ -782,11 +1284,53 @@ void Molecule::UpdateScattCompList()const
    {
       mQuat.RotateVector(mScattCompList(i).mX,mScattCompList(i).mY,mScattCompList(i).mZ);
    }
-   
    // Convert to fractionnal coordinates
+   for(long i;i<this->GetNbComponent();++i)
+   {
+      this->GetCrystal().OrthonormalToFractionalCoords(mScattCompList(i).mX,
+                                                       mScattCompList(i).mY,
+                                                       mScattCompList(i).mZ);
+   }
+   // translate center to (0,0,0)
+   for(long i;i<this->GetNbComponent();++i)
+   {
+      mScattCompList(i).mX += mXYZ(0);
+      mScattCompList(i).mY += mXYZ(1);
+      mScattCompList(i).mZ += mXYZ(2);
+   }
    mClockScattCompList.Click();
    VFN_DEBUG_EXIT("Molecule::UpdateScattCompList()",5)
 }
+vector<MolAtom*>::reverse_iterator Molecule::FindAtom(const string &name)
+{
+   VFN_DEBUG_ENTRY("Molecule::FindAtom():"<<name,4)
+   vector<MolAtom*>::reverse_iterator rpos;
+   for(rpos=mvpAtom.rbegin();rpos!=mvpAtom.rend();++rpos)
+      if(name==(*rpos)->GetName())
+      {
+         VFN_DEBUG_EXIT("Molecule::FindAtom():"<<name<<"...found",4)
+         return rpos;
+      }
+   VFN_DEBUG_EXIT("Molecule::FindAtom():"<<name<<"...NOT FOUND !",4)
+   return rpos;
+}
+vector<MolAtom*>::const_reverse_iterator Molecule::FindAtom(const string &name)const
+{
+   vector<MolAtom*>::const_reverse_iterator rpos;
+   rpos=mvpAtom.rbegin();
+   for(rpos=mvpAtom.rbegin();rpos!=mvpAtom.rend();++rpos)
+      if(name==(*rpos)->GetName()) return rpos;
+   return rpos;
+}
 
+#ifdef __WX__CRYST__
+WXCrystObjBasic* Molecule::WXCreate(wxWindow* parent)
+{
+   VFN_DEBUG_ENTRY("Molecule::WXCreate()",5)
+   mpWXCrystObj=new WXMolecule(parent,this);
+   VFN_DEBUG_EXIT("Molecule::WXCreate()",5)
+   return mpWXCrystObj;
+}
+#endif
 
 }//namespace

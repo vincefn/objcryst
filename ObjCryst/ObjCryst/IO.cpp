@@ -38,6 +38,7 @@
 #include "ObjCryst/DiffractionDataSingleCrystal.h"
 #include "ObjCryst/PowderPattern.h"
 #include "Quirks/VFNStreamFormat.h"
+#include "ObjCryst/Molecule.h"
 
 #include <iostream>
 #include <fstream>
@@ -1133,6 +1134,16 @@ void Crystal::XMLInput(istream &is,const XMLCrystTag &tagg)
          z->XMLInput(is,tag);
          this->AddScatterer(z);
          VFN_DEBUG_EXIT("Crystal::XMLInput():reading a ZScatterer",5)
+         continue;
+      }
+      if("Molecule"==tag.GetName())
+      {
+         VFN_DEBUG_ENTRY("Crystal::XMLInput():reading a Molecule",5)
+         VFN_DEBUG_MESSAGE("Crystal::XMLInput():reading a Molecule",5)
+         Molecule *z=new Molecule(*this,"");
+         z->XMLInput(is,tag);
+         this->AddScatterer(z);
+         VFN_DEBUG_EXIT("Crystal::XMLInput():reading a Molecule",5)
          continue;
       }
    }

@@ -150,6 +150,8 @@ class Crystal:public UnitCell
       void RemoveScatteringPower(ScatteringPower *scattPow);
       /// Find a ScatteringPower from its name. Names must be unique in a given Crystal.
       ScatteringPower& GetScatteringPower(const string &name);
+      /// Find a ScatteringPower from its name. Names must be unique in a given Crystal.
+      const ScatteringPower& GetScatteringPower(const string &name)const;
       
       /** \brief Get the list of all scattering components
       */
