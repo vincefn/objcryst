@@ -1442,9 +1442,15 @@ void DiffractionDataSingleCrystal::XMLOutput(ostream &os,int indent)const
    mTwinningOption.XMLOutput(os,indent);
    os <<endl;
    
-   XMLCrystTag tag2("HKLIobsSigmaWeightList");
    for(int i=0;i<indent;i++) os << "  " ;
-   os <<tag2<<endl;
+   XMLCrystTag tag2("MaxSinThetaOvLambda");
+   os << tag2<< mMaxSinThetaOvLambda;
+   tag2.SetIsEndTag(true);
+   os << tag2<<endl<<endl;
+	
+   XMLCrystTag tag3("HKLIobsSigmaWeightList");
+   for(int i=0;i<indent;i++) os << "  " ;
+   os <<tag3<<endl;
    
    for(long j=0;j<this->GetNbRefl();j++)
    {
@@ -1458,9 +1464,9 @@ void DiffractionDataSingleCrystal::XMLOutput(ostream &os,int indent)const
          <<endl;
    }
    
-   tag2.SetIsEndTag(true);
+   tag3.SetIsEndTag(true);
    for(int i=0;i<indent;i++) os << "  " ;
-   os <<tag2<<endl;
+   os <<tag3<<endl;
    
    
    indent--;
@@ -1496,6 +1502,11 @@ void DiffractionDataSingleCrystal::XMLInput(istream &is,const XMLCrystTag &tagg)
          continue;
       }
       if("Radiation"==tag.GetName()) mRadiation.XMLInput(is,tag);
+      if("MaxSinThetaOvLambda"==tag.GetName())
+      {
+         is>>mMaxSinThetaOvLambda;
+         XMLCrystTag junk(is);
+      }
       if("Par"==tag.GetName())
       {
          for(unsigned int i=0;i<tag.GetNbAttribute();i++)
@@ -2174,8 +2185,15 @@ void PowderPattern::XMLOutput(ostream &os,int indent)const
    
    
    mRadiation.XMLOutput(os,indent);
-   os <<endl<<endl;
-   
+   os <<endl;
+   {
+		for(int i=0;i<indent;i++) os << "  " ;
+   	XMLCrystTag tag2("MaxSinThetaOvLambda");
+   	os << tag2<< mMaxSinThetaOvLambda;
+   	tag2.SetIsEndTag(true);
+   	os << tag2<<endl<<endl;
+	}
+	
    for(int j=0;j<mPowderPatternComponentRegistry.GetNb();j++)
    {
       mPowderPatternComponentRegistry.GetObj(j).XMLOutput(os,indent);
@@ -2254,6 +2272,11 @@ void PowderPattern::XMLInput(istream &is,const XMLCrystTag &tagg)
          return;
       }
       if("Radiation"==tag.GetName()) mRadiation.XMLInput(is,tag);
+      if("MaxSinThetaOvLambda"==tag.GetName())
+      {
+         is>>mMaxSinThetaOvLambda;
+         XMLCrystTag junk(is);
+      }
       if("Par"==tag.GetName())
       {
          for(unsigned int i=0;i<tag.GetNbAttribute();i++)
