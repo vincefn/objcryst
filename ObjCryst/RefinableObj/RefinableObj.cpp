@@ -465,7 +465,8 @@ void RefinablePar::Mutate(const REAL mutateValue)
    }
    else if(true==this->IsPeriodic())
    {
-      if(*mpValue > mPeriod) *mpValue -= mPeriod;
+      //if(*mpValue > mPeriod) *mpValue -= mPeriod;
+      *mpValue=fmod((REAL)*mpValue,(REAL)mPeriod);
       if(*mpValue < 0) *mpValue += mPeriod;
    }
    VFN_DEBUG_MESSAGE("RefinablePar::Mutate():End",0)
@@ -1615,7 +1616,6 @@ void RefinableObj::BeginOptimization(const bool allowApproximations,
 void RefinableObj::EndOptimization()
 {
    mIsbeingRefined=false;
-   this->UpdateDisplay();
    for(int i=0;i<mSubObjRegistry.GetNb();i++)
       mSubObjRegistry.GetObj(i).EndOptimization();
    #ifdef __WX__CRYST__
@@ -1826,7 +1826,7 @@ void RefinableObj::UpdateDisplay()const
 {
    #ifdef __WX__CRYST__
    VFN_DEBUG_ENTRY("RefinableObj::UpdateDisplay()",3)
-      if(0!=mpWXCrystObj) mpWXCrystObj->CrystUpdate(true,true);
+   if(0!=mpWXCrystObj) mpWXCrystObj->CrystUpdate(true,true);
    VFN_DEBUG_EXIT("RefinableObj::UpdateDisplay()",3)
    #endif
 }

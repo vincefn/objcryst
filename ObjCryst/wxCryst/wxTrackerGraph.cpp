@@ -41,7 +41,7 @@ void WXTrackerGraph::UpdateDisplay()
    if(mClockGraphList<mpMainTracker->GetClockTrackerList())
    {
       std::map<Tracker*,long>::iterator pos1;
-      for(pos1=mvId.begin();pos1!=mvId.end();++pos1)
+      for(pos1=mvId.begin();pos1!=mvId.end();pos1++)
          if(pList->find(pos1->first)==pList->end())
          {
             this->DeleteGraph(pos1->second);
@@ -53,7 +53,7 @@ void WXTrackerGraph::UpdateDisplay()
    if(  (mClockGraphList  <mpMainTracker->GetClockTrackerList())
       ||(mClockGraphValues<mpMainTracker->GetClockValues()))
    {
-      for(pos=pList->begin();pos!=pList->end();++pos)
+      for(pos=pList->begin();pos!=pList->end();pos++)
       {
          if(mvId.find(*pos)==mvId.end())
          {
@@ -64,7 +64,7 @@ void WXTrackerGraph::UpdateDisplay()
          std::map<long,REAL>::const_iterator pos2;
          valarray<float> vx(nb),vy(nb);
          unsigned long i=0;
-         for(pos2=(*pos)->GetValues().begin();pos2!=(*pos)->GetValues().end();++pos2)
+         for(pos2=(*pos)->GetValues().begin();pos2!=(*pos)->GetValues().end();pos2++)
          {
             vx[i]=pos2->first;
             vy[i]=pos2->second;
@@ -85,7 +85,7 @@ void WXTrackerGraph::DeleteGraph(const unsigned long id)
 {
    // remove tracker. Maybe should keep a reverse map.
    std::map<Tracker*,long>::iterator pos;
-   for(pos=mvId.begin();pos!=mvId.end();++pos)
+   for(pos=mvId.begin();pos!=mvId.end();pos++)
    {
       if((long)id==pos->second)
       {
