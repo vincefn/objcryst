@@ -680,7 +680,7 @@ Applying profiles for "<<nbRefl<<" reflections",3)
          VFN_DEBUG_MESSAGE("Apply profile(Monochromatic)Refl("<<i<<")"\
             <<mIntH(i)<<" "<<mIntK(i)<<" "<<mIntL(i)<<" "\
             <<"  I="<<intensity<<"  2Theta="<<2*mTheta(i)*RAD2DEG\
-            <<",pixel #"<<first<<"->"<<last,10)
+            <<",pixel #"<<first<<"->"<<last,2)
          
          {
             const REAL *p2 = mSavedPowderReflProfile.data() + i*nbPoints +shift;
