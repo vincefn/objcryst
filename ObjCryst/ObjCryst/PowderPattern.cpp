@@ -1725,7 +1725,7 @@ REAL PowderPattern::X2Pixel(const REAL x)const
    REAL pixx;
    if(mIsXAscending==false)
    {
-      VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel()",3)
+      VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel()",1)
       long pix=(long)(mNbPoint-1-(x-this->GetPowderPatternXMin())/this->GetPowderPatternXStep());
       if((pix>0)&&(pix<((long)mNbPoint-1)))
       {
@@ -1733,15 +1733,15 @@ REAL PowderPattern::X2Pixel(const REAL x)const
          const REAL localStep=mX(pix)-mX(pix+1);
          if(localStep>0) pix -= (long)((x-mX(pix))/localStep);
       }
-      VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix,3)
+      VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix,1)
       if(pix<1) pix=1;
       if(pix>((long)mNbPoint-2))pix=(long)mNbPoint-2;
-      VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix<<","<<mX(pix),3)
+      VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix<<","<<mX(pix),1)
       if(mX(pix)<x)
       {
          for(;;pix--)
          {
-            VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix<<","<<mX(pix),3)
+            VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix<<","<<mX(pix),1)
             if(mX(pix)>=x)
             {
                pix++;
@@ -1759,14 +1759,14 @@ REAL PowderPattern::X2Pixel(const REAL x)const
          }
       }
       // This assumes step is at least localy constant...
-      VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix<<","<<mX(pix),3)
+      VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix<<","<<mX(pix),1)
       const REAL localStep=mX(pix)-mX(pix+1);
       pixx = (REAL)pix-(x-mX(pix))/localStep;
-      VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix<<","<<mX(pix),3)
+      VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix<<","<<mX(pix),1)
    }
    else
    {
-      VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<this->GetPowderPatternXMin()<<","<<this->GetPowderPatternXMax(),3)
+      VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<this->GetPowderPatternXMin()<<","<<this->GetPowderPatternXMax(),1)
       long pix=(long)((x-this->GetPowderPatternXMin())/this->GetPowderPatternXStep());
       if((pix>0)&&(pix<((long)mNbPoint-1)))
       {
@@ -1774,15 +1774,15 @@ REAL PowderPattern::X2Pixel(const REAL x)const
          const REAL localStep=mX(pix+1)-mX(pix);
          if(localStep>0) pix += (long)((x-mX(pix))/localStep);
       }
-      VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix,3)
+      VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix,1)
       if(pix<1) pix=1;
       if(pix>((long)mNbPoint-2))pix=(long)mNbPoint-2;
-      VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix<<","<<mX(pix),3)
+      VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix<<","<<mX(pix),1)
       if(x<mX(pix))
       {
          for(;;pix--)
          {
-            VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix<<","<<mX(pix),3)
+            VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix<<","<<mX(pix),1)
             if(mX(pix)<=x)
             {
                pix++;
@@ -1795,19 +1795,19 @@ REAL PowderPattern::X2Pixel(const REAL x)const
       {
          for(;;pix++)
          {
-            VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix<<","<<mX(pix),3)
+            VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix<<","<<mX(pix),1)
             if(mX(pix)>=x) break;
             if(pix==((long)mNbPoint-2)) break;
          }
       }
-      VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix<<","<<mX(pix),3)
+      VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix<<","<<mX(pix),1)
       if(pix>((long)mNbPoint-2))pix=(long)mNbPoint-2;
       // This assumes step is at least localy constant...
       const REAL localStep=mX(pix+1)-mX(pix);
-      VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix<<","<<mX(pix)<<","<<localStep,3)
+      VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix<<","<<mX(pix)<<","<<localStep,1)
       pixx = (REAL)pix+(x-mX(pix))/localStep;
    }
-   VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pixx,3)
+   VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pixx,1)
    return pixx;
 }
 
