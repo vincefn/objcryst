@@ -450,6 +450,12 @@ class Molecule: public Scatterer
       *
       */
       vector<MolBondAngle*>::iterator RemoveBondAngle(const MolBondAngle&);
+      /** Searches whether a bond between three atoms already exists,
+      * searching for either (at1,at2,at3) and (at3,at2,at1), as these are equivalent.
+      *
+      * If no bond angle is found, returns Molecule::mvpBondAngle.end().
+      */
+      vector<MolBondAngle*>::const_iterator FindBondAngle(const MolAtom& at1,const MolAtom&at0,const MolAtom&at2)const;
       /** Add a dihedral angle restraint
       *
       *
@@ -485,6 +491,8 @@ class Molecule: public Scatterer
                            const set<unsigned long> &atoms, const REAL angle);
       /// Print the status of all restraints (bond length, angles...)
       void RestraintStatus(ostream &os)const;
+      /// Get the connectivity table
+      const map<unsigned long,set<unsigned long> > & GetConnectivityTable()const;
    private:
       virtual void InitRefParList();
       /** Build the list of rings in the molecule.

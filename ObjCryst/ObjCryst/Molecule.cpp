@@ -1854,6 +1854,21 @@ vector<MolBondAngle*>::iterator Molecule::RemoveBondAngle(const MolBondAngle &an
    return pos;
 }
 
+vector<MolBondAngle*>::const_iterator Molecule::FindBondAngle(const MolAtom &at1,
+                                                              const MolAtom &at2,
+                                                              const MolAtom &at3)const
+{
+   for(vector<MolBondAngle*>::const_iterator pos=mvpBondAngle.begin();
+       pos!=mvpBondAngle.end();++pos)
+   {
+      if(  (&((*pos)->GetAtom2())==&at2)
+         &&(  ((&((*pos)->GetAtom1())==&at1)&&(&((*pos)->GetAtom3())==&at3))
+            ||((&((*pos)->GetAtom1())==&at3)&&(&((*pos)->GetAtom3())==&at1))))
+         return pos;
+   }
+   return mvpBondAngle.end();
+}
+
 void Molecule::AddDihedralAngle(MolAtom &atom1, MolAtom &atom2, MolAtom &atom3, MolAtom &atom4,
                       const REAL angle, const REAL sigma, const REAL delta)
 {
@@ -1975,6 +1990,12 @@ void Molecule::RestraintStatus(ostream &os)const
            <<", Angle="<<(*pos)->GetAngle()*180/M_PI
            <<", log(likelihood)="<<(*pos)->GetLogLikelihood()<<endl;
    VFN_DEBUG_EXIT("Molecule::RestraintStatus()",5)
+}
+
+const map<unsigned long,set<unsigned long> > &Molecule::GetConnectivityTable()const
+{
+   this->BuildConnectivityTable();
+   return mConnectivityTable;
 }
 
 void Molecule::InitRefParList()
@@ -2360,7 +2381,9 @@ void Molecule::BuildFlipGroup()
    }
    // List them
    this->SaveParamSet(mLocalParamSet);
+   #if 0
    const REAL llk0=this->GetLogLikelihood();
+   #endif
    for(list<FlipGroup>::iterator pos=mvFlipGroup.begin();
        pos!=mvFlipGroup.end();++pos)
    {
