@@ -273,7 +273,7 @@ bool WXField::SetForegroundColour(const wxColour& colour)
 //    WXFieldString
 //
 ////////////////////////////////////////////////////////////////////////
-BEGIN_EVENT_TABLE(WXFieldString,wxEvtHandler)
+BEGIN_EVENT_TABLE(WXFieldString,wxWindow)
    EVT_TEXT_ENTER(ID_WXFIELD,       WXFieldString::OnEnter)
    EVT_TEXT(      ID_WXFIELD,       WXFieldString::OnText)
 END_EVENT_TABLE()
@@ -383,7 +383,7 @@ void WXFieldString::ValidateUserInput()
 //    WXFieldName
 //
 ////////////////////////////////////////////////////////////////////////
-BEGIN_EVENT_TABLE(WXFieldName,wxEvtHandler)
+BEGIN_EVENT_TABLE(WXFieldName,wxWindow)
    EVT_TEXT_ENTER(ID_WXFIELD,       WXFieldName::OnEnter)
    EVT_TEXT(      ID_WXFIELD,       WXFieldName::OnText)
 END_EVENT_TABLE()
@@ -679,7 +679,7 @@ void WXFieldChoice::ValidateUserInput(){}
 ////////////////////////////////////////////////////////////////////////
 const long ID_WXOBJ_ENABLE=WXCRYST_ID(); //These are used in ObjCryst/RefinableObj.cpp
 const long ID_WXOBJ_DISABLE=WXCRYST_ID();
-BEGIN_EVENT_TABLE(WXCrystObj,wxEvtHandler)
+BEGIN_EVENT_TABLE(WXCrystObj,wxWindow)
    EVT_BUTTON(ID_WXOBJ_COLLAPSE,WXCrystObj::OnToggleCollapse)
    EVT_UPDATE_UI(ID_WXOBJ_ENABLE,WXCrystObj::OnEnable)                
    EVT_UPDATE_UI(ID_WXOBJ_DISABLE,WXCrystObj::OnEnable)                

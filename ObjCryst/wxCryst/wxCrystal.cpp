@@ -168,7 +168,7 @@ static const long ID_CRYSTAL_MENU_SCATT_DUPLICSCATTERER         =WXCRYST_ID();
 static const long ID_CRYSTAL_SPACEGROUP                         =WXCRYST_ID();
 static const long ID_GLCRYSTAL_MENU_UPDATE                      =WXCRYST_ID();
 
-BEGIN_EVENT_TABLE(WXCrystal,wxEvtHandler)
+BEGIN_EVENT_TABLE(WXCrystal,wxWindow)
    EVT_BUTTON(ID_WXOBJ_COLLAPSE,                      WXCrystObj::OnToggleCollapse)
    EVT_MENU(ID_REFOBJ_MENU_OBJ_SAVE,                  WXRefinableObj::OnMenuSave)
    EVT_MENU(ID_REFOBJ_MENU_OBJ_LOAD,                  WXRefinableObj::OnMenuLoad)

@@ -72,7 +72,7 @@ static const long ID_WXFIELD_REFPAR_FIXBUTTON    =WXCRYST_ID();
 static const long ID_WXFIELD_REFPAR_LIMITEDBUTTON=WXCRYST_ID();
 static const long ID_REFPAR_POPUP_SET_LIMITS     =WXCRYST_ID();
 
-BEGIN_EVENT_TABLE(WXFieldRefPar,wxEvtHandler)
+BEGIN_EVENT_TABLE(WXFieldRefPar,wxWindow)
    EVT_TEXT_ENTER(ID_WXFIELD,                   WXFieldRefPar::OnEnter)
    EVT_TEXT(ID_WXFIELD,                         WXFieldRefPar::OnText)
    EVT_CHECKBOX(ID_WXFIELD_REFPAR_FIXBUTTON,    WXFieldRefPar::OnToggleFix)
@@ -264,7 +264,7 @@ void WXFieldRefPar::ValidateUserInput()
 //    WXFieldOption
 //
 ////////////////////////////////////////////////////////////////////////
-BEGIN_EVENT_TABLE(WXFieldOption,wxEvtHandler)
+BEGIN_EVENT_TABLE(WXFieldOption,wxWindow)
    EVT_CHOICE(ID_WXFIELD,WXFieldOption::OnChoice)
 END_EVENT_TABLE()
 
@@ -337,7 +337,6 @@ WXCrystObj(parent,wxHORIZONTAL,false),mpRegistry(reg)
    VFN_DEBUG_MESSAGE("WXCrystRegistry::WXCrystRegistry(wxWindow*)",6)
    wxStaticText* mpLabel=new wxStaticText(this,-1,reg->GetName().c_str());
    mpSizer->Add(mpLabel,0,wxALIGN_LEFT);
-   mpLabel->SetBackgroundColour(wxColour(250,250,200));
    mpLabel->SetForegroundColour(wxColour(0,0,255));
    this->BottomLayout(0);
    VFN_DEBUG_MESSAGE("WXCrystRegistry::WXCrystRegistry(wxWindow*):End",6)
