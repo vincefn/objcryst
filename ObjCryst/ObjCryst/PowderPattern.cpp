@@ -2248,6 +2248,148 @@ Error opening file for input:"+filename);
 :finished: "<<mNbPoint<<" points",5)
 }
 
+void PowderPattern::ImportPowderPatternGSAS(const string &filename)
+{
+   VFN_DEBUG_ENTRY("PowderPattern::ImportPowderPatternGSAS():file:"<<filename,5)
+   ifstream fin (filename.c_str());
+   if(!fin)
+   {
+      throw ObjCrystException("PowderPattern::ImportPowderPatternGSAS():\
+Error opening file for input:"+filename);
+   }
+   {//Get rid of title
+      char title[80];
+      fin.read(title,80);
+      while(isprint(fin.peek())==false)
+      {
+         if(fin.eof()) break;
+         fin.get();
+      }
+      cout<<"Title:"<<title<<endl;
+      if(this->GetName()=="Change Me!") this->SetName(title);
+   }
+   
+   //BANK  1    38101    7620 CONST     200.00      0.10 0 0 ESD                     
+   int numBank,nbRecords;
+   string binType, type;
+   float bcoeff[4];
+   //string line;
+   char line[81];
+   line[80]='\0';
+   char bank[5];
+   do
+   {
+      fin.read(line,80);
+      while(isprint(fin.peek())==false)
+      {
+         if(fin.eof()) break;
+         fin.get();
+      }
+      sscanf(line,"%4s",bank);
+      if(fin.eof())
+         throw ObjCrystException("PowderPattern::ImportPowderPatternGSAS():\
+Could not find BANK statement !! In file: "+filename);
+   }
+   while(string(bank)!=string("BANK"));
+   
+   {
+      line[80]='\0';
+      char binTypeC[20],typeC[20];
+      sscanf(line,"%4s%d %ld %d %s %f %f %f %f %s",bank,&numBank,&mNbPoint,&nbRecords,
+             binTypeC,&bcoeff[0],&bcoeff[1],&bcoeff[2],&bcoeff[3],typeC);
+      binType=binTypeC;
+      type=typeC;
+   }
+   if(binType=="CONST") binType="CONS";
+   if((type!="ALT")&&(type!="ESD")) type="STD";
+   
+   cout<<"BANK #"<<numBank<<endl;
+   cout<<"Number of data points:"<<mNbPoint<<endl;
+   cout<<"Number of records:"<<nbRecords<<endl;
+   cout<<"BinType:"<<binType<<endl;
+   cout<<"BCoeff[1-4]:"<<bcoeff[0]<<","<<bcoeff[1]<<","<<bcoeff[2]<<","<<bcoeff[3]<<endl;
+   cout<<"Type:"<<type<<endl;
+
+   mPowderPatternObs.resize (mNbPoint);
+   mPowderPatternObsSigma.resize(mNbPoint);
+   mX.resize(mNbPoint);
+   bool importOK=false;
+   if((binType=="CONS") && (type=="ESD"))
+   {
+      this->SetPowderPatternPar(bcoeff[0]*DEG2RAD/100,bcoeff[1]*DEG2RAD/100,mNbPoint);
+      string sub;
+      unsigned long point=0;
+      REAL iobs[5],isig[5];
+      for(long i=0;i<nbRecords;i++)
+      {
+         fin.read(line,80);
+         //line[80]='\0';
+         //cout<<line<<endl;
+         while(isprint(fin.peek())==false)
+         {
+            if(fin.eof()) break;
+            fin.get();
+         }
+         sscanf(line,"%8f%8f%8f%8f%8f%8f%8f%8f%8f%8f",&iobs[0],&isig[0],
+                &iobs[1],&isig[1],&iobs[2],&isig[2],&iobs[3],&isig[3],&iobs[4],&isig[1]);
+         for(unsigned int j=0;j<5;j++)
+         {
+            mPowderPatternObs(point)=iobs[j];
+            mPowderPatternObsSigma(point++)=isig[j];
+            if(point==mNbPoint) break;
+         }
+      }
+      importOK=true;
+   }
+   if((binType=="CONS") && (type=="STD"))
+   {
+      this->SetPowderPatternPar(bcoeff[0]*DEG2RAD/100,bcoeff[1]*DEG2RAD/100,mNbPoint);
+      string sub;
+      unsigned long point=0;
+      REAL iobs[10];
+      for(long i=0;i<nbRecords;i++)
+      {
+         fin.read(line,80);
+         //line[80]='\0';
+         //cout<<line<<endl;
+         while(isprint(fin.peek())==false)
+         {
+            if(fin.eof()) break;
+            fin.get();
+         }
+         sscanf(line,"%8f%8f%8f%8f%8f%8f%8f%8f%8f%8f",&iobs[0],&iobs[1],
+                &iobs[2],&iobs[3],&iobs[4],&iobs[5],&iobs[6],&iobs[7],&iobs[8],&iobs[9]);
+         for(unsigned int j=0;j<10;j++)
+         {
+            mPowderPatternObs(point++)=iobs[j];
+            if(point==mNbPoint) break;
+         }
+      }
+      this->SetSigmaToSqrtIobs();
+      importOK=true;
+   }
+   fin.close();
+   if(!importOK)
+   {
+      mNbPoint=0;
+      mPowderPatternObs.resize (mNbPoint);
+      mPowderPatternObsSigma.resize(mNbPoint);
+      mX.resize(mNbPoint);
+      throw ObjCrystException("PowderPattern::ImportPowderPatternGSAS(): Sorry, \
+this type of format is not handled yet (send an example file to the Fox author)!:"+filename);
+   }
+   this->UpdateDisplay();
+   {
+      char buf [200];
+      sprintf(buf,"Imported powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
+              (int)mNbPoint,this->GetPowderPatternXMin()*RAD2DEG,
+              this->GetPowderPatternXMax()*RAD2DEG,
+              this->GetPowderPatternXStep()*RAD2DEG);
+      (*fpObjCrystInformUser)((string)buf);
+   }
+   VFN_DEBUG_EXIT("PowderPattern::ImportPowderPatternGSAS():file:"<<filename,5)
+}
+
 void PowderPattern::SetPowderPatternObs(const CrystVector_REAL& obs)
 {
    VFN_DEBUG_MESSAGE("PowderPattern::ImportPowderPatternObs()",5)

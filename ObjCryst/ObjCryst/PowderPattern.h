@@ -623,6 +623,10 @@ class PowderPattern : public RefinableObj
          *\param fileName: the filename
          */
          void ImportPowderPatternTOF_ISIS_XYSigma(const string &fileName);
+         /** Import GSAS standard powder pattern data (see GSAS manual).
+         * \warning : partial support (only CONST-constant wavelength- data so far)
+         */
+         void ImportPowderPatternGSAS(const string &fileName);
          /** \brief Set observed powder pattern from vector array.
          *
          * Note: powder pattern parameters must have been set before calling this function,

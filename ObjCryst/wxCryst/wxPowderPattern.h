@@ -39,16 +39,7 @@ class WXPowderPattern: public WXRefinableObj
       void OnMenuShowGraph(wxCommandEvent & WXUNUSED(event));
       void OnMenuSaveText(wxCommandEvent & WXUNUSED(event));
       void OnMenuSimulate(wxCommandEvent & WXUNUSED(event));
-      void OnMenuImportFullProf(wxCommandEvent & WXUNUSED(event));
-      void OnMenuImportPSI(wxCommandEvent & WXUNUSED(event));
-      void OnMenuImportILL(wxCommandEvent & WXUNUSED(event));
-      void OnMenuImportXdd(wxCommandEvent & WXUNUSED(event));
-      void OnMenuImportCPI(wxCommandEvent & WXUNUSED(event));
-      void OnMenuImportFullProf4(wxCommandEvent & WXUNUSED(event));
-      void OnMenuImportMultiDetectorLLBG42(wxCommandEvent & WXUNUSED(event));
-      void OnMenuImport2ThetaObsSigma(wxCommandEvent & WXUNUSED(event));
-      void OnMenuImport2ThetaObs(wxCommandEvent & WXUNUSED(event));
-      void OnMenuImportTOF_ISIS_XYSigma(wxCommandEvent & WXUNUSED(event));
+      void OnMenuImportPattern(wxCommandEvent & WXUNUSED(event));
       void OnMenuFitScaleForR(wxCommandEvent & WXUNUSED(event));
       void OnMenuFitScaleForRw(wxCommandEvent & WXUNUSED(event));
       void OnMenuSavePattern(wxCommandEvent & WXUNUSED(event));

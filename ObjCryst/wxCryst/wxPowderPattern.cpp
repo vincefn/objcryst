@@ -146,6 +146,7 @@ static const long ID_POWDER_MENU_IMPORT_MULTIDETECTORLLBG42=WXCRYST_ID();
 static const long ID_POWDER_MENU_IMPORT_2THETAOBSSIGMA=     WXCRYST_ID(); 
 static const long ID_POWDER_MENU_IMPORT_2THETAOBS=          WXCRYST_ID(); 
 static const long ID_POWDER_MENU_IMPORT_TOFISISXYSIGMA=     WXCRYST_ID(); 
+static const long ID_POWDER_MENU_IMPORT_GSAS=               WXCRYST_ID(); 
 static const long ID_POWDER_MENU_FITSCALE_R=                WXCRYST_ID(); 
 static const long ID_POWDER_MENU_FITSCALE_RW=               WXCRYST_ID(); 
 static const long ID_POWDER_MENU_WAVELENGTH=                WXCRYST_ID(); 
@@ -187,17 +188,17 @@ BEGIN_EVENT_TABLE(WXPowderPattern, wxWindow)
    EVT_MENU(ID_POWDER_MENU_COMP_ADDCRYST,           WXPowderPattern::OnMenuAddCompCryst)         
    EVT_MENU(ID_POWDER_MENU_SAVETEXT,                WXPowderPattern::OnMenuSaveText)             
    EVT_MENU(ID_POWDER_MENU_SIMULATE,                WXPowderPattern::OnMenuSimulate)             
-   EVT_MENU(ID_POWDER_MENU_IMPORT_FULLPROF,         WXPowderPattern::OnMenuImportFullProf)       
-   EVT_MENU(ID_POWDER_MENU_IMPORT_PSI_DMC,          WXPowderPattern::OnMenuImportPSI)            
-   EVT_MENU(ID_POWDER_MENU_IMPORT_ILL_D1A5,         WXPowderPattern::OnMenuImportILL)            
-   EVT_MENU(ID_POWDER_MENU_IMPORT_XDD,              WXPowderPattern::OnMenuImportXdd)            
-   EVT_MENU(ID_POWDER_MENU_IMPORT_CPI,              WXPowderPattern::OnMenuImportCPI)            
-   EVT_MENU(ID_POWDER_MENU_IMPORT_FULLPROF4,        WXPowderPattern::OnMenuImportFullProf4)      
-   EVT_MENU(ID_POWDER_MENU_IMPORT_MULTIDETECTORLLBG42,         
-                                                WXPowderPattern::OnMenuImportMultiDetectorLLBG42)
-   EVT_MENU(ID_POWDER_MENU_IMPORT_2THETAOBSSIGMA,   WXPowderPattern::OnMenuImport2ThetaObsSigma)
-   EVT_MENU(ID_POWDER_MENU_IMPORT_2THETAOBS,        WXPowderPattern::OnMenuImport2ThetaObs)    
-   EVT_MENU(ID_POWDER_MENU_IMPORT_TOFISISXYSIGMA,   WXPowderPattern::OnMenuImportTOF_ISIS_XYSigma)    
+   EVT_MENU(ID_POWDER_MENU_IMPORT_FULLPROF,         WXPowderPattern::OnMenuImportPattern)       
+   EVT_MENU(ID_POWDER_MENU_IMPORT_PSI_DMC,          WXPowderPattern::OnMenuImportPattern)            
+   EVT_MENU(ID_POWDER_MENU_IMPORT_ILL_D1A5,         WXPowderPattern::OnMenuImportPattern)            
+   EVT_MENU(ID_POWDER_MENU_IMPORT_XDD,              WXPowderPattern::OnMenuImportPattern)            
+   EVT_MENU(ID_POWDER_MENU_IMPORT_CPI,              WXPowderPattern::OnMenuImportPattern)            
+   EVT_MENU(ID_POWDER_MENU_IMPORT_FULLPROF4,        WXPowderPattern::OnMenuImportPattern)      
+   EVT_MENU(ID_POWDER_MENU_IMPORT_MULTIDETECTORLLBG42,WXPowderPattern::OnMenuImportPattern)
+   EVT_MENU(ID_POWDER_MENU_IMPORT_2THETAOBSSIGMA,   WXPowderPattern::OnMenuImportPattern)
+   EVT_MENU(ID_POWDER_MENU_IMPORT_2THETAOBS,        WXPowderPattern::OnMenuImportPattern)    
+   EVT_MENU(ID_POWDER_MENU_IMPORT_TOFISISXYSIGMA,   WXPowderPattern::OnMenuImportPattern)    
+   EVT_MENU(ID_POWDER_MENU_IMPORT_GSAS,             WXPowderPattern::OnMenuImportPattern)    
    EVT_MENU(ID_POWDER_MENU_WAVELENGTH_SET,          WXPowderPattern::OnMenuSetWavelength)      
    EVT_MENU(ID_POWDER_MENU_WAVELENGTH_XRAY,         WXPowderPattern::OnMenuSetWavelength)      
    EVT_MENU(ID_POWDER_MENU_WAVELENGTH_NEUTRON,      WXPowderPattern::OnMenuSetWavelength)      
@@ -222,7 +223,8 @@ BEGIN_EVENT_TABLE(WXPowderPattern, wxWindow)
 END_EVENT_TABLE()
 
 WXPowderPattern::WXPowderPattern(wxWindow *parent, PowderPattern* pow):
-WXRefinableObj(parent,pow),mpPowderPattern(pow),mpGraph(0)
+WXRefinableObj(parent,pow),mpPowderPattern(pow),mpGraph(0),
+mChi2(0.0),mGoF(0.0),mRwp(0.0),mRp(0.0)
 {
    VFN_DEBUG_MESSAGE("WXPowderPattern::WXPowderPattern()",6)
    mpWXTitle->SetForegroundColour(wxColour(255,0,0));
@@ -256,6 +258,8 @@ WXRefinableObj(parent,pow),mpPowderPattern(pow),mpGraph(0)
                                  "Import 2Theta-Obs Pattern");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_TOFISISXYSIGMA,
                                  "Import ISIS TOF X Y Sigma");
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_GSAS,
+                                 "Import GSAS Powder Data (Constant Wavelength)");
       mpMenuBar->AddMenu("Parameters",ID_REFOBJ_MENU_PAR);
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_FIXALL,"Fix all");
          //mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_UNFIXALL,"Unfix all");
@@ -614,113 +618,36 @@ void WXPowderPattern::OnMenuSimulate(wxCommandEvent & WXUNUSED(event))
    VFN_DEBUG_EXIT("WXPowderPattern::OnMenuSimulate()",6)
 }
 
-void WXPowderPattern::OnMenuImportFullProf(wxCommandEvent & WXUNUSED(event))
+void WXPowderPattern::OnMenuImportPattern(wxCommandEvent &event)
 {
-   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuImportFullProf()",6)
-   wxFileDialog *open= new wxFileDialog(this,"Choose a file","","","*.*",
-                                        wxOPEN | wxFILE_MUST_EXIST);
-   if(open->ShowModal() != wxID_OK) return;
-   
-   mpPowderPattern->ImportPowderPatternFullprof(open->GetPath().c_str());
-   open->Destroy();
+   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuImportPattern()",6)
+   wxFileDialog open(this,"Choose a file","","","*.*",wxOPEN | wxFILE_MUST_EXIST);
+   if(open.ShowModal() != wxID_OK) return;
+   if(event.GetId()==(long)ID_POWDER_MENU_IMPORT_FULLPROF)
+      mpPowderPattern->ImportPowderPatternFullprof(open.GetPath().c_str());
+   if(event.GetId()==(long)ID_POWDER_MENU_IMPORT_PSI_DMC)
+      mpPowderPattern->ImportPowderPatternPSI_DMC(open.GetPath().c_str());
+   if(event.GetId()==(long)ID_POWDER_MENU_IMPORT_ILL_D1A5)
+      mpPowderPattern->ImportPowderPatternILL_D1A5(open.GetPath().c_str());
+   if(event.GetId()==(long)ID_POWDER_MENU_IMPORT_XDD)
+      mpPowderPattern->ImportPowderPatternXdd(open.GetPath().c_str());
+   if(event.GetId()==(long)ID_POWDER_MENU_IMPORT_CPI)
+      mpPowderPattern->ImportPowderPatternSietronicsCPI(open.GetPath().c_str());
+   if(event.GetId()==(long)ID_POWDER_MENU_IMPORT_FULLPROF4)
+      mpPowderPattern->ImportPowderPatternFullprof4(open.GetPath().c_str());
+   if(event.GetId()==(long)ID_POWDER_MENU_IMPORT_MULTIDETECTORLLBG42)
+      mpPowderPattern->ImportPowderPatternMultiDetectorLLBG42(open.GetPath().c_str());
+   if(event.GetId()==(long)ID_POWDER_MENU_IMPORT_2THETAOBSSIGMA)
+      mpPowderPattern->ImportPowderPattern2ThetaObsSigma(open.GetPath().c_str());
+   if(event.GetId()==(long)ID_POWDER_MENU_IMPORT_2THETAOBS)
+      mpPowderPattern->ImportPowderPattern2ThetaObs(open.GetPath().c_str());
+   if(event.GetId()==(long)ID_POWDER_MENU_IMPORT_TOFISISXYSIGMA)
+      mpPowderPattern->ImportPowderPatternTOF_ISIS_XYSigma(open.GetPath().c_str());
+
+   if(event.GetId()==(long)ID_POWDER_MENU_IMPORT_GSAS)
+      mpPowderPattern->ImportPowderPatternGSAS(open.GetPath().c_str());
 }
 
-void WXPowderPattern::OnMenuImportPSI(wxCommandEvent & WXUNUSED(event))
-{
-   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuImportPSI()",6)
-   wxFileDialog *open= new wxFileDialog(this,"Choose a file","","","*.*",
-                                        wxOPEN | wxFILE_MUST_EXIST);
-   if(open->ShowModal() != wxID_OK) return;
-   
-   mpPowderPattern->ImportPowderPatternPSI_DMC(open->GetPath().c_str());
-   open->Destroy();
-}
-
-void WXPowderPattern::OnMenuImportILL(wxCommandEvent & WXUNUSED(event))
-{
-   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuImportPSI()",6)
-   wxFileDialog *open= new wxFileDialog(this,"Choose a file","","","*.*",
-                                        wxOPEN | wxFILE_MUST_EXIST);
-   if(open->ShowModal() != wxID_OK) return;
-   
-   mpPowderPattern->ImportPowderPatternILL_D1A5(open->GetPath().c_str());
-   open->Destroy();
-}
-
-void WXPowderPattern::OnMenuImportXdd(wxCommandEvent & WXUNUSED(event))
-{
-   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuImportXdd()",6)
-   wxFileDialog *open= new wxFileDialog(this,"Choose a file","","","*.xdd",
-                                        wxOPEN | wxFILE_MUST_EXIST);
-   if(open->ShowModal() != wxID_OK) return;
-   
-   mpPowderPattern->ImportPowderPatternXdd(open->GetPath().c_str());
-   open->Destroy();
-}
-
-void WXPowderPattern::OnMenuImportCPI(wxCommandEvent & WXUNUSED(event))
-{
-   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuImportCPI()",6)
-   wxFileDialog *open= new wxFileDialog(this,"Choose a file","","","*.cpi",
-                                        wxOPEN | wxFILE_MUST_EXIST);
-   if(open->ShowModal() != wxID_OK) return;
-   
-   mpPowderPattern->ImportPowderPatternSietronicsCPI(open->GetPath().c_str());
-   open->Destroy();
-}
-
-void WXPowderPattern::OnMenuImportFullProf4(wxCommandEvent & WXUNUSED(event))
-{
-   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuImportFullProf4()",6)
-   wxFileDialog *open= new wxFileDialog(this,"Choose a file","","","*.*",
-                                        wxOPEN | wxFILE_MUST_EXIST);
-   if(open->ShowModal() != wxID_OK) return;
-   
-   mpPowderPattern->ImportPowderPatternFullprof4(open->GetPath().c_str());
-   open->Destroy();
-}
-
-void WXPowderPattern::OnMenuImportMultiDetectorLLBG42(wxCommandEvent & WXUNUSED(event))
-{
-   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuImportMultiDetectorLLBG42()",6)
-   wxFileDialog *open= new wxFileDialog(this,"Choose a file","","","*.*",
-                                        wxOPEN | wxFILE_MUST_EXIST);
-   if(open->ShowModal() != wxID_OK) return;
-   
-   mpPowderPattern->ImportPowderPatternMultiDetectorLLBG42(open->GetPath().c_str());
-   open->Destroy();
-}
-
-void WXPowderPattern::OnMenuImport2ThetaObsSigma(wxCommandEvent & WXUNUSED(event))
-{
-   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuImport2ThetaObsSigma()",6)
-   wxFileDialog *open= new wxFileDialog(this,"Choose a file","","","*.*",
-                                        wxOPEN | wxFILE_MUST_EXIST);
-   if(open->ShowModal() != wxID_OK) return;
-   
-   mpPowderPattern->ImportPowderPattern2ThetaObsSigma(open->GetPath().c_str());
-   open->Destroy();
-}
-void WXPowderPattern::OnMenuImport2ThetaObs(wxCommandEvent & WXUNUSED(event))
-{
-   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuImport2ThetaObs()",6)
-   wxFileDialog *open= new wxFileDialog(this,"Choose a file","","","*.*",
-                                        wxOPEN | wxFILE_MUST_EXIST);
-   if(open->ShowModal() != wxID_OK) return;
-   
-   mpPowderPattern->ImportPowderPattern2ThetaObs(open->GetPath().c_str());
-   open->Destroy();
-}
-void WXPowderPattern::OnMenuImportTOF_ISIS_XYSigma(wxCommandEvent & WXUNUSED(event))
-{
-   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuImportTOF_ISIS_XYSigma()",6)
-   wxFileDialog *open= new wxFileDialog(this,"Choose a file","","","*.*",
-                                        wxOPEN | wxFILE_MUST_EXIST);
-   if(open->ShowModal() != wxID_OK) return;
-   
-   mpPowderPattern->ImportPowderPatternTOF_ISIS_XYSigma(open->GetPath().c_str());
-   open->Destroy();
-}
 void WXPowderPattern::OnMenuFitScaleForR(wxCommandEvent & WXUNUSED(event))
 {
    if(0==mpGraph) return;
