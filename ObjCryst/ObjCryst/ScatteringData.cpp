@@ -468,7 +468,7 @@ void ScatteringData::GenHKLFullSpace(const double maxTheta,const bool useMultipl
             bool test;
             do
             {
-      			VFN_DEBUG_MESSAGE("...Multiplicity 3, IgnoreImagScattFact="<<mIgnoreImagScattFact,10)
+      			VFN_DEBUG_MESSAGE("...Multiplicity 3, IgnoreImagScattFact="<<mIgnoreImagScattFact,1)
                compare=0;
                if(true==mIgnoreImagScattFact) //Friedel pairs are equivalent.
                   for(int i=0;i<nbTestPositions;i++) 
@@ -790,7 +790,7 @@ CrystVector_long ScatteringData::EliminateExtinctReflections()
    VFN_DEBUG_ENTRY("ScatteringData::EliminateExtinctReflections()",7)
    //return;
    //generate 20 random atom positions, to check which reflections are equivalent
-      int nbTestPositions=20;
+      int nbTestPositions=5;
       {//Init pseudo-random number generator
          time_t junk;
          time(&junk);

@@ -1204,7 +1204,7 @@ void ZScatterer::GlobalOptRandomMove(const double mutationAmplitude)
 				change= par->GetGlobalOptimStep()
                      	 *2*(rand()/(double)RAND_MAX-0.5)*mutationAmplitude*16;
 			}
-   		VFN_DEBUG_MESSAGE("ZScatterer::GlobalOptRandomMove(): mutation:"<<change*RAD2DEG,10)
+   		VFN_DEBUG_MESSAGE("ZScatterer::GlobalOptRandomMove(): mutation:"<<change*RAD2DEG,3)
 			par->Mutate(change);
 			if(2==moveType)
 			{
@@ -1232,7 +1232,7 @@ void ZScatterer::GlobalOptRandomMove(const double mutationAmplitude)
 				}
 				//cout <<" -> "<<mpZMoveMinimizer->GetCostFunctionValue(0)<<endl;
 			}
-   		VFN_DEBUG_MESSAGE("ZScatterer::GlobalOptRandomMove(): final value:"<<par->GetHumanValue(),10)
+   		VFN_DEBUG_MESSAGE("ZScatterer::GlobalOptRandomMove(): final value:"<<par->GetHumanValue(),3)
 		//
 	}
 	#if 0

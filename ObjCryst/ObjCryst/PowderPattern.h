@@ -81,7 +81,7 @@ class PowderPatternComponent : virtual public RefinableObj
 		/// The limits currently go from -2*FWHM to +2*FWHM.
 		/// returns a pointer to the min and max pixels arrays (null pointers if
 		/// no reflection for this phase).
-		virtual void GetBraggLimits(CrystVector_long *min,CrystVector_long *max)const=0;
+		virtual void GetBraggLimits(CrystVector_long *&min,CrystVector_long *&max)const=0;
 		/// Get last time the Bragg Limits were changed
 		const RefinableObjClock& GetClockBraggLimits()const;
 		
@@ -143,7 +143,7 @@ class PowderPatternBackground : public PowderPatternComponent
       virtual void CalcPowderPattern() const;
       virtual void SetRadiation(const Radiation &rad);
       virtual void Prepare();
-		virtual void GetBraggLimits(CrystVector_long *min,CrystVector_long *max)const;
+		virtual void GetBraggLimits(CrystVector_long *&min,CrystVector_long *&max)const;
       
       /// The kind of interpolation used
       PowderBackgroundInterpType mBackgroundType;
@@ -232,7 +232,7 @@ class PowderPatternDiffraction : public PowderPatternComponent,public Scattering
       virtual void SetRadiation(const Radiation &rad);
       virtual void Prepare();
       virtual void InitOptions();
-		virtual void GetBraggLimits(CrystVector_long *min,CrystVector_long *max)const;
+		virtual void GetBraggLimits(CrystVector_long *&min,CrystVector_long *&max)const;
       //Clocks
          /// Last time the reflection parameters were changed
          RefinableObjClock mClockProfilePar;

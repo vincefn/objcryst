@@ -242,7 +242,7 @@ void PowderPatternBackground::SetRadiation(const Radiation& rad)
 void PowderPatternBackground::Prepare()
 {
 }
-void PowderPatternBackground::GetBraggLimits(CrystVector_long *min,CrystVector_long *max)const
+void PowderPatternBackground::GetBraggLimits(CrystVector_long *&min,CrystVector_long *&max)const
 {
 	min=0;
 	max=0;
@@ -846,25 +846,29 @@ void PowderPatternDiffraction::InitOptions()
       this->AddPar(tmp);
    }
 }
-void PowderPatternDiffraction::GetBraggLimits(CrystVector_long *min,CrystVector_long *max)const
+void PowderPatternDiffraction::GetBraggLimits(CrystVector_long *&min,CrystVector_long *&max)const
 {
+   VFN_DEBUG_ENTRY("PowderPatternDiffraction::GetBraggLimits(*min,*max)",3)
 	this->CalcPowderReflProfile();
 	if(mClockProfileCalc>mClockBraggLimits)
 	{
+   	VFN_DEBUG_MESSAGE("PowderPatternDiffraction::GetBraggLimits(*min,*max):Recalc",3)
 		mIntegratedReflMin.resize(this->GetNbRefl());
 		mIntegratedReflMax.resize(this->GetNbRefl());
 		double fwhm,tmp;
    	for(long i=0;i<this->GetNbRefl();i++)
    	{
       	tmp=mTheta(i);
-			fwhm=mCagliotiW + mCagliotiV*tmp + mCagliotiU*tmp*tmp;
+			fwhm=sqrt(mCagliotiW + mCagliotiV*tmp + mCagliotiU*tmp*tmp);
 			mIntegratedReflMin(i)=mpParentPowderPattern->Get2ThetaCorrPixel(2*mTheta(i)-2*fwhm);
 			mIntegratedReflMax(i)=mpParentPowderPattern->Get2ThetaCorrPixel(2*mTheta(i)+2*fwhm);
 		}
+		mClockBraggLimits.Click();
 	}
+	//cout << FormatVertVector<long>(mIntegratedReflMin,mIntegratedReflMax)<<endl;
 	min=&mIntegratedReflMin;
 	max=&mIntegratedReflMax;
-	mClockBraggLimits.Click();
+   VFN_DEBUG_EXIT("PowderPatternDiffraction::GetBraggLimits(*min,*max)",3)
 }
 #ifdef __WX__CRYST__
 WXCrystObjBasic* PowderPatternDiffraction::WXCreate(wxWindow* parent)
@@ -1604,6 +1608,7 @@ double PowderPattern::GetIntegratedR()const
 {
    this->CalcPowderPattern();
 	this->PrepareIntegratedRfactor();
+   VFN_DEBUG_ENTRY("PowderPattern::GetIntegratedR()",4);
    TAU_PROFILE("PowderPattern::GetIntegratedR()","void ()",TAU_DEFAULT);
    
    double tmp1=0.;
@@ -1633,7 +1638,7 @@ double PowderPattern::GetIntegratedR()const
       p1=integratedCalc.data();
       p2=mIntegratedObs.data();
       p3=backgdCalc.data();
-      VFN_DEBUG_MESSAGE("PowderPattern::GetIntegratedR():Exclude Backgd",4);
+      VFN_DEBUG_MESSAGE("PowderPattern::GetIntegratedR():Exclude Backgd",2);
       for(long i=0;i<numInterval;i++)
       {
          tmp1 += ((*p1)-(*p2)) * ((*p1)-(*p2));
@@ -1656,7 +1661,7 @@ double PowderPattern::GetIntegratedR()const
 		}
       p1=integratedCalc.data();
       p2=mIntegratedObs.data();
-      VFN_DEBUG_MESSAGE("PowderPattern::GetIntegratedR()",4);
+      VFN_DEBUG_MESSAGE("PowderPattern::GetIntegratedR()",2);
       for(long i=0;i<numInterval;i++)
       {
          tmp1 += ((*p1)-(*p2))*((*p1)-(*p2));
@@ -1666,10 +1671,7 @@ double PowderPattern::GetIntegratedR()const
       }
    }
    
-   VFN_DEBUG_MESSAGE("PowderPattern::GetIntegratedR()="<<sqrt(tmp1/tmp2),4);
-   //cout << FormatVertVector<double>(mPowderPatternCalc,mPowderPatternObs);
-   //this->SavePowderPattern("refinedPattern.out");
-   //abort();
+   VFN_DEBUG_EXIT("PowderPattern::GetIntegratedR()="<<sqrt(tmp1/tmp2),4);
    return sqrt(tmp1/tmp2);
 }
 
@@ -2056,8 +2058,8 @@ void PowderPattern::FitScaleFactorForIntegratedR()
 {
    this->CalcPowderPattern();
 	this->PrepareIntegratedRfactor();
-   TAU_PROFILE("PowderPattern::FitScaleFactorForIntegratedR()","void ()",TAU_DEFAULT);
    VFN_DEBUG_ENTRY("PowderPattern::FitScaleFactorForIntegratedR()",3);
+   TAU_PROFILE("PowderPattern::FitScaleFactorForIntegratedR()","void ()",TAU_DEFAULT);
    // Which components are scalable ?
       mScalableComponentIndex.resize(mPowderPatternComponentRegistry.GetNb());
       int nbScale=0;
@@ -2067,13 +2069,14 @@ void PowderPattern::FitScaleFactorForIntegratedR()
 				mScalableComponentIndex(nbScale++)=i;
 		}
       mScalableComponentIndex.resizeAndPreserve(nbScale);
-   VFN_DEBUG_MESSAGE("-> Number of Scale Factors:"<<nbScale<<":Index:"<<endl<<mScalableComponentIndex,3);
+   VFN_DEBUG_MESSAGE("-> Number of Scale Factors:"<<nbScale<<":Index:"<<endl<<mScalableComponentIndex,2);
    // prepare matrices
       //mFitScaleFactorD.resize(mNbPoint,nbScale);
       mFitScaleFactorM.resize(nbScale,nbScale);
       mFitScaleFactorB.resize(nbScale,1);
       mFitScaleFactorX.resize(nbScale,1);
    // Build Matrix & Vector for LSQ
+   VFN_DEBUG_MESSAGE("PowderPattern::FitScaleFactorForIntegratedR():1",2);
 		const long numInterval=mIntegratedPatternMin.numElements();
 		CrystVector_double integratedCalc[nbScale];
    	for(int i=0;i<nbScale;i++)
@@ -2091,10 +2094,15 @@ void PowderPattern::FitScaleFactorForIntegratedR()
 				const long max=mIntegratedPatternMax(j);
 				p1=mPowderPatternComponentRegistry.GetObj(mScalableComponentIndex(i))
                           .mPowderPatternCalc.data()+mIntegratedPatternMin(j);
+				*p2=0;			  
 				for(int k=mIntegratedPatternMin(j);k<=max;k++) *p2 += *p1++;
+				//cout <<"Calc#"<<i<<":"<< mIntegratedPatternMin(j) << " "
+				//     <<mIntegratedPatternMax(j)<<" "
+				//	  << *p2<<endl;
 				p2++;
 			}
 		}
+   VFN_DEBUG_MESSAGE("PowderPattern::FitScaleFactorForIntegratedR():2",2);
 		CrystVector_double backdIntegrated(numInterval);
 		if(mPowderPatternBackgroundCalc.numElements()>1)
 		{	
@@ -2104,10 +2112,20 @@ void PowderPattern::FitScaleFactorForIntegratedR()
 			{
 				const long max=mIntegratedPatternMax(j);
 				p1=mPowderPatternBackgroundCalc.data()+mIntegratedPatternMin(j);
+				*p2=0;
 				for(int k=mIntegratedPatternMin(j);k<=max;k++) *p2 += *p1++;
+				//cout <<"Backgd:"<< mIntegratedPatternMin(j) << " "
+				//     <<mIntegratedPatternMax(j)<<" "
+				//	  << *p2<<endl;
 				p2++;
 			}
 		}
+		
+	//if(mPowderPatternBackgroundCalc.numElements()<=1)
+	//	cout<< FormatVertVector<double>(integratedCalc[0],mIntegratedObs,mIntegratedWeight,backdIntegrated)<<endl;
+   //else
+	//	cout<< FormatVertVector<double>(integratedCalc[0],mIntegratedObs,mIntegratedWeight)<<endl;
+	VFN_DEBUG_MESSAGE("PowderPattern::FitScaleFactorForIntegratedR():3",2);
    	for(int i=0;i<nbScale;i++)
    	{
       	for(int j=i;j<nbScale;j++)
@@ -2115,29 +2133,46 @@ void PowderPattern::FitScaleFactorForIntegratedR()
          	const double *p1=integratedCalc[i].data();
          	const double *p2=integratedCalc[j].data();
          	double m=0.;
-         	for(unsigned long k=0;k<mNbPoint;k++) m += *p1++ * *p2++;
+         	for(long k=0;k<numInterval;k++)
+				{
+					m += *p1++ * *p2++;
+					//cout <<"M:"<< mIntegratedPatternMin(k) << " "<<mIntegratedPatternMax(k)<<" "<<m<<endl;
+				}
          	mFitScaleFactorM(i,j)=m;
          	mFitScaleFactorM(j,i)=m;
       	}
    	}
+   VFN_DEBUG_MESSAGE("PowderPattern::FitScaleFactorForIntegratedR():4",2);
    	for(int i=0;i<nbScale;i++)
    	{
       	const double *p1=mIntegratedObs.data();
       	const double *p2=integratedCalc[i].data();
       	double b=0.;
 			if(mPowderPatternBackgroundCalc.numElements()<=1)
-      		for(long k=0;k<numInterval;k++) b += *p1++ * *p2++;
+      		for(long k=0;k<numInterval;k++)
+				{
+					b += *p1++ * *p2++;
+					cout<<"B:"<<mIntegratedPatternMin(k)<<" "<<mIntegratedPatternMax(k)<<" "<<b<<endl;
+				}
 			else
 			{
       		const double *p3=backdIntegrated.data();
-      		for(long k=0;k<numInterval;k++) b += (*p1++ - *p3++) * *p2++;
+      		for(long k=0;k<numInterval;k++) 
+				{
+					//cout<<"B(minus backgd):"<<mIntegratedPatternMin(k)<<" "
+					//	 <<mIntegratedPatternMax(k)<<" "
+					//	 <<*p1<<" "<<*p2<<" "<<*p3<<" "<<b<<endl;
+					b += (*p1++ - *p3++) * *p2++;
+				}
 			}
       	mFitScaleFactorB(i,0) =b;
    	}
+   VFN_DEBUG_MESSAGE("PowderPattern::FitScaleFactorForIntegratedR():5",2);
+	
    if(1==nbScale) mFitScaleFactorX=mFitScaleFactorB(0)/mFitScaleFactorM(0);
    else
       mFitScaleFactorX=product(InvertMatrix(mFitScaleFactorM),mFitScaleFactorB);
-   VFN_DEBUG_MESSAGE("B, M, X"<<endl<<mFitScaleFactorB<<endl<<mFitScaleFactorM<<endl<<mFitScaleFactorX,2)
+   VFN_DEBUG_MESSAGE("B, M, X"<<endl<<mFitScaleFactorB<<endl<<mFitScaleFactorM<<endl<<mFitScaleFactorX,3)
    for(int i=0;i<nbScale;i++)
    {
       const double * p1=mPowderPatternComponentRegistry.GetObj(mScalableComponentIndex(i))
@@ -2146,7 +2181,7 @@ void PowderPattern::FitScaleFactorForIntegratedR()
       const double s = mFitScaleFactorX(i)
 							  -mScaleFactor(mScalableComponentIndex(i));
       for(unsigned long j=0;j<mNbPoint;j++) *p0++ += s * *p1++;
-      VFN_DEBUG_MESSAGE("-> Old:"<<mScaleFactor(mScalableComponentIndex(i)) <<" Change:"<<mFitScaleFactorX(i),2);
+      VFN_DEBUG_MESSAGE("-> Old:"<<mScaleFactor(mScalableComponentIndex(i)) <<" New:"<<mFitScaleFactorX(i),3);
       mScaleFactor(mScalableComponentIndex(i)) = mFitScaleFactorX(i);
 		mClockScaleFactor.Click();
    }
@@ -2313,7 +2348,7 @@ void PowderPattern::FitScaleFactorForRw()
       const double s = mFitScaleFactorX(i)
 							  -mScaleFactor(mScalableComponentIndex(i));
       for(unsigned long j=0;j<mNbPoint;j++) *p0++ += s * *p1++;
-      VFN_DEBUG_MESSAGE("-> Old:"<<mScaleFactor(mScalableComponentIndex(i)) <<" Change:"<<mFitScaleFactorX(i),2);
+      VFN_DEBUG_MESSAGE("-> Old:"<<mScaleFactor(mScalableComponentIndex(i)) <<" Change:"<<mFitScaleFactorX(i),3);
       mScaleFactor(mScalableComponentIndex(i)) = mFitScaleFactorX(i);
 		mClockScaleFactor.Click();
    }
@@ -2321,8 +2356,138 @@ void PowderPattern::FitScaleFactorForRw()
 }
 void PowderPattern::FitScaleFactorForIntegratedRw()
 {
-	//:TODO:
-	throw 0;
+   this->CalcPowderPattern();
+	this->PrepareIntegratedRfactor();
+   VFN_DEBUG_ENTRY("PowderPattern::FitScaleFactorForIntegratedRw()",3);
+   TAU_PROFILE("PowderPattern::FitScaleFactorForIntegratedRw()","void ()",TAU_DEFAULT);
+   // Which components are scalable ?
+      mScalableComponentIndex.resize(mPowderPatternComponentRegistry.GetNb());
+      int nbScale=0;
+      for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++)
+		{
+         if(mPowderPatternComponentRegistry.GetObj(i).IsScalable())
+				mScalableComponentIndex(nbScale++)=i;
+		}
+      mScalableComponentIndex.resizeAndPreserve(nbScale);
+   VFN_DEBUG_MESSAGE("-> Number of Scale Factors:"<<nbScale<<":Index:"<<endl<<mScalableComponentIndex,2);
+   // prepare matrices
+      //mFitScaleFactorD.resize(mNbPoint,nbScale);
+      mFitScaleFactorM.resize(nbScale,nbScale);
+      mFitScaleFactorB.resize(nbScale,1);
+      mFitScaleFactorX.resize(nbScale,1);
+   // Build Matrix & Vector for LSQ
+   VFN_DEBUG_MESSAGE("PowderPattern::FitScaleFactorForIntegratedRw():1",2);
+		const long numInterval=mIntegratedPatternMin.numElements();
+		CrystVector_double integratedCalc[nbScale];
+   	for(int i=0;i<nbScale;i++)
+   	{
+			integratedCalc[i].resize(numInterval);
+			
+         // Here use a direct access to the powder spectrum, since
+         // we know it has just been recomputed
+			const double *p1=mPowderPatternComponentRegistry.GetObj(mScalableComponentIndex(i))
+                          .mPowderPatternCalc.data();
+			
+			double *p2=integratedCalc[i].data();
+			for(int j=0;j<numInterval;j++)
+			{
+				const long max=mIntegratedPatternMax(j);
+				p1=mPowderPatternComponentRegistry.GetObj(mScalableComponentIndex(i))
+                          .mPowderPatternCalc.data()+mIntegratedPatternMin(j);
+				*p2=0;			  
+				for(int k=mIntegratedPatternMin(j);k<=max;k++) *p2 += *p1++;
+				//cout <<"Calc#"<<i<<":"<< mIntegratedPatternMin(j) << " "
+				//     <<mIntegratedPatternMax(j)<<" "
+				//	  << *p2<<endl;
+				p2++;
+			}
+		}
+   VFN_DEBUG_MESSAGE("PowderPattern::FitScaleFactorForIntegratedRw():2",2);
+		CrystVector_double backdIntegrated(numInterval);
+		if(mPowderPatternBackgroundCalc.numElements()>1)
+		{	
+			const double *p1;
+			double *p2=backdIntegrated.data();
+			for(int j=0;j<numInterval;j++)
+			{
+				const long max=mIntegratedPatternMax(j);
+				p1=mPowderPatternBackgroundCalc.data()+mIntegratedPatternMin(j);
+				*p2=0;
+				for(int k=mIntegratedPatternMin(j);k<=max;k++) *p2 += *p1++;
+				//cout <<"Backgd:"<< mIntegratedPatternMin(j) << " "
+				//     <<mIntegratedPatternMax(j)<<" "
+				//	  << *p2<<endl;
+				p2++;
+			}
+		}
+		
+	//if(mPowderPatternBackgroundCalc.numElements()<=1)
+	//	cout<< FormatVertVector<double>(integratedCalc[0],mIntegratedObs,mIntegratedWeight,backdIntegrated)<<endl;
+   //else
+	//	cout<< FormatVertVector<double>(integratedCalc[0],mIntegratedObs,mIntegratedWeight)<<endl;
+	VFN_DEBUG_MESSAGE("PowderPattern::FitScaleFactorForIntegratedRw():3",2);
+   	for(int i=0;i<nbScale;i++)
+   	{
+      	for(int j=i;j<nbScale;j++)
+      	{
+         	const double *p1=integratedCalc[i].data();
+         	const double *p2=integratedCalc[j].data();
+         	const double *p3=mIntegratedWeight.data();
+         	double m=0.;
+         	for(long k=0;k<numInterval;k++)
+				{
+					m += *p1++ * *p2++ * *p3++;
+					//cout <<"M:"<< mIntegratedPatternMin(k) << " "<<mIntegratedPatternMax(k)<<" "<<m<<endl;
+				}
+         	mFitScaleFactorM(i,j)=m;
+         	mFitScaleFactorM(j,i)=m;
+      	}
+   	}
+   VFN_DEBUG_MESSAGE("PowderPattern::FitScaleFactorForIntegratedRw():4",2);
+   	for(int i=0;i<nbScale;i++)
+   	{
+      	const double *p1=mIntegratedObs.data();
+      	const double *p2=integratedCalc[i].data();
+         const double *p4=mIntegratedWeight.data();
+      	double b=0.;
+			if(mPowderPatternBackgroundCalc.numElements()<=1)
+      		for(long k=0;k<numInterval;k++)
+				{
+					b += *p1++ * *p2++ * *p4++;
+					cout<<"B:"<<mIntegratedPatternMin(k)<<" "<<mIntegratedPatternMax(k)<<" "<<b<<endl;
+				}
+			else
+			{
+      		const double *p3=backdIntegrated.data();
+      		for(long k=0;k<numInterval;k++) 
+				{
+					//cout<<"B(minus backgd):"<<mIntegratedPatternMin(k)<<" "
+					//	 <<mIntegratedPatternMax(k)<<" "
+					//	 <<*p1<<" "<<*p2<<" "<<*p3<<" "<<b<<endl;
+					b += (*p1++ - *p3++) * *p2++ * *p4++;
+				}
+			}
+      	mFitScaleFactorB(i,0) =b;
+   	}
+   VFN_DEBUG_MESSAGE("PowderPattern::FitScaleFactorForIntegratedRw():5",2);
+	
+   if(1==nbScale) mFitScaleFactorX=mFitScaleFactorB(0)/mFitScaleFactorM(0);
+   else
+      mFitScaleFactorX=product(InvertMatrix(mFitScaleFactorM),mFitScaleFactorB);
+   VFN_DEBUG_MESSAGE("B, M, X"<<endl<<mFitScaleFactorB<<endl<<mFitScaleFactorM<<endl<<mFitScaleFactorX,3)
+   for(int i=0;i<nbScale;i++)
+   {
+      const double * p1=mPowderPatternComponentRegistry.GetObj(mScalableComponentIndex(i))
+                        .mPowderPatternCalc.data();
+      double * p0 = mPowderPatternCalc.data();
+      const double s = mFitScaleFactorX(i)
+							  -mScaleFactor(mScalableComponentIndex(i));
+      for(unsigned long j=0;j<mNbPoint;j++) *p0++ += s * *p1++;
+      VFN_DEBUG_MESSAGE("-> Old:"<<mScaleFactor(mScalableComponentIndex(i)) <<" New:"<<mFitScaleFactorX(i),3);
+      mScaleFactor(mScalableComponentIndex(i)) = mFitScaleFactorX(i);
+		mClockScaleFactor.Click();
+   }
+   VFN_DEBUG_EXIT("PowderPattern::FitScaleFactorForIntegratedRw():End",3);
 }
 
 void PowderPattern::SetSigmaToSqrtIobs()
@@ -2608,6 +2773,7 @@ void PowderPattern::Init()
 }
 void PowderPattern::PrepareIntegratedRfactor()const
 {
+   VFN_DEBUG_ENTRY("PowderPattern::PrepareIntegratedRfactor()",3);
 	bool needPrep=false;
 	CrystVector_long *min,*max;
 	for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++)
@@ -2620,6 +2786,7 @@ void PowderPattern::PrepareIntegratedRfactor()const
 			break;
 		}
 	}
+   VFN_DEBUG_MESSAGE("PowderPattern::PrepareIntegratedRfactor():1",3);
 	if(false==needPrep) return;
 	
 	// First get all integration intervals and concatenate the arrays
@@ -2627,14 +2794,22 @@ void PowderPattern::PrepareIntegratedRfactor()const
 	long numNewInterval=0;
 	for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++)
 	{
+		min=0;
+		max=0;
 		mPowderPatternComponentRegistry.GetObj(i).GetBraggLimits(min,max);
+		//cout << "Component #"<<i<<"  "<<min <<" "<<max<<endl;
 		if(0==min) continue;
+		//cout <<" : num intervals:"<< min->numElements()<<endl
+		//	  <<FormatVertVector<long>(*min,*max)<<endl;
 		numNewInterval=min->numElements();
 		mIntegratedPatternMin.resizeAndPreserve(numInterval+numNewInterval);
 		for(int j=0;j<numNewInterval;j++) mIntegratedPatternMin(numInterval+j)=(*min)(j);
+		mIntegratedPatternMax.resizeAndPreserve(numInterval+numNewInterval);
 		for(int j=0;j<numNewInterval;j++) mIntegratedPatternMax(numInterval+j)=(*max)(j);
 		numInterval+=numNewInterval;
 	}
+   VFN_DEBUG_MESSAGE("PowderPattern::PrepareIntegratedRfactor():2",3);
+	//cout <<FormatVertVector<long>(mIntegratedPatternMin,mIntegratedPatternMax)<<endl;
 	//sort the arrays USELESS ?
 	{
 		CrystVector_long index,tmp;
@@ -2644,6 +2819,7 @@ void PowderPattern::PrepareIntegratedRfactor()const
 		tmp=mIntegratedPatternMax;
 		for(int i=0;i<numInterval;i++) mIntegratedPatternMax(i)=tmp(index(i));
 	}
+   VFN_DEBUG_MESSAGE("PowderPattern::PrepareIntegratedRfactor():3",3);
 	// Check all intervals are within pattern limits, correct them if necessary,
 	// remove them if necessary (keep=false)
 		CrystVector_bool keep(numInterval);
@@ -2655,6 +2831,7 @@ void PowderPattern::PrepareIntegratedRfactor()const
 			if(mIntegratedPatternMax(i)<0) keep(i)=false;
 			if(mIntegratedPatternMax(i)>=(long)mNbPoint) mIntegratedPatternMax(i)=mNbPoint-1;
 		}
+   VFN_DEBUG_MESSAGE("PowderPattern::PrepareIntegratedRfactor():4",3);
 	// Take care of excluded regions (change integration areas accordingly)
 	// regions are sorted by ascending theta
       const long nbExclude=mExcludedRegionMin2Theta.numElements();
@@ -2700,7 +2877,7 @@ void PowderPattern::PrepareIntegratedRfactor()const
 		if(keep(i))
 		{
 			mIntegratedPatternMin(j  )=mIntegratedPatternMin(i);
-			mIntegratedPatternMax(j++)=mIntegratedPatternMin(i);
+			mIntegratedPatternMax(j++)=mIntegratedPatternMax(i);
 		}
 	}
 	numInterval=j;
@@ -2722,6 +2899,7 @@ void PowderPattern::PrepareIntegratedRfactor()const
 		mIntegratedWeight(i)=1/mIntegratedWeight(i);
 	}
 	mClockIntegratedFactorsPrep.Click();
+   VFN_DEBUG_EXIT("PowderPattern::PrepareIntegratedRfactor()",3);
 }
 
 #ifdef __WX__CRYST__
