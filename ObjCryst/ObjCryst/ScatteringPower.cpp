@@ -165,6 +165,15 @@ void ScatteringPower::GetGeneGroup(const RefinableObj &obj,
          }
 }
 
+REAL ScatteringPower::GetBiasingCost()const
+{
+   REAL cost=0;
+   //for(int i=0;i<mNbRestraint;i++) cost+=mpRestraint[i]->GetRestraintCost();
+   for(int i=0;i<this->GetNbPar();i++) cost+=this->GetPar(i).GetBiasingCost();
+   VFN_DEBUG_MESSAGE("ScatteringPower::GetBiasingCost()="<<cost<<"("<<mName<<")",1)
+   return cost;
+}
+
 void ScatteringPower::Init()
 {
    VFN_DEBUG_MESSAGE("ScatteringPower::Init():"<<mName,2)
@@ -736,7 +745,10 @@ void ScatteringPowerAtom::InitRefParList()
                         gpRefParTypeScattPowTemperatureIso,REFPAR_DERIV_STEP_ABSOLUTE,
                         true,true,true,false);
       tmp.SetDerivStep(1e-3);
+      tmp.SetGlobalOptimStep(.5);
       tmp.AssignClock(mClock);
+      tmp.SetRestraintRange(.2);
+      tmp.EnableBiasing(true);
       this->AddPar(tmp);
    }
 }

@@ -137,10 +137,10 @@ Restraint::Restraint(const RefParType *type,
                      const bool hasMaxLimit,
                      const REAL softRange,
                      const bool enableRestraints,
-                     const bool isQuenched)
+                     const bool enableBiasing)
 {
    this->Init(type,hardMin,hardMax,hasMinLimit,hasMaxLimit,
-              softRange,enableRestraints,isQuenched);
+              softRange,enableRestraints,enableBiasing);
 }
 
 Restraint::~Restraint()
@@ -153,7 +153,7 @@ void Restraint::Init(const RefParType *type,
                      const bool hasMaxLimit,
                      const REAL softRange,
                      const bool enableRestraints,
-                     const bool isQuenched)
+                     const bool enableBiasing)
 {
    mpRefParType=type;
    mMin=hardMin;
@@ -162,20 +162,12 @@ void Restraint::Init(const RefParType *type,
    mHasMax=hasMaxLimit;
    mRestraintRange=softRange;
    mEnableRestraint=enableRestraints;
-   mEnableQuenching=isQuenched;
+   mEnableBiasing=enableBiasing;
 }
 
 REAL Restraint::GetRestraintCost()const
 {
-   if( ((false==mEnableRestraint)|| ((mHasMin==false)&&(mHasMax==false)))
-       && (false==mEnableQuenching)) return 0.;
-   if(true==mEnableQuenching)
-   {
-      REAL value=this->GetValue();
-      value= (value-mQuenchingValue)/(mRestraintRange);
-      return value*value;
-   }
-   else
+   if( (true==mEnableRestraint) && ((mHasMin==true)||(mHasMax==true)))
    {
       REAL value=this->GetValue();
       if((true==mHasMin)&&(value<mMin))
@@ -191,17 +183,29 @@ REAL Restraint::GetRestraintCost()const
    }
    return 0.;
 }
+REAL Restraint::GetBiasingCost()const
+{
+   if(true==mEnableBiasing)
+   {
+      REAL value=this->GetValue();
+      value= (value-mBiasingValue)/(mRestraintRange);
+      return value*value;
+   }
+   return 0;
+}
+
 void Restraint::SetRestraintRange(const REAL range)
 {
    mRestraintRange=range;
 }
-void Restraint::SetQuenching(const bool enableQuenching)
+void Restraint::EnableBiasing(const bool enable)
 {
-   mEnableQuenching=enableQuenching;
+   mEnableBiasing=enable;
+   this->SetBiasingValue();
 }
-void Restraint::SetQuenchingValue() const
+void Restraint::SetBiasingValue() const
 {
-   mQuenchingValue=this->GetValue();
+   mBiasingValue=this->GetValue();
 }
 //######################################################################
 //    RefinablePar
@@ -273,6 +277,7 @@ void RefinablePar::Init(const string &name,
    #endif
    mHasAssignedClock=false;
    mpClock=0;
+   this->SetBiasingValue();
 }
 
       
@@ -1710,6 +1715,11 @@ REAL  RefinableObj::GetRestraintCost()const
    return 0;
 }
 
+REAL  RefinableObj::GetBiasingCost()const
+{
+   return 0;
+}
+
 void RefinableObj::AddRestraint(Restraint *pNewRestraint)
 {
    VFN_DEBUG_MESSAGE("RefinableObj::AddPar(RefPar&)",2)
@@ -1726,7 +1736,8 @@ void RefinableObj::AddRestraint(Restraint *pNewRestraint)
 
 void RefinableObj::TagNewBestConfig()const
 {
-   for(int i=0;i<mNbRestraint;i++) mpRestraint[i]->SetQuenchingValue();
+   for(int i=0;i<mNbRestraint;i++) mpRestraint[i]->SetBiasingValue();
+   for(int i=0;i<this->GetNbPar();i++) this->GetPar(i).SetBiasingValue();
 }
 
 void RefinableObj::UpdateDisplay()const

@@ -175,6 +175,10 @@ class OptimizationObj
       void RestoreBestConfiguration();
       /// Are we busy optimizing ?
       bool IsOptimizing()const;
+      /** During a global optimization, tell all objects that the current config is
+      * the latest "best" config.
+      */
+      void TagNewBestConfig()const;
    protected:
       /// \internal Prepare mRefParList for the refinement
       void PrepareRefParList();

@@ -132,19 +132,28 @@ class RefinableObjClock
 * limits associated with a RefinableObj. These can be restrictions on a single
 * parameter (see RefinablePar), but inheritance allows involving several parameters.
 *
-* There are four behaviour for restraints:
+* There are three behaviour for restraints:
 * - no limits whatsoever.
 * - hard min and/or max limits (constraint), beyond which the parameter cannot go at all.
-* - quenched (dynamical restraint): this is a special type of restraints for global optimization
-*  only, where the value is restrained around (for example) the value recorded 
-*  for the last "best" configuration. (i.e. there is a penalty for going away from the
-*  "ideal" recorded value). This can be combined with hard min and/or max
-*  absolute limits.
 * - soft limits (restraint): if the restraint has a min and/or a max, then this time the
 *  value can go beyond the given limits, but with a penalty.
 *
 * All penalties for restraints are calculated under the form of a cost (strictly
 * positive number, weighted).
+*
+* Aside from the penalties, it is possible to use "quenching" or "biasing": i.e. for a
+* parameter which should not vary too quickly, it is possible to record an Optimal value,
+* and each time a new configuration is generated, the probability of the move is
+* modified by the departure of this OptimalValue. The Optimal value is generally equal
+* to the value recorded at the last "best configuration" reached duting a global
+* optimization, and therefore dynamically updated. This is used to make \e some
+* parameters vary slowly during the global optimization, by preventing the less favorable
+* configurations generated to go too far away from the last "ideal" value.
+*
+* The BiasingCost is entirely independent of the RestraintCost, and must be used
+* by the RefinableObj OR the algorithm to generate Biased moves.
+*
+* \note Biased moves are \b experimental, and may be removed...
 *
 * This is an abstract base class.
 */
@@ -165,16 +174,11 @@ class Restraint
       * \param enableRestraint: if true, then the value may go beyond the hard limits,
       * with penalty defined by the soft limits. Else no value beyond the hard limits
       * should be accepted.
-      * \param isQuenched: if true (useful only for global optimization), then each time
-      * a new "best" configuration is notified to the object, a new "QuenchingValue"
-      * is recorded, and a penalty is set each time the value goes away from this
-      * QuenchingValue. This forces some parameters to vary more slowly, and avoids
-      * exploring a wide range of values away from the current minimum for the worst
-      * configurations explored. WARNING: this should be used only for some type of
-      * parameters, generally those who have a very large influence on the overall
-      * cost of a given configuration, without being correlated to other values.
-      * \note if isQuenched=true, then enableRestraint is \e ignored, and existing
-      * limits (if any) are considered as hard limits \e automatically.
+      * \param enableBiasing: if true (useful only for global optimization), then each time
+      * a new "best" configuration is notified to the object, a new "BiasingValue"
+      * is recorded, so that this parameter does not go too far away from the recorded
+      * value until the next change of the biasing value. See Restraint::GetBiasingCost()
+      * and RefinableObj::GetBiasingCost().
       */
       Restraint(const RefParType *type,
                 const REAL hardMin,
@@ -183,7 +187,7 @@ class Restraint
                 const bool hasMaxLimit,
                 const REAL softRange,
                 const bool enableRestraint=false,
-                const bool isQuenched=false);
+                const bool enableBiasing=false);
       /// Destructor
       virtual ~Restraint();
       /** Constructor for the base Restrain class, setting hard&soft limits.
@@ -200,16 +204,11 @@ class Restraint
       * \param enableRestraint: if true, then the value may go beyond the hard limits,
       * with penalty defined by the soft limits. Else no value beyond the hard limits
       * should be accepted.
-      * \param isQuenched: if true (useful only for global optimization), then each time
-      * a new "best" configuration is notified to the object, a new "QuenchingValue"
-      * is recorded, and a penalty is set each time the value goes away from this
-      * QuenchingValue. This forces some parameters to vary more slowly, and avoids
-      * exploring a wide range of values away from the current minimum for the worst
-      * configurations explored. WARNING: this should be used only for some type of
-      * parameters, generally those who have a very large influence on the overall
-      * cost of a given configuration, without being correlated to other values.
-      * \note if isQuenched=true, then enableRestraint is \e ignored, and existing
-      * limits (if any) are considered as hard limits \e automatically.
+      * \param enableBiasing: if true (useful only for global optimization), then each time
+      * a new "best" configuration is notified to the object, a new "BiasingValue"
+      * is recorded, so that this parameter does not go too far away from the recorded
+      * value until the next change of the biasing value. See Restraint::GetBiasingCost()
+      * and RefinableObj::GetBiasingCost().
       */
       void Init(const RefParType *type,
                 const REAL hardMin,
@@ -218,7 +217,7 @@ class Restraint
                 const bool hasMaxLimit,
                 const REAL softRange,
                 const bool enableRestraint=false,
-                const bool isQuenched=false);
+                const bool enableBiasing=false);
       /// Get the current value.
       virtual REAL GetValue()const=0;
       /** Get the value of the penalty (cost) associated to the restraint.
@@ -236,13 +235,21 @@ class Restraint
       * If restraints are disabled, and there is no quenching, the returned cost is always null.
       */
       virtual REAL GetRestraintCost()const;
+      /** Get the value of the biasing cost.
+      *
+      * If biasing is enabled, the the returned cost is equal to:
+      * \f[ cost= weight\times\left(\frac{value-QuenchingValue}{range} \right)^2\f]
+      *
+      * Otherwise the returned cost is always null.
+      */
+      REAL GetBiasingCost()const;
       /// Set restraint range.
       void SetRestraintRange(const REAL range);
       /// Enable quenching.
-      void SetQuenching(const bool enableQuenching);
-      /// Set current value as the quenching value (typically called during derived forms of
-      /// RefinableObj::TagNewBestConfig).
-      void SetQuenchingValue() const;
+      void EnableBiasing(const bool enable);
+      /// Set current value as the biasing value (typically called during 
+      /// RefinableObj::TagNewBestConfig or derived functions).
+      void SetBiasingValue() const;
    protected:
       /// Type of value constrained/restrained.
       const RefParType *mpRefParType;
@@ -255,11 +262,11 @@ class Restraint
       /// Enable restraint (i.e. go beyond limits) ? (ignored if mEnableQuenching==true)
       bool mEnableRestraint;
       /// Enable quenching ?
-      bool mEnableQuenching;
+      bool mEnableBiasing;
       /// If quenched, this is the value away from which this should not go.
       /// This is mutable since it is to be dynamically updated during global
       /// optimizations.
-      mutable REAL mQuenchingValue;
+      mutable REAL mBiasingValue;
 };
 
 /** Generic class for parameters of refinable objects.
@@ -1092,15 +1099,24 @@ class RefinableObj
       */
       const RefinableObjClock& GetRefParListClock()const;
       // Restraints
-         /** Get the restraint cost (penalty)
+         /** Get the restraint cost (overall penalty of all restraints)
          *
          * By default this returns 0, so this \e must be overloaded by any
          * object which actually uses restraint.
          * \note Instead, we could return by default the sum of the restraints,
-         * but this is dangerous since we need to have objects using restraints fully
-         * responsible for them.
+         * but this is dangerous since we \e want to have derived objects fully
+         * responsible for handling restraints.
          */
          virtual REAL GetRestraintCost()const;
+         /** Get the biasing cost (used only internally)
+         *
+         * By default this returns 0, so this \e must be overloaded by any
+         * object which actually uses biasing restraints.
+         *
+         * This should be used only internally to the object, but for information
+         * purposes (debugging), this is kept public.
+         */
+         virtual REAL GetBiasingCost()const;
          /** Add a new restraint
          *
          */

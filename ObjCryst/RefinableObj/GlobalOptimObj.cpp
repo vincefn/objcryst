@@ -165,6 +165,8 @@ REAL OptimizationObj::GetCostFunctionValue()
       if(mCostFunctionWeight(i)>0)
          cost += mCostFunctionWeight(i)*mpCostFunctionRefinableObj[i]
                   ->GetCostFunctionValue(mpCostFunctionId(i));
+   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
+      cost += mRecursiveRefinedObjList.GetObj(i).GetRestraintCost();
    return cost;
 }
 void OptimizationObj::StopAfterCycle() 
@@ -183,6 +185,14 @@ void OptimizationObj::DisplayReport()
            <<mpCostFunctionRefinableObj[i]
                ->GetCostFunctionValue(mpCostFunctionId(i))
            <<", weight="<<mCostFunctionWeight(i)<<endl;
+   REAL restraintCost;
+   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
+   {
+      restraintCost= mRecursiveRefinedObjList.GetObj(i).GetRestraintCost();
+      if(restraintCost>1e-5) cout << mRecursiveRefinedObjList.GetObj(i).GetClassName()<<":"
+                                  << mRecursiveRefinedObjList.GetObj(i).GetName()
+                                  << ": RestraintCost="<<restraintCost<<endl;
+   }
 }
 
 void OptimizationObj::AddRefinableObj(RefinableObj &obj)
@@ -228,7 +238,13 @@ void OptimizationObj::RestoreBestConfiguration()
 }
 
 bool OptimizationObj::IsOptimizing()const{return mIsOptimizing;}
-   
+
+void OptimizationObj::TagNewBestConfig()const
+{
+   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
+      mRecursiveRefinedObjList.GetObj(i).TagNewBestConfig();
+}
+
 void OptimizationObj::PrepareRefParList()
 {
    VFN_DEBUG_ENTRY("OptimizationObj::PrepareRefParList()",6)
@@ -397,7 +413,8 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
    mRefParList.EraseAllParamSet();
    mIsOptimizing=true;
    // prepare all objects
-   
+   this->TagNewBestConfig();
+     
    /*
    if(mBestCost<.3)
    {//:KLUDGE: :TODO: Remove this and do it interactively !!
@@ -514,6 +531,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                if(mCurrentCost<mBestCost)
                {
                   mBestCost=mCurrentCost;
+                  this->TagNewBestConfig();
                   mRefParList.SaveParamSet(mBestParSavedSetIndex);
                   //mHistoryTrialNumber(mHistoryNb)=mNbTrial;
                   //mHistoryCostFunction(mHistoryNb)=mCurrentCost;
@@ -708,6 +726,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                      if(cost<mBestCost)
                      {
                         mBestCost=currentCost(i);
+                        this->TagNewBestConfig();
                         mRefParList.SaveParamSet(mBestParSavedSetIndex);
                         if(!silent) cout << "->Trial :" << mNbTrial 
                                          << " World="<< i
@@ -851,6 +870,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                         if(cost<mBestCost)
                         {
                            mBestCost=cost;
+                           this->TagNewBestConfig();
                            mRefParList.SaveParamSet(mBestParSavedSetIndex);
                            if(!silent) cout << "->Trial :" << mNbTrial 
                                 << " World="<< k
@@ -878,16 +898,19 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                worldNbAcceptedMoves*=nbWorld;
                if(!silent) cout <<"Trial :" << mNbTrial << " Best Cost=" << mBestCost<< " ";
                if(!silent) chrono.print();
-               for(int i=0;i<nbWorld;i++)
-               {
-                  if(!silent) cout <<"   World :" << i
-                       <<" Temp.: " << simAnnealTemp(i)
-                       <<" Mutation Ampl.: " << mutationAmplitude(i)
-                       <<" Current Cost=" << currentCost(i)
-                       <<" Accepting "
-                       << (int)((REAL)worldNbAcceptedMoves(i)/nbTrialsReport*100)
-                       <<"% moves" << endl;
-               }
+               if(!silent)
+                  for(int i=0;i<nbWorld;i++)
+                  {
+                     //mRefParList.RestoreParamSet(worldCurrentSetIndex(i));
+                     cout <<"   World :" << i
+                          <<" Temp.: " << simAnnealTemp(i)
+                          <<" Mutation Ampl.: " << mutationAmplitude(i)
+                          <<" Current Cost=" << currentCost(i)
+                          <<" Accepting "
+                          << (int)((REAL)worldNbAcceptedMoves(i)/nbTrialsReport*100)
+                          <<"% moves " <<endl;
+                     //     <<"% moves " << mRefParList.GetPar("Pboccup").GetValue()<<endl;
+                  }
                //Change the mutation rate if necessary for each world
                if(ANNEALING_SMART==mAnnealingScheduleMutation.GetChoice())
                {
@@ -1344,10 +1367,37 @@ const string MonteCarloObj::GetClassName()const { return "MonteCarloObj";}
 
 void MonteCarloObj::NewConfiguration()
 {
-   for(int i=0;i<mRefinedObjList.GetNb();i++)
-      mRefinedObjList.GetObj(i).BeginGlobalOptRandomMove();
-   for(int i=0;i<mRefinedObjList.GetNb();i++)
-      mRefinedObjList.GetObj(i).GlobalOptRandomMove(mMutationAmplitude);
+   VFN_DEBUG_ENTRY("MonteCarloObj::NewConfiguration()",4)
+   static unsigned long nbNewConfig=0;
+   static unsigned long nbNewConfigRejectedFromBias=0;
+   REAL biasCost0=0;
+   REAL biasCost1;
+   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
+      biasCost0 += mRecursiveRefinedObjList.GetObj(i).GetBiasingCost();
+   for(;;)
+   {
+      nbNewConfig++;
+      for(int i=0;i<mRefinedObjList.GetNb();i++)
+         mRefinedObjList.GetObj(i).BeginGlobalOptRandomMove();
+      for(int i=0;i<mRefinedObjList.GetNb();i++)
+         mRefinedObjList.GetObj(i).GlobalOptRandomMove(mMutationAmplitude);
+      
+      biasCost1=0;
+      for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
+         biasCost1 += mRecursiveRefinedObjList.GetObj(i).GetBiasingCost();
+      //if(true)
+      if(log((rand()+1)/(REAL)RAND_MAX)< ((biasCost0-biasCost1)/mMutationAmplitude))
+      {
+         VFN_DEBUG_EXIT("MonteCarloObj::NewConfiguration()",4)
+         return;
+      }
+      nbNewConfigRejectedFromBias++;
+      #ifdef __DEBUG__
+      if(((rand()+1)/(REAL)RAND_MAX)<.01)
+         VFN_DEBUG_MESSAGE("MonteCarloObj::NewConfiguration()rejected:"<<nbNewConfigRejectedFromBias/(float)nbNewConfig*100.<<"%",10)
+      #endif
+      mRefParList.RestoreParamSet(mLastParSavedSetIndex);  
+   }
 }
 
 void MonteCarloObj::InitOptions()
