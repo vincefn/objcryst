@@ -1058,8 +1058,20 @@ int UnitCellMapImport::ImportGRD(const string&filename)
      }
    }
    ffile.close();
-   
-   mName=filename;
+   {// Use short name
+      std::string::size_type idx =filename.rfind("/");
+      std::string::size_type idx2=filename.rfind("\\");
+      std::string::size_type idx3=filename.rfind(":");
+      if((idx2!=string::npos)&&(idx2>idx))idx=idx2;
+      if((idx2!=string::npos)&&(idx3>idx))idx=idx3;
+      if(idx==string::npos)
+         mName=filename;
+      else
+      {
+         cout<<"name="<<filename.substr(idx+1)<<endl;
+         mName=filename.substr(idx+1);
+      }
+   }
    VFN_DEBUG_EXIT("UnitCellMapImport::ImportGRD()",7)
      return 1;
 }
@@ -1761,8 +1773,12 @@ void WXGLCrystalCanvas::LoadFourier(const string&filename)
       //auto_ptr<UnitCellMapGLList> ptr(new UnitCellMapGLList);
       mvpUnitCellMapGLList.push_back(make_pair(make_pair(mvpUnitCellMapImport.back(),1.0),
                                                new UnitCellMapGLList) );
-      mvpUnitCellMapGLList.back().second->SetName(filename);
-      mvpUnitCellMapGLList.back().second->SetColour(1.,0,0,1);
+      switch(mvpUnitCellMapGLList.size())
+      {
+         case 1: mvpUnitCellMapGLList.back().second->SetColour(1.,0.,0.,1.);break;
+         case 2: mvpUnitCellMapGLList.back().second->SetColour(0.,0.,1.,1.);break;
+         default:mvpUnitCellMapGLList.back().second->SetColour(0.,1.,0.,1.);break;
+      }
       this->SetCurrent();
       mvpUnitCellMapGLList.back().second->GenList(*(mvpUnitCellMapImport.back()),
 		     this, mvpUnitCellMapGLList.back().first.second);
