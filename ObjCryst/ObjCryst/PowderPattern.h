@@ -19,21 +19,14 @@
 #ifndef _OBJCRYST_POWDERPATTERN_H_
 #define _OBJCRYST_POWDERPATTERN_H_
 
+#include <utility>
+#include <list>
+#include <string>
+
 #include "CrystVector/CrystVector.h"
 #include "ObjCryst/General.h"
-//#include "ObjCryst/SpaceGroup.h"
-//#include "ObjCryst/ScatteringPower.h"
-//#include "ObjCryst/Scatterer.h"
 #include "ObjCryst/Crystal.h"
 #include "ObjCryst/ScatteringCorr.h"
-
-//#include <stdlib.h>
-#include <string>
-//#include <iomanip>
-//#include <cmath>
-//#include <typeinfo>
-//#include <fstream>
-//#include <ctime>
 
 namespace ObjCryst
 {
@@ -105,6 +98,9 @@ class PowderPatternComponent : virtual public RefinableObj
       virtual bool HasPowderPatternCalcVariance()const=0;
       /// Last time the powder pattern was calculated.
       const RefinableObjClock& GetClockPowderPatternCalc()const;
+      /// Get a list of labels for the pattern (usually reflection indexes). This
+      /// returns the list generated during the last computation of the powder pattern.
+      const list<pair<const REAL ,const string > >& GetPatternLabelList() const;
    protected:
       /// Last time the variance on the pattern was actually calculated.
       const RefinableObjClock& GetClockPowderPatternCalcVariance()const;
@@ -164,6 +160,9 @@ class PowderPatternComponent : virtual public RefinableObj
       const PowderPattern *mpParentPowderPattern;
       /// Get last time the Bragg Limits were changed
       mutable RefinableObjClock mClockBraggLimits;
+      
+      /// The labels associated to different points of the pattern
+      mutable list<pair<const REAL ,const string > > mvLabel;
       
       //Eventually this should be removed (?)
       friend class PowderPattern;

@@ -157,7 +157,6 @@ static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CUA1=       WXCRYST_ID()
 static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_FEA1=       WXCRYST_ID(); 
 static const long ID_POWDERSPECTRUM_MENU_WAVELENGTH_SET_CRA1=       WXCRYST_ID(); 
 static const long ID_POWDERSPECTRUM_MENU_ADD_2THETA_EXCLUDE=        WXCRYST_ID(); 
-static const long ID_POWDERSPECTRUMGRAPH_MENU_UPDATE=               WXCRYST_ID(); 
 static const long ID_POWDERSPECTRUMBACKGROUND_IMPORT=               WXCRYST_ID(); 
 static const long ID_POWDERSPECTRUMDIFF_CRYSTAL=                    WXCRYST_ID(); 
 static const long ID_POWDERSPECTRUMDIFF_SAVEHKLFCALC=               WXCRYST_ID(); 
@@ -717,10 +716,14 @@ void WXPowderPattern::UpdateUI()
 //    WXPowderPatternGraph
 //
 ////////////////////////////////////////////////////////////////////////
+static const long ID_POWDERSPECTRUMGRAPH_MENU_UPDATE=               WXCRYST_ID(); 
+static const long ID_POWDERSPECTRUMGRAPH_MENU_TOGGLELABEL=          WXCRYST_ID(); 
+
 BEGIN_EVENT_TABLE(WXPowderPatternGraph, wxWindow)
    EVT_PAINT(                                   WXPowderPatternGraph::OnPaint)
    EVT_MOUSE_EVENTS(                            WXPowderPatternGraph::OnMouse)
    EVT_MENU(ID_POWDERSPECTRUMGRAPH_MENU_UPDATE, WXPowderPatternGraph::OnUpdate)
+   EVT_MENU(ID_POWDERSPECTRUMGRAPH_MENU_TOGGLELABEL, WXPowderPatternGraph::OnToggleLabel)
    EVT_UPDATE_UI(ID_POWDERSPECTRUM_GRAPH_NEW_PATTERN,WXPowderPatternGraph::OnRedrawNewPattern)
 END_EVENT_TABLE()
 
@@ -729,10 +732,11 @@ wxWindow(frame,-1,wxPoint(-1,-1),wxSize(-1,-1),wxRETAINED),
 mpPattern(parent),mMargin(50),mDiffPercentShift(.20),
 mMaxIntensity(-1),mMinIntensity(-1),mMin2Theta(-1),mMax2Theta(-1),
 mpParentFrame(frame),
-mCalcPatternIsLocked(false),mIsDragging(false)
+mCalcPatternIsLocked(false),mIsDragging(false),mDisplayLabel(true)
 {
-   mpPopUpMenu=new wxMenu("Crystal");
+   mpPopUpMenu=new wxMenu("Powder Pattern");
    mpPopUpMenu->Append(ID_POWDERSPECTRUMGRAPH_MENU_UPDATE, "&Update");
+   mpPopUpMenu->Append(ID_POWDERSPECTRUMGRAPH_MENU_TOGGLELABEL, "&Hide Labels");
    mpPattern->CrystUpdate();
 }
 
@@ -859,6 +863,35 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
          dc.DrawLine(x1,y1,x2,y2);
       }
    }
+   // Draw labels
+   if(true==mDisplayLabel)
+   {
+      dc.SetPen(* wxBLACK_PEN);
+      wxCoord x,y;
+      wxCoord tmpW,tmpH;
+      int loop=1;
+      REAL yr;
+      list<list<pair<const REAL ,const string > > >::const_iterator comp;
+      list<pair<const REAL ,const string > >::const_iterator pos;
+      for(comp=mvLabelList.begin();comp!=mvLabelList.end();++comp)
+         for(pos=comp->begin();pos!=comp->end();++pos)
+         {
+            const long point=(unsigned long)((pos->first-m2theta(0)*DEG2RAD)/m2ThetaStep);
+            if((point>=mFirst)&&(point<=mLast))
+            {
+               x=(wxCoord)(mMargin+ (point-mFirst)*(width-mMargin)/(REAL)nbPoints);
+               if(mCalc(point)>mObs(point)) yr=mCalc(point); else yr=mObs(point);
+               y=(wxCoord)(height-mMargin-(yr-mMinIntensity)*(height-2*mMargin)
+                        /(mMaxIntensity-mMinIntensity));
+               
+               dc.DrawLine(x,y-5,x,y-10);
+               fontInfo.Printf("%s",pos->second.c_str());
+               dc.GetTextExtent(fontInfo, &tmpW, &tmpH);
+               dc.DrawText(fontInfo,x-tmpW/2,y-tmpH*(loop++)-10);
+               if(loop==5) loop=1;
+            }
+         }
+   }
    
    mCalcPatternIsLocked=false;
    dc.EndDrawing();
@@ -979,6 +1012,15 @@ void WXPowderPatternGraph::OnUpdate(wxCommandEvent & WXUNUSED(event))
    mpPattern->CrystUpdate();
 }
 
+void WXPowderPatternGraph::OnToggleLabel(wxCommandEvent & WXUNUSED(event))
+{
+   VFN_DEBUG_MESSAGE("WXPowderPatternGraph::OnToggleLabel()",6)
+   mDisplayLabel = !mDisplayLabel;
+   this->Refresh(false);
+   if(mDisplayLabel) mpPopUpMenu->SetLabel(ID_POWDERSPECTRUMGRAPH_MENU_TOGGLELABEL, "Hide Labels");
+   else mpPopUpMenu->SetLabel(ID_POWDERSPECTRUMGRAPH_MENU_TOGGLELABEL, "Show Labels");
+}
+
 void WXPowderPatternGraph::SetPattern(const CrystVector_REAL &obs,
                                       const CrystVector_REAL &calc,
                                       const REAL tthetaMin,const REAL tthetaStep,
@@ -992,6 +1034,7 @@ void WXPowderPatternGraph::SetPattern(const CrystVector_REAL &obs,
    mCalcPatternIsLocked=false;
    mObs=obs;
    mSigma=sigma;
+   m2ThetaStep=tthetaStep;
    const long nbPoint=mObs.numElements();
    m2theta.resize(nbPoint);
    for(long i=0;i<nbPoint;i++) m2theta(i)=tthetaMin+i*tthetaStep;
@@ -1001,6 +1044,12 @@ void WXPowderPatternGraph::SetPattern(const CrystVector_REAL &obs,
    if(  (mMax2Theta<0)
       ||(mpPattern->GetPowderPattern().GetClockPowderPatternPar()>mClockAxisLimits)) 
       this->ResetAxisLimits();
+   
+   mvLabelList.clear();
+   for(unsigned int i=0;i<mpPattern->GetPowderPattern().GetNbPowderPatternComponent();++i)
+      mvLabelList.push_back(mpPattern->GetPowderPattern()
+                              .GetPowderPatternComponent(i).GetPatternLabelList());
+
    // If we only send an OnPaint event, only the parts which have been erased are redrawn
    // (under windows). SO we must force the complete Refresh of the window... in the
    // main thread of course...

@@ -92,11 +92,15 @@ class WXPowderPatternGraph: public wxWindow
                       const CrystVector_REAL &sigma);
       /// Redraw the pattern (special function to ensure complete redrawing under windows...)
       void OnRedrawNewPattern(wxUpdateUIEvent& WXUNUSED(event));
+      void OnToggleLabel(wxCommandEvent& WXUNUSED(event));
    private:
       /// Reset the limits of the axis to full range.
       void ResetAxisLimits();
       WXPowderPattern *mpPattern;
+      /// Data vectors (Note that m2theta is currently stored in degrees, which may be changed)
       CrystVector_REAL mObs,mCalc,m2theta,mSigma;
+      /// 2theta step (radians)
+      REAL m2ThetaStep;
       const long mMargin;
       const REAL mDiffPercentShift;
       REAL mMaxIntensity,mMinIntensity,mMin2Theta,mMax2Theta;
@@ -114,6 +118,11 @@ class WXPowderPatternGraph: public wxWindow
       /// is compared to PowderPattern::GetClockPowderPatternPar() to know if
       /// these parameter need to be reset.
       RefinableObjClock mClockAxisLimits;
+      /// Display labels ?
+      bool mDisplayLabel;
+      /// The lists of labels for all components of the powder pattern.
+      list<list<pair<const REAL ,const string > > > mvLabelList;
+      
       DECLARE_EVENT_TABLE()
 };
 

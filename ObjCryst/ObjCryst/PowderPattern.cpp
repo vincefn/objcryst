@@ -34,6 +34,7 @@
 
 #include <fstream>
 #include <iomanip>
+#include <sstream>
 
 //#define USE_BACKGROUND_MAXLIKE_ERROR
 
@@ -79,6 +80,11 @@ const RefinableObjClock& PowderPatternComponent::GetClockPowderPatternCalc()cons
 const RefinableObjClock& PowderPatternComponent::GetClockBraggLimits()const
 {
    return mClockBraggLimits;
+}
+
+const list<pair<const REAL, const string> >& PowderPatternComponent::GetPatternLabelList()const
+{
+   return mvLabel;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -541,7 +547,6 @@ void PowderPatternDiffraction::CalcPowderPattern() const
       &&(mClockPowderPatternCalc>mClockProfileCalc)) return;
    TAU_PROFILE("PowderPatternDiffraction::CalcPowderPattern()-Apply profiles","void (bool)",TAU_DEFAULT);
    
-   //mpCrystal->Print();
    if(true) //:TODO: false == mUseFastLessPreciseFunc
    {
       REAL theta;
@@ -822,6 +827,10 @@ Computing Widths",5)
       mSavedPowderReflProfile.resize(this->GetNbRefl(),2*mSavedPowderReflProfileNbPoint+1);
    //Calc all profiles
    p1=mSavedPowderReflProfile.data();
+   
+   mvLabel.clear();
+   stringstream label;
+
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile():\
 Computing all Profiles",5)
    for(long i=0;i<this->GetNbRefl();i++)
@@ -841,6 +850,11 @@ Computing all Profiles: Reflection #"<<i,2)
       thetaPt =(long) ((2*tmp-specMin)/specStep);
       tmp2theta = ttheta;
       tmp2theta += 2*tmp-(specMin + thetaPt * specStep);
+      
+      label.str("");
+      label<<mIntH(i)<<" "<<mIntK(i)<<" "<<mIntL(i);
+      mvLabel.push_back(make_pair(mpParentPowderPattern->Get2ThetaCorr(2*tmp),label.str()));
+
       switch(mReflectionProfileType.GetChoice())
       {
          case PROFILE_GAUSSIAN:
