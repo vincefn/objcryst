@@ -124,17 +124,47 @@ class PowderSlitApertureCorr:public ScatteringCorr
 *
 * This can include several phases.
 *
-* \todo the actual implementation of the texture classes...
 */
-class TextureMarchDollaseCorr:public ScatteringCorr
+class TextureMarchDollase:public ScatteringCorr,public RefinableObj
 {
+   struct TexturePhase
+   {
+      TexturePhase(const REAL f, const REAL c,const REAL h,const REAL k, const REAL l):
+         mFraction(f),mMarchCoeff(c),mH(h),mK(k),mL(l){}
+      void SetPar(const REAL f, const REAL c,const REAL h,const REAL k, const REAL l)
+         {mFraction=f;mMarchCoeff=c;mH=h;mK=k;mL=l;}
+      REAL mFraction,mMarchCoeff,mH,mK,mL;
+   };
    public:
-      TextureMarchDollaseCorr(const ScatteringData & data);
-      virtual ~TextureMarchDollaseCorr();
+      TextureMarchDollase(const ScatteringData & data);
+      virtual ~TextureMarchDollase();
       virtual const string & GetName() const;
       virtual const string & GetClassName() const;
+      void AddPhase(const REAL fraction, const REAL coeffMarch,
+                    const REAL h,const REAL k, const REAL l);
+      void SetPhasePar(const unsigned int i, const REAL fraction, const REAL coeffMarch,
+                       const REAL h,const REAL k, const REAL l);
+      //void DeletePhase(const unsigned int i);
+      unsigned int GetNbPhase() const;
+      REAL GetFraction(const unsigned int i)const;
+      REAL GetMarchCoeff(const unsigned int i)const;
+      REAL GetPhaseH(const unsigned int i)const;
+      REAL GetPhaseK(const unsigned int i)const;
+      REAL GetPhaseL(const unsigned int i)const;
+      virtual void GlobalOptRandomMove(const REAL mutationAmplitude);
+      virtual REAL GetBiasingCost()const;
+      virtual void XMLOutput(ostream &os,int indent=0)const;
+      virtual void XMLInput(istream &is,const XMLCrystTag &tag);
    protected:
       virtual void CalcCorr() const;
+      void DeleteAllPhase();
+      unsigned int mNbPhase;
+      TexturePhase** mpTexturePhase;
+      RefinableObjClock mClockTexturePar;
+   #ifdef __WX__CRYST__
+   public:
+      virtual WXCrystObjBasic* WXCreate(wxWindow*);
+   #endif
 };
 }//namespace
 #endif //_OBJCRYST_SCATTERING_CORR_H_
