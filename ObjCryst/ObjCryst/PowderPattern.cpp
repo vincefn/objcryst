@@ -840,6 +840,14 @@ void PowderPatternDiffraction::GetBraggLimits(CrystVector_long *&min,CrystVector
 	this->CalcPowderReflProfile();
 	if(mClockProfileCalc>mClockBraggLimits)
 	{
+		double fwhmRatio;//integrate from -fwhmRatio*fwhm to -fwhmRatio*fwhm
+      switch(mReflectionProfileType.GetChoice())
+      {
+         case PROFILE_GAUSSIAN:fwhmRatio=1;
+         case PROFILE_LORENTZIAN:fwhmRatio=2.;
+         case PROFILE_PSEUDO_VOIGT:fwhmRatio=1.+mPseudoVoigtEta0;
+		}
+		cout <<" Integrated R/Rw-factors up to +/- "<<fwhmRatio<<"*FWHM"<<endl;
    	TAU_PROFILE("PowderPatternDiffraction::GetBraggLimits()","void ()",TAU_DEFAULT);
    	VFN_DEBUG_MESSAGE("PowderPatternDiffraction::GetBraggLimits(*min,*max):Recalc",3)
 		mIntegratedReflMin.resize(this->GetNbRefl());
@@ -1824,6 +1832,8 @@ double PowderPattern::GetIntegratedRw()const
       {
          tmp1 += *p4   * ((*p1)-(*p2)) * ((*p1)-(*p2));
          tmp2 += *p4++ * ((*p2)-(*p3)) * ((*p2)-(*p3));
+         //cout <<i<<": " <<mIntegratedPatternMin(i)<<"->"<<mIntegratedPatternMax(i)
+			//	  <<" "<< tmp1 << " "<<tmp2 << " " << *p1 <<" "<<*p2<<" "<<*p3<<" "<<*(p4-1) <<endl;
          p1++;p2++;p3++;
       }
    } // Exclude Background ?
@@ -2938,12 +2948,12 @@ void PowderPattern::PrepareIntegratedRfactor()const
 			// NOTE : this will reset the effect of any SetWeight... but it's not available, so...
 			mIntegratedWeight(i)+=mPowderPatternObsSigma(j)*mPowderPatternObsSigma(j);
 		}
-		mIntegratedWeight(i)=1/mIntegratedWeight(i);
+		mIntegratedWeight(i)=1./mIntegratedWeight(i);
 	}
 
 	cout<<FormatVertVector<double>(mIntegratedPatternMin,
 											 mIntegratedPatternMax,
-											 mIntegratedObs,mIntegratedWeight,8)<<endl;
+											 mIntegratedObs,mIntegratedWeight,12,6)<<endl;
 	mClockIntegratedFactorsPrep.Click();
    VFN_DEBUG_EXIT("PowderPattern::PrepareIntegratedRfactor()",3);
 }
