@@ -88,7 +88,7 @@
 * create a crystal, add a PowderPattern object, a GlobalOptimization object and do
 * the global optimization while looking at the 'live' evolution of the Crystal Structure
 * (3D display with OpenGL) and of the PowderPattern !
-* \li Saving structures, data to files has been implemented. See RefinableObj::Output().
+* \li Saving structures, data to files has been implemented. See RefinableObj::XMLOutput().
 * Refinement flags are not saved (yet).
 * \li Changed all float to double precision. Performance hit=+15% on structure factor,
 * and +25% on full powder spectrums.

@@ -1,15 +1,13 @@
-/*
-* LibCryst++ : a Crystallographic computing library in C++
+/* 
+* ObjCryst++ : a Crystallographic computing library in C++
+*			http://objcryst.sourceforge.net
+*			http://www.ccp14.ac.uk/ccp/web-mirrors/objcryst/
 *
-*  (c) 2000 Vincent FAVRE-NICOLIN
-*           Laboratoire de Cristallographie
-*           24, quai Ernest-Ansermet, CH-1211 Geneva 4, Switzerland
-*  Contact: Vincent.Favre-Nicolin@cryst.unige.ch
-*           Radovan.Cerny@cryst.unige.ch
+*  (c) 2000-2001 Vincent FAVRE-NICOLIN vincefn@users.sourceforge.net
 *
 */
 /*   GlobalOptimObj.h
-*  header file for Global Optimization Objects
+*  header file for the Global Optimization object
 *
 */
 #ifndef _GLOBALOPTIMOBJ_H
@@ -33,7 +31,10 @@ namespace ObjCryst
 
 namespace ObjCryst
 {
-
+/** Annealing schedule type
+*
+*
+*/
 enum AnnealingSchedule
 {
    ANNEALING_CONSTANT,
@@ -43,6 +44,12 @@ enum AnnealingSchedule
    ANNEALING_EXPONENTIAL,
    ANNEALING_SMART
 };
+
+/** Global optimization type. Eventually it would be better to build
+* a base Global Optimization  (or even Optimization) object, and to derive
+* it in different classes for Simulated Annealing, Parallel Tempering,
+* Genetic Algorithm,...
+*/
 enum GlobalOptimType
 {
    GLOBAL_OPTIM_SIMULATED_ANNEALING,
@@ -50,14 +57,28 @@ enum GlobalOptimType
    GLOBAL_OPTIM_GENETIC
 };
 
-/** \brief Base object for Global Optimization method. This is still \e crude.
+/** \brief Base object for Global Optimization method.
 *
+* The algorithm is quite simple, whith two type of optimization, either
+* simulated Annealing or Parallel Tempering, the latter being recommanded
+* for most real-world optimizations
+*
+* \todo Change this class to a abstract base class, derived
+* to a SimulatedAnnealing and a ParallelTempering class (and hopefully
+* a GeneticAlgorithm class)
+*
+* \remarks Instead of keeping a copy of the list of parameters here,
+* maybe it would be better to delegate all parameter handling to the refined 
+* objects (they would also have to keep in memory the saved parameter sets, so
+* that could be difficult to administrate).
 */
 
 class GlobalOptimObj
 {
 	public:
+		/// Constructor
 		GlobalOptimObj(const string name="");
+		/// Destructor
 		virtual ~GlobalOptimObj();
       
       /** \brief Randomize starting configuration
@@ -87,6 +108,9 @@ class GlobalOptimObj
       *\param maxNbTrialSinceBest: if more than maxNbTrialSinceBest trials have been made
       * since the best configuration was recorded, then revert to that configuration. This
       * should be large enough to have an ergodic search (the default is never to revert..)
+		*
+		* \note this will be removed when we separate the different algorithms in different
+		* classes.
       */
       void SetAlgorithmSimulAnnealing(const AnnealingSchedule scheduleTemp,
                                  const double tMax, const double tMin,
@@ -109,6 +133,8 @@ class GlobalOptimObj
       *\param mutMax,mutMin: Max and Min mutation amplitudes. The Max will 
       * be ignored for constant, Cauchy, and Boltzmann schedules. Both parameters
       * are ignored for 'smart' schedule.
+		* \note this will be removed when we separate the different algorithms in different
+		* classes.
       */
       void SetAlgorithmParallTempering(const AnnealingSchedule scheduleTemp,
                                  const double tMax, const double tMin,
@@ -135,9 +161,13 @@ class GlobalOptimObj
       void SetParIsUsed(const string& parName,const bool use);
       /// Set a family of parameters to be used
       void SetParIsUsed(const RefParType *type,const bool use);
+		/// Change the relative limits for a parameter from its name
       void SetLimitsRelative(const string &parName, const double min, const double max);
+		/// Change the relative limits for a family of parameter
       void SetLimitsRelative(const RefParType *type, const double min, const double max);
+		/// Change the absolute limits for a parameter from its name
       void SetLimitsAbsolute(const string &parName, const double min, const double max);
+		/// Change the absolute limits for a family of parameter
       void SetLimitsAbsolute(const RefParType *type, const double min, const double max);
 
       
@@ -145,51 +175,61 @@ class GlobalOptimObj
       // characteristic figures...)
       //virtual ostream& operator<<(ostream& os)const;
       /// Save history of the evolution of parameters to a file. Only non-fixed parameters
-      /// are saved.
+      /// are saved. This saves a very crude array in which can bve found the value of
+		/// all non-fixed parameters for successive "best" configurations.
       void SaveOptimHistory() const;
       /** \brief The optimized (minimized, actually) function.
       *
-      * It \b must be strictly positive.
+      * This function is the weighted sum of the chosen Cost Functions for
+		* the refined objects. All Cost Functions \b must be strictly positive.
       */
       virtual double GetCostFunctionValue();
-      /// Stop after the current cycle
+      /// Stop after the current cycle. USed for interactive refinement.
       void StopAfterCycle();
-      /// Show report to the user during refinement. Overloaded for GUI update 8-)
+      /// Show report to the user during refinement. Used for GUI update.
       virtual void DisplayReport();
-      /// Add a refined object
+      /// Add a refined object. All sub-objects are also added
       void AddRefinableObj(RefinableObj &);
-      /// Add a cost function
+      /// Add a cost function, with a given weight. This cost function
+		/// should be strictly positive, and ideally should behave like a R/Rw function,
+		/// ie a value above 0.50 corresponds to a very inadequate configuration,
+		/// while 0.05 is excellent.
       void AddCostFunction(RefinableObj &,const unsigned int id, const double weight=1.);
-      /** \brief Output to stream
+      /** \brief Output a description of the object in XML format to a stream.
+      *
+		* This saves the list of refined object and the cost functions, as well as options
+		* for the refinement. The refined objects are \b not saved, so this must be done
+		* somewhere else (they must be reloaded before this object).
+      */
+      virtual void XMLOutput(ostream &os,int indent=0)const;
+      /** \brief Input in XML format from a stream, restoring the set of refined
+		* objects and the associated cost functions. Note that the corresponding objects
+		* must have be loaded in memory before, else shit happens.
       *
       */
-      virtual void Output(ostream &os,int indent=0)const;
-      /** \brief Input From stream
-      *
-      */
-      virtual void Input(istream &is,const XMLCrystTag &tag);
-      //virtual void InputOld(istream &is,const IOCrystTag &tag);
+      virtual void XMLInput(istream &is,const XMLCrystTag &tag);
+      //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
       /// Get the name for this object
       const string& GetName()const;
       /// Set the name for this object
       void SetName(const string&);
       /// Get the name for this class type
       const string GetClassName()const;
-      /// Print the configuration for this object
+      /// Print some information about this object
       void Print()const;
 	protected:
       
       /** \brief Make a random change in the configuration.
-      *
+      * 
+		* \internal
       *  This just generates a new configuration with random changes (according
       * to current parameters). The old config is stored in mRefParList as the
-      * last config (index mLastParSavedSetIndex). The new one is \e not tested
+      * last config (index mLastParSavedSetIndex). The new one is \e not tested \e in \e this \e function
       * vs temperature: this should be done in the GlobalOptimObj::Optimize() function,
-      * which also chooses whether to return to the previous configuration.
+      * which also chooses whether to revert to the previous configuration.
       *
-      * The reason this configuration generation is not incorporated to
-      * GlobalOptimObj::Optimize() is that the latter is a \e general algorythm, valid
-      * for any kind of optimized object, while the new configuration can be specific
+		* Random moves are made by the objects and not by this function,
+      * because the new configuration can be specific
       * (like, for example, permutations between some of the parameters (atoms)).
       */
       virtual void NewConfiguration();
@@ -200,9 +240,9 @@ class GlobalOptimObj
       /// \internal Initialize random seed from time
       void InitRandomSeedFromTime()const;
       
-      /// Initial initialization of options.
+      /// Initialization of options.
       void InitOptions();
-      /// Update Display (if any diplay is available), when a new 'relevant' configuration
+      /// Update Display (if any display is available), when a new 'relevant' configuration
       /// is reached. This calls all RefinableObj::UpdateDisplay()
       void UpdateDisplay();
       

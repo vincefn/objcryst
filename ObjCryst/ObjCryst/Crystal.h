@@ -218,7 +218,7 @@ class Crystal:public RefinableObj
       */
       void PrintMinDistanceTable(const double minDistance=0.1,ostream &os=cout) const;
 
-      /** \brief Output POV-Ray Description for this Crystal
+      /** \brief XMLOutput POV-Ray Description for this Crystal
 		*
 		* \param onlyIndependentAtoms if false, all symmetrics are showed in the
 		* drawing.
@@ -305,9 +305,9 @@ class Crystal:public RefinableObj
          const string& GetCostFunctionDescription(const unsigned int)const;
          virtual double GetCostFunctionValue(const unsigned int);
          
-      virtual void Output(ostream &os,int indent=0)const;
-      virtual void Input(istream &is,const XMLCrystTag &tag);
-      //virtual void InputOld(istream &is,const IOCrystTag &tag);
+      virtual void XMLOutput(ostream &os,int indent=0)const;
+      virtual void XMLInput(istream &is,const XMLCrystTag &tag);
+      //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
       
       virtual void GlobalOptRandomMove(const double mutationAmplitude);
       /** \brief output Crystal structure as a cif file (EXPERIMENTAL !)
@@ -316,7 +316,7 @@ class Crystal:public RefinableObj
       * are supported, and there is not much information beside atom
       * positions... 
       */
-      virtual void OutputCIF(ostream &os)const;
+      virtual void CIFOutput(ostream &os)const;
       
    protected:
    

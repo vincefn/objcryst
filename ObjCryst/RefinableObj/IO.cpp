@@ -9,7 +9,7 @@
 *
 */
 /*
-*  source file for generic Input/Output in 
+*  source file for generic XMLInput/XMLOutput in 
 *
 */
 
@@ -166,9 +166,9 @@ istream& operator>> (istream& is, XMLCrystTag &tag)
 //    I/O RefinablePar
 //
 ////////////////////////////////////////////////////////////////////////
-void RefinablePar::Output(ostream &os,const string &name,int indent)const
+void RefinablePar::XMLOutput(ostream &os,const string &name,int indent)const
 {
-   VFN_DEBUG_ENTRY("RefinablePar::Output():"<<this->GetName(),5)
+   VFN_DEBUG_ENTRY("RefinablePar::XMLOutput():"<<this->GetName(),5)
    XMLCrystTag tag("Par");
    {
       stringstream ss;
@@ -204,16 +204,16 @@ void RefinablePar::Output(ostream &os,const string &name,int indent)const
    os <<tag;
    tag.SetIsEndTag(true);
    os <<this->GetHumanValue()<<tag;
-   VFN_DEBUG_EXIT("RefinablePar::Output():"<<this->GetName(),5)
+   VFN_DEBUG_EXIT("RefinablePar::XMLOutput():"<<this->GetName(),5)
 }
-void RefinablePar::Output(ostream &os,int indent)const
+void RefinablePar::XMLOutput(ostream &os,int indent)const
 {
-   this->Output(os,mName,indent);
+   this->XMLOutput(os,mName,indent);
 }
 
-void RefinablePar::Input(istream &is,const XMLCrystTag &tag)
+void RefinablePar::XMLInput(istream &is,const XMLCrystTag &tag)
 {
-   VFN_DEBUG_ENTRY("RefinablePar::Input():"<<this->GetName(),5)
+   VFN_DEBUG_ENTRY("RefinablePar::XMLInput():"<<this->GetName(),5)
    for(unsigned int i=0;i<tag.GetNbAttribute();i++)
    {
       if("Name"==tag.GetAttributeName(i)) continue;//names must be set by the object
@@ -262,7 +262,7 @@ void RefinablePar::Input(istream &is,const XMLCrystTag &tag)
    is>>f;
    this->SetHumanValue(f);
    XMLCrystTag junk(is);//read end tag
-   VFN_DEBUG_EXIT("RefinablePar::Input():"<<this->GetName(),5)
+   VFN_DEBUG_EXIT("RefinablePar::XMLInput():"<<this->GetName(),5)
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -270,9 +270,9 @@ void RefinablePar::Input(istream &is,const XMLCrystTag &tag)
 //    I/O RefObjOpt
 //
 ////////////////////////////////////////////////////////////////////////
-void RefObjOpt::Output(ostream &os,int indent)const
+void RefObjOpt::XMLOutput(ostream &os,int indent)const
 {
-   VFN_DEBUG_ENTRY("RefObjOpt::Output():"<<this->GetName(),5)
+   VFN_DEBUG_ENTRY("RefObjOpt::XMLOutput():"<<this->GetName(),5)
    XMLCrystTag tag("Option",false,true);
    tag.AddAttribute("Name",this->GetName());
    {
@@ -285,12 +285,12 @@ void RefObjOpt::Output(ostream &os,int indent)const
    for(int i=0;i<indent;i++) os << "  " ;
    os <<tag;
    
-   VFN_DEBUG_EXIT("RefObjOpt::Output():"<<this->GetName(),5)
+   VFN_DEBUG_EXIT("RefObjOpt::XMLOutput():"<<this->GetName(),5)
 }
 
-void RefObjOpt::Input(istream &is,const XMLCrystTag &tag)
+void RefObjOpt::XMLInput(istream &is,const XMLCrystTag &tag)
 {
-   VFN_DEBUG_ENTRY("RefObjOpt::Input():"<<this->GetName(),5)
+   VFN_DEBUG_ENTRY("RefObjOpt::XMLInput():"<<this->GetName(),5)
    for(unsigned int i=0;i<tag.GetNbAttribute();i++)
    {
       if("Name"==tag.GetAttributeName(i)) continue;//names must be set by the object
@@ -304,26 +304,26 @@ void RefObjOpt::Input(istream &is,const XMLCrystTag &tag)
          continue;
       }
    }
-   VFN_DEBUG_EXIT("RefObjOpt::Input():"<<this->GetName(),5)
+   VFN_DEBUG_EXIT("RefObjOpt::XMLInput():"<<this->GetName(),5)
 }
 ////////////////////////////////////////////////////////////////////////
 //
 //    I/O RefinableObj // Does nothing ! Should be purely virtual...
 //
 ////////////////////////////////////////////////////////////////////////
-void RefinableObj::Output(ostream &os,int indent)const
+void RefinableObj::XMLOutput(ostream &os,int indent)const
 {
-   VFN_DEBUG_MESSAGE("RefinableObj::Output():"<<this->GetName(),5)
+   VFN_DEBUG_MESSAGE("RefinableObj::XMLOutput():"<<this->GetName(),5)
 }
 
-void RefinableObj::Input(istream &is,const XMLCrystTag &tag)
+void RefinableObj::XMLInput(istream &is,const XMLCrystTag &tag)
 {
-   VFN_DEBUG_MESSAGE("RefinableObj::Input():"<<this->GetName(),5)
+   VFN_DEBUG_MESSAGE("RefinableObj::XMLInput():"<<this->GetName(),5)
 }
 #if 0
-void RefinableObj::InputOld(istream &is,const IOCrystTag &tag)
+void RefinableObj::XMLInputOld(istream &is,const IOCrystTag &tag)
 {
-   VFN_DEBUG_MESSAGE("RefinableObj::Input():"<<this->GetName(),5)
+   VFN_DEBUG_MESSAGE("RefinableObj::XMLInput():"<<this->GetName(),5)
 }
 #endif
 ////////////////////////////////////////////////////////////////////////
@@ -365,7 +365,7 @@ void IOCrystExtractNameQuoted(istream &is,string &str)
    is.setf(f);
 }
 
-void IOCrystOutputNameQuoted(ostream &os,const string &str)
+void IOCrystXMLOutputNameQuoted(ostream &os,const string &str)
 {
    os << '\"' << str << '\"';
 }
@@ -419,14 +419,14 @@ bool IOCrystTag::operator==(const IOCrystTag& rhs)const
    if( (rhs.GetType()==this->GetType()) && (rhs.GetName()==this->GetName())) return true;
    return false;
 }
-void IOCrystTag::Input(istream &is)
+void IOCrystTag::XMLInput(istream &is)
 {
-   VFN_DEBUG_MESSAGE("IOCrystTag::Input(istream &is)",2)
+   VFN_DEBUG_MESSAGE("IOCrystTag::XMLInput(istream &is)",2)
    char tmp;
    do {is>>tmp;} while ((tmp!='<') && (!is.eof()) );
    if(is.eof()) return;
    IOCrystExtractNameSpace(is,mTagType);
-   VFN_DEBUG_MESSAGE("IOCrystTag::Input(istream &is):TagType:"<<mTagType,1)
+   VFN_DEBUG_MESSAGE("IOCrystTag::XMLInput(istream &is):TagType:"<<mTagType,1)
    if(*(mTagType.c_str())=='\\')
    {
       mTagVersion=0;//closing tag
@@ -440,7 +440,7 @@ void IOCrystTag::Input(istream &is)
       mIsClosingTag=false;
    }
    do {is>>tmp;} while (tmp!='>');
-   VFN_DEBUG_MESSAGE("IOCrystTag::Input(istream &is):End",2)
+   VFN_DEBUG_MESSAGE("IOCrystTag::XMLInput(istream &is):End",2)
 }
 const string &IOCrystTag::GetType() const{return mTagType;}
 const string &IOCrystTag::GetName() const{return mTagName;}

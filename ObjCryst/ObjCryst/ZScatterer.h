@@ -110,8 +110,8 @@ class ZAtom
       void SetOccupancy(const double);
       ///Set the ScatteringPower.
       void SetScatteringPower(const ScatteringPower*);
-      void Output(ostream &os,int indent=0)const;
-      void Input(istream &is,const XMLCrystTag &tag);
+      void XMLOutput(ostream &os,int indent=0)const;
+      void XMLInput(istream &is,const XMLCrystTag &tag);
    private:
       /// The ScatteringPower corresponding to this atom.
       const ScatteringPower *mpScattPow;
@@ -241,9 +241,9 @@ class ZScatterer: public Scatterer
 		* \warning EXPERIMENTAL
       */
       virtual void SetUseGlobalScatteringPower(const bool useIt);
-      virtual void Output(ostream &os,int indent=0)const;
-      virtual void Input(istream &is,const XMLCrystTag &tag);
-      //virtual void InputOld(istream &is,const IOCrystTag &tag);
+      virtual void XMLOutput(ostream &os,int indent=0)const;
+      virtual void XMLInput(istream &is,const XMLCrystTag &tag);
+      //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
    protected:
       void Update() const;
       /** For 3D display of the structure, bonds, triangular and quadric

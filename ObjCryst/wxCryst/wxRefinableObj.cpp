@@ -532,7 +532,7 @@ void WXRefinableObj::OnMenuSave(wxCommandEvent & WXUNUSED(event))
    ofstream out(save.GetPath().c_str());
    if(!out) return;//:TODO:
    {
-      mpRefinableObj->Output(out);
+      mpRefinableObj->XMLOutput(out);
    }
    out.close();
 }
@@ -548,7 +548,7 @@ void WXRefinableObj::OnMenuLoad(wxCommandEvent & WXUNUSED(event))
    if(!fin) return;//:TODO:
    {
       XMLCrystTag tag(fin);//:TODO: load all tags and find the right ones for this class
-      mpRefinableObj->Input(fin,tag);
+      mpRefinableObj->XMLInput(fin,tag);
    }
    fin.close();
    open->Destroy();

@@ -198,9 +198,9 @@ class DiffractionDataSingleCrystal:public ScatteringData
          const string& GetCostFunctionName(const unsigned int)const;
          const string& GetCostFunctionDescription(const unsigned int)const;
          virtual double GetCostFunctionValue(const unsigned int);
-      virtual void Output(ostream &os,int indent=0)const;
-      virtual void Input(istream &is,const XMLCrystTag &tag);
-      //virtual void InputOld(istream &is,const IOCrystTag &tag);
+      virtual void XMLOutput(ostream &os,int indent=0)const;
+      virtual void XMLInput(istream &is,const XMLCrystTag &tag);
+      //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
    protected:
    private:
       virtual void InitRefParList();

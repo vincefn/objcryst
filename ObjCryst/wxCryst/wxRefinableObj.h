@@ -137,7 +137,7 @@ template<class T> class WXRegistry:public WXCrystObj
 };
                                                       
 /// The base wxCryst class for all RefinableObj objects. This shows the title,
-/// a menu for Input/Output, and all RefObjOpt.
+/// a menu for XMLInput/XMLOutput, and all RefObjOpt.
 class WXRefinableObj: public WXCrystObj
 {
    public:

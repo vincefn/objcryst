@@ -250,9 +250,9 @@ class ScatteringPowerAtom:virtual public ScatteringPower
       ///Atomic radius for this atom, in Angstroems
       double GetRadius() const;
       virtual void Print()const;
-      virtual void Output(ostream &os,int indent=0)const;
-      virtual void Input(istream &is,const XMLCrystTag &tag);
-      //virtual void InputOld(istream &is,const IOCrystTag &tag);
+      virtual void XMLOutput(ostream &os,int indent=0)const;
+      virtual void XMLInput(istream &is,const XMLCrystTag &tag);
+      //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
    protected:
       /** \internal
       * Fetch the coefficients for analytical approximation of the

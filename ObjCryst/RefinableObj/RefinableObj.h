@@ -352,22 +352,22 @@ class RefinablePar
          void SetLimitsProportional(const double min, const double max);
       //@}
 
-      /** \brief Output to stream in well-formed XML 
+      /** \brief XMLOutput to stream in well-formed XML 
       *
       * this will save the fixed & limited flags, as well as limits
       * \param name the name to use instead of the RefPar name.
       */
-      void Output(ostream &os,const string &name,int indent=0)const;
-      /** \brief Output to stream in well-formed XML.
+      void XMLOutput(ostream &os,const string &name,int indent=0)const;
+      /** \brief XMLOutput to stream in well-formed XML.
       *
       * this will save the fixed & limited flags, as well as limits.
       * In this function the name used is that of the RefPar.
       */
-      void Output(ostream &os,int indent=0)const;
-      /** \brief Input From stream
+      void XMLOutput(ostream &os,int indent=0)const;
+      /** \brief XMLInput From stream
       *
       */
-      void Input(istream &is,const XMLCrystTag &tag);
+      void XMLInput(istream &is,const XMLCrystTag &tag);
    private:
       /// Click the Clock ! to telle the RefinableObj it has been modified.
       void Click();
@@ -447,15 +447,15 @@ class RefObjOpt
       const string& GetClassName()const;
       const string& GetChoiceName(const int i)const;
       const RefinableObjClock& GetClock()const;
-      /** \brief Output to stream in well-formed XML.
+      /** \brief XMLOutput to stream in well-formed XML.
       *
       * In this function the name used is that of the Option.
       */
-      void Output(ostream &os,int indent=0)const;
-      /** \brief Input From stream
+      void XMLOutput(ostream &os,int indent=0)const;
+      /** \brief XMLInput From stream
       *
       */
-      void Input(istream &is,const XMLCrystTag &tag);
+      void XMLInput(istream &is,const XMLCrystTag &tag);
    protected:
       /// Number of different choice possible for this option
       int mNbChoice;
@@ -812,19 +812,19 @@ class RefinableObj
       
       /** \brief Output to stream in well-formed XML 
       *
-      * \todo Use inheritance.. as for InputTag()...
+      * \todo Use inheritance.. as for XMLInputTag()...
       */
-      virtual void Output(ostream &os,int indent=0)const;
+      virtual void XMLOutput(ostream &os,int indent=0)const;
       /** \brief Input From stream
       *
-      * \todo Add an bool InputTag(is,tag) function to recognize all the tags
-      * from the stream. So that each inherited class can use the InputTag function
+      * \todo Add an bool XMLInputTag(is,tag) function to recognize all the tags
+      * from the stream. So that each inherited class can use the XMLInputTag function
       * from its parent (ie take advantage of inheritance). The children class 
       * would first try to interpret the tag, then if unsuccessful would pass it to
       * its parent (thus allowing overloading), etc...
       */
-      virtual void Input(istream &is,const XMLCrystTag &tag);
-      //virtual void InputOld(istream &is,const IOCrystTag &tag);
+      virtual void XMLInput(istream &is,const XMLCrystTag &tag);
+      //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
       /// If there is an interface, this should be automatically be called each
       /// time there is a 'new, significant' configuration to report.
       virtual void UpdateDisplay()const;

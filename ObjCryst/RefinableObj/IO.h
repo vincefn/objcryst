@@ -85,7 +85,7 @@ istream& operator>> (istream&, XMLCrystTag&);
 void IOCrystExtractNameSpace(istream &is,string &str);
 void IOCrystExtractNameLine(istream &is,string &str);
 void IOCrystExtractNameQuoted(istream &is,string &str);
-void IOCrystOutputNameQuoted(ostream &os,const string &str);
+void IOCrystXMLOutputNameQuoted(ostream &os,const string &str);
 
 #ifdef __WX__CRYST__
 class IOCrystTag;
@@ -112,7 +112,7 @@ class IOCrystTag
       IOCrystTag(const string& type,const string& name, const unsigned long version=0);
       IOCrystTag(istream &is);
       virtual ~IOCrystTag();
-      void Input(istream &is);
+      void XMLInput(istream &is);
       bool operator==(const IOCrystTag&)const;
       const string &GetType()const;
       const string &GetName()const;

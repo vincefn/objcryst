@@ -111,7 +111,7 @@ class Atom: public Scatterer
       * The Radius is extracted from the ScatteringPowerAtom.
       */
       double GetRadius() const;
-      /** \brief Output a description of the scatterer for POVRay
+      /** \brief XMLOutput a description of the scatterer for POVRay
       *
       */
       virtual ostream& POVRayDescription(ostream &os,
@@ -125,9 +125,9 @@ class Atom: public Scatterer
       /// Dummy atoms should not exist !
       bool IsDummy()const;
 
-      virtual void Output(ostream &os,int indent=0)const;
-      virtual void Input(istream &is,const XMLCrystTag &tag);
-      //virtual void InputOld(istream &is,const IOCrystTag &tag);
+      virtual void XMLOutput(ostream &os,int indent=0)const;
+      virtual void XMLInput(istream &is,const XMLCrystTag &tag);
+      //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
 		/// Get the ScatteringPowerAtom corresponding to this atom.
       const ScatteringPowerAtom& GetScatteringPower()const;
    protected:

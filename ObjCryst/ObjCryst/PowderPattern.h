@@ -122,9 +122,9 @@ class PowderPatternBackground : public PowderPatternComponent
       void ImportUserBackground(const string &filename);
       void SetUseFastLessPreciseFunc(const bool useItOrNot);
       virtual void SetUseOnlyLowAngleData(const bool useOnlyLowAngle,const double angle=0);
-      virtual void Output(ostream &os,int indent=0)const;
-      virtual void Input(istream &is,const XMLCrystTag &tag);
-      //virtual void InputOld(istream &is,const IOCrystTag &tag);
+      virtual void XMLOutput(ostream &os,int indent=0)const;
+      virtual void XMLInput(istream &is,const XMLCrystTag &tag);
+      //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
    protected:
       virtual void CalcPowderPattern() const;
       virtual void SetRadiation(const Radiation &rad);
@@ -198,9 +198,9 @@ class PowderPatternDiffraction : public PowderPatternComponent,public Scattering
       void SetUseFastLessPreciseFunc(const bool useItOrNot);
       virtual void SetUseOnlyLowAngleData(const bool useOnlyLowAngle,const double angle=0);
       virtual void GenHKLFullSpace();
-      virtual void Output(ostream &os,int indent=0)const;
-      virtual void Input(istream &is,const XMLCrystTag &tag);
-      //virtual void InputOld(istream &is,const IOCrystTag &tag);
+      virtual void XMLOutput(ostream &os,int indent=0)const;
+      virtual void XMLInput(istream &is,const XMLCrystTag &tag);
+      //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
    protected:
       virtual void CalcPowderPattern() const;
       
@@ -551,7 +551,7 @@ class PowderPattern : public RefinableObj
 												 const double minRelatIobs=1e-3);
 
          /// Add an Exclusion region, in 2theta, which will be ignored when computing R's
-         /// Input values must be, as always, in radians. Does not work yet with
+         /// XMLInput values must be, as always, in radians. Does not work yet with
          /// integrated R factors.
          /// Note that the pattern is still computed in these regions. They are only ignored
          /// by statistics functions (R, Rws).
@@ -564,9 +564,9 @@ class PowderPattern : public RefinableObj
          const string& GetCostFunctionDescription(const unsigned int)const;
          virtual double GetCostFunctionValue(const unsigned int);
 		// I/O	
-      	virtual void Output(ostream &os,int indent=0)const;
-      	virtual void Input(istream &is,const XMLCrystTag &tag);
-      	//virtual void InputOld(istream &is,const IOCrystTag &tag);
+      	virtual void XMLOutput(ostream &os,int indent=0)const;
+      	virtual void XMLInput(istream &is,const XMLCrystTag &tag);
+      	//virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
       	void Prepare();
    protected:
       /// Calc the powder spectrum

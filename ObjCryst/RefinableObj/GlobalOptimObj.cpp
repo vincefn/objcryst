@@ -682,9 +682,9 @@ void GlobalOptimObj::AddCostFunction(RefinableObj &obj,const unsigned int id, co
    #endif
 }
 
-void GlobalOptimObj::Output(ostream &os,int indent)const
+void GlobalOptimObj::XMLOutput(ostream &os,int indent)const
 {
-   VFN_DEBUG_ENTRY("GlobalOptimObj::Output():"<<this->GetName(),5)
+   VFN_DEBUG_ENTRY("GlobalOptimObj::XMLOutput():"<<this->GetName(),5)
    for(int i=0;i<indent;i++) os << "  " ;
    XMLCrystTag tag("GlobalOptimObj");
    tag.AddAttribute("Name",this->GetName());
@@ -692,10 +692,10 @@ void GlobalOptimObj::Output(ostream &os,int indent)const
    os <<tag<<endl;
    indent++;
    
-   mGlobalOptimType.Output(os,indent);
+   mGlobalOptimType.XMLOutput(os,indent);
    os<<endl;
 
-   mAnnealingScheduleTemp.Output(os,indent);
+   mAnnealingScheduleTemp.XMLOutput(os,indent);
    os<<endl;
    {
       XMLCrystTag tag2("TempMaxMin");
@@ -705,7 +705,7 @@ void GlobalOptimObj::Output(ostream &os,int indent)const
       os<<tag2<<endl;
    }
 
-   mAnnealingScheduleMutation.Output(os,indent);
+   mAnnealingScheduleMutation.XMLOutput(os,indent);
    os<<endl;
    
    {
@@ -747,12 +747,12 @@ void GlobalOptimObj::Output(ostream &os,int indent)const
    tag.SetIsEndTag(true);
    for(int i=0;i<indent;i++) os << "  " ;
    os <<tag<<endl;
-   VFN_DEBUG_EXIT("GlobalOptimObj::Output():"<<this->GetName(),5)
+   VFN_DEBUG_EXIT("GlobalOptimObj::XMLOutput():"<<this->GetName(),5)
 }
 
-void GlobalOptimObj::Input(istream &is,const XMLCrystTag &tagg)
+void GlobalOptimObj::XMLInput(istream &is,const XMLCrystTag &tagg)
 {
-   VFN_DEBUG_ENTRY("GlobalOptimObj::Input():"<<this->GetName(),5)
+   VFN_DEBUG_ENTRY("GlobalOptimObj::XMLInput():"<<this->GetName(),5)
    for(unsigned int i=0;i<tagg.GetNbAttribute();i++)
    {
       if("Name"==tagg.GetAttributeName(i)) this->SetName(tagg.GetAttributeValue(i));
@@ -773,17 +773,17 @@ void GlobalOptimObj::Input(istream &is,const XMLCrystTag &tagg)
             {
                if("Algorithm"==tag.GetAttributeValue(i))
                {
-                  mGlobalOptimType.Input(is,tag);
+                  mGlobalOptimType.XMLInput(is,tag);
                   break;
                }
                if("Temperature Schedule"==tag.GetAttributeValue(i))
                {
-                  mAnnealingScheduleTemp.Input(is,tag);
+                  mAnnealingScheduleTemp.XMLInput(is,tag);
                   break;
                }
                if("Displacement Amplitude Schedule"==tag.GetAttributeValue(i))
                {
-                  mAnnealingScheduleMutation.Input(is,tag);
+                  mAnnealingScheduleMutation.XMLInput(is,tag);
                   break;
                }
             }
@@ -839,9 +839,9 @@ void GlobalOptimObj::Input(istream &is,const XMLCrystTag &tagg)
    }
 }
 #if 0
-void GlobalOptimObj::InputOld(istream &is,const IOCrystTag &tagg)
+void GlobalOptimObj::XMLInputOld(istream &is,const IOCrystTag &tagg)
 {
-   VFN_DEBUG_MESSAGE("GlobalOptimObj::Input():"<<this->GetName(),5)
+   VFN_DEBUG_MESSAGE("GlobalOptimObj::XMLInput():"<<this->GetName(),5)
    switch(tagg.GetVersion())
    {
       case 0:
@@ -852,7 +852,7 @@ void GlobalOptimObj::InputOld(istream &is,const IOCrystTag &tagg)
             IOCrystTag tag(is);
             if(tag.IsClosingTag()==true)
             {
-               VFN_DEBUG_MESSAGE("GlobalOptimObj::Input():End",5)
+               VFN_DEBUG_MESSAGE("GlobalOptimObj::XMLInput():End",5)
                return;
             }
             if(tag.GetType()=="Param")
@@ -986,7 +986,7 @@ void GlobalOptimObj::SetName(const string& name) {mName=name;}
 
 const string GlobalOptimObj::GetClassName()const { return "GlobalOptimObj";}
 
-void GlobalOptimObj::Print()const {this->Output(cout);}
+void GlobalOptimObj::Print()const {this->XMLOutput(cout);}
       
 void GlobalOptimObj::PrepareRefParList()
 {

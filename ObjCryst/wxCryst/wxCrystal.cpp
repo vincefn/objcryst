@@ -281,7 +281,7 @@ void WXCrystal::OnMenuSaveCIF(wxCommandEvent & WXUNUSED(event))
    
    ofstream out(save.GetPath().c_str());
    if(!out) return;//:TODO:
-   mpCrystal->OutputCIF(out);
+   mpCrystal->CIFOutput(out);
    out.close();
 }
 
@@ -314,7 +314,7 @@ void WXCrystal::OnMenuRemoveScattPow(wxCommandEvent & WXUNUSED(event))
                                  "Choose Scattering Power to remove:",choice);
    if(0==scatt) return;
    mpCrystal->RemoveScatteringPower(scatt);
-   mpCrystal->Output(cout);
+   mpCrystal->XMLOutput(cout);
    VFN_DEBUG_MESSAGE("WXCrystal::OnButtonRemoveScattPow():End",6)
    this->Layout();
 }
@@ -600,7 +600,7 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
       }
    }
    mpCrystal->AddScatterer(scatt);
-   //mpCrystal->Output(cout);
+   //mpCrystal->XMLOutput(cout);
    this->CrystUpdate();
    //this->Layout();
    VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer():End",6)
@@ -615,7 +615,7 @@ void WXCrystal::OnMenuRemoveScatterer(wxCommandEvent & WXUNUSED(event))
    if(0==scatt) return;
    mpCrystal->RemoveScatterer(scatt);
    VFN_DEBUG_MESSAGE("WXCrystal::OnButtonRemoveScatterer():End",6)
-   mpCrystal->Output(cout);
+   mpCrystal->XMLOutput(cout);
    this->Layout();
 }
 

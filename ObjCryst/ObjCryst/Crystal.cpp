@@ -624,8 +624,29 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
       	double y000= 0.;
       	double z000= 0.;
       	this->FractionalToOrthonormalCoords(x000,y000,z000);
-      this->FractionalToOrthonormalCoords(xc,yc,zc);
       glPushMatrix();
+   	//Add Axis & axis names
+      	GLfloat colour_font[]= { 1.0,1.0,1.0, 1.0 };
+      	glMaterialfv (GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE,colour_font);
+      	//glMaterialfv (GL_FRONT, GL_EMISSION,colour_font);
+      	double x,y,z;
+
+      	x=1.2-xc;y=-yc;z=-zc;
+      	this->FractionalToOrthonormalCoords(x,y,z);
+      	glRasterPos3f(x,y,z);
+      	glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,'a');
+
+      	x=-xc;y=1.2-yc;z=-zc;
+      	this->FractionalToOrthonormalCoords(x,y,z);
+      	glRasterPos3f(x,y,z);
+      	glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,'b');
+
+      	x=-xc;y=-yc;z=1.2-zc;
+      	this->FractionalToOrthonormalCoords(x,y,z);
+      	glRasterPos3f(x,y,z);
+      	glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,'c');
+		// Cell
+      	this->FractionalToOrthonormalCoords(xc,yc,zc);
          glTranslatef(-xc, -yc, -zc);
       	glColor3f(1.0f,1.0f,1.0f);	   // White
       	glBegin(GL_LINE_LOOP);				// Bottom
@@ -653,26 +674,6 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
          	glVertex3f(    x100,    y100,    z100);
          	glVertex3f(    x110,    y110,    z110);
       	glEnd();
-   	//Add Axis & axis names
-      	GLfloat colour_font[]= { 1.0,1.0,1.0, 1.0 };
-      	glMaterialfv (GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE,colour_font);
-      	//glMaterialfv (GL_FRONT, GL_EMISSION,colour_font);
-      	double x,y,z;
-
-      	x=0.7;y=-.5;z=-.5;
-      	this->FractionalToOrthonormalCoords(x,y,z);
-      	glRasterPos3f(x,y,z);
-      	glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,'a');
-
-      	x=-.5;y=0.7;z=-.5;
-      	this->FractionalToOrthonormalCoords(x,y,z);
-      	glRasterPos3f(x,y,z);
-      	glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,'b');
-
-      	x=-.5;y=-.5;z=0.7;
-      	this->FractionalToOrthonormalCoords(x,y,z);
-      	glRasterPos3f(x,y,z);
-      	glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,'c');
 
 
    	//Describe all Scatterers
@@ -973,7 +974,7 @@ void Crystal::GlobalOptRandomMove(const double mutationAmplitude)
    VFN_DEBUG_MESSAGE("Crystal::GlobalOptRandomMove():End",1)
 }
 
-void Crystal::OutputCIF(ostream &os)const
+void Crystal::CIFOutput(ostream &os)const
 {
    VFN_DEBUG_ENTRY("Crystal::OutputCIF()",5)
    this->InitMatrices();
