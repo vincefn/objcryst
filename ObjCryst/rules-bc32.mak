@@ -1,5 +1,5 @@
 # Base ObjCryst directory
-DIR_CRYST=C:\cygwin\Home\Standard\devbc32\ObjCryst
+DIR_CRYST=C:\Dev\ObjCryst
 # Borland Directory
 DIR_BORLAND=C:\Borland\BCC55
 
