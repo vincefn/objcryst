@@ -929,7 +929,7 @@ void ScatteringData::SetMaxSinThetaOvLambda(const REAL max){mMaxSinThetaOvLambda
 REAL ScatteringData::GetMaxSinThetaOvLambda()const{return mMaxSinThetaOvLambda;}
 long ScatteringData::GetNbReflBelowMaxSinThetaOvLambda()const
 {
-   VFN_DEBUG_MESSAGE("ScatteringData::GetNbReflBelowMaxSinThetaOvLambda()",5)
+   VFN_DEBUG_MESSAGE("ScatteringData::GetNbReflBelowMaxSinThetaOvLambda()",4)
    this->CalcSinThetaLambda();
    if((mNbReflUsed>0)&&(mNbReflUsed<mNbRefl))
    {
@@ -947,7 +947,7 @@ long ScatteringData::GetNbReflBelowMaxSinThetaOvLambda()const
       mNbReflUsed=i;
       mClockNbReflUsed.Click();
       VFN_DEBUG_MESSAGE("->Changed Max sin(theta)/lambda="<<mMaxSinThetaOvLambda\
-                        <<" nb refl="<<mNbReflUsed,5)
+                        <<" nb refl="<<mNbReflUsed,4)
    }
    return mNbReflUsed;
 }
@@ -1903,6 +1903,23 @@ void ScatteringData::CalcLuzzatiFactor()const
 {
    // Assume this is  called by ScatteringData::CalcStructFactor()
    VFN_DEBUG_ENTRY("ScatteringData::CalcLuzzatiFactor",3)
+   bool useLuzzati=false;
+   for(long i=0;i<mNbScatteringPower;i++)
+   {
+      if(GetScatteringPower(mScatteringPowerIndex2(i)).GetMaximumLikelihoodPositionError()!=0)
+      {
+         useLuzzati=true;
+         break;
+      }
+   }
+   if(!useLuzzati)
+   {
+      mvLuzzatiFactor.resize(mNbScatteringPower);
+      for(long i=0;i<mNbScatteringPower;i++)
+         mvLuzzatiFactor[i].resize(0);
+      VFN_DEBUG_EXIT("ScatteringData::CalcLuzzatiFactor(): not needed, no positionnal errors",3)
+      return;
+   }
    bool recalc=false;
    if(  (mClockTheta     >mClockLuzzatiFactor)
       ||(mClockGeomStructFact>mClockLuzzatiFactor)//checks if occupancies changed
