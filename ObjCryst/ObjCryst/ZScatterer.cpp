@@ -91,11 +91,11 @@ REAL ZAtom::GetZDihedralAngle()const {return mDihed;}
 REAL ZAtom::GetOccupancy()const {return mOccupancy;}
 const ScatteringPower* ZAtom::GetScatteringPower()const{return mpScattPow;}
 //:TODO: fix the following so that their clocks are clicked accordingly
-void ZAtom::SetZBondLength(const REAL bond) {mBondLength=bond;}
-void ZAtom::SetZAngle(const REAL angle) {mAngle=angle;}
-void ZAtom::SetZDihedralAngle(const REAL dihed) {mDihed=dihed;}
-void ZAtom::SetOccupancy(const REAL pop) {mOccupancy=pop;}
-void ZAtom::SetScatteringPower(const ScatteringPower* scatt) {mpScattPow=scatt;}
+void ZAtom::SetZBondLength(const REAL bond) {mBondLength=bond;mpScatt->GetClockScatterer().Click();}
+void ZAtom::SetZAngle(const REAL angle) {mAngle=angle;mpScatt->GetClockScatterer().Click();}
+void ZAtom::SetZDihedralAngle(const REAL dihed) {mDihed=dihed;mpScatt->GetClockScatterer().Click();}
+void ZAtom::SetOccupancy(const REAL pop) {mOccupancy=pop;mpScatt->GetClockScatterer().Click();}
+void ZAtom::SetScatteringPower(const ScatteringPower* scatt) {mpScattPow=scatt;mpScatt->GetClockScatterer().Click();}
 #ifdef __WX__CRYST__
 WXCrystObjBasic* ZAtom::WXCreate(wxWindow *parent)
 {
@@ -1770,6 +1770,7 @@ void ZScatterer::UpdateScattCompList() const
          mScattCompList(j  ).mX=x;
          mScattCompList(j  ).mY=y;
          mScattCompList(j  ).mZ=z;
+         mScattCompList(j  ).mpScattPow=mZAtomRegistry.GetObj(i).GetScatteringPower();
          mScattCompList(j++).mOccupancy=mZAtomRegistry.GetObj(i).GetOccupancy()*mOccupancy;
       }
    }
