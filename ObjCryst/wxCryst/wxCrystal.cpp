@@ -291,7 +291,8 @@ void WXCrystal::OnMenuCrystalGL(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXCrystal::OnMenuCrystalGL()",6)
    if(mpCrystalGL!=0) return;
-   wxFrame* frame= new wxFrame(this,-1,mpCrystal->GetName().c_str());
+   wxFrame* frame= new wxFrame(this,-1,mpCrystal->GetName().c_str(),
+                               wxDefaultPosition,wxSize(400,400));
    mpCrystalGL=new WXGLCrystalCanvas(this,frame,-1);
    frame->Show(true);
    this->UpdateGL();

@@ -342,7 +342,8 @@ void WXPowderPattern::OnMenuShowGraph(wxCommandEvent & WXUNUSED(event))
    if(mpGraph!=0) return;
    WXCrystValidateAllUserInput();
    mpPowderPattern->Prepare();
-   wxFrame *frame= new wxFrame(this,-1,mpPowderPattern->GetName().c_str());
+   wxFrame *frame= new wxFrame(this,-1,mpPowderPattern->GetName().c_str(),
+                               wxDefaultPosition,wxSize(500,300));
    mpGraph = new WXPowderPatternGraph(frame,this);
    frame->Show(true);
    frame->CreateStatusBar(2);
