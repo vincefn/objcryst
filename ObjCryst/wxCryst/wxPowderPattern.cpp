@@ -19,7 +19,6 @@
 //#include <sstream> //for stringstream
 #include <fstream>
 
-#include "wx/wx.h"
 #include "wxCryst/wxPowderPattern.h"
 #include "wxCryst/wxRadiation.h"
 

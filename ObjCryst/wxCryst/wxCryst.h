@@ -28,13 +28,15 @@
 #include <string>
 #include <iostream>
 
-#include "wx/window.h"
-#include "wx/button.h"
-#include "wx/sizer.h"
-#include "wx/stattext.h"
-#include "wx/textctrl.h"
-#include "wx/checkbox.h"
-#include "wx/choice.h"
+// wx headers, with or without precompilation
+#include "wx/wxprec.h"
+#ifdef __BORLANDC__
+    #pragma hdrstop
+#endif
+#ifndef WX_PRECOMP
+    #include "wx/wx.h"
+#endif
+
 #include "CrystVector/CrystVector.h"
 
 namespace ObjCryst

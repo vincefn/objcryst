@@ -21,11 +21,11 @@
 
 #include <stdlib.h>
 
-#include "wx/wx.h"
+#include "wxCryst/wxCrystal.h"
+
 #include "wx/colordlg.h"
 #include "wx/progdlg.h"
 #include "wx/busyinfo.h"
-#include "wxCryst/wxCrystal.h"
 
 #include "ObjCryst/Atom.h"
 #include "ObjCryst/ZScatterer.h"

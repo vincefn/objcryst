@@ -19,7 +19,6 @@
 //#include <sstream> //for stringstream
 #include <fstream>
 
-#include "wx/wx.h"
 #include "wxCryst/wxGlobalOptimObj.h"
 
 // Next two just to fix some parameters during global optimization

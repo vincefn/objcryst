@@ -19,7 +19,6 @@
 //#include <sstream> //for stringstream
 #include <fstream>
 
-#include "wx/wx.h"
 #include "wxCryst/wxScatteringPower.h"
 
 //Fixes for Cygwin; where do those stupid macros come from ? Somewhere in wxMSW headers

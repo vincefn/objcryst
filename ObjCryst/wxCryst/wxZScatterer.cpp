@@ -20,7 +20,6 @@
 #include <stdio.h> //for sprintf()
 #include <fstream>
 
-#include "wx/wx.h"
 #include "wxCryst/wxZScatterer.h"
 
 //Fixes for Cygwin; where do those stupid macros come from ? Somewhere in wxMSW headers

@@ -19,8 +19,6 @@
 //#include <sstream> //for stringstream
 #include <fstream>
 
-#include "wx/wx.h"
-
 #include "wxCryst/wxRefinableObj.h"
 
 #include "wxCryst/wxRefinableObj.h"
