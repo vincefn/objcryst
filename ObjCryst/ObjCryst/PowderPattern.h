@@ -285,17 +285,21 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
          *The factor \f$ SlitAp = \frac{1}{\sin(\theta)} \f$ takes into account the 
          *fraction of the diffracted cone which falls in the detector slit.
          *
+         * If there is prefereed orientation, this also holds the associated correction.
+         *
          * \todo: store all corrections in a registry, so that other corrections
          * can more easily be added (? Maybe not that useful, especially since these
          * correction do not need to be displayed to the user ?).
          */
-         mutable CrystVector_REAL mLorentzPolarSlitCorr;
+         mutable CrystVector_REAL mIntensityCorr;
          /// Lorentz correction
          LorentzCorr mCorrLorentz;
          /// Polarization correction
          PolarizationCorr mCorrPolar;
          /// Slit aperture correction
          PowderSlitApertureCorr mCorrSlitAperture;
+         /// Preferred orientation (texture) correction following the March-Dollase model
+         TextureMarchDollase mCorrTextureMarchDollase;
          
       /// Computed intensities for all reflections
          mutable CrystVector_REAL mIhklCalc;

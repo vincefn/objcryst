@@ -21,6 +21,7 @@
 #define _VFN_WX_POWDERPATTERN_H_
 
 #include "wxCryst/wxRefinableObj.h"
+#include "ObjCryst/ScatteringCorr.h"
 #include "ObjCryst/PowderPattern.h"
 namespace ObjCryst
 {
@@ -136,6 +137,39 @@ class WXPowderPatternBackground: public WXRefinableObj
       void OnMenuImportUserBackground(wxCommandEvent & WXUNUSED(event));
    private:
       PowderPatternBackground *mpPowderPatternBackground;
+   DECLARE_EVENT_TABLE()
+};
+/** Class to display one Preferred Orientation phase using
+* the March-Dollase parametrization
+*
+*/
+class WXTexturePhaseMarchDollase: public WXCrystObjBasic
+{
+   public:
+      WXTexturePhaseMarchDollase(wxWindow *parent, TexturePhaseMarchDollase*,TextureMarchDollase*);
+      ~WXTexturePhaseMarchDollase();
+      virtual void CrystUpdate();
+      virtual void UpdateUI();
+      virtual bool Layout();
+   private:
+      wxBoxSizer *mpSizer;
+      WXCrystObjBasicList mList;
+      TexturePhaseMarchDollase* mpTexturePhaseMarchDollase;
+};
+
+/** Class to display the Preferred Orientation Correction using
+* the March-Dollase parametrization
+*
+* Allows to add phases, and change the parameters.
+*/
+class WXTextureMarchDollase: public WXRefinableObj
+{
+   public:
+      WXTextureMarchDollase(wxWindow *parent, TextureMarchDollase*);
+      void OnAddTexturePhase(wxCommandEvent & WXUNUSED(event));
+      void OnDeleteTexturePhase(wxCommandEvent & WXUNUSED(event));
+   private:
+      TextureMarchDollase* mpTextureMarchDollase;
    DECLARE_EVENT_TABLE()
 };
 

@@ -120,6 +120,38 @@ class PowderSlitApertureCorr:public ScatteringCorr
       virtual void CalcCorr() const;
 };
 
+class TextureMarchDollase;
+
+/** One texture phase for the March-Dollase model.
+*
+*/
+struct TexturePhaseMarchDollase
+{
+   TexturePhaseMarchDollase(const REAL f, const REAL c,const REAL h,const REAL k, const REAL l,
+                            TextureMarchDollase &);
+   ~TexturePhaseMarchDollase();
+   const string& GetClassName()const;
+   const string& GetName()const;
+   void SetPar(const REAL f, const REAL c,const REAL h,const REAL k, const REAL l);
+   void XMLOutput(ostream &os,int indent=0)const;
+   void XMLInput(istream &is,const XMLCrystTag &tag);
+   REAL mFraction,mMarchCoeff,mH,mK,mL;
+   /// Norm of the (HKL) vector, to keep it constant during optimization
+   mutable REAL mNorm;
+   /// The parent TextureMarchDollase object.
+   TextureMarchDollase *mpTextureMarchDollase;
+   /// Values of parameters towards which the optimization is biased (if biasing
+   /// is used). These are normally dynamically updated to the last "best" values found.
+   mutable REAL mBiasFraction,mBiasMarchCoeff,mBiasH,mBiasK,mBiasL;
+   #ifdef __WX__CRYST__
+      WXCrystObjBasic* WXCreate(wxWindow*);
+      WXCrystObjBasic* WXGet();
+      void WXDelete();
+      void WXNotifyDelete();
+      WXCrystObjBasic *mpWXCrystObj;
+   #endif
+};
+
 /** Texture correction using the March-Dollase model.
 *
 * This can include several phases.
@@ -127,14 +159,6 @@ class PowderSlitApertureCorr:public ScatteringCorr
 */
 class TextureMarchDollase:public ScatteringCorr,public RefinableObj
 {
-   struct TexturePhase
-   {
-      TexturePhase(const REAL f, const REAL c,const REAL h,const REAL k, const REAL l):
-         mFraction(f),mMarchCoeff(c),mH(h),mK(k),mL(l){}
-      void SetPar(const REAL f, const REAL c,const REAL h,const REAL k, const REAL l)
-         {mFraction=f;mMarchCoeff=c;mH=h;mK=k;mL=l;}
-      REAL mFraction,mMarchCoeff,mH,mK,mL;
-   };
    public:
       TextureMarchDollase(const ScatteringData & data);
       virtual ~TextureMarchDollase();
@@ -144,7 +168,7 @@ class TextureMarchDollase:public ScatteringCorr,public RefinableObj
                     const REAL h,const REAL k, const REAL l);
       void SetPhasePar(const unsigned int i, const REAL fraction, const REAL coeffMarch,
                        const REAL h,const REAL k, const REAL l);
-      //void DeletePhase(const unsigned int i);
+      void DeletePhase(const unsigned int i);
       unsigned int GetNbPhase() const;
       REAL GetFraction(const unsigned int i)const;
       REAL GetMarchCoeff(const unsigned int i)const;
@@ -155,15 +179,18 @@ class TextureMarchDollase:public ScatteringCorr,public RefinableObj
       virtual REAL GetBiasingCost()const;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
+      virtual void BeginOptimization(const bool allowApproximations=false,
+                                     const bool enableRestraints=false);
+      virtual void TagNewBestConfig()const;
    protected:
       virtual void CalcCorr() const;
       void DeleteAllPhase();
-      unsigned int mNbPhase;
-      TexturePhase** mpTexturePhase;
+      ObjRegistry<TexturePhaseMarchDollase> mPhaseRegistry;
       RefinableObjClock mClockTexturePar;
    #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);
+   friend class WXTextureMarchDollase;
    #endif
 };
 }//namespace

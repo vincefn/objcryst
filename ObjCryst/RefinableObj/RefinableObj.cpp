@@ -1938,6 +1938,7 @@ template void RefObjRegisterRecursive(RefinableObj &obj,ObjRegistry<RefinableObj
 #include "ObjCryst/ZScatterer.h"
 #include "ObjCryst/PowderPattern.h"
 #include "ObjCryst/DiffractionDataSingleCrystal.h"
+#include "ObjCryst/ScatteringCorr.h"
 #include "RefinableObj/GlobalOptimObj.h"
 #include "RefinableObj/IO.h"
 using namespace ObjCryst;
@@ -1954,6 +1955,7 @@ template class ObjRegistry<OptimizationObj>;
 //template class ObjRegistry<IOCrystTag>;//to be removed
 template class ObjRegistry<XMLCrystTag>;
 template class ObjRegistry<ZAtom>;
+template class ObjRegistry<TexturePhaseMarchDollase>;
 
 template class RefObjOption<RefinableObj>;
 template class RefObjOption<Crystal>;

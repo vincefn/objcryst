@@ -278,13 +278,15 @@ PowderPatternDiffraction::PowderPatternDiffraction():
 mFullProfileWidthFactor(5.),
 mCagliotiU(0),mCagliotiV(0),mCagliotiW(3e-5),
 mPseudoVoigtEta0(0.5),mPseudoVoigtEta1(0.),mUseAsymmetricProfile(false),
-mCorrLorentz(*this),mCorrPolar(*this),mCorrSlitAperture(*this)
+mCorrLorentz(*this),mCorrPolar(*this),mCorrSlitAperture(*this),
+mCorrTextureMarchDollase(*this)
 {
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::PowderPatternDiffraction()",10);
    mIsScalable=true;
    this->InitOptions();
    mReflectionProfileType.SetChoice(PROFILE_PSEUDO_VOIGT);
    this->SetIsIgnoringImagScattFact(true);
+   this->AddSubRefObj(mCorrTextureMarchDollase);
 }
 
 PowderPatternDiffraction::PowderPatternDiffraction(const PowderPatternDiffraction &old):
@@ -293,8 +295,11 @@ mFullProfileWidthFactor(old.mFullProfileWidthFactor),
 mCagliotiU(old.mCagliotiU),mCagliotiV(old.mCagliotiV),mCagliotiW(old.mCagliotiW),
 mPseudoVoigtEta0(old.mPseudoVoigtEta0),mPseudoVoigtEta1(old.mPseudoVoigtEta1),
 mUseAsymmetricProfile(old.mUseAsymmetricProfile),
-mCorrLorentz(*this),mCorrPolar(*this),mCorrSlitAperture(*this)
-{}
+mCorrLorentz(*this),mCorrPolar(*this),mCorrSlitAperture(*this),
+mCorrTextureMarchDollase(*this)
+{
+   this->AddSubRefObj(mCorrTextureMarchDollase);
+}
 
 PowderPatternDiffraction::~PowderPatternDiffraction()
 {}
@@ -680,17 +685,22 @@ void PowderPatternDiffraction::CalcIntensityCorr()const
    mpCorr[2]=&(mCorrSlitAperture.GetCorr());
    if(mClockIntensityCorr<mCorrSlitAperture.GetClockCorr()) needRecalc=true;
    
+   if(mCorrTextureMarchDollase.GetNbPhase()>0)
+   {
+      mpCorr[3]=&(mCorrTextureMarchDollase.GetCorr());
+      if(mClockIntensityCorr<mCorrTextureMarchDollase.GetClockCorr()) needRecalc=true;
+   }
+   
    if(needRecalc==false) return;
    
    TAU_PROFILE("PowderPatternDiffraction::CalcIntensityCorr()","void ()",TAU_DEFAULT);
-   VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcIntensityCorr()",10)
-   mLorentzPolarSlitCorr.resize(this->GetNbRefl());
-   mLorentzPolarSlitCorr=1.;
-   mLorentzPolarSlitCorr*=*(mpCorr[0]);
-   if(this->GetRadiation().GetRadiationType()==RAD_XRAY) mLorentzPolarSlitCorr*=*(mpCorr[1]);
-   mLorentzPolarSlitCorr*=*(mpCorr[2]);
+   VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcIntensityCorr()",2)
+   mIntensityCorr = *(mpCorr[0]);
+   if(this->GetRadiation().GetRadiationType()==RAD_XRAY) mIntensityCorr *= *(mpCorr[1]);
+   mIntensityCorr *= *(mpCorr[2]);
+   if(mCorrTextureMarchDollase.GetNbPhase()>0) mIntensityCorr *= *mpCorr[3];
    mClockIntensityCorr.Click();
-   VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcIntensityCorr():finished",0)
+   VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcIntensityCorr():finished",2)
 }
 
 void PowderPatternDiffraction::CalcIhkl() const
@@ -709,7 +719,7 @@ void PowderPatternDiffraction::CalcIhkl() const
    
    pr=mFhklCalcReal.data();
    pi=mFhklCalcImag.data();
-   pcorr=mLorentzPolarSlitCorr.data();
+   pcorr=mIntensityCorr.data();
    
    mult=mMultiplicity.data();
    mIhklCalc.resize(mNbRefl);
@@ -722,7 +732,7 @@ void PowderPatternDiffraction::CalcIhkl() const
       pi++;
    }
    //cout <<FormatVertVector<REAL>(mTheta,mIhklCalc,mMultiplicity,
-   //                               mFhklCalcReal,mFhklCalcImag,mLorentzPolarSlitCorr);
+   //                               mFhklCalcReal,mFhklCalcImag,mIntensityCorr);
    mClockIhklCalc.Click();
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcIhkl():End",3)
 }
@@ -857,6 +867,7 @@ mStatisticsExcludeBackground(false),mMaxSinThetaOvLambda(10)
    mScaleFactor=1;
    mSubObjRegistry.SetName("SubObjRegistry for a PowderPattern object");
    mPowderPatternComponentRegistry.SetName("Powder Pattern Components");
+   this->AddSubRefObj(mRadiation);
    this->Init();
    gPowderPatternRegistry.Register(*this);
    gTopRefinableObjRegistry.Register(*this);
@@ -876,6 +887,7 @@ mMaxSinThetaOvLambda(old.mMaxSinThetaOvLambda)
    mSubObjRegistry.SetName("SubObjRegistry for a PowderPattern :"+mName);
    gPowderPatternRegistry.Register(*this);
    gTopRefinableObjRegistry.Register(*this);
+   this->AddSubRefObj(mRadiation);
    this->Init();
 }
 

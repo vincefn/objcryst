@@ -35,6 +35,7 @@
 #include "ObjCryst/PowderPattern.h"
 #include "ObjCryst/ScatteringPower.h"
 #include "ObjCryst/ZScatterer.h"
+#include "ObjCryst/ScatteringCorr.h"
 
 //Fixes for Cygwin; where do those stupid macros come from ? Somewhere in wxMSW headers
 #ifdef max
@@ -391,6 +392,7 @@ template class WXRegistry<OptimizationObj>;
 template class WXRegistry<XMLCrystTag>;
 //template class WXRegistry<IOCrystTag>;//to be removed
 template class WXRegistry<ZAtom>;
+template class WXRegistry<TexturePhaseMarchDollase>;
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXDialogChooseFromRegistry

@@ -311,7 +311,13 @@ void WXMonteCarloObj::OnRunOptimization()
    
    //Fix parameters than really should not be global-optimized
       mpMonteCarloObj->SetParIsFixed(gpRefParTypeUnitCell,true);
-      mpMonteCarloObj->SetParIsFixed(gpRefParTypeScattData,true);
+      mpMonteCarloObj->SetParIsFixed(gpRefParTypeScattDataScale,true);
+      mpMonteCarloObj->SetParIsFixed(gpRefParTypeScattDataProfile,true);
+      mpMonteCarloObj->SetParIsFixed(gpRefParTypeScattDataCorrIntAbsorp,true);
+      mpMonteCarloObj->SetParIsFixed(gpRefParTypeScattDataCorrIntPolar,true);
+      mpMonteCarloObj->SetParIsFixed(gpRefParTypeScattDataCorrIntExtinc,true);
+      mpMonteCarloObj->SetParIsFixed(gpRefParTypeScattDataCorrPos,true);
+      mpMonteCarloObj->SetParIsFixed(gpRefParTypeScattDataBackground,true);
       mpMonteCarloObj->SetParIsFixed(gpRefParTypeRadiation,true);
       mpMonteCarloObj->UpdateDisplay();
    

@@ -1916,6 +1916,11 @@ void PowderPatternDiffraction::XMLOutput(ostream &os,int indent)const
    this->GetPar(&mGlobalBiso).XMLOutput(os,"globalBiso",indent);
    os <<endl;
    
+   if(mCorrTextureMarchDollase.GetNbPhase()>0)
+   {
+      mCorrTextureMarchDollase.XMLOutput(os,indent);
+   }
+   
    indent--;
    tag.SetIsEndTag(true);
    for(int i=0;i<indent;i++) os << "  " ;
@@ -2026,6 +2031,11 @@ void PowderPatternDiffraction::XMLInput(istream &is,const XMLCrystTag &tagg)
          for(unsigned int i=0;i<tag.GetNbAttribute();i++)
             if("Name"==tag.GetAttributeName(i)) 
                mOptionRegistry.GetObj(tag.GetAttributeValue(i)).XMLInput(is,tag);
+         continue;
+      }
+      if("TextureMarchDollase"==tag.GetName())
+      {
+         mCorrTextureMarchDollase.XMLInput(is,tag);
          continue;
       }
    }

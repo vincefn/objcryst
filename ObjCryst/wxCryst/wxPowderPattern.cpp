@@ -911,6 +911,120 @@ void WXPowderPatternBackground::OnMenuImportUserBackground(wxCommandEvent & WXUN
    mpPowderPatternBackground->ImportUserBackground(open->GetPath().c_str());
    open->Destroy();
 }
+////////////////////////////////////////////////////////////////////////
+//
+//    WXTexturePhaseMarchDollase
+//
+////////////////////////////////////////////////////////////////////////
+WXTexturePhaseMarchDollase::WXTexturePhaseMarchDollase(wxWindow *parent, 
+                                                       TexturePhaseMarchDollase *pObj,
+                                                       TextureMarchDollase* pTex):
+WXCrystObjBasic(parent),mpTexturePhaseMarchDollase(pObj)
+{
+   VFN_DEBUG_ENTRY("WXTexturePhaseMarchDollase::WXTexturePhaseMarchDollase()",5)
+   mpSizer=new wxBoxSizer(wxHORIZONTAL);
+   pTex->Print();
+   WXFieldRefPar* pFieldFraction  =new WXFieldRefPar(this,"fraction",
+            &(pTex->GetPar(&(mpTexturePhaseMarchDollase->mFraction))));
+   mpSizer->Add(pFieldFraction,0,wxALIGN_LEFT);
+   mList.Add(pFieldFraction);
+
+   WXFieldRefPar* pFieldMarch  =new WXFieldRefPar(this,"March Coeff.",
+            &(pTex->GetPar(&(mpTexturePhaseMarchDollase->mMarchCoeff))));
+   mpSizer->Add(pFieldMarch,0,wxALIGN_LEFT);
+   mList.Add(pFieldMarch);
+
+   WXFieldRefPar* pFieldH  =new WXFieldRefPar(this,"H",
+            &(pTex->GetPar(&(mpTexturePhaseMarchDollase->mH))));
+   mpSizer->Add(pFieldH,0,wxALIGN_LEFT);
+   mList.Add(pFieldH);
+   
+   WXFieldRefPar* pFieldK  =new WXFieldRefPar(this,"K",
+            &(pTex->GetPar(&(mpTexturePhaseMarchDollase->mK))));
+   mpSizer->Add(pFieldK,0,wxALIGN_LEFT);
+   mList.Add(pFieldK);
+   
+   WXFieldRefPar* pFieldL  =new WXFieldRefPar(this,"L",
+            &(pTex->GetPar(&(mpTexturePhaseMarchDollase->mL))));
+   mpSizer->Add(pFieldL,0,wxALIGN_LEFT);
+   mList.Add(pFieldL);
+
+   this->SetSizer(mpSizer);
+   
+   this->CrystUpdate();
+   this->Layout();
+   
+   VFN_DEBUG_EXIT("WXTexturePhaseMarchDollase::WXTexturePhaseMarchDollase()",5)
+}
+
+WXTexturePhaseMarchDollase::~WXTexturePhaseMarchDollase()
+{
+   mpTexturePhaseMarchDollase->WXNotifyDelete();
+}
+void WXTexturePhaseMarchDollase::CrystUpdate()
+{
+   mList.CrystUpdate();
+}
+void WXTexturePhaseMarchDollase::UpdateUI()
+{
+   mList.UpdateUI();
+}
+bool WXTexturePhaseMarchDollase::Layout()
+{
+   for(unsigned int i=0;i<mList.GetNb();i++)
+      mpSizer->SetItemMinSize(mList.Get(i),
+                              mList.Get(i)->GetSize().GetWidth(),
+                              mList.Get(i)->GetSize().GetHeight());
+      
+   mpSizer->Layout();
+   mpSizer->Fit(this);
+   wxSizer* s=mWXParent->GetSizer();
+   if(s != 0)
+   {// Need to do it that way, in case  the parent is not a WXCrystObj
+    // with an adequate Layout() function
+      s->SetItemMinSize(this,this->GetSize().GetWidth(),this->GetSize().GetHeight());
+      s->Fit(mWXParent);
+   }
+   mWXParent->Layout();
+   return this->wxWindow::Layout();
+}
+
+////////////////////////////////////////////////////////////////////////
+//
+//    WXTextureMarchDollase
+//
+////////////////////////////////////////////////////////////////////////
+BEGIN_EVENT_TABLE(WXTextureMarchDollase, wxWindow)
+   EVT_MENU(ID_POWDERTEXTURE_MENU_ADDPHASE,   WXTextureMarchDollase::OnAddTexturePhase)
+   EVT_MENU(ID_POWDERTEXTURE_MENU_DELETEPHASE,WXTextureMarchDollase::OnDeleteTexturePhase)
+   EVT_UPDATE_UI(ID_CRYST_UPDATEUI,           WXRefinableObj::OnUpdateUI)
+END_EVENT_TABLE()
+
+WXTextureMarchDollase::WXTextureMarchDollase(wxWindow *parent, TextureMarchDollase*obj):
+WXRefinableObj(parent,(RefinableObj*)obj),mpTextureMarchDollase(obj)
+{
+   VFN_DEBUG_ENTRY("WXTextureMarchDollase::WXTextureMarchDollase()",5)
+   // Menu
+      mpMenuBar->AddMenu("Phases",ID_REFOBJ_MENU_OBJ);
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERTEXTURE_MENU_ADDPHASE,
+                                "Add Phase");
+   //existing phases
+      WXRegistry<TexturePhaseMarchDollase> *pWXPhaseRegistry
+         =mpTextureMarchDollase->mPhaseRegistry.WXCreate(this);
+      mpSizer->Add(pWXPhaseRegistry,0,wxALIGN_LEFT);
+      mList.Add(pWXPhaseRegistry);
+   this->Layout();
+   VFN_DEBUG_EXIT("WXTextureMarchDollase::WXTextureMarchDollase()",5)
+}
+void WXTextureMarchDollase::OnAddTexturePhase(wxCommandEvent & WXUNUSED(event))
+{
+   VFN_DEBUG_ENTRY("WXTextureMarchDollase::OnAddTexturePhase()",5)
+   mpTextureMarchDollase->AddPhase(0.,1.,1,0,0);
+   VFN_DEBUG_EXIT("WXTextureMarchDollase::OnAddTexturePhase()",5)
+}
+void WXTextureMarchDollase::OnDeleteTexturePhase(wxCommandEvent & WXUNUSED(event))
+{
+}
 
 ////////////////////////////////////////////////////////////////////////
 //
@@ -989,6 +1103,11 @@ WXRefinableObj(parent,p),mpPowderPatternDiffraction(p)
             .WXCreate(this);
       mList.Add(fieldGlobalBiso);
       mpSizer->Add(fieldGlobalBiso);
+   // Texture
+      WXTextureMarchDollase* pTex
+         =new WXTextureMarchDollase(this,&(mpPowderPatternDiffraction->mCorrTextureMarchDollase));
+      mList.Add(pTex);
+      mpSizer->Add(pTex);
       
    this->CrystUpdate();
    this->Layout();
