@@ -255,9 +255,11 @@ void OptimizationObj::PrepareRefParList()
    
    this->BuildRecursiveRefObjList();
    // As any parameter been added in the recursive list of objects ?
+   // or has any object been added/removed ?
       RefinableObjClock clock;
       GetRefParListClockRecursive(mRecursiveRefinedObjList,clock);
-   if(clock>mRefParList.GetRefParListClock())
+   if(  (clock>mRefParList.GetRefParListClock())
+      ||(mRecursiveRefinedObjList.GetRegistryClock()>mRefParList.GetRefParListClock()) )
    {
       VFN_DEBUG_MESSAGE("OptimizationObj::PrepareRefParList():Rebuild list",6)
       mRefParList.ResetParList();
@@ -319,9 +321,11 @@ void OptimizationObj::BuildRecursiveRefObjList()
    GetSubRefObjListClockRecursive(mRefinedObjList,clock);
    if(clock>mRecursiveRefinedObjList.GetRegistryClock())
    {
+      VFN_DEBUG_ENTRY("OptimizationObj::BuildRecursiveRefObjList()",5)
       mRecursiveRefinedObjList.DeRegisterAll();
       for(int i=0;i<mRefinedObjList.GetNb();i++)
          RefObjRegisterRecursive(mRefinedObjList.GetObj(i),mRecursiveRefinedObjList);
+      VFN_DEBUG_EXIT("OptimizationObj::BuildRecursiveRefObjList()",5)
    }
 }
 
@@ -427,7 +431,6 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
    //:TODO: Other algorithms !
    TAU_PROFILE("MonteCarloObj::Optimize()","void (long)",TAU_DEFAULT);
    VFN_DEBUG_ENTRY("MonteCarloObj::Optimize()",5)
-   if(!silent) mRefParList.Print();
    for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).BeginOptimization(true);
    this->PrepareRefParList();
    if(!silent) mRefParList.Print();
