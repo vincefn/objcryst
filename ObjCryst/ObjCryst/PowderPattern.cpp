@@ -1112,6 +1112,8 @@ Error opening file for input:"+filename);
    fin.close();
    this->SetSigmaToSqrtIobs();
    this->SetWeightToInvSigmaSq();
+   mClockPowderPatternPar.Click();
+   this->UpdateDisplay();
    {
       char buf [200];
       sprintf(buf,"Imported powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
@@ -1158,6 +1160,8 @@ Error opening file for input:"+filename);
    for(unsigned long i=0;i<mNbPoint;i++) fin >> mPowderPatternObsSigma(i);
    fin.close();
    this->SetWeightToInvSigmaSq();
+   mClockPowderPatternPar.Click();
+   this->UpdateDisplay();
    {
       char buf [200];
       sprintf(buf,"Imported powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
@@ -1203,6 +1207,8 @@ Error opening file for input:"+filename);
    for(unsigned long i=0;i<mNbPoint;i++) fin >> mPowderPatternObsSigma(i);
    fin.close();
    this->SetWeightToInvSigmaSq();
+   mClockPowderPatternPar.Click();
+   this->UpdateDisplay();
    {
       char buf [200];
       sprintf(buf,"Imported powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
@@ -1248,6 +1254,7 @@ Error opening file for input:"+filename);
    fin.close();
    this->SetSigmaToSqrtIobs();
    this->SetWeightToInvSigmaSq();
+   this->UpdateDisplay();
    {
       char buf [200];
       sprintf(buf,"Imported powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
@@ -1297,6 +1304,8 @@ Error opening file for input:"+filename);
    fin.close();
    this->SetSigmaToSqrtIobs();
    this->SetWeightToInvSigmaSq();
+   mClockPowderPatternPar.Click();
+   this->UpdateDisplay();
    {
       char buf [200];
       sprintf(buf,"Imported powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
@@ -1357,6 +1366,8 @@ Error opening file for input:"+filename);
    m2ThetaStep *= DEG2RAD;
    
    this->SetWeightToInvSigmaSq();
+   mClockPowderPatternPar.Click();
+   this->UpdateDisplay();
    {
       char buf [200];
       sprintf(buf,"Imported powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
@@ -1416,7 +1427,8 @@ Error opening file for input:"+filename);
 
    this->SetSigmaToSqrtIobs();
    this->SetWeightToInvSigmaSq();
-
+   mClockPowderPatternPar.Click();
+   this->UpdateDisplay();
    {
       char buf [200];
       sprintf(buf,"Imported powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
@@ -1479,6 +1491,7 @@ Error opening file for input:"+filename);
    float tmp;
    string sub;
    float ct,iobs;
+   mNbPoint=0;
    for(;;)
    {            
       getline(fin,str);
@@ -1505,6 +1518,8 @@ Error opening file for input:"+filename);
    
    fin.close();
    this->SetWeightToInvSigmaSq();
+   mClockPowderPatternPar.Click();
+   this->UpdateDisplay();
    {
       char buf [200];
       sprintf(buf,"Imported powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
@@ -1565,6 +1580,8 @@ Error opening file for input:"+filename);
    }
    fin.close();
    this->SetWeightToInvSigmaSq();
+   mClockPowderPatternPar.Click();
+   this->UpdateDisplay();
    {
       char buf [200];
       sprintf(buf,"Imported powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
