@@ -456,9 +456,9 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                                           mNbTrial/(REAL)nbSteps);break;
                   case ANNEALING_SMART:
 						{
-                     if((nbAcceptedMovesTemp/(REAL)nbTrialsReport)>0.30)
+                     if((nbAcceptedMovesTemp/(REAL)nbTryPerTemp)>0.30)
                         simAnnealTemp/=1.5;
-                     if((nbAcceptedMovesTemp/(REAL)nbTrialsReport)<0.10)
+                     if((nbAcceptedMovesTemp/(REAL)nbTryPerTemp)<0.10)
                         simAnnealTemp*=1.5;
                      if(simAnnealTemp>mTemperatureMax) simAnnealTemp=mTemperatureMax;
                      if(simAnnealTemp<mTemperatureMin) simAnnealTemp=mTemperatureMin;
