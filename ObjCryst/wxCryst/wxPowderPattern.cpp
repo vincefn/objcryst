@@ -42,6 +42,7 @@ namespace ObjCryst
 //
 ////////////////////////////////////////////////////////////////////////
 BEGIN_EVENT_TABLE(WXRadiation, wxWindow)
+   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, WXRadiation::UpdateUI)
 END_EVENT_TABLE()
 
 WXRadiation::WXRadiation(wxWindow *parent, Radiation* rad):
@@ -54,11 +55,27 @@ WXCrystObjBasic(parent),mpRadiation(rad),mpFieldWavelength(0)
    
    mpFieldRadType= new WXFieldOption(this,-1,&(mpRadiation->mRadiationType));
    mpSizer->Add(mpFieldRadType,0);
+   mList.Add(mpFieldRadType);
    
-   //Better to do this throgh the object which uses the radiation
-   //mpFieldWavelength=new WXFieldRefPar(this,"Wavelength:",
-   //                                  &(mpRadiation->GetPar(mpRadiation->mWavelength.data())));
-   //mpSizer->Add(mpFieldWavelength,0);
+   mpFieldWavelengthType= new WXFieldOption(this,-1,&(mpRadiation->mWavelengthType));
+   mpSizer->Add(mpFieldWavelengthType,0);
+   mList.Add(mpFieldWavelengthType);
+   
+   mpFieldWavelength=new WXFieldRefPar(this,"Wavelength:",
+                                   &(mpRadiation->GetPar(mpRadiation->mWavelength.data())));
+   mpSizer->Add(mpFieldWavelength,0);
+   mList.Add(mpFieldWavelength);
+   
+   WXFieldPar<REAL> *xRayTubeDlambda=new WXFieldPar<REAL>(this,"Tube-DeltaLambda:",-1,
+                                                &(mpRadiation->mXRayTubeDeltaLambda));
+   mpSizer->Add(xRayTubeDlambda,0,wxALIGN_LEFT);
+   mList.Add(xRayTubeDlambda);
+      
+   WXFieldPar<REAL> *xRayTubeAlpha2Alpha1=new WXFieldPar<REAL>(this,"Tube-Alpha2/Alpha1:",-1,
+                                            &(mpRadiation->mXRayTubeAlpha2Alpha1Ratio));
+   mpSizer->Add(xRayTubeAlpha2Alpha1,0,wxALIGN_LEFT);
+   mList.Add(xRayTubeAlpha2Alpha1);
+      
    this->CrystUpdate();
    this->SetSizer(mpSizer);
    mpSizer->Layout();
@@ -68,14 +85,21 @@ WXCrystObjBasic(parent),mpRadiation(rad),mpFieldWavelength(0)
 
 void WXRadiation::CrystUpdate()
 {
-   mpFieldRadType->CrystUpdate();
-   //mpFieldWavelength->CrystUpdate();
-   //:TODO: if using an X-Ray tube, lock or hide the wavelength
+   mList.CrystUpdate();
+   if(true==wxThread::IsMain()) this->UpdateUI();
+   else
+   {
+      wxUpdateUIEvent event(ID_CRYST_UPDATEUI);
+      wxPostEvent(this,event);
+   }
 }
 void WXRadiation::UpdateUI()
 {
-   mpFieldRadType->UpdateUI();
-   //mpFieldWavelength->UpdateUI();
+   mList.UpdateUI();
+}
+void WXRadiation::OnUpdateUI(wxUpdateUIEvent& event)
+{
+   this->UpdateUI();
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -211,9 +235,8 @@ mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUM_MENU_IMPORT_CPI,
                                 ID_POWDERSPECTRUM_MENU_ADD_2THETA_EXCLUDE,
                                 "Add 2Theta excluded region");
    //Radiation
-      //:TODO: when all objects will use the same radiation object
-      //mpSizer->Add(mpPowderPattern->mRadiation.WXCreate(this),0);
-      //mList.Add(mpPowderPattern->mRadiation.WXGet());
+      mpSizer->Add(mpPowderPattern->mRadiation.WXCreate(this),0);
+      mList.Add(mpPowderPattern->mRadiation.WXGet());
    // Correction to 2Theta
       wxBoxSizer* thetaCorrSizer=new wxBoxSizer(wxHORIZONTAL);
       WXFieldRefPar* fieldThetaZero    =new WXFieldRefPar(this,"2theta zero:",

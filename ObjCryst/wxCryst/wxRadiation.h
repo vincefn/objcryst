@@ -32,11 +32,14 @@ class WXRadiation: public WXCrystObjBasic
       WXRadiation(wxWindow *parent, Radiation*);
       virtual void CrystUpdate();
       virtual void UpdateUI();
+      virtual void OnUpdateUI(wxUpdateUIEvent & WXUNUSED(event));
    private:
       Radiation *mpRadiation;
       WXFieldOption *mpFieldRadType;
+      WXFieldOption *mpFieldWavelengthType;
       WXFieldRefPar *mpFieldWavelength;
       wxBoxSizer *mpSizer;
+      WXCrystObjBasicList mList;
    DECLARE_EVENT_TABLE()
 };
 

@@ -140,9 +140,8 @@ WXRefinableObj(parent,data),mpData(data)
       //   mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_DISPLAY,ID_DIFFSINGLECRYST_MENU_FITSCALE_RW,
       //                          "Fit Scale for Rw");
    //Radiation
-      //:TODO: when all objects will use the same radiation object
-      //mpSizer->Add(mpPowderPattern->mRadiation.WXCreate(this),0);
-      //mList.Add(mpPowderPattern->mRadiation.WXGet());
+      mpSizer->Add(mpData->mRadiation.WXCreate(this),0);
+      mList.Add(mpData->mRadiation.WXGet());
    // Crystal
       mpFieldCrystal=new WXFieldChoice(this,ID_DIFFSINGLECRYST_CRYSTAL,"Crystal:",300);
       mpSizer->Add(mpFieldCrystal,0,wxALIGN_LEFT);
