@@ -53,20 +53,17 @@ Molecule *ZScatterer2Molecule(ZScatterer *scatt)
    VFN_DEBUG_ENTRY("ZScatterer2Molecule()",6)
    Molecule *mol=new Molecule(scatt->GetCrystal(),scatt->GetName());
    const unsigned long nb=scatt->GetZAtomRegistry().GetNb();
-   const ScatteringComponentList *l=&(scatt->GetScatteringComponentList());
-   REAL x,y,z;
    REAL x0=0,y0=0,z0=0;
    for(unsigned int i=0;i<nb;++i)
    {
-      x=(*l)(i).mX;
-      y=(*l)(i).mY;
-      z=(*l)(i).mZ;
+      const REAL x=scatt->GetZAtomX(i);
+      const REAL y=scatt->GetZAtomY(i);
+      const REAL z=scatt->GetZAtomZ(i);
       x0+=x;
       y0+=y;
       z0+=z;
-      scatt->GetCrystal().FractionalToOrthonormalCoords(x,y,z);
       mol->AddAtom(x,y,z,scatt->GetZAtomRegistry().GetObj(i).GetScatteringPower(),
-                   scatt->GetComponentName(i));
+                   scatt->GetZAtomRegistry().GetObj(i).GetName());
       
       if(i>0)
       {
@@ -116,23 +113,26 @@ Molecule *ZScatterer2Molecule(ZScatterer *scatt)
          }
       }
       mol->GetAtom(i).SetOccupancy(scatt->GetZAtomRegistry().GetObj(i).GetOccupancy());
-      
    }
    for(unsigned int i=0;i<nb;++i)
       for(unsigned int j=i+1;j<nb;++j)
       {
          const REAL dist=GetBondLength(mol->GetAtom(i),mol->GetAtom(j));
          const vector<MolBond*>::const_iterator pos=mol->FindBond(mol->GetAtom(i),mol->GetAtom(j));
-         
+         if(mol->GetAtom(i).IsDummy()) continue;
+         if(mol->GetAtom(j).IsDummy()) continue;
          if(   (dist<(1.10*( mol->GetAtom(i).GetScatteringPower().GetRadius()
                             +mol->GetAtom(j).GetScatteringPower().GetRadius())))
              &&(pos==mol->GetBondList().end()))
             mol->AddBond(mol->GetAtom(i),mol->GetAtom(j),dist,.01,.05);
       }
-
-   mol->SetX(x0/nb);
-   mol->SetY(y0/nb);
-   mol->SetZ(z0/nb);
+   x0 /= nb;
+   y0 /= nb;
+   z0 /= nb;
+   mol->GetCrystal().OrthonormalToFractionalCoords(x0,y0,z0);
+   mol->SetX(x0);
+   mol->SetY(y0);
+   mol->SetZ(z0);
    return mol;
    VFN_DEBUG_EXIT("ZScatterer2Molecule()",6)
 }
