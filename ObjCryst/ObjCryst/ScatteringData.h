@@ -305,6 +305,11 @@ class ScatteringData: virtual public RefinableObj
       virtual void BeginOptimization(const bool allowApproximations=false,
 												 const bool enableRestraints=false);
       virtual void EndOptimization();
+		/// Set the maximum value for sin(theta)/lambda. All data (reflections,..) still
+		/// exist but are ignored for all calculations.
+		virtual void SetMaxSinThetaOvLambda(const REAL max);
+		/// Get the maximum value for sin(theta)/lambda.
+		REAL GetMaxSinThetaOvLambda()const;
    protected:
       /// \internal This function is called after H,K and L arrays have 
       /// been initialized or modified.
@@ -501,39 +506,29 @@ class ScatteringData: virtual public RefinableObj
       */
       bool mIgnoreImagScattFact;
       
-      // Use only low angle data UNIMPLEMENTED
-         /* \brief Flag forcing the use of only low-angle reflections
-         *
-         * Mainly for use during global optimizations, or more generally when
-         * the program is far from the real structure. In this case high-angle reflection
-         * are not significant and only lead to slower calculations and also in fooling
-         * the optimization (bad agreement at low angle and good with the more numerous
-         * high-angle reflections). By default this is set to \b false.
-         *
-         * This is intended for use mainly for powder diffraction but \e can also implemented
-         * for other DiffractionData objects. (if not implemented, it should return
-         * an exception).
-         *
-         * Practically, this means that any reflections below 
-         * DiffractionData::mLowAngleReflectionLimit is simply ignored, not calculated,
-         * not taken into account in statistics. But they should remain present in hkl arrays.
-         *
-         * Caveheat: for powder diffraction, a reflection just above the angular limit
-         * will not be calculated but may be take partially into account in statistics.
-         *
-         * \warning This should only be used at the beginning of an optimization.
-         *
-         * \How this is done: when this flag is raised, a copy of all necessary data
-         * (observed, sigmas, hkl arrays) is made, and stored until the flag is unraised.
-         *
-         * This may eventually be moved to inherited classes.
-         */
-         //bool mUseOnlyLowAngleData;
-
-         /* \brief Limit (theta angle, radian) for the above option.
-         *
-         */
-         //REAL mUseOnlyLowAngleDataLimit;
+		// Maximum sin(theta)/lambda 
+			/** Maximum sin(theta)/lambda for all calculations (10 by default).
+			*
+			* This keeps all data in memory, but only the part which is below
+			* the max is calculated.
+			*
+			* This affects the computing of structure factors, intensities (for single
+			* crystal and powder patterns), R and Rw.
+			*
+			* The reflections \b must be sorted by increasing sin(theta)/lambda for
+			* this to work correctly.
+			*/
+			REAL mMaxSinThetaOvLambda;
+			/// Number of reflections which are below the max. This is updated automatically
+			/// from ScatteringData::mMaxSinThetaOvLambda
+			mutable long mNbReflUsed;
+			/// Clock recording the last time the number of reflections used has increased.
+			mutable RefinableObjClock mClockNbReflUsed;
+   #ifdef __WX__CRYST__
+		//to access mMaxSinThetaOvLambda
+      friend class WXDiffractionSingleCrystal;
+      friend class WXPowderPattern;
+   #endif
 };
 
 }//namespace ObjCryst

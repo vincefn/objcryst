@@ -129,6 +129,11 @@ WXRefinableObj(parent,data),mpData(data)
       mpFieldCrystal=new WXFieldChoice(this,ID_DIFFSINGLECRYST_CRYSTAL,"Crystal:",300);
       mpSizer->Add(mpFieldCrystal,0,wxALIGN_LEFT);
       mList.Add(mpFieldCrystal);
+	// Max Sin(theta/Lambda)
+      WXFieldPar<REAL> *maxSiThOvLa=
+         new WXFieldPar<REAL>(this,"Max Sin(theta)/lambda:",-1,&(mpData->mMaxSinThetaOvLambda));
+      mpSizer->Add(maxSiThOvLa,0,wxALIGN_LEFT);
+      mList.Add(maxSiThOvLa);
    
    this->CrystUpdate();
    this->Layout();

@@ -47,12 +47,6 @@ class PowderPatternComponent : virtual public RefinableObj
       /// Note that the spectrum is \e not scaled.
 		/// 
       virtual const CrystVector_REAL& GetPowderPatternCalc()const=0;
-      /// Set an option so that only low-angle reflections (theta < angle)
-      /// are used. See DiffractionData::mUseOnlyLowAngleData
-		/// \deprecated Do not use, as this will probably be removed
-		/// eventually.
-      virtual void SetUseOnlyLowAngleData(const bool useOnlyLowAngle,const REAL angle=0)=0;
-      
       /** \brief Is this component scalable ?
       *
       * This is used by the PowderPattern class, which fits all
@@ -81,6 +75,10 @@ class PowderPatternComponent : virtual public RefinableObj
 		virtual void GetBraggLimits(CrystVector_long *&min,CrystVector_long *&max)const=0;
 		/// Get last time the Bragg Limits were changed
 		const RefinableObjClock& GetClockBraggLimits()const;
+		
+ 		/// Set the maximum value for sin(theta)/lambda. All data above still
+		/// exist but are ignored for all calculations.
+		virtual void SetMaxSinThetaOvLambda(const REAL max)=0;
 		
       /// The calculated component of a powder spectrum. It is mutable since it is
       /// completely defined by other parameters (eg it is not an 'independent parameter')
@@ -128,7 +126,6 @@ class PowderPatternBackground : public PowderPatternComponent
       virtual const CrystVector_REAL& GetPowderPatternCalc()const;
       /// Import background points from a file (with two columns 2theta, intensity)
       void ImportUserBackground(const string &filename);
-      virtual void SetUseOnlyLowAngleData(const bool useOnlyLowAngle,const REAL angle=0);
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
@@ -140,6 +137,7 @@ class PowderPatternBackground : public PowderPatternComponent
       virtual void SetRadiation(const Radiation &rad);
       virtual void Prepare();
 		virtual void GetBraggLimits(CrystVector_long *&min,CrystVector_long *&max)const;
+		virtual void SetMaxSinThetaOvLambda(const REAL max);
       
       /// The kind of interpolation used
       PowderBackgroundInterpType mBackgroundType;
@@ -157,11 +155,12 @@ class PowderPatternBackground : public PowderPatternComponent
          /// Last time Splines were generated
          mutable RefinableObjClock mClockBackgroundSpline;
       
-      // Use only low-angle data ?
-         /// Use only low-angle data ? \deprecated
-         bool mUseOnlyLowAngleData;
-         /// Limit (theta angle, in radian) for the above option. \deprecated
-         REAL mUseOnlyLowAngleDataLimit;
+		/** Maximum sin(theta)/lambda for all calculations (10 by default).
+		*
+		* This keeps all data in memory, but only the part which is below
+		* the max is calculated.
+		*/
+		REAL mMaxSinThetaOvLambda;
 		
       //To be removed
       friend class PowderPattern; 
@@ -178,7 +177,7 @@ class PowderPatternBackground : public PowderPatternComponent
 *
 */
 //######################################################################
-class PowderPatternDiffraction : public PowderPatternComponent,public ScatteringData
+class PowderPatternDiffraction : virtual public PowderPatternComponent,public ScatteringData
 {
    public:
       PowderPatternDiffraction();
@@ -206,7 +205,6 @@ class PowderPatternDiffraction : public PowderPatternComponent,public Scattering
                                    const REAL fwhmCagliotiV=0,
                                    const REAL eta0=0.5,
                                    const REAL eta1=0.);
-      virtual void SetUseOnlyLowAngleData(const bool useOnlyLowAngle,const REAL angle=0);
       virtual void GenHKLFullSpace();
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
@@ -231,6 +229,7 @@ class PowderPatternDiffraction : public PowderPatternComponent,public Scattering
       virtual void Prepare();
       virtual void InitOptions();
 		virtual void GetBraggLimits(CrystVector_long *&min,CrystVector_long *&max)const;
+		virtual void SetMaxSinThetaOvLambda(const REAL max);
       //Clocks
          /// Last time the reflection parameters were changed
          RefinableObjClock mClockProfilePar;
@@ -293,31 +292,6 @@ class PowderPatternDiffraction : public PowderPatternComponent,public Scattering
          mutable long mSavedPowderReflProfileNbPoint;
          /// \internal The 1st pixel for each reflection
          mutable CrystVector_long mReflectionProfileFirstPixel;
-      // Use only low-angle reflections
-         /** \brief Flag forcing the use of only low-angle reflections
-         *
-         * Mainly for use during global optimizations, or more generally when
-         * the program is far from the real structure. In this case high-angle reflection
-         * are not significant and only lead to slower calculations and also in fooling
-         * the optimization (bad agreement at low angle and good with the more numerous
-         * high-angle reflections). By default this is set to \b false.
-         *
-         * Practically, this means that any reflections below 
-         * DiffractionData::mLowAngleReflectionLimit is simply ignored, not calculated,
-         * not taken into account in statistics.
-			* TO BE REMOVED
-         */
-         bool mUseOnlyLowAngleData;
-
-         /** \brief Limit (theta angle, in radian) for the above option.
-         * TO BE REMOVED
-         */
-         REAL mUseOnlyLowAngleDataLimit;
-         /// Saved H, K and L arrays when using only low-angle data
-			/// TO BE REMOVED
-         CrystVector_long  mUseOnlyLowAngleData_SavedH,
-                           mUseOnlyLowAngleData_SavedK,
-                           mUseOnlyLowAngleData_SavedL;
 			/// First and last pixel for integrated R-factors around each reflection
 			mutable CrystVector_long mIntegratedReflMin,mIntegratedReflMax;
    #ifdef __WX__CRYST__
@@ -416,13 +390,6 @@ class PowderPattern : public RefinableObj
          void SetEnergy(const REAL energy);
          /// wavelength of the experiment (in Angstroems)
          REAL GetWavelength()const;
-      
-      // Options to go faster...
-         /** Set an option so that only low-amgle reflections (theta < angle)
-         * are used. See DiffractionData::mUseOnlyLowAngleData
-			* \deprecated
-			*/
-         void SetUseOnlyLowAngleData(const bool useOnlyLowAngle,const REAL angle);
       
       //Access to spectrum data
          /// Get the calculated powder spectrum
@@ -600,6 +567,11 @@ class PowderPattern : public RefinableObj
 		virtual void GetGeneGroup(const RefinableObj &obj, 
 										  CrystVector_uint & groupIndex,
 										  unsigned int &firstGroup) const;
+		/// Set the maximum value for sin(theta)/lambda. All data (reflections,..) still
+		/// exist but are ignored for all calculations.
+		virtual void SetMaxSinThetaOvLambda(const REAL max);
+		/// Get the maximum value for sin(theta)/lambda.
+		REAL GetMaxSinThetaOvLambda()const;
    protected:
       /// Calc the powder spectrum
       void CalcPowderPattern() const;
@@ -607,6 +579,10 @@ class PowderPattern : public RefinableObj
       virtual void Init();
 		/// Prepare  the calculation of the integrated R-factors
 		void PrepareIntegratedRfactor()const;
+		/// Calculate the number of points of the pattern actually used, from the maximum
+		/// value of sin(theta)/lambda
+		void CalcNbPointUsed()const;
+		
       /// The calculated powder spectrum. It is mutable since it is
       /// completely defined by other parameters (eg it is not an 'independent parameter')
       mutable CrystVector_REAL mPowderPatternCalc;
@@ -679,32 +655,23 @@ class PowderPattern : public RefinableObj
          /// \internal Used to fit the components' scale factors
          mutable CrystMatrix_REAL mFitScaleFactorM,mFitScaleFactorB,mFitScaleFactorX;
          
-      // Use only low-angle reflections
-         /** \brief Flag forcing the use of only low-angle reflections
-         *
-         * Mainly for use during global optimizations, or more generally when
-         * the program is far from the real structure. In this case high-angle reflection
-         * are not significant and only lead to slower calculations and also in fooling
-         * the optimization (bad agreement at low angle and good with the more numerous
-         * high-angle reflections). By default this is set to \b false.
-         *
-         * Practically, this means that any reflections below 
-         * the limit is simply ignored, not calculated,
-         * not taken into account in statistics.
-			*
-			* \deprecated
-         */
-         bool mUseOnlyLowAngleData;
-
-         /** \brief Limit (theta angle, in radian) for the above option.
-         * \deprecated
-         */
-         REAL mUseOnlyLowAngleDataLimit;
 		// Integrated R-factors
 			mutable CrystVector_long mIntegratedPatternMin,mIntegratedPatternMax;
 			mutable CrystVector_REAL mIntegratedObs;
 			mutable CrystVector_REAL mIntegratedWeight;
 			mutable RefinableObjClock mClockIntegratedFactorsPrep;
+		/** Maximum sin(theta)/lambda for all calculations (10 by default).
+		*
+		* This keeps all data in memory, but only the part which is below
+		* the max is calculated.
+		*/
+		REAL mMaxSinThetaOvLambda;
+		/// Number of points actually used, due to the maximum value of
+		/// sin(theta)/lambda.
+		mutable unsigned long mNbPointUsed;
+		/// Clock recording the last time the number of points used (PowderPattern::mNbPointUsed)
+		/// was changed.
+		mutable RefinableObjClock mClockNbPointUsed;
    #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);

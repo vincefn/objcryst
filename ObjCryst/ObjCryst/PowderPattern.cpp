@@ -77,13 +77,15 @@ const RefinableObjClock& PowderPatternComponent::GetClockBraggLimits()const
 //
 ////////////////////////////////////////////////////////////////////////
 PowderPatternBackground::PowderPatternBackground():
-mBackgroundType(POWDER_BACKGROUND_LINEAR),mBackgroundNbPoint(0)
+mBackgroundType(POWDER_BACKGROUND_LINEAR),mBackgroundNbPoint(0),
+mMaxSinThetaOvLambda(10)
 {}
 
 PowderPatternBackground::PowderPatternBackground(const  PowderPatternBackground &old):
 mBackgroundType(old.mBackgroundType),mBackgroundNbPoint(old.mBackgroundNbPoint),
 mBackgroundInterpPoint2Theta(old.mBackgroundInterpPoint2Theta),
-mBackgroundInterpPointIntensity(old.mBackgroundInterpPointIntensity)
+mBackgroundInterpPointIntensity(old.mBackgroundInterpPointIntensity),
+mMaxSinThetaOvLambda(10)
 {}
 
 PowderPatternBackground::~PowderPatternBackground(){}
@@ -167,15 +169,6 @@ Error opening file for input:"+filename);
    VFN_DEBUG_MESSAGE("PowderPatternBackground::ImportUserBackground():finished",5)
 }
 
-void PowderPatternBackground::SetUseOnlyLowAngleData(const bool useOnlyLowAngle,
-                                                      const REAL angle)
-{
-   if(  (mUseOnlyLowAngleData != useOnlyLowAngle)
-      ||( fabs(mUseOnlyLowAngleDataLimit-angle)>.001))
-         mClockPowderPatternCalc.Reset();
-   mUseOnlyLowAngleData=useOnlyLowAngle;
-   mUseOnlyLowAngleDataLimit=angle;
-}
 void PowderPatternBackground::GetGeneGroup(const RefinableObj &obj,
 										  CrystVector_uint & groupIndex,
 										  unsigned int &first) const
@@ -257,6 +250,11 @@ void PowderPatternBackground::GetBraggLimits(CrystVector_long *&min,CrystVector_
 	max=0;
 }
 
+void PowderPatternBackground::SetMaxSinThetaOvLambda(const REAL max)
+{
+	mMaxSinThetaOvLambda=max;
+}
+
 #ifdef __WX__CRYST__
 WXCrystObjBasic* PowderPatternBackground::WXCreate(wxWindow* parent)
 {
@@ -277,9 +275,7 @@ mPseudoVoigtEta0(0.5),mPseudoVoigtEta1(0.),mUseAsymmetricProfile(false),
 mNeedLorentzCorr(true),
 mNeedPolarCorr(true),
 mNeedSlitApertureCorr(true),
-mPolarAfactor(1.),
-mUseOnlyLowAngleData(false),
-mUseOnlyLowAngleDataLimit(0.)
+mPolarAfactor(1.)
 {
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::PowderPatternDiffraction()",10);
    mIsScalable=true;
@@ -297,12 +293,7 @@ mUseAsymmetricProfile(old.mUseAsymmetricProfile),
 mNeedLorentzCorr(old.mNeedLorentzCorr),
 mNeedPolarCorr(old.mNeedPolarCorr),
 mNeedSlitApertureCorr(old.mNeedSlitApertureCorr),
-mPolarAfactor(old.mPolarAfactor),
-mUseOnlyLowAngleData(old.mUseOnlyLowAngleData),
-mUseOnlyLowAngleDataLimit(old.mUseOnlyLowAngleDataLimit),
-mUseOnlyLowAngleData_SavedH(old.mUseOnlyLowAngleData_SavedH),
-mUseOnlyLowAngleData_SavedK(old.mUseOnlyLowAngleData_SavedK),
-mUseOnlyLowAngleData_SavedL(old.mUseOnlyLowAngleData_SavedL)
+mPolarAfactor(old.mPolarAfactor)
 {}
 
 PowderPatternDiffraction::~PowderPatternDiffraction()
@@ -344,66 +335,6 @@ void PowderPatternDiffraction::SetReflectionProfilePar(const ReflectionProfileTy
    mPseudoVoigtEta0=eta0;
    mPseudoVoigtEta1=eta1;
    mClockProfilePar.Click();
-}
-
-void PowderPatternDiffraction::SetUseOnlyLowAngleData(const bool useOnlyLowAngle,
-                                                       const REAL angle)
-{
-   if((mUseOnlyLowAngleData==useOnlyLowAngle) &&
-      (fabs(mUseOnlyLowAngleDataLimit-angle) < 1e-4)) return;
-      
-   VFN_DEBUG_MESSAGE("PowderPatternDiffraction::SetUseOnlyLowAngleData(theta)",5)
-   
-   bool useSavedArrays=false;
-   if((true==useOnlyLowAngle)&&(true==mUseOnlyLowAngleData))
-      useSavedArrays=true;
-   
-   mUseOnlyLowAngleDataLimit=angle;
-   mUseOnlyLowAngleData=useOnlyLowAngle;
-   
-   if((true==mUseOnlyLowAngleData) && (mUseOnlyLowAngleDataLimit <= 0.))
-   {//shit happens
-      mUseOnlyLowAngleData=false;
-      throw ObjCrystException("PowderPatternDiffraction::SetUseOnlyLowAngleData(bool,angle) \
-Setting to use only low angle data, but given limit is <= 0 !");
-   }
-   
-   if((true==mUseOnlyLowAngleData) &&  ((2*mUseOnlyLowAngleDataLimit) >=
-       mpParentPowderPattern->Get2ThetaMax()))
-   {
-      mUseOnlyLowAngleData=false;
-      cout << "PowderPatternDiffraction::SetUseOnlyLowAngleData(theta)"<<endl;
-      cout << "-> The given theta low limit is higher than the spectrum limit !"
-           << " Stupid you... Ignoring limit" <<endl;
-      return;
-   }
-   
-   if(true==mUseOnlyLowAngleData)
-   {
-      if(true==useSavedArrays)
-      {
-         this ->SetHKL( mUseOnlyLowAngleData_SavedH,
-                        mUseOnlyLowAngleData_SavedK,
-                        mUseOnlyLowAngleData_SavedL);
-      }
-      else
-      {
-      //Make copies of arrays for when the flag is un-raised
-         mUseOnlyLowAngleData_SavedH=mIntH;
-         mUseOnlyLowAngleData_SavedK=mIntK;
-         mUseOnlyLowAngleData_SavedL=mIntL;
-      }
-      this->SortReflectionByTheta(mUseOnlyLowAngleDataLimit);
-   }
-   else
-   {//Restore full data
-      this ->SetHKL( mUseOnlyLowAngleData_SavedH,
-                     mUseOnlyLowAngleData_SavedK,
-                     mUseOnlyLowAngleData_SavedL);
-      mUseOnlyLowAngleData_SavedH.resize(0);
-      mUseOnlyLowAngleData_SavedK.resize(0);
-      mUseOnlyLowAngleData_SavedL.resize(0);
-   }
 }
 
 void PowderPatternDiffraction::GenHKLFullSpace()
@@ -485,7 +416,7 @@ Applying profiles for "<<nbRefl<<" reflections",3)
       mPowderPatternCalc.resize(specNbPoints);
       mPowderPatternCalc=0;
       
-      for(long i=0;i<nbRefl;i += step)
+      for(long i=0;i<mNbReflUsed;i += step)
       {
          REAL intensity=0.;
          //check if the next reflection is at the same theta. If this is true,
@@ -770,7 +701,8 @@ void PowderPatternDiffraction::CalcIhkl() const
    this->CalcStructFactor();
    this->CalcLorentzPolarCorr();
    if(  (mClockIhklCalc>mClockLorentzPolarSlitCorrCalc)
-      &&(mClockIhklCalc>mClockStructFactor)) return;
+      &&(mClockIhklCalc>mClockStructFactor)
+      &&(mClockIhklCalc>mClockNbReflUsed)) return;
       
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcIhkl()",3)
    TAU_PROFILE("PowderPatternDiffraction::CalcIhkl()","void ()",TAU_DEFAULT);
@@ -786,7 +718,7 @@ void PowderPatternDiffraction::CalcIhkl() const
    mIhklCalc.resize(mNbRefl);
    p=mIhklCalc.data();
    
-   for(long i=0;i<mNbRefl;i++)
+   for(long i=0;i<mNbReflUsed;i++)
    {
       *p++ = *mult++ * (*pr * *pr + *pi * *pi) * *pcorr++;
       pr++;
@@ -903,6 +835,10 @@ void PowderPatternDiffraction::GetBraggLimits(CrystVector_long *&min,CrystVector
 	max=&mIntegratedReflMax;
    VFN_DEBUG_EXIT("PowderPatternDiffraction::GetBraggLimits(*min,*max)",3)
 }
+
+void PowderPatternDiffraction::SetMaxSinThetaOvLambda(const REAL max)
+{this->ScatteringData::SetMaxSinThetaOvLambda(max);}
+
 #ifdef __WX__CRYST__
 WXCrystObjBasic* PowderPatternDiffraction::WXCreate(wxWindow* parent)
 {
@@ -924,8 +860,7 @@ PowderPattern::PowderPattern():
 m2ThetaMin(0),m2ThetaStep(0),mNbPoint(0),mWavelength(1.),
 m2ThetaZero(0.),m2ThetaDisplacement(0.),m2ThetaTransparency(0.),
 mScaleFactor(20),mUseFastLessPreciseFunc(false),
-mStatisticsExcludeBackground(false),
-mUseOnlyLowAngleData(false),mUseOnlyLowAngleDataLimit(0)
+mStatisticsExcludeBackground(false),mMaxSinThetaOvLambda(10)
 {
    mScaleFactor=1;
    mSubObjRegistry.SetName("SubObjRegistry for a PowderPattern object");
@@ -944,8 +879,7 @@ mPowderPatternComponentRegistry(old.mPowderPatternComponentRegistry),
 mScaleFactor(old.mScaleFactor),
 mUseFastLessPreciseFunc(old.mUseFastLessPreciseFunc),
 mStatisticsExcludeBackground(old.mStatisticsExcludeBackground),
-mUseOnlyLowAngleData(old.mUseOnlyLowAngleData),
-mUseOnlyLowAngleDataLimit(old.mUseOnlyLowAngleDataLimit)
+mMaxSinThetaOvLambda(old.mMaxSinThetaOvLambda)
 {
    mSubObjRegistry.SetName("SubObjRegistry for a PowderPattern :"+mName);
    gPowderPatternRegistry.Register(*this);
@@ -1070,17 +1004,6 @@ void PowderPattern::SetWavelength(const string &XRayTubeElementName,const REAL a
 }
 
 REAL PowderPattern::GetWavelength()const{return mRadiation.GetWavelength()(0);}
-
-void PowderPattern::SetUseOnlyLowAngleData(const bool useOnlyLowAngle,const REAL angle)
-{
-   VFN_DEBUG_MESSAGE("PowderPattern::SetUseOnlyLowAngleData()",3)
-   mUseOnlyLowAngleData=useOnlyLowAngle;
-   mUseOnlyLowAngleDataLimit=angle;
-   this->Prepare();//Will prepare components, if necessary
-   for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++)
-      mPowderPatternComponentRegistry.GetObj(i)
-         .SetUseOnlyLowAngleData(useOnlyLowAngle,angle);
-}
 
 const CrystVector_REAL& PowderPattern::GetPowderPatternCalc()const
 {
@@ -1580,11 +1503,7 @@ REAL PowderPattern::GetR()const
    REAL tmp1=0.;
    REAL tmp2=0.;
    
-   long maxPoints=mNbPoint;
-   if(true==mUseOnlyLowAngleData) 
-      maxPoints= (long)((2*mUseOnlyLowAngleDataLimit-m2ThetaMin)
-                     /m2ThetaStep+1);
-
+   unsigned long maxPoints=mNbPointUsed;
    if(  (true==mStatisticsExcludeBackground)
       &&(mPowderPatternBackgroundCalc.numElements()>0))
    {
@@ -1596,7 +1515,7 @@ REAL PowderPattern::GetR()const
       if(0==nbExclude)
       {
          VFN_DEBUG_MESSAGE("PowderPattern::GetR():Exclude Backgd",4);
-         for(long i=0;i<maxPoints;i++)
+         for(unsigned long i=0;i<maxPoints;i++)
          {
             tmp1 += ((*p1)-(*p2)) * ((*p1)-(*p2));
             tmp2 += ((*p2)-(*p3)) * ((*p2)-(*p3));
@@ -1606,8 +1525,8 @@ REAL PowderPattern::GetR()const
       else
       {
          VFN_DEBUG_MESSAGE("PowderPattern::GetR():Exclude Backgd,Exclude regions",4);
-         long min,max;
-         long i=0;
+         unsigned long min,max;
+         unsigned long i=0;
          for(int j=0;j<nbExclude;j++)
          {
             min=(long)floor((mExcludedRegionMin2Theta(j)-m2ThetaMin)
@@ -1645,7 +1564,7 @@ REAL PowderPattern::GetR()const
       if(0==nbExclude)
       {
          VFN_DEBUG_MESSAGE("PowderPattern::GetR()",4);
-         for(unsigned long i=0;i<mNbPoint;i++)
+         for(unsigned long i=0;i<maxPoints;i++)
          {
             tmp1 += ((*p1)-(*p2))*((*p1)-(*p2));
             tmp2 += (*p2) * (*p2);
@@ -1656,8 +1575,8 @@ REAL PowderPattern::GetR()const
       else
       {
          VFN_DEBUG_MESSAGE("PowderPattern::GetR(),Exclude regions",4);
-         long min,max;
-         long i=0;
+         unsigned long min,max;
+         unsigned long i=0;
          for(int j=0;j<nbExclude;j++)
          {
             min=(long)floor((mExcludedRegionMin2Theta(j)-m2ThetaMin)
@@ -1775,10 +1694,7 @@ REAL PowderPattern::GetRw()const
    REAL tmp1=0.;
    REAL tmp2=0.;
    
-   long maxPoints=mNbPoint;
-   if(true==mUseOnlyLowAngleData) 
-      maxPoints= (long)((2*mUseOnlyLowAngleDataLimit-m2ThetaMin)
-                     /m2ThetaStep+1);
+   unsigned long maxPoints=mNbPointUsed;
 
    if(  (true==mStatisticsExcludeBackground)
       &&(mPowderPatternBackgroundCalc.numElements()>0))
@@ -1792,7 +1708,7 @@ REAL PowderPattern::GetRw()const
       const long nbExclude=mExcludedRegionMin2Theta.numElements();
       if(0==nbExclude)
       {
-         for(long i=0;i<maxPoints;i++)
+         for(unsigned long i=0;i<maxPoints;i++)
          {
             tmp1 += *p4   * ((*p1)-(*p2)) * ((*p1)-(*p2));
             tmp2 += *p4++ * ((*p2)-(*p3)) * ((*p2)-(*p3));
@@ -1801,8 +1717,8 @@ REAL PowderPattern::GetRw()const
       }
       else
       {
-         long min,max;
-         long i=0;
+         unsigned long min,max;
+         unsigned long i=0;
          for(int j=0;j<nbExclude;j++)
          {
             min=(long)floor((mExcludedRegionMin2Theta(j)-m2ThetaMin)
@@ -1842,7 +1758,7 @@ REAL PowderPattern::GetRw()const
       const long nbExclude=mExcludedRegionMin2Theta.numElements();
       if(0==nbExclude)
       {
-         for(unsigned long i=0;i<mNbPoint;i++)
+         for(unsigned long i=0;i<maxPoints;i++)
          {
             tmp1 += *p4   * ((*p1)-(*p2))*((*p1)-(*p2));
             tmp2 += *p4++ * (*p2) * (*p2);
@@ -1851,8 +1767,8 @@ REAL PowderPattern::GetRw()const
       }
       else
       {
-         long min,max;
-         long i=0;
+         unsigned long min,max;
+         unsigned long i=0;
          for(int j=0;j<nbExclude;j++)
          {
             min=(long)floor((mExcludedRegionMin2Theta(j)-m2ThetaMin)
@@ -1965,18 +1881,15 @@ REAL PowderPattern::GetChiSq()const
    TAU_PROFILE("PowderPattern::GetChiSq()","void ()",TAU_DEFAULT);
    VFN_DEBUG_MESSAGE("PowderPattern::GetChiSq()",3);
    
-   long maxPoints=mNbPoint;
-   if(true==mUseOnlyLowAngleData) 
-      maxPoints= (long)((2*mUseOnlyLowAngleDataLimit-m2ThetaMin)
-                     /m2ThetaStep+1);
-                     
+   unsigned long maxPoints=mNbPointUsed;
+
    REAL tmp1=0.;
    {
       const REAL *p1, *p2, *p3;
       p1=mPowderPatternCalc.data();
       p2=mPowderPatternObs.data();
       p3=mPowderPatternWeight.data();
-      for(long i=0;i<maxPoints;i++)
+      for(unsigned long i=0;i<maxPoints;i++)
       {
          tmp1 += *p3 * ((*p1)-(*p2))*((*p1)-(*p2));
          p1++;p2++;
@@ -1991,7 +1904,6 @@ void PowderPattern::FitScaleFactorForR()
    this->CalcPowderPattern();
    TAU_PROFILE("PowderPattern::FitScaleFactorForR()","void ()",TAU_DEFAULT);
    VFN_DEBUG_ENTRY("PowderPattern::FitScaleFactorForR()",3);
-   //:TODO: take into account excluded regions...
    // Which components are scalable ?
       mScalableComponentIndex.resize(mPowderPatternComponentRegistry.GetNb());
       int nbScale=0;
@@ -2003,7 +1915,6 @@ void PowderPattern::FitScaleFactorForR()
       mScalableComponentIndex.resizeAndPreserve(nbScale);
    VFN_DEBUG_MESSAGE("-> Number of Scale Factors:"<<nbScale<<":Index:"<<endl<<mScalableComponentIndex,3);
    // prepare matrices
-      //mFitScaleFactorD.resize(mNbPoint,nbScale);
       mFitScaleFactorM.resize(nbScale,nbScale);
       mFitScaleFactorB.resize(nbScale,1);
       mFitScaleFactorX.resize(nbScale,1);
@@ -2022,7 +1933,7 @@ void PowderPattern::FitScaleFactorForR()
          	const REAL *p2=mPowderPatternComponentRegistry.GetObj(mScalableComponentIndex(j))
                            	.mPowderPatternCalc.data();
          	REAL m=0.;
-         	for(unsigned long k=0;k<mNbPoint;k++) m += *p1++ * *p2++;
+         	for(unsigned long k=0;k<mNbPointUsed;k++) m += *p1++ * *p2++;
          	mFitScaleFactorM(i,j)=m;
          	mFitScaleFactorM(j,i)=m;
       	}
@@ -2034,11 +1945,11 @@ void PowderPattern::FitScaleFactorForR()
                         	.mPowderPatternCalc.data();
       	REAL b=0.;
 			if(mPowderPatternBackgroundCalc.numElements()<=1)
-      		for(unsigned long k=0;k<mNbPoint;k++) b += *p1++ * *p2++;
+      		for(unsigned long k=0;k<mNbPointUsed;k++) b += *p1++ * *p2++;
 			else
 			{
       		const REAL *p3=mPowderPatternBackgroundCalc.data();
-      		for(unsigned long k=0;k<mNbPoint;k++) b += (*p1++ - *p3++) * *p2++;
+      		for(unsigned long k=0;k<mNbPointUsed;k++) b += (*p1++ - *p3++) * *p2++;
 			}
       	mFitScaleFactorB(i,0) =b;
    	}
@@ -2064,15 +1975,15 @@ void PowderPattern::FitScaleFactorForR()
                                     /m2ThetaStep);
                max=(unsigned long)ceil((mExcludedRegionMax2Theta(k)-m2ThetaMin)
                                     /m2ThetaStep);
-               if(min>mNbPoint) break;
-               if(max>mNbPoint)max=mNbPoint;
+               if(min>mNbPointUsed) break;
+               if(max>mNbPointUsed)max=mNbPointUsed;
 					//! min is the *beginning* of the excluded region
                for(;l<min;l++) m += *p1++ * *p2++;
                p1 += max-l;
                p2 += max-l;
                l  = max;
             }
-            for(;l<mNbPoint;l++) m += *p1++ * *p2++;
+            for(;l<mNbPointUsed;l++) m += *p1++ * *p2++;
          	mFitScaleFactorM(i,j)=m;
          	mFitScaleFactorM(j,i)=m;
       	}
@@ -2093,15 +2004,15 @@ void PowderPattern::FitScaleFactorForR()
                                  	/m2ThetaStep);
             	max=(long)ceil((mExcludedRegionMax2Theta(k)-m2ThetaMin)
                                  	/m2ThetaStep);
-            	if(min>mNbPoint) break;
-            	if(max>mNbPoint)max=mNbPoint;
+            	if(min>mNbPointUsed) break;
+            	if(max>mNbPointUsed)max=mNbPointUsed;
 					//! min is the *beginning* of the excluded region
             	for(;l<min;l++) b += *p1++ * *p2++;
             	p1 += max-l;
             	p2 += max-l;
             	l  = max;
          	}
-         	for(;l<mNbPoint;l++) b += *p1++ * *p2++;
+         	for(;l<mNbPointUsed;l++) b += *p1++ * *p2++;
 			}
 			else
 			{
@@ -2112,15 +2023,15 @@ void PowderPattern::FitScaleFactorForR()
                                  	/m2ThetaStep);
             	max=(long)ceil((mExcludedRegionMax2Theta(k)-m2ThetaMin)
                                  	/m2ThetaStep);
-            	if(min>mNbPoint) break;
-            	if(max>mNbPoint)max=mNbPoint;
+            	if(min>mNbPointUsed) break;
+            	if(max>mNbPointUsed)max=mNbPointUsed;
 					//! min is the *beginning* of the excluded region
             	for(;l<min;l++) b += (*p1++ - *p3++) * *p2++;
             	p1 += max-l;
             	p2 += max-l;
             	l  = max;
          	}
-         	for(;l<mNbPoint;l++) b += (*p1++ - *p3++) * *p2++;
+         	for(;l<mNbPointUsed;l++) b += (*p1++ - *p3++) * *p2++;
 			}
       	mFitScaleFactorB(i,0) =b;
    	}
@@ -2136,7 +2047,7 @@ void PowderPattern::FitScaleFactorForR()
       REAL * p0 = mPowderPatternCalc.data();
       const REAL s = mFitScaleFactorX(i)
 							  -mScaleFactor(mScalableComponentIndex(i));
-      for(unsigned long j=0;j<mNbPoint;j++) *p0++ += s * *p1++;
+      for(unsigned long j=0;j<mNbPointUsed;j++) *p0++ += s * *p1++;
       VFN_DEBUG_MESSAGE("-> Old:"<<mScaleFactor(mScalableComponentIndex(i)) <<" Change:"<<mFitScaleFactorX(i),2);
       mScaleFactor(mScalableComponentIndex(i)) = mFitScaleFactorX(i);
 		mClockScaleFactor.Click();
@@ -2161,7 +2072,6 @@ void PowderPattern::FitScaleFactorForIntegratedR()
       mScalableComponentIndex.resizeAndPreserve(nbScale);
    VFN_DEBUG_MESSAGE("-> Number of Scale Factors:"<<nbScale<<":Index:"<<endl<<mScalableComponentIndex,2);
    // prepare matrices
-      //mFitScaleFactorD.resize(mNbPoint,nbScale);
       mFitScaleFactorM.resize(nbScale,nbScale);
       mFitScaleFactorB.resize(nbScale,1);
       mFitScaleFactorX.resize(nbScale,1);
@@ -2270,7 +2180,7 @@ void PowderPattern::FitScaleFactorForIntegratedR()
       REAL * p0 = mPowderPatternCalc.data();
       const REAL s = mFitScaleFactorX(i)
 							  -mScaleFactor(mScalableComponentIndex(i));
-      for(unsigned long j=0;j<mNbPoint;j++) *p0++ += s * *p1++;
+      for(unsigned long j=0;j<mNbPointUsed;j++) *p0++ += s * *p1++;
       VFN_DEBUG_MESSAGE("-> Old:"<<mScaleFactor(mScalableComponentIndex(i)) <<" New:"<<mFitScaleFactorX(i),3);
       mScaleFactor(mScalableComponentIndex(i)) = mFitScaleFactorX(i);
 		mClockScaleFactor.Click();
@@ -2298,7 +2208,6 @@ void PowderPattern::FitScaleFactorForRw()
       mScalableComponentIndex.resizeAndPreserve(nbScale);
    VFN_DEBUG_MESSAGE("-> Number of Scale Factors:"<<nbScale<<":Index:"<<endl<<mScalableComponentIndex,2);
    // prepare matrices
-      //mFitScaleFactorD.resize(mNbPoint,nbScale);
       mFitScaleFactorM.resize(nbScale,nbScale);
       mFitScaleFactorB.resize(nbScale,1);
       mFitScaleFactorX.resize(nbScale,1);
@@ -2318,7 +2227,7 @@ void PowderPattern::FitScaleFactorForRw()
                            	.mPowderPatternCalc.data();
          	const REAL *p3=mPowderPatternWeight.data();
          	REAL m=0.;
-         	for(unsigned long k=0;k<mNbPoint;k++) m += *p1++ * *p2++ * *p3++;
+         	for(unsigned long k=0;k<mNbPointUsed;k++) m += *p1++ * *p2++ * *p3++;
          	mFitScaleFactorM(i,j)=m;
          	mFitScaleFactorM(j,i)=m;
       	}
@@ -2331,11 +2240,11 @@ void PowderPattern::FitScaleFactorForRw()
       	const REAL *p3=mPowderPatternWeight.data();
       	REAL b=0.;
 			if(mPowderPatternBackgroundCalc.numElements()<=1)
-      		for(unsigned long k=0;k<mNbPoint;k++) b += *p1++ * *p2++ * *p3++;
+      		for(unsigned long k=0;k<mNbPointUsed;k++) b += *p1++ * *p2++ * *p3++;
 			else
 			{
       		const REAL *p4=mPowderPatternBackgroundCalc.data();
-      		for(unsigned long k=0;k<mNbPoint;k++)
+      		for(unsigned long k=0;k<mNbPointUsed;k++)
 					b += (*p1++ - *p4++) * *p2++ * *p3++;
 			}
       	mFitScaleFactorB(i,0) =b;
@@ -2363,8 +2272,8 @@ void PowderPattern::FitScaleFactorForRw()
                                     /m2ThetaStep);
                max=(unsigned long)ceil((mExcludedRegionMax2Theta(k)-m2ThetaMin)
                                     /m2ThetaStep);
-               if(min>mNbPoint) break;
-               if(max>mNbPoint)max=mNbPoint;
+               if(min>mNbPointUsed) break;
+               if(max>mNbPointUsed)max=mNbPointUsed;
 					//! min is the *beginning* of the excluded region
                for(;l<min;l++) m += *p1++ * *p2++ * *p3++;
                p1 += max-l;
@@ -2372,7 +2281,7 @@ void PowderPattern::FitScaleFactorForRw()
                p3 += max-l;
                l  = max;
             }
-            for(;l<mNbPoint;l++) m += *p1++ * *p2++ * *p3++;
+            for(;l<mNbPointUsed;l++) m += *p1++ * *p2++ * *p3++;
          	mFitScaleFactorM(i,j)=m;
          	mFitScaleFactorM(j,i)=m;
       	}
@@ -2394,8 +2303,8 @@ void PowderPattern::FitScaleFactorForRw()
                                  	/m2ThetaStep);
             	max=(long)ceil((mExcludedRegionMax2Theta(k)-m2ThetaMin)
                                  	/m2ThetaStep);
-            	if(min>mNbPoint) break;
-            	if(max>mNbPoint)max=mNbPoint;
+            	if(min>mNbPointUsed) break;
+            	if(max>mNbPointUsed)max=mNbPointUsed;
 					//! min is the *beginning* of the excluded region
             	for(;l<min;l++) b += *p1++ * *p2++ * *p3++;
             	p1 += max-l;
@@ -2403,7 +2312,7 @@ void PowderPattern::FitScaleFactorForRw()
             	p3 += max-l;
             	l  = max;
          	}
-         	for(;l<mNbPoint;l++) b += *p1++ * *p2++ * *p3++;
+         	for(;l<mNbPointUsed;l++) b += *p1++ * *p2++ * *p3++;
 			}
 			else
 			{
@@ -2414,8 +2323,8 @@ void PowderPattern::FitScaleFactorForRw()
                                  	/m2ThetaStep);
             	max=(long)ceil((mExcludedRegionMax2Theta(k)-m2ThetaMin)
                                  	/m2ThetaStep);
-            	if(min>mNbPoint) break;
-            	if(max>mNbPoint)max=mNbPoint;
+            	if(min>mNbPointUsed) break;
+            	if(max>mNbPointUsed)max=mNbPointUsed;
 					//! min is the *beginning* of the excluded region
             	for(;l<min;l++) b += (*p1++ - *p4++) * *p2++ * *p3++;
             	p1 += max-l;
@@ -2423,7 +2332,7 @@ void PowderPattern::FitScaleFactorForRw()
             	p3 += max-l;
             	l  = max;
          	}
-         	for(;l<mNbPoint;l++) b += (*p1++ - *p4++) * *p2++ * *p3++;
+         	for(;l<mNbPointUsed;l++) b += (*p1++ - *p4++) * *p2++ * *p3++;
 			}
       	mFitScaleFactorB(i,0) =b;
    	}
@@ -2439,7 +2348,7 @@ void PowderPattern::FitScaleFactorForRw()
       REAL * p0 = mPowderPatternCalc.data();
       const REAL s = mFitScaleFactorX(i)
 							  -mScaleFactor(mScalableComponentIndex(i));
-      for(unsigned long j=0;j<mNbPoint;j++) *p0++ += s * *p1++;
+      for(unsigned long j=0;j<mNbPointUsed;j++) *p0++ += s * *p1++;
       VFN_DEBUG_MESSAGE("-> Old:"<<mScaleFactor(mScalableComponentIndex(i)) <<" Change:"<<mFitScaleFactorX(i),3);
       mScaleFactor(mScalableComponentIndex(i)) = mFitScaleFactorX(i);
 		mClockScaleFactor.Click();
@@ -2464,7 +2373,6 @@ void PowderPattern::FitScaleFactorForIntegratedRw()
       mScalableComponentIndex.resizeAndPreserve(nbScale);
    VFN_DEBUG_MESSAGE("-> Number of Scale Factors:"<<nbScale<<":Index:"<<endl<<mScalableComponentIndex,2);
    // prepare matrices
-      //mFitScaleFactorD.resize(mNbPoint,nbScale);
       mFitScaleFactorM.resize(nbScale,nbScale);
       mFitScaleFactorB.resize(nbScale,1);
       mFitScaleFactorX.resize(nbScale,1);
@@ -2575,7 +2483,7 @@ void PowderPattern::FitScaleFactorForIntegratedRw()
       REAL * p0 = mPowderPatternCalc.data();
       const REAL s = mFitScaleFactorX(i)
 							  -mScaleFactor(mScalableComponentIndex(i));
-      for(unsigned long j=0;j<mNbPoint;j++) *p0++ += s * *p1++;
+      for(unsigned long j=0;j<mNbPointUsed;j++) *p0++ += s * *p1++;
       VFN_DEBUG_MESSAGE("-> Old:"<<mScaleFactor(mScalableComponentIndex(i)) <<" New:"<<mFitScaleFactorX(i),3);
       mScaleFactor(mScalableComponentIndex(i)) = mFitScaleFactorX(i);
 		mClockScaleFactor.Click();
@@ -2749,7 +2657,10 @@ void PowderPattern::Prepare()
 {
    VFN_DEBUG_MESSAGE("PowderPattern::Prepare()",5);
    for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++)
+	{
+      mPowderPatternComponentRegistry.GetObj(i).SetMaxSinThetaOvLambda(mMaxSinThetaOvLambda);
       mPowderPatternComponentRegistry.GetObj(i).Prepare();
+	}
 }
 void PowderPattern::GetGeneGroup(const RefinableObj &obj,
 										  CrystVector_uint & groupIndex,
@@ -2775,6 +2686,10 @@ void PowderPattern::GetGeneGroup(const RefinableObj &obj,
 				}
 			}
 }
+
+void PowderPattern::SetMaxSinThetaOvLambda(const REAL max){mMaxSinThetaOvLambda=max;}
+
+REAL PowderPattern::GetMaxSinThetaOvLambda()const{return mMaxSinThetaOvLambda;}
 
 void PowderPattern::CalcPowderPattern() const
 {
@@ -2812,6 +2727,7 @@ void PowderPattern::CalcPowderPattern() const
    	VFN_DEBUG_EXIT("PowderPattern::CalcPowderPattern():no need to recalc",3);
 		return;
 	}
+	this->CalcNbPointUsed();
    TAU_PROFILE_TIMER(timer2,"PowderPattern::CalcPowderPattern2(Add spectrums-scaled)"\
                      ,"", TAU_FIELD);
    TAU_PROFILE_TIMER(timer3,"PowderPattern::CalcPowderPattern2(Add spectrums-backgd)"\
@@ -2836,7 +2752,7 @@ void PowderPattern::CalcPowderPattern() const
                               	.mPowderPatternCalc.data();
          	REAL * p0 = mPowderPatternCalc.data();
             const REAL s = mScaleFactor(i);
-            for(unsigned long j=0;j<mNbPoint;j++) *p0++ += s * *p1++;
+            for(unsigned long j=0;j<mNbPointUsed;j++) *p0++ += s * *p1++;
 			}
        	TAU_PROFILE_STOP (timer2);
      }
@@ -2850,7 +2766,7 @@ void PowderPattern::CalcPowderPattern() const
          	const REAL * p1=mPowderPatternComponentRegistry.GetObj(i)
                               	.mPowderPatternCalc.data();
          	REAL * p0 = mPowderPatternCalc.data();
-				for(unsigned long j=0;j<mNbPoint;j++) *p0++ += *p1++;
+				for(unsigned long j=0;j<mNbPointUsed;j++) *p0++ += *p1++;
 
 			}
 			if(0==nbBackgd) mPowderPatternBackgroundCalc=mPowderPatternComponentRegistry.GetObj(i)
@@ -2860,7 +2776,7 @@ void PowderPattern::CalcPowderPattern() const
          	REAL *p0 = mPowderPatternBackgroundCalc.data();
 				const REAL *p1=mPowderPatternComponentRegistry.GetObj(i)
                               .mPowderPatternCalc.data();
-				for(unsigned long j=0;j<mNbPoint;j++) *p0++ += *p1++;
+				for(unsigned long j=0;j<mNbPointUsed;j++) *p0++ += *p1++;
 			}
 			nbBackgd++;
       	TAU_PROFILE_STOP(timer3);
@@ -2909,6 +2825,11 @@ void PowderPattern::PrepareIntegratedRfactor()const
 			break;
 		}
 	}
+	
+	// If using max sin(theta)/lambda
+		this->CalcNbPointUsed();
+		if(mClockIntegratedFactorsPrep<mClockNbPointUsed) needPrep=true;
+	
 	if(false==needPrep)
 	{
    	VFN_DEBUG_EXIT("PowderPattern::PrepareIntegratedRfactor():nothing to do",3);
@@ -2955,9 +2876,9 @@ void PowderPattern::PrepareIntegratedRfactor()const
 		for(int i=0;i<numInterval;i++) 
 		{
 			if(mIntegratedPatternMin(i)<0) mIntegratedPatternMin(i)=0;
-			if(mIntegratedPatternMin(i)>=(long)mNbPoint) keep(i)=false;
+			if(mIntegratedPatternMin(i)>=(long)mNbPointUsed) keep(i)=false;
 			if(mIntegratedPatternMax(i)<0) keep(i)=false;
-			if(mIntegratedPatternMax(i)>=(long)mNbPoint) mIntegratedPatternMax(i)=mNbPoint-1;
+			if(mIntegratedPatternMax(i)>=(long)mNbPointUsed) mIntegratedPatternMax(i)=mNbPointUsed-1;
 		}
    VFN_DEBUG_MESSAGE("PowderPattern::PrepareIntegratedRfactor():4",3);
 	// Make sure all intervals do not overlap, and correct if necessary, by
@@ -3059,6 +2980,16 @@ void PowderPattern::PrepareIntegratedRfactor()const
 	//										 mIntegratedObs,mIntegratedWeight,12,6)<<endl;
 	mClockIntegratedFactorsPrep.Click();
    VFN_DEBUG_EXIT("PowderPattern::PrepareIntegratedRfactor()",3);
+}
+void PowderPattern::CalcNbPointUsed()const
+{
+	unsigned long tmp=this->Get2ThetaCorrPixel(2*asin(mMaxSinThetaOvLambda*this->GetWavelength()));
+	if(tmp>mNbPoint) tmp= mNbPoint;
+	if(tmp !=mNbPointUsed)
+	{
+		mNbPointUsed=tmp;
+		mClockNbPointUsed.Click();
+	}
 }
 
 #ifdef __WX__CRYST__

@@ -214,6 +214,12 @@ mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUM_MENU_IMPORT_CPI,
       mList.Add(fieldThetaDispl);
       mList.Add(fieldThetaTransp);
       mpSizer->Add(thetaCorrSizer);
+	// Max Sin(theta/Lambda)
+      WXFieldPar<REAL> *maxSiThOvLa=
+         new WXFieldPar<REAL>(this,"Max Sin(theta)/lambda:",-1,
+			                     &(mpPowderPattern->mMaxSinThetaOvLambda));
+      mpSizer->Add(maxSiThOvLa,0,wxALIGN_LEFT);
+      mList.Add(maxSiThOvLa);
    // Components
       mpWXComponent=mpPowderPattern
                     ->mPowderPatternComponentRegistry.WXCreate(this);
@@ -229,11 +235,11 @@ mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUM_MENU_IMPORT_CPI,
 void WXPowderPattern::CrystUpdate()
 {
    VFN_DEBUG_MESSAGE("WXPowderPattern::CrystUpdate()",6)
+	WXCrystValidateAllUserInput();
    this->WXRefinableObj::CrystUpdate();
 	
 	// Will force re-generating reflection list if the wavelength,
 	// or lattice par, or the spacegroup has changed.
-	WXCrystValidateAllUserInput();
 	mpPowderPattern->Prepare();
 	
    if(mpGraph!=0)

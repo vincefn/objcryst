@@ -324,7 +324,7 @@ mNbRefl(0),
 mpCrystal(0),mGlobalBiso(0),mUseFastLessPreciseFunc(false),
 mpTemperatureFactor(0),mpScatteringFactor(0),mpRealGeomSF(0),mpImagGeomSF(0),
 mpScattCompList(0),mNbScatteringPower(0),
-mIgnoreImagScattFact(false)
+mIgnoreImagScattFact(false),mMaxSinThetaOvLambda(10)
 {
    VFN_DEBUG_MESSAGE("ScatteringData::ScatteringData()",10)
    
@@ -353,7 +353,8 @@ mpTemperatureFactor(0),mpScatteringFactor(0),mpRealGeomSF(0),mpImagGeomSF(0),
 mClockHKL(old.mClockHKL),
 mpScattCompList(0),mNbScatteringPower(0),
 
-mIgnoreImagScattFact(old.mIgnoreImagScattFact)
+mIgnoreImagScattFact(old.mIgnoreImagScattFact),
+mMaxSinThetaOvLambda(old.mMaxSinThetaOvLambda)
 {
    VFN_DEBUG_MESSAGE("ScatteringData::ScatteringData(&old)",10)
    mClockStructFactor.Reset();
@@ -686,7 +687,7 @@ const CrystVector_REAL& ScatteringData::GetFhklCalcSq() const
    pr=mFhklCalcReal.data();
    pi=mFhklCalcImag.data();
    p=mFhklCalcSq.data();
-   for(long i=0;i<mNbRefl;i++)
+   for(long i=0;i<mNbReflUsed;i++)
    {
       *p++ = *pr * *pr + *pi * *pi;
       pr++;
@@ -800,9 +801,15 @@ void ScatteringData::PrepareHKLarrays()
    mH2Pi*=(2*M_PI);
    mK2Pi*=(2*M_PI);
    mL2Pi*=(2*M_PI);
+	
+	mNbReflUsed=mNbRefl;
+	
    mClockHKL.Click();
    VFN_DEBUG_EXIT("ScatteringData::PrepareHKLarrays()",5)
 }
+
+void ScatteringData::SetMaxSinThetaOvLambda(const REAL max){mMaxSinThetaOvLambda=max;}
+REAL ScatteringData::GetMaxSinThetaOvLambda()const{return mMaxSinThetaOvLambda;}
 
 CrystVector_long ScatteringData::SortReflectionByTheta(const REAL maxTheta)
 {
@@ -1071,7 +1078,26 @@ void ScatteringData::PrepareCalcStructFactor()const
    }
 	if(mClockStructFactor<mClockHKL) mGeomFhklCalcNeedRecalc=true;
    mLastScattCompList=*mpScattCompList;
-   mClockScattFactor.Click();//update clock
+	
+   //mClockScattFactor.Click();// What's this ?
+	
+	// Determine which reflections are below maxSin(theta)/lambda
+	{
+		this->CalcSinThetaLambda();
+		long i;
+		for(i=0;i<mNbRefl;i++) if(mSinThetaLambda(i)>mMaxSinThetaOvLambda) break;
+		if(i!=mNbReflUsed) mGeomFhklCalcNeedRecalc=true;
+		if(i==mNbRefl) mNbReflUsed=mNbRefl;
+		if((i<mNbRefl) && (i!=mNbReflUsed))
+		{
+			mNbReflUsed=i;
+			mClockNbReflUsed.Click();
+      	VFN_DEBUG_MESSAGE("->Changed Max sin(theta)/lambda="<<mMaxSinThetaOvLambda\
+									<<" nb refl="<<mNbReflUsed,5)
+		}
+	}
+   VFN_DEBUG_MESSAGE("->Number of reflections:"<<mNbRefl<<\
+							", below max sin(theta)/lambda="<<mMaxSinThetaOvLambda<< ":"<<mNbReflUsed,2)
    VFN_DEBUG_MESSAGE("->mGeomFhklCalcNeedRecalc:"<<mGeomFhklCalcNeedRecalc,2)
    VFN_DEBUG_MESSAGE("->mFhklCalcNeedRecalc    :"<<mFhklCalcNeedRecalc,2)
    VFN_DEBUG_MESSAGE("->mAnomalousNeedRecalc   :"<<mAnomalousNeedRecalc,2)
@@ -1272,7 +1298,8 @@ void ScatteringData::CalcGlobalTemperatureFactor() const
    TAU_PROFILE("ScatteringData::CalcGlobalTemperatureFactor()","void ()",TAU_DEFAULT);
 	this->CalcSinThetaLambda();
 	if(  (mClockGlobalBiso<mClockGlobalTemperatureFact)
-	   &&(mClockGlobalBiso>mClockTheta)) return;
+	   &&(mClockGlobalBiso>mClockTheta)
+	   &&(mClockGlobalBiso>mClockNbReflUsed)) return;
    VFN_DEBUG_MESSAGE("ScatteringData::CalcGlobalTemperatureFactor()",2)
 	
 	mGlobalTemperatureFactor.resize(mNbRefl);
@@ -1283,7 +1310,7 @@ void ScatteringData::CalcGlobalTemperatureFactor() const
 	{
 		const REAL *stol=this->GetSinThetaOverLambda().data();
 		REAL *fact=mGlobalTemperatureFactor.data();
-		for(long i=0;i<mNbRefl;i++) {*fact++ = exp(-mGlobalBiso * *stol * *stol);stol++;}
+		for(long i=0;i<mNbReflUsed;i++) {*fact++ = exp(-mGlobalBiso * *stol * *stol);stol++;}
 	}
 	mClockGlobalTemperatureFact.Click();
 }
@@ -1420,7 +1447,7 @@ void ScatteringData::CalcStructFactor() const
          {
             fsecond=mFsecond(i);
             VFN_DEBUG_MESSAGE("->fsecond= "<<fsecond,2)
-            for(long j=0;j<nbRefl;j++)
+            for(long j=0;j<mNbReflUsed;j++)
             {
                *pReal += *pGeomR  * *pTemp * *pScatt - *pGeomI * *pTemp * fsecond;
                *pImag += *pGeomI  * *pTemp * *pScatt + *pGeomR * *pTemp * fsecond;
@@ -1430,7 +1457,7 @@ void ScatteringData::CalcStructFactor() const
          }
          else
          {
-            for(long j=0;j<nbRefl;j++)
+            for(long j=0;j<mNbReflUsed;j++)
             {
                *pReal++ += *pGeomR  * *pTemp * *pScatt;
                *pImag++ += *pGeomI  * *pTemp * *pScatt;
@@ -1467,7 +1494,7 @@ void ScatteringData::CalcGeomStructFactor(const ScatteringComponentList &scattCo
    VFN_DEBUG_MESSAGE("-->Number of symetry operations (w/o transl&inv cent.):"\
                      <<spg.GetNbSymmetrics(true,true),2)
    VFN_DEBUG_MESSAGE("-->Number of Scattering Components :"<<scattCompList.GetNbComponent(),2)
-   VFN_DEBUG_MESSAGE("-->Number of reflections:"<<this->GetNbRefl(),2)
+   VFN_DEBUG_MESSAGE("-->Number of reflections:"<<this->GetNbRefl()<<" (actually used:"<<mNbReflUsed<<")",2)
    #ifdef __DEBUG__
    static long counter=0;
    VFN_DEBUG_MESSAGE("-->Number of GeomStructFactor calculations so far:"<<counter++,3)
@@ -1575,18 +1602,18 @@ void ScatteringData::CalcGeomStructFactor(const ScatteringComponentList &scattCo
                tmpInt=intVect.data();
 
                //the +sLibCrystNbTabulSine*1000 ensures that the resulting integer is >0
-               for(int jj=0;jj<nbRefl;jj++) 
+               for(int jj=0;jj<mNbReflUsed;jj++) 
                 *tmpInt++ = (*intH++ * intX + *intK++ * intY + *intL++ *intZ 
                               +sLibCrystNbTabulSine*1000)% sLibCrystNbTabulSine ;
 
                //Doing 2 loops for sine and cosine is faster than just 1 (for not-centro)
                tmpInt=intVect.data();
-               for(int jj=0;jj<nbRefl;jj++) 
+               for(int jj=0;jj<mNbReflUsed;jj++) 
                   *rrsf++ += popu * spLibCrystTabulCosine[*tmpInt++];
                tmpInt=intVect.data();
 
                if(false==spg.HasInversionCenter()) 
-                  for(int jj=0;jj<nbRefl;jj++) 
+                  for(int jj=0;jj<mNbReflUsed;jj++) 
                      *iisf++ += popu * spLibCrystTabulSine[*tmpInt++];
             }
             else
@@ -1600,18 +1627,18 @@ void ScatteringData::CalcGeomStructFactor(const ScatteringComponentList &scattCo
                tmp=tmpVect.data();
                
                
-               for(int jj=0;jj<nbRefl;jj++) *tmp++ = *hh++ * x + *kk++ * y + *ll++ *z;
+               for(int jj=0;jj<mNbReflUsed;jj++) *tmp++ = *hh++ * x + *kk++ * y + *ll++ *z;
                
                REAL *sf=(rsf2+index)->data();
                tmp=tmpVect.data();
                
-               for(int jj=0;jj<nbRefl;jj++) *sf++ += popu * cos(*tmp++);
+               for(int jj=0;jj<mNbReflUsed;jj++) *sf++ += popu * cos(*tmp++);
                
                if(false==spg.HasInversionCenter()) 
                {
                   sf=(isf2+index)->data();
                   tmp=tmpVect.data();
-                  for(int jj=0;jj<nbRefl;jj++) *sf++ += popu * sin(*tmp++);
+                  for(int jj=0;jj<mNbReflUsed;jj++) *sf++ += popu * sin(*tmp++);
                }
             }
          }
@@ -1626,7 +1653,7 @@ void ScatteringData::CalcGeomStructFactor(const ScatteringComponentList &scattCo
             hh=mH2Pi.data();
             kk=mK2Pi.data();
             ll=mL2Pi.data();
-            for(long j=0;j<nbRefl;j++) *p1++ += 2*cos((*hh++ - *kk++ - *ll++)/3.);
+            for(long j=0;j<mNbReflUsed;j++) *p1++ += 2*cos((*hh++ - *kk++ - *ll++)/3.);
          }
          else
          {
@@ -1639,7 +1666,7 @@ void ScatteringData::CalcGeomStructFactor(const ScatteringComponentList &scattCo
                hh=mH2Pi.data();
                kk=mK2Pi.data();
                ll=mL2Pi.data();
-               for(long j=0;j<nbRefl;j++) *p1++ += cos(*hh++ *x + *kk++ *y + *ll++ *z );
+               for(long j=0;j<mNbReflUsed;j++) *p1++ += cos(*hh++ *x + *kk++ *y + *ll++ *z );
             }
          }
          for(long i=0;i<nbScattArrays;i++) *(rsf2+i) *= tmpVect;
@@ -1671,7 +1698,7 @@ void ScatteringData::CalcGeomStructFactor(const ScatteringComponentList &scattCo
                   const REAL *kk=mK2Pi.data();
                   const REAL *ll=mL2Pi.data();
                   REAL *ttmpVect=tmpVect.data();
-                  for(long ii=0;ii<nbRefl;ii++) 
+                  for(long ii=0;ii<mNbReflUsed;ii++) 
                      *ttmpVect++ = *hh++ * xc + *kk++ * yc + *ll++ * zc;
                }
                #endif

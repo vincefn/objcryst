@@ -387,7 +387,7 @@ REAL DiffractionDataSingleCrystal::GetRw()const
 			p1=mCalcIntensity.data();
    		p2=mObsIntensity.data();
    		p3=mWeight.data();
-			nb=this->GetNbRefl();
+			nb=mNbReflUsed;
 			break;
 		}
 		case 1:
@@ -431,7 +431,7 @@ REAL DiffractionDataSingleCrystal::GetR()const
 		{
 			p1=mCalcIntensity.data();
    		p2=mObsIntensity.data();
-			nb=this->GetNbRefl();
+			nb=mNbReflUsed;
 			break;
 		}
 		case 1:
@@ -475,7 +475,7 @@ REAL DiffractionDataSingleCrystal::GetChi2()const
 			p1=mCalcIntensity.data();
    		p2=mObsIntensity.data();
    		p3=mWeight.data();
-			nb=this->GetNbRefl();
+			nb=mNbReflUsed;
 			break;
 		}
 		case 1:
@@ -518,7 +518,7 @@ void DiffractionDataSingleCrystal::FitScaleFactorForRw()
 			p1=mCalcIntensity.data();
    		p2=mObsIntensity.data();
    		p3=mWeight.data();
-			nb=this->GetNbRefl();
+			nb=mNbReflUsed;
 			break;
 		}
 		case 1:
@@ -564,7 +564,7 @@ void DiffractionDataSingleCrystal::FitScaleFactorForR()
 		{
 			p1=mCalcIntensity.data();
    		p2=mObsIntensity.data();
-			nb=this->GetNbRefl();
+			nb=mNbReflUsed;
 			break;
 		}
 		case 1:
@@ -864,10 +864,10 @@ void DiffractionDataSingleCrystal::PrepareTwinningCalc() const
 	long nbGroup=0;
 	{
 		const REAL dSiThOvLa=.0001;
-		mTwinnedGroupIndex.resize(mNbRefl);
+		mTwinnedGroupIndex.resize(mNbReflUsed);
 		this->CalcSinThetaLambda();
 		REAL sithol0=mSinThetaLambda(0)+dSiThOvLa;
-		for(long i=1;i<mNbRefl;i++)
+		for(long i=1;i<mNbReflUsed;i++)
 		{
 			if(mSinThetaLambda(i)>sithol0)
 			{
@@ -875,7 +875,7 @@ void DiffractionDataSingleCrystal::PrepareTwinningCalc() const
 				sithol0=mSinThetaLambda(i)+dSiThOvLa;
 			}
 		}
-		mTwinnedGroupIndex(nbGroup++)=mNbRefl;
+		mTwinnedGroupIndex(nbGroup++)=mNbReflUsed;
 		mTwinnedGroupIndex.resizeAndPreserve(nbGroup);
 	}
 	// Calculate summed Iobs and weight
