@@ -1427,6 +1427,154 @@ Error opening file for input:"+filename);
    VFN_DEBUG_MESSAGE("PowderPattern::ImportPowderPattern2ThetaObs():finished",5)
 }
 
+void PowderPattern::ImportPowderPatternMultiDetectorLLBG42(const string &filename)
+{
+
+   //Sample 4: NaY + CF2=CCL2 T=20K, Lambda: 2.343 A.                                
+   //     100       0   0.100      70       0       0
+   //   3.000
+   // 500000.  12000.    0.00    0.00
+   //70  570369  569668  562868  532769  527469  495669  481969  452767  429468  4132
+   //68  393269  372067  353769  337068  328268  310270  299469  296470  294668  2780
+   //...
+   //14  255814  282714  274014  281314  300314  302714  301114  298014  313214  3097
+   //14  286914  295714  305214  300714  288311  295511  288511  3024 8  2937 7  2883
+   // 7  2905 7  2895 7  2767 7  2777 7  2758 7  2495 7  2507 7  2496 7  2382 7  2329
+   // 7  2542 7  2415 7  2049 7  2389 7  2270 7  2157 6  2227 6  2084 3  1875 2  2094
+   // 1  1867
+   //   -1000
+   //  -10000
+   VFN_DEBUG_MESSAGE("PowderPattern::ImportPowderPatternMultiDetectorLLBG42() : \
+from file : "+filename,5)
+   ifstream fin(filename.c_str());
+   if(!fin)
+   {
+      throw ObjCrystException("PowderPattern::ImportPowderPatternMultiDetectorLLBG42() : \
+Error opening file for input:"+filename);
+   }
+   
+   string str;
+   getline(fin,str);
+   float junk;
+   fin >> junk;
+   fin >> junk;
+   fin >> m2ThetaStep;
+   fin >> junk;
+   fin >> junk;
+   fin >> junk;
+   fin >> m2ThetaMin;
+   fin >> junk;
+   fin >> junk;
+   fin >> junk;
+   fin >> junk;
+   VFN_DEBUG_MESSAGE("PowderPattern::ImportPowderPatternMultiDetectorLLBG42() :"\
+      << " 2Theta min=" << m2ThetaMin << " 2Theta step=" <<  m2ThetaStep,5)
+   m2ThetaMin  *= DEG2RAD;
+   m2ThetaStep *= DEG2RAD;
+   mPowderPatternObs.resize (1000);
+   mPowderPatternObsSigma.resize (1000);
+   
+   getline(fin,str);//finish reading line
+   
+   float tmp;
+   string sub;
+   float ct,iobs;
+   for(;;)
+   {            
+      getline(fin,str);
+      sscanf(str.c_str(),"%f",&tmp);
+      if(tmp<0) break;
+      const unsigned int nb=str.length()/8;
+      for(unsigned int i=0;i<nb;i++)
+      {
+         if(mNbPoint==(unsigned int)mPowderPatternObs.numElements())
+         {
+            mPowderPatternObs.resizeAndPreserve(mNbPoint+100);
+            mPowderPatternObsSigma.resizeAndPreserve(mNbPoint+100);
+         }
+         sub=str.substr(i*8,8);
+         sscanf(sub.c_str(),"%2f%6f",&ct,&iobs);
+         mPowderPatternObs(mNbPoint)=iobs;
+         mPowderPatternObsSigma(mNbPoint++)=sqrt(iobs/ct);
+      }
+   }
+   //exit(1);
+   mPowderPatternObs.resizeAndPreserve (mNbPoint);
+   mPowderPatternObsSigma.resizeAndPreserve (mNbPoint);
+   mPowderPatternWeight.resizeAndPreserve(mNbPoint);
+   
+   fin.close();
+   this->SetWeightToInvSigmaSq();
+   {
+      char buf [200];
+      sprintf(buf,"Imported powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
+              (int)mNbPoint,m2ThetaMin*RAD2DEG,(m2ThetaMin+m2ThetaStep*(mNbPoint-1))*RAD2DEG,
+              m2ThetaStep*RAD2DEG);
+      (*fpObjCrystInformUser)((string)buf);
+   }
+   VFN_DEBUG_MESSAGE("PowderPattern::ImportPowderPatternMultiDetectorLLBG42():finished:"<<mNbPoint<<" points",5)
+}
+
+void PowderPattern::ImportPowderPatternFullprof4(const string &filename)
+{
+   //1.550   0.005  66.000
+   // 213.135 193.243 208.811 185.873 231.607 200.995 196.792 187.516 215.977 199.634
+   //  17.402  16.570  12.180  11.491  18.141  11.950  11.824  11.542  17.518  11.909
+   // 211.890 185.740 204.610 200.645 199.489 169.549 203.189 178.298 186.241 198.522
+   //  12.269  11.487  17.051  11.939  11.905  10.975  16.992  11.255  11.503  11.876
+   VFN_DEBUG_MESSAGE("PowderPattern::ImportPowderPatternFullprof4() : \
+from file : "+filename,5)
+   ifstream fin(filename.c_str());
+   if(!fin)
+   {
+      throw ObjCrystException("PowderPattern::ImportPowderPatternFullprof4() : \
+Error opening file for input:"+filename);
+   }
+   fin >> m2ThetaMin;
+   fin >> m2ThetaStep;
+   REAL tmp;
+   fin >> tmp;
+   mNbPoint=(long)((tmp-m2ThetaMin)/m2ThetaStep+1.0001);
+   VFN_DEBUG_MESSAGE("PowderPattern::ImportPowderPatternFullprof4() :"\
+      << " 2Theta min=" << m2ThetaMin << " 2Theta max=" << tmp \
+      << " NbPoints=" << mNbPoint,5)
+   m2ThetaMin  *= DEG2RAD;
+   m2ThetaStep *= DEG2RAD;
+   mPowderPatternObs.resize (mNbPoint);
+   mPowderPatternObsSigma.resize (mNbPoint);
+   mPowderPatternWeight.resize(mNbPoint);
+   
+   string str;
+   getline(fin,str);//read end of first line
+   
+   unsigned ct=0;
+   unsigned ctSig=0;
+   float line[10];
+   for(;ct<mNbPoint;)
+   {            
+      getline(fin,str);
+      sscanf(str.c_str(),"%8f%8f%8f%8f%8f%8f%8f%8f%8f%8f",
+                         line+0,line+1,line+2,line+3,line+4,line+5,line+6,line+7,line+8,line+9);
+      for(unsigned int j=0;j<10;j++)
+         if(ct<mNbPoint) mPowderPatternObs(ct++)=line[j];
+      getline(fin,str);
+      sscanf(str.c_str(),"%8f%8f%8f%8f%8f%8f%8f%8f%8f%8f",
+                         line+0,line+1,line+2,line+3,line+4,line+5,line+6,line+7,line+8,line+9);
+      for(unsigned int j=0;j<10;j++)
+         if(ctSig<mNbPoint) mPowderPatternObsSigma(ctSig++)=line[j];
+   }
+   fin.close();
+   this->SetWeightToInvSigmaSq();
+   {
+      char buf [200];
+      sprintf(buf,"Imported powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
+              (int)mNbPoint,m2ThetaMin*RAD2DEG,(m2ThetaMin+m2ThetaStep*(mNbPoint-1))*RAD2DEG,
+              m2ThetaStep*RAD2DEG);
+      (*fpObjCrystInformUser)((string)buf);
+   }
+   VFN_DEBUG_MESSAGE("PowderPattern::ImportFullProfPattern4():finished:"<<mNbPoint<<" points",5)
+}
+
 void PowderPattern::SetPowderPatternObs(const CrystVector_REAL& obs)
 {
    VFN_DEBUG_MESSAGE("PowderPattern::ImportPowderPatternObs()",5)

@@ -131,6 +131,9 @@ BEGIN_EVENT_TABLE(WXPowderPattern, wxWindow)
    EVT_MENU(ID_POWDERSPECTRUM_MENU_IMPORT_ILL_D1A5,    WXPowderPattern::OnMenuImportILL)
    EVT_MENU(ID_POWDERSPECTRUM_MENU_IMPORT_XDD,         WXPowderPattern::OnMenuImportXdd)
    EVT_MENU(ID_POWDERSPECTRUM_MENU_IMPORT_CPI,         WXPowderPattern::OnMenuImportCPI)
+   EVT_MENU(ID_POWDERSPECTRUM_MENU_IMPORT_FULLPROF4,   WXPowderPattern::OnMenuImportFullProf4)
+   EVT_MENU(ID_POWDERSPECTRUM_MENU_IMPORT_MULTIDETECTORLLBG42,         
+                                                WXPowderPattern::OnMenuImportMultiDetectorLLBG42)
    EVT_MENU(ID_POWDERSPECTRUM_MENU_IMPORT_2THETAOBSSIGMA,
                                                 WXPowderPattern::OnMenuImport2ThetaObsSigma)
    EVT_MENU(ID_POWDERSPECTRUM_MENU_IMPORT_2THETAOBS,   WXPowderPattern::OnMenuImport2ThetaObs)
@@ -177,9 +180,12 @@ WXRefinableObj(parent,pow),mpPowderPattern(pow),mpGraph(0)
                                  "Import ILL(D1A-D1B) Pattern (D1A5)");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUM_MENU_IMPORT_XDD,
                                  "Import Xdd Pattern");
-        
-mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUM_MENU_IMPORT_CPI,
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUM_MENU_IMPORT_CPI,
                                  "Import Sietronics CPI Pattern");
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUM_MENU_IMPORT_FULLPROF4,
+                                 "Import FullProf format #4");
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUM_MENU_IMPORT_MULTIDETECTORLLBG42,
+                                 "Import Multi-Detector Format (LLB G42)");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUM_MENU_IMPORT_2THETAOBSSIGMA,
                                  "Import 2Theta-Obs-Sigma Pattern");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERSPECTRUM_MENU_IMPORT_2THETAOBS,
@@ -459,6 +465,28 @@ void WXPowderPattern::OnMenuImportCPI(wxCommandEvent & WXUNUSED(event))
    if(open->ShowModal() != wxID_OK) return;
    
    mpPowderPattern->ImportPowderPatternSietronicsCPI(open->GetPath().c_str());
+   open->Destroy();
+}
+
+void WXPowderPattern::OnMenuImportFullProf4(wxCommandEvent & WXUNUSED(event))
+{
+   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuImportFullProf4()",6)
+   wxFileDialog *open= new wxFileDialog(this,"Choose a file","","","*.*",
+                                        wxOPEN | wxFILE_MUST_EXIST);
+   if(open->ShowModal() != wxID_OK) return;
+   
+   mpPowderPattern->ImportPowderPatternFullprof4(open->GetPath().c_str());
+   open->Destroy();
+}
+
+void WXPowderPattern::OnMenuImportMultiDetectorLLBG42(wxCommandEvent & WXUNUSED(event))
+{
+   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuImportMultiDetectorLLBG42()",6)
+   wxFileDialog *open= new wxFileDialog(this,"Choose a file","","","*.*",
+                                        wxOPEN | wxFILE_MUST_EXIST);
+   if(open->ShowModal() != wxID_OK) return;
+   
+   mpPowderPattern->ImportPowderPatternMultiDetectorLLBG42(open->GetPath().c_str());
    open->Destroy();
 }
 

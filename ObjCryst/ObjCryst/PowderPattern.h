@@ -489,6 +489,24 @@ class PowderPattern : public RefinableObj
          *\param nbSkip: the number of lines to skip at the beginning of the file (default=0)
          */
          void ImportPowderPattern2ThetaObsSigma(const string &fileName,const int nbSkip=0);
+         /** \brief Import diffraction data from a file, with the first line
+         * has 2ThetaMin, step, 2thetaMax, and the following lines alternate
+         * 10 Iobs and 10 sigma. Ends with null entries (to fill last Iobs line
+         * to reach last sigme line).
+         
+         * That's fullprof format #4. 
+         *\param fileName: filename
+         */
+         void ImportPowderPatternFullprof4(const string &fileName);
+         /** \brief diffraction data in a multi-detector format (fullprof format #6).
+         * 
+         * First line is text. Third entry of second line is the 2theta step. Third
+         *line has the 2thetamin, fourth line has monitors and temperatures.
+         * Then each line has ten pairs (I2,I8)of NbCounters,intensity. Ends with
+         * negative entries.
+         *\param fileName: filename
+         */
+         void ImportPowderPatternMultiDetectorLLBG42(const string &fileName);
          /** \brief Import file with 2 columns 2Theta Iobs.
          *
          *\warning the 2theta step is assumed to be constant !!!
