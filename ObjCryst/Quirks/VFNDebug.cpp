@@ -25,7 +25,8 @@
 
 #include "Quirks/VFNDebug.h"
 //#include <stdlib.h>
-#include <iostream.h>
+#include <iostream>
+using namespace std;
 int gDebugMessageGlobalLevel=10;
 int gDebugMessageLevel=gDebugMessageLevel;
 unsigned int gVFNDebugMessageIndent=0;

@@ -22,7 +22,7 @@
 
 #include <stdlib.h>
 #include <time.h>
-#include <iostream.h>
+#include <iostream>
 
 class Chronometer
 {
