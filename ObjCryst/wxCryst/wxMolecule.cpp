@@ -274,7 +274,7 @@ void WXMolBond::OnChangeAtom(wxCommandEvent &event)
    VFN_DEBUG_ENTRY("WXMolBond::OnChangeAtom()",6)
    WXCrystValidateAllUserInput();
    int choice;
-   const MolAtom *at=WXDialogChooseFromVector<MolAtom>(mpMolBond->GetMolecule().GetAtomList(),
+   const MolAtom *at=WXDialogChooseFromVector(mpMolBond->GetMolecule().GetAtomList(),
                                (wxWindow*)this,"Choose a new Atom",choice);
    if(0==at) return;
    if((long)ID_MOLBOND_ATOM1==event.GetId())
@@ -397,7 +397,7 @@ void WXMolBondAngle::OnChangeAtom(wxCommandEvent &event)
    VFN_DEBUG_ENTRY("WXMolBondAngle::OnChangeAtom()",6)
    WXCrystValidateAllUserInput();
    int choice;
-   const MolAtom *at=WXDialogChooseFromVector<MolAtom>(mpMolBondAngle->GetMolecule().GetAtomList(),
+   const MolAtom *at=WXDialogChooseFromVector(mpMolBondAngle->GetMolecule().GetAtomList(),
                                (wxWindow*)this,"Choose a new Atom",choice);
    if(0==at) return;
    if((long)ID_MOLBONDANGLE_ATOM1==event.GetId())
@@ -537,7 +537,7 @@ void WXMolDihedralAngle::OnChangeAtom(wxCommandEvent &event)
    VFN_DEBUG_ENTRY("WXMolDihedralAngle::OnChangeAtom()",6)
    WXCrystValidateAllUserInput();
    int choice;
-   const MolAtom *at=WXDialogChooseFromVector<MolAtom>(mpMolDihedralAngle->GetMolecule().GetAtomList(),
+   const MolAtom *at=WXDialogChooseFromVector(mpMolDihedralAngle->GetMolecule().GetAtomList(),
                                (wxWindow*)this,"Choose a new Atom",choice);
    if(0==at) return;
    if((long)ID_MOLDIHEDRALANGLE_ATOM1==event.GetId())
@@ -694,10 +694,10 @@ void WXMolecule::OnMenuAddBond(wxCommandEvent & WXUNUSED(event))
    WXCrystValidateAllUserInput();
    int choice;
    vector<MolAtom*> v=mpMolecule->GetAtomList();
-   MolAtom *at1=WXDialogChooseFromVector<MolAtom>(v,
+   MolAtom *at1=WXDialogChooseFromVector(v,
                                (wxWindow*)this,"Choose the first Atom",choice);
    if(0==at1) return;
-   MolAtom *at2=WXDialogChooseFromVector<MolAtom>(v,
+   MolAtom *at2=WXDialogChooseFromVector(v,
                                (wxWindow*)this,"Choose the second Atom",choice);
    if(0==at2) return;
    
@@ -721,14 +721,14 @@ void WXMolecule::OnMenuAddAngle(wxCommandEvent & WXUNUSED(event))
    WXCrystValidateAllUserInput();
    int choice;
    vector<MolAtom*> v=mpMolecule->GetAtomList();
-   MolAtom *at1=WXDialogChooseFromVector<MolAtom>(v,
+   MolAtom *at1=WXDialogChooseFromVector(v,
                                (wxWindow*)this,"Choose the first Atom",choice);
    if(0==at1) return;
-   MolAtom *at2=WXDialogChooseFromVector<MolAtom>(v,
+   MolAtom *at2=WXDialogChooseFromVector(v,
                                (wxWindow*)this,"Choose the second Atom",choice);
    if(0==at2) return;
 
-   MolAtom *at3=WXDialogChooseFromVector<MolAtom>(v,
+   MolAtom *at3=WXDialogChooseFromVector(v,
                                (wxWindow*)this,"Choose the third Atom",choice);
    if(0==at2) return;
    
@@ -752,18 +752,18 @@ void WXMolecule::OnMenuAddDihedralAngle(wxCommandEvent & WXUNUSED(event))
    WXCrystValidateAllUserInput();
    int choice;
    vector<MolAtom*> v=mpMolecule->GetAtomList();
-   MolAtom *at1=WXDialogChooseFromVector<MolAtom>(v,
+   MolAtom *at1=WXDialogChooseFromVector(v,
                                (wxWindow*)this,"Choose the first Atom",choice);
    if(0==at1) return;
-   MolAtom *at2=WXDialogChooseFromVector<MolAtom>(v,
+   MolAtom *at2=WXDialogChooseFromVector(v,
                                (wxWindow*)this,"Choose the second Atom",choice);
    if(0==at2) return;
 
-   MolAtom *at3=WXDialogChooseFromVector<MolAtom>(v,
+   MolAtom *at3=WXDialogChooseFromVector(v,
                                (wxWindow*)this,"Choose the third Atom",choice);
    if(0==at3) return;
 
-   MolAtom *at4=WXDialogChooseFromVector<MolAtom>(v,
+   MolAtom *at4=WXDialogChooseFromVector(v,
                                (wxWindow*)this,"Choose the fourth Atom",choice);
    if(0==at4) return;
    
