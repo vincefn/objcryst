@@ -1061,8 +1061,8 @@ void Crystal::XMLInput(istream &is,const XMLCrystTag &tagg)
       if("AntiBumpDistance"==tag.GetName())
       {
          float dist;
-         bool useMerge;
-         bool allowMerge=false;
+         bool useMerge=false;
+         bool allowMerge;
          string scattPow1;
          string scattPow2;
          for(unsigned int i=0;i<tag.GetNbAttribute();i++)
