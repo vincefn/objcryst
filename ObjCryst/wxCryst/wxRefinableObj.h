@@ -74,9 +74,9 @@ class WXFieldRefPar:public WXField
       /// Toggle the 'limited' status of the parameter.
       void OnToggleLimited(wxCommandEvent & WXUNUSED(event));
       /// Opens the popu menu, to allow changing limits
-      void OnPopupMenu(wxCommandEvent & event);
+      void OnPopupMenu(wxMouseEvent & event);
       /// Opens the popu menu, to allow changing limits
-      void OnPopupMenuChoice(wxMenuEvent& event);
+      void OnPopupMenuChoice(wxCommandEvent& event);
       virtual void CrystUpdate();
       virtual void UpdateUI();
       /// Get the RefinablePar associated to this field

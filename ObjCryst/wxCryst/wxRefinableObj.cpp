@@ -145,7 +145,7 @@ void WXFieldRefPar::OnToggleLimited(wxCommandEvent & WXUNUSED(event))
    mpRefPar->Print();
 }
 
-void WXFieldRefPar::OnPopupMenu(wxCommandEvent & WXUNUSED(event))
+void WXFieldRefPar::OnPopupMenu(wxMouseEvent & WXUNUSED(event))
 {
    static wxMenu sWXFieldRefParPopupMenu;//("Refinable Parameter");
    static bool needInitMenu=true;
@@ -157,7 +157,7 @@ void WXFieldRefPar::OnPopupMenu(wxCommandEvent & WXUNUSED(event))
    this->PopupMenu(&sWXFieldRefParPopupMenu,0,0);
 }
 
-void WXFieldRefPar::OnPopupMenuChoice(wxMenuEvent& event)
+void WXFieldRefPar::OnPopupMenuChoice(wxCommandEvent& event)
 {
    VFN_DEBUG_MESSAGE("WXFieldRefPar::OnPopupMenuChoice()",7)
    if(event.GetId()== ID_REFPAR_POPUP_SET_LIMITS)

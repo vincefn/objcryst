@@ -128,7 +128,7 @@ void WXOptimizationObj::OnSave(){}
 
 void WXOptimizationObj::OnLoad(){}
 
-void WXOptimizationObj::OnAddRefinedObject()
+void WXOptimizationObj::OnAddRefinedObject(wxCommandEvent & WXUNUSED(event))
 {
    WXCrystValidateAllUserInput();
    int choice;
@@ -149,11 +149,11 @@ void WXOptimizationObj::AddRefinedObject(RefinableObj &obj)
    this->Layout();
 }
 
-void WXOptimizationObj::OnRemoveRefinedObject()
+void WXOptimizationObj::OnRemoveRefinedObject(wxCommandEvent & WXUNUSED(event))
 {
 }
 
-void WXOptimizationObj::OnStopOptimization()
+void WXOptimizationObj::OnStopOptimization(wxCommandEvent & WXUNUSED(event))
 {
    this->GetOptimizationObj().StopAfterCycle();
 }
@@ -270,7 +270,7 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(100000000)
    VFN_DEBUG_EXIT("WXMonteCarloObj::WXMonteCarloObj()",7)
 }
 
-void WXMonteCarloObj::OnRunOptimization()
+void WXMonteCarloObj::OnRunOptimization(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXGeneticAlgorithm::OnRunOptimization()",6)
    WXCrystValidateAllUserInput();

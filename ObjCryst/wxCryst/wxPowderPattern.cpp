@@ -52,7 +52,7 @@ namespace ObjCryst
 //
 ////////////////////////////////////////////////////////////////////////
 BEGIN_EVENT_TABLE(WXRadiation, wxWindow)
-   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, WXRadiation::UpdateUI)
+   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, WXRadiation::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXRadiation::WXRadiation(wxWindow *parent, Radiation* rad):

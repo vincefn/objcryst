@@ -45,6 +45,10 @@
 #ifdef OBJCRYST_GL
    #ifdef __DARWIN__
       #include <OpenGL/glu.h>
+      #include "AGL/agl.h"
+      #ifdef HAVE_GLUT
+         #include "GLUT/glut.h"
+      #endif
    #else
       #include <GL/glu.h>
    #endif
@@ -57,9 +61,6 @@
    #endif
    #ifdef __WIN32__
      #include "gl/glaux.h"
-   #endif
-   #ifdef __DARWIN
-     #include "AGL/agl.h"
    #endif
 #endif
 
@@ -111,7 +112,7 @@ Molecule *ZScatterer2Molecule(ZScatterer *scatt);
     ~UserSelectBoundingBox ();
     BBox GetBBox ();
   private:
-      void OnOk (void);
+      void OnOk (wxCommandEvent & WXUNUSED(event));
       wxTextCtrl * mpXminCtrl, *mpXmaxCtrl;
       wxTextCtrl * mpYminCtrl, *mpYmaxCtrl;
       wxTextCtrl * mpZminCtrl, *mpZmaxCtrl;
@@ -126,7 +127,7 @@ Molecule *ZScatterer2Molecule(ZScatterer *scatt);
     ~UserXYZBox ();
     Triple GetXYZ ();
   private:
-      void OnOk (void);
+      void OnOk (wxCommandEvent & WXUNUSED(event));
       wxTextCtrl * mpXCtrl;
       wxTextCtrl * mpYCtrl;
       wxTextCtrl * mpZCtrl;
@@ -2155,7 +2156,7 @@ void WXGLCrystalCanvas::OnChangeLimits(wxCommandEvent & WXUNUSED(event))
   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnChangeLimits():UserSelectBoundingBox done",10)
 }
 
-void WXGLCrystalCanvas::OnShowCrystal()
+void WXGLCrystalCanvas::OnShowCrystal( wxCommandEvent & WXUNUSED(event))
 {
    if(mShowCrystal) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWCRYSTAL, "Show Crystal");
    else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWCRYSTAL, "Hide Crystal");
@@ -2163,7 +2164,7 @@ void WXGLCrystalCanvas::OnShowCrystal()
    this->CrystUpdate();
 }
 
-void WXGLCrystalCanvas::OnShowAtomLabel()
+void WXGLCrystalCanvas::OnShowAtomLabel( wxCommandEvent & WXUNUSED(event))
 {
    if(mShowAtomName) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, "Show Atom Labels");
    else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, "Hide Atom Labels");
@@ -2171,7 +2172,7 @@ void WXGLCrystalCanvas::OnShowAtomLabel()
    this->CrystUpdate();
 }
 
-void WXGLCrystalCanvas::OnShowCursor()
+void WXGLCrystalCanvas::OnShowCursor( wxCommandEvent & WXUNUSED(event))
 {
    if(mShowCursor) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWCURSOR, "Show Cursor");
    else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWCURSOR, "Hide Cursor");
@@ -2179,7 +2180,7 @@ void WXGLCrystalCanvas::OnShowCursor()
    this->CrystUpdate();
 }
 
-void WXGLCrystalCanvas::OnSetCursor()
+void WXGLCrystalCanvas::OnSetCursor( wxCommandEvent & WXUNUSED(event))
 {
   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnSetCursor",1)
   REAL x=mX0;
@@ -2206,7 +2207,7 @@ void WXGLCrystalCanvas::OnSetCursor()
   }
 }
 
-void WXGLCrystalCanvas::OnLoadFourierGRD()
+void WXGLCrystalCanvas::OnLoadFourierGRD( wxCommandEvent & WXUNUSED(event))
 {
    wxFileDialog fd((wxWindow*)this, "Choose a file containing a Fourier Map",
            "", "", "Fourier Map files (*.grd)|*.grd", wxOPEN | wxFILE_MUST_EXIST);
@@ -2225,7 +2226,7 @@ void WXGLCrystalCanvas::OnLoadFourierGRD()
    }
 }
 
-void WXGLCrystalCanvas::OnLoadFourierDSN6()
+void WXGLCrystalCanvas::OnLoadFourierDSN6( wxCommandEvent & WXUNUSED(event))
 {
    wxFileDialog fd((wxWindow*)this, "Choose a file containing a Fourier Map",
            "", "", "Fourier Map files (*.DN6)|*.DN6", wxOPEN | wxFILE_MUST_EXIST);
@@ -2275,7 +2276,7 @@ void WXGLCrystalCanvas::AddFourier(UnitCellMapImport *map)
    this->CrystUpdate();
 }
 
-void WXGLCrystalCanvas::OnChangeContour()
+void WXGLCrystalCanvas::OnChangeContour( wxCommandEvent & WXUNUSED(event))
 {
    int mapgl=this->UserSelectUnitCellMapGLList();
    
@@ -2296,7 +2297,7 @@ void WXGLCrystalCanvas::OnChangeContour()
    this->CrystUpdate();
 }
 
-void WXGLCrystalCanvas::OnAddContour()
+void WXGLCrystalCanvas::OnAddContour( wxCommandEvent & WXUNUSED(event))
 {
    int map=this->UserSelectUnitCellMapImport();
    
@@ -2344,7 +2345,7 @@ void WXGLCrystalCanvas::OnAddContour()
       this->CrystUpdate();
 }
 
-void WXGLCrystalCanvas::OnShowFourier()
+void WXGLCrystalCanvas::OnShowFourier( wxCommandEvent & WXUNUSED(event))
 {
    if(mShowFourier == TRUE) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWFOURIER, "Show Fourier Map");
    else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWFOURIER, "Hide Fourier Map");
@@ -2352,7 +2353,7 @@ void WXGLCrystalCanvas::OnShowFourier()
    this->CrystUpdate();
 }
 
-void WXGLCrystalCanvas::OnFourierChangeColor()
+void WXGLCrystalCanvas::OnFourierChangeColor( wxCommandEvent & WXUNUSED(event))
 {
    int mapgl=this->UserSelectUnitCellMapGLList();
    wxColor ncolor((char)(255*mvpUnitCellMapGLList[mapgl].second->GetColour()[0]),
@@ -2367,7 +2368,7 @@ void WXGLCrystalCanvas::OnFourierChangeColor()
    }
 }
 
-void WXGLCrystalCanvas::OnFourierChangeBbox()
+void WXGLCrystalCanvas::OnFourierChangeBbox( wxCommandEvent & WXUNUSED(event))
 {
   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnFourierChangeBbox()",10)
   // change Xmax if in default mode
@@ -2395,7 +2396,7 @@ void WXGLCrystalCanvas::OnFourierChangeBbox()
   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnFourierChangeBbox done",10)
 }
 
-void WXGLCrystalCanvas::OnUnloadFourier()
+void WXGLCrystalCanvas::OnUnloadFourier( wxCommandEvent & WXUNUSED(event))
 {
    wxMessageDialog * msure = new wxMessageDialog((wxWindow*)this,
      "Are you sure you want to unload all Fourier Map Data?", "Unload Fourier Map", wxYES_NO | wxNO_DEFAULT |
@@ -2430,7 +2431,7 @@ void WXGLCrystalCanvas::OnUnloadFourier()
    delete msure;
 }
 
-void WXGLCrystalCanvas::OnShowWire()
+void WXGLCrystalCanvas::OnShowWire( wxCommandEvent & WXUNUSED(event))
 {
    vector<pair<pair<const UnitCellMapImport*,float>,UnitCellMapGLList* > >::iterator pos;
    for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();pos++)
@@ -2439,7 +2440,7 @@ void WXGLCrystalCanvas::OnShowWire()
    this->CrystUpdate();
 }
 
-void WXGLCrystalCanvas::OnPOVRay()
+void WXGLCrystalCanvas::OnPOVRay( wxCommandEvent & WXUNUSED(event))
 {
    WXCrystValidateAllUserInput();
    wxFileDialog save(this,"Choose filename","","","*.pov",wxSAVE | wxOVERWRITE_PROMPT);
@@ -2864,7 +2865,7 @@ UserSelectBoundingBox::~UserSelectBoundingBox () {
   //delete buttonSizer;
 };
 
-void UserSelectBoundingBox::OnOk () {
+void UserSelectBoundingBox::OnOk (wxCommandEvent & WXUNUSED(event)) {
   char * strptr;
   const char * val;
 
@@ -2973,7 +2974,7 @@ END_EVENT_TABLE()
 UserXYZBox::~UserXYZBox () {
 };
 
-void UserXYZBox::OnOk () {
+void UserXYZBox::OnOk (wxCommandEvent & WXUNUSED(event)) {
   char * strptr;
   const char * val;
 

@@ -59,7 +59,7 @@ endif
 
 #Using OpenGL ?
 ifeq ($(opengl),1)
-GL_WX_LIB = `/usr/local/bin/wx-config --gl-libs`
+GL_WX_LIB = `/usr/local/bin/wx-config --gl-libs` -framework GLUT -framework AppKit
 GL_FLAGS := -DOBJCRYST_GL -IGL -DHAVE_GLUT 
 else
 GL_WX_LIB :=

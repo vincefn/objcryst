@@ -41,14 +41,14 @@ class WXOptimizationObj: public WXCrystObj
       virtual void OnSave();
       virtual void OnLoad();
       /// From the menu
-      virtual void OnAddRefinedObject();
+      virtual void OnAddRefinedObject(wxCommandEvent & WXUNUSED(event));
       /// Added by the library
       virtual void AddRefinedObject(RefinableObj &obj);
       /// From the menu
-      virtual void OnRemoveRefinedObject();
+      virtual void OnRemoveRefinedObject(wxCommandEvent & WXUNUSED(event));
       /// Launches the optimization run
-      virtual void OnRunOptimization()=0;
-      virtual void OnStopOptimization();
+      virtual void OnRunOptimization(wxCommandEvent & WXUNUSED(event))=0;
+      virtual void OnStopOptimization(wxCommandEvent & WXUNUSED(event));
       virtual OptimizationObj & GetOptimizationObj()=0;
       virtual const OptimizationObj & GetOptimizationObj()const=0;
       virtual void OnUpdateUI(wxUpdateUIEvent& event);
@@ -85,7 +85,7 @@ class WXMonteCarloObj: public WXOptimizationObj
    public:
       WXMonteCarloObj(wxWindow *parent, MonteCarloObj*);
       //virtual void CrystUpdate();
-      virtual void OnRunOptimization();
+      virtual void OnRunOptimization(wxCommandEvent & WXUNUSED(event));
       /// Called during optimization, to show the user something's still going on...
       void UpdateDisplayNbTrial();
       virtual OptimizationObj & GetOptimizationObj();

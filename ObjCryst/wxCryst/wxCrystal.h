@@ -240,22 +240,22 @@ class WXGLCrystalCanvas : public wxGLCanvas
       void OnChangeLimits(wxCommandEvent & WXUNUSED(event));
       /// Redraw the structure (special function to ensure complete redrawing under windows...)
       void OnUpdateUI(wxUpdateUIEvent& WXUNUSED(event));
-      void OnShowCrystal();
-      void OnShowAtomLabel();
-      void OnShowCursor();
-      void OnSetCursor();
-      void OnLoadFourierGRD();
-      void OnLoadFourierDSN6();
+      void OnShowCrystal(wxCommandEvent & WXUNUSED(event));
+      void OnShowAtomLabel(wxCommandEvent & WXUNUSED(event));
+      void OnShowCursor(wxCommandEvent & WXUNUSED(event));
+      void OnSetCursor(wxCommandEvent & WXUNUSED(event));
+      void OnLoadFourierGRD(wxCommandEvent & WXUNUSED(event));
+      void OnLoadFourierDSN6(wxCommandEvent & WXUNUSED(event));
       void AddFourier(UnitCellMapImport*);
-      void OnAddContour();
-      void OnChangeContour();
-      void OnShowFourier();
-      void OnFourierChangeColor();
-      void OnUnloadFourier();
-      void OnShowWire();
-      void OnFourierChangeBbox();
+      void OnAddContour(wxCommandEvent & WXUNUSED(event));
+      void OnChangeContour(wxCommandEvent & WXUNUSED(event));
+      void OnShowFourier(wxCommandEvent & WXUNUSED(event));
+      void OnFourierChangeColor(wxCommandEvent & WXUNUSED(event));
+      void OnUnloadFourier(wxCommandEvent & WXUNUSED(event));
+      void OnShowWire(wxCommandEvent & WXUNUSED(event));
+      void OnFourierChangeBbox(wxCommandEvent & WXUNUSED(event));
       /// Save view as povray file
-      void OnPOVRay();
+      void OnPOVRay(wxCommandEvent & WXUNUSED(event));
       // get bounding box for atoms display
       BBox GetCellBBox();
       // get bounding box for display of Fourier map
