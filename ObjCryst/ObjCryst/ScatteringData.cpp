@@ -820,8 +820,7 @@ long ScatteringData::GetNbReflBelowMaxSinThetaOvLambda()const
    this->CalcSinThetaLambda();
    long i;
    for(i=0;i<mNbRefl;i++) if(mSinThetaLambda(i)>mMaxSinThetaOvLambda) break;
-   if(i==mNbRefl) mNbReflUsed=mNbRefl;
-   if((i<mNbRefl) && (i!=mNbReflUsed))
+   if(i!=mNbReflUsed)
    {
       mNbReflUsed=i;
       mClockNbReflUsed.Click();
