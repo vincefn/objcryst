@@ -106,6 +106,7 @@ class WXMolecule: public WXScatterer
 {
    public:
       WXMolecule(wxWindow *parent, Molecule*);
+      virtual ~WXMolecule();
       void OnMenuOptimizeConformation(wxCommandEvent & WXUNUSED(event));
       void OnMenuAddAtom(wxCommandEvent & WXUNUSED(event));
       void OnMenuAddBond(wxCommandEvent & WXUNUSED(event));
@@ -116,10 +117,10 @@ class WXMolecule: public WXScatterer
       virtual void UpdateUI();
    private:
       Molecule* mpMolecule;
-      wxBoxSizer mSizerAtomList;
-      wxBoxSizer mSizerBondList;
-      wxBoxSizer mSizerAngleList;
-      wxBoxSizer mSizerDihedralAngleList;
+      wxBoxSizer* mpSizerAtomList;
+      wxBoxSizer* mpSizerBondList;
+      wxBoxSizer* mpSizerAngleList;
+      wxBoxSizer* mpSizerDihedralAngleList;
       /** Displayed list of atoms
       */
       vector<const MolAtom*> mvpAtom;

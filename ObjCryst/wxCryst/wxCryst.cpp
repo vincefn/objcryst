@@ -627,7 +627,15 @@ WXCrystObjBasic(parent),mIsExpanded(true)
    VFN_DEBUG_MESSAGE("WXCrystObj::WXCrystObj():End",6)
 }
 
-WXCrystObj::~WXCrystObj(){}
+WXCrystObj::~WXCrystObj()
+{
+   if(0!=mpWXTitle)
+   {
+      delete mpWXTitle;
+   }
+   delete mpCollapseButton;
+   //sizers are automatically deleted
+}
 
 bool WXCrystObj::Layout()
 {
