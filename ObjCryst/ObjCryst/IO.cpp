@@ -710,11 +710,14 @@ void ZScatterer::XMLOutput(ostream &os,int indent)const
    
    for(int i=0;i<mZAtomRegistry.GetNb();i++) mZAtomRegistry.GetObj(i).XMLOutput(os,indent);
    
-   for(int i=0;i<=indent;i++) os << "  " ;
-   XMLCrystTag tag2("PivotAtom",false,true);
-   tag2.AddAttribute("Name",this->GetZAtomRegistry().GetObj(mCenterAtomIndex).GetName());
-   os <<tag2<<endl;
-   
+	if(mZAtomRegistry.GetNb()>0)
+	{
+   	for(int i=0;i<=indent;i++) os << "  " ;
+   	XMLCrystTag tag2("PivotAtom",false,true);
+   	tag2.AddAttribute("Name",this->GetZAtomRegistry().GetObj(mCenterAtomIndex).GetName());
+   	os <<tag2<<endl;
+   }
+	
    indent--;
    tag.SetIsEndTag(true);
    for(int i=0;i<indent;i++) os << "  " ;
