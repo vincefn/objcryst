@@ -2412,6 +2412,7 @@ void PowderPattern::XMLInput(istream &is,const XMLCrystTag &tagg)
          //cout << mPowderPatternObs.numElements()<<" "<<mNbPoint<<" "<<this<<endl;
          mPowderPatternObsSigma.resizeAndPreserve(mNbPoint);
          mPowderPatternWeight.resizeAndPreserve(mNbPoint);
+         mClockPowderPatternPar.Click();
          
          XMLCrystTag junk(is);
          VFN_DEBUG_EXIT("Loading Iobs-Sigma-Weight List...",8);
