@@ -202,9 +202,11 @@ void Crystal::AddScatteringPower(ScatteringPower *scattPow)
 
 void Crystal::RemoveScatteringPower(ScatteringPower *scattPow)
 {
-   VFN_DEBUG_MESSAGE("Crystal::RemoveScatteringPower()",2)
+   VFN_DEBUG_ENTRY("Crystal::RemoveScatteringPower()",2)
    mScatteringPowerRegistry.DeRegister(*scattPow);
-   delete &scattPow;
+   this->RemoveSubRefObj(*scattPow);
+   delete scattPow;
+   VFN_DEBUG_EXIT("Crystal::RemoveScatteringPower()",2)
 }
 
 ScatteringPower& Crystal::GetScatteringPower(const string &name)

@@ -877,29 +877,39 @@ template<class T> void ObjRegistry<T>::Register(T &obj)
 
 template<class T> void ObjRegistry<T>::DeRegister(T &obj)
 {
-   VFN_DEBUG_MESSAGE("ObjRegistry("<<mName<<")::Deregister(&obj):",2)
+   VFN_DEBUG_ENTRY("ObjRegistry("<<mName<<")::Deregister(&obj)",2)
    //this->Print();
    const long i=this->Find(obj);
-   if(-1==i) return; //:TODO: throw something ?
+   if(-1==i)
+   {
+      VFN_DEBUG_EXIT("ObjRegistry("<<mName<<")::Deregister(&obj):NOT FOUND !!!",2)
+      return; //:TODO: throw something ?
+   }
    #ifdef __WX__CRYST__
    if(0!=mpWXRegistry) mpWXRegistry->Remove(obj.WXGet());
    #endif
    if(i==(long)mNbRegistered) mNbRegistered--;
    else mpRegistry[i]=mpRegistry[--mNbRegistered];
    mListClock.Click();
+   VFN_DEBUG_EXIT("ObjRegistry("<<mName<<")::Deregister(&obj)",2)
 }
 
 template<class T> void ObjRegistry<T>::DeRegister(const string &objName)
 {
-   VFN_DEBUG_MESSAGE("ObjRegistry("<<mName<<")::Deregister(name):",2)
+   VFN_DEBUG_ENTRY("ObjRegistry("<<mName<<")::Deregister(name):"<<objName,2)
    const long i=this->Find(objName);
-   if(-1==i) return; //:TODO: throw something ?
+   if(-1==i)
+   {
+      VFN_DEBUG_EXIT("ObjRegistry("<<mName<<")::Deregister(name): NOT FOUND !!!",2)
+      return; //:TODO: throw something ?
+   }
    #ifdef __WX__CRYST__
    if(0!=mpWXRegistry) mpWXRegistry->Remove(mpRegistry[i]->WXGet());
    #endif
    if(i==((long)mNbRegistered)-1) mNbRegistered--;
    else mpRegistry[i]=mpRegistry[--mNbRegistered];
    mListClock.Click();
+   VFN_DEBUG_EXIT("ObjRegistry("<<mName<<")::Deregister(name):",2)
 }
 
 template<class T> void ObjRegistry<T>::DeRegisterAll()

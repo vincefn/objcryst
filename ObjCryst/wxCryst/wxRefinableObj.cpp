@@ -356,12 +356,12 @@ template<class T> void WXRegistry<T>::Add(WXCrystObjBasic *obj)
 }
 template<class T> void WXRegistry<T>::Remove(WXCrystObjBasic *obj)
 {
-   VFN_DEBUG_MESSAGE("WXCrystRegistry::RemoveWXCrystObj(WXCrystObj*)",6)
+   VFN_DEBUG_ENTRY("WXCrystRegistry::RemoveWXCrystObj(WXCrystObj*)",6)
    mList.Remove(obj);
    mpSizer->Remove(obj);
    obj->Destroy();
    this->Layout();
-   VFN_DEBUG_MESSAGE("WXCrystRegistry::RemoveWXCrystObj(WXCrystObj*):End",6)
+   VFN_DEBUG_EXIT("WXCrystRegistry::RemoveWXCrystObj(WXCrystObj*):End",6)
 }
 
 template<class T> bool WXRegistry<T>::OnChangeName(const int id)

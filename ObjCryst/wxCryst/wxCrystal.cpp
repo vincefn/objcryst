@@ -347,16 +347,20 @@ void WXCrystal::OnMenuAddScattPowAtom(wxCommandEvent & WXUNUSED(event))
 }
 void WXCrystal::OnMenuRemoveScattPow(wxCommandEvent & WXUNUSED(event))
 {
-   VFN_DEBUG_MESSAGE("WXCrystal::OnButtonRemoveScattPow()",6)
+   VFN_DEBUG_ENTRY("WXCrystal::OnButtonRemoveScattPow()",6)
    WXCrystValidateAllUserInput();
    int choice;
    ScatteringPower *scatt=
       WXDialogChooseFromRegistry(mpCrystal->GetScatteringPowerRegistry(),this,
                                  "Choose Scattering Power to remove:",choice);
-   if(0==scatt) return;
+   if(0==scatt)
+   {
+      VFN_DEBUG_EXIT("WXCrystal::OnButtonRemoveScattPow():Cancelled",6)
+      return;
+   }
    mpCrystal->RemoveScatteringPower(scatt);
    mpCrystal->XMLOutput(cout);
-   VFN_DEBUG_MESSAGE("WXCrystal::OnButtonRemoveScattPow():End",6)
+   VFN_DEBUG_EXIT("WXCrystal::OnButtonRemoveScattPow()",6)
    this->Layout();
 }
 
