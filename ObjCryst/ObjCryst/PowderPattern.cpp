@@ -468,7 +468,7 @@ Applying profiles for "<<nbRefl<<" reflections",3)
                {//Alpha1
                   intensity /= (1+this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio());
                   theta=mTheta(i);
-                  theta+=mTanTheta(i)*(
+                  theta+=tan(theta)*(
                      -this->GetRadiation().GetXRayTubeDeltaLambda()
                       *this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio())
                         /(1+this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio())
@@ -494,7 +494,7 @@ Applying profiles for "<<nbRefl<<" reflections",3)
                {//Alpha2
                   intensity *= this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio();
                   theta=mTheta(i);
-                  theta+=mTanTheta(i)*(this->GetRadiation().GetXRayTubeDeltaLambda()
+                  theta+=tan(theta)*(this->GetRadiation().GetXRayTubeDeltaLambda()
                               /(1+this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio()))
                            /this->GetRadiation().GetWavelength()(0);
                   thetaPt= mpParentPowderPattern->Get2ThetaCorrPixel(2*theta);

@@ -264,6 +264,8 @@ class ScatteringData: virtual public RefinableObj
       /// Return an array with \f$ \frac{sin(\theta)}{\lambda} = \frac{1}{2d_{hkl}}\f$ 
       ///for all reflections
       const CrystVector_REAL& GetSinThetaOverLambda()const;
+      /// Return an array with theta values for all reflections
+      const CrystVector_REAL& GetTheta()const;
    
       ///  Returns the Array of calculated |F(hkl)|^2 for all reflections.
       const CrystVector_REAL& GetFhklCalcSq() const;
@@ -417,10 +419,6 @@ class ScatteringData: virtual public RefinableObj
 
          /// theta for the crystal and the HKL in ReciprSpace (in radians)
          mutable CrystVector_REAL mTheta;
-
-         /// tan(theta) for the crystal and the HKL in ReciprSpace (for Caglioti's law)
-         /// \note this should be moved to DiffractionDataPowder
-         mutable CrystVector_REAL mTanTheta;
 
          /// Anomalous X-Ray scattering term f' and f" are stored here for each ScatteringPower 
          /// We assume yet that data is monochromatic, but this could be specialized.

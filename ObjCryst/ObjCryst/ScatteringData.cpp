@@ -676,6 +676,13 @@ const CrystVector_REAL& ScatteringData::GetSinThetaOverLambda()const
    VFN_DEBUG_EXIT("ScatteringData::GetSinThetaOverLambda()",1)
    return mSinThetaLambda;
 }
+const CrystVector_REAL& ScatteringData::GetTheta()const
+{
+   VFN_DEBUG_ENTRY("ScatteringData::GetTheta()",1)
+   this->CalcSinThetaLambda();
+   VFN_DEBUG_EXIT("ScatteringData::GetTheta()",1)
+   return mTheta;
+}
 const CrystVector_REAL& ScatteringData::GetFhklCalcSq() const
 {
    VFN_DEBUG_ENTRY("ScatteringData::GetFhklCalcSq()",2)
@@ -1123,14 +1130,12 @@ void ScatteringData::CalcSinThetaLambda()const
    if(this->GetRadiation().GetWavelength()(0) > 0)
    {
       mTheta.resize(mNbRefl);
-      mTanTheta.resize(mNbRefl);
       for(int i=0;i< (this->GetNbRefl());i++) 
       {  
          if( (mSinThetaLambda(i)*this->GetRadiation().GetWavelength()(0))>1)
          {
             //:KLUDGE: :TODO:
             mTheta(i)=M_PI;
-            mTanTheta(i)=1e6;
             /*
             ofstream out("log.txt");
             out << "Error when computing Sin(theta) :"
@@ -1148,7 +1153,6 @@ void ScatteringData::CalcSinThetaLambda()const
          else 
          {
             mTheta(i)=asin(mSinThetaLambda(i)*this->GetRadiation().GetWavelength()(0));
-            mTanTheta(i)=tan(mTheta(i));
          }
       }
    } else 
