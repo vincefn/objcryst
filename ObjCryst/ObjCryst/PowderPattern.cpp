@@ -661,14 +661,10 @@ Applying profiles for "<<nbRefl<<" reflections",3)
             if(useML) var += mIhklCalcVariance(i + step);
             step++;
             if( (i+step) >= nbRefl) break;
-            if(mTheta(i+step) > (mTheta(i)+1e-4) ) break;
+            if(mTheta(i+step) > (mTheta(i)+1e-5) ) break;
          }
          theta =  mpParentPowderPattern->Get2ThetaCorr(2*mTheta(i));
          thetaPt= mpParentPowderPattern->Get2ThetaCorrPixel(2*mTheta(i));
-         VFN_DEBUG_MESSAGE("Apply profile(Monochromatic)Refl("<<i<<")"\
-            <<mIntH(i)<<" "<<mIntK(i)<<" "<<mIntL(i)<<" "\
-            <<"  I="<<intensity<<"  2Theta="<<2*mTheta(i)*RAD2DEG\
-            <<",pixel #"<<thetaPt,2)
 
          first=thetaPt-mSavedPowderReflProfileNbPoint;
 
@@ -680,17 +676,22 @@ Applying profiles for "<<nbRefl<<" reflections",3)
          } else shift =0;
          last=thetaPt+mSavedPowderReflProfileNbPoint;
          if( last > specNbPoints) last=specNbPoints;
-         VFN_DEBUG_MESSAGE("first:"<<first<<"  last:"<<last,1)
+         
+         VFN_DEBUG_MESSAGE("Apply profile(Monochromatic)Refl("<<i<<")"\
+            <<mIntH(i)<<" "<<mIntK(i)<<" "<<mIntL(i)<<" "\
+            <<"  I="<<intensity<<"  2Theta="<<2*mTheta(i)*RAD2DEG\
+            <<",pixel #"<<first<<"->"<<last,10)
+         
          {
             const REAL *p2 = mSavedPowderReflProfile.data() + i*nbPoints +shift;
             REAL *p3 = mPowderPatternCalc.data()+first;
-            for(long j=first;j<last;j++) *p3++ += *p2++ * intensity;
+            for(long j=first;j<=last;j++) *p3++ += *p2++ * intensity;
          }
          if(useML)
          {
             const REAL *p2 = mSavedPowderReflProfile.data() + i*nbPoints +shift;
             REAL *p3 = mPowderPatternCalcVariance.data()+first;
-            for(long j=first;j<last;j++) *p3++ += *p2++ * var;
+            for(long j=first;j<=last;j++) *p3++ += *p2++ * var;
          }
       }
    }
@@ -726,59 +727,72 @@ void PowderPatternDiffraction::CalcPowderPatternIntegrated() const
    mPowderPatternIntegratedCalcVariance.resize(nb);
    mPowderPatternIntegratedCalcVariance=0;
    const bool useML= (mIhklCalcVariance.numElements() != 0);
-   int step;
-   for(long i=0;i<mNbReflUsed;i += step)
+   const REAL *pth=mTheta.data();
+   const REAL *pI=mIhklCalc.data();
+   const REAL *pIvar=mIhklCalcVariance.data();
+   vector< pair<unsigned long, CrystVector_REAL> >::const_iterator pos;
+   pos=mIntegratedProfileFactor.begin();
+   for(long i=0;i<mNbReflUsed;)
    {
       //VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderPatternIntegrated():"<<i,10)
       REAL intensity=0.;
       REAL var=0.;
+      const REAL thmax=*pth+1e-5;
       //check if the next reflection is at the same theta. If this is true,
       //Then assume that the profile is exactly the same.
-      for(step=0; ;)
+      for(;;)
       {
-         intensity += mIhklCalc(i + step);
-         if(useML) var += mIhklCalcVariance(i + step);
-         step++;
-         if( (i+step) >= nbRefl) break;
-         if(mTheta(i+step) > (mTheta(i)+1e-4) ) break;
+         intensity += *pI++;
+         if(useML) var += *pIvar++;
+         ++pos;
+         if( ++i >= nbRefl) break;
+         if( *(++pth) > thmax ) break;
       }
+      --pos;
       //VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderPatternIntegrated():"<<i,10)
-      for(map<long, REAL>::const_iterator pos=mIntegratedProfileFactor[i].begin();
-          pos!=mIntegratedProfileFactor[i].end();++pos)
+      REAL *pData=mPowderPatternIntegratedCalc.data()+pos->first;
+      const REAL *pFact=pos->second.data();
+      const unsigned long nb=pos->second.numElements();
+      //cout <<i<<" - "<< intensity<<"*:";
+      for(unsigned long j=0;j<nb;j++)
       {
-         //VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderPatternIntegrated():"<<&pos,10)
-         //VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderPatternIntegrated():"<<pos->first,10)
-         //VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderPatternIntegrated():"<<pos->second<<"*"<<intensity,10)
-         mPowderPatternIntegratedCalc(pos->first) += intensity * pos->second;
-         if(useML) mPowderPatternIntegratedCalcVariance(pos->first) += var * pos->second;
+         //cout <<pos->first+j<<"("<<*pFact<<","<<*pData<<") ";
+         *pData++ += intensity * *pFact++ ;
       }
+      //cout<<endl;
+      
+      if(useML)
+      {
+         const REAL *pFact=pos->second.data();
+         REAL *pVar=mPowderPatternIntegratedCalcVariance.data()+pos->first;
+         for(unsigned long j=0;j<nb;j++) *pVar++ += var * *pFact++ ;
+      }
+      ++pos;
    }
-   /*
-   // Compare-DEBUG ONLY
+   #ifdef __DEBUG__
+   if(gVFNDebugMessageLevel<3)
    {
       this->CalcPowderPattern();
-      CrystVector_REAL integr(nb),min(nb),max(nb);
+      CrystVector_REAL integr(nb),min(nb),max(nb),diff(nb),index(nb);
       integr=0;
       for(long i=0;i<nb;i++)
       {
+         index(i)=i;
          min(i)=mpParentPowderPattern->GetIntegratedProfileMin()(i);
          max(i)=mpParentPowderPattern->GetIntegratedProfileMax()(i);
-      }
-      
-      for(long i=0;i<nb;i++)
-      {
          integr(i)=0;
          for(long j=mpParentPowderPattern->GetIntegratedProfileMin()(i);
-             j<=mpParentPowderPattern->GetIntegratedProfileMax()(i);j++)
+                 j<=mpParentPowderPattern->GetIntegratedProfileMax()(i);j++)
          {
             integr(i) += mPowderPatternCalc(j);
          }
+         diff(i)=1.-mPowderPatternIntegratedCalc(i)/integr(i);
       }
       cout << "Integrated intensities, Component"<<endl
-           << FormatVertVectorHKLFloats<REAL> (min,max,max,integr,mPowderPatternIntegratedCalc)<<endl;
+           << FormatVertVectorHKLFloats<REAL>
+                (index,min,max,integr,mPowderPatternIntegratedCalc,diff,20,6)<<endl;
    }
-   */
-
+   #endif
    mClockPowderPatternIntegratedCalc.Click();
    VFN_DEBUG_EXIT("PowderPatternDiffraction::CalcPowderPatternIntegrated",3)
 }
@@ -1231,17 +1245,24 @@ void PowderPatternDiffraction::PrepareIntegratedProfile()const
    return;
    VFN_DEBUG_ENTRY("PowderPatternDiffraction::PrepareIntegratedProfile()",5)
    TAU_PROFILE("PowderPatternDiffraction::PrepareIntegratedProfile()","void ()",TAU_DEFAULT);
-   mIntegratedProfileFactor.resize(mNbReflUsed);
    const CrystVector_long *pMin=&(mpParentPowderPattern->GetIntegratedProfileMin());
    const CrystVector_long *pMax=&(mpParentPowderPattern->GetIntegratedProfileMax());
 
    const long numInterval=pMin->numElements();
    const long nbPoints=2*mSavedPowderReflProfileNbPoint+1;
-   vector< map<long, REAL> >::iterator pos;
-   pos=mIntegratedProfileFactor.begin();
+   
+   vector< map<long, REAL> > vIntegratedProfileFactor;
+   vIntegratedProfileFactor.resize(mNbReflUsed);
+   vector< map<long, REAL> >::iterator pos1;
+   pos1=vIntegratedProfileFactor.begin();
+   
+   mIntegratedProfileFactor.resize(mNbReflUsed);
+   vector< pair<unsigned long, CrystVector_REAL> >::iterator pos2;
+   pos2=mIntegratedProfileFactor.begin();
    for(long i=0;i<mNbReflUsed;i++)
    {
-      pos->clear();
+      pos1->clear();
+      long firstInterval=numInterval;
       for(long j=0;j<numInterval;j++)
       {
          const long thetaPt= mpParentPowderPattern->Get2ThetaCorrPixel(2*mTheta(i));
@@ -1249,33 +1270,41 @@ void PowderPatternDiffraction::PrepareIntegratedProfile()const
          const long last0  = thetaPt + mSavedPowderReflProfileNbPoint;
                long first= first0>(*pMin)(j) ? first0:(*pMin)(j);
          const long last = last0 <(*pMax)(j) ? last0 :(*pMax)(j);
-         if(first<last)
+         if(first<=last)
          {
-            if(pos->find(j) == pos->end()) (*pos)[j]=0.;
-            REAL *fact = &((*pos)[j]);//this creates the 'j' entry if necessary
+            if(firstInterval>j) firstInterval=j;
+            if(pos1->find(j) == pos1->end()) (*pos1)[j]=0.;
+            REAL *fact = &((*pos1)[j]);//this creates the 'j' entry if necessary
             const long shift=first-first0;
             const REAL *p2 = mSavedPowderReflProfile.data() + i*nbPoints +shift;
             for(int k=first;k<=last;k++) *fact += *p2++;
             //cout << i<<","<<j<<","<<first<<","<<last<<":"<<*fact<<endl;
          }
       }
-      pos++;
+      pos2->first=firstInterval;
+      pos2->second.resize(pos1->size());
+      REAL *pFact=pos2->second.data();
+      for(map<long, REAL>::const_iterator pos=pos1->begin();pos!=pos1->end();++pos)
+         *pFact++ = pos->second;
+      pos1++;
+      pos2++;
    }
    mClockIntegratedProfileFactor.Click();
-   //Check DEBUG
-   /*
-   for(long i=0;i<mNbReflUsed;i += 1)
+   #ifdef __DEBUG__
+   if(gVFNDebugMessageLevel<3)
    {
-      VFN_DEBUG_MESSAGE("PowderPatternDiffraction::PrepareIntegratedProfile():"<<i,10)
-      for(map<long, REAL>::const_iterator pos=mIntegratedProfileFactor[i].begin();
-          pos!=mIntegratedProfileFactor[i].end();++pos)
+      unsigned long i=0;
+      for(vector< pair<unsigned long, CrystVector_REAL> >::const_iterator
+            pos=mIntegratedProfileFactor.begin();
+            pos!=mIntegratedProfileFactor.end();++pos)
       {
-         VFN_DEBUG_MESSAGE("PowderPatternDiffraction::PrepareIntegratedProfile():"<<&pos,10)
-         VFN_DEBUG_MESSAGE("PowderPatternDiffraction::PrepareIntegratedProfile():"<<pos->first,10)
-         VFN_DEBUG_MESSAGE("PowderPatternDiffraction::PrepareIntegratedProfile():"<<pos->second,10)
+         cout <<"Integrated profile factors for reflection #"<<i++<<"  ";
+         for(int j=0;j<pos->second.numElements();++j)
+            cout << j+pos->first<<"("<<pos->second(j)<<")  ";
+         cout<<endl;
       }
    }
-   */
+   #endif
 
    VFN_DEBUG_EXIT("PowderPatternDiffraction::PrepareIntegratedProfile()",5)
 }

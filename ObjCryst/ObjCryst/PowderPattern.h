@@ -386,10 +386,11 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
          /** For each reflection, store the integrated value of the normalized
          * profile over all integration intervals.
          *
-         * the second value is the integrated factor, and the first is the number
-         * corresponding to the integration interval.
+         * The first field is the first integration interval to which the reflection
+         * contributes, and the second field is a vector with all the integrated
+         * values for the intervals, listed in ascending 2theta order.
          */
-         mutable vector< map<long, REAL> > mIntegratedProfileFactor;
+         mutable vector< pair<unsigned long, CrystVector_REAL> > mIntegratedProfileFactor;
          /// Last time the integrated values of normalized profiles was calculated.
          mutable RefinableObjClock mClockIntegratedProfileFactor;
    #ifdef __WX__CRYST__
