@@ -67,7 +67,9 @@ mRecursiveRefinedObjList("OptimizationObj: "+mName+" recursive RefinableObj regi
 
 OptimizationObj::~OptimizationObj()
 {
+   VFN_DEBUG_ENTRY("OptimizationObj::~OptimizationObj()",5)
    gOptimizationObjRegistry.DeRegister(*this);
+   VFN_DEBUG_EXIT("OptimizationObj::~OptimizationObj()",5)
 }
 
 void OptimizationObj::RandomizeStartingConfig()
@@ -344,6 +346,9 @@ mNbTrialRetry(0),mMinCostRetry(0),mMaxNbTrialSinceBest(0)
 
 MonteCarloObj::~MonteCarloObj()
 {
+   VFN_DEBUG_ENTRY("MonteCarloObj::~MonteCarloObj()",5)
+   gOptimizationObjRegistry.DeRegister(*this);
+   VFN_DEBUG_EXIT ("MonteCarloObj::~MonteCarloObj()",5)
 }
 void MonteCarloObj::SetAlgorithmSimulAnnealing(const AnnealingSchedule scheduleTemp,
                            const REAL tMax, const REAL tMin,
