@@ -255,7 +255,7 @@ const ScatteringComponentList& Crystal::GetScatteringComponentList()const
       mClockScattCompList.Click();
       
       if(1==mUseDynPopCorr.GetChoice()) 
-         this->CalcDynPopCorr(1.,.1); else this->ResetDynPopCorr();
+         this->CalcDynPopCorr(1.,.5); else this->ResetDynPopCorr();
       VFN_DEBUG_MESSAGE("Crystal::GetScatteringComponentList():End",2)
    }
    #ifdef __DEBUG__
@@ -990,6 +990,57 @@ void Crystal::BeginOptimization(const bool allowApproximations,const bool enable
          SetGlobalOptimStep(gpRefParTypeScattTranslZ,0.1/this->GetLatticePar(2));
    }
    this->RefinableObj::BeginOptimization(allowApproximations,enableRestraints);
+}
+
+void Crystal::AddBondValenceRo(const ScatteringPower *pow1,const ScatteringPower *pow2,const REAL ro)
+{
+   mvBondValenceRo[make_pair(pow1,pow2)]=ro;
+}
+
+void Crystal::CalcBondValenceSum()const
+{
+   this->CalcDistTable(true,5);
+   //mDistTableClock.Click();// Force recomputation of DynPopCorr
+   //if(1==mUseDynPopCorr.GetChoice()) 
+   //   this->CalcDynPopCorr(1.,.5); else this->ResetDynPopCorr();
+   this->Print(cout);
+   long l=0;
+   for(long i=0;i<mScattererRegistry.GetNb();i++)
+      for(long j=0;j<this->GetScatt(i).GetNbComponent();j++)
+      {
+         const ScatteringPower *pow1=mScattCompList(l).mpScattPow;
+         if(pow1->GetValence()<-0.0001)
+         {
+            cout<<pow1->GetName()<<"has valence<0..skipping"<<endl;
+         }
+         else
+         {
+            cout<<"Calculating Bond Valence sum for :"
+                <<this->GetScatt(i).GetComponentName(j)<<endl;
+            REAL val=0.0;
+            std::vector<Crystal::Neighbour>::const_iterator pos;
+            for(pos=mvDistTableSq[l].mvNeighbour.begin();
+                pos<mvDistTableSq[l].mvNeighbour.end();pos++)
+            {
+               const REAL dist=sqrt(pos->mDist2);
+               const REAL occup= mScattCompList(pos->mNeighbourIndex).mOccupancy
+                                *mScattCompList(pos->mNeighbourIndex).mDynPopCorr;
+               const ScatteringPower *pow2=mScattCompList(pos->mNeighbourIndex).mpScattPow;
+               map<pair<const ScatteringPower*,const ScatteringPower*>,REAL>::const_iterator pos;
+               pos=mvBondValenceRo.find(make_pair(pow1,pow2));
+               if(pos!=mvBondValenceRo.end())
+               {
+                  const REAL v=exp((pos->second-dist)/0.37);
+                  cout <<"  BondValence("<<pow1->GetName()<<","<<pow2->GetName()<<")="
+                       <<v<<", occup="<<occup<<endl;
+                  val += occup * v;
+               }
+            }
+            cout<<this->GetScatt(i).GetComponentName(j)<<": Valence="<<val<<endl;
+         }
+         l++;
+   }
+   
 }
 
 void Crystal::Init(const REAL a, const REAL b, const REAL c, const REAL alpha,

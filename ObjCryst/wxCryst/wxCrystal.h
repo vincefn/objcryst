@@ -93,6 +93,7 @@ class WXCrystal: public WXRefinableObj
       void OnMenuImportMoleculeFromFenskeHallZMatrix(wxCommandEvent &event);
       void OnMenuAddAntiBumpDist(wxCommandEvent & WXUNUSED(event));
       void OnMenuSetRelativeXYZLimits(wxCommandEvent & WXUNUSED(event));
+      void OnMenuManageBondValence(wxCommandEvent & WXUNUSED(event));
       bool OnChangeName(const int id);
       void UpdateUI();
       Crystal& GetCrystal();

@@ -311,6 +311,8 @@ class Crystal:public UnitCell
                                 unsigned int &firstGroup) const;
       virtual void BeginOptimization(const bool allowApproximations=false,
                                      const bool enableRestraints=false);
+      void AddBondValenceRo(const ScatteringPower*,const ScatteringPower*,const REAL ro);
+      void CalcBondValenceSum()const;
    protected:
    
    private:
@@ -451,6 +453,11 @@ class Crystal:public UnitCell
       /// be helpful for non-centrosymmetric structure which have been solved using
       /// powder diffraction (which only gives the relative configuration).
       RefObjOpt mDisplayEnantiomer;
+
+      /** Map of Bond Valence "Ro" parameters for each couple of
+      * ScatteringPower
+      */
+      map<pair<const ScatteringPower*,const ScatteringPower*>, REAL> mvBondValenceRo;
 
    #ifdef __WX__CRYST__
    public:
