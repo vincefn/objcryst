@@ -993,8 +993,8 @@ void Crystal::GlobalOptRandomMove(const REAL mutationAmplitude)
    {
 		// This is safe even if one scatterer is partially fixed,
 		// since we the SetX/SetY/SetZ actually use the MutateTo() function.
-      const unsigned long n1=(unsigned long)((rand()/(REAL)(RAND_MAX-1))*nb);
-      const long n2=( (long)((rand()/(REAL)(RAND_MAX-1))*(nb-1))+1+n1)%nb;
+      const unsigned long n1=(unsigned long)((rand()/(REAL)(RAND_MAX+1))*nb);
+      const long n2=( (long)((rand()/(REAL)(RAND_MAX+1))*(nb-1))+1+n1)%nb;
       const float x1=this->GetScatt(n1).GetX();
       const float y1=this->GetScatt(n1).GetY();
       const float z1=this->GetScatt(n1).GetZ();
