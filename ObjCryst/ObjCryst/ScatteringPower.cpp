@@ -914,13 +914,14 @@ void ScatteringComponentList::operator++()
 
 void ScatteringComponentList::Print()const
 {
-   VFN_DEBUG_MESSAGE("ScatteringComponentList::Print()",5)
+   VFN_DEBUG_ENTRY("ScatteringComponentList::Print()",5)
    cout<<"Number of Scattering components:"<<this->GetNbComponent()<<endl;
    for(long i=0;i<this->GetNbComponent();i++)
    {
       cout << i<<":";
       (mpScattComp+i)->Print();
    }
+   VFN_DEBUG_EXIT("ScatteringComponentList::Print()",5)
 }
 
 void ScatteringComponentList::ChangeMaxNbComponent(const long num)

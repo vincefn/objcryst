@@ -237,7 +237,6 @@ mpZMoveMinimizer(0)
 
 ZScatterer::ZScatterer(const ZScatterer &old):
 Scatterer(old),m3DDisplayIndex(old.m3DDisplayIndex),
-mScattCompList(old.mScattCompList),
 mNbAtom(0),mNbDummyAtom(0),
 mPhi(old.mPhi),mChi(old.mChi),mPsi(old.mPsi),
 mCenterAtomIndex(old.mCenterAtomIndex),
@@ -1025,6 +1024,7 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
             y=ySave;
             z=zSave;
          }//for translation
+         VFN_DEBUG_EXIT("ZScatterer::GLInitDisplayList():Symmetric#"<<i,3)
       }//for symmetrics
       VFN_DEBUG_EXIT("ZScatterer::GLInitDisplayList():Show all symmetrics",3)
    }//else
