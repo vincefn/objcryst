@@ -342,6 +342,9 @@ class ScatteringData: virtual public RefinableObj
          ///
          /// This \e could be specialized for multi-wavelength experiments...
          virtual void CalcResonantScattFactor()const;
+      	/**\brief Compute the overall temperature factor affecting all reflections
+      	*/
+      	void CalcGlobalTemperatureFactor() const;
          
       /**\brief Compute the overall structure factor (real \b and imaginary part).
       *This function is \e optimized \e for \e speed (geometrical structure factors are 
@@ -367,6 +370,7 @@ class ScatteringData: virtual public RefinableObj
                                 CrystVector_REAL* isf2,
                                 bool useFastTabulatedTrigFunctions=false) const;
       
+		
       /// Number of H,K,L reflections
       long mNbRefl;
       ///H,K,L coordinates
@@ -387,12 +391,22 @@ class ScatteringData: virtual public RefinableObj
       /// Radiation
       Radiation mRadiation;
       
+		
       /** Pointer to the crystal corresponding to this experiment.
       *
       *  This gives an access to the UB matrix for the crystal,
       * as well as to the list of Scatterer.
       */
       Crystal *mpCrystal;
+		
+		/** Global Biso, affecting the overall structure factor for all
+		* reflections (but not the structure factors of individual atoms or
+		* type of atomes).
+		*
+		*/
+		REAL mGlobalBiso;
+      /// Global Biso factor
+      mutable CrystVector_REAL  mGlobalTemperatureFactor;
       
       ///Use faster, but less precise, approximations for functions? (integer
       ///approximations to compute sin and cos in structure factors, and also
@@ -446,6 +460,11 @@ class ScatteringData: virtual public RefinableObj
          mutable RefinableObjClock mClockGeomStructFact;
          /// Clock the last time temperature factors were computed
          mutable RefinableObjClock mClockThermicFact;
+			
+         /// last time the global Biso factor was modified
+         RefinableObjClock mClockGlobalBiso;
+         /// last time the global temperature factor was computed
+         mutable RefinableObjClock mClockGlobalTemperatureFact;
       
       // Info about the Scattering components and powers
          /// Pointer to the ScatteringComponentList of the crystal.

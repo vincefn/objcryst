@@ -1436,6 +1436,9 @@ void DiffractionDataSingleCrystal::XMLOutput(ostream &os,int indent)const
    mRadiation.XMLOutput(os,indent);
    os <<endl;
 
+   this->GetPar(&mGlobalBiso).XMLOutput(os,"globalBiso",indent);
+   os <<endl;
+	
    XMLCrystTag tag2("HKLIobsSigmaWeightList");
    for(int i=0;i<indent;i++) os << "  " ;
    os <<tag2<<endl;
@@ -1483,6 +1486,20 @@ void DiffractionDataSingleCrystal::XMLInput(istream &is,const XMLCrystTag &tagg)
          return;
       }
       if("Radiation"==tag.GetName()) mRadiation.XMLInput(is,tag);
+      if("Par"==tag.GetName())
+      {
+         for(unsigned int i=0;i<tag.GetNbAttribute();i++)
+         {
+            if("Name"==tag.GetAttributeName(i))
+            {
+               if("globalBiso"==tag.GetAttributeValue(i))
+               {
+   				   this->GetPar(&mGlobalBiso).XMLInput(is,tag);
+                  break;
+               }
+				}
+			}
+		}
       if("HKLIobsSigmaWeightList"==tag.GetName())
       {
          long nbrefl=0;
@@ -1878,6 +1895,9 @@ void PowderPatternDiffraction::XMLOutput(ostream &os,int indent)const
    
    this->GetPar(&mPseudoVoigtEta1).XMLOutput(os,"Eta1",indent);
    os<<endl;
+
+   this->GetPar(&mGlobalBiso).XMLOutput(os,"globalBiso",indent);
+   os <<endl;
    
    indent--;
    tag.SetIsEndTag(true);
@@ -1973,6 +1993,11 @@ void PowderPatternDiffraction::XMLInput(istream &is,const XMLCrystTag &tagg)
                if("Eta1"==tag.GetAttributeValue(i))
                {
                   this->GetPar(&mPseudoVoigtEta1).XMLInput(is,tag);
+                  break;
+               }
+               if("globalBiso"==tag.GetAttributeValue(i))
+               {
+   				   this->GetPar(&mGlobalBiso).XMLInput(is,tag);
                   break;
                }
             }

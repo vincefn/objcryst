@@ -100,6 +100,23 @@ void InitLibCrystTabulCosine()
    for(REAL i=0;i<sLibCrystNbTabulSine;i++) *tmp++ = sin(i/sLibCrystTabulCosineRatio);
 }
 
+// Same for exponential calculations (used for global temperature factors)
+static bool sLibCrystTabulExpIsInit=false;
+void InitLibCrystTabulExp();
+static const long sLibCrystNbTabulExp=10000;
+static const REAL sLibCrystMinTabulExp=-5.;
+static const REAL sLibCrystMaxTabulExp=10.;
+static REAL *spLibCrystTabulExp;
+void InitLibCrystTabulExp()
+{
+   VFN_DEBUG_MESSAGE("InitLibCrystTabulExp()",10)
+	spLibCrystTabulExp=new REAL[sLibCrystNbTabulExp];
+   REAL *tmp=spLibCrystTabulExp;
+	for(REAL i=0;i<sLibCrystNbTabulExp;i++) 
+		*tmp++ = exp(sLibCrystMinTabulExp+i*(sLibCrystMaxTabulExp-sLibCrystMinTabulExp)/sLibCrystNbTabulExp);
+	sLibCrystTabulExpIsInit=true;
+}
+
 //:KLUDGE: The allocated memory for cos and sin table is never freed...
 // This should be done after the last ScatteringData object is deleted.
 
@@ -299,7 +316,7 @@ WXCrystObjBasic* Radiation::WXCreate(wxWindow* parent)
 
 ScatteringData::ScatteringData():
 mNbRefl(0),
-mpCrystal(0),mUseFastLessPreciseFunc(false),
+mpCrystal(0),mGlobalBiso(0),mUseFastLessPreciseFunc(false),
 mpTemperatureFactor(0),mpScatteringFactor(0),mpRealGeomSF(0),mpImagGeomSF(0),
 mpScattCompList(0),mNbScatteringPower(0),
 mIgnoreImagScattFact(false)
@@ -312,6 +329,15 @@ mIgnoreImagScattFact(false)
    mScattFactNeedRecalc=true;
    mGeomFhklCalcNeedRecalc=true;
    mFhklCalcNeedRecalc=true;
+	
+   {//This should be done elsewhere...
+      RefinablePar tmp("Global Biso",&mGlobalBiso,-1.,1.,
+                        gpRefParTypeScattPowTemperatureIso,REFPAR_DERIV_STEP_ABSOLUTE,
+                        true,true,true,false,1.0);
+      tmp.SetDerivStep(1e-4);
+      tmp.AssignClock(mClockGlobalBiso);
+      this->AddPar(tmp);
+   }
 }
 
 ScatteringData::ScatteringData(const ScatteringData &old):
@@ -339,6 +365,15 @@ mIgnoreImagScattFact(old.mIgnoreImagScattFact)
    mScattFactNeedRecalc=true;
    mGeomFhklCalcNeedRecalc=true;
    mFhklCalcNeedRecalc=true;
+
+   {//This should be done elsewhere...
+      RefinablePar tmp("Global Biso",&mGlobalBiso,-1.,1.,
+                        gpRefParTypeScattPowTemperatureIso,REFPAR_DERIV_STEP_ABSOLUTE,
+                        true,true,true,false,1.0);
+      tmp.SetDerivStep(1e-4);
+      tmp.AssignClock(mClockGlobalBiso);
+      this->AddPar(tmp);
+   }
 }
 
 ScatteringData::~ScatteringData()
@@ -1216,6 +1251,25 @@ void ScatteringData::CalcResonantScattFactor()const
    VFN_DEBUG_EXIT("ScatteringData::GetResonantScattFactor()",4)
 }
 
+void ScatteringData::CalcGlobalTemperatureFactor() const
+{
+   TAU_PROFILE("ScatteringData::CalcGlobalTemperatureFactor()","void ()",TAU_DEFAULT);
+	this->CalcSinThetaLambda();
+	if(mClockGlobalBiso<mClockGlobalTemperatureFact) return;
+	
+	mGlobalTemperatureFactor.resize(mNbRefl);
+	//if(true==mUseFastLessPreciseFunc) //:TODO:
+	{
+	}
+	//else
+	{
+		const REAL *stol=this->GetSinThetaOverLambda().data();
+		REAL *fact=mGlobalTemperatureFactor.data();
+		for(long i=0;i<mNbRefl;i++) {*fact++ = exp(-mGlobalBiso * *stol * *stol);stol++;}
+	}
+	mClockGlobalTemperatureFact.Click();
+}
+
 void ScatteringData::CalcStructFactor() const
 {
    TAU_PROFILE("ScatteringData::CalcStructFactor()","void ()",TAU_DEFAULT);
@@ -1281,6 +1335,10 @@ void ScatteringData::CalcStructFactor() const
    this->CalcScattFactor();
    this->CalcResonantScattFactor();
    this->CalcTemperatureFactor();
+	
+	this->CalcGlobalTemperatureFactor();
+	if(mClockGlobalTemperatureFact>mClockStructFactor) mFhklCalcNeedRecalc=true;
+	
    TAU_PROFILE_STOP(timer3);
    
    
@@ -1363,17 +1421,16 @@ void ScatteringData::CalcStructFactor() const
          }
       }
       TAU_PROFILE_STOP(timer4);
+   	mFhklCalcNeedRecalc=false;
+   	mGeomFhklCalcNeedRecalc=false;
+		
+		this->CalcGlobalTemperatureFactor();
+      mFhklCalcReal*=mGlobalTemperatureFactor;
+      mFhklCalcImag*=mGlobalTemperatureFactor;
+   	mClockStructFactor.Click();
    }
-   else 
-   {
-      VFN_DEBUG_EXIT("ScatteringData::CalcStructFactor():Fhkl NOT Recalc...",3)
-      return;
-   }
-   
+	
 
-   mFhklCalcNeedRecalc=false;
-   mGeomFhklCalcNeedRecalc=false;
-   mClockStructFactor.Click();
    VFN_DEBUG_EXIT("ScatteringData::CalcStructFactor()",3)
 }
 

@@ -641,7 +641,7 @@ void DiffractionDataSingleCrystal::InitRefParList()
    //:TODO:
 //   throw ObjCrystException("DiffractionDataSingleCrystal::InitRefParList() :
 // not yet implemented !");
-   this->ResetParList();
+   //this->ResetParList();
    cout << "DiffractionDataSingleCrystal::InitRefParList():no parameters !" <<endl;
 }
 unsigned int DiffractionDataSingleCrystal::GetNbLSQFunction()const{return 1;}

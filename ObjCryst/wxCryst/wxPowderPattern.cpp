@@ -878,7 +878,13 @@ WXRefinableObj(parent,p),mpPowderPatternDiffraction(p)
       mList.Add(mpFieldEta0);
       mList.Add(mpFieldEta1);
       mpSizer->Add(profileSizer);
-   
+	//Global Biso factor
+      WXFieldRefPar* fieldGlobalBiso    =new WXFieldRefPar(this,"Overall Temperature factor:",
+                                   &(mpPowderPatternDiffraction
+                                     ->GetPar(&(mpPowderPatternDiffraction->mGlobalBiso))),90 );
+   	mList.Add(fieldGlobalBiso);
+		mpSizer->Add(fieldGlobalBiso);
+		
    this->CrystUpdate();
    this->Layout();
 }
