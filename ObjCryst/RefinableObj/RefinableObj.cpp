@@ -469,6 +469,7 @@ void RefinablePar::MutateTo(const REAL mutateValue)
 {
    VFN_DEBUG_MESSAGE("RefinablePar::MutateTo()",2)
    if(true==mIsFixed) return;
+   if(*mpValue == mutateValue)return;
    this->Click();
    #if 0
    if(true==mUseEquation)
