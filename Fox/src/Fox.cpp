@@ -73,9 +73,9 @@ class WXCrystScrolledWindow:public wxScrolledWindow
    public:
       WXCrystScrolledWindow(wxWindow* parent);
       virtual bool Layout();
-      void SetChild(const wxWindow* pChild);
+      void SetChild(wxWindow* pChild);
    private:
-      const wxWindow* mpChild;
+      wxWindow* mpChild;
       int mHeight,mWidth;
       wxBoxSizer *mpSizer;
 };
@@ -392,7 +392,7 @@ wxScrolledWindow(parent),mpChild((wxWindow*)0),mHeight(-1),mWidth(-1)
 
 bool WXCrystScrolledWindow::Layout()
 {
-   #ifdef __DARWIN__   // to be tested on other platforms...
+   #ifndef __WINDOWS__   // to be tested for windows...
    this->Scroll(0,0);//workaround bug ?
    return this->wxWindow::Layout();
    #else
@@ -407,11 +407,11 @@ bool WXCrystScrolledWindow::Layout()
    #endif
 }
 
-void WXCrystScrolledWindow::SetChild(const wxWindow* pChild)
+void WXCrystScrolledWindow::SetChild(wxWindow* pChild)
 {
    mpChild=pChild;
-   #ifdef __DARWIN__  
-   // on OSX, we do not use the custom Layout() function so define scroll here
+   #ifndef __WINDOWS__   // to be tested for windows...
+   // we do not use the custom Layout() function so define scroll here
    this->SetScrollbars(40,40,2,2);
    #endif
    mpSizer->Add(mpChild);
