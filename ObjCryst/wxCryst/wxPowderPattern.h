@@ -102,6 +102,10 @@ class WXPowderPatternGraph: public wxWindow
       REAL mDragging2Theta0,mDraggingIntensity0;
       /// Index of the first and last points drawn of the pattern
       mutable long mFirst,mLast;
+      /// Clock corresponding to when the graph limits where last changed. This
+      /// is compared to PowderPattern::GetClockPowderPatternPar() to know if
+      /// these parameter need to be reset.
+      RefinableObjClock mClockAxisLimits;
       DECLARE_EVENT_TABLE()
 };
 

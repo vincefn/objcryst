@@ -741,7 +741,8 @@ void PowderPatternDiffraction::Prepare()
 {
    if(  (this->GetCrystal().GetSpaceGroup().GetClockSpaceGroup()>mClockHKL)
       ||(this->GetCrystal().GetClockLatticePar()>mClockHKL)
-      ||(this->GetRadiation().GetClockWavelength()>mClockHKL))
+      ||(this->GetRadiation().GetClockWavelength()>mClockHKL)
+      ||(mpParentPowderPattern->GetClockPowderPatternPar()>mClockHKL))
          this->GenHKLFullSpace();
    //if(0==this->GetNbRefl()) this->GenHKLFullSpace();
 }

@@ -815,6 +815,7 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
          mLast=nbpoints-1;
          mMax2Theta=m2theta.max();
       }
+      mClockAxisLimits.Click();
       wxUpdateUIEvent event(ID_POWDERSPECTRUM_GRAPH_NEW_PATTERN);
       wxPostEvent(this,event);
       return;
@@ -858,8 +859,11 @@ void WXPowderPatternGraph::SetPattern(const CrystVector_REAL &obs,
    m2theta.resize(nbPoint);
    for(long i=0;i<nbPoint;i++) m2theta(i)=tthetaMin+i*tthetaStep;
    m2theta*=RAD2DEG;
-   // Reset the zoom parameters, only for the first display
-   if(mMax2Theta<0) this->ResetAxisLimits();
+   // Reset the zoom parameters, only for the first display or if the limits of the
+   // full pattern have changed
+   if(  (mMax2Theta<0)
+      ||(mpPattern->GetPowderPattern().GetClockPowderPatternPar()>mClockAxisLimits)) 
+      this->ResetAxisLimits();
    // If we only send an OnPaint event, only the parts which have been erased are redrawn
    // (under windows). SO we must force the complete Refresh of the window... in the
    // main thread of course...
@@ -886,6 +890,7 @@ void WXPowderPatternGraph::ResetAxisLimits()
    mMin2Theta=m2theta.min();
    mFirst=0;
    mLast=m2theta.numElements()-1;
+   mClockAxisLimits.Click();
 }
 
 ////////////////////////////////////////////////////////////////////////
