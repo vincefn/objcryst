@@ -1034,9 +1034,6 @@ void Crystal::CalcBondValenceSum()const
 {
    if(mvBondValenceRo.size()==0) return;
    this->CalcDistTable(true,5);
-   //mDistTableClock.Click();// Force recomputation of DynPopCorr
-   //if(1==mUseDynPopCorr.GetChoice()) 
-   //   this->CalcDynPopCorr(1.,.5); else this->ResetDynPopCorr();
    VFN_DEBUG_MESSAGE("Crystal::CalcBondValenceSum()?",4)
    if(   (mBondValenceCalcClock>mDistTableClock)
        &&(mBondValenceCalcClock>mBondValenceParClock)) return;
@@ -1061,6 +1058,13 @@ void Crystal::CalcBondValenceSum()const
          {
             const REAL v=exp((pos->second-dist)/0.37);
             val += occup * v;
+            nb++;
+         }
+         pos=mvBondValenceRo.find(make_pair(pow2,pow1));
+         if(pos!=mvBondValenceRo.end())
+         {
+            const REAL v=exp((pos->second-dist)/0.37);
+            val -= occup * v;
             nb++;
          }
       }

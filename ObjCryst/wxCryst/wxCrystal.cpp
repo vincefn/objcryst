@@ -1044,17 +1044,18 @@ void WXCrystal::OnMenuManageBondValence(wxCommandEvent &event)
    }
    if(event.GetId()==ID_CRYSTAL_MENU_PAR_BONDVALENCE_SHOW)
    {
+      mpCrystal->CalcBondValenceSum();
       std::map<long, REAL>::const_iterator pos;
-      long l=0;
+      long l=-1;
       for(long i=0;i<mpCrystal->mScattererRegistry.GetNb();i++)
          for(long j=0;j<mpCrystal->GetScatt(i).GetNbComponent();j++)
          {
+            l++;
             pos=mpCrystal->mvBondValenceCalc.find(l);
             if(pos==mpCrystal->mvBondValenceCalc.end()) continue;
             cout<<mpCrystal->GetScatt(i).GetComponentName(j)
                 <<": Valence="<<pos->second<<", expected="
                 << mpCrystal->mScattCompList(l).mpScattPow->GetFormalCharge()<<endl;
-            l++;
       }
    }
    mpCrystal->UpdateDisplay();
