@@ -246,9 +246,6 @@ void PowderPatternBackground::CalcPowderPattern() const
    VFN_DEBUG_MESSAGE("PowderPatternBackground::CalcPowderPattern():End",3);
 }
 
-void PowderPatternBackground::SetRadiation(const Radiation& rad)
-{
-}
 void PowderPatternBackground::Prepare()
 {
 }
@@ -386,21 +383,19 @@ void PowderPatternDiffraction::GetGeneGroup(const RefinableObj &obj,
             //else //no parameters other than unit cell
          }
 }
+const Radiation& PowderPatternDiffraction::GetRadiation()const
+{ return mpParentPowderPattern->GetRadiation();}
 
 void PowderPatternDiffraction::CalcPowderPattern() const
 {
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderPattern():",3)
 
-   //:TODO: Synchronize some other way the two wavelengths... (or remove one ?)
-   //can't do this since it's not const...
-   //
-   //if(mpParentPowderPattern->GetRadiation().GetClockWavelength()
-   //   >mRadiation.GetClockWavelength())
-   //      mRadiation.SetWavelength(mpParentPowderPattern->GetRadiation().GetWavelength()(0));
-
    // :TODO: Can't do this as this is non-const
    //if(this->GetCrystal().GetSpaceGroup().GetClockSpaceGroup()>mClockHKL)
    //   this->GenHKLFullSpace();
+   //
+   // The workaround is to call Prepare() (non-const) before every calculation
+   // when a modifictaion may have occured.
 
    this->CalcIhkl();
    this->CalcPowderReflProfile();
@@ -436,7 +431,7 @@ Applying profiles for "<<nbRefl<<" reflections",3)
             if(mTheta(i+step) > (mTheta(i)+1e-4) ) break;
          }
          //intensity *= 1e-14;
-         switch(mRadiation.GetWavelengthType())
+         switch(this->GetRadiation().GetWavelengthType())
          {
             case WAVELENGTH_MONOCHROMATIC:
             {
@@ -471,13 +466,13 @@ Applying profiles for "<<nbRefl<<" reflections",3)
                "  I="<<intensity<<"  Theta="<<mTheta(i)*RAD2DEG,2)
                //:TODO: Use only ONE profile array for both alpha1&2 (faster)
                {//Alpha1
-                  intensity /= (1+mRadiation.GetXRayTubeAlpha2Alpha1Ratio());
+                  intensity /= (1+this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio());
                   theta=mTheta(i);
                   theta+=mTanTheta(i)*(
-                     -mRadiation.GetXRayTubeDeltaLambda()
-                      *mRadiation.GetXRayTubeAlpha2Alpha1Ratio())
-                        /(1+mRadiation.GetXRayTubeAlpha2Alpha1Ratio())
-                           /mRadiation.GetWavelength()(0);
+                     -this->GetRadiation().GetXRayTubeDeltaLambda()
+                      *this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio())
+                        /(1+this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio())
+                           /this->GetRadiation().GetWavelength()(0);
                   thetaPt= mpParentPowderPattern->Get2ThetaCorrPixel(2*theta);
                   theta=mpParentPowderPattern->Get2ThetaCorr(2*theta);
                   first=thetaPt-mSavedPowderReflProfileNbPoint;
@@ -497,11 +492,11 @@ Applying profiles for "<<nbRefl<<" reflections",3)
                   }
                }
                {//Alpha2
-                  intensity *= mRadiation.GetXRayTubeAlpha2Alpha1Ratio();
+                  intensity *= this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio();
                   theta=mTheta(i);
-                  theta+=mTanTheta(i)*(mRadiation.GetXRayTubeDeltaLambda()
-                              /(1+mRadiation.GetXRayTubeAlpha2Alpha1Ratio()))
-                           /mRadiation.GetWavelength()(0);
+                  theta+=mTanTheta(i)*(this->GetRadiation().GetXRayTubeDeltaLambda()
+                              /(1+this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio()))
+                           /this->GetRadiation().GetWavelength()(0);
                   thetaPt= mpParentPowderPattern->Get2ThetaCorrPixel(2*theta);
                   theta=mpParentPowderPattern->Get2ThetaCorr(2*theta);
                   first=thetaPt-mSavedPowderReflProfileNbPoint;
@@ -541,12 +536,12 @@ void PowderPatternDiffraction::CalcPowderReflProfile()const
 {
    this->CalcSinThetaLambda();
    //mClockProfileCalc.Print();
-   //mRadiation.GetClockWavelength().Print();
-   //mRadiation.GetClockRadiation().Print();
+   //this->GetRadiation().GetClockWavelength().Print();
+   //this->GetRadiation().GetClockRadiation().Print();
    if(  (mClockProfileCalc>mClockProfilePar)
       &&(mClockProfileCalc>mReflectionProfileType.GetClock())
       &&(mClockProfileCalc>mClockTheta)
-      &&(mClockProfileCalc>mRadiation.GetClockWavelength())
+      &&(mClockProfileCalc>this->GetRadiation().GetClockWavelength())
       &&(mClockProfileCalc>mpParentPowderPattern->GetClockPowderPattern2ThetaCorr())
       &&(mClockProfileCalc>mClockHKL)) return;
    
@@ -738,16 +733,11 @@ void PowderPatternDiffraction::CalcIhkl() const
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcIhkl():End",3)
 }
 
-void PowderPatternDiffraction::SetRadiation(const Radiation& rad)
-{
-   mRadiation=rad;
-}
-
 void PowderPatternDiffraction::Prepare()
 {
    if(  (this->GetCrystal().GetSpaceGroup().GetClockSpaceGroup()>mClockHKL)
       ||(this->GetCrystal().GetClockLatticePar()>mClockHKL)
-      ||(mRadiation.GetClockWavelength()>mClockHKL))
+      ||(this->GetRadiation().GetClockWavelength()>mClockHKL))
          this->GenHKLFullSpace();
    //if(0==this->GetNbRefl()) this->GenHKLFullSpace();
 }
@@ -919,7 +909,6 @@ void PowderPattern::AddPowderPatternComponent(PowderPatternComponent &comp)
    mSubObjRegistry.Register(comp);
    comp.RegisterClient(*this);
    mClockPowderPatternCalc.Reset();
-   comp.SetRadiation(mRadiation);
    mPowderPatternComponentRegistry.Register(comp);
    //:TODO: check if there are enough scale factors
    //mScaleFactor.resizeAndPreserve(mPowderPatternComponentRegistry.GetNb());
@@ -981,8 +970,6 @@ unsigned long PowderPattern::GetNbPoint()const {return mNbPoint;}
 void PowderPattern::SetRadiation(const Radiation &radiation)
 {
    mRadiation=radiation;
-   for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++)
-      mPowderPatternComponentRegistry.GetObj(i).SetRadiation(mRadiation);
    mClockPowderPatternRadiation.Click();
 }
 const Radiation& PowderPattern::GetRadiation()const {return mRadiation;}
@@ -990,8 +977,6 @@ const Radiation& PowderPattern::GetRadiation()const {return mRadiation;}
 void PowderPattern::SetRadiationType(const RadiationType rad)
 {
    mRadiation.SetRadiationType(rad);
-   for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++)
-      mPowderPatternComponentRegistry.GetObj(i).SetRadiation(mRadiation);
 }
 
 RadiationType PowderPattern::GetRadiationType()const {return mRadiation.GetRadiationType();}
@@ -999,16 +984,12 @@ void PowderPattern::SetWavelength(const REAL lambda)
 {
    VFN_DEBUG_MESSAGE("PowderPattern::SetWavelength(lambda)",3)
    mRadiation.SetWavelength(lambda);
-   for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++)
-      mPowderPatternComponentRegistry.GetObj(i).SetRadiation(mRadiation);
 }
 
 void PowderPattern::SetWavelength(const string &XRayTubeElementName,const REAL alpha12ratio)
 {
    VFN_DEBUG_MESSAGE("PowderPattern::SetWavelength(wavelength)",3)
    mRadiation.SetWavelength(XRayTubeElementName,alpha12ratio);
-   for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++)
-      mPowderPatternComponentRegistry.GetObj(i).SetRadiation(mRadiation);
 }
 
 REAL PowderPattern::GetWavelength()const{return mRadiation.GetWavelength()(0);}

@@ -291,14 +291,14 @@ void Radiation::InitOptions()
       WavelengthTypeName="Spectrum";
       WavelengthTypeChoices[0]="Monochromatic";
       WavelengthTypeChoices[1]="X-Ray Tube";
-      WavelengthTypeChoices[2]="MAD";
-      WavelengthTypeChoices[3]="DAFS";
-      WavelengthTypeChoices[4]="LAUE";
+      //WavelengthTypeChoices[2]="MAD";
+      //WavelengthTypeChoices[3]="DAFS";
+      //WavelengthTypeChoices[4]="LAUE";
       
       needInitNames=false;//Only once for the class
    }
    mRadiationType.Init(2,&RadiationTypeName,RadiationTypeChoices);
-   mWavelengthType.Init(5,&WavelengthTypeName,WavelengthTypeChoices);
+   mWavelengthType.Init(2,&WavelengthTypeName,WavelengthTypeChoices);
    this->AddOption(&mRadiationType);
    this->AddOption(&mWavelengthType);
    
@@ -354,7 +354,7 @@ mIgnoreImagScattFact(false),mMaxSinThetaOvLambda(10)
 }
 
 ScatteringData::ScatteringData(const ScatteringData &old):
-mNbRefl(old.mNbRefl),mRadiation(old.mRadiation),
+mNbRefl(old.mNbRefl),
 mpCrystal(old.mpCrystal),mUseFastLessPreciseFunc(old.mUseFastLessPreciseFunc),
 //Do not copy temporary arrays
 mpTemperatureFactor(0),mpScatteringFactor(0),mpRealGeomSF(0),mpImagGeomSF(0),
@@ -419,7 +419,7 @@ void ScatteringData::GenHKLFullSpace(const REAL maxTheta,const bool useMultiplic
    (*fpObjCrystInformUser)("Generating Full HKL list...");
    VFN_DEBUG_ENTRY("ScatteringData::GenHKLFullSpace()",5)
    TAU_PROFILE("ScatteringData::GenHKLFullSpace()","void (REAL,bool)",TAU_DEFAULT);
-   if(mRadiation.GetWavelength()(0) <=.01)
+   if(this->GetRadiation().GetWavelength()(0) <=.01)
    {
       throw ObjCrystException("ScatteringData::GenHKLFullSpace() \
       no wavelength assigned yet to this ScatteringData object.");;
@@ -431,13 +431,13 @@ void ScatteringData::GenHKLFullSpace(const REAL maxTheta,const bool useMultiplic
    }
    VFN_DEBUG_MESSAGE(" ->Max theta="<<maxTheta \
    << " Using Multiplicity : "<<useMultiplicity,3)
-   VFN_DEBUG_MESSAGE("-> wavelength:"<< mRadiation.GetWavelength()(0)<<"a,b,c:"\
+   VFN_DEBUG_MESSAGE("-> wavelength:"<< this->GetRadiation().GetWavelength()(0)<<"a,b,c:"\
                      <<mpCrystal->GetLatticePar(0)<<","<<mpCrystal->GetLatticePar(1)\
                      <<","<<mpCrystal->GetLatticePar(2)<<",",3)
    long maxH,maxK,maxL;
-   maxH=(int) (sin(maxTheta)/mRadiation.GetWavelength()(0) * mpCrystal->GetLatticePar(0)*2+1);
-   maxK=(int) (sin(maxTheta)/mRadiation.GetWavelength()(0) * mpCrystal->GetLatticePar(1)*2+1);
-   maxL=(int) (sin(maxTheta)/mRadiation.GetWavelength()(0) * mpCrystal->GetLatticePar(2)*2+1);
+   maxH=(int) (sin(maxTheta)/this->GetRadiation().GetWavelength()(0) * mpCrystal->GetLatticePar(0)*2+1);
+   maxK=(int) (sin(maxTheta)/this->GetRadiation().GetWavelength()(0) * mpCrystal->GetLatticePar(1)*2+1);
+   maxL=(int) (sin(maxTheta)/this->GetRadiation().GetWavelength()(0) * mpCrystal->GetLatticePar(2)*2+1);
    VFN_DEBUG_MESSAGE("->maxH : " << maxH << "  maxK : " << maxK << "maxL : " << maxL,5)
    mNbRefl=(2*maxH+1)*(2*maxK+1)*(2*maxL+1);
    CrystVector_long H(mNbRefl);
@@ -645,13 +645,7 @@ void ScatteringData::GenHKLFullSpace(const REAL maxTheta,const bool useMultiplic
    VFN_DEBUG_EXIT("ScatteringData::GenHKLFullSpace():End",5)
 }
 
-void ScatteringData::SetRadiationType(const RadiationType radiation)
-{
-   VFN_DEBUG_MESSAGE("ScatteringData::SetRadiationType():End",5)
-   mRadiation.SetRadiationType(radiation);
-}
-
-RadiationType ScatteringData::GetRadiationType()const {return mRadiation.GetRadiationType();}
+RadiationType ScatteringData::GetRadiationType()const {return this->GetRadiation().GetRadiationType();}
 
 void ScatteringData::SetCrystal(Crystal &crystal)
 {
@@ -722,24 +716,7 @@ const CrystVector_REAL& ScatteringData::GetFhklCalcImag() const
    return mFhklCalcImag;
 }
 
-void ScatteringData::SetWavelength(const REAL lambda)
-{
-   VFN_DEBUG_MESSAGE("ScatteringData::SetWavelength() to "<<lambda,5)
-   mRadiation.SetWavelength(lambda);
-}
-
-void ScatteringData::SetWavelength(const string &XRayTubeElementName,
-                                   const REAL alpha2Alpha2ratio)
-{
-   VFN_DEBUG_MESSAGE("ScatteringData::SetWavelength() to "<<XRayTubeElementName,5)
-   mRadiation.SetWavelength(XRayTubeElementName,alpha2Alpha2ratio);
-}
-
-void ScatteringData::SetEnergy(const REAL energy)
-{
-   this->SetWavelength(12398.4/energy);
-}
-CrystVector_REAL ScatteringData::GetWavelength()const {return mRadiation.GetWavelength();}
+CrystVector_REAL ScatteringData::GetWavelength()const {return this->GetRadiation().GetWavelength();}
 #if 0
 void ScatteringData::SetUseFastLessPreciseFunc(const bool useItOrNot)
 {
@@ -858,7 +835,7 @@ CrystVector_long ScatteringData::SortReflectionByTheta(const REAL maxTheta)
    VFN_DEBUG_MESSAGE("ScatteringData::SortReflectionByTheta() 4",2)
    if(0<maxTheta)
    {
-      REAL maxsithsl=sin(maxTheta)/mRadiation.GetWavelength()(0);
+      REAL maxsithsl=sin(maxTheta)/this->GetRadiation().GetWavelength()(0);
       long maxSubs;
       for(maxSubs=0;(mSinThetaLambda(maxSubs)<maxsithsl) && (maxSubs<mNbRefl) ;maxSubs++);
       if(maxSubs==mNbRefl) return sortedSubs;
@@ -1065,20 +1042,20 @@ void ScatteringData::PrepareCalcStructFactor()const
       }
    }
    
-   if(  (mClockScattFactor<mRadiation.GetClockWavelength()) || (mClockScattFactor<mClockHKL)
+   if(  (mClockScattFactor<this->GetRadiation().GetClockWavelength()) || (mClockScattFactor<mClockHKL)
       ||(mClockScattFactor<mpCrystal->GetClockLatticePar())) 
    {
       VFN_DEBUG_MESSAGE("Wavelength, or HKLs, or lattice has changed",2)
       mScattFactNeedRecalc=true;
    }
-   if(  (mClockThermicFact<mRadiation.GetClockWavelength()) || (mClockThermicFact<mClockHKL)
+   if(  (mClockThermicFact<this->GetRadiation().GetClockWavelength()) || (mClockThermicFact<mClockHKL)
       ||(mClockThermicFact<mpCrystal->GetClockLatticePar())) 
    {
       VFN_DEBUG_MESSAGE("Wavelength, or HKLs, or lattice has changed",2)
       mThermicNeedRecalc=true;
    }
-   if(  (mClockScattFactor        <mRadiation.GetClockRadiation())
-      ||(mClockScattFactorResonant<mRadiation.GetClockRadiation())) 
+   if(  (mClockScattFactor        <this->GetRadiation().GetClockRadiation())
+      ||(mClockScattFactorResonant<this->GetRadiation().GetClockRadiation())) 
    {
       VFN_DEBUG_MESSAGE("Radiation type has changed !",2)
       mAnomalousNeedRecalc=true;
@@ -1123,7 +1100,7 @@ void ScatteringData::CalcSinThetaLambda()const
    if( 0 == this->GetNbRefl()) throw ObjCrystException("ScatteringData::CalcSinThetaLambda() \
       Cannot compute sin(theta)/lambda : there are no reflections !");
 
-   if(  (mClockTheta>mRadiation.GetClockWavelength()) && (mClockTheta>mClockHKL)
+   if(  (mClockTheta>this->GetRadiation().GetClockWavelength()) && (mClockTheta>mClockHKL)
       &&(mClockTheta>mpCrystal->GetClockLatticePar())) return;
    
    VFN_DEBUG_ENTRY("ScatteringData::CalcSinThetaLambda()",3)
@@ -1143,13 +1120,13 @@ void ScatteringData::CalcSinThetaLambda()const
    for(int i=0;i< (this->GetNbRefl());i++)
       mSinThetaLambda(i)=sqrt(pow(xyz(i,0),2)+pow(xyz(i,1),2)+pow(xyz(i,2),2))/2;
    
-   if(mRadiation.GetWavelength()(0) > 0)
+   if(this->GetRadiation().GetWavelength()(0) > 0)
    {
       mTheta.resize(mNbRefl);
       mTanTheta.resize(mNbRefl);
       for(int i=0;i< (this->GetNbRefl());i++) 
       {  
-         if( (mSinThetaLambda(i)*mRadiation.GetWavelength()(0))>1)
+         if( (mSinThetaLambda(i)*this->GetRadiation().GetWavelength()(0))>1)
          {
             //:KLUDGE: :TODO:
             mTheta(i)=M_PI;
@@ -1158,8 +1135,8 @@ void ScatteringData::CalcSinThetaLambda()const
             ofstream out("log.txt");
             out << "Error when computing Sin(theta) :"
                 << "i="<<i<<" ,mSinThetaLambda(i)="<<mSinThetaLambda(i)
-                << " ,mRadiation.GetWavelength()(0)="
-                << mRadiation.GetWavelength()(0) 
+                << " ,this->GetRadiation().GetWavelength()(0)="
+                << this->GetRadiation().GetWavelength()(0) 
                 << " ,H="<<mH(i)
                 << " ,K="<<mK(i)
                 << " ,L="<<mL(i)
@@ -1170,7 +1147,7 @@ void ScatteringData::CalcSinThetaLambda()const
          }
          else 
          {
-            mTheta(i)=asin(mSinThetaLambda(i)*mRadiation.GetWavelength()(0));
+            mTheta(i)=asin(mSinThetaLambda(i)*this->GetRadiation().GetWavelength()(0));
             mTanTheta(i)=tan(mTheta(i));
          }
       }
@@ -1272,7 +1249,7 @@ void ScatteringData::CalcResonantScattFactor()const
    TAU_PROFILE("ScatteringData::GetResonantScattFactor()","void (bool)",TAU_DEFAULT);
    mFprime.resize(mNbScatteringPower);
    mFsecond.resize(mNbScatteringPower);
-   if(mRadiation.GetWavelength()(0) == 0)
+   if(this->GetRadiation().GetWavelength()(0) == 0)
    {
       mFprime=0;
       mFsecond=0;

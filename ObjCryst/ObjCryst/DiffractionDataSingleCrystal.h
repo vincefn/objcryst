@@ -212,6 +212,34 @@ class DiffractionDataSingleCrystal:public ScatteringData
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
+      virtual const Radiation& GetRadiation()const;
+      Radiation& GetRadiation();
+      /// Set : neutron or x-ray experiment ? Wavelength ?
+      virtual void SetRadiationType(const RadiationType radiation);
+      /// Set the (monochromatic) wavelength of the beam.
+      void SetWavelength(const REAL );
+      /** \ brief Set X-Ray tube radiation.
+      *
+      *\param XRayTubeElementName : name of the anticathode element name. Known
+      *ones are Cr, Fe, Cu, Mo, Ag. 
+      *\param alpha2Alpha2ratio: Kalpha2/Kalpha1 ratio (0.5 by default)
+      *
+      *the average wavelength is calculated
+      *using the alpha2/alpha1 weight. All structure factors computation are made 
+      *using the average wavelength, and for powder diffraction, profiles are output
+      *at the alpha1 and alpha2 ratio for the calculated pattern.
+      *
+      *NOTE : if the name of the wavelength is generic (eg"Cu"), 
+      *then the program considers that 
+      *there are both Alpha1 and Alpha2, and thus automatically changes the WavelengthType 
+      *to WAVELENGTH_ALPHA12. If instead either alpha1 or alpha2 (eg "CuA1") is asked for,
+      *the WavelengthType is set to WAVELENGTH_MONOCHROMATIC. In both cases,
+      * the radiation type is set to X-Ray.
+      */
+      void SetWavelength(const string &XRayTubeElementName,const REAL alpha2Alpha2ratio=0.5);
+      /// Set the (monochromatic) energy of the beam.
+      void SetEnergy(const REAL );
+      
    protected:
    private:
       virtual void InitRefParList();
@@ -264,6 +292,8 @@ class DiffractionDataSingleCrystal:public ScatteringData
          /// Clock for twinning, when the preparation of twiinning correction was last made.
          mutable RefinableObjClock mClockPrepareTwinningCorr;
          
+      // The Radiation for this object
+      Radiation mRadiation;
    #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);

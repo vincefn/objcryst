@@ -229,10 +229,10 @@ class ScatteringData: virtual public RefinableObj
       virtual void GenHKLFullSpace(const REAL maxTheta,
                                    const bool useMultiplicity=false);
       
-      /// Set : neutron or x-ray experiment ? Wavelength ?
-      virtual void SetRadiationType(const RadiationType radiation);
       ///Neutron or x-ray experiment ? Wavelength ?
       RadiationType GetRadiationType()const;
+      /// Get the radiation object for this data
+      virtual const Radiation& GetRadiation()const=0;
       
       /**Set the crystal for this experiment
       *
@@ -272,33 +272,6 @@ class ScatteringData: virtual public RefinableObj
       /// Access to imaginary part of F(hkl)calc
       const CrystVector_REAL& GetFhklCalcImag() const;
       
-      ///Set the wavelength of the experiment (in Angstroems). This is 
-      ///used to calculate theta angles and get X-Ray anomalous factors
-      void SetWavelength(const REAL lambda);
-      
-      /** \brief Set the wavelength of the experiment to that of an X-Ray tube.
-      *
-      *\param XRayTubeElementName : name of the anticathode element name. Known
-      *ones are Cr, Fe, Cu, Mo, Ag. 
-      *\param alpha2Alpha2ratio: Kalpha2/Kalpha1 ratio (0.5 by default)
-      *
-      *Alpha1 and alpha2 wavelength are taken
-      *from R. Grosse-Kunstleve package, and the average wavelength is calculated
-      *using the alpha2/alpha1 weight. All structure factors computation are made 
-      *using the average wavelength, and for powder diffraction, profiles are output
-      *at the alpha1 and alpha 2 ratio for the calculated pattern.
-      *
-      *NOTE : if the name of the wavelength is generic (eg"Cu"), 
-      *then the program considers that 
-      *there are both Alpha1 and Alpha2, and thus automatically changes the WavelengthType 
-      *to WAVELENGTH_ALPHA12. If instead either alpha1 or alpha2 (eg "CuA1") is asked for,
-      *the WavelengthType is set to WAVELENGTH_MONOCHROMATIC.
-      */
-      void SetWavelength(const string &XRayTubeElementName,const REAL alpha2Alpha1ratio=0.5);
-      
-      ///Set the energy of the experiment (in keV). This is 
-      ///used to calculate theta angles and get X-Ray anomalous factors
-      void SetEnergy(const REAL energy);
       ///wavelength of the experiment (in Angstroems)
       CrystVector_REAL GetWavelength()const;
       
@@ -411,10 +384,6 @@ class ScatteringData: virtual public RefinableObj
       mutable CrystVector_REAL mFhklCalcReal, mFhklCalcImag ;
       ///F(HKL)^2 calc for each reflection
       mutable CrystVector_REAL mFhklCalcSq ;
-      
-      /// Radiation
-      Radiation mRadiation;
-      
       
       /** Pointer to the crystal corresponding to this experiment.
       *

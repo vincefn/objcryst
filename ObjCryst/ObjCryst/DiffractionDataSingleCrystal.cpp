@@ -65,7 +65,7 @@ DiffractionDataSingleCrystal::DiffractionDataSingleCrystal(Crystal &cryst):mScal
 
 DiffractionDataSingleCrystal::DiffractionDataSingleCrystal(const DiffractionDataSingleCrystal &old):
 ScatteringData(old),
-mHasObservedData(old.mHasObservedData)
+mHasObservedData(old.mHasObservedData),mRadiation(old.mRadiation)
 {
    mObsIntensity=old.mObsIntensity;
    mObsSigma=old.mObsSigma;
@@ -790,6 +790,32 @@ const CrystVector_REAL&
 const CrystVector_REAL& 
    DiffractionDataSingleCrystal::GetLSQWeight(const unsigned int) const
 {return this->GetWeight();}
+
+const Radiation& DiffractionDataSingleCrystal::GetRadiation()const { return mRadiation;}
+Radiation& DiffractionDataSingleCrystal::GetRadiation() { return mRadiation;}
+void DiffractionDataSingleCrystal::SetRadiationType(const RadiationType radiation)
+{
+   VFN_DEBUG_MESSAGE("DiffractionDataSingleCrystal::SetRadiationType():End",5)
+   mRadiation.SetRadiationType(radiation);
+}
+
+void DiffractionDataSingleCrystal::SetWavelength(const REAL lambda)
+{
+   VFN_DEBUG_MESSAGE("DiffractionDataSingleCrystal::SetWavelength() to "<<lambda,5)
+   this->GetRadiation().SetWavelength(lambda);
+}
+
+void DiffractionDataSingleCrystal::SetWavelength(const string &XRayTubeElementName,
+                                   const REAL alpha2Alpha2ratio)
+{
+   VFN_DEBUG_MESSAGE("DiffractionDataSingleCrystal::SetWavelength() to "<<XRayTubeElementName,5)
+   this->GetRadiation().SetWavelength(XRayTubeElementName,alpha2Alpha2ratio);
+}
+
+void DiffractionDataSingleCrystal::SetEnergy(const REAL energy)
+{
+   this->SetWavelength(12398.4/energy);
+}
 
 void DiffractionDataSingleCrystal::CalcIcalc() const
 {

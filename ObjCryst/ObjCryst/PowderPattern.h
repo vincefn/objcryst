@@ -26,6 +26,8 @@
 //#include "ObjCryst/Scatterer.h"
 #include "ObjCryst/Crystal.h"
 
+#include "ObjCryst/ScatteringCorr.h"
+
 //#include <stdlib.h>
 #include <string>
 //#include <iomanip>
@@ -81,9 +83,6 @@ class PowderPatternComponent : virtual public RefinableObj
       /// done if necessary (ie if a parameter has changed since the last
       /// computation)
       virtual void CalcPowderPattern() const=0;
-      
-      /// \internal Set the radiation. This is called by PowderPattern
-      virtual void SetRadiation(const Radiation &rad)=0;
       
       /// Get the integration limits (first and last pixels) around each reflection,
       /// if this component has Bragg reflections. Used for integrated R(w) factors.
@@ -152,7 +151,6 @@ class PowderPatternBackground : public PowderPatternComponent
                                 unsigned int &firstGroup) const;
    protected:
       virtual void CalcPowderPattern() const;
-      virtual void SetRadiation(const Radiation &rad);
       virtual void Prepare();
       virtual void GetBraggLimits(CrystVector_long *&min,CrystVector_long *&max)const;
       virtual void SetMaxSinThetaOvLambda(const REAL max);
@@ -233,6 +231,7 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       virtual void BeginOptimization(const bool allowApproximations=false,
                                      const bool enableRestraints=false);
       virtual void EndOptimization();
+      virtual const Radiation& GetRadiation()const;
    protected:
       virtual void CalcPowderPattern() const;
       
@@ -243,7 +242,6 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       /// \internal Compute the intensity for all reflections (taking into account
       /// corrections, but not the multiplicity)
       virtual void CalcIhkl() const;
-      virtual void SetRadiation(const Radiation &rad);
       virtual void Prepare();
       virtual void InitOptions();
       virtual void GetBraggLimits(CrystVector_long *&min,CrystVector_long *&max)const;
