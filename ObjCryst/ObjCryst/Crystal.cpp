@@ -237,7 +237,7 @@ const ScatteringComponentList& Crystal::GetScatteringComponentList()const
       mClockScattCompList.Click();
       
       if(1==mUseDynPopCorr.GetChoice()) 
-         this->CalcDynPopCorr(2.,.5); else this->ResetDynPopCorr();
+         this->CalcDynPopCorr(1.,.1); else this->ResetDynPopCorr();
       VFN_DEBUG_MESSAGE("Crystal::GetScatteringComponentList():End",2)
    }
    #ifdef __DEBUG__
