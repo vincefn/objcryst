@@ -1,0 +1,146 @@
+/*
+* LibCryst++ : a Crystallographic computing library in C++
+*
+*  (c) 2000 Vincent FAVRE-NICOLIN
+*           Laboratoire de Cristallographie
+*           24, quai Ernest-Ansermet, CH-1211 Geneva 4, Switzerland
+*  Contact: Vincent.Favre-Nicolin@cryst.unige.ch
+*           Radovan.Cerny@cryst.unige.ch
+*
+*/
+
+#ifndef _VFN_WX_POWDERPATTERN_H_
+#define _VFN_WX_POWDERPATTERN_H_
+
+#include "wxCryst/wxRefinableObj.h"
+#include "ObjCryst/PowderPattern.h"
+namespace ObjCryst
+{
+/// WX Class for Radiation
+class WXRadiation: public WXCrystObjBasic
+{
+   public:
+      WXRadiation(wxWindow *parent, Radiation*);
+      virtual void CrystUpdate();
+   private:
+      Radiation *mpRadiation;
+      WXFieldOption *mpFieldRadType;
+      WXFieldRefPar *mpFieldWavelength;
+      wxBoxSizer *mpSizer;
+   DECLARE_EVENT_TABLE()
+};
+class WXPowderPatternGraph;
+
+/// WX Class for PowderPattern objects
+class WXPowderPattern: public WXRefinableObj
+{
+   public:
+      WXPowderPattern(wxWindow *parent, PowderPattern*);
+      virtual void CrystUpdate();
+      void OnMenuAddCompBackgd(wxCommandEvent & WXUNUSED(event));
+      void OnMenuAddCompCryst(wxCommandEvent & WXUNUSED(event));
+      void OnMenuShowGraph(wxCommandEvent & WXUNUSED(event));
+      void OnMenuSaveText(wxCommandEvent & WXUNUSED(event));
+      void OnMenuSimulate(wxCommandEvent & WXUNUSED(event));
+      void OnMenuImportFullProf(wxCommandEvent & WXUNUSED(event));
+      void OnMenuImportPSI(wxCommandEvent & WXUNUSED(event));
+      void OnMenuImportILL(wxCommandEvent & WXUNUSED(event));
+      void OnMenuImportXdd(wxCommandEvent & WXUNUSED(event));
+      void OnMenuImportCPI(wxCommandEvent & WXUNUSED(event));
+      void OnMenuImport2ThetaObsSigma(wxCommandEvent & WXUNUSED(event));
+      void OnMenuImport2ThetaObs(wxCommandEvent & WXUNUSED(event));
+      void OnMenuFitScaleForR(wxCommandEvent & WXUNUSED(event));
+      void OnMenuFitScaleForRw(wxCommandEvent & WXUNUSED(event));
+      void OnMenuSavePattern(wxCommandEvent & WXUNUSED(event));
+      void OnMenuSetWavelength(wxCommandEvent &event);
+      void OnMenuAdd2ThetaExclude(wxCommandEvent & WXUNUSED(event));
+      void NotifyDeleteGraph();
+   private:
+      PowderPattern *mpPowderPattern;
+      WXRegistry<PowderPatternComponent> *mpWXComponent;
+      WXPowderPatternGraph *mpGraph;
+   DECLARE_EVENT_TABLE()
+};
+/// Class to display a Powder Pattern (calc,obs, diff...).
+class WXPowderPatternGraph: public wxWindow
+{
+   public:
+      /// Constructor. The top frame should have a Status bar with two fields (at least)
+      WXPowderPatternGraph(wxFrame *frame, WXPowderPattern* parent);
+      ~WXPowderPatternGraph();
+      /// Redraw the spectrum
+      void OnPaint(wxPaintEvent& WXUNUSED(event));
+      /// Display the Theta and intensity values at the mouse position, in the status bar
+      void OnMouse(wxMouseEvent &event);
+      /// Update the powder spectrum, at the user's request. This calls
+      /// the WXPowderPattern::CrystUpdate().
+      void OnUpdate(wxCommandEvent & WXUNUSED(event));
+      /// Update the spectrum. This is called by the WXPowderPattern parent.
+      void SetPattern(const CrystVector_double &obs,
+                       const CrystVector_double &calc,
+                       const double tthetaMin,const double tthetaStep);
+      /// Redraw the pattern (special function to ensure complete redrawing under windows...)
+      void OnRedrawNewPattern(wxUpdateUIEvent& WXUNUSED(event));
+   private:
+      WXPowderPattern *mpPattern;
+      CrystVector_double mObs,mCalc,m2theta;
+      const long mMargin;
+      const double mDiffPercentShift;
+      double mMaxIntensity,mMinIntensity,mMin2Theta,mMax2Theta;
+      wxFrame *mpParentFrame;
+      bool mCalcPatternIsLocked;
+      /// Pop-up menu
+      wxMenu* mpPopUpMenu;
+      DECLARE_EVENT_TABLE()
+};
+
+//:TODO:
+#if 0 
+// Class to display one Background point for WXPowderPatternBackgound
+// It is just a RefPar, with a field inserted for the position of the Background point.
+// Only the value of the intensity is refinable.
+class WXFieldRefParBackground:public WXFieldRefPar
+{
+   public:
+      WXFieldRefParBackground(wxWindow *parent,RefinablePar *refpar,
+                              CrystVector_double *backgd2Theta, const int numPt);
+   private:
+      wxTextCtrl *mpField2Theta;
+      /// The vector of 2theta values
+      CrystVector_double* mpBackgd2Theta;
+      const int mBackgdPointNum;
+}
+#endif
+
+/// Class to display a Powder Pattern Background
+class WXPowderPatternBackground: public WXRefinableObj
+{
+   public:
+      WXPowderPatternBackground(wxWindow *parent, PowderPatternBackground*);
+      void OnMenuImportUserBackground(wxCommandEvent & WXUNUSED(event));
+   private:
+      PowderPatternBackground *mpPowderPatternBackground;
+   DECLARE_EVENT_TABLE()
+};
+
+/// Class to display a Powder Pattern for a crystalline phase
+class WXPowderPatternDiffraction: public WXRefinableObj
+{
+   public:
+      WXPowderPatternDiffraction(wxWindow *parent, PowderPatternDiffraction*);
+      void CrystUpdate();
+      void OnChangeCrystal(wxCommandEvent & WXUNUSED(event));
+   private:
+      PowderPatternDiffraction *mpPowderPatternDiffraction;
+      WXFieldChoice* mpFieldCrystal;
+      WXFieldRefPar* mpFieldCagliotiU;
+      WXFieldRefPar* mpFieldCagliotiV;
+      WXFieldRefPar* mpFieldCagliotiW;
+      WXFieldRefPar* mpFieldEta0;
+      WXFieldRefPar* mpFieldEta1;
+   DECLARE_EVENT_TABLE()
+};
+
+} //namespace
+
+#endif //_VFN_WX_POWDERPATTERN_H_
