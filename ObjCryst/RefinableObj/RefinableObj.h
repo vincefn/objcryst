@@ -788,6 +788,8 @@ class RefinableObj
       /// Change the limits for a category of parameters, proportionnaly to their current value.
       /// min should be < 1. and max > 1.
       void SetLimitsProportional(const RefParType *type, const REAL min, const REAL max);
+      ///Change the maximum step to use during Global Optimization algorithms
+      void  SetGlobalOptimStep(const RefParType *type, const REAL step);
       
       /// Access to the registry of RefinableObj used by this object
       ObjRegistry<RefinableObj>& GetSubObjRegistry();

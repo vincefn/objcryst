@@ -1379,6 +1379,14 @@ void RefinableObj::SetLimitsProportional(const RefParType *type,
    for(int i=0;i<this->GetSubObjRegistry().GetNb();i++)
       this->GetSubObjRegistry().GetObj(i).SetLimitsProportional(type,min,max);
 }
+void RefinableObj::SetGlobalOptimStep(const RefParType *type, const REAL step)
+{
+   for(long i=0;i<mNbRefPar;i++)
+      if(this->GetPar(i).GetType()->IsDescendantFromOrSameAs(type)) 
+         this->GetPar(i).SetGlobalOptimStep(step);
+   for(int i=0;i<this->GetSubObjRegistry().GetNb();i++)
+      this->GetSubObjRegistry().GetObj(i).SetGlobalOptimStep(type,step);
+}
 
 ObjRegistry<RefinableObj>& RefinableObj::GetSubObjRegistry()
 {return mSubObjRegistry;}
