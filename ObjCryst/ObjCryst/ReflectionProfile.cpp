@@ -244,28 +244,28 @@ void ReflectionProfilePseudoVoigt::InitParameters()
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp("AsymA0",&mAsymBerarBaldinozziA0,-1,1.,gpRefParTypeScattDataProfileAsym,
+      RefinablePar tmp("AsymA0",&mAsymBerarBaldinozziA0,-0.05,0.05,gpRefParTypeScattDataProfileAsym,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
       tmp.AssignClock(mClockMaster);
       tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp("AsymA1",&mAsymBerarBaldinozziA1,-1,1.,gpRefParTypeScattDataProfileAsym,
+      RefinablePar tmp("AsymA1",&mAsymBerarBaldinozziA1,-0.05,0.05,gpRefParTypeScattDataProfileAsym,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
       tmp.AssignClock(mClockMaster);
       tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp("AsymB0",&mAsymBerarBaldinozziB0,-1,1.,gpRefParTypeScattDataProfileAsym,
+      RefinablePar tmp("AsymB0",&mAsymBerarBaldinozziB0,-0.01,0.01,gpRefParTypeScattDataProfileAsym,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
       tmp.AssignClock(mClockMaster);
       tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp("AsymB1",&mAsymBerarBaldinozziB1,-1,1.,gpRefParTypeScattDataProfileAsym,
+      RefinablePar tmp("AsymB1",&mAsymBerarBaldinozziB1,-0.01,0.01,gpRefParTypeScattDataProfileAsym,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
       tmp.AssignClock(mClockMaster);
       tmp.SetDerivStep(1e-4);
@@ -873,15 +873,12 @@ CrystVector_REAL AsymmetryBerarBaldinozzi(const CrystVector_REAL x,
    result+= -center;
    result *= 1/fwhm;
    REAL *p=result.data();
+   const REAL a=a0/tan(center/2)+a1/tan(center);
+   const REAL b=b0/tan(center/2)+b1/tan(center);
    for(long i=0;i<nbPoints;i++)
    { 
-      if(*p<1e-6) *p++ = 1.0;
-      else
-      {
-         *p = 1+exp(-pow(*p,2))*((a0 * 2 * *p + b0*(8*pow(*p,3)-12* *p) )/tan(*p)
-                                +(a1 * 2 * *p + b1*(8*pow(*p,3)-12* *p) )/tan(2* *p));
-         p++ ;
-      }
+      *p = 1+*p * exp(-*p * *p)*(2*a+b*(8* *p * *p-12));
+      p++ ;
    }
    return result;
 }
