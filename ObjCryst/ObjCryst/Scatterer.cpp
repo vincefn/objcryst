@@ -98,7 +98,11 @@ Scatterer::~Scatterer()
    gScattererRegistry.DeRegister(*this);
 }
 
-const string Scatterer::GetClassName() const {return "Scatterer";}
+const string& Scatterer::GetClassName() const
+{
+	const static string className="Scatterer";
+	return className;
+}
 
 REAL Scatterer::GetX()    const {return mXYZ(0);}
 REAL Scatterer::GetY()    const {return mXYZ(1);}

@@ -166,7 +166,11 @@ mXRayTubeAlpha2Alpha1Ratio(old.mXRayTubeAlpha2Alpha1Ratio)
 Radiation::~Radiation()
 {}
 
-const string Radiation::GetClassName() const {return "Radiation";}
+const string& Radiation::GetClassName() const
+{
+	const static string className="Radiation";
+	return className;
+}
 
 void Radiation::operator=(const Radiation &old)
 {
@@ -746,7 +750,8 @@ void ScatteringData::PrintFhklCalc(ostream &os)const
                (mH,mK,mL,mFhklCalcSq,mFhklCalcReal,mFhklCalcImag,theta,mSinThetaLambda,12,4);
    VFN_DEBUG_EXIT("ScatteringData::PrintFhklCalc()",5)
 }
-void ScatteringData::BeginOptimization(const bool allowApproximations)
+void ScatteringData::BeginOptimization(const bool allowApproximations,
+													const bool enableRestraints)
 {
 	if(mUseFastLessPreciseFunc!=allowApproximations)
 	{
@@ -754,7 +759,7 @@ void ScatteringData::BeginOptimization(const bool allowApproximations)
    	mClockStructFactor.Reset();
 	}
 	mUseFastLessPreciseFunc=allowApproximations;
-	this->RefinableObj::BeginOptimization(allowApproximations);
+	this->RefinableObj::BeginOptimization(allowApproximations,enableRestraints);
 }
 void ScatteringData::EndOptimization()
 {

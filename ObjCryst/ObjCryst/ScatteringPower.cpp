@@ -89,7 +89,11 @@ ScatteringPower::~ScatteringPower()
    gScatteringPowerRegistry.DeRegister(*this);
 }
 
-const string ScatteringPower::GetClassName() const{return "ScatteringPower";}
+const string& ScatteringPower::GetClassName()
+{
+	const static string className="ScatteringPower";
+	return className;
+}
 
 void ScatteringPower::operator=(const ScatteringPower& rhs)
 {
@@ -233,7 +237,11 @@ ScatteringPowerAtom::~ScatteringPowerAtom()
    gScatteringPowerAtomRegistry.DeRegister(*this);
 }
 
-const string ScatteringPowerAtom::GetClassName() const{return "ScatteringPowerAtom";}
+const string& ScatteringPowerAtom::GetClassName() const
+{
+	const static string className="ScatteringPowerAtom";
+	return className;
+}
 
 void ScatteringPowerAtom::Init(const string &name,const string &symbol,const REAL bIso)
 {

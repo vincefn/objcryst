@@ -265,7 +265,11 @@ ZScatterer* ZScatterer::CreateCopy() const
    VFN_DEBUG_MESSAGE("ZScatterer::CreateCopy()"<<mName<<")",5)
    return new ZScatterer(*this);
 }
-const string ZScatterer::GetClassName() const {return "ZScatterer";}
+const string& ZScatterer::GetClassName() const
+{
+	const static string className="ZScatterer";
+	return className;
+}
 
 void ZScatterer::AddAtom(const string &name,const ScatteringPower *pow,
              const long atomBond, const REAL bondLength,

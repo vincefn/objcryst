@@ -56,7 +56,7 @@ class ScatteringPower:virtual public RefinableObj
       ScatteringPower();
       ScatteringPower(const ScatteringPower& old);
       virtual ~ScatteringPower();
-      virtual const string GetClassName() const;
+      virtual const string& GetClassName() const;
       virtual void operator=(const ScatteringPower& rhs);
       /** \brief Get the Scattering factor for all reflections of a given 
       * ScatteringData object.
@@ -240,7 +240,7 @@ class ScatteringPowerAtom:virtual public ScatteringPower
       ScatteringPowerAtom(const string &name,const string &symbol,const REAL bIso=1.0);
       ScatteringPowerAtom(const ScatteringPowerAtom& old);
       ~ScatteringPowerAtom();
-      virtual const string GetClassName() const;
+      virtual const string& GetClassName() const;
       /// Re-initialize parameters (after using the default constructor).
       void Init(const string &name,const string &symbol,const REAL bIso=1.0);
       virtual CrystVector_REAL GetScatteringFactor(const ScatteringData &data,

@@ -78,7 +78,7 @@ class Atom: public Scatterer
       virtual Atom* CreateCopy() const;
       /// Destructor...
      ~Atom();
-      virtual const string GetClassName() const;
+      virtual const string& GetClassName() const;
       ///
       virtual void operator=(const Atom & rhs);
 

@@ -103,7 +103,11 @@ Atom::~Atom()
    VFN_DEBUG_MESSAGE("Atom::~Atom():("<<mName<<")",5)
 }
 
-const string Atom::GetClassName() const{return "Atom";}
+const string& Atom::GetClassName()
+{
+	const static string className="Atom";
+	return className;
+}
 
 void Atom::operator=(const Atom &rhs)
 {

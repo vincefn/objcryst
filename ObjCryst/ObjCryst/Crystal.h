@@ -88,7 +88,7 @@ class Crystal:public RefinableObj
       Crystal(const Crystal &oldCryst);
       /// Crystal destructor
       ~Crystal();
-      virtual const string GetClassName() const;
+      virtual const string& GetClassName() const;
       
       /** \brief Add a scatterer to the crystal.
       *
@@ -322,7 +322,8 @@ class Crystal:public RefinableObj
 		virtual void GetGeneGroup(const RefinableObj &obj, 
 										  CrystVector_uint & groupIndex,
 										  unsigned int &firstGroup) const;
-      virtual void BeginOptimization(const bool allowApproximations=false);
+      virtual void BeginOptimization(const bool allowApproximations=false,
+												 const bool enableRestraints=false);
    protected:
    
    private:

@@ -83,7 +83,7 @@ class Radiation: public RefinableObj
 		/// Copy constructor
       Radiation(const Radiation&);
       ~Radiation();
-      virtual const string GetClassName() const;
+      virtual const string& GetClassName() const;
       
       void operator=(const Radiation&);
       
@@ -302,7 +302,8 @@ class ScatteringData: virtual public RefinableObj
       */
       virtual void PrintFhklCalc(ostream &os=cout)const;
 
-      virtual void BeginOptimization(const bool allowApproximations=false);
+      virtual void BeginOptimization(const bool allowApproximations=false,
+												 const bool enableRestraints=false);
       virtual void EndOptimization();
    protected:
       /// \internal This function is called after H,K and L arrays have 

@@ -35,7 +35,7 @@ class PowderPatternComponent : virtual public RefinableObj
       PowderPatternComponent();
       PowderPatternComponent(const PowderPatternComponent&);
       virtual ~PowderPatternComponent();
-      virtual const string GetClassName() const;
+      virtual const string& GetClassName() const;
       
       /// \internal
 		/// Set the PowderPattern object which uses this component.
@@ -122,7 +122,7 @@ class PowderPatternBackground : public PowderPatternComponent
       PowderPatternBackground();
       PowderPatternBackground(const PowderPatternBackground&);
       virtual ~PowderPatternBackground();
-      virtual const string GetClassName() const;
+      virtual const string& GetClassName() const;
       
       virtual void SetParentPowderPattern(const PowderPattern&);
       virtual const CrystVector_REAL& GetPowderPatternCalc()const;
@@ -185,7 +185,7 @@ class PowderPatternDiffraction : public PowderPatternComponent,public Scattering
       PowderPatternDiffraction(const PowderPatternDiffraction&);
       virtual ~PowderPatternDiffraction();
       virtual PowderPatternDiffraction* CreateCopy()const;
-      virtual const string GetClassName() const;
+      virtual const string& GetClassName() const;
       
       virtual void SetParentPowderPattern(const PowderPattern&);
       virtual const CrystVector_REAL& GetPowderPatternCalc()const;
@@ -214,7 +214,8 @@ class PowderPatternDiffraction : public PowderPatternComponent,public Scattering
 		virtual void GetGeneGroup(const RefinableObj &obj, 
 										  CrystVector_uint & groupIndex,
 										  unsigned int &firstGroup) const;
-      virtual void BeginOptimization(const bool allowApproximations=false);
+      virtual void BeginOptimization(const bool allowApproximations=false,
+												 const bool enableRestraints=false);
       virtual void EndOptimization();
    protected:
       virtual void CalcPowderPattern() const;
@@ -342,7 +343,7 @@ class PowderPattern : public RefinableObj
       PowderPattern();
       PowderPattern(const PowderPattern&);
       ~PowderPattern();
-      virtual const string GetClassName() const;
+      virtual const string& GetClassName() const;
       /** Add a component (phase, backround) to this spectrum. 
       *
       * It must have been allocated in the heap. The spectrum parameters (2theta min,

@@ -192,7 +192,7 @@ class ZScatterer: public Scatterer
       /// \internal so-called Virtual copy constructor, needed to make copies
       /// of arrays of Scatterers
       virtual ZScatterer* CreateCopy() const;
-      virtual const string GetClassName() const;
+      virtual const string& GetClassName() const;
       /// Add an atom to the Zscatterer. If &ScatteringPower=0, then it is a 'dummy'
       /// atom and will be ignored for any scattering analysis. The 'name' supplied may
       /// not be respected, and can be replaced by 'ZScatterer_name'+'AtomNum'+'ScattPowName'

@@ -55,7 +55,7 @@ class Scatterer:virtual public RefinableObj
       /// \internal so-called Virtual copy constructor, needed to make copies
       /// of arrays of Scatterers
       virtual Scatterer* CreateCopy() const=0;
-      virtual const string GetClassName() const;
+      virtual const string& GetClassName() const;
             
       /// Number of components in the scatterer (eg number of point scatterers)
       virtual int GetNbComponent() const=0;

@@ -56,7 +56,11 @@ PowderPatternComponent::~PowderPatternComponent()
    gPowderPatternComponentRegistry.DeRegister(*this);
 }
 
-const string PowderPatternComponent::GetClassName() const{return "PowderPatternComponent";}
+const string& PowderPatternComponent::GetClassName() const
+{
+	const static string className="PowderPatternComponent";
+	return className;
+}
 
 bool PowderPatternComponent::IsScalable()const {return mIsScalable;}
 
@@ -85,7 +89,11 @@ mBackgroundInterpPointIntensity(old.mBackgroundInterpPointIntensity)
 {}
 
 PowderPatternBackground::~PowderPatternBackground(){}
-const string PowderPatternBackground::GetClassName() const{return "PowderPatternBackground";}
+const string& PowderPatternBackground::GetClassName()
+{
+	const static string className="PowderPatternBackground";
+	return className;
+}
 
 void PowderPatternBackground::SetParentPowderPattern(const PowderPattern &s)
 {
@@ -296,8 +304,11 @@ mUseOnlyLowAngleData_SavedL(old.mUseOnlyLowAngleData_SavedL)
 
 PowderPatternDiffraction::~PowderPatternDiffraction()
 {}
-const string PowderPatternDiffraction::GetClassName() const
-{return "PowderPatternDiffraction";}
+const string& PowderPatternDiffraction::GetClassName() const
+{
+	const static string className="PowderPatternDiffraction";
+	return className;
+}
 
 PowderPatternDiffraction* PowderPatternDiffraction::CreateCopy()const
 {
@@ -397,13 +408,14 @@ void PowderPatternDiffraction::GenHKLFullSpace()
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::GenHKLFullSpace():",3)
    this->ScatteringData::GenHKLFullSpace(mpParentPowderPattern->Get2ThetaMax()/2,true);
 }
-void PowderPatternDiffraction::BeginOptimization(const bool allowApproximations)
+void PowderPatternDiffraction::BeginOptimization(const bool allowApproximations,
+																 const bool enableRestraints)
 {
 	if(mUseFastLessPreciseFunc!=allowApproximations)
 	{
 		mClockProfileCalc.Reset();
 	}
-	this->ScatteringData::BeginOptimization(allowApproximations);
+	this->ScatteringData::BeginOptimization(allowApproximations,enableRestraints);
 }
 void PowderPatternDiffraction::EndOptimization()
 {
@@ -941,7 +953,11 @@ PowderPattern::~PowderPattern()
    gPowderPatternRegistry.DeRegister(*this);
    gTopRefinableObjRegistry.DeRegister(*this);
 }
-const string PowderPattern::GetClassName() const {return "PowderPattern";}
+const string& PowderPattern::GetClassName() const
+{
+	const static string className="PowderPattern";
+	return className;
+}
 
 void PowderPattern::AddPowderPatternComponent(PowderPatternComponent &comp)
 {

@@ -128,7 +128,11 @@ Crystal::~Crystal()
    VFN_DEBUG_EXIT("Crystal::~Crystal()",5)
 }
 
-const string Crystal::GetClassName() const {return "Crystal";}
+const string& Crystal::GetClassName() const
+{
+	const static string className="Crystal";
+	return className;
+}
 
 void Crystal::AddScatterer(Scatterer *scatt)
 {
@@ -1121,7 +1125,7 @@ void Crystal::GetGeneGroup(const RefinableObj &obj,
 				//else //no parameters other than unit cell
 			}
 }
-void Crystal::BeginOptimization(const bool allowApproximations)
+void Crystal::BeginOptimization(const bool allowApproximations,const bool enableRestraints)
 {
 	for(int i=0;i<this->GetScattererRegistry().GetNb();i++)
 	{
@@ -1132,9 +1136,8 @@ void Crystal::BeginOptimization(const bool allowApproximations)
 		this->GetScattererRegistry().GetObj(i).
 			SetGlobalOptimStep(gpRefParTypeScattTranslZ,0.1/this->GetLatticePar(2));
 	}
-	this->RefinableObj::BeginOptimization(allowApproximations);
+	this->RefinableObj::BeginOptimization(allowApproximations,enableRestraints);
 }
-
 
 void Crystal::Init(const REAL a, const REAL b, const REAL c, const REAL alpha,
                    const REAL beta, const REAL gamma,const string &SpaceGroupId,

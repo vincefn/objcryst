@@ -78,8 +78,11 @@ DiffractionDataSingleCrystal* DiffractionDataSingleCrystal::CreateCopy()const
    return new DiffractionDataSingleCrystal(*this);
 }
 
-const string DiffractionDataSingleCrystal::GetClassName() const
-{return "DiffractionDataSingleCrystal";}
+const string& DiffractionDataSingleCrystal::GetClassName() const
+{
+	const static string className="DiffractionDataSingleCrystal";
+	return className;
+}
 
 void DiffractionDataSingleCrystal::SetHklIobs(const CrystVector_long &h,
                                               const CrystVector_long &k,

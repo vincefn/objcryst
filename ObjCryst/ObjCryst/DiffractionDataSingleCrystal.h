@@ -59,7 +59,7 @@ class DiffractionDataSingleCrystal:public ScatteringData
       DiffractionDataSingleCrystal(const DiffractionDataSingleCrystal &old);
       ~DiffractionDataSingleCrystal();
       virtual DiffractionDataSingleCrystal* CreateCopy()const;
-      virtual const string GetClassName() const;
+      virtual const string& GetClassName() const;
       
       /**  \brief returns the calculated diffracted intensity.
       *
