@@ -75,7 +75,7 @@ ifeq ($(debug),1)
 else
 # do not use -fomit-frame-pointer, or throw() catch() does not work !! GCC BUG ?
    DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS}
-   CPPFLAGS = -O3 -w -ffast-math
+   CPPFLAGS = -O3 -w -ffast-math -mcpu=G3 -funroll-all-loops -pipe -fomit-frame-pointer
    LOADLIBES = -s -lm -lRefinableObj -lcryst -lCrystVector -lQuirks -lsglite -latominfo ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS}
 endif
 
