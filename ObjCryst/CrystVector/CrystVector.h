@@ -329,6 +329,7 @@ template<class T> class CrystMatrix
 
    void resizeAndPreserve(const long ySize,const long xSize);
    
+	//void operator=(const T num);
    void operator*=(const T num);
    void operator*=(const CrystMatrix &vect);
    void operator/=(const T num);
@@ -393,7 +394,6 @@ template<class T> class CrystMatrix
       return ListInitializerSwitch(*this,num);
    }
    
-	//void operator=(const T num);
 	
    T operator()(const long i) const;
 
@@ -475,6 +475,7 @@ template<class T> class CrystArray3D
 
    void resizeAndPreserve(const long zSize,const long ySize,const long xSize);
    
+	void operator=(const T num);
    void operator*=(const T num);
    void operator*=(const CrystArray3D &vect);
    void operator/=(const T num);

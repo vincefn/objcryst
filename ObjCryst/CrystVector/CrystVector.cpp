@@ -427,7 +427,13 @@ template<class T> void CrystMatrix<T>::resizeAndPreserve(const long ySize,const 
    if(!mIsAreference)delete[] p ;
    mIsAreference=false;
 }
-
+/*
+template<class T> void CrystMatrix<T>::operator=(const T num)
+{
+   register T *p=mpData;
+   for(int i=0;i<mNumElements;i++) *p++ = num;
+}
+*/
 template<class T> void CrystMatrix<T>::operator*=(const T num)
 {
    register T *p=mpData;
@@ -632,9 +638,7 @@ template<class T> void CrystArray3D<T>::resize(const long zSize,
    if(xSize*ySize*zSize == mNumElements) return;
    if(!mIsAreference)delete[] mpData ;
    mpData=0;
-   mXSize=xSize;
-   mYSize=ySize;
-   mNumElements=xSize*ySize;
+   mNumElements=xSize*ySize*zSize;
    if(mNumElements>0) mpData=new T[mNumElements];
 }
 
@@ -658,6 +662,12 @@ template<class T> void CrystArray3D<T>::resizeAndPreserve(const long zSize,
    mIsAreference=false;
 }
 
+template<class T> void CrystArray3D<T>::operator=(const T num)
+{
+   VFN_DEBUG_MESSAGE("CrystArray3D<T>::operator=():"<<num,1)
+   register T *p=mpData;
+   for(int i=0;i<mNumElements;i++) *p++ = num;
+}
 template<class T> void CrystArray3D<T>::operator*=(const T num)
 {
    register T *p=mpData;
@@ -766,8 +776,8 @@ template<class T> ostream& operator<<(ostream &os, const CrystArray3D<T> &vect)
 	{
    	for(long j=0;j<vect.rows();j++) 
    	{
-      	for(long k=0;k<vect.cols();k++) os << FormatFloat(vect(i,j)) ;
-      	os << endl;
+       for(long k=0;k<vect.cols();k++) os << FormatFloat(vect(i,j,k)) ;
+       os << endl;
    	}
       os << endl;
    }
@@ -838,6 +848,7 @@ template CrystVector<REAL> sin(const CrystVector<REAL>&);
 template CrystVector<REAL> tan(const CrystVector<REAL>&);
 template CrystVector<REAL> sqrt(const CrystVector<REAL>&);
 template class CrystArray3D<REAL>;
+template ostream& operator<<(ostream &os, const CrystArray3D<REAL> &vect);
 
 template class CrystVector<long>;
 template long MaxDifference(const CrystVector<long>&,const CrystVector<long>&);
