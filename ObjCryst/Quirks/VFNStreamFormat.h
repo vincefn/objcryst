@@ -10,7 +10,12 @@ using namespace std;
 
 #include "CrystVector/CrystVector.h"
 
-
+/** output a number as a formatted integer: 
+*
+* \code os << FormatInt(mynumber,5);\endcode
+*
+*
+*/
 class FormatInt
 {
    public:
@@ -26,6 +31,12 @@ class FormatInt
 ostream& operator<< (ostream& os, const FormatInt& fInt);
 
 
+/** output a number as a formatted float:
+*
+*\code os << FormatFloat(mynumber,10,4); \endcode
+*
+*
+*/
 class FormatFloat
 {
    public:
@@ -41,6 +52,11 @@ class FormatFloat
 
 ostream& operator<< (ostream& os, const FormatFloat &fFloat);
 
+/** output a string with a fixed length (adding necessary space or removing
+* excess characters) : 
+*
+* \code os << FormatString(myString,15);\endcode
+*/
 class FormatString
 {
    public:
@@ -56,10 +72,15 @@ class FormatString
 
 ostream& operator<< (ostream& os, const FormatString& fStr);
 
-/**
-*  Format vectors as column arrays
+/** output one or several vectors as (a) column(s): 
 *
-* \example: cout << FormatVertVector<double>(vect,8,3);
+* \code 
+*  os << FormatVertVector<double>(vect,8,3);
+*  os << FormatVertVector<double>(vect1,vect2,vetc3,12,6);
+*  // For 7 vectors with width 12 and precision 4,
+*  // pVect being a pointer to an array of 7 vectors:
+*  os << FormatVertVector<double>(pVect,7,12,4);
+* \endcode
 */
 template<class T> class FormatVertVector
 {
@@ -119,10 +140,9 @@ template<class T> class FormatVertVector
 
 template<class T> ostream& operator<< (ostream &os, const FormatVertVector<T> &fVect);
 
-/**
-*  Format vector as horiz array
+/** Format vector as horiz array:
 *
-* \example: cout << FormatHorizVector<double>(vect,8,3);
+* \code os << FormatHorizVector<double>(vect,8,3);\endcode
 */
 template<class T> class FormatHorizVector
 {
@@ -142,11 +162,9 @@ template<class T> class FormatHorizVector
 
 template<class T> ostream& operator<< (ostream &os, const FormatHorizVector<T> &fVect);
 
-/**
-*  Format vectors as column arrays
-*Here the first 3 columns are printed as integers
+/** Output vectors as column arrays, with the first 3 columns printed as integers.
 *
-* \example: cout << FormatVertVectorHKLFloats<double>(vH,vK,vL,vIobs,vIcalc,vSigma,12,4);
+* \code cout << FormatVertVectorHKLFloats<double>(vH,vK,vL,vIobs,vIcalc,vSigma,12,4);\endcode
 */
 template<class T>class FormatVertVectorHKLFloats
 {

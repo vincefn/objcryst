@@ -52,7 +52,7 @@ class PowderPatternComponent : virtual public RefinableObj
       virtual void SetUseFastLessPreciseFunc(const bool useItOrNot)=0;
       /// Set an option so that only low-angle reflections (theta < angle)
       /// are used. See DiffractionData::mUseOnlyLowAngleData
-		/// OBSOLETE Do not use, as this will probably be removed
+		/// \deprecated Do not use, as this will probably be removed
 		/// eventually.
       virtual void SetUseOnlyLowAngleData(const bool useOnlyLowAngle,const double angle=0)=0;
       
@@ -147,9 +147,9 @@ class PowderPatternBackground : public PowderPatternComponent
          mutable RefinableObjClock mClockBackgroundSpline;
       
       // Use only low-angle data ?
-         /// Use only low-angle data ? OBSOLETE
+         /// Use only low-angle data ? \deprecated
          bool mUseOnlyLowAngleData;
-         /// Limit (theta angle, in radian) for the above option. OBSOLETE
+         /// Limit (theta angle, in radian) for the above option. \deprecated
          double mUseOnlyLowAngleDataLimit;
 			
       //To be removed
@@ -403,9 +403,10 @@ class PowderPattern : public RefinableObj
 			/// This can be useful fot global optimization, but should be avoided
 			/// for precise (eg derivative calculation) work. 
          void SetUseFastLessPreciseFunc(const bool useItOrNot);
-         /// Set an option so that only low-amgle reflections (theta < angle)
-         /// are used. See DiffractionData::mUseOnlyLowAngleData
-			/// \warning OBSOLETE. Will be removed eventually.
+         /** Set an option so that only low-amgle reflections (theta < angle)
+         * are used. See DiffractionData::mUseOnlyLowAngleData
+			* \deprecated
+			*/
          void SetUseOnlyLowAngleData(const bool useOnlyLowAngle,const double angle);
       
       //Access to spectrum data
@@ -479,13 +480,14 @@ class PowderPattern : public RefinableObj
          */
          void ImportPowderPatternSietronicsCPI(const string &fileName);
          /** \brief Import file with 3 columns 2Theta Iobs Sigma.
-         *\warning: the 2theta step is assumed to be constant !!!
+         *\warning the 2theta step is assumed to be constant !!!
          *\param fileName: the filename (surprise!)
          *\param nbSkip: the number of lines to skip at the beginning of the file (default=0)
          */
          void ImportPowderPattern2ThetaObsSigma(const string &fileName,const int nbSkip=0);
          /** \brief Import file with 2 columns 2Theta Iobs.
-         *\warning: the 2theta step is assumed to be constant !!!
+			*
+         *\warning the 2theta step is assumed to be constant !!!
          *\param fileName: the filename (surprise!)
          *\param nbSkip: the number of lines to skip at the beginning of the file (default=0)
          */
@@ -662,12 +664,12 @@ class PowderPattern : public RefinableObj
          * the limit is simply ignored, not calculated,
          * not taken into account in statistics.
 			*
-			* \warning OBSOLETE
+			* \deprecated
          */
          bool mUseOnlyLowAngleData;
 
          /** \brief Limit (theta angle, in radian) for the above option.
-         * OBSOLETE
+         * \deprecated
          */
          double mUseOnlyLowAngleDataLimit;
    #ifdef __WX__CRYST__

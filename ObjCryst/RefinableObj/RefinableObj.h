@@ -37,8 +37,8 @@ template<class T> class RefObjOption;
 
 namespace ObjCryst
 {
-/// How do we compute steps h for derivation calculation : d=f(x+h)-f(x)/h
-///either h is fixed (absolute), or relative h=x*derivFactor
+/// How do we compute steps h for numerical derivative calculation : d=f(x+h)-f(x-h)/h/2
+/// either h is fixed (absolute), or relative h=x*derivFactor
 enum  RefParDerivStepModel
 {
    REFPAR_DERIV_STEP_ABSOLUTE,
@@ -51,10 +51,16 @@ enum  RefParDerivStepModel
 * a complete category of parameters (fix/unfix, set limits,...).
 * The types are organized as a tree.
 *
-* Parameters must be allocated globally in the heap, so we only use
+* Parameters should be allocated globally in the heap, so we only use
 * pointers in the interface.
 *
-* In the future, why not use a tree with multiple inheritance ?? It would
+* \note when modifying (fixing, changing limits) for a given RefParType (ie a 'family'
+* of parameters), it affects all RefinablePar of this type \e and the parameters
+* belonging to the children of this RefParType. eg fixing for the type "gpRefParTypeScatt"
+* will fix all the derived postionnal, orientationnal, and population parameters
+* for the scatterers.
+*
+* \remarks In the future, why not use a tree with multiple inheritance ?? It would
 * be easy to allow multiple parents... But beware of loops...
 */
 class RefParType
@@ -63,7 +69,7 @@ class RefParType
       /// Create a \e top parameter type. (in ObjCryst, there is
       /// only one, the "ObjCryst" category.
       RefParType(const string &name);
-      /// create a child type.
+      /// create a children type.
       RefParType(const RefParType *parent,const string &name);
       ///Destructor
       ~RefParType();
@@ -80,6 +86,7 @@ class RefParType
       const string mName;
 };
 
+/// Top RefParType for the ObjCryst++ library.
 extern const RefParType *gpRefParTypeObjCryst;
 
 /// We need to record exactly when refinable objects 
@@ -99,7 +106,7 @@ class RefinableObjClock
       bool operator<=(const RefinableObjClock &rhs)const;
       bool operator> (const RefinableObjClock &rhs)const;
       bool operator>=(const RefinableObjClock &rhs)const;
-      /// Record an event for this clock ( generally, the 'time'
+      /// Record an event for this clock (generally, the 'time'
       /// an object has been modified, or some computation has been made)
       void Click();
       /// Reset a Clock to 0, to force an update
@@ -113,10 +120,12 @@ class RefinableObjClock
       static unsigned long msTick0,msTick1;
 };
 
-/**
-* Generic class for parameters of refinable objects.
+/** Generic class for parameters of refinable objects.
 * These must be continuous.
 *
+* \todo: define parameters using equations between parameters.
+* \todo: define some sort of soft constraint, with the possibility
+* of involving several parameters (complex).
 */
 class RefinablePar
 {
@@ -222,16 +231,16 @@ class RefinablePar
 
          /** \brief Add the given amount to the parameter current value.
          *
-         *If limit is hit, set to limit.
-         *If the limit is hit \e and the parameter is periodic, shift by period to bring
-         *back to allowed values.
+         * If limit is hit, set to limit.
+         * If the limit is hit \e and the parameter is periodic, shift by period to bring
+         * back to allowed values.
          *\warning Will throw an exception if the parameter is defined by an equation.
          */
          void Mutate(const double mutateValue);
          /**Change the current value to the given one.
          *
-         *If the limit is hit, then set to the limit (unless the pameter is periodic,
-         *then shift by the period amount back to allowed values).
+         * If the limit is hit, then set to the limit (unless the pameter is periodic,
+         * then shift by the period amount back to allowed values).
          *\warning Will throw an exception if the parameter is defined by an equation.
          */
          void MutateTo(const double newValue);
@@ -383,25 +392,25 @@ class RefinablePar
       double mMax;
       /// Does the refinable parameter need limits (min,max) ?
       bool mHasLimits;
-      ///is the parameter currently fixed ?
+      /// is the parameter currently fixed ?
       bool mIsFixed;
-      ///Is the parameter currently used ?
+      /// Is the parameter currently used ?
       bool mIsUsed;
-      ///Is the parameter periodic ? If this is the case, then when using the 
-      ///RefinablePar::Mutate() function, if the parameter goes beyond its limits,
-      ///it will be shifted by the value of its period.
+      /// Is the parameter periodic ? If this is the case, then when using the 
+      /// RefinablePar::Mutate() function, if the parameter goes beyond its limits,
+      /// it will be shifted by the value of its period.
       bool mIsPeriodic;
-      ///Period value (if relevant)
+      /// Period value (if relevant)
       double mPeriod;
-      ///Step to use for global method search (simulated annealing,...)
+      /// Step to use for global method search (simulated annealing,...)
       double mGlobalOptimStep;
-      ///Step to use for numerical derivative calculation
+      /// Step to use for numerical derivative calculation
       double mDerivStep;
-      ///Model followed for derivation
+      /// Model followed for derivation
       RefParDerivStepModel mRefParDerivStepModel;
-      ///Calculated sigma on value
+      /// Calculated sigma on value
       double mSigma;
-      ///Scale to be used to display 'human' value. This is for angular parameters: the computer
+      /// Scale to be used to display 'human' value. This is for angular parameters: the computer
       /// stores values in radians, whil the user only understands degrees. So a scale
       /// factor of 180/pi is necessary.
       double mHumanScale;
@@ -425,8 +434,7 @@ class RefinablePar
          
    friend class RefinableObj;
 };
-/**
-*  Base class for options
+/** Base class for options
 *  
 */
 class RefObjOpt

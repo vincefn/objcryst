@@ -31,9 +31,22 @@ namespace ObjCryst
 
 namespace ObjCryst
 {
-/** Annealing schedule type
+/** Annealing schedule type. Used to determine the variation of the
+* temperature and the mutation amplitude
+* 
+* With A=Temperature or A=MutationAMplitude, and the corresponding
+, min and max values supplied (the latter is ignored for constant,
+* Cauchy and Boltzmann), with 'step' being the current step, and
+* NbStep the total number of steps. (In the Parallel Tempering
+* algorithm, a 'step' denotes one of the parallel refinement).
+* \f[ A_{constant} = A_{min}\f]
+* \f[ A_{Boltzmann} = A_{min} \frac{\ln(NbStep)}{\ln(step)} \f]
+* \f[ A_{Cauchy} = A_{min} \frac{NbStep}{step} \f]
+* \f[ A_{exponential} = A_{max} (\frac{T_{min}}{T_{max}})^{\frac{step}{NbStep}} \f]
 *
-*
+* For the 'smart' schedule, it is only supported so far for the mutation amplitude:
+* it is modulated so that for each temperature between 30 and 70% of trial
+* configurations are accepted.
 */
 enum AnnealingSchedule
 {
@@ -70,7 +83,7 @@ enum GlobalOptimType
 * \remarks Instead of keeping a copy of the list of parameters here,
 * maybe it would be better to delegate all parameter handling to the refined 
 * objects (they would also have to keep in memory the saved parameter sets, so
-* that could be difficult to administrate).
+* that could be difficult to administrate...).
 */
 
 class GlobalOptimObj
@@ -81,27 +94,24 @@ class GlobalOptimObj
 		/// Destructor
 		virtual ~GlobalOptimObj();
       
-      /** \brief Randomize starting configuration
-      *
-      *  Only limited parameters are modified by this function. Others are not
-      * affected.
+      /** \brief Randomize starting configuration. Only affects limited and periodic parameters.
       */
       void RandomizeStartingConfig();
       
-      /** \brief  Set the refinement method to simulated Annealing, and
+      /** \brief  Set the refinement method to simulated Annealing. Note that
+		* Parellel Tempering is more efficient to get out of local minima, so you sould
+		* rather use that method.
       *
       * The refinement begins at max and finishes at min temperature.
       *
-      *\param scheduleTemp: temperature schedule
-      *\param tMax,tMin: Max and Min temperatures. The Max temperature will be ignored
-      * for constant, Cauchy, and Boltzmann temperature schedules.
+      *\param scheduleTemp: temperature schedule. See AnnealingSchedule.
+      *\param tMax,tMin: Max and Min temperatures.
       *\param scheduleMutation: the mutation schedule. For each new configuration, the
       * variation of each refinable parameter is less than its RefinablePar::GlobalOptimStep(),
       * multiplied by the current mutation amplitude. By default this mutation is equal to 1.,
-      * but making bigger steps can be a good idea at the beginning of the refinement. Thus
-      * you can choose a schedule for the amplitude, exactly like for the temperature.
-      *\param mutMax,mutMin: Max and Min mutation amplitudes. The Max temperature will 
-      * be ignored for constant, Cauchy, and Boltzmann schedules.
+      * but making bigger steps is a good idea at the beginning of the refinement
+		* (for higher temperatures). See AnnealingSchedule. See AnnealingSchedule.
+      *\param mutMax,mutMin: Max and Min mutation amplitudes.
       *\param minCostRetry, nbTrialRetry: if after nbTrialRetry, the cost function is still
       * above minCostRetry, then start again from a random configuration. No randomization is
       * made if nbTrialRetry <= 0.
@@ -109,6 +119,9 @@ class GlobalOptimObj
       * since the best configuration was recorded, then revert to that configuration. This
       * should be large enough to have an ergodic search (the default is never to revert..)
 		*
+		* \warning do not use the 'smart' option for the temperature schedule, it is not yet 
+		* implemented. Later it will be used to set the temperatures as a function of 
+		* the amplitude schedule, so that we accept between 30% and 70%  moves.
 		* \note this will be removed when we separate the different algorithms in different
 		* classes.
       */
@@ -123,16 +136,16 @@ class GlobalOptimObj
       * The refinement begins at max and finishes at min temperature.
       *
       *\param scheduleTemp: temperature schedule
-      *\param tMax,tMin: Max and Min temperatures. The Max temperature will be ignored
-      * for constant, Cauchy, and Boltzmann temperature schedules.
+      *\param tMax,tMin: Max and Min temperatures. See AnnealingSchedule.
       *\param scheduleMutation: the mutation schedule. For each new configuration, the
       * variation of each refinable parameter is less than its RefinablePar::GlobalOptimStep(),
       * multiplied by the current mutation amplitude. By default this mutation is equal to 1.,
       * but making bigger steps can be a good idea at the beginning of the refinement. Thus
       * you can choose a schedule for the amplitude, exactly like for the temperature. 
-      *\param mutMax,mutMin: Max and Min mutation amplitudes. The Max will 
-      * be ignored for constant, Cauchy, and Boltzmann schedules. Both parameters
-      * are ignored for 'smart' schedule.
+      *\param mutMax,mutMin: Max and Min mutation amplitudes. 
+		* \warning do not use the 'smart' option for the temperature schedule, it is not yet 
+		* implemented. Later it will be used to set the temperatures as a function of 
+		* the amplitude schedule, so that we keep accepeted move between 30% and 70%.
 		* \note this will be removed when we separate the different algorithms in different
 		* classes.
       */
@@ -204,7 +217,7 @@ class GlobalOptimObj
       virtual void XMLOutput(ostream &os,int indent=0)const;
       /** \brief Input in XML format from a stream, restoring the set of refined
 		* objects and the associated cost functions. Note that the corresponding objects
-		* must have be loaded in memory before, else shit happens.
+		* must have been loaded in memory before, else shit happens.
       *
       */
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
@@ -248,15 +261,16 @@ class GlobalOptimObj
       
       /// The refinable par list used during refinement. Only a condensed version
       /// of all objects. This is useful to keep an history of modifications, and to
-      /// restore previous values
+      /// restore previous values.
+		/// \remarks maybe this should be completely delegated to the refined objetcs.
 		mutable RefinableObj mRefParList;
-      ///Name of the refined object
+      /// Name of the GlobalOptimization object
 		string mName;
-      ///File name where refinement info is saved (NOT USED so far...)
+      /// File name where refinement info is saved (NOT USED so far...)
 		string mSaveFileName;
       
-      
-      ///Method used for the global optimization
+      /// Method used for the global optimization. Should be removed when we switch
+		/// to using several classes for different algorithms.
       RefObjOpt mGlobalOptimType;
       
       //Status of optimization
@@ -294,7 +308,7 @@ class GlobalOptimObj
          /// Index of the 'last' parameter set
          long mLastParSavedSetIndex;
       
-      //Simulated Annealing parameters
+      // Annealing parameters
          /// Beginning temperature for annealing
          double mTemperatureMax;
          /// Lower temperature
@@ -302,10 +316,10 @@ class GlobalOptimObj
          /// Schedule for the annealing
          RefObjOpt mAnnealingScheduleTemp;
       //Parameters to create new configurations
-         /// Mutation amplitude. From 1 to 100. Random moves will have a maximum amplitude
+         /// Mutation amplitude. From .25 to 64. Random moves will have a maximum amplitude
          /// equal to this amplitude multiplied by the Global optimization step defined
          /// for each RefinablePar. Large amplitude should be used at the beginning of the
-         /// refinement.
+         /// refinement (high temeratures).
          double mMutationAmplitude;
          /// Mutation amplitude at the beginning of the optimization.
          double mMutationAmplitudeBegin;
@@ -315,7 +329,7 @@ class GlobalOptimObj
          RefObjOpt mAnnealingScheduleMutation;
       //Automatic retry 
          /// Number of trials before testing if we are below the given minimum cost.
-         /// If <=0, this will be ignored
+         /// If <=0, this will be ignored.
          long mNbTrialRetry;
          /// Cost to reach unless an automatic randomization and retry is done
          double mMinCostRetry;
@@ -324,9 +338,9 @@ class GlobalOptimObj
          /// then this is ignored. This must be large enough to have an ergodic 
          /// algorithm (more strictly, should not be used ?)
          long mMaxNbTrialSinceBest;
-      /// True if a refinement is being done. For multi-thread environment
+      /// True if a refinement is being done. For multi-threaded environment
       bool mIsOptimizing;
-      /// If true, then stop at the end of the cycle. Used in multi-thread environment
+      /// If true, then stop at the end of the cycle. Used in multi-threaded environment
       bool mStopAfterCycle;
       
       // Refined objects

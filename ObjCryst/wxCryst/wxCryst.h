@@ -31,6 +31,7 @@
 
 namespace ObjCryst
 {
+#ifndef DOXYGEN_SKIP_THIS
 enum
 {
    ID_FIX_SCROLLBARS,//for FOX
@@ -141,19 +142,24 @@ enum
    ID_GLOBALOPT_MENU_GLOBAlOPT_RUN,
    ID_GLOBALOPT_MENU_GLOBAlOPT_STOP,
 };
-
+#endif
 /// Abstract base class for all objects in wxCryst
 class WXCrystObjBasic: public wxWindow
 {
    public:
+		/// Constructor
       WXCrystObjBasic(wxWindow* parent);
+		/// Destructor
       virtual ~WXCrystObjBasic();
-      /// Update the display, by getting new values from the object. The
-      /// Only new values should be grabbed from the object, and then a
-      /// wxUpdateUI event should be posted (this for multi-thread)
+      /// Update the display, by getting new values from the object. 
+      /// New values should be grabbed from the object, and then a
+      /// wxUpdateUI event should be posted (this for multi-thread, since
+		/// only one thread should do graphical changes)
       virtual void CrystUpdate()=0;
    protected:
+		/// Parent 
       wxWindow *mWXParent;
+		/// Is the the window currently shown ?
       bool mIsShown;
 };
 
@@ -161,11 +167,14 @@ class WXCrystObjBasic: public wxWindow
 class WXCrystObjBasicList
 {
    public:
+		/// Constructor
       WXCrystObjBasicList();
+		/// Destructor
       ~WXCrystObjBasicList();
       /// Number of objects.
       unsigned int GetNb()const;
-      /// Add an object to the list.
+      /// Add an object to the list. The object is just referenced,
+		/// not copied.
       void Add(WXCrystObjBasic *);
       /// remove an object from the list
       void Remove(const WXCrystObjBasic *);
@@ -173,23 +182,35 @@ class WXCrystObjBasicList
       WXCrystObjBasic* Get(const unsigned int i);
       /// Show or hide all of the windows
       bool Show(bool);
-      /// Forces all object to update
+      /// Forces all objects in the list to update. See WXCrystObjBasic::CrystUpdate()
       void CrystUpdate();
    private:
-      //unsigned int Find(WXCrystObj *);
+      /// Number of objects.
       unsigned int mNbWXCrystObj;
+		/// \internal Maximum number of objects
       unsigned int mMaxNbWXCrystObj;
+		/// Array of pointers to the objects.
       WXCrystObjBasic** mpWXCrystObj;
 };
 
 class WXFieldName;
 
-/** Base class for all displayed ObjCryst objects (with a title, collapsable)
+/** Base class for all displayed ObjCryst objects (with a title,
+* and a sizer to stack objects).
+*
+* A button (which should be used to collapse the object) is used
+* to create an indentation for the sub-objects.
 * 
+* \todo Allow the objects to be collabsable. The difficulty is that
+* even if the object is not shown, it is not removed by the Sizer as long
+* as it is not deleted... Needs some testing ! Otherwise it would also
+* be possible to delete and re-create sub-objects when collapsing, but
+* that would be more difficult.
 */
 class WXCrystObj: public WXCrystObjBasic
 {
    public:
+		/// Constructor, with a 
       WXCrystObj(wxWindow* parent,int orient=wxHORIZONTAL,bool showName=true);
       virtual ~WXCrystObj();
       /// Fix the Layout of the window, resize if necessary.
@@ -204,9 +225,13 @@ class WXCrystObj: public WXCrystObjBasic
       virtual bool OnChangeName(const int id)=0;
       virtual void CrystUpdate();
    protected:
+		/// Top sizer including the title and WXCrystObj::mpSizer
       wxBoxSizer *mpTopSizer;
+		/// Sizer including all sub-objects
       wxBoxSizer *mpSizer;
+		/// The title
       WXFieldName *mpWXTitle;
+		/// To be used for collapsing the sub-objects.
       bool mIsExpanded;
       ///All windows but the title and collapse button are in this list
       WXCrystObjBasicList mList;
@@ -215,26 +240,44 @@ class WXCrystObj: public WXCrystObjBasic
    DECLARE_EVENT_TABLE()
 };
 
-/// This is the abstract base class for all fields, wether they contain
-/// a doubleing-point parameter, or a string,... All WXField have a title
-/// and an entry field.
+/** This is the abstract base class for all fields, wether they contain
+* a floating-point parameter, or a string,... All WXField have a title
+* and an entry field.
+* \todo Currently for all fields, the user must hit the 'enter' key to validate
+* the input, which is annoying. So it would be nice to use another way. For 
+* example by recording when some typing has been made in a field, and 
+* doing the actual reading afterwards (eg a global function should be 
+* created to read the input for all fields, and that could be 
+* complicated to handle).
+*/
 class WXField: public WXCrystObjBasic
 {
    public:
+		/** Constructor, specifying the label of the field.
+		*
+		*/
       WXField(wxWindow *parent,const string& label,const int field_id);
       bool Layout();
       void SetLabel(const string&);
       /// After a user entry, this allows to go back to the last value, if for some reason
       /// the entry was rejected (because the object is currently busy, ...)
       virtual void Revert()=0;
+		/// Change the colour of the field's title. Can be used (with parcimony)
+		/// to clarify the interface.
       virtual bool SetForegroundColour(const wxColour& colour);
    protected:
+		/// The horizontal sizer in which the title, button, fields, are put. 
       wxBoxSizer *mpSizer;
+		/// The label
       wxStaticText *mpLabel;
+		/// The Id of this field
       const int mId;
 };
 
-/// A field with the name of a WXCrystObj. Updating must be done by the WXCrystObj owner.
+/** A field with the name of a WXCrystObj. Updating must be done by the WXCrystObj owner.
+*
+* 
+*/
 class WXFieldName:public WXField
 {
    public:
@@ -250,6 +293,7 @@ class WXFieldName:public WXField
       void OnEnter(wxCommandEvent & event);
       /// This posts an UpdateUI event.
       void SetValue(const string&);
+		/// Get the current name.
       const string GetValue() const;
       /// This does nothing. Updates should be done by the owner in the particular
       /// case of names.

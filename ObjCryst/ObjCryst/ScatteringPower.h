@@ -28,11 +28,16 @@ extern const RefParType *gpRefParTypeScattPowTemperatureAniso;
 /** \brief Abstract Base Class to describe the scattering power of any
 * Scatterer component in a crystal.
 *
-* This includes (i) the scattering factor,
-* (ii) the temperature factor, and (iii) real and imaginary parts of the resonant
-* scattering factor. Note that the interface is independent of the radiation type.
+* This includes:
+* - the scattering factor,
+* - the temperature factor
+* - real and imaginary parts of the resonant
+* scattering factor.
+*
+* The interface is independent of the radiation type.
+*
 * This base class is designed to handle both isotropic and anisotropic
-* versions of scattering, temperature and anomalous afctors.
+* versions of scattering, temperature and anomalous factors.
 *
 * \todo Anisotropic scattering (temperature factor especially) code, using derived
 * classes
@@ -41,7 +46,7 @@ extern const RefParType *gpRefParTypeScattPowTemperatureAniso;
 * Optionnaly 3 classes (used as members of ScatteringPower) could be created,
 * TemperatureFactor, ScatteringFactor, and ResonantScatteringFactor. In any way
 * the design of this class should not evolve, so that code using the ScatteringPower
-* interface will remian compatible whatever modifications are made.
+* interface will remain compatible whatever modifications are made.
 */
 //######################################################################
 class ScatteringPower:virtual public RefinableObj

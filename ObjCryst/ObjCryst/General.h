@@ -49,7 +49,7 @@
 #include "Quirks/VFNDebug.h"
 
 using namespace std;
-/** The namespace which includes all objects (Crystallographic and
+/** The namespace which includes all objects (crystallographic and
 * algorithmic) in ObjCryst++.
 *
 * \note It may be a good idea to separate in 3 namespaces for ObjCryst, WXObjCryst,

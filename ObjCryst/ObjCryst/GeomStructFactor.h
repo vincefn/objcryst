@@ -23,7 +23,7 @@ namespace ObjCryst
 //positions of the atom. This is done for SpaceGroups which
 //do not yet have a coded Geom Structure factor, or for those
 //where it does not make much difference
-/// OBSOLETE
+/// \deprecated
 void RealGeomStructFactor      (const double x,
                                 const double y,
                                 const double z,
@@ -32,7 +32,7 @@ void RealGeomStructFactor      (const double x,
                                 const CrystVector_double&l,
                                 CrystVector_double& rsf);
 // Same for the imaginary part
-/// OBSOLETE
+/// \deprecated
 void ImagGeomStructFactor      (const double x,
                                 const double y,
                                 const double z,
@@ -42,7 +42,7 @@ void ImagGeomStructFactor      (const double x,
                                 CrystVector_double& rsf);
 
 
-/// OBSOLETE
+/// \deprecated
 void RealGeomStructFactor_1    (const double x,
                                 const double y,
                                 const double z,
@@ -51,7 +51,7 @@ void RealGeomStructFactor_1    (const double x,
                                 const CrystVector_double&l,
                                 CrystVector_double& rsf);
 
-/// OBSOLETE
+/// \deprecated
 void RealGeomStructFactor_2    (const double x,
                                 const double y,
                                 const double z,
@@ -60,7 +60,7 @@ void RealGeomStructFactor_2    (const double x,
                                 const CrystVector_double&l,
                                 CrystVector_double& rsf);
 
-/// OBSOLETE
+/// \deprecated
 void RealGeomStructFactor_67   (const double x,
                                 const double y,
                                 const double z,
@@ -69,7 +69,7 @@ void RealGeomStructFactor_67   (const double x,
                                 const CrystVector_double&l,
                                 CrystVector_double& rsf);
 
-/// OBSOLETE
+/// \deprecated
 void RealGeomStructFactor_67ba_c(const double x,
                                 const double y,
                                 const double z,
@@ -78,7 +78,7 @@ void RealGeomStructFactor_67ba_c(const double x,
                                 const CrystVector_double&l,
                                 CrystVector_double& rsf);
 
-/// OBSOLETE
+/// \deprecated
 void RealGeomStructFactor_67cab(const double x,
                                 const double y,
                                 const double z,
@@ -87,7 +87,7 @@ void RealGeomStructFactor_67cab(const double x,
                                 const CrystVector_double&l,
                                 CrystVector_double& rsf);
 
-/// OBSOLETE
+/// \deprecated
 void RealGeomStructFactor_67_cba(const double x,
                                 const double y,
                                 const double z,
@@ -96,7 +96,7 @@ void RealGeomStructFactor_67_cba(const double x,
                                 const CrystVector_double&l,
                                 CrystVector_double& rsf);
 
-/// OBSOLETE
+/// \deprecated
 void RealGeomStructFactor_67bca(const double x,
                                 const double y,
                                 const double z,
@@ -105,7 +105,7 @@ void RealGeomStructFactor_67bca(const double x,
                                 const CrystVector_double&l,
                                 CrystVector_double& rsf);
                                 
-/// OBSOLETE
+/// \deprecated
 void RealGeomStructFactor_67a_cb(const double x,
                                 const double y,
                                 const double z,
@@ -114,7 +114,7 @@ void RealGeomStructFactor_67a_cb(const double x,
                                 const CrystVector_double&l,
                                 CrystVector_double& rsf);
                                 
-/// OBSOLETE
+/// \deprecated
 void RealGeomStructFactor_97   (const double x,
                                 const double y,
                                 const double z,
@@ -123,7 +123,7 @@ void RealGeomStructFactor_97   (const double x,
                                 const CrystVector_double&l,
                                 CrystVector_double& rsf);
 
-/// OBSOLETE
+/// \deprecated
 void RealGeomStructFactor_230  (const double x,
                                 const double y,
                                 const double z,
@@ -135,7 +135,7 @@ void RealGeomStructFactor_230  (const double x,
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-/// OBSOLETE
+/// \deprecated
 void ImagGeomStructFactor_centro(const double x,
                                 const double y,
                                 const double z,
@@ -144,7 +144,7 @@ void ImagGeomStructFactor_centro(const double x,
                                 const CrystVector_double&l,
                                 CrystVector_double& isf); //do nothing
 
-/// OBSOLETE
+/// \deprecated
 void ImagGeomStructFactor_1    (const double x,
                                 const double y,
                                 const double z,
@@ -153,7 +153,7 @@ void ImagGeomStructFactor_1    (const double x,
                                 const CrystVector_double&l,
                                 CrystVector_double& isf);
 
-/// OBSOLETE
+/// \deprecated
 void ImagGeomStructFactor_2    (const double x,
                                 const double y,
                                 const double z,
@@ -162,7 +162,7 @@ void ImagGeomStructFactor_2    (const double x,
                                 const CrystVector_double&l,
                                 CrystVector_double& isf);
 
-/// OBSOLETE
+/// \deprecated
 void ImagGeomStructFactor_67   (const double x,
                                 const double y,
                                 const double z,
@@ -171,7 +171,7 @@ void ImagGeomStructFactor_67   (const double x,
                                 const CrystVector_double&l,
                                 CrystVector_double& isf);
 
-/// OBSOLETE
+/// \deprecated
 void ImagGeomStructFactor_67ba_c(const double x,
                                 const double y,
                                 const double z,
@@ -180,7 +180,7 @@ void ImagGeomStructFactor_67ba_c(const double x,
                                 const CrystVector_double&l,
                                 CrystVector_double& rsf);
 
-/// OBSOLETE
+/// \deprecated
 void ImagGeomStructFactor_67cab(const double x,
                                 const double y,
                                 const double z,
@@ -189,7 +189,7 @@ void ImagGeomStructFactor_67cab(const double x,
                                 const CrystVector_double&l,
                                 CrystVector_double& rsf);
 
-/// OBSOLETE
+/// \deprecated
 void ImagGeomStructFactor_67_cba(const double x,
                                 const double y,
                                 const double z,
@@ -198,7 +198,7 @@ void ImagGeomStructFactor_67_cba(const double x,
                                 const CrystVector_double&l,
                                 CrystVector_double& rsf);
 
-/// OBSOLETE
+/// \deprecated
 void ImagGeomStructFactor_67bca(const double x,
                                 const double y,
                                 const double z,
@@ -207,7 +207,7 @@ void ImagGeomStructFactor_67bca(const double x,
                                 const CrystVector_double&l,
                                 CrystVector_double& rsf);
                                 
-/// OBSOLETE
+/// \deprecated
 void ImagGeomStructFactor_67a_cb(const double x,
                                 const double y,
                                 const double z,
@@ -216,7 +216,7 @@ void ImagGeomStructFactor_67a_cb(const double x,
                                 const CrystVector_double&l,
                                 CrystVector_double& rsf);
                                 
-/// OBSOLETE
+/// \deprecated
 void ImagGeomStructFactor_97   (const double x,
                                 const double y,
                                 const double z,
@@ -225,7 +225,7 @@ void ImagGeomStructFactor_97   (const double x,
                                 const CrystVector_double&l,
                                 CrystVector_double& isf);
 
-/// OBSOLETE
+/// \deprecated
 void ImagGeomStructFactor_230  (const double x,
                                 const double y,
                                 const double z,

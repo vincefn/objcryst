@@ -17,12 +17,12 @@
 
 #ifdef __DEBUG__
 
-///Set the Global debug level for messages
+/// Set the Global debug level for messages
 void LibCrystDebugGlobalLevel(const int level);
 
-///Use this for a local modification of debug level messages. Call this at the
-///beginning of the function, and call it without argument at the ned of the function
-///to revert to the default global debug level.
+/// Use this for a local modification of debug level messages. Call this at the
+/// beginning of the function, and call it without argument at the end of the function
+/// to revert to the default global debug level.
 void LibCrystDebugLocalLevel(const int level);
 
 extern int gVFNDebugMessageGlobalLevel;
