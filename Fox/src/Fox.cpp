@@ -77,6 +77,7 @@ class WXCrystScrolledWindow:public wxScrolledWindow
    private:
       const wxWindow* mpChild;
       int mHeight,mWidth;
+      wxBoxSizer *mpSizer;
 };
 
 // main frame
@@ -384,23 +385,36 @@ int MyApp::OnExit()
 // ----------------------------------------------------------------------------
 WXCrystScrolledWindow::WXCrystScrolledWindow(wxWindow* parent):
 wxScrolledWindow(parent),mpChild((wxWindow*)0),mHeight(-1),mWidth(-1)
-{}
+{
+   mpSizer=new wxBoxSizer(wxHORIZONTAL);
+   this->SetSizer(mpSizer);
+}
 
 bool WXCrystScrolledWindow::Layout()
 {
+   #ifdef __DARWIN__   // to be tested on other platforms...
+   this->Scroll(0,0);//workaround bug ?
+   return this->wxWindow::Layout();
+   #else
    if(0==mpChild) return true;
    int width,height;
    mpChild->GetSize(&width,&height);
-   this->Scroll(0,0);//workaround wxMSW 2.2.9 bug
+   this->Scroll(0,0);//workaround bug ?
    if((mHeight!=height)||(mWidth!=width)) this->SetScrollbars(40,40,width/40+1,height/40+1);
    mHeight=height;
    mWidth=width;
    return true;
+   #endif
 }
 
 void WXCrystScrolledWindow::SetChild(const wxWindow* pChild)
 {
    mpChild=pChild;
+   #ifdef __DARWIN__  
+   // on OSX, we do not use the custom Layout() function so define scroll here
+   this->SetScrollbars(40,40,2,2);
+   #endif
+   mpSizer->Add(mpChild);
 }
 
 // ----------------------------------------------------------------------------
