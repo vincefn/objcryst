@@ -38,6 +38,11 @@
 #include <iomanip>
 #include <sstream>
 
+#ifdef _MSC_VER // MS VC++ predefined macros....
+#undef min
+#undef max
+#endif
+
 //#define USE_BACKGROUND_MAXLIKE_ERROR
 
 namespace ObjCryst
