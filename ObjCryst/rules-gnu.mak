@@ -77,15 +77,16 @@ endif
 ifeq ($(debug),1)
    DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS}
    CPPFLAGS = -g -Wall -D__DEBUG__ 
+   LOADLIBES = -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lsglite -latominfo ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS}
 else
 # do not use -fomit-frame-pointer, or throw() catch() does not work !! GCC BUG ?
 # -mcpu=athlon,pentiumpro
    DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS}
    CPPFLAGS = -O3 -w -ffast-math -mcpu=pentiumpro
+   LOADLIBES = -s -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lsglite -latominfo ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS}
 endif
 
 # Add to statically link: -nodefaultlibs -lgcc /usr/lib/libstdc++.a
-LOADLIBES = -s -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lsglite -latominfo ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS}
 
 
 ######################################################################
