@@ -15,6 +15,10 @@ by using X-Ray and neutron powder patterns.</h3>
 <br>
 \anchor fourier <h3>Fox displaying the Alumina structure with the GSAS/EXPGUI Fourier map.</h3>
 \image html Alumina-Fourier.png
+<br>
+\anchor pov <h3>November 2003: Fox can now export 3D Crystal views to POV-Ray (http://www.povray.org)</h3>
+<br> For this image, the <tt>reflection</tt> for atoms was changed to 1.0 to get the mirror reflectivity effect.
+\image html ktartrate-pov.jpg
 </h3>
 </center>
 */

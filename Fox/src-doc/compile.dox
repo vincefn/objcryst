@@ -7,13 +7,14 @@ This page describes how to get the source of Fox (Free Objects For Crystallograp
 
 Requirements:
 <ul>
-   <li><b>Linux</b>: gcc 2.95.3 or (preferably) 3.1 and above, OpenGL librairies
+   <li><b>Linux</b>: gcc 2.95.3 or (preferably) 3.1 and above, OpenGL and GLUT librairies
    <li><b>windows</b>: win 98, NT4 or above (win95 will not have OpenGL (3D structures) working, but otherwise works)
+   <li>For both <b>Linux</b> and <b>windows</b>, you will need the <a href="http://wxwindows.org">wxWindows</a> library, version <b>2.4</b> or above.
 </ul>
 
 <h2>Getting & installing the compilers</h2>
 \n
-For <b>Linux</b>, you should have nothing to do here, since your box certainly includes development libraries. Fox is now developped under gcc 3.2.2, but should work down to gcc 2.95.3.
+For <b>Linux</b>, you should have nothing to do here, since your box certainly includes development libraries. Fox is now developped under gcc 3.3.1, but should work down to gcc 2.95.3.
 
 \n For <b>windows</b>:
 <ul>
@@ -38,40 +39,32 @@ For <b>Linux</b>, you should have nothing to do here, since your box certainly i
 </ul>
 <h2>Check you have OpenGL installed</h2> (the glut library is not required any more)
 
-For <b>Linux</b>, you need Mesa libraries. Check you have <tt>gl.h</tt> and <tt>glu.h</tt> in /usr/include/GL/, and the corresponding libraries (libGL, libGLU) These are generally installed by default. NVidia users will need the nVidia drivers.
+For <b>Linux</b>, you need Mesa libraries. Check you have <tt>gl.h</tt> and <tt>glu.h</tt> in /usr/include/GL/, and the corresponding libraries (libGL, libGLU) These are generally installed by default. NVidia users will need the nVidia drivers. You will also need to install the <b>glut</b> library (in Fox v1.5, this was not necessary but the new method does not work as expected on some graphic drivers... You stick to the Fox v1.5 method by removing the <tt>"-DHAVE_GLUT"</tt> and <tt>"-lglut"</tt> in the <tt>Fox/ObjCryst/rules.mak</tt> file)
 
 For <b>windows</b>, the necessary headers are installed by default with the Borland compiler.
 
-<h2>Getting & installing the wxWindows Library</h2>
+<h2>Getting & installing the wxWindows Library (version 2.4 or above required)</h2> 
 
 For <b>Linux</b>:
 <ul>
-   <li>It is easier to use the RPM. To avoid any possible conflicts due to different versions of wxWindows, please <b>recompile the wxGTK source rpm</b> (which you can get at http://www.wxwindows.org/) on your machine (rpm --rebuild wxGTK-***.src.rpm), and then install the recompiled RPM (wxGTK, wxGTK-gl and wxGTK-devel). Fow has been tested with wxWindows 2.4.1.
+   <li>It is easier to use the RPM. To avoid any possible conflicts due to different versions of wxWindows, please <b>recompile the wxGTK source rpm</b> (which you can get at http://www.wxwindows.org/) on your machine (rpm --rebuild wxGTK-***.src.rpm), and then install the recompiled RPM (wxGTK, wxGTK-gl and wxGTK-devel). Fow has been tested with wxWindows 2.4.2.
 
-   <li>Then you will need to do the following for wxGTK 2.4.* (nothing to do for wxGTK 2.2.*):
-   <ul><li><tt>ln -s /usr/bin/wxgtk-2.4-config /usr/bin/wx-config</tt></ul>
+   <li>Then you will need to do the following for wxGTK 2.4.*:
+   <ul><li><tt>ln -s /usr/bin/wxgtk-2.4-config /usr/bin/wx-config</tt>, or (for GTK2)<tt>ln -s /usr/bin/wxgtk2-2.4-config /usr/bin/wx-config</tt></ul>
    
-   <li>If you want to install from the source rather than install the rpm, do not forget to configure with --enable-opengl. By default shared libraries are produced (*.so), which is what Fox now uses (no static libraries).
+   <li>If you want to install from the source rather than install the rpm, do not forget to configure with <b>--enable-opengl</b>. By default shared libraries are produced (*.so), which is what Fox now uses (no static libraries).
 </ul>
 
 For <b>windows</b>:
 <ul>
-   <li>Get the wxWindows installer (wxMSW 2.2.9, \b not 2.4.*) at  http://www.wxwindows.org/, then run the wx installer to put everything in the directory of you choice (I'll assume it is <tt>C:\\dev\\wxWindows</tt>)
+   <li>Get the wxWindows installer (wxMSW 2.4.* only, 2.2 is not supported any more) at  http://www.wxwindows.org/, then run the wx installer to put everything in the directory of you choice (I'll assume it is <tt>C:\\dev\\wxWindows</tt>)
 
-   <li>For wxMSW 2.2.9 <i>only</i> , you need to remove the contents of the wxWindows\\include\\wx\\setup.h file, and replace it by a single line : <tt>\#include "wx/msw/setup.h"</tt>
-
-   <li>Edit the <tt>C:\\dev\\wxWindows\\include\\wx\\msw\\setup.h</tt> and search for "Opengl" and enable it:<tt>#define wxUSE_GLCANVAS 1</tt>
+   <li>Edit the <tt>C:\\dev\\wxWindows\\include\\wx\\msw\\setup.h</tt> and search for "OpenGL" and enable it:<tt>#define wxUSE_GLCANVAS 1</tt>
       
    <li>Add the WXWIN variable to your environment (<tt>set WXWIN=C:\\dev\\wxWindows</tt>)
 
    <li>then (in a DOS/Command prompt) go to the <tt>C:\\dev\\wxWindows\\src\\msw\ </tt> directory, and type: <tt>make -f makefile.b32 FINAL=1</tt>
-   
-   <li>\b NOTE: if you want to use <b>wxWindows 2.4.1</b> (works, but not very well with Fox presently, there are a few graphical glitches), you will need several changes \e after compiling wxWindows, \e before compiling Fox:
-   <ul>
-      <li>copy <tt>wxWindows/src/msw/wxw32.cfg</tt> to <tt>wxWindows/src/msw/wxwin32.cfg</tt>
-      <li>copy <tt>wxWindows/lib/wx24s_bcc.lib</tt> to <tt>wxWindows/lib/wx32.lib</tt>
-      <li>edit <tt>Fox/ObjCryst/rules.mak</tt>, search for <tt>xpm.lib</tt> and remove it.
-   </ul>
+
 </ul>
 <h2>Get the source of Fox</h2>
 

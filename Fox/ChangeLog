@@ -1,5 +1,8 @@
 #### 1.5.1 - december 2003
 NEW FEATURES
+   * Added the export to a POV-Ray file to create a Ray-traced
+     view of the 3D Crystal window, with support for both Crystal
+     structure and Fourier maps.
    * Added more user control on the fexibility of a Molecule:
       - Added "Rigid Body" and "User-Chosen Free Torsion" choices
         for the flexibility model of the Molecule.
