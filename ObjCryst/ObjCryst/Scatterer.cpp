@@ -106,9 +106,9 @@ REAL Scatterer::GetZ()    const {return mXYZ(2);}
 REAL Scatterer::GetOccupancy() const {return mOccupancy;}
 
 
-void Scatterer::SetX(const REAL x) { mClockScatterer.Click();mXYZ(0)=x;}
-void Scatterer::SetY(const REAL y) { mClockScatterer.Click();mXYZ(1)=y;}
-void Scatterer::SetZ(const REAL z) { mClockScatterer.Click();mXYZ(2)=z;}
+void Scatterer::SetX(const REAL x) { this->GetPar(mXYZ.data()).MutateTo(x);}
+void Scatterer::SetY(const REAL y) { this->GetPar(mXYZ.data()+1).MutateTo(y);}
+void Scatterer::SetZ(const REAL z) { this->GetPar(mXYZ.data()+2).MutateTo(z);}
 void Scatterer::SetOccupancy(const REAL occupancy)
 {
    mClockScatterer.Click();

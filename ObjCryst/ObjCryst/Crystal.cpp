@@ -984,9 +984,11 @@ void Crystal::GlobalOptRandomMove(const REAL mutationAmplitude)
 {
    VFN_DEBUG_MESSAGE("Crystal::GlobalOptRandomMove()",2)
    //Either a random move or a permutation of two scatterers
-   if( (rand()/(REAL)RAND_MAX)<-.1)//disabled :TODO: exclude fixed scatterers
+   const long nb=this->GetNbScatterer();
+   if( ((rand()/(REAL)RAND_MAX)<.02) && (nb>1))
    {
-      const long nb=this->GetNbScatterer();
+		// This is safe even if one scatterer is partially fixed,
+		// since we the SetX/SetY/SetZ actually use the MutateTo() function.
       const unsigned long n1=(unsigned long)((rand()/(REAL)(RAND_MAX-1))*nb);
       const long n2=( (long)((rand()/(REAL)(RAND_MAX-1))*(nb-1))+1+n1)%nb;
       const float x1=this->GetScatt(n1).GetX();
