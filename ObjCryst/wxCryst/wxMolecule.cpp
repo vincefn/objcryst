@@ -417,7 +417,7 @@ WXCrystObjBasic(parent),mpMolBondAngle(obj)
 
    WXFieldPar<REAL> *sigma=
       new WXFieldPar<REAL>(this,",sigma=",WXCRYST_ID(),&(mpMolBondAngle->AngleSigma()));
-   delta->SetHumanValueScale(RAD2DEG);
+   sigma->SetHumanValueScale(RAD2DEG);
    mpSizer->Add(sigma,0,wxALIGN_CENTER);
    mList.Add(sigma);
 
