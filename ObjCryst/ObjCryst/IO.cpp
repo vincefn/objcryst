@@ -1585,6 +1585,8 @@ void DiffractionDataSingleCrystal::XMLInput(istream &is,const XMLCrystTag &tagg)
          this->SetHklIobs(h,k,l,iobs,sigma);
          this->SetWeight(weight);
          this->SortReflectionByTheta();
+         this->CalcIcalc();
+         this->FitScaleFactorForRw();
       }
    }
 }

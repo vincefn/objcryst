@@ -285,6 +285,26 @@ WXRefinableObj(parent,pow),mpPowderPattern(pow),mpGraph(0)
                               &(mpPowderPattern->mMaxSinThetaOvLambda));
       mpSizer->Add(maxSiThOvLa,0,wxALIGN_LEFT);
       mList.Add(maxSiThOvLa);
+   // Statistics
+      wxBoxSizer* pStats=new wxBoxSizer(wxHORIZONTAL);
+      
+      WXFieldPar<REAL> *pWXFieldChi2=new WXFieldPar<REAL>(this,"Chi^2",-1,&mChi2,100);
+      pStats->Add(pWXFieldChi2    ,0,wxALIGN_CENTER);
+      mList.Add(pWXFieldChi2);
+      
+      WXFieldPar<REAL> *pWXFieldGof=new WXFieldPar<REAL>(this,"GoF",-1,&mGoF,70);
+      pStats->Add(pWXFieldGof    ,0,wxALIGN_CENTER);
+      mList.Add(pWXFieldGof);
+      
+      WXFieldPar<REAL> *pWXFieldRwp=new WXFieldPar<REAL>(this,"Rwp",-1,&mRwp,70);
+      pStats->Add(pWXFieldRwp    ,0,wxALIGN_CENTER);
+      mList.Add(pWXFieldRwp);
+      
+      WXFieldPar<REAL> *pWXFieldRp=new WXFieldPar<REAL>(this,"Rp",-1,&mRp,70);
+      pStats->Add(pWXFieldRp    ,0,wxALIGN_CENTER);
+      mList.Add(pWXFieldRp);
+      
+      mpSizer->Add(pStats);
    // Components
       mpWXComponent=mpPowderPattern
                     ->mPowderPatternComponentRegistry.WXCreate(this);
@@ -301,11 +321,17 @@ void WXPowderPattern::CrystUpdate()
 {
    VFN_DEBUG_MESSAGE("WXPowderPattern::CrystUpdate()",6)
    WXCrystValidateAllUserInput();
-   this->WXRefinableObj::CrystUpdate();
    
    // Will force re-generating reflection list if the wavelength,
    // or lattice par, or the spacegroup has changed.
    mpPowderPattern->Prepare();
+   
+   mChi2=mpPowderPattern->GetChi2();
+   if(mpPowderPattern->mNbPointUsed>0)
+      mGoF=mpPowderPattern->GetChi2()/mpPowderPattern->mNbPointUsed;
+   else mGoF=0;
+   mRwp=mpPowderPattern->GetRw();
+   mRp=mpPowderPattern->GetR();
    
    if(mpGraph!=0)
    {
@@ -314,6 +340,7 @@ void WXPowderPattern::CrystUpdate()
                            mpPowderPattern->Get2ThetaMin(),
                            mpPowderPattern->Get2ThetaStep());
    }
+   this->WXRefinableObj::CrystUpdate();
 } 
 
 void WXPowderPattern::OnMenuAddCompBackgd(wxCommandEvent & WXUNUSED(event))

@@ -33,6 +33,7 @@ class WXDiffractionSingleCrystal: public WXRefinableObj
 {
    public:
       WXDiffractionSingleCrystal(wxWindow *parent, DiffractionDataSingleCrystal*);
+      virtual void CrystUpdate();
       virtual void UpdateUI();
    private:
       void OnMenuSimulate(wxCommandEvent & WXUNUSED(event));
@@ -42,6 +43,11 @@ class WXDiffractionSingleCrystal: public WXRefinableObj
       void OnChangeCrystal(wxCommandEvent & WXUNUSED(event));
       WXFieldChoice* mpFieldCrystal;
       DiffractionDataSingleCrystal *mpData;
+      // Store statistics for display
+      REAL mChi2;
+      REAL mGoF;
+      REAL mRwp;
+      REAL mRp;
    DECLARE_EVENT_TABLE()
 };
 

@@ -136,7 +136,7 @@ mpZScatt(&scatt),mOptimObj(true)
    mOptimObj.SetAlgorithmSimulAnnealing(ANNEALING_EXPONENTIAL,.1,.001,
                                             ANNEALING_EXPONENTIAL,16,.25);
    mOptimObj.AddRefinableObj(*this);
-   mOptimObj.AddCostFunction(*this,0);
+   //mOptimObj.AddCostFunction(*this,0);
 }
 ZMoveMinimizer::~ZMoveMinimizer(){}
 unsigned int ZMoveMinimizer::GetNbCostFunction()const {return 1;}

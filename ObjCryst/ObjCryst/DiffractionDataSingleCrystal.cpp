@@ -381,8 +381,7 @@ REAL DiffractionDataSingleCrystal::GetRw()const
    VFN_DEBUG_MESSAGE("DiffractionData::Rw()",3);
    if(mHasObservedData==false)
    {
-      throw ObjCrystException("DiffractionData::Rw() Cannot compute Rw ! \
-         There is no observed data !");
+      return 0;
    }
    REAL tmp1=0;
    REAL tmp2=0;
@@ -426,8 +425,7 @@ REAL DiffractionDataSingleCrystal::GetR()const
    VFN_DEBUG_MESSAGE("DiffractionData::R()",3);
    if(mHasObservedData==false)
    {
-      throw ObjCrystException("DiffractionData::R() Cannot compute R ! \
-         There is no observed data !");
+      return 0;
    }
    
    REAL tmp1=0;
@@ -466,14 +464,18 @@ REAL DiffractionDataSingleCrystal::GetR()const
 
 REAL DiffractionDataSingleCrystal::GetChi2()const
 {
-   TAU_PROFILE("DiffractionData::Chi2()"," REAL()",TAU_DEFAULT);
-   VFN_DEBUG_MESSAGE("DiffractionData::Chi2()",3);
    if(mHasObservedData==false)
    {
-      throw ObjCrystException("DiffractionData::Chi2() Cannot compute Chi^2 ! \
-         There is no observed data !");
+      mChi2=0;
+      return mChi2;
    }
-   REAL tmp1=0;
+   this->CalcIcalc();
+   if(mClockChi2>mClockIcalc) return mChi2;
+   
+   TAU_PROFILE("DiffractionData::Chi2()"," REAL()",TAU_DEFAULT);
+   VFN_DEBUG_ENTRY("DiffractionData::Chi2()",3);
+   
+   REAL mChi2=0;
    const REAL *p1;
    const REAL *p2;
    const REAL *p3;
@@ -499,11 +501,12 @@ REAL DiffractionDataSingleCrystal::GetChi2()const
    }
    for(long i=nb;i>0;i--)
    {
-      tmp1 += *p3++ * ( *p1 - *p2) * ( *p1 - *p2);
+      mChi2 += *p3++ * ( *p1 - *p2) * ( *p1 - *p2);
       p1++;p2++;
    }
-   VFN_DEBUG_MESSAGE("DiffractionData::Chi2()="<<tmp1,3);
-   return tmp1;
+   mClockChi2.Click();
+   VFN_DEBUG_EXIT("DiffractionData::Chi2()="<<mChi2,3);
+   return mChi2;
 }
 
 void DiffractionDataSingleCrystal::FitScaleFactorForRw()
@@ -512,8 +515,9 @@ void DiffractionDataSingleCrystal::FitScaleFactorForRw()
    VFN_DEBUG_MESSAGE("DiffractionData::FitScaleFactorForRw()",3);
    if(mHasObservedData==false)
    {//throw exception here ?
-      throw ObjCrystException("DiffractionData::FitScaleFactorForRw() Cannot compute Rw \
-         or scale factor: there is no observed data !");
+      return;
+      //throw ObjCrystException("DiffractionData::FitScaleFactorForRw() Cannot compute Rw 
+      //   or scale factor: there is no observed data !");
    }
    REAL tmp1=0;
    REAL tmp2=0;
@@ -560,8 +564,9 @@ void DiffractionDataSingleCrystal::FitScaleFactorForR()
    VFN_DEBUG_MESSAGE("DiffractionData::FitScaleFactorForR()",3);
    if(mHasObservedData==false)
    {//throw exception here ?
-      throw ObjCrystException("DiffractionData::FitScaleFactorForR() Cannot compute R \
-         or scale factor: there is no observed data !");
+      return;
+      //throw ObjCrystException("DiffractionData::FitScaleFactorForR() Cannot compute R 
+      //   or scale factor: there is no observed data !");
    }
    REAL tmp1=0;
    REAL tmp2=0;
@@ -603,11 +608,6 @@ REAL DiffractionDataSingleCrystal::GetBestRFactor()
 {
    TAU_PROFILE("DiffractionData::GetBestRFactor()","void ()",TAU_DEFAULT);
    VFN_DEBUG_MESSAGE("DiffractionData::GetBestRFactor()",3);
-   if(mHasObservedData==false)
-   {
-      throw ObjCrystException("DiffractionData::GetBestRFactor() Cannot compute R \
-         or scale factor: there is no observed data !");
-   }
    this->FitScaleFactorForR();
    return this->GetR();
 }
@@ -710,63 +710,16 @@ void DiffractionDataSingleCrystal::SaveHKLIobsIcalc(const string &filename)
    VFN_DEBUG_MESSAGE("DiffractionDataSingleCrystal::SaveHKLIobsIcalc:End",3)
 }
 
-unsigned int DiffractionDataSingleCrystal::GetNbCostFunction()const {return 2;}
-
-const string& DiffractionDataSingleCrystal::GetCostFunctionName(const unsigned int id)const
+void DiffractionDataSingleCrystal::GlobalOptRandomMove(const REAL mutationAmplitude,
+                         const RefParType *type)
 {
-   static string costFunctionName[2];
-   if(0==costFunctionName[0].length())
-   {
-      costFunctionName[0]="Best R()";
-      costFunctionName[1]="Best Rw()";
-   }
-   switch(id)
-   {
-      case 0: return costFunctionName[0];
-      case 1: return costFunctionName[1];
-      default:
-      {
-         cout << "DiffractionDataSingleCrystal::GetCostFunctionName(): Not Found !" <<endl;
-         throw 0;
-      }
-   }
+   this->RefinableObj::GlobalOptRandomMove(mutationAmplitude,type);
+   this->FitScaleFactorForRw();
 }
 
-const string& DiffractionDataSingleCrystal::GetCostFunctionDescription(const unsigned int id)const
+REAL DiffractionDataSingleCrystal::GetLogLikelihood()const
 {
-   static string costFunctionDescription[2];
-   if(0==costFunctionDescription[0].length())
-   {
-      costFunctionDescription[0]="Crystallographic, unweighted R-factor with best scale";
-      costFunctionDescription[1]="Crystallographic, weigthed R-factor with best scale";
-   }
-   switch(id)
-   {
-      case 0: return costFunctionDescription[0];
-      case 1: return costFunctionDescription[1];
-      default:
-      {
-         cout << "DiffractionDataSingleCrystal::GetCostFunctionDescription(): Not Found !" 
-              <<endl;
-         throw 0;
-      }
-   }
-}
-
-REAL DiffractionDataSingleCrystal::GetCostFunctionValue(const unsigned int n)
-{
-   VFN_DEBUG_MESSAGE("DiffractionDataSingleCrystal::GetCostFunctionValue():"<<mName,4)
-   this->CalcIcalc();
-   switch(n)
-   {
-      case 0: this->FitScaleFactorForR()  ;return this->GetR();
-      case 1: this->FitScaleFactorForRw() ;return this->GetRw();
-      default:
-      {
-         cout << "DiffractionDataSingleCrystal::GetCostFunctionValue(): Not Found !" <<endl;
-         throw 0;
-      }
-   }
+   return this->GetChi2();
 }
 
 void DiffractionDataSingleCrystal::InitRefParList()

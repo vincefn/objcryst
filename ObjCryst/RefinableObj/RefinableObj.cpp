@@ -1590,6 +1590,11 @@ REAL RefinableObj::GetCostFunctionValue(const unsigned int)
 }
 unsigned int RefinableObj::GetNbLSQFunction()const{return 0;}
 
+REAL RefinableObj::GetLogLikelihood()const
+{
+   return 0;
+}
+
 const CrystVector_REAL& RefinableObj::GetLSQCalc(const unsigned int) const
 {
    throw ObjCrystException("Error: called RefinableObj::GetLSQCalc()");

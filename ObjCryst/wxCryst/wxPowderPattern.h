@@ -59,6 +59,11 @@ class WXPowderPattern: public WXRefinableObj
       PowderPattern *mpPowderPattern;
       WXRegistry<PowderPatternComponent> *mpWXComponent;
       WXPowderPatternGraph *mpGraph;
+      // Store statistics for display
+      REAL mChi2;
+      REAL mGoF;
+      REAL mRwp;
+      REAL mRp;
    DECLARE_EVENT_TABLE()
 };
 /** Class to display a Powder Pattern (calc,obs) in a graphic window.

@@ -885,11 +885,11 @@ mUseFastLessPreciseFunc(old.mUseFastLessPreciseFunc),
 mStatisticsExcludeBackground(old.mStatisticsExcludeBackground),
 mMaxSinThetaOvLambda(old.mMaxSinThetaOvLambda),mNbPointUsed(old.mNbPointUsed)
 {
+   this->Init();
    mSubObjRegistry.SetName("SubObjRegistry for a PowderPattern :"+mName);
    gPowderPatternRegistry.Register(*this);
    gTopRefinableObjRegistry.Register(*this);
    this->AddSubRefObj(mRadiation);
-   this->Init();
 }
 
 PowderPattern::~PowderPattern()
@@ -930,6 +930,7 @@ void PowderPattern::AddPowderPatternComponent(PowderPatternComponent &comp)
       tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }
+   this->UpdateDisplay();
    VFN_DEBUG_EXIT("PowderPattern::AddPowderPatternComponent():"<<comp.GetName(),5)
 }
 
@@ -1660,6 +1661,11 @@ void PowderPattern::PrintObsCalcData(ostream&os)const
 
 REAL PowderPattern::GetR()const
 {
+   if(  (0==this->GetPowderPatternObs().numElements())
+      ||(0==GetNbPowderPatternComponent()))
+   {
+      return 0;
+   } 
    this->CalcPowderPattern();
    TAU_PROFILE("PowderPattern::GetR()","void ()",TAU_DEFAULT);
    
@@ -1773,8 +1779,14 @@ REAL PowderPattern::GetR()const
    //abort();
    return sqrt(tmp1/tmp2);
 }
+
 REAL PowderPattern::GetIntegratedR()const
 {
+   if(  (0==this->GetPowderPatternObs().numElements())
+      ||(0==GetNbPowderPatternComponent()))
+   {
+      return 0;
+   } 
    this->CalcPowderPattern();
    this->PrepareIntegratedRfactor();
    VFN_DEBUG_ENTRY("PowderPattern::GetIntegratedR()",4);
@@ -1846,6 +1858,11 @@ REAL PowderPattern::GetIntegratedR()const
 
 REAL PowderPattern::GetRw()const
 {
+   if(  (0==this->GetPowderPatternObs().numElements())
+      ||(0==GetNbPowderPatternComponent()))
+   {
+      return 0;
+   } 
    this->CalcPowderPattern();
    TAU_PROFILE("PowderPattern::GetRw()","void ()",TAU_DEFAULT);
    VFN_DEBUG_MESSAGE("PowderPattern::GetRw()",3);
@@ -1964,6 +1981,11 @@ REAL PowderPattern::GetRw()const
 }
 REAL PowderPattern::GetIntegratedRw()const
 {
+   if(  (0==this->GetPowderPatternObs().numElements())
+      ||(0==GetNbPowderPatternComponent()))
+   {
+      return 0;
+   } 
    this->CalcPowderPattern();
    this->PrepareIntegratedRfactor();
    TAU_PROFILE("PowderPattern::GetIntegratedRw()","void ()",TAU_DEFAULT);
@@ -2039,14 +2061,94 @@ REAL PowderPattern::GetIntegratedRw()const
    return sqrt(tmp1/tmp2);
 }
 
-REAL PowderPattern::GetChiSq()const
+REAL PowderPattern::GetChi2()const
 {
-   TAU_PROFILE("PowderPattern::GetChiSq()","void ()",TAU_DEFAULT);
-   VFN_DEBUG_MESSAGE("PowderPattern::GetChiSq()",3);
+   if(  (0==this->GetPowderPatternObs().numElements())
+      ||(0==GetNbPowderPatternComponent()))
+   {
+      mChi2=0.;
+      return mChi2;
+   } 
+   this->CalcPowderPattern();
+   if(  (mClockChi2<mClockPowderPatternPar)
+      &&(mClockChi2<mClockPowderPatternCalc)) return mChi2;
+      TAU_PROFILE("PowderPattern::GetChi2()","void ()",TAU_DEFAULT);
    
-   unsigned long maxPoints=mNbPointUsed;
+   VFN_DEBUG_ENTRY("PowderPattern::GetChi2()",3);
+   
+   const unsigned long maxPoints=mNbPointUsed;
 
-   REAL tmp1=0.;
+   mChi2=0.;
+   if(0 == mOptProfileIntegration.GetChoice())
+   {// Integrated profiles
+      const long numInterval=mIntegratedPatternMin.numElements();
+      const REAL *p1, *p2, *p3;
+      CrystVector_REAL integratedCalc(numInterval);
+      integratedCalc=0;
+      REAL *pp1=integratedCalc.data();
+      for(int i=0;i<numInterval;i++)
+      {
+         const long max=mIntegratedPatternMax(i);
+         p1=mPowderPatternCalc.data()+mIntegratedPatternMin(i);
+         for(int j=mIntegratedPatternMin(i);j<=max;j++) *pp1 += *p1++;
+         pp1++;
+      }
+      p1=integratedCalc.data();
+      p2=mIntegratedObs.data();
+      p3=mIntegratedWeight.data();
+      VFN_DEBUG_MESSAGE("PowderPattern::GetIntegratedRw()",4);
+      for(long i=0;i<numInterval;i++)
+      {
+         mChi2 += *p3++ * ((*p1)-(*p2))*((*p1)-(*p2));
+         p1++;p2++;
+      }
+   }
+   else
+   {// "Full" profiles
+      VFN_DEBUG_MESSAGE("PowderPattern::GetChi2()",3);
+      const REAL *p1, *p2, *p3;
+      p1=mPowderPatternCalc.data();
+      p2=mPowderPatternObs.data();
+      p3=mPowderPatternWeight.data();
+      const long nbExclude=mExcludedRegionMin2Theta.numElements();
+      if(0==nbExclude)
+      {
+         for(unsigned long i=0;i<maxPoints;i++)
+         {
+            mChi2 += *p3++ * ((*p1)-(*p2))*((*p1)-(*p2));
+            p1++;p2++;
+         }
+      }
+      else
+      {
+         unsigned long min,max;
+         unsigned long i=0;
+         for(int j=0;j<nbExclude;j++)
+         {
+            min=(long)floor((mExcludedRegionMin2Theta(j)-m2ThetaMin)
+                                 /m2ThetaStep);
+            max=(long)ceil((mExcludedRegionMax2Theta(j)-m2ThetaMin)
+                                 /m2ThetaStep);
+            if(min>maxPoints) break;
+            if(max>maxPoints)max=maxPoints;
+            for(;i<min;i++)//! min is the *beginning* of the excluded region !
+            {
+               mChi2 += *p3++ * ((*p1)-(*p2))*((*p1)-(*p2));
+               p1++;p2++;
+            }
+            p1 += max-i;
+            p2 += max-i;
+            p3 += max-i;
+            i  += max-i;
+         }
+         for(;i<maxPoints;i++)
+         {
+            mChi2 += *p3++ * ((*p1)-(*p2))*((*p1)-(*p2));
+            p1++;p2++;
+         }
+      }
+   }
+   
    {
       const REAL *p1, *p2, *p3;
       p1=mPowderPatternCalc.data();
@@ -2054,16 +2156,22 @@ REAL PowderPattern::GetChiSq()const
       p3=mPowderPatternWeight.data();
       for(unsigned long i=0;i<maxPoints;i++)
       {
-         tmp1 += *p3 * ((*p1)-(*p2))*((*p1)-(*p2));
+         mChi2 += *p3 * ((*p1)-(*p2))*((*p1)-(*p2));
          p1++;p2++;
       }
    }
-   VFN_DEBUG_MESSAGE("PowderPattern::GetChiSq()="<<tmp1,3);
-   return tmp1;
+   mClockChi2.Click();
+   VFN_DEBUG_EXIT("PowderPattern::GetChi2()="<<mChi2,3);
+   return mChi2;
 }
 
 void PowderPattern::FitScaleFactorForR()
 {
+   if(  (0==this->GetPowderPatternObs().numElements())
+      ||(0==GetNbPowderPatternComponent()))
+   {
+      return ;
+   } 
    this->CalcPowderPattern();
    TAU_PROFILE("PowderPattern::FitScaleFactorForR()","void ()",TAU_DEFAULT);
    VFN_DEBUG_ENTRY("PowderPattern::FitScaleFactorForR()",3);
@@ -2218,8 +2326,14 @@ void PowderPattern::FitScaleFactorForR()
    }
    VFN_DEBUG_EXIT("PowderPattern::FitScaleFactorForR():End",3);
 }
+
 void PowderPattern::FitScaleFactorForIntegratedR()
 {
+   if(  (0==this->GetPowderPatternObs().numElements())
+      ||(0==GetNbPowderPatternComponent()))
+   {
+      return ;
+   } 
    this->CalcPowderPattern();
    this->PrepareIntegratedRfactor();
    VFN_DEBUG_ENTRY("PowderPattern::FitScaleFactorForIntegratedR()",3);
@@ -2355,6 +2469,11 @@ void PowderPattern::FitScaleFactorForIntegratedR()
 
 void PowderPattern::FitScaleFactorForRw()
 {
+   if(  (0==this->GetPowderPatternObs().numElements())
+      ||(0==GetNbPowderPatternComponent()))
+   {
+      return ;
+   } 
    this->CalcPowderPattern();
    TAU_PROFILE("PowderPattern::FitScaleFactorForRw()","void ()",TAU_DEFAULT);
    VFN_DEBUG_ENTRY("PowderPattern::FitScaleFactorForRw()",3);
@@ -2519,8 +2638,14 @@ void PowderPattern::FitScaleFactorForRw()
    }
    VFN_DEBUG_EXIT("PowderPattern::FitScaleFactorForRw():End",3);
 }
+
 void PowderPattern::FitScaleFactorForIntegratedRw()
 {
+   if(  (0==this->GetPowderPatternObs().numElements())
+      ||(0==GetNbPowderPatternComponent()))
+   {
+      return ;
+   } 
    this->CalcPowderPattern();
    this->PrepareIntegratedRfactor();
    VFN_DEBUG_ENTRY("PowderPattern::FitScaleFactorForIntegratedRw()",3);
@@ -2705,6 +2830,14 @@ void PowderPattern::SetWeightPolynomial(const REAL a, const REAL b,
    }
 }
 
+void PowderPattern::GlobalOptRandomMove(const REAL mutationAmplitude,
+                         const RefParType *type)
+{
+   this->RefinableObj::GlobalOptRandomMove(mutationAmplitude,type);
+   if(0 == mOptProfileIntegration.GetChoice()) this->FitScaleFactorForIntegratedRw();
+   else this->FitScaleFactorForRw();
+}
+
 void PowderPattern::Add2ThetaExcludedRegion(const REAL min2Theta,const REAL max2Theta)
 {
    VFN_DEBUG_MESSAGE("PowderPattern::Add2ThetaExcludedRegion()",5)
@@ -2737,71 +2870,11 @@ void PowderPattern::Add2ThetaExcludedRegion(const REAL min2Theta,const REAL max2
    VFN_DEBUG_MESSAGE("PowderPattern::Add2ThetaExcludedRegion():End",5)
 }
 
-unsigned int PowderPattern::GetNbCostFunction()const {return 4;}
-
-const string& PowderPattern::GetCostFunctionName(const unsigned int id)const
+REAL PowderPattern::GetLogLikelihood()const
 {
-   static string costFunctionName[4];
-   if(0==costFunctionName[0].length())
-   {
-      costFunctionName[0]="Best R";
-      costFunctionName[1]="Best Rw";
-      costFunctionName[2]="Best R, integrated";
-      costFunctionName[3]="Best Rw,integrated";
-   }
-   switch(id)
-   {
-      case 0: return costFunctionName[0];
-      case 1: return costFunctionName[1];
-      case 2: return costFunctionName[2];
-      case 3: return costFunctionName[3];
-      default:
-      {
-         cout << "RefinableObj::GetCostFunctionName(): Not Found !" <<endl;
-         throw 0;
-      }
-   }
+   return this->GetChi2();
 }
 
-const string& PowderPattern::GetCostFunctionDescription(const unsigned int id)const
-{
-   static string costFunctionDescription[4];
-   if(0==costFunctionDescription[0].length())
-   {
-      costFunctionDescription[0]="unweighted R-factor (best scale)";
-      costFunctionDescription[1]="weigthed R-factor (best scale)";
-      costFunctionDescription[2]="unweighted R-factor (best scale), integrated";
-      costFunctionDescription[3]="weigthed R-factor (best scale), integrated";
-   }
-   switch(id)
-   {
-      case 0: return costFunctionDescription[0];
-      case 1: return costFunctionDescription[1];
-      case 2: return costFunctionDescription[2];
-      case 3: return costFunctionDescription[3];
-      default:
-      {
-         cout << "RefinableObj::GetCostFunctionDescription(): Not Found !" <<endl;
-         throw 0;
-      }
-   }
-}
-
-REAL PowderPattern::GetCostFunctionValue(const unsigned int n)
-{
-   switch(n)
-   {
-      case 0: this->FitScaleFactorForR()  ;return this->GetR();
-      case 1: this->FitScaleFactorForRw() ;return this->GetRw();
-      case 2: this->FitScaleFactorForIntegratedR()  ;return this->GetIntegratedR();
-      case 3: this->FitScaleFactorForIntegratedRw() ;return this->GetIntegratedRw();
-      default:
-      {
-         cout << "RefinableObj::GetCostFunctionValue(): Not Found !" <<endl;
-         throw 0;
-      }
-   }
-}
 unsigned int PowderPattern::GetNbLSQFunction()const{return 1;}
 
 const CrystVector_REAL& 
@@ -2972,6 +3045,7 @@ void PowderPattern::CalcPowderPattern() const
 }
 void PowderPattern::Init()
 {
+   this->InitOptions();
    {
       RefinablePar tmp("2Theta0",&m2ThetaZero,-.05,.05,gpRefParTypeScattDataCorrPos,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG);
@@ -3176,6 +3250,25 @@ void PowderPattern::CalcNbPointUsed()const
       mNbPointUsed=tmp;
       mClockNbPointUsed.Click();
    }
+}
+
+void PowderPattern::InitOptions()
+{
+   VFN_DEBUG_MESSAGE("PowderPattern::InitOptions()",5)
+   static string OptProfileIntegrationName;
+   static string OptProfileIntegrationChoices[2];
+   
+   static bool needInitNames=true;
+   if(true==needInitNames)
+   {
+      OptProfileIntegrationName="Use Integrated Profiles";
+      OptProfileIntegrationChoices[0]="Yes (recommended)";
+      OptProfileIntegrationChoices[1]="No";
+      
+      needInitNames=false;//Only once for the class
+   }
+   mOptProfileIntegration.Init(2,&OptProfileIntegrationName,OptProfileIntegrationChoices);
+   this->AddOption(&mOptProfileIntegration);
 }
 
 #ifdef __WX__CRYST__

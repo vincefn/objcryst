@@ -133,9 +133,9 @@ class OptimizationObj
       /** \brief The optimized (minimized, actually) function.
       *
       * This function is the weighted sum of the chosen Cost Functions for
-      * the refined objects. All Cost Functions \b must be strictly positive.
+      * the refined objects.
       */
-      REAL GetCostFunctionValue();
+      REAL GetLogLikelihood();
 
       /// Stop after the current cycle. USed for interactive refinement.
       void StopAfterCycle();
@@ -144,11 +144,6 @@ class OptimizationObj
 
       /// Add a refined object. All sub-objects are also added
       void AddRefinableObj(RefinableObj &);
-      /// Add a cost function, with a given weight. This cost function
-      /// should be strictly positive, and ideally should behave like a R/Rw function,
-      /// ie a value above 0.50 corresponds to a very inadequate configuration,
-      /// while 0.05 is excellent.
-      void AddCostFunction(RefinableObj &,const unsigned int id, const REAL weight=1.);
       /** \brief Output a description of the object in XML format to a stream.
       *
       * This saves the list of refined object and the cost functions, as well as options
@@ -223,16 +218,6 @@ class OptimizationObj
          /// The refined objects, recursively including all sub-objects.
          /// This is mutable, since it is a function of mRefinedObjList only.
          mutable ObjRegistry<RefinableObj> mRecursiveRefinedObjList;
-         /// Number of Cost Functions used
-         unsigned int mNbCostFunction;
-         /// Max number of Cost Functions (dynamically adjusted)
-         unsigned int mMaxNbCostFunction;
-         /// The objects with the Cost functions
-         RefinableObj *mpCostFunctionRefinableObj[20];
-         /// The id of the cost functions in each RefinableObj
-         CrystVector_int mpCostFunctionId;
-         /// The weight associated with each cost function
-         CrystVector_REAL mCostFunctionWeight;
          
       /// Periodic save of complete environment as an xml file
          RefObjOpt mXMLAutoSave;

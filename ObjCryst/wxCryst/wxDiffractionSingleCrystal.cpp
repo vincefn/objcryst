@@ -151,11 +151,45 @@ WXRefinableObj(parent,data),mpData(data)
          new WXFieldPar<REAL>(this,"Max Sin(theta)/lambda:",-1,&(mpData->mMaxSinThetaOvLambda));
       mpSizer->Add(maxSiThOvLa,0,wxALIGN_LEFT);
       mList.Add(maxSiThOvLa);
-   
+   // Statistics
+      wxBoxSizer* pStats=new wxBoxSizer(wxHORIZONTAL);
+      
+      WXFieldPar<REAL> *pWXFieldChi2=new WXFieldPar<REAL>(this,"Chi^2",-1,&mChi2,100);
+      pStats->Add(pWXFieldChi2    ,0,wxALIGN_CENTER);
+      mList.Add(pWXFieldChi2);
+      
+      WXFieldPar<REAL> *pWXFieldGof=new WXFieldPar<REAL>(this,"GoF",-1,&mGoF,70);
+      pStats->Add(pWXFieldGof    ,0,wxALIGN_CENTER);
+      mList.Add(pWXFieldGof);
+      
+      WXFieldPar<REAL> *pWXFieldRwp=new WXFieldPar<REAL>(this,"Rwp",-1,&mRwp,70);
+      pStats->Add(pWXFieldRwp    ,0,wxALIGN_CENTER);
+      mList.Add(pWXFieldRwp);
+      
+      WXFieldPar<REAL> *pWXFieldRp=new WXFieldPar<REAL>(this,"Rp",-1,&mRp,70);
+      pStats->Add(pWXFieldRp    ,0,wxALIGN_CENTER);
+      mList.Add(pWXFieldRp);
+      
+      mpSizer->Add(pStats);
+         
    this->CrystUpdate();
    this->Layout();
    VFN_DEBUG_MESSAGE("WXDiffractionSingleCrystal::WXDiffractionSingleCrystal():End",6)
 }
+
+void WXDiffractionSingleCrystal::CrystUpdate()
+{
+   VFN_DEBUG_ENTRY("WXDiffractionSingleCrystal::CrystUpdate()",6)
+   WXCrystValidateAllUserInput();
+
+   mChi2=mpData->GetChi2();
+   mGoF=mpData->GetChi2()/mpData->GetIobs().numElements();
+   mRwp=mpData->GetRw();
+   mRp=mpData->GetR();
+   
+   this->WXRefinableObj::CrystUpdate();
+   VFN_DEBUG_EXIT("WXDiffractionSingleCrystal::CrystUpdate()",6)
+} 
 
 void WXDiffractionSingleCrystal::OnMenuSimulate(wxCommandEvent & WXUNUSED(event))
 {

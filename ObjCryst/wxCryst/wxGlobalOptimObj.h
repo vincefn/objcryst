@@ -46,12 +46,6 @@ class WXOptimizationObj: public WXCrystObj
       virtual void AddRefinedObject(RefinableObj &obj);
       /// From the menu
       virtual void OnRemoveRefinedObject();
-      /// From the menu
-      virtual void OnAddCostFunction();
-      /// Added by the library
-      virtual void AddCostFunction(RefinableObj &obj,const int costFuncNum);
-      /// From the menu
-      virtual void OnRemoveCostFunction();
       /// Launches the optimization run
       virtual void OnRunOptimization()=0;
       virtual void OnStopOptimization();

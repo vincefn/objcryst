@@ -3,12 +3,14 @@ DIR_CRYST := ..
 
 #target to make documentation (requires doxygen)
 #also makes tags file, although it is not related to doxygen
-doc:
+html/index.html: ../*/*.h
 	doxygen doxygen.config
 	cp ${DIR_CRYST}/license.txt html/ObjCryst-license.txt
 	cp ${DIR_CRYST}/../newmat/nm10.htm html/newmat.htm
 	cp ${DIR_CRYST}/../atominfo/readme.html html/atominfo.html
 	cp ${DIR_CRYST}/../sglite/LICENSE html/sglite-license.txt
+
+doc: html/index.html
 
 pdf: doc
 	cd latex ; pdflatex refman ; makeindex refman.idx ; pdflatex refman

@@ -53,9 +53,7 @@ mNbTrial(0),mBestCost(-1),
 mBestParSavedSetIndex(-1),
 mIsOptimizing(false),mStopAfterCycle(false),
 mRefinedObjList("OptimizationObj: "+mName+" RefinableObj registry"),
-mRecursiveRefinedObjList("OptimizationObj: "+mName+" recursive RefinableObj registry"),
-mNbCostFunction(0),mMaxNbCostFunction(20),
-mpCostFunctionId(mMaxNbCostFunction),mCostFunctionWeight(mMaxNbCostFunction)
+mRecursiveRefinedObjList("OptimizationObj: "+mName+" recursive RefinableObj registry")
 {
    VFN_DEBUG_ENTRY("OptimizationObj::OptimizationObj()",5)
    // This must be done in a real class to avoid calling a pure virtual method
@@ -161,16 +159,12 @@ void OptimizationObj::SetLimitsAbsolute(const RefParType *type,
       mRecursiveRefinedObjList.GetObj(i).SetLimitsAbsolute(type,min,max);
 }
 
-REAL OptimizationObj::GetCostFunctionValue() 
+REAL OptimizationObj::GetLogLikelihood() 
 {
-   TAU_PROFILE("OptimizationObj::GetCostFunctionValue()","void ()",TAU_DEFAULT);
+   TAU_PROFILE("OptimizationObj::GetLogLikelihood()","void ()",TAU_DEFAULT);
    REAL cost =0.;
-   for(unsigned int i=0;i<mNbCostFunction;i++)
-      if(mCostFunctionWeight(i)>0)
-         cost += mCostFunctionWeight(i)*mpCostFunctionRefinableObj[i]
-                  ->GetCostFunctionValue(mpCostFunctionId(i));
    for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
-      cost += mRecursiveRefinedObjList.GetObj(i).GetRestraintCost();
+      cost += mRecursiveRefinedObjList.GetObj(i).GetLogLikelihood();
    return cost;
 }
 void OptimizationObj::StopAfterCycle() 
@@ -181,22 +175,7 @@ void OptimizationObj::StopAfterCycle()
 
 void OptimizationObj::DisplayReport() 
 {
-   for(unsigned int i=0;i<mNbCostFunction;i++)
-      cout <<mpCostFunctionRefinableObj[i]->GetClassName()<<":"
-           <<mpCostFunctionRefinableObj[i]->GetName()<<":"
-           <<mpCostFunctionRefinableObj[i]
-               ->GetCostFunctionName(mpCostFunctionId(i))<<"="
-           <<mpCostFunctionRefinableObj[i]
-               ->GetCostFunctionValue(mpCostFunctionId(i))
-           <<", weight="<<mCostFunctionWeight(i)<<endl;
-   REAL restraintCost;
-   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
-   {
-      restraintCost= mRecursiveRefinedObjList.GetObj(i).GetRestraintCost();
-      if(restraintCost>1e-5) cout << mRecursiveRefinedObjList.GetObj(i).GetClassName()<<":"
-                                  << mRecursiveRefinedObjList.GetObj(i).GetName()
-                                  << ": RestraintCost="<<restraintCost<<endl;
-   }
+   //:TODO: ask all objects to print their own report ?
 }
 
 void OptimizationObj::AddRefinableObj(RefinableObj &obj)
@@ -209,21 +188,6 @@ void OptimizationObj::AddRefinableObj(RefinableObj &obj)
    RefObjRegisterRecursive(obj,mRecursiveRefinedObjList);
    #ifdef __WX__CRYST__
    if(0!=this->WXGet()) this->WXGet()->AddRefinedObject(obj);
-   #endif
-}
-
-void OptimizationObj::AddCostFunction(RefinableObj &obj,const unsigned int id, const REAL w)
-{
-   VFN_DEBUG_MESSAGE("OptimizationObj::AddGetCostFunctionValue()",5)
-   mpCostFunctionRefinableObj[mNbCostFunction]=&obj;
-   mpCostFunctionId(mNbCostFunction)=id;
-   mCostFunctionWeight(mNbCostFunction++)=w;
-   
-   //Forces the object to get ready
-      obj.BeginOptimization();
-      obj.EndOptimization();
-   #ifdef __WX__CRYST__
-   if(0!=this->WXGet()) this->WXGet()->AddCostFunction(obj,id);
    #endif
 }
 
@@ -443,7 +407,6 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
       {
          outHistory.open(mHistorySaveFileName.c_str());
          outHistory << "Trial World Accept OverallCost ";
-         for(unsigned int i=0;i<mNbCostFunction;i++) outHistory << "Cost ";
          for(long j=0;j<mRefParList.GetNbParNotFixed();j++)
             outHistory << mRefParList.GetParNotFixed(j).GetName() << " ";
          outHistory <<endl;
@@ -461,7 +424,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
          if(!silent) this->DisplayReport();
          RESTART_OPTIMIZATION:
          mRefParList.EraseAllParamSet();
-         mCurrentCost=this->GetCostFunctionValue();
+         mCurrentCost=this->GetLogLikelihood();
 
          mBestCost=mCurrentCost;
          mBestParSavedSetIndex=mRefParList.CreateParamSet("MonteCarloObj:Best parameters");
@@ -541,7 +504,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
 
             this->NewConfiguration();
             accept=0;
-            REAL cost=this->GetCostFunctionValue();
+            REAL cost=this->GetLogLikelihood();
             if(cost<mCurrentCost)
             {
                accept=1;
@@ -582,10 +545,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                   if(accept==2)
                   {
                      outHistory << mNbTrial <<" 0 " <<accept<<" "
-                                <<this->GetCostFunctionValue()<<" ";
-                     for(unsigned int i=0;i<mNbCostFunction;i++)
-                        outHistory << mpCostFunctionRefinableObj[i]
-                                       ->GetCostFunctionValue(mpCostFunctionId(i))<<" ";
+                                <<this->GetLogLikelihood()<<" ";
                      for(long i=0;i<mRefParList.GetNbParNotFixed();i++) 
                         outHistory << " "<< mRefParList.GetParNotFixed(i).GetHumanValue() ;
                      outHistory <<endl;
@@ -597,10 +557,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                   if(accept>0)
                   {
                      outHistory << mNbTrial <<" 0 "<<accept<<" "
-                                <<this->GetCostFunctionValue()<<" ";
-                     for(unsigned int i=0;i<mNbCostFunction;i++)
-                        outHistory << mpCostFunctionRefinableObj[i]
-                                       ->GetCostFunctionValue(mpCostFunctionId(i))<<" ";
+                                <<this->GetLogLikelihood()<<" ";
                      for(long i=0;i<mRefParList.GetNbParNotFixed();i++) 
                         outHistory << " "<< mRefParList.GetParNotFixed(i).GetHumanValue() ;
                      outHistory <<endl;
@@ -610,10 +567,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                case 3: 
                {
                   outHistory << mNbTrial <<" 0 "<<accept<<" "
-                             <<this->GetCostFunctionValue()<<" ";
-                  for(unsigned int i=0;i<mNbCostFunction;i++)
-                     outHistory << mpCostFunctionRefinableObj[i]
-                                    ->GetCostFunctionValue(mpCostFunctionId(i))<<" ";
+                             <<this->GetLogLikelihood()<<" ";
                   for(long i=0;i<mRefParList.GetNbParNotFixed();i++) 
                      outHistory << " "<< mRefParList.GetParNotFixed(i).GetHumanValue() ;
                   outHistory <<endl;
@@ -668,7 +622,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                strftime(strDate,sizeof(strDate),"%Y-%m-%d_%H-%M-%S",gmtime(&date));//%Y-%m-%dT%H:%M:%S%Z
                char costAsChar[30];
                if(accept!=2) mRefParList.RestoreParamSet(mBestParSavedSetIndex);
-               sprintf(costAsChar,"-Cost-%f",this->GetCostFunctionValue());
+               sprintf(costAsChar,"-Cost-%f",this->GetLogLikelihood());
                saveFileName=saveFileName+(string)strDate+(string)costAsChar+(string)".xml";
                XMLCrystFileSaveGlobal(saveFileName);
                if(accept!=2) mRefParList.RestoreParamSet(mLastParSavedSetIndex);
@@ -676,7 +630,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
          }
          //Restore Best values
          mRefParList.RestoreParamSet(mBestParSavedSetIndex);
-         mCurrentCost=this->GetCostFunctionValue();
+         mCurrentCost=this->GetLogLikelihood();
          if(!silent) this->DisplayReport();
          if(!silent) chrono.print();
          //mRefParList.Print();
@@ -689,6 +643,15 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
          // world must be i=nbWorld-1, and the most changing World (high mutation,
          // high temperature) is i=0.
             const long nbWorld=30;
+         // Number of successive trials for each World. At the end of these trials
+         // a swap is tried with the upper World (eg i-1). This number effectvely sets
+         // the rate of swapping.
+            const int nbTryPerWorld=10;
+         // Initialize the costs
+            mCurrentCost=this->GetLogLikelihood();
+            mBestCost=mCurrentCost;
+            CrystVector_REAL currentCost(nbWorld);
+            currentCost=mCurrentCost;
          // Init the different temperatures
             CrystVector_REAL simAnnealTemp(nbWorld);
             for(int i=0;i<nbWorld;i++)
@@ -706,9 +669,9 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                                     *pow(mTemperatureMin/mTemperatureMax,
                                           i/(REAL)(nbWorld-1));break;
                   case ANNEALING_SMART:
-                     simAnnealTemp(i)=sqrt(mTemperatureMin*mTemperatureMax);break;
+                     simAnnealTemp(i)=mCurrentCost/(100.+(REAL)i/(REAL)nbWorld*900.);break;
                   default:
-                     simAnnealTemp(i)=sqrt(mTemperatureMin*mTemperatureMax);break;
+                     simAnnealTemp(i)=mCurrentCost/(100.+(REAL)i/(REAL)nbWorld*900.);break;
                }
             }
          //Init the different mutation rate parameters
@@ -735,15 +698,6 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                }
             }
             cout << simAnnealTemp<<endl<<mutationAmplitude<<endl;
-         // Number of successive trials for each World. At the end of these trials
-         // a swap is tried with the upper World (eg i-1). This number effectvely sets
-         // the rate of swapping.
-            const int nbTryPerWorld=10;
-         // Initialize the costs
-            mCurrentCost=this->GetCostFunctionValue();
-            mBestCost=mCurrentCost;
-            CrystVector_REAL currentCost(nbWorld);
-            currentCost=mCurrentCost;
          // Init the parameter sets for each World
          // All Worlds start from the same (current) configuration.
             CrystVector_long worldCurrentSetIndex(nbWorld);
@@ -799,7 +753,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                   mRefParList.SaveParamSet(mLastParSavedSetIndex);
                   this->NewConfiguration();
                   accept=0;
-                  REAL cost=this->GetCostFunctionValue();
+                  REAL cost=this->GetLogLikelihood();
                   //trialsDensity((long)(cost*100.),i+1)+=1;
                   if(cost<currentCost(i))
                   {
@@ -843,10 +797,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                         if(accept==2)
                         {
                            outHistory << mNbTrial <<" "<<i<<" "<<accept<<" "
-                                      <<this->GetCostFunctionValue()<<" ";
-                           for(unsigned int j=0;j<mNbCostFunction;j++)
-                              outHistory << mpCostFunctionRefinableObj[j]
-                                             ->GetCostFunctionValue(mpCostFunctionId(i))<<" ";
+                                      <<this->GetLogLikelihood()<<" ";
                            for(long j=0;j<mRefParList.GetNbParNotFixed();j++) 
                               outHistory << " "<< mRefParList.GetParNotFixed(j).GetHumanValue() ;
                            outHistory <<endl;
@@ -858,10 +809,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                         if(accept>0)
                         {
                            outHistory << mNbTrial <<" "<<i<<" "<<accept<<" "
-                                      <<this->GetCostFunctionValue()<<" ";
-                           for(unsigned int j=0;j<mNbCostFunction;j++)
-                              outHistory << mpCostFunctionRefinableObj[j]
-                                             ->GetCostFunctionValue(mpCostFunctionId(j))<<" ";
+                                      <<this->GetLogLikelihood()<<" ";
                            for(long j=0;j<mRefParList.GetNbParNotFixed();j++) 
                               outHistory << " "<< mRefParList.GetParNotFixed(j).GetHumanValue() ;
                            outHistory <<endl;
@@ -871,10 +819,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                      case 3: 
                      {
                         outHistory << mNbTrial <<" "<<i<<" "<<accept<<" "
-                                   <<this->GetCostFunctionValue()<<" ";
-                        for(unsigned int j=0;j<mNbCostFunction;j++)
-                           outHistory << mpCostFunctionRefinableObj[j]
-                                          ->GetCostFunctionValue(mpCostFunctionId(j))<<" ";
+                                   <<this->GetLogLikelihood()<<" ";
                         for(long j=0;j<mRefParList.GetNbParNotFixed();j++) 
                            outHistory << " "<< mRefParList.GetParNotFixed(j).GetHumanValue() ;
                         outHistory <<endl;
@@ -893,7 +838,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                      strftime(strDate,sizeof(strDate),"%Y-%m-%d_%H-%M-%S",gmtime(&date));//%Y-%m-%dT%H:%M:%S%Z
                      char costAsChar[30];
                      if(accept!=2) mRefParList.RestoreParamSet(mBestParSavedSetIndex);
-                     sprintf(costAsChar,"-Cost-%f",this->GetCostFunctionValue());
+                     sprintf(costAsChar,"-Cost-%f",this->GetLogLikelihood());
                      saveFileName=saveFileName+(string)strDate+(string)costAsChar+(string)".xml";
                      XMLCrystFileSaveGlobal(saveFileName);
                      if(accept!=2) mRefParList.RestoreParamSet(mLastParSavedSetIndex);
@@ -996,7 +941,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                   {
                      if(junk==0) mRefParList.RestoreParamSet(parSetOffspringA);
                      else mRefParList.RestoreParamSet(parSetOffspringB);
-                     REAL cost=this->GetCostFunctionValue();
+                     REAL cost=this->GetLogLikelihood();
                      //if(log((rand()+1)/(REAL)RAND_MAX)
                      //    < (-(cost-currentCost(k))/simAnnealTemp(k)))
                      if(cost<currentCost(k))
@@ -1083,17 +1028,17 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                      if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)>0.80)
                         simAnnealTemp(i)/=2;
                      if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)>0.95)
-                        simAnnealTemp(i)/=2;
+                        simAnnealTemp(i)/=4;
                         
                      if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)<0.10)
                         simAnnealTemp(i)*=1.5;
                      if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)<0.04)
                         simAnnealTemp(i)*=2;
                      if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)<0.01)
-                        simAnnealTemp(i)*=2;
+                        simAnnealTemp(i)*=4;
                         
-                     if(simAnnealTemp(i)>mTemperatureMax) simAnnealTemp(i)=mTemperatureMax;
-                     if(simAnnealTemp(i)<mTemperatureMin) simAnnealTemp(i)=mTemperatureMin;
+                     //if(simAnnealTemp(i)>mTemperatureMax) simAnnealTemp(i)=mTemperatureMax;
+                     //if(simAnnealTemp(i)<mTemperatureMin) simAnnealTemp(i)=mTemperatureMin;
                   }
                }
                worldNbAcceptedMoves=0;
@@ -1115,8 +1060,8 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
                               mRefParList.GetParamSet(mBestParSavedSetIndex);
                         }
                         this->RandomizeStartingConfig();
-                        mCurrentCost=this->GetCostFunctionValue();
-                        mBestCost=this->GetCostFunctionValue();
+                        mCurrentCost=this->GetLogLikelihood();
+                        mBestCost=this->GetLogLikelihood();
                         for(int i=0;i<nbWorld;i++)
                         {
                            currentCost(i)=mCurrentCost;
@@ -1156,16 +1101,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
             else
                mRefParList.RestoreParamSet(mBestParSavedSetIndex);
             //for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).Print();
-            mCurrentCost=this->GetCostFunctionValue();
-            if(!silent) 
-               for(unsigned int i=0;i<mNbCostFunction;i++)
-                  cout <<mpCostFunctionRefinableObj[i]->GetClassName()<<":"
-                    <<mpCostFunctionRefinableObj[i]->GetName()<<":"
-                    <<mpCostFunctionRefinableObj[i]
-                        ->GetCostFunctionName(mpCostFunctionId(i))<<"="
-                    <<mpCostFunctionRefinableObj[i]
-                        ->GetCostFunctionValue(mpCostFunctionId(i))
-                    <<", weight="<<mCostFunctionWeight(i)<<endl;
+            mCurrentCost=this->GetLogLikelihood();
             if(!silent) cout<<"Overall cost:"<<mCurrentCost<<"("<<mBestCost<<")"<<endl;
             if(!silent) chrono.print();
             this->UpdateDisplay();
@@ -1259,24 +1195,6 @@ void MonteCarloObj::XMLOutput(ostream &os,int indent)const
       os<<tag2<<endl;
    }
    
-   for(unsigned int j=0;j<mNbCostFunction;j++)
-   {
-      XMLCrystTag tag2("CostFunction",false,true);
-      tag2.AddAttribute("ObjectType",mpCostFunctionRefinableObj[j]->GetClassName());
-      tag2.AddAttribute("ObjectName",mpCostFunctionRefinableObj[j]->GetName());
-      stringstream ss;
-      ss<<mpCostFunctionId(j);
-      tag2.AddAttribute("FunctionId",ss.str());
-      tag2.AddAttribute("FunctionName",
-                        mpCostFunctionRefinableObj[j]
-                           ->GetCostFunctionDescription(mpCostFunctionId(j)));
-      stringstream ss2;
-      ss2<<mCostFunctionWeight(j);
-      tag2.AddAttribute("Weight",ss2.str());
-      for(int i=0;i<indent;i++) os << "  " ;
-      os<<tag2<<endl;
-   }
-   
    indent--;
    tag.SetIsEndTag(true);
    for(int i=0;i<indent;i++) os << "  " ;
@@ -1347,174 +1265,9 @@ void MonteCarloObj::XMLInput(istream &is,const XMLCrystTag &tagg)
          this->AddRefinableObj(*obj);
          continue;
       }
-      if("CostFunction"==tag.GetName())
-      {
-         string name,type;
-         float weight;
-         int id;
-         for(unsigned int i=0;i<tag.GetNbAttribute();i++)
-         {
-            if("ObjectName"==tag.GetAttributeName(i)) name=tag.GetAttributeValue(i);
-            if("ObjectType"==tag.GetAttributeName(i)) type=tag.GetAttributeValue(i);
-            if("Weight"==tag.GetAttributeName(i))
-            {
-               stringstream ss(tag.GetAttributeValue(i));
-               ss>>weight;
-            }
-            if("FunctionId"==tag.GetAttributeName(i))
-            {
-               stringstream ss(tag.GetAttributeValue(i));
-               ss>>id;
-            }
-         }
-         RefinableObj* obj=& (gRefinableObjRegistry.GetObj(name,type));
-         this->AddCostFunction(*obj,id,weight);
-      }
    }
 }
-#if 0
-void MonteCarloObj::XMLInputOld(istream &is,const IOCrystTag &tagg)
-{
-   VFN_DEBUG_MESSAGE("MonteCarloObj::XMLInput():"<<this->GetName(),5)
-   switch(tagg.GetVersion())
-   {
-      case 0:
-      {
-         this->SetName(tagg.GetName());
-         do
-         {
-            IOCrystTag tag(is);
-            if(tag.IsClosingTag()==true)
-            {
-               VFN_DEBUG_MESSAGE("MonteCarloObj::XMLInput():End",5)
-               return;
-            }
-            if(tag.GetType()=="Param")
-            {
-               if(tag.GetName()=="Algorithm")
-               {
-                  string alg;
-                  IOCrystExtractNameSpace(is,alg);
-                  if(alg=="SimulatedAnnealing")
-                  {
-                     mGlobalOptimType.SetChoice(GLOBAL_OPTIM_SIMULATED_ANNEALING);
-                     continue;
-                  }
-                  if(alg=="ParallelTempering")
-                  {
-                     mGlobalOptimType.SetChoice(GLOBAL_OPTIM_PARALLEL_TEMPERING);
-                     continue;
-                  }
-                  if(alg=="Genetic")
-                  {
-                     mGlobalOptimType.SetChoice(GLOBAL_OPTIM_GENETIC);
-                     continue;
-                  }
-                  continue;
-               }
-               if(tag.GetName()=="TemperatureScheduleMaxMin")
-               {
-                  string temp;
-                  IOCrystExtractNameSpace(is,temp);
-                  is >> mTemperatureMax>>mTemperatureMin;
-                  if(temp=="Constant")
-                  {
-                     mAnnealingScheduleTemp.SetChoice(ANNEALING_CONSTANT);
-                     continue;
-                  }
-                  if(temp=="Boltzmann")
-                  {
-                     mAnnealingScheduleTemp.SetChoice(ANNEALING_BOLTZMANN);
-                     continue;
-                  }
-                  if(temp=="Cauchy")
-                  {
-                     mAnnealingScheduleTemp.SetChoice(ANNEALING_CAUCHY);
-                     continue;
-                  }
-                  if(temp=="Exponential")
-                  {
-                     mAnnealingScheduleTemp.SetChoice(ANNEALING_EXPONENTIAL);
-                     continue;
-                  }
-                  if(temp=="Smart")
-                  {
-                     mAnnealingScheduleTemp.SetChoice(ANNEALING_SMART);
-                     continue;
-                  }
-                  continue;
-               }
-               if(tag.GetName()=="AmplitudeScheduleMaxMin")
-               {
-                  string mut;
-                  IOCrystExtractNameSpace(is,mut);
-                  is >> mMutationAmplitudeMax>>mMutationAmplitudeMin;
-                  if(mut=="Constant")
-                  {
-                     mAnnealingScheduleMutation.SetChoice(ANNEALING_CONSTANT);
-                     continue;
-                  }
-                  if(mut=="Boltzmann")
-                  {
-                     mAnnealingScheduleMutation.SetChoice(ANNEALING_BOLTZMANN);
-                     continue;
-                  }
-                  if(mut=="Cauchy")
-                  {
-                     mAnnealingScheduleMutation.SetChoice(ANNEALING_CAUCHY);
-                     continue;
-                  }
-                  if(mut=="Exponential")
-                  {
-                     mAnnealingScheduleMutation.SetChoice(ANNEALING_EXPONENTIAL);
-                     continue;
-                  }
-                  if(mut=="Smart")
-                  {
-                     mAnnealingScheduleMutation.SetChoice(ANNEALING_SMART);
-                     continue;
-                  }
-                  continue;
-               }
-               if(tag.GetName()=="NbTrialRetry")
-               {
-                  is>>mNbTrialRetry;
-               }
-               if(tag.GetName()=="MinCostRetry")
-               {
-                  is>>mMinCostRetry;
-               }
-               if(tag.GetName()=="MaxNbTrialSinceBest")
-               {
-                  is>>mMaxNbTrialSinceBest;
-               }
-               if(tag.GetName()=="RefinedObject")
-               {
-                  string className,name;
-                  IOCrystExtractNameQuoted(is,className);
-                  IOCrystExtractNameQuoted(is,name);
-                  RefinableObj* obj=& (gRefinableObjRegistry.GetObj(name,className));
-                  this->AddRefinableObj(*obj);
-               }
-               if(tag.GetName()=="CostFunction")
-               {
-                  string className,name;
-                  IOCrystExtractNameQuoted(is,className);
-                  IOCrystExtractNameQuoted(is,name);
-                  int func;
-                  REAL weight;
-                  is >> func>>weight;
-                  RefinableObj* obj=& (gRefinableObjRegistry.GetObj(name,className));
-                  this->AddCostFunction(*obj,func,weight);
-               }
-            }//Param
-         } while(true);
-         break;
-      }
-      default: cout << "Unknown tag version !"<<endl;
-   }
-}
-#endif
+
 const string MonteCarloObj::GetClassName()const { return "MonteCarloObj";}
 
 void MonteCarloObj::NewConfiguration(const RefParType *type)

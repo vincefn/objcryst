@@ -59,11 +59,9 @@ WXCrystObj(parent),mpGlobalOptimRunThread(0)
       //mpMenuBar->AddMenu("Object",ID_REFOBJ_MENU_OBJ);
          //mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_REFOBJ_MENU_OBJ_SAVE,"Save");
          //mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_REFOBJ_MENU_OBJ_LOAD,"Load");
-      mpMenuBar->AddMenu("Objects && Cost Functions",ID_GLOBALOPT_MENU_OBJECTS);
+      mpMenuBar->AddMenu("Optimized Objects",ID_GLOBALOPT_MENU_OBJECTS);
          mpMenuBar->AddMenuItem(ID_GLOBALOPT_MENU_OBJECTS,ID_GLOBALOPT_MENU_OBJECTS_ADDOBJ,
                                 "Add object to optimize");
-         mpMenuBar->AddMenuItem(ID_GLOBALOPT_MENU_OBJECTS,
-                                ID_GLOBALOPT_MENU_OBJECTS_ADDCOSTFUNC,"Add Cost Function");
       mpMenuBar->AddMenu("Run/Stop",ID_GLOBALOPT_MENU_OPT);
          mpMenuBar->AddMenuItem(ID_GLOBALOPT_MENU_OPT,
                                 ID_GLOBALOPT_MENU_OPT_RUN,"Run Optimization");
@@ -78,16 +76,6 @@ WXCrystObj(parent),mpGlobalOptimRunThread(0)
                        +":"+obj->mRefinedObjList.GetObj(i).GetName());
       mpSizer->Add(refobj);
       mList.Add(refobj);
-   }
-   // Cost Functions
-   for(unsigned int i=0;i<obj->mNbCostFunction;i++)
-   {
-      WXCostFunction *cf=new
-         WXCostFunction(this,obj->mpCostFunctionRefinableObj[i],
-                        -1,obj->mpCostFunctionId(i),
-                        obj->mCostFunctionWeight.data()+i);
-      mpSizer->Add(cf);
-      mList.Add(cf);
    }
    
    // This will be done later
@@ -150,64 +138,6 @@ void WXOptimizationObj::OnRemoveRefinedObject()
 {
 }
 
-void WXOptimizationObj::OnAddCostFunction()
-{
-   VFN_DEBUG_MESSAGE("WXOptimizationObj::OnAddCostFunction()",6)
-   WXCrystValidateAllUserInput();
-   const int nbObj=this->GetOptimizationObj().mRefinedObjList.GetNb();
-   int nbCostFunc=0;
-   for(int i=0;i<nbObj;i++)
-   {
-     
-VFN_DEBUG_MESSAGE(this->GetOptimizationObj().mRefinedObjList.GetObj(i).GetName()<<":"<<this->GetOptimizationObj().mRefinedObjList.GetObj(i).GetNbCostFunction()<< " cost functions",6)
-      nbCostFunc += this->GetOptimizationObj().mRefinedObjList.GetObj(i).GetNbCostFunction();
-   }
-   if(0==nbCostFunc) 
-   {
-      cout << nbObj <<":"<<nbCostFunc<<endl;
-      return;
-   }
-   CrystVector_int refobj(nbCostFunc);
-   CrystVector_int costFunc(nbCostFunc);
-   wxString choices[10];//:TODO: use nbCostFunc
-   int k=0;
-   for(int i=0;i<nbObj;i++) 
-    for(int j=0;j<(int) this->GetOptimizationObj().mRefinedObjList.GetObj(i).GetNbCostFunction();j++)
-    {
-      refobj(k)=i;
-      costFunc(k)=j;
-      choices[k++]=(this->GetOptimizationObj().mRefinedObjList.GetObj(i).GetName()+":"+
-         this->GetOptimizationObj().mRefinedObjList.GetObj(i).GetCostFunctionName(j)
-         ).c_str();
-    }
-   
-   wxSingleChoiceDialog dialog
-         (this,"Choose a new cost function","Choose",nbCostFunc,choices,0,wxOK | wxCANCEL);
-   dialog.SetSize(300,300);
-   if(wxID_OK!=dialog.ShowModal()) return;
-   int choice=dialog.GetSelection();
-   this->GetOptimizationObj().AddCostFunction(
-         this->GetOptimizationObj().mRefinedObjList.GetObj(refobj(choice)),
-         costFunc(choice),1.0);
-}
-void WXOptimizationObj::AddCostFunction(RefinableObj &obj, const int costFunc)
-{
-   VFN_DEBUG_MESSAGE("WXOptimizationObj::AddCostFunction()",6)
-   WXCrystValidateAllUserInput();
-   //:KLUDGE: Here we are assuming that this is the *last* function added
-   WXCostFunction *cf=new
-         WXCostFunction(this,&obj,-1,costFunc,
-                        this->GetOptimizationObj().mCostFunctionWeight.data()
-                        +this->GetOptimizationObj().mNbCostFunction-1);
-   mpSizer->Add(cf);
-   mList.Add(cf);
-   this->Layout();
-}
-
-void WXOptimizationObj::OnRemoveCostFunction()
-{
-}
-
 void WXOptimizationObj::OnStopOptimization()
 {
    this->GetOptimizationObj().StopAfterCycle();
@@ -260,7 +190,6 @@ BEGIN_EVENT_TABLE(WXMonteCarloObj, wxWindow)
    //EVT_MENU(ID_REFOBJ_MENU_OBJ_SAVE,                   WXOptimizationObj::OnSave)
    //EVT_MENU(ID_REFOBJ_MENU_OBJ_LOAD,                   WXOptimizationObj::OnLoad)
    EVT_MENU(ID_GLOBALOPT_MENU_OBJECTS_ADDOBJ,        WXOptimizationObj::OnAddRefinedObject)
-   EVT_MENU(ID_GLOBALOPT_MENU_OBJECTS_ADDCOSTFUNC,   WXOptimizationObj::OnAddCostFunction)
    EVT_MENU(ID_GLOBALOPT_MENU_OPT_RUN,           WXOptimizationObj::OnRunOptimization)
    EVT_MENU(ID_GLOBALOPT_MENU_OPT_STOP,          WXOptimizationObj::OnStopOptimization)
    EVT_UPDATE_UI(ID_CRYST_UPDATEUI,                    WXOptimizationObj::OnUpdateUI)

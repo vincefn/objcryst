@@ -199,11 +199,9 @@ class DiffractionDataSingleCrystal:public ScatteringData
       ///Save H,K,L Iobs Icalc to a file, text format, 3 columns theta Iobs Icalc.
       ///If Iobs is missing, the column is omitted.
       void SaveHKLIobsIcalc(const string &filename="hklIobsIcalc.out");
-      //Cost functions
-         unsigned int GetNbCostFunction()const;
-         const string& GetCostFunctionName(const unsigned int)const;
-         const string& GetCostFunctionDescription(const unsigned int)const;
-         virtual REAL GetCostFunctionValue(const unsigned int);
+      virtual void GlobalOptRandomMove(const REAL mutationAmplitude,
+                                       const RefParType *type=gpRefParTypeObjCryst);
+      virtual REAL GetLogLikelihood()const;
       //LSQ functions
          virtual unsigned int GetNbLSQFunction()const;
          virtual const CrystVector_REAL& GetLSQCalc(const unsigned int) const;
@@ -269,10 +267,15 @@ class DiffractionDataSingleCrystal:public ScatteringData
       /// Scale factor. It is applied when computing intensities. The scale
       ///applies to intensities
       REAL mScaleFactor;
-      /// Last time Icalc was computed
-      mutable RefinableObjClock mClockIcalc;
-      /// Last modification of the scale factor
-      RefinableObjClock mClockScaleFactor;
+      /// Chi^2
+      mutable REAL mChi2;
+      //Clocks
+         /// Last time Icalc was computed
+         mutable RefinableObjClock mClockIcalc;
+         /// Last modification of the scale factor
+         RefinableObjClock mClockScaleFactor;
+         ///Clock the last time Chi^2 was computed
+         mutable RefinableObjClock mClockChi2;
       // Twinning
          /// Option for the type of twinning
          RefObjOpt mTwinningOption;

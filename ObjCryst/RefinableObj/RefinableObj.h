@@ -133,10 +133,20 @@ class RefinableObjClock
 
 /** Restraint: generic class for a restraint of a given model. This 
 * defines only the category (RefParType) of restraint, and the function
-* to access the likelihood associated to this restraint and the current model.
+* to access the log(likelihood) associated to this restraint and the current model.
 *
-* By default, the likelihood is equal to 100%, and the function must be overloaded
+* By default: -log(likelihood)=0, and the function must be overloaded
 * for "real" restraints.
+*
+*\note the log(likelihood) \e must always include the normalization term,
+* so that variances can also optimized during the maximum likelihood
+* optimization. e.g.:
+* - \f$ P=\frac{1}{\sqrt{2\pi\sigma^2}}e^{\frac{-(calc-expected)^2}{\sigma^2}}\f$
+* - \f$ -\log(P)= \log\left(\sqrt{2\pi\sigma^2}\right)
+* + \left(\frac{calc-expected}{\sigma} \right)^2\f$
+* 
+* forgetting the normalization term would result in making the optimization diverge towards
+* infinite variances.
 */
 class Restraint
 {
@@ -922,6 +932,22 @@ class RefinableObj
          /// Get the current value of a cost function
          /// this should be const...
          virtual REAL GetCostFunctionValue(const unsigned int);
+      // Likelihood
+         /** Get -log(likelihood) of the current configuration for the object.
+         *
+         *
+         * By default (no likelihood evaluation available), this is equal to 0.
+         *
+         * This call should not be recursive, it is the task of the algorithm to
+         * get the sum of likelihoods for all objects invlolved.
+         *
+         * \note contrary to the old "Cost Function" approach, with log(Likelihood)
+         * there is no 'choice' of cost function, so that it is the task of the 
+         * object to give the optimized likelihood (possibly with user options).
+         *
+         * \warning: this is in under heavy development, so expect changes...
+         */
+         virtual REAL GetLogLikelihood()const;
       //LSQ functions
          /// Number of LSQ functions
          virtual unsigned int GetNbLSQFunction()const;
