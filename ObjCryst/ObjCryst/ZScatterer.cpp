@@ -1776,7 +1776,7 @@ void ZScatterer::UpdateScattCompList() const
          mScattCompList(j  ).mX=x;
          mScattCompList(j  ).mY=y;
          mScattCompList(j  ).mZ=z;
-         mScattCompList(j++).mOccupancy=mZAtomRegistry.GetObj(i).GetOccupancy();
+         mScattCompList(j++).mOccupancy=mZAtomRegistry.GetObj(i).GetOccupancy()*mOccupancy;
       }
    }
    #ifdef __DEBUG__
