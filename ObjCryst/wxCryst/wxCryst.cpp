@@ -693,7 +693,7 @@ WXField(parent,name,field_id)
    mpSizer->Add(mpButton,0,wxALIGN_CENTER);
    mpSizer->SetItemMinSize(mpButton,
                            mpButton->GetSize().GetWidth(),
-                           mpButton->GetSize().GetHeight()+2);
+                           mpButton->GetSize().GetHeight());
    mpSizer->SetSizeHints(this);
    this->Layout();
 }
@@ -780,20 +780,20 @@ void WXCrystObj::OnToggleCollapse(wxCommandEvent & WXUNUSED(event))
 
 void WXCrystObj::CrystUpdate(const bool uui,const bool lock)
 {
-   VFN_DEBUG_ENTRY("WXCrystObj::CrystUpdate("<<uui<<lock<<")",10)
+   VFN_DEBUG_ENTRY("WXCrystObj::CrystUpdate("<<uui<<lock<<")",6)
    if(lock) mMutex.Lock();
    mList.CrystUpdate(uui,false);
    if(lock) mMutex.Unlock();
-   VFN_DEBUG_EXIT("WXCrystObj::CrystUpdate()",10)
+   VFN_DEBUG_EXIT("WXCrystObj::CrystUpdate()",6)
 }
 void WXCrystObj::UpdateUI(const bool lock)
 {
-   VFN_DEBUG_ENTRY("WXCrystObj::UpdateUI("<<lock<<")",10)
+   VFN_DEBUG_ENTRY("WXCrystObj::UpdateUI("<<lock<<")",6)
    if(lock) mMutex.Lock();
    if(mpWXTitle!=0) mpWXTitle->UpdateUI(false);
    mList.UpdateUI(false);
    if(lock) mMutex.Unlock();
-   VFN_DEBUG_EXIT("WXCrystObj::UpdateUI()",10)
+   VFN_DEBUG_EXIT("WXCrystObj::UpdateUI()",6)
 }
 void WXCrystObj::OnEnable(wxUpdateUIEvent &event)
 {
@@ -905,7 +905,7 @@ void WXCrystMenuBar::AddMenu(const string &name,const int menuId, const string& 
    mpSizer->Add(mvpMenu[menuId].second,0,wxALIGN_CENTER);
    mpSizer->SetItemMinSize(mvpMenu[menuId].second,
                            mvpMenu[menuId].second->GetSize().GetWidth(),
-                           mvpMenu[menuId].second->GetSize().GetHeight()+2);
+                           mvpMenu[menuId].second->GetSize().GetHeight());
    VFN_DEBUG_MESSAGE("WXCrystMenuBar::AddMenu():3",6)
    this->BottomLayout(0);
    VFN_DEBUG_MESSAGE("WXCrystMenuBar::AddMenu():End",6)
