@@ -980,6 +980,12 @@ Computing all Profiles",5)
             }
             first=(long)(mpParentPowderPattern->X2Pixel(center-halfwidth));
             last =(long)(mpParentPowderPattern->X2Pixel(center+halfwidth+spectrumwidth));
+            if(first>last)
+            { // Whoops - should not happen !! Unless there is a strange (dis)order for the x coordinates...
+               cout<<"PowderPatternDiffraction::CalcPowderReflProfile(), line"<<__LINE__<<"first>last !! :"<<first<<","<<last<<endl;
+               first=(first+last)/2;
+               last=first;
+            }
             if(this->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
             {
                const long f=first;
@@ -988,8 +994,8 @@ Computing all Profiles",5)
             }
             first -=1;
             last+=1;
-            
             VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile():"<<first<<","<<last<<","<<center,3)
+            if(first>last) exit(0);
             if((last>=0)&&(first<(long)(mpParentPowderPattern->GetNbPoint())))
             {
                if(first<0) first=0;
@@ -1610,11 +1616,7 @@ REAL PowderPattern::X2Pixel(const REAL x)const
          for(;;pix--)
          {
             VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix<<","<<mX(pix),1)
-            if(mX(pix)>=x)
-            {
-               pix++;
-               break;
-            }
+            if(mX(pix)>=x) break;
             if(pix==0) break;
          }
       }
@@ -1622,7 +1624,7 @@ REAL PowderPattern::X2Pixel(const REAL x)const
       {
          for(;;pix++)
          {
-            if(mX(pix)<=x) break;
+            if(mX(pix)<=x) {pix--;break;}
             if(pix==((long)mNbPoint-2)) break;
          }
       }
@@ -1651,11 +1653,7 @@ REAL PowderPattern::X2Pixel(const REAL x)const
          for(;;pix--)
          {
             VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix<<","<<mX(pix),1)
-            if(mX(pix)<=x)
-            {
-               pix++;
-               break;
-            }
+            if(mX(pix)<=x) break;
             if(pix==0) break;
          }
       }
@@ -1664,7 +1662,7 @@ REAL PowderPattern::X2Pixel(const REAL x)const
          for(;;pix++)
          {
             VFN_DEBUG_MESSAGE("PowderPattern::X2Pixel():"<<x<<","<<pix<<","<<mX(pix),1)
-            if(mX(pix)>=x) break;
+            if(mX(pix)>=x) {pix-- ;break;}
             if(pix==((long)mNbPoint-2)) break;
          }
       }
