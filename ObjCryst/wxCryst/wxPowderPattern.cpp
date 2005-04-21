@@ -461,6 +461,23 @@ void WXPowderPattern::OnMenuAddCompBackgd(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompBackgd()",6)
    WXCrystValidateAllUserInput();
+   const unsigned int nb=mpPowderPattern->GetNbPowderPatternComponent();
+   bool hasBack=false;
+   for(int i=0;i<nb;i++)
+      if(mpPowderPattern->GetPowderPatternComponent(i).GetClassName()=="PowderPatternBackground")
+      {
+         hasBack=true;
+         break;
+      }
+   if(hasBack)
+   {
+      wxMessageDialog dialog(this,_T("You already have one background !\n")
+                                  _T(" Are you sure you want to add one ?"),
+                             "Warning : Duplicate Background !",
+                             wxYES_NO|wxICON_HAND|wxNO_DEFAULT);
+      if(wxID_YES!=dialog.ShowModal())
+         return;
+   }
    PowderPatternBackground *backgdData= new PowderPatternBackground;
    mpPowderPattern->AddPowderPatternComponent(*backgdData);
    if(mpGraph!=0) mpPowderPattern->Prepare();//else this will be done when opening the graph
@@ -471,6 +488,23 @@ void WXPowderPattern::OnMenuAddCompBackgdBayesian(wxCommandEvent & WXUNUSED(even
 {
    VFN_DEBUG_ENTRY("WXPowderPattern::OnMenuAddCompBackgdBayesian()",6)
    WXCrystValidateAllUserInput();
+   const unsigned int nb=mpPowderPattern->GetNbPowderPatternComponent();
+   bool hasBack=false;
+   for(int i=0;i<nb;i++)
+      if(mpPowderPattern->GetPowderPatternComponent(i).GetClassName()=="PowderPatternBackground")
+      {
+         hasBack=true;
+         break;
+      }
+   if(hasBack)
+   {
+      wxMessageDialog dialog(this,_T("You already have one background !\n")
+                                  _T(" Are you sure you want to add one ?"),
+                             "Warning : Duplicate Background !",
+                             wxYES_NO|wxICON_HAND|wxNO_DEFAULT);
+      if(wxID_YES!=dialog.ShowModal())
+         return;
+   }
 
    long nbPointSpline=20;
    string mes="Number of Interpolation Points";
