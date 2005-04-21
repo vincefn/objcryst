@@ -1020,7 +1020,7 @@ void Crystal::XMLOutput(ostream &os,int indent)const
          {
             stringstream ss;
             ss << pos->second.mCanOverlap;
-            tag.AddAttribute("AllowMerge",ss.str());
+            tagBump.AddAttribute("AllowMerge",ss.str());
          }
          os<<tagBump;
          tagBump.SetIsEndTag(true);
