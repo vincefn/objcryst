@@ -37,7 +37,7 @@ LDFLAGS   = -L/usr/lib -L/usr/local/lib -L$(DIR_ATOMINFO) -L$(DIR_CRYSTVECTOR) -
 MAKEDEPEND = gcc -MM ${CPPFLAGS} ${CXXFLAGS} ${C_BLITZFLAG} $< > $*.dep
 
 # header files
-SEARCHDIRS = -I- -I${DIR_CRYST}/.. -I./ -I$(DIR_BLITZ)  -I$(DIR_TAU)/include -I$(DIR_NEWMAT) -I${DIR_CRYST}
+SEARCHDIRS =  -I${DIR_CRYST}/.. -I${DIR_CRYST}
 
 #wxWindows flags
 ifeq ($(wxcryst),1)
@@ -50,7 +50,7 @@ endif
 
 #activate profiling using TAU package
 ifeq ($(profile),1)
-   PROFILEFLAGS := -DPROFILING_ON -DTAU_STDCXXLIB
+   PROFILEFLAGS := -DPROFILING_ON -DTAU_STDCXXLIB -I$(DIR_TAU)/include
    PROFILELIB := -ltau
 else
    PROFILEFLAGS :=
@@ -63,7 +63,7 @@ GLUT_LIB= -lglut
 #Using OpenGL ?
 ifeq ($(opengl),1)
 GL_WX_LIB = `wx-config --gl-libs` -lGL -lGLU $(GLUT_LIB)
-GL_FLAGS := -DOBJCRYST_GL -IGL $(GLUT_FLAGS) -I/usr/include/GL
+GL_FLAGS := -DOBJCRYST_GL -IGL $(GLUT_FLAGS)
 else
 GL_WX_LIB :=
 GL_FLAGS :=
