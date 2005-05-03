@@ -63,7 +63,7 @@ GLUT_LIB= -lglut
 #Using OpenGL ?
 ifeq ($(opengl),1)
 GL_WX_LIB = `wx-config --gl-libs` -lGL -lGLU $(GLUT_LIB)
-GL_FLAGS := -DOBJCRYST_GL -IGL $(GLUT_FLAGS)
+GL_FLAGS := -DOBJCRYST_GL -IGL $(GLUT_FLAGS) -I/usr/include/GL
 else
 GL_WX_LIB :=
 GL_FLAGS :=
