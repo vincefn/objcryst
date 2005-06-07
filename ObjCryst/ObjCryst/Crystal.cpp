@@ -1014,7 +1014,7 @@ REAL Crystal::GetBondValenceCost() const
    }
    this->CalcBondValenceSum();
    if(  (mBondValenceCostClock>mBondValenceCalcClock)
-      &&(mBondValenceCostClock>this->GetMasterClockScatteringPower())) return mBondValenceCost*mBondValenceCost;
+      &&(mBondValenceCostClock>this->GetMasterClockScatteringPower())) return mBondValenceCost*mBondValenceCostScale;
    VFN_DEBUG_MESSAGE("Crystal::GetBondValenceCost():"<<mvBondValenceCalc.size()<<" valences",4)
    TAU_PROFILE("Crystal::GetBondValenceCost()","REAL ()",TAU_DEFAULT);
    mBondValenceCost=0.0;
