@@ -358,28 +358,21 @@ mpCrystalGL(0)
 
 void WXCrystal::CrystUpdate(const bool uui,const bool lock)
 {
-   VFN_DEBUG_ENTRY("WXCrystal::CrystUpdate()",10)
+   VFN_DEBUG_ENTRY("WXCrystal::CrystUpdate()",5)
    if(lock) mMutex.Lock();
-   VFN_DEBUG_MESSAGE("WXCrystal::CrystUpdate()",10)
    mpCrystal->GetBumpMergeCost();
-   VFN_DEBUG_MESSAGE("WXCrystal::CrystUpdate()",10)
    mpCrystal->GetBondValenceCost();
-   VFN_DEBUG_MESSAGE("WXCrystal::CrystUpdate()",10)
    //mWXParent->Layout();
    if(lock) mMutex.Unlock();
-   VFN_DEBUG_MESSAGE("WXCrystal::CrystUpdate()",10)
    #ifdef OBJCRYST_GL
    if(mpCrystalGL!=0)
    {
-   VFN_DEBUG_MESSAGE("WXCrystal::CrystUpdate()",10)
       BBox box=mpCrystalGL->GetCellBBox();
       this->UpdateGL(false,box.xMin,box.xMax,box.yMin,box.yMax,box.zMin,box.zMax);
    }
    #endif
-   VFN_DEBUG_MESSAGE("WXCrystal::CrystUpdate()",10)
    this->WXRefinableObj::CrystUpdate(uui,lock);
-   VFN_DEBUG_MESSAGE("WXCrystal::CrystUpdate()",10)
-   VFN_DEBUG_EXIT("WXCrystal::CrystUpdate():End",10)
+   VFN_DEBUG_EXIT("WXCrystal::CrystUpdate():End",5)
 }
 
 #ifdef OBJCRYST_GL
@@ -1701,10 +1694,14 @@ mShowFourier(true),mShowCrystal(true),mShowAtomName(true),mShowCursor(false),
 mIsGLFontBuilt(false),mGLFontDisplayListBase(0)
 {
    VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::WXGLCrystalCanvas()",3)
+   mcellbbox.xMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmin()-0.1;
+   mcellbbox.yMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Ymin()-0.1;
+   mcellbbox.zMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Zmin()-0.1;
+   mcellbbox.xMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmax()+0.1;
+   mcellbbox.yMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Ymax()+0.1;
+   mcellbbox.zMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Zmax()+0.1;
      // N.B. xMin=xMax so that the previous cell bbox is used for Maps 
      // until mmapbbox is changed
-   mcellbbox.xMin = mcellbbox.yMin = mcellbbox.zMin = -0.1;
-   mcellbbox.xMax = mcellbbox.yMax = mcellbbox.zMax = 1.1;
    mmapbbox.xMin = mmapbbox.xMax = mmapbbox.yMin = mmapbbox.zMin = 0.;
    mmapbbox.yMax = mmapbbox.zMax = 1.;
    mpPopUpMenu=new wxMenu("Crystal");
@@ -2023,7 +2020,7 @@ void WXGLCrystalCanvas::OnKeyUp(wxKeyEvent& event)
 
 void WXGLCrystalCanvas::OnEnterWindow( wxMouseEvent& event )
 {
-   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnEnterWindow()",10)
+   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnEnterWindow()",5)
 }
 
 void WXGLCrystalCanvas::OnMouse( wxMouseEvent& event )
