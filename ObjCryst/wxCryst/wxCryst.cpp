@@ -498,10 +498,10 @@ void WXFieldName::Revert()
 void WXFieldName::ValidateUserInput()
 {
    VFN_DEBUG_MESSAGE("WXFieldName::ValidateUserInput()",6)
-   //:TODO: Check that the object is not busy (input should be frozen)
-   wxMutexLocker mlock(mMutex);
+   mMutex.Lock();
    mValueOld=mValue;
    mValue=mpField->GetValue();
+   mMutex.Unlock();
    mpWXObj->OnChangeName(mId);
 }
 
