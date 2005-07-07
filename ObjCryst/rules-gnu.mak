@@ -2,10 +2,9 @@
 DIR_CRYST = .
 
 #external libraries directories
-DIR_ATOMINFO = ${DIR_CRYST}/../atominfo
 DIR_BLITZ = ${DIR_CRYST}/../blitz
 DIR_NEWMAT = ${DIR_CRYST}/../newmat
-DIR_SGLITE = ${DIR_CRYST}/../sglite
+DIR_CCTBX = ${DIR_CRYST}/../cctbx
 DIR_TAU = ${DIR_CRYST}/../tau
 # Just to find wxWindows headers. Libs are in /usr/lib or in /usr/local/lib
 DIR_WXWINDOWS = /usr/lib/wx
@@ -31,13 +30,13 @@ FC     := f77
 FFLAGS  = 
 # linker
 LINKER    := g++
-LDFLAGS   = -L/usr/lib -L/usr/local/lib -L$(DIR_ATOMINFO) -L$(DIR_CRYSTVECTOR) -L$(DIR_LIBCRYST) -L$(DIR_NEWMAT) -L$(DIR_BLITZ)/lib -L$(DIR_REFOBJ) -L$(DIR_SGLITE) -L$(DIR_VFNQUIRKS) -L$(DIR_WXWCRYST) -L$(DIR_TAU)/i386_linux/lib
+LDFLAGS   = -L/usr/lib -L/usr/local/lib -L$(DIR_CRYSTVECTOR) -L$(DIR_LIBCRYST) -L$(DIR_NEWMAT) -L$(DIR_BLITZ)/lib -L$(DIR_REFOBJ) -L$(DIR_CCTBX) -L$(DIR_VFNQUIRKS) -L$(DIR_WXWCRYST) -L$(DIR_TAU)/i386_linux/lib
 
 #to automatically generate dependencies
 MAKEDEPEND = gcc -MM ${CPPFLAGS} ${CXXFLAGS} ${C_BLITZFLAG} $< > $*.dep
 
 # header files
-SEARCHDIRS =  -I${DIR_CRYST}/.. -I${DIR_CRYST}
+SEARCHDIRS = -I- -I${DIR_CRYST}/.. -I./ -I$(DIR_BLITZ)  -I$(DIR_TAU)/include -I$(DIR_NEWMAT) -I${DIR_CRYST} -I${DIR_CCTBX}/cctbx/include -I${DIR_CCTBX}/scitbx/include -I${DIR_CCTBX}/
 
 #wxWindows flags
 ifeq ($(wxcryst),1)
@@ -79,7 +78,7 @@ ifeq ($(debug),1)
       CPPFLAGS = -g -Wall -D__DEBUG__ 
    endif
    DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS}
-   LOADLIBES = -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lsglite -latominfo ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS}
+   LOADLIBES = -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS}
 else
 # -march=athlon,pentiumpro
    ifdef RPM_OPT_FLAGS
@@ -89,10 +88,9 @@ else
       CPPFLAGS = -O3 -w -ffast-math 
    endif
    DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS}
-   LOADLIBES = -s -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lsglite -latominfo ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS}
-endif #DEBUG
+   LOADLIBES = -s -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS}
+endif
 # Add to statically link: -nodefaultlibs -lgcc /usr/lib/libstdc++.a
-
 
 ######################################################################
 #####################      LIBRAIRIES         ########################
@@ -128,10 +126,6 @@ libRefinableObj:
 libnewmat:
 	$(MAKE) -f nm_gnu.mak -C ${DIR_NEWMAT} libnewmat.a
      
-#SgLite -Spacegroup Lib
-libsglite:
-	$(MAKE) -f gnu.mak -C ${DIR_SGLITE} lib
-     
-#AtomInfo
-libatominfo:
-	$(MAKE) -f gnu.mak -C ${DIR_ATOMINFO} lib
+#cctbx
+libcctbx:
+	$(MAKE) -f gnu.mak -C ${DIR_CCTBX} lib

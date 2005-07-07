@@ -15,10 +15,10 @@ DIR_CRYST := ../ObjCryst
 -include Fox.dep
 
 #wxCryst Application ( wxCrystApp_resource.o for cygwin)
-Fox: Fox.o libCrystVector libQuirks libRefinableObj libsglite libatominfo libCryst libwxCryst
+Fox: Fox.o libCrystVector libQuirks libRefinableObj libcctbx libCryst libwxCryst
 	${LINKER} ${LDFLAGS} -o $@ ${filter-out %.a %.so lib%, $^} ${LOADLIBES} 
 
-Fox-nogui: Fox.o libCrystVector libQuirks libRefinableObj libsglite libatominfo libCryst
+Fox-nogui: Fox.o libCrystVector libQuirks libRefinableObj libcctbx libCryst
 	${LINKER} ${LDFLAGS} -o $@ ${filter-out %.a %.so lib%, $^} ${LOADLIBES} 
 
 fox: Fox

@@ -49,20 +49,6 @@ namespace ObjCryst
 
 ////////////////////////////////////////////////////////////////////////
 //
-// Using external functions from 'atominfo' package
-//
-//-> Coefficients for the analytical approximation of scattering factors.
-//AtomInfo (c) 1994-96 Ralf W. Grosse-Kunstleve 
-//
-////////////////////////////////////////////////////////////////////////
-
-extern "C"
-{
-#include "atominfo/atominfo.h"
-}
-
-////////////////////////////////////////////////////////////////////////
-//
 //    ATOM : the basic atom, within the crystal
 //
 //includes thermic factor (betas) and x,y,z,population
@@ -225,7 +211,6 @@ ostream& Atom::POVRayDescription(ostream &os,
    xyzCoords=this->GetCrystal().GetSpaceGroup().GetAllSymmetrics(x0,y0,z0,false,false,true);
    int nbSymmetrics=xyzCoords.rows();
    os << "// Description of Atom :" << this->GetName()<< endl;
-   int symNum=0;
    for(int i=0;i<nbSymmetrics;i++)
    {
       x0=xyzCoords(i,0);
@@ -235,7 +220,6 @@ ostream& Atom::POVRayDescription(ostream &os,
       y0 = fmod((float) y0,(float)1); if(y0<0) y0+=1.;
       z0 = fmod((float) z0,(float)1); if(z0<0) z0+=1.;
       //Generate also translated atoms near the unit cell
-      const REAL limit =0.1;
       CrystMatrix_int translate(27,3);
       translate=  -1,-1,-1,
                   -1,-1, 0,

@@ -32,6 +32,9 @@
 //#include <fstream>
 //#include <ctime>
 
+// forward declaration to avoid including boost headers 
+namespace cctbx { namespace eltbx { namespace xray_scattering {class gaussian;}}}
+
 namespace ObjCryst
 {
 extern const RefParType *gpRefParTypeScattPow;
@@ -359,14 +362,12 @@ class ScatteringPowerAtom:virtual public ScatteringPower
       string mSymbol;
       /// atomic number (Z) for the atom
       int mAtomicNumber;
-      /**  \brief X-Ray Scattering factor coefficients (ai,bi and c)
-      *for the analytical approximation
-      *
-      *[Acta Cryst. A51, 416-431]
-      *[International Tables for Crystallography, Vol. C, 1992 (6.1.1)]
+      
+      /** Pointer to cctbx's gaussian describing the thomson x-ray
+      * scattering factor.
       */
-      CrystVector_REAL mScattAi,mScattBi;
-      REAL mScattC;
+      cctbx::eltbx::xray_scattering::gaussian *mpGaussian;
+      
       /** \brief Neutron Bond Coherent Scattering lengths
       *
       *Real and imaginary (for atoms who have an imaginary part)

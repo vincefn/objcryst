@@ -3,7 +3,7 @@ DIR_CRYST=C:\Dev\Fox\ObjCryst
 # Borland Directory
 DIR_BORLAND=C:\Borland\BCC55
 # wxWindows Directory
-DIR_WXWINDOWS = C:\Dev\wxWindows
+DIR_WXWINDOWS = C:\Dev\wxWidgets
 
 #You should not need to modify anything below
 ###################################################################
@@ -13,15 +13,12 @@ wxcryst=1
 debug=0
 
 #Other directories
-DIR_ATOMINFO = ${DIR_CRYST}\..\atominfo
-DIR_BLITZ = ${DIR_CRYST}\..\blitz
+DIR_CCTBX = ${DIR_CRYST}\..\cctbx
 DIR_CRYSTVECTOR = ${DIR_CRYST}\CrystVector
 DIR_EXAMPLE = ${DIR_CRYST}\example
 DIR_LIBCRYST = ${DIR_CRYST}\ObjCryst
 DIR_NEWMAT = ${DIR_CRYST}\..\newmat
 DIR_REFOBJ = ${DIR_CRYST}\RefinableObj
-DIR_SGINFO = ${DIR_CRYST}\..\sginfo
-DIR_SGLITE = ${DIR_CRYST}\..\sglite
 DIR_TAU = ${DIR_CRYST}\..\tau
 DIR_VFNQUIRKS = ${DIR_CRYST}\Quirks
 DIR_WXWCRYST = ${DIR_CRYST}\wxCryst
@@ -138,16 +135,16 @@ CCOPTS = -w- -jb -j3 -O2 -6 -ff -OS
 #Compile flags:
 CPPFLAGS= $(CCOPTS) $(DBGOPT)  $(ENVOPTS) $(DEFOPTS) $(THROPTS) $(CCLINKOPT) $(SEARCHDIRS) -DOBJCRYST_GL $(WXCRYSTFLAGS) $(CPPDEBUGFLAGS)
 #LINKFLAGS= -Gn -Gi -Tpd -aa -L$(MAKEDIR)\..\lib -x
-LINKFLAGS= ${WX_LDFLAGS} -L$(DIR_ATOMINFO) -L$(DIR_CRYSTVECTOR) -L$(DIR_LIBCRYST) -L$(DIR_NEWMAT) -L$(DIR_BLITZ)lib -L$(DIR_REFOBJ) -L$(DIR_SGLITE) -L$(DIR_VFNQUIRKS) -L$(DIR_WXWCRYST) -L$(DIR_WXWINDOWS)\lib \
+LINKFLAGS= ${WX_LDFLAGS} -L$(DIR_CCTBX) -L$(DIR_CRYSTVECTOR) -L$(DIR_LIBCRYST) -L$(DIR_NEWMAT) -L$(DIR_BLITZ)lib -L$(DIR_REFOBJ) -L$(DIR_VFNQUIRKS) -L$(DIR_WXWCRYST) -L$(DIR_WXWINDOWS)\lib \
 	-L$(DIR_BORLAND)\lib;$(DIR_BORLAND)\lib\psdk
 
 LINKSTARTUP= c0d32.obj
-LINKLIBS= import32.lib cw32$(LIBSUF).lib libatominfo.lib libsglite.lib libcrystvector.lib libquirks.lib librefinableobj.lib libcryst.lib $(WX_LIBS)
+LINKLIBS= import32.lib cw32$(LIBSUF).lib libcctbx.lib libcrystvector.lib libquirks.lib librefinableobj.lib libcryst.lib $(WX_LIBS)
 RCFLAGS= -r -i$(MAKEDIR)\..\include;$(MAKEDIR)\..\include\windows
 
 
 # header files
-SEARCHDIRS = -I${DIR_CRYST} -I. -I.. -I..\.. -I..\..\.. -I$(DIR_BLITZ) -I$(DIR_NEWMAT) -I${DIR_CRYST} -I$(DIR_SGLITE) -I$(DIR_ATOMINFO) -I$(DIR_BORLAND)\include -I$(DIR_WXWINDOWS)\include
+SEARCHDIRS = -I${DIR_CRYST} -I. -I.. -I..\.. -I..\..\.. -I$(DIR_NEWMAT) -I${DIR_CRYST} -I$(DIR_CCTBX) -I$(DIR_BORLAND)\include -I$(DIR_WXWINDOWS)\include
 
 #debug ?
 !if $(debug)==1
@@ -244,12 +241,8 @@ libnewmat:
 	cd ${DIR_NEWMAT}
 	$(MAKE) -f nm_b55.mak newmat.lib
 
-#SgLite -Spacegroup Lib
-libsglite:
-	@cd ${DIR_SGLITE}
+#cctbx
+libcctbx:
+	@cd ${DIR_CCTBX}
 	$(MAKE) -f bc32.mak lib
 
-#AtomInfo
-libatominfo:
-	cd ${DIR_ATOMINFO} 
-	$(MAKE) -f bc32.mak lib

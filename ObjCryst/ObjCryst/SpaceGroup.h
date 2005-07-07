@@ -27,16 +27,11 @@
 #include "ObjCryst/General.h"
 #include "RefinableObj/RefinableObj.h"
 
+//#include "cctbx/sgtbx/space_group.h"
+namespace cctbx{namespace sgtbx{class space_group;}}
 
 namespace ObjCryst
 {
-
-//R. Gross-Kunstleve "sglite/sglite.h"
-//   struct T_SgInfo;
-extern "C"
-{
-#include "sglite/sglite.h"
-}
 class SpaceGroup;
 //######################################################################
 //  AsymmetricUnit.
@@ -204,13 +199,11 @@ class SpaceGroup
       bool HasInversionCenter()const;
       /// Is the center of symmetry at the origin ?
       bool IsInversionCenterAtOrigin()const;
-      /// Get the SgOps structure. This will be removed when switching to cctbx.
-      const T_SgOps& GetSgOps()const;
+      /// Get the underlying cctbx  Spacegroup object
+      const cctbx::sgtbx::space_group& GetCCTbxSpg()const;
       /// Get the SpaceGroup Clock (corresponding to the time of the
       /// initialization of the SpaceGroup)
       const RefinableObjClock& GetClockSpaceGroup() const;
-      /// Access to the HM_As_Hall structure. This will be removed when switching to cctbx.
-      const T_HM_as_Hall& GetHM_as_Hall()const;
       /// Which is the unique axis (for monoclinic space groups )
       unsigned int GetUniqueAxis()const;
       /** Are these reflections equivalent ?
@@ -270,7 +263,7 @@ class SpaceGroup
       * This is (c) R. Gross-Kunstleve, part of PyMol software
       * http://pymol.sourceforge.net/
       */
-      T_SgOps mSgOps;
+      cctbx::sgtbx::space_group *mpCCTbxSpaceGroup;
       
       /** \brief Is spacegroup centrosymmetric ?
       *
@@ -280,15 +273,6 @@ class SpaceGroup
       *
       */
       bool mIsInversionCenterAtOrigin;
-      
-      /** \brief  SgOps structure for this spacegroup. (Symmetry operations)
-      *
-      * See sglite subdirectory for more information.
-      * This is (c) R. Gross-Kunstleve, part of PyMol software
-      * http://pymol.sourceforge.net/
-      */
-      T_HM_as_Hall mHM_as_Hall;
-
 
       /// The spacegroup asymmetric unit
       AsymmetricUnit mAsymmetricUnit;

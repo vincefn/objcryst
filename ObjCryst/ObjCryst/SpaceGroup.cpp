@@ -25,10 +25,16 @@
 #include <cmath>
 #include <typeinfo>
 
+#include "cctbx/sgtbx/space_group.h"
+#include "cctbx/sgtbx/brick.h"
+#include "cctbx/miller/sym_equiv.h"
+#include "boost/rational.hpp"
+
 #include "ObjCryst/SpaceGroup.h"
 #include "Quirks/VFNStreamFormat.h" //simple formatting of integers, REALs..
 #include "ObjCryst/GeomStructFactor.h" //Geometrical Struct Factor definitions
 #include "Quirks/VFNDebug.h"
+
 
 #include <fstream>
 
@@ -65,6 +71,7 @@ AsymmetricUnit::~AsymmetricUnit()
 void AsymmetricUnit::SetSpaceGroup(const SpaceGroup &spg)
 {
    VFN_DEBUG_MESSAGE("AsymmetricUnit::SetSpaceGroup(SpGroup)",5)
+   # if 0
    TAU_PROFILE("(AsymmetricUnit::SetSpaceGroup)","void (SpaceGroup)",TAU_DEFAULT);
    mXmin=0.;
    mYmin=0.;
@@ -150,6 +157,18 @@ void AsymmetricUnit::SetSpaceGroup(const SpaceGroup &spg)
        <<"     0 <= x <= "<< mXmax<<endl
        <<"     0 <= y <= "<< mYmax<<endl
        <<"     0 <= z <= "<< mZmax<<endl<<endl;
+   #else
+   const cctbx::sgtbx::brick b(spg.GetCCTbxSpg().type());
+   cout<<"->>Parallelepipedic Asymmetric Unit, from cctbx::sgtbx::brick:"<<endl
+       <<b.as_string()<<endl;
+   mXmin=boost::rational_cast<REAL,int>(b(0,0).value());
+   mYmin=boost::rational_cast<REAL,int>(b(1,0).value());
+   mZmin=boost::rational_cast<REAL,int>(b(2,0).value());
+   mXmax=boost::rational_cast<REAL,int>(b(0,1).value());
+   mYmax=boost::rational_cast<REAL,int>(b(1,1).value());
+   mZmax=boost::rational_cast<REAL,int>(b(2,1).value());
+   
+   #endif
 }
 
 bool AsymmetricUnit::IsInAsymmetricUnit(const REAL x, const REAL y, const REAL z)const
@@ -209,7 +228,7 @@ const AsymmetricUnit& SpaceGroup::GetAsymUnit() const {return mAsymmetricUnit;}
 /// Id number of the spacegroup
 int SpaceGroup::GetSpaceGroupNumber()const
 {
-   return mHM_as_Hall.SgNumber;
+   return this->GetCCTbxSpg().match_tabulated_settings().number();
 }
       
 bool SpaceGroup::IsCentrosymmetric()const
@@ -219,17 +238,15 @@ bool SpaceGroup::IsCentrosymmetric()const
 
 int SpaceGroup::GetNbTranslationVectors()const
 {
-   return mSgOps.nLTr;
+   return this->GetCCTbxSpg().n_ltr();
 }
       
 CrystMatrix_REAL SpaceGroup::GetTranslationVectors()const
 {
-   const int *t1;
-   REAL *t2;
    CrystMatrix_REAL transVect(this->GetNbTranslationVectors(),3);
-   t1=&(mSgOps.LTr[0].v[0]);
-   t2=transVect.data();
-   for(int i=0;i<transVect.numElements();i++) *t2++ =  *t1++ / (REAL)STBF ;
+   for(int i=0;i<this->GetNbTranslationVectors();i++)
+      for(int j=0;j<3;j++)
+         transVect(i,j) = this->GetCCTbxSpg().ltr(i)[j];
    return transVect;
 }
 
@@ -241,7 +258,7 @@ CrystMatrix_REAL SpaceGroup::GetAllSymmetrics(const REAL x, const REAL y, const 
    TAU_PROFILE("SpaceGroup::GetAllSymmetrics()","Matrix (x,y,z)",TAU_DEFAULT);
    VFN_DEBUG_MESSAGE("SpaceGroup::GetAllSymmetrics()",0)
    int nbMatrix, nbTrans,coeffInvert,i,j,k;
-   nbMatrix=mSgOps.nSMx;
+   nbMatrix=this->GetCCTbxSpg().n_smx();
    nbTrans=this->GetNbTranslationVectors();
    if(this->IsCentrosymmetric()) coeffInvert=2 ; else coeffInvert=1;
    
@@ -249,43 +266,33 @@ CrystMatrix_REAL SpaceGroup::GetAllSymmetrics(const REAL x, const REAL y, const 
    if(noTransl==true) nbTrans=1; //skip translation operations
    CrystMatrix_REAL coords(nbMatrix*nbTrans*coeffInvert,3);
    
-   REAL tx,ty,tz;
-   const int *t;
-   t=&(mSgOps.LTr[0].v[0]);
-   const T_RTMx *pMatrix;
+   const cctbx::sgtbx::rt_mx *pMatrix;
    k=0;
    for(i=0;i<nbTrans;i++)
    {
-      tx=*t++;
-      ty=*t++;
-      tz=*t++;
+      const REAL tx=this->GetCCTbxSpg().ltr(i)[0]/(REAL)(this->GetCCTbxSpg().ltr(i).den());
+      const REAL ty=this->GetCCTbxSpg().ltr(i)[1]/(REAL)(this->GetCCTbxSpg().ltr(i).den());
+      const REAL tz=this->GetCCTbxSpg().ltr(i)[2]/(REAL)(this->GetCCTbxSpg().ltr(i).den());
       //if(noTransl==false) cout << nbTrans <<endl;
       //if(noTransl==false) cout << tx <<" "<< ty<<" "<< tz<<" "<<endl;
-      pMatrix=&(mSgOps.SMx[0]);
       for(j=0;j<nbMatrix;j++)
       {
-         coords(k,0)= (*pMatrix).s.R[0]*x+(*pMatrix).s.R[1]*y+(*pMatrix).s.R[2]*z
-                     +(*pMatrix).s.T[0]/(REAL)STBF+tx/(REAL)STBF;
-         coords(k,1)= (*pMatrix).s.R[3]*x+(*pMatrix).s.R[4]*y+(*pMatrix).s.R[5]*z
-                     +(*pMatrix).s.T[1]/(REAL)STBF+ty/(REAL)STBF;
-         coords(k,2)= (*pMatrix).s.R[6]*x+(*pMatrix).s.R[7]*y+(*pMatrix).s.R[8]*z
-                     +(*pMatrix).s.T[2]/(REAL)STBF+tz/(REAL)STBF;
-         //cout<<(*pMatrix).s.R[0]<<" "<<(*pMatrix).s.R[1]<<" "<<(*pMatrix).s.R[2];
-         //cout <<" "<<(*pMatrix).s.T[0]/(REAL)STBF<<endl;
-         //cout<<(*pMatrix).s.R[3]<<" "<<(*pMatrix).s.R[4]<<" "<<(*pMatrix).s.R[5];
-         //cout <<" "<<(*pMatrix).s.T[1]/(REAL)STBF<<endl;
-         //cout<<(*pMatrix).s.R[5]<<" "<<(*pMatrix).s.R[6]<<" "<<(*pMatrix).s.R[7];
-         //cout <<" "<<(*pMatrix).s.T[2]/(REAL)STBF<<endl<<endl;
-         pMatrix++;
+         pMatrix=&(this->GetCCTbxSpg().smx(j));
+         coords(k,0)= (pMatrix->r()[0]*x+pMatrix->r()[1]*y+pMatrix->r()[2]*z)/(REAL)(pMatrix->r().den())
+                     +pMatrix->t()[0]/(REAL)(pMatrix->t().den())+tx;
+         coords(k,1)= (pMatrix->r()[3]*x+pMatrix->r()[4]*y+pMatrix->r()[5]*z)/(REAL)(pMatrix->r().den())
+                     +pMatrix->t()[1]/(REAL)(pMatrix->t().den())+ty;
+         coords(k,2)= (pMatrix->r()[6]*x+pMatrix->r()[7]*y+pMatrix->r()[8]*z)/(REAL)(pMatrix->r().den())
+                     +pMatrix->t()[2]/(REAL)(pMatrix->t().den())+tz;
          k++;
       }
    }
    if(coeffInvert==2) //inversion center not in ListSeitzMx, but to be applied
    {
       int shift=nbMatrix*nbTrans;
-      const REAL dx=((REAL)mSgOps.InvT[0])/STBF;//inversion not at the origin
-      const REAL dy=((REAL)mSgOps.InvT[1])/STBF;
-      const REAL dz=((REAL)mSgOps.InvT[2])/STBF;
+      const REAL dx=((REAL)this->GetCCTbxSpg().inv_t()[0])/(REAL)this->GetCCTbxSpg().inv_t().den();//inversion not at the origin
+      const REAL dy=((REAL)this->GetCCTbxSpg().inv_t()[1])/(REAL)this->GetCCTbxSpg().inv_t().den();
+      const REAL dz=((REAL)this->GetCCTbxSpg().inv_t()[2])/(REAL)this->GetCCTbxSpg().inv_t().den();
       for(i=0;i<shift;i++)
       {
          coords(i+shift,0)=dx-coords(i,0);
@@ -338,243 +345,148 @@ CrystMatrix_REAL SpaceGroup::GetAllSymmetrics(const REAL x, const REAL y, const 
 
 int SpaceGroup::GetNbSymmetrics(const bool noCenter,const bool noTransl)const
 {
-   int nbMatrix, nbTrans,coeffInvert;
-   nbMatrix=mSgOps.nSMx;
-   nbTrans=this->GetNbTranslationVectors();
-   if(this->IsCentrosymmetric()) coeffInvert=2 ; else coeffInvert=1;
-   
-   if(noCenter==true) coeffInvert=1;   //skip center of symmetry
-   if(noTransl==true) nbTrans=1; //skip translation operations
-   
-   return nbMatrix*nbTrans*coeffInvert;
+   int c=this->GetCCTbxSpg().f_inv();
+   if(noCenter)c=1;
+   int t=this->GetCCTbxSpg().n_ltr();
+   if(noTransl)t=1;
+   int s=this->GetCCTbxSpg().n_smx();
+   return c*t*s;
 }
 
 void SpaceGroup::Print() const
 {
    cout << "SpaceGroup:" <<endl;
-   cout << "  Schoenflies symbol = " << mHM_as_Hall.Schoenfl << endl ;
-   cout << "  Hermann-Maugin symbol = " << mHM_as_Hall.HM << endl ;
-   cout << "  Hall symbol = " << mHM_as_Hall.Hall << endl ;
-   cout << "  SgNumber = " <<  mHM_as_Hall.SgNumber << endl ;
-   cout << "  Number of Seitz Matrix = " <<  mSgOps.nSMx << endl ;
-   cout << "  Number of Translation Vectors = " <<  mSgOps.nLTr << endl ;
+   cout << "  Schoenflies symbol = " << this->GetCCTbxSpg().match_tabulated_settings().schoenflies() << endl ;
+   cout << "  Hermann-Maugin symbol = " <<  this->GetCCTbxSpg().match_tabulated_settings().hermann_mauguin() << endl ;
+   cout << "  Hall symbol = " <<  this->GetCCTbxSpg().match_tabulated_settings().hall() << endl ;
+   cout << "  SgNumber = " <<   this->GetCCTbxSpg().match_tabulated_settings().number() << endl ;
+   cout << "  Number of Seitz Matrix = " <<  this->GetCCTbxSpg().n_smx() << endl ;
+   cout << "  Number of Translation Vectors = " <<   this->GetCCTbxSpg().n_ltr() << endl ;
    cout << "  List of Seitz Matrices : " << endl ;
-   for(int i=0;i<mSgOps.nSMx;i++)
-      cout << "    " << RTMx2XYZ(&mSgOps.SMx[i],1,STBF,0,0,1,NULL,NULL,80) <<endl;
+   for(unsigned int i=0;i<this->GetCCTbxSpg().n_smx();i++)
+      cout << "    " <<  this->GetCCTbxSpg().smx(i).as_xyz() <<endl;
    if(true==mHasInversionCenter)
    {
       cout << "  There is an inversion center at "
-           << ((REAL)mSgOps.InvT[0])/STBF/2. << " "
-           << ((REAL)mSgOps.InvT[1])/STBF/2. << " "
-           << ((REAL)mSgOps.InvT[2])/STBF/2. << endl;
+           << (this->GetCCTbxSpg().inv_t()[0])/(REAL)this->GetCCTbxSpg().inv_t().den()/2. << " "
+           << (this->GetCCTbxSpg().inv_t()[1])/(REAL)this->GetCCTbxSpg().inv_t().den()/2. << " "
+           << (this->GetCCTbxSpg().inv_t()[2])/(REAL)this->GetCCTbxSpg().inv_t().den()/2. << endl;
    }
-   if(mSgOps.nLTr>0)
+   if(this->GetCCTbxSpg().n_ltr()>0)
    {
       cout <<"  List of Translation vectors :"<<endl;
-      for(int i=0;i<mSgOps.nLTr;i++)
-         cout << "     "<< mSgOps.LTr[i].v[0]/(REAL)STBF<<","
-                        << mSgOps.LTr[i].v[1]/(REAL)STBF<<","
-                        << mSgOps.LTr[i].v[2]/(REAL)STBF<<endl;
+      for(unsigned int i=0;i<this->GetCCTbxSpg().n_ltr();i++)
+         cout << "     "<< this->GetCCTbxSpg().ltr(i)[0]/(REAL)this->GetCCTbxSpg().ltr(i).den()<<","
+                        << this->GetCCTbxSpg().ltr(i)[1]/(REAL)this->GetCCTbxSpg().ltr(i).den()<<","
+                        << this->GetCCTbxSpg().ltr(i)[2]/(REAL)this->GetCCTbxSpg().ltr(i).den()<<endl;
    }
 }
 bool SpaceGroup::HasInversionCenter() const {return mHasInversionCenter;}
 bool SpaceGroup::IsInversionCenterAtOrigin() const {return mIsInversionCenterAtOrigin;}
-const T_SgOps& SpaceGroup::GetSgOps()const{return mSgOps;}
+const cctbx::sgtbx::space_group& SpaceGroup::GetCCTbxSpg()const{return *mpCCTbxSpaceGroup;}
 
 const RefinableObjClock& SpaceGroup::GetClockSpaceGroup() const{return mClock;}
-
-const T_HM_as_Hall& SpaceGroup::GetHM_as_Hall()const
-{
-   return mHM_as_Hall;
-}
 
 unsigned int SpaceGroup::GetUniqueAxis()const{return mUniqueAxisId;}
 
 unsigned int SpaceGroup::AreReflEquiv(const REAL h1, const REAL k1, const REAL l1,
-                          const REAL h2, const REAL k2, const REAL l2)const
+                                      const REAL h2, const REAL k2, const REAL l2)const
 {
-   const REAL eps=.001;
-   const T_RTMx *pMatrix;
-   pMatrix=&(mSgOps.SMx[0]);
-   float h,k,l;
-   unsigned int equiv=0;
-   for(int j=0;j<mSgOps.nSMx;j++)
+   cctbx::miller::index<long> h(scitbx::vec3<long>(scitbx::math::iround(h1),
+                                                   scitbx::math::iround(k1),
+                                                   scitbx::math::iround(l1)));
+   cctbx::miller::sym_equiv_indices sei(this->GetCCTbxSpg(),h);
+   const bool anomalous=true;
+   const int f_mates=sei.f_mates(anomalous);
+   for(int i=0;i<sei.multiplicity(anomalous);i++)
    {
-      h=h2*(*pMatrix).s.R[0]+k2*(*pMatrix).s.R[3]+l2*(*pMatrix).s.R[6];
-      k=h2*(*pMatrix).s.R[1]+k2*(*pMatrix).s.R[4]+l2*(*pMatrix).s.R[7];
-      l=h2*(*pMatrix).s.R[2]+k2*(*pMatrix).s.R[5]+l2*(*pMatrix).s.R[8];
-      if( (fabs(h-h1) + fabs(k-k1) + fabs(l-l1) )<eps){equiv=1; break;}
-      if( (fabs(h+h1) + fabs(k+k1) + fabs(l+l1) )<eps){equiv=2; /*break;*/}
-      pMatrix++;
+      cctbx::miller::index<long> k = sei(i).h();
+      if(h==k)
+      {
+         if(i%f_mates) return 1;
+         else return 2;
+      }
    }
-   if(this->IsCentrosymmetric() && (equiv==2)) equiv=1;
-   return equiv;
+            
+   return 0;
 }
 
-CrystMatrix_REAL SpaceGroup::GetAllEquivRefl(const REAL h, const REAL k, const REAL l,
+CrystMatrix_REAL SpaceGroup::GetAllEquivRefl(const REAL h0, const REAL k0, const REAL l0,
                                              const bool excludeFriedelMate,
                                              const bool forceFriedelLaw) const
 {
-   const REAL eps=.001;
-   const T_RTMx *pMatrix;
-   pMatrix=&(mSgOps.SMx[0]);
-   float h1,k1,l1;
-   int nbEquiv=0;
-   CrystMatrix_REAL equivReflList(1,3);
-   for(int j=0;j<mSgOps.nSMx;j++)
+   VFN_DEBUG_ENTRY("SpaceGroup::GetAllEquivRefl():",5)
+   cctbx::miller::index<long> h(scitbx::vec3<long>(scitbx::math::iround(h0),
+                                                   scitbx::math::iround(k0),
+                                                   scitbx::math::iround(l0)));
+   cctbx::miller::sym_equiv_indices sei(this->GetCCTbxSpg(),h);
+   int f_mates=sei.f_mates(true);
+   if((this->IsCentrosymmetric() || forceFriedelLaw) && (!excludeFriedelMate)) f_mates=1;
+   int nbEquiv=sei.multiplicity(true)/f_mates;
+   CrystMatrix_REAL equivReflList(nbEquiv,3);
+   for(int i=0;i<sei.multiplicity(true);i+=f_mates)
    {
-      h1=h*(*pMatrix).s.R[0]+k*(*pMatrix).s.R[3]+l*(*pMatrix).s.R[6];
-      k1=h*(*pMatrix).s.R[1]+k*(*pMatrix).s.R[4]+l*(*pMatrix).s.R[7];
-      l1=h*(*pMatrix).s.R[2]+k*(*pMatrix).s.R[5]+l*(*pMatrix).s.R[8];
-      pMatrix++;
-      //Already listed ?
-         bool noRepeat=false;
-         for(int i=0;i<nbEquiv;i++)
-            if(  (( fabs(equivReflList(i,0)-h1)
-                   +fabs(equivReflList(i,1)-k1)
-                   +fabs(equivReflList(i,2)-l1))<eps)
-               ||(( fabs(equivReflList(i,0)+h1)
-                   +fabs(equivReflList(i,1)+k1)
-                   +fabs(equivReflList(i,2)+l1))<eps))
-            {noRepeat=true;continue;}
-         
-         if(noRepeat) continue;
-      nbEquiv++;
-      if(equivReflList.rows()<=nbEquiv) equivReflList.resizeAndPreserve(nbEquiv,3);
-      equivReflList(nbEquiv-1,0)=h1;
-      equivReflList(nbEquiv-1,1)=k1;
-      equivReflList(nbEquiv-1,2)=l1;
+      cctbx::miller::index<long> k = sei(i).h();
+      equivReflList(i/f_mates,0)=(REAL)k[0];
+      equivReflList(i/f_mates,1)=(REAL)k[1];
+      equivReflList(i/f_mates,2)=(REAL)k[2];
    }
-   if((this->IsCentrosymmetric() || forceFriedelLaw) && (!excludeFriedelMate))
-   {
-      //cout <<"Adding Friedels !"<<endl;
-      equivReflList.resizeAndPreserve(nbEquiv*2,3);
-      for(int i=0;i<nbEquiv;i++)
-      {
-         equivReflList(nbEquiv+i,0)=-equivReflList(i,0);
-         equivReflList(nbEquiv+i,1)=-equivReflList(i,1);
-         equivReflList(nbEquiv+i,2)=-equivReflList(i,2);
-      }
-      nbEquiv*=2;
-   }
-   equivReflList.resizeAndPreserve(nbEquiv,3);
+   VFN_DEBUG_EXIT("SpaceGroup::GetAllEquivRefl():",5)
    return equivReflList;
 }
 
-bool SpaceGroup::IsReflSystematicAbsent(const REAL h, const REAL k, const REAL l)const
+bool SpaceGroup::IsReflSystematicAbsent(const REAL h0, const REAL k0, const REAL l0)const
 {
-   const REAL eps=.01;
-   const T_RTMx *pMatrix;
-   pMatrix=&(mSgOps.SMx[0]);
-   float h1,k1,l1,t1,h2,k2,l2,t2,t3;
-   double junk;
-   int cen;
-   if(this->IsCentrosymmetric()) cen=2 ; else cen=1;
-   for(int j=0;j<mSgOps.nSMx;j++)
-   {
-      h1=h*(*pMatrix).s.R[0]+k*(*pMatrix).s.R[3]+l*(*pMatrix).s.R[6];
-      k1=h*(*pMatrix).s.R[1]+k*(*pMatrix).s.R[4]+l*(*pMatrix).s.R[7];
-      l1=h*(*pMatrix).s.R[2]+k*(*pMatrix).s.R[5]+l*(*pMatrix).s.R[8];
-      t1=h*(*pMatrix).s.T[0]+k*(*pMatrix).s.T[1]+l*(*pMatrix).s.T[2];// /(REAL)STBF;
-      
-      for(int i=0;i<this->GetNbTranslationVectors();i++)
-      {
-         t2=t1+h*mSgOps.LTr[i].v[0] + k*mSgOps.LTr[i].v[1] + l*mSgOps.LTr[i].v[2];
-         for(int c=1;c<=cen;c++)
-         {
-            if(c==1)
-            {
-               h2= h1;k2= k1;l2= l1;
-               t3= t2/(REAL)STBF;
-            }
-            else
-            {
-               h2=-h1;k2=-k1;l2=-l1;
-               t3=( h2*(REAL)mSgOps.InvT[0]
-                   +k2*(REAL)mSgOps.InvT[1]
-                   +l2*(REAL)mSgOps.InvT[2]
-                   -t2)/(REAL)STBF;
-            }
-            // +3(h+k+l) ensures it is >0 before modf.. Add .001 for rounding errors...
-            t3= modf(t3+3*(fabs(h)+fabs(k)+fabs(l))+.001,&junk);
-            //cout << "    " << RTMx2XYZ(&mSgOps.SMx[j],1,STBF,0,0,1,NULL,NULL,80) <<endl;
-            //cout <<h<<" "<<k<<" "<<l<<" : "<<h2<<" "<<k2<<" "<<l2<<" : "<<t3<<endl;
-            if( ((fabs(h-h2) + fabs(k-k2) + fabs(l-l2) )<eps) && (t3>eps)) return true;
-         }
-      }
-      pMatrix++;
-   }
-   return false;
+   cctbx::miller::index<long> h(scitbx::vec3<long>((long)(h0+1e-5),(long)(k0+1e-5),(long)(l0+1e-5)));
+   return this->GetCCTbxSpg().is_sys_absent(h);
 }
 
-bool SpaceGroup::IsReflCentric(const REAL h, const REAL k, const REAL l)const
+bool SpaceGroup::IsReflCentric(const REAL h0, const REAL k0, const REAL l0)const
 {
-   if(this->IsCentrosymmetric()) return true;
-   const REAL eps=.001;
-   const T_RTMx *pMatrix;
-   pMatrix=&(mSgOps.SMx[0]);
-   float h1,k1,l1;
-   for(int j=1;j<mSgOps.nSMx;j++)
-   {
-      h1=h*(*pMatrix).s.R[0]+k*(*pMatrix).s.R[3]+l*(*pMatrix).s.R[6];
-      k1=h*(*pMatrix).s.R[1]+k*(*pMatrix).s.R[4]+l*(*pMatrix).s.R[7];
-      l1=h*(*pMatrix).s.R[2]+k*(*pMatrix).s.R[5]+l*(*pMatrix).s.R[8];
-      if( (fabs(h+h1) + fabs(k+k1) + fabs(l+l1) )<eps) return true;
-      pMatrix++;
-   }
-   return false;
+   cctbx::miller::index<long> h(scitbx::vec3<long>(scitbx::math::iround(h0),
+                                                   scitbx::math::iround(k0),
+                                                   scitbx::math::iround(l0)));
+   return this->GetCCTbxSpg().is_centric(h);
 }
 
-unsigned int SpaceGroup::GetExpectedIntensityFactor(const REAL h,
-                                                    const REAL k,
-                                                    const REAL l)const
+unsigned int SpaceGroup::GetExpectedIntensityFactor(const REAL h0,
+                                                    const REAL k0,
+                                                    const REAL l0)const
 {
-   unsigned int f=0;
-   const REAL eps=.001;
-   for(int i=0;i<mSgOps.nSMx;i++)
-   {
-      const T_RTMx *pMatrix=&(mSgOps.SMx[i]);
-      const REAL h0=h*(*pMatrix).s.R[0]+k*(*pMatrix).s.R[3]+l*(*pMatrix).s.R[6];
-      const REAL k0=h*(*pMatrix).s.R[1]+k*(*pMatrix).s.R[4]+l*(*pMatrix).s.R[7];
-      const REAL l0=h*(*pMatrix).s.R[2]+k*(*pMatrix).s.R[5]+l*(*pMatrix).s.R[8];
-      if( (fabs(h-h0) + fabs(k-k0) + fabs(l-l0) )<eps) f++;
-   }
-   return f;
+   cctbx::miller::index<long> h(scitbx::vec3<long>(scitbx::math::iround(h0),
+                                                   scitbx::math::iround(k0),
+                                                   scitbx::math::iround(l0)));
+   return this->GetCCTbxSpg().epsilon(h);
 }
 
 void SpaceGroup::InitSpaceGroup(const string &spgId)
 {
-   VFN_DEBUG_MESSAGE("SpaceGroup::InitSpaceGroup():"<<spgId,5)
+   VFN_DEBUG_ENTRY("SpaceGroup::InitSpaceGroup():"<<spgId,8)
    (*fpObjCrystInformUser)("Initializing spacegroup: "+spgId);
-   int match;
    
-   ResetSgOps(&mSgOps);
-   match=SgSymbolLookup('A',spgId.c_str(),&mHM_as_Hall);
-   if( match <= 0)
+   cctbx::sgtbx::space_group_symbols sgs=cctbx::sgtbx::space_group_symbols(spgId);
+   
+   if(!sgs.is_valid())
    {
-      match=ParseHallSymbol(spgId.c_str(),&mSgOps,1);
-      if( match <= 0)
-      {
-         cout << "An Error occured ! Cannot build SpaceGroup Info :" ;
-         cout << "Cannot understand Spacegroup Symbol !" ;
-         //:TODO: throw Exception
-         this->InitSpaceGroup(mId);
-         (*fpObjCrystInformUser)("Could not understand spacegroup symbol: "+spgId);
-         return;
-         //throw 0;
-      }
-      MatchTabulatedSettings(&mSgOps,&mHM_as_Hall);
+      cout << "An Error occured ! Cannot build SpaceGroup Info :" ;
+      cout << "Cannot understand Spacegroup Symbol !" ;
+      //:TODO: throw Exception
+      this->InitSpaceGroup(mId);
+      (*fpObjCrystInformUser)("Could not understand spacegroup symbol: "+spgId);
+      VFN_DEBUG_EXIT("SpaceGroup::InitSpaceGroup():"<<spgId,8)
+      return;
+      //throw 0;
    }
-   else ParseHallSymbol(mHM_as_Hall.Hall,&mSgOps,1);
+   mpCCTbxSpaceGroup = new cctbx::sgtbx::space_group(sgs);
    mId=spgId;
       
    //Inversion center
-   if(mSgOps.fInv == 2)
+   if(this->GetCCTbxSpg().f_inv() == 2)
    {
       mHasInversionCenter=true ;
-      if( (mSgOps.InvT[0] !=0) || 
-          (mSgOps.InvT[1] !=0) || 
-          (mSgOps.InvT[2] !=0)   ) mIsInversionCenterAtOrigin=false;
+      if( (this->GetCCTbxSpg().inv_t()[0] !=0) || 
+          (this->GetCCTbxSpg().inv_t()[1] !=0) || 
+          (this->GetCCTbxSpg().inv_t()[2] !=0)   ) mIsInversionCenterAtOrigin=false;
       else mIsInversionCenterAtOrigin=true;
    }
    else
@@ -586,22 +498,19 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
    //initialize asymmetric unit
    mAsymmetricUnit.SetSpaceGroup(*this);
    
-   if( (mHM_as_Hall.SgNumber >2) && (mHM_as_Hall.SgNumber <16))
+   mUniqueAxisId=0;
+   if(  (this->GetCCTbxSpg().match_tabulated_settings().number() >2) 
+      &&(this->GetCCTbxSpg().match_tabulated_settings().number() <16))
    {
-      const char * ch=this->GetHM_as_Hall().Hall;
-      while(true)
-      {
-         if(*ch=='x') {mUniqueAxisId=0;break;}
-         if(*ch=='y') {mUniqueAxisId=1;break;}
-         if(*ch=='z') {mUniqueAxisId=2;break;}
-         if(*ch=='\0'){mUniqueAxisId=2;break;}//:TODO: check ??
-         ch++;
-      }
-   }else mUniqueAxisId=0;
+      string ch=this->GetCCTbxSpg().match_tabulated_settings().hall();
+      if(ch.find("x")!=std::string::npos) {mUniqueAxisId=0;}
+      if(ch.find("y")!=std::string::npos) {mUniqueAxisId=1;}
+      if(ch.find("z")!=std::string::npos) {mUniqueAxisId=2;}
+   }
    this->Print();
    mClock.Click();
    (*fpObjCrystInformUser)("Initializing spacegroup: "+spgId+"... Done");
-   VFN_DEBUG_MESSAGE("SpaceGroup::InitSpaceGroup():End",4)
+   VFN_DEBUG_EXIT("SpaceGroup::InitSpaceGroup():"<<spgId,8)
 }
 
 }//namespace

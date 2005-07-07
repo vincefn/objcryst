@@ -25,6 +25,9 @@
 
 #include <typeinfo>
 
+#include "cctbx/sgtbx/space_group.h"
+#include "cctbx/eltbx/wavelengths.h"
+
 #include "ObjCryst/ScatteringData.h"
 #include "Quirks/VFNDebug.h"
 #include "Quirks/VFNStreamFormat.h"
@@ -40,13 +43,6 @@
 
 namespace ObjCryst
 {
-
-extern "C"
-{
-//XRay Tubes wavelengths from atominfo
-//AtomInfo (c) 1994-96 Ralf W. Grosse-Kunstleve 
-#include "atominfo/atominfo.h"
-}
 const RefParType *gpRefParTypeScattData= 0;
 const RefParType *gpRefParTypeScattDataScale=0;
 const RefParType *gpRefParTypeScattDataProfile=0;
@@ -239,15 +235,14 @@ void Radiation::SetWavelength(const string &XRayTubeElementName,
       }
       else
       {
-         const T_ChXrayWaveLength *xrayWaveLength;
-         xrayWaveLength=ChXrayWaveLengthOf(mXRayTubeName.c_str());
-         if(xrayWaveLength==NULL)
+         cctbx::eltbx::wavelengths::characteristic ch(mXRayTubeName);
+         if(!ch.is_valid())
          {
             cout << "WARNING: could not interpret X-Ray tube name:"<<XRayTubeElementName<<endl
                  << "         not modifying wavelength !"<<endl;
             return;
          }
-         mWavelength=xrayWaveLength->Length;
+         mWavelength=ch.as_angstrom();
       }
    }
    else
@@ -262,23 +257,22 @@ void Radiation::SetWavelength(const string &XRayTubeElementName,
       }
       else
       {
-         const T_ChXrayWaveLength *xrayWaveLength;
-         xrayWaveLength=ChXrayWaveLengthOf((mXRayTubeName+"A1").c_str());
-         if(xrayWaveLength==NULL)
+         cctbx::eltbx::wavelengths::characteristic ch(mXRayTubeName+"A1");
+         if(!ch.is_valid())
          {
             cout << "WARNING: could not interpret X-Ray tube name:"<<XRayTubeElementName<<endl
                  << "         not modifying wavelength !"<<endl;
             return;
          }
-         lambda1=xrayWaveLength->Length;
-         xrayWaveLength=ChXrayWaveLengthOf((mXRayTubeName+"A2").c_str());
-         if(xrayWaveLength==NULL)
+         lambda1=ch.as_angstrom();
+         cctbx::eltbx::wavelengths::characteristic ch2(mXRayTubeName+"A1");
+         if(!ch2.is_valid())
          {
             cout << "WARNING: could not interpret X-Ray tube name:"<<XRayTubeElementName<<endl
                  << "         not modifying wavelength !"<<endl;
             return;
          }
-         lambda2=xrayWaveLength->Length;
+         lambda2=ch2.as_angstrom();
       }
       mXRayTubeDeltaLambda=lambda2-lambda1;
       mWavelength=lambda1
@@ -1431,6 +1425,7 @@ void ScatteringData::CalcGeomStructFactor() const
       transVect=pSpg->GetTranslationVectors();
       CrystMatrix_REAL allCoords(nbSymmetrics,3);
       CrystVector_REAL tmpVect(nbRefl);
+VFN_DEBUG_MESSAGE("TEST",3)
       
       if(mUseFastLessPreciseFunc==true)
       {
@@ -1472,6 +1467,7 @@ void ScatteringData::CalcGeomStructFactor() const
       
       for(long i=0;i<nbComp;i++)
       {
+         VFN_DEBUG_MESSAGE("ScatteringData::GeomStructFactor(),comp"<<i,3)
          const REAL x=(*pScattCompList)(i).mX;
          const REAL y=(*pScattCompList)(i).mY;
          const REAL z=(*pScattCompList)(i).mZ;
@@ -1485,17 +1481,19 @@ void ScatteringData::CalcGeomStructFactor() const
          allCoords=pSpg->GetAllSymmetrics(x,y,z,true,true);
          if((true==pSpg->HasInversionCenter()) && (false==pSpg->IsInversionCenterAtOrigin()))
          {
+            const REAL STBF=2.*pSpg->GetCCTbxSpg().inv_t().den();
             for(int j=0;j<nbSymmetrics;j++)
             {
                //The phase of the structure factor will be wrong
                //This is fixed a bit further...
-               allCoords(j,0) -= ((REAL)pSpg->GetSgOps().InvT[0])/STBF/2.;
-               allCoords(j,1) -= ((REAL)pSpg->GetSgOps().InvT[1])/STBF/2.;
-               allCoords(j,2) -= ((REAL)pSpg->GetSgOps().InvT[2])/STBF/2.;
+               allCoords(j,0) -= ((REAL)pSpg->GetCCTbxSpg().inv_t()[0])/STBF;
+               allCoords(j,1) -= ((REAL)pSpg->GetCCTbxSpg().inv_t()[1])/STBF;
+               allCoords(j,2) -= ((REAL)pSpg->GetCCTbxSpg().inv_t()[2])/STBF;
             }
          }
          for(int j=0;j<nbSymmetrics;j++)
          {
+            VFN_DEBUG_MESSAGE("ScatteringData::GeomStructFactor(),comp #"<<i<<", sym #"<<j,3)
             
             if(mUseFastLessPreciseFunc==true)
             {
@@ -1613,10 +1611,11 @@ void ScatteringData::CalcGeomStructFactor() const
             // Re(F) = RSF*cos(2pi(h*Xc+k*Yc+l*Zc))
             // Re(F) = RSF*sin(2pi(h*Xc+k*Yc+l*Zc))
             //cout << "Glop Glop"<<endl;
+            const REAL STBF=2*pSpg->GetCCTbxSpg().inv_t().den();
             {
-               const REAL xc=((REAL)pSpg->GetSgOps().InvT[0])/STBF/2.;
-               const REAL yc=((REAL)pSpg->GetSgOps().InvT[1])/STBF/2.;
-               const REAL zc=((REAL)pSpg->GetSgOps().InvT[2])/STBF/2.;
+               const REAL xc=((REAL)pSpg->GetCCTbxSpg().inv_t()[0])/STBF;
+               const REAL yc=((REAL)pSpg->GetCCTbxSpg().inv_t()[1])/STBF;
+               const REAL zc=((REAL)pSpg->GetCCTbxSpg().inv_t()[2])/STBF;
                #ifdef __LIBCRYST_VECTOR_USE_BLITZ__
                tmpVect = mH2Pi() * xc + mK2PI() * yc + mL2PI() * zc;
                #else

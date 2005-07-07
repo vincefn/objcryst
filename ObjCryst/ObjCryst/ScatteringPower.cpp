@@ -18,38 +18,29 @@
 */
 #include <cmath>
 #include <typeinfo>
+#include <iomanip>
+#include <fstream>
 
 #include <stdio.h> //for sprintf()
+
+
+#include "cctbx/eltbx/xray_scattering.h"
+#include "cctbx/include/cctbx/eltbx/tiny_pse.h"
+#include "cctbx/include/cctbx/eltbx/icsd_radii.h"
+#include "cctbx/include/cctbx/eltbx/henke.h"
+#include "cctbx/include/cctbx/eltbx/neutron.h"
 
 #include "ObjCryst/ScatteringPower.h"
 #include "Quirks/VFNStreamFormat.h"
 #include "Quirks/VFNDebug.h"
-
 #include "ObjCryst/Colours.h"
 
 #ifdef __WX__CRYST__
    #include "wxCryst/wxScatteringPower.h"
 #endif
 
-#include <iomanip>
-#include <fstream>
-
 namespace ObjCryst
 {
-
-////////////////////////////////////////////////////////////////////////
-//
-// Using external functions from 'atominfo' package
-//
-//-> Coefficients for the analytical approximation of scattering factors.
-//AtomInfo (c) 1994-96 Ralf W. Grosse-Kunstleve 
-//
-////////////////////////////////////////////////////////////////////////
-
-extern "C"
-{
-#include "atominfo/atominfo.h"
-}
 
 const RefParType *gpRefParTypeScattPow=0;
 const RefParType *gpRefParTypeScattPowResonant=0;
@@ -233,7 +224,7 @@ ObjRegistry<ScatteringPowerAtom>
    gScatteringPowerAtomRegistry("Global ScatteringPowerAtom Registry");
 
 ScatteringPowerAtom::ScatteringPowerAtom():
-ScatteringPower(),mSymbol(""),mAtomicNumber(0),mScattAi(5),mScattBi(5)
+ScatteringPower(),mSymbol(""),mAtomicNumber(0),mpGaussian(0)
 {
    VFN_DEBUG_MESSAGE("ScatteringPowerAtom::ScatteringPowerAtom():"<<mName,5)
    gScatteringPowerAtomRegistry.Register(*this);
@@ -243,7 +234,7 @@ ScatteringPower(),mSymbol(""),mAtomicNumber(0),mScattAi(5),mScattBi(5)
 ScatteringPowerAtom::ScatteringPowerAtom(const string &name,
                                          const string &symbol,
                                          const REAL bIso):
-mScattAi(5),mScattBi(5)
+mpGaussian(0)
 {
    VFN_DEBUG_MESSAGE("ScatteringPowerAtom::ScatteringPowerAtom(n,s,B):"<<name,5)
    gScatteringPowerAtomRegistry.Register(*this);
@@ -252,7 +243,7 @@ mScattAi(5),mScattBi(5)
 }
 
 ScatteringPowerAtom::ScatteringPowerAtom(const ScatteringPowerAtom& old):
-mScattAi(5),mScattBi(5)
+mpGaussian(0)
 {
    VFN_DEBUG_MESSAGE("ScatteringPowerAtom::ScatteringPowerAtom(&old):"<<old.mName,5)
    gScatteringPowerAtomRegistry.Register(*this);
@@ -264,6 +255,7 @@ ScatteringPowerAtom::~ScatteringPowerAtom()
 {
    VFN_DEBUG_MESSAGE("ScatteringPowerAtom::~ScatteringPowerAtom():"<<mName,5)
    gScatteringPowerAtomRegistry.DeRegister(*this);
+   delete mpGaussian;
 }
 
 const string& ScatteringPowerAtom::GetClassName() const
@@ -280,18 +272,17 @@ void ScatteringPowerAtom::Init(const string &name,const string &symbol,const REA
    mSymbol=symbol;
    mBiso=bIso;
    mIsIsotropic=true;
-   this->InitAtScattCoeffsWK95();
+   if(mpGaussian!=0) delete mpGaussian;
+   cctbx::eltbx::xray_scattering::wk1995 wk95t(mSymbol);
+   mpGaussian=new cctbx::eltbx::xray_scattering::gaussian(wk95t.fetch());
+   
    this->InitAtNeutronScattCoeffs();
    
-   const T_PSE * tmp;
-   tmp=FindInPSE(mSymbol.c_str(),0);
-   mAtomicNumber=tmp->Z;
-   //delete tmp;
+   cctbx::eltbx::tiny_pse::table tpse(mSymbol);
+   mAtomicNumber=tpse.atomic_number();
    
-   const T_AtomRadius *atomRadius;
-   atomRadius=FindAtomRadius(mSymbol.c_str(),0);
-   mRadius= atomRadius->Radius;
-   //delete atomRadius;
+   cctbx::eltbx::icsd_radii::table ticsd(mSymbol);
+   mRadius= ticsd.radius();
    
    VFN_DEBUG_MESSAGE("ScatteringPowerAtom::Init():/Name="<<this->GetName() \
       <<" /Symbol="<<mSymbol<<" /Atomic Number=" << mAtomicNumber,4)
@@ -427,41 +418,14 @@ CrystVector_REAL ScatteringPowerAtom::GetScatteringFactor(const ScatteringData &
       case(RAD_XRAY):
       {
          VFN_DEBUG_MESSAGE("ScatteringPower::GetScatteringFactor():XRAY:"<<mName,3)
-         CrystVector_REAL stolsq(data.GetNbRefl());
-         stolsq=data.GetSinThetaOverLambda();
-         stolsq*=data.GetSinThetaOverLambda();
-         sf=mScattC;
-         REAL a,b;
-         for(int i=0;i<5;i++) 
+         if(mpGaussian!=0)
          {
-            a=  mScattAi(i);
-            b= -mScattBi(i);
-            
-            #ifdef __VFN_VECTOR_USE_BLITZ__
-               #define SF sf
-               #define STOLSQ stolsq
-            #else
-               #define SF (*ssf)
-               #define STOLSQ (*sstolsq)
-               REAL *ssf=sf.data();
-               const REAL *sstolsq=stolsq.data();
-               for(long ii=0;ii<sf.numElements();ii++)
-               {
-            #endif
-            
-               SF+=a*exp(STOLSQ*b);
-               
-            #ifdef __VFN_VECTOR_USE_BLITZ__
-
-            #else
-               ssf++;
-               sstolsq++;
-               }
-            #endif
-
-            #undef SF
-            #undef STOLSQ
+            const long nb=data.GetSinThetaOverLambda().numElements();
+            const REAL *pstol=data.GetSinThetaOverLambda().data();
+            for(long i=0;i<nb;i++)
+               sf(i)=mpGaussian->at_stol(*pstol++);
          }
+         else sf=1.0;//:KLUDGE:  Should never happen
          break;
       }
       case(RAD_ELECTRON):
@@ -485,7 +449,9 @@ REAL ScatteringPowerAtom::GetForwardScatteringFactor(const RadiationType type) c
       }
       case(RAD_XRAY):
       {
-         sf=  mScattAi.sum()+mScattC;
+         if(mpGaussian!=0)
+            sf=mpGaussian->at_stol(0);
+         else sf=1.0;
          break;
       }
       case(RAD_ELECTRON):
@@ -609,18 +575,14 @@ CrystMatrix_REAL ScatteringPowerAtom::
       }
       case(RAD_XRAY):
       {
-         const char *tmpSymbol=mSymbol.c_str();
-         float fp,fs;
-         Get_fpfs_Henke(tmpSymbol, XRAY_WAVELENGTH_TO_ENERGY/data.GetWavelength()(0),
-                           &fp, &fs);
-         fprime(0)=fp;
-         fsecond(0)=fs;
-         //do a check : any value missing ?
-         if( (fprime(0)<-9000) || (fsecond(0)<-9000) )
-         {
-            fprime(0)=0;
-            fsecond(0)=0;
-         }
+         cctbx::eltbx::henke::table thenke(mSymbol);
+         cctbx::eltbx::fp_fdp f=thenke.at_angstrom(data.GetWavelength()(0));
+         
+         if(f.is_valid_fp()) fprime(0)=f.fp();
+         else fprime(0)=0;
+         if(f.is_valid_fdp()) fsecond(0)=f.fdp();
+         else fsecond(0)=0;
+         
          break;
       }
       case(RAD_ELECTRON):
@@ -650,18 +612,13 @@ CrystMatrix_REAL ScatteringPowerAtom::
       }
       case(RAD_XRAY):
       {
-         const char *tmpSymbol=mSymbol.c_str();
-         float fp,fs;
-         Get_fpfs_Henke(tmpSymbol, XRAY_WAVELENGTH_TO_ENERGY/data.GetWavelength()(0),
-                           &fp, &fs);
-         fprime(0)=fp;
-         fsecond(0)=fs;
-         //do a check : any value missing ?
-         if( (fprime(0)<-9000) || (fsecond(0)<-9000) )
-         {
-            fprime(0)=0;
-            fsecond(0)=0;
-         }
+         cctbx::eltbx::henke::table thenke(mSymbol);
+         cctbx::eltbx::fp_fdp f=thenke.at_angstrom(data.GetWavelength()(0));
+         
+         if(f.is_valid_fp()) fprime(0)=f.fp();
+         else fprime(0)=0;
+         if(f.is_valid_fdp()) fsecond(0)=f.fdp();
+         else fsecond(0)=0;
          break;
       }
       case(RAD_ELECTRON):
@@ -689,9 +646,8 @@ const string& ScatteringPowerAtom::GetSymbol() const
 string ScatteringPowerAtom::GetElementName() const
 {
    VFN_DEBUG_MESSAGE("ScatteringPowerAtom::GetElementName():"<<mName,2)
-   const T_PSE * atomMass;
-   atomMass=FindInPSE(mSymbol.c_str(),0);
-   return atomMass->Name;
+   cctbx::eltbx::tiny_pse::table tpse(mSymbol);
+   return tpse.name();
 }
 
 int ScatteringPowerAtom::GetAtomicNumber() const {return mAtomicNumber;}
@@ -707,35 +663,14 @@ void ScatteringPowerAtom::Print()const
    cout << endl;
 }
 
-void ScatteringPowerAtom::InitAtScattCoeffsWK95()
-{
-   VFN_DEBUG_MESSAGE("ScatteringPowerAtom::InitAtScattCoeffsWK95():"<<mName,3)
-   mClock.Click();
-   const char *tmpSymbol;
-   tmpSymbol=mSymbol.c_str();
-   const T_SF_WK95_CAA *atScattFact;
-   atScattFact=FindSF_WK95_CAA( tmpSymbol, 0);
-   VFN_DEBUG_MESSAGE("ScatteringPowerAtom::InitAtScattCoeffsWK95():1",2)
-   for(int i=0;i<5;i++)
-   {
-      mScattAi(i)=atScattFact->a[i];
-      mScattBi(i)=atScattFact->b[i];
-   }
-   mScattC=atScattFact->c;
-   VFN_DEBUG_MESSAGE("ScatteringPowerAtom::InitAtScattCoeffsWK95():End",2)
-}
-
 void ScatteringPowerAtom::InitAtNeutronScattCoeffs()
 {
    VFN_DEBUG_MESSAGE("ScatteringPowerAtom::InitAtNeutronScattCoeffs():"<<mName,3)
    mClock.Click();
-   const char *tmpSymbol;
-   tmpSymbol=mSymbol.c_str();
-   const T_NeutronBondSL_NN92 *neutronScattFact;
-   neutronScattFact=FindNeutronBondSL_NN92( tmpSymbol, 0);
-   mNeutronScattLengthReal=neutronScattFact->BondCohScattLength;
-   mNeutronScattLengthImag=neutronScattFact->BondCohScattLengthImag;
-   //mNeutronAbsCrossSection=neutronScattFact->AbsCrossSect;
+   cctbx::eltbx::neutron::neutron_news_1992_table nn92t(mSymbol);
+   mNeutronScattLengthReal=nn92t.bound_coh_scatt_length_real();
+   mNeutronScattLengthImag=nn92t.bound_coh_scatt_length_imag();
+   
    VFN_DEBUG_MESSAGE("ScatteringPowerAtom::InitAtNeutronScattCoeffs():End",3)
 }
 

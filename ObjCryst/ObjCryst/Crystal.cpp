@@ -25,6 +25,8 @@
 
 #include <typeinfo>
 
+#include "cctbx/sgtbx/space_group.h"
+
 #include "ObjCryst/Crystal.h"
 
 #include "Quirks/VFNStreamFormat.h" //simple formatting of integers, REALs..
@@ -855,9 +857,9 @@ void Crystal::CIFOutput(ostream &os)const
    
    //Symmetry
    os <<"_symmetry_space_group_name_H-M    '"
-      << this->GetSpaceGroup().GetHM_as_Hall().HM<<"'"<<endl;
+      << this->GetSpaceGroup().GetCCTbxSpg().match_tabulated_settings().hermann_mauguin()<<"'"<<endl;
    os <<"_symmetry_space_group_name_Hall   '"
-      << this->GetSpaceGroup().GetHM_as_Hall().Hall<<"'"<<endl;
+      << this->GetSpaceGroup().GetCCTbxSpg().match_tabulated_settings().hall()<<"'"<<endl;
    os <<endl;
       
    os << "_cell_length_a    " << FormatFloat(this->GetLatticePar(0),8,5) << endl

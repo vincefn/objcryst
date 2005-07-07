@@ -66,11 +66,11 @@ dist:
 #
 # ObjCryst/blitz
 dist-libs:
-	tar -czf ../archives/ObjCryst-libs.tar.gz  -C .. --exclude='*.o' --exclude='.systemG.Desktop'  --exclude='*.a' --exclude='*.exe' atominfo sglite newmat --exclude='Makefile' --dereference
+	tar -czf ../archives/ObjCryst-libs.tar.gz  -C .. --exclude='*.o' --exclude='.systemG.Desktop'  --exclude='*.a' --exclude='*.exe' cctbx newmat --exclude='Makefile' --dereference
 
 #target to make a complete archive of ObjCryst++
 archive:
-	tar -czf ../archives/ObjCryst-complete.tar.gz  -C .. --exclude='*.o' --exclude='.systemG.Desktop' --exclude='*.a' --exclude='*.exe' --exclude='*.out' --exclude='CVS' --exclude='ObjCryst/doc/html' --exclude='ObjCryst/doc/latex' --exclude='*.oxy' --exclude='profile.0.0.0' --exclude='Makefile' atominfo sglite newmat AsymProfLarryFinger ObjCryst --dereference
+	tar -czf ../archives/ObjCryst-complete.tar.gz  -C .. --exclude='*.o' --exclude='.systemG.Desktop' --exclude='*.a' --exclude='*.exe' --exclude='*.out' --exclude='CVS' --exclude='ObjCryst/doc/html' --exclude='ObjCryst/doc/latex' --exclude='*.oxy' --exclude='profile.0.0.0' --exclude='Makefile' cctbx newmat AsymProfLarryFinger ObjCryst --dereference
 
 #Copy the .cvsignore in all relevant directories
 cvsignore:

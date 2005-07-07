@@ -1,7 +1,7 @@
 # Base ObjCryst directory
 DIR_CRYST=C:\Dev\Fox\ObjCryst
 # wxWindows Directory
-DIR_WXWINDOWS = C:\Dev\wxWindows
+DIR_WXWINDOWS = C:\Dev\wxWidgets
 
 #You should not need to modify anything below
 ###################################################################
@@ -11,15 +11,12 @@ wxcryst=1
 debug=0
 
 #Other directories
-DIR_ATOMINFO = $(DIR_CRYST)\..\atominfo
-DIR_BLITZ = $(DIR_CRYST)\..\blitz
+DIR_CCTBX = $(DIR_CRYST)\..\cctbx
 DIR_CRYSTVECTOR = $(DIR_CRYST)\CrystVector
 DIR_EXAMPLE = $(DIR_CRYST)\example
 DIR_LIBCRYST = $(DIR_CRYST)\ObjCryst
 DIR_NEWMAT = $(DIR_CRYST)\..\newmat
 DIR_REFOBJ = $(DIR_CRYST)\RefinableObj
-DIR_SGINFO = $(DIR_CRYST)\..\sginfo
-DIR_SGLITE = $(DIR_CRYST)\..\sglite
 DIR_TAU = $(DIR_CRYST)\..\tau
 DIR_VFNQUIRKS = $(DIR_CRYST)\Quirks
 DIR_WXWCRYST = $(DIR_CRYST)\wxCryst
@@ -36,7 +33,7 @@ CCOPTS = -nologo -O2 -G6 -GX -Ox -GR -MT -I"C:\Program Files\Microsoft Visual C+
 
 
 # header files
-SEARCHDIRS = -I$(DIR_CRYST) -I. -I.. -I..\.. -I..\..\.. -I$(DIR_BLITZ) -I$(DIR_NEWMAT) -I$(DIR_CRYST) -I$(DIR_SGLITE) -I$(DIR_ATOMINFO) -I$(DIR_WXWINDOWS)\include -I"C:\Program Files\Microsoft Visual C++ Toolkit 2003\include" -I"E:\Program Files\Microsoft SDK\include"
+SEARCHDIRS = -I$(DIR_CRYST) -I. -I.. -I..\.. -I..\..\.. -I$(DIR_NEWMAT) -I$(DIR_CRYST) -I$(DIR_CCTBX) -I$(DIR_CCTBX)\cctbx\include  -I$(DIR_CCTBX)\scitbx\include -I$(DIR_WXWINDOWS)\include -I$(DIR_WXWINDOWS)\lib\vc_lib\msw -I"C:\Program Files\Microsoft Visual C++ Toolkit 2003\include" -I"E:\Program Files\Microsoft SDK\include"
 
 #debug ?
 !if ($(debug)==1)
@@ -49,9 +46,16 @@ CPPDEBUGFLAGS =
 !if $(wxcryst)==1
 #@$(DIR_WXWINDOWS)\src\msw\wxw32.cfg
 WXCRYSTFLAGS = -D__WX__CRYST__ -DOBJCRYST_GL
-WX_LDFLAGS = -LIBPATH:$(DIR_WXWCRYST) -LIBPATH:$(DIR_WXWINDOWS)\lib
 WINLIBS=  kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib oldnames.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib 
-WX_LIBS = libwxcryst.lib wxmsw.lib jpeg.lib tiff.lib png.lib zlib.lib opengl32.lib glu32.lib $(WINLIBS)
+
+#wx2.5
+WX_LDFLAGS = -LIBPATH:$(DIR_WXWCRYST) -LIBPATH:$(DIR_WXWINDOWS)\lib\vc_lib
+WX_LIBS = libwxcryst.lib wxbase25.lib wxbase25_net.lib wxbase25_xml.lib wxmsw25_adv.lib wxmsw25_core.lib wxmsw25_gl.lib wxmsw25_html.lib wxmsw25_media.lib wxmsw25_xrc.lib wxexpat.lib wxjpeg.lib wxpng.lib wxregex.lib wxtiff.lib wxzlib.lib opengl32.lib glu32.lib $(WINLIBS)
+
+#wx2.4
+#WX_LDFLAGS = -LIBPATH:$(DIR_WXWCRYST) -LIBPATH:$(DIR_WXWINDOWS)\lib
+#WX_LIBS = libwxcryst.lib wxmsw.lib jpeg.lib tiff.lib png.lib zlib.lib opengl32.lib glu32.lib $(WINLIBS)
+
 !else
 WXCRYSTFLAGS = 
 WX_LDFLAGS = 
@@ -68,9 +72,9 @@ CPPFLAGS= $(CCOPTS) $(DBGOPT)  $(ENVOPTS) $(DEFOPTS) $(THROPTS) $(CCLINKOPT) $(S
 #-machine:i386 -subsystem:windows,4
 #-entry:WinMainCRTStartup
 #LINKFLAGS= /INCREMENTAL:NO /NOLOGO -subsystem:windows $(WX_LDFLAGS) -LIBPATH:$(DIR_ATOMINFO) -LIBPATH:$(DIR_CRYSTVECTOR) -LIBPATH:$(DIR_LIBCRYST) -LIBPATH:$(DIR_NEWMAT) -LIBPATH:$(DIR_BLITZ)lib -LIBPATH:$(DIR_REFOBJ) -LIBPATH:$(DIR_SGLITE) -LIBPATH:$(DIR_VFNQUIRKS) -LIBPATH:"C:\Program Files\Microsoft Visual C++ Toolkit 2003\Lib" -LIBPATH:"E:\Program Files\Microsoft SDK\Lib"
-LINKFLAGS= -INCREMENTAL:NO -nologo -subsystem:console -entry:WinMainCRTStartup $(WX_LDFLAGS) -LIBPATH:$(DIR_ATOMINFO) -LIBPATH:$(DIR_CRYSTVECTOR) -LIBPATH:$(DIR_LIBCRYST) -LIBPATH:$(DIR_NEWMAT) -LIBPATH:$(DIR_BLITZ)lib -LIBPATH:$(DIR_REFOBJ) -LIBPATH:$(DIR_SGLITE) -LIBPATH:$(DIR_VFNQUIRKS) -LIBPATH:"C:\Program Files\Microsoft Visual C++ Toolkit 2003\Lib" -LIBPATH:"E:\Program Files\Microsoft SDK\Lib"
+LINKFLAGS= -INCREMENTAL:NO -nologo -subsystem:console -entry:WinMainCRTStartup $(WX_LDFLAGS) -LIBPATH:$(DIR_CCTBX) -LIBPATH:$(DIR_CRYSTVECTOR) -LIBPATH:$(DIR_LIBCRYST) -LIBPATH:$(DIR_NEWMAT) -LIBPATH:$(DIR_REFOBJ) -LIBPATH:$(DIR_VFNQUIRKS) -LIBPATH:"C:\Program Files\Microsoft Visual C++ Toolkit 2003\Lib" -LIBPATH:"E:\Program Files\Microsoft SDK\Lib"
 
-LINKLIBS= libatominfo.lib libsglite.lib libcrystvector.lib libquirks.lib librefinableobj.lib libcryst.lib $(WX_LIBS)
+LINKLIBS= libcctbx.lib libcrystvector.lib libquirks.lib librefinableobj.lib libcryst.lib $(WX_LIBS)
 #RCFLAGS= -r -i$(MAKEDIR)\..\include;$(MAKEDIR)\..\include\windows
 
 
@@ -125,12 +129,7 @@ libnewmat:
 	cd $(DIR_NEWMAT)
 	$(MAKE) -f nm_m6.mak newmat.lib
 
-#SgLite -Spacegroup Lib
-libsglite:
-	@cd $(DIR_SGLITE)
-	$(MAKE) -f vc.mak lib
-
-#AtomInfo
-libatominfo:
-	cd $(DIR_ATOMINFO)
+#cctbx
+libcctbx:
+	@cd $(DIR_CCTBX)
 	$(MAKE) -f vc.mak lib

@@ -9,13 +9,13 @@ OBJ= $@.o
 
 -include $(OBJ:.o=.dep)
 
-xray-single: xray-single.o libCrystVector libQuirks libRefinableObj libsglite libatominfo libCryst libwxCryst
+xray-single: xray-single.o libCrystVector libQuirks libRefinableObj libcctbx libCryst libwxCryst
 	${LINKER} ${LDFLAGS} -o $@.exe ${filter-out %.a %.so lib%, $^} ${LOADLIBES}
 
-xray: xray.o libCrystVector libQuirks libRefinableObj libsglite libatominfo libCryst libwxCryst
+xray: xray.o libCrystVector libQuirks libRefinableObj libcctbx libCryst libwxCryst
 	${LINKER} ${LDFLAGS} -o $@.exe ${filter-out %.a %.so lib%, $^} ${LOADLIBES}
 
-neutron: neutron.o libCrystVector libQuirks libRefinableObj libsglite libatominfo libCryst libwxCryst
+neutron: neutron.o libCrystVector libQuirks libRefinableObj libcctbx libCryst libwxCryst
 	${LINKER} ${LDFLAGS} -o $@.exe ${filter-out %.a %.so lib%, $^} ${LOADLIBES}
 
 # target for making everything
