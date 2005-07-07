@@ -72,17 +72,25 @@ endif
 #Set DEBUG options
 #for Blitz++: -ftemplate-depth-30 
 ifeq ($(debug),1)
+   ifdef RPM_OPT_FLAGS
+      # we are building a RPM !
+      CPPFLAGS = ${RPM_OPT_FLAGS} 
+   else
+      CPPFLAGS = -g -Wall -D__DEBUG__ 
+   endif
    DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS}
-   CPPFLAGS = -g -Wall -D__DEBUG__ 
    LOADLIBES = -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lsglite -latominfo ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS}
 else
-# do not use -fomit-frame-pointer, or throw() catch() does not work !! GCC BUG ?
-# -mcpu=athlon,pentiumpro
+# -march=athlon,pentiumpro
+   ifdef RPM_OPT_FLAGS
+      # we are building a RPM !
+      CPPFLAGS = ${RPM_OPT_FLAGS} 
+   else
+      CPPFLAGS = -O3 -w -ffast-math 
+   endif
    DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS}
-   CPPFLAGS = -O3 -w -ffast-math -march=i686
    LOADLIBES = -s -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lsglite -latominfo ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS}
-endif
-
+endif #DEBUG
 # Add to statically link: -nodefaultlibs -lgcc /usr/lib/libstdc++.a
 
 
