@@ -463,21 +463,30 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
 {
    VFN_DEBUG_ENTRY("SpaceGroup::InitSpaceGroup():"<<spgId,8)
    (*fpObjCrystInformUser)("Initializing spacegroup: "+spgId);
-   
-   cctbx::sgtbx::space_group_symbols sgs=cctbx::sgtbx::space_group_symbols(spgId);
-   
-   if(!sgs.is_valid())
+   try
    {
-      cout << "An Error occured ! Cannot build SpaceGroup Info :" ;
-      cout << "Cannot understand Spacegroup Symbol !" ;
-      //:TODO: throw Exception
+      cctbx::sgtbx::space_group_symbols sgs=cctbx::sgtbx::space_group_symbols(spgId);
+
+      if(!sgs.is_valid())
+      {
+         cout << "An Error occured ! Cannot build SpaceGroup Info :" ;
+         cout << "Cannot understand Spacegroup Symbol !" ;
+         this->InitSpaceGroup(mId);
+         (*fpObjCrystInformUser)("Could not understand spacegroup symbol: "+spgId);
+         VFN_DEBUG_EXIT("SpaceGroup::InitSpaceGroup():"<<spgId,8)
+         return;
+      }
+      mpCCTbxSpaceGroup = new cctbx::sgtbx::space_group(sgs);
+   }
+   catch(cctbx::error)
+   {
+      cout << "WARNING: Could not interpret Spacegroup name:"<<spgId<<endl;
+      (*fpObjCrystInformUser)("Could not interpret Spacegroup Symbol:"+spgId);
       this->InitSpaceGroup(mId);
-      (*fpObjCrystInformUser)("Could not understand spacegroup symbol: "+spgId);
       VFN_DEBUG_EXIT("SpaceGroup::InitSpaceGroup():"<<spgId,8)
       return;
-      //throw 0;
    }
-   mpCCTbxSpaceGroup = new cctbx::sgtbx::space_group(sgs);
+   
    mId=spgId;
       
    //Inversion center

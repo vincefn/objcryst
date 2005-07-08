@@ -235,14 +235,22 @@ void Radiation::SetWavelength(const string &XRayTubeElementName,
       }
       else
       {
-         cctbx::eltbx::wavelengths::characteristic ch(mXRayTubeName);
-         if(!ch.is_valid())
+         try
+         {
+            cctbx::eltbx::wavelengths::characteristic ch(mXRayTubeName);
+            if(!ch.is_valid())
+            {
+               cout << "WARNING: could not interpret X-Ray tube name:"<<XRayTubeElementName<<endl
+                    << "         not modifying wavelength !"<<endl;
+               return;
+            }
+            mWavelength=ch.as_angstrom();
+         }
+         catch(cctbx::error)
          {
             cout << "WARNING: could not interpret X-Ray tube name:"<<XRayTubeElementName<<endl
                  << "         not modifying wavelength !"<<endl;
-            return;
          }
-         mWavelength=ch.as_angstrom();
       }
    }
    else
@@ -257,22 +265,30 @@ void Radiation::SetWavelength(const string &XRayTubeElementName,
       }
       else
       {
-         cctbx::eltbx::wavelengths::characteristic ch(mXRayTubeName+"A1");
-         if(!ch.is_valid())
+         try
+         {
+            cctbx::eltbx::wavelengths::characteristic ch(mXRayTubeName+"A1");
+            if(!ch.is_valid())
+            {
+               cout << "WARNING: could not interpret X-Ray tube name:"<<XRayTubeElementName<<endl
+                    << "         not modifying wavelength !"<<endl;
+               return;
+            }
+            lambda1=ch.as_angstrom();
+            cctbx::eltbx::wavelengths::characteristic ch2(mXRayTubeName+"A1");
+            if(!ch2.is_valid())
+            {
+               cout << "WARNING: could not interpret X-Ray tube name:"<<XRayTubeElementName<<endl
+                    << "         not modifying wavelength !"<<endl;
+               return;
+            }
+            lambda2=ch2.as_angstrom();
+         }
+         catch(cctbx::error)
          {
             cout << "WARNING: could not interpret X-Ray tube name:"<<XRayTubeElementName<<endl
                  << "         not modifying wavelength !"<<endl;
-            return;
          }
-         lambda1=ch.as_angstrom();
-         cctbx::eltbx::wavelengths::characteristic ch2(mXRayTubeName+"A1");
-         if(!ch2.is_valid())
-         {
-            cout << "WARNING: could not interpret X-Ray tube name:"<<XRayTubeElementName<<endl
-                 << "         not modifying wavelength !"<<endl;
-            return;
-         }
-         lambda2=ch2.as_angstrom();
       }
       mXRayTubeDeltaLambda=lambda2-lambda1;
       mWavelength=lambda1

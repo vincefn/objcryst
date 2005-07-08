@@ -273,16 +273,27 @@ void ScatteringPowerAtom::Init(const string &name,const string &symbol,const REA
    mBiso=bIso;
    mIsIsotropic=true;
    if(mpGaussian!=0) delete mpGaussian;
-   cctbx::eltbx::xray_scattering::wk1995 wk95t(mSymbol);
-   mpGaussian=new cctbx::eltbx::xray_scattering::gaussian(wk95t.fetch());
+   try
+   {
+      cctbx::eltbx::xray_scattering::wk1995 wk95t(mSymbol);
+      mpGaussian=new cctbx::eltbx::xray_scattering::gaussian(wk95t.fetch());
+
+      this->InitAtNeutronScattCoeffs();
+
+      cctbx::eltbx::tiny_pse::table tpse(mSymbol);
+      mAtomicNumber=tpse.atomic_number();
+
+      cctbx::eltbx::icsd_radii::table ticsd(mSymbol);
+      mRadius= ticsd.radius();
+   }
+   catch(cctbx::error)
+   {
+      cout << "WARNING: could not interpret Symbol name !"<<mSymbol<<endl
+           << "         Reverting to H !"<<endl;
+      (*fpObjCrystInformUser)("Symbol not understood:"+mSymbol);
+      this->Init(name,"H",bIso);
+   }
    
-   this->InitAtNeutronScattCoeffs();
-   
-   cctbx::eltbx::tiny_pse::table tpse(mSymbol);
-   mAtomicNumber=tpse.atomic_number();
-   
-   cctbx::eltbx::icsd_radii::table ticsd(mSymbol);
-   mRadius= ticsd.radius();
    
    VFN_DEBUG_MESSAGE("ScatteringPowerAtom::Init():/Name="<<this->GetName() \
       <<" /Symbol="<<mSymbol<<" /Atomic Number=" << mAtomicNumber,4)
@@ -575,14 +586,21 @@ CrystMatrix_REAL ScatteringPowerAtom::
       }
       case(RAD_XRAY):
       {
-         cctbx::eltbx::henke::table thenke(mSymbol);
-         cctbx::eltbx::fp_fdp f=thenke.at_angstrom(data.GetWavelength()(0));
-         
-         if(f.is_valid_fp()) fprime(0)=f.fp();
-         else fprime(0)=0;
-         if(f.is_valid_fdp()) fsecond(0)=f.fdp();
-         else fsecond(0)=0;
-         
+         try
+         {
+            cctbx::eltbx::henke::table thenke(mSymbol);
+            cctbx::eltbx::fp_fdp f=thenke.at_angstrom(data.GetWavelength()(0));
+
+            if(f.is_valid_fp()) fprime(0)=f.fp();
+            else fprime(0)=0;
+            if(f.is_valid_fdp()) fsecond(0)=f.fdp();
+            else fsecond(0)=0;
+         }
+         catch(cctbx::error)
+         {
+            fprime(0)=0;
+            fsecond(0)=0;
+         }
          break;
       }
       case(RAD_ELECTRON):
@@ -612,13 +630,21 @@ CrystMatrix_REAL ScatteringPowerAtom::
       }
       case(RAD_XRAY):
       {
-         cctbx::eltbx::henke::table thenke(mSymbol);
-         cctbx::eltbx::fp_fdp f=thenke.at_angstrom(data.GetWavelength()(0));
-         
-         if(f.is_valid_fp()) fprime(0)=f.fp();
-         else fprime(0)=0;
-         if(f.is_valid_fdp()) fsecond(0)=f.fdp();
-         else fsecond(0)=0;
+         try
+         {
+            cctbx::eltbx::henke::table thenke(mSymbol);
+            cctbx::eltbx::fp_fdp f=thenke.at_angstrom(data.GetWavelength()(0));
+
+            if(f.is_valid_fp()) fprime(0)=f.fp();
+            else fprime(0)=0;
+            if(f.is_valid_fdp()) fsecond(0)=f.fdp();
+            else fsecond(0)=0;
+         }
+         catch(cctbx::error)
+         {
+            fprime(0)=0;
+            fsecond(0)=0;
+         }
          break;
       }
       case(RAD_ELECTRON):
@@ -646,8 +672,16 @@ const string& ScatteringPowerAtom::GetSymbol() const
 string ScatteringPowerAtom::GetElementName() const
 {
    VFN_DEBUG_MESSAGE("ScatteringPowerAtom::GetElementName():"<<mName,2)
-   cctbx::eltbx::tiny_pse::table tpse(mSymbol);
-   return tpse.name();
+   try
+   {
+      cctbx::eltbx::tiny_pse::table tpse(mSymbol);
+      return tpse.name();
+   }
+   catch(cctbx::error)
+   {
+      cout << "WARNING: could not interpret Symbol:"<<mSymbol<<endl;
+   }
+   return "Unknown";
 }
 
 int ScatteringPowerAtom::GetAtomicNumber() const {return mAtomicNumber;}
@@ -667,9 +701,16 @@ void ScatteringPowerAtom::InitAtNeutronScattCoeffs()
 {
    VFN_DEBUG_MESSAGE("ScatteringPowerAtom::InitAtNeutronScattCoeffs():"<<mName,3)
    mClock.Click();
-   cctbx::eltbx::neutron::neutron_news_1992_table nn92t(mSymbol);
-   mNeutronScattLengthReal=nn92t.bound_coh_scatt_length_real();
-   mNeutronScattLengthImag=nn92t.bound_coh_scatt_length_imag();
+   try
+   {
+      cctbx::eltbx::neutron::neutron_news_1992_table nn92t(mSymbol);
+      mNeutronScattLengthReal=nn92t.bound_coh_scatt_length_real();
+      mNeutronScattLengthImag=nn92t.bound_coh_scatt_length_imag();
+   }
+   catch(cctbx::error)
+   {
+      cout << "WARNING: could not interpret symbol for neutron coeefs:"<<mSymbol<<endl;
+   }
    
    VFN_DEBUG_MESSAGE("ScatteringPowerAtom::InitAtNeutronScattCoeffs():End",3)
 }
