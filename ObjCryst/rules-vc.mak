@@ -29,7 +29,7 @@ DIR_DOC = $(DIR_CRYST)/doc
 
 #CCOPTS = -nologo -O2 -MT -GX -I"C:\Program Files\Microsoft Visual C++ Toolkit 2003\include"
 #CCOPTS = -nologo -O2 -G7 -arch:SSE -GX -Ox -GR  -MT -I"C:\Program Files\Microsoft Visual C++ Toolkit 2003\include"
-CCOPTS = -nologo -O2 -G6 -GX -Ox -GR -MT -I"C:\Program Files\Microsoft Visual C++ Toolkit 2003\include"
+CCOPTS = -nologo -O2 -G6 -GX -Ox -GR -MT -YX -I"C:\Program Files\Microsoft Visual C++ Toolkit 2003\include"
 
 
 # header files
@@ -48,9 +48,13 @@ CPPDEBUGFLAGS =
 WXCRYSTFLAGS = -D__WX__CRYST__ -DOBJCRYST_GL
 WINLIBS=  kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib oldnames.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib 
 
-#wx2.5
+#wx2.6
 WX_LDFLAGS = -LIBPATH:$(DIR_WXWCRYST) -LIBPATH:$(DIR_WXWINDOWS)\lib\vc_lib
-WX_LIBS = libwxcryst.lib wxbase25.lib wxbase25_net.lib wxbase25_xml.lib wxmsw25_adv.lib wxmsw25_core.lib wxmsw25_gl.lib wxmsw25_html.lib wxmsw25_media.lib wxmsw25_xrc.lib wxexpat.lib wxjpeg.lib wxpng.lib wxregex.lib wxtiff.lib wxzlib.lib opengl32.lib glu32.lib $(WINLIBS)
+WX_LIBS = libwxcryst.lib wxexpat.lib wxjpeg.lib wxmsw26.lib wxmsw26_gl.lib wxpng.lib wxregex.lib wxtiff.lib wxzlib.lib opengl32.lib glu32.lib $(WINLIBS)
+
+#wx2.5
+#WX_LDFLAGS = -LIBPATH:$(DIR_WXWCRYST) -LIBPATH:$(DIR_WXWINDOWS)\lib\vc_lib
+#WX_LIBS = libwxcryst.lib wxbase25.lib wxbase25_net.lib wxbase25_xml.lib wxmsw25_adv.lib wxmsw25_core.lib wxmsw25_gl.lib wxmsw25_html.lib wxmsw25_media.lib wxmsw25_xrc.lib wxexpat.lib wxjpeg.lib wxpng.lib wxregex.lib wxtiff.lib wxzlib.lib opengl32.lib glu32.lib $(WINLIBS)
 
 #wx2.4
 #WX_LDFLAGS = -LIBPATH:$(DIR_WXWCRYST) -LIBPATH:$(DIR_WXWINDOWS)\lib
