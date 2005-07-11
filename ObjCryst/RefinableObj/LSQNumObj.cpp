@@ -23,9 +23,12 @@
 #include "newmat/newmatio.h"
 
 using namespace NEWMAT;
+using namespace std;
 
 #include <iomanip>
 
+namespace ObjCryst
+{
 LSQNumObj::LSQNumObj(string objName)
 {
    mDampingFactor=1.;
@@ -75,6 +78,7 @@ void LSQNumObj::SetParIsUsed(const RefParType *type,const bool use)
 void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
                         const bool silent)
 {
+   mpRefinedObj->BeginOptimization();
    mObs=mpRefinedObj->GetLSQObs(mLSQFuncIndex);
    mWeight=mpRefinedObj->GetLSQWeight(mLSQFuncIndex);
 
@@ -534,8 +538,19 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
                for(i=0;i<nbVar;i++) mRefParList.GetParNotFixed(i).SetSigma(sqrt(N(i,i)*mChiSq/(nbObs-nbVar)));
          //Correlations :TODO: re-compute M and N if using Levenberg-Marquardt
          mCorrelMatrix.resize(nbVar,nbVar);
+          mvVarCovar.clear();
+         
          for(i=0;i<nbVar;i++)
-            for(j=0;j<nbVar;j++) mCorrelMatrix(i,j)=sqrt(N(i,j)*N(i,j)/N(i,i)/N(j,j));
+         {
+            RefinablePar *pi=&(mRefParList.GetParNotFixed(i));
+            for(j=0;j<nbVar;j++)
+	         {
+               RefinablePar *pj=&(mRefParList.GetParNotFixed(j));
+	            mCorrelMatrix(i,j)=sqrt(N(i,j)*N(i,j)/N(i,i)/N(j,j));
+               if(nbObs!=nbVar) 
+               mvVarCovar[make_pair(pi,pj)]=N(i,j)*mChiSq/(nbObs-nbVar);
+            }
+         }
          //R-factor
             tmpV1 = mObs;
             tmpV1 -= calc;
@@ -553,6 +568,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
       
       if(!silent)this->PrintRefResults();
    }
+   mpRefinedObj->EndOptimization();
 }
 
 CrystMatrix_REAL LSQNumObj::CorrelMatrix()const{return mCorrelMatrix;};
@@ -627,6 +643,9 @@ void LSQNumObj::OptimizeDerivativeSteps()
    //:TODO:
 }
 
+const std::map<pair<const RefinablePar*,const RefinablePar*>,REAL > & LSQNumObj::GetVarianceCovarianceMap()const
+{ return mvVarCovar;}
+
 void LSQNumObj::PrepareRefParList()
 {
    //:TODO: instead of resetting the list every time, check if it is necessary !
@@ -639,4 +658,4 @@ void LSQNumObj::PrepareRefParList()
    //mRefParList.Print();
 }
 
-
+}//namespace

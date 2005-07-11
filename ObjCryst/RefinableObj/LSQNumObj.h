@@ -26,9 +26,10 @@
 #include "CrystVector/CrystVector.h"
 #include "RefinableObj/RefinableObj.h"
 #include <string>
+#include <map>
 
-using namespace std;
-using namespace ObjCryst;
+namespace ObjCryst
+{
 /** \brief (Quick & dirty) Least-Squares Refinement Object with Numerical derivatives
 *
 * This is still highly experimental !
@@ -36,16 +37,16 @@ using namespace ObjCryst;
 class LSQNumObj
 {
    public:
-      LSQNumObj(string objName="Unnamed LSQ object");
+      LSQNumObj(std::string objName="Unnamed LSQ object");
       ~LSQNumObj();
       /// Fix one parameter
-      void SetParIsFixed(const string& parName,const bool fix);
+      void SetParIsFixed(const std::string& parName,const bool fix);
       /// Fix one family of parameters
       void SetParIsFixed(const RefParType *type,const bool fix);
       /// UnFix All parameters
       void UnFixAllPar();
       /// Set a parameter to be used
-      void SetParIsUsed(const string& parName,const bool use);
+      void SetParIsUsed(const std::string& parName,const bool use);
       /// Set a family of parameters to be used
       void SetParIsUsed(const RefParType *type,const bool use);
       
@@ -59,13 +60,14 @@ class LSQNumObj
       ///Add an object to refine
       void SetRefinedObj(RefinableObj &obj, const unsigned int LSQFuncIndex=0);
       void SetUseSaveFileOnEachCycle(bool yesOrNo=true);
-      void SetSaveFile(string fileName="refine.save");
+      void SetSaveFile(std::string fileName="refine.save");
       void PrintRefResults()const;
       void SetDampingFactor(const REAL newDampFact);
       void PurgeSaveFile();
       void WriteReportToFile()const;
       
       void OptimizeDerivativeSteps();
+      const std::map<pair<const RefinablePar*,const RefinablePar*>,REAL > &GetVarianceCovarianceMap()const;
    protected:
    private:
       /// Prepare mRefParList for the refinement
@@ -81,12 +83,14 @@ class LSQNumObj
       ///Save result to file after each cycle ?
       bool mSaveReportOnEachCycle;   
       /// Name of the refined object
-      string mName;
+      std::string mName;
       /// File name where refinement info is saved
-      string mSaveFileName;
+      std::string mSaveFileName;
       REAL mR,mRw,mChiSq;
       /// Correlation matrix between all refined parameters.
       CrystMatrix_REAL mCorrelMatrix;
+      ///Variance-Covariance matrix, as a std::map
+      std::map<pair<const RefinablePar*,const RefinablePar*>,REAL > mvVarCovar;
       /// Observed values.
       CrystVector_REAL mObs;
       /// Weight corresponding to all observed values.
@@ -102,4 +106,5 @@ class LSQNumObj
       unsigned int mLSQFuncIndex;
 };
 
+}//namespace
 #endif //_LSQOBJNUM_H
