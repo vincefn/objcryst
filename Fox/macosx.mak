@@ -7,6 +7,9 @@ all: Fox
 Fox:
 	$(MAKE) -f macosx.mak wxcryst=1 opengl=1 debug=$(debug) -C src all
 
+Fox-nogui:
+	$(MAKE) -f gnu.mak wxcryst=0 opengl=0 debug=$(debug) -C src all
+
 doc:
 	$(MAKE) -f gnu.mak -C src-doc all
 
