@@ -392,16 +392,21 @@ unsigned int SpaceGroup::GetUniqueAxis()const{return mUniqueAxisId;}
 unsigned int SpaceGroup::AreReflEquiv(const REAL h1, const REAL k1, const REAL l1,
                                       const REAL h2, const REAL k2, const REAL l2)const
 {
-   cctbx::miller::index<long> h(scitbx::vec3<long>(scitbx::math::iround(h1),
-                                                   scitbx::math::iround(k1),
-                                                   scitbx::math::iround(l1)));
-   cctbx::miller::sym_equiv_indices sei(this->GetCCTbxSpg(),h);
+   const int ih1=scitbx::math::iround(h1);
+   const int ik1=scitbx::math::iround(k1);
+   const int il1=scitbx::math::iround(l1);
+   cctbx::miller::index<long> h0(scitbx::vec3<long>(ih1,ik1,il1));
+   const int ih2=scitbx::math::iround(h2);
+   const int ik2=scitbx::math::iround(k2);
+   const int il2=scitbx::math::iround(l2);
+   cctbx::miller::index<long> k0(scitbx::vec3<long>(ih2,ik2,il2));
+   cctbx::miller::sym_equiv_indices sei(this->GetCCTbxSpg(),k0);
    const bool anomalous=true;
    const int f_mates=sei.f_mates(anomalous);
    for(int i=0;i<sei.multiplicity(anomalous);i++)
    {
       cctbx::miller::index<long> k = sei(i).h();
-      if(h==k)
+      if(h0==k)
       {
          if(i%f_mates) return 1;
          else return 2;
@@ -416,9 +421,10 @@ CrystMatrix_REAL SpaceGroup::GetAllEquivRefl(const REAL h0, const REAL k0, const
                                              const bool forceFriedelLaw) const
 {
    VFN_DEBUG_ENTRY("SpaceGroup::GetAllEquivRefl():",5)
-   cctbx::miller::index<long> h(scitbx::vec3<long>(scitbx::math::iround(h0),
-                                                   scitbx::math::iround(k0),
-                                                   scitbx::math::iround(l0)));
+   const int ih0=scitbx::math::iround(h0);
+   const int ik0=scitbx::math::iround(k0);
+   const int il0=scitbx::math::iround(l0);
+   cctbx::miller::index<long> h(scitbx::vec3<long>(ih0,ik0,il0));
    cctbx::miller::sym_equiv_indices sei(this->GetCCTbxSpg(),h);
    int f_mates=sei.f_mates(true);
    if((this->IsCentrosymmetric() || forceFriedelLaw) && (!excludeFriedelMate)) f_mates=1;
@@ -437,15 +443,19 @@ CrystMatrix_REAL SpaceGroup::GetAllEquivRefl(const REAL h0, const REAL k0, const
 
 bool SpaceGroup::IsReflSystematicAbsent(const REAL h0, const REAL k0, const REAL l0)const
 {
-   cctbx::miller::index<long> h(scitbx::vec3<long>((long)(h0+1e-5),(long)(k0+1e-5),(long)(l0+1e-5)));
+   const int ih0=scitbx::math::iround(h0);
+   const int ik0=scitbx::math::iround(k0);
+   const int il0=scitbx::math::iround(l0);
+   cctbx::miller::index<long> h(scitbx::vec3<long>(ih0,ik0,il0));
    return this->GetCCTbxSpg().is_sys_absent(h);
 }
 
 bool SpaceGroup::IsReflCentric(const REAL h0, const REAL k0, const REAL l0)const
 {
-   cctbx::miller::index<long> h(scitbx::vec3<long>(scitbx::math::iround(h0),
-                                                   scitbx::math::iround(k0),
-                                                   scitbx::math::iround(l0)));
+   const int ih0=scitbx::math::iround(h0);
+   const int ik0=scitbx::math::iround(k0);
+   const int il0=scitbx::math::iround(l0);
+   cctbx::miller::index<long> h(scitbx::vec3<long>(ih0,ik0,il0));
    return this->GetCCTbxSpg().is_centric(h);
 }
 
@@ -453,9 +463,10 @@ unsigned int SpaceGroup::GetExpectedIntensityFactor(const REAL h0,
                                                     const REAL k0,
                                                     const REAL l0)const
 {
-   cctbx::miller::index<long> h(scitbx::vec3<long>(scitbx::math::iround(h0),
-                                                   scitbx::math::iround(k0),
-                                                   scitbx::math::iround(l0)));
+   const int ih0=scitbx::math::iround(h0);
+   const int ik0=scitbx::math::iround(k0);
+   const int il0=scitbx::math::iround(l0);
+   cctbx::miller::index<long> h(scitbx::vec3<long>(ih0,ik0,il0));
    return this->GetCCTbxSpg().epsilon(h);
 }
 
