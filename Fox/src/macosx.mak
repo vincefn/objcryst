@@ -15,9 +15,8 @@ DIR_CRYST := ../ObjCryst
 -include Fox.dep
 
 #wxCryst Application ( wxCrystApp_resource.o for cygwin)
-Fox: Fox.o libCrystVector libQuirks libRefinableObj libsglite libatominfo libCryst libwxCryst
+Fox: Fox.o libCrystVector libQuirks libRefinableObj libcctbx libCryst libwxCryst
 	${LINKER} ${LDFLAGS} -o $@ ${filter-out %.a %.so lib%, $^} ${LOADLIBES}
-	`/usr/local/bin/wx-config --rezflags ` Fox
 
 
 fox: Fox
