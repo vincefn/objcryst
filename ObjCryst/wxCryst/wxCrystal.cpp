@@ -43,24 +43,25 @@
 #include "ObjCryst/Polyhedron.h"
 
 #ifdef OBJCRYST_GL
-   #ifdef __DARWIN__
+   #ifdef __WXGTK__
+      #include "GL/glu.h"
+   #endif
+   
+   #ifdef __WXMAC__ // For the wxMac version of wxWindows, i.e. with the "Aqua" look
       #include <OpenGL/glu.h>
       #include "AGL/agl.h"
-      #ifdef HAVE_GLUT
-         #include "GLUT/glut.h"
-      #endif
-   #else
-      #include <GL/glu.h>
    #endif
 
    #ifdef __LINUX__
       #include "GL/glx.h"
-      #ifdef HAVE_GLUT
-         #include "GL/glut.h"
-      #endif
    #endif
+   
    #ifdef __WIN32__
      #include "gl/glaux.h"
+   #endif
+   
+   #ifdef HAVE_GLUT
+     #include "GL/glut.h"
    #endif
 #endif
 
