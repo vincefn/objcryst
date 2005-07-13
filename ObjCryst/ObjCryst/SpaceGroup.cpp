@@ -401,19 +401,22 @@ unsigned int SpaceGroup::AreReflEquiv(const REAL h1, const REAL k1, const REAL l
    const int il2=scitbx::math::iround(l2);
    cctbx::miller::index<long> k0(scitbx::vec3<long>(ih2,ik2,il2));
    cctbx::miller::sym_equiv_indices sei(this->GetCCTbxSpg(),k0);
-   const bool anomalous=true;
-   const int f_mates=sei.f_mates(anomalous);
-   for(int i=0;i<sei.multiplicity(anomalous);i++)
-   {
-      cctbx::miller::index<long> k = sei(i).h();
-      if(h0==k)
+   int equiv=0;
+   //cout<<h0.as_string()<<" - "<<k0.as_string()<<endl;
+   for(std::size_t i_indices=0;i_indices<sei.indices().size();i_indices++)
+      for(std::size_t i_mate=0;i_mate<sei.f_mates(false);i_mate++)
       {
-         if(i%f_mates) return 1;
-         else return 2;
+         cctbx::miller::index<long> k = sei(i_mate, i_indices).h();
+         //cout<<" ->("<<i_indices<<","<<i_mate<<")"<<k.as_string()<<endl;
+         if(h0==k)
+         {
+            if(i_mate==0) equiv=1;
+            else equiv=2;
+            break;
+         }
       }
-   }
-            
-   return 0;
+   VFN_DEBUG_MESSAGE("SpaceGroup::AreReflEquiv("<<ih1<<","<<ik1<<","<<il1<<"),("<<ih2<<","<<ik2<<","<<il2<<"):"<<equiv,2)
+   return equiv;
 }
 
 CrystMatrix_REAL SpaceGroup::GetAllEquivRefl(const REAL h0, const REAL k0, const REAL l0,
