@@ -254,7 +254,6 @@ void OptimizationObj::TagNewBestConfig()
    for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
       mRecursiveRefinedObjList.GetObj(i).TagNewBestConfig();
    mMainTracker.AppendValues(mNbTrial);
-   this->UpdateDisplay();
 }
 
 REAL OptimizationObj::GetLastOptimElapsedTime()const
@@ -347,12 +346,14 @@ void OptimizationObj::InitOptions()
 
 void OptimizationObj::UpdateDisplay()
 {
+   Chronometer chrono;
    #ifdef __WX__CRYST__
    if(0!=this->WXGet()) this->WXGet()->CrystUpdate(true,true);
    #endif
    for(int i=0;i<mRefinedObjList.GetNb();i++) 
       mRefinedObjList.GetObj(i).UpdateDisplay();
    mMainTracker.UpdateDisplay();
+   cout<<__FILE__<<":"<<__LINE__<<", OptimizationObj::UpdateDisplay(), dt="<<chrono.seconds()<<endl;
 }
 void OptimizationObj::BuildRecursiveRefObjList()
 {
@@ -629,6 +630,8 @@ void MonteCarloObj::RunSimulatedAnnealing(long &nbStep,const bool silent,
    mTemperature=sqrt(mTemperatureMin*mTemperatureMax);
    mMutationAmplitude=sqrt(mMutationAmplitudeMin*mMutationAmplitudeMax);
 
+   // Do we need to update the display ?
+   bool needUpdateDisplay=false;
    Chronometer chrono;
    chrono.start();
    for(mNbTrial=1;mNbTrial<=nbSteps;)
@@ -707,6 +710,7 @@ void MonteCarloObj::RunSimulatedAnnealing(long &nbStep,const bool silent,
             accept=2;
             runBestCost=mCurrentCost;
             this->TagNewBestConfig();
+            needUpdateDisplay=true;
             mRefParList.SaveParamSet(runBestIndex);
             if(runBestCost<mBestCost)
             {
@@ -776,6 +780,13 @@ void MonteCarloObj::RunSimulatedAnnealing(long &nbStep,const bool silent,
          XMLCrystFileSaveGlobal(saveFileName);
          if(accept!=2) mRefParList.RestoreParamSet(lastParSavedSetIndex);
       }
+      if((mNbTrial%300==0)&&needUpdateDisplay)
+      {
+         this->UpdateDisplay();
+         needUpdateDisplay=false;
+         mRefParList.RestoreParamSet(lastParSavedSetIndex);
+      }
+
    }
    mLastOptimTime=chrono.seconds();
    //Restore Best values
@@ -905,6 +916,8 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
       //CrystMatrix_REAL trialsDensity(100,nbWorld+1);
       //trialsDensity=0;
       //for(int i=0;i<100;i++) trialsDensity(i,0)=i/(float)100;
+   // Do we need to update the display ?
+   bool needUpdateDisplay=false;
    //Do the refinement
    bool makeReport=false;
    Chronometer chrono;
@@ -935,6 +948,8 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
                   accept=2;
                   runBestCost=currentCost(i);
                   this->TagNewBestConfig();
+                  needUpdateDisplay=true;
+                  
                   mRefParList.SaveParamSet(runBestIndex);
                   if(runBestCost<mBestCost)
                   {
@@ -1127,6 +1142,7 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
                   {
                      runBestCost=cost;
                      this->TagNewBestConfig();
+                     needUpdateDisplay=true;
                      mRefParList.SaveParamSet(runBestIndex);
                      if(cost<mBestCost)
                      {
@@ -1295,6 +1311,13 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
          if(0!=mpWXCrystObj) mpWXCrystObj->UpdateDisplayNbTrial();
          #endif
       }
+      if(needUpdateDisplay)
+      {
+         mRefParList.RestoreParamSet(runBestIndex);
+         this->UpdateDisplay();
+         needUpdateDisplay=false;
+      }
+
       if((runBestCost<finalcost) || mStopAfterCycle ||( (maxTime>0)&&(chrono.seconds()>maxTime))) 
       {
          if(!silent) cout << endl <<endl << "Refinement Stopped:"<<mBestCost<<endl;
