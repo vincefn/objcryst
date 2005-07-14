@@ -281,6 +281,12 @@ class SpaceGroup
       RefinableObjClock mClock;
       /// Unique axis number (0=a,1=b,2=c)
       unsigned int mUniqueAxisId;
+      /// Number of symmetry operations (excluding center, and translations).
+      unsigned long mNbSym;
+      /// Number of lattice translations, including (0,0,0).
+      unsigned long mNbTrans;
+      /// SpaceGroup Number
+      unsigned long mSpgNumber;
 };
 
 }//namespace

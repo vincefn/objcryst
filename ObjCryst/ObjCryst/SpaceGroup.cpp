@@ -228,7 +228,7 @@ const AsymmetricUnit& SpaceGroup::GetAsymUnit() const {return mAsymmetricUnit;}
 /// Id number of the spacegroup
 int SpaceGroup::GetSpaceGroupNumber()const
 {
-   return this->GetCCTbxSpg().match_tabulated_settings().number();
+   return mSpgNumber;
 }
       
 bool SpaceGroup::IsCentrosymmetric()const
@@ -345,12 +345,17 @@ CrystMatrix_REAL SpaceGroup::GetAllSymmetrics(const REAL x, const REAL y, const 
 
 int SpaceGroup::GetNbSymmetrics(const bool noCenter,const bool noTransl)const
 {
-   int c=this->GetCCTbxSpg().f_inv();
-   if(noCenter)c=1;
-   int t=this->GetCCTbxSpg().n_ltr();
-   if(noTransl)t=1;
-   int s=this->GetCCTbxSpg().n_smx();
-   return c*t*s;
+   if(noCenter || (!mHasInversionCenter))
+   {
+      if(noTransl) return mNbSym;
+      else return mNbSym*mNbTrans;
+   }
+   else
+   {
+      if(noTransl) return 2*mNbSym;
+      else return 2*mNbSym*mNbTrans;
+   }
+   return 2*mNbSym*mNbTrans;
 }
 
 void SpaceGroup::Print() const
@@ -530,6 +535,11 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
       if(ch.find("y")!=std::string::npos) {mUniqueAxisId=1;}
       if(ch.find("z")!=std::string::npos) {mUniqueAxisId=2;}
    }
+
+   mNbSym    =this->GetCCTbxSpg().n_smx();
+   mNbTrans  =this->GetCCTbxSpg().n_ltr();
+   mSpgNumber=this->GetCCTbxSpg().match_tabulated_settings().number();
+
    this->Print();
    mClock.Click();
    (*fpObjCrystInformUser)("Initializing spacegroup: "+spgId+"... Done");
