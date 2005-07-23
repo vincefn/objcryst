@@ -61,7 +61,11 @@
    #endif
    
    #ifdef HAVE_GLUT
-     #include "GL/glut.h"
+      #ifdef __WXMAC__ // For the wxMac version of wxWindows, i.e. with the "Aqua" look
+         #include <GLUT/glut.h>
+      #else
+         #include "GL/glut.h"
+       #endif
    #endif
 #endif
 
