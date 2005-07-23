@@ -861,6 +861,7 @@ WXPowderPatternGraph::~WXPowderPatternGraph()
 
 void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
 {
+   if((mObs.numElements()<=0)||(mCalc.numElements()<=0)) return;
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint()",5)
    wxMutexLocker mlock(mMutex);
    wxBufferedPaintDC dc(this);
