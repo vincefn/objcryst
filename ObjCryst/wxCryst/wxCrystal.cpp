@@ -1796,6 +1796,33 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
    glTranslatef( mX0, mY0, mZ0 );
 
    //Draw
+   //Show display limits
+   {
+      int w, h;
+      GetClientSize(& w, & h);
+      glPushMatrix();
+         glLoadIdentity();
+         glMatrixMode(GL_PROJECTION);
+         glPushMatrix();
+            glLoadIdentity();
+            gluOrtho2D(0,w,0,h);
+            
+            glRasterPos2i(2,h-12);
+            char c[128];
+            sprintf(c,"%5.3f<x<%5.3f\n",mcellbbox.xMin,mcellbbox.xMax);
+            crystGLPrint(c);
+            
+            glRasterPos2i(2, h-24);
+            sprintf(c,"%5.3f<y<%5.3f\n",mcellbbox.yMin,mcellbbox.yMax);
+            crystGLPrint(c);
+            
+            glRasterPos2i(2, h-36);
+            sprintf(c,"%5.3f<z<%5.3f\n",mcellbbox.zMin,mcellbbox.zMax);
+            crystGLPrint(c);
+         glPopMatrix();
+         glMatrixMode( GL_MODELVIEW );
+      glPopMatrix();
+   }
    
    if(mShowFourier)
    {
