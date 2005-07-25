@@ -119,9 +119,7 @@ WXCrystObj(parent),mpGlobalOptimRunThread(0)
 void WXOptimizationObj::CrystUpdate(const bool uui,const bool lock)
 {
    VFN_DEBUG_ENTRY("WXOptimizationObj::CrystUpdate("<<uui<<lock<<")",7)
-   if(lock)mMutex.Lock();
-   this->WXCrystObj::CrystUpdate(false,false);
-   if(lock)mMutex.Unlock();
+   this->WXCrystObj::CrystUpdate(uui,lock);
    if(uui)
    {
       if(true==wxThread::IsMain()) this->UpdateUI(lock);

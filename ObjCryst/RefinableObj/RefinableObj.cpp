@@ -688,7 +688,7 @@ void RefinablePar::SetLimitsProportional(const REAL min, const REAL max)
 #ifdef __WX__CRYST__
 WXCrystObjBasic* RefinablePar::WXCreate(wxWindow *parent)
 {
-   VFN_DEBUG_MESSAGE("RefinablePar::WXCreate()",10)
+   VFN_DEBUG_MESSAGE("RefinablePar::WXCreate()",8)
    if(mpWXFieldRefPar!=0)
    {
       throw ObjCrystException((string)"RefinablePar::WXCreate():"+this->GetName()+(string)" WXFieldRefPar already exists !");
@@ -783,7 +783,7 @@ const RefinableObjClock& RefObjOpt::GetClock()const{return mClock;}
 #ifdef __WX__CRYST__
 WXCrystObjBasic* RefObjOpt::WXCreate(wxWindow *parent)
 {
-   VFN_DEBUG_MESSAGE("RefObjOpt::WXCreate()",10)
+   VFN_DEBUG_MESSAGE("RefObjOpt::WXCreate()",8)
    mpWXFieldOption=new WXFieldOption (parent,-1,this);
    return mpWXFieldOption;
 }
@@ -1929,7 +1929,7 @@ map<unsigned long,pair<CrystVector_REAL,string> >::iterator
 #ifdef __WX__CRYST__
 WXCrystObjBasic* RefinableObj::WXCreate(wxWindow *parent)
 {
-   VFN_DEBUG_MESSAGE("RefinableObj::WXCreate()",10)
+   VFN_DEBUG_MESSAGE("RefinableObj::WXCreate()",8)
    mpWXCrystObj=new WXRefinableObj (parent,this);
    return mpWXCrystObj;
 }

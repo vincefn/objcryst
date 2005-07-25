@@ -353,7 +353,6 @@ void OptimizationObj::UpdateDisplay()
    for(int i=0;i<mRefinedObjList.GetNb();i++) 
       mRefinedObjList.GetObj(i).UpdateDisplay();
    mMainTracker.UpdateDisplay();
-   cout<<__FILE__<<":"<<__LINE__<<", OptimizationObj::UpdateDisplay(), dt="<<chrono.seconds()<<endl;
 }
 void OptimizationObj::BuildRecursiveRefObjList()
 {

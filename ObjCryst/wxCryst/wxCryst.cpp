@@ -125,6 +125,8 @@ WXCrystObjBasic::~WXCrystObjBasic()
 
 void WXCrystObjBasic::BottomLayout(WXCrystObjBasic *pChild)
 {
+   //static unsigned long sBottomLayoutNb=0;
+   //cout<<"WXCrystObjBasic::BottomLayout: #"<<++sBottomLayoutNb<<endl;
    VFN_DEBUG_ENTRY("WXCrystObjBasic::BottomLayout(...)"<<this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
    wxSizer *pSizer=this->GetSizer();
    if((pChild !=0) &&(pSizer!=0))
@@ -210,14 +212,17 @@ bool WXCrystObjBasicList::Show(bool show)
 
 void WXCrystObjBasicList::CrystUpdate(const bool updateUI,const bool mutexlock)
 {
-   VFN_DEBUG_ENTRY("WXCrystObjBasicList::CrystUpdate()",3)
+   VFN_DEBUG_ENTRY("WXCrystObjBasicList::CrystUpdate()",5)
    for(set<WXCrystObjBasic*>::iterator pos=mvpWXCrystObj.begin();pos!=mvpWXCrystObj.end();pos++)
+   {
+      VFN_DEBUG_MESSAGE("WXCrystObjBasicList::CrystUpdate("<<updateUI<<mutexlock<<")@"<<*pos,5)
       (*pos)->CrystUpdate(updateUI,mutexlock);
-   VFN_DEBUG_EXIT("WXCrystObjBasicList::CrystUpdate()",3)
+   }
+   VFN_DEBUG_EXIT("WXCrystObjBasicList::CrystUpdate()",5)
 }
 void WXCrystObjBasicList::UpdateUI(const bool mutexlock)
 {
-   VFN_DEBUG_ENTRY("WXCrystObjBasicList::UpdateUI()",5)
+   VFN_DEBUG_ENTRY("WXCrystObjBasicList::UpdateUI("<<mutexlock<<")"<<"MainThread="<<wxThread::IsMain(),5)
    for(set<WXCrystObjBasic*>::iterator pos=mvpWXCrystObj.begin();pos!=mvpWXCrystObj.end();pos++)
       (*pos)->UpdateUI(mutexlock);
    VFN_DEBUG_EXIT("WXCrystObjBasicList::UpdateUI()",5)
@@ -364,8 +369,8 @@ void WXFieldString::CrystUpdate(const bool uui,const bool lock)
    mValueOld=mValue;
    mValue=*mpString;
    mNeedUpdateUI=true;
-   if(uui) if(true==wxThread::IsMain()) this->UpdateUI(false);
    if(lock) mMutex.Unlock();
+   if(uui) if(true==wxThread::IsMain()) this->UpdateUI(lock);
    VFN_DEBUG_EXIT("WXFieldString::CrystUpdate()",3)
 }
 void WXFieldString::UpdateUI(const bool lock)
@@ -376,7 +381,7 @@ void WXFieldString::UpdateUI(const bool lock)
       if(lock) mMutex.Unlock();
       return;
    }
-   VFN_DEBUG_ENTRY("WXFieldString::UpdateUI()",4)
+   VFN_DEBUG_ENTRY("WXFieldString::UpdateUI("<<lock<<")"<<"MainThread="<<wxThread::IsMain(),4)
    mIsSelfUpdating=true;
    mpField->SetValue(mValue.c_str());
    mIsSelfUpdating=false;
@@ -480,7 +485,7 @@ void WXFieldName::UpdateUI(const bool lock)
       if(lock) mMutex.Unlock();
       return;
    }
-   VFN_DEBUG_ENTRY("WXFieldName::UpdateUI()",4)
+   VFN_DEBUG_ENTRY("WXFieldName::UpdateUI("<<lock<<")"<<"MainThread="<<wxThread::IsMain(),4)
    mIsSelfUpdating=true;
    mpField->SetValue(mValue.c_str());
    mIsSelfUpdating=false;
@@ -576,8 +581,8 @@ template<class T> void WXFieldPar<T>::CrystUpdate(const bool uui,const bool lock
    mValueOld=mValue;
    mValue=*mpValue;
    mNeedUpdateUI=true;
-   if(uui) if(true==wxThread::IsMain()) this->UpdateUI(false);
    if(lock) mMutex.Unlock();
+   if(uui) if(true==wxThread::IsMain()) this->UpdateUI(lock);
    VFN_DEBUG_EXIT("WXFieldPar<T>::CrystUpdate()",6)
 }
 
@@ -589,7 +594,7 @@ template<> void WXFieldPar<REAL>::UpdateUI(const bool lock)
       if(lock)mMutex.Unlock();
       return;
    }
-   VFN_DEBUG_ENTRY("WXFieldPar<REAL>::UpdateUI()",4)
+   VFN_DEBUG_ENTRY("WXFieldPar<REAL>::UpdateUI("<<lock<<")"<<"MainThread="<<wxThread::IsMain(),4)
    wxString tmp;
    tmp.Printf("%f",mValue*mHumanScale);
    mIsSelfUpdating=true;
@@ -608,7 +613,7 @@ template<> void WXFieldPar<long>::UpdateUI(const bool lock)
       if(lock)mMutex.Unlock();
       return;
    }
-   VFN_DEBUG_ENTRY("WXFieldPar<long>::UpdateUI()",4)
+   VFN_DEBUG_ENTRY("WXFieldPar<long>::UpdateUI("<<lock<<")"<<"MainThread="<<wxThread::IsMain(),4)
    wxString tmp;
    tmp.Printf("%ld",mValue*mHumanScale);
    mIsSelfUpdating=true;
@@ -781,14 +786,14 @@ void WXCrystObj::OnToggleCollapse(wxCommandEvent & WXUNUSED(event))
 void WXCrystObj::CrystUpdate(const bool uui,const bool lock)
 {
    VFN_DEBUG_ENTRY("WXCrystObj::CrystUpdate("<<uui<<lock<<")",6)
-   if(lock) mMutex.Lock();
-   mList.CrystUpdate(uui,false);
-   if(lock) mMutex.Unlock();
+   //if(lock) mMutex.Lock();
+   mList.CrystUpdate(uui,lock);
+   //if(lock) mMutex.Unlock();
    VFN_DEBUG_EXIT("WXCrystObj::CrystUpdate()",6)
 }
 void WXCrystObj::UpdateUI(const bool lock)
 {
-   VFN_DEBUG_ENTRY("WXCrystObj::UpdateUI("<<lock<<")",6)
+   VFN_DEBUG_ENTRY("WXCrystObj::UpdateUI("<<lock<<")"<<"MainThread="<<wxThread::IsMain(),6)
    if(lock) mMutex.Lock();
    if(mpWXTitle!=0) mpWXTitle->UpdateUI(false);
    mList.UpdateUI(false);
@@ -809,6 +814,8 @@ bool WXCrystObj::Enable(bool enable)
 void WXCrystObj::BottomLayout(WXCrystObjBasic *pChild)
 {
    VFN_DEBUG_ENTRY("WXCrystObj::BottomLayout(..)"<<this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
+   //static unsigned long sBottomLayoutNb=0;
+   //cout<<"WXCrystObjBasic(CrystObj)::BottomLayout: #"<<++sBottomLayoutNb<<endl;
    if(mpSizer!=0) mpSizer->SetSizeHints(this);
    if((pChild !=0) &&(mpSizer!=0))
    {

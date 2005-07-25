@@ -364,16 +364,15 @@ mpCrystalGL(0)
 void WXCrystal::CrystUpdate(const bool uui,const bool lock)
 {
    VFN_DEBUG_ENTRY("WXCrystal::CrystUpdate()",5)
-   if(lock) mMutex.Lock();
    mpCrystal->GetBumpMergeCost();
    mpCrystal->GetBondValenceCost();
-   //mWXParent->Layout();
-   if(lock) mMutex.Unlock();
    #ifdef OBJCRYST_GL
    if(mpCrystalGL!=0)
    {
+      if(lock) mMutex.Lock();
       BBox box=mpCrystalGL->GetCellBBox();
       this->UpdateGL(false,box.xMin,box.xMax,box.yMin,box.yMax,box.zMin,box.zMax);
+      if(lock) mMutex.Unlock();
    }
    #endif
    this->WXRefinableObj::CrystUpdate(uui,lock);
@@ -1082,8 +1081,8 @@ void WXCrystal::UpdateUI(const bool lock)
    #ifdef OBJCRYST_GL
    if(0!=mpCrystalGL) mpCrystalGL->GetParent()->SetTitle(mpCrystal->GetName().c_str());
    #endif
-   this->WXRefinableObj::UpdateUI(false);
    if(lock) mMutex.Unlock();
+   this->WXRefinableObj::UpdateUI(lock);
    VFN_DEBUG_EXIT("WXCrystal::UpdateUI()",6)
 }
 Crystal& WXCrystal::GetCrystal(){return *mpCrystal;}
