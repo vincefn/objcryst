@@ -1,7 +1,8 @@
 /*
    Colour definitions from POVRay (http://www.povray.org)
 */
-
+#ifndef __OBJCRYST_COULOURS_H
+#define __OBJCRYST_COULOURS_H
 struct POVRayColours
 {
    const char *mName;
@@ -143,3 +144,5 @@ const POVRayColours gPOVRayColours[]=
    {"Very_Light_Purple",    { 0.94 , 0.81 , 0.99}},
    {"",{0. , 0. , 0.}}
 };
+#endif
+
