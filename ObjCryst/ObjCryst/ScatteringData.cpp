@@ -26,11 +26,14 @@
 #include <typeinfo>
 
 #include "cctbx/sgtbx/space_group.h"
+#include "cctbx/miller/index_generator.h"
+#include "cctbx/miller/sym_equiv.h"
 #include "cctbx/eltbx/wavelengths.h"
 
 #include "ObjCryst/ScatteringData.h"
 #include "Quirks/VFNDebug.h"
 #include "Quirks/VFNStreamFormat.h"
+#include "Quirks/Chronometer.h"
 
 #ifdef __WX__CRYST__
    #include "wxCryst/wxPowderPattern.h"
@@ -465,189 +468,70 @@ void ScatteringData::GenHKLFullSpace2(const REAL maxSTOL,const bool useMultiplic
       throw ObjCrystException("ScatteringData::GenHKLFullSpace2() \
       no crystal assigned yet to this ScatteringData object.");;
    }
-   VFN_DEBUG_MESSAGE(" ->Max sin(theta)/lambda="<<maxSTOL \
-   << " Using Multiplicity : "<<useMultiplicity,3)
-   VFN_DEBUG_MESSAGE("a,b,c:"<<mpCrystal->GetLatticePar(0)\
-                     <<","<<mpCrystal->GetLatticePar(1)<<","<<mpCrystal->GetLatticePar(2)<<",",3)
-   long maxH,maxK,maxL;
-   maxH=(int) (maxSTOL * mpCrystal->GetLatticePar(0)*2+1);
-   maxK=(int) (maxSTOL * mpCrystal->GetLatticePar(1)*2+1);
-   maxL=(int) (maxSTOL * mpCrystal->GetLatticePar(2)*2+1);
-   VFN_DEBUG_MESSAGE("->maxH : " << maxH << "  maxK : " << maxK << "maxL : " << maxL,5)
-   mNbRefl=(2*maxH+1)*(2*maxK+1)*(2*maxL+1);
-   CrystVector_long H(mNbRefl);
-   CrystVector_long K(mNbRefl);
-   CrystVector_long L(mNbRefl);
-   long i=0;
-   for(int h = maxH ; h >= -maxH;h--)
-      for(int k = maxK ; k >= -maxK;k--)
-         for(int l = maxL ; l>= -maxL;l--)
-         {
-            H(i)=h;
-            K(i)=k;
-            L(i)=l;
-            i++;
-         }
-   VFN_DEBUG_MESSAGE("ScatteringData::GenHKLFullSpace2():Finished setting h, k and l...",3)
-   this->SetHKL(H,K,L);
-   VFN_DEBUG_MESSAGE("ScatteringData::GenHKLFullSpace2()",1)
-   this->SortReflectionBySinThetaOverLambda(maxSTOL);
-   VFN_DEBUG_MESSAGE("ScatteringData::GenHKLFullSpace2()",1)
-   #if 0
+   cctbx::miller::index_generator igen
+       (cctbx::uctbx::unit_cell(scitbx::af::double6(mpCrystal->GetLatticePar(0),
+                                                    mpCrystal->GetLatticePar(1),
+                                                    mpCrystal->GetLatticePar(2),
+                                                    mpCrystal->GetLatticePar(3)*RAD2DEG,
+                                                    mpCrystal->GetLatticePar(4)*RAD2DEG,
+                                                    mpCrystal->GetLatticePar(5)*RAD2DEG)),
+                                this->GetCrystal().GetSpaceGroup().GetCCTbxSpg().type(),
+                                !(this->IsIgnoringImagScattFact()),
+                                1/(2*maxSTOL));
+   scitbx::af::shared<cctbx::miller::index<> > vi=igen.to_array();
+   if(useMultiplicity)
    {
-      REAL h,k,l;
-      for(int i=0;i<mNbRefl;i++)
+      mNbRefl=vi.size();
+      CrystVector_long H(mNbRefl);
+      CrystVector_long K(mNbRefl);
+      CrystVector_long L(mNbRefl);
+      mMultiplicity.resize(mNbRefl);
+      scitbx::af::shared<cctbx::miller::index<> >::const_iterator pos=vi.begin();
+      for(unsigned long i=0;i<mNbRefl;++i)
       {
-         h=mH(i);
-         k=mK(i);
-         l=mL(i);
-         if(i<40) cout <<"Reflection:"<<h<<" "<<k<<" "<<l<<endl;
-         if(this->GetCrystal().GetSpaceGroup().IsReflSystematicAbsent(h,k,l))
-         {
-            cout <<"Reflection:"<<h<<" "<<k<<" "<<l<<endl;
-            cout <<"     is centric:"<<this->GetCrystal().GetSpaceGroup().IsReflCentric(h,k,l)<<endl;
-            cout <<"     is systematiccaly absent:"
-                 << this->GetCrystal().GetSpaceGroup().IsReflSystematicAbsent(h,k,l)<<endl;
-            cout <<"      list of equivalent reflections:"<<endl
-                 << this->GetCrystal().GetSpaceGroup().GetAllEquivRefl(h,k,l)<<endl;
-            cout <<"      list of equivalent reflections (exclude Friedels):"<<endl
-                 << this->GetCrystal().GetSpaceGroup().GetAllEquivRefl(h,k,l,true)<<endl;
-            cout <<"      list of equivalent reflections (impose Friedel law):"<<endl
-                 << this->GetCrystal().GetSpaceGroup().GetAllEquivRefl(h,k,l,false,true)<<endl;
-         }
+         H(i)=(*pos)[0];
+         K(i)=(*pos)[1];
+         L(i)=(*pos)[2]; 
+         cctbx::miller::sym_equiv_indices sei(this->GetCrystal().GetSpaceGroup().GetCCTbxSpg(),*pos);
+         mMultiplicity(i)=sei.multiplicity(this->IsIgnoringImagScattFact());
+         cout<<__FILE__<<":"<<__LINE__<<":"<<(*pos).as_string()<<" *"<<mMultiplicity(i)<<endl;
+         pos++;
       }
+      this->SetHKL(H,K,L);
+      this->SortReflectionBySinThetaOverLambda(maxSTOL);
    }
-   #endif
-   if(true==useMultiplicity)
-   {
-      VFN_DEBUG_MESSAGE("ScatteringData::GenHKLFullSpace2():Multiplicity...",3)
-      //OK, now sort reflections to keep or remove
-         long nbKeptRefl=0;
-         CrystVector_long subscriptKeptRefl(mNbRefl);
-         mMultiplicity.resize(mNbRefl);
-         CrystVector_bool treatedRefl(mNbRefl);
-         long currentBaseRefl=0,testedRefl=0;
-         REAL currentSTOL=0;
-         REAL h,k,l,h1,k1,l1;
-         subscriptKeptRefl=0;
-         mMultiplicity=0;
-         treatedRefl=false;
-      VFN_DEBUG_MESSAGE("ScatteringData::GenHKLFullSpace2():Multiplicity 1",2)
-         do
-         {
-            VFN_DEBUG_MESSAGE("...Multiplicity 2",1)
-            if(true==treatedRefl(currentBaseRefl)) continue;
-            subscriptKeptRefl(nbKeptRefl)=currentBaseRefl;
-            mMultiplicity(nbKeptRefl)=1;
-            currentSTOL=mSinThetaLambda(currentBaseRefl);
-            treatedRefl(currentBaseRefl)=true;
-            h=mH(currentBaseRefl);
-            k=mK(currentBaseRefl);
-            l=mL(currentBaseRefl);
-            testedRefl=currentBaseRefl+1;
-            if(testedRefl==mNbRefl) break;
-            bool test;
-            int equiv;
-            do
-            {
-               VFN_DEBUG_MESSAGE("...Multiplicity 3, IgnoreImagScattFact="<<mIgnoreImagScattFact,1)
-               h1=mH(testedRefl);
-               k1=mK(testedRefl);
-               l1=mL(testedRefl);
-               equiv=this->GetCrystal().GetSpaceGroup().AreReflEquiv(h,k,l,h1,k1,l1);
-               if( (equiv==1) || ((equiv==2)&&(mIgnoreImagScattFact==true)))
-               {
-                  mMultiplicity(nbKeptRefl) +=1;
-                  treatedRefl(testedRefl)=true;
-                  
-                  //keep the reflection with 0) max indices positive then 
-                  //1)max H, 2)max K and 3) max L
-                  VFN_DEBUG_MESSAGE("...Multiplicity 5",1)
-                  VFN_DEBUG_MESSAGE(h1<<","<<k1<<","<<l1<<",",1)
-                  VFN_DEBUG_MESSAGE(fabs(h1)<<","<<fabs(k1)<<","<<fabs(l1)<<",",1)
-                  if( ((int)(h1/fabs(h1+.001)+k1/fabs(k1+.001)+l1/fabs(l1+.001)))
-                        > ((int)(h/fabs(h+.001)+k/fabs(k+.001)+l/fabs(l+.001))) )
-                  {
-                     VFN_DEBUG_MESSAGE("...Multiplicity 6a",1)
-                     subscriptKeptRefl(nbKeptRefl)=testedRefl;
-                     h=h1;
-                     k=k1;
-                     l=l1;
-                  } else
-                  {
-                     VFN_DEBUG_MESSAGE("...Multiplicity 6b",1)
-                     if( (int)(h1/fabs(h1+.001)+k1/fabs(k1+.001)+l1/fabs(l1+.001))
-                                 == (int)(h/fabs(h+.001)+k/fabs(k+.001)+l/fabs(l+.001)) )
-                     {
-                        if(  (mH(testedRefl) > mH(subscriptKeptRefl(nbKeptRefl)))  ||
-
-                            ((mH(testedRefl) == mH(subscriptKeptRefl(nbKeptRefl))) &&
-                             (mK(testedRefl) > mK(subscriptKeptRefl(nbKeptRefl)))) ||
-
-                            ((mH(testedRefl) == mH(subscriptKeptRefl(nbKeptRefl))) &&
-                             (mK(testedRefl) == mK(subscriptKeptRefl(nbKeptRefl))) &&
-                             (mL(testedRefl) > mL(subscriptKeptRefl(nbKeptRefl)))) )
-                        {
-                           subscriptKeptRefl(nbKeptRefl)=testedRefl;
-                           h=h1;
-                           k=k1;
-                           l=l1;
-                        }
-                     }
-                  }
-                  //cout << currentSTOL*RAD2DEG << "  " <<
-                  //       mIntH(subscriptKeptRefl(nbKeptRefl))<<"  "<<
-                  //       mIntK(subscriptKeptRefl(nbKeptRefl))<<"  "<<
-                  //       mIntL(subscriptKeptRefl(nbKeptRefl))<<"  ";
-                  VFN_DEBUG_MESSAGE(mIntH(testedRefl)<<"  "<< mIntK(testedRefl)<<"  "<<mIntL(testedRefl),1);
-                  //cout << "   " << compare << "  " << h/fabs(h)+k/fabs(k)+l/fabs(l) << endl;
-               }
-               VFN_DEBUG_MESSAGE("...Multiplicity 5",1)
-               testedRefl++;
-               if(testedRefl<mNbRefl)
-               {
-                  if(fabs(currentSTOL-mSinThetaLambda(testedRefl)) < .002) test=true;
-                  else test=false;
-               }
-               else test=false;
-            } while(test);
-            nbKeptRefl++;
-         } while( ++currentBaseRefl < mNbRefl);
-      VFN_DEBUG_MESSAGE("ScatteringData::GenHKLFullSpace2():Multiplicity 2",2)
-      //Keep only the elected reflections
-         mNbRefl=nbKeptRefl;
-         {
-            CrystVector_REAL oldH,oldK,oldL;
-            CrystVector_REAL oldWeight;
-            long subs;
-            
-            oldH=mH;
-            oldK=mK;
-            oldL=mL;
-            
-            mMultiplicity.resizeAndPreserve(mNbRefl);
-            subscriptKeptRefl.resizeAndPreserve(mNbRefl);
-            mH.resize(mNbRefl);
-            mK.resize(mNbRefl);
-            mL.resize(mNbRefl);
-            for(long i=0;i<mNbRefl;i++)
-            {
-               subs=subscriptKeptRefl(i);
-               mH(i)=oldH(subs);
-               mK(i)=oldK(subs);
-               mL(i)=oldL(subs);
-            }
-         }
-         this->PrepareHKLarrays();
-         //this->CalcSinThetaLambda(true);
-      // Eliminate extinct reflections now
-         this->EliminateExtinctReflections();
-   } //true==useMultiplicity
    else
    {
-      mMultiplicity.resize(mNbRefl);
-      mMultiplicity=1;
-      this->EliminateExtinctReflections();
+      const unsigned long nbReflASU=vi.size();
+      mNbRefl=0;
+      CrystVector_long H(nbReflASU);
+      CrystVector_long K(nbReflASU);
+      CrystVector_long L(nbReflASU);
+      mMultiplicity.resize(0);
+      scitbx::af::shared<cctbx::miller::index<> >::const_iterator pos=vi.begin();
+      for(pos=vi.begin();pos!=vi.end();++pos)
+      {
+         cctbx::miller::sym_equiv_indices sei(this->GetCrystal().GetSpaceGroup().GetCCTbxSpg(),*pos);
+         for(int i=0;i<sei.multiplicity(true);i++)
+         {
+            cctbx::miller::index<long> k = sei(i).h();
+            if(mNbRefl==H.numElements())
+            {
+               H.resizeAndPreserve(mNbRefl+100);
+               K.resizeAndPreserve(mNbRefl+100);
+               L.resizeAndPreserve(mNbRefl+100);
+            }
+            H(mNbRefl)=k[0];
+            K(mNbRefl)=k[1];
+            L(mNbRefl++)=k[2];
+         }
+      }
+      H.resizeAndPreserve(mNbRefl);
+      K.resizeAndPreserve(mNbRefl);
+      L.resizeAndPreserve(mNbRefl);
+      this->SetHKL(H,K,L);
+      this->SortReflectionBySinThetaOverLambda(maxSTOL);
+      this->PrepareHKLarrays();
    }
    mClockHKL.Click();
    {
@@ -955,10 +839,11 @@ CrystVector_long ScatteringData::SortReflectionBySinThetaOverLambda(const REAL m
    this->CalcSinThetaLambda();
    CrystVector_long sortedSubs;
    sortedSubs=SortSubs(mSinThetaLambda);
-   CrystVector_long oldH,oldK,oldL;
+   CrystVector_long oldH,oldK,oldL,oldMult;
    oldH=mH;
    oldK=mK;
    oldL=mL;
+   oldMult=mMultiplicity;
    long subs;
    long shift=0;
    
@@ -971,6 +856,7 @@ CrystVector_long ScatteringData::SortReflectionBySinThetaOverLambda(const REAL m
       mH.resize(mNbRefl);
       mK.resize(mNbRefl);
       mL.resize(mNbRefl);
+      mMultiplicity.resize(mNbRefl);
    }
    VFN_DEBUG_MESSAGE("ScatteringData::SortReflectionBySinThetaOverLambda() 2",2)
    for(long i=0;i<mNbRefl;i++)
@@ -979,6 +865,7 @@ CrystVector_long ScatteringData::SortReflectionBySinThetaOverLambda(const REAL m
       mH(i)=oldH(subs);
       mK(i)=oldK(subs);
       mL(i)=oldL(subs);
+      mMultiplicity(i)=oldMult(subs);
    }
    mClockHKL.Click();
    VFN_DEBUG_MESSAGE("ScatteringData::SortReflectionBySinThetaOverLambda() 3",2)
@@ -1004,6 +891,7 @@ CrystVector_long ScatteringData::SortReflectionBySinThetaOverLambda(const REAL m
       mH.resizeAndPreserve(mNbRefl);
       mK.resizeAndPreserve(mNbRefl);
       mL.resizeAndPreserve(mNbRefl);
+      mMultiplicity.resizeAndPreserve(mNbRefl);
       sortedSubs.resizeAndPreserve(mNbRefl);
       mClockHKL.Click();
       this->PrepareHKLarrays();
