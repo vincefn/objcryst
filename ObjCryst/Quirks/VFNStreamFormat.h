@@ -1,5 +1,5 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
-    (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
+    (c) 2000-2005 Vincent Favre-Nicolin vincefn@users.sourceforge.net
         2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
@@ -25,8 +25,6 @@
 #include <iostream>
 #include <vector>
 
-using namespace std;
-
 #include "CrystVector/CrystVector.h"
 
 /** output a number as a formatted integer: 
@@ -40,15 +38,12 @@ class FormatInt
    public:
       FormatInt(const long num,const int width=5);
       ~FormatInt();
-   private:
+   //private:
       const long mValue;
       const int mWidth;
-   
-   friend ostream& operator<< (ostream& os, const FormatInt &fInt);
 };
 
-ostream& operator<< (ostream& os, const FormatInt& fInt);
-
+std::ostream& operator<< (std::ostream& os, const FormatInt& fInt);
 
 /** output a number as a formatted float:
 *
@@ -62,14 +57,13 @@ class FormatFloat
       FormatFloat(const REAL num,const int width=10,const int precision=4);
       ~FormatFloat();
       
-   private:
+   //private:
       const REAL mValue;
       const int mWidth;
       const int mPrecision;
-  friend ostream& operator<< (ostream&, const FormatFloat&);
 };
 
-ostream& operator<< (ostream& os, const FormatFloat &fFloat);
+std::ostream& operator<< (std::ostream& os, const FormatFloat &fFloat);
 
 /** output a string with a fixed length (adding necessary space or removing
 * excess characters) : 
@@ -82,14 +76,12 @@ class FormatString
       FormatString(const string &str,const unsigned int width=5);
       ~FormatString();
       int length() const;
-   private:
+   //private:
       string mString;
       const unsigned int mWidth;
-   
-   friend ostream& operator<< (ostream&, const FormatString&);
 };
 
-ostream& operator<< (ostream& os, const FormatString& fStr);
+std::ostream& operator<< (std::ostream& os, const FormatString& fStr);
 
 /** output one or several vectors as (a) column(s): 
 *
@@ -153,11 +145,9 @@ template<class T> class FormatVertVector
       const int mNbVectors;
       const int mWidth;
       const int mPrecision;
-   
-   //friend ostream& operator<< <T>(ostream&, const FormatVertVector<T>&);
 };
 
-template<class T> ostream& operator<< (ostream &os, const FormatVertVector<T> &fVect);
+template<class T> std::ostream& operator<< (std::ostream &os, const FormatVertVector<T> &fVect);
 
 /** Format vector as horiz array:
 *
@@ -175,11 +165,9 @@ template<class T> class FormatHorizVector
       const CrystVector<T> *mpVectors;
       const int mWidth;
       const int mPrecision;
-   
-   //friend ostream& operator<< <T>(ostream&, const FormatHorizVector<T>&);
 };
 
-template<class T> ostream& operator<< (ostream &os, const FormatHorizVector<T> &fVect);
+template<class T> ostream& operator<< (std::ostream &os, const FormatHorizVector<T> &fVect);
 
 /** Output vectors as column arrays, with the first 3 columns printed as integers.
 *
@@ -283,20 +271,19 @@ template<class T>class FormatVertVectorHKLFloats
                                  const CrystVector<T> &u,
                                  const int width=10,
                                  const int precision=4);
-      FormatVertVectorHKLFloats( vector<const CrystVector<T> *>& v,
+      FormatVertVectorHKLFloats( std::vector<const CrystVector<T> *>& v,
                                  const int width=10,
                                  const int precision=4);
       ~FormatVertVectorHKLFloats();
       //int length() const;
    //private:
-      vector<const CrystVector<T> *>mvpVectors;
+      std::vector<const CrystVector<T> *>mvpVectors;
       const int mWidth;
       const int mPrecision;
    
-   //friend ostream& operator<< <T>(ostream&, const FormatVertVectorHKLFloats<T>&);
 };
 
-template<class T> ostream& operator<< (ostream& os, const FormatVertVectorHKLFloats<T> &fStr);
+template<class T> std::ostream& operator<< (std::ostream& os, const FormatVertVectorHKLFloats<T> &fStr);
 
 
 #endif

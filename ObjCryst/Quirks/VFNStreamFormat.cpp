@@ -24,6 +24,8 @@
 #include "Quirks/VFNStreamFormat.h"
 #include "Quirks/VFNDebug.h"
 
+using namespace std;
+
 ////////////////////////////////////////////////////////////////////////
 //
 //    FormatInt
