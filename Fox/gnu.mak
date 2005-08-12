@@ -33,3 +33,14 @@ cvsignore:
 	cp -f ${DIR_CRYST}/.cvsignore ./
 	$(MAKE) -f gnu.mak -C src cvsignore
 	$(MAKE) -f gnu.mak -C src-doc cvsignore
+
+dist:
+	cd .. && tar -cjf ../Fox.tar.bz2 --exclude "*.o" --exclude ".#*" --exclude "*.a" --exclude "*.dep" --exclude "*.exe"  --exclude "Obj*.xml" --exclude "profile*" --exclude "Fox/src/Fox" Fox
+
+rpm: dist
+	mkdir ../rpmbuild
+	mkdir ../rpmbuild/SOURCES
+	mkdir ../rpmbuild/SPECS
+	mkdir ../rpmbuild/SRPMS
+	cp ObjCryst-Fox.spec ../rpmbuild/SPECS
+	cd ../rpmbuild/SPECS && rpm -ba ObjCryst-Fox.spec
