@@ -666,7 +666,7 @@ void WXRefinableObj::OnUpdateUI(wxUpdateUIEvent& event)
 void WXRefinableObj::UpdateUI(const bool lock)
 {
    VFN_DEBUG_ENTRY("WXRefinableObj::UpdateUI("<<lock<<")"<<"MainThread="<<wxThread::IsMain()<<":"<<mpRefinableObj->GetName(),6)
-   if(true==wxThread::IsMain())
+   if(!mpRefinableObj->IsBeingRefined())
    {
       if(lock) mMutex.Lock();
       mpWXTitle->SetValue(mpRefinableObj->GetName());

@@ -217,6 +217,7 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpCrystal(obj)
 ,mCrystalGLDisplayList(0),mCrystalGLNameDisplayList(0),
 mpCrystalGL(0)
 #endif
+,mpConditionGLUpdate(0)
 {
    VFN_DEBUG_MESSAGE("WXCrystal::WXCrystal()",6)
    //this->SetBackgroundColour("Red");
@@ -371,8 +372,8 @@ void WXCrystal::CrystUpdate(const bool uui,const bool lock)
    {
       if(lock) mMutex.Lock();
       BBox box=mpCrystalGL->GetCellBBox();
-      this->UpdateGL(false,box.xMin,box.xMax,box.yMin,box.yMax,box.zMin,box.zMax);
       if(lock) mMutex.Unlock();
+      this->UpdateGL(false,box.xMin,box.xMax,box.yMin,box.yMax,box.zMin,box.zMax);
    }
    #endif
    this->WXRefinableObj::CrystUpdate(uui,lock);
@@ -392,15 +393,16 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
    {
       VFN_DEBUG_MESSAGE("WXCrystal::UpdateGL():mpCrystalGL",7)
       
-      // During a refinement (multi-threaded)
-      // Wait until the display list has been updated by the main thread...
-      static bool cont;//:TODO: not static, but mutable member function (if >1 crystal,...)
       if(false==wxThread::IsMain())
       {
-         cont=false;
+         mpConditionGLUpdate=new wxCondition(mMutexGLUpdate);
+         mMutexGLUpdate.Lock();
          wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_GLCRYSTAL_MENU_UPDATE);
          wxPostEvent(mpCrystalGL,event);
-         while(!cont) wxUsleep(10);
+         mpConditionGLUpdate->Wait();
+         mMutexGLUpdate.Unlock();
+         delete mpConditionGLUpdate;
+         mpConditionGLUpdate=0;
          VFN_DEBUG_EXIT("WXCrystal::UpdateGL()-Not in main thread :End",8)
          return;
       }
@@ -427,9 +429,11 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
             mpCrystal->GLInitDisplayList(onlyIndependentAtoms,xMin,xMax,yMin,yMax,zMin,zMax,true);
          glPopMatrix();
       glEndList();
-      //#ifdef __WINDOWS__
-      cont=true;
-      //#endif
+      if(mpConditionGLUpdate!=0)
+      {
+         wxMutexLocker lock(mMutexGLUpdate);
+         mpConditionGLUpdate->Signal();
+      }
       mpCrystalGL->CrystUpdate();
    }
    else
@@ -1076,12 +1080,15 @@ bool WXCrystal::OnChangeName(const int id)
 void WXCrystal::UpdateUI(const bool lock)
 {
    VFN_DEBUG_ENTRY("WXCrystal::UpdateUI()",6)
-   if(lock) mMutex.Lock();
-   mpFieldSpacegroup->SetValue(mpCrystal->GetSpaceGroup().GetName());
-   #ifdef OBJCRYST_GL
-   if(0!=mpCrystalGL) mpCrystalGL->GetParent()->SetTitle(mpCrystal->GetName().c_str());
-   #endif
-   if(lock) mMutex.Unlock();
+   if(!mpCrystal->IsBeingRefined())
+   {
+      if(lock) mMutex.Lock();
+      mpFieldSpacegroup->SetValue(mpCrystal->GetSpaceGroup().GetName());
+      #ifdef OBJCRYST_GL
+      if(0!=mpCrystalGL) mpCrystalGL->GetParent()->SetTitle(mpCrystal->GetName().c_str());
+      #endif
+      if(lock) mMutex.Unlock();
+   }
    this->WXRefinableObj::UpdateUI(lock);
    VFN_DEBUG_EXIT("WXCrystal::UpdateUI()",6)
 }

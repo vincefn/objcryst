@@ -115,6 +115,10 @@ class WXCrystal: public WXRefinableObj
          /// the frame in which the crystal is displayed. There can only be one...
          WXGLCrystalCanvas* mpCrystalGL;
       #endif
+      /// Mutex used when updating the OpenGL display List, between background and main thread
+      wxMutex mMutexGLUpdate;
+      /// wxCondition used when updating the OpenGL display List, between background and main thread
+      wxCondition *mpConditionGLUpdate;
    DECLARE_EVENT_TABLE()
 };
 
