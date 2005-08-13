@@ -463,7 +463,7 @@ void WXPowderPattern::OnMenuAddCompBackgd(wxCommandEvent & WXUNUSED(event))
    WXCrystValidateAllUserInput();
    const unsigned int nb=mpPowderPattern->GetNbPowderPatternComponent();
    bool hasBack=false;
-   for(int i=0;i<nb;i++)
+   for(unsigned int i=0;i<nb;i++)
       if(mpPowderPattern->GetPowderPatternComponent(i).GetClassName()=="PowderPatternBackground")
       {
          hasBack=true;
@@ -490,7 +490,7 @@ void WXPowderPattern::OnMenuAddCompBackgdBayesian(wxCommandEvent & WXUNUSED(even
    WXCrystValidateAllUserInput();
    const unsigned int nb=mpPowderPattern->GetNbPowderPatternComponent();
    bool hasBack=false;
-   for(int i=0;i<nb;i++)
+   for(unsigned int i=0;i<nb;i++)
       if(mpPowderPattern->GetPowderPatternComponent(i).GetClassName()=="PowderPatternBackground")
       {
          hasBack=true;
@@ -1140,6 +1140,10 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
    if(event.RightIsDown())
    {//popup menu
       mMutex.Unlock();
+      if(mpPattern->GetPowderPattern().IsBeingRefined())
+         mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_UPDATE, false);
+      else
+         mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_UPDATE, true);
       this->PopupMenu(mpPopUpMenu, event.GetX(), event.GetY() );
       return;
    }
@@ -1321,7 +1325,7 @@ void WXPowderPatternGraph::SetPattern(const CrystVector_REAL &x,
                                       const CrystVector_REAL &calc,
                                       const CrystVector_REAL &sigma)
 {
-   VFN_DEBUG_ENTRY("WXPowderPatternGraph::SetPattern(x,obs,calc,sigma)",10)
+   VFN_DEBUG_ENTRY("WXPowderPatternGraph::SetPattern(x,obs,calc,sigma)",4)
    mMutex.Lock();
    mX=x;
    if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF) mX*=RAD2DEG;
@@ -1357,7 +1361,7 @@ void WXPowderPatternGraph::SetPattern(const CrystVector_REAL &x,
       wxPostEvent(this,event);
    }
    //cout<<FormatVertVector<REAL>(x,obs,calc,sigma)<<endl;
-   VFN_DEBUG_EXIT("WXPowderPatternGraph::SetPattern(x,obs,calc,sigma)"<<mX.numElements()<<","<<mCalc.numElements()<<","<<mObs.numElements()<<","<<mSigma.numElements()<<",",10)
+   VFN_DEBUG_EXIT("WXPowderPatternGraph::SetPattern(x,obs,calc,sigma)"<<mX.numElements()<<","<<mCalc.numElements()<<","<<mObs.numElements()<<","<<mSigma.numElements()<<",",4)
 }
 
 void WXPowderPatternGraph::OnRedrawNewPattern(wxUpdateUIEvent& WXUNUSED(event))

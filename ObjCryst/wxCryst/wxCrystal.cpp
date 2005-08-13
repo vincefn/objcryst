@@ -2125,6 +2125,21 @@ void WXGLCrystalCanvas::OnMouse( wxMouseEvent& event )
    if(event.RightIsDown())
    {
       VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnMouse():Right Button",2)
+      if(mpWXCrystal->GetCrystal().IsBeingRefined())
+      {
+         mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_UPDATE, false);
+         mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_POVRAY, false);
+         mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_LOADFOURIERGRD, false);
+         mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_LOADFOURIERDSN6, false);
+      }
+      else
+      {
+         mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_UPDATE, true);
+         mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_POVRAY, true);
+         mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_LOADFOURIERGRD, true);
+         mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_LOADFOURIERDSN6, true);
+      }
+
       this->PopupMenu(mpPopUpMenu, event.GetX(), event.GetY() );
    }
 
@@ -2221,7 +2236,7 @@ void WXGLCrystalCanvas::OnChangeLimits(wxCommandEvent & WXUNUSED(event))
          wxBusyInfo wait("Processing Fourier Map...");
          pos->second->GenList(*(pos->first.first),this, pos->first.second);
       }
-      this->CrystUpdate();
+      if(!mpWXCrystal->GetCrystal().IsBeingRefined()) this->CrystUpdate();
       VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnChangeLimits (X: " << 
 		      mcellbbox.xMin << ", " << mcellbbox.xMax << 
 		      " Y: " << 
