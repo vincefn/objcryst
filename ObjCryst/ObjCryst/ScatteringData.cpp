@@ -494,7 +494,6 @@ void ScatteringData::GenHKLFullSpace2(const REAL maxSTOL,const bool useMultiplic
          L(i)=(*pos)[2]; 
          cctbx::miller::sym_equiv_indices sei(this->GetCrystal().GetSpaceGroup().GetCCTbxSpg(),*pos);
          mMultiplicity(i)=sei.multiplicity(this->IsIgnoringImagScattFact());
-         cout<<__FILE__<<":"<<__LINE__<<":"<<(*pos).as_string()<<" *"<<mMultiplicity(i)<<endl;
          pos++;
       }
       this->SetHKL(H,K,L);
@@ -878,9 +877,14 @@ CrystVector_long ScatteringData::SortReflectionBySinThetaOverLambda(const REAL m
       VFN_DEBUG_MESSAGE("ScatteringData::SortReflectionBySinThetaOverLambda() 5"<<maxSTOL,2)
       long maxSubs=0;
       VFN_DEBUG_MESSAGE("  "<< mIntH(maxSubs)<<" "<< mIntK(maxSubs)<<" "<< mIntL(maxSubs)<<" "<<mSinThetaLambda(maxSubs),1)
-      for(maxSubs=0;(mSinThetaLambda(maxSubs)<maxSTOL) && (maxSubs<mNbRefl) ;maxSubs++)
+      for(maxSubs=0;mSinThetaLambda(maxSubs)<maxSTOL;maxSubs++)
       {
          VFN_DEBUG_MESSAGE("  "<< mIntH(maxSubs)<<" "<< mIntK(maxSubs)<<" "<< mIntL(maxSubs)<<" "<<mSinThetaLambda(maxSubs),1)
+         if(maxSubs==(mNbRefl-1))
+         {
+            maxSubs=mNbRefl;
+            break;
+         }
       }
       if(maxSubs==mNbRefl)
       {
