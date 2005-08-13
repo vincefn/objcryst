@@ -43,22 +43,6 @@ template<class T> T MaxDifference(const Array<T,2> &a,const Array<T,2> &b)
 #include "Quirks/VFNDebug.h"
 #include "Quirks/VFNStreamFormat.h"
 
-#ifdef __DEBUG__
-   #include "Quirks/Chronometer.h"
-   // count allocated memory, report from time to time
-   static Chronometer chrono;
-   static unsigned long gMemAllocVector=0;
-   static unsigned long gMemAllocVectorMax=0;
-   #define CRYSTVECTOR_MEM_CHANGE(s)\
-      gMemAllocVector+=s;\
-      if((chrono.seconds()>(float)2)&&(gVFNDebugMessageLevel<3)) \
-         {cout <<"vect-Alloc.Mem:"<<gMemAllocVector<<endl;chrono.start();}\
-      if(gMemAllocVectorMax<gMemAllocVector)\
-      {gMemAllocVectorMax=gMemAllocVector; cout <<"vect-Alloc.MAX:"<<gMemAllocVector<<endl;}
-#else
-   #define CRYSTVECTOR_MEM_CHANGE(s)
-#endif
-
 //######################################################################
 //  CrystVector
 //######################################################################
@@ -68,14 +52,12 @@ template<class T> CrystVector<T>::CrystVector(const long nbElements):
 mNumElements(nbElements),mIsAreference(false)
 {
    mpData=new T[mNumElements];
-   CRYSTVECTOR_MEM_CHANGE(mNumElements*sizeof(T))
 }
    
 template<class T> CrystVector<T>::CrystVector(const CrystVector &old):
 mNumElements(old.numElements()),mIsAreference(false)
 {
    mpData=new T[mNumElements];
-   CRYSTVECTOR_MEM_CHANGE(mNumElements*sizeof(T))
    T *p1=mpData;
    const T *p2=old.data();
    for(long i=0;i<mNumElements;i++) *p1++=*p2++;
@@ -86,7 +68,6 @@ template<class T> CrystVector<T>::~CrystVector()
    if(!mIsAreference)
    {
       delete[] mpData;
-      CRYSTVECTOR_MEM_CHANGE(-mNumElements*sizeof(T))
    }
 }
 template<class T> void CrystVector<T>::operator=(const CrystVector &old)
@@ -103,7 +84,6 @@ template<class T> void CrystVector<T>::reference(CrystVector &old)
 {
    if(!mIsAreference)
    {
-      CRYSTVECTOR_MEM_CHANGE(-mNumElements*sizeof(T))
       delete[] mpData ;
    }
    mNumElements=old.numElements();
@@ -156,14 +136,12 @@ template<class T> void CrystVector<T>::resize(const long newNbElements)
    if((mIsAreference==false) && (mNumElements != 0))
    {
       delete[] mpData ;
-      CRYSTVECTOR_MEM_CHANGE(-mNumElements*sizeof(T))
    }
    mpData=0;
    mNumElements=newNbElements;
    if(mNumElements>0)
    {
       mpData=new T[mNumElements];
-      CRYSTVECTOR_MEM_CHANGE(mNumElements*sizeof(T))
    }
    mIsAreference=false;
 }
@@ -176,14 +154,12 @@ template<class T> void CrystVector<T>::resizeAndPreserve(const long newNbElement
    register T *p2,*p1;
    mpData=0;
    mpData=new T[newNbElements];
-   CRYSTVECTOR_MEM_CHANGE(newNbElements*sizeof(T))
    p2=mpData;
    p1=p;
    long tmp= (newNbElements > mNumElements) ? mNumElements : newNbElements ;
    for(long i=0;i<tmp;i++) *p2++ = *p1++ ;
    if(mIsAreference==false)
    {
-      CRYSTVECTOR_MEM_CHANGE(-mNumElements*sizeof(T))
       delete[] p ;
    }
    mNumElements=newNbElements;
@@ -376,14 +352,12 @@ template<class T> CrystMatrix<T>::CrystMatrix(const long ySize,const long xSize)
 mNumElements(xSize*ySize),mXSize(xSize),mYSize(ySize),mIsAreference(false)
 {
    mpData=new T[mNumElements];
-   CRYSTVECTOR_MEM_CHANGE(mNumElements*sizeof(T))
 }
 
 template<class T> CrystMatrix<T>::CrystMatrix(const CrystMatrix &old):
 mNumElements(old.numElements()),mXSize(old.cols()),mYSize(old.rows()),mIsAreference(false)
 {
    mpData=new T[mNumElements];
-   CRYSTVECTOR_MEM_CHANGE(mNumElements*sizeof(T))
    register T *p1=mpData;
    register const T *p2=old.data();
    for(long i=0;i<mNumElements;i++) *p1++=*p2++;
@@ -393,7 +367,6 @@ template<class T> CrystMatrix<T>::~CrystMatrix()
 {
    if(!mIsAreference)
    {
-      CRYSTVECTOR_MEM_CHANGE(-mNumElements*sizeof(T))
       delete[] mpData;
    }
 }
@@ -408,11 +381,9 @@ template<class T> void CrystMatrix<T>::operator=(const CrystMatrix<T> &old)
       if(mIsAreference==false)
       {
          delete[] mpData ;
-         CRYSTVECTOR_MEM_CHANGE(-mNumElements*sizeof(T))
       }
       mNumElements=old.numElements();
       mpData=new T[mNumElements];
-      CRYSTVECTOR_MEM_CHANGE(mNumElements*sizeof(T))
    }
    register T *p1=mpData;
    register const T *p2=old.data();
@@ -423,7 +394,6 @@ template<class T> void CrystMatrix<T>::reference(CrystMatrix<T> &old)
 {
    if(mIsAreference==false)
    {
-      CRYSTVECTOR_MEM_CHANGE(-mNumElements*sizeof(T))
       delete[] mpData ;
    }
    mIsAreference=true;
@@ -481,7 +451,6 @@ template<class T> void CrystMatrix<T>::resize(const long ySize,const long xSize)
    if(xSize*ySize == mNumElements) return;
    if(!mIsAreference)
    {
-      CRYSTVECTOR_MEM_CHANGE(-mNumElements*sizeof(T))
       delete[] mpData ;
    }
    mpData=0;
@@ -491,7 +460,6 @@ template<class T> void CrystMatrix<T>::resize(const long ySize,const long xSize)
    if(mNumElements>0)
    {
       mpData=new T[mNumElements];
-      CRYSTVECTOR_MEM_CHANGE(mNumElements*sizeof(T))
    }
 }
 
@@ -504,14 +472,12 @@ template<class T> void CrystMatrix<T>::resizeAndPreserve(const long ySize,const 
    register T *p2,*p1;
    mpData=0;
    mpData=new T[xSize*ySize];
-   CRYSTVECTOR_MEM_CHANGE(xSize*ySize*sizeof(T))
    p2=mpData;
    p1=p;
    long tmp= ( (xSize*ySize) > mNumElements) ? mNumElements : xSize*ySize;
    for(long i=0;i<tmp;i++) *p2++ = *p1++ ;
    if(!mIsAreference)
    {
-      CRYSTVECTOR_MEM_CHANGE(-mNumElements*sizeof(T))
       delete[] p ;
    }
    mNumElements=xSize*ySize;
