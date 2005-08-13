@@ -35,7 +35,7 @@ cvsignore:
 	$(MAKE) -f gnu.mak -C src-doc cvsignore
 
 dist:
-	cd .. && tar -cjf ../Fox.tar.bz2 --exclude "*.o" --exclude ".#*" --exclude "*.a" --exclude "*.dep" --exclude "*.exe"  --exclude "Obj*.xml" --exclude "profile*" --exclude "Fox/src/Fox" Fox
+	cd .. && tar -cjf Fox.tar.bz2 --exclude "*.o" --exclude "Fox-LastOptimizationStop.xml" --exclude ".#*" --exclude "*.a" --exclude "*.dep" --exclude "*.exe"  --exclude "Obj*.xml" --exclude "profile*" --exclude "Fox/src/Fox" Fox
 
 rpm: dist
 	mkdir ../rpmbuild
@@ -44,3 +44,13 @@ rpm: dist
 	mkdir ../rpmbuild/SRPMS
 	cp ObjCryst-Fox.spec ../rpmbuild/SPECS
 	cd ../rpmbuild/SPECS && rpm -ba ObjCryst-Fox.spec
+
+#Switch to ssh developer access
+cvs-ext:
+	perl -pi -e 's|pserver|ext|g' `find . -name Root`
+	perl -pi -e 's|anonymous|vincefn|g' `find . -name Root`
+
+#Switch to anonymous CVS
+cvs-anon:
+	perl -pi -e 's|ext|pserver|g' `find . -name Root`
+	perl -pi -e 's|vincefn|anonymous|g' `find . -name Root`
