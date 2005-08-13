@@ -83,7 +83,6 @@ void MainTracker::AppendValues(const long nb)
    for(std::set<Tracker*>::iterator pos=mvpTracker.begin(); pos!=mvpTracker.end();++pos)
       (*pos)->AppendValue(nb);
    mClockValues.Click();
-   this->UpdateDisplay();
 }
 
 void MainTracker::ClearTrackers()
