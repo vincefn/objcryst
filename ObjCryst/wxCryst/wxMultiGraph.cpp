@@ -183,7 +183,7 @@ void WXMultiGraph::SetGraphData
                         << mvData[id].ymin<<","<< mvData[id].ymax<<",",3)
       mMutexData.Unlock();
       if(rescale)
-         this->AutoScale(id);
+         this->AutoScale(-1);
    }
    else mMutexData.Unlock();
 }
