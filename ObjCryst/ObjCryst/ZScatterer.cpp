@@ -1340,6 +1340,7 @@ void ZScatterer::GlobalOptRandomMove(const REAL mutationAmplitude,
          }
          if(nbDihed<2) //Can't play :-(
          {
+            mRandomMoveIsDone=false;
             this->RefinableObj::GlobalOptRandomMove(mutationAmplitude);
             TAU_PROFILE_STOP(timer1);
             VFN_DEBUG_EXIT("ZScatterer::GlobalOptRandomMove():End",3)
@@ -1579,6 +1580,7 @@ void ZScatterer::GlobalOptRandomMove(const REAL mutationAmplitude,
    #endif
    else
    {
+      mRandomMoveIsDone=false;
       this->RefinableObj::GlobalOptRandomMove(mutationAmplitude,type);
    }
    mRandomMoveIsDone=true;
