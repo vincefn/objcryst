@@ -221,7 +221,7 @@ void WXMultiGraph::OnPaint(wxPaintEvent &event)
       wxCoord tmpW,tmpH;
       dc.SetPen(*wxBLACK_PEN);
       dc.SetTextForeground(*wxBLACK);
-      int nbTick=10;//approx.
+      int nbTick=5;//approx.
       float xs,ys;
       // X & Y margins.
          float yStep,xStep,dx,dy;
