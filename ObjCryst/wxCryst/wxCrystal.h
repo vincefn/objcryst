@@ -238,7 +238,7 @@ class WXGLCrystalCanvas : public wxGLCanvas
       void OnUpdate(wxCommandEvent & WXUNUSED(event));
       /// This is called by the Crystal in WXCrystal::UpdateGL().
       void CrystUpdate();
-      void OnChangeLimits(wxCommandEvent & WXUNUSED(event));
+      void OnChangeLimits(wxCommandEvent &event);
       /// Redraw the structure (special function to ensure complete redrawing under windows...)
       void OnUpdateUI(wxUpdateUIEvent& WXUNUSED(event));
       void OnShowCrystal(wxCommandEvent & WXUNUSED(event));

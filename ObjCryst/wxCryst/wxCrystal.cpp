@@ -1656,6 +1656,8 @@ static const long ID_GLCRYSTAL_MENU_SHOWCURSOR=        WXCRYST_ID();
 static const long ID_GLCRYSTAL_MENU_SETCURSOR=        WXCRYST_ID(); 
 static const long ID_GLCRYSTAL_UPDATEUI=               WXCRYST_ID(); 
 static const long ID_GLCRYSTAL_MENU_CHANGELIMITS=      WXCRYST_ID(); 
+static const long ID_GLCRYSTAL_MENU_LIMITS_FULLCELL=   WXCRYST_ID(); 
+static const long ID_GLCRYSTAL_MENU_LIMITS_ASYMCELL=   WXCRYST_ID(); 
 static const long ID_GLCRYSTAL_MENU_SHOWCRYSTAL=       WXCRYST_ID(); 
 static const long ID_GLCRYSTAL_MENU_LOADFOURIERGRD=    WXCRYST_ID(); 
 static const long ID_GLCRYSTAL_MENU_LOADFOURIERDSN6=   WXCRYST_ID(); 
@@ -1675,6 +1677,8 @@ BEGIN_EVENT_TABLE(WXGLCrystalCanvas, wxGLCanvas)
    EVT_MOUSE_EVENTS     (WXGLCrystalCanvas::OnMouse)
    EVT_MENU             (ID_GLCRYSTAL_MENU_UPDATE,              WXGLCrystalCanvas::OnUpdate)
    EVT_MENU             (ID_GLCRYSTAL_MENU_CHANGELIMITS,        WXGLCrystalCanvas::OnChangeLimits)
+   EVT_MENU             (ID_GLCRYSTAL_MENU_LIMITS_FULLCELL,     WXGLCrystalCanvas::OnChangeLimits)
+   EVT_MENU             (ID_GLCRYSTAL_MENU_LIMITS_ASYMCELL,     WXGLCrystalCanvas::OnChangeLimits)
    EVT_MENU             (ID_GLCRYSTAL_MENU_SHOWCRYSTAL,         WXGLCrystalCanvas::OnShowCrystal)
    EVT_MENU             (ID_GLCRYSTAL_MENU_SHOWATOMLABEL,       WXGLCrystalCanvas::OnShowAtomLabel)
    EVT_MENU             (ID_GLCRYSTAL_MENU_SHOWCURSOR,          WXGLCrystalCanvas::OnShowCursor)
@@ -1717,8 +1721,11 @@ mIsGLFontBuilt(false),mGLFontDisplayListBase(0)
    mmapbbox.yMax = mmapbbox.zMax = 1.;
    mpPopUpMenu=new wxMenu("Crystal");
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_UPDATE, "&Update");
+   mpPopUpMenu->AppendSeparator();
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_CHANGELIMITS, "Change display &Limits");
-   
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_LIMITS_FULLCELL, "Show Full Unit Cell +0.1");
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_LIMITS_ASYMCELL, "Show Asymmetric Unit Cell +0.1");
+   mpPopUpMenu->AppendSeparator();
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWCRYSTAL, "Hide Crystal");
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, "Hide Atom Labels");
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWCURSOR, "Show Cursor");
@@ -2217,35 +2224,62 @@ void WXGLCrystalCanvas::InitGL()
    this->CrystUpdate();
    VFN_DEBUG_EXIT("WXGLCrystalCanvas::InitGL()",8)
 }
-void WXGLCrystalCanvas::OnChangeLimits(wxCommandEvent & WXUNUSED(event))
+void WXGLCrystalCanvas::OnChangeLimits(wxCommandEvent &event)
 {
   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnChangeLimits()",10)
-  UserSelectBoundingBox *BoxDlg = new UserSelectBoundingBox(this,
-	    "Set bounding box for display of\natoms (fractional coordinates)",
-			 mcellbbox);
-   if (BoxDlg->ShowModal() == wxID_OK )
+   if(event.GetId()==ID_GLCRYSTAL_MENU_LIMITS_FULLCELL)
    {
-      mcellbbox =  BoxDlg->GetBBox();
-      mpWXCrystal->UpdateGL(false,
-			 mcellbbox.xMin,mcellbbox.xMax,
-			 mcellbbox.yMin,mcellbbox.yMax,
-			 mcellbbox.zMin,mcellbbox.zMax);
-      vector<pair<pair<const UnitCellMapImport*,float>,UnitCellMapGLList* > >::iterator pos;
-      for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();pos++)
+      mcellbbox.xMin = -0.1;
+      mcellbbox.yMin = -0.1;
+      mcellbbox.zMin = -0.1;
+      mcellbbox.xMax =  1.1;
+      mcellbbox.yMax =  1.1;
+      mcellbbox.zMax =  1.1;
+   }
+   if(event.GetId()==ID_GLCRYSTAL_MENU_LIMITS_ASYMCELL)
+   {
+      mcellbbox.xMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmin()-0.1;
+      mcellbbox.yMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Ymin()-0.1;
+      mcellbbox.zMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Zmin()-0.1;
+      mcellbbox.xMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmax()+0.1;
+      mcellbbox.yMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Ymax()+0.1;
+      mcellbbox.zMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Zmax()+0.1;
+   }
+   if(event.GetId()==ID_GLCRYSTAL_MENU_CHANGELIMITS)
+   {
+
+      UserSelectBoundingBox *BoxDlg = new UserSelectBoundingBox(this,
+	       "Set bounding box for display of\natoms (fractional coordinates)",
+			    mcellbbox);
+      if (BoxDlg->ShowModal() == wxID_OK )
       {
-         wxBusyInfo wait("Processing Fourier Map...");
-         pos->second->GenList(*(pos->first.first),this, pos->first.second);
-      }
-      if(!mpWXCrystal->GetCrystal().IsBeingRefined()) this->CrystUpdate();
-      VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnChangeLimits (X: " << 
-		      mcellbbox.xMin << ", " << mcellbbox.xMax << 
-		      " Y: " << 
-		      mcellbbox.yMin << ", " << mcellbbox.yMax << 
-		      " Z: " << 
-		      mcellbbox.zMin << ", " << mcellbbox.zMax << 
-		      ")", 10)
-  } 
-  BoxDlg->Destroy();
+         mcellbbox =  BoxDlg->GetBBox();
+         mpWXCrystal->UpdateGL(false,
+			    mcellbbox.xMin,mcellbbox.xMax,
+			    mcellbbox.yMin,mcellbbox.yMax,
+			    mcellbbox.zMin,mcellbbox.zMax);
+         vector<pair<pair<const UnitCellMapImport*,float>,UnitCellMapGLList* > >::iterator pos;
+         for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();pos++)
+         {
+            wxBusyInfo wait("Processing Fourier Map...");
+            pos->second->GenList(*(pos->first.first),this, pos->first.second);
+         }
+         VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnChangeLimits (X: " << 
+		         mcellbbox.xMin << ", " << mcellbbox.xMax << 
+		         " Y: " << 
+		         mcellbbox.yMin << ", " << mcellbbox.yMax << 
+		         " Z: " << 
+		         mcellbbox.zMin << ", " << mcellbbox.zMax << 
+		         ")", 10)
+      } 
+      BoxDlg->Destroy();
+   }
+   if(!(mpWXCrystal->GetCrystal().IsBeingRefined()))
+      mpWXCrystal->UpdateGL(false,
+			                   mcellbbox.xMin,mcellbbox.xMax,
+			                   mcellbbox.yMin,mcellbbox.yMax,
+			                   mcellbbox.zMin,mcellbbox.zMax);
+
   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnChangeLimits():UserSelectBoundingBox done",10)
 }
 
