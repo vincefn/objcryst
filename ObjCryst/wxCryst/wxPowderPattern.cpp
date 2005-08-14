@@ -451,7 +451,8 @@ void WXPowderPattern::CrystUpdate(const bool uui,const bool lock)
       mpGraph->SetPattern( mpPowderPattern->GetPowderPatternX(),
                            mpPowderPattern->GetPowderPatternObs(),
                            mpPowderPattern->GetPowderPatternCalc(),
-                           tmp);
+                           tmp,
+                           mpPowderPattern->GetChi2Cumul());
    }
    if(lock) mMutex.Unlock();
    this->WXRefinableObj::CrystUpdate(uui,lock);
@@ -839,12 +840,11 @@ END_EVENT_TABLE()
 
 WXPowderPatternGraph::WXPowderPatternGraph(wxFrame *frame, WXPowderPattern* parent):
 wxWindow(frame,-1,wxPoint(-1,-1),wxSize(-1,-1)),
-mpPattern(parent),mMargin(50),mDiffPercentShift(.20),
+mpPattern(parent),mMargin(20),mDiffPercentShift(.20),
 mMaxIntensity(-1),mMinIntensity(-1),mMinX(-1),mMaxX(-1),
 mpParentFrame(frame),
 mIsDragging(false),mDisplayLabel(true)
 {
-   cout <<"new CrystMutex("<<&mMutex<<")for WXPowderPatternGraph:"<<this<<endl;
    mpPopUpMenu=new wxMenu("Powder Pattern");
    mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_UPDATE, "&Update");
    mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_TOGGLELABEL, "&Hide Labels");
@@ -854,9 +854,6 @@ mIsDragging(false),mDisplayLabel(true)
 WXPowderPatternGraph::~WXPowderPatternGraph()
 {
    mpPattern->NotifyDeleteGraph();
-   #ifdef VFN_CRYST_MUTEX
-   cout <<"Deleting CrystMutex("<<&mMutex<<")for WXPowderPatternGraph:"<<this<<endl;
-   #endif
 }
 
 void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
@@ -913,12 +910,12 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
    {
       wxCoord tmpW,tmpH;
       dc.SetPen(* wxBLACK_PEN);
-      dc.DrawLine(mMargin,height-mMargin,mMargin,mMargin);
-      dc.DrawLine(mMargin,height-mMargin,width,height-mMargin);
+      dc.DrawLine(mMargin*3,height-mMargin,mMargin*3,mMargin);
+      dc.DrawLine(mMargin*3,height-mMargin,width,height-mMargin);
       const int nbTick=10;//approximate
       wxCoord xc,yc;
       //Y axis
-         xc=(wxCoord)mMargin;
+         xc=(wxCoord)mMargin*3;
          REAL yStep=pow((float)10,(float)floor(log10((mMaxIntensity-mMinIntensity)/nbTick)));
          yStep *= floor((mMaxIntensity-mMinIntensity)/yStep/nbTick);
          for(REAL y=yStep*ceil(mMinIntensity/yStep);y<mMaxIntensity;y+=yStep)
@@ -927,7 +924,7 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
             dc.DrawLine(xc-3,yc,xc+3,yc);
             fontInfo.Printf("%g",y);
             dc.GetTextExtent(fontInfo, &tmpW, &tmpH);
-            dc.DrawText(fontInfo,xc-tmpW,yc-tmpH/2);
+            dc.DrawText(fontInfo,xc-tmpW-3,yc-tmpH/2);
          }
       //X axis
          yc=(wxCoord)(height-mMargin);
@@ -939,8 +936,27 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
             dc.DrawLine(xc,yc-3,xc,yc+3);
             fontInfo.Printf("%g",x);
             dc.GetTextExtent(fontInfo, &tmpW, &tmpH);
-            dc.DrawText(fontInfo,xc-tmpW/2,yc+tmpH);
+            dc.DrawText(fontInfo,xc-tmpW/2,yc+6);
          }
+   }
+   // Draw cumulated Chi^2, scaled
+   {
+      dc.SetPen(* wxGREY_PEN);
+      wxCoord x1,y1,x2,y2;
+      x2=this->Point2ScreenX(0);
+      const REAL s=(mMaxIntensity-mMinIntensity)/mChi2Cumul(mpPattern->GetPowderPattern().GetNbPointUsed()-1);
+      y2=this->Data2ScreenY(mMinIntensity+mChi2Cumul(0)*s);
+      for(long i=0;i<mpPattern->GetPowderPattern().GetNbPointUsed();i++)
+      {
+         if((mX(i)>mMinX)&&(mX(i)<mMaxX))
+         {
+            x1=x2;
+            y1=y2;
+            x2=this->Point2ScreenX(i);
+            y2=this->Data2ScreenY(mMinIntensity+mChi2Cumul(i)*s);
+            dc.DrawLine(x1,y1,x2,y2);
+         }
+      }
    }
    // Draw observed spectrum
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():4:",5)
@@ -1307,23 +1323,11 @@ void WXPowderPatternGraph::OnSize(wxSizeEvent& event)
    this->Refresh(false);
 }
 
-void WXPowderPatternGraph::SetPattern(const CrystVector_REAL &obs,
-                                      const CrystVector_REAL &calc,
-                                      const REAL tthetaMin,const REAL tthetaStep,
-                                      const CrystVector_REAL &sigma)
-{
-   VFN_DEBUG_MESSAGE("WXPowderPatternGraph::SetPattern(obs,calc,step,sigma)",10)
-   const long nbPoint=mObs.numElements();
-   CrystVector_REAL x(nbPoint);
-   for(long i=0;i<nbPoint;i++) x(i)=tthetaMin+i*tthetaStep;
-   this->SetPattern(x,obs,calc,sigma);
-   VFN_DEBUG_MESSAGE("WXPowderPatternGraph::SetPattern():End",10)
-}
-
 void WXPowderPatternGraph::SetPattern(const CrystVector_REAL &x,
                                       const CrystVector_REAL &obs,
                                       const CrystVector_REAL &calc,
-                                      const CrystVector_REAL &sigma)
+                                      const CrystVector_REAL &sigma,
+                                      const CrystVector_REAL &chi2Cumul)
 {
    VFN_DEBUG_ENTRY("WXPowderPatternGraph::SetPattern(x,obs,calc,sigma)",4)
    mMutex.Lock();
@@ -1332,6 +1336,7 @@ void WXPowderPatternGraph::SetPattern(const CrystVector_REAL &x,
    mCalc=calc;
    mObs=obs;
    mSigma=sigma;
+   mChi2Cumul=chi2Cumul;
    // Reset the zoom parameters, only for the first display or if the limits of the
    // full pattern have changed
    if(  (mMaxX<0)
@@ -1388,13 +1393,13 @@ long WXPowderPatternGraph::Data2ScreenX(const REAL x)const
 {
    wxCoord width,height;
    this->GetSize(&width, &height);
-   return (long)(mMargin+(x-mMinX)*(width-mMargin)/(mMaxX-mMinX));
+   return (long)(mMargin*3+(x-mMinX)*(width-mMargin)/(mMaxX-mMinX));
 }
 long WXPowderPatternGraph::Point2ScreenX(const long x)const
 {
    wxCoord width,height;
    this->GetSize(&width, &height);
-   return (long)(mMargin+(mX(x)-mMinX)*(width-mMargin)/(REAL)(mMaxX-mMinX));
+   return (long)(mMargin*3+(mX(x)-mMinX)*(width-3*mMargin)/(REAL)(mMaxX-mMinX));
 }
 long WXPowderPatternGraph::Data2ScreenY(const REAL y)const
 {
@@ -1407,7 +1412,7 @@ REAL WXPowderPatternGraph::Screen2DataX(const long x)const
 {
    wxCoord width,height;
    this->GetSize(&width, &height);
-   return mMinX+(x-mMargin)*(mMaxX-mMinX)/(REAL)(width-mMargin);
+   return mMinX+(x-mMargin*3)*(mMaxX-mMinX)/(REAL)(width-3*mMargin);
 }
 REAL WXPowderPatternGraph::Screen2DataY(const long y)const
 {

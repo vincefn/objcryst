@@ -88,14 +88,16 @@ class WXPowderPatternGraph: public wxWindow
       void SetPattern(const CrystVector_REAL &obs,
                       const CrystVector_REAL &calc,
                       const REAL tthetaMin,const REAL tthetaStep,
-                      const CrystVector_REAL &sigma);
+                      const CrystVector_REAL &sigma,
+                      const CrystVector_REAL &chi2Cumul);
       /** Update the pattern. This is called by the WXPowderPattern parent.
       *
       */
       void SetPattern(const CrystVector_REAL &x,
                       const CrystVector_REAL &obs,
                       const CrystVector_REAL &calc,
-                      const CrystVector_REAL &sigma);
+                      const CrystVector_REAL &sigma,
+                      const CrystVector_REAL &chi2Cumul);
       /// Redraw the pattern (special function to ensure complete redrawing under windows...)
       void OnRedrawNewPattern(wxUpdateUIEvent& WXUNUSED(event));
       void OnToggleLabel(wxCommandEvent& WXUNUSED(event));
@@ -116,7 +118,7 @@ class WXPowderPatternGraph: public wxWindow
       REAL Screen2DataY(const long y)const;
       WXPowderPattern *mpPattern;
       /// Data vectors (Note that when x coordinates are 2theta, they are stored in degrees here)
-      CrystVector_REAL mX,mObs,mCalc,m2theta,mSigma;
+      CrystVector_REAL mX,mObs,mCalc,m2theta,mSigma,mChi2Cumul;
       const long mMargin;
       const REAL mDiffPercentShift;
       REAL mMaxIntensity,mMinIntensity,mMinX,mMaxX;

@@ -1468,6 +1468,8 @@ void PowderPattern::SetPowderPatternX(const CrystVector_REAL &x)
 
 unsigned long PowderPattern::GetNbPoint()const {return mNbPoint;}
 
+unsigned long PowderPattern::GetNbPointUsed()const {return mNbPointUsed;}
+
 void PowderPattern::SetRadiation(const Radiation &radiation)
 {
    mRadiation=radiation;
@@ -1545,6 +1547,54 @@ REAL PowderPattern::GetPowderPatternXMax()const
 const CrystVector_REAL& PowderPattern::GetPowderPatternX()const 
 {
    return mX;
+}
+
+const CrystVector_REAL& PowderPattern::GetChi2Cumul()const
+{
+   mChi2Cumul.resize(mNbPoint);
+   mChi2Cumul=0;
+   if(0 == mOptProfileIntegration.GetChoice())
+   {
+      this->CalcPowderPatternIntegrated();
+      const REAL *pObs=mIntegratedObs.data();
+      const REAL *pCalc=mPowderPatternIntegratedCalc.data();
+      const REAL *pWeight;
+      if(mIntegratedWeight.numElements()==0) pWeight=mIntegratedWeightObs.data();
+      else pWeight=mIntegratedWeight.data();
+      
+      REAL *pC2Cu=mChi2Cumul.data();
+      for(unsigned int i=0;i<mIntegratedPatternMin(0);i++) *pC2Cu++ = 0;
+      REAL chi2cumul=0,tmp;
+      for(unsigned long j=1;j<mNbIntegrationUsed;j++)
+      {
+         tmp=(*pObs++ - *pCalc++) ;
+         chi2cumul += *pWeight++ * tmp*tmp;
+         for(unsigned int i=mIntegratedPatternMin(j-1);i<mIntegratedPatternMin(j);i++) *pC2Cu++ =chi2cumul;
+         if(mIntegratedPatternMin(j)>mNbPointUsed)
+         {
+            for(unsigned int i=mIntegratedPatternMin(j);i<mNbPoint;i++) *pC2Cu++ =chi2cumul;
+            break;
+         }
+      }
+      pC2Cu=mChi2Cumul.data()+mIntegratedPatternMin(mNbIntegrationUsed-1);
+      for(unsigned int i=mIntegratedPatternMin(mNbIntegrationUsed-1);i<mNbPoint;i++) *pC2Cu++ =chi2cumul;
+   }
+   else
+   {
+      this->CalcPowderPattern();
+      const REAL *pObs=mPowderPatternObs.data();
+      const REAL *pCalc=mPowderPatternCalc.data();
+      const REAL *pWeight=mPowderPatternWeight.data();
+      REAL *pC2Cu=mChi2Cumul.data();
+      REAL chi2cumul=0,tmp;
+      for(unsigned int i=0;i<mNbPointUsed;i++)
+      {
+         tmp = (*pObs++ - *pCalc++) ;
+         chi2cumul += *pWeight++ * tmp*tmp;
+         *pC2Cu++ = chi2cumul;
+      }
+   }
+   return mChi2Cumul;
 }
 
 const RefinableObjClock& PowderPattern::GetClockPowderPatternCalc()const

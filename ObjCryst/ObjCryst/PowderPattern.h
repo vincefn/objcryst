@@ -478,6 +478,8 @@ class PowderPattern : public RefinableObj
          void SetPowderPatternX(const CrystVector_REAL &x);
          ///Number of points ?
          unsigned long GetNbPoint()const;
+         ///Number of points actually calculated (below the chosen max(sin(theta)/lambda)) ?
+         unsigned long GetNbPointUsed()const;
          
          /// Set the radiation
          void SetRadiation(const Radiation &radiation);
@@ -548,6 +550,12 @@ class PowderPattern : public RefinableObj
          REAL GetPowderPatternXMax()const;
          /// Get the vector of X (2theta or time-of-flight) coordinates 
          const CrystVector_REAL& GetPowderPatternX()const;
+         /** Get the powder pattern cumulative Chi^2. Depending on the chosen option,
+         *it will be calculated in an integrated manner or not.
+         *
+         * The vector is recomputed on every call, so this is \e slow.
+         */
+         const CrystVector_REAL& GetChi2Cumul()const;
       
       // Clocks
          /// Last time the pattern was calculated
@@ -809,6 +817,8 @@ class PowderPattern : public RefinableObj
       /// The complete variance associated to each point of the powder pattern,
       /// taking into account observation and model errors. Integrated.
       mutable CrystVector_REAL mPowderPatternVarianceIntegrated;
+      /// The cumulative Chi^2 (integrated or not, depending on the option)
+      mutable CrystVector_REAL mChi2Cumul;
       
       /** Vector of x coordinates (either 2theta or time-of-flight) for the pattern
       *
