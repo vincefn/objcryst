@@ -980,17 +980,17 @@ Computing all Profiles",5)
             }
             first=(long)(mpParentPowderPattern->X2Pixel(center-halfwidth));
             last =(long)(mpParentPowderPattern->X2Pixel(center+halfwidth+spectrumwidth));
-            if(first>last)
-            { // Whoops - should not happen !! Unless there is a strange (dis)order for the x coordinates...
-               cout<<"PowderPatternDiffraction::CalcPowderReflProfile(), line"<<__LINE__<<"first>last !! :"<<first<<","<<last<<endl;
-               first=(first+last)/2;
-               last=first;
-            }
             if(this->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
             {
                const long f=first;
                first=last;
                last=f;
+            }
+            if(first>last)
+            { // Whoops - should not happen !! Unless there is a strange (dis)order for the x coordinates...
+               cout<<"PowderPatternDiffraction::CalcPowderReflProfile(), line"<<__LINE__<<"first>last !! :"<<first<<","<<last<<endl;
+               first=(first+last)/2;
+               last=first;
             }
             first -=1;
             last+=1;
