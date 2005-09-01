@@ -1551,33 +1551,38 @@ const CrystVector_REAL& PowderPattern::GetPowderPatternX()const
 
 const CrystVector_REAL& PowderPattern::GetChi2Cumul()const
 {
+   VFN_DEBUG_ENTRY("PowderPattern::GetChi2Cumul()",3)
    mChi2Cumul.resize(mNbPoint);
-   mChi2Cumul=0;
    if(0 == mOptProfileIntegration.GetChoice())
    {
       this->CalcPowderPatternIntegrated();
-      const REAL *pObs=mIntegratedObs.data();
-      const REAL *pCalc=mPowderPatternIntegratedCalc.data();
-      const REAL *pWeight;
-      if(mIntegratedWeight.numElements()==0) pWeight=mIntegratedWeightObs.data();
-      else pWeight=mIntegratedWeight.data();
-      
-      REAL *pC2Cu=mChi2Cumul.data();
-      for(unsigned int i=0;i<mIntegratedPatternMin(0);i++) *pC2Cu++ = 0;
-      REAL chi2cumul=0,tmp;
-      for(unsigned long j=1;j<mNbIntegrationUsed;j++)
+      if(mNbIntegrationUsed==0)
+      	mChi2Cumul=0;
+      else
       {
-         tmp=(*pObs++ - *pCalc++) ;
-         chi2cumul += *pWeight++ * tmp*tmp;
-         for(unsigned int i=mIntegratedPatternMin(j-1);i<mIntegratedPatternMin(j);i++) *pC2Cu++ =chi2cumul;
-         if(mIntegratedPatternMin(j)>mNbPointUsed)
+         const REAL *pObs=mIntegratedObs.data();
+         const REAL *pCalc=mPowderPatternIntegratedCalc.data();
+         const REAL *pWeight;
+         if(mIntegratedWeight.numElements()==0) pWeight=mIntegratedWeightObs.data();
+         else pWeight=mIntegratedWeight.data();
+
+         REAL *pC2Cu=mChi2Cumul.data();
+         for(unsigned int i=0;i<mIntegratedPatternMin(0);i++) *pC2Cu++ = 0;
+         REAL chi2cumul=0,tmp;
+         for(unsigned long j=1;j<mNbIntegrationUsed;j++)
          {
-            for(unsigned int i=mIntegratedPatternMin(j);i<mNbPoint;i++) *pC2Cu++ =chi2cumul;
-            break;
+            tmp=(*pObs++ - *pCalc++) ;
+            chi2cumul += *pWeight++ * tmp*tmp;
+            for(unsigned int i=mIntegratedPatternMin(j-1);i<mIntegratedPatternMin(j);i++) *pC2Cu++ =chi2cumul;
+            if(mIntegratedPatternMin(j)>mNbPointUsed)
+            {
+               for(unsigned int i=mIntegratedPatternMin(j);i<mNbPoint;i++) *pC2Cu++ =chi2cumul;
+               break;
+            }
          }
+         pC2Cu=mChi2Cumul.data()+mIntegratedPatternMin(mNbIntegrationUsed-1);
+         for(unsigned int i=mIntegratedPatternMin(mNbIntegrationUsed-1);i<mNbPoint;i++) *pC2Cu++ =chi2cumul;
       }
-      pC2Cu=mChi2Cumul.data()+mIntegratedPatternMin(mNbIntegrationUsed-1);
-      for(unsigned int i=mIntegratedPatternMin(mNbIntegrationUsed-1);i<mNbPoint;i++) *pC2Cu++ =chi2cumul;
    }
    else
    {
@@ -1594,6 +1599,7 @@ const CrystVector_REAL& PowderPattern::GetChi2Cumul()const
          *pC2Cu++ = chi2cumul;
       }
    }
+   VFN_DEBUG_EXIT("PowderPattern::GetChi2Cumul()",3)
    return mChi2Cumul;
 }
 
