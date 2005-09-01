@@ -1393,7 +1393,7 @@ long WXPowderPatternGraph::Data2ScreenX(const REAL x)const
 {
    wxCoord width,height;
    this->GetSize(&width, &height);
-   return (long)(mMargin*3+(x-mMinX)*(width-mMargin)/(mMaxX-mMinX));
+   return (long)(mMargin*3+(x-mMinX)*(width-3*mMargin)/(mMaxX-mMinX));
 }
 long WXPowderPatternGraph::Point2ScreenX(const long x)const
 {
