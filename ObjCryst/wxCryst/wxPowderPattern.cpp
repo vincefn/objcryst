@@ -1018,17 +1018,17 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
             case 3: dc.SetPen(*wxRED_PEN  );dc.SetTextForeground(*wxRED  );break;
             default:dc.SetPen(*wxGREY_PEN );dc.SetTextForeground(*wxLIGHT_GREY );break;
          }
-         unsigned long ct=0;
          for(pos=comp->begin();pos!=comp->end();++pos)
          {
+            unsigned long ct=0;
             REAL point=pos->first;
             if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
                point *= RAD2DEG;
             if((point>=mMinX)&&(point<=mMaxX))
             {
-               if(++ct>500)
+               if(++ct>100)
                {
-                  cout <<"Too many labels (>500): displaying only first 500"<<endl;
+                  cout <<"Too many labels (>100): displaying only first 100"<<endl;
                   break;
                }
                x=this->Data2ScreenX(point);
