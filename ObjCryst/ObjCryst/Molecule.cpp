@@ -132,7 +132,7 @@ REAL GetDihedralAngle(const MolAtom &at1,const MolAtom &at2,const MolAtom &at3,c
       if(angle<=-1) angle=M_PI;
       else angle=acos(angle);
    }
-   if((x21*x34 + y21*y34 + z21*z34)<0) return -angle;
+   if((x21*x234 + y21*y234 + z21*z234)<0) return -angle;
    return angle;
 }
 
@@ -736,8 +736,8 @@ REAL MolDihedralAngle::GetLogLikelihood()const
    //TAU_PROFILE("MolDihedralAngle::GetLogLikelihood()","void ()",TAU_DEFAULT);
    const REAL angle=this->GetAngle();
    REAL tmp=angle-(mAngle0+mDelta);
-   if(fabs(tmp+2*M_PI)<fabs(tmp)) tmp += 2*M_PI;
-   if(fabs(tmp-2*M_PI)<fabs(tmp)) tmp -= 2*M_PI;
+   if(tmp<(-M_PI)) tmp += 2*M_PI;
+   if(tmp>  M_PI ) tmp -= 2*M_PI;
    if(tmp>0)
    {
       tmp/=mSigma;
@@ -748,8 +748,8 @@ REAL MolDihedralAngle::GetLogLikelihood()const
       return tmp*tmp;
    }
    tmp=angle-(mAngle0-mDelta);
-   if(fabs(tmp+2*M_PI)<fabs(tmp)) tmp=tmp+2*M_PI;
-   if(fabs(tmp-2*M_PI)<fabs(tmp)) tmp=tmp-2*M_PI;
+   if(tmp<(-M_PI)) tmp += 2*M_PI;
+   if(tmp>  M_PI ) tmp -= 2*M_PI;
    if(tmp<0)
    {
       tmp/=mSigma;
