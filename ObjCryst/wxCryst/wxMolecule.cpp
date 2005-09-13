@@ -154,7 +154,7 @@ WXCrystObjBasic(parent),mpMolAtom(obj)
    }
    
    this->SetSizer(mpSizer);
-   this->BottomLayout(0);
+   this->Layout();
    this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXMolAtom::WXMolAtom():"<<obj->GetName(),6)
 }
@@ -252,7 +252,7 @@ WXCrystObjBasic(parent),mpMolBond(obj),mpButtonFree(0)
    mList.Add(sigma);
 
    this->SetSizer(mpSizer);
-   this->BottomLayout(0);
+   this->Layout();
    this->CrystUpdate(true,true);
    VFN_DEBUG_EXIT("WXMolBond::WXMolBond():"<<obj->GetName(),6)
 }
@@ -379,7 +379,7 @@ WXCrystObjBasic(parent),mpMolBondAngle(obj)
    mList.Add(sigma);
 
    this->SetSizer(mpSizer);
-   this->BottomLayout(0);
+   this->Layout();
    this->CrystUpdate(true,true);
    VFN_DEBUG_EXIT("WXMolBondAngle::WXMolBond():"<<obj->GetName(),6)
 }
@@ -518,7 +518,7 @@ WXCrystObjBasic(parent),mpMolDihedralAngle(obj)
    mList.Add(sigma);
 
    this->SetSizer(mpSizer);
-   this->BottomLayout(0);
+   this->Layout();
    this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXMolDihedralAngle::WXMolBond():"<<obj->GetName(),6)
 }
@@ -1247,7 +1247,7 @@ void WXMolecule::OnMenuShowBondList(wxCommandEvent &event)
 {
    if(0!=mpBondWin) return;
    wxFrame *frame= new wxFrame(this,-1,("Bond List for: "+mpMolecule->GetName()).c_str(),
-                               wxDefaultPosition,wxSize(250,200));
+                               wxDefaultPosition,wxSize(650,300));
    mpBondWin = new WXMolScrolledWindow(frame,this);
    mpSizerBondList= new wxBoxSizer(wxVERTICAL);
    frame->Show(true);
@@ -1257,7 +1257,7 @@ void WXMolecule::OnMenuShowBondAngleList(wxCommandEvent &event)
 {
    if(0!=mpAngleWin) return;
    wxFrame *frame= new wxFrame(this,-1,("Bond Angles list for: "+mpMolecule->GetName()).c_str(),
-                               wxDefaultPosition,wxSize(250,200));
+                               wxDefaultPosition,wxSize(650,300));
    mpAngleWin = new WXMolScrolledWindow(frame,this);
    mpSizerAngleList= new wxBoxSizer(wxVERTICAL);
    frame->Show(true);
@@ -1267,7 +1267,7 @@ void WXMolecule::OnMenuShowDihedralAngleList(wxCommandEvent &event)
 {
    if(0!=mpDihedralAngleWin) return;
    wxFrame *frame= new wxFrame(this,-1,("Dihedral Angles list for: "+mpMolecule->GetName()).c_str(),
-                               wxDefaultPosition,wxSize(250,200));
+                               wxDefaultPosition,wxSize(650,300));
    mpDihedralAngleWin = new WXMolScrolledWindow(frame,this);
    mpSizerDihedralAngleList= new wxBoxSizer(wxVERTICAL);
    frame->Show(true);
