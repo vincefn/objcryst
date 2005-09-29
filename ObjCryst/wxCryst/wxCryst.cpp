@@ -168,6 +168,12 @@ void WXCrystObjBasic::AddChild(WXCrystObjBasic *pChild, bool doBottomLayout)
 
 void WXCrystObjBasic::AddedToList(WXCrystObjBasicList* list){mvpList.insert(list);}
 void WXCrystObjBasic::RemovedFromList(WXCrystObjBasicList* list){mvpList.erase(list);}
+bool WXCrystObjBasic::Layout()
+{
+   //static unsigned long ct=0;
+   //cout<<"WXCrystObjBasic::Layout() #"<<++ct<<endl;
+   return wxWindow::Layout();
+}
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXCrystObjBasicList

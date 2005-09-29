@@ -155,6 +155,7 @@ class WXCrystObjBasic: public wxWindow
       void AddedToList(WXCrystObjBasicList* list);
       /// \internal Tell the object it has been removed from a list
       void RemovedFromList(WXCrystObjBasicList* list);
+      virtual bool Layout();
    protected:
       /// Parent, if a WXCrystObjBasic itself
       WXCrystObjBasic *mWXCrystParent;

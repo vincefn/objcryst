@@ -673,7 +673,7 @@ void WXRefinableObj::UpdateUI(const bool lock)
       mpWXTitle->UpdateUI(false);
       mpSizer->SetItemMinSize
             (mpWXTitle, mpWXTitle->GetSize().GetWidth(),mpWXTitle->GetSize().GetHeight());
-      mpWXTitle->Layout();
+      //mpWXTitle->Layout();
       if(lock) mMutex.Unlock();
    }
    this->WXCrystObj::UpdateUI(lock);

@@ -20,6 +20,7 @@
 #ifndef _VFN_WX_MOLECULE_H_
 #define _VFN_WX_MOLECULE_H_
 
+#include "wx/grid.h"
 #include "wxCryst/wxScatterer.h"
 #include "ObjCryst/Molecule.h"
 
@@ -27,10 +28,10 @@ namespace ObjCryst
 {
 class WXMolecule;
 // Scrolled window for bonds, bond angles and dihedral angles
-class WXMolScrolledWindow:public wxScrolledWindow
+class WXMolScrolledWindow:public wxGrid
 {
    public:
-      WXMolScrolledWindow(wxWindow* parent, WXMolecule* pWXMol);
+      WXMolScrolledWindow(wxWindow* parent, WXMolecule* pWXMol,long id=-1);
       virtual ~WXMolScrolledWindow();
    private:
       /// The WXMolecule window which created this window, and who should be told
@@ -74,6 +75,8 @@ class WXMolBond:public WXCrystObjBasic
       WXFieldChoice* mpFieldAtom1;
       WXFieldChoice* mpFieldAtom2;
       wxCheckBox *mpButtonFree;
+      /// The current value
+      REAL mValue;
    DECLARE_EVENT_TABLE()
 };
 
@@ -93,6 +96,8 @@ class WXMolBondAngle:public WXCrystObjBasic
       WXFieldChoice* mpFieldAtom1;
       WXFieldChoice* mpFieldAtom2;
       WXFieldChoice* mpFieldAtom3;
+      /// The current value
+      REAL mValue;
    DECLARE_EVENT_TABLE()
 };
 
@@ -113,6 +118,8 @@ class WXMolDihedralAngle:public WXCrystObjBasic
       WXFieldChoice* mpFieldAtom2;
       WXFieldChoice* mpFieldAtom3;
       WXFieldChoice* mpFieldAtom4;
+      /// The current value
+      REAL mValue;
    DECLARE_EVENT_TABLE()
 };
 
@@ -128,43 +135,122 @@ class WXMolecule: public WXScatterer
       void OnMenuAddBond(wxCommandEvent & WXUNUSED(event));
       void OnMenuAddAngle(wxCommandEvent & WXUNUSED(event));
       void OnMenuAddDihedralAngle(wxCommandEvent & WXUNUSED(event));
+      void OnMenuAddRigidGroup(wxCommandEvent & WXUNUSED(event));
       void OnMenuRigidfyWithDihedralAngles(wxCommandEvent & WXUNUSED(event));
       void OnMenuRemoveAtom(wxCommandEvent & WXUNUSED(event));
       void OnMenuRemoveBond(wxCommandEvent & WXUNUSED(event));
       void OnMenuRemoveAngle(wxCommandEvent & WXUNUSED(event));
       void OnMenuRemoveDihedralAngle(wxCommandEvent & WXUNUSED(event));
+      void OnMenuRemoveRigidGroup(wxCommandEvent & WXUNUSED(event));
       void OnMenuSetLimits(wxCommandEvent &event);
-      void OnMenuShowBondList(wxCommandEvent &event);
-      void OnMenuShowBondAngleList(wxCommandEvent &event);
-      void OnMenuShowDihedralAngleList(wxCommandEvent &event);
+      void OnMenuShowRestraintWindow(wxCommandEvent &event);
       void OnMenuSetDeltaSigma(wxCommandEvent &event);
+      void OnChangeCenterAtom(wxCommandEvent &event);
+      void OnEditGridAtom(wxGridEvent &e);
+      void OnEditGridBondLength(wxGridEvent &e);
+      void OnEditGridBondAngle(wxGridEvent &e);
+      void OnEditGridDihedralAngle(wxGridEvent &e);
+      void OnEditGridRigidGroup(wxGridEvent &e);
       void OnMenuTest(wxCommandEvent &event);
       /// Notify that either the bond, bond angle or dihedral angle list window has
       /// been destroyed
       void NotifyDeleteListWin(WXMolScrolledWindow *win);
       virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false);
       virtual void UpdateUI(const bool mutexlock=false);
+      virtual bool Enable(bool enable=true);
    private:
       Molecule* mpMolecule;
-      wxBoxSizer* mpSizerAtomList;
-      wxBoxSizer* mpSizerBondList;
-      wxBoxSizer* mpSizerAngleList;
-      wxBoxSizer* mpSizerDihedralAngleList;
+      WXMolScrolledWindow* mpAtomWin;
       WXMolScrolledWindow* mpBondWin;
       WXMolScrolledWindow* mpAngleWin;
       WXMolScrolledWindow* mpDihedralAngleWin;
+      WXMolScrolledWindow* mpRigidGroupWin;
+      /// Structure to store the Atom parameters
+      struct CellAtom
+      {
+         CellAtom();
+         MolAtom* mpAtom;
+         std::string mName;
+         const ScatteringPower* mpScatteringPower;
+         REAL mX,mY,mZ;
+         /// True if we need to update the displayed values
+         bool mNeedUpdateUI;
+      };
       /** Displayed list of atoms
       */
-      map<MolAtom*,WXCrystObjBasic*> mvpAtom;
-      /** Displayed list of bonds
+      std::list<CellAtom> mvpAtom;
+      /// Structure to store the bond current values
+      struct CellBond
+      {
+         CellBond();
+         MolBond* mpBond;
+         std::string mAtom1;
+         std::string mAtom2;
+         REAL mLength;
+         REAL mLength0;
+         REAL mSigma;
+         REAL mDelta;
+         /// True if we need to update the displayed values
+         bool mNeedUpdateUI;
+      };
+      /** Displayed list of bonds, in the order they appear
       */
-      map<MolBond*,WXCrystObjBasic*> mvpBond;
+      std::list<CellBond> mvpBond;
+      /// Structure to store the bond angles current values
+      struct CellBondAngle
+      {
+         CellBondAngle();
+         MolBondAngle* mpBondAngle;
+         std::string mAtom1;
+         std::string mAtom2;
+         std::string mAtom3;
+         REAL mAngle;
+         REAL mAngle0;
+         REAL mSigma;
+         REAL mDelta;
+         /// True if we need to update the displayed values
+         bool mNeedUpdateUI;
+      };
       /** Displayed list of bond angle
       */
-      map<MolBondAngle*,WXCrystObjBasic*> mvpBondAngle;
+      std::list<CellBondAngle> mvpBondAngle;
+      /// Structure to store the dihedral angles current values
+      struct CellDihedralAngle
+      {
+         CellDihedralAngle();
+         MolDihedralAngle* mpDihedralAngle;
+         std::string mAtom1;
+         std::string mAtom2;
+         std::string mAtom3;
+         std::string mAtom4;
+         REAL mAngle;
+         REAL mAngle0;
+         REAL mSigma;
+         REAL mDelta;
+         /// True if we need to update the displayed values
+         bool mNeedUpdateUI;
+      };
       /** Displayed list of Dihedral angles
       */
-      map<MolDihedralAngle*,WXCrystObjBasic*> mvpDihedralAngle;
+      std::list<CellDihedralAngle> mvpDihedralAngle;
+      struct CellRigidGroup
+      {
+         CellRigidGroup();
+         /// Rigid group in the Molecule
+         RigidGroup *mpGroup;
+         /// Copy of the set of atoms, as it was last displayed
+         RigidGroup mGroupCopy;
+         /// True if we need to update the displayed values
+         bool mNeedUpdateUI;
+      };
+      /** Displayed list of Dihedral angles
+      */
+      std::list<CellRigidGroup> mvpRigidGroup;
+      /// Flag to indicate whether we are updating values in the wxGrid data.
+      /// (enabled in wxMolecule::UpdateUI()).
+      bool mIsSelfUpdating;
+      /// Center atom
+      WXFieldChoice* mpFieldCenterAtom;
    DECLARE_EVENT_TABLE()
 };
 

@@ -138,25 +138,19 @@ Molecule *ZScatterer2Molecule(ZScatterer *scatt)
          }
       }
    
-   for(map<unsigned long,set<unsigned long> >::const_iterator pos=mol->GetConnectivityTable().begin();
+   for(map<MolAtom*,set<MolAtom*> >::const_iterator pos=mol->GetConnectivityTable().begin();
        pos!=mol->GetConnectivityTable().end();++pos)
    {
-      for(set<unsigned long>::const_iterator pos1=pos->second.begin();
+      for(set<MolAtom*>::const_iterator pos1=pos->second.begin();
           pos1!=pos->second.end();++pos1)
       {
-         for(set<unsigned long>::const_iterator pos2=pos1;
+         for(set<MolAtom*>::const_iterator pos2=pos1;
           pos2!=pos->second.end();++pos2)
           {
             if(pos2==pos1) continue;
-            if(mol->FindBondAngle(mol->GetAtom(*pos1),
-                                  mol->GetAtom(pos->first),
-                                  mol->GetAtom(*pos2)) == mol->GetBondAngleList().end())
-               mol->AddBondAngle(mol->GetAtom(*pos1),
-                                 mol->GetAtom(pos->first),
-                                 mol->GetAtom(*pos2),
-                                 GetBondAngle(mol->GetAtom(*pos1),
-                                              mol->GetAtom(pos->first),
-                                              mol->GetAtom(*pos2)),0.01,0.02,false);
+            if(mol->FindBondAngle(**pos1,*(pos->first),**pos2)== mol->GetBondAngleList().end())
+               mol->AddBondAngle(**pos1,*(pos->first),**pos2,
+                                 GetBondAngle(**pos1,*(pos->first),**pos2),0.01,0.02,false);
           }
       }
    }
