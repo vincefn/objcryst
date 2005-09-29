@@ -1194,10 +1194,10 @@ void WXMolecule::OnEditGridBondLength(wxGridEvent &e)
          if(*at!=&(mpMolecule->GetBondList()[r]->GetAtom2()))
             mpMolecule->GetBondList()[r]->SetAtom1(**at);
          else
-            mpBondWin->SetCellValue(r,c,mpMolecule->GetBondList()[r]->GetAtom1().GetName());
+            mpBondWin->SetCellValue(r,c,mpMolecule->GetBondList()[r]->GetAtom1().GetName().c_str());
       }
       else
-         mpBondWin->SetCellValue(r,c,mpMolecule->GetBondList()[r]->GetAtom1().GetName());
+         mpBondWin->SetCellValue(r,c,mpMolecule->GetBondList()[r]->GetAtom1().GetName().c_str());
    }
    if(c==1)
    {
@@ -1208,10 +1208,10 @@ void WXMolecule::OnEditGridBondLength(wxGridEvent &e)
          if(*at!=&(mpMolecule->GetBondList()[r]->GetAtom1()))
             mpMolecule->GetBondList()[r]->SetAtom2(**at);
          else
-            mpBondWin->SetCellValue(r,c,mpMolecule->GetBondList()[r]->GetAtom2().GetName());
+            mpBondWin->SetCellValue(r,c,mpMolecule->GetBondList()[r]->GetAtom2().GetName().c_str());
       }
       else
-         mpBondWin->SetCellValue(r,c,mpMolecule->GetBondList()[r]->GetAtom2().GetName());
+         mpBondWin->SetCellValue(r,c,mpMolecule->GetBondList()[r]->GetAtom2().GetName().c_str());
    }
    if(c==3)
    {
@@ -1263,10 +1263,10 @@ void WXMolecule::OnEditGridBondAngle(wxGridEvent &e)
             &&(*at!=&(mpMolecule->GetBondAngleList()[r]->GetAtom3())))
             mpMolecule->GetBondAngleList()[r]->SetAtom1(**at);
          else
-            mpAngleWin->SetCellValue(r,c,mpMolecule->GetBondAngleList()[r]->GetAtom1().GetName());
+            mpAngleWin->SetCellValue(r,c,mpMolecule->GetBondAngleList()[r]->GetAtom1().GetName().c_str());
       }
       else
-         mpAngleWin->SetCellValue(r,c,mpMolecule->GetBondAngleList()[r]->GetAtom1().GetName());
+         mpAngleWin->SetCellValue(r,c,mpMolecule->GetBondAngleList()[r]->GetAtom1().GetName().c_str());
    }
    if(c==1)
    {
@@ -1278,10 +1278,10 @@ void WXMolecule::OnEditGridBondAngle(wxGridEvent &e)
             &&(*at!=&(mpMolecule->GetBondAngleList()[r]->GetAtom3())))
             mpMolecule->GetBondAngleList()[r]->SetAtom2(**at);
          else
-            mpAngleWin->SetCellValue(r,c,mpMolecule->GetBondAngleList()[r]->GetAtom2().GetName());
+            mpAngleWin->SetCellValue(r,c,mpMolecule->GetBondAngleList()[r]->GetAtom2().GetName().c_str());
       }
       else
-         mpAngleWin->SetCellValue(r,c,mpMolecule->GetBondAngleList()[r]->GetAtom2().GetName());
+         mpAngleWin->SetCellValue(r,c,mpMolecule->GetBondAngleList()[r]->GetAtom2().GetName().c_str());
    }
    if(c==2)
    {
@@ -1293,10 +1293,10 @@ void WXMolecule::OnEditGridBondAngle(wxGridEvent &e)
             &&(*at!=&(mpMolecule->GetBondAngleList()[r]->GetAtom2())))
             mpMolecule->GetBondAngleList()[r]->SetAtom3(**at);
          else
-            mpAngleWin->SetCellValue(r,c,mpMolecule->GetBondAngleList()[r]->GetAtom3().GetName());
+            mpAngleWin->SetCellValue(r,c,mpMolecule->GetBondAngleList()[r]->GetAtom3().GetName().c_str());
       }
       else
-         mpAngleWin->SetCellValue(r,c,mpMolecule->GetBondAngleList()[r]->GetAtom2().GetName());
+         mpAngleWin->SetCellValue(r,c,mpMolecule->GetBondAngleList()[r]->GetAtom2().GetName().c_str());
    }
    if(c==4)
    {
@@ -1348,10 +1348,10 @@ void WXMolecule::OnEditGridDihedralAngle(wxGridEvent &e)
             &&(*at!=&(mpMolecule->GetDihedralAngleList()[r]->GetAtom3())))
             mpMolecule->GetDihedralAngleList()[r]->SetAtom1(**at);
          else
-            mpDihedralAngleWin->SetCellValue(r,c,mpMolecule->GetDihedralAngleList()[r]->GetAtom1().GetName());
+            mpDihedralAngleWin->SetCellValue(r,c,mpMolecule->GetDihedralAngleList()[r]->GetAtom1().GetName().c_str());
       }
       else
-         mpDihedralAngleWin->SetCellValue(r,c,mpMolecule->GetDihedralAngleList()[r]->GetAtom1().GetName());
+         mpDihedralAngleWin->SetCellValue(r,c,mpMolecule->GetDihedralAngleList()[r]->GetAtom1().GetName().c_str());
    }
    if(c==1)
    {
@@ -1363,10 +1363,10 @@ void WXMolecule::OnEditGridDihedralAngle(wxGridEvent &e)
             &&(*at!=&(mpMolecule->GetDihedralAngleList()[r]->GetAtom3())))
             mpMolecule->GetDihedralAngleList()[r]->SetAtom2(**at);
          else
-            mpDihedralAngleWin->SetCellValue(r,c,mpMolecule->GetDihedralAngleList()[r]->GetAtom2().GetName());
+            mpDihedralAngleWin->SetCellValue(r,c,mpMolecule->GetDihedralAngleList()[r]->GetAtom2().GetName().c_str());
       }
       else
-         mpDihedralAngleWin->SetCellValue(r,c,mpMolecule->GetDihedralAngleList()[r]->GetAtom2().GetName());
+         mpDihedralAngleWin->SetCellValue(r,c,mpMolecule->GetDihedralAngleList()[r]->GetAtom2().GetName().c_str());
    }
    if(c==2)
    {
@@ -1378,10 +1378,10 @@ void WXMolecule::OnEditGridDihedralAngle(wxGridEvent &e)
             &&(*at!=&(mpMolecule->GetDihedralAngleList()[r]->GetAtom2())))
             mpMolecule->GetDihedralAngleList()[r]->SetAtom3(**at);
          else
-            mpDihedralAngleWin->SetCellValue(r,c,mpMolecule->GetDihedralAngleList()[r]->GetAtom3().GetName());
+            mpDihedralAngleWin->SetCellValue(r,c,mpMolecule->GetDihedralAngleList()[r]->GetAtom3().GetName().c_str());
       }
       else
-         mpDihedralAngleWin->SetCellValue(r,c,mpMolecule->GetDihedralAngleList()[r]->GetAtom2().GetName());
+         mpDihedralAngleWin->SetCellValue(r,c,mpMolecule->GetDihedralAngleList()[r]->GetAtom2().GetName().c_str());
    }
    if(c==4)
    {
@@ -2057,8 +2057,8 @@ void WXMolecule::UpdateUI(const bool lock)
          if(pos->mNeedUpdateUI==true)
          {
             mIsSelfUpdating=true;
-            mpAtomWin->SetCellValue(i, 0, pos->mName);
-            mpAtomWin->SetCellValue(i, 1, pos->mpScatteringPower->GetName());
+            mpAtomWin->SetCellValue(i, 0, pos->mName.c_str());
+            mpAtomWin->SetCellValue(i, 1, pos->mpScatteringPower->GetName().c_str());
             wxString tmp;
             tmp.Printf("%f",pos->mX);
             mpAtomWin->SetCellValue(i, 2, tmp);
@@ -2079,8 +2079,8 @@ void WXMolecule::UpdateUI(const bool lock)
          if(pos->mNeedUpdateUI==true)
          {
             mIsSelfUpdating=true;
-            mpBondWin->SetCellValue(i, 0, pos->mAtom1);
-            mpBondWin->SetCellValue(i, 1, pos->mAtom2);
+            mpBondWin->SetCellValue(i, 0, pos->mAtom1.c_str());
+            mpBondWin->SetCellValue(i, 1, pos->mAtom2.c_str());
             wxString tmp;
             tmp.Printf("%f",pos->mLength);
             mpBondWin->SetCellValue(i, 2, tmp);
@@ -2103,9 +2103,9 @@ void WXMolecule::UpdateUI(const bool lock)
          if(pos->mNeedUpdateUI==true)
          {
             mIsSelfUpdating=true;
-            mpAngleWin->SetCellValue(i, 0, pos->mAtom1);
-            mpAngleWin->SetCellValue(i, 1, pos->mAtom2);
-            mpAngleWin->SetCellValue(i, 2, pos->mAtom3);
+            mpAngleWin->SetCellValue(i, 0, pos->mAtom1.c_str());
+            mpAngleWin->SetCellValue(i, 1, pos->mAtom2.c_str());
+            mpAngleWin->SetCellValue(i, 2, pos->mAtom3.c_str());
             wxString tmp;
             tmp.Printf("%f",pos->mAngle*RAD2DEG);
             mpAngleWin->SetCellValue(i, 3, tmp);
@@ -2128,10 +2128,10 @@ void WXMolecule::UpdateUI(const bool lock)
          if(pos->mNeedUpdateUI==true)
          {
             mIsSelfUpdating=true;
-            mpDihedralAngleWin->SetCellValue(i, 0, pos->mAtom1);
-            mpDihedralAngleWin->SetCellValue(i, 1, pos->mAtom2);
-            mpDihedralAngleWin->SetCellValue(i, 2, pos->mAtom3);
-            mpDihedralAngleWin->SetCellValue(i, 3, pos->mAtom4);
+            mpDihedralAngleWin->SetCellValue(i, 0, pos->mAtom1.c_str());
+            mpDihedralAngleWin->SetCellValue(i, 1, pos->mAtom2.c_str());
+            mpDihedralAngleWin->SetCellValue(i, 2, pos->mAtom3.c_str());
+            mpDihedralAngleWin->SetCellValue(i, 3, pos->mAtom4.c_str());
             wxString tmp;
             tmp.Printf("%f",pos->mAngle*RAD2DEG);
             mpDihedralAngleWin->SetCellValue(i, 4, tmp);
@@ -2154,7 +2154,7 @@ void WXMolecule::UpdateUI(const bool lock)
          if(pos->mNeedUpdateUI==true)
          {
             mIsSelfUpdating=true;
-            mpRigidGroupWin->SetCellValue(i, 0, pos->mpGroup->GetName());
+            mpRigidGroupWin->SetCellValue(i, 0, pos->mpGroup->GetName().c_str());
             mIsSelfUpdating=false;
          }
          ++i;
