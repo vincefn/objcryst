@@ -284,43 +284,39 @@ class ScatteringData: virtual public RefinableObj
       * up to a given maximum theta value
       *
       * \param maxTheta:maximum theta value
-      * \param useMultiplicity: if set to true, equivalent reflections will be removed.
+      * \param unique: if set to true, only unique reflections will be listed.
       * Bijvoet (Friedel) pairs
       * are NOT merged, for 'anomalous' reasons, unless you have chosen to ignore the
-      * imaginary part of the scattering factor. If true, then multiplicity is stored
-      * in the mMultiplicity data member.
+      * imaginary part of the scattering factor. 
+      *
+      * The multiplicity is always stored in ScatteringData::mMultiplicity.
       *
       * \warning The ScatteringData object must already have been assigned 
       * a crystal object using SetCrystal(), and the experimental wavelength 
       * must also have been set before calling this function.
-      *
-      * \todo smarter generation, using spacegroup information to remove extinct reflection
-      * rather than brute-force computation.
       */
       virtual void GenHKLFullSpace2(const REAL maxsithsl,
-                                   const bool useMultiplicity=false);
+                                   const bool unique=false);
       /** \brief Generate a list of h,k,l to describe a full reciprocal space, 
       * up to a given maximum theta value
       *
       * \param maxsithsl:maximum sin(theta)/lambda=1/2d value
-      * \param useMultiplicity: if set to true, equivalent reflections will be removed.
+      * \param unique: if set to true, only unique reflections will be listed.
       * Bijvoet (Friedel) pairs
       * are NOT merged, for 'anomalous' reasons, unless you have chosen to ignore the
-      * imaginary part of the scattering factor. If true, then multiplicity is stored
-      * in the mMultiplicity data member.
+      * imaginary part of the scattering factor. 
+      *
+      * The multiplicity is always stored in ScatteringData::mMultiplicity.
       *
       * \warning The ScatteringData object must already have been assigned 
       * a crystal object using SetCrystal(), and the experimental wavelength 
       * must also have been set before calling this function.
-      *
-      * \todo smarter generation, using spacegroup information to remove extinct reflection
-      * rather than brute-force computation.
       *
       * \deprecated Rather use PowderPattern::GenHKLFullSpace2,
       * with a maximum sin(theta)/lambda value, which also works for dispersive experiments.
       */
       virtual void GenHKLFullSpace(const REAL maxTheta,
-                                   const bool useMultiplicity=false);
+                                   const bool unique=false);
       
       ///Neutron or x-ray experiment ? Wavelength ?
       RadiationType GetRadiationType()const;

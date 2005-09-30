@@ -458,7 +458,7 @@ void ScatteringData::SetHKL(const CrystVector_REAL &h,
    VFN_DEBUG_EXIT("ScatteringData::SetHKL(h,k,l):End",5)
 }
 
-void ScatteringData::GenHKLFullSpace2(const REAL maxSTOL,const bool useMultiplicity)
+void ScatteringData::GenHKLFullSpace2(const REAL maxSTOL,const bool unique)
 {
    (*fpObjCrystInformUser)("Generating Full HKL list...");
    VFN_DEBUG_ENTRY("ScatteringData::GenHKLFullSpace2()",5)
@@ -478,48 +478,61 @@ void ScatteringData::GenHKLFullSpace2(const REAL maxSTOL,const bool useMultiplic
                                 this->GetCrystal().GetSpaceGroup().GetCCTbxSpg().type(),
                                 !(this->IsIgnoringImagScattFact()),
                                 1/(2*maxSTOL));
-   scitbx::af::shared<cctbx::miller::index<> > vi=igen.to_array();
-   if(useMultiplicity)
+   if(unique)
    {
-      mNbRefl=vi.size();
+      mNbRefl=0;
       CrystVector_long H(mNbRefl);
       CrystVector_long K(mNbRefl);
       CrystVector_long L(mNbRefl);
       mMultiplicity.resize(mNbRefl);
-      scitbx::af::shared<cctbx::miller::index<> >::const_iterator pos=vi.begin();
-      for(unsigned long i=0;i<mNbRefl;++i)
+      for(;;)
       {
-         H(i)=(*pos)[0];
-         K(i)=(*pos)[1];
-         L(i)=(*pos)[2]; 
-         cctbx::miller::sym_equiv_indices sei(this->GetCrystal().GetSpaceGroup().GetCCTbxSpg(),*pos);
-         mMultiplicity(i)=sei.multiplicity(this->IsIgnoringImagScattFact());
-         pos++;
+         if(mNbRefl==H.numElements())
+         {
+            H.resizeAndPreserve(mNbRefl+100);
+            K.resizeAndPreserve(mNbRefl+100);
+            L.resizeAndPreserve(mNbRefl+100);
+            mMultiplicity.resizeAndPreserve(mNbRefl+100);
+         }
+         cctbx::miller::index<> h = igen.next();
+         if (h.is_zero()) break;
+         H(mNbRefl)=h[0];
+         K(mNbRefl)=h[1];
+         L(mNbRefl)=h[2]; 
+         cctbx::miller::sym_equiv_indices sei(this->GetCrystal().GetSpaceGroup().GetCCTbxSpg(),h);
+         mMultiplicity(mNbRefl)=sei.multiplicity(!(this->IsIgnoringImagScattFact()));
+         mNbRefl++;
       }
+      H.resizeAndPreserve(mNbRefl);
+      K.resizeAndPreserve(mNbRefl);
+      L.resizeAndPreserve(mNbRefl);
+      mMultiplicity.resizeAndPreserve(mNbRefl);
       this->SetHKL(H,K,L);
       this->SortReflectionBySinThetaOverLambda(maxSTOL);
    }
    else
    {
-      const unsigned long nbReflASU=vi.size();
       mNbRefl=0;
-      CrystVector_long H(nbReflASU);
-      CrystVector_long K(nbReflASU);
-      CrystVector_long L(nbReflASU);
-      mMultiplicity.resize(0);
-      scitbx::af::shared<cctbx::miller::index<> >::const_iterator pos=vi.begin();
-      for(pos=vi.begin();pos!=vi.end();++pos)
+      CrystVector_long H(mNbRefl);
+      CrystVector_long K(mNbRefl);
+      CrystVector_long L(mNbRefl);
+      mMultiplicity.resize(mNbRefl);
+      for(;;)
       {
-         cctbx::miller::sym_equiv_indices sei(this->GetCrystal().GetSpaceGroup().GetCCTbxSpg(),*pos);
+         cctbx::miller::index<> h = igen.next();
+         if (h.is_zero()) break;
+         cctbx::miller::sym_equiv_indices sei(this->GetCrystal().GetSpaceGroup().GetCCTbxSpg(),h);
          for(int i=0;i<sei.multiplicity(true);i++)
          {
-            cctbx::miller::index<long> k = sei(i).h();
+            cctbx::miller::index<> k = sei(i).h();
             if(mNbRefl==H.numElements())
             {
                H.resizeAndPreserve(mNbRefl+100);
                K.resizeAndPreserve(mNbRefl+100);
                L.resizeAndPreserve(mNbRefl+100);
+               mMultiplicity.resizeAndPreserve(mNbRefl+100);
             }
+            mMultiplicity(mNbRefl)=sei.multiplicity(!(this->IsIgnoringImagScattFact()));
             H(mNbRefl)=k[0];
             K(mNbRefl)=k[1];
             L(mNbRefl++)=k[2];
@@ -528,9 +541,9 @@ void ScatteringData::GenHKLFullSpace2(const REAL maxSTOL,const bool useMultiplic
       H.resizeAndPreserve(mNbRefl);
       K.resizeAndPreserve(mNbRefl);
       L.resizeAndPreserve(mNbRefl);
+      mMultiplicity.resizeAndPreserve(mNbRefl);
       this->SetHKL(H,K,L);
       this->SortReflectionBySinThetaOverLambda(maxSTOL);
-      this->PrepareHKLarrays();
    }
    mClockHKL.Click();
    {
