@@ -629,13 +629,14 @@ void WXPowderPattern::OnMenuSimulate(wxCommandEvent & WXUNUSED(event))
    long nbPoints=6000;
    {
       wxTextEntryDialog dialog(this,"2Theta Min",
-                              "Enter minimum 2Theta (degrees)","0",wxOK | wxCANCEL);
+                              "Enter minimum 2Theta (degrees)","5",wxOK | wxCANCEL);
       if(wxID_OK!=dialog.ShowModal())
       {
          VFN_DEBUG_EXIT("WXPowderPattern::OnMenuSimulate():Cancelled",6)
          return;
       }
       dialog.GetValue().ToDouble(&min);
+      if(min<1) min=1.0;
    }
    {
       wxTextEntryDialog dialog(this,"2Theta Max",
