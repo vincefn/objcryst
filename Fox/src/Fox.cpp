@@ -61,6 +61,9 @@
 
 using namespace ObjCryst;
 using namespace std;
+
+static const std::string foxVersion=std::string("1.6.99CVS-")+__DATE__;
+
 // ----------------------------------------------------------------------------
 // Speed test
 // ----------------------------------------------------------------------------
@@ -345,13 +348,15 @@ int main (int argc, char *argv[])
       }
       XMLCrystFileSaveGlobal(tmpstr);
       cout <<"End of Fox execution. Bye !"<<endl;
-      exit (0);
+      #ifdef __WX__CRYST__
+      this->OnExit();
+      #endif
    }
 #ifdef __WX__CRYST__
    
    WXCrystMainFrame *frame ;
    
-   frame = new WXCrystMainFrame("FOX: Free Objects for Xtal structures v1.6.2CVS",
+   frame = new WXCrystMainFrame(std::string("FOX: Free Objects for Xtal structures v")+foxVersion,
                                  wxPoint(50, 50), wxSize(550, 400),
                                  !(loadFourierGRD||loadFourierDSN6));
    // Use the main frame status bar to pass messages to the user
@@ -576,16 +581,16 @@ void WXCrystMainFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 void WXCrystMainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
    wxString msg;
-   msg.Printf( _T("F.O.X. - Free Objects for Xtal structures\n")
-               _T("Version 1.6.2CVS\n\n")
-               _T("(c) 2000-2005 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n")
-               _T("    2000-2001 Radovan CERNY, University of Geneva\n\n")
-               _T("http://objcryst.sourceforge.net\n")
-               _T("http://www.ccp14.ac.uk/ccp/web-mirrors/objcryst/ (Mirror)\n\n")
-               _T("FOX comes with ABSOLUTELY NO WARRANTY. It is free software, and you are\n")
-               _T("welcome to redistribute it under certain conditions. \n")
-               _T("See the LICENSE file for details.")
-              );
+   msg<<"F.O.X. - Free Objects for Xtal structures\n"
+      <<"Version"<< foxVersion <<" \n\n"
+      <<"(c) 2000-2005 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n"
+      <<"    2000-2001 Radovan CERNY, University of Geneva\n\n"
+      <<"http://objcryst.sourceforge.net\n"
+      <<"http://www.ccp14.ac.uk/ccp/web-mirrors/objcryst/ (Mirror)\n\n"
+      <<"FOX comes with ABSOLUTELY NO WARRANTY. It is free software, and you are\n"
+      <<"welcome to redistribute it under certain conditions. \n"
+      <<"See the LICENSE file for details.";
+        
 
    wxMessageBox(msg, "About Fox", wxOK | wxICON_INFORMATION, this);
 }
