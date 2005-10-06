@@ -278,7 +278,7 @@ void Radiation::SetWavelength(const string &XRayTubeElementName,
                return;
             }
             lambda1=ch.as_angstrom();
-            cctbx::eltbx::wavelengths::characteristic ch2(mXRayTubeName+"A1");
+            cctbx::eltbx::wavelengths::characteristic ch2(mXRayTubeName+"A2");
             if(!ch2.is_valid())
             {
                cout << "WARNING: could not interpret X-Ray tube name:"<<XRayTubeElementName<<endl
