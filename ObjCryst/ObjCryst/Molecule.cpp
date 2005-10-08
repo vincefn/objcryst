@@ -2201,6 +2201,8 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
       VFN_DEBUG_EXIT("Molecule::GLInitDisplayList():No atom to display !",4)
       return;
    }
+   bool large=false;
+   if(mvpAtom.size()>100) large=true;
    REAL en=1;
    if(displayEnantiomer==true) en=-1;
    this->UpdateScattCompList();
@@ -2266,6 +2268,13 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
    else
    {
       VFN_DEBUG_ENTRY("Molecule::GLInitDisplayList():Show all symmetrics",3)
+      // Reverse index of atoms
+      map<const MolAtom*,unsigned long> rix;
+         {
+            long i=0;
+            for(vector<MolAtom*>::const_iterator pos=mvpAtom.begin();pos!=mvpAtom.end();++pos)
+               rix[*pos]=i++;
+         }
       vector<CrystMatrix_REAL> vXYZCoords;
       {
          this->GetScatteringComponentList();
@@ -2383,49 +2392,86 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                      }
                      else
                      {
-                        const GLfloat colourAtom [] = {r, g, b, 1.0}; 
-                        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE,colourAtom); 
-                        glMaterialfv(GL_FRONT, GL_SPECULAR,           colour0); 
-                        glMaterialfv(GL_FRONT, GL_EMISSION,           colour0); 
-                        glMaterialfv(GL_FRONT, GL_SHININESS,          colour0);
-                        glPolygonMode(GL_FRONT, GL_FILL);
-                        glTranslatef(x(k)*en, y(k), z(k));
-                        gluSphere(pQuadric,
-                           mvpAtom[k]->GetScatteringPower().GetRadius()/3.,10,10);
+                        if(!large)
+                        {
+                           const GLfloat colourAtom [] = {r, g, b, 1.0}; 
+                           glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE,colourAtom); 
+                           glMaterialfv(GL_FRONT, GL_SPECULAR,           colour0); 
+                           glMaterialfv(GL_FRONT, GL_EMISSION,           colour0); 
+                           glMaterialfv(GL_FRONT, GL_SHININESS,          colour0);
+                           glPolygonMode(GL_FRONT, GL_FILL);
+                           glTranslatef(x(k)*en, y(k), z(k));
+                           gluSphere(pQuadric,
+                              mvpAtom[k]->GetScatteringPower().GetRadius()/3.,10,10);
+                        }
                      }
                   glPopMatrix();
                }
                if(displayNames==false)
                {
-                  for(unsigned int k=0;k<mvpBond.size();k++)
+                  if(large)
                   {
-                     if(  (mvpBond[k]->GetAtom1().IsDummy())
-                        ||(mvpBond[k]->GetAtom2().IsDummy()) ) continue;
-                     unsigned long n1,n2;
-                     //:KLUDGE: Get the atoms
-                     for(n1=0;n1<mvpAtom.size();n1++)
-                        if(mvpAtom[n1]==&(mvpBond[k]->GetAtom1())) break;
-                     for(n2=0;n2<mvpAtom.size();n2++)
-                        if(mvpAtom[n2]==&(mvpBond[k]->GetAtom2())) break;
-                     if(mvpBond[k]->IsFreeTorsion())
-                        glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,colour_bondfree);
-                     else
-                        glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,colour_bondnonfree);
                      glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0); 
                      glMaterialfv(GL_FRONT, GL_EMISSION,  colour0); 
                      glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
-                     glPolygonMode(GL_FRONT, GL_FILL);
-                     glPushMatrix();
-                        glTranslatef(x(n1)*en, y(n1), z(n1));
-                        GLUquadricObj *quadobj = gluNewQuadric();
-                        //glColor4f(1.0f,1.0f,1.0f,1.0);
-                        const REAL height= sqrt(  (x(n2)-x(n1))*(x(n2)-x(n1))
-                                                 +(y(n2)-y(n1))*(y(n2)-y(n1))
-                                                 +(z(n2)-z(n1))*(z(n2)-z(n1)));
-                        glRotatef(180,(x(n2)-x(n1))*en,y(n2)-y(n1),z(n2)-z(n1)+height);// ?!?!?!
-                        gluCylinder(quadobj,.1,.1,height,10,1 );
-                        gluDeleteQuadric(quadobj);
-                     glPopMatrix();
+                     //glPolygonMode(GL_FRONT, GL_FILL);
+                     for(unsigned int k=0;k<mvpBond.size();k++)
+                     {
+                        if(  (mvpBond[k]->GetAtom1().IsDummy())
+                           ||(mvpBond[k]->GetAtom2().IsDummy()) ) continue;
+                        const float r1=mvpBond[k]->GetAtom1().GetScatteringPower().GetColourRGB()[0];
+                        const float g1=mvpBond[k]->GetAtom1().GetScatteringPower().GetColourRGB()[1];
+                        const float b1=mvpBond[k]->GetAtom1().GetScatteringPower().GetColourRGB()[2];
+                        const float r2=mvpBond[k]->GetAtom2().GetScatteringPower().GetColourRGB()[0];
+                        const float g2=mvpBond[k]->GetAtom2().GetScatteringPower().GetColourRGB()[1];
+                        const float b2=mvpBond[k]->GetAtom2().GetScatteringPower().GetColourRGB()[2];
+                        const GLfloat colourAtom1 [] = {r1, g1, b1, 1.0};
+                        const GLfloat colourAtom2 [] = {r2, g2, b2, 1.0};
+                        const unsigned long n1=rix[&(mvpBond[k]->GetAtom1())],
+                                            n2=rix[&(mvpBond[k]->GetAtom2())];
+                        glPushMatrix();
+                           glBegin(GL_LINE_STRIP);
+                              glMaterialfv(GL_FRONT, GL_SPECULAR,  colourAtom1); 
+                              glMaterialfv(GL_FRONT, GL_EMISSION,  colourAtom1); 
+                              glMaterialfv(GL_FRONT, GL_SHININESS, colourAtom1);
+                              glVertex3f(x(n1)*en,y(n1),z(n1));
+                              glVertex3f((x(n1)+x(n2))/2*en,(y(n1)+y(n2))/2,(z(n1)+z(n2))/2);
+                              glMaterialfv(GL_FRONT, GL_SPECULAR,  colourAtom2); 
+                              glMaterialfv(GL_FRONT, GL_EMISSION,  colourAtom2); 
+                              glMaterialfv(GL_FRONT, GL_SHININESS, colourAtom2);
+                              glVertex3f(x(n2)*en,y(n2),z(n2));
+                           glEnd();
+                        glPopMatrix();
+                     }
+                  }
+                  else
+                  {
+                     for(unsigned int k=0;k<mvpBond.size();k++)
+                     {
+                        if(  (mvpBond[k]->GetAtom1().IsDummy())
+                           ||(mvpBond[k]->GetAtom2().IsDummy()) ) continue;
+                        const unsigned long n1=rix[&(mvpBond[k]->GetAtom1())],
+                                            n2=rix[&(mvpBond[k]->GetAtom2())];
+                        if(mvpBond[k]->IsFreeTorsion())
+                           glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,colour_bondfree);
+                        else
+                           glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,colour_bondnonfree);
+                        glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0); 
+                        glMaterialfv(GL_FRONT, GL_EMISSION,  colour0); 
+                        glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
+                        glPolygonMode(GL_FRONT, GL_FILL);
+                        glPushMatrix();
+                           glTranslatef(x(n1)*en, y(n1), z(n1));
+                           GLUquadricObj *quadobj = gluNewQuadric();
+                           //glColor4f(1.0f,1.0f,1.0f,1.0);
+                           const REAL height= sqrt(  (x(n2)-x(n1))*(x(n2)-x(n1))
+                                                    +(y(n2)-y(n1))*(y(n2)-y(n1))
+                                                    +(z(n2)-z(n1))*(z(n2)-z(n1)));
+                           glRotatef(180,(x(n2)-x(n1))*en,y(n2)-y(n1),z(n2)-z(n1)+height);// ?!?!?!
+                           gluCylinder(quadobj,.1,.1,height,10,1 );
+                           gluDeleteQuadric(quadobj);
+                        glPopMatrix();
+                     }
                   }
                }
             }//if in limits
@@ -3437,13 +3483,14 @@ void Molecule::BuildConnectivityTable()
       unsigned long at=0;
       for(pos=mConnectivityTable.begin();pos!=mConnectivityTable.end();++pos)
       {
-         cout<<"Atom "<<(at++)->GetName()<<" is connected to atoms: ";
+         cout<<"Atom "<<pos->first->GetName()<<" is connected to atoms: ";
          set<MolAtom *>::const_iterator pos1;
          for(pos1=pos->second.begin();pos1!=pos->second.end();++pos1)
          {
             cout<<(*pos1)->GetName()<<"  ";
          }
          cout<<endl;
+         if(pos->second.size()>10) exit(0);
       }
    }
    #endif

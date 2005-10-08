@@ -65,6 +65,7 @@ Molecule *ZScatterer2Molecule(ZScatterer *scatt)
       mol->AddAtom(x,y,z,scatt->GetZAtomRegistry().GetObj(i).GetScatteringPower(),
                    scatt->GetZAtomRegistry().GetObj(i).GetName());
       
+      #if 0
       if(i>0)
       {
          const RefinablePar* pLength=&(scatt->GetPar(&(scatt->GetZAtomRegistry()
@@ -91,7 +92,6 @@ Molecule *ZScatterer2Molecule(ZScatterer *scatt)
                                  mol->GetAtom(scatt->GetZAngleAtom(i)),
                                  (pAngle->GetMin()+pAngle->GetMax())/2.,.01,.02,false);
       }
-      #if 0 //Dihedral angles are too much constraints, prefer a combnation of bond angles
       if(i>2)
       {
          const RefinablePar* pDihed=&(scatt->GetPar(&(scatt->GetZAtomRegistry()
@@ -116,28 +116,52 @@ Molecule *ZScatterer2Molecule(ZScatterer *scatt)
       #endif
       mol->GetAtom(i).SetOccupancy(scatt->GetZAtomRegistry().GetObj(i).GetOccupancy());
    }
+
+   CrystVector_REAL x(nb),y(nb),z(nb),radius(nb);
+   vector<pair<const ScatteringPowerAtom *,long> > scattpow(nb);
    for(unsigned int i=0;i<nb;++i)
+   {
+      x(i)=mol->GetAtom(i).GetX();
+      y(i)=mol->GetAtom(i).GetY();
+      z(i)=mol->GetAtom(i).GetZ();
+      if(mol->GetAtom(i).IsDummy())
+      {
+         radius(i)=-1;
+         scattpow[i].first=0;
+      }
+      else
+      {
+         radius(i)=mol->GetAtom(i).GetScatteringPower().GetRadius();
+         scattpow[i].first=dynamic_cast<const ScatteringPowerAtom *> 
+                             (&(mol->GetAtom(i).GetScatteringPower()));
+         scattpow[i].second=scattpow[i].first->GetAtomicNumber();
+      }
+   }
+   for(unsigned int i=0;i<nb;++i)
+   {
+      if(scattpow[i].first==0) continue;
+      const REAL x1=x(i),y1=y(i),z1=z(i);
+      x += -x1;
+      y += -y1;
+      z += -z1;
       for(unsigned int j=i+1;j<nb;++j)
       {
-         const REAL dist=GetBondLength(mol->GetAtom(i),mol->GetAtom(j));
-         const vector<MolBond*>::const_iterator pos=mol->FindBond(mol->GetAtom(i),mol->GetAtom(j));
-         if(mol->GetAtom(i).IsDummy()) continue;
-         if(mol->GetAtom(j).IsDummy()) continue;
-         if(   (dist<(1.10*( mol->GetAtom(i).GetScatteringPower().GetRadius()
-                            +mol->GetAtom(j).GetScatteringPower().GetRadius())))
-             &&(pos==mol->GetBondList().end()))
+         if(scattpow[j].first==0) continue;
+         const REAL dist=sqrt(x(j)*x(j)+y(j)*y(j)+z(j)*z(j));
+         //cout<<"          -> d="<<dist<<"("<<radius(i)<<","<<radius(j)<<"):"<<scattpow[i].second<<","<<scattpow[j].second<<endl;
+         if(dist<(1.10*(radius(i)+radius(j))))
          {
-            // test if we are not creating a H-H bond
-               const ScatteringPowerAtom *p1=dynamic_cast<const ScatteringPowerAtom *> 
-                  (&(mol->GetAtom(i).GetScatteringPower()));
-               const ScatteringPowerAtom *p2=dynamic_cast<const ScatteringPowerAtom *> 
-                  (&(mol->GetAtom(i).GetScatteringPower()));
-               if((0!=p1)&&(0!=p2))
-                  if((1==p1->GetAtomicNumber())&&(1==p2->GetAtomicNumber())) continue;
-            mol->AddBond(mol->GetAtom(i),mol->GetAtom(j),dist,.01,.02,false);
+            if((1!=scattpow[i].second)||(1!=scattpow[j].second))
+            {
+                  mol->AddBond(mol->GetAtom(i),mol->GetAtom(j),dist,.01,.02,false);
+            }
          }
       }
-   
+      x += x1;
+      y += y1;
+      z += z1;
+   }
+   mol->BuildConnectivityTable();
    for(map<MolAtom*,set<MolAtom*> >::const_iterator pos=mol->GetConnectivityTable().begin();
        pos!=mol->GetConnectivityTable().end();++pos)
    {
@@ -339,7 +363,6 @@ WXScatterer(parent,obj),mpZScatterer(obj)
                               mpMenuBar->GetSize().GetHeight());
    //Orientation
       wxBoxSizer* sizer=new wxBoxSizer(wxHORIZONTAL);
-      mpScatterer->RefinableObj::Print();
 
       WXCrystObjBasic* pFieldPhi =mpZScatterer->GetPar(&(mpZScatterer->mPhi)).WXCreate(this);
       WXCrystObjBasic* pFieldChi =mpZScatterer->GetPar(&(mpZScatterer->mChi)).WXCreate(this);
