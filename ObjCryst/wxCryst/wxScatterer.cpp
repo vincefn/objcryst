@@ -55,7 +55,6 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpScatterer(obj)
    mpWXTitle->SetForegroundColour(wxColour(0,100,0));
    //Lattice
       wxBoxSizer* sizer=new wxBoxSizer(wxHORIZONTAL);
-      mpScatterer->RefinableObj::Print();
 
       WXCrystObjBasic* pFieldX
          =mpScatterer->GetPar(mpScatterer->mXYZ.data()+0).WXCreate(this);

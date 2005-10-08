@@ -62,9 +62,6 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpScatteringPowerAtom(obj)
 {
    VFN_DEBUG_MESSAGE("WXScatteringPowerAtom::WXScatteringPowerAtom()",6)
    mpWXTitle->SetForegroundColour(wxColour(0,200,0));
-   //mpScatteringPowerAtom->Print();
-   //mpScatteringPowerAtom->RefinableObj::Print();
-   //cout << mpScatteringPowerAtom->GetSymbol()<<endl;
    //Lattice
       wxBoxSizer* sizer=new wxBoxSizer(wxHORIZONTAL);
       mpMenuBar->AddMenu("Colour",ID_SCATTPOWATOM_MENU_COLOUR);

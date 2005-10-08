@@ -396,13 +396,6 @@ You are using the Global ScatteringPower approximation !!");
       else mNbDummyAtom++;
   
    //Finish
-   cout << "Added atom:"<<mNbAtom
-        << " : "<<this->GetZBondAtom(mNbAtom)
-        << " : "<<this->GetZAngleAtom(mNbAtom)
-        << " : "<<this->GetZDihedralAngleAtom(mNbAtom)
-        << " : "<<this->GetZBondLength(mNbAtom)
-        << " : "<<this->GetZAngle(mNbAtom)
-        << " : "<<this->GetZDihedralAngle(mNbAtom)<<endl;
       mNbAtom++;
       mClockScatterer.Click();
    VFN_DEBUG_MESSAGE("ZScatterer::AddAtom():End",3)
@@ -1179,10 +1172,6 @@ void ZScatterer::ImportFenskeHallZMatrix(istream &is)
    char buf [10];
    //first
       is >> symbol >> junk;
-      cout << symbol <<" "
-           << bondAtom  <<" "<< bond <<" "
-           << angleAtom <<" "<< angle<<" "
-           << dihedAtom <<" "<< dihed<<endl;
    {
       scattPow=mpCryst->GetScatteringPowerRegistry().Find
                   (symbol,"ScatteringPowerAtom",true);
@@ -1203,10 +1192,6 @@ void ZScatterer::ImportFenskeHallZMatrix(istream &is)
    //second
       is >> symbol 
          >> bondAtom  >> bond;
-   cout << symbol <<" "
-        << bondAtom  <<" "<< bond <<" "
-        << angleAtom <<" "<< angle<<" "
-        << dihedAtom <<" "<< dihed<<endl;
    {
       scattPow=mpCryst->GetScatteringPowerRegistry().Find
                   (symbol,"ScatteringPowerAtom",true);
@@ -1228,9 +1213,6 @@ void ZScatterer::ImportFenskeHallZMatrix(istream &is)
       is >> symbol 
          >> bondAtom  >> bond
          >> angleAtom >> angle;
-   cout << symbol <<" "
-        << bondAtom  <<" "<< bond <<" "
-        << angleAtom <<" "<< angle<<endl;
    {
       scattPow=mpCryst->GetScatteringPowerRegistry().Find
                   (symbol,"ScatteringPowerAtom",true);
@@ -1254,10 +1236,6 @@ void ZScatterer::ImportFenskeHallZMatrix(istream &is)
          >> bondAtom  >> bond
          >> angleAtom >> angle
          >> dihedAtom >> dihed;
-      cout << symbol <<" "
-           << bondAtom  <<" "<< bond <<" "
-           << angleAtom <<" "<< angle
-           << dihedAtom <<" "<< dihed<<endl;
       {
          scattPow=mpCryst->GetScatteringPowerRegistry().Find
                      (symbol,"ScatteringPowerAtom",true);
@@ -1268,8 +1246,7 @@ void ZScatterer::ImportFenskeHallZMatrix(istream &is)
          }
          scattPow=mpCryst->GetScatteringPowerRegistry().Find
                      (symbol,"ScatteringPowerAtom");
-         cout<<
-            sprintf(buf,"%d",i+1);
+         sprintf(buf,"%d",i+1);
          this->AddAtom(symbol+(string)buf,
                        &(mpCryst->GetScatteringPowerRegistry().GetObj(scattPow)),
                        bondAtom-1,bond,

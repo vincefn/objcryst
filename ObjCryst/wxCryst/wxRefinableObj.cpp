@@ -655,7 +655,6 @@ void WXRefinableObj::OnMenuUnFixAllPar(wxCommandEvent & WXUNUSED(event))
 void WXRefinableObj::OnMenuParRandomize(wxCommandEvent & WXUNUSED(event))
 {
    mpRefinableObj->RandomizeConfiguration();
-   mpRefinableObj->RefinableObj::Print();
    this->CrystUpdate(true);
 }
 

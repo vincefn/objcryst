@@ -468,7 +468,6 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
    VFN_DEBUG_ENTRY("MonteCarloObj::Optimize()",5)
    for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).BeginOptimization(true);
    this->PrepareRefParList();
-   if(!silent) mRefParList.Print();
    mIsOptimizing=true;
    if(mTemperatureGamma<0.1) mTemperatureGamma= 0.1;
    if(mTemperatureGamma>10.0)mTemperatureGamma=10.0;
@@ -524,7 +523,6 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
    const long nbStep0=nbStep;
    for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).BeginOptimization(true);
    this->PrepareRefParList();
-   if(!silent) mRefParList.Print();
    mIsOptimizing=true;
    if(mTemperatureGamma<0.1) mTemperatureGamma= 0.1;
    if(mTemperatureGamma>10.0)mTemperatureGamma=10.0;
@@ -899,12 +897,14 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
          unsigned int first=1;
          for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
             mRecursiveRefinedObjList.GetObj(i).GetGeneGroup(mRefParList,refParGeneGroupIndex,first);
+         #if 0
          if(!silent) 
             for(int i=0;i<mRefParList.GetNbPar();i++)
             {
                cout << "Gene Group:"<<refParGeneGroupIndex(i)<<" :";
                mRefParList.GetPar(i).Print();
             }
+         #endif
       // number of gene groups
       // to select which gene groups are exchanged in the mating
          //const unsigned int nbGeneGroup=refParGeneGroupIndex.max();
