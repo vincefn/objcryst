@@ -288,6 +288,31 @@ class Crystal:public UnitCell
       void SetBumpMergeDistance(const ScatteringPower &scatt1,
                                 const ScatteringPower &scatt2, const REAL dist,
                                 const bool allowMerge);
+
+      /// Remove an Anti-bumping distance between two scattering types.
+      void RemoveBumpMergeDistance(const ScatteringPower &scatt1,
+                                   const ScatteringPower &scatt2);
+      
+      /// Storage for anti-bump/merge parameters
+      struct BumpMergePar
+      {
+         BumpMergePar();
+         /** Constructor
+         *
+         * \param dist: the bump/merge distance in Angstroems
+         */
+         BumpMergePar(const REAL dist, const bool canOverlap=false);
+         /// The squared antibump interatomic distance
+         REAL mDist2;
+         /// Can the two atoms completely overlap ?
+         bool mCanOverlap;
+      };
+      
+      /// Anti-bump parameters. Each atom type (ScatteringPower is referenced
+      /// using a reference number)
+      typedef std::map<pair<const ScatteringPower*, const ScatteringPower*>,Crystal::BumpMergePar > VBumpMergePar;
+      const VBumpMergePar& GetBumpMergeParList()const;      
+      VBumpMergePar& GetBumpMergeParList();      
       /// When was the list of scatterers last changed ?
       const RefinableObjClock& GetClockScattererList()const;
          
@@ -316,6 +341,8 @@ class Crystal:public UnitCell
       * to the one computed from Bond-Valence Ro parameters.
       */
       REAL GetBondValenceCost() const;
+      std::map<pair<const ScatteringPower*,const ScatteringPower*>, REAL> GetBondValenceRoTable();
+      const std::map<pair<const ScatteringPower*,const ScatteringPower*>, REAL> GetBondValenceRoList()const;
    private:
       /** \brief Init all Crystal parameters
       *  \param a,b,c : unit cell dimension, in angstroems
@@ -369,24 +396,6 @@ class Crystal:public UnitCell
       /// The registry of scatterers for this UnitCell
       ObjRegistry<Scatterer> mScattererRegistry ;
 
-      /// Storage for anti-bump/merge parameters
-      struct BumpMergePar
-      {
-         BumpMergePar();
-         /** Constructor
-         *
-         * \param dist: the bump/merge distance in Angstroems
-         */
-         BumpMergePar(const REAL dist, const bool canOverlap=false);
-         /// The squared antibump interatomic distance
-         REAL mDist2;
-         /// Can the two atoms completely overlap ?
-         bool mCanOverlap;
-      };
-      
-      /// Anti-bump parameters. Each atom type (ScatteringPower is referenced
-      /// using a reference number)
-      typedef std::map<pair<long, long>,Crystal::BumpMergePar > VBumpMergePar;
       /// Anti-bump parameters map
       VBumpMergePar mvBumpMergePar;
       /// Last Time Anti-bump parameters were changed

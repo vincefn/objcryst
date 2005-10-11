@@ -220,6 +220,27 @@ void Crystal::RemoveScatteringPower(ScatteringPower *scattPow)
    mClockMaster.RemoveChild(scattPow->GetMaximumLikelihoodPositionErrorClock());
    mMasterClockScatteringPower.RemoveChild(scattPow->GetClockMaster());
    delete scattPow;
+   
+   for(Crystal::VBumpMergePar::iterator pos=mvBumpMergePar.begin();pos!=mvBumpMergePar.end();)
+   {
+      if((pos->first.first==scattPow)||(pos->first.second==scattPow))
+      {
+         mvBumpMergePar.erase(pos++);
+         mBumpMergeParClock.Click();
+      }
+      else ++pos;// See Josuttis Std C++ Lib p.205 for safe method
+   }
+   
+   for(map<pair<const ScatteringPower*,const ScatteringPower*>, REAL>::iterator
+         pos=mvBondValenceRo.begin();pos!=mvBondValenceRo.end();)
+   {
+      if((pos->first.first==scattPow)||(pos->first.second==scattPow))
+      {
+         mvBondValenceRo.erase(pos++);
+         mBondValenceParClock.Click();
+      }
+      else ++pos;// See Josuttis Std C++ Lib p.205 for safe method
+   }
    VFN_DEBUG_EXIT("Crystal::RemoveScatteringPower()",2)
 }
 
@@ -736,14 +757,14 @@ REAL Crystal::GetBumpMergeCost() const
    std::vector<NeighbourHood>::const_iterator pos;
    std::vector<Crystal::Neighbour>::const_iterator neigh;
    REAL tmp;
-   long i1,i2;
+   const ScatteringPower *i1,*i2;
    VBumpMergePar::const_iterator par;
    for(pos=mvDistTableSq.begin();pos<mvDistTableSq.end();pos++)
    {
-      i1=mScattCompList(pos->mIndex).mpScattPow->GetDynPopCorrIndex();
+      i1=mScattCompList(pos->mIndex).mpScattPow;
       for(neigh=pos->mvNeighbour.begin();neigh<pos->mvNeighbour.end();neigh++)
       {
-         i2=mScattCompList(neigh->mNeighbourIndex).mpScattPow->GetDynPopCorrIndex();
+         i2=mScattCompList(neigh->mNeighbourIndex).mpScattPow;
          if(i1<i2) par=mvBumpMergePar.find(std::make_pair(i1,i2));
          else par=mvBumpMergePar.find(std::make_pair(i2,i1));
          if(par==mvBumpMergePar.end()) continue;
@@ -773,11 +794,25 @@ void Crystal::SetBumpMergeDistance(const ScatteringPower &scatt1,
                                    const ScatteringPower &scatt2,const REAL dist,
                                    const bool allowMerge)
 {
-   VFN_DEBUG_MESSAGE("Crystal::SetBumpMergeDistance()",8)
-   long i1=scatt1.GetDynPopCorrIndex(),i2=scatt2.GetDynPopCorrIndex();
-   if(i2<i1) {const long i=i1; i1=i2; i2=i;}
-   mvBumpMergePar[std::make_pair(i1,i2)]=BumpMergePar(dist,allowMerge);
+   VFN_DEBUG_MESSAGE("Crystal::SetBumpMergeDistance("<<scatt1.GetName()<<","<<scatt2.GetName()<<")="<<dist<<","<<allowMerge,3)
+   if(&scatt1 < &scatt2)
+      mvBumpMergePar[std::make_pair(&scatt1,&scatt2)]=BumpMergePar(dist,allowMerge);
+   else
+      mvBumpMergePar[std::make_pair(&scatt2,&scatt1)]=BumpMergePar(dist,allowMerge);
+   mBumpMergeParClock.Click();
 }
+void Crystal::RemoveBumpMergeDistance(const ScatteringPower &scatt1,
+                                      const ScatteringPower &scatt2)
+{
+   Crystal::VBumpMergePar::iterator pos;
+   if(&scatt1 < &scatt2) pos=mvBumpMergePar.find(make_pair(&scatt1 , &scatt2));
+   else pos=mvBumpMergePar.find(make_pair(&scatt2 , &scatt1));
+   if(pos!=mvBumpMergePar.end()) mvBumpMergePar.erase(pos);
+   mBumpMergeParClock.Click();
+}
+
+const Crystal::VBumpMergePar& Crystal::GetBumpMergeParList()const{return mvBumpMergePar;}
+Crystal::VBumpMergePar& Crystal::GetBumpMergeParList(){return mvBumpMergePar;}      
 
 const RefinableObjClock& Crystal::GetClockScattererList()const {return mClockScattererList;}
 

@@ -1001,22 +1001,8 @@ void Crystal::XMLOutput(ostream &os,int indent)const
       {
          for(int k=0;k<=indent;k++) os << "  " ;
          XMLCrystTag tagBump("AntiBumpDistance");
-         for(long i=0;i<mScatteringPowerRegistry.GetNb();++i)
-         {
-            if(mScatteringPowerRegistry.GetObj(i).GetDynPopCorrIndex()==pos->first.first)
-            {
-               tagBump.AddAttribute("ScattPow1",mScatteringPowerRegistry.GetObj(i).GetName());
-               break;
-            }
-         }
-         for(long i=0;i<mScatteringPowerRegistry.GetNb();++i)
-         {
-            if(mScatteringPowerRegistry.GetObj(i).GetDynPopCorrIndex()==pos->first.second)
-            {
-               tagBump.AddAttribute("ScattPow2",mScatteringPowerRegistry.GetObj(i).GetName());
-               break;
-            }
-         }
+         tagBump.AddAttribute("ScattPow1",pos->first.first->GetName());
+         tagBump.AddAttribute("ScattPow2",pos->first.second->GetName());
          {
             stringstream ss;
             ss << pos->second.mCanOverlap;
