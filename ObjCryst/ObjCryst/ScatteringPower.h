@@ -233,6 +233,9 @@ class ScatteringPower:virtual public RefinableObj
       /// Maximum Likelihood: get the estimated error (sigma) on the positions
       /// for this kind of element.
       virtual REAL GetMaximumLikelihoodPositionError()const;
+      /// Maximum Likelihood: set the estimated error (sigma) on the positions
+      /// for this kind of element.
+      virtual void SetMaximumLikelihoodPositionError(const REAL mle);
       /// Get the clock value for the last change on the positionnal errors.
       virtual const RefinableObjClock& GetMaximumLikelihoodPositionErrorClock()const;
       virtual REAL GetFormalCharge()const;

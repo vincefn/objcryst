@@ -162,6 +162,15 @@ REAL ScatteringPower::GetMaximumLikelihoodPositionError()const
 const RefinableObjClock& ScatteringPower::GetMaximumLikelihoodPositionErrorClock()const
 {return mMaximumLikelihoodPositionErrorClock;}
 
+void ScatteringPower::SetMaximumLikelihoodPositionError(const REAL mle) 
+{
+   if(mle!=mMaximumLikelihoodPositionError)
+   {
+      mMaximumLikelihoodPositionError=mle;
+      mMaximumLikelihoodPositionErrorClock.Click();
+   }
+}
+
 REAL ScatteringPower::GetFormalCharge()const{return mFormalCharge;}
 void ScatteringPower::SetFormalCharge(const REAL charge)
 {mFormalCharge=charge;}
