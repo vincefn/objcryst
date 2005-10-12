@@ -1138,8 +1138,8 @@ void Crystal::XMLInput(istream &is,const XMLCrystTag &tagg)
          }
          is>>ro;
          XMLCrystTag junk(is);//end tag
-         this->AddBondValenceRo(&(mScatteringPowerRegistry.GetObj(scattPow1)),
-                                &(mScatteringPowerRegistry.GetObj(scattPow2)),ro);
+         this->AddBondValenceRo(mScatteringPowerRegistry.GetObj(scattPow1),
+                                mScatteringPowerRegistry.GetObj(scattPow2),ro);
          continue;
       }
       if("AntiBumpScale"==tag.GetName())

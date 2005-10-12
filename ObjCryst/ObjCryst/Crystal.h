@@ -336,13 +336,14 @@ class Crystal:public UnitCell
                                 unsigned int &firstGroup) const;
       virtual void BeginOptimization(const bool allowApproximations=false,
                                      const bool enableRestraints=false);
-      void AddBondValenceRo(const ScatteringPower*,const ScatteringPower*,const REAL ro);
+      void AddBondValenceRo(const ScatteringPower&,const ScatteringPower&,const REAL ro);
+      void RemoveBondValenceRo(const ScatteringPower&,const ScatteringPower&);
       /** Get the Bond-Valence cost function, which compares the expected valence
       * to the one computed from Bond-Valence Ro parameters.
       */
       REAL GetBondValenceCost() const;
-      std::map<pair<const ScatteringPower*,const ScatteringPower*>, REAL> GetBondValenceRoTable();
-      const std::map<pair<const ScatteringPower*,const ScatteringPower*>, REAL> GetBondValenceRoList()const;
+      std::map<pair<const ScatteringPower*,const ScatteringPower*>, REAL>& GetBondValenceRoList();
+      const std::map<pair<const ScatteringPower*,const ScatteringPower*>, REAL>& GetBondValenceRoList()const;
    private:
       /** \brief Init all Crystal parameters
       *  \param a,b,c : unit cell dimension, in angstroems

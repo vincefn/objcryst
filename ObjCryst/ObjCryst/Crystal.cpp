@@ -1033,11 +1033,21 @@ void Crystal::BeginOptimization(const bool allowApproximations,const bool enable
    this->RefinableObj::BeginOptimization(allowApproximations,enableRestraints);
 }
 
-void Crystal::AddBondValenceRo(const ScatteringPower *pow1,const ScatteringPower *pow2,const REAL ro)
+void Crystal::AddBondValenceRo(const ScatteringPower &pow1,const ScatteringPower &pow2,const REAL ro)
 {
-   mvBondValenceRo[make_pair(pow1,pow2)]=ro;
+   if(&pow1 < &pow2) mvBondValenceRo[make_pair(&pow1,&pow2)]=ro;
+   else mvBondValenceRo[make_pair(&pow2,&pow1)]=ro;
    mBondValenceParClock.Click();
    this->UpdateDisplay();
+}
+
+void Crystal::RemoveBondValenceRo(const ScatteringPower &pow1,const ScatteringPower &pow2)
+{
+   map<pair<const ScatteringPower*,const ScatteringPower*>, REAL>::iterator pos;
+   if(&pow1 < &pow2) pos=mvBondValenceRo.find(make_pair(&pow1 , &pow2));
+   else pos=mvBondValenceRo.find(make_pair(&pow2 , &pow1));
+   if(pos!=mvBondValenceRo.end()) mvBondValenceRo.erase(pos);
+   mBondValenceParClock.Click();
 }
 
 REAL Crystal::GetBondValenceCost() const
@@ -1068,6 +1078,12 @@ REAL Crystal::GetBondValenceCost() const
    return mBondValenceCost*mBondValenceCostScale;
 }
 
+std::map<pair<const ScatteringPower*,const ScatteringPower*>, REAL>& Crystal::GetBondValenceRoList()
+{ return mvBondValenceRo;}
+
+const std::map<pair<const ScatteringPower*,const ScatteringPower*>, REAL>& Crystal::GetBondValenceRoList()const
+{ return mvBondValenceRo;}
+
 void Crystal::CalcBondValenceSum()const
 {
    if(mvBondValenceRo.size()==0) return;
@@ -1092,18 +1108,12 @@ void Crystal::CalcBondValenceSum()const
                           *mScattCompList(pos->mNeighbourIndex).mDynPopCorr;
          const ScatteringPower *pow2=mScattCompList(pos->mNeighbourIndex).mpScattPow;
          map<pair<const ScatteringPower*,const ScatteringPower*>,REAL>::const_iterator pos;
-         pos=mvBondValenceRo.find(make_pair(pow1,pow2));
+         if(pow1<pow2) pos=mvBondValenceRo.find(make_pair(pow1,pow2));
+         else pos=mvBondValenceRo.find(make_pair(pow2,pow1));
          if(pos!=mvBondValenceRo.end())
          {
             const REAL v=exp((pos->second-dist)/0.37);
             val += occup * v;
-            nb++;
-         }
-         pos=mvBondValenceRo.find(make_pair(pow2,pow1));
-         if(pos!=mvBondValenceRo.end())
-         {
-            const REAL v=exp((pos->second-dist)/0.37);
-            val -= occup * v;
             nb++;
          }
       }
