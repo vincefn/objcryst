@@ -63,38 +63,11 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpScatteringPowerAtom(obj)
    VFN_DEBUG_MESSAGE("WXScatteringPowerAtom::WXScatteringPowerAtom()",6)
    mpWXTitle->SetForegroundColour(wxColour(0,200,0));
    //Lattice
-      wxBoxSizer* sizer=new wxBoxSizer(wxHORIZONTAL);
-      mpMenuBar->AddMenu("Colour",ID_SCATTPOWATOM_MENU_COLOUR);
-         mpMenuBar->AddMenuItem(ID_SCATTPOWATOM_MENU_COLOUR,
-                                ID_SCATTPOWATOM_MENU_COLOUR_SETRGB,"Set RGB Colour");
-   
-      mpSizer->SetItemMinSize(mpMenuBar,
-                              mpMenuBar->GetSize().GetWidth(),
-                              mpMenuBar->GetSize().GetHeight());
-
       mpFieldSymbol=new WXFieldName
          (this,"Symbol:",this,ID_WXSCATTPOWATOM_SYMBOL);
 
-      WXCrystObjBasic* pFieldBiso
-         =mpScatteringPowerAtom->GetPar(&(mpScatteringPowerAtom->mBiso)).WXCreate(this);
-
-      sizer->Add(mpFieldSymbol  ,0,wxALIGN_CENTER);
-      sizer->Add(pFieldBiso    ,0,wxALIGN_CENTER);
-      #if 0
-      WXCrystObjBasic* pFieldError  =mpScatteringPowerAtom->GetPar("ML Error").WXCreate(this);
-      sizer->Add(pFieldError    ,0,wxALIGN_CENTER);
-      mList.Add(pFieldError);
-      #else
-      mpScatteringPowerAtom->GetPar("ML Error").SetValue(0.);
-      #endif
-      mpSizer->Add(sizer,0,wxALIGN_LEFT);
+      mpTopSizer->Add(mpFieldSymbol  ,0,wxALIGN_TOP);
       mList.Add(mpFieldSymbol);
-      mList.Add(pFieldBiso);
-      
-      WXCrystObjBasic* pFieldFormalCharge 
-         =mpScatteringPowerAtom->GetPar("Formal Charge").WXCreate(this);
-      sizer->Add(pFieldFormalCharge    ,0,wxALIGN_CENTER);
-      mList.Add(pFieldFormalCharge);
       
    this->BottomLayout(0);
    this->CrystUpdate(true);

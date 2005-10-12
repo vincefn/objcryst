@@ -26,9 +26,12 @@
 #ifndef _VFN_WX_CRYSTAL_H_
 #define _VFN_WX_CRYSTAL_H_
 
+#include <list>
+
 #include "wxCryst/wxRefinableObj.h"
 
 #include "wx/glcanvas.h"
+#include "wx/grid.h"
 
 #include "ObjCryst/Crystal.h"
 
@@ -56,12 +59,26 @@ typedef struct
   Triple;
 
 class WXGLCrystalCanvas;
+class WXCrystal;
+
+class WXCrystalScrolledGridWindow:public wxGrid
+{
+   public:
+      WXCrystalScrolledGridWindow(wxWindow* parent, WXCrystal* pWXMol,long id=-1);
+      virtual ~WXCrystalScrolledGridWindow();
+   private:
+      /// The WXCrystal window which created this window, and who should be told
+      /// if it is destroyed.
+      WXCrystal* mpWXCrystal;
+};
+
 
 /// wxCryst class for Crystals
 class WXCrystal: public WXRefinableObj
 {
    public:
       WXCrystal(wxWindow *parent, Crystal*);
+      ~WXCrystal();
       virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false);
       #ifdef OBJCRYST_GL
       /// Update the OpenGL Display List
@@ -96,6 +113,12 @@ class WXCrystal: public WXRefinableObj
       void UpdateUI(const bool mutexlock=false);
       Crystal& GetCrystal();
       const Crystal& GetCrystal()const;
+      void OnMenuShowScattPowWindow(wxCommandEvent &event);
+      void OnEditGridScattPow(wxGridEvent &e);
+      void OnEditGridScattPowAntiBump(wxGridEvent &e);
+      void OnEditGridScattPowBondValence(wxGridEvent &e);
+      void NotifyDeleteListWin(WXCrystalScrolledGridWindow *win);
+      virtual bool Enable(bool enable=true);
    private:
       Crystal* mpCrystal;
       /// SpaceGroup
@@ -105,6 +128,56 @@ class WXCrystal: public WXRefinableObj
       /// Scattering Powers
          WXRegistry<ScatteringPower>* mpWXScatteringPowerRegistry;
 
+      /// Structure to store the maximum likelihood parameters
+      struct RowScattPow
+      {
+         RowScattPow();
+         std::string mName;
+         /// Last displayed values
+         REAL mBiso,mFormalCharge,mR,mG,mB,mMaximumLikelihoodError,mNbGhostAtoms;
+         /// True if we need to update the displayed values
+         bool mNeedUpdateUI;
+      };
+      /// Structure to store the antibump parameters
+      struct RowAntiBump
+      {
+         RowAntiBump();
+         std::string mName;
+         /// Last displayed values
+         std::vector<REAL> mvAntiBumpDistance;
+         /// True if we need to update the displayed values
+         bool mNeedUpdateUI;
+      };
+      /// Structure to store the bond valence parameters
+      struct RowBondValence
+      {
+         RowBondValence();
+         std::string mName;
+         /// Last displayed values
+         std::vector<REAL> mvBondValenceRo;
+         /// True if we need to update the displayed values
+         bool mNeedUpdateUI;
+      };
+      /// Index of all ScatteringPowerAtom in the Crystal's registry
+      /// (excluding any other type of ScatteringPower),
+      /// as they are displayed in the grid windows.
+      mutable std::map<ScatteringPowerAtom*,int> mvScattPowIndex;
+      /// Index of Scattering power in each row (and sometimes column)
+      mutable std::vector<ScatteringPowerAtom*> mvScattPowRowIndex;
+      mutable RefinableObjClock mvScattPowIndexClock;
+      
+      WXCrystalScrolledGridWindow* mpScattPowWin;
+      WXCrystalScrolledGridWindow* mpAntiBumpWin;
+      WXCrystalScrolledGridWindow* mpBondValenceWin;
+      
+      std::list<RowScattPow> mvpRowScattPow;
+      std::list<RowAntiBump> mvpRowAntiBump;
+      std::list<RowBondValence> mvpRowBondValence;
+      
+      /// Flag to indicate that we are updating values in the wxGrid data,
+      /// and that it is not the user inputing data.
+      bool mIsSelfUpdating;
+      
       #ifdef OBJCRYST_GL
       //OpenGl
          /// OpenGL Display of the Crystal-Display List. Updated each time CrystUpdate() is called.
