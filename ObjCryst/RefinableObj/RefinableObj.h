@@ -715,12 +715,6 @@ template<class T> class ObjRegistry
    #endif
 };
 
-/// Register a new object in a registry, and recursively
-/// include all included (sub)objects. 
-template<class T> void RefObjRegisterRecursive(T &obj,ObjRegistry<T> &reg);
-/// Get the last time any object was added in the recursive list of objects.
-void GetSubRefObjListClockRecursive(ObjRegistry<RefinableObj> &reg,RefinableObjClock &clock);
-
 /** \brief Generic Refinable Object
 *
 * This is basically a list of refinable parameters, with other basic common properties
@@ -1203,6 +1197,11 @@ class RefinableObj
 };
 /// Get the last time any RefinablePar was added in a recursive list of objects.
 void GetRefParListClockRecursive(ObjRegistry<RefinableObj> &reg,RefinableObjClock &clock);
+/// Register a new object in a registry, and recursively
+/// include all included (sub)objects. 
+template<class T> void RefObjRegisterRecursive(T &obj,ObjRegistry<T> &reg);
+/// Get the last time any object was added in the recursive list of objects.
+void GetSubRefObjListClockRecursive(ObjRegistry<RefinableObj> &reg,RefinableObjClock &clock);
 
 /// Global Registry for all RefinableObj
 extern ObjRegistry<RefinableObj> gRefinableObjRegistry;
