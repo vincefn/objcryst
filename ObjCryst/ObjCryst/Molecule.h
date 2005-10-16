@@ -173,10 +173,11 @@ class MolBond:public Restraint
       string GetName()const;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
-      virtual REAL GetLogLikelihood(const bool calcDeriv=false)const;
+      virtual REAL GetLogLikelihood(const bool calcDeriv=false, const bool recalc=true)const;
       /// Get the derivative of the bond length, given the derivatives of the atom positions
-      /// This requires that GetLogLikelihood(calcDeriv=true) be called first
-      REAL GetDeriv(const std::map<const MolAtom*,XYZ>)const;
+      /// This requires that GetLogLikelihood(calcDeriv=true) be called first.
+      /// If llk=true, this will return the derivative of the llk rather than the derivative of the length or angle
+      REAL GetDeriv(const std::map<const MolAtom*,XYZ> &m, const bool llk=false)const;
       const MolAtom& GetAtom1()const;
       const MolAtom& GetAtom2()const;
       MolAtom& GetAtom1();
@@ -205,11 +206,17 @@ class MolBond:public Restraint
       bool mIsFreeTorsion;
       /// Parent Molecule
       Molecule *mpMol;
+      /// Stored log(likelihood)
+      mutable REAL mLLK;
       /** Derivatives of the bond length with respect to the coordinates of the atoms
       *
       * The derivatives are calculated in MolBond::GetLogLikelihood(true)
       */
-      mutable std::map<const MolAtom*,XYZ> mDeriv;
+      mutable XYZ mDerivAtom1,mDerivAtom2;
+      /** The factor used to change the derivative of the length/angle, to the derivative
+      * of the log(likelihood). e.g. (for mDelta=0) \f$ mDerivLLKCoeff = \frac{L-L_0}{\sigma^2} \f$
+      */
+      mutable REAL mDerivLLKCoeff;
    #ifdef __WX__CRYST__
    public:
       WXCrystObjBasic *mpWXCrystObj;
@@ -244,10 +251,11 @@ class MolBondAngle:public Restraint
       string GetName()const;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
-      virtual REAL GetLogLikelihood(const bool calcDeriv=false)const;
+      virtual REAL GetLogLikelihood(const bool calcDeriv=false, const bool recalc=true)const;
       /// Get the derivative of the angle, given the derivatives of the atom positions
       /// This requires that GetLogLikelihood(calcDeriv=true) be called first
-      REAL GetDeriv(const std::map<const MolAtom*,XYZ>)const;
+      /// If llk=true, this will return the derivative of the llk rather than the derivative of the length or angle
+      REAL GetDeriv(const std::map<const MolAtom*,XYZ> &m, const bool llk=false)const;
       REAL GetAngle()const;
       REAL& Angle0();
       REAL& AngleDelta();
@@ -279,11 +287,17 @@ class MolBondAngle:public Restraint
       /// some flexibility for this bond angle, i.e. the bond angle
       /// does not remain strictly rigid, and is still restrained.
       bool mIsFlexible;
+      /// Stored log(likelihood)
+      mutable REAL mLLK;
       /** Partial derivatives of the angle with respect to the coordinates of the atoms
       *
       * The derivatives are calculated in MolBondAngle::GetLogLikelihood(true)
       */
-      mutable std::map<const MolAtom*,XYZ> mDeriv;
+      mutable XYZ mDerivAtom1,mDerivAtom2,mDerivAtom3;
+      /** The factor used to change the derivative of the length/angle, to the derivative
+      * of the log(likelihood). e.g. (for mDelta=0) \f$ mDerivLLKCoeff = \frac{L-L_0}{\sigma^2} \f$
+      */
+      mutable REAL mDerivLLKCoeff;
    #ifdef __WX__CRYST__
    public:
       WXCrystObjBasic *mpWXCrystObj;
@@ -319,10 +333,11 @@ class MolDihedralAngle:public Restraint
       string GetName()const;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
-      virtual REAL GetLogLikelihood(const bool calcDeriv=false)const;
+      virtual REAL GetLogLikelihood(const bool calcDeriv=false, const bool recalc=true)const;
       /// Get the derivative of the Angle, given the derivatives of the atom positions
       /// This requires that GetLogLikelihood(calcDeriv=true) be called first
-      REAL GetDeriv(const std::map<const MolAtom*,XYZ>)const;
+      /// If llk=true, this will return the derivative of the llk rather than the derivative of the length or angle
+      REAL GetDeriv(const std::map<const MolAtom*,XYZ> &m, const bool llk=false)const;
       REAL GetAngle()const;
       REAL& Angle0();
       REAL& AngleDelta();
@@ -351,11 +366,17 @@ class MolDihedralAngle:public Restraint
       REAL mAngle,mAngle0,mDelta,mSigma;
       /// Parent Molecule
       Molecule *mpMol;
+      /// Stored log(likelihood)
+      mutable REAL mLLK;
       /** Partial derivatives of the angle with respect to the coordinates of the atoms
       *
       * The derivatives are calculated in MolBondAngle::GetLogLikelihood(true)
       */
-      mutable std::map<const MolAtom*,XYZ> mDeriv;
+      mutable XYZ mDerivAtom1,mDerivAtom2,mDerivAtom3,mDerivAtom4;
+      /** The factor used to change the derivative of the length/angle, to the derivative
+      * of the log(likelihood). e.g. (for mDelta=0) \f$ mDerivLLKCoeff = \frac{L-L_0}{\sigma^2} \f$
+      */
+      mutable REAL mDerivLLKCoeff;
    #ifdef __WX__CRYST__
    public:
       WXCrystObjBasic *mpWXCrystObj;
@@ -430,32 +451,23 @@ class Quaternion
       REAL mQ0,mQ1,mQ2,mQ3;
       bool mIsUniQuaternion;
 };
-
-/** Group of atoms for random moves changing a bond length. 
+/** Abstract base Stretch Mode for Molecule objects
 *
-* This should be merged (or have an inheritance relation) with MolBond.
 */
-struct StretchModeBondLength
+struct StretchMode
 {
-   /** Constructor
-   * If pBond!=0, the bond length restraint is respected.
-   */
-   StretchModeBondLength(MolAtom &at0,MolAtom &at1,const MolBond *pBond);
+   virtual ~StretchMode();
    /// Calculate the derivative of the Molecule's Log(likelihood) and atomic psoitions
    /// versus a change of the bond length. The result is stored in mLLKDeriv and mLLKDerivXYZ,
    /// as well as in the various lists of restraints broken by this mode.
-   void CalcDeriv()const;
+   virtual void CalcDeriv()const=0;
    /// Print one-line list of atoms moved
-   void Print(ostream &os,bool full=true)const;
-   /// The first atom (fixed).
-   MolAtom * mpAtom0;
-   /// The second atom  (first atom moved)
-   MolAtom * mpAtom1;
-   /// The (optional) bond length which this stretch mode should respect.
-   const MolBond *mpBond;
-   /// The set of atoms that are to be translated, including at1.
-   set<MolAtom *> mvTranslatedAtomList;
-   /// List of bond restraints affected by this mode (apart from mpBond)
+   virtual void Print(ostream &os,bool full=true)const=0;
+   /// Move the atoms according to this mode
+   virtual void Stretch(const REAL change)=0;
+   /// Move the atoms according to this mode, randomly
+   virtual void RandomStretch(const REAL amplitude)=0;
+   /// List of bond restraints affected by this mode
    /// The key is the restraint, the value is the derivative of the LLK associated
    std::map<const MolBond*,REAL> mvpBrokenBond;
    /// List of bond angle restraints modified by this mode
@@ -468,25 +480,71 @@ struct StretchModeBondLength
    mutable REAL mLLKDeriv;
    /// Derivative of the atomic positions versus a change of the bond length.
    mutable std::map<const MolAtom*,XYZ> mDerivXYZ;
+   /// The Molecule corresponding to this stretch mode
+   Molecule *mpMol;
+   /** The recommended change amplitude, for a base global optimization
+   * displacement, to obtain an average 0.1 Angstroem displacement.
+   *
+   * This is learnt at the beginning of an optimization.
+   *
+   * This can be superseeded to respect any restraint.
+   */
+   REAL mBaseAmplitude;
+};
+
+/** Group of atoms for random moves changing a bond length. 
+*
+* This should be merged (or have an inheritance relation) with MolBond.
+*/
+struct StretchModeBondLength:public StretchMode
+{
+   /** Constructor
+   * If pBond!=0, the bond length restraint is respected.
+   */
+   StretchModeBondLength(MolAtom &at0,MolAtom &at1,const MolBond *pBond);
+   virtual ~StretchModeBondLength();
+   /// Calculate the derivative of the Molecule's Log(likelihood) and atomic psoitions
+   /// versus a change of the bond length. The result is stored in mLLKDeriv and mLLKDerivXYZ,
+   /// as well as in the various lists of restraints broken by this mode.
+   virtual void CalcDeriv()const;
+   /// Print one-line list of atoms moved
+   virtual void Print(ostream &os,bool full=true)const;
+   /// Move the atoms according to this mode
+   virtual void Stretch(const REAL change);
+   /// Move the atoms according to this mode, randomly
+   virtual void RandomStretch(const REAL amplitude);
+   /// The first atom (fixed).
+   MolAtom * mpAtom0;
+   /// The second atom  (first atom moved)
+   MolAtom * mpAtom1;
+   /// The (optional) bond length which this stretch mode should respect.
+   const MolBond *mpBond;
+   /// The set of atoms that are to be translated, including at1.
+   set<MolAtom *> mvTranslatedAtomList;
 };
 
 /** Atoms moved when changing a bond angle.
 *
 * This should be merged (or have an inheritance relation) with MolBondAngle.
 */
-struct StretchModeBondAngle
+struct StretchModeBondAngle:public StretchMode
 {
    /** Constructor
    * If pBondAngle!=0, the bond angle length restraint is respected.
    */
    StretchModeBondAngle(MolAtom &at0,MolAtom &at1,MolAtom &at2,
                         const MolBondAngle *pBondAngle);
+   virtual ~StretchModeBondAngle();
    /// Calculate the derivative of the Molecule's Log(likelihood) and atomic psoitions
    /// versus a change of the angle. The result is stored in mLLKDeriv and mLLKDerivXYZ,
    /// as well as in the various lists of restraints broken by this mode.
-   void CalcDeriv()const;
+   virtual void CalcDeriv()const;
    /// Print one-line list of atoms moved
-   void Print(ostream &os,bool full=true)const;
+   virtual void Print(ostream &os,bool full=true)const;
+   /// Move the atoms according to this mode
+   virtual void Stretch(const REAL change);
+   /// Move the atoms according to this mode, randomly
+   virtual void RandomStretch(const REAL amplitude);
    /// The first atom
    MolAtom * mpAtom0;
    /// The second atom 
@@ -498,53 +556,29 @@ struct StretchModeBondAngle
    /// The set of atoms that are to be rotated around the direction going
    /// through at1 and perpendicular to the at0-at1-at2 plane.
    set<MolAtom *> mvRotatedAtomList;
-   /** The recommended rotation amplitude, for a base global optimization
-   * displacement, to obtain an average 0.1 Angstroem displacement 
-   * per atom (pi*0.04 by default)
-   *
-   * This is learnt at the beginning of an optimization.
-   *
-   * This will be superseeded to respect any restraint.
-   */
-   REAL mBaseRotationAmplitude;
-   /// List of bond restraints affected by this mode.
-   /// The key is the restraint, the value is the derivative of the LLK associated
-   std::map<const MolBond*,REAL> mvpBrokenBond;
-   /// List of bond angle restraints modified by this mode (apart from mpBondAngle).
-   /// The key is the restraint, the value is the derivative of the LLK associated
-   std::map<const MolBondAngle*,REAL> mvpBrokenBondAngle;
-   /// List of dihedral angle restraints modified by this mode.
-   /// The key is the restraint, the value is the derivative of the LLK associated
-   std::map<const MolDihedralAngle*,REAL> mvpBrokenDihedralAngle;
-   /// Derivative of the Molecule's Log(likelihood) versus a change of the angle.
-   mutable REAL mLLKDeriv;
-   /// Derivative of the atomic positions versus a change of the angle.
-   mutable std::map<const MolAtom*,XYZ> mDerivXYZ;
 };
 /** Atoms moved when rotated around a bond at0-at1-at2-at3
 *
 * This should be merged (or have an inheritance relation) with MolDihedralAngle
 */
-struct StretchModeTorsion
+struct StretchModeTorsion:public StretchMode
 {
    /** Constructor
    * If pDihedralAngle!=0, the dihedral angle length restraint is respected.
    */
    StretchModeTorsion(MolAtom &at1,MolAtom &at2,
                       const MolDihedralAngle *pDihedralAngle);
-   /** Stretch the bond angle, while respecting the Restraint (if any).
-   *
-   *\return the \e actual change in bond angle.
-   *\param change: the desired angular change. This will be the actual change \e if
-   * there is no restraint \e or if the restraint is constant in this range.
-   */
-   REAL Stretch(const REAL change, const bool respectRestraint=true);
+   virtual ~StretchModeTorsion();
    /// Calculate the derivative of the Molecule's Log(likelihood) and atomic psoitions
    /// versus a change of the angle. The result is stored in mLLKDeriv and mLLKDerivXYZ,
    /// as well as in the various lists of restraints broken by this mode.
-   void CalcDeriv()const;
+   virtual void CalcDeriv()const;
    /// Print one-line list of atoms moved
-   void Print(ostream &os,bool full=true)const;
+   virtual void Print(ostream &os,bool full=true)const;
+   /// Move the atoms according to this mode
+   virtual void Stretch(const REAL change);
+   /// Move the atoms according to this mode, randomly
+   virtual void RandomStretch(const REAL amplitude);
    /// The first atom
    MolAtom * mpAtom1;
    /// The second atom 
@@ -554,28 +588,6 @@ struct StretchModeTorsion
    const MolDihedralAngle *mpDihedralAngle;
    /// The set of atoms that are to be rotated around at1-at2
    set<MolAtom *> mvRotatedAtomList;
-   /** The recommended rotation amplitude, for a base global optimization
-   * displacement, to obtain an average 0.1 Angstroem displacement 
-   * per atom (pi*0.04 by default)
-   *
-   * This is learnt at the beginning of an optimization.
-   *
-   * This will be superseeded to respect any restraint.
-   */
-   REAL mBaseRotationAmplitude;
-   /// List of bond restraints affected by this mode.
-   /// The key is the restraint, the value is the derivative of the LLK associated
-   std::map<const MolBond*,REAL> mvpBrokenBond;
-   /// List of bond angle restraints modified by this mode.
-   /// The key is the restraint, the value is the derivative of the LLK associated
-   std::map<const MolBondAngle*,REAL> mvpBrokenBondAngle;
-   /// List of dihedral angle restraints modified by this mode (apart from mpDihedralAngle).
-   /// The key is the restraint, the value is the derivative of the LLK associated
-   std::map<const MolDihedralAngle*,REAL> mvpBrokenDihedralAngle;
-   /// Derivative of the Molecule's Log(likelihood) versus a change of the angle.
-   mutable REAL mLLKDeriv;
-   /// Derivative of the atomic positions versus a change of the angle.
-   mutable std::map<const MolAtom*,XYZ> mDerivXYZ;
 };
 
 /** Atoms moved *between* two other atoms, using a "twist"
@@ -584,56 +596,29 @@ struct StretchModeTorsion
 * the atoms in the middle between the two reference atoms are more
 * displaced than the one closer, to help avoid breaking restraints.
 */
-struct StretchModeTwist
+struct StretchModeTwist:public StretchMode
 {
    /** Constructor
    * If pDihedralAngle!=0, the dihedral angle length restraint is respected.
    */
    StretchModeTwist(MolAtom &at1,MolAtom &at2);
-   /** Twist
-   *
-   * Respecting the Restraint is experimental, no garanty yet !
-   *
-   *\return the \e actual angular change, which is maximum for atoms in the center
-   * between the two atoms.
-   *\param change: the desired angular change. This will be the actual change \e if
-   * there is no restraint \e or if the restraint is constant in this range.
-   */
-   REAL Stretch(const REAL change, const bool respectRestraint=true);
+   virtual ~StretchModeTwist();
    /// Calculate the derivative of the Molecule's Log(likelihood) and atomic psoitions
    /// versus a change of the angle. The result is stored in mLLKDeriv and mLLKDerivXYZ,
    /// as well as in the various lists of restraints broken by this mode.
-   void CalcDeriv()const;
+   virtual void CalcDeriv()const;
    /// Print one-line list of atoms moved
-   void Print(ostream &os,bool full=true)const;
+   virtual void Print(ostream &os,bool full=true)const;
+   /// Move the atoms according to this mode
+   virtual void Stretch(const REAL change);
+   /// Move the atoms according to this mode, randomly
+   virtual void RandomStretch(const REAL amplitude);
    /// The first atom
    MolAtom * mpAtom1;
    /// The second atom 
    MolAtom * mpAtom2;
    /// The set of atoms that are to be rotated around at1-at2
    set<MolAtom *> mvRotatedAtomList;
-   /** The recommended rotation amplitude, for a base global optimization
-   * displacement, to obtain an average 0.1 Angstroem displacement 
-   * per atom (pi*0.04 by default)
-   *
-   * This is learnt at the beginning of an optimization.
-   *
-   * This will be superseeded to respect any restraint.
-   */
-   REAL mBaseRotationAmplitude;
-   /// List of bond restraints affected by this mode.
-   /// The key is the restraint, the value is the derivative of the LLK associated
-   std::map<const MolBond*,REAL> mvpBrokenBond;
-   /// List of bond angle restraints modified by this mode.
-   /// The key is the restraint, the value is the derivative of the LLK associated
-   std::map<const MolBondAngle*,REAL> mvpBrokenBondAngle;
-   /// List of dihedral angle restraints modified by this mode (apart from mpDihedralAngle).
-   /// The key is the restraint, the value is the derivative of the LLK associated
-   std::map<const MolDihedralAngle*,REAL> mvpBrokenDihedralAngle;
-   /// Derivative of the Molecule's Log(likelihood) versus a change of the angle.
-   mutable REAL mLLKDeriv;
-   /// Derivative of the atomic positions versus a change of the angle.
-   mutable std::map<const MolAtom*,XYZ> mDerivXYZ;
 };
 
 /** Molecule : class for complex scatterer descriptions using
@@ -920,6 +905,10 @@ class Molecule: public Scatterer
       * respecting the Molecule restraints.
       */
       void BuildStretchModeTorsion();
+      /** Separate StretchMode that break more than their assigned restraint from others.
+      * See Molecule::mvpStretchModeFree and Molecule::mvpStretchModeNotFree
+      */
+      void BuildStretchModeGroups();
       /** Update the Molecule::mScattCompList from the cartesian coordinates
       * of all atoms, and the orientation parameters.
       */
@@ -1125,6 +1114,20 @@ class Molecule: public Scatterer
          mutable list<StretchModeTorsion> mvStretchModeTorsion;
          /// List of StretchModeTwist
          mutable list<StretchModeTwist> mvStretchModeTwist;
+      
+      /// Groups of StretchMode not breaking any restraint (unless the one they are associated to)
+      mutable std::list<StretchMode*> mvpStretchModeFree;
+      /// Groups of StretchMode breaking restraints (beyond the one they are associated to)
+      mutable std::list<StretchMode*> mvpStretchModeNotFree;
+      /// Group of concurrent StretchModes (affecting common restraints)
+      /// A given stretch mode can only belong to one group.
+      struct StretchModeGroup
+      {
+         std::set<StretchMode*> mvpStretchMode;
+         std::set<const MolBond*> mvpBrokenBond;
+         std::set<const MolBondAngle*> mvpBrokenBondAngle;
+         std::set<const MolDihedralAngle*> mvpBrokenDihedralAngle;
+      };
 
    /// The current log(likelihood)
    mutable REAL mLogLikelihood;

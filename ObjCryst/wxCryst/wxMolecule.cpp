@@ -1440,10 +1440,8 @@ void WXMolecule::OnMenuTest(wxCommandEvent & WXUNUSED(event))
    mpMolecule->TuneGlobalOptimRotationAmplitude();
    //mpMolecule->FlipAtomGroup(*(mpMolecule->mvFlipGroup.begin()));
    //mpMolecule->GlobalOptRandomMove(0.1,gpRefParTypeObjCryst);
+   mpMolecule->BuildStretchModeGroups();
    #else
-   mpMolecule->AutoCreateAngleDescriptor(true);
-   mpMolecule->PrepareDescriptor();
-   #endif
    for(list<StretchModeTorsion>::iterator pos=mpMolecule->GetStretchModeTorsionList().begin();
        pos!=mpMolecule->GetStretchModeTorsionList().end();++pos)
    {
@@ -1457,6 +1455,26 @@ void WXMolecule::OnMenuTest(wxCommandEvent & WXUNUSED(event))
       }
    }
    mpMolecule->GetCrystal().UpdateDisplay();
+   #endif
+   #if 0
+   mpMolecule->BeginOptimization(true);
+   for(REAL amplitude=0.1;amplitude<10;amplitude*=1.5)
+   {
+      REAL maxLLK=0,llk,ave=0.0;
+      for(unsigned long i=0;i<1000;i++)
+      {
+         mpMolecule->BeginGlobalOptRandomMove();
+         mpMolecule->GlobalOptRandomMove(amplitude,gpRefParTypeObjCryst);
+         llk=mpMolecule->GetLogLikelihood();
+         //cout<<"           "<<llk<<endl;
+         if(llk>maxLLK) maxLLK=llk;
+         ave+=llk;
+         mpMolecule->GetCrystal().UpdateDisplay();
+      }
+      cout<<"Amplitude="<<amplitude<<", <LLK>= "<<ave/1000<<", Max LLK= "<<maxLLK<<endl;
+   }
+   mpMolecule->EndOptimization();
+   #endif
    VFN_DEBUG_EXIT("WXMolecule::OnMenuTest()",6)
 }
 

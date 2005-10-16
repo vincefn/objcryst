@@ -381,10 +381,11 @@ void MolBond::XMLInput(istream &is,const XMLCrystTag &tag)
    VFN_DEBUG_EXIT("MolBond::XMLInput():",7)
 }
 
-REAL MolBond::GetLogLikelihood(const bool calcDeriv)const
+REAL MolBond::GetLogLikelihood(const bool calcDeriv, const bool recalc)const
 {
+   if(!recalc) return mLLK;
    VFN_DEBUG_ENTRY("MolBond::GetLogLikelihood():",2)
-   //TAU_PROFILE("MolBond::GetLogLikelihood()","void ()",TAU_DEFAULT);
+   //TAU_PROFILE("MolBond::GetLogLikelihood()","REAL (bool,bool)",TAU_DEFAULT);
    //const REAL length=this->GetLength();
    const REAL x=this->GetAtom2().GetX()-this->GetAtom1().GetX();
    const REAL y=this->GetAtom2().GetY()-this->GetAtom1().GetY();
@@ -394,45 +395,61 @@ REAL MolBond::GetLogLikelihood(const bool calcDeriv)const
    if(calcDeriv)
    {
       const REAL tmp2=1/(length+1e-10);
-      mDeriv[&(this->GetAtom1())].x=-x*tmp2;
-      mDeriv[&(this->GetAtom1())].y=-y*tmp2;
-      mDeriv[&(this->GetAtom1())].z=-z*tmp2;
+      mDerivAtom1.x=-x*tmp2;
+      mDerivAtom1.y=-y*tmp2;
+      mDerivAtom1.z=-z*tmp2;
 
-      mDeriv[&(this->GetAtom2())].x=-mDeriv[&(this->GetAtom1())].x;
-      mDeriv[&(this->GetAtom2())].y=-mDeriv[&(this->GetAtom1())].y;
-      mDeriv[&(this->GetAtom2())].z=-mDeriv[&(this->GetAtom1())].z;
+      mDerivAtom2.x=-mDerivAtom1.x;
+      mDerivAtom2.y=-mDerivAtom1.y;
+      mDerivAtom2.z=-mDerivAtom1.z;
    }
 
-   if(mSigma<1e-6) return 0;
-   
-   REAL tmp=length-(mLength0+mDelta);
-   if(tmp>0)
+   if(mSigma<1e-6)
    {
-      tmp/=mSigma;
-      VFN_DEBUG_EXIT("MolBond::GetLogLikelihood():",2)
-      return tmp*tmp;
+      if(calcDeriv) mDerivLLKCoeff=0;
+      mLLK=0;
+      return 0;
    }
-   tmp=length-(mLength0-mDelta);
-   if(tmp<0)
+   mLLK=length-(mLength0+mDelta);
+   if(mLLK>0)
    {
-      tmp/=mSigma;
+      mLLK /= mSigma;
+      if(calcDeriv) mDerivLLKCoeff=2*mLLK/mSigma;
+      mLLK *= mLLK;
       VFN_DEBUG_EXIT("MolBond::GetLogLikelihood():",2)
-      return tmp*tmp;
+      return mLLK;
    }
+   mLLK=length-(mLength0-mDelta);
+   if(mLLK<0)
+   {
+      mLLK /= mSigma;
+      if(calcDeriv) mDerivLLKCoeff=2*mLLK/mSigma;
+      mLLK *= mLLK;
+      VFN_DEBUG_EXIT("MolBond::GetLogLikelihood():",2)
+      return mLLK;
+   }
+   if(calcDeriv) mDerivLLKCoeff=0;
+   mLLK=0;
    VFN_DEBUG_EXIT("MolBond::GetLogLikelihood():",2)
-   return 0;
+   return mLLK;
 }
 
-REAL MolBond::GetDeriv(const std::map<const MolAtom*,XYZ> m)const
+REAL MolBond::GetDeriv(const map<const MolAtom*,XYZ> &m, const bool llk)const
 {
+   //TAU_PROFILE("MolBond::GetDeriv()","REAL (mak,bool)",TAU_DEFAULT);
    REAL d=0;
-   for(std::map<const MolAtom*,XYZ>::const_iterator pos=mDeriv.begin();pos!=mDeriv.end();++pos)
-   {
-      std::map<const MolAtom*,XYZ>::const_iterator pos1=m.find(pos->first);
-      if(pos1!=m.end()) d+= pos->second.x*pos1->second.x
-                           +pos->second.y*pos1->second.y
-                           +pos->second.z*pos1->second.z;
-   }
+   map<const MolAtom*,XYZ>::const_iterator pos;
+   pos=m.find(mAtomPair.first);
+   if(pos!=m.end())
+      d+= pos->second.x*mDerivAtom1.x
+         +pos->second.y*mDerivAtom1.y
+         +pos->second.z*mDerivAtom1.z;
+   pos=m.find(mAtomPair.second);
+   if(pos!=m.end())
+      d+= pos->second.x*mDerivAtom2.x
+         +pos->second.y*mDerivAtom2.y
+         +pos->second.z*mDerivAtom2.z;
+   if(llk) return mDerivLLKCoeff*d;
    return d;
 }
 
@@ -602,10 +619,11 @@ REAL MolBondAngle::GetAngle()const
    return GetBondAngle(this->GetAtom1(),this->GetAtom2(),this->GetAtom3());
 }
 
-REAL MolBondAngle::GetLogLikelihood(const bool calcDeriv)const
+REAL MolBondAngle::GetLogLikelihood(const bool calcDeriv, const bool recalc)const
 {
+   if(!recalc) return mLLK;
    VFN_DEBUG_ENTRY("MolBondAngle::GetLogLikelihood():",2)
-   //TAU_PROFILE("MolBondAngle::GetLogLikelihood()","void ()",TAU_DEFAULT);
+   //TAU_PROFILE("MolBondAngle::GetLogLikelihood()","REAL (bool,bool)",TAU_DEFAULT);
    //const REAL angle=this->GetAngle();
    const REAL x21=this->GetAtom1().GetX()-this->GetAtom2().GetX();
    const REAL y21=this->GetAtom1().GetY()-this->GetAtom2().GetY();
@@ -633,49 +651,71 @@ REAL MolBondAngle::GetLogLikelihood(const bool calcDeriv)const
       const REAL s0=-s/(n1*n3+1e-10);
       const REAL s1= s*p/(n3*n1*n1*n1+1e-10);
       const REAL s3= s*p/(n1*n3*n3*n3+1e-10);
-      mDeriv[&(this->GetAtom1())].x=s0*x23+s1*x21;
-      mDeriv[&(this->GetAtom1())].y=s0*y23+s1*y21;
-      mDeriv[&(this->GetAtom1())].z=s0*z23+s1*z21;
+      mDerivAtom1.x=s0*x23+s1*x21;
+      mDerivAtom1.y=s0*y23+s1*y21;
+      mDerivAtom1.z=s0*z23+s1*z21;
 
-      mDeriv[&(this->GetAtom3())].x=s0*x21+s3*x23;
-      mDeriv[&(this->GetAtom3())].y=s0*y21+s3*y23;
-      mDeriv[&(this->GetAtom3())].z=s0*z21+s3*z23;
+      mDerivAtom3.x=s0*x21+s3*x23;
+      mDerivAtom3.y=s0*y21+s3*y23;
+      mDerivAtom3.z=s0*z21+s3*z23;
 
-      mDeriv[&(this->GetAtom2())].x=-(mDeriv[&(this->GetAtom1())].x+mDeriv[&(this->GetAtom3())].x);
-      mDeriv[&(this->GetAtom2())].y=-(mDeriv[&(this->GetAtom1())].y+mDeriv[&(this->GetAtom3())].y);
-      mDeriv[&(this->GetAtom2())].z=-(mDeriv[&(this->GetAtom1())].z+mDeriv[&(this->GetAtom3())].z);
+      mDerivAtom2.x=-(mDerivAtom1.x+mDerivAtom3.x);
+      mDerivAtom2.y=-(mDerivAtom1.y+mDerivAtom3.y);
+      mDerivAtom2.z=-(mDerivAtom1.z+mDerivAtom3.z);
    }
 
-   if(mSigma<1e-6) return 0;
+   if(mSigma<1e-6)
+   {
+      if(calcDeriv) mDerivLLKCoeff=0;
+      mLLK=0;
+      return 0;
+   }
    
-   REAL tmp=angle-(mAngle0+mDelta);
-   if(tmp>0)
+   mLLK=angle-(mAngle0+mDelta);
+   if(mLLK>0)
    {
-      tmp/=mSigma;
+      mLLK/=mSigma;
+      if(calcDeriv) mDerivLLKCoeff=2*mLLK/mSigma;
+      mLLK*=mLLK;
       VFN_DEBUG_EXIT("MolBondAngle::GetLogLikelihood():",2)
-      return tmp*tmp;
+      return mLLK;
    }
-   tmp=angle-(mAngle0-mDelta);
-   if(tmp<0)
+   mLLK=angle-(mAngle0-mDelta);
+   if(mLLK<0)
    {
-      tmp/=mSigma;
+      mLLK/=mSigma;
+      if(calcDeriv) mDerivLLKCoeff=2*mLLK/mSigma;
+      mLLK*=mLLK;
       VFN_DEBUG_EXIT("MolBondAngle::GetLogLikelihood():",2)
-      return tmp*tmp;
+      return mLLK;
    }
    VFN_DEBUG_EXIT("MolBondAngle::GetLogLikelihood():",2)
-   return 0;
+   if(calcDeriv) mDerivLLKCoeff=0;
+   mLLK=0;
+   return mLLK;
 }
 
-REAL MolBondAngle::GetDeriv(const std::map<const MolAtom*,XYZ> m)const
+REAL MolBondAngle::GetDeriv(const std::map<const MolAtom*,XYZ> &m,const bool llk)const
 {
+   //TAU_PROFILE("MolBondAngle::GetDeriv()","REAL (mak,bool)",TAU_DEFAULT);
    REAL d=0;
-   for(std::map<const MolAtom*,XYZ>::const_iterator pos=mDeriv.begin();pos!=mDeriv.end();++pos)
-   {
-      std::map<const MolAtom*,XYZ>::const_iterator pos1=m.find(pos->first);
-      if(pos1!=m.end()) d+= pos->second.x*pos1->second.x
-                           +pos->second.y*pos1->second.y
-                           +pos->second.z*pos1->second.z;
-   }
+   map<const MolAtom*,XYZ>::const_iterator pos;
+   pos=m.find(mvpAtom[0]);
+   if(pos!=m.end())
+      d+= pos->second.x*mDerivAtom1.x
+         +pos->second.y*mDerivAtom1.y
+         +pos->second.z*mDerivAtom1.z;
+   pos=m.find(mvpAtom[1]);
+   if(pos!=m.end())
+      d+= pos->second.x*mDerivAtom2.x
+         +pos->second.y*mDerivAtom2.y
+         +pos->second.z*mDerivAtom2.z;
+   pos=m.find(mvpAtom[2]);
+   if(pos!=m.end())
+      d+= pos->second.x*mDerivAtom3.x
+         +pos->second.y*mDerivAtom3.y
+         +pos->second.z*mDerivAtom3.z;
+   if(llk) return mDerivLLKCoeff*d;
    return d;
 }
 
@@ -841,10 +881,11 @@ void MolDihedralAngle::SetAngle0(const REAL angle){mAngle0=angle;}
 void MolDihedralAngle::SetAngleDelta(const REAL delta){mDelta=delta;}
 void MolDihedralAngle::SetAngleSigma(const REAL sigma){mSigma=sigma;}
 
-REAL MolDihedralAngle::GetLogLikelihood(const bool calcDeriv)const
+REAL MolDihedralAngle::GetLogLikelihood(const bool calcDeriv, const bool recalc)const
 {
+   if(!recalc) return mLLK;
    VFN_DEBUG_ENTRY("MolDihedralAngle::GetLogLikelihood():",2)
-   //TAU_PROFILE("MolDihedralAngle::GetLogLikelihood()","void ()",TAU_DEFAULT);
+   //TAU_PROFILE("MolDihedralAngle::GetLogLikelihood()","REAL (bool,bool)",TAU_DEFAULT);
    const REAL x21=this->GetAtom1().GetX()-this->GetAtom2().GetX();
    const REAL y21=this->GetAtom1().GetY()-this->GetAtom2().GetY();
    const REAL z21=this->GetAtom1().GetZ()-this->GetAtom2().GetZ();
@@ -885,61 +926,87 @@ REAL MolDihedralAngle::GetLogLikelihood(const bool calcDeriv)const
    
    if(calcDeriv)
    {
-      mDeriv.clear();
       const REAL s=sgn/(sqrt(1-a0*a0)+1e-7);
       const REAL s0=-s/(n123*n234+1e-10);
       const REAL s1= s*p/(n234*n123*n123*n123+1e-10);
       const REAL s3= s*p/(n123*n234*n234*n234+1e-10);
-      mDeriv[&(this->GetAtom1())].x=s0*(-z23*y234+y23*z234)+s1*(-z23*y123+y23*z123);
-      mDeriv[&(this->GetAtom1())].y=s0*(-x23*z234+z23*x234)+s1*(-x23*z123+z23*x123);
-      mDeriv[&(this->GetAtom1())].z=s0*(-y23*x234+x23*y234)+s1*(-y23*x123+x23*y123);
+      mDerivAtom1.x=s0*(-z23*y234+y23*z234)+s1*(-z23*y123+y23*z123);
+      mDerivAtom1.y=s0*(-x23*z234+z23*x234)+s1*(-x23*z123+z23*x123);
+      mDerivAtom1.z=s0*(-y23*x234+x23*y234)+s1*(-y23*x123+x23*y123);
 
-      mDeriv[&(this->GetAtom4())].x=s0*(-z23*y123+y23*z123)+s3*(-z23*y234+y23*z234);
-      mDeriv[&(this->GetAtom4())].y=s0*(-x23*z123+z23*x123)+s3*(-x23*z234+z23*x234);
-      mDeriv[&(this->GetAtom4())].z=s0*(-y23*x123+x23*y123)+s3*(-y23*x234+x23*y234);
+      mDerivAtom4.x=s0*(-z23*y123+y23*z123)+s3*(-z23*y234+y23*z234);
+      mDerivAtom4.y=s0*(-x23*z123+z23*x123)+s3*(-x23*z234+z23*x234);
+      mDerivAtom4.z=s0*(-y23*x123+x23*y123)+s3*(-y23*x234+x23*y234);
 
-      mDeriv[&(this->GetAtom2())].x=s0*((z23-z21)*y234-y123*z34+(y21-y23)*z234+z123*y34)+s1*(y123*(z23-z21)+z123*(y21-y23))+s3*(-y234*z34+z234*y34);
-      mDeriv[&(this->GetAtom2())].y=s0*((x23-x21)*z234-z123*x34+(z21-z23)*x234+x123*z34)+s1*(z123*(x23-x21)+x123*(z21-z23))+s3*(-z234*x34+x234*z34);
-      mDeriv[&(this->GetAtom2())].z=s0*((y23-y21)*x234-x123*y34+(x21-x23)*y234+y123*x34)+s1*(x123*(y23-y21)+y123*(x21-x23))+s3*(-x234*y34+y234*x34);
+      mDerivAtom2.x=s0*((z23-z21)*y234-y123*z34+(y21-y23)*z234+z123*y34)+s1*(y123*(z23-z21)+z123*(y21-y23))+s3*(-y234*z34+z234*y34);
+      mDerivAtom2.y=s0*((x23-x21)*z234-z123*x34+(z21-z23)*x234+x123*z34)+s1*(z123*(x23-x21)+x123*(z21-z23))+s3*(-z234*x34+x234*z34);
+      mDerivAtom2.z=s0*((y23-y21)*x234-x123*y34+(x21-x23)*y234+y123*x34)+s1*(x123*(y23-y21)+y123*(x21-x23))+s3*(-x234*y34+y234*x34);
 
-      mDeriv[&(this->GetAtom3())].x=-(mDeriv[&(this->GetAtom1())].x+mDeriv[&(this->GetAtom2())].x+mDeriv[&(this->GetAtom4())].x);
-      mDeriv[&(this->GetAtom3())].y=-(mDeriv[&(this->GetAtom1())].y+mDeriv[&(this->GetAtom2())].y+mDeriv[&(this->GetAtom4())].y);
-      mDeriv[&(this->GetAtom3())].z=-(mDeriv[&(this->GetAtom1())].z+mDeriv[&(this->GetAtom2())].z+mDeriv[&(this->GetAtom4())].z);
+      mDerivAtom3.x=-(mDerivAtom1.x+mDerivAtom2.x+mDerivAtom4.x);
+      mDerivAtom3.y=-(mDerivAtom1.y+mDerivAtom2.y+mDerivAtom4.y);
+      mDerivAtom3.z=-(mDerivAtom1.z+mDerivAtom2.z+mDerivAtom4.z);
    }
    
-   if(mSigma<1e-6) return 0;
-   REAL tmp=angle-(mAngle0+mDelta);
-   if(tmp<(-M_PI)) tmp += 2*M_PI;
-   if(tmp>  M_PI ) tmp -= 2*M_PI;
-   if(tmp>0)
+   if(mSigma<1e-6)
    {
-      tmp/=mSigma;
-      VFN_DEBUG_EXIT("MolDihedralAngle::GetLogLikelihood():",2)
-      return tmp*tmp;
+      if(calcDeriv) mDerivLLKCoeff=0;
+      mLLK=0;
+      return mLLK;
    }
-   tmp=angle-(mAngle0-mDelta);
-   if(tmp<(-M_PI)) tmp += 2*M_PI;
-   if(tmp>  M_PI ) tmp -= 2*M_PI;
-   if(tmp<0)
+   mLLK=angle-(mAngle0+mDelta);
+   if(mLLK<(-M_PI)) mLLK += 2*M_PI;
+   if(mLLK>  M_PI ) mLLK -= 2*M_PI;
+   if(mLLK>0)
    {
-      tmp/=mSigma;
+      mLLK/=mSigma;
+      if(calcDeriv) mDerivLLKCoeff=2*mLLK/mSigma;
+      mLLK*=mLLK;
       VFN_DEBUG_EXIT("MolDihedralAngle::GetLogLikelihood():",2)
-      return tmp*tmp;
+      return mLLK;
+   }
+   mLLK=angle-(mAngle0-mDelta);
+   if(mLLK<(-M_PI)) mLLK += 2*M_PI;
+   if(mLLK>  M_PI ) mLLK -= 2*M_PI;
+   if(mLLK<0)
+   {
+      mLLK/=mSigma;
+      if(calcDeriv) mDerivLLKCoeff=2*mLLK/mSigma;
+      mLLK*=mLLK;
+      VFN_DEBUG_EXIT("MolDihedralAngle::GetLogLikelihood():",2)
+      return mLLK;
    }
    VFN_DEBUG_EXIT("MolDihedralAngle::GetLogLikelihood():",2)
+   if(calcDeriv) mDerivLLKCoeff=0;
+   mLLK=0;
    return 0;
 }
 
-REAL MolDihedralAngle::GetDeriv(const std::map<const MolAtom*,XYZ> m)const
+REAL MolDihedralAngle::GetDeriv(const std::map<const MolAtom*,XYZ> &m,const bool llk)const
 {
+   //TAU_PROFILE("MolDihedralAngle::GetDeriv()","REAL (mak,bool)",TAU_DEFAULT);
    REAL d=0;
-   for(std::map<const MolAtom*,XYZ>::const_iterator pos=mDeriv.begin();pos!=mDeriv.end();++pos)
-   {
-      std::map<const MolAtom*,XYZ>::const_iterator pos1=m.find(pos->first);
-      if(pos1!=m.end()) d+= pos->second.x*pos1->second.x
-                           +pos->second.y*pos1->second.y
-                           +pos->second.z*pos1->second.z;
-   }
+   map<const MolAtom*,XYZ>::const_iterator pos;
+   pos=m.find(mvpAtom[0]);
+   if(pos!=m.end())
+      d+= pos->second.x*mDerivAtom1.x
+         +pos->second.y*mDerivAtom1.y
+         +pos->second.z*mDerivAtom1.z;
+   pos=m.find(mvpAtom[1]);
+   if(pos!=m.end())
+      d+= pos->second.x*mDerivAtom2.x
+         +pos->second.y*mDerivAtom2.y
+         +pos->second.z*mDerivAtom2.z;
+   pos=m.find(mvpAtom[2]);
+   if(pos!=m.end())
+      d+= pos->second.x*mDerivAtom3.x
+         +pos->second.y*mDerivAtom3.y
+         +pos->second.z*mDerivAtom3.z;
+   pos=m.find(mvpAtom[3]);
+   if(pos!=m.end())
+      d+= pos->second.x*mDerivAtom4.x
+         +pos->second.y*mDerivAtom4.y
+         +pos->second.z*mDerivAtom4.z;
+   if(llk) return mDerivLLKCoeff*d;
    return d;
 }
 
@@ -1182,30 +1249,46 @@ REAL& Quaternion::Q3(){return mQ3;}
 //      Molecule Stretch Modes
 //
 //######################################################################
+StretchMode::~StretchMode(){}
+
 StretchModeBondLength::StretchModeBondLength(MolAtom &at0,MolAtom &at1,
                                              const MolBond *pBond):
 mpAtom0(&at0),mpAtom1(&at1),mpBond(pBond)
-{}
+{
+   mBaseAmplitude=0.1;
+   mpMol = &(at1.GetMolecule());
+}
+
+StretchModeBondLength::~StretchModeBondLength(){}
 
 void StretchModeBondLength::CalcDeriv()const
 {
-   mDerivXYZ.clear();
-   REAL dx=mpAtom1->GetX()-mpAtom0->GetX();
-   REAL dy=mpAtom1->GetY()-mpAtom0->GetY();
-   REAL dz=mpAtom1->GetZ()-mpAtom0->GetZ();
-   const REAL n=sqrt(dx*dx+dy*dy+dz*dz);
-   if(n<1e-6) return;//:KLUDGE: ?
-   dx/=n;
-   dy/=n;
-   dz/=n;
-   for(set<MolAtom *>::const_iterator pos=mvTranslatedAtomList.begin();
-       pos!=mvTranslatedAtomList.end();++pos)
-   {
-      XYZ *const p=&(mDerivXYZ[*pos]);
-      p->x=dx;
-      p->y=dy;
-      p->z=dz;
-   }
+   // Derivative of the atom positions
+      //mDerivXYZ.clear();
+      REAL dx=mpAtom1->GetX()-mpAtom0->GetX();
+      REAL dy=mpAtom1->GetY()-mpAtom0->GetY();
+      REAL dz=mpAtom1->GetZ()-mpAtom0->GetZ();
+      const REAL n=sqrt(dx*dx+dy*dy+dz*dz);
+      if(n<1e-6) return;//:KLUDGE: ?
+      dx/=n;
+      dy/=n;
+      dz/=n;
+      for(set<MolAtom *>::const_iterator pos=mvTranslatedAtomList.begin();
+          pos!=mvTranslatedAtomList.end();++pos)
+      {
+         XYZ *const p=&(mDerivXYZ[*pos]);
+         p->x=dx;
+         p->y=dy;
+         p->z=dz;
+      }
+   // Derivative of the LLK
+      mLLKDeriv=0;
+      for(map<const MolBond*,REAL>::const_iterator pos=this->mvpBrokenBond.begin();
+          pos!=this->mvpBrokenBond.end();++pos) mLLKDeriv += pos->first->GetDeriv(mDerivXYZ,true);
+      for(map<const MolBondAngle*,REAL>::const_iterator pos=this->mvpBrokenBondAngle.begin();
+          pos!=this->mvpBrokenBondAngle.end();++pos) mLLKDeriv += pos->first->GetDeriv(mDerivXYZ,true);
+      for(map<const MolDihedralAngle*,REAL>::const_iterator pos=this->mvpBrokenDihedralAngle.begin();
+          pos!=this->mvpBrokenDihedralAngle.end();++pos) mLLKDeriv += pos->first->GetDeriv(mDerivXYZ,true);
 }
 
 void StretchModeBondLength::Print(ostream &os,bool full)const
@@ -1213,7 +1296,7 @@ void StretchModeBondLength::Print(ostream &os,bool full)const
    cout<<mpAtom0->GetName()<<"-"<<mpAtom1->GetName();
    if(full)
    {
-      cout<<"Translated Atoms:";
+      cout<<", Translated Atoms:";
       for(set<MolAtom*>::const_iterator atom=mvTranslatedAtomList.begin();
           atom!=mvTranslatedAtomList.end();++atom)
       {
@@ -1222,51 +1305,84 @@ void StretchModeBondLength::Print(ostream &os,bool full)const
    }
 }
 
+void StretchModeBondLength::Stretch(const REAL amplitude)
+{
+   REAL dx=mpAtom1->GetX()-mpAtom0->GetX();
+   REAL dy=mpAtom1->GetY()-mpAtom0->GetY();
+   REAL dz=mpAtom1->GetZ()-mpAtom0->GetZ();
+   const REAL l=sqrt(dx*dx+dy*dy+dz*dz);
+   if(l<1e-6) return;// :KLUDGE:
+   const REAL change=amplitude/l;
+   dx*=change;
+   dy*=change;
+   dz*=change;
+   mpMol->TranslateAtomGroup(mvTranslatedAtomList,dx,dy,dz,true);
+}
+
+void StretchModeBondLength::RandomStretch(const REAL amplitude)
+{
+   mpMol->BondLengthRandomChange(*this,amplitude,true);
+}
+
 StretchModeBondAngle::StretchModeBondAngle(MolAtom &at0,MolAtom &at1,MolAtom &at2,
                                            const MolBondAngle *pBondAngle):
-mpAtom0(&at0),mpAtom1(&at1),mpAtom2(&at2),mpBondAngle(pBondAngle),
-mBaseRotationAmplitude(M_PI*0.02)
-{}
+mpAtom0(&at0),mpAtom1(&at1),mpAtom2(&at2),mpBondAngle(pBondAngle)
+{
+   mBaseAmplitude=M_PI*0.02;
+   mpMol = &(at1.GetMolecule());
+}
+
+StretchModeBondAngle::~StretchModeBondAngle(){}
 
 void StretchModeBondAngle::CalcDeriv()const
 {
-   const REAL x1=mpAtom1->GetX(),
-              y1=mpAtom1->GetY(),
-              z1=mpAtom1->GetZ();
-   
-   const REAL dx10=mpAtom0->GetX()-x1,
-              dy10=mpAtom0->GetY()-y1,
-              dz10=mpAtom0->GetZ()-z1,
-              dx12=mpAtom2->GetX()-x1,
-              dy12=mpAtom2->GetY()-y1,
-              dz12=mpAtom2->GetZ()-z1;
-   
-   REAL vx=dy10*dz12-dz10*dy12,
-        vy=dz10*dx12-dx10*dz12,
-        vz=dx10*dy12-dy10*dx12;
-   //const REAL n=sqrt((dx10*dx10+dy10*dy10+dz10*dz10)*(dx12*dx12+dy12*dy12+dz12*dz12))+1e-10;
-   const REAL n=sqrt(vx*vx+vy*vy+vz*vz)+1e-10;
-   vx/=n;
-   vy/=n;
-   vz/=n;
-   
-   if(n<1e-6)
-   {
-      mDerivXYZ.clear();
-      return;//:KLUDGE: ?
-   }
-   
-   for(set<MolAtom *>::const_iterator pos=mvRotatedAtomList.begin();
-       pos!=mvRotatedAtomList.end();++pos)
-   {
-      XYZ *const p=&(mDerivXYZ[*pos]);
-      const REAL x=(*pos)->GetX()-x1,
-                 y=(*pos)->GetY()-y1,
-                 z=(*pos)->GetZ()-z1;
-      p->x=z*vy-y*vz;
-      p->y=x*vz-z*vx;
-      p->z=y*vx-x*vy;
-   }
+   // Derivative of the atomic positions
+      const REAL x1=mpAtom1->GetX(),
+                 y1=mpAtom1->GetY(),
+                 z1=mpAtom1->GetZ();
+
+      const REAL dx10=mpAtom0->GetX()-x1,
+                 dy10=mpAtom0->GetY()-y1,
+                 dz10=mpAtom0->GetZ()-z1,
+                 dx12=mpAtom2->GetX()-x1,
+                 dy12=mpAtom2->GetY()-y1,
+                 dz12=mpAtom2->GetZ()-z1;
+
+      REAL vx=dy10*dz12-dz10*dy12,
+           vy=dz10*dx12-dx10*dz12,
+           vz=dx10*dy12-dy10*dx12;
+      //const REAL n=sqrt((dx10*dx10+dy10*dy10+dz10*dz10)*(dx12*dx12+dy12*dy12+dz12*dz12))+1e-10;
+      const REAL n=sqrt(vx*vx+vy*vy+vz*vz)+1e-10;
+      vx/=n;
+      vy/=n;
+      vz/=n;
+
+      if(n<1e-6)
+      {
+         mDerivXYZ.clear();
+         return;//:KLUDGE: ?
+      }
+
+      for(set<MolAtom *>::const_iterator pos=mvRotatedAtomList.begin();
+          pos!=mvRotatedAtomList.end();++pos)
+      {
+         XYZ *const p=&(mDerivXYZ[*pos]);
+         const REAL x=(*pos)->GetX()-x1,
+                    y=(*pos)->GetY()-y1,
+                    z=(*pos)->GetZ()-z1;
+         p->x=z*vy-y*vz;
+         p->y=x*vz-z*vx;
+         p->z=y*vx-x*vy;
+      }
+   // Derivative of the LLK
+      mLLKDeriv=0;
+      for(map<const MolBond*,REAL>::const_iterator pos=this->mvpBrokenBond.begin();
+          pos!=this->mvpBrokenBond.end();++pos) mLLKDeriv += pos->first->GetDeriv(mDerivXYZ,true);
+      for(map<const MolBondAngle*,REAL>::const_iterator pos=this->mvpBrokenBondAngle.begin();
+          pos!=this->mvpBrokenBondAngle.end();++pos) mLLKDeriv += pos->first->GetDeriv(mDerivXYZ,true);
+      for(map<const MolDihedralAngle*,REAL>::const_iterator pos=this->mvpBrokenDihedralAngle.begin();
+          pos!=this->mvpBrokenDihedralAngle.end();++pos) mLLKDeriv += pos->first->GetDeriv(mDerivXYZ,true);
+
 }
 
 void StretchModeBondAngle::Print(ostream &os,bool full)const
@@ -1274,7 +1390,7 @@ void StretchModeBondAngle::Print(ostream &os,bool full)const
    cout<<mpAtom0->GetName()<<"-"<<mpAtom1->GetName()<<"-"<<mpAtom2->GetName();
    if(full)
    {
-      cout<<"Rotated Atoms:";
+      cout<<", Rotated Atoms:";
       for(set<MolAtom*>::const_iterator atom=mvRotatedAtomList.begin();
           atom!=mvRotatedAtomList.end();++atom)
       {
@@ -1283,39 +1399,72 @@ void StretchModeBondAngle::Print(ostream &os,bool full)const
    }
 }
 
+void StretchModeBondAngle::Stretch(const REAL amplitude)
+{
+   REAL dx10=mpAtom0->GetX()-mpAtom1->GetX();
+   REAL dy10=mpAtom0->GetY()-mpAtom1->GetY();
+   REAL dz10=mpAtom0->GetZ()-mpAtom1->GetZ();
+   REAL dx12=mpAtom2->GetX()-mpAtom1->GetX();
+   REAL dy12=mpAtom2->GetY()-mpAtom1->GetY();
+   REAL dz12=mpAtom2->GetZ()-mpAtom1->GetZ();
+   
+   const REAL vx=dy10*dz12-dz10*dy12;
+   const REAL vy=dz10*dx12-dx10*dz12;
+   const REAL vz=dx10*dy12-dy10*dx12;
+   mpMol->RotateAtomGroup(*mpAtom1,vx,vy,vz,mvRotatedAtomList,amplitude,true);
+}
+
+void StretchModeBondAngle::RandomStretch(const REAL amplitude)
+{
+   mpMol->BondAngleRandomChange(*this,amplitude,true);
+}
+
 StretchModeTorsion::StretchModeTorsion(MolAtom &at1,MolAtom &at2,
                                        const MolDihedralAngle *pAngle):
-mpAtom1(&at1),mpAtom2(&at2),mpDihedralAngle(pAngle),
-mBaseRotationAmplitude(M_PI*0.02)
-{}
+mpAtom1(&at1),mpAtom2(&at2),mpDihedralAngle(pAngle)
+{
+   mBaseAmplitude=M_PI*0.02;
+   mpMol = &(at1.GetMolecule());
+}
+
+StretchModeTorsion::~StretchModeTorsion(){}
 
 void StretchModeTorsion::CalcDeriv()const
 {
-   mDerivXYZ.clear();
-   const REAL x1=mpAtom1->GetX(),
-              y1=mpAtom1->GetY(),
-              z1=mpAtom1->GetZ();
-   
-   REAL vx=mpAtom2->GetX()-x1,
-        vy=mpAtom2->GetY()-y1,
-        vz=mpAtom2->GetZ()-z1;
+   // Derivative of the LLK
+   //mDerivXYZ.clear();
+      const REAL x1=mpAtom1->GetX(),
+                 y1=mpAtom1->GetY(),
+                 z1=mpAtom1->GetZ();
 
-   const REAL n=sqrt(vx*vx+vy*vy+vz*vz)+1e-10;
-   vx/=n;
-   vy/=n;
-   vz/=n;
+      REAL vx=mpAtom2->GetX()-x1,
+           vy=mpAtom2->GetY()-y1,
+           vz=mpAtom2->GetZ()-z1;
 
-   for(set<MolAtom *>::const_iterator pos=mvRotatedAtomList.begin();
-       pos!=mvRotatedAtomList.end();++pos)
-   {
-      XYZ *const p=&(mDerivXYZ[*pos]);
-      const REAL x=(*pos)->GetX()-x1,
-                 y=(*pos)->GetY()-y1,
-                 z=(*pos)->GetZ()-z1;
-      p->x=z*vy-y*vz;
-      p->y=x*vz-z*vx;
-      p->z=y*vx-x*vy;
-   }
+      const REAL n=sqrt(vx*vx+vy*vy+vz*vz)+1e-10;
+      vx/=n;
+      vy/=n;
+      vz/=n;
+
+      for(set<MolAtom *>::const_iterator pos=mvRotatedAtomList.begin();
+          pos!=mvRotatedAtomList.end();++pos)
+      {
+         XYZ *const p=&(mDerivXYZ[*pos]);
+         const REAL x=(*pos)->GetX()-x1,
+                    y=(*pos)->GetY()-y1,
+                    z=(*pos)->GetZ()-z1;
+         p->x=z*vy-y*vz;
+         p->y=x*vz-z*vx;
+         p->z=y*vx-x*vy;
+      }
+   // Derivative of the LLK
+      mLLKDeriv=0;
+      for(map<const MolBond*,REAL>::const_iterator pos=this->mvpBrokenBond.begin();
+          pos!=this->mvpBrokenBond.end();++pos) mLLKDeriv += pos->first->GetDeriv(mDerivXYZ,true);
+      for(map<const MolBondAngle*,REAL>::const_iterator pos=this->mvpBrokenBondAngle.begin();
+          pos!=this->mvpBrokenBondAngle.end();++pos) mLLKDeriv += pos->first->GetDeriv(mDerivXYZ,true);
+      for(map<const MolDihedralAngle*,REAL>::const_iterator pos=this->mvpBrokenDihedralAngle.begin();
+          pos!=this->mvpBrokenDihedralAngle.end();++pos) mLLKDeriv += pos->first->GetDeriv(mDerivXYZ,true);
 }
 
 void StretchModeTorsion::Print(ostream &os,bool full)const
@@ -1323,7 +1472,7 @@ void StretchModeTorsion::Print(ostream &os,bool full)const
    cout<<mpAtom1->GetName()<<"-"<<mpAtom2->GetName();
    if(full)
    {
-      cout<<"Rotated Atoms:";
+      cout<<", Rotated Atoms:";
       for(set<MolAtom*>::const_iterator atom=mvRotatedAtomList.begin();
           atom!=mvRotatedAtomList.end();++atom)
       {
@@ -1332,6 +1481,41 @@ void StretchModeTorsion::Print(ostream &os,bool full)const
    }
 }
 
+void StretchModeTorsion::Stretch(const REAL amplitude)
+{
+   mpMol->RotateAtomGroup(*mpAtom1,*mpAtom2,mvRotatedAtomList,amplitude,true);
+}
+
+void StretchModeTorsion::RandomStretch(const REAL amplitude)
+{
+   mpMol->DihedralAngleRandomChange(*this,amplitude,true);
+}
+
+
+//######################################################################
+//
+//      StretchModeTwist
+//
+//######################################################################
+StretchModeTwist::StretchModeTwist(MolAtom &at1,MolAtom &at2):
+mpAtom1(&at1),mpAtom2(&at2)
+{
+   mpMol = &(at1.GetMolecule());
+}
+
+StretchModeTwist::~StretchModeTwist(){}
+
+void StretchModeTwist::CalcDeriv()const
+{}
+
+void StretchModeTwist::Print(ostream &os,bool full)const
+{}
+
+void StretchModeTwist::Stretch(const REAL amplitude)
+{}
+
+void StretchModeTwist::RandomStretch(const REAL amplitude)
+{}
 
 //######################################################################
 //
@@ -1745,6 +1929,7 @@ void Molecule::BeginOptimization(const bool allowApproximations,const bool enabl
       this->BuildStretchModeBondAngle();
       this->BuildStretchModeTorsion();
       this->TuneGlobalOptimRotationAmplitude();
+      this->BuildStretchModeGroups();
    }
    this->RefinableObj::BeginOptimization(allowApproximations,enableRestraints);
    mRandomConformChangeNbTest=0;
@@ -1833,105 +2018,181 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
    TAU_PROFILE_START(timer1);
    VFN_DEBUG_ENTRY("Molecule::GlobalOptRandomMove()",4)
    mClockScatterer.Click();
-   if(mOptimizeOrientation.GetChoice()==0)
-   {//Rotate around an arbitrary vector
-      static const REAL amp=mBaseRotationAmplitude/(REAL)RAND_MAX;
-      REAL mult=1.0;
-      if((1==mFlexModel.GetChoice())||(mvRotorGroupTorsion.size()<2)) mult=2.0;
-      mQuat *= Quaternion::RotationQuaternion
-                  ((2.*(REAL)rand()-(REAL)RAND_MAX)*amp*mutationAmplitude*mult,
-                   (REAL)rand(),(REAL)rand(),(REAL)rand());
-      mQuat.Normalize();
-      mClockOrientation.Click();
-   }
-   // Occupancy
-   if(gpRefParTypeScattOccup->IsDescendantFromOrSameAs(type))
-      this->RefinableObj::GlobalOptRandomMove(mutationAmplitude,gpRefParTypeScattOccup);
-   mRandomMoveIsDone=false;
-   //translation
-   if(gpRefParTypeScattTransl->IsDescendantFromOrSameAs(type))
-      this->RefinableObj::GlobalOptRandomMove(mutationAmplitude,gpRefParTypeScattTransl);
-   mRandomMoveIsDone=false;
-   TAU_PROFILE_STOP(timer1);
-   if(gpRefParTypeScattConform->IsDescendantFromOrSameAs(type))
+   
+   // From time to time, just do one flip
+   if(  (mFlexModel.GetChoice()!=1)
+      &&(gpRefParTypeScattConform->IsDescendantFromOrSameAs(type))
+      &&(mvFlipGroup.size()>0)
+      &&(((rand()%100)==0)))
    {
-      if(mFlexModel.GetChoice()!=1)
+      this->SaveParamSet(mLocalParamSet);
+      const REAL llk0=this->GetLogLikelihood();
+      const unsigned long i=rand() % mvFlipGroup.size();
+      list<FlipGroup>::iterator posFlip=mvFlipGroup.begin();
+      for(unsigned long j=0;j<i;++j)++posFlip;
+      this->FlipAtomGroup(*posFlip);
+      if((this->GetLogLikelihood()-llk0)>100) this->RestoreParamSet(mLocalParamSet);
+   }
+   else
+   {
+      if(mOptimizeOrientation.GetChoice()==0)
+      {//Rotate around an arbitrary vector
+         static const REAL amp=mBaseRotationAmplitude/(REAL)RAND_MAX;
+         REAL mult=1.0;
+         if((1==mFlexModel.GetChoice())||(mvRotorGroupTorsion.size()<2)) mult=2.0;
+         mQuat *= Quaternion::RotationQuaternion
+                     ((2.*(REAL)rand()-(REAL)RAND_MAX)*amp*mutationAmplitude*mult,
+                      (REAL)rand(),(REAL)rand(),(REAL)rand());
+         mQuat.Normalize();
+         mClockOrientation.Click();
+      }
+      // Occupancy
+      if(gpRefParTypeScattOccup->IsDescendantFromOrSameAs(type))
+         this->RefinableObj::GlobalOptRandomMove(mutationAmplitude,gpRefParTypeScattOccup);
+      mRandomMoveIsDone=false;
+      //translation
+      if(gpRefParTypeScattTransl->IsDescendantFromOrSameAs(type))
+         this->RefinableObj::GlobalOptRandomMove(mutationAmplitude,gpRefParTypeScattTransl);
+      mRandomMoveIsDone=false;
+      TAU_PROFILE_STOP(timer1);
+      if(gpRefParTypeScattConform->IsDescendantFromOrSameAs(type))
       {
-         TAU_PROFILE_START(timer2);
-         #if 0
-         if(((rand()%20)==0)&&(mvFlipGroup.size()>0))
-         {// Try a flip from time to time
-            const unsigned long i=rand() % mvFlipGroup.size();
-            posFlip=mvFlipGroup.begin();
-            for(unsigned long j=0;j<i;++j)++posFlip;
-            #if 0
-            // If seems to break restraints, don't try it too often.
-            if(posFlip->mNbTest>100)
-               if(  (((REAL)(posFlip->mNbAccept)/(REAL)(posFlip->mNbTest))<0.1)
-                  &&((rand()%10)!=0)) break;
-            posFlip->mNbTest++;
-            if((rand()%1000)==0)
-               for(list<FlipGroup>::const_iterator pos=mvFlipGroup.begin();
-                   pos!=mvFlipGroup.end();++pos)
+         if(mFlexModel.GetChoice()!=1)
+         {
+            #if 0 // For tests
+            mLogLikelihood=0;
+            for(vector<MolBond*>::const_iterator pos=mvpBond.begin();pos!=mvpBond.end();++pos)
+               mLogLikelihood+=(*pos)->GetLogLikelihood(true,true);
+            for(vector<MolBondAngle*>::const_iterator pos=mvpBondAngle.begin();pos!=mvpBondAngle.end();++pos)
+               mLogLikelihood+=(*pos)->GetLogLikelihood(true,true);
+            for(vector<MolDihedralAngle*>::const_iterator pos=mvpDihedralAngle.begin();pos!=mvpDihedralAngle.end();++pos)
+               mLogLikelihood+=(*pos)->GetLogLikelihood(true,true);
+            for(list<StretchMode*>::const_iterator mode=mvpStretchModeNotFree.begin();
+                mode!=mvpStretchModeNotFree.end();++mode)
+            {
+               //if((rand()%3)==0)
                {
-                  //cout <<"Flip group with respect to: "
-                  //     <<pos->mpAtom1->GetName()<<"-"
-                  //     <<pos->mpAtom0->GetName()<<"-"
-                  //     <<pos->mpAtom2->GetName()<<" : ";
-                  //for(list<pair<const MolAtom *,set<MolAtom *> > >::const_iterator 
-                  //    chain=pos->mvRotatedChainList.begin();
-                  //    chain!=pos->mvRotatedChainList.end();++chain)
-                  //{
-                  //   cout<<"    -"<<chain->first->GetName()<<":";
-                  //   for(set<MolAtom *>::iterator pos1=chain->second.begin();
-                  //       pos1!=chain->second.end();++pos1)
-                  //      cout<<mvpAtom[*pos1]->GetName()<<"  ";
-                  //}
-                  //cout<<"accept="<<pos->mNbAccept<<"/"<<pos->mNbTest<<endl;
+                  // 2) Get the derivative of the overall LLK for this mode
+                  (*mode)->CalcDeriv();
+                  REAL llk=0;
+                  for(map<const MolBond*,REAL>::const_iterator pos=(*mode)->mvpBrokenBond.begin();
+                      pos!=(*mode)->mvpBrokenBond.end();++pos) llk+=pos->first->GetLogLikelihood(false,false);
+                  for(map<const MolBondAngle*,REAL>::const_iterator pos=(*mode)->mvpBrokenBondAngle.begin();
+                      pos!=(*mode)->mvpBrokenBondAngle.end();++pos) llk+=pos->first->GetLogLikelihood(false,false);
+                  for(map<const MolDihedralAngle*,REAL>::const_iterator pos=(*mode)->mvpBrokenDihedralAngle.begin();
+                      pos!=(*mode)->mvpBrokenDihedralAngle.end();++pos) llk+=pos->first->GetLogLikelihood(false,false);
+                  // 3) Calculate MD move. base step =0.1 A (accelerated moves may go faster)
+                  REAL change=(2.*(REAL)rand()-(REAL)RAND_MAX)/(REAL)RAND_MAX;
+                  // if llk>100, change has to be in the opposite direction
+                  // For a single restraint, sqrt(llk)=dx/sigma, so do not go above 10*sigma
+                  if((*mode)->mLLKDeriv>0)
+                  {
+                     change -= 0.3*sqrt(llk);
+                     if(change<-1) change=-1;
+                  }
+                  else
+                  {
+                     change += 0.3*sqrt(llk);
+                     if(change>1) change=1;
+                  }
+                  (*mode)->Print(cout);
+                  change *= mutationAmplitude * (*mode)->mBaseAmplitude;
+                  cout <<"      Change="<<change<<" (dLLK= "<<(*mode)->mLLKDeriv<<"), llk= "<<llk<<"     ?->"<<llk+(*mode)->mLLKDeriv*change<<endl;
+                  //change *= mutationAmplitude * (*mode)->mBaseAmplitude;
+                  (*mode)->Stretch(change);
+                  llk=0;
+                  //(*mode)->RandomStretch(change * mutationAmplitude * (*mode)->mBaseAmplitude);
+                  for(map<const MolBond*,REAL>::const_iterator pos=(*mode)->mvpBrokenBond.begin();
+                      pos!=(*mode)->mvpBrokenBond.end();++pos) 
+                  {
+                      cout<<"      "<<pos->first->GetName()<<", llk= "<<pos->first->GetLogLikelihood(false,false)
+                          <<"   ?->"<<pos->first->GetLogLikelihood(false,false)+pos->first->GetDeriv((*mode)->mDerivXYZ,true)*change
+                          <<"?   (deriv="<<pos->first->GetDeriv((*mode)->mDerivXYZ)<<", "<<pos->first->GetDeriv((*mode)->mDerivXYZ,true);
+                      cout<<")  ->" <<pos->first->GetLogLikelihood()<<endl;
+                     llk+=pos->first->GetLogLikelihood(false,false);
+                  }
+                  for(map<const MolBondAngle*,REAL>::const_iterator pos=(*mode)->mvpBrokenBondAngle.begin();
+                      pos!=(*mode)->mvpBrokenBondAngle.end();++pos) 
+                  {
+                      cout<<"      "<<pos->first->GetName()<<", llk= "<<pos->first->GetLogLikelihood(false,false)
+                          <<"   ?->"<<pos->first->GetLogLikelihood(false,false)+pos->first->GetDeriv((*mode)->mDerivXYZ,true)*change
+                          <<"?   (deriv="<<pos->first->GetDeriv((*mode)->mDerivXYZ)<<", "<<pos->first->GetDeriv((*mode)->mDerivXYZ,true);
+                      cout<<")  ->" <<pos->first->GetLogLikelihood()<<endl;
+                     llk+=pos->first->GetLogLikelihood(false,false);
+                  }
+                  for(map<const MolDihedralAngle*,REAL>::const_iterator pos=(*mode)->mvpBrokenDihedralAngle.begin();
+                      pos!=(*mode)->mvpBrokenDihedralAngle.end();++pos) 
+                  {
+                      cout<<"      "<<pos->first->GetName()<<", llk= "<<pos->first->GetLogLikelihood(false,false)
+                          <<"   ?->"<<pos->first->GetLogLikelihood(false,false)+pos->first->GetDeriv((*mode)->mDerivXYZ,true)*change
+                          <<"?   (deriv="<<pos->first->GetDeriv((*mode)->mDerivXYZ)<<", "<<pos->first->GetDeriv((*mode)->mDerivXYZ,true);
+                      cout<<")  ->" <<pos->first->GetLogLikelihood()<<endl;
+                     llk+=pos->first->GetLogLikelihood(false,false);
+                  }
+                  cout <<" -> "<<llk<<endl;
                }
+            }
+            #else
+            // First move free Stretch modes
+            TAU_PROFILE_START(timer2);
+            for(list<StretchMode*>::iterator mode=mvpStretchModeFree.begin();
+                mode!=mvpStretchModeFree.end();++mode)
+            {
+               if((rand()%2)==0) (*mode)->RandomStretch(mutationAmplitude);
+            }
+            TAU_PROFILE_STOP(timer2);
+            if((rand()%3)==0)
+            {
+               // Now do an hybrid move for other modes, with a smaller amplitude (<=0.5)
+               // 1) Calc LLK and derivatives for restraints
+               mLogLikelihood=0;
+               TAU_PROFILE_START(timer3);
+               for(vector<MolBond*>::const_iterator pos=mvpBond.begin();pos!=mvpBond.end();++pos)
+                  mLogLikelihood+=(*pos)->GetLogLikelihood(true,true);
+               for(vector<MolBondAngle*>::const_iterator pos=mvpBondAngle.begin();pos!=mvpBondAngle.end();++pos)
+                  mLogLikelihood+=(*pos)->GetLogLikelihood(true,true);
+               for(vector<MolDihedralAngle*>::const_iterator pos=mvpDihedralAngle.begin();pos!=mvpDihedralAngle.end();++pos)
+                  mLogLikelihood+=(*pos)->GetLogLikelihood(true,true);
+               TAU_PROFILE_STOP(timer3);
+
+               TAU_PROFILE_START(timer4);
+               for(list<StretchMode*>::const_iterator mode=mvpStretchModeNotFree.begin();
+                   mode!=mvpStretchModeNotFree.end();++mode)
+               {
+                  // 2) Choose Stretch modes
+                  if((rand()%3)==0)
+                  {
+                     // 2) Get the derivative of the overall LLK for this mode
+                     (*mode)->CalcDeriv();
+                     REAL llk=0;
+                     for(map<const MolBond*,REAL>::const_iterator pos=(*mode)->mvpBrokenBond.begin();
+                         pos!=(*mode)->mvpBrokenBond.end();++pos) llk+=pos->first->GetLogLikelihood(false,false);
+                     for(map<const MolBondAngle*,REAL>::const_iterator pos=(*mode)->mvpBrokenBondAngle.begin();
+                         pos!=(*mode)->mvpBrokenBondAngle.end();++pos) llk+=pos->first->GetLogLikelihood(false,false);
+                     for(map<const MolDihedralAngle*,REAL>::const_iterator pos=(*mode)->mvpBrokenDihedralAngle.begin();
+                         pos!=(*mode)->mvpBrokenDihedralAngle.end();++pos) llk+=pos->first->GetLogLikelihood(false,false);
+                     REAL change=(2.*(REAL)rand()-(REAL)RAND_MAX)/(REAL)RAND_MAX;
+                     // if llk>100, change has to be in the direction minimising the llk
+                     if((*mode)->mLLKDeriv>0)
+                     {
+                        change -= 0.01*llk;
+                        if(change<-1) change=-1;
+                     }
+                     else
+                     {
+                        change += 0.01*llk;
+                        if(change>1) change=1;
+                     }
+                     if(mutationAmplitude<0.5) change *= mutationAmplitude * (*mode)->mBaseAmplitude;
+                     else change *= 0.5 * (*mode)->mBaseAmplitude;
+                     (*mode)->Stretch(change);
+                  }
+               }
+               TAU_PROFILE_STOP(timer4);
+            }
+            mClockLogLikelihood.Click();
             #endif
-            this->FlipAtomGroup(*posFlip);
-            doneFlip=true;
          }
-         #endif
-         // We are stretching one in $mod mode
-         const unsigned long modBond   =1;//1+mvStretchModeBondLength.size()/5;
-         const unsigned long modAngle  =2;//1+mvStretchModeBondAngle.size() /5;
-         const unsigned long modTorsion=2;//1+mvStretchModeTorsion.size()   /5;
-         //cout<<modBond<<","<<modAngle<<","<<modTorsion<<endl;
-         if(((rand()%20)==0)&&(mvFlipGroup.size()>0))
-         {// Try a flip from time to time
-            const unsigned long i=rand() % mvFlipGroup.size();
-            list<FlipGroup>::iterator posFlip=mvFlipGroup.begin();
-            for(unsigned long j=0;j<i;++j)++posFlip;
-            this->FlipAtomGroup(*posFlip);
-         }
-         TAU_PROFILE_STOP(timer2);
-         TAU_PROFILE_START(timer3);
-         for(list<StretchModeBondLength>::const_iterator pos=mvStretchModeBondLength.begin();
-             pos!=mvStretchModeBondLength.end();++pos)
-         {
-            if((rand()%modBond)==0)
-               this->BondLengthRandomChange(*pos,mutationAmplitude,true);
-         }
-         TAU_PROFILE_STOP(timer3);
-         TAU_PROFILE_START(timer4);
-         for(list<StretchModeBondAngle>::const_iterator pos=mvStretchModeBondAngle.begin();
-             pos!=mvStretchModeBondAngle.end();++pos)
-         {
-            if((rand()%modAngle)==0) 
-               this->BondAngleRandomChange(*pos,mutationAmplitude,true);
-         }
-         TAU_PROFILE_STOP(timer4);
-         TAU_PROFILE_START(timer5);
-         for(list<StretchModeTorsion>::const_iterator
-               pos=mvStretchModeTorsion.begin();
-             pos!=mvStretchModeTorsion.end();++pos)
-         {
-            if((rand()%modTorsion)==0) 
-               this->DihedralAngleRandomChange(*pos,mutationAmplitude,true);
-         }
-         TAU_PROFILE_STOP(timer5);
       }
    }
    if((rand()%100)==0)
@@ -3295,12 +3556,12 @@ REAL Molecule::BondAngleRandomChange(const StretchModeBondAngle& mode, const REA
       const REAL delta=mode.mpBondAngle->GetAngleDelta();
       if(sigma<1e-6)
       {
-         REAL a1=a0+(REAL)(2*rand()-RAND_MAX)/(REAL)RAND_MAX*amplitude*mode.mBaseRotationAmplitude;
+         REAL a1=a0+(REAL)(2*rand()-RAND_MAX)/(REAL)RAND_MAX*amplitude*mode.mBaseAmplitude;
          if(a1> delta)a1= delta;
          if(a1<-delta)a1=-delta;
          change=a1-a0;
       }
-      else change=LorentzianBiasedRandomMove(a0,sigma,delta,amplitude*mode.mBaseRotationAmplitude)-a0;
+      else change=LorentzianBiasedRandomMove(a0,sigma,delta,amplitude*mode.mBaseAmplitude)-a0;
       if((a0+change)>(delta+sigma*5.0))       change= delta+sigma*5.0-a0;
       else if((a0+change)<(-delta-sigma*5.0)) change=-delta-sigma*5.0-a0;
       #if 0
@@ -3315,7 +3576,7 @@ REAL Molecule::BondAngleRandomChange(const StretchModeBondAngle& mode, const REA
       }
       #endif
    }
-   else change=(2.*(REAL)rand()-(REAL)RAND_MAX)/(REAL)RAND_MAX*mode.mBaseRotationAmplitude*amplitude;
+   else change=(2.*(REAL)rand()-(REAL)RAND_MAX)/(REAL)RAND_MAX*mode.mBaseAmplitude*amplitude;
    this->RotateAtomGroup(*(mode.mpAtom1),vx,vy,vz,mode.mvRotatedAtomList,change,true);
    return change;
 }
@@ -3335,12 +3596,12 @@ REAL Molecule::DihedralAngleRandomChange(const StretchModeTorsion& mode, const R
       const REAL delta=mode.mpDihedralAngle->GetAngleDelta();
       if(sigma<1e-6)
       {
-         REAL a1=a0+(REAL)(2*rand()-RAND_MAX)/(REAL)RAND_MAX*amplitude*mode.mBaseRotationAmplitude;
+         REAL a1=a0+(REAL)(2*rand()-RAND_MAX)/(REAL)RAND_MAX*amplitude*mode.mBaseAmplitude;
          if(a1> delta)a1= delta;
          if(a1<-delta)a1=-delta;
          change=a1-a0;
       }
-      else change=LorentzianBiasedRandomMove(a0,sigma,delta,amplitude*mode.mBaseRotationAmplitude)-a0;
+      else change=LorentzianBiasedRandomMove(a0,sigma,delta,amplitude*mode.mBaseAmplitude)-a0;
       if((a0+change)>(delta+sigma*5.0))       change= delta+sigma*5.0-a0;
       else if((a0+change)<(-delta-sigma*5.0)) change=-delta-sigma*5.0-a0;
       #if 0
@@ -3355,7 +3616,7 @@ REAL Molecule::DihedralAngleRandomChange(const StretchModeTorsion& mode, const R
       }
       #endif
    }
-   else change=(REAL)(2.*rand()-RAND_MAX)/(REAL)RAND_MAX*mode.mBaseRotationAmplitude*amplitude;
+   else change=(REAL)(2.*rand()-RAND_MAX)/(REAL)RAND_MAX*mode.mBaseAmplitude*amplitude;
    this->RotateAtomGroup(*(mode.mpAtom1),*(mode.mpAtom2),mode.mvRotatedAtomList,change,true);
    return change;
 }
@@ -3825,6 +4086,20 @@ void Molecule::BuildStretchModeBondLength()
                   break;//we translate exactly half of the atoms, so skip the other half
       }
    }
+   
+   // Generate 5 completely random atomic positions
+      this->SaveParamSet(mLocalParamSet);
+      unsigned long paramSetRandom[5];
+      for(unsigned long i=0;i<5;++i)
+      {
+         for(vector<MolAtom*>::iterator pos=mvpAtom.begin();pos!=mvpAtom.end();++pos)
+         {
+            (*pos)->SetX(100.*rand()/(REAL) RAND_MAX);
+            (*pos)->SetY(100.*rand()/(REAL) RAND_MAX);
+            (*pos)->SetZ(100.*rand()/(REAL) RAND_MAX);
+         }
+         paramSetRandom[i]=this->CreateParamSet();
+      }
    // find bond, bond angles and dihedral angles broken by each mode
    for(list<StretchModeBondLength>::iterator pos=mvStretchModeBondLength.begin();
        pos!=mvStretchModeBondLength.end();)
@@ -3844,10 +4119,15 @@ void Molecule::BuildStretchModeBondLength()
       #endif
       for(vector<MolBond*>::const_iterator r=mvpBond.begin();r!=mvpBond.end();++r)
       {
-         if(*r==pos->mpBond) continue;
+         // if(*r==pos->mpBond) continue;
          (*r)->GetLogLikelihood(true);
-         const REAL d=(*r)->GetDeriv(pos->mDerivXYZ);
-         if(abs(d)>0.01)
+         REAL d=0;
+         for(unsigned long i=0;i<5;++i)
+         {
+            this->RestoreParamSet(paramSetRandom[i]);
+            d += abs((*r)->GetDeriv(pos->mDerivXYZ));
+         }
+         if(d>0.01)
          {
             pos->mvpBrokenBond.insert(make_pair(*r,0));
             #ifdef __DEBUG__
@@ -3858,7 +4138,12 @@ void Molecule::BuildStretchModeBondLength()
       for(vector<MolBondAngle*>::const_iterator r=mvpBondAngle.begin();r!=mvpBondAngle.end();++r)
       {
          (*r)->GetLogLikelihood(true);
-         const REAL d=(*r)->GetDeriv(pos->mDerivXYZ);
+         REAL d=0;
+         for(unsigned long i=0;i<5;++i)
+         {
+            this->RestoreParamSet(paramSetRandom[i]);
+            d += abs((*r)->GetDeriv(pos->mDerivXYZ));
+         }
          if(abs(d)>0.01)
          {
             pos->mvpBrokenBondAngle.insert(make_pair(*r,0));
@@ -3871,7 +4156,12 @@ void Molecule::BuildStretchModeBondLength()
           r!=mvpDihedralAngle.end();++r)
       {
          (*r)->GetLogLikelihood(true);
-         const REAL d=(*r)->GetDeriv(pos->mDerivXYZ);
+         REAL d=0;
+         for(unsigned long i=0;i<5;++i)
+         {
+            this->RestoreParamSet(paramSetRandom[i]);
+            d += abs((*r)->GetDeriv(pos->mDerivXYZ));
+         }
          if(abs(d)>0.01)
          {
             pos->mvpBrokenDihedralAngle.insert(make_pair(*r,0));
@@ -3901,11 +4191,16 @@ void Molecule::BuildStretchModeBondLength()
          }
       }
       if(mFlexModel.GetChoice()==2)
-         if((pos->mvpBrokenBond.size()+pos->mvpBrokenBondAngle.size()+pos->mvpBrokenDihedralAngle.size())>0)
-            keep=false;
+      {
+         int nb=pos->mvpBrokenBond.size()+pos->mvpBrokenBondAngle.size()+pos->mvpBrokenDihedralAngle.size();
+         if(pos->mpBond!=0) nb -= 1;
+         if(nb>0) keep=false;
+      }
       if(keep) ++pos;
       else pos=mvStretchModeBondLength.erase(pos);
    }
+   this->RestoreParamSet(mLocalParamSet);
+   for(unsigned long i=0;i<5;++i) this->ClearParamSet(paramSetRandom[i]);
    
    #if 1
    cout<<"List of Bond Length stretch modes"<<endl;
@@ -4035,6 +4330,19 @@ void Molecule::BuildStretchModeBondAngle()
          }
       }
    }
+   // Generate 5 completely random atomic positions
+      this->SaveParamSet(mLocalParamSet);
+      unsigned long paramSetRandom[5];
+      for(unsigned long i=0;i<5;++i)
+      {
+         for(vector<MolAtom*>::iterator pos=mvpAtom.begin();pos!=mvpAtom.end();++pos)
+         {
+            (*pos)->SetX(100.*rand()/(REAL) RAND_MAX);
+            (*pos)->SetY(100.*rand()/(REAL) RAND_MAX);
+            (*pos)->SetZ(100.*rand()/(REAL) RAND_MAX);
+         }
+         paramSetRandom[i]=this->CreateParamSet();
+      }
    // find bond, bond angles and dihedral angles broken by each mode
    for(list<StretchModeBondAngle>::iterator pos=mvStretchModeBondAngle.begin();
        pos!=mvStretchModeBondAngle.end();)
@@ -4056,7 +4364,12 @@ void Molecule::BuildStretchModeBondAngle()
       for(vector<MolBond*>::const_iterator r=mvpBond.begin();r!=mvpBond.end();++r)
       {
          (*r)->GetLogLikelihood(true);
-         const REAL d=(*r)->GetDeriv(pos->mDerivXYZ);
+         REAL d=0;
+         for(unsigned long i=0;i<5;++i)
+         {
+            this->RestoreParamSet(paramSetRandom[i]);
+            d += abs((*r)->GetDeriv(pos->mDerivXYZ));
+         }
          if(abs(d)>0.01)
          {
             pos->mvpBrokenBond.insert(make_pair(*r,0.0));
@@ -4067,9 +4380,14 @@ void Molecule::BuildStretchModeBondAngle()
       }
       for(vector<MolBondAngle*>::const_iterator r=mvpBondAngle.begin();r!=mvpBondAngle.end();++r)
       {
-         if(*r==pos->mpBondAngle) continue;
+         //if(*r==pos->mpBondAngle) continue;
          (*r)->GetLogLikelihood(true);
-         const REAL d=(*r)->GetDeriv(pos->mDerivXYZ);
+         REAL d=0;
+         for(unsigned long i=0;i<5;++i)
+         {
+            this->RestoreParamSet(paramSetRandom[i]);
+            d += abs((*r)->GetDeriv(pos->mDerivXYZ));
+         }
          if(abs(d)>0.01)
          {
             pos->mvpBrokenBondAngle.insert(make_pair(*r,0.0));
@@ -4082,7 +4400,12 @@ void Molecule::BuildStretchModeBondAngle()
           r!=mvpDihedralAngle.end();++r)
       {
          (*r)->GetLogLikelihood(true);
-         const REAL d=(*r)->GetDeriv(pos->mDerivXYZ);
+         REAL d=0;
+         for(unsigned long i=0;i<5;++i)
+         {
+            this->RestoreParamSet(paramSetRandom[i]);
+            d += abs((*r)->GetDeriv(pos->mDerivXYZ));
+         }
          if(abs(d)>0.01)
          {
             pos->mvpBrokenDihedralAngle.insert(make_pair(*r,0.0));
@@ -4119,11 +4442,17 @@ void Molecule::BuildStretchModeBondAngle()
          }
       }
       if(mFlexModel.GetChoice()==2)
-         if((pos->mvpBrokenBond.size()+pos->mvpBrokenBondAngle.size()+pos->mvpBrokenDihedralAngle.size())>0)
-            keep=false;
+      {
+         int nb=pos->mvpBrokenBond.size()+pos->mvpBrokenBondAngle.size()+pos->mvpBrokenDihedralAngle.size();
+         if(pos->mpBondAngle!=0) nb -= 1;
+         if(nb>0) keep=false;
+      }
       if(keep) ++pos;
       else pos=mvStretchModeBondAngle.erase(pos);
    }
+   this->RestoreParamSet(mLocalParamSet);
+   for(unsigned long i=0;i<5;++i) this->ClearParamSet(paramSetRandom[i]);
+   
    #if 1
    cout<<"List of Bond Angle stretch modes"<<endl;
    for(list<StretchModeBondAngle>::const_iterator pos=mvStretchModeBondAngle.begin();
@@ -4349,6 +4678,19 @@ void Molecule::BuildStretchModeTorsion()
          }
       }
    }
+   // Generate 5 completely random atomic positions
+      this->SaveParamSet(mLocalParamSet);
+      unsigned long paramSetRandom[5];
+      for(unsigned long i=0;i<5;++i)
+      {
+         for(vector<MolAtom*>::iterator pos=mvpAtom.begin();pos!=mvpAtom.end();++pos)
+         {
+            (*pos)->SetX(100.*rand()/(REAL) RAND_MAX);
+            (*pos)->SetY(100.*rand()/(REAL) RAND_MAX);
+            (*pos)->SetZ(100.*rand()/(REAL) RAND_MAX);
+         }
+         paramSetRandom[i]=this->CreateParamSet();
+      }
    // find bond, bond angles and dihedral angles broken by each mode
    for(list<StretchModeTorsion>::iterator pos=mvStretchModeTorsion.begin();
        pos!=mvStretchModeTorsion.end();)
@@ -4369,7 +4711,12 @@ void Molecule::BuildStretchModeTorsion()
       for(vector<MolBond*>::const_iterator r=mvpBond.begin();r!=mvpBond.end();++r)
       {
          (*r)->GetLogLikelihood(true);
-         const REAL d=(*r)->GetDeriv(pos->mDerivXYZ);
+         REAL d=0;
+         for(unsigned long i=0;i<5;++i)
+         {
+            this->RestoreParamSet(paramSetRandom[i]);
+            d += abs((*r)->GetDeriv(pos->mDerivXYZ));
+         }
          if(abs(d)>0.1)
          {
             #ifdef __DEBUG__
@@ -4382,7 +4729,12 @@ void Molecule::BuildStretchModeTorsion()
       for(vector<MolBondAngle*>::const_iterator r=mvpBondAngle.begin();r!=mvpBondAngle.end();++r)
       {
          (*r)->GetLogLikelihood(true);
-         const REAL d=(*r)->GetDeriv(pos->mDerivXYZ);
+         REAL d=0;
+         for(unsigned long i=0;i<5;++i)
+         {
+            this->RestoreParamSet(paramSetRandom[i]);
+            d += abs((*r)->GetDeriv(pos->mDerivXYZ));
+         }
          if(abs(d)>0.01)
          {
             #ifdef __DEBUG__
@@ -4394,9 +4746,14 @@ void Molecule::BuildStretchModeTorsion()
       for(vector<MolDihedralAngle*>::const_iterator r=mvpDihedralAngle.begin();
           r!=mvpDihedralAngle.end();++r)
       {
-         if(*r==pos->mpDihedralAngle) continue;
+         //if(*r==pos->mpDihedralAngle) continue;
          (*r)->GetLogLikelihood(true);
-         const REAL d=(*r)->GetDeriv(pos->mDerivXYZ);
+         REAL d=0;
+         for(unsigned long i=0;i<5;++i)
+         {
+            this->RestoreParamSet(paramSetRandom[i]);
+            d += abs((*r)->GetDeriv(pos->mDerivXYZ));
+         }
          if(abs(d)>0.01)
          {
             #ifdef __DEBUG__
@@ -4433,11 +4790,17 @@ void Molecule::BuildStretchModeTorsion()
          }
       }
       if(mFlexModel.GetChoice()==2)
-         if((pos->mvpBrokenBond.size()+pos->mvpBrokenBondAngle.size()+pos->mvpBrokenDihedralAngle.size())>0)
-            keep=false;
+      {
+         int nb=pos->mvpBrokenBond.size()+pos->mvpBrokenBondAngle.size()+pos->mvpBrokenDihedralAngle.size();
+         if(pos->mpDihedralAngle!=0) nb -= 1;
+         if(nb>0) keep=false;
+      }
       if(keep) ++pos;
       else pos=mvStretchModeTorsion.erase(pos);
    }
+   for(unsigned long i=0;i<5;++i) this->ClearParamSet(paramSetRandom[i]);
+   this->RestoreParamSet(mLocalParamSet);
+   
    #if 1
    cout<<"List of Dihedral Angle stretch modes("<<mvStretchModeTorsion.size()<<")"<<endl;
    for(list<StretchModeTorsion>::const_iterator pos=mvStretchModeTorsion.begin();
@@ -4494,9 +4857,9 @@ void Molecule::TuneGlobalOptimRotationAmplitude()
    // First we store in mBaseRotationAmplitude the cumulated atomic displacement 
    // for nbTest rotations of 0.01 rad
    for(list<StretchModeBondAngle>::iterator pos=mvStretchModeBondAngle.begin();
-       pos!=mvStretchModeBondAngle.end();++pos) pos->mBaseRotationAmplitude=0;
+       pos!=mvStretchModeBondAngle.end();++pos) pos->mBaseAmplitude=0;
    for(list<StretchModeTorsion>::iterator pos=mvStretchModeTorsion.begin();
-       pos!=mvStretchModeTorsion.end();++pos) pos->mBaseRotationAmplitude=0;
+       pos!=mvStretchModeTorsion.end();++pos) pos->mBaseAmplitude=0;
 
    REAL displacement=0;//For the global Molecule rotation
 
@@ -4539,7 +4902,7 @@ void Molecule::TuneGlobalOptimRotationAmplitude()
             dx=x0[i]-mvpAtom[i]->GetX();
             dy=y0[i]-mvpAtom[i]->GetY();
             dz=z0[i]-mvpAtom[i]->GetZ();
-            pos->mBaseRotationAmplitude+=sqrt(dx*dx+dy*dy+dz*dz);
+            pos->mBaseAmplitude+=sqrt(dx*dx+dy*dy+dz*dz);
          }
          this->RotateAtomGroup(*(pos->mpAtom1),vx,vy,vz,pos->mvRotatedAtomList,-0.01,false);
       }
@@ -4552,7 +4915,7 @@ void Molecule::TuneGlobalOptimRotationAmplitude()
             dx=x0[i]-mvpAtom[i]->GetX();
             dy=y0[i]-mvpAtom[i]->GetY();
             dz=z0[i]-mvpAtom[i]->GetZ();
-            pos->mBaseRotationAmplitude+=sqrt(dx*dx+dy*dy+dz*dz);
+            pos->mBaseAmplitude+=sqrt(dx*dx+dy*dy+dz*dz);
          }
          this->RotateAtomGroup(*(pos->mpAtom1),*(pos->mpAtom2),pos->mvRotatedAtomList,-0.01,false);
       }
@@ -4578,33 +4941,33 @@ void Molecule::TuneGlobalOptimRotationAmplitude()
    for(list<StretchModeBondAngle>::iterator pos=mvStretchModeBondAngle.begin();
        pos!=mvStretchModeBondAngle.end();++pos)
    {
-      pos->mBaseRotationAmplitude/=(REAL)(nbTest*this->GetNbComponent());//(REAL)(nbTest*pos->mvRotatedAtomList.size())
-      pos->mBaseRotationAmplitude=0.1*0.01/pos->mBaseRotationAmplitude;
+      pos->mBaseAmplitude/=(REAL)(nbTest*this->GetNbComponent());//(REAL)(nbTest*pos->mvRotatedAtomList.size())
+      pos->mBaseAmplitude=0.1*0.01/pos->mBaseAmplitude;
       if((pos->mvpBrokenBond.size()+pos->mvpBrokenBondAngle.size()+pos->mvpBrokenDihedralAngle.size())>0)
-         pos->mBaseRotationAmplitude/=10;
+         pos->mBaseAmplitude/=10;
       cout<<"ANGLE :"
           <<pos->mpAtom0->GetName()<<"-"
           <<pos->mpAtom1->GetName()<<"-"
           <<pos->mpAtom2->GetName()<<":";
       for(set<MolAtom*>::const_iterator atom=pos->mvRotatedAtomList.begin();
           atom!=pos->mvRotatedAtomList.end();++atom) cout<<(*atom)->GetName()<<",";
-      cout <<": base rotation="<<pos->mBaseRotationAmplitude*RAD2DEG<<endl;
+      cout <<": base rotation="<<pos->mBaseAmplitude*RAD2DEG<<endl;
 
    }
    // Modify base rotation amplitudes, for an average 0.1 Angstroem displacement
    for(list<StretchModeTorsion>::iterator pos=mvStretchModeTorsion.begin();
        pos!=mvStretchModeTorsion.end();++pos)
    {
-      pos->mBaseRotationAmplitude/=(REAL)(nbTest*this->GetNbComponent());//(REAL)(nbTest*pos->mvRotatedAtomList.size())
-      pos->mBaseRotationAmplitude=0.1*0.01/pos->mBaseRotationAmplitude;
+      pos->mBaseAmplitude/=(REAL)(nbTest*this->GetNbComponent());//(REAL)(nbTest*pos->mvRotatedAtomList.size())
+      pos->mBaseAmplitude=0.1*0.01/pos->mBaseAmplitude;
       if((pos->mvpBrokenBond.size()+pos->mvpBrokenBondAngle.size()+pos->mvpBrokenDihedralAngle.size())>0)
-         pos->mBaseRotationAmplitude/=10;
+         pos->mBaseAmplitude/=10;
       cout<<"TORSION :"
           <<pos->mpAtom1->GetName()<<"-"
           <<pos->mpAtom2->GetName()<<":";
       for(set<MolAtom*>::const_iterator atom=pos->mvRotatedAtomList.begin();
           atom!=pos->mvRotatedAtomList.end();++atom) cout<<(*atom)->GetName()<<",";
-      cout <<": base rotation="<<pos->mBaseRotationAmplitude*RAD2DEG<<endl;
+      cout <<": base rotation="<<pos->mBaseAmplitude*RAD2DEG<<endl;
 
    }
    // Same for global rotation
@@ -4615,15 +4978,15 @@ void Molecule::TuneGlobalOptimRotationAmplitude()
       {
          mBaseRotationAmplitude=0.02*M_PI/20.;
          //cout <<"WARNING - too low Global BaseRotationAmplitude - setting to: "
-         //     << mBaseRotationAmplitude*RAD2DEG<< " °"<<endl;
+         //     << mBaseAmplitude*RAD2DEG<< " °"<<endl;
       }
       if(mBaseRotationAmplitude>(0.02*M_PI*20.))
       {
          mBaseRotationAmplitude=0.02*M_PI*20.;
          //cout <<"WARNING - too high Global BaseRotationAmplitude - setting to: "
-         //     << mBaseRotationAmplitude*RAD2DEG<< " °"<<endl;
+         //     << mBaseAmplitude*RAD2DEG<< " °"<<endl;
       }
-      //cout <<" -> Base rotation="<<mBaseRotationAmplitude*RAD2DEG<<"°"<<endl;
+      //cout <<" -> Base rotation="<<mBaseAmplitude*RAD2DEG<<"°"<<endl;
 
    // Move back atoms to initial position
    this->RestoreParamSet(initialConfig);
@@ -4751,6 +5114,130 @@ void Molecule::BuildFlipGroup()
    #endif
    mClockFlipGroup.Click();
    VFN_DEBUG_EXIT("Molecule::BuildFlipGroup()",5)
+}
+
+void Molecule::BuildStretchModeGroups()
+{
+   // Assume Stretch modes have already been built
+   map<const MolBond*,         set<const StretchMode*> > vpBond;
+   for(list<StretchModeBondLength>::const_iterator mode=mvStretchModeBondLength.begin();
+       mode!=mvStretchModeBondLength.end();++mode)
+   {
+      if(mode->mpBond!=0) vpBond[mode->mpBond].insert(&(*mode));
+      for(map<const MolBond*,REAL>::const_iterator pos=mode->mvpBrokenBond.begin();
+          pos!=mode->mvpBrokenBond.end();++pos)
+          vpBond[pos->first].insert(&(*mode));
+   }
+   for(list<StretchModeBondAngle>::const_iterator mode=mvStretchModeBondAngle.begin();
+       mode!=mvStretchModeBondAngle.end();++mode)
+      for(map<const MolBond*,REAL>::const_iterator pos=mode->mvpBrokenBond.begin();
+          pos!=mode->mvpBrokenBond.end();++pos)
+          vpBond[pos->first].insert(&(*mode));
+
+   for(list<StretchModeTorsion>::const_iterator mode=mvStretchModeTorsion.begin();
+       mode!=mvStretchModeTorsion.end();++mode)
+      for(map<const MolBond*,REAL>::const_iterator pos=mode->mvpBrokenBond.begin();
+          pos!=mode->mvpBrokenBond.end();++pos)
+          vpBond[pos->first].insert(&(*mode));
+
+
+
+   map<const MolBondAngle*,    set<const StretchMode*> > vpAngle;
+   for(list<StretchModeBondLength>::const_iterator mode=mvStretchModeBondLength.begin();
+       mode!=mvStretchModeBondLength.end();++mode)
+      for(map<const MolBondAngle*,REAL>::const_iterator pos=mode->mvpBrokenBondAngle.begin();
+          pos!=mode->mvpBrokenBondAngle.end();++pos)
+          vpAngle[pos->first].insert(&(*mode));
+
+   for(list<StretchModeBondAngle>::const_iterator mode=mvStretchModeBondAngle.begin();
+       mode!=mvStretchModeBondAngle.end();++mode)
+   {
+      if(mode->mpBondAngle!=0) vpAngle[mode->mpBondAngle].insert(&(*mode));
+      for(map<const MolBondAngle*,REAL>::const_iterator pos=mode->mvpBrokenBondAngle.begin();
+          pos!=mode->mvpBrokenBondAngle.end();++pos)
+          vpAngle[pos->first].insert(&(*mode));
+   }
+   for(list<StretchModeTorsion>::const_iterator mode=mvStretchModeTorsion.begin();
+       mode!=mvStretchModeTorsion.end();++mode)
+      for(map<const MolBondAngle*,REAL>::const_iterator pos=mode->mvpBrokenBondAngle.begin();
+          pos!=mode->mvpBrokenBondAngle.end();++pos)
+          vpAngle[pos->first].insert(&(*mode));
+
+   
+   
+   map<const MolDihedralAngle*,set<const StretchMode*> > vpDihed;
+   for(list<StretchModeBondLength>::const_iterator mode=mvStretchModeBondLength.begin();
+       mode!=mvStretchModeBondLength.end();++mode)
+      for(map<const MolDihedralAngle*,REAL>::const_iterator pos=mode->mvpBrokenDihedralAngle.begin();
+          pos!=mode->mvpBrokenDihedralAngle.end();++pos)
+          vpDihed[pos->first].insert(&(*mode));
+
+   for(list<StretchModeBondAngle>::const_iterator mode=mvStretchModeBondAngle.begin();
+       mode!=mvStretchModeBondAngle.end();++mode)
+      for(map<const MolDihedralAngle*,REAL>::const_iterator pos=mode->mvpBrokenDihedralAngle.begin();
+          pos!=mode->mvpBrokenDihedralAngle.end();++pos)
+          vpDihed[pos->first].insert(&(*mode));
+
+   for(list<StretchModeTorsion>::const_iterator mode=mvStretchModeTorsion.begin();
+       mode!=mvStretchModeTorsion.end();++mode)
+   {
+      if(mode->mpDihedralAngle!=0) vpDihed[mode->mpDihedralAngle].insert(&(*mode));
+      for(map<const MolDihedralAngle*,REAL>::const_iterator pos=mode->mvpBrokenDihedralAngle.begin();
+          pos!=mode->mvpBrokenDihedralAngle.end();++pos)
+          vpDihed[pos->first].insert(&(*mode));
+   }
+   
+   for(map<const MolBond*,set<const StretchMode*> >::const_iterator pos=vpBond.begin();pos!=vpBond.end();++pos)
+   {
+      cout<<"Bond "<<pos->first->GetName()<<" is modified by the stretch modes:"<<endl;
+      for(set<const StretchMode*>::const_iterator mode=pos->second.begin();mode!=pos->second.end();++mode)
+      {
+         cout<<"      ";
+         (*mode)->Print(cout);
+         cout<<endl;
+      }
+   }
+   for(map<const MolBondAngle*,set<const StretchMode*> >::const_iterator pos=vpAngle.begin();pos!=vpAngle.end();++pos)
+   {
+      cout<<"Bond Angle "<<pos->first->GetName()<<" is modified by the stretch modes:"<<endl;
+      for(set<const StretchMode*>::const_iterator mode=pos->second.begin();mode!=pos->second.end();++mode)
+      {
+         cout<<"      ";
+         (*mode)->Print(cout);
+         cout<<endl;
+      }
+   }
+   for(map<const MolDihedralAngle*,set<const StretchMode*> >::const_iterator pos=vpDihed.begin();pos!=vpDihed.end();++pos)
+   {
+      cout<<"Dihedral Angle "<<pos->first->GetName()<<" is modified by the stretch modes:"<<endl;
+      for(set<const StretchMode*>::const_iterator mode=pos->second.begin();mode!=pos->second.end();++mode)
+      {
+         cout<<"      ";
+         (*mode)->Print(cout);
+         cout<<endl;
+      }
+   }
+   
+   mvpStretchModeFree.clear();
+   mvpStretchModeNotFree.clear();
+   
+   for(list<StretchModeBondLength>::iterator mode=mvStretchModeBondLength.begin();
+       mode!=mvStretchModeBondLength.end();++mode)
+      if(mode->mvpBrokenDihedralAngle.size()+mode->mvpBrokenBondAngle.size()+mode->mvpBrokenBond.size()==0)
+         mvpStretchModeFree.push_back(&(*mode));
+      else mvpStretchModeNotFree.push_back(&(*mode));
+   
+   for(list<StretchModeBondAngle>::iterator mode=mvStretchModeBondAngle.begin();
+       mode!=mvStretchModeBondAngle.end();++mode)
+      if(mode->mvpBrokenDihedralAngle.size()+mode->mvpBrokenBondAngle.size()+mode->mvpBrokenBond.size()==0)
+         mvpStretchModeFree.push_back(&(*mode));
+      else mvpStretchModeNotFree.push_back(&(*mode));
+
+   for(list<StretchModeTorsion>::iterator mode=mvStretchModeTorsion.begin();
+       mode!=mvStretchModeTorsion.end();++mode)
+      if(mode->mvpBrokenDihedralAngle.size()+mode->mvpBrokenBondAngle.size()+mode->mvpBrokenBond.size()==0)
+         mvpStretchModeFree.push_back(&(*mode));
+      else mvpStretchModeNotFree.push_back(&(*mode));
 }
 
 void Molecule::UpdateScattCompList()const
