@@ -1434,8 +1434,9 @@ void WXMolecule::OnMenuTest(wxCommandEvent & WXUNUSED(event))
    mpMolecule->BuildStretchModeBondLength();
    mpMolecule->BuildStretchModeBondAngle();
    mpMolecule->BuildStretchModeTorsion();
+   mpMolecule->BuildStretchModeTwist();
    
-   mpMolecule->BuildRotorGroup();
+   //mpMolecule->BuildRotorGroup();
    mpMolecule->BuildFlipGroup();
    mpMolecule->TuneGlobalOptimRotationAmplitude();
    //mpMolecule->FlipAtomGroup(*(mpMolecule->mvFlipGroup.begin()));

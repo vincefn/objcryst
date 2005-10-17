@@ -905,6 +905,10 @@ class Molecule: public Scatterer
       * respecting the Molecule restraints.
       */
       void BuildStretchModeTorsion();
+      /** Build the groups of atoms used to twist internally the Molecule, e.g. by
+      * rotating one chain of atoms between 2 given atoms.
+      */
+      void BuildStretchModeTwist();
       /** Separate StretchMode that break more than their assigned restraint from others.
       * See Molecule::mvpStretchModeFree and Molecule::mvpStretchModeNotFree
       */
