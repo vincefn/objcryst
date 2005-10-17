@@ -183,7 +183,6 @@ static const long ID_CRYSTAL_MENU_DISPLAY                       =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_DISPLAY_3DVIEW                =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT                         =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_PAR_SETRELATIVEXYZLIMITS      =WXCRYST_ID();
-static const long ID_CRYSTAL_MENU_PAR_BONDVALENCE_SHOW          =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT_REMOVESCATTPOW          =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT_ADDSCATTPOWATOM         =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT_ADDSCATTPOWSPHERE       =WXCRYST_ID();
@@ -218,7 +217,6 @@ BEGIN_EVENT_TABLE(WXCrystal,wxWindow)
    EVT_MENU(ID_REFOBJ_MENU_PAR_UNFIXALL,              WXRefinableObj::OnMenuUnFixAllPar)
    EVT_MENU(ID_REFOBJ_MENU_PAR_RANDOMIZE,             WXRefinableObj::OnMenuParRandomize)
    EVT_MENU(ID_CRYSTAL_MENU_PAR_SETRELATIVEXYZLIMITS, WXCrystal::OnMenuSetRelativeXYZLimits)
-   EVT_MENU(ID_CRYSTAL_MENU_PAR_BONDVALENCE_SHOW,     WXCrystal::OnMenuManageBondValence)
 #ifdef OBJCRYST_GL
    EVT_MENU(ID_CRYSTAL_MENU_DISPLAY_3DVIEW,           WXCrystal::OnMenuCrystalGL)
 #endif
@@ -273,9 +271,6 @@ mpCrystalGL(0)
                                 "Randomize Configuration");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_CRYSTAL_MENU_PAR_SETRELATIVEXYZLIMITS,
                                 "Set Relative Limits On All XYZ Parameters");
-         mpMenuBar->GetMenu(ID_REFOBJ_MENU_PAR).AppendSeparator();
-         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_CRYSTAL_MENU_PAR_BONDVALENCE_SHOW,
-                                "List Calculated Bond Valences");
       mpMenuBar->AddMenu("Scatterers",ID_CRYSTAL_MENU_SCATT);
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SHOW_SCATTPOW_WIN,
                                 "Show Scattering Powers Parameters Window");
@@ -1162,44 +1157,6 @@ Error opening file for input:"+string(open.GetPath().c_str()));
    VFN_DEBUG_EXIT("WXCrystal::OnMenuImportFenskeHallZMatrix()",6)
 }
 
-void WXCrystal::OnMenuAddAntiBumpDist(wxCommandEvent & WXUNUSED(event))
-{
-   WXCrystValidateAllUserInput();
-   int choice;
-   //Scattering power 1
-      const ScatteringPower *scattPow1=WXDialogChooseFromRegistry(
-                                 mpCrystal->GetScatteringPowerRegistry(),
-                                 this,"Atom type (ScatteringPower) #1",choice);
-      if(0==scattPow1)
-      {
-         VFN_DEBUG_EXIT("WXCrystal::OnMenuAddAntiBumpDist():Canceled",6)
-         return;
-      }
-   //Scattering power 2
-      const ScatteringPower *scattPow2=WXDialogChooseFromRegistry(
-                                 mpCrystal->GetScatteringPowerRegistry(),
-                                 this,"Atom type (ScatteringPower) #2",choice);
-      if(0==scattPow2)
-      {
-         VFN_DEBUG_EXIT("WXCrystal::OnMenuAddAntiBumpDist():Canceled",6)
-         return;
-      }
-   //Distance
-      wxTextEntryDialog bondLengthDialog(this,"Antibump Distance",
-                              "Enter antibmup distance (<bond length) (Angstroems)",
-                              "1.2",wxOK | wxCANCEL);
-      if(wxID_OK!=bondLengthDialog.ShowModal())
-      {
-         VFN_DEBUG_EXIT("WXCrystal::OnMenuAddAntiBumpDist():Cancelled",6)
-         return;
-      }
-      double bondLength;
-      bondLengthDialog.GetValue().ToDouble(&bondLength);
-      
-   mpCrystal->SetBumpMergeDistance(*scattPow1,*scattPow2,bondLength);
-   mpCrystal->UpdateDisplay();
-}
-
 void WXCrystal::OnMenuSetRelativeXYZLimits(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXCrystal::OnMenuSetRelativeXYZLimits():Cancelled",6)
@@ -1226,55 +1183,6 @@ void WXCrystal::OnMenuSetRelativeXYZLimits(wxCommandEvent & WXUNUSED(event))
                                 -limit/mpCrystal->GetLatticePar(2),
                                 limit/mpCrystal->GetLatticePar(2));
    VFN_DEBUG_EXIT("WXCrystal::OnMenuSetRelativeXYZLimits()",6)
-}
-
-void WXCrystal::OnMenuManageBondValence(wxCommandEvent &event)
-{
-   WXCrystValidateAllUserInput();
-   #if 0
-   if(event.GetId()==ID_CRYSTAL_MENU_PAR_BONDVALENCE_ADD)
-   {
-      int choice;
-      const ScatteringPower *pow1=WXDialogChooseFromRegistry(
-                  mpCrystal->GetScatteringPowerRegistry(),
-                  (wxWindow*)this,"1st Atom Type",choice);
-      if(0==pow1) return;
-      const ScatteringPower *pow2=WXDialogChooseFromRegistry(
-                  mpCrystal->GetScatteringPowerRegistry(),
-                  (wxWindow*)this,"2nd Atom Type",choice);
-      if(0==pow2) return;
-
-      static double ro=1.5;
-      stringstream s;
-      s<<ro;
-      stringstream mes;
-      mes<<"Enter Ro for ("<<pow1->GetName()<<","<<pow1->GetFormalCharge()<<") and ("
-                           <<pow2->GetName()<<","<<pow2->GetFormalCharge()<<")";
-      wxTextEntryDialog dialog(this,mes.str().c_str(),
-                              "Bond Valence Ro",s.str().c_str(),wxOK | wxCANCEL);
-      if(wxID_OK!=dialog.ShowModal())
-      {
-         VFN_DEBUG_EXIT("WXMolecule::OnMenuAddBond():Canceled",6)
-         return;
-      }
-      dialog.GetValue().ToDouble(&ro);
-      mpCrystal->AddBondValenceRo(*pow1,*pow2,ro);
-   }
-   #endif
-   if(event.GetId()==ID_CRYSTAL_MENU_PAR_BONDVALENCE_SHOW)
-   {
-      mpCrystal->CalcBondValenceSum();
-      std::map<long, REAL>::const_iterator pos;
-      long l=-1;
-      for(long i=0;i<mpCrystal->mScattererRegistry.GetNb();i++)
-         for(long j=0;j<mpCrystal->GetScatt(i).GetNbComponent();j++)
-         {
-            l++;
-            pos=mpCrystal->mvBondValenceCalc.find(l);
-            if(pos==mpCrystal->mvBondValenceCalc.end()) continue;
-      }
-   }
-   mpCrystal->UpdateDisplay();
 }
 
 bool WXCrystal::OnChangeName(const int id)

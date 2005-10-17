@@ -302,10 +302,12 @@ void Crystal::Print(ostream &os)const
    this->UnitCell::Print(os);
    
    this->GetScatteringComponentList();
+   this->CalcBondValenceSum();
    
    os << "List of scattering components (atoms): " << mScattCompList.GetNbComponent() << endl ;
    
    long k=0;
+   std::map<long, REAL>::const_iterator posBV;
    for(int i=0;i<mScattererRegistry.GetNb();i++) 
    {
       //mpScatterrer[i]->Print();
@@ -319,8 +321,12 @@ void Crystal::Print(ostream &os)const
               << ", Occup=" << FormatFloat(list(j).mOccupancy,6,4)
               << " * " << FormatFloat(mScattCompList(k).mDynPopCorr,6,4)
               << " ,ScattPow:" << FormatString(list(j).mpScattPow->GetName(),16)
-              << ", Biso=" << FormatFloat(list(j).mpScattPow->GetBiso())
-              << endl;
+              << ", Biso=" << FormatFloat(list(j).mpScattPow->GetBiso());
+         posBV=this->mvBondValenceCalc.find(k);
+         if(posBV!=this->mvBondValenceCalc.end())
+            os <<": Valence="<<posBV->second<<" (expected="
+               <<this->mScattCompList(k).mpScattPow->GetFormalCharge()<<")";
+         os << endl;
          k++;
       }
    }
