@@ -173,7 +173,8 @@ class MolBond:public Restraint
       string GetName()const;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
-      virtual REAL GetLogLikelihood(const bool calcDeriv=false, const bool recalc=true)const;
+      virtual REAL GetLogLikelihood()const;
+      REAL GetLogLikelihood(const bool calcDeriv, const bool recalc)const;
       /// Get the derivative of the bond length, given the derivatives of the atom positions
       /// This requires that GetLogLikelihood(calcDeriv=true) be called first.
       /// If llk=true, this will return the derivative of the llk rather than the derivative of the length or angle
@@ -251,7 +252,8 @@ class MolBondAngle:public Restraint
       string GetName()const;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
-      virtual REAL GetLogLikelihood(const bool calcDeriv=false, const bool recalc=true)const;
+      virtual REAL GetLogLikelihood()const;
+      REAL GetLogLikelihood(const bool calcDeriv, const bool recalc)const;
       /// Get the derivative of the angle, given the derivatives of the atom positions
       /// This requires that GetLogLikelihood(calcDeriv=true) be called first
       /// If llk=true, this will return the derivative of the llk rather than the derivative of the length or angle
@@ -333,7 +335,8 @@ class MolDihedralAngle:public Restraint
       string GetName()const;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
-      virtual REAL GetLogLikelihood(const bool calcDeriv=false, const bool recalc=true)const;
+      virtual REAL GetLogLikelihood()const;
+      REAL GetLogLikelihood(const bool calcDeriv, const bool recalc)const;
       /// Get the derivative of the Angle, given the derivatives of the atom positions
       /// This requires that GetLogLikelihood(calcDeriv=true) be called first
       /// If llk=true, this will return the derivative of the llk rather than the derivative of the length or angle

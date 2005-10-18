@@ -381,6 +381,8 @@ void MolBond::XMLInput(istream &is,const XMLCrystTag &tag)
    VFN_DEBUG_EXIT("MolBond::XMLInput():",7)
 }
 
+REAL MolBond::GetLogLikelihood()const{return this->GetLogLikelihood(false,true);}
+
 REAL MolBond::GetLogLikelihood(const bool calcDeriv, const bool recalc)const
 {
    if(!recalc) return mLLK;
@@ -618,6 +620,8 @@ REAL MolBondAngle::GetAngle()const
 {
    return GetBondAngle(this->GetAtom1(),this->GetAtom2(),this->GetAtom3());
 }
+
+REAL MolBondAngle::GetLogLikelihood()const{return this->GetLogLikelihood(false,true);}
 
 REAL MolBondAngle::GetLogLikelihood(const bool calcDeriv, const bool recalc)const
 {
@@ -880,6 +884,8 @@ REAL MolDihedralAngle::GetAngleSigma()const{return mSigma;}
 void MolDihedralAngle::SetAngle0(const REAL angle){mAngle0=angle;}
 void MolDihedralAngle::SetAngleDelta(const REAL delta){mDelta=delta;}
 void MolDihedralAngle::SetAngleSigma(const REAL sigma){mSigma=sigma;}
+
+REAL MolDihedralAngle::GetLogLikelihood()const{return this->GetLogLikelihood(false,true);}
 
 REAL MolDihedralAngle::GetLogLikelihood(const bool calcDeriv, const bool recalc)const
 {
@@ -4181,7 +4187,7 @@ void Molecule::BuildStretchModeBondLength()
       for(vector<MolBond*>::const_iterator r=mvpBond.begin();r!=mvpBond.end();++r)
       {
          // if(*r==pos->mpBond) continue;
-         (*r)->GetLogLikelihood(true);
+         (*r)->GetLogLikelihood(true,true);
          REAL d=0;
          for(unsigned long i=0;i<5;++i)
          {
@@ -4198,7 +4204,7 @@ void Molecule::BuildStretchModeBondLength()
       }
       for(vector<MolBondAngle*>::const_iterator r=mvpBondAngle.begin();r!=mvpBondAngle.end();++r)
       {
-         (*r)->GetLogLikelihood(true);
+         (*r)->GetLogLikelihood(true,true);
          REAL d=0;
          for(unsigned long i=0;i<5;++i)
          {
@@ -4216,7 +4222,7 @@ void Molecule::BuildStretchModeBondLength()
       for(vector<MolDihedralAngle*>::const_iterator r=mvpDihedralAngle.begin();
           r!=mvpDihedralAngle.end();++r)
       {
-         (*r)->GetLogLikelihood(true);
+         (*r)->GetLogLikelihood(true,true);
          REAL d=0;
          for(unsigned long i=0;i<5;++i)
          {
@@ -4424,7 +4430,7 @@ void Molecule::BuildStretchModeBondAngle()
       #endif
       for(vector<MolBond*>::const_iterator r=mvpBond.begin();r!=mvpBond.end();++r)
       {
-         (*r)->GetLogLikelihood(true);
+         (*r)->GetLogLikelihood(true,true);
          REAL d=0;
          for(unsigned long i=0;i<5;++i)
          {
@@ -4442,7 +4448,7 @@ void Molecule::BuildStretchModeBondAngle()
       for(vector<MolBondAngle*>::const_iterator r=mvpBondAngle.begin();r!=mvpBondAngle.end();++r)
       {
          //if(*r==pos->mpBondAngle) continue;
-         (*r)->GetLogLikelihood(true);
+         (*r)->GetLogLikelihood(true,true);
          REAL d=0;
          for(unsigned long i=0;i<5;++i)
          {
@@ -4460,7 +4466,7 @@ void Molecule::BuildStretchModeBondAngle()
       for(vector<MolDihedralAngle*>::const_iterator r=mvpDihedralAngle.begin();
           r!=mvpDihedralAngle.end();++r)
       {
-         (*r)->GetLogLikelihood(true);
+         (*r)->GetLogLikelihood(true,true);
          REAL d=0;
          for(unsigned long i=0;i<5;++i)
          {
@@ -4771,7 +4777,7 @@ void Molecule::BuildStretchModeTorsion()
       #endif
       for(vector<MolBond*>::const_iterator r=mvpBond.begin();r!=mvpBond.end();++r)
       {
-         (*r)->GetLogLikelihood(true);
+         (*r)->GetLogLikelihood(true,true);
          REAL d=0;
          for(unsigned long i=0;i<5;++i)
          {
@@ -4789,7 +4795,7 @@ void Molecule::BuildStretchModeTorsion()
       }
       for(vector<MolBondAngle*>::const_iterator r=mvpBondAngle.begin();r!=mvpBondAngle.end();++r)
       {
-         (*r)->GetLogLikelihood(true);
+         (*r)->GetLogLikelihood(true,true);
          REAL d=0;
          for(unsigned long i=0;i<5;++i)
          {
@@ -4808,7 +4814,7 @@ void Molecule::BuildStretchModeTorsion()
           r!=mvpDihedralAngle.end();++r)
       {
          //if(*r==pos->mpDihedralAngle) continue;
-         (*r)->GetLogLikelihood(true);
+         (*r)->GetLogLikelihood(true,true);
          REAL d=0;
          for(unsigned long i=0;i<5;++i)
          {
@@ -5044,7 +5050,7 @@ void Molecule::BuildStretchModeTwist()
       #endif
       for(vector<MolBond*>::const_iterator r=mvpBond.begin();r!=mvpBond.end();++r)
       {
-         (*r)->GetLogLikelihood(true);
+         (*r)->GetLogLikelihood(true,true);
          REAL d=0;
          for(unsigned long i=0;i<5;++i)
          {
@@ -5062,7 +5068,7 @@ void Molecule::BuildStretchModeTwist()
       }
       for(vector<MolBondAngle*>::const_iterator r=mvpBondAngle.begin();r!=mvpBondAngle.end();++r)
       {
-         (*r)->GetLogLikelihood(true);
+         (*r)->GetLogLikelihood(true,true);
          REAL d=0;
          for(unsigned long i=0;i<5;++i)
          {
@@ -5081,7 +5087,7 @@ void Molecule::BuildStretchModeTwist()
           r!=mvpDihedralAngle.end();++r)
       {
          //if(*r==pos->mpDihedralAngle) continue;
-         (*r)->GetLogLikelihood(true);
+         (*r)->GetLogLikelihood(true,true);
          REAL d=0;
          for(unsigned long i=0;i<5;++i)
          {
