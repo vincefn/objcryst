@@ -1019,17 +1019,17 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
             case 3: dc.SetPen(*wxRED_PEN  );dc.SetTextForeground(*wxRED  );break;
             default:dc.SetPen(*wxGREY_PEN );dc.SetTextForeground(*wxLIGHT_GREY );break;
          }
+         unsigned long ct=0;
          for(pos=comp->begin();pos!=comp->end();++pos)
          {
-            unsigned long ct=0;
             REAL point=pos->first;
             if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
                point *= RAD2DEG;
             if((point>=mMinX)&&(point<=mMaxX))
             {
-               if(++ct>100)
+               if(++ct>200)
                {
-                  cout <<"Too many labels (>100): displaying only first 100"<<endl;
+                  cout <<"Too many labels (>100): displaying only first 100 and ticking 100 more..."<<endl;
                   break;
                }
                x=this->Data2ScreenX(point);
@@ -1039,9 +1039,12 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
                y=this->Data2ScreenY(yr);
                
                dc.DrawLine(x,y-5,x,y-10);
-               fontInfo.Printf("%s",pos->second.c_str());
-               dc.GetTextExtent(fontInfo, &tmpW, &tmpH);
-               dc.DrawText(fontInfo,x-tmpW/2,y-tmpH*(loop++)-10);
+               if(ct<100)
+               {
+                  fontInfo.Printf("%s",pos->second.c_str());
+                  dc.GetTextExtent(fontInfo, &tmpW, &tmpH);
+                  dc.DrawText(fontInfo,x-tmpW/2,y-tmpH*(loop++)-10);
+               }
                if(loop==5) loop=1;
             }
          }
