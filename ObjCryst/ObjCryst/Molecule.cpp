@@ -182,9 +182,9 @@ REAL MolAtom::GetY()const{return mY;}
 REAL MolAtom::GetZ()const{return mZ;}
 REAL MolAtom::GetOccupancy()const{return mOccupancy;}
 
-void MolAtom::SetX(const REAL a){ mX=a;}
-void MolAtom::SetY(const REAL a){ mY=a;}
-void MolAtom::SetZ(const REAL a){ mZ=a;}
+void MolAtom::SetX(const REAL a){ mX=a;mpMol->GetAtomPositionClock().Click();}
+void MolAtom::SetY(const REAL a){ mY=a;mpMol->GetAtomPositionClock().Click();}
+void MolAtom::SetZ(const REAL a){ mZ=a;mpMol->GetAtomPositionClock().Click();}
 void MolAtom::SetOccupancy(const REAL a){ mOccupancy=a;}
 
 bool MolAtom::IsDummy()const{return mpScattPow==0;}
@@ -3247,6 +3247,9 @@ const map<MolAtom *,set<MolAtom *> > &Molecule::GetConnectivityTable()
 
 RefinableObjClock& Molecule::GetBondListClock(){return mClockBondList;}
 const RefinableObjClock& Molecule::GetBondListClock()const{return mClockBondList;}
+
+RefinableObjClock& Molecule::GetAtomPositionClock(){return mClockAtomPosition;}
+const RefinableObjClock& Molecule::GetAtomPositionClock()const{return mClockAtomPosition;}
 
 void Molecule::RigidifyWithDihedralAngles()
 {

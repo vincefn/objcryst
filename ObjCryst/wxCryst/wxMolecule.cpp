@@ -1175,7 +1175,7 @@ void WXMolecule::OnEditGridAtom(wxGridEvent &e)
          mpMolecule->GetAtomList()[r]->SetZ(d);
       }
    }
-   this->CrystUpdate(true);
+   mpMolecule->GetCrystal().UpdateDisplay();
    VFN_DEBUG_EXIT("WXMolecule::OnEditGridAtom():"<<e.GetRow()<<","<<e.GetCol(),10)
 }
 
