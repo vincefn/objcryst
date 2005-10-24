@@ -95,6 +95,37 @@ template<class T> list<T const*> WXDialogChooseMultipleFromVector(const vector<T
    delete[] choices;
    return vChoice;
 }
+
+// Compress a string by removing a given character
+string CompressString(const string &s,const string &c)
+{
+   string sc=s;
+   string::size_type idx=0;
+   while(idx!=string::npos)
+   {
+      idx=sc.find(c);
+      if(idx!=string::npos) sc.erase(idx,c.size());
+   }
+   return sc;
+}
+// Split 
+list<string> SplitString(const string &str, const string &separator)
+{
+   string::size_type idx0=(string::size_type) 0;
+   string::size_type idx1=(string::size_type) 0;
+   list<string> l;
+   while((idx1!=string::npos)&&(idx0<str.size()))
+   {
+      idx1=str.find(separator,idx0);
+      if(idx1==string::npos) l.push_back(str.substr(idx0,idx1));
+      if(idx1>idx0) l.push_back(str.substr(idx0,idx1-idx0));
+      idx0=idx1+1;
+   }
+   //for(list<string>::const_iterator pos=l.begin();pos!=l.end();++pos) cout <<*pos<<" / ";
+   //cout<<endl;
+   return l;
+}
+
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXMolScrolledWindow
@@ -1420,8 +1451,25 @@ void WXMolecule::OnEditGridDihedralAngle(wxGridEvent &e)
 void WXMolecule::OnEditGridRigidGroup(wxGridEvent &e)
 {
    if(mIsSelfUpdating) return;
+   mIsSelfUpdating=true;
    VFN_DEBUG_ENTRY("WXMolecule::OnEditGridRigidGroup():"<<e.GetRow()<<","<<e.GetCol(),10)
    
+   const long r=e.GetRow();
+   const long c=e.GetCol();
+   wxString s=mpRigidGroupWin->GetCellValue(r,c);
+   list<string> l=SplitString(CompressString(s.c_str()," "),",");
+   list<MolAtom*> v;
+   for(list<string>::const_iterator pos=l.begin();pos!=l.end();++pos)
+   {
+      vector<MolAtom*>::reverse_iterator rpos=mpMolecule->FindAtom(*pos);
+      if(rpos!=mpMolecule->GetAtomList().rend()) v.push_back(*rpos);
+      else   cout<<*pos<<" : NOT FOUND"<<endl;;
+   }
+   mpMolecule->RemoveRigidGroup(*(mpMolecule->GetRigidGroupList()[r]),false);
+   RigidGroup rg;
+   for(list<MolAtom*>::const_iterator pos=v.begin();pos!=v.end();++pos) rg.insert(*pos);
+   mpMolecule->AddRigidGroup(rg,false);
+   mIsSelfUpdating=false;
    this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXMolecule::OnEditGridRigidGroup():"<<e.GetRow()<<","<<e.GetCol(),10)
 }
@@ -1916,15 +1964,8 @@ void WXMolecule::OnMenuShowRestraintWindow(wxCommandEvent &event)
       wxGridCellAttr* cellAttrName = new wxGridCellAttr;
       cellAttrName->SetRenderer(new wxGridCellStringRenderer);
       cellAttrName->SetEditor(new wxGridCellTextEditor);
-      wxGridCellAttr* cellAttrFloat = new wxGridCellAttr;
-      cellAttrFloat->SetRenderer(new wxGridCellFloatRenderer);
-      cellAttrFloat->SetEditor(new wxGridCellFloatEditor);
-      wxGridCellAttr* cellAttrFloatReadOnly = new wxGridCellAttr;
-      cellAttrFloatReadOnly->SetRenderer(new wxGridCellFloatRenderer);
-      cellAttrFloatReadOnly->SetEditor(new wxGridCellFloatEditor);
-      cellAttrFloatReadOnly->SetReadOnly();
-
-      mpRigidGroupWin = new WXMolScrolledWindow(notebook,this,ID_WINDOW_DIHEDRALANGLE);
+      
+      mpRigidGroupWin = new WXMolScrolledWindow(notebook,this,ID_WINDOW_RIGIDGROUP);
       notebook->AddPage(mpRigidGroupWin, "Rigid Groups", true);
       mpRigidGroupWin->CreateGrid(0,1);
       mpRigidGroupWin->SetColMinimalWidth(0,600);
