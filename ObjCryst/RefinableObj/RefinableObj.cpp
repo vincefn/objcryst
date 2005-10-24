@@ -1596,6 +1596,7 @@ extern const long ID_WXOBJ_DISABLE;
 void RefinableObj::BeginOptimization(const bool allowApproximations,
                                      const bool enableRestraints)
 {
+   if(mIsbeingRefined) return;
    mIsbeingRefined=true;
    this->Prepare();
    for(int i=0;i<mSubObjRegistry.GetNb();i++)
@@ -1615,6 +1616,7 @@ void RefinableObj::BeginOptimization(const bool allowApproximations,
 
 void RefinableObj::EndOptimization()
 {
+   if(!mIsbeingRefined) return;
    mIsbeingRefined=false;
    for(int i=0;i<mSubObjRegistry.GetNb();i++)
       mSubObjRegistry.GetObj(i).EndOptimization();
