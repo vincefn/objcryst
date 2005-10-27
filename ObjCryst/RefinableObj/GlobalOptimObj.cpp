@@ -499,7 +499,6 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
    mStopAfterCycle=false;
       
    mRefParList.RestoreParamSet(mBestParSavedSetIndex);
-   this->UpdateDisplay();
    for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).EndOptimization();
    
    if(mSaveTrackedData.GetChoice()==1)
@@ -510,7 +509,20 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
       mMainTracker.SaveAll(outTracker);
       outTracker.close();
    }
-
+   
+   for(vector<pair<long,REAL> >::iterator pos=mvSavedParamSet.begin();pos!=mvSavedParamSet.end();++pos)
+      if(pos->first==mBestParSavedSetIndex)
+      {
+         if(  (pos->second>mBestCost)
+            ||(pos->second<0))
+         {
+            pos->second=mBestCost;
+            break;
+         }
+      }
+   
+   this->UpdateDisplay();
+   
    VFN_DEBUG_EXIT("MonteCarloObj::Optimize()",5)
 }
 void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silent,
@@ -591,6 +603,18 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
    mStopAfterCycle=false;
 
    mRefParList.RestoreParamSet(mBestParSavedSetIndex);
+   
+   for(vector<pair<long,REAL> >::iterator pos=mvSavedParamSet.begin();pos!=mvSavedParamSet.end();++pos)
+      if(pos->first==mBestParSavedSetIndex)
+      {
+         if(  (pos->second>mBestCost)
+            ||(pos->second<0))
+         {
+            pos->second=mBestCost;
+            break;
+         }
+      }
+   
    this->UpdateDisplay();
       
    for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).EndOptimization();
