@@ -178,7 +178,8 @@ void RefinableObjClock::operator=(const RefinableObjClock &rhs)
 {
    mTick0=rhs.mTick0;
    mTick1=rhs.mTick1;
-   this->Click();
+   for(std::set<RefinableObjClock*>::iterator pos=mvParent.begin();
+       pos!=mvParent.end();++pos) if( (*this) > (**pos) ) **pos = *this;
 }
 
 bool RefinableObjClock::HasParent(const RefinableObjClock &clock) const
