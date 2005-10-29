@@ -186,8 +186,8 @@ Molecule *ZScatterer2Molecule(ZScatterer *scatt)
    mol->SetY(y0);
    mol->SetZ(z0);
    mol->UpdateDisplay();
-   return mol;
    VFN_DEBUG_EXIT("ZScatterer2Molecule()",6)
+   return mol;
 }
 
 ////////////////////////////////////////////////////////////////////////
