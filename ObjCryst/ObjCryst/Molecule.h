@@ -460,10 +460,15 @@ class Quaternion
 struct StretchMode
 {
    virtual ~StretchMode();
-   /// Calculate the derivative of the Molecule's Log(likelihood) and atomic psoitions
-   /// versus a change of the bond length. The result is stored in mLLKDeriv and mLLKDerivXYZ,
-   /// as well as in the various lists of restraints broken by this mode.
-   virtual void CalcDeriv()const=0;
+   /** Calculate the derivative of the Molecule's Log(likelihood) and atomic positions
+   * versus a change of the bond length. The result is stored in mLLKDeriv and mLLKDerivXYZ,
+   * as well as in the various lists of restraints broken by this mode.
+   *
+   * \param derivllk: if false, the derivative of the overall llk will not be computed, only
+   * the derivative of the atomic positions.
+   **/
+   
+   virtual void CalcDeriv(const bool derivllk=true)const=0;
    /// Print one-line list of atoms moved
    virtual void Print(ostream &os,bool full=true)const=0;
    /// Move the atoms according to this mode
@@ -506,10 +511,7 @@ struct StretchModeBondLength:public StretchMode
    */
    StretchModeBondLength(MolAtom &at0,MolAtom &at1,const MolBond *pBond);
    virtual ~StretchModeBondLength();
-   /// Calculate the derivative of the Molecule's Log(likelihood) and atomic psoitions
-   /// versus a change of the bond length. The result is stored in mLLKDeriv and mLLKDerivXYZ,
-   /// as well as in the various lists of restraints broken by this mode.
-   virtual void CalcDeriv()const;
+   virtual void CalcDeriv(const bool derivllk=true)const;
    /// Print one-line list of atoms moved
    virtual void Print(ostream &os,bool full=true)const;
    /// Move the atoms according to this mode
@@ -538,10 +540,7 @@ struct StretchModeBondAngle:public StretchMode
    StretchModeBondAngle(MolAtom &at0,MolAtom &at1,MolAtom &at2,
                         const MolBondAngle *pBondAngle);
    virtual ~StretchModeBondAngle();
-   /// Calculate the derivative of the Molecule's Log(likelihood) and atomic psoitions
-   /// versus a change of the angle. The result is stored in mLLKDeriv and mLLKDerivXYZ,
-   /// as well as in the various lists of restraints broken by this mode.
-   virtual void CalcDeriv()const;
+   virtual void CalcDeriv(const bool derivllk=true)const;
    /// Print one-line list of atoms moved
    virtual void Print(ostream &os,bool full=true)const;
    /// Move the atoms according to this mode
@@ -572,10 +571,7 @@ struct StretchModeTorsion:public StretchMode
    StretchModeTorsion(MolAtom &at1,MolAtom &at2,
                       const MolDihedralAngle *pDihedralAngle);
    virtual ~StretchModeTorsion();
-   /// Calculate the derivative of the Molecule's Log(likelihood) and atomic psoitions
-   /// versus a change of the angle. The result is stored in mLLKDeriv and mLLKDerivXYZ,
-   /// as well as in the various lists of restraints broken by this mode.
-   virtual void CalcDeriv()const;
+   virtual void CalcDeriv(const bool derivllk=true)const;
    /// Print one-line list of atoms moved
    virtual void Print(ostream &os,bool full=true)const;
    /// Move the atoms according to this mode
@@ -606,10 +602,7 @@ struct StretchModeTwist:public StretchMode
    */
    StretchModeTwist(MolAtom &at1,MolAtom &at2);
    virtual ~StretchModeTwist();
-   /// Calculate the derivative of the Molecule's Log(likelihood) and atomic psoitions
-   /// versus a change of the angle. The result is stored in mLLKDeriv and mLLKDerivXYZ,
-   /// as well as in the various lists of restraints broken by this mode.
-   virtual void CalcDeriv()const;
+   virtual void CalcDeriv(const bool derivllk=true)const;
    /// Print one-line list of atoms moved
    virtual void Print(ostream &os,bool full=true)const;
    /// Move the atoms according to this mode
@@ -752,7 +745,7 @@ class Molecule: public Scatterer
       void AddRigidGroup(const RigidGroup&,const bool updateDisplay=true);
       /** Remove a rigid group of atoms. See Molecule::mvRigidGroup
       */
-      std::vector<RigidGroup*>::iterator RemoveRigidGroup(const RigidGroup &group);
+      std::vector<RigidGroup*>::iterator RemoveRigidGroup(const RigidGroup &group,const bool updateDisplay=true);
 
       MolAtom &GetAtom(unsigned int i);
       const MolAtom &GetAtom(unsigned int i)const;
@@ -791,6 +784,9 @@ class Molecule: public Scatterer
       /** List of rigid group of atoms. See Molecule::mvRigidGroup
       */
       const std::vector<RigidGroup *>& GetRigidGroupList()const;
+      /** List of rigid group of atoms. See Molecule::mvRigidGroup
+      */
+      std::vector<RigidGroup *>& GetRigidGroupList();
       
       /** Rotate a group of atoms around an axis defined by two atoms
       *
@@ -977,6 +973,7 @@ class Molecule: public Scatterer
          RefinableObjClock mClockBondList;
          RefinableObjClock mClockBondAngleList;
          RefinableObjClock mClockDihedralAngleList;
+         RefinableObjClock mClockRigidGroup;
          RefinableObjClock mClockAtomPosition;
          RefinableObjClock mClockAtomScattPow;
          RefinableObjClock mClockOrientation;
@@ -989,7 +986,6 @@ class Molecule: public Scatterer
          mutable RefinableObjClock mClockStretchModeBondAngle;
          mutable RefinableObjClock mClockStretchModeTorsion;
          mutable RefinableObjClock mClockStretchModeTwist;
-         mutable RefinableObjClock mClockRigidGroup;
          
       // For local minimization (EXPERIMENTAL)
          unsigned long mLocalParamSet;

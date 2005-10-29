@@ -1267,8 +1267,9 @@ mpAtom0(&at0),mpAtom1(&at1),mpBond(pBond)
 
 StretchModeBondLength::~StretchModeBondLength(){}
 
-void StretchModeBondLength::CalcDeriv()const
+void StretchModeBondLength::CalcDeriv(const bool derivllk)const
 {
+   //TAU_PROFILE("StretchModeBondLength::CalcDeriv()","void ()",TAU_DEFAULT);
    // Derivative of the atom positions
       //mDerivXYZ.clear();
       REAL dx=mpAtom1->GetX()-mpAtom0->GetX();
@@ -1288,6 +1289,8 @@ void StretchModeBondLength::CalcDeriv()const
          p->z=dz;
       }
    // Derivative of the LLK
+   if(derivllk)
+   {
       mLLKDeriv=0;
       for(map<const MolBond*,REAL>::const_iterator pos=this->mvpBrokenBond.begin();
           pos!=this->mvpBrokenBond.end();++pos) mLLKDeriv += pos->first->GetDeriv(mDerivXYZ,true);
@@ -1295,6 +1298,7 @@ void StretchModeBondLength::CalcDeriv()const
           pos!=this->mvpBrokenBondAngle.end();++pos) mLLKDeriv += pos->first->GetDeriv(mDerivXYZ,true);
       for(map<const MolDihedralAngle*,REAL>::const_iterator pos=this->mvpBrokenDihedralAngle.begin();
           pos!=this->mvpBrokenDihedralAngle.end();++pos) mLLKDeriv += pos->first->GetDeriv(mDerivXYZ,true);
+   }
 }
 
 void StretchModeBondLength::Print(ostream &os,bool full)const
@@ -1340,8 +1344,9 @@ mpAtom0(&at0),mpAtom1(&at1),mpAtom2(&at2),mpBondAngle(pBondAngle)
 
 StretchModeBondAngle::~StretchModeBondAngle(){}
 
-void StretchModeBondAngle::CalcDeriv()const
+void StretchModeBondAngle::CalcDeriv(const bool derivllk)const
 {
+   //TAU_PROFILE("StretchModeBondAngle::CalcDeriv()","void ()",TAU_DEFAULT);
    // Derivative of the atomic positions
       const REAL x1=mpAtom1->GetX(),
                  y1=mpAtom1->GetY(),
@@ -1381,6 +1386,8 @@ void StretchModeBondAngle::CalcDeriv()const
          p->z=y*vx-x*vy;
       }
    // Derivative of the LLK
+   if(derivllk)
+   {
       mLLKDeriv=0;
       for(map<const MolBond*,REAL>::const_iterator pos=this->mvpBrokenBond.begin();
           pos!=this->mvpBrokenBond.end();++pos) mLLKDeriv += pos->first->GetDeriv(mDerivXYZ,true);
@@ -1388,7 +1395,7 @@ void StretchModeBondAngle::CalcDeriv()const
           pos!=this->mvpBrokenBondAngle.end();++pos) mLLKDeriv += pos->first->GetDeriv(mDerivXYZ,true);
       for(map<const MolDihedralAngle*,REAL>::const_iterator pos=this->mvpBrokenDihedralAngle.begin();
           pos!=this->mvpBrokenDihedralAngle.end();++pos) mLLKDeriv += pos->first->GetDeriv(mDerivXYZ,true);
-
+   }
 }
 
 void StretchModeBondAngle::Print(ostream &os,bool full)const
@@ -1435,8 +1442,9 @@ mpAtom1(&at1),mpAtom2(&at2),mpDihedralAngle(pAngle)
 
 StretchModeTorsion::~StretchModeTorsion(){}
 
-void StretchModeTorsion::CalcDeriv()const
+void StretchModeTorsion::CalcDeriv(const bool derivllk)const
 {
+   //TAU_PROFILE("StretchModeTorsion::CalcDeriv()","void ()",TAU_DEFAULT);
    // Derivative of the LLK
    //mDerivXYZ.clear();
       const REAL x1=mpAtom1->GetX(),
@@ -1464,6 +1472,8 @@ void StretchModeTorsion::CalcDeriv()const
          p->z=y*vx-x*vy;
       }
    // Derivative of the LLK
+   if(derivllk)
+   {
       mLLKDeriv=0;
       for(map<const MolBond*,REAL>::const_iterator pos=this->mvpBrokenBond.begin();
           pos!=this->mvpBrokenBond.end();++pos) mLLKDeriv += pos->first->GetDeriv(mDerivXYZ,true);
@@ -1471,6 +1481,7 @@ void StretchModeTorsion::CalcDeriv()const
           pos!=this->mvpBrokenBondAngle.end();++pos) mLLKDeriv += pos->first->GetDeriv(mDerivXYZ,true);
       for(map<const MolDihedralAngle*,REAL>::const_iterator pos=this->mvpBrokenDihedralAngle.begin();
           pos!=this->mvpBrokenDihedralAngle.end();++pos) mLLKDeriv += pos->first->GetDeriv(mDerivXYZ,true);
+   }
 }
 
 void StretchModeTorsion::Print(ostream &os,bool full)const
@@ -1512,7 +1523,7 @@ mpAtom1(&at1),mpAtom2(&at2)
 
 StretchModeTwist::~StretchModeTwist(){}
 
-void StretchModeTwist::CalcDeriv()const
+void StretchModeTwist::CalcDeriv(const bool derivllk)const
 {// Identical to StretchModeTorsion::CalcDeriv()
    // Derivative of the LLK
    //mDerivXYZ.clear();
@@ -1541,6 +1552,8 @@ void StretchModeTwist::CalcDeriv()const
          p->z=y*vx-x*vy;
       }
    // Derivative of the LLK
+   if(derivllk)
+   {
       mLLKDeriv=0;
       for(map<const MolBond*,REAL>::const_iterator pos=this->mvpBrokenBond.begin();
           pos!=this->mvpBrokenBond.end();++pos) mLLKDeriv += pos->first->GetDeriv(mDerivXYZ,true);
@@ -1548,6 +1561,7 @@ void StretchModeTwist::CalcDeriv()const
           pos!=this->mvpBrokenBondAngle.end();++pos) mLLKDeriv += pos->first->GetDeriv(mDerivXYZ,true);
       for(map<const MolDihedralAngle*,REAL>::const_iterator pos=this->mvpBrokenDihedralAngle.begin();
           pos!=this->mvpBrokenDihedralAngle.end();++pos) mLLKDeriv += pos->first->GetDeriv(mDerivXYZ,true);
+   }
 }
 
 void StretchModeTwist::Print(ostream &os,bool full)const
@@ -1967,6 +1981,8 @@ void Molecule::XMLInput(istream &is,const XMLCrystTag &tag)
 
 void Molecule::BeginOptimization(const bool allowApproximations,const bool enableRestraints)
 {
+   if(mIsbeingRefined) return;
+   TAU_PROFILE("Molecule::BeginOptimization()","void (bool,bool)",TAU_DEFAULT);
    #if 1 // Is doing this automatically too dangerous ?
    if(  (!mIsSelfOptimizing)
       &&(mAutoOptimizeConformation.GetChoice()==0))
@@ -2080,7 +2096,6 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
    TAU_PROFILE_TIMER(timer3,"Molecule::GlobalOptRandomMove 3","", TAU_FIELD);
    TAU_PROFILE_TIMER(timer4,"Molecule::GlobalOptRandomMove 4","", TAU_FIELD);
    TAU_PROFILE_TIMER(timer5,"Molecule::GlobalOptRandomMove 5","", TAU_FIELD);
-   TAU_PROFILE_START(timer1);
    VFN_DEBUG_ENTRY("Molecule::GlobalOptRandomMove()",4)
    mClockScatterer.Click();
    
@@ -2102,6 +2117,7 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
    else
    #endif
    {
+      TAU_PROFILE_START(timer1);
       if(mOptimizeOrientation.GetChoice()==0)
       {//Rotate around an arbitrary vector
          static const REAL amp=mBaseRotationAmplitude/(REAL)RAND_MAX;
@@ -3068,13 +3084,13 @@ void Molecule::AddRigidGroup(const RigidGroup &group,
    if(updateDisplay) this->UpdateDisplay();
 }
 
-vector<RigidGroup*>::iterator Molecule::RemoveRigidGroup(const RigidGroup &g)
+vector<RigidGroup*>::iterator Molecule::RemoveRigidGroup(const RigidGroup &g,const bool updateDisplay)
 {
    vector<RigidGroup*>::iterator pos=find(mvRigidGroup.begin(),mvRigidGroup.end(),&g);
    if(pos==mvRigidGroup.end()) return pos;
    delete *pos;
    pos=mvRigidGroup.erase(pos);
-   this->UpdateDisplay();
+   if(updateDisplay) this->UpdateDisplay();
    return pos;
 }
 
@@ -3123,6 +3139,7 @@ const list<StretchModeBondAngle>& Molecule::GetStretchModeBondAngleList()const{r
 const list<StretchModeTorsion>& Molecule::GetStretchModeTorsionList()const{return mvStretchModeTorsion;}
 
 const std::vector<RigidGroup*>& Molecule::GetRigidGroupList()const{return mvRigidGroup;}
+std::vector<RigidGroup*>& Molecule::GetRigidGroupList(){return mvRigidGroup;}
 
 void Molecule::RotateAtomGroup(const MolAtom &at1,const MolAtom &at2,
                                const set<MolAtom *> &atoms, const REAL angle,
@@ -4103,9 +4120,16 @@ void Molecule::BuildStretchModeBondLength()
    #endif
    VFN_DEBUG_ENTRY("Molecule::BuildStretchModeBondLength()",7)
    this->BuildConnectivityTable();
+   TAU_PROFILE("Molecule::BuildStretchModeBondLength()","void ()",TAU_DEFAULT);
+   TAU_PROFILE_TIMER(timer1,"Molecule::BuildStretchModeBondLength 1","", TAU_FIELD);
+   TAU_PROFILE_TIMER(timer2,"Molecule::BuildStretchModeBondLength 2","", TAU_FIELD);
+   TAU_PROFILE_TIMER(timer3,"Molecule::BuildStretchModeBondLength 3","", TAU_FIELD);
+   TAU_PROFILE_TIMER(timer4,"Molecule::BuildStretchModeBondLength 4","", TAU_FIELD);
+   TAU_PROFILE_TIMER(timer5,"Molecule::BuildStretchModeBondLength 5","", TAU_FIELD);
    mvStretchModeBondLength.clear();
    // Build list of atoms moved when stretching a bond length. Only keep the group
    // of atoms on the smaller side.
+   TAU_PROFILE_START(timer1);
    for(unsigned long i=0;i<mvpBond.size();++i)
    {
       //if((mFlexModel.GetChoice()!=0)&&(false==mvpBond[i]->IsFreeTorsion())) continue;
@@ -4156,91 +4180,13 @@ void Molecule::BuildStretchModeBondLength()
                   break;//we translate exactly half of the atoms, so skip the other half
       }
    }
+   TAU_PROFILE_STOP(timer1);
    
-   // Generate 5 completely random atomic positions
-      this->SaveParamSet(mLocalParamSet);
-      unsigned long paramSetRandom[5];
-      for(unsigned long i=0;i<5;++i)
-      {
-         for(vector<MolAtom*>::iterator pos=mvpAtom.begin();pos!=mvpAtom.end();++pos)
-         {
-            (*pos)->SetX(100.*rand()/(REAL) RAND_MAX);
-            (*pos)->SetY(100.*rand()/(REAL) RAND_MAX);
-            (*pos)->SetZ(100.*rand()/(REAL) RAND_MAX);
-         }
-         paramSetRandom[i]=this->CreateParamSet();
-      }
-   // find bond, bond angles and dihedral angles broken by each mode
+   // find rigid groups broken by each mode
    for(list<StretchModeBondLength>::iterator pos=mvStretchModeBondLength.begin();
        pos!=mvStretchModeBondLength.end();)
    {
-      pos->mvpBrokenBond.clear();
-      pos->mvpBrokenBondAngle.clear();
-      pos->mvpBrokenDihedralAngle.clear();
-      pos->CalcDeriv();
-      #ifdef __DEBUG__
-      cout<<"   DerivLLK for Bond Length stretch mode:"
-          <<pos->mpAtom0->GetName()<<"-"
-          <<pos->mpAtom1->GetName()<<": Moving atoms:";
-      for(set<MolAtom*>::const_iterator atom=pos->mvTranslatedAtomList.begin();
-          atom!=pos->mvTranslatedAtomList.end();++atom)
-         cout<<(*atom)->GetName()<<",";
-      cout<<endl;
-      #endif
-      for(vector<MolBond*>::const_iterator r=mvpBond.begin();r!=mvpBond.end();++r)
-      {
-         // if(*r==pos->mpBond) continue;
-         (*r)->GetLogLikelihood(true,true);
-         REAL d=0;
-         for(unsigned long i=0;i<5;++i)
-         {
-            this->RestoreParamSet(paramSetRandom[i]);
-            d += abs((*r)->GetDeriv(pos->mDerivXYZ));
-         }
-         if(d>0.01)
-         {
-            pos->mvpBrokenBond.insert(make_pair(*r,0));
-            #ifdef __DEBUG__
-            cout<<"       Bond "<<(*r)->GetName()<<": dLength/dl="<<d<<endl;
-            #endif
-         }
-      }
-      for(vector<MolBondAngle*>::const_iterator r=mvpBondAngle.begin();r!=mvpBondAngle.end();++r)
-      {
-         (*r)->GetLogLikelihood(true,true);
-         REAL d=0;
-         for(unsigned long i=0;i<5;++i)
-         {
-            this->RestoreParamSet(paramSetRandom[i]);
-            d += abs((*r)->GetDeriv(pos->mDerivXYZ));
-         }
-         if(abs(d)>0.01)
-         {
-            pos->mvpBrokenBondAngle.insert(make_pair(*r,0));
-            #ifdef __DEBUG__
-            cout<<"       BondAngle:"<<(*r)->GetName()<<": dAngle/dl="<<d<<endl;
-            #endif
-         }
-      }
-      for(vector<MolDihedralAngle*>::const_iterator r=mvpDihedralAngle.begin();
-          r!=mvpDihedralAngle.end();++r)
-      {
-         (*r)->GetLogLikelihood(true,true);
-         REAL d=0;
-         for(unsigned long i=0;i<5;++i)
-         {
-            this->RestoreParamSet(paramSetRandom[i]);
-            d += abs((*r)->GetDeriv(pos->mDerivXYZ));
-         }
-         if(abs(d)>0.01)
-         {
-            pos->mvpBrokenDihedralAngle.insert(make_pair(*r,0));
-            #ifdef __DEBUG__
-            cout<<"       DihedralAngle:"<<(*r)->GetName()<<": dAngle/dl="<<d<<endl;
-            #endif
-         }
-      }
-      //Get rid of stretch modes that break rigid groups
+      TAU_PROFILE_START(timer5);
       bool keep=true;
       for(vector<RigidGroup*>::const_iterator group=mvRigidGroup.begin();
           group!=mvRigidGroup.end();++group)
@@ -4260,18 +4206,139 @@ void Molecule::BuildStretchModeBondLength()
             break;
          }
       }
+      if(keep) ++pos;
+      else pos=mvStretchModeBondLength.erase(pos);
+      TAU_PROFILE_STOP(timer5);
+   }
+   // Generate 5 completely random atomic positions
+      this->SaveParamSet(mLocalParamSet);
+      unsigned long paramSetRandom[5];
+      for(unsigned long i=0;i<5;++i)
+      {
+         for(vector<MolAtom*>::iterator pos=mvpAtom.begin();pos!=mvpAtom.end();++pos)
+         {
+            (*pos)->SetX(100.*rand()/(REAL) RAND_MAX);
+            (*pos)->SetY(100.*rand()/(REAL) RAND_MAX);
+            (*pos)->SetZ(100.*rand()/(REAL) RAND_MAX);
+         }
+         paramSetRandom[i]=this->CreateParamSet();
+      }
+   // find bond lengths broken by each mode
+   for(list<StretchModeBondLength>::iterator pos=mvStretchModeBondLength.begin();
+       pos!=mvStretchModeBondLength.end();)
+   {
+      TAU_PROFILE_START(timer2);
+      bool keep=true;
+      pos->mvpBrokenBond.clear();
+      for(vector<MolBond*>::const_iterator r=mvpBond.begin();r!=mvpBond.end();++r)
+      {
+         unsigned int ct=0;
+         for(set<MolAtom *>::const_iterator at=pos->mvTranslatedAtomList.begin();
+             at!=pos->mvTranslatedAtomList.end();++at)
+         {
+            if(*at==&((*r)->GetAtom1())) ct++;
+            if(*at==&((*r)->GetAtom2())) ct++;
+         }
+         // If we moved either both or non of the bond atom, the bond length is unchanged.
+         if((ct!=0)&&(ct !=2)) pos->mvpBrokenBond.insert(make_pair(*r,0));
+      }
       if(mFlexModel.GetChoice()==2)
       {
-         int nb=pos->mvpBrokenBond.size()+pos->mvpBrokenBondAngle.size()+pos->mvpBrokenDihedralAngle.size();
+         int nb=pos->mvpBrokenBond.size();
          if(pos->mpBond!=0) nb -= 1;
          if(nb>0) keep=false;
       }
       if(keep) ++pos;
       else pos=mvStretchModeBondLength.erase(pos);
+      TAU_PROFILE_STOP(timer2);
+   }
+   // find bond angles broken by each mode
+   for(list<StretchModeBondLength>::iterator pos=mvStretchModeBondLength.begin();
+       pos!=mvStretchModeBondLength.end();)
+   {
+      TAU_PROFILE_START(timer3);
+      bool keep=true;
+      pos->mvpBrokenBondAngle.clear();
+      for(vector<MolBondAngle*>::const_iterator r=mvpBondAngle.begin();r!=mvpBondAngle.end();++r)
+      {
+         unsigned int ct=0;
+         for(set<MolAtom *>::const_iterator at=pos->mvTranslatedAtomList.begin();
+             at!=pos->mvTranslatedAtomList.end();++at)
+         {
+            if(*at==&((*r)->GetAtom1())) ct++;
+            if(*at==&((*r)->GetAtom2())) ct++;
+            if(*at==&((*r)->GetAtom3())) ct++;
+         }
+         bool broken=true;
+         if((ct==0)||(ct==3)) broken=false;
+         if(broken)
+         {// Make sure with derivatives
+            REAL d=0;
+            for(unsigned long i=0;i<5;++i)
+            {
+               this->RestoreParamSet(paramSetRandom[i]);
+               pos->CalcDeriv(false);
+               (*r)->GetLogLikelihood(true,true);
+               d += abs((*r)->GetDeriv(pos->mDerivXYZ));
+               if(d>0.01) break;
+            }
+            if(abs(d)<=0.01) broken=false;
+         }
+         if(broken) pos->mvpBrokenBondAngle.insert(make_pair(*r,0));
+      }
+      if(mFlexModel.GetChoice()==2)
+      {
+         if(pos->mvpBrokenBondAngle.size()>0) keep=false;
+      }
+      if(keep) ++pos;
+      else pos=mvStretchModeBondLength.erase(pos);
+      TAU_PROFILE_STOP(timer3);
+   }
+   // find dihedral angles broken by each mode
+   for(list<StretchModeBondLength>::iterator pos=mvStretchModeBondLength.begin();
+       pos!=mvStretchModeBondLength.end();)
+   {
+      TAU_PROFILE_START(timer4);
+      bool keep=true;
+      pos->mvpBrokenDihedralAngle.clear();
+      for(vector<MolDihedralAngle*>::const_iterator r=mvpDihedralAngle.begin();r!=mvpDihedralAngle.end();++r)
+      {
+         unsigned int ct=0;
+         for(set<MolAtom *>::const_iterator at=pos->mvTranslatedAtomList.begin();
+             at!=pos->mvTranslatedAtomList.end();++at)
+         {
+            if(*at==&((*r)->GetAtom1())) ct++;
+            if(*at==&((*r)->GetAtom2())) ct++;
+            if(*at==&((*r)->GetAtom3())) ct++;
+            if(*at==&((*r)->GetAtom4())) ct++;
+         }
+         bool broken=true;
+         if((ct==0)||(ct==4)) broken=false;
+         if(broken)
+         {// Make sure with derivatives
+            REAL d=0;
+            for(unsigned long i=0;i<5;++i)
+            {
+               this->RestoreParamSet(paramSetRandom[i]);
+               pos->CalcDeriv(false);
+               (*r)->GetLogLikelihood(true,true);
+               d += abs((*r)->GetDeriv(pos->mDerivXYZ));
+               if(d>0.01) break;
+            }
+            if(abs(d)<=0.01) broken=false;
+         }
+         if(broken) pos->mvpBrokenDihedralAngle.insert(make_pair(*r,0));
+      }
+      if(mFlexModel.GetChoice()==2)
+      {
+         if(pos->mvpBrokenDihedralAngle.size()>0) keep=false;
+      }
+      if(keep) ++pos;
+      else pos=mvStretchModeBondLength.erase(pos);
+      TAU_PROFILE_STOP(timer4);
    }
    this->RestoreParamSet(mLocalParamSet);
    for(unsigned long i=0;i<5;++i) this->ClearParamSet(paramSetRandom[i]);
-   
    #if 1
    cout<<"List of Bond Length stretch modes"<<endl;
    for(list<StretchModeBondLength>::const_iterator pos=mvStretchModeBondLength.begin();
@@ -4325,9 +4392,16 @@ void Molecule::BuildStretchModeBondAngle()
    #endif
    VFN_DEBUG_ENTRY("Molecule::BuildStretchModeBondAngle()",10)
    this->BuildConnectivityTable();
+   TAU_PROFILE("Molecule::BuildStretchModeBondAngle()","void ()",TAU_DEFAULT);
+   TAU_PROFILE_TIMER(timer1,"Molecule::BuildStretchModeBondAngle 1","", TAU_FIELD);
+   TAU_PROFILE_TIMER(timer2,"Molecule::BuildStretchModeBondAngle 2","", TAU_FIELD);
+   TAU_PROFILE_TIMER(timer3,"Molecule::BuildStretchModeBondAngle 3","", TAU_FIELD);
+   TAU_PROFILE_TIMER(timer4,"Molecule::BuildStretchModeBondAngle 4","", TAU_FIELD);
+   TAU_PROFILE_TIMER(timer5,"Molecule::BuildStretchModeBondAngle 5","", TAU_FIELD);
    mvStretchModeBondAngle.clear();
    // Build list of atoms moved when stretching a bond angle. Only keep the group
    // of atoms on the smaller side.
+   TAU_PROFILE_START(timer1);
    for(unsigned long i=0;i<mvpAtom.size();++i)
    {
       //if((mFlexModel.GetChoice()!=0)&&(false==mvpBond[i]->IsFreeTorsion())) continue;
@@ -4400,6 +4474,41 @@ void Molecule::BuildStretchModeBondAngle()
          }
       }
    }
+   TAU_PROFILE_STOP(timer1);
+   // find rigid groups broken by each mode
+   for(list<StretchModeBondAngle>::iterator pos=mvStretchModeBondAngle.begin();
+       pos!=mvStretchModeBondAngle.end();)
+   {
+      TAU_PROFILE_START(timer5);
+      bool keep=true;
+      for(vector<RigidGroup*>::const_iterator group=mvRigidGroup.begin();
+          group!=mvRigidGroup.end();++group)
+      {
+         unsigned long ct=0;
+         for(set<MolAtom *>::const_iterator at=(*group)->begin();at!=(*group)->end();++at)
+            ct += pos->mvRotatedAtomList.count(*at);
+         if(ct>0)
+         {
+            // Add the origin atom, which does not move relatively to the rotated atoms
+            ct += (*group)->count(pos->mpAtom1);
+            if(ct!=(*group)->size())
+            {
+               keep=false;
+               #ifdef __DEBUG__
+               pos->Print(cout);
+               cout<<"       Breaks Rigid Group:";
+               for(set<MolAtom *>::const_iterator at=(*group)->begin();at!=(*group)->end();++at)
+                  cout<<(*at)->GetName()<<" ";
+               cout<<endl;
+               #endif
+               break;
+            }
+         }
+      }
+      if(keep) ++pos;
+      else pos=mvStretchModeBondAngle.erase(pos);
+      TAU_PROFILE_STOP(timer5);
+   }
    // Generate 5 completely random atomic positions
       this->SaveParamSet(mLocalParamSet);
       unsigned long paramSetRandom[5];
@@ -4413,116 +4522,139 @@ void Molecule::BuildStretchModeBondAngle()
          }
          paramSetRandom[i]=this->CreateParamSet();
       }
-   // find bond, bond angles and dihedral angles broken by each mode
+   // find bond lengths broken by each mode
    for(list<StretchModeBondAngle>::iterator pos=mvStretchModeBondAngle.begin();
        pos!=mvStretchModeBondAngle.end();)
    {
+      TAU_PROFILE_START(timer2);
+      bool keep=true;
       pos->mvpBrokenBond.clear();
-      pos->mvpBrokenBondAngle.clear();
-      pos->mvpBrokenDihedralAngle.clear();
-      pos->CalcDeriv();
-      #ifdef __DEBUG__
-      cout<<"   DerivLLK for Bond Angle stretch mode:"
-          <<pos->mpAtom0->GetName()<<"-"
-          <<pos->mpAtom1->GetName()<<"-"
-          <<pos->mpAtom2->GetName()<<": Moving atoms:";
-      for(set<MolAtom*>::const_iterator atom=pos->mvRotatedAtomList.begin();
-          atom!=pos->mvRotatedAtomList.end();++atom)
-         cout<<(*atom)->GetName()<<",";
-      cout<<endl;
-      #endif
       for(vector<MolBond*>::const_iterator r=mvpBond.begin();r!=mvpBond.end();++r)
       {
-         (*r)->GetLogLikelihood(true,true);
-         REAL d=0;
-         for(unsigned long i=0;i<5;++i)
+         unsigned int ct=0;
+         for(set<MolAtom *>::const_iterator at=pos->mvRotatedAtomList.begin();
+             at!=pos->mvRotatedAtomList.end();++at)
          {
-            this->RestoreParamSet(paramSetRandom[i]);
-            d += abs((*r)->GetDeriv(pos->mDerivXYZ));
+            if(*at==&((*r)->GetAtom1())) ct++;
+            if(*at==&((*r)->GetAtom2())) ct++;
          }
-         if(abs(d)>0.01)
-         {
-            pos->mvpBrokenBond.insert(make_pair(*r,0.0));
-            #ifdef __DEBUG__
-            cout<<"       Bond "<<(*r)->GetName()<<": dLength/da="<<d<<endl;
-            #endif
-         }
-      }
-      for(vector<MolBondAngle*>::const_iterator r=mvpBondAngle.begin();r!=mvpBondAngle.end();++r)
-      {
-         //if(*r==pos->mpBondAngle) continue;
-         (*r)->GetLogLikelihood(true,true);
-         REAL d=0;
-         for(unsigned long i=0;i<5;++i)
-         {
-            this->RestoreParamSet(paramSetRandom[i]);
-            d += abs((*r)->GetDeriv(pos->mDerivXYZ));
-         }
-         if(abs(d)>0.01)
-         {
-            pos->mvpBrokenBondAngle.insert(make_pair(*r,0.0));
-            #ifdef __DEBUG__
-            cout<<"       BondAngle:"<<(*r)->GetName()<<": dAngle/da="<<d<<endl;
-            #endif
-         }
-      }
-      for(vector<MolDihedralAngle*>::const_iterator r=mvpDihedralAngle.begin();
-          r!=mvpDihedralAngle.end();++r)
-      {
-         (*r)->GetLogLikelihood(true,true);
-         REAL d=0;
-         for(unsigned long i=0;i<5;++i)
-         {
-            this->RestoreParamSet(paramSetRandom[i]);
-            d += abs((*r)->GetDeriv(pos->mDerivXYZ));
-         }
-         if(abs(d)>0.01)
-         {
-            pos->mvpBrokenDihedralAngle.insert(make_pair(*r,0.0));
-            #ifdef __DEBUG__
-            cout<<"       DihedralAngle:"<<(*r)->GetName()<<": dAngle/da="<<d<<endl;
-            #endif
-         }
-      }
-      //Get rid of stretch modes that break rigid groups
-      bool keep=true;
-      for(vector<RigidGroup*>::const_iterator group=mvRigidGroup.begin();
-          group!=mvRigidGroup.end();++group)
-      {
-         unsigned long ct=0;
-         for(set<MolAtom *>::const_iterator at=(*group)->begin();at!=(*group)->end();++at)
-            ct += pos->mvRotatedAtomList.count(*at);
-         if(ct>0)
-         {
-            // Add atom1 and atom2 to the count only if they are in the group
-            // They do not move in absolute or relatively to the group.
-            ct += (*group)->count(pos->mpAtom1);
-            ct += (*group)->count(pos->mpAtom2);
-            if(ct!=(*group)->size())
+         bool broken=true;
+         // If we moved either both or non of the bond atom, the bond length is unchanged.
+         if((ct==0)||(ct==2)) broken=false;
+         if(broken)
+         {// Make sure with derivatives
+            REAL d=0;
+            for(unsigned long i=0;i<5;++i)
             {
-               keep=false;
-               #ifdef __DEBUG__
-               cout<<"       Breaks Rigid Group:";
-               for(set<MolAtom *>::const_iterator at=(*group)->begin();at!=(*group)->end();++at)
-                  cout<<(*at)->GetName()<<" ";
-               cout<<endl;
-               #endif
-               break;
+               this->RestoreParamSet(paramSetRandom[i]);
+               pos->CalcDeriv(false);
+               (*r)->GetLogLikelihood(true,true);
+               d += abs((*r)->GetDeriv(pos->mDerivXYZ));
+               if(d>0.01) break;
             }
+            if(abs(d)<=0.01) broken=false;
          }
+         if(broken) pos->mvpBrokenBond.insert(make_pair(*r,0));
       }
       if(mFlexModel.GetChoice()==2)
       {
-         int nb=pos->mvpBrokenBond.size()+pos->mvpBrokenBondAngle.size()+pos->mvpBrokenDihedralAngle.size();
+         if(pos->mvpBrokenBond.size()>0) keep=false;
+      }
+      if(keep) ++pos;
+      else pos=mvStretchModeBondAngle.erase(pos);
+      TAU_PROFILE_STOP(timer2);
+   }
+   // find bond angles broken by each mode
+   for(list<StretchModeBondAngle>::iterator pos=mvStretchModeBondAngle.begin();
+       pos!=mvStretchModeBondAngle.end();)
+   {
+      TAU_PROFILE_START(timer3);
+      bool keep=true;
+      pos->mvpBrokenBondAngle.clear();
+      for(vector<MolBondAngle*>::const_iterator r=mvpBondAngle.begin();r!=mvpBondAngle.end();++r)
+      {
+         unsigned int ct=0;
+         for(set<MolAtom *>::const_iterator at=pos->mvRotatedAtomList.begin();
+             at!=pos->mvRotatedAtomList.end();++at)
+         {
+            if(*at==&((*r)->GetAtom1())) ct++;
+            if(*at==&((*r)->GetAtom2())) ct++;
+            if(*at==&((*r)->GetAtom3())) ct++;
+         }
+         bool broken=true;
+         if(ct==0) broken=false;
+         if(ct==3) broken=false;
+         if(broken)
+         {// Make sure with derivatives
+            REAL d=0;
+            for(unsigned long i=0;i<5;++i)
+            {
+               this->RestoreParamSet(paramSetRandom[i]);
+               pos->CalcDeriv(false);
+               (*r)->GetLogLikelihood(true,true);
+               d += abs((*r)->GetDeriv(pos->mDerivXYZ));
+               if(d>0.01) break;
+            }
+            if(abs(d)<=0.01) broken=false;
+         }
+         if(broken) pos->mvpBrokenBondAngle.insert(make_pair(*r,0));
+      }
+      if(mFlexModel.GetChoice()==2)
+      {
+         int nb=pos->mvpBrokenBond.size();
          if(pos->mpBondAngle!=0) nb -= 1;
          if(nb>0) keep=false;
       }
       if(keep) ++pos;
       else pos=mvStretchModeBondAngle.erase(pos);
+      TAU_PROFILE_STOP(timer3);
+   }
+   // find dihedral angles broken by each mode
+   for(list<StretchModeBondAngle>::iterator pos=mvStretchModeBondAngle.begin();
+       pos!=mvStretchModeBondAngle.end();)
+   {
+      TAU_PROFILE_START(timer4);
+      bool keep=true;
+      pos->mvpBrokenDihedralAngle.clear();
+      for(vector<MolDihedralAngle*>::const_iterator r=mvpDihedralAngle.begin();r!=mvpDihedralAngle.end();++r)
+      {
+         unsigned int ct=0;
+         for(set<MolAtom *>::const_iterator at=pos->mvRotatedAtomList.begin();
+             at!=pos->mvRotatedAtomList.end();++at)
+         {
+            if(*at==&((*r)->GetAtom1())) ct++;
+            if(*at==&((*r)->GetAtom2())) ct++;
+            if(*at==&((*r)->GetAtom3())) ct++;
+            if(*at==&((*r)->GetAtom4())) ct++;
+         }
+         bool broken=true;
+         if(ct==0) broken=false;
+         if(ct==4) broken=false;
+         if(broken)
+         {// Make sure with derivatives
+            REAL d=0;
+            for(unsigned long i=0;i<5;++i)
+            {
+               this->RestoreParamSet(paramSetRandom[i]);
+               pos->CalcDeriv(false);
+               (*r)->GetLogLikelihood(true,true);
+               d += abs((*r)->GetDeriv(pos->mDerivXYZ));
+               if(d>0.01) break;
+            }
+            if(abs(d)<=0.01) broken=false;
+         }
+         if(broken) pos->mvpBrokenDihedralAngle.insert(make_pair(*r,0));
+      }
+      if(mFlexModel.GetChoice()==2)
+      {
+         if(pos->mvpBrokenDihedralAngle.size()>0) keep=false;
+      }
+      if(keep) ++pos;
+      else pos=mvStretchModeBondAngle.erase(pos);
+      TAU_PROFILE_STOP(timer4);
    }
    this->RestoreParamSet(mLocalParamSet);
    for(unsigned long i=0;i<5;++i) this->ClearParamSet(paramSetRandom[i]);
-   
    #if 1
    cout<<"List of Bond Angle stretch modes"<<endl;
    for(list<StretchModeBondAngle>::const_iterator pos=mvStretchModeBondAngle.begin();
@@ -4577,6 +4709,12 @@ void Molecule::BuildStretchModeTorsion()
       &&(mClockStretchModeTorsion>mClockDihedralAngleList)) return;
    #endif
    VFN_DEBUG_ENTRY("Molecule::BuildStretchModeTorsion()",7)
+   TAU_PROFILE("Molecule::BuildStretchModeTorsion()","void ()",TAU_DEFAULT);
+   TAU_PROFILE_TIMER(timer1,"Molecule::BuildStretchModeTorsion 1","", TAU_FIELD);
+   TAU_PROFILE_TIMER(timer2,"Molecule::BuildStretchModeTorsion 2","", TAU_FIELD);
+   TAU_PROFILE_TIMER(timer3,"Molecule::BuildStretchModeTorsion 3","", TAU_FIELD);
+   TAU_PROFILE_TIMER(timer4,"Molecule::BuildStretchModeTorsion 4","", TAU_FIELD);
+   TAU_PROFILE_TIMER(timer5,"Molecule::BuildStretchModeTorsion 5","", TAU_FIELD);
    this->BuildConnectivityTable();
    mvStretchModeTorsion.clear();
    // Build list of atoms moved when changing the angle. Only keep the group
@@ -4748,6 +4886,41 @@ void Molecule::BuildStretchModeTorsion()
          }
       }
    }
+   // find rigid groups broken by each mode
+   for(list<StretchModeTorsion>::iterator pos=mvStretchModeTorsion.begin();
+       pos!=mvStretchModeTorsion.end();)
+   {
+      TAU_PROFILE_START(timer5);
+      bool keep=true;
+      for(vector<RigidGroup*>::const_iterator group=mvRigidGroup.begin();
+          group!=mvRigidGroup.end();++group)
+      {
+         unsigned long ct=0;
+         for(set<MolAtom *>::const_iterator at=(*group)->begin();at!=(*group)->end();++at)
+            ct += pos->mvRotatedAtomList.count(*at);
+         if(ct>0)
+         {
+            // Add the axis atoms, which do not move relatively to the rotated atoms
+            ct += (*group)->count(pos->mpAtom1);
+            ct += (*group)->count(pos->mpAtom2);
+            if(ct!=(*group)->size())
+            {
+               keep=false;
+               #ifdef __DEBUG__
+               pos->Print(cout);
+               cout<<"       Breaks Rigid Group:";
+               for(set<MolAtom *>::const_iterator at=(*group)->begin();at!=(*group)->end();++at)
+                  cout<<(*at)->GetName()<<" ";
+               cout<<endl;
+               #endif
+               break;
+            }
+         }
+      }
+      if(keep) ++pos;
+      else pos=mvStretchModeTorsion.erase(pos);
+      TAU_PROFILE_STOP(timer5);
+   }
    // Generate 5 completely random atomic positions
       this->SaveParamSet(mLocalParamSet);
       unsigned long paramSetRandom[5];
@@ -4761,113 +4934,136 @@ void Molecule::BuildStretchModeTorsion()
          }
          paramSetRandom[i]=this->CreateParamSet();
       }
-   // find bond, bond angles and dihedral angles broken by each mode
+   // find bond lengths broken by each mode
    for(list<StretchModeTorsion>::iterator pos=mvStretchModeTorsion.begin();
        pos!=mvStretchModeTorsion.end();)
    {
+      TAU_PROFILE_START(timer2);
+      bool keep=true;
       pos->mvpBrokenBond.clear();
-      pos->mvpBrokenBondAngle.clear();
-      pos->mvpBrokenDihedralAngle.clear();
-      pos->CalcDeriv();
-      #ifdef __DEBUG__
-      cout<<"   DerivLLK for Torsion mode around:"
-          <<pos->mpAtom1->GetName()<<"-"
-          <<pos->mpAtom2->GetName()<<": Moving atoms:";
-      for(set<MolAtom*>::const_iterator atom=pos->mvRotatedAtomList.begin();
-          atom!=pos->mvRotatedAtomList.end();++atom)
-         cout<<(*atom)->GetName()<<",";
-      cout<<endl;
-      #endif
       for(vector<MolBond*>::const_iterator r=mvpBond.begin();r!=mvpBond.end();++r)
       {
-         (*r)->GetLogLikelihood(true,true);
-         REAL d=0;
-         for(unsigned long i=0;i<5;++i)
+         unsigned int ct=0;
+         for(set<MolAtom *>::const_iterator at=pos->mvRotatedAtomList.begin();
+             at!=pos->mvRotatedAtomList.end();++at)
          {
-            this->RestoreParamSet(paramSetRandom[i]);
-            d += abs((*r)->GetDeriv(pos->mDerivXYZ));
+            if(*at==&((*r)->GetAtom1())) ct++;
+            if(*at==&((*r)->GetAtom2())) ct++;
          }
-         if(abs(d)>0.1)
-         {
-            #ifdef __DEBUG__
-            cout<<"       Bond "<<(*r)->GetName()
-                <<": dLength/da="<<d<<endl;
-            #endif
-            pos->mvpBrokenBond.insert(make_pair(*r,0.0));
-         }
-      }
-      for(vector<MolBondAngle*>::const_iterator r=mvpBondAngle.begin();r!=mvpBondAngle.end();++r)
-      {
-         (*r)->GetLogLikelihood(true,true);
-         REAL d=0;
-         for(unsigned long i=0;i<5;++i)
-         {
-            this->RestoreParamSet(paramSetRandom[i]);
-            d += abs((*r)->GetDeriv(pos->mDerivXYZ));
-         }
-         if(abs(d)>0.01)
-         {
-            #ifdef __DEBUG__
-            cout<<"       BondAngle:"<<(*r)->GetName()<<": dAngle/da="<<d<<endl;
-            #endif
-            pos->mvpBrokenBondAngle.insert(make_pair(*r,0.0));
-         }
-      }
-      for(vector<MolDihedralAngle*>::const_iterator r=mvpDihedralAngle.begin();
-          r!=mvpDihedralAngle.end();++r)
-      {
-         //if(*r==pos->mpDihedralAngle) continue;
-         (*r)->GetLogLikelihood(true,true);
-         REAL d=0;
-         for(unsigned long i=0;i<5;++i)
-         {
-            this->RestoreParamSet(paramSetRandom[i]);
-            d += abs((*r)->GetDeriv(pos->mDerivXYZ));
-         }
-         if(abs(d)>0.01)
-         {
-            #ifdef __DEBUG__
-            cout<<"       DihedralAngle:"<<(*r)->GetName()<<": dAngle/da="<<d<<endl;
-            #endif
-            pos->mvpBrokenDihedralAngle.insert(make_pair(*r,0.0));
-         }
-      }
-      //Get rid of stretch modes that break rigid groups
-      bool keep=true;
-      for(vector<RigidGroup*>::const_iterator group=mvRigidGroup.begin();
-          group!=mvRigidGroup.end();++group)
-      {
-         unsigned long ct=0;
-         for(set<MolAtom *>::const_iterator at=(*group)->begin();at!=(*group)->end();++at)
-            ct += pos->mvRotatedAtomList.count(*at);
-         if(ct>0)
-         {
-            // Add atom1 and atom2 to the count only if they are in the group
-            // They do not move in absolute or relatively to the group.
-            ct += (*group)->count(pos->mpAtom1);
-            ct += (*group)->count(pos->mpAtom2);
-            if(ct!=(*group)->size())
+         bool broken=true;
+         // If we moved either both or non of the bond atom, the bond length is unchanged.
+         if((ct==0)||(ct==2)) broken=false;
+         if(broken)
+         {// Make sure with derivatives
+            REAL d=0;
+            for(unsigned long i=0;i<5;++i)
             {
-               keep=false;
-               #ifdef __DEBUG__
-               cout<<"       Breaks Rigid Group:"<<ct<<"!="<<(*group)->size()<<":";
-               for(set<MolAtom *>::const_iterator at=(*group)->begin();at!=(*group)->end();++at)
-                  cout<<(*at)->GetName()<<" ";
-               cout<<endl;
-               #endif
-               break;
+               this->RestoreParamSet(paramSetRandom[i]);
+               pos->CalcDeriv(false);
+               (*r)->GetLogLikelihood(true,true);
+               d += abs((*r)->GetDeriv(pos->mDerivXYZ));
+               if(d>0.01) break;
             }
+            if(abs(d)<=0.01) broken=false;
          }
+         if(broken) pos->mvpBrokenBond.insert(make_pair(*r,0));
       }
       if(mFlexModel.GetChoice()==2)
       {
-         int nb=pos->mvpBrokenBond.size()+pos->mvpBrokenBondAngle.size()+pos->mvpBrokenDihedralAngle.size();
+         if(pos->mvpBrokenBond.size()>0) keep=false;
+      }
+      if(keep) ++pos;
+      else pos=mvStretchModeTorsion.erase(pos);
+      TAU_PROFILE_STOP(timer2);
+   }
+   // find bond angles broken by each mode
+   for(list<StretchModeTorsion>::iterator pos=mvStretchModeTorsion.begin();
+       pos!=mvStretchModeTorsion.end();)
+   {
+      TAU_PROFILE_START(timer3);
+      bool keep=true;
+      pos->mvpBrokenBondAngle.clear();
+      for(vector<MolBondAngle*>::const_iterator r=mvpBondAngle.begin();r!=mvpBondAngle.end();++r)
+      {
+         unsigned int ct=0;
+         for(set<MolAtom *>::const_iterator at=pos->mvRotatedAtomList.begin();
+             at!=pos->mvRotatedAtomList.end();++at)
+         {
+            if(*at==&((*r)->GetAtom1())) ct++;
+            if(*at==&((*r)->GetAtom2())) ct++;
+            if(*at==&((*r)->GetAtom3())) ct++;
+         }
+         bool broken=true;
+         if((ct==0)||(ct==3)) broken=false;
+         if(broken)
+         {// Make sure with derivatives
+            REAL d=0;
+            for(unsigned long i=0;i<5;++i)
+            {
+               this->RestoreParamSet(paramSetRandom[i]);
+               pos->CalcDeriv(false);
+               (*r)->GetLogLikelihood(true,true);
+               d += abs((*r)->GetDeriv(pos->mDerivXYZ));
+               if(d>0.01) break;
+            }
+            if(abs(d)<=0.01) broken=false;
+         }
+         if(broken) pos->mvpBrokenBondAngle.insert(make_pair(*r,0));
+      }
+      if(mFlexModel.GetChoice()==2)
+      {
+         if(pos->mvpBrokenBond.size()>0) keep=false;
+      }
+      if(keep) ++pos;
+      else pos=mvStretchModeTorsion.erase(pos);
+      TAU_PROFILE_STOP(timer3);
+   }
+   // find dihedral angles broken by each mode
+   for(list<StretchModeTorsion>::iterator pos=mvStretchModeTorsion.begin();
+       pos!=mvStretchModeTorsion.end();)
+   {
+      TAU_PROFILE_START(timer4);
+      bool keep=true;
+      pos->mvpBrokenDihedralAngle.clear();
+      for(vector<MolDihedralAngle*>::const_iterator r=mvpDihedralAngle.begin();r!=mvpDihedralAngle.end();++r)
+      {
+         unsigned int ct=0;
+         for(set<MolAtom *>::const_iterator at=pos->mvRotatedAtomList.begin();
+             at!=pos->mvRotatedAtomList.end();++at)
+         {
+            if(*at==&((*r)->GetAtom1())) ct++;
+            if(*at==&((*r)->GetAtom2())) ct++;
+            if(*at==&((*r)->GetAtom3())) ct++;
+            if(*at==&((*r)->GetAtom4())) ct++;
+         }
+         bool broken=true;
+         if((ct==0)||(ct==4)) broken=false;
+         if(broken)
+         {// Make sure with derivatives
+            REAL d=0;
+            for(unsigned long i=0;i<5;++i)
+            {
+               this->RestoreParamSet(paramSetRandom[i]);
+               pos->CalcDeriv(false);
+               (*r)->GetLogLikelihood(true,true);
+               d += abs((*r)->GetDeriv(pos->mDerivXYZ));
+               if(d>0.01) break;
+            }
+            if(abs(d)<=0.01) broken=false;
+         }
+         if(broken) pos->mvpBrokenDihedralAngle.insert(make_pair(*r,0));
+      }
+      if(mFlexModel.GetChoice()==2)
+      {
+         int nb=pos->mvpBrokenDihedralAngle.size();
          if(pos->mpDihedralAngle!=0) nb -= 1;
          if(nb>0) keep=false;
       }
       if(keep) ++pos;
       else pos=mvStretchModeTorsion.erase(pos);
+      TAU_PROFILE_STOP(timer4);
    }
+
    for(unsigned long i=0;i<5;++i) this->ClearParamSet(paramSetRandom[i]);
    this->RestoreParamSet(mLocalParamSet);
    
