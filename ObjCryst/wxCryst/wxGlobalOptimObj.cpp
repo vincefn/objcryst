@@ -244,6 +244,12 @@ void WXOptimizationObj::OnSelectParamSet(wxCommandEvent &event)
            <<this->GetOptimizationObj().mvSavedParamSet[n].second
            <<", now cost="<<this->GetOptimizationObj().GetLogLikelihood()<<endl;
    }
+   else
+   {
+      wxMessageDialog bad(this,"Impossible ! The list of parameters has been changed !",
+                               "Impossible ! The list of parameters has been changed !",wxOK|wxICON_EXCLAMATION);
+      bad.ShowModal();
+   }
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -373,6 +379,11 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(10000000),mNbRun(-1)
       pWXFieldNbRun->SetToolTip(_T("Number of runs to perform (for Multiple Runs).\n")
                                 _T("Use -1 (the default) to run an infinite number of Runs.\n\n")
                                 _T("The model will be randomized at the beginning of each run.\n"));
+   // Best cost so far
+      WXFieldPar<REAL> *pWXFieldBestCost=new WXFieldPar<REAL>(this,"Overall Best Cost:",-1,&(mpMonteCarloObj->GetBestCost()),70);
+      mpSizer->Add(pWXFieldBestCost);
+      mList.Add(pWXFieldBestCost);
+      pWXFieldBestCost->SetToolTip("Overall (all runs) Best Cost");
    this->BottomLayout(0);
    this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXMonteCarloObj::WXMonteCarloObj()",7)

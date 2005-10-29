@@ -206,6 +206,12 @@ class OptimizationObj
       MainTracker& GetMainTracker();
       /// Get the MainTracker
       const MainTracker& GetMainTracker()const;
+      RefObjOpt& GetXMLAutoSaveOption();
+      const RefObjOpt& GetXMLAutoSaveOption()const;
+      /// Access to current best cost
+      const REAL& GetBestCost()const;
+      /// Access to current best cost
+      REAL& GetBestCost();
    protected:
       /// \internal Prepare mRefParList for the refinement
       void PrepareRefParList();

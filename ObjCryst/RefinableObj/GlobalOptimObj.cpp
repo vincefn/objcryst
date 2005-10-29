@@ -265,6 +265,12 @@ MainTracker& OptimizationObj::GetMainTracker(){return mMainTracker;}
 
 const MainTracker& OptimizationObj::GetMainTracker()const{return mMainTracker;}
 
+RefObjOpt& OptimizationObj::GetXMLAutoSaveOption() {return mXMLAutoSave;}
+const RefObjOpt& OptimizationObj::GetXMLAutoSaveOption()const {return mXMLAutoSave;}
+
+const REAL& OptimizationObj::GetBestCost()const{return mBestCost;}
+REAL& OptimizationObj::GetBestCost(){return mBestCost;}
+
 void OptimizationObj::PrepareRefParList()
 {
    VFN_DEBUG_ENTRY("OptimizationObj::PrepareRefParList()",6)
@@ -545,12 +551,16 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
    mBestCost=mCurrentCost;
    this->TagNewBestConfig();
    mvObjWeight.clear();
+   long nbTrialCumul=0;
+   const long nbCycle0=nbCycle;
+	Chronometer chrono;
    while(nbCycle!=0)
    {
       if(!silent) cout <<"MonteCarloObj::MultiRunOptimize: Starting Run#"<<abs(nbCycle)<<endl;
       nbStep=nbStep0;
       for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).RandomizeConfiguration();
       mMainTracker.ClearValues();
+      chrono.start();
       switch(mGlobalOptimType.GetChoice())
       {
          case GLOBAL_OPTIM_SIMULATED_ANNEALING:
@@ -567,6 +577,11 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
          {
          }
       }
+      nbTrialCumul+=(nbStep0-nbStep);
+      if(finalcost>1)
+         cout<<"Finished Run #"<<nbCycle0-nbCycle<<", final cost="
+             <<this->GetLogLikelihood()<<", nbTrial="<< nbStep0-nbStep<<" ("<<chrono.seconds()
+             <<" seconds), so far <nbTrial>="<< nbTrialCumul/(nbCycle0-nbCycle+1)<<endl;
       nbStep=nbStep0;
       this->UpdateDisplay();
       stringstream s;
@@ -618,6 +633,10 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
    this->UpdateDisplay();
       
    for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).EndOptimization();
+   
+   if(finalcost>1)
+      cout<<endl<<"Finished all runs, number of trials to reach cost="
+          <<finalcost<<" : <nbTrial>="<<nbTrialCumul/(nbCycle0-nbCycle)<<endl;
    VFN_DEBUG_EXIT("MonteCarloObj::MultiRunOptimize()",5)
 }
 
