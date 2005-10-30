@@ -4608,6 +4608,11 @@
 		BF033A7109156C6400BB8A5B /* Release-Universal */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					ppc,
+					ppc7400,
+					ppc970,
+				);
 				COPY_PHASE_STRIP = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G3;
@@ -4624,6 +4629,8 @@
 					Carbon,
 				);
 				OTHER_REZFLAGS = "";
+				PER_ARCH_CFLAGS_ppc = "-mtune=G3";
+				PER_ARCH_CFLAGS_ppc970 = "-mtune=G5 -maltivec -ftree-vectorize";
 				PREBINDING = NO;
 				PRODUCT_NAME = newmat;
 				SECTORDER_FLAGS = "";
@@ -4638,6 +4645,11 @@
 		BF033A7209156C6400BB8A5B /* Release-Universal */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					ppc,
+					ppc7400,
+					ppc970,
+				);
 				COPY_PHASE_STRIP = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G3;
@@ -4657,6 +4669,8 @@
 					Carbon,
 				);
 				OTHER_REZFLAGS = "";
+				PER_ARCH_CFLAGS_ppc = "-mtune=G3";
+				PER_ARCH_CFLAGS_ppc970 = "-mtune=G5 -maltivec -ftree-vectorize";
 				PREBINDING = NO;
 				PRODUCT_NAME = cctbx;
 				SECTORDER_FLAGS = "";
