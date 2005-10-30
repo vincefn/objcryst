@@ -209,6 +209,7 @@ int main (int argc, char *argv[])
    
    bool useGUI(true);
    long nbTrial(1000000);
+   long nbRun(1);
    REAL finalCost=0.;
    bool silent=false;
    string outfilename("Fox-out.xml");
@@ -255,6 +256,14 @@ int main (int argc, char *argv[])
             stringstream sstr(argv[i]);
             sstr >> nbTrial;
             cout << "Fox will run for "<<nbTrial<<" trials"<<endl;
+            continue;
+         }
+         if(string("--nbrun")==string(argv[i]))
+         {
+            ++i;
+            stringstream sstr(argv[i]);
+            sstr >> nbRun;
+            cout << "Fox will do "<<nbRun<<" runs, randomizing before each run"<<endl;
             continue;
          }
          if(string("-i")==string(argv[i]))
@@ -314,6 +323,7 @@ int main (int argc, char *argv[])
               <<"   --nogui: run without GUI, automatically launches optimization"<<endl
               <<"      options with --nogui:"<<endl
               <<"         -n 10000     : run for 10000 trials at most (default: 1000000)"<<endl
+              <<"         --nbrun 5     : do 5 runs, randomizing before each run (default: 1), use -1 to run indefinitely"<<endl
               <<"         -o out.xml   : output in 'out.xml'"<<endl
               <<"         --randomize  : randomize initial configuration"<<endl
               <<"         --silent     : (almost) no text output"<<endl
@@ -335,9 +345,20 @@ int main (int argc, char *argv[])
    if(!useGUI)
    {
       if(nbTrial!=0)
-         for(int i=0;i<gOptimizationObjRegistry.GetNb();i++)
-            for(int j=0;j<5;j++)
-               gOptimizationObjRegistry.GetObj(i).Optimize(nbTrial,silent,finalCost);
+      {
+         if(nbRun==1)
+         {
+            for(int i=0;i<gOptimizationObjRegistry.GetNb();i++)
+                  gOptimizationObjRegistry.GetObj(i).Optimize(nbTrial,silent,finalCost);
+         }
+         else
+         {
+            for(int i=0;i<gOptimizationObjRegistry.GetNb();i++)
+               gOptimizationObjRegistry.GetObj(i).GetXMLAutoSaveOption().SetChoice(5);
+            for(int i=0;i<gOptimizationObjRegistry.GetNb();i++)
+               gOptimizationObjRegistry.GetObj(i).MultiRunOptimize(nbRun,nbTrial,silent,finalCost);
+         }
+      }
       string tmpstr=outfilename;
       if(filenameInsertCost>=0)
       {
@@ -350,6 +371,7 @@ int main (int argc, char *argv[])
       cout <<"End of Fox execution. Bye !"<<endl;
       #ifdef __WX__CRYST__
       this->OnExit();
+      exit(0);
       #endif
    }
 #ifdef __WX__CRYST__
