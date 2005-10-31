@@ -4605,11 +4605,10 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		BF033A7109156C6400BB8A5B /* Release-Universal */ = {
+		BF033A7109156C6400BB8A5B /* Aqua-Universal */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = (
-					ppc,
 					ppc7400,
 					ppc970,
 				);
@@ -4622,14 +4621,14 @@
 				GCC_UNROLL_LOOPS = YES;
 				INSTALL_PATH = /usr/local/lib;
 				LIBRARY_STYLE = STATIC;
-				OPTIMIZATION_CFLAGS = "-O0";
+				OPTIMIZATION_CFLAGS = "-O3";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = (
 					"-framework",
 					Carbon,
 				);
 				OTHER_REZFLAGS = "";
-				PER_ARCH_CFLAGS_ppc = "-mtune=G3";
+				PER_ARCH_CFLAGS_ppc7400 = "-mtune=G4 -maltivec -ftree-vectorize";
 				PER_ARCH_CFLAGS_ppc970 = "-mtune=G5 -maltivec -ftree-vectorize";
 				PREBINDING = NO;
 				PRODUCT_NAME = newmat;
@@ -4640,13 +4639,12 @@
 					"-Wno-unknown-pragmas",
 				);
 			};
-			name = "Release-Universal";
+			name = "Aqua-Universal";
 		};
-		BF033A7209156C6400BB8A5B /* Release-Universal */ = {
+		BF033A7209156C6400BB8A5B /* Aqua-Universal */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = (
-					ppc,
 					ppc7400,
 					ppc970,
 				);
@@ -4662,14 +4660,14 @@
 				);
 				INSTALL_PATH = /usr/local/lib;
 				LIBRARY_STYLE = STATIC;
-				OPTIMIZATION_CFLAGS = "-O0";
+				OPTIMIZATION_CFLAGS = "-O3";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = (
 					"-framework",
 					Carbon,
 				);
 				OTHER_REZFLAGS = "";
-				PER_ARCH_CFLAGS_ppc = "-mtune=G3";
+				PER_ARCH_CFLAGS_ppc7400 = "-mtune=G4 -maltivec -ftree-vectorize";
 				PER_ARCH_CFLAGS_ppc970 = "-mtune=G5 -maltivec -ftree-vectorize";
 				PREBINDING = NO;
 				PRODUCT_NAME = cctbx;
@@ -4680,15 +4678,14 @@
 					"-Wno-unknown-pragmas",
 				);
 			};
-			name = "Release-Universal";
+			name = "Aqua-Universal";
 		};
-		BF033A7309156C6400BB8A5B /* Release-Universal */ = {
+		BF033A7309156C6400BB8A5B /* Aqua-Universal */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = (
 					ppc7400,
 					ppc970,
-					ppc,
 				);
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_LOCATION = NO;
@@ -4749,7 +4746,6 @@
 					"$HOME/dev/wxdir/lib/libwx_mac_gl-2.6.a",
 				);
 				OTHER_REZFLAGS = "";
-				PER_ARCH_CFLAGS_ppc = "-mtune=G3";
 				PER_ARCH_CFLAGS_ppc7400 = "-mtune=G4 -maltivec -ftree-vectorize";
 				PER_ARCH_CFLAGS_ppc970 = "-mtune=G5 -maltivec -ftree-vectorize";
 				PREBINDING = NO;
@@ -4761,37 +4757,36 @@
 					"-Wno-unknown-pragmas",
 				);
 			};
-			name = "Release-Universal";
+			name = "Aqua-Universal";
 		};
-		BF033A7409156C6400BB8A5B /* Release-Universal */ = {
+		BF033A7409156C6400BB8A5B /* Aqua-Universal */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = (
-					ppc750,
 					ppc7400,
 					ppc970,
 				);
 				COPY_PHASE_STRIP = YES;
 				GCC_MODEL_TUNING = "";
 				GCC_OPTIMIZATION_LEVEL = 3;
-				PER_ARCH_CFLAGS_PPC970 = "-mtune=G5 -maltivec -ftree-vectorize";
 				PER_ARCH_CFLAGS_ppc7400 = "-mtune=G4 -maltivec -ftree-vectorize";
+				PER_ARCH_CFLAGS_ppc970 = "-mtune=G5 -maltivec -ftree-vectorize";
 			};
-			name = "Release-Universal";
+			name = "Aqua-Universal";
 		};
-		BF48AEF808924F3F0060B5BE /* Profile */ = {
+		BF48AEF808924F3F0060B5BE /* Aqua-Profile */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
+				GCC_MODEL_TUNING = G3;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
 				GCC_UNROLL_LOOPS = YES;
 				INSTALL_PATH = /usr/local/lib;
 				LIBRARY_STYLE = STATIC;
-				OPTIMIZATION_CFLAGS = "-O0";
+				OPTIMIZATION_CFLAGS = "-O3";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -4807,14 +4802,14 @@
 					"-Wno-unknown-pragmas",
 				);
 			};
-			name = Profile;
+			name = "Aqua-Profile";
 		};
-		BF48AEF908924F3F0060B5BE /* Profile */ = {
+		BF48AEF908924F3F0060B5BE /* Aqua-Profile */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
+				GCC_MODEL_TUNING = G3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
 				HEADER_SEARCH_PATHS = (
@@ -4824,7 +4819,7 @@
 				);
 				INSTALL_PATH = /usr/local/lib;
 				LIBRARY_STYLE = STATIC;
-				OPTIMIZATION_CFLAGS = "-O0";
+				OPTIMIZATION_CFLAGS = "-O3";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -4840,18 +4835,18 @@
 					"-Wno-unknown-pragmas",
 				);
 			};
-			name = Profile;
+			name = "Aqua-Profile";
 		};
-		BF48AEFA08924F3F0060B5BE /* Profile */ = {
+		BF48AEFA08924F3F0060B5BE /* Aqua-Profile */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_LOCATION = NO;
-				GCC_ALTIVEC_EXTENSIONS = YES;
-				GCC_AUTO_VECTORIZATION = YES;
+				GCC_ALTIVEC_EXTENSIONS = NO;
+				GCC_AUTO_VECTORIZATION = NO;
 				GCC_FAST_MATH = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
+				GCC_MODEL_TUNING = G3;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
@@ -4869,7 +4864,7 @@
 				INFOPLIST_FILE = "Fox-Info.plist";
 				INSTALL_PATH = "$(USER_APPS_DIR)";
 				MACOSX_DEPLOYMENT_TARGET = 10.2;
-				OPTIMIZATION_CFLAGS = "-O0";
+				OPTIMIZATION_CFLAGS = "-O3";
 				OTHER_CFLAGS = (
 					"-DHAVE_GLUT",
 					"-D__WX__CRYST__",
@@ -4914,14 +4909,192 @@
 					"-Wno-unknown-pragmas",
 				);
 			};
-			name = Profile;
+			name = "Aqua-Profile";
 		};
-		BF48AEFB08924F3F0060B5BE /* Profile */ = {
+		BF48AEFB08924F3F0060B5BE /* Aqua-Profile */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
+				GCC_FAST_MATH = YES;
+				GCC_MODEL_TUNING = "";
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_STRICT_ALIASING = NO;
 			};
-			name = Profile;
+			name = "Aqua-Profile";
+		};
+		BF72984B09166319006F90D2 /* GTK2 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G3;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				GCC_UNROLL_LOOPS = YES;
+				INSTALL_PATH = /usr/local/lib;
+				LIBRARY_STYLE = STATIC;
+				OPTIMIZATION_CFLAGS = "-O3";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Carbon,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = newmat;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = GTK2;
+		};
+		BF72984C09166319006F90D2 /* GTK2 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G3;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				HEADER_SEARCH_PATHS = (
+					cctbx/cctbx/include/,
+					cctbx/scitbx/include/,
+					cctbx/,
+				);
+				INSTALL_PATH = /usr/local/lib;
+				LIBRARY_STYLE = STATIC;
+				OPTIMIZATION_CFLAGS = "-O3";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Carbon,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = cctbx;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = GTK2;
+		};
+		BF72984D09166319006F90D2 /* GTK2 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEPLOYMENT_LOCATION = NO;
+				GCC_ALTIVEC_EXTENSIONS = NO;
+				GCC_AUTO_VECTORIZATION = NO;
+				GCC_FAST_MATH = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = "";
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "";
+				GCC_UNROLL_LOOPS = NO;
+				HEADER_SEARCH_PATHS = (
+					ObjCryst,
+					../Fox,
+					cctbx,
+					/sw/include/,
+					/usr/X11R6/include/,
+					cctbx/scitbx/include/,
+					cctbx/cctbx/include/,
+					"$HOME/dev/wxgtk/include/wx-2.6/",
+					"$HOME/dev/wxgtk/lib/wx/include/gtk2-ansi-release-static-2.6/",
+				);
+				INFOPLIST_FILE = "Fox-Info.plist";
+				INSTALL_PATH = "$(USER_APPS_DIR)";
+				MACOSX_DEPLOYMENT_TARGET = 10.2;
+				OPTIMIZATION_CFLAGS = "-O3";
+				OTHER_CFLAGS = (
+					"-DHAVE_GLUT",
+					"-D__WX__CRYST__",
+					"-DOBJCRYST_GL",
+					"-DGTK_NO_CHECK_CASTS",
+					"-D__WXGTK__",
+					"-D_FILE_OFFSET_BITS=64",
+					"-D_LARGE_FILES",
+					"-DNO_GCC_PRAGMA",
+				);
+				OTHER_LDFLAGS = (
+					"-L$HOME/dev/wxgtk/lib",
+					"-L/usr/X11R6/lib",
+					"-L/sw/lib",
+					"-framework",
+					IOKit,
+					"-framework",
+					CoreServices,
+					"-framework",
+					System,
+					"-framework",
+					ApplicationServices,
+					"$HOME/dev/wxgtk/lib/libwx_gtk2-2.6.a",
+					"-L/sw/lib",
+					"-lgtk-x11-2.0",
+					"-lgdk-x11-2.0",
+					"-lXrandr",
+					"-lXinerama",
+					"-lXext",
+					"-lXft",
+					"-lfreetype",
+					"-lXrender",
+					"-lfontconfig",
+					"-lX11",
+					"-lXcursor",
+					"-latk-1.0",
+					"-lgdk_pixbuf-2.0",
+					"-lm",
+					"-lpangoxft-1.0",
+					"-lpangox-1.0",
+					"-lpango-1.0",
+					"-lgobject-2.0",
+					"-lgmodule-2.0",
+					"-lgthread-2.0",
+					"-lglib-2.0",
+					"-lintl",
+					"-liconv",
+					"-lXinerama",
+					"-lXxf86vm",
+					"-lz",
+					"-lpthread",
+					"-liconv",
+					"-framework",
+					OpenGL,
+					"-lglut",
+					"-framework",
+					AGL,
+					"$HOME/dev/wxgtk/lib/libwx_gtk2_gl-2.6.a",
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = Fox;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = GTK2;
+		};
+		BF72984E09166319006F90D2 /* GTK2 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = ppc;
+				COPY_PHASE_STRIP = YES;
+				GCC_FAST_MATH = YES;
+				GCC_MODEL_TUNING = "";
+				GCC_OPTIMIZATION_LEVEL = 3;
+			};
+			name = GTK2;
 		};
 		BFFCCB53089028D300044EBA /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -4930,13 +5103,14 @@
 			};
 			name = Debug;
 		};
-		BFFCCB54089028D300044EBA /* Release */ = {
+		BFFCCB54089028D300044EBA /* Aqua */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
+				GCC_MODEL_TUNING = "";
 				GCC_OPTIMIZATION_LEVEL = 3;
 			};
-			name = Release;
+			name = Aqua;
 		};
 		BFFCCB60089028E600044EBA /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -4966,7 +5140,7 @@
 			};
 			name = Debug;
 		};
-		BFFCCB61089028E600044EBA /* Release */ = {
+		BFFCCB61089028E600044EBA /* Aqua */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
@@ -4978,7 +5152,7 @@
 				GCC_UNROLL_LOOPS = YES;
 				INSTALL_PATH = /usr/local/lib;
 				LIBRARY_STYLE = STATIC;
-				OPTIMIZATION_CFLAGS = "-O0";
+				OPTIMIZATION_CFLAGS = "-O3";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -4994,7 +5168,7 @@
 					"-Wno-unknown-pragmas",
 				);
 			};
-			name = Release;
+			name = Aqua;
 		};
 		BFFCCBE7089030B800044EBA /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -5029,7 +5203,7 @@
 			};
 			name = Debug;
 		};
-		BFFCCBE8089030B800044EBA /* Release */ = {
+		BFFCCBE8089030B800044EBA /* Aqua */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
@@ -5044,7 +5218,7 @@
 				);
 				INSTALL_PATH = /usr/local/lib;
 				LIBRARY_STYLE = STATIC;
-				OPTIMIZATION_CFLAGS = "-O0";
+				OPTIMIZATION_CFLAGS = "-O3";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -5060,7 +5234,7 @@
 					"-Wno-unknown-pragmas",
 				);
 			};
-			name = Release;
+			name = Aqua;
 		};
 		BFFCD88C089041A900044EBA /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -5132,7 +5306,7 @@
 			};
 			name = Debug;
 		};
-		BFFCD88D089041A900044EBA /* Release */ = {
+		BFFCD88D089041A900044EBA /* Aqua */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
@@ -5158,7 +5332,7 @@
 				INFOPLIST_FILE = "Fox-Info.plist";
 				INSTALL_PATH = "$(USER_APPS_DIR)";
 				MACOSX_DEPLOYMENT_TARGET = 10.2;
-				OPTIMIZATION_CFLAGS = "-O0";
+				OPTIMIZATION_CFLAGS = "-O3";
 				OTHER_CFLAGS = (
 					"-DHAVE_GLUT",
 					"-D__WX__CRYST__",
@@ -5203,7 +5377,7 @@
 					"-Wno-unknown-pragmas",
 				);
 			};
-			name = Release;
+			name = Aqua;
 		};
 /* End XCBuildConfiguration section */
 
@@ -5212,45 +5386,49 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BFFCCB53089028D300044EBA /* Debug */,
-				BFFCCB54089028D300044EBA /* Release */,
-				BF033A7409156C6400BB8A5B /* Release-Universal */,
-				BF48AEFB08924F3F0060B5BE /* Profile */,
+				BFFCCB54089028D300044EBA /* Aqua */,
+				BF72984E09166319006F90D2 /* GTK2 */,
+				BF033A7409156C6400BB8A5B /* Aqua-Universal */,
+				BF48AEFB08924F3F0060B5BE /* Aqua-Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Aqua;
 		};
 		BFFCCB5F089028E600044EBA /* Build configuration list for PBXNativeTarget "newmat" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BFFCCB60089028E600044EBA /* Debug */,
-				BFFCCB61089028E600044EBA /* Release */,
-				BF033A7109156C6400BB8A5B /* Release-Universal */,
-				BF48AEF808924F3F0060B5BE /* Profile */,
+				BFFCCB61089028E600044EBA /* Aqua */,
+				BF72984B09166319006F90D2 /* GTK2 */,
+				BF033A7109156C6400BB8A5B /* Aqua-Universal */,
+				BF48AEF808924F3F0060B5BE /* Aqua-Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Aqua;
 		};
 		BFFCCBE6089030B800044EBA /* Build configuration list for PBXNativeTarget "cctbx" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BFFCCBE7089030B800044EBA /* Debug */,
-				BFFCCBE8089030B800044EBA /* Release */,
-				BF033A7209156C6400BB8A5B /* Release-Universal */,
-				BF48AEF908924F3F0060B5BE /* Profile */,
+				BFFCCBE8089030B800044EBA /* Aqua */,
+				BF72984C09166319006F90D2 /* GTK2 */,
+				BF033A7209156C6400BB8A5B /* Aqua-Universal */,
+				BF48AEF908924F3F0060B5BE /* Aqua-Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Aqua;
 		};
 		BFFCD88B089041A900044EBA /* Build configuration list for PBXNativeTarget "Fox" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BFFCD88C089041A900044EBA /* Debug */,
-				BFFCD88D089041A900044EBA /* Release */,
-				BF033A7309156C6400BB8A5B /* Release-Universal */,
-				BF48AEFA08924F3F0060B5BE /* Profile */,
+				BFFCD88D089041A900044EBA /* Aqua */,
+				BF72984D09166319006F90D2 /* GTK2 */,
+				BF033A7309156C6400BB8A5B /* Aqua-Universal */,
+				BF48AEFA08924F3F0060B5BE /* Aqua-Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Aqua;
 		};
 /* End XCConfigurationList section */
 	};
