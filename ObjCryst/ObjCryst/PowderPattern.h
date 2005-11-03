@@ -223,6 +223,7 @@ class PowderPatternBackground : public PowderPatternComponent
       virtual void SetMaxSinThetaOvLambda(const REAL max);
       void InitRefParList();
       void InitOptions();
+      void InitSpline()const;
       /// Number of fitting points for background
       int mBackgroundNbPoint;
       /// Vector of 2theta values for the fitting points of the background
@@ -230,9 +231,18 @@ class PowderPatternBackground : public PowderPatternComponent
       /// Values of background at interpolating points
       CrystVector_REAL mBackgroundInterpPointIntensity;
       
+      /// Vector of pixel values between each interval, for faster CubicSpline calculations.
+      /// Mutable since it copies information from mBackgroundInterpPointX.
+      mutable CrystVector_REAL mvSplinePixel;
+      /// Spline used for interpolation.
+      /// Mutable since it copies information from mBackgroundInterpPointX 
+      ///and mBackgroundInterpPointIntensity.
+      mutable CubicSpline mvSpline;
       // Clocks
          /// Modification of the interpolated points
          RefinableObjClock mClockBackgroundPoint;
+         /// Initialization of the spline
+         mutable RefinableObjClock mClockSpline;
       
       /** Maximum sin(theta)/lambda for all calculations (10 by default).
       *

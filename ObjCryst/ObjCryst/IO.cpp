@@ -1828,40 +1828,33 @@ void PowderPatternBackground::XMLInput(istream &is,const XMLCrystTag &tagg)
       }
       if(("TThetaIntensityList"==tag.GetName())||("XIntensityList"==tag.GetName()))
       {
-         mBackgroundNbPoint=0;
-         mBackgroundInterpPointX.resize(100);
-         mBackgroundInterpPointIntensity.resize(100);
+         long nbPoint=0;
+         CrystVector_REAL bckgd2Theta(100);
+         CrystVector_REAL bckgd(100);
          CrystVector_bool fix(100);
          do
          {
             VFN_DEBUG_MESSAGE("PowderPatternBackground::XMLInput():"<<mBackgroundNbPoint,1)
-            is >>mBackgroundInterpPointX(mBackgroundNbPoint)
-               >>mBackgroundInterpPointIntensity(mBackgroundNbPoint)
-               >>fix(mBackgroundNbPoint);
-            mBackgroundNbPoint++;
-            if(mBackgroundNbPoint==mBackgroundInterpPointX.numElements())
+            is >>bckgd2Theta(nbPoint)
+               >>bckgd(nbPoint)
+               >>fix(nbPoint);
+            nbPoint++;
+            if(nbPoint==bckgd2Theta.numElements())
             {
-               mBackgroundInterpPointX.
-                        resizeAndPreserve(mBackgroundNbPoint+100);
-               mBackgroundInterpPointIntensity.
-                        resizeAndPreserve(mBackgroundNbPoint+100);
-               fix.resizeAndPreserve(mBackgroundNbPoint+100);
+               bckgd2Theta.resizeAndPreserve(nbPoint+100);
+               bckgd.resizeAndPreserve(nbPoint+100);
+               fix.resizeAndPreserve(nbPoint+100);
             }
             while(0==isgraph(is.peek())) is.get();//Why do I need that ?
             //cout << is.peek()<<" "<<nbrefl<<endl;
          }
          while(is.peek()!='<');//until next tag
-         VFN_DEBUG_MESSAGE("PowderPatternBackground::XMLInput():",2)
-         mBackgroundInterpPointX.resizeAndPreserve(mBackgroundNbPoint);
-         mBackgroundInterpPointIntensity.resizeAndPreserve(mBackgroundNbPoint);
-         VFN_DEBUG_MESSAGE("PowderPatternBackground::XMLInput():",2)
+         bckgd2Theta.resizeAndPreserve(nbPoint);
+         bckgd.resizeAndPreserve(nbPoint);
          if(this->GetParentPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF) 
-            mBackgroundInterpPointX*= DEG2RAD;
-         mClockBackgroundPoint.Click();
-         VFN_DEBUG_MESSAGE("PowderPatternBackground::XMLInput():",2)
-
+            bckgd2Theta*= DEG2RAD;
+         this->SetInterpPoints(bckgd2Theta,bckgd);
          this->InitRefParList();
-         VFN_DEBUG_MESSAGE("PowderPatternBackground::XMLInput():",2)
          //read closing tag
          XMLCrystTag junkEndTag(is);
       }

@@ -44,19 +44,26 @@ const string& PowderPatternBackgroundBayesianMinimiser::GetClassName()const
 
 REAL PowderPatternBackgroundBayesianMinimiser::GetLogLikelihood()const
 {
+   TAU_PROFILE("PowderPatternBackgroundBayesianMinimiser::GetLogLikelihood()","void ()",TAU_DEFAULT);
    REAL llk=0;
-   const REAL *pBackgd=mpBackground->GetPowderPatternCalc().data();
-   const REAL *pObs=mpBackground->GetParentPowderPattern().GetPowderPatternObs().data();
-   const REAL *pSigma=mpBackground->GetParentPowderPattern().GetPowderPatternObsSigma().data();
-   for(long i=0;i<mpBackground->GetPowderPatternCalc().numElements();i++)
-   {
-      if(*pSigma>0)
+   const long nb=mpBackground->GetPowderPatternCalc().numElements();
+   const long step=nb/500+1;
+   {// Calc (obs-calc)/sigma
+      const REAL *pBackgd=mpBackground->GetPowderPatternCalc().data();
+      const REAL *pObs=mpBackground->GetParentPowderPattern().GetPowderPatternObs().data();
+      const REAL *pSigma=mpBackground->GetParentPowderPattern().GetPowderPatternObsSigma().data();
+      for(long i=0;i<nb;i+=step)
       {
-         llk += PowderPatternBackgroundBayesianMinimiser
-                  ::BayesianBackgroundLogLikelihood
-                     ((*pObs-*pBackgd) / (1.4142135623730951**pSigma));
+         if(*pSigma>0)
+         {
+            llk += PowderPatternBackgroundBayesianMinimiser
+                     ::BayesianBackgroundLogLikelihood
+                        ((*pObs-*pBackgd) / (1.4142135623730951**pSigma));
+         }
+         pObs+=step;
+         pBackgd+=step;
+         pSigma+=step;
       }
-      pObs++;pBackgd++;pSigma++;
    }
    return llk;
 }
@@ -192,10 +199,10 @@ REAL PowderPatternBackgroundBayesianMinimiser::BayesianBackgroundLogLikelihood(c
                                8.00000};
    static const CubicSpline spline(vt,vllk,41);
    static const REAL s0=spline(0);
-   static const REAL s1=s0-spline(8)+log(sqrt(M_PI)/8);
+   static const REAL s1=s0-spline(8)-log(8);
    if(t<=0) return t*t;
    if(t<8)return s0-spline(t);
-   return s1-log(sqrt(M_PI)/t);
+   return s1+log(t);
 }
 
 

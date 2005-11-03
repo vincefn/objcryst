@@ -193,13 +193,10 @@ Error opening file for input:"+filename);
    fin.close();
    bckgd2Theta.resizeAndPreserve(nbPoints);
    bckgd.resizeAndPreserve(nbPoints);
-   //cout << bckgd << endl;
-   mBackgroundNbPoint=nbPoints;
-   mBackgroundInterpPointX=bckgd2Theta;
    if((this->GetParentPowderPattern().GetRadiation().GetWavelengthType()==WAVELENGTH_MONOCHROMATIC)
       ||(this->GetParentPowderPattern().GetRadiation().GetWavelengthType()==WAVELENGTH_ALPHA12))
-      mBackgroundInterpPointX*= DEG2RAD;
-   mBackgroundInterpPointIntensity=bckgd;
+      bckgd2Theta*= DEG2RAD;
+   this->SetInterpPoints(bckgd2Theta,bckgd);
    this->InitRefParList();
    mClockBackgroundPoint.Click();
    {
@@ -223,6 +220,7 @@ number of points differ or less than 2 points !");
    mBackgroundNbPoint=tth.numElements();
    mBackgroundInterpPointX=tth;
    mBackgroundInterpPointIntensity=backgd;
+   
    this->InitRefParList();
    mClockBackgroundPoint.Click();
    this->UpdateDisplay();
@@ -275,39 +273,35 @@ void PowderPatternBackground::TagNewBestConfig()const
 void PowderPatternBackground::OptimizeBayesianBackground()
 {
    VFN_DEBUG_ENTRY("PowderPatternBackground::OptimizeBayesianBackground()",10);
+   TAU_PROFILE("PowderPatternBackground::OptimizeBayesianBackground()","void ()",TAU_DEFAULT);
    PowderPatternBackgroundBayesianMinimiser min(*this);
    SimplexObj simplex("Simplex Test");
    simplex.AddRefinableObj(min);
    long nbcycle;
-   REAL lastllk=simplex.GetLogLikelihood();
+   REAL llk=simplex.GetLogLikelihood();
    long ct=0;
-   cout<<ct<<"Chi^2(BayesianBackground)="<<lastllk<<endl;
-   this->GetParentPowderPattern().UpdateDisplay();
+   cout<<"Initial Chi^2(BayesianBackground)="<<llk<<endl;
    this->SetGlobalOptimStep(gpRefParTypeScattDataBackground,
                             mBackgroundInterpPointIntensity.max()/100.0);
-   for(;;)
+   
    {
-      {
-         char buf [200];
-         sprintf(buf,"Optimizing Background, Cycle %d, Chi^2(Background)=%f",
-                 (int)ct,(float)lastllk);
-         (*fpObjCrystInformUser)((string)buf);
-      }
-      nbcycle=50*mBackgroundNbPoint;
-      simplex.Optimize(nbcycle,true);
-      this->GetParentPowderPattern().UpdateDisplay();
-      const REAL tmp=simplex.GetLogLikelihood();
-      cout<<ct<<"Chi^2(BayesianBackground)="<<tmp<<endl;
-      if((lastllk-tmp)<1e-4*lastllk) {lastllk=tmp ;break;}
-      lastllk=tmp;
-      if(++ct>20) break;
+      char buf [200];
+      sprintf(buf,"Optimizing Background, Cycle %d, Chi^2(Background)=%f",
+              (int)ct,(float)llk);
+      (*fpObjCrystInformUser)((string)buf);
    }
+   nbcycle=200*mBackgroundNbPoint;
+   simplex.Optimize(nbcycle,true);
+   llk=simplex.GetLogLikelihood();
+   cout<<ct<<", Chi^2(BayesianBackground)="<<llk<<endl;
+   
    this->SetGlobalOptimStep(gpRefParTypeScattDataBackground,10.0);
    {
       char buf [200];
-      sprintf(buf,"Done Optimizing Bayesian Background, Chi^2(Background)=%f",(float)lastllk);
+      sprintf(buf,"Done Optimizing Bayesian Background, Chi^2(Background)=%f",(float)llk);
       (*fpObjCrystInformUser)((string)buf);
    }
+   this->GetParentPowderPattern().UpdateDisplay();
    VFN_DEBUG_EXIT("PowderPatternBackground::OptimizeBayesianBackground()",10);
 }
 
@@ -322,75 +316,66 @@ void PowderPatternBackground::CalcPowderPattern() const
    TAU_PROFILE("PowderPatternBackground::CalcPowderPattern()","void ()",TAU_DEFAULT);
    VFN_DEBUG_MESSAGE("PowderPatternBackground::CalcPowderPattern()",3);
    
-   switch(mInterpolationModel.GetChoice())
-   {
-      case POWDER_BACKGROUND_LINEAR:
+   const unsigned long nb=mpParentPowderPattern->GetNbPoint();
+   mPowderPatternCalc.resize(nb);
+   if(nb!=0)
+      switch(mInterpolationModel.GetChoice())
       {
-         VFN_DEBUG_MESSAGE("PowderPatternBackground::CalcPowderPattern()..Linear",2)
-         REAL p1,p2;
-         REAL b1,b2;
-         const long nbPoint=mpParentPowderPattern->GetNbPoint();
-         mPowderPatternCalc.resize(nbPoint);
-         if(mBackgroundNbPoint==0)
+         case POWDER_BACKGROUND_LINEAR:
          {
-            mPowderPatternCalc=0;
-            break;
-         }
-         VFN_DEBUG_MESSAGE("PowderPatternBackground::CalcPowderPattern()"<<nbPoint,2)
-         //mPowderPatternCalc=0.;
-         REAL *b=mPowderPatternCalc.data();
-         p1=this->GetParentPowderPattern().X2Pixel(mBackgroundInterpPointX(0));
-         p2=this->GetParentPowderPattern().X2Pixel(mBackgroundInterpPointX(1));
-         b1=mBackgroundInterpPointIntensity(0);
-         b2=mBackgroundInterpPointIntensity(1);
-         long point=1;
-         for(long i=0;i<nbPoint;i++)
-         {
-            if(i >= p2)
+            VFN_DEBUG_MESSAGE("PowderPatternBackground::CalcPowderPattern()..Linear",2)
+            REAL p1,p2;
+            REAL b1,b2;
+            if(mBackgroundNbPoint==0)
             {
-               if(point < mBackgroundNbPoint-1)
-               {
-                  b1=b2;
-                  p1=p2;
-                  b2=mBackgroundInterpPointIntensity(point+1);
-                  p2=this->GetParentPowderPattern().X2Pixel(mBackgroundInterpPointX(point+1));
-                  point++ ;
-               }
+               mPowderPatternCalc=0;
+               break;
             }
-            *b = (b1*(p2-i)+b2*(i-p1))/(p2-p1) ;
-            b++;
-         }
-         break;
-      }
-      case POWDER_BACKGROUND_CUBIC_SPLINE:
-      {
-         const unsigned long nb=mpParentPowderPattern->GetNbPoint();
-         mPowderPatternCalc.resize(nb);
-         if(mBackgroundNbPoint==0)
-         {
-            mPowderPatternCalc=0;
+            VFN_DEBUG_MESSAGE("PowderPatternBackground::CalcPowderPattern()"<<nb,2)
+            //mPowderPatternCalc=0.;
+            REAL *b=mPowderPatternCalc.data();
+            p1=this->GetParentPowderPattern().X2Pixel(mBackgroundInterpPointX(0));
+            p2=this->GetParentPowderPattern().X2Pixel(mBackgroundInterpPointX(1));
+            b1=mBackgroundInterpPointIntensity(0);
+            b2=mBackgroundInterpPointIntensity(1);
+            long point=1;
+            for(unsigned long i=0;i<nb;i++)
+            {
+               if(i >= p2)
+               {
+                  if(point < mBackgroundNbPoint-1)
+                  {
+                     b1=b2;
+                     p1=p2;
+                     b2=mBackgroundInterpPointIntensity(point+1);
+                     p2=this->GetParentPowderPattern().X2Pixel(mBackgroundInterpPointX(point+1));
+                     point++ ;
+                  }
+               }
+               *b = (b1*(p2-i)+b2*(i-p1))/(p2-p1) ;
+               b++;
+            }
             break;
          }
-         // we need an ascending array, so use pixels rather than the original X,
-         CrystVector_REAL vpixel(mBackgroundNbPoint);
-         for(long i=0;i<mBackgroundNbPoint;++i)
-            vpixel(i)=this->GetParentPowderPattern().X2Pixel(mBackgroundInterpPointX(i));
-         
-         CubicSpline spline(vpixel,mBackgroundInterpPointIntensity);
-         for(unsigned long i=0;i<nb;++i) 
-            mPowderPatternCalc(i)=spline((REAL)i);
-         break;
+         case POWDER_BACKGROUND_CUBIC_SPLINE:
+         {
+            if(mBackgroundNbPoint==0) mPowderPatternCalc=0;
+            else
+            {
+               this->InitSpline();
+               mPowderPatternCalc=mvSpline((REAL)0,(REAL)1,nb);
+            }
+            break;
+         }
       }
-   }
    VFN_DEBUG_MESSAGE("PowderPatternBackground::CalcPowderPattern()",3);
    #ifdef USE_BACKGROUND_MAXLIKE_ERROR
    {
-      const long nbPoint=mpParentPowderPattern->GetNbPoint();
-      mPowderPatternCalcVariance.resize(nbPoint);
+      mPowderPatternCalcVariance.resize(nb);
       const REAL step=mModelVariance*mModelVariance/(REAL)nbPoint;
       REAL var=0;
       REAL *p=mPowderPatternCalcVariance.data();
-      for(long i=0;i<nbPoint;i++) {*p++ = var;var +=step;}
+      for(long i=0;i<nb;i++) {*p++ = var;var +=step;}
    }
    mClockPowderPatternVarianceCalc.Click();
    #endif
@@ -509,6 +494,17 @@ void PowderPatternBackground::InitOptions()
    mClockMaster.AddChild(mInterpolationModel.GetClock());
    mInterpolationModel.SetChoice(1);
 }
+
+void PowderPatternBackground::InitSpline()const
+{
+   if(mClockSpline>mClockBackgroundPoint) return;
+   mvSplinePixel.resize(mBackgroundNbPoint);
+   for(long i=0;i<mBackgroundNbPoint;++i)
+      mvSplinePixel(i)=this->GetParentPowderPattern().X2Pixel(mBackgroundInterpPointX(i));
+   mvSpline.Init(mvSplinePixel,mBackgroundInterpPointIntensity);
+   mClockSpline.Click();
+}
+
 #ifdef __WX__CRYST__
 WXCrystObjBasic* PowderPatternBackground::WXCreate(wxWindow* parent)
 {
