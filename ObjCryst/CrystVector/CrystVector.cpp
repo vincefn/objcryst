@@ -1114,49 +1114,81 @@ template long   MinAbs(const CrystVector_long &vector);
 //######################################################################
 //  CubicSpline
 //######################################################################
+CubicSpline::CubicSpline():
+mX(0),mY(0),mYsecond(0)
+{}
 
 CubicSpline::CubicSpline(const CrystVector_REAL &x, const CrystVector_REAL &y, 
-            const REAL yp0, const REAL ypn):
-mX(x),mY(y),mYsecond(x.numElements())
+                         const REAL yp0, const REAL ypn)
 {
-   VFN_DEBUG_MESSAGE("CubicSpline::CubicSpline(x,y,yp0,ypn)",5)
-   this->InitSpline(yp0,ypn);
-   VFN_DEBUG_MESSAGE("CubicSpline::CubicSpline(x,y,yp0,ypn):End",5)
+   this->Init(x,y,yp0,ypn);
 }
 
 CubicSpline::CubicSpline(const REAL *px, const REAL *py, const unsigned long nbPoints, 
-            const REAL yp0, const REAL ypn):
-mX(nbPoints),mY(nbPoints),mYsecond(nbPoints)
+                         const REAL yp0, const REAL ypn)
 {
-   VFN_DEBUG_MESSAGE("CubicSpline::CubicSpline(x,y,yp0,ypn)",5)
+   this->Init(px,py,nbPoints,yp0,ypn);
+}
+
+CubicSpline::CubicSpline(const CrystVector_REAL &x, const CrystVector_REAL &y)
+{
+   this->Init(x,y);
+}
+
+CubicSpline::CubicSpline(const REAL *px, const REAL *py, const unsigned long nbPoints)
+{
+   this->Init(px,py,nbPoints);
+}
+
+void CubicSpline::Init(const CrystVector_REAL &x, const CrystVector_REAL &y, 
+                       const REAL yp0, const REAL ypn)
+{
+   VFN_DEBUG_ENTRY("CubicSpline::Init(x,y,yp0,ypn)",5)
+   mX=x;
+   mY=y;
+   mYsecond.resize(x.numElements());
+   this->InitSpline(yp0,ypn);
+   VFN_DEBUG_EXIT("CubicSpline::Init(x,y,yp0,ypn)",5)
+}
+void CubicSpline::Init(const REAL *px, const REAL *py, const unsigned long nbPoints, 
+                       const REAL yp0, const REAL ypn)
+{
+   VFN_DEBUG_ENTRY("CubicSpline::Init(px,py,yp0,ypn)",5)
+   mX.resize(nbPoints);
+   mY.resize(nbPoints);
+   mYsecond.resize(nbPoints);
    for(unsigned long i=0;i<nbPoints;i++)
    {
       mX(i)=px[i];
       mY(i)=py[i];
    }
    this->InitSpline(yp0,ypn);
-   VFN_DEBUG_MESSAGE("CubicSpline::CubicSpline(x,y,yp0,ypn):End",5)
+   VFN_DEBUG_EXIT("CubicSpline::Init(x,y,yp0,ypn)",5)
 }
 
-CubicSpline::CubicSpline(const CrystVector_REAL &x, const CrystVector_REAL &y):
-mX(x),mY(y),mYsecond(x.numElements())
+void CubicSpline::Init(const CrystVector_REAL &x, const CrystVector_REAL &y)
 {
-   VFN_DEBUG_MESSAGE("CubicSpline::CubicSpline(x,y)",5)
+   VFN_DEBUG_ENTRY("CubicSpline::Init(x,y)",5)
+   mX=x;
+   mY=y;
+   mYsecond.resize(x.numElements());
    this->InitNaturalSpline();
-   VFN_DEBUG_MESSAGE("CubicSpline::CubicSpline(x,y):End",5)
+   VFN_DEBUG_EXIT("CubicSpline::Init(x,y)",5)
 }
 
-CubicSpline::CubicSpline(const REAL *px, const REAL *py, const unsigned long nbPoints):
-mX(nbPoints),mY(nbPoints),mYsecond(nbPoints)
+void CubicSpline::Init(const REAL *px, const REAL *py, const unsigned long nbPoints)
 {
-   VFN_DEBUG_MESSAGE("CubicSpline::CubicSpline(x,y,yp0,ypn)",5)
+   VFN_DEBUG_ENTRY("CubicSpline::Init(px,py,n)",5)
+   mX.resize(nbPoints);
+   mY.resize(nbPoints);
+   mYsecond.resize(nbPoints);
    for(unsigned long i=0;i<nbPoints;i++)
    {
       mX(i)=px[i];
       mY(i)=py[i];
    }
    this->InitNaturalSpline();
-   VFN_DEBUG_MESSAGE("CubicSpline::CubicSpline(x,y,yp0,ypn):End",5)
+   VFN_DEBUG_EXIT("CubicSpline::Init(x,y,n)",5)
 }
 
 CubicSpline::~CubicSpline()
@@ -1181,6 +1213,75 @@ REAL CubicSpline::operator()(const REAL x) const
          return a*mY(i)+b*mY(i+1)+c*mYsecond(i)+d*mYsecond(i+1);
       }
    return mY(mY.numElements()-1);
+}
+
+CrystVector_REAL CubicSpline::operator()(const CrystVector_REAL &x) const
+{
+   const long nb=x.numElements();
+   CrystVector_REAL y(nb);
+   //for(long i=0;i<nb;++i)y(i)=(*this)(x(i));
+   //return y;
+   const REAL *px=x.data();
+   long i=0;
+   REAL *py=y.data();
+   const REAL *pX=mX.data();
+   const REAL *pY=mY.data();
+   const REAL *pY2=mYsecond.data();
+   while((*px<*pX)&&(i<nb))
+   {
+      *py++=*pY;px++;i++;
+   }
+   
+   for(long j=0;j<(mX.numElements()-1);j++)
+   {
+      while((*px<*(pX+1))&&(i<nb))
+      {
+         const REAL e= *(pX+1) - *pX;
+         const REAL a= (*(pX+1)- *px)/e;
+         const REAL b=1.-a;
+         const REAL c=0.16666666666666666*(a*a*a-a)*e*e;
+         const REAL d=0.16666666666666666*(b*b*b-b)*e*e;
+         *py++ = a* *pY +b* *(pY+1) +c* *pY2 +d* *(pY2+1);
+         px++;i++;
+      }
+      pX++;pY++;pY2++;
+      if(i==nb) break;
+   }
+   for(;i<nb;++i) *py++ = *pY;
+   return y;
+}
+
+CrystVector_REAL CubicSpline::operator()(const REAL xmin,const REAL xstep, const long nb) const
+{
+   CrystVector_REAL y(nb);
+   REAL x=xmin;
+   long i=0;
+   REAL *py=y.data();
+   const REAL *pX=mX.data();
+   const REAL *pY=mY.data();
+   const REAL *pY2=mYsecond.data();
+   while((x<*pX)&&(i<nb))
+   {
+      *py++=*pY;x += xstep;i++;
+   }
+   
+   for(long j=0;j<(mX.numElements()-1);j++)
+   {
+      while((x<*(pX+1))&&(i<nb))
+      {
+         const REAL e= *(pX+1) - *pX;
+         const REAL a= (*(pX+1)- x)/e;
+         const REAL b=1.-a;
+         const REAL c=0.16666666666666666*(a*a*a-a)*e*e;
+         const REAL d=0.16666666666666666*(b*b*b-b)*e*e;
+         *py++ = a* *pY +b* *(pY+1) +c* *pY2 +d* *(pY2+1);
+         x+=xstep;i++;
+      }
+      pX++;pY++;pY2++;
+      if(i==nb) break;
+   }
+   for(;i<nb;++i) *py++ = *pY;
+   return y;
 }
 
 void CubicSpline::InitSpline(const REAL yp0, const REAL ypn)

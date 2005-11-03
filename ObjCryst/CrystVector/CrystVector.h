@@ -543,6 +543,8 @@ template<class T> T MinAbs(const CrystVector_T &vector);
 class CubicSpline
 {
    public:
+      /// Default constructor - CubicSpline::Init() should be called afterwards
+      CubicSpline();
       /// Spline with given extremum derivatives
       CubicSpline(const CrystVector_REAL &x, const CrystVector_REAL &y, 
                   const REAL yp1, const REAL ypn);
@@ -554,6 +556,23 @@ class CubicSpline
       /// Natural cubic spline
       CubicSpline(const REAL *px, const REAL *py, const unsigned long nbPoints);
       ~CubicSpline();
+      
+      /// Spline with given extremum derivatives
+      void Init(const CrystVector_REAL &x, const CrystVector_REAL &y, 
+                const REAL yp1, const REAL ypn);
+      /// Spline with given extremum derivatives
+      void Init(const REAL *px, const REAL *py, const unsigned long nbPoints,
+                const REAL yp1, const REAL ypn);
+      /// Natural cubic spline
+      void Init(const CrystVector_REAL &x, const CrystVector_REAL &y);
+      /// Natural cubic spline
+      void Init(const REAL *px, const REAL *py, const unsigned long nbPoints);
+      
+      /// Get spline value at a series of point - x is assumed to be sorted by increasing values
+      CrystVector_REAL operator()(const CrystVector_REAL &x) const;
+      /// Get spline value on a range of values with a fixed step
+      CrystVector_REAL operator()(const REAL min,const REAL step, const long nbpoint) const;
+      /// Get spline value at one point
       REAL operator()(const REAL x) const;
    private:
       void InitSpline(const REAL yp1, const REAL ypn);
