@@ -195,6 +195,7 @@ class PowderPatternBackground : public PowderPatternComponent
       /// Import background points from a file (with two columns 2theta (or tof), intensity)
       void ImportUserBackground(const string &filename);
       void SetInterpPoints(const CrystVector_REAL tth, const CrystVector_REAL backgd);
+      const std::pair<const CrystVector_REAL*,const CrystVector_REAL*> GetInterpPoints()const;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);

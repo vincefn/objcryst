@@ -218,13 +218,32 @@ void PowderPatternBackground::SetInterpPoints(const CrystVector_REAL tth,
 number of points differ or less than 2 points !");
    }
    mBackgroundNbPoint=tth.numElements();
-   mBackgroundInterpPointX=tth;
-   mBackgroundInterpPointIntensity=backgd;
-   
+   // The points must be in ascending order of the pattern's pixels
+   CrystVector<long> subs;
+   subs=SortSubs(tth);
+   mBackgroundInterpPointX.resize(mBackgroundNbPoint);
+   mBackgroundInterpPointIntensity.resize(mBackgroundNbPoint);
+   if(this->GetParentPowderPattern().GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
+      for(long i=0;i<mBackgroundNbPoint;++i) 
+      {
+         mBackgroundInterpPointX(i)=tth(mBackgroundNbPoint-1-subs(i));
+         mBackgroundInterpPointIntensity(i)=backgd(mBackgroundNbPoint-1-subs(i));
+      }
+   else
+      for(long i=0;i<mBackgroundNbPoint;++i)
+      {
+         mBackgroundInterpPointX(i)=tth(subs(i));
+         mBackgroundInterpPointIntensity(i)=backgd(subs(i));
+      }
    this->InitRefParList();
    mClockBackgroundPoint.Click();
-   this->UpdateDisplay();
+   this->GetParentPowderPattern().UpdateDisplay();
    VFN_DEBUG_EXIT("PowderPatternBackground::SetInterpPoints()",5)
+}
+
+const pair<const CrystVector_REAL*,const CrystVector_REAL*> PowderPatternBackground::GetInterpPoints()const
+{
+   return make_pair(&mBackgroundInterpPointX,&mBackgroundInterpPointIntensity);
 }
 
 void PowderPatternBackground::GetGeneGroup(const RefinableObj &obj,
