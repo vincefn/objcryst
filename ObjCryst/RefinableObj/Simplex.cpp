@@ -68,8 +68,25 @@ void SimplexObj::Optimize(long &nbSteps,const bool silent,const REAL finalcost,
             }
             else if((vLLK(i)>vLLK(nextworst)) && (i!=worst)) nextworst=i;
          }
-      if(!silent) cout<<"Simplex:cycle="<<nbSteps<<", cost="<<vLLK(best)
-                      <<",best="<<best<<",worst="<<worst<<",nextworst="<<nextworst<<endl;
+      {
+         CrystVector_REAL center(n);
+         center = 0.0;
+         for(unsigned long i=0;i<=n;i++)
+         {
+            if(i==worst) continue;
+            center += mRefParList.GetParamSet(vIndex(i));
+         }
+         center /= (REAL)n;
+         CrystVector_REAL worstdiff;
+         worstdiff=mRefParList.GetParamSet(vIndex(worst));
+         worstdiff-=center;
+         for(unsigned long i=0;i<n;i++) worstdiff(i)/=mRefParList.GetParNotFixed(i).GetGlobalOptimStep();
+         
+         if(!silent) cout<<"Simplex:cycle="<<nbSteps<<", cost="<<vLLK(best)
+                         <<",best="<<best<<",worst="<<worst<<",nextworst="<<nextworst
+                         <<", Worst diff="<<abs(worstdiff.min())+abs(worstdiff.max())<<endl;
+         if((abs(worstdiff.min())+abs(worstdiff.max()))<0.1) break;
+      }
       #if 0
       cout<<FormatHorizVector<REAL>(vLLK)<<endl;
       cout<<FormatVertVector<REAL>(mRefParList.GetParamSet(vIndex(best)),
@@ -138,8 +155,7 @@ REAL SimplexObj::GenerateNewSimplexConfiguration(CrystVector_REAL &vLLK,
    for(unsigned long i=0;i<=n;i++)
    {
       if(i==worst) continue;
-      CrystVector_REAL *pi=&(mRefParList.GetParamSet(vIndex(i)));
-      for(unsigned long j=0;j<n;j++) {center(j) += (*pi)(j);}
+      center += mRefParList.GetParamSet(vIndex(i));
    }
    center /= (REAL)n;
    for(unsigned long i=0;i<n;i++)
