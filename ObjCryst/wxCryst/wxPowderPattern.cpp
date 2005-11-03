@@ -947,7 +947,7 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
       x2=this->Point2ScreenX(0);
       const REAL s=(mMaxIntensity-mMinIntensity)/mChi2Cumul(mpPattern->GetPowderPattern().GetNbPointUsed()-1);
       y2=this->Data2ScreenY(mMinIntensity+mChi2Cumul(0)*s);
-      for(long i=0;i<mpPattern->GetPowderPattern().GetNbPointUsed();i++)
+      for(unsigned long i=0;i<mpPattern->GetPowderPattern().GetNbPointUsed();i++)
       {
          if((mX(i)>mMinX)&&(mX(i)<mMaxX))
          {
@@ -1430,16 +1430,23 @@ REAL WXPowderPatternGraph::Screen2DataY(const long y)const
 //    WXPowderPatternBackgound
 //
 ////////////////////////////////////////////////////////////////////////
+static const long ID_POWDERBACKGROUND_GRID= WXCRYST_ID(); 
+static const long ID_POWDERBACKGROUND_NEWBAYESIAN= WXCRYST_ID(); 
+
 BEGIN_EVENT_TABLE(WXPowderPatternBackground, wxWindow)
    EVT_MENU(ID_POWDERBACKGROUND_IMPORT, 
                      WXPowderPatternBackground::OnMenuImportUserBackground)
    EVT_MENU(ID_POWDERBACKGROUND_OPTIMIZEBAYESIAN, 
                      WXPowderPatternBackground::OnMenuOptimizeBayesianBackground)
+   EVT_GRID_CMD_CELL_CHANGE(ID_POWDERBACKGROUND_GRID,
+                     WXPowderPatternBackground::OnEditGridBackgroundPoint)
+   EVT_MENU(ID_POWDERBACKGROUND_NEWBAYESIAN,
+                     WXPowderPatternBackground::OnMenuAutomaticBayesianBackground)
 END_EVENT_TABLE()
 
 WXPowderPatternBackground::WXPowderPatternBackground(wxWindow *parent, 
                                                      PowderPatternBackground *b):
-WXRefinableObj(parent,b),mpPowderPatternBackground(b)
+WXRefinableObj(parent,b),mpPowderPatternBackground(b),mNeedUpdateUI(false),mIsSelfUpdating(false)
 {
    mpWXTitle->SetForegroundColour(wxColour(0,255,0));
    //Menu
@@ -1447,6 +1454,8 @@ WXRefinableObj(parent,b),mpPowderPatternBackground(b)
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERBACKGROUND_IMPORT,"Import");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERBACKGROUND_OPTIMIZEBAYESIAN,
          "Bayesian Optimization");
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERBACKGROUND_NEWBAYESIAN,
+         "New Automatic Background (Change Number of Points)");
    VFN_DEBUG_MESSAGE(mpMenuBar->GetSize().GetWidth()<<","<<mpMenuBar->GetSize().GetHeight(),10);
    mpSizer->SetItemMinSize(mpMenuBar,
                            mpMenuBar->GetSize().GetWidth(),
@@ -1458,6 +1467,23 @@ WXRefinableObj(parent,b),mpPowderPatternBackground(b)
    mpSizer->Add(pFieldModelSigma,0,wxALIGN_LEFT);
    mList.Add(pFieldModelSigma);
    #endif
+   // List of background points
+      wxGridCellAttr* cellAttrFloat = new wxGridCellAttr;
+      cellAttrFloat->SetRenderer(new wxGridCellFloatRenderer(10,3));
+      cellAttrFloat->SetEditor(new wxGridCellFloatEditor(10,3));
+
+      mpGridBackgroundPoint= new wxGrid(this,ID_POWDERBACKGROUND_GRID);
+      mpGridBackgroundPoint->SetSize(400,300);
+      mpGridBackgroundPoint->EnableScrolling(true,true);
+      mpGridBackgroundPoint->SetSizeHints(-1,300,-1,300);
+      mpGridBackgroundPoint->SetColSize(0,150);
+      mpGridBackgroundPoint->CreateGrid(0,2);
+      mpGridBackgroundPoint->SetColAttr(0,cellAttrFloat);
+      mpGridBackgroundPoint->SetColAttr(1,cellAttrFloat);
+      mpGridBackgroundPoint->SetColLabelValue(0,"Position");
+      mpGridBackgroundPoint->SetColLabelValue(1,"Intensity");
+      mpGridBackgroundPoint->AutoSizeRows();
+      mpSizer->Add(mpGridBackgroundPoint,0,wxALIGN_LEFT);
    mpTopSizer->SetSizeHints(this);
    this->Layout();
    this->CrystUpdate(true);
@@ -1503,8 +1529,11 @@ void WXPowderPatternBackground::OnMenuAutomaticBayesianBackground(wxCommandEvent
       const unsigned long nbPoint=mpPowderPatternBackground->GetParentPowderPattern().GetNbPoint();
       for(int i=0;i<nbPointSpline;i++)
       {
-         tth(i)=mpPowderPatternBackground->GetParentPowderPattern()
-                  .GetPowderPatternX()(i*nbPoint/(nbPointSpline-1));
+         if(i==(nbPointSpline-1))
+            tth(i)=mpPowderPatternBackground->GetParentPowderPattern()
+                     .GetPowderPatternX()(nbPoint-1);
+         else tth(i)=mpPowderPatternBackground->GetParentPowderPattern()
+                     .GetPowderPatternX()((i*nbPoint)/(nbPointSpline-1));
          long n1=(long)((REAL)nbPoint/(REAL)nbPointSpline*((REAL)i-0.2));
          long n2=(long)((REAL)nbPoint/(REAL)nbPointSpline*((REAL)i+0.2));
          if(n1<0) n1=0;
@@ -1524,6 +1553,97 @@ void WXPowderPatternBackground::OnMenuAutomaticBayesianBackground(wxCommandEvent
    mpPowderPatternBackground->FixAllPar();
 
    VFN_DEBUG_EXIT("WXPowderPatternBackground::OnMenuAutomaticBayesianBackground()",6)
+}
+void WXPowderPatternBackground::OnEditGridBackgroundPoint(wxGridEvent &e)
+{
+   if(mIsSelfUpdating) return;
+   VFN_DEBUG_ENTRY("WXPowderPatternBackground::OnEditGridBackgroundPoint():"<<e.GetRow()<<","<<e.GetCol(),10)
+   const long r=e.GetRow();
+   const long c=e.GetCol();
+   wxString s=mpGridBackgroundPoint->GetCellValue(r,c);
+   if(s!="")
+   {
+      REAL f=1.0;
+      if(mpPowderPatternBackground->GetParentPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)f=DEG2RAD;
+      double d;
+      s.ToDouble(&d);
+      if(c==0)
+      {
+         if(d!=mBackgroundInterpPointX(r))
+            mBackgroundInterpPointX(r)=d*f;
+      }
+      else
+      {
+         if(d!=mBackgroundInterpPointX(r))
+            mBackgroundInterpPointIntensity(r)=d;
+      }
+      mpPowderPatternBackground->SetInterpPoints(mBackgroundInterpPointX,
+                                                 mBackgroundInterpPointIntensity);
+      // The order of the points might have changed
+      mBackgroundInterpPointX        =*(mpPowderPatternBackground->GetInterpPoints().first);
+      mBackgroundInterpPointIntensity=*(mpPowderPatternBackground->GetInterpPoints().second);
+   }
+   mNeedUpdateUI=true,
+   this->UpdateUI();
+   VFN_DEBUG_EXIT("WXPowderPatternBackground::OnEditGridBackgroundPoint():"<<e.GetRow()<<","<<e.GetCol(),10)
+}
+
+void WXPowderPatternBackground::CrystUpdate(const bool uui,const bool lock)
+{
+   if(lock) mMutex.Lock();
+   this->WXRefinableObj::CrystUpdate(uui,false);
+   if(false==mpPowderPatternBackground->IsBeingRefined())
+   {
+      const long diff=mpPowderPatternBackground->GetInterpPoints().first->numElements()
+                      -mpGridBackgroundPoint->GetNumberRows();
+      if(diff>0)
+      {
+         mNeedUpdateUI=true;
+         mpGridBackgroundPoint->AppendRows(diff);
+      }
+      if(diff<0)
+      {
+         mNeedUpdateUI=true;
+         mpGridBackgroundPoint->DeleteRows(0,-diff);
+      }
+      if(diff!=0)
+         if(  (MaxDifference(mBackgroundInterpPointX        ,
+                             *(mpPowderPatternBackground->GetInterpPoints().first )))
+            ||(MaxDifference(mBackgroundInterpPointIntensity,
+                             *(mpPowderPatternBackground->GetInterpPoints().second))))
+            mNeedUpdateUI=true;
+      if(mNeedUpdateUI)
+      {
+         mBackgroundInterpPointX        =*(mpPowderPatternBackground->GetInterpPoints().first);
+         mBackgroundInterpPointIntensity=*(mpPowderPatternBackground->GetInterpPoints().second);
+      }
+   }
+   if(lock) mMutex.Unlock();
+}
+
+void WXPowderPatternBackground::UpdateUI(const bool lock)
+{
+   if(lock) mMutex.Lock();
+   if(mNeedUpdateUI)
+   {
+      REAL f=1.0;
+      if(mpPowderPatternBackground->GetParentPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)f=RAD2DEG;
+      const long nb=mBackgroundInterpPointX.numElements();
+      mIsSelfUpdating=true;
+      for(long i=0;i<nb;++i)
+      {
+         wxString tmp;
+         tmp.Printf("%f",f*mBackgroundInterpPointX(i));
+         mpGridBackgroundPoint->SetCellValue(i,0,tmp);
+         tmp.Printf("%f",mBackgroundInterpPointIntensity(i));
+         mpGridBackgroundPoint->SetCellValue(i,1,tmp);
+      }
+      mIsSelfUpdating=false;
+   }
+      
+   mNeedUpdateUI=false;
+   this->WXRefinableObj::UpdateUI(false);
+   if(lock) mMutex.Unlock();
 }
 ////////////////////////////////////////////////////////////////////////
 //

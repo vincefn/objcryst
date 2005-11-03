@@ -20,6 +20,8 @@
 #ifndef _VFN_WX_POWDERPATTERN_H_
 #define _VFN_WX_POWDERPATTERN_H_
 
+#include "wx/grid.h"
+
 #include "wxCryst/wxRefinableObj.h"
 #include "ObjCryst/ScatteringCorr.h"
 #include "ObjCryst/PowderPattern.h"
@@ -143,24 +145,6 @@ class WXPowderPatternGraph: public wxWindow
       DECLARE_EVENT_TABLE()
 };
 
-//:TODO:
-#if 0 
-// Class to display one Background point for WXPowderPatternBackgound
-// It is just a RefPar, with a field inserted for the position of the Background point.
-// Only the value of the intensity is refinable.
-class WXFieldRefParBackground:public WXFieldRefPar
-{
-   public:
-      WXFieldRefParBackground(wxWindow *parent,RefinablePar *refpar,
-                              CrystVector_REAL *backgd2Theta, const int numPt);
-   private:
-      wxTextCtrl *mpField2Theta;
-      /// The vector of 2theta values
-      CrystVector_REAL* mpBackgd2Theta;
-      const int mBackgdPointNum;
-}
-#endif
-
 /** Class to display a Powder Pattern Background
 *
 * Still very limited ! Only allows to import a list of background
@@ -175,8 +159,17 @@ class WXPowderPatternBackground: public WXRefinableObj
       void OnMenuImportUserBackground(wxCommandEvent & WXUNUSED(event));
       void OnMenuOptimizeBayesianBackground(wxCommandEvent & WXUNUSED(event));
       void OnMenuAutomaticBayesianBackground(wxCommandEvent & WXUNUSED(event));
+      void OnEditGridBackgroundPoint(wxGridEvent &e);
+      virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false);
+      virtual void UpdateUI(const bool mutexlock=false);
    private:
       PowderPatternBackground *mpPowderPatternBackground;
+      wxGrid *mpGridBackgroundPoint;
+      /// Copy of the list of points and intensity
+      mutable CrystVector_REAL mBackgroundInterpPointX,mBackgroundInterpPointIntensity;
+      /// True if the list of points has changed since last displayed
+      bool mNeedUpdateUI;
+      bool mIsSelfUpdating;
    DECLARE_EVENT_TABLE()
 };
 /** Class to display one Preferred Orientation phase using
