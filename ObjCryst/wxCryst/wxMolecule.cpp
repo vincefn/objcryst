@@ -1412,9 +1412,24 @@ void WXMolecule::OnEditGridDihedralAngle(wxGridEvent &e)
             mpDihedralAngleWin->SetCellValue(r,c,mpMolecule->GetDihedralAngleList()[r]->GetAtom3().GetName().c_str());
       }
       else
-         mpDihedralAngleWin->SetCellValue(r,c,mpMolecule->GetDihedralAngleList()[r]->GetAtom2().GetName().c_str());
+         mpDihedralAngleWin->SetCellValue(r,c,mpMolecule->GetDihedralAngleList()[r]->GetAtom3().GetName().c_str());
    }
-   if(c==4)
+   if(c==3)
+   {
+      wxString s=mpDihedralAngleWin->GetCellValue(r,c);
+      vector<MolAtom*>::reverse_iterator at=mpMolecule->FindAtom(s.c_str());
+      if(at!=mpMolecule->GetAtomList().rend())
+      {
+         if(  (*at!=&(mpMolecule->GetDihedralAngleList()[r]->GetAtom1()))
+            &&(*at!=&(mpMolecule->GetDihedralAngleList()[r]->GetAtom2())))
+            mpMolecule->GetDihedralAngleList()[r]->SetAtom4(**at);
+         else
+            mpDihedralAngleWin->SetCellValue(r,c,mpMolecule->GetDihedralAngleList()[r]->GetAtom4().GetName().c_str());
+      }
+      else
+         mpDihedralAngleWin->SetCellValue(r,c,mpMolecule->GetDihedralAngleList()[r]->GetAtom4().GetName().c_str());
+   }
+   if(c==5)
    {
       wxString s=mpDihedralAngleWin->GetCellValue(r,c);
       if(s!="")
@@ -1424,7 +1439,7 @@ void WXMolecule::OnEditGridDihedralAngle(wxGridEvent &e)
          mpMolecule->GetDihedralAngleList()[r]->SetAngle0(d*DEG2RAD);
       }
    }
-   if(c==5)
+   if(c==6)
    {
       wxString s=mpDihedralAngleWin->GetCellValue(r,c);
       if(s!="")
@@ -1434,7 +1449,7 @@ void WXMolecule::OnEditGridDihedralAngle(wxGridEvent &e)
          mpMolecule->GetDihedralAngleList()[r]->SetAngleSigma(d*DEG2RAD);
       }
    }
-   if(c==6)
+   if(c==7)
    {
       wxString s=mpDihedralAngleWin->GetCellValue(r,c);
       if(s!="")
@@ -1451,25 +1466,27 @@ void WXMolecule::OnEditGridDihedralAngle(wxGridEvent &e)
 void WXMolecule::OnEditGridRigidGroup(wxGridEvent &e)
 {
    if(mIsSelfUpdating) return;
-   mIsSelfUpdating=true;
    VFN_DEBUG_ENTRY("WXMolecule::OnEditGridRigidGroup():"<<e.GetRow()<<","<<e.GetCol(),10)
    
    const long r=e.GetRow();
    const long c=e.GetCol();
    wxString s=mpRigidGroupWin->GetCellValue(r,c);
    list<string> l=SplitString(CompressString(s.c_str()," "),",");
-   list<MolAtom*> v;
+   RigidGroup rg;
    for(list<string>::const_iterator pos=l.begin();pos!=l.end();++pos)
    {
       vector<MolAtom*>::reverse_iterator rpos=mpMolecule->FindAtom(*pos);
-      if(rpos!=mpMolecule->GetAtomList().rend()) v.push_back(*rpos);
+      if(rpos!=mpMolecule->GetAtomList().rend()) rg.insert(*rpos);
       else   cout<<*pos<<" : NOT FOUND"<<endl;;
    }
-   mpMolecule->RemoveRigidGroup(*(mpMolecule->GetRigidGroupList()[r]),false);
-   RigidGroup rg;
-   for(list<MolAtom*>::const_iterator pos=v.begin();pos!=v.end();++pos) rg.insert(*pos);
-   mpMolecule->AddRigidGroup(rg,false);
-   mIsSelfUpdating=false;
+   set<MolAtom *> *pold=(set<MolAtom *>*)  mpMolecule->GetRigidGroupList()[r];
+   set<MolAtom *> *pnew=(set<MolAtom *>*) &rg;
+   
+   if( *pold != *pnew)
+   {
+      *pold = *pnew;
+      mpMolecule->GetRigidGroupClock().Click();
+   }
    this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXMolecule::OnEditGridRigidGroup():"<<e.GetRow()<<","<<e.GetCol(),10)
 }

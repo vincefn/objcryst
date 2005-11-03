@@ -824,6 +824,12 @@ class Molecule: public Scatterer
       RefinableObjClock& GetAtomPositionClock();
       /// Get the clock associated to the atomic positions
       const RefinableObjClock& GetAtomPositionClock()const;
+      /// Get the clock associated to the list of rigid groups
+      ///(clicked also whenever a rigid group is modified)
+      RefinableObjClock& GetRigidGroupClock();
+      /// Get the clock associated to the list of rigid groups
+      ///(clicked also whenever a rigid group is modified)
+      const RefinableObjClock& GetRigidGroupClock()const;
       /** Add dihedral angles so as to rigidify the Molecule.
       *
       * In practice, for every sequence of atoms A-B-C-D, add the dihedral angle
