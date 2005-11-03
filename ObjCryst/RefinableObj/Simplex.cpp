@@ -119,7 +119,7 @@ void SimplexObj::Optimize(long &nbSteps,const bool silent,const REAL finalcost,
          }
       }
    }
-   mRefParList.RestoreParamSet(best);
+   mRefParList.RestoreParamSet(vIndex(best));
    mRefParList.EraseAllParamSet();
    for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).EndOptimization();
    VFN_DEBUG_EXIT("SimplexObj::Optimize()",10)
