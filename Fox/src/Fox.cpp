@@ -222,116 +222,135 @@ int main (int argc, char *argv[])
    list<string> vFourierFilenameDSN6;
    for(int i=1;i<argc;i++)
    {
-      if('-'==argv[i][0])
+      if(string("--nogui")==string(argv[i]))
       {
-         if(string("--nogui")==string(argv[i]))
-         {
-            useGUI=false;
-            cout << "Running Fox without GUI"<<endl;
-            continue;  
-         }
-         if(string("--randomize")==string(argv[i]))
-         {
-            randomize=true;
-            cout << "Randomizing parameters before running"<<endl;
-            continue;  
-         }
-         if(string("--silent")==string(argv[i]))
-         {
-            silent=true;
-            cout << "Running Fox quietly"<<endl;
-            continue;  
-         }
-         if(string("--finalcost")==string(argv[i]))
-         {
-            ++i;
-            stringstream sstr(argv[i]);
-            sstr >> finalCost;
-            cout << "Fox will stop after reaching cost:"<<finalCost<<endl;
-            continue;  
-         }
-         if(string("-n")==string(argv[i]))
-         {
-            ++i;
-            stringstream sstr(argv[i]);
-            sstr >> nbTrial;
-            cout << "Fox will run for "<<nbTrial<<" trials"<<endl;
-            continue;
-         }
-         if(string("--nbrun")==string(argv[i]))
-         {
-            ++i;
-            stringstream sstr(argv[i]);
-            sstr >> nbRun;
-            cout << "Fox will do "<<nbRun<<" runs, randomizing before each run"<<endl;
-            continue;
-         }
-         if(string("-i")==string(argv[i]))
-         {
-            ++i;
-            XMLCrystFileLoadAllObject(argv[i]);
-            continue;
-         }
-         if(string("-o")==string(argv[i]))
-         {
-            ++i;
-            outfilename=string(argv[i]);
-            filenameInsertCost = outfilename.find("#cost",0);
-            cout <<"Fox:#cost, pos="<<filenameInsertCost<<","<<string::npos<<endl;
-            if((long)(string::npos)==filenameInsertCost) filenameInsertCost=-1;
-            continue;
-         }
-         if(string("--loadfouriergrd")==string(argv[i]))
-         {
-            ++i;
-            loadFourierGRD=true;
-            vFourierFilenameGRD.push_back(string(argv[i]));
-            continue;
-         }
-         if(string("--loadfourierdsn6")==string(argv[i]))
-         {
-            ++i;
-            loadFourierDSN6=true;
-            vFourierFilenameDSN6.push_back(string(argv[i]));
-            continue;
-         }
-         if(string("--only3d")==string(argv[i]))
-         {
-            only3D=true;
-            continue;
-         }
-         if(string("--speedtest")==string(argv[i]))
-         {
-            standardSpeedTest();
-            exit(0);
-         }
-         #ifdef __DEBUG__
-         if(string("--debuglevel")==string(argv[i]))
-         {
-            int level;
-            ++i;
-            stringstream sstr(argv[i]);
-            sstr >> level;
-            VFN_DEBUG_GLOBAL_LEVEL(level);
-            continue;
-         }
-         #endif
-         cout <<"command-line arguments:"<<endl
-              <<"   -i input.xml: input 'in.xml' file"<<endl
-              <<"   --loadfouriergrd map.grd: load and display 'map.grd' fourier map with (first) crystal structure"<<endl
-              <<"   --loadfourierdsn6 map.DN6: load and display a DSN6 fourier map with (first) crystal structure"<<endl
-              <<"   --nogui: run without GUI, automatically launches optimization"<<endl
-              <<"      options with --nogui:"<<endl
-              <<"         -n 10000     : run for 10000 trials at most (default: 1000000)"<<endl
-              <<"         --nbrun 5     : do 5 runs, randomizing before each run (default: 1), use -1 to run indefinitely"<<endl
-              <<"         -o out.xml   : output in 'out.xml'"<<endl
-              <<"         --randomize  : randomize initial configuration"<<endl
-              <<"         --silent     : (almost) no text output"<<endl
-              <<"         --finalcost 0.15 : run optimization until cost < 0.15"<<endl
-              <<"   --speedtest: run speed test (takes about 1mn30s)"<<endl
-              <<endl;
-         exit(0);  
+         useGUI=false;
+         cout << "Running Fox without GUI"<<endl;
+         continue;  
       }
+      if(string("--randomize")==string(argv[i]))
+      {
+         randomize=true;
+         cout << "Randomizing parameters before running"<<endl;
+         continue;  
+      }
+      if(string("--silent")==string(argv[i]))
+      {
+         silent=true;
+         cout << "Running Fox quietly"<<endl;
+         continue;  
+      }
+      if(string("--finalcost")==string(argv[i]))
+      {
+         ++i;
+         stringstream sstr(argv[i]);
+         sstr >> finalCost;
+         cout << "Fox will stop after reaching cost:"<<finalCost<<endl;
+         continue;  
+      }
+      if(string("-n")==string(argv[i]))
+      {
+         ++i;
+         stringstream sstr(argv[i]);
+         sstr >> nbTrial;
+         cout << "Fox will run for "<<nbTrial<<" trials"<<endl;
+         continue;
+      }
+      if(string("--nbrun")==string(argv[i]))
+      {
+         ++i;
+         stringstream sstr(argv[i]);
+         sstr >> nbRun;
+         cout << "Fox will do "<<nbRun<<" runs, randomizing before each run"<<endl;
+         continue;
+      }
+      if(string("-i")==string(argv[i]))
+      {
+         ++i;
+         XMLCrystFileLoadAllObject(argv[i]);
+         continue;
+      }
+      if(string("-o")==string(argv[i]))
+      {
+         ++i;
+         outfilename=string(argv[i]);
+         filenameInsertCost = outfilename.find("#cost",0);
+         cout <<"Fox:#cost, pos="<<filenameInsertCost<<","<<string::npos<<endl;
+         if((long)(string::npos)==filenameInsertCost) filenameInsertCost=-1;
+         continue;
+      }
+      if(string("--loadfouriergrd")==string(argv[i]))
+      {
+         ++i;
+         loadFourierGRD=true;
+         vFourierFilenameGRD.push_back(string(argv[i]));
+         continue;
+      }
+      if(string("--loadfourierdsn6")==string(argv[i]))
+      {
+         ++i;
+         loadFourierDSN6=true;
+         vFourierFilenameDSN6.push_back(string(argv[i]));
+         continue;
+      }
+      if(string("--only3d")==string(argv[i]))
+      {
+         only3D=true;
+         continue;
+      }
+      if(string("--speedtest")==string(argv[i]))
+      {
+         standardSpeedTest();
+         exit(0);
+      }
+      #ifdef __DEBUG__
+      if(string("--debuglevel")==string(argv[i]))
+      {
+         int level;
+         ++i;
+         stringstream sstr(argv[i]);
+         sstr >> level;
+         VFN_DEBUG_GLOBAL_LEVEL(level);
+         continue;
+      }
+      #endif
+      if(string(argv[i]).find(string(".xml"))!=string::npos)
+      {
+         cout<<"Loading: "<<string(argv[i])<<endl;
+         XMLCrystFileLoadAllObject(argv[i]);
+         continue;
+      }
+      cout <<"command-line arguments:"<<endl
+           <<"   in.xml: input 'in.xml' file"<<endl
+           <<"   --loadfouriergrd map.grd: load and display 'map.grd' fourier map with (first) crystal structure"<<endl
+           <<"   --loadfourierdsn6 map.DN6: load and display a DSN6 fourier map with (first) crystal structure"<<endl
+           <<"   --nogui: run without GUI, automatically launches optimization"<<endl
+           <<"      options with --nogui:"<<endl
+           <<"         -n 10000     : run for 10000 trials at most (default: 1000000)"<<endl
+           <<"         --nbrun 5     : do 5 runs, randomizing before each run (default: 1), use -1 to run indefinitely"<<endl
+           <<"         -o out.xml   : output in 'out.xml'"<<endl
+           <<"         --randomize  : randomize initial configuration"<<endl
+           <<"         --silent     : (almost) no text output"<<endl
+           <<"         --finalcost 0.15 : run optimization until cost < 0.15"<<endl
+           <<endl<<endl<<"           EXAMPLES :"<<endl<<endl
+           <<"Load file 'silicon.xml' and launch GUI:"<<endl<<endl
+           <<"    Fox silicon.xml"<<endl<<endl
+           
+           <<"Load file 'ktartrate.xml', randomize, then make 1 optimization of "<<endl
+           <<"1 million trials, and save the best structure in 'best.xml' :"<<endl<<endl
+           <<"    Fox Cimetidine-powder.xml --nogui --randomize -n 1000000 -o best.xml"<<endl<<endl
+
+           <<"Load file 'Cimetidine-powder.xml', then make 10 runs (starting from "<<endl
+           <<"a random structure) of 10 million trials (each run saves one xml file)"<<endl
+           <<", and save the best structure in 'best.xml' :"<<endl<<endl
+           <<"    Fox Cimetidine-powder.xml --nogui --randomize -n 10000000 --nbrun 10 -o best.xml"<<endl<<endl
+           
+           <<"Load file 'Cimetidine-powder.xml', then make 10 silent runs of 10 million trials"<<endl
+           <<" (each run saves one xml file), and save the best structure in 'best.xml'."<<endl
+           <<" For each run, the optimization stops if the cost goes below 200000."<<endl<<endl
+           <<"    Fox Cimetidine-powder.xml --nogui --silent --randomize -n 10000000 --nbrun 10 --finalcost 200000 -o best.xml"<<endl<<endl
+           <<endl;
+      exit(0);  
    }
    
    
