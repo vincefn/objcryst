@@ -1,29 +1,35 @@
-DIR_CRYST := ObjCryst
-
 default: all
 
-all: Fox
+all: Aqua Aqua-G4 NoGUI NoGUI-G4 
 
-Fox:
-	$(MAKE) -f macosx.mak wxcryst=1 opengl=1 debug=$(debug) -C src all
+Aqua:
+	xcodebuild -project Fox.xcodeproj -target Fox -configuration Aqua
 
-Fox-nogui:
-	$(MAKE) -f gnu.mak wxcryst=0 opengl=0 debug=$(debug) -C src all
+Aqua-G4:
+	xcodebuild -project Fox.xcodeproj -target Fox -configuration Aqua-G4
 
-doc:
-	$(MAKE) -f gnu.mak -C src-doc all
+Fox-nogui: NoGUI
+
+NoGUI:
+	xcodebuild -project Fox.xcodeproj -target NoGUI -configuration NoGUI
+
+Aqua-dist:Aqua
+	rm -Rf Fox`date "+-%Y-%m-%d"` Fox`date "+-%Y-%m-%d"`.dmg
+	mkdir Fox`date "+-%Y-%m-%d"`
+	cp -R build/Aqua/Fox.app example Fox`date "+-%Y-%m-%d"`/
+	hdiutil create -srcfolder Fox`date "+-%Y-%m-%d"` Fox`date "+-%Y-%m-%d"`.dmg
+	rm -Rf Fox`date "+-%Y-%m-%d"`
+
+Aqua-G4-dist:Aqua-G4
+	rm -Rf Fox-G4`date "+-%Y-%m-%d"` Fox-G4`date "+-%Y-%m-%d"`.dmg
+	mkdir Fox-G4`date "+-%Y-%m-%d"`
+	cp -R build/Aqua-G4/Fox.app example Fox-G4`date "+-%Y-%m-%d"`/
+	hdiutil create -srcfolder Fox-G4`date "+-%Y-%m-%d"` Fox-G4`date "+-%Y-%m-%d"`.dmg
+	rm -Rf Fox-G4`date "+-%Y-%m-%d"`
 
 clean:
 	$(MAKE) -f macosx.mak -C src clean
 	$(MAKE) -f gnu.mak -C ${DIR_CRYST} clean
-
-tidy:
-	$(MAKE) -f macosx.mak -C src tidy
-	$(MAKE) -f gnu.mak -C ${DIR_CRYST} tidy
-
-#install Fox in /usr/local/bin
-install:
-	install -m 755 src/Fox /usr/local/bin
 
 update:
 	cvs -z3 update
