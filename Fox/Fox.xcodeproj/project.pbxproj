@@ -4760,11 +4760,9 @@
 		BF033A7109156C6400BB8A5B /* Aqua-G4 */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					ppc7400,
-					ppc970,
-				);
+				ARCHS = ppc;
 				COPY_PHASE_STRIP = YES;
+				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_FAST_MATH = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G3;
@@ -4775,14 +4773,15 @@
 				INSTALL_PATH = /usr/local/lib;
 				LIBRARY_STYLE = STATIC;
 				OPTIMIZATION_CFLAGS = "-O3";
-				OTHER_CFLAGS = "";
+				OTHER_CFLAGS = (
+					"-fast",
+					"-mcpu=7450",
+				);
 				OTHER_LDFLAGS = (
 					"-framework",
 					Carbon,
 				);
 				OTHER_REZFLAGS = "";
-				PER_ARCH_CFLAGS_ppc7400 = "-mtune=G4 -maltivec -ftree-vectorize";
-				PER_ARCH_CFLAGS_ppc970 = "-mtune=G5 -maltivec -ftree-vectorize";
 				PREBINDING = NO;
 				PRODUCT_NAME = newmat;
 				SECTORDER_FLAGS = "";
@@ -4797,14 +4796,12 @@
 		BF033A7209156C6400BB8A5B /* Aqua-G4 */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					ppc7400,
-					ppc970,
-				);
+				ARCHS = ppc;
 				COPY_PHASE_STRIP = YES;
+				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_FAST_MATH = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G3;
+				GCC_MODEL_TUNING = G4;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
 				HEADER_SEARCH_PATHS = (
@@ -4815,14 +4812,15 @@
 				INSTALL_PATH = /usr/local/lib;
 				LIBRARY_STYLE = STATIC;
 				OPTIMIZATION_CFLAGS = "-O3";
-				OTHER_CFLAGS = "";
+				OTHER_CFLAGS = (
+					"-fast",
+					"-mcpu=7450",
+				);
 				OTHER_LDFLAGS = (
 					"-framework",
 					Carbon,
 				);
 				OTHER_REZFLAGS = "";
-				PER_ARCH_CFLAGS_ppc7400 = "-mtune=G4 -maltivec -ftree-vectorize";
-				PER_ARCH_CFLAGS_ppc970 = "-mtune=G5 -maltivec -ftree-vectorize";
 				PREBINDING = NO;
 				PRODUCT_NAME = cctbx;
 				SECTORDER_FLAGS = "";
@@ -5471,10 +5469,20 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
+				GCC_MODEL_TUNING = G4;
+				HEADER_SEARCH_PATHS = (
+					ObjCryst,
+					../Fox,
+					cctbx,
+					cctbx/scitbx/include,
+					cctbx/cctbx/include,
+				);
 				INSTALL_PATH = "$(HOME)/bin";
 				OPTIMIZATION_CFLAGS = "-O0";
-				OTHER_CFLAGS = "";
+				OTHER_CFLAGS = (
+					"-fast",
+					"-mcpu=7450",
+				);
 				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
 				PREBINDING = NO;
