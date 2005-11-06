@@ -199,7 +199,7 @@ REAL PowderPatternBackgroundBayesianMinimiser::BayesianBackgroundLogLikelihood(c
                                8.00000};
    static const CubicSpline spline(vt,vllk,41);
    static const REAL s0=spline(0);
-   static const REAL s1=s0-spline(8)-log(8);
+   static const REAL s1=s0-spline(8)-log((REAL)8);
    if(t<=0) return t*t;
    if(t<8)return s0-spline(t);
    return s1+log(t);
