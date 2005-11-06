@@ -217,14 +217,14 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = BFFCCB51089028D300044EBA /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = BFFCCBE40890309900044EBA /* cctbx */;
+			remoteGlobalIDString = BFFCCBE40890309900044EBA;
 			remoteInfo = cctbx;
 		};
 		BFE3CE1109177C12002021F6 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFFCCB51089028D300044EBA /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = BFFCCB5C089028E500044EBA /* newmat */;
+			remoteGlobalIDString = BFFCCB5C089028E500044EBA;
 			remoteInfo = newmat;
 		};
 		BFFCD9960890583C00044EBA /* PBXContainerItemProxy */ = {
@@ -1792,7 +1792,7 @@
 		BFFCD2C6089038A400044EBA /* transform_traits_spec.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = transform_traits_spec.hpp; sourceTree = "<group>"; };
 		BFFCD2C7089038A400044EBA /* type_with_alignment.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = type_with_alignment.hpp; sourceTree = "<group>"; };
 		BFFCD2C8089038A400044EBA /* type_traits.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = type_traits.hpp; sourceTree = "<group>"; };
-		BFFCD888089041A600044EBA /* Fox-NoGUI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Fox-NoGUI.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		BFFCD888089041A600044EBA /* Fox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Fox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFFCD88A089041A600044EBA /* Fox-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Fox-Info.plist"; sourceTree = SOURCE_ROOT; };
 		BFFCD88E0890422000044EBA /* Fox.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Fox.cpp; path = src/Fox.cpp; sourceTree = SOURCE_ROOT; };
 		BFFCD8900890426600044EBA /* Atom.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Atom.cpp; path = ObjCryst/ObjCryst/Atom.cpp; sourceTree = SOURCE_ROOT; };
@@ -2109,7 +2109,7 @@
 			children = (
 				BFFCCB5D089028E500044EBA /* libnewmat.a */,
 				BFFCCBE50890309900044EBA /* libcctbx.a */,
-				BFFCD888089041A600044EBA /* Fox-NoGUI.app */,
+				BFFCD888089041A600044EBA /* Fox.app */,
 				BFE3CE0609177BF1002021F6 /* Fox-NoGUI */,
 			);
 			name = Products;
@@ -4461,7 +4461,7 @@
 			);
 			name = Fox;
 			productName = Fox;
-			productReference = BFFCD888089041A600044EBA /* Fox-NoGUI.app */;
+			productReference = BFFCD888089041A600044EBA /* Fox.app */;
 			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
 <plist version=\"1.0\">
@@ -4757,7 +4757,7 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		BF033A7109156C6400BB8A5B /* Aqua-Universal */ = {
+		BF033A7109156C6400BB8A5B /* Aqua-G4 */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = (
@@ -4792,9 +4792,9 @@
 					"-Wno-unknown-pragmas",
 				);
 			};
-			name = "Aqua-Universal";
+			name = "Aqua-G4";
 		};
-		BF033A7209156C6400BB8A5B /* Aqua-Universal */ = {
+		BF033A7209156C6400BB8A5B /* Aqua-G4 */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = (
@@ -4832,22 +4832,19 @@
 					"-Wno-unknown-pragmas",
 				);
 			};
-			name = "Aqua-Universal";
+			name = "Aqua-G4";
 		};
-		BF033A7309156C6400BB8A5B /* Aqua-Universal */ = {
+		BF033A7309156C6400BB8A5B /* Aqua-G4 */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					ppc7400,
-					ppc970,
-				);
+				ARCHS = ppc;
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_LOCATION = NO;
-				GCC_ALTIVEC_EXTENSIONS = NO;
-				GCC_AUTO_VECTORIZATION = NO;
+				GCC_ALTIVEC_EXTENSIONS = YES;
+				GCC_AUTO_VECTORIZATION = YES;
 				GCC_FAST_MATH = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = "";
+				GCC_MODEL_TUNING = G4;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
@@ -4866,6 +4863,8 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.2;
 				OPTIMIZATION_CFLAGS = "-O3";
 				OTHER_CFLAGS = (
+					"-fast",
+					"-mcpu=7450",
 					"-DHAVE_GLUT",
 					"-D__WX__CRYST__",
 					"-DOBJCRYST_GL",
@@ -4900,8 +4899,6 @@
 					"$HOME/dev/wxdir/lib/libwx_mac_gl-2.6.a",
 				);
 				OTHER_REZFLAGS = "";
-				PER_ARCH_CFLAGS_ppc7400 = "-mtune=G4 -maltivec -ftree-vectorize";
-				PER_ARCH_CFLAGS_ppc970 = "-mtune=G5 -maltivec -ftree-vectorize";
 				PREBINDING = NO;
 				PRODUCT_NAME = Fox;
 				SECTORDER_FLAGS = "";
@@ -4911,22 +4908,22 @@
 					"-Wno-unknown-pragmas",
 				);
 			};
-			name = "Aqua-Universal";
+			name = "Aqua-G4";
 		};
-		BF033A7409156C6400BB8A5B /* Aqua-Universal */ = {
+		BF033A7409156C6400BB8A5B /* Aqua-G4 */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					ppc7400,
-					ppc970,
-				);
+				ARCHS = ppc;
 				COPY_PHASE_STRIP = YES;
-				GCC_MODEL_TUNING = "";
+				GCC_AUTO_VECTORIZATION = YES;
+				GCC_MODEL_TUNING = G4;
 				GCC_OPTIMIZATION_LEVEL = 3;
-				PER_ARCH_CFLAGS_ppc7400 = "-mtune=G4 -maltivec -ftree-vectorize";
-				PER_ARCH_CFLAGS_ppc970 = "-mtune=G5 -maltivec -ftree-vectorize";
+				OTHER_CFLAGS = (
+					"-fast",
+					"-mcpu=7450",
+				);
 			};
-			name = "Aqua-Universal";
+			name = "Aqua-G4";
 		};
 		BF48AEF808924F3F0060B5BE /* Aqua-Profile */ = {
 			isa = XCBuildConfiguration;
@@ -5322,7 +5319,7 @@
 				GCC_AUTO_VECTORIZATION = NO;
 				GCC_FAST_MATH = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G3;
+				GCC_MODEL_TUNING = "";
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
@@ -5374,10 +5371,18 @@
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_MODEL_TUNING = G5;
+				GCC_MODEL_TUNING = "";
+				GCC_OPTIMIZATION_LEVEL = 0;
+				HEADER_SEARCH_PATHS = (
+					ObjCryst,
+					../Fox,
+					cctbx,
+					cctbx/scitbx/include,
+					cctbx/cctbx/include,
+				);
 				INSTALL_PATH = "$(HOME)/bin";
-				OPTIMIZATION_CFLAGS = "";
-				OTHER_CFLAGS = "";
+				OPTIMIZATION_CFLAGS = "-O0";
+				OTHER_CFLAGS = "-D__DEBUG__";
 				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
 				PREBINDING = NO;
@@ -5397,7 +5402,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = "$(HOME)/bin";
-				OPTIMIZATION_CFLAGS = "";
+				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
@@ -5417,7 +5422,7 @@
 			buildSettings = {
 				GCC_FAST_MATH = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G3;
+				GCC_MODEL_TUNING = "";
 				HEADER_SEARCH_PATHS = (
 					ObjCryst,
 					../Fox,
@@ -5447,7 +5452,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = "$(HOME)/bin";
-				OPTIMIZATION_CFLAGS = "";
+				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
@@ -5462,13 +5467,13 @@
 			};
 			name = GTK;
 		};
-		BFE3CE0D09177C10002021F6 /* Aqua-Universal */ = {
+		BFE3CE0D09177C10002021F6 /* Aqua-G4 */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = "$(HOME)/bin";
-				OPTIMIZATION_CFLAGS = "";
+				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
@@ -5481,7 +5486,7 @@
 					"-Wno-unknown-pragmas",
 				);
 			};
-			name = "Aqua-Universal";
+			name = "Aqua-G4";
 		};
 		BFE3CE0E09177C10002021F6 /* Aqua-Profile */ = {
 			isa = XCBuildConfiguration;
@@ -5489,7 +5494,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = "$(HOME)/bin";
-				OPTIMIZATION_CFLAGS = "";
+				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
@@ -5673,6 +5678,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.2;
 				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CFLAGS = (
+					"-D__DEBUG__",
 					"-DHAVE_GLUT",
 					"-D__WX__CRYST__",
 					"-DOBJCRYST_GL",
@@ -5727,7 +5733,7 @@
 				GCC_AUTO_VECTORIZATION = NO;
 				GCC_FAST_MATH = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G3;
+				GCC_MODEL_TUNING = "";
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
@@ -5801,7 +5807,7 @@
 				BFE3CE0A09177C10002021F6 /* Aqua */,
 				BFE3CE0B09177C10002021F6 /* NoGUI */,
 				BFE3CE0C09177C10002021F6 /* GTK */,
-				BFE3CE0D09177C10002021F6 /* Aqua-Universal */,
+				BFE3CE0D09177C10002021F6 /* Aqua-G4 */,
 				BFE3CE0E09177C10002021F6 /* Aqua-Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -5813,7 +5819,7 @@
 				BFFCCB54089028D300044EBA /* Aqua */,
 				BFE3CDFD09177617002021F6 /* NoGUI */,
 				BF72984E09166319006F90D2 /* GTK */,
-				BF033A7409156C6400BB8A5B /* Aqua-Universal */,
+				BF033A7409156C6400BB8A5B /* Aqua-G4 */,
 				BF48AEFB08924F3F0060B5BE /* Aqua-Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -5826,7 +5832,7 @@
 				BFFCCB61089028E600044EBA /* Aqua */,
 				BFE3CDFA09177617002021F6 /* NoGUI */,
 				BF72984B09166319006F90D2 /* GTK */,
-				BF033A7109156C6400BB8A5B /* Aqua-Universal */,
+				BF033A7109156C6400BB8A5B /* Aqua-G4 */,
 				BF48AEF808924F3F0060B5BE /* Aqua-Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -5839,7 +5845,7 @@
 				BFFCCBE8089030B800044EBA /* Aqua */,
 				BFE3CDFB09177617002021F6 /* NoGUI */,
 				BF72984C09166319006F90D2 /* GTK */,
-				BF033A7209156C6400BB8A5B /* Aqua-Universal */,
+				BF033A7209156C6400BB8A5B /* Aqua-G4 */,
 				BF48AEF908924F3F0060B5BE /* Aqua-Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -5852,7 +5858,7 @@
 				BFFCD88D089041A900044EBA /* Aqua */,
 				BFE3CDFC09177617002021F6 /* NoGUI */,
 				BF72984D09166319006F90D2 /* GTK */,
-				BF033A7309156C6400BB8A5B /* Aqua-Universal */,
+				BF033A7309156C6400BB8A5B /* Aqua-G4 */,
 				BF48AEFA08924F3F0060B5BE /* Aqua-Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
