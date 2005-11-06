@@ -3268,8 +3268,8 @@ const RefinableObjClock& Molecule::GetBondListClock()const{return mClockBondList
 RefinableObjClock& Molecule::GetAtomPositionClock(){return mClockAtomPosition;}
 const RefinableObjClock& Molecule::GetAtomPositionClock()const{return mClockAtomPosition;}
 
-      RefinableObjClock& Molecule::Molecule::GetRigidGroupClock(){return mClockRigidGroup;}
-const RefinableObjClock& Molecule::Molecule::GetRigidGroupClock()const{return mClockRigidGroup;}
+      RefinableObjClock& Molecule::GetRigidGroupClock(){return mClockRigidGroup;}
+const RefinableObjClock& Molecule::GetRigidGroupClock()const{return mClockRigidGroup;}
 
 void Molecule::RigidifyWithDihedralAngles()
 {
