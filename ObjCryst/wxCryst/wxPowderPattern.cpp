@@ -1577,6 +1577,7 @@ void WXPowderPatternBackground::OnEditGridBackgroundPoint(wxGridEvent &e)
          if(d!=mBackgroundInterpPointX(r))
             mBackgroundInterpPointIntensity(r)=d;
       }
+      
       mpPowderPatternBackground->SetInterpPoints(mBackgroundInterpPointX,
                                                  mBackgroundInterpPointIntensity);
       // The order of the points might have changed
@@ -1585,6 +1586,7 @@ void WXPowderPatternBackground::OnEditGridBackgroundPoint(wxGridEvent &e)
    }
    mNeedUpdateUI=true,
    this->UpdateUI();
+   mpPowderPatternBackground->GetParentPowderPattern().UpdateDisplay();
    VFN_DEBUG_EXIT("WXPowderPatternBackground::OnEditGridBackgroundPoint():"<<e.GetRow()<<","<<e.GetCol(),10)
 }
 

@@ -218,26 +218,19 @@ void PowderPatternBackground::SetInterpPoints(const CrystVector_REAL tth,
 number of points differ or less than 2 points !");
    }
    mBackgroundNbPoint=tth.numElements();
-   // The points must be in ascending order of the pattern's pixels
-   CrystVector<long> subs;
-   subs=SortSubs(tth);
    mBackgroundInterpPointX.resize(mBackgroundNbPoint);
    mBackgroundInterpPointIntensity.resize(mBackgroundNbPoint);
-   if(this->GetParentPowderPattern().GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
-      for(long i=0;i<mBackgroundNbPoint;++i) 
-      {
-         mBackgroundInterpPointX(i)=tth(mBackgroundNbPoint-1-subs(i));
-         mBackgroundInterpPointIntensity(i)=backgd(mBackgroundNbPoint-1-subs(i));
-      }
-   else
-      for(long i=0;i<mBackgroundNbPoint;++i)
-      {
-         mBackgroundInterpPointX(i)=tth(subs(i));
-         mBackgroundInterpPointIntensity(i)=backgd(subs(i));
-      }
+   // Sort in ascending order, disregarding radiation type.
+   CrystVector<long> subs;
+   subs=SortSubs(tth);
+   
+   for(long i=0;i<mBackgroundNbPoint;++i)
+   {
+      mBackgroundInterpPointX(i)=tth(subs(i));
+      mBackgroundInterpPointIntensity(i)=backgd(subs(i));
+   }
    this->InitRefParList();
    mClockBackgroundPoint.Click();
-   this->GetParentPowderPattern().UpdateDisplay();
    VFN_DEBUG_EXIT("PowderPatternBackground::SetInterpPoints()",5)
 }
 
@@ -351,10 +344,10 @@ void PowderPatternBackground::CalcPowderPattern() const
                break;
             }
             VFN_DEBUG_MESSAGE("PowderPatternBackground::CalcPowderPattern()"<<nb,2)
-            //mPowderPatternCalc=0.;
+            this->InitSpline();
             REAL *b=mPowderPatternCalc.data();
-            p1=this->GetParentPowderPattern().X2Pixel(mBackgroundInterpPointX(0));
-            p2=this->GetParentPowderPattern().X2Pixel(mBackgroundInterpPointX(1));
+            p1=this->GetParentPowderPattern().X2Pixel(mBackgroundInterpPointX(mPointOrder(0)));
+            p2=this->GetParentPowderPattern().X2Pixel(mBackgroundInterpPointX(mPointOrder(1)));
             b1=mBackgroundInterpPointIntensity(0);
             b2=mBackgroundInterpPointIntensity(1);
             long point=1;
@@ -366,8 +359,8 @@ void PowderPatternBackground::CalcPowderPattern() const
                   {
                      b1=b2;
                      p1=p2;
-                     b2=mBackgroundInterpPointIntensity(point+1);
-                     p2=this->GetParentPowderPattern().X2Pixel(mBackgroundInterpPointX(point+1));
+                     b2=mBackgroundInterpPointIntensity(mPointOrder(point+1));
+                     p2=this->GetParentPowderPattern().X2Pixel(mBackgroundInterpPointX(mPointOrder(point+1)));
                      point++ ;
                   }
                }
@@ -516,10 +509,29 @@ void PowderPatternBackground::InitOptions()
 
 void PowderPatternBackground::InitSpline()const
 {
-   if(mClockSpline>mClockBackgroundPoint) return;
+   if(  (mClockSpline>mClockBackgroundPoint)
+      &&(mClockSpline>mpParentPowderPattern->GetClockPowderPatternPar())
+      &&(mClockSpline>this->GetParentPowderPattern().GetRadiation().GetClockWavelength())) return;
+   
    mvSplinePixel.resize(mBackgroundNbPoint);
+
+   // The points must be in ascending order
+   // Take care later of neutron TOF, as the powder apttern data may not have been initialized yet.
+   CrystVector<long> subs;
+   subs=SortSubs(mBackgroundInterpPointX);
+   
+   if(this->GetParentPowderPattern().GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
+   {
+      mPointOrder.resize(mBackgroundNbPoint);
+      for(long i=0;i<mBackgroundNbPoint;++i)
+         mPointOrder(i)=subs(mBackgroundNbPoint-1-i);
+   }
+   else mPointOrder=subs;
+   
    for(long i=0;i<mBackgroundNbPoint;++i)
-      mvSplinePixel(i)=this->GetParentPowderPattern().X2Pixel(mBackgroundInterpPointX(i));
+      mvSplinePixel(i)=
+         this->GetParentPowderPattern().X2Pixel(mBackgroundInterpPointX(mPointOrder(i)));
+   
    mvSpline.Init(mvSplinePixel,mBackgroundInterpPointIntensity);
    mClockSpline.Click();
 }

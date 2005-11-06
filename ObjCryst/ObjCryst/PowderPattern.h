@@ -231,7 +231,9 @@ class PowderPatternBackground : public PowderPatternComponent
       CrystVector_REAL mBackgroundInterpPointX;
       /// Values of background at interpolating points
       CrystVector_REAL mBackgroundInterpPointIntensity;
-      
+      /// Subscript of the points, sorted the correct order,
+      ///taking into account the type of radiation (monochromatic/TOF).
+      mutable CrystVector_long mPointOrder;
       /// Vector of pixel values between each interval, for faster CubicSpline calculations.
       /// Mutable since it copies information from mBackgroundInterpPointX.
       mutable CrystVector_REAL mvSplinePixel;
