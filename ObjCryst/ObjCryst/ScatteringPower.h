@@ -232,12 +232,17 @@ class ScatteringPower:virtual public RefinableObj
                                 unsigned int &firstGroup) const;
       /// Maximum Likelihood: get the estimated error (sigma) on the positions
       /// for this kind of element.
-      virtual REAL GetMaximumLikelihoodPositionError()const;
+      REAL GetMaximumLikelihoodPositionError()const;
       /// Maximum Likelihood: set the estimated error (sigma) on the positions
       /// for this kind of element.
-      virtual void SetMaximumLikelihoodPositionError(const REAL mle);
-      /// Get the clock value for the last change on the positionnal errors.
-      virtual const RefinableObjClock& GetMaximumLikelihoodPositionErrorClock()const;
+      void SetMaximumLikelihoodPositionError(const REAL mle);
+      /// Maximum Likelihood: get the number of ghost elements per asymmetric unit.
+      REAL GetMaximumLikelihoodNbGhostAtom()const;
+      /// Maximum Likelihood: set the number of ghost elements per asymmetric unit.
+      void SetMaximumLikelihoodNbGhostAtom(const REAL nb);
+      /// Get the clock value for the last change on the maximum likelihood parameters
+      /// (positionnal error, number of ghost atoms).
+      const RefinableObjClock& GetMaximumLikelihoodParClock()const;
       virtual REAL GetFormalCharge()const;
       virtual void SetFormalCharge(const REAL charge);
    protected:
@@ -275,7 +280,11 @@ class ScatteringPower:virtual public RefinableObj
          /// estimated error (sigma) on the positions for this type of element.
          REAL mMaximumLikelihoodPositionError;
          /// 
-         RefinableObjClock mMaximumLikelihoodPositionErrorClock;
+         RefinableObjClock mMaximumLikelihoodParClock;
+         /// Number of ghost atoms in the asymmetric unit.
+         /// These contribute to the variance of the structure factor, but not to the structure
+         /// factor as the uncertainty on their position is infinite.
+         REAL mMaximumLikelihoodNbGhost;
       /** Formal Charge. This can be used for bond valence analysis,
       * or energy calculations.
       *

@@ -501,7 +501,7 @@ void WXCrystal::CrystUpdate(const bool uui,const bool lock)
             const REAL formalCharge=pow->first->GetFormalCharge();
             const REAL *pRGB=pow->first->GetColourRGB();
             const REAL mlerror=pow->first->GetMaximumLikelihoodPositionError();
-            const REAL nbghost=0;
+            const REAL nbghost=pow->first->GetMaximumLikelihoodNbGhostAtom();
             if(  (name   !=row->mName)
                ||(biso!=row->mBiso)
                ||(formalCharge!=row->mFormalCharge)
@@ -1452,7 +1452,7 @@ void WXCrystal::OnEditGridScattPow(wxGridEvent &e)
          {
             double d;
             s.ToDouble(&d);
-            //p->SetMaximumLikelihoodNbGhostAtoms(d);
+            p->SetMaximumLikelihoodNbGhostAtom(d);
          }
          break;
       }

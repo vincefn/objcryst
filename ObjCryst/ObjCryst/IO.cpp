@@ -349,17 +349,17 @@ void ScatteringPowerAtom::XMLOutput(ostream &os,int indent)const
    tag.AddAttribute("Symbol",mSymbol);
    os <<tag<<endl;
    
-   for(int i=0;i<=indent;i++) os << "  " ;
    if(true==this->mIsIsotropic)
-      this->GetPar(&mBiso).XMLOutput(os,"Biso",0);
+      this->GetPar(&mBiso).XMLOutput(os,"Biso",indent+1);
    os<<endl;
 
-   for(int i=0;i<=indent;i++) os << "  " ;
-   this->GetPar("ML Error").XMLOutput(os,"ML Error",indent);
+   this->GetPar("ML Error").XMLOutput(os,"ML Error",indent+1);
+   os <<endl;
+
+   this->GetPar("ML-Nb Ghost Atoms").XMLOutput(os,"ML-NbGhost",indent+1);
    os <<endl;
    
-   for(int i=0;i<=indent;i++) os << "  " ;
-   this->GetPar("Formal Charge").XMLOutput(os,"Formal Charge",indent);
+   this->GetPar("Formal Charge").XMLOutput(os,"Formal Charge",indent+1);
    os <<endl;
    
    for(int i=0;i<=indent;i++) os << "  " ;
@@ -415,6 +415,11 @@ void ScatteringPowerAtom::XMLInput(istream &is,const XMLCrystTag &tagg)
                if("ML Error"==tag.GetAttributeValue(i))
                {
                   this->GetPar("ML Error").XMLInput(is,tag);
+                  break;
+               }
+               if("ML-NbGhost"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar("ML-Nb Ghost Atoms").XMLInput(is,tag);
                   break;
                }
                if("Formal Charge"==tag.GetAttributeValue(i))

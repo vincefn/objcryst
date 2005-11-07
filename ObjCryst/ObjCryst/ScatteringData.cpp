@@ -1303,7 +1303,7 @@ void ScatteringData::CalcGeomStructFactor() const
       =&(this->GetCrystal().GetScatteringComponentList());
    if(  (mClockGeomStructFact>mpCrystal->GetClockScattCompList())
       &&(mClockGeomStructFact>mClockHKL)
-      &&(mClockGeomStructFact<mpCrystal->GetMasterClockScatteringPower())) return;
+      &&(mClockGeomStructFact>mpCrystal->GetMasterClockScatteringPower())) return;
    TAU_PROFILE("ScatteringData::GeomStructFactor()","void (Vx,Vy,Vz,data,M,M,bool)",TAU_DEFAULT);
    VFN_DEBUG_ENTRY("ScatteringData::GeomStructFactor(Vx,Vy,Vz,...)",3)
    VFN_DEBUG_MESSAGE("-->Using fast functions:"<<mUseFastLessPreciseFunc,2)
@@ -1362,7 +1362,11 @@ VFN_DEBUG_MESSAGE("TEST",3)
       // which scattering powers are actually used ?
       map<const ScatteringPower*,bool> vUsed;
       for(int i=mpCrystal->GetScatteringPowerRegistry().GetNb()-1;i>=0;i--)
-         vUsed[&(mpCrystal->GetScatteringPowerRegistry().GetObj(i))]=false;
+      {
+         const ScatteringPower*pow=&(mpCrystal->GetScatteringPowerRegistry().GetObj(i));
+         if(pow->GetMaximumLikelihoodNbGhostAtom()>0) vUsed[pow]=true;
+         else vUsed[pow]=false;
+      }
       for(long i=0;i<nbComp;i++)
          vUsed[(*pScattCompList)(i).mpScattPow]=true;
       //Resize all arrays and set them to 0
@@ -1609,7 +1613,7 @@ void ScatteringData::CalcLuzzatiFactor()const
       for(int i=mpCrystal->GetScatteringPowerRegistry().GetNb()-1;i>=0;i--)
       {
          if(mpCrystal->GetScatteringPowerRegistry().GetObj(i)
-            .GetMaximumLikelihoodPositionErrorClock()>mClockLuzzatiFactor)
+            .GetMaximumLikelihoodParClock()>mClockLuzzatiFactor)
          {
             recalc=true;
             break;
@@ -1655,9 +1659,26 @@ void ScatteringData::CalcStructFactVariance()const
    // this is called by CalcStructFactor(), after the calculation of the structure factors,
    // and the recomputation of Luzzati factors has already been asked
    // So we only recompute if these clocks have changed.
+   //
+   // The Crystal::mMasterClockScatteringPower will tell the last time the number of ghost
+   // atoms has been changed in any of the scattpow.
+   
    if(  (mClockFhklCalcVariance>mClockLuzzatiFactor)
-      &&(mClockFhklCalcVariance>mClockStructFactor)) return;
-   if(0==mvLuzzatiFactor.size())
+      &&(mClockFhklCalcVariance>mClockStructFactor)
+      &&(mClockFhklCalcVariance>mpCrystal->GetMasterClockScatteringPower())) return;
+
+   bool hasGhostAtoms=false;
+   for(map<const ScatteringPower*,CrystVector_REAL>::const_iterator
+       pos=mvRealGeomSF.begin();pos!=mvRealGeomSF.end();++pos)
+   {
+      if(pos->first->GetMaximumLikelihoodNbGhostAtom()!=0)
+      {
+         hasGhostAtoms=true;
+         break;
+      }
+   }
+
+   if( (0==mvLuzzatiFactor.size())&&(!hasGhostAtoms))
    {
       mFhklCalcVariance.resize(0);
       return;
@@ -1685,6 +1706,18 @@ void ScatteringData::CalcStructFactVariance()const
           pos=vComp.begin();pos!=vComp.end();++pos)
             pos->second *= this->GetCrystal().GetSpaceGroup().GetNbSymmetrics();
    }
+   // Ghost atoms
+   map<const ScatteringPower*,REAL> vGhost;
+   {
+      const long nbScattPow=mpCrystal->GetScatteringPowerRegistry().GetNb();
+      const long mult=this->GetCrystal().GetSpaceGroup().GetNbSymmetrics();
+      for(int i=0;i<nbScattPow;i++)
+      {
+         const ScatteringPower* pow=&(mpCrystal->GetScatteringPowerRegistry().GetObj(i));
+         const REAL nb=pow->GetMaximumLikelihoodNbGhostAtom();
+         vGhost[pow]=nb*mult;
+      }
+   }
 
    if(mFhklCalcVariance.numElements() == mNbRefl)
    {
@@ -1695,7 +1728,8 @@ void ScatteringData::CalcStructFactVariance()const
    for(int i=mpCrystal->GetScatteringPowerRegistry().GetNb()-1;i>=0;i--)
    {
       const ScatteringPower* pScattPow=&(mpCrystal->GetScatteringPowerRegistry().GetObj(i));
-      if(mvLuzzatiFactor[pScattPow].numElements()==0) continue;
+      if(  (mvLuzzatiFactor[pScattPow].numElements()==0)
+         &&(vGhost[pScattPow]==0)) continue;
       needVar=true;
       if(mFhklCalcVariance.numElements() != mNbRefl)
       {
@@ -1705,14 +1739,27 @@ void ScatteringData::CalcStructFactVariance()const
       }
       // variance on real & imag parts of the structure factor
       const REAL *pScatt=mvScatteringFactor[pScattPow].data();
-      const REAL *pLuz=mvLuzzatiFactor[pScattPow].data();
       const int  *pExp=mExpectedIntensityFactor.data();
       REAL *pVar=mFhklCalcVariance.data();
-      const REAL occ=vComp[pScattPow];
-      for(long j=0;j<mNbReflUsed;j++)
+      if(mvLuzzatiFactor[pScattPow].numElements()==0)
       {
-         *pVar++ +=  occ * *pExp++ * *pScatt * *pScatt * (1 - *pLuz * *pLuz);
-         pScatt++; pLuz++;
+         const REAL nbghost=vGhost[pScattPow];
+         for(long j=0;j<mNbReflUsed;j++)
+         {
+            *pVar++ += *pExp++ * *pScatt * *pScatt * nbghost;
+            pScatt++; 
+         }
+      }
+      else
+      {
+         const REAL *pLuz=mvLuzzatiFactor[pScattPow].data();
+         const REAL occ=vComp[pScattPow];
+         const REAL nbghost=vGhost[pScattPow];
+         for(long j=0;j<mNbReflUsed;j++)
+         {
+            *pVar++ += *pExp++ * *pScatt * *pScatt * ( occ*(1 - *pLuz * *pLuz) + nbghost);
+            pScatt++; pLuz++;
+         }
       }
    }
    if(false == needVar) mFhklCalcVariance.resize(0);

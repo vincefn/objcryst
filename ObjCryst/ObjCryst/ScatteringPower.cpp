@@ -61,7 +61,7 @@ CrystVector_bool ScatteringPower::mspScatteringPowerGlobalListIsUsed(1000);
 
 
 ScatteringPower::ScatteringPower():mDynPopCorrIndex(0),mBiso(1.0),mIsIsotropic(true),
-mScatteringPowerId(mNbScatteringPower),mFormalCharge(0.0)
+mScatteringPowerId(mNbScatteringPower),mMaximumLikelihoodNbGhost(0),mFormalCharge(0.0)
 {
    VFN_DEBUG_MESSAGE("ScatteringPower::ScatteringPower():"<<mName,5)
    if(mNbScatteringPower>1000) throw ObjCrystException("ScatteringPower::ScatteringPower() \
@@ -73,7 +73,7 @@ mScatteringPowerId(mNbScatteringPower),mFormalCharge(0.0)
    gScatteringPowerRegistry.Register(*this);
    this->Init();
    mClockMaster.AddChild(mClock);
-   mClockMaster.AddChild(mMaximumLikelihoodPositionErrorClock);
+   mClockMaster.AddChild(mMaximumLikelihoodParClock);
 }
 ScatteringPower::ScatteringPower(const ScatteringPower& old):
 mDynPopCorrIndex(old.mDynPopCorrIndex),mBiso(old.mBiso),mIsIsotropic(old.mIsIsotropic),
@@ -88,8 +88,10 @@ mFormalCharge(old.mFormalCharge)
    mNbScatteringPower++;
    gScatteringPowerRegistry.Register(*this);
    this->Init();
+   mMaximumLikelihoodPositionError=old.mMaximumLikelihoodPositionError;
+   mMaximumLikelihoodNbGhost=old.mMaximumLikelihoodNbGhost;
    mClockMaster.AddChild(mClock);
-   mClockMaster.AddChild(mMaximumLikelihoodPositionErrorClock);
+   mClockMaster.AddChild(mMaximumLikelihoodParClock);
 }
 ScatteringPower::~ScatteringPower()
 {
@@ -159,15 +161,27 @@ void ScatteringPower::GetGeneGroup(const RefinableObj &obj,
 REAL ScatteringPower::GetMaximumLikelihoodPositionError()const 
 {return mMaximumLikelihoodPositionError;}
 
-const RefinableObjClock& ScatteringPower::GetMaximumLikelihoodPositionErrorClock()const
-{return mMaximumLikelihoodPositionErrorClock;}
+const RefinableObjClock& ScatteringPower::GetMaximumLikelihoodParClock()const
+{return mMaximumLikelihoodParClock;}
 
 void ScatteringPower::SetMaximumLikelihoodPositionError(const REAL mle) 
 {
    if(mle!=mMaximumLikelihoodPositionError)
    {
       mMaximumLikelihoodPositionError=mle;
-      mMaximumLikelihoodPositionErrorClock.Click();
+      mMaximumLikelihoodParClock.Click();
+   }
+}
+
+REAL ScatteringPower::GetMaximumLikelihoodNbGhostAtom()const
+{return mMaximumLikelihoodNbGhost;}
+
+void ScatteringPower::SetMaximumLikelihoodNbGhostAtom(const REAL nb)
+{
+   if(nb!=mMaximumLikelihoodNbGhost)
+   {
+      mMaximumLikelihoodNbGhost=nb;
+      mMaximumLikelihoodParClock.Click();
    }
 }
 
@@ -180,6 +194,7 @@ void ScatteringPower::Init()
    VFN_DEBUG_MESSAGE("ScatteringPower::Init():"<<mName,2)
    mColourName="White";
    mMaximumLikelihoodPositionError=0;
+   mMaximumLikelihoodNbGhost=0;
    VFN_DEBUG_MESSAGE("ScatteringPower::Init():End",2)
 }
 void ScatteringPower::InitRGBColour()
@@ -742,7 +757,16 @@ void ScatteringPowerAtom::InitRefParList()
                         false,true,true,false);
       tmp.SetDerivStep(1e-4);
       tmp.SetGlobalOptimStep(.001);
-      tmp.AssignClock(mMaximumLikelihoodPositionErrorClock);
+      tmp.AssignClock(mMaximumLikelihoodParClock);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("ML-Nb Ghost Atoms",&mMaximumLikelihoodNbGhost,0.,10.,
+                        gpRefParTypeScattPow,REFPAR_DERIV_STEP_ABSOLUTE,
+                        true,true,true,false);
+      tmp.SetDerivStep(1e-3);
+      tmp.SetGlobalOptimStep(.05);
+      tmp.AssignClock(mMaximumLikelihoodParClock);
       this->AddPar(tmp);
    }
    {

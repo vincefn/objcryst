@@ -207,7 +207,7 @@ void Crystal::AddScatteringPower(ScatteringPower *scattPow)
    scattPow->RegisterClient(*this);//:TODO: Should register as (unique) 'owner'.
    this->AddSubRefObj(*scattPow);
    mClockMaster.AddChild(scattPow->GetClockMaster());
-   mClockMaster.AddChild(scattPow->GetMaximumLikelihoodPositionErrorClock());
+   mClockMaster.AddChild(scattPow->GetMaximumLikelihoodParClock());
    mMasterClockScatteringPower.AddChild(scattPow->GetClockMaster());
 }
 
@@ -217,7 +217,7 @@ void Crystal::RemoveScatteringPower(ScatteringPower *scattPow)
    mScatteringPowerRegistry.DeRegister(*scattPow);
    this->RemoveSubRefObj(*scattPow);
    mClockMaster.RemoveChild(scattPow->GetClockMaster());
-   mClockMaster.RemoveChild(scattPow->GetMaximumLikelihoodPositionErrorClock());
+   mClockMaster.RemoveChild(scattPow->GetMaximumLikelihoodParClock());
    mMasterClockScatteringPower.RemoveChild(scattPow->GetClockMaster());
    delete scattPow;
    
