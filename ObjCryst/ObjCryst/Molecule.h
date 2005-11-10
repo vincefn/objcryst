@@ -617,6 +617,18 @@ struct StretchModeTwist:public StretchMode
    set<MolAtom *> mvRotatedAtomList;
 };
 
+/** Light-weight representation of an atom in the molecule, as a part of a Z-matrix.
+* This is used to export the Molecule structure to a z-matrix.
+*
+* \todo: some flags could be added to mark the fixed/limited nature of the parameters.
+*/
+struct MolZAtom
+{
+   const ScatteringPower *mpPow;
+   unsigned long mBondAtom,mBondAngleAtom,mDihedralAtom;
+   REAL mBondLength,mBondAngle,mDihedralAngle;
+};
+
 /** Molecule : class for complex scatterer descriptions using
 * cartesian coordinates with bond length/angle restraints, and
 * moves either of individual atoms or using torsion bonds.
@@ -868,6 +880,12 @@ class Molecule: public Scatterer
       /// Get the atom defining the origin of the Molecule
       /// Equal to 0 if no atom as been set.
       void SetCenterAtom(const MolAtom &at);
+      /** Molecule as Z-matrix
+      *
+      * \param keeporder: if true, the order of the atoms is exactly the same as in 
+      * the Molecule.
+      */
+      const std::vector<MolZAtom>& AsZMatrix(const bool keeporder)const;
    public:
       virtual void InitRefParList();
       /** Build the list of rings in the molecule.
@@ -883,7 +901,7 @@ class Molecule: public Scatterer
       /** Build the Connectivity table
       *
       */
-      void BuildConnectivityTable();
+      void BuildConnectivityTable()const;
       /** Build the groups of atoms that will be rotated during global optimization.
       *
       * This is not const because we temporarily modify the molecule conformation
@@ -1141,6 +1159,9 @@ class Molecule: public Scatterer
          std::set<const MolBondAngle*> mvpBrokenBondAngle;
          std::set<const MolDihedralAngle*> mvpBrokenDihedralAngle;
       };
+   
+   /// The Molecule, as a lightweight ZMatrix, for export purposes.
+   mutable std::vector<MolZAtom> mAsZMatrix;
 
    /// The current log(likelihood)
    mutable REAL mLogLikelihood;

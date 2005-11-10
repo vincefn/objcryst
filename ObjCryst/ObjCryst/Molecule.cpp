@@ -3723,6 +3723,174 @@ void Molecule::SetCenterAtom(const MolAtom &at)
    this->UpdateDisplay();
 }
 
+void BuildZMatrixRecursive(long &z,const long curr,
+                           const vector<MolAtom*> &vpAtom,
+                           const map<MolAtom *, set<MolAtom *> > &connT,
+                           vector<MolZAtom> &zmatrix,
+                           const map<const MolAtom*,long> &vIndex,
+                           vector<long> &vZIndex,
+                           vector<long> &vrZIndex)
+{
+   zmatrix[z].mpPow=&(vpAtom[curr]->GetScatteringPower());
+   vZIndex[curr]=z;
+   vrZIndex[z]=curr;
+   const long n=vpAtom.size();
+   // Get the list of connected atoms and sort them
+      map<MolAtom *, set<MolAtom *> >::const_iterator pConn=connT.find(vpAtom[curr]);
+      const long nc=pConn->second.size();
+      vector<long> conn(nc);
+      vector<long> zconn(nc);
+      vector<long>::iterator pos=conn.begin();
+      vector<long>::iterator zpos=zconn.begin();
+      for(set<MolAtom *>::const_iterator pos1=pConn->second.begin();pos1!=pConn->second.end();++pos1)
+      {
+         *pos = vIndex.find(*pos1)->second;
+         *zpos = vZIndex[*pos];
+         cout<<(*pos1)->GetName()<<"("<<*pos<<","<<*zpos<<")"<<endl;
+         zpos++;pos++;
+      }
+      sort(conn.begin(),conn.end());
+      sort(zconn.begin(),zconn.end());
+   if(z>0)
+   {
+      // Use the most recent atom in the z-matrix
+      const long b=zconn[nc-1];
+      zmatrix[z].mBondAtom=b;
+      zmatrix[z].mBondLength=GetBondLength(*vpAtom[vrZIndex[b]],*vpAtom[curr]);
+      if(z>1)
+      {
+         const long a=zmatrix[b].mBondAtom;
+         zmatrix[z].mBondAngleAtom=a;
+         zmatrix[z].mBondAngle=GetBondAngle(*vpAtom[vrZIndex[a]],*vpAtom[vrZIndex[b]],*vpAtom[curr]);
+         if(z>2)
+         {
+            const long d=zmatrix[b].mBondAngleAtom;
+            zmatrix[z].mDihedralAtom=d;
+            zmatrix[z].mDihedralAngle=fmod(GetDihedralAngle(*vpAtom[vrZIndex[d]],*vpAtom[vrZIndex[a]],
+                                                            *vpAtom[vrZIndex[b]],*vpAtom[curr])+2*M_PI,
+                                           2*M_PI);
+         }
+         else
+         {
+            zmatrix[z].mDihedralAtom=0;
+            zmatrix[z].mDihedralAngle=0;
+         }
+      }
+      else
+      {
+         zmatrix[z].mBondAngleAtom=0;
+         zmatrix[z].mBondAngle=0;
+      }
+   }
+   else
+   {
+      zmatrix[z].mBondAtom=0;
+      zmatrix[z].mBondLength=0;
+   }
+   z++;
+   // Continue filling up the zmatrix, beginning from thz first atoms not already in the zmatrix
+   for(pos=conn.begin();pos!=conn.end();++pos)
+   {
+      if(*pos!=-1)
+      {
+         if(vZIndex[*pos]==-1)
+            BuildZMatrixRecursive(z,*pos,vpAtom,connT,zmatrix,vIndex,vZIndex,vrZIndex);
+      }
+   }
+}
+
+const vector<MolZAtom>& Molecule::AsZMatrix(const bool keeporder)const
+{
+   this->BuildConnectivityTable();
+   const long n=mvpAtom.size();
+   // index of the atoms in the list
+   map<const MolAtom*,long> vIndex;
+   {
+      long i=0;
+      for(vector<MolAtom*>::const_iterator pos=mvpAtom.begin();pos!=mvpAtom.end();++pos)
+         vIndex[*pos]=i++;
+   }
+   mAsZMatrix.resize(n);
+   if(keeporder)
+   {
+      for(long i=0;i<n;++i)
+      {
+         mAsZMatrix[i].mpPow=&(mvpAtom[i]->GetScatteringPower());
+         if(i>0)
+         {
+            const set<MolAtom *> *pConn=&(mConnectivityTable.find(mvpAtom[i])->second);
+            // Find a connected atom already in the mAsZMatrix, prefereably the most recent
+            long b=-1;
+            for(set<MolAtom *>::const_iterator pos=pConn->begin();pos!=pConn->end();++pos)
+               if((vIndex[*pos]<i)&&(vIndex[*pos]>b)) b=vIndex[*pos];
+            // Did not find a connected atom already in the z-matrix ? Take the last one
+            if(b==-1) b=i-1;
+            mAsZMatrix[i].mBondAtom=b;
+            mAsZMatrix[i].mBondLength=GetBondLength(*mvpAtom[b],*mvpAtom[i]);
+            if(i>1)
+            {
+               const long a= (b==0)?1 : mAsZMatrix[b].mBondAtom;
+               mAsZMatrix[i].mBondAngleAtom=a;
+               mAsZMatrix[i].mBondAngle=GetBondAngle(*mvpAtom[a],*mvpAtom[b],*mvpAtom[i]);
+               if(i>2)
+               {
+                  long d= mAsZMatrix[a].mBondAtom;
+                  if(d==b)
+                  {// Dihedral atom is already bond atom, find another connected to angle atom
+                     d=-1;
+                     const set<MolAtom *> *pConn=&(mConnectivityTable.find(mvpAtom[a])->second);
+                     // Find a connected atom already in the mAsZMatrix, prefereably the most recent
+                     for(set<MolAtom *>::const_iterator pos=pConn->begin();pos!=pConn->end();++pos)
+                        if((vIndex[*pos]<i) && (vIndex[*pos]!=b) && (vIndex[*pos]>d)) d=vIndex[*pos];
+                  }
+                  if(d==-1)
+                  {// Can't find an angle connected to angle atom, so find another with bond atom
+                     const set<MolAtom *> *pConn=&(mConnectivityTable.find(mvpAtom[b])->second);
+                     // Find a connected atom already in the mAsZMatrix, prefereably the most recent
+                     for(set<MolAtom *>::const_iterator pos=pConn->begin();pos!=pConn->end();++pos)
+                        if((vIndex[*pos]<i) && (vIndex[*pos]!=a) && (vIndex[*pos]>d)) d=vIndex[*pos];
+                  }
+                  if(d==-1)
+                  {// Maybe another connected to this atom ??
+                     const set<MolAtom *> *pConn=&(mConnectivityTable.find(mvpAtom[i])->second);
+                     // Find a connected atom already in the mAsZMatrix, prefereably the most recent
+                     for(set<MolAtom *>::const_iterator pos=pConn->begin();pos!=pConn->end();++pos)
+                        if(  (vIndex[*pos]<i)  && (vIndex[*pos]!=a)
+                           &&(vIndex[*pos]!=b) && (vIndex[*pos]>d)) d=vIndex[*pos];
+                  }
+                  if(d==-1)
+                  {// OK, pick *any* (can this happen ? Really ?)
+                     for(long j=0;j<i;++j)
+                        if((j!=a) &&(j!=b) && (j>d)) d=j;
+                  }
+                  mAsZMatrix[i].mDihedralAtom=d;
+                  mAsZMatrix[i].mDihedralAngle=fmod(GetDihedralAngle(*mvpAtom[d],
+                                                                     *mvpAtom[a],
+                                                                     *mvpAtom[b],
+                                                                     *mvpAtom[i])+2*M_PI,
+                                                 2*M_PI);
+               }
+            }
+         }
+      }
+   }
+   else
+   {
+      // vZIndex[i] tells where mvpAtom[i] is in the z-matrix
+      vector<long> vZIndex(n);
+      // vrZIndex[i] tells where which index in vpAtom is ZAtom #i
+      vector<long> vrZIndex(n);
+      for(long i=0;i<n;++i)
+      {
+         vZIndex [i]=-1;
+         vrZIndex[i]=-1;
+      }
+      long z=0;
+      BuildZMatrixRecursive(z,0,mvpAtom,mConnectivityTable,mAsZMatrix,vIndex,vZIndex,vrZIndex);
+   }
+   return mAsZMatrix;
+}
+
 void Molecule::InitRefParList()
 {
 }
@@ -3815,7 +3983,7 @@ void Molecule::BuildRingList()
    VFN_DEBUG_EXIT("Molecule::BuildRingList()",7)
 }
 
-void Molecule::BuildConnectivityTable()
+void Molecule::BuildConnectivityTable()const
 {
    if(  (mClockConnectivityTable>mClockBondList)
       &&(mClockConnectivityTable>mClockAtomList)) return;

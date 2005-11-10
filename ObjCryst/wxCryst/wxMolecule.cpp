@@ -27,6 +27,7 @@
 #endif
 
 #include <sstream>
+#include <fstream>
 #include <algorithm>
 #include "wxCryst/wxMolecule.h"
 namespace ObjCryst
@@ -703,6 +704,7 @@ mpGroup(0),mNeedUpdateUI(false)
 WXCRYST_ID ID_MENU_OPTIMIZECONFORMATION;
 WXCRYST_ID ID_MENU_SETLIMITS;
 WXCRYST_ID ID_MOLECULE_MENU_FILE;
+WXCRYST_ID ID_MOLECULE_MENU_FILE_2ZMATRIX;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_OPTIMIZECONFORMATION;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_STATUS;
@@ -751,6 +753,7 @@ BEGIN_EVENT_TABLE(WXMolecule,wxWindow)
    EVT_MENU(ID_MENU_SETLIMITS,                            WXMolecule::OnMenuSetLimits)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_SHOW_RESTRAINT,      WXMolecule::OnMenuShowRestraintWindow)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_SET_DELTA_SIGMA     ,WXMolecule::OnMenuSetDeltaSigma)
+   EVT_MENU(ID_MOLECULE_MENU_FILE_2ZMATRIX,               WXMolecule::OnMenuExport2ZMatrix)
    EVT_GRID_CMD_CELL_CHANGE(ID_WINDOW_ATOM,               WXMolecule::OnEditGridAtom)
    EVT_GRID_CMD_CELL_CHANGE(ID_WINDOW_BONDLENGTH,         WXMolecule::OnEditGridBondLength)
    EVT_GRID_CMD_CELL_CHANGE(ID_WINDOW_BONDANGLE,          WXMolecule::OnEditGridBondAngle)
@@ -766,6 +769,7 @@ mpBondWin(0),mpAngleWin(0),mpDihedralAngleWin(0),mpRigidGroupWin(0),mIsSelfUpdat
    VFN_DEBUG_ENTRY("WXMolecule::WXMolecule():"<<mol->GetName(),6)
    //Menus
       mpMenuBar->AddMenu("File",ID_MOLECULE_MENU_FILE);
+         mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FILE,ID_MOLECULE_MENU_FILE_2ZMATRIX,"Export to Z-Matrix");
       mpMenuBar->AddMenu("Parameters",ID_REFOBJ_MENU_PAR);
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_FIXALL,"Fix all");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_UNFIXALL,"Unfix all");
@@ -1489,6 +1493,46 @@ void WXMolecule::OnEditGridRigidGroup(wxGridEvent &e)
    }
    this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXMolecule::OnEditGridRigidGroup():"<<e.GetRow()<<","<<e.GetCol(),10)
+}
+
+void WXMolecule::OnMenuExport2ZMatrix(wxCommandEvent &event)
+{
+   VFN_DEBUG_MESSAGE("WXMolecule::OnMenuExport2ZMatrix()",6)
+   const vector<MolZAtom> *pz=&(mpMolecule->AsZMatrix(true));
+   wxFileDialog open(this,"Choose a file to save the Z-matrix to","","","*.fhz",
+                     wxSAVE | wxOVERWRITE_PROMPT);
+   if(open.ShowModal() != wxID_OK) return;
+   ofstream fout (open.GetPath().c_str());
+   if(fout)
+   {
+      wxString tmp;
+
+      fout<<mpMolecule->GetName()<<endl<<pz->size()<<endl;
+      long i=0;
+      for(vector<MolZAtom>::const_iterator pos=pz->begin();pos!=pz->end();++pos)
+      {
+         tmp.Printf("%-2s %2lu",pos->mpPow->GetSymbol().c_str(),pos->mBondAtom+1);
+         fout<<tmp;
+         if(i>0)
+         {
+            tmp.Printf("%6.3f",pos->mBondLength);
+            fout<<tmp;
+            if(i>1) 
+            {
+               tmp.Printf(" %2lu%8.3f",pos->mBondAngleAtom+1,pos->mBondAngle*RAD2DEG);
+               fout<<tmp;
+               if(i>2)
+               {
+                  tmp.Printf(" %2lu%8.3f",pos->mDihedralAtom+1,pos->mDihedralAngle*RAD2DEG);
+                  fout<<tmp;
+               }
+            }
+         }
+         fout<<endl;
+         i++;
+      }
+   }
+   fout.close();
 }
 
 void WXMolecule::OnMenuTest(wxCommandEvent & WXUNUSED(event))
