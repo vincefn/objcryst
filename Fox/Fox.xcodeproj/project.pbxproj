@@ -4757,26 +4757,25 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		BF033A7109156C6400BB8A5B /* Aqua-G4 */ = {
+		BF033A7109156C6400BB8A5B /* G4 */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = ppc;
+				ARCHS = "$(NATIVE_ARCH)";
 				COPY_PHASE_STRIP = YES;
 				GCC_ALTIVEC_EXTENSIONS = YES;
+				GCC_AUTO_VECTORIZATION = YES;
 				GCC_FAST_MATH = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G3;
+				GCC_MODEL_TUNING = G4;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				GCC_STRICT_ALIASING = YES;
 				GCC_UNROLL_LOOPS = YES;
 				INSTALL_PATH = /usr/local/lib;
 				LIBRARY_STYLE = STATIC;
 				OPTIMIZATION_CFLAGS = "-O3";
-				OTHER_CFLAGS = (
-					"-fast",
-					"-mcpu=7450",
-				);
+				OTHER_CFLAGS = "-mcpu=G4";
 				OTHER_LDFLAGS = (
 					"-framework",
 					Carbon,
@@ -4791,19 +4790,22 @@
 					"-Wno-unknown-pragmas",
 				);
 			};
-			name = "Aqua-G4";
+			name = G4;
 		};
-		BF033A7209156C6400BB8A5B /* Aqua-G4 */ = {
+		BF033A7209156C6400BB8A5B /* G4 */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = ppc;
+				ARCHS = "$(NATIVE_ARCH)";
 				COPY_PHASE_STRIP = YES;
 				GCC_ALTIVEC_EXTENSIONS = YES;
+				GCC_AUTO_VECTORIZATION = YES;
 				GCC_FAST_MATH = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G4;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				GCC_STRICT_ALIASING = YES;
+				GCC_UNROLL_LOOPS = YES;
 				HEADER_SEARCH_PATHS = (
 					cctbx/cctbx/include/,
 					cctbx/scitbx/include/,
@@ -4812,10 +4814,7 @@
 				INSTALL_PATH = /usr/local/lib;
 				LIBRARY_STYLE = STATIC;
 				OPTIMIZATION_CFLAGS = "-O3";
-				OTHER_CFLAGS = (
-					"-fast",
-					"-mcpu=7450",
-				);
+				OTHER_CFLAGS = "-mcpu=G4";
 				OTHER_LDFLAGS = (
 					"-framework",
 					Carbon,
@@ -4830,12 +4829,12 @@
 					"-Wno-unknown-pragmas",
 				);
 			};
-			name = "Aqua-G4";
+			name = G4;
 		};
-		BF033A7309156C6400BB8A5B /* Aqua-G4 */ = {
+		BF033A7309156C6400BB8A5B /* G4 */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = ppc;
+				ARCHS = "$(NATIVE_ARCH)";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_LOCATION = NO;
 				GCC_ALTIVEC_EXTENSIONS = YES;
@@ -4846,7 +4845,8 @@
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
-				GCC_UNROLL_LOOPS = NO;
+				GCC_STRICT_ALIASING = YES;
+				GCC_UNROLL_LOOPS = YES;
 				HEADER_SEARCH_PATHS = (
 					ObjCryst,
 					../Fox,
@@ -4861,8 +4861,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.2;
 				OPTIMIZATION_CFLAGS = "-O3";
 				OTHER_CFLAGS = (
-					"-fast",
-					"-mcpu=7450",
+					"-mcpu=G4",
 					"-DHAVE_GLUT",
 					"-D__WX__CRYST__",
 					"-DOBJCRYST_GL",
@@ -4906,9 +4905,9 @@
 					"-Wno-unknown-pragmas",
 				);
 			};
-			name = "Aqua-G4";
+			name = G4;
 		};
-		BF033A7409156C6400BB8A5B /* Aqua-G4 */ = {
+		BF033A7409156C6400BB8A5B /* G4 */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = ppc;
@@ -4921,7 +4920,7 @@
 					"-mcpu=7450",
 				);
 			};
-			name = "Aqua-G4";
+			name = G4;
 		};
 		BF48AEF808924F3F0060B5BE /* Aqua-Profile */ = {
 			isa = XCBuildConfiguration;
@@ -5243,21 +5242,24 @@
 			};
 			name = GTK;
 		};
-		BFE3CDFA09177617002021F6 /* NoGUI */ = {
+		BFE3CDFA09177617002021F6 /* G5 */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
+				GCC_ALTIVEC_EXTENSIONS = YES;
+				GCC_AUTO_VECTORIZATION = YES;
 				GCC_FAST_MATH = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G3;
+				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				GCC_STRICT_ALIASING = YES;
 				GCC_UNROLL_LOOPS = YES;
 				INSTALL_PATH = /usr/local/lib;
 				LIBRARY_STYLE = STATIC;
 				OPTIMIZATION_CFLAGS = "-O3";
-				OTHER_CFLAGS = "";
+				OTHER_CFLAGS = "-mcpu=G5";
 				OTHER_LDFLAGS = (
 					"-framework",
 					Carbon,
@@ -5272,17 +5274,21 @@
 					"-Wno-unknown-pragmas",
 				);
 			};
-			name = NoGUI;
+			name = G5;
 		};
-		BFE3CDFB09177617002021F6 /* NoGUI */ = {
+		BFE3CDFB09177617002021F6 /* G5 */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
+				GCC_ALTIVEC_EXTENSIONS = YES;
+				GCC_AUTO_VECTORIZATION = YES;
 				GCC_FAST_MATH = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G3;
+				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				GCC_STRICT_ALIASING = YES;
+				GCC_UNROLL_LOOPS = YES;
 				HEADER_SEARCH_PATHS = (
 					cctbx/cctbx/include/,
 					cctbx/scitbx/include/,
@@ -5291,7 +5297,7 @@
 				INSTALL_PATH = /usr/local/lib;
 				LIBRARY_STYLE = STATIC;
 				OPTIMIZATION_CFLAGS = "-O3";
-				OTHER_CFLAGS = "";
+				OTHER_CFLAGS = "-mcpu=G5";
 				OTHER_LDFLAGS = (
 					"-framework",
 					Carbon,
@@ -5306,22 +5312,23 @@
 					"-Wno-unknown-pragmas",
 				);
 			};
-			name = NoGUI;
+			name = G5;
 		};
-		BFE3CDFC09177617002021F6 /* NoGUI */ = {
+		BFE3CDFC09177617002021F6 /* G5 */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_LOCATION = NO;
-				GCC_ALTIVEC_EXTENSIONS = NO;
-				GCC_AUTO_VECTORIZATION = NO;
+				GCC_ALTIVEC_EXTENSIONS = YES;
+				GCC_AUTO_VECTORIZATION = YES;
 				GCC_FAST_MATH = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = "";
+				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
-				GCC_UNROLL_LOOPS = NO;
+				GCC_STRICT_ALIASING = YES;
+				GCC_UNROLL_LOOPS = YES;
 				HEADER_SEARCH_PATHS = (
 					ObjCryst,
 					../Fox,
@@ -5334,6 +5341,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.2;
 				OPTIMIZATION_CFLAGS = "-O3";
 				OTHER_CFLAGS = (
+					"-mcpu=G5",
 					"-DHAVE_GLUT",
 					"-D__WX__CRYST__",
 					"-DOBJCRYST_GL",
@@ -5353,16 +5361,16 @@
 					"-Wno-unknown-pragmas",
 				);
 			};
-			name = NoGUI;
+			name = G5;
 		};
-		BFE3CDFD09177617002021F6 /* NoGUI */ = {
+		BFE3CDFD09177617002021F6 /* G5 */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				GCC_MODEL_TUNING = "";
 				GCC_OPTIMIZATION_LEVEL = 3;
 			};
-			name = NoGUI;
+			name = G5;
 		};
 		BFE3CE0909177C10002021F6 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -5394,33 +5402,14 @@
 			};
 			name = Debug;
 		};
-		BFE3CE0A09177C10002021F6 /* Aqua */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
-				INSTALL_PATH = "$(HOME)/bin";
-				OPTIMIZATION_CFLAGS = "-O0";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = "Fox-NoGUI";
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = Aqua;
-		};
-		BFE3CE0B09177C10002021F6 /* NoGUI */ = {
+		BFE3CE0A09177C10002021F6 /* G3 */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_FAST_MATH = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = "";
+				GCC_MODEL_TUNING = G3;
+				GCC_STRICT_ALIASING = YES;
+				GCC_UNROLL_LOOPS = YES;
 				HEADER_SEARCH_PATHS = (
 					ObjCryst,
 					../Fox,
@@ -5429,8 +5418,9 @@
 					cctbx/cctbx/include,
 				);
 				INSTALL_PATH = "$(HOME)/bin";
+				MACOSX_DEPLOYMENT_TARGET = 10.2;
 				OPTIMIZATION_CFLAGS = "-O3";
-				OTHER_CFLAGS = "";
+				OTHER_CFLAGS = "-mcpu=G3";
 				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
 				PREBINDING = NO;
@@ -5442,13 +5432,54 @@
 					"-Wno-unknown-pragmas",
 				);
 			};
-			name = NoGUI;
+			name = G3;
+		};
+		BFE3CE0B09177C10002021F6 /* G5 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_ALTIVEC_EXTENSIONS = YES;
+				GCC_AUTO_VECTORIZATION = YES;
+				GCC_FAST_MATH = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_STRICT_ALIASING = YES;
+				GCC_UNROLL_LOOPS = YES;
+				HEADER_SEARCH_PATHS = (
+					ObjCryst,
+					../Fox,
+					cctbx,
+					cctbx/scitbx/include,
+					cctbx/cctbx/include,
+				);
+				INSTALL_PATH = "$(HOME)/bin";
+				MACOSX_DEPLOYMENT_TARGET = 10.2;
+				OPTIMIZATION_CFLAGS = "-O3";
+				OTHER_CFLAGS = "-mcpu=G5";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = "Fox-NoGUI";
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = G5;
 		};
 		BFE3CE0C09177C10002021F6 /* GTK */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
+				HEADER_SEARCH_PATHS = (
+					ObjCryst,
+					../Fox,
+					cctbx,
+					cctbx/scitbx/include,
+					cctbx/cctbx/include,
+				);
 				INSTALL_PATH = "$(HOME)/bin";
 				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CFLAGS = "";
@@ -5465,11 +5496,16 @@
 			};
 			name = GTK;
 		};
-		BFE3CE0D09177C10002021F6 /* Aqua-G4 */ = {
+		BFE3CE0D09177C10002021F6 /* G4 */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_ALTIVEC_EXTENSIONS = YES;
+				GCC_AUTO_VECTORIZATION = YES;
+				GCC_FAST_MATH = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G4;
+				GCC_STRICT_ALIASING = YES;
+				GCC_UNROLL_LOOPS = YES;
 				HEADER_SEARCH_PATHS = (
 					ObjCryst,
 					../Fox,
@@ -5478,11 +5514,9 @@
 					cctbx/cctbx/include,
 				);
 				INSTALL_PATH = "$(HOME)/bin";
-				OPTIMIZATION_CFLAGS = "-O0";
-				OTHER_CFLAGS = (
-					"-fast",
-					"-mcpu=7450",
-				);
+				MACOSX_DEPLOYMENT_TARGET = 10.2;
+				OPTIMIZATION_CFLAGS = "-O3";
+				OTHER_CFLAGS = "-mcpu=G4";
 				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
 				PREBINDING = NO;
@@ -5494,13 +5528,20 @@
 					"-Wno-unknown-pragmas",
 				);
 			};
-			name = "Aqua-G4";
+			name = G4;
 		};
 		BFE3CE0E09177C10002021F6 /* Aqua-Profile */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
+				HEADER_SEARCH_PATHS = (
+					ObjCryst,
+					../Fox,
+					cctbx,
+					cctbx/scitbx/include,
+					cctbx/cctbx/include,
+				);
 				INSTALL_PATH = "$(HOME)/bin";
 				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CFLAGS = "";
@@ -5524,14 +5565,14 @@
 			};
 			name = Debug;
 		};
-		BFFCCB54089028D300044EBA /* Aqua */ = {
+		BFFCCB54089028D300044EBA /* G3 */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				GCC_MODEL_TUNING = "";
 				GCC_OPTIMIZATION_LEVEL = 3;
 			};
-			name = Aqua;
+			name = G3;
 		};
 		BFFCCB60089028E600044EBA /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -5562,7 +5603,7 @@
 			};
 			name = Debug;
 		};
-		BFFCCB61089028E600044EBA /* Aqua */ = {
+		BFFCCB61089028E600044EBA /* G3 */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
@@ -5572,11 +5613,12 @@
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				GCC_STRICT_ALIASING = YES;
 				GCC_UNROLL_LOOPS = YES;
 				INSTALL_PATH = /usr/local/lib;
 				LIBRARY_STYLE = STATIC;
 				OPTIMIZATION_CFLAGS = "-O3";
-				OTHER_CFLAGS = "";
+				OTHER_CFLAGS = "-mcpu=G3";
 				OTHER_LDFLAGS = (
 					"-framework",
 					Carbon,
@@ -5591,7 +5633,7 @@
 					"-Wno-unknown-pragmas",
 				);
 			};
-			name = Aqua;
+			name = G3;
 		};
 		BFFCCBE7089030B800044EBA /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -5627,7 +5669,7 @@
 			};
 			name = Debug;
 		};
-		BFFCCBE8089030B800044EBA /* Aqua */ = {
+		BFFCCBE8089030B800044EBA /* G3 */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
@@ -5636,6 +5678,8 @@
 				GCC_MODEL_TUNING = G3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				GCC_STRICT_ALIASING = YES;
+				GCC_UNROLL_LOOPS = YES;
 				HEADER_SEARCH_PATHS = (
 					cctbx/cctbx/include/,
 					cctbx/scitbx/include/,
@@ -5644,7 +5688,7 @@
 				INSTALL_PATH = /usr/local/lib;
 				LIBRARY_STYLE = STATIC;
 				OPTIMIZATION_CFLAGS = "-O3";
-				OTHER_CFLAGS = "";
+				OTHER_CFLAGS = "-mcpu=G3";
 				OTHER_LDFLAGS = (
 					"-framework",
 					Carbon,
@@ -5659,7 +5703,7 @@
 					"-Wno-unknown-pragmas",
 				);
 			};
-			name = Aqua;
+			name = G3;
 		};
 		BFFCD88C089041A900044EBA /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -5732,7 +5776,7 @@
 			};
 			name = Debug;
 		};
-		BFFCD88D089041A900044EBA /* Aqua */ = {
+		BFFCD88D089041A900044EBA /* G3 */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
@@ -5741,11 +5785,12 @@
 				GCC_AUTO_VECTORIZATION = NO;
 				GCC_FAST_MATH = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = "";
+				GCC_MODEL_TUNING = G3;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
-				GCC_UNROLL_LOOPS = NO;
+				GCC_STRICT_ALIASING = YES;
+				GCC_UNROLL_LOOPS = YES;
 				HEADER_SEARCH_PATHS = (
 					ObjCryst,
 					../Fox,
@@ -5760,6 +5805,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.2;
 				OPTIMIZATION_CFLAGS = "-O3";
 				OTHER_CFLAGS = (
+					"-mcpu=G3",
 					"-DHAVE_GLUT",
 					"-D__WX__CRYST__",
 					"-DOBJCRYST_GL",
@@ -5803,7 +5849,7 @@
 					"-Wno-unknown-pragmas",
 				);
 			};
-			name = Aqua;
+			name = G3;
 		};
 /* End XCBuildConfiguration section */
 
@@ -5812,65 +5858,66 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BFE3CE0909177C10002021F6 /* Debug */,
-				BFE3CE0A09177C10002021F6 /* Aqua */,
-				BFE3CE0B09177C10002021F6 /* NoGUI */,
+				BFE3CE0A09177C10002021F6 /* G3 */,
+				BFE3CE0B09177C10002021F6 /* G5 */,
 				BFE3CE0C09177C10002021F6 /* GTK */,
-				BFE3CE0D09177C10002021F6 /* Aqua-G4 */,
+				BFE3CE0D09177C10002021F6 /* G4 */,
 				BFE3CE0E09177C10002021F6 /* Aqua-Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = G3;
 		};
 		BFFCCB52089028D300044EBA /* Build configuration list for PBXProject "Fox" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BFFCCB53089028D300044EBA /* Debug */,
-				BFFCCB54089028D300044EBA /* Aqua */,
-				BFE3CDFD09177617002021F6 /* NoGUI */,
+				BFFCCB54089028D300044EBA /* G3 */,
+				BFE3CDFD09177617002021F6 /* G5 */,
 				BF72984E09166319006F90D2 /* GTK */,
-				BF033A7409156C6400BB8A5B /* Aqua-G4 */,
+				BF033A7409156C6400BB8A5B /* G4 */,
 				BF48AEFB08924F3F0060B5BE /* Aqua-Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Aqua;
+			defaultConfigurationName = G3;
 		};
 		BFFCCB5F089028E600044EBA /* Build configuration list for PBXNativeTarget "newmat" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BFFCCB60089028E600044EBA /* Debug */,
-				BFFCCB61089028E600044EBA /* Aqua */,
-				BFE3CDFA09177617002021F6 /* NoGUI */,
+				BFFCCB61089028E600044EBA /* G3 */,
+				BFE3CDFA09177617002021F6 /* G5 */,
 				BF72984B09166319006F90D2 /* GTK */,
-				BF033A7109156C6400BB8A5B /* Aqua-G4 */,
+				BF033A7109156C6400BB8A5B /* G4 */,
 				BF48AEF808924F3F0060B5BE /* Aqua-Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Aqua;
+			defaultConfigurationName = G3;
 		};
 		BFFCCBE6089030B800044EBA /* Build configuration list for PBXNativeTarget "cctbx" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BFFCCBE7089030B800044EBA /* Debug */,
-				BFFCCBE8089030B800044EBA /* Aqua */,
-				BFE3CDFB09177617002021F6 /* NoGUI */,
+				BFFCCBE8089030B800044EBA /* G3 */,
+				BFE3CDFB09177617002021F6 /* G5 */,
 				BF72984C09166319006F90D2 /* GTK */,
-				BF033A7209156C6400BB8A5B /* Aqua-G4 */,
+				BF033A7209156C6400BB8A5B /* G4 */,
 				BF48AEF908924F3F0060B5BE /* Aqua-Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Aqua;
+			defaultConfigurationName = G3;
 		};
 		BFFCD88B089041A900044EBA /* Build configuration list for PBXNativeTarget "Fox" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BFFCD88C089041A900044EBA /* Debug */,
-				BFFCD88D089041A900044EBA /* Aqua */,
-				BFE3CDFC09177617002021F6 /* NoGUI */,
+				BFFCD88D089041A900044EBA /* G3 */,
+				BFE3CDFC09177617002021F6 /* G5 */,
 				BF72984D09166319006F90D2 /* GTK */,
-				BF033A7309156C6400BB8A5B /* Aqua-G4 */,
+				BF033A7309156C6400BB8A5B /* G4 */,
 				BF48AEFA08924F3F0060B5BE /* Aqua-Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Aqua;
+			defaultConfigurationName = G3;
 		};
 /* End XCConfigurationList section */
 	};
