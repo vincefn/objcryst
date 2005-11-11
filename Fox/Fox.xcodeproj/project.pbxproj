@@ -5333,8 +5333,10 @@
 					ObjCryst,
 					../Fox,
 					cctbx,
-					cctbx/scitbx/include,
-					cctbx/cctbx/include,
+					cctbx/scitbx/include/,
+					cctbx/cctbx/include/,
+					"$HOME/dev/wxdir/include/wx-2.6/",
+					"$HOME/dev/wxdir/lib/wx/include/mac-ansi-release-static-2.6/",
 				);
 				INFOPLIST_FILE = "Fox-Info.plist";
 				INSTALL_PATH = "$(USER_APPS_DIR)";
@@ -5350,10 +5352,34 @@
 					"-D_LARGE_FILES",
 					"-DNO_GCC_PRAGMA",
 				);
-				OTHER_LDFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Carbon,
+					"-framework",
+					Cocoa,
+					"-framework",
+					System,
+					"-framework",
+					QuickTime,
+					"-framework",
+					IOKit,
+					"-framework",
+					OpenGL,
+					"-framework",
+					AGL,
+					"-framework",
+					GLUT,
+					"-framework",
+					WebKit,
+					"$HOME/dev/wxdir/lib/libwx_mac-2.6.a",
+					"-lz",
+					"-lpthread",
+					"-liconv",
+					"$HOME/dev/wxdir/lib/libwx_mac_gl-2.6.a",
+				);
 				OTHER_REZFLAGS = "";
 				PREBINDING = NO;
-				PRODUCT_NAME = "Fox-NoGUI";
+				PRODUCT_NAME = Fox;
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = (
 					"-Wmost",
