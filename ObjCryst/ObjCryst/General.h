@@ -30,6 +30,15 @@
 #include <cmath>
 #include <utility>
 
+// Restricted pointers (useful for auto-vectorization)
+#ifdef __GNUG__
+   #define RESTRICT __restrict__
+#elif defined(_MSC_VER) || defined(__ICL) // MS and VC++ compiler
+   #define RESTRICT __restrict
+#else
+   #define RESTRICT 
+#endif
+
 //profiling
 #ifdef __MWERKS__
 #include <Profiler.h>

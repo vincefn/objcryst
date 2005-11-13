@@ -411,11 +411,11 @@ void PowderPatternBackground::CalcPowderPatternIntegrated() const
 
    const long numInterval=pMin->numElements();
    mPowderPatternIntegratedCalc.resize(numInterval);
-   REAL *p2=mPowderPatternIntegratedCalc.data();
+   REAL * RESTRICT p2=mPowderPatternIntegratedCalc.data();
    for(int j=0;j<numInterval;j++)
    {
       const long max=(*pMax)(j);
-      const REAL *p1=mPowderPatternCalc.data()+(*pMin)(j);
+      const REAL * RESTRICT p1=mPowderPatternCalc.data()+(*pMin)(j);
       *p2=0;           
       for(int k=(*pMin)(j);k<=max;k++) *p2 += *p1++;
       p2++;
@@ -825,9 +825,9 @@ void PowderPatternDiffraction::CalcPowderPatternIntegrated() const
       mPowderPatternIntegratedCalcVariance=0;
    }
    else mPowderPatternIntegratedCalcVariance.resize(0);
-   const REAL *psith=mSinThetaLambda.data();
-   const REAL *pI=mIhklCalc.data();
-   const REAL *pIvar=mIhklCalcVariance.data();
+   const REAL * RESTRICT psith=mSinThetaLambda.data();
+   const REAL * RESTRICT pI=mIhklCalc.data();
+   const REAL * RESTRICT pIvar=mIhklCalcVariance.data();
    vector< pair<unsigned long, CrystVector_REAL> >::const_iterator pos;
    pos=mIntegratedProfileFactor.begin();
    for(long i=0;i<mNbReflUsed;)
@@ -849,11 +849,11 @@ void PowderPatternDiffraction::CalcPowderPatternIntegrated() const
       }
       --pos;
       VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderPatternIntegrated():"<<i,2)
-      REAL *pData=mPowderPatternIntegratedCalc.data()+pos->first;
-      const REAL *pFact=pos->second.data();
+      REAL * RESTRICT pData=mPowderPatternIntegratedCalc.data()+pos->first;
+      const REAL * RESTRICT pFact=pos->second.data();
       const unsigned long nb=pos->second.numElements();
       //cout <<i<<" - "<< intensity<<"*:";
-      for(unsigned long j=0;j<nb;j++)
+      for(unsigned long j=nb;j>0;j--)
       {
          //cout <<pos->first+j<<"("<<*pFact<<","<<*pData<<") ";
          *pData++ += intensity * *pFact++ ;
@@ -862,9 +862,9 @@ void PowderPatternDiffraction::CalcPowderPatternIntegrated() const
       
       if(useML)
       {
-         const REAL *pFact=pos->second.data();
-         REAL *pVar=mPowderPatternIntegratedCalcVariance.data()+pos->first;
-         for(unsigned long j=0;j<nb;j++) *pVar++ += var * *pFact++ ;
+         const REAL * RESTRICT pFact=pos->second.data();
+         REAL * RESTRICT pVar=mPowderPatternIntegratedCalcVariance.data()+pos->first;
+         for(unsigned long j=nb;j>0;j--) *pVar++ += var * *pFact++ ;
       }
       ++pos;
    }
@@ -1131,9 +1131,9 @@ void PowderPatternDiffraction::CalcIhkl() const
       
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcIhkl()",3)
    TAU_PROFILE("PowderPatternDiffraction::CalcIhkl()","void ()",TAU_DEFAULT);
-   const REAL *pr,*pi,*pcorr;
-   const int *mult;
-   REAL *p;
+   const REAL * RESTRICT pr,* RESTRICT pi,* RESTRICT pcorr;
+   const int * RESTRICT mult;
+   REAL * RESTRICT p;
    
    pr=mFhklCalcReal.data();
    pi=mFhklCalcImag.data();
@@ -1144,8 +1144,8 @@ void PowderPatternDiffraction::CalcIhkl() const
    p=mIhklCalc.data();
    if(mFhklCalcVariance.numElements()>0)
    {
-      const REAL *pv=mFhklCalcVariance.data();
-      for(long i=0;i<mNbReflUsed;i++)
+      const REAL * RESTRICT pv=mFhklCalcVariance.data();
+      for(long i=mNbReflUsed;i>0;i--)
       {
          *p++ = *mult++ * (*pr * *pr + *pi * *pi + 2 * *pv++) * *pcorr++;
          pr++;
@@ -1154,7 +1154,7 @@ void PowderPatternDiffraction::CalcIhkl() const
    }
    else
    {
-      for(long i=0;i<mNbReflUsed;i++)
+      for(long i=mNbReflUsed;i>0;i--)
       {
          *p++ = *mult++ * (*pr * *pr + *pi * *pi) * *pcorr++;
          pr++;
@@ -1177,16 +1177,14 @@ void PowderPatternDiffraction::CalcIhkl() const
    {
       VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcIhkl(): Calc Variance",2)
       mIhklCalcVariance.resize(mNbRefl);
-      REAL *pVar2=mIhklCalcVariance.data();
+      REAL * RESTRICT pVar2=mIhklCalcVariance.data();
 
-      const REAL *pInt=mIhklCalc.data();
-      const REAL *pVar=mFhklCalcVariance.data();
+      const REAL * RESTRICT pInt=mIhklCalc.data();
+      const REAL * RESTRICT pVar=mFhklCalcVariance.data();
       pcorr=mIntensityCorr.data();
       mult=mMultiplicity.data();
       
-      pVar2=mIhklCalcVariance.data();
-      
-      for(long j=0;j<mNbReflUsed;j++)
+      for(long j=mNbReflUsed;j>0;j--)
       {
          *pVar2++ = (4* *mult) * *pcorr * *pVar *(*pInt++ - (*mult * *pcorr) * *pVar);
          pVar++;mult++;pcorr++;
@@ -2971,7 +2969,7 @@ REAL PowderPattern::GetChi2()const
    if(0 == mOptProfileIntegration.GetChoice())
    {// Integrated profiles
       VFN_DEBUG_MESSAGE("PowderPattern::GetChi2():Integrated profiles",3);
-      const REAL *p1, *p2, *p3;
+      const REAL * RESTRICT p1, * RESTRICT p2, * RESTRICT p3;
       p1=mPowderPatternIntegratedCalc.data();
       p2=mIntegratedObs.data();
       if(mIntegratedWeight.numElements()==0) p3=mIntegratedWeightObs.data();
@@ -2996,7 +2994,7 @@ REAL PowderPattern::GetChi2()const
    else
    {// "Full" profiles
       VFN_DEBUG_MESSAGE("PowderPattern::GetChi2()Integrated profiles",3);
-      const REAL *p1, *p2, *p3;
+      const REAL * RESTRICT p1, * RESTRICT p2, * RESTRICT p3;
       p1=mPowderPatternCalc.data();
       p2=mPowderPatternObs.data();
       p3=mPowderPatternWeight.data();
@@ -3569,15 +3567,15 @@ void PowderPattern::FitScaleFactorForIntegratedRw()const
       double a=0.,b=0.,c=0.;// possible overflows...
       REAL newscale;
       {
-         const REAL *p1=mIntegratedObs.data();
-         const REAL *p2=mPowderPatternComponentRegistry.GetObj(mScalableComponentIndex(0))
+         const REAL * RESTRICT p1=mIntegratedObs.data();
+         const REAL * RESTRICT p2=mPowderPatternComponentRegistry.GetObj(mScalableComponentIndex(0))
                               .GetPowderPatternIntegratedCalc().first->data();
-         const REAL *p1v=mIntegratedVarianceObs.data();
-         const REAL *p2v=mPowderPatternComponentRegistry.GetObj(mScalableComponentIndex(0))
+         const REAL * RESTRICT p1v=mIntegratedVarianceObs.data();
+         const REAL * RESTRICT p2v=mPowderPatternComponentRegistry.GetObj(mScalableComponentIndex(0))
                               .GetPowderPatternIntegratedCalcVariance().first->data();
          if(mPowderPatternBackgroundIntegratedCalc.numElements()<=1)
          {
-            for(unsigned long k=0;k<mNbIntegrationUsed;k++)
+            for(unsigned long k=mNbIntegrationUsed;k>0;k--)
             {
                a += *p2v * *p1 * *p2;
                b += *p2 * *p2 * *p1v - *p1 * *p1 * *p2v;
@@ -3587,8 +3585,8 @@ void PowderPattern::FitScaleFactorForIntegratedRw()const
          }
          else
          {
-            const REAL *p3=mPowderPatternBackgroundIntegratedCalc.data();
-            for(unsigned long k=0;k<mNbIntegrationUsed;k++) 
+            const REAL * RESTRICT p3=mPowderPatternBackgroundIntegratedCalc.data();
+            for(unsigned long k=mNbIntegrationUsed;k>0;k--) 
             {
                a += *p2v * (*p1 - *p3) * *p2;
                b += *p2 * *p2 * *p1v - (*p1 - *p3) * (*p1 - *p3) * *p2v;
@@ -3604,14 +3602,14 @@ void PowderPattern::FitScaleFactorForIntegratedRw()const
          const REAL s2 = newscale*newscale
                          -mScaleFactor(mScalableComponentIndex(0))
                          *mScaleFactor(mScalableComponentIndex(0));
-         REAL * p0 = mPowderPatternIntegratedCalc.data();
-         const REAL * p1=mPowderPatternComponentRegistry.GetObj(mScalableComponentIndex(0))
+         REAL * RESTRICT p0 = mPowderPatternIntegratedCalc.data();
+         const REAL * RESTRICT p1=mPowderPatternComponentRegistry.GetObj(mScalableComponentIndex(0))
                            .GetPowderPatternIntegratedCalc().first->data();
-         REAL * p0v = mPowderPatternVarianceIntegrated.data();
-         const REAL * p1v=mPowderPatternComponentRegistry.GetObj(mScalableComponentIndex(0))
+         REAL * RESTRICT p0v = mPowderPatternVarianceIntegrated.data();
+         const REAL * RESTRICT p1v=mPowderPatternComponentRegistry.GetObj(mScalableComponentIndex(0))
                            .GetPowderPatternIntegratedCalcVariance().first->data();
-         REAL * p0w = mIntegratedWeight.data();
-         for(unsigned long j=0;j<mNbIntegrationUsed;j++)
+         REAL * RESTRICT p0w = mIntegratedWeight.data();
+         for(unsigned long j=mNbIntegrationUsed;j>0;j--)
          {
             *p0++  += s * *p1++;
             *p0v += s2 * *p1v++;
@@ -3644,9 +3642,9 @@ void PowderPattern::FitScaleFactorForIntegratedRw()const
          {
             for(int j=i;j<nbScale;j++)
             {
-               const REAL *p1=integratedCalc[i]->data();
-               const REAL *p2=integratedCalc[j]->data();
-               const REAL *p3;
+               const REAL * RESTRICT p1=integratedCalc[i]->data();
+               const REAL * RESTRICT p2=integratedCalc[j]->data();
+               const REAL * RESTRICT p3;
                if(mIntegratedWeight.numElements()==0)
                {
                   p3=mIntegratedWeightObs.data();
@@ -3658,10 +3656,12 @@ void PowderPattern::FitScaleFactorForIntegratedRw()const
                   if(ctagain>0) cout <<"ctagain="<<ctagain<<", using mIntegratedWeight"<<endl;
                }
                REAL m=0.;
-               for(unsigned long k=0;k<mNbIntegrationUsed;k++)
-               {
-                  m += *p1++ * *p2++ * *p3++;
-               }
+               if(j==i)
+                  for(unsigned long k=mNbIntegrationUsed;k>0;k--)
+                     {m += *p1 * *p1 * *p3++; p1++;}
+               else
+                  for(unsigned long k=mNbIntegrationUsed;k>0;k--)
+                     m += *p1++ * *p2++ * *p3++;
                mFitScaleFactorM(i,j)=m;
                mFitScaleFactorM(j,i)=m;
             }
@@ -3669,15 +3669,15 @@ void PowderPattern::FitScaleFactorForIntegratedRw()const
       VFN_DEBUG_MESSAGE("PowderPattern::FitScaleFactorForIntegratedRw():4",2);
          for(int i=0;i<nbScale;i++)
          {
-            const REAL *p1=mIntegratedObs.data();
-            const REAL *p2=integratedCalc[i]->data();
-            const REAL *p4;
+            const REAL * RESTRICT p1=mIntegratedObs.data();
+            const REAL * RESTRICT p2=integratedCalc[i]->data();
+            const REAL * RESTRICT p4;
             if(mIntegratedWeight.numElements()==0) p4=mIntegratedWeightObs.data();
             else p4=mIntegratedWeight.data();
             REAL b=0.;
             if(mPowderPatternBackgroundIntegratedCalc.numElements()<=1)
             {
-               for(unsigned long k=0;k<mNbIntegrationUsed;k++)
+               for(unsigned long k=mNbIntegrationUsed;k>0;k--)
                {
                   b += *p1++ * *p2++ * *p4++;
                   //cout<<"B:"<<mIntegratedPatternMin(k)<<" "<<mIntegratedPatternMax(k)<<" "<<b<<endl;
@@ -3685,8 +3685,8 @@ void PowderPattern::FitScaleFactorForIntegratedRw()const
             }
             else
             {
-               const REAL *p3=mPowderPatternBackgroundIntegratedCalc.data();
-               for(unsigned long k=0;k<mNbIntegrationUsed;k++) 
+               const REAL * RESTRICT p3=mPowderPatternBackgroundIntegratedCalc.data();
+               for(unsigned long k=mNbIntegrationUsed;k>0;k--) 
                {
                   //cout<<"B(minus backgd):"<<mIntegratedPatternMin(k)<<" "
                   //    <<mIntegratedPatternMax(k)<<" "
@@ -3713,23 +3713,23 @@ void PowderPattern::FitScaleFactorForIntegratedRw()const
                if(0!=mPowderPatternComponentRegistry.GetObj(mScalableComponentIndex(i))
                      .GetPowderPatternIntegratedCalcVariance().first->numElements())
                {
-                  const REAL * p1=mPowderPatternComponentRegistry.GetObj(mScalableComponentIndex(i))
+                  const REAL * RESTRICT p1=mPowderPatternComponentRegistry.GetObj(mScalableComponentIndex(i))
                                     .GetPowderPatternIntegratedCalcVariance().first->data();
                   //cout <<",sumvar(i)="<<log(mPowderPatternComponentRegistry.GetObj(mScalableComponentIndex(i))
                   //                    .GetPowderPatternIntegratedCalcVariance().first->sum());
-                  REAL * p0 = mPowderPatternVarianceIntegrated.data();
+                  REAL * RESTRICT p0 = mPowderPatternVarianceIntegrated.data();
                   const REAL s2 = mFitScaleFactorX(i)*mFitScaleFactorX(i)
                                    -mScaleFactor(mScalableComponentIndex(i))
                                     *mScaleFactor(mScalableComponentIndex(i));
-                  for(unsigned long j=0;j<mNbIntegrationUsed;j++) *p0++ += s2 * *p1++;
+                  for(unsigned long j=mNbIntegrationUsed;j>0;j--) *p0++ += s2 * *p1++;
                }
             }
          }
          //if(ctagain>0) cout <<" ->"<<log(mPowderPatternVarianceIntegrated.sum())
          //                   <<" , sumobsvar="<<log(mIntegratedVarianceObs.sum())<<endl;
-         REAL *p0 = mIntegratedWeight.data();
-         const REAL *p1=mPowderPatternVarianceIntegrated.data();
-         for(unsigned long j=0;j<mNbIntegrationUsed;j++)
+         REAL * RESTRICT p0 = mIntegratedWeight.data();
+         const REAL * RESTRICT p1=mPowderPatternVarianceIntegrated.data();
+         for(unsigned long j=mNbIntegrationUsed;j>0;j--)
             if(*p1 <=0) {*p0++ =0;p1++;}
             else *p0++ = 1. / *p1++;
 
@@ -3737,9 +3737,9 @@ void PowderPattern::FitScaleFactorForIntegratedRw()const
       // Correct the calculated integrated pattern
       for(int i=0;i<nbScale;i++)
       {
-         const REAL * p1=mPowderPatternComponentRegistry.GetObj(mScalableComponentIndex(i))
+         const REAL * RESTRICT p1=mPowderPatternComponentRegistry.GetObj(mScalableComponentIndex(i))
                            .GetPowderPatternIntegratedCalc().first->data();
-         REAL * p0 = mPowderPatternIntegratedCalc.data();
+         REAL * RESTRICT p0 = mPowderPatternIntegratedCalc.data();
          const REAL s = mFitScaleFactorX(i)
                           -mScaleFactor(mScalableComponentIndex(i));
          if(nbVarCalc>0)
@@ -3756,7 +3756,7 @@ void PowderPattern::FitScaleFactorForIntegratedRw()const
                    <<"->"<<log(mFitScaleFactorX(i))<<" Again="<<ctagain,5);
             }
          }
-         for(unsigned long j=0;j<mNbIntegrationUsed;j++) *p0++ += s * *p1++;
+         for(unsigned long j=mNbIntegrationUsed;j>0;j--) *p0++ += s * *p1++;
          VFN_DEBUG_MESSAGE("->log(scale) Old :"<<log(mScaleFactor(mScalableComponentIndex(i))) <<" New:"<<log(mFitScaleFactorX(i)),3);
          mScaleFactor(mScalableComponentIndex(i)) = mFitScaleFactorX(i);
       }
@@ -4206,17 +4206,17 @@ void PowderPattern::CalcPowderPatternIntegrated() const
          TAU_PROFILE_START(timer2);
          if(0==i)
          {
-            const REAL * p1= comps[i].first->data();
-            REAL * p0 = mPowderPatternIntegratedCalc.data();
+            const REAL * RESTRICT p1= comps[i].first->data();
+            REAL * RESTRICT p0 = mPowderPatternIntegratedCalc.data();
             const REAL s = mScaleFactor(i);
-            for(unsigned long j=0;j<mNbIntegrationUsed;j++) *p0++ = s * *p1++;
+            for(unsigned long j=mNbIntegrationUsed;j>0;j--) *p0++ = s * *p1++;
          }
          else
          {
-            const REAL * p1= comps[i].first->data();
-            REAL * p0 = mPowderPatternIntegratedCalc.data();
+            const REAL * RESTRICT p1= comps[i].first->data();
+            REAL * RESTRICT p0 = mPowderPatternIntegratedCalc.data();
             const REAL s = mScaleFactor(i);
-            for(unsigned long j=0;j<mNbIntegrationUsed;j++) *p0++ += s * *p1++;
+            for(unsigned long j=mNbIntegrationUsed;j>0;j--) *p0++ += s * *p1++;
          }
           TAU_PROFILE_STOP (timer2);
       }
@@ -4225,15 +4225,15 @@ void PowderPattern::CalcPowderPatternIntegrated() const
          TAU_PROFILE_START(timer3);
          if(0==i)
          {
-            const REAL * p1= comps[i].first->data();
-            REAL * p0 = mPowderPatternIntegratedCalc.data();
-            for(unsigned long j=0;j<mNbIntegrationUsed;j++) *p0++ = *p1++;
+            const REAL * RESTRICT p1= comps[i].first->data();
+            REAL * RESTRICT p0 = mPowderPatternIntegratedCalc.data();
+            for(unsigned long j=mNbIntegrationUsed;j>0;j--) *p0++ = *p1++;
          }
          else
          {
-            const REAL * p1= comps[i].first->data();
-            REAL * p0 = mPowderPatternIntegratedCalc.data();
-            for(unsigned long j=0;j<mNbIntegrationUsed;j++) *p0++ += *p1++;
+            const REAL * RESTRICT p1= comps[i].first->data();
+            REAL * RESTRICT p0 = mPowderPatternIntegratedCalc.data();
+            for(unsigned long j=mNbIntegrationUsed;j>0;j--) *p0++ += *p1++;
 
          }
          TAU_PROFILE_STOP(timer3);
@@ -4242,15 +4242,15 @@ void PowderPattern::CalcPowderPatternIntegrated() const
          if(0==nbBackgd)
          {
             mPowderPatternBackgroundIntegratedCalc.resize(mNbIntegrationUsed);
-            const REAL * p1= comps[i].first->data();
-            REAL * p0 = mPowderPatternBackgroundIntegratedCalc.data();
-            for(unsigned long j=0;j<mNbIntegrationUsed;j++) *p0++ = *p1++;
+            const REAL * RESTRICT p1= comps[i].first->data();
+            REAL * RESTRICT p0 = mPowderPatternBackgroundIntegratedCalc.data();
+            for(unsigned long j=mNbIntegrationUsed;j>0;j--) *p0++ = *p1++;
          }
          else
          {
-            const REAL * p1= comps[i].first->data();
-            REAL * p0 = mPowderPatternBackgroundIntegratedCalc.data();
-            for(unsigned long j=0;j<mNbIntegrationUsed;j++) *p0++ += *p1++;
+            const REAL * RESTRICT p1= comps[i].first->data();
+            REAL * RESTRICT p0 = mPowderPatternBackgroundIntegratedCalc.data();
+            for(unsigned long j=mNbIntegrationUsed;j>0;j--) *p0++ += *p1++;
          }
          nbBackgd++;
          TAU_PROFILE_STOP(timer4);
@@ -4271,9 +4271,9 @@ void PowderPattern::CalcPowderPatternIntegrated() const
       {
          mPowderPatternVarianceIntegrated.resize(mNbIntegrationUsed);
          mIntegratedWeight.resize(mNbIntegrationUsed);
-         const REAL * p1= mIntegratedVarianceObs.data();
-         REAL * p0 = mPowderPatternVarianceIntegrated.data();
-         for(unsigned long j=0;j<mNbIntegrationUsed;j++) *p0++ = *p1++;
+         const REAL * RESTRICT p1= mIntegratedVarianceObs.data();
+         REAL * RESTRICT p0 = mPowderPatternVarianceIntegrated.data();
+         for(unsigned long j=mNbIntegrationUsed;j>0;j--) *p0++ = *p1++;
       }
       //cout <<"PowderPattern::CalcPowderPatternIntegrated():variance"
       //     <<"obsvarsum="<<log(mIntegratedVarianceObs.sum());
@@ -4284,25 +4284,25 @@ void PowderPattern::CalcPowderPatternIntegrated() const
             if(0==mPowderPatternComponentRegistry.GetObj(i)
                     .GetPowderPatternIntegratedCalcVariance().first->numElements()) break;
                     
-            const REAL * p1= mPowderPatternComponentRegistry.GetObj(i)
+            const REAL * RESTRICT p1= mPowderPatternComponentRegistry.GetObj(i)
                                 .GetPowderPatternIntegratedCalcVariance().first->data();
             //cout <<",sumvar(i)="<<log(mPowderPatternComponentRegistry.GetObj(i)
             //                    .GetPowderPatternIntegratedCalcVariance().first->sum());
-            REAL * p0 = mPowderPatternVarianceIntegrated.data();
+            REAL * RESTRICT p0 = mPowderPatternVarianceIntegrated.data();
             
             if(true==mPowderPatternComponentRegistry.GetObj(i).IsScalable())
             {
                const REAL s2 = mScaleFactor(i) * mScaleFactor(i);
-               for(unsigned long j=0;j<mNbIntegrationUsed;j++) *p0++ += s2 * *p1++;
+               for(unsigned long j=mNbIntegrationUsed;j>0;j--) *p0++ += s2 * *p1++;
             }
-            else for(unsigned long j=0;j<mNbIntegrationUsed;j++) *p0++ += *p1++;
+            else for(unsigned long j=mNbIntegrationUsed;j>0;j--) *p0++ += *p1++;
             
          }
       }
       //cout <<endl;
       REAL *p0 = mIntegratedWeight.data();
       const REAL *p1=mPowderPatternVarianceIntegrated.data();
-      for(unsigned long j=0;j<mNbIntegrationUsed;j++)
+      for(unsigned long j=mNbIntegrationUsed;j>0;j--)
          if(*p1 <=0) {*p0++ =0;p1++;}
          else *p0++ = 1. / *p1++;
    }

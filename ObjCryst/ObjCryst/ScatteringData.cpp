@@ -1183,13 +1183,13 @@ void ScatteringData::CalcStructFactor() const
    {
       const ScatteringPower* pScattPow=pos->first;
       VFN_DEBUG_MESSAGE("ScatteringData::CalcStructFactor():Fhkl Recalc, "<<pScattPow->GetName(),2)
-      const REAL *pGeomR=mvRealGeomSF[pScattPow].data();
-      const REAL *pGeomI=mvImagGeomSF[pScattPow].data();
-      const REAL *pScatt=mvScatteringFactor[pScattPow].data();
-      const REAL *pTemp=mvTemperatureFactor[pScattPow].data();
+      const REAL * RESTRICT pGeomR=mvRealGeomSF[pScattPow].data();
+      const REAL * RESTRICT pGeomI=mvImagGeomSF[pScattPow].data();
+      const REAL * RESTRICT pScatt=mvScatteringFactor[pScattPow].data();
+      const REAL * RESTRICT pTemp=mvTemperatureFactor[pScattPow].data();
 
-      REAL *pReal=mFhklCalcReal.data();
-      REAL *pImag=mFhklCalcImag.data();
+      REAL * RESTRICT pReal=mFhklCalcReal.data();
+      REAL * RESTRICT pImag=mFhklCalcImag.data();
 
       VFN_DEBUG_MESSAGE("->mvRealGeomSF[i] "
          <<mvRealGeomSF[pScattPow].numElements()<<"elements",2)
@@ -1211,12 +1211,12 @@ void ScatteringData::CalcStructFactor() const
                                                         ),1);
       if(mvLuzzatiFactor[pScattPow].numElements()>0)
       {// using maximum likelihood
-         const REAL* pLuzzati=mvLuzzatiFactor[pScattPow].data();
+         const REAL* RESTRICT pLuzzati=mvLuzzatiFactor[pScattPow].data();
          if(false==mIgnoreImagScattFact)
          {
             const REAL fsecond=mvFsecond[pScattPow];
             VFN_DEBUG_MESSAGE("->fsecond= "<<fsecond,2)
-            for(long j=0;j<mNbReflUsed;j++)
+            for(long j=mNbReflUsed;j>0;j--)
             {
                VFN_DEBUG_MESSAGE("-->"<<j<<" "<<*pReal<<" "<<*pImag<<" "<<*pGeomR<<" "<<*pGeomI<<" "<<*pScatt<<" "<<*pTemp,1)
                *pReal++ += (*pGeomR   * *pScatt   - *pGeomI   * fsecond)* *pTemp * *pLuzzati;
@@ -1225,7 +1225,7 @@ void ScatteringData::CalcStructFactor() const
          }
          else
          {
-            for(long j=0;j<mNbReflUsed;j++)
+            for(long j=mNbReflUsed;j>0;j--)
             {
                *pReal++ += *pGeomR++  * *pTemp   * *pScatt   * *pLuzzati;
                *pImag++ += *pGeomI++  * *pTemp++ * *pScatt++ * *pLuzzati++;
@@ -1249,7 +1249,7 @@ void ScatteringData::CalcStructFactor() const
          {
             const REAL fsecond=mvFsecond[pScattPow];
             VFN_DEBUG_MESSAGE("->fsecond= "<<fsecond,2)
-            for(long j=0;j<mNbReflUsed;j++)
+            for(long j=mNbReflUsed;j>0;j--)
             {
                *pReal += (*pGeomR   * *pScatt - *pGeomI * fsecond)* *pTemp;
                *pImag += (*pGeomI   * *pScatt + *pGeomR * fsecond)* *pTemp;
@@ -1259,11 +1259,10 @@ void ScatteringData::CalcStructFactor() const
          }
          else
          {
-            for(long j=0;j<mNbReflUsed;j++)
+            for(long j=mNbReflUsed;j>0;j--)
             {
-               *pReal++ += *pGeomR  * *pTemp * *pScatt;
-               *pImag++ += *pGeomI  * *pTemp * *pScatt;
-               pGeomR++;pGeomI++;pTemp++;pScatt++;
+               *pReal++ += *pGeomR++  * *pTemp * *pScatt;
+               *pImag++ += *pGeomI++  * *pTemp++ * *pScatt++;
             }
          }
          VFN_DEBUG_MESSAGE(FormatVertVectorHKLFloats<REAL>(mH,mK,mL,mSinThetaLambda,
@@ -1422,32 +1421,32 @@ VFN_DEBUG_MESSAGE("TEST",3)
             
             if(mUseFastLessPreciseFunc==true)
             {
-               REAL *rrsf=mvRealGeomSF[pScattPow].data();
-               REAL *iisf=mvImagGeomSF[pScattPow].data();
+               REAL * RESTRICT rrsf=mvRealGeomSF[pScattPow].data();
+               REAL * RESTRICT iisf=mvImagGeomSF[pScattPow].data();
                
                const long intX=(long)(allCoords(j,0)*sLibCrystNbTabulSine);
                const long intY=(long)(allCoords(j,1)*sLibCrystNbTabulSine);
                const long intZ=(long)(allCoords(j,2)*sLibCrystNbTabulSine);
 
-               const long *intH=mIntH.data();
-               const long *intK=mIntK.data();
-               const long *intL=mIntL.data();
+               const long * RESTRICT intH=mIntH.data();
+               const long * RESTRICT intK=mIntK.data();
+               const long * RESTRICT intL=mIntL.data();
 
-               register long *tmpInt=intVect.data();
+               register long * RESTRICT tmpInt=intVect.data();
                // :KLUDGE: using a AND to bring back within [0;sLibCrystNbTabulSine[ may
                // not be portable, depending on the model used to represent signed integers
                // a test should be added to throw up in that case.
                //
                // This work if we are using "2's complement" to represent negative numbers,
                // but not with a "sign magnitude" approach
-               for(int jj=0;jj<mNbReflUsed;jj++) 
+               for(int jj=mNbReflUsed;jj>0;jj--)
                 *tmpInt++ = (*intH++ * intX + *intK++ * intY + *intL++ *intZ)
                               &sLibCrystNbTabulSineMASK;
                if(false==pSpg->HasInversionCenter())
                {
 
                   tmpInt=intVect.data();
-                  for(int jj=0;jj<mNbReflUsed;jj++)
+                  for(int jj=mNbReflUsed;jj>0;jj--)
                   {
                      const REAL *pTmp=&spLibCrystTabulCosineSine[*tmpInt++ <<1];
                      *rrsf++ += popu * *pTmp++;
@@ -1458,7 +1457,7 @@ VFN_DEBUG_MESSAGE("TEST",3)
                else
                {
                   tmpInt=intVect.data();
-                  for(int jj=0;jj<mNbReflUsed;jj++) 
+                  for(int jj=mNbReflUsed;jj>0;jj--)
                      *rrsf++ += popu * spLibCrystTabulCosine[*tmpInt++];
                }
             }
@@ -1495,11 +1494,11 @@ VFN_DEBUG_MESSAGE("TEST",3)
          tmpVect=1;
          if( (pSpg->GetSpaceGroupNumber()>= 143) && (pSpg->GetSpaceGroupNumber()<= 167))
          {//Special case for trigonal groups R3,...
-            REAL *p1=tmpVect.data();
-            const register REAL *hh=mH2Pi.data();
-            const register REAL *kk=mK2Pi.data();
-            const register REAL *ll=mL2Pi.data();
-            for(long j=0;j<mNbReflUsed;j++) *p1++ += 2*cos((*hh++ - *kk++ - *ll++)/3.);
+            REAL * RESTRICT p1=tmpVect.data();
+            const register REAL * RESTRICT hh=mH2Pi.data();
+            const register REAL * RESTRICT kk=mK2Pi.data();
+            const register REAL * RESTRICT ll=mL2Pi.data();
+            for(long j=mNbReflUsed;j>0;j--) *p1++ += 2*cos((*hh++ - *kk++ - *ll++)/3.);
          }
          else
          {
@@ -1512,7 +1511,7 @@ VFN_DEBUG_MESSAGE("TEST",3)
                const register REAL *hh=mH2Pi.data();
                const register REAL *kk=mK2Pi.data();
                const register REAL *ll=mL2Pi.data();
-               for(long j=0;j<mNbReflUsed;j++) *p1++ += cos(*hh++ *x + *kk++ *y + *ll++ *z );
+               for(long j=mNbReflUsed;j>0;j--) *p1++ += cos(*hh++ *x + *kk++ *y + *ll++ *z );
             }
          }
          for(map<const ScatteringPower*,CrystVector_REAL>::iterator
@@ -1545,11 +1544,11 @@ VFN_DEBUG_MESSAGE("TEST",3)
                tmpVect = mH2Pi() * xc + mK2PI() * yc + mL2PI() * zc;
                #else
                {
-                  const REAL *hh=mH2Pi.data();
-                  const REAL *kk=mK2Pi.data();
-                  const REAL *ll=mL2Pi.data();
-                  REAL *ttmpVect=tmpVect.data();
-                  for(long ii=0;ii<mNbReflUsed;ii++) 
+                  const REAL * RESTRICT hh=mH2Pi.data();
+                  const REAL * RESTRICT kk=mK2Pi.data();
+                  const REAL * RESTRICT ll=mL2Pi.data();
+                  REAL * RESTRICT ttmpVect=tmpVect.data();
+                  for(long ii=mNbReflUsed;ii>0;ii--) 
                      *ttmpVect++ = *hh++ * xc + *kk++ * yc + *ll++ * zc;
                }
                #endif
