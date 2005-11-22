@@ -190,12 +190,12 @@ REAL AsymmetricUnit::Zmax() const {return mZmax;}
 //
 ////////////////////////////////////////////////////////////////////////
 
-SpaceGroup::SpaceGroup():mId("P1")
+SpaceGroup::SpaceGroup():mId("P1"),mpCCTbxSpaceGroup(0)
 {
    InitSpaceGroup(mId);
 }
 
-SpaceGroup::SpaceGroup(const string &spgId):mId(spgId)
+SpaceGroup::SpaceGroup(const string &spgId):mId(spgId),mpCCTbxSpaceGroup(0)
 {
    InitSpaceGroup(spgId);
 }
@@ -480,6 +480,7 @@ unsigned int SpaceGroup::GetExpectedIntensityFactor(const REAL h0,
 
 void SpaceGroup::InitSpaceGroup(const string &spgId)
 {
+   if((mId==spgId)&&(mpCCTbxSpaceGroup!=0)) return;
    VFN_DEBUG_ENTRY("SpaceGroup::InitSpaceGroup():"<<spgId,8)
    (*fpObjCrystInformUser)("Initializing spacegroup: "+spgId);
    try
