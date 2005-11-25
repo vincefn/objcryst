@@ -1,11 +1,27 @@
 DIR_CRYST := ObjCryst
 
-default: all
-
 all: Fox
 
+default: all
+
+ifneq ($(shared),1)
+static-libs/lib/libglut.a:
+	tar -xjf freeglut-2.4.0.tar.bz2
+	cd freeglut-2.4.0 && ./configure --prefix=$(PWD)/static-libs --disable-shared && make install
+	rm -Rf freeglut-2.4.0
+static-libs/lib/libwx_base-2.6.a:
+	tar -xjf wxGTK-2.6.2.tar.bz2 # wxGtK source, with "demos" "samples" "contrib" removed
+	cd wxGTK-2.6.2 && ./configure --with-gtk --with-opengl --prefix=$(PWD)/static-libs --enable-optimise --disable-shared && make install
+	rm -Rf wxGTK-2.6.2
+endif
+
+
 Fox:
-	$(MAKE) -f gnu.mak wxcryst=1 opengl=1 debug=$(debug) -C src all
+	echo "toto2"
+ifneq ($(shared),1)
+	make static-libs/lib/libglut.a static-libs/lib/libwx_base-2.6.a
+endif
+	$(MAKE) -f gnu.mak wxcryst=1 opengl=1 debug=$(debug) shared=$(shared) -C src all
 
 Fox-nogui:
 	$(MAKE) -f gnu.mak wxcryst=0 opengl=0 debug=$(debug) -C src all

@@ -6,8 +6,6 @@ DIR_BLITZ = ${DIR_CRYST}/../blitz
 DIR_NEWMAT = ${DIR_CRYST}/../newmat
 DIR_CCTBX = ${DIR_CRYST}/../cctbx
 DIR_TAU = ${DIR_CRYST}/../tau
-# Just to find wxWindows headers. Libs are in /usr/lib or in /usr/local/lib
-DIR_WXWINDOWS = /usr/lib/wx
 
 #Internal directories
 DIR_CRYSTVECTOR = ${DIR_CRYST}/CrystVector
@@ -36,12 +34,12 @@ LDFLAGS   = -L/usr/lib -L/usr/local/lib -L$(DIR_CRYSTVECTOR) -L$(DIR_LIBCRYST) -
 MAKEDEPEND = gcc -MM ${CPPFLAGS} ${CXXFLAGS} ${C_BLITZFLAG} $< > $*.dep
 
 # header files
-SEARCHDIRS = -I- -I${DIR_CRYST}/.. -I./ -I$(DIR_BLITZ)  -I$(DIR_TAU)/include -I$(DIR_NEWMAT) -I${DIR_CRYST} -I${DIR_CCTBX}/cctbx/include -I${DIR_CCTBX}/scitbx/include -I${DIR_CCTBX}/
+SEARCHDIRS = -I${DIR_CRYST}/.. -I./ -I$(DIR_BLITZ)  -I$(DIR_TAU)/include -I$(DIR_NEWMAT) -I${DIR_CRYST} -I${DIR_CCTBX}/cctbx/include -I${DIR_CCTBX}/scitbx/include -I${DIR_CCTBX}/
 
 #wxWindows flags
 ifeq ($(wxcryst),1)
-   WXCRYSTFLAGS = -D__WX__CRYST__ `wx-config --cxxflags`
-   WX_LDFLAGS = -L/usr/X11R6/lib -lwxcryst `wx-config --libs` $(GL_WX_LIB) -lXmu
+   WXCRYSTFLAGS = -D__WX__CRYST__ `$(WXCONFIG) --cxxflags`
+   WX_LDFLAGS = -L/usr/X11R6/lib -lwxcryst `$(WXCONFIG) --libs` $(GL_WX_LIB) -lXmu
 else
    WXCRYSTFLAGS :=
    WX_LDFLAGS :=
@@ -56,12 +54,20 @@ else
    PROFILELIB :=
 endif
 
-#Using GLUT ? Remove this to generate Fonts using a display list
-GLUT_FLAGS= -DHAVE_GLUT 
-GLUT_LIB= -lglut  
+#Use static linking to wx and freeglut libraries ?
+ifneq ($(shared),1)
+WXCONFIG= $(DIR_CRYST)/../static-libs/bin/wx-config
+GLUT_FLAGS= -DHAVE_GLUT -I$(DIR_CRYST)/../static-libs/include/
+GLUT_LIB= $(DIR_CRYST)/../static-libs/lib/libglut.a
+else
+WXCONFIG= wx-config
+GLUT_FLAGS= -DHAVE_GLUT
+GLUT_LIB= -lglut
+endif
+
 #Using OpenGL ?
 ifeq ($(opengl),1)
-GL_WX_LIB = `wx-config --gl-libs` -lGL -lGLU $(GLUT_LIB)
+GL_WX_LIB = `$(WXCONFIG) --gl-libs` -lGL -lGLU $(GLUT_LIB)
 GL_FLAGS := -DOBJCRYST_GL -IGL $(GLUT_FLAGS)
 else
 GL_WX_LIB :=
