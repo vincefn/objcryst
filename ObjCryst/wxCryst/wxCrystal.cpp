@@ -2639,6 +2639,10 @@ void WXGLCrystalCanvas::InitGL()
    //Initialize Trackball
    trackball(mQuat,0.,0.,0.,0.);
    
+   #ifdef HAVE_GLUT
+   glutInit(&(wxApp::GetInstance()->argc),wxApp::GetInstance()->argv);
+   #endif
+
    wxSizeEvent event;
    this->OnSize(event);
    
