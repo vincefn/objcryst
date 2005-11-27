@@ -466,15 +466,15 @@ void ScatteringData::GenHKLFullSpace2(const REAL maxSTOL,const bool unique)
    if(0==mpCrystal)
    {
       throw ObjCrystException("ScatteringData::GenHKLFullSpace2() \
-      no crystal assigned yet to this ScatteringData object.");;
+      no crystal assigned yet to this ScatteringData object.");
    }
-   cctbx::miller::index_generator igen
-       (cctbx::uctbx::unit_cell(scitbx::af::double6(mpCrystal->GetLatticePar(0),
-                                                    mpCrystal->GetLatticePar(1),
-                                                    mpCrystal->GetLatticePar(2),
-                                                    mpCrystal->GetLatticePar(3)*RAD2DEG,
-                                                    mpCrystal->GetLatticePar(4)*RAD2DEG,
-                                                    mpCrystal->GetLatticePar(5)*RAD2DEG)),
+   cctbx::uctbx::unit_cell uc=cctbx::uctbx::unit_cell(scitbx::af::double6(mpCrystal->GetLatticePar(0),
+                                                                          mpCrystal->GetLatticePar(1),
+						                          mpCrystal->GetLatticePar(2),
+									  mpCrystal->GetLatticePar(3)*RAD2DEG,
+									  mpCrystal->GetLatticePar(4)*RAD2DEG,
+									  mpCrystal->GetLatticePar(5)*RAD2DEG));
+   cctbx::miller::index_generator igen(uc,
                                 this->GetCrystal().GetSpaceGroup().GetCCTbxSpg().type(),
                                 !(this->IsIgnoringImagScattFact()),
                                 1/(2*maxSTOL));
