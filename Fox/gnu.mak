@@ -7,11 +7,11 @@ default: all
 ifneq ($(shared),1)
 static-libs/lib/libglut.a:
 	tar -xjf freeglut-2.4.0.tar.bz2
-	cd freeglut-2.4.0 && ./configure --prefix=$(PWD)/static-libs --disable-shared && make install
+	cd freeglut-2.4.0 && ./configure --prefix=$(PWD)/static-libs --disable-shared --disable-warnings && make install
 	rm -Rf freeglut-2.4.0
 static-libs/lib/libwx_base-2.6.a:
 	tar -xjf wxGTK-2.6.2.tar.bz2 # wxGtK source, with "demos" "samples" "contrib" removed
-	cd wxGTK-2.6.2 && ./configure --with-gtk --with-opengl --prefix=$(PWD)/static-libs --enable-optimise --disable-shared && make install
+	cd wxGTK-2.6.2 && ./configure --with-gtk --with-opengl --prefix=$(PWD)/static-libs --enable-optimise --disable-shared --with-gtk=any && make install
 	rm -Rf wxGTK-2.6.2
 endif
 
