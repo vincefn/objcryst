@@ -34,7 +34,7 @@ LDFLAGS   = -L/usr/lib -L/usr/local/lib -L$(DIR_CRYSTVECTOR) -L$(DIR_LIBCRYST) -
 MAKEDEPEND = gcc -MM ${CPPFLAGS} ${CXXFLAGS} ${C_BLITZFLAG} $< > $*.dep
 
 # header files
-SEARCHDIRS = -I${DIR_CRYST}/.. -I./ -I$(DIR_BLITZ)  -I$(DIR_TAU)/include -I$(DIR_NEWMAT) -I${DIR_CRYST} -I${DIR_CCTBX}/cctbx/include -I${DIR_CCTBX}/scitbx/include -I${DIR_CCTBX}/
+SEARCHDIRS = -I${DIR_CRYST}/.. -I${DIR_CRYST} -I$(DIR_BLITZ)  -I$(DIR_TAU)/include -I$(DIR_NEWMAT) -I${DIR_CRYST} -I${DIR_CCTBX}/cctbx/include -I${DIR_CCTBX}/scitbx/include -I${DIR_CCTBX}/
 
 #wxWindows flags
 ifeq ($(wxcryst),1)
@@ -47,7 +47,7 @@ endif
 
 #activate profiling using TAU package
 ifeq ($(profile),1)
-   PROFILEFLAGS := -DPROFILING_ON -DTAU_STDCXXLIB -I$(DIR_TAU)/include
+   PROFILEFLAGS = -DPROFILING_ON -DTAU_STDCXXLIB -I$(DIR_TAU)/include
    PROFILELIB := -ltau
 else
    PROFILEFLAGS :=
@@ -68,7 +68,7 @@ endif
 #Using OpenGL ?
 ifeq ($(opengl),1)
 GL_WX_LIB = `$(WXCONFIG) --gl-libs` -lGL -lGLU $(GLUT_LIB)
-GL_FLAGS := -DOBJCRYST_GL -IGL $(GLUT_FLAGS)
+GL_FLAGS = -DOBJCRYST_GL -IGL $(GLUT_FLAGS)
 else
 GL_WX_LIB :=
 GL_FLAGS :=
@@ -91,7 +91,11 @@ else
       # we are building a RPM !
       CPPFLAGS = ${RPM_OPT_FLAGS} 
    else
-      CPPFLAGS = -O3 -w -ffast-math 
+      # Athlon XP, with auto-vectorization
+      #CPPFLAGS = -O3 -w -ffast-math -march=athlon-xp -mmmx -msse -m3dnow -mfpmath=sse -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops -ftree-vectorize -ftree-vectorizer-verbose=0
+      # AMD64 Opteron , with auto-vectorization
+      #CPPFLAGS = -O3 -w -ffast-math -march=opteron -mmmx -msse -msse2 -m3dnow -mfpmath=sse -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops -ftree-vectorize -ftree-vectorizer-verbose=0
+      CPPFLAGS = -O3 -w -ffast-math -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops
    endif
    DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS}
    LOADLIBES = -s -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS}
