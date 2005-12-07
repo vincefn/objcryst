@@ -210,8 +210,6 @@ class ScatteringPower:virtual public RefinableObj
       /// Get the number identifying this kind of scatterer, used to decide whether two
       /// scatterers are equivalent, for the dynamical occupancy correction.
       long GetDynPopCorrIndex()const;
-      /// Unique number identifying this ScatteringPower object
-      long GetScatteringPowerId()const;
       /// Total number of ScatteringPower object
       long GetNbScatteringPower()const;
       /// ObjCrystClock time when the last modification was made to the object
@@ -260,16 +258,6 @@ class ScatteringPower:virtual public RefinableObj
       bool mIsIsotropic;
       /// Anisotropic Beta(ij)
       CrystVector_REAL mBeta;
-      /// Unique number identifying this ScatteringPower. Needed for avoiding re-calculations
-      /// in ScatteringData
-      const long mScatteringPowerId;
-      /// Current unique number to use for a new ScatteringPower object= total number
-      /// of objects that have been allocated
-      static long mNbScatteringPower;
-      /// Keep a list of all objects
-      static ScatteringPower* mspScatteringPowerGlobalList[1000];
-      /// To know which objects are available in the list
-      static CrystVector_bool mspScatteringPowerGlobalListIsUsed;
       /// Clock.
       RefinableObjClock mClock;
       /// Colour for this ScatteringPower (from POVRay)
@@ -291,15 +279,10 @@ class ScatteringPower:virtual public RefinableObj
       * Default value is 0.
       */
       REAL mFormalCharge;
-   private:
-      friend const ScatteringPower& GetScatteringPower(const long i);
 };
 
 /// Global registry for all ScatteringPower objects
 extern ObjRegistry<ScatteringPower> gScatteringPowerRegistry;
-
-// Returns the ith ScatteringPower
-//const ScatteringPower& GetScatteringPower(const long i);
 
 //######################################################################
 //

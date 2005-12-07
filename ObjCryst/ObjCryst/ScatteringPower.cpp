@@ -55,21 +55,10 @@ long NiftyStaticGlobalObjectsInitializer_ScatteringPower::mCount=0;
 //######################################################################
 ObjRegistry<ScatteringPower> gScatteringPowerRegistry("Global ScatteringPower Registry");
 
-long ScatteringPower::mNbScatteringPower=0;
-ScatteringPower* ScatteringPower::mspScatteringPowerGlobalList[1000];
-CrystVector_bool ScatteringPower::mspScatteringPowerGlobalListIsUsed(1000);
-
-
 ScatteringPower::ScatteringPower():mDynPopCorrIndex(0),mBiso(1.0),mIsIsotropic(true),
-mScatteringPowerId(mNbScatteringPower),mMaximumLikelihoodNbGhost(0),mFormalCharge(0.0)
+mMaximumLikelihoodNbGhost(0),mFormalCharge(0.0)
 {
    VFN_DEBUG_MESSAGE("ScatteringPower::ScatteringPower():"<<mName,5)
-   if(mNbScatteringPower>1000) throw ObjCrystException("ScatteringPower::ScatteringPower() \
-      Reached maximum number of ScatteringPower objects (1000!)");
-   mspScatteringPowerGlobalList[mNbScatteringPower] = this;
-   if(0==mNbScatteringPower) mspScatteringPowerGlobalListIsUsed=false;
-   mspScatteringPowerGlobalListIsUsed(mNbScatteringPower)=true;
-   mNbScatteringPower++;
    gScatteringPowerRegistry.Register(*this);
    this->Init();
    mClockMaster.AddChild(mClock);
@@ -77,15 +66,10 @@ mScatteringPowerId(mNbScatteringPower),mMaximumLikelihoodNbGhost(0),mFormalCharg
 }
 ScatteringPower::ScatteringPower(const ScatteringPower& old):
 mDynPopCorrIndex(old.mDynPopCorrIndex),mBiso(old.mBiso),mIsIsotropic(old.mIsIsotropic),
-mBeta(old.mBeta),mScatteringPowerId(mNbScatteringPower),
+mBeta(old.mBeta),
 mFormalCharge(old.mFormalCharge)
 {
    VFN_DEBUG_MESSAGE("ScatteringPower::ScatteringPower(&old):"<<mName,5)
-   if(mNbScatteringPower>1000) throw ObjCrystException("ScatteringPower::ScatteringPower() \
-      Reached maximum number of ScatteringPower objects (1000!)");
-   mspScatteringPowerGlobalList[mNbScatteringPower] = this;
-   mspScatteringPowerGlobalListIsUsed(mNbScatteringPower)=true;
-   mNbScatteringPower++;
    gScatteringPowerRegistry.Register(*this);
    this->Init();
    mMaximumLikelihoodPositionError=old.mMaximumLikelihoodPositionError;
@@ -96,7 +80,6 @@ mFormalCharge(old.mFormalCharge)
 ScatteringPower::~ScatteringPower()
 {
    VFN_DEBUG_MESSAGE("ScatteringPower::~ScatteringPower():"<<mName,5)
-   mspScatteringPowerGlobalListIsUsed(mScatteringPowerId)=false;
    gScatteringPowerRegistry.DeRegister(*this);
 }
 
@@ -125,8 +108,7 @@ REAL& ScatteringPower::GetBiso() {mClock.Click();return mBiso;}
 void ScatteringPower::SetBiso(const REAL newB) { mClock.Click();mBiso=newB;}
 bool ScatteringPower::IsIsotropic() const {return mIsIsotropic;}
 long ScatteringPower::GetDynPopCorrIndex() const {return mDynPopCorrIndex;}
-long ScatteringPower::GetScatteringPowerId()const {return mScatteringPowerId;}
-long ScatteringPower::GetNbScatteringPower()const {return mNbScatteringPower;}
+long ScatteringPower::GetNbScatteringPower()const {return gScatteringPowerRegistry.GetNb();}
 const RefinableObjClock& ScatteringPower::GetLastChangeClock()const {return mClock;}
 
 const string& ScatteringPower::GetColourName()const{ return mColourName;}
@@ -223,23 +205,6 @@ void ScatteringPower::InitRGBColour()
 }
 
 //######################################################################
-// GetScatteringPower
-//######################################################################
-const ScatteringPower& GetScatteringPower(const long i) 
-{  
-   VFN_DEBUG_MESSAGE("GetScatteringPower(i):"<<i,2)
-   if(false==ScatteringPower::mspScatteringPowerGlobalListIsUsed(i))
-   {
-      cout <<i<<endl;
-      cout <<ScatteringPower::mspScatteringPowerGlobalListIsUsed<<endl;
-      throw ObjCrystException("GetScatteringPower(i):this Scattering power does not exist !!");
-   }
-
-   return *ScatteringPower::mspScatteringPowerGlobalList[i];
-}
-
-
-//######################################################################
 //
 //      SCATTERING POWER ATOM
 //
@@ -290,7 +255,7 @@ const string& ScatteringPowerAtom::GetClassName() const
 
 void ScatteringPowerAtom::Init(const string &name,const string &symbol,const REAL bIso)
 {
-   VFN_DEBUG_MESSAGE("ScatteringPowerAtom::Init(n,s,b)"<<mName<<":"<<mScatteringPowerId,4)
+   VFN_DEBUG_MESSAGE("ScatteringPowerAtom::Init(n,s,b)"<<mName,4)
    this->ScatteringPower::Init();
    this->SetName(name);
    mSymbol=symbol;
@@ -809,7 +774,7 @@ bool ScatteringComponent::operator!=(const ScatteringComponent& rhs) const
 void ScatteringComponent::Print()const
 {
    cout <<mX<<" "<<mY<<" "<<mZ<<" "<<mOccupancy<<" "<<mDynPopCorr<<" "<<mpScattPow;
-   if(0!=mpScattPow) cout <<" "<<mpScattPow->GetScatteringPowerId()<<" "<<mpScattPow->GetName();
+   if(0!=mpScattPow) cout <<" "<<mpScattPow->GetName();
    cout<<endl;
 }
 
