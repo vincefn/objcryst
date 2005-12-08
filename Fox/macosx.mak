@@ -1,6 +1,6 @@
 default: all
 
-all: Aqua Aqua-G4 NoGUI NoGUI-G4 
+all: G3 G4 G5
 
 Aqua-G3:
 	xcodebuild -project Fox.xcodeproj -target Fox -configuration G3 
@@ -58,7 +58,7 @@ clean:
 
 update:
 	cvs -z3 update
-	cd ${DIR_CRYST} ; cvs -z3 update
+	cd ObjCryst ; cvs -z3 update
    
 cvsignore:
 	cp -f ${DIR_CRYST}/.cvsignore ./
