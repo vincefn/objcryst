@@ -34,7 +34,7 @@ LDFLAGS   = -L/usr/lib -L/usr/local/lib -L$(DIR_CRYSTVECTOR) -L$(DIR_LIBCRYST) -
 MAKEDEPEND = gcc -MM ${CPPFLAGS} ${CXXFLAGS} ${C_BLITZFLAG} $< > $*.dep
 
 # header files
-SEARCHDIRS = -I${DIR_CRYST}/.. -I${DIR_CRYST} -I$(DIR_BLITZ)  -I$(DIR_TAU)/include -I$(DIR_NEWMAT) -I${DIR_CRYST} -I${DIR_CCTBX}/cctbx/include -I${DIR_CCTBX}/scitbx/include -I${DIR_CCTBX}/
+SEARCHDIRS = -I${DIR_CRYST}/.. -I./ -I$(DIR_BLITZ)  -I$(DIR_TAU)/include -I$(DIR_NEWMAT) -I${DIR_CRYST} -I${DIR_CCTBX}/cctbx/include -I${DIR_CCTBX}/scitbx/include -I${DIR_CCTBX}/
 
 #wxWindows flags
 ifeq ($(wxcryst),1)
@@ -45,13 +45,23 @@ else
    WX_LDFLAGS :=
 endif
 
-#activate profiling using TAU package
-ifeq ($(profile),1)
-   PROFILEFLAGS = -DPROFILING_ON -DTAU_STDCXXLIB -I$(DIR_TAU)/include
+#Profiling
+ifeq ($(profile),1) #activate profiling using TAU package
+   PROFILEFLAGS := -DPROFILING_ON -DTAU_STDCXXLIB -I$(DIR_TAU)/include
    PROFILELIB := -ltau
 else
-   PROFILEFLAGS :=
-   PROFILELIB :=
+   ifeq ($(profile),2) # *generate* profiling using gcc
+      PROFILEFLAGS := -fprofile-generate
+      PROFILELIB := -fprofile-generate
+   else
+      ifeq ($(profile),3) # *use* profiling using gcc
+         PROFILEFLAGS := -fprofile-use
+         PROFILELIB := -fprofile-use
+      else
+         PROFILEFLAGS :=
+         PROFILELIB :=
+      endif
+   endif
 endif
 
 #Use static linking to wx and freeglut libraries ?
@@ -68,7 +78,7 @@ endif
 #Using OpenGL ?
 ifeq ($(opengl),1)
 GL_WX_LIB = `$(WXCONFIG) --gl-libs` -lGL -lGLU $(GLUT_LIB)
-GL_FLAGS = -DOBJCRYST_GL -IGL $(GLUT_FLAGS)
+GL_FLAGS := -DOBJCRYST_GL -IGL $(GLUT_FLAGS)
 else
 GL_WX_LIB :=
 GL_FLAGS :=
