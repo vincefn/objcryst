@@ -4,13 +4,27 @@ DIR_CRYST := ..
 #wxGeneticAlgorithm.o
 OBJ= wxTrackerGraph.o wxMultiGraph.o wxScatteringPowerSphere.o trackball.o wxDiffractionSingleCrystal.o wxCryst.o wxRefinableObj.o wxScatteringPower.o wxScatterer.o wxAtom.o wxMolecule.o wxCrystal.o wxZScatterer.o wxPowderPattern.o wxGlobalOptimObj.o mpVector.o MC.o
 
+ifeq ($(profile),2)
+%.o : %.c
+	@rm -f $(*F).gcda $(*F).gcno
+	@$(MAKEDEPEND)
+	${CC} ${CPPFLAGS} ${CXXFLAGS} -c $< -o $@
+else
 %.o : %.c
 	@$(MAKEDEPEND)
 	${CC} ${CPPFLAGS} ${CXXFLAGS} -c $< -o $@
+endif
 
+ifeq ($(profile),2)
+%.o : %.cpp
+	@rm -f $(*F).gcda $(*F).gcno
+	@$(MAKEDEPEND)
+	${CXX} ${CPPFLAGS} ${CXXFLAGS} -c $< -o $@
+else
 %.o : %.cpp
 	@$(MAKEDEPEND)
 	${CXX} ${CPPFLAGS} ${CXXFLAGS} -c $< -o $@
+endif
 
 -include $(OBJ:.o=.dep)
 

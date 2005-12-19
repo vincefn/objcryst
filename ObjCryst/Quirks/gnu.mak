@@ -3,9 +3,16 @@ DIR_CRYST = ..
 
 OBJ= VFNStreamFormat.o VFNDebug.o
 
+ifeq ($(profile),2)
+%.o : %.cpp
+	@rm -f $(*F).gcda $(*F).gcno
+	@$(MAKEDEPEND)
+	${CXX} ${CPPFLAGS} ${CXXFLAGS} -c $< -o $@
+else
 %.o : %.cpp
 	@$(MAKEDEPEND)
-	${CXX} ${CPPFLAGS} ${CXXFLAGS} ${C_BLITZFLAG} -c $< -o $@
+	${CXX} ${CPPFLAGS} ${CXXFLAGS} -c $< -o $@
+endif
 
 -include $(OBJ:.o=.dep)
 

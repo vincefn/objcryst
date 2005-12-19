@@ -1,13 +1,27 @@
 include ../ObjCryst/rules.mak
 DIR_CRYST := ../ObjCryst
 
+ifeq ($(profile),2)
+%.o : %.c
+	@rm -f $(*F).gcda $(*F).gcno
+	@$(MAKEDEPEND)
+	${CC} ${CPPFLAGS} ${CXXFLAGS} -c $< -o $@
+else
 %.o : %.c
 	@$(MAKEDEPEND)
 	${CC} ${CPPFLAGS} ${CXXFLAGS} -c $< -o $@
+endif
 
+ifeq ($(profile),2)
+%.o : %.cpp
+	@rm -f $(*F).gcda $(*F).gcno
+	@$(MAKEDEPEND)
+	${CXX} ${CPPFLAGS} ${CXXFLAGS} -c $< -o $@
+else
 %.o : %.cpp
 	@$(MAKEDEPEND)
 	${CXX} ${CPPFLAGS} ${CXXFLAGS} -c $< -o $@
+endif
 
 %.o : %.rc
 	windres -i $< -o $@ --include-dir ${DIR_WXWINDOWS}/include

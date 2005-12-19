@@ -3,9 +3,16 @@ DIR_CRYST = ..
 # GeneticAlgorithm.o Powell.o ConjugateGradient.o 
 OBJ= Tracker.o Simplex.o RefinableObj.o GlobalOptimObj.o IO.o LSQNumObj.o 
 
+ifeq ($(profile),2)
+%.o : %.cpp
+	@rm -f $(*F).gcda $(*F).gcno
+	@$(MAKEDEPEND)
+	${CXX} ${CPPFLAGS} ${CXXFLAGS} -c $< -o $@
+else
 %.o : %.cpp
 	@$(MAKEDEPEND)
-	${CXX} ${CPPFLAGS} ${CXXFLAGS} ${C_BLITZFLAG} -c $< -o $@
+	${CXX} ${CPPFLAGS} ${CXXFLAGS} -c $< -o $@
+endif
    
 libRefinableObj.a : ${OBJ}
 	@${RM} $@
