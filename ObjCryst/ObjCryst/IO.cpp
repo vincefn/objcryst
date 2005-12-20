@@ -1402,7 +1402,9 @@ void Radiation::XMLInput(istream &is,const XMLCrystTag &tagg)
    string scattPowName;
    for(unsigned int i=0;i<tagg.GetNbAttribute();i++)
    {
-      if("XRayTube"==tagg.GetAttributeName(i)) this->SetWavelength(tagg.GetAttributeValue(i));
+      if("XRayTube"==tagg.GetAttributeName(i))
+         if(tagg.GetAttributeValue(i)!="") // Something went wrong !
+            this->SetWavelength(tagg.GetAttributeValue(i));
    }
    
    while(true)
