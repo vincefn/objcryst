@@ -1302,6 +1302,7 @@ void ScatteringData::CalcGeomStructFactor() const
       =&(this->GetCrystal().GetScatteringComponentList());
    if(  (mClockGeomStructFact>mpCrystal->GetClockScattCompList())
       &&(mClockGeomStructFact>mClockHKL)
+      &&(mClockGeomStructFact>mClockNbReflUsed)
       &&(mClockGeomStructFact>mpCrystal->GetMasterClockScatteringPower())) return;
    TAU_PROFILE("ScatteringData::GeomStructFactor()","void (Vx,Vy,Vz,data,M,M,bool)",TAU_DEFAULT);
    VFN_DEBUG_ENTRY("ScatteringData::GeomStructFactor(Vx,Vy,Vz,...)",3)
