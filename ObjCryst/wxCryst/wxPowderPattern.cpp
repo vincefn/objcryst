@@ -347,10 +347,16 @@ mChi2(0.0),mGoF(0.0),mRwp(0.0),mRp(0.0)
 
       WXCrystObjBasic* fieldZero    
          =mpPowderPattern->GetPar(&(mpPowderPattern->mXZero)).WXCreate(this);
+      fieldZero->SetToolTip(_T("Zero shift of peaks\n")
+                            _T("2Theta = 2Theta_Bragg + Zero\n"));
       WXCrystObjBasic* fieldThetaDispl
          =mpPowderPattern->GetPar(&(mpPowderPattern->m2ThetaDisplacement)).WXCreate(this);
+      fieldThetaDispl->SetToolTip(_T("Peak shift due to sample displacement:\n")
+                                  _T("2Theta = 2Theta_Bragg + Displacement/cos(Theta)"));
       WXCrystObjBasic* fieldThetaTransp
          =mpPowderPattern->GetPar(&(mpPowderPattern->m2ThetaTransparency)).WXCreate(this);
+      fieldThetaTransp->SetToolTip(_T("Zero shift of the peak 2theta positions\n")
+                                   _T("2Theta = 2Theta_Bragg + Transparency*sin(Theta)"));
 
       thetaCorrSizer->Add(fieldZero,0);
       thetaCorrSizer->Add(fieldThetaDispl,0);
@@ -363,6 +369,10 @@ mChi2(0.0),mGoF(0.0),mRwp(0.0),mRp(0.0)
       wxBoxSizer* tofSizer=new wxBoxSizer(wxHORIZONTAL);
       WXCrystObjBasic* fieldDIFC=mpPowderPattern->GetPar(&(mpPowderPattern->mDIFC)).WXCreate(this);
       WXCrystObjBasic* fieldDIFA=mpPowderPattern->GetPar(&(mpPowderPattern->mDIFA)).WXCreate(this);
+      fieldDIFA->SetToolTip(_T("Peak position (time, in microseconds):\n")
+                            _T("t = DIFA * d_hkl + DIFC * d_hkl^2 + ZERO"));
+      fieldDIFC->SetToolTip(_T("Peak position (time, in microseconds):\n")
+                            _T("t = DIFA * d_hkl + DIFC * d_hkl^2 + ZERO"));
       tofSizer->Add(fieldDIFC,0);
       tofSizer->Add(fieldDIFA,0);
       mList.Add(fieldDIFC);
@@ -386,18 +396,24 @@ mChi2(0.0),mGoF(0.0),mRwp(0.0),mRp(0.0)
       WXFieldPar<REAL> *pWXFieldChi2=new WXFieldPar<REAL>(this,"Chi^2",-1,&mChi2,100);
       pStats->Add(pWXFieldChi2    ,0,wxALIGN_CENTER);
       mList.Add(pWXFieldChi2);
+      pWXFieldChi2->SetToolTip(_T("Chi^2=SUM[(Obs_i-Calc_i)^2/Sigma_i^2]"));
       
       WXFieldPar<REAL> *pWXFieldGof=new WXFieldPar<REAL>(this,"GoF",-1,&mGoF,70);
       pStats->Add(pWXFieldGof    ,0,wxALIGN_CENTER);
       mList.Add(pWXFieldGof);
+      pWXFieldGof->SetToolTip(_T("GoF=Chi^2/NbParameters"));
       
       WXFieldPar<REAL> *pWXFieldRwp=new WXFieldPar<REAL>(this,"Rwp",-1,&mRwp,70);
       pStats->Add(pWXFieldRwp    ,0,wxALIGN_CENTER);
       mList.Add(pWXFieldRwp);
+      pWXFieldRwp->SetToolTip(_T("Full profile R-factor (weighted)\n")
+                              _T("Will use integrated profiles if option is set."));
       
       WXFieldPar<REAL> *pWXFieldRp=new WXFieldPar<REAL>(this,"Rp",-1,&mRp,70);
       pStats->Add(pWXFieldRp    ,0,wxALIGN_CENTER);
       mList.Add(pWXFieldRp);
+      pWXFieldRp->SetToolTip(_T("Full profile R-factor (unweighted)\n")
+                             _T("Will use integrated profiles if option is set."));
       //pStats->SetSizeHints(this);
       //pStats->Layout();
       
