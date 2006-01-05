@@ -1127,6 +1127,7 @@ Molecule *ZScatterer2Molecule(ZScatterer *scatt);//defined in wxZScatterer.cpp
 void WXCrystal::OnMenuImportMoleculeFromFenskeHallZMatrix(wxCommandEvent &event)
 {
    VFN_DEBUG_ENTRY("WXCrystal::OnMenuImportFenskeHallZMatrix()",6)
+   WXCrystValidateAllUserInput();
    wxFileDialog open(this,"Choose a file with a Fenske-Hall Z-matrix","","","*.fhz",
                      wxOPEN | wxFILE_MUST_EXIST);
    if(open.ShowModal() != wxID_OK) return;
