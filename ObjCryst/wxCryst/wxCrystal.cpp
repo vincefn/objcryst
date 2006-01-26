@@ -2641,7 +2641,12 @@ void WXGLCrystalCanvas::InitGL()
    trackball(mQuat,0.,0.,0.,0.);
    
    #ifdef HAVE_GLUT
-   glutInit(&(wxApp::GetInstance()->argc),wxApp::GetInstance()->argv);
+   static bool needglutinit=true;
+   if(needglutinit)
+   {
+      needglutinit=false;
+      glutInit(&(wxApp::GetInstance()->argc),wxApp::GetInstance()->argv);
+   }
    #endif
 
    wxSizeEvent event;
