@@ -202,6 +202,7 @@ SpaceGroup::SpaceGroup(const string &spgId):mId(spgId),mpCCTbxSpaceGroup(0)
 
 SpaceGroup::~SpaceGroup()
 {
+   if(mpCCTbxSpaceGroup!=0) delete mpCCTbxSpaceGroup;
 }
 
 void SpaceGroup::ChangeSpaceGroup(const string &spgId)
@@ -255,7 +256,7 @@ CrystMatrix_REAL SpaceGroup::GetAllSymmetrics(const REAL x, const REAL y, const 
                                 const bool noCenter,const bool noTransl,
                                 const bool noIdentical)const
 {
-   TAU_PROFILE("SpaceGroup::GetAllSymmetrics()","Matrix (x,y,z)",TAU_DEFAULT);
+   //TAU_PROFILE("SpaceGroup::GetAllSymmetrics()","Matrix (x,y,z)",TAU_DEFAULT);
    VFN_DEBUG_MESSAGE("SpaceGroup::GetAllSymmetrics()",0)
    int nbMatrix, nbTrans,coeffInvert,i,j,k;
    nbMatrix=this->GetCCTbxSpg().n_smx();
@@ -266,24 +267,25 @@ CrystMatrix_REAL SpaceGroup::GetAllSymmetrics(const REAL x, const REAL y, const 
    if(noTransl==true) nbTrans=1; //skip translation operations
    CrystMatrix_REAL coords(nbMatrix*nbTrans*coeffInvert,3);
    
-   const cctbx::sgtbx::rt_mx *pMatrix;
    k=0;
    for(i=0;i<nbTrans;i++)
    {
-      const REAL tx=this->GetCCTbxSpg().ltr(i)[0]/(REAL)(this->GetCCTbxSpg().ltr(i).den());
-      const REAL ty=this->GetCCTbxSpg().ltr(i)[1]/(REAL)(this->GetCCTbxSpg().ltr(i).den());
-      const REAL tz=this->GetCCTbxSpg().ltr(i)[2]/(REAL)(this->GetCCTbxSpg().ltr(i).den());
+      const REAL ltr_den=1/(REAL)(this->GetCCTbxSpg().ltr(i).den());
+      const REAL tx=this->GetCCTbxSpg().ltr(i)[0]*ltr_den;
+      const REAL ty=this->GetCCTbxSpg().ltr(i)[1]*ltr_den;
+      const REAL tz=this->GetCCTbxSpg().ltr(i)[2]*ltr_den;
       //if(noTransl==false) cout << nbTrans <<endl;
       //if(noTransl==false) cout << tx <<" "<< ty<<" "<< tz<<" "<<endl;
       for(j=0;j<nbMatrix;j++)
       {
-         pMatrix=&(this->GetCCTbxSpg().smx(j));
-         coords(k,0)= (pMatrix->r()[0]*x+pMatrix->r()[1]*y+pMatrix->r()[2]*z)/(REAL)(pMatrix->r().den())
-                     +pMatrix->t()[0]/(REAL)(pMatrix->t().den())+tx;
-         coords(k,1)= (pMatrix->r()[3]*x+pMatrix->r()[4]*y+pMatrix->r()[5]*z)/(REAL)(pMatrix->r().den())
-                     +pMatrix->t()[1]/(REAL)(pMatrix->t().den())+ty;
-         coords(k,2)= (pMatrix->r()[6]*x+pMatrix->r()[7]*y+pMatrix->r()[8]*z)/(REAL)(pMatrix->r().den())
-                     +pMatrix->t()[2]/(REAL)(pMatrix->t().den())+tz;
+         const cctbx::sgtbx::rt_mx *pMatrix=&(this->GetCCTbxSpg().smx(j));
+         const cctbx::sgtbx::rot_mx *pRot=&(pMatrix->r());
+         const cctbx::sgtbx::tr_vec *pTrans=&(pMatrix->t());
+         const REAL r_den=1/(REAL)(pMatrix->r().den());
+         const REAL t_den=1/(REAL)(pMatrix->t().den());
+         coords(k,0)= ((*pRot)[0]*x+(*pRot)[1]*y+(*pRot)[2]*z)*r_den+(*pTrans)[0]*t_den+tx;
+         coords(k,1)= ((*pRot)[3]*x+(*pRot)[4]*y+(*pRot)[5]*z)*r_den+(*pTrans)[1]*t_den+ty;
+         coords(k,2)= ((*pRot)[6]*x+(*pRot)[7]*y+(*pRot)[8]*z)*r_den+(*pTrans)[2]*t_den+tz;
          k++;
       }
    }
@@ -496,6 +498,7 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
          VFN_DEBUG_EXIT("SpaceGroup::InitSpaceGroup():"<<spgId,8)
          return;
       }
+      if(mpCCTbxSpaceGroup!=0) delete mpCCTbxSpaceGroup;
       mpCCTbxSpaceGroup = new cctbx::sgtbx::space_group(sgs);
    }
    catch(cctbx::error)
