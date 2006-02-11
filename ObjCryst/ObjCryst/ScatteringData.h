@@ -38,6 +38,12 @@
 
 namespace ObjCryst
 {
+//initialize tabulated values of cosine
+void InitLibCrystTabulCosine();
+void DeleteLibCrystTabulCosine();
+void InitLibCrystTabulExp();
+void DeleteLibCrystTabulExp();
+
 extern const RefParType *gpRefParTypeScattData;
 extern const RefParType *gpRefParTypeScattDataScale;
 extern const RefParType *gpRefParTypeScattDataProfile;
@@ -62,6 +68,8 @@ class NiftyStaticGlobalObjectsInitializer_ScatteringData
       {
          if (mCount++ == 0)
          {
+            InitLibCrystTabulCosine();
+            InitLibCrystTabulExp();
             gpRefParTypeScattData= new RefParType(gpRefParTypeObjCryst,"Scattering Data");
             gpRefParTypeScattDataScale= new RefParType(gpRefParTypeObjCryst,"Scale Factor");
             gpRefParTypeScattDataProfile= new RefParType(gpRefParTypeScattData,"Profile");
@@ -83,6 +91,8 @@ class NiftyStaticGlobalObjectsInitializer_ScatteringData
       {
          if (--mCount == 0)
          {
+            DeleteLibCrystTabulCosine();
+            DeleteLibCrystTabulExp();
             delete gpRefParTypeScattData;
             delete gpRefParTypeScattDataScale;
             delete gpRefParTypeScattDataProfile;

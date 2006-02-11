@@ -73,8 +73,6 @@ long NiftyStaticGlobalObjectsInitializer_ScatteringData::mCount=0;
 static bool sLibCrystTabulCosineIsInit=false;
 //conversion value
 static REAL sLibCrystTabulCosineRatio;
-//initialize tabulated values of cosine
-void InitLibCrystTabulCosine();
 // Number of tabulated values of cosine between [0;2pi]
 // 100 000 is far enough for a model search, yielding a maximum
 // error less than .05%... 10000 should be enough, too, with (probably) a higher cache hit
@@ -100,9 +98,14 @@ void InitLibCrystTabulCosine()
    }
 }
 
+void DeleteLibCrystTabulCosine()
+{
+   delete[] spLibCrystTabulCosine;
+   delete[] spLibCrystTabulCosineSine;
+}
+
 // Same for exponential calculations (used for global temperature factors)
 static bool sLibCrystTabulExpIsInit=false;
-void InitLibCrystTabulExp();
 static const long sLibCrystNbTabulExp=10000;
 static const REAL sLibCrystMinTabulExp=-5.;
 static const REAL sLibCrystMaxTabulExp=10.;
@@ -116,6 +119,8 @@ void InitLibCrystTabulExp()
       *tmp++ = exp(sLibCrystMinTabulExp+i*(sLibCrystMaxTabulExp-sLibCrystMinTabulExp)/sLibCrystNbTabulExp);
    sLibCrystTabulExpIsInit=true;
 }
+
+void DeleteLibCrystTabulExp() { delete[] spLibCrystTabulExp;}
 
 //:KLUDGE: The allocated memory for cos and sin table is never freed...
 // This should be done after the last ScatteringData object is deleted.
@@ -1348,15 +1353,6 @@ void ScatteringData::CalcGeomStructFactor() const
       CrystVector_REAL tmpVect(nbRefl);
 VFN_DEBUG_MESSAGE("TEST",3)
       
-      if(mUseFastLessPreciseFunc==true)
-      {
-         if(sLibCrystTabulCosineIsInit==false )
-         {
-            cout << "Init tabulated sin and cosine functions."<<endl;
-            InitLibCrystTabulCosine();
-            sLibCrystTabulCosineIsInit=true;
-         }
-      }
       CrystVector_long intVect(nbRefl);//not used if mUseFastLessPreciseFunc==false
       
       // which scattering powers are actually used ?
