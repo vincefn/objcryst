@@ -578,7 +578,13 @@ mCorrTextureMarchDollase(*this),mCorrTOF(*this)
 }
 
 PowderPatternDiffraction::~PowderPatternDiffraction()
-{}
+{
+   if(mpReflectionProfile!=0)
+   {
+      this->RemoveSubRefObj(*mpReflectionProfile);
+      delete mpReflectionProfile;
+   }
+}
 const string& PowderPatternDiffraction::GetClassName() const
 {
    const static string className="PowderPatternDiffraction";
@@ -804,9 +810,13 @@ void PowderPatternDiffraction::CalcPowderPatternIntegrated() const
    this->GetNbReflBelowMaxSinThetaOvLambda();
    if(mClockPowderPatternIntegratedCalc>mClockMaster) return;
    TAU_PROFILE("PowderPatternDiffraction::CalcPowderPatternIntegrated()","void (bool)",TAU_DEFAULT);
+   TAU_PROFILE_TIMER(timer1,"PowderPatternDiffraction::CalcPowderPatternIntegrated()1","", TAU_FIELD);
+   TAU_PROFILE_TIMER(timer2,"PowderPatternDiffraction::CalcPowderPatternIntegrated()2","", TAU_FIELD);
 
    this->CalcIhkl();
+   TAU_PROFILE_START(timer1);
    this->PrepareIntegratedProfile();
+   TAU_PROFILE_STOP(timer1);
    
    if(  (mClockPowderPatternIntegratedCalc>mClockIhklCalc)
       &&(mClockPowderPatternIntegratedCalc>mClockIntegratedProfileFactor)
@@ -830,6 +840,7 @@ void PowderPatternDiffraction::CalcPowderPatternIntegrated() const
    const REAL * RESTRICT pIvar=mIhklCalcVariance.data();
    vector< pair<unsigned long, CrystVector_REAL> >::const_iterator pos;
    pos=mIntegratedProfileFactor.begin();
+   TAU_PROFILE_START(timer2);
    for(long i=0;i<mNbReflUsed;)
    {
       VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderPatternIntegrated():"<<i,2)
@@ -868,6 +879,7 @@ void PowderPatternDiffraction::CalcPowderPatternIntegrated() const
       }
       ++pos;
    }
+   TAU_PROFILE_STOP(timer2);
    #ifdef __DEBUG__
    if(gVFNDebugMessageLevel<3)
    {
