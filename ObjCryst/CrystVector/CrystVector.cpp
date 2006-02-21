@@ -997,7 +997,6 @@ CrystMatrix_REAL InvertMatrix(const CrystMatrix_REAL &m)
       for(long i=0;i<size;i++) im(i,i)=1.;
       CrystMatrix_long rowIndex(size,1);//Keep track of pivoted rows
       for(long i=0;i<size;i++) rowIndex(i)=i;
-      REAL det=1;
    //Make an upper triangular matrix
       for(long i=0;i<size;i++)
       {
@@ -1031,14 +1030,12 @@ CrystMatrix_REAL InvertMatrix(const CrystMatrix_REAL &m)
          /*
          */
          //substract
-            REAL a;
             for(long j=i+1;j<size;j++)
             {
-               a=cm(j,i)/cm(i,i);
+               const REAL a=cm(j,i)/cm(i,i);
                for(long k=0;k<size;k++) im(j,k) -= im(i,k)*a;
                for(long k=0;k<size;k++) cm(j,k) -= cm(i,k)*a;
             }
-            det *= a;
          //cout << cm <<endl;
          //cout << im <<endl;
       }
