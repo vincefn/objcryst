@@ -404,8 +404,8 @@ mNbTrialRetry(0),mMinCostRetry(0)
 MonteCarloObj::MonteCarloObj(const bool internalUseOnly):
 OptimizationObj(""),
 mCurrentCost(-1),
-mTemperatureMax(.03),mTemperatureMin(.003),
-mMutationAmplitudeMax(16.),mMutationAmplitudeMin(.125),
+mTemperatureMax(.03),mTemperatureMin(.003),mTemperatureGamma(1.0),
+mMutationAmplitudeMax(16.),mMutationAmplitudeMin(.125),mMutationAmplitudeGamma(1.0),
 mNbTrialRetry(0),mMinCostRetry(0)
 #ifdef __WX__CRYST__
 ,mpWXCrystObj(0)
@@ -655,8 +655,8 @@ void MonteCarloObj::RunSimulatedAnnealing(long &nbStep,const bool silent,
    REAL runBestCost;
    mCurrentCost=this->GetLogLikelihood();
    runBestCost=mCurrentCost;
-   const long lastParSavedSetIndex=mRefParList.CreateParamSet("MonteCarloObj:Last parameters");
-   const long runBestIndex=mRefParList.CreateParamSet("best parameters for current run");
+   const long lastParSavedSetIndex=mRefParList.CreateParamSet("MonteCarloObj:Last parameters (SA)");
+   const long runBestIndex=mRefParList.CreateParamSet("Best parameters for current run (SA)");
    //Report each ... cycles
       const int nbTryReport=3000;
    // Keep record of the number of accepted moves
@@ -831,6 +831,7 @@ void MonteCarloObj::RunSimulatedAnnealing(long &nbStep,const bool silent,
    mLastOptimTime=chrono.seconds();
    //Restore Best values
    mRefParList.RestoreParamSet(runBestIndex);
+   mRefParList.ClearParamSet(runBestIndex);
    mRefParList.ClearParamSet(lastParSavedSetIndex);
    mCurrentCost=this->GetLogLikelihood();
    if(!silent) this->DisplayReport();
@@ -926,8 +927,8 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
          mRefParList.RestoreParamSet(worldCurrentSetIndex(nbWorld-1));
       }
       //mNbTrial=nbSteps;;
-      const long lastParSavedSetIndex=mRefParList.CreateParamSet("MonteCarloObj:Last parameters");
-   const long runBestIndex=mRefParList.CreateParamSet("best parameters for current run");
+      const long lastParSavedSetIndex=mRefParList.CreateParamSet("MonteCarloObj:Last parameters (PT)");
+      const long runBestIndex=mRefParList.CreateParamSet("Best parameters for current run (PT)");
       CrystVector_REAL swapPar;
    //Keep track of how many trials are accepted for each World
       CrystVector_long worldNbAcceptedMoves(nbWorld);
