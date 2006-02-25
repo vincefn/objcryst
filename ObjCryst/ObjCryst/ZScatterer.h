@@ -310,7 +310,14 @@ class ZScatterer: public Scatterer
       * to convert a pdb file to a Z-Matrix file (the -d removes
       * hydrogen atoms)
       *
-      * \warning: this should be called before any atom has been
+      * \param is: the input stream from which to read the z-matrix
+      * \param names: if true, instead of reading a standard Fenske-Hall 
+      * z-matrix, the file will be read with names, i.e. with an added first
+      * column with the names of the atoms, and the number used to reference
+      * the bond, bond angle and dihedral angle atoms are replaced by the
+      * names of the atoms.
+      *
+      * \warning: this should be called \e before any atom has been
       * added (if there are already atoms, they should be removed
       * but this has not been tested...)
       *
@@ -325,7 +332,7 @@ class ZScatterer: public Scatterer
       * \todo: identify which dihedral angles should \e not be limited,
       * by analysing a coordination table.
       */
-      void ImportFenskeHallZMatrix(istream &is);
+      void ImportFenskeHallZMatrix(istream &is,bool named=false);
       /** Export to Fenske-Hall ZMatrix file
       * 
       * \todo USe more strict formatting than space-delimited.

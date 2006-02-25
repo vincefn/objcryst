@@ -1140,7 +1140,7 @@ void ZScatterer::EndOptimization()
    mpZMoveMinimizer=0;
    this->RefinableObj::EndOptimization();
 }
-void ZScatterer::ImportFenskeHallZMatrix(istream &is)
+void ZScatterer::ImportFenskeHallZMatrix(istream &is,bool named)
 {
    // Get read of "KEYWORD GO HERE", just in case...
    {
@@ -1165,13 +1165,19 @@ void ZScatterer::ImportFenskeHallZMatrix(istream &is)
    // ...
    int nbAtoms=0;
    is >> nbAtoms;
-   string symbol;
-   int bondAtom=0,angleAtom=0,dihedAtom=0,junk=0;
+   string symbol, atomName,bondAtomName,angleAtomName,dihedAtomName,junk;
+   int bondAtom=0,angleAtom=0,dihedAtom=0;
    float bond=0,angle=0,dihed=0;
    int scattPow;
    char buf [10];
    //first
-      is >> symbol >> junk;
+      if(named)
+      {
+         is >> atomName >> symbol >> junk;
+         VFN_DEBUG_MESSAGE("ZScatterer::ImportFenskeHallZMatrix():#"<<2<<",name:"<<atomName
+                           <<", bond: "<<bondAtomName<<", angle: "<<angleAtomName<<", dihed: "<<dihedAtomName,10);
+      }
+      else is >> symbol >> junk;
    {
       scattPow=mpCryst->GetScatteringPowerRegistry().Find
                   (symbol,"ScatteringPowerAtom",true);
@@ -1182,16 +1188,30 @@ void ZScatterer::ImportFenskeHallZMatrix(istream &is)
       }
       scattPow=mpCryst->GetScatteringPowerRegistry().Find
                   (symbol,"ScatteringPowerAtom");
-      sprintf(buf,"%d",1);
-      this->AddAtom(symbol+(string)buf,
-                    &(mpCryst->GetScatteringPowerRegistry().GetObj(scattPow)),
-                    0,0,
-                    0,0,
-                    0,0);
+      if(named)
+         this->AddAtom(atomName,
+                       &(mpCryst->GetScatteringPowerRegistry().GetObj(scattPow)),
+                       0,0,
+                       0,0,
+                       0,0);
+      else
+      {
+         sprintf(buf,"%d",1);
+         this->AddAtom(symbol+(string)buf,
+                       &(mpCryst->GetScatteringPowerRegistry().GetObj(scattPow)),
+                       0,0,
+                       0,0,
+                       0,0);
+      }
    }
    //second
-      is >> symbol 
-         >> bondAtom  >> bond;
+      if(named)
+      {
+         is >> atomName >> symbol >> bondAtomName >> bond;
+         VFN_DEBUG_MESSAGE("ZScatterer::ImportFenskeHallZMatrix():#"<<2<<",name:"<<atomName
+                           <<", bond: "<<bondAtomName<<", angle: "<<angleAtomName<<", dihed: "<<dihedAtomName,10);
+      }
+      else      is             >> symbol >> bondAtom     >> bond;
    {
       scattPow=mpCryst->GetScatteringPowerRegistry().Find
                   (symbol,"ScatteringPowerAtom",true);
@@ -1202,17 +1222,41 @@ void ZScatterer::ImportFenskeHallZMatrix(istream &is)
       }
       scattPow=mpCryst->GetScatteringPowerRegistry().Find
                   (symbol,"ScatteringPowerAtom");
+      if(named)
+      {
+         bondAtom=mZAtomRegistry.Find(bondAtomName);
+         if(bondAtom<0)
+            throw ObjCrystException(string("ZScatterer::ImportFenskeHallZMatrix:")
+                                    +string("when adding atom ")+atomName+string(": could not find atom: ")
+                                    +bondAtomName);
+         this->AddAtom(atomName,
+                       &(mpCryst->GetScatteringPowerRegistry().GetObj(scattPow)),
+                       bondAtom,bond,
+                       0,0,
+                       0,0);
+      }
+      else
+      {
          sprintf(buf,"%d",2);
-      this->AddAtom(symbol+(string)buf,
-                    &(mpCryst->GetScatteringPowerRegistry().GetObj(scattPow)),
-                    bondAtom-1,bond,
-                    0,0,
-                    0,0);
+         this->AddAtom(symbol+(string)buf,
+                       &(mpCryst->GetScatteringPowerRegistry().GetObj(scattPow)),
+                       bondAtom-1,bond,
+                       0,0,
+                       0,0);
+      }
    }
    //third
-      is >> symbol 
-         >> bondAtom  >> bond
-         >> angleAtom >> angle;
+      if(named) 
+      {
+         is >> atomName >> symbol >>
+               bondAtomName  >> bond >>
+               angleAtomName >> angle;
+         VFN_DEBUG_MESSAGE("ZScatterer::ImportFenskeHallZMatrix():#"<<2<<",name:"<<atomName
+                           <<", bond: "<<bondAtomName<<", angle: "<<angleAtomName<<", dihed: "<<dihedAtomName,10);
+      }
+      else      is >> symbol >>
+                bondAtom  >> bond >>
+                angleAtom >> angle;
    {
       scattPow=mpCryst->GetScatteringPowerRegistry().Find
                   (symbol,"ScatteringPowerAtom",true);
@@ -1223,19 +1267,52 @@ void ZScatterer::ImportFenskeHallZMatrix(istream &is)
       }
       scattPow=mpCryst->GetScatteringPowerRegistry().Find
                   (symbol,"ScatteringPowerAtom");
+      if(named)
+      {
+         VFN_DEBUG_MESSAGE("ZScatterer::ImportFenskeHallZMatrix():#"<<i<<",name:"<<atomName
+                           <<", bond: "<<bondAtomName<<", angle: "<<angleAtomName<<", dihed: "<<dihedAtomName,10);
+         bondAtom=mZAtomRegistry.Find(bondAtomName);
+         if(bondAtom<0)
+            throw ObjCrystException(string("ZScatterer::ImportFenskeHallZMatrix:")
+                                    +string("when adding atom ")+atomName+string(": could not find atom: ")
+                                    +bondAtomName);
+         angleAtom=mZAtomRegistry.Find(angleAtomName);
+         if(angleAtom<0)
+            throw ObjCrystException(string("ZScatterer::ImportFenskeHallZMatrix:")
+                                    +string("when adding atom ")+atomName+string(": could not find atom: ")
+                                    +angleAtomName);
+         this->AddAtom(atomName,
+                       &(mpCryst->GetScatteringPowerRegistry().GetObj(scattPow)),
+                       bondAtom,bond,
+                       angleAtom,angle*DEG2RAD,
+                       0,0);
+      }
+      else
+      {
          sprintf(buf,"%d",3);
-      this->AddAtom(symbol+(string)buf,
-                    &(mpCryst->GetScatteringPowerRegistry().GetObj(scattPow)),
-                    bondAtom-1,bond,
-                    angleAtom-1,angle*DEG2RAD,
-                    0,0);
+         this->AddAtom(symbol+(string)buf,
+                       &(mpCryst->GetScatteringPowerRegistry().GetObj(scattPow)),
+                       bondAtom-1,bond,
+                       angleAtom-1,angle*DEG2RAD,
+                       0,0);
+      }
    }
    for(int i=3;i<nbAtoms;i++)
    {
-      is >> symbol 
-         >> bondAtom  >> bond
-         >> angleAtom >> angle
-         >> dihedAtom >> dihed;
+      if(named) 
+      {
+         is >> atomName >> symbol >>
+               bondAtomName  >> bond >> 
+               angleAtomName >> angle >> 
+               dihedAtomName >> dihed;
+         VFN_DEBUG_MESSAGE("ZScatterer::ImportFenskeHallZMatrix():#"<<i<<",name:"<<atomName
+                           <<", bond: "<<bondAtomName<<", angle: "<<angleAtomName<<", dihed: "<<dihedAtomName,10);
+      }
+      else is >> symbol >>
+           bondAtom  >> bond >> 
+           angleAtom >> angle >> 
+           dihedAtom >> dihed;
+      
       {
          scattPow=mpCryst->GetScatteringPowerRegistry().Find
                      (symbol,"ScatteringPowerAtom",true);
@@ -1246,12 +1323,40 @@ void ZScatterer::ImportFenskeHallZMatrix(istream &is)
          }
          scattPow=mpCryst->GetScatteringPowerRegistry().Find
                      (symbol,"ScatteringPowerAtom");
-         sprintf(buf,"%d",i+1);
-         this->AddAtom(symbol+(string)buf,
-                       &(mpCryst->GetScatteringPowerRegistry().GetObj(scattPow)),
-                       bondAtom-1,bond,
-                       angleAtom-1,angle*DEG2RAD,
-                       dihedAtom-1,dihed*DEG2RAD);
+         if(named)
+         {
+            bondAtom=mZAtomRegistry.Find(bondAtomName);
+            angleAtom=mZAtomRegistry.Find(angleAtomName);
+            dihedAtom=mZAtomRegistry.Find(dihedAtomName);
+            VFN_DEBUG_MESSAGE("ZScatterer::ImportFenskeHallZMatrix():#"<<i<<",name:"<<atomName
+                              <<", bond: "<<bondAtomName<<", angle: "<<angleAtomName<<", dihed: "<<dihedAtomName,10);
+            if(bondAtom<0)
+            throw ObjCrystException(string("ZScatterer::ImportFenskeHallZMatrix:")
+                                    +string("when adding atom ")+atomName+string(": could not find atom: ")
+                                    +bondAtomName);
+            if(bondAtom<0)
+            throw ObjCrystException(string("ZScatterer::ImportFenskeHallZMatrix:")
+                                    +string("when adding atom ")+atomName+string(": could not find atom: ")
+                                    +angleAtomName);
+            if(dihedAtom<0)
+            throw ObjCrystException(string("ZScatterer::ImportFenskeHallZMatrix:")
+                                    +string("when adding atom ")+atomName+string(": could not find atom: ")
+                                    +dihedAtomName);
+            this->AddAtom(atomName,
+                          &(mpCryst->GetScatteringPowerRegistry().GetObj(scattPow)),
+                          bondAtom,bond,
+                          angleAtom,angle*DEG2RAD,
+                          dihedAtom,dihed*DEG2RAD);
+         }
+         else
+         {
+            sprintf(buf,"%d",i+1);
+            this->AddAtom(symbol+(string)buf,
+                          &(mpCryst->GetScatteringPowerRegistry().GetObj(scattPow)),
+                          bondAtom-1,bond,
+                          angleAtom-1,angle*DEG2RAD,
+                          dihedAtom-1,dihed*DEG2RAD);
+         }
       }
    }
    this->SetLimitsRelative(gpRefParTypeScattConformBondLength,-.03,.03);

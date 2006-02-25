@@ -190,6 +190,7 @@ static const long ID_CRYSTAL_MENU_SCATT_ADDATOM                 =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT_ADDZSCATTERER           =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT_ADDMOLECULE             =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT_IMPORTFENSKEHALLZMATRIX =WXCRYST_ID();
+static const long ID_CRYSTAL_MENU_SCATT_IMPORTNAMEDZMATRIX      =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT_ADDTETRAHEDRON          =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT_ADDOCTAHEDRON           =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT_ADDTRIANGLE             =WXCRYST_ID();
@@ -227,6 +228,7 @@ BEGIN_EVENT_TABLE(WXCrystal,wxWindow)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDZSCATTERER,      WXCrystal::OnMenuAddScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDMOLECULE,        WXCrystal::OnMenuAddScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_IMPORTFENSKEHALLZMATRIX,WXCrystal::OnMenuImportMoleculeFromFenskeHallZMatrix)
+   EVT_MENU(ID_CRYSTAL_MENU_SCATT_IMPORTNAMEDZMATRIX, WXCrystal::OnMenuImportMoleculeFromFenskeHallZMatrix)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDTETRAHEDRON,     WXCrystal::OnMenuAddScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDOCTAHEDRON,      WXCrystal::OnMenuAddScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDTRIANGLE,        WXCrystal::OnMenuAddScatterer)
@@ -288,6 +290,8 @@ mpCrystalGL(0)
                                 "Add Molecule");
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_IMPORTFENSKEHALLZMATRIX,
                                 "Import Molecule from Fenske-Hall Z-Matrix");
+         mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_IMPORTNAMEDZMATRIX,
+                                "Import Molecule from a named Z-Matrix");
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_REMOVESCATTERER,
                                 "Remove Scatterer");
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_DUPLICSCATTERER,
@@ -1128,7 +1132,9 @@ void WXCrystal::OnMenuImportMoleculeFromFenskeHallZMatrix(wxCommandEvent &event)
 {
    VFN_DEBUG_ENTRY("WXCrystal::OnMenuImportFenskeHallZMatrix()",6)
    WXCrystValidateAllUserInput();
-   wxFileDialog open(this,"Choose a file with a Fenske-Hall Z-matrix","","","*.fhz",
+   string tmp("*.fhz");
+   if(event.GetId()==ID_CRYSTAL_MENU_SCATT_IMPORTNAMEDZMATRIX) tmp="*.zmat";
+   wxFileDialog open(this,"Choose a file with a Fenske-Hall Z-matrix","","",tmp,
                      wxOPEN | wxFILE_MUST_EXIST);
    if(open.ShowModal() != wxID_OK) return;
    ifstream fin (open.GetPath().c_str());
@@ -1151,7 +1157,9 @@ Error opening file for input:"+string(open.GetPath().c_str()));
          shortName=filename.substr(idx+1);
    }
    ZScatterer scatt(shortName,*mpCrystal);
-   scatt.ImportFenskeHallZMatrix(fin);
+   bool named=false;
+   if(event.GetId()==ID_CRYSTAL_MENU_SCATT_IMPORTNAMEDZMATRIX) named=true;
+   scatt.ImportFenskeHallZMatrix(fin,named);
    fin.close();
    mpCrystal->AddScatterer(ZScatterer2Molecule(&scatt));
    this->CrystUpdate(true);
