@@ -122,8 +122,9 @@ void PolarizationCorr::CalcCorr() const
    TAU_PROFILE("PolarizationCorr::CalcCorr()","void ()",TAU_DEFAULT);
    mPolarAfactor=((1-f)/(1+f));
    mCorr.resize(mpData->GetNbRefl());
+   // cos^2(2*theta)=0.5+0.5*cos(4*theta)
    for(long i=0;i<mpData->GetNbRefl();i++)
-      mCorr(i) =(1.+mPolarAfactor*cos((*theta)(i))*cos((*theta)(i)))/(1.+mPolarAfactor);
+      mCorr(i) =(1.+mPolarAfactor*(0.5+0.5*cos(4*(*theta)(i))))/(1.+mPolarAfactor);
    mClockCorrCalc.Click();
 }
 
