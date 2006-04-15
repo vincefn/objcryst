@@ -10,9 +10,9 @@ static-libs/lib/libglut.a:
 	cd freeglut-2.4.0 && ./configure --prefix=$(PWD)/static-libs --disable-shared --disable-warnings && make install
 	rm -Rf freeglut-2.4.0
 static-libs/lib/libwx_base-2.6.a:
-	tar -xjf wxGTK-2.6.2.tar.bz2 # wxGtK source, with "demos" "samples" "contrib" removed
-	cd wxGTK-2.6.2 && ./configure --with-gtk --with-opengl --prefix=$(PWD)/static-libs --enable-optimise --disable-shared --with-gtk=any && make install
-	rm -Rf wxGTK-2.6.2
+	tar -xjf wxGTK-2.6.3.tar.bz2 # wxGtK source, with "demos" "samples" "contrib" removed
+	cd wxGTK-2.6.3 && ./configure --with-gtk --with-opengl --prefix=$(PWD)/static-libs --enable-optimise --disable-shared --with-gtk=any && make install
+	rm -Rf wxGTK-2.6.3
 endif
 
 
@@ -51,15 +51,12 @@ cvsignore:
 	$(MAKE) -f gnu.mak -C src-doc cvsignore
 
 dist:
-	cd .. && tar -cjf Fox.tar.bz2 --exclude "*.o" --exclude "Fox-LastOptimizationStop.xml" --exclude ".#*" --exclude "*.a" --exclude "*.dep" --exclude "*.exe"  --exclude "Obj*.xml" --exclude "profile*" --exclude "Fox/src/Fox" Fox
+	cd .. && tar -cjf Fox.tar.bz2 --exclude "*.o" --exclude "Fox-LastOptimizationStop.xml" --exclude ".#*" --exclude "*.a" --exclude "*.dep" --exclude "*.exe"  --exclude "Obj*.xml" --exclude "profile*" --exclude "Fox/src/Fox" --exclude "*~" --exclude "static-limbs" --exclude "doc" --exclude "*.bak" --exclude "*.pdf" Fox
 
 rpm: dist
-	mkdir ../rpmbuild
-	mkdir ../rpmbuild/SOURCES
-	mkdir ../rpmbuild/SPECS
-	mkdir ../rpmbuild/SRPMS
-	cp ObjCryst-Fox.spec ../rpmbuild/SPECS
-	cd ../rpmbuild/SPECS && rpm -ba ObjCryst-Fox.spec
+	cp ObjCryst-Fox.spec /usr/src/RPM/SPECS/
+	cp ../Fox.tar.bz2 /usr/src/RPM/SOURCES/
+	cd /usr/src/RPM/SPECS && rpm -ba ObjCryst-Fox.spec
 
 #Switch to ssh developer access
 cvs-ext:
