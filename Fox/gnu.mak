@@ -17,7 +17,6 @@ endif
 
 
 Fox:
-	echo "toto2"
 ifneq ($(shared),1)
 	make static-libs/lib/libglut.a static-libs/lib/libwx_base-2.6.a
 endif
@@ -42,14 +41,9 @@ install:
 	install -m 755 src/Fox /usr/local/bin
 
 update:
-	cvs -z3 update
-	cd ${DIR_CRYST} ; cvs -z3 update
+	svn update
+	cd ${DIR_CRYST} ; svn update
    
-cvsignore:
-	cp -f ${DIR_CRYST}/.cvsignore ./
-	$(MAKE) -f gnu.mak -C src cvsignore
-	$(MAKE) -f gnu.mak -C src-doc cvsignore
-
 dist:
 	cd .. && tar -cjf Fox.tar.bz2 --exclude "*.o" --exclude "Fox-LastOptimizationStop.xml" --exclude ".#*" --exclude "*.a" --exclude "*.dep" --exclude "*.exe"  --exclude "Obj*.xml" --exclude "profile*" --exclude "Fox/src/Fox" --exclude "*~" --exclude "static-limbs" --exclude "doc" --exclude "*.bak" --exclude "*.pdf" Fox
 
@@ -57,13 +51,3 @@ rpm: dist
 	cp ObjCryst-Fox.spec /usr/src/RPM/SPECS/
 	cp ../Fox.tar.bz2 /usr/src/RPM/SOURCES/
 	cd /usr/src/RPM/SPECS && rpm -ba ObjCryst-Fox.spec
-
-#Switch to ssh developer access
-cvs-ext:
-	perl -pi -e 's|pserver|ext|g' `find . -name Root`
-	perl -pi -e 's|anonymous|vincefn|g' `find . -name Root`
-
-#Switch to anonymous CVS
-cvs-anon:
-	perl -pi -e 's|ext|pserver|g' `find . -name Root`
-	perl -pi -e 's|vincefn|anonymous|g' `find . -name Root`
