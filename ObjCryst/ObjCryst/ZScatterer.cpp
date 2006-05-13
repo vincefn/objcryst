@@ -1269,7 +1269,7 @@ void ZScatterer::ImportFenskeHallZMatrix(istream &is,bool named)
                   (symbol,"ScatteringPowerAtom");
       if(named)
       {
-         VFN_DEBUG_MESSAGE("ZScatterer::ImportFenskeHallZMatrix():#"<<i<<",name:"<<atomName
+         VFN_DEBUG_MESSAGE("ZScatterer::ImportFenskeHallZMatrix():#"<<3<<",name:"<<atomName
                            <<", bond: "<<bondAtomName<<", angle: "<<angleAtomName<<", dihed: "<<dihedAtomName,10);
          bondAtom=mZAtomRegistry.Find(bondAtomName);
          if(bondAtom<0)
