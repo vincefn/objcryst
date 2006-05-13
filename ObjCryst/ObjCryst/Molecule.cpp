@@ -2919,6 +2919,7 @@ vector<MolAtom*>::iterator Molecule::RemoveAtom(MolAtom &atom)
    
    delete *pos;
    pos=mvpAtom.erase(pos);
+   --mScattCompList;
 
    this->UpdateDisplay();
    VFN_DEBUG_EXIT("Molecule::RemoveAtom()",6)
