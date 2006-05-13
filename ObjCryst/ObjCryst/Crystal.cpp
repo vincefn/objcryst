@@ -951,9 +951,7 @@ void Crystal::CIFOutput(ostream &os)const
       }
    }
    
-   os <<endl
-      << "# The following atoms have been excluded by Fox because they are"<<endl
-      << "# almost fully overlapping with another atom (d<0.5A)"<< endl;
+   bool first=true;
    k=0;
    for(int i=0;i<mScattererRegistry.GetNb();i++) 
    {
@@ -965,6 +963,13 @@ void Crystal::CIFOutput(ostream &os)const
          for(unsigned long l=0;l<k;++l) if(minDistTable(l,k)<0.5) redundant=true;
          if(redundant)
          {
+            if(first)
+            {
+               first=false;
+               os <<endl
+                  << "# The following atoms have been excluded by Fox because they are"<<endl
+                  << "# almost fully overlapping with another atom (d<0.5A)"<< endl;
+            }
             os   << "#    "
                  << FormatString(list(j).mpScattPow->GetName(),8) << " "
                  << FormatString(this->GetScatt(i).GetComponentName(j),10) << " "
