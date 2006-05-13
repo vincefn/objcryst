@@ -863,6 +863,13 @@ void ScatteringComponentList::operator++()
    mvScattComp.resize(this->GetNbComponent()+1);
 }
 
+void ScatteringComponentList::operator--()
+{
+   VFN_DEBUG_MESSAGE("ScatteringComponentList::operator--()",1)
+   if(this->GetNbComponent()>0)
+      mvScattComp.resize(this->GetNbComponent()-1);
+}
+
 void ScatteringComponentList::Print()const
 {
    VFN_DEBUG_ENTRY("ScatteringComponentList::Print()",5)

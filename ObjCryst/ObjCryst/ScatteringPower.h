@@ -459,8 +459,10 @@ class ScatteringComponentList
       void operator+=(const ScatteringComponentList &rhs);
       /// Add component
       void operator+=(const ScatteringComponent &rhs);
-      /// Add component, not initialized (!)
+      /// Add component (the whole list should be updated after that)
       void operator++();
+      /// Remove component (the whole list should be updated after that)
+      void operator--();
       /// Print the list of Scattering components. For debugging
       void Print() const;
    protected:
