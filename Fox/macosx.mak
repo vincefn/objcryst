@@ -57,21 +57,6 @@ clean:
 	rm -Rf build/Fox.build
 
 update:
-	cvs -z3 update
-	cd ObjCryst ; cvs -z3 update
+	svn update
+	cd ObjCryst ; svn update
    
-cvsignore:
-	cp -f ${DIR_CRYST}/.cvsignore ./
-	$(MAKE) -f gnu.mak -C src cvsignore
-	$(MAKE) -f gnu.mak -C src-doc cvsignore
-
-#Switch to ssh developer access
-cvs-ext:
-	perl -pi -e 's|pserver|ext|g' `find . -name Root`
-	perl -pi -e 's|anonymous|vincefn|g' `find . -name Root`
-
-#Switch to anonymous CVS
-cvs-anon:
-	perl -pi -e 's|ext|pserver|g' `find . -name Root`
-	perl -pi -e 's|vincefn|anonymous|g' `find . -name Root`
-
