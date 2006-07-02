@@ -187,6 +187,7 @@ static const long ID_CRYSTAL_MENU_SCATT_REMOVESCATTPOW          =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT_ADDSCATTPOWATOM         =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT_ADDSCATTPOWSPHERE       =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT_ADDATOM                 =WXCRYST_ID();
+static const long ID_CRYSTAL_MENU_SCATT_IMPORTATOMLIST          =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT_ADDZSCATTERER           =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT_ADDMOLECULE             =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT_IMPORTFENSKEHALLZMATRIX =WXCRYST_ID();
@@ -225,6 +226,7 @@ BEGIN_EVENT_TABLE(WXCrystal,wxWindow)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDSCATTPOWSPHERE,  WXCrystal::OnMenuAddScattPowSphere)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_REMOVESCATTPOW,     WXCrystal::OnMenuRemoveScattPow)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDATOM,            WXCrystal::OnMenuAddScatterer)
+   EVT_MENU(ID_CRYSTAL_MENU_SCATT_IMPORTATOMLIST,     WXCrystal::OnMenuAddScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDZSCATTERER,      WXCrystal::OnMenuAddScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDMOLECULE,        WXCrystal::OnMenuAddScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_IMPORTFENSKEHALLZMATRIX,WXCrystal::OnMenuImportMoleculeFromFenskeHallZMatrix)
@@ -286,6 +288,8 @@ mpCrystalGL(0)
          mpMenuBar->GetMenu(ID_CRYSTAL_MENU_SCATT).AppendSeparator();
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_ADDATOM,
                                 "Add Atom");
+         mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_IMPORTATOMLIST,
+                                "Import a List of Atoms");
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_ADDMOLECULE,
                                 "Add Molecule");
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_IMPORTFENSKEHALLZMATRIX,
@@ -769,7 +773,7 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
 {
    VFN_DEBUG_ENTRY("WXCrystal::OnMenuAddScatterer()",6)
    WXCrystValidateAllUserInput();
-   Scatterer *scatt;
+   Scatterer *scatt=0;
    if(event.GetId()== ID_CRYSTAL_MENU_SCATT_ADDATOM)
    {
       int choice;
@@ -782,6 +786,40 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
          return;
       }
       scatt=new Atom(0,0,0,"Change Me!",scattPow);
+   }
+   if(event.GetId()== ID_CRYSTAL_MENU_SCATT_IMPORTATOMLIST)
+   {
+      wxFileDialog open(this,"Choose a file with a list of atoms: Element x y z occup","","","*",
+                        wxOPEN | wxFILE_MUST_EXIST);
+      if(open.ShowModal() != wxID_OK) return;
+      ifstream fin (open.GetPath().c_str());
+      if(!fin)
+      {
+         throw ObjCrystException("WXCrystal::OnMenuAddScatterer() : Error opening file for input:"+string(open.GetPath().c_str()));
+      }
+      string symbol;
+      REAL x,y,z,occup;
+      int n=1;
+      char buf [10];
+      int scattPow;
+      while(true)
+      {
+         fin>>symbol;
+         if(fin.eof()) break;
+         fin>>x>>y>>z>>occup;
+         cout<<symbol<<n<<": "<<x<<", "<<y<<", "<<z<<endl;
+         scattPow=mpCrystal->GetScatteringPowerRegistry().Find(symbol,"ScatteringPowerAtom",true);
+         if(scattPow<0)
+         {
+            cout<<"Scattering power "<<symbol<<" not found, creating it..."<<endl;
+            mpCrystal->AddScatteringPower(new ScatteringPowerAtom(symbol,symbol));
+         }
+         sprintf(buf,"%d",n++);
+         mpCrystal->AddScatterer(new Atom(x,y,z,symbol+(string)buf,&(mpCrystal->GetScatteringPower(symbol)),occup));
+         if(fin.eof()) break;
+      }
+      fin.close();
+      scatt=0;
    }
    if(event.GetId()== ID_CRYSTAL_MENU_SCATT_ADDZSCATTERER)
    {
@@ -1090,7 +1128,7 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
       mol->RestraintStatus(cout);
       scatt=mol;
    }
-   mpCrystal->AddScatterer(scatt);
+   if(scatt!=0) mpCrystal->AddScatterer(scatt);
    VFN_DEBUG_MESSAGE("WXCrystal::OnMenuAddScatterer():calling Layout()",6)
    //this->CrystUpdate();
    this->Layout();
