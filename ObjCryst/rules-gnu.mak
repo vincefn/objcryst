@@ -39,7 +39,7 @@ SEARCHDIRS = -I${DIR_CRYST}/.. -I./ -I$(DIR_BLITZ)  -I$(DIR_TAU)/include -I$(DIR
 #wxWindows flags
 ifeq ($(wxcryst),1)
    WXCRYSTFLAGS = -D__WX__CRYST__ `$(WXCONFIG) --cxxflags`
-   WX_LDFLAGS = -L/usr/X11R6/lib -lwxcryst `$(WXCONFIG) --libs` $(GL_WX_LIB) -lXmu
+   WX_LDFLAGS = -L/usr/X11R6/lib -lwxcryst `$(WXCONFIG) --libs` $(GL_WX_LIB)
 else
    WXCRYSTFLAGS :=
    WX_LDFLAGS :=
@@ -78,7 +78,7 @@ endif
 #Using OpenGL ?
 ifeq ($(opengl),1)
 GL_WX_LIB = `$(WXCONFIG) --gl-libs` -lGL -lGLU $(GLUT_LIB)
-GL_FLAGS := -DOBJCRYST_GL -IGL $(GLUT_FLAGS)
+GL_FLAGS = -DOBJCRYST_GL -IGL $(GLUT_FLAGS)
 else
 GL_WX_LIB :=
 GL_FLAGS :=
