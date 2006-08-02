@@ -109,6 +109,12 @@ wxWindow(parent,-1),mWXCrystParent(0),mIsShown(true),mNeedUpdateUI(true)
 {
    VFN_DEBUG_MESSAGE("WXCrystObjBasic::WXCrystObjBasic() at "<<this,6)
    if(parent !=0) mWXCrystParent=dynamic_cast<WXCrystObjBasic*>(parent);
+#ifdef __WXGTK__
+#ifndef __WXGTK20__
+   // Why is this necessary for GTK 1.2 ? wxWidgets 2.6.3
+   this->SetBackgroundColour(wxColour(240,240,240));// wxLIGHT_GREY 
+#endif
+#endif
    VFN_DEBUG_MESSAGE("WXCrystObjBasic::WXCrystObjBasic():End",6)
 }
 
