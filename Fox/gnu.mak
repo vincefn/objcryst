@@ -11,7 +11,7 @@ static-libs/lib/libglut.a:
 	rm -Rf freeglut-2.4.0
 static-libs/lib/libwx_base-2.6.a:
 	tar -xjf wxGTK-2.6.3.tar.bz2 # wxGtK source, with "demos" "samples" "contrib" removed
-	cd wxGTK-2.6.3 && ./configure --with-gtk --with-opengl --prefix=$(PWD)/static-libs --enable-optimise --disable-shared --with-gtk=any && make install
+	cd wxGTK-2.6.3 && ./configure --with-gtk --with-opengl --prefix=$(PWD)/static-libs --enable-optimise --disable-shared --with-gtk=any --disable-clipboard && make install
 	rm -Rf wxGTK-2.6.3
 endif
 
