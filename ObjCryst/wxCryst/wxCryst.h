@@ -284,6 +284,8 @@ class WXField: public WXCrystObjBasic
       virtual bool SetForegroundColour(const wxColour& colour);
       /// This function shall be called when a new value has been entered.
       virtual void ValidateUserInput()=0;
+      /// Change the size of the field (excluding the title)
+      virtual void SetSize(int width, int height);
    protected:
       /// The horizontal sizer in which the title, button, fields, are put. 
       wxBoxSizer *mpSizer;
@@ -323,6 +325,7 @@ class WXFieldString:public WXField
       virtual void UpdateUI(const bool mutexlock=false);
       void Revert();
       virtual void ValidateUserInput();
+      virtual void SetSize(int width, int height);
    protected:
       /// The WXCrystObj whose name is shown here
       string* mpString;
@@ -365,6 +368,7 @@ class WXFieldName:public WXField
       virtual void UpdateUI(const bool mutexlock=false);
       void Revert();
       virtual void ValidateUserInput();
+      virtual void SetSize(int width, int height);
    protected:
       /// The WXCrystObj whose name is shown here
       WXCrystObj* mpWXObj;

@@ -114,6 +114,7 @@ WXRefinableObj(parent,data),mpData(data)
 {
    VFN_DEBUG_MESSAGE("WXDiffractionSingleCrystal::WXDiffractionSingleCrystal()",6)
    mpWXTitle->SetForegroundColour(wxColour(255,0,0));
+   mpWXTitle->SetSize(400,-1);
    // Menu
       mpMenuBar->AddMenu("File",ID_REFOBJ_MENU_OBJ);
          //:TODO: reactivate & test those menus

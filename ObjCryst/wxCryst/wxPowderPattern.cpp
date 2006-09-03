@@ -233,15 +233,16 @@ mChi2(0.0),mGoF(0.0),mRwp(0.0),mRp(0.0)
 {
    VFN_DEBUG_MESSAGE("WXPowderPattern::WXPowderPattern()",6)
    mpWXTitle->SetForegroundColour(wxColour(255,0,0));
+   mpWXTitle->SetSize(400,-1);
    // Menu
       mpMenuBar->AddMenu("Data",ID_REFOBJ_MENU_OBJ);
          //:TODO: reactivate & test those menus
          //mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_REFOBJ_MENU_OBJ_SAVE,"Save");
          //mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_REFOBJ_MENU_OBJ_LOAD,"Load");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_SAVETEXT,
-                                "Save spectrum (text)");
+                                "Save pattern (text)");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_SIMULATE,
-                                "Simulation mode (no obs. spectrum)");
+                                "Simulation mode (no obs. pattern)");
          //mpMenuBar->AppendSeparator();
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_FULLPROF,
                                  "Import Fullprof Pattern");
@@ -401,7 +402,7 @@ mChi2(0.0),mGoF(0.0),mRwp(0.0),mRp(0.0)
       WXFieldPar<REAL> *pWXFieldGof=new WXFieldPar<REAL>(this,"GoF",-1,&mGoF,70);
       pStats->Add(pWXFieldGof    ,0,wxALIGN_CENTER);
       mList.Add(pWXFieldGof);
-      pWXFieldGof->SetToolTip(_T("GoF=Chi^2/NbParameters"));
+      pWXFieldGof->SetToolTip(_T("GoF=Chi^2/NbPoints"));
       
       WXFieldPar<REAL> *pWXFieldRwp=new WXFieldPar<REAL>(this,"Rwp",-1,&mRwp,70);
       pStats->Add(pWXFieldRwp    ,0,wxALIGN_CENTER);
@@ -901,7 +902,7 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
    //height -= margin;
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():1",5)
 
-   //Check spectrum is not being updated
+   //Check pattern is not being updated
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():2:"<<mObs.numElements(),5)
 
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():3:min="
@@ -975,7 +976,7 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
          }
       }
    }
-   // Draw observed spectrum
+   // Draw observed pattern
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():4:",5)
    {
       dc.SetPen(* wxCYAN_PEN);
@@ -995,7 +996,7 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
       }
    }
 
-   // Draw calculated spectrum
+   // Draw calculated pattern
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():5:",5)
    {
       dc.SetPen(* wxRED_PEN);

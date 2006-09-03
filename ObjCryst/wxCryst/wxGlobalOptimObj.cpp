@@ -76,6 +76,7 @@ WXCrystObj(parent),mpGlobalOptimRunThread(0)
    #endif
    mpWXTitle->SetForegroundColour(wxColour(255,0,0));
    mpWXTitle->SetLabel("Global Optimization:");
+   mpWXTitle->SetSize(400,-1);
    // Menu
       mpMenuBar=new WXCrystMenuBar(this,this);
       mpSizer->Add(mpMenuBar);

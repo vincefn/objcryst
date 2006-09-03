@@ -294,9 +294,7 @@ void WXField::SetLabel(const string& s)
    mpSizer->SetItemMinSize(mpLabel,
                            mpLabel->GetSize().GetWidth(),
                            mpLabel->GetSize().GetHeight());
-   //mpSizer->SetSizeHints(this);
-   //this->Layout();
-   this->Layout();
+   this->BottomLayout(this);
 }
 bool WXField::SetForegroundColour(const wxColour& colour)
 {
@@ -304,6 +302,9 @@ bool WXField::SetForegroundColour(const wxColour& colour)
    mpLabel->SetForegroundColour(colour);
    return this->wxWindow::SetForegroundColour(colour);
 }
+
+void WXField::SetSize(int width, int height)
+{}
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXFieldString
@@ -417,6 +418,11 @@ void WXFieldString::ValidateUserInput()
    mValue=mpField->GetValue();
    *mpString=mValue;
 }
+void WXFieldString::SetSize(int width, int height)
+{
+   mpField->SetSize(width,height);
+   this->BottomLayout(this);
+}
 
 
 ////////////////////////////////////////////////////////////////////////
@@ -446,7 +452,7 @@ WXField(parent,label,id),mpWXObj(owner),mValue(""),mIsSelfUpdating(false)
 
    mpSizer->Add(mpField,0,wxALIGN_CENTER);
    mpSizer->SetSizeHints(this);
-   this->Layout();
+   this->BottomLayout(this);
 }
 
 void WXFieldName::OnEnter(wxCommandEvent & WXUNUSED(event))
@@ -520,6 +526,16 @@ void WXFieldName::ValidateUserInput()
    mValue=mpField->GetValue();
    mMutex.Unlock();
    mpWXObj->OnChangeName(mId);
+}
+void WXFieldName::SetSize(int width, int height)
+{
+   mpField->SetSize(width,height);
+   wxSizer *pSizer=this->GetSizer();
+   if(pSizer!=0)
+   {
+      pSizer->SetItemMinSize(mpField, width,height);
+   }
+   this->BottomLayout(this);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -764,7 +780,7 @@ WXCrystObjBasic(parent),mIsExpanded(true)
    
    if(showName)
    {
-      mpWXTitle = new WXFieldName(this,"name:",this,ID_WXOBJ_NAME,200);
+      mpWXTitle = new WXFieldName(this,"name:",this,ID_WXOBJ_NAME,100);
       mpSizer->Add(mpWXTitle,0,wxALIGN_LEFT);
    }else mpWXTitle=0;
    

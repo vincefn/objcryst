@@ -262,6 +262,7 @@ mpCrystalGL(0)
    //this->SetBackgroundColour("Red");
    //mpWXTitle->SetBackgroundColour(wxColour(255,200,200));
    mpWXTitle->SetForegroundColour(wxColour(255,0,0));
+   mpWXTitle->SetSize(400,-1);
    // Menu
       mpMenuBar->AddMenu("File",ID_REFOBJ_MENU_OBJ);
          //mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_REFOBJ_MENU_OBJ_LOAD,"Load");
