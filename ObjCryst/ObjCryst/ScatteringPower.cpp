@@ -33,7 +33,7 @@
 #include "ObjCryst/ScatteringPower.h"
 #include "Quirks/VFNStreamFormat.h"
 #include "Quirks/VFNDebug.h"
-#include "ObjCryst/Colours.h"
+#include "ObjCryst/Colours.h" 
 
 #ifdef __WX__CRYST__
    #include "wxCryst/wxScatteringPower.h"
@@ -430,7 +430,18 @@ CrystVector_REAL ScatteringPowerAtom::GetScatteringFactor(const ScatteringData &
       }
       case(RAD_ELECTRON):
       {
-         throw ObjCrystException("ScatteringPowerAtom::GetScatteringFactor(data): Scattering factors not implemented for electrons yet !!!:");
+         VFN_DEBUG_MESSAGE("ScatteringPower::GetScatteringFactor():ELECTRON:"<<mName,3)
+         if(mpGaussian!=0)
+         {
+            const REAL z=this->GetAtomicNumber();
+            const long nb=data.GetSinThetaOverLambda().numElements();
+            const REAL *pstol=data.GetSinThetaOverLambda().data();
+            for(long i=0;i<nb;i++)
+               sf(i)=(z-mpGaussian->at_stol(*pstol))/(*pstol * *pstol);
+               pstol++;
+         }
+         else sf=1.0;//:KLUDGE:  Should never happen
+         break;
       }
    }
    VFN_DEBUG_MESSAGE("ScatteringPower::GetScatteringFactor(&data):End",3)
@@ -456,7 +467,8 @@ REAL ScatteringPowerAtom::GetForwardScatteringFactor(const RadiationType type) c
       }
       case(RAD_ELECTRON):
       {
-         throw ObjCrystException("ScatteringPowerAtom::GetForwardScatteringFactor(data): Scattering factors not implemented for electrons yet !!!:");
+         const REAL z=this->GetAtomicNumber();
+         (z-mpGaussian->at_stol(0.0001))/(.0001 * .0001);
       }
    }
    VFN_DEBUG_MESSAGE("ScatteringPower::GetScatteringFactor(&data):End",3)

@@ -206,6 +206,7 @@ void Radiation::SetRadiationType(const RadiationType rad)
 {
    mRadiationType.SetChoice(rad);
    if(rad == RAD_NEUTRON) mLinearPolarRate=0;
+   if(rad == RAD_ELECTRON) mLinearPolarRate=0;
 }
 
 void Radiation::SetWavelengthType(const WavelengthType &type)
@@ -345,7 +346,7 @@ void Radiation::SetLinearPolarRate(const REAL f){mLinearPolarRate=f;}
 void Radiation::InitOptions()
 {
    static string RadiationTypeName;
-   static string RadiationTypeChoices[2];
+   static string RadiationTypeChoices[3];
    static string WavelengthTypeName;
    static string WavelengthTypeChoices[3];
    
@@ -355,6 +356,7 @@ void Radiation::InitOptions()
       RadiationTypeName="Radiation";
       RadiationTypeChoices[0]="Neutron";
       RadiationTypeChoices[1]="X-Ray";
+      RadiationTypeChoices[2]="Electron";
       
       WavelengthTypeName="Spectrum";
       WavelengthTypeChoices[0]="Monochromatic";
@@ -366,7 +368,7 @@ void Radiation::InitOptions()
       
       needInitNames=false;//Only once for the class
    }
-   mRadiationType.Init(2,&RadiationTypeName,RadiationTypeChoices);
+   mRadiationType.Init(3,&RadiationTypeName,RadiationTypeChoices);
    mWavelengthType.Init(3,&WavelengthTypeName,WavelengthTypeChoices);
    this->AddOption(&mRadiationType);
    this->AddOption(&mWavelengthType);
@@ -1173,6 +1175,7 @@ void ScatteringData::CalcStructFactor() const
       &&(mClockStructFactor>mClockGeomStructFact)
       &&(mClockStructFactor>mClockScattFactorResonant)
       &&(mClockStructFactor>mClockThermicFact)
+      &&(mClockStructFactor>mClockFhklCalcVariance)
       &&(mClockStructFactor>mClockLuzzatiFactor)) return;
    VFN_DEBUG_ENTRY("ScatteringData::CalcStructFactor()",3)
    TAU_PROFILE("ScatteringData::CalcStructFactor()","void ()",TAU_DEFAULT);

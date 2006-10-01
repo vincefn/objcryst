@@ -60,6 +60,7 @@ static long ID_DIFFSINGLECRYST_MENU_FITSCALE_RW=           WXCRYST_ID();
 static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH=            WXCRYST_ID(); 
 static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_XRAY=       WXCRYST_ID(); 
 static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_NEUTRON=    WXCRYST_ID(); 
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_ELECTRON=   WXCRYST_ID(); 
 static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET=        WXCRYST_ID(); 
 static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_AG=     WXCRYST_ID(); 
 static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_MO=     WXCRYST_ID(); 
@@ -93,6 +94,7 @@ BEGIN_EVENT_TABLE(WXDiffractionSingleCrystal, wxWindow)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET,     WXDiffractionSingleCrystal::OnMenuSetWavelength)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_WAVELENGTH_XRAY,    WXDiffractionSingleCrystal::OnMenuSetWavelength)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_WAVELENGTH_NEUTRON, WXDiffractionSingleCrystal::OnMenuSetWavelength)
+   EVT_MENU(ID_DIFFSINGLECRYST_MENU_WAVELENGTH_ELECTRON,WXDiffractionSingleCrystal::OnMenuSetWavelength)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_AG,  WXDiffractionSingleCrystal::OnMenuSetWavelength)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_MO,  WXDiffractionSingleCrystal::OnMenuSetWavelength)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CU,  WXDiffractionSingleCrystal::OnMenuSetWavelength)
@@ -140,7 +142,10 @@ WXRefinableObj(parent,data),mpData(data)
                                 "Neutron");
          mpMenuBar->AddMenuItem(ID_DIFFSINGLECRYST_MENU_WAVELENGTH,
                                 ID_DIFFSINGLECRYST_MENU_WAVELENGTH_XRAY,
-                                "X-Rays");
+                                "X-Ray");
+         mpMenuBar->AddMenuItem(ID_DIFFSINGLECRYST_MENU_WAVELENGTH,
+                                ID_DIFFSINGLECRYST_MENU_WAVELENGTH_ELECTRON,
+                                "Electron");
          mpMenuBar->AddMenuItem(ID_DIFFSINGLECRYST_MENU_WAVELENGTH,
                                 ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET,
                                 "Monochromatic Wavelength");
@@ -341,6 +346,8 @@ void WXDiffractionSingleCrystal::OnMenuSetWavelength(wxCommandEvent &event)
       mpData->SetRadiationType(RAD_XRAY);
    if(event.GetId()== ID_DIFFSINGLECRYST_MENU_WAVELENGTH_NEUTRON)
       mpData->SetRadiationType(RAD_NEUTRON);
+   if(event.GetId()== ID_DIFFSINGLECRYST_MENU_WAVELENGTH_ELECTRON)
+      mpData->SetRadiationType(RAD_ELECTRON);
    if(event.GetId()== ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET)
    {
       double lambda;
