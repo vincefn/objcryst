@@ -206,6 +206,8 @@ class SpaceGroup
       const RefinableObjClock& GetClockSpaceGroup() const;
       /// Which is the unique axis (for monoclinic space groups )
       unsigned int GetUniqueAxis()const;
+      /// Extension to space group symbol ('1','2':origin choice ; 'R','H'=rhomboedral/hexagonal)
+      char GetExtension()const;
       /** Are these reflections equivalent ?
       *
       * \return 1 if they are equivalent, 2 if they are Friedel/Bijvoet mates, and else 0.
@@ -287,6 +289,8 @@ class SpaceGroup
       unsigned long mNbTrans;
       /// SpaceGroup Number
       unsigned long mSpgNumber;
+      /// Extension to space group symbol (1,2:origin choice ; R,H=rhomboedral/hexagonal)
+      char mExtension;
 };
 
 }//namespace

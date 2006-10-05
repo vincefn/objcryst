@@ -387,6 +387,7 @@ void SpaceGroup::Print() const
                         << this->GetCCTbxSpg().ltr(i)[1]/(REAL)this->GetCCTbxSpg().ltr(i).den()<<","
                         << this->GetCCTbxSpg().ltr(i)[2]/(REAL)this->GetCCTbxSpg().ltr(i).den()<<endl;
    }
+   cout<<"Extension (origin choice, rhomboedral/hexagonal):"<<mExtension<<endl;
 }
 bool SpaceGroup::HasInversionCenter() const {return mHasInversionCenter;}
 bool SpaceGroup::IsInversionCenterAtOrigin() const {return mIsInversionCenterAtOrigin;}
@@ -395,6 +396,8 @@ const cctbx::sgtbx::space_group& SpaceGroup::GetCCTbxSpg()const{return *mpCCTbxS
 const RefinableObjClock& SpaceGroup::GetClockSpaceGroup() const{return mClock;}
 
 unsigned int SpaceGroup::GetUniqueAxis()const{return mUniqueAxisId;}
+
+char SpaceGroup::GetExtension()const{return mExtension;}
 
 unsigned int SpaceGroup::AreReflEquiv(const REAL h1, const REAL k1, const REAL l1,
                                       const REAL h2, const REAL k2, const REAL l2)const
@@ -543,10 +546,17 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
    mNbSym    =this->GetCCTbxSpg().n_smx();
    mNbTrans  =this->GetCCTbxSpg().n_ltr();
    mSpgNumber=this->GetCCTbxSpg().match_tabulated_settings().number();
+   
+   mExtension=this->GetCCTbxSpg().match_tabulated_settings().extension();
 
    this->Print();
    mClock.Click();
-   (*fpObjCrystInformUser)("Initializing spacegroup: "+spgId+"... Done");
+   string extension("");
+   if(mExtension=='1') extension=" (Using origin choice #1)";
+   if(mExtension=='2') extension=" (Using origin choice #2)";
+   if(mExtension=='R') extension=" (Using Rhombohedral cell)";
+   if(mExtension=='H') extension=" (Using Hexagonal cell)";
+  (*fpObjCrystInformUser)("Initialized spacegroup: "+spgId+extension);
    VFN_DEBUG_EXIT("SpaceGroup::InitSpaceGroup():"<<spgId,8)
 }
 
