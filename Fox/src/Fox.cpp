@@ -35,6 +35,8 @@
 
    #include "wx/tooltip.h"
    #include "wx/notebook.h"
+   #include "wx/wfstream.h"
+   #include "wx/zstream.h"
 #endif
 
 #include <locale.h>
@@ -103,7 +105,9 @@ public:
    void OnQuit(wxCommandEvent& WXUNUSED(event));
    void OnAbout(wxCommandEvent& WXUNUSED(event));
    void OnLoad(wxCommandEvent& event);
-   void OnClose(wxCommandEvent& event);
+   void OnMenuClose(wxCommandEvent& event);
+   void OnClose(wxCloseEvent& event);
+   void SafeClose();
    void OnSave(wxCommandEvent& WXUNUSED(event));
    void OnAddCrystal(wxCommandEvent& WXUNUSED(event));
    void OnAddPowderPattern(wxCommandEvent& WXUNUSED(event));
@@ -166,7 +170,8 @@ BEGIN_EVENT_TABLE(WXCrystMainFrame, wxFrame)
    EVT_MENU(MENU_HELP_ABOUT, WXCrystMainFrame::OnAbout)
    EVT_MENU(MENU_HELP_TOGGLETOOLTIP, WXCrystMainFrame::OnToggleTooltips)
    EVT_MENU(MENU_FILE_LOAD, WXCrystMainFrame::OnLoad)
-   EVT_MENU(MENU_FILE_CLOSE, WXCrystMainFrame::OnClose)
+   EVT_MENU(MENU_FILE_CLOSE, WXCrystMainFrame::OnMenuClose)
+   EVT_CLOSE(                WXCrystMainFrame::OnClose)
    EVT_MENU(MENU_FILE_SAVE, WXCrystMainFrame::OnSave)
    EVT_MENU(MENU_OBJECT_CREATE_CRYSTAL, WXCrystMainFrame::OnAddCrystal)
    EVT_MENU(MENU_OBJECT_CREATE_POWDERSPECTRUM, WXCrystMainFrame::OnAddPowderPattern)
@@ -394,7 +399,23 @@ int main (int argc, char *argv[])
       #endif
    }
 #ifdef __WX__CRYST__
+   SetVendorName(_T("http://objcryst.sf.net/Fox"));
+   SetAppName(_T("Fox"));
+   // Read (or create if necessary) global Fox preferences
+   if(wxConfigBase::Get()->HasEntry("Fox/BOOL/Enable tooltips"))
+   {
+       bool tooltip_enabled;
+       wxConfigBase::Get()->Read("Fox/BOOL/Enable tooltips", &tooltip_enabled);
+       wxToolTip::Enable(tooltip_enabled);
+   }
+   else wxConfigBase::Get()->Write("Fox/BOOL/Enable tooltips", true);
    
+   if(!wxConfigBase::Get()->HasEntry("Fox/BOOL/Ask confirmation before exiting Fox"))
+      wxConfigBase::Get()->Write("Fox/BOOL/Ask confirmation before exiting Fox", true);
+   
+   if(!wxConfigBase::Get()->HasEntry("Fox/BOOL/Use compressed file format (.xml.gz)"))
+      wxConfigBase::Get()->Write("Fox/BOOL/Use compressed file format (.xml.gz)", true);
+
    WXCrystMainFrame *frame ;
    string title(string("FOX: Free Objects for Xtal structures v")+foxVersion);
    frame = new WXCrystMainFrame(title.c_str(),
@@ -452,6 +473,7 @@ int main (int argc, char *argv[])
 #ifdef __WX__CRYST__
 int MyApp::OnExit()
 {
+   delete wxConfigBase::Set((wxConfigBase *) NULL);
    TAU_REPORT_STATISTICS();
    return this->wxApp::OnExit();
 }
@@ -599,34 +621,16 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
 
 void WXCrystMainFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
-   bool saved=true;
-   for(int i=0;i<gRefinableObjRegistry.GetNb();i++)
-      if(gRefinableObjRegistry.GetObj(i).GetClockMaster()>mClockLastSave)
-      {
-         saved=false;
-         break;
-      }
-   if(!saved)
-   {
-      wxString msg;
-      msg.Printf( _T("Some objects have not been saved\n")
-               _T("Do you really want to exit ?"));
-
-      wxMessageDialog d(this,msg, "Are you sure ?", wxOK | wxCANCEL);
-      if(wxID_OK!=d.ShowModal()) return;
-   }
-   // TRUE is to force the frame to close
-   Close(TRUE);
+   this->SafeClose();
 }
 
 void WXCrystMainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
    string msg(string("F.O.X. - Free Objects for Xtal structures\n")
               +"Version "+ foxVersion +" \n\n"
-              +"(c) 2000-2005 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n"
+              +"(c) 2000-2006 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n"
               +"    2000-2001 Radovan CERNY, University of Geneva\n\n"
-              +"http://objcryst.sourceforge.net\n"
-              +"http://www.ccp14.ac.uk/ccp/web-mirrors/objcryst/ (Mirror)\n\n"
+              +"http://objcryst.sourceforge.net\n\n"
               +"FOX comes with ABSOLUTELY NO WARRANTY. It is free software, and you are\n"
               +"welcome to redistribute it under certain conditions. \n"
               +"See the LICENSE file for details.");
@@ -639,14 +643,37 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
    if(event.GetId()==MENU_FILE_LOAD)
    {
       open= new wxFileDialog(this,"Choose File :",
-                                           "","","*.xml",wxOPEN | wxFILE_MUST_EXIST);
+                             "","","FOX files (*.xml,*.xml.gz)|*.xml;*.xml.gz",wxOPEN | wxFILE_MUST_EXIST);
       if(open->ShowModal() != wxID_OK) return;
-      XMLCrystFileLoadAllObject(open->GetPath().c_str());
+      wxString name=open->GetPath();
+      cout<<name.Mid(name.size()-4)<<endl;
+      if(name.Mid(name.size()-4)==wxString(".xml"))
+         XMLCrystFileLoadAllObject(name.c_str());
+      else
+      {//compressed file
+         wxFileInputStream is(name.c_str());
+         wxZlibInputStream zstream(is);
+         stringstream sst;
+         while (!zstream.Eof()) sst<<zstream.GetC();
+         XMLCrystFileLoadAllObject(sst);
+      }
    }
    open->Destroy();
 }
-void WXCrystMainFrame::OnClose(wxCommandEvent& event)
+void WXCrystMainFrame::OnMenuClose(wxCommandEvent& event)
 {
+   this->SafeClose();
+}
+void WXCrystMainFrame::OnClose(wxCloseEvent& event)
+{
+   this->SafeClose();
+}
+void WXCrystMainFrame::SafeClose()
+{
+   bool safe=true;
+   wxConfigBase::Get()->Read("Fox/BOOL/Ask confirmation before exiting Fox",&safe);
+   if(!safe) this->Destroy();
+
    bool saved=true;
    for(int i=0;i<gRefinableObjRegistry.GetNb();i++)
       if(gRefinableObjRegistry.GetObj(i).GetClockMaster()>mClockLastSave)
@@ -660,8 +687,8 @@ void WXCrystMainFrame::OnClose(wxCommandEvent& event)
       msg.Printf( _T("Some objects have not been saved\n")
                _T("Do you really want to close all objects ?"));
 
-      wxMessageDialog d(this,msg, "Are you sure ?", wxOK | wxCANCEL);
-      if(wxID_OK!=d.ShowModal()) return;
+      wxMessageDialog d(this,msg, "Really Exit ?", wxYES | wxNO);
+      if(wxID_YES!=d.ShowModal()) return;
    }
    cout<<"Removing all Optimization objects..."<<endl;
    gOptimizationObjRegistry.DeleteAll();
@@ -671,15 +698,31 @@ void WXCrystMainFrame::OnClose(wxCommandEvent& event)
    gPowderPatternRegistry.DeleteAll();
    cout<<"Removing all Crystal objects..."<<endl;
    gCrystalRegistry.DeleteAll();
+   this->Destroy();
 }
 void WXCrystMainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
 {
    WXCrystValidateAllUserInput();
-   wxFileDialog *open= new wxFileDialog(this,"Choose File to save all objects:",
-                                        "","","*.xml", wxSAVE | wxOVERWRITE_PROMPT);
-   if(open->ShowModal() != wxID_OK) return;
-   XMLCrystFileSaveGlobal(open->GetPath().c_str());
-   open->Destroy();
+   bool compressed;
+   wxConfigBase::Get()->Read("Fox/BOOL/Use compressed file format (.xml.gz)",&compressed);
+   if(compressed)
+   {
+      wxFileDialog open(this,"Choose File to save all objects:",
+                        "","","FOX compressed files (*.xml.gz)|*.xml.gz", wxSAVE | wxOVERWRITE_PROMPT);
+      if(open.ShowModal() != wxID_OK) return;
+      stringstream sst;
+      XMLCrystFileSaveGlobal(sst);
+      wxFileOutputStream ostream(open.GetPath().c_str());
+      wxZlibOutputStream zstream(ostream,-1,wxZLIB_GZIP);
+      zstream.Write(sst.str().c_str(),sst.str().size());
+   }
+   else
+   {
+      wxFileDialog open(this,"Choose File to save all objects:",
+                        "","","*.xml", wxSAVE | wxOVERWRITE_PROMPT);
+      if(open.ShowModal() != wxID_OK) return;
+      XMLCrystFileSaveGlobal(open.GetPath().c_str());
+   }
    mClockLastSave.Click();
 }
 void WXCrystMainFrame::OnAddCrystal(wxCommandEvent& WXUNUSED(event))
@@ -807,10 +850,12 @@ void WXCrystMainFrame::OnUpdateUI(wxUpdateUIEvent& event)
 }
 void WXCrystMainFrame::OnToggleTooltips(wxCommandEvent& event)
 {
-    static bool tooltip_enabled = true;
-    tooltip_enabled = !tooltip_enabled;
-    wxToolTip::Enable(tooltip_enabled);
-    VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnToggleTooltips(): Tooltips= "<<tooltip_enabled,10)
+   bool tooltip_enabled;
+   wxConfigBase::Get()->Read("Fox/BOOL/Enable tooltips", &tooltip_enabled);
+   tooltip_enabled = !tooltip_enabled;
+   wxToolTip::Enable(tooltip_enabled);
+   wxConfigBase::Get()->Write("Fox/BOOL/Enable tooltips", tooltip_enabled);
+   VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnToggleTooltips(): Tooltips= "<<tooltip_enabled,10)
 }
 #endif
 ///////////////////////////////////////// Speed Test////////////////////
