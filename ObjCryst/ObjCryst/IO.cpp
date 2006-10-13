@@ -1,5 +1,5 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
-    (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
+    (c) 2000-2006 Vincent Favre-Nicolin vincefn@users.sourceforge.net
         2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
@@ -59,8 +59,15 @@ void XMLCrystFileSaveGlobal(const string & filename)
    VFN_DEBUG_ENTRY("XMLCrystFileSaveGlobal(filename)",5)
    
    ofstream out(filename.c_str());
-   if(!out) {};//:TODO:
-   
+   if(!out){};//:TODO:
+   XMLCrystFileSaveGlobal(out);
+   out.close();
+   VFN_DEBUG_EXIT("XMLCrystFileSaveGlobal(filename):End",5)
+}
+
+void XMLCrystFileSaveGlobal(ostream &out)
+{
+   VFN_DEBUG_ENTRY("XMLCrystFileSaveGlobal(ostream)",5)  
    XMLCrystTag tag("ObjCryst");
    time_t date=time(0);
    char strDate[40];
@@ -82,10 +89,7 @@ void XMLCrystFileSaveGlobal(const string & filename)
    
    tag.SetIsEndTag(true);
    out<<tag;
-   
-   out.close();
-   
-   VFN_DEBUG_EXIT("XMLCrystFileSaveGlobal(filename):End",5)
+   VFN_DEBUG_EXIT("XMLCrystFileSaveGlobal(ostream)",5)
 }
 
 ObjRegistry<XMLCrystTag> XMLCrystFileLoadObjectList(const string & filename)
@@ -162,13 +166,18 @@ template void XMLCrystFileLoadObject(const string & ,const string &,const string
                                      PowderPatternDiffraction*);
 template void XMLCrystFileLoadObject(const string & ,const string &,const string &,
                                      MonteCarloObj*);
-                                    
+
 void XMLCrystFileLoadAllObject(const string & filename)
 {
-   VFN_DEBUG_ENTRY("XMLCrystFileLoadAllObject(filename,IOCrystTag,T&)",5)
+   VFN_DEBUG_ENTRY("XMLCrystFileLoadAllObject(filename,)",5)
    ifstream is(filename.c_str());
    if(!is){};//:TODO:
-   
+   XMLCrystFileLoadAllObject(is);
+   VFN_DEBUG_EXIT("XMLCrystFileLoadAllObject(filename,)",5)
+}
+void XMLCrystFileLoadAllObject(istream &is)
+{
+   VFN_DEBUG_ENTRY("XMLCrystFileLoadAllObject(istream)",5)
    XMLCrystTag tag;
    do {is>>tag;} while("ObjCryst"!=tag.GetName());
    
@@ -197,144 +206,8 @@ void XMLCrystFileLoadAllObject(const string & filename)
          obj->XMLInput(is,tag);
       }
    }
-   VFN_DEBUG_EXIT("XMLCrystFileLoadAllObject(filename,IOCrystTag,T&)",5)
+   VFN_DEBUG_EXIT("XMLCrystFileLoadAllObject(istream)",5)
 }
-#if 0
-////////////////////////////////////////////////////////////////////////
-//
-//    Global functions -OLD
-//
-////////////////////////////////////////////////////////////////////////
-
-void IOCrystFileSaveGlobal(const string & filename)
-{
-   VFN_DEBUG_MESSAGE("IOCrystFileSaveGlobal(filename)",5)
-   
-   ofstream out(filename.c_str());
-   if(!out) {};//:TODO:
-   
-   for(int i=0;i<gCrystalRegistry.GetNb();i++)
-      gCrystalRegistry.GetObj(i).XMLOutput(out);
-   
-   for(int i=0;i<gDiffractionDataSingleCrystalRegistry.GetNb();i++)
-      gDiffractionDataSingleCrystalRegistry.GetObj(i).XMLOutput(out);
-   
-   for(int i=0;i<gPowderPatternRegistry.GetNb();i++)
-      gPowderPatternRegistry.GetObj(i).XMLOutput(out);
-   
-   for(int i=0;i<gOptimizationObjRegistry.GetNb();i++)
-      gOptimizationObjRegistry.GetObj(i).XMLOutput(out);
-   
-   out.close();
-   
-   VFN_DEBUG_MESSAGE("IOCrystFileSaveGlobal(filename):End",5)
-}
-
-ObjRegistry<IOCrystTag> IOCrystFileLoadObjectList(const string & filename)
-{
-   VFN_DEBUG_MESSAGE("IOCrystFileLoadObjectList(filename)",5)
-
-   ifstream is(filename.c_str());
-   if(!is){};//:TODO:
-   ObjRegistry<IOCrystTag> reg;
-   for(;;)
-   {
-      IOCrystTag *pTag =new IOCrystTag (is);
-      if(true==is.eof())
-      {
-         VFN_DEBUG_MESSAGE("IOCrystFileLoadObjectList(filename):End",5)
-         for(int i=0;i<reg.GetNb();i++) reg.GetObj(i).Print();
-         is.close();
-         return reg;
-      }
-      //pTag->Print();
-      if(  (pTag->GetType()!="Param")
-         &&(pTag->GetType()!="ParList")
-         &&(pTag->GetType()!="Radiation")
-         &&(pTag->GetType()!="Atom")
-         &&(pTag->GetType()!="ScatteringPowerAtom")
-         &&(pTag->GetType()!="ZScatterer")
-         &&(pTag->IsClosingTag()==false)
-         ) reg.Register(*pTag);
-      else delete pTag;
-   }
-   
-}
-
-template<class T> void IOCrystFileLoadObject(const string & filename,
-                                             const IOCrystTag &tag,
-                                             T* obj)
-{
-   VFN_DEBUG_ENTRY("IOCrystFileLoadObject(filename,IOCrystTag,T&)",5)
-
-   ifstream is(filename.c_str());
-   if(!is){};//:TODO:
-   IOCrystTag ttag(is);;
-   for(;;)
-   {
-      if(true==is.eof())
-      {
-         cout<<"IOCrystFileLoadObject(filename,IOCrystTag,T&):Not Found !"<<endl;
-         is.close();
-         return;
-      }
-      if(tag==ttag) break;
-      ttag.XMLInput(is);
-   }
-   VFN_DEBUG_MESSAGE("IOCrystFileLoadObject(filename,IOCrystTag,T&):Found"<<ttag.GetName(),5)
-   obj = new T;
-   obj->XMLInputOld(is,ttag);
-   is.close();
-   VFN_DEBUG_EXIT("IOCrystFileLoadObject(filename,IOCrystTag,T&)",5)
-}
-
-template void IOCrystFileLoadObject(const string &,const IOCrystTag &,
-                                    Crystal*);
-template void IOCrystFileLoadObject(const string &,const IOCrystTag &,
-                                    PowderPattern*);
-template void IOCrystFileLoadObject(const string &,const IOCrystTag &,
-                                    DiffractionDataSingleCrystal*);
-//template void IOCrystFileLoadObject(const string &,const IOCrystTag &,
-//                                    ZScatterer*);
-template void IOCrystFileLoadObject(const string &,const IOCrystTag &,
-                                    PowderPatternBackground*);
-template void IOCrystFileLoadObject(const string &,const IOCrystTag &,
-                                    PowderPatternDiffraction*);
-template void IOCrystFileLoadObject(const string &,const IOCrystTag &,
-                                    OptimizationObj*);
-                                    
-void IOCrystFileLoadAllObject(const string & filename)
-{
-   ifstream is(filename.c_str());
-   if(!is){};//:TODO:
-   IOCrystTag tag(is);
-   for(;;)
-   {
-      if(true==is.eof()) break;
-      if(tag.GetType()=="Crystal")
-      {
-         Crystal* obj = new Crystal;
-         obj->XMLInputOld(is,tag);
-      }
-      if(tag.GetType()=="PowderPattern")
-      {
-         PowderPattern* obj = new PowderPattern;
-         obj->XMLInputOld(is,tag);
-      }
-      if(tag.GetType()=="DiffractionDataSingleCrystal")
-      {
-         DiffractionDataSingleCrystal* obj = new DiffractionDataSingleCrystal;
-         obj->XMLInputOld(is,tag);
-      }
-      if(tag.GetType()=="GlobalOptimObj")
-      {
-         GlobalOptimObj* obj = new GlobalOptimObj;
-         obj->XMLInputOld(is,tag);
-      }
-      tag.XMLInput(is);
-   }
-}
-#endif
 ////////////////////////////////////////////////////////////////////////
 //
 //    I/O ScatteringPowerAtom
@@ -433,38 +306,6 @@ void ScatteringPowerAtom::XMLInput(istream &is,const XMLCrystTag &tagg)
       }
    }
 }
-#if 0
-void ScatteringPowerAtom::XMLInputOld(istream &is,const IOCrystTag &tag)
-{
-   VFN_DEBUG_MESSAGE("ScatteringPowerAtom::XMLInput():"<<this->GetName(),5)
-   switch(tag.GetVersion())
-   {
-      case 0:
-      {
-         string symbol;
-         bool isIso;
-         REAL bIso;
-         //First read name of the object
-         IOCrystExtractNameQuoted(is,symbol);
-         is>> isIso;
-         if(true==isIso)
-         {
-            is>>bIso;
-            VFN_DEBUG_MESSAGE("->"<<tag.GetName()<<" "<<symbol<<" "<<isIso,5)
-            this->Init(tag.GetName(),symbol,bIso);
-            bool fix;
-            is>>fix;
-            this->GetPar(&mBiso).SetIsFixed(!fix);
-         }
-         this->UpdateDisplay();
-         //else :TODO:
-         break;
-      }
-      default: cout << "Unknown tag version !"<<endl;
-   }
-   VFN_DEBUG_MESSAGE("ScatteringPowerAtom::XMLInput():End",5)
-}
-#endif
 ////////////////////////////////////////////////////////////////////////
 //
 //    I/O Atom
@@ -554,38 +395,6 @@ void Atom::XMLInput(istream &is,const XMLCrystTag &tagg)
       }
    }
 }
-#if 0
-void Atom::XMLInputOld(istream &is,const IOCrystTag &tag)
-{
-   VFN_DEBUG_MESSAGE("Atom::XMLInput():"<<this->GetName(),5)
-   switch(tag.GetVersion())
-   {
-      case 0:
-      {
-         REAL x,y,z,p;
-         string scattPow;
-         is >> x >> y>> z>> p;
-         IOCrystExtractNameQuoted(is,scattPow);
-         //cout <<name<<" "<< x<<" "<<y<<" "<<z<<" "<<p<<" "<<scattPow<<endl;
-         //gScatteringPowerAtomRegistry.GetObj(scattPow).Print();
-         this->Init(x,y,z,tag.GetName(),&gScatteringPowerAtomRegistry.GetObj(scattPow),p);
-         bool fix;
-         is>>fix;
-         this->GetPar(mXYZ.data()+0).SetIsFixed(!fix);
-         is>>fix;
-         this->GetPar(mXYZ.data()+1).SetIsFixed(!fix);
-         is>>fix;
-         this->GetPar(mXYZ.data()+2).SetIsFixed(!fix);
-         is>>fix;
-         this->GetPar(&mOccupancy).SetIsFixed(!fix);
-         this->UpdateDisplay();
-         break;
-      }
-      default: cout << "Unknown tag version !"<<endl;
-   }
-   VFN_DEBUG_MESSAGE("Atom::XMLInput():End",5)
-}
-#endif
 ////////////////////////////////////////////////////////////////////////
 //
 //    I/O ZAtom
@@ -863,94 +672,6 @@ void ZScatterer::XMLInput(istream &is,const XMLCrystTag &tagg)
       }
    }
 }
-#if 0
-void ZScatterer::XMLInputOld(istream &is,const IOCrystTag &tag)
-{
-   VFN_DEBUG_ENTRY("ZScatterer::XMLInput():"<<this->GetName(),5)
-   switch(tag.GetVersion())
-   {
-      case 0:
-      {
-         this->SetName(tag.GetName());
-         do
-         {
-            VFN_DEBUG_MESSAGE("ZScatterer::XMLInput():Reading new tag..",5)
-            IOCrystTag tag(is);
-            //tag.Print();
-            if(tag.IsClosingTag()==true)
-            {
-               VFN_DEBUG_EXIT("ZScatterer::XMLInput():"<<this->GetName()<<"->UpdateDisplay",5)
-               this->UpdateDisplay();
-               VFN_DEBUG_EXIT("ZScatterer::XMLInput():"<<this->GetName(),5)
-               return;
-            }
-            if(tag.GetType()=="Param")
-            {
-               if(tag.GetName()=="XYZPhiChiPsiPopu")
-               {
-                  VFN_DEBUG_MESSAGE("ZScatterer::XMLInput():XMLInput position&popu",5)
-                  REAL x,y,z,phi,chi,psi,p;
-                  is >>x>>y>>z>>phi>>chi>>psi>>p;
-                  this->SetX(x);
-                  this->SetY(y);
-                  this->SetZ(z);
-                  this->SetPhi(phi*DEG2RAD);
-                  this->SetChi(chi*DEG2RAD);
-                  this->SetPsi(psi*DEG2RAD);
-                  this->SetOccupancy(p);
-                  bool fix;
-                  is>>fix;
-                  this->GetPar(mXYZ.data()+0).SetIsFixed(!fix);
-                  is>>fix;
-                  this->GetPar(mXYZ.data()+1).SetIsFixed(!fix);
-                  is>>fix;
-                  this->GetPar(mXYZ.data()+2).SetIsFixed(!fix);
-                  is>>fix;
-                  this->GetPar(&mPhi).SetIsFixed(!fix);
-                  is>>fix;
-                  this->GetPar(&mChi).SetIsFixed(!fix);
-                  is>>fix;
-                  this->GetPar(&mPsi).SetIsFixed(!fix);
-                  is>>fix;
-                  this->GetPar(&mOccupancy).SetIsFixed(!fix);
-                  continue;
-               }
-               if(tag.GetName()=="Atom")
-               {
-                  VFN_DEBUG_MESSAGE("ZScatterer::XMLInput():XMLInput an atom",5)
-                  string scattPow;
-                  string name;
-                  int abond,aangle,adihed;
-                  REAL bond,angle,dihed,p;
-                  IOCrystExtractNameQuoted(is,name);
-                  is >>abond>>bond>>aangle>>angle>>adihed>>dihed>>p;
-                  IOCrystExtractNameQuoted(is,scattPow);
-                  //cout <<abond<<" "<<bond<<" "<<aangle<<" "<<angle
-                  //     <<" "<<adihed<<" "<<dihed<<" "<<p<<" "<<scattPow<<endl;
-                  this->AddAtom(name,&gScatteringPowerAtomRegistry.GetObj(scattPow),
-                                abond,bond,aangle,angle*DEG2RAD,adihed,dihed*DEG2RAD,p);
-                  const int j=mNbAtom-1;
-                  bool fix;
-                  is>>fix;
-                  this->GetPar(&(mZAtomRegistry.GetObj(j).mBondLength)).SetIsFixed(!fix);
-                  is>>fix;
-                  this->GetPar(&(mZAtomRegistry.GetObj(j).mAngle)).SetIsFixed(!fix);
-                  is>>fix;
-                  this->GetPar(&(mZAtomRegistry.GetObj(j).mDihed)).SetIsFixed(!fix);
-                  is>>fix;
-                  this->GetPar(&(mZAtomRegistry.GetObj(j).mOccupancy)).SetIsFixed(!fix);
-                  VFN_DEBUG_MESSAGE("ZScatterer::XMLInput():XMLInput an atom:Finished",5)
-                  continue;
-               }
-            }
-         } while(true);
-         break;
-      }
-      default: cout << "Unknown tag version !"<<endl;
-   }
-   VFN_DEBUG_EXIT("ZScatterer::XMLInput():"<<this->GetName(),5)
-}
-#endif
 ////////////////////////////////////////////////////////////////////////
 //
 //    I/O Crystal
@@ -1209,125 +930,6 @@ void Crystal::XMLInput(istream &is,const XMLCrystTag &tagg)
       }
    }
 }
-#if 0
-void Crystal::XMLInputOld(istream &is,const IOCrystTag &tagg)
-{
-   VFN_DEBUG_MESSAGE("Crystal::XMLInput():"<<this->GetName(),5)
-   //Remove Scatterers and Scattering Powers
-      for(long i=0;i<mScatteringPowerRegistry.GetNb();i++)
-      {
-         this->RemoveSubRefObj(mScatteringPowerRegistry.GetObj(i));
-         mScatteringPowerRegistry.GetObj(i).DeRegisterClient(*this);
-      }
-      mScatteringPowerRegistry.DeleteAll();
-      for(long i=0;i<mScattererRegistry.GetNb();i++)
-      {
-         this->RemoveSubRefObj(mScattererRegistry.GetObj(i));
-         mScattererRegistry.GetObj(i).DeRegisterClient(*this);
-      }
-      mScattererRegistry.DeleteAll();
-   
-   
-   switch(tagg.GetVersion())
-   {
-      case 0:
-      {
-         this->SetName(tagg.GetName());
-         do
-         {
-            IOCrystTag tag(is);
-            //tag.Print();
-            if(tag.GetType()=="Param")
-            {
-               VFN_DEBUG_MESSAGE("Crystal::XMLInput():reading a Param",5)
-               if(tag.GetName()=="Lattice")
-               {
-                  VFN_DEBUG_MESSAGE("Crystal::XMLInput():reading Lattice",5)
-                  REAL a,b,c,alpha,beta,gamma;
-                  string spg;
-                  is >>a>>b>>c>>alpha>>beta>>gamma;
-                  IOCrystExtractNameQuoted(is,spg);
-                  this->Init(a,b,c,alpha*DEG2RAD,beta*DEG2RAD,gamma*DEG2RAD,
-                             spg,tagg.GetName());
-                  bool fix;
-                  is >>fix;
-                  this->GetPar(mCellDim.data()+0).SetIsFixed(!fix);
-                  is >>fix;
-                  this->GetPar(mCellDim.data()+1).SetIsFixed(!fix);
-                  is >>fix;
-                  this->GetPar(mCellDim.data()+2).SetIsFixed(!fix);
-                  is >>fix;
-                  this->GetPar(mCellDim.data()+3).SetIsFixed(!fix);
-                  is >>fix;
-                  this->GetPar(mCellDim.data()+4).SetIsFixed(!fix);
-                  is >>fix;
-                  this->GetPar(mCellDim.data()+5).SetIsFixed(!fix);
-                  continue;
-               }
-               if(tag.GetName()=="UseDynamicOccupancyCorr")
-               {
-                  VFN_DEBUG_MESSAGE("Crystal::XMLInput():reading UseDynamicOccupancyCorr",5)
-                  bool useDynPopCorr;
-                  is >>useDynPopCorr;
-                  this->SetUseDynPopCorr(useDynPopCorr);
-                  continue;
-               }
-               if(tag.GetName()=="BumpMergeDistance")
-               {
-                  VFN_DEBUG_MESSAGE("Crystal::XMLInput():reading a Bump/Merge distance",5)
-                  float dist;
-                  bool allowMerge;
-                  string scattPow1,scattPow2;
-                  IOCrystExtractNameQuoted(is,scattPow1);
-                  IOCrystExtractNameQuoted(is,scattPow2);
-                  is >> dist >>allowMerge;
-                  this->SetBumpMergeDistance(mScatteringPowerRegistry.GetObj(scattPow1),
-                                             mScatteringPowerRegistry.GetObj(scattPow2),
-                                             dist,allowMerge);
-                  continue;
-               }
-               cout <<"Cannot recognize tag name:";
-               IOCrystXMLOutputNameQuoted(cout,tag.GetName());
-            }
-            if(tag.IsClosingTag()==true)
-            {
-               VFN_DEBUG_MESSAGE("Crystal::XMLInput():End",5)
-               this->UpdateDisplay();
-               return;
-            }
-            if(tag.GetType()=="Atom")
-            {
-               VFN_DEBUG_MESSAGE("Crystal::XMLInput():reading an Atom",5)
-               Atom *at=new Atom;
-               at->XMLInputOld(is,tag);
-               this->AddScatterer(at);
-               continue;
-            }
-            if(tag.GetType()=="ScatteringPowerAtom")
-            {
-               VFN_DEBUG_MESSAGE("Crystal::XMLInput():reading a ScatteringPowerAtom",5)
-               ScatteringPowerAtom *sc=new ScatteringPowerAtom;
-               sc->XMLInputOld(is,tag);
-               this->AddScatteringPower(sc);
-               continue;
-            }
-            if(tag.GetType()=="ZScatterer")
-            {
-               VFN_DEBUG_MESSAGE("Crystal::XMLInput():reading a ZScatterer",5)
-               ZScatterer *z=new ZScatterer("",*this);
-               z->XMLInputOld(is,tag);
-               this->AddScatterer(z);
-               continue;
-            }
-            cout <<"Cannot recognize tag type:";
-            IOCrystXMLOutputNameQuoted(cout,tag.GetType());
-         } while(true);
-         break;
-      }
-      default: cout << "Unknown tag version !"<<endl;
-   }
-}
-#endif
 ////////////////////////////////////////////////////////////////////////
 //
 //    I/O Radiation
@@ -1456,78 +1058,6 @@ void Radiation::XMLInput(istream &is,const XMLCrystTag &tagg)
       }
    }
 }
-#if 0
-void Radiation::XMLInputOld(istream &is,const IOCrystTag &tagg)
-{
-   VFN_DEBUG_MESSAGE("Radiation::XMLInput():"<<this->GetName(),5)
-   switch(tagg.GetVersion())
-   {
-      case 0:
-      {
-         do
-         {
-            IOCrystTag tag(is);
-            //tag.Print();
-            if(tag.IsClosingTag()==true)
-            {
-               VFN_DEBUG_MESSAGE("Radiation::XMLInput():End",5)
-               this->UpdateDisplay();
-               return;
-            }
-            if(tag.GetType()=="Param")
-            {
-               if(tag.GetName()=="RadiationType")
-               {
-                  string rad;
-                  IOCrystExtractNameSpace(is,rad);
-                  if(rad=="neutron")
-                  {
-                     this->SetRadiationType(RAD_NEUTRON);
-                     continue;
-                  }
-                  if(rad=="xray")
-                  {
-                     this->SetRadiationType(RAD_XRAY);
-                     continue;
-                  }
-                  if(rad=="RAD_ELECTRON")
-                  {
-                     this->SetRadiationType(RAD_NEUTRON);
-                     continue;
-                  }
-               }
-               if(tag.GetName()=="Wavelength")
-               {
-                  string rad;
-                  IOCrystExtractNameSpace(is,rad);
-                  if(rad=="monochromatic")
-                  {
-                     REAL l;
-                     is>>l;
-                     this->SetWavelength(l);
-                     bool fix;
-                     is>>fix;
-                     this->GetPar(mWavelength.data()+0).SetIsFixed(!fix);
-                     continue;
-                  }
-                  if(rad=="tube")
-                  {
-                     string tube;
-                     IOCrystExtractNameSpace(is,tube);
-                     REAL ratio;
-                     is>>ratio;
-                     this->SetWavelength(tube,ratio);
-                     continue;
-                  }
-               }
-            }
-         } while(true);
-         break;
-      }
-      default: cout << "Unknown tag version !"<<endl;
-   }
-}
-#endif
 ////////////////////////////////////////////////////////////////////////
 //
 //    I/O DiffractionDataSingleCrystal
@@ -1670,97 +1200,6 @@ void DiffractionDataSingleCrystal::XMLInput(istream &is,const XMLCrystTag &tagg)
       }
    }
 }
-#if 0
-void DiffractionDataSingleCrystal::XMLInputOld(istream &is,const IOCrystTag &tagg)
-{
-   VFN_DEBUG_MESSAGE("DiffractionDataSingleCrystal::XMLInput():"<<this->GetName(),5)
-   switch(tagg.GetVersion())
-   {
-      case 0:
-      {
-         this->SetName(tagg.GetName());
-         do
-         {
-            IOCrystTag tag(is);
-            //tag.Print();
-            if(tag.IsClosingTag()==true)
-            {
-               this->UpdateDisplay();
-               return;
-            }
-            if(tag.GetType()=="Param")
-            {
-               if(tag.GetName()=="Crystal")
-               {
-                  string cryst;
-                  IOCrystExtractNameQuoted(is,cryst);
-                  //:TODO: Check we found the Crystal !
-                  this->SetCrystal(gCrystalRegistry.GetObj(cryst));
-                  continue;
-               }
-               if(tag.GetName()=="IgnoreImagScattFact")
-               {
-                  bool b;
-                  is>>b;
-                  this->SetIsIgnoringImagScattFact(b);
-                  continue;
-               }
-               if(tag.GetName()=="UseFastLessPreciseFunc")
-               {
-                  bool b;
-                  is>>b;
-                  this->SetUseFastLessPreciseFunc(b);
-                  continue;
-               }
-            }
-            if(tag.GetType()=="Radiation")
-            {
-               mRadiation.XMLInputOld(is,tag);
-               continue;
-            }
-            if(tag.GetType()=="ParList")
-            {
-               if(tag.GetName()=="HKLIobsSigmaWeight")
-               {
-                  long nbrefl=0;
-                  CrystVector_long h(100),k(100),l(100);
-                  CrystVector_REAL iobs(100),sigma(100),weight(100);
-                  do
-                  {
-                     is >>h(nbrefl)>>k(nbrefl)>>l(nbrefl)
-                        >>iobs(nbrefl)>>sigma(nbrefl)>>weight(nbrefl);
-                     nbrefl++;
-                     if(nbrefl==iobs.numElements())
-                     {
-                        h.resizeAndPreserve(nbrefl+100);
-                        k.resizeAndPreserve(nbrefl+100);
-                        l.resizeAndPreserve(nbrefl+100);
-                        iobs.resizeAndPreserve(nbrefl+100);
-                        sigma.resizeAndPreserve(nbrefl+100);
-                        weight.resizeAndPreserve(nbrefl+100);
-                     }
-                     while(0==isgraph(is.peek())) is.get();
-                     //cout << is.peek()<<" "<<nbrefl<<endl;
-                  }
-                  while(is.peek()!='<');//until next tag
-                  
-                  h.resizeAndPreserve(nbrefl);
-                  k.resizeAndPreserve(nbrefl);
-                  l.resizeAndPreserve(nbrefl);
-                  iobs.resizeAndPreserve(nbrefl);
-                  sigma.resizeAndPreserve(nbrefl);
-                  weight.resizeAndPreserve(nbrefl);
-                  this->SetHklIobs(h,k,l,iobs,sigma);
-                  this->SetWeight(weight);
-               }//HKLIobsSigmaWeight
-            }//ParList
-         } while(true);
-         break;
-      }
-      default: cout << "Unknown tag version !"<<endl;
-   }
-}
-#endif
 ////////////////////////////////////////////////////////////////////////
 //
 //    I/O PowderPatternBackground
@@ -1890,102 +1329,6 @@ void PowderPatternBackground::XMLInput(istream &is,const XMLCrystTag &tagg)
       }
    }
 }
-#if 0
-void PowderPatternBackground::XMLInputOld(istream &is,const IOCrystTag &tagg)
-{
-   VFN_DEBUG_MESSAGE("PowderPatternBackground::XMLInput():"<<this->GetName(),5)
-   switch(tagg.GetVersion())
-   {
-      case 0:
-      {
-         this->SetName(tagg.GetName());
-         do
-         {
-            IOCrystTag tag(is);
-            tag.Print();
-            if(tag.GetType()=="\\PowderPatternBackground")
-            {
-               this->UpdateDisplay();
-               return;
-            }
-            if(tag.GetType()=="Param")
-            {
-               if(tag.GetName()=="BackgroundType")
-               {
-                  string type;
-                  IOCrystExtractNameSpace(is,type);
-                  if(type=="Linear")
-                  {
-                     mBackgroundType=POWDER_BACKGROUND_LINEAR;
-                     continue;
-                  }
-                  if(type=="Spline")
-                  {
-                     mBackgroundType=POWDER_BACKGROUND_CUBIC_SPLINE;
-                     continue;
-                  }
-                  continue;
-               }
-            }
-            if(tag.GetType()=="ParList")
-            {
-               if(tag.GetName()=="BackgroundPoints2ThetaIntensity")
-               {
-                  mBackgroundNbPoint=0;
-                  mBackgroundInterpPoint2Theta.resize(100);
-                  mBackgroundInterpPointIntensity.resize(100);
-                  CrystVector_bool fix(100);
-                  do
-                  {
-                     is >>mBackgroundInterpPoint2Theta(mBackgroundNbPoint)
-                        >>mBackgroundInterpPointIntensity(mBackgroundNbPoint)
-                        >>fix(mBackgroundNbPoint);
-                     mBackgroundNbPoint++;
-                     if(mBackgroundNbPoint==mBackgroundInterpPoint2Theta.numElements())
-                     {
-                        mBackgroundInterpPoint2Theta.
-                                 resizeAndPreserve(mBackgroundNbPoint+100);
-                        mBackgroundInterpPointIntensity.
-                                 resizeAndPreserve(mBackgroundNbPoint+100);
-                        fix.resizeAndPreserve(mBackgroundNbPoint+100);
-                     }
-                     while(0==isgraph(is.peek())) is.get();
-                     //cout << is.peek()<<" "<<nbrefl<<endl;
-                  }
-                  while(is.peek()!='<');//until next tag
-                  mBackgroundInterpPoint2Theta.resizeAndPreserve(mBackgroundNbPoint);
-                  mBackgroundInterpPointIntensity.resizeAndPreserve(mBackgroundNbPoint);
-                  mBackgroundInterpPoint2Theta *= DEG2RAD;
-                  mClockBackgroundPoint.Click();
-                  
-                  //Rebuild parameter list
-                  this->ResetParList();
-                  char buf[25];
-                  for(int j=0;j<mBackgroundNbPoint;j++)
-                  {
-                     sprintf(buf,"Background_Point_%d",j);
-                     RefinablePar tmp(buf,
-                                      mBackgroundInterpPointIntensity.data()+j,0.,1000.,
-                                      gpRefParTypeScattDataBackground,REFPAR_DERIV_STEP_RELATIVE,
-                                      false,true,true,false,1.);
-                     tmp.AssignClock(mClockBackgroundPoint);
-                     tmp.SetDerivStep(1e-3);
-                     tmp.SetIsFixed(!fix(j));
-                     this->AddPar(tmp);
-                  }
-
-                  //cout<<FormatVertVector<REAL>(mBackgroundInterpPoint2Theta,
-                  //                              mBackgroundInterpPointIntensity);
-               }//BackgroundPoints2ThetaIntensity
-            }//ParList
-         } while(true);
-         break;
-      }
-      default: cout << "Unknown tag version !"<<endl;
-   }
-   VFN_DEBUG_MESSAGE("PowderPatternBackground::XMLInput():End",5)
-}
-#endif
 ////////////////////////////////////////////////////////////////////////
 //
 //    I/O PowderPatternDiffraction
@@ -2188,131 +1531,6 @@ void PowderPatternDiffraction::XMLInput(istream &is,const XMLCrystTag &tagg)
       }
    }
 }
-#if 0
-void PowderPatternDiffraction::XMLInputOld(istream &is,const IOCrystTag &tagg)
-{
-   VFN_DEBUG_MESSAGE("PowderPatternDiffraction::XMLInput():"<<this->GetName(),5)
-   switch(tagg.GetVersion())
-   {
-      case 0:
-      {
-         this->SetName(tagg.GetName());
-         do
-         {
-            IOCrystTag tag(is);
-            //tag.Print();
-            if(tag.IsClosingTag()==true)
-            {
-               this->UpdateDisplay();
-               return;
-            }
-            if(tag.GetType()=="Param")
-            {
-               if(tag.GetName()=="Crystal")
-               {
-                  string cryst;
-                  IOCrystExtractNameQuoted(is,cryst);
-                  //:TODO: check crystal was found
-                  this->SetCrystal(gCrystalRegistry.GetObj(cryst));
-                  continue;
-               }
-               if(tag.GetName()=="ProfileType")
-               {
-                  string type;
-                  IOCrystExtractNameSpace(is,type);
-                  if(type=="pearson-VII")
-                  {
-                     mReflectionProfileType.SetChoice(PROFILE_PEARSON_VII);
-                     mClockProfilePar.Click();
-                     continue;
-                  }
-                  if(type=="gaussian")
-                  {
-                     mReflectionProfileType.SetChoice(PROFILE_GAUSSIAN);
-                     mClockProfilePar.Click();
-                     continue;
-                  }
-                  if(type=="lorentzian")
-                  {
-                     mReflectionProfileType.SetChoice(PROFILE_LORENTZIAN);
-                     mClockProfilePar.Click();
-                     continue;
-                  }
-                  if(type=="pseudo-voigt")
-                  {
-                     mReflectionProfileType.SetChoice(PROFILE_PSEUDO_VOIGT);
-                     mClockProfilePar.Click();
-                     continue;
-                  }
-                  if(type=="pseudo-voigt-fcj")
-                  {
-                     mReflectionProfileType.SetChoice(PROFILE_PSEUDO_VOIGT_FINGER_COX_JEPHCOAT);
-                     mClockProfilePar.Click();
-                     continue;
-                  }
-                  continue;
-               }
-               if(tag.GetName()=="CagliotiUVW")
-               {
-                  is>>mCagliotiU>>mCagliotiV>>mCagliotiW;
-                  mCagliotiU*=DEG2RAD*DEG2RAD;
-                  mCagliotiV*=DEG2RAD*DEG2RAD;
-                  mCagliotiW*=DEG2RAD*DEG2RAD;
-                  mClockProfilePar.Click();
-                  bool fix;
-                  is>>fix;
-                  this->GetPar(&mCagliotiU).SetIsFixed(!fix);
-                  is>>fix;
-                  this->GetPar(&mCagliotiV).SetIsFixed(!fix);
-                  is>>fix;
-                  this->GetPar(&mCagliotiW).SetIsFixed(!fix);
-                  continue;
-               }
-               if(tag.GetName()=="PseudoVoigtEta0Eta1")
-               {
-                  is>>mPseudoVoigtEta0>>mPseudoVoigtEta1;
-                  mClockProfilePar.Click();
-                  bool fix;
-                  is>>fix;
-                  this->GetPar(&mPseudoVoigtEta0).SetIsFixed(!fix);
-                  is>>fix;
-                  this->GetPar(&mPseudoVoigtEta1).SetIsFixed(!fix);
-                  continue;
-               }
-               if(tag.GetName()=="NeedLorentzCorr")
-               {
-                  is>>mNeedLorentzCorr;
-                  mClockLorentzPolarSlitCorrPar.Reset();
-                  continue;
-               }
-               if(tag.GetName()=="NeedPolarCorr-AFactor")
-               {
-                  is>>mNeedPolarCorr>>mPolarAfactor;
-                  mClockLorentzPolarSlitCorrPar.Reset();
-                  continue;
-               }
-               if(tag.GetName()=="NeedSlitApertureCorr")
-               {
-                  is>>mNeedSlitApertureCorr;
-                  mClockLorentzPolarSlitCorrPar.Reset();
-                  continue;
-               }
-               if(tag.GetName()=="IgnoreImagScattFact")
-               {
-                  bool b;
-                  is>>b;
-                  this->SetIsIgnoringImagScattFact(b);
-                  continue;
-               }
-            }//Param
-         } while(true);
-         break;
-      }
-      default: cout << "Unknown tag version !"<<endl;
-   }
-   VFN_DEBUG_MESSAGE("PowderPatternDiffraction::XMLInput():End",5)
-}
-#endif
 ////////////////////////////////////////////////////////////////////////
 //
 //    I/O PowderPattern
@@ -2634,140 +1852,4 @@ void PowderPattern::XMLInput(istream &is,const XMLCrystTag &tagg)
       }
    }
 }
-#if 0
-void PowderPattern::XMLInputOld(istream &is,const IOCrystTag &tagg)
-{
-   VFN_DEBUG_MESSAGE("PowderPattern::XMLInput():"<<this->GetName(),5)
-   switch(tagg.GetVersion())
-   {
-      case 0:
-      {
-         this->SetName(tagg.GetName());
-         do
-         {
-            IOCrystTag tag(is);
-            //tag.Print();
-            if(tag.IsClosingTag()==true)
-            {
-               VFN_DEBUG_MESSAGE("PowderPattern::XMLInput():End",5)
-               this->UpdateDisplay();
-               return;
-            }
-            if(tag.GetType()=="Param")
-            {
-               if(tag.GetName()=="PowderPatternComponent")
-               {
-                  string comp;
-                  IOCrystExtractNameQuoted(is,comp);
-                  REAL scale;
-                  is >> scale;
-                  //:TODO: Check we found the component
-                  this->AddPowderPatternComponent(
-                           gPowderPatternComponentRegistry.GetObj(comp));
-                  mScaleFactor(mPowderPatternComponentRegistry.GetNb()-1)=scale;
-                  continue;
-               }
-               if(tag.GetName()=="2thetaMin-Step")
-               {
-                  is>>m2ThetaMin>>m2ThetaStep;
-                  m2ThetaMin*=DEG2RAD;
-                  m2ThetaStep*=DEG2RAD;
-                  mClockPowderPatternPar.Click();
-                  continue;
-               }
-               if(tag.GetName()=="UseFastLessPreciseFunc")
-               {
-                  bool b;
-                  is>>b;
-                  this->SetUseFastLessPreciseFunc(b);
-                  continue;
-               }
-               if(tag.GetName()=="2ThetaZero")
-               {
-                  is>>m2ThetaZero;
-                  m2ThetaZero*=DEG2RAD;
-                  bool fix;
-                  is>>fix;
-                  this->GetPar(&m2ThetaZero).SetIsFixed(!fix);
-                  continue;
-               }
-               if(tag.GetName()=="2ThetaDisplacement")
-               {
-                  is>>m2ThetaDisplacement;
-                  m2ThetaDisplacement*=DEG2RAD;
-                  bool fix;
-                  is>>fix;
-                  this->GetPar(&m2ThetaDisplacement).SetIsFixed(!fix);
-                  continue;
-               }
-               if(tag.GetName()=="2ThetaTransparency")
-               {
-                  is>>m2ThetaTransparency;
-                  m2ThetaTransparency*=DEG2RAD;
-                  bool fix;
-                  is>>fix;
-                  this->GetPar(&m2ThetaTransparency).SetIsFixed(!fix);
-                  continue;
-               }
-               if(tag.GetName()=="StatisticsExcludeBackground")
-               {
-                  is>>mStatisticsExcludeBackground;
-                  continue;
-               }
-            }
-            if(tag.GetType()=="PowderPatternBackground")
-            {
-               PowderPatternBackground* tmp=new PowderPatternBackground;
-               tmp->XMLInputOld(is,tag);
-            }
-            if(tag.GetType()=="PowderPatternDiffraction")
-            {
-               PowderPatternDiffraction* tmp=new PowderPatternDiffraction;
-               tmp->XMLInputOld(is,tag);
-            }
-            if(tag.GetType()=="Radiation")
-            {
-               Radiation rad;
-               rad.XMLInputOld(is,tag);
-               this->SetRadiation(rad);
-               continue;
-            }
-            if(tag.GetType()=="ParList")
-            {
-               if(tag.GetName()=="IobsSigmaWeight")
-               {
-                  mNbPoint=0;
-                  mPowderPatternObs.resize(500);
-                  mPowderPatternObsSigma.resize(500);
-                  mPowderPatternWeight.resize(500);
-                  do
-                  {
-                     is >>mPowderPatternObs(mNbPoint)
-                        >>mPowderPatternObsSigma(mNbPoint)
-                        >>mPowderPatternWeight(mNbPoint);
-                     mNbPoint++;
-                     if(mNbPoint==(unsigned long)mPowderPatternObs.numElements())
-                     {
-                        mPowderPatternObs.resizeAndPreserve(mNbPoint+500);
-                        mPowderPatternObsSigma.resizeAndPreserve(mNbPoint+500);
-                        mPowderPatternWeight.resizeAndPreserve(mNbPoint+500);
-                     }
-                     while(0==isgraph(is.peek())) is.get();
-                     //cout << is.peek()<<" "<<nbrefl<<endl;
-                  }
-                  while(is.peek()!='<');//until next tag
-                  
-                  mPowderPatternObs.resizeAndPreserve(mNbPoint);
-                  //cout << mPowderPatternObs.numElements()<<" "<<mNbPoint<<" "<<this<<endl;
-                  mPowderPatternObsSigma.resizeAndPreserve(mNbPoint);
-                  mPowderPatternWeight.resizeAndPreserve(mNbPoint);
-               }//IobsSigmaWeight
-            }//ParList
-         } while(true);
-         break;
-      }
-      default: cout << "Unknown tag version !"<<endl;
-   }
-}
-#endif
 } //namespace

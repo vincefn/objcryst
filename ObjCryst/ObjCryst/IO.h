@@ -39,6 +39,16 @@ namespace ObjCryst
 * Saving is done in well-formed xml format.
 */
 void XMLCrystFileSaveGlobal(const string & filename);
+/** \brief Save all Objcryst++ objects.
+*
+* This saves all Crystal, PowderPattern, DiffDataSingleCrystal and GlobalOptimObj objects,
+* using the global registries for these classes. All other objects (Scatterer, 
+* ScatteringPower, PowderPatternComponent are saved as well since they are sub-objects
+* of Crystal or PowderPattern objects).
+*
+* Saving is done in well-formed xml format.
+*/
+void XMLCrystFileSaveGlobal(std::ostream &out);
 /** \brief Get the list (tags) of ObjCryst objects in a file
 *
 * This will recognize only certain tags in the file (Crystal,PowderPattern,
@@ -73,15 +83,12 @@ template<class T> void XMLCrystFileLoadObject(const string & file,
 * \param file: the filename from which the objects will be loaded.
 */
 void XMLCrystFileLoadAllObject(const string & file);
+/** \brief Load all 'top' objects from a file (Crystal, PowderPattern, DiffDataSingleCrystal
+*  and GlobalOptimObj objects). All objects are directly allocated, and can be accessed through
+* their respective global registry (eg gCrystalRegistry fro a Crysta, etc...)
+*
+* \param file: the filename from which the objects will be loaded.
+*/
+void XMLCrystFileLoadAllObject(std::istream &is);
 
-#if 0
-///OBSOLETE
-void IOCrystFileSaveGlobal(const string & filename);
-///OBSOLETE
-ObjRegistry<IOCrystTag> IOCrystFileLoadObjectList(const string & filename);
-///OBSOLETE
-template<class T> void IOCrystFileLoadObject(const string & file,const IOCrystTag &tag, T*obj);
-///OBSOLETE
-void IOCrystFileLoadAllObject(const string & file);
-#endif
 }
