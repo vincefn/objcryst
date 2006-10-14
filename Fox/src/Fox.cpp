@@ -37,6 +37,7 @@
    #include "wx/notebook.h"
    #include "wx/wfstream.h"
    #include "wx/zstream.h"
+   #include "wx/config.h"
 #endif
 
 #include <locale.h>
