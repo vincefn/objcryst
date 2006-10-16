@@ -35,6 +35,7 @@
 #include "wx/colordlg.h"
 #include "wx/progdlg.h"
 #include "wx/busyinfo.h"
+#include "wx/config.h"
 
 #include "ObjCryst/Atom.h"
 #include "ObjCryst/ZScatterer.h"
@@ -399,6 +400,20 @@ mpCrystalGL(0)
    
    this->BottomLayout(0);
    this->CrystUpdate(true);
+   {
+      bool val;
+      if(!wxConfigBase::Get()->HasEntry("Crystal/BOOL/Automatically open crystal 3D view"))
+         wxConfigBase::Get()->Write("Crystal/BOOL/Automatically open crystal 3D view", false);
+      else
+      {
+         wxConfigBase::Get()->Read("Crystal/BOOL/Automatically open crystal 3D view", &val);
+         if(val)
+         {
+            wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_CRYSTAL_MENU_DISPLAY_3DVIEW);
+            wxPostEvent(this,event);
+         }
+      }
+   }
    VFN_DEBUG_MESSAGE("WXCrystal::WXCrystal():End",6)
 }
 
@@ -2217,6 +2232,35 @@ mIsGLFontBuilt(false),mGLFontDisplayListBase(0)
    mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_UNLOADFOURIER, FALSE);
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_FOURIERCHANGEBBOX, "Change Fourier Limits");
    mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_FOURIERCHANGEBBOX, FALSE);	//disable it for now
+   if(!wxConfigBase::Get()->HasEntry("Crystal/BOOL/Default-display only asymmetric unit cell in 3D view"))
+      wxConfigBase::Get()->Write("Crystal/BOOL/Default-display only asymmetric unit cell in 3D view", true);
+   else
+   {
+      bool val;
+      wxConfigBase::Get()->Read("Crystal/BOOL/Default-display only asymmetric unit cell in 3D view", &val);
+      if(val)
+      {
+         mcellbbox.xMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmin()-0.1;
+         mcellbbox.yMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Ymin()-0.1;
+         mcellbbox.zMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Zmin()-0.1;
+         mcellbbox.xMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmax()+0.1;
+         mcellbbox.yMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Ymax()+0.1;
+         mcellbbox.zMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Zmax()+0.1;
+      }
+      else
+      {
+         mcellbbox.xMin = -0.1;
+         mcellbbox.yMin = -0.1;
+         mcellbbox.zMin = -0.1;
+         mcellbbox.xMax =  1.1;
+         mcellbbox.yMax =  1.1;
+         mcellbbox.zMax =  1.1;
+      }
+   }
+   if(!wxConfigBase::Get()->HasEntry("Crystal/BOOL/Default-display atom names in 3D view"))
+      wxConfigBase::Get()->Write("Crystal/BOOL/Default-display atom names in 3D view", mShowAtomName);
+   else
+      wxConfigBase::Get()->Read("Crystal/BOOL/Default-display atom names in 3D view", &mShowAtomName);
 }
 
 WXGLCrystalCanvas::~WXGLCrystalCanvas()

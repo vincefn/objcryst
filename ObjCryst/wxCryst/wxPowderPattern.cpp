@@ -28,6 +28,7 @@
     #include "wx/wx.h"
 #endif
 #include "wx/dcbuffer.h"
+#include "wx/config.h"
 
 #include "wxCryst/wxPowderPattern.h"
 #include "wxCryst/wxRadiation.h"
@@ -428,7 +429,21 @@ mChi2(0.0),mGoF(0.0),mRwp(0.0),mRp(0.0)
    VFN_DEBUG_MESSAGE("WXPowderPattern::WXPowderPattern():1",6)
    this->BottomLayout(0);
    this->CrystUpdate(true);
-   VFN_DEBUG_MESSAGE("WXPowderPattern::WXPowderPattern():End",6)
+   {
+      bool val;
+      if(!wxConfigBase::Get()->HasEntry("PowderPattern/BOOL/Automatically open powder pattern graph"))
+         wxConfigBase::Get()->Write("PowderPattern/BOOL/Automatically open powder pattern graph", false);
+      else
+      {
+         wxConfigBase::Get()->Read("PowderPattern/BOOL/Automatically open powder pattern graph/", &val);
+         if((val)&&(mpPowderPattern->GetNbPoint()>0))
+         {
+            wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_POWDER_MENU_GRAPH);
+            wxPostEvent(this,event);
+         }
+      }
+   }
+  VFN_DEBUG_MESSAGE("WXPowderPattern::WXPowderPattern():End",6)
 }
 
 void WXPowderPattern::CrystUpdate(const bool uui,const bool lock)
@@ -440,6 +455,7 @@ void WXPowderPattern::CrystUpdate(const bool uui,const bool lock)
    if(mpPowderPattern->GetNbPoint()<=0)
    {
       if(lock) mMutex.Unlock();
+      this->WXRefinableObj::CrystUpdate(uui,lock);
       return;// nothing to display yet
    }
    
@@ -866,6 +882,10 @@ mIsDragging(false),mDisplayLabel(true)
    mpPopUpMenu=new wxMenu("Powder Pattern");
    mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_UPDATE, "&Update");
    mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_TOGGLELABEL, "&Hide Labels");
+   if(!wxConfigBase::Get()->HasEntry("PowderPattern/BOOL/Default-display reflection indices"))
+      wxConfigBase::Get()->Write("PowderPattern/BOOL/Default-display reflection indices", mDisplayLabel);
+   else
+      wxConfigBase::Get()->Read("PowderPattern/BOOL/Default-display reflection indices", &mDisplayLabel);
    mpPattern->CrystUpdate(true);
 }
 
