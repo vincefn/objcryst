@@ -37,7 +37,7 @@
    #include "wx/notebook.h"
    #include "wx/wfstream.h"
    #include "wx/zstream.h"
-   #include "wx/config.h"
+   #include "wx/fileconf.h"
 #endif
 
 #include <locale.h>
@@ -119,6 +119,7 @@ public:
    void OnSetDebugLevel(wxCommandEvent& event);
    void OnUpdateUI(wxUpdateUIEvent& event);
    void OnToggleTooltips(wxCommandEvent& event);
+   void OnPreferences(wxCommandEvent& event);
 private:
     DECLARE_EVENT_TABLE()
     RefinableObjClock mClockLastSave;
@@ -139,6 +140,7 @@ void WXCrystInformUserStdOut(const string &str)
 static const long MENU_FILE_QUIT=                      WXCRYST_ID();
 static const long MENU_HELP_ABOUT=                     WXCRYST_ID();
 static const long MENU_HELP_TOGGLETOOLTIP=             WXCRYST_ID();
+static const long MENU_PREFS_PREFERENCES=              WXCRYST_ID();
 static const long MENU_FILE_LOAD=                      WXCRYST_ID();
 static const long MENU_FILE_CLOSE=                     WXCRYST_ID();
 static const long MENU_FILE_SAVE=                      WXCRYST_ID();
@@ -170,6 +172,7 @@ BEGIN_EVENT_TABLE(WXCrystMainFrame, wxFrame)
    EVT_MENU(MENU_FILE_QUIT,  WXCrystMainFrame::OnQuit)
    EVT_MENU(MENU_HELP_ABOUT, WXCrystMainFrame::OnAbout)
    EVT_MENU(MENU_HELP_TOGGLETOOLTIP, WXCrystMainFrame::OnToggleTooltips)
+   EVT_MENU(MENU_PREFS_PREFERENCES, WXCrystMainFrame::OnPreferences)
    EVT_MENU(MENU_FILE_LOAD, WXCrystMainFrame::OnLoad)
    EVT_MENU(MENU_FILE_CLOSE, WXCrystMainFrame::OnMenuClose)
    EVT_CLOSE(                WXCrystMainFrame::OnClose)
@@ -400,9 +403,12 @@ int main (int argc, char *argv[])
       #endif
    }
 #ifdef __WX__CRYST__
-   SetVendorName(_T("http://objcryst.sf.net/Fox"));
-   SetAppName(_T("Fox"));
-   // Read (or create if necessary) global Fox preferences
+   this->SetVendorName(_T("http://objcryst.sf.net/Fox"));
+   this->SetAppName(_T("FOX-Free Objects for Crystallography"));
+   // Read (and automatically create if necessary) global Fox preferences
+   // We explicitely use a wxFileConfig, to avoid the registry under Windows
+   wxConfigBase::Set(new wxFileConfig("FOX-Free Objects for Crystallography"));
+
    if(wxConfigBase::Get()->HasEntry("Fox/BOOL/Enable tooltips"))
    {
        bool tooltip_enabled;
@@ -536,6 +542,9 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
          objectMenu->Append(MENU_OBJECT_CREATE_GLOBALOPTOBJ, "New Monte-Carlo Object",
                            "Add a new Monte-Carlo Object");
       
+      wxMenu *prefsMenu = new wxMenu;
+         prefsMenu->Append(MENU_PREFS_PREFERENCES, "&Preferences...", "Fox Preferences...");
+      
       wxMenu *helpMenu = new wxMenu;
          helpMenu->Append(MENU_HELP_ABOUT, "&About...", "About ObjCryst...");
          helpMenu->Append(MENU_HELP_TOGGLETOOLTIP, "Toggle Tooltip", "Set Tooltips on/off");
@@ -543,6 +552,8 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
       wxMenuBar *menuBar = new wxMenuBar();
          menuBar->Append(menuFile,  "&File");
          menuBar->Append(objectMenu,"&Objects");
+         menuBar->Append(prefsMenu, "&Preferences");
+         menuBar->Append(helpMenu,  "&Help");
          #ifdef __DEBUG__
          wxMenu *debugMenu = new wxMenu;
             debugMenu->Append(MENU_DEBUG_TEST1, "Test #1");
@@ -561,13 +572,12 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
             debugMenu->Append(MENU_DEBUG_LEVEL10,"Debug level 10 (few messages)");
          menuBar->Append(debugMenu,  "&Debug");
          #endif
-         menuBar->Append(helpMenu,  "&Help");
 
    SetMenuBar(menuBar);
 
 #if wxUSE_STATUSBAR
    CreateStatusBar(1);
-   SetStatusText("Welcome to ObjCryst++!");
+   SetStatusText("Welcome to FOX/ObjCryst++!");
 #endif // wxUSE_STATUSBAR
 
    // Create the notebook
@@ -618,6 +628,8 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
    }
    // Set tooltip delay
    wxToolTip::SetDelay(500);
+   // Reset "last save" clock, in the case we loaded an xml file on startup
+   mClockLastSave.Click();
 }
 
 void WXCrystMainFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
@@ -627,7 +639,7 @@ void WXCrystMainFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 
 void WXCrystMainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
-   string msg(string("F.O.X. - Free Objects for Xtal structures\n")
+   string msg(string("F.O.X. - Free Objects for Xtallography\n")
               +"Version "+ foxVersion +" \n\n"
               +"(c) 2000-2006 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n"
               +"    2000-2001 Radovan CERNY, University of Geneva\n\n"
@@ -640,6 +652,15 @@ void WXCrystMainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 }
 void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
 {
+   // First record if any object already in memory need to be saved
+   bool saved=true;
+   for(int i=0;i<gRefinableObjRegistry.GetNb();i++)
+      if(gRefinableObjRegistry.GetObj(i).GetClockMaster()>mClockLastSave)
+      {
+         saved=false;
+         break;
+      }
+
    wxFileDialog *open;
    if(event.GetId()==MENU_FILE_LOAD)
    {
@@ -660,6 +681,7 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
       }
    }
    open->Destroy();
+   if(saved) mClockLastSave.Click();
 }
 void WXCrystMainFrame::OnMenuClose(wxCommandEvent& event)
 {
@@ -673,7 +695,11 @@ void WXCrystMainFrame::SafeClose()
 {
    bool safe=true;
    wxConfigBase::Get()->Read("Fox/BOOL/Ask confirmation before exiting Fox",&safe);
-   if(!safe) this->Destroy();
+   if(!safe)
+   {
+      this->Destroy();
+      return;
+   }
 
    bool saved=true;
    for(int i=0;i<gRefinableObjRegistry.GetNb();i++)
@@ -686,7 +712,7 @@ void WXCrystMainFrame::SafeClose()
    {
       wxString msg;
       msg.Printf( _T("Some objects have not been saved\n")
-               _T("Do you really want to close all objects ?"));
+               _T("Do you really want to Exit ?"));
 
       wxMessageDialog d(this,msg, "Really Exit ?", wxYES | wxNO);
       if(wxID_YES!=d.ShowModal()) return;
@@ -730,13 +756,25 @@ void WXCrystMainFrame::OnAddCrystal(wxCommandEvent& WXUNUSED(event))
 {
    Crystal* obj;
    obj=new Crystal;
-   obj->SetName("Change Me!");
+   stringstream s;s<<"Crystal #"<<gCrystalRegistry.GetNb();
+   obj->SetName(s.str());
+   if(!wxConfigBase::Get()->HasEntry("Crystal/BOOL/Default-use Dynamical Occupancy Correction"))
+      wxConfigBase::Get()->Write("Crystal/BOOL/Default-use Dynamical Occupancy Correction", true);
+   else
+   {
+      bool doc;
+      wxConfigBase::Get()->Read("Crystal/BOOL/Default-use Dynamical Occupancy Correction", &doc);
+      if(doc) obj->GetOption(0).SetChoice(0);
+      else obj->GetOption(0).SetChoice(1);
+   }
+   obj->UpdateDisplay();
 }
 void WXCrystMainFrame::OnAddPowderPattern(wxCommandEvent& WXUNUSED(event))
 {
    PowderPattern* obj;
    obj=new PowderPattern;
-   obj->SetName("Change Me!");
+   stringstream s;s<<"Powder Pattern #"<<gPowderPatternRegistry.GetNb();
+   obj->SetName(s.str());
    obj->SetMaxSinThetaOvLambda(0.4);
    obj->UpdateDisplay();
 }
@@ -752,14 +790,15 @@ void WXCrystMainFrame::OnAddSingleCrystalData(wxCommandEvent& WXUNUSED(event))
 
    DiffractionDataSingleCrystal* obj;
    obj=new DiffractionDataSingleCrystal(*cryst);
-   obj->SetName("Change Me!");
+   stringstream s;s<<"Diffraction data for "<<cryst->GetName();
+   obj->SetName(s.str());
    obj->SetMaxSinThetaOvLambda(0.4);
    obj->UpdateDisplay();
 }
 void WXCrystMainFrame::OnAddGlobalOptimObj(wxCommandEvent& WXUNUSED(event))
 {
-   MonteCarloObj* obj;
-   obj=new MonteCarloObj((string)"Change Me!");
+   stringstream s;s<<"OptimizationObj #"<<gOptimizationObjRegistry.GetNb();
+   MonteCarloObj* obj=new MonteCarloObj(s.str());
 }
 void WXCrystMainFrame::OnAddGeneticAlgorithm(wxCommandEvent& WXUNUSED(event))
 {
@@ -857,6 +896,192 @@ void WXCrystMainFrame::OnToggleTooltips(wxCommandEvent& event)
    wxToolTip::Enable(tooltip_enabled);
    wxConfigBase::Get()->Write("Fox/BOOL/Enable tooltips", tooltip_enabled);
    VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnToggleTooltips(): Tooltips= "<<tooltip_enabled,10)
+}
+
+void GetRecursiveConfigEntryList(list<pair<wxString,wxString> > &l)
+{
+   wxString str;
+   wxString path=wxConfigBase::Get()->GetPath();
+   if(path=="")path="/"+path;
+   long entry;
+   bool bCont = wxConfigBase::Get()->GetFirstEntry(str, entry);
+   while(bCont)
+   {
+      //cout<<__FILE__<<":"<<__LINE__<<"Entry:"<<path+"/"+str<<endl;
+      l.push_back(make_pair(path,str));
+      bCont = wxConfigBase::Get()->GetNextEntry(str, entry);
+   }
+   long group;
+   bCont = wxConfigBase::Get()->GetFirstGroup(str, group);
+   while(bCont)
+   {
+      wxConfigBase::Get()->SetPath(path+"/"+str);
+      GetRecursiveConfigEntryList(l);
+      wxConfigBase::Get()->SetPath("..");
+      bCont = wxConfigBase::Get()->GetNextGroup(str, group);
+   }
+}
+
+enum FOX_PREF_TYPE {PREF_BOOL,PREF_STRING,PREF_LONG} ;
+struct FoxPref
+{
+   FoxPref(wxString &comp,FOX_PREF_TYPE &t,wxString &e,wxWindow *w):
+   component(comp),type(t),entry(e),win(w)
+   {}
+   wxString component;
+   FOX_PREF_TYPE type;
+   wxString entry;
+   wxWindow  *win;
+};
+
+class WXFoxPreferences:public wxDialog
+{
+   public:
+      WXFoxPreferences(wxWindow *parent);
+      ~WXFoxPreferences();
+      void OnClose(wxCloseEvent& event);
+   private:
+      list<FoxPref> l;
+   DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(WXFoxPreferences, wxDialog)
+   EVT_CLOSE(WXFoxPreferences::OnClose)
+END_EVENT_TABLE()
+
+WXFoxPreferences::WXFoxPreferences(wxWindow *parent):
+wxDialog(parent,-1,"FOX Preferences: ",wxDefaultPosition,wxSize(400,300),wxCLOSE_BOX|wxRESIZE_BORDER|wxOK)
+{
+   wxScrolledWindow *sw=new wxScrolledWindow(this);
+   sw->FitInside();
+   sw->SetScrollRate(10,10);
+   //sw=this;
+   wxBoxSizer *sizer=new wxBoxSizer(wxVERTICAL);
+   sw->SetSizer(sizer);
+   list<pair<wxString,wxString> > ltmp;
+   GetRecursiveConfigEntryList(ltmp);
+   
+   wxWindow *w;
+   list<FoxPref> l2;
+   for(list<pair<wxString,wxString> >::const_iterator pos=ltmp.begin();pos!=ltmp.end();++pos)
+   {
+      wxString component,entry;
+      FOX_PREF_TYPE type;
+      
+      size_t tmp=pos->first.find("/",1);
+      component=pos->first.substr(1,tmp-1);
+      
+      entry=pos->second;
+      
+      if(pos->first.find("BOOL"  ,1)!=wxString::npos) type=PREF_BOOL;
+      if(pos->first.find("STRING",1)!=wxString::npos) type=PREF_STRING;
+      if(pos->first.find("LONG"  ,1)!=wxString::npos) type=PREF_LONG;
+      
+      switch(type)
+      {
+         case PREF_BOOL:
+         {
+            wxCheckBox *win=new wxCheckBox(sw,-1,component+":"+entry);
+            bool val;
+            wxConfigBase::Get()->Read("/"+component+"/BOOL/"+entry,&val);
+            win->SetValue(val);
+            sizer->Add(win,0,wxLEFT);
+            w=win;
+            break;
+         }
+         case PREF_STRING:
+         {
+            w=new wxWindow(sw,-1);
+            wxBoxSizer *s=new wxBoxSizer(wxHORIZONTAL);
+            w->SetSizer(s);
+            wxStaticText *txt=new wxStaticText(w,-1,component+":"+entry);
+            wxString val;
+            wxConfigBase::Get()->Read("/"+component+"/STRING/"+entry,&val);
+            wxTextCtrl *win=new wxTextCtrl(w,-1,val);
+            s->Add(txt,0,wxALIGN_CENTER);
+            s->Add(win,0,wxALIGN_CENTER);
+            w->Layout();
+            sizer->Add(w,0,wxLEFT);
+            w=win;
+            break;
+         }
+         case PREF_LONG:
+         {
+            w=new wxWindow(sw,-1);
+            wxBoxSizer *s=new wxBoxSizer(wxHORIZONTAL);
+            w->SetSizer(s);
+            wxStaticText *txt=new wxStaticText(w,-1,component+":"+entry);
+            wxString val;
+            wxConfigBase::Get()->Read("/"+component+"/LONG/"+entry,&val);
+            wxTextCtrl *win=new wxTextCtrl(w,-1,val,wxDefaultPosition,wxDefaultSize,0,wxTextValidator(wxFILTER_NUMERIC));
+            s->Add(txt,0,wxALIGN_CENTER);
+            s->Add(win,0,wxALIGN_CENTER);
+            w->Layout();
+            sizer->Add(w,0,wxLEFT);
+            w=win;
+            break;
+         }
+      }
+      l.push_back(FoxPref(component,type,entry,w));
+   }
+   sw->Layout();
+   sizer->Fit(sw);
+   this->Layout();
+}
+WXFoxPreferences::~WXFoxPreferences()
+{
+   cout<<"WXFoxPreferences::~WXFoxPreferences()"<<endl;
+}
+
+void WXFoxPreferences::OnClose(wxCloseEvent& event)
+{
+   cout<<"WXFoxPreferences::OnClose()"<<endl;
+   for(list<FoxPref>::const_iterator pos=l.begin();pos!=l.end();++pos)
+   {
+      switch(pos->type)
+      {
+         case PREF_BOOL:
+         {
+            wxString full="/"+pos->component+"/BOOL/"+pos->entry;
+            bool val;
+            wxConfigBase::Get()->Read(full,&val);
+            wxCheckBox *w=dynamic_cast<wxCheckBox *>(pos->win);
+            val=w->GetValue();
+            wxConfigBase::Get()->Write(full,val);
+            break;
+         }
+         case PREF_STRING:
+         {
+            wxString full="/"+pos->component+"/STRING/"+pos->entry;
+            wxString val;
+            wxConfigBase::Get()->Read(full,&val);
+            wxTextCtrl *w=dynamic_cast<wxTextCtrl *>(pos->win);
+            val=w->GetValue();
+            wxConfigBase::Get()->Write(full,val);
+            break;
+         }
+         case PREF_LONG:
+         {
+            wxString full="/"+pos->component+"/LONG/"+pos->entry;
+            wxString s;
+            long val;
+            wxConfigBase::Get()->Read(full,&val);
+            wxTextCtrl *w=dynamic_cast<wxTextCtrl *>(pos->win);
+            s=w->GetValue();
+            s.ToLong(&val);
+            wxConfigBase::Get()->Write(full,val);
+            break;
+         }
+      }
+   }
+   this->Destroy();
+}
+
+
+void WXCrystMainFrame::OnPreferences(wxCommandEvent& event)
+{
+   WXFoxPreferences *prefs= new WXFoxPreferences(this);
+   prefs->ShowModal();
 }
 #endif
 ///////////////////////////////////////// Speed Test////////////////////
