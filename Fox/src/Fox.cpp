@@ -950,7 +950,7 @@ BEGIN_EVENT_TABLE(WXFoxPreferences, wxDialog)
 END_EVENT_TABLE()
 
 WXFoxPreferences::WXFoxPreferences(wxWindow *parent):
-wxDialog(parent,-1,"FOX Preferences: ",wxDefaultPosition,wxSize(400,300),wxCLOSE_BOX|wxRESIZE_BORDER|wxOK)
+wxDialog(parent,-1,"FOX Preferences: ",wxDefaultPosition,wxSize(400,300),wxDEFAULT_DIALOG_STYLE)
 {
    wxScrolledWindow *sw=new wxScrolledWindow(this);
    sw->FitInside();
