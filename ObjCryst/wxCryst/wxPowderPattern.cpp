@@ -436,7 +436,7 @@ mChi2(0.0),mGoF(0.0),mRwp(0.0),mRp(0.0)
       else
       {
          wxConfigBase::Get()->Read("PowderPattern/BOOL/Automatically open powder pattern graph/", &val);
-         if((val)&&(mpPowderPattern->GetNbPoint()>0))
+         if(val)
          {
             wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_POWDER_MENU_GRAPH);
             wxPostEvent(this,event);
@@ -616,13 +616,6 @@ void WXPowderPattern::OnMenuAddCompCryst(wxCommandEvent & WXUNUSED(event))
 void WXPowderPattern::OnMenuShowGraph(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuShowGraph()"<<mpGraph,6)
-   if(mpPowderPattern->GetPowderPatternObs().numElements()==0)
-   {
-      wxMessageDialog dumbUser(this,"Import a powder pattern or use simulation",
-                               "No observed pattern !",wxOK|wxICON_EXCLAMATION);
-      dumbUser.ShowModal();
-      return;
-   }
    if(mpGraph!=0) return;
    WXCrystValidateAllUserInput();
    mpPowderPattern->Prepare();
