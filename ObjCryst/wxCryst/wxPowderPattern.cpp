@@ -435,8 +435,7 @@ mChi2(0.0),mGoF(0.0),mRwp(0.0),mRp(0.0)
       else
       {
          bool val;
-         wxConfigBase::Get()->Read("PowderPattern/BOOL/Automatically open powder pattern graph/", &val);
-         cout<<__FILE__<<":"<<__LINE__<<val<<endl;//KLUDGE for VC++2005or val is always evaluated as false ??
+         wxConfigBase::Get()->Read("PowderPattern/BOOL/Automatically open powder pattern graph", &val);
          if(val)
          {
             wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_POWDER_MENU_GRAPH);
