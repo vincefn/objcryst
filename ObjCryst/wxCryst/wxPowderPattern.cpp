@@ -430,12 +430,13 @@ mChi2(0.0),mGoF(0.0),mRwp(0.0),mRp(0.0)
    this->BottomLayout(0);
    this->CrystUpdate(true);
    {
-      bool val;
       if(!wxConfigBase::Get()->HasEntry("PowderPattern/BOOL/Automatically open powder pattern graph"))
          wxConfigBase::Get()->Write("PowderPattern/BOOL/Automatically open powder pattern graph", false);
       else
       {
+         bool val;
          wxConfigBase::Get()->Read("PowderPattern/BOOL/Automatically open powder pattern graph/", &val);
+         cout<<__FILE__<<":"<<__LINE__<<val<<endl;//KLUDGE for VC++2005or val is always evaluated as false ??
          if(val)
          {
             wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_POWDER_MENU_GRAPH);
