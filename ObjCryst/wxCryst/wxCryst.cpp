@@ -131,9 +131,8 @@ WXCrystObjBasic::~WXCrystObjBasic()
 
 void WXCrystObjBasic::BottomLayout(WXCrystObjBasic *pChild)
 {
-   //static unsigned long sBottomLayoutNb=0;
-   //cout<<"WXCrystObjBasic::BottomLayout: #"<<++sBottomLayoutNb<<endl;
    VFN_DEBUG_ENTRY("WXCrystObjBasic::BottomLayout(...)"<<this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
+   this->Freeze();
    wxSizer *pSizer=this->GetSizer();
    if((pChild !=0) &&(pSizer!=0))
    {
@@ -150,14 +149,9 @@ void WXCrystObjBasic::BottomLayout(WXCrystObjBasic *pChild)
    {
       wxSizer *pParentSizer=this->GetParent()->GetSizer();
       if(pParentSizer!=0)
-      {
-         //this->GetParent()->GetSizer()->SetItemMinSize
-            //(this,this->GetSize().GetWidth(),this->GetSize().GetHeight());
-         //this->GetParent()->GetSizer()->Fit(this->GetParent());
          this->GetParent()->GetSizer()->SetVirtualSizeHints(this->GetParent());
-      }
-      //this->GetParent()->Layout();
    }
+   this->Thaw();
    VFN_DEBUG_EXIT("WXCrystObjBasic::BottomLayout(...)"<<this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
 }
 void WXCrystObjBasic::AddChild(WXCrystObjBasic *pChild, bool doBottomLayout)
@@ -842,8 +836,7 @@ bool WXCrystObj::Enable(bool enable)
 void WXCrystObj::BottomLayout(WXCrystObjBasic *pChild)
 {
    VFN_DEBUG_ENTRY("WXCrystObj::BottomLayout(..)"<<this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
-   //static unsigned long sBottomLayoutNb=0;
-   //cout<<"WXCrystObjBasic(CrystObj)::BottomLayout: #"<<++sBottomLayoutNb<<endl;
+   this->Freeze();
    if(mpSizer!=0) mpSizer->SetSizeHints(this);
    if((pChild !=0) &&(mpSizer!=0))
    {
@@ -867,11 +860,10 @@ void WXCrystObj::BottomLayout(WXCrystObjBasic *pChild)
       {
          this->GetParent()->GetSizer()->SetItemMinSize
             (this,this->GetSize().GetWidth(),this->GetSize().GetHeight());
-         //this->GetParent()->GetSizer()->Fit(this->GetParent());
          this->GetParent()->GetSizer()->SetVirtualSizeHints(this->GetParent());
       }
-      //this->GetParent()->Layout();
    }
+   this->Thaw();
    VFN_DEBUG_EXIT("WXCrystObj::BottomLayout(..)"<<this->GetSize().GetWidth()<<","<<this->GetSize().GetHeight(),5);
 }
 void WXCrystObj::AddChild(WXCrystObjBasic *pChild, bool doBottomLayout)
