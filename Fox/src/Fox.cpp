@@ -326,7 +326,21 @@ int main (int argc, char *argv[])
       if(string(argv[i]).find(string(".xml"))!=string::npos)
       {
          cout<<"Loading: "<<string(argv[i])<<endl;
+         #ifdef __WX__CRYST__
+         wxString name(argv[i]);
+         if(name.Mid(name.size()-4)==wxString(".xml"))
+            XMLCrystFileLoadAllObject(name.c_str());
+         else
+         {//compressed file
+            wxFileInputStream is(name.c_str());
+            wxZlibInputStream zstream(is);
+            stringstream sst;
+            while (!zstream.Eof()) sst<<zstream.GetC();
+            XMLCrystFileLoadAllObject(sst);
+         }
+         #else
          XMLCrystFileLoadAllObject(argv[i]);
+         #endif
          continue;
       }
       cout <<"command-line arguments:"<<endl
