@@ -209,8 +209,11 @@ void WXMultiGraph::OnPaint(wxPaintEvent &event)
    dc.Clear();
 
    wxString fontInfo;
+   #ifdef __WIN32__
+   dc.SetFont(*wxNORMAL_FONT);
+   #else
    dc.SetFont(*wxSMALL_FONT);
-
+   #endif
    // Get Window Size
    wxCoord width,height;
    this->GetSize(&width, &height);

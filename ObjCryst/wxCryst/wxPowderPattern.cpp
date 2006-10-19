@@ -903,7 +903,11 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
    dc.Clear();
 
    wxString fontInfo;
+   #ifdef __WIN32__
+   dc.SetFont(*wxNORMAL_FONT);
+   #else
    dc.SetFont(*wxSMALL_FONT);
+   #endif
 
    long nbPoint=mX.numElements();
    
