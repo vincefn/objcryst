@@ -125,6 +125,45 @@ template<class T> T CrystVector<T>::max()const
    return tmp;
 }
 
+template<class T> unsigned long CrystVector<T>::imin(const unsigned long start0,const unsigned long finish0)const
+{
+   unsigned long start=start0,finish=finish0;
+   if(start0==finish0)
+   {
+      start=0;
+      finish=this->numElements();
+   }
+   register T tmp=0;
+   register const T *p=this->data()+start;
+   tmp=*p++;
+   long im=0;
+   for(long i=start+1;i<finish;i++)
+   {
+      if(tmp>*p) {tmp=*p;im=i;}
+      p++;
+   }
+   return (unsigned long)im;
+}
+template<class T> unsigned long CrystVector<T>::imax(const unsigned long start0,const unsigned long finish0)const
+{
+   unsigned long start=start0,finish=finish0;
+   if(start0==finish0)
+   {
+      start=0;
+      finish=this->numElements();
+   }
+   register T tmp=0;
+   register const T *p=this->data()+start;
+   tmp=*p++;
+   long im=0;
+   for(long i=start+1;i<finish;i++)
+   {
+      if(tmp<*p) {tmp=*p;im=i;}
+      p++;
+   }
+   return (unsigned long)im;
+}
+
 template<class T> T * CrystVector<T>::data() {return mpData;}
 template<class T> const T * CrystVector<T>::data() const {return mpData;}
 
@@ -1339,4 +1378,89 @@ void CubicSpline::InitNaturalSpline()
    }
    mYsecond(n-1)=0;
    for(long i=(n-2);i>=0;i--) mYsecond(i)=mYsecond(i)*mYsecond(i+1)+u(i);
+}
+
+//######################################################################
+//  Savitzky-Golay interpolation
+//######################################################################
+// Coefficients for smoothing (deriv=0) - is there a general formula for these ?
+REAL sgcoeffs_0_5[]={-0.08571429,  0.34285714,  0.48571429,  0.34285714, -0.08571429};
+REAL sgcoeffs_0_7[]={-0.0952381 ,  0.14285714,  0.28571429,  0.33333333,  0.28571429,
+                       0.14285714,  -0.0952381};
+REAL sgcoeffs_0_9[]={-0.09090909,  0.06060606,  0.16883117,  0.23376623,  0.25541126,
+                      0.23376623,   0.16883117,  0.06060606, -0.09090909};
+REAL sgcoeffs_0_11[]={-0.08391608,  0.02097902,  0.1025641 ,  0.16083916,  0.1958042 ,  0.20745921,
+                       0.1958042 ,  0.16083916,  0.1025641 ,  0.02097902, -0.08391608};
+REAL sgcoeffs_0_13[]={-7.69230769e-02,   1.73472348e-18,   6.29370629e-02,   1.11888112e-01,
+                       1.46853147e-01,   1.67832168e-01,   1.74825175e-01,   1.67832168e-01,
+                       1.46853147e-01,   1.11888112e-01,   6.29370629e-02,   1.73472348e-18,
+                      -7.69230769e-02};
+REAL sgcoeffs_0_15[]={-0.07058824, -0.01176471,  0.03800905,  0.07873303,  0.11040724,  0.13303167,
+                       0.14660633,  0.15113122,  0.14660633,  0.13303167,  0.11040724,
+                       0.07873303,  0.03800905, -0.01176471, -0.07058824};
+REAL sgcoeffs_0_17[]={-0.06501548, -0.01857585,  0.02167183,  0.05572755,  0.08359133,  0.10526316,
+                       0.12074303,  0.13003096,  0.13312693,  0.13003096,  0.12074303,
+                       0.10526316,  0.08359133,  0.05572755,  0.02167183, -0.01857585,
+                      -0.06501548};
+REAL sgcoeffs_0_19[]={-0.06015038, -0.02255639,  0.01061477,  0.03936311,  0.06368863,  0.08359133,
+                       0.09907121,  0.11012826,  0.11676249,  0.11897391,  0.11676249,
+                       0.11012826,  0.09907121,  0.08359133,  0.06368863,  0.03936311,
+                       0.01061477, -0.02255639, -0.06015038};
+REAL sgcoeffs_0_21[]={-0.05590062, -0.02484472,  0.00294214,  0.02745995,  0.04870873,  0.06668846,
+                       0.08139915,  0.0928408 ,  0.1010134 ,  0.10591697,  0.10755149,
+                       0.10591697,  0.1010134 ,  0.0928408 ,  0.08139915,  0.06668846,
+                       0.04870873,  0.02745995,  0.00294214, -0.02484472, -0.05590062};
+REAL sgcoeffs_0_23[]={-0.05217391, -0.02608696, -0.00248447,  0.01863354,  0.03726708,  0.05341615,
+                       0.06708075,  0.07826087,  0.08695652,  0.0931677 ,  0.09689441,
+                       0.09813665,  0.09689441,  0.0931677 ,  0.08695652,  0.07826087,
+                       0.06708075,  0.05341615,  0.03726708,  0.01863354, -0.00248447,
+                      -0.02608696, -0.05217391};
+CrystVector_REAL SavitzkyGolay(const CrystVector_REAL &v, const unsigned int um, const unsigned int deriv)
+{
+   const int m=(int)um;
+   REAL *sgcoeffs=0;
+   if(deriv==0)
+   {
+      if(m==2)sgcoeffs=sgcoeffs_0_5;
+      if(m==3)sgcoeffs=sgcoeffs_0_7;
+      if(m==4)sgcoeffs=sgcoeffs_0_9;
+      if(m==5)sgcoeffs=sgcoeffs_0_11;
+      if(m==6)sgcoeffs=sgcoeffs_0_13;
+      if(m==7)sgcoeffs=sgcoeffs_0_15;
+      if(m==8)sgcoeffs=sgcoeffs_0_17;
+      if(m==9)sgcoeffs=sgcoeffs_0_19;
+      if(m==10)sgcoeffs=sgcoeffs_0_21;
+      if(m==11)sgcoeffs=sgcoeffs_0_23;
+   }
+   if(deriv==1)
+   {
+      sgcoeffs=new REAL[2*m+1];
+      REAL *p=sgcoeffs;
+      const REAL f=3/(REAL) (m*(m+1)*(2*m+1));
+      for(int j=-m;j<=m;++j) *p++ = f*j;
+   }
+   if(deriv==2)
+   {
+      sgcoeffs=new REAL[2*m+1];
+      REAL *p=sgcoeffs;
+      const REAL f1=45/(REAL) (m*(m+1)*(2*m+1)*(4*m*(m+1)-3));
+      const REAL f2=-15/(REAL) ((2*m+1)*(4*m*(m+1)-3));
+      for(int j=-m;j<=m;++j) *p++ = f1*j*j + f2;
+   }
+   //cout<<__FILE__<<":"<<__LINE__<<"Savitzky-Golay coeeficients(m="<<m<<",deriv="<<deriv<<"): ";
+   //for(int j=-m;j<=m;++j) cout<<m<<"="<<sgcoeffs[m+j]<<" ";
+   //cout<<endl;
+   const unsigned int n=v.numElements();
+   CrystVector_REAL d(n);
+   d=0;
+   const unsigned int nm=n-m;
+   float *pd=d.data()+m;
+   for(unsigned int i=m;i<nm;++i)
+   {
+      const REAL *c=sgcoeffs,*p=v.data()+i-m;
+      for(int j=-m;j<=m;++j) *pd += *c++ * *p++;
+      pd++;
+   }
+   if(deriv!=0) delete[]sgcoeffs;
+   return d;
 }

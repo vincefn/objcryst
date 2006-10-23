@@ -191,6 +191,10 @@ template<class T> class CrystVector
    T sum()const;
    T min()const;
    T max()const;
+   /// Find index of minimum, between start and end (if start==end, use full vector)
+   unsigned long imin(const unsigned long start=0,const unsigned long finish=0)const;
+   /// Find index of maximum, between start and end (if start==end, use full vector)
+   unsigned long imax(const unsigned long start=0,const unsigned long finish=0)const;
    
    T * data();
    const T * data() const;
@@ -300,7 +304,6 @@ template<class T> CrystVector<T> sin(const CrystVector<T> &vect);
 template<class T> CrystVector<T> tan(const CrystVector<T> &vect);
 ///Square root (slow routine, not memory-savy...)
 template<class T> CrystVector<T> sqrt(const CrystVector<T> &vect);
-
 
 //######################################################################
 //  CrystMatrix
@@ -581,5 +584,12 @@ class CubicSpline
       CrystVector_REAL mY;
       CrystVector_REAL mYsecond;
 };
+//######################################################################
+//  Savitzky-Golay interpolation
+//######################################################################
+/** Savitzky-Golay computing of smoothed data, using 2nd order polynomial coefficients
+*
+*/
+CrystVector_REAL SavitzkyGolay(const CrystVector_REAL &v, const unsigned int m, const unsigned int deriv);
 
 #endif   // __LIBCRYST_VECTOR_H
