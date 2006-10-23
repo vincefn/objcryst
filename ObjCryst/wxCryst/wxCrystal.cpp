@@ -2260,7 +2260,11 @@ mIsGLFontBuilt(false),mGLFontDisplayListBase(0)
    if(!wxConfigBase::Get()->HasEntry("Crystal/BOOL/Default-display atom names in 3D view"))
       wxConfigBase::Get()->Write("Crystal/BOOL/Default-display atom names in 3D view", mShowAtomName);
    else
+   {
       wxConfigBase::Get()->Read("Crystal/BOOL/Default-display atom names in 3D view", &mShowAtomName);
+      if(mShowAtomName) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, "Hide Atom Labels");
+      else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, "Show Atom Labels");
+   }
 }
 
 WXGLCrystalCanvas::~WXGLCrystalCanvas()
