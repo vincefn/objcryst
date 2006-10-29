@@ -101,7 +101,7 @@ class DiffractionDataSingleCrystal:public ScatteringData
                       const CrystVector_REAL &iObs,
                       const CrystVector_REAL &sigma);
       
-      /** \brief Import h,k,l,I form a file
+      /** \brief Import h,k,l,I from a file
       *
       *The file is assumed to correspond to a single crystal diffraction file.
       *  \param fileName The name of the data file. This file should be formatted
@@ -110,7 +110,7 @@ class DiffractionDataSingleCrystal:public ScatteringData
       *  \param skipLines The number of lines to skip at the beginning of the file.
       */
       void ImportHklIobs(const string &fileName,const long nbRefl,const int skipLines=0);
-      /** \brief Import h,k,l,I,Sigma form a file
+      /** \brief Import h,k,l,I,Sigma from a file
       *
       *The file is assumed to correspond to a single crystal diffraction file.
       *  \param fileName The name of the data file. This file should be formatted
@@ -119,12 +119,28 @@ class DiffractionDataSingleCrystal:public ScatteringData
       *  \param skipLines The number of lines to skip at the beginning of the file.
       */
       void ImportHklIobsSigma(const string &fileName,const long nbRefl,const int skipLines=0);
-      /** \brief Import h,k,l,I,Sigma form a Jana98 '*.m91' file
+      /** \brief Import h,k,l,I,Sigma from a Jana98 '*.m91' file
       *
       *The file is assumed to correspond to a single crystal diffraction file.
       *  \param fileName The name of the data file.
       */
       void ImportHklIobsSigmaJanaM91(const string &fileName);
+      /** \brief Import h,k,l and grouped intensities from a file
+      *
+      *The file is assumed to correspond to a single crystal diffraction file.
+      *  \param fileName The name of the data file. This file should be formatted
+      *with H,k,l, Iobs separated by spaces.
+      *  \param skipLines The number of lines to skip at the beginning of the file.
+      *
+      * File format (the reflection which has an intensity entry marks the end of the group)
+      * h   k   l    Igroup    
+      * -2   4   2                            
+      * -2  -4   2   100.4
+      *  2  -4   1                           
+      *  2   4   1   193.2
+      *  ...
+      */
+      void ImportHklIobsGroup(const string &fileName,const unsigned int skipLines=0);
       
       /** \brief  Return the Crystal R-factor (weighted)
       *
@@ -246,7 +262,7 @@ class DiffractionDataSingleCrystal:public ScatteringData
       virtual CrystVector_long SortReflectionBySinThetaOverLambda(const REAL maxTheta=-1.);
       /// Init options (currently only twinning).
       void InitOptions();
-      /// Determine the index of reflections to be summed because of twinning.
+      /// Determine the index of reflections to be summed because of twinning (GroupOption==1)
       /// The reflections \e must have been sorted by increasing theta beforehand. 
       void PrepareTwinningCalc() const;
       /// Are there observed intensities ?
@@ -276,23 +292,38 @@ class DiffractionDataSingleCrystal:public ScatteringData
          RefinableObjClock mClockScaleFactor;
          ///Clock the last time Chi^2 was computed
          mutable RefinableObjClock mClockChi2;
-      // Twinning
-         /// Option for the type of twinning
-         RefObjOpt mTwinningOption;
+      // Grouped reflections
+         /// Option for the type of grouping (0:no, 1:by theta values (twinning), 2:user-supplied groups)
+         RefObjOpt mGroupOption;
          /// The observed intensities summed on all reflections that are (or could be) 
          /// overlapped dur to a twinning
-         mutable CrystVector_REAL mTwinnedIobsSum;
-         /// The calculated intensities summed on all reflections that are (or could be) 
-         /// overlapped dur to a twinning
-         mutable CrystVector_REAL mTwinnedIcalcSum;
-         /// The weight on each reflection sum in case of twinning. The sum is the
+         mutable CrystVector_REAL mGroupIobs;
+         /// The uncertainty on observed grouped intensities.
+         mutable CrystVector_REAL mGroupSigma;
+         /// The calculated intensities summed on all reflections that are grouped
+         mutable CrystVector_REAL mGroupIcalc;
+         /// The weight on each reflection sum in case of grouped reflections. The sum is the
          /// inverse of the sum of all sigma^2
-         mutable CrystVector_REAL mTwinnedWeight;
-         /// The index of reflections which need to be summed. They must have been sorted
-         /// by increasing theta values. Each entry marks the beginning of a new batch
-         /// of reflections to be summed. 
-         mutable CrystVector_long mTwinnedGroupIndex;
-         /// Clock for twinning, when the preparation of twiinning correction was last made.
+         mutable CrystVector_REAL mGroupWeight;
+         /** The index of reflections which need to be summed. They must have been sorted
+         * by increasing theta values. Each entry (the reflection index) marks the beginning 
+         * of a new batch of reflections to be summed.
+         *
+         * Here only the groups of reflections are \e roughly sorted by sin(theta)/lambda.
+         * It is assumed, howver, that grouped reflections are of approximately the same
+         * d_hkl. After ScatteringData::GetNbReflBelowMaxSinThetaOvLambda(),
+         * the number of groups for which *all* reflections are below the limit are 
+         * taken into account for the statistics.
+         *
+         * Note that \before DiffractionDataSingleCrystal::SortReflectionBySinThetaOverLambda()
+         * is called (i.e. immediately after importing the reflections) 
+         **/
+         mutable CrystVector_long mGroupIndex;
+         /// Number of groups
+         mutable long mNbGroup;
+          /// Number of groups below max[sin(theta)/lambda]
+         mutable long mNbGroupUsed;
+        /// Clock for twinning, when the preparation of twinning correction was last made.
          mutable RefinableObjClock mClockPrepareTwinningCorr;
          
       // The Radiation for this object

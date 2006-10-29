@@ -1073,13 +1073,16 @@ void DiffractionDataSingleCrystal::XMLOutput(ostream &os,int indent)const
    os <<tag<<endl;
    indent++;
    
+   this->GetPar("Scale factor").XMLOutput(os,"Scale factor",indent);
+   os <<endl;
+   
    mRadiation.XMLOutput(os,indent);
    os <<endl;
 
    this->GetPar(&mGlobalBiso).XMLOutput(os,"globalBiso",indent);
    os <<endl;
    
-   mTwinningOption.XMLOutput(os,indent);
+   mGroupOption.XMLOutput(os,indent);
    os <<endl;
    
    for(int i=0;i<indent;i++) os << "  " ;
@@ -1088,26 +1091,70 @@ void DiffractionDataSingleCrystal::XMLOutput(ostream &os,int indent)const
    tag2.SetIsEndTag(true);
    os << tag2<<endl<<endl;
    
-   XMLCrystTag tag3("HKLIobsSigmaWeightList");
-   for(int i=0;i<indent;i++) os << "  " ;
-   os <<tag3<<endl;
-   
-   for(long j=0;j<this->GetNbRefl();j++)
+   if(mGroupOption.GetChoice()!=2)
    {
-      for(int i=0;i<=indent;i++) os << "  " ;
-      os << mIntH(j) <<" "
-         << mIntK(j) <<" "
-         << mIntL(j) <<" "
-         << mObsIntensity(j) <<" "
-         << mObsSigma(j) <<" "
-         << mWeight(j) <<" "
-         <<endl;
+      XMLCrystTag tag3("HKLIobsSigmaWeightList");
+      for(int i=0;i<indent;i++) os << "  " ;
+      os <<tag3<<endl;
+      
+      for(long j=0;j<this->GetNbRefl();j++)
+      {
+         for(int i=0;i<=indent;i++) os << "  " ;
+         os << mIntH(j) <<" "
+            << mIntK(j) <<" "
+            << mIntL(j) <<" "
+            << mObsIntensity(j) <<" "
+            << mObsSigma(j) <<" "
+            << mWeight(j) <<" "
+            <<endl;
+      }
+      
+      tag3.SetIsEndTag(true);
+      for(int i=0;i<indent;i++) os << "  " ;
+      os <<tag3<<endl;
    }
-   
-   tag3.SetIsEndTag(true);
-   for(int i=0;i<indent;i++) os << "  " ;
-   os <<tag3<<endl;
-   
+   else
+   {
+      XMLCrystTag tag3("HKLIobsSigmaWeightGROUPList");
+      for(int i=0;i<indent;i++) os << "  " ;
+      os <<tag3<<endl;
+      
+      long first=0;
+      for(long j=0;j<mNbGroup;j++)
+      {
+         XMLCrystTag tag4("HKLGroup");
+         {
+            stringstream s;
+            s<<mGroupIobs(j);
+            tag4.AddAttribute("Iobs",s.str());
+         }
+         {
+            stringstream s;
+            s<<mGroupSigma(j);
+            tag4.AddAttribute("IobsSigma",s.str());
+         }
+         {
+            stringstream s;
+            s<<mGroupWeight(j);
+            tag4.AddAttribute("Weight",s.str());
+         }
+         for(int i=0;i<=indent;i++) os << "  " ;
+         os<<tag4<<endl;
+         for(long k=first;k<mGroupIndex(j);k++)
+         {
+            for(int i=0;i<=indent;i++) os << "  " ;
+            os << mIntH(k) <<" "<< mIntK(k) <<" "<< mIntL(k) <<" "<<endl;
+         }
+         for(int i=0;i<=indent;i++) os << "  " ;
+         tag4.SetIsEndTag(true);
+         os<<tag4<<endl;
+         first=mGroupIndex(j);
+      }
+      
+      tag3.SetIsEndTag(true);
+      for(int i=0;i<indent;i++) os << "  " ;
+      os <<tag3<<endl;
+   }
    
    indent--;
    tag.SetIsEndTag(true);
@@ -1131,15 +1178,33 @@ void DiffractionDataSingleCrystal::XMLInput(istream &is,const XMLCrystTag &tagg)
       if(("DiffractionDataSingleCrystal"==tag.GetName())&&tag.IsEndTag())
       {
          this->UpdateDisplay();
-         VFN_DEBUG_EXIT("DiffractionDataSingleCrystal::Exit():"<<this->GetName(),5)
+         VFN_DEBUG_EXIT("DiffractionDataSingleCrystal::XMLInput():"<<this->GetName(),5)
          return;
       }
       if("Option"==tag.GetName())
       {
          for(unsigned int i=0;i<tag.GetNbAttribute();i++)
             if("Name"==tag.GetAttributeName(i)) 
-               mOptionRegistry.GetObj(tag.GetAttributeValue(i)).XMLInput(is,tag);
+            {
+               string name=tag.GetAttributeValue(i);
+               if(name=="Twinning correction") name="Group Reflections";
+               mOptionRegistry.GetObj(name).XMLInput(is,tag);
+            }
          continue;
+      }
+      if("Par"==tag.GetName())
+      {
+         for(unsigned int i=0;i<tag.GetNbAttribute();i++)
+         {
+            if("Name"==tag.GetAttributeName(i))
+            {
+               if("Scale factor"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar(&mScaleFactor).XMLInput(is,tag);
+                  break;
+               }
+            }
+         }
       }
       if("Radiation"==tag.GetName()) mRadiation.XMLInput(is,tag);
       if("MaxSinThetaOvLambda"==tag.GetName())
@@ -1197,6 +1262,102 @@ void DiffractionDataSingleCrystal::XMLInput(istream &is,const XMLCrystTag &tagg)
          this->SortReflectionBySinThetaOverLambda();
          this->CalcIcalc();
          this->FitScaleFactorForRw();
+      }
+      if("HKLIobsSigmaWeightGROUPList"==tag.GetName())
+      {
+         mNbRefl=0;
+         mNbGroup=0;
+         // This must NOT be changed with this kind of data.
+         mGroupOption.SetChoice(2);
+         // So de-register the option so that it is hidden from the user's view
+         mOptionRegistry.DeRegister(mGroupOption);
+         mClockMaster.RemoveChild(mGroupOption.GetClock());
+         mH.resize(500);
+         mK.resize(500);
+         mL.resize(500);
+         mObsIntensity.resize(500);
+         mObsSigma.resize(500);
+         mGroupIndex.resize(500);
+         mGroupIobs.resize(500);
+         mGroupSigma.resize(500);
+         mGroupWeight.resize(500);
+         while(true)
+         {
+            XMLCrystTag grouptag(is);
+            if(grouptag.GetName()=="HKLIobsSigmaWeightGROUPList") break;
+            if(grouptag.GetName()=="HKLGroup")
+            {
+               for(unsigned int i=0;i<grouptag.GetNbAttribute();++i)
+               {
+                  if(grouptag.GetAttributeName(i)=="Iobs")
+                  {
+                     stringstream sst;
+                     sst<<grouptag.GetAttributeValue(i);
+                     sst>>mGroupIobs(mNbGroup);
+                     continue;
+                  }
+                  if(grouptag.GetAttributeName(i)=="IobsSigma")
+                  {
+                     stringstream sst;
+                     sst<<grouptag.GetAttributeValue(i);
+                     sst>>mGroupSigma(mNbGroup);
+                     continue;
+                  }
+                  if(grouptag.GetAttributeName(i)=="Weight")
+                  {
+                     stringstream sst;
+                     sst<<grouptag.GetAttributeValue(i);
+                     sst>>mGroupWeight(mNbGroup);
+                     continue;
+                  }
+               }
+               VFN_DEBUG_MESSAGE("Group #"<<mNbGroup<<" ,Iobs="<<mGroupIobs(mNbGroup)<<" ,Sigma="<<mGroupSigma(mNbGroup)<<" ,Weight="<<mGroupWeight(mNbGroup),2)
+               do
+               {
+                  is >>mH(mNbRefl)>>mK(mNbRefl)>>mL(mNbRefl);
+                  VFN_DEBUG_MESSAGE("         "<<mH(mNbRefl)<<" "<<mK(mNbRefl)<<" "<<mL(mNbRefl),2)
+                  mGroupIndex(mNbRefl)=mNbGroup;
+                  mNbRefl++;
+                  if(mNbRefl==mH.numElements())
+                  {
+                     mH.resizeAndPreserve(mNbRefl+500);
+                     mK.resizeAndPreserve(mNbRefl+500);
+                     mL.resizeAndPreserve(mNbRefl+500);
+                     mObsIntensity.resizeAndPreserve(mNbRefl+500);
+                     mObsSigma.resizeAndPreserve(mNbRefl+500);
+                     mGroupIndex.resizeAndPreserve(mNbRefl+500);
+                  }
+                  while(0==isgraph(is.peek())) is.get();
+               }
+               while(is.peek()!='<');//until end tag
+               XMLCrystTag junkEndTag(is);
+               if(++mNbGroup==mGroupIobs.numElements())
+               {
+                  mGroupIobs.resizeAndPreserve(mNbGroup+500);
+                  mGroupSigma.resizeAndPreserve(mNbGroup+500);
+                  mGroupWeight.resizeAndPreserve(mNbGroup+500);
+               }
+            }
+         }
+         mH.resizeAndPreserve(mNbRefl);
+         mK.resizeAndPreserve(mNbRefl);
+         mL.resizeAndPreserve(mNbRefl);
+         mObsIntensity.resizeAndPreserve(mNbRefl);
+         mObsSigma.resizeAndPreserve(mNbRefl);
+         mWeight.resizeAndPreserve(mNbRefl);
+         mGroupIndex.resizeAndPreserve(mNbRefl);
+         
+         mGroupIobs.resizeAndPreserve(mNbGroup);
+         mGroupWeight.resizeAndPreserve(mNbGroup);
+         mGroupSigma.resizeAndPreserve(mNbGroup);
+      
+         mHasObservedData=true;
+         
+         mMultiplicity.resize(mNbRefl);
+         mMultiplicity=1;
+         
+         this->PrepareHKLarrays();
+         this->SortReflectionBySinThetaOverLambda();
       }
    }
 }

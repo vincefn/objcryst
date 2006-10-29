@@ -55,6 +55,7 @@ static long ID_DIFFSINGLECRYST_MENU_SIMULATE=              WXCRYST_ID();
 static long ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBS=        WXCRYST_ID(); 
 static long ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBSSIGMA=   WXCRYST_ID(); 
 static long ID_DIFFSINGLECRYST_MENU_IMPORT_JANAM91=        WXCRYST_ID(); 
+static long ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBSGROUP=   WXCRYST_ID(); 
 static long ID_DIFFSINGLECRYST_MENU_FITSCALE_R=            WXCRYST_ID(); 
 static long ID_DIFFSINGLECRYST_MENU_FITSCALE_RW=           WXCRYST_ID(); 
 static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH=            WXCRYST_ID(); 
@@ -88,6 +89,7 @@ BEGIN_EVENT_TABLE(WXDiffractionSingleCrystal, wxWindow)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBS,     WXDiffractionSingleCrystal::OnMenuImport)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBSSIGMA,WXDiffractionSingleCrystal::OnMenuImport)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_IMPORT_JANAM91,     WXDiffractionSingleCrystal::OnMenuImport)
+   EVT_MENU(ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBSGROUP,WXDiffractionSingleCrystal::OnMenuImport)
    EVT_BUTTON(ID_DIFFSINGLECRYST_CRYSTAL,               WXDiffractionSingleCrystal::OnChangeCrystal)
    //EVT_MENU(ID_DIFFSINGLECRYST_MENU_FITSCALE_R,         WXDiffractionSingleCrystal::OnMenuFitScaleForR)
    //EVT_MENU(ID_DIFFSINGLECRYST_MENU_FITSCALE_RW,        WXDiffractionSingleCrystal::OnMenuFitScaleForRw)
@@ -133,8 +135,10 @@ WXRefinableObj(parent,data),mpData(data)
                                  "Import HKL Iobs");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBSSIGMA,
                                  "Import HKL Iobs Sigma");
-         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_DIFFSINGLECRYST_MENU_IMPORT_JANAM91,
-                                 "Import Jana M91");
+         //mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_DIFFSINGLECRYST_MENU_IMPORT_JANAM91,
+         //                        "Import Jana M91");
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBSGROUP,
+                                 "Import Reflections with group intensity");
         
       mpMenuBar->AddMenu("Radiation",ID_DIFFSINGLECRYST_MENU_WAVELENGTH);
          mpMenuBar->AddMenuItem(ID_DIFFSINGLECRYST_MENU_WAVELENGTH,
@@ -293,6 +297,7 @@ void WXDiffractionSingleCrystal::OnMenuImport(wxCommandEvent & event)
          dialog.GetValue().ToLong(&nb);
       }
       mpData->ImportHklIobs(open.GetPath().c_str(),nb);
+      mpData->UpdateDisplay();
       return;
    }
    if(event.GetId()== ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBSSIGMA)
@@ -313,10 +318,26 @@ void WXDiffractionSingleCrystal::OnMenuImport(wxCommandEvent & event)
          dialog.GetValue().ToLong(&nb);
       }
       mpData->ImportHklIobsSigma(open.GetPath().c_str(),nb);
+      mpData->UpdateDisplay();
+      return;
+   }
+   if(event.GetId()== ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBSGROUP)
+   {
+      wxFileDialog open(this,"Choose data file",
+                                     "","","*.*",wxOPEN | wxFILE_MUST_EXIST);
+      if(open.ShowModal() != wxID_OK) return;
+      mpData->ImportHklIobsGroup(open.GetPath().c_str());
+      mpData->UpdateDisplay();
       return;
    }
    if(event.GetId()== ID_DIFFSINGLECRYST_MENU_IMPORT_JANAM91)
    {
+      wxFileDialog open(this,"Choose data file",
+                                     "","","*.*",wxOPEN | wxFILE_MUST_EXIST);
+      if(open.ShowModal() != wxID_OK) return;
+      mpData->ImportHklIobsSigmaJanaM91(open.GetPath().c_str());
+      mpData->UpdateDisplay();
+      return;
    }
 }
 void WXDiffractionSingleCrystal::OnMenuSaveHKLIobsIcalc(wxCommandEvent & WXUNUSED(event))
