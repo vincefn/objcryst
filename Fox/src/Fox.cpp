@@ -123,6 +123,7 @@ public:
 private:
     DECLARE_EVENT_TABLE()
     RefinableObjClock mClockLastSave;
+    wxNotebook *mpNotebook;
 };
 // ----------------------------------------------------------------------------
 // For messaging the user
@@ -596,7 +597,7 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
 
    // Create the notebook
 
-      wxNotebook *notebook = new wxNotebook(this, -1);
+      mpNotebook = new wxNotebook(this, -1);
 
       wxLayoutConstraints* c = new wxLayoutConstraints;
       c->left.SameAs(this, wxLeft, 2);
@@ -604,36 +605,36 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
       c->top.SameAs(this, wxTop, 2);
       c->bottom.SameAs(this, wxBottom, 2);
 
-      notebook->SetConstraints(c);
+      mpNotebook->SetConstraints(c);
 
    // First window -Crystals
-      WXCrystScrolledWindow *mpWin1 = new WXCrystScrolledWindow(notebook);
+      WXCrystScrolledWindow *mpWin1 = new WXCrystScrolledWindow(mpNotebook);
       mpWin1->SetChild(gCrystalRegistry.WXCreate(mpWin1));
       mpWin1->Layout();
-      notebook->AddPage(mpWin1, "Crystals", TRUE);
+      mpNotebook->AddPage(mpWin1, "Crystals", TRUE);
 
    // Second window - PowderPattern
-      WXCrystScrolledWindow *mpWin2 = new WXCrystScrolledWindow(notebook);
+      WXCrystScrolledWindow *mpWin2 = new WXCrystScrolledWindow(mpNotebook);
       mpWin2->SetChild(gPowderPatternRegistry.WXCreate(mpWin2));
       mpWin2->Layout();
-      notebook->AddPage(mpWin2,"Powder Diffraction",true);
+      mpNotebook->AddPage(mpWin2,"Powder Diffraction",true);
       
    // Third window - SingleCrystal
-      WXCrystScrolledWindow *mpWin3 = new WXCrystScrolledWindow(notebook);
+      WXCrystScrolledWindow *mpWin3 = new WXCrystScrolledWindow(mpNotebook);
       mpWin3->SetChild(gDiffractionDataSingleCrystalRegistry.WXCreate(mpWin3));
       mpWin3->Layout();
-      notebook->AddPage(mpWin3,"Single Crystal Diffraction",true);
+      mpNotebook->AddPage(mpWin3,"Single Crystal Diffraction",true);
       
    // Fourth window - Global Optimization
-      WXCrystScrolledWindow *mpWin4 = new WXCrystScrolledWindow(notebook);
+      WXCrystScrolledWindow *mpWin4 = new WXCrystScrolledWindow(mpNotebook);
       mpWin4->SetChild(gOptimizationObjRegistry.WXCreate(mpWin4));
       mpWin4->Layout();
-      notebook->AddPage(mpWin4,"Global Optimization",true);
+      mpNotebook->AddPage(mpWin4,"Global Optimization",true);
 
    this->SetIcon(wxICON(Fox));
    this->Show(TRUE);
    this->Layout();
-   notebook->SetSelection(0);
+   mpNotebook->SetSelection(0);
    //Splash Screen
    if(true==splashscreen)
    {
@@ -782,6 +783,7 @@ void WXCrystMainFrame::OnAddCrystal(wxCommandEvent& WXUNUSED(event))
       else obj->GetOption(0).SetChoice(1);
    }
    obj->UpdateDisplay();
+   mpNotebook->SetSelection(0);
 }
 void WXCrystMainFrame::OnAddPowderPattern(wxCommandEvent& WXUNUSED(event))
 {
@@ -791,16 +793,22 @@ void WXCrystMainFrame::OnAddPowderPattern(wxCommandEvent& WXUNUSED(event))
    obj->SetName(s.str());
    obj->SetMaxSinThetaOvLambda(0.4);
    obj->UpdateDisplay();
+   mpNotebook->SetSelection(1);
 }
 
 void WXCrystMainFrame::OnAddSingleCrystalData(wxCommandEvent& WXUNUSED(event))
 {
    WXCrystValidateAllUserInput();
-   int choice;
-   Crystal *cryst=dynamic_cast<Crystal*>
-      (WXDialogChooseFromRegistry(gCrystalRegistry,(wxWindow*)this,
-         "Choose a Crystal Structure:",choice));
-   if(0==cryst) return;
+   Crystal *cryst;
+   if(gCrystalRegistry.GetNb()==1) cryst=&(gCrystalRegistry.GetObj(0));
+   else
+   {
+      int choice;
+      Crystal *cryst=dynamic_cast<Crystal*>
+         (WXDialogChooseFromRegistry(gCrystalRegistry,(wxWindow*)this,
+            "Choose a Crystal Structure:",choice));
+      if(0==cryst) return;
+   }
 
    DiffractionDataSingleCrystal* obj;
    obj=new DiffractionDataSingleCrystal(*cryst);
@@ -808,11 +816,13 @@ void WXCrystMainFrame::OnAddSingleCrystalData(wxCommandEvent& WXUNUSED(event))
    obj->SetName(s.str());
    obj->SetMaxSinThetaOvLambda(0.4);
    obj->UpdateDisplay();
+   mpNotebook->SetSelection(2);
 }
 void WXCrystMainFrame::OnAddGlobalOptimObj(wxCommandEvent& WXUNUSED(event))
 {
    stringstream s;s<<"OptimizationObj #"<<gOptimizationObjRegistry.GetNb();
    MonteCarloObj* obj=new MonteCarloObj(s.str());
+   mpNotebook->SetSelection(3);
 }
 void WXCrystMainFrame::OnAddGeneticAlgorithm(wxCommandEvent& WXUNUSED(event))
 {
