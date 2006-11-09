@@ -491,26 +491,27 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
    try
    {
       cctbx::sgtbx::space_group_symbols sgs=cctbx::sgtbx::space_group_symbols(spgId);
-
-      if(!sgs.is_valid())
-      {
-         cout << "An Error occured ! Cannot build SpaceGroup Info :" ;
-         cout << "Cannot understand Spacegroup Symbol !" ;
-         this->InitSpaceGroup(mId);
-         (*fpObjCrystInformUser)("Could not understand spacegroup symbol: "+spgId);
-         VFN_DEBUG_EXIT("SpaceGroup::InitSpaceGroup():"<<spgId,8)
-         return;
-      }
       if(mpCCTbxSpaceGroup!=0) delete mpCCTbxSpaceGroup;
+      mpCCTbxSpaceGroup=0;
       mpCCTbxSpaceGroup = new cctbx::sgtbx::space_group(sgs);
    }
    catch(cctbx::error)
    {
-      cout << "WARNING: Could not interpret Spacegroup name:"<<spgId<<endl;
-      (*fpObjCrystInformUser)("Could not interpret Spacegroup Symbol:"+spgId);
-      this->InitSpaceGroup(mId);
-      VFN_DEBUG_EXIT("SpaceGroup::InitSpaceGroup():"<<spgId,8)
-      return;
+      try
+      {
+         cout<<"Failed lookup symbol, try Hall symbol ?"<<endl;
+         if(mpCCTbxSpaceGroup!=0) delete mpCCTbxSpaceGroup;
+         mpCCTbxSpaceGroup=0;
+         mpCCTbxSpaceGroup = new cctbx::sgtbx::space_group(spgId);
+      }
+      catch(cctbx::error)
+      {
+         cout << "WARNING: Could not interpret Spacegroup name:"<<spgId<<endl;
+         (*fpObjCrystInformUser)("Could not interpret Spacegroup Symbol:"+spgId);
+         this->InitSpaceGroup(mId);
+         VFN_DEBUG_EXIT("SpaceGroup::InitSpaceGroup():"<<spgId,8)
+         return;
+      }
    }
    
    mId=spgId;
