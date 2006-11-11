@@ -50,6 +50,7 @@
 #include "ObjCryst/DiffractionDataSingleCrystal.h"
 #include "ObjCryst/Polyhedron.h"
 #include "ObjCryst/test.h"
+#include "ObjCryst/CIF.h"
 #include "RefinableObj/GlobalOptimObj.h"
 #include "Quirks/VFNStreamFormat.h"
 
@@ -344,6 +345,13 @@ int main (int argc, char *argv[])
          #endif
          continue;
       }
+      if(string(argv[i]).find(string(".cif"))!=string::npos)
+      {
+         cout<<"Loading: "<<string(argv[i])<<endl;
+         ifstream in (argv[i]);
+         CreateCrystalFromCIF(in);
+         continue;
+      }
       cout <<"command-line arguments:"<<endl
            <<"   in.xml: input 'in.xml' file"<<endl
            <<"   --loadfouriergrd map.grd: load and display 'map.grd' fourier map with (first) crystal structure"<<endl
@@ -542,7 +550,7 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
 
    // create a menu bar
       wxMenu *menuFile = new wxMenu;//
-         menuFile->Append(MENU_FILE_LOAD, "&Open\tCtrl-O", "Open .xml file");
+         menuFile->Append(MENU_FILE_LOAD, "&Open .xml or .cif\tCtrl-O", "Open Fox (.xml, .xml.gz) or CIF file");
          menuFile->Append(MENU_FILE_CLOSE, "Close\tCtrl-W", "Close all");
          menuFile->Append(MENU_FILE_SAVE, "&Save\tCtrl-S", "Save Everything...");
          menuFile->Append(MENU_FILE_QUIT, "E&xit\tCtrl-Q", "Quit ");
@@ -680,24 +688,32 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
    if(event.GetId()==MENU_FILE_LOAD)
    {
       open= new wxFileDialog(this,"Choose File :",
-                             "","","FOX files (*.xml,*.xml.gz)|*.xml;*.xml.gz",wxOPEN | wxFILE_MUST_EXIST);
+                             "","","FOX files (*.xml,*.xml.gz) or CIF (*.cif)|*.xml;*.xml.gz;*.cif",wxOPEN | wxFILE_MUST_EXIST);
       if(open->ShowModal() != wxID_OK) return;
       wxString name=open->GetPath();
-      cout<<name.Mid(name.size()-4)<<endl;
       if(name.Mid(name.size()-4)==wxString(".xml"))
          XMLCrystFileLoadAllObject(name.c_str());
       else
-      {//compressed file
-         wxFileInputStream is(name.c_str());
-         wxZlibInputStream zstream(is);
-         stringstream sst;
-         while (!zstream.Eof()) sst<<zstream.GetC();
-         XMLCrystFileLoadAllObject(sst);
-      }
+         if(name.Mid(name.size()-4)==wxString(".cif"))
+         {
+            ifstream in (open->GetPath().c_str());
+            CreateCrystalFromCIF(in);
+         }
+         else
+            if(name.size()>6)
+               if(name.Mid(name.size()-3)==wxString("xml.gz"))
+               {//compressed file
+                  wxFileInputStream is(name.c_str());
+                  wxZlibInputStream zstream(is);
+                  stringstream sst;
+                  while (!zstream.Eof()) sst<<zstream.GetC();
+                  XMLCrystFileLoadAllObject(sst);
+               }
    }
    open->Destroy();
    if(saved) mClockLastSave.Click();
 }
+
 void WXCrystMainFrame::OnMenuClose(wxCommandEvent& event)
 {
    this->SafeClose();
