@@ -1,7 +1,7 @@
 include ../rules.mak
 DIR_CRYST = ..
 
-OBJ= VFNStreamFormat.o VFNDebug.o
+OBJ= VFNStreamFormat.o VFNDebug.o ci_string.o
 
 ifeq ($(profile),2)
 %.o : %.cpp

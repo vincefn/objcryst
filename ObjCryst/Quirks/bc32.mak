@@ -1,7 +1,7 @@
 !include ../rules.mak
    
-libQuirks.lib : VFNStreamFormat.obj VFNDebug.obj
-	tlib "libQuirks.lib" -+VFNStreamFormat -+VFNDebug.obj
+libQuirks.lib : ci_string.obj VFNStreamFormat.obj VFNDebug.obj
+	tlib "libQuirks.lib" -+ci_string.obj -+VFNStreamFormat -+VFNDebug.obj
 
 lib: libQuirks.lib
 
