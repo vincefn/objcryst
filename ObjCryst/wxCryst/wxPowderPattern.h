@@ -103,6 +103,7 @@ class WXPowderPatternGraph: public wxWindow
       /// Redraw the pattern (special function to ensure complete redrawing under windows...)
       void OnRedrawNewPattern(wxUpdateUIEvent& WXUNUSED(event));
       void OnToggleLabel(wxCommandEvent& WXUNUSED(event));
+      void OnFindPeaks(wxCommandEvent& WXUNUSED(event));
       void OnKeyDown(wxKeyEvent& event);
       void OnSize(wxSizeEvent& event);
    private:

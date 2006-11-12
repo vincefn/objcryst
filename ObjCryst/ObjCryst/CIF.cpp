@@ -26,7 +26,7 @@ void CIFData::ExtractAll(const bool verbose)
    this->ExtractUnitCell(verbose);
    this->ExtractSpacegroup(verbose);
    this->ExtractAtomicPositions(verbose);
-   this->CalcMatrices(verbose);
+   this->ExtractPowderPattern(verbose);
 }
 
 void CIFData::ExtractUnitCell(const bool verbose)
@@ -270,6 +270,81 @@ void CIFData::ExtractAtomicPositions(const bool verbose)
    }
 }
 
+void CIFData::ExtractPowderPattern(const bool verbose)
+{
+   for(map<set<ci_string>,map<ci_string,vector<string> > >::const_iterator loop=mvLoop.begin();
+       loop!=mvLoop.end();++loop)
+   {
+      mDataType=WAVELENGTH_MONOCHROMATIC;
+      map<ci_string,vector<string> >::const_iterator pos_x,pos_iobs,pos_weight,pos_mon;
+      pos_iobs=loop->second.find("_pd_meas_counts_total");
+      if(pos_iobs==loop->second.end())
+      {
+         pos_iobs=loop->second.find("_pd_meas_intensity_total");
+         if(pos_iobs==loop->second.end()) pos_iobs=loop->second.find("_pd_proc_intensity_total");
+         if(pos_iobs==loop->second.end()) pos_iobs=loop->second.find("_pd_proc_intensity_net");
+         if(pos_iobs!=loop->second.end()) pos_weight=loop->second.find("_pd_proc_ls_weight");
+         else continue;//no powder data found
+      }
+      pos_x=loop->second.find("_pd_proc_2theta_corrected");
+      if(pos_x==loop->second.end()) pos_x=loop->second.find("_pd_meas_angle_2theta");
+      if(pos_x==loop->second.end())
+      {
+         pos_x=loop->second.find("_pd_meas_time_of_flight");
+         if(pos_x!=loop->second.end()) mDataType=WAVELENGTH_TOF;
+      }
+      
+      bool x_fixed_step=false;
+      float xmin,xmax,xinc;
+      if(pos_x==loop->second.end())
+      {
+         map<ci_string,string>::const_iterator pos_min,pos_max,pos_inc;
+         pos_min=mvItem.find("_pd_proc_2theta_range_min");
+         pos_max=mvItem.find("_pd_proc_2theta_range_max");
+         pos_inc=mvItem.find("_pd_proc_2theta_range_inc");
+         if((pos_min!=mvItem.end()) && (pos_max!=mvItem.end()) && (pos_inc!=mvItem.end()) )
+         {
+            x_fixed_step=true;
+            xmin=CIFNumeric2Float(pos_min->second);
+            xmax=CIFNumeric2Float(pos_max->second);
+            xinc=CIFNumeric2Float(pos_inc->second);
+         }
+      }
+      pos_mon=loop->second.find("_pd_meas_intensity_monitor");
+      if(pos_mon==loop->second.end()) pos_mon=loop->second.find("_pd_meas_step_count_time");
+      if( (pos_iobs!=loop->second.end()) && ( (pos_x!=loop->second.end()) || (x_fixed_step)) )
+      {// Found powder data !
+         const long nb=pos_iobs->second.size();
+         if(verbose) cout<<"Found powder data, with "<<nb<<" data points"<<endl;
+         mPowderPatternObs.resize(nb);
+         mPowderPatternX.resize(nb);
+         mPowderPatternSigma.resize(nb);
+         float mult=1.0;
+         if(mDataType!=WAVELENGTH_TOF) mult=0.017453292519943295;
+         for(long i=0;i<nb;++i)
+         {
+            mPowderPatternObs[i]=CIFNumeric2Float(pos_iobs->second[i]);
+            if(x_fixed_step) mPowderPatternX[i]=(xmin+i*xinc)*mult;
+            else mPowderPatternX[i]=CIFNumeric2Float(pos_x->second[i])*mult;
+            // :TODO: use esd on observed intensity, if available.
+            if(pos_weight!=loop->second.end())
+            {
+               mPowderPatternSigma[i]=CIFNumeric2Float(pos_weight->second[i]);
+               if(mPowderPatternSigma[i]>0) mPowderPatternSigma[i]=1/sqrt(mPowderPatternSigma[i]);
+               else mPowderPatternSigma[i]=0; // :KLUDGE: ?
+            }
+            else mPowderPatternSigma[i]=sqrt(mPowderPatternObs[i]);
+            if(pos_mon!=loop->second.end())
+            {//VCT or monitor
+               mPowderPatternObs[i]/=CIFNumeric2Float(pos_mon->second[i]);
+               mPowderPatternSigma[i]/=sqrt(CIFNumeric2Float(pos_mon->second[i]));
+            }
+            //if((i<10) && verbose) cout<<i<<" "<<mPowderPatternX[i]/mult<<" "<<mPowderPatternObs[i]<<" "<<mPowderPatternSigma[i]<<endl;
+         }
+      }
+   }
+}
+
 void CIFData::CalcMatrices(const bool verbose)
 {
    if(mvLatticePar.size()==0) return;//:TODO: throw error
@@ -462,8 +537,7 @@ string CIFReadValue(stringstream &sst,list<string>::const_iterator &pos, bool la
          if(tmp.at(0)==';') break;
          value+=tmp+" ";
       }
-      sst.clear();
-      sst<<*pos++;
+      //cout<<"SemiColonTextField:"<<value<<endl;
    }
    else
       if((value.at(0)=='\'') || (value.at(0)=='\"'))
@@ -472,11 +546,27 @@ string CIFReadValue(stringstream &sst,list<string>::const_iterator &pos, bool la
          value=value.substr(1);//remove leading ' or "
          if(!last)
          {// Make sure we read till the end of the quoted string
-            const string::size_type loc = value.find(delim, 0 );
-            if( loc == string::npos )
+            bool end=false;
+            string::size_type loc = value.find(delim, 0 );
+            while(true)
             {
-               char c;
-               while(sst.peek()!=delim){sst.get(c); value+=c;}
+               if(loc==string::npos) break;
+               if(value.at(loc-1)=='\\')
+               {
+                  //cout<<"Found delimiter inside string ! "<<value<<endl;
+                  loc = value.find(delim, loc+1);
+               }
+               else break;
+            }
+            if(loc==string::npos)
+            {
+               char c=' ';
+               while(true)
+               {
+                  if((sst.peek()==delim)&&(c!='\\')) break;
+                  sst.get(c);
+                  value+=c;
+               }
                sst.get(c);
             }
          }
@@ -511,7 +601,7 @@ void CIF::Parse()
       if(ci_string(pos->substr(0,5).c_str())==ci_string("data_"))
       {
          block=pos++->substr(5);
-         //cout<<"NEW BLOCK DATA: "<<block<<endl;
+         //cout<<endl<<endl<<"NEW BLOCK DATA: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<block<<endl<<endl<<endl;
          mvData[block]=CIFData();
          continue;
       }
@@ -550,18 +640,25 @@ void CIF::Parse()
          while(true)
          {
             stringstream sst;
-            //cout<<"LOOP VALUES...: ";
-            sst<<*pos++;
-            for(unsigned int i=0;i<tit.size();++i)
+            //cout<<"LOOP VALUES...: "<<*pos<<endl;
+            if(pos->at(0)=='#')pos++;
+            else
             {
-               const string value=CIFReadValue(sst,pos,i==(tit.size()-1));
-               lp[tit[i]].push_back(value);
-               //cout<<value<<"  ";
+               sst<<*pos++;
+      
+               for(unsigned int i=0;i<tit.size();++i)
+               {
+                  const string value=CIFReadValue(sst,pos,i==(tit.size()-1));
+                  lp[tit[i]].push_back(value);
+                  //cout<<"     #"<<i<<" :  "<<value<<endl;
+               }
             }
-            //cout<<endl<<*pos<<endl;
+            //cout<<"    Next line:"<<*pos<<endl;
             if(pos==mvLine.end()) break;
             if(pos->size()==0) break;
-            if(pos->at(0)!=' ') break;
+            if(pos->at(0)=='_') break;
+            if(pos->size()>=5) if(ci_string(pos->substr(0,5).c_str())=="data_") break;
+            if(pos->size()>=5) if(ci_string(pos->substr(0,5).c_str())=="loop_") break;
          }
          // The key to the mvLoop map is the set of column titles
          set<ci_string> stit;
@@ -592,9 +689,9 @@ int CIFNumeric2Int(const string &s)
    return v;
 }
 
-bool CreateCrystalFromCIF(std::istream &in)
+Crystal* CreateCrystalFromCIF(CIF &cif)
 {
-   ObjCryst::CIF cif(in,true,true);
+   Crystal *pCryst=NULL;
    for(map<string,CIFData>::iterator pos=cif.mvData.begin();pos!=cif.mvData.end();++pos)
       if(pos->second.mvLatticePar.size()==6)
       {
@@ -618,9 +715,22 @@ bool CreateCrystalFromCIF(std::istream &in)
                                           posat->mLabel,&(pCryst->GetScatteringPower(posat->mSymbol)),
                                           posat->mOccupancy));
          }
-         return true;
       }
-   return false;
+   return pCryst;
+}
+
+PowderPattern* CreatePowderPatternFromCIF(CIF &cif)
+{
+   PowderPattern* pPow=NULL;
+   for(map<string,CIFData>::iterator pos=cif.mvData.begin();pos!=cif.mvData.end();++pos)
+   {
+      if(pos->second.mPowderPatternObs.size()>10)
+      {
+         PowderPattern* pPow=new PowderPattern();
+         pPow->ImportPowderPatternCIF(cif);
+      }
+   }
+   return pPow;
 }
 
 }//namespace

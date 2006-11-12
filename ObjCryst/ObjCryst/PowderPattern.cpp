@@ -30,6 +30,7 @@
 #include "RefinableObj/Simplex.h"
 #include "Quirks/VFNDebug.h"
 #include "Quirks/VFNStreamFormat.h"
+#include "ObjCryst/CIF.h"
 #ifdef __WX__CRYST__
    #include "wxCryst/wxPowderPattern.h"
 #endif
@@ -1772,7 +1773,7 @@ REAL PowderPattern::X2Pixel(const REAL x)const
 
 void PowderPattern::ImportPowderPatternFullprof(const string &filename)
 {
-   //15.000   0.030  70.000 LANI4FE#1 REC 800ø 4JRS                                 
+   //15.000   0.030  70.000 LANI4FE#1 REC 800 4JRS                                 
    //2447.   2418.   2384.   2457.   2398.   2374.   2378.   2383.
    //...
    VFN_DEBUG_MESSAGE("PowderPattern::ImportPowderPatternFullprof() : \
@@ -2484,6 +2485,36 @@ this type of format is not handled yet (send an example file to the Fox author)!
    }
    VFN_DEBUG_EXIT("PowderPattern::ImportPowderPatternGSAS():file:"<<filename,5)
 }
+
+void PowderPattern::ImportPowderPatternCIF(const CIF &cif)
+{
+   VFN_DEBUG_ENTRY("PowderPattern::ImportPowderPatternCIF():file:",5)
+   for(map<string,CIFData>::const_iterator pos=cif.mvData.begin();pos!=cif.mvData.end();++pos)
+      if(pos->second.mPowderPatternObs.size()>10)
+      {
+         mNbPoint=pos->second.mPowderPatternObs.size();
+         mX.resize(mNbPoint);
+         mPowderPatternObs.resize(mNbPoint);
+         mPowderPatternObsSigma.resize(mNbPoint);
+         mPowderPatternWeight.resize(mNbPoint);
+         if(pos->second.mDataType==WAVELENGTH_TOF)
+         {
+            this->SetRadiationType(RAD_NEUTRON);
+            this->GetRadiation().SetWavelengthType(WAVELENGTH_TOF);
+            mClockPowderPatternPar.Click();
+         }
+         for(unsigned long i=0;i<mNbPoint;++i)
+         {
+            mPowderPatternObs(i)=pos->second.mPowderPatternObs[i];
+            mX(i)=pos->second.mPowderPatternX[i];
+            mPowderPatternObsSigma(i)=pos->second.mPowderPatternSigma[i];
+            this->SetWeightToInvSigmaSq();
+         }
+         this->SetPowderPatternX(mX);
+      }
+   VFN_DEBUG_EXIT("PowderPattern::ImportPowderPatternCIF():file:",5)
+}
+
 
 void PowderPattern::SetPowderPatternObs(const CrystVector_REAL& obs)
 {

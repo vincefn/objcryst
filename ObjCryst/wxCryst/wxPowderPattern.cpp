@@ -18,6 +18,7 @@
 */
 #include <sstream> //for stringstream
 #include <fstream>
+#include <algorithm>
 
 // wx headers, with or without precompilation
 #include "wx/wxprec.h"
@@ -153,6 +154,7 @@ static const long ID_POWDER_MENU_IMPORT_2THETAOBSSIGMA=     WXCRYST_ID();
 static const long ID_POWDER_MENU_IMPORT_2THETAOBS=          WXCRYST_ID(); 
 static const long ID_POWDER_MENU_IMPORT_TOFISISXYSIGMA=     WXCRYST_ID(); 
 static const long ID_POWDER_MENU_IMPORT_GSAS=               WXCRYST_ID(); 
+static const long ID_POWDER_MENU_IMPORT_CIF=                WXCRYST_ID(); 
 static const long ID_POWDER_MENU_FITSCALE_R=                WXCRYST_ID(); 
 static const long ID_POWDER_MENU_FITSCALE_RW=               WXCRYST_ID(); 
 static const long ID_POWDER_MENU_WAVELENGTH=                WXCRYST_ID(); 
@@ -205,6 +207,7 @@ BEGIN_EVENT_TABLE(WXPowderPattern, wxWindow)
    EVT_MENU(ID_POWDER_MENU_IMPORT_2THETAOBS,        WXPowderPattern::OnMenuImportPattern)    
    EVT_MENU(ID_POWDER_MENU_IMPORT_TOFISISXYSIGMA,   WXPowderPattern::OnMenuImportPattern)    
    EVT_MENU(ID_POWDER_MENU_IMPORT_GSAS,             WXPowderPattern::OnMenuImportPattern)    
+   EVT_MENU(ID_POWDER_MENU_IMPORT_CIF,              WXPowderPattern::OnMenuImportPattern)    
    EVT_MENU(ID_POWDER_MENU_WAVELENGTH_SET,          WXPowderPattern::OnMenuSetWavelength)      
    EVT_MENU(ID_POWDER_MENU_WAVELENGTH_XRAY,         WXPowderPattern::OnMenuSetWavelength)      
    EVT_MENU(ID_POWDER_MENU_WAVELENGTH_NEUTRON,      WXPowderPattern::OnMenuSetWavelength)      
@@ -267,6 +270,8 @@ mChi2(0.0),mGoF(0.0),mRwp(0.0),mRp(0.0)
                                  "Import ISIS TOF X Y Sigma");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_GSAS,
                                  "Import GSAS Powder Data (Constant Wavelength)");
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_CIF,
+                                 "Import CIF Powder Data");
       mpMenuBar->AddMenu("Parameters",ID_REFOBJ_MENU_PAR);
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_FIXALL,"Fix all");
          //mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_UNFIXALL,"Unfix all");
@@ -617,6 +622,7 @@ void WXPowderPattern::OnMenuShowGraph(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuShowGraph()"<<mpGraph,6)
    if(mpGraph!=0) return;
+   if(mpPowderPattern->GetNbPoint()<=0) return;
    WXCrystValidateAllUserInput();
    mpPowderPattern->Prepare();
    wxFrame *frame= new wxFrame(this,-1,mpPowderPattern->GetName().c_str(),
@@ -716,9 +722,25 @@ void WXPowderPattern::OnMenuImportPattern(wxCommandEvent &event)
       mpPowderPattern->ImportPowderPattern2ThetaObs(open.GetPath().c_str());
    if(event.GetId()==(long)ID_POWDER_MENU_IMPORT_TOFISISXYSIGMA)
       mpPowderPattern->ImportPowderPatternTOF_ISIS_XYSigma(open.GetPath().c_str());
-
    if(event.GetId()==(long)ID_POWDER_MENU_IMPORT_GSAS)
       mpPowderPattern->ImportPowderPatternGSAS(open.GetPath().c_str());
+   if(event.GetId()==(long)ID_POWDER_MENU_IMPORT_CIF)
+   {
+      ifstream fin (open.GetPath().c_str());
+      if(!fin)
+      {
+         throw ObjCrystException("WXPowderPattern::OnMenuImportPattern(): Error opening file for input:"+string(open.GetPath()));
+      }
+      ObjCryst::CIF cif(fin,true,true);
+      mpPowderPattern->ImportPowderPatternCIF(cif);
+   }
+   bool val;
+   wxConfigBase::Get()->Read("PowderPattern/BOOL/Automatically open powder pattern graph", &val);
+   if(val)
+   {
+      wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_POWDER_MENU_GRAPH);
+      wxPostEvent(this,event);
+   }
 }
 
 void WXPowderPattern::OnMenuFitScaleForR(wxCommandEvent & WXUNUSED(event))
@@ -853,12 +875,14 @@ void WXPowderPattern::UpdateUI(const bool lock)
 ////////////////////////////////////////////////////////////////////////
 static const long ID_POWDERGRAPH_MENU_UPDATE=               WXCRYST_ID(); 
 static const long ID_POWDERGRAPH_MENU_TOGGLELABEL=          WXCRYST_ID(); 
+static const long ID_POWDERGRAPH_MENU_FINDPEAKS=            WXCRYST_ID(); 
 
 BEGIN_EVENT_TABLE(WXPowderPatternGraph, wxWindow)
    EVT_PAINT(                                   WXPowderPatternGraph::OnPaint)
    EVT_MOUSE_EVENTS(                            WXPowderPatternGraph::OnMouse)
    EVT_MENU(ID_POWDERGRAPH_MENU_UPDATE, WXPowderPatternGraph::OnUpdate)
    EVT_MENU(ID_POWDERGRAPH_MENU_TOGGLELABEL, WXPowderPatternGraph::OnToggleLabel)
+   EVT_MENU(ID_POWDERGRAPH_MENU_FINDPEAKS, WXPowderPatternGraph::OnFindPeaks)
    EVT_UPDATE_UI(ID_POWDER_GRAPH_NEW_PATTERN,WXPowderPatternGraph::OnRedrawNewPattern)
    EVT_CHAR(                                    WXPowderPatternGraph::OnKeyDown)
    EVT_MOUSEWHEEL(                              WXPowderPatternGraph::OnMouseWheel)
@@ -875,6 +899,7 @@ mIsDragging(false),mDisplayLabel(true)
    mpPopUpMenu=new wxMenu("Powder Pattern");
    mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_UPDATE, "&Update");
    mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_TOGGLELABEL, "&Hide Labels");
+   //mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_FINDPEAKS, "&Find Peaks");
    if(!wxConfigBase::Get()->HasEntry("PowderPattern/BOOL/Default-display reflection indices"))
       wxConfigBase::Get()->Write("PowderPattern/BOOL/Default-display reflection indices", mDisplayLabel);
    else
@@ -1261,6 +1286,118 @@ void WXPowderPatternGraph::OnToggleLabel(wxCommandEvent & WXUNUSED(event))
    else mpPopUpMenu->SetLabel(ID_POWDERGRAPH_MENU_TOGGLELABEL, "Show Labels");
 }
 
+/** Structure to record peak position and iobs
+*
+*/
+struct Peak
+{
+   Peak(REAL d, REAL iobs, const string &s);
+   REAL d;
+   REAL iobs;
+   string s;
+};
+   
+Peak::Peak(REAL d0, REAL iobs0, const string &s0):
+d(d0),iobs(iobs0),s(s0)
+{}
+
+bool peakGreater(const Peak peak1,const Peak peak2)
+{
+   return peak1.d>peak2.d;
+}
+
+void WXPowderPatternGraph::OnFindPeaks(wxCommandEvent& WXUNUSED(event))
+{
+   const unsigned long nb=mObs.numElements();
+   // Limit peak detection to 1.5A resolution
+   const REAL dmin=1.5;
+   unsigned long start,finish;
+   if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
+   {
+      start=0;
+      for(finish=0;finish<nb;++finish)
+      {
+         const REAL d=1/(mpPattern->GetPowderPattern().X2STOL(mpPattern->GetPowderPattern().GetPowderPatternX()(finish))*2);
+         cout<<__FILE__<<":"<<__LINE__<<", #"<<finish<<",d="<<d<<endl;
+         if(d<dmin) break;
+      }
+   }
+   else
+   {
+      finish=nb;
+      for(start=nb;start>=0;--start) 
+      {
+         const REAL d=1/(mpPattern->GetPowderPattern().X2STOL(mpPattern->GetPowderPattern().GetPowderPatternX()(start))*2);
+         cout<<__FILE__<<":"<<__LINE__<<", #"<<start<<",d="<<d<<endl;
+         if(d<dmin) break;
+      }
+   }
+   // get 2nd derivative
+   CrystVector_REAL obsd2;
+   obsd2=SavitzkyGolay(mObs,4,2);
+   obsd2 /= obsd2.min();
+   mCalc=obsd2;
+   mCalc*=mObs.max();
+   unsigned int nbPeak=0;
+   REAL min_int;
+   list<Peak> peaklist;
+   while(true)
+   {// Start from max
+      const unsigned long imax=obsd2.imax(start,finish);
+      REAL iobs=obsd2(imax);
+      REAL xmax=mX(imax);
+      long nbav=1;
+      unsigned long i=imax;
+      REAL lastiobs=obsd2(i);
+      while(true)
+      {
+         if(i<0) break;
+         if(obsd2(--i)>=lastiobs) break;
+         lastiobs=obsd2(i);
+         obsd2(i)=0;
+         if(lastiobs<0) break;
+         iobs+=lastiobs;
+         xmax+=mX(i);nbav++;
+      }
+      i=imax;
+      lastiobs=obsd2(i);
+      while(true)
+      {
+         if(i>=nb) break;
+         if(obsd2(++i)>=lastiobs) break;
+         lastiobs=obsd2(i);
+         obsd2(i)=0;
+         if(lastiobs<0) break;
+         iobs+=lastiobs;
+         xmax+=mX(i);nbav++;
+      }
+      xmax/=nbav;
+      obsd2(imax)=0;
+      nbPeak++;
+      REAL dmax;
+      if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
+         dmax=1/(mpPattern->GetPowderPattern().X2STOL(DEG2RAD*xmax)*2);
+      else
+         dmax=1/(mpPattern->GetPowderPattern().X2STOL(xmax)*2);
+      //cout<<"Peak #"<<nbPeak<<", x="<<xmax<<",d="<<dmax<<", Iobs="<<iobs<<", nbav="<<nbav<<endl;
+      stringstream sst;sst<<"#"<<nbPeak<<", Iobs="<<iobs;
+      if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
+               xmax *= DEG2RAD;
+      //TODO : evaluate min intensity ratio from noise ?
+      if(nbPeak==1) min_int=iobs*.01;
+      else if((nbPeak>500)||(iobs<min_int)) break;
+      if((nbav>=5)||((nbav>=3)&&(iobs>min_int*5))) peaklist.push_back(Peak(dmax,iobs,sst.str()));
+   }
+   peaklist.sort(peakGreater);
+   //std::sort(peaklist.begin(),peaklist.end(),peakLess);
+   for(list<Peak>::const_iterator pos=peaklist.begin();pos!=peaklist.end();++pos)
+      cout<<"Peak: d="<<pos->d<<", Iobs="<<pos->iobs<<endl;
+   for(list<Peak>::const_iterator pos=peaklist.begin();pos!=peaklist.end();++pos)
+      cout<<pos->d<<" "<<pos->iobs<<endl;
+
+   //mvLabelList.push_back(peaklist);
+}
+
 void WXPowderPatternGraph::OnKeyDown(wxKeyEvent& event)
 {
    wxMutexLocker mlock(mMutex);
@@ -1376,6 +1513,8 @@ void WXPowderPatternGraph::SetPattern(const CrystVector_REAL &x,
    mX=x;
    if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF) mX*=RAD2DEG;
    mCalc=calc;
+   //mCalc=SavitzkyGolay(obs,4,2);
+   //mCalc *= -obs.max()/mCalc.max();
    mObs=obs;
    mSigma=sigma;
    mChi2Cumul=chi2Cumul;

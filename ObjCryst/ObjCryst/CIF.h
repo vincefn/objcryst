@@ -1,5 +1,5 @@
-#ifndef _CIF_H
-#define _CIF_H
+#ifndef _OBJCRYST_CIF_H
+#define _OBJCRYST_CIF_H
 
 #include <iostream>
 #include <fstream>
@@ -10,6 +10,13 @@
 #include <set>
 
 #include "Quirks/ci_string.h"
+namespace ObjCryst
+{// Forward declaration
+   class CIF;
+}
+#include "ObjCryst/PowderPattern.h" // For CreatePowderPatternFromCIF only.
+#include "ObjCryst/Crystal.h" // For CreateCrystalFromCIF only.
+#include "ObjCryst/General.h" // TO identify wavelength type in CIFData::ExtractPowderPattern.
 
 namespace ObjCryst
 {
@@ -61,6 +68,9 @@ class CIFData
       /// Extract all atomic positions. Will generate cartesian from fractional
       /// coordinates or vice-versa if only cartesian coordinates are available.
       void ExtractAtomicPositions(const bool verbose=false);
+      /// Extract Powder Diffraction data, with Iobs, sigma(Iobs) and either 2theta
+      /// or time-of-flight position.
+      void ExtractPowderPattern(const bool verbose=false);
       /// Generate fractional coordinates from cartesian ones for all atoms
       /// CIFData::CalcMatrices() must be called first
       void Cartesian2FractionalCoord();
@@ -118,6 +128,10 @@ class CIFData
       float mOrthMatrix[3][3];
       /// Cartesian2Fractionnal matrix
       float mOrthMatrixInvert[3][3];
+      /// Powder pattern data
+      std::vector<float> mPowderPatternObs,mPowderPatternX,mPowderPatternSigma;
+      /// Is this X-Ray 2theta, time-of-flight ?
+      WavelengthType mDataType;
 };
 
 /** Main CIF class - parses the stream and separates data blocks, comments, items, loops.
@@ -145,10 +159,19 @@ class CIF
       std::list<std::string> mvComment;
 };
 
-/// Extract one Crystal object from a CIF.
+// Forward declarations
+class Crystal;
+class PowderPattern;
+
+/// Extract Crystal object(s) from a CIF, if possible.
 /// Returns a null pointer if no crystal structure could be extracted
 /// (the minimum data is the unit cell parameters).
-Crystal* CreateCrystalFromCIF(std::istream &in);
+Crystal* CreateCrystalFromCIF(CIF &cif);
+
+/// Create PowderPattern object(s) from a CIF, if possible.
+/// Returns a null pointer if no pattern could be extracted.
+/// No components (background, crystal data) are created.
+PowderPattern* CreatePowderPatternFromCIF(CIF &cif);
 
 }
 

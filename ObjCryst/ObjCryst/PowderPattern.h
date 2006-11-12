@@ -28,6 +28,7 @@
 #include "ObjCryst/Crystal.h"
 #include "ObjCryst/ScatteringCorr.h"
 #include "ObjCryst/ReflectionProfile.h"
+#include "ObjCryst/CIF.h"
 
 namespace ObjCryst
 {
@@ -648,6 +649,9 @@ class PowderPattern : public RefinableObj
          * \warning : partial support (only CONST-constant wavelength- data so far)
          */
          void ImportPowderPatternGSAS(const string &fileName);
+         /** Import CIF powder pattern data.
+         */
+         void ImportPowderPatternCIF(const CIF &cif);
          /** \brief Set observed powder pattern from vector array.
          *
          * Note: powder pattern parameters must have been set before calling this function,
