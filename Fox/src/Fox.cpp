@@ -349,7 +349,9 @@ int main (int argc, char *argv[])
       {
          cout<<"Loading: "<<string(argv[i])<<endl;
          ifstream in (argv[i]);
-         CreateCrystalFromCIF(in);
+         ObjCryst::CIF cif(in,true,true);
+         CreateCrystalFromCIF(cif);
+         CreatePowderPatternFromCIF(cif);
          continue;
       }
       cout <<"command-line arguments:"<<endl
@@ -697,7 +699,9 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
          if(name.Mid(name.size()-4)==wxString(".cif"))
          {
             ifstream in (open->GetPath().c_str());
-            CreateCrystalFromCIF(in);
+            ObjCryst::CIF cif(in,true,true);
+            CreateCrystalFromCIF(cif);
+            CreatePowderPatternFromCIF(cif);
          }
          else
             if(name.size()>6)
