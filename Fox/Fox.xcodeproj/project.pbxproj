@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BF08978B0B072DF600C0F576 /* CIF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF08978A0B072DF600C0F576 /* CIF.cpp */; };
+		BF08978C0B072DF600C0F576 /* CIF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF08978A0B072DF600C0F576 /* CIF.cpp */; };
+		BF08978E0B072E2F00C0F576 /* ci_string.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF08978D0B072E2F00C0F576 /* ci_string.cpp */; };
+		BF08978F0B072E2F00C0F576 /* ci_string.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF08978D0B072E2F00C0F576 /* ci_string.cpp */; };
 		BF26F599089306500008175B /* Fox.icns in Resources */ = {isa = PBXBuildFile; fileRef = BF26F598089306500008175B /* Fox.icns */; };
 		BF3EB05508968F5500E02367 /* uctbx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3EB05408968F5500E02367 /* uctbx.cpp */; };
 		BF3EB063089690D200E02367 /* spoil_optimization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3EB062089690D200E02367 /* spoil_optimization.cpp */; };
@@ -195,23 +199,6 @@
 		BFFCD9950890580F00044EBA /* libnewmat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BFFCCB5D089028E500044EBA /* libnewmat.a */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXBuildStyle section */
-		BFD48D6B089246E000441CD3 /* Development */ = {
-			isa = PBXBuildStyle;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-			};
-			name = Development;
-		};
-		BFD48D6C089246E000441CD3 /* Deployment */ = {
-			isa = PBXBuildStyle;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-			};
-			name = Deployment;
-		};
-/* End PBXBuildStyle section */
-
 /* Begin PBXContainerItemProxy section */
 		BFE3CE0F09177C12002021F6 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -244,6 +231,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		BF08978A0B072DF600C0F576 /* CIF.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = CIF.cpp; path = ObjCryst/ObjCryst/CIF.cpp; sourceTree = "<group>"; };
+		BF08978D0B072E2F00C0F576 /* ci_string.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ci_string.cpp; path = ObjCryst/Quirks/ci_string.cpp; sourceTree = "<group>"; };
 		BF26F598089306500008175B /* Fox.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = Fox.icns; path = src/Fox.icns; sourceTree = "<group>"; };
 		BF3EB05408968F5500E02367 /* uctbx.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = uctbx.cpp; path = cctbx/cctbx/uctbx/uctbx.cpp; sourceTree = "<group>"; };
 		BF3EB062089690D200E02367 /* spoil_optimization.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = spoil_optimization.cpp; path = cctbx/cctbx/uctbx/spoil_optimization.cpp; sourceTree = "<group>"; };
@@ -1925,6 +1914,7 @@
 		BF34793A091505E2006E569C /* Quirks */ = {
 			isa = PBXGroup;
 			children = (
+				BF08978D0B072E2F00C0F576 /* ci_string.cpp */,
 				BFFCD8B40890426600044EBA /* VFNDebug.cpp */,
 				BFFCD8B50890426600044EBA /* VFNStreamFormat.cpp */,
 			);
@@ -2057,6 +2047,7 @@
 		BF3EAF910896291100E02367 /* ObjCryst */ = {
 			isa = PBXGroup;
 			children = (
+				BF08978A0B072DF600C0F576 /* CIF.cpp */,
 				BFFCD8940890426600044EBA /* Exception.cpp */,
 				BFFCD8C60890426700044EBA /* ZScatterer.cpp */,
 				BFFCD8B10890426600044EBA /* test.cpp */,
@@ -4316,23 +4307,6 @@
 			);
 			buildRules = (
 			);
-			buildSettings = {
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
-				INSTALL_PATH = "$(HOME)/bin";
-				OPTIMIZATION_CFLAGS = "";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = "Fox-NoGUI";
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
 			dependencies = (
 				BFE3CE1209177C12002021F6 /* PBXTargetDependency */,
 				BFE3CE1009177C12002021F6 /* PBXTargetDependency */,
@@ -4352,29 +4326,6 @@
 			);
 			buildRules = (
 			);
-			buildSettings = {
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
-				INSTALL_PATH = /usr/local/lib;
-				LIBRARY_STYLE = STATIC;
-				OPTIMIZATION_CFLAGS = "";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Carbon,
-				);
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = Untitled;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
 			dependencies = (
 			);
 			name = newmat;
@@ -4392,29 +4343,6 @@
 			);
 			buildRules = (
 			);
-			buildSettings = {
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
-				INSTALL_PATH = /usr/local/lib;
-				LIBRARY_STYLE = STATIC;
-				OPTIMIZATION_CFLAGS = "";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Carbon,
-				);
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = cctbx;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
 			dependencies = (
 			);
 			name = cctbx;
@@ -4432,29 +4360,6 @@
 			);
 			buildRules = (
 			);
-			buildSettings = {
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
-				INFOPLIST_FILE = "Fox-Info.plist";
-				INSTALL_PATH = "$(USER_APPS_DIR)";
-				OPTIMIZATION_CFLAGS = "";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Carbon,
-				);
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = Fox;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
 			dependencies = (
 				BFFCD9970890583C00044EBA /* PBXTargetDependency */,
 				BFFCD9990890584000044EBA /* PBXTargetDependency */,
@@ -4462,27 +4367,6 @@
 			name = Fox;
 			productName = Fox;
 			productReference = BFFCD888089041A600044EBA /* Fox.app */;
-			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
-<plist version=\"1.0\">
-<dict>
-	<key>CFBundleDevelopmentRegion</key>
-	<string>English</string>
-	<key>CFBundleExecutable</key>
-	<string>Fox</string>
-	<key>CFBundleIdentifier</key>
-	<string>com.yourcompany.Fox</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
-	<key>CFBundlePackageType</key>
-	<string>APPL</string>
-	<key>CFBundleSignature</key>
-	<string>????</string>
-	<key>CFBundleVersion</key>
-	<string>1.0</string>
-</dict>
-</plist>
-";
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -4491,12 +4375,6 @@
 		BFFCCB51089028D300044EBA /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = BFFCCB52089028D300044EBA /* Build configuration list for PBXProject "Fox" */;
-			buildSettings = {
-			};
-			buildStyles = (
-				BFD48D6B089246E000441CD3 /* Development */,
-				BFD48D6C089246E000441CD3 /* Deployment */,
-			);
 			hasScannedForEncodings = 0;
 			mainGroup = BFFCCB4F089028D300044EBA;
 			productRefGroup = BFFCCB5E089028E500044EBA /* Products */;
@@ -4562,6 +4440,8 @@
 				BFE3CE3809177C29002021F6 /* VFNDebug.cpp in Sources */,
 				BFE3CE3909177C29002021F6 /* VFNStreamFormat.cpp in Sources */,
 				BFE3CE4809177C29002021F6 /* ZScatterer.cpp in Sources */,
+				BF08978C0B072DF600C0F576 /* CIF.cpp in Sources */,
+				BF08978F0B072E2F00C0F576 /* ci_string.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4728,6 +4608,8 @@
 				BFFCD8FA0890426700044EBA /* wxZScatterer.cpp in Sources */,
 				BFFCD8FD0890426700044EBA /* ZScatterer.cpp in Sources */,
 				BFFCD97D08904D7D00044EBA /* trackball.c in Sources */,
+				BF08978B0B072DF600C0F576 /* CIF.cpp in Sources */,
+				BF08978E0B072E2F00C0F576 /* ci_string.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4760,7 +4642,6 @@
 		BF033A7109156C6400BB8A5B /* G4 */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH)";
 				COPY_PHASE_STRIP = YES;
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_AUTO_VECTORIZATION = NO;
@@ -4795,7 +4676,6 @@
 		BF033A7209156C6400BB8A5B /* G4 */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH)";
 				COPY_PHASE_STRIP = YES;
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_AUTO_VECTORIZATION = NO;
@@ -4834,7 +4714,6 @@
 		BF033A7309156C6400BB8A5B /* G4 */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH)";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_LOCATION = NO;
 				GCC_ALTIVEC_EXTENSIONS = YES;

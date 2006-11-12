@@ -9,6 +9,22 @@
 		<dict>
 			<key>CFBundleTypeExtensions</key>
 			<array>
+				<string>cif</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string>Fox.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>Crystallogrphic Information File</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSTypeIsPackage</key>
+			<false/>
+			<key>NSPersistentStoreTypeKey</key>
+			<string>XML</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
 				<string>xml</string>
 			</array>
 			<key>CFBundleTypeIconFile</key>
@@ -36,6 +52,6 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>1.6.99CVS</string>
+	<string>1.6.99SVN</string>
 </dict>
 </plist>
