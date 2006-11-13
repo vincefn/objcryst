@@ -472,193 +472,174 @@ void CIFData::Fractional2CartesianCoord()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-CIF::CIF(istream &in, const bool interpret,const bool verbose)
+CIF::CIF(istream &is, const bool interpret,const bool verbose)
 {
-   string tmp;
-   do
-   {
-      getline(in,tmp);
-      mvLine.push_back(tmp);
-   }
-   while(!in.eof());
-   
-   long i=0;
-   //for(list<string>::const_iterator pos=mvLine.begin();pos!=mvLine.end();++pos)
-   //   cout<< i++<<" : " <<*pos <<endl;
-   this->Parse();
-   
+   //Copy to an iostream so that we can put back characters if necessary
+   stringstream in;
+   char c;
+   while(is.get(c))in.put(c);
+   this->Parse(in);
    // Extract structure from blocks
    if(interpret)
       for(map<string,CIFData>::iterator posd=mvData.begin();posd!=mvData.end();++posd)
          posd->second.ExtractAll(verbose);
 }
 
-/// Read one value, whether it is numeric, string or text
-/// If last==true, this is the last value on the line,
-/// so it may be a quoted string with the delimiter character allowe dinside the string... (what idiot supported _that_ in the specs ?)
-string CIFReadValue(stringstream &sst,list<string>::const_iterator &pos, bool last=false)
-{
-   string value,tmp;
-   if(sst.eof())
-   {
-      sst.clear();
-      sst<<*pos++;//one row of data on multiple lines. STUPID FORMAT !
-   }
+bool iseol(const char c) { return ((c=='\n')||(c=='\r'));}
 
-   value="";
-   while(value.size()==0)
-   {
-      if(last)
-      {
-         getline(sst,value);
-         // remove leading spaces - getline reads everything
-         while(true)
-         {
-            if(value.size()==0) break;
-            if(value.at(0)==' ')
-               value=value.substr(1);
-            else break;
-         }
-      }
-      else sst>>value;
-      if(value.size()==0)
-      {
-         sst.clear();
-         sst<<*pos++;
-      }
+/// Read one value, whether it is numeric, string or text
+string CIFReadValue(stringstream &in,char &lastc)
+{
+   bool vv=false;//very verbose ?
+   string value;
+   while(!isgraph(in.peek())) in.get(lastc);
+   while(in.peek()=='#')
+   {//discard these comments for now
+      string tmp;
+      getline(in,tmp);
+      lastc='\r';
+      while(!isgraph(in.peek())) in.get(lastc);
    }
-   //cout<<__FILE__<<":"<<__LINE__<<":"<<value<<" , "<<value.at(0)<<endl;
-   if(value.at(0)==';')
+   if(in.peek()==';')
    {//SemiColonTextField
+      bool warning=!iseol(lastc);
+      if(warning)
+         cout<<"WARNING: Trying to read a SemiColonTextField but last char is not an end-of-line char !"<<endl;
       value="";
-      for(;;)
+      in.get(lastc);
+      while(in.peek()!=';')
       {
-         tmp=*pos++;
-         if(tmp.at(0)==';') break;
+         string tmp;
+         getline(in,tmp);
          value+=tmp+" ";
       }
-      //cout<<"SemiColonTextField:"<<value<<endl;
+      in.get(lastc);
+      if(vv) cout<<"SemiColonTextField:"<<value<<endl;
+      if(warning && !vv) cout<<"SemiColonTextField:"<<value<<endl;
+      return value;
    }
-   else
-      if((value.at(0)=='\'') || (value.at(0)=='\"'))
-      {//QuotedString => remove quotes and trailing spaces
-         const char delim=value.at(0);
-         value=value.substr(1);//remove leading ' or "
-         if(!last)
-         {// Make sure we read till the end of the quoted string
-            bool end=false;
-            string::size_type loc = value.find(delim, 0 );
-            while(true)
-            {
-               if(loc==string::npos) break;
-               if(value.at(loc-1)=='\\')
-               {
-                  //cout<<"Found delimiter inside string ! "<<value<<endl;
-                  loc = value.find(delim, loc+1);
-               }
-               else break;
-            }
-            if(loc==string::npos)
-            {
-               char c=' ';
-               while(true)
-               {
-                  if((sst.peek()==delim)&&(c!='\\')) break;
-                  sst.get(c);
-                  value+=c;
-               }
-               sst.get(c);
-            }
-         }
-         // Remove trailing spaces
-         while(isgraph(value.at(value.size()-1))==0)
-            value=value.substr(0,value.size()-1);
-         value=value.substr(0,value.size()-1);
-         //cout<<"QuotedString:"<<value<<endl;
+   if((in.peek()=='\'') || (in.peek()=='\"'))
+   {//QuotedString
+      char delim;
+      in.get(delim);
+      value="";
+      while(!((lastc==delim)&&(!isgraph(in.peek()))) )
+      {
+         in.get(lastc);
+         value+=lastc;
       }
+      if(vv) cout<<"QuotedString:"<<value<<endl;
+      return value.substr(0,value.size()-1);
+   }
+   // If we got here, we have an ordinary value, numeric or unquoted string
+   in>>value;
+   if(vv) cout<<"NormalValue:"<<value<<endl;
    return value;
 }
 
-void CIF::Parse()
+void CIF::Parse(stringstream &in)
 {
-   list<string>::const_iterator pos=mvLine.begin();
-   string block="";
-   while(pos!=mvLine.end())
+   bool vv=false;//very verbose ?
+   char lastc=' ';
+   string block="";// Current block data
+   while(!in.eof())
    {
-      //cout<<*pos<<endl;
-      if(pos->size()==0)
-      {
-         ++pos;
+      while(!isgraph(in.peek()) && !in.eof()) in.get(lastc);
+      if(vv) cout<<endl;
+      if(in.peek()=='#')
+      {//Comment
+         string tmp;
+         getline(in,tmp);
+         if(block=="") mvComment.push_back(tmp);
+         else mvData[block].mvComment.push_back(tmp);
+         lastc='\r';
          continue;
       }
-      if(pos->at(0)=='#')
-      {
-         //cout<<"Comment :"<<*pos<<endl;
-         if(block=="") mvComment.push_back(*pos++);
-         else mvData[block].mvComment.push_back(*pos++);
+      if(in.peek()=='_')
+      {//Tag
+         string tag,value;
+         in>>tag;
+         value=CIFReadValue(in,lastc);
+         mvData[block].mvItem[ci_string(tag.c_str())]=value;
+         if(vv)cout<<"New Tag:"<<tag<<" ("<<value.size()<<"):"<<value<<endl;
          continue;
       }
-      if(ci_string(pos->substr(0,5).c_str())==ci_string("data_"))
-      {
-         block=pos++->substr(5);
-         //cout<<endl<<endl<<"NEW BLOCK DATA: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<block<<endl<<endl<<endl;
+      if((in.peek()=='d') || (in.peek()=='D'))
+      {// Data
+         string tmp;
+         in>>tmp;
+         block=tmp.substr(5);
+         if(vv) cout<<endl<<endl<<"NEW BLOCK DATA: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ->"<<block<<endl<<endl<<endl;
          mvData[block]=CIFData();
          continue;
       }
-      if(pos->substr(0,1)=="_")
-      {
-         stringstream sst;
-         sst<<*pos++;
-         string tag,value;
-         sst>>tag;
-         value=CIFReadValue(sst,pos,true);
-         mvData[block].mvItem[ci_string(tag.c_str())]=value;
-         //cout<<"New Tag:"<<tag<<" ("<<value.size()<<"):"<<value<<endl;
-         continue;
-      }
-      if(ci_string(pos->substr(0,5).c_str())=="loop_")
-      {
+      if((in.peek()=='l') || (in.peek()=='L'))
+      {// loop_
          vector<ci_string> tit;
          string tmp;
-         //cout<<"LOOP: ";
-         ++pos;
-         {//extract string while ignoring leading and trailing spaces
-            stringstream sst;
-            sst<<*pos;
-            sst>>tmp;
-         }
-         while(tmp.at(0)=='_')
-         {
+         in>>tmp; //should be loop_
+         if(vv) cout<<"LOOP : "<<tmp;
+         while(true)
+         {//read titles
+            while(!isgraph(in.peek()) && !in.eof()) in.get(lastc);
+            if(in.peek()=='#')
+            {
+               getline(in,tmp);
+               if(block=="") mvComment.push_back(tmp);
+               else mvData[block].mvComment.push_back(tmp);
+               continue;
+            }
+            if(in.peek()!='_')
+            {
+               if(vv) cout<<endl<<"End of loop titles:"<<(char)in.peek()<<endl;
+               break;
+            }
+            in>>tmp;
             tit.push_back(ci_string(tmp.c_str()));
-            //cout<<" : "<<tmp;
-            stringstream sst;
-            sst<<*++pos;//increment before so that the first value after the titles is not missed
-            sst>>tmp;
+            if(vv) cout<<" , "<<tmp;
          }
-         //cout<<endl;
+         if(vv) cout<<endl;
          map<ci_string,vector<string> > lp;
          while(true)
          {
-            stringstream sst;
-            //cout<<"LOOP VALUES...: "<<*pos<<endl;
-            if(pos->at(0)=='#')pos++;
-            else
-            {
-               sst<<*pos++;
-      
-               for(unsigned int i=0;i<tit.size();++i)
-               {
-                  const string value=CIFReadValue(sst,pos,i==(tit.size()-1));
-                  lp[tit[i]].push_back(value);
-                  //cout<<"     #"<<i<<" :  "<<value<<endl;
-               }
+            while(!isgraph(in.peek()) && !in.eof()) in.get(lastc);
+            if(in.eof()) break;
+            if(vv) cout<<"LOOP VALUES...: "<<(char)in.peek()<<" "<<endl;
+            if(in.peek()=='_') break;
+            if(in.peek()=='#')
+            {// Comment (in a loop ??)
+               string tmp;
+               getline(in,tmp);
+               if(block=="") mvComment.push_back(tmp);
+               else mvData[block].mvComment.push_back(tmp);
+               lastc='\r';
+               if(vv) cout<<"Comment in a loop (?):"<<tmp<<endl;
+               continue;
+            };
+            const std::ios::pos_type pos=in.tellg();
+            in>>tmp;
+            if(vv) cout<<"WHATNEXT? "<<tmp;
+            if(ci_string(tmp.c_str())=="loop_")
+            {//go back and continue
+               if(vv) cout<<endl<<"END OF LOOP :"<<tmp<<endl;
+               in.seekg(pos);
+               break;
             }
-            //cout<<"    Next line:"<<*pos<<endl;
-            if(pos==mvLine.end()) break;
-            if(pos->size()==0) break;
-            if(pos->at(0)=='_') break;
-            if(pos->size()>=5) if(ci_string(pos->substr(0,5).c_str())=="data_") break;
-            if(pos->size()>=5) if(ci_string(pos->substr(0,5).c_str())=="loop_") break;
+            if(tmp.size()>=5)
+               if(ci_string(tmp.substr(0,5).c_str())=="data_")
+               {//go back and continue
+                  if(vv) cout<<endl<<"END OF LOOP :"<<tmp<<endl;
+                  in.seekg(pos);
+                  break;
+               }
+            // go back
+            in.seekg(pos);
+            for(unsigned int i=0;i<tit.size();++i)
+            {//Read all values
+               const string value=CIFReadValue(in,lastc);
+               lp[tit[i]].push_back(value);
+               if(vv) cout<<"     #"<<i<<" :  "<<value<<endl;
+            }
          }
          // The key to the mvLoop map is the set of column titles
          set<ci_string> stit;
@@ -666,8 +647,10 @@ void CIF::Parse()
          mvData[block].mvLoop[stit]=lp;
          continue;
       }
-      // We should never get here !
-      ++pos;
+      // If we get here, something went wrong ! Discard till end of line...
+      string junk;
+      getline(in,junk);
+      cout<<"WARNING: did not understand : "<<junk<<endl;
    }
 }
 

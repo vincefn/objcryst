@@ -29,7 +29,7 @@ int CIFNumeric2Int(const std::string &s);
 
 /** The CIFData class holds all the information from a \e single data_ block from a cif file.
 * 
-* It is a placeholder for all comments, item and loop data, as raw string copied from
+* It is a placeholder for all comments, item and loop data, as raw strings copied from
 * a cif file.
 *
 * It is also used to interpret this data to extract parts of the cif data, i.e.
@@ -45,10 +45,16 @@ int CIFNumeric2Int(const std::string &s);
 *  - atom occupancy: _atom_site_occupancy
 *  - atom label & symbol: _atom_site_type_symbol ; _atom_site_label
 *
+* Cartesian coordinates are stored in Angstroems, angles in radians.
+*
+* To import PowderPattern data, the following tags are used:
+* - observed intensity: _pd_meas_counts_total > _pd_meas_intensity_total > _pd_proc_intensity_total > _pd_proc_intensity_net
+* - uncertainty on intensity: deducted from _pd_proc_ls_weight or square root of intensity
+* - coordinates: _pd_proc_2theta_corrected > _pd_meas_angle_2theta > _pd_meas_time_of_flight > _pd_proc_2theta_range_{min,max,inc}
+* - intensity normalizer (optional): _pd_meas_intensity_monitor > _pd_meas_step_count_time
+*
 * If another data field is needed, it is possible to directly access the string data 
 * (CIFData::mvComment , CIFData::mvItem and CIFData::mvLoop) to search for the correct tags.
-*
-* Cartesian coordinates are stored in Angstroems, angles in radians.
 */
 class CIFData
 {
@@ -148,11 +154,7 @@ class CIF
    //private:
       /// Separate the file in data blocks and parse them to sort tags, loops and comments.
       /// All is stored in the original strings.
-      void Parse();
-      /// The input stream
-      std::istream *mStream;
-      /// The full cif file, line by line
-      std::list<std::string> mvLine;
+      void Parse(std::stringstream &in);
       /// The data blocks, after parsing. The key is the name of the data block
       std::map<std::string,CIFData> mvData;
       /// Global comments, outside and data block
