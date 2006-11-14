@@ -1220,23 +1220,23 @@ void Crystal::CalcDistTable(const bool fast, const REAL asymUnitMargin) const
    }
    VFN_DEBUG_MESSAGE("Crystal::CalcDistTable():1",3)
    
-   // Get limits of the (pseudo) asymmetric unit
-      // strict limits
-      const REAL xMax0=this->GetSpaceGroup().GetAsymUnit().Xmax();
-      const REAL yMax0=this->GetSpaceGroup().GetAsymUnit().Ymax();
-      const REAL zMax0=this->GetSpaceGroup().GetAsymUnit().Zmax();
+   // Get range and origin of the (pseudo) asymmetric unit
+      const REAL x0=this->GetSpaceGroup().GetAsymUnit().Xmin();
+      const REAL y0=this->GetSpaceGroup().GetAsymUnit().Ymin();
+      const REAL z0=this->GetSpaceGroup().GetAsymUnit().Zmin();
+      const REAL xrange=this->GetSpaceGroup().GetAsymUnit().Xmax()-x0;
+      const REAL yrange=this->GetSpaceGroup().GetAsymUnit().Ymax()-y0;
+      const REAL zrange=this->GetSpaceGroup().GetAsymUnit().Zmax()-z0;
    
-      // limits with a margin, within [0;1[
-      const REAL xMax=this->GetSpaceGroup().GetAsymUnit().Xmax()+asymUnitMargin/GetLatticePar(0);
-      const REAL yMax=this->GetSpaceGroup().GetAsymUnit().Ymax()+asymUnitMargin/GetLatticePar(1);
-      const REAL zMax=this->GetSpaceGroup().GetAsymUnit().Zmax()+asymUnitMargin/GetLatticePar(2);
+      // limits of coordinates (modulo 1) with a margin
+      const REAL xMax=xrange+asymUnitMargin/GetLatticePar(0);
+      const REAL yMax=yrange+asymUnitMargin/GetLatticePar(1);
+      const REAL zMax=zrange+asymUnitMargin/GetLatticePar(2);
       const REAL xMin=1.-asymUnitMargin/GetLatticePar(0);
       const REAL yMin=1.-asymUnitMargin/GetLatticePar(1);
       const REAL zMin=1.-asymUnitMargin/GetLatticePar(2);
       
-      bool useAsymUnit=false;
-      if((xMax0*yMax0*zMax0)<0.6) useAsymUnit=true;
-   
+      const bool useAsymUnit=(xrange*yrange*zrange)<0.6;
    
    // List of all positions within or near the asymmetric unit
    std::vector<DistTableInternalPosition> vPos;
@@ -1258,9 +1258,9 @@ void Crystal::CalcDistTable(const bool fast, const REAL asymUnitMargin) const
       
       // Get limits of the (pseudo) asymmetric unit in long
          // strict limits
-         const long xMax0l=(long)(xMax0*(REAL)FRAC2LONG);
-         const long yMax0l=(long)(yMax0*(REAL)FRAC2LONG);
-         const long zMax0l=(long)(zMax0*(REAL)FRAC2LONG);
+         const long xMax0l=(long)(xrange*(REAL)FRAC2LONG);
+         const long yMax0l=(long)(yrange*(REAL)FRAC2LONG);
+         const long zMax0l=(long)(zrange*(REAL)FRAC2LONG);
 
          // limits with a margin, within [0;FRAC2LONG[
          const long xMaxl=(long)(xMax*(REAL)FRAC2LONG);
@@ -1285,9 +1285,9 @@ void Crystal::CalcDistTable(const bool fast, const REAL asymUnitMargin) const
          for(int j=0;j<nbSymmetrics;j++)
          {
             // Convert to long [0;1[ -> [0 ; FRAC2LONG[ with some bit twidlling
-            xl=(long)(symmetricsCoords(j,0)*(REAL)FRAC2LONG);
-            yl=(long)(symmetricsCoords(j,1)*(REAL)FRAC2LONG);
-            zl=(long)(symmetricsCoords(j,2)*(REAL)FRAC2LONG);
+            xl=(long)((symmetricsCoords(j,0)-x0)*(REAL)FRAC2LONG);
+            yl=(long)((symmetricsCoords(j,1)-y0)*(REAL)FRAC2LONG);
+            zl=(long)((symmetricsCoords(j,2)-z0)*(REAL)FRAC2LONG);
             xl= xl & FRAC2LONGMASK; //xl %= FRAC2LONG;if(xl<0) xl += FRAC2LONG;
             yl= yl & FRAC2LONGMASK; //yl %= FRAC2LONG;if(yl<0) yl += FRAC2LONG;
             zl= zl & FRAC2LONGMASK; //zl %= FRAC2LONG;if(zl<0) zl += FRAC2LONG;
@@ -1398,9 +1398,9 @@ void Crystal::CalcDistTable(const bool fast, const REAL asymUnitMargin) const
          mvDistTableSq[i].mIndex=i;//USELESS ?
          for(int j=0;j<nbSymmetrics;j++)
          {
-            x=modf(symmetricsCoords(j,0),&junk);
-            y=modf(symmetricsCoords(j,1),&junk);
-            z=modf(symmetricsCoords(j,2),&junk);
+            x=modf(symmetricsCoords(j,0)-x0,&junk);
+            y=modf(symmetricsCoords(j,1)-y0,&junk);
+            z=modf(symmetricsCoords(j,2)-z0,&junk);
             if(x<0) x +=1.;
             if(y<0) y +=1.;
             if(z<0) z +=1.;
@@ -1412,7 +1412,7 @@ void Crystal::CalcDistTable(const bool fast, const REAL asymUnitMargin) const
                      if( (y>yMin) || (y<yMax))
                      {
                         vPos.push_back(DistTableInternalPosition(i,j,x,y,z));
-                        if((x<=xMax0)&&(y<=yMax0)&&(z<=zMax0))
+                        if((x<=xrange)&&(y<=yrange)&&(z<=zrange))
                         {
                            vUniqueIndex[i]=vPos.size()-1;
                            mvDistTableSq[i].mUniquePosSymmetryIndex=j;
