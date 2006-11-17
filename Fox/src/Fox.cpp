@@ -772,6 +772,12 @@ void WXCrystMainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
       wxFileDialog open(this,"Choose File to save all objects:",
                         "","","FOX compressed files (*.xml.gz)|*.xml.gz", wxSAVE | wxOVERWRITE_PROMPT);
       if(open.ShowModal() != wxID_OK) return;
+      string name=open.GetPath().c_str();
+      if(name.substr(name.size()-7,7)!=".xml.gz")
+      {
+         cout<<name<<" -> "<<name+".xml.gz"<<endl;
+         name=name+".xml.gz";
+      }
       stringstream sst;
       XMLCrystFileSaveGlobal(sst);
       wxFileOutputStream ostream(open.GetPath().c_str());
@@ -783,7 +789,13 @@ void WXCrystMainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
       wxFileDialog open(this,"Choose File to save all objects:",
                         "","","*.xml", wxSAVE | wxOVERWRITE_PROMPT);
       if(open.ShowModal() != wxID_OK) return;
-      XMLCrystFileSaveGlobal(open.GetPath().c_str());
+      string name=open.GetPath().c_str();
+      if(name.substr(name.size()-4,4)!=".xml")
+      {
+         cout<<name<<" -> "<<name+".xml"<<endl;
+         name=name+".xml";
+      }
+      XMLCrystFileSaveGlobal(name);
    }
    mClockLastSave.Click();
 }
