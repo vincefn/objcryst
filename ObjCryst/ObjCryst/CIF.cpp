@@ -238,7 +238,22 @@ void CIFData::ExtractAtomicPositions(const bool verbose)
          poslabel=loop->second.find("_atom_site_label");
          if(poslabel!=loop->second.end())
             for(unsigned int i=0;i<nb;++i)
+            {
                mvAtom[i].mLabel=poslabel->second[i];
+               if(possymbol==loop->second.end())
+               {// There was no symbol, use the labels to guess it
+                  int nbc=0;
+                  if(mvAtom[i].mLabel.size()==1)
+                     if(isalpha(mvAtom[i].mLabel[0])) nbc=1;
+                  if(mvAtom[i].mLabel.size()>=2)
+                  {
+                     if(isalpha(mvAtom[i].mLabel[0]) && isalpha(mvAtom[i].mLabel[1])) nbc=2;
+                     else if(isalpha(mvAtom[i].mLabel[0])) nbc=1;
+                  }
+                  if(nbc>0) mvAtom[i].mSymbol=mvAtom[i].mLabel.substr(0,nbc);
+                  else mvAtom[i].mSymbol="H";//Something wen wrong, no symbol !
+               }
+            }
          // Occupancy ?
          posoccup=loop->second.find("atom_site_occupancy");
          if(posoccup!=loop->second.end())
