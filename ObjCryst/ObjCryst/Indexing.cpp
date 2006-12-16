@@ -19,6 +19,7 @@
 *  source file for Indexing classes & functions
 *
 */
+#include <algorithm>
 
 #include "ObjCryst/Indexing.h"
 #include "Quirks/VFNDebug.h"
@@ -1416,7 +1417,7 @@ void CellExplorer::DicVol(const unsigned int depth)
    unsigned long nbCalc=0;
    const clock_t mTime0=clock();
    float bestscore=0;
-   list<pair<RecUnitCell,float> >::iterator bestpos=(list<pair<RecUnitCell,float> >::iterator) NULL;
+   list<pair<RecUnitCell,float> >::iterator bestpos;
    for(float minv=0;minv<mVolumeMax;minv+=vstep)
    {
       const float maxv=minv+vstep;
@@ -1732,7 +1733,7 @@ void CellExplorer::DicVol(const unsigned int depth)
    }
    */
    this->ReduceSolutions();
-   bestscore=0;bestpos=(list<pair<RecUnitCell,float> >::iterator)NULL;
+   bestscore=0;bestpos=mvSolution.end();
    for(list<pair<RecUnitCell,float> >::iterator pos=mvSolution.begin();pos!=mvSolution.end();++pos)
    {
       const float score=Score(*mpPeakList,pos->first,mNbSpurious);
@@ -1742,7 +1743,7 @@ void CellExplorer::DicVol(const unsigned int depth)
           <<", alpha="<<uc[3]*RAD2DEG<<", beta="<<uc[4]*RAD2DEG<<", gamma="<<uc[5]*RAD2DEG
           <<", V="<<uc[6]<<", score="<<score<<endl;
    }
-   if(bestpos!=(list<pair<RecUnitCell,float> >::iterator)NULL)
+   if(bestpos!=mvSolution.end())
    {
       vector<float> uc=bestpos->first.DirectUnitCell();
       cout<<__FILE__<<":"<<__LINE__<<" BEST ? a="<<uc[0]<<", b="<<uc[1]<<", c="<<uc[2]
