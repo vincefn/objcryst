@@ -201,6 +201,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ObjCryst\Quirks\ci_string.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\ObjCryst\ObjCryst\CIF.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\ObjCryst\ObjCryst\Crystal.cpp"
 				>
 			</File>
@@ -222,6 +230,10 @@
 			</File>
 			<File
 				RelativePath="..\ObjCryst\RefinableObj\GlobalOptimObj.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\ObjCryst\ObjCryst\Indexing.cpp"
 				>
 			</File>
 			<File
@@ -413,6 +425,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ObjCryst\Quirks\ci_string.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ObjCryst\ObjCryst\CIF.h"
+				>
+			</File>
+			<File
 				RelativePath="..\ObjCryst\ObjCryst\Colours.h"
 				>
 			</File>
@@ -442,6 +462,10 @@
 			</File>
 			<File
 				RelativePath="..\ObjCryst\RefinableObj\GlobalOptimObj.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ObjCryst\ObjCryst\Indexing.h"
 				>
 			</File>
 			<File
@@ -633,6 +657,14 @@
 			<File
 				RelativePath="..\src\Fox.rc"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCResourceCompilerTool"
+						AdditionalIncludeDirectories="C:\Dev\wxWidgets\include"
+					/>
+				</FileConfiguration>
 			</File>
 		</Filter>
 	</Files>
