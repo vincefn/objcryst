@@ -4105,8 +4105,8 @@ PeakList PowderPattern::FindPeaks(const float dmin,const float maxratio,const un
    }
    else
    {
-      finish=nb;
-      for(start=nb;start>=0;--start) 
+      finish=nb-1;
+      for(start=nb-1;start>=0;--start) 
       {
          const REAL d=1/(this->X2STOL(this->GetPowderPatternX()(start))*2);
          cout<<__FILE__<<":"<<__LINE__<<", #"<<start<<",d="<<d<<endl;
