@@ -4179,7 +4179,7 @@ PeakList PowderPattern::FindPeaks(const float dmin,const float maxratio,const un
          xmax  *= RAD2DEG;
       cout<<"Peak #"<<pl.GetPeakList().size()<<", x="<<xmax<<",d="<<1/dmax<<", Iobs="<<iobs<<", nbav="<<nbav<<endl;
       //TODO : evaluate min intensity ratio from noise ?
-      if(pl.GetPeakList().size()==1) min_int=iobs*maxr;
+      if(pl.GetPeakList().size()==0) min_int=iobs*maxr;
       else if((pl.GetPeakList().size()>maxpeak)||(iobs<min_int)) break;
       const float sigma=this->GetPowderPatternObsSigma()(imax)/norm;
       if(((nbav>=5)&&(iobs>3*sigma))||((nbav>=3)&&(iobs>min_int*5)&&(iobs>5*sigma)))
