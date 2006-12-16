@@ -1605,14 +1605,14 @@ const CrystVector_REAL& PowderPattern::GetChi2Cumul()const
          else pWeight=mIntegratedWeight.data();
 
          REAL *pC2Cu=mChi2Cumul.data();
-         for(unsigned int i=0;i<mIntegratedPatternMin(0);i++) *pC2Cu++ = 0;
+         for(int i=0;i<mIntegratedPatternMin(0);i++) *pC2Cu++ = 0;
          REAL chi2cumul=0,tmp;
          for(unsigned long j=1;j<mNbIntegrationUsed;j++)
          {
             tmp=(*pObs++ - *pCalc++) ;
             chi2cumul += *pWeight++ * tmp*tmp;
-            for(unsigned int i=mIntegratedPatternMin(j-1);i<mIntegratedPatternMin(j);i++) *pC2Cu++ =chi2cumul;
-            if(mIntegratedPatternMin(j)>mNbPointUsed)
+            for(int i=mIntegratedPatternMin(j-1);i<mIntegratedPatternMin(j);i++) *pC2Cu++ =chi2cumul;
+            if(mIntegratedPatternMin(j)>(int)mNbPointUsed)
             {
                for(unsigned int i=mIntegratedPatternMin(j);i<mNbPoint;i++) *pC2Cu++ =chi2cumul;
                break;
@@ -2423,12 +2423,20 @@ Could not find BANK statement !! In file: "+filename);
          }
          for(unsigned int j=0;j<5;j++)
          {
+            /*
             substr=string(line).substr(j*16,16);
             sscanf(substr.c_str(),"%8f%8f",&iobs,&isig);
+            */
+            substr=string(line).substr(j*16+0 ,8);
+            sscanf(substr.c_str(),"%f",&iobs);
+            substr=string(line).substr(j*16+8 ,8);
+            sscanf(substr.c_str(),"%f",&isig);
+            
             mPowderPatternObs(point)=iobs;
             mPowderPatternObsSigma(point++)=isig;
             if(point==mNbPoint) break;
          }
+         if(point==mNbPoint) break;
       }
       importOK=true;
    }
@@ -2450,6 +2458,7 @@ Could not find BANK statement !! In file: "+filename);
          }
          for(unsigned int j=0;j<10;j++)
          {
+            /*
             substr=string(line).substr(j*8,8);
             if(substr.substr(0,2)==string("  "))
             {
@@ -2457,10 +2466,57 @@ Could not find BANK statement !! In file: "+filename);
                sscanf(substr.c_str(),"%8f",&iobs);
             }
             else sscanf(substr.c_str(),"%2d%6f",&nc,&iobs);
+            */
+            substr=string(line).substr(j*8+0 ,2);
+            if(substr=="  ") nc=1;
+            else sscanf(substr.c_str(),"%d",&nc);
+            substr=string(line).substr(j*8+2 ,6);
+            sscanf(substr.c_str(),"%f",&iobs);
+            
             mPowderPatternObs(point)=iobs;
             mPowderPatternObsSigma(point++)=sqrt(iobs)/sqrt((REAL)nc);
             if(point==mNbPoint) break;
          }
+         if(point==mNbPoint) break;
+      }
+      importOK=true;
+   }
+   if((binType=="RALF") && (type=="ALT"))
+   {
+      this->SetRadiationType(RAD_NEUTRON);
+      this->GetRadiation().SetWavelengthType(WAVELENGTH_TOF);
+      mClockPowderPatternPar.Click();
+      
+      unsigned long point=0;
+      REAL x,iobs,iobssigma;
+      string substr;
+      for(long i=0;i<nbRecords;i++)
+      {
+         fin.read(line,80);
+         line[80]='\0';
+         while(isprint(fin.peek())==false)
+         {
+            if(fin.eof()) break;
+            fin.get();
+         }
+         for(unsigned int j=0;j<4;j++)
+         {//4 records per line
+            /* Does not work because sscanf ignores the leading spaces and shifts the reading !
+            substr=string(line).substr(j*20,20);
+            sscanf(substr.c_str(),"%8f%7f%5f",&x,&iobs,&iobssigma);
+            */
+            substr=string(line).substr(j*20+0 ,8);
+            sscanf(substr.c_str(),"%f",&x);
+            substr=string(line).substr(j*20+8 ,7);
+            sscanf(substr.c_str(),"%f",&iobs);
+            substr=string(line).substr(j*20+15,5);
+            sscanf(substr.c_str(),"%f",&iobssigma);
+            mPowderPatternObs(point)=iobs;
+            mPowderPatternObsSigma(point)=iobssigma;
+            mX(point)=x/32;
+            if(++point==mNbPoint) break;
+         }
+         if(point==mNbPoint) break;
       }
       importOK=true;
    }
@@ -2474,7 +2530,20 @@ Could not find BANK statement !! In file: "+filename);
       throw ObjCrystException("PowderPattern::ImportPowderPatternGSAS(): Sorry, \
 this type of format is not handled yet (send an example file to the Fox author)!:"+filename);
    }
+   mPowderPatternWeight.resize(mNbPoint);
+   this->SetPowderPatternX(mX);
+   this->SetWeightToInvSigmaSq();
+
    this->UpdateDisplay();
+   if(this->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
+   {
+      char buf [200];
+      sprintf(buf,"Imported powder pattern: %d points, tof=%7.3f us-> %7.3f us",
+              (int)mNbPoint,this->GetPowderPatternXMin(),
+              this->GetPowderPatternXMax());
+      (*fpObjCrystInformUser)((string)buf);
+   }
+   else
    {
       char buf [200];
       sprintf(buf,"Imported powder pattern: %d points, 2theta=%7.3f -> %7.3f, step=%6.3f",
@@ -4017,6 +4086,109 @@ REAL PowderPattern::X2STOL(const REAL x)const
 REAL PowderPattern::STOL2Pixel(const REAL stol)const
 {
    return this->X2Pixel(this->STOL2X(stol));
+}
+
+PeakList PowderPattern::FindPeaks(const float dmin,const float maxratio,const unsigned int maxpeak)
+{
+   const unsigned long nb=this->GetNbPoint() ;
+   // Limit peak detection to 1.5A resolution
+   unsigned long start,finish;
+   if(this->GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
+   {
+      start=0;
+      for(finish=0;finish<nb;++finish)
+      {
+         const REAL d=1/(this->X2STOL(this->GetPowderPatternX()(finish))*2);
+         //cout<<__FILE__<<":"<<__LINE__<<", #"<<finish<<",d="<<d<<endl;
+         if(d<dmin) break;
+      }
+   }
+   else
+   {
+      finish=nb;
+      for(start=nb;start>=0;--start) 
+      {
+         const REAL d=1/(this->X2STOL(this->GetPowderPatternX()(start))*2);
+         cout<<__FILE__<<":"<<__LINE__<<", #"<<start<<",d="<<d<<endl;
+         if(d<dmin) break;
+      }
+   }
+   // get 2nd derivative
+   CrystVector_REAL obsd2;
+   obsd2=SavitzkyGolay(this->GetPowderPatternObs(),4,2);
+   const float norm=-obsd2.min();
+   obsd2 /= -norm;
+   
+   float maxr=maxratio;
+   if(maxr<0)
+   {//Automatic discrimination - get an idea from distribution on lower side
+      CrystVector_REAL tmp;
+      tmp=obsd2;
+      tmp.resizeAndPreserve(tmp.numElements()/4);// First quarter, avoid too many peaks
+      CrystVector<long> sub(tmp.numElements());
+      QuickSortSubs(tmp,sub,tmp.numElements()-1,0);
+      maxr=3*(tmp(tmp.numElements()/2)-tmp(tmp.numElements()/4));
+      cout<<__FILE__<<":"<<__LINE__<<" MAXRATIO="<<maxr<<endl;
+   }
+   if(true)
+   {//replace the calculated powder pattern by derivative, for user check
+      mPowderPatternCalc=obsd2;
+      mPowderPatternCalc*=mPowderPatternObs.max();
+   }
+   REAL min_int;
+   PeakList pl;
+
+   while(true)
+   {// Start from max
+      const unsigned long imax=obsd2.imax(start,finish);
+      REAL iobs=obsd2(imax);
+      REAL xmax=mX(imax)*iobs;
+      long nbav=1;
+      unsigned long i=imax;
+      REAL lastiobs=obsd2(i);
+      while(true)
+      {
+         if(i<=1) break;
+         if(obsd2(--i)>=lastiobs) break;
+         lastiobs=obsd2(i);
+         obsd2(i)=0;
+         if(lastiobs<0) break;
+         iobs+=lastiobs;
+         xmax+=mX(i)*lastiobs;nbav++;
+      }
+      float dleft=mX(i+1);
+      i=imax;
+      lastiobs=obsd2(i);
+      while(true)
+      {
+         if(i>=(nb-2)) break;
+         if(obsd2(++i)>=lastiobs) break;
+         lastiobs=obsd2(i);
+         obsd2(i)=0;
+         if(lastiobs<0) break;
+         iobs+=lastiobs;
+         xmax+=mX(i)*lastiobs;nbav++;
+      }
+      float dright=mX(i-1);
+      xmax/=iobs;
+      obsd2(imax)=0;
+      REAL dmax=this->X2STOL(xmax)*2;
+      dright=this->X2STOL(dright)*2;
+      dleft =this->X2STOL(dleft)*2;
+      if(this->GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
+         xmax  *= RAD2DEG;
+      cout<<"Peak #"<<pl.GetPeakList().size()<<", x="<<xmax<<",d="<<1/dmax<<", Iobs="<<iobs<<", nbav="<<nbav<<endl;
+      //TODO : evaluate min intensity ratio from noise ?
+      if(pl.GetPeakList().size()==1) min_int=iobs*maxr;
+      else if((pl.GetPeakList().size()>maxpeak)||(iobs<min_int)) break;
+      const float sigma=this->GetPowderPatternObsSigma()(imax)/norm;
+      if(((nbav>=5)&&(iobs>3*sigma))||((nbav>=3)&&(iobs>min_int*5)&&(iobs>5*sigma)))
+      {
+         pl.AddPeak(dmax,iobs,abs(dright-dleft));//d,iobs,dobssigma,iobssigma,h,k,l,d2calc
+      }
+   }
+   pl.Print(cout);
+   return pl;
 }
 
 void PowderPattern::CalcPowderPattern() const

@@ -29,6 +29,7 @@
 #include "ObjCryst/ScatteringCorr.h"
 #include "ObjCryst/ReflectionProfile.h"
 #include "ObjCryst/CIF.h"
+#include "ObjCryst/Indexing.h"
 
 namespace ObjCryst
 {
@@ -796,6 +797,8 @@ class PowderPattern : public RefinableObj
       ///
       /// This does not take into account any zero/transparency, etc... correction
          REAL STOL2Pixel(const REAL stol)const;
+      /// Find peaks in the pattern
+      PeakList FindPeaks(const float dmin=2.0,const float maxratio=0.01,const unsigned int maxpeak=100);
    protected:
       /// Calc the powder pattern
       void CalcPowderPattern() const;

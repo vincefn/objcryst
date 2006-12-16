@@ -36,6 +36,7 @@
 #include "RefinableObj/Simplex.h"
 #include "ObjCryst/PowderPatternBackgroundBayesianMinimiser.h"
 #include "Quirks/VFNStreamFormat.h"
+#include "Quirks/Chronometer.h"
 
 //Fixes for Cygwin; where do those stupid macros come from ? Somewhere in wxMSW headers
 #ifdef max
@@ -247,31 +248,34 @@ mChi2(0.0),mGoF(0.0),mRwp(0.0),mRp(0.0)
                                 "Save pattern (text)");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_SIMULATE,
                                 "Simulation mode (no obs. pattern)");
-         //mpMenuBar->AppendSeparator();
-         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_FULLPROF,
-                                 "Import Fullprof Pattern");
-         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_PSI_DMC,
-                                 "Import PSI(DMC) Pattern");
-         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_ILL_D1A5,
-                                 "Import ILL(D1A-D1B) Pattern (D1A5)");
-         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_XDD,
-                                 "Import Xdd Pattern");
-         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_CPI,
-                                 "Import Sietronics CPI Pattern");
-         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_FULLPROF4,
-                                 "Import FullProf format #4");
-         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_MULTIDETECTORLLBG42,
-                                 "Import Multi-Detector Format (LLB G42)");
+         mpMenuBar->GetMenu(ID_REFOBJ_MENU_OBJ).AppendSeparator();
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_CIF,
+                                 "Import CIF Powder Data");
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_GSAS,
+                                 "Import GSAS Data(CONS-ESD,CONS6STD,RALF-ALT)");
+         mpMenuBar->GetMenu(ID_REFOBJ_MENU_OBJ).AppendSeparator();
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_2THETAOBSSIGMA,
                                  "Import 2Theta-Obs-Sigma Pattern");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_2THETAOBS,
                                  "Import 2Theta-Obs Pattern");
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_FULLPROF,
+                                 "Import Fullprof Pattern");
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_FULLPROF4,
+                                 "Import FullProf format #4");
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_PSI_DMC,
+                                 "Import PSI(DMC) Pattern");
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_XDD,
+                                 "Import Xdd Pattern");
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_CPI,
+                                 "Import Sietronics CPI Pattern");
+         mpMenuBar->GetMenu(ID_REFOBJ_MENU_OBJ).AppendSeparator();
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_ILL_D1A5,
+                                 "Import Neutron ILL(D1A-D1B) Pattern (D1A5)");
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_MULTIDETECTORLLBG42,
+                                 "Import Neutron Multi-Detector Format (LLB G42)");
+         mpMenuBar->GetMenu(ID_REFOBJ_MENU_OBJ).AppendSeparator();
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_TOFISISXYSIGMA,
-                                 "Import ISIS TOF X Y Sigma");
-         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_GSAS,
-                                 "Import GSAS Powder Data (Constant Wavelength)");
-         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_CIF,
-                                 "Import CIF Powder Data");
+                                 "Import Neutron TOF ISIS X Y Sigma");
       mpMenuBar->AddMenu("Parameters",ID_REFOBJ_MENU_PAR);
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_FIXALL,"Fix all");
          //mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_UNFIXALL,"Unfix all");
@@ -693,6 +697,14 @@ void WXPowderPattern::OnMenuSimulate(wxCommandEvent & WXUNUSED(event))
    CrystVector_REAL newObs(nbPoints);
    mpPowderPattern->SetPowderPatternPar(min*DEG2RAD,(max-min)/(nbPoints-1)*DEG2RAD,nbPoints);
    newObs=1;//we must not have 0 in case a scale factor is fitted...
+   if(mpPowderPattern->GetNbPowderPatternComponent()>0)
+   {
+      // Use the calculated pattern, for indexing simulation
+      newObs=mpPowderPattern->GetPowderPatternCalc();
+      // Add some noise !
+      for(unsigned long i=0;i<newObs.numElements();++i)
+         newObs(i) += sqrt(newObs(i))*(2*rand()/(REAL)RAND_MAX-1);
+   }
    mpPowderPattern->SetPowderPatternObs(newObs);
    VFN_DEBUG_EXIT("WXPowderPattern::OnMenuSimulate()",6)
 }
@@ -858,6 +870,10 @@ void WXPowderPattern::OnMenuAddExclude(wxCommandEvent & WXUNUSED(event))
 void WXPowderPattern::NotifyDeleteGraph() {mpGraph=0;}
 const PowderPattern& WXPowderPattern::GetPowderPattern()const
 { return *mpPowderPattern;}
+
+PowderPattern& WXPowderPattern::GetPowderPattern()
+{ return *mpPowderPattern;}
+
 void WXPowderPattern::UpdateUI(const bool lock)
 {
    if(lock)mMutex.Lock();
@@ -875,15 +891,23 @@ void WXPowderPattern::UpdateUI(const bool lock)
 ////////////////////////////////////////////////////////////////////////
 static const long ID_POWDERGRAPH_MENU_UPDATE=               WXCRYST_ID(); 
 static const long ID_POWDERGRAPH_MENU_TOGGLELABEL=          WXCRYST_ID(); 
+static const long ID_POWDERGRAPH_MENU_TOGGPEAK=             WXCRYST_ID(); 
 static const long ID_POWDERGRAPH_MENU_FINDPEAKS=            WXCRYST_ID(); 
+static const long ID_POWDERGRAPH_MENU_ADDPEAK=              WXCRYST_ID(); 
+static const long ID_POWDERGRAPH_MENU_REMOVEPEAK=           WXCRYST_ID(); 
+static const long ID_POWDERGRAPH_MENU_INDEX=                WXCRYST_ID(); 
 
 BEGIN_EVENT_TABLE(WXPowderPatternGraph, wxWindow)
    EVT_PAINT(                                   WXPowderPatternGraph::OnPaint)
    EVT_MOUSE_EVENTS(                            WXPowderPatternGraph::OnMouse)
-   EVT_MENU(ID_POWDERGRAPH_MENU_UPDATE, WXPowderPatternGraph::OnUpdate)
-   EVT_MENU(ID_POWDERGRAPH_MENU_TOGGLELABEL, WXPowderPatternGraph::OnToggleLabel)
-   EVT_MENU(ID_POWDERGRAPH_MENU_FINDPEAKS, WXPowderPatternGraph::OnFindPeaks)
-   EVT_UPDATE_UI(ID_POWDER_GRAPH_NEW_PATTERN,WXPowderPatternGraph::OnRedrawNewPattern)
+   EVT_MENU(ID_POWDERGRAPH_MENU_UPDATE,         WXPowderPatternGraph::OnUpdate)
+   EVT_MENU(ID_POWDERGRAPH_MENU_TOGGLELABEL,    WXPowderPatternGraph::OnToggleLabel)
+   EVT_MENU(ID_POWDERGRAPH_MENU_TOGGPEAK,       WXPowderPatternGraph::OnToggleLabel)
+   EVT_MENU(ID_POWDERGRAPH_MENU_FINDPEAKS,      WXPowderPatternGraph::OnFindPeaks)
+   EVT_MENU(ID_POWDERGRAPH_MENU_ADDPEAK,        WXPowderPatternGraph::OnChangePeak)
+   EVT_MENU(ID_POWDERGRAPH_MENU_REMOVEPEAK,     WXPowderPatternGraph::OnChangePeak)
+   EVT_MENU(ID_POWDERGRAPH_MENU_INDEX,          WXPowderPatternGraph::OnIndex)
+   EVT_UPDATE_UI(ID_POWDER_GRAPH_NEW_PATTERN,   WXPowderPatternGraph::OnRedrawNewPattern)
    EVT_CHAR(                                    WXPowderPatternGraph::OnKeyDown)
    EVT_MOUSEWHEEL(                              WXPowderPatternGraph::OnMouseWheel)
    EVT_SIZE(                                    WXPowderPatternGraph::OnSize)
@@ -894,19 +918,28 @@ wxWindow(frame,-1,wxPoint(-1,-1),wxSize(-1,-1)),
 mpPattern(parent),mMargin(20),mDiffPercentShift(.20),
 mMaxIntensity(-1),mMinIntensity(-1),mMinX(-1),mMaxX(-1),
 mpParentFrame(frame),
-mIsDragging(false),mDisplayLabel(true)
+mIsDragging(false),mDisplayLabel(true),mDisplayPeak(true)
 {
    mpPopUpMenu=new wxMenu("Powder Pattern");
    mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_UPDATE, "&Update");
-   mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_TOGGLELABEL, "&Hide Labels");
-   //mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_FINDPEAKS, "&Find Peaks");
+   mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_TOGGLELABEL, "&Hide labels");
+   mpPopUpMenu->AppendSeparator();
+   mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_FINDPEAKS, "&Find peaks");
+   mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_INDEX, "&Index");
+   mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_TOGGPEAK, "&Hide peaks");
+   mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_ADDPEAK, "&Add peak");
+   mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_REMOVEPEAK, "&Remove peak");
+   mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_TOGGPEAK, FALSE);
+   mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_ADDPEAK, FALSE);
+   mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_REMOVEPEAK, FALSE);
+   mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_INDEX, FALSE);
    if(!wxConfigBase::Get()->HasEntry("PowderPattern/BOOL/Default-display reflection indices"))
       wxConfigBase::Get()->Write("PowderPattern/BOOL/Default-display reflection indices", mDisplayLabel);
    else
    {
       wxConfigBase::Get()->Read("PowderPattern/BOOL/Default-display reflection indices", &mDisplayLabel);
-      if(mDisplayLabel) mpPopUpMenu->SetLabel(ID_POWDERGRAPH_MENU_TOGGLELABEL, "Hide Labels");
-      else mpPopUpMenu->SetLabel(ID_POWDERGRAPH_MENU_TOGGLELABEL, "Show Labels");
+      if(mDisplayLabel) mpPopUpMenu->SetLabel(ID_POWDERGRAPH_MENU_TOGGLELABEL, "Hide labels");
+      else mpPopUpMenu->SetLabel(ID_POWDERGRAPH_MENU_TOGGLELABEL, "Show labels");
    }
    mpPattern->CrystUpdate(true);
 }
@@ -1061,9 +1094,54 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
          }
       }
    }
+   
+   // Display labels ?
+   list<list<pair<const REAL ,const string > > > vLabel;
+   if(true==mDisplayLabel) // "vLabel=mvLabelList;" does not work (gcc 4.1.1)
+      for(list<list<pair<const REAL ,const string > > >::const_iterator 
+          comp=mvLabelList.begin();comp!=mvLabelList.end();++comp) vLabel.push_back(*comp);
+   // Show peaks ?
+   if((true==mDisplayPeak)&&(mPeakList.GetPeakList().size()>0))
+   {
+      list<pair<const REAL ,const string > > peakLabels;
+      char buf[50];
+      for(vector<PeakList::hkl>::const_iterator pos=mPeakList.GetPeakList().begin();pos!=mPeakList.GetPeakList().end();++pos)
+      {
+         const float x=mpPattern->GetPowderPattern().STOL2X(pos->dobs/2);
+         if(pos->isSpurious)
+         {
+            if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
+               sprintf(buf,"x=%6.3f° d=%6.3fA SPURIOUS?",x*RAD2DEG,1/pos->dobs);
+            else
+               sprintf(buf,"x=%6.3f d=%6.3fA SPURIOUS?",x        ,1/pos->dobs);
+         }
+         else
+         {
+            if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
+               sprintf(buf,"x=%6.2f d=%6.3fA",x*RAD2DEG,1/pos->dobs);
+            else
+               sprintf(buf,"x=%6.2f d=%6.3fA",x        ,1/pos->dobs);
+         }
+         peakLabels.push_back(make_pair(x,buf));
+      }
+      vLabel.push_back(peakLabels);
+      // Do we have a list of predicted HKL positions as well ?
+      if(mPeakList.mvPredictedHKL.size()>0)
+      {
+         peakLabels.clear();
+         for(list<PeakList::hkl>::const_iterator pos=mPeakList.mvPredictedHKL.begin();pos!=mPeakList.mvPredictedHKL.end();++pos)
+         {
+            const float dobs=sqrt(pos->d2calc);
+            const float x=mpPattern->GetPowderPattern().STOL2X(dobs/2);
+            sprintf(buf,"?(%2d %2d %2d)?",pos->h,pos->k,pos->l);
+            peakLabels.push_back(make_pair(x,buf));
+         }
+         vLabel.push_back(peakLabels);
+      }
+   }
    // Draw labels
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():5:",5)
-   if(true==mDisplayLabel)
+   if(vLabel.size()>0)
    {
       wxCoord x,y;
       wxCoord tmpW,tmpH;
@@ -1072,7 +1150,7 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
       list<list<pair<const REAL ,const string > > >::const_iterator comp;
       list<pair<const REAL ,const string > >::const_iterator pos;
       unsigned int pen=0;
-      for(comp=mvLabelList.begin();comp!=mvLabelList.end();++comp)
+      for(comp=vLabel.begin();comp!=vLabel.end();++comp)
       {
          switch(pen++)
          {
@@ -1117,6 +1195,7 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
    dc.EndDrawing();
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():End",5)
 }
+
 void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
 {
    if(event.Leaving()) return;// wxMSW2.4 bug ?
@@ -1144,20 +1223,36 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
       return;
    }
    //cout <<pos.x<<" "<<pos.y<<" "<<x<<" "<<y<<" "<<width<<" "<<height<<endl;
+   const REAL x0=this->Screen2DataX(x);
+   const REAL intensity=this->Screen2DataY(y);
+   if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
+   {
 
+      wxString str;
+      const long pixel=
+         (long)(mpPattern->GetPowderPattern().X2PixelCorr(x0));
+      str.Printf("tof=%6.2f    ,I=%12.2f.   pixel=#%ld",x0,intensity,pixel);
+      mpParentFrame->SetStatusText(str);
+      str.Printf("d=%6.3fA",0.5/mpPattern->GetPowderPattern().X2STOL(x0));
+      mpParentFrame->SetStatusText(str,1);
+   }
+   else
+   {
       const REAL ttheta=this->Screen2DataX(x);
       const REAL intensity=this->Screen2DataY(y);
 
       wxString str;
       const long pixel=
-         (long)(mpPattern->GetPowderPattern().X2PixelCorr(ttheta*DEG2RAD));
-      str.Printf("X=%6.2f    ,I=%12.2f.   pixel=#%ld",ttheta,intensity,pixel);
+         (long)(mpPattern->GetPowderPattern().X2PixelCorr(x0*DEG2RAD));
+      str.Printf("2theta=%6.2f    ,I=%12.2f.   pixel=#%ld",x0,intensity,pixel);
       mpParentFrame->SetStatusText(str);
-
+      str.Printf("d=%6.3fA",0.5/mpPattern->GetPowderPattern().X2STOL(x0*DEG2RAD));
+      mpParentFrame->SetStatusText(str,1);
+   }
    if (event.Dragging() && event.LeftIsDown() && (!mIsDragging))
    {//Begin zooming
       mIsDragging=true;
-      mDraggingX0=ttheta;
+      mDraggingX0=x0;
       mDraggingIntensity0=intensity;
       mMutex.Unlock();
       return;
@@ -1167,7 +1262,7 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
       VFN_DEBUG_MESSAGE("WXPowderPatternGraph::OnMouse():Finished zooming...",5)
       mIsDragging=false;
       
-      if( (fabs(ttheta-mDraggingX0)<.1) || (fabs(mDraggingIntensity0-intensity)< fabs(mMaxIntensity*.02)) )
+      if( (fabs(x0-mDraggingX0)<.1) || (fabs(mDraggingIntensity0-intensity)< fabs(mMaxIntensity*.02)) )
       {
          mMutex.Unlock();
          return;
@@ -1192,15 +1287,15 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
          mMinIntensity=mDraggingIntensity0;
          mMaxIntensity=intensity;
       }
-      if(mDraggingX0>ttheta)
+      if(mDraggingX0>x0)
       {
-         mMinX=ttheta;
+         mMinX=x0;
          mMaxX=mDraggingX0;
       }
       else
       {
          mMinX=mDraggingX0;
-         mMaxX=ttheta;
+         mMaxX=x0;
       }
       mClockAxisLimits.Click();
       mMutex.Unlock();
@@ -1227,6 +1322,8 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
          mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_UPDATE, false);
       else
          mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_UPDATE, true);
+      // Store x coordinate to allow adding/removing peaks manually
+      mDraggingX0=x;
       this->PopupMenu(mpPopUpMenu, event.GetX(), event.GetY() );
       return;
    }
@@ -1277,125 +1374,341 @@ void WXPowderPatternGraph::OnUpdate(wxCommandEvent & WXUNUSED(event))
    mpPattern->CrystUpdate(true,true);
 }
 
-void WXPowderPatternGraph::OnToggleLabel(wxCommandEvent & WXUNUSED(event))
+void WXPowderPatternGraph::OnToggleLabel(wxCommandEvent &event)
 {
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph::OnToggleLabel()",6)
-   mDisplayLabel = !mDisplayLabel;
+   if(event.GetId()==ID_POWDERGRAPH_MENU_TOGGPEAK)
+   {
+      mDisplayPeak = !mDisplayPeak;
+      if(mDisplayPeak) mpPopUpMenu->SetLabel(ID_POWDERGRAPH_MENU_TOGGPEAK, "Hide peaks");
+      else mpPopUpMenu->SetLabel(ID_POWDERGRAPH_MENU_TOGGPEAK, "Show peaks");
+   }
+   if(event.GetId()==ID_POWDERGRAPH_MENU_TOGGLELABEL)
+   {
+      mDisplayLabel = !mDisplayLabel;
+      if(mDisplayLabel) mpPopUpMenu->SetLabel(ID_POWDERGRAPH_MENU_TOGGLELABEL, "Hide labels");
+      else mpPopUpMenu->SetLabel(ID_POWDERGRAPH_MENU_TOGGLELABEL, "Show labels");
+   }
    this->Refresh(false);
-   if(mDisplayLabel) mpPopUpMenu->SetLabel(ID_POWDERGRAPH_MENU_TOGGLELABEL, "Hide Labels");
-   else mpPopUpMenu->SetLabel(ID_POWDERGRAPH_MENU_TOGGLELABEL, "Show Labels");
-}
-
-/** Structure to record peak position and iobs
-*
-*/
-struct Peak
-{
-   Peak(REAL d, REAL iobs, const string &s);
-   REAL d;
-   REAL iobs;
-   string s;
-};
-   
-Peak::Peak(REAL d0, REAL iobs0, const string &s0):
-d(d0),iobs(iobs0),s(s0)
-{}
-
-bool peakGreater(const Peak peak1,const Peak peak2)
-{
-   return peak1.d>peak2.d;
 }
 
 void WXPowderPatternGraph::OnFindPeaks(wxCommandEvent& WXUNUSED(event))
 {
-   const unsigned long nb=mObs.numElements();
-   // Limit peak detection to 1.5A resolution
-   const REAL dmin=1.5;
-   unsigned long start,finish;
-   if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
+   float dmin=2.0;
+   while(true)
    {
-      start=0;
-      for(finish=0;finish<nb;++finish)
+      mPeakList=mpPattern->GetPowderPattern().FindPeaks(dmin,-1,1000);
+      dmin*=0.75;
+      if((mPeakList.GetPeakList().size()>20)||(dmin<0.3)) break;
+   }
+   
+   if(mPeakList.GetPeakList().size()>10)
+   {
+      mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_TOGGPEAK, TRUE);
+      mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_INDEX, TRUE);
+      mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_ADDPEAK, TRUE);
+      mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_REMOVEPEAK, TRUE);
+   }
+   // Keep 20 lowest peaks
+   if(mPeakList.GetPeakList().size()>20) mPeakList.GetPeakList().resize(20);
+   this->Refresh(false);
+}
+
+void WXPowderPatternGraph::OnChangePeak(wxCommandEvent& event)
+{
+   if(mPeakList.GetPeakList().size()<=0) return;
+   if(event.GetId()==ID_POWDERGRAPH_MENU_REMOVEPEAK)
+   {
+      unsigned int idx=0;
+      const float d=2*mpPattern->GetPowderPattern().X2STOL(this->Screen2DataX(mDraggingX0)*DEG2RAD);
+      float dist=100.0;
+      for(unsigned int i=0;i<mPeakList.GetPeakList().size();++i)
       {
-         const REAL d=1/(mpPattern->GetPowderPattern().X2STOL(mpPattern->GetPowderPattern().GetPowderPatternX()(finish))*2);
-         cout<<__FILE__<<":"<<__LINE__<<", #"<<finish<<",d="<<d<<endl;
-         if(d<dmin) break;
+         float x=mpPattern->GetPowderPattern().STOL2X(mPeakList.GetPeakList()[i].dobs/2);
+         if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
+               x *= RAD2DEG;
+         x=this->Data2ScreenX(x);
+         if(abs(x-mDraggingX0)<dist)
+         {
+            dist=abs(x-mDraggingX0);
+            idx=i;
+         }
+         cout<<__FILE__<<":"<<__LINE__<<": 1/d0="<<d<<" peak #"<<i<<",d="<<1/mPeakList.GetPeakList()[i].dobs
+             <<"("<<mDraggingX0<<","<<x<<"),  mindist="<<dist<<endl;
+      }
+      if(dist>5)       mpParentFrame->SetStatusText("Could not find peak close enough",1);
+      else
+      {
+         char buf[50];
+         sprintf(buf,"Removing peak at d=%6.3f",1/mPeakList.GetPeakList()[idx].dobs);
+         mpParentFrame->SetStatusText(buf,1);
+         mPeakList.RemovePeak(idx);
+         this->Refresh(false);
       }
    }
+   if(event.GetId()==ID_POWDERGRAPH_MENU_ADDPEAK)
+   {
+      float d;
+      if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
+         d=2*mpPattern->GetPowderPattern().X2STOL(this->Screen2DataX(mDraggingX0)*DEG2RAD);
+      else d=2*mpPattern->GetPowderPattern().X2STOL(this->Screen2DataX(mDraggingX0));
+      char buf[50];
+      sprintf(buf,"Added peak at d=%6.3f",1/d);
+      mPeakList.AddPeak(d);
+      mpParentFrame->SetStatusText(buf,1);
+   }
+}
+//////////////////////////////////////// WXCellExplorer /////////////////////
+
+class WXCellExplorer:public wxWindow
+{
+   public:
+      WXCellExplorer(wxWindow *parent,PeakList &peaklist,WXPowderPatternGraph *graph=NULL);
+      /// Start indexing
+      void OnIndex(wxCommandEvent &event);
+      /// Select cell
+      void OnSelectCell(wxCommandEvent &event);
+      /// Apply cell
+      void OnApplyCell(wxCommandEvent &event);
+      /// Choose crystal to apply cell to
+      void OnChooseCrystal(wxCommandEvent &event);
+   private:
+      WXPowderPatternGraph *mpGraph;
+      PeakList *mpPeakList;
+      CellExplorer *mpCellExplorer;
+      wxRadioBox *mpAlgorithm;
+      wxRadioBox *mpBravais;
+      wxListBox *mpCell;
+      wxTextCtrl *mpLengthMin,*mpLengthMax;
+      wxTextCtrl *mpAngleMin,*mpAngleMax;
+      wxTextCtrl *mpVolumeMin,*mpVolumeMax;
+      wxTextCtrl *mpNbSpurious;
+      wxTextCtrl *mpErrorD;
+      WXFieldChoice *mpFieldCrystal;
+      Crystal *mpCrystal;
+      DECLARE_EVENT_TABLE()
+};
+static const long ID_CELLEXPLORER_INDEX= WXCRYST_ID();
+static const long ID_CELLEXPLORER_SELECTCELL= WXCRYST_ID();
+static const long ID_CELLEXPLORER_APPLYCELL= WXCRYST_ID();
+static const long ID_CELLEXPLORER_CHOOSECRYSTAL= WXCRYST_ID();
+
+BEGIN_EVENT_TABLE(WXCellExplorer, wxWindow)
+   EVT_BUTTON(ID_CELLEXPLORER_INDEX,             WXCellExplorer::OnIndex)
+   EVT_LISTBOX(ID_CELLEXPLORER_SELECTCELL,       WXCellExplorer::OnSelectCell)
+   EVT_LISTBOX_DCLICK(ID_CELLEXPLORER_SELECTCELL,WXCellExplorer::OnApplyCell)
+   EVT_BUTTON(ID_CELLEXPLORER_APPLYCELL,         WXCellExplorer::OnApplyCell)
+   EVT_BUTTON(ID_CELLEXPLORER_CHOOSECRYSTAL,     WXCellExplorer::OnChooseCrystal)
+END_EVENT_TABLE()
+
+WXCellExplorer::WXCellExplorer(wxWindow *parent, PeakList &peaklist, WXPowderPatternGraph *graph):
+wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCrystal(0)
+{
+   wxBoxSizer *pSizer1=new wxBoxSizer(wxHORIZONTAL);
+   this->SetSizer(pSizer1);
+   
+   wxStaticBoxSizer *pSizer2=new wxStaticBoxSizer(wxVERTICAL,this);
+   pSizer1->Add(pSizer2,0,wxALIGN_TOP);
+   
+   wxButton *pButton1=new wxButton(this,ID_CELLEXPLORER_INDEX,"Find cell!");
+   pSizer2->Add(pButton1,0,wxALIGN_CENTER);
+   
+   wxButton *pButton2=new wxButton(this,ID_CELLEXPLORER_APPLYCELL,"Apply selected cell");
+   pSizer2->Add(pButton2,0,wxALIGN_CENTER);
+
+   mpFieldCrystal=new WXFieldChoice(this,ID_CELLEXPLORER_CHOOSECRYSTAL,"Choose crystal:",200);
+   pSizer2->Add(mpFieldCrystal,0,wxALIGN_CENTER);
+
+   wxBoxSizer *pLengthSizer=new wxBoxSizer(wxHORIZONTAL);
+   wxStaticText *pLengthText=new wxStaticText(this,-1,"Length min, max (A):");
+   pLengthSizer->Add(pLengthText,0,wxALIGN_CENTER);
+   mpLengthMin=new wxTextCtrl(this,-1,"3",wxDefaultPosition,wxSize(30,-1),0,
+                               wxTextValidator(wxFILTER_NUMERIC));
+   pLengthSizer->Add(mpLengthMin,0,wxALIGN_CENTER);
+   mpLengthMax=new wxTextCtrl(this,-1,"15",wxDefaultPosition,wxSize(30,-1),0,
+                               wxTextValidator(wxFILTER_NUMERIC));
+   pLengthSizer->Add(mpLengthMax,0,wxALIGN_CENTER);
+   pSizer2->Add(pLengthSizer,0,wxALIGN_CENTER);
+
+   wxBoxSizer *pAngleSizer=new wxBoxSizer(wxHORIZONTAL);
+   wxStaticText *pAngleText=new wxStaticText(this,-1,"Angle max(90< <179°):");
+   pAngleSizer->Add(pAngleText,0,wxALIGN_CENTER);
+   //mpAngleMin=new wxTextCtrl(this,-1,"90",wxDefaultPosition,wxSize(40,-1),0,
+   //                          wxTextValidator(wxFILTER_NUMERIC));
+   //pAngleSizer->Add(mpAngleMin,0,wxALIGN_CENTER);
+   mpAngleMax=new wxTextCtrl(this,-1,"120",wxDefaultPosition,wxSize(40,-1),0,
+                             wxTextValidator(wxFILTER_NUMERIC));
+   pAngleSizer->Add(mpAngleMax,0,wxALIGN_CENTER);
+   pSizer2->Add(pAngleSizer,0,wxALIGN_CENTER);
+
+   wxBoxSizer *pVolumeSizer=new wxBoxSizer(wxHORIZONTAL);
+   wxStaticText *pVolumeText=new wxStaticText(this,-1,"Volume min, max (A3):");
+   pVolumeSizer->Add(pVolumeText,0,wxALIGN_CENTER);
+   mpVolumeMin=new wxTextCtrl(this,-1,"10",wxDefaultPosition,wxSize(50,-1),0,
+                               wxTextValidator(wxFILTER_NUMERIC));
+   pVolumeSizer->Add(mpVolumeMin,0,wxALIGN_CENTER);
+   mpVolumeMax=new wxTextCtrl(this,-1,"1500",wxDefaultPosition,wxSize(50,-1),0,
+                              wxTextValidator(wxFILTER_NUMERIC));
+   pVolumeSizer->Add(mpVolumeMax,0,wxALIGN_CENTER);
+   pSizer2->Add(pVolumeSizer,0,wxALIGN_CENTER);
+
+   wxBoxSizer *pSpuriousSizer=new wxBoxSizer(wxHORIZONTAL);
+   wxStaticText *pSpuriousText=new wxStaticText(this,-1,"Nb spurious lines:");
+   pSpuriousSizer->Add(pSpuriousText,0,wxALIGN_CENTER);
+   mpNbSpurious=new wxTextCtrl(this,-1,"2",wxDefaultPosition,wxSize(40,-1),0,
+                               wxTextValidator(wxFILTER_NUMERIC));
+   pSpuriousSizer->Add(mpNbSpurious,0,wxALIGN_CENTER);
+   pSizer2->Add(pSpuriousSizer,0,wxALIGN_CENTER);
+   
+   wxBoxSizer *pErrorSizer=new wxBoxSizer(wxHORIZONTAL);
+   wxStaticText* pErrorText=new wxStaticText(this,-1,"1/d error:");
+   pErrorSizer->Add(pErrorText,0,wxALIGN_CENTER);
+   mpErrorD=new wxTextCtrl(this,-1,"0.0005",wxDefaultPosition,wxSize(50,-1),0,
+                           wxTextValidator(wxFILTER_NUMERIC));
+   pErrorSizer->Add(mpErrorD,0,wxALIGN_CENTER);
+   pSizer2->Add(pErrorSizer,0,wxALIGN_CENTER);
+
+   wxArrayString bravaisChoices;
+   bravaisChoices.Add("Triclinic");
+   bravaisChoices.Add("Monoclinic");
+   bravaisChoices.Add("Orthorombic");
+   bravaisChoices.Add("Hexagonal");
+   bravaisChoices.Add("Rhomboedral");
+   bravaisChoices.Add("Tetragonal");
+   bravaisChoices.Add("Cubic");
+   mpBravais=new wxRadioBox((wxWindow*)this,-1,"Bravais Lattice",wxDefaultPosition,wxDefaultSize,bravaisChoices);
+   mpBravais->SetSelection(2);
+   pSizer2->Add(mpBravais,0,wxALIGN_CENTER);
+   
+   wxArrayString algoChoices;
+   algoChoices.Add("DICVOL");
+   algoChoices.Add("Differential Evolution");
+   mpAlgorithm=new wxRadioBox(this,-1,"Algorithm",wxDefaultPosition,wxDefaultSize,algoChoices);
+   pSizer2->Add(mpAlgorithm,0,wxALIGN_CENTER);
+   
+   wxArrayString cells;
+   mpCell=new wxListBox(this,ID_CELLEXPLORER_SELECTCELL,wxDefaultPosition,wxSize(600,400),cells,wxLB_SINGLE);
+   pSizer1->Add(mpCell,1,wxALIGN_TOP);
+   
+   this->Layout();
+   pSizer1->Fit(this->GetParent());
+   pSizer1->SetSizeHints(this);
+}
+void WXCellExplorer::OnIndex(wxCommandEvent &event)
+{
+   mpCellExplorer = new CellExplorer(*mpPeakList,(Bravais)(mpBravais->GetSelection()),0);
+   
+   wxString s;
+   double lmin,lmax,amin=90,amax,vmin,vmax,error;
+   long nbspurious;
+   s=mpLengthMin->GetValue();s.ToDouble(&lmin);
+   s=mpLengthMax->GetValue();s.ToDouble(&lmax);
+   //s=mpAngleMin->GetValue();s.ToDouble(&amin);
+   s=mpAngleMax->GetValue();s.ToDouble(&amax);
+   s=mpVolumeMin->GetValue();s.ToDouble(&vmin);
+   s=mpVolumeMax->GetValue();s.ToDouble(&vmax);
+   s=mpNbSpurious->GetValue();s.ToLong(&nbspurious);
+   s=mpErrorD->GetValue();s.ToDouble(&error);
+   
+   mpCellExplorer->SetLengthMinMax((float)lmin,(float)lmax);
+   mpCellExplorer->SetAngleMinMax((float)amin*DEG2RAD,(float)amax*DEG2RAD);
+   mpCellExplorer->SetVolumeMinMax((float)vmin,(float)vmax);
+   mpCellExplorer->SetNbSpurious((unsigned int)nbspurious);
+   mpCellExplorer->SetD2Error((float)(error*error));
+   
+   for(vector<PeakList::hkl>::iterator pos=mpPeakList->mvHKL.begin();pos!=mpPeakList->mvHKL.end();++pos)
+      pos->isSpurious=false;
+
+   Chronometer chrono;
+   if(mpAlgorithm->GetSelection()==0) mpCellExplorer->DicVol(5);
    else
    {
-      finish=nb;
-      for(start=nb;start>=0;--start) 
+      for(unsigned int i=0;i<20;++i)
       {
-         const REAL d=1/(mpPattern->GetPowderPattern().X2STOL(mpPattern->GetPowderPattern().GetPowderPatternX()(start))*2);
-         cout<<__FILE__<<":"<<__LINE__<<", #"<<start<<",d="<<d<<endl;
-         if(d<dmin) break;
+         mpCellExplorer->Evolution(5000,true,0.7,0.5,50);
+         if(mpCellExplorer->GetBestScore()>50) break;
       }
    }
-   // get 2nd derivative
-   CrystVector_REAL obsd2;
-   obsd2=SavitzkyGolay(mObs,4,2);
-   obsd2 /= obsd2.min();
-   mCalc=obsd2;
-   mCalc*=mObs.max();
-   unsigned int nbPeak=0;
-   REAL min_int;
-   list<Peak> peaklist;
-   while(true)
-   {// Start from max
-      const unsigned long imax=obsd2.imax(start,finish);
-      REAL iobs=obsd2(imax);
-      REAL xmax=mX(imax);
-      long nbav=1;
-      unsigned long i=imax;
-      REAL lastiobs=obsd2(i);
-      while(true)
+   cout<<"Finished indexing, bestscore="<<mpCellExplorer->GetBestScore()<<", elapsed time="<<chrono.seconds()<<endl;
+   if(mpCellExplorer->GetSolutions().size()>0)
+   {
+      char buf[100];
+      wxArrayString sols;
+      float bestvol=0;
+      for(list<pair<RecUnitCell,float> >::const_iterator pos=mpCellExplorer->GetSolutions().begin();
+          pos!=mpCellExplorer->GetSolutions().end();++pos)
       {
-         if(i<0) break;
-         if(obsd2(--i)>=lastiobs) break;
-         lastiobs=obsd2(i);
-         obsd2(i)=0;
-         if(lastiobs<0) break;
-         iobs+=lastiobs;
-         xmax+=mX(i);nbav++;
+         vector<float> uc=pos->first.DirectUnitCell();
+         if(pos==mpCellExplorer->GetSolutions().begin()) bestvol=uc[6]*.99999;
+         const float relvol=uc[6]/bestvol;
+         sprintf(buf,"Score=%6.1f V=%6.1f(%3.1f*) %7.3f %7.3f %7.2f %6.3f %6.3f %6.3f",pos->second,
+                 uc[6],relvol,uc[0],uc[1],uc[2],uc[3]*RAD2DEG,uc[4]*RAD2DEG,uc[5]*RAD2DEG);
+         //cout<<buf<<endl;
+         sols.Add(buf);
       }
-      i=imax;
-      lastiobs=obsd2(i);
-      while(true)
-      {
-         if(i>=nb) break;
-         if(obsd2(++i)>=lastiobs) break;
-         lastiobs=obsd2(i);
-         obsd2(i)=0;
-         if(lastiobs<0) break;
-         iobs+=lastiobs;
-         xmax+=mX(i);nbav++;
-      }
-      xmax/=nbav;
-      obsd2(imax)=0;
-      nbPeak++;
-      REAL dmax;
-      if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
-         dmax=1/(mpPattern->GetPowderPattern().X2STOL(DEG2RAD*xmax)*2);
-      else
-         dmax=1/(mpPattern->GetPowderPattern().X2STOL(xmax)*2);
-      //cout<<"Peak #"<<nbPeak<<", x="<<xmax<<",d="<<dmax<<", Iobs="<<iobs<<", nbav="<<nbav<<endl;
-      stringstream sst;sst<<"#"<<nbPeak<<", Iobs="<<iobs;
-      if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
-               xmax *= DEG2RAD;
-      //TODO : evaluate min intensity ratio from noise ?
-      if(nbPeak==1) min_int=iobs*.01;
-      else if((nbPeak>500)||(iobs<min_int)) break;
-      if((nbav>=5)||((nbav>=3)&&(iobs>min_int*5))) peaklist.push_back(Peak(dmax,iobs,sst.str()));
+      mpCell->Set(sols);
    }
-   peaklist.sort(peakGreater);
-   //std::sort(peaklist.begin(),peaklist.end(),peakLess);
-   for(list<Peak>::const_iterator pos=peaklist.begin();pos!=peaklist.end();++pos)
-      cout<<"Peak: d="<<pos->d<<", Iobs="<<pos->iobs<<endl;
-   for(list<Peak>::const_iterator pos=peaklist.begin();pos!=peaklist.end();++pos)
-      cout<<pos->d<<" "<<pos->iobs<<endl;
+   
+   if(mpGraph!=0) mpGraph->Refresh(FALSE);
+}
+void WXCellExplorer::OnSelectCell(wxCommandEvent &event)
+{
+   const int choice=mpCell->GetSelection();
+   if(choice!=wxNOT_FOUND)
+   {
+      wxString s;
+      long nbspurious;
+      s=mpNbSpurious->GetValue();s.ToLong(&nbspurious);
+      
+      list<pair<RecUnitCell,float> >::const_iterator pos=mpCellExplorer->GetSolutions().begin();
+      for(int i=0;i<choice;++i)++pos;// We need a random access ?
+      // This will update the hkl in the list and therefore on the graph
+      Score(*mpPeakList,pos->first,nbspurious,false,true,true);
+      if(mpGraph!=0) mpGraph->Refresh(FALSE);
+   }
+}
+void WXCellExplorer::OnApplyCell(wxCommandEvent &event)
+{
+   const int choice=mpCell->GetSelection();
+   if((mpCrystal!=0)&&(choice!=wxNOT_FOUND))
+   {
+      list<pair<RecUnitCell,float> >::const_iterator pos=mpCellExplorer->GetSolutions().begin();
+      for(int i=0;i<choice;++i)++pos;// We need a random access ?
+      vector<float> uc=pos->first.DirectUnitCell();
+      mpCrystal->GetPar("a").SetValue(uc[0]);
+      mpCrystal->GetPar("b").SetValue(uc[1]);
+      mpCrystal->GetPar("c").SetValue(uc[2]);
+      mpCrystal->GetPar("alpha").SetValue(uc[3]);
+      mpCrystal->GetPar("beta").SetValue(uc[4]);
+      mpCrystal->GetPar("gamma").SetValue(uc[5]);
+      mpCrystal->UpdateDisplay();
+      if(mpGraph!=0)
+      {
+         wxCommandEvent ev(ID_POWDERGRAPH_MENU_UPDATE);
+         mpGraph->OnUpdate(ev);
+      }
+   }
+}
 
-   //mvLabelList.push_back(peaklist);
+void WXCellExplorer::OnChooseCrystal(wxCommandEvent &event)
+{
+   VFN_DEBUG_MESSAGE("WXCellExplorer::OnChooseCrystal()",6)
+   WXCrystValidateAllUserInput();
+   int choice;
+   mpCrystal=dynamic_cast<Crystal*>
+      ( WXDialogChooseFromRegistry(gCrystalRegistry,(wxWindow*)this,
+         "Choose a Crystal Structure:",choice));
+   if(0==mpCrystal) return;
+   mpFieldCrystal->SetValue(mpCrystal->GetName());
+}
+
+//////////////////////////////////////// END WXCellExplorer /////////////////////
+
+void WXPowderPatternGraph::OnIndex(wxCommandEvent& WXUNUSED(event))
+{
+   wxFrame *mpFrame=new wxFrame(this,-1,"Fox cell Explorer (EXPERIMENTAL)");
+   WXCellExplorer *mpWXCellExplorer=new WXCellExplorer(mpFrame,mPeakList,this);
+   mpFrame->Show(TRUE);
 }
 
 void WXPowderPatternGraph::OnKeyDown(wxKeyEvent& event)

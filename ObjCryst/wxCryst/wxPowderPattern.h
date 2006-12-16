@@ -25,6 +25,7 @@
 #include "wxCryst/wxRefinableObj.h"
 #include "ObjCryst/ScatteringCorr.h"
 #include "ObjCryst/PowderPattern.h"
+#include "ObjCryst/Indexing.h"
 namespace ObjCryst
 {
 class WXPowderPatternGraph;
@@ -49,6 +50,7 @@ class WXPowderPattern: public WXRefinableObj
       void OnMenuAddExclude(wxCommandEvent & WXUNUSED(event));
       void NotifyDeleteGraph();
       const PowderPattern& GetPowderPattern()const;
+      PowderPattern& GetPowderPattern();
       void UpdateUI(const bool mutexlock=false);
    private:
       PowderPattern *mpPowderPattern;
@@ -104,6 +106,9 @@ class WXPowderPatternGraph: public wxWindow
       void OnRedrawNewPattern(wxUpdateUIEvent& WXUNUSED(event));
       void OnToggleLabel(wxCommandEvent& WXUNUSED(event));
       void OnFindPeaks(wxCommandEvent& WXUNUSED(event));
+      /// Add or remove peak
+      void OnChangePeak(wxCommandEvent& WXUNUSED(event));
+      void OnIndex(wxCommandEvent& WXUNUSED(event));
       void OnKeyDown(wxKeyEvent& event);
       void OnSize(wxSizeEvent& event);
    private:
@@ -140,9 +145,12 @@ class WXPowderPatternGraph: public wxWindow
       RefinableObjClock mClockAxisLimits;
       /// Display labels ?
       bool mDisplayLabel;
+      /// Display peaks ?
+      bool mDisplayPeak;
       /// The lists of labels for all components of the powder pattern.
       list<list<pair<const REAL ,const string > > > mvLabelList;
-      
+      /// List of observed peak positions
+      PeakList mPeakList;
       DECLARE_EVENT_TABLE()
 };
 
