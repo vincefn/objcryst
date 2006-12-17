@@ -262,8 +262,6 @@ mChi2(0.0),mGoF(0.0),mRwp(0.0),mRp(0.0)
                                  "Import Fullprof Pattern");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_FULLPROF4,
                                  "Import FullProf format #4");
-         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_PSI_DMC,
-                                 "Import PSI(DMC) Pattern");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_XDD,
                                  "Import Xdd Pattern");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_CPI,
@@ -271,6 +269,8 @@ mChi2(0.0),mGoF(0.0),mRwp(0.0),mRp(0.0)
          mpMenuBar->GetMenu(ID_REFOBJ_MENU_OBJ).AppendSeparator();
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_ILL_D1A5,
                                  "Import Neutron ILL(D1A-D1B) Pattern (D1A5)");
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_PSI_DMC,
+                                 "Import PSI(DMC) Pattern");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_MULTIDETECTORLLBG42,
                                  "Import Neutron Multi-Detector Format (LLB G42)");
          mpMenuBar->GetMenu(ID_REFOBJ_MENU_OBJ).AppendSeparator();
