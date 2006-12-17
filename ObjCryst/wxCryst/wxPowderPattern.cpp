@@ -625,7 +625,7 @@ void WXPowderPattern::OnMenuAddCompCryst(wxCommandEvent & WXUNUSED(event))
       diffData->SetProfile(new ReflectionProfileDoubleExponentialPseudoVoigt(*puc));
    }
    if(mpGraph!=0) mpPowderPattern->Prepare();//else this will be done when opening the graph
-   //this->Layout();
+   this->CrystUpdate();
 }
 
 void WXPowderPattern::OnMenuShowGraph(wxCommandEvent & WXUNUSED(event))
