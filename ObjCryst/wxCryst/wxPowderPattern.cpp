@@ -571,18 +571,18 @@ void WXPowderPattern::OnMenuAddCompBackgdBayesian(wxCommandEvent & WXUNUSED(even
       CrystVector_REAL x(nbPointSpline),backgd(nbPointSpline);
       const CrystVector_REAL *pObs=&(pBckgd->GetParentPowderPattern().GetPowderPatternObs());
       const unsigned long nbPoint=pBckgd->GetParentPowderPattern().GetNbPoint();
+      const float xmin=pBckgd->GetParentPowderPattern().GetPowderPatternX()(0),
+                  xmax=pBckgd->GetParentPowderPattern().GetPowderPatternX()(nbPoint-1);
       for(int i=0;i<nbPointSpline;i++)
-      {
-         VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompBackgdBayesian():"<<i,6)
-         x(i)=pBckgd->GetParentPowderPattern().GetPowderPatternX()(i*(nbPoint-1)/(nbPointSpline-1));
-         VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompBackgdBayesian():"<<i,6)
-         long n1=(long)((REAL)nbPoint/(REAL)nbPointSpline*((REAL)i-0.2));
-         long n2=(long)((REAL)nbPoint/(REAL)nbPointSpline*((REAL)i+0.2));
+      {// xmax is not necessarily > xmin, but in the right order (TOF)
+         x(i)=xmin+(xmax-xmin)/(REAL)(nbPointSpline-1)*REAL(i);
+         REAL x1=xmin+(xmax-xmin)/(REAL)(nbPointSpline-1)*REAL(i-.2);
+         REAL x2=xmin+(xmax-xmin)/(REAL)(nbPointSpline-1)*REAL(i+.2);
+         long n1=(long)(pBckgd->GetParentPowderPattern().X2Pixel(x1));
+         long n2=(long)(pBckgd->GetParentPowderPattern().X2Pixel(x2));
          if(n1<0) n1=0;
          if(n2>(long)nbPoint)n2=nbPoint;
-         VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompBackgdBayesian():"<<i,6)
          backgd(i)=(*pObs)(n1);
-         VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompBackgdBayesian():"<<i,6)
          for(long j=n1;j<n2;j++)
             if((*pObs)(j)<backgd(i))backgd(i)=(*pObs)(j);
       }
@@ -702,7 +702,7 @@ void WXPowderPattern::OnMenuSimulate(wxCommandEvent & WXUNUSED(event))
       // Use the calculated pattern, for indexing simulation
       newObs=mpPowderPattern->GetPowderPatternCalc();
       // Add some noise !
-      for(unsigned long i=0;i<newObs.numElements();++i)
+      for(long i=0;i<newObs.numElements();++i)
          newObs(i) += sqrt(newObs(i))*(2*rand()/(REAL)RAND_MAX-1);
    }
    mpPowderPattern->SetPowderPatternObs(newObs);
@@ -1238,7 +1238,6 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
    }
    else
    {
-      const REAL ttheta=this->Screen2DataX(x);
       const REAL intensity=this->Screen2DataY(y);
 
       wxString str;
@@ -1420,7 +1419,7 @@ void WXPowderPatternGraph::OnChangePeak(wxCommandEvent& event)
    if(event.GetId()==ID_POWDERGRAPH_MENU_REMOVEPEAK)
    {
       unsigned int idx=0;
-      const float d=2*mpPattern->GetPowderPattern().X2STOL(this->Screen2DataX(mDraggingX0)*DEG2RAD);
+      const float d=2*mpPattern->GetPowderPattern().X2STOL(this->Screen2DataX((long)mDraggingX0)*DEG2RAD);
       float dist=100.0;
       for(unsigned int i=0;i<mPeakList.GetPeakList().size();++i)
       {
@@ -1450,8 +1449,8 @@ void WXPowderPatternGraph::OnChangePeak(wxCommandEvent& event)
    {
       float d;
       if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
-         d=2*mpPattern->GetPowderPattern().X2STOL(this->Screen2DataX(mDraggingX0)*DEG2RAD);
-      else d=2*mpPattern->GetPowderPattern().X2STOL(this->Screen2DataX(mDraggingX0));
+         d=2*mpPattern->GetPowderPattern().X2STOL(this->Screen2DataX((long)mDraggingX0)*DEG2RAD);
+      else d=2*mpPattern->GetPowderPattern().X2STOL(this->Screen2DataX((long)mDraggingX0));
       char buf[50];
       sprintf(buf,"Added peak at d=%6.3f",1/d);
       mPeakList.AddPeak(d);
@@ -1707,7 +1706,8 @@ void WXCellExplorer::OnChooseCrystal(wxCommandEvent &event)
 void WXPowderPatternGraph::OnIndex(wxCommandEvent& WXUNUSED(event))
 {
    wxFrame *mpFrame=new wxFrame(this,-1,"Fox cell Explorer (EXPERIMENTAL)");
-   WXCellExplorer *mpWXCellExplorer=new WXCellExplorer(mpFrame,mPeakList,this);
+   WXCellExplorer *mpWXCellExplorer;
+   mpWXCellExplorer=new WXCellExplorer(mpFrame,mPeakList,this);
    mpFrame->Show(TRUE);
 }
 
@@ -1993,6 +1993,7 @@ void WXPowderPatternBackground::OnMenuOptimizeBayesianBackground(wxCommandEvent 
    mpPowderPatternBackground->UnFixAllPar();
    mpPowderPatternBackground->OptimizeBayesianBackground();
    mpPowderPatternBackground->FixAllPar();
+   this->CrystUpdate();
    VFN_DEBUG_EXIT("WXPowderPatternBackground::OnMenuOptimizeBayesianBackground()",6)
 }
 void WXPowderPatternBackground::OnMenuAutomaticBayesianBackground(wxCommandEvent & WXUNUSED(event))
@@ -2014,25 +2015,27 @@ void WXPowderPatternBackground::OnMenuAutomaticBayesianBackground(wxCommandEvent
    dialog.GetValue().ToLong(&nbPointSpline);
    if(nbPointSpline<=1) nbPointSpline=1;
    {
-      CrystVector_REAL tth(nbPointSpline),backgd(nbPointSpline);
+      CrystVector_REAL x(nbPointSpline),backgd(nbPointSpline);
       const CrystVector_REAL *pObs=&(mpPowderPatternBackground->GetParentPowderPattern().GetPowderPatternObs());
       const unsigned long nbPoint=mpPowderPatternBackground->GetParentPowderPattern().GetNbPoint();
+      const float xmin=mpPowderPatternBackground->GetParentPowderPattern()
+                       .GetPowderPatternX()(0),
+                  xmax=mpPowderPatternBackground->GetParentPowderPattern()
+                       .GetPowderPatternX()(nbPoint-1);
       for(int i=0;i<nbPointSpline;i++)
-      {
-         if(i==(nbPointSpline-1))
-            tth(i)=mpPowderPatternBackground->GetParentPowderPattern()
-                     .GetPowderPatternX()(nbPoint-1);
-         else tth(i)=mpPowderPatternBackground->GetParentPowderPattern()
-                     .GetPowderPatternX()((i*nbPoint)/(nbPointSpline-1));
-         long n1=(long)((REAL)nbPoint/(REAL)nbPointSpline*((REAL)i-0.2));
-         long n2=(long)((REAL)nbPoint/(REAL)nbPointSpline*((REAL)i+0.2));
+      {// xmax is not necessarily > xmin, but in the right order (TOF)
+         x(i)=xmin+(xmax-xmin)/(REAL)(nbPointSpline-1)*REAL(i);
+         REAL x1=xmin+(xmax-xmin)/(REAL)(nbPointSpline-1)*REAL(i-.2);
+         REAL x2=xmin+(xmax-xmin)/(REAL)(nbPointSpline-1)*REAL(i+.2);
+         long n1=(long)(mpPowderPatternBackground->GetParentPowderPattern().X2Pixel(x1));
+         long n2=(long)(mpPowderPatternBackground->GetParentPowderPattern().X2Pixel(x2));
          if(n1<0) n1=0;
          if(n2>(long)nbPoint)n2=nbPoint;
          backgd(i)=(*pObs)(n1);
          for(long j=n1;j<n2;j++)
             if((*pObs)(j)<backgd(i))backgd(i)=(*pObs)(j);
       }
-      mpPowderPatternBackground->SetInterpPoints(tth,backgd);
+      mpPowderPatternBackground->SetInterpPoints(x,backgd);
    }
    //mpPowderPatternBackground->GetParentPowderPattern().Prepare();
    mpPowderPatternBackground->UnFixAllPar();
@@ -2098,7 +2101,7 @@ void WXPowderPatternBackground::CrystUpdate(const bool uui,const bool lock)
          mNeedUpdateUI=true;
          mpGridBackgroundPoint->DeleteRows(0,-diff);
       }
-      if(diff!=0)
+      if(diff==0)
          if(  (MaxDifference(mBackgroundInterpPointX        ,
                              *(mpPowderPatternBackground->GetInterpPoints().first )))
             ||(MaxDifference(mBackgroundInterpPointIntensity,

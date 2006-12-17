@@ -290,6 +290,7 @@ void PowderPatternBackground::OptimizeBayesianBackground()
    PowderPatternBackgroundBayesianMinimiser min(*this);
    SimplexObj simplex("Simplex Test");
    simplex.AddRefinableObj(min);
+
    long nbcycle;
    REAL llk=simplex.GetLogLikelihood();
    long ct=0;
@@ -314,6 +315,7 @@ void PowderPatternBackground::OptimizeBayesianBackground()
       sprintf(buf,"Done Optimizing Bayesian Background, Chi^2(Background)=%f",(float)llk);
       (*fpObjCrystInformUser)((string)buf);
    }
+   
    this->GetParentPowderPattern().UpdateDisplay();
    VFN_DEBUG_EXIT("PowderPatternBackground::OptimizeBayesianBackground()",10);
 }
@@ -349,8 +351,8 @@ void PowderPatternBackground::CalcPowderPattern() const
             REAL *b=mPowderPatternCalc.data();
             p1=this->GetParentPowderPattern().X2Pixel(mBackgroundInterpPointX(mPointOrder(0)));
             p2=this->GetParentPowderPattern().X2Pixel(mBackgroundInterpPointX(mPointOrder(1)));
-            b1=mBackgroundInterpPointIntensity(0);
-            b2=mBackgroundInterpPointIntensity(1);
+            b1=mBackgroundInterpPointIntensity(mPointOrder(0));
+            b2=mBackgroundInterpPointIntensity(mPointOrder(1));
             long point=1;
             for(unsigned long i=0;i<nb;i++)
             {
@@ -529,11 +531,16 @@ void PowderPatternBackground::InitSpline()const
    }
    else mPointOrder=subs;
    
+   CrystVector_REAL ipixel(mBackgroundNbPoint);
+      
    for(long i=0;i<mBackgroundNbPoint;++i)
+   {
       mvSplinePixel(i)=
          this->GetParentPowderPattern().X2Pixel(mBackgroundInterpPointX(mPointOrder(i)));
+      ipixel(i)=mBackgroundInterpPointIntensity(mPointOrder(i));
+   }
    
-   mvSpline.Init(mvSplinePixel,mBackgroundInterpPointIntensity);
+   mvSpline.Init(mvSplinePixel,ipixel);
    mClockSpline.Click();
 }
 
@@ -2517,6 +2524,22 @@ Could not find BANK statement !! In file: "+filename);
             if(++point==mNbPoint) break;
          }
          if(point==mNbPoint) break;
+      }
+      // Reverse order of arrays, so that we are in ascending order of sin(theta)/lambda
+      REAL tmp;
+      for(unsigned long i=0;i<(mNbPoint/2);i++)
+      {
+         tmp=mX(i);
+         mX(i)=mX(mNbPoint-1-i);
+         mX(mNbPoint-1-i)=tmp;
+   
+         tmp=mPowderPatternObs(i);
+         mPowderPatternObs(i)=mPowderPatternObs(mNbPoint-1-i);
+         mPowderPatternObs(mNbPoint-1-i)=tmp;
+   
+         tmp=mPowderPatternObsSigma(i);
+         mPowderPatternObsSigma(i)=mPowderPatternObsSigma(mNbPoint-1-i);
+         mPowderPatternObsSigma(mNbPoint-1-i)=tmp;
       }
       importOK=true;
    }
