@@ -660,12 +660,13 @@ void PowderPatternDiffraction::SetProfile(ReflectionProfile *p)
 void PowderPatternDiffraction::GenHKLFullSpace()
 {
    VFN_DEBUG_ENTRY("PowderPatternDiffraction::GenHKLFullSpace():",3)
+   float stol;
    if(this->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
-      this->ScatteringData::GenHKLFullSpace2
-         (mpParentPowderPattern->X2STOL(mpParentPowderPattern->GetPowderPatternXMin()),true);
+      stol=mpParentPowderPattern->X2STOL(mpParentPowderPattern->GetPowderPatternXMin());
    else
-      this->ScatteringData::GenHKLFullSpace2
-         (mpParentPowderPattern->X2STOL(mpParentPowderPattern->GetPowderPatternXMax()),true);
+      stol=mpParentPowderPattern->X2STOL(mpParentPowderPattern->GetPowderPatternXMax());
+   if(stol>1) stol=1; // Do not go beyond 0.5 A resolution (mostly for TOF data)
+   this->ScatteringData::GenHKLFullSpace2(stol,true);
    VFN_DEBUG_EXIT("PowderPatternDiffraction::GenHKLFullSpace():",3)
 }
 void PowderPatternDiffraction::BeginOptimization(const bool allowApproximations,
@@ -722,6 +723,19 @@ pair<const CrystVector_REAL*,const RefinableObjClock*>
 bool PowderPatternDiffraction::HasPowderPatternCalcVariance()const
 {
    return true;
+}
+
+void PowderPatternDiffraction::SetCrystal(Crystal &crystal)
+{
+   this->ScatteringData::SetCrystal(crystal);
+   // Check if we use DE-PV
+   if(mpReflectionProfile!=0)
+      if(mpReflectionProfile->GetClassName()=="ReflectionProfileDoubleExponentialPseudoVoigt")
+      {
+         ReflectionProfileDoubleExponentialPseudoVoigt *p
+            =dynamic_cast<ReflectionProfileDoubleExponentialPseudoVoigt*>(mpReflectionProfile);
+            p->SetUnitCell((UnitCell)crystal);
+      }
 }
 
 const Radiation& PowderPatternDiffraction::GetRadiation()const

@@ -133,8 +133,8 @@ class ReflectionProfilePseudoVoigt:public ReflectionProfile
       ///Pseudo-Voigt mixing parameter : eta=eta0 +2*theta*eta1
       /// eta=1 -> pure Lorentzian ; eta=0 -> pure Gaussian
       REAL mPseudoVoigtEta0,mPseudoVoigtEta1;
-      /** Asymmetry parameters, following the Bérar \& Baldinozzi approach
-      * ( Bérar \& baldinozzi, J. Appl. Cryst 26 (1993), 128-129)
+      /** Asymmetry parameters, following the Bï¿½ar \& Baldinozzi approach
+      * ( Bï¿½ar \& baldinozzi, J. Appl. Cryst 26 (1993), 128-129)
       *
       * \note: these are not used right now.
       */
@@ -157,6 +157,11 @@ class ReflectionProfilePseudoVoigt:public ReflectionProfile
 class ReflectionProfileDoubleExponentialPseudoVoigt:public ReflectionProfile
 {
    public:
+      /** Constructor, without unit cell
+      */
+      ReflectionProfileDoubleExponentialPseudoVoigt();
+      /** Constructor, with unit cell
+      */
       ReflectionProfileDoubleExponentialPseudoVoigt(const UnitCell &cell);
       ReflectionProfileDoubleExponentialPseudoVoigt
          (const ReflectionProfileDoubleExponentialPseudoVoigt &old);
@@ -183,6 +188,10 @@ class ReflectionProfileDoubleExponentialPseudoVoigt:public ReflectionProfile
       bool IsAnisotropic()const;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
+      /** Set unit cell. This is used to compute d_hkl for reflections.
+      *
+      */
+      void SetUnitCell(const UnitCell &cell);
    private:
       /// Initialize parameters
       void InitParameters();

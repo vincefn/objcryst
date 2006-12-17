@@ -615,9 +615,15 @@ void WXPowderPattern::OnMenuAddCompCryst(wxCommandEvent & WXUNUSED(event))
    Crystal *cryst=dynamic_cast<Crystal*>
       ( WXDialogChooseFromRegistry(gCrystalRegistry,(wxWindow*)this,
          "Choose a Crystal Structure:",choice));
-   if(0==cryst) return;
+   if(0==cryst) {delete diffData;return;}
    diffData->SetCrystal(*cryst);
    mpPowderPattern->AddPowderPatternComponent(*diffData);
+   if(diffData->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
+   {
+      VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompCryst():Switch to DE-PV",6)
+      UnitCell *puc=cryst;
+      diffData->SetProfile(new ReflectionProfileDoubleExponentialPseudoVoigt(*puc));
+   }
    if(mpGraph!=0) mpPowderPattern->Prepare();//else this will be done when opening the graph
    //this->Layout();
 }

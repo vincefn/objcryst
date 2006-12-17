@@ -326,6 +326,7 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       virtual pair<const CrystVector_REAL*,const RefinableObjClock*>
          GetPowderPatternIntegratedCalcVariance() const;
       virtual bool HasPowderPatternCalcVariance()const;
+      virtual void SetCrystal(Crystal &crystal);
    protected:
       virtual void CalcPowderPattern() const;
       virtual void CalcPowderPatternIntegrated() const;

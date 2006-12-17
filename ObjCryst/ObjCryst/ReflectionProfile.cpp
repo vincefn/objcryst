@@ -459,6 +459,24 @@ WXCrystObjBasic* ReflectionProfilePseudoVoigt::WXCreate(wxWindow* parent)
 //    ReflectionProfileDoubleExponentialPseudoVoigt    
 //
 ////////////////////////////////////////////////////////////////////////
+ReflectionProfileDoubleExponentialPseudoVoigt::ReflectionProfileDoubleExponentialPseudoVoigt():
+ReflectionProfile(),
+mInstrumentAlpha0(0.0),
+mInstrumentAlpha1(0.0952),
+mInstrumentBeta0(0.0239),
+mInstrumentBeta1(0.0043),
+mGaussianSigma0(0.0),
+mGaussianSigma1(7.0),
+mGaussianSigma2(0.0),
+mLorentzianGamma0(0.0),
+mLorentzianGamma1(0.0),
+mLorentzianGamma2(0.414),
+mpCell(0)
+{
+   VFN_DEBUG_MESSAGE("ReflectionProfileDoubleExponentialPseudoVoigt::ReflectionProfileDoubleExponentialPseudoVoigt()",10)
+   this->InitParameters();
+}
+
 ReflectionProfileDoubleExponentialPseudoVoigt
    ::ReflectionProfileDoubleExponentialPseudoVoigt(const UnitCell &cell):
 ReflectionProfile(),
@@ -474,6 +492,7 @@ mLorentzianGamma1(0.0),
 mLorentzianGamma2(0.414),
 mpCell(&cell)
 {
+   VFN_DEBUG_MESSAGE("ReflectionProfileDoubleExponentialPseudoVoigt::ReflectionProfileDoubleExponentialPseudoVoigt()",10)
    this->InitParameters();
 }
 
@@ -492,6 +511,7 @@ mLorentzianGamma1(old.mLorentzianGamma1),
 mLorentzianGamma2(old.mLorentzianGamma2),
 mpCell(old.mpCell)
 {
+   VFN_DEBUG_MESSAGE("ReflectionProfileDoubleExponentialPseudoVoigt::ReflectionProfileDoubleExponentialPseudoVoigt()",10)
    this->InitParameters();
 }
 
@@ -523,7 +543,8 @@ CrystVector_REAL ReflectionProfileDoubleExponentialPseudoVoigt
                 const REAL h, const REAL k, const REAL l)const
 {
    VFN_DEBUG_ENTRY("ReflectionProfileDoubleExponentialPseudoVoigt::GetProfile()",4)
-   REAL dcenter;
+   REAL dcenter=0;
+   if(mpCell!=0)
    {
       REAL hh=h,kk=k,ll=l;// orthonormal coordinates in reciprocal space
       mpCell->MillerToOrthonormalCoords(hh,kk,ll);
@@ -609,7 +630,7 @@ CrystVector_REAL ReflectionProfileDoubleExponentialPseudoVoigt
       *pp++=(1-eta)*alpha*beta/(2*(alpha+beta))*(expu_erfcy+expnu_erfcz)
             -eta*alpha*beta/(M_PI*(alpha+beta))*(e1p.imag()+e1q.imag());
    }
-   VFN_DEBUG_EXIT("ReflectionProfileDoubleExponentialPseudoVoigt::GetProfile()",3)
+   VFN_DEBUG_EXIT("ReflectionProfileDoubleExponentialPseudoVoigt::GetProfile()",4)
    return prof;
 }
 
@@ -643,12 +664,16 @@ REAL ReflectionProfileDoubleExponentialPseudoVoigt
                          const REAL h, const REAL k, const REAL l)
 {
    VFN_DEBUG_ENTRY("ReflectionProfileDoubleExponentialPseudoVoigt::GetFullProfileWidth()",10)
-   REAL dcenter;
+   REAL dcenter=0;
+   if(mpCell!=0)
    {
       REAL hh=h,kk=k,ll=l;// orthonormal coordinates in reciprocal space
+      VFN_DEBUG_MESSAGE("ReflectionProfileDoubleExponentialPseudoVoigt::GetFullProfileWidth(),"<<dcenter<<","<<mpCell->GetName(),10)
       mpCell->MillerToOrthonormalCoords(hh,kk,ll);
+      VFN_DEBUG_MESSAGE("ReflectionProfileDoubleExponentialPseudoVoigt::GetFullProfileWidth(),"<<dcenter,10)
       dcenter=sqrt(hh*hh+kk*kk+ll*ll);//1/d
    }
+   VFN_DEBUG_MESSAGE("ReflectionProfileDoubleExponentialPseudoVoigt::GetFullProfileWidth(),"<<dcenter,10)
    const int nb=100;
    const int halfnb=nb/2;
    CrystVector_REAL x(nb);
@@ -680,14 +705,15 @@ REAL ReflectionProfileDoubleExponentialPseudoVoigt
          while(*p<test){ p++; n1++;n2++;}
          n1--;
          while(*p>test){ p++; n2++;}
-         VFN_DEBUG_EXIT("ReflectionProfilePseudoVoigt::GetFullProfileWidth():"<<x(n2)-x(n1),10)
+         VFN_DEBUG_EXIT("ReflectionProfilePseudoVoigt::GetFullProfileWidth():"<<x(n2)-x(n1),5)
          return abs(x(n2)-x(n1));
       }
       VFN_DEBUG_MESSAGE("ReflectionProfilePseudoVoigt::GetFullProfileWidth():"<<max<<","<<test
-                        <<endl<<FormatVertVector<REAL>(x,prof),10)
+                        <<endl<<FormatVertVector<REAL>(x,prof),5)
       n*=2.0;
       //if(n>200) exit(0);
    }
+   VFN_DEBUG_EXIT("ReflectionProfileDoubleExponentialPseudoVoigt::GetFullProfileWidth()",10)
 }
 
 bool ReflectionProfileDoubleExponentialPseudoVoigt
@@ -775,6 +801,12 @@ void ReflectionProfileDoubleExponentialPseudoVoigt
          continue;
       }
    }
+}
+
+void ReflectionProfileDoubleExponentialPseudoVoigt::SetUnitCell(const UnitCell &cell)
+{
+   VFN_DEBUG_MESSAGE("ReflectionProfileDoubleExponentialPseudoVoigt::SetUnitCell()",10)
+   mpCell=&cell;
 }
 
 void ReflectionProfileDoubleExponentialPseudoVoigt
