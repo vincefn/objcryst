@@ -705,7 +705,7 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
          }
          else
             if(name.size()>6)
-               if(name.Mid(name.size()-3)==wxString("xml.gz"))
+               if(name.Mid(name.size()-6)==wxString("xml.gz"))
                {//compressed file
                   wxFileInputStream is(name.c_str());
                   wxZlibInputStream zstream(is);
