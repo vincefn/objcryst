@@ -933,15 +933,14 @@ void PowderPatternDiffraction::CalcPowderPatternIntegrated() const
 void PowderPatternDiffraction::CalcPowderReflProfile()const
 {
    this->CalcSinThetaLambda();
-   //mClockProfileCalc.Print();
-   //this->GetRadiation().GetClockWavelength().Print();
-   //this->GetRadiation().GetClockRadiation().Print();
+   //this->GetNbReflBelowMaxSinThetaOvLambda(); // Not needed, this is done by the calling functions
    if(  (mClockProfileCalc>mClockProfilePar)
       &&(mClockProfileCalc>mpReflectionProfile->GetClockMaster())
       &&(mClockProfileCalc>mClockTheta)
       &&(mClockProfileCalc>this->GetRadiation().GetClockWavelength())
       &&(mClockProfileCalc>mpParentPowderPattern->GetClockPowderPatternXCorr())
-      &&(mClockProfileCalc>mClockHKL)) return;
+      &&(mClockProfileCalc>mClockHKL)
+      &&(mClockProfileCalc>mClockNbReflUsed)) return;
    
    TAU_PROFILE("PowderPatternDiffraction::CalcPowderReflProfile()","void (bool)",TAU_DEFAULT);
    VFN_DEBUG_ENTRY("PowderPatternDiffraction::CalcPowderReflProfile()",5)
@@ -1002,9 +1001,10 @@ Computing all Profiles",5)
    const REAL xmin=mpParentPowderPattern->GetPowderPatternX()(0);
    const REAL xmax=mpParentPowderPattern->GetPowderPatternX()(mpParentPowderPattern->GetNbPoint()-1);
    
+   const long nbreflused=this->GetNbReflBelowMaxSinThetaOvLambda();
    REAL fullwidth0,fullwidth1;
    {
-      long imax=this->GetNbReflBelowMaxSinThetaOvLambda();
+      long imax=nbreflused;
       if(imax==mNbRefl)imax-=1;
       fullwidth0=mpReflectionProfile->GetFullProfileWidth(0.04,xmin,mH(0),mK(0),mL(0)),
       fullwidth1=mpReflectionProfile->GetFullProfileWidth(0.04,xmax,mH(imax),mK(imax),mL(imax));
@@ -1014,7 +1014,7 @@ Computing all Profiles",5)
    
    for(unsigned int line=0;line<nbLine;line++)
    {
-      for(long i=0;i<this->GetNbRefl();i++)
+      for(long i=0;i<nbreflused;i++)
       {
          VFN_DEBUG_ENTRY("PowderPatternDiffraction::CalcPowderReflProfile()#"<<i,5)
          x0=mpParentPowderPattern->STOL2X(mSinThetaLambda(i));
