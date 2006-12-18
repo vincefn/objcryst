@@ -720,7 +720,35 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
 
 void WXCrystMainFrame::OnMenuClose(wxCommandEvent& event)
 {
-   this->SafeClose();
+   bool safe=true;
+   wxConfigBase::Get()->Read("Fox/BOOL/Ask confirmation before exiting Fox",&safe);
+   if(safe)
+   {
+      bool saved=true;
+      for(int i=0;i<gRefinableObjRegistry.GetNb();i++)
+         if(gRefinableObjRegistry.GetObj(i).GetClockMaster()>mClockLastSave)
+         {
+            saved=false;
+            break;
+         }
+      if(!saved)
+      {
+         wxString msg;
+         msg.Printf( _T("Some objects have not been saved\n")
+                  _T("Do you really want to close all ?"));
+   
+         wxMessageDialog d(this,msg, "Really Close ?", wxYES | wxNO);
+         if(wxID_YES!=d.ShowModal()) return;
+      }
+   }
+   cout<<"Removing all Optimization objects..."<<endl;
+   gOptimizationObjRegistry.DeleteAll();
+   cout<<"Removing all DiffractionDataSingleCrystal objects..."<<endl;
+   gDiffractionDataSingleCrystalRegistry.DeleteAll();
+   cout<<"Removing all PowderPattern objects..."<<endl;
+   gPowderPatternRegistry.DeleteAll();
+   cout<<"Removing all Crystal objects..."<<endl;
+   gCrystalRegistry.DeleteAll();
 }
 void WXCrystMainFrame::OnClose(wxCloseEvent& event)
 {
