@@ -146,7 +146,7 @@ void Atom::Init(const REAL x, const REAL y, const REAL z,
    mpScattPowAtom->RegisterClient(*this);
    mOccupancy=popu;
    
-   this->InitRefParList();
+   if(this->GetNbPar()<4) this->InitRefParList();
    
    mClockScatterer.Click();
    VFN_DEBUG_MESSAGE("Atom::Init():End.",5)
