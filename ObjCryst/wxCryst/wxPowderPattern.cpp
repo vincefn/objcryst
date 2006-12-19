@@ -185,7 +185,10 @@ static const long ID_POWDERTEXTURE_MENU_ADDPHASE=                   WXCRYST_ID()
 static const long ID_POWDERTEXTURE_MENU_DELETEPHASE=                WXCRYST_ID(); 
 static const long ID_POWDERPATTERN_MENU_COMPONENTS=                 WXCRYST_ID(); 
 static const long ID_POWDERPATTERN_MENU_PATTERN=                    WXCRYST_ID(); 
-  
+
+static const long ID_POWDERDIFF_PROFILE_DEPV=                  WXCRYST_ID();
+
+
 BEGIN_EVENT_TABLE(WXPowderPattern, wxWindow)
    EVT_BUTTON(ID_WXOBJ_COLLAPSE,                    WXCrystObj::OnToggleCollapse)                
    EVT_MENU(ID_REFOBJ_MENU_OBJ_SAVE,                WXRefinableObj::OnMenuSave)                  
@@ -457,7 +460,7 @@ mChi2(0.0),mGoF(0.0),mRwp(0.0),mRp(0.0)
 
 void WXPowderPattern::CrystUpdate(const bool uui,const bool lock)
 {
-   VFN_DEBUG_MESSAGE("WXPowderPattern::CrystUpdate()",6)
+   VFN_DEBUG_ENTRY("WXPowderPattern::CrystUpdate()",6)
    if(lock) mMutex.Lock();
    WXCrystValidateAllUserInput();
    
@@ -498,6 +501,7 @@ void WXPowderPattern::CrystUpdate(const bool uui,const bool lock)
    }
    if(lock) mMutex.Unlock();
    this->WXRefinableObj::CrystUpdate(uui,lock);
+   VFN_DEBUG_EXIT("WXPowderPattern::CrystUpdate()",6)
 } 
 
 void WXPowderPattern::OnMenuAddCompBackgd(wxCommandEvent & WXUNUSED(event))
@@ -608,7 +612,7 @@ void WXPowderPattern::OnMenuAddCompBackgdBayesian(wxCommandEvent & WXUNUSED(even
 
 void WXPowderPattern::OnMenuAddCompCryst(wxCommandEvent & WXUNUSED(event))
 {
-   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompCryst()",6)
+   VFN_DEBUG_ENTRY("WXPowderPattern::OnMenuAddCompCryst()",6)
    WXCrystValidateAllUserInput();
    PowderPatternDiffraction * diffData=new PowderPatternDiffraction;
    int choice;
@@ -620,12 +624,12 @@ void WXPowderPattern::OnMenuAddCompCryst(wxCommandEvent & WXUNUSED(event))
    mpPowderPattern->AddPowderPatternComponent(*diffData);
    if(diffData->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
    {
-      VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompCryst():Switch to DE-PV",6)
-      UnitCell *puc=cryst;
-      diffData->SetProfile(new ReflectionProfileDoubleExponentialPseudoVoigt(*puc));
+      wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_POWDERDIFF_PROFILE_DEPV);
+      wxPostEvent(diffData->WXGet(),event);
    }
    if(mpGraph!=0) mpPowderPattern->Prepare();//else this will be done when opening the graph
    this->CrystUpdate();
+   VFN_DEBUG_EXIT("WXPowderPattern::OnMenuAddCompCryst()",6)
 }
 
 void WXPowderPattern::OnMenuShowGraph(wxCommandEvent & WXUNUSED(event))
@@ -2253,7 +2257,6 @@ void WXTextureMarchDollase::OnDeleteTexturePhase(wxCommandEvent & WXUNUSED(event
 ////////////////////////////////////////////////////////////////////////
 static const long ID_POWDERDIFF_PROFILE=                       WXCRYST_ID();
 static const long ID_POWDERDIFF_PROFILE_PV=                    WXCRYST_ID();
-static const long ID_POWDERDIFF_PROFILE_DEPV=                  WXCRYST_ID();
 
 BEGIN_EVENT_TABLE(WXPowderPatternDiffraction, wxWindow)
    EVT_BUTTON(ID_POWDERDIFF_CRYSTAL,WXPowderPatternDiffraction::OnChangeCrystal)
@@ -2393,7 +2396,7 @@ void WXPowderPatternDiffraction::OnChangeProfile(wxCommandEvent & event)
       mList.Add(mpPowderPatternDiffraction->mpReflectionProfile->WXGet());
       mpSizer->Add(mpPowderPatternDiffraction->mpReflectionProfile->WXGet());
       this->BottomLayout(mpPowderPatternDiffraction->mpReflectionProfile->WXGet());
-      this->CrystUpdate(true);
+      mpPowderPatternDiffraction->GetParentPowderPattern().UpdateDisplay();
    }
    VFN_DEBUG_EXIT("WXPowderPatternDiffraction::OnChangeProfile()",6)
 }
