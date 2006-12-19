@@ -48,6 +48,14 @@
 
 namespace ObjCryst
 {
+bool ISNAN_OR_INF(REAL r)
+{
+   #if defined(_MSC_VER) || defined(__BORLANDC__)
+   return  _isnan(x) || (!_finite(x));
+   #else
+   return (isnan(r)!=0) || (isinf(r)!=0);
+   #endif
+}
 ////////////////////////////////////////////////////////////////////////
 //
 //    PowderPatternComponent    
@@ -1010,7 +1018,7 @@ Computing all Profiles",5)
       fullwidth1=mpReflectionProfile->GetFullProfileWidth(0.04,xmax,mH(imax),mK(imax),mL(imax));
       if(!mUseFastLessPreciseFunc) {fullwidth0*=2;fullwidth1*=2;}
    }
-   VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile()w="<<fullwidth0<<"->"<<fullwidth1,10)
+   VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile()w="<<fullwidth0<<"->"<<fullwidth1,5)
    
    for(unsigned int line=0;line<nbLine;line++)
    {
@@ -3348,6 +3356,11 @@ void PowderPattern::FitScaleFactorForR()const
       REAL * p0 = mPowderPatternCalc.data();
       const REAL s = mFitScaleFactorX(i)
                        -mScaleFactor(mScalableComponentIndex(i));
+      if(ISNAN_OR_INF(s))
+      {
+         (*fpObjCrystInformUser)("Warning: working around NaN scale factor...");
+         continue;
+      }
       for(unsigned long j=0;j<mNbPointUsed;j++) *p0++ += s * *p1++;
       VFN_DEBUG_MESSAGE("-> Old:"<<mScaleFactor(mScalableComponentIndex(i)) <<" Change:"<<mFitScaleFactorX(i),2);
       mScaleFactor(mScalableComponentIndex(i)) = mFitScaleFactorX(i);
@@ -3492,6 +3505,11 @@ void PowderPattern::FitScaleFactorForIntegratedR()const
       REAL * p0 = mPowderPatternCalc.data();
       const REAL s = mFitScaleFactorX(i)
                        -mScaleFactor(mScalableComponentIndex(i));
+      if(ISNAN_OR_INF(s))
+      {
+         (*fpObjCrystInformUser)("Warning: working around NaN scale factor...");
+         continue;
+      }
       for(unsigned long j=0;j<mNbPointUsed;j++) *p0++ += s * *p1++;
       VFN_DEBUG_MESSAGE("-> Old:"<<mScaleFactor(mScalableComponentIndex(i)) <<" New:"<<mFitScaleFactorX(i),3);
       mScaleFactor(mScalableComponentIndex(i)) = mFitScaleFactorX(i);
@@ -3664,6 +3682,11 @@ void PowderPattern::FitScaleFactorForRw()const
       REAL * p0 = mPowderPatternCalc.data();
       const REAL s = mFitScaleFactorX(i)
                        -mScaleFactor(mScalableComponentIndex(i));
+      if(ISNAN_OR_INF(s))
+      {
+         (*fpObjCrystInformUser)("Warning: working around NaN scale factor...");
+         continue;
+      }
       for(unsigned long j=0;j<mNbPointUsed;j++) *p0++ += s * *p1++;
       VFN_DEBUG_MESSAGE("-> Old:"<<mScaleFactor(mScalableComponentIndex(i)) <<" Change:"<<mFitScaleFactorX(i),3);
       mScaleFactor(mScalableComponentIndex(i)) = mFitScaleFactorX(i);
@@ -3891,6 +3914,11 @@ void PowderPattern::FitScaleFactorForIntegratedRw()const
          REAL * RESTRICT p0 = mPowderPatternIntegratedCalc.data();
          const REAL s = mFitScaleFactorX(i)
                           -mScaleFactor(mScalableComponentIndex(i));
+         if(ISNAN_OR_INF(s))
+         {
+            (*fpObjCrystInformUser)("Warning: working around NaN scale factor...");
+            continue;
+         }
          if(nbVarCalc>0)
          {
             if(abs(s/mFitScaleFactorX(i))>0.001)
