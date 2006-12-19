@@ -51,7 +51,7 @@ namespace ObjCryst
 bool ISNAN_OR_INF(REAL r)
 {
    #if defined(_MSC_VER) || defined(__BORLANDC__)
-   return  _isnan(x) || (!_finite(x));
+   return  _isnan(r) || (!_finite(r));
    #else
    return (isnan(r)!=0) || (isinf(r)!=0);
    #endif
