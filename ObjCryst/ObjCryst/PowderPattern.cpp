@@ -641,12 +641,6 @@ void PowderPatternDiffraction::SetReflectionProfilePar(const ReflectionProfileTy
                                                        const REAL eta0, const REAL eta1)
 {
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::SetReflectionProfilePar()",5)
-   if(mpReflectionProfile!=0)
-   {
-      this->RemoveSubRefObj(*mpReflectionProfile);
-      delete mpReflectionProfile;
-      mpReflectionProfile=0;
-   }
    ReflectionProfilePseudoVoigt* p=new ReflectionProfilePseudoVoigt();
    p->SetProfilePar(w,u,v,eta0,eta1);
    this->SetProfile(p);
@@ -654,12 +648,12 @@ void PowderPatternDiffraction::SetReflectionProfilePar(const ReflectionProfileTy
 
 void PowderPatternDiffraction::SetProfile(ReflectionProfile *p)
 {
+   if(p==mpReflectionProfile) return;
    if(mpReflectionProfile!=0)
    {
       this->RemoveSubRefObj(*mpReflectionProfile);
       delete mpReflectionProfile;
    }
-   if(p==mpReflectionProfile) return;
    mpReflectionProfile= p;
    this->AddSubRefObj(*mpReflectionProfile);
    mClockMaster.AddChild(mpReflectionProfile->GetClockMaster());

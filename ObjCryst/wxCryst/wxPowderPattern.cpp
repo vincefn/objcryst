@@ -2358,15 +2358,16 @@ void WXPowderPatternDiffraction::OnChangeProfile(wxCommandEvent & event)
    {
       if(mpPowderPatternDiffraction->mpReflectionProfile==0)
       {
-         mpPowderPatternDiffraction->mpReflectionProfile= new ReflectionProfilePseudoVoigt;
+         ReflectionProfilePseudoVoigt *p= new ReflectionProfilePseudoVoigt;
+         mpPowderPatternDiffraction->SetProfile(p);
          add=true;
       }
       else
          if(mpPowderPatternDiffraction->mpReflectionProfile->GetClassName()
             !="ReflectionProfilePseudoVoigt")
          {
-            delete mpPowderPatternDiffraction->mpReflectionProfile;
-            mpPowderPatternDiffraction->mpReflectionProfile= new ReflectionProfilePseudoVoigt;
+            ReflectionProfilePseudoVoigt *p= new ReflectionProfilePseudoVoigt;
+            mpPowderPatternDiffraction->SetProfile(p);
             add=true;
          }
    }
@@ -2374,19 +2375,20 @@ void WXPowderPatternDiffraction::OnChangeProfile(wxCommandEvent & event)
    {
       if(mpPowderPatternDiffraction->mpReflectionProfile==0)
       {
-         mpPowderPatternDiffraction->mpReflectionProfile
-            = new ReflectionProfileDoubleExponentialPseudoVoigt
-                     (mpPowderPatternDiffraction->GetCrystal());
+         ReflectionProfileDoubleExponentialPseudoVoigt *p=
+            new ReflectionProfileDoubleExponentialPseudoVoigt
+                (mpPowderPatternDiffraction->GetCrystal());
+         mpPowderPatternDiffraction->SetProfile(p);
          add=true;
       }
       else
          if(mpPowderPatternDiffraction->mpReflectionProfile->GetClassName()
             !="ReflectionProfileDoubleExponentialPseudoVoigt")
          {
-            delete mpPowderPatternDiffraction->mpReflectionProfile;
-            mpPowderPatternDiffraction->mpReflectionProfile
-               = new ReflectionProfileDoubleExponentialPseudoVoigt
-                        (mpPowderPatternDiffraction->GetCrystal());
+            ReflectionProfileDoubleExponentialPseudoVoigt *p=
+               new ReflectionProfileDoubleExponentialPseudoVoigt
+                  (mpPowderPatternDiffraction->GetCrystal());
+            mpPowderPatternDiffraction->SetProfile(p);
             add=true;
          }
    }
