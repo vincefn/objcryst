@@ -761,6 +761,17 @@ float Score(const PeakList &dhkl, const RecUnitCell &ruc, const unsigned int nbS
          if(++i==nbSpurious) break;
       }
    }
+   if(verbose)
+   {
+      float epstmp=0;
+      unsigned long i=0;
+      for(pos=dhkl.GetPeakList().begin();pos!=dhkl.GetPeakList().end();++pos)
+      {
+         epstmp+=fabs(pos->d2diff-zero);
+         cout<<"Line #"<<i++<<": obs="<<pos->d2obs<<", diff="<<pos->d2diff<<" -> epsilon="<<epstmp<<endl;
+      }
+      cout<<"epsilon="<<epstmp<<", dmax="<<dmax<<" ,nb="<<nb<<" ,nbcalc="<<nbCalc<<endl;
+   }
    /*
    else
    {//Only stat+ the worst
@@ -1158,7 +1169,7 @@ void CellExplorer::LSQRefine(int nbCycle, bool useLevenbergMarquardt, const bool
    //this->BeginOptimization();
    //cout<<FormatVertVector<REAL>(this->GetLSQObs(0),this->GetLSQCalc(0),this->GetLSQWeight(0),this->GetLSQDeriv(0,this->GetPar((long)0)))<<endl;
    mLSQObj.Refine(nbCycle,useLevenbergMarquardt,silent);
-   mpPeakList->Print(cout);
+   if(!silent) mpPeakList->Print(cout);
    VFN_DEBUG_EXIT("CellExplorer::LSQRefine()",5)
 }
 
@@ -1271,7 +1282,7 @@ float CellExplorer::GetBestScore()const{return mBestScore;}
 const std::list<std::pair<RecUnitCell,float> >& CellExplorer::GetSolutions()const {return mvSolution;}
 std::list<std::pair<RecUnitCell,float> >& CellExplorer::GetSolutions() {return mvSolution;}
 
-void CellExplorer::RDicVol(RecUnitCell uc0,RecUnitCell duc, unsigned int depth,unsigned long &nbCalc)
+void CellExplorer::RDicVol(RecUnitCell uc0,RecUnitCell duc, unsigned int depth,unsigned long &nbCalc,const unsigned int stopOnDepth)
 {
    if(depth<0)
    {
@@ -1307,26 +1318,27 @@ void CellExplorer::RDicVol(RecUnitCell uc0,RecUnitCell duc, unsigned int depth,u
       {
          mRecUnitCell=uc0;
          vector<float> uc=mRecUnitCell.DirectUnitCell();
-         float score=Score(*mpPeakList,mRecUnitCell,mNbSpurious,false,true);
-         if(score>10)
+         float score=Score(*mpPeakList,mRecUnitCell,mNbSpurious,false,true,false);
+         if((score>10)||(depth>=stopOnDepth))
          {
             cout<<__FILE__<<":"<<__LINE__<<" Depth="<<depth<<" (DIC) ! a="<<uc[0]<<", b="<<uc[1]<<", c="<<uc[2]<<", alpha="
                <<uc[3]*RAD2DEG<<", beta="<<uc[4]*RAD2DEG<<", gamma="<<uc[5]*RAD2DEG<<", V="<<uc[6]
                <<", score="<<score<<endl;
             this->LSQRefine(10,true,true);
             uc=mRecUnitCell.DirectUnitCell();
-            score=Score(*mpPeakList,mRecUnitCell,mNbSpurious,false,true);
+            score=Score(*mpPeakList,mRecUnitCell,mNbSpurious,false,true,false);
             cout<<__FILE__<<":"<<__LINE__<<" Depth="<<depth<<" (LSQ) ! a="<<uc[0]<<", b="<<uc[1]<<", c="<<uc[2]<<", alpha="
                <<uc[3]*RAD2DEG<<", beta="<<uc[4]*RAD2DEG<<", gamma="<<uc[5]*RAD2DEG<<", V="<<uc[6]
                <<", score="<<score<<endl;
-            if(score>10)
+            if((score>10)||(depth>=stopOnDepth))
             {
                if(score>mBestScore) mBestScore=score;
                mvSolution.push_back(make_pair(mRecUnitCell,score));
+               mvNbSolutionDepth[depth]+=1;
             }
          }
       }
-      if(depth<6)
+      if(depth<stopOnDepth)
       {
          if(false)//depth>=3)
          {
@@ -1347,36 +1359,36 @@ void CellExplorer::RDicVol(RecUnitCell uc0,RecUnitCell duc, unsigned int depth,u
             //:TODO: dichotomy on zero shift ?
             uc.par[1]=uc0.par[1]+i0*duc.par[1];
             if(mnpar==2)
-               RDicVol(uc,duc, depth+1,nbCalc);
+               RDicVol(uc,duc, depth+1,nbCalc,stopOnDepth);
             else
                for(int i1=-1;i1<=1;i1+=2)
                {
                   uc.par[2]=uc0.par[2]+i1*duc.par[2];
                   if(mnpar==3)
-                     RDicVol(uc,duc, depth+1,nbCalc);
+                     RDicVol(uc,duc, depth+1,nbCalc,stopOnDepth);
                   else
                      for(int i2=-1;i2<=1;i2+=2)
                      {
                         uc.par[3]=uc0.par[3]+i2*duc.par[3];
                         if(mnpar==4)
-                           RDicVol(uc,duc, depth+1,nbCalc);
+                           RDicVol(uc,duc, depth+1,nbCalc,stopOnDepth);
                         else
                            for(int i3=-1;i3<=1;i3+=2)
                            {
                               uc.par[4]=uc0.par[4]+i3*duc.par[4];
                               if(mnpar==5)
-                                 RDicVol(uc,duc, depth+1,nbCalc);
+                                 RDicVol(uc,duc, depth+1,nbCalc,stopOnDepth);
                               else
                                  for(int i4=-1;i4<=1;i4+=2)
                                  {
                                     uc.par[5]=uc0.par[5]+i4*duc.par[5];
                                     if(mnpar==7)
-                                       RDicVol(uc,duc, depth+1,nbCalc);
+                                       RDicVol(uc,duc, depth+1,nbCalc,stopOnDepth);
                                     else
                                        for(int i5=-1;i5<=1;i5+=2)
                                        {
                                           uc.par[6]=uc0.par[6]+i5*duc.par[6];
-                                          RDicVol(uc,duc, depth+1,nbCalc);
+                                          RDicVol(uc,duc, depth+1,nbCalc,stopOnDepth);
                                        }
                                  }
                            }
@@ -1398,9 +1410,11 @@ void CellExplorer::RDicVol(RecUnitCell uc0,RecUnitCell duc, unsigned int depth,u
    */
 }
 
-void CellExplorer::DicVol(const unsigned int depth)
+void CellExplorer::DicVol(const float stopOnScore,const unsigned int stopOnDepth)
 {
    this->Init();
+   mvNbSolutionDepth.resize(7);
+   for(unsigned int i=0;i<=6;++i) mvNbSolutionDepth[i]=0;
    const float latstep=0.5,
                cosangstep=.05,
                cosangmax=abs(cos(mAngleMax)),
@@ -1464,7 +1478,7 @@ void CellExplorer::DicVol(const unsigned int depth)
                               uclarged=uclarge.DirectUnitCell();
                               ucsmalld =ucsmall.DirectUnitCell();
                               
-                              RDicVol(uc0,duc,0,nbCalc);
+                              RDicVol(uc0,duc,0,nbCalc,stopOnDepth);
                               
                               if(uclarged[6]>maxv) break;
                               if(uclarged[2]>mLengthMax) break;
@@ -1520,7 +1534,7 @@ void CellExplorer::DicVol(const unsigned int depth)
                         if((ucsmalld[6]<maxv)&&(uclarged[6]>minv))//&&(ucpd[0]<mLengthMax)&&(ucpd[1]<mLengthMax)&&(ucpd[2]<mLengthMax))
                         {
                           //cout<<buf<<"   VM="<<maxv<<endl;
-                          RDicVol(uc0,duc,0,nbCalc);
+                          RDicVol(uc0,duc,0,nbCalc,stopOnDepth);
                         }
                         else
                         {
@@ -1582,7 +1596,7 @@ void CellExplorer::DicVol(const unsigned int depth)
                      if((ucpd[6]<maxv)&&(ucmd[6]>minv))
                      {
                         //cout<<buf<<"   VM="<<maxv<<endl;
-                        RDicVol(uc0,duc,0,nbCalc);
+                        RDicVol(uc0,duc,0,nbCalc,stopOnDepth);
                      }
                      else
                      {
@@ -1619,7 +1633,7 @@ void CellExplorer::DicVol(const unsigned int depth)
                   if((ucsmalld[6]<maxv)&&(uclarged[6]>minv))
                   {
                      //cout<<buf<<endl;
-                     RDicVol(uc0,duc,0,nbCalc);
+                     RDicVol(uc0,duc,0,nbCalc,stopOnDepth);
                   }
                   //else cout<<buf<<" BREAK"<<endl;
                }
@@ -1642,7 +1656,7 @@ void CellExplorer::DicVol(const unsigned int depth)
                   vector<float> uc=uc0.DirectUnitCell();
                   if((uc[6]<maxv)&&(uc[6]>minv))
                   {
-                     RDicVol(uc0,duc,0,nbCalc);
+                     RDicVol(uc0,duc,0,nbCalc,stopOnDepth);
                   }
                }
             }
@@ -1674,7 +1688,7 @@ void CellExplorer::DicVol(const unsigned int depth)
                   */
                   if((ucsmalld[6]<maxv)&&(uclarged[6]>minv))
                   {
-                     RDicVol(uc0,duc,0,nbCalc);
+                     RDicVol(uc0,duc,0,nbCalc,stopOnDepth);
                   }
                }
             }
@@ -1705,7 +1719,7 @@ void CellExplorer::DicVol(const unsigned int depth)
                if((ucsmalld[6]<maxv)&&(uclarged[6]>minv))
                {
                   //cout<<buf<<endl;
-                  RDicVol(uc0,duc,0,nbCalc);
+                  RDicVol(uc0,duc,0,nbCalc,stopOnDepth);
                }
                //else cout<<buf<<" BREAK"<<endl;
             }
@@ -1717,7 +1731,12 @@ void CellExplorer::DicVol(const unsigned int depth)
          const float score=Score(*mpPeakList,pos->first,mNbSpurious);
          if(score>bestscore) {bestscore=score;bestpos=pos;}
       }
-      if(bestscore>50) break;
+      if(bestscore>stopOnScore) break;
+      cout<<"STOPONDEPTH:"<<stopOnDepth<<endl<<endl<<endl<<endl<<endl<<endl;
+      bool breakDepth=false;
+      for(unsigned int i=stopOnDepth; i<mvNbSolutionDepth.size();++i)
+         if(mvNbSolutionDepth[i]>1) {breakDepth=true;break;}
+      if(breakDepth) break;
    }
    /*
    {// Tag spurious lines

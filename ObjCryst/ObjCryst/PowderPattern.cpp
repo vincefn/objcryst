@@ -4128,7 +4128,7 @@ REAL PowderPattern::X2STOL(const REAL x)const
    REAL stol;
    if(this->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
    {
-      if(abs(mDIFA/mDIFC)>1e-6)
+      if(abs(mDIFA)>abs(mDIFC*1e-6))
       {
          const REAL delta=mDIFC*mDIFC+4.0*mDIFA*x;
          stol = (-mDIFC+sqrt(delta))/(2.0*mDIFA);

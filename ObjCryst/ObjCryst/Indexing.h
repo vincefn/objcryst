@@ -178,14 +178,14 @@ class CellExplorer:public RefinableObj
       virtual const CrystVector_REAL & GetLSQDeriv(const unsigned int, RefinablePar &);
       virtual void BeginOptimization(const bool allowApproximations=false, const bool enableRestraints=false);
       void LSQRefine(int nbCycle=1, bool useLevenbergMarquardt=true, const bool silent=false);
-      void DicVol(const unsigned int depth);
+      void DicVol(const float stopOnScore=50.0,const unsigned int stopOnDepth=6);
       /// Sort all solutions by score, remove duplicates
       void ReduceSolutions();
       float GetBestScore()const;
       const std::list<std::pair<RecUnitCell,float> >& GetSolutions()const;
       std::list<std::pair<RecUnitCell,float> >& GetSolutions();
    private:
-      void RDicVol(RecUnitCell uc0, RecUnitCell uc1, unsigned int depth,unsigned long &nbCalc);
+      void RDicVol(RecUnitCell uc0, RecUnitCell uc1, unsigned int depth,unsigned long &nbCalc,const unsigned int stopOnDepth=6);
       void Init();
       /// Max number of obs reflections to use
       std::list<std::pair<RecUnitCell,float> > mvSolution;
@@ -211,7 +211,10 @@ class CellExplorer:public RefinableObj
       mutable CrystVector_REAL mDeriv;
       /// Reciprocal unit cell used for least squares refinement
       RecUnitCell mRecUnitCell;
+      /// Current best score
       float mBestScore;
+      /// Number of solutions found during dicvol search, at each depth.
+      std::vector<unsigned int> mvNbSolutionDepth;
 };
 
 
