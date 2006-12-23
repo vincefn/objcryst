@@ -637,7 +637,7 @@ float Score(const PeakList &dhkl, const RecUnitCell &ruc, const unsigned int nbS
    int h,k,l;
    float predict_coeff=1;
    if(storePredictedHKL)predict_coeff=2;
-   const float dmax=dhkl.mvHKL[nb-1].d2obs*predict_coeff;
+   const float dmax=dhkl.mvHKL[nb-1].d2obs*predict_coeff*1.05;
    int sk0,sl0;// do we need >0 *and* <0 indices for k,l ?
    switch(ruc.mlattice)
    {
@@ -742,8 +742,7 @@ float Score(const PeakList &dhkl, const RecUnitCell &ruc, const unsigned int nbS
    }
    for(pos=dhkl.GetPeakList().begin();pos!=dhkl.GetPeakList().end();++pos)
    {
-      //if(verbose) cout<<"Line #"<<i<<":"<<sqrt(dhkl.mvd2obs[i])<<", epsilon="<<*pdq2-2*zero* *pdobs<<endl;
-      epsilon +=fabs(pos->d2diff-zero);//fabs(*pdq2-2*zero* *pdobs)      //fabs(*pdq2-zero)
+      epsilon +=fabs(pos->d2diff-zero);
    }
    if(nbSpurious>0)
    {// find worst fitting lines and remove them from epsilon calculation
@@ -768,7 +767,7 @@ float Score(const PeakList &dhkl, const RecUnitCell &ruc, const unsigned int nbS
       for(pos=dhkl.GetPeakList().begin();pos!=dhkl.GetPeakList().end();++pos)
       {
          epstmp+=fabs(pos->d2diff-zero);
-         cout<<"Line #"<<i++<<": obs="<<pos->d2obs<<", diff="<<pos->d2diff<<" -> epsilon="<<epstmp<<endl;
+         //cout<<"Line #"<<i++<<": obs="<<pos->d2obs<<", diff="<<pos->d2diff<<" -> epsilon="<<epstmp<<endl;
       }
       cout<<"epsilon="<<epstmp<<", dmax="<<dmax<<" ,nb="<<nb<<" ,nbcalc="<<nbCalc<<endl;
    }
@@ -1068,9 +1067,10 @@ const CrystVector_REAL& CellExplorer::GetLSQCalc(const unsigned int) const
    unsigned int j=0;
    for(vector<PeakList::hkl>::const_iterator pos=mpPeakList->GetPeakList().begin();pos!=mpPeakList->GetPeakList().end();++pos)
    {
-      if(pos->isIndexed) 
+      if(pos->isIndexed)
          mCalc(j++)=mRecUnitCell.hkl2d(pos->h,pos->k,pos->l);
    }
+   //cout<<__FILE__<<":"<<__LINE__<<"LSQCalc : Score:"<<Score(*mpPeakList,mRecUnitCell,mNbSpurious,false,true,false)<<endl;
    VFN_DEBUG_EXIT("CellExplorer::GetLSQCalc()",2)
    return mCalc;
 }
@@ -1118,7 +1118,7 @@ const CrystVector_REAL& CellExplorer::GetLSQDeriv(const unsigned int, RefinableP
 void CellExplorer::BeginOptimization(const bool allowApproximations, const bool enableRestraints)
 {
    VFN_DEBUG_ENTRY("CellExplorer::BeginOptimization()",10)
-   Score(*mpPeakList,mRecUnitCell,mNbSpurious,false,true);
+   Score(*mpPeakList,mRecUnitCell,mNbSpurious,false,true,false);
    const unsigned int nb=mpPeakList->GetPeakList().size();
    mCalc.resize(nb-mNbSpurious);
    mObs.resize(nb-mNbSpurious);
@@ -1413,8 +1413,8 @@ void CellExplorer::RDicVol(RecUnitCell uc0,RecUnitCell duc, unsigned int depth,u
 void CellExplorer::DicVol(const float stopOnScore,const unsigned int stopOnDepth)
 {
    this->Init();
-   mvNbSolutionDepth.resize(7);
-   for(unsigned int i=0;i<=6;++i) mvNbSolutionDepth[i]=0;
+   mvNbSolutionDepth.resize(stopOnDepth+1);
+   for(unsigned int i=0;i<=stopOnDepth;++i) mvNbSolutionDepth[i]=0;
    const float latstep=0.5,
                cosangstep=.05,
                cosangmax=abs(cos(mAngleMax)),
@@ -1732,7 +1732,6 @@ void CellExplorer::DicVol(const float stopOnScore,const unsigned int stopOnDepth
          if(score>bestscore) {bestscore=score;bestpos=pos;}
       }
       if(bestscore>stopOnScore) break;
-      cout<<"STOPONDEPTH:"<<stopOnDepth<<endl<<endl<<endl<<endl<<endl<<endl;
       bool breakDepth=false;
       for(unsigned int i=stopOnDepth; i<mvNbSolutionDepth.size();++i)
          if(mvNbSolutionDepth[i]>1) {breakDepth=true;break;}
