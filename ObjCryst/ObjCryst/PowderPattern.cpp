@@ -4240,8 +4240,8 @@ PeakList PowderPattern::FindPeaks(const float dmin,const float maxratio,const un
       //TODO : evaluate min intensity ratio from noise ?
       if(pl.GetPeakList().size()==0) min_int=iobs*maxr;
       else if((pl.GetPeakList().size()>maxpeak)||(iobs<min_int)) break;
-      const float sigma=this->GetPowderPatternObsSigma()(imax)/norm;
-      if(((nbav>=5)&&(iobs>3*sigma))||((nbav>=3)&&(iobs>min_int*5)&&(iobs>5*sigma)))
+      //const float sigma=this->GetPowderPatternObsSigma()(imax)/norm;
+      if(((nbav>=5)&&(iobs>min_int*3))||((nbav>=3)&&(iobs>min_int*5)))
       {
          pl.AddPeak(dmax,iobs,abs(dright-dleft));//d,iobs,dobssigma,iobssigma,h,k,l,d2calc
       }
