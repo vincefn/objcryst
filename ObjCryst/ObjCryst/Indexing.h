@@ -53,7 +53,9 @@ class RecUnitCell
       //float operator[](const unsigned int i);
       /// Compute d*^2 for hkl reflection
       /// if deriv != -1, compute derivate versus the corresponding parameter
-      float hkl2d(const float h,const float k,const float l,REAL *derivpar=NULL) const;
+      ///
+      /// If derivhkl=1,2,3, compute derivative versus h,k or l.
+      float hkl2d(const float h,const float k,const float l,REAL *derivpar=NULL,const unsigned int derivhkl=0) const;
       /// Compute d*^2 for one hkl reflection: this functions computes a d*^2 range (min,max)
       /// for a given range of unit cell parameter (given in the delta parameter) around the
       /// current parameters.
@@ -178,14 +180,19 @@ class CellExplorer:public RefinableObj
       virtual const CrystVector_REAL & GetLSQDeriv(const unsigned int, RefinablePar &);
       virtual void BeginOptimization(const bool allowApproximations=false, const bool enableRestraints=false);
       void LSQRefine(int nbCycle=1, bool useLevenbergMarquardt=true, const bool silent=false);
-      void DicVol(const float stopOnScore=50.0,const unsigned int stopOnDepth=6);
+      /// Run DicVOl algorithm, store only solutions with score >minScore or depth>=minDepth, 
+      /// stop at the end of one volume interval (~400 A^3) if best score>stopOnScore, 
+      /// or if one solution was found at depth>=stopOnDepth
+      ///
+      /// If stopOnDepth==0, do not stop for any depth
+      void DicVol(const float minScore=10,const unsigned int minDepth=3,const float stopOnScore=50.0,const unsigned int stopOnDepth=6);
       /// Sort all solutions by score, remove duplicates
       void ReduceSolutions();
       float GetBestScore()const;
       const std::list<std::pair<RecUnitCell,float> >& GetSolutions()const;
       std::list<std::pair<RecUnitCell,float> >& GetSolutions();
    private:
-      void RDicVol(RecUnitCell uc0, RecUnitCell uc1, unsigned int depth,unsigned long &nbCalc,const unsigned int stopOnDepth=6);
+      unsigned int RDicVol(RecUnitCell uc0, RecUnitCell uc1, unsigned int depth,unsigned long &nbCalc);
       void Init();
       /// Max number of obs reflections to use
       std::list<std::pair<RecUnitCell,float> > mvSolution;
@@ -215,6 +222,8 @@ class CellExplorer:public RefinableObj
       float mBestScore;
       /// Number of solutions found during dicvol search, at each depth.
       std::vector<unsigned int> mvNbSolutionDepth;
+      float mMinScoreReport;
+      unsigned int mMaxDicVolDepth,mDicVolDepthReport;
 };
 
 

@@ -1495,6 +1495,7 @@ class WXCellExplorer:public wxWindow
       wxTextCtrl *mpErrorD;
       WXFieldChoice *mpFieldCrystal;
       wxTextCtrl *mpStopOnScore,*mpStopOnDepth;
+      wxTextCtrl *mpReportOnScore,*mpReportOnDepth;
       Crystal *mpCrystal;
       DECLARE_EVENT_TABLE()
 };
@@ -1570,6 +1571,7 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
    pSpuriousSizer->Add(mpNbSpurious,0,wxALIGN_CENTER);
    pSizer2->Add(pSpuriousSizer,0,wxALIGN_CENTER);
    
+   
    wxBoxSizer *pStopSizer=new wxBoxSizer(wxHORIZONTAL);
    wxStaticText* pStopOnScoreText=new wxStaticText(this,-1,"Stop on Score>");
    pStopSizer->Add(pStopOnScoreText,0,wxALIGN_CENTER);
@@ -1577,12 +1579,28 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
                                 wxTextValidator(wxFILTER_NUMERIC));
    pStopSizer->Add(mpStopOnScore,0,wxALIGN_CENTER);
    
-   wxStaticText* pStopOnDepthText=new wxStaticText(this,-1,"Depth>=");
+   wxStaticText* pStopOnDepthText=new wxStaticText(this,-1,"or depth>=");
    pStopSizer->Add(pStopOnDepthText,0,wxALIGN_CENTER);
    mpStopOnDepth=new wxTextCtrl(this,-1,"6",wxDefaultPosition,wxSize(50,-1),0,
                                 wxTextValidator(wxFILTER_NUMERIC));
    pStopSizer->Add(mpStopOnDepth,0,wxALIGN_CENTER);
    pSizer2->Add(pStopSizer,0,wxALIGN_CENTER);
+   
+   
+   wxBoxSizer *pReportSizer=new wxBoxSizer(wxHORIZONTAL);
+   wxStaticText* pReportOnScoreText=new wxStaticText(this,-1,"Report score>");
+   pReportSizer->Add(pReportOnScoreText,0,wxALIGN_CENTER);
+   mpReportOnScore=new wxTextCtrl(this,-1,"10",wxDefaultPosition,wxSize(50,-1),0,
+                                wxTextValidator(wxFILTER_NUMERIC));
+   pReportSizer->Add(mpReportOnScore,0,wxALIGN_CENTER);
+   
+   wxStaticText* pReportOnDepthText=new wxStaticText(this,-1,"and depth>=");
+   pReportSizer->Add(pReportOnDepthText,0,wxALIGN_CENTER);
+   mpReportOnDepth=new wxTextCtrl(this,-1,"3",wxDefaultPosition,wxSize(50,-1),0,
+                                wxTextValidator(wxFILTER_NUMERIC));
+   pReportSizer->Add(mpReportOnDepth,0,wxALIGN_CENTER);
+   pSizer2->Add(pReportSizer,0,wxALIGN_CENTER);
+   
    
    wxBoxSizer *pErrorSizer=new wxBoxSizer(wxHORIZONTAL);
    wxStaticText* pErrorText=new wxStaticText(this,-1,"1/d error:");
@@ -1623,8 +1641,8 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
    mpCellExplorer = new CellExplorer(*mpPeakList,(Bravais)(mpBravais->GetSelection()),0);
    
    wxString s;
-   double lmin,lmax,amin=90,amax,vmin,vmax,error,stopOnScore;
-   long nbspurious,stopOnDepth;
+   double lmin,lmax,amin=90,amax,vmin,vmax,error,stopOnScore,reportOnScore;
+   long nbspurious,stopOnDepth,reportOnDepth;
    s=mpLengthMin->GetValue();s.ToDouble(&lmin);
    s=mpLengthMax->GetValue();s.ToDouble(&lmax);
    //s=mpAngleMin->GetValue();s.ToDouble(&amin);
@@ -1635,6 +1653,8 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
    s=mpErrorD->GetValue();s.ToDouble(&error);
    s=mpStopOnScore->GetValue();s.ToDouble(&stopOnScore);
    s=mpStopOnDepth->GetValue();s.ToLong(&stopOnDepth);
+   s=mpReportOnScore->GetValue();s.ToDouble(&reportOnScore);
+   s=mpReportOnDepth->GetValue();s.ToLong(&reportOnDepth);
    
    mpCellExplorer->SetLengthMinMax((float)lmin,(float)lmax);
    mpCellExplorer->SetAngleMinMax((float)amin*DEG2RAD,(float)amax*DEG2RAD);
@@ -1646,7 +1666,7 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
       pos->isSpurious=false;
 
    Chronometer chrono;
-   if(mpAlgorithm->GetSelection()==0) mpCellExplorer->DicVol(stopOnScore,stopOnDepth);
+   if(mpAlgorithm->GetSelection()==0) mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
    else
    {
       for(unsigned int i=0;i<20;++i)
