@@ -4243,7 +4243,7 @@ PeakList PowderPattern::FindPeaks(const float dmin,const float maxratio,const un
       //const float sigma=this->GetPowderPatternObsSigma()(imax)/norm;
       if(((nbav>=5)&&(iobs>min_int*3))||((nbav>=3)&&(iobs>min_int*5)))
       {
-         pl.AddPeak(dmax,iobs,abs(dright-dleft));//d,iobs,dobssigma,iobssigma,h,k,l,d2calc
+         pl.AddPeak(dmax,iobs,abs(dright-dleft)*.5);
       }
    }
    pl.Print(cout);
