@@ -29,10 +29,10 @@ endif
 -include Fox.dep
 
 #wxCryst Application ( wxCrystApp_resource.o for cygwin)
-Fox: Fox.o libCrystVector libQuirks libRefinableObj libcctbx libCryst libwxCryst
+Fox: Fox.o libCrystVector libQuirks libRefinableObj libcctbx libCryst libwxCryst libnewmat
 	${LINKER} ${LDFLAGS} -o $@ ${filter-out %.a %.so lib%, $^} ${LOADLIBES} 
 
-Fox-nogui: Fox.o libCrystVector libQuirks libRefinableObj libcctbx libCryst
+Fox-nogui: Fox.o libCrystVector libQuirks libRefinableObj libcctbx libCryst libnewmat
 	${LINKER} ${LDFLAGS} -o $@ ${filter-out %.a %.so lib%, $^} ${LOADLIBES} 
 
 fox: Fox
