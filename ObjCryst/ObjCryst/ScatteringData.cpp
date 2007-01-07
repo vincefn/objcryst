@@ -1350,8 +1350,7 @@ void ScatteringData::CalcGeomStructFactor() const
       const int nbTranslationVectors=pSpg->GetNbTranslationVectors();
       const long nbComp=pScattCompList->GetNbComponent();
       const int nbRefl=this->GetNbRefl();
-      CrystMatrix_REAL transVect(nbTranslationVectors,3);
-      transVect=pSpg->GetTranslationVectors();
+      const std::vector<SpaceGroup::TRx> *pTransVect=&(pSpg->GetTranslationVectors());
       CrystMatrix_REAL allCoords(nbSymmetrics,3);
       CrystVector_REAL tmpVect(nbRefl);
 VFN_DEBUG_MESSAGE("TEST",3)
@@ -1504,9 +1503,9 @@ VFN_DEBUG_MESSAGE("TEST",3)
          {
             for(int j=1;j<nbTranslationVectors;j++)
             {
-               const REAL x=transVect(j,0);
-               const REAL y=transVect(j,1);
-               const REAL z=transVect(j,2);
+               const REAL x=(*pTransVect)[j].tr[0];
+               const REAL y=(*pTransVect)[j].tr[1];
+               const REAL z=(*pTransVect)[j].tr[2];
                REAL *p1=tmpVect.data();
                const register REAL *hh=mH2Pi.data();
                const register REAL *kk=mK2Pi.data();

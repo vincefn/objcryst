@@ -239,16 +239,12 @@ bool SpaceGroup::IsCentrosymmetric()const
 
 int SpaceGroup::GetNbTranslationVectors()const
 {
-   return this->GetCCTbxSpg().n_ltr();
+   return mNbTrans;
 }
       
-CrystMatrix_REAL SpaceGroup::GetTranslationVectors()const
+const std::vector<SpaceGroup::TRx>& SpaceGroup::GetTranslationVectors()const
 {
-   CrystMatrix_REAL transVect(this->GetNbTranslationVectors(),3);
-   for(int i=0;i<this->GetNbTranslationVectors();i++)
-      for(int j=0;j<3;j++)
-         transVect(i,j) = this->GetCCTbxSpg().ltr(i)[j];
-   return transVect;
+   return mvTrans;
 }
 
 
@@ -549,6 +545,25 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
    mSpgNumber=this->GetCCTbxSpg().match_tabulated_settings().number();
    
    mExtension=this->GetCCTbxSpg().match_tabulated_settings().extension();
+
+   // Store rotation matrices & translation vectors
+   mvTrans.resize(mNbTrans);
+   for(unsigned int i=0;i<mNbTrans;i++)
+   {
+      for(unsigned int j=0;j<3;j++)
+         mvTrans[i].tr[j] = this->GetCCTbxSpg().ltr(i)[j]/(REAL)(this->GetCCTbxSpg().ltr(i).den());
+   }
+   mvSym.resize(mNbSym);
+   for(unsigned int j=0;j<mNbSym;j++)
+   {
+      const cctbx::sgtbx::rt_mx *pMatrix=&(this->GetCCTbxSpg().smx(j));
+      const cctbx::sgtbx::rot_mx *pRot=&(pMatrix->r());
+      const cctbx::sgtbx::tr_vec *pTrans=&(pMatrix->t());
+      const REAL r_den=1/(REAL)(pMatrix->r().den());
+      const REAL t_den=1/(REAL)(pMatrix->t().den());
+      for(unsigned int i=0;i<9;++i) mvSym[j].mx[i]=(*pRot)[i]*r_den;
+      for(unsigned int i=0;i<3;++i) mvSym[j].tr[i]=(*pTrans)[i]*t_den;
+   }
 
    this->Print();
    mClock.Click();

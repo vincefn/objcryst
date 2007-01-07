@@ -367,16 +367,8 @@ class Crystal:public UnitCell
       /** \internal \brief Compute the distance Table (mDistTable) for all scattering components
       * \param fast : if true, the distance calculations will be made using
       * integers, thus with a lower precision but faster. Less atoms will also
-      * be involved (using the AsymmetricUnit) to make it even faster.
-      * \param asymUnitMargin (in Angstroem). This is used only if fast=true.
-      * In that case, the distance is calculated between (i) independent atoms in the
-      * asymmetric unit cell and (ii) all atoms which are inside the asymmetric unit cell
-      * or less than 'asymUnitMargin' distant from the asymmetric unit borders.
-      * This parameter should be used when only the shortest distances need to be calculated
-      * (typically for dynamical population correction). Using a too short  margin will
-      * result in having some distances calculated wrongly (ie one atom1 in the unit cell
-      * could have an atom2 neighbor just outside the sym unit: if margin=0, then the distance
-      * is calculated between atom1 and the atom2 symmetric inside the asym unit).
+      * be involved (using the AsymmetricUnit and mDistTableMaxDistance2) to make it even faster.
+      *
       * \warning Crystal::GetScatteringComponentList() \b must be called beforehand,
       * since this will not be done here.
       *
@@ -387,13 +379,13 @@ class Crystal:public UnitCell
       * \todo optimize again. Test if recomputation is needed using Clocks.
       * Use a global option instead of asymUnitMargin.
       */
-      void CalcDistTable(const bool fast,const REAL asymUnitMargin=4)const;
+      void CalcDistTable(const bool fast)const;
       
       /** Calculate all Bond Valences.
       *
       */
       void CalcBondValenceSum()const;
-            
+      
       /// The registry of scatterers for this UnitCell
       ObjRegistry<Scatterer> mScattererRegistry ;
 
@@ -440,6 +432,8 @@ class Crystal:public UnitCell
       mutable std::vector<NeighbourHood> mvDistTableSq;
       /// The time when the distance table was last calculated
       mutable RefinableObjClock mDistTableClock;
+      /// The distance up to which the distance table & neighbours needs to be calculated
+      mutable REAL mDistTableMaxDistance;
       
       /// The list of all scattering components in the crystal
       mutable ScatteringComponentList mScattCompList;

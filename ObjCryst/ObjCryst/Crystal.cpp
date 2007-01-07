@@ -53,6 +53,7 @@ ObjRegistry<Crystal> gCrystalRegistry("List of all Crystals");
 Crystal::Crystal():
 mScattererRegistry("List of Crystal Scatterers"),
 mBumpMergeCost(0.0),mBumpMergeScale(1.0),
+mDistTableMaxDistance(1.0),
 mScatteringPowerRegistry("List of Crystal ScatteringPowers"),
 mBondValenceCost(0.0),mBondValenceCostScale(1.0)
 {
@@ -69,6 +70,7 @@ mBondValenceCost(0.0),mBondValenceCostScale(1.0)
 Crystal::Crystal(const REAL a, const REAL b, const REAL c, const string &SpaceGroupId):
 mScattererRegistry("List of Crystal Scatterers"),
 mBumpMergeCost(0.0),mBumpMergeScale(1.0),
+mDistTableMaxDistance(1.0),
 mScatteringPowerRegistry("List of Crystal ScatteringPowers"),
 mBondValenceCost(0.0),mBondValenceCostScale(1.0)
 {
@@ -86,6 +88,7 @@ Crystal::Crystal(const REAL a, const REAL b, const REAL c, const REAL alpha,
               const REAL beta, const REAL gamma,const string &SpaceGroupId):
 mScattererRegistry("List of Crystal Scatterers"),
 mBumpMergeCost(0.0),mBumpMergeScale(1.0),
+mDistTableMaxDistance(1.0),
 mScatteringPowerRegistry("List of Crystal ScatteringPowers"),
 mBondValenceCost(0.0),mBondValenceCostScale(1.0)
 {
@@ -102,6 +105,7 @@ mBondValenceCost(0.0),mBondValenceCostScale(1.0)
 Crystal::Crystal(const Crystal &old):
 mScattererRegistry(old.mScattererRegistry),
 mBumpMergeCost(old.mBumpMergeCost),mBumpMergeScale(old.mBumpMergeScale),
+mDistTableMaxDistance(old.mDistTableMaxDistance),
 mScatteringPowerRegistry(old.mScatteringPowerRegistry),
 mBondValenceCost(old.mBondValenceCost),mBondValenceCostScale(old.mBondValenceCostScale)
 {
@@ -669,7 +673,7 @@ void Crystal::CalcDynPopCorr(const REAL overlapDist, const REAL mergeDist) const
    VFN_DEBUG_ENTRY("Crystal::CalcDynPopCorr(REAL)",4)
    TAU_PROFILE("Crystal::CalcDynPopCorr()","void (REAL)",TAU_DEFAULT);
    
-   this->CalcDistTable(true,overlapDist);
+   this->CalcDistTable(true);
    if(mClockDynPopCorr>mDistTableClock) return;
    
    const long nbComponent=mScattCompList.GetNbComponent();
@@ -752,7 +756,7 @@ REAL Crystal::GetBumpMergeCost() const
 {
    if(mvBumpMergePar.size()==0) return 0;
    if(mBumpMergeScale<1e-5) return 0;
-   this->CalcDistTable(true,3);
+   this->CalcDistTable(true);
    VFN_DEBUG_ENTRY("Crystal::GetBumpMergeCost()",4)
    if(  (mBumpMergeCostClock>mBumpMergeParClock)
       &&(mBumpMergeCostClock>mDistTableClock)) return mBumpMergeCost*mBumpMergeScale;
@@ -1043,6 +1047,14 @@ void Crystal::BeginOptimization(const bool allowApproximations,const bool enable
          SetGlobalOptimStep(gpRefParTypeScattTranslZ,0.1/this->GetLatticePar(2));
    }
    this->RefinableObj::BeginOptimization(allowApproximations,enableRestraints);
+   // Calculate mDistTableMaxDistance: Default 1 Angstroem, for dynamical occupancy correction
+   mDistTableMaxDistance=1.0;
+   // Up to 4 Angstroem if bond-valence is used
+   if((mvBondValenceRo.size()>0) && (mBondValenceCostScale>1e-5)) mDistTableMaxDistance=4;
+   // Up to whatever antibump distance the user requires (hopefully not too large !)
+   for(Crystal::VBumpMergePar::iterator pos=mvBumpMergePar.begin();pos!=mvBumpMergePar.end();++pos)
+      if(sqrt(pos->second.mDist2)>mDistTableMaxDistance) mDistTableMaxDistance=sqrt(pos->second.mDist2);
+   VFN_DEBUG_MESSAGE("Crystal::BeginOptimization():mDistTableMaxDistance="<<mDistTableMaxDistance,10)
 }
 
 void Crystal::AddBondValenceRo(const ScatteringPower &pow1,const ScatteringPower &pow2,const REAL ro)
@@ -1099,7 +1111,7 @@ const std::map<pair<const ScatteringPower*,const ScatteringPower*>, REAL>& Cryst
 void Crystal::CalcBondValenceSum()const
 {
    if(mvBondValenceRo.size()==0) return;
-   this->CalcDistTable(true,5);
+   this->CalcDistTable(true);
    VFN_DEBUG_MESSAGE("Crystal::CalcBondValenceSum()?",4)
    if(   (mBondValenceCalcClock>mDistTableClock)
        &&(mBondValenceCalcClock>mBondValenceParClock)) return;
@@ -1195,22 +1207,30 @@ struct DistTableInternalPosition
                              const long x,const long y,const long z):
    mAtomIndex(atomIndex),mSymmetryIndex(sym),mXL(x),mYL(y),mZL(z)
    {}
+   /// Index of the atom (order) in the component list
    long mAtomIndex;
+   /// Which symmetry opertaion does this symmetric correspond to ?
    int mSymmetryIndex;
+   /// Fractionnal coordinates
    REAL mX,mY,mZ;
+   /// Fractionnal coordinates (multiplied by 0x4000) as long integer
    long mXL,mYL,mZL;
 };
 
-void Crystal::CalcDistTable(const bool fast, const REAL asymUnitMargin) const
+void Crystal::CalcDistTable(const bool fast) const
 {
    this->GetScatteringComponentList();
+   if(!this->IsBeingRefined())
+   {
+      if(mDistTableMaxDistance!=10) mDistTableClock.Reset();
+      mDistTableMaxDistance=10;
+   }
    
    if(  (mDistTableClock>mClockScattCompList)
       &&(mDistTableClock>this->GetClockMetricMatrix())) return;
-   VFN_DEBUG_ENTRY("Crystal::CalcDistTable()",4)
+   VFN_DEBUG_ENTRY("Crystal::CalcDistTable(fast="<<fast<<"),maxDist="<<mDistTableMaxDistance,4)
       
    const long nbComponent=mScattCompList.GetNbComponent();
-   const int nbSymmetrics=this->GetSpaceGroup().GetNbSymmetrics();
    
    mvDistTableSq.resize(nbComponent);
    {
@@ -1229,12 +1249,12 @@ void Crystal::CalcDistTable(const bool fast, const REAL asymUnitMargin) const
       const REAL zrange=this->GetSpaceGroup().GetAsymUnit().Zmax()-z0;
    
       // limits of coordinates (modulo 1) with a margin
-      const REAL xMax=xrange+asymUnitMargin/GetLatticePar(0);
-      const REAL yMax=yrange+asymUnitMargin/GetLatticePar(1);
-      const REAL zMax=zrange+asymUnitMargin/GetLatticePar(2);
-      const REAL xMin=1.-asymUnitMargin/GetLatticePar(0);
-      const REAL yMin=1.-asymUnitMargin/GetLatticePar(1);
-      const REAL zMin=1.-asymUnitMargin/GetLatticePar(2);
+      const REAL xMax=xrange+mDistTableMaxDistance/GetLatticePar(0);
+      const REAL yMax=yrange+mDistTableMaxDistance/GetLatticePar(1);
+      const REAL zMax=zrange+mDistTableMaxDistance/GetLatticePar(2);
+      const REAL xMin=1.-mDistTableMaxDistance/GetLatticePar(0);
+      const REAL yMin=1.-mDistTableMaxDistance/GetLatticePar(1);
+      const REAL zMin=1.-mDistTableMaxDistance/GetLatticePar(2);
       
       const bool useAsymUnit=(xrange*yrange*zrange)<0.6;
    
@@ -1243,7 +1263,9 @@ void Crystal::CalcDistTable(const bool fast, const REAL asymUnitMargin) const
    // index of unique atoms in vPos, which are strictly in the asymmetric unit
    std::vector<unsigned long> vUniqueIndex(nbComponent);
    
-   if(true==fast)//
+   const REAL asymUnitMargin2 = mDistTableMaxDistance*mDistTableMaxDistance;
+
+   if(true==fast)
    {
       VFN_DEBUG_MESSAGE("Crystal::CalcDistTable(fast):2",3)
       TAU_PROFILE("Crystal::CalcDistTable(fast=true)","Matrix (string&)",TAU_DEFAULT);
@@ -1269,19 +1291,30 @@ void Crystal::CalcDistTable(const bool fast, const REAL asymUnitMargin) const
          const long xMinl=(long)(xMin*(REAL)FRAC2LONG);
          const long yMinl=(long)(yMin*(REAL)FRAC2LONG);
          const long zMinl=(long)(zMin*(REAL)FRAC2LONG);
-      
+
+      // No need to loop on a,b,c translations if mDistTableMaxDistance is small enough
+      bool loopOnLattice=true;
+      if(  ((this->GetLatticePar(0)*.5)>mDistTableMaxDistance)
+         &&((this->GetLatticePar(1)*.5)>mDistTableMaxDistance)
+         &&((this->GetLatticePar(2)*.5)>mDistTableMaxDistance)) loopOnLattice=false;
+
       long xl,yl,zl;
       
       CrystMatrix_REAL symmetricsCoords;
-      
+
+      const int nbSymmetrics=this->GetSpaceGroup().GetNbSymmetrics(false,true);
+
       // Get the list of all atoms within or near the asymmetric unit
       for(long i=0;i<nbComponent;i++)
       {
          VFN_DEBUG_MESSAGE("Crystal::CalcDistTable(fast):3:component "<<i,0)
+         // generate all symmetrics, excluding translations 
          symmetricsCoords=this->GetSpaceGroup().GetAllSymmetrics(mScattCompList(i).mX,
                                                                  mScattCompList(i).mY,
-                                                                 mScattCompList(i).mZ);
+                                                                 mScattCompList(i).mZ,
+                                                                 false,true,false);
          mvDistTableSq[i].mIndex=i;//USELESS ?
+         bool hasunique=false;
          for(int j=0;j<nbSymmetrics;j++)
          {
             // Convert to long [0;1[ -> [0 ; FRAC2LONG[ with some bit twidlling
@@ -1294,23 +1327,26 @@ void Crystal::CalcDistTable(const bool fast, const REAL asymUnitMargin) const
             
             if(useAsymUnit)
             {
-               if( (zl>zMinl) || (zl<zMaxl)) 
-                  if( (xl>xMinl) || (xl<xMaxl)) 
-                     if( (yl>yMinl) || (yl<yMaxl))
-                     {
-                        vPos.push_back(DistTableInternalPosition(i,j,xl,yl,zl));
-                        if((xl<=xMax0l)&&(yl<=yMax0l)&&(zl<=zMax0l))
-                        {
-                           vUniqueIndex[i]=vPos.size()-1;
-                           mvDistTableSq[i].mUniquePosSymmetryIndex=j;
-                        }
+               if( ((zl>zMinl) || (zl<zMaxl)) && ( (xl>xMinl) || (xl<xMaxl)) && ( (yl>yMinl) || (yl<yMaxl)) )
+               {
+                  vPos.push_back(DistTableInternalPosition(i,j,xl,yl,zl));
+                  if(!hasunique)
+                     if((xl<=xMax0l)&&(yl<=yMax0l)&&(zl<=zMax0l))
+                     {// We use one position *in* the asym unit as a reference
+                        vUniqueIndex[i]=vPos.size()-1;
+                        mvDistTableSq[i].mUniquePosSymmetryIndex=j;
+                        hasunique=true;
                      }
+               }
             }
             else
             {
                vPos.push_back(DistTableInternalPosition(i,j,xl,yl,zl));
-               vUniqueIndex[i]=vPos.size()-1;
-               mvDistTableSq[i].mUniquePosSymmetryIndex=j;
+               if(j==0)
+               {// We use one position as a reference
+                  vUniqueIndex[i]=vPos.size()-1;
+                  mvDistTableSq[i].mUniquePosSymmetryIndex=j;
+               }
             }
          }
       }
@@ -1320,16 +1356,24 @@ void Crystal::CalcDistTable(const bool fast, const REAL asymUnitMargin) const
       // between (i) unique atoms and (ii) all remaining atoms
       
       const CrystMatrix_REAL* pOrthMatrix=&(this->GetOrthMatrix());
-      const REAL M00=(*pOrthMatrix)(0,0)/(REAL)FRAC2LONG;
-      const REAL M01=(*pOrthMatrix)(0,1)/(REAL)FRAC2LONG;
-      const REAL M02=(*pOrthMatrix)(0,2)/(REAL)FRAC2LONG;
-      //const REAL M10=(*pOrthMatrix)(1,0)/(REAL)FRAC2LONG;
-      const REAL M11=(*pOrthMatrix)(1,1)/(REAL)FRAC2LONG;
-      const REAL M12=(*pOrthMatrix)(1,2)/(REAL)FRAC2LONG;
-      //const REAL M20=(*pOrthMatrix)(2,0)/(REAL)FRAC2LONG;
-      //const REAL M21=(*pOrthMatrix)(2,1)/(REAL)FRAC2LONG;
-      const REAL M22=(*pOrthMatrix)(2,2)/(REAL)FRAC2LONG;
-      
+
+      const REAL m00=(*pOrthMatrix)(0,0);
+      const REAL m01=(*pOrthMatrix)(0,1);
+      const REAL m02=(*pOrthMatrix)(0,2);
+      const REAL m11=(*pOrthMatrix)(1,1);
+      const REAL m12=(*pOrthMatrix)(1,2);
+      const REAL m22=(*pOrthMatrix)(2,2);
+
+      const REAL M00=m00/(REAL)FRAC2LONG;
+      const REAL M01=m01/(REAL)FRAC2LONG;
+      const REAL M02=m02/(REAL)FRAC2LONG;
+      const REAL M11=m11/(REAL)FRAC2LONG;
+      const REAL M12=m12/(REAL)FRAC2LONG;
+      const REAL M22=m22/(REAL)FRAC2LONG;
+                     
+      const std::vector<SpaceGroup::TRx> *pTransVect=&(this->GetSpaceGroup().GetTranslationVectors());
+      const unsigned int nTr=(unsigned int) pTransVect->size();
+                     
       for(long i=0;i<nbComponent;i++)
       {
          VFN_DEBUG_MESSAGE("Crystal::CalcDistTable(fast):4:component "<<i,0)
@@ -1340,38 +1384,92 @@ void Crystal::CalcDistTable(const bool fast, const REAL asymUnitMargin) const
              <<vPos[vUniqueIndex[i]].mSymmetryIndex<<":"
              <<vPos[vUniqueIndex[i]].mXL/(REAL)FRAC2LONG<<","
              <<vPos[vUniqueIndex[i]].mYL/(REAL)FRAC2LONG<<","
-             <<vPos[vUniqueIndex[i]].mZL/(REAL)FRAC2LONG<<endl;
+             <<vPos[vUniqueIndex[i]].mZL/(REAL)FRAC2LONG<<"/"<<nTr<<endl;
          #endif
          std::vector<Crystal::Neighbour> * const vnb=&(mvDistTableSq[i].mvNeighbour);
          for(unsigned long j=0;j<vPos.size();j++)
          {
-            if(vUniqueIndex[i]==j) continue;
-            xl=vPos[j].mXL - vPos[ vUniqueIndex[i] ].mXL;
-            yl=vPos[j].mYL - vPos[ vUniqueIndex[i] ].mYL;
-            zl=vPos[j].mZL - vPos[ vUniqueIndex[i] ].mZL;
+            const long dx0= (vPos[j].mXL - vPos[ vUniqueIndex[i] ].mXL) & FRAC2LONGMASK;
+            const long dy0= (vPos[j].mYL - vPos[ vUniqueIndex[i] ].mYL) & FRAC2LONGMASK;
+            const long dz0= (vPos[j].mZL - vPos[ vUniqueIndex[i] ].mZL) & FRAC2LONGMASK;
             
-            xl= xl & FRAC2LONGMASK;  //xl %= FRAC2LONG;if(xl<0) xl += FRAC2LONG;
-            yl= yl & FRAC2LONGMASK;  //yl %= FRAC2LONG;if(yl<0) yl += FRAC2LONG;
-            zl= zl & FRAC2LONGMASK;  //zl %= FRAC2LONG;if(zl<0) zl += FRAC2LONG;
-            
-            if(xl & HALF_FRAC2LONG) xl= (~xl) & HALF_FRAC2LONGMASK;//if(xl>HALF_FRAC2LONG) xl = FRAC2LONG-xl;
-            if(yl & HALF_FRAC2LONG) yl= (~yl) & HALF_FRAC2LONGMASK;//if(yl>HALF_FRAC2LONG) yl = FRAC2LONG-yl;
-            if(zl & HALF_FRAC2LONG) zl= (~zl) & HALF_FRAC2LONGMASK;//if(zl>HALF_FRAC2LONG) zl = FRAC2LONG-zl;
-            
-            const REAL x=M00 * (REAL)xl + M01 * (REAL)yl + M02 * (REAL)zl;
-            const REAL y=                 M11 * (REAL)yl + M12 * (REAL)zl;
-            const REAL z=                                  M22 * (REAL)zl;
-            Neighbour neigh(vPos[j].mAtomIndex,vPos[j].mSymmetryIndex,x*x+y*y+z*z);
-            vnb->push_back(neigh);
-            #if 0
-            cout<<vPos[j].mAtomIndex<<":"
-                <<mScattCompList(vPos[j].mAtomIndex).mpScattPow->GetName()<<":"
-                <<vPos[j].mSymmetryIndex<<":"
-                <<vPos[j].mXL/(REAL)FRAC2LONG<<","
-                <<vPos[j].mYL/(REAL)FRAC2LONG<<","
-                <<vPos[j].mZL/(REAL)FRAC2LONG<<" vector="
-                <<x<<","<<y<<","<<z<<endl;
-            #endif
+            for(unsigned int t=0;t<nTr;++t)
+            {
+               if((vUniqueIndex[i]==j) &&(t==0) &&(!loopOnLattice)) continue;// distance to self
+               xl=(long)(dx0+(*pTransVect)[t].tr[0]*FRAC2LONG) & FRAC2LONGMASK;
+               yl=(long)(dy0+(*pTransVect)[t].tr[1]*FRAC2LONG) & FRAC2LONGMASK;
+               zl=(long)(dz0+(*pTransVect)[t].tr[2]*FRAC2LONG) & FRAC2LONGMASK;
+               
+               // Start with the smallest absolute coordinates possible
+               if(xl>HALF_FRAC2LONG) xl -= FRAC2LONG;
+               if(yl>HALF_FRAC2LONG) yl -= FRAC2LONG;
+               if(zl>HALF_FRAC2LONG) zl -= FRAC2LONG;
+
+               const REAL x0=M00 * (REAL)xl + M01 * (REAL)yl + M02 * (REAL)zl;
+               const REAL y0=                 M11 * (REAL)yl + M12 * (REAL)zl;
+               const REAL z0=                                  M22 * (REAL)zl;
+               
+               if(loopOnLattice)
+               {//Now loop over lattice translations
+                  for(int sz=-1;sz<=1;sz+=2)// Sign of translation
+                  {
+                     for(int nz=0;;++nz)
+                     {
+                        const REAL z=z0+sz*nz*m22;
+                        if(abs(z)>mDistTableMaxDistance) break;
+                        for(int sy=-1;sy<=1;sy+=2)// Sign of translation
+                        {
+                           for(int ny=0;;++ny)
+                           {
+                              const REAL y=y0 + sy*ny*m11 + sz*nz*m12;
+                              if(abs(y)>mDistTableMaxDistance) break;
+                              for(int sx=-1;sx<=1;sx+=2)// Sign of translation
+                              {
+                                 for(int nx=0;;++nx)
+                                 {
+                                    const REAL x=x0 + sx*nx*m00 + sy*ny*m01 + sz*nz*m02;
+                                    if(abs(x)>mDistTableMaxDistance) break;
+                                    const REAL d2=x*x+y*y+z*z;
+                                    if(d2<=asymUnitMargin2)
+                                    {
+                                       Neighbour neigh(vPos[j].mAtomIndex,vPos[j].mSymmetryIndex,d2);
+                                       vnb->push_back(neigh);
+                                       #if 0
+                                       cout<<vPos[j].mAtomIndex<<":"
+                                             <<mScattCompList(vPos[j].mAtomIndex).mpScattPow->GetName()<<":"
+                                             <<vPos[j].mSymmetryIndex<<":"
+                                             <<vPos[j].mXL/(REAL)FRAC2LONG<<","
+                                             <<vPos[j].mYL/(REAL)FRAC2LONG<<","
+                                             <<vPos[j].mZL/(REAL)FRAC2LONG<<" vector="
+                                             <<x<<","<<y<<","<<z<<":"<<sqrt(d2)<<","<<asymUnitMargin2<<endl;
+                                       #endif
+                                    }
+                                 }
+                              }
+                           }
+                        }
+                     }
+                  }
+               }
+               else
+               {
+                  const REAL d2=x0*x0+y0*y0+z0*z0;
+                  if(d2<=asymUnitMargin2)
+                  {
+                     Neighbour neigh(vPos[j].mAtomIndex,vPos[j].mSymmetryIndex,d2);
+                     vnb->push_back(neigh);
+                     #if 0
+                     cout<<vPos[j].mAtomIndex<<":"
+                           <<mScattCompList(vPos[j].mAtomIndex).mpScattPow->GetName()<<":"
+                           <<vPos[j].mSymmetryIndex<<":"
+                           <<vPos[j].mXL/(REAL)FRAC2LONG<<","
+                           <<vPos[j].mYL/(REAL)FRAC2LONG<<","
+                           <<vPos[j].mZL/(REAL)FRAC2LONG<<" vector="
+                           <<x<<","<<y<<","<<z<<":"<<sqrt(d2)<<","<<asymUnitMargin2<<endl;
+                     #endif
+                  }
+               }
+            }
          }
       }
       TAU_PROFILE_STOP(timer2);
@@ -1388,6 +1486,9 @@ void Crystal::CalcDistTable(const bool fast, const REAL asymUnitMargin) const
       
       REAL x,y,z;
       double junk;
+      
+      const int nbSymmetrics=this->GetSpaceGroup().GetNbSymmetrics();
+      
       // Get the list of all atoms within or near the asymmetric unit
       for(long i=0;i<nbComponent;i++)
       {
@@ -1429,6 +1530,15 @@ void Crystal::CalcDistTable(const bool fast, const REAL asymUnitMargin) const
       }
       TAU_PROFILE_STOP(timer1);
       TAU_PROFILE_START(timer2);
+      
+      const CrystMatrix_REAL* pOrthMatrix=&(this->GetOrthMatrix());
+      const REAL m00=(*pOrthMatrix)(0,0);
+      const REAL m01=(*pOrthMatrix)(0,1);
+      const REAL m02=(*pOrthMatrix)(0,2);
+      const REAL m11=(*pOrthMatrix)(1,1);
+      const REAL m12=(*pOrthMatrix)(1,2);
+      const REAL m22=(*pOrthMatrix)(2,2);
+      
       // Compute interatomic vectors & distance 
       // between (i) unique atoms and (ii) all remaining atoms
       for(long i=0;i<nbComponent;i++)
@@ -1447,28 +1557,56 @@ void Crystal::CalcDistTable(const bool fast, const REAL asymUnitMargin) const
          VFN_DEBUG_MESSAGE("Crystal::CalcDistTable(fast):4:vector "<<vnb->size(),3)
          for(unsigned long j=0;j<vPos.size();j++)
          {
-            if(vUniqueIndex[i]==j) continue;
-            x=modf(vPos[j].mX - vPos[ vUniqueIndex[i] ].mX,&junk);
-            y=modf(vPos[j].mY - vPos[ vUniqueIndex[i] ].mY,&junk);
-            z=modf(vPos[j].mZ - vPos[ vUniqueIndex[i] ].mZ,&junk);
-            if(x<0) x+=1 ;
-            if(y<0) y+=1 ;
-            if(z<0) z+=1 ;
-            if(x>0.5) x=1-x ;
-            if(y>0.5) y=1-y ;
-            if(z>0.5) z=1-z ;
-            this->FractionalToOrthonormalCoords(x,y,z);
-            Neighbour neigh(vPos[j].mAtomIndex,vPos[j].mSymmetryIndex,x*x+y*y+z*z);
-            vnb->push_back(neigh);
-            #if 0
-            cout<<vPos[j].mAtomIndex<<":"
-                <<mScattCompList(vPos[j].mAtomIndex).mpScattPow->GetName()<<":"
-                <<vPos[j].mSymmetryIndex<<":"
-                <<vPos[j].mX<<","
-                <<vPos[j].mY<<","
-                <<vPos[j].mZ<<" vector="
-                <<x<<","<<y<<","<<z<<endl;
-            #endif
+            REAL x0=modf(vPos[j].mX - vPos[ vUniqueIndex[i] ].mX,&junk);
+            REAL y0=modf(vPos[j].mY - vPos[ vUniqueIndex[i] ].mY,&junk);
+            REAL z0=modf(vPos[j].mZ - vPos[ vUniqueIndex[i] ].mZ,&junk);
+            if(x0<0) x0+=1 ;
+            if(y0<0) y0+=1 ;
+            if(z0<0) z0+=1 ;
+            if(x0>0.5) x0-=1 ;
+            if(y0>0.5) y0-=1 ;
+            if(z0>0.5) z0-=1 ;
+            this->FractionalToOrthonormalCoords(x0,y0,z0);
+            //Now loop over lattice translations
+            for(int sz=-1;sz<=1;sz+=2)// Sign of translation
+            {
+               for(int nz=0;;++nz)
+               {
+                  const REAL z=z0+sz*nz*m22;
+                  if(abs(z)>mDistTableMaxDistance) break;
+                  for(int sy=-1;sy<=1;sy+=2)// Sign of translation
+                  {
+                     for(int ny=0;;++ny)
+                     {
+                        const REAL y=y0 + sy*ny*m11 + sz*nz*m12;
+                        if(abs(y)>mDistTableMaxDistance) break;
+                        for(int sx=-1;sx<=1;sx+=2)// Sign of translation
+                        {
+                           for(int nx=0;;++nx)
+                           {
+                              const REAL x=x0 + sx*nx*m00 + sy*ny*m01 + sz*nz*m02;
+                              if(abs(x)>mDistTableMaxDistance) break;
+                              const REAL d2=x*x+y*y+z*z;
+                              if(d2<=asymUnitMargin2)
+                              {
+                                 Neighbour neigh(vPos[j].mAtomIndex,vPos[j].mSymmetryIndex,d2);
+                                 vnb->push_back(neigh);
+                                 #if 0
+                                 cout<<vPos[j].mAtomIndex<<":"
+                                       <<mScattCompList(vPos[j].mAtomIndex).mpScattPow->GetName()<<":"
+                                       <<vPos[j].mSymmetryIndex<<":"
+                                       <<vPos[j].mXL/(REAL)FRAC2LONG<<","
+                                       <<vPos[j].mYL/(REAL)FRAC2LONG<<","
+                                       <<vPos[j].mZL/(REAL)FRAC2LONG<<" vector="
+                                       <<x<<","<<y<<","<<z<<":"<<sqrt(d2)<<","<<asymUnitMargin2<<endl;
+                                 #endif
+                              }
+                           }
+                        }
+                     }
+                  }
+               }
+            }
          }
       }
       TAU_PROFILE_STOP(timer2);
