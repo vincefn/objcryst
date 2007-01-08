@@ -78,7 +78,7 @@ endif
 #Using OpenGL ?
 ifeq ($(opengl),1)
 GL_WX_LIB = `$(WXCONFIG) --gl-libs` -lGL -lGLU $(GLUT_LIB)
-GL_FLAGS = -DOBJCRYST_GL -IGL $(GLUT_FLAGS)
+GL_FLAGS = -DOBJCRYST_GL -I/usr/X11R6/include -IGL $(GLUT_FLAGS)
 else
 GL_WX_LIB :=
 GL_FLAGS :=
