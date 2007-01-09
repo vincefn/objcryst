@@ -25,6 +25,7 @@
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
+#include "wx/notebook.h"
 
 #include <sstream>
 #include <fstream>

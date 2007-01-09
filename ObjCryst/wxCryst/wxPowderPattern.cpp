@@ -889,7 +889,7 @@ void WXPowderPattern::UpdateUI(const bool lock)
    if(lock)mMutex.Lock();
    if(mpGraph!=0)
    {
-      mpGraph->GetParent()->SetTitle(mpPowderPattern->GetName().c_str());
+      mpGraph->GetParent()->SetLabel(mpPowderPattern->GetName().c_str());
    }
    this->WXRefinableObj::UpdateUI(false);
    if(lock)mMutex.Unlock();

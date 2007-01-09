@@ -29,6 +29,7 @@
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
+#include "wx/notebook.h"
 
 #include "wxCryst/wxCrystal.h"
 
@@ -1278,7 +1279,7 @@ void WXCrystal::UpdateUI(const bool lock)
       if(lock) mMutex.Lock();
       mpFieldSpacegroup->SetValue(mpCrystal->GetSpaceGroup().GetName());
       #ifdef OBJCRYST_GL
-      if(0!=mpCrystalGL) mpCrystalGL->GetParent()->SetTitle(mpCrystal->GetName().c_str());
+      if(0!=mpCrystalGL) mpCrystalGL->GetParent()->SetLabel(mpCrystal->GetName().c_str());
       #endif
       if(lock) mMutex.Unlock();
    }
