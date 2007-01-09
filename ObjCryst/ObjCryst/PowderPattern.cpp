@@ -1281,10 +1281,10 @@ void PowderPatternDiffraction::GetBraggLimits(CrystVector_long *&min,CrystVector
    {
       VFN_DEBUG_ENTRY("PowderPatternDiffraction::GetBraggLimits(*min,*max)",3)
       TAU_PROFILE("PowderPatternDiffraction::GetBraggLimits()","void ()",TAU_DEFAULT);
-      mIntegratedReflMin.resize(this->GetNbRefl());
-      mIntegratedReflMax.resize(this->GetNbRefl());
+      mIntegratedReflMin.resize(this->GetNbReflBelowMaxSinThetaOvLambda());
+      mIntegratedReflMax.resize(this->GetNbReflBelowMaxSinThetaOvLambda());
       //REAL fwhm,tmp;
-      for(long i=0;i<this->GetNbRefl();i++)
+      for(long i=0;i<this->GetNbReflBelowMaxSinThetaOvLambda();i++)
       {
          mIntegratedReflMin(i)=mvReflProfile[i].first;
          mIntegratedReflMax(i)=mvReflProfile[i].last;
