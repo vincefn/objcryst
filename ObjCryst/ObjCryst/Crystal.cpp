@@ -1378,7 +1378,7 @@ void Crystal::CalcDistTable(const bool fast) const
       {
          VFN_DEBUG_MESSAGE("Crystal::CalcDistTable(fast):4:component "<<i,0)
          #if 0
-         cout<<endl<<"Unique pos:"<<vUniqueIndex[i]<<":"
+         if(!this->IsBeingRefined()) cout<<endl<<"Unique pos:"<<vUniqueIndex[i]<<":"
              <<vPos[vUniqueIndex[i]].mAtomIndex<<":"
              <<mScattCompList(vPos[vUniqueIndex[i]].mAtomIndex).mpScattPow->GetName()<<":"
              <<vPos[vUniqueIndex[i]].mSymmetryIndex<<":"
@@ -1413,20 +1413,21 @@ void Crystal::CalcDistTable(const bool fast) const
                {//Now loop over lattice translations
                   for(int sz=-1;sz<=1;sz+=2)// Sign of translation
                   {
-                     for(int nz=0;;++nz)
+                     for(int nz=(sz+1)/2;;++nz)
                      {
                         const REAL z=z0+sz*nz*m22;
                         if(abs(z)>mDistTableMaxDistance) break;
                         for(int sy=-1;sy<=1;sy+=2)// Sign of translation
                         {
-                           for(int ny=0;;++ny)
+                           for(int ny=(sy+1)/2;;++ny)
                            {
                               const REAL y=y0 + sy*ny*m11 + sz*nz*m12;
                               if(abs(y)>mDistTableMaxDistance) break;
                               for(int sx=-1;sx<=1;sx+=2)// Sign of translation
                               {
-                                 for(int nx=0;;++nx)
+                                 for(int nx=(sx+1)/2;;++nx)
                                  {
+                                    if((vUniqueIndex[i]==j) && (t==0) && (nx==0) && (ny==0) && (nz==0)) continue;
                                     const REAL x=x0 + sx*nx*m00 + sy*ny*m01 + sz*nz*m02;
                                     if(abs(x)>mDistTableMaxDistance) break;
                                     const REAL d2=x*x+y*y+z*z;
@@ -1435,13 +1436,14 @@ void Crystal::CalcDistTable(const bool fast) const
                                        Neighbour neigh(vPos[j].mAtomIndex,vPos[j].mSymmetryIndex,d2);
                                        vnb->push_back(neigh);
                                        #if 0
-                                       cout<<vPos[j].mAtomIndex<<":"
+                                       if(!this->IsBeingRefined()) cout<<"    "<<vPos[j].mAtomIndex<<":"
                                              <<mScattCompList(vPos[j].mAtomIndex).mpScattPow->GetName()<<":"
                                              <<vPos[j].mSymmetryIndex<<":"
                                              <<vPos[j].mXL/(REAL)FRAC2LONG<<","
                                              <<vPos[j].mYL/(REAL)FRAC2LONG<<","
                                              <<vPos[j].mZL/(REAL)FRAC2LONG<<" vector="
-                                             <<x<<","<<y<<","<<z<<":"<<sqrt(d2)<<","<<asymUnitMargin2<<endl;
+                                             <<x<<","<<y<<","<<z<<":"<<sqrt(d2)<<","
+                                             <<"("<<sx*nx<<","<<sy*ny<<","<<sz*nz<<")"<<endl;
                                        #endif
                                     }
                                  }
@@ -1459,13 +1461,13 @@ void Crystal::CalcDistTable(const bool fast) const
                      Neighbour neigh(vPos[j].mAtomIndex,vPos[j].mSymmetryIndex,d2);
                      vnb->push_back(neigh);
                      #if 0
-                     cout<<vPos[j].mAtomIndex<<":"
+                     if(!this->IsBeingRefined()) cout<<vPos[j].mAtomIndex<<":"
                            <<mScattCompList(vPos[j].mAtomIndex).mpScattPow->GetName()<<":"
                            <<vPos[j].mSymmetryIndex<<":"
                            <<vPos[j].mXL/(REAL)FRAC2LONG<<","
                            <<vPos[j].mYL/(REAL)FRAC2LONG<<","
                            <<vPos[j].mZL/(REAL)FRAC2LONG<<" vector="
-                           <<x<<","<<y<<","<<z<<":"<<sqrt(d2)<<","<<asymUnitMargin2<<endl;
+                           <<x0<<","<<y0<<","<<z0<<":"<<sqrt(d2)<<","<<asymUnitMargin2<<endl;
                      #endif
                   }
                }
