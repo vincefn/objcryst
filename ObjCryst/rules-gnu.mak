@@ -94,7 +94,7 @@ ifeq ($(debug),1)
       CPPFLAGS = -g -Wall -D__DEBUG__ 
    endif
    DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS}
-   LOADLIBES = -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS}
+   LOADLIBES = -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx -lnewmat ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS}
 else
 # -march=athlon,pentiumpro
    ifdef RPM_OPT_FLAGS
@@ -108,7 +108,7 @@ else
       CPPFLAGS = -O3 -w -ffast-math -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops
    endif
    DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS}
-   LOADLIBES = -s -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS}
+   LOADLIBES = -s -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx -lnewmat ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS}
 endif
 # Add to statically link: -nodefaultlibs -lgcc /usr/lib/libstdc++.a
 
