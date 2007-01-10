@@ -871,7 +871,7 @@ float Score(const PeakList &dhkl, const RecUnitCell &ruc, const unsigned int nbS
          vdiff_idx.push_back(make_pair(fabs(pos->d2diff),i++));
       vdiff_idx.sort(comparePairFirst<float,unsigned int>);
       i=0;
-      for(list<pair<float,unsigned int> >::const_reverse_iterator rpos=vdiff_idx.rbegin();rpos!=vdiff_idx.rend();++rpos)
+      for(list<pair<float,unsigned int> >::reverse_iterator rpos=vdiff_idx.rbegin();rpos!=vdiff_idx.rend();++rpos)
       {// :TODO: correct zero after removing spurious lines
          epsilon -= fabs(rpos->first-zero);
          if(storehkl) dhkl.GetPeakList()[rpos->second].isIndexed=false;
