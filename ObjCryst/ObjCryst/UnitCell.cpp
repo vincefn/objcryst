@@ -133,15 +133,7 @@ CrystVector_REAL UnitCell::GetLatticePar() const
          cellDim(1) = mCellDim(0) ;
          return cellDim;
       }
-      if(mSpaceGroup.GetExtension()=='H')
-      {
-         cellDim(3) = M_PI/2.;
-         cellDim(4) = M_PI/2.;
-         cellDim(5) = M_PI*2./3.;
-         cellDim(1) = mCellDim(0) ;
-         return cellDim;
-      }
-      if(num <= 167) // ||(mSpaceGroup.GetExtension()=='R')
+      if(mSpaceGroup.GetExtension()=='R')
       {
          cellDim(4) = mCellDim(3);
          cellDim(5) = mCellDim(3);
@@ -149,8 +141,8 @@ CrystVector_REAL UnitCell::GetLatticePar() const
          cellDim(2) = mCellDim(0);
          return cellDim;
       }
-      if(num <= 194) //Hexagonal
-      {
+      if(num <= 194) // || (mSpaceGroup.GetExtension()=='H') //Hexagonal
+      {//Hexagonal axes, for hexagonal and non-rhomboedral trigonal cells
          cellDim(3) = M_PI/2.;
          cellDim(4) = M_PI/2.;
          cellDim(5) = M_PI*2./3.;
@@ -215,15 +207,7 @@ REAL UnitCell::GetLatticePar(int whichPar)const
          cellDim(1) = mCellDim(0) ;
          return cellDim(whichPar);
       }
-      if(mSpaceGroup.GetExtension()=='H')
-      {
-         cellDim(3) = M_PI/2.;
-         cellDim(4) = M_PI/2.;
-         cellDim(5) = M_PI*2./3.;
-         cellDim(1) = mCellDim(0) ;
-         return cellDim(whichPar);
-      }
-      if(num <= 167) // ||(mSpaceGroup.GetExtension()=='R')
+      if(mSpaceGroup.GetExtension()=='R')
       {
          cellDim(4) = mCellDim(3);
          cellDim(5) = mCellDim(3);
@@ -231,8 +215,8 @@ REAL UnitCell::GetLatticePar(int whichPar)const
          cellDim(2) = mCellDim(0);
          return cellDim(whichPar);
       }
-      if(num <= 194) 
-      {
+      if(num <= 194) // ||(mSpaceGroup.GetExtension()=='H')
+      {//Hexagonal axes, for hexagonal and non-rhomboedral trigonal cells
          cellDim(3) = M_PI/2.;
          cellDim(4) = M_PI/2.;
          cellDim(5) = M_PI*2./3.;
@@ -506,16 +490,7 @@ void UnitCell::UpdateLatticePar()
       mClockLatticeParUpdate.Click();
       return;
    }
-   if(mSpaceGroup.GetExtension()=='H')
-   {
-      mCellDim(3) = M_PI/2.;
-      mCellDim(4) = M_PI/2.;
-      mCellDim(5) = M_PI*2./3.;
-      mCellDim(1) = mCellDim(0) ;
-      mClockLatticeParUpdate.Click();
-      return;
-   }
-   if(num <= 167) // ||(mSpaceGroup.GetExtension()=='R')
+   if(mSpaceGroup.GetExtension()=='R')
    {
       mCellDim(4) = mCellDim(3);
       mCellDim(5) = mCellDim(3);
@@ -524,8 +499,8 @@ void UnitCell::UpdateLatticePar()
       mClockLatticeParUpdate.Click();
       return;
    }
-   if(num <= 194) 
-   {
+   if(num <= 194) //||(mSpaceGroup.GetExtension()=='H')
+   {//Hexagonal axes, for hexagonal and non-rhomboedral trigonal cells
       mCellDim(3) = M_PI/2.;
       mCellDim(4) = M_PI/2.;
       mCellDim(5) = M_PI*2./3.;
@@ -587,14 +562,7 @@ void UnitCell::InitRefParList()
          beta=false;
          gamma=false;
       }
-      else if(mSpaceGroup.GetExtension()=='H')
-      {//Hexagonal axes !
-         b=false;
-         alpha=false;
-         beta=false;
-         gamma=false;
-      }
-      else if(num <= 167) // ||(mSpaceGroup.GetExtension()=='R')
+      else if(mSpaceGroup.GetExtension()=='R')
       {//Rhombohedral
          b=false;
          c=false;
@@ -603,7 +571,7 @@ void UnitCell::InitRefParList()
          gamma=false;
       }
       else if(num <= 194) 
-      {
+      {//Hexagonal axes, for hexagonal and non-rhomboedral trigonal cells
          b=false;
          alpha=false;
          beta=false;
