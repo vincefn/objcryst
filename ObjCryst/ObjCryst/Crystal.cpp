@@ -383,8 +383,8 @@ CrystMatrix_REAL Crystal::GetMinDistanceTable(const REAL minDistance) const
    {
       for(int j=0;j<=i;j++)
       {
-         if(9999.<minDistTable(i,j)) minDistTable(i,j)=0;
-         minDistTable(i,j)=sqrt(minDistTable(i,j));
+         if(9999.>minDistTable(i,j)) minDistTable(i,j)=sqrt(minDistTable(i,j));
+         else minDistTable(i,j)=-1;
          minDistTable(j,i)=minDistTable(i,j);
       }
    }
@@ -415,7 +415,10 @@ void Crystal::PrintMinDistanceTable(const REAL minDistance,ostream &os) const
          VFN_DEBUG_MESSAGE("Crystal::PrintMinDistanceTable()2:Scatt,comp:"<<i<<","<<j,3)
          os << FormatString(this->GetScatt(i).GetComponentName(j),14);
          for(long k=0;k<nbComponent;k++)
-            os << FormatFloat(minDistTable(l,k),6,3) ;
+         {
+            if(minDistTable(l,k)>0) os << FormatFloat(minDistTable(l,k),6,3) ;
+            else os<<"  >10  ";
+         }
          os << endl;
          l++;
       }
@@ -937,7 +940,7 @@ void Crystal::CIFOutput(ostream &os)const
       {
          if(0==list(j).mpScattPow) continue;
          bool redundant=false;
-         for(unsigned long l=0;l<k;++l) if(minDistTable(l,k)<0.5) redundant=true;
+         for(unsigned long l=0;l<k;++l) if(abs(minDistTable(l,k))<0.5) redundant=true;//-1 means dist > 10A
          if(!redundant)
          {
             os   << "    "
@@ -964,7 +967,7 @@ void Crystal::CIFOutput(ostream &os)const
       {
          if(0==list(j).mpScattPow) continue;
          bool redundant=false;
-         for(unsigned long l=0;l<k;++l) if(minDistTable(l,k)<0.5) redundant=true;
+         for(unsigned long l=0;l<k;++l) if(abs(minDistTable(l,k))<0.5) redundant=true;//-1 means dist > 10A
          if(redundant)
          {
             if(first)
