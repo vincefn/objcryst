@@ -510,7 +510,6 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
       }
    }
    
-   mId=spgId;
       
    //Inversion center
    if(this->GetCCTbxSpg().f_inv() == 2)
@@ -545,6 +544,10 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
    mSpgNumber=this->GetCCTbxSpg().match_tabulated_settings().number();
    
    mExtension=this->GetCCTbxSpg().match_tabulated_settings().extension();
+   
+   // Force using the H-M symbol
+   if(mExtension=='\0') mId=this->GetCCTbxSpg().match_tabulated_settings().hermann_mauguin();
+   else                 mId=this->GetCCTbxSpg().match_tabulated_settings().hermann_mauguin()+":"+mExtension;
 
    // Store rotation matrices & translation vectors
    mvTrans.resize(mNbTrans);

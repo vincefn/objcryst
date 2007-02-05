@@ -383,7 +383,7 @@ mpCrystalGL(0)
       mList.Add(pFieldLatticeGamma);
       
    // SpaceGroup
-      mpFieldSpacegroup=new WXFieldName(this,"SpaceGroup:",this,ID_CRYSTAL_SPACEGROUP);
+      mpFieldSpacegroup=new WXFieldName(this,"SpaceGroup:",this,ID_CRYSTAL_SPACEGROUP,100);
       mpSizer->Add(mpFieldSpacegroup,0,wxALIGN_LEFT);
       mList.Add(mpFieldSpacegroup);
       

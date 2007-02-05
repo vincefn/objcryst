@@ -693,8 +693,8 @@ Crystal* CreateCrystalFromCIF(CIF &cif)
    for(map<string,CIFData>::iterator pos=cif.mvData.begin();pos!=cif.mvData.end();++pos)
       if(pos->second.mvLatticePar.size()==6)
       {
-         string spg=pos->second.mSpacegroupSymbolHall;
-         if(spg=="") spg=pos->second.mSpacegroupHermannMauguin;
+         string spg=pos->second.mSpacegroupHermannMauguin;
+         if(spg=="") spg=pos->second.mSpacegroupSymbolHall;
          if(spg=="") spg=pos->second.mSpacegroupNumberIT;
          if(spg=="") spg="P1";
          Crystal *pCryst=new Crystal(pos->second.mvLatticePar[0],pos->second.mvLatticePar[1],pos->second.mvLatticePar[2],
