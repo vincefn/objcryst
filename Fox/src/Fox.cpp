@@ -66,7 +66,8 @@
 using namespace ObjCryst;
 using namespace std;
 
-static const std::string foxVersion=std::string("1.6.99CVS - ")+__DATE__;
+//static const std::string foxVersion=std::string("1.6.99SVN - ")+__DATE__; // Development
+static const std::string foxVersion=std::string("1.7.0-Rev845")+__DATE__; // Release
 
 // ----------------------------------------------------------------------------
 // Speed test
