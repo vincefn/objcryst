@@ -1,5 +1,5 @@
-include ../rules.mak
-DIR_CRYST = ..
+BUILD_DIR=$(CURDIR)/../..
+include $(BUILD_DIR)/ObjCryst/rules.mak
 
 OBJ= VFNStreamFormat.o VFNDebug.o ci_string.o
 

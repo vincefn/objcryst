@@ -197,31 +197,31 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\Atom.cpp"
+				RelativePath="..\..\ObjCryst\ObjCryst\Atom.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\Quirks\ci_string.cpp"
+				RelativePath="..\..\ObjCryst\Quirks\ci_string.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\CIF.cpp"
+				RelativePath="..\..\ObjCryst\ObjCryst\CIF.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\Crystal.cpp"
+				RelativePath="..\..\ObjCryst\ObjCryst\Crystal.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\CrystVector\CrystVector.cpp"
+				RelativePath="..\..\ObjCryst\CrystVector\CrystVector.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\DiffractionDataSingleCrystal.cpp"
+				RelativePath="..\..\ObjCryst\ObjCryst\DiffractionDataSingleCrystal.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\Exception.cpp"
+				RelativePath="..\..\ObjCryst\ObjCryst\Exception.cpp"
 				>
 			</File>
 			<File
@@ -229,15 +229,15 @@
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\RefinableObj\GlobalOptimObj.cpp"
+				RelativePath="..\..\ObjCryst\RefinableObj\GlobalOptimObj.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\Indexing.cpp"
+				RelativePath="..\..\ObjCryst\ObjCryst\Indexing.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\RefinableObj\IO.cpp"
+				RelativePath="..\..\ObjCryst\RefinableObj\IO.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -259,155 +259,155 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\IO.cpp"
+				RelativePath="..\..\ObjCryst\ObjCryst\IO.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\RefinableObj\LSQNumObj.cpp"
+				RelativePath="..\..\ObjCryst\RefinableObj\LSQNumObj.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\MC.cpp"
+				RelativePath="..\..\ObjCryst\wxCryst\MC.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\Molecule.cpp"
+				RelativePath="..\..\ObjCryst\ObjCryst\Molecule.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\mpVector.cpp"
+				RelativePath="..\..\ObjCryst\wxCryst\mpVector.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\Polyhedron.cpp"
+				RelativePath="..\..\ObjCryst\ObjCryst\Polyhedron.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\PowderPattern.cpp"
+				RelativePath="..\..\ObjCryst\ObjCryst\PowderPattern.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\PowderPatternBackgroundBayesianMinimiser.cpp"
+				RelativePath="..\..\ObjCryst\ObjCryst\PowderPatternBackgroundBayesianMinimiser.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\RefinableObj\RefinableObj.cpp"
+				RelativePath="..\..\ObjCryst\RefinableObj\RefinableObj.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\ReflectionProfile.cpp"
+				RelativePath="..\..\ObjCryst\ObjCryst\ReflectionProfile.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\Scatterer.cpp"
+				RelativePath="..\..\ObjCryst\ObjCryst\Scatterer.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\ScatteringCorr.cpp"
+				RelativePath="..\..\ObjCryst\ObjCryst\ScatteringCorr.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\ScatteringData.cpp"
+				RelativePath="..\..\ObjCryst\ObjCryst\ScatteringData.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\ScatteringPower.cpp"
+				RelativePath="..\..\ObjCryst\ObjCryst\ScatteringPower.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\ScatteringPowerSphere.cpp"
+				RelativePath="..\..\ObjCryst\ObjCryst\ScatteringPowerSphere.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\RefinableObj\Simplex.cpp"
+				RelativePath="..\..\ObjCryst\RefinableObj\Simplex.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\SpaceGroup.cpp"
+				RelativePath="..\..\ObjCryst\ObjCryst\SpaceGroup.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\test.cpp"
+				RelativePath="..\..\ObjCryst\ObjCryst\test.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\trackball.c"
+				RelativePath="..\..\ObjCryst\wxCryst\trackball.c"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\RefinableObj\Tracker.cpp"
+				RelativePath="..\..\ObjCryst\RefinableObj\Tracker.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\UnitCell.cpp"
+				RelativePath="..\..\ObjCryst\ObjCryst\UnitCell.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\Quirks\VFNDebug.cpp"
+				RelativePath="..\..\ObjCryst\Quirks\VFNDebug.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\Quirks\VFNStreamFormat.cpp"
+				RelativePath="..\..\ObjCryst\Quirks\VFNStreamFormat.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxAtom.cpp"
+				RelativePath="..\..\ObjCryst\wxCryst\wxAtom.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxCryst.cpp"
+				RelativePath="..\..\ObjCryst\wxCryst\wxCryst.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxCrystal.cpp"
+				RelativePath="..\..\ObjCryst\wxCryst\wxCrystal.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxDiffractionSingleCrystal.cpp"
+				RelativePath="..\..\ObjCryst\wxCryst\wxDiffractionSingleCrystal.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxGlobalOptimObj.cpp"
+				RelativePath="..\..\ObjCryst\wxCryst\wxGlobalOptimObj.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxMolecule.cpp"
+				RelativePath="..\..\ObjCryst\wxCryst\wxMolecule.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxMultiGraph.cpp"
+				RelativePath="..\..\ObjCryst\wxCryst\wxMultiGraph.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxPowderPattern.cpp"
+				RelativePath="..\..\ObjCryst\wxCryst\wxPowderPattern.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxRefinableObj.cpp"
+				RelativePath="..\..\ObjCryst\wxCryst\wxRefinableObj.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxScatterer.cpp"
+				RelativePath="..\..\ObjCryst\wxCryst\wxScatterer.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxScatteringPower.cpp"
+				RelativePath="..\..\ObjCryst\wxCryst\wxScatteringPower.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxScatteringPowerSphere.cpp"
+				RelativePath="..\..\ObjCryst\wxCryst\wxScatteringPowerSphere.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxTrackerGraph.cpp"
+				RelativePath="..\..\ObjCryst\wxCryst\wxTrackerGraph.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxZScatterer.cpp"
+				RelativePath="..\..\ObjCryst\wxCryst\wxZScatterer.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\ZScatterer.cpp"
+				RelativePath="..\..\ObjCryst\ObjCryst\ZScatterer.cpp"
 				>
 			</File>
 		</Filter>
@@ -417,231 +417,231 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\Atom.h"
+				RelativePath="..\..\ObjCryst\ObjCryst\Atom.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\Quirks\Chronometer.h"
+				RelativePath="..\..\ObjCryst\Quirks\Chronometer.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\Quirks\ci_string.h"
+				RelativePath="..\..\ObjCryst\Quirks\ci_string.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\CIF.h"
+				RelativePath="..\..\ObjCryst\ObjCryst\CIF.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\Colours.h"
+				RelativePath="..\..\ObjCryst\ObjCryst\Colours.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\Crystal.h"
+				RelativePath="..\..\ObjCryst\ObjCryst\Crystal.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\CrystVector\CrystVector.h"
+				RelativePath="..\..\ObjCryst\CrystVector\CrystVector.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\DiffractionDataSingleCrystal.h"
+				RelativePath="..\..\ObjCryst\ObjCryst\DiffractionDataSingleCrystal.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\General.h"
+				RelativePath="..\..\ObjCryst\ObjCryst\General.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\RefinableObj\GeneticAlgorithm.h"
+				RelativePath="..\..\ObjCryst\RefinableObj\GeneticAlgorithm.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\GeomStructFactor.h"
+				RelativePath="..\..\ObjCryst\ObjCryst\GeomStructFactor.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\RefinableObj\GlobalOptimObj.h"
+				RelativePath="..\..\ObjCryst\RefinableObj\GlobalOptimObj.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\Indexing.h"
+				RelativePath="..\..\ObjCryst\ObjCryst\Indexing.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\RefinableObj\IO.h"
+				RelativePath="..\..\ObjCryst\RefinableObj\IO.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\IO.h"
+				RelativePath="..\..\ObjCryst\ObjCryst\IO.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\RefinableObj\LSQNumObj.h"
+				RelativePath="..\..\ObjCryst\RefinableObj\LSQNumObj.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\Map.h"
+				RelativePath="..\..\ObjCryst\ObjCryst\Map.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\MC.h"
+				RelativePath="..\..\ObjCryst\wxCryst\MC.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\MCTable.h"
+				RelativePath="..\..\ObjCryst\wxCryst\MCTable.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\Molecule.h"
+				RelativePath="..\..\ObjCryst\ObjCryst\Molecule.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\mpVector.h"
+				RelativePath="..\..\ObjCryst\wxCryst\mpVector.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\Polyhedron.h"
+				RelativePath="..\..\ObjCryst\ObjCryst\Polyhedron.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\PowderPattern.h"
+				RelativePath="..\..\ObjCryst\ObjCryst\PowderPattern.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\PowderPatternBackgroundBayesianMinimiser.h"
+				RelativePath="..\..\ObjCryst\ObjCryst\PowderPatternBackgroundBayesianMinimiser.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\RefinableObj\RefinableObj.h"
+				RelativePath="..\..\ObjCryst\RefinableObj\RefinableObj.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\ReflectionProfile.h"
+				RelativePath="..\..\ObjCryst\ObjCryst\ReflectionProfile.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\Scatterer.h"
+				RelativePath="..\..\ObjCryst\ObjCryst\Scatterer.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\ScatteringCorr.h"
+				RelativePath="..\..\ObjCryst\ObjCryst\ScatteringCorr.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\ScatteringData.h"
+				RelativePath="..\..\ObjCryst\ObjCryst\ScatteringData.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\ScatteringPower.h"
+				RelativePath="..\..\ObjCryst\ObjCryst\ScatteringPower.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\ScatteringPowerSphere.h"
+				RelativePath="..\..\ObjCryst\ObjCryst\ScatteringPowerSphere.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\RefinableObj\Simplex.h"
+				RelativePath="..\..\ObjCryst\RefinableObj\Simplex.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\SpaceGroup.h"
+				RelativePath="..\..\ObjCryst\ObjCryst\SpaceGroup.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\test.h"
+				RelativePath="..\..\ObjCryst\ObjCryst\test.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\trackball.h"
+				RelativePath="..\..\ObjCryst\wxCryst\trackball.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\RefinableObj\Tracker.h"
+				RelativePath="..\..\ObjCryst\RefinableObj\Tracker.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\UnitCell.h"
+				RelativePath="..\..\ObjCryst\ObjCryst\UnitCell.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\Quirks\VFNDebug.h"
+				RelativePath="..\..\ObjCryst\Quirks\VFNDebug.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\Quirks\VFNStreamFormat.h"
+				RelativePath="..\..\ObjCryst\Quirks\VFNStreamFormat.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxAtom.h"
+				RelativePath="..\..\ObjCryst\wxCryst\wxAtom.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxCryst.h"
+				RelativePath="..\..\ObjCryst\wxCryst\wxCryst.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxCrystal.h"
+				RelativePath="..\..\ObjCryst\wxCryst\wxCrystal.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxDiffractionSingleCrystal.h"
+				RelativePath="..\..\ObjCryst\wxCryst\wxDiffractionSingleCrystal.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxGeneticAlgorithm.h"
+				RelativePath="..\..\ObjCryst\wxCryst\wxGeneticAlgorithm.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxGlobalOptimObj.h"
+				RelativePath="..\..\ObjCryst\wxCryst\wxGlobalOptimObj.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxLSQNumObj.h"
+				RelativePath="..\..\ObjCryst\wxCryst\wxLSQNumObj.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxMolecule.h"
+				RelativePath="..\..\ObjCryst\wxCryst\wxMolecule.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxMultiGraph.h"
+				RelativePath="..\..\ObjCryst\wxCryst\wxMultiGraph.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxPowderPattern.h"
+				RelativePath="..\..\ObjCryst\wxCryst\wxPowderPattern.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxRadiation.h"
+				RelativePath="..\..\ObjCryst\wxCryst\wxRadiation.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxRefinableObj.h"
+				RelativePath="..\..\ObjCryst\wxCryst\wxRefinableObj.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxScatterer.h"
+				RelativePath="..\..\ObjCryst\wxCryst\wxScatterer.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxScatteringPower.h"
+				RelativePath="..\..\ObjCryst\wxCryst\wxScatteringPower.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxScatteringPowerSphere.h"
+				RelativePath="..\..\ObjCryst\wxCryst\wxScatteringPowerSphere.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxTrackerGraph.h"
+				RelativePath="..\..\ObjCryst\wxCryst\wxTrackerGraph.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\wxCryst\wxZScatterer.h"
+				RelativePath="..\..\ObjCryst\wxCryst\wxZScatterer.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ObjCryst\ObjCryst\ZScatterer.h"
+				RelativePath="..\..\ObjCryst\ObjCryst\ZScatterer.h"
 				>
 			</File>
 		</Filter>

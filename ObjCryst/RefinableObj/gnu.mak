@@ -1,5 +1,6 @@
-include ../rules.mak
-DIR_CRYST = ..
+BUILD_DIR=$(CURDIR)/../..
+include $(BUILD_DIR)/ObjCryst/rules.mak
+
 # GeneticAlgorithm.o Powell.o ConjugateGradient.o 
 OBJ= Tracker.o Simplex.o RefinableObj.o GlobalOptimObj.o IO.o LSQNumObj.o 
 

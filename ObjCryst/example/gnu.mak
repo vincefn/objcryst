@@ -1,4 +1,3 @@
-DIR_CRYST=..
 SUBDIRS= pbso4
 
 all:
@@ -16,6 +15,3 @@ tidy::
 clean::
 	@for d in $(SUBDIRS); do (cd $$d && make -f gnu.mak clean); done
 
-cvsignore:
-	cp -f ${DIR_CRYST}/.cvsignore ./
-	@for d in $(SUBDIRS); do (cd $$d && make -f gnu.mak cvsignore); done

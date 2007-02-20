@@ -1,11 +1,11 @@
+# Base building directory - This must be defined in the Makefile including this one
+#ROOT_DIR = ${CURDIR}
 # Base ObjCryst directory
-DIR_CRYST = .
+DIR_CRYST = $(BUILD_DIR)/ObjCryst
 
-#external libraries directories
-DIR_BLITZ = ${DIR_CRYST}/../blitz
-DIR_NEWMAT = ${DIR_CRYST}/../newmat
-DIR_CCTBX = ${DIR_CRYST}/../cctbx
-DIR_TAU = ${DIR_CRYST}/../tau
+#Libraries to be statically linked are installed in $(DIR_STATIC_LIBS)/lib,
+#with their headers in DIR_STATIC_LIBS)/include 
+DIR_STATIC_LIBS = $(BUILD_DIR)/static-libs
 
 #Internal directories
 DIR_CRYSTVECTOR = ${DIR_CRYST}/CrystVector
@@ -28,13 +28,13 @@ FC     := f77
 FFLAGS  = 
 # linker
 LINKER    := g++
-LDFLAGS   = -L/usr/lib -L/usr/local/lib -L$(DIR_CRYSTVECTOR) -L$(DIR_LIBCRYST) -L$(DIR_NEWMAT) -L$(DIR_BLITZ)/lib -L$(DIR_REFOBJ) -L$(DIR_CCTBX) -L$(DIR_VFNQUIRKS) -L$(DIR_WXWCRYST) -L$(DIR_TAU)/i386_linux/lib
+LDFLAGS   = -L/usr/lib -L/usr/local/lib -L$(DIR_CRYSTVECTOR) -L$(DIR_LIBCRYST) -L$(DIR_REFOBJ) -L$(DIR_STATIC_LIBS)/lib -L$(DIR_VFNQUIRKS) -L$(DIR_WXWCRYST) -L$(DIR_TAU)/i386_linux/lib
 
 #to automatically generate dependencies
 MAKEDEPEND = gcc -MM ${CPPFLAGS} ${CXXFLAGS} ${C_BLITZFLAG} $< > $*.dep
 
 # header files
-SEARCHDIRS = -I${DIR_CRYST}/.. -I./ -I$(DIR_BLITZ)  -I$(DIR_TAU)/include -I$(DIR_NEWMAT) -I${DIR_CRYST} -I${DIR_CCTBX}/cctbx/include -I${DIR_CCTBX}/scitbx/include -I${DIR_CCTBX}/
+SEARCHDIRS = -I${DIR_CRYST}/.. -I./ -I$(DIR_TAU)/include -I${DIR_CRYST} -I$(DIR_STATIC_LIBS)/include
 
 #wxWindows flags
 ifeq ($(wxcryst),1)
@@ -67,13 +67,12 @@ endif
 #Use static linking to wx and freeglut libraries ?
 ifneq ($(shared),1)
 WXCONFIG= $(DIR_CRYST)/../static-libs/bin/wx-config
-GLUT_FLAGS= -DHAVE_GLUT -I$(DIR_CRYST)/../static-libs/include/
-GLUT_LIB= $(DIR_CRYST)/../static-libs/lib/libglut.a
 else
 WXCONFIG= wx-config
+endif
+# If using glut (freeglut)
 GLUT_FLAGS= -DHAVE_GLUT
 GLUT_LIB= -lglut
-endif
 
 #Using OpenGL ?
 ifeq ($(opengl),1)
@@ -143,9 +142,22 @@ libRefinableObj:
 	$(MAKE) -f gnu.mak -C ${DIR_REFOBJ} lib
 
 #Newmat Matrix Algebra library (used for SVD)
-libnewmat:
-	$(MAKE) -f nm_gnu.mak -C ${DIR_NEWMAT} libnewmat.a
+$(DIR_STATIC_LIBS)/lib/libnewmat.a:
+	cd $(BUILD_DIR) && tar -xjf newmat.tar.bz2
+	$(MAKE) -f nm_gnu.mak -C $(BUILD_DIR)/newmat libnewmat.a
+	mkdir -p $(DIR_STATIC_LIBS)/lib/
+	cp $(BUILD_DIR)/newmat/libnewmat.a $(DIR_STATIC_LIBS)/lib/
+	mkdir -p $(DIR_STATIC_LIBS)/include/newmat
+	cp $(BUILD_DIR)/newmat/*.h $(DIR_STATIC_LIBS)/include/newmat/
+	rm -Rf $(BUILD_DIR)/newmat
+
+libnewmat: $(DIR_STATIC_LIBS)/lib/libnewmat.a
      
 #cctbx
-libcctbx:
-	$(MAKE) -f gnu.mak -C ${DIR_CCTBX} lib
+$(DIR_STATIC_LIBS)/lib/libcctbx.a:
+	cd $(BUILD_DIR) && tar -xjf cctbx.tar.bz2        
+	$(MAKE) -f gnu.mak -C $(BUILD_DIR)/cctbx install
+	rm -Rf $(BUILD_DIR)/cctbx
+
+libcctbx: $(DIR_STATIC_LIBS)/lib/libcctbx.a
+

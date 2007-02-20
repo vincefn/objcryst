@@ -1,7 +1,5 @@
+BUILD_DIR=$(CURDIR)/..
 include rules.mak
-
-#local directory is base directory
-DIR_CRYST := ./
 
 ######################################################################
 #####################      LIBRAIRIES         ########################
@@ -72,12 +70,3 @@ dist-libs:
 archive:
 	tar -czf ../archives/ObjCryst-complete.tar.gz  -C .. --exclude='*.o' --exclude='.systemG.Desktop' --exclude='*.a' --exclude='*.exe' --exclude='*.out' --exclude='CVS' --exclude='ObjCryst/doc/html' --exclude='ObjCryst/doc/latex' --exclude='*.oxy' --exclude='profile.0.0.0' --exclude='Makefile' cctbx newmat AsymProfLarryFinger ObjCryst --dereference
 
-#Copy the .cvsignore in all relevant directories
-cvsignore:
-	$(MAKE) -f gnu.mak -C ${DIR_LIBCRYST} cvsignore
-	$(MAKE) -f gnu.mak -C ${DIR_CRYSTVECTOR} cvsignore
-	$(MAKE) -f gnu.mak -C ${DIR_VFNQUIRKS} cvsignore
-	$(MAKE) -f gnu.mak -C ${DIR_REFOBJ} cvsignore
-	$(MAKE) -f gnu.mak -C ${DIR_WXWCRYST} cvsignore
-	$(MAKE) -f gnu.mak -C ${DIR_EXAMPLE} cvsignore
-	cp -f ${DIR_CRYST}/.cvsignore doc/

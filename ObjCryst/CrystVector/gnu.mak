@@ -1,6 +1,5 @@
-include ../rules.mak
-
-DIR_CRYST = ..
+BUILD_DIR=$(CURDIR)/../..
+include $(BUILD_DIR)/ObjCryst/rules.mak
 
 ##Using blitz library ??
 ##Make it (in blitz dir)  using : ./configure --with-cxx=gcc --enable-optimize

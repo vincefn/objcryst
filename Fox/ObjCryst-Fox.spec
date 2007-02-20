@@ -1,17 +1,17 @@
 #------------------------------------------------------------------------------
 # INFO
 #------------------------------------------------------------------------------
-Summary: F.O.X., Free Objects for Crystallography, a program for the ab initio structure determination from powder diffraction
+Summary: F.O.X., Free Objects for Crystallography, a program for crystal structure analysis, and ab initio structure determination from powder diffraction
 Name: ObjCryst-Fox
 Version: 1.7.0
-Release: CVS20050706
+Release: 20070211
 Copyright: GPL
-Packager: Vincent Favre-Nicolin <vincefn@users.sourceforge.net
-Group: Sciences/Physics
+Packager: Vincent Favre-Nicolin <vincefn@users.sourceforge.net>
+Group: Sciences/Chemistry
 Source: Fox.tar.bz2
 #Patch: ObjCryst-Fox.patch
-BuildRoot: /var/tmp/%{name}-buildroot
-URL: http://objcryst.sourceforge.net/cgi-bin/moin.cgi
+BuildRoot: %{_tmppath}/%{name}-buildroot
+URL: http://objcryst.sourceforge.net/Fox/
 #Provides: (what does it provide - binaries and/or libraries)
 Prefix: /usr/local
 DOCDIR: /usr/local/doc
@@ -19,22 +19,26 @@ DOCDIR: /usr/local/doc
 #------------------------------------------------------------------------------
 # REQUIRES (DISTRIB-DEPENDANT)
 #------------------------------------------------------------------------------
-#MANDRIVA 10.2
-Requires: libwxgtk2.6 libwxgtkgl2.6 wxGTK2.6 libwxgtkgl2.6 libMesaGLU1 libMesaglut3 
-BuildRequires: gcc gcc-c++ gcc-cpp gcc-g77 libwxgtk2.6-devel libMesaGLU1-devel libMesaglut3-devel libxorg-x11-devel
+#MANDRIVA 2007
+Requires: libgtk+2.0_0 libmesaglu1 libmesagl1
+BuildRequires: gcc gcc-c++ gcc-cpp libxorg-x11-devel libgtk+2.0_0-devel libmesaglu1-devel libmesagl1-devel
 #FEDORA Core 3,4
-#Requires: wxGTK2>=2.4.0 wxGTK2-gl>=2.4.0 wxGTK2-stc>=2.4.0 wxGTK2-xrc>=2.4.0 xorg-x11-Mesa-libGL xorg-x11-Mesa-libGLU freeglut
-#BuildRequires:gcc gcc-c++ gcc-g77 wxGTK2-devel>=2.4.0 freeglut-devel xorg-x11-devel
+#Requires: xorg-x11-Mesa-libGL xorg-x11-Mesa-libGLU
+#BuildRequires:gcc gcc-c++ xorg-x11-devel
 
 #------------------------------------------------------------------------------
 # DESCRIPTION
 #------------------------------------------------------------------------------
 %description
-FOX is an open-source program for Crystallographers who wish to solve crystal structures
-from powder diffraction data (X-ray, neutron, neutron TOF).
+FOX is an open-source program for crystallographers who wish to solve crystal 
+structures from powder diffraction data (X-ray, neutron, neutron TOF).
 
-Additionally, it can be used to create crystal structures and display them in 3D,
-simulate powder patterns and calculate structure factors.
+Additionally, it can be used to create crystal structures and display them 
+in 3D, simulate powder patterns and calculate structure factors. It can also
+import crystal structures from CIF (Crystallographic Information File) files.
+
+FOX is built on top of an object-oriented crystallographic library (ObjCryst++),
+which can be used for other purposes than structure determination.
 
 #------------------------------------------------------------------------------
 # BUILD
@@ -58,10 +62,13 @@ install -s -m 755 src/Fox ${RPM_BUILD_ROOT}%{prefix}/bin/Fox
 
 %files
 %defattr(-,root,root)
-%doc README LICENSE ChangeLog html
+%doc README LICENSE ChangeLog
 /usr/local/bin/Fox
 
 %changelog
+* Sun Feb 11 2007 Vincent Favre-Nicolin <vincefn@users.sf.net>
+- Release 1.7
+
 * Thu Jul 06 2005 Vincent Favre-Nicolin <vincefn@users.sf.net>
 - First rpm package !
 

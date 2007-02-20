@@ -1,5 +1,5 @@
-include ../rules.mak
-DIR_CRYST := ..
+BUILD_DIR=$(CURDIR)/../..
+include $(BUILD_DIR)/ObjCryst/rules.mak
 
 #wxGeneticAlgorithm.o
 OBJ= wxTrackerGraph.o wxMultiGraph.o wxScatteringPowerSphere.o trackball.o wxDiffractionSingleCrystal.o wxCryst.o wxRefinableObj.o wxScatteringPower.o wxScatterer.o wxAtom.o wxMolecule.o wxCrystal.o wxZScatterer.o wxPowderPattern.o wxGlobalOptimObj.o mpVector.o MC.o

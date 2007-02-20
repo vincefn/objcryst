@@ -52,6 +52,8 @@
 		BFE3CE3809177C29002021F6 /* VFNDebug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8B40890426600044EBA /* VFNDebug.cpp */; };
 		BFE3CE3909177C29002021F6 /* VFNStreamFormat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8B50890426600044EBA /* VFNStreamFormat.cpp */; };
 		BFE3CE4809177C29002021F6 /* ZScatterer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8C60890426700044EBA /* ZScatterer.cpp */; };
+		BFE6AC690B886ACB007AFBA8 /* Indexing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFE6AC680B886ACA007AFBA8 /* Indexing.cpp */; };
+		BFE6AC6A0B886ACB007AFBA8 /* Indexing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFE6AC680B886ACA007AFBA8 /* Indexing.cpp */; };
 		BFFCCB670890296D00044EBA /* bandmat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCB660890296D00044EBA /* bandmat.cpp */; };
 		BFFCCBA0089029F400044EBA /* cholesky.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCB6A089029F400044EBA /* cholesky.cpp */; };
 		BFFCCBA1089029F400044EBA /* evalue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCB6B089029F400044EBA /* evalue.cpp */; };
@@ -231,104 +233,105 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		BF08978A0B072DF600C0F576 /* CIF.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = CIF.cpp; path = ObjCryst/ObjCryst/CIF.cpp; sourceTree = "<group>"; };
-		BF08978D0B072E2F00C0F576 /* ci_string.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ci_string.cpp; path = ObjCryst/Quirks/ci_string.cpp; sourceTree = "<group>"; };
+		BF08978A0B072DF600C0F576 /* CIF.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = CIF.cpp; path = ../ObjCryst/ObjCryst/CIF.cpp; sourceTree = "<group>"; };
+		BF08978D0B072E2F00C0F576 /* ci_string.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ci_string.cpp; path = ../ObjCryst/Quirks/ci_string.cpp; sourceTree = "<group>"; };
 		BF26F598089306500008175B /* Fox.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = Fox.icns; path = src/Fox.icns; sourceTree = "<group>"; };
-		BF3EB05408968F5500E02367 /* uctbx.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = uctbx.cpp; path = cctbx/cctbx/uctbx/uctbx.cpp; sourceTree = "<group>"; };
-		BF3EB062089690D200E02367 /* spoil_optimization.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = spoil_optimization.cpp; path = cctbx/cctbx/uctbx/spoil_optimization.cpp; sourceTree = "<group>"; };
+		BF3EB05408968F5500E02367 /* uctbx.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = uctbx.cpp; path = ../cctbx/cctbx/uctbx/uctbx.cpp; sourceTree = "<group>"; };
+		BF3EB062089690D200E02367 /* spoil_optimization.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = spoil_optimization.cpp; path = ../cctbx/cctbx/uctbx/spoil_optimization.cpp; sourceTree = "<group>"; };
 		BFE3CE0609177BF1002021F6 /* Fox-NoGUI */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Fox-NoGUI"; sourceTree = BUILT_PRODUCTS_DIR; };
+		BFE6AC680B886ACA007AFBA8 /* Indexing.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Indexing.cpp; path = ../ObjCryst/ObjCryst/Indexing.cpp; sourceTree = SOURCE_ROOT; };
 		BFFCCB5D089028E500044EBA /* libnewmat.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libnewmat.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		BFFCCB660890296D00044EBA /* bandmat.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = bandmat.cpp; path = newmat/bandmat.cpp; sourceTree = "<group>"; };
-		BFFCCB6A089029F400044EBA /* cholesky.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = cholesky.cpp; path = newmat/cholesky.cpp; sourceTree = "<group>"; };
-		BFFCCB6B089029F400044EBA /* evalue.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = evalue.cpp; path = newmat/evalue.cpp; sourceTree = "<group>"; };
-		BFFCCB6D089029F400044EBA /* fft.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = fft.cpp; path = newmat/fft.cpp; sourceTree = "<group>"; };
-		BFFCCB6E089029F400044EBA /* garch.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = garch.cpp; path = newmat/garch.cpp; sourceTree = "<group>"; };
-		BFFCCB6F089029F400044EBA /* hholder.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = hholder.cpp; path = newmat/hholder.cpp; sourceTree = "<group>"; };
-		BFFCCB70089029F400044EBA /* jacobi.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = jacobi.cpp; path = newmat/jacobi.cpp; sourceTree = "<group>"; };
-		BFFCCB71089029F400044EBA /* myexcept.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = myexcept.cpp; path = newmat/myexcept.cpp; sourceTree = "<group>"; };
-		BFFCCB72089029F400044EBA /* newfft.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = newfft.cpp; path = newmat/newfft.cpp; sourceTree = "<group>"; };
-		BFFCCB73089029F400044EBA /* newmat1.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = newmat1.cpp; path = newmat/newmat1.cpp; sourceTree = "<group>"; };
-		BFFCCB74089029F400044EBA /* newmat2.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = newmat2.cpp; path = newmat/newmat2.cpp; sourceTree = "<group>"; };
-		BFFCCB75089029F400044EBA /* newmat3.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = newmat3.cpp; path = newmat/newmat3.cpp; sourceTree = "<group>"; };
-		BFFCCB76089029F400044EBA /* newmat4.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = newmat4.cpp; path = newmat/newmat4.cpp; sourceTree = "<group>"; };
-		BFFCCB77089029F400044EBA /* newmat5.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = newmat5.cpp; path = newmat/newmat5.cpp; sourceTree = "<group>"; };
-		BFFCCB78089029F400044EBA /* newmat6.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = newmat6.cpp; path = newmat/newmat6.cpp; sourceTree = "<group>"; };
-		BFFCCB79089029F400044EBA /* newmat7.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = newmat7.cpp; path = newmat/newmat7.cpp; sourceTree = "<group>"; };
-		BFFCCB7A089029F400044EBA /* newmat8.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = newmat8.cpp; path = newmat/newmat8.cpp; sourceTree = "<group>"; };
-		BFFCCB7B089029F400044EBA /* newmat9.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = newmat9.cpp; path = newmat/newmat9.cpp; sourceTree = "<group>"; };
-		BFFCCB7C089029F400044EBA /* newmatex.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = newmatex.cpp; path = newmat/newmatex.cpp; sourceTree = "<group>"; };
-		BFFCCB7D089029F400044EBA /* newmatnl.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = newmatnl.cpp; path = newmat/newmatnl.cpp; sourceTree = "<group>"; };
-		BFFCCB7E089029F400044EBA /* newmatrm.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = newmatrm.cpp; path = newmat/newmatrm.cpp; sourceTree = "<group>"; };
-		BFFCCB82089029F400044EBA /* nm_misc.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = nm_misc.cpp; path = newmat/nm_misc.cpp; sourceTree = "<group>"; };
-		BFFCCB83089029F400044EBA /* sl_ex.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = sl_ex.cpp; path = newmat/sl_ex.cpp; sourceTree = "<group>"; };
-		BFFCCB84089029F400044EBA /* solution.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = solution.cpp; path = newmat/solution.cpp; sourceTree = "<group>"; };
-		BFFCCB85089029F400044EBA /* sort.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = sort.cpp; path = newmat/sort.cpp; sourceTree = "<group>"; };
-		BFFCCB86089029F400044EBA /* submat.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = submat.cpp; path = newmat/submat.cpp; sourceTree = "<group>"; };
-		BFFCCB87089029F400044EBA /* svd.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = svd.cpp; path = newmat/svd.cpp; sourceTree = "<group>"; };
+		BFFCCB660890296D00044EBA /* bandmat.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = bandmat.cpp; path = ../newmat/bandmat.cpp; sourceTree = "<group>"; };
+		BFFCCB6A089029F400044EBA /* cholesky.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = cholesky.cpp; path = ../newmat/cholesky.cpp; sourceTree = "<group>"; };
+		BFFCCB6B089029F400044EBA /* evalue.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = evalue.cpp; path = ../newmat/evalue.cpp; sourceTree = "<group>"; };
+		BFFCCB6D089029F400044EBA /* fft.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = fft.cpp; path = ../newmat/fft.cpp; sourceTree = "<group>"; };
+		BFFCCB6E089029F400044EBA /* garch.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = garch.cpp; path = ../newmat/garch.cpp; sourceTree = "<group>"; };
+		BFFCCB6F089029F400044EBA /* hholder.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = hholder.cpp; path = ../newmat/hholder.cpp; sourceTree = "<group>"; };
+		BFFCCB70089029F400044EBA /* jacobi.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = jacobi.cpp; path = ../newmat/jacobi.cpp; sourceTree = "<group>"; };
+		BFFCCB71089029F400044EBA /* myexcept.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = myexcept.cpp; path = ../newmat/myexcept.cpp; sourceTree = "<group>"; };
+		BFFCCB72089029F400044EBA /* newfft.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = newfft.cpp; path = ../newmat/newfft.cpp; sourceTree = "<group>"; };
+		BFFCCB73089029F400044EBA /* newmat1.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = newmat1.cpp; path = ../newmat/newmat1.cpp; sourceTree = "<group>"; };
+		BFFCCB74089029F400044EBA /* newmat2.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = newmat2.cpp; path = ../newmat/newmat2.cpp; sourceTree = "<group>"; };
+		BFFCCB75089029F400044EBA /* newmat3.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = newmat3.cpp; path = ../newmat/newmat3.cpp; sourceTree = "<group>"; };
+		BFFCCB76089029F400044EBA /* newmat4.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = newmat4.cpp; path = ../newmat/newmat4.cpp; sourceTree = "<group>"; };
+		BFFCCB77089029F400044EBA /* newmat5.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = newmat5.cpp; path = ../newmat/newmat5.cpp; sourceTree = "<group>"; };
+		BFFCCB78089029F400044EBA /* newmat6.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = newmat6.cpp; path = ../newmat/newmat6.cpp; sourceTree = "<group>"; };
+		BFFCCB79089029F400044EBA /* newmat7.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = newmat7.cpp; path = ../newmat/newmat7.cpp; sourceTree = "<group>"; };
+		BFFCCB7A089029F400044EBA /* newmat8.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = newmat8.cpp; path = ../newmat/newmat8.cpp; sourceTree = "<group>"; };
+		BFFCCB7B089029F400044EBA /* newmat9.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = newmat9.cpp; path = ../newmat/newmat9.cpp; sourceTree = "<group>"; };
+		BFFCCB7C089029F400044EBA /* newmatex.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = newmatex.cpp; path = ../newmat/newmatex.cpp; sourceTree = "<group>"; };
+		BFFCCB7D089029F400044EBA /* newmatnl.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = newmatnl.cpp; path = ../newmat/newmatnl.cpp; sourceTree = "<group>"; };
+		BFFCCB7E089029F400044EBA /* newmatrm.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = newmatrm.cpp; path = ../newmat/newmatrm.cpp; sourceTree = "<group>"; };
+		BFFCCB82089029F400044EBA /* nm_misc.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = nm_misc.cpp; path = ../newmat/nm_misc.cpp; sourceTree = "<group>"; };
+		BFFCCB83089029F400044EBA /* sl_ex.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = sl_ex.cpp; path = ../newmat/sl_ex.cpp; sourceTree = "<group>"; };
+		BFFCCB84089029F400044EBA /* solution.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = solution.cpp; path = ../newmat/solution.cpp; sourceTree = "<group>"; };
+		BFFCCB85089029F400044EBA /* sort.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = sort.cpp; path = ../newmat/sort.cpp; sourceTree = "<group>"; };
+		BFFCCB86089029F400044EBA /* submat.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = submat.cpp; path = ../newmat/submat.cpp; sourceTree = "<group>"; };
+		BFFCCB87089029F400044EBA /* svd.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = svd.cpp; path = ../newmat/svd.cpp; sourceTree = "<group>"; };
 		BFFCCBE50890309900044EBA /* libcctbx.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libcctbx.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		BFFCCBEB089031AF00044EBA /* basic.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = basic.cpp; path = cctbx/cctbx/eltbx/basic.cpp; sourceTree = "<group>"; };
-		BFFCCBED089031AF00044EBA /* fp_fdp.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = fp_fdp.cpp; path = cctbx/cctbx/eltbx/fp_fdp.cpp; sourceTree = "<group>"; };
-		BFFCCBEF089031AF00044EBA /* henke_tables_01_12.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = henke_tables_01_12.cpp; path = cctbx/cctbx/eltbx/henke_tables_01_12.cpp; sourceTree = "<group>"; };
-		BFFCCBF0089031AF00044EBA /* henke_tables_13_24.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = henke_tables_13_24.cpp; path = cctbx/cctbx/eltbx/henke_tables_13_24.cpp; sourceTree = "<group>"; };
-		BFFCCBF1089031AF00044EBA /* henke_tables_25_36.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = henke_tables_25_36.cpp; path = cctbx/cctbx/eltbx/henke_tables_25_36.cpp; sourceTree = "<group>"; };
-		BFFCCBF2089031AF00044EBA /* henke_tables_37_48.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = henke_tables_37_48.cpp; path = cctbx/cctbx/eltbx/henke_tables_37_48.cpp; sourceTree = "<group>"; };
-		BFFCCBF3089031AF00044EBA /* henke_tables_49_60.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = henke_tables_49_60.cpp; path = cctbx/cctbx/eltbx/henke_tables_49_60.cpp; sourceTree = "<group>"; };
-		BFFCCBF4089031AF00044EBA /* henke_tables_61_72.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = henke_tables_61_72.cpp; path = cctbx/cctbx/eltbx/henke_tables_61_72.cpp; sourceTree = "<group>"; };
-		BFFCCBF5089031AF00044EBA /* henke_tables_73_84.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = henke_tables_73_84.cpp; path = cctbx/cctbx/eltbx/henke_tables_73_84.cpp; sourceTree = "<group>"; };
-		BFFCCBF6089031AF00044EBA /* henke_tables_85_92.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = henke_tables_85_92.cpp; path = cctbx/cctbx/eltbx/henke_tables_85_92.cpp; sourceTree = "<group>"; };
-		BFFCCBF7089031AF00044EBA /* henke.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = henke.cpp; path = cctbx/cctbx/eltbx/henke.cpp; sourceTree = "<group>"; };
-		BFFCCBF9089031AF00044EBA /* icsd_radii.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = icsd_radii.cpp; path = cctbx/cctbx/eltbx/icsd_radii.cpp; sourceTree = "<group>"; };
-		BFFCCBFA089031AF00044EBA /* it1992.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = it1992.cpp; path = cctbx/cctbx/eltbx/xray_scattering/it1992.cpp; sourceTree = "<group>"; };
-		BFFCCBFB089031AF00044EBA /* n_gaussian_raw.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = n_gaussian_raw.cpp; path = cctbx/cctbx/eltbx/xray_scattering/n_gaussian_raw.cpp; sourceTree = "<group>"; };
-		BFFCCBFC089031AF00044EBA /* n_gaussian.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = n_gaussian.cpp; path = cctbx/cctbx/eltbx/xray_scattering/n_gaussian.cpp; sourceTree = "<group>"; };
-		BFFCCBFE089031AF00044EBA /* neutron.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = neutron.cpp; path = cctbx/cctbx/eltbx/neutron.cpp; sourceTree = "<group>"; };
-		BFFCCC00089031AF00044EBA /* sasaki_tables_01_12.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = sasaki_tables_01_12.cpp; path = cctbx/cctbx/eltbx/sasaki_tables_01_12.cpp; sourceTree = "<group>"; };
-		BFFCCC01089031AF00044EBA /* sasaki_tables_13_24.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = sasaki_tables_13_24.cpp; path = cctbx/cctbx/eltbx/sasaki_tables_13_24.cpp; sourceTree = "<group>"; };
-		BFFCCC02089031AF00044EBA /* sasaki_tables_25_36.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = sasaki_tables_25_36.cpp; path = cctbx/cctbx/eltbx/sasaki_tables_25_36.cpp; sourceTree = "<group>"; };
-		BFFCCC03089031AF00044EBA /* sasaki_tables_37_48.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = sasaki_tables_37_48.cpp; path = cctbx/cctbx/eltbx/sasaki_tables_37_48.cpp; sourceTree = "<group>"; };
-		BFFCCC04089031AF00044EBA /* sasaki_tables_49_60.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = sasaki_tables_49_60.cpp; path = cctbx/cctbx/eltbx/sasaki_tables_49_60.cpp; sourceTree = "<group>"; };
-		BFFCCC05089031AF00044EBA /* sasaki_tables_61_72.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = sasaki_tables_61_72.cpp; path = cctbx/cctbx/eltbx/sasaki_tables_61_72.cpp; sourceTree = "<group>"; };
-		BFFCCC06089031AF00044EBA /* sasaki_tables_73_82.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = sasaki_tables_73_82.cpp; path = cctbx/cctbx/eltbx/sasaki_tables_73_82.cpp; sourceTree = "<group>"; };
-		BFFCCC07089031AF00044EBA /* sasaki.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = sasaki.cpp; path = cctbx/cctbx/eltbx/sasaki.cpp; sourceTree = "<group>"; };
-		BFFCCC09089031AF00044EBA /* tiny_pse.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = tiny_pse.cpp; path = cctbx/cctbx/eltbx/tiny_pse.cpp; sourceTree = "<group>"; };
-		BFFCCC0B089031AF00044EBA /* wavelengths.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wavelengths.cpp; path = cctbx/cctbx/eltbx/wavelengths.cpp; sourceTree = "<group>"; };
-		BFFCCC0C089031AF00044EBA /* wk1995.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wk1995.cpp; path = cctbx/cctbx/eltbx/xray_scattering/wk1995.cpp; sourceTree = "<group>"; };
-		BFFCCC320890324D00044EBA /* bricks.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = bricks.cpp; path = cctbx/cctbx/sgtbx/bricks.cpp; sourceTree = "<group>"; };
-		BFFCCC330890324D00044EBA /* change_of_basis_op.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = change_of_basis_op.cpp; path = cctbx/cctbx/sgtbx/change_of_basis_op.cpp; sourceTree = "<group>"; };
-		BFFCCC360890324D00044EBA /* find_affine.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = find_affine.cpp; path = cctbx/cctbx/sgtbx/find_affine.cpp; sourceTree = "<group>"; };
-		BFFCCC370890324D00044EBA /* group_codes.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = group_codes.cpp; path = cctbx/cctbx/sgtbx/group_codes.cpp; sourceTree = "<group>"; };
-		BFFCCC380890324D00044EBA /* hall_in.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = hall_in.cpp; path = cctbx/cctbx/sgtbx/hall_in.cpp; sourceTree = "<group>"; };
-		BFFCCC390890324D00044EBA /* hall_symbol_table.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = hall_symbol_table.cpp; path = cctbx/cctbx/sgtbx/reference_settings/hall_symbol_table.cpp; sourceTree = "<group>"; };
-		BFFCCC3B0890324D00044EBA /* lattice_symmetry.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = lattice_symmetry.cpp; path = cctbx/cctbx/sgtbx/lattice_symmetry.cpp; sourceTree = "<group>"; };
-		BFFCCC3C0890324D00044EBA /* lattice_tr.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = lattice_tr.cpp; path = cctbx/cctbx/sgtbx/lattice_tr.cpp; sourceTree = "<group>"; };
-		BFFCCC3D0890324D00044EBA /* matrix_group_code_table.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = matrix_group_code_table.cpp; path = cctbx/cctbx/sgtbx/reference_settings/matrix_group_code_table.cpp; sourceTree = "<group>"; };
-		BFFCCC3E0890324D00044EBA /* miller.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = miller.cpp; path = cctbx/cctbx/sgtbx/miller.cpp; sourceTree = "<group>"; };
-		BFFCCC3F0890324D00044EBA /* normalizer.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = normalizer.cpp; path = cctbx/cctbx/sgtbx/reference_settings/normalizer.cpp; sourceTree = "<group>"; };
-		BFFCCC420890324D00044EBA /* reciprocal_space_asu.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = reciprocal_space_asu.cpp; path = cctbx/cctbx/sgtbx/reciprocal_space_asu.cpp; sourceTree = "<group>"; };
-		BFFCCC430890324D00044EBA /* reciprocal_space_ref_asu.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = reciprocal_space_ref_asu.cpp; path = cctbx/cctbx/sgtbx/reciprocal_space_ref_asu.cpp; sourceTree = "<group>"; };
-		BFFCCC440890324D00044EBA /* rot_mx_info.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = rot_mx_info.cpp; path = cctbx/cctbx/sgtbx/rot_mx_info.cpp; sourceTree = "<group>"; };
-		BFFCCC460890324D00044EBA /* rot_mx.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = rot_mx.cpp; path = cctbx/cctbx/sgtbx/rot_mx.cpp; sourceTree = "<group>"; };
-		BFFCCC470890324D00044EBA /* row_echelon_solve.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = row_echelon_solve.cpp; path = cctbx/cctbx/sgtbx/row_echelon_solve.cpp; sourceTree = "<group>"; };
-		BFFCCC490890324D00044EBA /* rt_mx.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = rt_mx.cpp; path = cctbx/cctbx/sgtbx/rt_mx.cpp; sourceTree = "<group>"; };
-		BFFCCC4B0890324D00044EBA /* select_generators.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = select_generators.cpp; path = cctbx/cctbx/sgtbx/select_generators.cpp; sourceTree = "<group>"; };
-		BFFCCC4D0890324D00044EBA /* seminvariant.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = seminvariant.cpp; path = cctbx/cctbx/sgtbx/seminvariant.cpp; sourceTree = "<group>"; };
-		BFFCCC500890324D00044EBA /* site_symmetry.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = site_symmetry.cpp; path = cctbx/cctbx/sgtbx/site_symmetry.cpp; sourceTree = "<group>"; };
-		BFFCCC520890324D00044EBA /* space_group_type.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = space_group_type.cpp; path = cctbx/cctbx/sgtbx/space_group_type.cpp; sourceTree = "<group>"; };
-		BFFCCC540890324D00044EBA /* space_group.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = space_group.cpp; path = cctbx/cctbx/sgtbx/space_group.cpp; sourceTree = "<group>"; };
-		BFFCCC570890324D00044EBA /* symbols.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = symbols.cpp; path = cctbx/cctbx/sgtbx/symbols.cpp; sourceTree = "<group>"; };
-		BFFCCC590890324D00044EBA /* tensor_rank_2.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = tensor_rank_2.cpp; path = cctbx/cctbx/sgtbx/tensor_rank_2.cpp; sourceTree = "<group>"; };
-		BFFCCC5A0890324D00044EBA /* tr_group.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = tr_group.cpp; path = cctbx/cctbx/sgtbx/tr_group.cpp; sourceTree = "<group>"; };
-		BFFCCC5C0890324D00044EBA /* tr_vec.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = tr_vec.cpp; path = cctbx/cctbx/sgtbx/tr_vec.cpp; sourceTree = "<group>"; };
-		BFFCCC5D0890324D00044EBA /* utils.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = utils.cpp; path = cctbx/cctbx/sgtbx/utils.cpp; sourceTree = "<group>"; };
-		BFFCCC5F0890324D00044EBA /* wyckoff.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wyckoff.cpp; path = cctbx/cctbx/sgtbx/reference_settings/wyckoff.cpp; sourceTree = "<group>"; };
-		BFFCCC600890324D00044EBA /* wyckoff.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wyckoff.cpp; path = cctbx/cctbx/sgtbx/wyckoff.cpp; sourceTree = "<group>"; };
-		BFFCCC910890326700044EBA /* error.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = error.cpp; path = cctbx/cctbx/global/error.cpp; sourceTree = "<group>"; };
-		BFFCCC930890328F00044EBA /* asu.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = asu.cpp; path = cctbx/cctbx/miller/asu.cpp; sourceTree = "<group>"; };
-		BFFCCC940890328F00044EBA /* bins.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = bins.cpp; path = cctbx/cctbx/miller/bins.cpp; sourceTree = "<group>"; };
-		BFFCCC950890328F00044EBA /* index_generator.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = index_generator.cpp; path = cctbx/cctbx/miller/index_generator.cpp; sourceTree = "<group>"; };
-		BFFCCC960890328F00044EBA /* match_bijvoet_mates.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = match_bijvoet_mates.cpp; path = cctbx/cctbx/miller/match_bijvoet_mates.cpp; sourceTree = "<group>"; };
-		BFFCCC970890328F00044EBA /* match_indices.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = match_indices.cpp; path = cctbx/cctbx/miller/match_indices.cpp; sourceTree = "<group>"; };
-		BFFCCC980890328F00044EBA /* sym_equiv.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = sym_equiv.cpp; path = cctbx/cctbx/miller/sym_equiv.cpp; sourceTree = "<group>"; };
+		BFFCCBEB089031AF00044EBA /* basic.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = basic.cpp; path = ../cctbx/cctbx/eltbx/basic.cpp; sourceTree = "<group>"; };
+		BFFCCBED089031AF00044EBA /* fp_fdp.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = fp_fdp.cpp; path = ../cctbx/cctbx/eltbx/fp_fdp.cpp; sourceTree = "<group>"; };
+		BFFCCBEF089031AF00044EBA /* henke_tables_01_12.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = henke_tables_01_12.cpp; path = ../cctbx/cctbx/eltbx/henke_tables_01_12.cpp; sourceTree = "<group>"; };
+		BFFCCBF0089031AF00044EBA /* henke_tables_13_24.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = henke_tables_13_24.cpp; path = ../cctbx/cctbx/eltbx/henke_tables_13_24.cpp; sourceTree = "<group>"; };
+		BFFCCBF1089031AF00044EBA /* henke_tables_25_36.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = henke_tables_25_36.cpp; path = ../cctbx/cctbx/eltbx/henke_tables_25_36.cpp; sourceTree = "<group>"; };
+		BFFCCBF2089031AF00044EBA /* henke_tables_37_48.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = henke_tables_37_48.cpp; path = ../cctbx/cctbx/eltbx/henke_tables_37_48.cpp; sourceTree = "<group>"; };
+		BFFCCBF3089031AF00044EBA /* henke_tables_49_60.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = henke_tables_49_60.cpp; path = ../cctbx/cctbx/eltbx/henke_tables_49_60.cpp; sourceTree = "<group>"; };
+		BFFCCBF4089031AF00044EBA /* henke_tables_61_72.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = henke_tables_61_72.cpp; path = ../cctbx/cctbx/eltbx/henke_tables_61_72.cpp; sourceTree = "<group>"; };
+		BFFCCBF5089031AF00044EBA /* henke_tables_73_84.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = henke_tables_73_84.cpp; path = ../cctbx/cctbx/eltbx/henke_tables_73_84.cpp; sourceTree = "<group>"; };
+		BFFCCBF6089031AF00044EBA /* henke_tables_85_92.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = henke_tables_85_92.cpp; path = ../cctbx/cctbx/eltbx/henke_tables_85_92.cpp; sourceTree = "<group>"; };
+		BFFCCBF7089031AF00044EBA /* henke.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = henke.cpp; path = ../cctbx/cctbx/eltbx/henke.cpp; sourceTree = "<group>"; };
+		BFFCCBF9089031AF00044EBA /* icsd_radii.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = icsd_radii.cpp; path = ../cctbx/cctbx/eltbx/icsd_radii.cpp; sourceTree = "<group>"; };
+		BFFCCBFA089031AF00044EBA /* it1992.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = it1992.cpp; path = ../cctbx/cctbx/eltbx/xray_scattering/it1992.cpp; sourceTree = "<group>"; };
+		BFFCCBFB089031AF00044EBA /* n_gaussian_raw.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = n_gaussian_raw.cpp; path = ../cctbx/cctbx/eltbx/xray_scattering/n_gaussian_raw.cpp; sourceTree = "<group>"; };
+		BFFCCBFC089031AF00044EBA /* n_gaussian.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = n_gaussian.cpp; path = ../cctbx/cctbx/eltbx/xray_scattering/n_gaussian.cpp; sourceTree = "<group>"; };
+		BFFCCBFE089031AF00044EBA /* neutron.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = neutron.cpp; path = ../cctbx/cctbx/eltbx/neutron.cpp; sourceTree = "<group>"; };
+		BFFCCC00089031AF00044EBA /* sasaki_tables_01_12.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = sasaki_tables_01_12.cpp; path = ../cctbx/cctbx/eltbx/sasaki_tables_01_12.cpp; sourceTree = "<group>"; };
+		BFFCCC01089031AF00044EBA /* sasaki_tables_13_24.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = sasaki_tables_13_24.cpp; path = ../cctbx/cctbx/eltbx/sasaki_tables_13_24.cpp; sourceTree = "<group>"; };
+		BFFCCC02089031AF00044EBA /* sasaki_tables_25_36.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = sasaki_tables_25_36.cpp; path = ../cctbx/cctbx/eltbx/sasaki_tables_25_36.cpp; sourceTree = "<group>"; };
+		BFFCCC03089031AF00044EBA /* sasaki_tables_37_48.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = sasaki_tables_37_48.cpp; path = ../cctbx/cctbx/eltbx/sasaki_tables_37_48.cpp; sourceTree = "<group>"; };
+		BFFCCC04089031AF00044EBA /* sasaki_tables_49_60.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = sasaki_tables_49_60.cpp; path = ../cctbx/cctbx/eltbx/sasaki_tables_49_60.cpp; sourceTree = "<group>"; };
+		BFFCCC05089031AF00044EBA /* sasaki_tables_61_72.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = sasaki_tables_61_72.cpp; path = ../cctbx/cctbx/eltbx/sasaki_tables_61_72.cpp; sourceTree = "<group>"; };
+		BFFCCC06089031AF00044EBA /* sasaki_tables_73_82.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = sasaki_tables_73_82.cpp; path = ../cctbx/cctbx/eltbx/sasaki_tables_73_82.cpp; sourceTree = "<group>"; };
+		BFFCCC07089031AF00044EBA /* sasaki.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = sasaki.cpp; path = ../cctbx/cctbx/eltbx/sasaki.cpp; sourceTree = "<group>"; };
+		BFFCCC09089031AF00044EBA /* tiny_pse.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = tiny_pse.cpp; path = ../cctbx/cctbx/eltbx/tiny_pse.cpp; sourceTree = "<group>"; };
+		BFFCCC0B089031AF00044EBA /* wavelengths.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wavelengths.cpp; path = ../cctbx/cctbx/eltbx/wavelengths.cpp; sourceTree = "<group>"; };
+		BFFCCC0C089031AF00044EBA /* wk1995.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wk1995.cpp; path = ../cctbx/cctbx/eltbx/xray_scattering/wk1995.cpp; sourceTree = "<group>"; };
+		BFFCCC320890324D00044EBA /* bricks.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = bricks.cpp; path = ../cctbx/cctbx/sgtbx/bricks.cpp; sourceTree = "<group>"; };
+		BFFCCC330890324D00044EBA /* change_of_basis_op.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = change_of_basis_op.cpp; path = ../cctbx/cctbx/sgtbx/change_of_basis_op.cpp; sourceTree = "<group>"; };
+		BFFCCC360890324D00044EBA /* find_affine.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = find_affine.cpp; path = ../cctbx/cctbx/sgtbx/find_affine.cpp; sourceTree = "<group>"; };
+		BFFCCC370890324D00044EBA /* group_codes.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = group_codes.cpp; path = ../cctbx/cctbx/sgtbx/group_codes.cpp; sourceTree = "<group>"; };
+		BFFCCC380890324D00044EBA /* hall_in.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = hall_in.cpp; path = ../cctbx/cctbx/sgtbx/hall_in.cpp; sourceTree = "<group>"; };
+		BFFCCC390890324D00044EBA /* hall_symbol_table.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = hall_symbol_table.cpp; path = ../cctbx/cctbx/sgtbx/reference_settings/hall_symbol_table.cpp; sourceTree = "<group>"; };
+		BFFCCC3B0890324D00044EBA /* lattice_symmetry.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = lattice_symmetry.cpp; path = ../cctbx/cctbx/sgtbx/lattice_symmetry.cpp; sourceTree = "<group>"; };
+		BFFCCC3C0890324D00044EBA /* lattice_tr.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = lattice_tr.cpp; path = ../cctbx/cctbx/sgtbx/lattice_tr.cpp; sourceTree = "<group>"; };
+		BFFCCC3D0890324D00044EBA /* matrix_group_code_table.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = matrix_group_code_table.cpp; path = ../cctbx/cctbx/sgtbx/reference_settings/matrix_group_code_table.cpp; sourceTree = "<group>"; };
+		BFFCCC3E0890324D00044EBA /* miller.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = miller.cpp; path = ../cctbx/cctbx/sgtbx/miller.cpp; sourceTree = "<group>"; };
+		BFFCCC3F0890324D00044EBA /* normalizer.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = normalizer.cpp; path = ../cctbx/cctbx/sgtbx/reference_settings/normalizer.cpp; sourceTree = "<group>"; };
+		BFFCCC420890324D00044EBA /* reciprocal_space_asu.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = reciprocal_space_asu.cpp; path = ../cctbx/cctbx/sgtbx/reciprocal_space_asu.cpp; sourceTree = "<group>"; };
+		BFFCCC430890324D00044EBA /* reciprocal_space_ref_asu.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = reciprocal_space_ref_asu.cpp; path = ../cctbx/cctbx/sgtbx/reciprocal_space_ref_asu.cpp; sourceTree = "<group>"; };
+		BFFCCC440890324D00044EBA /* rot_mx_info.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = rot_mx_info.cpp; path = ../cctbx/cctbx/sgtbx/rot_mx_info.cpp; sourceTree = "<group>"; };
+		BFFCCC460890324D00044EBA /* rot_mx.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = rot_mx.cpp; path = ../cctbx/cctbx/sgtbx/rot_mx.cpp; sourceTree = "<group>"; };
+		BFFCCC470890324D00044EBA /* row_echelon_solve.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = row_echelon_solve.cpp; path = ../cctbx/cctbx/sgtbx/row_echelon_solve.cpp; sourceTree = "<group>"; };
+		BFFCCC490890324D00044EBA /* rt_mx.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = rt_mx.cpp; path = ../cctbx/cctbx/sgtbx/rt_mx.cpp; sourceTree = "<group>"; };
+		BFFCCC4B0890324D00044EBA /* select_generators.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = select_generators.cpp; path = ../cctbx/cctbx/sgtbx/select_generators.cpp; sourceTree = "<group>"; };
+		BFFCCC4D0890324D00044EBA /* seminvariant.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = seminvariant.cpp; path = ../cctbx/cctbx/sgtbx/seminvariant.cpp; sourceTree = "<group>"; };
+		BFFCCC500890324D00044EBA /* site_symmetry.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = site_symmetry.cpp; path = ../cctbx/cctbx/sgtbx/site_symmetry.cpp; sourceTree = "<group>"; };
+		BFFCCC520890324D00044EBA /* space_group_type.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = space_group_type.cpp; path = ../cctbx/cctbx/sgtbx/space_group_type.cpp; sourceTree = "<group>"; };
+		BFFCCC540890324D00044EBA /* space_group.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = space_group.cpp; path = ../cctbx/cctbx/sgtbx/space_group.cpp; sourceTree = "<group>"; };
+		BFFCCC570890324D00044EBA /* symbols.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = symbols.cpp; path = ../cctbx/cctbx/sgtbx/symbols.cpp; sourceTree = "<group>"; };
+		BFFCCC590890324D00044EBA /* tensor_rank_2.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = tensor_rank_2.cpp; path = ../cctbx/cctbx/sgtbx/tensor_rank_2.cpp; sourceTree = "<group>"; };
+		BFFCCC5A0890324D00044EBA /* tr_group.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = tr_group.cpp; path = ../cctbx/cctbx/sgtbx/tr_group.cpp; sourceTree = "<group>"; };
+		BFFCCC5C0890324D00044EBA /* tr_vec.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = tr_vec.cpp; path = ../cctbx/cctbx/sgtbx/tr_vec.cpp; sourceTree = "<group>"; };
+		BFFCCC5D0890324D00044EBA /* utils.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = utils.cpp; path = ../cctbx/cctbx/sgtbx/utils.cpp; sourceTree = "<group>"; };
+		BFFCCC5F0890324D00044EBA /* wyckoff.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wyckoff.cpp; path = ../cctbx/cctbx/sgtbx/reference_settings/wyckoff.cpp; sourceTree = "<group>"; };
+		BFFCCC600890324D00044EBA /* wyckoff.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wyckoff.cpp; path = ../cctbx/cctbx/sgtbx/wyckoff.cpp; sourceTree = "<group>"; };
+		BFFCCC910890326700044EBA /* error.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = error.cpp; path = ../cctbx/cctbx/global/error.cpp; sourceTree = "<group>"; };
+		BFFCCC930890328F00044EBA /* asu.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = asu.cpp; path = ../cctbx/cctbx/miller/asu.cpp; sourceTree = "<group>"; };
+		BFFCCC940890328F00044EBA /* bins.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = bins.cpp; path = ../cctbx/cctbx/miller/bins.cpp; sourceTree = "<group>"; };
+		BFFCCC950890328F00044EBA /* index_generator.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = index_generator.cpp; path = ../cctbx/cctbx/miller/index_generator.cpp; sourceTree = "<group>"; };
+		BFFCCC960890328F00044EBA /* match_bijvoet_mates.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = match_bijvoet_mates.cpp; path = ../cctbx/cctbx/miller/match_bijvoet_mates.cpp; sourceTree = "<group>"; };
+		BFFCCC970890328F00044EBA /* match_indices.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = match_indices.cpp; path = ../cctbx/cctbx/miller/match_indices.cpp; sourceTree = "<group>"; };
+		BFFCCC980890328F00044EBA /* sym_equiv.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = sym_equiv.cpp; path = ../cctbx/cctbx/miller/sym_equiv.cpp; sourceTree = "<group>"; };
 		BFFCCCC40890389700044EBA /* aligned_storage.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = aligned_storage.hpp; sourceTree = "<group>"; };
 		BFFCCCC50890389700044EBA /* call_traits.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = call_traits.hpp; sourceTree = "<group>"; };
 		BFFCCCC80890389700044EBA /* borland_prefix.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = borland_prefix.hpp; sourceTree = "<group>"; };
@@ -1784,58 +1787,58 @@
 		BFFCD888089041A600044EBA /* Fox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Fox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFFCD88A089041A600044EBA /* Fox-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Fox-Info.plist"; sourceTree = SOURCE_ROOT; };
 		BFFCD88E0890422000044EBA /* Fox.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Fox.cpp; path = src/Fox.cpp; sourceTree = SOURCE_ROOT; };
-		BFFCD8900890426600044EBA /* Atom.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Atom.cpp; path = ObjCryst/ObjCryst/Atom.cpp; sourceTree = SOURCE_ROOT; };
-		BFFCD8910890426600044EBA /* Crystal.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Crystal.cpp; path = ObjCryst/ObjCryst/Crystal.cpp; sourceTree = SOURCE_ROOT; };
-		BFFCD8920890426600044EBA /* CrystVector.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = CrystVector.cpp; path = ObjCryst/CrystVector/CrystVector.cpp; sourceTree = "<group>"; };
-		BFFCD8930890426600044EBA /* DiffractionDataSingleCrystal.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DiffractionDataSingleCrystal.cpp; path = ObjCryst/ObjCryst/DiffractionDataSingleCrystal.cpp; sourceTree = SOURCE_ROOT; };
-		BFFCD8940890426600044EBA /* Exception.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Exception.cpp; path = ObjCryst/ObjCryst/Exception.cpp; sourceTree = "<group>"; };
-		BFFCD8960890426600044EBA /* geomStructFactor_001.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = geomStructFactor_001.cpp; path = ObjCryst/ObjCryst/geomStructFactor_001.cpp; sourceTree = SOURCE_ROOT; };
-		BFFCD8970890426600044EBA /* geomStructFactor_002.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = geomStructFactor_002.cpp; path = ObjCryst/ObjCryst/geomStructFactor_002.cpp; sourceTree = SOURCE_ROOT; };
-		BFFCD8980890426600044EBA /* geomStructFactor_067.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = geomStructFactor_067.cpp; path = ObjCryst/ObjCryst/geomStructFactor_067.cpp; sourceTree = SOURCE_ROOT; };
-		BFFCD8990890426600044EBA /* geomStructFactor_097.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = geomStructFactor_097.cpp; path = ObjCryst/ObjCryst/geomStructFactor_097.cpp; sourceTree = SOURCE_ROOT; };
-		BFFCD89A0890426600044EBA /* geomStructFactor_230.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = geomStructFactor_230.cpp; path = ObjCryst/ObjCryst/geomStructFactor_230.cpp; sourceTree = SOURCE_ROOT; };
-		BFFCD89B0890426600044EBA /* geomStructFactor_centro.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = geomStructFactor_centro.cpp; path = ObjCryst/ObjCryst/geomStructFactor_centro.cpp; sourceTree = SOURCE_ROOT; };
-		BFFCD89C0890426600044EBA /* geomStructFactor.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = geomStructFactor.cpp; path = ObjCryst/ObjCryst/geomStructFactor.cpp; sourceTree = SOURCE_ROOT; };
-		BFFCD89D0890426600044EBA /* GlobalOptimObj.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = GlobalOptimObj.cpp; path = ObjCryst/RefinableObj/GlobalOptimObj.cpp; sourceTree = "<group>"; };
-		BFFCD89E0890426600044EBA /* IO.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = IO.cpp; path = ObjCryst/ObjCryst/IO.cpp; sourceTree = SOURCE_ROOT; };
-		BFFCD89F0890426600044EBA /* IO.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = IO.cpp; path = ObjCryst/RefinableObj/IO.cpp; sourceTree = "<group>"; };
-		BFFCD8A00890426600044EBA /* LSQNumObj.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = LSQNumObj.cpp; path = ObjCryst/RefinableObj/LSQNumObj.cpp; sourceTree = "<group>"; };
-		BFFCD8A10890426600044EBA /* MC.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = MC.cpp; path = ObjCryst/wxCryst/MC.cpp; sourceTree = "<group>"; };
-		BFFCD8A20890426600044EBA /* Molecule.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Molecule.cpp; path = ObjCryst/ObjCryst/Molecule.cpp; sourceTree = SOURCE_ROOT; };
-		BFFCD8A30890426600044EBA /* mpVector.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = mpVector.cpp; path = ObjCryst/wxCryst/mpVector.cpp; sourceTree = "<group>"; };
-		BFFCD8A50890426600044EBA /* Polyhedron.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Polyhedron.cpp; path = ObjCryst/ObjCryst/Polyhedron.cpp; sourceTree = SOURCE_ROOT; };
-		BFFCD8A60890426600044EBA /* PowderPattern.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = PowderPattern.cpp; path = ObjCryst/ObjCryst/PowderPattern.cpp; sourceTree = SOURCE_ROOT; };
-		BFFCD8A70890426600044EBA /* PowderPatternBackgroundBayesianMinimiser.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = PowderPatternBackgroundBayesianMinimiser.cpp; path = ObjCryst/ObjCryst/PowderPatternBackgroundBayesianMinimiser.cpp; sourceTree = SOURCE_ROOT; };
-		BFFCD8A80890426600044EBA /* RefinableObj.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = RefinableObj.cpp; path = ObjCryst/RefinableObj/RefinableObj.cpp; sourceTree = "<group>"; };
-		BFFCD8A90890426600044EBA /* ReflectionProfile.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ReflectionProfile.cpp; path = ObjCryst/ObjCryst/ReflectionProfile.cpp; sourceTree = SOURCE_ROOT; };
-		BFFCD8AA0890426600044EBA /* Scatterer.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Scatterer.cpp; path = ObjCryst/ObjCryst/Scatterer.cpp; sourceTree = SOURCE_ROOT; };
-		BFFCD8AB0890426600044EBA /* ScatteringCorr.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ScatteringCorr.cpp; path = ObjCryst/ObjCryst/ScatteringCorr.cpp; sourceTree = SOURCE_ROOT; };
-		BFFCD8AC0890426600044EBA /* ScatteringData.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ScatteringData.cpp; path = ObjCryst/ObjCryst/ScatteringData.cpp; sourceTree = SOURCE_ROOT; };
-		BFFCD8AD0890426600044EBA /* ScatteringPower.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ScatteringPower.cpp; path = ObjCryst/ObjCryst/ScatteringPower.cpp; sourceTree = SOURCE_ROOT; };
-		BFFCD8AE0890426600044EBA /* ScatteringPowerSphere.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ScatteringPowerSphere.cpp; path = ObjCryst/ObjCryst/ScatteringPowerSphere.cpp; sourceTree = SOURCE_ROOT; };
-		BFFCD8AF0890426600044EBA /* Simplex.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Simplex.cpp; path = ObjCryst/RefinableObj/Simplex.cpp; sourceTree = "<group>"; };
-		BFFCD8B00890426600044EBA /* SpaceGroup.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = SpaceGroup.cpp; path = ObjCryst/ObjCryst/SpaceGroup.cpp; sourceTree = SOURCE_ROOT; };
-		BFFCD8B10890426600044EBA /* test.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = test.cpp; path = ObjCryst/ObjCryst/test.cpp; sourceTree = "<group>"; };
-		BFFCD8B20890426600044EBA /* Tracker.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Tracker.cpp; path = ObjCryst/RefinableObj/Tracker.cpp; sourceTree = "<group>"; };
-		BFFCD8B30890426600044EBA /* UnitCell.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = UnitCell.cpp; path = ObjCryst/ObjCryst/UnitCell.cpp; sourceTree = SOURCE_ROOT; };
-		BFFCD8B40890426600044EBA /* VFNDebug.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = VFNDebug.cpp; path = ObjCryst/Quirks/VFNDebug.cpp; sourceTree = "<group>"; };
-		BFFCD8B50890426600044EBA /* VFNStreamFormat.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = VFNStreamFormat.cpp; path = ObjCryst/Quirks/VFNStreamFormat.cpp; sourceTree = "<group>"; };
-		BFFCD8B60890426600044EBA /* wxAtom.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxAtom.cpp; path = ObjCryst/wxCryst/wxAtom.cpp; sourceTree = "<group>"; };
-		BFFCD8B70890426600044EBA /* wxCryst.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxCryst.cpp; path = ObjCryst/wxCryst/wxCryst.cpp; sourceTree = "<group>"; };
-		BFFCD8B80890426600044EBA /* wxCrystal.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxCrystal.cpp; path = ObjCryst/wxCryst/wxCrystal.cpp; sourceTree = "<group>"; };
-		BFFCD8B90890426600044EBA /* wxDiffractionSingleCrystal.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxDiffractionSingleCrystal.cpp; path = ObjCryst/wxCryst/wxDiffractionSingleCrystal.cpp; sourceTree = "<group>"; };
-		BFFCD8BA0890426600044EBA /* wxGlobalOptimObj.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxGlobalOptimObj.cpp; path = ObjCryst/wxCryst/wxGlobalOptimObj.cpp; sourceTree = "<group>"; };
-		BFFCD8BB0890426600044EBA /* wxMolecule.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxMolecule.cpp; path = ObjCryst/wxCryst/wxMolecule.cpp; sourceTree = "<group>"; };
-		BFFCD8BC0890426600044EBA /* wxMultiGraph.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxMultiGraph.cpp; path = ObjCryst/wxCryst/wxMultiGraph.cpp; sourceTree = "<group>"; };
-		BFFCD8BD0890426600044EBA /* wxPowderPattern.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxPowderPattern.cpp; path = ObjCryst/wxCryst/wxPowderPattern.cpp; sourceTree = "<group>"; };
-		BFFCD8BE0890426600044EBA /* wxRefinableObj.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxRefinableObj.cpp; path = ObjCryst/wxCryst/wxRefinableObj.cpp; sourceTree = "<group>"; };
-		BFFCD8BF0890426600044EBA /* wxScatterer.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxScatterer.cpp; path = ObjCryst/wxCryst/wxScatterer.cpp; sourceTree = "<group>"; };
-		BFFCD8C00890426600044EBA /* wxScatteringPower.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxScatteringPower.cpp; path = ObjCryst/wxCryst/wxScatteringPower.cpp; sourceTree = "<group>"; };
-		BFFCD8C10890426600044EBA /* wxScatteringPowerSphere.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxScatteringPowerSphere.cpp; path = ObjCryst/wxCryst/wxScatteringPowerSphere.cpp; sourceTree = "<group>"; };
-		BFFCD8C20890426600044EBA /* wxTrackerGraph.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxTrackerGraph.cpp; path = ObjCryst/wxCryst/wxTrackerGraph.cpp; sourceTree = "<group>"; };
-		BFFCD8C30890426700044EBA /* wxZScatterer.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxZScatterer.cpp; path = ObjCryst/wxCryst/wxZScatterer.cpp; sourceTree = "<group>"; };
-		BFFCD8C60890426700044EBA /* ZScatterer.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ZScatterer.cpp; path = ObjCryst/ObjCryst/ZScatterer.cpp; sourceTree = "<group>"; };
-		BFFCD97C08904D7D00044EBA /* trackball.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = trackball.c; path = ObjCryst/wxCryst/trackball.c; sourceTree = "<group>"; };
+		BFFCD8900890426600044EBA /* Atom.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Atom.cpp; path = ../ObjCryst/ObjCryst/Atom.cpp; sourceTree = SOURCE_ROOT; };
+		BFFCD8910890426600044EBA /* Crystal.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Crystal.cpp; path = ../ObjCryst/ObjCryst/Crystal.cpp; sourceTree = SOURCE_ROOT; };
+		BFFCD8920890426600044EBA /* CrystVector.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = CrystVector.cpp; path = ../ObjCryst/CrystVector/CrystVector.cpp; sourceTree = "<group>"; };
+		BFFCD8930890426600044EBA /* DiffractionDataSingleCrystal.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DiffractionDataSingleCrystal.cpp; path = ../ObjCryst/ObjCryst/DiffractionDataSingleCrystal.cpp; sourceTree = SOURCE_ROOT; };
+		BFFCD8940890426600044EBA /* Exception.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Exception.cpp; path = ../ObjCryst/ObjCryst/Exception.cpp; sourceTree = "<group>"; };
+		BFFCD8960890426600044EBA /* geomStructFactor_001.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = geomStructFactor_001.cpp; path = ../ObjCryst/ObjCryst/geomStructFactor_001.cpp; sourceTree = SOURCE_ROOT; };
+		BFFCD8970890426600044EBA /* geomStructFactor_002.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = geomStructFactor_002.cpp; path = ../ObjCryst/ObjCryst/geomStructFactor_002.cpp; sourceTree = SOURCE_ROOT; };
+		BFFCD8980890426600044EBA /* geomStructFactor_067.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = geomStructFactor_067.cpp; path = ../ObjCryst/ObjCryst/geomStructFactor_067.cpp; sourceTree = SOURCE_ROOT; };
+		BFFCD8990890426600044EBA /* geomStructFactor_097.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = geomStructFactor_097.cpp; path = ../ObjCryst/ObjCryst/geomStructFactor_097.cpp; sourceTree = SOURCE_ROOT; };
+		BFFCD89A0890426600044EBA /* geomStructFactor_230.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = geomStructFactor_230.cpp; path = ../ObjCryst/ObjCryst/geomStructFactor_230.cpp; sourceTree = SOURCE_ROOT; };
+		BFFCD89B0890426600044EBA /* geomStructFactor_centro.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = geomStructFactor_centro.cpp; path = ../ObjCryst/ObjCryst/geomStructFactor_centro.cpp; sourceTree = SOURCE_ROOT; };
+		BFFCD89C0890426600044EBA /* geomStructFactor.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = geomStructFactor.cpp; path = ../ObjCryst/ObjCryst/geomStructFactor.cpp; sourceTree = SOURCE_ROOT; };
+		BFFCD89D0890426600044EBA /* GlobalOptimObj.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = GlobalOptimObj.cpp; path = ../ObjCryst/RefinableObj/GlobalOptimObj.cpp; sourceTree = "<group>"; };
+		BFFCD89E0890426600044EBA /* IO.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = IO.cpp; path = ../ObjCryst/ObjCryst/IO.cpp; sourceTree = SOURCE_ROOT; };
+		BFFCD89F0890426600044EBA /* IO.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = IO.cpp; path = ../ObjCryst/RefinableObj/IO.cpp; sourceTree = "<group>"; };
+		BFFCD8A00890426600044EBA /* LSQNumObj.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = LSQNumObj.cpp; path = ../ObjCryst/RefinableObj/LSQNumObj.cpp; sourceTree = "<group>"; };
+		BFFCD8A10890426600044EBA /* MC.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = MC.cpp; path = ../ObjCryst/wxCryst/MC.cpp; sourceTree = "<group>"; };
+		BFFCD8A20890426600044EBA /* Molecule.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Molecule.cpp; path = ../ObjCryst/ObjCryst/Molecule.cpp; sourceTree = SOURCE_ROOT; };
+		BFFCD8A30890426600044EBA /* mpVector.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = mpVector.cpp; path = ../ObjCryst/wxCryst/mpVector.cpp; sourceTree = "<group>"; };
+		BFFCD8A50890426600044EBA /* Polyhedron.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Polyhedron.cpp; path = ../ObjCryst/ObjCryst/Polyhedron.cpp; sourceTree = SOURCE_ROOT; };
+		BFFCD8A60890426600044EBA /* PowderPattern.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = PowderPattern.cpp; path = ../ObjCryst/ObjCryst/PowderPattern.cpp; sourceTree = SOURCE_ROOT; };
+		BFFCD8A70890426600044EBA /* PowderPatternBackgroundBayesianMinimiser.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = PowderPatternBackgroundBayesianMinimiser.cpp; path = ../ObjCryst/ObjCryst/PowderPatternBackgroundBayesianMinimiser.cpp; sourceTree = SOURCE_ROOT; };
+		BFFCD8A80890426600044EBA /* RefinableObj.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = RefinableObj.cpp; path = ../ObjCryst/RefinableObj/RefinableObj.cpp; sourceTree = "<group>"; };
+		BFFCD8A90890426600044EBA /* ReflectionProfile.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ReflectionProfile.cpp; path = ../ObjCryst/ObjCryst/ReflectionProfile.cpp; sourceTree = SOURCE_ROOT; };
+		BFFCD8AA0890426600044EBA /* Scatterer.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Scatterer.cpp; path = ../ObjCryst/ObjCryst/Scatterer.cpp; sourceTree = SOURCE_ROOT; };
+		BFFCD8AB0890426600044EBA /* ScatteringCorr.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ScatteringCorr.cpp; path = ../ObjCryst/ObjCryst/ScatteringCorr.cpp; sourceTree = SOURCE_ROOT; };
+		BFFCD8AC0890426600044EBA /* ScatteringData.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ScatteringData.cpp; path = ../ObjCryst/ObjCryst/ScatteringData.cpp; sourceTree = SOURCE_ROOT; };
+		BFFCD8AD0890426600044EBA /* ScatteringPower.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ScatteringPower.cpp; path = ../ObjCryst/ObjCryst/ScatteringPower.cpp; sourceTree = SOURCE_ROOT; };
+		BFFCD8AE0890426600044EBA /* ScatteringPowerSphere.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ScatteringPowerSphere.cpp; path = ../ObjCryst/ObjCryst/ScatteringPowerSphere.cpp; sourceTree = SOURCE_ROOT; };
+		BFFCD8AF0890426600044EBA /* Simplex.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Simplex.cpp; path = ../ObjCryst/RefinableObj/Simplex.cpp; sourceTree = "<group>"; };
+		BFFCD8B00890426600044EBA /* SpaceGroup.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = SpaceGroup.cpp; path = ../ObjCryst/ObjCryst/SpaceGroup.cpp; sourceTree = SOURCE_ROOT; };
+		BFFCD8B10890426600044EBA /* test.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = test.cpp; path = ../ObjCryst/ObjCryst/test.cpp; sourceTree = "<group>"; };
+		BFFCD8B20890426600044EBA /* Tracker.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Tracker.cpp; path = ../ObjCryst/RefinableObj/Tracker.cpp; sourceTree = "<group>"; };
+		BFFCD8B30890426600044EBA /* UnitCell.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = UnitCell.cpp; path = ../ObjCryst/ObjCryst/UnitCell.cpp; sourceTree = SOURCE_ROOT; };
+		BFFCD8B40890426600044EBA /* VFNDebug.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = VFNDebug.cpp; path = ../ObjCryst/Quirks/VFNDebug.cpp; sourceTree = "<group>"; };
+		BFFCD8B50890426600044EBA /* VFNStreamFormat.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = VFNStreamFormat.cpp; path = ../ObjCryst/Quirks/VFNStreamFormat.cpp; sourceTree = "<group>"; };
+		BFFCD8B60890426600044EBA /* wxAtom.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxAtom.cpp; path = ../ObjCryst/wxCryst/wxAtom.cpp; sourceTree = "<group>"; };
+		BFFCD8B70890426600044EBA /* wxCryst.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxCryst.cpp; path = ../ObjCryst/wxCryst/wxCryst.cpp; sourceTree = "<group>"; };
+		BFFCD8B80890426600044EBA /* wxCrystal.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxCrystal.cpp; path = ../ObjCryst/wxCryst/wxCrystal.cpp; sourceTree = "<group>"; };
+		BFFCD8B90890426600044EBA /* wxDiffractionSingleCrystal.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxDiffractionSingleCrystal.cpp; path = ../ObjCryst/wxCryst/wxDiffractionSingleCrystal.cpp; sourceTree = "<group>"; };
+		BFFCD8BA0890426600044EBA /* wxGlobalOptimObj.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxGlobalOptimObj.cpp; path = ../ObjCryst/wxCryst/wxGlobalOptimObj.cpp; sourceTree = "<group>"; };
+		BFFCD8BB0890426600044EBA /* wxMolecule.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxMolecule.cpp; path = ../ObjCryst/wxCryst/wxMolecule.cpp; sourceTree = "<group>"; };
+		BFFCD8BC0890426600044EBA /* wxMultiGraph.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxMultiGraph.cpp; path = ../ObjCryst/wxCryst/wxMultiGraph.cpp; sourceTree = "<group>"; };
+		BFFCD8BD0890426600044EBA /* wxPowderPattern.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxPowderPattern.cpp; path = ../ObjCryst/wxCryst/wxPowderPattern.cpp; sourceTree = "<group>"; };
+		BFFCD8BE0890426600044EBA /* wxRefinableObj.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxRefinableObj.cpp; path = ../ObjCryst/wxCryst/wxRefinableObj.cpp; sourceTree = "<group>"; };
+		BFFCD8BF0890426600044EBA /* wxScatterer.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxScatterer.cpp; path = ../ObjCryst/wxCryst/wxScatterer.cpp; sourceTree = "<group>"; };
+		BFFCD8C00890426600044EBA /* wxScatteringPower.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxScatteringPower.cpp; path = ../ObjCryst/wxCryst/wxScatteringPower.cpp; sourceTree = "<group>"; };
+		BFFCD8C10890426600044EBA /* wxScatteringPowerSphere.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxScatteringPowerSphere.cpp; path = ../ObjCryst/wxCryst/wxScatteringPowerSphere.cpp; sourceTree = "<group>"; };
+		BFFCD8C20890426600044EBA /* wxTrackerGraph.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxTrackerGraph.cpp; path = ../ObjCryst/wxCryst/wxTrackerGraph.cpp; sourceTree = "<group>"; };
+		BFFCD8C30890426700044EBA /* wxZScatterer.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxZScatterer.cpp; path = ../ObjCryst/wxCryst/wxZScatterer.cpp; sourceTree = "<group>"; };
+		BFFCD8C60890426700044EBA /* ZScatterer.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ZScatterer.cpp; path = ../ObjCryst/ObjCryst/ZScatterer.cpp; sourceTree = "<group>"; };
+		BFFCD97C08904D7D00044EBA /* trackball.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = trackball.c; path = ../ObjCryst/wxCryst/trackball.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2054,6 +2057,7 @@
 				BFFCD8900890426600044EBA /* Atom.cpp */,
 				BFFCD8910890426600044EBA /* Crystal.cpp */,
 				BFFCD8930890426600044EBA /* DiffractionDataSingleCrystal.cpp */,
+				BFE6AC680B886ACA007AFBA8 /* Indexing.cpp */,
 				BFFCD8960890426600044EBA /* geomStructFactor_001.cpp */,
 				BFFCD8970890426600044EBA /* geomStructFactor_002.cpp */,
 				BFFCD8980890426600044EBA /* geomStructFactor_067.cpp */,
@@ -2127,7 +2131,7 @@
 				BFFCD2C8089038A400044EBA /* type_traits.hpp */,
 			);
 			name = boost;
-			path = cctbx/boost;
+			path = ../boost;
 			sourceTree = SOURCE_ROOT;
 		};
 		BFFCCCC60890389700044EBA /* config */ = {
@@ -4442,6 +4446,7 @@
 				BFE3CE4809177C29002021F6 /* ZScatterer.cpp in Sources */,
 				BF08978C0B072DF600C0F576 /* CIF.cpp in Sources */,
 				BF08978F0B072E2F00C0F576 /* ci_string.cpp in Sources */,
+				BFE6AC6A0B886ACB007AFBA8 /* Indexing.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4610,6 +4615,7 @@
 				BFFCD97D08904D7D00044EBA /* trackball.c in Sources */,
 				BF08978B0B072DF600C0F576 /* CIF.cpp in Sources */,
 				BF08978E0B072E2F00C0F576 /* ci_string.cpp in Sources */,
+				BFE6AC690B886ACB007AFBA8 /* Indexing.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4687,9 +4693,9 @@
 				GCC_STRICT_ALIASING = YES;
 				GCC_UNROLL_LOOPS = YES;
 				HEADER_SEARCH_PATHS = (
-					cctbx/cctbx/include/,
-					cctbx/scitbx/include/,
-					cctbx/,
+					../cctbx/cctbx/include/,
+					../cctbx/scitbx/include/,
+					../,
 				);
 				INSTALL_PATH = /usr/local/lib;
 				LIBRARY_STYLE = STATIC;
@@ -4727,11 +4733,10 @@
 				GCC_STRICT_ALIASING = YES;
 				GCC_UNROLL_LOOPS = YES;
 				HEADER_SEARCH_PATHS = (
-					ObjCryst,
-					../Fox,
-					cctbx,
-					cctbx/scitbx/include/,
-					cctbx/cctbx/include/,
+					../ObjCryst,
+					../,
+					../cctbx/scitbx/include/,
+					../cctbx/cctbx/include/,
 					"$HOME/dev/wxdir/include/wx-2.6/",
 					"$HOME/dev/wxdir/lib/wx/include/mac-ansi-release-static-2.6/",
 				);
@@ -4842,9 +4847,9 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
 				HEADER_SEARCH_PATHS = (
-					cctbx/cctbx/include/,
-					cctbx/scitbx/include/,
-					cctbx/,
+					../cctbx/cctbx/include/,
+					../cctbx/scitbx/include/,
+					../,
 				);
 				INSTALL_PATH = /usr/local/lib;
 				LIBRARY_STYLE = STATIC;
@@ -4992,9 +4997,9 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
 				HEADER_SEARCH_PATHS = (
-					cctbx/cctbx/include/,
-					cctbx/scitbx/include/,
-					cctbx/,
+					../cctbx/cctbx/include/,
+					../cctbx/scitbx/include/,
+					../,
 				);
 				INSTALL_PATH = /usr/local/lib;
 				LIBRARY_STYLE = STATIC;
@@ -5169,9 +5174,9 @@
 				GCC_STRICT_ALIASING = YES;
 				GCC_UNROLL_LOOPS = YES;
 				HEADER_SEARCH_PATHS = (
-					cctbx/cctbx/include/,
-					cctbx/scitbx/include/,
-					cctbx/,
+					../cctbx/cctbx/include/,
+					../cctbx/scitbx/include/,
+					../,
 				);
 				INSTALL_PATH = /usr/local/lib;
 				LIBRARY_STYLE = STATIC;
@@ -5209,11 +5214,10 @@
 				GCC_STRICT_ALIASING = YES;
 				GCC_UNROLL_LOOPS = YES;
 				HEADER_SEARCH_PATHS = (
-					ObjCryst,
-					../Fox,
-					cctbx,
-					cctbx/scitbx/include/,
-					cctbx/cctbx/include/,
+					../ObjCryst,
+					../,
+					../cctbx/scitbx/include/,
+					../cctbx/cctbx/include/,
 					"$HOME/dev/wxdir/include/wx-2.6/",
 					"$HOME/dev/wxdir/lib/wx/include/mac-ansi-release-static-2.6/",
 				);
@@ -5316,11 +5320,10 @@
 				GCC_STRICT_ALIASING = YES;
 				GCC_UNROLL_LOOPS = YES;
 				HEADER_SEARCH_PATHS = (
-					ObjCryst,
-					../Fox,
-					cctbx,
-					cctbx/scitbx/include,
-					cctbx/cctbx/include,
+					../ObjCryst,
+					../,
+					../cctbx/scitbx/include,
+					../cctbx/cctbx/include,
 				);
 				INSTALL_PATH = "$(HOME)/bin";
 				MACOSX_DEPLOYMENT_TARGET = 10.2;
@@ -5350,11 +5353,10 @@
 				GCC_STRICT_ALIASING = YES;
 				GCC_UNROLL_LOOPS = YES;
 				HEADER_SEARCH_PATHS = (
-					ObjCryst,
-					../Fox,
-					cctbx,
-					cctbx/scitbx/include,
-					cctbx/cctbx/include,
+					../ObjCryst,
+					../,
+					../cctbx/scitbx/include,
+					../cctbx/cctbx/include,
 				);
 				INSTALL_PATH = "$(HOME)/bin";
 				MACOSX_DEPLOYMENT_TARGET = 10.2;
@@ -5412,11 +5414,10 @@
 				GCC_STRICT_ALIASING = YES;
 				GCC_UNROLL_LOOPS = YES;
 				HEADER_SEARCH_PATHS = (
-					ObjCryst,
-					../Fox,
-					cctbx,
-					cctbx/scitbx/include,
-					cctbx/cctbx/include,
+					../ObjCryst,
+					../,
+					../cctbx/scitbx/include,
+					../cctbx/cctbx/include,
 				);
 				INSTALL_PATH = "$(HOME)/bin";
 				MACOSX_DEPLOYMENT_TARGET = 10.2;
@@ -5550,9 +5551,9 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
 				HEADER_SEARCH_PATHS = (
-					cctbx/cctbx/include/,
-					cctbx/scitbx/include/,
-					cctbx/,
+					../cctbx/cctbx/include/,
+					../cctbx/scitbx/include/,
+					../,
 				);
 				INSTALL_PATH = /usr/local/lib;
 				LIBRARY_STYLE = STATIC;
@@ -5586,9 +5587,9 @@
 				GCC_STRICT_ALIASING = YES;
 				GCC_UNROLL_LOOPS = YES;
 				HEADER_SEARCH_PATHS = (
-					cctbx/cctbx/include/,
-					cctbx/scitbx/include/,
-					cctbx/,
+					../cctbx/cctbx/include/,
+					../cctbx/scitbx/include/,
+					../,
 				);
 				INSTALL_PATH = /usr/local/lib;
 				LIBRARY_STYLE = STATIC;
@@ -5697,11 +5698,10 @@
 				GCC_STRICT_ALIASING = YES;
 				GCC_UNROLL_LOOPS = YES;
 				HEADER_SEARCH_PATHS = (
-					ObjCryst,
-					../Fox,
-					cctbx,
-					cctbx/scitbx/include/,
-					cctbx/cctbx/include/,
+					../ObjCryst,
+					../,
+					../cctbx/scitbx/include/,
+					../cctbx/cctbx/include/,
 					"$HOME/dev/wxdir/include/wx-2.6/",
 					"$HOME/dev/wxdir/lib/wx/include/mac-ansi-release-static-2.6/",
 				);

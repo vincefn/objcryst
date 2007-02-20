@@ -1,5 +1,5 @@
-include ../ObjCryst/rules.mak
-DIR_CRYST := ../ObjCryst
+BUILD_DIR = $(CURDIR)/../..
+include $(BUILD_DIR)/ObjCryst/rules.mak
 
 ifeq ($(profile),2)
 %.o : %.c
@@ -29,10 +29,10 @@ endif
 -include Fox.dep
 
 #wxCryst Application ( wxCrystApp_resource.o for cygwin)
-Fox: Fox.o libCrystVector libQuirks libRefinableObj libcctbx libCryst libwxCryst libnewmat
+Fox: Fox.o libnewmat libCrystVector libQuirks libRefinableObj libcctbx libCryst libwxCryst
 	${LINKER} ${LDFLAGS} -o $@ ${filter-out %.a %.so lib%, $^} ${LOADLIBES} 
 
-Fox-nogui: Fox.o libCrystVector libQuirks libRefinableObj libcctbx libCryst libnewmat
+Fox-nogui: Fox.o libnewmat libCrystVector libQuirks libRefinableObj libcctbx libCryst
 	${LINKER} ${LDFLAGS} -o $@ ${filter-out %.a %.so lib%, $^} ${LOADLIBES} 
 
 fox: Fox

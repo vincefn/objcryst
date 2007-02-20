@@ -25,10 +25,10 @@
 
 
 #include "cctbx/eltbx/xray_scattering.h"
-#include "cctbx/include/cctbx/eltbx/tiny_pse.h"
-#include "cctbx/include/cctbx/eltbx/icsd_radii.h"
-#include "cctbx/include/cctbx/eltbx/henke.h"
-#include "cctbx/include/cctbx/eltbx/neutron.h"
+#include "cctbx/eltbx/tiny_pse.h"
+#include "cctbx/eltbx/icsd_radii.h"
+#include "cctbx/eltbx/henke.h"
+#include "cctbx/eltbx/neutron.h"
 
 #include "ObjCryst/ScatteringPower.h"
 #include "Quirks/VFNStreamFormat.h"
