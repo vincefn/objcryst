@@ -945,6 +945,7 @@ mIsDragging(false),mDisplayLabel(true),mDisplayPeak(true)
    mpPopUpMenu=new wxMenu("Powder Pattern");
    mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_UPDATE, "&Update");
    mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_TOGGLELABEL, "&Hide labels");
+   #if 0
    mpPopUpMenu->AppendSeparator();
    mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_FINDPEAKS, "&Find peaks");
    mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_INDEX, "&Index");
@@ -955,6 +956,7 @@ mIsDragging(false),mDisplayLabel(true),mDisplayPeak(true)
    mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_ADDPEAK, FALSE);
    mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_REMOVEPEAK, FALSE);
    mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_INDEX, FALSE);
+   #endif
    mpPopUpMenu->AppendSeparator();
    mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_XSCALE_DATA, "&X scale: 2theta/TOF");
    mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_XSCALE_D, "&X scale: Q=1/d");

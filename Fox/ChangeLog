@@ -1,18 +1,48 @@
-#### 1.7? BETA
+#### 1.7.0 (Rev 845)
 NEW FEATURES
-   * Fox can be compiled without GUI under Linux, using "make Fox-nogui"
-     removing the requirement for wxGTK on Linux servers.
+   * Support for multiple optimizations - store all the solutions 
+     obtained, then allow 'browsing' the solutions.
+   * Support for neutron time-of-flight data
+   * Support for reflection profiles other than symmetrical pseudo-Voigt
+   * Add bond-valence computation
+   * CIF import (powder patterns / crystal structures)
+   * Background can be automaticaly estimated using a Bayesian
+     approach (David-Sivia method)
    * Background calculation can now use either a linear or a cubic
      spline interpolation
+   * Support for Mac OS X (using XCode /Apple Developper tools)
+   * Add a 'tracker' window to display the progress of the optimization,
+     including all the Chi^2, antibump costs, ...
+   * Add preferences (remembered between sessions) to automatically open 
+     crystal 3D view, powder pattern graph, display names / reflections 
+     Miller indices,...
+   * Enable saving files in a compressed (gzip) format (*.xml.gz)
+
+IMPROVEMENTS
+   * Add choices for scaling of powder pattern graphs: x as 2theta/tof,
+     1/d or 2pi/d ; y as I, sqrt(I) or log10(I)
+   * Compilation for windows is now done using the free (as in 'free as
+     a beer') compiler Visual C++ 2005. Large speed improvement.
+   * Fox can be compiled without GUI under *nix, using "make Fox-nogui"
+     removing the requirement for wxGTK on *nix servers.
+   * Support for large Molecules (1000's of atoms) - these *must* be 
+     treated as rigid bodies
+   * Better graphical interface to a Molecule's parameters, including
+     rigid sub-groups
+   * Better graphical interface to access scattering power parameters
+     (Biso, antibump, bond valence, colour...)
    * Significant speed improvements for powder patterns when using
      the default integrated Chi^2
    * Rotation amplitudes for torsion angles and overall molecule
      rotation is now tuned so that the average displacament per atom
      is now set to 0.1 Angstroem.
-   * Preliminary support for Mac OS X (using Apple Developper tools)
-   * Compilation for windows is now done using the free (as in 'free as
-     a beer') compiler Visual C++ 2003. Large speed improvement.
-   
+   * Faster refresh of graphical user interface
+   * Using cctbx rather than atominfo + sglite, enabling using either
+     Hall, Hermann-Mauguin or spacegroup number for spacegroup 
+     description. Fox will revert to the Hermann-Mauguin symbol.
+   * freeglut and wxWidgets are statically linked under Linux as well
+     to avoid compilation issues for user without root access.
+
 BUG FIXES
    * Avoid creating H-H bonds when converting ZScatterer to a Molecule
    

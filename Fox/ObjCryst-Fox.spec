@@ -3,8 +3,8 @@
 #------------------------------------------------------------------------------
 Summary: F.O.X., Free Objects for Crystallography, a program for crystal structure analysis, and ab initio structure determination from powder diffraction
 Name: ObjCryst-Fox
-Version: 1.7.0
-Release: 20070211
+Version: FOXVERSION
+Release: FOXRELEASE
 Copyright: GPL
 Packager: Vincent Favre-Nicolin <vincefn@users.sourceforge.net>
 Group: Sciences/Chemistry
@@ -17,14 +17,19 @@ Prefix: /usr/local
 DOCDIR: /usr/local/doc
 
 #------------------------------------------------------------------------------
-# REQUIRES (DISTRIB-DEPENDANT)
+# REQUIRES
 #------------------------------------------------------------------------------
+<<<<<<< .mine
+Requires: /usr/lib/libGL.so /usr/lib/libgtk-x11-2.0.so
+BuildRequires: gcc /usr/include/GL/gl.h /usr/include/gtk-2.0/gtk/gtk.h
+=======
 #MANDRIVA 2007
 Requires: libgtk+2.0_0 libmesaglu1 libmesagl1
 BuildRequires: gcc gcc-c++ gcc-cpp libxorg-x11-devel libgtk+2.0_0-devel libmesaglu1-devel libmesagl1-devel
 #FEDORA Core 3,4
 #Requires: xorg-x11-Mesa-libGL xorg-x11-Mesa-libGLU
 #BuildRequires:gcc gcc-c++ xorg-x11-devel
+>>>>>>> .r847
 
 #------------------------------------------------------------------------------
 # DESCRIPTION
@@ -48,14 +53,14 @@ which can be used for other purposes than structure determination.
 #%patch -p1 -b .buildroot
 
 %build
-make RPM_OPT_FLAGS="$RPM_OPT_FLAGS"
+make -C Fox RPM_OPT_FLAGS="$RPM_OPT_FLAGS"
 
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf ${RPM_BUILD_ROOT}%{prefix}
 mkdir -p ${RPM_BUILD_ROOT}%{prefix}/bin
 #mkdir -p ${RPM_BUILD_ROOT}%{prefix}/man/man1
 
-install -s -m 755 src/Fox ${RPM_BUILD_ROOT}%{prefix}/bin/Fox
+install -s -m 755 Fox/src/Fox ${RPM_BUILD_ROOT}%{prefix}/bin/Fox
 
 %clean
 [ "${RPM_BUILD_ROOT}%{prefix}" != "/" ] && rm -rf ${RPM_BUILD_ROOT}%{prefix}
@@ -63,7 +68,7 @@ install -s -m 755 src/Fox ${RPM_BUILD_ROOT}%{prefix}/bin/Fox
 %files
 %defattr(-,root,root)
 %doc README LICENSE ChangeLog
-/usr/local/bin/Fox
+%{prefix}/bin/Fox
 
 %changelog
 * Sun Feb 11 2007 Vincent Favre-Nicolin <vincefn@users.sf.net>
