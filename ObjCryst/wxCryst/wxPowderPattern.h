@@ -109,6 +109,7 @@ class WXPowderPatternGraph: public wxWindow
       /// Add or remove peak
       void OnChangePeak(wxCommandEvent& WXUNUSED(event));
       void OnIndex(wxCommandEvent& WXUNUSED(event));
+      void OnChangeScale(wxCommandEvent &event);
       void OnKeyDown(wxKeyEvent& event);
       void OnSize(wxSizeEvent& event);
    private:
@@ -151,6 +152,10 @@ class WXPowderPatternGraph: public wxWindow
       list<list<pair<const REAL ,const string > > > mvLabelList;
       /// List of observed peak positions
       PeakList mPeakList;
+      /// Scaling options for x and y axis
+      /// x: 0 data (2theta, tof) ; 1: 1/d ; 2: 2pi/d
+      /// y: 0 linear ; 1: sqrt(I) ; 2: log10(I)
+      long mXScale,mYScale;
       DECLARE_EVENT_TABLE()
 };
 

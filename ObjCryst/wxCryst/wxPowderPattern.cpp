@@ -906,6 +906,12 @@ static const long ID_POWDERGRAPH_MENU_FINDPEAKS=            WXCRYST_ID();
 static const long ID_POWDERGRAPH_MENU_ADDPEAK=              WXCRYST_ID(); 
 static const long ID_POWDERGRAPH_MENU_REMOVEPEAK=           WXCRYST_ID(); 
 static const long ID_POWDERGRAPH_MENU_INDEX=                WXCRYST_ID(); 
+static const long ID_POWDERGRAPH_MENU_XSCALE_DATA=          WXCRYST_ID(); 
+static const long ID_POWDERGRAPH_MENU_XSCALE_D=             WXCRYST_ID(); 
+static const long ID_POWDERGRAPH_MENU_XSCALE_2PID=          WXCRYST_ID(); 
+static const long ID_POWDERGRAPH_MENU_YSCALE_LINEAR=        WXCRYST_ID(); 
+static const long ID_POWDERGRAPH_MENU_YSCALE_SQRT=          WXCRYST_ID(); 
+static const long ID_POWDERGRAPH_MENU_YSCALE_LOG10=         WXCRYST_ID(); 
 
 BEGIN_EVENT_TABLE(WXPowderPatternGraph, wxWindow)
    EVT_PAINT(                                   WXPowderPatternGraph::OnPaint)
@@ -917,6 +923,12 @@ BEGIN_EVENT_TABLE(WXPowderPatternGraph, wxWindow)
    EVT_MENU(ID_POWDERGRAPH_MENU_ADDPEAK,        WXPowderPatternGraph::OnChangePeak)
    EVT_MENU(ID_POWDERGRAPH_MENU_REMOVEPEAK,     WXPowderPatternGraph::OnChangePeak)
    EVT_MENU(ID_POWDERGRAPH_MENU_INDEX,          WXPowderPatternGraph::OnIndex)
+   EVT_MENU(ID_POWDERGRAPH_MENU_XSCALE_DATA,    WXPowderPatternGraph::OnChangeScale)
+   EVT_MENU(ID_POWDERGRAPH_MENU_XSCALE_D,       WXPowderPatternGraph::OnChangeScale)
+   EVT_MENU(ID_POWDERGRAPH_MENU_XSCALE_2PID,    WXPowderPatternGraph::OnChangeScale)
+   EVT_MENU(ID_POWDERGRAPH_MENU_YSCALE_LINEAR,  WXPowderPatternGraph::OnChangeScale)
+   EVT_MENU(ID_POWDERGRAPH_MENU_YSCALE_SQRT,    WXPowderPatternGraph::OnChangeScale)
+   EVT_MENU(ID_POWDERGRAPH_MENU_YSCALE_LOG10,   WXPowderPatternGraph::OnChangeScale)
    EVT_UPDATE_UI(ID_POWDER_GRAPH_NEW_PATTERN,   WXPowderPatternGraph::OnRedrawNewPattern)
    EVT_CHAR(                                    WXPowderPatternGraph::OnKeyDown)
    EVT_MOUSEWHEEL(                              WXPowderPatternGraph::OnMouseWheel)
@@ -943,6 +955,13 @@ mIsDragging(false),mDisplayLabel(true),mDisplayPeak(true)
    mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_ADDPEAK, FALSE);
    mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_REMOVEPEAK, FALSE);
    mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_INDEX, FALSE);
+   mpPopUpMenu->AppendSeparator();
+   mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_XSCALE_DATA, "&X scale: 2theta/TOF");
+   mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_XSCALE_D, "&X scale: Q=1/d");
+   mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_XSCALE_2PID, "&X scale: Q=2pi/d");
+   mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_YSCALE_LINEAR, "&Y scale: I");
+   mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_YSCALE_SQRT, "&Y scale: sqrt(I)");
+   mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_YSCALE_LOG10, "&Y scale: log10(I)");
    if(!wxConfigBase::Get()->HasEntry("PowderPattern/BOOL/Default-display reflection indices"))
       wxConfigBase::Get()->Write("PowderPattern/BOOL/Default-display reflection indices", mDisplayLabel);
    else
@@ -951,6 +970,32 @@ mIsDragging(false),mDisplayLabel(true),mDisplayPeak(true)
       if(mDisplayLabel) mpPopUpMenu->SetLabel(ID_POWDERGRAPH_MENU_TOGGLELABEL, "Hide labels");
       else mpPopUpMenu->SetLabel(ID_POWDERGRAPH_MENU_TOGGLELABEL, "Show labels");
    }
+   
+   // Scale used to display graph x coordinates : 0 - experimental ; 1 - 1/d ; 2 - 2pi/d
+   if(!wxConfigBase::Get()->HasEntry("PowderPattern/LONG/graph x scale"))
+      wxConfigBase::Get()->Write("PowderPattern/LONG/graph x scale", 0);
+   
+   // Scale used to display graph y coordinates : 0 - linear ; 1 - square root ; 2 - log10
+   if(!wxConfigBase::Get()->HasEntry("PowderPattern/LONG/graph y scale"))
+      wxConfigBase::Get()->Write("PowderPattern/LONG/graph y scale", 0);
+   
+   wxConfigBase::Get()->Read("PowderPattern/LONG/graph x scale", &mXScale);
+   wxConfigBase::Get()->Read("PowderPattern/LONG/graph y scale", &mYScale);
+
+   mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_XSCALE_DATA, TRUE);
+   mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_XSCALE_D, TRUE);
+   mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_XSCALE_2PID, TRUE);
+   mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_YSCALE_LINEAR, TRUE);
+   mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_YSCALE_SQRT, TRUE);
+   mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_YSCALE_LOG10, TRUE);
+   
+   if(mXScale==0)  mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_XSCALE_DATA, FALSE);
+   if(mXScale==1)     mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_XSCALE_D, FALSE);
+   if(mXScale==2)  mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_XSCALE_2PID, FALSE);
+   if(mYScale==0)mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_YSCALE_LINEAR, FALSE);
+   if(mYScale==1)  mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_YSCALE_SQRT, FALSE);
+   if(mYScale==2) mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_YSCALE_LOG10, FALSE);
+
    mpPattern->CrystUpdate(true);
 }
 
@@ -1022,29 +1067,64 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
       const int nbTick=10;//approximate
       wxCoord xc,yc;
       //Y axis
+      {
          xc=(wxCoord)mMargin*3;
-         REAL yStep=pow((float)10,(float)floor(log10((mMaxIntensity-mMinIntensity)/nbTick)));
-         yStep *= floor((mMaxIntensity-mMinIntensity)/yStep/nbTick);
-         for(REAL y=yStep*ceil(mMinIntensity/yStep);y<mMaxIntensity;y+=yStep)
+         REAL miny=mMinIntensity,maxy=mMaxIntensity;
+         if(mYScale==1) {miny=sqrt(miny) ;maxy=sqrt(maxy);}
+         if(mYScale==2) {miny=log10(miny);maxy=log10(maxy);}
+         REAL yStep=pow((float)10,(float)floor(log10((maxy-miny)/nbTick)));
+         yStep *= floor((maxy-miny)/yStep/nbTick);
+         for(REAL ys=yStep*ceil(miny/yStep);ys<maxy;ys+=yStep)
          {
+            REAL y=ys;
+            if(mYScale==1) {y=ys*ys;}
+            if(mYScale==2) {y=pow((float)10,(float)ys);}
             yc=this->Data2ScreenY(y);
             dc.DrawLine(xc-3,yc,xc+3,yc);
             fontInfo.Printf("%g",y);
             dc.GetTextExtent(fontInfo, &tmpW, &tmpH);
             dc.DrawText(fontInfo,xc-tmpW-3,yc-tmpH/2);
          }
+      }
       //X axis
+      {
          yc=(wxCoord)(height-mMargin);
-         REAL xStep=pow((float)10,(float)floor(log10((mMaxX-mMinX)/nbTick)));
-         xStep *= floor((mMaxX-mMinX)/xStep/nbTick);
-         for(REAL x=xStep*ceil(mMinX/xStep);x<mMaxX;x+=xStep)
+         
+         REAL minx=mMinX,maxx=mMaxX;
+         float mind,maxd;// 1/d
+         if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
          {
-            xc=this->Data2ScreenX(x);
+            mind=2*mpPattern->GetPowderPattern().X2STOL(minx*DEG2RAD);
+            maxd=2*mpPattern->GetPowderPattern().X2STOL(maxx*DEG2RAD);
+         }
+         else
+         {
+            mind=2*mpPattern->GetPowderPattern().X2STOL(minx);
+            maxd=2*mpPattern->GetPowderPattern().X2STOL(maxx);
+         }
+         if(mXScale==1) {minx=mind;       maxx=maxd;}
+         if(mXScale==2) {minx=2*M_PI*mind;maxx=2*M_PI*maxd;}
+         
+         REAL xStep=pow((float)10,(float)floor(log10((maxx-minx)/nbTick)));
+         xStep *= floor((maxx-minx)/xStep/nbTick);
+         for(REAL xs=xStep*ceil(minx/xStep);xs<maxx;xs+=xStep)
+         {
+            REAL x=xs;
+            if(mXScale==1) {x=mpPattern->GetPowderPattern().STOL2X(xs/2);}
+            if(mXScale==2) {x=mpPattern->GetPowderPattern().STOL2X(xs/(4*M_PI));}
+            if(mXScale==0) xc=this->Data2ScreenX(x);
+            else
+            {
+               if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
+                  xc=this->Data2ScreenX(RAD2DEG*x);
+               else xc=this->Data2ScreenX(x);
+            }
             dc.DrawLine(xc,yc-3,xc,yc+3);
-            fontInfo.Printf("%g",x);
+            fontInfo.Printf("%g",xs);
             dc.GetTextExtent(fontInfo, &tmpW, &tmpH);
             dc.DrawText(fontInfo,xc-tmpW/2,yc+6);
          }
+      }
    }
    // Draw cumulated Chi^2, scaled
    {
@@ -1758,6 +1838,33 @@ void WXPowderPatternGraph::OnIndex(wxCommandEvent& WXUNUSED(event))
    mpFrame->Show(TRUE);
 }
 
+void WXPowderPatternGraph::OnChangeScale(wxCommandEvent& event)
+{
+   VFN_DEBUG_MESSAGE("WXPowderPatternGraph::OnChangeScale()",10)
+   if(event.GetId()==ID_POWDERGRAPH_MENU_XSCALE_DATA)  mXScale=0;
+   if(event.GetId()==ID_POWDERGRAPH_MENU_XSCALE_D)     mXScale=1;
+   if(event.GetId()==ID_POWDERGRAPH_MENU_XSCALE_2PID)  mXScale=2;
+   if(event.GetId()==ID_POWDERGRAPH_MENU_YSCALE_LINEAR)mYScale=0;
+   if(event.GetId()==ID_POWDERGRAPH_MENU_YSCALE_SQRT)  mYScale=1;
+   if(event.GetId()==ID_POWDERGRAPH_MENU_YSCALE_LOG10) mYScale=2;
+
+   mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_XSCALE_DATA, TRUE);
+   mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_XSCALE_D, TRUE);
+   mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_XSCALE_2PID, TRUE);
+   mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_YSCALE_LINEAR, TRUE);
+   mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_YSCALE_SQRT, TRUE);
+   mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_YSCALE_LOG10, TRUE);
+   
+   if(mXScale==0)  mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_XSCALE_DATA, FALSE);
+   if(mXScale==1)     mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_XSCALE_D, FALSE);
+   if(mXScale==2)  mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_XSCALE_2PID, FALSE);
+   if(mYScale==0)mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_YSCALE_LINEAR, FALSE);
+   if(mYScale==1)  mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_YSCALE_SQRT, FALSE);
+   if(mYScale==2) mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_YSCALE_LOG10, FALSE);
+
+   this->Refresh(false);
+}
+
 void WXPowderPatternGraph::OnKeyDown(wxKeyEvent& event)
 {
    wxMutexLocker mlock(mMutex);
@@ -1796,6 +1903,15 @@ void WXPowderPatternGraph::OnKeyDown(wxKeyEvent& event)
       }
       case(WXK_UP):
       {
+         REAL max=mObs.max(),min=mObs.min();
+         if(min<1e-6*max)min=1e-6*max;
+         if(mYScale==2)
+         {
+            const REAL range=log10(max)-log10(min);
+            mMinIntensity*=pow(10,range/8);
+            mMaxIntensity*=pow(10,range/8);
+            break;
+         }
          const REAL range=mMaxIntensity-mMinIntensity;
          mMinIntensity+=range/8;
          mMaxIntensity+=range/8;
@@ -1803,9 +1919,19 @@ void WXPowderPatternGraph::OnKeyDown(wxKeyEvent& event)
       }
       case(WXK_DOWN):
       {
+         REAL max=mObs.max(),min=mObs.min();
+         if(min<1e-6*max)min=1e-6*max;
+         if(mYScale==2)
+         {
+            const REAL range=log10(max)-log10(min);
+            mMinIntensity*=pow(10,-range/8);
+            mMaxIntensity*=pow(10,-range/8);
+            break;
+         }
          const REAL range=mMaxIntensity-mMinIntensity;
          mMinIntensity-=range/8;
-         mMaxIntensity-=range/8;
+         if(mMinIntensity<1e-6*max) mMinIntensity=1e-6*max;
+         mMaxIntensity=mMinIntensity+range;
          break;
       }
       case(43):// WXK_ADD ?
@@ -1918,13 +2044,13 @@ void WXPowderPatternGraph::OnRedrawNewPattern(wxUpdateUIEvent& WXUNUSED(event))
 void WXPowderPatternGraph::ResetAxisLimits()
 {
    wxMutexLocker mlock(mMutex);
-   mMaxIntensity=mCalc.max();
-   mMinIntensity=mCalc.min();
+   mMaxIntensity=mObs.max();
+   mMinIntensity=mObs.min();
    const float max=mObs.max();
    const float min=mObs.min();
    if(max>mMaxIntensity) mMaxIntensity=max;
    if(min<mMinIntensity) mMinIntensity=min;
-   if(mMinIntensity<0) mMinIntensity=0;
+   if(mMinIntensity<=0) mMinIntensity=max/1e6;
    mMaxX=mX.max();
    mMinX=mX.min();
    mClockAxisLimits.Click();
@@ -1934,32 +2060,90 @@ long WXPowderPatternGraph::Data2ScreenX(const REAL x)const
 {
    wxCoord width,height;
    this->GetSize(&width, &height);
-   return (long)(mMargin*3+(x-mMinX)*(width-3*mMargin)/(mMaxX-mMinX));
+   REAL xs=x,minx=mMinX,maxx=mMaxX;
+   if(xs<minx)xs=minx;
+   if(xs>maxx)xs=maxx;
+   float d,mind,maxd;
+   if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
+   {
+      d=2*mpPattern->GetPowderPattern().X2STOL(xs*DEG2RAD);
+      mind=2*mpPattern->GetPowderPattern().X2STOL(minx*DEG2RAD);
+      maxd=2*mpPattern->GetPowderPattern().X2STOL(maxx*DEG2RAD);
+   }
+   else
+   {
+      d=2*mpPattern->GetPowderPattern().X2STOL(xs);
+      mind=2*mpPattern->GetPowderPattern().X2STOL(minx);
+      maxd=2*mpPattern->GetPowderPattern().X2STOL(maxx);
+   }
+   if(mXScale==1) {xs=d;minx=mind;maxx=maxd;}
+   if(mXScale==2) {xs=2*M_PI*d;minx=2*M_PI*mind;maxx=2*M_PI*maxd;}
+   return (long)(mMargin*3+(xs-minx)*(width-3*mMargin)/(maxx-minx));
 }
 long WXPowderPatternGraph::Point2ScreenX(const long x)const
 {
-   wxCoord width,height;
-   this->GetSize(&width, &height);
-   return (long)(mMargin*3+(mX(x)-mMinX)*(width-3*mMargin)/(REAL)(mMaxX-mMinX));
+   return this->Data2ScreenX(mX(x));
 }
 long WXPowderPatternGraph::Data2ScreenY(const REAL y)const
 {
    wxCoord width,height;
    this->GetSize(&width, &height);
-   return (long)(height-mMargin-(y-mMinIntensity)*(height-2*mMargin)
-                        /(mMaxIntensity-mMinIntensity));
+   REAL ys=y,miny=mMinIntensity,maxy=mMaxIntensity;
+   if(ys<miny)ys=miny;
+   if(ys>maxy)ys=maxy;
+   if(mYScale==1) {ys=sqrt(ys) ;miny=sqrt(miny) ;maxy=sqrt(maxy);}
+   if(mYScale==2) {ys=log10(ys);miny=log10(miny);maxy=log10(maxy);}
+   return (long)(height-mMargin-(ys-miny)*(height-2*mMargin)/(maxy-miny));
 }
 REAL WXPowderPatternGraph::Screen2DataX(const long x)const
 {
    wxCoord width,height;
    this->GetSize(&width, &height);
+   REAL minx=mMinX,maxx=mMaxX;
+   float mind,maxd;
+   if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
+   {
+      mind=2*mpPattern->GetPowderPattern().X2STOL(minx*DEG2RAD);
+      maxd=2*mpPattern->GetPowderPattern().X2STOL(maxx*DEG2RAD);
+   }
+   else
+   {
+      mind=2*mpPattern->GetPowderPattern().X2STOL(minx);
+      maxd=2*mpPattern->GetPowderPattern().X2STOL(maxx);
+   }
+   if(mXScale==1)
+   {
+      minx=mind;
+      maxx=maxd;
+      REAL stol=(minx+(x-mMargin*3)*(maxx-minx)/(REAL)(width-3*mMargin))/2;
+      if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
+         return mpPattern->GetPowderPattern().STOL2X(stol)*RAD2DEG;
+      else
+         return mpPattern->GetPowderPattern().STOL2X(stol);
+   }
+   if(mXScale==2)
+   {
+      minx=2*M_PI*mind;
+      maxx=2*M_PI*maxd;
+      REAL stol=(minx+(x-mMargin*3)*(maxx-minx)/(REAL)(width-3*mMargin))/(4*M_PI);
+      if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
+         return mpPattern->GetPowderPattern().STOL2X(stol)*RAD2DEG;
+      else
+         return mpPattern->GetPowderPattern().STOL2X(stol);
+   }
    return mMinX+(x-mMargin*3)*(mMaxX-mMinX)/(REAL)(width-3*mMargin);
 }
 REAL WXPowderPatternGraph::Screen2DataY(const long y)const
 {
    wxCoord width,height;
    this->GetSize(&width, &height);
-   return mMinIntensity+(height-mMargin-y)*(mMaxIntensity-mMinIntensity)/(REAL)(height-2*mMargin);
+   REAL miny=mMinIntensity,maxy=mMaxIntensity;
+   if(mYScale==1) {miny=sqrt(miny) ;maxy=sqrt(maxy);}
+   if(mYScale==2) {miny=log10(miny);maxy=log10(maxy);}
+   REAL ys=miny+(height-mMargin-y)*(maxy-miny)/(REAL)(height-2*mMargin);
+   if(mYScale==1) ys=ys*ys;
+   if(mYScale==2) ys=pow((float)10,(float)ys);
+   return ys;
 }
 
 ////////////////////////////////////////////////////////////////////////
