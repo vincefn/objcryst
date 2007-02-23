@@ -1,4 +1,4 @@
-#### 1.7.0 (Rev 845)
+#### 1.7.0 - February 2007
 NEW FEATURES
    * Support for multiple optimizations - store all the solutions 
      obtained, then allow 'browsing' the solutions.

@@ -19,17 +19,8 @@ DOCDIR: /usr/local/doc
 #------------------------------------------------------------------------------
 # REQUIRES
 #------------------------------------------------------------------------------
-<<<<<<< .mine
-Requires: /usr/lib/libGL.so /usr/lib/libgtk-x11-2.0.so
+#Requires: /usr/lib/libGL.so /usr/lib/libgtk-x11-2.0.so
 BuildRequires: gcc /usr/include/GL/gl.h /usr/include/gtk-2.0/gtk/gtk.h
-=======
-#MANDRIVA 2007
-Requires: libgtk+2.0_0 libmesaglu1 libmesagl1
-BuildRequires: gcc gcc-c++ gcc-cpp libxorg-x11-devel libgtk+2.0_0-devel libmesaglu1-devel libmesagl1-devel
-#FEDORA Core 3,4
-#Requires: xorg-x11-Mesa-libGL xorg-x11-Mesa-libGLU
-#BuildRequires:gcc gcc-c++ xorg-x11-devel
->>>>>>> .r847
 
 #------------------------------------------------------------------------------
 # DESCRIPTION
