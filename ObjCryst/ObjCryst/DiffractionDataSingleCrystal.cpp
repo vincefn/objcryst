@@ -598,7 +598,7 @@ REAL DiffractionDataSingleCrystal::GetChi2()const
    
    TAU_PROFILE("DiffractionData::Chi2()"," REAL()",TAU_DEFAULT);
    VFN_DEBUG_ENTRY("DiffractionData::Chi2()",3);
-   
+   this->FitScaleFactorForRw();
    mChi2=0;
    const REAL *p1;
    const REAL *p2;
@@ -661,7 +661,7 @@ REAL DiffractionDataSingleCrystal::GetChi2()const
    return mChi2;
 }
 
-void DiffractionDataSingleCrystal::FitScaleFactorForRw()
+void DiffractionDataSingleCrystal::FitScaleFactorForRw() const
 {
    TAU_PROFILE("DiffractionData::FitScaleFactorForRw()","void ()",TAU_DEFAULT);
    VFN_DEBUG_MESSAGE("DiffractionData::FitScaleFactorForRw()",3);
@@ -706,7 +706,7 @@ void DiffractionDataSingleCrystal::FitScaleFactorForRw()
    mClockIcalc.Click();
 }
 
-void DiffractionDataSingleCrystal::FitScaleFactorForR()
+void DiffractionDataSingleCrystal::FitScaleFactorForR() const
 {
    TAU_PROFILE("DiffractionData::FitScaleFactorForR()","void ()",TAU_DEFAULT);
    VFN_DEBUG_MESSAGE("DiffractionData::FitScaleFactorForR()",3);
@@ -748,7 +748,7 @@ void DiffractionDataSingleCrystal::FitScaleFactorForR()
    mClockIcalc.Click();
 }
 
-REAL DiffractionDataSingleCrystal::GetBestRFactor()
+REAL DiffractionDataSingleCrystal::GetBestRFactor() const
 {
    TAU_PROFILE("DiffractionData::GetBestRFactor()","void ()",TAU_DEFAULT);
    VFN_DEBUG_MESSAGE("DiffractionData::GetBestRFactor()",3);
@@ -860,7 +860,7 @@ void DiffractionDataSingleCrystal::GlobalOptRandomMove(const REAL mutationAmplit
                          const RefParType *type)
 {
    this->RefinableObj::GlobalOptRandomMove(mutationAmplitude,type);
-   this->FitScaleFactorForRw();
+   //this->FitScaleFactorForRw();
 }
 
 REAL DiffractionDataSingleCrystal::GetLogLikelihood()const

@@ -174,15 +174,15 @@ class DiffractionDataSingleCrystal:public ScatteringData
       *
       * The computed scale factor is \e immediatly applied to Icalc
       */
-      virtual void FitScaleFactorForRw();
+      virtual void FitScaleFactorForRw() const;
       /** Compute the best scale factor minimising R.
       *
       * The computed scale factor is \e immediatly applied to Icalc
       */
-      virtual void FitScaleFactorForR();
+      virtual void FitScaleFactorForR() const;
       /// Compute the best scale factor to minimize R, apply this scale factor and return
       /// the R value obtained.
-      virtual REAL GetBestRFactor();
+      virtual REAL GetBestRFactor() const;
 
       /** \brief Set sigma for all observed intensities to sqrt(obs)
       *
@@ -282,14 +282,14 @@ class DiffractionDataSingleCrystal:public ScatteringData
       mutable CrystVector_REAL mCalcIntensity ;  
       /// Scale factor. It is applied when computing intensities. The scale
       ///applies to intensities
-      REAL mScaleFactor;
+      mutable REAL mScaleFactor;
       /// Chi^2
       mutable REAL mChi2;
       //Clocks
          /// Last time Icalc was computed
          mutable RefinableObjClock mClockIcalc;
          /// Last modification of the scale factor
-         RefinableObjClock mClockScaleFactor;
+         mutable RefinableObjClock mClockScaleFactor;
          ///Clock the last time Chi^2 was computed
          mutable RefinableObjClock mClockChi2;
       // Grouped reflections
