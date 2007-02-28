@@ -66,8 +66,11 @@
 using namespace ObjCryst;
 using namespace std;
 
-//static const std::string foxVersion=std::string("1.6.99SVN - ")+__DATE__; // Development
+#ifdef __FOXVERSION__
 static const std::string foxVersion=string(__FOXVERSION__); // Release
+#else
+static const std::string foxVersion=std::string("1.7.0SVN-")+__DATE__;
+#endif
 
 // ----------------------------------------------------------------------------
 // Speed test
@@ -865,7 +868,7 @@ void WXCrystMainFrame::OnAddSingleCrystalData(wxCommandEvent& WXUNUSED(event))
    else
    {
       int choice;
-      Crystal *cryst=dynamic_cast<Crystal*>
+      cryst=dynamic_cast<Crystal*>
          (WXDialogChooseFromRegistry(gCrystalRegistry,(wxWindow*)this,
             "Choose a Crystal Structure:",choice));
       if(0==cryst) return;
