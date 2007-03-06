@@ -46,6 +46,29 @@ namespace ObjCryst
 {
 ////////////////////////////////////////////////////////////////////////
 //
+//    WXDiffractionSingleCrystalGraph
+//
+////////////////////////////////////////////////////////////////////////
+/** Class to display Iobs and Icalc as a function of 1/d
+*
+*/
+class WXDiffractionSingleCrystalGraph:public WXMultiGraph
+{
+   public:
+      WXDiffractionSingleCrystalGraph(wxFrame *frame,WXDiffractionSingleCrystal *parent):
+      WXMultiGraph(frame)
+      {
+         mpParent=parent;
+      }
+      virtual ~WXDiffractionSingleCrystalGraph()
+      {
+         mpParent->NotifyDeleteGraph();
+      }
+   private:
+      WXDiffractionSingleCrystal *mpParent;
+};
+////////////////////////////////////////////////////////////////////////
+//
 //    WXDiffractionSingleCrystal
 //
 ////////////////////////////////////////////////////////////////////////
@@ -76,6 +99,8 @@ static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_FEA1=   WXCRYST_ID();
 static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_COA1=   WXCRYST_ID(); 
 static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CRA1=   WXCRYST_ID(); 
 static long ID_DIFFSINGLECRYST_CRYSTAL=                    WXCRYST_ID(); 
+static long ID_DIFFSINGLECRYST_MENU_DATA=                  WXCRYST_ID();
+static long ID_DIFFSINGLECRYST_MENU_DATA_GRAPH=            WXCRYST_ID();
   
 BEGIN_EVENT_TABLE(WXDiffractionSingleCrystal, wxWindow)
    EVT_BUTTON(ID_WXOBJ_COLLAPSE,                        WXCrystObj::OnToggleCollapse)
@@ -109,12 +134,13 @@ BEGIN_EVENT_TABLE(WXDiffractionSingleCrystal, wxWindow)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_FEA1,WXDiffractionSingleCrystal::OnMenuSetWavelength)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_COA1,WXDiffractionSingleCrystal::OnMenuSetWavelength)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CRA1,WXDiffractionSingleCrystal::OnMenuSetWavelength)
+   EVT_MENU(ID_DIFFSINGLECRYST_MENU_DATA_GRAPH,         WXDiffractionSingleCrystal::OnMenuShowGraph)
    EVT_UPDATE_UI(ID_CRYST_UPDATEUI,                     WXRefinableObj::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXDiffractionSingleCrystal::WXDiffractionSingleCrystal(wxWindow *parent,
                                                        DiffractionDataSingleCrystal* data):
-WXRefinableObj(parent,data),mpData(data)
+WXRefinableObj(parent,data),mpData(data),mpGraph(0),mGrapIdObs(0),mGrapIdCalc(0)
 {
    VFN_DEBUG_MESSAGE("WXDiffractionSingleCrystal::WXDiffractionSingleCrystal()",6)
    mpWXTitle->SetForegroundColour(wxColour(255,0,0));
@@ -194,6 +220,9 @@ WXRefinableObj(parent,data),mpData(data)
       //                          "Fit Scale for R");
       //   mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_DISPLAY,ID_DIFFSINGLECRYST_MENU_FITSCALE_RW,
       //                          "Fit Scale for Rw");
+      mpMenuBar->AddMenu("Data",ID_DIFFSINGLECRYST_MENU_DATA);
+         mpMenuBar->AddMenuItem(ID_DIFFSINGLECRYST_MENU_DATA,ID_DIFFSINGLECRYST_MENU_DATA_GRAPH,
+                                "Show Graph");
       mpSizer->SetItemMinSize(mpMenuBar,
                               mpMenuBar->GetSize().GetWidth(),
                               mpMenuBar->GetSize().GetHeight());
@@ -246,11 +275,31 @@ void WXDiffractionSingleCrystal::CrystUpdate(const bool uui,const bool lock)
    else mGoF=mpData->GetChi2()/mpData->GetIobs().numElements();
    mRwp=mpData->GetRw();
    mRp=mpData->GetR();
-   
+   if(mpGraph!=0)
+   {
+      const CrystVector_REAL *mpCalc=&(mpData->GetIcalc());
+      const CrystVector_REAL *mpObs =&(mpData->GetIobs());
+      const CrystVector_REAL *mpSinThetaOverLambda=&(mpData->GetSinThetaOverLambda());
+      const unsigned long nb=mpCalc->numElements();
+      mX    .resize(nb);
+      mIobs .resize(nb);
+      mIcalc.resize(nb);
+      for(unsigned long i=0;i<nb;i++)
+      {
+         mX[i]=(*mpSinThetaOverLambda)(i)*2;//1/d
+         mIobs[i] =(*mpObs)(i);
+         mIcalc[i]=(*mpCalc)(i);
+      }
+   }
    if(lock) mMutex.Unlock();
    this->WXRefinableObj::CrystUpdate(uui,lock);
    VFN_DEBUG_EXIT("WXDiffractionSingleCrystal::CrystUpdate()",6)
 } 
+
+void WXDiffractionSingleCrystal::NotifyDeleteGraph()
+{
+   mpGraph=0;
+}
 
 void WXDiffractionSingleCrystal::OnMenuSimulate(wxCommandEvent & WXUNUSED(event))
 {
@@ -408,6 +457,29 @@ void WXDiffractionSingleCrystal::OnMenuSetWavelength(wxCommandEvent &event)
       mpData->SetWavelength("CrA1");
    this->CrystUpdate(true,true);
 }
+
+void WXDiffractionSingleCrystal::OnMenuShowGraph(wxCommandEvent &event)
+{
+   VFN_DEBUG_MESSAGE("WXDiffractionSingleCrystal::OnMenuShowGraph()"<<mpGraph,6)
+   if(mpGraph!=0) return;
+   if(mpData->GetNbRefl()<=0) return;
+   WXCrystValidateAllUserInput();
+   wxFrame *frame= new wxFrame(this,-1,mpData->GetName().c_str(),
+                               wxDefaultPosition,wxSize(500,300));
+   mpGraph = new WXDiffractionSingleCrystalGraph(frame,this);
+   mGrapIdObs =mpGraph->AddGraph("Iobs");
+   mGrapIdCalc=mpGraph->AddGraph("Icalc");
+   
+   wxSizer *ps=new wxBoxSizer(wxHORIZONTAL);
+   ps->Add(mpGraph,1,wxEXPAND);
+   frame->SetSizer(ps);
+   frame->SetAutoLayout(true);
+   
+   //frame->CreateStatusBar(2);
+   frame->Show(true);
+   this->CrystUpdate(true);
+}
+
 void WXDiffractionSingleCrystal::OnChangeCrystal(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXDiffractionSingleCrystal::OnChangeCrystal()",6)
@@ -424,6 +496,12 @@ void WXDiffractionSingleCrystal::UpdateUI(const bool lock)
 {
    if(lock) mMutex.Lock();
    if(&(mpData->GetCrystal())!=0) mpFieldCrystal->SetValue(mpData->GetCrystal().GetName());
+   if(mpGraph!=0)
+   {
+      mpGraph->SetGraphData(mGrapIdObs,mX,mIobs);
+      mpGraph->SetGraphData(mGrapIdCalc,mX,mIcalc);
+      mpGraph->UpdateDisplay();
+   }
    this->WXRefinableObj::UpdateUI(false);
    if(lock) mMutex.Unlock();
 }

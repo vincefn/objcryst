@@ -22,6 +22,7 @@
 
 #include "ObjCryst/DiffractionDataSingleCrystal.h"
 #include "wxCryst/wxRefinableObj.h"
+#include "wxCryst/wxMultiGraph.h"
 namespace ObjCryst
 {
 
@@ -35,12 +36,15 @@ class WXDiffractionSingleCrystal: public WXRefinableObj
       WXDiffractionSingleCrystal(wxWindow *parent, DiffractionDataSingleCrystal*);
       virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false);
       virtual void UpdateUI(const bool mutexlock=false);
+      /// For the mpGraph to tell its owner it was deleted
+      void NotifyDeleteGraph();
    private:
       void OnMenuSimulate(wxCommandEvent & WXUNUSED(event));
       void OnMenuImport(wxCommandEvent & event);
       void OnMenuSaveHKLIobsIcalc(wxCommandEvent & WXUNUSED(event));
       void OnMenuSaveHKLFcalc(wxCommandEvent & WXUNUSED(event));
       void OnMenuSetWavelength(wxCommandEvent &event);
+      void OnMenuShowGraph(wxCommandEvent &event);
       void OnChangeCrystal(wxCommandEvent & WXUNUSED(event));
       WXFieldChoice* mpFieldCrystal;
       DiffractionDataSingleCrystal *mpData;
@@ -49,6 +53,11 @@ class WXDiffractionSingleCrystal: public WXRefinableObj
       REAL mGoF;
       REAL mRwp;
       REAL mRp;
+      WXMultiGraph *mpGraph;
+      unsigned long mGrapIdObs;
+      unsigned long mGrapIdCalc;
+      /// Copy of the data for graph display
+      valarray<float>  mIobs,mIcalc,mX;
    DECLARE_EVENT_TABLE()
 };
 
