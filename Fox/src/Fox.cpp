@@ -280,9 +280,8 @@ int main (int argc, char *argv[])
          continue;
       }
       if(string("-i")==string(argv[i]))
-      {
+      {// Obsolete, just ignore
          ++i;
-         XMLCrystFileLoadAllObject(argv[i]);
          continue;
       }
       if(string("-o")==string(argv[i]))
@@ -341,7 +340,7 @@ int main (int argc, char *argv[])
             wxFileInputStream is(name.c_str());
             wxZlibInputStream zstream(is);
             stringstream sst;
-            while (!zstream.Eof()) sst<<zstream.GetC();
+            while (!zstream.Eof()) sst<<(char)zstream.GetC();
             XMLCrystFileLoadAllObject(sst);
          }
          #else
@@ -714,7 +713,7 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
                   wxFileInputStream is(name.c_str());
                   wxZlibInputStream zstream(is);
                   stringstream sst;
-                  while (!zstream.Eof()) sst<<zstream.GetC();
+                  while (!zstream.Eof()) sst<<(char)zstream.GetC();
                   XMLCrystFileLoadAllObject(sst);
                }
    }
@@ -807,12 +806,13 @@ void WXCrystMainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
       string name=open.GetPath().c_str();
       if(name.substr(name.size()-7,7)!=".xml.gz")
       {
-         cout<<name<<" -> "<<name+".xml.gz"<<endl;
-         name=name+".xml.gz";
+         cout<<name<<" -> "<<name+".gz"<<endl;
+         if(name.substr(name.size()-4,4)==".xml") name=name+".gz";
+         else name=name+".xml.gz";
       }
       stringstream sst;
       XMLCrystFileSaveGlobal(sst);
-      wxFileOutputStream ostream(open.GetPath().c_str());
+      wxFileOutputStream ostream(name.c_str());
       wxZlibOutputStream zstream(ostream,-1,wxZLIB_GZIP);
       zstream.Write(sst.str().c_str(),sst.str().size());
    }
