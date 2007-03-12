@@ -134,10 +134,11 @@ CrystVector_REAL ReflectionProfilePseudoVoigt::GetProfile(const CrystVector_REAL
                             const REAL center,const REAL h, const REAL k, const REAL l)const
 {
    VFN_DEBUG_ENTRY("ReflectionProfilePseudoVoigt::GetProfile(),c="<<center,2)
-   const REAL fwhm=sqrt( mCagliotiW
-                        +mCagliotiV*tan(center/2.0)
-                        +mCagliotiU*pow(tan(center/2.0),2));
-   
+   REAL fwhm= mCagliotiW
+             +mCagliotiV*tan(center/2.0)
+             +mCagliotiU*pow(tan(center/2.0),2);
+   if(fwhm<=0) fwhm=1e-6;
+   else fwhm=sqrt(fwhm);
    CrystVector_REAL profile,tmpV;
    const REAL asym=mAsym0+mAsym1/sin(center)+mAsym2/pow((REAL)sin(center),(REAL)2.0);
    profile=PowderProfileGauss(x,fwhm,center,asym);
@@ -175,9 +176,11 @@ REAL ReflectionProfilePseudoVoigt::GetFullProfileWidth(const REAL relativeIntens
    const int halfnb=nb/2;
    CrystVector_REAL x(nb);
    REAL n=5.0;
-   const REAL fwhm=sqrt( mCagliotiW
-                        +mCagliotiV*tan(center/2.0)
-                        +mCagliotiU*pow(tan(center/2.0),2));
+   REAL fwhm= mCagliotiW
+             +mCagliotiV*tan(center/2.0)
+             +mCagliotiU*pow(tan(center/2.0),2);
+   if(fwhm<=0) fwhm=1e-6;
+   else fwhm=sqrt(fwhm);
    CrystVector_REAL prof;
    while(true)
    {
@@ -198,8 +201,9 @@ REAL ReflectionProfilePseudoVoigt::GetFullProfileWidth(const REAL relativeIntens
          VFN_DEBUG_EXIT("ReflectionProfilePseudoVoigt::GetFullProfileWidth():"<<x(n2)-x(n1),2)
          return x(n2)-x(n1);
       }
-      VFN_DEBUG_MESSAGE("ReflectionProfilePseudoVoigt::GetFullProfileWidth():"<<max<<","<<test
-                        <<endl<<FormatVertVector<REAL>(x,prof),2)
+      VFN_DEBUG_MESSAGE("ReflectionProfilePseudoVoigt::GetFullProfileWidth():"<<relativeIntensity<<","
+                        <<fwhm<<","<<center<<","<<h<<","<<k<<","<<l<<","<<max<<","<<test,2)
+      VFN_DEBUG_MESSAGE(FormatVertVector<REAL>(x,prof),2)
       n*=2.0;
       //if(n>200) exit(0);
    }
@@ -897,17 +901,18 @@ WXCrystObjBasic* ReflectionProfileDoubleExponentialPseudoVoigt::WXCreate(wxWindo
 //    Basic PROFILE FUNCTIONS
 //######################################################################
 
-CrystVector_REAL PowderProfileGauss  (const CrystVector_REAL ttheta,const REAL fwhm,
+CrystVector_REAL PowderProfileGauss  (const CrystVector_REAL ttheta,const REAL fw,
                                       const REAL center, const REAL asym)
 {
    TAU_PROFILE("PowderProfileGauss()","Vector (Vector,REAL)",TAU_DEFAULT);
+   REAL fwhm=fw;
+   if(fwhm<=0) fwhm=1e-6;
    const long nbPoints=ttheta.numElements();
    CrystVector_REAL result(nbPoints);
    result=ttheta;
    result+= -center;
    result *= result;
    REAL *p;
-   
    if( fabs(asym-1.) < 1e-5)
    {
       //reference: IUCr Monographs on Crystallo 5 - The Rietveld Method (ed RA Young)
@@ -936,10 +941,12 @@ CrystVector_REAL PowderProfileGauss  (const CrystVector_REAL ttheta,const REAL f
    return result;
 }
 
-CrystVector_REAL PowderProfileLorentz(const CrystVector_REAL ttheta,const REAL fwhm,
+CrystVector_REAL PowderProfileLorentz(const CrystVector_REAL ttheta,const REAL fw,
                                       const REAL center, const REAL asym)
 {
    TAU_PROFILE("PowderProfileLorentz()","Vector (Vector,REAL)",TAU_DEFAULT);
+   REAL fwhm=fw;
+   if(fwhm<=0) fwhm=1e-6;
    const long nbPoints=ttheta.numElements();
    CrystVector_REAL result(nbPoints);
    result=ttheta;
@@ -970,11 +977,13 @@ CrystVector_REAL PowderProfileLorentz(const CrystVector_REAL ttheta,const REAL f
 }
 
 CrystVector_REAL AsymmetryBerarBaldinozzi(const CrystVector_REAL x,
-                                          const REAL fwhm, const REAL center,
+                                          const REAL fw, const REAL center,
                                           const REAL a0, const REAL a1,
                                           const REAL b0, const REAL b1)
 {
    TAU_PROFILE("AsymmetryBerarBaldinozzi()","Vector (Vector,REAL)",TAU_DEFAULT);
+   REAL fwhm=fw;
+   if(fwhm<=0) fwhm=1e-6;
    const long nbPoints=x.numElements();
    CrystVector_REAL result(nbPoints);
    result=x;
