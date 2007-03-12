@@ -1004,14 +1004,6 @@ Computing all Profiles",5)
    const REAL xmax=mpParentPowderPattern->GetPowderPatternX()(mpParentPowderPattern->GetNbPoint()-1);
    
    const long nbreflused=this->GetNbReflBelowMaxSinThetaOvLambda();
-   REAL fullwidth0,fullwidth1;
-   {
-      long imax=nbreflused;
-      if(imax==mNbRefl)imax-=1;
-      fullwidth0=mpReflectionProfile->GetFullProfileWidth(0.04,xmin,mH(0),mK(0),mL(0)),
-      fullwidth1=mpReflectionProfile->GetFullProfileWidth(0.04,xmax,mH(imax),mK(imax),mL(imax));
-      if(!mUseFastLessPreciseFunc) {fullwidth0*=2;fullwidth1*=2;}
-   }
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile()w="<<fullwidth0<<"->"<<fullwidth1,5)
    
    for(unsigned int line=0;line<nbLine;line++)
@@ -1028,7 +1020,9 @@ Computing all Profiles",5)
                         x0+2*tan(x0/2.0)*spectrumDeltaLambdaOvLambda(line));
          }
          else center=mpParentPowderPattern->X2XCorr(x0);
-         const REAL halfwidth=(fullwidth0+(center-xmin)/(xmax-xmin)*fullwidth1)/2.0;
+         REAL fact=0.5;
+         if(!mUseFastLessPreciseFunc) fact=2.0;
+         const REAL halfwidth=mpReflectionProfile->GetFullProfileWidth(0.04,center,mH(i),mK(i),mL(i))*fact;
          if(line==0)
          {
             // For an X-Ray tube, label on first (strongest) of reflections lines (Kalpha1)

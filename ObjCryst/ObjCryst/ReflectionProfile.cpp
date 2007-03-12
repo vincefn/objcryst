@@ -137,7 +137,12 @@ CrystVector_REAL ReflectionProfilePseudoVoigt::GetProfile(const CrystVector_REAL
    REAL fwhm= mCagliotiW
              +mCagliotiV*tan(center/2.0)
              +mCagliotiU*pow(tan(center/2.0),2);
-   if(fwhm<=0) fwhm=1e-6;
+   if(fwhm<=0)
+   {
+      cout<<"ReflectionProfilePseudoVoigt::GetProfile(): fwhm**2<0 ! "
+          <<h<<","<<k<<","<<l<<":"<<center<<","<<mCagliotiU<<","<<mCagliotiV<<","<<","<<mCagliotiW<<":"<<fwhm<<endl;
+      fwhm=1e-6;
+   }
    else fwhm=sqrt(fwhm);
    CrystVector_REAL profile,tmpV;
    const REAL asym=mAsym0+mAsym1/sin(center)+mAsym2/pow((REAL)sin(center),(REAL)2.0);
