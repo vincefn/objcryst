@@ -1000,11 +1000,9 @@ Computing all Profiles",5)
    long first,last;// first & last point of the stored profile
    CrystVector_REAL vx,reflProfile,tmpV;
    mvReflProfile.resize(this->GetNbRefl());
-   const REAL xmin=mpParentPowderPattern->GetPowderPatternX()(0);
-   const REAL xmax=mpParentPowderPattern->GetPowderPatternX()(mpParentPowderPattern->GetNbPoint()-1);
    
    const long nbreflused=this->GetNbReflBelowMaxSinThetaOvLambda();
-   VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile()w="<<fullwidth0<<"->"<<fullwidth1,5)
+   VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile()",5)
    
    for(unsigned int line=0;line<nbLine;line++)
    {
