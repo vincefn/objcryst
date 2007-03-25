@@ -163,15 +163,8 @@ WXCrystalScrolledGridWindow::~WXCrystalScrolledGridWindow()
 ////////////////////////////////////////////////////////////////////////
 WXCrystal::RowScattPow::RowScattPow():
 mName("H"),
-mBiso(1.0),mFormalCharge(0.0),mR(1.0),mG(1.0),mB(1.0),mMaximumLikelihoodError(0.0),mNbGhostAtoms(0.0),mNeedUpdateUI(true)
-{}
-
-WXCrystal::RowAntiBump::RowAntiBump():
-mName(""),mNeedUpdateUI(true)
-{}
-
-WXCrystal::RowBondValence::RowBondValence():
-mName(""),mNeedUpdateUI(true)
+mBiso(1.0),mFormalCharge(0.0),mR(1.0),mG(1.0),mB(1.0),mMaximumLikelihoodError(0.0),mNbGhostAtoms(0.0),
+mNeedUpdateUI(true),mIdx(-1)
 {}
 
 ////////////////////////////////////////////////////////////////////////
@@ -440,167 +433,155 @@ void WXCrystal::CrystUpdate(const bool uui,const bool lock)
    }
    #endif
    if(lock) mMutex.Lock();
-   if(false==this->GetCrystal().IsBeingRefined())
+   if((false==this->GetCrystal().IsBeingRefined())&&(mpScattPowWin!=0)&&(mpAntiBumpWin!=0)&&(mpBondValenceWin!=0))
    {
-      // Update map of scatteringPowers, if needs be.
-      //if(mvScattPowIndexClock<this->GetCrystal().GetScatteringPowerRegistry().GetRegistryClock())
+      //set<ScatteringPowerAtom*> vpRemovedScattPow;
+      //set<ScatteringPowerAtom*> vpAddedScattPow;
+      
+      bool needLayout=false;
+      // Delete rows & cols as required
+      for(map<ScatteringPowerAtom*,RowScattPow>::iterator pos=mvpRowScattPow.begin();pos!=mvpRowScattPow.end();)
+         if(this->GetCrystal().GetScatteringPowerRegistry().Find(pos->second.mName,"ScatteringPowerAtom",true)<0)
+         {
+            VFN_DEBUG_MESSAGE("WXCrystal::CrystUpdate(): Removing scattering power: "<<pos->second.mName,5)
+            mpScattPowWin->DeleteRows(mvpRowScattPow.size()-1,1,false);
+            mpAntiBumpWin->DeleteRows(mvpRowScattPow.size()-1,1,false);
+            mpBondValenceWin->DeleteRows(mvpRowScattPow.size()-1,1,false);
+            mpAntiBumpWin->DeleteCols(mvpRowScattPow.size()-1,1,false);
+            mpBondValenceWin->DeleteCols(mvpRowScattPow.size()-1,1,false);
+            mvpRowScattPow.erase(pos++);
+            needLayout=true;
+         }
+         else ++pos; // See Josuttis, p.205
+      // Add rows & cols as required
+      for(int i=0;i<this->GetCrystal().GetScatteringPowerRegistry().GetNb();++i)
       {
-         mvScattPowIndex.clear();
-         mvScattPowRowIndex.clear();
-         int ix=0;
+         ScatteringPower *s=&(this->GetCrystal().GetScatteringPowerRegistry().GetObj(i));
+         if(s->GetClassName()=="ScatteringPowerAtom")
+         {
+            ScatteringPowerAtom *p=dynamic_cast<ScatteringPowerAtom *>(s);
+            if(mvpRowScattPow.find(p)==mvpRowScattPow.end())
+            {
+               VFN_DEBUG_MESSAGE("WXCrystal::CrystUpdate(): Adding scattering power: "<<s->GetName(),5)
+               mpScattPowWin->AppendRows();
+               mpAntiBumpWin->AppendRows();
+               mpAntiBumpWin->AppendCols();
+               mpBondValenceWin->AppendRows();
+               mpBondValenceWin->AppendCols();
+               mvpRowScattPow.insert(make_pair(p,RowScattPow()));
+               needLayout=true;
+            }
+         }
+      }
+      // Put the scattering powers in the same order as they have been declared,
+      // for user convenience
+      {
+         int j=0; // :KLUDGE: number of scattering powers that are not ScatteringPowerAtom
          for(int i=0;i<this->GetCrystal().GetScatteringPowerRegistry().GetNb();++i)
          {
             ScatteringPower *s=&(this->GetCrystal().GetScatteringPowerRegistry().GetObj(i));
             if(s->GetClassName()=="ScatteringPowerAtom")
             {
-               mvScattPowRowIndex.push_back(dynamic_cast<ScatteringPowerAtom *>(s));
-               mvScattPowIndex[mvScattPowRowIndex.back()]=ix;
+               ScatteringPowerAtom *p=dynamic_cast<ScatteringPowerAtom *>(s);
+               if(mvpRowScattPow[p].mIdx!=i-j)
+               {
+                  mvpRowScattPow[p].mIdx=i-j;
+                  mvpRowScattPow[p].mNeedUpdateUI=true;
+               }
             }
+            else j++;
          }
-         mvScattPowIndexClock.Click();
       }
-      if(mpScattPowWin!=0)
-      {// Add/remove row(s), if necessary
-         bool needLayout=false;
-         for(unsigned long i=mvpRowScattPow.size();i<mvScattPowIndex.size();++i)
-         {
-            mpScattPowWin->AppendRows();
-            mvpRowScattPow.push_back(RowScattPow());
-            needLayout=true;
-         }
-         for(unsigned long i=mvScattPowIndex.size();i<mvpRowScattPow.size();++i)
-         {
-            mpScattPowWin->DeleteRows(i,1,false);
-            mvpRowScattPow.pop_back();
-            needLayout=true;
-         }
-         if(needLayout) mpScattPowWin->FitInside();
-      }
-      if(mpAntiBumpWin!=0)
-      {// Add AntiBump rows, if necessary
-         bool needLayout=false;
-         for(unsigned long i=mvpRowAntiBump.size();i<mvScattPowIndex.size();++i)
-         {
-            mpAntiBumpWin->AppendRows();
-            mpAntiBumpWin->AppendCols();
-            mvpRowAntiBump.push_back(RowAntiBump());
-            needLayout=true;
-         }
-         for(unsigned long i=mvScattPowIndex.size();i<mvpRowAntiBump.size();++i)
-         {
-            mpAntiBumpWin->DeleteRows(i,1,false);
-            mpAntiBumpWin->DeleteCols(i,1,false);
-            mvpRowAntiBump.pop_back();
-            needLayout=true;
-         }
-         if(needLayout) mpAntiBumpWin->FitInside();
-      }
-      if(mpBondValenceWin!=0)
-      {// Add Bond Valence row, if necessary
-         bool needLayout=false;
-         for(unsigned long i=mvpRowBondValence.size();i<mvScattPowIndex.size();++i)
-         {
-            mpBondValenceWin->AppendRows();
-            mpBondValenceWin->AppendCols();
-            mvpRowBondValence.push_back(RowBondValence());
-            needLayout=true;
-         }
-         for(unsigned long i=mvScattPowIndex.size();i<mvpRowBondValence.size();++i)
-         {
-            mpBondValenceWin->DeleteRows(i,1,false);
-            mpBondValenceWin->DeleteCols(i,1,false);
-            mvpRowBondValence.pop_back();
-            needLayout=true;
-         }
-         if(needLayout) mpBondValenceWin->FitInside();
-      }
-      
-      if(mpScattPowWin!=0)
+      if(needLayout)
       {
-         list<RowScattPow>::iterator row=mvpRowScattPow.begin();
-         map<ScatteringPowerAtom*,int>::iterator pow=mvScattPowIndex.begin();
-         for(;row!=mvpRowScattPow.end();)
+         mpScattPowWin->FitInside();
+         mpAntiBumpWin->FitInside();
+         mpBondValenceWin->FitInside();
+      }
+      // Update windows
+      //if(mpScattPowWin!=0)
+      {
+         map<ScatteringPowerAtom*,RowScattPow>::iterator pos;
+         for(pos=mvpRowScattPow.begin();pos!=mvpRowScattPow.end();++pos)
          {
-            const string name=pow->first->GetName();
-            const REAL biso=pow->first->GetBiso();
-            const REAL formalCharge=pow->first->GetFormalCharge();
-            const REAL *pRGB=pow->first->GetColourRGB();
-            const REAL mlerror=pow->first->GetMaximumLikelihoodPositionError();
-            const REAL nbghost=pow->first->GetMaximumLikelihoodNbGhostAtom();
-            if(  (name   !=row->mName)
-               ||(biso!=row->mBiso)
-               ||(formalCharge!=row->mFormalCharge)
-               ||(pRGB[0]!=row->mR)
-               ||(pRGB[1]!=row->mG)
-               ||(pRGB[2]!=row->mB)
-               ||(mlerror!=row->mMaximumLikelihoodError)
-               ||(nbghost!=row->mNbGhostAtoms))
+            const string name=pos->first->GetName();
+            const REAL biso=pos->first->GetBiso();
+            const REAL formalCharge=pos->first->GetFormalCharge();
+            const REAL *pRGB=pos->first->GetColourRGB();
+            const REAL mlerror=pos->first->GetMaximumLikelihoodPositionError();
+            const REAL nbghost=pos->first->GetMaximumLikelihoodNbGhostAtom();
+            if(  (name   !=pos->second.mName)
+               ||(biso   !=pos->second.mBiso)
+               ||(formalCharge!=pos->second.mFormalCharge)
+               ||(pRGB[0]!=pos->second.mR)
+               ||(pRGB[1]!=pos->second.mG)
+               ||(pRGB[2]!=pos->second.mB)
+               ||(mlerror!=pos->second.mMaximumLikelihoodError)
+               ||(nbghost!=pos->second.mNbGhostAtoms)
+               || pos->second.mNeedUpdateUI)
             {
-               row->mName=name;
-               row->mBiso=biso;
-               row->mFormalCharge=formalCharge;
-               row->mR=pRGB[0];
-               row->mG=pRGB[1];
-               row->mB=pRGB[2];
-               row->mMaximumLikelihoodError=mlerror;
-               row->mNbGhostAtoms=nbghost;
-               row->mNeedUpdateUI=true;
+               pos->second.mName=name;
+               pos->second.mBiso=biso;
+               pos->second.mFormalCharge=formalCharge;
+               pos->second.mR=pRGB[0];
+               pos->second.mG=pRGB[1];
+               pos->second.mB=pRGB[2];
+               pos->second.mMaximumLikelihoodError=mlerror;
+               pos->second.mNbGhostAtoms=nbghost;
+               pos->second.mNeedUpdateUI=true;
             }
-            ++row;++pow;
          }
       }
-      if(mpAntiBumpWin!=0)
+      //if(mpAntiBumpWin!=0)
       {
-         list<RowAntiBump>::iterator row=mvpRowAntiBump.begin();
-         map<ScatteringPowerAtom*,int>::iterator pow=mvScattPowIndex.begin();
-         for(;row!=mvpRowAntiBump.end();)
+         map<ScatteringPowerAtom*,RowScattPow>::iterator pos,pos1;
+         for(pos=mvpRowScattPow.begin();pos!=mvpRowScattPow.end();++pos)
          {
-            const string name=pow->first->GetName();
+            const string name=pos->first->GetName();
             const Crystal::VBumpMergePar *pMap=&(mpCrystal->GetBumpMergeParList());
-            vector<REAL> dist(mvScattPowIndex.size());
-            for(unsigned int i=0;i<mvScattPowRowIndex.size();++i)
+            vector<REAL> dist(mvpRowScattPow.size());
+            for(pos1=mvpRowScattPow.begin();pos1!=mvpRowScattPow.end();++pos1)
             {
-               Crystal::VBumpMergePar::const_iterator pos;
-               if(pow->first<mvScattPowRowIndex[i]) pos=pMap->find(make_pair(pow->first,mvScattPowRowIndex[i]));
-               else pos=pMap->find(make_pair(mvScattPowRowIndex[i],pow->first));
-               if(pos==pMap->end()) dist[i]=-999;
-               else dist[i]=sqrt(pos->second.mDist2);
+               Crystal::VBumpMergePar::const_iterator pos2;
+               if(pos->first<pos1->first) pos2=pMap->find(make_pair(pos->first,pos1->first));
+               else pos2=pMap->find(make_pair(pos1->first,pos->first));
+               if(pos2==pMap->end()) dist[pos1->second.mIdx]=-999;
+               else dist[pos1->second.mIdx]=sqrt(pos2->second.mDist2);
             }
-            if(  (name!=row->mName)
-               ||(dist!=row->mvAntiBumpDistance))
+            if(  (name!=pos->second.mName)
+               ||(dist!=pos->second.mvAntiBumpDistance)
+               || pos->second.mNeedUpdateUI)
             {
-               row->mName=name;
-               row->mvAntiBumpDistance=dist;
-               row->mNeedUpdateUI=true;
+               pos->second.mName=name;
+               pos->second.mvAntiBumpDistance=dist;
+               pos->second.mNeedUpdateUI=true;
             }
-            ++row;++pow;
          }
       }
-      if(mpBondValenceWin!=0)
+      //if(mpBondValenceWin!=0)
       {
-         list<RowBondValence>::iterator row=mvpRowBondValence.begin();
-         map<ScatteringPowerAtom*,int>::iterator pow=mvScattPowIndex.begin();
-         for(;row!=mvpRowBondValence.end();)
+         map<ScatteringPowerAtom*,RowScattPow>::iterator pos,pos1;
+         for(pos=mvpRowScattPow.begin();pos!=mvpRowScattPow.end();++pos)
          {
-            const string name=pow->first->GetName();
+            const string name=pos->first->GetName();
             const std::map<pair<const ScatteringPower*,const ScatteringPower*>, REAL> *pMap=&(mpCrystal->GetBondValenceRoList());
-            vector<REAL> ro(mvScattPowIndex.size());
-            for(unsigned int i=0;i<mvScattPowRowIndex.size();++i)
+            vector<REAL> ro(mvpRowScattPow.size());
+            for(pos1=mvpRowScattPow.begin();pos1!=mvpRowScattPow.end();++pos1)
             {
-               map<pair<const ScatteringPower*,const ScatteringPower*>, REAL>::const_iterator pos;
-               if(pow->first<mvScattPowRowIndex[i]) pos=pMap->find(make_pair(pow->first,mvScattPowRowIndex[i]));
-               else pos=pMap->find(make_pair(mvScattPowRowIndex[i],pow->first));
-               if(pos==pMap->end()) ro[i]=-999;
-               else ro[i]=pos->second;
+               map<pair<const ScatteringPower*,const ScatteringPower*>, REAL>::const_iterator pos2;
+               if(pos->first<pos1->first) pos2=pMap->find(make_pair(pos->first,pos1->first));
+               else pos2=pMap->find(make_pair(pos1->first,pos->first));
+               if(pos2==pMap->end()) ro[pos1->second.mIdx]=-999;
+               else ro[pos1->second.mIdx]=pos2->second;
             }
-            if(  (name!=row->mName)
-               ||(ro!=row->mvBondValenceRo))
+            if(  (name!=pos->second.mName)
+               ||(ro!=pos->second.mvBondValenceRo)
+               || pos->second.mNeedUpdateUI)
             {
-               row->mName=name;
-               row->mvBondValenceRo=ro;
-               row->mNeedUpdateUI=true;
+               pos->second.mName=name;
+               pos->second.mvBondValenceRo=ro;
+               pos->second.mNeedUpdateUI=true;
             }
-            ++row;++pow;
          }
       }
    }
@@ -1286,85 +1267,82 @@ void WXCrystal::UpdateUI(const bool lock)
    if(lock) mMutex.Lock();
    if(0!=mpScattPowWin)
    {
-      unsigned long i=0;
-      for(list<RowScattPow>::iterator pos=mvpRowScattPow.begin();pos!=mvpRowScattPow.end();++pos)
+      map<ScatteringPowerAtom*,RowScattPow>::iterator pos;
+      for(pos=mvpRowScattPow.begin();pos!=mvpRowScattPow.end();++pos)
       {
-         if(pos->mNeedUpdateUI==true)
+         if(pos->second.mNeedUpdateUI==true)
          {
             mIsSelfUpdating=true;
-            mpScattPowWin->SetRowLabelValue(i,pos->mName.c_str());
+            mpScattPowWin->SetRowLabelValue(pos->second.mIdx,pos->second.mName.c_str());
             wxString tmp;
-            tmp.Printf("%f",pos->mBiso);
-            mpScattPowWin->SetCellValue(i, 0, tmp);
-            tmp.Printf("%f",pos->mFormalCharge);
-            mpScattPowWin->SetCellValue(i, 1, tmp);
-            tmp.Printf("%f",pos->mR);
-            mpScattPowWin->SetCellValue(i, 2, tmp);
-            tmp.Printf("%f",pos->mG);
-            mpScattPowWin->SetCellValue(i, 3, tmp);
-            tmp.Printf("%f",pos->mB);
-            mpScattPowWin->SetCellValue(i, 4, tmp);
-            tmp.Printf("%f",pos->mMaximumLikelihoodError);
-            mpScattPowWin->SetCellValue(i, 5, tmp);
-            tmp.Printf("%f",pos->mNbGhostAtoms);
-            mpScattPowWin->SetCellValue(i, 6, tmp);
+            tmp.Printf("%f",pos->second.mBiso);
+            mpScattPowWin->SetCellValue(pos->second.mIdx, 0, tmp);
+            tmp.Printf("%f",pos->second.mFormalCharge);
+            mpScattPowWin->SetCellValue(pos->second.mIdx, 1, tmp);
+            tmp.Printf("%f",pos->second.mR);
+            mpScattPowWin->SetCellValue(pos->second.mIdx, 2, tmp);
+            tmp.Printf("%f",pos->second.mG);
+            mpScattPowWin->SetCellValue(pos->second.mIdx, 3, tmp);
+            tmp.Printf("%f",pos->second.mB);
+            mpScattPowWin->SetCellValue(pos->second.mIdx, 4, tmp);
+            tmp.Printf("%f",pos->second.mMaximumLikelihoodError);
+            mpScattPowWin->SetCellValue(pos->second.mIdx, 5, tmp);
+            tmp.Printf("%f",pos->second.mNbGhostAtoms);
+            mpScattPowWin->SetCellValue(pos->second.mIdx, 6, tmp);
             mIsSelfUpdating=false;
          }
-         ++i;
       }
    }
    if(0!=mpAntiBumpWin)
    {
-      unsigned long i=0;
-      for(list<RowAntiBump>::iterator pos=mvpRowAntiBump.begin();pos!=mvpRowAntiBump.end();++pos)
+      map<ScatteringPowerAtom*,RowScattPow>::iterator pos;
+      for(pos=mvpRowScattPow.begin();pos!=mvpRowScattPow.end();++pos)
       {
-         if(pos->mNeedUpdateUI==true)
+         if(pos->second.mNeedUpdateUI==true)
          {
             mIsSelfUpdating=true;
-            mpAntiBumpWin->SetRowLabelValue(i,pos->mName.c_str());
-            mpAntiBumpWin->SetColLabelValue(i,pos->mName.c_str());
+            mpAntiBumpWin->SetRowLabelValue(pos->second.mIdx,pos->second.mName.c_str());
+            mpAntiBumpWin->SetColLabelValue(pos->second.mIdx,pos->second.mName.c_str());
             wxString tmp;
-            for(unsigned long j=0;j<pos->mvAntiBumpDistance.size();++j)
+            for(unsigned long j=0;j<pos->second.mvAntiBumpDistance.size();++j)
             {
-               VFN_DEBUG_MESSAGE("WXCrystal::UpdateUI():Antibump("<<mvScattPowRowIndex[i]->GetName()
-                                                                  <<","<<mvScattPowRowIndex[j]->GetName()
-                                                                  <<")="<<pos->mvAntiBumpDistance[j],3);
-               if(pos->mvAntiBumpDistance[j]>-998)
+               VFN_DEBUG_MESSAGE("WXCrystal::UpdateUI():Antibump("<<pos->first->GetName()
+                                                                  <<",?"//<<mvScattPowRowIndex[j]->GetName()
+                                                                  <<")="<<pos->second.mvAntiBumpDistance[j],3);
+               if(pos->second.mvAntiBumpDistance[j]>-998)
                {
-                  tmp.Printf("%f",pos->mvAntiBumpDistance[j]);
-                  mpAntiBumpWin->SetCellValue(i,j,tmp);
-               } else mpAntiBumpWin->SetCellValue(i,j,"");
+                  tmp.Printf("%f",pos->second.mvAntiBumpDistance[j]);
+                  mpAntiBumpWin->SetCellValue(pos->second.mIdx,j,tmp);
+               } else mpAntiBumpWin->SetCellValue(pos->second.mIdx,j,"");
             }
             mIsSelfUpdating=false;
          }
-         ++i;
       }
    }
    if(0!=mpBondValenceWin)
    {
-      unsigned long i=0;
-      for(list<RowBondValence>::iterator pos=mvpRowBondValence.begin();pos!=mvpRowBondValence.end();++pos)
+      map<ScatteringPowerAtom*,RowScattPow>::iterator pos;
+      for(pos=mvpRowScattPow.begin();pos!=mvpRowScattPow.end();++pos)
       {
-         if(pos->mNeedUpdateUI==true)
+         if(pos->second.mNeedUpdateUI==true)
          {
             mIsSelfUpdating=true;
-            mpBondValenceWin->SetRowLabelValue(i,pos->mName.c_str());
-            mpBondValenceWin->SetColLabelValue(i,pos->mName.c_str());
+            mpBondValenceWin->SetRowLabelValue(pos->second.mIdx,pos->second.mName.c_str());
+            mpBondValenceWin->SetColLabelValue(pos->second.mIdx,pos->second.mName.c_str());
             wxString tmp;
-            for(unsigned long j=0;j<pos->mvBondValenceRo.size();++j)
+            for(unsigned long j=0;j<pos->second.mvBondValenceRo.size();++j)
             {
-               VFN_DEBUG_MESSAGE("WXCrystal::UpdateUI():BondValence("<<mvScattPowRowIndex[i]->GetName()
-                                                                <<","<<mvScattPowRowIndex[j]->GetName()
-                                                               <<")="<<pos->mvBondValenceRo[j],3);
-               if(pos->mvBondValenceRo[j]>-998)
+               VFN_DEBUG_MESSAGE("WXCrystal::UpdateUI():BondValence("<<pos->first->GetName()
+                                                                <<",?"//<<mvScattPowRowIndex[j]->GetName()
+                                                               <<")="<<pos->second.mvBondValenceRo[j],3);
+               if(pos->second.mvBondValenceRo[j]>-998)
                {
-                  tmp.Printf("%f",pos->mvBondValenceRo[j]);
-                  mpBondValenceWin->SetCellValue(i,j,tmp);
-               } else mpBondValenceWin->SetCellValue(i,j,"");
+                  tmp.Printf("%f",pos->second.mvBondValenceRo[j]);
+                  mpBondValenceWin->SetCellValue(pos->second.mIdx,j,tmp);
+               } else mpBondValenceWin->SetCellValue(pos->second.mIdx,j,"");
             }
             mIsSelfUpdating=false;
          }
-         ++i;
       }
    }
    if(lock) mMutex.Unlock();
@@ -1440,7 +1418,10 @@ void WXCrystal::OnEditGridScattPow(wxGridEvent &e)
    if(mIsSelfUpdating) return;
    const int r=e.GetRow();
    const int c=e.GetCol();
-   ScatteringPowerAtom *const p=mvScattPowRowIndex[r];
+   map<ScatteringPowerAtom*,RowScattPow>::iterator pos=mvpRowScattPow.begin();
+   while(pos->second.mIdx!=r)++pos;
+   ScatteringPowerAtom *const p=pos->first;
+   
    wxString s=mpScattPowWin->GetCellValue(r,c);
    switch(c)
    {
@@ -1450,7 +1431,7 @@ void WXCrystal::OnEditGridScattPow(wxGridEvent &e)
          {
             double d;
             s.ToDouble(&d);
-            mvScattPowRowIndex[r]->SetBiso(d);
+            p->SetBiso(d);
          }
          break;
       }
@@ -1529,8 +1510,15 @@ void WXCrystal::OnEditGridScattPowAntiBump(wxGridEvent &e)
    if(mIsSelfUpdating) return;
    const int r=e.GetRow();
    const int c=e.GetCol();
-   const ScatteringPowerAtom *const p1=mvScattPowRowIndex[r];
-   const ScatteringPowerAtom *const p2=mvScattPowRowIndex[c];
+
+   map<ScatteringPowerAtom*,RowScattPow>::iterator pos=mvpRowScattPow.begin();
+   while(pos->second.mIdx!=r)++pos;
+   const ScatteringPowerAtom *const p1=pos->first;
+   
+   pos=mvpRowScattPow.begin();
+   while(pos->second.mIdx!=c)++pos;
+   const ScatteringPowerAtom *const p2=pos->first;
+   
    wxString s=mpAntiBumpWin->GetCellValue(r,c);
    double d;
    s.ToDouble(&d);
@@ -1544,8 +1532,15 @@ void WXCrystal::OnEditGridScattPowBondValence(wxGridEvent &e)
    if(mIsSelfUpdating) return;
    const int r=e.GetRow();
    const int c=e.GetCol();
-   const ScatteringPowerAtom *const p1=mvScattPowRowIndex[r];
-   const ScatteringPowerAtom *const p2=mvScattPowRowIndex[c];
+
+   map<ScatteringPowerAtom*,RowScattPow>::iterator pos=mvpRowScattPow.begin();
+   while(pos->second.mIdx!=r)++pos;
+   const ScatteringPowerAtom *const p1=pos->first;
+   
+   pos=mvpRowScattPow.begin();
+   while(pos->second.mIdx!=c)++pos;
+   const ScatteringPowerAtom *const p2=pos->first;
+   
    wxString s=mpBondValenceWin->GetCellValue(r,c);
    double d;
    s.ToDouble(&d);
@@ -1556,21 +1551,11 @@ void WXCrystal::OnEditGridScattPowBondValence(wxGridEvent &e)
 
 void WXCrystal::NotifyDeleteListWin(WXCrystalScrolledGridWindow *win)
 {
-   if(win==mpScattPowWin)
-   {
-      mpScattPowWin=0;
-      mvpRowScattPow.clear();
-   }
-   if(win==mpAntiBumpWin)
-   {
-      mpAntiBumpWin=0;
-      mvpRowAntiBump.clear();
-   }
-   if(win==mpBondValenceWin)
-   {
-      mpBondValenceWin=0;
-      mvpRowBondValence.clear();
-   }
+   if(win==mpScattPowWin) mpScattPowWin=0;
+   if(win==mpAntiBumpWin) mpAntiBumpWin=0;
+   if(win==mpBondValenceWin) mpBondValenceWin=0;
+   // NOTE : all three subwindows should actually be deleted at the *same* time.
+   if((mpScattPowWin==0)&&(mpAntiBumpWin==0)&&(mpBondValenceWin==0)) mvpRowScattPow.clear();
 }
 bool WXCrystal::Enable(bool e)
 {

@@ -126,51 +126,28 @@ class WXCrystal: public WXRefinableObj
       /// Scattering Powers
          WXRegistry<ScatteringPower>* mpWXScatteringPowerRegistry;
 
-      /// Structure to store the maximum likelihood parameters
+      /// Structure to store the scattering power parameters
       struct RowScattPow
       {
          RowScattPow();
          std::string mName;
          /// Last displayed values
          REAL mBiso,mFormalCharge,mR,mG,mB,mMaximumLikelihoodError,mNbGhostAtoms;
-         /// True if we need to update the displayed values
-         bool mNeedUpdateUI;
-      };
-      /// Structure to store the antibump parameters
-      struct RowAntiBump
-      {
-         RowAntiBump();
-         std::string mName;
-         /// Last displayed values
+         /// Last displayed values for antibump
          std::vector<REAL> mvAntiBumpDistance;
-         /// True if we need to update the displayed values
-         bool mNeedUpdateUI;
-      };
-      /// Structure to store the bond valence parameters
-      struct RowBondValence
-      {
-         RowBondValence();
-         std::string mName;
-         /// Last displayed values
+         /// Last displayed values for bond valence
          std::vector<REAL> mvBondValenceRo;
          /// True if we need to update the displayed values
          bool mNeedUpdateUI;
+         /// Current position in the list of rows or columns
+         int mIdx;
       };
-      /// Index of all ScatteringPowerAtom in the Crystal's registry
-      /// (excluding any other type of ScatteringPower),
-      /// as they are displayed in the grid windows.
-      mutable std::map<ScatteringPowerAtom*,int> mvScattPowIndex;
-      /// Index of Scattering power in each row (and sometimes column)
-      mutable std::vector<ScatteringPowerAtom*> mvScattPowRowIndex;
-      mutable RefinableObjClock mvScattPowIndexClock;
       
       WXCrystalScrolledGridWindow* mpScattPowWin;
       WXCrystalScrolledGridWindow* mpAntiBumpWin;
       WXCrystalScrolledGridWindow* mpBondValenceWin;
       
-      std::list<RowScattPow> mvpRowScattPow;
-      std::list<RowAntiBump> mvpRowAntiBump;
-      std::list<RowBondValence> mvpRowBondValence;
+      std::map<ScatteringPowerAtom*,RowScattPow> mvpRowScattPow;
       
       /// Flag to indicate that we are updating values in the wxGrid data,
       /// and that it is not the user inputing data.
