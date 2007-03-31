@@ -303,6 +303,7 @@ void CIFData::ExtractPowderPattern(const bool verbose)
       }
       pos_x=loop->second.find("_pd_proc_2theta_corrected");
       if(pos_x==loop->second.end()) pos_x=loop->second.find("_pd_meas_angle_2theta");
+      if(pos_x==loop->second.end()) pos_x=loop->second.find("_pd_meas_2theta_scan");
       if(pos_x==loop->second.end())
       {
          pos_x=loop->second.find("_pd_meas_time_of_flight");
