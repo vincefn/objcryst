@@ -155,7 +155,7 @@ template<class T> unsigned long CrystVector<T>::imax(const unsigned long start0,
    register T tmp=0;
    register const T *p=this->data()+start;
    tmp=*p++;
-   long im=0;
+   long im=start;
    for(long i=start+1;i<finish;i++)
    {
       if(tmp<*p) {tmp=*p;im=i;}
