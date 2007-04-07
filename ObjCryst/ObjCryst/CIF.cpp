@@ -10,7 +10,6 @@ using namespace std;
 
 namespace ObjCryst
 {
-
 CIFData::CIFAtom::CIFAtom():
 mLabel(""),mSymbol(""),mOccupancy(1.0)
 {}
@@ -285,22 +284,47 @@ void CIFData::ExtractAtomicPositions(const bool verbose)
    }
 }
 
+/// This is the default wavelength - whenever a "_diffrn_radiation_wavelength" or 
+/// "_pd_proc_wavelength"entry is found,
+/// it is used as a new value for the default wavelength. Since the powder CIFs do not 
+/// include the wavelength, this could be useful if the crystal structure CIF (including
+/// the wavelength) is parsed right before the powder pattern one.
+static float defaultWavelength=1.0;
+
 void CIFData::ExtractPowderPattern(const bool verbose)
 {
+   map<ci_string,string>::const_iterator positem;
+   positem=mvItem.find("_diffrn_radiation_wavelength");
+   if(positem==mvItem.end()) positem=mvItem.find("_pd_proc_wavelength");
+   if(positem!=mvItem.end())
+   {
+      mWavelength=CIFNumeric2Float(positem->second);
+      defaultWavelength=mWavelength;
+      cout<<"Found wavelength:"<<defaultWavelength<<endl;
+   }
+   else mWavelength=defaultWavelength;
+   
+   /// Now find the data
    for(map<set<ci_string>,map<ci_string,vector<string> > >::const_iterator loop=mvLoop.begin();
        loop!=mvLoop.end();++loop)
    {
       mDataType=WAVELENGTH_MONOCHROMATIC;
-      map<ci_string,vector<string> >::const_iterator pos_x,pos_iobs,pos_weight,pos_mon;
-      pos_iobs=loop->second.find("_pd_meas_counts_total");
-      if(pos_iobs==loop->second.end())
+      map<ci_string,vector<string> >::const_iterator pos_x,pos_iobs,pos_weight,pos_mon,pos_wavelength;
+      pos_wavelength=loop->second.find("_diffrn_radiation_wavelength");
+      if(pos_wavelength!=loop->second.end())
       {
-         pos_iobs=loop->second.find("_pd_meas_intensity_total");
-         if(pos_iobs==loop->second.end()) pos_iobs=loop->second.find("_pd_proc_intensity_total");
-         if(pos_iobs==loop->second.end()) pos_iobs=loop->second.find("_pd_proc_intensity_net");
-         if(pos_iobs!=loop->second.end()) pos_weight=loop->second.find("_pd_proc_ls_weight");
-         else continue;//no powder data found
+         cout<<"Found wavelength (in loop):"<<pos_wavelength->second[0];
+         mWavelength=CIFNumeric2Float(pos_wavelength->second[0]);
+         defaultWavelength=mWavelength;
+         cout<<" -> "<<defaultWavelength<<endl;
       }
+         
+      pos_iobs=loop->second.find("_pd_meas_counts_total");
+      if(pos_iobs==loop->second.end()) pos_iobs=loop->second.find("_pd_meas_intensity_total");
+      if(pos_iobs==loop->second.end()) pos_iobs=loop->second.find("_pd_proc_intensity_total");
+      if(pos_iobs==loop->second.end()) pos_iobs=loop->second.find("_pd_proc_intensity_net");
+      if(pos_iobs==loop->second.end()) continue;//no observed powder data found
+      pos_weight=loop->second.find("_pd_proc_ls_weight");
       pos_x=loop->second.find("_pd_proc_2theta_corrected");
       if(pos_x==loop->second.end()) pos_x=loop->second.find("_pd_meas_angle_2theta");
       if(pos_x==loop->second.end()) pos_x=loop->second.find("_pd_meas_2theta_scan");
@@ -347,7 +371,7 @@ void CIFData::ExtractPowderPattern(const bool verbose)
             {
                mPowderPatternSigma[i]=CIFNumeric2Float(pos_weight->second[i]);
                if(mPowderPatternSigma[i]>0) mPowderPatternSigma[i]=1/sqrt(mPowderPatternSigma[i]);
-               else mPowderPatternSigma[i]=0; // :KLUDGE: ?
+               else mPowderPatternSigma[i]=sqrt(mPowderPatternObs[i]); // :KLUDGE: ?
             }
             else mPowderPatternSigma[i]=sqrt(mPowderPatternObs[i]);
             if(pos_mon!=loop->second.end())
@@ -561,6 +585,7 @@ void CIF::Parse(stringstream &in)
    while(!in.eof())
    {
       while(!isgraph(in.peek()) && !in.eof()) in.get(lastc);
+      if(in.eof()) break;
       if(vv) cout<<endl;
       if(in.peek()=='#')
       {//Comment
@@ -569,6 +594,7 @@ void CIF::Parse(stringstream &in)
          if(block=="") mvComment.push_back(tmp);
          else mvData[block].mvComment.push_back(tmp);
          lastc='\r';
+         if(vv)cout<<"Comment:"<<tmp<<endl;
          continue;
       }
       if(in.peek()=='_')

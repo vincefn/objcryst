@@ -138,6 +138,8 @@ class CIFData
       std::vector<float> mPowderPatternObs,mPowderPatternX,mPowderPatternSigma;
       /// Is this X-Ray 2theta, time-of-flight ?
       WavelengthType mDataType;
+      /// Wavelength
+      float mWavelength;
 };
 
 /** Main CIF class - parses the stream and separates data blocks, comments, items, loops.
