@@ -35,8 +35,21 @@ namespace ObjCryst
 /** Different lattice types.
 *
 */
-enum Bravais
+enum CrystalSystem
 { TRICLINIC, MONOCLINIC, ORTHOROMBIC, HEXAGONAL, RHOMBOEDRAL, TETRAGONAL, CUBIC};
+
+enum CrystalCentering
+{ LATTICE_P,LATTICE_I,LATTICE_A,LATTICE_B,LATTICE_C,LATTICE_F};
+
+/** Estimate volume from number of peaks at a given dmin
+* See J. Appl. Cryst. 20 (1987), 161
+*
+* \param dmin,dmax: 1/d limits between which the number of reflections has been observed
+* \param nbrefl: number of observed reflections
+* \param kappa: estimated percentage of reflections actually observed (default=1.0)
+*/
+float EstimateCellVolume(const float dmin, const float dmax, const float nbrefl, 
+                         const CrystalSystem system,const CrystalCentering centering,const float kappa=1);
 
 /** Lightweight class describing the reciprocal unit cell, for the fast computation of d*_hkl^2.
 *
@@ -46,7 +59,7 @@ class RecUnitCell
 {
    public:
       RecUnitCell(const float zero=0,const float par0=0,const float par1=0,const float par2=0,
-                  const float par3=0,const float par4=0,const float par5=0,Bravais lattice=CUBIC);
+                  const float par3=0,const float par4=0,const float par5=0,CrystalSystem lattice=CUBIC);
       RecUnitCell(const RecUnitCell &old);
       void operator=(const RecUnitCell &rhs);
       // access to ith parameter
@@ -83,7 +96,7 @@ class RecUnitCell
       */
       float par[6];
       float zero;
-      Bravais mlattice;
+      CrystalSystem mlattice;
 };
 
 /** Class to store positions of observed reflections.
@@ -161,7 +174,7 @@ float Score(const PeakList &dhkl, const RecUnitCell &ruc, const unsigned int nbS
 class CellExplorer:public RefinableObj
 {
    public:
-      CellExplorer(const PeakList &dhkl, const Bravais lattice, const unsigned int nbSpurious);
+      CellExplorer(const PeakList &dhkl, const CrystalSystem lattice, const unsigned int nbSpurious);
       void Evolution(unsigned int ng,const bool randomize=true,const float f=0.7,const float cr=0.5,unsigned int np=100);
       void SetLengthMinMax(const float min,const float max);
       void SetAngleMinMax(const float min,const float max);
@@ -192,7 +205,7 @@ class CellExplorer:public RefinableObj
       const std::list<std::pair<RecUnitCell,float> >& GetSolutions()const;
       std::list<std::pair<RecUnitCell,float> >& GetSolutions();
    private:
-      unsigned int RDicVol(RecUnitCell uc0, RecUnitCell uc1, unsigned int depth,unsigned long &nbCalc);
+      unsigned int RDicVol(RecUnitCell uc0, RecUnitCell uc1, unsigned int depth,unsigned long &nbCalc,const float minV,const float maxV);
       void Init();
       /// Max number of obs reflections to use
       std::list<std::pair<RecUnitCell,float> > mvSolution;
@@ -207,8 +220,8 @@ class CellExplorer:public RefinableObj
       /// Max amplitude (max=min+amplitude) for all parameters
       /// All parameters are treated as periodic for DE (??)
       float mAmp[7];
-      /// Bravais Lattice for which we search
-      Bravais mlattice;
+      /// Lattice type for which we search
+      CrystalSystem mlattice;
       unsigned int mNbSpurious;
       float mD2Error;
       LSQNumObj mLSQObj;

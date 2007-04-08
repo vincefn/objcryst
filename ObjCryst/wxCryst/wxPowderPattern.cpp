@@ -30,6 +30,7 @@
 #endif
 #include "wx/dcbuffer.h"
 #include "wx/config.h"
+#include "wx/notebook.h"
 
 #include "wxCryst/wxPowderPattern.h"
 #include "wxCryst/wxRadiation.h"
@@ -1485,23 +1486,76 @@ void WXPowderPatternGraph::OnToggleLabel(wxCommandEvent &event)
 
 void WXPowderPatternGraph::OnFindPeaks(wxCommandEvent& WXUNUSED(event))
 {
-   float dmin=2.0;
+   float dmin=1.5;
    while(true)
    {
       mPeakList=mpPattern->GetPowderPattern().FindPeaks(dmin,-1,1000);
       dmin*=0.75;
-      if((mPeakList.GetPeakList().size()>20)||(dmin<0.3)) break;
+      if((mPeakList.GetPeakList().size()>30)||(dmin<0.3)) break;
    }
    
-   if(mPeakList.GetPeakList().size()>10)
-   {
-      mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_TOGGPEAK, TRUE);
-      mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_INDEX, TRUE);
-      mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_ADDPEAK, TRUE);
-      mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_REMOVEPEAK, TRUE);
-   }
+   const unsigned int nb=mPeakList.GetPeakList().size();
+   if(nb<5) return;
+   
+   // Estimate volume from number of peaks at a given dmin
+   // See J. Appl. Cryst. 20 (1987), 161
+   dmin=mPeakList.GetPeakList()[nb-1].dobs;
+   const float dmax=mpPattern->GetPowderPattern().X2STOL(mpPattern->GetPowderPattern().GetPowderPatternXMin())*2;
+   cout<<"Predicted Unit Cell Volume from: dmax="<<1/dmax<<" -> dmin="<<1/dmin<<", nb peak="<<nb<<endl;
+   cout<<"  Cubic P        (120%/33% reflections observed):v="
+       <<EstimateCellVolume(dmin,dmax,nb,CUBIC      ,LATTICE_P,1.2)<<","
+       <<EstimateCellVolume(dmin,dmax,nb,CUBIC      ,LATTICE_P,0.3)<<endl;
+   cout<<"  Cubic I        (120%/30% reflections observed):v="
+       <<EstimateCellVolume(dmin,dmax,nb,CUBIC      ,LATTICE_I,1.2)<<","
+       <<EstimateCellVolume(dmin,dmax,nb,CUBIC      ,LATTICE_I,0.3)<<endl;
+   cout<<"  Cubic F        (120%/30% reflections observed):v="
+       <<EstimateCellVolume(dmin,dmax,nb,CUBIC      ,LATTICE_F,1.2)<<","
+       <<EstimateCellVolume(dmin,dmax,nb,CUBIC      ,LATTICE_F,0.3)<<endl;
+   cout<<"  Tetragonal P   (120%/30% reflections observed):v="
+       <<EstimateCellVolume(dmin,dmax,nb,TETRAGONAL ,LATTICE_P,1.2)<<","
+       <<EstimateCellVolume(dmin,dmax,nb,TETRAGONAL ,LATTICE_P,0.3)<<endl;
+   cout<<"  Tetragonal I   (120%/30% reflections observed):v="
+       <<EstimateCellVolume(dmin,dmax,nb,TETRAGONAL ,LATTICE_I,1.2)<<","
+       <<EstimateCellVolume(dmin,dmax,nb,TETRAGONAL ,LATTICE_I,0.3)<<endl;
+   cout<<"  Orthorombic P  (120%/30% reflections observed):v="
+       <<EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_P,1.2)<<","
+       <<EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_P,0.3)<<endl;
+   cout<<"  Orthorombic I,C(120%/30% reflections observed):v="
+       <<EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_I,1.2)<<","
+       <<EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_I,0.3)<<endl;
+   cout<<"  Hexagonal      (120%/30% reflections observed):v="
+       <<EstimateCellVolume(dmin,dmax,nb,HEXAGONAL  ,LATTICE_P,1.2)<<","
+       <<EstimateCellVolume(dmin,dmax,nb,HEXAGONAL  ,LATTICE_P,0.3)<<endl;
+   cout<<"  Monoclinic P   (120%/30% reflections observed):v="
+       <<EstimateCellVolume(dmin,dmax,nb,MONOCLINIC ,LATTICE_P,1.2)<<","
+       <<EstimateCellVolume(dmin,dmax,nb,MONOCLINIC ,LATTICE_P,0.3)<<endl;
+   cout<<"  Monoclinic C   (120%/30% reflections observed):v="
+       <<EstimateCellVolume(dmin,dmax,nb,MONOCLINIC ,LATTICE_C,1.2)<<","
+       <<EstimateCellVolume(dmin,dmax,nb,MONOCLINIC ,LATTICE_C,0.3)<<endl;
+   cout<<"  Triclinic      (120%/30% reflections observed):v="
+       <<EstimateCellVolume(dmin,dmax,nb,TRICLINIC  ,LATTICE_P,1.0)  <<","
+       <<EstimateCellVolume(dmin,dmax,nb,TRICLINIC  ,LATTICE_P,0.3)<<endl;
+
+   
+   mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_TOGGPEAK, TRUE);
+   mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_INDEX, TRUE);
+   mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_ADDPEAK, TRUE);
+   mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_REMOVEPEAK, TRUE);
+   
    // Keep 20 lowest peaks
-   if(mPeakList.GetPeakList().size()>20) mPeakList.GetPeakList().resize(20);
+   if(mPeakList.GetPeakList().size()>30) mPeakList.GetPeakList().resize(30);
+   //mpPattern->CrystUpdate(true,true);
+   if(true)
+   {// display 2nd derivative as 'calc' (will remain until an update to the pattern is made)
+      CrystVector_REAL obsd2;
+      obsd2=SavitzkyGolay(mObs,4,2);
+      const float norm=-obsd2.min();
+      obsd2 /= -norm;
+      
+      mCalc=obsd2;
+      mCalc*=mObs.max();
+   }
+
    this->Refresh(false);
 }
 
@@ -1547,6 +1601,7 @@ void WXPowderPatternGraph::OnChangePeak(wxCommandEvent& event)
       sprintf(buf,"Added peak at d=%6.3f",1/d);
       mPeakList.AddPeak(d);
       mpParentFrame->SetStatusText(buf,1);
+      this->Refresh(false);
    }
 }
 //////////////////////////////////////// WXCellExplorer /////////////////////
@@ -1618,7 +1673,7 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
    mpLengthMin=new wxTextCtrl(this,-1,"3",wxDefaultPosition,wxSize(30,-1),0,
                                wxTextValidator(wxFILTER_NUMERIC));
    pLengthSizer->Add(mpLengthMin,0,wxALIGN_CENTER);
-   mpLengthMax=new wxTextCtrl(this,-1,"15",wxDefaultPosition,wxSize(30,-1),0,
+   mpLengthMax=new wxTextCtrl(this,-1,"25",wxDefaultPosition,wxSize(30,-1),0,
                                wxTextValidator(wxFILTER_NUMERIC));
    pLengthSizer->Add(mpLengthMax,0,wxALIGN_CENTER);
    pSizer2->Add(pLengthSizer,0,wxALIGN_CENTER);
@@ -1629,7 +1684,7 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
    //mpAngleMin=new wxTextCtrl(this,-1,"90",wxDefaultPosition,wxSize(40,-1),0,
    //                          wxTextValidator(wxFILTER_NUMERIC));
    //pAngleSizer->Add(mpAngleMin,0,wxALIGN_CENTER);
-   mpAngleMax=new wxTextCtrl(this,-1,"120",wxDefaultPosition,wxSize(40,-1),0,
+   mpAngleMax=new wxTextCtrl(this,-1,"130",wxDefaultPosition,wxSize(40,-1),0,
                              wxTextValidator(wxFILTER_NUMERIC));
    pAngleSizer->Add(mpAngleMax,0,wxALIGN_CENTER);
    pSizer2->Add(pAngleSizer,0,wxALIGN_CENTER);
@@ -1640,7 +1695,7 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
    mpVolumeMin=new wxTextCtrl(this,-1,"10",wxDefaultPosition,wxSize(50,-1),0,
                                wxTextValidator(wxFILTER_NUMERIC));
    pVolumeSizer->Add(mpVolumeMin,0,wxALIGN_CENTER);
-   mpVolumeMax=new wxTextCtrl(this,-1,"1500",wxDefaultPosition,wxSize(50,-1),0,
+   mpVolumeMax=new wxTextCtrl(this,-1,"2500",wxDefaultPosition,wxSize(50,-1),0,
                               wxTextValidator(wxFILTER_NUMERIC));
    pVolumeSizer->Add(mpVolumeMax,0,wxALIGN_CENTER);
    pSizer2->Add(pVolumeSizer,0,wxALIGN_CENTER);
@@ -1661,9 +1716,9 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
                                 wxTextValidator(wxFILTER_NUMERIC));
    pStopSizer->Add(mpStopOnScore,0,wxALIGN_CENTER);
    
-   wxStaticText* pStopOnDepthText=new wxStaticText(this,-1,"or depth>=");
+   wxStaticText* pStopOnDepthText=new wxStaticText(this,-1,"and depth>=");
    pStopSizer->Add(pStopOnDepthText,0,wxALIGN_CENTER);
-   mpStopOnDepth=new wxTextCtrl(this,-1,"6",wxDefaultPosition,wxSize(50,-1),0,
+   mpStopOnDepth=new wxTextCtrl(this,-1,"6",wxDefaultPosition,wxSize(30,-1),0,
                                 wxTextValidator(wxFILTER_NUMERIC));
    pStopSizer->Add(mpStopOnDepth,0,wxALIGN_CENTER);
    pSizer2->Add(pStopSizer,0,wxALIGN_CENTER);
@@ -1676,16 +1731,16 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
                                 wxTextValidator(wxFILTER_NUMERIC));
    pReportSizer->Add(mpReportOnScore,0,wxALIGN_CENTER);
    
-   wxStaticText* pReportOnDepthText=new wxStaticText(this,-1,"and depth>=");
+   wxStaticText* pReportOnDepthText=new wxStaticText(this,-1,"or depth>=");
    pReportSizer->Add(pReportOnDepthText,0,wxALIGN_CENTER);
-   mpReportOnDepth=new wxTextCtrl(this,-1,"3",wxDefaultPosition,wxSize(50,-1),0,
+   mpReportOnDepth=new wxTextCtrl(this,-1,"4",wxDefaultPosition,wxSize(50,-1),0,
                                 wxTextValidator(wxFILTER_NUMERIC));
    pReportSizer->Add(mpReportOnDepth,0,wxALIGN_CENTER);
    pSizer2->Add(pReportSizer,0,wxALIGN_CENTER);
    
    
    wxBoxSizer *pErrorSizer=new wxBoxSizer(wxHORIZONTAL);
-   wxStaticText* pErrorText=new wxStaticText(this,-1,"1/d error:");
+   wxStaticText* pErrorText=new wxStaticText(this,-1,"delta(d)/d^2 error:");
    pErrorSizer->Add(pErrorText,0,wxALIGN_CENTER);
    mpErrorD=new wxTextCtrl(this,-1,"0",wxDefaultPosition,wxSize(50,-1),0,
                            wxTextValidator(wxFILTER_NUMERIC));
@@ -1720,7 +1775,14 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
 }
 void WXCellExplorer::OnIndex(wxCommandEvent &event)
 {
-   mpCellExplorer = new CellExplorer(*mpPeakList,(Bravais)(mpBravais->GetSelection()),0);
+   for(vector<PeakList::hkl>::iterator pos=mpPeakList->mvHKL.begin();pos!=mpPeakList->mvHKL.end();++pos)
+      pos->isSpurious=false;
+   
+   PeakList peaklist=*mpPeakList;
+   for(vector<PeakList::hkl>::iterator pos=mpPeakList->mvHKL.begin();pos!=mpPeakList->mvHKL.end();++pos)
+   {   pos->d2obsmin=pos->d2obs; pos->d2obsmax=pos->d2obs;}
+   
+   mpCellExplorer = new CellExplorer(peaklist,(CrystalSystem)(mpBravais->GetSelection()),0);
    
    wxString s;
    double lmin,lmax,amin=90,amax,vmin,vmax,error,stopOnScore,reportOnScore;
@@ -1743,9 +1805,6 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
    mpCellExplorer->SetVolumeMinMax((float)vmin,(float)vmax);
    mpCellExplorer->SetNbSpurious((unsigned int)nbspurious);
    mpCellExplorer->SetD2Error((float)(error*error));
-   
-   for(vector<PeakList::hkl>::iterator pos=mpPeakList->mvHKL.begin();pos!=mpPeakList->mvHKL.end();++pos)
-      pos->isSpurious=false;
 
    Chronometer chrono;
    if(mpAlgorithm->GetSelection()==0) mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
@@ -1754,7 +1813,7 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
       for(unsigned int i=0;i<20;++i)
       {
          mpCellExplorer->Evolution(5000,true,0.7,0.5,50);
-         if(mpCellExplorer->GetBestScore()>50) break;
+         if(mpCellExplorer->GetBestScore()>stopOnScore) break;
       }
    }
    cout<<"Finished indexing, bestscore="<<mpCellExplorer->GetBestScore()<<", elapsed time="<<chrono.seconds()<<endl;

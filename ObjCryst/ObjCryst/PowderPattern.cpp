@@ -2603,6 +2603,7 @@ void PowderPattern::ImportPowderPatternCIF(const CIF &cif)
             this->GetRadiation().SetWavelengthType(WAVELENGTH_TOF);
             mClockPowderPatternPar.Click();
          }
+         else this->GetRadiation().SetWavelength(pos->second.mWavelength);
          for(unsigned long i=0;i<mNbPoint;++i)
          {
             mPowderPatternObs(i)=pos->second.mPowderPatternObs[i];
@@ -4146,11 +4147,10 @@ PeakList PowderPattern::FindPeaks(const float dmin,const float maxratio,const un
    unsigned long start,finish;
    if(this->GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
    {
-      start=0;
+      start=1;// do not start at 0, if this is a simulation that really start at theta=0...
       for(finish=0;finish<nb;++finish)
       {
          const REAL d=1/(this->X2STOL(this->GetPowderPatternX()(finish))*2);
-         //cout<<__FILE__<<":"<<__LINE__<<", #"<<finish<<",d="<<d<<endl;
          if(d<dmin) break;
       }
    }
@@ -4160,52 +4160,103 @@ PeakList PowderPattern::FindPeaks(const float dmin,const float maxratio,const un
       for(start=nb-1;start>=0;--start) 
       {
          const REAL d=1/(this->X2STOL(this->GetPowderPatternX()(start))*2);
-         cout<<__FILE__<<":"<<__LINE__<<", #"<<start<<",d="<<d<<endl;
          if(d<dmin) break;
       }
    }
+   // First evaluate approximate width (in number of pixels) of reflections
+   unsigned int width_golay=10;
+   {
+      CrystVector_REAL obs;
+      const unsigned int nbwidth=9;
+      CrystVector_long width(nbwidth);
+      width=0;
+      obs=this->GetPowderPatternObs();
+      const unsigned long nb=obs.numElements();
+      for(unsigned int j=0;j<nbwidth;j++)
+      {
+         const unsigned long imax=obs.imax(nb/10,nb-1);
+         const REAL iobs_max=obs(imax);
+         REAL thres=iobs_max;
+         unsigned long i;
+         for(i=imax-100;i<(imax+100);++i)
+         {
+            if(i<0){i=0;continue;}
+            if(i>nb) break;
+            if(obs(i)<thres) thres=obs(i);
+         }
+         thres=(iobs_max+thres)/2;
+         i=imax;
+         while(obs(i)>=thres)
+         {
+            cout<<obs(i)<<"   ";
+            obs(i--)=0;
+            width(j)+=1;
+            if(i<0) break;
+         }
+         i=imax+1;
+         while(obs(i)>=thres)
+         {
+            cout<<obs(i)<<"   ";
+            obs(i++)=0;
+            width(j)+=1;
+            if(i>=nb) break;
+         }
+         cout<<endl<<" => "<<width(j)<<endl;
+         for(i=imax-width(j)*2;i<(imax+width(j)*2);++i)
+         {
+            if(i<0) continue;
+            if(i>=nb) break;
+            obs(i)=0;
+         }
+      }
+      cout<<"Width of "<<nbwidth<<" strongest peaks:"<<endl<<width;
+      width_golay=width(SortSubs(width)(nbwidth/2));
+      cout<<"median width:"<<width_golay<<endl;
+      if(width_golay<=4)width_golay=4;
+      if(width_golay>=10)width_golay=10;
+   }
+   
    // get 2nd derivative
    CrystVector_REAL obsd2;
-   obsd2=SavitzkyGolay(this->GetPowderPatternObs(),4,2);
+   obsd2=SavitzkyGolay(this->GetPowderPatternObs(),width_golay,2);
    const float norm=-obsd2.min();
-   obsd2 /= -norm;
+   // Normalize, so that the derivative has the same extent as the observed pattern
+   obsd2 *= mPowderPatternObs.max()/(-norm);
    
-   float maxr=maxratio;
-   if(maxr<0)
-   {//Automatic discrimination - get an idea from distribution on lower side
+   REAL min_iobs;
+   if(maxratio<0)
+   {//Automatic discrimination - get an idea of noise from the distribution of the scond derivative
       CrystVector_REAL tmp;
       tmp=obsd2;
       tmp.resizeAndPreserve(tmp.numElements()/4);// First quarter, avoid too many peaks
       CrystVector<long> sub(tmp.numElements());
       QuickSortSubs(tmp,sub,tmp.numElements()-1,0);
-      maxr=3*(tmp(tmp.numElements()/2)-tmp(tmp.numElements()/4));
-      cout<<__FILE__<<":"<<__LINE__<<" MAXRATIO="<<maxr<<endl;
-   }
-   if(true)
-   {//replace the calculated powder pattern by derivative, for user check
-      mPowderPatternCalc=obsd2;
-      mPowderPatternCalc*=mPowderPatternObs.max();
-   }
-   REAL min_int;
+      min_iobs=5*(tmp(tmp.numElements()/2)-tmp(tmp.numElements()/4));
+      //cout<<__FILE__<<":"<<__LINE__<<" MIN_IOBS (automatic)="<<min_iobs<<endl;
+   }else min_iobs=-1;// This will be set after highest peak is found
    PeakList pl;
-
+   int nbav_min=0;//minimum numerb of points over which the peak is integrated
    while(true)
    {// Start from max
       const unsigned long imax=obsd2.imax(start,finish);
       REAL iobs=obsd2(imax);
+      if(iobs<=0) break;
       REAL xmax=mX(imax)*iobs;
       long nbav=1;
       unsigned long i=imax;
       REAL lastiobs=obsd2(i);
+      const REAL iobs_max=lastiobs;
+      //cout<<i<<":"<<lastiobs<<":"<<mX(i)*RAD2DEG<<endl;
       while(true)
       {
          if(i<=1) break;
          if(obsd2(--i)>=lastiobs) break;
          lastiobs=obsd2(i);
          obsd2(i)=0;
-         if(lastiobs<0) break;
          iobs+=lastiobs;
          xmax+=mX(i)*lastiobs;nbav++;
+         if(lastiobs<=0) break;
+         //cout<<i<<":"<<lastiobs<<":"<<mX(i)*RAD2DEG<<endl;
       }
       float dleft=mX(i+1);
       i=imax;
@@ -4216,9 +4267,10 @@ PeakList PowderPattern::FindPeaks(const float dmin,const float maxratio,const un
          if(obsd2(++i)>=lastiobs) break;
          lastiobs=obsd2(i);
          obsd2(i)=0;
-         if(lastiobs<0) break;
          iobs+=lastiobs;
          xmax+=mX(i)*lastiobs;nbav++;
+         if(lastiobs<=0) break;
+         //cout<<i<<":"<<lastiobs<<":"<<mX(i)*RAD2DEG<<endl;
       }
       float dright=mX(i-1);
       xmax/=iobs;
@@ -4226,16 +4278,30 @@ PeakList PowderPattern::FindPeaks(const float dmin,const float maxratio,const un
       REAL dmax=this->X2STOL(xmax)*2;
       dright=this->X2STOL(dright)*2;
       dleft =this->X2STOL(dleft)*2;
+      //TODO : evaluate min intensity ratio from noise ?
+      if(min_iobs<0)
+      {
+         cout<<this->GetPowderPatternObsSigma()(imax)<<","<<this->GetPowderPatternObs()(imax)<<endl;
+         min_iobs=iobs/nbav*maxratio;
+         //cout<<__FILE__<<":"<<__LINE__<<" MIN_IOBS="<<min_iobs<<endl;
+      }
+      if(nbav_min==0)
+      {
+         nbav_min=nbav/2;
+         if(nbav_min<3)nbav_min=3;
+      }
+      if(pl.GetPeakList().size()>maxpeak) break;
+      float sigma=this->GetPowderPatternObsSigma()(imax);
       if(this->GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
          xmax  *= RAD2DEG;
-      cout<<"Peak #"<<pl.GetPeakList().size()<<", x="<<xmax<<",d="<<1/dmax<<", Iobs="<<iobs<<", nbav="<<nbav<<endl;
-      //TODO : evaluate min intensity ratio from noise ?
-      if(pl.GetPeakList().size()==0) min_int=iobs*maxr;
-      else if((pl.GetPeakList().size()>maxpeak)||(iobs<min_int)) break;
-      //const float sigma=this->GetPowderPatternObsSigma()(imax)/norm;
-      if(((nbav>=5)&&(iobs>min_int*3))||((nbav>=3)&&(iobs>min_int*5)))
+      cout<<"Peak #"<<pl.GetPeakList().size()<<"imax="<<imax<<", x="<<xmax<<",d="<<1/dmax<<", d2iobs_max="<<iobs_max
+          <<", d2Iobs="<<iobs<<", nbav="<<nbav<<", min_iobs="<<min_iobs<<",sigma="<<sigma<<endl;
+      if(  ((nbav>=nbav_min)  &&(iobs_max>min_iobs)&&((iobs/nbav)>min_iobs))
+         ||((nbav>=nbav_min)  &&(iobs_max>min_iobs)&&((iobs/nbav)>min_iobs*.2)&&((iobs/nbav)>3*sigma))
+         ||((nbav>=nbav_min/2)&&(iobs_max>min_iobs)&&((iobs/nbav)>min_iobs*2 )&&((iobs/nbav)>6*sigma)))
       {
          pl.AddPeak(dmax,iobs,abs(dright-dleft)*.5);
+         if((pl.GetPeakList().size()==1)&&(maxratio<0)&&(min_iobs<0.005*iobs/nbav)) min_iobs=0.005*iobs/nbav;
       }
    }
    pl.Print(cout);

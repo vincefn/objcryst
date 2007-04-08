@@ -40,11 +40,44 @@ using namespace std;
 
 namespace ObjCryst
 {
+
+float EstimateCellVolume(const float dmin, const float dmax, const float nbrefl, 
+                         const CrystalSystem system,const CrystalCentering centering,const float kappa)
+{
+   const float q1=dmin*dmin*dmin-dmax*dmax*dmax;
+   const float q2=dmin*dmin     -dmax*dmax;
+   float D0,C0;
+   if(system==TRICLINIC)
+   {
+      C0=2.095;
+      return nbrefl/(C0*kappa*q1);
+   }
+   if(system==CUBIC)
+   {
+      if(centering==LATTICE_P) D0=0.862;
+      if(centering==LATTICE_I) D0=0.475;
+      if(centering==LATTICE_F) D0=0.354;
+      return pow(nbrefl/(D0*kappa*q2),(float)1.5);
+   }
+   // "*.85" means using D0_min rather than D0
+   if(system==MONOCLINIC) {C0=1.047;D0=0.786*.85;}
+   if(system==ORTHOROMBIC){C0=0.524;D0=1.36 *.85;}
+   if(system==HEXAGONAL)  {C0=0.150;D0=1.04 *.85;}
+   if(system==RHOMBOEDRAL){C0=0.230;D0=1.04 *.85;}
+   if(system==TETRAGONAL) {C0=0.214;D0=1.25 *.85;}
+   if((centering==LATTICE_I)||(centering==LATTICE_A)||(centering==LATTICE_B)||(centering==LATTICE_C)) {C0/=2;D0/=2;}
+   if(centering==LATTICE_F){C0/=4;D0/=4;}
+   const double alpha=D0*q2/(3*C0*q1), beta=nbrefl/(2*kappa*C0*q1);
+   const double eta=beta-alpha*alpha*alpha,gamma=sqrt(beta*beta-2*beta*alpha*alpha*alpha);
+   const float v=pow(pow(eta+gamma,(double)1/3.)+pow((eta-gamma),(double)1/3.)-alpha,(double)3);
+   return v;
+}
+
 /** light-weight class storing the reciprocal space unitcell
 */
 
 RecUnitCell::RecUnitCell(const float zero,const float p0,const float p1,const float p2,
-                         const float p3,const float p4,const float p5,Bravais lattice):
+                         const float p3,const float p4,const float p5,CrystalSystem lattice):
 mlattice(lattice)
 {
    par[0]=zero;
@@ -91,7 +124,7 @@ float RecUnitCell::hkl2d(const float h,const float k,const float l,REAL *derivpa
          }
          case HEXAGONAL:
          {
-            return par[0]+par[1]*par[1]*(h*h + k*k + 2*0.8660254037844386*h*k)+ par[2]*par[2]*l*l ;
+            return par[0]+par[1]*par[1]*(h*h + k*k + h*k)+ par[2]*par[2]*l*l ;
             break;
          }
          case RHOMBOEDRAL:
@@ -132,7 +165,7 @@ float RecUnitCell::hkl2d(const float h,const float k,const float l,REAL *derivpa
          }
          case HEXAGONAL:
          {
-            return par[1]*par[1]*(2*h + 2*0.8660254037844386*k);
+            return par[1]*par[1]*(2*h + k);
             break;
          }
          case RHOMBOEDRAL:
@@ -173,7 +206,7 @@ float RecUnitCell::hkl2d(const float h,const float k,const float l,REAL *derivpa
          }
          case HEXAGONAL:
          {
-            return par[1]*par[1]*(2*k + 2*0.8660254037844386*h);
+            return par[1]*par[1]*(2*k + h);
             break;
          }
          case RHOMBOEDRAL:
@@ -257,7 +290,7 @@ float RecUnitCell::hkl2d(const float h,const float k,const float l,REAL *derivpa
          }
          case HEXAGONAL:
          {
-            return 2*par[1]*(h*h + k*k + 2*0.8660254037844386*h*k);
+            return 2*par[1]*(h*h + k*k + h*k);
             break;
          }
          case RHOMBOEDRAL:
@@ -479,8 +512,8 @@ void RecUnitCell::hkl2d_delta(const float h,const float k,const float l,
       }
       case HEXAGONAL: //OK
       {
-         dmin=p0m+p1m*p1m*(h*h + k*k + 1.732050807568877*h*k)+ p2m*p2m*l*l ;
-         dmax=p0p+p1p*p1p*(h*h + k*k + 1.732050807568877*h*k)+ p2p*p2p*l*l ;
+         dmin=p0m+p1m*p1m*(h*h + k*k + h*k)+ p2m*p2m*l*l ;
+         dmax=p0p+p1p*p1p*(h*h + k*k + h*k)+ p2p*p2p*l*l ;
          return;
       }
       case RHOMBOEDRAL:
@@ -708,8 +741,17 @@ void PeakList::Import2ThetaIntensity(istream &is, const float wavelength)
 void PeakList::AddPeak(const float d, const float iobs,const float dobssigma,const float iobssigma,
                        const int h,const int k, const int l,const float d2calc)
 {
-   mvHKL.push_back(hkl(d,iobs,dobssigma,iobssigma,h,k,l,d2calc));
+   if(dobssigma<=0)
+   {// Manually added peak ? Use other reflection's sigmas to evaluate sigma for this reflection
+      float s=0;
+      for(vector<hkl>::const_iterator pos=mvHKL.begin();pos!=mvHKL.end();++pos)
+         s+= pos->dobssigma;
+      s/=mvHKL.size();
+      mvHKL.push_back(hkl(d,iobs,s,iobssigma,h,k,l,d2calc));
+   }
+   else mvHKL.push_back(hkl(d,iobs,dobssigma,iobssigma,h,k,l,d2calc));
    sort(mvHKL.begin(),mvHKL.end(),compareHKL_d);
+   this->Print(cout);
 }
 
 void PeakList::RemovePeak(unsigned int idx)
@@ -725,10 +767,12 @@ void PeakList::Print(std::ostream &os) const
    os<<"PeakList, with "<<mvHKL.size()<<" peaks"<<endl;
    for(vector<PeakList::hkl>::const_iterator pos=mvHKL.begin();pos!=mvHKL.end();++pos)
    {
+      const float sigma=1/(pos->dobs-pos->dobssigma/2)-1/(pos->dobs+pos->dobssigma/2);
       if(pos->isIndexed)
-         sprintf(buf,"#%3d d=%6.3f+/-%6.3f dcalc=%6.3f iobs=%6.3f HKL=%2d %2d %2d Spurious=%1d stats=%6d",
-                 i++,1/pos->dobs,1/(pos->dobs-pos->dobssigma/2)-1/(pos->dobs+pos->dobssigma/2),
-                 1/sqrt(pos->d2calc),pos->iobs,pos->h,pos->k,pos->l,pos->isSpurious,pos->stats);
+         sprintf(buf,"#%3d d=%6.3f+/-%7.4f dcalc=%6.3f, diff=%7.4f, iobs=%6.3f HKL=%2d %2d %2d Spurious=%1d stats=%6d",
+                 i++,1/pos->dobs,sigma,
+                 1/sqrt(pos->d2calc),1/sqrt(pos->d2calc)-1/pos->dobs,
+                 pos->iobs,pos->h,pos->k,pos->l,pos->isSpurious,pos->stats);
       else
          sprintf(buf,"#%3d d=%6.3f+/-%6.3f              iobs=%6.3f  UNINDEXED   Spurious=%1d stats=%6d",
                  i++,1/pos->dobs,1/(pos->dobs-pos->dobssigma/2)-1/(pos->dobs+pos->dobssigma/2),
@@ -794,13 +838,31 @@ float Score(const PeakList &dhkl, const RecUnitCell &ruc, const unsigned int nbS
       nbCalcH=0;
       for(int sk=sk0;sk<=1;sk+=2)
       {
+         if(h==0) sk=1;// no need to explore 0kl with both sk -1 and 1
          for(k=0;;++k)
          {
             nbCalcK=0;
             for(int sl=sl0;sl<=1;sl+=2)
             {
-               if((h+k)==0) l=1;
-               else l=0;
+               if((h+k)==0)
+               {
+                  sl=1;// No need to list 0 0 l with l<0
+                  l=1;
+               }
+               else
+               {
+                  if(h==0)
+                  {
+                     if(ruc.mlattice==MONOCLINIC) sl=1;// 0 k l and 0 k -l are equivalent
+                     if((sk<0)||(sl<0)) l=1;// Do not list 0 k 0 with k<0
+                     else l=0;// h==k==0 already covered
+                  }
+                  else
+                  {
+                     if(sl<0) l=1;// Do not list h k 0 twice
+                     else l=0;
+                  }
+               }
                for(;;++l)
                {
                   const float d2=ruc.hkl2d(h,sk*k,sl*l);
@@ -815,7 +877,7 @@ float Score(const PeakList &dhkl, const RecUnitCell &ruc, const unsigned int nbS
                   if(storePredictedHKL)
                   {
                      dhkl.mvPredictedHKL.push_back(PeakList::hkl(0,0,0,0,h,sk*k,sl*l,d2));
-                     continue;
+                     //continue;
                   }
                   for(pos=first;pos!=last;++pos)
                   {
@@ -904,7 +966,7 @@ float Score(const PeakList &dhkl, const RecUnitCell &ruc, const unsigned int nbS
    */
    if(nbCalc==0) return 0;
    const float score=sqrt(dmax)*nb/(2*epsilon*nbCalc);
-   if(score<0)
+   if(verbose)
    {
       dhkl.Print(cout);
       cout<<"Final score:"<<score<<", nbCalc="<<nbCalc<<" ,<epsilon>="<<epsilon<<" nb="<<nb<<" Qn="<<sqrt(dmax)<<endl;
@@ -914,7 +976,7 @@ float Score(const PeakList &dhkl, const RecUnitCell &ruc, const unsigned int nbS
 
 /////////////////////////////////////////////////////// CellExplorer ///////////////////////////////////////
 
-CellExplorer::CellExplorer(const PeakList &dhkl, const Bravais lattice, const unsigned int nbSpurious):
+CellExplorer::CellExplorer(const PeakList &dhkl, const CrystalSystem lattice, const unsigned int nbSpurious):
 mnpar(3),mpPeakList(&dhkl),
 mLengthMin(4),mLengthMax(25),
 mAngleMin(M_PI),mAngleMax(2*M_PI/3),
@@ -1118,7 +1180,7 @@ void CellExplorer::Evolution(unsigned int ng,const bool randomize,const float f,
        <<uc[3]*RAD2DEG<<", beta="<<uc[4]*RAD2DEG<<", gamma="<<uc[5]*RAD2DEG<<", V="<<uc[6]
        <<", score="<<bestpos->second
        <<"     ("<<ng*np/((clock()-mTime0)/(float)CLOCKS_PER_SEC)<<" trials/s)"<<endl;
-   if(score>5)
+   if(score>mMinScoreReport*.5)
    {
       // Now, do a least-squares refinement on best
       mRecUnitCell=bestpos->first;
@@ -1128,7 +1190,7 @@ void CellExplorer::Evolution(unsigned int ng,const bool randomize,const float f,
       cout<<__FILE__<<":"<<__LINE__<<" Best-LSQ: a="<<uc[0]<<", b="<<uc[1]<<", c="<<uc[2]<<", alpha="
          <<uc[3]*RAD2DEG<<", beta="<<uc[4]*RAD2DEG<<", gamma="<<uc[5]*RAD2DEG<<", V="<<uc[6]
          <<", score="<<score<<endl;
-      if(score>10)
+      if(score>mMinScoreReport)
       {
          if(score>mBestScore) mBestScore=score;
          mvSolution.push_back(make_pair(mRecUnitCell,score));
@@ -1295,7 +1357,7 @@ void CellExplorer::LSQRefine(int nbCycle, bool useLevenbergMarquardt, const bool
 
 /// Number of reflexions found in the intervals calculated between uc+duc and uc-duc
 int DichoIndexed(const PeakList &dhkl, const RecUnitCell &uc,const RecUnitCell &duc,
-                 const unsigned int nbUnindexed=0,const float maxderr=0, const bool verbose=false)
+                 const unsigned int nbUnindexed=0,const bool verbose=false)
 {
    // List of indexed reflections
    const unsigned int nb=dhkl.GetPeakList().size();
@@ -1304,8 +1366,8 @@ int DichoIndexed(const PeakList &dhkl, const RecUnitCell &uc,const RecUnitCell &
    
    unsigned int nbIndexed=nb-nbUnindexed;// Number of reflections we require to be indexed
    int h,k,l;
-   const float dmax=dhkl.GetPeakList()[nb-1].d2obs;
-   const float dmin=dhkl.GetPeakList()[0   ].d2obs;
+   float dmax=dhkl.GetPeakList()[nb-1].d2obs;
+   float dmin=dhkl.GetPeakList()[0   ].d2obs;
    
    int sk0,sl0;// do we need >0 *and* <0 indices for k,l ?
    switch(uc.mlattice)
@@ -1346,18 +1408,37 @@ int DichoIndexed(const PeakList &dhkl, const RecUnitCell &uc,const RecUnitCell &
       break_k=false;
       for(int sk=sk0;sk<=1;sk+=2)
       {
+         if(h==0) sk=1;
          for(k=0;;++k)
          {
             break_l=false;
             for(int sl=sl0;sl<=1;sl+=2)
             {
+               if((h+k)==0)
+               {
+                  sl=1;// No need to list 0 0 l with l<0
+                  l=1;
+               }
+               else
+               {
+                  if(h==0)
+                  {
+                     if(uc.mlattice==MONOCLINIC) sl=1;// 0 k l and 0 k -l are equivalent
+                     if((sk<0)||(sl<0)) l=1;// Do not list 0 k 0 with k<0
+                     else l=0;// h==k==0 already covered
+                  }
+                  else
+                  {
+                     if(sl<0) l=1;// Do not list h k 0 twice
+                     else l=0;
+                  }
+               }
                if((h+k)==0) l=1;
                else l=0;
                for(;;++l)
                {
                   float d0,d1;
                   uc.hkl2d_delta(h,sk*k,sl*l,duc,d0,d1);
-                  d0-=maxderr;d1+=maxderr;
                   if(d1<dmin) continue;
                   if(d0>dmax)
                   {
@@ -1376,8 +1457,8 @@ int DichoIndexed(const PeakList &dhkl, const RecUnitCell &uc,const RecUnitCell &
                         --nbIndexed;
                         if(verbose) cout<<d1<<" < ? <"<<d0<<"("<<h<<","<<sk*k<<","<<sl*l<<"): "<<d2obs<<" (remaining to index:"<<nbIndexed<<")"<<endl;
                         if(nbIndexed==0) return true;
-                        if(pos==first)first++;
-                        if(pos==last)last--;
+                        if(pos==first){first++;dmin=first->d2obsmin;}
+                        if(pos==last){last--;dmax=last->d2obsmax;}
                      }
                   }
                }
@@ -1402,9 +1483,19 @@ float CellExplorer::GetBestScore()const{return mBestScore;}
 const std::list<std::pair<RecUnitCell,float> >& CellExplorer::GetSolutions()const {return mvSolution;}
 std::list<std::pair<RecUnitCell,float> >& CellExplorer::GetSolutions() {return mvSolution;}
 
-unsigned int CellExplorer::RDicVol(RecUnitCell uc0,RecUnitCell duc, unsigned int depth,unsigned long &nbCalc)
+unsigned int CellExplorer::RDicVol(RecUnitCell uc0,RecUnitCell duc, unsigned int depth,unsigned long &nbCalc,const float minV,const float maxV)
 {
-   if(depth<0)
+   if((depth>0)&&(depth<=2))// test if volume is within range
+   {
+      RecUnitCell ucm=uc0,ucp=uc0;
+      for(unsigned int i=0;i<6;++i) {ucm.par[i]-=duc.par[i];ucp.par[i]+=duc.par[i];}
+      vector<float> ucmd=ucm.DirectUnitCell();
+      vector<float> ucpd=ucp.DirectUnitCell();
+      if((ucpd[6]>maxV)||(ucmd[6]<minV))return 0;
+   }
+   static unsigned long cct=0;
+   bool indexed=DichoIndexed(*mpPeakList,uc0,duc,mNbSpurious);
+   if(false)//(depth==0))//&&(rand()%10==0))
    {
       RecUnitCell ucm=uc0,ucp=uc0;
       for(unsigned int i=0;i<6;++i) {ucm.par[i]-=duc.par[i];ucp.par[i]+=duc.par[i];}
@@ -1414,10 +1505,11 @@ unsigned int CellExplorer::RDicVol(RecUnitCell uc0,RecUnitCell duc, unsigned int
       sprintf(buf,"a=%5.2f-%5.2f b=%5.2f-%5.2f c=%5.2f-%5.2f alpha=%5.2f-%5.2f beta=%5.2f-%5.2f gamma=%5.2f-%5.2f V=%5.2f-%5.2f",
                ucpd[0],ucmd[0],ucpd[1],ucmd[1],ucpd[2],ucmd[2],ucpd[3]*RAD2DEG,ucmd[3]*RAD2DEG,
                ucpd[4]*RAD2DEG,ucmd[4]*RAD2DEG,ucpd[5]*RAD2DEG,ucmd[5]*RAD2DEG,ucpd[6],ucmd[6]);
-      cout<<buf<<"level="<<depth<<endl;
-   }
+      for(int i=0;i<depth;++i) cout<<" ";
+      cout<<buf<<"level="<<depth<<" ("<<cct<<") indexed="<<indexed<<endl;
+      cct=0;
+   }else cct++;
    nbCalc++;
-   bool indexed=DichoIndexed(*mpPeakList,uc0,duc,mNbSpurious,mD2Error);
    // :TODO: if we failed the dichotomy and reached some depth, try guessing a zero shift from the indexed reflections
    /*
    if((!indexed)&&(depth>=2))
@@ -1428,7 +1520,7 @@ unsigned int CellExplorer::RDicVol(RecUnitCell uc0,RecUnitCell duc, unsigned int
       {   *spos++ = peakpos->d2diff * (float)(peakpos->isIndexed&&(!peakpos->isSpurious));peakpos++;}
       sort(shifts.begin(),shifts.end());
       uc0.par[0]=shifts[mpPeakList->GetPeakList().size()/2];//use median value
-      indexed=DichoIndexed(*mpPeakList,uc0,duc,mNbSpurious,mD2Error);
+      indexed=DichoIndexed(*mpPeakList,uc0,duc,mNbSpurious);
       if(indexed) cout<<"Failed Dicho ? Trying auto-zero shifting :Worked !"<<endl;
    }
    */
@@ -1456,36 +1548,36 @@ unsigned int CellExplorer::RDicVol(RecUnitCell uc0,RecUnitCell duc, unsigned int
             //:TODO: dichotomy on zero shift ?
             uc.par[1]=uc0.par[1]+i0*duc.par[1];
             if(mnpar==2)
-               deeperSolutions+=RDicVol(uc,duc, depth+1,nbCalc);
+               deeperSolutions+=RDicVol(uc,duc, depth+1,nbCalc,minV,maxV);
             else
                for(int i1=-1;i1<=1;i1+=2)
                {
                   uc.par[2]=uc0.par[2]+i1*duc.par[2];
                   if(mnpar==3)
-                     deeperSolutions+=RDicVol(uc,duc, depth+1,nbCalc);
+                     deeperSolutions+=RDicVol(uc,duc, depth+1,nbCalc,minV,maxV);
                   else
                      for(int i2=-1;i2<=1;i2+=2)
                      {
                         uc.par[3]=uc0.par[3]+i2*duc.par[3];
                         if(mnpar==4)
-                           deeperSolutions+=RDicVol(uc,duc, depth+1,nbCalc);
+                           deeperSolutions+=RDicVol(uc,duc, depth+1,nbCalc,minV,maxV);
                         else
                            for(int i3=-1;i3<=1;i3+=2)
                            {
                               uc.par[4]=uc0.par[4]+i3*duc.par[4];
                               if(mnpar==5)
-                                 deeperSolutions+=RDicVol(uc,duc, depth+1,nbCalc);
+                                 deeperSolutions+=RDicVol(uc,duc, depth+1,nbCalc,minV,maxV);
                               else
                                  for(int i4=-1;i4<=1;i4+=2)
                                  {
                                     uc.par[5]=uc0.par[5]+i4*duc.par[5];
                                     if(mnpar==7)
-                                       deeperSolutions+=RDicVol(uc,duc, depth+1,nbCalc);
+                                       deeperSolutions+=RDicVol(uc,duc, depth+1,nbCalc,minV,maxV);
                                     else
                                        for(int i5=-1;i5<=1;i5+=2)
                                        {
                                           uc.par[6]=uc0.par[6]+i5*duc.par[6];
-                                          deeperSolutions+=RDicVol(uc,duc, depth+1,nbCalc);
+                                          deeperSolutions+=RDicVol(uc,duc, depth+1,nbCalc,minV,maxV);
                                        }
                                  }
                            }
@@ -1498,21 +1590,24 @@ unsigned int CellExplorer::RDicVol(RecUnitCell uc0,RecUnitCell duc, unsigned int
          mRecUnitCell=uc0;
          vector<float> uc=mRecUnitCell.DirectUnitCell();
          float score=Score(*mpPeakList,mRecUnitCell,mNbSpurious,false,true,false);
-         if((score>(mMinScoreReport*.5))&&(depth>=mDicVolDepthReport))
+         if(((score>(mMinScoreReport*.5))&&(depth>=mDicVolDepthReport))||(depth>=6))
          {
-            if((score>mMinScoreReport)&&(depth>=mDicVolDepthReport))
+            if(score>mBestScore) //((score>mMinScoreReport)||(depth>=mDicVolDepthReport))
                cout<<__FILE__<<":"<<__LINE__<<" Depth="<<depth<<" (DIC) ! a="<<uc[0]<<", b="<<uc[1]<<", c="<<uc[2]<<", alpha="
                   <<uc[3]*RAD2DEG<<", beta="<<uc[4]*RAD2DEG<<", gamma="<<uc[5]*RAD2DEG<<", V="<<uc[6]
                   <<", score="<<score<<endl;
             this->LSQRefine(10,true,true);
             uc=mRecUnitCell.DirectUnitCell();
             score=Score(*mpPeakList,mRecUnitCell,mNbSpurious,false,true,false);
-            if((score>mMinScoreReport)&&(depth>=mDicVolDepthReport))
+            if((score>mMinScoreReport)||(depth>=mDicVolDepthReport))
             {
-               cout<<__FILE__<<":"<<__LINE__<<" Depth="<<depth<<" (LSQ) ! a="<<uc[0]<<", b="<<uc[1]<<", c="<<uc[2]<<", alpha="
-                  <<uc[3]*RAD2DEG<<", beta="<<uc[4]*RAD2DEG<<", gamma="<<uc[5]*RAD2DEG<<", V="<<uc[6]
-                  <<", score="<<score<<endl;
-               if(score>mBestScore) mBestScore=score;
+               if(score>mBestScore)
+               {
+                  cout<<__FILE__<<":"<<__LINE__<<" Depth="<<depth<<" (LSQ) ! a="<<uc[0]<<", b="<<uc[1]<<", c="<<uc[2]<<", alpha="
+                     <<uc[3]*RAD2DEG<<", beta="<<uc[4]*RAD2DEG<<", gamma="<<uc[5]*RAD2DEG<<", V="<<uc[6]
+                     <<", score="<<score<<endl;
+                  mBestScore=score;
+               }
                mvSolution.push_back(make_pair(mRecUnitCell,score));
                mvNbSolutionDepth[depth]+=1;
             }
@@ -1534,7 +1629,7 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
    const float latstep=0.5,
                cosangstep=.05,
                cosangmax=abs(cos(mAngleMax)),
-               vstep=(mVolumeMax-mVolumeMin)/ceil((mVolumeMax-mVolumeMin)/400)*.999;
+               vstep=400;
    cout<<mLengthMin<<"->"<<mLengthMax<<","<<latstep<<","<<(mLengthMax-mLengthMin)/latstep<<endl;
    cout<<mAngleMin<<"->"<<mAngleMax<<","<<cosangstep<<","<<cosangmax<<","<<(mAngleMax-mAngleMin)/cosangstep<<endl;
    cout<<mVolumeMin<<"->"<<mVolumeMax<<","<<vstep<<","<<(mVolumeMax-mVolumeMin)/vstep<<endl;
@@ -1548,9 +1643,11 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
    const clock_t mTime0=clock();
    float bestscore=0;
    list<pair<RecUnitCell,float> >::iterator bestpos;
-   for(float minv=0;minv<mVolumeMax;minv+=vstep)
+   for(float minv=mVolumeMin;minv<mVolumeMax;minv+=vstep)
    {
-      const float maxv=minv+vstep;
+      float maxv=minv+vstep;
+      if(maxv>mVolumeMax)maxv=mVolumeMax;
+      cout<<"Starting: V="<<minv<<"->"<<maxv<<endl;
       switch(mlattice)
       {
          case TRICLINIC:
@@ -1594,7 +1691,7 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                               uclarged=uclarge.DirectUnitCell();
                               ucsmalld =ucsmall.DirectUnitCell();
                               
-                              RDicVol(uc0,duc,0,nbCalc);
+                              RDicVol(uc0,duc,0,nbCalc,minv,maxv);
                               
                               if(uclarged[6]>maxv) break;
                               if(uclarged[2]>mLengthMax) break;
@@ -1624,10 +1721,10 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                      float x3=x1;
                      for(;;x3+=latstep)
                      {
-                        duc.par[1]=(1/(x1)-1/(x1+latstep))*0.51;
-                        duc.par[2]=(1/(x2)-1/(x2+latstep))*0.51;
-                        duc.par[3]=(1/(x3)-1/(x3+latstep))*0.51;
-                        duc.par[4]=cosangstep*0.51;
+                        duc.par[1]=(1/(x1)-1/(x1+latstep))*0.5;
+                        duc.par[2]=(1/(x2)-1/(x2+latstep))*0.5;
+                        duc.par[3]=(1/(x3)-1/(x3+latstep))*0.5;
+                        duc.par[4]=cosangstep*0.5;
                         
                         uc0.par[0]=0;
                         uc0.par[1]=(1/(x1)+1/(x1+latstep))*0.5;
@@ -1650,7 +1747,7 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                         if((ucsmalld[6]<maxv)&&(uclarged[6]>minv))//&&(ucpd[0]<mLengthMax)&&(ucpd[1]<mLengthMax)&&(ucpd[2]<mLengthMax))
                         {
                           //cout<<buf<<"   VM="<<maxv<<endl;
-                          RDicVol(uc0,duc,0,nbCalc);
+                          RDicVol(uc0,duc,0,nbCalc,minv,maxv);
                         }
                         else
                         {
@@ -1685,6 +1782,22 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
          }
          case ORTHOROMBIC:
          {
+            if(false)
+            {
+               // Test 7.677350  5.803770  10.313160   V=480
+               //const float a=7.75,b=5.75,c=10.25;
+               // Test 6.062000 16.779400 16.8881 v=1750
+               const float a=6.25,b=16.75,c=16.75;
+               duc.par[1]=(1/(a-.25)-1/(a+.25))*0.5;
+               duc.par[2]=(1/(b-.25)-1/(b+.25))*0.5;
+               duc.par[3]=(1/(c-.25)-1/(c+.25))*0.5;
+               uc0.par[0]=0;
+               uc0.par[1]=1/a;
+               uc0.par[2]=1/b;
+               uc0.par[3]=1/c;
+               RDicVol(uc0,duc,0,nbCalc,minv,maxv);
+               break;
+            }
             for(float x1=mLengthMin;x1<(mLengthMax+latstep);x1+=latstep)
                for(float x2=x1;x2<(mLengthMax+latstep);x2+=latstep)
                   for(float x3=x2;x3<(mLengthMax+latstep);x3+=latstep)
@@ -1703,16 +1816,14 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                      for(unsigned int i=0;i<6;++i) {ucm.par[i]-=duc.par[i];ucp.par[i]+=duc.par[i];}
                      vector<float> ucmd=ucm.DirectUnitCell();
                      vector<float> ucpd=ucp.DirectUnitCell();
-                     /*
                      char buf[200];
                      sprintf(buf,"a=%5.2f-%5.2f b=%5.2f-%5.2f c=%5.2f-%5.2f alpha=%5.2f-%5.2f beta=%5.2f-%5.2f gamma=%5.2f-%5.2f V=%5.2f-%5.2f",
                               ucpd[0],ucmd[0],ucpd[1],ucmd[1],ucpd[2],ucmd[2],ucpd[3]*RAD2DEG,ucmd[3]*RAD2DEG,
                               ucpd[4]*RAD2DEG,ucmd[4]*RAD2DEG,ucpd[5]*RAD2DEG,ucmd[5]*RAD2DEG,ucpd[6],ucmd[6]);
-                     */
                      if((ucpd[6]<maxv)&&(ucmd[6]>minv))
                      {
                         //cout<<buf<<"   VM="<<maxv<<endl;
-                        RDicVol(uc0,duc,0,nbCalc);
+                        RDicVol(uc0,duc,0,nbCalc,minv,maxv);
                      }
                      else
                      {
@@ -1749,7 +1860,7 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                   if((ucsmalld[6]<maxv)&&(uclarged[6]>minv))
                   {
                      //cout<<buf<<endl;
-                     RDicVol(uc0,duc,0,nbCalc);
+                     RDicVol(uc0,duc,0,nbCalc,minv,maxv);
                   }
                   //else cout<<buf<<" BREAK"<<endl;
                }
@@ -1772,7 +1883,7 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                   vector<float> uc=uc0.DirectUnitCell();
                   if((uc[6]<maxv)&&(uc[6]>minv))
                   {
-                     RDicVol(uc0,duc,0,nbCalc);
+                     RDicVol(uc0,duc,0,nbCalc,minv,maxv);
                   }
                }
             }
@@ -1804,7 +1915,7 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                   */
                   if((ucsmalld[6]<maxv)&&(uclarged[6]>minv))
                   {
-                     RDicVol(uc0,duc,0,nbCalc);
+                     RDicVol(uc0,duc,0,nbCalc,minv,maxv);
                   }
                }
             }
@@ -1835,7 +1946,7 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                if((ucsmalld[6]<maxv)&&(uclarged[6]>minv))
                {
                   //cout<<buf<<endl;
-                  RDicVol(uc0,duc,0,nbCalc);
+                  RDicVol(uc0,duc,0,nbCalc,minv,maxv);
                }
                //else cout<<buf<<" BREAK"<<endl;
             }
@@ -1847,12 +1958,11 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
          const float score=Score(*mpPeakList,pos->first,mNbSpurious);
          if(score>bestscore) {bestscore=score;bestpos=pos;}
       }
-      if(bestscore>stopOnScore) break;
       bool breakDepth=false;
       if(stopOnDepth>0)
          for(unsigned int i=stopOnDepth; i<mvNbSolutionDepth.size();++i)
             if(mvNbSolutionDepth[i]>1) {breakDepth=true;break;}
-      if(breakDepth) break;
+      if((bestscore>stopOnScore)&&(breakDepth)) break;
    }
    /*
    {// Tag spurious lines
