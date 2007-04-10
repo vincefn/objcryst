@@ -647,6 +647,10 @@ vector<float> RecUnitCell::DirectUnitCell()const
    uc[6]=v;
    return uc;
 }
+///////////////////////////////////////////////// PEAKLIST:HKL0 /////////////////////
+PeakList::hkl0::hkl0(const int h0,const int k0, const int l0):
+h(h0),k(k0),l(l0)
+{}
 
 ///////////////////////////////////////////////// PEAKLIST:HKL /////////////////////
 PeakList::hkl::hkl(const float d,const float i,const float ds,const float is,
@@ -1224,6 +1228,11 @@ void CellExplorer::SetMinMaxZeroShift(const float min,const float max)
    mZeroShiftMax=max;
 }
 
+void CellExplorer::SetCrystalSystem(const CrystalSystem system)
+{
+   mlattice=system;
+}
+
 void CellExplorer::SetD2Error(const float err){mD2Error=err;}
 
 const string& CellExplorer::GetClassName() const
@@ -1355,19 +1364,59 @@ void CellExplorer::LSQRefine(int nbCycle, bool useLevenbergMarquardt, const bool
    VFN_DEBUG_EXIT("CellExplorer::LSQRefine()",5)
 }
 
-/// Number of reflexions found in the intervals calculated between uc+duc and uc-duc
-int DichoIndexed(const PeakList &dhkl, const RecUnitCell &uc,const RecUnitCell &duc,
-                 const unsigned int nbUnindexed=0,const bool verbose=false)
+/** Number of reflexions found in the intervals calculated between uc+duc and uc-duc
+*
+* \param useStoredHKL:
+*    - if equal to 0, explore all possible hkl values to find possible Miller indices.
+*    - if useStoredHKL=1, use the Miller indices already stored in hkl.vDicVolHKL
+*    for each observed line as the only possible indices.
+*    - if useStoredHKL=2, search all the possible Miller indices for all reflections
+*    and store them in hkl.vDicVolHKL for each observed line.
+*/
+bool DichoIndexed(const PeakList &dhkl, const RecUnitCell &uc,const RecUnitCell &duc,
+                 const unsigned int nbUnindexed=0,const bool verbose=false,unsigned int useStoredHKL=0)
 {
-   // List of indexed reflections
    const unsigned int nb=dhkl.GetPeakList().size();
+   int nbIndexed=nb-nbUnindexed;// Number of reflections we require to be indexed
+   // List of indexed reflections
    vector<PeakList::hkl>::const_iterator pos,first,last,end;
-   for(pos=dhkl.GetPeakList().begin();pos!=dhkl.GetPeakList().end();++pos) pos->isIndexed=false;
+   if(useStoredHKL==1)
+   {// We already now possible Miller indices for all reflections
+      int nbUnIx=0;
+      for(pos=dhkl.GetPeakList().begin();pos!=dhkl.GetPeakList().end();++pos)
+      {
+         pos->isIndexed=false;
+         for(list<PeakList::hkl0>::const_iterator phkl0=pos->vDicVolHKL.begin();phkl0!=pos->vDicVolHKL.end();++phkl0)
+         {
+            float d0,d1;
+            uc.hkl2d_delta(phkl0->h,phkl0->k,phkl0->l,duc,d0,d1);
+            if((pos->d2obsmax>=d0) && (d1>=pos->d2obsmin))
+            {
+               pos->d2calc=(d0+d1)/2;
+               pos->isIndexed=true;
+               if(--nbIndexed==0) return true;
+               break;
+            }
+         }
+         if(!(pos->isIndexed)) if(++nbUnIx>nbUnindexed) return false;
+      }
+      return false;
+   }
+   const bool storePossibleHKL=(useStoredHKL==2);
    
-   unsigned int nbIndexed=nb-nbUnindexed;// Number of reflections we require to be indexed
+   if(storePossibleHKL)
+      for(pos=dhkl.GetPeakList().begin();pos!=dhkl.GetPeakList().end();++pos)
+      {
+         pos->isIndexed=false;
+         pos->vDicVolHKL.clear();
+      }
+   else
+      for(pos=dhkl.GetPeakList().begin();pos!=dhkl.GetPeakList().end();++pos) pos->isIndexed=false;
+   
    int h,k,l;
    float dmax=dhkl.GetPeakList()[nb-1].d2obs;
    float dmin=dhkl.GetPeakList()[0   ].d2obs;
+   
    
    int sk0,sl0;// do we need >0 *and* <0 indices for k,l ?
    switch(uc.mlattice)
@@ -1414,51 +1463,60 @@ int DichoIndexed(const PeakList &dhkl, const RecUnitCell &uc,const RecUnitCell &
             break_l=false;
             for(int sl=sl0;sl<=1;sl+=2)
             {
+               int l0;
                if((h+k)==0)
                {
                   sl=1;// No need to list 0 0 l with l<0
-                  l=1;
+                  l0=1;
                }
                else
                {
                   if(h==0)
                   {
                      if(uc.mlattice==MONOCLINIC) sl=1;// 0 k l and 0 k -l are equivalent
-                     if((sk<0)||(sl<0)) l=1;// Do not list 0 k 0 with k<0
-                     else l=0;// h==k==0 already covered
+                     if((sk<0)||(sl<0)) l0=1;// Do not list 0 k 0 with k<0
+                     else l0=0;// h==k==0 already covered
                   }
                   else
                   {
-                     if(sl<0) l=1;// Do not list h k 0 twice
-                     else l=0;
+                     if(sl<0) l0=1;// Do not list h k 0 twice
+                     else l0=0;
                   }
                }
-               if((h+k)==0) l=1;
-               else l=0;
-               for(;;++l)
+               if((h+k)==0) l0=1;
+               else l0=0;
+               for(l=l0;;++l)
                {
                   float d0,d1;
                   uc.hkl2d_delta(h,sk*k,sl*l,duc,d0,d1);
                   if(d1<dmin) continue;
                   if(d0>dmax)
                   {
-                     if(l==0) break_l=true;
+                     if(l==l0) break_l=true;
                      break;
                   }
                   for(pos=first;pos!=end;++pos)
                   {
                      if(pos==last) break;
+                     if((!storePossibleHKL)&&(pos->isIndexed)) continue;
                      const float d2obs=pos->d2obs,d2obsmin=pos->d2obsmin, d2obsmax=pos->d2obsmax;
-                     if(pos->isIndexed) continue;
                      if((d2obsmax>=d0) && (d1>=d2obsmin))
                      {
-                        pos->isIndexed=true;
-                        pos->d2calc=(d0+d1)/2;
-                        --nbIndexed;
+                        if(!(pos->isIndexed))
+                        {
+                           pos->d2calc=(d0+d1)/2;
+                           --nbIndexed;
+                           pos->isIndexed=true;
+                        }
                         if(verbose) cout<<d1<<" < ? <"<<d0<<"("<<h<<","<<sk*k<<","<<sl*l<<"): "<<d2obs<<" (remaining to index:"<<nbIndexed<<")"<<endl;
-                        if(nbIndexed==0) return true;
-                        if(pos==first){first++;dmin=first->d2obsmin;}
-                        if(pos==last){last--;dmax=last->d2obsmax;}
+                        if(storePossibleHKL)
+                           pos->vDicVolHKL.push_back(PeakList::hkl0(h,sk*k,sl*l));
+                        else
+                        {
+                           if((!storePossibleHKL)&&(nbIndexed==0)) return true;
+                           if(pos==first){first++;dmin=first->d2obsmin;}
+                           if(pos==last){last--;dmax=last->d2obsmax;}
+                        }
                      }
                   }
                }
@@ -1476,7 +1534,7 @@ int DichoIndexed(const PeakList &dhkl, const RecUnitCell &uc,const RecUnitCell &
    {
       dhkl.Print(cout);
    }
-   return false;
+   return nbIndexed<=0;
 }
 
 float CellExplorer::GetBestScore()const{return mBestScore;}
@@ -1493,9 +1551,12 @@ unsigned int CellExplorer::RDicVol(RecUnitCell uc0,RecUnitCell duc, unsigned int
       vector<float> ucpd=ucp.DirectUnitCell();
       if((ucpd[6]>maxV)||(ucmd[6]<minV))return 0;
    }
+   unsigned int useStoredHKL=1;//Use already stored hkl
+   if(depth==0) useStoredHKL=2; //Store possible hkl for all observed lines
+   
    static unsigned long cct=0;
-   bool indexed=DichoIndexed(*mpPeakList,uc0,duc,mNbSpurious);
-   if(false)//(depth==0))//&&(rand()%10==0))
+   bool indexed=DichoIndexed(*mpPeakList,uc0,duc,mNbSpurious,false,useStoredHKL);
+   if(false)//(depth==1)&&(rand()%10==0))
    {
       RecUnitCell ucm=uc0,ucp=uc0;
       for(unsigned int i=0;i<6;++i) {ucm.par[i]-=duc.par[i];ucp.par[i]+=duc.par[i];}
@@ -1777,6 +1838,17 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                   }//x2
                if(uclarged[0]>mLengthMax) break;
                }//x1
+               // Test if we have one solution before going to the next angle range
+               for(list<pair<RecUnitCell,float> >::iterator pos=mvSolution.begin();pos!=mvSolution.end();++pos)
+               {
+                  const float score=pos->second;//Score(*mpPeakList,pos->first,mNbSpurious);
+                  if(score>bestscore) {bestscore=score;bestpos=pos;}
+               }
+               bool breakDepth=false;
+               if(stopOnDepth>0)
+                  for(unsigned int i=stopOnDepth; i<mvNbSolutionDepth.size();++i)
+                     if(mvNbSolutionDepth[i]>1) {breakDepth=true;break;}
+               if((bestscore>stopOnScore)&&(breakDepth)) break;
             }//x4
             break;
          }
@@ -1955,7 +2027,7 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
       }
       for(list<pair<RecUnitCell,float> >::iterator pos=mvSolution.begin();pos!=mvSolution.end();++pos)
       {
-         const float score=Score(*mpPeakList,pos->first,mNbSpurious);
+         const float score=pos->second;//Score(*mpPeakList,pos->first,mNbSpurious);
          if(score>bestscore) {bestscore=score;bestpos=pos;}
       }
       bool breakDepth=false;

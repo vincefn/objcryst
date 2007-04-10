@@ -1495,8 +1495,7 @@ void WXPowderPatternGraph::OnFindPeaks(wxCommandEvent& WXUNUSED(event))
    }
    
    const unsigned int nb=mPeakList.GetPeakList().size();
-   if(nb<5) return;
-   
+   //if(nb<5) return;
    // Estimate volume from number of peaks at a given dmin
    // See J. Appl. Cryst. 20 (1987), 161
    dmin=mPeakList.GetPeakList()[nb-1].dobs;
@@ -1535,15 +1534,14 @@ void WXPowderPatternGraph::OnFindPeaks(wxCommandEvent& WXUNUSED(event))
    cout<<"  Triclinic      (120%/30% reflections observed):v="
        <<EstimateCellVolume(dmin,dmax,nb,TRICLINIC  ,LATTICE_P,1.0)  <<","
        <<EstimateCellVolume(dmin,dmax,nb,TRICLINIC  ,LATTICE_P,0.3)<<endl;
-
    
    mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_TOGGPEAK, TRUE);
    mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_INDEX, TRUE);
    mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_ADDPEAK, TRUE);
    mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_REMOVEPEAK, TRUE);
    
-   // Keep 20 lowest peaks
-   if(mPeakList.GetPeakList().size()>30) mPeakList.GetPeakList().resize(30);
+   // Keep lowest peaks
+   if(mPeakList.GetPeakList().size()>40) mPeakList.GetPeakList().resize(40);
    //mpPattern->CrystUpdate(true,true);
    if(true)
    {// display 2nd derivative as 'calc' (will remain until an update to the pattern is made)
@@ -1637,12 +1635,14 @@ class WXCellExplorer:public wxWindow
       DECLARE_EVENT_TABLE()
 };
 static const long ID_CELLEXPLORER_INDEX= WXCRYST_ID();
+static const long ID_CELLEXPLORER_INDEX_QUICK= WXCRYST_ID();
 static const long ID_CELLEXPLORER_SELECTCELL= WXCRYST_ID();
 static const long ID_CELLEXPLORER_APPLYCELL= WXCRYST_ID();
 static const long ID_CELLEXPLORER_CHOOSECRYSTAL= WXCRYST_ID();
 
 BEGIN_EVENT_TABLE(WXCellExplorer, wxWindow)
    EVT_BUTTON(ID_CELLEXPLORER_INDEX,             WXCellExplorer::OnIndex)
+   EVT_BUTTON(ID_CELLEXPLORER_INDEX_QUICK,       WXCellExplorer::OnIndex)
    EVT_LISTBOX(ID_CELLEXPLORER_SELECTCELL,       WXCellExplorer::OnSelectCell)
    EVT_LISTBOX_DCLICK(ID_CELLEXPLORER_SELECTCELL,WXCellExplorer::OnApplyCell)
    EVT_BUTTON(ID_CELLEXPLORER_APPLYCELL,         WXCellExplorer::OnApplyCell)
@@ -1655,119 +1655,146 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
    wxBoxSizer *pSizer1=new wxBoxSizer(wxHORIZONTAL);
    this->SetSizer(pSizer1);
    
-   wxStaticBoxSizer *pSizer2=new wxStaticBoxSizer(wxVERTICAL,this);
-   pSizer1->Add(pSizer2,0,wxALIGN_TOP);
+   wxNotebook *pNotebook = new wxNotebook(this, -1);
    
-   wxButton *pButton1=new wxButton(this,ID_CELLEXPLORER_INDEX,"Find cell!");
-   pSizer2->Add(pButton1,0,wxALIGN_CENTER);
+   pSizer1->Add(pNotebook,0,wxALIGN_TOP);
    
-   wxButton *pButton2=new wxButton(this,ID_CELLEXPLORER_APPLYCELL,"Apply selected cell");
-   pSizer2->Add(pButton2,0,wxALIGN_CENTER);
-
-   mpFieldCrystal=new WXFieldChoice(this,ID_CELLEXPLORER_CHOOSECRYSTAL,"Choose crystal:",200);
-   pSizer2->Add(mpFieldCrystal,0,wxALIGN_CENTER);
-
-   wxBoxSizer *pLengthSizer=new wxBoxSizer(wxHORIZONTAL);
-   wxStaticText *pLengthText=new wxStaticText(this,-1,"Length min, max (A):");
-   pLengthSizer->Add(pLengthText,0,wxALIGN_CENTER);
-   mpLengthMin=new wxTextCtrl(this,-1,"3",wxDefaultPosition,wxSize(30,-1),0,
-                               wxTextValidator(wxFILTER_NUMERIC));
-   pLengthSizer->Add(mpLengthMin,0,wxALIGN_CENTER);
-   mpLengthMax=new wxTextCtrl(this,-1,"25",wxDefaultPosition,wxSize(30,-1),0,
-                               wxTextValidator(wxFILTER_NUMERIC));
-   pLengthSizer->Add(mpLengthMax,0,wxALIGN_CENTER);
-   pSizer2->Add(pLengthSizer,0,wxALIGN_CENTER);
-
-   wxBoxSizer *pAngleSizer=new wxBoxSizer(wxHORIZONTAL);
-   wxStaticText *pAngleText=new wxStaticText(this,-1,"Angle max(90< <179°):");
-   pAngleSizer->Add(pAngleText,0,wxALIGN_CENTER);
-   //mpAngleMin=new wxTextCtrl(this,-1,"90",wxDefaultPosition,wxSize(40,-1),0,
-   //                          wxTextValidator(wxFILTER_NUMERIC));
-   //pAngleSizer->Add(mpAngleMin,0,wxALIGN_CENTER);
-   mpAngleMax=new wxTextCtrl(this,-1,"130",wxDefaultPosition,wxSize(40,-1),0,
-                             wxTextValidator(wxFILTER_NUMERIC));
-   pAngleSizer->Add(mpAngleMax,0,wxALIGN_CENTER);
-   pSizer2->Add(pAngleSizer,0,wxALIGN_CENTER);
-
-   wxBoxSizer *pVolumeSizer=new wxBoxSizer(wxHORIZONTAL);
-   wxStaticText *pVolumeText=new wxStaticText(this,-1,"Volume min, max (A3):");
-   pVolumeSizer->Add(pVolumeText,0,wxALIGN_CENTER);
-   mpVolumeMin=new wxTextCtrl(this,-1,"10",wxDefaultPosition,wxSize(50,-1),0,
-                               wxTextValidator(wxFILTER_NUMERIC));
-   pVolumeSizer->Add(mpVolumeMin,0,wxALIGN_CENTER);
-   mpVolumeMax=new wxTextCtrl(this,-1,"2500",wxDefaultPosition,wxSize(50,-1),0,
+   // Quick interface
+      wxWindow *pQuick=new wxWindow(pNotebook,-1);
+      pNotebook->AddPage(pQuick,"Quick");
+      
+      wxStaticBoxSizer *pSizerQuick=new wxStaticBoxSizer(wxVERTICAL,pQuick);
+      
+      wxButton *pQuickButtonIndex=new wxButton(pQuick,ID_CELLEXPLORER_INDEX_QUICK,"Find cell!");
+      pSizerQuick->Add(pQuickButtonIndex,0,wxALIGN_CENTER);
+   
+      pQuick->SetSizer(pSizerQuick);
+      pSizerQuick->Fit(pQuick);
+      pSizerQuick->RecalcSizes();
+      pQuick->Layout();
+   // Advanced interface
+      wxWindow *pAdvanced=new wxWindow(pNotebook,-1);
+      
+      wxStaticBoxSizer *pSizerAdvanced=new wxStaticBoxSizer(wxVERTICAL,pAdvanced);
+      
+      wxButton *pButton1=new wxButton(pAdvanced,ID_CELLEXPLORER_INDEX,"Find cell!");
+      pSizerAdvanced->Add(pButton1,0,wxALIGN_CENTER);
+      
+      wxButton *pButton2=new wxButton(pAdvanced,ID_CELLEXPLORER_APPLYCELL,"Apply selected cell");
+      pSizerAdvanced->Add(pButton2,0,wxALIGN_CENTER);
+   
+      mpFieldCrystal=new WXFieldChoice(pAdvanced,ID_CELLEXPLORER_CHOOSECRYSTAL,"Choose crystal:",200);
+      pSizerAdvanced->Add(mpFieldCrystal,0,wxALIGN_CENTER);
+   
+      wxBoxSizer *pLengthSizer=new wxBoxSizer(wxHORIZONTAL);
+      wxStaticText *pLengthText=new wxStaticText(pAdvanced,-1,"Length min, max (A):");
+      pLengthSizer->Add(pLengthText,0,wxALIGN_CENTER);
+      mpLengthMin=new wxTextCtrl(pAdvanced,-1,"3",wxDefaultPosition,wxSize(30,-1),0,
+                                 wxTextValidator(wxFILTER_NUMERIC));
+      pLengthSizer->Add(mpLengthMin,0,wxALIGN_CENTER);
+      mpLengthMax=new wxTextCtrl(pAdvanced,-1,"25",wxDefaultPosition,wxSize(30,-1),0,
+                                 wxTextValidator(wxFILTER_NUMERIC));
+      pLengthSizer->Add(mpLengthMax,0,wxALIGN_CENTER);
+      pSizerAdvanced->Add(pLengthSizer,0,wxALIGN_CENTER);
+   
+      wxBoxSizer *pAngleSizer=new wxBoxSizer(wxHORIZONTAL);
+      wxStaticText *pAngleText=new wxStaticText(pAdvanced,-1,"Angle max(90< <179°):");
+      pAngleSizer->Add(pAngleText,0,wxALIGN_CENTER);
+      //mpAngleMin=new wxTextCtrl(this,-1,"90",wxDefaultPosition,wxSize(40,-1),0,
+      //                          wxTextValidator(wxFILTER_NUMERIC));
+      //pAngleSizer->Add(mpAngleMin,0,wxALIGN_CENTER);
+      mpAngleMax=new wxTextCtrl(pAdvanced,-1,"130",wxDefaultPosition,wxSize(40,-1),0,
                               wxTextValidator(wxFILTER_NUMERIC));
-   pVolumeSizer->Add(mpVolumeMax,0,wxALIGN_CENTER);
-   pSizer2->Add(pVolumeSizer,0,wxALIGN_CENTER);
-
-   wxBoxSizer *pSpuriousSizer=new wxBoxSizer(wxHORIZONTAL);
-   wxStaticText *pSpuriousText=new wxStaticText(this,-1,"Nb spurious lines:");
-   pSpuriousSizer->Add(pSpuriousText,0,wxALIGN_CENTER);
-   mpNbSpurious=new wxTextCtrl(this,-1,"0",wxDefaultPosition,wxSize(40,-1),0,
-                               wxTextValidator(wxFILTER_NUMERIC));
-   pSpuriousSizer->Add(mpNbSpurious,0,wxALIGN_CENTER);
-   pSizer2->Add(pSpuriousSizer,0,wxALIGN_CENTER);
+      pAngleSizer->Add(mpAngleMax,0,wxALIGN_CENTER);
+      pSizerAdvanced->Add(pAngleSizer,0,wxALIGN_CENTER);
    
+      wxBoxSizer *pVolumeSizer=new wxBoxSizer(wxHORIZONTAL);
+      wxStaticText *pVolumeText=new wxStaticText(pAdvanced,-1,"Volume min, max (A3):");
+      pVolumeSizer->Add(pVolumeText,0,wxALIGN_CENTER);
+      mpVolumeMin=new wxTextCtrl(pAdvanced,-1,"10",wxDefaultPosition,wxSize(50,-1),0,
+                                 wxTextValidator(wxFILTER_NUMERIC));
+      pVolumeSizer->Add(mpVolumeMin,0,wxALIGN_CENTER);
+      mpVolumeMax=new wxTextCtrl(pAdvanced,-1,"2500",wxDefaultPosition,wxSize(50,-1),0,
+                                 wxTextValidator(wxFILTER_NUMERIC));
+      pVolumeSizer->Add(mpVolumeMax,0,wxALIGN_CENTER);
+      pSizerAdvanced->Add(pVolumeSizer,0,wxALIGN_CENTER);
    
-   wxBoxSizer *pStopSizer=new wxBoxSizer(wxHORIZONTAL);
-   wxStaticText* pStopOnScoreText=new wxStaticText(this,-1,"Stop on Score>");
-   pStopSizer->Add(pStopOnScoreText,0,wxALIGN_CENTER);
-   mpStopOnScore=new wxTextCtrl(this,-1,"50",wxDefaultPosition,wxSize(50,-1),0,
-                                wxTextValidator(wxFILTER_NUMERIC));
-   pStopSizer->Add(mpStopOnScore,0,wxALIGN_CENTER);
+      wxBoxSizer *pSpuriousSizer=new wxBoxSizer(wxHORIZONTAL);
+      wxStaticText *pSpuriousText=new wxStaticText(pAdvanced,-1,"Nb spurious lines:");
+      pSpuriousSizer->Add(pSpuriousText,0,wxALIGN_CENTER);
+      mpNbSpurious=new wxTextCtrl(pAdvanced,-1,"0",wxDefaultPosition,wxSize(40,-1),0,
+                                 wxTextValidator(wxFILTER_NUMERIC));
+      pSpuriousSizer->Add(mpNbSpurious,0,wxALIGN_CENTER);
+      pSizerAdvanced->Add(pSpuriousSizer,0,wxALIGN_CENTER);
+      
+      wxBoxSizer *pStopSizer=new wxBoxSizer(wxHORIZONTAL);
+      wxStaticText* pStopOnScoreText=new wxStaticText(pAdvanced,-1,"Stop on Score>");
+      pStopSizer->Add(pStopOnScoreText,0,wxALIGN_CENTER);
+      mpStopOnScore=new wxTextCtrl(pAdvanced,-1,"50",wxDefaultPosition,wxSize(50,-1),0,
+                                 wxTextValidator(wxFILTER_NUMERIC));
+      pStopSizer->Add(mpStopOnScore,0,wxALIGN_CENTER);
+      
+      wxStaticText* pStopOnDepthText=new wxStaticText(pAdvanced,-1,"and depth>=");
+      pStopSizer->Add(pStopOnDepthText,0,wxALIGN_CENTER);
+      mpStopOnDepth=new wxTextCtrl(pAdvanced,-1,"6",wxDefaultPosition,wxSize(30,-1),0,
+                                 wxTextValidator(wxFILTER_NUMERIC));
+      pStopSizer->Add(mpStopOnDepth,0,wxALIGN_CENTER);
+      pSizerAdvanced->Add(pStopSizer,0,wxALIGN_CENTER);
+      
+      
+      wxBoxSizer *pReportSizer=new wxBoxSizer(wxHORIZONTAL);
+      wxStaticText* pReportOnScoreText=new wxStaticText(pAdvanced,-1,"Report score>");
+      pReportSizer->Add(pReportOnScoreText,0,wxALIGN_CENTER);
+      mpReportOnScore=new wxTextCtrl(pAdvanced,-1,"10",wxDefaultPosition,wxSize(50,-1),0,
+                                 wxTextValidator(wxFILTER_NUMERIC));
+      pReportSizer->Add(mpReportOnScore,0,wxALIGN_CENTER);
+      
+      wxStaticText* pReportOnDepthText=new wxStaticText(pAdvanced,-1,"or depth>=");
+      pReportSizer->Add(pReportOnDepthText,0,wxALIGN_CENTER);
+      mpReportOnDepth=new wxTextCtrl(pAdvanced,-1,"4",wxDefaultPosition,wxSize(50,-1),0,
+                                 wxTextValidator(wxFILTER_NUMERIC));
+      pReportSizer->Add(mpReportOnDepth,0,wxALIGN_CENTER);
+      pSizerAdvanced->Add(pReportSizer,0,wxALIGN_CENTER);
+      
+      wxBoxSizer *pErrorSizer=new wxBoxSizer(wxHORIZONTAL);
+      wxStaticText* pErrorText=new wxStaticText(pAdvanced,-1,"delta(d)/d^2 error:");
+      pErrorSizer->Add(pErrorText,0,wxALIGN_CENTER);
+      mpErrorD=new wxTextCtrl(pAdvanced,-1,"0",wxDefaultPosition,wxSize(50,-1),0,
+                              wxTextValidator(wxFILTER_NUMERIC));
+      pErrorSizer->Add(mpErrorD,0,wxALIGN_CENTER);
+      pSizerAdvanced->Add(pErrorSizer,0,wxALIGN_CENTER);
    
-   wxStaticText* pStopOnDepthText=new wxStaticText(this,-1,"and depth>=");
-   pStopSizer->Add(pStopOnDepthText,0,wxALIGN_CENTER);
-   mpStopOnDepth=new wxTextCtrl(this,-1,"6",wxDefaultPosition,wxSize(30,-1),0,
-                                wxTextValidator(wxFILTER_NUMERIC));
-   pStopSizer->Add(mpStopOnDepth,0,wxALIGN_CENTER);
-   pSizer2->Add(pStopSizer,0,wxALIGN_CENTER);
-   
-   
-   wxBoxSizer *pReportSizer=new wxBoxSizer(wxHORIZONTAL);
-   wxStaticText* pReportOnScoreText=new wxStaticText(this,-1,"Report score>");
-   pReportSizer->Add(pReportOnScoreText,0,wxALIGN_CENTER);
-   mpReportOnScore=new wxTextCtrl(this,-1,"10",wxDefaultPosition,wxSize(50,-1),0,
-                                wxTextValidator(wxFILTER_NUMERIC));
-   pReportSizer->Add(mpReportOnScore,0,wxALIGN_CENTER);
-   
-   wxStaticText* pReportOnDepthText=new wxStaticText(this,-1,"or depth>=");
-   pReportSizer->Add(pReportOnDepthText,0,wxALIGN_CENTER);
-   mpReportOnDepth=new wxTextCtrl(this,-1,"4",wxDefaultPosition,wxSize(50,-1),0,
-                                wxTextValidator(wxFILTER_NUMERIC));
-   pReportSizer->Add(mpReportOnDepth,0,wxALIGN_CENTER);
-   pSizer2->Add(pReportSizer,0,wxALIGN_CENTER);
-   
-   
-   wxBoxSizer *pErrorSizer=new wxBoxSizer(wxHORIZONTAL);
-   wxStaticText* pErrorText=new wxStaticText(this,-1,"delta(d)/d^2 error:");
-   pErrorSizer->Add(pErrorText,0,wxALIGN_CENTER);
-   mpErrorD=new wxTextCtrl(this,-1,"0",wxDefaultPosition,wxSize(50,-1),0,
-                           wxTextValidator(wxFILTER_NUMERIC));
-   pErrorSizer->Add(mpErrorD,0,wxALIGN_CENTER);
-   pSizer2->Add(pErrorSizer,0,wxALIGN_CENTER);
-
-   wxArrayString bravaisChoices;
-   bravaisChoices.Add("Triclinic");
-   bravaisChoices.Add("Monoclinic");
-   bravaisChoices.Add("Orthorombic");
-   bravaisChoices.Add("Hexagonal");
-   bravaisChoices.Add("Rhomboedral");
-   bravaisChoices.Add("Tetragonal");
-   bravaisChoices.Add("Cubic");
-   mpBravais=new wxRadioBox((wxWindow*)this,-1,"Bravais Lattice",wxDefaultPosition,wxDefaultSize,bravaisChoices);
-   mpBravais->SetSelection(2);
-   pSizer2->Add(mpBravais,0,wxALIGN_CENTER);
-   
-   wxArrayString algoChoices;
-   algoChoices.Add("DICVOL");
-   algoChoices.Add("Differential Evolution");
-   mpAlgorithm=new wxRadioBox(this,-1,"Algorithm",wxDefaultPosition,wxDefaultSize,algoChoices);
-   pSizer2->Add(mpAlgorithm,0,wxALIGN_CENTER);
+      wxArrayString bravaisChoices;
+      bravaisChoices.Add("Triclinic");
+      bravaisChoices.Add("Monoclinic");
+      bravaisChoices.Add("Orthorombic");
+      bravaisChoices.Add("Hexagonal");
+      bravaisChoices.Add("Rhomboedral");
+      bravaisChoices.Add("Tetragonal");
+      bravaisChoices.Add("Cubic");
+      mpBravais=new wxRadioBox((wxWindow*)pAdvanced,-1,"Crystal System",wxDefaultPosition,wxDefaultSize,bravaisChoices);
+      mpBravais->SetSelection(2);
+      pSizerAdvanced->Add(mpBravais,0,wxALIGN_CENTER);
+      
+      wxArrayString algoChoices;
+      algoChoices.Add("DICVOL");
+      algoChoices.Add("Differential Evolution");
+      
+      mpAlgorithm=new wxRadioBox(pAdvanced,-1,"Algorithm",wxDefaultPosition,wxDefaultSize,algoChoices);
+      pSizerAdvanced->Add(mpAlgorithm,0,wxALIGN_CENTER);
+      
+      pAdvanced->SetSizer(pSizerAdvanced);
+      pSizerAdvanced->Fit(pAdvanced);
+      pSizerAdvanced->RecalcSizes();
+      pAdvanced->Layout();
+      
+      pNotebook->AddPage(pAdvanced,"Advanced");
+      
+   pNotebook->Layout();
    
    wxArrayString cells;
    mpCell=new wxListBox(this,ID_CELLEXPLORER_SELECTCELL,wxDefaultPosition,wxSize(600,400),cells,wxLB_SINGLE);
-   pSizer1->Add(mpCell,1,wxALIGN_TOP);
+   pSizer1->Add(mpCell,0,wxALIGN_TOP);
    
    this->Layout();
    pSizer1->Fit(this->GetParent());
@@ -1775,65 +1802,194 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
 }
 void WXCellExplorer::OnIndex(wxCommandEvent &event)
 {
-   for(vector<PeakList::hkl>::iterator pos=mpPeakList->mvHKL.begin();pos!=mpPeakList->mvHKL.end();++pos)
-      pos->isSpurious=false;
-   
-   PeakList peaklist=*mpPeakList;
-   for(vector<PeakList::hkl>::iterator pos=mpPeakList->mvHKL.begin();pos!=mpPeakList->mvHKL.end();++pos)
-   {   pos->d2obsmin=pos->d2obs; pos->d2obsmax=pos->d2obs;}
-   
-   mpCellExplorer = new CellExplorer(peaklist,(CrystalSystem)(mpBravais->GetSelection()),0);
-   
-   wxString s;
-   double lmin,lmax,amin=90,amax,vmin,vmax,error,stopOnScore,reportOnScore;
-   long nbspurious,stopOnDepth,reportOnDepth;
-   s=mpLengthMin->GetValue();s.ToDouble(&lmin);
-   s=mpLengthMax->GetValue();s.ToDouble(&lmax);
-   //s=mpAngleMin->GetValue();s.ToDouble(&amin);
-   s=mpAngleMax->GetValue();s.ToDouble(&amax);
-   s=mpVolumeMin->GetValue();s.ToDouble(&vmin);
-   s=mpVolumeMax->GetValue();s.ToDouble(&vmax);
-   s=mpNbSpurious->GetValue();s.ToLong(&nbspurious);
-   s=mpErrorD->GetValue();s.ToDouble(&error);
-   s=mpStopOnScore->GetValue();s.ToDouble(&stopOnScore);
-   s=mpStopOnDepth->GetValue();s.ToLong(&stopOnDepth);
-   s=mpReportOnScore->GetValue();s.ToDouble(&reportOnScore);
-   s=mpReportOnDepth->GetValue();s.ToLong(&reportOnDepth);
-   
-   mpCellExplorer->SetLengthMinMax((float)lmin,(float)lmax);
-   mpCellExplorer->SetAngleMinMax((float)amin*DEG2RAD,(float)amax*DEG2RAD);
-   mpCellExplorer->SetVolumeMinMax((float)vmin,(float)vmax);
-   mpCellExplorer->SetNbSpurious((unsigned int)nbspurious);
-   mpCellExplorer->SetD2Error((float)(error*error));
-
-   Chronometer chrono;
-   if(mpAlgorithm->GetSelection()==0) mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
-   else
+   if(event.GetId()==ID_CELLEXPLORER_INDEX_QUICK)
    {
-      for(unsigned int i=0;i<20;++i)
+      // Erase spurious record
+      for(vector<PeakList::hkl>::iterator pos=mpPeakList->mvHKL.begin();pos!=mpPeakList->mvHKL.end();++pos)
+         pos->isSpurious=false;
+      
+      // Use at most 30 reflections for indexing
+      PeakList peaklist=*mpPeakList;
+      if(peaklist.GetPeakList().size()>30) peaklist.GetPeakList().resize(30);
+      
+      // Estimate volume from number of peaks at a given dmin
+      // See J. Appl. Cryst. 20 (1987), 161
+      unsigned int nb=mpPeakList->GetPeakList().size();
+      if(nb>20) nb=20;// Just use 20 - beyond that we probably have a lot of weak peaks
+      float dmin=mpPeakList->GetPeakList()[nb-1].dobs;
+      const float dmax=mpPeakList->GetPeakList()[0].dobs;
+      cout<<"Predicted Unit Cell Volume from: dmax="<<1/dmax<<" -> dmin="<<1/dmin<<", for nb peak="<<nb<<endl;
+
+      mpCellExplorer = new CellExplorer(peaklist,CUBIC,0);
+      mpCellExplorer->SetLengthMinMax(3,25);
+      mpCellExplorer->SetAngleMinMax(90*DEG2RAD,130*DEG2RAD);
+      mpCellExplorer->SetD2Error(0);
+      
+      const float        stopOnScore=50, reportOnScore=10;
+      const unsigned int stopOnDepth=6,   reportOnDepth=4;
+      
+      unsigned int nbSpurious=0;
+      Chronometer chrono;
+      while(true)
       {
-         mpCellExplorer->Evolution(5000,true,0.7,0.5,50);
-         if(mpCellExplorer->GetBestScore()>stopOnScore) break;
+         mpCellExplorer->SetNbSpurious(nbSpurious);
+         float minv=EstimateCellVolume(dmin,dmax,nb,CUBIC      ,LATTICE_P,1.5);
+         float maxv=EstimateCellVolume(dmin,dmax,nb,CUBIC      ,LATTICE_P,0.4);
+         mpCellExplorer->SetVolumeMinMax(minv,maxv);
+         float lengthmax=pow(maxv,(float)(1/3.0))*3;
+         if(lengthmax<25)lengthmax=25;
+         mpCellExplorer->SetLengthMinMax(3,lengthmax);
+         mpCellExplorer->SetCrystalSystem(CUBIC);
+         cout<<"  CUBIC (150%/40% reflections observed):v="<<minv<<"," <<maxv<<", maxlength="<<lengthmax<<endl;
+         mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
+         if(mpCellExplorer->GetBestScore()<=stopOnScore)
+         {
+            minv=EstimateCellVolume(dmin,dmax,nb,TETRAGONAL,LATTICE_P,1.5);
+            maxv=EstimateCellVolume(dmin,dmax,nb,TETRAGONAL,LATTICE_P,0.4);
+            mpCellExplorer->SetVolumeMinMax(minv,maxv);
+            float lengthmax=pow(maxv,(float)(1/3.0))*3;
+            if(lengthmax<25)lengthmax=25;
+            mpCellExplorer->SetLengthMinMax(3,lengthmax);
+            mpCellExplorer->SetCrystalSystem(TETRAGONAL);
+            cout<<"  TETRAGONAL (150%/40% reflections observed):v="<<minv<<"," <<maxv<<", maxlength="<<lengthmax<<endl;
+            mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
+         }
+         if(mpCellExplorer->GetBestScore()<=stopOnScore)
+         {
+            minv=EstimateCellVolume(dmin,dmax,nb,RHOMBOEDRAL,LATTICE_P,1.5);
+            maxv=EstimateCellVolume(dmin,dmax,nb,RHOMBOEDRAL,LATTICE_P,0.4);
+            mpCellExplorer->SetVolumeMinMax(minv,maxv);
+            float lengthmax=pow(maxv,(float)(1/3.0))*3;
+            if(lengthmax<25)lengthmax=25;
+            mpCellExplorer->SetLengthMinMax(3,lengthmax);
+            mpCellExplorer->SetCrystalSystem(RHOMBOEDRAL);
+            cout<<"  RHOMBOEDRAL (150%/40% reflections observed):v="<<minv<<"," <<maxv<<", maxlength="<<lengthmax<<endl;
+            mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
+         }
+         if(mpCellExplorer->GetBestScore()<=stopOnScore)
+         {
+            minv=EstimateCellVolume(dmin,dmax,nb,HEXAGONAL,LATTICE_P,1.5);
+            maxv=EstimateCellVolume(dmin,dmax,nb,HEXAGONAL,LATTICE_P,0.4);
+            mpCellExplorer->SetVolumeMinMax(minv,maxv);
+            float lengthmax=pow(maxv,(float)(1/3.0))*3;
+            if(lengthmax<25)lengthmax=25;
+            mpCellExplorer->SetLengthMinMax(3,lengthmax);
+            mpCellExplorer->SetCrystalSystem(HEXAGONAL);
+            cout<<"  HEXAGONAL (150%/40% reflections observed):v="<<minv<<"," <<maxv<<", maxlength="<<lengthmax<<endl;
+            mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
+         }
+         if(mpCellExplorer->GetBestScore()<=stopOnScore)
+         {
+            minv=EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_P,1.5);
+            maxv=EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_P,0.4);
+            mpCellExplorer->SetVolumeMinMax(minv,maxv);
+            float lengthmax=pow(maxv,(float)(1/3.0))*3;
+            if(lengthmax<25)lengthmax=25;
+            mpCellExplorer->SetLengthMinMax(3,lengthmax);
+            mpCellExplorer->SetCrystalSystem(ORTHOROMBIC);
+            cout<<"  ORTHOROMBIC (150%/40% reflections observed):v="<<minv<<"," <<maxv<<", maxlength="<<lengthmax<<endl;
+            mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
+         }
+         if(mpCellExplorer->GetBestScore()<=stopOnScore)
+         {
+            minv=EstimateCellVolume(dmin,dmax,nb,MONOCLINIC,LATTICE_P,1.5);
+            maxv=EstimateCellVolume(dmin,dmax,nb,MONOCLINIC,LATTICE_P,0.4);
+            mpCellExplorer->SetVolumeMinMax(minv,maxv);
+            float lengthmax=pow(maxv,(float)(1/3.0))*3;
+            if(lengthmax<25)lengthmax=25;
+            mpCellExplorer->SetLengthMinMax(3,lengthmax);
+            mpCellExplorer->SetCrystalSystem(MONOCLINIC);
+            cout<<"  MONOCLINIC (150%/40% reflections observed):v="<<minv<<"," <<maxv<<", maxlength="<<lengthmax<<endl;
+            mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
+         }
+         
+         nbSpurious+=3;
+         if((mpCellExplorer->GetBestScore()>=stopOnScore)||(nbSpurious>3)) break;
+         cout<<"Trying with NB_SPURIOUS="<<nbSpurious<<endl;
+      }
+      cout<<"Finished indexing, bestscore="<<mpCellExplorer->GetBestScore()<<", elapsed time="<<chrono.seconds()<<endl;
+      if(mpCellExplorer->GetSolutions().size()>0)
+      {
+         char buf[100];
+         wxArrayString sols;
+         float bestvol=0;
+         for(list<pair<RecUnitCell,float> >::const_iterator pos=mpCellExplorer->GetSolutions().begin();
+            pos!=mpCellExplorer->GetSolutions().end();++pos)
+         {
+            vector<float> uc=pos->first.DirectUnitCell();
+            if(pos==mpCellExplorer->GetSolutions().begin()) bestvol=uc[6]*.99999;
+            const float relvol=uc[6]/bestvol;
+            sprintf(buf,"Score=%6.1f V=%6.1f(%3.1f*) %7.3f %7.3f %7.2f %6.3f %6.3f %6.3f",pos->second,
+                  uc[6],relvol,uc[0],uc[1],uc[2],uc[3]*RAD2DEG,uc[4]*RAD2DEG,uc[5]*RAD2DEG);
+            //cout<<buf<<endl;
+            sols.Add(buf);
+         }
+         mpCell->Set(sols);
       }
    }
-   cout<<"Finished indexing, bestscore="<<mpCellExplorer->GetBestScore()<<", elapsed time="<<chrono.seconds()<<endl;
-   if(mpCellExplorer->GetSolutions().size()>0)
+   else
    {
-      char buf[100];
-      wxArrayString sols;
-      float bestvol=0;
-      for(list<pair<RecUnitCell,float> >::const_iterator pos=mpCellExplorer->GetSolutions().begin();
-          pos!=mpCellExplorer->GetSolutions().end();++pos)
+      // Erase spurious record
+      for(vector<PeakList::hkl>::iterator pos=mpPeakList->mvHKL.begin();pos!=mpPeakList->mvHKL.end();++pos)
+         pos->isSpurious=false;
+      
+      PeakList peaklist=*mpPeakList;
+      for(vector<PeakList::hkl>::iterator pos=mpPeakList->mvHKL.begin();pos!=mpPeakList->mvHKL.end();++pos)
+      {   pos->d2obsmin=pos->d2obs; pos->d2obsmax=pos->d2obs;}
+      
+      mpCellExplorer = new CellExplorer(peaklist,(CrystalSystem)(mpBravais->GetSelection()),0);
+      
+      wxString s;
+      double lmin,lmax,amin=90,amax,vmin,vmax,error,stopOnScore,reportOnScore;
+      long nbspurious,stopOnDepth,reportOnDepth;
+      s=mpLengthMin->GetValue();s.ToDouble(&lmin);
+      s=mpLengthMax->GetValue();s.ToDouble(&lmax);
+      //s=mpAngleMin->GetValue();s.ToDouble(&amin);
+      s=mpAngleMax->GetValue();s.ToDouble(&amax);
+      s=mpVolumeMin->GetValue();s.ToDouble(&vmin);
+      s=mpVolumeMax->GetValue();s.ToDouble(&vmax);
+      s=mpNbSpurious->GetValue();s.ToLong(&nbspurious);
+      s=mpErrorD->GetValue();s.ToDouble(&error);
+      s=mpStopOnScore->GetValue();s.ToDouble(&stopOnScore);
+      s=mpStopOnDepth->GetValue();s.ToLong(&stopOnDepth);
+      s=mpReportOnScore->GetValue();s.ToDouble(&reportOnScore);
+      s=mpReportOnDepth->GetValue();s.ToLong(&reportOnDepth);
+      
+      mpCellExplorer->SetLengthMinMax((float)lmin,(float)lmax);
+      mpCellExplorer->SetAngleMinMax((float)amin*DEG2RAD,(float)amax*DEG2RAD);
+      mpCellExplorer->SetVolumeMinMax((float)vmin,(float)vmax);
+      mpCellExplorer->SetNbSpurious((unsigned int)nbspurious);
+      mpCellExplorer->SetD2Error((float)(error*error));
+   
+      Chronometer chrono;
+      if(mpAlgorithm->GetSelection()==0) mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
+      else
       {
-         vector<float> uc=pos->first.DirectUnitCell();
-         if(pos==mpCellExplorer->GetSolutions().begin()) bestvol=uc[6]*.99999;
-         const float relvol=uc[6]/bestvol;
-         sprintf(buf,"Score=%6.1f V=%6.1f(%3.1f*) %7.3f %7.3f %7.2f %6.3f %6.3f %6.3f",pos->second,
-                 uc[6],relvol,uc[0],uc[1],uc[2],uc[3]*RAD2DEG,uc[4]*RAD2DEG,uc[5]*RAD2DEG);
-         //cout<<buf<<endl;
-         sols.Add(buf);
+         for(unsigned int i=0;i<20;++i)
+         {
+            mpCellExplorer->Evolution(5000,true,0.7,0.5,50);
+            if(mpCellExplorer->GetBestScore()>stopOnScore) break;
+         }
       }
-      mpCell->Set(sols);
+      cout<<"Finished indexing, bestscore="<<mpCellExplorer->GetBestScore()<<", elapsed time="<<chrono.seconds()<<endl;
+      if(mpCellExplorer->GetSolutions().size()>0)
+      {
+         char buf[100];
+         wxArrayString sols;
+         float bestvol=0;
+         for(list<pair<RecUnitCell,float> >::const_iterator pos=mpCellExplorer->GetSolutions().begin();
+            pos!=mpCellExplorer->GetSolutions().end();++pos)
+         {
+            vector<float> uc=pos->first.DirectUnitCell();
+            if(pos==mpCellExplorer->GetSolutions().begin()) bestvol=uc[6]*.99999;
+            const float relvol=uc[6]/bestvol;
+            sprintf(buf,"Score=%6.1f V=%6.1f(%3.1f*) %7.3f %7.3f %7.2f %6.3f %6.3f %6.3f",pos->second,
+                  uc[6],relvol,uc[0],uc[1],uc[2],uc[3]*RAD2DEG,uc[4]*RAD2DEG,uc[5]*RAD2DEG);
+            //cout<<buf<<endl;
+            sols.Add(buf);
+         }
+         mpCell->Set(sols);
+      }
    }
    
    if(mpGraph!=0) mpGraph->Refresh(FALSE);

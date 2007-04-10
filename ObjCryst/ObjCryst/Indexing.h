@@ -119,6 +119,16 @@ class PeakList
                    const int h=0,const int k=0, const int l=0,const float d2calc=0);
       void RemovePeak(unsigned int i);
       void Print(std::ostream &os) const;
+      /// One set of Miller indices, a possible indexation for a reflection
+      struct hkl0
+      {
+         hkl0(const int h=0,const int k=0, const int l=0);
+         /// Miller indices
+         int h,k,l;
+      };
+      /** One observed diffraction line, to be indexed
+      *
+      */
       struct hkl
       {
          hkl(const float dobs=1.0,const float iobs=0.0,const float dobssigma=0.0,const float iobssigma=0.0,
@@ -139,6 +149,8 @@ class PeakList
          float iobssigma;
          /// Miller indices, after line is indexed
          mutable int h,k,l;
+         /// Possible Miller indices, stored during a dichotomy search.
+         mutable std::list<hkl0> vDicVolHKL;
          /// Is this line indexed ?
          mutable bool isIndexed;
          /// Is this an impurity line ?
@@ -183,6 +195,7 @@ class CellExplorer:public RefinableObj
       /// Allowed error on 1/d (squared!), used for dicvol
       void SetD2Error(const float err);
       void SetMinMaxZeroShift(const float min,const float max);
+      void SetCrystalSystem(const CrystalSystem system);
       virtual const string& GetClassName() const;
       virtual const string& GetName() const;
       virtual void Print() const;
