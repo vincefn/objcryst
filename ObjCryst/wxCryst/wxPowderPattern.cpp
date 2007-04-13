@@ -1821,15 +1821,17 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
       bravaisChoices.Add("Rhomboedral");
       bravaisChoices.Add("Tetragonal");
       bravaisChoices.Add("Cubic");
-      mpBravais=new wxRadioBox((wxWindow*)pAdvanced,-1,"Crystal System",wxDefaultPosition,wxDefaultSize,bravaisChoices);
+      mpBravais=new wxRadioBox((wxWindow*)pAdvanced,-1,"Crystal System",wxDefaultPosition,wxDefaultSize,bravaisChoices,0,wxRA_SPECIFY_ROWS);
       mpBravais->SetSelection(2);
+      mpBravais->Enable(0,false);
       pSizerAdvanced->Add(mpBravais,0,wxALIGN_CENTER);
       
       wxArrayString algoChoices;
       algoChoices.Add("DICVOL");
       algoChoices.Add("Differential Evolution");
       
-      mpAlgorithm=new wxRadioBox(pAdvanced,-1,"Algorithm",wxDefaultPosition,wxDefaultSize,algoChoices);
+      mpAlgorithm=new wxRadioBox(pAdvanced,-1,"Algorithm",wxDefaultPosition,wxDefaultSize,algoChoices,0,wxRA_SPECIFY_ROWS);
+      mpAlgorithm->Enable(1,false);
       pSizerAdvanced->Add(mpAlgorithm,0,wxALIGN_CENTER);
       
       pAdvanced->SetSizer(pSizerAdvanced);
@@ -2050,7 +2052,7 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
    mpCellExplorer->ReduceSolutions();
    if(mpCellExplorer->GetSolutions().size()>0)
    {
-      char buf[100];
+      char buf[200];
       wxArrayString sols;
       float bestvol=0;
       for(list<pair<RecUnitCell,float> >::const_iterator pos=mpCellExplorer->GetSolutions().begin();

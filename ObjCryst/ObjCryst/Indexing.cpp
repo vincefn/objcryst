@@ -798,7 +798,7 @@ void PeakList::RemovePeak(unsigned int idx)
 void PeakList::Print(std::ostream &os) const
 {
    unsigned int i=0;
-   char buf[100];
+   char buf[200];
    os<<"PeakList, with "<<mvHKL.size()<<" peaks"<<endl;
    for(vector<PeakList::hkl>::const_iterator pos=mvHKL.begin();pos!=mvHKL.end();++pos)
    {
@@ -2129,7 +2129,7 @@ void CellExplorer::ReduceSolutions()
          cout<<__FILE__<<":"<<__LINE__<<" SOLUTION: a="<<uc[0]<<", b="<<uc[1]<<", c="<<uc[2]
                <<", alpha="<<uc[3]*RAD2DEG<<", beta="<<uc[4]*RAD2DEG<<", gamma="<<uc[5]*RAD2DEG
                <<", V="<<uc[6]<<", score="<<vSolution2.back().second<<",   SIMILAR TO:"<<endl;
-      for(list<pair<RecUnitCell,float> >::iterator pos=mvSolution.begin();pos!=mvSolution.end();++pos)
+      for(list<pair<RecUnitCell,float> >::iterator pos=mvSolution.begin();pos!=mvSolution.end();)
       {
          if(SimilarRUC(pos->first,vSolution2.back().first))
          {
@@ -2142,8 +2142,8 @@ void CellExplorer::ReduceSolutions()
             {
                if(pos->second>vSolution2.back().second) vSolution2.back()=*pos;
             }
-            else if(vSolution2.back().first.mlattice>pos->first.mlattice) vSolution2.back()=*pos;
-            pos=mvSolution.erase(pos);pos--;
+            else if(vSolution2.back().first.mlattice<pos->first.mlattice) vSolution2.back()=*pos;
+            pos=mvSolution.erase(pos);
          }
          else
          {
@@ -2152,6 +2152,7 @@ void CellExplorer::ReduceSolutions()
                cout<<__FILE__<<":"<<__LINE__<<"        0: a="<<uc[0]<<", b="<<uc[1]<<", c="<<uc[2]
                      <<", alpha="<<uc[3]*RAD2DEG<<", beta="<<uc[4]*RAD2DEG<<", gamma="<<uc[5]*RAD2DEG
                      <<", V="<<uc[6]<<", score="<<pos->second<<"       ("<<mvSolution.size()<<")"<<endl;
+            ++pos;
          }
       }
    }
