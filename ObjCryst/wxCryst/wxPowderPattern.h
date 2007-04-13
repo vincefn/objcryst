@@ -106,6 +106,8 @@ class WXPowderPatternGraph: public wxWindow
       void OnRedrawNewPattern(wxUpdateUIEvent& WXUNUSED(event));
       void OnToggleLabel(wxCommandEvent& WXUNUSED(event));
       void OnFindPeaks(wxCommandEvent& WXUNUSED(event));
+      void OnLoadPeaks(wxCommandEvent& WXUNUSED(event));
+      void OnSavePeaks(wxCommandEvent& WXUNUSED(event));
       /// Add or remove peak
       void OnChangePeak(wxCommandEvent& WXUNUSED(event));
       void OnIndex(wxCommandEvent& WXUNUSED(event));

@@ -110,9 +110,11 @@ class PeakList
       PeakList(const PeakList &old);
       void operator=(const PeakList &rhs);
       ~PeakList();
+      void ImportDhklDSigmaIntensity(std::istream &is,float defaultsigma=.001);
       void ImportDhklIntensity(std::istream &is);
       void ImportDhkl(std::istream &is);
       void Import2ThetaIntensity(std::istream &is, const float wavelength=1.5418);
+      void ExportDhklDSigmaIntensity(std::ostream &out)const;
       /// Add one peak
       ///\param d: 1/d for this peak (Angstroem)
       void AddPeak(const float d, const float iobs=1.0,const float dobssigma=0.0,const float iobssigma=0.0,

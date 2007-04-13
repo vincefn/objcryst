@@ -904,6 +904,8 @@ static const long ID_POWDERGRAPH_MENU_UPDATE=               WXCRYST_ID();
 static const long ID_POWDERGRAPH_MENU_TOGGLELABEL=          WXCRYST_ID(); 
 static const long ID_POWDERGRAPH_MENU_TOGGPEAK=             WXCRYST_ID(); 
 static const long ID_POWDERGRAPH_MENU_FINDPEAKS=            WXCRYST_ID(); 
+static const long ID_POWDERGRAPH_MENU_LOADPEAKS=            WXCRYST_ID(); 
+static const long ID_POWDERGRAPH_MENU_SAVEPEAKS=            WXCRYST_ID(); 
 static const long ID_POWDERGRAPH_MENU_ADDPEAK=              WXCRYST_ID(); 
 static const long ID_POWDERGRAPH_MENU_REMOVEPEAK=           WXCRYST_ID(); 
 static const long ID_POWDERGRAPH_MENU_INDEX=                WXCRYST_ID(); 
@@ -921,6 +923,8 @@ BEGIN_EVENT_TABLE(WXPowderPatternGraph, wxWindow)
    EVT_MENU(ID_POWDERGRAPH_MENU_TOGGLELABEL,    WXPowderPatternGraph::OnToggleLabel)
    EVT_MENU(ID_POWDERGRAPH_MENU_TOGGPEAK,       WXPowderPatternGraph::OnToggleLabel)
    EVT_MENU(ID_POWDERGRAPH_MENU_FINDPEAKS,      WXPowderPatternGraph::OnFindPeaks)
+   EVT_MENU(ID_POWDERGRAPH_MENU_LOADPEAKS,      WXPowderPatternGraph::OnLoadPeaks)
+   EVT_MENU(ID_POWDERGRAPH_MENU_SAVEPEAKS,      WXPowderPatternGraph::OnSavePeaks)
    EVT_MENU(ID_POWDERGRAPH_MENU_ADDPEAK,        WXPowderPatternGraph::OnChangePeak)
    EVT_MENU(ID_POWDERGRAPH_MENU_REMOVEPEAK,     WXPowderPatternGraph::OnChangePeak)
    EVT_MENU(ID_POWDERGRAPH_MENU_INDEX,          WXPowderPatternGraph::OnIndex)
@@ -946,13 +950,16 @@ mIsDragging(false),mDisplayLabel(true),mDisplayPeak(true)
    mpPopUpMenu=new wxMenu("Powder Pattern");
    mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_UPDATE, "&Update");
    mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_TOGGLELABEL, "&Hide labels");
-   #if 0
+   #if 1
    mpPopUpMenu->AppendSeparator();
    mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_FINDPEAKS, "&Find peaks");
-   mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_INDEX, "&Index");
+   mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_LOADPEAKS, "&Load peaks");
+   mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_SAVEPEAKS, "&Save peaks");
+   mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_INDEX, "&Index !");
    mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_TOGGPEAK, "&Hide peaks");
    mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_ADDPEAK, "&Add peak");
    mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_REMOVEPEAK, "&Remove peak");
+   mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_SAVEPEAKS, FALSE);
    mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_TOGGPEAK, FALSE);
    mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_ADDPEAK, FALSE);
    mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_REMOVEPEAK, FALSE);
@@ -1198,23 +1205,25 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
    {
       list<pair<const REAL ,const string > > peakLabels;
       char buf[50];
+      unsigned int ix=0;
       for(vector<PeakList::hkl>::const_iterator pos=mPeakList.GetPeakList().begin();pos!=mPeakList.GetPeakList().end();++pos)
       {
          const float x=mpPattern->GetPowderPattern().STOL2X(pos->dobs/2);
          if(pos->isSpurious)
          {
             if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
-               sprintf(buf,"x=%6.3f° d=%6.3fA SPURIOUS?",x*RAD2DEG,1/pos->dobs);
+               sprintf(buf,"#%2u,x=%6.3f° d=%6.3fA SPURIOUS?",ix,x*RAD2DEG,1/pos->dobs);
             else
-               sprintf(buf,"x=%6.3f d=%6.3fA SPURIOUS?",x        ,1/pos->dobs);
+               sprintf(buf,"#%2u,x=%6.3f d=%6.3fA SPURIOUS?",ix,x        ,1/pos->dobs);
          }
          else
          {
             if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
-               sprintf(buf,"x=%6.2f d=%6.3fA",x*RAD2DEG,1/pos->dobs);
+               sprintf(buf,"#%2u,x=%6.2f° d=%6.3fA",ix,x*RAD2DEG,1/pos->dobs);
             else
-               sprintf(buf,"x=%6.2f d=%6.3fA",x        ,1/pos->dobs);
+               sprintf(buf,"#%2u,x=%6.2f d=%6.3fA",ix,x        ,1/pos->dobs);
          }
+         ++ix;
          peakLabels.push_back(make_pair(x,buf));
       }
       vLabel.push_back(peakLabels);
@@ -1535,6 +1544,7 @@ void WXPowderPatternGraph::OnFindPeaks(wxCommandEvent& WXUNUSED(event))
        <<EstimateCellVolume(dmin,dmax,nb,TRICLINIC  ,LATTICE_P,1.0)  <<","
        <<EstimateCellVolume(dmin,dmax,nb,TRICLINIC  ,LATTICE_P,0.3)<<endl;
    
+   mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_SAVEPEAKS, TRUE);
    mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_TOGGPEAK, TRUE);
    mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_INDEX, TRUE);
    mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_ADDPEAK, TRUE);
@@ -1556,6 +1566,35 @@ void WXPowderPatternGraph::OnFindPeaks(wxCommandEvent& WXUNUSED(event))
 
    this->Refresh(false);
 }
+
+void WXPowderPatternGraph::OnLoadPeaks(wxCommandEvent& WXUNUSED(event))
+{
+   wxFileDialog fn(this,"Choose a file","","","*",wxOPEN);
+   if(fn.ShowModal() != wxID_OK) return;
+   ifstream f(fn.GetPath().c_str());
+   if(!f) return;//:TODO:
+   mPeakList.GetPeakList().clear();
+   mPeakList.ImportDhklDSigmaIntensity(f);
+   f.close();
+   
+   mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_SAVEPEAKS, TRUE);
+   mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_TOGGPEAK, TRUE);
+   mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_INDEX, TRUE);
+   mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_ADDPEAK, TRUE);
+   mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_REMOVEPEAK, TRUE);
+   this->Refresh(false);
+}
+
+void WXPowderPatternGraph::OnSavePeaks(wxCommandEvent& WXUNUSED(event))
+{
+   wxFileDialog save(this,"Choose a file","","","*.txt",wxSAVE | wxOVERWRITE_PROMPT);
+   if(save.ShowModal() != wxID_OK) return;
+   
+   ofstream out(save.GetPath().c_str());
+   if(!out) return;//:TODO:
+   out.close();
+}
+
 
 void WXPowderPatternGraph::OnChangePeak(wxCommandEvent& event)
 {
@@ -1623,6 +1662,7 @@ class WXCellExplorer:public wxWindow
       wxRadioBox *mpAlgorithm;
       wxRadioBox *mpBravais;
       wxListBox *mpCell;
+      wxTextCtrl *mpLog;
       wxTextCtrl *mpLengthMin,*mpLengthMax;
       wxTextCtrl *mpAngleMin,*mpAngleMax;
       wxTextCtrl *mpVolumeMin,*mpVolumeMax;
@@ -1632,10 +1672,13 @@ class WXCellExplorer:public wxWindow
       wxTextCtrl *mpStopOnScore,*mpStopOnDepth;
       wxTextCtrl *mpReportOnScore,*mpReportOnDepth;
       Crystal *mpCrystal;
+      wxCheckBox *mpWeakDiffraction;
+      wxCheckBox *mpContinueOnSolution;
       DECLARE_EVENT_TABLE()
 };
 static const long ID_CELLEXPLORER_INDEX= WXCRYST_ID();
 static const long ID_CELLEXPLORER_INDEX_QUICK= WXCRYST_ID();
+static const long ID_CELLEXPLORER_WEAK= WXCRYST_ID();
 static const long ID_CELLEXPLORER_SELECTCELL= WXCRYST_ID();
 static const long ID_CELLEXPLORER_APPLYCELL= WXCRYST_ID();
 static const long ID_CELLEXPLORER_CHOOSECRYSTAL= WXCRYST_ID();
@@ -1667,7 +1710,13 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
       
       wxButton *pQuickButtonIndex=new wxButton(pQuick,ID_CELLEXPLORER_INDEX_QUICK,"Find cell!");
       pSizerQuick->Add(pQuickButtonIndex,0,wxALIGN_CENTER);
-   
+      
+      mpWeakDiffraction=new wxCheckBox(pQuick,ID_CELLEXPLORER_WEAK,"Weak Diffraction (scan larger volume)");
+      pSizerQuick->Add(mpWeakDiffraction,0,wxALIGN_CENTER);
+      
+      mpContinueOnSolution=new wxCheckBox(pQuick,ID_CELLEXPLORER_WEAK,"Continue exploring after solution");
+      pSizerQuick->Add(mpContinueOnSolution,0,wxALIGN_CENTER);
+      
       pQuick->SetSizer(pSizerQuick);
       pSizerQuick->Fit(pQuick);
       pSizerQuick->RecalcSizes();
@@ -1791,10 +1840,19 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
       pNotebook->AddPage(pAdvanced,"Advanced");
       
    pNotebook->Layout();
-   
-   wxArrayString cells;
-   mpCell=new wxListBox(this,ID_CELLEXPLORER_SELECTCELL,wxDefaultPosition,wxSize(600,400),cells,wxLB_SINGLE);
-   pSizer1->Add(mpCell,0,wxALIGN_TOP);
+   // Solutions & log
+      wxBoxSizer *pSizer2=new wxBoxSizer(wxVERTICAL);
+      
+      wxArrayString cells;
+      mpCell=new wxListBox(this,ID_CELLEXPLORER_SELECTCELL,wxDefaultPosition,wxSize(600,400),cells,wxLB_SINGLE);
+      mpCell->SetFont(wxFont(9,wxTELETYPE,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL));
+      pSizer2->Add(mpCell,0,wxALIGN_CENTER);
+      
+      mpLog =new wxTextCtrl(this,-1,"",wxDefaultPosition,wxSize(600,200),wxTE_MULTILINE|wxTE_READONLY|wxTE_DONTWRAP);
+      mpLog->SetFont(wxFont(9,wxTELETYPE,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL));
+      pSizer2->Add(mpLog,0,wxALIGN_CENTER);
+      
+      pSizer1->Add(pSizer2,0,wxALIGN_TOP);
    
    this->Layout();
    pSizer1->Fit(this->GetParent());
@@ -1802,6 +1860,8 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
 }
 void WXCellExplorer::OnIndex(wxCommandEvent &event)
 {
+   
+   Chronometer chrono;
    if(event.GetId()==ID_CELLEXPLORER_INDEX_QUICK)
    {
       // Erase spurious record
@@ -1818,113 +1878,125 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
       if(nb>20) nb=20;// Just use 20 - beyond that we probably have a lot of weak peaks
       float dmin=mpPeakList->GetPeakList()[nb-1].dobs;
       const float dmax=mpPeakList->GetPeakList()[0].dobs;
-      cout<<"Predicted Unit Cell Volume from: dmax="<<1/dmax<<" -> dmin="<<1/dmin<<", for nb peak="<<nb<<endl;
+      mpLog->AppendText(wxString::Format("Predicting volumes from %2u peaks between d=%6.3f and d=%6.3f\n",nb,1/dmax,1/dmin));
+      mpLog->AppendText(wxString::Format("Starting indexing using %2u peaks\n",nb));
 
       mpCellExplorer = new CellExplorer(peaklist,CUBIC,0);
       mpCellExplorer->SetLengthMinMax(3,25);
       mpCellExplorer->SetAngleMinMax(90*DEG2RAD,130*DEG2RAD);
       mpCellExplorer->SetD2Error(0);
       
+      float weak_f=1.0;
+      if(mpWeakDiffraction->GetValue()) weak_f=0.5;
+      const bool continueOnSolution=mpContinueOnSolution->GetValue();
+      
       const float        stopOnScore=50, reportOnScore=10;
-      const unsigned int stopOnDepth=6,   reportOnDepth=4;
+      const unsigned int stopOnDepth=6+int(continueOnSolution),   reportOnDepth=4;
       
       unsigned int nbSpurious=0;
-      Chronometer chrono;
       while(true)
       {
+         unsigned int nbsol0;
+         float t0;
          mpCellExplorer->SetNbSpurious(nbSpurious);
          float minv=EstimateCellVolume(dmin,dmax,nb,CUBIC      ,LATTICE_P,1.5);
-         float maxv=EstimateCellVolume(dmin,dmax,nb,CUBIC      ,LATTICE_P,0.4);
+         float maxv=EstimateCellVolume(dmin,dmax,nb,CUBIC      ,LATTICE_P,0.4*weak_f);
          mpCellExplorer->SetVolumeMinMax(minv,maxv);
          float lengthmax=pow(maxv,(float)(1/3.0))*3;
          if(lengthmax<25)lengthmax=25;
          mpCellExplorer->SetLengthMinMax(3,lengthmax);
          mpCellExplorer->SetCrystalSystem(CUBIC);
-         cout<<"  CUBIC (150%/40% reflections observed):v="<<minv<<"," <<maxv<<", maxlength="<<lengthmax<<endl;
+         mpLog->AppendText(wxString::Format("CUBIC      : V= %6.0f -> %6.0f A^3, max length=%6.2fA",minv,maxv,lengthmax));
+         t0=chrono.seconds();nbsol0=mpCellExplorer->GetSolutions().size();
          mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
-         if(mpCellExplorer->GetBestScore()<=stopOnScore)
+         mpLog->AppendText(wxString::Format(" -> %3u sols in %6.2fs, best score=%6.1f\n",
+                    mpCellExplorer->GetSolutions().size()-nbsol0,chrono.seconds()-t0,mpCellExplorer->GetBestScore()));
+         mpLog->Update();
+         if((mpCellExplorer->GetBestScore()<=stopOnScore)||continueOnSolution)
          {
             minv=EstimateCellVolume(dmin,dmax,nb,TETRAGONAL,LATTICE_P,1.5);
-            maxv=EstimateCellVolume(dmin,dmax,nb,TETRAGONAL,LATTICE_P,0.4);
+            maxv=EstimateCellVolume(dmin,dmax,nb,TETRAGONAL,LATTICE_P,0.4*weak_f);
             mpCellExplorer->SetVolumeMinMax(minv,maxv);
             float lengthmax=pow(maxv,(float)(1/3.0))*3;
             if(lengthmax<25)lengthmax=25;
             mpCellExplorer->SetLengthMinMax(3,lengthmax);
             mpCellExplorer->SetCrystalSystem(TETRAGONAL);
-            cout<<"  TETRAGONAL (150%/40% reflections observed):v="<<minv<<"," <<maxv<<", maxlength="<<lengthmax<<endl;
+            mpLog->AppendText(wxString::Format("TETRAGONAL : V= %6.0f -> %6.0f A^3, max length=%6.2fA",minv,maxv,lengthmax));
+            t0=chrono.seconds();nbsol0=mpCellExplorer->GetSolutions().size();
             mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
+            mpLog->AppendText(wxString::Format(" -> %3u sols in %6.2fs, best score=%6.1f\n",
+                     mpCellExplorer->GetSolutions().size()-nbsol0,chrono.seconds()-t0,mpCellExplorer->GetBestScore()));
+            mpLog->Update();
          }
-         if(mpCellExplorer->GetBestScore()<=stopOnScore)
+         if((mpCellExplorer->GetBestScore()<=stopOnScore)||continueOnSolution)
          {
             minv=EstimateCellVolume(dmin,dmax,nb,RHOMBOEDRAL,LATTICE_P,1.5);
-            maxv=EstimateCellVolume(dmin,dmax,nb,RHOMBOEDRAL,LATTICE_P,0.4);
+            maxv=EstimateCellVolume(dmin,dmax,nb,RHOMBOEDRAL,LATTICE_P,0.4*weak_f);
             mpCellExplorer->SetVolumeMinMax(minv,maxv);
             float lengthmax=pow(maxv,(float)(1/3.0))*3;
             if(lengthmax<25)lengthmax=25;
             mpCellExplorer->SetLengthMinMax(3,lengthmax);
             mpCellExplorer->SetCrystalSystem(RHOMBOEDRAL);
-            cout<<"  RHOMBOEDRAL (150%/40% reflections observed):v="<<minv<<"," <<maxv<<", maxlength="<<lengthmax<<endl;
+            mpLog->AppendText(wxString::Format("RHOMBOEDRAL: V= %6.0f -> %6.0f A^3, max length=%6.2fA",minv,maxv,lengthmax));
+            t0=chrono.seconds();nbsol0=mpCellExplorer->GetSolutions().size();
             mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
+            mpLog->AppendText(wxString::Format(" -> %3u sols in %6.2fs, best score=%6.1f\n",
+                     mpCellExplorer->GetSolutions().size()-nbsol0,chrono.seconds()-t0,mpCellExplorer->GetBestScore()));
+            mpLog->Update();
          }
-         if(mpCellExplorer->GetBestScore()<=stopOnScore)
+         if((mpCellExplorer->GetBestScore()<=stopOnScore)||continueOnSolution)
          {
             minv=EstimateCellVolume(dmin,dmax,nb,HEXAGONAL,LATTICE_P,1.5);
-            maxv=EstimateCellVolume(dmin,dmax,nb,HEXAGONAL,LATTICE_P,0.4);
+            maxv=EstimateCellVolume(dmin,dmax,nb,HEXAGONAL,LATTICE_P,0.4*weak_f);
             mpCellExplorer->SetVolumeMinMax(minv,maxv);
             float lengthmax=pow(maxv,(float)(1/3.0))*3;
             if(lengthmax<25)lengthmax=25;
             mpCellExplorer->SetLengthMinMax(3,lengthmax);
             mpCellExplorer->SetCrystalSystem(HEXAGONAL);
-            cout<<"  HEXAGONAL (150%/40% reflections observed):v="<<minv<<"," <<maxv<<", maxlength="<<lengthmax<<endl;
+            mpLog->AppendText(wxString::Format("HEXAGONAL  : V= %6.0f -> %6.0f A^3, max length=%6.2fA",minv,maxv,lengthmax));
+            t0=chrono.seconds();nbsol0=mpCellExplorer->GetSolutions().size();
             mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
+            mpLog->AppendText(wxString::Format(" -> %3u sols in %6.2fs, best score=%6.1f\n",
+                     mpCellExplorer->GetSolutions().size()-nbsol0,chrono.seconds()-t0,mpCellExplorer->GetBestScore()));
+            mpLog->Update();
          }
-         if(mpCellExplorer->GetBestScore()<=stopOnScore)
+         if((mpCellExplorer->GetBestScore()<=stopOnScore)||continueOnSolution)
          {
             minv=EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_P,1.5);
-            maxv=EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_P,0.4);
+            maxv=EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_P,0.4*weak_f);
             mpCellExplorer->SetVolumeMinMax(minv,maxv);
             float lengthmax=pow(maxv,(float)(1/3.0))*3;
             if(lengthmax<25)lengthmax=25;
             mpCellExplorer->SetLengthMinMax(3,lengthmax);
             mpCellExplorer->SetCrystalSystem(ORTHOROMBIC);
-            cout<<"  ORTHOROMBIC (150%/40% reflections observed):v="<<minv<<"," <<maxv<<", maxlength="<<lengthmax<<endl;
+            mpLog->AppendText(wxString::Format("ORTHOROMBIC: V= %6.0f -> %6.0f A^3, max length=%6.2fA",minv,maxv,lengthmax));
+            t0=chrono.seconds();nbsol0=mpCellExplorer->GetSolutions().size();
             mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
+            mpLog->AppendText(wxString::Format(" -> %3u sols in %6.2fs, best score=%6.1f\n",
+                     mpCellExplorer->GetSolutions().size()-nbsol0,chrono.seconds()-t0,mpCellExplorer->GetBestScore()));
+            mpLog->Update();
          }
-         if(mpCellExplorer->GetBestScore()<=stopOnScore)
+         if((mpCellExplorer->GetBestScore()<=stopOnScore)||continueOnSolution)
          {
             minv=EstimateCellVolume(dmin,dmax,nb,MONOCLINIC,LATTICE_P,1.5);
-            maxv=EstimateCellVolume(dmin,dmax,nb,MONOCLINIC,LATTICE_P,0.4);
+            maxv=EstimateCellVolume(dmin,dmax,nb,MONOCLINIC,LATTICE_P,0.4*weak_f);
             mpCellExplorer->SetVolumeMinMax(minv,maxv);
             float lengthmax=pow(maxv,(float)(1/3.0))*3;
             if(lengthmax<25)lengthmax=25;
             mpCellExplorer->SetLengthMinMax(3,lengthmax);
             mpCellExplorer->SetCrystalSystem(MONOCLINIC);
-            cout<<"  MONOCLINIC (150%/40% reflections observed):v="<<minv<<"," <<maxv<<", maxlength="<<lengthmax<<endl;
+            mpLog->AppendText(wxString::Format("MONOCLINIC : V= %6.0f -> %6.0f A^3, max length=%6.2fA",minv,maxv,lengthmax));
+            t0=chrono.seconds();nbsol0=mpCellExplorer->GetSolutions().size();
             mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
+            mpLog->AppendText(wxString::Format(" -> %3u sols in %6.2fs, best score=%6.1f\n",
+                  mpCellExplorer->GetSolutions().size()-nbsol0,chrono.seconds()-t0,mpCellExplorer->GetBestScore()));
+            mpLog->Update();
          }
          
          nbSpurious+=3;
          if((mpCellExplorer->GetBestScore()>=stopOnScore)||(nbSpurious>3)) break;
-         cout<<"Trying with NB_SPURIOUS="<<nbSpurious<<endl;
-      }
-      cout<<"Finished indexing, bestscore="<<mpCellExplorer->GetBestScore()<<", elapsed time="<<chrono.seconds()<<endl;
-      if(mpCellExplorer->GetSolutions().size()>0)
-      {
-         char buf[100];
-         wxArrayString sols;
-         float bestvol=0;
-         for(list<pair<RecUnitCell,float> >::const_iterator pos=mpCellExplorer->GetSolutions().begin();
-            pos!=mpCellExplorer->GetSolutions().end();++pos)
-         {
-            vector<float> uc=pos->first.DirectUnitCell();
-            if(pos==mpCellExplorer->GetSolutions().begin()) bestvol=uc[6]*.99999;
-            const float relvol=uc[6]/bestvol;
-            sprintf(buf,"Score=%6.1f V=%6.1f(%3.1f*) %7.3f %7.3f %7.2f %6.3f %6.3f %6.3f",pos->second,
-                  uc[6],relvol,uc[0],uc[1],uc[2],uc[3]*RAD2DEG,uc[4]*RAD2DEG,uc[5]*RAD2DEG);
-            //cout<<buf<<endl;
-            sols.Add(buf);
-         }
-         mpCell->Set(sols);
+         mpLog->AppendText(wxString::Format("\n Trying now with %2u spurious peaks\n",nbSpurious));
+         mpLog->Update();
       }
    }
    else
@@ -1933,9 +2005,10 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
       for(vector<PeakList::hkl>::iterator pos=mpPeakList->mvHKL.begin();pos!=mpPeakList->mvHKL.end();++pos)
          pos->isSpurious=false;
       
+      // Copy peaklist, set uncertainty of position lines to 1/4 of sigma.
       PeakList peaklist=*mpPeakList;
-      for(vector<PeakList::hkl>::iterator pos=mpPeakList->mvHKL.begin();pos!=mpPeakList->mvHKL.end();++pos)
-      {   pos->d2obsmin=pos->d2obs; pos->d2obsmax=pos->d2obs;}
+      for(vector<PeakList::hkl>::iterator pos=peaklist.mvHKL.begin();pos!=peaklist.mvHKL.end();++pos)
+      {   pos->d2obsmin=(3*pos->d2obs+pos->d2obsmin)/4; pos->d2obsmax=(3*pos->d2obs+pos->d2obsmax)/4;}
       
       mpCellExplorer = new CellExplorer(peaklist,(CrystalSystem)(mpBravais->GetSelection()),0);
       
@@ -1961,7 +2034,6 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
       mpCellExplorer->SetNbSpurious((unsigned int)nbspurious);
       mpCellExplorer->SetD2Error((float)(error*error));
    
-      Chronometer chrono;
       if(mpAlgorithm->GetSelection()==0) mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
       else
       {
@@ -1971,25 +2043,39 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
             if(mpCellExplorer->GetBestScore()>stopOnScore) break;
          }
       }
-      cout<<"Finished indexing, bestscore="<<mpCellExplorer->GetBestScore()<<", elapsed time="<<chrono.seconds()<<endl;
-      if(mpCellExplorer->GetSolutions().size()>0)
+   }
+   mpLog->AppendText(wxString::Format("Finished indexing, bestscore=%6.1f, elapsed time=%6.2fs\n",
+                     mpCellExplorer->GetBestScore(),chrono.seconds()));
+   // Merge similar solutions - useful here for solutions from different runs/different systems
+   mpCellExplorer->ReduceSolutions();
+   if(mpCellExplorer->GetSolutions().size()>0)
+   {
+      char buf[100];
+      wxArrayString sols;
+      float bestvol=0;
+      for(list<pair<RecUnitCell,float> >::const_iterator pos=mpCellExplorer->GetSolutions().begin();
+         pos!=mpCellExplorer->GetSolutions().end();++pos)
       {
-         char buf[100];
-         wxArrayString sols;
-         float bestvol=0;
-         for(list<pair<RecUnitCell,float> >::const_iterator pos=mpCellExplorer->GetSolutions().begin();
-            pos!=mpCellExplorer->GetSolutions().end();++pos)
+         vector<float> uc=pos->first.DirectUnitCell();
+         if(pos==mpCellExplorer->GetSolutions().begin()) bestvol=uc[6]*.99999;
+         const float relvol=uc[6]/bestvol;
+         string sys;
+         switch(pos->first.mlattice)
          {
-            vector<float> uc=pos->first.DirectUnitCell();
-            if(pos==mpCellExplorer->GetSolutions().begin()) bestvol=uc[6]*.99999;
-            const float relvol=uc[6]/bestvol;
-            sprintf(buf,"Score=%6.1f V=%6.1f(%3.1f*) %7.3f %7.3f %7.2f %6.3f %6.3f %6.3f",pos->second,
-                  uc[6],relvol,uc[0],uc[1],uc[2],uc[3]*RAD2DEG,uc[4]*RAD2DEG,uc[5]*RAD2DEG);
-            //cout<<buf<<endl;
-            sols.Add(buf);
+            case TRICLINIC:sys="TRICLINIC"; break;
+            case MONOCLINIC:sys="MONOCLINIC"; break;
+            case ORTHOROMBIC:sys="ORTHOROMBIC"; break;
+            case HEXAGONAL:sys="HEXAGONAL"; break;
+            case RHOMBOEDRAL:sys="RHOMBOEDRAL"; break;
+            case TETRAGONAL:sys="TETRAGONAL"; break;
+            case CUBIC:sys="CUBIC"; break;
          }
-         mpCell->Set(sols);
+         sprintf(buf,"Score=%6.1f V=%6.1f(%3.1fV) %6.3f %6.3f %6.3f %6.2f %6.2f %6.2f %s",pos->second,
+               uc[6],relvol,uc[0],uc[1],uc[2],uc[3]*RAD2DEG,uc[4]*RAD2DEG,uc[5]*RAD2DEG,sys.c_str());
+         //cout<<buf<<endl;
+         sols.Add(buf);
       }
+      mpCell->Set(sols);
    }
    
    if(mpGraph!=0) mpGraph->Refresh(FALSE);

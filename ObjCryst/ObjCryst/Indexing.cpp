@@ -686,6 +686,26 @@ void PeakList::operator=(const PeakList &rhs)
 PeakList::~PeakList()
 {}
 
+void PeakList::ImportDhklDSigmaIntensity(istream &is,float defaultsigma)
+{
+   float d,sigma,iobs;
+   while(true)
+   {// :TODO: use readline to make sure when the end is reached
+      is >>d;
+      if(is.eof()) break;
+      is>>sigma;
+      if(is.eof()) break;
+      is>>iobs;
+      if(sigma<=0) sigma=d*defaultsigma;
+      if(iobs<=0) iobs=1.0;
+      mvHKL.push_back(hkl(1/d,iobs,1/(d-sigma/2)-1/(d+sigma/2)));
+      cout<<__FILE__<<":"<<__LINE__<<"  "<<mvHKL.size()<<":d="<<d<<"+/-"<<sigma<<", I="<<iobs<<" 1/d="<<1/d<<endl;
+      if(is.eof()) break;
+   }
+   sort(mvHKL.begin(),mvHKL.end(),compareHKL_d);
+   cout<<"Imported "<<mvHKL.size()<<" observed reflection positions."<<endl;
+}
+
 void PeakList::ImportDhklIntensity(istream &is)
 {
    float d,iobs;
@@ -696,7 +716,7 @@ void PeakList::ImportDhklIntensity(istream &is)
       is>>iobs;
       mvHKL.push_back(hkl(1/d,iobs));
       cout<<__FILE__<<":"<<__LINE__<<"  "<<mvHKL.size()<<":d="<<d<<", I="<<iobs<<" 1/d="<<1/d<<endl;
-      if((is.eof())||mvHKL.size()>=20) break;
+      if(is.eof()) break;
    }
    sort(mvHKL.begin(),mvHKL.end(),compareHKL_d);
    cout<<"Imported "<<mvHKL.size()<<" observed reflection positions."<<endl;
@@ -712,7 +732,7 @@ void PeakList::ImportDhkl(istream &is)
       if(is.eof()) break;
       mvHKL.push_back(hkl(1/d));
       cout<<__FILE__<<":"<<__LINE__<<"  "<<mvHKL.size()<<":d="<<d<<" 1/d="<<1/d<<endl;
-      if((is.eof())||mvHKL.size()>=20) break;
+      if(is.eof()) break;
    }
    sort(mvHKL.begin(),mvHKL.end(),compareHKL_d);
    cout<<"Imported "<<v.size()<<" observed reflection positions."<<endl;
@@ -740,6 +760,17 @@ void PeakList::Import2ThetaIntensity(istream &is, const float wavelength)
    }
    sort(mvHKL.begin(),mvHKL.end(),compareHKL_d);
    cout<<"Imported "<<v.size()<<" observed reflection positions."<<endl;
+}
+
+void PeakList::ExportDhklDSigmaIntensity(std::ostream &os)const
+{
+   char buf[100];
+   for(vector<PeakList::hkl>::const_iterator pos=mvHKL.begin();pos!=mvHKL.end();++pos)
+   {
+      const float sigma=1/(pos->dobs-pos->dobssigma/2)-1/(pos->dobs+pos->dobssigma/2);
+      sprintf(buf,"%6.3f %6.3f %f",1/pos->dobs,sigma,pos->iobs);
+      os<<buf<<endl;
+   }
 }
 
 void PeakList::AddPeak(const float d, const float iobs,const float dobssigma,const float iobssigma,
@@ -2107,7 +2138,11 @@ void CellExplorer::ReduceSolutions()
                cout<<__FILE__<<":"<<__LINE__<<"        1: a="<<uc[0]<<", b="<<uc[1]<<", c="<<uc[2]
                      <<", alpha="<<uc[3]*RAD2DEG<<", beta="<<uc[4]*RAD2DEG<<", gamma="<<uc[5]*RAD2DEG
                      <<", V="<<uc[6]<<", score="<<pos->second<<"       ("<<mvSolution.size()<<")"<<endl;
-            if(pos->second>vSolution2.back().second) vSolution2.back()=*pos;
+            if(vSolution2.back().first.mlattice==pos->first.mlattice)
+            {
+               if(pos->second>vSolution2.back().second) vSolution2.back()=*pos;
+            }
+            else if(vSolution2.back().first.mlattice>pos->first.mlattice) vSolution2.back()=*pos;
             pos=mvSolution.erase(pos);pos--;
          }
          else

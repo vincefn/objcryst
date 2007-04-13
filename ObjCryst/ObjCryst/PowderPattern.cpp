@@ -4213,7 +4213,7 @@ PeakList PowderPattern::FindPeaks(const float dmin,const float maxratio,const un
       width_golay=width(SortSubs(width)(nbwidth/2));
       cout<<"median width:"<<width_golay<<endl;
       if(width_golay<=4)width_golay=4;
-      if(width_golay>=10)width_golay=10;
+      if(width_golay>=16)width_golay=16;
    }
    
    // get 2nd derivative
