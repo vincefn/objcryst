@@ -1718,10 +1718,14 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
    if(minDepth>mMaxDicVolDepth) mMaxDicVolDepth=minDepth;
    mvNbSolutionDepth.resize(mMaxDicVolDepth+1);
    for(unsigned int i=0;i<=mMaxDicVolDepth;++i) mvNbSolutionDepth[i]=0;
-   const float latstep=0.5,
-               cosangstep=.05,
-               cosangmax=abs(cos(mAngleMax)),
-               vstep=400;
+   
+   float latstep=0.5,
+         cosangmax=abs(cos(mAngleMax)),
+         vstep=(mVolumeMax-mVolumeMin)/ceil((mVolumeMax-mVolumeMin)/500-0.0001);
+   const float cosangstep=cosangmax/ceil(cosangmax/.08-.0001);
+   if(((mVolumeMax-mVolumeMin)/vstep)>10) vstep=(mVolumeMax-mVolumeMin)/9.999;
+   if(((mLengthMax-mLengthMin)/latstep)>50) latstep=(mLengthMax-mLengthMin)/49.9999;
+   
    cout<<mLengthMin<<"->"<<mLengthMax<<","<<latstep<<","<<(mLengthMax-mLengthMin)/latstep<<endl;
    cout<<mAngleMin<<"->"<<mAngleMax<<","<<cosangstep<<","<<cosangmax<<","<<(mAngleMax-mAngleMin)/cosangstep<<endl;
    cout<<mVolumeMin<<"->"<<mVolumeMax<<","<<vstep<<","<<(mVolumeMax-mVolumeMin)/vstep<<endl;
@@ -1782,11 +1786,16 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                               for(unsigned int i=4;i<=6;++i) {uclarge.par[i]+=duc.par[i];ucsmall.par[i]-=duc.par[i];}//:TODO: Check
                               uclarged=uclarge.DirectUnitCell();
                               ucsmalld =ucsmall.DirectUnitCell();
-                              
-                              RDicVol(uc0,duc,0,nbCalc,minv,maxv);
-                              
+                              /*
+                              char buf[200];
+                              sprintf(buf,"a=%5.2f-%5.2f b=%5.2f-%5.2f c=%5.2f-%5.2f alpha=%5.2f-%5.2f beta=%5.2f-%5.2f gamma=%5.2f-%5.2f V=%5.2f-%5.2f",
+                                       ucsmalld[0],uclarged[0],ucsmalld[1],uclarged[1],ucsmalld[2],uclarged[2],ucsmalld[3]*RAD2DEG,uclarged[3]*RAD2DEG,
+                                       ucsmalld[4]*RAD2DEG,uclarged[4]*RAD2DEG,ucsmalld[5]*RAD2DEG,uclarged[5]*RAD2DEG,ucsmalld[6],uclarged[6]);
+                              cout<<buf<<"   VM="<<maxv<<endl;
+                              */
                               if(uclarged[6]>maxv) break;
                               if(uclarged[2]>mLengthMax) break;
+                              RDicVol(uc0,duc,0,nbCalc,minv,maxv);
                            }
                            if(uclarged[1]>mLengthMax) break;
                         }
@@ -1804,6 +1813,7 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
             vector<float> uclarged,ucsmalld;
             for(float x4=0;x4<cosangmax+cosangstep;x4+=cosangstep)
             {
+               const float sinbeta=sqrt(1-x4*x4);
                float x1=mLengthMin;
                for(;;x1+=latstep)
                {
@@ -1811,7 +1821,7 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                   for(;;x2+=latstep)
                   {
                      float x3=x1;
-                     for(;;x3+=latstep)
+                     for(;;x3+=latstep) //x3+=(latstep+x3*sin4)
                      {
                         duc.par[1]=(1/(x1)-1/(x1+latstep))*0.5;
                         duc.par[2]=(1/(x2)-1/(x2+latstep))*0.5;
@@ -1835,10 +1845,10 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                         sprintf(buf,"a=%5.2f-%5.2f b=%5.2f-%5.2f c=%5.2f-%5.2f alpha=%5.2f-%5.2f beta=%5.2f-%5.2f gamma=%5.2f-%5.2f V=%5.2f-%5.2f",
                                  ucsmalld[0],uclarged[0],ucsmalld[1],uclarged[1],ucsmalld[2],uclarged[2],ucsmalld[3]*RAD2DEG,uclarged[3]*RAD2DEG,
                                  ucsmalld[4]*RAD2DEG,uclarged[4]*RAD2DEG,ucsmalld[5]*RAD2DEG,uclarged[5]*RAD2DEG,ucsmalld[6],uclarged[6]);
+                        cout<<buf<<"   VM="<<maxv<<", x3="<<x3<<endl;
                         */
                         if((ucsmalld[6]<maxv)&&(uclarged[6]>minv))//&&(ucpd[0]<mLengthMax)&&(ucpd[1]<mLengthMax)&&(ucpd[2]<mLengthMax))
                         {
-                          //cout<<buf<<"   VM="<<maxv<<endl;
                           RDicVol(uc0,duc,0,nbCalc,minv,maxv);
                         }
                         else
@@ -1862,12 +1872,11 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                                     }
                            */
                         }
-                        if(uclarged[6]>maxv) break;
-                        if(uclarged[2]>mLengthMax) break;
+                        if((ucsmalld[6]>maxv)||(uclarged[2]>mLengthMax)) break;
                      }//x3
-                     if(uclarged[1]>mLengthMax) break;
+                     if(((ucsmalld[6]>maxv)&&(x3==x1))||(uclarged[1]>mLengthMax)) break;
                   }//x2
-               if(uclarged[0]>mLengthMax) break;
+                  if(uclarged[0]>mLengthMax) break;
                }//x1
                // Test if we have one solution before going to the next angle range
                for(list<pair<RecUnitCell,float> >::iterator pos=mvSolution.begin();pos!=mvSolution.end();++pos)
@@ -1902,7 +1911,9 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                break;
             }
             for(float x1=mLengthMin;x1<(mLengthMax+latstep);x1+=latstep)
+            {
                for(float x2=x1;x2<(mLengthMax+latstep);x2+=latstep)
+               {
                   for(float x3=x2;x3<(mLengthMax+latstep);x3+=latstep)
                   {
                      duc.par[1]=(1/(x1)-1/(x1+latstep))*0.5;
@@ -1934,6 +1945,10 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                         if(ucpd[6]>maxv) break;
                      }
                   }
+                  if((x1*x2*x2)>maxv) break;
+               }
+               if((x1*x1*x1)>maxv) break;
+            }
             break;
          }
          case HEXAGONAL:
@@ -2020,7 +2035,9 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                   {
                      RDicVol(uc0,duc,0,nbCalc,minv,maxv);
                   }
+                  if(ucsmalld[6]<maxv) break;
                }
+               if((x1*mLengthMin*mLengthMin)>maxv) break;
             }
             break;
          }
