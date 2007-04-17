@@ -160,7 +160,7 @@ float RecUnitCell::hkl2d(const float h,const float k,const float l,REAL *derivpa
          }
          case ORTHOROMBIC:
          {
-            return 2*par[1]*par[1]*h*h;
+            return 2*par[1]*par[1]*h;
             break;
          }
          case HEXAGONAL:
@@ -463,7 +463,15 @@ void RecUnitCell::hkl2d_delta(const float h,const float k,const float l,
    {
       case TRICLINIC://TODO
       {
-         throw 0;
+         float p0mm,p1mm,p2mm,p3mm,p4mm,p5mm,p6mm,p0pp,p1pp,p2pp,p3pp,p4pp,p5pp,p6pp;
+         if((h*(par[1]*h+par[2]*par[4]*k+par[3]*par[6]*l))>0) {p1mm=p1m;p1pp=p1p;}else{p1mm=p1p;p1pp=p1m;}
+         if((k*(par[2]*k+par[1]*par[4]*h+par[3]*par[5]*l))>0) {p2mm=p2m;p2pp=p2p;}else{p2mm=p2p;p2pp=p2m;}
+         if((l*(par[3]*l+par[2]*par[5]*k+par[1]*par[6]*h))>0) {p3mm=p3m;p3pp=p3p;}else{p3mm=p3p;p3pp=p3m;}
+         if((h*k)>0){p4mm=p4m;p4pp=p4p;}else{p4mm=p4p;p4pp=p4m;}
+         if((k*l)>0){p5mm=p5m;p5pp=p5p;}else{p5mm=p5p;p5pp=p5m;}
+         if((h*l)>0){p6mm=p6m;p6pp=p6p;}else{p6mm=p6p;p6pp=p6m;}
+         dmin=p0m+p1mm*p1mm*h*h+p2mm*p2mm*k*k+p3mm*p3mm*l*l+2*p1mm*p2mm*p4mm*h*k+2*p2mm*p3mm*p5mm*k*l+2*p1mm*p3mm*p6mm*h*l;
+         dmax=p0p+p1pp*p1pp*h*h+p2pp*p2pp*k*k+p3pp*p3pp*l*l+2*p1pp*p2pp*p4pp*h*k+2*p2pp*p3pp*p5pp*k*l+2*p1pp*p3pp*p6pp*h*l;
          return;
       }
       case MONOCLINIC: //OK
@@ -1766,26 +1774,28 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                            float x3=x2;
                            for(;;x3+=latstep)
                            {
-                              duc.par[1]=latstep/2*1.1;
-                              duc.par[2]=latstep/2*1.1;
-                              duc.par[3]=latstep/2*1.1;
-                              duc.par[4]=cosangstep/2*1.1;
-                              duc.par[5]=cosangstep/2*1.1;
-                              duc.par[6]=cosangstep/2*1.1;
+                              duc.par[1]=(1/(x1)-1/(x1+latstep))*0.5;
+                              duc.par[2]=(1/(x2)-1/(x2+latstep))*0.5;
+                              duc.par[3]=(1/(x3)-1/(x3+latstep))*0.5;
+                              duc.par[4]=cosangstep*0.5;
+                              duc.par[5]=cosangstep*0.5;
+                              duc.par[6]=cosangstep*0.5;
                               
                               uc0.par[0]=0;
-                              uc0.par[1]=x1-latstep/2*1.1;
-                              uc0.par[2]=x2-latstep/2*1.1;
-                              uc0.par[3]=x3-latstep/2*1.1;
-                              uc0.par[4]=x4-cosangstep/2*1.1;
-                              uc0.par[5]=x5-cosangstep/2*1.1;
-                              uc0.par[6]=x6-cosangstep/2*1.1;
+                              uc0.par[1]=(1/(x1)+1/(x1+latstep))*0.5;
+                              uc0.par[2]=(1/(x2)+1/(x2+latstep))*0.5;
+                              uc0.par[3]=(1/(x3)+1/(x3+latstep))*0.5;
+                              uc0.par[4]=x4+cosangstep*.5;
+                              uc0.par[5]=x5+cosangstep*.5;
+                              uc0.par[6]=x6+cosangstep*.5;
+                              
                               uclarge=uc0;
                               ucsmall=uc0;
-                              for(unsigned int i=0;i<=3;++i) {uclarge.par[i]-=duc.par[i];ucsmall.par[i]+=duc.par[i];}
-                              for(unsigned int i=4;i<=6;++i) {uclarge.par[i]+=duc.par[i];ucsmall.par[i]-=duc.par[i];}//:TODO: Check
+                              for(unsigned int i=0;i<4;++i) {uclarge.par[i]-=duc.par[i];ucsmall.par[i]+=duc.par[i];}
+                              for(unsigned int i=4;i<7;++i) {uclarge.par[i]+=duc.par[i];ucsmall.par[i]-=duc.par[i];}
                               uclarged=uclarge.DirectUnitCell();
                               ucsmalld =ucsmall.DirectUnitCell();
+
                               /*
                               char buf[200];
                               sprintf(buf,"a=%5.2f-%5.2f b=%5.2f-%5.2f c=%5.2f-%5.2f alpha=%5.2f-%5.2f beta=%5.2f-%5.2f gamma=%5.2f-%5.2f V=%5.2f-%5.2f",
