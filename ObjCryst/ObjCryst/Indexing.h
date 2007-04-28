@@ -220,7 +220,7 @@ class CellExplorer:public RefinableObj
       const std::list<std::pair<RecUnitCell,float> >& GetSolutions()const;
       std::list<std::pair<RecUnitCell,float> >& GetSolutions();
    private:
-      unsigned int RDicVol(RecUnitCell uc0, RecUnitCell uc1, unsigned int depth,unsigned long &nbCalc,const float minV,const float maxV);
+      unsigned int RDicVol(RecUnitCell uc0, RecUnitCell uc1, unsigned int depth,unsigned long &nbCalc,const float minV,const float maxV,vector<unsigned int> vdepth=vector<unsigned int>());
       void Init();
       /// Max number of obs reflections to use
       std::list<std::pair<RecUnitCell,float> > mvSolution;

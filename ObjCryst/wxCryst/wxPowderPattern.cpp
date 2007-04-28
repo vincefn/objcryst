@@ -1505,44 +1505,6 @@ void WXPowderPatternGraph::OnFindPeaks(wxCommandEvent& WXUNUSED(event))
    
    const unsigned int nb=mPeakList.GetPeakList().size();
    //if(nb<5) return;
-   // Estimate volume from number of peaks at a given dmin
-   // See J. Appl. Cryst. 20 (1987), 161
-   dmin=mPeakList.GetPeakList()[nb-1].dobs;
-   const float dmax=mpPattern->GetPowderPattern().X2STOL(mpPattern->GetPowderPattern().GetPowderPatternXMin())*2;
-   cout<<"Predicted Unit Cell Volume from: dmax="<<1/dmax<<" -> dmin="<<1/dmin<<", nb peak="<<nb<<endl;
-   cout<<"  Cubic P        (120%/33% reflections observed):v="
-       <<EstimateCellVolume(dmin,dmax,nb,CUBIC      ,LATTICE_P,1.2)<<","
-       <<EstimateCellVolume(dmin,dmax,nb,CUBIC      ,LATTICE_P,0.3)<<endl;
-   cout<<"  Cubic I        (120%/30% reflections observed):v="
-       <<EstimateCellVolume(dmin,dmax,nb,CUBIC      ,LATTICE_I,1.2)<<","
-       <<EstimateCellVolume(dmin,dmax,nb,CUBIC      ,LATTICE_I,0.3)<<endl;
-   cout<<"  Cubic F        (120%/30% reflections observed):v="
-       <<EstimateCellVolume(dmin,dmax,nb,CUBIC      ,LATTICE_F,1.2)<<","
-       <<EstimateCellVolume(dmin,dmax,nb,CUBIC      ,LATTICE_F,0.3)<<endl;
-   cout<<"  Tetragonal P   (120%/30% reflections observed):v="
-       <<EstimateCellVolume(dmin,dmax,nb,TETRAGONAL ,LATTICE_P,1.2)<<","
-       <<EstimateCellVolume(dmin,dmax,nb,TETRAGONAL ,LATTICE_P,0.3)<<endl;
-   cout<<"  Tetragonal I   (120%/30% reflections observed):v="
-       <<EstimateCellVolume(dmin,dmax,nb,TETRAGONAL ,LATTICE_I,1.2)<<","
-       <<EstimateCellVolume(dmin,dmax,nb,TETRAGONAL ,LATTICE_I,0.3)<<endl;
-   cout<<"  Orthorombic P  (120%/30% reflections observed):v="
-       <<EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_P,1.2)<<","
-       <<EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_P,0.3)<<endl;
-   cout<<"  Orthorombic I,C(120%/30% reflections observed):v="
-       <<EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_I,1.2)<<","
-       <<EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_I,0.3)<<endl;
-   cout<<"  Hexagonal      (120%/30% reflections observed):v="
-       <<EstimateCellVolume(dmin,dmax,nb,HEXAGONAL  ,LATTICE_P,1.2)<<","
-       <<EstimateCellVolume(dmin,dmax,nb,HEXAGONAL  ,LATTICE_P,0.3)<<endl;
-   cout<<"  Monoclinic P   (120%/30% reflections observed):v="
-       <<EstimateCellVolume(dmin,dmax,nb,MONOCLINIC ,LATTICE_P,1.2)<<","
-       <<EstimateCellVolume(dmin,dmax,nb,MONOCLINIC ,LATTICE_P,0.3)<<endl;
-   cout<<"  Monoclinic C   (120%/30% reflections observed):v="
-       <<EstimateCellVolume(dmin,dmax,nb,MONOCLINIC ,LATTICE_C,1.2)<<","
-       <<EstimateCellVolume(dmin,dmax,nb,MONOCLINIC ,LATTICE_C,0.3)<<endl;
-   cout<<"  Triclinic      (120%/30% reflections observed):v="
-       <<EstimateCellVolume(dmin,dmax,nb,TRICLINIC  ,LATTICE_P,1.0)  <<","
-       <<EstimateCellVolume(dmin,dmax,nb,TRICLINIC  ,LATTICE_P,0.3)<<endl;
    
    mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_SAVEPEAKS, TRUE);
    mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_TOGGPEAK, TRUE);
@@ -1592,6 +1554,7 @@ void WXPowderPatternGraph::OnSavePeaks(wxCommandEvent& WXUNUSED(event))
    
    ofstream out(save.GetPath().c_str());
    if(!out) return;//:TODO:
+   mPeakList.ExportDhklDSigmaIntensity(out);
    out.close();
 }
 
@@ -1823,7 +1786,7 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
       bravaisChoices.Add("Cubic");
       mpBravais=new wxRadioBox((wxWindow*)pAdvanced,-1,"Crystal System",wxDefaultPosition,wxDefaultSize,bravaisChoices,0,wxRA_SPECIFY_ROWS);
       mpBravais->SetSelection(2);
-      mpBravais->Enable(0,false);
+      //mpBravais->Enable(0,false);
       pSizerAdvanced->Add(mpBravais,0,wxALIGN_CENTER);
       
       wxArrayString algoChoices;
@@ -1831,7 +1794,7 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
       algoChoices.Add("Differential Evolution");
       
       mpAlgorithm=new wxRadioBox(pAdvanced,-1,"Algorithm",wxDefaultPosition,wxDefaultSize,algoChoices,0,wxRA_SPECIFY_ROWS);
-      mpAlgorithm->Enable(1,false);
+      //mpAlgorithm->Enable(1,false);
       pSizerAdvanced->Add(mpAlgorithm,0,wxALIGN_CENTER);
       
       pAdvanced->SetSizer(pSizerAdvanced);
@@ -1850,7 +1813,7 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
       mpCell->SetFont(wxFont(9,wxTELETYPE,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL));
       pSizer2->Add(mpCell,0,wxALIGN_CENTER);
       
-      mpLog =new wxTextCtrl(this,-1,"",wxDefaultPosition,wxSize(600,200),wxTE_MULTILINE|wxTE_READONLY|wxTE_DONTWRAP);
+      mpLog =new wxTextCtrl(this,-1,"",wxDefaultPosition,wxSize(600,250),wxTE_MULTILINE|wxTE_READONLY|wxTE_DONTWRAP);
       mpLog->SetFont(wxFont(9,wxTELETYPE,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL));
       pSizer2->Add(mpLog,0,wxALIGN_CENTER);
       
@@ -1859,6 +1822,26 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
    this->Layout();
    pSizer1->Fit(this->GetParent());
    pSizer1->SetSizeHints(this);
+
+   // Estimate volume from number of peaks at a given dmin
+   // See J. Appl. Cryst. 20 (1987), 161
+   unsigned int nb=mpPeakList->GetPeakList().size();
+   if(nb>20) nb=20;// Just use 20 - beyond that we probably have a lot of weak peaks missed
+   const float dmin=mpPeakList->GetPeakList()[nb-1].dobs;
+   const float dmax=mpPeakList->GetPeakList()[0].dobs/10;// /10: assume no peaks at lower resolution
+   mpLog->AppendText(wxString::Format("Predicted unit vell volume from %2u observed peaks between: dmax=%6.3f A-> dmin=%6.3fA\n",nb,1/dmax,1/dmin));
+   mpLog->AppendText(wxString::Format("(Assuming observed lines represent 120%% down to 30%% of existing reflections)\n"));
+   mpLog->AppendText(wxString::Format("  Cubic P         v=%6.0f -> %6.0f A\n",EstimateCellVolume(dmin,dmax,nb,CUBIC      ,LATTICE_P,1.2),EstimateCellVolume(dmin,dmax,nb,CUBIC      ,LATTICE_P,0.3)));
+   mpLog->AppendText(wxString::Format("  Cubic I         v=%6.0f -> %6.0f A\n",EstimateCellVolume(dmin,dmax,nb,CUBIC      ,LATTICE_I,1.2),EstimateCellVolume(dmin,dmax,nb,CUBIC      ,LATTICE_I,0.3)));
+   mpLog->AppendText(wxString::Format("  Cubic F         v=%6.0f -> %6.0f A\n",EstimateCellVolume(dmin,dmax,nb,CUBIC      ,LATTICE_F,1.2),EstimateCellVolume(dmin,dmax,nb,CUBIC      ,LATTICE_F,0.3)));
+   mpLog->AppendText(wxString::Format("  Tetragonal P    v=%6.0f -> %6.0f A\n",EstimateCellVolume(dmin,dmax,nb,TETRAGONAL ,LATTICE_P,1.2),EstimateCellVolume(dmin,dmax,nb,TETRAGONAL ,LATTICE_P,0.3)));
+   mpLog->AppendText(wxString::Format("  Tetragonal I    v=%6.0f -> %6.0f A\n",EstimateCellVolume(dmin,dmax,nb,TETRAGONAL ,LATTICE_I,1.2),EstimateCellVolume(dmin,dmax,nb,TETRAGONAL ,LATTICE_I,0.3)));
+   mpLog->AppendText(wxString::Format("  Orthorombic P   v=%6.0f -> %6.0f A\n",EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_P,1.2),EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_P,0.3)));
+   mpLog->AppendText(wxString::Format("  Orthorombic I,C v=%6.0f -> %6.0f A\n",EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_I,1.2),EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_I,0.3)));
+   mpLog->AppendText(wxString::Format("  Hexagonal       v=%6.0f -> %6.0f A\n",EstimateCellVolume(dmin,dmax,nb,HEXAGONAL  ,LATTICE_P,1.2),EstimateCellVolume(dmin,dmax,nb,HEXAGONAL  ,LATTICE_P,0.3)));
+   mpLog->AppendText(wxString::Format("  Monoclinic P    v=%6.0f -> %6.0f A\n",EstimateCellVolume(dmin,dmax,nb,MONOCLINIC ,LATTICE_P,1.2),EstimateCellVolume(dmin,dmax,nb,MONOCLINIC ,LATTICE_P,0.3)));
+   mpLog->AppendText(wxString::Format("  Monoclinic C    v=%6.0f -> %6.0f A\n",EstimateCellVolume(dmin,dmax,nb,MONOCLINIC ,LATTICE_C,1.2),EstimateCellVolume(dmin,dmax,nb,MONOCLINIC ,LATTICE_C,0.3)));
+   mpLog->AppendText(wxString::Format("  Triclinic       v=%6.0f -> %6.0f A\n",EstimateCellVolume(dmin,dmax,nb,TRICLINIC  ,LATTICE_P,1.2),EstimateCellVolume(dmin,dmax,nb,TRICLINIC  ,LATTICE_P,0.3)));
 }
 void WXCellExplorer::OnIndex(wxCommandEvent &event)
 {
@@ -1879,7 +1862,7 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
       unsigned int nb=mpPeakList->GetPeakList().size();
       if(nb>20) nb=20;// Just use 20 - beyond that we probably have a lot of weak peaks
       float dmin=mpPeakList->GetPeakList()[nb-1].dobs;
-      const float dmax=mpPeakList->GetPeakList()[0].dobs;
+      const float dmax=mpPeakList->GetPeakList()[0].dobs/10;//assume there are no peaks at lower resolution
       mpLog->AppendText(wxString::Format("Predicting volumes from %2u peaks between d=%6.3f and d=%6.3f\n",nb,1/dmax,1/dmin));
       mpLog->AppendText(wxString::Format("Starting indexing using %2u peaks\n",nb));
 
