@@ -326,6 +326,8 @@ class WXFieldString:public WXField
       void Revert();
       virtual void ValidateUserInput();
       virtual void SetSize(int width, int height);
+      /// Set tooltip for this window. It will be activated when going over the entry field.
+      virtual void SetToolTip(const wxString& tip);
    protected:
       /// The WXCrystObj whose name is shown here
       string* mpString;
@@ -369,6 +371,8 @@ class WXFieldName:public WXField
       void Revert();
       virtual void ValidateUserInput();
       virtual void SetSize(int width, int height);
+      /// Set tooltip for this window. It will be activated when going over the entry field.
+      virtual void SetToolTip(const wxString& tip);
    protected:
       /// The WXCrystObj whose name is shown here
       WXCrystObj* mpWXObj;
@@ -405,6 +409,8 @@ class WXFieldParBase:public WXField
       virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false)=0;
       virtual void Revert()=0;
       virtual void ValidateUserInput();
+      /// Set tooltip for this window. It will be activated when going over the entry field.
+      virtual void SetToolTip(const wxString& tip);
    protected:
       /// Reads the new value when the Enter key is hit
       virtual void ReadNewValue()=0;
@@ -488,6 +494,8 @@ class WXCrystMenuBar: public WXCrystObjBasic
       virtual void UpdateUI(const bool mutexlock=false);
       /// Event handler to popu the menu when the button is clicked.
       void OnPopupMenu(wxCommandEvent & event);
+      /// Set tooltip for each menu.
+      virtual void SetToolTip(const wxString& tip,long menu=0);
    protected:
       /// The sizer of the menu
       wxBoxSizer* mpSizer;

@@ -83,6 +83,8 @@ class WXFieldRefPar:public WXField
       RefinablePar& GetRefPar();
       void Revert();
       virtual void ValidateUserInput();
+      /// Set tooltip for this window. It will be activated when going over the entry field.
+      virtual void SetToolTip(const wxString& tip);
    protected:
       REAL mValue;
       wxCheckBox *mpButtonFix;
@@ -112,6 +114,8 @@ class WXFieldOption:public WXField
       void Revert();
       /// Does nothing. Any user input is directly validated (OnChoice).
       virtual void ValidateUserInput();
+      /// Set tooltip for this window. It will be activated when going over the choice field.
+      virtual void SetToolTip(const wxString& tip);
    protected:
       int mChoice;
       int mChoiceOld;

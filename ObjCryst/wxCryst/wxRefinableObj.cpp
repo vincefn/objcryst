@@ -93,12 +93,15 @@ WXField(parent,label,ID_WXFIELD_REFPAR),mValue(0.),mpRefPar(par),mIsSelfUpdating
       this->SetLabel(label+"R");
       mpButtonFix=new wxCheckBox(this,ID_WXFIELD_REFPAR_FIXBUTTON,"L",wxDefaultPosition, wxDefaultSize);
       mpButtonFix->Fit();
+      mpButtonFix->SetToolTip(_T("Check this box to enable optimizing this parameter.\n") 
+                              _T("(some parameters may be automatically fixed for global optimization)"));
       mpSizer->Add(mpButtonFix,0,wxALIGN_CENTER);
    }else mpButtonFix=0;
    if(enableLimitedButton)
    {
       mpButtonLimited=new wxCheckBox(this,ID_WXFIELD_REFPAR_LIMITEDBUTTON,"",
                                      wxDefaultPosition, wxSize(16,20));
+      mpButtonLimited->SetToolTip(_T("Check this box to use limits for this parameter"));
       mpSizer->Add(mpButtonLimited,0,wxALIGN_CENTER);
    }else mpButtonLimited=0;
    
@@ -106,8 +109,6 @@ WXField(parent,label,ID_WXFIELD_REFPAR),mValue(0.),mpRefPar(par),mIsSelfUpdating
                             wxDefaultPosition,wxSize(hsize,-1),wxTE_PROCESS_ENTER,
                             wxTextValidator(wxFILTER_NUMERIC));
    mpSizer->Add(mpField,0,wxALIGN_CENTER);
-   if(enableFixButton)
-      this->SetToolTip("right-click label to change limits");
    this->BottomLayout(0);
 }
 WXFieldRefPar::~WXFieldRefPar()
@@ -272,6 +273,9 @@ void WXFieldRefPar::ValidateUserInput()
    mValue=tmp;
    mpRefPar->SetHumanValue(mValue);
 }
+
+void WXFieldRefPar::SetToolTip(const wxString& tip){mpField->SetToolTip(tip);}
+
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXFieldOption
@@ -344,6 +348,8 @@ void WXFieldOption::Revert()
 void WXFieldOption::ValidateUserInput()
 {
 }
+
+void WXFieldOption::SetToolTip(const wxString& tip){mpList->SetToolTip(tip);}
 
 ////////////////////////////////////////////////////////////////////////
 //

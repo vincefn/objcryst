@@ -418,6 +418,7 @@ void WXFieldString::SetSize(int width, int height)
    this->BottomLayout(this);
 }
 
+void WXFieldString::SetToolTip(const wxString& tip){mpField->SetToolTip(tip);}
 
 ////////////////////////////////////////////////////////////////////////
 //
@@ -532,6 +533,8 @@ void WXFieldName::SetSize(int width, int height)
    this->BottomLayout(this);
 }
 
+void WXFieldName::SetToolTip(const wxString& tip){mpField->SetToolTip(tip);}
+
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXFieldParBase
@@ -578,6 +581,8 @@ void WXFieldParBase::ValidateUserInput()
    VFN_DEBUG_MESSAGE("WXFieldRefPar::ValidateUserInput()",6)
    this->ReadNewValue();
 }
+
+void WXFieldParBase::SetToolTip(const wxString& tip){mpField->SetToolTip(tip);}
 
 ////////////////////////////////////////////////////////////////////////
 //
@@ -978,5 +983,6 @@ void WXCrystMenuBar::OnPopupMenu(wxCommandEvent & event)
    if(pos!=mvpMenu.end())
       this->PopupMenu(pos->second.first,pos->second.second->GetPosition());
 }
+void WXCrystMenuBar::SetToolTip(const wxString& tip,long menuId){mvpMenu[menuId].second->SetToolTip(tip);}
 
 }//namespace
