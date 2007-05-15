@@ -1617,6 +1617,27 @@ unsigned int CellExplorer::RDicVol(RecUnitCell uc0,RecUnitCell duc, unsigned int
    if(depth==0) useStoredHKL=2; //Store possible hkl for all observed lines
    
    bool indexed=DichoIndexed(*mpPeakList,uc0,duc,mNbSpurious,false,useStoredHKL);
+   if(indexed)
+   {
+      // Test if two successive lines have been indexed exclusively with the same hkl
+      unsigned int nbident=0;
+      for(vector<PeakList::hkl>::const_iterator pos=mpPeakList->GetPeakList().begin();pos!=mpPeakList->GetPeakList().end();)
+      {
+         if(pos->vDicVolHKL.size()==1)
+         {
+            const PeakList::hkl0 h0=pos->vDicVolHKL.front();
+            if(++pos==mpPeakList->GetPeakList().end()) break;
+            if(pos->vDicVolHKL.size()==1)
+            {
+               const PeakList::hkl0 h1=pos->vDicVolHKL.front();
+               if((h0.h==h1.h)&&(h0.k==h1.k)&&(h0.l==h1.l)) nbident++;
+               if(nbident>mNbSpurious) {indexed=false;break;}
+            }
+         }
+         else ++pos;
+      }
+   }
+   
    // if we can zoom in for one parameter directly, we need per-parameter depth
    if(vdepth.size()==0)
    {
@@ -1625,7 +1646,7 @@ unsigned int CellExplorer::RDicVol(RecUnitCell uc0,RecUnitCell duc, unsigned int
    }
    else
       for(vector<unsigned int>::iterator pos=vdepth.begin();pos!=vdepth.end();++pos) if(*pos<depth)*pos=depth;
-   if((useStoredHKL==2)&&(mNbSpurious==0))
+   if((useStoredHKL==2)&&(mNbSpurious==0)&&indexed)
    {  // If high-d lines have been associated to a single reflection which is either h00, 0k0 or 00l,
       // jump the corresponding parameter to higher depth (mDicVolDepthReport, lowest depth report) immediately
       vector<pair<unsigned int,float> > vq0(3);
