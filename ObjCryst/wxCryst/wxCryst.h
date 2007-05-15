@@ -156,6 +156,11 @@ class WXCrystObjBasic: public wxWindow
       /// \internal Tell the object it has been removed from a list
       void RemovedFromList(WXCrystObjBasicList* list);
       virtual bool Layout();
+      /// Set tooltip for this window. The WXCrystObjBasicList::SetToolTip() will just
+      /// call wxWindow::SetToolTip(), but is virtual and will correctly call specialized
+      /// derived function. This is needed to avoid settin a tooltip on widgets
+      /// not receiving motion events (e.g. static text under windows).
+      virtual void SetToolTip(const wxString& tip);
    protected:
       /// Parent, if a WXCrystObjBasic itself
       WXCrystObjBasic *mWXCrystParent;

@@ -174,6 +174,8 @@ bool WXCrystObjBasic::Layout()
    //cout<<"WXCrystObjBasic::Layout() #"<<++ct<<endl;
    return wxWindow::Layout();
 }
+void WXCrystObjBasic::SetToolTip(const wxString& tip){this->wxWindow::SetToolTip(tip);}
+
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXCrystObjBasicList
