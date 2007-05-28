@@ -918,15 +918,15 @@ CrystVector_REAL PowderProfileGauss  (const CrystVector_REAL ttheta,const REAL f
    result+= -center;
    result *= result;
    REAL *p;
-   if( fabs(asym-1.) < 1e-5)
+   if(false)// fabs(asym-1.) < 1e-5)
    {
       //reference: IUCr Monographs on Crystallo 5 - The Rietveld Method (ed RA Young)
       result *= -4.*log(2.)/fwhm/fwhm;
    }
    else
    {  // Adapted from Toraya J. Appl. Cryst 23(1990),485-491
-      const REAL c1= -(1.+asym)/asym*log(2.)/fwhm/fwhm;
-      const REAL c2= -(1.+asym)     *log(2.)/fwhm/fwhm;
+      const REAL c1= -(1.+asym)/asym*(1.+asym)/asym*log(2.)/fwhm/fwhm;
+      const REAL c2= -(1.+asym)     *(1.+asym)     *log(2.)/fwhm/fwhm;
       long i;
       p=result.data();
       const REAL *pt=ttheta.data();
@@ -958,7 +958,7 @@ CrystVector_REAL PowderProfileLorentz(const CrystVector_REAL ttheta,const REAL f
    result+= -center;
    result *= result;
    REAL *p;
-   if( fabs(asym-1.) < 1e-5)
+   if(false)// fabs(asym-1.) < 1e-5)
    {
       //reference: IUCr Monographs on Crystallo 5 - The Rietveld Method (ed RA Young)
       result *= 4./fwhm/fwhm;
