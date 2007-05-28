@@ -122,7 +122,6 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
    {
       mRefParList.SaveParamSet(mIndexValuesSetLast);// end of last cycle
       if(!silent) cout << "LSQNumObj::Refine():Cycle#"<< cycle <<endl;
-      if(!silent) cout << "LSQNumObj::Refine():Computing initial values" <<endl;
       //initial value of function
          calc0=mpRefinedObj->GetLSQCalc(mLSQFuncIndex);
          //R
@@ -137,7 +136,6 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
             tmpV2 *= mWeight;
             Rw_ini=sqrt(tmpV1.sum()/tmpV2.sum());
       //derivatives
-      if(!silent) cout << "LSQNumObj::Refine():Computing derivatives" <<endl;
       designMatrix=0.;
       pTmp2=designMatrix.data();
       //cout <<"obs:"<<FormatHorizVector<REAL>(calc0,10,8);
@@ -146,7 +144,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
       for(i=0;i<nbVar;i++)
       {
          //:NOTE: Real design matrix is the transposed of the one computed here
-         if(!silent) cout << "........." << mRefParList.GetParNotFixed(i).GetName() <<endl;
+         //if(!silent) cout << "........." << mRefParList.GetParNotFixed(i).GetName() <<endl;
          
          tmpV1=mpRefinedObj->GetLSQDeriv(mLSQFuncIndex,mRefParList.GetParNotFixed(i));
          pTmp1=tmpV1.data();
@@ -157,7 +155,6 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
          
       LSQNumObj_Refine_Restart: //Used in case of singular matrix or for Marquardt
       
-      if(!silent) cout << "LSQNumObj::Refine():Computing M and B Matrices" <<endl;
       //Calculate M and B matrices
          tmpV1.resize(nbObs);
          tmpV2.resize(nbObs);
@@ -194,6 +191,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
                if(!silent) cout << "LSQNumObj::Refine() Singular parameter !";
                if(!silent) cout << "(null derivate in all points) : ";
                if(!silent) cout << mRefParList.GetParNotFixed(i).GetName() << endl;
+               /*
                if(!silent)
                {
                   for(i=0;i<nbVar;i++)
@@ -202,6 +200,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
                      cout <<"deriv#"<<i<<":"<<FormatHorizVector<REAL>(tmpV1,10,8);
                   }
                }
+               */
                if(!silent) cout << "LSQNumObj::Refine(): Automatically fixing parameter";
                if(!silent) cout << " and re-start cycle..";
                if(!silent) cout << endl;
@@ -288,10 +287,10 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
 */
       //Perform "Eigenvalue Filtering" on normal matrix (using newmat library)
       {
-         if(!silent) cout << "LSQNumObj::Refine():Eigenvalue Filtering..." <<endl;
+         //if(!silent) cout << "LSQNumObj::Refine():Eigenvalue Filtering..." <<endl;
          CrystMatrix_REAL V(nbVar,nbVar);
          CrystVector_REAL invW(nbVar);//diagonal matrix, in fact
-         if(!silent) cout << "LSQNumObj::Refine():Eigenvalue Filtering...1" <<endl;
+         //if(!silent) cout << "LSQNumObj::Refine():Eigenvalue Filtering...1" <<endl;
          {
             SymmetricMatrix newmatA(nbVar);
             Matrix   newmatV(nbVar,nbVar),
@@ -308,16 +307,16 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
                for(long j=0;j<nbVar;j++) 
                   newmatA(i+1,j+1) = M(i,j) * newmatDscale(i+1,i+1) * newmatDscale(j+1,j+1);
             }
-         if(!silent) cout << "LSQNumObj::Refine():Eigenvalue Filtering...2" <<endl;
+         //if(!silent) cout << "LSQNumObj::Refine():Eigenvalue Filtering...2" <<endl;
             
             //cout << newmatA.SubMatrix(1,3,1,3) <<endl;
-         if(!silent) cout << "LSQNumObj::Refine():Eigenvalue Filtering...3" <<endl;
+         //if(!silent) cout << "LSQNumObj::Refine():Eigenvalue Filtering...3" <<endl;
             
             //Jacobi(newmatA,newmatW,newmatV);
             EigenValues(newmatA,newmatW,newmatV);
             ColumnVector newmatDelta(nbVar);
             DiagonalMatrix newmatInvW(nbVar);
-         if(!silent) cout << "LSQNumObj::Refine():Eigenvalue Filtering...4" <<endl;
+         //if(!silent) cout << "LSQNumObj::Refine():Eigenvalue Filtering...4" <<endl;
             //Avoid singular values
             {
                REAL max=newmatW.MaximumAbsoluteValue();
@@ -368,7 +367,6 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
             newmatN=newmatV * newmatInvW * newmatV.t();
             
             //Back 'Derivative Scaling' :TODO:
-               if(!silent) cout << "Back-scaling" << endl;
                newmatN = newmatDscale * newmatN * newmatDscale;
             newmatDelta = newmatN * newmatB;
             
@@ -486,7 +484,6 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
          }
          */
       /// Applying new computed values :TODO: & Check if a limit has been hit
-         if(!silent) cout << "LSQNumObj::Refine():Computing new values for variables" <<endl;
          for(i=0;i<nbVar;i++)
          {
             //const REAL oldvalue=mRefParList.GetParNotFixed(i).GetValue();
@@ -495,12 +492,10 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
             //const REAL newvalue=mRefParList.GetParNotFixed(i).GetValue();
          }
          
-      if(!silent) cout << "LSQNumObj::Refine():Computing statistics for last cycle..." <<endl;
       //for statistics...
          //mRefParList.Print();
          calc=mpRefinedObj->GetLSQCalc(mLSQFuncIndex);
          //Chi^2
-      if(!silent) cout << "LSQNumObj::Refine():Computing Chi^2 for last cycle..." <<endl;
          {
             REAL oldChiSq=mChiSq;
             tmpV1 = mObs;
@@ -611,8 +606,8 @@ void LSQNumObj::PrintRefResults() const
       if( (true==mRefParList.GetPar(i).IsFixed()) 
             || (false == mRefParList.GetPar(i).IsUsed()) ) continue;
       cout << FormatString(mRefParList.GetPar(i).GetName(),30) << "  " ;
-      cout << FormatFloat((mRefParList.GetParamSet(mIndexValuesSetInitial))(i),15,8) << "  " ;
-      cout << FormatFloat((mRefParList.GetParamSet(mIndexValuesSetLast))(i),15,8) << "  " ;
+      cout << FormatFloat((mRefParList.GetParamSet(mIndexValuesSetInitial))(i)*mRefParList.GetPar(i).GetHumanScale(),15,8) << "  " ;
+      cout << FormatFloat((mRefParList.GetParamSet(mIndexValuesSetLast))(i)*mRefParList.GetPar(i).GetHumanScale(),15,8) << "  " ;
       cout << FormatFloat(mRefParList.GetPar(i).GetHumanValue(),15,8) << "  " ;
       cout << FormatFloat(mRefParList.GetPar(i).GetHumanSigma(),15,8) << "  " ;
       //cout << FormatFloat(mRefParList(i).DerivStep(),16,12) << "  ";
