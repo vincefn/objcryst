@@ -817,8 +817,15 @@ class RefinableObj
       * such as in the OptimizationObj class, make sure that upon deletion
       * of this object the parameters will not be destroyed. To do this
       * use RefinableObj::SetDeleteRefParInDestructor(false).
+      *
+      * \param copyParam: if false (default), then parameters are not copied
+      * from the object but just referenced. Use RefinableObj::SetDeleteRefParInDestructor(false)
+      * accordingly. If true, then the parameters are copied, so that any
+      * modification to the fixed/limited/used attributes do not affect
+      * the original parameter. Only the value and the parameter's clock
+      * can then be modified by the copied parameter
       */
-      void AddPar(RefinableObj &newRefParList);
+      void AddPar(RefinableObj &newRefParList, const bool copyParam=false);
       /** Remove a refinable parameter. 
       *
       * This returns an iterator to the next parameter in the vector.

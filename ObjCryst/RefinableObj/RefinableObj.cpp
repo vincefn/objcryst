@@ -1397,10 +1397,16 @@ void RefinableObj::AddPar(RefinablePar *newRefPar)
    mRefParListClock.Click();
 }
 
-void RefinableObj::AddPar(RefinableObj &newRefParList)
+void RefinableObj::AddPar(RefinableObj &newRefParList,const bool copyParam)
 {
    VFN_DEBUG_MESSAGE("RefinableObj::AddPar(RefParList&)" <<newRefParList.GetNbPar() ,2)
-   for(long i=0;i<newRefParList.GetNbPar();i++) this->AddPar(&(newRefParList.GetPar(i)));
+   RefinablePar *p;
+   for(long i=0;i<newRefParList.GetNbPar();i++)
+   {
+      if(copyParam) p=new RefinablePar(newRefParList.GetPar(i));
+      else p=&(newRefParList.GetPar(i));
+      this->AddPar(p);
+   }
 }
 
 vector<RefinablePar *>::iterator RefinableObj::RemovePar(RefinablePar *refPar)
