@@ -39,15 +39,25 @@ class LSQNumObj
    public:
       LSQNumObj(std::string objName="Unnamed LSQ object");
       ~LSQNumObj();
-      /// Fix one parameter
+      /// Fix one parameter.
+      ///
+      /// LSQNumObj::PrepareRefParList() must be called first!
       void SetParIsFixed(const std::string& parName,const bool fix);
       /// Fix one family of parameters
+      ///
+      /// LSQNumObj::PrepareRefParList() must be called first!
       void SetParIsFixed(const RefParType *type,const bool fix);
       /// UnFix All parameters
+      ///
+      /// LSQNumObj::PrepareRefParList() must be called first!
       void UnFixAllPar();
       /// Set a parameter to be used
+      ///
+      /// LSQNumObj::PrepareRefParList() must be called first!
       void SetParIsUsed(const std::string& parName,const bool use);
       /// Set a family of parameters to be used
+      ///
+      /// LSQNumObj::PrepareRefParList() must be called first!
       void SetParIsUsed(const RefParType *type,const bool use);
       
       void Refine (int nbCycle=1,bool useLevenbergMarquardt=false,
@@ -57,8 +67,18 @@ class LSQNumObj
       REAL Rfactor()const;
       REAL RwFactor()const;
       REAL ChiSquare()const;   //uses the weight if specified
-      ///Add an object to refine
+      /** Choose the object to refine. The minimization will be done
+      * against its LSQ function, and its parameters.
+      *
+      * \param LSQFuncIndex: one object can have a choice of several LSQ
+      * functions to minimize- this allows to choose which one to minimize.
+      */
       void SetRefinedObj(RefinableObj &obj, const unsigned int LSQFuncIndex=0);
+      /// Access to the full list of refined object. The list is initially built
+      /// recursively from one object. This function allows to modify the list
+      /// of sub-objects before refinement (such as fore removing certain types
+      /// of objects).
+      ObjRegistry<RefinableObj> &GetRefinedObjList();
       void SetUseSaveFileOnEachCycle(bool yesOrNo=true);
       void SetSaveFile(std::string fileName="refine.save");
       void PrintRefResults()const;
@@ -68,10 +88,23 @@ class LSQNumObj
       
       void OptimizeDerivativeSteps();
       const std::map<pair<const RefinablePar*,const RefinablePar*>,REAL > &GetVarianceCovarianceMap()const;
+      /** Prepare the full parameter list for the refinement
+      * \param copy_param: if false (the default), then the lsq algorithm will work directly
+      * on the parameters of the refined object and sub-object. So that any modification
+      * to the fixed/used/limited status applies permanently to the parameters.
+      * if true, then the parameters are copied and therefore only the value of the
+      * parameter is changed (and the clocks are ticked).
+      *
+      * \note: if copy_param==true, then any modification to the parameters (fixed, limited, used
+      * status) only affects the copy and not the original. Also, calling again PrepareRefParList
+      * cancels any such modification.
+      *
+      * \note This will be called automatically before starting the refinement only if
+      * the parameter list is empty. Otherwise it should be called before refinement.
+      */
+      void PrepareRefParList(const bool copy_param=false);
    protected:
    private:
-      /// Prepare mRefParList for the refinement
-      void PrepareRefParList();
       // Refined object
          /// The recursive list of all refined sub-objects
          ObjRegistry<RefinableObj> mRecursiveRefinedObjList;
@@ -100,10 +133,14 @@ class LSQNumObj
       int mIndexValuesSetInitial, mIndexValuesSetLast;
       /// If true, then stop at the end of the cycle. Used in multi-threading environment
       bool mStopAfterCycle;
-      /// The opitimized object
+      /// The optimized object
       RefinableObj *mpRefinedObj;
       /// The index of the LSQ function in the refined object (if there are several...)
       unsigned int mLSQFuncIndex;
+      /// If true, then parameters to be refined will be copied instead of referenced.
+      /// Therefore only their values and the parameter's clocks are affected when
+      /// working on the copy.
+      bool mCopyRefPar;
 };
 
 }//namespace

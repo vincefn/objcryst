@@ -39,8 +39,6 @@ LSQNumObj::LSQNumObj(string objName)
    mRw=0;
    mChiSq=0;
    mStopAfterCycle=false;
-   //We only use copies of parameters.
-   mRefParList.SetDeleteRefParInDestructor(false);
 }
 
 LSQNumObj::~LSQNumObj()
@@ -49,30 +47,30 @@ LSQNumObj::~LSQNumObj()
 
 void LSQNumObj::SetParIsFixed(const string& parName,const bool fix)
 {
-   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
-      mRecursiveRefinedObjList.GetObj(i).SetParIsFixed(parName,fix);
+   if(mRefParList.GetNbPar()==0) this->PrepareRefParList();
+   mRefParList.SetParIsFixed(parName,fix);
 }
 void LSQNumObj::SetParIsFixed(const RefParType *type,const bool fix)
 {
-   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
-      mRecursiveRefinedObjList.GetObj(i).SetParIsFixed(type,fix);
+   if(mRefParList.GetNbPar()==0) this->PrepareRefParList();
+   mRefParList.SetParIsFixed(type,fix);
 }
    
 void LSQNumObj::UnFixAllPar()
 {
-   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
-      mRecursiveRefinedObjList.GetObj(i).UnFixAllPar();
+   if(mRefParList.GetNbPar()==0) this->PrepareRefParList();
+   mRefParList.UnFixAllPar();
 }
    
 void LSQNumObj::SetParIsUsed(const string& parName,const bool use)
 {
-   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
-      mRecursiveRefinedObjList.GetObj(i).SetParIsUsed(parName,use);
+   if(mRefParList.GetNbPar()==0) this->PrepareRefParList();
+   mRefParList.SetParIsUsed(parName,use);
 }
 void LSQNumObj::SetParIsUsed(const RefParType *type,const bool use)
 {
-   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
-      mRecursiveRefinedObjList.GetObj(i).SetParIsUsed(type,use);
+   if(mRefParList.GetNbPar()==0) this->PrepareRefParList();
+   mRefParList.SetParIsUsed(type,use);
 }
 
 void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
@@ -86,7 +84,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
    //:TODO:
    if(!silent) cout << "LSQNumObj::Refine():Beginning "<<endl;
    //Prepare for refinement (get non-fixed parameters)
-      this->PrepareRefParList();
+      if(mRefParList.GetNbPar()==0) this->PrepareRefParList();
       mRefParList.PrepareForRefinement();
       if(!silent) mRefParList.Print();
 
@@ -189,7 +187,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
             if( M(i,i) < 1e-20) //:TODO: Check what value to use as a limit
             {  
                if(!silent) cout << "LSQNumObj::Refine() Singular parameter !";
-               if(!silent) cout << "(null derivate in all points) : ";
+               if(!silent) cout << "(null derivate in all points) : "<<M(i,i)<<":";
                if(!silent) cout << mRefParList.GetParNotFixed(i).GetName() << endl;
                /*
                if(!silent)
@@ -577,9 +575,12 @@ REAL LSQNumObj::ChiSquare()const{return mChiSq;};
 void LSQNumObj::SetRefinedObj(RefinableObj &obj, const unsigned int LSQFuncIndex)
 {
    mpRefinedObj=&obj;
+   mRefParList.ResetParList();
    mLSQFuncIndex=LSQFuncIndex;
    RefObjRegisterRecursive(obj,mRecursiveRefinedObjList);
 }
+
+ObjRegistry<RefinableObj> &LSQNumObj::GetRefinedObjList(){return mRecursiveRefinedObjList;}
 
 void LSQNumObj::SetUseSaveFileOnEachCycle(bool yesOrNo)
 {
@@ -641,16 +642,18 @@ void LSQNumObj::OptimizeDerivativeSteps()
 const std::map<pair<const RefinablePar*,const RefinablePar*>,REAL > & LSQNumObj::GetVarianceCovarianceMap()const
 { return mvVarCovar;}
 
-void LSQNumObj::PrepareRefParList()
+void LSQNumObj::PrepareRefParList(const bool copy_param)
 {
-   //:TODO: instead of resetting the list every time, check if it is necessary !
    mRefParList.ResetParList();
    for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
    {
+      cout<<"LSQNumObj::PrepareRefParList():"<<mRecursiveRefinedObjList.GetObj(i).GetName()<<endl;
       //mRecursiveRefinedObjList.GetObj(i).Print();
-      mRefParList.AddPar( mRecursiveRefinedObjList.GetObj(i));
+      mRefParList.AddPar(mRecursiveRefinedObjList.GetObj(i),copy_param);
    }
    //mRefParList.Print();
+   if(copy_param) mRefParList.SetDeleteRefParInDestructor(true);
+   else mRefParList.SetDeleteRefParInDestructor(false);
 }
 
 }//namespace
