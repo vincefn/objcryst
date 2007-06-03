@@ -56,11 +56,15 @@ class PowderPatternComponent : virtual public RefinableObj
       /// This allows to know the observed powder pattern to evaluate
       /// the background.
       const PowderPattern& GetParentPowderPattern()const;
+      /// Get the PowderPattern object which uses this component.
+      /// This allows to know the observed powder pattern to evaluate
+      /// the background.
+      PowderPattern& GetParentPowderPattern();
       /// Set the PowderPattern object which uses this component.
       /// This sets all necessary pattern parameters (2theta/tof range,
       /// wavelength, radiation type...) accordingly.
       /// 
-      virtual void SetParentPowderPattern(const PowderPattern&)=0;
+      virtual void SetParentPowderPattern(PowderPattern&)=0;
       /// Get the calculated powder pattern for this component.
       /// Note that the pattern is \e not scaled.
       /// 
@@ -163,7 +167,7 @@ class PowderPatternComponent : virtual public RefinableObj
          mutable RefinableObjClock mClockPowderPatternIntegratedVarianceCalc;
       
       /// The PowderPattern object in which this component is included
-      const PowderPattern *mpParentPowderPattern;
+      PowderPattern *mpParentPowderPattern;
       /// Get last time the Bragg Limits were changed
       mutable RefinableObjClock mClockBraggLimits;
       
@@ -190,7 +194,7 @@ class PowderPatternBackground : public PowderPatternComponent
       virtual ~PowderPatternBackground();
       virtual const string& GetClassName() const;
       
-      virtual void SetParentPowderPattern(const PowderPattern&);
+      virtual void SetParentPowderPattern(PowderPattern&);
       virtual const CrystVector_REAL& GetPowderPatternCalc()const;
       virtual pair<const CrystVector_REAL*,const RefinableObjClock*>
          GetPowderPatternIntegratedCalc()const;
@@ -286,7 +290,7 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       virtual PowderPatternDiffraction* CreateCopy()const;
       virtual const string& GetClassName() const;
       
-      virtual void SetParentPowderPattern(const PowderPattern&);
+      virtual void SetParentPowderPattern(PowderPattern&);
       virtual const CrystVector_REAL& GetPowderPatternCalc()const;
       virtual pair<const CrystVector_REAL*,const RefinableObjClock*>
          GetPowderPatternIntegratedCalc()const;
@@ -327,6 +331,18 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
          GetPowderPatternIntegratedCalcVariance() const;
       virtual bool HasPowderPatternCalcVariance()const;
       virtual void SetCrystal(Crystal &crystal);
+      /** Prepare intensity extraction (Le Bail or Pawley)
+      *\param extract: if true, begin extraction mode, else enable structure factor calculations
+      *\param init: if true and extract=true, intensities are set to 100
+      */
+      void SetExtractionMode(const bool extract=true,const bool init=false);
+      /// Return true if in extraction mode, i.e. using extracted intensities instead of computed structure factors.
+      bool GetExtractionMode()const;
+      /** Extract intensities using Le Bail method
+      *
+      *\param nbcycle: number of cycles
+      */
+      void ExtractLeBail(unsigned int nbcycle=1);
    protected:
       virtual void CalcPowderPattern() const;
       virtual void CalcPowderPatternIntegrated() const;
@@ -423,6 +439,10 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
          mutable vector< pair<unsigned long, CrystVector_REAL> > mIntegratedProfileFactor;
          /// Last time the integrated values of normalized profiles was calculated.
          mutable RefinableObjClock mClockIntegratedProfileFactor;
+      // Extraction mode (Le Bail, Pawley)
+      bool mExtractionMode;
+      CrystVector_REAL mFhklSqExtract;
+      RefinableObjClock mClockFhklSqExtract;
    #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);
@@ -800,6 +820,10 @@ class PowderPattern : public RefinableObj
          REAL STOL2Pixel(const REAL stol)const;
       /// Find peaks in the pattern
       PeakList FindPeaks(const float dmin=2.0,const float maxratio=0.01,const unsigned int maxpeak=100);
+      /// Access the scale factors (see PowderPattern::mScaleFactor)
+      const CrystVector_REAL &GetScaleFactor() const;
+      /// Access the scale factors (see PowderPattern::mScaleFactor)
+      CrystVector_REAL &GetScaleFactor();
    protected:
       /// Calc the powder pattern
       void CalcPowderPattern() const;
@@ -840,7 +864,15 @@ class PowderPattern : public RefinableObj
       mutable CrystVector_REAL mPowderPatternVarianceIntegrated;
       /// The cumulative Chi^2 (integrated or not, depending on the option)
       mutable CrystVector_REAL mChi2Cumul;
-      
+
+
+      /// The calculated powder pattern. Cropped to the maximum sin(theta)/lambda for LSQ
+      mutable CrystVector_REAL mPowderPatternUsedCalc;
+      /// The calculated powder pattern. Cropped to the maximum sin(theta)/lambda for LSQ
+      mutable CrystVector_REAL mPowderPatternUsedObs;
+      /// The weight for each point of the pattern. Cropped to the maximum sin(theta)/lambda for LSQ
+      mutable CrystVector_REAL mPowderPatternUsedWeight;
+
       /** Vector of x coordinates (either 2theta or time-of-flight) for the pattern
       *
       * Stored in ascending order for 2theta, and descending for TOF, i.e. always

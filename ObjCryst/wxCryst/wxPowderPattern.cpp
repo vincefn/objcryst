@@ -31,10 +31,12 @@
 #include "wx/dcbuffer.h"
 #include "wx/config.h"
 #include "wx/notebook.h"
+#include "wx/progdlg.h"
 
 #include "wxCryst/wxPowderPattern.h"
 #include "wxCryst/wxRadiation.h"
 #include "RefinableObj/Simplex.h"
+#include "RefinableObj/LSQNumObj.h"
 #include "ObjCryst/PowderPatternBackgroundBayesianMinimiser.h"
 #include "Quirks/VFNStreamFormat.h"
 #include "Quirks/Chronometer.h"
@@ -708,6 +710,7 @@ void WXPowderPattern::OnMenuSimulate(wxCommandEvent & WXUNUSED(event))
    CrystVector_REAL newObs(nbPoints);
    mpPowderPattern->SetPowderPatternPar(min*DEG2RAD,(max-min)/(nbPoints-1)*DEG2RAD,nbPoints);
    newObs=1;//we must not have 0 in case a scale factor is fitted...
+   newObs(0)=0.01;//Avoid having the same value for ALL points for scaling the graph.
    if(mpPowderPattern->GetNbPowderPatternComponent()>0)
    {
       // Use the calculated pattern, for indexing simulation
@@ -1618,6 +1621,9 @@ class WXCellExplorer:public wxWindow
       void OnApplyCell(wxCommandEvent &event);
       /// Choose crystal to apply cell to
       void OnChooseCrystal(wxCommandEvent &event);
+      /// User chose to automatically run Le Bail & profile fitting,
+      ///make sure there is a background and a crystal structure selected
+      void OnAutoLeBail(wxCommandEvent &event);
    private:
       WXPowderPatternGraph *mpGraph;
       PeakList *mpPeakList;
@@ -1635,8 +1641,10 @@ class WXCellExplorer:public wxWindow
       wxTextCtrl *mpStopOnScore,*mpStopOnDepth;
       wxTextCtrl *mpReportOnScore,*mpReportOnDepth;
       Crystal *mpCrystal;
+      PowderPatternDiffraction *mpDiff;
       wxCheckBox *mpWeakDiffraction;
       wxCheckBox *mpContinueOnSolution;
+      wxCheckBox *mpAutomaticLeBail;
       DECLARE_EVENT_TABLE()
 };
 static const long ID_CELLEXPLORER_INDEX= WXCRYST_ID();
@@ -1645,6 +1653,7 @@ static const long ID_CELLEXPLORER_WEAK= WXCRYST_ID();
 static const long ID_CELLEXPLORER_SELECTCELL= WXCRYST_ID();
 static const long ID_CELLEXPLORER_APPLYCELL= WXCRYST_ID();
 static const long ID_CELLEXPLORER_CHOOSECRYSTAL= WXCRYST_ID();
+static const long ID_CELLEXPLORER_LEBAIL= WXCRYST_ID();
 
 BEGIN_EVENT_TABLE(WXCellExplorer, wxWindow)
    EVT_BUTTON(ID_CELLEXPLORER_INDEX,             WXCellExplorer::OnIndex)
@@ -1653,10 +1662,11 @@ BEGIN_EVENT_TABLE(WXCellExplorer, wxWindow)
    EVT_LISTBOX_DCLICK(ID_CELLEXPLORER_SELECTCELL,WXCellExplorer::OnApplyCell)
    EVT_BUTTON(ID_CELLEXPLORER_APPLYCELL,         WXCellExplorer::OnApplyCell)
    EVT_BUTTON(ID_CELLEXPLORER_CHOOSECRYSTAL,     WXCellExplorer::OnChooseCrystal)
+   EVT_CHECKBOX(ID_CELLEXPLORER_LEBAIL,          WXCellExplorer::OnAutoLeBail)
 END_EVENT_TABLE()
 
 WXCellExplorer::WXCellExplorer(wxWindow *parent, PeakList &peaklist, WXPowderPatternGraph *graph):
-wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCrystal(0)
+wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCrystal(0),mpDiff(0)
 {
    wxBoxSizer *pSizer1=new wxBoxSizer(wxHORIZONTAL);
    this->SetSizer(pSizer1);
@@ -1692,12 +1702,6 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
       wxButton *pButton1=new wxButton(pAdvanced,ID_CELLEXPLORER_INDEX,"Find cell!");
       pSizerAdvanced->Add(pButton1,0,wxALIGN_CENTER);
       
-      wxButton *pButton2=new wxButton(pAdvanced,ID_CELLEXPLORER_APPLYCELL,"Apply selected cell");
-      pSizerAdvanced->Add(pButton2,0,wxALIGN_CENTER);
-   
-      mpFieldCrystal=new WXFieldChoice(pAdvanced,ID_CELLEXPLORER_CHOOSECRYSTAL,"Choose crystal:",200);
-      pSizerAdvanced->Add(mpFieldCrystal,0,wxALIGN_CENTER);
-   
       wxBoxSizer *pLengthSizer=new wxBoxSizer(wxHORIZONTAL);
       wxStaticText *pLengthText=new wxStaticText(pAdvanced,-1,"Length min, max (A):");
       pLengthSizer->Add(pLengthText,0,wxALIGN_CENTER);
@@ -1808,6 +1812,15 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
    // Solutions & log
       wxBoxSizer *pSizer2=new wxBoxSizer(wxVERTICAL);
       
+      //wxButton *pButton2=new wxButton(this,ID_CELLEXPLORER_APPLYCELL,"Apply selected cell");
+      //pSizer2->Add(pButton2,0,wxALIGN_CENTER);
+   
+      mpFieldCrystal=new WXFieldChoice(this,ID_CELLEXPLORER_CHOOSECRYSTAL,"Choose crystal to apply selected cell to:",200);
+      pSizer2->Add(mpFieldCrystal,0,wxALIGN_CENTER);
+   
+      mpAutomaticLeBail=new wxCheckBox(this,ID_CELLEXPLORER_LEBAIL,"Automatic Profile Fitting (Le Bail)");
+      pSizer2->Add(mpAutomaticLeBail,0,wxALIGN_CENTER);
+      
       wxArrayString cells;
       mpCell=new wxListBox(this,ID_CELLEXPLORER_SELECTCELL,wxDefaultPosition,wxSize(600,400),cells,wxLB_SINGLE);
       mpCell->SetFont(wxFont(9,wxTELETYPE,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL));
@@ -1879,7 +1892,9 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
       const unsigned int stopOnDepth=6+int(continueOnSolution),   reportOnDepth=4;
       
       unsigned int nbSpurious=0;
-      while(true)
+      wxProgressDialog dlgProgress(_T("Indexing..."),_T("Starting Indexing in Quick Mode"),
+                                   7,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME|wxPD_CAN_ABORT);
+      while(nbSpurious<=3)
       {
          unsigned int nbsol0;
          float t0;
@@ -1893,6 +1908,9 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
          mpCellExplorer->SetCrystalSystem(CUBIC);
          mpLog->AppendText(wxString::Format("CUBIC      : V= %6.0f -> %6.0f A^3, max length=%6.2fA",minv,maxv,lengthmax));
          t0=chrono.seconds();nbsol0=mpCellExplorer->GetSolutions().size();
+         if(dlgProgress.Update(0,wxString::Format(_T("CUBIC (%d spurious), V=%6.0f-%6.0f, l<%6.2fA\n")
+                                                  _T("Best Score=%6.1f"),
+                                                  nbSpurious,minv,maxv,lengthmax,mpCellExplorer->GetBestScore()))==false) break;
          mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
          mpLog->AppendText(wxString::Format(" -> %3u sols in %6.2fs, best score=%6.1f\n",
                     mpCellExplorer->GetSolutions().size()-nbsol0,chrono.seconds()-t0,mpCellExplorer->GetBestScore()));
@@ -1908,6 +1926,9 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
             mpCellExplorer->SetCrystalSystem(TETRAGONAL);
             mpLog->AppendText(wxString::Format("TETRAGONAL : V= %6.0f -> %6.0f A^3, max length=%6.2fA",minv,maxv,lengthmax));
             t0=chrono.seconds();nbsol0=mpCellExplorer->GetSolutions().size();
+            if(dlgProgress.Update(1,wxString::Format(_T("TETRAGONAL (%d spurious), V=%6.0f-%6.0f, l<%6.2fA\n")
+                                                   _T("Best Score=%6.1f"),
+                                                   nbSpurious,minv,maxv,lengthmax,mpCellExplorer->GetBestScore()))==false) break;
             mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
             mpLog->AppendText(wxString::Format(" -> %3u sols in %6.2fs, best score=%6.1f\n",
                      mpCellExplorer->GetSolutions().size()-nbsol0,chrono.seconds()-t0,mpCellExplorer->GetBestScore()));
@@ -1924,6 +1945,9 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
             mpCellExplorer->SetCrystalSystem(RHOMBOEDRAL);
             mpLog->AppendText(wxString::Format("RHOMBOEDRAL: V= %6.0f -> %6.0f A^3, max length=%6.2fA",minv,maxv,lengthmax));
             t0=chrono.seconds();nbsol0=mpCellExplorer->GetSolutions().size();
+            if(dlgProgress.Update(2,wxString::Format(_T("RHOMBOEDRAL (%d spurious), V=%6.0f-%6.0f, l<%6.2fA\n")
+                                                   _T("Best Score=%6.1f"),
+                                                   nbSpurious,minv,maxv,lengthmax,mpCellExplorer->GetBestScore()))==false) break;
             mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
             mpLog->AppendText(wxString::Format(" -> %3u sols in %6.2fs, best score=%6.1f\n",
                      mpCellExplorer->GetSolutions().size()-nbsol0,chrono.seconds()-t0,mpCellExplorer->GetBestScore()));
@@ -1940,6 +1964,9 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
             mpCellExplorer->SetCrystalSystem(HEXAGONAL);
             mpLog->AppendText(wxString::Format("HEXAGONAL  : V= %6.0f -> %6.0f A^3, max length=%6.2fA",minv,maxv,lengthmax));
             t0=chrono.seconds();nbsol0=mpCellExplorer->GetSolutions().size();
+            if(dlgProgress.Update(3,wxString::Format(_T("HEXAGONAL (%d spurious), V=%6.0f-%6.0f, l<%6.2fA\n")
+                                                   _T("Best Score=%6.1f"),
+                                                   nbSpurious,minv,maxv,lengthmax,mpCellExplorer->GetBestScore()))==false) break;
             mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
             mpLog->AppendText(wxString::Format(" -> %3u sols in %6.2fs, best score=%6.1f\n",
                      mpCellExplorer->GetSolutions().size()-nbsol0,chrono.seconds()-t0,mpCellExplorer->GetBestScore()));
@@ -1956,6 +1983,9 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
             mpCellExplorer->SetCrystalSystem(ORTHOROMBIC);
             mpLog->AppendText(wxString::Format("ORTHOROMBIC: V= %6.0f -> %6.0f A^3, max length=%6.2fA",minv,maxv,lengthmax));
             t0=chrono.seconds();nbsol0=mpCellExplorer->GetSolutions().size();
+            if(dlgProgress.Update(4,wxString::Format(_T("ORTHOROMBIC (%d spurious), V=%6.0f-%6.0f, l<%6.2fA\n")
+                                                   _T("Best Score=%6.1f"),
+                                                   nbSpurious,minv,maxv,lengthmax,mpCellExplorer->GetBestScore()))==false) break;
             mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
             mpLog->AppendText(wxString::Format(" -> %3u sols in %6.2fs, best score=%6.1f\n",
                      mpCellExplorer->GetSolutions().size()-nbsol0,chrono.seconds()-t0,mpCellExplorer->GetBestScore()));
@@ -1972,13 +2002,16 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
             mpCellExplorer->SetCrystalSystem(MONOCLINIC);
             mpLog->AppendText(wxString::Format("MONOCLINIC : V= %6.0f -> %6.0f A^3, max length=%6.2fA",minv,maxv,lengthmax));
             t0=chrono.seconds();nbsol0=mpCellExplorer->GetSolutions().size();
+            if(dlgProgress.Update(5,wxString::Format(_T("MONOCLINIC (%d spurious), V=%6.0f-%6.0f, l<%6.2fA\n")
+                                                   _T("Best Score=%6.1f"),
+                                                   nbSpurious,minv,maxv,lengthmax,mpCellExplorer->GetBestScore()))==false) break;
             mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
             mpLog->AppendText(wxString::Format(" -> %3u sols in %6.2fs, best score=%6.1f\n",
                   mpCellExplorer->GetSolutions().size()-nbsol0,chrono.seconds()-t0,mpCellExplorer->GetBestScore()));
             mpLog->Update();
          }
          
-         nbSpurious+=3;
+         nbSpurious+=1;
          if((mpCellExplorer->GetBestScore()>=stopOnScore)||(nbSpurious>3)) break;
          mpLog->AppendText(wxString::Format("\n Trying now with %2u spurious peaks\n",nbSpurious));
          mpLog->Update();
@@ -2078,7 +2111,187 @@ void WXCellExplorer::OnSelectCell(wxCommandEvent &event)
       for(int i=0;i<choice;++i)++pos;// We need a random access ?
       // This will update the hkl in the list and therefore on the graph
       Score(*mpPeakList,pos->first,nbspurious,true,true,true);
+      if(mpCrystal!=NULL)
+      {
+         // Apply crystal structure
+         list<pair<RecUnitCell,float> >::const_iterator pos=mpCellExplorer->GetSolutions().begin();
+         for(int i=0;i<choice;++i)++pos;// We need a random access ?
+         vector<float> uc=pos->first.DirectUnitCell();
+         mpCrystal->GetPar("a").SetValue(uc[0]);
+         mpCrystal->GetPar("b").SetValue(uc[1]);
+         mpCrystal->GetPar("c").SetValue(uc[2]);
+         mpCrystal->GetPar("alpha").SetValue(uc[3]);
+         mpCrystal->GetPar("beta").SetValue(uc[4]);
+         mpCrystal->GetPar("gamma").SetValue(uc[5]);
+         switch(pos->first.mlattice)
+         {
+            case TRICLINIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("P-1");break;
+            case MONOCLINIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("P2/m");break;
+            case ORTHOROMBIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("Pmmm");break;
+            case HEXAGONAL:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("P6/mmm");break;
+            case RHOMBOEDRAL:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("R-3m");break;
+            case TETRAGONAL:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("P4/mmm");break;
+            case CUBIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("Pm-3m");break;
+         }
+         mpCrystal->UpdateDisplay();
+      }
+      if(mpAutomaticLeBail->GetValue())
+      {
+         // run Le Bail
+         const bool fitzero=true,
+                  fitwidth0=true,
+                  fitwidth=true,
+                  fiteta=true,
+                  fitasym=true,
+                  fitdispltransp=true,
+                  fitbackgd=true,
+                  fitcell=true;
+         
+         wxProgressDialog dlgProgress(_T("Le Bail and Profile Fitting"),_T("Le Bail Fitting, cycle #0/20"),
+                                      25,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME|wxPD_CAN_ABORT);
+         mpDiff->SetExtractionMode(true,true);
+         
+         mpLog->AppendText(wxString::Format("Starting 20 Le Bail cycles\n"));
+         for(int i=0;i<10;++i)
+         {
+            mpDiff->ExtractLeBail(2);
+            mpDiff->GetParentPowderPattern().FitScaleFactorForRw();
+            mpDiff->GetParentPowderPattern().UpdateDisplay();
+            if(dlgProgress.Update(i,wxString::Format(_T("Le Bail Fitting, cycle #%d/20"),i*2))==false) return;
+         }
+         mpLog->AppendText(wxString::Format("                  => Rwp=%5.3f%%, GoF=%7.3f\n",
+                                          mpDiff->GetParentPowderPattern().GetRw()*100,
+                                          mpDiff->GetParentPowderPattern().GetChi2()
+                                          /mpDiff->GetParentPowderPattern().GetNbPointUsed()));
+         
+         LSQNumObj lsqobj("Profile Fitting object");
+         lsqobj.SetRefinedObj(mpDiff->GetParentPowderPattern());
+         lsqobj.PrepareRefParList(true);
+         lsqobj.SetParIsUsed(gpRefParTypeObjCryst,false);
+         lsqobj.SetParIsUsed(gpRefParTypeScattDataScale,true);
+         lsqobj.SetParIsUsed(gpRefParTypeScattDataProfile,true);
+         lsqobj.SetParIsUsed(gpRefParTypeScattDataCorrPos,true);
+         lsqobj.SetParIsUsed(gpRefParTypeScattDataBackground,true);
+         lsqobj.SetParIsUsed(gpRefParTypeUnitCell,true);
+         lsqobj.SetParIsFixed(gpRefParTypeObjCryst,true);
+         lsqobj.SetParIsFixed(gpRefParTypeScattDataScale,false);
+         
+         // :TODO: take car of other profiles than pseudo-voigt (DE-PV)
+         if(fitzero) lsqobj.SetParIsFixed("Zero",false);
+         if(fitwidth0) lsqobj.SetParIsFixed("W",false);
+         if(fitzero||fitwidth0)
+         {
+            mpLog->AppendText(wxString::Format("Fitting zero shift && constant width\n"));
+            if(dlgProgress.Update(11,_T("Fitting zero shift && constant width"))==false) return;
+            lsqobj.Refine(5,true,false);
+            mpDiff->GetParentPowderPattern().FitScaleFactorForRw();
+            mpDiff->GetParentPowderPattern().UpdateDisplay();
+            mpLog->AppendText(wxString::Format("                  => Rwp=%6.3f%%, GoF=%7.3f\n",
+                                             mpDiff->GetParentPowderPattern().GetRw()*100,
+                                             mpDiff->GetParentPowderPattern().GetChi2()
+                                             /mpDiff->GetParentPowderPattern().GetNbPointUsed()));
+         }
+         if(fitwidth) lsqobj.SetParIsFixed("U",false);
+         if(fitwidth) lsqobj.SetParIsFixed("V",false);
+         if(fiteta) lsqobj.SetParIsFixed("Eta0",false);
+         if(fitwidth||fiteta)
+         {
+            mpLog->AppendText(wxString::Format("Fitting width and gaussian/lorentzian fixed mix\n"));
+            if(dlgProgress.Update(12,_T("Fitting variable width and gaussian/lorentzian fixed mix"))==false) return;
+            lsqobj.Refine(5,true,false);
+            mpDiff->GetParentPowderPattern().FitScaleFactorForRw();
+            mpDiff->GetParentPowderPattern().UpdateDisplay();
+            mpLog->AppendText(wxString::Format("                  => Rwp=%6.3f%%, GoF=%7.3f\n",
+                                             mpDiff->GetParentPowderPattern().GetRw()*100,
+                                             mpDiff->GetParentPowderPattern().GetChi2()
+                                             /mpDiff->GetParentPowderPattern().GetNbPointUsed()));
+         }
+         
+         if(fiteta) lsqobj.SetParIsFixed("Eta1",false);
+         if(fiteta)
+         {
+            mpLog->AppendText(wxString::Format("Fitting variable width and gaussian/lorentzian mix\n"));
+            if(dlgProgress.Update(13,_T("Fitting variable width and gaussian/lorentzian mix"))==false) return;
+            lsqobj.Refine(5,true,false);
+            mpDiff->GetParentPowderPattern().FitScaleFactorForRw();
+            mpDiff->GetParentPowderPattern().UpdateDisplay();
+            mpLog->AppendText(wxString::Format("                  => Rwp=%6.3f%%, GoF=%7.3f\n",
+                                             mpDiff->GetParentPowderPattern().GetRw()*100,
+                                             mpDiff->GetParentPowderPattern().GetChi2()
+                                             /mpDiff->GetParentPowderPattern().GetNbPointUsed()));
+         }
+         
+         if(fitasym) lsqobj.SetParIsFixed("Asym0",false);
+         if(fitasym) lsqobj.SetParIsFixed("Asym1",false);
+         if(fitasym) lsqobj.SetParIsFixed("Asym2",false);
+         if(fitdispltransp) lsqobj.SetParIsFixed("2ThetaDispl",false);
+         if(fitdispltransp) lsqobj.SetParIsFixed("2ThetaTransp",false);
+         if(fitdispltransp||fitasym)
+         {
+            mpLog->AppendText(wxString::Format("Fitting assymetry and sample displacement/transparency\n"));
+            if(dlgProgress.Update(14,_T("Fitting assymetry and sample displacement/transparency"))==false) return;
+            lsqobj.Refine(5,true,false);
+            mpDiff->GetParentPowderPattern().FitScaleFactorForRw();
+            mpDiff->GetParentPowderPattern().UpdateDisplay();
+            mpLog->AppendText(wxString::Format("                  => Rwp=%6.3f%%, GoF=%7.3f\n",
+                                             mpDiff->GetParentPowderPattern().GetRw()*100,
+                                             mpDiff->GetParentPowderPattern().GetChi2()
+                                             /mpDiff->GetParentPowderPattern().GetNbPointUsed()));
+         }
+         
+         if(fitbackgd) lsqobj.SetParIsFixed(gpRefParTypeScattDataBackground,false);
+         if(fitbackgd)
+         {
+            mpLog->AppendText(wxString::Format("Fitting background\n"));
+            if(dlgProgress.Update(15,_T("Fitting background"))==false) return;
+            lsqobj.Refine(5,true,false);
+            mpDiff->GetParentPowderPattern().FitScaleFactorForRw();
+            mpDiff->GetParentPowderPattern().UpdateDisplay();
+            mpLog->AppendText(wxString::Format("                  => Rwp=%6.3f%%, GoF=%7.3f\n",
+                                             mpDiff->GetParentPowderPattern().GetRw()*100,
+                                             mpDiff->GetParentPowderPattern().GetChi2()
+                                             /mpDiff->GetParentPowderPattern().GetNbPointUsed()));
+         }
+         
+         if(fitcell) lsqobj.SetParIsFixed(gpRefParTypeUnitCell,false);
+         if(fitcell)
+         {
+            mpLog->AppendText(wxString::Format("Fitting unit cell\n"));
+            if(dlgProgress.Update(16,_T("Fitting unit cell"))==false) return;
+            lsqobj.Refine(5,true,false);
+            mpDiff->GetParentPowderPattern().FitScaleFactorForRw();
+            mpDiff->GetParentPowderPattern().UpdateDisplay();
+            mpLog->AppendText(wxString::Format("                  => Rwp=%6.3f%%, GoF=%7.3f\n",
+                                             mpDiff->GetParentPowderPattern().GetRw()*100,
+                                             mpDiff->GetParentPowderPattern().GetChi2()
+                                             /mpDiff->GetParentPowderPattern().GetNbPointUsed()));
+         }
+         // Run Le Bail again from scratch
+         mpDiff->SetExtractionMode(true,true);
+         mpLog->AppendText(wxString::Format("Starting 10 Le Bail cycles\n"));
+         for(int i=17;i<22;++i)
+         {
+            if(dlgProgress.Update(i,wxString::Format(_T("Le Bail Fitting, cycle #%d/10"),(i-17)*2))==false) return;
+            mpDiff->ExtractLeBail(2);
+            mpDiff->GetParentPowderPattern().FitScaleFactorForRw();
+            mpDiff->GetParentPowderPattern().UpdateDisplay();
+         }
+         mpLog->AppendText(wxString::Format("                  => Rwp=%5.3f%%, GoF=%7.3f\n",
+                                          mpDiff->GetParentPowderPattern().GetRw()*100,
+                                          mpDiff->GetParentPowderPattern().GetChi2()
+                                          /mpDiff->GetParentPowderPattern().GetNbPointUsed()));
+         // Last fit
+         mpLog->AppendText(wxString::Format("Last fit...\n"));
+         if(dlgProgress.Update(23,_T("Last fit..."))==false) return;
+         lsqobj.Refine(5,true,false);
+         mpLog->AppendText(wxString::Format("                  => Rwp=%5.3f%%, GoF=%7.3f\n",
+                                          mpDiff->GetParentPowderPattern().GetRw()*100,
+                                          mpDiff->GetParentPowderPattern().GetChi2()
+                                          /mpDiff->GetParentPowderPattern().GetNbPointUsed()));
+         // Change 
+      }
       if(mpGraph!=0) mpGraph->Refresh(FALSE);
+      //:TODO: store refined cell parameters, display GoF
    }
 }
 void WXCellExplorer::OnApplyCell(wxCommandEvent &event)
@@ -2114,6 +2327,115 @@ void WXCellExplorer::OnChooseCrystal(wxCommandEvent &event)
          "Choose a Crystal Structure:",choice));
    if(0==mpCrystal) return;
    mpFieldCrystal->SetValue(mpCrystal->GetName());
+}
+
+void WXCellExplorer::OnAutoLeBail(wxCommandEvent &event)
+{
+   if(mpGraph==NULL)
+   {
+      mpAutomaticLeBail->SetValue(false);
+      return;
+   }
+   // Check if powder pattern has a background phase
+   const unsigned int nbcomp= mpGraph->GetWXPowderPattern().GetPowderPattern().GetNbPowderPatternComponent();
+   bool needBackground=true;
+   for(unsigned int i=0;i<nbcomp;++i)
+      if(mpGraph->GetWXPowderPattern().GetPowderPattern().GetPowderPatternComponent(i).GetClassName()=="PowderPatternBackground")
+      {
+         needBackground=false;
+         break;
+      };
+   if(needBackground)
+   {
+      int answer =wxMessageBox(_T("To automatically run profile-fitting\n")
+                               _T("and Le Bail extraction, you must have\n")
+                               _T("defined a background phase for the pattern\n\n")
+                               _T("Do you want to do that now ?"),
+                               _T("Add Background ?"),wxYES_NO|wxICON_QUESTION);
+      if(answer==wxNO)
+      {
+         mpAutomaticLeBail->SetValue(false);
+         return;
+      }
+      wxCommandEvent ev;
+      mpGraph->GetWXPowderPattern().OnMenuAddCompBackgdBayesian(ev);
+   }
+   // Check if a crystal structure has been selected to apply the calculated cell
+   if(mpCrystal==NULL)
+   {
+      int answer =wxMessageBox(_T("To automatically run profile-fitting\n")
+                               _T("and Le Bail extraction, you must have\n")
+                               _T("defined a Crystal phase to apply the cell to\n\n")
+                               _T("Do you want to use an EXISTING crystal structure ?\n")
+                               _T("(otherwise a new one will be created for you)"),
+                               _T("Select Crystal ?"),wxYES_NO|wxICON_QUESTION);
+      if(answer==wxNO)
+      {
+         mpCrystal=new Crystal(4,5,6,"P1");
+         mpCrystal->SetName("Indexing Result");
+      }
+      else
+      {
+         wxCommandEvent ev;
+         this->OnChooseCrystal(ev);
+      }
+   }
+   // Now make sure this Crystal structure is used by the powder pattern object
+   bool needPowderPatternDiffraction=true;
+   unsigned int nbPowderPatternDiffraction=0;
+   for(unsigned int i=0;i<nbcomp;++i)
+      if(mpGraph->GetWXPowderPattern().GetPowderPattern().GetPowderPatternComponent(i).GetClassName()=="PowderPatternDiffraction")
+      {
+         nbPowderPatternDiffraction++;
+         mpDiff=dynamic_cast<PowderPatternDiffraction*>
+            (&(mpGraph->GetWXPowderPattern().GetPowderPattern().GetPowderPatternComponent(i)));
+         if(&(mpDiff->GetCrystal())==mpCrystal)
+         {
+            needPowderPatternDiffraction=false;
+            break;
+         }
+      };
+   if(needPowderPatternDiffraction)
+   {
+      cout<<"needPowderPatternDiffraction,"<<nbPowderPatternDiffraction<<endl;
+      if(nbPowderPatternDiffraction>0)
+      {
+         int answer =wxMessageBox(_T("To automatically run profile-fitting\n")
+                                  _T("and Le Bail extraction, you must assign\n")
+                                  _T("the Crystal to a Diffraction Component\n\n")
+                                  _T("Do you want to use an already existing one ?"),
+                                  _T("Use Crystal Phase ?"),wxYES_NO|wxICON_QUESTION);
+         if(answer==wxYES)
+         {
+            //if(nbPowderPatternDiffraction==1) :TODO: handle multiple phases
+            {
+               for(unsigned int i=0;i<nbcomp;++i)
+                  if(mpGraph->GetWXPowderPattern().GetPowderPattern().GetPowderPatternComponent(i).GetClassName()=="PowderPatternDiffraction")
+                  {
+                     mpDiff=dynamic_cast<PowderPatternDiffraction*>
+                        (&(mpGraph->GetWXPowderPattern().GetPowderPattern().GetPowderPatternComponent(i)));
+                     mpDiff->SetCrystal(*mpCrystal);
+                     return;
+                  }
+            }
+         }
+      }
+      else
+      {// Create one crystalline phase
+         mpDiff=new PowderPatternDiffraction;
+         mpDiff->SetCrystal(*mpCrystal);
+         mpGraph->GetWXPowderPattern().GetPowderPattern().AddPowderPatternComponent(*mpDiff);
+         if(mpGraph->GetWXPowderPattern().GetPowderPattern().GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
+         {
+            wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_POWDERDIFF_PROFILE_DEPV);
+            wxPostEvent(mpDiff->WXGet(),event);
+         }
+         mpGraph->GetWXPowderPattern().GetPowderPattern().Prepare();
+         mpGraph->GetWXPowderPattern().CrystUpdate();
+      }
+   }
+   // Limit resolution (:TODO: Take into account density of peask to limit to ~100 reflections)
+   mpDiff->GetParentPowderPattern().SetMaxSinThetaOvLambda(0.25);
 }
 
 //////////////////////////////////////// END WXCellExplorer /////////////////////
@@ -2276,6 +2598,9 @@ void WXPowderPatternGraph::OnSize(wxSizeEvent& event)
    this->Refresh(false);
 }
 
+WXPowderPattern& WXPowderPatternGraph::GetWXPowderPattern(){return *mpPattern;}
+const WXPowderPattern& WXPowderPatternGraph::GetWXPowderPattern()const{return *mpPattern;}
+
 void WXPowderPatternGraph::SetPattern(const CrystVector_REAL &x,
                                       const CrystVector_REAL &obs,
                                       const CrystVector_REAL &calc,
@@ -2329,6 +2654,7 @@ void WXPowderPatternGraph::OnRedrawNewPattern(wxUpdateUIEvent& WXUNUSED(event))
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph::SetPattern()",5)
    this->Refresh(false);
 }
+
 void WXPowderPatternGraph::ResetAxisLimits()
 {
    wxMutexLocker mlock(mMutex);
@@ -2766,6 +3092,8 @@ void WXTextureMarchDollase::OnDeleteTexturePhase(wxCommandEvent & WXUNUSED(event
 ////////////////////////////////////////////////////////////////////////
 static const long ID_POWDERDIFF_PROFILE=                       WXCRYST_ID();
 static const long ID_POWDERDIFF_PROFILE_PV=                    WXCRYST_ID();
+static const long ID_POWDERDIFF_LEBAIL=                        WXCRYST_ID(); 
+static const long ID_POWDERDIFF_PROFILEFITTINGMODE=            WXCRYST_ID(); 
 
 BEGIN_EVENT_TABLE(WXPowderPatternDiffraction, wxWindow)
    EVT_BUTTON(ID_POWDERDIFF_CRYSTAL,WXPowderPatternDiffraction::OnChangeCrystal)
@@ -2773,6 +3101,8 @@ BEGIN_EVENT_TABLE(WXPowderPatternDiffraction, wxWindow)
                                             WXPowderPatternDiffraction::OnMenuSaveHKLFcalc)
    EVT_MENU(ID_POWDERDIFF_PROFILE_PV,       WXPowderPatternDiffraction::OnChangeProfile)
    EVT_MENU(ID_POWDERDIFF_PROFILE_DEPV,     WXPowderPatternDiffraction::OnChangeProfile)
+   EVT_MENU(ID_POWDERDIFF_LEBAIL,           WXPowderPatternDiffraction::OnLeBail)
+   EVT_CHECKBOX(ID_POWDERDIFF_PROFILEFITTINGMODE,WXPowderPatternDiffraction::OnLeBail)
    EVT_UPDATE_UI(ID_CRYST_UPDATEUI,         WXRefinableObj::OnUpdateUI)
 END_EVENT_TABLE()
 
@@ -2783,7 +3113,7 @@ WXRefinableObj(parent,p),mpPowderPatternDiffraction(p)
    VFN_DEBUG_ENTRY("WXPowderPatternDiffraction::WXPowderPatternDiffraction()",6)
    mpWXTitle->SetForegroundColour(wxColour(0,255,0));
     //Menu
-      mpMenuBar->AddMenu("Object",ID_REFOBJ_MENU_OBJ);
+      mpMenuBar->AddMenu("File",ID_REFOBJ_MENU_OBJ);
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERDIFF_SAVEHKLFCALC,
                                 "Save HKL Fcalc");
       mpMenuBar->AddMenu("Profile",ID_POWDERDIFF_PROFILE);
@@ -2791,9 +3121,16 @@ WXRefinableObj(parent,p),mpPowderPatternDiffraction(p)
                                 "Pseudo-Voigt (X-Ray & monochromatic neutron)");
          mpMenuBar->AddMenuItem(ID_POWDERDIFF_PROFILE,ID_POWDERDIFF_PROFILE_DEPV,
                                 "Double-Exponential Pseudo-Voigt (neutron TOF)");
+         mpMenuBar->GetMenu(ID_POWDERDIFF_PROFILE).AppendSeparator();
+         mpMenuBar->AddMenuItem(ID_POWDERDIFF_PROFILE,ID_POWDERDIFF_LEBAIL,
+                                "Profile Fitting + Le Bail Extraction");
       mpSizer->SetItemMinSize(mpMenuBar,
                               mpMenuBar->GetSize().GetWidth(),
                               mpMenuBar->GetSize().GetHeight());
+    // Profile Fitting Mode
+      mpProfileFittingMode= new wxCheckBox(this,ID_POWDERDIFF_PROFILEFITTINGMODE,
+                                           _T("Profile Fitting (Le Bail) Mode"));
+      mpSizer->Add(mpProfileFittingMode,0,wxALIGN_LEFT);
     // Crystal Choice
       mpFieldCrystal=new WXFieldChoice(this,ID_POWDERDIFF_CRYSTAL,"Crystal:",300);
       mpSizer->Add(mpFieldCrystal,0,wxALIGN_LEFT);
@@ -2856,6 +3193,7 @@ void WXPowderPatternDiffraction::UpdateUI(const bool lock)
 {
    if(lock) mMutex.Lock();
    mpFieldCrystal->SetValue(mpPowderPatternDiffraction->GetCrystal().GetName());
+   mpProfileFittingMode->SetValue(mpPowderPatternDiffraction->GetExtractionMode());
    if(lock) mMutex.Unlock();
    this->WXRefinableObj::UpdateUI(lock);
 }
@@ -2911,6 +3249,216 @@ void WXPowderPatternDiffraction::OnChangeProfile(wxCommandEvent & event)
    }
    VFN_DEBUG_EXIT("WXPowderPatternDiffraction::OnChangeProfile()",6)
 }
+
+//////////////////////////////////////// WXProfileFitting /////////////////////
+
+class WXProfileFitting:public wxWindow
+{
+   public:
+      WXProfileFitting(wxWindow *parent,PowderPatternDiffraction *pDiff);
+      /// Start Fitting
+      void OnFit(wxCommandEvent &event);
+   private:
+      PowderPatternDiffraction *mpDiff;
+      wxCheckListBox *mpFitCheckList;
+      wxTextCtrl *mpLog;
+      DECLARE_EVENT_TABLE()
+};
+static const long ID_PROFILEFITTING_RUN= WXCRYST_ID();
+
+BEGIN_EVENT_TABLE(WXProfileFitting, wxWindow)
+   EVT_BUTTON(ID_PROFILEFITTING_RUN,             WXProfileFitting::OnFit)
+END_EVENT_TABLE()
+
+WXProfileFitting::WXProfileFitting(wxWindow *parent,PowderPatternDiffraction *pDiff):
+wxWindow(parent,-1),mpDiff(pDiff)
+{
+   wxBoxSizer *pSizer=new wxBoxSizer(wxVERTICAL);
+   this->SetSizer(pSizer);
+   
+   wxButton *pButton1=new wxButton(this,ID_PROFILEFITTING_RUN,"Le Bail + Fit Profile !");
+   pSizer->Add(pButton1,0,wxALIGN_CENTER);
+   
+   wxArrayString fitChoices;
+      fitChoices.Add(_T("Fit Zero shift"));
+      fitChoices.Add(_T("Fit Constant Width"));
+      fitChoices.Add(_T("Fit Variable Width"));
+      fitChoices.Add(_T("Fit Gaussian-Lorentzian Mixing"));
+      fitChoices.Add(_T("Fit Asymmetric parameters"));
+      fitChoices.Add(_T("Fit Displacement+Transparency"));
+      fitChoices.Add(_T("Fit Background"));
+      fitChoices.Add(_T("Fit Unit Cell"));
+   mpFitCheckList=new wxCheckListBox(this,-1,wxDefaultPosition,wxDefaultSize,fitChoices);
+   mpFitCheckList->Check(0,true);
+   mpFitCheckList->Check(1,true);
+   mpFitCheckList->Check(2,true);
+   mpFitCheckList->Check(3,true);
+   mpFitCheckList->Check(4,true);
+   mpFitCheckList->Check(5,true);
+   mpFitCheckList->Check(6,true);
+   mpFitCheckList->Check(7,true);
+   pSizer->Add(mpFitCheckList,0,wxALIGN_CENTER);
+   
+   mpLog =new wxTextCtrl(this,-1,"",wxDefaultPosition,wxSize(400,250),wxTE_MULTILINE|wxTE_READONLY|wxTE_DONTWRAP);
+   mpLog->SetFont(wxFont(9,wxTELETYPE,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL));
+   pSizer->Add(mpLog,0,wxALIGN_CENTER);
+
+   pSizer->SetSizeHints(this);
+   pSizer->Fit(this);
+   pSizer->Fit(this->GetParent());
+   this->Layout();
+}
+
+void WXProfileFitting::OnFit(wxCommandEvent &event)
+{
+   const bool fitzero=mpFitCheckList->IsChecked(0),
+              fitwidth0=mpFitCheckList->IsChecked(1),
+              fitwidth=mpFitCheckList->IsChecked(2),
+              fiteta=mpFitCheckList->IsChecked(3),
+              fitasym=mpFitCheckList->IsChecked(4),
+              fitdispltransp=mpFitCheckList->IsChecked(5),
+              fitbackgd=mpFitCheckList->IsChecked(6),
+              fitcell=mpFitCheckList->IsChecked(7);
+   
+   mpDiff->SetExtractionMode(true,true);
+   
+   mpLog->AppendText(wxString::Format("Starting 20 Le Bail cycles\n"));
+   wxProgressDialog dlgProgress(_T("Le Bail and Profile Fitting"),_T("Le Bail Fitting, cycle #0/20"),
+                                 18,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME|wxPD_CAN_ABORT);
+   for(int i=0;i<10;++i)
+   {
+      mpDiff->ExtractLeBail(2);
+      mpDiff->GetParentPowderPattern().FitScaleFactorForRw();
+      mpDiff->GetParentPowderPattern().UpdateDisplay();
+      if(dlgProgress.Update(i,wxString::Format(_T("Le Bail Fitting, cycle #%d/20"),i*2))==false) return;
+   }
+   mpLog->AppendText(wxString::Format("                  => Rwp=%5.3f%%, GoF=%7.3f\n",
+                                      mpDiff->GetParentPowderPattern().GetRw()*100,
+                                      mpDiff->GetParentPowderPattern().GetChi2()
+                                      /mpDiff->GetParentPowderPattern().GetNbPointUsed()));
+   
+   LSQNumObj lsqobj("Profile Fitting object");
+   lsqobj.SetRefinedObj(mpDiff->GetParentPowderPattern());
+   lsqobj.PrepareRefParList(true);
+   lsqobj.SetParIsUsed(gpRefParTypeObjCryst,false);
+   lsqobj.SetParIsUsed(gpRefParTypeScattDataScale,true);
+   lsqobj.SetParIsUsed(gpRefParTypeScattDataProfile,true);
+   lsqobj.SetParIsUsed(gpRefParTypeScattDataCorrPos,true);
+   lsqobj.SetParIsUsed(gpRefParTypeScattDataBackground,true);
+   lsqobj.SetParIsUsed(gpRefParTypeUnitCell,true);
+   lsqobj.SetParIsFixed(gpRefParTypeObjCryst,true);
+   lsqobj.SetParIsFixed(gpRefParTypeScattDataScale,false);
+   
+   // :TODO: take car of other profiles than pseudo-voigt (DE-PV)
+   if(fitzero) lsqobj.SetParIsFixed("Zero",false);
+   if(fitwidth0) lsqobj.SetParIsFixed("W",false);
+   if(fitzero||fitwidth0)
+   {
+      mpLog->AppendText(wxString::Format("Fitting zero shift && constant width\n"));
+      if(dlgProgress.Update(11,_T("Fitting zero shift && constant width"))==false) return;
+      lsqobj.Refine(5,true,false);
+      mpDiff->GetParentPowderPattern().FitScaleFactorForRw();
+      mpDiff->GetParentPowderPattern().UpdateDisplay();
+      mpLog->AppendText(wxString::Format("                  => Rwp=%6.3f%%, GoF=%7.3f\n",
+                                       mpDiff->GetParentPowderPattern().GetRw()*100,
+                                       mpDiff->GetParentPowderPattern().GetChi2()
+                                       /mpDiff->GetParentPowderPattern().GetNbPointUsed()));
+   }
+   if(fitwidth) lsqobj.SetParIsFixed("U",false);
+   if(fitwidth) lsqobj.SetParIsFixed("V",false);
+   if(fiteta) lsqobj.SetParIsFixed("Eta0",false);
+   if(fitwidth||fiteta)
+   {
+      mpLog->AppendText(wxString::Format("Fitting width and gaussian/lorentzian fixed mix\n"));
+      if(dlgProgress.Update(12,_T("Fitting variable width and gaussian/lorentzian fixed mix"))==false) return;
+      lsqobj.Refine(5,true,false);
+      mpDiff->GetParentPowderPattern().FitScaleFactorForRw();
+      mpDiff->GetParentPowderPattern().UpdateDisplay();
+      mpLog->AppendText(wxString::Format("                  => Rwp=%6.3f%%, GoF=%7.3f\n",
+                                       mpDiff->GetParentPowderPattern().GetRw()*100,
+                                       mpDiff->GetParentPowderPattern().GetChi2()
+                                       /mpDiff->GetParentPowderPattern().GetNbPointUsed()));
+   }
+   
+   if(fiteta) lsqobj.SetParIsFixed("Eta1",false);
+   if(fiteta)
+   {
+      mpLog->AppendText(wxString::Format("Fitting gaussian/lorentzian mix\n"));
+      if(dlgProgress.Update(13,_T("Fitting variable width and gaussian/lorentzian mix"))==false) return;
+      lsqobj.Refine(5,true,false);
+      mpDiff->GetParentPowderPattern().FitScaleFactorForRw();
+      mpDiff->GetParentPowderPattern().UpdateDisplay();
+      mpLog->AppendText(wxString::Format("                  => Rwp=%6.3f%%, GoF=%7.3f\n",
+                                       mpDiff->GetParentPowderPattern().GetRw()*100,
+                                       mpDiff->GetParentPowderPattern().GetChi2()
+                                       /mpDiff->GetParentPowderPattern().GetNbPointUsed()));
+   }
+   
+   if(fitasym) lsqobj.SetParIsFixed("Asym0",false);
+   if(fitasym) lsqobj.SetParIsFixed("Asym1",false);
+   if(fitasym) lsqobj.SetParIsFixed("Asym2",false);
+   if(fitdispltransp) lsqobj.SetParIsFixed("2ThetaDispl",false);
+   if(fitdispltransp) lsqobj.SetParIsFixed("2ThetaTransp",false);
+   if(fitdispltransp||fitasym)
+   {
+      mpLog->AppendText(wxString::Format("Fitting assymetry and sample displacement/transparency\n"));
+      if(dlgProgress.Update(14,_T("Fitting assymetry and sample displacement/transparency"))==false) return;
+      lsqobj.Refine(5,true,false);
+      mpDiff->GetParentPowderPattern().FitScaleFactorForRw();
+      mpDiff->GetParentPowderPattern().UpdateDisplay();
+      mpLog->AppendText(wxString::Format("                  => Rwp=%6.3f%%, GoF=%7.3f\n",
+                                       mpDiff->GetParentPowderPattern().GetRw()*100,
+                                       mpDiff->GetParentPowderPattern().GetChi2()
+                                       /mpDiff->GetParentPowderPattern().GetNbPointUsed()));
+   }
+   
+   if(fitbackgd) lsqobj.SetParIsFixed(gpRefParTypeScattDataBackground,false);
+   if(fitbackgd)
+   {
+      mpLog->AppendText(wxString::Format("Fitting background\n"));
+      if(dlgProgress.Update(15,_T("Fitting background"))==false) return;
+      lsqobj.Refine(5,true,false);
+      mpDiff->GetParentPowderPattern().FitScaleFactorForRw();
+      mpDiff->GetParentPowderPattern().UpdateDisplay();
+      mpLog->AppendText(wxString::Format("                  => Rwp=%6.3f%%, GoF=%7.3f\n",
+                                       mpDiff->GetParentPowderPattern().GetRw()*100,
+                                       mpDiff->GetParentPowderPattern().GetChi2()
+                                       /mpDiff->GetParentPowderPattern().GetNbPointUsed()));
+   }
+   
+   if(fitcell) lsqobj.SetParIsFixed(gpRefParTypeUnitCell,false);
+   if(fitcell)
+   {
+      mpLog->AppendText(wxString::Format("Fitting unit cell\n"));
+      if(dlgProgress.Update(16,_T("Fitting unit cell"))==false) return;
+      lsqobj.Refine(5,true,false);
+      mpDiff->GetParentPowderPattern().FitScaleFactorForRw();
+      mpDiff->GetParentPowderPattern().UpdateDisplay();
+      mpLog->AppendText(wxString::Format("                  => Rwp=%6.3f%%, GoF=%7.3f\n",
+                                       mpDiff->GetParentPowderPattern().GetRw()*100,
+                                       mpDiff->GetParentPowderPattern().GetChi2()
+                                       /mpDiff->GetParentPowderPattern().GetNbPointUsed()));
+   }
+
+}
+
+
+void WXPowderPatternDiffraction::OnLeBail(wxCommandEvent &event)
+{
+   if((event.GetId()==ID_POWDERDIFF_PROFILEFITTINGMODE)&&(mpProfileFittingMode->GetValue()==false))
+   {
+      mpPowderPatternDiffraction->SetExtractionMode(false);
+      mpPowderPatternDiffraction->GetParentPowderPattern().UpdateDisplay();
+      return;
+   }
+   mpPowderPatternDiffraction->SetExtractionMode(true,true);
+   wxFrame *pFrame=new wxFrame(this,-1,"Profile Fitting");
+   WXProfileFitting *pFit;
+   pFit=new WXProfileFitting(pFrame,mpPowderPatternDiffraction);
+   pFrame->Show(true);
+}
+
+
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXProfilePseudoVoigt

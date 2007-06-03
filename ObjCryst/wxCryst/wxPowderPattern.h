@@ -114,6 +114,8 @@ class WXPowderPatternGraph: public wxWindow
       void OnChangeScale(wxCommandEvent &event);
       void OnKeyDown(wxKeyEvent& event);
       void OnSize(wxSizeEvent& event);
+      WXPowderPattern& GetWXPowderPattern();
+      const WXPowderPattern& GetWXPowderPattern()const;
    private:
       /// Reset the limits of the axis to full range.
       void ResetAxisLimits();
@@ -234,9 +236,12 @@ class WXPowderPatternDiffraction: public WXRefinableObj
       void OnMenuSaveHKLFcalc(wxCommandEvent & WXUNUSED(event));
       void OnChangeProfile(wxCommandEvent & event);
       virtual void UpdateUI(const bool mutexlock=false);
+      /// Perform Le Bail extraction
+      void OnLeBail(wxCommandEvent &event);
    private:
       PowderPatternDiffraction *mpPowderPatternDiffraction;
       WXFieldChoice* mpFieldCrystal;
+      wxCheckBox *mpProfileFittingMode;
    DECLARE_EVENT_TABLE()
 };
 
