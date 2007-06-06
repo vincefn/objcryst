@@ -570,6 +570,9 @@ void WXPowderPattern::OnMenuAddCompBackgdBayesian(wxCommandEvent & WXUNUSED(even
    dialog.GetValue().ToLong(&nbPointSpline);
    if(nbPointSpline<=1)nbPointSpline=2;
    
+   wxProgressDialog dlgProgress(_T("Automatic Bayesian Background"),_T("Automatic Background: Initializing..."),
+                                4,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME|wxPD_CAN_ABORT);
+
    PowderPatternBackground *pBckgd= new PowderPatternBackground;
    VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompBackgdBayesian()",6)
    mpPowderPattern->AddPowderPatternComponent(*pBckgd);
@@ -595,18 +598,15 @@ void WXPowderPattern::OnMenuAddCompBackgdBayesian(wxCommandEvent & WXUNUSED(even
       }
       pBckgd->SetInterpPoints(x,backgd);
    }
-   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompBackgdBayesian()",6)
    if(mpGraph!=0) mpPowderPattern->Prepare();//else this will be done when opening the graph
-   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompBackgdBayesian()",6)
    
    pBckgd->UnFixAllPar();
    pBckgd->GetOption(0).SetChoice(0);//linear
-   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompBackgdBayesian()",6)
+   if(dlgProgress.Update(1,_T("Automatic Background: Optimizing Linear Model..."))==false) return;
    pBckgd->OptimizeBayesianBackground();
-   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompBackgdBayesian()",6)
    pBckgd->GetOption(0).SetChoice(1);//spline
+   if(dlgProgress.Update(2,_T("Automatic Background: Optimizing Spline Model..."))==false) return;
    pBckgd->OptimizeBayesianBackground();
-   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompBackgdBayesian()",6)
    pBckgd->FixAllPar();
 
    //this->Layout();
@@ -2284,14 +2284,15 @@ void WXCellExplorer::OnSelectCell(wxCommandEvent &event)
          mpLog->AppendText(wxString::Format("Last fit...\n"));
          if(dlgProgress.Update(23,_T("Last fit..."))==false) return;
          lsqobj.Refine(5,true,false);
+         mpDiff->GetParentPowderPattern().FitScaleFactorForRw();
          mpLog->AppendText(wxString::Format("                  => Rwp=%5.3f%%, GoF=%7.3f\n",
                                           mpDiff->GetParentPowderPattern().GetRw()*100,
                                           mpDiff->GetParentPowderPattern().GetChi2()
                                           /mpDiff->GetParentPowderPattern().GetNbPointUsed()));
-         // Change 
+         mpDiff->GetParentPowderPattern().UpdateDisplay();
       }
       if(mpGraph!=0) mpGraph->Refresh(FALSE);
-      //:TODO: store refined cell parameters, display GoF
+      //:TODO: store refined cell parameters, display GoF in cell list
    }
 }
 void WXCellExplorer::OnApplyCell(wxCommandEvent &event)
@@ -2858,7 +2859,9 @@ void WXPowderPatternBackground::OnMenuAutomaticBayesianBackground(wxCommandEvent
       return;
    }
    dialog.GetValue().ToLong(&nbPointSpline);
-   if(nbPointSpline<=1) nbPointSpline=1;
+   wxProgressDialog dlgProgress(_T("Automatic Bayesian Background"),_T("Automatic Background, Initializing..."),
+                                      4,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME|wxPD_CAN_ABORT);
+   if(nbPointSpline<2) nbPointSpline=2;
    {
       CrystVector_REAL x(nbPointSpline),backgd(nbPointSpline);
       const CrystVector_REAL *pObs=&(mpPowderPatternBackground->GetParentPowderPattern().GetPowderPatternObs());
@@ -2885,11 +2888,14 @@ void WXPowderPatternBackground::OnMenuAutomaticBayesianBackground(wxCommandEvent
    //mpPowderPatternBackground->GetParentPowderPattern().Prepare();
    mpPowderPatternBackground->UnFixAllPar();
    mpPowderPatternBackground->GetOption(0).SetChoice(0);//linear
+   if(dlgProgress.Update(1,_T("Automatic Background: Optimizing Linear Model..."))==false) return;
    mpPowderPatternBackground->OptimizeBayesianBackground();
    mpPowderPatternBackground->GetOption(0).SetChoice(1);//spline
+   if(dlgProgress.Update(2,_T("Automatic Background: Optimizing Spline Model..."))==false) return;
    mpPowderPatternBackground->OptimizeBayesianBackground();
    mpPowderPatternBackground->FixAllPar();
 
+   this->CrystUpdate();
    VFN_DEBUG_EXIT("WXPowderPatternBackground::OnMenuAutomaticBayesianBackground()",6)
 }
 void WXPowderPatternBackground::OnEditGridBackgroundPoint(wxGridEvent &e)

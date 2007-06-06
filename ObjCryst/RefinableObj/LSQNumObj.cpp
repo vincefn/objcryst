@@ -647,7 +647,7 @@ void LSQNumObj::PrepareRefParList(const bool copy_param)
    mRefParList.ResetParList();
    for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
    {
-      cout<<"LSQNumObj::PrepareRefParList():"<<mRecursiveRefinedObjList.GetObj(i).GetName()<<endl;
+      VFN_DEBUG_MESSAGE("LSQNumObj::PrepareRefParList():"<<mRecursiveRefinedObjList.GetObj(i).GetName(),4);
       //mRecursiveRefinedObjList.GetObj(i).Print();
       mRefParList.AddPar(mRecursiveRefinedObjList.GetObj(i),copy_param);
    }
