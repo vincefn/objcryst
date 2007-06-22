@@ -578,6 +578,7 @@ RadiationType ScatteringData::GetRadiationType()const {return this->GetRadiation
 void ScatteringData::SetCrystal(Crystal &crystal)
 {
    VFN_DEBUG_MESSAGE("ScatteringData::SetCrystal()",5)
+   if(mpCrystal!=0) mpCrystal->DeRegisterClient(*this);
    mpCrystal=&crystal;
    this->AddSubRefObj(crystal);
    crystal.RegisterClient(*this);

@@ -4069,6 +4069,8 @@ void PowderPattern::SetWeightPolynomial(const REAL a, const REAL b,
 void PowderPattern::BeginOptimization(const bool allowApproximations,
                                       const bool enableRestraints)
 {
+   // must compute this _before_ starting the optimization, since it cannot be modified during it
+   this->CalcNbPointUsed();
    this->Prepare();
    if(0 == mOptProfileIntegration.GetChoice()) this->FitScaleFactorForIntegratedRw();
    else this->FitScaleFactorForRw();
@@ -4284,7 +4286,7 @@ PeakList PowderPattern::FindPeaks(const float dmin,const float maxratio,const un
          for(i=imax-100;i<(imax+100);++i)
          {
             if(i<0){i=0;continue;}
-            if(i>nb) break;
+            if(i>=nb) break;
             if(obs(i)<thres) thres=obs(i);
          }
          thres=(iobs_max+thres)/2;
@@ -4986,6 +4988,7 @@ void PowderPattern::PrepareIntegratedRfactor()const
 }
 void PowderPattern::CalcNbPointUsed()const
 {
+   if(this->IsBeingRefined())return;
    unsigned long tmp;
    if(this->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
    {

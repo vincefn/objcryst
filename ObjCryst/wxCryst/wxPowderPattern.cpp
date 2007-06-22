@@ -2290,6 +2290,7 @@ void WXCellExplorer::OnSelectCell(wxCommandEvent &event)
                                           mpDiff->GetParentPowderPattern().GetChi2()
                                           /mpDiff->GetParentPowderPattern().GetNbPointUsed()));
          mpDiff->GetParentPowderPattern().UpdateDisplay();
+         mpCrystal->UpdateDisplay();
       }
       if(mpGraph!=0) mpGraph->Refresh(FALSE);
       //:TODO: store refined cell parameters, display GoF in cell list
@@ -3445,6 +3446,7 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
                                        mpDiff->GetParentPowderPattern().GetChi2()
                                        /mpDiff->GetParentPowderPattern().GetNbPointUsed()));
    }
+   mpDiff->GetCrystal().UpdateDisplay();
 
 }
 
