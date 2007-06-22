@@ -433,6 +433,9 @@ void WXCrystal::CrystUpdate(const bool uui,const bool lock)
    }
    #endif
    if(lock) mMutex.Lock();
+   // Necessary to change the "used" status of unit cell parameters.
+   if(false==this->GetCrystal().IsBeingRefined()) this->GetCrystal().InitRefParList();
+   
    if((false==this->GetCrystal().IsBeingRefined())&&(mpScattPowWin!=0)&&(mpAntiBumpWin!=0)&&(mpBondValenceWin!=0))
    {
       //set<ScatteringPowerAtom*> vpRemovedScattPow;
