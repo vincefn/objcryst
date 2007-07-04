@@ -672,17 +672,17 @@ REAL ReflectionProfileDoubleExponentialPseudoVoigt
    ::GetFullProfileWidth(const REAL relativeIntensity, const REAL center,
                          const REAL h, const REAL k, const REAL l)
 {
-   VFN_DEBUG_ENTRY("ReflectionProfileDoubleExponentialPseudoVoigt::GetFullProfileWidth()",10)
+   VFN_DEBUG_ENTRY("ReflectionProfileDoubleExponentialPseudoVoigt::GetFullProfileWidth()",5)
    REAL dcenter=0;
    if(mpCell!=0)
    {
       REAL hh=h,kk=k,ll=l;// orthonormal coordinates in reciprocal space
-      VFN_DEBUG_MESSAGE("ReflectionProfileDoubleExponentialPseudoVoigt::GetFullProfileWidth(),"<<dcenter<<","<<mpCell->GetName(),10)
+      VFN_DEBUG_MESSAGE("ReflectionProfileDoubleExponentialPseudoVoigt::GetFullProfileWidth(),"<<dcenter<<","<<mpCell->GetName(),5)
       mpCell->MillerToOrthonormalCoords(hh,kk,ll);
-      VFN_DEBUG_MESSAGE("ReflectionProfileDoubleExponentialPseudoVoigt::GetFullProfileWidth(),"<<dcenter,10)
+      VFN_DEBUG_MESSAGE("ReflectionProfileDoubleExponentialPseudoVoigt::GetFullProfileWidth(),"<<dcenter,5)
       dcenter=sqrt(hh*hh+kk*kk+ll*ll);//1/d
    }
-   VFN_DEBUG_MESSAGE("ReflectionProfileDoubleExponentialPseudoVoigt::GetFullProfileWidth(),"<<dcenter,10)
+   VFN_DEBUG_MESSAGE("ReflectionProfileDoubleExponentialPseudoVoigt::GetFullProfileWidth(),"<<dcenter,5)
    const int nb=100;
    const int halfnb=nb/2;
    CrystVector_REAL x(nb);
@@ -722,7 +722,7 @@ REAL ReflectionProfileDoubleExponentialPseudoVoigt
       n*=2.0;
       //if(n>200) exit(0);
    }
-   VFN_DEBUG_EXIT("ReflectionProfileDoubleExponentialPseudoVoigt::GetFullProfileWidth()",10)
+   VFN_DEBUG_EXIT("ReflectionProfileDoubleExponentialPseudoVoigt::GetFullProfileWidth()",5)
 }
 
 bool ReflectionProfileDoubleExponentialPseudoVoigt

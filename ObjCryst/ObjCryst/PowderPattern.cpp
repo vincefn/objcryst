@@ -1551,7 +1551,7 @@ void PowderPattern::AddPowderPatternComponent(PowderPatternComponent &comp)
       tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }
-   this->UpdateDisplay();
+   //this->UpdateDisplay();
    VFN_DEBUG_EXIT("PowderPattern::AddPowderPatternComponent():"<<comp.GetName(),5)
 }
 

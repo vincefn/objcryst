@@ -615,7 +615,7 @@ void WXPowderPattern::OnMenuAddCompBackgdBayesian(wxCommandEvent & WXUNUSED(even
 
 void WXPowderPattern::OnMenuAddCompCryst(wxCommandEvent & WXUNUSED(event))
 {
-   VFN_DEBUG_ENTRY("WXPowderPattern::OnMenuAddCompCryst()",6)
+   VFN_DEBUG_ENTRY("WXPowderPattern::OnMenuAddCompCryst()",10)
    WXCrystValidateAllUserInput();
    PowderPatternDiffraction * diffData=new PowderPatternDiffraction;
    int choice;
@@ -623,16 +623,25 @@ void WXPowderPattern::OnMenuAddCompCryst(wxCommandEvent & WXUNUSED(event))
       ( WXDialogChooseFromRegistry(gCrystalRegistry,(wxWindow*)this,
          "Choose a Crystal Structure:",choice));
    if(0==cryst) {delete diffData;return;}
+   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompCryst()",10)
    diffData->SetCrystal(*cryst);
+   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompCryst()",10)
    mpPowderPattern->AddPowderPatternComponent(*diffData);
+   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompCryst()",10)
    if(diffData->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
    {
-      wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_POWDERDIFF_PROFILE_DEPV);
-      wxPostEvent(diffData->WXGet(),event);
+   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompCryst()",10)
+      //wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_POWDERDIFF_PROFILE_DEPV);
+      //wxPostEvent(diffData->WXGet(),event);
+      ReflectionProfileDoubleExponentialPseudoVoigt *p=
+         new ReflectionProfileDoubleExponentialPseudoVoigt
+            (diffData->GetCrystal());
+      diffData->SetProfile(p);
    }
+   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompCryst()",10)
    if(mpGraph!=0) mpPowderPattern->Prepare();//else this will be done when opening the graph
    this->CrystUpdate();
-   VFN_DEBUG_EXIT("WXPowderPattern::OnMenuAddCompCryst()",6)
+   VFN_DEBUG_EXIT("WXPowderPattern::OnMenuAddCompCryst()",10)
 }
 
 void WXPowderPattern::OnMenuShowGraph(wxCommandEvent & WXUNUSED(event))
