@@ -235,6 +235,11 @@ int main (int argc, char *argv[])
    list<string> vFourierFilenameGRD;
    bool loadFourierDSN6(false);
    list<string> vFourierFilenameDSN6;
+   bool cif2pattern=false;
+   REAL cif2patternWavelength=1.54056;
+   REAL cif2patternPeakWidth=0.01;
+   REAL cif2patternNbPoint=1000;
+   REAL cif2patternMax2Theta=M_PI*.9;
    for(int i=1;i<argc;i++)
    {
       if(string("--nogui")==string(argv[i]))
@@ -277,6 +282,34 @@ int main (int argc, char *argv[])
          stringstream sstr(argv[i]);
          sstr >> nbRun;
          cout << "Fox will do "<<nbRun<<" runs, randomizing before each run"<<endl;
+         continue;
+      }
+      if(string("--cif2pattern")==string(argv[i]))
+      {
+         ++i;
+         cif2pattern=true;
+         {
+            stringstream sstr(argv[i]);
+            sstr >> cif2patternWavelength;
+         }
+         ++i;
+         {
+            stringstream sstr(argv[i]);
+            sstr >> cif2patternMax2Theta;
+            cif2patternMax2Theta*=DEG2RAD;
+            if(cif2patternMax2Theta>M_PI) cif2patternMax2Theta=M_PI;
+         }
+         ++i;
+         {
+            stringstream sstr(argv[i]);
+            sstr >> cif2patternNbPoint;
+         }
+         ++i;
+         {
+            stringstream sstr(argv[i]);
+            sstr >> cif2patternPeakWidth;
+            cif2patternPeakWidth*=DEG2RAD;
+         }
          continue;
       }
       if(string("-i")==string(argv[i]))
@@ -346,7 +379,7 @@ int main (int argc, char *argv[])
          #else
          XMLCrystFileLoadAllObject(argv[i]);
          #endif
-         continue;
+         if(!cif2pattern)continue;
       }
       if(string(argv[i]).find(string(".cif"))!=string::npos)
       {
@@ -355,6 +388,54 @@ int main (int argc, char *argv[])
          ObjCryst::CIF cif(in,true,true);
          CreateCrystalFromCIF(cif);
          CreatePowderPatternFromCIF(cif);
+         if(!cif2pattern)continue;
+      }
+      if(cif2pattern)
+      {
+            for(int j=0;j<gCrystalRegistry.GetNb();++j)
+            {
+               PowderPattern data;
+               data.SetRadiationType(RAD_XRAY);
+               data.SetWavelength(cif2patternWavelength);
+               data.SetPowderPatternPar(0,cif2patternMax2Theta/cif2patternNbPoint,cif2patternNbPoint);
+               //add CaF2 as a Crystalline phase
+               PowderPatternDiffraction * diffData=new PowderPatternDiffraction;
+               diffData->SetCrystal(gCrystalRegistry.GetObj(j));
+               diffData->SetReflectionProfilePar(PROFILE_PSEUDO_VOIGT,cif2patternPeakWidth*cif2patternPeakWidth);
+               diffData->GetCrystal().SetUseDynPopCorr(true);
+               data.SetMaxSinThetaOvLambda(50.0);
+               data.AddPowderPatternComponent(*diffData);
+               //we don't have data, so just simulate (0->Pi/2)..
+               //give a constant 'obs pattern of unit intensity
+               CrystVector_REAL obs(cif2patternNbPoint);
+               obs=1;
+               data.SetPowderPatternObs(obs);
+               data.Prepare();
+               // Save the powder pattern in text format
+               char buf [200];
+               sprintf(buf,"%s_%06d.dat",argv[i],j);
+               cout<<"Auto-simulating powder pattern:"<<endl
+                   <<"   Crystal #"<<j<<": "<<gCrystalRegistry.GetObj(j).GetName()<<endl
+                   <<"   Wavelength: "<<cif2patternWavelength<<endl
+                   <<"   2theta: 0->"<<cif2patternMax2Theta*RAD2DEG<<"° ("<<cif2patternNbPoint<<" points)"<<endl
+                   <<"   peak width: "<<cif2patternPeakWidth*RAD2DEG<<"°"<<endl
+                   <<"   to FILE:"<<buf<<endl;
+               ofstream out(buf);
+               CrystVector_REAL ttheta,icalc;
+               icalc=data.GetPowderPatternCalc();
+               icalc*=100/icalc.max();
+               ttheta=data.GetPowderPatternX();
+               if(data.GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF) ttheta *= RAD2DEG;
+               out << "#Simulated data for crystal:"<<gCrystalRegistry.GetObj(j).GetName() << endl;
+               out << "#    2Theta/TOF    ICalc" << endl;
+               out << FormatVertVector<REAL>(ttheta,icalc,12,4);
+               out.close();
+            }
+            // Erase every data in memory
+         gOptimizationObjRegistry.DeleteAll();
+         gDiffractionDataSingleCrystalRegistry.DeleteAll();
+         gPowderPatternRegistry.DeleteAll();
+         gCrystalRegistry.DeleteAll();
          continue;
       }
       cout <<"command-line arguments:"<<endl
@@ -369,6 +450,8 @@ int main (int argc, char *argv[])
            <<"         --randomize  : randomize initial configuration"<<endl
            <<"         --silent     : (almost) no text output"<<endl
            <<"         --finalcost 0.15 : run optimization until cost < 0.15"<<endl
+           <<"         --cif2pattern 1.5406 170 5000 .1 : simulate pattern for input crystal, wavelength=1.5406"<<endl
+           <<"                                            up to 170° with 500 points and a peak width of 0.1°"<<endl
            <<endl<<endl<<"           EXAMPLES :"<<endl<<endl
            <<"Load file 'silicon.xml' and launch GUI:"<<endl<<endl
            <<"    Fox silicon.xml"<<endl<<endl
@@ -390,7 +473,13 @@ int main (int argc, char *argv[])
       exit(0);  
    }
    
-   
+   if(cif2pattern)
+   {
+      #ifdef __WX__CRYST__
+      this->OnExit();
+      #endif
+      exit(0);
+   }
    if(randomize)
       for(int i=0;i<gOptimizationObjRegistry.GetNb();i++)
          gOptimizationObjRegistry.GetObj(i).RandomizeStartingConfig();
@@ -669,7 +758,7 @@ void WXCrystMainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
    string msg(string("F.O.X. - Free Objects for Xtallography\n")
               +"Version "+ foxVersion +" \n\n"
-              +"(c) 2000-2006 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n"
+              +"(c) 2000-2007 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n"
               +"    2000-2001 Radovan CERNY, University of Geneva\n\n"
               +"http://objcryst.sourceforge.net\n\n"
               +"FOX comes with ABSOLUTELY NO WARRANTY. It is free software, and you are\n"
