@@ -55,16 +55,15 @@ FormatFloat::~FormatFloat(){}
 
 ostream& operator<< (ostream& os, const FormatFloat &fFloat)
 {
-   //:TODO: check the formatting ->DOESN'T WORK
-   //#ifdef __MWERKS__
-   //return os << fFloat.mValue << " ";
-   //#endif
-   return os << setiosflags(ios::right) <<
-                setiosflags(ios::fixed)<<
-                setprecision(fFloat.mPrecision) <<
-                setiosflags(ios::showpoint)<<
-                setw(fFloat.mWidth) <<
-                fFloat.mValue << " ";
+   std::istream::fmtflags old_flags=os.flags();
+   os.setf( std::istream::fixed | std::istream::right | std::istream::showpoint,std::istream::floatfield );
+   std::streamsize old_prec = os.precision(fFloat.mPrecision);
+   std::streamsize old_width = os.width(fFloat.mWidth);
+   os << fFloat.mValue;
+   os.flags( old_flags );
+   os.precision( old_prec );
+   os.width(old_width);
+   return os;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -210,22 +209,22 @@ template<class T> ostream& operator<< (ostream &os, const FormatVertVector<T> &f
 {
    VFN_DEBUG_MESSAGE("ostream& operator<<(os,FormatVertVector<T>)",3)
    long i;
-   int j,width,precision;
-   width=fVect.mWidth;
-   precision=fVect.mPrecision;
+   int j;
+   std::istream::fmtflags old_flags=os.flags();
+   os.setf( std::istream::fixed | std::istream::right | std::istream::showpoint);
+   std::streamsize old_prec = os.precision(fVect.mPrecision);
+   std::streamsize old_width = os.width();
    for(i=0;i<(fVect.mpVectors[0])->numElements();i++)
    {
       for(j=0;j<fVect.mNbVectors;j++)
       {
-         os << setiosflags(ios::right) <<
-               setiosflags(ios::fixed)<<
-               setprecision(precision) <<
-               setiosflags(ios::showpoint)<<
-               setw(width) <<
-               (*fVect.mpVectors[j])(i) << " ";
+         os <<setw(fVect.mWidth)<< (*fVect.mpVectors[j])(i) << " ";
       }
       os << endl;
    }
+   os.flags( old_flags );
+   os.precision( old_prec );
+   os<<setw(old_width);
    VFN_DEBUG_MESSAGE("ostream& operator<<(os,FormatVertVector<T>):End",2)
    return os;
 }
@@ -249,19 +248,18 @@ template<class T> FormatHorizVector<T>::~FormatHorizVector()
 template<class T> ostream& operator<< (ostream &os, const FormatHorizVector<T> &fVect)
 {
    long i;
-   int width,precision;
-   width=fVect.mWidth;
-   precision=fVect.mPrecision;
+   std::istream::fmtflags old_flags=os.flags();
+   os.setf( std::istream::fixed | std::istream::right | std::istream::showpoint);
+   std::streamsize old_prec = os.precision(fVect.mPrecision);
+   std::streamsize old_width = os.width();
    for(i=0;i<(*(fVect.mpVectors)).numElements();i++)
    {
-      os << setiosflags(ios::right) <<
-            setiosflags(ios::fixed)<<
-            setprecision(precision) <<
-            setiosflags(ios::showpoint)<<
-            setw(width) <<
-            (*(fVect.mpVectors))(i) << " ";
+      os <<setw(fVect.mWidth)<< (*(fVect.mpVectors))(i) << " ";
    }
    os<<endl;
+   os.flags( old_flags );
+   os.precision( old_prec );
+   os<<setw(old_width);
    return os;
 }
 
@@ -495,27 +493,26 @@ template<class T> FormatVertVectorHKLFloats<T>::~FormatVertVectorHKLFloats()
 template<class T> ostream& operator<< (ostream& os, const FormatVertVectorHKLFloats<T> &fVect)
 {
    long i;
-   unsigned int j,width,precision;
-   width=fVect.mWidth;
-   precision=fVect.mPrecision;
+   unsigned int j;
+   std::istream::fmtflags old_flags=os.flags();
+   os.setf( std::istream::fixed | std::istream::right | std::istream::showpoint);
+   std::streamsize old_prec = os.precision(fVect.mPrecision);
+   std::streamsize old_width = os.width();
    for(i=0 ; i<(fVect.mvpVectors[0])->numElements() ; i++)
    {
       for(j=0;j<3;j++)
       {
-         os << setiosflags(ios::right) << setw(width-precision) <<
-            (int) ((*fVect.mvpVectors[j])(i)) << " ";
+         os <<setw(fVect.mWidth-fVect.mPrecision)<< (int) ((*fVect.mvpVectors[j])(i)) << " ";
       }
       for(j=3;j<fVect.mvpVectors.size();j++)
       {
-         os << setiosflags(ios::right) <<
-               setiosflags(ios::fixed)<<
-               setprecision(precision) <<
-               setiosflags(ios::showpoint)<<
-               setw(width) <<
-               (*fVect.mvpVectors[j])(i) << " ";
+         os <<setw(fVect.mWidth)<<(*fVect.mvpVectors[j])(i) << " ";
       }
       os << endl;
    }
+   os.flags( old_flags );
+   os.precision( old_prec );
+   os<<setw(old_width);
    return os;
 }
 
