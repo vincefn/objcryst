@@ -965,6 +965,7 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
    bool makeReport=false;
    Chronometer chrono;
    chrono.start();
+   float lastUpdateDisplayTime=chrono.seconds();
    for(;mNbTrial<nbSteps;)
    {
       for(int i=0;i<nbWorld;i++)
@@ -1354,11 +1355,12 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
          if(0!=mpWXCrystObj) mpWXCrystObj->UpdateDisplayNbTrial();
          #endif
       }
-      if(needUpdateDisplay)
+      if( (needUpdateDisplay&&(lastUpdateDisplayTime<(chrono.seconds()-1)))||(lastUpdateDisplayTime<(chrono.seconds()-30)))
       {
          mRefParList.RestoreParamSet(runBestIndex);
          this->UpdateDisplay();
          needUpdateDisplay=false;
+         lastUpdateDisplayTime=chrono.seconds();
       }
 
       if((runBestCost<finalcost) || mStopAfterCycle ||( (maxTime>0)&&(chrono.seconds()>maxTime))) 
