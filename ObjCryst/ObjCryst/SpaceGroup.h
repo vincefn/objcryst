@@ -26,6 +26,7 @@
 
 #include "ObjCryst/General.h"
 #include "RefinableObj/RefinableObj.h"
+#include <complex>
 
 //#include "cctbx/sgtbx/space_group.h"
 namespace cctbx{namespace sgtbx{class space_group;}}
@@ -222,17 +223,21 @@ class SpaceGroup
                                 const REAL h2, const REAL k2, const REAL l2)const;
       /** Get the list of all equivalent reflections.
       *
-      * \return a matrix with 3 columns for h,k,l, and as many rows as there are 
-      * reflections (the input reflection is included).
+      * \return a matrix with 5 columns for h,k,l,Re(F),Im(F) and as many rows as there are 
+      * reflections (the input reflection is included), with the associated structure factor,
+      * from the structure factor of the input reflection.
       * \param excludeFriedelMate if true, then Friedel mates of reflections will not
       * be listed, even if there is a center of symmetry.
       * \param forceFriedelLaw if true, a center of symmetry will be added (to force
       * considering Friedel mates as equivalent). This as no effect if 
       * excludeFriedelMate=true
+      *
+      * \param sf_re, sf_im: the real & imaginary part of the structure factor of the original reflection
       */
       CrystMatrix_REAL GetAllEquivRefl(const REAL h, const REAL k, const REAL l,
                                        const bool excludeFriedelMate=false,
-                                       const bool forceFriedelLaw=false) const;
+                                       const bool forceFriedelLaw=false,
+                                       const REAL sf_re=0,const REAL sf_im=0) const;
       /// Is the reflection systematically absent ?
       bool IsReflSystematicAbsent(const REAL h, const REAL k, const REAL l)const;
       /// Is the reflection centric ?

@@ -408,7 +408,7 @@ unsigned int SpaceGroup::AreReflEquiv(const REAL h1, const REAL k1, const REAL l
    cctbx::miller::index<long> k0(scitbx::vec3<long>(ih2,ik2,il2));
    cctbx::miller::sym_equiv_indices sei(this->GetCCTbxSpg(),k0);
    int equiv=0;
-   //cout<<h0.as_string()<<" - "<<k0.as_string()<<endl;
+   //cout<<h0.as_string()<<" - "<<k0.as_string()<<","<<sei.f_mates(false)<<","<<sei.f_mates(true)<<endl;
    for(std::size_t i_indices=0;i_indices<sei.indices().size();i_indices++)
       for(std::size_t i_mate=0;i_mate<sei.f_mates(false);i_mate++)
       {
@@ -427,7 +427,8 @@ unsigned int SpaceGroup::AreReflEquiv(const REAL h1, const REAL k1, const REAL l
 
 CrystMatrix_REAL SpaceGroup::GetAllEquivRefl(const REAL h0, const REAL k0, const REAL l0,
                                              const bool excludeFriedelMate,
-                                             const bool forceFriedelLaw) const
+                                             const bool forceFriedelLaw,
+                                             const REAL sf_re,const REAL sf_im) const
 {
    VFN_DEBUG_ENTRY("SpaceGroup::GetAllEquivRefl():",5)
    const int ih0=scitbx::math::iround(h0);
@@ -435,16 +436,20 @@ CrystMatrix_REAL SpaceGroup::GetAllEquivRefl(const REAL h0, const REAL k0, const
    const int il0=scitbx::math::iround(l0);
    cctbx::miller::index<long> h(scitbx::vec3<long>(ih0,ik0,il0));
    cctbx::miller::sym_equiv_indices sei(this->GetCCTbxSpg(),h);
-   int f_mates=sei.f_mates(true);
-   if((this->IsCentrosymmetric() || forceFriedelLaw) && (!excludeFriedelMate)) f_mates=1;
-   int nbEquiv=sei.multiplicity(true)/f_mates;
-   CrystMatrix_REAL equivReflList(nbEquiv,3);
-   for(int i=0;i<sei.multiplicity(true);i+=f_mates)
+   int nbEquiv;
+   if(forceFriedelLaw) nbEquiv=sei.multiplicity(false);
+   else nbEquiv=sei.multiplicity(true);
+   if( ((this->IsCentrosymmetric())||forceFriedelLaw) && excludeFriedelMate) nbEquiv/=2;
+   CrystMatrix_REAL equivReflList(nbEquiv,5);
+   complex<double> sf0((double)(sf_re),(double)(sf_im));
+   for(int i=0;i<nbEquiv;i+=1)
    {
       cctbx::miller::index<long> k = sei(i).h();
-      equivReflList(i/f_mates,0)=(REAL)k[0];
-      equivReflList(i/f_mates,1)=(REAL)k[1];
-      equivReflList(i/f_mates,2)=(REAL)k[2];
+      equivReflList(i,0)=(REAL)k[0];
+      equivReflList(i,1)=(REAL)k[1];
+      equivReflList(i,2)=(REAL)k[2];
+      equivReflList(i,3)=(REAL)sei(i).complex_eq(sf0).real();
+      equivReflList(i,4)=(REAL)sei(i).complex_eq(sf0).imag();
    }
    VFN_DEBUG_EXIT("SpaceGroup::GetAllEquivRefl():",5)
    return equivReflList;
