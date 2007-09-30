@@ -3272,6 +3272,7 @@ class WXProfileFitting:public wxWindow
 {
    public:
       WXProfileFitting(wxWindow *parent,PowderPatternDiffraction *pDiff);
+      ~WXProfileFitting();
       /// Start Fitting
       void OnFit(wxCommandEvent &event);
    private:
@@ -3323,6 +3324,11 @@ wxWindow(parent,-1),mpDiff(pDiff)
    pSizer->Fit(this);
    pSizer->Fit(this->GetParent());
    this->Layout();
+}
+WXProfileFitting::~WXProfileFitting()
+{
+   mpDiff->SetExtractionMode(false);
+   mpDiff->UpdateDisplay();
 }
 
 void WXProfileFitting::OnFit(wxCommandEvent &event)
