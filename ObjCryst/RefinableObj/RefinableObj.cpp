@@ -1071,6 +1071,15 @@ template<class T> long ObjRegistry<T>::Find(const T &obj) const
    return -1;
 }
 
+template<class T> long ObjRegistry<T>::Find(const T *pobj) const
+{
+   VFN_DEBUG_MESSAGE("ObjRegistry::Find(&obj)",2)
+   for(long i=this->GetNb()-1;i>=0;i--) 
+      if( mvpRegistry[i]== pobj)  return i;
+   //:TODO: throw something
+   return -1;
+}
+
 template<class T> const RefinableObjClock& ObjRegistry<T>::GetRegistryClock()const{return mListClock;}
 
 #ifdef __WX__CRYST__
@@ -1595,6 +1604,9 @@ void RefinableObj::RegisterClient(RefinableObj &obj)const
 
 void RefinableObj::DeRegisterClient(RefinableObj &obj)const
 {mClientObjRegistry.DeRegister(obj);}
+
+const ObjRegistry<RefinableObj>& RefinableObj::GetClientRegistry()const{return mClientObjRegistry;}
+      ObjRegistry<RefinableObj>& RefinableObj::GetClientRegistry()     {return mClientObjRegistry;}
 
 bool RefinableObj::IsBeingRefined()const {return mIsbeingRefined;}
 

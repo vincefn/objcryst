@@ -695,6 +695,9 @@ template<class T> class ObjRegistry
       /// Find the number of an object in the registry
       /// The search starts at the *end* of the registry.
       long Find(const T &obj)const;
+      /// Find the number of an object in the registry
+      /// The search starts at the *end* of the registry.
+      long Find(const T *pobj)const;
       /// Last time an object was added or removed from the registry
       const RefinableObjClock& GetRegistryClock()const;
    private:
@@ -919,6 +922,10 @@ class RefinableObj
       virtual void RegisterClient(RefinableObj &)const;
       /// Deregister an object (which not any more) using this object
       virtual void DeRegisterClient(RefinableObj &)const;
+      /// Get the list of clients
+      virtual const ObjRegistry<RefinableObj>& GetClientRegistry()const;
+      /// Get the list of clients
+      virtual ObjRegistry<RefinableObj>& GetClientRegistry();
       
       /// Is the object being refined ? (Can be refined by one algorithm at a time only.)
       bool IsBeingRefined()const;
