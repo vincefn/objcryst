@@ -415,6 +415,7 @@ mIgnoreImagScattFact(false),mMaxSinThetaOvLambda(10)
    mClockMaster.AddChild(mClockHKL);
    mClockMaster.AddChild(mClockGlobalBiso);
    mClockMaster.AddChild(mClockNbReflUsed);
+   mClockMaster.AddChild(mClockGetFhklObsSq);
 }
 
 ScatteringData::ScatteringData(const ScatteringData &old):
@@ -444,6 +445,7 @@ mMaxSinThetaOvLambda(old.mMaxSinThetaOvLambda)
    mClockMaster.AddChild(mClockHKL);
    mClockMaster.AddChild(mClockGlobalBiso);
    mClockMaster.AddChild(mClockNbReflUsed);
+   mClockMaster.AddChild(mClockGetFhklObsSq);
 }
 
 ScatteringData::~ScatteringData()
@@ -682,6 +684,11 @@ const CrystVector_REAL& ScatteringData::GetFhklCalcImag() const
    return mFhklCalcImag;
 }
 
+const CrystVector_REAL& ScatteringData::GetFhklObsSq() const
+{
+   return mFhklObsSq;
+}
+
 CrystVector_REAL ScatteringData::GetWavelength()const {return this->GetRadiation().GetWavelength();}
 #if 0
 void ScatteringData::SetUseFastLessPreciseFunc(const bool useItOrNot)
@@ -693,6 +700,7 @@ void ScatteringData::SetUseFastLessPreciseFunc(const bool useItOrNot)
 #endif
 void ScatteringData::SetIsIgnoringImagScattFact(const bool b)
 {
+   VFN_DEBUG_MESSAGE("ScatteringData::SetIsIgnoringImagScattFact():"<<b,10)
    mIgnoreImagScattFact=b;
    mClockGeomStructFact.Reset();
    mClockStructFactor.Reset();
@@ -1224,7 +1232,7 @@ void ScatteringData::CalcStructFactor() const
          if(false==mIgnoreImagScattFact)
          {
             const REAL fsecond=mvFsecond[pScattPow];
-            VFN_DEBUG_MESSAGE("->fsecond= "<<fsecond,2)
+            VFN_DEBUG_MESSAGE("->fsecond= "<<fsecond,10)
             for(long j=mNbReflUsed;j>0;j--)
             {
                VFN_DEBUG_MESSAGE("-->"<<j<<" "<<*pReal<<" "<<*pImag<<" "<<*pGeomR<<" "<<*pGeomI<<" "<<*pScatt<<" "<<*pTemp,1)
@@ -1253,7 +1261,7 @@ void ScatteringData::CalcStructFactor() const
                                                            ),2);
       }
       else
-      {
+      { 
          if(false==mIgnoreImagScattFact)
          {
             const REAL fsecond=mvFsecond[pScattPow];

@@ -381,6 +381,9 @@ class ScatteringData: virtual public RefinableObj
       /// Access to imaginary part of F(hkl)calc
       const CrystVector_REAL& GetFhklCalcImag() const;
       
+      ///  Returns the Array of observed |F(hkl)|^2 for all reflections.
+      const CrystVector_REAL& GetFhklObsSq() const;
+      
       ///wavelength of the experiment (in Angstroems)
       CrystVector_REAL GetWavelength()const;
       
@@ -623,6 +626,10 @@ class ScatteringData: virtual public RefinableObj
          mutable CrystVector_REAL mFhklCalcVariance;
          mutable RefinableObjClock mClockLuzzatiFactor;
          mutable RefinableObjClock mClockFhklCalcVariance;
+      /// Observed squared structure factors (zero-sized if none)
+      CrystVector_REAL mFhklObsSq;
+      /// Last time observed squared structure factors were altered
+      RefinableObjClock mClockGetFhklObsSq;
    #ifdef __WX__CRYST__
       //to access mMaxSinThetaOvLambda
       friend class WXDiffractionSingleCrystal;

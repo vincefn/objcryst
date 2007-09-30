@@ -441,8 +441,6 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
          mutable RefinableObjClock mClockIntegratedProfileFactor;
       // Extraction mode (Le Bail, Pawley)
       bool mExtractionMode;
-      CrystVector_REAL mFhklSqExtract;
-      RefinableObjClock mClockFhklSqExtract;
    #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);
@@ -484,6 +482,14 @@ class PowderPattern : public RefinableObj
       PowderPatternComponent& GetPowderPatternComponent(const string &name);
       /// Access to a component of the powder pattern
       PowderPatternComponent& GetPowderPatternComponent(const int);
+      /// Access to the scale factor of components (will be 1 for background components)
+      REAL GetScaleFactor(const int i)const;
+      /// Access to the scale factor of components (will be 1 for background components)
+      REAL GetScaleFactor(const PowderPatternComponent &comp)const;
+      /// Access to the scale factor of components (will be 1 for background components)
+      void SetScaleFactor(const int i, REAL s);
+      /// Access to the scale factor of components (will be 1 for background components)
+      void SetScaleFactor(const PowderPatternComponent &comp, REAL s);
       
       // Pattern parameters (2theta range, wavelength, radiation)
          /** \briefSet the powder pattern angular range & resolution parameter.
