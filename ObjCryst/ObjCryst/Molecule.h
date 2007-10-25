@@ -1171,5 +1171,21 @@ class Molecule: public Scatterer
    #endif
 };
 
+/** Build recursively a list of atoms, starting from a one atom, and given
+* a connectivity table.
+*
+* \param atom: the starting atom
+* \param connect: the connectivity table
+* \param atomlist: the list of atoms to which will be appended the atoms newly found.
+* \param finalAtom: if specified, the list buildin will stop after finding this atom.
+* This can be used to build the list of atoms between two given atoms. Otherwise,
+* the list is expanded until the end of the chain(s), or until an atom already
+* in the list is encountered (i.e. a ring has been found).
+*/
+void ExpandAtomGroupRecursive(MolAtom* atom,
+                              const map<MolAtom*,set<MolAtom*> > &connect,
+                              set<MolAtom*> &atomlist,const MolAtom* finalAtom=0);
+
+
 }//namespace
 #endif
