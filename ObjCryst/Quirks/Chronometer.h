@@ -1,5 +1,5 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
-    (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
+    (c) 2000-2007 Vincent Favre-Nicolin vincefn@users.sourceforge.net
         2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
@@ -21,25 +21,29 @@
 
 
 #include <stdlib.h>
-#include <time.h>
 #include <iostream>
+#include "boost/date_time/posix_time/posix_time_types.hpp"
 
+/** Simple chronometer class, with microsecond precision
+*
+* Reported time correspond to \e real time, i.e. not the time the program
+* has been running independently from other programs.
+*/
 class Chronometer
 {
    public:
       Chronometer(){this->start();};
       ~Chronometer(){};
-      void start() {mPaused=false;mTime0=clock();mTimeSec0=time(0);}
-      void pause() {mTime1=clock();mTimeSec1=time(0);mPaused=true;}
+      void start() {mPaused=false;mTime0=boost::posix_time::microsec_clock::local_time();}
+      void pause() {mTime1=boost::posix_time::microsec_clock::local_time();mPaused=true;}
       void resume()
       {
-         mTime0=clock()-(mTime1-mTime0);
-         mTimeSec0=time(0)-(mTimeSec1-mTimeSec0);
+         mTime0=boost::posix_time::microsec_clock::local_time()-(mTime1-mTime0);
          mPaused=false;
       }
       void print() 
       {
-         if(mPaused == false) mTime1=clock();
+         if(mPaused == false) mTime1=boost::posix_time::microsec_clock::local_time();
          cout.setf(ios::fixed);
          int tmp=cout.precision(2);
          cout << "Elapsed time : " << this->seconds() << " s."<<endl ;
@@ -50,18 +54,14 @@ class Chronometer
       {
          if(mPaused ==false)
          {
-            mTime1=clock();
-            mTimeSec1=time(0);
+            mTime1=boost::posix_time::microsec_clock::local_time();
          }
-         if((mTimeSec1-mTimeSec0)>100) return (mTimeSec1-mTimeSec0);
-         return (mTime1-mTime0)/(float)CLOCKS_PER_SEC;
+         return (mTime1-mTime0).total_microseconds()/1.0e6;
       }
    private:
-      clock_t mTime0;
-      clock_t mTime1;
-      time_t mTimeSec0;
-      time_t mTimeSec1;
       bool mPaused;
+      boost::posix_time::ptime mTime0;
+      boost::posix_time::ptime mTime1;
 };
 
 #endif
