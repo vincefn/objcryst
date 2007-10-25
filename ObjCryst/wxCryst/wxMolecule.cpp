@@ -26,6 +26,7 @@
     #include "wx/wx.h"
 #endif
 #include "wx/notebook.h"
+#include "wx/minifram.h"
 
 #include <sstream>
 #include <fstream>
@@ -724,8 +725,11 @@ WXCRYST_ID ID_MOLECULE_MENU_FORMULA_REMOVE_DIHEDRAL;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_REMOVE_RIGID_GROUP;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_SHOW_RESTRAINT;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_SET_DELTA_SIGMA;
+WXCRYST_ID ID_MOLECULE_MENU_GEOMETRY;
+WXCRYST_ID ID_MOLECULE_MENU_GEOMETRY_ROTATE_BOND;
 
 WXCRYST_ID ID_MOLECULE_CHANGE_CENTER_ATOM;
+
 
 WXCRYST_ID ID_WINDOW_ATOM;
 WXCRYST_ID ID_WINDOW_BONDLENGTH;
@@ -757,6 +761,7 @@ BEGIN_EVENT_TABLE(WXMolecule,wxWindow)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_SET_DELTA_SIGMA     ,WXMolecule::OnMenuSetDeltaSigma)
    EVT_MENU(ID_MOLECULE_MENU_FILE_2ZMATRIX,               WXMolecule::OnMenuExport2ZMatrix)
    EVT_MENU(ID_MOLECULE_MENU_FILE_2ZMATRIXNAMED,          WXMolecule::OnMenuExport2ZMatrix)
+   EVT_MENU(ID_MOLECULE_MENU_GEOMETRY_ROTATE_BOND,        WXMolecule::OnMenuRotate)
    EVT_GRID_CMD_CELL_CHANGE(ID_WINDOW_ATOM,               WXMolecule::OnEditGridAtom)
    EVT_GRID_CMD_CELL_CHANGE(ID_WINDOW_BONDLENGTH,         WXMolecule::OnEditGridBondLength)
    EVT_GRID_CMD_CELL_CHANGE(ID_WINDOW_BONDANGLE,          WXMolecule::OnEditGridBondAngle)
@@ -779,7 +784,7 @@ mpBondWin(0),mpAngleWin(0),mpDihedralAngleWin(0),mpRigidGroupWin(0),mIsSelfUpdat
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_UNFIXALL,"Unfix all");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_RANDOMIZE,
                                 "Randomize Configuration");
-      mpMenuBar->AddMenu("Formula",ID_MOLECULE_MENU_FORMULA);
+      mpMenuBar->AddMenu("Formula && Restraints",ID_MOLECULE_MENU_FORMULA);
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_OPTIMIZECONFORMATION,
                                 "Optimize Starting Conformation");
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_SET_DELTA_SIGMA,
@@ -816,6 +821,9 @@ mpBondWin(0),mpAngleWin(0),mpDihedralAngleWin(0),mpRigidGroupWin(0),mIsSelfUpdat
          //#ifdef __DEBUG__
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_TEST,"Debug Test");
          //#endif
+      mpMenuBar->AddMenu("Manipulate Geometry",ID_MOLECULE_MENU_GEOMETRY);
+         mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_GEOMETRY,ID_MOLECULE_MENU_GEOMETRY_ROTATE_BOND,
+                                "Rotate around bond");
       mpSizer->SetItemMinSize(mpMenuBar,
                               mpMenuBar->GetSize().GetWidth(),
                               mpMenuBar->GetSize().GetHeight());
@@ -1548,7 +1556,7 @@ void WXMolecule::OnMenuExport2ZMatrix(wxCommandEvent &event)
       
       if(open.ShowModal() != wxID_OK) return;
       
-      long nbchar=0;
+      unsigned long nbchar=0;
       for(vector<MolAtom*>::const_iterator pos=mpMolecule->GetAtomList().begin();
           pos!=mpMolecule->GetAtomList().end();++pos)
             if(nbchar<(*pos)->GetName().size()) nbchar=(*pos)->GetName().size();
@@ -1647,6 +1655,140 @@ void WXMolecule::OnMenuTest(wxCommandEvent & WXUNUSED(event))
    #endif
    VFN_DEBUG_EXIT("WXMolecule::OnMenuTest()",6)
 }
+
+static const long ID_MOLECULE_ROTATE_BOND_GO   =WXCRYST_ID();
+static const long ID_MOLECULE_ROTATE_BOND_ATOMS=WXCRYST_ID();
+
+class WXMoleculeRotation:public wxWindow
+{
+   public:
+      WXMoleculeRotation(wxWindow *parent, Molecule &mol):
+      wxWindow(parent,-1),mBondListClock(mol.GetBondListClock()),mpMol(&mol)
+      {
+         VFN_DEBUG_ENTRY("WXMoleculeRotation::WXMoleculeRotation()",10)
+         this->SetFont(wxFont(8,wxTELETYPE,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL));
+         
+         wxArrayString choices;
+         for(vector<MolBond*>::const_iterator pos=mol.GetBondList().begin();pos!=mol.GetBondList().end();++pos)
+            choices.Add((*pos)->GetName());
+         
+         wxBoxSizer* pSizer=new wxBoxSizer(wxHORIZONTAL);
+         
+         wxBoxSizer* pSizer1=new wxBoxSizer(wxVERTICAL);
+         pSizer1->Add(new wxStaticText(this,-1,_T("Select bond:")),0,wxALIGN_CENTER);
+         mpBond= new wxChoice(this,ID_MOLECULE_ROTATE_BOND_ATOMS,wxDefaultPosition,wxDefaultSize,choices);
+         mpBond->SetSelection(0);
+         pSizer1->Add(mpBond,0,wxALIGN_CENTER);
+         pSizer->Add(pSizer1,0,wxALIGN_CENTER);
+         
+         wxBoxSizer* pSizer2=new wxBoxSizer(wxVERTICAL);
+         pSizer2->Add(new wxStaticText(this,-1,_T("Atoms to rotate:")),0,wxALIGN_CENTER);
+         mpRotatedAtoms= new wxListBox(this,-1,wxDefaultPosition,wxSize(150,60));
+         pSizer2->Add(mpRotatedAtoms,0,wxALIGN_CENTER);
+         pSizer->Add(pSizer2,0,wxALIGN_CENTER);
+         
+         wxBoxSizer* pSizer3=new wxBoxSizer(wxVERTICAL);
+         pSizer3->Add(new wxStaticText(this,-1,_T("Amplitude:")),0,wxALIGN_CENTER);
+         mpAngle=new wxTextCtrl(this,-1,_T("10"));
+         pSizer3->Add(mpAngle,0,wxALIGN_CENTER);
+         pSizer->Add(pSizer3,0,wxALIGN_CENTER);
+         
+         wxButton *pButtonRotate=new wxButton(this,ID_MOLECULE_ROTATE_BOND_GO,_T("Rotate !"));
+         pSizer->Add(pButtonRotate,0,wxALIGN_CENTER);
+         
+         this->SetSizer(pSizer);
+         this->SetAutoLayout(true);
+         pSizer->SetSizeHints(this);
+         pSizer->SetSizeHints(parent);
+         this->Layout();
+         wxCommandEvent ev(wxEVT_COMMAND_CHOICE_SELECTED,ID_MOLECULE_ROTATE_BOND_ATOMS);
+         wxPostEvent(this,ev);
+         VFN_DEBUG_EXIT("WXMoleculeRotation::WXMoleculeRotation()",10)
+      }
+      
+      void OnRotate(wxCommandEvent &event)
+      {
+         if(mBondListClock<mpMol->GetBondListClock())
+         {
+            cout<<" The bond list has changed !"<<endl;
+            this->GetParent()->Destroy();
+            return;
+         }
+         VFN_DEBUG_MESSAGE("WXMoleculeRotation::OnRotate()",10)
+         unsigned int bond=mpBond->GetSelection();
+         unsigned int choice=mpRotatedAtoms->GetSelection();
+         double angle;
+         mpAngle->GetValue().ToDouble(&angle);
+         mpMol->RotateAtomGroup(mpMol->GetBondList()[bond]->GetAtom1(),
+                                mpMol->GetBondList()[bond]->GetAtom2(),
+                                mvpRotatedAtoms[choice], angle*DEG2RAD, true);
+         mpMol->GetCrystal().UpdateDisplay();
+      }
+      void OnSelectBond(wxCommandEvent &event)
+      {
+         if(mBondListClock<mpMol->GetBondListClock())
+         {
+            cout<<" The bond list has changed !"<<endl;
+            this->GetParent()->Destroy();
+            return;
+         }
+         VFN_DEBUG_MESSAGE("WXMoleculeRotation::OnSelectBond()",10)
+         const unsigned int choice=mpBond->GetSelection();
+         MolAtom *pAt1=&(mpMol->GetBondList()[choice]->GetAtom1());
+         MolAtom *pAt2=&(mpMol->GetBondList()[choice]->GetAtom2());
+         mpMol->BuildConnectivityTable();
+         
+         mvpRotatedAtoms.clear();
+         mvpRotatedAtoms.resize(2);
+         mvpRotatedAtoms[0].insert(pAt1);
+         ExpandAtomGroupRecursive(pAt2,mpMol->GetConnectivityTable(),mvpRotatedAtoms[0]);
+         
+         mvpRotatedAtoms[1].insert(pAt2);
+         ExpandAtomGroupRecursive(pAt1,mpMol->GetConnectivityTable(),mvpRotatedAtoms[1]);
+         
+         wxArrayString choices;
+         
+         set<MolAtom *>::const_iterator pos=mvpRotatedAtoms[0].begin();
+         wxString choice1((*pos++)->GetName());
+         for(;pos!=mvpRotatedAtoms[0].end();++pos)
+            choice1 +=_T("-")+(*pos)->GetName();
+         choices.Add(choice1);
+         
+         pos=mvpRotatedAtoms[1].begin();
+         wxString choice2((*pos++)->GetName());
+         for(;pos!=mvpRotatedAtoms[1].end();++pos)
+            choice2 +=_T("-")+(*pos)->GetName();
+         choices.Add(choice2);
+         
+         mpRotatedAtoms->Set(choices);
+         mpRotatedAtoms->SetSelection(0);
+      }
+   private:
+      /// Record the last time the bond list was changed
+      const RefinableObjClock& mBondListClock;
+      Molecule *mpMol;
+      wxChoice *mpBond;
+      wxListBox *mpRotatedAtoms;
+      vector<set<MolAtom *> > mvpRotatedAtoms;
+      wxTextCtrl *mpAngle;
+      DECLARE_EVENT_TABLE()
+};
+BEGIN_EVENT_TABLE(WXMoleculeRotation,wxWindow)
+   EVT_BUTTON(ID_MOLECULE_ROTATE_BOND_GO, WXMoleculeRotation::OnRotate)
+   EVT_CHOICE(ID_MOLECULE_ROTATE_BOND_ATOMS, WXMoleculeRotation::OnSelectBond)
+END_EVENT_TABLE()
+
+void WXMolecule::OnMenuRotate(wxCommandEvent &event)
+{
+   VFN_DEBUG_ENTRY("WXMolecule::OnMenuRotate()",10)
+   wxMiniFrame *frame= new wxMiniFrame(this,-1,"Rotate around bond",wxDefaultPosition,
+                                       wxDefaultSize,wxCLOSE_BOX|wxSTAY_ON_TOP|wxCAPTION);
+   WXMoleculeRotation * wxMolRot;
+   wxMolRot=new WXMoleculeRotation(frame,*mpMolecule);
+   frame->Show(true);
+   VFN_DEBUG_EXIT("WXMolecule::OnMenuRotate()",10)
+}
+
 
 void WXMolecule::OnMenuSetLimits(wxCommandEvent &event)
 {

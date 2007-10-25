@@ -1,5 +1,5 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
-    (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
+    (c) 2000-2007 Vincent Favre-Nicolin vincefn@users.sourceforge.net
         2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
@@ -153,6 +153,7 @@ class WXMolecule: public WXScatterer
       void OnEditGridRigidGroup(wxGridEvent &e);
       void OnMenuExport2ZMatrix(wxCommandEvent &event);
       void OnMenuTest(wxCommandEvent &event);
+      void OnMenuRotate(wxCommandEvent &event);
       /// Notify that either the bond, bond angle or dihedral angle list window has
       /// been destroyed
       void NotifyDeleteListWin(WXMolScrolledWindow *win);
