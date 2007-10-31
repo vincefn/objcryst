@@ -1922,16 +1922,26 @@ void WXMolecule::OnMenuRotate(wxCommandEvent &event)
    VFN_DEBUG_ENTRY("WXMolecule::OnMenuRotate()",10)
    if(event.GetId()==ID_MOLECULE_MENU_GEOMETRY_ROTATE_BOND)
    {
-      wxMiniFrame *frame= new wxMiniFrame(this,-1,"Rotate around bond",wxDefaultPosition,
+      #ifdef __WXGTK__
+      wxFrame *frame= new wxMiniFrame(this,-1,"Rotate around bond",wxDefaultPosition,
                                           wxDefaultSize,wxCLOSE_BOX|wxSTAY_ON_TOP|wxCAPTION);
+      #else
+      wxFrame *frame= new wxFrame(this,-1,"Rotate around bond",wxDefaultPosition,
+                                          wxDefaultSize);
+      #endif
       WXMoleculeRotation * wxMolRot;
       wxMolRot=new WXMoleculeRotation(frame,*mpMolecule);
       frame->Show(true);
    }
    if(event.GetId()==ID_MOLECULE_MENU_GEOMETRY_ROTATE_DIHED)
    {
-      wxMiniFrame *frame= new wxMiniFrame(this,-1,"Change dihedral angle",wxDefaultPosition,
+      #ifdef __WXGTK__
+      wxFrame *frame= new wxMiniFrame(this,-1,"Change dihedral angle",wxDefaultPosition,
                                           wxDefaultSize,wxCLOSE_BOX|wxSTAY_ON_TOP|wxCAPTION);
+      #else
+      wxFrame *frame= new wxFrame(this,-1,"Change dihedral angle",wxDefaultPosition,
+                                          wxDefaultSize);
+      #endif
       WXMoleculeRotationDihed * wxMolRot;
       wxMolRot=new WXMoleculeRotationDihed(frame,*mpMolecule);
       frame->Show(true);
