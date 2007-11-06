@@ -1808,14 +1808,6 @@ class WXMoleculeRotationDihed:public wxWindow
                mvDihed.push_back(MolDihedralAngle(*pAt1,*pAt2,*pAt3,**neigh,0,.001,.001,*mpMol));
                choices.Add(mvDihed.back().GetName());
             }
-            // Also add dihedral angle from the other side
-            pConn=&(mpMol->GetConnectivityTable().find(pAt1)->second);
-            for(set<MolAtom * >::const_iterator neigh=pConn->begin();neigh!=pConn->end();++neigh)
-            {
-               if( (*neigh==pAt3) || (*neigh==pAt2) ) continue;
-               mvDihed.push_back(MolDihedralAngle(*pAt3,*pAt2,*pAt1,**neigh,0,.001,.001,*mpMol));
-               choices.Add(mvDihed.back().GetName());
-            }
          }
          
          wxBoxSizer* pSizer=new wxBoxSizer(wxHORIZONTAL);
@@ -1867,6 +1859,9 @@ class WXMoleculeRotationDihed:public wxWindow
          mpAngle->GetValue().ToDouble(&angle);
          angle*=DEG2RAD;
          angle-=pDihed->GetAngle();
+         
+         if(mvpRotatedAtoms[choice].find(&(pDihed->GetAtom1()))!=mvpRotatedAtoms[choice].end()) angle*=-1;
+         
          mpMol->RotateAtomGroup(pDihed->GetAtom2(),
                                 pDihed->GetAtom3(),
                                 mvpRotatedAtoms[choice], angle, true);
@@ -1885,17 +1880,23 @@ class WXMoleculeRotationDihed:public wxWindow
          MolAtom *pAt1=&(pDihed->GetAtom1());
          MolAtom *pAt2=&(pDihed->GetAtom2());
          MolAtom *pAt3=&(pDihed->GetAtom3());
+         MolAtom *pAt4=&(pDihed->GetAtom4());
          mpMol->BuildConnectivityTable();
          
          mvpRotatedAtoms.clear();
-         mvpRotatedAtoms.resize(1);
+         mvpRotatedAtoms.resize(2);
+         
          mvpRotatedAtoms[0].insert(pAt1);
          mvpRotatedAtoms[0].insert(pAt2);
-         //mvpRotatedAtoms[0].insert(pAt3);
          ExpandAtomGroupRecursive(pAt3,mpMol->GetConnectivityTable(),mvpRotatedAtoms[0]);
          mvpRotatedAtoms[0].erase(pAt1);
          mvpRotatedAtoms[0].erase(pAt2);
-         //mvpRotatedAtoms[0].erase(pAt3);
+         
+         mvpRotatedAtoms[1].insert(pAt4);
+         mvpRotatedAtoms[1].insert(pAt3);
+         ExpandAtomGroupRecursive(pAt2,mpMol->GetConnectivityTable(),mvpRotatedAtoms[1]);
+         mvpRotatedAtoms[1].erase(pAt4);
+         mvpRotatedAtoms[1].erase(pAt3);
          
          wxArrayString choices;
          
@@ -1904,6 +1905,12 @@ class WXMoleculeRotationDihed:public wxWindow
          for(;pos!=mvpRotatedAtoms[0].end();++pos)
             choice1 +=_T("-")+(*pos)->GetName();
          choices.Add(choice1);
+         
+         pos=mvpRotatedAtoms[1].begin();
+         wxString choice2((*pos++)->GetName());
+         for(;pos!=mvpRotatedAtoms[1].end();++pos)
+            choice2 +=_T("-")+(*pos)->GetName();
+         choices.Add(choice2);
          
          mpRotatedAtoms->Set(choices);
          mpRotatedAtoms->SetSelection(0);
