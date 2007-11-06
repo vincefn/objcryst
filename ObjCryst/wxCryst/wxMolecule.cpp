@@ -1808,6 +1808,14 @@ class WXMoleculeRotationDihed:public wxWindow
                mvDihed.push_back(MolDihedralAngle(*pAt1,*pAt2,*pAt3,**neigh,0,.001,.001,*mpMol));
                choices.Add(mvDihed.back().GetName());
             }
+            // Also add dihedral angle from the other side
+            pConn=&(mpMol->GetConnectivityTable().find(pAt1)->second);
+            for(set<MolAtom * >::const_iterator neigh=pConn->begin();neigh!=pConn->end();++neigh)
+            {
+               if( (*neigh==pAt3) || (*neigh==pAt2) ) continue;
+               mvDihed.push_back(MolDihedralAngle(*pAt3,*pAt2,*pAt1,**neigh,0,.001,.001,*mpMol));
+               choices.Add(mvDihed.back().GetName());
+            }
          }
          
          wxBoxSizer* pSizer=new wxBoxSizer(wxHORIZONTAL);
