@@ -601,6 +601,9 @@ void CIF::Parse(stringstream &in)
       {//Tag
          string tag,value;
          in>>tag;
+         // Convert all dots to underscores to cover much of DDL2 with this DDL1 parser.
+         for (string::size_type pos = tag.find('.'); pos != string::npos; pos = tag.find('.', ++ pos))
+            tag.replace(pos, 1, 1, '_');
          value=CIFReadValue(in,lastc);
          mvData[block].mvItem[ci_string(tag.c_str())]=value;
          if(vv)cout<<"New Tag:"<<tag<<" ("<<value.size()<<"):"<<value<<endl;
@@ -637,6 +640,9 @@ void CIF::Parse(stringstream &in)
                break;
             }
             in>>tmp;
+            // Convert all dots to underscores to cover much of DDL2 with this DDL1 parser.
+            for (string::size_type pos = tmp.find('.'); pos != string::npos; pos = tmp.find('.', ++ pos))
+               tmp.replace(pos, 1, 1, '_');
             tit.push_back(ci_string(tmp.c_str()));
             if(vv) cout<<" , "<<tmp;
          }
