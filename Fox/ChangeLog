@@ -1,3 +1,22 @@
+#### 1.7.1 - December 2007 (Revision #903)
+NEW FEATURES
+   * Add peak detection & auto-indexing (still beta for some values)
+   * Add Le Bail fitting
+   * Add graph representing Iobs and Icalc as a function of 1/d 
+     for single crystal data.
+   * Add user-controlled rotation of atoms around any existing bond
+
+IMPROVEMENTS
+   * Better support for CIF files import
+   * More responsive UI (refresh display even when no new solution 
+   has been found, every 30s at least, and no more than once every second)
+   * Always report *real* time instead of process-time for the
+   first 100s, and then real time
+
+BUG FIXES
+   * Correct distance table calculations in some cases, and therefore
+   dynamical occupancy correction...
+
 #### 1.7.0 - February 2007
 NEW FEATURES
    * Support for multiple optimizations - store all the solutions 
@@ -17,6 +36,7 @@ NEW FEATURES
      crystal 3D view, powder pattern graph, display names / reflections 
      Miller indices,...
    * Enable saving files in a compressed (gzip) format (*.xml.gz)
+   * Add graph display for Single Crystal data (Iobs and Icalc vs 1/d)
 
 IMPROVEMENTS
    * Add choices for scaling of powder pattern graphs: x as 2theta/tof,
