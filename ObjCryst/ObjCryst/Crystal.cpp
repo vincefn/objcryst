@@ -1305,7 +1305,7 @@ void Crystal::CalcDistTable(const bool fast) const
       
       CrystMatrix_REAL symmetricsCoords;
 
-      const int nbSymmetrics=this->GetSpaceGroup().GetNbSymmetrics(false,true);
+      const int nbSymmetrics=this->GetSpaceGroup().GetNbSymmetrics(false,false);
 
       // Get the list of all atoms within or near the asymmetric unit
       for(long i=0;i<nbComponent;i++)
@@ -1315,7 +1315,7 @@ void Crystal::CalcDistTable(const bool fast) const
          symmetricsCoords=this->GetSpaceGroup().GetAllSymmetrics(mScattCompList(i).mX,
                                                                  mScattCompList(i).mY,
                                                                  mScattCompList(i).mZ,
-                                                                 false,true,false);
+                                                                 false,false,false);
          mvDistTableSq[i].mIndex=i;//USELESS ?
          bool hasunique=false;
          for(int j=0;j<nbSymmetrics;j++)
