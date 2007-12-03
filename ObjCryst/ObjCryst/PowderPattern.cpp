@@ -2742,8 +2742,8 @@ void PowderPattern::ImportPowderPatternCIF(const CIF &cif)
             mPowderPatternObs(i)=pos->second.mPowderPatternObs[i];
             mX(i)=pos->second.mPowderPatternX[i];
             mPowderPatternObsSigma(i)=pos->second.mPowderPatternSigma[i];
-            this->SetWeightToInvSigmaSq();
          }
+         this->SetWeightToInvSigmaSq();
          this->SetPowderPatternX(mX);
       }
    VFN_DEBUG_EXIT("PowderPattern::ImportPowderPatternCIF():file:",5)
