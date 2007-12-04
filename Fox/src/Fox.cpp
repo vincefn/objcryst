@@ -69,7 +69,7 @@ using namespace std;
 #ifdef __FOXVERSION__
 static const std::string foxVersion=string(__FOXVERSION__); // Release
 #else
-static const std::string foxVersion=std::string("1.7.1")+__DATE__;
+static const std::string foxVersion=std::string("1.7.1.1")+__DATE__;
 #endif
 
 // ----------------------------------------------------------------------------
