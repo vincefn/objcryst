@@ -38,6 +38,9 @@
    #include "wx/wfstream.h"
    #include "wx/zstream.h"
    #include "wx/fileconf.h"
+   #include "wx/filesys.h"
+   #include <wx/fs_inet.h>
+   #include <wx/txtstrm.h>
 #endif
 
 #include <locale.h>
@@ -66,11 +69,13 @@
 using namespace ObjCryst;
 using namespace std;
 
-#ifdef __FOXVERSION__
-static const std::string foxVersion=string(__FOXVERSION__); // Release
-#else
-static const std::string foxVersion=std::string("1.7.1.1")+__DATE__;
-#endif
+// Rough version number - must be updated at least for every major version or critical update
+// This is used to check for updates...
+//:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
+#define __FOXREVISION__ 907
+
+static std::string foxVersion=std::string("1.7.X(Beta)-Revision#")+string("__FOXREVISION__");
+
 
 // ----------------------------------------------------------------------------
 // Speed test
@@ -125,6 +130,8 @@ public:
    void OnUpdateUI(wxUpdateUIEvent& event);
    void OnToggleTooltips(wxCommandEvent& event);
    void OnPreferences(wxCommandEvent& event);
+   void OnCheckUpdate(wxCommandEvent& event);
+   std::map<unsigned int,pair<int,wxString> > GetUpdates()const;
 private:
     DECLARE_EVENT_TABLE()
     RefinableObjClock mClockLastSave;
@@ -146,6 +153,7 @@ void WXCrystInformUserStdOut(const string &str)
 static const long MENU_FILE_QUIT=                      WXCRYST_ID();
 static const long MENU_HELP_ABOUT=                     WXCRYST_ID();
 static const long MENU_HELP_TOGGLETOOLTIP=             WXCRYST_ID();
+static const long MENU_HELP_UPDATE=                    WXCRYST_ID();
 static const long MENU_PREFS_PREFERENCES=              WXCRYST_ID();
 static const long MENU_FILE_LOAD=                      WXCRYST_ID();
 static const long MENU_FILE_CLOSE=                     WXCRYST_ID();
@@ -178,6 +186,7 @@ BEGIN_EVENT_TABLE(WXCrystMainFrame, wxFrame)
    EVT_MENU(MENU_FILE_QUIT,  WXCrystMainFrame::OnQuit)
    EVT_MENU(MENU_HELP_ABOUT, WXCrystMainFrame::OnAbout)
    EVT_MENU(MENU_HELP_TOGGLETOOLTIP, WXCrystMainFrame::OnToggleTooltips)
+   EVT_MENU(MENU_HELP_UPDATE, WXCrystMainFrame::OnCheckUpdate)
    EVT_MENU(MENU_PREFS_PREFERENCES, WXCrystMainFrame::OnPreferences)
    EVT_MENU(MENU_FILE_LOAD, WXCrystMainFrame::OnLoad)
    EVT_MENU(MENU_FILE_CLOSE, WXCrystMainFrame::OnMenuClose)
@@ -541,6 +550,9 @@ int main (int argc, char *argv[])
    if(!wxConfigBase::Get()->HasEntry("Fox/BOOL/Use compressed file format (.xml.gz)"))
       wxConfigBase::Get()->Write("Fox/BOOL/Use compressed file format (.xml.gz)", true);
 
+   if(!wxConfigBase::Get()->HasEntry("Fox/BOOL/Check for Fox updates"))
+      wxConfigBase::Get()->Write("Fox/BOOL/Check for Fox updates", true);
+
    WXCrystMainFrame *frame ;
    string title(string("FOX: Free Objects for Xtal structures v")+foxVersion);
    frame = new WXCrystMainFrame(title.c_str(),
@@ -565,7 +577,7 @@ int main (int argc, char *argv[])
       list<string>::iterator pos;
       for(pos=vFourierFilenameGRD.begin();pos!=vFourierFilenameGRD.end();++pos)
       {
-         UnitCellMapImport *pMap=new UnitCellMapImport(pWXCryst->GetCrystal());
+         UnitCellMap *pMap=new UnitCellMap(pWXCryst->GetCrystal());
          cout<<"Reading Fourier file:"<<*pos<<endl;
          if (pMap->ImportGRD(*pos) == 0)
          {
@@ -580,7 +592,7 @@ int main (int argc, char *argv[])
       list<string>::iterator pos;
       for(pos=vFourierFilenameDSN6.begin();pos!=vFourierFilenameDSN6.end();++pos)
       {
-         UnitCellMapImport *pMap=new UnitCellMapImport(pWXCryst->GetCrystal());
+         UnitCellMap *pMap=new UnitCellMap(pWXCryst->GetCrystal());
          cout<<"Reading Fourier file:"<<*pos<<endl;
          if (pMap->ImportDSN6(*pos) == 0)
          {
@@ -665,7 +677,8 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
       
       wxMenu *helpMenu = new wxMenu;
          helpMenu->Append(MENU_HELP_ABOUT, "&About...", "About ObjCryst...");
-         helpMenu->Append(MENU_HELP_TOGGLETOOLTIP, "Toggle Tooltip", "Set Tooltips on/off");
+         helpMenu->Append(MENU_HELP_TOGGLETOOLTIP, "Toggle Tooltips", "Set Tooltips on/off");
+         helpMenu->Append(MENU_HELP_UPDATE, "Check for Updates", "Check for a newer version of Fox");
 
       wxMenuBar *menuBar = new wxMenuBar();
          menuBar->Append(menuFile,  "&File");
@@ -738,6 +751,34 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
    this->Show(TRUE);
    this->Layout();
    mpNotebook->SetSelection(0);
+   
+   // Check for updates
+      bool check;
+      wxConfigBase::Get()->Read("Fox/BOOL/Check for Fox updates", &check);
+      if(check || ((rand()%10)==0))
+      {
+         map<unsigned int,pair<int,wxString> > vupdates=this->GetUpdates();
+         unsigned int nbmajorbug=0,nbcritical=0;
+         for(map<unsigned int,pair<int,wxString> >::const_iterator pos=vupdates.begin();pos!=vupdates.end();++pos)
+         {
+            if(pos->second.first==11) nbmajorbug++;// Major bug but calculations are still OK
+            if(pos->second.first==12) nbcritical++;// A mistake was made, giving erroneous results
+         }
+         if(nbcritical>0)
+         {
+            wxString msg;
+            msg.Printf( _T("A new version of Fox is available, including CRITICAL bug fixes\n")
+                        _T("It is strongly recommended to update to a new version\n\n Major changes: \n"));
+   
+            for(map<unsigned int,pair<int,wxString> >::const_iterator pos=vupdates.begin();pos!=vupdates.end();++pos)
+            {
+               if(pos->second.first==12)
+                  msg=msg+wxString::Format("#%d (CRITICAL): %s\n",pos->first,pos->second.second.c_str());
+            }
+            wxMessageDialog d(this,msg, "CRITICAL updates available", wxOK);
+            d.ShowModal();
+         }
+      }
    //Splash Screen
    if(true==splashscreen)
    {
@@ -1261,6 +1302,106 @@ void WXCrystMainFrame::OnPreferences(wxCommandEvent& event)
    WXFoxPreferences *prefs= new WXFoxPreferences(this);
    prefs->ShowModal();
 }
+
+void WXCrystMainFrame::OnCheckUpdate(wxCommandEvent& event)
+{
+   std::map<unsigned int,pair<int,wxString> > vupdates=this->GetUpdates();
+   wxFrame *frame=new wxFrame(this,-1,"FOX Updates",wxDefaultPosition,wxSize(800,250),wxSTAY_ON_TOP | wxRESIZE_BORDER | wxCAPTION | wxCLOSE_BOX | wxCLIP_CHILDREN);
+   wxTextCtrl *wUpdates=new wxTextCtrl(frame,-1,"",wxDefaultPosition,wxDefaultSize,wxTE_MULTILINE|wxTE_READONLY|wxTE_DONTWRAP);
+   wUpdates->SetFont(wxFont(10,wxROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_BOLD));
+   wUpdates->AppendText(wxString::Format("Checking for updates from http://objcryst.sf.net/FoxUpdates.txt\n\n"));
+   if(vupdates.size()>0)
+   {
+      unsigned int nbminorfeature=0,nbmajorfeature=0,nbrelease=0,nbminorbug=0,nbmajorbug=0,nbcritical=0;
+      for(map<unsigned int,pair<int,wxString> >::const_iterator pos=vupdates.begin();pos!=vupdates.end();++pos)
+      {//Critical fixes
+         if(pos->second.first==0) nbminorfeature++;
+         if(pos->second.first==1) nbmajorfeature++;
+         if(pos->second.first==2) nbrelease++;
+         if(pos->second.first==10) nbminorbug++;
+         if(pos->second.first==11) nbmajorbug++;// Major bug but calculations are still OK
+         if(pos->second.first==12) nbcritical++;// A mistake was made, giving erroneous results
+      }
+      if(nbcritical>0)
+      {
+         cout<<wxString::Format("\n%d CRITICAL updates available:\n",nbcritical)<<endl;
+         wUpdates->AppendText(wxString::Format("\n%d CRITICAL updates available:\n",nbcritical));
+         for(map<unsigned int,pair<int,wxString> >::const_iterator pos=vupdates.begin();pos!=vupdates.end();++pos)
+         {
+            if(pos->second.first==12)
+            {
+               wxString mess=wxString::Format("  #%d: %s\n",pos->first,pos->second.second.c_str());
+               wUpdates->AppendText(mess);
+            }
+         }
+      }
+      if(nbrelease>0)
+      {
+         cout<<wxString::Format("\n%d new RELEASE available :\n",nbrelease)<<endl;
+         wUpdates->AppendText(wxString::Format("\n%d new RELEASE available :\n",nbrelease));
+         for(map<unsigned int,pair<int,wxString> >::const_iterator pos=vupdates.begin();pos!=vupdates.end();++pos)
+         {
+            if(pos->second.first==2)
+               wUpdates->AppendText(wxString::Format("  #%d: %s\n",pos->first,pos->second.second.c_str()));
+         }
+      }
+      if(nbmajorfeature>0)
+      {
+         cout<<wxString::Format("\n%d major features updates available:\n",nbmajorfeature)<<endl;
+         wUpdates->AppendText(wxString::Format("\n%d major features updates available:\n",nbmajorfeature));
+         for(map<unsigned int,pair<int,wxString> >::const_iterator pos=vupdates.begin();pos!=vupdates.end();++pos)
+         {
+            if(pos->second.first==1)
+               wUpdates->AppendText(wxString::Format("  #%d: %s\n",pos->first,pos->second.second.c_str()));
+         }
+      }
+      if(nbminorfeature>0)
+      {
+         cout<<wxString::Format("\n%d minor features updates available:\n",nbminorfeature)<<endl;
+         wUpdates->AppendText(wxString::Format("\n%d minor features updates available:\n",nbminorfeature));
+         for(map<unsigned int,pair<int,wxString> >::const_iterator pos=vupdates.begin();pos!=vupdates.end();++pos)
+         {
+            if(pos->second.first==0)
+               wUpdates->AppendText(wxString::Format("  #%d: %s\n",pos->first,pos->second.second.c_str()));
+         }
+      }
+   }
+   else
+   {
+      wUpdates->AppendText(wxString::Format("No updates found !\n"));
+   }
+   frame->Show(true);
+}
+
+std::map<unsigned int,pair<int,wxString> > WXCrystMainFrame::GetUpdates()const
+{
+   wxFileSystem::AddHandler(new wxInternetFSHandler);
+   cout<<wxFileSystem::HasHandlerForPath("http://objcryst.sourceforge.net/FoxUpdates.txt")<<endl;
+   wxFileSystem fs;
+   wxFSFile *fp= NULL;
+   fp= fs.OpenFile(_T("http://objcryst.sourceforge.net/FoxUpdates.txt"),wxFS_READ);
+   std::map<unsigned int,pair<int,wxString> > vupdates;
+   if(fp!=NULL)
+   {
+      wxInputStream *fstream = fp->GetStream();
+      wxTextInputStream txtis(*fstream);
+      txtis.ReadLine();//first line
+      while(!fstream->Eof())
+      {
+         unsigned int revisionfix=txtis.Read16();
+         unsigned int revisionbug=txtis.Read16();
+         unsigned int severity=txtis.Read16();
+         wxString reason=txtis.ReadLine();
+         if((revisionfix>__FOXREVISION__)&&(__FOXREVISION__>revisionbug))
+         {
+            cout<<"Revision:"<<revisionfix<<", severity="<<severity<<",reason="<<reason<<endl;
+            vupdates[revisionfix]=make_pair(severity,reason);
+         }
+      }
+   }
+   return vupdates;
+}
+
 #endif
 ///////////////////////////////////////// Speed Test////////////////////
 void standardSpeedTest()
