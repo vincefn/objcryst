@@ -30,6 +30,7 @@
     #include "wx/wx.h"
 #endif
 #include "wx/notebook.h"
+#include "wx/minifram.h"
 
 #include "wxCryst/wxCrystal.h"
 
@@ -68,6 +69,9 @@
       #else
          #include "GL/glut.h"
        #endif
+   #endif
+   #ifdef HAVE_FFTW
+      #include "fftw3.h"
    #endif
 #endif
 
@@ -153,7 +157,7 @@ wxGrid(parent,id),mpWXCrystal(p)
 
 WXCrystalScrolledGridWindow::~WXCrystalScrolledGridWindow()
 {
-   mpWXCrystal->NotifyDeleteListWin(this);
+   if(mpWXCrystal!=0) mpWXCrystal->NotifyDeleteListWin(this);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -1571,20 +1575,20 @@ bool WXCrystal::Enable(bool e)
 #ifdef OBJCRYST_GL
 ////////////////////////////////////////////////////////////////////////
 //
-//    UnitCellMapImport
+//    UnitCellMap
 //
 ////////////////////////////////////////////////////////////////////////
-UnitCellMapImport::UnitCellMapImport(const Crystal&crystal):
+UnitCellMap::UnitCellMap(const Crystal&crystal):
 mpCrystal(&crystal)
 {}
-UnitCellMapImport::~UnitCellMapImport(){}
-void UnitCellMapImport::GLInitDisplayList(const float minValue,
+UnitCellMap::~UnitCellMap(){}
+void UnitCellMap::GLInitDisplayList(const float minValue,
 					  WXGLCrystalCanvas * parentCrystal) const
 {
-   VFN_DEBUG_ENTRY("UnitCellMapImport::GLInitDisplayList()",7)
+   VFN_DEBUG_ENTRY("UnitCellMap::GLInitDisplayList()",10)
    cout<<"Generating OpenGL Triangles for Fourier map:"<<mName<<", contour="<<minValue<<endl;
    // Generate triangles
-      VFN_DEBUG_MESSAGE("UnitCellMapImport::GLInitDisplayList(): Generate Triangles",7)
+      VFN_DEBUG_MESSAGE("UnitCellMap::GLInitDisplayList(): Generate Triangles",7)
 
       const int nx=mPoints.cols();
       const int ny=mPoints.rows();
@@ -1631,10 +1635,10 @@ void UnitCellMapImport::GLInitDisplayList(const float minValue,
          }
       }
       int numOfTriangles;
-      VFN_DEBUG_MESSAGE("UnitCellMapImport::GLInitDisplayList(): MC, Min Value="<<minValue,10)
+      VFN_DEBUG_MESSAGE("UnitCellMap::GLInitDisplayList(): MC, Min Value="<<minValue,10)
       const TRIANGLE *pTriangles= MC(snx-1, sny-1, snz-1, step[0], step[1], step[2], minValue, subPoints, numOfTriangles);
    // OpenGL drawing instructions
-      VFN_DEBUG_MESSAGE("UnitCellMapImport::GLInitDisplayList(): OpenGL instructions",7)
+      VFN_DEBUG_MESSAGE("UnitCellMap::GLInitDisplayList(): OpenGL instructions",7)
       glBegin(GL_TRIANGLES);
          float normx,normy,normz;
          for(int i=0; i < numOfTriangles; i++)
@@ -1670,15 +1674,15 @@ void UnitCellMapImport::GLInitDisplayList(const float minValue,
 
    delete [] subPoints; 
    delete [] pTriangles; 
-   VFN_DEBUG_EXIT("UnitCellMapImport::GLInitDisplayList()",7)
+   VFN_DEBUG_EXIT("UnitCellMap::GLInitDisplayList():nb triangles="<<numOfTriangles,10)
 }
 
-void UnitCellMapImport::POVRayDescription(ostream &os,const float minValue,
+void UnitCellMap::POVRayDescription(ostream &os,const float minValue,
                                           const CrystalPOVRayOptions &options)const
 {// basically the same code asGLInitDisplayList(), but creates cylinders
-   VFN_DEBUG_ENTRY("UnitCellMapImport::POVRayDescription()",7)
+   VFN_DEBUG_ENTRY("UnitCellMap::POVRayDescription()",7)
    // Generate triangles
-      VFN_DEBUG_MESSAGE("UnitCellMapImport::POVRayDescription(): Generate Triangles",7)
+      VFN_DEBUG_MESSAGE("UnitCellMap::POVRayDescription(): Generate Triangles",7)
 
       const int nx=mPoints.cols();
       const int ny=mPoints.rows();
@@ -1722,10 +1726,10 @@ void UnitCellMapImport::POVRayDescription(ostream &os,const float minValue,
          }
       }
       int numOfTriangles;
-      VFN_DEBUG_MESSAGE("UnitCellMapImport::POVRayDescription(): MC, Min Value="<<minValue,10)
+      VFN_DEBUG_MESSAGE("UnitCellMap::POVRayDescription(): MC, Min Value="<<minValue,10)
       const TRIANGLE *pTriangles= MC(snx-1, sny-1, snz-1, step[0], step[1], step[2], minValue, subPoints, numOfTriangles);
    // drawing instructions
-      VFN_DEBUG_MESSAGE("UnitCellMapImport::POVRayDescription(): POVRay instructions",7)
+      VFN_DEBUG_MESSAGE("UnitCellMap::POVRayDescription(): POVRay instructions",7)
       float normx,normy,normz;
       for(int i=0; i < numOfTriangles; i++)
       {
@@ -1763,16 +1767,16 @@ void UnitCellMapImport::POVRayDescription(ostream &os,const float minValue,
 
    delete [] subPoints; 
    delete [] pTriangles; 
-   VFN_DEBUG_EXIT("UnitCellMapImport::GLInitDisplayList()",7)
+   VFN_DEBUG_EXIT("UnitCellMap::GLInitDisplayList()",7)
 }
 
-int UnitCellMapImport::ImportGRD(const string&filename)
+int UnitCellMap::ImportGRD(const string&filename)
 {
-   VFN_DEBUG_ENTRY("UnitCellMapImport::ImportGRD()",7)
+   VFN_DEBUG_ENTRY("UnitCellMap::ImportGRD()",7)
    ifstream ffile(filename.c_str());
    if(!ffile.is_open())
    {     //if file could not be loaded for some reason then exit
-     VFN_DEBUG_MESSAGE("UnitCellMapImport::ImportGRD() error opening "<<filename.c_str(),10)
+     VFN_DEBUG_MESSAGE("UnitCellMap::ImportGRD() error opening "<<filename.c_str(),10)
       (*fpObjCrystInformUser)("Error opening file: "+filename);
       return 0;
    }
@@ -1854,7 +1858,7 @@ int UnitCellMapImport::ImportGRD(const string&filename)
          mName=filename.substr(idx+1);
       }
    }
-   VFN_DEBUG_EXIT("UnitCellMapImport::ImportGRD()",7)
+   VFN_DEBUG_EXIT("UnitCellMap::ImportGRD()",7)
      return 1;
 }
 
@@ -1872,13 +1876,13 @@ void swap2(void *data, unsigned int nb)
    }
 }
 
-int UnitCellMapImport::ImportDSN6(const string&filename)
+int UnitCellMap::ImportDSN6(const string&filename)
 {
-   VFN_DEBUG_ENTRY("UnitCellMapImport::ImportDSN6()",7)
+   VFN_DEBUG_ENTRY("UnitCellMap::ImportDSN6()",7)
    FILE *pfile=fopen(filename.c_str(),"rb");
    if(NULL==pfile)
    {     //if file could not be loaded for some reason then exit
-     VFN_DEBUG_MESSAGE("UnitCellMapImport::ImportDSN6() error opening "<<filename.c_str(),10)
+     VFN_DEBUG_MESSAGE("UnitCellMap::ImportDSN6() error opening "<<filename.c_str(),10)
       (*fpObjCrystInformUser)("Error opening file: "+filename);
       return 0;
    }
@@ -1993,16 +1997,115 @@ int UnitCellMapImport::ImportDSN6(const string&filename)
          mName=filename.substr(idx+1);
       }
    }
-   VFN_DEBUG_EXIT("UnitCellMapImport::ImportDSN6()",7)
+   VFN_DEBUG_EXIT("UnitCellMap::ImportDSN6()",7)
    return 1;
 }
+#ifdef HAVE_FFTW
+int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0)
+{
+   mpData=&data;
+   const unsigned long size=32;
+   fftwf_complex *in= (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * size*size*size);
+   fftwf_plan plan=fftwf_plan_dft_3d(size, size, size,in, in,FFTW_FORWARD, FFTW_ESTIMATE);
+   
+   float *p=(float*)in;
+   for(unsigned long i=0;i<size*size*size*2;i++) *p++=0;
+   
+   const long nb=data.GetNbReflBelowMaxSinThetaOvLambda();
+   
+   mType=type0;
+   if(data.GetFhklObsSq().numElements()==0) mType=1;
+   
+   const REAL v=1/mpCrystal->GetVolume();//(REAL)(size*size*size);// mpCrystal->GetVolume(); (REAL)(size*size*size);
+   for(long i=0;i<nb;++i)
+   {
+      CrystMatrix_REAL m=mpCrystal->GetSpaceGroup().GetAllEquivRefl (data.GetH()(i),data.GetK()(i),data.GetL()(i),
+                                                                     false, false,data.GetFhklCalcReal()(i),data.GetFhklCalcImag()(i));
+      for(int j=0;j<m.rows();j++)
+      {
+         const int h=(int(m(j,0))+size)%size,k=(int(m(j,1))+size)%size,l=(int(m(j,2))+size)%size;
+         /*
+         cout <<int(m(j,0))<<" "<<int(m(j,1))<<" "<<int(m(j,2))<<"("
+              <<mpCrystal->GetSpaceGroup().IsReflCentric(data.GetH()(i),data.GetK()(i),data.GetL()(i))<<"):"
+              <<m(j,3)<<"+"<<m(j,4)<<"i"<<endl;
+         */
+         if(mType==2)
+         {// Obs-Calc
+            const REAL iobs=sqrt(data.GetFhklObsSq()(i));
+            const REAL rec=m(j,3),imc=m(j,4),icalc=sqrt(data.GetFhklCalcSq()(i));
+            in[h+size*k+size*size*l][0]=v*rec*(icalc-iobs)/sqrt(rec*rec+imc*imc);
+            in[h+size*k+size*size*l][1]=v*imc*(icalc-iobs)/sqrt(rec*rec+imc*imc);
+         }
+         if(mType==1)
+         {// Calc
+            in[h+size*k+size*size*l][0]=v*m(j,3);
+            in[h+size*k+size*size*l][1]=v*m(j,4);
+         }
+         if(mType==0)
+         {// Obs
+            const REAL iobs=sqrt(data.GetFhklObsSq()(i));
+            const REAL rec=m(j,3),imc=m(j,4),icalc=sqrt(data.GetFhklCalcSq()(i));
+            in[h+size*k+size*size*l][0]=v*rec*iobs/icalc;
+            in[h+size*k+size*size*l][1]=v*imc*iobs/icalc;
+         }
+      }
+      //cout<<endl;
+   }
+   
+   if(mType!=2)
+   {// F000, for obs & calc fourier maps ?
+      const int nbSymmetrics=mpCrystal->GetSpaceGroup().GetNbSymmetrics(false,false);
+      const ScatteringComponentList *pScattCompList=&(mpCrystal->GetScatteringComponentList());
+      const long nbComp=pScattCompList->GetNbComponent();
+      for(long i=0;i<nbComp;i++)
+      {
+         //TODO: include f" en forward scattering factor ?
+         in[0][0]+= (*pScattCompList)(i).mpScattPow->GetForwardScatteringFactor(data.GetRadiationType())
+                   *(*pScattCompList)(i).mOccupancy
+                   *(*pScattCompList)(i).mDynPopCorr
+                   *nbSymmetrics*v;
+      }
+      //cout<<"F(000)="<<in[0][0]/v<<endl;
+   }
+   fftwf_execute(plan);
+   mPoints.resize(size,size,size);
+   REAL *p1=mPoints.data();
+   for(unsigned int i=0;i<size*size*size;i++) *p1++ =in[i][0] ;
+   mMean=mPoints.sum()/(REAL)(mPoints.numElements());
+   mMin=mPoints.min();
+   mMax=mPoints.max();
+   {
+      mStandardDeviation=0.0;
+      const REAL *tmp=mPoints.data();
+      for(long i=0;i<mPoints.numElements();i++)
+      {
+         mStandardDeviation += (*tmp-mMean) * (*tmp-mMean);
+         tmp++;
+      }
+      mStandardDeviation = sqrt(mStandardDeviation/(REAL)(mPoints.numElements()));
+   }
+   cout << "Min density value="<<mMin<<endl
+        << "Max density value="<<mMax<<endl
+        << "Mean density="<<mMean<<endl
+        << "Standard Deviation="<<mStandardDeviation<<endl;
+   fftwf_destroy_plan(plan);
+   fftwf_free(in);
+   mName=data.GetClassName()+":";
+   if(data.GetName()=="") mName+="?";
+   else mName+=data.GetName();
+   if(mType==0) mName+="(Fo)";
+   if(mType==1) mName+="(Fc)";
+   if(mType==2) mName+="(Fo-Fc)";
+   return 1;
+}
+#endif
 
-const string & UnitCellMapImport::GetName()const
+const string & UnitCellMap::GetName()const
 {
    return mName;
 }
 
-REAL UnitCellMapImport::GetValue(const REAL x,const REAL y,const REAL z)const
+REAL UnitCellMap::GetValue(const REAL x,const REAL y,const REAL z)const
 {
    const int nx=mPoints.cols();
    const int ny=mPoints.rows();
@@ -2015,20 +2118,23 @@ REAL UnitCellMapImport::GetValue(const REAL x,const REAL y,const REAL z)const
    if(iz<0) iz+=nz;
    return mPoints(iz,iy,ix);
 }
-REAL UnitCellMapImport::Max()const{return mMax;}
-REAL UnitCellMapImport::Min()const{return mMin;}
-REAL UnitCellMapImport::Mean()const{return mMean;}
-REAL UnitCellMapImport::StandardDeviation()const{return mStandardDeviation;}
+REAL UnitCellMap::Max()const{return mMax;}
+REAL UnitCellMap::Min()const{return mMin;}
+REAL UnitCellMap::Mean()const{return mMean;}
+REAL UnitCellMap::StandardDeviation()const{return mStandardDeviation;}
+int UnitCellMap::GetType()const{return mType;}
+const Crystal &UnitCellMap::GetCrystal()const{return *mpCrystal;}
+const ScatteringData *UnitCellMap::GetData()const{return mpData;}
 
 ////////////////////////////////////////////////////////////////////////
 //
 //    UnitCellMapGLList
 //
 ////////////////////////////////////////////////////////////////////////
-UnitCellMapGLList::UnitCellMapGLList(const bool showWire,
-                                     const float r,const float g,const float b,
-                                     const float t):
-mGLDisplayList(0),mShowWire(showWire)
+UnitCellMapGLList::UnitCellMapGLList(const UnitCellMap &ucmap,WXGLCrystalCanvas * parent,
+                                     const bool showWire,float contour,
+                                     const float r,const float g,const float b,const float t):
+mGLDisplayList(0),mShowWire(showWire),mShow(true),mContour(contour),mpUCMap(&ucmap),mpParent(parent)
 {
    VFN_DEBUG_MESSAGE("UnitCellMapGLList::UnitCellMapGLList()",10)
    this->SetColour(r,g,b,t);
@@ -2039,15 +2145,13 @@ UnitCellMapGLList::~UnitCellMapGLList()
    VFN_DEBUG_MESSAGE("UnitCellMapGLList::~UnitCellMapGLList()",10)
    if(0!=mGLDisplayList) glDeleteLists(mGLDisplayList,1);
 }
-void UnitCellMapGLList::GenList(const UnitCellMapImport &ucmap,
-				WXGLCrystalCanvas * parent,
-                                const float contourValue)
+void UnitCellMapGLList::GenList()
 {
    VFN_DEBUG_ENTRY("UnitCellMapGLList::GenList()",7)
    if(0==mGLDisplayList) mGLDisplayList=glGenLists(1);
    glNewList(mGLDisplayList,GL_COMPILE);
       glPushMatrix();
-      ucmap.GLInitDisplayList(contourValue, parent);
+      mpUCMap->GLInitDisplayList(mContour, mpParent);
       glPopMatrix();
    glEndList();
    VFN_DEBUG_EXIT("UnitCellMapGLList::GenList()",7)
@@ -2098,7 +2202,7 @@ void UnitCellMapGLList::Draw()const
       // and non-orthogonal unit cells
       glMaterialf( GL_FRONT, GL_SHININESS, 0.0); 
 
-      const GLfloat colorBack [] = {mColour[0]/3., mColour[1]/3., mColour[2]/3., 1.00}; 
+      const GLfloat colorBack [] = {mColour[0]/3., mColour[1]/3., mColour[2]/3., 0.5}; 
       glMaterialfv(GL_BACK, GL_AMBIENT, colorBack);
       glMaterialfv(GL_BACK, GL_DIFFUSE, colorBack);
       glMaterialfv(GL_BACK, GL_SPECULAR, colorBack);
@@ -2118,30 +2222,119 @@ const string &UnitCellMapGLList::GetName()const
 {
    return mName;
 }
+void UnitCellMapGLList::SetShow(bool show) {mShow=show;}
+bool UnitCellMapGLList::Show()const {return mShow;}
+void UnitCellMapGLList::SetContour(float contour) {mContour=contour;}
+float UnitCellMapGLList::GetContour()const {return mContour;}
+const UnitCellMap & UnitCellMapGLList::GetMap()const {return *mpUCMap;}
+////////////////////////////////////////////////////////////////////////
+//
+//    WXGLCrystalCanvas::WXFourierMapList
+//
+////////////////////////////////////////////////////////////////////////
+static const long ID_GLCRYSTAL_FOURIER_ADD=            WXCRYST_ID();
+static const long ID_GLCRYSTAL_FOURIER_REMOVE=         WXCRYST_ID();
+static const long ID_GLCRYSTAL_FOURIER_UPDATE=         WXCRYST_ID();
+static const long ID_GLCRYSTAL_FOURIER_WIREFRAME=      WXCRYST_ID();
+static const long ID_GLCRYSTAL_FOURIER_SHOW=           WXCRYST_ID();
+static const long ID_GLCRYSTAL_FOURIER_LISTMAP=        WXCRYST_ID();
+static const long ID_GLCRYSTAL_FOURIER_LISTGLMAP=      WXCRYST_ID();
+static const long ID_GLCRYSTAL_FOURIER_CONTOUR=        WXCRYST_ID();
+static const long ID_GLCRYSTAL_FOURIER_NEWCONTOUR=     WXCRYST_ID();
+static const long ID_GLCRYSTAL_FOURIER_COLOURPICKER=   WXCRYST_ID();
+
+WXGLCrystalCanvas::WXFourierMapList::WXFourierMapList(WXGLCrystalCanvas *pGLCrystalCanvas,wxWindow *parent):
+wxWindow(parent,-1),mpGLCrystalCanvas(pGLCrystalCanvas),mIsUpdating(false)
+{
+   this->SetFont(wxFont(8,wxTELETYPE,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL));
+   wxBoxSizer* pSizer=new wxBoxSizer(wxVERTICAL);
+   // Top buttons
+      wxBoxSizer* pSizerButtons=new wxBoxSizer(wxHORIZONTAL);
+      wxButton *pButtonUpdate=new wxButton(this,ID_GLCRYSTAL_FOURIER_UPDATE,_T("Update 3D View"));
+      mpWireFrame=new wxCheckBox(this,ID_GLCRYSTAL_FOURIER_WIREFRAME,_T("Wireframe"));
+      mpShowFourier=new wxCheckBox(this,ID_GLCRYSTAL_FOURIER_SHOW,_T("Show Fourier"));
+      pSizerButtons->Add(pButtonUpdate,0,wxALIGN_CENTER);
+      pSizerButtons->Add(mpWireFrame,0,wxALIGN_CENTER);
+      pSizerButtons->Add(mpShowFourier,0,wxALIGN_CENTER);
+      pSizer->Add(pSizerButtons,0,wxALIGN_CENTER);
+   
+   // Map lists
+      wxBoxSizer* pSizerMaps=new wxBoxSizer(wxHORIZONTAL);
+      
+      // Left column - available maps
+         wxBoxSizer* pSizerLeft=new wxBoxSizer(wxVERTICAL);
+         pSizerMaps->Add(pSizerLeft,0,wxALIGN_TOP);
+         
+         wxStaticText *mpLabel0=new wxStaticText(this,-1,_T("Available Maps"));
+         pSizerLeft->Add(mpLabel0,0,wxALIGN_CENTER);
+         mpAvailableMapList=new wxListBox(this,ID_GLCRYSTAL_FOURIER_LISTMAP,wxDefaultPosition,wxSize(250,150));
+         pSizerLeft->Add(mpAvailableMapList,0,wxALIGN_CENTER);
+         
+         mpMapInfo=new wxStaticText(this,-1,_T("min=+00.00 max=+00.00 sigma=00.00"));
+         pSizerLeft->Add(mpMapInfo,0,wxALIGN_CENTER);
+         
+         wxBoxSizer* pSizerLeft2=new wxBoxSizer(wxHORIZONTAL);
+         pSizerLeft->Add(pSizerLeft2,0,wxALIGN_CENTER);
+         wxStaticText *mpLabel2=new wxStaticText(this,-1,_T("New Contour:"));
+         mpNewContourValue=new wxTextCtrl(this,ID_GLCRYSTAL_FOURIER_NEWCONTOUR,_T(""),wxDefaultPosition,wxDefaultSize,wxTE_PROCESS_ENTER);
+         pSizerLeft2->Add(mpLabel2,0,wxALIGN_CENTER);
+         pSizerLeft2->Add(mpNewContourValue,0,wxALIGN_CENTER);
+      
+         wxButton *pButtonAdd=new wxButton(this,ID_GLCRYSTAL_FOURIER_ADD,_T("Add"));
+         pSizerLeft->Add(pButtonAdd,0,wxALIGN_CENTER);
+      
+      pSizerMaps->AddSpacer(5);
+      // Right column - displayed maps & contours
+         wxBoxSizer* pSizerRight=new wxBoxSizer(wxVERTICAL);
+         pSizerMaps->Add(pSizerRight,0,wxALIGN_TOP);
+         
+         wxStaticText *mpLabel0r=new wxStaticText(this,-1,_T("Displayed Maps"));
+         pSizerRight->Add(mpLabel0r,0,wxALIGN_CENTER);
+         mpDisplayedMapList=new wxListBox(this,ID_GLCRYSTAL_FOURIER_LISTGLMAP,wxDefaultPosition,wxSize(250,150));
+         pSizerRight->Add(mpDisplayedMapList,0,wxALIGN_CENTER);
+         
+         wxBoxSizer* pSizerRight1=new wxBoxSizer(wxHORIZONTAL);
+         pSizerRight->Add(pSizerRight1,0,wxALIGN_CENTER);
+         wxStaticText *mpLabel3=new wxStaticText(this,-1,_T("Contour:"));
+         mpContourValue=new wxTextCtrl(this,ID_GLCRYSTAL_FOURIER_CONTOUR,_T(""),wxDefaultPosition,wxDefaultSize,wxTE_PROCESS_ENTER);
+         pSizerRight1->Add(mpLabel3,0,wxALIGN_CENTER);
+         pSizerRight1->Add(mpContourValue,0,wxALIGN_CENTER);
+         
+         mpColourPicker=new wxColourPickerCtrl(this, ID_GLCRYSTAL_FOURIER_COLOURPICKER, *wxRED, wxDefaultPosition, wxDefaultSize,wxCLRP_USE_TEXTCTRL);
+         wxButton *pButtonRemove=new wxButton(this,ID_GLCRYSTAL_FOURIER_REMOVE,_T("Remove"));
+         pSizerRight->Add(mpColourPicker,0,wxALIGN_CENTER);
+         pSizerRight->Add(pButtonRemove,0,wxALIGN_CENTER);
+      pSizer->Add(pSizerMaps,0,wxALIGN_CENTER);
+   this->SetSizer(pSizer);
+   this->SetAutoLayout(true);
+   pSizer->SetSizeHints(this);
+   pSizer->SetSizeHints(parent);
+   this->Layout();
+}
+WXGLCrystalCanvas::WXFourierMapList::~WXFourierMapList()
+{
+   mpGLCrystalCanvas->NotifyDeleteFourierWin();
+}
 
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXGLCrystalCanvas
 //
 ////////////////////////////////////////////////////////////////////////
-static const long ID_GLCRYSTAL_MENU_SHOWATOMLABEL=     WXCRYST_ID(); 
-static const long ID_GLCRYSTAL_MENU_SHOWCURSOR=        WXCRYST_ID(); 
-static const long ID_GLCRYSTAL_MENU_SETCURSOR=        WXCRYST_ID(); 
-static const long ID_GLCRYSTAL_UPDATEUI=               WXCRYST_ID(); 
-static const long ID_GLCRYSTAL_MENU_CHANGELIMITS=      WXCRYST_ID(); 
-static const long ID_GLCRYSTAL_MENU_LIMITS_FULLCELL=   WXCRYST_ID(); 
-static const long ID_GLCRYSTAL_MENU_LIMITS_ASYMCELL=   WXCRYST_ID(); 
-static const long ID_GLCRYSTAL_MENU_SHOWCRYSTAL=       WXCRYST_ID(); 
-static const long ID_GLCRYSTAL_MENU_LOADFOURIERGRD=    WXCRYST_ID(); 
-static const long ID_GLCRYSTAL_MENU_LOADFOURIERDSN6=   WXCRYST_ID(); 
-static const long ID_GLCRYSTAL_MENU_CHANGECONTOUR=     WXCRYST_ID(); 
-static const long ID_GLCRYSTAL_MENU_ADDCONTOUR=        WXCRYST_ID(); 
-static const long ID_GLCRYSTAL_MENU_SHOWFOURIER=       WXCRYST_ID(); 
-static const long ID_GLCRYSTAL_MENU_FOURIERCHANGECOLOR=WXCRYST_ID(); 
-static const long ID_GLCRYSTAL_MENU_SHOWWIRE=          WXCRYST_ID(); 
-static const long ID_GLCRYSTAL_MENU_UNLOADFOURIER=     WXCRYST_ID(); 
-static const long ID_GLCRYSTAL_MENU_FOURIERCHANGEBBOX= WXCRYST_ID(); 
-static const long ID_GLCRYSTAL_MENU_POVRAY=            WXCRYST_ID(); 
+static const long ID_GLCRYSTAL_MENU_SHOWATOMLABEL=     WXCRYST_ID();
+static const long ID_GLCRYSTAL_MENU_SHOWCURSOR=        WXCRYST_ID();
+static const long ID_GLCRYSTAL_MENU_SETCURSOR=        WXCRYST_ID();
+static const long ID_GLCRYSTAL_UPDATEUI=               WXCRYST_ID();
+static const long ID_GLCRYSTAL_MENU_CHANGELIMITS=      WXCRYST_ID();
+static const long ID_GLCRYSTAL_MENU_LIMITS_FULLCELL=   WXCRYST_ID();
+static const long ID_GLCRYSTAL_MENU_LIMITS_ASYMCELL=   WXCRYST_ID();
+static const long ID_GLCRYSTAL_MENU_SHOWCRYSTAL=       WXCRYST_ID();
+static const long ID_GLCRYSTAL_MENU_FOURIER=           WXCRYST_ID();
+static const long ID_GLCRYSTAL_MENU_LOADFOURIERGRD=    WXCRYST_ID();
+static const long ID_GLCRYSTAL_MENU_LOADFOURIERDSN6=   WXCRYST_ID();
+//static const long ID_GLCRYSTAL_MENU_UNLOADFOURIER=     WXCRYST_ID();
+static const long ID_GLCRYSTAL_MENU_POVRAY=            WXCRYST_ID();
+      
 
 BEGIN_EVENT_TABLE(WXGLCrystalCanvas, wxGLCanvas)
    EVT_SIZE             (WXGLCrystalCanvas::OnSize)
@@ -2158,14 +2351,19 @@ BEGIN_EVENT_TABLE(WXGLCrystalCanvas, wxGLCanvas)
    EVT_MENU             (ID_GLCRYSTAL_MENU_SETCURSOR,           WXGLCrystalCanvas::OnSetCursor)
    EVT_MENU             (ID_GLCRYSTAL_MENU_LOADFOURIERGRD,      WXGLCrystalCanvas::OnLoadFourierGRD)
    EVT_MENU             (ID_GLCRYSTAL_MENU_LOADFOURIERDSN6,     WXGLCrystalCanvas::OnLoadFourierDSN6)
-   EVT_MENU             (ID_GLCRYSTAL_MENU_CHANGECONTOUR,       WXGLCrystalCanvas::OnChangeContour)
-   EVT_MENU             (ID_GLCRYSTAL_MENU_ADDCONTOUR,          WXGLCrystalCanvas::OnAddContour)
-   EVT_MENU             (ID_GLCRYSTAL_MENU_SHOWFOURIER,         WXGLCrystalCanvas::OnShowFourier)
-   EVT_MENU             (ID_GLCRYSTAL_MENU_FOURIERCHANGECOLOR,  WXGLCrystalCanvas::OnFourierChangeColor)
-   EVT_MENU             (ID_GLCRYSTAL_MENU_SHOWWIRE,            WXGLCrystalCanvas::OnShowWire)
-   EVT_MENU             (ID_GLCRYSTAL_MENU_UNLOADFOURIER,       WXGLCrystalCanvas::OnUnloadFourier)
-   EVT_MENU             (ID_GLCRYSTAL_MENU_FOURIERCHANGEBBOX,   WXGLCrystalCanvas::OnFourierChangeBbox)
+//   EVT_MENU             (ID_GLCRYSTAL_MENU_UNLOADFOURIER,       WXGLCrystalCanvas::OnUnloadFourier)
    EVT_MENU             (ID_GLCRYSTAL_MENU_POVRAY,              WXGLCrystalCanvas::OnPOVRay)
+   EVT_MENU             (ID_GLCRYSTAL_MENU_FOURIER,             WXGLCrystalCanvas::OnFourier)
+   EVT_LISTBOX          (ID_GLCRYSTAL_FOURIER_LISTGLMAP,        WXGLCrystalCanvas::OnFourier)
+   EVT_LISTBOX          (ID_GLCRYSTAL_FOURIER_LISTMAP,          WXGLCrystalCanvas::OnFourier)
+   EVT_BUTTON           (ID_GLCRYSTAL_FOURIER_ADD,              WXGLCrystalCanvas::OnFourier)
+   EVT_BUTTON           (ID_GLCRYSTAL_FOURIER_REMOVE,           WXGLCrystalCanvas::OnFourier)
+   EVT_BUTTON           (ID_GLCRYSTAL_FOURIER_UPDATE,           WXGLCrystalCanvas::OnFourier)
+   EVT_CHECKBOX         (ID_GLCRYSTAL_FOURIER_WIREFRAME,        WXGLCrystalCanvas::OnFourier)
+   EVT_CHECKBOX         (ID_GLCRYSTAL_FOURIER_SHOW,             WXGLCrystalCanvas::OnFourier)
+   EVT_TEXT_ENTER       (ID_GLCRYSTAL_FOURIER_NEWCONTOUR,       WXGLCrystalCanvas::OnFourier)
+   EVT_TEXT_ENTER       (ID_GLCRYSTAL_FOURIER_CONTOUR,          WXGLCrystalCanvas::OnFourier)
+   EVT_COLOURPICKER_CHANGED(ID_GLCRYSTAL_FOURIER_COLOURPICKER,  WXGLCrystalCanvas::OnFourierChangeColour)
    EVT_CHAR             (WXGLCrystalCanvas::OnKeyDown)
    EVT_KEY_DOWN         (WXGLCrystalCanvas::OnKeyDown)
    EVT_KEY_UP           (WXGLCrystalCanvas::OnKeyUp)
@@ -2179,7 +2377,7 @@ WXGLCrystalCanvas::WXGLCrystalCanvas(WXCrystal *wxcryst,
 wxGLCanvas(parent,id,pos,size,wxDEFAULT_FRAME_STYLE),mpParentFrame(parent),
 mpWXCrystal(wxcryst),mIsGLInit(false),mDist(60),mX0(0),mY0(0),mZ0(0),mViewAngle(15),
 mShowFourier(true),mShowCrystal(true),mShowAtomName(true),mShowCursor(false),
-mIsGLFontBuilt(false),mGLFontDisplayListBase(0)
+mIsGLFontBuilt(false),mGLFontDisplayListBase(0),mpFourierMapListWin(0)
 {
    VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::WXGLCrystalCanvas()",3)
    mcellbbox.xMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmin()-0.1;
@@ -2205,22 +2403,13 @@ mIsGLFontBuilt(false),mGLFontDisplayListBase(0)
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SETCURSOR, "Set view cntr and cursor pos.");
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_POVRAY, "Create POVRay file");
    mpPopUpMenu->AppendSeparator();
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_FOURIER, "Fourier Maps");
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_LOADFOURIERGRD, "Load GRD Fourier Map");	
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_LOADFOURIERDSN6,"Load DSN6 Fourier Map");	
-   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_CHANGECONTOUR, "Change Contour Value");
-   mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_CHANGECONTOUR, FALSE);	//disable it for now
-   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_ADDCONTOUR, "Add Contour Value");
-   mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_ADDCONTOUR, FALSE);	//disable it for now
-   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWFOURIER, "Hide Fourier Map");
-   mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_SHOWFOURIER, FALSE);
-   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_FOURIERCHANGECOLOR, "Change Fourier Color");
-   mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_FOURIERCHANGECOLOR, FALSE);
-   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWWIRE, "Toggle WireFrame/Filled");
-   mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_SHOWWIRE, FALSE);
+   /*
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_UNLOADFOURIER, "Unload Fourier Map(s)");
    mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_UNLOADFOURIER, FALSE);
-   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_FOURIERCHANGEBBOX, "Change Fourier Limits");
-   mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_FOURIERCHANGEBBOX, FALSE);	//disable it for now
+   */
    if(!wxConfigBase::Get()->HasEntry("Crystal/BOOL/Default-display only asymmetric unit cell in 3D view"))
       wxConfigBase::Get()->Write("Crystal/BOOL/Default-display only asymmetric unit cell in 3D view", true);
    else
@@ -2259,18 +2448,6 @@ mIsGLFontBuilt(false),mGLFontDisplayListBase(0)
 WXGLCrystalCanvas::~WXGLCrystalCanvas()
 {
    mpWXCrystal->NotifyCrystalGLDelete();
-   {
-      vector<UnitCellMapImport*>::iterator pos;
-      for(pos=mvpUnitCellMapImport.begin();pos != mvpUnitCellMapImport.end();pos++)
-         delete *pos;
-      mvpUnitCellMapImport.clear();
-   }
-   {
-      vector<pair<pair<const UnitCellMapImport*,float>,UnitCellMapGLList* > >::iterator pos;
-      for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();pos++)
-         delete pos->second;
-      mvpUnitCellMapGLList.clear();
-   }
    #ifndef HAVE_GLUT
    this->DeleteGLFont();
    #endif
@@ -2342,24 +2519,6 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
          glMatrixMode( GL_MODELVIEW );
       glPopMatrix();
    }
-   
-   if(mShowFourier)
-   {
-      glPushMatrix();
-         // The display origin is the center of the Crystal BoundingBox, so translate
-            BBox cellbbox = this->GetCellBBox();
-            REAL xc=(cellbbox.xMin+cellbbox.xMax)/2.;  
-            REAL yc=(cellbbox.yMin+cellbbox.yMax)/2.; 
-            REAL zc=(cellbbox.zMin+cellbbox.zMax)/2.; 
-            mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(xc, yc, zc);
-            glTranslatef(-xc, -yc, -zc);
-         // Draw all Fourier maps
-         vector<pair<pair<const UnitCellMapImport*,float>,UnitCellMapGLList* > >::
-            const_iterator pos;
-         for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();++pos)
-            pos->second->Draw();
-      glPopMatrix();
-   }
    if(mShowCrystal)
    {
       glCallList(mpWXCrystal->GetCrystalGLDisplayList());  //Draw Crystal
@@ -2408,16 +2567,34 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
       y=(mcellbbox.yMax+mcellbbox.yMin)/2.-y;
       z=(mcellbbox.zMax+mcellbbox.zMin)/2.-z;
       statusText.sprintf("Center@(%5.3f,%5.3f,%5.3f)",x,y,z);
-      for(unsigned int i=0;i<mvpUnitCellMapImport.size();++i)
+      for(unsigned int i=0;i<mvpUnitCellMap.size();++i)
       {
          wxString tmp;
          tmp=statusText;
          statusText.sprintf("%s, map(%s)=%5.2fe",tmp.c_str(),
-                            mvpUnitCellMapImport[i]->GetName().c_str(),
-                            mvpUnitCellMapImport[i]->GetValue(x,y,z));
+                            mvpUnitCellMap[i]->GetName().c_str(),
+                            mvpUnitCellMap[i]->GetValue(x,y,z));
       }
       mpParentFrame->SetStatusText(statusText);
-    }  
+   }
+   if(mShowFourier)
+   {
+      glDepthMask(false);
+      glPushMatrix();
+         // The display origin is the center of the Crystal BoundingBox, so translate
+            BBox cellbbox = this->GetCellBBox();
+            REAL xc=(cellbbox.xMin+cellbbox.xMax)/2.;  
+            REAL yc=(cellbbox.yMin+cellbbox.yMax)/2.; 
+            REAL zc=(cellbbox.zMin+cellbbox.zMax)/2.; 
+            mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(xc, yc, zc);
+            glTranslatef(-xc, -yc, -zc);
+         // Draw all Fourier maps
+         vector<boost::shared_ptr<UnitCellMapGLList> >::const_iterator pos;
+         for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();++pos)
+            if((*pos)->Show()) (*pos)->Draw();
+      glPopMatrix();
+      glDepthMask(true);
+   }
    glFlush();
    SwapBuffers();
    VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnPaint():End",7)
@@ -2673,7 +2850,98 @@ void WXGLCrystalCanvas::OnUpdate(wxCommandEvent & WXUNUSED(event))
 
 void WXGLCrystalCanvas::CrystUpdate()
 {
-   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::CrystUpdate()",7)
+   VFN_DEBUG_ENTRY("WXGLCrystalCanvas::CrystUpdate()",10)
+   
+   // Update the list of available maps & update the displayed ones
+   if(mpFourierMapListWin!=0) mpFourierMapListWin->mMutex.Lock();
+   // Remove maps that cannot be computed any more
+   for(vector<boost::shared_ptr<UnitCellMap> >::iterator pos=mvpUnitCellMap.begin();pos!=mvpUnitCellMap.end();++pos)
+   {
+      bool keep=false;
+      if(((*pos)->GetType()==0)||((*pos)->GetType()==2))
+      {
+      cout<<"WXGLCrystalCanvas::CrystUpdate()"<<endl<<(*pos)->GetName()<<(*pos)->GetType()<<" "
+          <<mpWXCrystal->GetCrystal().GetScatteringComponentList().GetNbComponent()<<","
+          <<(*pos)->GetData()->GetFhklObsSq().numElements()<<endl;
+         if(mpWXCrystal->GetCrystal().GetClientRegistry().Find((RefinableObj*)(*pos)->GetData())>=0)
+            if(mpWXCrystal->GetCrystal().GetScatteringComponentList().GetNbComponent()>0)
+               if((*pos)->GetData()->GetFhklObsSq().numElements()>0)
+                  keep=true;
+      }
+      if((*pos)->GetType()==1)
+      {
+         if(mpWXCrystal->GetCrystal().GetClientRegistry().Find((RefinableObj*)(*pos)->GetData())>=0)
+            if(mpWXCrystal->GetCrystal().GetScatteringComponentList().GetNbComponent()>0)
+               keep=true;
+      }
+      cout<<"WXGLCrystalCanvas::CrystUpdate()"<<(*pos)->GetName()<<(*pos)->GetType()<<":"<<keep<<endl;
+      if(!keep)
+      {
+         //erase corresponding gl maps
+         for(vector<boost::shared_ptr<UnitCellMapGLList> >::iterator 
+               posgl=mvpUnitCellMapGLList.begin();posgl!=mvpUnitCellMapGLList.end();++posgl)
+         {
+            if(&(**pos)==&((*posgl)->GetMap()))
+            {
+               cout<<"Erasing GL map:"<<(*posgl)->GetName()<<endl;
+               posgl=mvpUnitCellMapGLList.erase(posgl);
+               if(posgl==mvpUnitCellMapGLList.end()) break;
+            }
+         }
+         pos=mvpUnitCellMap.erase(pos);
+         if(pos==mvpUnitCellMap.end()) break;
+      }
+      else if((*pos)->GetType()!=-1)
+      {
+         #ifdef HAVE_FFTW
+         cout<<"Updating Fourier map:"<<(*pos)->GetName()<<endl;
+         (*pos)->CalcFourierMap(*((*pos)->GetData()),(*pos)->GetType());
+         #endif
+      }
+   }
+   #ifdef HAVE_FFTW
+   // Add newly computable maps
+   if(mpWXCrystal->GetCrystal().GetScatteringComponentList().GetNbComponent()>0)
+      for(int i=0;i<mpWXCrystal->GetCrystal().GetClientRegistry().GetNb();++i)
+      {
+         ScatteringData* data=dynamic_cast<ScatteringData *>(&(mpWXCrystal->GetCrystal().GetClientRegistry().GetObj(i)));
+         
+         if(data!=0)
+         {
+            // Add if not already listed
+            bool addCalcMap=true,addObsDiffMaps=true;
+            for(vector<boost::shared_ptr<UnitCellMap> >::iterator pos=mvpUnitCellMap.begin();pos!=mvpUnitCellMap.end();++pos)
+               if((*pos)->GetData()==data)
+               {
+                  if((*pos)->GetType()==1) addCalcMap=false;
+                  if((*pos)->GetType()==0) addObsDiffMaps=false;//type==2 will also be there
+               }
+            if(addCalcMap)
+            {
+               mvpUnitCellMap.push_back(boost::shared_ptr<UnitCellMap>(new UnitCellMap(mpWXCrystal->GetCrystal())));
+               mvpUnitCellMap.back()->CalcFourierMap(*data);
+            }
+            if(addObsDiffMaps && (data->GetFhklObsSq().numElements()>0) )
+            {
+               mvpUnitCellMap.push_back(boost::shared_ptr<UnitCellMap>(new UnitCellMap(mpWXCrystal->GetCrystal())));
+               mvpUnitCellMap.back()->CalcFourierMap(*data,0);
+               mvpUnitCellMap.push_back(boost::shared_ptr<UnitCellMap>(new UnitCellMap(mpWXCrystal->GetCrystal())));
+               mvpUnitCellMap.back()->CalcFourierMap(*data,2);
+            }
+            break;
+         }
+      }
+   #endif
+   //update GL maps
+   for(vector<boost::shared_ptr<UnitCellMapGLList> >::iterator 
+         pos=mvpUnitCellMapGLList.begin();pos!=mvpUnitCellMapGLList.end();++pos)
+   {
+      cout<<"Updating GL map:"<<(*pos)->GetName()<<endl;
+      (*pos)->GenList();
+   }
+   if(mpFourierMapListWin!=0) mpFourierMapListWin->mMutex.Unlock();
+   VFN_DEBUG_EXIT("WXGLCrystalCanvas::CrystUpdate()",10)
+
    wxUpdateUIEvent event(ID_GLCRYSTAL_UPDATEUI);
    wxPostEvent(this,event);
 }
@@ -2681,6 +2949,34 @@ void WXGLCrystalCanvas::CrystUpdate()
 void WXGLCrystalCanvas::OnUpdateUI(wxUpdateUIEvent& WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXGLCrystalCanvas::OnUpdateUI()",5)
+   if(mpFourierMapListWin!=0)
+   {
+      mpFourierMapListWin->mIsUpdating=true;
+      mpFourierMapListWin->mMutex.Lock();
+      
+      wxArrayString maps;
+      for(vector<boost::shared_ptr<UnitCellMap> >::iterator 
+          pos=mvpUnitCellMap.begin();pos!=mvpUnitCellMap.end();++pos)
+            maps.Add((*pos)->GetName());
+      if(mpFourierMapListWin->mpAvailableMapList->GetStrings()!=maps)
+         mpFourierMapListWin->mpAvailableMapList->Set(maps);
+      
+      wxArrayString glmaps;
+      for(vector<boost::shared_ptr<UnitCellMapGLList> >::iterator 
+          pos=mvpUnitCellMapGLList.begin();pos!=mvpUnitCellMapGLList.end();++pos)
+            glmaps.Add((*pos)->GetName());
+      if(mpFourierMapListWin->mpDisplayedMapList->GetStrings()!=glmaps)
+         mpFourierMapListWin->mpDisplayedMapList->Set(glmaps);
+      
+      if(mpFourierMapListWin->mpAvailableMapList->GetSelection()>=0)
+      {
+         boost::shared_ptr<ObjCryst::UnitCellMap> pMap=mvpUnitCellMap[mpFourierMapListWin->mpAvailableMapList->GetSelection()];
+         mpFourierMapListWin->mpMapInfo->SetLabel(wxString::Format(_T("min=%5.2f max=%5.2f sigma=%5.2f"),
+                                                pMap->Min(),pMap->Max(),pMap->StandardDeviation()));
+      }
+      mpFourierMapListWin->mMutex.Unlock();
+      mpFourierMapListWin->mIsUpdating=false;
+   }
    this->Refresh(false);
    VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnUpdateUI()",5)
 }
@@ -2695,6 +2991,11 @@ void WXGLCrystalCanvas::SetCurrent()
    #endif
 }
 
+void WXGLCrystalCanvas::NotifyDeleteFourierWin()
+{
+   mpFourierMapListWin=0;
+}
+
 void WXGLCrystalCanvas::InitGL()
 {
    VFN_DEBUG_ENTRY("WXGLCrystalCanvas::InitGL()",8)
@@ -2702,6 +3003,8 @@ void WXGLCrystalCanvas::InitGL()
     
    glEnable(GL_DEPTH_TEST);
    glEnable(GL_LIGHTING);
+   //glEnable (GL_BLEND);
+   //glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
    
    const GLfloat colour_Ambient [] = {0.4, 0.4, 0.4, 1.00}; 
    const GLfloat colour_Diffuse [] = {0.6, 0.6, 0.6, 1.00}; 
@@ -2751,6 +3054,12 @@ void WXGLCrystalCanvas::OnChangeLimits(wxCommandEvent &event)
       mcellbbox.xMax =  1.1;
       mcellbbox.yMax =  1.1;
       mcellbbox.zMax =  1.1;
+      vector<boost::shared_ptr<UnitCellMapGLList> >::iterator pos;
+      for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();pos++)
+      {
+         wxBusyInfo wait("Processing Fourier Map...");
+         (*pos)->GenList();
+      }
    }
    if(event.GetId()==ID_GLCRYSTAL_MENU_LIMITS_ASYMCELL)
    {
@@ -2760,6 +3069,12 @@ void WXGLCrystalCanvas::OnChangeLimits(wxCommandEvent &event)
       mcellbbox.xMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmax()+0.1;
       mcellbbox.yMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Ymax()+0.1;
       mcellbbox.zMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Zmax()+0.1;
+      vector<boost::shared_ptr<UnitCellMapGLList> >::iterator pos;
+      for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();pos++)
+      {
+         wxBusyInfo wait("Processing Fourier Map...");
+         (*pos)->GenList();
+      }
    }
    if(event.GetId()==ID_GLCRYSTAL_MENU_CHANGELIMITS)
    {
@@ -2774,11 +3089,11 @@ void WXGLCrystalCanvas::OnChangeLimits(wxCommandEvent &event)
 			    mcellbbox.xMin,mcellbbox.xMax,
 			    mcellbbox.yMin,mcellbbox.yMax,
 			    mcellbbox.zMin,mcellbbox.zMax);
-         vector<pair<pair<const UnitCellMapImport*,float>,UnitCellMapGLList* > >::iterator pos;
+         vector<boost::shared_ptr<UnitCellMapGLList> >::iterator pos;
          for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();pos++)
          {
             wxBusyInfo wait("Processing Fourier Map...");
-            pos->second->GenList(*(pos->first.first),this, pos->first.second);
+            (*pos)->GenList();
          }
          VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnChangeLimits (X: " << 
 		         mcellbbox.xMin << ", " << mcellbbox.xMax << 
@@ -2849,6 +3164,105 @@ void WXGLCrystalCanvas::OnSetCursor( wxCommandEvent & WXUNUSED(event))
      Refresh(FALSE);
   }
 }
+void WXGLCrystalCanvas::OnFourier(wxCommandEvent &event)
+{
+   if(event.GetId()==ID_GLCRYSTAL_MENU_FOURIER)
+   {
+      if(mpFourierMapListWin!=0) return;
+      wxMiniFrame *frame= new wxMiniFrame(this,-1,("Available Fourier maps for "+mpWXCrystal->GetCrystal().GetName()).c_str(),
+                                          wxDefaultPosition,wxSize(300,300),wxCLOSE_BOX|wxSTAY_ON_TOP|wxCAPTION);
+      mpFourierMapListWin=new WXFourierMapList(this,frame);
+      mpFourierMapListWin->mpWireFrame->SetValue(true);
+      mpFourierMapListWin->mpShowFourier->SetValue(mShowFourier);
+      frame->Show(true);
+      mpWXCrystal->GetCrystal().UpdateDisplay();
+      return;
+   }
+   if(mpFourierMapListWin==0) return;
+   if(mpFourierMapListWin->mIsUpdating) return;
+   if(  (event.GetId()==ID_GLCRYSTAL_FOURIER_UPDATE)
+      ||(event.GetId()==ID_GLCRYSTAL_FOURIER_CONTOUR))
+   {
+      mpFourierMapListWin->mMutex.Lock();
+      //Changed colour or contour ?
+      unsigned int choice=mpFourierMapListWin->mpDisplayedMapList->GetSelection();
+      if(wxNOT_FOUND!=choice)
+      {
+         double contour;
+         mpFourierMapListWin->mpContourValue->GetValue().ToDouble(&contour);
+         wxColour col(mpFourierMapListWin->mpColourPicker->GetColour());
+         if(abs((float)contour-mvpUnitCellMapGLList[choice]->GetContour())>.0001)
+         {
+            wxBusyInfo wait("Processing Fourier Map...");
+            mvpUnitCellMapGLList[choice]->SetContour((float)contour);
+            mvpUnitCellMapGLList[choice]->GenList();
+         }
+         mvpUnitCellMapGLList[choice]->SetColour(col.Red()/255.0,col.Green()/255.0,col.Blue()/255.0,0.5);
+      }
+      mpFourierMapListWin->mMutex.Unlock();
+      mpWXCrystal->GetCrystal().UpdateDisplay();
+   }
+   mpFourierMapListWin->mMutex.Lock();
+   if(event.GetId()==ID_GLCRYSTAL_FOURIER_LISTMAP)
+   {// Selected one map
+      if(mpFourierMapListWin->mpAvailableMapList->GetSelection()>=0)
+      {
+         boost::shared_ptr<ObjCryst::UnitCellMap> pMap=mvpUnitCellMap[mpFourierMapListWin->mpAvailableMapList->GetSelection()];
+         mpFourierMapListWin->mpMapInfo->SetLabel(wxString::Format(_T("min=%5.2f max=%5.2f sigma=%5.2f"),
+                                                pMap->Min(),pMap->Max(),pMap->StandardDeviation()));
+      }
+   }
+   if(event.GetId()==ID_GLCRYSTAL_FOURIER_LISTGLMAP)
+   {
+      if(mpFourierMapListWin->mpDisplayedMapList->GetSelection()>=0)
+      {
+         boost::shared_ptr<UnitCellMapGLList> pMap=mvpUnitCellMapGLList[mpFourierMapListWin->mpDisplayedMapList->GetSelection()];
+         mpFourierMapListWin->mpContourValue->SetValue(wxString::Format(_T("%5.2f"),pMap->GetContour()));
+         mpFourierMapListWin->mpColourPicker->SetColour(wxColour(pMap->GetColour()[0]*255,pMap->GetColour()[1]*255,
+                                                                 pMap->GetColour()[2]*255,pMap->GetColour()[3]*255));
+      }
+   }
+   if((event.GetId()==ID_GLCRYSTAL_FOURIER_ADD)||(event.GetId()==ID_GLCRYSTAL_FOURIER_NEWCONTOUR))
+   {
+      if(mpFourierMapListWin->mpAvailableMapList->GetSelection()!=wxNOT_FOUND)
+      {
+         mpFourierMapListWin->mMutex.Unlock();
+         boost::shared_ptr<ObjCryst::UnitCellMap> pMap=mvpUnitCellMap[mpFourierMapListWin->mpAvailableMapList->GetSelection()];
+         double contour=0;
+         wxString scontour=mpFourierMapListWin->mpNewContourValue->GetValue();
+         if(scontour=="") contour=pMap->Min()+pMap->StandardDeviation()*3;
+         else scontour.ToDouble(&contour);
+         wxColor ncolor(255,0,0);
+         ncolor = wxGetColourFromUser((wxWindow*)this, ncolor);
+   
+         wxBusyInfo wait("Processing Fourier Map...");
+         mvpUnitCellMapGLList.push_back(boost::shared_ptr<UnitCellMapGLList>(new UnitCellMapGLList(*pMap,this,true,(float)contour)));
+         mvpUnitCellMapGLList.back()->SetName(pMap->GetName());
+         mvpUnitCellMapGLList.back()->SetColour(ncolor.Red()/255.0,ncolor.Green()/255.0,ncolor.Blue()/255.0,0.5);
+         mpFourierMapListWin->mMutex.Unlock();
+         this->SetCurrent();
+         mvpUnitCellMapGLList.back()->GenList();
+      }
+   }
+   if(event.GetId()==ID_GLCRYSTAL_FOURIER_REMOVE)
+   {
+      unsigned int choice=mpFourierMapListWin->mpDisplayedMapList->GetSelection();
+      if(wxNOT_FOUND!=choice)
+         mvpUnitCellMapGLList.erase(mvpUnitCellMapGLList.begin()+choice);
+   }
+   if(event.GetId()==ID_GLCRYSTAL_FOURIER_SHOW)
+   {
+      mShowFourier=mpFourierMapListWin->mpShowFourier->GetValue();
+   }
+   if(event.GetId()==ID_GLCRYSTAL_FOURIER_WIREFRAME)
+   {
+      vector<boost::shared_ptr<UnitCellMapGLList> >::iterator pos;
+      for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();pos++)
+         (*pos)->ToggleShowWire();
+   }
+   mpFourierMapListWin->mMutex.Unlock();
+   this->CrystUpdate();
+}
 
 void WXGLCrystalCanvas::OnLoadFourierGRD( wxCommandEvent & WXUNUSED(event))
 {
@@ -2858,7 +3272,7 @@ void WXGLCrystalCanvas::OnLoadFourierGRD( wxCommandEvent & WXUNUSED(event))
    if(fd.ShowModal() == wxID_OK)
    {
       const string filename=fd.GetPath().c_str();
-      UnitCellMapImport *pMap=new UnitCellMapImport(mpWXCrystal->GetCrystal());
+      UnitCellMap *pMap=new UnitCellMap(mpWXCrystal->GetCrystal());
       if (pMap->ImportGRD(filename) == 0)
       {
          string tmp="Error reading Fourier file:"+filename;
@@ -2877,7 +3291,7 @@ void WXGLCrystalCanvas::OnLoadFourierDSN6( wxCommandEvent & WXUNUSED(event))
    if(fd.ShowModal() == wxID_OK)
    {
       const string filename=fd.GetPath().c_str();
-      UnitCellMapImport *pMap=new UnitCellMapImport(mpWXCrystal->GetCrystal());
+      UnitCellMap *pMap=new UnitCellMap(mpWXCrystal->GetCrystal());
       if (pMap->ImportDSN6(filename) == 0)
       {
          string tmp="Error reading Fourier file:"+filename;
@@ -2888,157 +3302,51 @@ void WXGLCrystalCanvas::OnLoadFourierDSN6( wxCommandEvent & WXUNUSED(event))
    }
 }
 
-void WXGLCrystalCanvas::AddFourier(UnitCellMapImport *map)
+void WXGLCrystalCanvas::AddFourier(UnitCellMap *map)
 {
-   mvpUnitCellMapImport.push_back(map);
+   mvpUnitCellMap.push_back(boost::shared_ptr<UnitCellMap>(map));
    wxBusyInfo wait("Processing Fourier Map...");
    {
       float contour=map->Mean()+2*map->StandardDeviation();
       if(contour>map->Max()) contour=map->Mean()+0.75*(map->Max()-map->Mean());
-      mvpUnitCellMapGLList.push_back(make_pair(make_pair(mvpUnitCellMapImport.back(),contour),
-                                               new UnitCellMapGLList) );
+      mvpUnitCellMapGLList.push_back(boost::shared_ptr<UnitCellMapGLList>(new UnitCellMapGLList(*map,this)));
       switch(mvpUnitCellMapGLList.size())
       {
-         case 1: mvpUnitCellMapGLList.back().second->SetColour(1.,0.,0.,1.);break;
-         case 2: mvpUnitCellMapGLList.back().second->SetColour(0.,0.,1.,1.);break;
-         default:mvpUnitCellMapGLList.back().second->SetColour(0.,1.,0.,1.);break;
+         case 1: mvpUnitCellMapGLList.back()->SetColour(1.,0.,0.,.5);break;
+         case 2: mvpUnitCellMapGLList.back()->SetColour(0.,0.,1.,.5);break;
+         default:mvpUnitCellMapGLList.back()->SetColour(0.,1.,0.,.5);break;
       }
       this->SetCurrent();
-      mvpUnitCellMapGLList.back().second->GenList(*map,
-		     this, mvpUnitCellMapGLList.back().first.second);
-      mvpUnitCellMapGLList.back().second->SetName(map->GetName());
+      mvpUnitCellMapGLList.back()->GenList();
+      mvpUnitCellMapGLList.back()->SetName(map->GetName());
    }
-
-   mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_CHANGECONTOUR, TRUE);
-   mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_ADDCONTOUR, TRUE);
-   mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_SHOWFOURIER, TRUE);
-   mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_FOURIERCHANGECOLOR, TRUE);
-   mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_UNLOADFOURIER, TRUE);
-   mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_SHOWWIRE, TRUE);
-   mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_FOURIERCHANGEBBOX, TRUE);
    this->CrystUpdate();
 }
 
-void WXGLCrystalCanvas::OnChangeContour( wxCommandEvent & WXUNUSED(event))
+
+void WXGLCrystalCanvas::OnFourierChangeColour(wxColourPickerEvent  &event)
 {
-   int mapgl=this->UserSelectUnitCellMapGLList();
-   
-   double contourValue=(double) (mvpUnitCellMapGLList[mapgl].first.second);
-   wxString strValue;
-   strValue.Printf("%lf",contourValue);
-   wxTextEntryDialog contourValueDialog(this,"New contour value",
-                           "New contour value",strValue,wxOK | wxCANCEL);
-   if(wxID_OK!=contourValueDialog.ShowModal())
+   mpFourierMapListWin->mMutex.Lock();
+   //Changed colour or contour ?
+   unsigned int choice=mpFourierMapListWin->mpDisplayedMapList->GetSelection();
+   if(wxNOT_FOUND!=choice)
    {
-      return;
+      double contour;
+      mpFourierMapListWin->mpContourValue->GetValue().ToDouble(&contour);
+      wxColour col(mpFourierMapListWin->mpColourPicker->GetColour());
+      if(abs((float)contour-mvpUnitCellMapGLList[choice]->GetContour())>.0001)
+      {
+         wxBusyInfo wait("Processing Fourier Map...");
+         mvpUnitCellMapGLList[choice]->SetContour((float)contour);
+         mvpUnitCellMapGLList[choice]->GenList();
+      }
+      mvpUnitCellMapGLList[choice]->SetColour(col.Red()/255.0,col.Green()/255.0,col.Blue()/255.0,0.5);
    }
-   wxBusyInfo wait("Processing Fourier Map...");
-   contourValueDialog.GetValue().ToDouble(&contourValue);
-   mvpUnitCellMapGLList[mapgl].first.second = (float) contourValue;
-   mvpUnitCellMapGLList[mapgl].second->GenList(*(mvpUnitCellMapGLList[mapgl].first.first),
-					       this, mvpUnitCellMapGLList[mapgl].first.second);
-   this->CrystUpdate();
+   mpFourierMapListWin->mMutex.Unlock();
+   mpWXCrystal->GetCrystal().UpdateDisplay();
 }
 
-void WXGLCrystalCanvas::OnAddContour( wxCommandEvent & WXUNUSED(event))
-{
-   int map=this->UserSelectUnitCellMapImport();
-   
-   // Choose contour value
-      const REAL min  =mvpUnitCellMapImport[map]->Min();
-      const REAL max  =mvpUnitCellMapImport[map]->Max();
-      const REAL mean =mvpUnitCellMapImport[map]->Mean();
-      const REAL sigma=mvpUnitCellMapImport[map]->StandardDeviation();
-      double contour=mean+2*sigma;
-      if(contour>max) contour=mean+0.75*(max-mean);
-      wxString strValue;
-      strValue.Printf("%lf",contour);
-      wxString info;
-      info.Printf(_T("Add a new contour value\n")
-                  _T("For this map: min  =%6.3f\n")
-                  _T("              max  =%6.3f\n")
-                  _T("              mean =%6.3f\n")
-                  _T("              sigma=%6.3f\n\n")
-                  _T("Recommended values are mean + 2sigma\n")
-                  _T("i.e. %6.3f for a Fobs or Fcalc map\n")
-                  _T("or %6.3f and %6.3f for a Fobs-Fcalc map\n"),
-                  min,max,mean,sigma,
-                  mean+2*sigma,mean+2*sigma,mean-2*sigma
-                 );
-                  
-      wxTextEntryDialog contourValueDialog(this,info,
-                              "Add contour value",strValue,wxOK | wxCANCEL);
-      if(wxID_OK!=contourValueDialog.ShowModal())  return;
-      contourValueDialog.GetValue().ToDouble(&contour);
-   // Choose colour
-      wxColor ncolor(255,0,0);
-      ncolor = wxGetColourFromUser((wxWindow*)this, ncolor);   
-      if(!(ncolor.Ok())) return;
-   // Add display map
-      wxBusyInfo wait("Processing Fourier Map...");
-      mvpUnitCellMapGLList.push_back(make_pair(make_pair(mvpUnitCellMapImport[map],
-                                                         (float)contour),
-                                               new UnitCellMapGLList()) );
-      mvpUnitCellMapGLList.back().second->SetName(mvpUnitCellMapImport[map]->GetName());
-      mvpUnitCellMapGLList.back().second
-         ->SetColour(ncolor.Red()/255.0,ncolor.Green()/255.0,ncolor.Blue()/255.0,0.5);
-      this->SetCurrent();
-      mvpUnitCellMapGLList.back().second->GenList(*mvpUnitCellMapImport[map],
-						  this, mvpUnitCellMapGLList.back().first.second);
-      this->CrystUpdate();
-}
-
-void WXGLCrystalCanvas::OnShowFourier( wxCommandEvent & WXUNUSED(event))
-{
-   if(mShowFourier == TRUE) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWFOURIER, "Show Fourier Map");
-   else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWFOURIER, "Hide Fourier Map");
-   mShowFourier = !mShowFourier;
-   this->CrystUpdate();
-}
-
-void WXGLCrystalCanvas::OnFourierChangeColor( wxCommandEvent & WXUNUSED(event))
-{
-   int mapgl=this->UserSelectUnitCellMapGLList();
-   wxColor ncolor((char)(255*mvpUnitCellMapGLList[mapgl].second->GetColour()[0]),
-                  (char)(255*mvpUnitCellMapGLList[mapgl].second->GetColour()[1]),
-                  (char)(255*mvpUnitCellMapGLList[mapgl].second->GetColour()[2]));
-   ncolor = wxGetColourFromUser((wxWindow*)this, ncolor);   
-   if(ncolor.Ok()) 
-   {
-      mvpUnitCellMapGLList[mapgl].second
-         ->SetColour(ncolor.Red()/255.0,ncolor.Green()/255.0,ncolor.Blue()/255.0,0.5);
-      this->CrystUpdate();
-   }
-}
-
-void WXGLCrystalCanvas::OnFourierChangeBbox( wxCommandEvent & WXUNUSED(event))
-{
-  VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnFourierChangeBbox()",10)
-  // change Xmax if in default mode
-    BBox bbox = mmapbbox;
-  if (bbox.xMin == bbox.xMax) bbox.xMax += 1.0;
-  UserSelectBoundingBox *BoxDlg = new UserSelectBoundingBox(this,
-      "Set bounding box for display of\nFourier map (fractional coordinates)",
-       bbox);
-  if (BoxDlg->ShowModal() == wxID_OK ) {
-    mmapbbox =  BoxDlg->GetBBox();
-    vector<pair<pair<const UnitCellMapImport*,float>,UnitCellMapGLList* > >::iterator pos;
-    for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();pos++)
-         pos->second->GenList(*(pos->first.first),this, pos->first.second);
-
-    this->CrystUpdate();
-    VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnFourierChangeBbox (X: " << 
-		      mmapbbox.xMin << ", " << mmapbbox.xMax << 
-		      " Y: " << 
-		      mmapbbox.yMin << ", " << mmapbbox.yMax << 
-		      " Z: " << 
-		      mmapbbox.zMin << ", " << mmapbbox.zMax << 
-		      ")", 10)
-  }
-  BoxDlg->Destroy();
-  VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnFourierChangeBbox done",10)
-}
-
+/*
 void WXGLCrystalCanvas::OnUnloadFourier( wxCommandEvent & WXUNUSED(event))
 {
    wxMessageDialog * msure = new wxMessageDialog((wxWindow*)this,
@@ -3046,18 +3354,8 @@ void WXGLCrystalCanvas::OnUnloadFourier( wxCommandEvent & WXUNUSED(event))
      wxICON_QUESTION );
    if(msure->ShowModal() == wxID_YES)
    {
-      {
-         vector<UnitCellMapImport*>::iterator pos;
-         for(pos=mvpUnitCellMapImport.begin();pos != mvpUnitCellMapImport.end();pos++)
-            delete *pos;
-         mvpUnitCellMapImport.clear();
-      }
-      {
-         vector<pair<pair<const UnitCellMapImport*,float>,UnitCellMapGLList* > >::iterator pos;
-         for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();pos++)
-            delete pos->second;
-         mvpUnitCellMapGLList.clear();
-      }
+      mvpUnitCellMap.clear();
+      mvpUnitCellMapGLList.clear();
       mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWCRYSTAL, "Hide Crystal");
       mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_CHANGECONTOUR, FALSE);      //disable all of these
       mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_ADDCONTOUR, FALSE);      //disable all of these
@@ -3073,16 +3371,7 @@ void WXGLCrystalCanvas::OnUnloadFourier( wxCommandEvent & WXUNUSED(event))
    }
    delete msure;
 }
-
-void WXGLCrystalCanvas::OnShowWire( wxCommandEvent & WXUNUSED(event))
-{
-   vector<pair<pair<const UnitCellMapImport*,float>,UnitCellMapGLList* > >::iterator pos;
-   for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();pos++)
-      pos->second->ToggleShowWire();
-
-   this->CrystUpdate();
-}
-
+*/
 void WXGLCrystalCanvas::OnPOVRay( wxCommandEvent & WXUNUSED(event))
 {
    WXCrystValidateAllUserInput();
@@ -3218,12 +3507,11 @@ void WXGLCrystalCanvas::OnPOVRay( wxCommandEvent & WXUNUSED(event))
       }
 
       os<<"/////////////////// FOURIER MAPS///////////////////////////"<<endl;
-      vector<pair<pair<const UnitCellMapImport*,float>,UnitCellMapGLList* > >::
-         const_iterator pos;
+      vector<boost::shared_ptr<UnitCellMapGLList> >::const_iterator pos;
       for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();++pos)
       {
-         const float *prgbf=pos->second->GetColour();
-         if(pos->second->ShowWire())
+         const float *prgbf=(*pos)->GetColour();
+         if((*pos)->ShowWire())
          {
             os << "#macro ObjCrystMeshTriangle(x1,y1,z1,x2,y2,z2,x3,y3,z3,"
                << "nx1,ny1,nz1,nx2,ny2,nz2,nx3,ny3,nz3)"<<endl
@@ -3255,7 +3543,7 @@ void WXGLCrystalCanvas::OnPOVRay( wxCommandEvent & WXUNUSED(event))
                << "      no_shadow"<<endl
                << "   }"<<endl
                << "#end"<<endl<<endl;
-            pos->first.first->POVRayDescription(os,pos->first.second,options);
+            (*pos)->GetMap().POVRayDescription(os,(*pos)->GetContour(),options);
          }
          else
          {
@@ -3268,7 +3556,7 @@ void WXGLCrystalCanvas::OnPOVRay( wxCommandEvent & WXUNUSED(event))
                << "#end"<<endl<<endl;
             os << "   mesh"<<endl
                << "   {"<<endl;
-            pos->first.first->POVRayDescription(os,pos->first.second,options);
+            (*pos)->GetMap().POVRayDescription(os,(*pos)->GetContour(),options);
             os << "      texture"<<endl
                << "      {"<<endl
                << "         finish {ambient 0.5 diffuse 0.4}"<<endl
@@ -3285,54 +3573,15 @@ void WXGLCrystalCanvas::OnPOVRay( wxCommandEvent & WXUNUSED(event))
    }
 }
 
-int WXGLCrystalCanvas::UserSelectUnitCellMapGLList()const
-{
-   int mapgl=0;
-   if(mvpUnitCellMapGLList.size()>1)
-   {
-      wxString *pChoices=new wxString[mvpUnitCellMapGLList.size()];
-      for(unsigned int i=0;i<mvpUnitCellMapGLList.size();i++) 
-         (pChoices+i)->Printf("%s:contour=%5.3f,rgb=(%5.3f,%5.3f,%5.3f)",
-                           mvpUnitCellMapGLList[i].second->GetName().c_str(),
-                           mvpUnitCellMapGLList[i].first.second,
-                           mvpUnitCellMapGLList[i].second->GetColour()[0],
-                           mvpUnitCellMapGLList[i].second->GetColour()[1],
-                           mvpUnitCellMapGLList[i].second->GetColour()[2]);
-      wxSingleChoiceDialog dialog
-         ((wxWindow*)this,"Choose displayed map","Choose displayed map",
-          mvpUnitCellMapGLList.size(),pChoices,0,wxOK);
-      dialog.ShowModal();
-      mapgl=dialog.GetSelection();
-      delete[] pChoices;
-   }
-   return mapgl;
-}
-
-
-int WXGLCrystalCanvas::UserSelectUnitCellMapImport()const
-{
-   int map=0;
-   if(1<mvpUnitCellMapImport.size())
-   {
-      wxString *pChoices=new wxString[mvpUnitCellMapImport.size()];
-      for(unsigned int i=0;i<mvpUnitCellMapImport.size();i++) 
-         *(pChoices+i) = mvpUnitCellMapImport[i]->GetName().c_str();
-      wxSingleChoiceDialog dialog
-         ((wxWindow*)this,"Choose map","Choose map",
-          mvpUnitCellMapImport.size(),pChoices,0,wxOK);
-      dialog.ShowModal();
-      map=dialog.GetSelection();
-      delete[] pChoices;
-   }
-   return map;
-}
 
 BBox WXGLCrystalCanvas::GetCellBBox() {
   return mcellbbox;
 }
+
 BBox WXGLCrystalCanvas::GetMapBBox() {
   return mmapbbox;
 }
+
 void WXGLCrystalCanvas::UnProject(REAL &x, REAL &y, REAL &z)
 {
    GLdouble vx,vy,vz,junk;

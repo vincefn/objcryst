@@ -83,8 +83,17 @@ GL_WX_LIB :=
 GL_FLAGS :=
 endif
 
+#Using fftw
+ifneq ($(fftw),0)
+FFTW_LIB = -lfftw3f
+FFTW_FLAGS = -DHAVE_FFTW
+else
+FFTW_LIB :=
+FFTW_FLAGS :=
+endif
+
 #Set DEBUG options
-#for Blitz++: -ftemplate-depth-30 
+# $(DIR_CRYST)/../static-libs/lib/libfftw3f.a
 ifeq ($(debug),1)
    ifdef RPM_OPT_FLAGS
       # we are building a RPM !
@@ -92,8 +101,8 @@ ifeq ($(debug),1)
    else
       CPPFLAGS = -g -Wall -D__DEBUG__ 
    endif
-   DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS}
-   LOADLIBES = -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx -lnewmat ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS}
+   DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS} ${FFTW_FLAGS}
+   LOADLIBES = -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx -lnewmat ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS} ${FFTW_LIB}
 else
 # -march=athlon,pentiumpro
    ifdef RPM_OPT_FLAGS
@@ -104,10 +113,11 @@ else
       #CPPFLAGS = -O3 -w -ffast-math -march=athlon-xp -mmmx -msse -m3dnow -mfpmath=sse -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops -ftree-vectorize -ftree-vectorizer-verbose=0
       # AMD64 Opteron , with auto-vectorization
       #CPPFLAGS = -O3 -w -ffast-math -march=opteron -mmmx -msse -msse2 -m3dnow -mfpmath=sse -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops -ftree-vectorize -ftree-vectorizer-verbose=0
+      #default flags
       CPPFLAGS = -O3 -w -ffast-math -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops
    endif
-   DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS}
-   LOADLIBES = -s -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx -lnewmat ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS}
+   DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS} ${FFTW_FLAGS}
+   LOADLIBES = -s -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx -lnewmat ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS} ${FFTW_LIB}
 endif
 # Add to statically link: -nodefaultlibs -lgcc /usr/lib/libstdc++.a
 
@@ -160,4 +170,9 @@ $(DIR_STATIC_LIBS)/lib/libcctbx.a:
 	rm -Rf $(BUILD_DIR)/cctbx
 
 libcctbx: $(DIR_STATIC_LIBS)/lib/libcctbx.a
+
+libfftw: $(DIR_STATIC_LIBS)/lib/libfftw3f.a
+	cd $(BUILD_DIR) && tar -xjf fftw.tar.bz2
+	cd $(BUILD_DIR)/fftw && ./configure --enable-single --prefix $(DIR_STATIC_LIBS) && make install
+	rm -Rf $(BUILD_DIR)/fftw
 

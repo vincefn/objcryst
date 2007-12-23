@@ -27,11 +27,13 @@
 #define _VFN_WX_CRYSTAL_H_
 
 #include <list>
+#include "boost/shared_ptr.hpp"
 
 #include "wxCryst/wxRefinableObj.h"
 
 #include "wx/glcanvas.h"
 #include "wx/grid.h"
+#include "wx/clrpicker.h"
 
 #include "ObjCryst/Crystal.h"
 
@@ -173,15 +175,15 @@ class WXCrystal: public WXRefinableObj
 #ifdef OBJCRYST_GL
 /// Class to store a Fourier map, imported from another package.
 /// This can also generate a 3d view (OpenGL display list) of the map.
-class UnitCellMapImport
+class UnitCellMap
 {
    public:
       /** Creator
       *
       * \param crystal: the crystal correponding to this map 
       */
-      UnitCellMapImport(const Crystal&crystal);
-      ~UnitCellMapImport();
+      UnitCellMap(const Crystal&crystal);
+      ~UnitCellMap();
       /// Perform the OpenGL drawing, to be stored in an OpenGL Display List.
       /// Assumes the color and type of drawing (GL_LINE or GL_FILL) 
       /// is chosen before calling this display list.
@@ -200,6 +202,10 @@ class UnitCellMapImport
       * \param filename: the file with the fourier map
       */ 
       int ImportDSN6(const string&filename);
+      #ifdef HAVE_FFTW
+      /// Calculate Fourier map (0=obs,1=calc,2=diff) for a given scattering data object
+      int CalcFourierMap(const ScatteringData& data, unsigned int type=0);
+      #endif
       /// Name associated to this map (the filename)
       const string & GetName()const;
       /// Get the value of the map at a given set of fractionnal coordinates
@@ -212,12 +218,21 @@ class UnitCellMapImport
       REAL Mean()const;
       /// Standard Deviation of the map
       REAL StandardDeviation()const;
+      /// Type of map (-1=imported, 0=obs, 1=calc,2=diff)
+      int GetType()const;
+      /// Corresponding Crystal
+      const Crystal &GetCrystal()const;
+      /// For computed maps, the scattering data it corresponds to - otherwise NULL.
+      const ScatteringData *GetData()const;
+      
    private:
       /// The crystal corresponding to this map
       const Crystal *mpCrystal;
+      /// For computed maps, the scattering data it corresponds to - otherwise NULL.
+      const ScatteringData *mpData;
       /// The map data points
       CrystArray3D_REAL mPoints;
-      /// Name associated to this map (the filename)
+      /// Name associated to this map (the filename for imported maps)
       string mName;
       /// Min and max value of the map
       REAL mMin,mMax;
@@ -225,28 +240,28 @@ class UnitCellMapImport
       REAL mMean;
       /// Standard Deviation of the map
       REAL mStandardDeviation;
+      /// Type of map (-1=imported, 0=obs, 1=calc,2=diff)
+      int mType;
 };
 
 /// Class to store and execute OpenGL Display Lists of fourier maps.
 /// Only display information is kept here.
-class UnitCellMapGLList
+struct UnitCellMapGLList
 {
    public:
-      UnitCellMapGLList(const bool showWire=true,
-                        const float r=1.0,const float g=0.0,const float b=0.0,
-                        const float t=0.5);
+      UnitCellMapGLList(const UnitCellMap &ucmap,WXGLCrystalCanvas * parent,
+                        const bool showWire=true,float contour=1.0,
+                        const float r=1.0,const float g=0.0,const float b=0.0,const float t=0.5);
       ~UnitCellMapGLList();
-      /// Generates, or changes the display list.
-      void GenList(const UnitCellMapImport &ucmap,
-		   WXGLCrystalCanvas * parent,
-                   const float contourValue=1.);
+      /// Generates, or updates the display list.
+      void GenList();
       /// Change name for this map
       void SetName(const string &name);
       /// Name for this map
       const string &GetName()const;
       /// Change the color.
       void SetColour(const float r=1.0,const float g=0.0,const float b=0.0,
-                    const float t=1.0);
+                     const float t=1.0);
       /// Get the color, as a float[4] array
       const float* GetColour()const;
       /// Toggle show Wire/Filled
@@ -255,6 +270,16 @@ class UnitCellMapGLList
       bool ShowWire()const;
       /// Perform the OpenGL drawing
       void Draw()const;
+      /// Show this map ?
+      void SetShow(bool show);
+      /// Show this map ?
+      bool Show()const;
+      /// Change contour value
+      void SetContour(float contour);
+      /// Get contour value
+      float GetContour()const;
+      /// The Map
+      const UnitCellMap & GetMap()const;
    private:
       /// The index of the OpenGL display list
       unsigned int mGLDisplayList;
@@ -264,7 +289,16 @@ class UnitCellMapGLList
       bool mShowWire;
       /// The name associated with this map display
       string mName;
+      /// Show this ?
+      bool mShow;
+      /// The contour value
+      float mContour;
+      /// Corresponding UCMap
+      const UnitCellMap *mpUCMap;
+      /// Parent canvas for graphic context
+      WXGLCrystalCanvas *mpParent;
 };
+
 /// Class for 3D OpenGL display of Crystal structures
 class WXGLCrystalCanvas : public wxGLCanvas
 {
@@ -293,13 +327,16 @@ class WXGLCrystalCanvas : public wxGLCanvas
       void OnShowAtomLabel(wxCommandEvent & WXUNUSED(event));
       void OnShowCursor(wxCommandEvent & WXUNUSED(event));
       void OnSetCursor(wxCommandEvent & WXUNUSED(event));
+      /// Handle Fourier maps (display dialog, etc...)
+      void OnFourier(wxCommandEvent &event);
+      
       void OnLoadFourierGRD(wxCommandEvent & WXUNUSED(event));
       void OnLoadFourierDSN6(wxCommandEvent & WXUNUSED(event));
-      void AddFourier(UnitCellMapImport*);
+      void AddFourier(UnitCellMap*);
       void OnAddContour(wxCommandEvent & WXUNUSED(event));
       void OnChangeContour(wxCommandEvent & WXUNUSED(event));
       void OnShowFourier(wxCommandEvent & WXUNUSED(event));
-      void OnFourierChangeColor(wxCommandEvent & WXUNUSED(event));
+      void OnFourierChangeColour(wxColourPickerEvent  & event);
       void OnUnloadFourier(wxCommandEvent & WXUNUSED(event));
       void OnShowWire(wxCommandEvent & WXUNUSED(event));
       void OnFourierChangeBbox(wxCommandEvent & WXUNUSED(event));
@@ -310,6 +347,7 @@ class WXGLCrystalCanvas : public wxGLCanvas
       // get bounding box for display of Fourier map
       BBox GetMapBBox();
       virtual void SetCurrent();
+      void NotifyDeleteFourierWin();
    private:
       void InitGL();
       /// Shows a dialog to choose a displayed fourier map from one of those
@@ -317,7 +355,7 @@ class WXGLCrystalCanvas : public wxGLCanvas
       int UserSelectUnitCellMapGLList()const;
       /// Shows a dialog to choose a fourier map from one of those
       /// available.
-      int UserSelectUnitCellMapImport()const;
+      int UserSelectUnitCellMap()const;
       /** Transform (x,y) window coordinates to (x,y,z) coordinates in the
       * Crystal's orthonormal frame (with the origin at the center of the Unit Cell).
       *
@@ -355,30 +393,46 @@ class WXGLCrystalCanvas : public wxGLCanvas
       
       /// To display Fourier map
       bool mShowFourier, mShowCrystal, mShowAtomName, mShowCursor;
-      // bounding box for atoms to be included
+      /// bounding box for atoms to be included
       BBox mcellbbox;
-      // bounding box for display of Fourier map
+      /// bounding box for display of Fourier map
       BBox mmapbbox;
-      // position to use as center
+      /// position to use as center
       Triple mViewCntr;
 
-      /** Imported fourier maps
+      /** Fourier maps, imported or calculated.
       *
-      * :TODO: use an auto_ptr<UnitCellMapGLList>
+      * All diffraction data associated with this crystal will be listed here, for
+      * the different maps possible (obs, calc, obs-calc).
       */
-      vector<UnitCellMapImport* > mvpUnitCellMapImport;
+      vector<boost::shared_ptr<UnitCellMap> > mvpUnitCellMap;
       /** OpenGL display lists corresponding to Fourier maps.
       *
-      * We store 3 things in this list, a const pointer to the imported map,
-      * the contour level used, and a pointer to the display list used.
-      *
-      * :TODO: use an auto_ptr<UnitCellMapGLList>
       */
-      vector<pair<pair<const UnitCellMapImport*,float>,UnitCellMapGLList* > > mvpUnitCellMapGLList;
+      vector<boost::shared_ptr<UnitCellMapGLList> > mvpUnitCellMapGLList;
       
-      // Display lists for the font used to display strings
+      /// Display lists for the font used to display strings
       mutable bool mIsGLFontBuilt;
       mutable int mGLFontDisplayListBase;
+   /// Window to list available Fourier maps
+   class WXFourierMapList:public wxWindow
+   {
+      public:
+         WXFourierMapList(WXGLCrystalCanvas *pGLCrystalCanvas,wxWindow *parent);
+         ~WXFourierMapList();
+         wxCheckBox *mpWireFrame;
+         wxCheckBox *mpShowFourier;
+         wxListBox *mpAvailableMapList;
+         wxListBox *mpDisplayedMapList;
+         wxStaticText *mpMapInfo;
+         wxTextCtrl *mpNewContourValue;
+         wxTextCtrl *mpContourValue;
+         wxColourPickerCtrl *mpColourPicker;
+         WXGLCrystalCanvas *mpGLCrystalCanvas;
+         wxMutex mMutex;
+         bool mIsUpdating;
+   };
+   WXFourierMapList *mpFourierMapListWin;
    DECLARE_EVENT_TABLE()
 };
 #endif
