@@ -3169,8 +3169,8 @@ void WXGLCrystalCanvas::OnFourier(wxCommandEvent &event)
    if(event.GetId()==ID_GLCRYSTAL_MENU_FOURIER)
    {
       if(mpFourierMapListWin!=0) return;
-      wxMiniFrame *frame= new wxMiniFrame(this,-1,("Available Fourier maps for "+mpWXCrystal->GetCrystal().GetName()).c_str(),
-                                          wxDefaultPosition,wxSize(300,300),wxCLOSE_BOX|wxSTAY_ON_TOP|wxCAPTION);
+      wxFrame *frame= new wxMiniFrame(this,-1,("Available Fourier maps for "+mpWXCrystal->GetCrystal().GetName()).c_str(),
+                                          wxDefaultPosition,wxSize(300,300),wxCLOSE_BOX|wxCAPTION|wxSYSTEM_MENU);
       mpFourierMapListWin=new WXFourierMapList(this,frame);
       mpFourierMapListWin->mpWireFrame->SetValue(true);
       mpFourierMapListWin->mpShowFourier->SetValue(mShowFourier);
