@@ -72,10 +72,9 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 907
+#define __FOXREVISION__ 910
 
 static std::string foxVersion=std::string("1.7.X(Beta)-Revision#")+string("__FOXREVISION__");
-
 
 // ----------------------------------------------------------------------------
 // Speed test
@@ -131,12 +130,16 @@ public:
    void OnToggleTooltips(wxCommandEvent& event);
    void OnPreferences(wxCommandEvent& event);
    void OnCheckUpdate(wxCommandEvent& event);
-   std::map<unsigned int,pair<int,wxString> > GetUpdates()const;
 private:
     DECLARE_EVENT_TABLE()
     RefinableObjClock mClockLastSave;
     wxNotebook *mpNotebook;
+    /// List of available updates
+   std::map<unsigned int,pair<int,wxString> > mvUpdates;
+   /// Are we during an autocheck ?
+   bool mvUpdatesAutoCheck;
 };
+
 // ----------------------------------------------------------------------------
 // For messaging the user
 // ----------------------------------------------------------------------------
@@ -178,40 +181,90 @@ static const long MENU_DEBUG_TEST1=                    WXCRYST_ID();
 static const long MENU_DEBUG_TEST2=                    WXCRYST_ID();
 static const long MENU_DEBUG_TEST3=                    WXCRYST_ID();
 
+/// Separate thread to check for updates////////////////////////////////////////////////////////////
+static const long ID_FOX_UPDATES_RESULT=               WXCRYST_ID();
+
+class WXThreadCheckUpdates:public wxThread
+{
+   public:
+      WXThreadCheckUpdates(std::map<unsigned int,pair<int,wxString> > &vUpdates,WXCrystMainFrame &caller):
+      wxThread(wxTHREAD_DETACHED),mpvUpdates(&vUpdates),mpCaller(&caller)
+      {}
+      wxThread::ExitCode Entry()
+      {
+         cout<<"WXThreadCheckUpdates:: OnEntry()"<<endl;
+         mpvUpdates->clear();
+         wxFileSystem::AddHandler(new wxInternetFSHandler);
+         cout<<wxFileSystem::HasHandlerForPath("http://objcryst.sourceforge.net/FoxUpdates.txt")<<endl;
+         wxFileSystem fs;
+         wxFSFile *fp= NULL;
+         fp= fs.OpenFile(_T("http://objcryst.sourceforge.net/FoxUpdates.txt"),wxFS_READ);
+         if(fp!=NULL)
+         {
+            wxInputStream *fstream = fp->GetStream();
+            wxTextInputStream txtis(*fstream);
+            txtis.ReadLine();//first line
+            while(!fstream->Eof())
+            {
+               unsigned int revisionfix=txtis.Read16();
+               unsigned int revisionbug=txtis.Read16();
+               unsigned int severity=txtis.Read16();
+               wxString reason=txtis.ReadLine();
+               if((revisionfix>__FOXREVISION__)&&(__FOXREVISION__>revisionbug))
+               {
+                  cout<<"Revision:"<<revisionfix<<", severity="<<severity<<",reason="<<reason<<endl;
+                  (*mpvUpdates)[revisionfix]=make_pair(severity,reason);
+               }
+            }
+         }
+         return NULL;
+      }
+      void OnExit()
+      {
+         cout<<"WXThreadCheckUpdates:: OnExit()"<<endl;
+         wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_FOX_UPDATES_RESULT);
+         wxPostEvent(mpCaller,event);
+      }
+   private:
+      std::map<unsigned int,pair<int,wxString> > *mpvUpdates;
+      WXCrystMainFrame *mpCaller;
+};
+
 // ----------------------------------------------------------------------------
 // event tables and other macros for wxWindows
 // ----------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(WXCrystMainFrame, wxFrame)
-   EVT_MENU(MENU_FILE_QUIT,  WXCrystMainFrame::OnQuit)
-   EVT_MENU(MENU_HELP_ABOUT, WXCrystMainFrame::OnAbout)
-   EVT_MENU(MENU_HELP_TOGGLETOOLTIP, WXCrystMainFrame::OnToggleTooltips)
-   EVT_MENU(MENU_HELP_UPDATE, WXCrystMainFrame::OnCheckUpdate)
-   EVT_MENU(MENU_PREFS_PREFERENCES, WXCrystMainFrame::OnPreferences)
-   EVT_MENU(MENU_FILE_LOAD, WXCrystMainFrame::OnLoad)
-   EVT_MENU(MENU_FILE_CLOSE, WXCrystMainFrame::OnMenuClose)
-   EVT_CLOSE(                WXCrystMainFrame::OnClose)
-   EVT_MENU(MENU_FILE_SAVE, WXCrystMainFrame::OnSave)
-   EVT_MENU(MENU_OBJECT_CREATE_CRYSTAL, WXCrystMainFrame::OnAddCrystal)
-   EVT_MENU(MENU_OBJECT_CREATE_POWDERSPECTRUM, WXCrystMainFrame::OnAddPowderPattern)
-   EVT_MENU(MENU_OBJECT_CREATE_SINGLECRYSTALDATA, WXCrystMainFrame::OnAddSingleCrystalData)
-   EVT_MENU(MENU_OBJECT_CREATE_GLOBALOPTOBJ, WXCrystMainFrame::OnAddGlobalOptimObj)
-   EVT_MENU(MENU_OBJECT_CREATE_GENETICALGORITHM, WXCrystMainFrame::OnAddGeneticAlgorithm)
-   EVT_MENU(MENU_DEBUG_LEVEL0, WXCrystMainFrame::OnSetDebugLevel)
-   EVT_MENU(MENU_DEBUG_LEVEL1, WXCrystMainFrame::OnSetDebugLevel)
-   EVT_MENU(MENU_DEBUG_LEVEL2, WXCrystMainFrame::OnSetDebugLevel)
-   EVT_MENU(MENU_DEBUG_LEVEL3, WXCrystMainFrame::OnSetDebugLevel)
-   EVT_MENU(MENU_DEBUG_LEVEL4, WXCrystMainFrame::OnSetDebugLevel)
-   EVT_MENU(MENU_DEBUG_LEVEL5, WXCrystMainFrame::OnSetDebugLevel)
-   EVT_MENU(MENU_DEBUG_LEVEL6, WXCrystMainFrame::OnSetDebugLevel)
-   EVT_MENU(MENU_DEBUG_LEVEL7, WXCrystMainFrame::OnSetDebugLevel)
-   EVT_MENU(MENU_DEBUG_LEVEL8, WXCrystMainFrame::OnSetDebugLevel)
-   EVT_MENU(MENU_DEBUG_LEVEL9, WXCrystMainFrame::OnSetDebugLevel)
-   EVT_MENU(MENU_DEBUG_LEVEL10,WXCrystMainFrame::OnSetDebugLevel)
-   EVT_MENU(MENU_DEBUG_TEST1,  WXCrystMainFrame::OnDebugTest)
-   EVT_MENU(MENU_DEBUG_TEST2,  WXCrystMainFrame::OnDebugTest)
-   EVT_MENU(MENU_DEBUG_TEST3,  WXCrystMainFrame::OnDebugTest)
-   EVT_UPDATE_UI(ID_CRYST_UPDATEUI, WXCrystMainFrame::OnUpdateUI)
+   EVT_MENU(MENU_FILE_QUIT,                        WXCrystMainFrame::OnQuit)
+   EVT_MENU(MENU_HELP_ABOUT,                       WXCrystMainFrame::OnAbout)
+   EVT_MENU(MENU_HELP_TOGGLETOOLTIP,               WXCrystMainFrame::OnToggleTooltips)
+   EVT_MENU(MENU_HELP_UPDATE,                      WXCrystMainFrame::OnCheckUpdate)
+   EVT_MENU(ID_FOX_UPDATES_RESULT,                 WXCrystMainFrame::OnCheckUpdate)
+   EVT_MENU(MENU_PREFS_PREFERENCES,                WXCrystMainFrame::OnPreferences)
+   EVT_MENU(MENU_FILE_LOAD,                        WXCrystMainFrame::OnLoad)
+   EVT_MENU(MENU_FILE_CLOSE,                       WXCrystMainFrame::OnMenuClose)
+   EVT_CLOSE(                                      WXCrystMainFrame::OnClose)
+   EVT_MENU(MENU_FILE_SAVE,                        WXCrystMainFrame::OnSave)
+   EVT_MENU(MENU_OBJECT_CREATE_CRYSTAL,            WXCrystMainFrame::OnAddCrystal)
+   EVT_MENU(MENU_OBJECT_CREATE_POWDERSPECTRUM,     WXCrystMainFrame::OnAddPowderPattern)
+   EVT_MENU(MENU_OBJECT_CREATE_SINGLECRYSTALDATA,  WXCrystMainFrame::OnAddSingleCrystalData)
+   EVT_MENU(MENU_OBJECT_CREATE_GLOBALOPTOBJ,       WXCrystMainFrame::OnAddGlobalOptimObj)
+   EVT_MENU(MENU_OBJECT_CREATE_GENETICALGORITHM,   WXCrystMainFrame::OnAddGeneticAlgorithm)
+   EVT_MENU(MENU_DEBUG_LEVEL0,                     WXCrystMainFrame::OnSetDebugLevel)
+   EVT_MENU(MENU_DEBUG_LEVEL1,                     WXCrystMainFrame::OnSetDebugLevel)
+   EVT_MENU(MENU_DEBUG_LEVEL2,                     WXCrystMainFrame::OnSetDebugLevel)
+   EVT_MENU(MENU_DEBUG_LEVEL3,                     WXCrystMainFrame::OnSetDebugLevel)
+   EVT_MENU(MENU_DEBUG_LEVEL4,                     WXCrystMainFrame::OnSetDebugLevel)
+   EVT_MENU(MENU_DEBUG_LEVEL5,                     WXCrystMainFrame::OnSetDebugLevel)
+   EVT_MENU(MENU_DEBUG_LEVEL6,                     WXCrystMainFrame::OnSetDebugLevel)
+   EVT_MENU(MENU_DEBUG_LEVEL7,                     WXCrystMainFrame::OnSetDebugLevel)
+   EVT_MENU(MENU_DEBUG_LEVEL8,                     WXCrystMainFrame::OnSetDebugLevel)
+   EVT_MENU(MENU_DEBUG_LEVEL9,                     WXCrystMainFrame::OnSetDebugLevel)
+   EVT_MENU(MENU_DEBUG_LEVEL10,                    WXCrystMainFrame::OnSetDebugLevel)
+   EVT_MENU(MENU_DEBUG_TEST1,                      WXCrystMainFrame::OnDebugTest)
+   EVT_MENU(MENU_DEBUG_TEST2,                      WXCrystMainFrame::OnDebugTest)
+   EVT_MENU(MENU_DEBUG_TEST3,                      WXCrystMainFrame::OnDebugTest)
+   EVT_UPDATE_UI(ID_CRYST_UPDATEUI,                WXCrystMainFrame::OnUpdateUI)
 END_EVENT_TABLE()
 
 IMPLEMENT_APP(MyApp)
@@ -647,7 +700,7 @@ void WXCrystScrolledWindow::SetChild(wxWindow* pChild)
 
 WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, const wxSize& size,
                                    const bool splashscreen)
-       : wxFrame((wxFrame *)NULL, -1, title, pos, size)
+       : wxFrame((wxFrame *)NULL, -1, title, pos, size),mvUpdatesAutoCheck(false)
 {
 #ifdef __WXMAC__
    // we need this in order to allow the about menu relocation, since ABOUT is
@@ -679,7 +732,6 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
          helpMenu->Append(MENU_HELP_ABOUT, "&About...", "About ObjCryst...");
          helpMenu->Append(MENU_HELP_TOGGLETOOLTIP, "Toggle Tooltips", "Set Tooltips on/off");
          helpMenu->Append(MENU_HELP_UPDATE, "Check for Updates", "Check for a newer version of Fox");
-
       wxMenuBar *menuBar = new wxMenuBar();
          menuBar->Append(menuFile,  "&File");
          menuBar->Append(objectMenu,"&Objects");
@@ -752,33 +804,6 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
    this->Layout();
    mpNotebook->SetSelection(0);
    
-   // Check for updates
-      bool check;
-      wxConfigBase::Get()->Read("Fox/BOOL/Check for Fox updates", &check);
-      if(check || ((rand()%10)==0))
-      {
-         map<unsigned int,pair<int,wxString> > vupdates=this->GetUpdates();
-         unsigned int nbmajorbug=0,nbcritical=0;
-         for(map<unsigned int,pair<int,wxString> >::const_iterator pos=vupdates.begin();pos!=vupdates.end();++pos)
-         {
-            if(pos->second.first==11) nbmajorbug++;// Major bug but calculations are still OK
-            if(pos->second.first==12) nbcritical++;// A mistake was made, giving erroneous results
-         }
-         if(nbcritical>0)
-         {
-            wxString msg;
-            msg.Printf( _T("A new version of Fox is available, including CRITICAL bug fixes\n")
-                        _T("It is strongly recommended to update to a new version\n\n Major changes: \n"));
-   
-            for(map<unsigned int,pair<int,wxString> >::const_iterator pos=vupdates.begin();pos!=vupdates.end();++pos)
-            {
-               if(pos->second.first==12)
-                  msg=msg+wxString::Format("#%d (CRITICAL): %s\n",pos->first,pos->second.second.c_str());
-            }
-            wxMessageDialog d(this,msg, "CRITICAL updates available", wxOK);
-            d.ShowModal();
-         }
-      }
    //Splash Screen
    if(true==splashscreen)
    {
@@ -789,6 +814,18 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
    wxToolTip::SetDelay(500);
    // Reset "last save" clock, in the case we loaded an xml file on startup
    mClockLastSave.Click();
+   
+   // Check for updates in a separate thread
+   bool check;
+   wxConfigBase::Get()->Read("Fox/BOOL/Check for Fox updates", &check);
+   if(check || ((rand()%10)==0))
+   {
+      WXThreadCheckUpdates *pThreadCheckUpdates = new WXThreadCheckUpdates(mvUpdates,*this);
+      if(pThreadCheckUpdates->Create() != wxTHREAD_NO_ERROR) 
+         wxLogError("Can't create updates check thread");
+      else pThreadCheckUpdates->Run();
+      mvUpdatesAutoCheck=true;
+   }
 }
 
 void WXCrystMainFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
@@ -1305,15 +1342,11 @@ void WXCrystMainFrame::OnPreferences(wxCommandEvent& event)
 
 void WXCrystMainFrame::OnCheckUpdate(wxCommandEvent& event)
 {
-   std::map<unsigned int,pair<int,wxString> > vupdates=this->GetUpdates();
-   wxFrame *frame=new wxFrame(this,-1,"FOX Updates",wxDefaultPosition,wxSize(800,250),wxSTAY_ON_TOP | wxRESIZE_BORDER | wxCAPTION | wxCLOSE_BOX | wxCLIP_CHILDREN);
-   wxTextCtrl *wUpdates=new wxTextCtrl(frame,-1,"",wxDefaultPosition,wxDefaultSize,wxTE_MULTILINE|wxTE_READONLY|wxTE_DONTWRAP);
-   wUpdates->SetFont(wxFont(10,wxROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_BOLD));
-   wUpdates->AppendText(wxString::Format("Checking for updates from http://objcryst.sf.net/FoxUpdates.txt\n\n"));
-   if(vupdates.size()>0)
+   cout<<"WXCrystMainFrame::OnCheckUpdate"<<endl;
+   if(event.GetId()==ID_FOX_UPDATES_RESULT)
    {
       unsigned int nbminorfeature=0,nbmajorfeature=0,nbrelease=0,nbminorbug=0,nbmajorbug=0,nbcritical=0;
-      for(map<unsigned int,pair<int,wxString> >::const_iterator pos=vupdates.begin();pos!=vupdates.end();++pos)
+      for(map<unsigned int,pair<int,wxString> >::const_iterator pos=mvUpdates.begin();pos!=mvUpdates.end();++pos)
       {//Critical fixes
          if(pos->second.first==0) nbminorfeature++;
          if(pos->second.first==1) nbmajorfeature++;
@@ -1322,84 +1355,89 @@ void WXCrystMainFrame::OnCheckUpdate(wxCommandEvent& event)
          if(pos->second.first==11) nbmajorbug++;// Major bug but calculations are still OK
          if(pos->second.first==12) nbcritical++;// A mistake was made, giving erroneous results
       }
-      if(nbcritical>0)
-      {
-         cout<<wxString::Format("\n%d CRITICAL updates available:\n",nbcritical)<<endl;
-         wUpdates->AppendText(wxString::Format("\n%d CRITICAL updates available:\n",nbcritical));
-         for(map<unsigned int,pair<int,wxString> >::const_iterator pos=vupdates.begin();pos!=vupdates.end();++pos)
+      if(mvUpdatesAutoCheck)
+      {// Autocheck => only critical updates
+         if(nbcritical>0)
          {
-            if(pos->second.first==12)
+            wxString msg;
+            msg.Printf( _T("A new version of Fox is available, including CRITICAL bug fixes\n")
+                        _T("It is strongly recommended to update to a new version\n\n Major changes: \n"));
+   
+            for(map<unsigned int,pair<int,wxString> >::const_iterator pos=mvUpdates.begin();pos!=mvUpdates.end();++pos)
             {
-               wxString mess=wxString::Format("  #%d: %s\n",pos->first,pos->second.second.c_str());
-               wUpdates->AppendText(mess);
+               if(pos->second.first==12)
+                  msg=msg+wxString::Format("#%d (CRITICAL): %s\n",pos->first,pos->second.second.c_str());
+            }
+            wxMessageDialog d(this,msg, "! CRITICAL update available !", wxOK|wxICON_EXCLAMATION);
+            d.ShowModal();
+         }
+      }
+      else
+      {// User asked for this, so give the full version
+         wxFrame *frame=new wxFrame(this,-1,"FOX Updates",wxDefaultPosition,wxSize(800,250),wxSTAY_ON_TOP | wxRESIZE_BORDER | wxCAPTION | wxCLOSE_BOX | wxCLIP_CHILDREN);
+         wxTextCtrl *wUpdates=new wxTextCtrl(frame,-1,"",wxDefaultPosition,wxDefaultSize,wxTE_MULTILINE|wxTE_READONLY|wxTE_DONTWRAP);
+         wUpdates->SetFont(wxFont(10,wxROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_BOLD));
+         if(mvUpdates.size()>0)
+         {
+            if(nbcritical>0)
+            {
+               cout<<wxString::Format("\n%d CRITICAL updates available:\n",nbcritical)<<endl;
+               wUpdates->AppendText(wxString::Format("\n%d CRITICAL updates available:\n",nbcritical));
+               for(map<unsigned int,pair<int,wxString> >::const_iterator pos=mvUpdates.begin();pos!=mvUpdates.end();++pos)
+               {
+                  if(pos->second.first==12)
+                  {
+                     wxString mess=wxString::Format("  #%d: %s\n",pos->first,pos->second.second.c_str());
+                     wUpdates->AppendText(mess);
+                  }
+               }
+            }
+            if(nbrelease>0)
+            {
+               cout<<wxString::Format("\n%d new RELEASE available :\n",nbrelease)<<endl;
+               wUpdates->AppendText(wxString::Format("\n%d new RELEASE available :\n",nbrelease));
+               for(map<unsigned int,pair<int,wxString> >::const_iterator pos=mvUpdates.begin();pos!=mvUpdates.end();++pos)
+               {
+                  if(pos->second.first==2)
+                     wUpdates->AppendText(wxString::Format("  #%d: %s\n",pos->first,pos->second.second.c_str()));
+               }
+            }
+            if(nbmajorfeature>0)
+            {
+               cout<<wxString::Format("\n%d major features updates available:\n",nbmajorfeature)<<endl;
+               wUpdates->AppendText(wxString::Format("\n%d major features updates available:\n",nbmajorfeature));
+               for(map<unsigned int,pair<int,wxString> >::const_iterator pos=mvUpdates.begin();pos!=mvUpdates.end();++pos)
+               {
+                  if(pos->second.first==1)
+                     wUpdates->AppendText(wxString::Format("  #%d: %s\n",pos->first,pos->second.second.c_str()));
+               }
+            }
+            if(nbminorfeature>0)
+            {
+               cout<<wxString::Format("\n%d minor features updates available:\n",nbminorfeature)<<endl;
+               wUpdates->AppendText(wxString::Format("\n%d minor features updates available:\n",nbminorfeature));
+               for(map<unsigned int,pair<int,wxString> >::const_iterator pos=mvUpdates.begin();pos!=mvUpdates.end();++pos)
+               {
+                  if(pos->second.first==0)
+                     wUpdates->AppendText(wxString::Format("  #%d: %s\n",pos->first,pos->second.second.c_str()));
+               }
             }
          }
-      }
-      if(nbrelease>0)
-      {
-         cout<<wxString::Format("\n%d new RELEASE available :\n",nbrelease)<<endl;
-         wUpdates->AppendText(wxString::Format("\n%d new RELEASE available :\n",nbrelease));
-         for(map<unsigned int,pair<int,wxString> >::const_iterator pos=vupdates.begin();pos!=vupdates.end();++pos)
+         else
          {
-            if(pos->second.first==2)
-               wUpdates->AppendText(wxString::Format("  #%d: %s\n",pos->first,pos->second.second.c_str()));
+            wUpdates->AppendText(wxString::Format("No updates found !\n"));
          }
-      }
-      if(nbmajorfeature>0)
-      {
-         cout<<wxString::Format("\n%d major features updates available:\n",nbmajorfeature)<<endl;
-         wUpdates->AppendText(wxString::Format("\n%d major features updates available:\n",nbmajorfeature));
-         for(map<unsigned int,pair<int,wxString> >::const_iterator pos=vupdates.begin();pos!=vupdates.end();++pos)
-         {
-            if(pos->second.first==1)
-               wUpdates->AppendText(wxString::Format("  #%d: %s\n",pos->first,pos->second.second.c_str()));
-         }
-      }
-      if(nbminorfeature>0)
-      {
-         cout<<wxString::Format("\n%d minor features updates available:\n",nbminorfeature)<<endl;
-         wUpdates->AppendText(wxString::Format("\n%d minor features updates available:\n",nbminorfeature));
-         for(map<unsigned int,pair<int,wxString> >::const_iterator pos=vupdates.begin();pos!=vupdates.end();++pos)
-         {
-            if(pos->second.first==0)
-               wUpdates->AppendText(wxString::Format("  #%d: %s\n",pos->first,pos->second.second.c_str()));
-         }
+         frame->Show(true);
       }
    }
    else
    {
-      wUpdates->AppendText(wxString::Format("No updates found !\n"));
+      mvUpdatesAutoCheck=false;
+      WXThreadCheckUpdates *pThreadCheckUpdates = new WXThreadCheckUpdates(mvUpdates,*this);
+      if(pThreadCheckUpdates->Create() != wxTHREAD_NO_ERROR) 
+         wxLogError("Can't create updates check thread");
+      else pThreadCheckUpdates->Run();
    }
-   frame->Show(true);
-}
-
-std::map<unsigned int,pair<int,wxString> > WXCrystMainFrame::GetUpdates()const
-{
-   wxFileSystem::AddHandler(new wxInternetFSHandler);
-   cout<<wxFileSystem::HasHandlerForPath("http://objcryst.sourceforge.net/FoxUpdates.txt")<<endl;
-   wxFileSystem fs;
-   wxFSFile *fp= NULL;
-   fp= fs.OpenFile(_T("http://objcryst.sourceforge.net/FoxUpdates.txt"),wxFS_READ);
-   std::map<unsigned int,pair<int,wxString> > vupdates;
-   if(fp!=NULL)
-   {
-      wxInputStream *fstream = fp->GetStream();
-      wxTextInputStream txtis(*fstream);
-      txtis.ReadLine();//first line
-      while(!fstream->Eof())
-      {
-         unsigned int revisionfix=txtis.Read16();
-         unsigned int revisionbug=txtis.Read16();
-         unsigned int severity=txtis.Read16();
-         wxString reason=txtis.ReadLine();
-         if((revisionfix>__FOXREVISION__)&&(__FOXREVISION__>revisionbug))
-         {
-            cout<<"Revision:"<<revisionfix<<", severity="<<severity<<",reason="<<reason<<endl;
-            vupdates[revisionfix]=make_pair(severity,reason);
-         }
-      }
-   }
-   return vupdates;
 }
 
 #endif
