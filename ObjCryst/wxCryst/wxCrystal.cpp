@@ -2579,7 +2579,6 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
    }
    if(mShowFourier)
    {
-      glDepthMask(false);
       glPushMatrix();
          // The display origin is the center of the Crystal BoundingBox, so translate
             BBox cellbbox = this->GetCellBBox();
@@ -2593,7 +2592,6 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
          for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();++pos)
             if((*pos)->Show()) (*pos)->Draw();
       glPopMatrix();
-      glDepthMask(true);
    }
    glFlush();
    SwapBuffers();
