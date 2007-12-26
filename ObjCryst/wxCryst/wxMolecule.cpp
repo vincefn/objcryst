@@ -1674,7 +1674,7 @@ class WXMoleculeRotation:public wxWindow
          
          wxArrayString choices;
          for(vector<MolBond*>::const_iterator pos=mol.GetBondList().begin();pos!=mol.GetBondList().end();++pos)
-            choices.Add((*pos)->GetName());
+            choices.Add((*pos)->GetName().c_str());
          
          wxBoxSizer* pSizer=new wxBoxSizer(wxHORIZONTAL);
          
@@ -1753,15 +1753,15 @@ class WXMoleculeRotation:public wxWindow
          wxArrayString choices;
          
          set<MolAtom *>::const_iterator pos=mvpRotatedAtoms[0].begin();
-         wxString choice1((*pos++)->GetName());
+         wxString choice1((*pos++)->GetName().c_str());
          for(;pos!=mvpRotatedAtoms[0].end();++pos)
-            choice1 +=_T("-")+(*pos)->GetName();
+            choice1 +=_T("-")+wxString((*pos)->GetName().c_str());
          choices.Add(choice1);
          
          pos=mvpRotatedAtoms[1].begin();
-         wxString choice2((*pos++)->GetName());
+         wxString choice2((*pos++)->GetName().c_str());
          for(;pos!=mvpRotatedAtoms[1].end();++pos)
-            choice2 +=_T("-")+(*pos)->GetName();
+            choice2 +=_T("-")+wxString((*pos)->GetName().c_str());
          choices.Add(choice2);
          
          mpRotatedAtoms->Set(choices);
@@ -1806,7 +1806,7 @@ class WXMoleculeRotationDihed:public wxWindow
             {
                if( (*neigh==pAt1) || (*neigh==pAt2) ) continue;
                mvDihed.push_back(MolDihedralAngle(*pAt1,*pAt2,*pAt3,**neigh,0,.001,.001,*mpMol));
-               choices.Add(mvDihed.back().GetName());
+               choices.Add(mvDihed.back().GetName().c_str());
             }
          }
          
@@ -1901,15 +1901,15 @@ class WXMoleculeRotationDihed:public wxWindow
          wxArrayString choices;
          
          set<MolAtom *>::const_iterator pos=mvpRotatedAtoms[0].begin();
-         wxString choice1((*pos++)->GetName());
+         wxString choice1((*pos++)->GetName().c_str());
          for(;pos!=mvpRotatedAtoms[0].end();++pos)
-            choice1 +=_T("-")+(*pos)->GetName();
+            choice1 +=_T("-")+wxString((*pos)->GetName().c_str());
          choices.Add(choice1);
          
          pos=mvpRotatedAtoms[1].begin();
-         wxString choice2((*pos++)->GetName());
+         wxString choice2((*pos++)->GetName().c_str());
          for(;pos!=mvpRotatedAtoms[1].end();++pos)
-            choice2 +=_T("-")+(*pos)->GetName();
+            choice2 +=_T("-")+wxString((*pos)->GetName().c_str());
          choices.Add(choice2);
          
          mpRotatedAtoms->Set(choices);

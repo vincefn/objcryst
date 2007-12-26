@@ -2955,14 +2955,14 @@ void WXGLCrystalCanvas::OnUpdateUI(wxUpdateUIEvent& WXUNUSED(event))
       wxArrayString maps;
       for(vector<boost::shared_ptr<UnitCellMap> >::iterator 
           pos=mvpUnitCellMap.begin();pos!=mvpUnitCellMap.end();++pos)
-            maps.Add((*pos)->GetName());
+            maps.Add((*pos)->GetName().c_str());
       if(mpFourierMapListWin->mpAvailableMapList->GetStrings()!=maps)
          mpFourierMapListWin->mpAvailableMapList->Set(maps);
       
       wxArrayString glmaps;
       for(vector<boost::shared_ptr<UnitCellMapGLList> >::iterator 
           pos=mvpUnitCellMapGLList.begin();pos!=mvpUnitCellMapGLList.end();++pos)
-            glmaps.Add((*pos)->GetName());
+            glmaps.Add((*pos)->GetName().c_str());
       if(mpFourierMapListWin->mpDisplayedMapList->GetStrings()!=glmaps)
          mpFourierMapListWin->mpDisplayedMapList->Set(glmaps);
       
