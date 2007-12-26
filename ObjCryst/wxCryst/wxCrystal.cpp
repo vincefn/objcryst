@@ -647,12 +647,12 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
             mpCrystal->GLInitDisplayList(onlyIndependentAtoms,xMin,xMax,yMin,yMax,zMin,zMax,true);
          glPopMatrix();
       glEndList();
+      mpCrystalGL->CrystUpdate();
       if(mpConditionGLUpdate!=0)
       {
          wxMutexLocker lock(mMutexGLUpdate);
          mpConditionGLUpdate->Signal();
       }
-      mpCrystalGL->CrystUpdate();
    }
    else
    {
@@ -2848,7 +2848,8 @@ void WXGLCrystalCanvas::OnUpdate(wxCommandEvent & WXUNUSED(event))
 
 void WXGLCrystalCanvas::CrystUpdate()
 {
-   VFN_DEBUG_ENTRY("WXGLCrystalCanvas::CrystUpdate()",10)
+   // This can only be called from the main (graphical) thread
+   VFN_DEBUG_ENTRY("WXGLCrystalCanvas::CrystUpdate():"<<wxThread::IsMain(),10)
    
    // Update the list of available maps & update the displayed ones
    if(mpFourierMapListWin!=0) mpFourierMapListWin->mMutex.Lock();
@@ -3191,14 +3192,17 @@ void WXGLCrystalCanvas::OnFourier(wxCommandEvent &event)
          wxColour col(mpFourierMapListWin->mpColourPicker->GetColour());
          if(abs((float)contour-mvpUnitCellMapGLList[choice]->GetContour())>.0001)
          {
-            wxBusyInfo wait("Processing Fourier Map...");
             mvpUnitCellMapGLList[choice]->SetContour((float)contour);
-            mvpUnitCellMapGLList[choice]->GenList();
+            if(false==mpWXCrystal->GetCrystal().IsBeingRefined())
+            {
+               wxBusyInfo wait("Processing Fourier Map...");
+               mvpUnitCellMapGLList[choice]->GenList();
+            }
          }
          mvpUnitCellMapGLList[choice]->SetColour(col.Red()/255.0,col.Green()/255.0,col.Blue()/255.0,0.5);
       }
       mpFourierMapListWin->mMutex.Unlock();
-      mpWXCrystal->GetCrystal().UpdateDisplay();
+      //mpWXCrystal->GetCrystal().UpdateDisplay();
    }
    mpFourierMapListWin->mMutex.Lock();
    if(event.GetId()==ID_GLCRYSTAL_FOURIER_LISTMAP)
@@ -3238,8 +3242,11 @@ void WXGLCrystalCanvas::OnFourier(wxCommandEvent &event)
          mvpUnitCellMapGLList.back()->SetName(pMap->GetName());
          mvpUnitCellMapGLList.back()->SetColour(ncolor.Red()/255.0,ncolor.Green()/255.0,ncolor.Blue()/255.0,0.5);
          mpFourierMapListWin->mMutex.Unlock();
-         this->SetCurrent();
-         mvpUnitCellMapGLList.back()->GenList();
+         if(false==mpWXCrystal->GetCrystal().IsBeingRefined())
+         {
+            this->SetCurrent();
+            mvpUnitCellMapGLList.back()->GenList();
+         }
       }
    }
    if(event.GetId()==ID_GLCRYSTAL_FOURIER_REMOVE)
@@ -3259,7 +3266,9 @@ void WXGLCrystalCanvas::OnFourier(wxCommandEvent &event)
          (*pos)->ToggleShowWire();
    }
    mpFourierMapListWin->mMutex.Unlock();
-   this->CrystUpdate();
+   // Update - if the crystal is being refined, it will be done at the next display update
+   if(false==mpWXCrystal->GetCrystal().IsBeingRefined())
+      this->CrystUpdate();
 }
 
 void WXGLCrystalCanvas::OnLoadFourierGRD( wxCommandEvent & WXUNUSED(event))
