@@ -2004,12 +2004,17 @@ int UnitCellMap::ImportDSN6(const string&filename)
 int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0)
 {
    mpData=&data;
-   const unsigned long size=32;
-   fftwf_complex *in= (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * size*size*size);
-   fftwf_plan plan=fftwf_plan_dft_3d(size, size, size,in, in,FFTW_FORWARD, FFTW_ESTIMATE);
+   const float resolution=0.4;//Approximate resolution in Ansgtroem
+   // We need something like 2^n2 * 3^n3 * 5^n5 - just use a power of 2 now
+   const unsigned long sizex=int(pow((double)2, (double)ceil(log(mpCrystal->GetLatticePar(0)/resolution)/log(2)))+.00001);
+   const unsigned long sizey=int(pow((double)2, (double)ceil(log(mpCrystal->GetLatticePar(1)/resolution)/log(2)))+.00001);
+   const unsigned long sizez=int(pow((double)2, (double)ceil(log(mpCrystal->GetLatticePar(2)/resolution)/log(2)))+.00001);
+   //cout<<"UnitCellMap::CalcFourierMap():"<<sizex<<","<<sizey<<","<<sizez<<","<<endl;
+   fftwf_complex *in= (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * sizex*sizey*sizez);
+   fftwf_plan plan=fftwf_plan_dft_3d(sizez, sizey, sizex,in, in,FFTW_FORWARD, FFTW_ESTIMATE);
    
    float *p=(float*)in;
-   for(unsigned long i=0;i<size*size*size*2;i++) *p++=0;
+   for(unsigned long i=0;i<sizex*sizey*sizez*2;i++) *p++=0;
    
    const long nb=data.GetNbReflBelowMaxSinThetaOvLambda();
    
@@ -2020,10 +2025,15 @@ int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0)
    for(long i=0;i<nb;++i)
    {
       CrystMatrix_REAL m=mpCrystal->GetSpaceGroup().GetAllEquivRefl (data.GetH()(i),data.GetK()(i),data.GetL()(i),
-                                                                     false, false,data.GetFhklCalcReal()(i),data.GetFhklCalcImag()(i));
+                                                                     false, data.IsIgnoringImagScattFact(),
+                                                                     data.GetFhklCalcReal()(i),data.GetFhklCalcImag()(i));
       for(int j=0;j<m.rows();j++)
       {
-         const int h=(int(m(j,0))+size)%size,k=(int(m(j,1))+size)%size,l=(int(m(j,2))+size)%size;
+         int h=int(m(j,0)),k=int(m(j,1)),l=int(m(j,2));
+         if((abs(h*2)>sizex)||(abs(k*2)>sizey)||(abs(l*2)>sizez)) continue;
+         h=(h+sizex)%sizex;// e.g. h=-1 is at nx-1
+         k=(k+sizey)%sizey;
+         l=(l+sizez)%sizez;
          /*
          cout <<int(m(j,0))<<" "<<int(m(j,1))<<" "<<int(m(j,2))<<"("
               <<mpCrystal->GetSpaceGroup().IsReflCentric(data.GetH()(i),data.GetK()(i),data.GetL()(i))<<"):"
@@ -2033,20 +2043,20 @@ int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0)
          {// Obs-Calc
             const REAL iobs=sqrt(data.GetFhklObsSq()(i));
             const REAL rec=m(j,3),imc=m(j,4),icalc=sqrt(data.GetFhklCalcSq()(i));
-            in[h+size*k+size*size*l][0]=v*rec*(icalc-iobs)/sqrt(rec*rec+imc*imc);
-            in[h+size*k+size*size*l][1]=v*imc*(icalc-iobs)/sqrt(rec*rec+imc*imc);
+            in[h+sizex*k+sizex*sizey*l][0]=v*rec*(icalc-iobs)/sqrt(rec*rec+imc*imc);
+            in[h+sizex*k+sizex*sizey*l][1]=v*imc*(icalc-iobs)/sqrt(rec*rec+imc*imc);
          }
          if(mType==1)
          {// Calc
-            in[h+size*k+size*size*l][0]=v*m(j,3);
-            in[h+size*k+size*size*l][1]=v*m(j,4);
+            in[h+sizex*k+sizex*sizey*l][0]=v*m(j,3);
+            in[h+sizex*k+sizex*sizey*l][1]=v*m(j,4);
          }
          if(mType==0)
          {// Obs
             const REAL iobs=sqrt(data.GetFhklObsSq()(i));
             const REAL rec=m(j,3),imc=m(j,4),icalc=sqrt(data.GetFhklCalcSq()(i));
-            in[h+size*k+size*size*l][0]=v*rec*iobs/icalc;
-            in[h+size*k+size*size*l][1]=v*imc*iobs/icalc;
+            in[h+sizex*k+sizex*sizey*l][0]=v*rec*iobs/icalc;
+            in[h+sizex*k+sizex*sizey*l][1]=v*imc*iobs/icalc;
          }
       }
       //cout<<endl;
@@ -2068,9 +2078,15 @@ int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0)
       //cout<<"F(000)="<<in[0][0]/v<<endl;
    }
    fftwf_execute(plan);
-   mPoints.resize(size,size,size);
+   mPoints.resize(sizez,sizey,sizex);
    REAL *p1=mPoints.data();
-   for(unsigned int i=0;i<size*size*size;i++) *p1++ =in[i][0] ;
+   for(unsigned int i=0;i<sizex*sizey*sizez;i++) *p1++ =in[i][0] ;
+   /*
+   for(unsigned int ix=0;ix<sizex;ix++)
+      for(unsigned int iy=0;iy<sizey;iy++)
+         for(unsigned int iz=0;iz<sizez;iz++)
+            mPoints(iz,iy,ix)=in[ix+sizex*iy+sizex*sizey*iz][0];
+   */
    mMean=mPoints.sum()/(REAL)(mPoints.numElements());
    mMin=mPoints.min();
    mMax=mPoints.max();
@@ -2110,9 +2126,9 @@ REAL UnitCellMap::GetValue(const REAL x,const REAL y,const REAL z)const
    const int nx=mPoints.cols();
    const int ny=mPoints.rows();
    const int nz=mPoints.depth();
-   long ix=((long)(x*nx))%nx;
-   long iy=((long)(y*ny))%ny;
-   long iz=((long)(z*nz))%nz;
+   long ix=((long)round(x*nx))%nx;
+   long iy=((long)round(y*ny))%ny;
+   long iz=((long)round(z*nz))%nz;
    if(ix<0) ix+=nx;
    if(iy<0) iy+=ny;
    if(iz<0) iz+=nz;
