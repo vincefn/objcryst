@@ -3202,20 +3202,22 @@ void WXGLCrystalCanvas::OnFourier(wxCommandEvent &event)
          mvpUnitCellMapGLList[choice]->SetColour(col.Red()/255.0,col.Green()/255.0,col.Blue()/255.0,0.5);
       }
       mpFourierMapListWin->mMutex.Unlock();
-      //mpWXCrystal->GetCrystal().UpdateDisplay();
    }
-   mpFourierMapListWin->mMutex.Lock();
+   
    if(event.GetId()==ID_GLCRYSTAL_FOURIER_LISTMAP)
    {// Selected one map
+      mpFourierMapListWin->mMutex.Lock();
       if(mpFourierMapListWin->mpAvailableMapList->GetSelection()>=0)
       {
          boost::shared_ptr<ObjCryst::UnitCellMap> pMap=mvpUnitCellMap[mpFourierMapListWin->mpAvailableMapList->GetSelection()];
          mpFourierMapListWin->mpMapInfo->SetLabel(wxString::Format(_T("min=%5.2f max=%5.2f sigma=%5.2f"),
                                                 pMap->Min(),pMap->Max(),pMap->StandardDeviation()));
       }
+	  mpFourierMapListWin->mMutex.Unlock();
    }
    if(event.GetId()==ID_GLCRYSTAL_FOURIER_LISTGLMAP)
    {
+      mpFourierMapListWin->mMutex.Lock();
       if(mpFourierMapListWin->mpDisplayedMapList->GetSelection()>=0)
       {
          boost::shared_ptr<UnitCellMapGLList> pMap=mvpUnitCellMapGLList[mpFourierMapListWin->mpDisplayedMapList->GetSelection()];
@@ -3223,12 +3225,13 @@ void WXGLCrystalCanvas::OnFourier(wxCommandEvent &event)
          mpFourierMapListWin->mpColourPicker->SetColour(wxColour(pMap->GetColour()[0]*255,pMap->GetColour()[1]*255,
                                                                  pMap->GetColour()[2]*255,pMap->GetColour()[3]*255));
       }
+	  mpFourierMapListWin->mMutex.Unlock();
    }
    if((event.GetId()==ID_GLCRYSTAL_FOURIER_ADD)||(event.GetId()==ID_GLCRYSTAL_FOURIER_NEWCONTOUR))
    {
+      mpFourierMapListWin->mMutex.Lock();
       if(mpFourierMapListWin->mpAvailableMapList->GetSelection()!=wxNOT_FOUND)
       {
-         mpFourierMapListWin->mMutex.Unlock();
          boost::shared_ptr<ObjCryst::UnitCellMap> pMap=mvpUnitCellMap[mpFourierMapListWin->mpAvailableMapList->GetSelection()];
          double contour=0;
          wxString scontour=mpFourierMapListWin->mpNewContourValue->GetValue();
@@ -3251,21 +3254,26 @@ void WXGLCrystalCanvas::OnFourier(wxCommandEvent &event)
    }
    if(event.GetId()==ID_GLCRYSTAL_FOURIER_REMOVE)
    {
+      mpFourierMapListWin->mMutex.Lock();
       unsigned int choice=mpFourierMapListWin->mpDisplayedMapList->GetSelection();
       if(wxNOT_FOUND!=choice)
          mvpUnitCellMapGLList.erase(mvpUnitCellMapGLList.begin()+choice);
+      mpFourierMapListWin->mMutex.Unlock();
    }
    if(event.GetId()==ID_GLCRYSTAL_FOURIER_SHOW)
    {
+      mpFourierMapListWin->mMutex.Lock();
       mShowFourier=mpFourierMapListWin->mpShowFourier->GetValue();
+	  mpFourierMapListWin->mMutex.Unlock();
    }
    if(event.GetId()==ID_GLCRYSTAL_FOURIER_WIREFRAME)
    {
+      mpFourierMapListWin->mMutex.Lock();
       vector<boost::shared_ptr<UnitCellMapGLList> >::iterator pos;
       for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();pos++)
          (*pos)->ToggleShowWire();
+      mpFourierMapListWin->mMutex.Unlock();
    }
-   mpFourierMapListWin->mMutex.Unlock();
    // Update - if the crystal is being refined, it will be done at the next display update
    if(false==mpWXCrystal->GetCrystal().IsBeingRefined())
       this->CrystUpdate();
