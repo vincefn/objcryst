@@ -72,7 +72,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 910
+#define __FOXREVISION__ 918
 
 static std::string foxVersion=std::string("1.7.X(Beta)-Revision#")+string("__FOXREVISION__");
 
@@ -194,11 +194,11 @@ class WXThreadCheckUpdates:public wxThread
       {
          cout<<"WXThreadCheckUpdates:: OnEntry()"<<endl;
          mpvUpdates->clear();
-         wxFileSystem::AddHandler(new wxInternetFSHandler);
-         cout<<wxFileSystem::HasHandlerForPath("http://objcryst.sourceforge.net/FoxUpdates.txt")<<endl;
+         if(!(wxFileSystem::HasHandlerForPath("http://objcryst.sourceforge.net/FoxUpdates.txt")))
+            wxFileSystem::AddHandler(new wxInternetFSHandler);
          wxFileSystem fs;
          wxFSFile *fp= NULL;
-         fp= fs.OpenFile(_T("http://objcryst.sourceforge.net/FoxUpdates.txt"),wxFS_READ);
+         fp= fs.OpenFile("http://objcryst.sourceforge.net/FoxUpdates.txt",wxFS_READ);
          if(fp!=NULL)
          {
             wxInputStream *fstream = fp->GetStream();
@@ -763,6 +763,12 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
    SetStatusText("Welcome to FOX/ObjCryst++!");
 #endif // wxUSE_STATUSBAR
 
+   //Splash Screen
+   if(true==splashscreen)
+   {
+      wxCommandEvent event;
+      this->OnAbout(event);
+   }
    // Create the notebook
 
       mpNotebook = new wxNotebook(this, -1);
@@ -804,12 +810,6 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
    this->Layout();
    mpNotebook->SetSelection(0);
    
-   //Splash Screen
-   if(true==splashscreen)
-   {
-      wxCommandEvent event;
-      this->OnAbout(event);
-   }
    // Set tooltip delay
    wxToolTip::SetDelay(500);
    // Reset "last save" clock, in the case we loaded an xml file on startup
@@ -844,7 +844,8 @@ void WXCrystMainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
               +"welcome to redistribute it under certain conditions. \n"
               +"See the LICENSE file for details.");
 
-   wxMessageBox(msg.c_str(), "About Fox", wxOK | wxICON_INFORMATION, this);
+   wxMessageDialog ab(this,msg.c_str(), "About Fox", wxOK | wxICON_INFORMATION | wxSTAY_ON_TOP );
+   ab.ShowModal();
 }
 void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
 {
