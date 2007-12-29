@@ -2001,15 +2001,59 @@ int UnitCellMap::ImportDSN6(const string&filename)
    return 1;
 }
 #ifdef HAVE_FFTW
+
+/** Find the closest value toa given integer v which is larger than v and
+* under the form 2^n2 * 3^n3 * 3^n5
+*
+*/
+unsigned int closest235(unsigned int v)
+{// This is not particularly fast but we need few iterations so...
+   unsigned int n2=0,n3=0,n5=0;
+   unsigned int v2,v3,v5=1;
+   unsigned int bestdiff=10000;
+   unsigned int best=0;
+   for(unsigned int i5=1;;)
+   {
+      v3=1;
+      for(unsigned int i3=1;;)
+      {
+         v2=1;
+         for(unsigned int i2=1;;)
+         {
+            const unsigned int n=v2*v3*v5;
+            if(n>v)
+            {
+               if((n-v)<bestdiff)
+               {
+                  bestdiff=n-v;
+                  n2=i2;
+                  n3=i3;
+                  n5=i5;
+                  best=n;
+                  if(best==v) return best;
+               }
+               else break;
+            }
+            v2*=2;i2+=1;
+         }
+         v3*=3;i3+=1;
+         if((v3*v5)>(v+bestdiff)) break;
+      }
+      v5*=5;i5+=1;
+      if(v5>(v+bestdiff)) break;
+   }
+   return best;
+}
+
 int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0)
 {
    mpData=&data;
-   const float resolution=0.4;//Approximate resolution in Ansgtroem
+   const float resolution=0.3;//Approximate resolution in Ansgtroem
    // We need something like 2^n2 * 3^n3 * 5^n5 - just use a power of 2 now
-   const unsigned long sizex=int(pow((double)2, (double)ceil(log(mpCrystal->GetLatticePar(0)/resolution)/log(2)))+.00001);
-   const unsigned long sizey=int(pow((double)2, (double)ceil(log(mpCrystal->GetLatticePar(1)/resolution)/log(2)))+.00001);
-   const unsigned long sizez=int(pow((double)2, (double)ceil(log(mpCrystal->GetLatticePar(2)/resolution)/log(2)))+.00001);
-   //cout<<"UnitCellMap::CalcFourierMap():"<<sizex<<","<<sizey<<","<<sizez<<","<<endl;
+   const unsigned long sizex=closest235((unsigned int)round(mpCrystal->GetLatticePar(0)/resolution)) ;//int(pow((double)2, (double)ceil(log(mpCrystal->GetLatticePar(0)/resolution)/log(2)))+.00001);
+   const unsigned long sizey=closest235((unsigned int)round(mpCrystal->GetLatticePar(1)/resolution)) ;//int(pow((double)2, (double)ceil(log(mpCrystal->GetLatticePar(1)/resolution)/log(2)))+.00001);
+   const unsigned long sizez=closest235((unsigned int)round(mpCrystal->GetLatticePar(2)/resolution)) ;//int(pow((double)2, (double)ceil(log(mpCrystal->GetLatticePar(2)/resolution)/log(2)))+.00001);
+   cout<<"UnitCellMap::CalcFourierMap():"<<sizex<<","<<sizey<<","<<sizez<<","<<endl;
    fftwf_complex *in= (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * sizex*sizey*sizez);
    fftwf_plan plan=fftwf_plan_dft_3d(sizez, sizey, sizex,in, in,FFTW_FORWARD, FFTW_ESTIMATE);
    
