@@ -73,6 +73,7 @@ void XMLCrystFileSaveGlobal(ostream &out)
    char strDate[40];
    strftime(strDate,sizeof(strDate),"%Y-%m-%dT%H:%M:%S%Z",gmtime(&date));//%Y-%m-%dT%H:%M:%S%Z
    tag.AddAttribute("Date",strDate);
+   tag.AddAttribute("Revision","918");
    out<<tag<<endl;
    
    for(int i=0;i<gCrystalRegistry.GetNb();i++)
