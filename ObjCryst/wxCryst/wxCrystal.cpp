@@ -2050,9 +2050,9 @@ int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0)
    mpData=&data;
    const float resolution=0.3;//Approximate resolution in Ansgtroem
    // We need something like 2^n2 * 3^n3 * 5^n5 - just use a power of 2 now
-   const unsigned long sizex=closest235((unsigned int)round(mpCrystal->GetLatticePar(0)/resolution)) ;//int(pow((double)2, (double)ceil(log(mpCrystal->GetLatticePar(0)/resolution)/log(2)))+.00001);
-   const unsigned long sizey=closest235((unsigned int)round(mpCrystal->GetLatticePar(1)/resolution)) ;//int(pow((double)2, (double)ceil(log(mpCrystal->GetLatticePar(1)/resolution)/log(2)))+.00001);
-   const unsigned long sizez=closest235((unsigned int)round(mpCrystal->GetLatticePar(2)/resolution)) ;//int(pow((double)2, (double)ceil(log(mpCrystal->GetLatticePar(2)/resolution)/log(2)))+.00001);
+   const unsigned long sizex=closest235((unsigned int)floor(mpCrystal->GetLatticePar(0)/resolution+.5)) ;//int(pow((double)2, (double)ceil(log(mpCrystal->GetLatticePar(0)/resolution)/log(2)))+.00001);
+   const unsigned long sizey=closest235((unsigned int)floor(mpCrystal->GetLatticePar(1)/resolution+.5)) ;//int(pow((double)2, (double)ceil(log(mpCrystal->GetLatticePar(1)/resolution)/log(2)))+.00001);
+   const unsigned long sizez=closest235((unsigned int)floor(mpCrystal->GetLatticePar(2)/resolution+.5)) ;//int(pow((double)2, (double)ceil(log(mpCrystal->GetLatticePar(2)/resolution)/log(2)))+.00001);
    cout<<"UnitCellMap::CalcFourierMap():"<<sizex<<","<<sizey<<","<<sizez<<","<<endl;
    fftwf_complex *in= (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * sizex*sizey*sizez);
    fftwf_plan plan=fftwf_plan_dft_3d(sizez, sizey, sizex,in, in,FFTW_FORWARD, FFTW_ESTIMATE);
@@ -2170,9 +2170,9 @@ REAL UnitCellMap::GetValue(const REAL x,const REAL y,const REAL z)const
    const int nx=mPoints.cols();
    const int ny=mPoints.rows();
    const int nz=mPoints.depth();
-   long ix=((long)round(x*nx))%nx;
-   long iy=((long)round(y*ny))%ny;
-   long iz=((long)round(z*nz))%nz;
+   long ix=((long)floor(x*nx+.5))%nx;
+   long iy=((long)floor(y*ny+.5))%ny;
+   long iz=((long)floor(z*nz+.5))%nz;
    if(ix<0) ix+=nx;
    if(iy<0) iy+=ny;
    if(iz<0) iz+=nz;
