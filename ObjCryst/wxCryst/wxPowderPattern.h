@@ -48,6 +48,8 @@ class WXPowderPattern: public WXRefinableObj
       void OnMenuSavePattern(wxCommandEvent & WXUNUSED(event));
       void OnMenuSetWavelength(wxCommandEvent &event);
       void OnMenuAddExclude(wxCommandEvent & WXUNUSED(event));
+      /// Profile fitting & Le Bail intensity extraction
+      void OnMenuLeBail(wxCommandEvent &event);
       void NotifyDeleteGraph();
       const PowderPattern& GetPowderPattern()const;
       PowderPattern& GetPowderPattern();
@@ -112,6 +114,8 @@ class WXPowderPatternGraph: public wxWindow
       void OnChangePeak(wxCommandEvent& WXUNUSED(event));
       void OnIndex(wxCommandEvent& WXUNUSED(event));
       void OnChangeScale(wxCommandEvent &event);
+      /// Profile fitting & Le Bail intensity extraction
+      void OnLeBail(wxCommandEvent &event);
       void OnKeyDown(wxKeyEvent& event);
       void OnSize(wxSizeEvent& event);
       WXPowderPattern& GetWXPowderPattern();
