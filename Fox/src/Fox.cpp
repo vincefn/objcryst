@@ -72,9 +72,9 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 918
+#define __FOXREVISION__ 923
 
-static std::string foxVersion=std::string("1.7.X(Beta)-Revision#")+string("__FOXREVISION__");
+static std::string foxVersion;
 
 // ----------------------------------------------------------------------------
 // Speed test
@@ -284,6 +284,11 @@ int main (int argc, char *argv[])
    //set locale settings to standard
    setlocale(LC_NUMERIC,"C");
    
+   {// Fox version
+      char verBuf[200];
+      sprintf(verBuf,"1.7.X(Beta)-#%d",__FOXREVISION__);
+      foxVersion=verBuf;
+   }
    bool useGUI(true);
    long nbTrial(1000000);
    long nbRun(1);
