@@ -2992,7 +2992,6 @@ void WXGLCrystalCanvas::CrystUpdate()
                mvpUnitCellMap.push_back(boost::shared_ptr<UnitCellMap>(new UnitCellMap(mpWXCrystal->GetCrystal())));
                mvpUnitCellMap.back()->CalcFourierMap(*data,2);
             }
-            break;
          }
       }
    #endif
