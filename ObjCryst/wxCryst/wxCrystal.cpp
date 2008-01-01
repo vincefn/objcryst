@@ -2953,15 +2953,13 @@ void WXGLCrystalCanvas::CrystUpdate()
          pos=mvpUnitCellMap.erase(pos);
          if(pos==mvpUnitCellMap.end()) break;
       }
-      /*
       else if((*pos)->GetType()!=-1)
       {
          #ifdef HAVE_FFTW
-         cout<<"Updating Fourier map:"<<(*pos)->GetName()<<endl;
+         //cout<<"Updating Fourier map:"<<(*pos)->GetName()<<endl;
          (*pos)->CalcFourierMap(*((*pos)->GetData()),(*pos)->GetType());
          #endif
       }
-      */
    }
    #ifdef HAVE_FFTW
    // Add newly computable maps
