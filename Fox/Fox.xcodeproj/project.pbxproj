@@ -7,53 +7,82 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		BF08978B0B072DF600C0F576 /* CIF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF08978A0B072DF600C0F576 /* CIF.cpp */; };
-		BF08978C0B072DF600C0F576 /* CIF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF08978A0B072DF600C0F576 /* CIF.cpp */; };
-		BF08978E0B072E2F00C0F576 /* ci_string.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF08978D0B072E2F00C0F576 /* ci_string.cpp */; };
-		BF08978F0B072E2F00C0F576 /* ci_string.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF08978D0B072E2F00C0F576 /* ci_string.cpp */; };
-		BF26F599089306500008175B /* Fox.icns in Resources */ = {isa = PBXBuildFile; fileRef = BF26F598089306500008175B /* Fox.icns */; };
+		BF1DDDEE0D228E3700A3939D /* Fox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD88E0890422000044EBA /* Fox.cpp */; };
+		BF1DDDEF0D228E3700A3939D /* Atom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8900890426600044EBA /* Atom.cpp */; };
+		BF1DDDF00D228E3700A3939D /* Crystal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8910890426600044EBA /* Crystal.cpp */; };
+		BF1DDDF10D228E3700A3939D /* CrystVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8920890426600044EBA /* CrystVector.cpp */; };
+		BF1DDDF20D228E3700A3939D /* DiffractionDataSingleCrystal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8930890426600044EBA /* DiffractionDataSingleCrystal.cpp */; };
+		BF1DDDF30D228E3700A3939D /* Exception.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8940890426600044EBA /* Exception.cpp */; };
+		BF1DDDF40D228E3700A3939D /* geomStructFactor_001.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8960890426600044EBA /* geomStructFactor_001.cpp */; };
+		BF1DDDF50D228E3700A3939D /* geomStructFactor_002.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8970890426600044EBA /* geomStructFactor_002.cpp */; };
+		BF1DDDF60D228E3700A3939D /* geomStructFactor_067.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8980890426600044EBA /* geomStructFactor_067.cpp */; };
+		BF1DDDF70D228E3700A3939D /* geomStructFactor_097.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8990890426600044EBA /* geomStructFactor_097.cpp */; };
+		BF1DDDF80D228E3700A3939D /* geomStructFactor_230.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD89A0890426600044EBA /* geomStructFactor_230.cpp */; };
+		BF1DDDF90D228E3700A3939D /* geomStructFactor_centro.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD89B0890426600044EBA /* geomStructFactor_centro.cpp */; };
+		BF1DDDFA0D228E3700A3939D /* geomStructFactor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD89C0890426600044EBA /* geomStructFactor.cpp */; };
+		BF1DDDFB0D228E3700A3939D /* GlobalOptimObj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD89D0890426600044EBA /* GlobalOptimObj.cpp */; };
+		BF1DDDFC0D228E3700A3939D /* IO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD89E0890426600044EBA /* IO.cpp */; };
+		BF1DDDFD0D228E3700A3939D /* IO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD89F0890426600044EBA /* IO.cpp */; };
+		BF1DDDFE0D228E3700A3939D /* LSQNumObj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8A00890426600044EBA /* LSQNumObj.cpp */; };
+		BF1DDDFF0D228E3700A3939D /* MC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8A10890426600044EBA /* MC.cpp */; };
+		BF1DDE000D228E3700A3939D /* Molecule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8A20890426600044EBA /* Molecule.cpp */; };
+		BF1DDE010D228E3700A3939D /* mpVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8A30890426600044EBA /* mpVector.cpp */; };
+		BF1DDE020D228E3700A3939D /* Polyhedron.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8A50890426600044EBA /* Polyhedron.cpp */; };
+		BF1DDE030D228E3700A3939D /* PowderPattern.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8A60890426600044EBA /* PowderPattern.cpp */; };
+		BF1DDE040D228E3700A3939D /* PowderPatternBackgroundBayesianMinimiser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8A70890426600044EBA /* PowderPatternBackgroundBayesianMinimiser.cpp */; };
+		BF1DDE050D228E3700A3939D /* RefinableObj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8A80890426600044EBA /* RefinableObj.cpp */; };
+		BF1DDE060D228E3700A3939D /* ReflectionProfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8A90890426600044EBA /* ReflectionProfile.cpp */; };
+		BF1DDE070D228E3700A3939D /* Scatterer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8AA0890426600044EBA /* Scatterer.cpp */; };
+		BF1DDE080D228E3700A3939D /* ScatteringCorr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8AB0890426600044EBA /* ScatteringCorr.cpp */; };
+		BF1DDE090D228E3700A3939D /* ScatteringData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8AC0890426600044EBA /* ScatteringData.cpp */; };
+		BF1DDE0A0D228E3700A3939D /* ScatteringPower.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8AD0890426600044EBA /* ScatteringPower.cpp */; };
+		BF1DDE0B0D228E3700A3939D /* ScatteringPowerSphere.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8AE0890426600044EBA /* ScatteringPowerSphere.cpp */; };
+		BF1DDE0C0D228E3700A3939D /* Simplex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8AF0890426600044EBA /* Simplex.cpp */; };
+		BF1DDE0D0D228E3700A3939D /* SpaceGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8B00890426600044EBA /* SpaceGroup.cpp */; };
+		BF1DDE0E0D228E3700A3939D /* test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8B10890426600044EBA /* test.cpp */; };
+		BF1DDE0F0D228E3700A3939D /* Tracker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8B20890426600044EBA /* Tracker.cpp */; };
+		BF1DDE100D228E3700A3939D /* UnitCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8B30890426600044EBA /* UnitCell.cpp */; };
+		BF1DDE110D228E3700A3939D /* VFNDebug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8B40890426600044EBA /* VFNDebug.cpp */; };
+		BF1DDE120D228E3700A3939D /* VFNStreamFormat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8B50890426600044EBA /* VFNStreamFormat.cpp */; };
+		BF1DDE130D228E3700A3939D /* wxAtom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8B60890426600044EBA /* wxAtom.cpp */; };
+		BF1DDE140D228E3700A3939D /* wxCryst.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8B70890426600044EBA /* wxCryst.cpp */; };
+		BF1DDE150D228E3700A3939D /* wxCrystal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8B80890426600044EBA /* wxCrystal.cpp */; };
+		BF1DDE160D228E3700A3939D /* wxDiffractionSingleCrystal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8B90890426600044EBA /* wxDiffractionSingleCrystal.cpp */; };
+		BF1DDE170D228E3700A3939D /* wxGlobalOptimObj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8BA0890426600044EBA /* wxGlobalOptimObj.cpp */; };
+		BF1DDE180D228E3700A3939D /* wxMolecule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8BB0890426600044EBA /* wxMolecule.cpp */; };
+		BF1DDE190D228E3700A3939D /* wxMultiGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8BC0890426600044EBA /* wxMultiGraph.cpp */; };
+		BF1DDE1A0D228E3700A3939D /* wxPowderPattern.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8BD0890426600044EBA /* wxPowderPattern.cpp */; };
+		BF1DDE1B0D228E3700A3939D /* wxRefinableObj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8BE0890426600044EBA /* wxRefinableObj.cpp */; };
+		BF1DDE1C0D228E3700A3939D /* wxScatterer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8BF0890426600044EBA /* wxScatterer.cpp */; };
+		BF1DDE1D0D228E3700A3939D /* wxScatteringPower.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8C00890426600044EBA /* wxScatteringPower.cpp */; };
+		BF1DDE1E0D228E3700A3939D /* wxScatteringPowerSphere.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8C10890426600044EBA /* wxScatteringPowerSphere.cpp */; };
+		BF1DDE1F0D228E3700A3939D /* wxTrackerGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8C20890426600044EBA /* wxTrackerGraph.cpp */; };
+		BF1DDE200D228E3700A3939D /* wxZScatterer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8C30890426700044EBA /* wxZScatterer.cpp */; };
+		BF1DDE210D228E3700A3939D /* ZScatterer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8C60890426700044EBA /* ZScatterer.cpp */; };
+		BF1DDE220D228E3700A3939D /* trackball.c in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD97C08904D7D00044EBA /* trackball.c */; };
+		BF1DDE230D228E3700A3939D /* CIF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF08978A0B072DF600C0F576 /* CIF.cpp */; };
+		BF1DDE240D228E3700A3939D /* ci_string.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF08978D0B072E2F00C0F576 /* ci_string.cpp */; };
+		BF1DDE250D228E3700A3939D /* Indexing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFE6AC680B886ACA007AFBA8 /* Indexing.cpp */; };
+		BF1DDE260D228E4100A3939D /* Fox.icns in Resources */ = {isa = PBXBuildFile; fileRef = BF26F598089306500008175B /* Fox.icns */; };
+		BF1DE1110D228E5D00A3939D /* libcctbx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BFFCCBE50890309900044EBA /* libcctbx.a */; };
+		BF1DE1120D228E5D00A3939D /* libnewmat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BFFCCB5D089028E500044EBA /* libnewmat.a */; };
+		BF1DE1130D228E6100A3939D /* AGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF3611180BD6E30F000C0EE9 /* AGL.framework */; };
+		BF1DE1140D228E6100A3939D /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF36111A0BD6E326000C0EE9 /* Carbon.framework */; };
+		BF1DE1150D228E6100A3939D /* System.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF3611220BD6E38F000C0EE9 /* System.framework */; };
+		BF1DE1160D228E6100A3939D /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF3611240BD6E3A6000C0EE9 /* IOKit.framework */; };
+		BF1DE1170D228E6100A3939D /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF3611260BD6E3B6000C0EE9 /* OpenGL.framework */; };
+		BF1DE1180D228E6100A3939D /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF3611280BD6E3CA000C0EE9 /* AppKit.framework */; };
+		BF1DE1190D228E6100A3939D /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF36112B0BD6E3F5000C0EE9 /* GLUT.framework */; };
+		BF1DE11A0D228E6100A3939D /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF36112F0BD6E409000C0EE9 /* WebKit.framework */; };
+		BF1DE1240D228EA500A3939D /* libfftw3f.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF1DE1230D228EA500A3939D /* libfftw3f.a */; };
+		BF1DE12A0D228EBB00A3939D /* libwx_mac-2.8.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF1DE1250D228EBB00A3939D /* libwx_mac-2.8.a */; };
+		BF1DE12B0D228EBB00A3939D /* libwx_mac_gl-2.8.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF1DE1260D228EBB00A3939D /* libwx_mac_gl-2.8.a */; };
+		BF1DE12C0D228EBB00A3939D /* libwxjpeg-2.8.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF1DE1270D228EBB00A3939D /* libwxjpeg-2.8.a */; };
+		BF1DE12D0D228EBB00A3939D /* libwxpng-2.8.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF1DE1280D228EBB00A3939D /* libwxpng-2.8.a */; };
+		BF1DE12E0D228EBB00A3939D /* libwxtiff-2.8.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF1DE1290D228EBB00A3939D /* libwxtiff-2.8.a */; };
+		BF1DE1540D2297C300A3939D /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF1DE1530D2297C300A3939D /* QuickTime.framework */; };
 		BF3EB05508968F5500E02367 /* uctbx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3EB05408968F5500E02367 /* uctbx.cpp */; };
 		BF3EB063089690D200E02367 /* spoil_optimization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3EB062089690D200E02367 /* spoil_optimization.cpp */; };
-		BFE3CE1309177C1D002021F6 /* libcctbx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BFFCCBE50890309900044EBA /* libcctbx.a */; };
-		BFE3CE1409177C1D002021F6 /* libnewmat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BFFCCB5D089028E500044EBA /* libnewmat.a */; };
-		BFE3CE1509177C29002021F6 /* Fox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD88E0890422000044EBA /* Fox.cpp */; };
-		BFE3CE1609177C29002021F6 /* Atom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8900890426600044EBA /* Atom.cpp */; };
-		BFE3CE1709177C29002021F6 /* Crystal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8910890426600044EBA /* Crystal.cpp */; };
-		BFE3CE1809177C29002021F6 /* CrystVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8920890426600044EBA /* CrystVector.cpp */; };
-		BFE3CE1909177C29002021F6 /* DiffractionDataSingleCrystal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8930890426600044EBA /* DiffractionDataSingleCrystal.cpp */; };
-		BFE3CE1A09177C29002021F6 /* Exception.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8940890426600044EBA /* Exception.cpp */; };
-		BFE3CE1B09177C29002021F6 /* geomStructFactor_001.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8960890426600044EBA /* geomStructFactor_001.cpp */; };
-		BFE3CE1C09177C29002021F6 /* geomStructFactor_002.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8970890426600044EBA /* geomStructFactor_002.cpp */; };
-		BFE3CE1D09177C29002021F6 /* geomStructFactor_067.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8980890426600044EBA /* geomStructFactor_067.cpp */; };
-		BFE3CE1E09177C29002021F6 /* geomStructFactor_097.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8990890426600044EBA /* geomStructFactor_097.cpp */; };
-		BFE3CE1F09177C29002021F6 /* geomStructFactor_230.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD89A0890426600044EBA /* geomStructFactor_230.cpp */; };
-		BFE3CE2009177C29002021F6 /* geomStructFactor_centro.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD89B0890426600044EBA /* geomStructFactor_centro.cpp */; };
-		BFE3CE2109177C29002021F6 /* geomStructFactor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD89C0890426600044EBA /* geomStructFactor.cpp */; };
-		BFE3CE2209177C29002021F6 /* GlobalOptimObj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD89D0890426600044EBA /* GlobalOptimObj.cpp */; };
-		BFE3CE2309177C29002021F6 /* IO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD89E0890426600044EBA /* IO.cpp */; };
-		BFE3CE2409177C29002021F6 /* IO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD89F0890426600044EBA /* IO.cpp */; };
-		BFE3CE2509177C29002021F6 /* LSQNumObj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8A00890426600044EBA /* LSQNumObj.cpp */; };
-		BFE3CE2709177C29002021F6 /* Molecule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8A20890426600044EBA /* Molecule.cpp */; };
-		BFE3CE2909177C29002021F6 /* Polyhedron.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8A50890426600044EBA /* Polyhedron.cpp */; };
-		BFE3CE2A09177C29002021F6 /* PowderPattern.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8A60890426600044EBA /* PowderPattern.cpp */; };
-		BFE3CE2B09177C29002021F6 /* PowderPatternBackgroundBayesianMinimiser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8A70890426600044EBA /* PowderPatternBackgroundBayesianMinimiser.cpp */; };
-		BFE3CE2C09177C29002021F6 /* RefinableObj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8A80890426600044EBA /* RefinableObj.cpp */; };
-		BFE3CE2D09177C29002021F6 /* ReflectionProfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8A90890426600044EBA /* ReflectionProfile.cpp */; };
-		BFE3CE2E09177C29002021F6 /* Scatterer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8AA0890426600044EBA /* Scatterer.cpp */; };
-		BFE3CE2F09177C29002021F6 /* ScatteringCorr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8AB0890426600044EBA /* ScatteringCorr.cpp */; };
-		BFE3CE3009177C29002021F6 /* ScatteringData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8AC0890426600044EBA /* ScatteringData.cpp */; };
-		BFE3CE3109177C29002021F6 /* ScatteringPower.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8AD0890426600044EBA /* ScatteringPower.cpp */; };
-		BFE3CE3209177C29002021F6 /* ScatteringPowerSphere.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8AE0890426600044EBA /* ScatteringPowerSphere.cpp */; };
-		BFE3CE3309177C29002021F6 /* Simplex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8AF0890426600044EBA /* Simplex.cpp */; };
-		BFE3CE3409177C29002021F6 /* SpaceGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8B00890426600044EBA /* SpaceGroup.cpp */; };
-		BFE3CE3509177C29002021F6 /* test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8B10890426600044EBA /* test.cpp */; };
-		BFE3CE3609177C29002021F6 /* Tracker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8B20890426600044EBA /* Tracker.cpp */; };
-		BFE3CE3709177C29002021F6 /* UnitCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8B30890426600044EBA /* UnitCell.cpp */; };
-		BFE3CE3809177C29002021F6 /* VFNDebug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8B40890426600044EBA /* VFNDebug.cpp */; };
-		BFE3CE3909177C29002021F6 /* VFNStreamFormat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8B50890426600044EBA /* VFNStreamFormat.cpp */; };
-		BFE3CE4809177C29002021F6 /* ZScatterer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8C60890426700044EBA /* ZScatterer.cpp */; };
-		BFE6AC690B886ACB007AFBA8 /* Indexing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFE6AC680B886ACA007AFBA8 /* Indexing.cpp */; };
-		BFE6AC6A0B886ACB007AFBA8 /* Indexing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFE6AC680B886ACA007AFBA8 /* Indexing.cpp */; };
 		BFFCCB670890296D00044EBA /* bandmat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCB660890296D00044EBA /* bandmat.cpp */; };
 		BFFCCBA0089029F400044EBA /* cholesky.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCB6A089029F400044EBA /* cholesky.cpp */; };
 		BFFCCBA1089029F400044EBA /* evalue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCB6B089029F400044EBA /* evalue.cpp */; };
@@ -144,101 +173,63 @@
 		BFFCCC9C0890328F00044EBA /* match_bijvoet_mates.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCC960890328F00044EBA /* match_bijvoet_mates.cpp */; };
 		BFFCCC9D0890328F00044EBA /* match_indices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCC970890328F00044EBA /* match_indices.cpp */; };
 		BFFCCC9E0890328F00044EBA /* sym_equiv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCC980890328F00044EBA /* sym_equiv.cpp */; };
-		BFFCD88F0890422000044EBA /* Fox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD88E0890422000044EBA /* Fox.cpp */; };
-		BFFCD8C70890426700044EBA /* Atom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8900890426600044EBA /* Atom.cpp */; };
-		BFFCD8C80890426700044EBA /* Crystal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8910890426600044EBA /* Crystal.cpp */; };
-		BFFCD8C90890426700044EBA /* CrystVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8920890426600044EBA /* CrystVector.cpp */; };
-		BFFCD8CA0890426700044EBA /* DiffractionDataSingleCrystal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8930890426600044EBA /* DiffractionDataSingleCrystal.cpp */; };
-		BFFCD8CB0890426700044EBA /* Exception.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8940890426600044EBA /* Exception.cpp */; };
-		BFFCD8CD0890426700044EBA /* geomStructFactor_001.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8960890426600044EBA /* geomStructFactor_001.cpp */; };
-		BFFCD8CE0890426700044EBA /* geomStructFactor_002.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8970890426600044EBA /* geomStructFactor_002.cpp */; };
-		BFFCD8CF0890426700044EBA /* geomStructFactor_067.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8980890426600044EBA /* geomStructFactor_067.cpp */; };
-		BFFCD8D00890426700044EBA /* geomStructFactor_097.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8990890426600044EBA /* geomStructFactor_097.cpp */; };
-		BFFCD8D10890426700044EBA /* geomStructFactor_230.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD89A0890426600044EBA /* geomStructFactor_230.cpp */; };
-		BFFCD8D20890426700044EBA /* geomStructFactor_centro.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD89B0890426600044EBA /* geomStructFactor_centro.cpp */; };
-		BFFCD8D30890426700044EBA /* geomStructFactor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD89C0890426600044EBA /* geomStructFactor.cpp */; };
-		BFFCD8D40890426700044EBA /* GlobalOptimObj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD89D0890426600044EBA /* GlobalOptimObj.cpp */; };
-		BFFCD8D50890426700044EBA /* IO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD89E0890426600044EBA /* IO.cpp */; };
-		BFFCD8D60890426700044EBA /* IO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD89F0890426600044EBA /* IO.cpp */; };
-		BFFCD8D70890426700044EBA /* LSQNumObj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8A00890426600044EBA /* LSQNumObj.cpp */; };
-		BFFCD8D80890426700044EBA /* MC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8A10890426600044EBA /* MC.cpp */; };
-		BFFCD8D90890426700044EBA /* Molecule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8A20890426600044EBA /* Molecule.cpp */; };
-		BFFCD8DA0890426700044EBA /* mpVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8A30890426600044EBA /* mpVector.cpp */; };
-		BFFCD8DC0890426700044EBA /* Polyhedron.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8A50890426600044EBA /* Polyhedron.cpp */; };
-		BFFCD8DD0890426700044EBA /* PowderPattern.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8A60890426600044EBA /* PowderPattern.cpp */; };
-		BFFCD8DE0890426700044EBA /* PowderPatternBackgroundBayesianMinimiser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8A70890426600044EBA /* PowderPatternBackgroundBayesianMinimiser.cpp */; };
-		BFFCD8DF0890426700044EBA /* RefinableObj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8A80890426600044EBA /* RefinableObj.cpp */; };
-		BFFCD8E00890426700044EBA /* ReflectionProfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8A90890426600044EBA /* ReflectionProfile.cpp */; };
-		BFFCD8E10890426700044EBA /* Scatterer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8AA0890426600044EBA /* Scatterer.cpp */; };
-		BFFCD8E20890426700044EBA /* ScatteringCorr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8AB0890426600044EBA /* ScatteringCorr.cpp */; };
-		BFFCD8E30890426700044EBA /* ScatteringData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8AC0890426600044EBA /* ScatteringData.cpp */; };
-		BFFCD8E40890426700044EBA /* ScatteringPower.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8AD0890426600044EBA /* ScatteringPower.cpp */; };
-		BFFCD8E50890426700044EBA /* ScatteringPowerSphere.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8AE0890426600044EBA /* ScatteringPowerSphere.cpp */; };
-		BFFCD8E60890426700044EBA /* Simplex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8AF0890426600044EBA /* Simplex.cpp */; };
-		BFFCD8E70890426700044EBA /* SpaceGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8B00890426600044EBA /* SpaceGroup.cpp */; };
-		BFFCD8E80890426700044EBA /* test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8B10890426600044EBA /* test.cpp */; };
-		BFFCD8E90890426700044EBA /* Tracker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8B20890426600044EBA /* Tracker.cpp */; };
-		BFFCD8EA0890426700044EBA /* UnitCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8B30890426600044EBA /* UnitCell.cpp */; };
-		BFFCD8EB0890426700044EBA /* VFNDebug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8B40890426600044EBA /* VFNDebug.cpp */; };
-		BFFCD8EC0890426700044EBA /* VFNStreamFormat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8B50890426600044EBA /* VFNStreamFormat.cpp */; };
-		BFFCD8ED0890426700044EBA /* wxAtom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8B60890426600044EBA /* wxAtom.cpp */; };
-		BFFCD8EE0890426700044EBA /* wxCryst.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8B70890426600044EBA /* wxCryst.cpp */; };
-		BFFCD8EF0890426700044EBA /* wxCrystal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8B80890426600044EBA /* wxCrystal.cpp */; };
-		BFFCD8F00890426700044EBA /* wxDiffractionSingleCrystal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8B90890426600044EBA /* wxDiffractionSingleCrystal.cpp */; };
-		BFFCD8F10890426700044EBA /* wxGlobalOptimObj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8BA0890426600044EBA /* wxGlobalOptimObj.cpp */; };
-		BFFCD8F20890426700044EBA /* wxMolecule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8BB0890426600044EBA /* wxMolecule.cpp */; };
-		BFFCD8F30890426700044EBA /* wxMultiGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8BC0890426600044EBA /* wxMultiGraph.cpp */; };
-		BFFCD8F40890426700044EBA /* wxPowderPattern.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8BD0890426600044EBA /* wxPowderPattern.cpp */; };
-		BFFCD8F50890426700044EBA /* wxRefinableObj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8BE0890426600044EBA /* wxRefinableObj.cpp */; };
-		BFFCD8F60890426700044EBA /* wxScatterer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8BF0890426600044EBA /* wxScatterer.cpp */; };
-		BFFCD8F70890426700044EBA /* wxScatteringPower.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8C00890426600044EBA /* wxScatteringPower.cpp */; };
-		BFFCD8F80890426700044EBA /* wxScatteringPowerSphere.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8C10890426600044EBA /* wxScatteringPowerSphere.cpp */; };
-		BFFCD8F90890426700044EBA /* wxTrackerGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8C20890426600044EBA /* wxTrackerGraph.cpp */; };
-		BFFCD8FA0890426700044EBA /* wxZScatterer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8C30890426700044EBA /* wxZScatterer.cpp */; };
-		BFFCD8FD0890426700044EBA /* ZScatterer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8C60890426700044EBA /* ZScatterer.cpp */; };
-		BFFCD97D08904D7D00044EBA /* trackball.c in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD97C08904D7D00044EBA /* trackball.c */; };
-		BFFCD9940890580F00044EBA /* libcctbx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BFFCCBE50890309900044EBA /* libcctbx.a */; };
-		BFFCD9950890580F00044EBA /* libnewmat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BFFCCB5D089028E500044EBA /* libnewmat.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		BFE3CE0F09177C12002021F6 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = BFFCCB51089028D300044EBA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = BFFCCBE40890309900044EBA;
-			remoteInfo = cctbx;
-		};
-		BFE3CE1109177C12002021F6 /* PBXContainerItemProxy */ = {
+		BF1DE1880D229E1B00A3939D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFFCCB51089028D300044EBA /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = BFFCCB5C089028E500044EBA;
 			remoteInfo = newmat;
 		};
-		BFFCD9960890583C00044EBA /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = BFFCCB51089028D300044EBA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = BFFCCB5C089028E500044EBA;
-			remoteInfo = newmat;
-		};
-		BFFCD9980890584000044EBA /* PBXContainerItemProxy */ = {
+		BF1DE18A0D229E1B00A3939D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFFCCB51089028D300044EBA /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = BFFCCBE40890309900044EBA;
 			remoteInfo = cctbx;
+		};
+		BF36115A0BD6E4BE000C0EE9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BF3611540BD6E4BE000C0EE9 /* wxWindows.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 4086C8CB063AB30000D4CD53;
+			remoteInfo = static;
+		};
+		BF36115C0BD6E4BE000C0EE9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BF3611540BD6E4BE000C0EE9 /* wxWindows.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 4086CBE1063AB30000D4CD53;
+			remoteInfo = dynamic;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		BF08978A0B072DF600C0F576 /* CIF.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = CIF.cpp; path = ../ObjCryst/ObjCryst/CIF.cpp; sourceTree = "<group>"; };
 		BF08978D0B072E2F00C0F576 /* ci_string.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ci_string.cpp; path = ../ObjCryst/Quirks/ci_string.cpp; sourceTree = "<group>"; };
+		BF1DDDE90D228DCF00A3939D /* Fox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Fox.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BF1DDDEB0D228DCF00A3939D /* FoxCocoa-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "FoxCocoa-Info.plist"; sourceTree = "<group>"; };
+		BF1DE1230D228EA500A3939D /* libfftw3f.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfftw3f.a; path = "../static-libs/lib/libfftw3f.a"; sourceTree = SOURCE_ROOT; };
+		BF1DE1250D228EBB00A3939D /* libwx_mac-2.8.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libwx_mac-2.8.a"; path = "../static-libs/lib/libwx_mac-2.8.a"; sourceTree = SOURCE_ROOT; };
+		BF1DE1260D228EBB00A3939D /* libwx_mac_gl-2.8.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libwx_mac_gl-2.8.a"; path = "../static-libs/lib/libwx_mac_gl-2.8.a"; sourceTree = SOURCE_ROOT; };
+		BF1DE1270D228EBB00A3939D /* libwxjpeg-2.8.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libwxjpeg-2.8.a"; path = "../static-libs/lib/libwxjpeg-2.8.a"; sourceTree = SOURCE_ROOT; };
+		BF1DE1280D228EBB00A3939D /* libwxpng-2.8.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libwxpng-2.8.a"; path = "../static-libs/lib/libwxpng-2.8.a"; sourceTree = SOURCE_ROOT; };
+		BF1DE1290D228EBB00A3939D /* libwxtiff-2.8.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libwxtiff-2.8.a"; path = "../static-libs/lib/libwxtiff-2.8.a"; sourceTree = SOURCE_ROOT; };
+		BF1DE1530D2297C300A3939D /* QuickTime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = /System/Library/Frameworks/QuickTime.framework; sourceTree = "<absolute>"; };
 		BF26F598089306500008175B /* Fox.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = Fox.icns; path = src/Fox.icns; sourceTree = "<group>"; };
+		BF3611180BD6E30F000C0EE9 /* AGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AGL.framework; path = ../../../../../System/Library/Frameworks/AGL.framework; sourceTree = SOURCE_ROOT; };
+		BF36111A0BD6E326000C0EE9 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = ../../../../../System/Library/Frameworks/Carbon.framework; sourceTree = SOURCE_ROOT; };
+		BF3611220BD6E38F000C0EE9 /* System.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = System.framework; path = ../../../../../System/Library/Frameworks/System.framework; sourceTree = SOURCE_ROOT; };
+		BF3611240BD6E3A6000C0EE9 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = ../../../../../System/Library/Frameworks/IOKit.framework; sourceTree = SOURCE_ROOT; };
+		BF3611260BD6E3B6000C0EE9 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = ../../../../../System/Library/Frameworks/OpenGL.framework; sourceTree = SOURCE_ROOT; };
+		BF3611280BD6E3CA000C0EE9 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = ../../../../../System/Library/Frameworks/AppKit.framework; sourceTree = SOURCE_ROOT; };
+		BF36112B0BD6E3F5000C0EE9 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = ../../../../../System/Library/Frameworks/GLUT.framework; sourceTree = SOURCE_ROOT; };
+		BF36112F0BD6E409000C0EE9 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = ../../../../../System/Library/Frameworks/WebKit.framework; sourceTree = SOURCE_ROOT; };
+		BF3611540BD6E4BE000C0EE9 /* wxWindows.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = wxWindows.xcodeproj; path = ../../wxMac/src/wxWindows.xcodeproj; sourceTree = SOURCE_ROOT; };
 		BF3EB05408968F5500E02367 /* uctbx.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = uctbx.cpp; path = ../cctbx/cctbx/uctbx/uctbx.cpp; sourceTree = "<group>"; };
 		BF3EB062089690D200E02367 /* spoil_optimization.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = spoil_optimization.cpp; path = ../cctbx/cctbx/uctbx/spoil_optimization.cpp; sourceTree = "<group>"; };
-		BFE3CE0609177BF1002021F6 /* Fox-NoGUI */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Fox-NoGUI"; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFE6AC680B886ACA007AFBA8 /* Indexing.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Indexing.cpp; path = ../ObjCryst/ObjCryst/Indexing.cpp; sourceTree = SOURCE_ROOT; };
 		BFFCCB5D089028E500044EBA /* libnewmat.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libnewmat.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFFCCB660890296D00044EBA /* bandmat.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = bandmat.cpp; path = ../newmat/bandmat.cpp; sourceTree = "<group>"; };
@@ -432,29 +423,6 @@
 		BFFCCD2B0890389800044EBA /* templated_streams.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = templated_streams.hpp; sourceTree = "<group>"; };
 		BFFCCD2C0890389800044EBA /* utf8_codecvt_facet.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = utf8_codecvt_facet.hpp; sourceTree = "<group>"; };
 		BFFCCD2D0890389800044EBA /* workaround.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = workaround.hpp; sourceTree = "<group>"; };
-		BFFCCD2F0890389800044EBA /* counting_iterator.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = counting_iterator.hpp; sourceTree = "<group>"; };
-		BFFCCD310890389800044EBA /* any_conversion_eater.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = any_conversion_eater.hpp; sourceTree = "<group>"; };
-		BFFCCD320890389800044EBA /* config_def.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = config_def.hpp; sourceTree = "<group>"; };
-		BFFCCD330890389800044EBA /* config_undef.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = config_undef.hpp; sourceTree = "<group>"; };
-		BFFCCD340890389800044EBA /* enable_if.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = enable_if.hpp; sourceTree = "<group>"; };
-		BFFCCD350890389800044EBA /* facade_iterator_category.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = facade_iterator_category.hpp; sourceTree = "<group>"; };
-		BFFCCD360890389800044EBA /* minimum_category.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = minimum_category.hpp; sourceTree = "<group>"; };
-		BFFCCD370890389800044EBA /* filter_iterator.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = filter_iterator.hpp; sourceTree = "<group>"; };
-		BFFCCD380890389800044EBA /* indirect_iterator.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = indirect_iterator.hpp; sourceTree = "<group>"; };
-		BFFCCD390890389800044EBA /* interoperable.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = interoperable.hpp; sourceTree = "<group>"; };
-		BFFCCD3A0890389800044EBA /* is_lvalue_iterator.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = is_lvalue_iterator.hpp; sourceTree = "<group>"; };
-		BFFCCD3B0890389800044EBA /* is_readable_iterator.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = is_readable_iterator.hpp; sourceTree = "<group>"; };
-		BFFCCD3C0890389800044EBA /* iterator_adaptor.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = iterator_adaptor.hpp; sourceTree = "<group>"; };
-		BFFCCD3D0890389800044EBA /* iterator_archetypes.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = iterator_archetypes.hpp; sourceTree = "<group>"; };
-		BFFCCD3E0890389800044EBA /* iterator_categories.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = iterator_categories.hpp; sourceTree = "<group>"; };
-		BFFCCD3F0890389800044EBA /* iterator_concepts.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = iterator_concepts.hpp; sourceTree = "<group>"; };
-		BFFCCD400890389800044EBA /* iterator_facade.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = iterator_facade.hpp; sourceTree = "<group>"; };
-		BFFCCD410890389800044EBA /* iterator_traits.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = iterator_traits.hpp; sourceTree = "<group>"; };
-		BFFCCD420890389800044EBA /* new_iterator_tests.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = new_iterator_tests.hpp; sourceTree = "<group>"; };
-		BFFCCD430890389800044EBA /* permutation_iterator.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = permutation_iterator.hpp; sourceTree = "<group>"; };
-		BFFCCD440890389800044EBA /* reverse_iterator.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = reverse_iterator.hpp; sourceTree = "<group>"; };
-		BFFCCD450890389800044EBA /* transform_iterator.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = transform_iterator.hpp; sourceTree = "<group>"; };
-		BFFCCD460890389800044EBA /* zip_iterator.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = zip_iterator.hpp; sourceTree = "<group>"; };
 		BFFCCD470890389800044EBA /* iterator.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = iterator.hpp; sourceTree = "<group>"; };
 		BFFCCD490890389800044EBA /* common_factor.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = common_factor.hpp; sourceTree = "<group>"; };
 		BFFCCD4A0890389800044EBA /* common_factor_ct.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = common_factor_ct.hpp; sourceTree = "<group>"; };
@@ -1784,7 +1752,6 @@
 		BFFCD2C6089038A400044EBA /* transform_traits_spec.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = transform_traits_spec.hpp; sourceTree = "<group>"; };
 		BFFCD2C7089038A400044EBA /* type_with_alignment.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = type_with_alignment.hpp; sourceTree = "<group>"; };
 		BFFCD2C8089038A400044EBA /* type_traits.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = type_traits.hpp; sourceTree = "<group>"; };
-		BFFCD888089041A600044EBA /* Fox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Fox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFFCD88A089041A600044EBA /* Fox-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Fox-Info.plist"; sourceTree = SOURCE_ROOT; };
 		BFFCD88E0890422000044EBA /* Fox.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Fox.cpp; path = src/Fox.cpp; sourceTree = SOURCE_ROOT; };
 		BFFCD8900890426600044EBA /* Atom.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Atom.cpp; path = ../ObjCryst/ObjCryst/Atom.cpp; sourceTree = SOURCE_ROOT; };
@@ -1842,12 +1809,27 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		BFE3CE0409177BF0002021F6 /* Frameworks */ = {
+		BF1DDDE70D228DCF00A3939D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BFE3CE1309177C1D002021F6 /* libcctbx.a in Frameworks */,
-				BFE3CE1409177C1D002021F6 /* libnewmat.a in Frameworks */,
+				BF1DE1130D228E6100A3939D /* AGL.framework in Frameworks */,
+				BF1DE1140D228E6100A3939D /* Carbon.framework in Frameworks */,
+				BF1DE1150D228E6100A3939D /* System.framework in Frameworks */,
+				BF1DE1160D228E6100A3939D /* IOKit.framework in Frameworks */,
+				BF1DE1170D228E6100A3939D /* OpenGL.framework in Frameworks */,
+				BF1DE1180D228E6100A3939D /* AppKit.framework in Frameworks */,
+				BF1DE1190D228E6100A3939D /* GLUT.framework in Frameworks */,
+				BF1DE11A0D228E6100A3939D /* WebKit.framework in Frameworks */,
+				BF1DE1110D228E5D00A3939D /* libcctbx.a in Frameworks */,
+				BF1DE1120D228E5D00A3939D /* libnewmat.a in Frameworks */,
+				BF1DE1240D228EA500A3939D /* libfftw3f.a in Frameworks */,
+				BF1DE12A0D228EBB00A3939D /* libwx_mac-2.8.a in Frameworks */,
+				BF1DE12B0D228EBB00A3939D /* libwx_mac_gl-2.8.a in Frameworks */,
+				BF1DE12C0D228EBB00A3939D /* libwxjpeg-2.8.a in Frameworks */,
+				BF1DE12D0D228EBB00A3939D /* libwxpng-2.8.a in Frameworks */,
+				BF1DE12E0D228EBB00A3939D /* libwxtiff-2.8.a in Frameworks */,
+				BF1DE1540D2297C300A3939D /* QuickTime.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1862,15 +1844,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		BFFCD886089041A600044EBA /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				BFFCD9940890580F00044EBA /* libcctbx.a in Frameworks */,
-				BFFCD9950890580F00044EBA /* libnewmat.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2038,6 +2011,15 @@
 			name = CrystVector;
 			sourceTree = "<group>";
 		};
+		BF3611550BD6E4BE000C0EE9 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BF36115B0BD6E4BE000C0EE9 /* libwx_mac_static.a */,
+				BF36115D0BD6E4BE000C0EE9 /* libwx_mac.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		BF3EAF90089628D200E02367 /* Fox */ = {
 			isa = PBXGroup;
 			children = (
@@ -2085,6 +2067,22 @@
 		BFFCCB4F089028D300044EBA = {
 			isa = PBXGroup;
 			children = (
+				BF1DE1530D2297C300A3939D /* QuickTime.framework */,
+				BF1DE1250D228EBB00A3939D /* libwx_mac-2.8.a */,
+				BF1DE1260D228EBB00A3939D /* libwx_mac_gl-2.8.a */,
+				BF1DE1270D228EBB00A3939D /* libwxjpeg-2.8.a */,
+				BF1DE1280D228EBB00A3939D /* libwxpng-2.8.a */,
+				BF1DE1290D228EBB00A3939D /* libwxtiff-2.8.a */,
+				BF1DE1230D228EA500A3939D /* libfftw3f.a */,
+				BF3611540BD6E4BE000C0EE9 /* wxWindows.xcodeproj */,
+				BF36112F0BD6E409000C0EE9 /* WebKit.framework */,
+				BF36112B0BD6E3F5000C0EE9 /* GLUT.framework */,
+				BF3611280BD6E3CA000C0EE9 /* AppKit.framework */,
+				BF3611260BD6E3B6000C0EE9 /* OpenGL.framework */,
+				BF3611240BD6E3A6000C0EE9 /* IOKit.framework */,
+				BF3611220BD6E38F000C0EE9 /* System.framework */,
+				BF36111A0BD6E326000C0EE9 /* Carbon.framework */,
+				BF3611180BD6E30F000C0EE9 /* AGL.framework */,
 				BF3EAF910896291100E02367 /* ObjCryst */,
 				BF347947091506B7006E569C /* CrystVector */,
 				BF3479340915057C006E569C /* RefinableObj */,
@@ -2096,6 +2094,7 @@
 				BF34794209150686006E569C /* newmat */,
 				BFFCCB5E089028E500044EBA /* Products */,
 				BFFCD88A089041A600044EBA /* Fox-Info.plist */,
+				BF1DDDEB0D228DCF00A3939D /* FoxCocoa-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -2104,8 +2103,7 @@
 			children = (
 				BFFCCB5D089028E500044EBA /* libnewmat.a */,
 				BFFCCBE50890309900044EBA /* libcctbx.a */,
-				BFFCD888089041A600044EBA /* Fox.app */,
-				BFE3CE0609177BF1002021F6 /* Fox-NoGUI */,
+				BF1DDDE90D228DCF00A3939D /* Fox.app */,
 			);
 			name = Products;
 			sourceTree = SOURCE_ROOT;
@@ -2118,7 +2116,6 @@
 				BFFCCCC60890389700044EBA /* config */,
 				BFFCCCFD0890389700044EBA /* config.hpp */,
 				BFFCCCFE0890389700044EBA /* detail */,
-				BFFCCD2E0890389800044EBA /* iterator */,
 				BFFCCD470890389800044EBA /* iterator.hpp */,
 				BFFCCD480890389800044EBA /* math */,
 				BFFCCD540890389800044EBA /* mpl */,
@@ -2273,44 +2270,6 @@
 				BFFCCD2B0890389800044EBA /* templated_streams.hpp */,
 				BFFCCD2C0890389800044EBA /* utf8_codecvt_facet.hpp */,
 				BFFCCD2D0890389800044EBA /* workaround.hpp */,
-			);
-			path = detail;
-			sourceTree = "<group>";
-		};
-		BFFCCD2E0890389800044EBA /* iterator */ = {
-			isa = PBXGroup;
-			children = (
-				BFFCCD2F0890389800044EBA /* counting_iterator.hpp */,
-				BFFCCD300890389800044EBA /* detail */,
-				BFFCCD370890389800044EBA /* filter_iterator.hpp */,
-				BFFCCD380890389800044EBA /* indirect_iterator.hpp */,
-				BFFCCD390890389800044EBA /* interoperable.hpp */,
-				BFFCCD3A0890389800044EBA /* is_lvalue_iterator.hpp */,
-				BFFCCD3B0890389800044EBA /* is_readable_iterator.hpp */,
-				BFFCCD3C0890389800044EBA /* iterator_adaptor.hpp */,
-				BFFCCD3D0890389800044EBA /* iterator_archetypes.hpp */,
-				BFFCCD3E0890389800044EBA /* iterator_categories.hpp */,
-				BFFCCD3F0890389800044EBA /* iterator_concepts.hpp */,
-				BFFCCD400890389800044EBA /* iterator_facade.hpp */,
-				BFFCCD410890389800044EBA /* iterator_traits.hpp */,
-				BFFCCD420890389800044EBA /* new_iterator_tests.hpp */,
-				BFFCCD430890389800044EBA /* permutation_iterator.hpp */,
-				BFFCCD440890389800044EBA /* reverse_iterator.hpp */,
-				BFFCCD450890389800044EBA /* transform_iterator.hpp */,
-				BFFCCD460890389800044EBA /* zip_iterator.hpp */,
-			);
-			path = iterator;
-			sourceTree = "<group>";
-		};
-		BFFCCD300890389800044EBA /* detail */ = {
-			isa = PBXGroup;
-			children = (
-				BFFCCD310890389800044EBA /* any_conversion_eater.hpp */,
-				BFFCCD320890389800044EBA /* config_def.hpp */,
-				BFFCCD330890389800044EBA /* config_undef.hpp */,
-				BFFCCD340890389800044EBA /* enable_if.hpp */,
-				BFFCCD350890389800044EBA /* facade_iterator_category.hpp */,
-				BFFCCD360890389800044EBA /* minimum_category.hpp */,
 			);
 			path = detail;
 			sourceTree = "<group>";
@@ -4302,23 +4261,24 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		BFE3CE0509177BF0002021F6 /* Fox-NoGUI */ = {
+		BF1DDDE80D228DCF00A3939D /* Fox */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = BFE3CE0809177C10002021F6 /* Build configuration list for PBXNativeTarget "Fox-NoGUI" */;
+			buildConfigurationList = BF1DDDED0D228DD000A3939D /* Build configuration list for PBXNativeTarget "Fox" */;
 			buildPhases = (
-				BFE3CE0309177BF0002021F6 /* Sources */,
-				BFE3CE0409177BF0002021F6 /* Frameworks */,
+				BF1DDDE50D228DCF00A3939D /* Resources */,
+				BF1DDDE60D228DCF00A3939D /* Sources */,
+				BF1DDDE70D228DCF00A3939D /* Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				BFE3CE1209177C12002021F6 /* PBXTargetDependency */,
-				BFE3CE1009177C12002021F6 /* PBXTargetDependency */,
+				BF1DE1890D229E1B00A3939D /* PBXTargetDependency */,
+				BF1DE18B0D229E1B00A3939D /* PBXTargetDependency */,
 			);
-			name = "Fox-NoGUI";
-			productName = "Fox-NoGUI";
-			productReference = BFE3CE0609177BF1002021F6 /* Fox-NoGUI */;
-			productType = "com.apple.product-type.tool";
+			name = Fox;
+			productName = FoxCocoa;
+			productReference = BF1DDDE90D228DCF00A3939D /* Fox.app */;
+			productType = "com.apple.product-type.application";
 		};
 		BFFCCB5C089028E500044EBA /* newmat */ = {
 			isa = PBXNativeTarget;
@@ -4354,99 +4314,121 @@
 			productReference = BFFCCBE50890309900044EBA /* libcctbx.a */;
 			productType = "com.apple.product-type.library.static";
 		};
-		BFFCD887089041A600044EBA /* Fox */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = BFFCD88B089041A900044EBA /* Build configuration list for PBXNativeTarget "Fox" */;
-			buildPhases = (
-				BFFCD884089041A600044EBA /* Resources */,
-				BFFCD885089041A600044EBA /* Sources */,
-				BFFCD886089041A600044EBA /* Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				BFFCD9970890583C00044EBA /* PBXTargetDependency */,
-				BFFCD9990890584000044EBA /* PBXTargetDependency */,
-			);
-			name = Fox;
-			productName = Fox;
-			productReference = BFFCD888089041A600044EBA /* Fox.app */;
-			productType = "com.apple.product-type.application";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		BFFCCB51089028D300044EBA /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = BFFCCB52089028D300044EBA /* Build configuration list for PBXProject "Fox" */;
+			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 0;
 			mainGroup = BFFCCB4F089028D300044EBA;
 			productRefGroup = BFFCCB5E089028E500044EBA /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = BF3611550BD6E4BE000C0EE9 /* Products */;
+					ProjectRef = BF3611540BD6E4BE000C0EE9 /* wxWindows.xcodeproj */;
+				},
+			);
+			projectRoot = ..;
 			targets = (
 				BFFCCB5C089028E500044EBA /* newmat */,
 				BFFCCBE40890309900044EBA /* cctbx */,
-				BFFCD887089041A600044EBA /* Fox */,
-				BFE3CE0509177BF0002021F6 /* Fox-NoGUI */,
+				BF1DDDE80D228DCF00A3939D /* Fox */,
 			);
 		};
 /* End PBXProject section */
 
+/* Begin PBXReferenceProxy section */
+		BF36115B0BD6E4BE000C0EE9 /* libwx_mac_static.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libwx_mac_static.a;
+			remoteRef = BF36115A0BD6E4BE000C0EE9 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		BF36115D0BD6E4BE000C0EE9 /* libwx_mac.dylib */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			path = libwx_mac.dylib;
+			remoteRef = BF36115C0BD6E4BE000C0EE9 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
 /* Begin PBXResourcesBuildPhase section */
-		BFFCD884089041A600044EBA /* Resources */ = {
+		BF1DDDE50D228DCF00A3939D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BF26F599089306500008175B /* Fox.icns in Resources */,
+				BF1DDE260D228E4100A3939D /* Fox.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		BFE3CE0309177BF0002021F6 /* Sources */ = {
+		BF1DDDE60D228DCF00A3939D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BFE3CE1509177C29002021F6 /* Fox.cpp in Sources */,
-				BFE3CE1609177C29002021F6 /* Atom.cpp in Sources */,
-				BFE3CE1709177C29002021F6 /* Crystal.cpp in Sources */,
-				BFE3CE1809177C29002021F6 /* CrystVector.cpp in Sources */,
-				BFE3CE1909177C29002021F6 /* DiffractionDataSingleCrystal.cpp in Sources */,
-				BFE3CE1A09177C29002021F6 /* Exception.cpp in Sources */,
-				BFE3CE1B09177C29002021F6 /* geomStructFactor_001.cpp in Sources */,
-				BFE3CE1C09177C29002021F6 /* geomStructFactor_002.cpp in Sources */,
-				BFE3CE1D09177C29002021F6 /* geomStructFactor_067.cpp in Sources */,
-				BFE3CE1E09177C29002021F6 /* geomStructFactor_097.cpp in Sources */,
-				BFE3CE1F09177C29002021F6 /* geomStructFactor_230.cpp in Sources */,
-				BFE3CE2009177C29002021F6 /* geomStructFactor_centro.cpp in Sources */,
-				BFE3CE2109177C29002021F6 /* geomStructFactor.cpp in Sources */,
-				BFE3CE2209177C29002021F6 /* GlobalOptimObj.cpp in Sources */,
-				BFE3CE2309177C29002021F6 /* IO.cpp in Sources */,
-				BFE3CE2409177C29002021F6 /* IO.cpp in Sources */,
-				BFE3CE2509177C29002021F6 /* LSQNumObj.cpp in Sources */,
-				BFE3CE2709177C29002021F6 /* Molecule.cpp in Sources */,
-				BFE3CE2909177C29002021F6 /* Polyhedron.cpp in Sources */,
-				BFE3CE2A09177C29002021F6 /* PowderPattern.cpp in Sources */,
-				BFE3CE2B09177C29002021F6 /* PowderPatternBackgroundBayesianMinimiser.cpp in Sources */,
-				BFE3CE2C09177C29002021F6 /* RefinableObj.cpp in Sources */,
-				BFE3CE2D09177C29002021F6 /* ReflectionProfile.cpp in Sources */,
-				BFE3CE2E09177C29002021F6 /* Scatterer.cpp in Sources */,
-				BFE3CE2F09177C29002021F6 /* ScatteringCorr.cpp in Sources */,
-				BFE3CE3009177C29002021F6 /* ScatteringData.cpp in Sources */,
-				BFE3CE3109177C29002021F6 /* ScatteringPower.cpp in Sources */,
-				BFE3CE3209177C29002021F6 /* ScatteringPowerSphere.cpp in Sources */,
-				BFE3CE3309177C29002021F6 /* Simplex.cpp in Sources */,
-				BFE3CE3409177C29002021F6 /* SpaceGroup.cpp in Sources */,
-				BFE3CE3509177C29002021F6 /* test.cpp in Sources */,
-				BFE3CE3609177C29002021F6 /* Tracker.cpp in Sources */,
-				BFE3CE3709177C29002021F6 /* UnitCell.cpp in Sources */,
-				BFE3CE3809177C29002021F6 /* VFNDebug.cpp in Sources */,
-				BFE3CE3909177C29002021F6 /* VFNStreamFormat.cpp in Sources */,
-				BFE3CE4809177C29002021F6 /* ZScatterer.cpp in Sources */,
-				BF08978C0B072DF600C0F576 /* CIF.cpp in Sources */,
-				BF08978F0B072E2F00C0F576 /* ci_string.cpp in Sources */,
-				BFE6AC6A0B886ACB007AFBA8 /* Indexing.cpp in Sources */,
+				BF1DDDEE0D228E3700A3939D /* Fox.cpp in Sources */,
+				BF1DDDEF0D228E3700A3939D /* Atom.cpp in Sources */,
+				BF1DDDF00D228E3700A3939D /* Crystal.cpp in Sources */,
+				BF1DDDF10D228E3700A3939D /* CrystVector.cpp in Sources */,
+				BF1DDDF20D228E3700A3939D /* DiffractionDataSingleCrystal.cpp in Sources */,
+				BF1DDDF30D228E3700A3939D /* Exception.cpp in Sources */,
+				BF1DDDF40D228E3700A3939D /* geomStructFactor_001.cpp in Sources */,
+				BF1DDDF50D228E3700A3939D /* geomStructFactor_002.cpp in Sources */,
+				BF1DDDF60D228E3700A3939D /* geomStructFactor_067.cpp in Sources */,
+				BF1DDDF70D228E3700A3939D /* geomStructFactor_097.cpp in Sources */,
+				BF1DDDF80D228E3700A3939D /* geomStructFactor_230.cpp in Sources */,
+				BF1DDDF90D228E3700A3939D /* geomStructFactor_centro.cpp in Sources */,
+				BF1DDDFA0D228E3700A3939D /* geomStructFactor.cpp in Sources */,
+				BF1DDDFB0D228E3700A3939D /* GlobalOptimObj.cpp in Sources */,
+				BF1DDDFC0D228E3700A3939D /* IO.cpp in Sources */,
+				BF1DDDFD0D228E3700A3939D /* IO.cpp in Sources */,
+				BF1DDDFE0D228E3700A3939D /* LSQNumObj.cpp in Sources */,
+				BF1DDDFF0D228E3700A3939D /* MC.cpp in Sources */,
+				BF1DDE000D228E3700A3939D /* Molecule.cpp in Sources */,
+				BF1DDE010D228E3700A3939D /* mpVector.cpp in Sources */,
+				BF1DDE020D228E3700A3939D /* Polyhedron.cpp in Sources */,
+				BF1DDE030D228E3700A3939D /* PowderPattern.cpp in Sources */,
+				BF1DDE040D228E3700A3939D /* PowderPatternBackgroundBayesianMinimiser.cpp in Sources */,
+				BF1DDE050D228E3700A3939D /* RefinableObj.cpp in Sources */,
+				BF1DDE060D228E3700A3939D /* ReflectionProfile.cpp in Sources */,
+				BF1DDE070D228E3700A3939D /* Scatterer.cpp in Sources */,
+				BF1DDE080D228E3700A3939D /* ScatteringCorr.cpp in Sources */,
+				BF1DDE090D228E3700A3939D /* ScatteringData.cpp in Sources */,
+				BF1DDE0A0D228E3700A3939D /* ScatteringPower.cpp in Sources */,
+				BF1DDE0B0D228E3700A3939D /* ScatteringPowerSphere.cpp in Sources */,
+				BF1DDE0C0D228E3700A3939D /* Simplex.cpp in Sources */,
+				BF1DDE0D0D228E3700A3939D /* SpaceGroup.cpp in Sources */,
+				BF1DDE0E0D228E3700A3939D /* test.cpp in Sources */,
+				BF1DDE0F0D228E3700A3939D /* Tracker.cpp in Sources */,
+				BF1DDE100D228E3700A3939D /* UnitCell.cpp in Sources */,
+				BF1DDE110D228E3700A3939D /* VFNDebug.cpp in Sources */,
+				BF1DDE120D228E3700A3939D /* VFNStreamFormat.cpp in Sources */,
+				BF1DDE130D228E3700A3939D /* wxAtom.cpp in Sources */,
+				BF1DDE140D228E3700A3939D /* wxCryst.cpp in Sources */,
+				BF1DDE150D228E3700A3939D /* wxCrystal.cpp in Sources */,
+				BF1DDE160D228E3700A3939D /* wxDiffractionSingleCrystal.cpp in Sources */,
+				BF1DDE170D228E3700A3939D /* wxGlobalOptimObj.cpp in Sources */,
+				BF1DDE180D228E3700A3939D /* wxMolecule.cpp in Sources */,
+				BF1DDE190D228E3700A3939D /* wxMultiGraph.cpp in Sources */,
+				BF1DDE1A0D228E3700A3939D /* wxPowderPattern.cpp in Sources */,
+				BF1DDE1B0D228E3700A3939D /* wxRefinableObj.cpp in Sources */,
+				BF1DDE1C0D228E3700A3939D /* wxScatterer.cpp in Sources */,
+				BF1DDE1D0D228E3700A3939D /* wxScatteringPower.cpp in Sources */,
+				BF1DDE1E0D228E3700A3939D /* wxScatteringPowerSphere.cpp in Sources */,
+				BF1DDE1F0D228E3700A3939D /* wxTrackerGraph.cpp in Sources */,
+				BF1DDE200D228E3700A3939D /* wxZScatterer.cpp in Sources */,
+				BF1DDE210D228E3700A3939D /* ZScatterer.cpp in Sources */,
+				BF1DDE220D228E3700A3939D /* trackball.c in Sources */,
+				BF1DDE230D228E3700A3939D /* CIF.cpp in Sources */,
+				BF1DDE240D228E3700A3939D /* ci_string.cpp in Sources */,
+				BF1DDE250D228E3700A3939D /* Indexing.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4556,257 +4538,83 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		BFFCD885089041A600044EBA /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				BFFCD88F0890422000044EBA /* Fox.cpp in Sources */,
-				BFFCD8C70890426700044EBA /* Atom.cpp in Sources */,
-				BFFCD8C80890426700044EBA /* Crystal.cpp in Sources */,
-				BFFCD8C90890426700044EBA /* CrystVector.cpp in Sources */,
-				BFFCD8CA0890426700044EBA /* DiffractionDataSingleCrystal.cpp in Sources */,
-				BFFCD8CB0890426700044EBA /* Exception.cpp in Sources */,
-				BFFCD8CD0890426700044EBA /* geomStructFactor_001.cpp in Sources */,
-				BFFCD8CE0890426700044EBA /* geomStructFactor_002.cpp in Sources */,
-				BFFCD8CF0890426700044EBA /* geomStructFactor_067.cpp in Sources */,
-				BFFCD8D00890426700044EBA /* geomStructFactor_097.cpp in Sources */,
-				BFFCD8D10890426700044EBA /* geomStructFactor_230.cpp in Sources */,
-				BFFCD8D20890426700044EBA /* geomStructFactor_centro.cpp in Sources */,
-				BFFCD8D30890426700044EBA /* geomStructFactor.cpp in Sources */,
-				BFFCD8D40890426700044EBA /* GlobalOptimObj.cpp in Sources */,
-				BFFCD8D50890426700044EBA /* IO.cpp in Sources */,
-				BFFCD8D60890426700044EBA /* IO.cpp in Sources */,
-				BFFCD8D70890426700044EBA /* LSQNumObj.cpp in Sources */,
-				BFFCD8D80890426700044EBA /* MC.cpp in Sources */,
-				BFFCD8D90890426700044EBA /* Molecule.cpp in Sources */,
-				BFFCD8DA0890426700044EBA /* mpVector.cpp in Sources */,
-				BFFCD8DC0890426700044EBA /* Polyhedron.cpp in Sources */,
-				BFFCD8DD0890426700044EBA /* PowderPattern.cpp in Sources */,
-				BFFCD8DE0890426700044EBA /* PowderPatternBackgroundBayesianMinimiser.cpp in Sources */,
-				BFFCD8DF0890426700044EBA /* RefinableObj.cpp in Sources */,
-				BFFCD8E00890426700044EBA /* ReflectionProfile.cpp in Sources */,
-				BFFCD8E10890426700044EBA /* Scatterer.cpp in Sources */,
-				BFFCD8E20890426700044EBA /* ScatteringCorr.cpp in Sources */,
-				BFFCD8E30890426700044EBA /* ScatteringData.cpp in Sources */,
-				BFFCD8E40890426700044EBA /* ScatteringPower.cpp in Sources */,
-				BFFCD8E50890426700044EBA /* ScatteringPowerSphere.cpp in Sources */,
-				BFFCD8E60890426700044EBA /* Simplex.cpp in Sources */,
-				BFFCD8E70890426700044EBA /* SpaceGroup.cpp in Sources */,
-				BFFCD8E80890426700044EBA /* test.cpp in Sources */,
-				BFFCD8E90890426700044EBA /* Tracker.cpp in Sources */,
-				BFFCD8EA0890426700044EBA /* UnitCell.cpp in Sources */,
-				BFFCD8EB0890426700044EBA /* VFNDebug.cpp in Sources */,
-				BFFCD8EC0890426700044EBA /* VFNStreamFormat.cpp in Sources */,
-				BFFCD8ED0890426700044EBA /* wxAtom.cpp in Sources */,
-				BFFCD8EE0890426700044EBA /* wxCryst.cpp in Sources */,
-				BFFCD8EF0890426700044EBA /* wxCrystal.cpp in Sources */,
-				BFFCD8F00890426700044EBA /* wxDiffractionSingleCrystal.cpp in Sources */,
-				BFFCD8F10890426700044EBA /* wxGlobalOptimObj.cpp in Sources */,
-				BFFCD8F20890426700044EBA /* wxMolecule.cpp in Sources */,
-				BFFCD8F30890426700044EBA /* wxMultiGraph.cpp in Sources */,
-				BFFCD8F40890426700044EBA /* wxPowderPattern.cpp in Sources */,
-				BFFCD8F50890426700044EBA /* wxRefinableObj.cpp in Sources */,
-				BFFCD8F60890426700044EBA /* wxScatterer.cpp in Sources */,
-				BFFCD8F70890426700044EBA /* wxScatteringPower.cpp in Sources */,
-				BFFCD8F80890426700044EBA /* wxScatteringPowerSphere.cpp in Sources */,
-				BFFCD8F90890426700044EBA /* wxTrackerGraph.cpp in Sources */,
-				BFFCD8FA0890426700044EBA /* wxZScatterer.cpp in Sources */,
-				BFFCD8FD0890426700044EBA /* ZScatterer.cpp in Sources */,
-				BFFCD97D08904D7D00044EBA /* trackball.c in Sources */,
-				BF08978B0B072DF600C0F576 /* CIF.cpp in Sources */,
-				BF08978E0B072E2F00C0F576 /* ci_string.cpp in Sources */,
-				BFE6AC690B886ACB007AFBA8 /* Indexing.cpp in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		BFE3CE1009177C12002021F6 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = BFFCCBE40890309900044EBA /* cctbx */;
-			targetProxy = BFE3CE0F09177C12002021F6 /* PBXContainerItemProxy */;
-		};
-		BFE3CE1209177C12002021F6 /* PBXTargetDependency */ = {
+		BF1DE1890D229E1B00A3939D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = BFFCCB5C089028E500044EBA /* newmat */;
-			targetProxy = BFE3CE1109177C12002021F6 /* PBXContainerItemProxy */;
+			targetProxy = BF1DE1880D229E1B00A3939D /* PBXContainerItemProxy */;
 		};
-		BFFCD9970890583C00044EBA /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = BFFCCB5C089028E500044EBA /* newmat */;
-			targetProxy = BFFCD9960890583C00044EBA /* PBXContainerItemProxy */;
-		};
-		BFFCD9990890584000044EBA /* PBXTargetDependency */ = {
+		BF1DE18B0D229E1B00A3939D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = BFFCCBE40890309900044EBA /* cctbx */;
-			targetProxy = BFFCD9980890584000044EBA /* PBXContainerItemProxy */;
+			targetProxy = BF1DE18A0D229E1B00A3939D /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		BF033A7109156C6400BB8A5B /* G4 */ = {
+		BF1DDDEC0D228DD000A3939D /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ALTIVEC_EXTENSIONS = YES;
-				GCC_AUTO_VECTORIZATION = NO;
-				GCC_FAST_MATH = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_AUTO_VECTORIZATION = YES;
+				GCC_ENABLE_SSE3_EXTENSIONS = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G4;
-				GCC_OPTIMIZATION_LEVEL = 3;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
-				GCC_STRICT_ALIASING = YES;
-				GCC_UNROLL_LOOPS = YES;
-				INSTALL_PATH = /usr/local/lib;
-				LIBRARY_STYLE = STATIC;
-				OPTIMIZATION_CFLAGS = "-O3";
-				OTHER_CFLAGS = "-mcpu=G4";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Carbon,
-				);
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = newmat;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = G4;
-		};
-		BF033A7209156C6400BB8A5B /* G4 */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_ALTIVEC_EXTENSIONS = YES;
-				GCC_AUTO_VECTORIZATION = NO;
-				GCC_FAST_MATH = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G4;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
-				GCC_STRICT_ALIASING = YES;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_UNROLL_LOOPS = YES;
 				HEADER_SEARCH_PATHS = (
-					../cctbx/cctbx/include/,
-					../cctbx/scitbx/include/,
-					../,
-				);
-				INSTALL_PATH = /usr/local/lib;
-				LIBRARY_STYLE = STATIC;
-				OPTIMIZATION_CFLAGS = "-O3";
-				OTHER_CFLAGS = "-mcpu=G4";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Carbon,
-				);
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = cctbx;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = G4;
-		};
-		BF033A7309156C6400BB8A5B /* G4 */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				DEPLOYMENT_LOCATION = NO;
-				GCC_ALTIVEC_EXTENSIONS = YES;
-				GCC_AUTO_VECTORIZATION = NO;
-				GCC_FAST_MATH = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G4;
-				GCC_OPTIMIZATION_LEVEL = 3;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
-				GCC_STRICT_ALIASING = YES;
-				GCC_UNROLL_LOOPS = YES;
-				HEADER_SEARCH_PATHS = (
-					../ObjCryst,
-					../,
-					../cctbx/scitbx/include/,
-					../cctbx/cctbx/include/,
-					"$HOME/dev/wxdir/include/wx-2.6/",
-					"$HOME/dev/wxdir/lib/wx/include/mac-ansi-release-static-2.6/",
+					"$(SRCROOT)/../static-libs/include",
+					"$(SRCROOT)/../static-libs/include/wx-2.8",
+					"$(SRCROOT)/../static-libs/lib/wx/include/mac-ansi-release-static-2.8",
+					"$(SRCROOT)/../ObjCryst",
+					"$(SRCROOT)/../cctbx/cctbx/include",
+					"$(SRCROOT)/../cctbx/scitbx/include",
+					"$(SRCROOT)/../",
 				);
 				INFOPLIST_FILE = "Fox-Info.plist";
-				INSTALL_PATH = "$(USER_APPS_DIR)";
-				MACOSX_DEPLOYMENT_TARGET = 10.2;
-				OPTIMIZATION_CFLAGS = "-O3";
+				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../static-libs/lib",
+				);
 				OTHER_CFLAGS = (
-					"-mcpu=G4",
-					"-DHAVE_GLUT",
-					"-D__WX__CRYST__",
-					"-DOBJCRYST_GL",
-					"-D__WXMAC__",
 					"-D_FILE_OFFSET_BITS=64",
 					"-D_LARGE_FILES",
-					"-DNO_GCC_PRAGMA",
+					"-D__WXMAC__",
+					"-DHAVE_FFTW",
+					"-D__WX__CRYST__",
+					"-DOBJCRYST_GL",
+					"-DHAVE_GLUT",
 				);
 				OTHER_LDFLAGS = (
 					"-framework",
-					Carbon,
+					Foundation,
 					"-framework",
-					Cocoa,
-					"-framework",
-					System,
-					"-framework",
-					QuickTime,
-					"-framework",
-					IOKit,
-					"-framework",
-					OpenGL,
-					"-framework",
-					AGL,
-					"-framework",
-					GLUT,
-					"-framework",
-					WebKit,
-					"$HOME/dev/wxdir/lib/libwx_mac-2.6.a",
+					AppKit,
 					"-lz",
 					"-lpthread",
 					"-liconv",
-					"$HOME/dev/wxdir/lib/libwx_mac_gl-2.6.a",
 				);
-				OTHER_REZFLAGS = "";
 				PREBINDING = NO;
 				PRODUCT_NAME = Fox;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
+				WRAPPER_EXTENSION = app;
+				ZERO_LINK = YES;
 			};
-			name = G4;
+			name = Deployment;
 		};
-		BF033A7409156C6400BB8A5B /* G4 */ = {
+		BF1DE1810D229D0800A3939D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH)";
-				COPY_PHASE_STRIP = YES;
-				GCC_AUTO_VECTORIZATION = NO;
-				GCC_MODEL_TUNING = G4;
-				GCC_OPTIMIZATION_LEVEL = 3;
-				OTHER_CFLAGS = (
-					"-fast",
-					"-mcpu=G4",
-				);
+				COPY_PHASE_STRIP = NO;
+				GCC_FAST_MATH = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_STRICT_ALIASING = NO;
 			};
-			name = G4;
+			name = Debug;
 		};
-		BF48AEF808924F3F0060B5BE /* Aqua-Profile */ = {
+		BF1DE1820D229D0800A3939D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
@@ -4835,9 +4643,9 @@
 					"-Wno-unknown-pragmas",
 				);
 			};
-			name = "Aqua-Profile";
+			name = Debug;
 		};
-		BF48AEF908924F3F0060B5BE /* Aqua-Profile */ = {
+		BF1DE1830D229D0800A3939D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
@@ -4869,73 +4677,73 @@
 					"-Wno-unknown-pragmas",
 				);
 			};
-			name = "Aqua-Profile";
+			name = Debug;
 		};
-		BF48AEFA08924F3F0060B5BE /* Aqua-Profile */ = {
+		BF1DE1840D229D0800A3939D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../static-libs/include",
+					"$(SRCROOT)/../static-libs/include/wx-2.8",
+					"$(SRCROOT)/../static-libs/lib/wx/include/mac-ansi-release-static-2.8",
+					"$(SRCROOT)/../ObjCryst",
+					"$(SRCROOT)/../cctbx/cctbx/include",
+					"$(SRCROOT)/../cctbx/scitbx/include",
+					"$(SRCROOT)/../",
+				);
+				INFOPLIST_FILE = "Fox-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../static-libs/lib",
+				);
+				OTHER_CFLAGS = (
+					"-D_FILE_OFFSET_BITS=64",
+					"-D_LARGE_FILES",
+					"-D__WXMAC__",
+					"-DHAVE_FFTW",
+					"-D__WX__CRYST__",
+					"-DOBJCRYST_GL",
+					"-DHAVE_GLUT",
+				);
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+					"-lz",
+					"-lpthread",
+					"-liconv",
+				);
+				PRODUCT_NAME = Fox;
+				WRAPPER_EXTENSION = app;
+				ZERO_LINK = NO;
+			};
+			name = Debug;
+		};
+		BF48AEF808924F3F0060B5BE /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				DEPLOYMENT_LOCATION = NO;
-				GCC_ALTIVEC_EXTENSIONS = NO;
-				GCC_AUTO_VECTORIZATION = NO;
 				GCC_FAST_MATH = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G3;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
-				GCC_UNROLL_LOOPS = NO;
-				GENERATE_PROFILING_CODE = YES;
-				HEADER_SEARCH_PATHS = (
-					ObjCryst,
-					../Fox,
-					cctbx,
-					cctbx/scitbx/include/,
-					cctbx/cctbx/include/,
-					"$HOME/dev/wxdir/include/wx-2.6/",
-					"$HOME/dev/wxdir/lib/wx/include/mac-ansi-release-static-2.6/",
-				);
-				INFOPLIST_FILE = "Fox-Info.plist";
-				INSTALL_PATH = "$(USER_APPS_DIR)";
-				MACOSX_DEPLOYMENT_TARGET = 10.2;
+				GCC_UNROLL_LOOPS = YES;
+				INSTALL_PATH = /usr/local/lib;
+				LIBRARY_STYLE = STATIC;
 				OPTIMIZATION_CFLAGS = "-O3";
-				OTHER_CFLAGS = (
-					"-DHAVE_GLUT",
-					"-D__WX__CRYST__",
-					"-DOBJCRYST_GL",
-					"-D__WXMAC__",
-					"-D_FILE_OFFSET_BITS=64",
-					"-D_LARGE_FILES",
-					"-DNO_GCC_PRAGMA",
-				);
+				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = (
 					"-framework",
 					Carbon,
-					"-framework",
-					Cocoa,
-					"-framework",
-					System,
-					"-framework",
-					QuickTime,
-					"-framework",
-					IOKit,
-					"-framework",
-					OpenGL,
-					"-framework",
-					AGL,
-					"-framework",
-					GLUT,
-					"-framework",
-					WebKit,
-					"$HOME/dev/wxdir/lib/libwx_mac-2.6.a",
-					"-lz",
-					"-lpthread",
-					"-liconv",
-					"$HOME/dev/wxdir/lib/libwx_mac_gl-2.6.a",
 				);
 				OTHER_REZFLAGS = "";
 				PREBINDING = NO;
-				PRODUCT_NAME = Fox;
+				PRODUCT_NAME = newmat;
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -4943,9 +4751,43 @@
 					"-Wno-unknown-pragmas",
 				);
 			};
-			name = "Aqua-Profile";
+			name = Deployment;
 		};
-		BF48AEFB08924F3F0060B5BE /* Aqua-Profile */ = {
+		BF48AEF908924F3F0060B5BE /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_FAST_MATH = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G3;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				HEADER_SEARCH_PATHS = (
+					../cctbx/cctbx/include/,
+					../cctbx/scitbx/include/,
+					../,
+				);
+				INSTALL_PATH = /usr/local/lib;
+				LIBRARY_STYLE = STATIC;
+				OPTIMIZATION_CFLAGS = "-O3";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Carbon,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = cctbx;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Deployment;
+		};
+		BF48AEFB08924F3F0060B5BE /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
@@ -4954,875 +4796,46 @@
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_STRICT_ALIASING = NO;
 			};
-			name = "Aqua-Profile";
-		};
-		BF72984B09166319006F90D2 /* GTK */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_FAST_MATH = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G3;
-				GCC_OPTIMIZATION_LEVEL = 3;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
-				GCC_UNROLL_LOOPS = YES;
-				INSTALL_PATH = /usr/local/lib;
-				LIBRARY_STYLE = STATIC;
-				OPTIMIZATION_CFLAGS = "-O3";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Carbon,
-				);
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = newmat;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = GTK;
-		};
-		BF72984C09166319006F90D2 /* GTK */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_FAST_MATH = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G3;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
-				HEADER_SEARCH_PATHS = (
-					../cctbx/cctbx/include/,
-					../cctbx/scitbx/include/,
-					../,
-				);
-				INSTALL_PATH = /usr/local/lib;
-				LIBRARY_STYLE = STATIC;
-				OPTIMIZATION_CFLAGS = "-O3";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Carbon,
-				);
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = cctbx;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = GTK;
-		};
-		BF72984D09166319006F90D2 /* GTK */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				DEPLOYMENT_LOCATION = NO;
-				GCC_ALTIVEC_EXTENSIONS = NO;
-				GCC_AUTO_VECTORIZATION = NO;
-				GCC_FAST_MATH = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = "";
-				GCC_OPTIMIZATION_LEVEL = 3;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
-				GCC_UNROLL_LOOPS = NO;
-				HEADER_SEARCH_PATHS = (
-					ObjCryst,
-					../Fox,
-					cctbx,
-					/sw/include/,
-					/usr/X11R6/include/,
-					cctbx/scitbx/include/,
-					cctbx/cctbx/include/,
-					"$HOME/dev/wxgtk/include/wx-2.6/",
-					"$HOME/dev/wxgtk/lib/wx/include/gtk-ansi-release-static-2.6/",
-				);
-				INFOPLIST_FILE = "Fox-Info.plist";
-				INSTALL_PATH = "$(USER_APPS_DIR)";
-				MACOSX_DEPLOYMENT_TARGET = 10.2;
-				OPTIMIZATION_CFLAGS = "-O3";
-				OTHER_CFLAGS = (
-					"-DHAVE_GLUT",
-					"-D__WX__CRYST__",
-					"-DOBJCRYST_GL",
-					"-DGTK_NO_CHECK_CASTS",
-					"-D__WXGTK__",
-					"-D_FILE_OFFSET_BITS=64",
-					"-D_LARGE_FILES",
-					"-DNO_GCC_PRAGMA",
-				);
-				OTHER_LDFLAGS = (
-					"-L$HOME/dev/wxgtk/lib",
-					"-L/usr/X11R6/lib",
-					"-L/sw/lib",
-					"-framework",
-					IOKit,
-					"-framework",
-					CoreServices,
-					"-framework",
-					System,
-					"-framework",
-					ApplicationServices,
-					"$HOME/dev/wxgtk/lib/libwx_gtk-2.6.a",
-					"-L/sw/lib",
-					"-lgtk",
-					"-lgdk",
-					"-lXrandr",
-					"-lXinerama",
-					"-lXext",
-					"-lXft",
-					"-lfreetype",
-					"-lXrender",
-					"-lfontconfig",
-					"-lX11",
-					"-lXcursor",
-					"-lm",
-					"-lgmodule",
-					"-lgthread",
-					"-lglib",
-					"-lintl",
-					"-liconv",
-					"-lXinerama",
-					"-lXxf86vm",
-					"-lz",
-					"-lpthread",
-					"-liconv",
-					"-framework",
-					OpenGL,
-					"-lglut",
-					"-framework",
-					AGL,
-					"$HOME/dev/wxgtk/lib/libwx_gtk_gl-2.6.a",
-				);
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = Fox;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = GTK;
-		};
-		BF72984E09166319006F90D2 /* GTK */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH)";
-				COPY_PHASE_STRIP = YES;
-				GCC_FAST_MATH = YES;
-				GCC_MODEL_TUNING = "";
-				GCC_OPTIMIZATION_LEVEL = 3;
-			};
-			name = GTK;
-		};
-		BFE3CDFA09177617002021F6 /* G5 */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_ALTIVEC_EXTENSIONS = YES;
-				GCC_AUTO_VECTORIZATION = YES;
-				GCC_FAST_MATH = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 3;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
-				GCC_STRICT_ALIASING = YES;
-				GCC_UNROLL_LOOPS = YES;
-				INSTALL_PATH = /usr/local/lib;
-				LIBRARY_STYLE = STATIC;
-				OPTIMIZATION_CFLAGS = "-O3";
-				OTHER_CFLAGS = "-mcpu=G5";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Carbon,
-				);
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = newmat;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = G5;
-		};
-		BFE3CDFB09177617002021F6 /* G5 */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_ALTIVEC_EXTENSIONS = YES;
-				GCC_AUTO_VECTORIZATION = YES;
-				GCC_FAST_MATH = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
-				GCC_STRICT_ALIASING = YES;
-				GCC_UNROLL_LOOPS = YES;
-				HEADER_SEARCH_PATHS = (
-					../cctbx/cctbx/include/,
-					../cctbx/scitbx/include/,
-					../,
-				);
-				INSTALL_PATH = /usr/local/lib;
-				LIBRARY_STYLE = STATIC;
-				OPTIMIZATION_CFLAGS = "-O3";
-				OTHER_CFLAGS = "-mcpu=G5";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Carbon,
-				);
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = cctbx;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = G5;
-		};
-		BFE3CDFC09177617002021F6 /* G5 */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				DEPLOYMENT_LOCATION = NO;
-				GCC_ALTIVEC_EXTENSIONS = YES;
-				GCC_AUTO_VECTORIZATION = YES;
-				GCC_FAST_MATH = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 3;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
-				GCC_STRICT_ALIASING = YES;
-				GCC_UNROLL_LOOPS = YES;
-				HEADER_SEARCH_PATHS = (
-					../ObjCryst,
-					../,
-					../cctbx/scitbx/include/,
-					../cctbx/cctbx/include/,
-					"$HOME/dev/wxdir/include/wx-2.6/",
-					"$HOME/dev/wxdir/lib/wx/include/mac-ansi-release-static-2.6/",
-				);
-				INFOPLIST_FILE = "Fox-Info.plist";
-				INSTALL_PATH = "$(USER_APPS_DIR)";
-				MACOSX_DEPLOYMENT_TARGET = 10.2;
-				OPTIMIZATION_CFLAGS = "-O3";
-				OTHER_CFLAGS = (
-					"-mcpu=G5",
-					"-DHAVE_GLUT",
-					"-D__WX__CRYST__",
-					"-DOBJCRYST_GL",
-					"-D__WXMAC__",
-					"-D_FILE_OFFSET_BITS=64",
-					"-D_LARGE_FILES",
-					"-DNO_GCC_PRAGMA",
-				);
-				OTHER_LDFLAGS = (
-					"-framework",
-					Carbon,
-					"-framework",
-					Cocoa,
-					"-framework",
-					System,
-					"-framework",
-					QuickTime,
-					"-framework",
-					IOKit,
-					"-framework",
-					OpenGL,
-					"-framework",
-					AGL,
-					"-framework",
-					GLUT,
-					"-framework",
-					WebKit,
-					"$HOME/dev/wxdir/lib/libwx_mac-2.6.a",
-					"-lz",
-					"-lpthread",
-					"-liconv",
-					"$HOME/dev/wxdir/lib/libwx_mac_gl-2.6.a",
-				);
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = Fox;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = G5;
-		};
-		BFE3CDFD09177617002021F6 /* G5 */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_MODEL_TUNING = "";
-				GCC_OPTIMIZATION_LEVEL = 3;
-			};
-			name = G5;
-		};
-		BFE3CE0909177C10002021F6 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_MODEL_TUNING = "";
-				GCC_OPTIMIZATION_LEVEL = 0;
-				HEADER_SEARCH_PATHS = (
-					ObjCryst,
-					../Fox,
-					cctbx,
-					cctbx/scitbx/include,
-					cctbx/cctbx/include,
-				);
-				INSTALL_PATH = "$(HOME)/bin";
-				OPTIMIZATION_CFLAGS = "-O0";
-				OTHER_CFLAGS = "-D__DEBUG__";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = "Fox-NoGUI";
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = Debug;
-		};
-		BFE3CE0A09177C10002021F6 /* G3 */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				GCC_FAST_MATH = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G3;
-				GCC_STRICT_ALIASING = YES;
-				GCC_UNROLL_LOOPS = YES;
-				HEADER_SEARCH_PATHS = (
-					../ObjCryst,
-					../,
-					../cctbx/scitbx/include,
-					../cctbx/cctbx/include,
-				);
-				INSTALL_PATH = "$(HOME)/bin";
-				MACOSX_DEPLOYMENT_TARGET = 10.2;
-				OPTIMIZATION_CFLAGS = "-O3";
-				OTHER_CFLAGS = "-mcpu=G3";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = "Fox-NoGUI";
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = G3;
-		};
-		BFE3CE0B09177C10002021F6 /* G5 */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				GCC_ALTIVEC_EXTENSIONS = YES;
-				GCC_AUTO_VECTORIZATION = YES;
-				GCC_FAST_MATH = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_STRICT_ALIASING = YES;
-				GCC_UNROLL_LOOPS = YES;
-				HEADER_SEARCH_PATHS = (
-					../ObjCryst,
-					../,
-					../cctbx/scitbx/include,
-					../cctbx/cctbx/include,
-				);
-				INSTALL_PATH = "$(HOME)/bin";
-				MACOSX_DEPLOYMENT_TARGET = 10.2;
-				OPTIMIZATION_CFLAGS = "-O3";
-				OTHER_CFLAGS = "-mcpu=G5";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = "Fox-NoGUI";
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = G5;
-		};
-		BFE3CE0C09177C10002021F6 /* GTK */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
-				HEADER_SEARCH_PATHS = (
-					ObjCryst,
-					../Fox,
-					cctbx,
-					cctbx/scitbx/include,
-					cctbx/cctbx/include,
-				);
-				INSTALL_PATH = "$(HOME)/bin";
-				OPTIMIZATION_CFLAGS = "-O0";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = "Fox-NoGUI";
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = GTK;
-		};
-		BFE3CE0D09177C10002021F6 /* G4 */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				GCC_ALTIVEC_EXTENSIONS = YES;
-				GCC_AUTO_VECTORIZATION = NO;
-				GCC_FAST_MATH = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G4;
-				GCC_STRICT_ALIASING = YES;
-				GCC_UNROLL_LOOPS = YES;
-				HEADER_SEARCH_PATHS = (
-					../ObjCryst,
-					../,
-					../cctbx/scitbx/include,
-					../cctbx/cctbx/include,
-				);
-				INSTALL_PATH = "$(HOME)/bin";
-				MACOSX_DEPLOYMENT_TARGET = 10.2;
-				OPTIMIZATION_CFLAGS = "-O3";
-				OTHER_CFLAGS = "-mcpu=G4";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = "Fox-NoGUI";
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = G4;
-		};
-		BFE3CE0E09177C10002021F6 /* Aqua-Profile */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
-				HEADER_SEARCH_PATHS = (
-					ObjCryst,
-					../Fox,
-					cctbx,
-					cctbx/scitbx/include,
-					cctbx/cctbx/include,
-				);
-				INSTALL_PATH = "$(HOME)/bin";
-				OPTIMIZATION_CFLAGS = "-O0";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = "Fox-NoGUI";
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = "Aqua-Profile";
-		};
-		BFFCCB53089028D300044EBA /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-			};
-			name = Debug;
-		};
-		BFFCCB54089028D300044EBA /* G3 */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_MODEL_TUNING = "";
-				GCC_OPTIMIZATION_LEVEL = 3;
-			};
-			name = G3;
-		};
-		BFFCCB60089028E600044EBA /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_FAST_MATH = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
-				INSTALL_PATH = /usr/local/lib;
-				LIBRARY_STYLE = STATIC;
-				OPTIMIZATION_CFLAGS = "-O0";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Carbon,
-				);
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = newmat;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = Debug;
-		};
-		BFFCCB61089028E600044EBA /* G3 */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_FAST_MATH = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G3;
-				GCC_OPTIMIZATION_LEVEL = 3;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
-				GCC_STRICT_ALIASING = YES;
-				GCC_UNROLL_LOOPS = YES;
-				INSTALL_PATH = /usr/local/lib;
-				LIBRARY_STYLE = STATIC;
-				OPTIMIZATION_CFLAGS = "-O3";
-				OTHER_CFLAGS = "-mcpu=G3";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Carbon,
-				);
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = newmat;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = G3;
-		};
-		BFFCCBE7089030B800044EBA /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_FAST_MATH = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
-				HEADER_SEARCH_PATHS = (
-					../cctbx/cctbx/include/,
-					../cctbx/scitbx/include/,
-					../,
-				);
-				INSTALL_PATH = /usr/local/lib;
-				LIBRARY_STYLE = STATIC;
-				OPTIMIZATION_CFLAGS = "-O0";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Carbon,
-				);
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = cctbx;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = Debug;
-		};
-		BFFCCBE8089030B800044EBA /* G3 */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_FAST_MATH = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G3;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
-				GCC_STRICT_ALIASING = YES;
-				GCC_UNROLL_LOOPS = YES;
-				HEADER_SEARCH_PATHS = (
-					../cctbx/cctbx/include/,
-					../cctbx/scitbx/include/,
-					../,
-				);
-				INSTALL_PATH = /usr/local/lib;
-				LIBRARY_STYLE = STATIC;
-				OPTIMIZATION_CFLAGS = "-O3";
-				OTHER_CFLAGS = "-mcpu=G3";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Carbon,
-				);
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = cctbx;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = G3;
-		};
-		BFFCD88C089041A900044EBA /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				DEPLOYMENT_LOCATION = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
-				GCC_UNROLL_LOOPS = NO;
-				HEADER_SEARCH_PATHS = (
-					ObjCryst,
-					../Fox,
-					cctbx,
-					cctbx/scitbx/include/,
-					cctbx/cctbx/include/,
-					"$HOME/dev/wxdir/include/wx-2.6/",
-					"$HOME/dev/wxdir/lib/wx/include/mac-ansi-release-static-2.6/",
-				);
-				INFOPLIST_FILE = "Fox-Info.plist";
-				INSTALL_PATH = "$(USER_APPS_DIR)";
-				MACOSX_DEPLOYMENT_TARGET = 10.2;
-				OPTIMIZATION_CFLAGS = "-O0";
-				OTHER_CFLAGS = (
-					"-D__DEBUG__",
-					"-DHAVE_GLUT",
-					"-D__WX__CRYST__",
-					"-DOBJCRYST_GL",
-					"-D__WXMAC__",
-					"-D_FILE_OFFSET_BITS=64",
-					"-D_LARGE_FILES",
-					"-DNO_GCC_PRAGMA",
-				);
-				OTHER_LDFLAGS = (
-					"-framework",
-					Carbon,
-					"-framework",
-					Cocoa,
-					"-framework",
-					System,
-					"-framework",
-					QuickTime,
-					"-framework",
-					IOKit,
-					"-framework",
-					OpenGL,
-					"-framework",
-					AGL,
-					"-framework",
-					GLUT,
-					"-framework",
-					WebKit,
-					"$HOME/dev/wxdir/lib/libwx_mac-2.6.a",
-					"-lz",
-					"-lpthread",
-					"-liconv",
-					"$HOME/dev/wxdir/lib/libwx_mac_gl-2.6.a",
-				);
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = Fox;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = Debug;
-		};
-		BFFCD88D089041A900044EBA /* G3 */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				DEPLOYMENT_LOCATION = NO;
-				GCC_ALTIVEC_EXTENSIONS = NO;
-				GCC_AUTO_VECTORIZATION = NO;
-				GCC_FAST_MATH = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G3;
-				GCC_OPTIMIZATION_LEVEL = 3;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
-				GCC_STRICT_ALIASING = YES;
-				GCC_UNROLL_LOOPS = YES;
-				HEADER_SEARCH_PATHS = (
-					../ObjCryst,
-					../,
-					../cctbx/scitbx/include/,
-					../cctbx/cctbx/include/,
-					"$HOME/dev/wxdir/include/wx-2.6/",
-					"$HOME/dev/wxdir/lib/wx/include/mac-ansi-release-static-2.6/",
-				);
-				INFOPLIST_FILE = "Fox-Info.plist";
-				INSTALL_PATH = "$(USER_APPS_DIR)";
-				MACOSX_DEPLOYMENT_TARGET = 10.2;
-				OPTIMIZATION_CFLAGS = "-O3";
-				OTHER_CFLAGS = (
-					"-mcpu=G3",
-					"-DHAVE_GLUT",
-					"-D__WX__CRYST__",
-					"-DOBJCRYST_GL",
-					"-D__WXMAC__",
-					"-D_FILE_OFFSET_BITS=64",
-					"-D_LARGE_FILES",
-					"-DNO_GCC_PRAGMA",
-				);
-				OTHER_LDFLAGS = (
-					"-framework",
-					Carbon,
-					"-framework",
-					Cocoa,
-					"-framework",
-					System,
-					"-framework",
-					QuickTime,
-					"-framework",
-					IOKit,
-					"-framework",
-					OpenGL,
-					"-framework",
-					AGL,
-					"-framework",
-					GLUT,
-					"-framework",
-					WebKit,
-					"$HOME/dev/wxdir/lib/libwx_mac-2.6.a",
-					"-lz",
-					"-lpthread",
-					"-liconv",
-					"$HOME/dev/wxdir/lib/libwx_mac_gl-2.6.a",
-				);
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = Fox;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = G3;
+			name = Deployment;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		BFE3CE0809177C10002021F6 /* Build configuration list for PBXNativeTarget "Fox-NoGUI" */ = {
+		BF1DDDED0D228DD000A3939D /* Build configuration list for PBXNativeTarget "Fox" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				BFE3CE0909177C10002021F6 /* Debug */,
-				BFE3CE0A09177C10002021F6 /* G3 */,
-				BFE3CE0B09177C10002021F6 /* G5 */,
-				BFE3CE0C09177C10002021F6 /* GTK */,
-				BFE3CE0D09177C10002021F6 /* G4 */,
-				BFE3CE0E09177C10002021F6 /* Aqua-Profile */,
+				BF1DDDEC0D228DD000A3939D /* Deployment */,
+				BF1DE1840D229D0800A3939D /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = G3;
+			defaultConfigurationName = Deployment;
 		};
 		BFFCCB52089028D300044EBA /* Build configuration list for PBXProject "Fox" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				BFFCCB53089028D300044EBA /* Debug */,
-				BFFCCB54089028D300044EBA /* G3 */,
-				BFE3CDFD09177617002021F6 /* G5 */,
-				BF72984E09166319006F90D2 /* GTK */,
-				BF033A7409156C6400BB8A5B /* G4 */,
-				BF48AEFB08924F3F0060B5BE /* Aqua-Profile */,
+				BF48AEFB08924F3F0060B5BE /* Deployment */,
+				BF1DE1810D229D0800A3939D /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = G3;
+			defaultConfigurationName = Deployment;
 		};
 		BFFCCB5F089028E600044EBA /* Build configuration list for PBXNativeTarget "newmat" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				BFFCCB60089028E600044EBA /* Debug */,
-				BFFCCB61089028E600044EBA /* G3 */,
-				BFE3CDFA09177617002021F6 /* G5 */,
-				BF72984B09166319006F90D2 /* GTK */,
-				BF033A7109156C6400BB8A5B /* G4 */,
-				BF48AEF808924F3F0060B5BE /* Aqua-Profile */,
+				BF48AEF808924F3F0060B5BE /* Deployment */,
+				BF1DE1820D229D0800A3939D /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = G3;
+			defaultConfigurationName = Deployment;
 		};
 		BFFCCBE6089030B800044EBA /* Build configuration list for PBXNativeTarget "cctbx" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				BFFCCBE7089030B800044EBA /* Debug */,
-				BFFCCBE8089030B800044EBA /* G3 */,
-				BFE3CDFB09177617002021F6 /* G5 */,
-				BF72984C09166319006F90D2 /* GTK */,
-				BF033A7209156C6400BB8A5B /* G4 */,
-				BF48AEF908924F3F0060B5BE /* Aqua-Profile */,
+				BF48AEF908924F3F0060B5BE /* Deployment */,
+				BF1DE1830D229D0800A3939D /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = G3;
-		};
-		BFFCD88B089041A900044EBA /* Build configuration list for PBXNativeTarget "Fox" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				BFFCD88C089041A900044EBA /* Debug */,
-				BFFCD88D089041A900044EBA /* G3 */,
-				BFE3CDFC09177617002021F6 /* G5 */,
-				BF72984D09166319006F90D2 /* GTK */,
-				BF033A7309156C6400BB8A5B /* G4 */,
-				BF48AEFA08924F3F0060B5BE /* Aqua-Profile */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = G3;
+			defaultConfigurationName = Deployment;
 		};
 /* End XCConfigurationList section */
 	};
