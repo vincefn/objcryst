@@ -159,7 +159,7 @@ $(DIR_STATIC_LIBS)/lib/libnewmat.a:
 	cp $(BUILD_DIR)/newmat/libnewmat.a $(DIR_STATIC_LIBS)/lib/
 	mkdir -p $(DIR_STATIC_LIBS)/include/newmat
 	cp $(BUILD_DIR)/newmat/*.h $(DIR_STATIC_LIBS)/include/newmat/
-	rm -Rf $(BUILD_DIR)/newmat
+	#rm -Rf $(BUILD_DIR)/newmat
 
 libnewmat: $(DIR_STATIC_LIBS)/lib/libnewmat.a
      
@@ -167,7 +167,7 @@ libnewmat: $(DIR_STATIC_LIBS)/lib/libnewmat.a
 $(DIR_STATIC_LIBS)/lib/libcctbx.a:
 	cd $(BUILD_DIR) && tar -xjf cctbx.tar.bz2        
 	$(MAKE) -f gnu.mak -C $(BUILD_DIR)/cctbx install
-	rm -Rf $(BUILD_DIR)/cctbx
+	#rm -Rf $(BUILD_DIR)/cctbx
 
 libcctbx: $(DIR_STATIC_LIBS)/lib/libcctbx.a
 
