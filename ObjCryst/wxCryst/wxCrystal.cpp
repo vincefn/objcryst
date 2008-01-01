@@ -1586,7 +1586,7 @@ void UnitCellMap::GLInitDisplayList(const float minValue,
 					  WXGLCrystalCanvas * parentCrystal) const
 {
    VFN_DEBUG_ENTRY("UnitCellMap::GLInitDisplayList()",10)
-   cout<<"Generating OpenGL Triangles for Fourier map:"<<mName<<", contour="<<minValue<<endl;
+   //cout<<"Generating OpenGL Triangles for Fourier map:"<<mName<<", contour="<<minValue<<endl;
    // Generate triangles
       VFN_DEBUG_MESSAGE("UnitCellMap::GLInitDisplayList(): Generate Triangles",7)
 
@@ -1839,11 +1839,12 @@ int UnitCellMap::ImportGRD(const string&filename)
       }
       mStandardDeviation = sqrt(mStandardDeviation/(REAL)(mPoints.numElements()));
    }
+   /*
    cout << "Min density value="<<mMin<<endl
         << "Max density value="<<mMax<<endl
         << "Mean density="<<mMean<<endl
         << "Standard Deviation="<<mStandardDeviation<<endl;
-   
+   */
    {// Use short name
       std::string::size_type idx =filename.rfind("/");
       std::string::size_type idx2=filename.rfind("\\");
@@ -2919,9 +2920,11 @@ void WXGLCrystalCanvas::CrystUpdate()
       bool keep=false;
       if(((*pos)->GetType()==0)||((*pos)->GetType()==2))
       {
-      cout<<"WXGLCrystalCanvas::CrystUpdate()"<<endl<<(*pos)->GetName()<<(*pos)->GetType()<<" "
-          <<mpWXCrystal->GetCrystal().GetScatteringComponentList().GetNbComponent()<<","
-          <<(*pos)->GetData()->GetFhklObsSq().numElements()<<endl;
+         /*
+         cout<<"WXGLCrystalCanvas::CrystUpdate()"<<endl<<(*pos)->GetName()<<(*pos)->GetType()<<" "
+            <<mpWXCrystal->GetCrystal().GetScatteringComponentList().GetNbComponent()<<","
+            <<(*pos)->GetData()->GetFhklObsSq().numElements()<<endl;
+         */
          if(mpWXCrystal->GetCrystal().GetClientRegistry().Find((RefinableObj*)(*pos)->GetData())>=0)
             if(mpWXCrystal->GetCrystal().GetScatteringComponentList().GetNbComponent()>0)
                if((*pos)->GetData()->GetFhklObsSq().numElements()>0)
@@ -2933,7 +2936,7 @@ void WXGLCrystalCanvas::CrystUpdate()
             if(mpWXCrystal->GetCrystal().GetScatteringComponentList().GetNbComponent()>0)
                keep=true;
       }
-      cout<<"WXGLCrystalCanvas::CrystUpdate()"<<(*pos)->GetName()<<(*pos)->GetType()<<":"<<keep<<endl;
+      //cout<<"WXGLCrystalCanvas::CrystUpdate()"<<(*pos)->GetName()<<(*pos)->GetType()<<":"<<keep<<endl;
       if(!keep)
       {
          //erase corresponding gl maps
@@ -2942,7 +2945,7 @@ void WXGLCrystalCanvas::CrystUpdate()
          {
             if(&(**pos)==&((*posgl)->GetMap()))
             {
-               cout<<"Erasing GL map:"<<(*posgl)->GetName()<<endl;
+               //cout<<"Erasing GL map:"<<(*posgl)->GetName()<<endl;
                posgl=mvpUnitCellMapGLList.erase(posgl);
                if(posgl==mvpUnitCellMapGLList.end()) break;
             }
@@ -2950,6 +2953,7 @@ void WXGLCrystalCanvas::CrystUpdate()
          pos=mvpUnitCellMap.erase(pos);
          if(pos==mvpUnitCellMap.end()) break;
       }
+      /*
       else if((*pos)->GetType()!=-1)
       {
          #ifdef HAVE_FFTW
@@ -2957,6 +2961,7 @@ void WXGLCrystalCanvas::CrystUpdate()
          (*pos)->CalcFourierMap(*((*pos)->GetData()),(*pos)->GetType());
          #endif
       }
+      */
    }
    #ifdef HAVE_FFTW
    // Add newly computable maps
@@ -2975,10 +2980,12 @@ void WXGLCrystalCanvas::CrystUpdate()
                   if((*pos)->GetType()==1) addCalcMap=false;
                   if((*pos)->GetType()==0) addObsDiffMaps=false;//type==2 will also be there
                }
+            //cout<<__FILE__<<":"<<__LINE__<<":WXGLCrystalCanvas::CrystUpdate()"
+            //    <<data<<","<<addCalcMap<<","<<addObsDiffMaps<<endl;
             if(addCalcMap)
             {
                mvpUnitCellMap.push_back(boost::shared_ptr<UnitCellMap>(new UnitCellMap(mpWXCrystal->GetCrystal())));
-               mvpUnitCellMap.back()->CalcFourierMap(*data);
+               mvpUnitCellMap.back()->CalcFourierMap(*data,1);
             }
             if(addObsDiffMaps && (data->GetFhklObsSq().numElements()>0) )
             {
@@ -2995,7 +3002,7 @@ void WXGLCrystalCanvas::CrystUpdate()
    for(vector<boost::shared_ptr<UnitCellMapGLList> >::iterator 
          pos=mvpUnitCellMapGLList.begin();pos!=mvpUnitCellMapGLList.end();++pos)
    {
-      cout<<"Updating GL map:"<<(*pos)->GetName()<<endl;
+      //cout<<"Updating GL map:"<<(*pos)->GetName()<<endl;
       (*pos)->GenList();
    }
    if(mpFourierMapListWin!=0) mpFourierMapListWin->mMutex.Unlock();
