@@ -689,6 +689,12 @@ const CrystVector_REAL& ScatteringData::GetFhklObsSq() const
    return mFhklObsSq;
 }
 
+const map<const ScatteringPower*,CrystVector_REAL>& ScatteringData::GetScatteringFactor() const
+{
+   this->CalcScattFactor();
+   return mvScatteringFactor;
+}
+
 CrystVector_REAL ScatteringData::GetWavelength()const {return this->GetRadiation().GetWavelength();}
 #if 0
 void ScatteringData::SetUseFastLessPreciseFunc(const bool useItOrNot)

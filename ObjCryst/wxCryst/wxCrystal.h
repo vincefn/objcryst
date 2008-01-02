@@ -203,8 +203,13 @@ class UnitCellMap
       */ 
       int ImportDSN6(const string&filename);
       #ifdef HAVE_FFTW
-      /// Calculate Fourier map (0=obs,1=calc,2=diff) for a given scattering data object
-      int CalcFourierMap(const ScatteringData& data, unsigned int type=0);
+      /** Calculate Fourier map (type0=obs,1=calc,2=diff) for a given scattering data object
+      *
+      * \param type: 0=obs,1=calc,2=diff (Fobs-Fcalc)
+      * \param normalized_sf: if true, normalize structure factors 
+      * by the sum of the squared scattering factor to sharpen the map.
+      */
+      int CalcFourierMap(const ScatteringData& data, unsigned int type=0, const bool normalized_sf=false);
       #endif
       /// Name associated to this map (the filename)
       const string & GetName()const;
@@ -392,7 +397,7 @@ class WXGLCrystalCanvas : public wxGLCanvas
       wxMenu* mpPopUpMenu;
       
       /// To display Fourier map
-      bool mShowFourier, mShowCrystal, mShowAtomName, mShowCursor;
+      bool mShowFourier, mShowCrystal, mShowAtomName, mShowCursor,mSharpenMap;
       /// bounding box for atoms to be included
       BBox mcellbbox;
       /// bounding box for display of Fourier map
@@ -422,6 +427,7 @@ class WXGLCrystalCanvas : public wxGLCanvas
          ~WXFourierMapList();
          wxCheckBox *mpWireFrame;
          wxCheckBox *mpShowFourier;
+         wxCheckBox *mpSharpenMap;
          wxListBox *mpAvailableMapList;
          wxListBox *mpDisplayedMapList;
          wxStaticText *mpMapInfo;

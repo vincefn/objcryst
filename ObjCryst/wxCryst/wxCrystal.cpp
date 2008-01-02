@@ -42,6 +42,7 @@
 #include "ObjCryst/Atom.h"
 #include "ObjCryst/ZScatterer.h"
 #include "ObjCryst/Molecule.h"
+#include "ObjCryst/PowderPattern.h"
 #include "ObjCryst/ScatteringPowerSphere.h"
 #include "ObjCryst/Polyhedron.h"
 
@@ -2046,7 +2047,7 @@ unsigned int closest235(unsigned int v)
    return best;
 }
 
-int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0)
+int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0, const bool normalized_sf)
 {
    mpData=&data;
    const float resolution=0.3;//Approximate resolution in Ansgtroem
@@ -2066,12 +2067,39 @@ int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0)
    mType=type0;
    if(data.GetFhklObsSq().numElements()==0) mType=1;
    
+   CrystVector_REAL norm_sf;
+   if(normalized_sf)
+   {
+      CrystVector_REAL tmp;
+      norm_sf.resize(data.GetFhklCalcReal().numElements());
+      norm_sf=0;
+      const map<const ScatteringPower*,CrystVector_REAL> *pSF=&(data.GetScatteringFactor());
+      const ScatteringComponentList *pComp =&(mpCrystal->GetScatteringComponentList());
+      REAL norm0=0;// norm_sf normalized to 1 at low angle
+      for(unsigned int i=0;i<pComp->GetNbComponent();i++)
+      {
+         tmp=pSF->find((*pComp)(i).mpScattPow)->second;// safe enough ?
+         tmp*=tmp;
+         tmp*=  (*pComp)(i).mOccupancy * (*pComp)(i).mDynPopCorr;
+         
+         const REAL sf0=(*pComp)(i).mpScattPow->GetForwardScatteringFactor(data.GetRadiationType ());
+         norm0+=(*pComp)(i).mOccupancy * (*pComp)(i).mDynPopCorr *sf0*sf0;
+         
+         norm_sf+=tmp;
+      }
+      REAL *p=norm_sf.data();
+      norm0=1/norm0;
+      for(unsigned int i=norm_sf.numElements();i>0;i--) {*p=sqrt(*p * norm0);p++;}
+   }
+   
    const REAL v=1/mpCrystal->GetVolume();//(REAL)(size*size*size);// mpCrystal->GetVolume(); (REAL)(size*size*size);
    for(long i=0;i<nb;++i)
    {
       CrystMatrix_REAL m=mpCrystal->GetSpaceGroup().GetAllEquivRefl (data.GetH()(i),data.GetK()(i),data.GetL()(i),
                                                                      false, data.IsIgnoringImagScattFact(),
                                                                      data.GetFhklCalcReal()(i),data.GetFhklCalcImag()(i));
+      REAL norm=1.0;
+      if(normalized_sf) norm=1/norm_sf(i);
       for(int j=0;j<m.rows();j++)
       {
          int h=int(m(j,0)),k=int(m(j,1)),l=int(m(j,2));
@@ -2086,22 +2114,22 @@ int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0)
          */
          if(mType==2)
          {// Obs-Calc
-            const REAL iobs=sqrt(data.GetFhklObsSq()(i));
-            const REAL rec=m(j,3),imc=m(j,4),icalc=sqrt(data.GetFhklCalcSq()(i));
-            in[h+sizex*k+sizex*sizey*l][0]=v*rec*(icalc-iobs)/sqrt(rec*rec+imc*imc);
-            in[h+sizex*k+sizex*sizey*l][1]=v*imc*(icalc-iobs)/sqrt(rec*rec+imc*imc);
+            const REAL fobs=sqrt(data.GetFhklObsSq()(i));
+            const REAL rec=m(j,3),imc=m(j,4),fcalc=sqrt(data.GetFhklCalcSq()(i));
+            in[h+sizex*k+sizex*sizey*l][0]=v*rec*(fobs-fcalc)/sqrt(rec*rec+imc*imc)*norm;
+            in[h+sizex*k+sizex*sizey*l][1]=v*imc*(fobs-fcalc)/sqrt(rec*rec+imc*imc)*norm;
          }
          if(mType==1)
          {// Calc
-            in[h+sizex*k+sizex*sizey*l][0]=v*m(j,3);
-            in[h+sizex*k+sizex*sizey*l][1]=v*m(j,4);
+            in[h+sizex*k+sizex*sizey*l][0]=v*m(j,3)*norm;
+            in[h+sizex*k+sizex*sizey*l][1]=v*m(j,4)*norm;
          }
          if(mType==0)
          {// Obs
             const REAL iobs=sqrt(data.GetFhklObsSq()(i));
             const REAL rec=m(j,3),imc=m(j,4),icalc=sqrt(data.GetFhklCalcSq()(i));
-            in[h+sizex*k+sizex*sizey*l][0]=v*rec*iobs/icalc;
-            in[h+sizex*k+sizex*sizey*l][1]=v*imc*iobs/icalc;
+            in[h+sizex*k+sizex*sizey*l][0]=v*rec*iobs/icalc*norm;
+            in[h+sizex*k+sizex*sizey*l][1]=v*imc*iobs/icalc*norm;
          }
       }
       //cout<<endl;
@@ -2151,12 +2179,47 @@ int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0)
         << "Standard Deviation="<<mStandardDeviation<<endl;
    fftwf_destroy_plan(plan);
    fftwf_free(in);
+   
    mName=data.GetClassName()+":";
    if(data.GetName()=="") mName+="?";
    else mName+=data.GetName();
-   if(mType==0) mName+="(Fo)";
-   if(mType==1) mName+="(Fc)";
-   if(mType==2) mName+="(Fo-Fc)";
+   if(data.GetClassName()=="PowderPatternDiffraction")
+   {
+      mName="Powder:";
+      if(data.GetRadiationType()==RAD_XRAY)     mName+="Xray:";
+      if(data.GetRadiationType()==RAD_NEUTRON)  mName+="Neut:";
+      if(data.GetRadiationType()==RAD_ELECTRON) mName+="Elec:";
+      
+      char buf[100];
+      if(data.GetRadiation().GetWavelengthType()==WAVELENGTH_TOF) mName+="TOF:";
+      else
+      {
+         sprintf(buf,"lambda=%6.4f:",data.GetWavelength()(0));
+         mName+=buf;
+      }
+      const PowderPatternDiffraction* diff=dynamic_cast<const PowderPatternDiffraction *>(&data);
+      if(diff!=0) mName+=diff->GetParentPowderPattern().GetName();
+   }
+   if(data.GetClassName()=="DiffractionDataSingleCrystal")
+   {
+      mName="Single:";
+      if(data.GetRadiationType()==RAD_XRAY)     mName+="Xray:";
+      if(data.GetRadiationType()==RAD_NEUTRON)  mName+="Neut:";
+      if(data.GetRadiationType()==RAD_ELECTRON) mName+="Elec:";
+      
+      char buf[100];
+      if(data.GetRadiation().GetWavelengthType()==WAVELENGTH_TOF) mName+="TOF:";
+      else
+      {
+         sprintf(buf,"lambda=%6.4f",data.GetWavelength()(0));
+         mName+=buf;
+      }
+      mName+=data.GetName();
+      
+   }
+   if(mType==0) mName="(Fo)"+mName;
+   if(mType==1) mName="(Fc)"+mName;
+   if(mType==2) mName="(Fo-Fc)"+mName;
    return 1;
 }
 #endif
@@ -2298,6 +2361,7 @@ static const long ID_GLCRYSTAL_FOURIER_REMOVE=         WXCRYST_ID();
 static const long ID_GLCRYSTAL_FOURIER_UPDATE=         WXCRYST_ID();
 static const long ID_GLCRYSTAL_FOURIER_WIREFRAME=      WXCRYST_ID();
 static const long ID_GLCRYSTAL_FOURIER_SHOW=           WXCRYST_ID();
+static const long ID_GLCRYSTAL_FOURIER_SHARPEN=        WXCRYST_ID();
 static const long ID_GLCRYSTAL_FOURIER_LISTMAP=        WXCRYST_ID();
 static const long ID_GLCRYSTAL_FOURIER_LISTGLMAP=      WXCRYST_ID();
 static const long ID_GLCRYSTAL_FOURIER_CONTOUR=        WXCRYST_ID();
@@ -2314,9 +2378,11 @@ wxWindow(parent,-1),mpGLCrystalCanvas(pGLCrystalCanvas),mIsUpdating(false)
       wxButton *pButtonUpdate=new wxButton(this,ID_GLCRYSTAL_FOURIER_UPDATE,_T("Update 3D View"));
       mpWireFrame=new wxCheckBox(this,ID_GLCRYSTAL_FOURIER_WIREFRAME,_T("Wireframe"));
       mpShowFourier=new wxCheckBox(this,ID_GLCRYSTAL_FOURIER_SHOW,_T("Show Fourier"));
+      mpSharpenMap=new wxCheckBox(this,ID_GLCRYSTAL_FOURIER_SHARPEN,_T("Sharpen maps"));
       pSizerButtons->Add(pButtonUpdate,0,wxALIGN_CENTER);
       pSizerButtons->Add(mpWireFrame,0,wxALIGN_CENTER);
       pSizerButtons->Add(mpShowFourier,0,wxALIGN_CENTER);
+      pSizerButtons->Add(mpSharpenMap,0,wxALIGN_CENTER);
       pSizer->Add(pSizerButtons,0,wxALIGN_CENTER);
    
    // Map lists
@@ -2328,7 +2394,7 @@ wxWindow(parent,-1),mpGLCrystalCanvas(pGLCrystalCanvas),mIsUpdating(false)
          
          wxStaticText *mpLabel0=new wxStaticText(this,-1,_T("Available Maps"));
          pSizerLeft->Add(mpLabel0,0,wxALIGN_CENTER);
-         mpAvailableMapList=new wxListBox(this,ID_GLCRYSTAL_FOURIER_LISTMAP,wxDefaultPosition,wxSize(250,150));
+         mpAvailableMapList=new wxListBox(this,ID_GLCRYSTAL_FOURIER_LISTMAP,wxDefaultPosition,wxSize(300,150));
          pSizerLeft->Add(mpAvailableMapList,0,wxALIGN_CENTER);
          
          mpMapInfo=new wxStaticText(this,-1,_T("min=+00.00 max=+00.00 sigma=00.00"));
@@ -2351,7 +2417,7 @@ wxWindow(parent,-1),mpGLCrystalCanvas(pGLCrystalCanvas),mIsUpdating(false)
          
          wxStaticText *mpLabel0r=new wxStaticText(this,-1,_T("Displayed Maps"));
          pSizerRight->Add(mpLabel0r,0,wxALIGN_CENTER);
-         mpDisplayedMapList=new wxListBox(this,ID_GLCRYSTAL_FOURIER_LISTGLMAP,wxDefaultPosition,wxSize(250,150));
+         mpDisplayedMapList=new wxListBox(this,ID_GLCRYSTAL_FOURIER_LISTGLMAP,wxDefaultPosition,wxSize(300,150));
          pSizerRight->Add(mpDisplayedMapList,0,wxALIGN_CENTER);
          
          wxBoxSizer* pSizerRight1=new wxBoxSizer(wxHORIZONTAL);
@@ -2422,6 +2488,7 @@ BEGIN_EVENT_TABLE(WXGLCrystalCanvas, wxGLCanvas)
    EVT_BUTTON           (ID_GLCRYSTAL_FOURIER_UPDATE,           WXGLCrystalCanvas::OnFourier)
    EVT_CHECKBOX         (ID_GLCRYSTAL_FOURIER_WIREFRAME,        WXGLCrystalCanvas::OnFourier)
    EVT_CHECKBOX         (ID_GLCRYSTAL_FOURIER_SHOW,             WXGLCrystalCanvas::OnFourier)
+   EVT_CHECKBOX         (ID_GLCRYSTAL_FOURIER_SHARPEN,          WXGLCrystalCanvas::OnFourier)
    EVT_TEXT_ENTER       (ID_GLCRYSTAL_FOURIER_NEWCONTOUR,       WXGLCrystalCanvas::OnFourier)
    EVT_TEXT_ENTER       (ID_GLCRYSTAL_FOURIER_CONTOUR,          WXGLCrystalCanvas::OnFourier)
    EVT_COLOURPICKER_CHANGED(ID_GLCRYSTAL_FOURIER_COLOURPICKER,  WXGLCrystalCanvas::OnFourierChangeColour)
@@ -2437,7 +2504,7 @@ WXGLCrystalCanvas::WXGLCrystalCanvas(WXCrystal *wxcryst,
                                      const wxSize &size):
 wxGLCanvas(parent,id,pos,size,wxDEFAULT_FRAME_STYLE),mpParentFrame(parent),
 mpWXCrystal(wxcryst),mIsGLInit(false),mDist(60),mX0(0),mY0(0),mZ0(0),mViewAngle(15),
-mShowFourier(true),mShowCrystal(true),mShowAtomName(true),mShowCursor(false),
+mShowFourier(true),mShowCrystal(true),mShowAtomName(true),mShowCursor(false),mSharpenMap(false),
 mIsGLFontBuilt(false),mGLFontDisplayListBase(0),mpFourierMapListWin(0)
 {
    VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::WXGLCrystalCanvas()",3)
@@ -2957,7 +3024,7 @@ void WXGLCrystalCanvas::CrystUpdate()
       {
          #ifdef HAVE_FFTW
          //cout<<"Updating Fourier map:"<<(*pos)->GetName()<<endl;
-         (*pos)->CalcFourierMap(*((*pos)->GetData()),(*pos)->GetType());
+         (*pos)->CalcFourierMap(*((*pos)->GetData()),(*pos)->GetType(),mSharpenMap);
          #endif
       }
    }
@@ -3237,6 +3304,7 @@ void WXGLCrystalCanvas::OnFourier(wxCommandEvent &event)
       mpFourierMapListWin=new WXFourierMapList(this,frame);
       mpFourierMapListWin->mpWireFrame->SetValue(true);
       mpFourierMapListWin->mpShowFourier->SetValue(mShowFourier);
+      mpFourierMapListWin->mpSharpenMap->SetValue(mSharpenMap);
       frame->Show(true);
       mpWXCrystal->GetCrystal().UpdateDisplay();
       return;
@@ -3328,7 +3396,7 @@ void WXGLCrystalCanvas::OnFourier(wxCommandEvent &event)
    {
       mpFourierMapListWin->mMutex.Lock();
       mShowFourier=mpFourierMapListWin->mpShowFourier->GetValue();
-	  mpFourierMapListWin->mMutex.Unlock();
+      mpFourierMapListWin->mMutex.Unlock();
    }
    if(event.GetId()==ID_GLCRYSTAL_FOURIER_WIREFRAME)
    {
@@ -3338,6 +3406,14 @@ void WXGLCrystalCanvas::OnFourier(wxCommandEvent &event)
          (*pos)->ToggleShowWire();
       mpFourierMapListWin->mMutex.Unlock();
    }
+   
+   if(event.GetId()==ID_GLCRYSTAL_FOURIER_SHARPEN)
+   {
+      mpFourierMapListWin->mMutex.Lock();
+      mSharpenMap=mpFourierMapListWin->mpSharpenMap->GetValue();
+      mpFourierMapListWin->mMutex.Unlock();
+   }
+   
    // Update - if the crystal is being refined, it will be done at the next display update
    if(false==mpWXCrystal->GetCrystal().IsBeingRefined())
       this->CrystUpdate();

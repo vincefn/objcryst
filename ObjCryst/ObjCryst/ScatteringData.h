@@ -383,7 +383,10 @@ class ScatteringData: virtual public RefinableObj
       
       ///  Returns the Array of observed |F(hkl)|^2 for all reflections.
       const CrystVector_REAL& GetFhklObsSq() const;
-      
+
+      /// Scattering factors for each ScatteringPower, as vectors with NbRefl elements
+      const map<const ScatteringPower*,CrystVector_REAL> &GetScatteringFactor() const;
+
       ///wavelength of the experiment (in Angstroems)
       CrystVector_REAL GetWavelength()const;
       
