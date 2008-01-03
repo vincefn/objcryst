@@ -2707,6 +2707,11 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
    }
    if(mShowFourier)
    {
+      glLoadIdentity();
+      glTranslatef( 0, 0, -mDist );
+      build_rotmatrix( m,mQuat);
+      glMultMatrixf( &m[0][0] );
+      glTranslatef( mX0, mY0, mZ0 );
       glPushMatrix();
          // The display origin is the center of the Crystal BoundingBox, so translate
             BBox cellbbox = this->GetCellBBox();
@@ -3074,6 +3079,16 @@ void WXGLCrystalCanvas::CrystUpdate()
 
    wxUpdateUIEvent event(ID_GLCRYSTAL_UPDATEUI);
    wxPostEvent(this,event);
+   /* // To make a movie
+   if(mpWXCrystal->GetCrystal().IsBeingRefined())
+   {
+      // Export POV-Ray file to make a movie
+      char povFile[40];
+      time_t date=time(0);
+      strftime(povFile,sizeof(povFile),"pov/%Y%m%d-%Hh%Mm%Ss%Z.pov",gmtime(&date));//%Y-%m-%dT%H:%M:%S%Z
+      this->POVRayOutput(povFile);
+   }
+   */
 }
 
 void WXGLCrystalCanvas::OnUpdateUI(wxUpdateUIEvent& WXUNUSED(event))
@@ -3532,9 +3547,12 @@ void WXGLCrystalCanvas::OnPOVRay( wxCommandEvent & WXUNUSED(event))
    WXCrystValidateAllUserInput();
    wxFileDialog save(this,"Choose filename","","","*.pov",wxSAVE | wxOVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
-   
-   ofstream os(save.GetPath().c_str());
-   //ofstream os("test.pov");
+   this->POVRayOutput(save.GetPath().c_str());
+}
+
+void WXGLCrystalCanvas::POVRayOutput(const std::string &filename)
+{
+   ofstream os(filename.c_str());
    
    os << "// This File was created by FOX/ObjCryst++ (http://objcryst.sf.net)"<<endl
       << "//"<<endl
@@ -3726,6 +3744,7 @@ void WXGLCrystalCanvas::OnPOVRay( wxCommandEvent & WXUNUSED(event))
       }
       
    }
+   os.close();
 }
 
 

@@ -347,6 +347,8 @@ class WXGLCrystalCanvas : public wxGLCanvas
       void OnFourierChangeBbox(wxCommandEvent & WXUNUSED(event));
       /// Save view as povray file
       void OnPOVRay(wxCommandEvent & WXUNUSED(event));
+      /// Save view as povray file
+      void POVRayOutput(const std::string &filename);
       // get bounding box for atoms display
       BBox GetCellBBox();
       // get bounding box for display of Fourier map
