@@ -171,8 +171,10 @@ $(DIR_STATIC_LIBS)/lib/libcctbx.a:
 
 libcctbx: $(DIR_STATIC_LIBS)/lib/libcctbx.a
 
-libfftw: $(DIR_STATIC_LIBS)/lib/libfftw3f.a
+$(DIR_STATIC_LIBS)/lib/libfftw3f.a:
 	cd $(BUILD_DIR) && tar -xjf fftw.tar.bz2
 	cd $(BUILD_DIR)/fftw && ./configure --enable-single --prefix $(DIR_STATIC_LIBS) && make install
 	rm -Rf $(BUILD_DIR)/fftw
+
+libfftw: $(DIR_STATIC_LIBS)/lib/libfftw3f.a
 
