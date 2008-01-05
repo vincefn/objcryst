@@ -87,7 +87,6 @@
 		BFFCCBA0089029F400044EBA /* cholesky.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCB6A089029F400044EBA /* cholesky.cpp */; };
 		BFFCCBA1089029F400044EBA /* evalue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCB6B089029F400044EBA /* evalue.cpp */; };
 		BFFCCBA3089029F400044EBA /* fft.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCB6D089029F400044EBA /* fft.cpp */; };
-		BFFCCBA4089029F400044EBA /* garch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCB6E089029F400044EBA /* garch.cpp */; };
 		BFFCCBA5089029F400044EBA /* hholder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCB6F089029F400044EBA /* hholder.cpp */; };
 		BFFCCBA6089029F400044EBA /* jacobi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCB70089029F400044EBA /* jacobi.cpp */; };
 		BFFCCBA7089029F400044EBA /* myexcept.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCB71089029F400044EBA /* myexcept.cpp */; };
@@ -105,7 +104,6 @@
 		BFFCCBB3089029F400044EBA /* newmatnl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCB7D089029F400044EBA /* newmatnl.cpp */; };
 		BFFCCBB4089029F400044EBA /* newmatrm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCB7E089029F400044EBA /* newmatrm.cpp */; };
 		BFFCCBB8089029F400044EBA /* nm_misc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCB82089029F400044EBA /* nm_misc.cpp */; };
-		BFFCCBB9089029F400044EBA /* sl_ex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCB83089029F400044EBA /* sl_ex.cpp */; };
 		BFFCCBBA089029F400044EBA /* solution.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCB84089029F400044EBA /* solution.cpp */; };
 		BFFCCBBB089029F400044EBA /* sort.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCB85089029F400044EBA /* sort.cpp */; };
 		BFFCCBBC089029F400044EBA /* submat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCB86089029F400044EBA /* submat.cpp */; };
@@ -4440,7 +4438,6 @@
 				BFFCCBA0089029F400044EBA /* cholesky.cpp in Sources */,
 				BFFCCBA1089029F400044EBA /* evalue.cpp in Sources */,
 				BFFCCBA3089029F400044EBA /* fft.cpp in Sources */,
-				BFFCCBA4089029F400044EBA /* garch.cpp in Sources */,
 				BFFCCBA5089029F400044EBA /* hholder.cpp in Sources */,
 				BFFCCBA6089029F400044EBA /* jacobi.cpp in Sources */,
 				BFFCCBA7089029F400044EBA /* myexcept.cpp in Sources */,
@@ -4458,7 +4455,6 @@
 				BFFCCBB3089029F400044EBA /* newmatnl.cpp in Sources */,
 				BFFCCBB4089029F400044EBA /* newmatrm.cpp in Sources */,
 				BFFCCBB8089029F400044EBA /* nm_misc.cpp in Sources */,
-				BFFCCBB9089029F400044EBA /* sl_ex.cpp in Sources */,
 				BFFCCBBA089029F400044EBA /* solution.cpp in Sources */,
 				BFFCCBBB089029F400044EBA /* sort.cpp in Sources */,
 				BFFCCBBC089029F400044EBA /* submat.cpp in Sources */,
