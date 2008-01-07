@@ -4596,7 +4596,7 @@
 				PREBINDING = NO;
 				PRODUCT_NAME = Fox;
 				WRAPPER_EXTENSION = app;
-				ZERO_LINK = YES;
+				ZERO_LINK = NO;
 			};
 			name = Deployment;
 		};
