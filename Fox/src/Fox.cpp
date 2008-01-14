@@ -147,7 +147,8 @@ wxFrame *pMainFrameForUserMessage;
 
 void WXCrystInformUserStdOut(const string &str)
 {
-   pMainFrameForUserMessage->SetStatusText((wxString)str.c_str());
+   if(wxThread::IsMain()) pMainFrameForUserMessage->SetStatusText((wxString)str.c_str());
+   else cout<<"Message for user (outside main thread):"<<str<<endl;
 }
 
 // ----------------------------------------------------------------------------
