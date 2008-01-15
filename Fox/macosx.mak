@@ -27,11 +27,10 @@ Fox: libfftw libwx ../cctbx ../newmat
 Fox-nogui: ../cctbx ../newmat
 	make -f gnu.mak Fox-nogui
 
-dist:Fox Fox-nogui
+dist:Fox
 	rm -Rf Fox-`arch`-`date "+%Y-%m-%d"` Fox-`arch`-`date "+%Y-%m-%d"`.dmg
 	mkdir Fox-`arch`-`date "+%Y-%m-%d"`
 	cp -R build/Deployment/Fox.app example Fox-`arch`-`date "+%Y-%m-%d"`/
-	cp src/Fox Fox-`arch`-`date "+%Y-%m-%d"`/Fox-noGUI
 	hdiutil create -srcfolder Fox-`arch`-`date "+%Y-%m-%d"` Fox-`arch`-`date "+%Y-%m-%d"`.dmg
 	rm -Rf Fox-`arch`-`date "+%Y-%m-%d"`
 
