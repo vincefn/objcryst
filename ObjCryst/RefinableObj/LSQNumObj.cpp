@@ -205,7 +205,13 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
                mRefParList.GetParNotFixed(i).SetIsFixed(true);
                mRefParList.PrepareForRefinement();
                nbVar=mRefParList.GetNbParNotFixed();
-               if(nbVar<=1) throw ObjCrystException("LSQNumObj::Refine(): not enough (1) parameters after fixing one...");
+               if(nbVar<=1)
+               {
+                  mRefParList.RestoreParamSet(mIndexValuesSetInitial);
+                  mpRefinedObj->EndOptimization();
+                  if(!silent) mRefParList.Print();
+                  throw ObjCrystException("LSQNumObj::Refine(): not enough (1) parameters after fixing one...");
+               }
                N.resize(nbVar,nbVar);
                deltaVar.resize(nbVar);
 
@@ -514,7 +520,13 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
                           << FormatFloat(marquardt,18,14) <<endl;
                   }
                   mChiSq=oldChiSq;
-                  if(marquardt>1e8) throw ObjCrystException("LSQNumObj::Refine():Levenberg-Marquardt diverging !");
+                  if(marquardt>1e8)
+                  {
+                     mRefParList.RestoreParamSet(mIndexValuesSetInitial);
+                     mpRefinedObj->EndOptimization();
+                     if(!silent) mRefParList.Print();
+                     throw ObjCrystException("LSQNumObj::Refine():Levenberg-Marquardt diverging !");
+                  }
                   goto LSQNumObj_Refine_Restart;
                }
                else marquardt /= marquardtMult;
@@ -581,6 +593,10 @@ void LSQNumObj::SetRefinedObj(RefinableObj &obj, const unsigned int LSQFuncIndex
 }
 
 ObjRegistry<RefinableObj> &LSQNumObj::GetRefinedObjList(){return mRecursiveRefinedObjList;}
+
+RefinableObj& LSQNumObj::GetCompiledRefinedObj(){return mRefParList;}
+
+const RefinableObj& LSQNumObj::GetCompiledRefinedObj()const{return mRefParList;}
 
 void LSQNumObj::SetUseSaveFileOnEachCycle(bool yesOrNo)
 {

@@ -74,11 +74,29 @@ class LSQNumObj
       * functions to minimize- this allows to choose which one to minimize.
       */
       void SetRefinedObj(RefinableObj &obj, const unsigned int LSQFuncIndex=0);
-      /// Access to the full list of refined object. The list is initially built
+      /// Access to the full list of refined objects. The list is initially built
       /// recursively from one object. This function allows to modify the list
       /// of sub-objects before refinement (such as fore removing certain types
       /// of objects).
       ObjRegistry<RefinableObj> &GetRefinedObjList();
+      /** Access to the RefinableObj which is the compilation of all parameters
+      * from the object supplied for optimization and its sub-objects.
+      *
+      * Since this compilation is only updated from the suplied refinableobj and
+      * its sub-objects when SetRefinedObj() and PrepareRefParList() are called,
+      * it is possible to alter the fixed/limited status of parameters
+      * here without affecting the parameters in the refined objects.
+      */
+      RefinableObj& GetCompiledRefinedObj();
+      /** Access to the RefinableObj which is the compilation of all parameters
+      * from the object supplied for optimization and its sub-objects.
+      *
+      * Since this compilation is only updated from the suplied refinableobj and
+      * its sub-objects when SetRefinedObj() and PrepareRefParList() are called,
+      * it is possible to alter the fixed/limited status of parameters
+      * here without affecting the parameters in the refined objects.
+      */
+      const RefinableObj& GetCompiledRefinedObj()const;
       void SetUseSaveFileOnEachCycle(bool yesOrNo=true);
       void SetSaveFile(std::string fileName="refine.save");
       void PrintRefResults()const;
@@ -108,8 +126,14 @@ class LSQNumObj
       // Refined object
          /// The recursive list of all refined sub-objects
          ObjRegistry<RefinableObj> mRecursiveRefinedObjList;
-      /// The refinable par list used during refinement. Only a compilation
-      /// of the parameters in RefinableObj and its sub-objects
+      /** The refinable par list used during refinement. It is only a compilation
+      * of the parameters in RefinableObj and its sub-objects
+      *
+      * This list is only updated from the suplied refinableobj and
+      * its sub-objects when SetRefinedObj() and PrepareRefParList() are called,
+      * so it is possible to alter the fixed/limited status of parameters
+      * here without affecting the parameters in the refined objects.
+      */
       mutable RefinableObj mRefParList;
       /// Damping factor for the refinement (unused yet...)
       REAL mDampingFactor;
