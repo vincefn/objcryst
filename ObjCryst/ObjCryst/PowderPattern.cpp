@@ -269,6 +269,12 @@ void PowderPatternBackground::GetGeneGroup(const RefinableObj &obj,
          }
 }
 
+void PowderPatternBackground::BeginOptimization(const bool allowApproximations,
+                                                const bool enableRestraints)
+{
+   this->RefinableObj::BeginOptimization(allowApproximations,enableRestraints);
+}
+
 const CrystVector_REAL& PowderPatternBackground::GetPowderPatternCalcVariance()const
 {
    this->CalcPowderPattern();
@@ -331,6 +337,18 @@ void PowderPatternBackground::OptimizeBayesianBackground()
    
    this->GetParentPowderPattern().UpdateDisplay();
    VFN_DEBUG_EXIT("PowderPatternBackground::OptimizeBayesianBackground()",5);
+}
+
+void PowderPatternBackground::FixParametersBeyondMaxresolution(RefinableObj &obj)
+{
+   //Auto-fix points beyond used range
+   unsigned long nbpoint=this->GetParentPowderPattern().GetNbPointUsed();
+   for(long j=0;j<mBackgroundNbPoint;j++)
+      if(this->GetParentPowderPattern().X2Pixel(mBackgroundInterpPointX(j))>nbpoint)
+      {
+         obj.GetPar(&mBackgroundInterpPointIntensity(j)).Print();
+         obj.GetPar(&mBackgroundInterpPointIntensity(j)).SetIsFixed(true);
+      }
 }
 
 void PowderPatternBackground::CalcPowderPattern() const
@@ -686,6 +704,7 @@ void PowderPatternDiffraction::BeginOptimization(const bool allowApproximations,
    {
       mClockProfileCalc.Reset();
    }
+   this->GetNbReflBelowMaxSinThetaOvLambda();
    this->ScatteringData::BeginOptimization(allowApproximations,enableRestraints);
 }
 void PowderPatternDiffraction::EndOptimization()
@@ -806,7 +825,7 @@ void PowderPatternDiffraction::ExtractLeBail(unsigned int nbcycle)
             s1 += obs(i)*mvReflProfile[k0].profile(i-mvReflProfile[k0].first)*mFhklObsSq(k0)/s2;
             //cout<<"   "<<s2<<" "<<obs(i)<<" "<<mvReflProfile[k0].profile(i-mvReflProfile[k0].first)<<" "<<mFhklObsSq(k0)<<endl;
          }
-         if(s1>1e-8)iextract(k0)=s1;
+         if((s1>1e-8)&&(!ISNAN_OR_INF(s1))) iextract(k0)=s1;
          else iextract(k0)=1e-8;//:KLUDGE: should <0 intensities be allowed ?
          //if(nbcycle==1) cout<<"  "<<int(mH(k0))<<" "<<int(mK(k0))<<" "<<int(mL(k0))<<" , Iobs="<<iextract(k0)<<endl;
       }
@@ -829,6 +848,36 @@ void PowderPatternDiffraction::ExtractLeBail(unsigned int nbcycle)
       //    <<endl<< FormatVertVectorHKLFloats<REAL>(mH,mK,mL,this->GetFhklCalcSq(),mFhklObsSq)<<endl;
    }
 }
+long PowderPatternDiffraction::GetNbReflBelowMaxSinThetaOvLambda()const
+{
+   if(this->IsBeingRefined()) return mNbReflUsed;
+   VFN_DEBUG_MESSAGE("PowderPattern::GetNbReflBelowMaxSinThetaOvLambda()",4)
+   this->CalcPowderReflProfile();
+   const long nbpoint=mpParentPowderPattern->GetNbPointUsed();
+   if((mNbReflUsed>0)&&(mNbReflUsed<mNbRefl))
+   {
+      //:TODO: handle anisotropic profiles ?
+      if(  (mvReflProfile[mNbReflUsed  ].first>nbpoint)
+         &&(mvReflProfile[mNbReflUsed-1].first<=nbpoint)) return mNbReflUsed;
+   }
+   
+   if((mNbReflUsed==mNbRefl)&&(mvReflProfile[mNbReflUsed-1].first<=nbpoint))
+      return mNbReflUsed;
+   long i;
+   for(i=0;i<mNbRefl;i++)
+   {
+      if(mvReflProfile[i].first>nbpoint) break;
+   }
+   if(i!=mNbReflUsed)
+   {
+      mNbReflUsed=i;
+      mClockNbReflUsed.Click();
+      VFN_DEBUG_MESSAGE("->Changed Max sin(theta)/lambda="<<mMaxSinThetaOvLambda\
+                        <<" nb refl="<<mNbReflUsed,4)
+   }
+   return mNbReflUsed;
+}
+
 
 void PowderPatternDiffraction::CalcPowderPattern() const
 {
@@ -1092,7 +1141,6 @@ Computing all Profiles",5)
    CrystVector_REAL vx,reflProfile,tmpV;
    mvReflProfile.resize(this->GetNbRefl());
    
-   const long nbreflused=this->GetNbReflBelowMaxSinThetaOvLambda();
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile()",5)
    
    for(unsigned int line=0;line<nbLine;line++)
@@ -1141,7 +1189,11 @@ Computing all Profiles",5)
             first -=1;
             last+=1;
             VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile():"<<first<<","<<last<<","<<center,3)
-            if(first>last) exit(0);
+            if(first>last)
+            {
+               cout<<__FILE__<<__LINE__<<endl;
+               exit(0);
+            }
             if((last>=0)&&(first<(long)(mpParentPowderPattern->GetNbPoint())))
             {
                if(first<0) first=0;
@@ -5031,6 +5083,7 @@ void PowderPattern::CalcNbPointUsed()const
 {
    if(this->IsBeingRefined())return;
    unsigned long tmp;
+   // Use the first point of the profile of the first reflection not calculated
    if(this->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
    {
       tmp=(unsigned long)(this->X2PixelCorr(this->STOL2X(mMaxSinThetaOvLambda)));
@@ -5046,6 +5099,7 @@ void PowderPattern::CalcNbPointUsed()const
       mNbPointUsed=tmp;
       mClockNbPointUsed.Click();
    }
+   
 }
 
 void PowderPattern::InitOptions()

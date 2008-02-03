@@ -423,7 +423,7 @@ class ScatteringData: virtual public RefinableObj
       REAL GetMaxSinThetaOvLambda()const;
       /// Recalc, and get the number of reflections which should be actually used, 
       /// due to the maximuml sin(theta)/lambda value set.
-      long GetNbReflBelowMaxSinThetaOvLambda()const;
+      virtual long GetNbReflBelowMaxSinThetaOvLambda()const;
       /// Clock the last time the number of reflections used was changed
       const RefinableObjClock& GetClockNbReflBelowMaxSinThetaOvLambda()const;
    protected:

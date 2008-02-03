@@ -841,6 +841,7 @@ void ScatteringData::SetMaxSinThetaOvLambda(const REAL max){mMaxSinThetaOvLambda
 REAL ScatteringData::GetMaxSinThetaOvLambda()const{return mMaxSinThetaOvLambda;}
 long ScatteringData::GetNbReflBelowMaxSinThetaOvLambda()const
 {
+   if(this->IsBeingRefined()) return mNbReflUsed;
    VFN_DEBUG_MESSAGE("ScatteringData::GetNbReflBelowMaxSinThetaOvLambda()",4)
    this->CalcSinThetaLambda();
    if((mNbReflUsed>0)&&(mNbReflUsed<mNbRefl))

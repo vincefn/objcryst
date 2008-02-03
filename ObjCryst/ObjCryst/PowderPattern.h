@@ -208,6 +208,8 @@ class PowderPatternBackground : public PowderPatternComponent
       virtual void GetGeneGroup(const RefinableObj &obj, 
                                 CrystVector_uint & groupIndex,
                                 unsigned int &firstGroup) const;
+      virtual void BeginOptimization(const bool allowApproximations=false,
+                                     const bool enableRestraints=false);
       virtual const CrystVector_REAL& GetPowderPatternCalcVariance()const;
       virtual pair<const CrystVector_REAL*,const RefinableObjClock*>
          GetPowderPatternIntegratedCalcVariance() const;
@@ -222,6 +224,15 @@ class PowderPatternBackground : public PowderPatternComponent
       * See the class documentation for PowderPatternBackgroundBayesianMinimiser.
       */
       void OptimizeBayesianBackground();
+      /** Fix parameters corresponding to points of the pattern that are not actually calculated.
+      * This is necessary for modelling using splines, to avoid divergence of interpolation
+      * points during least squares optimization.
+      *
+      * \param obj: the object in which are parameters to be fixed. Normally this will be
+      * the PowderPatternBackground object itself, but it can also be the parameter list
+      * copied such as in a LSQNumObj.
+      */
+      void FixParametersBeyondMaxresolution(RefinableObj &obj);
    protected:
       virtual void CalcPowderPattern() const;
       virtual void CalcPowderPatternIntegrated() const;
@@ -343,6 +354,9 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       *\param nbcycle: number of cycles
       */
       void ExtractLeBail(unsigned int nbcycle=1);
+      /// Recalc, and get the number of reflections which should be actually used, 
+      /// due to the maximuml sin(theta)/lambda value set.
+      virtual long GetNbReflBelowMaxSinThetaOvLambda()const;
    protected:
       virtual void CalcPowderPattern() const;
       virtual void CalcPowderPatternIntegrated() const;
