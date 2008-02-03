@@ -3314,6 +3314,11 @@ void WXGLCrystalCanvas::OnFourier(wxCommandEvent &event)
    if(event.GetId()==ID_GLCRYSTAL_MENU_FOURIER)
    {
       if(mpFourierMapListWin!=0) return;
+      if(mpWXCrystal->GetCrystal().IsBeingRefined())
+      {
+         wxMessageBox("The Fourier maps dialog \ncannot be opened during an optimization", "Error", wxOK, this);
+         return;
+      }
       wxFrame *frame= new wxMiniFrame(this,-1,("Available Fourier maps for "+mpWXCrystal->GetCrystal().GetName()).c_str(),
                                           wxDefaultPosition,wxSize(300,300),wxCLOSE_BOX|wxCAPTION|wxSYSTEM_MENU);
       mpFourierMapListWin=new WXFourierMapList(this,frame);
