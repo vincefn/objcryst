@@ -2871,6 +2871,7 @@ void WXGLCrystalCanvas::OnKeyDown(wxKeyEvent& event)
          break;
       }
    }
+   event.Skip();
 }
 
 void WXGLCrystalCanvas::OnKeyUp(wxKeyEvent& event)
@@ -2967,6 +2968,7 @@ void WXGLCrystalCanvas::OnMouse( wxMouseEvent& event )
 
    mTrackBallLastX = event.GetX();
    mTrackBallLastY = event.GetY();
+   event.Skip();
 }
 
 void WXGLCrystalCanvas::OnUpdate(wxCommandEvent & WXUNUSED(event))

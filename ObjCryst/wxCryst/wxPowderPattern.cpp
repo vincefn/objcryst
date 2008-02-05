@@ -1461,6 +1461,7 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
       this->ResetAxisLimits();
       wxUpdateUIEvent event(ID_POWDER_GRAPH_NEW_PATTERN);
       wxPostEvent(this,event);
+      event.Skip();
       return;
    }
    
@@ -1477,6 +1478,7 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
       return;
    }
    mMutex.Unlock();
+   event.Skip();
 }
 void WXPowderPatternGraph::OnMouseWheel(wxMouseEvent &event)
 {
@@ -2678,6 +2680,7 @@ void WXPowderPatternGraph::OnKeyDown(wxKeyEvent& event)
    mClockAxisLimits.Click();
    wxUpdateUIEvent ev(ID_POWDER_GRAPH_NEW_PATTERN);
    wxPostEvent(this,ev);
+   event.Skip();
 }
 
 void WXPowderPatternGraph::OnSize(wxSizeEvent& event)
