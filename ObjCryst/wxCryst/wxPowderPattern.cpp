@@ -1660,6 +1660,7 @@ class WXCellExplorer:public wxWindow
 {
    public:
       WXCellExplorer(wxWindow *parent,PeakList &peaklist,WXPowderPatternGraph *graph=NULL);
+      ~WXCellExplorer();
       /// Start indexing
       void OnIndex(wxCommandEvent &event);
       /// Select cell
@@ -1903,6 +1904,16 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
    mpLog->AppendText(wxString::Format("  Monoclinic C    v=%6.0f -> %6.0f A\n",EstimateCellVolume(dmin,dmax,nb,MONOCLINIC ,LATTICE_C,1.2),EstimateCellVolume(dmin,dmax,nb,MONOCLINIC ,LATTICE_C,0.3)));
    mpLog->AppendText(wxString::Format("  Triclinic       v=%6.0f -> %6.0f A\n",EstimateCellVolume(dmin,dmax,nb,TRICLINIC  ,LATTICE_P,1.2),EstimateCellVolume(dmin,dmax,nb,TRICLINIC  ,LATTICE_P,0.3)));
 }
+
+WXCellExplorer::~WXCellExplorer()
+{
+   if(mpDiff!=0)
+   {
+      mpDiff->SetExtractionMode(false,false);
+      mpDiff->UpdateDisplay();
+   }
+}
+
 void WXCellExplorer::OnIndex(wxCommandEvent &event)
 {
    
