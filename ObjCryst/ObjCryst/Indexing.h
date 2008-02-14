@@ -75,7 +75,13 @@ class RecUnitCell
       ///
       /// Used for DicVol algorithm
       void hkl2d_delta(const float h,const float k,const float l,const RecUnitCell &delta, float & dmin, float &dmax) const;
-      std::vector<float> DirectUnitCell()const;
+      /** Compute real space unit cell from reciprocal one
+      *
+      *\param equiv: if true, return real unit cell \e equivalent to the one computed from the reciprocal one,
+      * so that alpha, beta and gamma are larger or equal to pi/2, and minimum. This is done
+      * by adding multiples of \b a to \b b and multiples of \b a and \b b to \b c.
+      */
+      std::vector<float> DirectUnitCell(const bool equiv=false)const;
       /** The 6 parameters defining 1/d_hkl^2 = d*_hkl^2, for different crystal classes, from:
       * d*_hkl^2 = zero + a*^2 h^2 + b*^2 k^2 + c*^2 l^2 + 2 a*.b* hk + 2 b*.c* kl + 2 a*.c* hl
       *
@@ -94,7 +100,7 @@ class RecUnitCell
       * for cubic
       *   d*_hkl^2 = zero + par[0]^2 (h^2 + k^2 + l^2)
       */
-      float par[6];
+      float par[7];
       float zero;
       CrystalSystem mlattice;
 };
@@ -252,6 +258,9 @@ class CellExplorer:public RefinableObj
       std::vector<unsigned int> mvNbSolutionDepth;
       float mMinScoreReport;
       unsigned int mMaxDicVolDepth,mDicVolDepthReport;
+      /// Stored value of cos(max ang) for tricilinic search - we do
+      /// not want to recompute the cos at every dicvol iteration
+      mutable float mCosAngMax;
 };
 
 
