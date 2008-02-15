@@ -1248,19 +1248,11 @@ void Crystal::CalcDistTable(const bool fast) const
       
       const REAL halfasuxrange=(asux1-asux0)*0.5+1e-5;
       const REAL halfasuyrange=(asuy1-asuy0)*0.5+1e-5;
-      const REAL halfasuzrange=(asuz1-asuy0)*0.5+1e-5;
+      const REAL halfasuzrange=(asuz1-asuz0)*0.5+1e-5;
       
       const REAL asuxc=0.5*(asux0+asux1);
       const REAL asuyc=0.5*(asuy0+asuy1);
       const REAL asuzc=0.5*(asuz0+asuz1);
-      
-      const REAL minx=asux0+mDistTableMaxDistance/GetLatticePar(0);
-      const REAL miny=asuy0+mDistTableMaxDistance/GetLatticePar(1);
-      const REAL minz=asuz0+mDistTableMaxDistance/GetLatticePar(2);
-      
-      const REAL maxx=asux1+mDistTableMaxDistance/GetLatticePar(0);
-      const REAL maxy=asuy1+mDistTableMaxDistance/GetLatticePar(1);
-      const REAL maxz=asuz1+mDistTableMaxDistance/GetLatticePar(2);
       
       const REAL maxdx=halfasuxrange+mDistTableMaxDistance/GetLatticePar(0);
       const REAL maxdy=halfasuyrange+mDistTableMaxDistance/GetLatticePar(1);
@@ -1322,7 +1314,10 @@ void Crystal::CalcDistTable(const bool fast) const
                   mvDistTableSq[i].mUniquePosSymmetryIndex=j;
                }
          }
-         if(!hasUnique) {cout<<"No unik??"<<endl;exit(0);}
+         if(!hasUnique)
+         {
+            throw ObjCrystException("One atom did not have any symmetric in the ASU !");
+         }
       }
       TAU_PROFILE_STOP(timer1);
       TAU_PROFILE_START(timer2);
