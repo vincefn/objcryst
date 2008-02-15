@@ -3030,8 +3030,11 @@ void WXGLCrystalCanvas::CrystUpdate()
       else if((*pos)->GetType()!=-1)
       {
          #ifdef HAVE_FFTW
-         //cout<<"Updating Fourier map:"<<(*pos)->GetName()<<endl;
-         (*pos)->CalcFourierMap(*((*pos)->GetData()),(*pos)->GetType(),mSharpenMap);
+         // During optimization, only update Fourier maps if one is displayed or the Fourier win is opened
+         if(  (mvpUnitCellMapGLList.size()>0)
+            ||(!(mpWXCrystal->GetCrystal().IsBeingRefined()))
+            ||(mpFourierMapListWin!=0))
+            (*pos)->CalcFourierMap(*((*pos)->GetData()),(*pos)->GetType(),mSharpenMap);
          #endif
       }
    }
