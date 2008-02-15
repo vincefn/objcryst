@@ -323,6 +323,8 @@ void WXMultiGraph::OnPaint(wxPaintEvent &event)
 
 void WXMultiGraph::OnMouse(wxMouseEvent &event)
 {
+   event.Skip();// Make sure the default handler gets the event too
+   
    if(event.Leaving()) return;// ?
    wxCoord width,height;
    this->GetSize(&width, &height);
@@ -515,6 +517,7 @@ void WXMultiGraph::OnKeyDown(wxKeyEvent& event)
       }
    }
    this->UpdateDisplay();
+   event.Skip();// Make sure the default handler gets the event too
 }
 
 void WXMultiGraph::OnUpdateUI(wxUpdateUIEvent &event)
