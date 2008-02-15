@@ -1355,7 +1355,7 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
          if(0!=mpWXCrystObj) mpWXCrystObj->UpdateDisplayNbTrial();
          #endif
       }
-      if( (needUpdateDisplay&&(lastUpdateDisplayTime<(chrono.seconds()-1)))||(lastUpdateDisplayTime<(chrono.seconds()-30)))
+      if( (needUpdateDisplay&&(lastUpdateDisplayTime<(chrono.seconds()-1)))||(lastUpdateDisplayTime<(chrono.seconds()-5)))
       {
          mRefParList.RestoreParamSet(runBestIndex);
          this->UpdateDisplay();

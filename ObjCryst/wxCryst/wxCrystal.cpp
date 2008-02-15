@@ -3266,7 +3266,7 @@ void WXGLCrystalCanvas::OnShowCrystal( wxCommandEvent & WXUNUSED(event))
    if(mShowCrystal) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWCRYSTAL, "Show Crystal");
    else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWCRYSTAL, "Hide Crystal");
    mShowCrystal = !mShowCrystal;
-   this->CrystUpdate();
+   if(!(mpWXCrystal->GetCrystal().IsBeingRefined())) this->CrystUpdate();
 }
 
 void WXGLCrystalCanvas::OnShowAtomLabel( wxCommandEvent & WXUNUSED(event))
@@ -3274,7 +3274,7 @@ void WXGLCrystalCanvas::OnShowAtomLabel( wxCommandEvent & WXUNUSED(event))
    if(mShowAtomName) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, "Show Atom Labels");
    else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, "Hide Atom Labels");
    mShowAtomName= !mShowAtomName;
-   this->CrystUpdate();
+   if(!(mpWXCrystal->GetCrystal().IsBeingRefined())) this->CrystUpdate();
 }
 
 void WXGLCrystalCanvas::OnShowCursor( wxCommandEvent & WXUNUSED(event))
@@ -3282,7 +3282,7 @@ void WXGLCrystalCanvas::OnShowCursor( wxCommandEvent & WXUNUSED(event))
    if(mShowCursor) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWCURSOR, "Show Cursor");
    else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWCURSOR, "Hide Cursor");
    mShowCursor= !mShowCursor;
-   this->CrystUpdate();
+   if(!(mpWXCrystal->GetCrystal().IsBeingRefined())) this->CrystUpdate();
 }
 
 void WXGLCrystalCanvas::OnSetCursor( wxCommandEvent & WXUNUSED(event))
@@ -3497,7 +3497,7 @@ void WXGLCrystalCanvas::AddFourier(UnitCellMap *map)
       mvpUnitCellMapGLList.back()->GenList();
       mvpUnitCellMapGLList.back()->SetName(map->GetName());
    }
-   this->CrystUpdate();
+   if(!(mpWXCrystal->GetCrystal().IsBeingRefined())) this->CrystUpdate();
 }
 
 
