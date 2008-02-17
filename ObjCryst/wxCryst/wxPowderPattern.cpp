@@ -2108,7 +2108,7 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
             if(lengthmax<25)lengthmax=25;
             mpCellExplorer->SetLengthMinMax(3,lengthmax);
             mpCellExplorer->SetCrystalSystem(MONOCLINIC);
-            mpCellExplorer->SetCrystalCentering(LATTICE_P);
+            mpCellExplorer->SetCrystalCentering(cent);
             mpLog->AppendText(wxString::Format("MONOCLINIC %c : V= %6.0f -> %6.0f A^3, max length=%6.2fA",centc,minv,maxv,lengthmax));
             t0=chrono.seconds();
             if(dlgProgress.Update(5,wxString::Format(_T("MONOCLINIC %c (%d spurious), V=%6.0f-%6.0f, l<%6.2fA\n")
