@@ -59,7 +59,8 @@ class RecUnitCell
 {
    public:
       RecUnitCell(const float zero=0,const float par0=0,const float par1=0,const float par2=0,
-                  const float par3=0,const float par4=0,const float par5=0,CrystalSystem lattice=CUBIC);
+                  const float par3=0,const float par4=0,const float par5=0,CrystalSystem lattice=CUBIC,
+                  const CrystalCentering cent=LATTICE_P);
       RecUnitCell(const RecUnitCell &old);
       void operator=(const RecUnitCell &rhs);
       // access to ith parameter
@@ -103,6 +104,7 @@ class RecUnitCell
       float par[7];
       float zero;
       CrystalSystem mlattice;
+      CrystalCentering mCentering;
 };
 
 /** Class to store positions of observed reflections.
@@ -204,6 +206,7 @@ class CellExplorer:public RefinableObj
       void SetD2Error(const float err);
       void SetMinMaxZeroShift(const float min,const float max);
       void SetCrystalSystem(const CrystalSystem system);
+      void SetCrystalCentering(const CrystalCentering cent);
       virtual const string& GetClassName() const;
       virtual const string& GetName() const;
       virtual void Print() const;
@@ -243,6 +246,8 @@ class CellExplorer:public RefinableObj
       float mAmp[7];
       /// Lattice type for which we search
       CrystalSystem mlattice;
+      /// Centering type
+      CrystalCentering mCentering;
       unsigned int mNbSpurious;
       float mD2Error;
       LSQNumObj mLSQObj;
