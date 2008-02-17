@@ -1017,12 +1017,11 @@ void PowderPatternDiffraction::CalcPowderPatternIntegrated() const
       {
          intensity += *pI++;
          if(useML) var += *pIvar++;
-         ++pos;
          if( ++i >= nbRefl) break;
          if( *(++psith) > thmax ) break;
          if(mpReflectionProfile->IsAnisotropic()) break;// Anisotropic profile
+         ++pos;
       }
-      --pos;
       VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderPatternIntegrated():"<<i,2)
       REAL * RESTRICT pData=mPowderPatternIntegratedCalc.data()+pos->first;
       const REAL * RESTRICT pFact=pos->second.data();

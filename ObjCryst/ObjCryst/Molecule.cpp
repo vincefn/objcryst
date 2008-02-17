@@ -2885,38 +2885,35 @@ vector<MolAtom*>::iterator Molecule::RemoveAtom(MolAtom &atom)
       this->RemovePar(&(this->GetPar(&(atom.Y()))));
       this->RemovePar(&(this->GetPar(&(atom.Z()))));
    // Delete relevant bonds, bond angles, dihedral angles...
-   for(vector<MolBond*>::iterator posb=mvpBond.begin();posb!=mvpBond.end();++posb)
+   for(vector<MolBond*>::iterator posb=mvpBond.begin();posb!=mvpBond.end();)
    {
       if( (&atom==&((*posb)->GetAtom1())) || (&atom==&((*posb)->GetAtom2())) )
       {
          posb=this->RemoveBond(**posb);
-         --posb;
       }
+      else ++posb;
    }
-   for(vector<MolBondAngle*>::iterator posb=mvpBondAngle.begin();posb!=mvpBondAngle.end();++posb)
+   for(vector<MolBondAngle*>::iterator posb=mvpBondAngle.begin();posb!=mvpBondAngle.end();)
    {
       if(  (&atom==&((*posb)->GetAtom1())) || (&atom==&((*posb)->GetAtom2()))
          ||(&atom==&((*posb)->GetAtom3())))
       {
          posb=this->RemoveBondAngle(**posb);
-         --posb;
       }
+      else ++posb;
    }
    for(vector<MolDihedralAngle*>::iterator posb=mvpDihedralAngle.begin();
-       posb!=mvpDihedralAngle.end();++posb)
+       posb!=mvpDihedralAngle.end();)
    {
       if(  (&atom==&((*posb)->GetAtom1())) || (&atom==&((*posb)->GetAtom2()))
          ||(&atom==&((*posb)->GetAtom3())) || (&atom==&((*posb)->GetAtom4())))
-      {
          posb=this->RemoveDihedralAngle(**posb);
-         --posb;
-      }
-   }
+      else ++posb;
+  }
    mClockAtomList.Click();
    mClockScatterer.Click();
    
    if(mpCenterAtom==*pos) mpCenterAtom=0;
-   
    delete *pos;
    pos=mvpAtom.erase(pos);
    --mScattCompList;
@@ -4161,9 +4158,9 @@ void Molecule::BuildRotorGroup()
                case 3: pRotorGroup2=&mvRotorGroupInternal;break;
             }
             for(list<RotorGroup>::iterator pos2=pRotorGroup2->begin();
-                pos2!=pRotorGroup2->end();++pos2)
+                pos2!=pRotorGroup2->end();)
             {
-               if(pos2==pos1) continue;
+               if(pos2==pos1) {++pos2;continue;}
                if((  ((pos1->mpAtom1 == pos2->mpAtom1) && (pos1->mpAtom2 == pos2->mpAtom2))
                    ||((pos1->mpAtom2 == pos2->mpAtom1) && (pos1->mpAtom1 == pos2->mpAtom2))) 
                   &&pos1->mvRotatedAtomList.size() == pos2->mvRotatedAtomList.size())
@@ -4199,9 +4196,10 @@ void Molecule::BuildRotorGroup()
                      cout<<endl;
                      #endif
                      pos2=pRotorGroup2->erase(pos2);
-                     --pos2;
                   }
+                  else ++pos2;
                }
+               else ++pos2;
             }
          }
       }
@@ -4219,7 +4217,7 @@ void Molecule::BuildRotorGroup()
          case 3: pRotorGroup1=&mvRotorGroupInternal;break;
       }
       for(list<RotorGroup>::iterator pos=pRotorGroup1->begin();
-          pos!=pRotorGroup1->end();++pos)
+          pos!=pRotorGroup1->end();)
       {
          REAL llk=0;
          for(unsigned int j=0;j<36;++j)
@@ -4248,9 +4246,9 @@ void Molecule::BuildRotorGroup()
          if((llk/50.)>100.)
          {
             pos = pRotorGroup1->erase(pos);
-            --pos;
             //cout <<" -> NOT a free torsion"<<endl;
          }
+         else ++pos;
          //else
          //   cout <<" -> free torsion"<<endl;
       }

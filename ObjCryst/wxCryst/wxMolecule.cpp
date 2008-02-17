@@ -1098,19 +1098,17 @@ void WXMolecule::OnMenuRemoveBond(wxCommandEvent & WXUNUSED(event))
          const MolAtom *pAtom1= &((*pos)->GetAtom1());
          const MolAtom *pAtom2= &((*pos)->GetAtom2());
          for(vector<MolBondAngle*>::iterator posb=mpMolecule->GetBondAngleList().begin();
-             posb!=mpMolecule->GetBondAngleList().end();++posb)
+             posb!=mpMolecule->GetBondAngleList().end();)
          {
             if(  ( (pAtom1==&((*posb)->GetAtom1())) && (pAtom2==&((*posb)->GetAtom2())) )
                ||( (pAtom1==&((*posb)->GetAtom2())) && (pAtom2==&((*posb)->GetAtom1())) )
                ||( (pAtom1==&((*posb)->GetAtom2())) && (pAtom2==&((*posb)->GetAtom3())) )
                ||( (pAtom1==&((*posb)->GetAtom3())) && (pAtom2==&((*posb)->GetAtom2())) ))
-            {
                posb=mpMolecule->RemoveBondAngle(**posb);
-               --posb;
-            }
+            else ++posb;
          }
          for(vector<MolDihedralAngle*>::iterator posb=mpMolecule->GetDihedralAngleList().begin();
-             posb!=mpMolecule->GetDihedralAngleList().end();++posb)
+             posb!=mpMolecule->GetDihedralAngleList().end();)
          {
             if(  ( (pAtom1==&((*posb)->GetAtom1())) && (pAtom2==&((*posb)->GetAtom2())) )
                ||( (pAtom1==&((*posb)->GetAtom2())) && (pAtom2==&((*posb)->GetAtom1())) )
@@ -1118,10 +1116,8 @@ void WXMolecule::OnMenuRemoveBond(wxCommandEvent & WXUNUSED(event))
                ||( (pAtom1==&((*posb)->GetAtom3())) && (pAtom2==&((*posb)->GetAtom2())) )
                ||( (pAtom1==&((*posb)->GetAtom3())) && (pAtom2==&((*posb)->GetAtom4())) )
                ||( (pAtom1==&((*posb)->GetAtom4())) && (pAtom2==&((*posb)->GetAtom3())) ))
-            {
                posb=mpMolecule->RemoveDihedralAngle(**posb);
-               --posb;
-            }
+            else ++posb;
          }
       }
       mpMolecule->RemoveBond(**pos);
