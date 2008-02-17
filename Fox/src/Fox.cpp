@@ -72,7 +72,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 936
+#define __FOXREVISION__ 953
 
 static std::string foxVersion;
 
@@ -416,6 +416,49 @@ int main (int argc, char *argv[])
       if(string("--speedtest")==string(argv[i]))
       {
          standardSpeedTest();
+         TAU_REPORT_STATISTICS();
+         exit(0);
+      }
+      if(string("--index")==string(argv[i]))
+      {
+         ++i;
+         ifstream f(argv[i]);
+         if(!f) 
+         {
+            cout<<"Cannot find file to index:"<<argv[i]<<endl;
+            exit(0);
+         }
+         PeakList pl;
+         pl.ImportDhklDSigmaIntensity(f);
+         f.close();
+         // Set uncertainty of position lines to 1/4 of sigma ... or 0
+         for(vector<PeakList::hkl>::iterator pos=pl.mvHKL.begin();pos!=pl.mvHKL.end();++pos)
+         //{   pos->d2obsmin=(3*pos->d2obs+pos->d2obsmin)/4; pos->d2obsmax=(3*pos->d2obs+pos->d2obsmax)/4;}
+         { pos->d2obsmin=pos->d2obs; pos->d2obsmax=pos->d2obs;}
+         
+         CellExplorer cx(pl,TRICLINIC,0);
+         cx.SetAngleMinMax((float)90*DEG2RAD,(float)120*DEG2RAD);
+         
+         // Use at most 20 lines
+         if(pl.GetPeakList().size()>25) pl.GetPeakList().resize(25);
+         const unsigned int nb=pl.GetPeakList().size();
+         
+         const float dmin=pl.GetPeakList()[nb-1].dobs;
+         const float dmax=pl.GetPeakList()[0].dobs/10;// /10: assume no peaks at lower resolution
+
+         const float vmin=EstimateCellVolume(dmin,dmax,nb,TRICLINIC  ,LATTICE_P,1.2);
+         const float vmax=EstimateCellVolume(dmin,dmax,nb,TRICLINIC  ,LATTICE_P,0.3);
+         
+         float lengthmax=pow(vmax,(float)(1/3.0))*3;
+         if(lengthmax<25)lengthmax=25;
+         if(lengthmax>(2/pl.GetPeakList()[0].dobs)) lengthmax=2/pl.GetPeakList()[0].dobs;
+         cout<<"Indexing using TRICLINIC lattice, latt=3.0->"<<lengthmax<<"A, V="<<vmin<<"->"<<vmax<<"A^3"<<endl;
+         
+         cx.SetVolumeMinMax(vmin,vmax);
+         cx.SetLengthMinMax(3,lengthmax);
+         //cx.SetVolumeMinMax(800,1800);
+         //cx.SetLengthMinMax(4,25);
+         cx.DicVol(10,4,50,4);
          TAU_REPORT_STATISTICS();
          exit(0);
       }
