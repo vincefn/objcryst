@@ -1501,7 +1501,6 @@ void PowderPatternDiffraction::XMLOutput(ostream &os,int indent)const
    VFN_DEBUG_ENTRY("PowderPatternDiffraction::XMLOutput():"<<this->GetName(),5)
    for(int i=0;i<indent;i++) os << "  " ;
    XMLCrystTag tag("PowderPatternCrystal");
-   //:TODO: Asymmetry parameter, and put the following as options...
    tag.AddAttribute("Name",this->GetName());
    tag.AddAttribute("Crystal",this->GetCrystal().GetName());
    {
@@ -1520,6 +1519,26 @@ void PowderPatternDiffraction::XMLOutput(ostream &os,int indent)const
    if(mCorrTextureMarchDollase.GetNbPhase()>0)
    {
       mCorrTextureMarchDollase.XMLOutput(os,indent);
+   }
+   
+   if(mFhklObsSq.numElements()>0)
+   {
+      XMLCrystTag tag2("FhklObsSq");
+      for(int i=0;i<indent;i++) os << "  " ;
+      os <<tag2<<endl;
+      
+      for(long j=0;j<this->GetNbRefl();j++)
+      {
+         for(int i=0;i<=indent;i++) os << "  " ;
+         os << mIntH(j) <<" "
+            << mIntK(j) <<" "
+            << mIntL(j) <<" "
+            << mFhklObsSq(j) <<endl;
+      }
+      
+      tag2.SetIsEndTag(true);
+      for(int i=0;i<indent;i++) os << "  " ;
+      os <<tag2<<endl;
    }
    
    indent--;
@@ -1690,6 +1709,27 @@ void PowderPatternDiffraction::XMLInput(istream &is,const XMLCrystTag &tagg)
             }
          mpReflectionProfile->XMLInput(is,tag);
          continue;
+      }
+      if("FhklObsSq"==tag.GetName())
+      {
+         // We ignore the h,k,l arrays - just assume for now the order
+         // is unchanged compared to when the extraction was made...
+         long nbrefl=0;
+         long junk;
+         mFhklObsSq.resize(100);
+         do
+         {
+            is >>junk>>junk>>junk
+               >>mFhklObsSq(nbrefl);
+            nbrefl++;
+            if(nbrefl==mFhklObsSq.numElements()) mFhklObsSq.resizeAndPreserve(nbrefl+100);
+            while(0==isgraph(is.peek())) is.get();
+         }
+         while(is.peek()!='<');//until next tag
+         XMLCrystTag junkEndTag(is);
+         
+         mFhklObsSq.resizeAndPreserve(nbrefl);
+         mClockGetFhklObsSq.Click();
       }
    }
 }

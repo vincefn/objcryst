@@ -815,6 +815,16 @@ void ScatteringData::PrepareHKLarrays()
    mK2Pi*=(2*M_PI);
    mL2Pi*=(2*M_PI);
    
+   // If we extracted some intensities, try to keep them.
+   // Do not do this if the number of reflections changed too much, if there is no crystal
+   // structure associated, or if the spacegroup changed.
+   bool noSpgChange=false;
+   if(mpCrystal!=0) noSpgChange = mpCrystal->GetSpaceGroup().GetClockSpaceGroup()<mClockGetFhklObsSq;
+   if( (mFhklObsSq.numElements()>0) && (abs(mFhklObsSq.numElements()-mNbRefl)<(0.1*mNbRefl)) && (noSpgChange) )
+      mFhklObsSq.resizeAndPreserve(mNbRefl);
+   else mFhklObsSq.resize(0);
+   mClockGetFhklObsSq.Click();
+   
    mNbReflUsed=mNbRefl;
    
    mExpectedIntensityFactor.resize(mNbRefl);
