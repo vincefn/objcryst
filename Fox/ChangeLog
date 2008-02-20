@@ -1,3 +1,24 @@
+#### 1.7.5 - February 2007 (Revision #956)
+NEW FEATURES
+   * Add support to compute Fourier maps (observed, difference),
+     with a "live" update during optimization
+   * Profile fitting and Le Bail extraction is now directly 
+     available from a right-click on the powder pattern graph.
+   * Support for Intel macs
+   * Indexing triclinic lattices
+   * Explore centered lattices during auto-indexing
+   * LeBail-extracted structure factors are now saved in the xml file
+
+IMPROVEMENTS
+   * More stable profile fitting
+   * Linux: keyboard shortcuts are working again
+
+BUG FIXES
+   * Fixed incorrect computation of dynamical occupancy correction
+     in some asymmetric unit configurations
+   * Fixed crash when switching labels on/off during optimization
+   * Fixed windows crash when removing atoms in a Molecule/Polyhedron
+
 #### 1.7.1 - December 2007 (Revision #903)
 NEW FEATURES
    * Add peak detection & auto-indexing (still beta for some values)
