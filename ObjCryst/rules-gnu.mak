@@ -126,7 +126,11 @@ endif
 ######################################################################
 
 #LibCryst++
+ifneq ($(fftw),0)
+libCryst: libfftw
+else
 libCryst:
+endif
 	$(MAKE) -f gnu.mak -C ${DIR_LIBCRYST} lib
 
 libcryst: libCryst
