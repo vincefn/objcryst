@@ -536,6 +536,8 @@ class PowderPattern : public RefinableObj
          unsigned long GetNbPoint()const;
          ///Number of points actually calculated (below the chosen max(sin(theta)/lambda)) ?
          unsigned long GetNbPointUsed()const;
+         /// Clock corresponding to the last time the number of points used was changed
+         const RefinableObjClock& GetClockNbPointUsed()const;
          
          /// Set the radiation
          void SetRadiation(const Radiation &radiation);

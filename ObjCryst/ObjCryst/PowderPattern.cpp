@@ -1076,14 +1076,14 @@ void PowderPatternDiffraction::CalcPowderPatternIntegrated() const
 void PowderPatternDiffraction::CalcPowderReflProfile()const
 {
    this->CalcSinThetaLambda();
-   //this->GetNbReflBelowMaxSinThetaOvLambda(); // Not needed, this is done by the calling functions
+   mpParentPowderPattern->GetNbPointUsed();//
    if(  (mClockProfileCalc>mClockProfilePar)
       &&(mClockProfileCalc>mpReflectionProfile->GetClockMaster())
       &&(mClockProfileCalc>mClockTheta)
       &&(mClockProfileCalc>this->GetRadiation().GetClockWavelength())
       &&(mClockProfileCalc>mpParentPowderPattern->GetClockPowderPatternXCorr())
       &&(mClockProfileCalc>mClockHKL)
-      &&(mClockProfileCalc>mClockNbReflUsed)) return;
+      &&(mClockProfileCalc>mpParentPowderPattern->GetClockNbPointUsed())) return;
    
    TAU_PROFILE("PowderPatternDiffraction::CalcPowderReflProfile()","void (bool)",TAU_DEFAULT);
    VFN_DEBUG_ENTRY("PowderPatternDiffraction::CalcPowderReflProfile()",5)
@@ -1707,7 +1707,13 @@ void PowderPattern::SetPowderPatternX(const CrystVector_REAL &x)
 
 unsigned long PowderPattern::GetNbPoint()const {return mNbPoint;}
 
-unsigned long PowderPattern::GetNbPointUsed()const {return mNbPointUsed;}
+unsigned long PowderPattern::GetNbPointUsed()const
+{
+   if(!this->IsBeingRefined()) this->CalcNbPointUsed();
+   return mNbPointUsed;
+}
+
+const RefinableObjClock& PowderPattern::GetClockNbPointUsed()const{return mClockNbPointUsed;}
 
 void PowderPattern::SetRadiation(const Radiation &radiation)
 {
