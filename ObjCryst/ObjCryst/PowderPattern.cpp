@@ -799,7 +799,7 @@ void PowderPatternDiffraction::ExtractLeBail(unsigned int nbcycle)
    mFhklObsSq=iextract;
    mClockGetFhklObsSq.Click();
    // NB: nbreflused < number of calculated profiles (see PowderPatternDiffraction::CalcPowderReflProfile())
-   const unsigned long nbrefl=this->GetNbRefl();
+   const unsigned long nbrefl=this->GetNbReflBelowMaxSinThetaOvLambda();
    for(;nbcycle>0;nbcycle--)
    {
       //cout<<"PowderPatternDiffraction::ExtractLeBail(): cycle #"<<nbcycle<<endl;
@@ -861,8 +861,10 @@ long PowderPatternDiffraction::GetNbReflBelowMaxSinThetaOvLambda()const
          &&(mvReflProfile[mNbReflUsed-1].first<=nbpoint)) return mNbReflUsed;
    }
    
-   if((mNbReflUsed==mNbRefl)&&(mvReflProfile[mNbReflUsed-1].first<=nbpoint))
-      return mNbReflUsed;
+   if((mNbReflUsed==mNbRefl) && (mvReflProfile[mNbReflUsed-1].profile.numElements()>0))
+      if(mvReflProfile[mNbReflUsed-1].first<=nbpoint)return mNbReflUsed;
+      
+      
    long i;
    for(i=0;i<mNbRefl;i++)
    {
