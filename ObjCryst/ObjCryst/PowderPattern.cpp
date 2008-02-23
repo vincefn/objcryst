@@ -4169,8 +4169,6 @@ void PowderPattern::SetWeightPolynomial(const REAL a, const REAL b,
 void PowderPattern::BeginOptimization(const bool allowApproximations,
                                       const bool enableRestraints)
 {
-   // must compute this _before_ starting the optimization, since it cannot be modified during it
-   this->CalcNbPointUsed();
    this->Prepare();
    if(0 == mOptProfileIntegration.GetChoice()) this->FitScaleFactorForIntegratedRw();
    else this->FitScaleFactorForRw();
