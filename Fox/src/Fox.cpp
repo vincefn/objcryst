@@ -1,5 +1,5 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
-    (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
+    (c) 2000-2008 Vincent Favre-Nicolin vincefn@users.sourceforge.net
         2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
@@ -72,7 +72,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 956
+#define __FOXREVISION__ 962
 
 static std::string foxVersion;
 
@@ -287,7 +287,7 @@ int main (int argc, char *argv[])
    
    {// Fox version
       char verBuf[200];
-      sprintf(verBuf,"1.7.5-#%d",__FOXREVISION__);
+      sprintf(verBuf,"1.7.5.1-#%d",__FOXREVISION__);
       foxVersion=verBuf;
    }
    bool useGUI(true);
@@ -886,7 +886,7 @@ void WXCrystMainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
    string msg(string("F.O.X. - Free Objects for Xtallography\n")
               +"Version "+ foxVersion +" \n\n"
-              +"(c) 2000-2007 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n"
+              +"(c) 2000-2008 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n"
               +"    2000-2001 Radovan CERNY, University of Geneva\n\n"
               +"http://objcryst.sourceforge.net\n\n"
               +"FOX comes with ABSOLUTELY NO WARRANTY. It is free software, and you are\n"
