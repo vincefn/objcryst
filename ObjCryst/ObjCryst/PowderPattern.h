@@ -431,9 +431,9 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
          struct ReflProfile
          {
             /// First point of the pattern for which the profile is calculated
-            unsigned long first;
+            long first;
             /// Last point of the pattern for which the profile is calculated
-            unsigned long last;
+            long last;
             /// The profile
             CrystVector_REAL profile;
          };

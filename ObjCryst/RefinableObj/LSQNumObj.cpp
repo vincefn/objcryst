@@ -29,6 +29,15 @@ using namespace std;
 
 namespace ObjCryst
 {
+static bool ISNAN_OR_INF(REAL r)
+{
+   #if defined(_MSC_VER) || defined(__BORLANDC__)
+   return  _isnan(r) || (!_finite(r));
+   #else
+   return (isnan(r)!=0) || (isinf(r)!=0);
+   #endif
+}
+
 LSQNumObj::LSQNumObj(string objName)
 {
    mDampingFactor=1.;
@@ -184,7 +193,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
        // Check for singular values
          for(i=0;i<nbVar;i++)
          {
-            if( M(i,i) < 1e-20) //:TODO: Check what value to use as a limit
+            if( (M(i,i) < 1e-20)||(ISNAN_OR_INF(M(i,i)))) //:TODO: Check what value to use as a limit
             {  
                if(!silent) cout << "LSQNumObj::Refine() Singular parameter !";
                if(!silent) cout << "(null derivate in all points) : "<<M(i,i)<<":";
@@ -320,7 +329,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
             EigenValues(newmatA,newmatW,newmatV);
             ColumnVector newmatDelta(nbVar);
             DiagonalMatrix newmatInvW(nbVar);
-         //if(!silent) cout << "LSQNumObj::Refine():Eigenvalue Filtering...4" <<endl;
+        //if(!silent) cout << "LSQNumObj::Refine():Eigenvalue Filtering...4" <<endl;
             //Avoid singular values
             {
                REAL max=newmatW.MaximumAbsoluteValue();

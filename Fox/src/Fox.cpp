@@ -72,7 +72,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 962
+#define __FOXREVISION__ 963
 
 static std::string foxVersion;
 
@@ -193,7 +193,7 @@ class WXThreadCheckUpdates:public wxThread
       {}
       wxThread::ExitCode Entry()
       {
-         cout<<"WXThreadCheckUpdates:: OnEntry()"<<endl;
+         //cout<<"WXThreadCheckUpdates:: OnEntry()"<<endl;
          mpvUpdates->clear();
          if(!(wxFileSystem::HasHandlerForPath("http://objcryst.sourceforge.net/FoxUpdates.txt")))
             wxFileSystem::AddHandler(new wxInternetFSHandler);
@@ -213,7 +213,7 @@ class WXThreadCheckUpdates:public wxThread
                wxString reason=txtis.ReadLine();
                if((revisionfix>__FOXREVISION__)&&(__FOXREVISION__>revisionbug))
                {
-                  cout<<"Revision:"<<revisionfix<<", severity="<<severity<<",reason="<<reason<<endl;
+                  //cout<<"Revision:"<<revisionfix<<", severity="<<severity<<",reason="<<reason<<endl;
                   (*mpvUpdates)[revisionfix]=make_pair(severity,reason);
                }
             }
@@ -222,7 +222,7 @@ class WXThreadCheckUpdates:public wxThread
       }
       void OnExit()
       {
-         cout<<"WXThreadCheckUpdates:: OnExit()"<<endl;
+         //cout<<"WXThreadCheckUpdates:: OnExit()"<<endl;
          wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_FOX_UPDATES_RESULT);
          wxPostEvent(mpCaller,event);
       }

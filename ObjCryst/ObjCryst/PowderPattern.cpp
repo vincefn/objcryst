@@ -48,7 +48,7 @@
 
 namespace ObjCryst
 {
-bool ISNAN_OR_INF(REAL r)
+static bool ISNAN_OR_INF(REAL r)
 {
    #if defined(_MSC_VER) || defined(__BORLANDC__)
    return  _isnan(r) || (!_finite(r));
@@ -1141,7 +1141,12 @@ Computing all Profiles",5)
    long first,last;// first & last point of the stored profile
    CrystVector_REAL vx,reflProfile,tmpV;
    mvReflProfile.resize(this->GetNbRefl());
-   
+   for(unsigned int i=0;i<this->GetNbRefl();i++)
+   {
+      mvReflProfile[i].first=0;
+      mvReflProfile[i].last=0;
+      mvReflProfile[i].profile.resize(0);
+   }
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderReflProfile()",5)
    
    for(unsigned int line=0;line<nbLine;line++)
