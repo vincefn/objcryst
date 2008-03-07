@@ -124,37 +124,6 @@ endif
 ######################################################################
 #####################      LIBRAIRIES         ########################
 ######################################################################
-
-#LibCryst++
-ifneq ($(fftw),0)
-libCryst: libfftw
-else
-libCryst:
-endif
-	$(MAKE) -f gnu.mak -C ${DIR_LIBCRYST} lib
-
-libcryst: libCryst
-
-#wxCryst++
-ifeq ($(wxcryst),1)
-libwxCryst:
-	$(MAKE) -f gnu.mak -C ${DIR_WXWCRYST} lib
-else
-libwxCryst:
-endif
-
-#Vector computation library
-libCrystVector:
-	$(MAKE) -f gnu.mak -C ${DIR_CRYSTVECTOR} lib
-
-#Quirks, including a (crude) library to display float, vectors, matrices, strings with some formatting..
-libQuirks:
-	$(MAKE) -f gnu.mak -C ${DIR_VFNQUIRKS} lib
-
-#Library to take care of refinable parameters, plus Global optimization and Least Squares refinements
-libRefinableObj:
-	$(MAKE) -f gnu.mak -C ${DIR_REFOBJ} lib
-
 #Newmat Matrix Algebra library (used for SVD)
 $(DIR_STATIC_LIBS)/lib/libnewmat.a:
 	cd $(BUILD_DIR) && tar -xjf newmat.tar.bz2
@@ -166,6 +135,36 @@ $(DIR_STATIC_LIBS)/lib/libnewmat.a:
 	#rm -Rf $(BUILD_DIR)/newmat
 
 libnewmat: $(DIR_STATIC_LIBS)/lib/libnewmat.a
+
+$(BUILD_DIR)/static-libs/lib/libglut.a:
+	cd $(BUILD_DIR) && tar -xjf freeglut.tar.bz2
+	cd $(BUILD_DIR)/freeglut && ./configure --prefix=$(BUILD_DIR)/static-libs --disable-shared --disable-warnings --x-includes=/usr/X11R6/include/ && make install
+	rm -Rf freeglut
+
+ifeq ($(opengl),1)
+ifneq ($(shared),1)
+libfreeglut: $(BUILD_DIR)/static-libs/lib/libglut.a
+else
+libfreeglut:
+endif
+else
+libfreeglut:
+endif
+
+$(BUILD_DIR)/static-libs/bin/wx-config:
+	cd $(BUILD_DIR) && tar -xjf wxGTK.tar.bz2 # wxGtK source, with "demos" "samples" "contrib" removed
+	cd $(BUILD_DIR)/wxGTK && ./configure --with-gtk --with-opengl --prefix=$(BUILD_DIR)/static-libs --disable-unicode --enable-optimise --disable-shared --disable-clipboard --x-includes=/usr/X11R6/include/ && make install
+	rm -Rf wxGTK
+
+ifneq ($(wxcryst),0)
+ifneq ($(shared),1)
+libwx: $(BUILD_DIR)/static-libs/bin/wx-config
+else
+libwx:
+endif
+else
+libwx:
+endif
      
 #cctbx
 $(DIR_STATIC_LIBS)/lib/libcctbx.a:
@@ -180,5 +179,35 @@ $(DIR_STATIC_LIBS)/lib/libfftw3f.a:
 	cd $(BUILD_DIR)/fftw && ./configure --enable-single --prefix $(DIR_STATIC_LIBS) && make install
 	rm -Rf $(BUILD_DIR)/fftw
 
+ifeq ($(fftw),1)
 libfftw: $(DIR_STATIC_LIBS)/lib/libfftw3f.a
+else
+libfftw:
+endif
+
+#ObjCryst++
+ifneq ($(wxcryst),0)
+libCryst: libwx libfreeglut
+else
+libCryst:
+endif
+	$(MAKE) -f gnu.mak -C ${DIR_LIBCRYST} lib
+
+libcryst: libCryst
+
+#wxCryst++
+libwxCryst: libwx libfreeglut libfftw
+	$(MAKE) -f gnu.mak -C ${DIR_WXWCRYST} lib
+
+#Vector computation library
+libCrystVector:
+	$(MAKE) -f gnu.mak -C ${DIR_CRYSTVECTOR} lib
+
+#Quirks, including a (crude) library to display float, vectors, matrices, strings with some formatting..
+libQuirks:
+	$(MAKE) -f gnu.mak -C ${DIR_VFNQUIRKS} lib
+
+#Library to take care of refinable parameters, plus Global optimization and Least Squares refinements
+libRefinableObj:libnewmat
+	$(MAKE) -f gnu.mak -C ${DIR_REFOBJ} lib
 
