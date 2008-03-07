@@ -2604,7 +2604,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                glMaterialfv(GL_FRONT, GL_SHININESS,             colour0);
                glPolygonMode(GL_FRONT, GL_FILL);
                glTranslatef((*pos)->X()*en+xc, (*pos)->Y()+yc, (*pos)->Z()+zc);
-               gluSphere(pQuadric,(*pos)->GetScatteringPower().GetRadius()/3.,10,10);
+               gluSphere(pQuadric,(*pos)->GetScatteringPower().GetRadius()/3.,20,20);
             }
          glPopMatrix();
       }
@@ -2746,7 +2746,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                            glPolygonMode(GL_FRONT, GL_FILL);
                            glTranslatef(x(k)*en, y(k), z(k));
                            gluSphere(pQuadric,
-                              mvpAtom[k]->GetScatteringPower().GetRadius()/3.,10,10);
+                              mvpAtom[k]->GetScatteringPower().GetRadius()/3.,20,20);
                         }
                      }
                   glPopMatrix();

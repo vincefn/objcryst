@@ -328,7 +328,7 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
             glMaterialfv(GL_FRONT, GL_EMISSION,  colour0); 
             glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
             glPolygonMode(GL_FRONT, GL_FILL);
-            gluSphere(pQuadric,this->GetRadius()/3.,10,10);
+            gluSphere(pQuadric,this->GetRadius()/3.,20,20);
          }
       glPopMatrix();
    }
@@ -407,7 +407,7 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
                      glMaterialfv(GL_FRONT, GL_EMISSION,  colour0); 
                      glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
                      glPolygonMode(GL_FRONT, GL_FILL);
-                     gluSphere(pQuadric,this->GetRadius()/3.,10,10);
+                     gluSphere(pQuadric,this->GetRadius()/3.,20,20);
                   }
                glPopMatrix();
             }
