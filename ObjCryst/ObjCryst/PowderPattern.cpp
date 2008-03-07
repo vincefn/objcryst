@@ -4350,9 +4350,9 @@ REAL PowderPattern::STOL2Pixel(const REAL stol)const
 
 PeakList PowderPattern::FindPeaks(const float dmin,const float maxratio,const unsigned int maxpeak)
 {
-   const unsigned long nb=this->GetNbPoint() ;
+   const long nb=this->GetNbPoint() ;
    // Limit peak detection to 1.5A resolution
-   unsigned long start,finish;
+   long start,finish;
    if(this->GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
    {
       start=1;// do not start at 0, if this is a simulation that really start at theta=0...
@@ -4375,17 +4375,17 @@ PeakList PowderPattern::FindPeaks(const float dmin,const float maxratio,const un
    unsigned int width_golay=10;
    {
       CrystVector_REAL obs;
-      const unsigned int nbwidth=9;
+      const int nbwidth=9;
       CrystVector_long width(nbwidth);
       width=0;
       obs=this->GetPowderPatternObs();
-      const unsigned long nb=obs.numElements();
-      for(unsigned int j=0;j<nbwidth;j++)
+      const long nb=obs.numElements();
+      for(int j=0;j<nbwidth;j++)
       {
-         const unsigned long imax=obs.imax(nb/10,nb-1);
+         const long imax=obs.imax(nb/10,nb-1);
          const REAL iobs_max=obs(imax);
          REAL thres=iobs_max;
-         unsigned long i;
+         long i;
          for(i=imax-100;i<(imax+100);++i)
          {
             if(i<0){i=0;continue;}
@@ -4446,12 +4446,12 @@ PeakList PowderPattern::FindPeaks(const float dmin,const float maxratio,const un
    int nbav_min=0;//minimum numerb of points over which the peak is integrated
    while(true)
    {// Start from max
-      const unsigned long imax=obsd2.imax(start,finish);
+      const long imax=obsd2.imax(start,finish);
       REAL iobs=obsd2(imax);
       if(iobs<=0) break;
       REAL xmax=mX(imax)*iobs;
       long nbav=1;
-      unsigned long i=imax;
+      long i=imax;
       REAL lastiobs=obsd2(i);
       const REAL iobs_max=lastiobs;
       //cout<<i<<":"<<lastiobs<<":"<<mX(i)*RAD2DEG<<endl;
