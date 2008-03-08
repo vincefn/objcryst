@@ -186,13 +186,13 @@ libfftw:
 endif
 
 #ObjCryst++
-libCryst: libwx
+libCryst: libwx libcctbx
 	$(MAKE) -f gnu.mak -C ${DIR_LIBCRYST} lib
 
 libcryst: libCryst
 
 #wxCryst++
-libwxCryst: libwx libfreeglut libfftw
+libwxCryst: libwx libfreeglut libfftw libcctbx
 	$(MAKE) -f gnu.mak -C ${DIR_WXWCRYST} lib
 
 #Vector computation library
@@ -204,6 +204,6 @@ libQuirks: libwx
 	$(MAKE) -f gnu.mak -C ${DIR_VFNQUIRKS} lib
 
 #Library to take care of refinable parameters, plus Global optimization and Least Squares refinements
-libRefinableObj:libnewmat libwx
+libRefinableObj:libnewmat libwx libcctbx
 	$(MAKE) -f gnu.mak -C ${DIR_REFOBJ} lib
 

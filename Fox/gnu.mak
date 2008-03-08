@@ -8,10 +8,10 @@ all: Fox
 default: all
 
 Fox:
-	$(MAKE) -f gnu.mak wxcryst=1 opengl=1 debug=$(debug) shared=$(shared) -C src Fox
+	$(MAKE) -f gnu.mak wxcryst=1 opengl=1 fftw=1 debug=$(debug) shared=$(shared) -C src Fox
 
 Fox-nogui:
-	$(MAKE) -f gnu.mak wxcryst=0 opengl=0 debug=$(debug) -C src Fox-nogui
+	$(MAKE) -f gnu.mak wxcryst=0 opengl=0 fftw=0 debug=$(debug) -C src Fox-nogui
 
 doc:
 	python wiki2pdf.py
