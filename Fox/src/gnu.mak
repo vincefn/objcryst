@@ -13,12 +13,12 @@ else
 endif
 
 ifeq ($(profile),2)
-%.o : %.cpp
+%.o : %.cpp libwx
 	@rm -f $(*F).gcda $(*F).gcno
 	@$(MAKEDEPEND)
 	${CXX} ${CPPFLAGS} ${CXXFLAGS} -D'__FOXVERSION__="$(foxversion)"' -c $< -o $@
 else
-%.o : %.cpp
+%.o : %.cpp libwx
 	@$(MAKEDEPEND)
 	${CXX} ${CPPFLAGS} ${CXXFLAGS} -D'__FOXVERSION__="$(foxversion)"' -c $< -o $@
 endif
@@ -28,8 +28,8 @@ endif
 	
 -include Fox.dep
 
-#wxCryst Application ( wxCrystApp_resource.o for cygwin)
-Fox: Fox.o libnewmat libCrystVector libQuirks libRefinableObj libcctbx libCryst libwxCryst libfftw
+#Main Application
+Fox: Fox.o libwx libnewmat libCrystVector libQuirks libRefinableObj libcctbx libCryst libwxCryst libfftw
 	${LINKER} ${LDFLAGS} -o $@ ${filter-out %.a %.so lib%, $^} ${LOADLIBES} 
 
 Fox-nogui: Fox.o libnewmat libCrystVector libQuirks libRefinableObj libcctbx libCryst

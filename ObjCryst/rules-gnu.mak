@@ -158,7 +158,7 @@ $(BUILD_DIR)/static-libs/bin/wx-config:
 
 ifneq ($(wxcryst),0)
 ifneq ($(shared),1)
-libwx: $(BUILD_DIR)/static-libs/bin/wx-config
+libwx: $(BUILD_DIR)/static-libs/bin/wx-config libfreeglut
 else
 libwx:
 endif
@@ -179,18 +179,14 @@ $(DIR_STATIC_LIBS)/lib/libfftw3f.a:
 	cd $(BUILD_DIR)/fftw && ./configure --enable-single --prefix $(DIR_STATIC_LIBS) && make install
 	rm -Rf $(BUILD_DIR)/fftw
 
-ifeq ($(fftw),1)
+ifneq ($(fftw),0)
 libfftw: $(DIR_STATIC_LIBS)/lib/libfftw3f.a
 else
 libfftw:
 endif
 
 #ObjCryst++
-ifneq ($(wxcryst),0)
-libCryst: libwx libfreeglut
-else
-libCryst:
-endif
+libCryst: libwx
 	$(MAKE) -f gnu.mak -C ${DIR_LIBCRYST} lib
 
 libcryst: libCryst
@@ -200,14 +196,14 @@ libwxCryst: libwx libfreeglut libfftw
 	$(MAKE) -f gnu.mak -C ${DIR_WXWCRYST} lib
 
 #Vector computation library
-libCrystVector:
+libCrystVector: libwx
 	$(MAKE) -f gnu.mak -C ${DIR_CRYSTVECTOR} lib
 
 #Quirks, including a (crude) library to display float, vectors, matrices, strings with some formatting..
-libQuirks:
+libQuirks: libwx
 	$(MAKE) -f gnu.mak -C ${DIR_VFNQUIRKS} lib
 
 #Library to take care of refinable parameters, plus Global optimization and Least Squares refinements
-libRefinableObj:libnewmat
+libRefinableObj:libnewmat libwx
 	$(MAKE) -f gnu.mak -C ${DIR_REFOBJ} lib
 
