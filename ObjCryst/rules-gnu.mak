@@ -174,13 +174,15 @@ $(DIR_STATIC_LIBS)/lib/libcctbx.a:
 
 libcctbx: $(DIR_STATIC_LIBS)/lib/libcctbx.a
 
+ifneq ($(fftw),0)
+ifneq ($(shared),1)
 $(DIR_STATIC_LIBS)/lib/libfftw3f.a:
 	cd $(BUILD_DIR) && tar -xjf fftw.tar.bz2
 	cd $(BUILD_DIR)/fftw && ./configure --enable-single --prefix $(DIR_STATIC_LIBS) && make install
 	rm -Rf $(BUILD_DIR)/fftw
 
-ifneq ($(fftw),0)
 libfftw: $(DIR_STATIC_LIBS)/lib/libfftw3f.a
+endif
 else
 libfftw:
 endif
