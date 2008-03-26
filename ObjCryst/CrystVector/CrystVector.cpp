@@ -241,6 +241,25 @@ template<class T> void CrystVector<T>::operator/=(const T num)
    for(int i=mNumElements;i>0;i--) *p++ *= d;
 }
 
+template<class T> void CrystVector<T>::operator/=(const CrystVector<T> &vect)
+{
+   #ifdef __DEBUG__
+   if( vect.numElements() != mNumElements)
+   {
+      cout<<"CrystVector::operator/=(&vect)(i): Number of elements differ:"<< mNumElements \
+            << "!="<< vect.numElements() <<endl;
+      throw 0;
+   }
+   #endif
+   if(mpData!=vect.data())
+   {
+      register T * RESTRICT p=mpData;
+      register const T * RESTRICT rhs=vect.data();
+      for(int i=mNumElements;i>0;i--) { *p /= *rhs; p++ ; rhs++;}
+   }
+   else *this=1;
+}
+
 template<class T> void CrystVector<T>::operator+=(const T num)
 {
    register T * RESTRICT p=mpData;
