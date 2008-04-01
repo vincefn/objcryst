@@ -1,4 +1,7 @@
-#### 1.7.5 - February 2007 (Revision #956)
+#### 1.7.5.3 - March 2008 (Revision #973)
+   * Small bugfixes 
+
+#### 1.7.5 - February 2008 (Revision #956)
 NEW FEATURES
    * Add support to compute Fourier maps (observed, difference),
      with a "live" update during optimization
@@ -12,6 +15,8 @@ NEW FEATURES
 IMPROVEMENTS
    * More stable profile fitting
    * Linux: keyboard shortcuts are working again
+   * Correctly compute reflections beyond the supplied 
+     max(sin(theta)/lambda), but whose profile extend below the limit.
 
 BUG FIXES
    * Fixed incorrect computation of dynamical occupancy correction
