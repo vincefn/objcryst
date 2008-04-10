@@ -1333,16 +1333,16 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
                if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)>0.30)
                   simAnnealTemp(i)/=1.5;
                if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)>0.80)
-                  simAnnealTemp(i)/=2;
+                  simAnnealTemp(i)/=1.5;
                if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)>0.95)
-                  simAnnealTemp(i)/=4;
+                  simAnnealTemp(i)/=1.5;
 
                if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)<0.10)
                   simAnnealTemp(i)*=1.5;
                if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)<0.04)
-                  simAnnealTemp(i)*=2;
-               if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)<0.01)
-                  simAnnealTemp(i)*=4;
+                  simAnnealTemp(i)*=1.5;
+               //if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)<0.01)
+               //   simAnnealTemp(i)*=1.5;
                //cout<<"World#"<<i<<":"<<worldNbAcceptedMoves(i)<<":"<<nbTrialsReport<<endl;
                //if(simAnnealTemp(i)>mTemperatureMax) simAnnealTemp(i)=mTemperatureMax;
                //if(simAnnealTemp(i)<mTemperatureMin) simAnnealTemp(i)=mTemperatureMin;
