@@ -800,6 +800,7 @@ void PowderPatternDiffraction::ExtractLeBail(unsigned int nbcycle)
    mClockGetFhklObsSq.Click();
    // NB: nbreflused < number of calculated profiles (see PowderPatternDiffraction::CalcPowderReflProfile())
    const unsigned long nbrefl=this->GetNbReflBelowMaxSinThetaOvLambda();
+   for(unsigned int k0=nbrefl;k0<this->GetNbRefl();++k0) iextract(k0)=0;
    for(;nbcycle>0;nbcycle--)
    {
       //cout<<"PowderPatternDiffraction::ExtractLeBail(): cycle #"<<nbcycle<<endl;
