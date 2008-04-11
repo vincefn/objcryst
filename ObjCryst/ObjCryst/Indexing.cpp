@@ -2432,19 +2432,19 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                   for(;x2<mLengthMax;x2+=latstep)
                   {
                      float x3=x1;
-                     const float x3step=(mLengthMax-x1)/(ceil((mLengthMax-x1)/24.999));
+                     const float x3step=(mLengthMax-x1)/(ceil((mLengthMax-x1)/latstep)-0.001);
                      for(;x3<mLengthMax;x3+=x3step) //x3+=(latstep+x3*sin4)
                      {
                         if((x3*x4)>x1) break;// | c * cos(beta) | <a
                         duc.par[1]=(1/(x1)-1/(x1+latstep))*0.5/sinbeta;
                         duc.par[2]=(1/(x2)-1/(x2+latstep))*0.5/sinbeta;
-                        duc.par[3]=(1/(x3)-1/(x3+latstep))*0.5/sinbeta;
+                        duc.par[3]=(1/(x3)-1/(x3+x3step ))*0.5/sinbeta;
                         duc.par[4]=cosangstep*0.5;
                         
                         uc0.par[0]=0;
                         uc0.par[1]=(1/(x1)+1/(x1+latstep))*0.5/sinbeta;
                         uc0.par[2]=(1/(x2)+1/(x2+latstep))*0.5/sinbeta;
-                        uc0.par[3]=(1/(x3)+1/(x3+latstep))*0.5/sinbeta;
+                        uc0.par[3]=(1/(x3)+1/(x3+x3step ))*0.5/sinbeta;
                         uc0.par[4]=x4+cosangstep*.5;
                         
                         const float smallv=x1*x2*x3*sinbeta;
