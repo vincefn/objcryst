@@ -159,8 +159,10 @@ void AsymmetricUnit::SetSpaceGroup(const SpaceGroup &spg)
        <<"     0 <= z <= "<< mZmax<<endl<<endl;
    #else
    const cctbx::sgtbx::brick b(spg.GetCCTbxSpg().type());
+   #ifdef __DEBUG__
    cout<<"->>Parallelepipedic Asymmetric Unit, from cctbx::sgtbx::brick:"<<endl
        <<b.as_string()<<endl;
+   #endif
    mXmin=boost::rational_cast<REAL,int>(b(0,0).value());
    mYmin=boost::rational_cast<REAL,int>(b(1,0).value());
    mZmin=boost::rational_cast<REAL,int>(b(2,0).value());
@@ -488,7 +490,9 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
 {
    if((mId==spgId)&&(mpCCTbxSpaceGroup!=0)) return;
    VFN_DEBUG_ENTRY("SpaceGroup::InitSpaceGroup():"<<spgId,8)
+   #ifdef __DEBUG__
    (*fpObjCrystInformUser)("Initializing spacegroup: "+spgId);
+   #endif
    try
    {
       cctbx::sgtbx::space_group_symbols sgs=cctbx::sgtbx::space_group_symbols(spgId);
@@ -572,15 +576,18 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
       for(unsigned int i=0;i<9;++i) mvSym[j].mx[i]=(*pRot)[i]*r_den;
       for(unsigned int i=0;i<3;++i) mvSym[j].tr[i]=(*pTrans)[i]*t_den;
    }
-
+   #ifdef __DEBUG__
    this->Print();
+   #endif
    mClock.Click();
    string extension("");
    if(mExtension=='1') extension=" (Using origin choice #1)";
    if(mExtension=='2') extension=" (Using origin choice #2)";
    if(mExtension=='R') extension=" (Using Rhombohedral cell)";
    if(mExtension=='H') extension=" (Using Hexagonal cell)";
+   #ifdef __DEBUG__
   (*fpObjCrystInformUser)("Initialized spacegroup: "+spgId+extension);
+   #endif
    VFN_DEBUG_EXIT("SpaceGroup::InitSpaceGroup():"<<spgId,8)
 }
 
