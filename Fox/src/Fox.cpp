@@ -54,6 +54,7 @@
 #include "ObjCryst/Polyhedron.h"
 #include "ObjCryst/test.h"
 #include "ObjCryst/CIF.h"
+//#include "ObjCryst/PDF.h"
 #include "RefinableObj/GlobalOptimObj.h"
 #include "Quirks/VFNStreamFormat.h"
 
@@ -72,7 +73,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 973
+#define __FOXREVISION__ 985
 
 static std::string foxVersion;
 
@@ -287,7 +288,7 @@ int main (int argc, char *argv[])
    
    {// Fox version
       char verBuf[200];
-      sprintf(verBuf,"1.7.5.3-#%d",__FOXREVISION__);
+      sprintf(verBuf,"1.7.6-#%d",__FOXREVISION__);
       foxVersion=verBuf;
    }
    bool useGUI(true);
@@ -864,6 +865,7 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
    // Reset "last save" clock, in the case we loaded an xml file on startup
    mClockLastSave.Click();
    
+   #if 0
    // Check for updates in a separate thread
    bool check;
    wxConfigBase::Get()->Read("Fox/BOOL/Check for Fox updates", &check);
@@ -875,6 +877,7 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
       else pThreadCheckUpdates->Run();
       mvUpdatesAutoCheck=true;
    }
+   #endif
 }
 
 void WXCrystMainFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
@@ -1066,6 +1069,10 @@ void WXCrystMainFrame::OnAddCrystal(wxCommandEvent& WXUNUSED(event))
    }
    obj->UpdateDisplay();
    mpNotebook->SetSelection(0);
+   
+   // Fake pdf for linking ?
+   //PDF pdf;
+   //pdf.GetPDFR();
 }
 void WXCrystMainFrame::OnAddPowderPattern(wxCommandEvent& WXUNUSED(event))
 {

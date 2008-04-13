@@ -1,5 +1,17 @@
-#### 1.7.5.3 - March 2008 (Revision #973)
-   * Small bugfixes 
+#### 1.7.6 - April 2008 (Revision #985)
+IMPROVEMENTS
+   * More efficient random moves for molecules, particularly for
+     large molecules or with flexible cycles.
+   * Better automatic changes of temperature for parallel tempering
+   * Linux: enable compilation using "make -jN" (j2, j4...)
+   * Nicer atom drawing. Force double buffering
+
+BUG FIXES
+   * Fixed incorrect formula for sample displacement
+   * Linux: avoid lock of optimisation when 3D view is opened
+   * Correct monoclinic indexing
+   * Disable auto-check for updates (could crash under Linux when no
+     network can be reached)
 
 #### 1.7.5 - February 2008 (Revision #956)
 NEW FEATURES
