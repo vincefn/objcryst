@@ -881,6 +881,7 @@ void WXMolecule::OnMenuOptimizeConformation(wxCommandEvent & WXUNUSED(event))
    VFN_DEBUG_ENTRY("WXMolecule::OnMenuOptimizeConformation()",5)
    WXCrystValidateAllUserInput();
    mpMolecule->OptimizeConformation(100000,mpMolecule->GetAtomList().size());
+   mpMolecule->OptimizeConformationSteepestDescent(0.01,100);
    mpMolecule->GetCrystal().UpdateDisplay();
    mpMolecule->RestraintStatus(cout);
    VFN_DEBUG_EXIT("WXMolecule::OnMenuOptimizeConformation()",5)

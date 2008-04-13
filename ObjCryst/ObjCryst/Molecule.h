@@ -179,6 +179,14 @@ class MolBond:public Restraint
       /// This requires that GetLogLikelihood(calcDeriv=true) be called first.
       /// If llk=true, this will return the derivative of the llk rather than the derivative of the length or angle
       REAL GetDeriv(const std::map<const MolAtom*,XYZ> &m, const bool llk=false)const;
+      /** Calc log(likelihood) gradient - versus all atomic coordinates
+      *
+      * \param m: this map should have been initialized by adding all possible atom
+      * pointers as keys, with all XYZ values equal to zeros. On return, the derivative
+      * of the log(likelihood) vs each atomic coordinates will \b added
+      * to each coordinate of the corresponding atoms.
+      */
+      void CalcGradient(std::map<MolAtom*,XYZ> &m)const;
       const MolAtom& GetAtom1()const;
       const MolAtom& GetAtom2()const;
       MolAtom& GetAtom1();
@@ -258,6 +266,14 @@ class MolBondAngle:public Restraint
       /// This requires that GetLogLikelihood(calcDeriv=true) be called first
       /// If llk=true, this will return the derivative of the llk rather than the derivative of the length or angle
       REAL GetDeriv(const std::map<const MolAtom*,XYZ> &m, const bool llk=false)const;
+      /** Calc log(likelihood) gradient - versus all atomic coordinates
+      *
+      * \param m: this map should have been initialized by adding all possible atom
+      * pointers as keys, with all XYZ values equal to zeros. On return, the derivative
+      * of the log(likelihood) vs each atomic coordinates will \b added
+      * to each coordinate of the corresponding atoms.
+      */
+      void CalcGradient(std::map<MolAtom*,XYZ> &m)const;
       REAL GetAngle()const;
       REAL& Angle0();
       REAL& AngleDelta();
@@ -341,6 +357,14 @@ class MolDihedralAngle:public Restraint
       /// This requires that GetLogLikelihood(calcDeriv=true) be called first
       /// If llk=true, this will return the derivative of the llk rather than the derivative of the length or angle
       REAL GetDeriv(const std::map<const MolAtom*,XYZ> &m, const bool llk=false)const;
+      /** Calc log(likelihood) gradient - versus all atomic coordinates
+      *
+      * \param m: this map should have been initialized by adding all possible atom
+      * pointers as keys, with all XYZ values equal to zeros. On return, the derivative
+      * of the log(likelihood) vs each atomic coordinates will \b added
+      * to each coordinate of the corresponding atoms.
+      */
+      void CalcGradient(std::map<MolAtom*,XYZ> &m)const;
       REAL GetAngle()const;
       REAL& Angle0();
       REAL& AngleDelta();
@@ -776,6 +800,13 @@ class Molecule: public Scatterer
       * reasonable configuration. 
       */
       void OptimizeConformation(const long nbTrial=10000,const REAL stopCost=0.);
+      /** Optimize the conformation from internal restraints (bond lengths, angles
+      * and dihedral angles), using a steepest descent algorithm.
+      *
+      *\param maxStep: maximum displacement allowed along any coordinate for all atoms.
+      *\param nbStep: number of steps - the gradient is re-calculated after each step.
+      */
+      void OptimizeConformationSteepestDescent(const REAL maxStep=0.1,const unsigned nbStep=1);
       const vector<MolAtom*>& GetAtomList()const;
       const vector<MolBond*>& GetBondList()const;
       const vector<MolBondAngle*>& GetBondAngleList()const;
