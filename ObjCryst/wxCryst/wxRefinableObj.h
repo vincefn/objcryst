@@ -59,7 +59,7 @@ class WXFieldRefPar:public WXField
 {
    public:
       WXFieldRefPar(wxWindow *parent,const string& label, 
-                    RefinablePar *refpar,const int hsize=50,
+                    RefinablePar *refpar,const int hsize=65,
                     const bool enableFixButton=true, const bool enableLimitedButton=true);
       /// When a new value is entered (must type it and then hit the 'enter' key).
       /// The Field reads the new value, 

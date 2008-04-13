@@ -402,7 +402,7 @@ class WXFieldParBase:public WXField
    public:
       /// Constructor
       WXFieldParBase(wxWindow *parent,const string& label, const int field_id,
-                     const int hsize=50);
+                     const int hsize=65);
       /// When a new value is entered (must type it and then hit the 'enter' key).
       /// The Field reads the new value, 
       /// and directly changes the RefinablePar value (contrary to what happens
@@ -434,7 +434,7 @@ template<class T>class WXFieldPar:public WXFieldParBase
    public:
       /// Constructor
       WXFieldPar(wxWindow *parent,const string& label, const int field_id,
-                    T *par,const int hsize=50);
+                    T *par,const int hsize=65);
       /// This gets a new value from the parameter.
       virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false);
       virtual void UpdateUI(const bool mutexlock=false);

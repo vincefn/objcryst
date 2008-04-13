@@ -245,7 +245,8 @@ void WXFieldRefPar::UpdateUI(const bool lock)
    
    //mpField->SetValue(wxString::Printf("%f",mValue));
    wxString tmp;
-   tmp.Printf("%f",mValue);
+   if((abs(mValue)<100)&&(abs(mValue)>0.01)) tmp.Printf("%6.4f",mValue);
+   else tmp.Printf("%f",mValue);
    mIsSelfUpdating=true;
    mpField->SetValue(tmp);
    mIsSelfUpdating=false;

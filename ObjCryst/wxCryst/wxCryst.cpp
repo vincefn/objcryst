@@ -625,7 +625,8 @@ template<> void WXFieldPar<REAL>::UpdateUI(const bool lock)
    }
    VFN_DEBUG_ENTRY("WXFieldPar<REAL>::UpdateUI("<<lock<<")"<<"MainThread="<<wxThread::IsMain(),4)
    wxString tmp;
-   tmp.Printf("%f",mValue*mHumanScale);
+   if((abs(mValue*mHumanScale)<100)&&(abs(mValue*mHumanScale)>0.01)) tmp.Printf("%6.4f",mValue*mHumanScale);
+   else tmp.Printf("%f",mValue*mHumanScale);
    mIsSelfUpdating=true;
    mpField->SetValue(tmp);
    mIsSelfUpdating=false;
