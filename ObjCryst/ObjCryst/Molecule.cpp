@@ -3278,6 +3278,29 @@ void Molecule::OptimizeConformationSteepestDescent(const REAL maxStep,const unsi
       }
       if(f>1e-6) f=maxStep/f;
       else break;//nothing to optimize ?
+      // Average derivatives inside rigid groups
+      //:TODO: still allow rotations of rigid groups ?
+      //:TODO: Handle case when one atom belongs to several rigid groups...
+      for(vector<RigidGroup *>::const_iterator pos=this->GetRigidGroupList().begin();pos!=this->GetRigidGroupList().end();++pos)
+      {
+         if((*pos)->size()==0) continue; // Just in case...
+         REAL dx=0,dy=0,dz=0;
+         for(set<MolAtom *>::const_iterator at=(*pos)->begin();at!=(*pos)->end();++at)
+         {
+            dx+=(*at)->GetX();
+            dy+=(*at)->GetY();
+            dz+=(*at)->GetZ();
+         }
+         dx/=(*pos)->size();
+         dy/=(*pos)->size();
+         dz/=(*pos)->size();
+         for(set<MolAtom *>::const_iterator at=(*pos)->begin();at!=(*pos)->end();++at)
+         {
+            grad[*at].x=dx;
+            grad[*at].y=dy;
+            grad[*at].z=dz;
+         }
+      }
       // Move according to max step to minimize LLK
       for(map<MolAtom*,XYZ>::const_iterator pos=grad.begin();pos!=grad.end();++pos)
       {

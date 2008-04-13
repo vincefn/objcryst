@@ -1,4 +1,4 @@
-#### 1.7.6 - April 2008 (Revision #985)
+#### 1.7.6.1 - April 2008 (Revision #985)
 IMPROVEMENTS
    * More efficient random moves for molecules, particularly for
      large molecules or with flexible cycles.
