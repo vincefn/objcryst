@@ -1940,8 +1940,7 @@ map<unsigned long,pair<CrystVector_REAL,string> >::iterator
    pos=mvpSavedValuesSet.find(id);
    if(mvpSavedValuesSet.end() == pos)
    {//throw up
-      cout << "RefinableObj::FindParamSet(long): Unknown saved set !" <<endl;
-      exit(EXIT_FAILURE);//:TODO: some more inteligent exception
+      throw ObjCrystException("RefinableObj::FindParamSet(long): Unknown saved set !");
    }
    VFN_DEBUG_EXIT("RefinableObj::FindParamSet()",2)
    return pos;
