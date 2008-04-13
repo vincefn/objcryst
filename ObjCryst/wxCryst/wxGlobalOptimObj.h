@@ -64,6 +64,8 @@ class WXOptimizationObj: public WXCrystObj
       WXFieldPar<long> *mpWXFieldNbTrial;
       /// Record when the window giving the list of recorded parameter set was created.
       RefinableObjClock mClockParamSetWindow;
+      /// Window giving the list of recorded parameter sets
+      wxListBox *mpwxParamSetList;
 };
 
 /// Class for a GlobalOptimization thread

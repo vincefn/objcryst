@@ -217,11 +217,11 @@ void WXOptimizationObj::OnBrowseParamSet(wxCommandEvent & WXUNUSED(event))
                            (this->GetOptimizationObj().mvSavedParamSet[i].first).c_str());
       //cout<<choices[i]<<endl;
    }
-   wxListBox* wxlist=new wxListBox(frame, ID_BROWSE_WIN, wxDefaultPosition, 
+   mpwxParamSetList=new wxListBox(frame, ID_BROWSE_WIN, wxDefaultPosition, 
                                    wxDefaultSize, nb, choices,
                                    wxLB_SINGLE|wxLB_NEEDED_SB, wxDefaultValidator,
                                    "listBox");
-   wxlist->SetEventHandler(this);
+   mpwxParamSetList->SetEventHandler(this);
    mClockParamSetWindow.Click();
    frame->Show(true);
 }
@@ -238,8 +238,18 @@ void WXOptimizationObj::OnSelectParamSet(wxCommandEvent &event)
    const long n=event.GetSelection();
    if(mClockParamSetWindow>this->GetOptimizationObj().mRefParList.GetRefParListClock())
    {
-      this->GetOptimizationObj().mRefParList
-         .RestoreParamSet(this->GetOptimizationObj().mvSavedParamSet[n].first);
+      try
+      {
+         this->GetOptimizationObj().mRefParList
+            .RestoreParamSet(this->GetOptimizationObj().mvSavedParamSet[n].first);
+      }
+      catch(const ObjCrystException &except)
+      {
+         wxMessageDialog bad(this,"Impossible ! Model has been altered !",
+                                  "Impossible ! Model has been altered !",wxOK|wxICON_EXCLAMATION);
+         mpwxParamSetList->GetParent()->Close();
+         mpwxParamSetList=0;
+      }
       this->GetOptimizationObj().UpdateDisplay();
       cout <<"Param set #"<<this->GetOptimizationObj().mvSavedParamSet[n].first<<", cost="
            <<this->GetOptimizationObj().mvSavedParamSet[n].second
