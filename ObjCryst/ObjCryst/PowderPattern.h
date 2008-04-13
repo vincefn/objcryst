@@ -630,7 +630,7 @@ class PowderPattern : public RefinableObj
          ///Change Zero in x (2theta,tof)
          void SetXZero(const REAL newZero);
          /// Change displacement correction
-         /// \f$ (2\theta)_{obs} = (2\theta)_{real} + \frac{a}{\cos(\theta)} \f$
+         /// \f$ (2\theta)_{obs} = (2\theta)_{real} + a\cos(\theta) \f$
          void Set2ThetaDisplacement(const REAL displacement);
          ///Change transparency correction
          /// \f$ (2\theta)_{obs} = (2\theta)_{real} + b\sin(2\theta) \f$

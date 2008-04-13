@@ -1889,7 +1889,7 @@ REAL PowderPattern::X2XCorr(const REAL x0)const
    REAL x=x0;
    if(  (mRadiation.GetWavelengthType()==WAVELENGTH_MONOCHROMATIC)
       ||(mRadiation.GetWavelengthType()==WAVELENGTH_ALPHA12))
-      x += m2ThetaDisplacement/cos(x/2) +m2ThetaTransparency*sin(x);
+      x += m2ThetaDisplacement*cos(x/2) +m2ThetaTransparency*sin(x);
 
    return x+mXZero;
 }
