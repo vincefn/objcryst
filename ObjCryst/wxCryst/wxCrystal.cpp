@@ -208,6 +208,7 @@ static const long ID_CRYSTAL_WIN_SCATTPOW                       =WXCRYST_ID();
 static const long ID_CRYSTAL_WIN_ANTIBUMP                       =WXCRYST_ID();
 static const long ID_CRYSTAL_WIN_BONDVALENCE                    =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SHOW_SCATTPOW_WIN             =WXCRYST_ID();
+//static const long ID_CRYSTAL_MENU_SHOW_PDF                      =WXCRYST_ID();
 
 BEGIN_EVENT_TABLE(WXCrystal,wxWindow)
    EVT_BUTTON(ID_WXOBJ_COLLAPSE,                      WXCrystObj::OnToggleCollapse)
@@ -246,6 +247,7 @@ BEGIN_EVENT_TABLE(WXCrystal,wxWindow)
    EVT_GRID_CMD_CELL_CHANGE(ID_CRYSTAL_WIN_SCATTPOW,  WXCrystal::OnEditGridScattPow)
    EVT_GRID_CMD_CELL_CHANGE(ID_CRYSTAL_WIN_ANTIBUMP,  WXCrystal::OnEditGridScattPowAntiBump)
    EVT_GRID_CMD_CELL_CHANGE(ID_CRYSTAL_WIN_BONDVALENCE,WXCrystal::OnEditGridScattPowBondValence)
+//   EVT_MENU(ID_CRYSTAL_MENU_SHOW_PDF,                 WXCrystal::OnMenuPDF)
 END_EVENT_TABLE()
 
 WXCrystal::WXCrystal(wxWindow* parent, Crystal *obj):
@@ -257,6 +259,7 @@ mIsSelfUpdating(false)
 mpCrystalGL(0)
 #endif
 ,mpConditionGLUpdate(0)
+//,mpPDF(0)
 {
    VFN_DEBUG_MESSAGE("WXCrystal::WXCrystal()",6)
    //this->SetBackgroundColour("Red");
@@ -322,6 +325,8 @@ mpCrystalGL(0)
       mpMenuBar->AddMenu("Display",ID_CRYSTAL_MENU_DISPLAY);
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_DISPLAY,ID_CRYSTAL_MENU_DISPLAY_3DVIEW,
                                 "3D Display");
+         //mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_DISPLAY,ID_CRYSTAL_MENU_SHOW_PDF,
+         //                       "PDF");
 
       mpSizer->SetItemMinSize(mpMenuBar,
                               mpMenuBar->GetSize().GetWidth(),
@@ -615,10 +620,15 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
       if(false==wxThread::IsMain())
       {
          mpConditionGLUpdate=new wxCondition(mMutexGLUpdate);
-         mMutexGLUpdate.Lock();
+         bool ok=mpConditionGLUpdate->IsOk();
          wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_GLCRYSTAL_MENU_UPDATE);
          wxPostEvent(mpCrystalGL,event);
-         mpConditionGLUpdate->Wait();
+         mMutexGLUpdate.Lock();
+         wxCondError err=mpConditionGLUpdate->WaitTimeout(200);
+         if(err!=wxCOND_NO_ERROR)
+         {
+            cerr<<"WXCrystal::UpdateGL():timeout waiting for mpConditionGLUpdate release..("<<ok<<")"<<endl;
+         }
          mMutexGLUpdate.Unlock();
          delete mpConditionGLUpdate;
          mpConditionGLUpdate=0;
@@ -1565,6 +1575,46 @@ void WXCrystal::NotifyDeleteListWin(WXCrystalScrolledGridWindow *win)
    // NOTE : all three subwindows should actually be deleted at the *same* time.
    if((mpScattPowWin==0)&&(mpAntiBumpWin==0)&&(mpBondValenceWin==0)) mvpRowScattPow.clear();
 }
+
+/*
+void WXCrystal::OnMenuPDF(wxCommandEvent &event)
+{
+   const unsigned int nb=1000;
+   // Simulate data
+      if(mpPDF!=0) delete mpPDF;
+      mpPDF=new PDF();
+      CrystVector_REAL r,obs;
+      r.resize(nb);obs.resize(nb);
+      for(unsigned int i=0;i<nb;++i) r(i)=(i+1)*.02;
+      obs=1.0;
+      mpPDF->SetPDFObs(r,obs);
+      PDFCrystal *pPDFCrystal=new PDFCrystal(*mpPDF,*mpCrystal);
+      mpPDF->AddPDFPhase(*pPDFCrystal);
+   // WX window
+      wxFrame *frame= new wxFrame(this,-1,"PDF",
+                                  wxDefaultPosition,wxSize(300,200));
+      WXMultiGraph* pGraph =new WXMultiGraph(frame);
+
+      wxSizer *ps=new wxBoxSizer(wxHORIZONTAL);
+      ps->Add(pGraph,1,wxEXPAND);
+      frame->CreateStatusBar(2);
+      frame->SetSizer(ps);
+      frame->SetAutoLayout(true);
+      frame->Show(true);
+      unsigned long id=pGraph->AddGraph("PDF");
+      valarray<float> vr(nb),vcalc(nb);
+      CrystVector_REAL v2r,v2calc;
+      v2r=mpPDF->GetPDFR();
+      v2calc=mpPDF->GetPDFCalc();
+      for(unsigned int i=0;i<nb;++i)
+      {
+         vr[i]=v2r(i);
+         vcalc[i]=v2calc(i);
+      }
+      pGraph->SetGraphData(id,vr,vcalc);
+      pGraph->UpdateDisplay();
+}
+*/
 bool WXCrystal::Enable(bool e)
 {
    if(0!=mpScattPowWin)    mpScattPowWin   ->Enable(e);
@@ -2498,11 +2548,13 @@ BEGIN_EVENT_TABLE(WXGLCrystalCanvas, wxGLCanvas)
    EVT_UPDATE_UI(ID_GLCRYSTAL_UPDATEUI,WXGLCrystalCanvas::OnUpdateUI)
 END_EVENT_TABLE()
 
+int AttribList [] = {WX_GL_RGBA , WX_GL_DOUBLEBUFFER};
+
 WXGLCrystalCanvas::WXGLCrystalCanvas(WXCrystal *wxcryst,
                                      wxFrame *parent, wxWindowID id,
                                      const wxPoint &pos,
                                      const wxSize &size):
-wxGLCanvas(parent,id,pos,size,wxDEFAULT_FRAME_STYLE),mpParentFrame(parent),
+wxGLCanvas(parent,id,pos,size,wxDEFAULT_FRAME_STYLE,"GLCanvas",AttribList),mpParentFrame(parent),
 mpWXCrystal(wxcryst),mIsGLInit(false),mDist(60),mX0(0),mY0(0),mZ0(0),mViewAngle(15),
 mShowFourier(true),mShowCrystal(true),mShowAtomName(true),mShowCursor(false),mSharpenMap(false),
 mIsGLFontBuilt(false),mGLFontDisplayListBase(0),mpFourierMapListWin(0)
@@ -2589,16 +2641,15 @@ void WXGLCrystalCanvas::OnExit(wxCommandEvent &event)
 void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
 {
    VFN_DEBUG_ENTRY("WXGLCrystalCanvas::OnPaint()",7)
-   // This means that another update of the display list is being done, so...
+   this->SetCurrent();
    wxPaintDC dc(this);
-   PrepareDC(dc);
-   this->GetParent()->PrepareDC(dc);
+   //PrepareDC(dc);
+   //this->GetParent()->PrepareDC(dc);
 
    #ifndef __WXMOTIF__
    if (!GetContext()) return;
    #endif
 
-   this->SetCurrent();
    if(false==mIsGLInit)
    {
       mIsGLInit=true;

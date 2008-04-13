@@ -36,6 +36,7 @@
 #include "wx/clrpicker.h"
 
 #include "ObjCryst/Crystal.h"
+//#include "ObjCryst/PDF.h"
 
 #include "wxCryst/MC.h"
 
@@ -118,6 +119,7 @@ class WXCrystal: public WXRefinableObj
       void OnEditGridScattPowAntiBump(wxGridEvent &e);
       void OnEditGridScattPowBondValence(wxGridEvent &e);
       void NotifyDeleteListWin(WXCrystalScrolledGridWindow *win);
+      //void OnMenuPDF(wxCommandEvent &event);
       virtual bool Enable(bool enable=true);
    private:
       Crystal* mpCrystal;
@@ -169,6 +171,9 @@ class WXCrystal: public WXRefinableObj
       wxMutex mMutexGLUpdate;
       /// wxCondition used when updating the OpenGL display List, between background and main thread
       wxCondition *mpConditionGLUpdate;
+      
+      /// PDF, for tests
+      //PDF *mpPDF;
    DECLARE_EVENT_TABLE()
 };
 
