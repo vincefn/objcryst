@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="wxbase26.lib wxmsw26_core.lib wxmsw26_adv.lib wxmsw26_gl.lib opengl32.lib glu32.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregex.lib wxexpat.lib winmm.lib comctl32.lib rpcrt4.lib wsock32.lib oleacc.lib odbc32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib shell32.lib oldnames.lib ole32.lib oleaut32.lib uuid.lib advapi32.lib"
+				AdditionalDependencies="wxbase28.lib wxmsw28_core.lib wxmsw28_adv.lib wxmsw28_gl.lib opengl32.lib glu32.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregex.lib wxexpat.lib winmm.lib comctl32.lib rpcrt4.lib wsock32.lib oleacc.lib odbc32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib shell32.lib oldnames.lib ole32.lib oleaut32.lib uuid.lib advapi32.lib"
 				OutputFile="$(OutDir)\$(ProjectName)-DEBUG.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="C:\Dev\wxWidgets\lib\vc_lib"
@@ -126,13 +126,14 @@
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
 				EnableFiberSafeOptimizations="true"
-				AdditionalIncludeDirectories="C:\Dev\Fox;C:\Dev\Fox\cctbx;C:\Dev\Fox\cctbx\cctbx\include;C:\Dev\Fox\cctbx\scitbx\include;C:\Dev\Fox\ObjCryst;C:\Dev\wxWidgets\include;C:\Dev\wxWidgets\lib\vc_lib\msw"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;__WX__CRYST__;OBJCRYST_GL"
+				AdditionalIncludeDirectories="C:\Dev\Fox;C:\Dev\Fox\cctbx\cctbx\include;C:\Dev\Fox\cctbx\scitbx\include;C:\Dev\Fox\ObjCryst;C:\Dev\wxWidgets\include;C:\Dev\wxWidgets\lib\vc_lib\msw;C:\Dev\Fox\fftw\api"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;__WX__CRYST__;OBJCRYST_GL;BOOST_ALL_NO_LIB;HAVE_FFTW"
 				MinimalRebuild="true"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="false"
 				EnableEnhancedInstructionSet="1"
 				FloatingPointModel="2"
+				FloatingPointExceptions="false"
 				UsePrecompiledHeader="0"
 				WarningLevel="0"
 				Detect64BitPortabilityProblems="true"
@@ -150,10 +151,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="wxbase26.lib wxmsw26_core.lib wxmsw26_adv.lib wxmsw26_gl.lib opengl32.lib glu32.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregex.lib wxexpat.lib winmm.lib comctl32.lib rpcrt4.lib wsock32.lib oleacc.lib odbc32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib shell32.lib oldnames.lib ole32.lib oleaut32.lib uuid.lib advapi32.lib"
+				AdditionalDependencies="wxbase28.lib wxbase28_net.lib wxmsw28_core.lib wxmsw28_adv.lib wxmsw28_gl.lib opengl32.lib glu32.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregex.lib wxexpat.lib winmm.lib comctl32.lib rpcrt4.lib wsock32.lib oleacc.lib odbc32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib shell32.lib oldnames.lib ole32.lib oleaut32.lib uuid.lib advapi32.lib libfftwf.lib"
 				ShowProgress="2"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="C:\Dev\wxWidgets\lib\vc_lib"
+				AdditionalLibraryDirectories="C:\Dev\wxWidgets\lib\vc_lib;C:\Dev\Fox\fftw"
 				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
