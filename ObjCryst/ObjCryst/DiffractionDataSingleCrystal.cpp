@@ -141,6 +141,12 @@ void DiffractionDataSingleCrystal::SetHklIobs(const CrystVector_long &h,
    this->CalcSinThetaLambda();
    
    mHasObservedData=true;
+   
+   // Keep a copy as squared F(hkl), to enable fourier maps
+   // :TODO: stop using mObsIntensity and just keep mFhklObsSq ?
+   mFhklObsSq=mObsIntensity;
+   mClockGetFhklObsSq.Click();
+   
    {
       char buf [200];
       sprintf(buf,"Changed HKL list, with %d reflections",(int)mNbRefl);
