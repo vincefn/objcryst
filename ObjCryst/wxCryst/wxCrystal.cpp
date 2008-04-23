@@ -2142,6 +2142,17 @@ int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0, 
       for(unsigned int i=norm_sf.numElements();i>0;i--) {*p=sqrt(*p * norm0);p++;}
    }
    
+   // Auto-scale Fcalc and Fobs ?
+   REAL scale_fobs=1.0;
+   if(mType!=1)
+   {
+      REAL tmp=0;
+      scale_fobs=0;
+      for(long i=0;i<nb;++i) {scale_fobs+=data.GetFhklCalcSq()(i); tmp+=data.GetFhklObsSq()(i);}
+      scale_fobs=sqrt(scale_fobs/(tmp+1e-10));
+      cout<<__FILE__<<":"<<__LINE__<<" Fourier map obs/calc scale factor:"<<scale_fobs<<endl;
+   }
+
    const REAL v=1/mpCrystal->GetVolume();//(REAL)(size*size*size);// mpCrystal->GetVolume(); (REAL)(size*size*size);
    for(long i=0;i<nb;++i)
    {
@@ -2164,7 +2175,7 @@ int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0, 
          */
          if(mType==2)
          {// Obs-Calc
-            const REAL fobs=sqrt(data.GetFhklObsSq()(i));
+            const REAL fobs=scale_fobs*sqrt(data.GetFhklObsSq()(i));
             const REAL rec=m(j,3),imc=m(j,4),fcalc=sqrt(data.GetFhklCalcSq()(i));
             in[h+sizex*k+sizex*sizey*l][0]=v*rec*(fobs-fcalc)/sqrt(rec*rec+imc*imc)*norm;
             in[h+sizex*k+sizex*sizey*l][1]=v*imc*(fobs-fcalc)/sqrt(rec*rec+imc*imc)*norm;
@@ -2176,7 +2187,7 @@ int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0, 
          }
          if(mType==0)
          {// Obs
-            const REAL iobs=sqrt(data.GetFhklObsSq()(i));
+            const REAL iobs=scale_fobs*sqrt(data.GetFhklObsSq()(i));
             const REAL rec=m(j,3),imc=m(j,4),icalc=sqrt(data.GetFhklCalcSq()(i));
             in[h+sizex*k+sizex*sizey*l][0]=v*rec*iobs/icalc*norm;
             in[h+sizex*k+sizex*sizey*l][1]=v*imc*iobs/icalc*norm;
