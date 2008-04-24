@@ -3119,7 +3119,7 @@ void WXGLCrystalCanvas::CrystUpdate()
                }
             //cout<<__FILE__<<":"<<__LINE__<<":WXGLCrystalCanvas::CrystUpdate()"
             //    <<data<<","<<addCalcMap<<","<<addObsDiffMaps<<endl;
-            if(addCalcMap)
+            if(addCalcMap&&(data->GetNbRefl()>0))
             {
                mvpUnitCellMap.push_back(boost::shared_ptr<UnitCellMap>(new UnitCellMap(mpWXCrystal->GetCrystal())));
                mvpUnitCellMap.back()->CalcFourierMap(*data,1);
