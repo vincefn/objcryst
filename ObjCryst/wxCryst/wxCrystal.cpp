@@ -621,13 +621,14 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
       {
          mpConditionGLUpdate=new wxCondition(mMutexGLUpdate);
          bool ok=mpConditionGLUpdate->IsOk();
+         mMutexGLUpdate.Lock();
          wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_GLCRYSTAL_MENU_UPDATE);
          wxPostEvent(mpCrystalGL,event);
-         mMutexGLUpdate.Lock();
-         wxCondError err=mpConditionGLUpdate->WaitTimeout(200);
-         if(err!=wxCOND_NO_ERROR)
+         int ct=0;
+         while(mpConditionGLUpdate->WaitTimeout(200)!=wxCOND_NO_ERROR)
          {
-            cerr<<"WXCrystal::UpdateGL():timeout waiting for mpConditionGLUpdate release..("<<ok<<")"<<endl;
+            cerr<<"WXCrystal::UpdateGL():timeout waiting for mpConditionGLUpdate release: #"<<++ct<<endl;
+            wxWakeUpIdle();
          }
          mMutexGLUpdate.Unlock();
          delete mpConditionGLUpdate;
