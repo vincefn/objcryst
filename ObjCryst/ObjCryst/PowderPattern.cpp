@@ -784,7 +784,7 @@ void PowderPatternDiffraction::SetExtractionMode(const bool extract,const bool i
    mExtractionMode=extract;
    //this->Prepare();
    if(extract && init) {mFhklObsSq.resize(this->GetNbRefl());mFhklObsSq=100;}
-   if(mExtractionMode==false)
+   if((mExtractionMode==false)&&(mFhklObsSq.numElements()>0))
    {// Leaving extraction mode, so update extracted single crystal data
       if(mpLeBailData==0)  mpLeBailData=new DiffractionDataSingleCrystal(this->GetCrystal(),false);
       // Update wavelength & name
