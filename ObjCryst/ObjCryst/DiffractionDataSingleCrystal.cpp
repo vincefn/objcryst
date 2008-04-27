@@ -52,26 +52,26 @@ namespace ObjCryst
 ObjRegistry<DiffractionDataSingleCrystal> 
    gDiffractionDataSingleCrystalRegistry("Global DiffractionDataSingleCrystal Registry");
 
-DiffractionDataSingleCrystal::DiffractionDataSingleCrystal():
+DiffractionDataSingleCrystal::DiffractionDataSingleCrystal(const bool regist):
 mHasObservedData(false),mScaleFactor(1.)
 {
    VFN_DEBUG_MESSAGE("DiffractionDataSingleCrystal::DiffractionDataSingleCrystal()",5)
    this->InitRefParList();
    this->InitOptions();
-   gDiffractionDataSingleCrystalRegistry.Register(*this);
-   gTopRefinableObjRegistry.Register(*this);
+   if(regist) gDiffractionDataSingleCrystalRegistry.Register(*this);
+   if(regist) gTopRefinableObjRegistry.Register(*this);
    mClockMaster.AddChild(mClockScaleFactor);
    this->AddSubRefObj(mRadiation);
 }
-DiffractionDataSingleCrystal::DiffractionDataSingleCrystal(Crystal &cryst):
+DiffractionDataSingleCrystal::DiffractionDataSingleCrystal(Crystal &cryst,const bool regist):
 mHasObservedData(false),mScaleFactor(1.)
 {
    VFN_DEBUG_MESSAGE("DiffractionDataSingleCrystal::DiffractionDataSingleCrystal()",5)
    this->InitRefParList();
    this->SetCrystal(cryst);
    this->InitOptions();
-   gDiffractionDataSingleCrystalRegistry.Register(*this);
-   gTopRefinableObjRegistry.Register(*this);
+   if(regist) gDiffractionDataSingleCrystalRegistry.Register(*this);
+   if(regist) gTopRefinableObjRegistry.Register(*this);
    mClockMaster.AddChild(mClockScaleFactor);
    this->AddSubRefObj(mRadiation);
 }
@@ -84,7 +84,7 @@ mHasObservedData(old.mHasObservedData),mRadiation(old.mRadiation)
    // Keep a copy as squared F(hkl), to enable fourier maps
    // :TODO: stop using mObsIntensity and just keep mFhklObsSq ?
    mFhklObsSq=mObsIntensity;
-   mClockGetFhklObsSq.Click();
+   mClockFhklObsSq.Click();
    
    mObsSigma=old.mObsSigma;
    mWeight=old.mWeight;
@@ -150,7 +150,7 @@ void DiffractionDataSingleCrystal::SetHklIobs(const CrystVector_long &h,
    // Keep a copy as squared F(hkl), to enable fourier maps
    // :TODO: stop using mObsIntensity and just keep mFhklObsSq ?
    mFhklObsSq=mObsIntensity;
-   mClockGetFhklObsSq.Click();
+   mClockFhklObsSq.Click();
    
    {
       char buf [200];
@@ -177,7 +177,7 @@ void DiffractionDataSingleCrystal::SetIobs(const CrystVector_REAL &obs)
    // Keep a copy as squared F(hkl), to enable fourier maps
    // :TODO: stop using mObsIntensity and just keep mFhklObsSq ?
    mFhklObsSq=mObsIntensity;
-   mClockGetFhklObsSq.Click();
+   mClockFhklObsSq.Click();
 }
 
 const CrystVector_REAL& DiffractionDataSingleCrystal::GetSigma()const
@@ -213,7 +213,7 @@ void DiffractionDataSingleCrystal::SetIobsToIcalc()
    // Keep a copy as squared F(hkl), to enable fourier maps
    // :TODO: stop using mObsIntensity and just keep mFhklObsSq ?
    mFhklObsSq=mObsIntensity;
-   mClockGetFhklObsSq.Click();
+   mClockFhklObsSq.Click();
    mClockMaster.Click();
 }
 
@@ -268,7 +268,7 @@ Error opening file for input:"+fileName);
    // Keep a copy as squared F(hkl), to enable fourier maps
    // :TODO: stop using mObsIntensity and just keep mFhklObsSq ?
    mFhklObsSq=mObsIntensity;
-   mClockGetFhklObsSq.Click();
+   mClockFhklObsSq.Click();
    
    this->PrepareHKLarrays();
    this->SortReflectionBySinThetaOverLambda();
@@ -335,7 +335,7 @@ Error opening file for input:"+fileName);
    // Keep a copy as squared F(hkl), to enable fourier maps
    // :TODO: stop using mObsIntensity and just keep mFhklObsSq ?
    mFhklObsSq=mObsIntensity;
-   mClockGetFhklObsSq.Click();
+   mClockFhklObsSq.Click();
    
    this->PrepareHKLarrays();
    this->SortReflectionBySinThetaOverLambda();
@@ -416,7 +416,7 @@ Error opening file for input:"+fileName);
    // Keep a copy as squared F(hkl), to enable fourier maps
    // :TODO: stop using mObsIntensity and just keep mFhklObsSq ?
    mFhklObsSq=mObsIntensity;
-   mClockGetFhklObsSq.Click();
+   mClockFhklObsSq.Click();
    
    this->PrepareHKLarrays();
    this->SortReflectionBySinThetaOverLambda();
@@ -1008,7 +1008,7 @@ CrystVector_long DiffractionDataSingleCrystal::SortReflectionBySinThetaOverLambd
       // Keep a copy as squared F(hkl), to enable fourier maps
       // :TODO: stop using mObsIntensity and just keep mFhklObsSq ?
       mFhklObsSq=mObsIntensity;
-      mClockGetFhklObsSq.Click();
+      mClockFhklObsSq.Click();
 
       if(mGroupOption.GetChoice()==2)
       {
@@ -1099,7 +1099,7 @@ CrystVector_long DiffractionDataSingleCrystal::SortReflectionBySinThetaOverLambd
       mObsSigma=1.;
       mWeight=1.;
       mFhklObsSq.resize(0);
-      mClockGetFhklObsSq.Click();
+      mClockFhklObsSq.Click();
    }
    VFN_DEBUG_EXIT("DiffractionDataSingleCrystal::SortReflectionBySinThetaOverLambda()",5)
    return index;

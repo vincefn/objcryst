@@ -50,11 +50,22 @@ namespace ObjCryst
 class DiffractionDataSingleCrystal:public ScatteringData
 {
    public:
-      DiffractionDataSingleCrystal();
+      /** Default constructor
+      *
+      * \param regist: if false, do not add to the global registry of
+      * single crystal data or refinable objects - this is only useful
+      *  for data to be used internally only.
+      *
+      * \deprecated Use the constructor passing a crystal structure instead.
+      */
+      DiffractionDataSingleCrystal(const bool regist=true);
       /** Constructor, with an assigned crystal structure.
       *
+      * \param regist: if false, do not add to the global registry of
+      * single crystal data or refinable objects - this is only useful
+      *  for data to be used internally only.
       */
-      DiffractionDataSingleCrystal(Crystal &cryst);
+      DiffractionDataSingleCrystal(Crystal &cryst,const bool regist=true);
       /// Copy constructor
       DiffractionDataSingleCrystal(const DiffractionDataSingleCrystal &old);
       ~DiffractionDataSingleCrystal();

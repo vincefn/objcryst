@@ -1520,7 +1520,7 @@ void PowderPatternDiffraction::XMLOutput(ostream &os,int indent)const
    {
       mCorrTextureMarchDollase.XMLOutput(os,indent);
    }
-   
+   #if 0
    if(mFhklObsSq.numElements()>0)
    {
       XMLCrystTag tag2("FhklObsSq");
@@ -1540,6 +1540,9 @@ void PowderPatternDiffraction::XMLOutput(ostream &os,int indent)const
       for(int i=0;i<indent;i++) os << "  " ;
       os <<tag2<<endl;
    }
+   #else
+   if(mpLeBailData!=0) mpLeBailData->XMLOutput(os,indent);
+   #endif
    
    indent--;
    tag.SetIsEndTag(true);
@@ -1711,25 +1714,53 @@ void PowderPatternDiffraction::XMLInput(istream &is,const XMLCrystTag &tagg)
          continue;
       }
       if("FhklObsSq"==tag.GetName())
-      {
-         // We ignore the h,k,l arrays - just assume for now the order
-         // is unchanged compared to when the extraction was made...
+      {// old-style extracted data
          long nbrefl=0;
          long junk;
+         CrystVector_REAL iobs(100),sigma;
+         CrystVector_long h(100),k(100),l(100);
          mFhklObsSq.resize(100);
          do
          {
-            is >>junk>>junk>>junk
-               >>mFhklObsSq(nbrefl);
+            is >>h(nbrefl)>>k(nbrefl)>>l(nbrefl)>>iobs(nbrefl);
             nbrefl++;
-            if(nbrefl==mFhklObsSq.numElements()) mFhklObsSq.resizeAndPreserve(nbrefl+100);
+            if(nbrefl==h.numElements())
+            {
+               h.resizeAndPreserve(nbrefl+100);
+               k.resizeAndPreserve(nbrefl+100);
+               l.resizeAndPreserve(nbrefl+100);
+               iobs.resizeAndPreserve(nbrefl+100);
+            }
             while(0==isgraph(is.peek())) is.get();
          }
          while(is.peek()!='<');//until next tag
          XMLCrystTag junkEndTag(is);
+         h.resizeAndPreserve(nbrefl);
+         k.resizeAndPreserve(nbrefl);
+         l.resizeAndPreserve(nbrefl);
+         iobs.resizeAndPreserve(nbrefl);
+         sigma.resizeAndPreserve(nbrefl);
+         sigma=1;
          
-         mFhklObsSq.resizeAndPreserve(nbrefl);
-         mClockGetFhklObsSq.Click();
+         if(mpLeBailData==0)  mpLeBailData=new DiffractionDataSingleCrystal(this->GetCrystal(),false);
+         
+         mpLeBailData->SetHklIobs(h,k,l,iobs,sigma);
+         mpLeBailData->SetWavelength(this->GetRadiation().GetWavelength()(0));
+         mpLeBailData->SetRadiationType(this->GetRadiation().GetRadiationType());
+         
+         // Estimate resolution
+         const REAL min=iobs.max()*1e-6;
+         unsigned long iresol=0;
+         for(unsigned long i=0;i<nbrefl;++i) if(iobs(i)>min) iresol=i;
+         char buf[200];
+         sprintf(buf,"LeBail (d=%4.2fA?):",1/(2*abs(mpLeBailData->GetSinThetaOverLambda()(iresol))+1e-6));
+         mpLeBailData->SetName(string(buf)+this->GetCrystal().GetName());
+         //mpLeBailData->SetName(string("LeBail (resol=?):")+this->GetCrystal().GetName());
+      }
+      if("DiffractionDataSingleCrystal"==tag.GetName())
+      {// Le Bail data
+         if(mpLeBailData==0) mpLeBailData=new DiffractionDataSingleCrystal(this->GetCrystal(),false);
+         mpLeBailData->XMLInput(is,tag);
       }
    }
 }

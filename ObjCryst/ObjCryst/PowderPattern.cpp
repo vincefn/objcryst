@@ -591,7 +591,8 @@ WXCrystObjBasic* PowderPatternBackground::WXCreate(wxWindow* parent)
 PowderPatternDiffraction::PowderPatternDiffraction():
 mpReflectionProfile(0),
 mCorrLorentz(*this),mCorrPolar(*this),mCorrSlitAperture(*this),
-mCorrTextureMarchDollase(*this),mCorrTOF(*this),mExtractionMode(false)
+mCorrTextureMarchDollase(*this),mCorrTOF(*this),mExtractionMode(false),
+mpLeBailData(0)
 {
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::PowderPatternDiffraction()",10)
    mIsScalable=true;
@@ -607,11 +608,19 @@ mCorrTextureMarchDollase(*this),mCorrTOF(*this),mExtractionMode(false)
 PowderPatternDiffraction::PowderPatternDiffraction(const PowderPatternDiffraction &old):
 mpReflectionProfile(0),
 mCorrLorentz(*this),mCorrPolar(*this),mCorrSlitAperture(*this),
-mCorrTextureMarchDollase(*this),mCorrTOF(*this),mExtractionMode(false)
+mCorrTextureMarchDollase(*this),mCorrTOF(*this),mExtractionMode(false),
+mpLeBailData(0)
 {
    this->AddSubRefObj(mCorrTextureMarchDollase);
    this->SetIsIgnoringImagScattFact(true);
    this->SetProfile(old.mpReflectionProfile->CreateCopy());
+   #if 0 //:TODO:
+   if(old.mpLeBailData!=0)
+   {
+      mpLeBailData=new DiffractionDataSingleCrystal(false);
+      *mpLeBailData = *(old.mpLeBailData);
+   }
+   #endif
    mClockMaster.AddChild(mClockProfilePar);
    mClockMaster.AddChild(mClockLorentzPolarSlitCorrPar);
    mClockMaster.AddChild(mpReflectionProfile->GetClockMaster());
@@ -775,8 +784,33 @@ void PowderPatternDiffraction::SetExtractionMode(const bool extract,const bool i
    mExtractionMode=extract;
    //this->Prepare();
    if(extract && init) {mFhklObsSq.resize(this->GetNbRefl());mFhklObsSq=100;}
+   if(mExtractionMode==false)
+   {// Leaving extraction mode, so update extracted single crystal data
+      if(mpLeBailData==0)  mpLeBailData=new DiffractionDataSingleCrystal(this->GetCrystal(),false);
+      // Update wavelength & name
+      mpLeBailData->SetWavelength(this->GetRadiation().GetWavelength()(0));
+      mpLeBailData->SetRadiationType(this->GetRadiation().GetRadiationType());
+      char buf[200];
+      sprintf(buf,"LeBail (d=%4.2fA):",1/(2*abs(mMaxSinThetaOvLambda)+1e-6));
+      mpLeBailData->SetName(string(buf)+this->GetCrystal().GetName());
+      
+      const unsigned long nbrefl=this->GetNbReflBelowMaxSinThetaOvLambda();
+      CrystVector_REAL iobs(nbrefl),sigma(nbrefl);
+      CrystVector_long h(nbrefl),k(nbrefl),l(nbrefl);
+      sigma=1;
+      for(unsigned long i=0;i<nbrefl;++i)
+      {
+         h(i)=mIntH(i);
+         k(i)=mIntK(i);
+         l(i)=mIntL(i);
+         iobs(i)=mFhklObsSq(i);
+      }
+      mpLeBailData->SetHklIobs(h,k,l,iobs,sigma);
+      // Erase mFhklObsSq - only used during extraction mode.
+      mFhklObsSq.resize(0);
+   }
    mClockIhklCalc.Reset();mClockMaster.Reset();
-   mClockGetFhklObsSq.Click();
+   mClockFhklObsSq.Click();
 }
 
 bool PowderPatternDiffraction::GetExtractionMode()const{return mExtractionMode;}
@@ -793,11 +827,11 @@ void PowderPatternDiffraction::ExtractLeBail(unsigned int nbcycle)
    CrystVector_REAL obs,iextract;
    iextract=mFhklObsSq;
    mFhklObsSq=0;
-   mClockGetFhklObsSq.Click();
+   mClockFhklObsSq.Click();
    obs=mpParentPowderPattern->GetPowderPatternObs();
    obs-=mpParentPowderPattern->GetPowderPatternCalc();
    mFhklObsSq=iextract;
-   mClockGetFhklObsSq.Click();
+   mClockFhklObsSq.Click();
    // NB: nbreflused < number of calculated profiles (see PowderPatternDiffraction::CalcPowderReflProfile())
    const unsigned long nbrefl=this->GetNbReflBelowMaxSinThetaOvLambda();
    for(unsigned int k0=nbrefl;k0<this->GetNbRefl();++k0) iextract(k0)=0;
@@ -844,9 +878,24 @@ void PowderPatternDiffraction::ExtractLeBail(unsigned int nbcycle)
          }
          mFhklObsSq*=tmp2/tmp1;
       }
-      mClockGetFhklObsSq.Click();
+      mClockFhklObsSq.Click();
       //cout<<"PowderPatternDiffraction::ExtractLeBail():results (scale factor="<<mpParentPowderPattern->GetScaleFactor(*this)*1e6<<")"
       //    <<endl<< FormatVertVectorHKLFloats<REAL>(mH,mK,mL,this->GetFhklCalcSq(),mFhklObsSq)<<endl;
+   }
+   // Store extracted data in a single crystal data object
+   if(mpLeBailData==0) mpLeBailData=new DiffractionDataSingleCrystal(*mpCrystal,false);
+   {
+      CrystVector_REAL iobs(nbrefl),sigma(nbrefl);
+      CrystVector_long h(nbrefl),k(nbrefl),l(nbrefl);
+      sigma=1;
+      for(unsigned long i=0;i<nbrefl;++i)
+      {
+         h(i)=mIntH(i);
+         k(i)=mIntK(i);
+         l(i)=mIntL(i);
+         iobs(i)=mFhklObsSq(i);
+      }
+      mpLeBailData->SetHklIobs(h,k,l,iobs,sigma);
    }
 }
 long PowderPatternDiffraction::GetNbReflBelowMaxSinThetaOvLambda()const

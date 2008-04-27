@@ -2247,7 +2247,7 @@ int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0, 
    else mName+=data.GetName();
    if(data.GetClassName()=="PowderPatternDiffraction")
    {
-      mName="Powder:";
+      mName="P:";
       if(data.GetRadiationType()==RAD_XRAY)     mName+="Xray:";
       if(data.GetRadiationType()==RAD_NEUTRON)  mName+="Neut:";
       if(data.GetRadiationType()==RAD_ELECTRON) mName+="Elec:";
@@ -2256,7 +2256,7 @@ int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0, 
       if(data.GetRadiation().GetWavelengthType()==WAVELENGTH_TOF) mName+="TOF:";
       else
       {
-         sprintf(buf,"lambda=%6.4f:",data.GetWavelength()(0));
+         sprintf(buf,"%6.3fA:",data.GetWavelength()(0));
          mName+=buf;
       }
       const PowderPatternDiffraction* diff=dynamic_cast<const PowderPatternDiffraction *>(&data);
@@ -2264,7 +2264,7 @@ int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0, 
    }
    if(data.GetClassName()=="DiffractionDataSingleCrystal")
    {
-      mName="Single:";
+      mName="S:";
       if(data.GetRadiationType()==RAD_XRAY)     mName+="Xray:";
       if(data.GetRadiationType()==RAD_NEUTRON)  mName+="Neut:";
       if(data.GetRadiationType()==RAD_ELECTRON) mName+="Elec:";
@@ -2273,7 +2273,7 @@ int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0, 
       if(data.GetRadiation().GetWavelengthType()==WAVELENGTH_TOF) mName+="TOF:";
       else
       {
-         sprintf(buf,"lambda=%6.4f",data.GetWavelength()(0));
+         sprintf(buf,"%6.3fA:",data.GetWavelength()(0));
          mName+=buf;
       }
       mName+=data.GetName();
@@ -2456,7 +2456,7 @@ wxWindow(parent,-1),mpGLCrystalCanvas(pGLCrystalCanvas),mIsUpdating(false)
          
          wxStaticText *mpLabel0=new wxStaticText(this,-1,_T("Available Maps"));
          pSizerLeft->Add(mpLabel0,0,wxALIGN_CENTER);
-         mpAvailableMapList=new wxListBox(this,ID_GLCRYSTAL_FOURIER_LISTMAP,wxDefaultPosition,wxSize(300,150));
+         mpAvailableMapList=new wxListBox(this,ID_GLCRYSTAL_FOURIER_LISTMAP,wxDefaultPosition,wxSize(400,150));
          pSizerLeft->Add(mpAvailableMapList,0,wxALIGN_CENTER);
          
          mpMapInfo=new wxStaticText(this,-1,_T("min=+00.00 max=+00.00 sigma=00.00"));
@@ -2479,7 +2479,7 @@ wxWindow(parent,-1),mpGLCrystalCanvas(pGLCrystalCanvas),mIsUpdating(false)
          
          wxStaticText *mpLabel0r=new wxStaticText(this,-1,_T("Displayed Maps"));
          pSizerRight->Add(mpLabel0r,0,wxALIGN_CENTER);
-         mpDisplayedMapList=new wxListBox(this,ID_GLCRYSTAL_FOURIER_LISTGLMAP,wxDefaultPosition,wxSize(300,150));
+         mpDisplayedMapList=new wxListBox(this,ID_GLCRYSTAL_FOURIER_LISTGLMAP,wxDefaultPosition,wxSize(400,150));
          pSizerRight->Add(mpDisplayedMapList,0,wxALIGN_CENTER);
          
          wxBoxSizer* pSizerRight1=new wxBoxSizer(wxHORIZONTAL);
@@ -3388,7 +3388,7 @@ void WXGLCrystalCanvas::OnFourier(wxCommandEvent &event)
          return;
       }
       wxFrame *frame= new wxMiniFrame(this,-1,("Available Fourier maps for "+mpWXCrystal->GetCrystal().GetName()).c_str(),
-                                          wxDefaultPosition,wxSize(300,300),wxCLOSE_BOX|wxCAPTION|wxSYSTEM_MENU);
+                                          wxDefaultPosition,wxSize(500,500),wxCLOSE_BOX|wxCAPTION|wxSYSTEM_MENU);
       mpFourierMapListWin=new WXFourierMapList(this,frame);
       mpFourierMapListWin->mpWireFrame->SetValue(true);
       mpFourierMapListWin->mpShowFourier->SetValue(mShowFourier);

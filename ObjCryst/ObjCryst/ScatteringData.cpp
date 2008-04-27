@@ -415,7 +415,7 @@ mIgnoreImagScattFact(false),mMaxSinThetaOvLambda(10)
    mClockMaster.AddChild(mClockHKL);
    mClockMaster.AddChild(mClockGlobalBiso);
    mClockMaster.AddChild(mClockNbReflUsed);
-   mClockMaster.AddChild(mClockGetFhklObsSq);
+   mClockMaster.AddChild(mClockFhklObsSq);
 }
 
 ScatteringData::ScatteringData(const ScatteringData &old):
@@ -445,7 +445,7 @@ mMaxSinThetaOvLambda(old.mMaxSinThetaOvLambda)
    mClockMaster.AddChild(mClockHKL);
    mClockMaster.AddChild(mClockGlobalBiso);
    mClockMaster.AddChild(mClockNbReflUsed);
-   mClockMaster.AddChild(mClockGetFhklObsSq);
+   mClockMaster.AddChild(mClockFhklObsSq);
 }
 
 ScatteringData::~ScatteringData()
@@ -819,11 +819,11 @@ void ScatteringData::PrepareHKLarrays()
    // Do not do this if the number of reflections changed too much, if there is no crystal
    // structure associated, or if the spacegroup changed.
    bool noSpgChange=false;
-   if(mpCrystal!=0) noSpgChange = mpCrystal->GetSpaceGroup().GetClockSpaceGroup()<mClockGetFhklObsSq;
+   if(mpCrystal!=0) noSpgChange = mpCrystal->GetSpaceGroup().GetClockSpaceGroup()<mClockFhklObsSq;
    if( (mFhklObsSq.numElements()>0) && (abs(mFhklObsSq.numElements()-mNbRefl)<(0.1*mNbRefl)) && (noSpgChange) )
       mFhklObsSq.resizeAndPreserve(mNbRefl);
    else mFhklObsSq.resize(0);
-   mClockGetFhklObsSq.Click();
+   mClockFhklObsSq.Click();
    
    mNbReflUsed=mNbRefl;
    

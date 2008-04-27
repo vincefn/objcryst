@@ -632,7 +632,7 @@ class ScatteringData: virtual public RefinableObj
       /// Observed squared structure factors (zero-sized if none)
       CrystVector_REAL mFhklObsSq;
       /// Last time observed squared structure factors were altered
-      RefinableObjClock mClockGetFhklObsSq;
+      RefinableObjClock mClockFhklObsSq;
    #ifdef __WX__CRYST__
       //to access mMaxSinThetaOvLambda
       friend class WXDiffractionSingleCrystal;

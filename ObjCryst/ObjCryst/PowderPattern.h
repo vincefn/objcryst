@@ -30,6 +30,7 @@
 #include "ObjCryst/ReflectionProfile.h"
 #include "ObjCryst/CIF.h"
 #include "ObjCryst/Indexing.h"
+#include "ObjCryst/DiffractionDataSingleCrystal.h"
 
 namespace ObjCryst
 {
@@ -455,6 +456,8 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
          mutable RefinableObjClock mClockIntegratedProfileFactor;
       // Extraction mode (Le Bail, Pawley)
       bool mExtractionMode;
+      /// Single crystal data extracted from the powder pattern.
+      DiffractionDataSingleCrystal *mpLeBailData;
    #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);
