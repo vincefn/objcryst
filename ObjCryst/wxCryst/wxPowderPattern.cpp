@@ -1849,11 +1849,11 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
       wxArrayString algoChoices;
       algoChoices.Add("DICVOL");
       //algoChoices.Add("Differential Evolution");  // :TODO: re-enable after testing
-      
+      #if 0
       mpAlgorithm=new wxRadioBox(pAdvanced,-1,"Algorithm",wxDefaultPosition,wxDefaultSize,algoChoices,0,wxRA_SPECIFY_ROWS);
-      //mpAlgorithm->Enable(1,false);
+      mpAlgorithm->Enable(1,false);
       pSizerAdvanced->Add(mpAlgorithm,0,wxALIGN_CENTER);
-      
+      #endif
       pAdvanced->SetSizer(pSizerAdvanced);
       pSizerAdvanced->Fit(pAdvanced);
       pSizerAdvanced->RecalcSizes();
@@ -2133,12 +2133,10 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
       for(vector<PeakList::hkl>::iterator pos=mpPeakList->mvHKL.begin();pos!=mpPeakList->mvHKL.end();++pos)
          pos->isSpurious=false;
       
-      // Copy peaklist, set uncertainty of position lines to 1/4 of sigma.
-      PeakList peaklist=*mpPeakList;
-      for(vector<PeakList::hkl>::iterator pos=peaklist.mvHKL.begin();pos!=peaklist.mvHKL.end();++pos)
-      {   pos->d2obsmin=(3*pos->d2obs+pos->d2obsmin)/4; pos->d2obsmax=(3*pos->d2obs+pos->d2obsmax)/4;}
+      // Use at most 30 reflections for indexing
+      if(mpPeakList->GetPeakList().size()>30) mpPeakList->GetPeakList().resize(30);
       
-      mpCellExplorer = new CellExplorer(peaklist,(CrystalSystem)(mpBravais->GetSelection()),0);
+      mpCellExplorer = new CellExplorer(*mpPeakList,(CrystalSystem)(mpBravais->GetSelection()),0);
       
       wxString s;
       double lmin,lmax,amin=90,amax,vmin,vmax,error,stopOnScore,reportOnScore;
@@ -2161,7 +2159,13 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
       mpCellExplorer->SetVolumeMinMax((float)vmin,(float)vmax);
       mpCellExplorer->SetNbSpurious((unsigned int)nbspurious);
       mpCellExplorer->SetD2Error((float)(error*error));
-   
+
+      mpCellExplorer->SetCrystalCentering(LATTICE_P);
+
+      cout<<lmin<<" "<<lmax<<" "<<amin<<" "<<amax<<" "<<vmin<<" "<<vmax<<" "<<(unsigned int)nbspurious<<" "<<error*error<<endl;
+      #if 1
+      mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
+      #else
       if(mpAlgorithm->GetSelection()==0) mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
       else
       {
@@ -2171,6 +2175,7 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
             if(mpCellExplorer->GetBestScore()>stopOnScore) break;
          }
       }
+      #endif
    }
    mpLog->AppendText(wxString::Format("Finished indexing, bestscore=%6.1f, elapsed time=%6.2fs\n",
                      mpCellExplorer->GetBestScore(),chrono.seconds()));
