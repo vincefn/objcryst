@@ -1,4 +1,10 @@
-#### 1.7.6.1 - April 2008 (Revision #985)
+#### 1.7.6.2 - April 2008 (Revision #995)
+NEW FEATURES
+   * Support Fourier maps for single crystal data
+   * Display Fourier maps with the original resolution used for the
+     extraction, no matter what resolution is used afterwards
+     (e.g. during the optimisation)
+
 IMPROVEMENTS
    * More efficient random moves for molecules, particularly for
      large molecules or with flexible cycles.
@@ -10,6 +16,7 @@ BUG FIXES
    * Fixed incorrect formula for sample displacement
    * Linux: avoid lock of optimisation when 3D view is opened
    * Correct monoclinic indexing
+   * Fix issue with manual auto-indexing
    * Disable auto-check for updates (could crash under Linux when no
      network can be reached)
 
