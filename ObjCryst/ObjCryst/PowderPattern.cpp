@@ -849,7 +849,7 @@ void PowderPatternDiffraction::ExtractLeBail(unsigned int nbcycle)
          {
             if(mvReflProfile[k0].profile(i-mvReflProfile[k0].first)<=0) continue;
             REAL s2=0;
-            for(unsigned int k=0;k<mvReflProfile.size();++k)
+            for(unsigned int k=0;k<nbrefl;++k)
             {
                if((mvReflProfile[k].last<i) || (mvReflProfile[k].profile.numElements()==0)) continue; 
                if(mvReflProfile[k].first>i) break;
