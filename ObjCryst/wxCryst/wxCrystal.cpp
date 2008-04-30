@@ -2031,11 +2031,12 @@ int UnitCellMap::ImportDSN6(const string&filename)
       }
       mStandardDeviation = sqrt(mStandardDeviation/(REAL)(mPoints.numElements()));
    }
+   /*
    cout << "Min density value="<<mMin<<endl
         << "Max density value="<<mMax<<endl
         << "Mean density="<<mMean<<endl
         << "Standard Deviation="<<mStandardDeviation<<endl;
-   
+   */
    {// Use short name
       std::string::size_type idx =filename.rfind("/");
       std::string::size_type idx2=filename.rfind("\\");
@@ -2046,7 +2047,7 @@ int UnitCellMap::ImportDSN6(const string&filename)
          mName=filename;
       else
       {
-         cout<<"name="<<filename.substr(idx+1)<<endl;
+         //cout<<"name="<<filename.substr(idx+1)<<endl;
          mName=filename.substr(idx+1);
       }
    }
@@ -2106,7 +2107,7 @@ int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0, 
    const unsigned long sizex=closest235((unsigned int)floor(mpCrystal->GetLatticePar(0)/resolution+.5)) ;//int(pow((double)2, (double)ceil(log(mpCrystal->GetLatticePar(0)/resolution)/log(2)))+.00001);
    const unsigned long sizey=closest235((unsigned int)floor(mpCrystal->GetLatticePar(1)/resolution+.5)) ;//int(pow((double)2, (double)ceil(log(mpCrystal->GetLatticePar(1)/resolution)/log(2)))+.00001);
    const unsigned long sizez=closest235((unsigned int)floor(mpCrystal->GetLatticePar(2)/resolution+.5)) ;//int(pow((double)2, (double)ceil(log(mpCrystal->GetLatticePar(2)/resolution)/log(2)))+.00001);
-   cout<<"UnitCellMap::CalcFourierMap():"<<sizex<<","<<sizey<<","<<sizez<<","<<endl;
+   //cout<<"UnitCellMap::CalcFourierMap():"<<sizex<<","<<sizey<<","<<sizez<<","<<endl;
    fftwf_complex *in= (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * sizex*sizey*sizez);
    fftwf_plan plan=fftwf_plan_dft_3d(sizez, sizey, sizex,in, in,FFTW_FORWARD, FFTW_ESTIMATE);
    
@@ -2151,7 +2152,7 @@ int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0, 
       scale_fobs=0;
       for(long i=0;i<nb;++i) {scale_fobs+=data.GetFhklCalcSq()(i); tmp+=data.GetFhklObsSq()(i);}
       scale_fobs=sqrt(scale_fobs/(tmp+1e-10));
-      cout<<__FILE__<<":"<<__LINE__<<" Fourier map obs/calc scale factor:"<<scale_fobs<<endl;
+      //cout<<__FILE__<<":"<<__LINE__<<" Fourier map obs/calc scale factor:"<<scale_fobs<<endl;
    }
 
    const REAL v=1/mpCrystal->GetVolume();//(REAL)(size*size*size);// mpCrystal->GetVolume(); (REAL)(size*size*size);
@@ -2235,10 +2236,12 @@ int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0, 
       }
       mStandardDeviation = sqrt(mStandardDeviation/(REAL)(mPoints.numElements()));
    }
+   /*
    cout << "Min density value="<<mMin<<endl
         << "Max density value="<<mMax<<endl
         << "Mean density="<<mMean<<endl
         << "Standard Deviation="<<mStandardDeviation<<endl;
+   */
    fftwf_destroy_plan(plan);
    fftwf_free(in);
    
@@ -3048,11 +3051,10 @@ void WXGLCrystalCanvas::CrystUpdate()
 {
    // This can only be called from the main (graphical) thread
    VFN_DEBUG_ENTRY("WXGLCrystalCanvas::CrystUpdate():"<<wxThread::IsMain(),10)
-   
    // Update the list of available maps & update the displayed ones
    if(mpFourierMapListWin!=0) mpFourierMapListWin->mMutex.Lock();
    // Remove maps that cannot be computed any more
-   for(vector<boost::shared_ptr<UnitCellMap> >::iterator pos=mvpUnitCellMap.begin();pos!=mvpUnitCellMap.end();++pos)
+   for(vector<boost::shared_ptr<UnitCellMap> >::iterator pos=mvpUnitCellMap.begin();pos!=mvpUnitCellMap.end();)
    {
       bool keep=false;
       if(((*pos)->GetType()==0)||((*pos)->GetType()==2))
@@ -3073,22 +3075,20 @@ void WXGLCrystalCanvas::CrystUpdate()
             if(mpWXCrystal->GetCrystal().GetScatteringComponentList().GetNbComponent()>0)
                keep=true;
       }
-      //cout<<"WXGLCrystalCanvas::CrystUpdate()"<<(*pos)->GetName()<<(*pos)->GetType()<<":"<<keep<<endl;
+      VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::CrystUpdate()"<<(*pos)->GetName()<<(*pos)->GetType()<<": keep="<<keep,8)
       if(!keep)
       {
          //erase corresponding gl maps
          for(vector<boost::shared_ptr<UnitCellMapGLList> >::iterator 
-               posgl=mvpUnitCellMapGLList.begin();posgl!=mvpUnitCellMapGLList.end();++posgl)
+               posgl=mvpUnitCellMapGLList.begin();posgl!=mvpUnitCellMapGLList.end();)
          {
             if(&(**pos)==&((*posgl)->GetMap()))
             {
-               //cout<<"Erasing GL map:"<<(*posgl)->GetName()<<endl;
+               VFN_DEBUG_MESSAGE("Erasing GL map:"<<(*posgl)->GetName(),8)
                posgl=mvpUnitCellMapGLList.erase(posgl);
-               if(posgl==mvpUnitCellMapGLList.end()) break;
-            }
+            } else ++posgl;
          }
          pos=mvpUnitCellMap.erase(pos);
-         if(pos==mvpUnitCellMap.end()) break;
       }
       else if((*pos)->GetType()!=-1)
       {
@@ -3099,6 +3099,7 @@ void WXGLCrystalCanvas::CrystUpdate()
             ||(mpFourierMapListWin!=0))
             (*pos)->CalcFourierMap(*((*pos)->GetData()),(*pos)->GetType(),mSharpenMap);
          #endif
+         ++pos;
       }
    }
    #ifdef HAVE_FFTW
@@ -3124,13 +3125,16 @@ void WXGLCrystalCanvas::CrystUpdate()
             {
                mvpUnitCellMap.push_back(boost::shared_ptr<UnitCellMap>(new UnitCellMap(mpWXCrystal->GetCrystal())));
                mvpUnitCellMap.back()->CalcFourierMap(*data,1);
+               VFN_DEBUG_MESSAGE("Added GL map:"<<mvpUnitCellMap.back()->GetName(),8)
             }
             if(addObsDiffMaps && (data->GetFhklObsSq().numElements()>0) )
             {
                mvpUnitCellMap.push_back(boost::shared_ptr<UnitCellMap>(new UnitCellMap(mpWXCrystal->GetCrystal())));
                mvpUnitCellMap.back()->CalcFourierMap(*data,0);
+               VFN_DEBUG_MESSAGE("Added GL map:"<<mvpUnitCellMap.back()->GetName()<<":"<<data->GetFhklObsSq().numElements(),8)
                mvpUnitCellMap.push_back(boost::shared_ptr<UnitCellMap>(new UnitCellMap(mpWXCrystal->GetCrystal())));
                mvpUnitCellMap.back()->CalcFourierMap(*data,2);
+               VFN_DEBUG_MESSAGE("Added GL map:"<<mvpUnitCellMap.back()->GetName()<<":"<<data->GetFhklObsSq().numElements(),8)
             }
          }
       }
