@@ -221,7 +221,7 @@ void ReflectionProfilePseudoVoigt::InitParameters()
                         gpRefParTypeScattDataProfileWidth,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG*RAD2DEG);
       tmp.AssignClock(mClockMaster);
-      tmp.SetDerivStep(1e-7);
+      tmp.SetDerivStep(1e-9);
       this->AddPar(tmp);
    }
    {
@@ -229,7 +229,7 @@ void ReflectionProfilePseudoVoigt::InitParameters()
                         gpRefParTypeScattDataProfileWidth,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG*RAD2DEG);
       tmp.AssignClock(mClockMaster);
-      tmp.SetDerivStep(1e-7);
+      tmp.SetDerivStep(1e-9);
       this->AddPar(tmp);
    }
    {
@@ -237,7 +237,7 @@ void ReflectionProfilePseudoVoigt::InitParameters()
                         gpRefParTypeScattDataProfileWidth,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG*RAD2DEG);
       tmp.AssignClock(mClockMaster);
-      tmp.SetDerivStep(1e-7);
+      tmp.SetDerivStep(1e-9);
       this->AddPar(tmp);
    }
    {
