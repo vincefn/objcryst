@@ -1187,8 +1187,8 @@ void WXCrystal::OnMenuImportMoleculeFromFenskeHallZMatrix(wxCommandEvent &event)
 {
    VFN_DEBUG_ENTRY("WXCrystal::OnMenuImportFenskeHallZMatrix()",6)
    WXCrystValidateAllUserInput();
-   string tmp("*.fhz");
-   if(event.GetId()==ID_CRYSTAL_MENU_SCATT_IMPORTNAMEDZMATRIX) tmp="*.zmat";
+   string tmp("Fenske-Hall z-matrix|*.fhz;*.fh");
+   if(event.GetId()==ID_CRYSTAL_MENU_SCATT_IMPORTNAMEDZMATRIX) tmp="Fox z-matrix|*.zmat";
    wxFileDialog open(this,"Choose a file with a Fenske-Hall Z-matrix","","",tmp.c_str(),
                      wxOPEN | wxFILE_MUST_EXIST);
    if(open.ShowModal() != wxID_OK) return;
