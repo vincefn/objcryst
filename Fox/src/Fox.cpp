@@ -501,6 +501,7 @@ int main (int argc, char *argv[])
          ObjCryst::CIF cif(in,true,true);
          CreateCrystalFromCIF(cif);
          CreatePowderPatternFromCIF(cif);
+         CreateSingleCrystalDataFromCIF(cif);
          if(!cif2pattern)continue;
       }
       if(cif2pattern)

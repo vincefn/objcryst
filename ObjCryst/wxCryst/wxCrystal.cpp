@@ -2177,8 +2177,8 @@ int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0, 
          */
          if(mType==2)
          {// Obs-Calc
-            const REAL fobs=scale_fobs*sqrt(data.GetFhklObsSq()(i));
-            const REAL rec=m(j,3),imc=m(j,4),fcalc=sqrt(data.GetFhklCalcSq()(i));
+            const REAL fobs=scale_fobs*sqrt(fabs(data.GetFhklObsSq()(i)));
+            const REAL rec=m(j,3),imc=m(j,4),fcalc=sqrt(fabs(data.GetFhklCalcSq()(i)));
             in[h+sizex*k+sizex*sizey*l][0]=v*rec*(fobs-fcalc)/sqrt(rec*rec+imc*imc)*norm;
             in[h+sizex*k+sizex*sizey*l][1]=v*imc*(fobs-fcalc)/sqrt(rec*rec+imc*imc)*norm;
          }
@@ -2189,8 +2189,8 @@ int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0, 
          }
          if(mType==0)
          {// Obs
-            const REAL iobs=scale_fobs*sqrt(data.GetFhklObsSq()(i));
-            const REAL rec=m(j,3),imc=m(j,4),icalc=sqrt(data.GetFhklCalcSq()(i));
+            const REAL iobs=scale_fobs*sqrt(fabs(data.GetFhklObsSq()(i)));
+            const REAL rec=m(j,3),imc=m(j,4),icalc=sqrt(fabs(data.GetFhklCalcSq()(i)));
             in[h+sizex*k+sizex*sizey*l][0]=v*rec*iobs/icalc*norm;
             in[h+sizex*k+sizex*sizey*l][1]=v*imc*iobs/icalc*norm;
          }

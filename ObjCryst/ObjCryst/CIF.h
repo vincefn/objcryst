@@ -15,6 +15,7 @@ namespace ObjCryst
    class CIF;
 }
 #include "ObjCryst/PowderPattern.h" // For CreatePowderPatternFromCIF only.
+#include "ObjCryst/DiffractionDataSingleCrystal.h" // For CreateSingleCrystalDataFromCIF only.
 #include "ObjCryst/Crystal.h" // For CreateCrystalFromCIF only.
 #include "ObjCryst/General.h" // TO identify wavelength type in CIFData::ExtractPowderPattern.
 
@@ -77,6 +78,8 @@ class CIFData
       /// Extract Powder Diffraction data, with Iobs, sigma(Iobs) and either 2theta
       /// or time-of-flight position.
       void ExtractPowderPattern(const bool verbose=false);
+      /// Extract single crystal data, with Iobs, sigma(Iobs) and h,k,l
+      void ExtractSingleCrystalData(const bool verbose=false);
       /// Generate fractional coordinates from cartesian ones for all atoms
       /// CIFData::CalcMatrices() must be called first
       void Cartesian2FractionalCoord();
@@ -102,7 +105,7 @@ class CIFData
       /// parameters have been obtained yet.
       std::vector<float> mvLatticePar;
       /// Spacegroup number from International Tables (_space_group_IT_number), or -1.
-      unsigned int mSpacegroupNumberIT;
+      std::string mSpacegroupNumberIT;
       /// Spacegroup Hall symbol (or empty string) (_space_group_name_Hall)
       std::string mSpacegroupSymbolHall;
       /// Spacegroup Hermann-Mauguin symbol (or empty string) (_space_group_name_H-M_alt)
@@ -136,6 +139,10 @@ class CIFData
       float mOrthMatrixInvert[3][3];
       /// Powder pattern data
       std::vector<float> mPowderPatternObs,mPowderPatternX,mPowderPatternSigma;
+      /// Single crystal data
+      CrystVector_long mH,mK,mL;
+      /// Single crystal data
+      CrystVector_REAL mIobs,mSigma;
       /// Is this X-Ray 2theta, time-of-flight ?
       WavelengthType mDataType;
       /// Wavelength
@@ -176,6 +183,12 @@ Crystal* CreateCrystalFromCIF(CIF &cif);
 /// Returns a null pointer if no pattern could be extracted.
 /// No components (background, crystal data) are created.
 PowderPattern* CreatePowderPatternFromCIF(CIF &cif);
+
+/// Create DiffractionDataSingleCrystal object(s) from a CIF, if possible.
+/// Returns a null pointer if no data could be extracted.
+/// A Crystal object must be supplied - if none is given, the last Crystal
+/// object will be used. If no Cyrstal data exists, a new one will be created.
+DiffractionDataSingleCrystal* CreateSingleCrystalDataFromCIF(CIF &cif, Crystal *pryst=0);
 
 }
 

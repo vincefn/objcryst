@@ -26,6 +26,7 @@ void CIFData::ExtractAll(const bool verbose)
    this->ExtractSpacegroup(verbose);
    this->ExtractAtomicPositions(verbose);
    this->ExtractPowderPattern(verbose);
+   this->ExtractSingleCrystalData(verbose);
 }
 
 void CIFData::ExtractUnitCell(const bool verbose)
@@ -370,16 +371,73 @@ void CIFData::ExtractPowderPattern(const bool verbose)
             if(pos_weight!=loop->second.end())
             {
                mPowderPatternSigma[i]=CIFNumeric2Float(pos_weight->second[i]);
-               if(mPowderPatternSigma[i]>0) mPowderPatternSigma[i]=1/sqrt(mPowderPatternSigma[i]);
-               else mPowderPatternSigma[i]=sqrt(mPowderPatternObs[i]); // :KLUDGE: ?
+               if(mPowderPatternSigma[i]>0) mPowderPatternSigma[i]=1/sqrt(fabs(mPowderPatternSigma[i]));
+               else mPowderPatternSigma[i]=sqrt(fabs(mPowderPatternObs[i])); // :KLUDGE: ?
             }
-            else mPowderPatternSigma[i]=sqrt(mPowderPatternObs[i]);
+            else mPowderPatternSigma[i]=sqrt(fabs(mPowderPatternObs[i]));
             if(pos_mon!=loop->second.end())
             {//VCT or monitor
                mPowderPatternObs[i]/=CIFNumeric2Float(pos_mon->second[i]);
-               mPowderPatternSigma[i]/=sqrt(CIFNumeric2Float(pos_mon->second[i]));
+               mPowderPatternSigma[i]/=sqrt(fabs(CIFNumeric2Float(pos_mon->second[i])));
             }
             //if((i<10) && verbose) cout<<i<<" "<<mPowderPatternX[i]/mult<<" "<<mPowderPatternObs[i]<<" "<<mPowderPatternSigma[i]<<endl;
+         }
+      }
+   }
+}
+
+void CIFData::ExtractSingleCrystalData(const bool verbose)
+{
+   map<ci_string,string>::const_iterator positem;
+   positem=mvItem.find("_diffrn_radiation_wavelength");
+   if(positem==mvItem.end()) positem=mvItem.find("_pd_proc_wavelength");
+   if(positem!=mvItem.end())
+   {
+      mWavelength=CIFNumeric2Float(positem->second);
+      defaultWavelength=mWavelength;
+      cout<<"Found wavelength:"<<defaultWavelength<<endl;
+   }
+   else mWavelength=defaultWavelength;
+   
+   /// Now find the data
+   for(map<set<ci_string>,map<ci_string,vector<string> > >::const_iterator loop=mvLoop.begin();
+       loop!=mvLoop.end();++loop)
+   {
+      mDataType=WAVELENGTH_MONOCHROMATIC;
+      map<ci_string,vector<string> >::const_iterator pos_h,pos_k,pos_l,pos_iobs,pos_sigma,pos_wavelength;
+      pos_wavelength=loop->second.find("_diffrn_radiation_wavelength");
+      if(pos_wavelength!=loop->second.end())
+      {
+         cout<<"Found wavelength (in loop):"<<pos_wavelength->second[0];
+         mWavelength=CIFNumeric2Float(pos_wavelength->second[0]);
+         defaultWavelength=mWavelength;
+         cout<<" -> "<<defaultWavelength<<endl;
+      }
+         
+      pos_iobs=loop->second.find("_refln_F_squared_meas");
+      if(pos_iobs==loop->second.end()) continue;//no observed powder data found
+      pos_sigma=loop->second.find("_refln_F_squared_sigma");
+      pos_h=loop->second.find("_refln_index_h");
+      pos_k=loop->second.find("_refln_index_k");
+      pos_l=loop->second.find("_refln_index_l");
+      
+      if( (pos_iobs!=loop->second.end()) && (pos_h!=loop->second.end()) && (pos_k!=loop->second.end()) && (pos_l!=loop->second.end()))
+      {// Found single crystal data !
+         const long nb=pos_iobs->second.size();
+         if(verbose) cout<<"Found single crystal data, with "<<nb<<" data points"<<endl;
+         mIobs.resize(nb);
+         mH.resize(nb);
+         mK.resize(nb);
+         mL.resize(nb);
+         if(pos_sigma!=loop->second.end()) mSigma.resize(nb);
+         for(long i=0;i<nb;++i)
+         {
+            mIobs(i)=CIFNumeric2Float(pos_iobs->second[i]);
+            mH(i)=CIFNumeric2Int(pos_h->second[i]);
+            mK(i)=CIFNumeric2Int(pos_k->second[i]);
+            mL(i)=CIFNumeric2Int(pos_l->second[i]);
+            if(pos_iobs!=loop->second.end()) mSigma(i)=CIFNumeric2Float(pos_sigma->second[i]);
+            else mSigma(i)=sqrt(fabs(abs(mIobs(i))));
          }
       }
    }
@@ -398,8 +456,8 @@ void CIFData::CalcMatrices(const bool verbose)
    beta=mvLatticePar[4];
    gamma=mvLatticePar[5];
    
-   v=sqrt(1-cos(alpha)*cos(alpha)-cos(beta)*cos(beta)-cos(gamma)*cos(gamma)
-            +2*cos(alpha)*cos(beta)*cos(gamma));
+   v=sqrt(fabs(1-cos(alpha)*cos(alpha)-cos(beta)*cos(beta)-cos(gamma)*cos(gamma)
+               +2*cos(alpha)*cos(beta)*cos(gamma)));
    
    aa=sin(alpha)/a/v;
    bb=sin(beta )/b/v;
@@ -726,10 +784,19 @@ Crystal* CreateCrystalFromCIF(CIF &cif)
    for(map<string,CIFData>::iterator pos=cif.mvData.begin();pos!=cif.mvData.end();++pos)
       if(pos->second.mvLatticePar.size()==6)
       {
+         // If no atoms are listed and we already have a crystal structure defined,
+         //asssume we don't want this one - e.g. like some IuCr journals single crystal 
+         //data cif files including cell parameters
+         if((pos->second.mvAtom.size()==0) && (gCrystalRegistry.GetNb()>0)) continue;
          string spg=pos->second.mSpacegroupHermannMauguin;
          if(spg=="") spg=pos->second.mSpacegroupSymbolHall;
          if(spg=="") spg=pos->second.mSpacegroupNumberIT;
          if(spg=="") spg="P1";
+         cout<<"Create crystal with spacegroup: "<<spg
+             <<" / "<<pos->second.mSpacegroupHermannMauguin
+             <<" / "<<pos->second.mSpacegroupSymbolHall
+             <<" / "<<pos->second.mSpacegroupNumberIT
+             <<endl;
          Crystal *pCryst=new Crystal(pos->second.mvLatticePar[0],pos->second.mvLatticePar[1],pos->second.mvLatticePar[2],
                                      pos->second.mvLatticePar[3],pos->second.mvLatticePar[4],pos->second.mvLatticePar[5],spg);
          if(pos->second.mName!="") pCryst->SetName(pos->second.mName);
@@ -757,11 +824,37 @@ PowderPattern* CreatePowderPatternFromCIF(CIF &cif)
    {
       if(pos->second.mPowderPatternObs.size()>10)
       {
-         PowderPattern* pPow=new PowderPattern();
+         pPow=new PowderPattern();
          pPow->ImportPowderPatternCIF(cif);
       }
    }
    return pPow;
+}
+
+DiffractionDataSingleCrystal* CreateSingleCrystalDataFromCIF(CIF &cif, Crystal *pcryst)
+{
+   DiffractionDataSingleCrystal* pData=NULL;
+   for(map<string,CIFData>::iterator pos=cif.mvData.begin();pos!=cif.mvData.end();++pos)
+   {
+      if(pos->second.mH.numElements()>0)
+      {
+         if(pcryst==0)
+         {
+            if(gCrystalRegistry.GetNb()>0)
+            {  // Use last Crystal created
+               pcryst=&(gCrystalRegistry.GetObj(gCrystalRegistry.GetNb()-1));
+            }
+            else
+            {
+               pcryst=new Crystal;
+               pcryst->SetName("Dummy");
+            }
+         }
+         pData=new DiffractionDataSingleCrystal(*pcryst);
+         pData->SetHklIobs(pos->second.mH,pos->second.mK,pos->second.mL,pos->second.mIobs,pos->second.mSigma);
+      }
+   }
+   return pData;
 }
 
 }//namespace
