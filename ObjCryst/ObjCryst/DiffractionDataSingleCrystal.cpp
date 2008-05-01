@@ -248,7 +248,7 @@ Error opening file for input:"+fileName);
          fin >> mK(i);
          fin >> mL(i);
          fin >> mObsIntensity(i);
-         mObsSigma(i)=sqrt(mObsIntensity(i));
+         mObsSigma(i)=sqrt(fabs(mObsIntensity(i)));
          //cout << mObsIntensity(i) <<endl;
       }
       cout << "Finished reading data>"<< endl;
@@ -1163,7 +1163,7 @@ void DiffractionDataSingleCrystal::PrepareTwinningCalc() const
             mGroupWeight(i)+=mObsSigma(j)*mObsSigma(j);
          }
          mGroupWeight(i)=1./mGroupWeight(i);
-         mGroupSigma(i)=sqrt(mGroupSigma(i));
+         mGroupSigma(i)=sqrt(fabs(mGroupSigma(i)));
          first=mGroupIndex(i);
       }
    }
