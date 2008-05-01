@@ -927,7 +927,8 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
             ObjCryst::CIF cif(in,true,true);
             CreateCrystalFromCIF(cif);
             CreatePowderPatternFromCIF(cif);
-         }
+            CreateSingleCrystalDataFromCIF(cif);
+}
          else
             if(name.size()>6)
                if(name.Mid(name.size()-6)==wxString("xml.gz"))
