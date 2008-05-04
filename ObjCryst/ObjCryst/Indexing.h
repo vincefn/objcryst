@@ -223,8 +223,12 @@ class CellExplorer:public RefinableObj
       ///
       /// If stopOnDepth==0, do not stop for any depth
       void DicVol(const float minScore=10,const unsigned int minDepth=3,const float stopOnScore=50.0,const unsigned int stopOnDepth=6);
-      /// Sort all solutions by score, remove duplicates
-      void ReduceSolutions();
+      /** Sort all solutions by score, remove duplicates
+      *
+      * \param updateReportThreshold: if true, when too many solutions are produced, 
+      * the threshold above which solutions are reported will be updated to get less solutions.
+      */
+      void ReduceSolutions(const bool updateReportThreshold=false);
       float GetBestScore()const;
       const std::list<std::pair<RecUnitCell,float> >& GetSolutions()const;
       std::list<std::pair<RecUnitCell,float> >& GetSolutions();
