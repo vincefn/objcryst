@@ -73,7 +73,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 996
+#define __FOXREVISION__ 1008
 
 static std::string foxVersion;
 
@@ -288,7 +288,7 @@ int main (int argc, char *argv[])
    
    {// Fox version
       char verBuf[200];
-      sprintf(verBuf,"1.7.6.2-#%d",__FOXREVISION__);
+      sprintf(verBuf,"1.7.6.3-#%d",__FOXREVISION__);
       foxVersion=verBuf;
    }
    bool useGUI(true);
@@ -441,7 +441,7 @@ int main (int argc, char *argv[])
          cx.SetAngleMinMax((float)90*DEG2RAD,(float)120*DEG2RAD);
          
          // Use at most 20 lines
-         if(pl.GetPeakList().size()>25) pl.GetPeakList().resize(25);
+         if(pl.GetPeakList().size()>20) pl.GetPeakList().resize(20);
          const unsigned int nb=pl.GetPeakList().size();
          
          const float dmin=pl.GetPeakList()[nb-1].dobs;
@@ -457,9 +457,15 @@ int main (int argc, char *argv[])
          
          cx.SetVolumeMinMax(vmin,vmax);
          cx.SetLengthMinMax(3,lengthmax);
-         //cx.SetVolumeMinMax(800,1800);
-         //cx.SetLengthMinMax(4,25);
+         
          cx.DicVol(10,4,50,4);
+         /*
+         for(unsigned int i=0;;++i)
+         {
+            cx.Evolution(10000,true,0.7,0.5,50);
+            if(cx.GetBestScore()>40) break;
+         }
+         */
          TAU_REPORT_STATISTICS();
          exit(0);
       }
