@@ -1932,7 +1932,7 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
       
       // Use at most 30 reflections for indexing
       PeakList peaklist=*mpPeakList;
-      if(peaklist.GetPeakList().size()>30) peaklist.GetPeakList().resize(30);
+      if(peaklist.GetPeakList().size()>20) peaklist.GetPeakList().resize(20);
       
       // Estimate volume from number of peaks at a given dmin
       // See J. Appl. Cryst. 20 (1987), 161
@@ -2134,7 +2134,7 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
          pos->isSpurious=false;
       
       // Use at most 30 reflections for indexing
-      if(mpPeakList->GetPeakList().size()>30) mpPeakList->GetPeakList().resize(30);
+      if(mpPeakList->GetPeakList().size()>20) mpPeakList->GetPeakList().resize(20);
       
       mpCellExplorer = new CellExplorer(*mpPeakList,(CrystalSystem)(mpBravais->GetSelection()),0);
       
