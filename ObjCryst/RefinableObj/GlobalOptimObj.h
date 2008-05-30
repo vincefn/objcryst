@@ -309,6 +309,8 @@ class OptimizationObj
       friend class ObjCryst::WXOptimizationObj;
       //friend class ObjCryst::WXMonteCarloObj;
       //friend class ObjCryst::WXGeneticAlgorithm;
+      /// Mutex used to protect mStopAfterCycle
+      wxMutex mMutexStopAfterCycle;
    #endif
 };
 

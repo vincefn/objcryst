@@ -206,7 +206,13 @@ REAL OptimizationObj::GetLogLikelihood() const
 void OptimizationObj::StopAfterCycle() 
 {
    VFN_DEBUG_MESSAGE("OptimizationObj::StopAfterCycle()",5)
-   if(mIsOptimizing) mStopAfterCycle=true;
+   if(mIsOptimizing) 
+   {
+      #ifdef __WX__CRYST__
+      wxMutexLocker lock(mMutexStopAfterCycle);
+      #endif
+      mStopAfterCycle=true;
+   }
 }
 
 void OptimizationObj::DisplayReport() 
@@ -502,7 +508,13 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
       }//case GLOBAL_OPTIM_GENETIC
    }
    mIsOptimizing=false;
+   #ifdef __WX__CRYST__
+   mMutexStopAfterCycle.Lock();
+   #endif
    mStopAfterCycle=false;
+   #ifdef __WX__CRYST__
+   mMutexStopAfterCycle.Unlock();
+   #endif
       
    mRefParList.RestoreParamSet(mBestParSavedSetIndex);
    for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).EndOptimization();
@@ -612,10 +624,29 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
          outTracker.close();
       }
       nbCycle--;
-      if(mStopAfterCycle) break;
+      #ifdef __WX__CRYST__
+      mMutexStopAfterCycle.Lock();
+      #endif
+      if(mStopAfterCycle)
+      {
+         #ifdef __WX__CRYST__
+         mMutexStopAfterCycle.Unlock();
+         #endif
+         break;
+      }
+      #ifdef __WX__CRYST__
+      mMutexStopAfterCycle.Unlock();
+      #endif
    }
    mIsOptimizing=false;
+   
+   #ifdef __WX__CRYST__
+   mMutexStopAfterCycle.Lock();
+   #endif
    mStopAfterCycle=false;
+   #ifdef __WX__CRYST__
+   mMutexStopAfterCycle.Unlock();
+   #endif
 
    mRefParList.RestoreParamSet(mBestParSavedSetIndex);
    
@@ -797,11 +828,20 @@ void MonteCarloObj::RunSimulatedAnnealing(long &nbStep,const bool silent,
       }
       mNbTrial++;nbStep--;
 
+      #ifdef __WX__CRYST__
+      mMutexStopAfterCycle.Lock();
+      #endif
       if((runBestCost<finalcost) || mStopAfterCycle ||( (maxTime>0)&&(chrono.seconds()>maxTime))) 
       {
+         #ifdef __WX__CRYST__
+         mMutexStopAfterCycle.Unlock();
+         #endif
          if(!silent) cout << endl <<endl << "Refinement Stopped."<<endl;
          break;
       }
+      #ifdef __WX__CRYST__
+      mMutexStopAfterCycle.Unlock();
+      #endif
       nbTriesSinceBest++;
       if(  ((mXMLAutoSave.GetChoice()==1)&&((chrono.seconds()-secondsWhenAutoSave)>86400))
          ||((mXMLAutoSave.GetChoice()==2)&&((chrono.seconds()-secondsWhenAutoSave)>3600))
@@ -1362,12 +1402,21 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
          needUpdateDisplay=false;
          lastUpdateDisplayTime=chrono.seconds();
       }
-
+      
+      #ifdef __WX__CRYST__
+      mMutexStopAfterCycle.Lock();
+      #endif
       if((runBestCost<finalcost) || mStopAfterCycle ||( (maxTime>0)&&(chrono.seconds()>maxTime))) 
       {
+         #ifdef __WX__CRYST__
+         mMutexStopAfterCycle.Unlock();
+         #endif
          if(!silent) cout << endl <<endl << "Refinement Stopped:"<<mBestCost<<endl;
          break;
       }
+      #ifdef __WX__CRYST__
+      mMutexStopAfterCycle.Unlock();
+      #endif
    }//Trials
    mLastOptimTime=chrono.seconds();
    //Restore Best values
