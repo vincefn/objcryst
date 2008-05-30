@@ -1117,7 +1117,7 @@ float Score(const PeakList &dhkl, const RecUnitCell &ruc, const unsigned int nbS
    }
    */
    if(nbCalc==0) return 0;
-   const float score=sqrt(dmax)*nb/(2*epsilon*nbCalc);
+   const float score=(dmax/predict_coeff)*nb/(2*epsilon*nbCalc);
    if(verbose)
    {
       dhkl.Print(cout);
