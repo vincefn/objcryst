@@ -488,6 +488,7 @@ mChi2(0.0),mGoF(0.0),mRwp(0.0),mRp(0.0)
 void WXPowderPattern::CrystUpdate(const bool uui,const bool lock)
 {
    VFN_DEBUG_ENTRY("WXPowderPattern::CrystUpdate()",6)
+   wxWakeUpIdle();
    if(lock) mMutex.Lock();
    WXCrystValidateAllUserInput();
    
