@@ -619,7 +619,7 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
    if(mpCrystalGL!=0)
    {
       VFN_DEBUG_MESSAGE("WXCrystal::UpdateGL():mpCrystalGL",7)
-      
+cout<<"<WXCrystal::UpdateGL():"<<wxThread::IsMain()<<endl;
       if(false==wxThread::IsMain())
       {
          mpConditionGLUpdate=new wxCondition(mMutexGLUpdate);
@@ -628,15 +628,20 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
          wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_GLCRYSTAL_MENU_UPDATE);
          wxPostEvent(mpCrystalGL,event);
          int ct=0;
+         #ifdef __LINUX__
          while(mpConditionGLUpdate->WaitTimeout(200)!=wxCOND_NO_ERROR)
          {
-            cerr<<"WXCrystal::UpdateGL():timeout waiting for mpConditionGLUpdate release: #"<<++ct<<endl;
+            cout<<"WXCrystal::UpdateGL():timeout waiting for mpConditionGLUpdate release: #"<<++ct<<":"<<ok<<endl;
             wxWakeUpIdle();
          }
+         #else
+         mpConditionGLUpdate->Wait();
+         #endif
          mMutexGLUpdate.Unlock();
          delete mpConditionGLUpdate;
          mpConditionGLUpdate=0;
          VFN_DEBUG_EXIT("WXCrystal::UpdateGL()-Not in main thread :End",8)
+cout<<" WXCrystal::UpdateGL():"<<wxThread::IsMain()<<">"<<endl;
          return;
       }
       if(mCrystalGLDisplayList==0)
@@ -674,6 +679,7 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
       VFN_DEBUG_MESSAGE("WXCrystal::UpdateGL():No mpCrystalGL",7)
    }
    VFN_DEBUG_EXIT("WXCrystal::UpdateGL():End",8)
+cout<<" WXCrystal::UpdateGL():"<<wxThread::IsMain()<<">"<<endl;
 }
 
 int WXCrystal::GetCrystalGLDisplayList(const bool atomName)const
