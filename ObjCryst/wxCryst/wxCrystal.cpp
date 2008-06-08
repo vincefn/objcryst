@@ -619,7 +619,6 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
    if(mpCrystalGL!=0)
    {
       VFN_DEBUG_MESSAGE("WXCrystal::UpdateGL():mpCrystalGL",7)
-cout<<"<WXCrystal::UpdateGL():"<<wxThread::IsMain()<<endl;
       if(false==wxThread::IsMain())
       {
          mpConditionGLUpdate=new wxCondition(mMutexGLUpdate);
@@ -641,7 +640,6 @@ cout<<"<WXCrystal::UpdateGL():"<<wxThread::IsMain()<<endl;
          delete mpConditionGLUpdate;
          mpConditionGLUpdate=0;
          VFN_DEBUG_EXIT("WXCrystal::UpdateGL()-Not in main thread :End",8)
-cout<<" WXCrystal::UpdateGL():"<<wxThread::IsMain()<<">"<<endl;
          return;
       }
       if(mCrystalGLDisplayList==0)
@@ -679,7 +677,6 @@ cout<<" WXCrystal::UpdateGL():"<<wxThread::IsMain()<<">"<<endl;
       VFN_DEBUG_MESSAGE("WXCrystal::UpdateGL():No mpCrystalGL",7)
    }
    VFN_DEBUG_EXIT("WXCrystal::UpdateGL():End",8)
-cout<<" WXCrystal::UpdateGL():"<<wxThread::IsMain()<<">"<<endl;
 }
 
 int WXCrystal::GetCrystalGLDisplayList(const bool atomName)const
