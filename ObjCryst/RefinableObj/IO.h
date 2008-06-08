@@ -33,6 +33,19 @@ class XMLCrystTag;
 
 namespace ObjCryst
 {
+/** Safely read a floating-point value from a stream. 
+*
+* \param endchar: the character ending the input. On return, the stream will be placed 
+* at this character (i.e. it will be the next to be read). Note that the input will
+* stop when encoutering a space character, even if the endchar has not been found.
+* \return: the value - NaN will be returned as NaN, but probably only if the value
+* was written on the same platform
+*/
+float InputFloat(istream &is, const char endchar=' ');
+
+/// Test if the value is a NaN 
+bool ISNAN_OR_INF(REAL r);
+
 #ifdef __WX__CRYST__
 /** \brief wxWindows representation of a XMLCrystTag (not implemented yet !)
 *

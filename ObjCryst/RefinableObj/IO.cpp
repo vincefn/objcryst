@@ -266,8 +266,8 @@ void RefinablePar::XMLInput(istream &is,const XMLCrystTag &tag)
          continue;
       }
    }
-   REAL f;
-   is>>f;
+   REAL f=InputFloat(is,'<');
+   if(ISNAN_OR_INF(f)) f=1.0;
    this->SetHumanValue(f);
    XMLCrystTag junk(is);//read end tag
    VFN_DEBUG_EXIT("RefinablePar::XMLInput():"<<this->GetName(),5)

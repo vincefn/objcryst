@@ -48,14 +48,6 @@
 
 namespace ObjCryst
 {
-static bool ISNAN_OR_INF(REAL r)
-{
-   #if defined(_MSC_VER) || defined(__BORLANDC__)
-   return  _isnan(r) || (!_finite(r));
-   #else
-   return (isnan(r)!=0) || (isinf(r)!=0);
-   #endif
-}
 ////////////////////////////////////////////////////////////////////////
 //
 //    PowderPatternComponent    

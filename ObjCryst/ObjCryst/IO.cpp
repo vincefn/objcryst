@@ -43,6 +43,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <cstdlib>
 
 //#define USE_BACKGROUND_MAXLIKE_ERROR
 
@@ -53,6 +54,25 @@ namespace ObjCryst
 //    Global functions
 //
 ////////////////////////////////////////////////////////////////////////
+float InputFloat(istream &is, const char endchar)
+{
+   // Get rid of spaces, returns etc...
+   while(0==isgraph(is.peek())) is.get();
+   string tmp;
+   while((endchar!=is.peek())&&(' '!=is.peek())) tmp+=is.get();
+   const float f=atof(tmp.c_str());
+   VFN_DEBUG_MESSAGE("InputFloat(..):"<<tmp<<" -> "<<f,3);
+   return f;
+}
+
+bool ISNAN_OR_INF(REAL r)
+{
+   #if defined(_MSC_VER) || defined(__BORLANDC__)
+   return  _isnan(r) || (!_finite(r));
+   #else
+   return (isnan(r)!=0) || (isinf(r)!=0);
+   #endif
+}
 
 void XMLCrystFileSaveGlobal(const string & filename)
 {
@@ -1234,8 +1254,11 @@ void DiffractionDataSingleCrystal::XMLInput(istream &is,const XMLCrystTag &tagg)
          CrystVector_REAL iobs(100),sigma(100),weight(100);
          do
          {
-            is >>h(nbrefl)>>k(nbrefl)>>l(nbrefl)
-               >>iobs(nbrefl)>>sigma(nbrefl)>>weight(nbrefl);
+            is >>h(nbrefl)>>k(nbrefl)>>l(nbrefl);
+            iobs  (nbrefl)=InputFloat(is); if(ISNAN_OR_INF(iobs  (nbrefl))||(iobs  (nbrefl)<0)) iobs  (nbrefl)=1e-8;
+            sigma (nbrefl)=InputFloat(is); if(ISNAN_OR_INF(sigma (nbrefl))||(sigma (nbrefl)<0)) sigma (nbrefl)=1e-8;
+            weight(nbrefl)=InputFloat(is); if(ISNAN_OR_INF(weight(nbrefl))||(weight(nbrefl)<0)) weight(nbrefl)=1e-8;
+            
             nbrefl++;
             if(nbrefl==iobs.numElements())
             {
