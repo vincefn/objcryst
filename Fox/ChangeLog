@@ -1,3 +1,20 @@
+#### 1.7.7 - June 2008 (Revision #1013)
+NEW FEATURES
+   * Import single crystal data from CIF
+   * Use M(n) for indexing scores, with n=20 as default
+
+IMPROVEMENTS
+   * Faster Le Bail
+   * Improved triclinic indexing
+
+BUG FIXES
+   * Correct Fourier maps listing, when the 3D crystal view is
+     opened during the Le Bail extraction
+   * Fix freezing of optimization during long runs on windows.
+   * Handle cas when scale factors or intensities would be written
+     as NaN in xml files.
+   * Correctly add/remove Fourier maps
+
 #### 1.7.6.2 - April 2008 (Revision #995)
 NEW FEATURES
    * Support Fourier maps for single crystal data
