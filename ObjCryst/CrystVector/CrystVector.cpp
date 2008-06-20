@@ -218,7 +218,7 @@ template<class T> void CrystVector<T>::operator*=(const CrystVector<T> &vect)
    {
       cout<<"CrystVector::operator*=(&vect)(i): Number of elements differ:"<< mNumElements \
             << "!="<< vect.numElements() <<endl;
-      throw 0;
+      //throw 0;
    }
    #endif
    if(mpData!=vect.data())
@@ -248,7 +248,7 @@ template<class T> void CrystVector<T>::operator/=(const CrystVector<T> &vect)
    {
       cout<<"CrystVector::operator/=(&vect)(i): Number of elements differ:"<< mNumElements \
             << "!="<< vect.numElements() <<endl;
-      throw 0;
+      //throw 0;
    }
    #endif
    if(mpData!=vect.data())
@@ -273,7 +273,7 @@ template<class T> void CrystVector<T>::operator+=(const CrystVector<T> &vect)
    {
       cout<<"CrystVector::operator+=(&vect)(i): Number of elements differ:"<< mNumElements \
             << "!="<< vect.numElements() <<endl;
-      throw 0;
+      //throw 0;
    }
    #endif
    if(mpData!=vect.data())
@@ -296,7 +296,7 @@ template<class T> void CrystVector<T>::operator-=(const CrystVector<T> &vect)
    {
       cout<<"CrystVector::operator-=(&vect)(i): Number of elements differ:"<< mNumElements \
             << "!="<< vect.numElements() <<endl;
-      throw 0;
+      //throw 0;
    }
    #endif
    if(mpData!=vect.data())
@@ -320,7 +320,7 @@ template<class T> T CrystVector<T>::operator()(const long i) const
    if( (i<0) || (i>=mNumElements))
    {
       cout<<"CrystVector::operator()(i): Tried to access an element out of bounds :"<<i<<endl;
-      throw 0;
+      //throw 0;
    }
    #endif
    return mpData[i];
@@ -332,7 +332,7 @@ template<class T> T& CrystVector<T>::operator()(const long i)
    if( (i<0) || (i>=mNumElements))
    {
       cout<<"CrystVector::operator()(i): Tried to access an element out of bounds !"<<i<<endl;
-      throw 0;
+      //throw 0;
    }
    #endif
    return mpData[i];
@@ -581,7 +581,7 @@ template<class T> void CrystMatrix<T>::operator*=(const CrystMatrix<T> &vect)
    if( this->numElements() != vect.numElements())
    {
       cout<<"CrystMatrix::operator*=(): Number of elements differ !"<<endl;
-      throw 0;
+      //throw 0;
    }
    #endif
    register T *p=mpData;
@@ -613,7 +613,7 @@ template<class T> T CrystMatrix<T>::operator()(const long i) const
    if( (i<0) || (i>=mNumElements))
    {
       cout<<"CrystMatrix::operator()(i): element out of bounds !"<<i<<endl;
-      throw 0;
+      //throw 0;
    }
    #endif
    return mpData[i];
@@ -626,7 +626,7 @@ template<class T> T CrystMatrix<T>::operator()(const long i,const long j) const
    {
       cout<<"CrystMatrix::operator()(i,j): element out of bounds:"<<i<<","<<j<<endl;
       cout<<"dimensions:"<<mYSize<<","<<mXSize<<endl;
-      throw 0;
+      //throw 0;
    }
    #endif
    return mpData[i*mXSize+j];
@@ -638,7 +638,7 @@ template<class T> T& CrystMatrix<T>::operator()(const long i)
    if( (i<0) || (i>=mNumElements))
    {
       cout<<"CrystMatrix::operator()(i): element out of bounds !"<<i<<endl;
-      throw 0;
+      //throw 0;
    }
    #endif
    return mpData[i];
@@ -650,7 +650,7 @@ template<class T> T& CrystMatrix<T>::operator()(const long i,const long j)
    if( (i<0) || (j<0) || (i>=mYSize) || (j>=mXSize) )
    {
       cout<<"CrystMatrix::operator()(i,j): element out of bounds:"<<i<<","<<j<<endl;
-      throw 0;
+      //throw 0;
    }
    #endif
    return mpData[i*mXSize+j];
@@ -815,7 +815,7 @@ template<class T> void CrystArray3D<T>::operator*=(const CrystArray3D<T> &vect)
    if( this->numElements() != vect.numElements())
    {
       cout<<"CrystArray3D::operator*=(): Number of elements differ !"<<endl;
-      throw 0;
+      //throw 0;
    }
    #endif
    register T *p=mpData;
@@ -847,7 +847,7 @@ template<class T> T CrystArray3D<T>::operator()(const long i) const
    if( (i<0) || (i>=mNumElements))
    {
       cout<<"CrystArray3D::operator()(i): element out of bounds !"<<i<<endl;
-      throw 0;
+      //throw 0;
    }
    #endif
    return mpData[i];
@@ -860,7 +860,7 @@ template<class T> T CrystArray3D<T>::operator()(const long i,const long j,const 
    {
       cout<<"CrystArray3D::operator()(i,j,k): element out of bounds:"<<i<<","<<j<<","<<k<<endl;
       cout<<"dimensions:"<<mZSize<<","<<mYSize<<","<<mXSize<<endl;
-      throw 0;
+      //throw 0;
    }
    #endif
    return mpData[i*mYSize*mXSize+j*mXSize+k];
@@ -872,7 +872,7 @@ template<class T> T& CrystArray3D<T>::operator()(const long i)
    if( (i<0) || (i>=mNumElements))
    {
       cout<<"CrystArray3D::operator()(i): element out of bounds !"<<i<<endl;
-      throw 0;
+      //throw 0;
    }
    #endif
    return mpData[i];
@@ -885,7 +885,7 @@ template<class T> T& CrystArray3D<T>::operator()(const long i,const long j,const
    {
       cout<<"CrystArray3D::operator()(i,j,k): element out of bounds:"<<i<<","<<j<<","<<k<<endl;
       cout<<"dimensions:"<<mZSize<<","<<mYSize<<","<<mXSize<<endl;
-      throw 0;
+      //throw 0;
    }
    #endif
    return mpData[i*mYSize*mXSize+j*mXSize+k];
@@ -1045,7 +1045,7 @@ CrystMatrix_REAL InvertMatrix(const CrystMatrix_REAL &m)
       if( (m.rows() != m.cols()) || (m.rows() <2))
       {//DoSomethingBad
          cout << "Matrix inversion: Cannot invert matrix !" <<endl;
-         throw 0;
+         //throw 0;
       }
    //prepare...
       long size=m.rows();
@@ -1069,12 +1069,13 @@ CrystMatrix_REAL InvertMatrix(const CrystMatrix_REAL &m)
                      rowMax=j;
                   }
                   
-               //Check if pivot is non-singular
-               
+               //Check if pivot is non-singular :TODO:
+               /*
                if(max < eps)
                {
                   throw i;
                }
+               */
             }
          //pivot
             if(rowMax != i)
