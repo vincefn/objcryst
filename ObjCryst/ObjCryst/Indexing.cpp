@@ -2323,7 +2323,7 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                   if(max5r>0.5) max5r=0.5;
                   const float step5r=max5r/(ceil(max5r/.05)-.001);
                   #endif
-                  for(float p5=-max5r;p5<max5r;p5+=step5r) // This one + or -
+                  for(float p5=0;p5<max5r;p5+=step5r)
                   {//p5=cos(alpha*)
                      //cout<<"        p5="<<p5<<endl;
                      #ifdef TRI1
@@ -2334,7 +2334,7 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                      if(max6r>0.5) max6r=0.5;
                      const float step6r=max6r/(ceil(max6r/.05)-.001);
                      #endif
-                     for(float p6=-max6r;p6<max6r;p6+=step6r)
+                     for(float p6=0;p6<max6r;p6+=step6r)
                      {//p6=cos(beta*)
                         //cout<<"          p6="<<p6<<"/"<<p1<<"/"<<p3<<endl;
                         duc.par[1]=stepr*pow(float(0.51),int(vdepth[0]));
@@ -2428,7 +2428,7 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                         float max5r=(p2+step2r)/(2*p3);
                         const float step5r=max5r/(ceil(max5r/.05)-.001);
                         #endif
-                        for(float p5=-max5r;p5<max5r;p5+=step5r) // This one + or -
+                        for(float p5=0;p5<max5r;p5+=step5r)
                         {
                            //cout<<"        p5="<<p5<<endl;
                            #ifdef TRI1
@@ -2438,7 +2438,7 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                            float max6r=(p1+stepr)/(2*p3);
                            const float step6r=max6r/(ceil(max6r/.05)-.001);
                            #endif
-                           for(float p6=-max6r;p6<max6r;p6+=step6r)
+                           for(float p6=0;p6<max6r;p6+=step6r)
                            {
                               //cout<<"          p6="<<p6<<endl;
                               duc.par[1]=step1r*0.51;
