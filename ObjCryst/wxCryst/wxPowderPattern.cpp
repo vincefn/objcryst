@@ -487,7 +487,7 @@ mChi2(0.0),mGoF(0.0),mRwp(0.0),mRp(0.0)
 
 void WXPowderPattern::CrystUpdate(const bool uui,const bool lock)
 {
-   VFN_DEBUG_ENTRY("WXPowderPattern::CrystUpdate()",6)
+   VFN_DEBUG_ENTRY("WXPowderPattern::CrystUpdate()",7)
    wxWakeUpIdle();
    if(lock) mMutex.Lock();
    WXCrystValidateAllUserInput();
@@ -501,7 +501,9 @@ void WXPowderPattern::CrystUpdate(const bool uui,const bool lock)
    
    // Will force re-generating reflection list if the wavelength,
    // or lattice par, or the spacegroup has changed.
+   VFN_DEBUG_MESSAGE("WXPowderPattern::CrystUpdate()",7)
    mpPowderPattern->Prepare();
+   VFN_DEBUG_MESSAGE("WXPowderPattern::CrystUpdate()",7)
    
    mChi2=mpPowderPattern->GetChi2();
    if(mpPowderPattern->mNbPointUsed>0)
@@ -529,7 +531,7 @@ void WXPowderPattern::CrystUpdate(const bool uui,const bool lock)
    }
    if(lock) mMutex.Unlock();
    this->WXRefinableObj::CrystUpdate(uui,lock);
-   VFN_DEBUG_EXIT("WXPowderPattern::CrystUpdate()",6)
+   VFN_DEBUG_EXIT("WXPowderPattern::CrystUpdate()",7)
 } 
 
 void WXPowderPattern::OnMenuAddCompBackgd(wxCommandEvent & WXUNUSED(event))
@@ -1685,6 +1687,7 @@ class WXCellExplorer:public wxWindow
       wxTextCtrl *mpAngleMin,*mpAngleMax;
       wxTextCtrl *mpVolumeMin,*mpVolumeMax;
       wxTextCtrl *mpNbSpurious;
+      wxTextCtrl *mpNbPeak;
       wxTextCtrl *mpErrorD;
       WXFieldChoice *mpFieldCrystal;
       wxTextCtrl *mpStopOnScore,*mpStopOnDepth;
@@ -1796,6 +1799,14 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
                                  wxTextValidator(wxFILTER_NUMERIC));
       pSpuriousSizer->Add(mpNbSpurious,0,wxALIGN_CENTER);
       pSizerAdvanced->Add(pSpuriousSizer,0,wxALIGN_CENTER);
+      
+      wxBoxSizer *pNbPeakSizer=new wxBoxSizer(wxHORIZONTAL);
+      wxStaticText *pNbPeakText=new wxStaticText(pAdvanced,-1,"Use Nb Peaks:");
+      pNbPeakSizer->Add(pNbPeakText,0,wxALIGN_CENTER);
+      mpNbPeak=new wxTextCtrl(pAdvanced,-1,"20",wxDefaultPosition,wxSize(40,-1),0,
+                                 wxTextValidator(wxFILTER_NUMERIC));
+      pNbPeakSizer->Add(mpNbPeak,0,wxALIGN_CENTER);
+      pSizerAdvanced->Add(pNbPeakSizer,0,wxALIGN_CENTER);
       
       wxBoxSizer *pStopSizer=new wxBoxSizer(wxHORIZONTAL);
       wxStaticText* pStopOnScoreText=new wxStaticText(pAdvanced,-1,"Stop on Score>");
@@ -2134,14 +2145,9 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
       for(vector<PeakList::hkl>::iterator pos=mpPeakList->mvHKL.begin();pos!=mpPeakList->mvHKL.end();++pos)
          pos->isSpurious=false;
       
-      // Use at most 30 reflections for indexing
-      if(mpPeakList->GetPeakList().size()>20) mpPeakList->GetPeakList().resize(20);
-      
-      mpCellExplorer = new CellExplorer(*mpPeakList,(CrystalSystem)(mpBravais->GetSelection()),0);
-      
       wxString s;
       double lmin,lmax,amin=90,amax,vmin,vmax,error,stopOnScore,reportOnScore;
-      long nbspurious,stopOnDepth,reportOnDepth;
+      long nbspurious,nbPeak,stopOnDepth,reportOnDepth;
       s=mpLengthMin->GetValue();s.ToDouble(&lmin);
       s=mpLengthMax->GetValue();s.ToDouble(&lmax);
       //s=mpAngleMin->GetValue();s.ToDouble(&amin);
@@ -2149,11 +2155,17 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
       s=mpVolumeMin->GetValue();s.ToDouble(&vmin);
       s=mpVolumeMax->GetValue();s.ToDouble(&vmax);
       s=mpNbSpurious->GetValue();s.ToLong(&nbspurious);
+      s=mpNbPeak->GetValue();s.ToLong(&nbPeak);
       s=mpErrorD->GetValue();s.ToDouble(&error);
       s=mpStopOnScore->GetValue();s.ToDouble(&stopOnScore);
       s=mpStopOnDepth->GetValue();s.ToLong(&stopOnDepth);
       s=mpReportOnScore->GetValue();s.ToDouble(&reportOnScore);
       s=mpReportOnDepth->GetValue();s.ToLong(&reportOnDepth);
+      
+      // Use at most 30 reflections for indexing
+      if(mpPeakList->GetPeakList().size()>nbPeak) mpPeakList->GetPeakList().resize(nbPeak);
+      
+      mpCellExplorer = new CellExplorer(*mpPeakList,(CrystalSystem)(mpBravais->GetSelection()),0);
       
       mpCellExplorer->SetLengthMinMax((float)lmin,(float)lmax);
       mpCellExplorer->SetAngleMinMax((float)amin*DEG2RAD,(float)amax*DEG2RAD);
@@ -2227,6 +2239,7 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
 }
 void WXCellExplorer::OnSelectCell(wxCommandEvent &event)
 {
+   VFN_DEBUG_ENTRY("WXCellExplorer::OnSelectCell()",7)
    const int choice=mpCell->GetSelection();
    if(choice!=wxNOT_FOUND)
    {
@@ -2265,6 +2278,7 @@ void WXCellExplorer::OnSelectCell(wxCommandEvent &event)
       try{
          if(mpAutomaticLeBail->GetValue())
          {
+            VFN_DEBUG_MESSAGE("WXCellExplorer::OnSelectCell():auto-Le Bail",7);
             // run Le Bail
             const bool fitzero=true,
                      fitwidth0=true,
@@ -2278,12 +2292,15 @@ void WXCellExplorer::OnSelectCell(wxCommandEvent &event)
             wxProgressDialog dlgProgress(_T("Le Bail and Profile Fitting"),_T("Le Bail Fitting, cycle #0/20"),
                                        25,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME|wxPD_CAN_ABORT);
             mpDiff->SetExtractionMode(true,true);
+            VFN_DEBUG_MESSAGE("WXCellExplorer::OnSelectCell():auto-Le Bail",7);
             
             mpLog->AppendText(wxString::Format("Starting 20 Le Bail cycles\n"));
             for(int i=0;i<10;++i)
             {
+               VFN_DEBUG_MESSAGE("WXCellExplorer::OnSelectCell():auto-Le Bail #"<<i,7);
                mpDiff->ExtractLeBail(2);
                mpDiff->GetParentPowderPattern().FitScaleFactorForRw();
+               VFN_DEBUG_MESSAGE("WXCellExplorer::OnSelectCell():auto-Le Bail #"<<i,7);
                mpDiff->GetParentPowderPattern().UpdateDisplay();
                if(dlgProgress.Update(i,wxString::Format(_T("Le Bail Fitting, cycle #%d/20"),i*2))==false) return;
             }
@@ -2438,6 +2455,7 @@ void WXCellExplorer::OnSelectCell(wxCommandEvent &event)
       if(mpGraph!=0) mpGraph->Refresh(FALSE);
       //:TODO: store refined cell parameters, display GoF in cell list
    }
+   VFN_DEBUG_EXIT("WXCellExplorer::OnSelectCell",7)
 }
 void WXCellExplorer::OnApplyCell(wxCommandEvent &event)
 {
@@ -2481,6 +2499,7 @@ void WXCellExplorer::OnAutoLeBail(wxCommandEvent &event)
       mpAutomaticLeBail->SetValue(false);
       return;
    }
+   VFN_DEBUG_ENTRY("WXCellExplorer::OnAutoLeBail()",7)
    // Check if powder pattern has a background phase
    const unsigned int nbcomp= mpGraph->GetWXPowderPattern().GetPowderPattern().GetNbPowderPatternComponent();
    bool needBackground=true;
@@ -2549,6 +2568,7 @@ void WXCellExplorer::OnAutoLeBail(wxCommandEvent &event)
             break;
          }
       };
+   VFN_DEBUG_MESSAGE("WXCellExplorer::OnAutoLeBail():needPowderPatternDiffraction=="<<needPowderPatternDiffraction,7)
    if(needPowderPatternDiffraction)
    {
       if(nbPowderPatternDiffraction>0)
@@ -2575,6 +2595,7 @@ void WXCellExplorer::OnAutoLeBail(wxCommandEvent &event)
       }
       else
       {// Create one crystalline phase
+         VFN_DEBUG_MESSAGE("WXCellExplorer::OnAutoLeBail():Create PowderPatternDiffraction",7)
          mpDiff=new PowderPatternDiffraction;
          mpDiff->SetCrystal(*mpCrystal);
          mpGraph->GetWXPowderPattern().GetPowderPattern().AddPowderPatternComponent(*mpDiff);
@@ -2592,10 +2613,12 @@ void WXCellExplorer::OnAutoLeBail(wxCommandEvent &event)
    // If one cell is already selected, do optimization immediately
    if(mpCell->GetSelection()>=0)
    {
+      VFN_DEBUG_MESSAGE("WXCellExplorer::OnAutoLeBail()->OnSelectCell()",7)
       cout<<mpCell->GetSelection()<<endl;
       wxCommandEvent ev;
       this->OnSelectCell(ev);
    }
+   VFN_DEBUG_EXIT("WXCellExplorer::OnAutoLeBail()",7)
 }
 
 //////////////////////////////////////// END WXCellExplorer /////////////////////
