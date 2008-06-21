@@ -174,6 +174,104 @@ mNeedUpdateUI(true),mIdx(-1)
 
 ////////////////////////////////////////////////////////////////////////
 //
+//    Convert a list of atoms to one molecule
+//
+////////////////////////////////////////////////////////////////////////
+Molecule* Atoms2Molecule(list<Atom *> &vAtom)
+{
+   VFN_DEBUG_ENTRY("Atoms2Molecule()",6)
+   Molecule *mol=new Molecule((*vAtom.begin())->GetCrystal(),"Molecule");
+   const unsigned long nb=vAtom.size();
+   REAL x0=0,y0=0,z0=0;
+   unsigned int i=0;
+   for(list<Atom *>::iterator pos=vAtom.begin();pos!=vAtom.end();++pos)
+   {
+      REAL x=(*pos)->GetX();
+      REAL y=(*pos)->GetY();
+      REAL z=(*pos)->GetZ();
+      (*pos)->GetCrystal().FractionalToOrthonormalCoords(x,y,z);
+      x0+=x;
+      y0+=y;
+      z0+=z;
+      mol->AddAtom(x,y,z,&((*pos)->GetScatteringPower()),(*pos)->GetName());
+      mol->GetAtom(i++).SetOccupancy((*pos)->GetOccupancy());
+   }
+
+   CrystVector_REAL x(nb),y(nb),z(nb),radius(nb);
+   vector<pair<const ScatteringPowerAtom *,long> > scattpow(nb);
+   for(unsigned int i=0;i<nb;++i)
+   {
+      x(i)=mol->GetAtom(i).GetX();
+      y(i)=mol->GetAtom(i).GetY();
+      z(i)=mol->GetAtom(i).GetZ();
+      if(mol->GetAtom(i).IsDummy())
+      {
+         radius(i)=-1;
+         scattpow[i].first=0;
+      }
+      else
+      {
+         radius(i)=mol->GetAtom(i).GetScatteringPower().GetRadius();
+         scattpow[i].first=dynamic_cast<const ScatteringPowerAtom *> 
+                             (&(mol->GetAtom(i).GetScatteringPower()));
+         scattpow[i].second=scattpow[i].first->GetAtomicNumber();
+      }
+   }
+   for(unsigned int i=0;i<nb;++i)
+   {
+      if(scattpow[i].first==0) continue;
+      const REAL x1=x(i),y1=y(i),z1=z(i);
+      x += -x1;
+      y += -y1;
+      z += -z1;
+      for(unsigned int j=i+1;j<nb;++j)
+      {
+         if(scattpow[j].first==0) continue;
+         const REAL dist=sqrt(x(j)*x(j)+y(j)*y(j)+z(j)*z(j));
+         //cout<<"          -> d="<<dist<<"("<<radius(i)<<","<<radius(j)<<"):"<<scattpow[i].second<<","<<scattpow[j].second<<endl;
+         if(dist<(1.10*(radius(i)+radius(j))))
+         {
+            if((1!=scattpow[i].second)||(1!=scattpow[j].second))
+            {
+                  mol->AddBond(mol->GetAtom(i),mol->GetAtom(j),dist,.01,.02,false);
+            }
+         }
+      }
+      x += x1;
+      y += y1;
+      z += z1;
+   }
+   mol->BuildConnectivityTable();
+   for(map<MolAtom*,set<MolAtom*> >::const_iterator pos=mol->GetConnectivityTable().begin();
+       pos!=mol->GetConnectivityTable().end();++pos)
+   {
+      for(set<MolAtom*>::const_iterator pos1=pos->second.begin();
+          pos1!=pos->second.end();++pos1)
+      {
+         for(set<MolAtom*>::const_iterator pos2=pos1;
+          pos2!=pos->second.end();++pos2)
+          {
+            if(pos2==pos1) continue;
+            if(mol->FindBondAngle(**pos1,*(pos->first),**pos2)== mol->GetBondAngleList().end())
+               mol->AddBondAngle(**pos1,*(pos->first),**pos2,
+                                 GetBondAngle(**pos1,*(pos->first),**pos2),0.01,0.02,false);
+          }
+      }
+   }
+   x0 /= nb;
+   y0 /= nb;
+   z0 /= nb;
+   mol->GetCrystal().OrthonormalToFractionalCoords(x0,y0,z0);
+   mol->SetX(x0);
+   mol->SetY(y0);
+   mol->SetZ(z0);
+   mol->UpdateDisplay();
+   VFN_DEBUG_EXIT("ZScatterer2Molecule()",6)
+   return mol;
+}
+
+////////////////////////////////////////////////////////////////////////
+//
 //    WXCrystal
 //
 ////////////////////////////////////////////////////////////////////////
@@ -190,6 +288,7 @@ static const long ID_CRYSTAL_MENU_SCATT_ADDATOM                 =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT_IMPORTATOMLIST          =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT_ADDZSCATTERER           =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT_ADDMOLECULE             =WXCRYST_ID();
+static const long ID_CRYSTAL_MENU_SCATT_ATOMS2MOLECULE          =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT_IMPORTFENSKEHALLZMATRIX =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT_IMPORTNAMEDZMATRIX      =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT_ADDTETRAHEDRON          =WXCRYST_ID();
@@ -230,6 +329,7 @@ BEGIN_EVENT_TABLE(WXCrystal,wxWindow)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_IMPORTATOMLIST,     WXCrystal::OnMenuAddScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDZSCATTERER,      WXCrystal::OnMenuAddScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDMOLECULE,        WXCrystal::OnMenuAddScatterer)
+   EVT_MENU(ID_CRYSTAL_MENU_SCATT_ATOMS2MOLECULE,     WXCrystal::OnMenuAtoms2Molecule)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_IMPORTFENSKEHALLZMATRIX,WXCrystal::OnMenuImportMoleculeFromFenskeHallZMatrix)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_IMPORTNAMEDZMATRIX, WXCrystal::OnMenuImportMoleculeFromFenskeHallZMatrix)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDTETRAHEDRON,     WXCrystal::OnMenuAddScatterer)
@@ -296,6 +396,8 @@ mpCrystalGL(0)
                                 "Import a List of Atoms");
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_ADDMOLECULE,
                                 "Add Molecule");
+         mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_ATOMS2MOLECULE,
+                                "Convert Atoms to a Molecule");
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_IMPORTFENSKEHALLZMATRIX,
                                 "Import Molecule from Fenske-Hall Z-Matrix");
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_IMPORTNAMEDZMATRIX,
@@ -1188,6 +1290,29 @@ void WXCrystal::OnMenuDuplicateScatterer(wxCommandEvent & WXUNUSED(event))
 }
 
 Molecule *ZScatterer2Molecule(ZScatterer *scatt);//defined in wxZScatterer.cpp
+
+void WXCrystal::OnMenuAtoms2Molecule(wxCommandEvent &event)
+{
+   vector<Atom*> v;
+   for(unsigned int i=0; i<mpCrystal->GetScattererRegistry().GetNb();++i)
+   {
+      Atom *pAtom=dynamic_cast<Atom *>(&(mpCrystal->GetScattererRegistry().GetObj(i)));
+      if(pAtom!=0) v.push_back(pAtom);
+   }
+   const unsigned int nb=v.size();
+   wxString *choices = new wxString[nb];
+   for(unsigned int i=0;i<nb;i++) 
+      choices[i]=(v[i]->GetName()).c_str();
+   wxMultiChoiceDialog dialog (this,"Choose the molecule's atoms","Select Atoms",nb,choices,wxOK | wxCANCEL);
+   dialog.SetSize(300,300);
+   dialog.ShowModal();
+   wxArrayInt choice=dialog.GetSelections();
+   list<Atom*> vChoice;
+   for(unsigned int i=0;i<choice.GetCount();++i) vChoice.push_back(v[choice.Item(i)]);
+
+   mpCrystal->AddScatterer(Atoms2Molecule(vChoice));
+   for(unsigned int i=0;i<choice.GetCount();++i) mpCrystal->RemoveScatterer(v[choice.Item(i)]);
+}
 
 void WXCrystal::OnMenuImportMoleculeFromFenskeHallZMatrix(wxCommandEvent &event)
 {
