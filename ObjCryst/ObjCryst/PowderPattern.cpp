@@ -466,10 +466,11 @@ void PowderPatternBackground::CalcPowderPatternIntegrated() const
 void PowderPatternBackground::Prepare()
 {
 }
-void PowderPatternBackground::GetBraggLimits(CrystVector_long *&min,CrystVector_long *&max)const
+const CrystVector_long& PowderPatternBackground::GetBraggLimits()const
 {
-   min=0;
-   max=0;
+   // no integration interval for the background
+   mIntegratedReflLimits.resize(0);
+   return mIntegratedReflLimits;
 }
 
 void PowderPatternBackground::SetMaxSinThetaOvLambda(const REAL max)
@@ -773,11 +774,17 @@ const Radiation& PowderPatternDiffraction::GetRadiation()const
 
 void PowderPatternDiffraction::SetExtractionMode(const bool extract,const bool init)
 {
+   VFN_DEBUG_ENTRY("PowderPatternDiffraction::SetExtractionMode(),ExtractionMode="<<mExtractionMode<<", nbrefl="<<this->GetNbRefl(),7)
    mExtractionMode=extract;
-   //this->Prepare();
-   if(extract && init) {mFhklObsSq.resize(this->GetNbRefl());mFhklObsSq=100;}
+   if(extract && init)
+   {
+      this->Prepare();
+      mFhklObsSq.resize(this->GetNbRefl());
+      mFhklObsSq=100;
+   }
    if((mExtractionMode==false)&&(mFhklObsSq.numElements()>0))
    {// Leaving extraction mode, so update extracted single crystal data
+      VFN_DEBUG_ENTRY("PowderPatternDiffraction::SetExtractionMode(),LEAVING Le Bail Mode",7)
       if(mpLeBailData==0)  mpLeBailData=new DiffractionDataSingleCrystal(this->GetCrystal(),false);
       // Update wavelength & name
       mpLeBailData->SetWavelength(this->GetRadiation().GetWavelength()(0));
@@ -803,15 +810,18 @@ void PowderPatternDiffraction::SetExtractionMode(const bool extract,const bool i
    }
    mClockIhklCalc.Reset();mClockMaster.Reset();
    mClockFhklObsSq.Click();
+   VFN_DEBUG_EXIT("PowderPatternDiffraction::SetExtractionMode(),ExtractionMode="<<mExtractionMode<<", nbrefl="<<this->GetNbRefl(),7)
 }
 
 bool PowderPatternDiffraction::GetExtractionMode()const{return mExtractionMode;}
 
 void PowderPatternDiffraction::ExtractLeBail(unsigned int nbcycle)
 {
+   VFN_DEBUG_ENTRY("PowderPatternDiffraction::ExtractLeBail()",7)
    if(mExtractionMode==false) this->SetExtractionMode(true,true);// Should not have to do this here !
    if(mFhklObsSq.numElements()!=this->GetNbRefl())
    {//Something went wrong !
+      VFN_DEBUG_ENTRY("PowderPatternDiffraction::ExtractLeBail() mFhklObsSq.size() != NbRefl !!!!!!",7)
       mFhklObsSq.resize(this->GetNbRefl());
       mFhklObsSq=100;
    }
@@ -877,6 +887,7 @@ void PowderPatternDiffraction::ExtractLeBail(unsigned int nbcycle)
    // Store extracted data in a single crystal data object
    if(mpLeBailData==0) mpLeBailData=new DiffractionDataSingleCrystal(*mpCrystal,false);
    {
+      VFN_DEBUG_MESSAGE("PowderPatternDiffraction::ExtractLeBail(): creating single crystal extracted data",7)
       CrystVector_REAL iobs(nbrefl),sigma(nbrefl);
       CrystVector_long h(nbrefl),k(nbrefl),l(nbrefl);
       sigma=1;
@@ -889,6 +900,7 @@ void PowderPatternDiffraction::ExtractLeBail(unsigned int nbcycle)
       }
       mpLeBailData->SetHklIobs(h,k,l,iobs,sigma);
    }
+   VFN_DEBUG_EXIT("PowderPatternDiffraction::ExtractLeBail()mFhklObsSq.size()=="<<mFhklObsSq.numElements(),7)
 }
 long PowderPatternDiffraction::GetNbReflBelowMaxSinThetaOvLambda()const
 {
@@ -1346,6 +1358,7 @@ void PowderPatternDiffraction::CalcIhkl() const
    this->CalcIntensityCorr();
    if(mExtractionMode==true)
    {
+      VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcIhkl():"<<mFhklObsSq.numElements()<<","<<mIntensityCorr.numElements()<<","<<mMultiplicity.numElements(),7);
       mIhklCalc=mFhklObsSq;
       mIhklCalc*=mIntensityCorr;
       mIhklCalc*=mMultiplicity;
@@ -1466,27 +1479,23 @@ void PowderPatternDiffraction::InitOptions()
    this->AddOption(&mReflectionProfileType);
    #endif
 }
-void PowderPatternDiffraction::GetBraggLimits(CrystVector_long *&min,CrystVector_long *&max)const
+const CrystVector_long& PowderPatternDiffraction::GetBraggLimits()const
 {
    this->CalcPowderReflProfile();
-   if(mClockProfileCalc>mClockBraggLimits)
+   if((mClockProfileCalc>mClockBraggLimits)&&(this->GetNbReflBelowMaxSinThetaOvLambda()>0))
    {
       VFN_DEBUG_ENTRY("PowderPatternDiffraction::GetBraggLimits(*min,*max)",3)
       TAU_PROFILE("PowderPatternDiffraction::GetBraggLimits()","void ()",TAU_DEFAULT);
-      mIntegratedReflMin.resize(this->GetNbReflBelowMaxSinThetaOvLambda());
-      mIntegratedReflMax.resize(this->GetNbReflBelowMaxSinThetaOvLambda());
-      //REAL fwhm,tmp;
-      for(long i=0;i<this->GetNbReflBelowMaxSinThetaOvLambda();i++)
-      {
-         mIntegratedReflMin(i)=mvReflProfile[i].first;
-         mIntegratedReflMax(i)=mvReflProfile[i].last;
-      }
+      mIntegratedReflLimits.resize(this->GetNbReflBelowMaxSinThetaOvLambda());
+      unsigned long i=0;
+      mIntegratedReflLimits(i)=mvReflProfile[0].first;
+      for(;i<(this->GetNbReflBelowMaxSinThetaOvLambda()-1);++i)
+         mIntegratedReflLimits(i+1)=(mvReflProfile[i].first+mvReflProfile[i].last+mvReflProfile[i+1].first+mvReflProfile[i+1].last)/4;
+      mIntegratedReflLimits(i)=mvReflProfile[i].last;
       mClockBraggLimits.Click();
       VFN_DEBUG_EXIT("PowderPatternDiffraction::GetBraggLimits(*min,*max)",3)
    }
-   //cout << FormatVertVector<long>(mIntegratedReflMin,mIntegratedReflMax)<<endl;
-   min=&mIntegratedReflMin;
-   max=&mIntegratedReflMax;
+   return mIntegratedReflLimits;
 }
 
 void PowderPatternDiffraction::SetMaxSinThetaOvLambda(const REAL max)
@@ -1500,7 +1509,7 @@ void PowderPatternDiffraction::PrepareIntegratedProfile()const
       &&(mClockIntegratedProfileFactor>mpParentPowderPattern->GetIntegratedProfileLimitsClock())
       &&(mClockIntegratedProfileFactor>mClockNbReflUsed))
    return;
-   VFN_DEBUG_ENTRY("PowderPatternDiffraction::PrepareIntegratedProfile()",5)
+   VFN_DEBUG_ENTRY("PowderPatternDiffraction::PrepareIntegratedProfile()",7)
    TAU_PROFILE("PowderPatternDiffraction::PrepareIntegratedProfile()","void ()",TAU_DEFAULT);
    const CrystVector_long *pMin=&(mpParentPowderPattern->GetIntegratedProfileMin());
    const CrystVector_long *pMax=&(mpParentPowderPattern->GetIntegratedProfileMax());
@@ -1560,7 +1569,7 @@ void PowderPatternDiffraction::PrepareIntegratedProfile()const
    }
    #endif
 
-   VFN_DEBUG_EXIT("PowderPatternDiffraction::PrepareIntegratedProfile()",5)
+   VFN_DEBUG_EXIT("PowderPatternDiffraction::PrepareIntegratedProfile()",7)
 }
 
 #ifdef __WX__CRYST__
@@ -1866,6 +1875,7 @@ const CrystVector_REAL& PowderPattern::GetChi2Cumul()const
             tmp=(*pObs++ - *pCalc++) ;
             chi2cumul += *pWeight++ * tmp*tmp;
             for(int i=mIntegratedPatternMin(j-1);i<mIntegratedPatternMin(j);i++) *pC2Cu++ =chi2cumul;
+            
             if(mIntegratedPatternMin(j)>(int)mNbPointUsed)
             {
                for(unsigned int i=mIntegratedPatternMin(j);i<mNbPoint;i++) *pC2Cu++ =chi2cumul;
@@ -1886,6 +1896,7 @@ const CrystVector_REAL& PowderPattern::GetChi2Cumul()const
       REAL chi2cumul=0,tmp;
       for(unsigned int i=0;i<mNbPointUsed;i++)
       {
+         VFN_DEBUG_MESSAGE("PowderPattern::GetChi2Cumul():"mIntegratedPatternMin(i)<<"->"<<mIntegratedPatternMax(i)<<":obs-calc="<<*pObs - *pCalc<<", weight="<<*pWeight,5);
          tmp = (*pObs++ - *pCalc++) ;
          chi2cumul += *pWeight++ * tmp*tmp;
          *pC2Cu++ = chi2cumul;
@@ -4964,10 +4975,9 @@ void PowderPattern::Init()
 void PowderPattern::PrepareIntegratedRfactor()const
 {
    bool needPrep=false;
-   CrystVector_long *min,*max;
    for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++)
    {
-      mPowderPatternComponentRegistry.GetObj(i).GetBraggLimits(min,max);
+      mPowderPatternComponentRegistry.GetObj(i).GetBraggLimits();
       if(mPowderPatternComponentRegistry.GetObj(i).GetClockBraggLimits()
             >mClockIntegratedFactorsPrep)
       {
@@ -4984,71 +4994,91 @@ void PowderPattern::PrepareIntegratedRfactor()const
    VFN_DEBUG_ENTRY("PowderPattern::PrepareIntegratedRfactor()",3);
    TAU_PROFILE("PowderPattern::PrepareIntegratedRfactor()","void ()",TAU_DEFAULT);
    
-   // First get all integration intervals and concatenate the arrays
-   long numInterval=0;
-   long numNewInterval=0;
-   for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++)
+   // Aggregate all limiting pixels in a single list
    {
-      min=0;
-      max=0;
-      mPowderPatternComponentRegistry.GetObj(i).GetBraggLimits(min,max);
-      VFN_DEBUG_MESSAGE("Component #"<<i<<"  "<<min <<" "<<max,3)
-      if(0==min) continue;
-      VFN_DEBUG_MESSAGE(" : num intervals:"<< min->numElements()<<endl \
-                        <<FormatVertVector<long>(*min,*max),3)
-      numNewInterval=min->numElements();
-      mIntegratedPatternMin.resizeAndPreserve(numInterval+numNewInterval);
-      for(int j=0;j<numNewInterval;j++) mIntegratedPatternMin(numInterval+j)=(*min)(j);
-      mIntegratedPatternMax.resizeAndPreserve(numInterval+numNewInterval);
-      for(int j=0;j<numNewInterval;j++) mIntegratedPatternMax(numInterval+j)=(*max)(j);
-      numInterval+=numNewInterval;
-   }
-   VFN_DEBUG_MESSAGE("PowderPattern::PrepareIntegratedRfactor():2",3);
-   //cout <<FormatVertVector<long>(mIntegratedPatternMin,mIntegratedPatternMax)<<endl;
-   //sort the arrays USELESS ?
-   {
-      CrystVector_long index,tmp;
-      if(mIntegratedPatternMin.numElements()>0) index=SortSubs(mIntegratedPatternMin);
-      tmp=mIntegratedPatternMin;
-      for(int i=0;i<numInterval;i++) mIntegratedPatternMin(i)=tmp(index(i));
-      tmp=mIntegratedPatternMax;
-      for(int i=0;i<numInterval;i++) mIntegratedPatternMax(i)=tmp(index(i));
-   }
-   //cout<<FormatVertVector<long>(mIntegratedPatternMin,mIntegratedPatternMax)<<endl;
-   VFN_DEBUG_MESSAGE("PowderPattern::PrepareIntegratedRfactor():3",3);
-   // Check all intervals are within pattern limits, correct them if necessary,
-   // remove them if necessary (keep=false)
-      CrystVector_bool keep(numInterval);
-      keep=true;
-      for(int i=0;i<numInterval;i++) 
+      list<long> vLimits;
+      
+      for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++)
       {
-         if(mIntegratedPatternMin(i)<0) mIntegratedPatternMin(i)=0;
-         if(mIntegratedPatternMin(i)>=(long)mNbPointUsed) keep(i)=false;
-         if(mIntegratedPatternMax(i)<0) keep(i)=false;
-         if(mIntegratedPatternMax(i)>=(long)mNbPointUsed) mIntegratedPatternMax(i)=mNbPointUsed-1;
+         const CrystVector_long vLim=mPowderPatternComponentRegistry.GetObj(i).GetBraggLimits();
+         for(i=0;i<vLim.numElements();i++) vLimits.push_back(vLim(i));
       }
-   VFN_DEBUG_MESSAGE("PowderPattern::PrepareIntegratedRfactor():4",3);
-   // Make sure all intervals do not overlap, and correct if necessary, by
-   // setting an intermediate point at the middle of the two intervals extremities
-      for(int i=0;i<(numInterval-1);i++) 
-      {// Here we assume the intervals are distributed ideally
-       // :TODO: some more thorough testing may be needed
-       // (eg for several phases with different widths...)
-         if(false==keep(i)) continue;
-         if(mIntegratedPatternMax(i)>=mIntegratedPatternMin(i+1))
+      if(vLimits.size()<2)
+      {
+         mIntegratedPatternMin.resize(0);
+         mIntegratedPatternMax.resize(0);
+         mNbIntegrationUsed=0;
+         mClockIntegratedFactorsPrep.Click();
+         VFN_DEBUG_EXIT("PowderPattern::PrepareIntegratedRfactor(): no intervals !",3);
+      }
+      vLimits.sort();
+      if(*(vLimits.begin())<0)
+      {
+         vLimits.push_back(0);
+         vLimits.sort();
+      }
+      for(list<long>::iterator pos=vLimits.begin();pos!=vLimits.end();)
+      {
+         if( (*pos<0) || (*pos>=mNbPointUsed) ) pos=vLimits.erase(pos);
+         else ++pos;
+      }
+      
+      // Try to avoid too small intervals
+      list<long> vLimits2;
+      list<long>::iterator pos1=vLimits.begin();
+      list<long>::iterator pos2=pos1;pos2++;
+      for(;pos2!=vLimits.end();)
+      {
+         const long pix1=*pos1;
+         //cout<<__FILE__<<":"<<__LINE__<<":"<<pix1<<endl;
+         vLimits2.push_back(pix1);
+         for(;;)
          {
-            mIntegratedPatternMax(i)=(mIntegratedPatternMax(i)+mIntegratedPatternMin(i+1))/2;
-            long j=1;
-            while(mIntegratedPatternMin(i + j)<=mIntegratedPatternMax(i))
-            {
-               mIntegratedPatternMin(i+j)=mIntegratedPatternMax(i)+1;
-               if(mIntegratedPatternMin(i+j)>mIntegratedPatternMax(i+j)) keep(i+j)=false;
-               if( (i+ ++j)==numInterval) break;
-            }
+            pos1=pos2++;
+            if(pos2==vLimits.end()) break;
+            if(*pos2>(pix1+8)) break;
          }
-         //just in case...Could it happen ?
-         if(mIntegratedPatternMin(i)>mIntegratedPatternMax(i)) keep(i)=false;
       }
+      vLimits2.push_back(*pos1);
+      
+      // Try to avoid too small intervals (2nd pass)
+      pos1=vLimits2.begin();
+      pos2=pos1;pos2++;
+      for(;pos2!=vLimits2.end();)
+      {
+         //cout<<__FILE__<<":"<<__LINE__<<":"<<*pos1<<" -> "<<*pos2<<endl;
+         if( *pos2<=((*pos1)+2))
+         {
+            //cout<<__FILE__<<":"<<__LINE__<<":"<<*pos1<<" -> "<<*pos2<<"...PLONK";
+            pos2=vLimits2.erase(pos2);
+            //cout<<"->"<<*pos2<<endl;
+         }
+         else {pos1++;pos2++;}
+      }
+      
+      // Create min/max pairs
+      list<pair<long,long> > vLimits3;
+      pos1=vLimits2.begin();
+      pos2=pos1;pos2++;
+      for(;pos2!=vLimits2.end();)
+      {
+         if(*pos2!=(mNbPointUsed-1)) vLimits3.push_back(make_pair(*pos1++,*pos2++-1));
+         else vLimits3.push_back(make_pair(*pos1++,*pos2++));
+         //cout<<__FILE__<<":"<<__LINE__<<":"<<vLimits3.back().first<<" -> "<<vLimits3.back().second<<endl;
+      }
+      
+      mIntegratedPatternMin.resize(vLimits3.size());
+      mIntegratedPatternMax.resize(vLimits3.size());
+      unsigned long i=0;
+      for(list<pair<long,long> >::iterator pos=vLimits3.begin();pos!=vLimits3.end();++pos)
+      {
+         mIntegratedPatternMin(i)=pos->first;
+         mIntegratedPatternMax(i++)=pos->second;
+      }
+   }
+   unsigned long numInterval=mIntegratedPatternMin.numElements();
+   CrystVector_bool keep(numInterval);
+   keep=true;
    // Take care of excluded regions (change integration areas accordingly)
    // regions are sorted by ascending theta
       const long nbExclude=mExcludedRegionMinX.numElements();

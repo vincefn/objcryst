@@ -124,12 +124,13 @@ class PowderPatternComponent : virtual public RefinableObj
       /// the full powder pattern is not explicitely computed.
       virtual void CalcPowderPatternIntegrated() const=0;
       
-      /// Get the integration limits (first and last pixels) around each reflection,
-      /// if this component has Bragg reflections. Used for integrated R(w) factors.
-      /// The limits currently go from -2*FWHM to +2*FWHM.
-      /// returns a pointer to the min and max pixels arrays (null pointers if
-      /// no reflection for this phase).
-      virtual void GetBraggLimits(CrystVector_long *&min,CrystVector_long *&max)const=0;
+      /** Get the pixel positions separating the integration intervals around reflections.
+      *
+      * \returns: an array with the pixel positions, empty if this component 
+      * has no peaks. The positions should be in increasing order, but 
+      * could go beyond the pattern limits.
+      */
+      virtual const CrystVector_long& GetBraggLimits()const=0;
       /// Get last time the Bragg Limits were changed
       const RefinableObjClock& GetClockBraggLimits()const;
       
@@ -147,6 +148,9 @@ class PowderPatternComponent : virtual public RefinableObj
       mutable CrystVector_REAL mPowderPatternCalcVariance;
       /// The variance associated to each point of the calculated powder pattern, integrated
       mutable CrystVector_REAL mPowderPatternIntegratedCalcVariance;
+      
+      /// Interval limits around each reflection, for integrated R-factors 
+      mutable CrystVector_long mIntegratedReflLimits;
       
       /// \internal
       /// This will be called by the parent PowderPattern object, before
@@ -238,7 +242,7 @@ class PowderPatternBackground : public PowderPatternComponent
       virtual void CalcPowderPattern() const;
       virtual void CalcPowderPatternIntegrated() const;
       virtual void Prepare();
-      virtual void GetBraggLimits(CrystVector_long *&min,CrystVector_long *&max)const;
+      virtual const CrystVector_long& GetBraggLimits()const;
       virtual void SetMaxSinThetaOvLambda(const REAL max);
       void InitRefParList();
       void InitOptions();
@@ -371,7 +375,7 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       virtual void CalcIhkl() const;
       virtual void Prepare();
       virtual void InitOptions();
-      virtual void GetBraggLimits(CrystVector_long *&min,CrystVector_long *&max)const;
+      virtual const CrystVector_long& GetBraggLimits()const;
       virtual void SetMaxSinThetaOvLambda(const REAL max);
       
       void PrepareIntegratedProfile()const;
@@ -440,8 +444,6 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
          };
          ///Reflection profiles for ALL reflections during the last powder pattern generation
          mutable vector<ReflProfile> mvReflProfile;
-         /// First and last pixel for integrated R-factors around each reflection
-         mutable CrystVector_long mIntegratedReflMin,mIntegratedReflMax;
       
       // When using integrated profiles
          /** For each reflection, store the integrated value of the normalized
