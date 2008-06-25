@@ -331,6 +331,8 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       *
       */
       void SetProfile(ReflectionProfile *prof);
+      /// Get reflection profile
+      const ReflectionProfile& GetProfile()const;
       virtual void GenHKLFullSpace();
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
@@ -851,6 +853,16 @@ class PowderPattern : public RefinableObj
       const CrystVector_REAL &GetScaleFactor() const;
       /// Access the scale factors (see PowderPattern::mScaleFactor)
       CrystVector_REAL &GetScaleFactor();
+      /** Export powder pattern & crystal structure in Fullprof format.
+      *
+      * This will create two files - the .pcr file (including the crystal structure
+      * and all pattern parameters), and the .dat file with the powder pattern,
+      * written using the "Ins=10" file format.
+      * \param prefix: the prefix used to output the two files, 'prefix'.pcr and 'prefix'.dat
+      *
+      * \note: in development. Only supports constant wavelength neutron & X-ray patterns.
+      */
+      void ExportFullprof(const std::string &prefix)const;
    protected:
       /// Calc the powder pattern
       void CalcPowderPattern() const;

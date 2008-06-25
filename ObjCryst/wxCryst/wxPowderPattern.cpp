@@ -165,6 +165,8 @@ static const long ID_POWDER_MENU_COMP_ADDCRYST=        WXCRYST_ID();
 static const long ID_POWDER_MENU_GRAPH=                     WXCRYST_ID(); 
 static const long ID_POWDER_MENU_SAVETEXT=                  WXCRYST_ID(); 
 static const long ID_POWDER_MENU_SIMULATE=                  WXCRYST_ID(); 
+static const long ID_POWDER_MENU_EXPORT=                    WXCRYST_ID(); 
+static const long ID_POWDER_MENU_EXPORT_FULLPROF=           WXCRYST_ID(); 
 static const long ID_POWDER_MENU_IMPORT_FULLPROF=           WXCRYST_ID(); 
 static const long ID_POWDER_MENU_IMPORT_PSI_DMC=            WXCRYST_ID(); 
 static const long ID_POWDER_MENU_IMPORT_ILL_D1A5=           WXCRYST_ID(); 
@@ -213,6 +215,7 @@ static const long ID_POWDERDIFF_PROFILE_DEPV=                  WXCRYST_ID();
 
 BEGIN_EVENT_TABLE(WXPowderPattern, wxWindow)
    EVT_BUTTON(ID_WXOBJ_COLLAPSE,                    WXCrystObj::OnToggleCollapse)                
+   EVT_MENU(ID_POWDER_MENU_EXPORT_FULLPROF,         WXPowderPattern::OnMenuExport)                  
    EVT_MENU(ID_REFOBJ_MENU_OBJ_SAVE,                WXRefinableObj::OnMenuSave)                  
    EVT_MENU(ID_REFOBJ_MENU_OBJ_LOAD,                WXRefinableObj::OnMenuLoad)                  
    EVT_MENU(ID_REFOBJ_MENU_PAR_FIXALL,              WXRefinableObj::OnMenuFixAllPar)             
@@ -266,6 +269,9 @@ mChi2(0.0),mGoF(0.0),mRwp(0.0),mRp(0.0)
    mpWXTitle->SetForegroundColour(wxColour(255,0,0));
    mpWXTitle->SetSize(400,-1);
    // Menu
+      mpMenuBar->AddMenu("Export",ID_POWDER_MENU_EXPORT);
+         mpMenuBar->AddMenuItem(ID_POWDER_MENU_EXPORT,ID_POWDER_MENU_EXPORT_FULLPROF,
+                                "Export to Fullprof");
       mpMenuBar->AddMenu("Data",ID_REFOBJ_MENU_OBJ);
          //:TODO: reactivate & test those menus
          //mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_REFOBJ_MENU_OBJ_SAVE,"Save");
@@ -923,6 +929,23 @@ void WXPowderPattern::OnMenuLeBail(wxCommandEvent& event)
    WXProfileFitting *pFit;
    pFit=new WXProfileFitting(pFrame,&(this->GetPowderPattern()));
    pFrame->Show(true);
+}
+
+void WXPowderPattern::OnMenuExport(wxCommandEvent &event)
+{
+   WXCrystValidateAllUserInput();
+   wxFileDialog save(this,"Choose a .pcr file","","","*.pcr",wxSAVE | wxOVERWRITE_PROMPT);
+   if(save.ShowModal() != wxID_OK) return;
+   wxString prefix;
+   if(save.GetPath().size()>4)
+      prefix=save.GetPath().Left(save.GetPath().size()-4);
+   else prefix=save.GetPath();
+   wxString mes;
+   wxString pcr=prefix+_T(".pcr");
+   wxString dat=prefix+_T(".dat");
+   mes.Printf("This will create the files:\n   %s\n   %s",pcr.c_str(),dat.c_str());
+   wxMessageDialog mesd(this,mes,_T("Files"),wxOK|wxCANCEL|wxICON_INFORMATION);
+   if(mesd.ShowModal()==wxID_OK) mpPowderPattern->ExportFullprof(prefix.c_str());
 }
 
 void WXPowderPattern::NotifyDeleteGraph() {mpGraph=0;}

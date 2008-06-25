@@ -50,6 +50,7 @@ class WXPowderPattern: public WXRefinableObj
       void OnMenuAddExclude(wxCommandEvent & WXUNUSED(event));
       /// Profile fitting & Le Bail intensity extraction
       void OnMenuLeBail(wxCommandEvent &event);
+      void OnMenuExport(wxCommandEvent &event);
       void NotifyDeleteGraph();
       const PowderPattern& GetPowderPattern()const;
       PowderPattern& GetPowderPattern();

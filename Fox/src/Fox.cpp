@@ -288,7 +288,7 @@ int main (int argc, char *argv[])
    
    {// Fox version
       char verBuf[200];
-      sprintf(verBuf,"1.7.7-#%d",__FOXREVISION__);
+      sprintf(verBuf,"1.7.8-#%d",__FOXREVISION__);
       foxVersion=verBuf;
    }
    bool useGUI(true);
@@ -309,6 +309,7 @@ int main (int argc, char *argv[])
    REAL cif2patternPeakWidth=0.01;
    REAL cif2patternNbPoint=1000;
    REAL cif2patternMax2Theta=M_PI*.9;
+   bool exportfullprof=false;
    for(int i=1;i<argc;i++)
    {
       if(string("--nogui")==string(argv[i]))
@@ -420,6 +421,11 @@ int main (int argc, char *argv[])
          TAU_REPORT_STATISTICS();
          exit(0);
       }
+      if(string("--exportfullprof")==string(argv[i]))
+      {
+         exportfullprof=true;
+         continue;
+      }
       if(string("--index")==string(argv[i]))
       {
          ++i;
@@ -440,29 +446,30 @@ int main (int argc, char *argv[])
          CellExplorer cx(pl,TRICLINIC,0);
          cx.SetAngleMinMax((float)90*DEG2RAD,(float)120*DEG2RAD);
          
-         // Use at most 20 lines
+         // Use at most 20 lines ?
          if(pl.GetPeakList().size()>20) pl.GetPeakList().resize(20);
-         const unsigned int nb=pl.GetPeakList().size();
-         
+         unsigned int nb=pl.GetPeakList().size();
+         if(nb>20) nb=20;// Use at most 20 peaks to estimate cell volume
          const float dmin=pl.GetPeakList()[nb-1].dobs;
          const float dmax=pl.GetPeakList()[0].dobs/10;// /10: assume no peaks at lower resolution
 
          const float vmin=EstimateCellVolume(dmin,dmax,nb,TRICLINIC  ,LATTICE_P,1.2);
-         const float vmax=EstimateCellVolume(dmin,dmax,nb,TRICLINIC  ,LATTICE_P,0.3);
+         const float vmax=EstimateCellVolume(dmin,dmax,nb,TRICLINIC  ,LATTICE_P,0.2);
          
-         float lengthmax=pow(vmax,(float)(1/3.0))*3;
+         float lengthmax=pow(vmax,(float)(1/3.0))*4;
          if(lengthmax<25)lengthmax=25;
-         if(lengthmax>(2/pl.GetPeakList()[0].dobs)) lengthmax=2/pl.GetPeakList()[0].dobs;
+         if(lengthmax>(2.1/pl.GetPeakList()[0].dobs)) lengthmax=2.1/pl.GetPeakList()[0].dobs;
          cout<<"Indexing using TRICLINIC lattice, latt=3.0->"<<lengthmax<<"A, V="<<vmin<<"->"<<vmax<<"A^3"<<endl;
          
          cx.SetVolumeMinMax(vmin,vmax);
-         cx.SetLengthMinMax(3,lengthmax);
+         cx.SetLengthMinMax(2,lengthmax);
          
          cx.DicVol(10,4,50,4);
          /*
          for(unsigned int i=0;;++i)
          {
-            cx.Evolution(10000,true,0.7,0.5,50);
+            cout<<i<<endl;
+            cx.Evolution(100,true,0.7,0.5,50);
             if(cx.GetBestScore()>40) break;
          }
          */
@@ -591,6 +598,19 @@ int main (int argc, char *argv[])
            <<"    Fox Cimetidine-powder.xml --nogui --silent --randomize -n 10000000 --nbrun 10 --finalcost 200000 -o best.xml"<<endl<<endl
            <<endl;
       exit(0);  
+   }
+   
+   if(exportfullprof)
+   {
+      // Find every powder pattern, export to fullprof
+      for(unsigned int i=0;i<gPowderPatternRegistry.GetNb();++i)
+      {
+         gPowderPatternRegistry.GetObj(i).ExportFullprof("test");
+      }
+      #ifdef __WX__CRYST__
+      this->OnExit();
+      #endif
+      exit(0);
    }
    
    if(cif2pattern)

@@ -35,6 +35,8 @@
    #include "wxCryst/wxPowderPattern.h"
 #endif
 
+#include "cctbx/sgtbx/space_group.h"
+
 #include <fstream>
 #include <iomanip>
 #include <sstream>
@@ -683,6 +685,11 @@ void PowderPatternDiffraction::SetProfile(ReflectionProfile *p)
    mpReflectionProfile= p;
    this->AddSubRefObj(*mpReflectionProfile);
    mClockMaster.AddChild(mpReflectionProfile->GetClockMaster());
+}
+
+const ReflectionProfile& PowderPatternDiffraction::GetProfile()const
+{
+   return *mpReflectionProfile;
 }
 
 void PowderPatternDiffraction::GenHKLFullSpace()
@@ -4571,6 +4578,155 @@ PeakList PowderPattern::FindPeaks(const float dmin,const float maxratio,const un
 
 const CrystVector_REAL& PowderPattern::GetScaleFactor() const{return mScaleFactor;}
 CrystVector_REAL& PowderPattern::GetScaleFactor(){return mScaleFactor;}
+
+void PowderPattern::ExportFullprof(const std::string &prefix)const
+{
+   // Analyze our data - background ? number of crystalline phases ?
+   const PowderPatternBackground *pBackground=0;
+   vector<const PowderPatternDiffraction*> vDiff;
+   for(unsigned int i=0;i<this->GetNbPowderPatternComponent();i++)
+   {
+      if(this->GetPowderPatternComponent(i).GetClassName()=="PowderPatternBackground")
+         pBackground=dynamic_cast<const PowderPatternBackground*>(&(this->GetPowderPatternComponent(i)));
+      if(this->GetPowderPatternComponent(i).GetClassName()=="PowderPatternDiffraction")
+         vDiff.push_back(dynamic_cast<const PowderPatternDiffraction*>(&(this->GetPowderPatternComponent(i))));
+   }
+   if((pBackground==0)||vDiff.size()==0) return;
+   
+   // Powder data file
+   ofstream dat((prefix+".dat").c_str());
+   dat<<"XYDATA"<<endl
+      <<"INTER 1.0 1.0 0"<<endl<<endl<<endl<<endl<<endl;
+   
+   CrystVector_REAL ttheta;
+   ttheta=mX;
+   if(this->GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF) ttheta *= RAD2DEG;
+   dat << FormatVertVector<REAL>(ttheta,mPowderPatternObs,mPowderPatternObsSigma,12,4);
+   dat.close();
+   
+   
+   // PCR file
+   ofstream pcr((prefix+".pcr").c_str());
+   // if(!pcr) ???;
+   // Title
+   pcr<<"Fox/ObjCryst exported file:"<<this->GetName()<<endl;
+   // Number of patterns
+   pcr<<"NPATT 1"<<endl;
+   // Weight of each pattern
+   pcr<<"W_PAT 1.0"<<endl;
+   // Multi-pattern format
+   pcr<<"! Nph Dum Ias Nre Cry Opt Aut"<<endl;
+   pcr<<"   1   0   0   0   0   1   1 "<<endl;
+   // For each phase
+   {
+      int npr=0;
+      if(this->GetRadiation().GetRadiationType()==RAD_XRAY) npr=0;
+      if(this->GetRadiation().GetRadiationType()==RAD_NEUTRON) npr=1;
+   
+      pcr<<"! Job Npr Nba Nex Nsc Nor Iwg Ilo Res Ste Uni Cor Anm"<<endl
+         <<"   "<<-npr
+              <<"  5 "<<pBackground->GetInterpPoints().first->numElements()
+                       <<" 0   0   1   0   0   0   1   0   0   0"<<endl;
+   }
+   // Names of data files
+   pcr<<"! File names of data files"<<endl;
+   pcr<<prefix<<".dat"<<endl;
+   // Output options...
+   pcr<<"! Mat Pcr Syo Rpa Sym Sho"<<endl
+      <<"   1   1   0   1   0   0 "<<endl;
+   // Output options... For each pattern
+   pcr<<"! Ipr Ppl Ioc Ls1 Ls2 Ls3 Prf Ins Hkl Fou Ana"<<endl
+      <<"   0   0   0   0   0   0   1   10  0   0   1 "<<endl;
+   // Fixed experimental parameters For each 2-theta pattern :TODO: Check !
+   pcr<<"!lambda1 lambda2 Ratio Bkpos Wdt Cthm muR AsyLim Rpolarz -> Patt #1"<<endl
+      <<this->GetRadiation().GetWavelength()(0)<<" "<<this->GetRadiation().GetWavelength()(0)
+      <<                  " 0     0    10   0   0    0     0.95"<<endl;
+   // Refinement parameters - changes are damped !!
+   pcr<<"!NCY Eps R_at R_an R_pr R_gl"<<endl
+      <<"  5  0.2  1.0  1.0  1.0  1.0"<<endl;
+   // Refinement parameters & powder data range, for each 2theta pattern
+   pcr<<"! Thmin Step Thmax PSD Sent0 -> Patt #1"<<endl
+      <<"    0     0    0    0    0"<<endl;
+   // Background points
+   pcr<<"!2Theta Background for Pattern #1"<<endl;
+   for(unsigned long i=0;i<pBackground->GetInterpPoints().first->numElements();i++)
+      pcr<<(*(pBackground->GetInterpPoints().first))(i)*RAD2DEG<<" "
+      <<(*(pBackground->GetInterpPoints().second))(i)<<" 0.0"<<endl;
+   // Number of refined parameters - just use one for the scale factor !
+   pcr<<"!"<<endl<<"!"<<endl<<"1 !Number of refined parameters"<<endl;
+   // Powder data experimental set-up II (refinable parameters)
+   pcr<<"! Zero Code Sycos Code Sysin Code Lambda Code More -> Patt #1"<<endl;
+   pcr<<" "<<mXZero*RAD2DEG <<" 0.0 "
+                   <<m2ThetaDisplacement*RAD2DEG <<" 0.0 "
+                                <<m2ThetaTransparency*RAD2DEG <<" 0.0 "
+                                         <<"0.000  0.0  0"<<endl;
+   // PHASE DESCRIPTIONS
+   for(unsigned int i=0;i<vDiff.size();++i)
+   {
+      pcr<<"!-------------------------------------------------------------------------------"<<endl
+         <<"!  Data for PHASE number:   "<<i<<"  ==> Current R_Bragg for Pattern#  1:     0.00    "<<endl
+         <<"!-------------------------------------------------------------------------------"<<endl;
+      //Phase name
+      pcr<<vDiff[i]->GetCrystal().GetName()<<endl;
+      // Main control codes line for the phase
+      const ScatteringComponentList *pSC=&(vDiff[i]->GetCrystal().GetScatteringComponentList());
+      pcr<<"!Nat Dis Ang Jbt Isy Str Furth  ATZ Nvk More"<<endl
+         <<  pSC->GetNbComponent()
+              <<" 0   0   0   0   0    0    1.0  0   0"<<endl;
+      // Contribution to the patterns
+      pcr<<"!Contributions (0/1) of this phase to the  patterns"<<endl
+         <<" 1"<<endl;
+      //
+      pcr<<"!Irf Npr Jtyp  Nsp_Ref Ph_Shift for Pattern#"<<i<<endl
+         <<"  0   0   0      0      0"<<endl;
+      pcr<<"! Pr1    Pr2    Pr3   Brind.   Rmua   Rmub   Rmuc     for Pattern#"<<i<<endl
+         <<"  1.0    1.0    1.0    1.0      0.0    0.0    0.0"<<endl;
+
+      // Space group symbol
+      pcr<<vDiff[i]->GetCrystal().GetSpaceGroup().GetCCTbxSpg().match_tabulated_settings().hermann_mauguin()
+         <<"                       <- Space Group Symbol"<<endl;
+      // Atomic parameters
+      pcr<<"!Atom Typ X Y Z Biso Occ In Fin N_t Spc / Codes"<<endl;
+      for(long j=0;j<pSC->GetNbComponent();++j)
+      {
+         if((*pSC)(j).mpScattPow==0) continue ; //:TODO: changed number of atoms declared above !!
+         pcr<<(*pSC)(j).mpScattPow->GetName()<<" "<<(*pSC)(j).mpScattPow->GetSymbol()<<" "
+            <<(*pSC)(j).mX<<" "<<(*pSC)(j).mY<<" "<<(*pSC)(j).mZ<<" "
+            <<(*pSC)(j).mpScattPow->GetBiso()<<" "
+            <<(*pSC)(j).mOccupancy*(*pSC)(j).mDynPopCorr
+                                  <<" 0  0   0   0"<<endl
+            <<"       0 0 0  0    0"<<endl;
+      }
+      // POWDER DATA-I: PROFILE PARAMETERS FOR EACH PATTERN
+      pcr<<"!Scale Shape1 Bov Str1 Str2 Str3 Strain-Model"<<endl
+         <<" 1.0     0.0  0.0  0.0  0.0  0.0       0"<<endl
+         <<" 1.0     0.0  0.0  0.0  0.0  0.0       0"<<endl;
+      
+      // :TODO: make sure the profile used corrseponds to pseudo-Voigt first !
+         pcr<<"!     U     V     W     X     Y     GauSiz     LorSiz Size-Model"<<endl
+            <<vDiff[i]->GetProfile().GetPar("U").GetHumanValue()<<" "
+            <<vDiff[i]->GetProfile().GetPar("V").GetHumanValue()<<" "
+            <<vDiff[i]->GetProfile().GetPar("W").GetHumanValue()<<" "
+            <<                     "  0.0   0.0      0.0        0.0 "<<endl
+            << "    0.0   0.0   0.0   0.0   0.0      0.0        0.0 "<<endl;
+      // Cell parameters
+      pcr<<"!     a          b         c        alpha      beta       gamma      #Cell Info"<<endl
+         <<vDiff[i]->GetCrystal().GetLatticePar(0)<<" "
+         <<vDiff[i]->GetCrystal().GetLatticePar(1)<<" "
+         <<vDiff[i]->GetCrystal().GetLatticePar(2)<<" "
+         <<vDiff[i]->GetCrystal().GetLatticePar(3)*RAD2DEG<<" "
+         <<vDiff[i]->GetCrystal().GetLatticePar(4)*RAD2DEG<<" "
+         <<vDiff[i]->GetCrystal().GetLatticePar(5)*RAD2DEG<<endl
+         <<"    0.0        0.0       0.0        0.0        0.0        0.0"<<endl;
+      pcr<<"! Pref1 Pref2 alpha0 beta0 alpha1 beta1 ?"<<endl
+         <<"   0.0   0.0    0.0   0.0    0.0   0.0"<<endl
+         <<"   0.0   0.0    0.0   0.0    0.0   0.0"<<endl;
+      // ??
+      pcr<<"!Absorption correction parameters ?"<<endl
+         <<"0.00   0.00   0.00000    0.00"<<endl;
+   }
+   pcr.close();
+}
 
 void PowderPattern::CalcPowderPattern() const
 {
