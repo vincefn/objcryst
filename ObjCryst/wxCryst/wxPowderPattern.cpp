@@ -32,6 +32,7 @@
 #include "wx/config.h"
 #include "wx/notebook.h"
 #include "wx/progdlg.h"
+#include "wx/filename.h"
 
 #include "wxCryst/wxPowderPattern.h"
 #include "wxCryst/wxRadiation.h"
@@ -936,16 +937,16 @@ void WXPowderPattern::OnMenuExport(wxCommandEvent &event)
    WXCrystValidateAllUserInput();
    wxFileDialog save(this,"Choose a .pcr file","","","*.pcr",wxSAVE | wxOVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
-   wxString prefix;
-   if(save.GetPath().size()>4)
-      prefix=save.GetPath().Left(save.GetPath().size()-4);
-   else prefix=save.GetPath();
+   
+   wxString path,name,ext;
+   wxFileName::SplitPath(save.GetPath(), &path, &name, &ext, wxPATH_NATIVE);
    wxString mes;
-   wxString pcr=prefix+_T(".pcr");
-   wxString dat=prefix+_T(".dat");
+   wxString pcr=path+wxFileName::GetPathSeparator()+name+_T(".pcr");
+   wxString dat=path+wxFileName::GetPathSeparator()+name+_T(".dat");
    mes.Printf("This will create the files:\n   %s\n   %s",pcr.c_str(),dat.c_str());
    wxMessageDialog mesd(this,mes,_T("Files"),wxOK|wxCANCEL|wxICON_INFORMATION);
-   if(mesd.ShowModal()==wxID_OK) mpPowderPattern->ExportFullprof(prefix.c_str());
+   if(mesd.ShowModal()==wxID_OK)
+      mpPowderPattern->ExportFullprof((path+wxFileName::GetPathSeparator()+name).c_str());
 }
 
 void WXPowderPattern::NotifyDeleteGraph() {mpGraph=0;}

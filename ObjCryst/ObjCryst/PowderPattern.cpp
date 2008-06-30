@@ -4604,10 +4604,11 @@ void PowderPattern::ExportFullprof(const std::string &prefix)const
    dat << FormatVertVector<REAL>(ttheta,mPowderPatternObs,mPowderPatternObsSigma,12,4);
    dat.close();
    
-   
    // PCR file
    ofstream pcr((prefix+".pcr").c_str());
    // if(!pcr) ???;
+   #define FULLPROF_MULTI_PATTERN
+   #ifdef FULLPROF_MULTI_PATTERN
    // Title
    pcr<<"Fox/ObjCryst exported file:"<<this->GetName()<<endl;
    // Number of patterns
@@ -4619,28 +4620,43 @@ void PowderPattern::ExportFullprof(const std::string &prefix)const
    pcr<<"   1   0   0   0   0   1   1 "<<endl;
    // For each phase
    {
-      int npr=0;
-      if(this->GetRadiation().GetRadiationType()==RAD_XRAY) npr=0;
-      if(this->GetRadiation().GetRadiationType()==RAD_NEUTRON) npr=1;
-   
+      int job=0;
+      if(this->GetRadiation().GetRadiationType()==RAD_XRAY) job=0;
+      if(this->GetRadiation().GetRadiationType()==RAD_NEUTRON) job=1;
+      //:TODO: TOF: 
       pcr<<"! Job Npr Nba Nex Nsc Nor Iwg Ilo Res Ste Uni Cor Anm"<<endl
-         <<"   "<<-npr
+         <<"   "<<job
               <<"  5 "<<pBackground->GetInterpPoints().first->numElements()
                        <<" 0   0   1   0   0   0   1   0   0   0"<<endl;
    }
    // Names of data files
+   string shortName;
+   {// Strip path for data file
+      std::string::size_type idx =prefix.rfind("/");
+      std::string::size_type idx2=prefix.rfind("\\");
+      std::string::size_type idx3=prefix.rfind(":");
+      if(((long)idx2!=(long)string::npos)&&((long)idx2>(long)idx))idx=idx2;
+      if(((long)idx3!=(long)string::npos)&&((long)idx3>(long)idx))idx=idx3;
+      if(idx==string::npos)
+         shortName=prefix;
+      else
+         shortName=prefix.substr(idx+1);
+   }
    pcr<<"! File names of data files"<<endl;
-   pcr<<prefix<<".dat"<<endl;
+   pcr<<shortName<<".dat"<<endl;
    // Output options...
    pcr<<"! Mat Pcr Syo Rpa Sym Sho"<<endl
-      <<"   1   1   0   1   0   0 "<<endl;
+      <<"   1   1   0   -1  0   0 "<<endl;
    // Output options... For each pattern
    pcr<<"! Ipr Ppl Ioc Ls1 Ls2 Ls3 Prf Ins Hkl Fou Ana"<<endl
       <<"   0   0   0   0   0   0   1   10  0   0   1 "<<endl;
    // Fixed experimental parameters For each 2-theta pattern :TODO: Check !
+   int wdt=16;
+   if(this->GetRadiation().GetRadiationType()==RAD_NEUTRON) wdt=10;
    pcr<<"!lambda1 lambda2 Ratio Bkpos Wdt Cthm muR AsyLim Rpolarz -> Patt #1"<<endl
       <<this->GetRadiation().GetWavelength()(0)<<" "<<this->GetRadiation().GetWavelength()(0)
-      <<                  " 0     0    10   0   0    0     0.95"<<endl;
+      <<                  " 0     0   "<<wdt
+                                       <<"  0   0    0     0.95"<<endl;
    // Refinement parameters - changes are damped !!
    pcr<<"!NCY Eps R_at R_an R_pr R_gl"<<endl
       <<"  5  0.2  1.0  1.0  1.0  1.0"<<endl;
@@ -4672,7 +4688,9 @@ void PowderPattern::ExportFullprof(const std::string &prefix)const
       const ScatteringComponentList *pSC=&(vDiff[i]->GetCrystal().GetScatteringComponentList());
       pcr<<"!Nat Dis Ang Jbt Isy Str Furth  ATZ Nvk More"<<endl
          <<  pSC->GetNbComponent()
-              <<" 0   0   0   0   0    0    1.0  0   0"<<endl;
+              <<" 0   0   0   0   0    0    1.0  0   1"<<endl;
+      pcr<<"!Jvi Jdi Hel Sol Mom Ter  N_Domains"<<endl
+         <<"  0   3   0   0   0   0      0"<<endl;
       // Contribution to the patterns
       pcr<<"!Contributions (0/1) of this phase to the  patterns"<<endl
          <<" 1"<<endl;
@@ -4682,6 +4700,10 @@ void PowderPattern::ExportFullprof(const std::string &prefix)const
       pcr<<"! Pr1    Pr2    Pr3   Brind.   Rmua   Rmub   Rmuc     for Pattern#"<<i<<endl
          <<"  1.0    1.0    1.0    1.0      0.0    0.0    0.0"<<endl;
 
+      // Limits for distance calculations
+      pcr<<"! Max_dst(dist) (angles)  Bond-Valence Calc."<<endl
+         <<"    2.7000      1.5000        0"<<endl;
+
       // Space group symbol
       pcr<<vDiff[i]->GetCrystal().GetSpaceGroup().GetCCTbxSpg().match_tabulated_settings().hermann_mauguin()
          <<"                       <- Space Group Symbol"<<endl;
@@ -4690,7 +4712,8 @@ void PowderPattern::ExportFullprof(const std::string &prefix)const
       for(long j=0;j<pSC->GetNbComponent();++j)
       {
          if((*pSC)(j).mpScattPow==0) continue ; //:TODO: changed number of atoms declared above !!
-         pcr<<(*pSC)(j).mpScattPow->GetName()<<" "<<(*pSC)(j).mpScattPow->GetSymbol()<<" "
+         pcr<<(*pSC)(j).mpScattPow->GetName()<<j+1
+            <<" "<<(*pSC)(j).mpScattPow->GetSymbol()<<" "
             <<(*pSC)(j).mX<<" "<<(*pSC)(j).mY<<" "<<(*pSC)(j).mZ<<" "
             <<(*pSC)(j).mpScattPow->GetBiso()<<" "
             <<(*pSC)(j).mOccupancy*(*pSC)(j).mDynPopCorr
@@ -4698,8 +4721,12 @@ void PowderPattern::ExportFullprof(const std::string &prefix)const
             <<"       0 0 0  0    0"<<endl;
       }
       // POWDER DATA-I: PROFILE PARAMETERS FOR EACH PATTERN
+      REAL eta0=vDiff[0]->GetProfile().GetPar("Eta0").GetHumanValue();
+      if(eta0<.01) eta0=.01;
+      else if(eta0>.99) eta0=.99;
       pcr<<"!Scale Shape1 Bov Str1 Str2 Str3 Strain-Model"<<endl
-         <<" 1.0     0.0  0.0  0.0  0.0  0.0       0"<<endl
+         <<" 1.0 "<<eta0
+                   <<" 0.0  0.0  0.0  0.0       0"<<endl
          <<" 1.0     0.0  0.0  0.0  0.0  0.0       0"<<endl;
       
       // :TODO: make sure the profile used corrseponds to pseudo-Voigt first !
@@ -4725,6 +4752,101 @@ void PowderPattern::ExportFullprof(const std::string &prefix)const
       pcr<<"!Absorption correction parameters ?"<<endl
          <<"0.00   0.00   0.00000    0.00"<<endl;
    }
+   #else
+   // Title
+   pcr<<"COMM Fox/ObjCryst exported file:"<<this->GetName()<<endl;
+   int npr=0;
+   if(this->GetRadiation().GetRadiationType()==RAD_XRAY) npr=0;
+   if(this->GetRadiation().GetRadiationType()==RAD_NEUTRON) npr=1;
+   pcr<<"!Job Npr Nph Nba Nex Nsc Nor Dum Iwg Ilo Ias Res Ste Nre Cry Uni Cor Opt Aut"<<endl;
+   pcr<<npr<<" 5   1 "<<pBackground->GetInterpPoints().first->numElements()
+                       <<" 0   0   1   0   0   0   0   0   1   0   0   0   0   1   1 "<<endl;
+   pcr<<"! File names of data files"<<endl;
+   pcr<<"!"<<prefix<<".dat"<<endl;
+   
+   pcr<<"!Ipr Ppl Ioc Mat Pcr Ls1 Ls2 Ls3 Syo Prf Ins Rpa Sym Hkl Fou Sho Ana"<<endl
+      <<"  0   0   0   2   1   0   0   0   0   1   10 -1   0   0   0   0   1 "<<endl;
+   
+   int wdt=16;
+   if(this->GetRadiation().GetRadiationType()==RAD_NEUTRON) wdt=10;
+   pcr<<"!lambda1 lambda2 Ratio Bkpos Wdt Cthm muR AsyLim Rpolarz"<<endl
+      <<this->GetRadiation().GetWavelength()(0)<<" "<<this->GetRadiation().GetWavelength()(0)
+      <<                  " 0     0   "<<wdt
+                                       <<"  0   0    0     0.95"<<endl;
+   
+   pcr<<"!NCY Eps R_at R_an R_pr R_gl Thmin Step Thmax PSD Sent0"<<endl
+      <<"  5  0.2  1.0  1.0  1.0  1.0   0     0    0    0    0"<<endl;
+   
+   pcr<<"!2Theta Background"<<endl;
+   for(unsigned long i=0;i<pBackground->GetInterpPoints().first->numElements();i++)
+      pcr<<(*(pBackground->GetInterpPoints().first))(i)*RAD2DEG<<" "
+      <<(*(pBackground->GetInterpPoints().second))(i)<<" 0.0"<<endl;
+   
+   pcr<<"!"<<endl<<"!"<<endl<<"1 !Number of refined parameters"<<endl;
+   
+   pcr<<"! Zero Code Sycos Code Sysin Code Lambda Code More -> Patt #1"<<endl;
+   pcr<<" "<<mXZero*RAD2DEG <<" 0.0 "
+                   <<m2ThetaDisplacement*RAD2DEG <<" 0.0 "
+                                <<m2ThetaTransparency*RAD2DEG <<" 0.0 "
+                                         <<"0.000  0.0  0"<<endl;
+   
+   pcr<<"!-------------------------------------------------------------------------------"<<endl
+      <<"!  Data for PHASE number:   0  ==> Current R_Bragg for Pattern#  1:     0.00    "<<endl
+      <<"!-------------------------------------------------------------------------------"<<endl;
+   pcr<<vDiff[0]->GetCrystal().GetName()<<endl;
+   
+   const ScatteringComponentList *pSC=&(vDiff[0]->GetCrystal().GetScatteringComponentList());
+   pcr<<"! Nat Dis Ang Pr1 Pr2 Pr3 Jbt Irf Isy Str Furth ATZ Nvk Npr More"<<endl
+      <<pSC->GetNbComponent()
+      <<     "  0   0   0   0   0   0   0   0   0    0   1.0  0   0    0 "<<endl;
+      
+   pcr<<vDiff[0]->GetCrystal().GetSpaceGroup().GetCCTbxSpg().match_tabulated_settings().hermann_mauguin()
+      <<"                       <- Space Group Symbol"<<endl;
+   
+   pcr<<"!Atom Typ X Y Z Biso Occ In Fin N_t Spc / Codes"<<endl;
+   for(long j=0;j<pSC->GetNbComponent();++j)
+   {
+      if((*pSC)(j).mpScattPow==0) continue ; //:TODO: changed number of atoms declared above !!
+      pcr<<(*pSC)(j).mpScattPow->GetName()<<j+1
+         <<" "<<(*pSC)(j).mpScattPow->GetSymbol()<<" "
+         <<(*pSC)(j).mX<<" "<<(*pSC)(j).mY<<" "<<(*pSC)(j).mZ<<" "
+         <<(*pSC)(j).mpScattPow->GetBiso()<<" "
+         <<(*pSC)(j).mOccupancy*(*pSC)(j).mDynPopCorr
+                                 <<" 0  0   0   0"<<endl
+         <<"       0 0 0  0    0"<<endl;
+   }
+   
+   REAL eta0=vDiff[0]->GetProfile().GetPar("Eta0").GetHumanValue();
+   if(eta0<.01) eta0=.01;
+   else if(eta0>.99) eta0=.99;
+   pcr<<"!Scale Shape1 Bov Str1 Str2 Str3 Strain-Model"<<endl
+      <<" 1.0 "<<eta0
+                   <<" 0.0  0.0  0.0  0.0       0"<<endl
+      <<" 1.0     0.0  0.0  0.0  0.0  0.0       0"<<endl;
+         
+   pcr<<"!     U     V     W     X     Y     GauSiz     LorSiz Size-Model"<<endl
+      <<vDiff[0]->GetProfile().GetPar("U").GetHumanValue()<<" "
+      <<vDiff[0]->GetProfile().GetPar("V").GetHumanValue()<<" "
+      <<vDiff[0]->GetProfile().GetPar("W").GetHumanValue()<<" "
+      <<                     "  0.0   0.0      0.0        0.0 "<<endl
+      << "    0.0   0.0   0.0   0.0   0.0      0.0        0.0 "<<endl;
+   
+   pcr<<"!     a          b         c        alpha      beta       gamma      #Cell Info"<<endl
+      <<vDiff[0]->GetCrystal().GetLatticePar(0)<<" "
+      <<vDiff[0]->GetCrystal().GetLatticePar(1)<<" "
+      <<vDiff[0]->GetCrystal().GetLatticePar(2)<<" "
+      <<vDiff[0]->GetCrystal().GetLatticePar(3)*RAD2DEG<<" "
+      <<vDiff[0]->GetCrystal().GetLatticePar(4)*RAD2DEG<<" "
+      <<vDiff[0]->GetCrystal().GetLatticePar(5)*RAD2DEG<<endl
+      <<"    0.0        0.0       0.0        0.0        0.0        0.0"<<endl;
+   
+   pcr<<"! Pref1 Pref2 alpha0 beta0 alpha1 beta1 ?"<<endl
+      <<"   0.0   0.0    0.0   0.0    0.0   0.0"<<endl
+      <<"   0.0   0.0    0.0   0.0    0.0   0.0"<<endl;
+   // ??
+   pcr<<"!Absorption correction parameters ?"<<endl
+      <<"0.00   0.00   0.00000    0.00"<<endl;
+   #endif
    pcr.close();
 }
 
