@@ -270,9 +270,6 @@ mChi2(0.0),mGoF(0.0),mRwp(0.0),mRp(0.0)
    mpWXTitle->SetForegroundColour(wxColour(255,0,0));
    mpWXTitle->SetSize(400,-1);
    // Menu
-      mpMenuBar->AddMenu("Export",ID_POWDER_MENU_EXPORT);
-         mpMenuBar->AddMenuItem(ID_POWDER_MENU_EXPORT,ID_POWDER_MENU_EXPORT_FULLPROF,
-                                "Export to Fullprof");
       mpMenuBar->AddMenu("Data",ID_REFOBJ_MENU_OBJ);
          //:TODO: reactivate & test those menus
          //mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_REFOBJ_MENU_OBJ_SAVE,"Save");
@@ -309,6 +306,9 @@ mChi2(0.0),mGoF(0.0),mRwp(0.0),mRp(0.0)
          mpMenuBar->GetMenu(ID_REFOBJ_MENU_OBJ).AppendSeparator();
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDER_MENU_IMPORT_TOFISISXYSIGMA,
                                  "Import Neutron TOF ISIS X Y Sigma");
+      mpMenuBar->AddMenu("Export",ID_POWDER_MENU_EXPORT);
+         mpMenuBar->AddMenuItem(ID_POWDER_MENU_EXPORT,ID_POWDER_MENU_EXPORT_FULLPROF,
+                                "Export to Fullprof");
       mpMenuBar->AddMenu("Parameters",ID_REFOBJ_MENU_PAR);
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_FIXALL,"Fix all");
          //mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_UNFIXALL,"Unfix all");
