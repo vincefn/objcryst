@@ -25,6 +25,9 @@
 
 #include <typeinfo>
 #include <stdio.h> //for sprintf()
+
+#include "cctbx/sgtbx/space_group.h" // For fullprof export
+
 #include "ObjCryst/PowderPattern.h"
 #include "ObjCryst/Molecule.h" // For fullprof export
 #include "ObjCryst/PowderPatternBackgroundBayesianMinimiser.h"
@@ -35,8 +38,6 @@
 #ifdef __WX__CRYST__
    #include "wxCryst/wxPowderPattern.h"
 #endif
-
-#include "cctbx/sgtbx/space_group.h" // For fullprof export
 
 #include <fstream>
 #include <iomanip>
