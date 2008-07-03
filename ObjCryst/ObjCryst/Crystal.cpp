@@ -200,6 +200,8 @@ const Scatterer& Crystal::GetScatt(const long scattIndex) const
 
 ObjRegistry<Scatterer>& Crystal::GetScattererRegistry() {return mScattererRegistry;}
 
+const ObjRegistry<Scatterer>& Crystal::GetScattererRegistry() const {return mScattererRegistry;}
+
 ObjRegistry<ScatteringPower>& Crystal::GetScatteringPowerRegistry() 
 {return mScatteringPowerRegistry;}
 const ObjRegistry<ScatteringPower>& Crystal::GetScatteringPowerRegistry() const

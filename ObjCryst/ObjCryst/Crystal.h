@@ -159,6 +159,8 @@ class Crystal:public UnitCell
       
       /// Get the registry of scatterers
       ObjRegistry<Scatterer>& GetScattererRegistry();
+      /// Get the registry of scatterers
+      const ObjRegistry<Scatterer>& GetScattererRegistry()const;
       /// Get the registry of ScatteringPower included in this Crystal.
       ObjRegistry<ScatteringPower>& GetScatteringPowerRegistry();
       /// Get the registry of ScatteringPower included in this Crystal.
