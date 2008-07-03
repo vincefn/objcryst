@@ -26,6 +26,7 @@
 #include <typeinfo>
 #include <stdio.h> //for sprintf()
 #include "ObjCryst/PowderPattern.h"
+#include "ObjCryst/Molecule.h" // For fullprof export
 #include "ObjCryst/PowderPatternBackgroundBayesianMinimiser.h"
 #include "RefinableObj/Simplex.h"
 #include "Quirks/VFNDebug.h"
@@ -35,7 +36,7 @@
    #include "wxCryst/wxPowderPattern.h"
 #endif
 
-#include "cctbx/sgtbx/space_group.h"
+#include "cctbx/sgtbx/space_group.h" // For fullprof export
 
 #include <fstream>
 #include <iomanip>
@@ -4577,7 +4578,34 @@ PeakList PowderPattern::FindPeaks(const float dmin,const float maxratio,const un
 }
 
 const CrystVector_REAL& PowderPattern::GetScaleFactor() const{return mScaleFactor;}
+
 CrystVector_REAL& PowderPattern::GetScaleFactor(){return mScaleFactor;}
+
+//Local structures to export atoms, bond and angle restraints
+struct exportAtom
+{
+   exportAtom(string n,REAL X, REAL Y, REAL Z,REAL b,REAL o,const ScatteringPower *pow):
+   name(n),x(X),y(Y),z(Z),biso(b),occ(o),mpScattPow(pow){}
+   string name;
+   REAL x,y,z,biso,occ;
+   const ScatteringPower *mpScattPow;
+};
+
+struct exportBond
+{
+   exportBond(const string &a1,const string &a2, REAL d, REAL s):
+   at1(a1),at2(a2),dist(d),sigma(s){}
+   string at1,at2;
+   REAL dist,sigma;
+};
+
+struct exportAngle
+{
+   exportAngle(const string &a1,const string &a2,const string &a3, REAL a, REAL s):
+   at1(a1),at2(a2),at3(a3),ang(a),sigma(s){}
+   string at1,at2,at3;
+   REAL ang,sigma;
+};
 
 void PowderPattern::ExportFullprof(const std::string &prefix)const
 {
@@ -4606,9 +4634,8 @@ void PowderPattern::ExportFullprof(const std::string &prefix)const
    
    // PCR file
    ofstream pcr((prefix+".pcr").c_str());
-   // if(!pcr) ???;
-   #define FULLPROF_MULTI_PATTERN
-   #ifdef FULLPROF_MULTI_PATTERN
+   // if(!pcr) :TODO:
+   
    // Title
    pcr<<"Fox/ObjCryst exported file:"<<this->GetName()<<endl;
    // Number of patterns
@@ -4684,11 +4711,84 @@ void PowderPattern::ExportFullprof(const std::string &prefix)const
          <<"!-------------------------------------------------------------------------------"<<endl;
       //Phase name
       pcr<<vDiff[i]->GetCrystal().GetName()<<endl;
+      
+      // List all atoms, remove overlapping ones
+      map<int,exportAtom> vExportAtom;
+      list<exportBond> vExportBond;
+      list<exportAngle> vExportAngle;
+      {
+         CrystMatrix_REAL minDistTable;
+         minDistTable=vDiff[i]->GetCrystal().GetMinDistanceTable(-1.);
+         unsigned long k=0;
+         // list0 is the full scattering component list with all atoms except dummies, 
+         // and a correct mDynPopCorr
+         const ScatteringComponentList list0=vDiff[i]->GetCrystal().GetScatteringComponentList();
+         for(int s=0;s<vDiff[i]->GetCrystal().GetScattererRegistry().GetNb();s++) 
+         {
+            const ScatteringComponentList list=vDiff[i]->GetCrystal().GetScatt(s).GetScatteringComponentList();
+            set<string> vName;// list of atoms that are listed (not redundant)
+            for(int j=0;j<list.GetNbComponent();j++)
+            {
+               if(0==list(j).mpScattPow) continue;
+               bool redundant=false;
+               for(unsigned long l=0;l<k;++l) 
+                  if(abs(minDistTable(l,k))<0.5) 
+                  {
+                     map<int,exportAtom>::iterator pos=vExportAtom.find(l);
+                     if(pos!=vExportAtom.end()) pos->second.occ*=2;
+                     redundant=true;//-1 means dist > 10A
+                  }
+               if(!redundant)
+               {
+                  //:TODO: avoid non-alphanumeric characters in name
+                  vName.insert(vDiff[i]->GetCrystal().GetScatt(s).GetComponentName(j));
+                  vExportAtom.insert(make_pair(k,exportAtom(vDiff[i]->GetCrystal().GetScatt(s).GetComponentName(j),
+                                                            list(j).mX,list(j).mY,list(j).mZ,
+                                                            list(j).mpScattPow->GetBiso(),
+                                                            list(j).mOccupancy*list0(k).mDynPopCorr,
+                                                            list(j).mpScattPow)));
+               }
+               k++;
+            }
+            if(vDiff[i]->GetCrystal().GetScatt(s).GetClassName()=="Molecule")
+            {
+               const Molecule *pMol=dynamic_cast<const Molecule*>(&(vDiff[i]->GetCrystal().GetScatt(s)));
+               if(pMol!=0)
+               {
+                  for(vector<MolBond*>::const_iterator pos=pMol->GetBondList().begin();
+                      pos!=pMol->GetBondList().end();++pos)
+                  {
+                     if(  (vName.find((*pos)->GetAtom1().GetName())!=vName.end())
+                        &&(vName.find((*pos)->GetAtom2().GetName())!=vName.end()))
+                        vExportBond.push_back(exportBond((*pos)->GetAtom1().GetName(),
+                                                      (*pos)->GetAtom2().GetName(),
+                                                      (*pos)->GetLength0(),(*pos)->GetLengthSigma()));
+                  }
+                  
+                  for(vector<MolBondAngle*>::const_iterator pos=pMol->GetBondAngleList().begin();
+                      pos!=pMol->GetBondAngleList().end();++pos)
+                  {
+                     if(  (vName.find((*pos)->GetAtom1().GetName())!=vName.end())
+                        &&(vName.find((*pos)->GetAtom2().GetName())!=vName.end())
+                        &&(vName.find((*pos)->GetAtom3().GetName())!=vName.end()))
+                        vExportAngle.push_back(exportAngle((*pos)->GetAtom1().GetName(),
+                                                        (*pos)->GetAtom2().GetName(),
+                                                        (*pos)->GetAtom3().GetName(),
+                                                        (*pos)->GetAngle0(),(*pos)->GetAngleSigma()));
+                  }
+               }
+            }
+         }
+         // :TODO: recognize special positions, and move the atoms on them.
+         // :TODO: list atoms excluded, commented out
+      }
+
       // Main control codes line for the phase
+      //:TODO:  extract distance (Dis) and bond angle (Ang) restraints whenever possible
       const ScatteringComponentList *pSC=&(vDiff[i]->GetCrystal().GetScatteringComponentList());
       pcr<<"!Nat Dis Ang Jbt Isy Str Furth  ATZ Nvk More"<<endl
-         <<  pSC->GetNbComponent()
-              <<" 0   0   0   0   0    0    1.0  0   1"<<endl;
+         <<  vExportAtom.size() <<"  "<<vExportBond.size()<<"  "<<vExportAngle.size()
+                    <<"   0   0   0    0    1.0  0   1"<<endl;
       pcr<<"!Jvi Jdi Hel Sol Mom Ter  N_Domains"<<endl
          <<"  0   3   0   0   0   0      0"<<endl;
       // Contribution to the patterns
@@ -4709,15 +4809,13 @@ void PowderPattern::ExportFullprof(const std::string &prefix)const
          <<"                       <- Space Group Symbol"<<endl;
       // Atomic parameters
       pcr<<"!Atom Typ X Y Z Biso Occ In Fin N_t Spc / Codes"<<endl;
-      for(long j=0;j<pSC->GetNbComponent();++j)
+      for(map<int,exportAtom>::const_iterator pos=vExportAtom.begin();pos!=vExportAtom.end();++pos)
       {
-         if((*pSC)(j).mpScattPow==0) continue ; //:TODO: changed number of atoms declared above !!
-         pcr<<(*pSC)(j).mpScattPow->GetName()<<j+1
-            <<" "<<(*pSC)(j).mpScattPow->GetSymbol()<<" "
-            <<(*pSC)(j).mX<<" "<<(*pSC)(j).mY<<" "<<(*pSC)(j).mZ<<" "
-            <<(*pSC)(j).mpScattPow->GetBiso()<<" "
-            <<(*pSC)(j).mOccupancy*(*pSC)(j).mDynPopCorr
-                                  <<" 0  0   0   0"<<endl
+         pcr<<pos->second.name
+            <<" "<<pos->second.mpScattPow->GetSymbol()<<" "
+            <<pos->second.x<<" "<<pos->second.y<<" "<<pos->second.z<<" "
+            <<pos->second.biso<<" "
+            <<pos->second.occ<<" 0  0   0   0"<<endl
             <<"       0 0 0  0    0"<<endl;
       }
       // POWDER DATA-I: PROFILE PARAMETERS FOR EACH PATTERN
@@ -4749,104 +4847,26 @@ void PowderPattern::ExportFullprof(const std::string &prefix)const
          <<"   0.0   0.0    0.0   0.0    0.0   0.0"<<endl
          <<"   0.0   0.0    0.0   0.0    0.0   0.0"<<endl;
       // ??
-      pcr<<"!Absorption correction parameters ?"<<endl
-         <<"0.00   0.00   0.00000    0.00"<<endl;
+      //pcr<<"! ??"<<endl
+      //   <<"0.00   0.00   0.00000    0.00"<<endl;
+      if(vExportBond.size()>0)
+      {
+         pcr<<"!Soft distance constraints"<<endl;
+         for(list<exportBond>::const_iterator pos=vExportBond.begin();pos!=vExportBond.end();++pos)
+         {
+            pcr<<pos->at1<<" "<<pos->at2<<" 1 0 0 0 "<<pos->dist<<" "<<pos->sigma<<endl;
+         }
+      }
+      if(vExportBond.size()>0)
+      {
+         pcr<<"!Soft angle constraints"<<endl;
+         for(list<exportAngle>::const_iterator pos=vExportAngle.begin();pos!=vExportAngle.end();++pos)
+         {
+            pcr<<pos->at1<<" "<<pos->at2<<" "<<pos->at3<<" 1 1  0 0 0  0 0 0 "
+               <<pos->ang*RAD2DEG<<" "<<pos->sigma*RAD2DEG<<endl;
+         }
+      }
    }
-   #else
-   // Title
-   pcr<<"COMM Fox/ObjCryst exported file:"<<this->GetName()<<endl;
-   int npr=0;
-   if(this->GetRadiation().GetRadiationType()==RAD_XRAY) npr=0;
-   if(this->GetRadiation().GetRadiationType()==RAD_NEUTRON) npr=1;
-   pcr<<"!Job Npr Nph Nba Nex Nsc Nor Dum Iwg Ilo Ias Res Ste Nre Cry Uni Cor Opt Aut"<<endl;
-   pcr<<npr<<" 5   1 "<<pBackground->GetInterpPoints().first->numElements()
-                       <<" 0   0   1   0   0   0   0   0   1   0   0   0   0   1   1 "<<endl;
-   pcr<<"! File names of data files"<<endl;
-   pcr<<"!"<<prefix<<".dat"<<endl;
-   
-   pcr<<"!Ipr Ppl Ioc Mat Pcr Ls1 Ls2 Ls3 Syo Prf Ins Rpa Sym Hkl Fou Sho Ana"<<endl
-      <<"  0   0   0   2   1   0   0   0   0   1   10 -1   0   0   0   0   1 "<<endl;
-   
-   int wdt=16;
-   if(this->GetRadiation().GetRadiationType()==RAD_NEUTRON) wdt=10;
-   pcr<<"!lambda1 lambda2 Ratio Bkpos Wdt Cthm muR AsyLim Rpolarz"<<endl
-      <<this->GetRadiation().GetWavelength()(0)<<" "<<this->GetRadiation().GetWavelength()(0)
-      <<                  " 0     0   "<<wdt
-                                       <<"  0   0    0     0.95"<<endl;
-   
-   pcr<<"!NCY Eps R_at R_an R_pr R_gl Thmin Step Thmax PSD Sent0"<<endl
-      <<"  5  0.2  1.0  1.0  1.0  1.0   0     0    0    0    0"<<endl;
-   
-   pcr<<"!2Theta Background"<<endl;
-   for(unsigned long i=0;i<pBackground->GetInterpPoints().first->numElements();i++)
-      pcr<<(*(pBackground->GetInterpPoints().first))(i)*RAD2DEG<<" "
-      <<(*(pBackground->GetInterpPoints().second))(i)<<" 0.0"<<endl;
-   
-   pcr<<"!"<<endl<<"!"<<endl<<"1 !Number of refined parameters"<<endl;
-   
-   pcr<<"! Zero Code Sycos Code Sysin Code Lambda Code More -> Patt #1"<<endl;
-   pcr<<" "<<mXZero*RAD2DEG <<" 0.0 "
-                   <<m2ThetaDisplacement*RAD2DEG <<" 0.0 "
-                                <<m2ThetaTransparency*RAD2DEG <<" 0.0 "
-                                         <<"0.000  0.0  0"<<endl;
-   
-   pcr<<"!-------------------------------------------------------------------------------"<<endl
-      <<"!  Data for PHASE number:   0  ==> Current R_Bragg for Pattern#  1:     0.00    "<<endl
-      <<"!-------------------------------------------------------------------------------"<<endl;
-   pcr<<vDiff[0]->GetCrystal().GetName()<<endl;
-   
-   const ScatteringComponentList *pSC=&(vDiff[0]->GetCrystal().GetScatteringComponentList());
-   pcr<<"! Nat Dis Ang Pr1 Pr2 Pr3 Jbt Irf Isy Str Furth ATZ Nvk Npr More"<<endl
-      <<pSC->GetNbComponent()
-      <<     "  0   0   0   0   0   0   0   0   0    0   1.0  0   0    0 "<<endl;
-      
-   pcr<<vDiff[0]->GetCrystal().GetSpaceGroup().GetCCTbxSpg().match_tabulated_settings().hermann_mauguin()
-      <<"                       <- Space Group Symbol"<<endl;
-   
-   pcr<<"!Atom Typ X Y Z Biso Occ In Fin N_t Spc / Codes"<<endl;
-   for(long j=0;j<pSC->GetNbComponent();++j)
-   {
-      if((*pSC)(j).mpScattPow==0) continue ; //:TODO: changed number of atoms declared above !!
-      pcr<<(*pSC)(j).mpScattPow->GetName()<<j+1
-         <<" "<<(*pSC)(j).mpScattPow->GetSymbol()<<" "
-         <<(*pSC)(j).mX<<" "<<(*pSC)(j).mY<<" "<<(*pSC)(j).mZ<<" "
-         <<(*pSC)(j).mpScattPow->GetBiso()<<" "
-         <<(*pSC)(j).mOccupancy*(*pSC)(j).mDynPopCorr
-                                 <<" 0  0   0   0"<<endl
-         <<"       0 0 0  0    0"<<endl;
-   }
-   
-   REAL eta0=vDiff[0]->GetProfile().GetPar("Eta0").GetHumanValue();
-   if(eta0<.01) eta0=.01;
-   else if(eta0>.99) eta0=.99;
-   pcr<<"!Scale Shape1 Bov Str1 Str2 Str3 Strain-Model"<<endl
-      <<" 1.0 "<<eta0
-                   <<" 0.0  0.0  0.0  0.0       0"<<endl
-      <<" 1.0     0.0  0.0  0.0  0.0  0.0       0"<<endl;
-         
-   pcr<<"!     U     V     W     X     Y     GauSiz     LorSiz Size-Model"<<endl
-      <<vDiff[0]->GetProfile().GetPar("U").GetHumanValue()<<" "
-      <<vDiff[0]->GetProfile().GetPar("V").GetHumanValue()<<" "
-      <<vDiff[0]->GetProfile().GetPar("W").GetHumanValue()<<" "
-      <<                     "  0.0   0.0      0.0        0.0 "<<endl
-      << "    0.0   0.0   0.0   0.0   0.0      0.0        0.0 "<<endl;
-   
-   pcr<<"!     a          b         c        alpha      beta       gamma      #Cell Info"<<endl
-      <<vDiff[0]->GetCrystal().GetLatticePar(0)<<" "
-      <<vDiff[0]->GetCrystal().GetLatticePar(1)<<" "
-      <<vDiff[0]->GetCrystal().GetLatticePar(2)<<" "
-      <<vDiff[0]->GetCrystal().GetLatticePar(3)*RAD2DEG<<" "
-      <<vDiff[0]->GetCrystal().GetLatticePar(4)*RAD2DEG<<" "
-      <<vDiff[0]->GetCrystal().GetLatticePar(5)*RAD2DEG<<endl
-      <<"    0.0        0.0       0.0        0.0        0.0        0.0"<<endl;
-   
-   pcr<<"! Pref1 Pref2 alpha0 beta0 alpha1 beta1 ?"<<endl
-      <<"   0.0   0.0    0.0   0.0    0.0   0.0"<<endl
-      <<"   0.0   0.0    0.0   0.0    0.0   0.0"<<endl;
-   // ??
-   pcr<<"!Absorption correction parameters ?"<<endl
-      <<"0.00   0.00   0.00000    0.00"<<endl;
-   #endif
    pcr.close();
 }
 
