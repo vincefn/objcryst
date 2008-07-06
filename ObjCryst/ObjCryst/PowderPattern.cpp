@@ -767,6 +767,7 @@ bool PowderPatternDiffraction::HasPowderPatternCalcVariance()const
 
 void PowderPatternDiffraction::SetCrystal(Crystal &crystal)
 {
+   bool reprep=(mpCrystal!=0);
    this->ScatteringData::SetCrystal(crystal);
    // Check if we use DE-PV
    if(mpReflectionProfile!=0)
@@ -776,6 +777,8 @@ void PowderPatternDiffraction::SetCrystal(Crystal &crystal)
             =dynamic_cast<ReflectionProfileDoubleExponentialPseudoVoigt*>(mpReflectionProfile);
             p->SetUnitCell((UnitCell)crystal);
       }
+   mClockHKL.Reset();
+   if(reprep) this->Prepare();
 }
 
 const Radiation& PowderPatternDiffraction::GetRadiation()const
@@ -1905,7 +1908,7 @@ const CrystVector_REAL& PowderPattern::GetChi2Cumul()const
       REAL chi2cumul=0,tmp;
       for(unsigned int i=0;i<mNbPointUsed;i++)
       {
-         VFN_DEBUG_MESSAGE("PowderPattern::GetChi2Cumul():"mIntegratedPatternMin(i)<<"->"<<mIntegratedPatternMax(i)<<":obs-calc="<<*pObs - *pCalc<<", weight="<<*pWeight,5);
+         VFN_DEBUG_MESSAGE("PowderPattern::GetChi2Cumul():"<<mIntegratedPatternMin(i)<<"->"<<mIntegratedPatternMax(i)<<":obs-calc="<<*pObs - *pCalc<<", weight="<<*pWeight,5);
          tmp = (*pObs++ - *pCalc++) ;
          chi2cumul += *pWeight++ * tmp*tmp;
          *pC2Cu++ = chi2cumul;
