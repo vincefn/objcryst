@@ -1071,6 +1071,7 @@ void ScatteringData::CalcScattFactor()const
    //if(mClockScattFactor>mClockMaster) return;
    if(  (mClockScattFactor>this->GetRadiation().GetClockWavelength()) 
       &&(mClockScattFactor>mClockHKL)
+      &&(mClockScattFactor>mClockTheta)
       &&(mClockScattFactor>mpCrystal->GetClockLatticePar())
       &&(mClockThermicFact>mpCrystal->GetMasterClockScatteringPower())) return;
    TAU_PROFILE("ScatteringData::CalcScattFactor()","void (bool)",TAU_DEFAULT);
@@ -1096,6 +1097,7 @@ void ScatteringData::CalcTemperatureFactor()const
    //if(mClockThermicFact>mClockMaster) return;
    if(  (mClockThermicFact>this->GetRadiation().GetClockWavelength())
       &&(mClockThermicFact>mClockHKL)
+      &&(mClockThermicFact>mClockTheta)
       &&(mClockThermicFact>mpCrystal->GetClockLatticePar())
       &&(mClockThermicFact>mpCrystal->GetMasterClockScatteringPower())) return;
    TAU_PROFILE("ScatteringData::CalcTemperatureFactor()","void (bool)",TAU_DEFAULT);
@@ -1235,7 +1237,7 @@ void ScatteringData::CalcStructFactor() const
          <<mvTemperatureFactor[pScattPow].numElements()<<"elements",1)
       VFN_DEBUG_MESSAGE("->mFhklCalcReal "<<mFhklCalcReal.numElements()<<"elements",2)
       VFN_DEBUG_MESSAGE("->mFhklCalcImag "<<mFhklCalcImag.numElements()<<"elements",2)
-      VFN_DEBUG_MESSAGE("->   H      K      L   sin(t/l)     Re(F)      Im(F)      scatt      Temp",1)
+      VFN_DEBUG_MESSAGE("->   H      K      L   sin(t/l)     Re(F)      Im(F)      scatt      Temp->"<<pScattPow->GetName(),1)
 
       VFN_DEBUG_MESSAGE(FormatVertVectorHKLFloats<REAL>(mH,mK,mL,mSinThetaLambda,
                                                         mvRealGeomSF[pScattPow],
@@ -1379,14 +1381,17 @@ void ScatteringData::CalcGeomStructFactor() const
       const std::vector<SpaceGroup::TRx> *pTransVect=&(pSpg->GetTranslationVectors());
       CrystMatrix_REAL allCoords(nbSymmetrics,3);
       CrystVector_REAL tmpVect(nbRefl);
-VFN_DEBUG_MESSAGE("TEST",3)
       
       CrystVector_long intVect(nbRefl);//not used if mUseFastLessPreciseFunc==false
       
       // which scattering powers are actually used ?
       map<const ScatteringPower*,bool> vUsed;
+      // Add existing previously used scattering power to the test;
+      for(map<const ScatteringPower*,CrystVector_REAL>::const_iterator pos=mvRealGeomSF.begin();pos!=mvRealGeomSF.end();++pos)
+         vUsed[pos->first]=false;// this will be changed to true later if they are actually used
+      
       for(int i=mpCrystal->GetScatteringPowerRegistry().GetNb()-1;i>=0;i--)
-      {
+      {// Here we make sure scattering power that only contribute ghost atoms are taken into account
          const ScatteringPower*pow=&(mpCrystal->GetScatteringPowerRegistry().GetObj(i));
          if(pow->GetMaximumLikelihoodNbGhostAtom()>0) vUsed[pow]=true;
          else vUsed[pow]=false;
