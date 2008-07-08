@@ -4648,7 +4648,8 @@ void PowderPattern::ExportFullprof(const std::string &prefix)const
    pcr<<"W_PAT 1.0"<<endl;
    // Multi-pattern format
    pcr<<"! Nph Dum Ias Nre Cry Opt Aut"<<endl;
-   pcr<<"   1   0   0   0   0   1   1 "<<endl;
+   pcr<<"   "<<vDiff.size()
+           <<"   0   0   0   0   1   1 "<<endl;
    // For each phase
    {
       int job=0;
@@ -4657,8 +4658,8 @@ void PowderPattern::ExportFullprof(const std::string &prefix)const
       //:TODO: TOF: 
       pcr<<"! Job Npr Nba Nex Nsc Nor Iwg Ilo Res Ste Uni Cor Anm"<<endl
          <<"   "<<job
-              <<"  5 "<<pBackground->GetInterpPoints().first->numElements()
-                       <<" 0   0   1   0   0   0   1   0   0   0"<<endl;
+              <<"   5   "<<pBackground->GetInterpPoints().first->numElements()
+                       <<"  0   0   1   0   0   0   1   0   0   0"<<endl;
    }
    // Names of data files
    string shortName;
