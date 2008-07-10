@@ -4724,7 +4724,7 @@ void PowderPattern::ExportFullprof(const std::string &prefix)const
       {
          CrystMatrix_REAL minDistTable;
          minDistTable=vDiff[i]->GetCrystal().GetMinDistanceTable(-1.);
-         unsigned long k=1;
+         unsigned long k=0;
          // list0 is the full scattering component list with all atoms except dummies, 
          // and a correct mDynPopCorr
          const ScatteringComponentList list0=vDiff[i]->GetCrystal().GetScatteringComponentList();
@@ -4741,7 +4741,7 @@ void PowderPattern::ExportFullprof(const std::string &prefix)const
             
             for(int j=0;j<list.GetNbComponent();j++)
             {
-               if(0==list(j).mpScattPow) continue;
+               if(0==list(j).mpScattPow) continue;//Can this happen ?
                bool redundant=false;
                for(unsigned long l=0;l<k;++l)
                   if(abs(minDistTable(l,k))<0.5)
@@ -4754,7 +4754,7 @@ void PowderPattern::ExportFullprof(const std::string &prefix)const
                {
                   //:TODO: avoid non-alphanumeric characters in name
                   stringstream name;
-                  name<<list(j).mpScattPow->GetName()<<k;
+                  name<<list(j).mpScattPow->GetName()<<k+1;
                   vExportAtom.insert(make_pair(k,exportAtom(name.str(),
                                                             list(j).mX,list(j).mY,list(j).mZ,
                                                             list(j).mpScattPow->GetBiso(),
