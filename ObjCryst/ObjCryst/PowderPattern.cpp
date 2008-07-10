@@ -4724,20 +4724,27 @@ void PowderPattern::ExportFullprof(const std::string &prefix)const
       {
          CrystMatrix_REAL minDistTable;
          minDistTable=vDiff[i]->GetCrystal().GetMinDistanceTable(-1.);
-         unsigned long k=0;
+         unsigned long k=1;
          // list0 is the full scattering component list with all atoms except dummies, 
          // and a correct mDynPopCorr
          const ScatteringComponentList list0=vDiff[i]->GetCrystal().GetScatteringComponentList();
          for(int s=0;s<vDiff[i]->GetCrystal().GetScattererRegistry().GetNb();s++) 
          {
             const ScatteringComponentList list=vDiff[i]->GetCrystal().GetScatt(s).GetScatteringComponentList();
-            set<string> vName;// list of atoms that are listed (not redundant)
+            
+            // If we have a Molecule, remember the names used for the atoms to describe restraints
+            // We can't use the original atom names as they might not be unique in the crystal
+            const Molecule *pMol=0;
+            if(vDiff[i]->GetCrystal().GetScatt(s).GetClassName()=="Molecule")
+               pMol=dynamic_cast<const Molecule*>(&(vDiff[i]->GetCrystal().GetScatt(s)));
+            map<const MolAtom*,string> vMolAtomName;
+            
             for(int j=0;j<list.GetNbComponent();j++)
             {
                if(0==list(j).mpScattPow) continue;
                bool redundant=false;
-               for(unsigned long l=0;l<k;++l) 
-                  if(abs(minDistTable(l,k))<0.5) 
+               for(unsigned long l=0;l<k;++l)
+                  if(abs(minDistTable(l,k))<0.5)
                   {
                      map<int,exportAtom>::iterator pos=vExportAtom.find(l);
                      if(pos!=vExportAtom.end()) pos->second.occ*=2;
@@ -4746,41 +4753,40 @@ void PowderPattern::ExportFullprof(const std::string &prefix)const
                if(!redundant)
                {
                   //:TODO: avoid non-alphanumeric characters in name
-                  vName.insert(vDiff[i]->GetCrystal().GetScatt(s).GetComponentName(j));
-                  vExportAtom.insert(make_pair(k,exportAtom(vDiff[i]->GetCrystal().GetScatt(s).GetComponentName(j),
+                  stringstream name;
+                  name<<list(j).mpScattPow->GetName()<<k;
+                  vExportAtom.insert(make_pair(k,exportAtom(name.str(),
                                                             list(j).mX,list(j).mY,list(j).mZ,
                                                             list(j).mpScattPow->GetBiso(),
                                                             list(j).mOccupancy*list0(k).mDynPopCorr,
                                                             list(j).mpScattPow)));
+                  if(pMol!=0) vMolAtomName.insert(make_pair(pMol->GetAtomList()[j],name.str()));
                }
                k++;
             }
-            if(vDiff[i]->GetCrystal().GetScatt(s).GetClassName()=="Molecule")
+            if(pMol!=0)
             {
-               const Molecule *pMol=dynamic_cast<const Molecule*>(&(vDiff[i]->GetCrystal().GetScatt(s)));
-               if(pMol!=0)
+               for(vector<MolBond*>::const_iterator pos=pMol->GetBondList().begin();
+                     pos!=pMol->GetBondList().end();++pos)
                {
-                  for(vector<MolBond*>::const_iterator pos=pMol->GetBondList().begin();
-                      pos!=pMol->GetBondList().end();++pos)
-                  {
-                     if(  (vName.find((*pos)->GetAtom1().GetName())!=vName.end())
-                        &&(vName.find((*pos)->GetAtom2().GetName())!=vName.end()))
-                        vExportBond.push_back(exportBond((*pos)->GetAtom1().GetName(),
-                                                      (*pos)->GetAtom2().GetName(),
+                  map<const MolAtom*,string>::const_iterator p1,p2;
+                  p1=vMolAtomName.find(&((*pos)->GetAtom1()));
+                  p2=vMolAtomName.find(&((*pos)->GetAtom2()));
+                  if( (p1!=vMolAtomName.end()) && (p2!=vMolAtomName.end()))
+                     vExportBond.push_back(exportBond(p1->second, p2->second,
                                                       (*pos)->GetLength0(),(*pos)->GetLengthSigma()));
-                  }
-                  
-                  for(vector<MolBondAngle*>::const_iterator pos=pMol->GetBondAngleList().begin();
-                      pos!=pMol->GetBondAngleList().end();++pos)
-                  {
-                     if(  (vName.find((*pos)->GetAtom1().GetName())!=vName.end())
-                        &&(vName.find((*pos)->GetAtom2().GetName())!=vName.end())
-                        &&(vName.find((*pos)->GetAtom3().GetName())!=vName.end()))
-                        vExportAngle.push_back(exportAngle((*pos)->GetAtom1().GetName(),
-                                                        (*pos)->GetAtom2().GetName(),
-                                                        (*pos)->GetAtom3().GetName(),
+               }
+               
+               for(vector<MolBondAngle*>::const_iterator pos=pMol->GetBondAngleList().begin();
+                     pos!=pMol->GetBondAngleList().end();++pos)
+               {
+                  map<const MolAtom*,string>::const_iterator p1,p2,p3;
+                  p1=vMolAtomName.find(&((*pos)->GetAtom1()));
+                  p2=vMolAtomName.find(&((*pos)->GetAtom2()));
+                  p3=vMolAtomName.find(&((*pos)->GetAtom3()));
+                  if( (p1!=vMolAtomName.end()) && (p2!=vMolAtomName.end()) && (p3!=vMolAtomName.end()))
+                     vExportAngle.push_back(exportAngle(p1->second, p2->second,p3->second,
                                                         (*pos)->GetAngle0(),(*pos)->GetAngleSigma()));
-                  }
                }
             }
          }
