@@ -1713,8 +1713,7 @@ void PowderPatternDiffraction::XMLInput(istream &is,const XMLCrystTag &tagg)
          else
             if(mpReflectionProfile->GetClassName()!="ReflectionProfilePseudoVoigt")
             {
-               delete mpReflectionProfile;
-               mpReflectionProfile=new ReflectionProfilePseudoVoigt;
+               this->SetProfile(new ReflectionProfilePseudoVoigt);
             }
          mpReflectionProfile->XMLInput(is,tag);
          continue;
@@ -1729,9 +1728,7 @@ void PowderPatternDiffraction::XMLInput(istream &is,const XMLCrystTag &tagg)
          else
             if(mpReflectionProfile->GetClassName()!="ReflectionProfileDoubleExponentialPseudoVoigt")
             {
-               delete mpReflectionProfile;
-               mpReflectionProfile
-                  =new ReflectionProfileDoubleExponentialPseudoVoigt(this->GetCrystal());
+               this->SetProfile(new ReflectionProfileDoubleExponentialPseudoVoigt(this->GetCrystal()));
             }
          mpReflectionProfile->XMLInput(is,tag);
          continue;
@@ -1739,7 +1736,6 @@ void PowderPatternDiffraction::XMLInput(istream &is,const XMLCrystTag &tagg)
       if("FhklObsSq"==tag.GetName())
       {// old-style extracted data
          long nbrefl=0;
-         long junk;
          CrystVector_REAL iobs(100),sigma;
          CrystVector_long h(100),k(100),l(100);
          mFhklObsSq.resize(100);
@@ -1774,7 +1770,7 @@ void PowderPatternDiffraction::XMLInput(istream &is,const XMLCrystTag &tagg)
          // Estimate resolution
          const REAL min=iobs.max()*1e-6;
          unsigned long iresol=0;
-         for(unsigned long i=0;i<nbrefl;++i) if(iobs(i)>min) iresol=i;
+         for(long i=0;i<nbrefl;++i) if(iobs(i)>min) iresol=i;
          char buf[200];
          sprintf(buf,"LeBail (d=%4.2fA?):",1/(2*abs(mpLeBailData->GetSinThetaOverLambda()(iresol))+1e-6));
          mpLeBailData->SetName(string(buf)+this->GetCrystal().GetName());
