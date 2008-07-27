@@ -16,6 +16,15 @@ DIR_VFNQUIRKS = ${DIR_CRYST}/Quirks
 DIR_WXWCRYST = ${DIR_CRYST}/wxCryst
 DIR_DOC := ${DIR_CRYST}/doc
 
+# DO we want to use shared libraries for wxGTK, freeglut, fftw & newmat ?
+# User can also use shared libraries only for some libraries, by using
+# "make shared-wxgtk=1" instead of "make shared=1"
+ifeq ($(shared),1)
+shared-newmat=1
+shared-wxgtk=1
+shared-fftw=1
+shared-freeglut=1
+endif
 ### Rules for Linux & GCC
 # C compiler
 CC     := gcc
@@ -65,7 +74,7 @@ else
 endif
 
 #Use static linking to wx and freeglut libraries ?
-ifneq ($(shared),1)
+ifneq ($(shared-wxgtk),1)
 WXCONFIG= $(DIR_CRYST)/../static-libs/bin/wx-config
 else
 WXCONFIG= wx-config
@@ -134,7 +143,11 @@ $(DIR_STATIC_LIBS)/lib/libnewmat.a:
 	cp $(BUILD_DIR)/newmat/*.h $(DIR_STATIC_LIBS)/include/newmat/
 	#rm -Rf $(BUILD_DIR)/newmat
 
+ifneq ($(shared-newmat),1)
 libnewmat: $(DIR_STATIC_LIBS)/lib/libnewmat.a
+else
+libnewmat:
+endif
 
 $(BUILD_DIR)/static-libs/lib/libglut.a:
 	cd $(BUILD_DIR) && tar -xjf freeglut.tar.bz2
@@ -142,7 +155,7 @@ $(BUILD_DIR)/static-libs/lib/libglut.a:
 	rm -Rf freeglut
 
 ifeq ($(opengl),1)
-ifneq ($(shared),1)
+ifneq ($(shared-freeglut),1)
 libfreeglut: $(BUILD_DIR)/static-libs/lib/libglut.a
 else
 libfreeglut:
@@ -157,7 +170,7 @@ $(BUILD_DIR)/static-libs/bin/wx-config:
 	rm -Rf wxGTK
 
 ifneq ($(wxcryst),0)
-ifneq ($(shared),1)
+ifneq ($(shared-wxgtk),1)
 libwx: $(BUILD_DIR)/static-libs/bin/wx-config libfreeglut
 else
 libwx:
@@ -174,14 +187,16 @@ $(DIR_STATIC_LIBS)/lib/libcctbx.a:
 
 libcctbx: $(DIR_STATIC_LIBS)/lib/libcctbx.a
 
-ifneq ($(fftw),0)
-ifneq ($(shared),1)
 $(DIR_STATIC_LIBS)/lib/libfftw3f.a:
 	cd $(BUILD_DIR) && tar -xjf fftw.tar.bz2
 	cd $(BUILD_DIR)/fftw && ./configure --enable-single --prefix $(DIR_STATIC_LIBS) && make install
 	rm -Rf $(BUILD_DIR)/fftw
 
+ifneq ($(fftw),0)
+ifneq ($(shared-fftw),1)
 libfftw: $(DIR_STATIC_LIBS)/lib/libfftw3f.a
+else
+libfftw:
 endif
 else
 libfftw:
