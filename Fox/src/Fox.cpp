@@ -47,6 +47,7 @@
 #include <sstream>
 #include <list>
 
+#include "ObjCryst/General.h"
 #include "ObjCryst/IO.h"
 #include "ObjCryst/Crystal.h"
 #include "ObjCryst/PowderPattern.h"
@@ -66,6 +67,9 @@
    #endif
 #endif
 
+#if !wxUSE_UNICODE
+#define _T(x) x
+#endif
 
 using namespace ObjCryst;
 using namespace std;
@@ -148,7 +152,7 @@ wxFrame *pMainFrameForUserMessage;
 
 void WXCrystInformUserStdOut(const string &str)
 {
-   if(wxThread::IsMain()) pMainFrameForUserMessage->SetStatusText((wxString)str.c_str());
+   if(wxThread::IsMain()) pMainFrameForUserMessage->SetStatusText(wxString::FromAscii(str.c_str()));
    else cout<<"Message for user (outside main thread):"<<str<<endl;
 }
 
@@ -196,11 +200,11 @@ class WXThreadCheckUpdates:public wxThread
       {
          //cout<<"WXThreadCheckUpdates:: OnEntry()"<<endl;
          mpvUpdates->clear();
-         if(!(wxFileSystem::HasHandlerForPath("http://objcryst.sourceforge.net/FoxUpdates.txt")))
+         if(!(wxFileSystem::HasHandlerForPath(wxString::FromAscii("http://objcryst.sourceforge.net/FoxUpdates.txt"))))
             wxFileSystem::AddHandler(new wxInternetFSHandler);
          wxFileSystem fs;
          wxFSFile *fp= NULL;
-         fp= fs.OpenFile("http://objcryst.sourceforge.net/FoxUpdates.txt",wxFS_READ);
+         fp= fs.OpenFile(wxString::FromAscii("http://objcryst.sourceforge.net/FoxUpdates.txt"),wxFS_READ);
          if(fp!=NULL)
          {
             wxInputStream *fstream = fp->GetStream();
@@ -294,7 +298,7 @@ int main (int argc, char *argv[])
    bool useGUI(true);
    long nbTrial(1000000);
    long nbRun(1);
-   REAL finalCost=0.;
+   double finalCost=0.;
    bool silent=false;
    string outfilename("Fox-out.xml");
    long filenameInsertCost=-1;
@@ -305,131 +309,175 @@ int main (int argc, char *argv[])
    bool loadFourierDSN6(false);
    list<string> vFourierFilenameDSN6;
    bool cif2pattern=false;
-   REAL cif2patternWavelength=1.54056;
-   REAL cif2patternPeakWidth=0.01;
-   REAL cif2patternNbPoint=1000;
-   REAL cif2patternMax2Theta=M_PI*.9;
+   double cif2patternWavelength=1.54056;
+   double cif2patternPeakWidth=0.01;
+   long cif2patternNbPoint=1000;
+   double cif2patternMax2Theta=M_PI*.9;
    bool exportfullprof=false;
    for(int i=1;i<argc;i++)
    {
-      if(string("--nogui")==string(argv[i]))
+      if(_T("--nogui")==argv[i])
       {
          useGUI=false;
          cout << "Running Fox without GUI"<<endl;
          continue;  
       }
-      if(string("--randomize")==string(argv[i]))
+      if(_T("--randomize")==argv[i])
       {
          randomize=true;
          cout << "Randomizing parameters before running"<<endl;
          continue;  
       }
-      if(string("--silent")==string(argv[i]))
+      if(_T("--silent")==argv[i])
       {
          silent=true;
          cout << "Running Fox quietly"<<endl;
          continue;  
       }
-      if(string("--finalcost")==string(argv[i]))
+      if(_T("--finalcost")==argv[i])
       {
          ++i;
+         #ifdef __WX__CRYST__
+         wxString(argv[i]).ToDouble(&finalCost);
+         #else
          stringstream sstr(argv[i]);
          sstr >> finalCost;
+         #endif
          cout << "Fox will stop after reaching cost:"<<finalCost<<endl;
          continue;  
       }
-      if(string("-n")==string(argv[i]))
+      if(_T("-n")==argv[i])
       {
          ++i;
+         #ifdef __WX__CRYST__
+         wxString(argv[i]).ToLong(&nbTrial);
+         #else
          stringstream sstr(argv[i]);
          sstr >> nbTrial;
+         #endif
          cout << "Fox will run for "<<nbTrial<<" trials"<<endl;
          continue;
       }
-      if(string("--nbrun")==string(argv[i]))
+      if(_T("--nbrun")==argv[i])
       {
          ++i;
+        #ifdef __WX__CRYST__
+         wxString(argv[i]).ToLong(&nbRun);
+         #else
          stringstream sstr(argv[i]);
          sstr >> nbRun;
+         #endif
          cout << "Fox will do "<<nbRun<<" runs, randomizing before each run"<<endl;
          continue;
       }
-      if(string("--cif2pattern")==string(argv[i]))
+      if(_T("--cif2pattern")==argv[i])
       {
          ++i;
          cif2pattern=true;
          {
+            #ifdef __WX__CRYST__
+            wxString(argv[i]).ToDouble(&cif2patternWavelength);
+            #else
             stringstream sstr(argv[i]);
             sstr >> cif2patternWavelength;
+            #endif
          }
          ++i;
          {
+            #ifdef __WX__CRYST__
+            wxString(argv[i]).ToDouble(&cif2patternMax2Theta);
+            #else
             stringstream sstr(argv[i]);
             sstr >> cif2patternMax2Theta;
+            #endif
             cif2patternMax2Theta*=DEG2RAD;
             if(cif2patternMax2Theta>M_PI) cif2patternMax2Theta=M_PI;
          }
          ++i;
          {
+            #ifdef __WX__CRYST__
+            wxString(argv[i]).ToLong(&cif2patternNbPoint);
+            #else
             stringstream sstr(argv[i]);
             sstr >> cif2patternNbPoint;
+            #endif
          }
          ++i;
          {
+            #ifdef __WX__CRYST__
+            wxString(argv[i]).ToDouble(&cif2patternPeakWidth);
+            #else
             stringstream sstr(argv[i]);
             sstr >> cif2patternPeakWidth;
+            #endif
             cif2patternPeakWidth*=DEG2RAD;
          }
          continue;
       }
-      if(string("-i")==string(argv[i]))
+      if(_T("-i")==argv[i])
       {// Obsolete, just ignore
          ++i;
          continue;
       }
-      if(string("-o")==string(argv[i]))
+      if(_T("-o")==argv[i])
       {
          ++i;
-         outfilename=string(argv[i]);
+         #ifdef __WX__CRYST__
+         outfilename=string(wxString(argv[i]).ToAscii());
+         #else
+         outfilename=argv[i];
+         #endif
          filenameInsertCost = outfilename.find("#cost",0);
          cout <<"Fox:#cost, pos="<<filenameInsertCost<<","<<string::npos<<endl;
          if((long)(string::npos)==filenameInsertCost) filenameInsertCost=-1;
          continue;
       }
-      if(string("--loadfouriergrd")==string(argv[i]))
+      if(_T("--loadfouriergrd")==argv[i])
       {
          ++i;
          loadFourierGRD=true;
-         vFourierFilenameGRD.push_back(string(argv[i]));
+         #ifdef __WX__CRYST__
+         vFourierFilenameGRD.push_back(string(wxString(argv[i]).ToAscii()));
+         #else
+         vFourierFilenameGRD.push_back(argv[i]);
+         #endif
          continue;
       }
-      if(string("--loadfourierdsn6")==string(argv[i]))
+      if(_T("--loadfourierdsn6")==argv[i])
       {
          ++i;
          loadFourierDSN6=true;
-         vFourierFilenameDSN6.push_back(string(argv[i]));
+         #ifdef __WX__CRYST__
+         vFourierFilenameDSN6.push_back(string(wxString(argv[i]).ToAscii()));
+         #else
+         vFourierFilenameDSN6.push_back(argv[i]);
+         #endif
          continue;
       }
-      if(string("--only3d")==string(argv[i]))
+      if(_T("--only3d")==argv[i])
       {
          only3D=true;
          continue;
       }
-      if(string("--speedtest")==string(argv[i]))
+      if(_T("--speedtest")==argv[i])
       {
          standardSpeedTest();
          TAU_REPORT_STATISTICS();
          exit(0);
       }
-      if(string("--exportfullprof")==string(argv[i]))
+      if(_T("--exportfullprof")==argv[i])
       {
          exportfullprof=true;
          continue;
       }
-      if(string("--index")==string(argv[i]))
+      if(_T("--index")==argv[i])
       {
          ++i;
+         #ifdef __WX__CRYST__
+         ifstream f(wxString(argv[i]).ToAscii());
+         #else
          ifstream f(argv[i]);
+         #endif
          if(!f) 
          {
             cout<<"Cannot find file to index:"<<argv[i]<<endl;
@@ -477,26 +525,34 @@ int main (int argc, char *argv[])
          exit(0);
       }
       #ifdef __DEBUG__
-      if(string("--debuglevel")==string(argv[i]))
+      if(_T("--debuglevel")==argv[i])
       {
-         int level;
+         long level;
          ++i;
+         #ifdef __WX__CRYST__
+         wxString(argv[i]).ToLong(&level);
+         #else
          stringstream sstr(argv[i]);
          sstr >> level;
+         #endif
          VFN_DEBUG_GLOBAL_LEVEL(level);
          continue;
       }
       #endif
+      #ifdef __WX__CRYST__
+      if(wxString(argv[i]).find(_T(".xml"))!=wxNOT_FOUND)
+      #else
       if(string(argv[i]).find(string(".xml"))!=string::npos)
+      #endif
       {
-         cout<<"Loading: "<<string(argv[i])<<endl;
+         cout<<"Loading: "<<argv[i]<<endl;
          #ifdef __WX__CRYST__
          wxString name(argv[i]);
-         if(name.Mid(name.size()-4)==wxString(".xml"))
-            XMLCrystFileLoadAllObject(name.c_str());
+         if(name.Mid(name.size()-4)==wxString(_T(".xml")))
+            XMLCrystFileLoadAllObject(string(name.ToAscii()));
          else
          {//compressed file
-            wxFileInputStream is(name.c_str());
+            wxFileInputStream is(name);
             wxZlibInputStream zstream(is);
             stringstream sst;
             while (!zstream.Eof()) sst<<(char)zstream.GetC();
@@ -507,10 +563,18 @@ int main (int argc, char *argv[])
          #endif
          if(!cif2pattern)continue;
       }
+      #ifdef __WX__CRYST__
+      if(wxString(argv[i]).find(_T(".cif"))!=wxNOT_FOUND)
+      #else
       if(string(argv[i]).find(string(".cif"))!=string::npos)
+      #endif
       {
-         cout<<"Loading: "<<string(argv[i])<<endl;
+         cout<<"Loading: "<<argv[i]<<endl;
+         #ifdef __WX__CRYST__
+         ifstream in (wxString(argv[i]).ToAscii());
+         #else
          ifstream in (argv[i]);
+         #endif
          ObjCryst::CIF cif(in,true,true);
          CreateCrystalFromCIF(cif);
          CreatePowderPatternFromCIF(cif);
@@ -664,28 +728,28 @@ int main (int argc, char *argv[])
    this->SetAppName(_T("FOX-Free Objects for Crystallography"));
    // Read (and automatically create if necessary) global Fox preferences
    // We explicitely use a wxFileConfig, to avoid the registry under Windows
-   wxConfigBase::Set(new wxFileConfig("FOX-Free Objects for Crystallography"));
+   wxConfigBase::Set(new wxFileConfig(_T("FOX-Free Objects for Crystallography")));
 
-   if(wxConfigBase::Get()->HasEntry("Fox/BOOL/Enable tooltips"))
+   if(wxConfigBase::Get()->HasEntry(_T("Fox/BOOL/Enable tooltips")))
    {
        bool tooltip_enabled;
-       wxConfigBase::Get()->Read("Fox/BOOL/Enable tooltips", &tooltip_enabled);
+       wxConfigBase::Get()->Read(_T("Fox/BOOL/Enable tooltips"), &tooltip_enabled);
        wxToolTip::Enable(tooltip_enabled);
    }
-   else wxConfigBase::Get()->Write("Fox/BOOL/Enable tooltips", true);
+   else wxConfigBase::Get()->Write(_T("Fox/BOOL/Enable tooltips"), true);
    
-   if(!wxConfigBase::Get()->HasEntry("Fox/BOOL/Ask confirmation before exiting Fox"))
-      wxConfigBase::Get()->Write("Fox/BOOL/Ask confirmation before exiting Fox", true);
+   if(!wxConfigBase::Get()->HasEntry(_T("Fox/BOOL/Ask confirmation before exiting Fox")))
+      wxConfigBase::Get()->Write(_T("Fox/BOOL/Ask confirmation before exiting Fox"), true);
    
-   if(!wxConfigBase::Get()->HasEntry("Fox/BOOL/Use compressed file format (.xml.gz)"))
-      wxConfigBase::Get()->Write("Fox/BOOL/Use compressed file format (.xml.gz)", true);
+   if(!wxConfigBase::Get()->HasEntry(_T("Fox/BOOL/Use compressed file format (.xml.gz)")))
+      wxConfigBase::Get()->Write(_T("Fox/BOOL/Use compressed file format (.xml.gz)"), true);
 
-   if(!wxConfigBase::Get()->HasEntry("Fox/BOOL/Check for Fox updates"))
-      wxConfigBase::Get()->Write("Fox/BOOL/Check for Fox updates", true);
+   if(!wxConfigBase::Get()->HasEntry(_T("Fox/BOOL/Check for Fox updates")))
+      wxConfigBase::Get()->Write(_T("Fox/BOOL/Check for Fox updates"), true);
 
    WXCrystMainFrame *frame ;
    string title(string("FOX: Free Objects for Xtal structures v")+foxVersion);
-   frame = new WXCrystMainFrame(title.c_str(),
+   frame = new WXCrystMainFrame(wxString::FromAscii(title.c_str()),
                                  wxPoint(50, 50), wxSize(550, 400),
                                  !(loadFourierGRD||loadFourierDSN6));
    // Use the main frame status bar to pass messages to the user
@@ -787,57 +851,57 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
 
    // create a menu bar
       wxMenu *menuFile = new wxMenu;//
-         menuFile->Append(MENU_FILE_LOAD, "&Open .xml or .cif\tCtrl-O", "Open Fox (.xml, .xml.gz) or CIF file");
-         menuFile->Append(MENU_FILE_CLOSE, "Close\tCtrl-W", "Close all");
-         menuFile->Append(MENU_FILE_SAVE, "&Save\tCtrl-S", "Save Everything...");
-         menuFile->Append(MENU_FILE_QUIT, "E&xit\tCtrl-Q", "Quit ");
+         menuFile->Append(MENU_FILE_LOAD, _T("&Open .xml or .cif\tCtrl-O"), _T("Open Fox (.xml, .xml.gz) or CIF file"));
+         menuFile->Append(MENU_FILE_CLOSE, _T("Close\tCtrl-W"), _T("Close all"));
+         menuFile->Append(MENU_FILE_SAVE, _T("&Save\tCtrl-S"), _T("Save Everything..."));
+         menuFile->Append(MENU_FILE_QUIT, _T("E&xit\tCtrl-Q"), _T("Quit "));
       
-      wxMenu *objectMenu = new wxMenu("", wxMENU_TEAROFF);
-         objectMenu->Append(MENU_OBJECT_CREATE_CRYSTAL, "New Crystal",
-                           "Add a new Crystal structure");
-         objectMenu->Append(MENU_OBJECT_CREATE_POWDERSPECTRUM, "New PowderPattern",
-                           "Add a new PowderPattern Object");
-         objectMenu->Append(MENU_OBJECT_CREATE_SINGLECRYSTALDATA, "New Single Crystal Diffraction",
-                           "Add a new Single Crystal Diffraction Object");
-         objectMenu->Append(MENU_OBJECT_CREATE_GLOBALOPTOBJ, "New Monte-Carlo Object",
-                           "Add a new Monte-Carlo Object");
+      wxMenu *objectMenu = new wxMenu(_T(""), wxMENU_TEAROFF);
+         objectMenu->Append(MENU_OBJECT_CREATE_CRYSTAL, _T("New Crystal"),
+                           _T("Add a new Crystal structure"));
+         objectMenu->Append(MENU_OBJECT_CREATE_POWDERSPECTRUM, _T("New PowderPattern"),
+                           _T("Add a new PowderPattern Object"));
+         objectMenu->Append(MENU_OBJECT_CREATE_SINGLECRYSTALDATA, _T("New Single Crystal Diffraction"),
+                           _T("Add a new Single Crystal Diffraction Object"));
+         objectMenu->Append(MENU_OBJECT_CREATE_GLOBALOPTOBJ, _T("New Monte-Carlo Object"),
+                           _T("Add a new Monte-Carlo Object"));
       
       wxMenu *prefsMenu = new wxMenu;
-         prefsMenu->Append(MENU_PREFS_PREFERENCES, "&Preferences...", "Fox Preferences...");
+         prefsMenu->Append(MENU_PREFS_PREFERENCES, _T("&Preferences..."), _T("Fox Preferences..."));
       
       wxMenu *helpMenu = new wxMenu;
-         helpMenu->Append(MENU_HELP_ABOUT, "&About...", "About ObjCryst...");
-         helpMenu->Append(MENU_HELP_TOGGLETOOLTIP, "Toggle Tooltips", "Set Tooltips on/off");
-         helpMenu->Append(MENU_HELP_UPDATE, "Check for Updates", "Check for a newer version of Fox");
+         helpMenu->Append(MENU_HELP_ABOUT, _T("&About..."), _T("About ObjCryst..."));
+         helpMenu->Append(MENU_HELP_TOGGLETOOLTIP, _T("Toggle Tooltips"), _T("Set Tooltips on/off"));
+         helpMenu->Append(MENU_HELP_UPDATE, _T("Check for Updates"), _T("Check for a newer version of Fox"));
       wxMenuBar *menuBar = new wxMenuBar();
-         menuBar->Append(menuFile,  "&File");
-         menuBar->Append(objectMenu,"&Objects");
-         menuBar->Append(prefsMenu, "&Preferences");
-         menuBar->Append(helpMenu,  "&Help");
+         menuBar->Append(menuFile,  _T("&File"));
+         menuBar->Append(objectMenu,_T("&Objects"));
+         menuBar->Append(prefsMenu, _T("&Preferences"));
+         menuBar->Append(helpMenu,  _T("&Help"));
          #ifdef __DEBUG__
          wxMenu *debugMenu = new wxMenu;
-            debugMenu->Append(MENU_DEBUG_TEST1, "Test #1");
-            debugMenu->Append(MENU_DEBUG_TEST2, "Test #2");
-            debugMenu->Append(MENU_DEBUG_TEST3, "Test #3");
-            debugMenu->Append(MENU_DEBUG_LEVEL0, "Debug level 0 (lots of messages)");
-            debugMenu->Append(MENU_DEBUG_LEVEL1, "Debug level 1");
-            debugMenu->Append(MENU_DEBUG_LEVEL2, "Debug level 2");
-            debugMenu->Append(MENU_DEBUG_LEVEL3, "Debug level 3");
-            debugMenu->Append(MENU_DEBUG_LEVEL4, "Debug level 4");
-            debugMenu->Append(MENU_DEBUG_LEVEL5, "Debug level 5");
-            debugMenu->Append(MENU_DEBUG_LEVEL6, "Debug level 6");
-            debugMenu->Append(MENU_DEBUG_LEVEL7, "Debug level 7");
-            debugMenu->Append(MENU_DEBUG_LEVEL8, "Debug level 8");
-            debugMenu->Append(MENU_DEBUG_LEVEL9, "Debug level 9");
-            debugMenu->Append(MENU_DEBUG_LEVEL10,"Debug level 10 (few messages)");
-         menuBar->Append(debugMenu,  "&Debug");
+            debugMenu->Append(MENU_DEBUG_TEST1, _T("Test #1"));
+            debugMenu->Append(MENU_DEBUG_TEST2, _T("Test #2"));
+            debugMenu->Append(MENU_DEBUG_TEST3, _T("Test #3"));
+            debugMenu->Append(MENU_DEBUG_LEVEL0, _T("Debug level 0 (lots of messages)"));
+            debugMenu->Append(MENU_DEBUG_LEVEL1, _T("Debug level 1"));
+            debugMenu->Append(MENU_DEBUG_LEVEL2, _T("Debug level 2"));
+            debugMenu->Append(MENU_DEBUG_LEVEL3, _T("Debug level 3"));
+            debugMenu->Append(MENU_DEBUG_LEVEL4, _T("Debug level 4"));
+            debugMenu->Append(MENU_DEBUG_LEVEL5, _T("Debug level 5"));
+            debugMenu->Append(MENU_DEBUG_LEVEL6, _T("Debug level 6"));
+            debugMenu->Append(MENU_DEBUG_LEVEL7, _T("Debug level 7"));
+            debugMenu->Append(MENU_DEBUG_LEVEL8, _T("Debug level 8"));
+            debugMenu->Append(MENU_DEBUG_LEVEL9, _T("Debug level 9"));
+            debugMenu->Append(MENU_DEBUG_LEVEL10,_T("Debug level 10 (few messages)"));
+         menuBar->Append(debugMenu,  _T("&Debug"));
          #endif
 
    SetMenuBar(menuBar);
 
 #if wxUSE_STATUSBAR
    CreateStatusBar(1);
-   SetStatusText("Welcome to FOX/ObjCryst++!");
+   SetStatusText(_T("Welcome to FOX/ObjCryst++!"));
 #endif // wxUSE_STATUSBAR
 
    //Splash Screen
@@ -862,25 +926,25 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
       WXCrystScrolledWindow *mpWin1 = new WXCrystScrolledWindow(mpNotebook);
       mpWin1->SetChild(gCrystalRegistry.WXCreate(mpWin1));
       mpWin1->Layout();
-      mpNotebook->AddPage(mpWin1, "Crystals", TRUE);
+      mpNotebook->AddPage(mpWin1, _T("Crystals"), TRUE);
 
    // Second window - PowderPattern
       WXCrystScrolledWindow *mpWin2 = new WXCrystScrolledWindow(mpNotebook);
       mpWin2->SetChild(gPowderPatternRegistry.WXCreate(mpWin2));
       mpWin2->Layout();
-      mpNotebook->AddPage(mpWin2,"Powder Diffraction",true);
+      mpNotebook->AddPage(mpWin2,_T("Powder Diffraction"),true);
       
    // Third window - SingleCrystal
       WXCrystScrolledWindow *mpWin3 = new WXCrystScrolledWindow(mpNotebook);
       mpWin3->SetChild(gDiffractionDataSingleCrystalRegistry.WXCreate(mpWin3));
       mpWin3->Layout();
-      mpNotebook->AddPage(mpWin3,"Single Crystal Diffraction",true);
+      mpNotebook->AddPage(mpWin3,_T("Single Crystal Diffraction"),true);
       
    // Fourth window - Global Optimization
       WXCrystScrolledWindow *mpWin4 = new WXCrystScrolledWindow(mpNotebook);
       mpWin4->SetChild(gOptimizationObjRegistry.WXCreate(mpWin4));
       mpWin4->Layout();
-      mpNotebook->AddPage(mpWin4,"Global Optimization",true);
+      mpNotebook->AddPage(mpWin4,_T("Global Optimization"),true);
 
    this->SetIcon(wxICON(Fox));
    this->Show(TRUE);
@@ -923,7 +987,7 @@ void WXCrystMainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
               +"welcome to redistribute it under certain conditions. \n"
               +"See the LICENSE file for details.");
 
-   wxMessageDialog ab(this,msg.c_str(), "About Fox", wxOK | wxICON_INFORMATION | wxSTAY_ON_TOP );
+   wxMessageDialog ab(this,wxString::FromAscii(msg.c_str()), _T("About Fox"), wxOK | wxICON_INFORMATION | wxSTAY_ON_TOP );
    ab.ShowModal();
 }
 void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
@@ -940,16 +1004,16 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
    wxFileDialog *open;
    if(event.GetId()==MENU_FILE_LOAD)
    {
-      open= new wxFileDialog(this,"Choose File :",
-                             "","","FOX files (*.xml,*.xml.gz) or CIF (*.cif)|*.xml;*.xml.gz;*.cif",wxOPEN | wxFILE_MUST_EXIST);
+      open= new wxFileDialog(this,_T("Choose File :"),
+                             _T(""),_T(""),_T("FOX files (*.xml,*.xml.gz) or CIF (*.cif)|*.xml;*.xml.gz;*.cif"),wxOPEN | wxFILE_MUST_EXIST);
       if(open->ShowModal() != wxID_OK) return;
       wxString name=open->GetPath();
-      if(name.Mid(name.size()-4)==wxString(".xml"))
-         XMLCrystFileLoadAllObject(name.c_str());
+      if(name.Mid(name.size()-4)==wxString(_T(".xml")))
+         XMLCrystFileLoadAllObject(string(name.ToAscii()));
       else
-         if(name.Mid(name.size()-4)==wxString(".cif"))
+         if(name.Mid(name.size()-4)==wxString(_T(".cif")))
          {
-            ifstream in (open->GetPath().c_str());
+            ifstream in (open->GetPath().ToAscii());
             ObjCryst::CIF cif(in,true,true);
             CreateCrystalFromCIF(cif);
             CreatePowderPatternFromCIF(cif);
@@ -957,12 +1021,12 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
 }
          else
             if(name.size()>6)
-               if(name.Mid(name.size()-6)==wxString("xml.gz"))
+               if(name.Mid(name.size()-6)==wxString(_T("xml.gz")))
                {//compressed file
-                  wxFileInputStream is(name.c_str());
+                  wxFileInputStream is(name);
                   wxZlibInputStream zstream(is);
                   stringstream sst;
-                  while (!zstream.Eof()) sst<<(char)zstream.GetC();
+                  while (!zstream.Eof()) sst<<(wxChar)zstream.GetC();
                   XMLCrystFileLoadAllObject(sst);
                }
    }
@@ -973,7 +1037,7 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
 void WXCrystMainFrame::OnMenuClose(wxCommandEvent& event)
 {
    bool safe=true;
-   wxConfigBase::Get()->Read("Fox/BOOL/Ask confirmation before exiting Fox",&safe);
+   wxConfigBase::Get()->Read(_T("Fox/BOOL/Ask confirmation before exiting Fox"),&safe);
    if(safe)
    {
       bool saved=true;
@@ -989,7 +1053,7 @@ void WXCrystMainFrame::OnMenuClose(wxCommandEvent& event)
          msg.Printf( _T("Some objects have not been saved\n")
                   _T("Do you really want to close all ?"));
    
-         wxMessageDialog d(this,msg, "Really Close ?", wxYES | wxNO);
+         wxMessageDialog d(this,msg, _T("Really Close ?"), wxYES | wxNO);
          if(wxID_YES!=d.ShowModal()) return;
       }
    }
@@ -1009,7 +1073,7 @@ void WXCrystMainFrame::OnClose(wxCloseEvent& event)
 void WXCrystMainFrame::SafeClose()
 {
    bool safe=true;
-   wxConfigBase::Get()->Read("Fox/BOOL/Ask confirmation before exiting Fox",&safe);
+   wxConfigBase::Get()->Read(_T("Fox/BOOL/Ask confirmation before exiting Fox"),&safe);
    if(!safe)
    {
       this->Destroy();
@@ -1029,7 +1093,7 @@ void WXCrystMainFrame::SafeClose()
       msg.Printf( _T("Some objects have not been saved\n")
                _T("Do you really want to Exit ?"));
 
-      wxMessageDialog d(this,msg, "Really Exit ?", wxYES | wxNO);
+      wxMessageDialog d(this,msg, _T("Really Exit ?"), wxYES | wxNO);
       if(wxID_YES!=d.ShowModal()) return;
    }
    cout<<"Removing all Optimization objects..."<<endl;
@@ -1046,37 +1110,37 @@ void WXCrystMainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
 {
    WXCrystValidateAllUserInput();
    bool compressed;
-   wxConfigBase::Get()->Read("Fox/BOOL/Use compressed file format (.xml.gz)",&compressed);
+   wxConfigBase::Get()->Read(_T("Fox/BOOL/Use compressed file format (.xml.gz)"),&compressed);
    if(compressed)
    {
-      wxFileDialog open(this,"Choose File to save all objects:",
-                        "","","FOX compressed files (*.xml.gz)|*.xml.gz", wxSAVE | wxOVERWRITE_PROMPT);
+      wxFileDialog open(this,_T("Choose File to save all objects:"),
+                        _T(""),_T(""),_T("FOX compressed files (*.xml.gz)|*.xml.gz"), wxSAVE | wxOVERWRITE_PROMPT);
       if(open.ShowModal() != wxID_OK) return;
-      string name=open.GetPath().c_str();
-      if(name.substr(name.size()-7,7)!=".xml.gz")
+      wxString name=open.GetPath();
+      if(name.substr(name.size()-7,7)!=_T(".xml.gz"))
       {
-         cout<<name<<" -> "<<name+".gz"<<endl;
-         if(name.substr(name.size()-4,4)==".xml") name=name+".gz";
-         else name=name+".xml.gz";
+         cout<<name<<" -> "<<name+_T(".gz")<<endl;
+         if(name.substr(name.size()-4,4)==_T(".xml")) name=name+_T(".gz");
+         else name=name+_T(".xml.gz");
       }
       stringstream sst;
       XMLCrystFileSaveGlobal(sst);
       wxFileOutputStream ostream(name.c_str());
       wxZlibOutputStream zstream(ostream,-1,wxZLIB_GZIP);
-      zstream.Write(sst.str().c_str(),sst.str().size());
+      zstream.Write(wxString::FromAscii(sst.str().c_str()),sst.str().size());
    }
    else
    {
-      wxFileDialog open(this,"Choose File to save all objects:",
-                        "","","*.xml", wxSAVE | wxOVERWRITE_PROMPT);
+      wxFileDialog open(this,_T("Choose File to save all objects:"),
+                        _T(""),_T(""),_T("*.xml"), wxSAVE | wxOVERWRITE_PROMPT);
       if(open.ShowModal() != wxID_OK) return;
-      string name=open.GetPath().c_str();
-      if(name.substr(name.size()-4,4)!=".xml")
+      wxString name=open.GetPath();
+      if(name.substr(name.size()-4,4)!=_T(".xml"))
       {
-         cout<<name<<" -> "<<name+".xml"<<endl;
-         name=name+".xml";
+         cout<<name<<" -> "<<name+_T(".xml")<<endl;
+         name=name+_T(".xml");
       }
-      XMLCrystFileSaveGlobal(name);
+      XMLCrystFileSaveGlobal(string(name.ToAscii()));
    }
    mClockLastSave.Click();
 }
@@ -1086,12 +1150,12 @@ void WXCrystMainFrame::OnAddCrystal(wxCommandEvent& WXUNUSED(event))
    obj=new Crystal;
    stringstream s;s<<"Crystal #"<<gCrystalRegistry.GetNb();
    obj->SetName(s.str());
-   if(!wxConfigBase::Get()->HasEntry("Crystal/BOOL/Default-use Dynamical Occupancy Correction"))
-      wxConfigBase::Get()->Write("Crystal/BOOL/Default-use Dynamical Occupancy Correction", true);
+   if(!wxConfigBase::Get()->HasEntry(_T("Crystal/BOOL/Default-use Dynamical Occupancy Correction")))
+      wxConfigBase::Get()->Write(_T("Crystal/BOOL/Default-use Dynamical Occupancy Correction"), true);
    else
    {
       bool doc;
-      wxConfigBase::Get()->Read("Crystal/BOOL/Default-use Dynamical Occupancy Correction", &doc);
+      wxConfigBase::Get()->Read(_T("Crystal/BOOL/Default-use Dynamical Occupancy Correction"), &doc);
       if(doc) obj->GetOption(0).SetChoice(0);
       else obj->GetOption(0).SetChoice(1);
    }
@@ -1232,10 +1296,10 @@ void WXCrystMainFrame::OnUpdateUI(wxUpdateUIEvent& event)
 void WXCrystMainFrame::OnToggleTooltips(wxCommandEvent& event)
 {
    bool tooltip_enabled;
-   wxConfigBase::Get()->Read("Fox/BOOL/Enable tooltips", &tooltip_enabled);
+   wxConfigBase::Get()->Read(_T("Fox/BOOL/Enable tooltips"), &tooltip_enabled);
    tooltip_enabled = !tooltip_enabled;
    wxToolTip::Enable(tooltip_enabled);
-   wxConfigBase::Get()->Write("Fox/BOOL/Enable tooltips", tooltip_enabled);
+   wxConfigBase::Get()->Write(_T("Fox/BOOL/Enable tooltips"), tooltip_enabled);
    VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnToggleTooltips(): Tooltips= "<<tooltip_enabled,10)
 }
 
@@ -1243,7 +1307,7 @@ void GetRecursiveConfigEntryList(list<pair<wxString,wxString> > &l)
 {
    wxString str;
    wxString path=wxConfigBase::Get()->GetPath();
-   if(path=="")path="/"+path;
+   if(path==_T(""))path=_T("/")+path;
    long entry;
    bool bCont = wxConfigBase::Get()->GetFirstEntry(str, entry);
    while(bCont)
@@ -1256,9 +1320,9 @@ void GetRecursiveConfigEntryList(list<pair<wxString,wxString> > &l)
    bCont = wxConfigBase::Get()->GetFirstGroup(str, group);
    while(bCont)
    {
-      wxConfigBase::Get()->SetPath(path+"/"+str);
+      wxConfigBase::Get()->SetPath(path+_T("/")+str);
       GetRecursiveConfigEntryList(l);
-      wxConfigBase::Get()->SetPath("..");
+      wxConfigBase::Get()->SetPath(_T(".."));
       bCont = wxConfigBase::Get()->GetNextGroup(str, group);
    }
 }
@@ -1291,7 +1355,7 @@ BEGIN_EVENT_TABLE(WXFoxPreferences, wxDialog)
 END_EVENT_TABLE()
 
 WXFoxPreferences::WXFoxPreferences(wxWindow *parent):
-wxDialog(parent,-1,"FOX Preferences: ",wxDefaultPosition,wxSize(400,300),wxDEFAULT_DIALOG_STYLE)
+wxDialog(parent,-1,_T("FOX Preferences: "),wxDefaultPosition,wxSize(400,300),wxDEFAULT_DIALOG_STYLE)
 {
    wxScrolledWindow *sw=new wxScrolledWindow(this);
    sw->FitInside();
@@ -1309,22 +1373,22 @@ wxDialog(parent,-1,"FOX Preferences: ",wxDefaultPosition,wxSize(400,300),wxDEFAU
       wxString component,entry;
       FOX_PREF_TYPE type;
       
-      size_t tmp=pos->first.find("/",1);
+      size_t tmp=pos->first.find(_T("/"),1);
       component=pos->first.substr(1,tmp-1);
       
       entry=pos->second;
       
-      if(pos->first.find("BOOL"  ,1)!=wxString::npos) type=PREF_BOOL;
-      if(pos->first.find("STRING",1)!=wxString::npos) type=PREF_STRING;
-      if(pos->first.find("LONG"  ,1)!=wxString::npos) type=PREF_LONG;
+      if(pos->first.find(_T("BOOL")  ,1)!=wxString::npos) type=PREF_BOOL;
+      if(pos->first.find(_T("STRING"),1)!=wxString::npos) type=PREF_STRING;
+      if(pos->first.find(_T("LONG")  ,1)!=wxString::npos) type=PREF_LONG;
       
       switch(type)
       {
          case PREF_BOOL:
          {
-            wxCheckBox *win=new wxCheckBox(sw,-1,component+":"+entry);
+            wxCheckBox *win=new wxCheckBox(sw,-1,component+_T(":")+entry);
             bool val;
-            wxConfigBase::Get()->Read("/"+component+"/BOOL/"+entry,&val);
+            wxConfigBase::Get()->Read(_T("/")+component+_T("/BOOL/")+entry,&val);
             win->SetValue(val);
             sizer->Add(win,0,wxLEFT);
             w=win;
@@ -1335,9 +1399,9 @@ wxDialog(parent,-1,"FOX Preferences: ",wxDefaultPosition,wxSize(400,300),wxDEFAU
             w=new wxWindow(sw,-1);
             wxBoxSizer *s=new wxBoxSizer(wxHORIZONTAL);
             w->SetSizer(s);
-            wxStaticText *txt=new wxStaticText(w,-1,component+":"+entry);
+            wxStaticText *txt=new wxStaticText(w,-1,component+_T(":")+entry);
             wxString val;
-            wxConfigBase::Get()->Read("/"+component+"/STRING/"+entry,&val);
+            wxConfigBase::Get()->Read(_T("/")+component+_T("/STRING/")+entry,&val);
             wxTextCtrl *win=new wxTextCtrl(w,-1,val);
             s->Add(txt,0,wxALIGN_CENTER);
             s->Add(win,0,wxALIGN_CENTER);
@@ -1351,9 +1415,9 @@ wxDialog(parent,-1,"FOX Preferences: ",wxDefaultPosition,wxSize(400,300),wxDEFAU
             w=new wxWindow(sw,-1);
             wxBoxSizer *s=new wxBoxSizer(wxHORIZONTAL);
             w->SetSizer(s);
-            wxStaticText *txt=new wxStaticText(w,-1,component+":"+entry);
+            wxStaticText *txt=new wxStaticText(w,-1,component+_T(":")+entry);
             wxString val;
-            wxConfigBase::Get()->Read("/"+component+"/LONG/"+entry,&val);
+            wxConfigBase::Get()->Read(_T("/")+component+_T("/LONG/")+entry,&val);
             wxTextCtrl *win=new wxTextCtrl(w,-1,val,wxDefaultPosition,wxDefaultSize,0,wxTextValidator(wxFILTER_NUMERIC));
             s->Add(txt,0,wxALIGN_CENTER);
             s->Add(win,0,wxALIGN_CENTER);
@@ -1383,7 +1447,7 @@ void WXFoxPreferences::OnClose(wxCloseEvent& event)
       {
          case PREF_BOOL:
          {
-            wxString full="/"+pos->component+"/BOOL/"+pos->entry;
+            wxString full=_T("/")+pos->component+_T("/BOOL/")+pos->entry;
             bool val;
             wxConfigBase::Get()->Read(full,&val);
             wxCheckBox *w=dynamic_cast<wxCheckBox *>(pos->win);
@@ -1393,7 +1457,7 @@ void WXFoxPreferences::OnClose(wxCloseEvent& event)
          }
          case PREF_STRING:
          {
-            wxString full="/"+pos->component+"/STRING/"+pos->entry;
+            wxString full=_T("/")+pos->component+_T("/STRING/")+pos->entry;
             wxString val;
             wxConfigBase::Get()->Read(full,&val);
             wxTextCtrl *w=dynamic_cast<wxTextCtrl *>(pos->win);
@@ -1403,7 +1467,7 @@ void WXFoxPreferences::OnClose(wxCloseEvent& event)
          }
          case PREF_LONG:
          {
-            wxString full="/"+pos->component+"/LONG/"+pos->entry;
+            wxString full=_T("/")+pos->component+_T("/LONG/")+pos->entry;
             wxString s;
             long val;
             wxConfigBase::Get()->Read(full,&val);
@@ -1451,66 +1515,66 @@ void WXCrystMainFrame::OnCheckUpdate(wxCommandEvent& event)
             for(map<unsigned int,pair<int,wxString> >::const_iterator pos=mvUpdates.begin();pos!=mvUpdates.end();++pos)
             {
                if(pos->second.first==12)
-                  msg=msg+wxString::Format("#%d (CRITICAL): %s\n",pos->first,pos->second.second.c_str());
+                  msg=msg+wxString::Format(_T("#%d (CRITICAL): %s\n"),pos->first,pos->second.second.c_str());
             }
-            wxMessageDialog d(this,msg, "! CRITICAL update available !", wxOK|wxICON_EXCLAMATION);
+            wxMessageDialog d(this,msg, _T("! CRITICAL update available !"), wxOK|wxICON_EXCLAMATION);
             d.ShowModal();
          }
       }
       else
       {// User asked for this, so give the full version
-         wxFrame *frame=new wxFrame(this,-1,"FOX Updates",wxDefaultPosition,wxSize(800,250),wxSTAY_ON_TOP | wxRESIZE_BORDER | wxCAPTION | wxCLOSE_BOX | wxCLIP_CHILDREN);
-         wxTextCtrl *wUpdates=new wxTextCtrl(frame,-1,"",wxDefaultPosition,wxDefaultSize,wxTE_MULTILINE|wxTE_READONLY|wxTE_DONTWRAP);
+         wxFrame *frame=new wxFrame(this,-1,_T("FOX Updates"),wxDefaultPosition,wxSize(800,250),wxSTAY_ON_TOP | wxRESIZE_BORDER | wxCAPTION | wxCLOSE_BOX | wxCLIP_CHILDREN);
+         wxTextCtrl *wUpdates=new wxTextCtrl(frame,-1,_T(""),wxDefaultPosition,wxDefaultSize,wxTE_MULTILINE|wxTE_READONLY|wxTE_DONTWRAP);
          wUpdates->SetFont(wxFont(10,wxROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_BOLD));
          if(mvUpdates.size()>0)
          {
             if(nbcritical>0)
             {
-               cout<<wxString::Format("\n%d CRITICAL updates available:\n",nbcritical)<<endl;
-               wUpdates->AppendText(wxString::Format("\n%d CRITICAL updates available:\n",nbcritical));
+               cout<<wxString::Format(_T("\n%d CRITICAL updates available:\n"),nbcritical)<<endl;
+               wUpdates->AppendText(wxString::Format(_T("\n%d CRITICAL updates available:\n"),nbcritical));
                for(map<unsigned int,pair<int,wxString> >::const_iterator pos=mvUpdates.begin();pos!=mvUpdates.end();++pos)
                {
                   if(pos->second.first==12)
                   {
-                     wxString mess=wxString::Format("  #%d: %s\n",pos->first,pos->second.second.c_str());
+                     wxString mess=wxString::Format(_T("  #%d: %s\n"),pos->first,pos->second.second.c_str());
                      wUpdates->AppendText(mess);
                   }
                }
             }
             if(nbrelease>0)
             {
-               cout<<wxString::Format("\n%d new RELEASE available :\n",nbrelease)<<endl;
-               wUpdates->AppendText(wxString::Format("\n%d new RELEASE available :\n",nbrelease));
+               cout<<wxString::Format(_T("\n%d new RELEASE available :\n"),nbrelease)<<endl;
+               wUpdates->AppendText(wxString::Format(_T("\n%d new RELEASE available :\n"),nbrelease));
                for(map<unsigned int,pair<int,wxString> >::const_iterator pos=mvUpdates.begin();pos!=mvUpdates.end();++pos)
                {
                   if(pos->second.first==2)
-                     wUpdates->AppendText(wxString::Format("  #%d: %s\n",pos->first,pos->second.second.c_str()));
+                     wUpdates->AppendText(wxString::Format(_T("  #%d: %s\n"),pos->first,pos->second.second.c_str()));
                }
             }
             if(nbmajorfeature>0)
             {
-               cout<<wxString::Format("\n%d major features updates available:\n",nbmajorfeature)<<endl;
-               wUpdates->AppendText(wxString::Format("\n%d major features updates available:\n",nbmajorfeature));
+               cout<<wxString::Format(_T("\n%d major features updates available:\n"),nbmajorfeature)<<endl;
+               wUpdates->AppendText(wxString::Format(_T("\n%d major features updates available:\n"),nbmajorfeature));
                for(map<unsigned int,pair<int,wxString> >::const_iterator pos=mvUpdates.begin();pos!=mvUpdates.end();++pos)
                {
                   if(pos->second.first==1)
-                     wUpdates->AppendText(wxString::Format("  #%d: %s\n",pos->first,pos->second.second.c_str()));
+                     wUpdates->AppendText(wxString::Format(_T("  #%d: %s\n"),pos->first,pos->second.second.c_str()));
                }
             }
             if(nbminorfeature>0)
             {
-               cout<<wxString::Format("\n%d minor features updates available:\n",nbminorfeature)<<endl;
-               wUpdates->AppendText(wxString::Format("\n%d minor features updates available:\n",nbminorfeature));
+               cout<<wxString::Format(_T("\n%d minor features updates available:\n"),nbminorfeature)<<endl;
+               wUpdates->AppendText(wxString::Format(_T("\n%d minor features updates available:\n"),nbminorfeature));
                for(map<unsigned int,pair<int,wxString> >::const_iterator pos=mvUpdates.begin();pos!=mvUpdates.end();++pos)
                {
                   if(pos->second.first==0)
-                     wUpdates->AppendText(wxString::Format("  #%d: %s\n",pos->first,pos->second.second.c_str()));
+                     wUpdates->AppendText(wxString::Format(_T("  #%d: %s\n"),pos->first,pos->second.second.c_str()));
                }
             }
          }
          else
          {
-            wUpdates->AppendText(wxString::Format("No updates found !\n"));
+            wUpdates->AppendText(wxString::Format(_T("No updates found !\n")));
          }
          frame->Show(true);
       }
@@ -1520,7 +1584,7 @@ void WXCrystMainFrame::OnCheckUpdate(wxCommandEvent& event)
       mvUpdatesAutoCheck=false;
       WXThreadCheckUpdates *pThreadCheckUpdates = new WXThreadCheckUpdates(mvUpdates,*this);
       if(pThreadCheckUpdates->Create() != wxTHREAD_NO_ERROR) 
-         wxLogError("Can't create updates check thread");
+         wxLogError(_T("Can't create updates check thread"));
       else pThreadCheckUpdates->Run();
    }
 }

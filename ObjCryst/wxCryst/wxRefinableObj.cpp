@@ -91,7 +91,7 @@ WXField(parent,label,ID_WXFIELD_REFPAR),mValue(0.),mpRefPar(par),mIsSelfUpdating
    if(enableFixButton)
    {
       this->SetLabel(label+"R");
-      mpButtonFix=new wxCheckBox(this,ID_WXFIELD_REFPAR_FIXBUTTON,"L",wxDefaultPosition, wxDefaultSize);
+      mpButtonFix=new wxCheckBox(this,ID_WXFIELD_REFPAR_FIXBUTTON,_T("L"),wxDefaultPosition, wxDefaultSize);
       mpButtonFix->Fit();
       mpButtonFix->SetToolTip(_T("Check this box to enable optimizing this parameter.\n") 
                               _T("(some parameters may be automatically fixed for global optimization)"));
@@ -99,13 +99,13 @@ WXField(parent,label,ID_WXFIELD_REFPAR),mValue(0.),mpRefPar(par),mIsSelfUpdating
    }else mpButtonFix=0;
    if(enableLimitedButton)
    {
-      mpButtonLimited=new wxCheckBox(this,ID_WXFIELD_REFPAR_LIMITEDBUTTON,"",
+      mpButtonLimited=new wxCheckBox(this,ID_WXFIELD_REFPAR_LIMITEDBUTTON,_T(""),
                                      wxDefaultPosition, wxSize(16,20));
       mpButtonLimited->SetToolTip(_T("Check this box to use limits for this parameter"));
       mpSizer->Add(mpButtonLimited,0,wxALIGN_CENTER);
    }else mpButtonLimited=0;
    
-   mpField=new wxTextCtrl(this,ID_WXFIELD,"",
+   mpField=new wxTextCtrl(this,ID_WXFIELD,_T(""),
                             wxDefaultPosition,wxSize(hsize,-1),wxTE_PROCESS_ENTER,
                             wxTextValidator(wxFILTER_NUMERIC));
    mpSizer->Add(mpField,0,wxALIGN_CENTER);
@@ -153,7 +153,7 @@ void WXFieldRefPar::OnPopupMenu(wxMouseEvent & WXUNUSED(event))
    if(needInitMenu)
    {
       needInitMenu=false;
-      sWXFieldRefParPopupMenu.Append(ID_REFPAR_POPUP_SET_LIMITS, "Change Limits");
+      sWXFieldRefParPopupMenu.Append(ID_REFPAR_POPUP_SET_LIMITS, _T("Change Limits"));
    }
    this->PopupMenu(&sWXFieldRefParPopupMenu,0,0);
 }
@@ -167,8 +167,8 @@ void WXFieldRefPar::OnPopupMenuChoice(wxCommandEvent& event)
       {
          wxString str;
          str << mpRefPar->GetHumanMin();
-         wxTextEntryDialog limitDialog(this,"Enter the minimum value",
-                                 "Minimum",str,wxOK | wxCANCEL);
+         wxTextEntryDialog limitDialog(this,_T("Enter the minimum value"),
+                                 _T("Minimum"),str,wxOK | wxCANCEL);
          if(wxID_OK!=limitDialog.ShowModal())
          {
             VFN_DEBUG_EXIT("WXZScatterer::OnMenuSetLimits():Cancelled",6)
@@ -179,8 +179,8 @@ void WXFieldRefPar::OnPopupMenuChoice(wxCommandEvent& event)
       {
          wxString str;
          str << mpRefPar->GetHumanMax();
-         wxTextEntryDialog limitDialog(this,"Enter the maximum value",
-                                 "Maximum",str,wxOK | wxCANCEL);
+         wxTextEntryDialog limitDialog(this,_T("Enter the maximum value"),
+                                 _T("Maximum"),str,wxOK | wxCANCEL);
          if(wxID_OK!=limitDialog.ShowModal())
          {
             VFN_DEBUG_EXIT("WXZScatterer::OnMenuSetLimits():Cancelled",6)
@@ -190,8 +190,8 @@ void WXFieldRefPar::OnPopupMenuChoice(wxCommandEvent& event)
       }
       if(max<=min)
       {
-         wxMessageDialog dumbUser(this,"max <= min !!!",
-                                  "Whooops",wxOK|wxICON_EXCLAMATION);
+         wxMessageDialog dumbUser(this,_T("max <= min !!!"),
+                                  _T("Whooops"),wxOK|wxICON_EXCLAMATION);
          dumbUser.ShowModal();
          return;
       }
@@ -245,8 +245,8 @@ void WXFieldRefPar::UpdateUI(const bool lock)
    
    //mpField->SetValue(wxString::Printf("%f",mValue));
    wxString tmp;
-   if((abs(mValue)<100)&&(abs(mValue)>0.01)) tmp.Printf("%6.4f",mValue);
-   else tmp.Printf("%f",mValue);
+   if((abs(mValue)<100)&&(abs(mValue)>0.01)) tmp.Printf(_T("%6.4f"),mValue);
+   else tmp.Printf(_T("%f"),mValue);
    mIsSelfUpdating=true;
    mpField->SetValue(tmp);
    mIsSelfUpdating=false;
@@ -293,7 +293,7 @@ mChoice(-1),mChoiceOld(-1),mpOption(option),mpList(0)
 {
    wxString choices[20];//:TODO: dynamically choose correct number
    for(int i=0;i<mpOption->GetNbChoice();i++)
-      choices[i]=mpOption->GetChoiceName(i).c_str();
+      choices[i]=wxString::FromAscii(mpOption->GetChoiceName(i).c_str());
    
    mpList= new wxChoice(this,ID_WXFIELD,wxDefaultPosition,wxDefaultSize,
                         mpOption->GetNbChoice(),choices);
@@ -365,7 +365,7 @@ WXCrystObj(parent,wxHORIZONTAL,false),mpRegistry(reg)
    #ifdef VFN_CRYST_MUTEX
    cout <<"new CrystMutex("<<&mMutex<<")for WXCrystRegistry:"<<reg->GetName()<<endl;
    #endif
-   wxStaticText* mpLabel=new wxStaticText(this,-1,reg->GetName().c_str());
+   wxStaticText* mpLabel=new wxStaticText(this,-1,wxString::FromAscii(reg->GetName().c_str()));
    mpSizer->Add(mpLabel,0,wxALIGN_LEFT);
    mpLabel->SetForegroundColour(wxColour(0,0,255));
    this->BottomLayout(0);
@@ -434,9 +434,9 @@ template<class T> T* WXDialogChooseFromRegistry(ObjRegistry<T> &reg,wxWindow*par
 {
    wxString* choices=new wxString[reg.GetNb()];
    for(int i=0;i<reg.GetNb();i++) 
-      *(choices+i)=(reg.GetObj(i).GetClassName()+":"+reg.GetObj(i).GetName()).c_str();
+      *(choices+i)=wxString::FromAscii((reg.GetObj(i).GetClassName()+":"+reg.GetObj(i).GetName()).c_str());
    wxSingleChoiceDialog dialog
-         (parent,message.c_str(),"Choose",reg.GetNb(),choices,0,wxOK | wxCANCEL);
+         (parent,wxString::FromAscii(message.c_str()),_T("Choose"),reg.GetNb(),choices,0,wxOK | wxCANCEL);
    dialog.SetSize(300,300);
    if(wxID_OK!=dialog.ShowModal())
    {
@@ -481,9 +481,9 @@ template<class T> const T* WXDialogChooseFromRegistry(const ObjRegistry<T> &reg,
 {
    wxString* choices=new wxString[reg.GetNb()];
    for(int i=0;i<reg.GetNb();i++) 
-      *(choices+i)=(reg.GetObj(i).GetClassName()+":"+reg.GetObj(i).GetName()).c_str();
+      *(choices+i)=wxString::FromAscii((reg.GetObj(i).GetClassName()+":"+reg.GetObj(i).GetName()).c_str());
    wxSingleChoiceDialog dialog
-         (parent,message.c_str(),"Choose",reg.GetNb(),choices,0,wxOK | wxCANCEL);
+         (parent,wxString::FromAscii(message.c_str()),_T("Choose"),reg.GetNb(),choices,0,wxOK | wxCANCEL);
    dialog.SetSize(300,300);
    if(wxID_OK!=dialog.ShowModal())
    {
@@ -619,10 +619,10 @@ bool WXRefinableObj::OnChangeName(const int id)
 void WXRefinableObj::OnMenuSave(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXRefinableObj::OnButtonSave()",6)
-   wxFileDialog save(this,"Choose a file","","","*.xml",wxSAVE | wxOVERWRITE_PROMPT);
+   wxFileDialog save(this,_T("Choose a file"),_T(""),_T(""),_T("*.xml"),wxSAVE | wxOVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
    
-   ofstream out(save.GetPath().c_str());
+   ofstream out(save.GetPath().ToAscii());
    if(!out) return;//:TODO:
    {
       mpRefinableObj->XMLOutput(out);
@@ -633,11 +633,11 @@ void WXRefinableObj::OnMenuSave(wxCommandEvent & WXUNUSED(event))
 void WXRefinableObj::OnMenuLoad(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXRefinableObj::OnButtonLoad()",6)
-   wxFileDialog *open= new wxFileDialog(this,"Choose a file","","","*.xml",
+   wxFileDialog *open= new wxFileDialog(this,_T("Choose a file"),_T(""),_T(""),_T("*.xml"),
                                         wxOPEN | wxFILE_MUST_EXIST);
    if(open->ShowModal() != wxID_OK) return;
    
-   ifstream fin(open->GetPath().c_str());
+   ifstream fin(open->GetPath().ToAscii());
    if(!fin) return;//:TODO:
    {
       XMLCrystTag tag(fin);//:TODO: load all tags and find the right ones for this class

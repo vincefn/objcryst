@@ -418,8 +418,8 @@ void WXZScatterer::OnMenuAddZAtom(wxCommandEvent & WXUNUSED(event))
          return;
       }
       //Bond length
-      wxTextEntryDialog bondLengthDialog(this,"Enter bond length (Angstroems)",
-                              "Bond length","1.5",wxOK | wxCANCEL);
+      wxTextEntryDialog bondLengthDialog(this,_T("Enter bond length (Angstroems)"),
+                              _T("Bond length"),_T("1.5"),wxOK | wxCANCEL);
       if(wxID_OK!=bondLengthDialog.ShowModal())
       {
          VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom():Cancelled",6)
@@ -438,8 +438,8 @@ void WXZScatterer::OnMenuAddZAtom(wxCommandEvent & WXUNUSED(event))
          return;
       }
       //angle
-      wxTextEntryDialog angleDialog(this,"Enter bond angle (degrees)",
-                              "Bond Angle","110",wxOK | wxCANCEL);
+      wxTextEntryDialog angleDialog(this,_T("Enter bond angle (degrees)"),
+                              _T("Bond Angle"),_T("110"),wxOK | wxCANCEL);
       if(wxID_OK!=angleDialog.ShowModal())
       {
          VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom():Cancelled",6)
@@ -458,8 +458,8 @@ void WXZScatterer::OnMenuAddZAtom(wxCommandEvent & WXUNUSED(event))
          return;
       }
    //dihedral angle
-      wxTextEntryDialog dihedDialog(this,"Enter dihedral angle (degrees)",
-                              "Dihedral Angle","0",wxOK | wxCANCEL);
+      wxTextEntryDialog dihedDialog(this,_T("Enter dihedral angle (degrees)"),
+                              _T("Dihedral Angle"),_T("0"),wxOK | wxCANCEL);
       if(wxID_OK!=dihedDialog.ShowModal())
       {
          VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom():Cancelled",6)
@@ -471,16 +471,16 @@ void WXZScatterer::OnMenuAddZAtom(wxCommandEvent & WXUNUSED(event))
    if(1<mpZScatterer->GetZAtomRegistry().GetNb())
       if(bondAtomId==angleAtomId)
       {
-         wxMessageDialog dumbUser(this,"Bond, angle an dihedral atoms *must* be different",
-                                  "Whooops",wxOK|wxICON_EXCLAMATION);
+         wxMessageDialog dumbUser(this,_T("Bond, angle an dihedral atoms *must* be different"),
+                                  _T("Whooops"),wxOK|wxICON_EXCLAMATION);
          dumbUser.ShowModal();
          return;
       }
    if(2<mpZScatterer->GetZAtomRegistry().GetNb())
       if((bondAtomId==angleAtomId)||(bondAtomId==dihedAtomId)||(angleAtomId==dihedAtomId))
       {
-         wxMessageDialog dumbUser(this,"Bond, angle an dihedral atoms *must* be different",
-                                  "Whooops",wxOK|wxICON_EXCLAMATION);
+         wxMessageDialog dumbUser(this,_T("Bond, angle an dihedral atoms *must* be different"),
+                                  _T("Whooops"),wxOK|wxICON_EXCLAMATION);
          dumbUser.ShowModal();
          return;
       }
@@ -503,8 +503,8 @@ void WXZScatterer::OnMenuSetLimits(wxCommandEvent & event)
    if(event.GetId()==ID_ZSCATTERER_MENU_PAR_LIMITS_RELAT_BOND)
    {
       double limit=.1;
-      wxTextEntryDialog limitDialog(this,"Enter maximum shift in Angstroems\n The limits are taken symmetrically around current position:\n X0-l < X < X0+l ",
-                              "Set limits (relative) for bondlengths",".1",wxOK | wxCANCEL);
+      wxTextEntryDialog limitDialog(this,_T("Enter maximum shift in Angstroems\n The limits are taken symmetrically around current position:\n X0-l < X < X0+l "),
+                              _T("Set limits (relative) for bondlengths"),_T(".1"),wxOK | wxCANCEL);
       if(wxID_OK!=limitDialog.ShowModal())
       {
          VFN_DEBUG_EXIT("WXZScatterer::OnMenuSetLimits():Cancelled",6)
@@ -513,8 +513,8 @@ void WXZScatterer::OnMenuSetLimits(wxCommandEvent & event)
       limitDialog.GetValue().ToDouble(&limit);
       if(limit<=0)
       {
-         wxMessageDialog dumbUser(this,"Limit must be > 0 !",
-                                  "Whooops",wxOK|wxICON_EXCLAMATION);
+         wxMessageDialog dumbUser(this,_T("Limit must be > 0 !"),
+                                  _T("Whooops"),wxOK|wxICON_EXCLAMATION);
          dumbUser.ShowModal();
          return;
       }
@@ -523,8 +523,8 @@ void WXZScatterer::OnMenuSetLimits(wxCommandEvent & event)
    if(event.GetId()==ID_ZSCATTERER_MENU_PAR_LIMITS_RELAT_ANGLE)
    {
       double limit=5;
-      wxTextEntryDialog limitDialog(this,"Enter maximum shift in Degrees\n The limits are taken symmetrically around current position:\n X0-l < X < X0+l ",
-                              "Set limits (relative) for bond angles",".1",wxOK | wxCANCEL);
+      wxTextEntryDialog limitDialog(this,_T("Enter maximum shift in Degrees\n The limits are taken symmetrically around current position:\n X0-l < X < X0+l "),
+                              _T("Set limits (relative) for bond angles"),_T(".1"),wxOK | wxCANCEL);
       if(wxID_OK!=limitDialog.ShowModal())
       {
          VFN_DEBUG_EXIT("WXZScatterer::OnMenuSetLimits():Cancelled",6)
@@ -533,8 +533,8 @@ void WXZScatterer::OnMenuSetLimits(wxCommandEvent & event)
       limitDialog.GetValue().ToDouble(&limit);
       if(limit<=0)
       {
-         wxMessageDialog dumbUser(this,"Limit must be > 0 !",
-                                  "Whooops",wxOK|wxICON_EXCLAMATION);
+         wxMessageDialog dumbUser(this,_T("Limit must be > 0 !"),
+                                  _T("Whooops"),wxOK|wxICON_EXCLAMATION);
          dumbUser.ShowModal();
          return;
       }
@@ -544,8 +544,8 @@ void WXZScatterer::OnMenuSetLimits(wxCommandEvent & event)
    if(event.GetId()==ID_ZSCATTERER_MENU_PAR_LIMITS_RELAT_DIHED)
    {
       double limit=5;
-      wxTextEntryDialog limitDialog(this,"Enter maximum shift in Degrees\n The limits are taken symmetrically around current position:\n X0-l < X < X0+l ",
-                              "Set limits (relative) for dihedral angles",".1",wxOK | wxCANCEL);
+      wxTextEntryDialog limitDialog(this,_T("Enter maximum shift in Degrees\n The limits are taken symmetrically around current position:\n X0-l < X < X0+l "),
+                              _T("Set limits (relative) for dihedral angles"),_T(".1"),wxOK | wxCANCEL);
       if(wxID_OK!=limitDialog.ShowModal())
       {
          VFN_DEBUG_EXIT("WXZScatterer::OnMenuSetLimits():Cancelled",6)
@@ -554,8 +554,8 @@ void WXZScatterer::OnMenuSetLimits(wxCommandEvent & event)
       limitDialog.GetValue().ToDouble(&limit);
       if(limit<=0)
       {
-         wxMessageDialog dumbUser(this,"Limit must be > 0 !",
-                                  "Whooops",wxOK|wxICON_EXCLAMATION);
+         wxMessageDialog dumbUser(this,_T("Limit must be > 0 !"),
+                                  _T("Whooops"),wxOK|wxICON_EXCLAMATION);
          dumbUser.ShowModal();
          return;
       }
@@ -581,27 +581,27 @@ void WXZScatterer::OnMenuChangePivotAtom(wxCommandEvent &WXUNUSED(event))
 
 void WXZScatterer::OnMenuImportZMatrix(wxCommandEvent &WXUNUSED(event))
 {
-   wxFileDialog open(this,"Choose a file","","","*.fhz",
+   wxFileDialog open(this,_T("Choose a file"),_T(""),_T(""),_T("*.fhz"),
                                         wxOPEN | wxFILE_MUST_EXIST);
    if(open.ShowModal() != wxID_OK) return;
-   ifstream fin (open.GetPath().c_str());
+   ifstream fin (open.GetPath().ToAscii());
    if(!fin)
    {
       throw ObjCrystException("WXZScatterer::OnMenuImportZMatrix() : \
-Error opening file for input:"+string(open.GetPath().c_str()));
+Error opening file for input:"+string(open.GetPath().ToAscii()));
    }
    mpZScatterer->ImportFenskeHallZMatrix(fin);
    fin.close();
 }
 void WXZScatterer::OnMenuExportZMatrix(wxCommandEvent &WXUNUSED(event))
 {
-   wxFileDialog save(this,"Choose a file","","","*.fhz",wxSAVE);
+   wxFileDialog save(this,_T("Choose a file"),_T(""),_T(""),_T("*.fhz"),wxSAVE);
    if(save.ShowModal() != wxID_OK) return;
-   ofstream fout (save.GetPath().c_str());
+   ofstream fout (save.GetPath().ToAscii());
    if(!fout)
    {
       throw ObjCrystException("WXZScatterer::OnMenuExportZMatrix() : \
-Error opening file for input:"+string(save.GetPath().c_str()));
+Error opening file for input:"+string(save.GetPath().ToAscii()));
    }
    mpZScatterer->ExportFenskeHallZMatrix(fout);
    fout.close();

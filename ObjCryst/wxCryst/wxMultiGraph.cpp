@@ -133,8 +133,8 @@ mIsDragging(false),mpParentFrame(frame)
    #ifdef VFN_CRYST_MUTEX
    cout <<"new CrystMutex("<<&mMutexData<<")for WXMultiGraph:"<<this<<endl;
    #endif
-   mpPopUpMenu=new wxMenu("Graph");
-   mpPopUpMenu->Append(ID_MENU_AUTOSCALE, "&AutoScale");
+   mpPopUpMenu=new wxMenu(_T("Graph"));
+   mpPopUpMenu->Append(ID_MENU_AUTOSCALE, _T("&AutoScale"));
    //mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_TOGGLELABEL, "&Hide Labels");
 }
 
@@ -205,7 +205,7 @@ void WXMultiGraph::OnPaint(wxPaintEvent &event)
    dc.BeginDrawing();
    
    dc.DestroyClippingRegion();
-   dc.SetBackground(wxBrush("white", wxSOLID));
+   dc.SetBackground(wxBrush(_T("white"), wxSOLID));
    dc.Clear();
 
    wxString fontInfo;
@@ -241,12 +241,12 @@ void WXMultiGraph::OnPaint(wxPaintEvent &event)
          mLeft=0;
          for(float y=yStep*ceil(mMinY/yStep);y<mMaxY;y+=yStep)
          {//get left margin from tick labels
-            fontInfo.Printf("%g",y);
+            fontInfo.Printf(_T("%g"),y);
             dc.GetTextExtent(fontInfo, &tmpW, &tmpH);
             if((tmpW+3)>mLeft) mLeft=tmpW+3;
          }
          
-         fontInfo.Printf("%g",xStep);
+         fontInfo.Printf(_T("%g"),xStep);
          dc.GetTextExtent(fontInfo, &tmpW, &tmpH);
          mBottom=tmpH*3/2+3;
          
@@ -262,7 +262,7 @@ void WXMultiGraph::OnPaint(wxPaintEvent &event)
             this->Data2Screen(xs,ys);
             VFN_DEBUG_MESSAGE("WXMultiGraph::OnPaint():Axis:"<<xs<<","<<ys,3)
             dc.DrawLine(wxCoord(xs-3),wxCoord(ys),wxCoord(xs+3),wxCoord(ys));
-            fontInfo.Printf("%g",y);
+            fontInfo.Printf(_T("%g"),y);
             dc.GetTextExtent(fontInfo, &tmpW, &tmpH);
             dc.DrawText(fontInfo,wxCoord(xs-tmpW-3),wxCoord(ys-tmpH/2));
          }
@@ -276,7 +276,7 @@ void WXMultiGraph::OnPaint(wxPaintEvent &event)
             ys=mMinY;
             this->Data2Screen(xs,ys);
             dc.DrawLine(wxCoord(xs),wxCoord(ys-3),wxCoord(xs),wxCoord(ys+3));
-            fontInfo.Printf("%g",x);
+            fontInfo.Printf(_T("%g"),x);
             dc.GetTextExtent(fontInfo, &tmpW, &tmpH);
             dc.DrawText(fontInfo,wxCoord(xs-tmpW/2),wxCoord(ys+tmpH/2+3));
          }
@@ -291,7 +291,7 @@ void WXMultiGraph::OnPaint(wxPaintEvent &event)
       if((pos->second.vx.size()<1)||(pos->second.vx.size()!=pos->second.vy.size())) continue;
       wxColour *pc;//=dynamic_cast<wxColour*>(wxTheColourDatabase->Item(ix++)->GetData());
       
-      pc=wxTheColourDatabase->FindColour(swxColourNameList[ix]);
+      pc=wxTheColourDatabase->FindColour(wxString::FromAscii(swxColourNameList[ix]));
       if(pc==0) dc.SetPen(*wxGREY_PEN);
       else dc.SetPen(wxPen(*pc,1,wxSOLID));
       float x1,y1,x2,y2;
@@ -313,7 +313,7 @@ void WXMultiGraph::OnPaint(wxPaintEvent &event)
       if(pc==0) dc.SetTextForeground(wxGREY_PEN->GetColour());
       else dc.SetTextForeground(wxPen(*pc,1,wxSOLID).GetColour());
       wxCoord tmpW,tmpH;
-      fontInfo.Printf(pos->second.name.c_str());
+      fontInfo.Printf(wxString::FromAscii(pos->second.name.c_str()));
       dc.GetTextExtent(fontInfo, &tmpW, &tmpH);
       dc.DrawText(fontInfo,wxCoord(width-tmpW-2),wxCoord(tmpH*(ix)+2));
    }
@@ -343,7 +343,7 @@ void WXMultiGraph::OnMouse(wxMouseEvent &event)
       }
       this->Screen2Data(x,y);
       wxString str;
-      str.Printf("x=%f    ,y=%f",x,y);
+      str.Printf(_T("x=%f    ,y=%f"),x,y);
       mpParentFrame->SetStatusText(str);
 
    if(event.RightIsDown())

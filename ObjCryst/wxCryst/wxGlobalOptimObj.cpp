@@ -200,18 +200,18 @@ void WXOptimizationObj::OnBrowseParamSet(wxCommandEvent & WXUNUSED(event))
 {
    if(this->GetOptimizationObj().IsOptimizing())
    {
-      wxMessageDialog dumbUser(this,"Cannot browse during Optimisation !",
-                               "Cannot browse during Optimisation!",wxOK|wxICON_EXCLAMATION);
+      wxMessageDialog dumbUser(this,_T("Cannot browse during Optimisation !"),
+                               _T("Cannot browse during Optimisation!"),wxOK|wxICON_EXCLAMATION);
       dumbUser.ShowModal();
       return;
    }
-   wxFrame *frame= new wxFrame(this,-1,"Stored Configurations",
+   wxFrame *frame= new wxFrame(this,-1,_T("Stored Configurations"),
                                wxDefaultPosition,wxSize(250,200));
    const long nb=this->GetOptimizationObj().mvSavedParamSet.size();
    wxString *choices = new wxString[nb];
    for(int i=0;i<nb;i++)
    {
-      choices[i].sprintf("%d, cost= %f, %s",i,
+      choices[i].Printf(_T("%d, cost= %f, %s"),i,
                          this->GetOptimizationObj().mvSavedParamSet[i].second,
                          this->GetOptimizationObj().mRefParList.GetParamSetName
                            (this->GetOptimizationObj().mvSavedParamSet[i].first).c_str());
@@ -220,7 +220,7 @@ void WXOptimizationObj::OnBrowseParamSet(wxCommandEvent & WXUNUSED(event))
    mpwxParamSetList=new wxListBox(frame, ID_BROWSE_WIN, wxDefaultPosition, 
                                    wxDefaultSize, nb, choices,
                                    wxLB_SINGLE|wxLB_NEEDED_SB, wxDefaultValidator,
-                                   "listBox");
+                                   _T("listBox"));
    mpwxParamSetList->SetEventHandler(this);
    mClockParamSetWindow.Click();
    frame->Show(true);
@@ -230,8 +230,8 @@ void WXOptimizationObj::OnSelectParamSet(wxCommandEvent &event)
 {
    if(this->GetOptimizationObj().IsOptimizing())
    {
-      wxMessageDialog dumbUser(this,"Cannot browse during Optimisation !",
-                               "Cannot browse during Optimisation!",wxOK|wxICON_EXCLAMATION);
+      wxMessageDialog dumbUser(this,_T("Cannot browse during Optimisation !"),
+                               _T("Cannot browse during Optimisation!"),wxOK|wxICON_EXCLAMATION);
       dumbUser.ShowModal();
       return;
    }
@@ -245,8 +245,8 @@ void WXOptimizationObj::OnSelectParamSet(wxCommandEvent &event)
       }
       catch(const ObjCrystException &except)
       {
-         wxMessageDialog bad(this,"Impossible ! Model has been altered !",
-                                  "Impossible ! Model has been altered !",wxOK|wxICON_EXCLAMATION);
+         wxMessageDialog bad(this,_T("Impossible ! Model has been altered !"),
+                                  _T("Impossible ! Model has been altered !"),wxOK|wxICON_EXCLAMATION);
          mpwxParamSetList->GetParent()->Close();
          mpwxParamSetList=0;
       }
@@ -257,8 +257,8 @@ void WXOptimizationObj::OnSelectParamSet(wxCommandEvent &event)
    }
    else
    {
-      wxMessageDialog bad(this,"Impossible ! The list of parameters has been changed !",
-                               "Impossible ! The list of parameters has been changed !",wxOK|wxICON_EXCLAMATION);
+      wxMessageDialog bad(this,_T("Impossible ! The list of parameters has been changed !"),
+                               _T("Impossible ! The list of parameters has been changed !"),wxOK|wxICON_EXCLAMATION);
       bad.ShowModal();
    }
 }
@@ -394,7 +394,7 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(10000000),mNbRun(-1)
       WXFieldPar<REAL> *pWXFieldBestCost=new WXFieldPar<REAL>(this,"Overall Best Cost:",-1,&(mpMonteCarloObj->GetBestCost()),70);
       mpSizer->Add(pWXFieldBestCost);
       mList.Add(pWXFieldBestCost);
-      pWXFieldBestCost->SetToolTip("Overall (all runs) Best Cost");
+      pWXFieldBestCost->SetToolTip(_T("Overall (all runs) Best Cost"));
    this->BottomLayout(0);
    this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXMonteCarloObj::WXMonteCarloObj()",7)
@@ -406,7 +406,7 @@ void WXMonteCarloObj::OnRunOptimization(wxCommandEvent & event)
    WXCrystValidateAllUserInput();
    if(true==this->GetOptimizationObj().IsOptimizing())
    {
-      wxMessageDialog dumbUser(this,"The optimization is already running !","Huh ?",
+      wxMessageDialog dumbUser(this,_T("The optimization is already running !"),_T("Huh ?"),
                                wxOK|wxICON_EXCLAMATION);
       dumbUser.ShowModal();
       VFN_DEBUG_EXIT("WXGeneticAlgorithm::OnRunOptimization()",6)
@@ -429,8 +429,8 @@ void WXMonteCarloObj::OnRunOptimization(wxCommandEvent & event)
    if(mNbTrial<0)
    {
       mNbTrial = - mNbTrial;
-      wxTextEntryDialog costDialog(this,"Enter desired cost for the optimization to stop",
-                              "Goal Cost",".20",wxOK | wxCANCEL);
+      wxTextEntryDialog costDialog(this,_T("Enter desired cost for the optimization to stop"),
+                              _T("Goal Cost"),_T(".20"),wxOK | wxCANCEL);
       if(wxID_OK==costDialog.ShowModal()) costDialog.GetValue().ToDouble(&finalCost);
    }
    if(event.GetId()==ID_GLOBALOPT_MENU_OPT_RUN_MULTIPLE)
@@ -442,7 +442,7 @@ void WXMonteCarloObj::OnRunOptimization(wxCommandEvent & event)
    // Tracker window
    if(this->GetOptimizationObj().GetMainTracker().WXGet()==0)
    {
-      wxFrame *frame= new wxFrame(this,-1,"Tracked data",
+      wxFrame *frame= new wxFrame(this,-1,_T("Tracked data"),
                                   wxDefaultPosition,wxSize(300,200));
       wxWindow* pwxTrackerGraph = this->GetOptimizationObj().GetMainTracker().WXCreate(frame);
 
@@ -454,7 +454,7 @@ void WXMonteCarloObj::OnRunOptimization(wxCommandEvent & event)
       frame->Show(true);
    }
    if(mpGlobalOptimRunThread->Create() != wxTHREAD_NO_ERROR) 
-      wxLogError("Can't create optimization thread");
+      wxLogError(_T("Can't create optimization thread"));
    else mpGlobalOptimRunThread->Run();
    
    VFN_DEBUG_EXIT("WXMonteCarloObj::OnRunOptimization()",6)

@@ -273,7 +273,7 @@ WXCrystObjBasic(parent),mId(id)
 {
    VFN_DEBUG_MESSAGE("WXField::WXField()",6)
    mpSizer = new wxBoxSizer(wxHORIZONTAL);
-   mpLabel=new wxStaticText(this,-1,label.c_str());
+   mpLabel=new wxStaticText(this,-1,wxString::FromAscii(label.c_str()));
    #ifndef __DARWIN__   // *KLUDGE*
    mpLabel->SetEventHandler(this);
    #endif
@@ -285,7 +285,7 @@ WXCrystObjBasic(parent),mId(id)
 void WXField::SetLabel(const string& s)
 {
    VFN_DEBUG_MESSAGE("WXField::SetLabel()",3)
-   mpLabel->SetLabel(s.c_str());
+   mpLabel->SetLabel(wxString::FromAscii(s.c_str()));
    mpLabel->Layout();
    mpSizer->SetItemMinSize(mpLabel,
                            mpLabel->GetSize().GetWidth(),
@@ -318,11 +318,11 @@ WXField(parent,"",id),mpString(&st),mValue(st),mIsSelfUpdating(false)
    VFN_DEBUG_MESSAGE("WXFieldString::WXFieldName():End",6)
 
    if(true==isEditable)
-      mpField=new wxTextCtrl(this,ID_WXFIELD,mValue.c_str(),
+      mpField=new wxTextCtrl(this,ID_WXFIELD,wxString::FromAscii(mValue.c_str()),
                              wxDefaultPosition,wxSize(hsize,-1),wxTE_PROCESS_ENTER,
                              wxTextValidator(wxFILTER_ASCII));
    else
-      mpField=new wxTextCtrl(this,ID_WXFIELD,mValue.c_str(),
+      mpField=new wxTextCtrl(this,ID_WXFIELD,wxString::FromAscii(mValue.c_str()),
                              wxDefaultPosition,wxSize(hsize,-1),wxTE_READONLY,
                              wxTextValidator(wxFILTER_ASCII));
 
@@ -392,7 +392,7 @@ void WXFieldString::UpdateUI(const bool lock)
    }
    VFN_DEBUG_ENTRY("WXFieldString::UpdateUI("<<lock<<")"<<"MainThread="<<wxThread::IsMain(),4)
    mIsSelfUpdating=true;
-   mpField->SetValue(mValue.c_str());
+   mpField->SetValue(wxString::FromAscii(mValue.c_str()));
    mIsSelfUpdating=false;
    mNeedUpdateUI=false;
    if(lock) mMutex.Unlock();
@@ -411,7 +411,7 @@ void WXFieldString::ValidateUserInput()
    //:TODO: Check that the object is not busy (input should be frozen)
    wxMutexLocker mlock(mMutex);
    mValueOld=mValue;
-   mValue=mpField->GetValue();
+   mValue=mpField->GetValue().ToAscii();
    *mpString=mValue;
 }
 void WXFieldString::SetSize(int width, int height)
@@ -439,11 +439,11 @@ WXField(parent,label,id),mpWXObj(owner),mValue(""),mIsSelfUpdating(false)
    VFN_DEBUG_MESSAGE("WXFieldName::WXFieldName():End",6)
 
    if(true==isEditable)
-      mpField=new wxTextCtrl(this,ID_WXFIELD,mValue.c_str(),
+      mpField=new wxTextCtrl(this,ID_WXFIELD,wxString::FromAscii(mValue.c_str()),
                              wxDefaultPosition,wxSize(hsize,-1),wxTE_PROCESS_ENTER,
                              wxTextValidator(wxFILTER_ASCII));
    else
-      mpField=new wxTextCtrl(this,ID_WXFIELD,mValue.c_str(),
+      mpField=new wxTextCtrl(this,ID_WXFIELD,wxString::FromAscii(mValue.c_str()),
                              wxDefaultPosition,wxSize(hsize,-1),wxTE_READONLY,
                              wxTextValidator(wxFILTER_ASCII));
 
@@ -502,7 +502,7 @@ void WXFieldName::UpdateUI(const bool lock)
    }
    VFN_DEBUG_ENTRY("WXFieldName::UpdateUI("<<lock<<")"<<"MainThread="<<wxThread::IsMain(),4)
    mIsSelfUpdating=true;
-   mpField->SetValue(mValue.c_str());
+   mpField->SetValue(wxString::FromAscii(mValue.c_str()));
    mIsSelfUpdating=false;
    mNeedUpdateUI=false;
    if(lock) mMutex.Unlock();
@@ -520,7 +520,7 @@ void WXFieldName::ValidateUserInput()
    VFN_DEBUG_MESSAGE("WXFieldName::ValidateUserInput()",6)
    mMutex.Lock();
    mValueOld=mValue;
-   mValue=mpField->GetValue();
+   mValue=mpField->GetValue().ToAscii();
    mMutex.Unlock();
    mpWXObj->OnChangeName(mId);
 }
@@ -553,7 +553,7 @@ WXField(parent,label,id),mIsSelfUpdating(false)
 {
    VFN_DEBUG_MESSAGE("WXFieldParBase::WXFieldName():End",6)
 
-   mpField=new wxTextCtrl(this,ID_WXFIELD,"",
+   mpField=new wxTextCtrl(this,ID_WXFIELD,_T(""),
                             wxDefaultPosition,wxSize(hsize,-1),wxTE_PROCESS_ENTER,
                             wxTextValidator(wxFILTER_NUMERIC));
    mpSizer->Add(mpField,0,wxALIGN_CENTER);
@@ -625,8 +625,8 @@ template<> void WXFieldPar<REAL>::UpdateUI(const bool lock)
    }
    VFN_DEBUG_ENTRY("WXFieldPar<REAL>::UpdateUI("<<lock<<")"<<"MainThread="<<wxThread::IsMain(),4)
    wxString tmp;
-   if((abs(mValue*mHumanScale)<100)&&(abs(mValue*mHumanScale)>0.01)) tmp.Printf("%6.4f",mValue*mHumanScale);
-   else tmp.Printf("%f",mValue*mHumanScale);
+   if((abs(mValue*mHumanScale)<100)&&(abs(mValue*mHumanScale)>0.01)) tmp.Printf(_T("%6.4f"),mValue*mHumanScale);
+   else tmp.Printf(_T("%f"),mValue*mHumanScale);
    mIsSelfUpdating=true;
    mpField->SetValue(tmp);
    mIsSelfUpdating=false;
@@ -645,7 +645,7 @@ template<> void WXFieldPar<long>::UpdateUI(const bool lock)
    }
    VFN_DEBUG_ENTRY("WXFieldPar<long>::UpdateUI("<<lock<<")"<<"MainThread="<<wxThread::IsMain(),4)
    wxString tmp;
-   tmp.Printf("%ld",mValue*mHumanScale);
+   tmp.Printf(_T("%ld"),mValue*mHumanScale);
    mIsSelfUpdating=true;
    mpField->SetValue(tmp);
    mIsSelfUpdating=false;
@@ -724,7 +724,7 @@ WXFieldChoice::WXFieldChoice
    (wxWindow *parent,const int field_id,const string &name,const int hsize):
 WXField(parent,name,field_id)
 {
-   mpButton=new wxButton(this,field_id,name.c_str(),wxDefaultPosition,wxSize(hsize,-1));
+   mpButton=new wxButton(this,field_id,wxString::FromAscii(name.c_str()),wxDefaultPosition,wxSize(hsize,-1));
    mpSizer->Add(mpButton,0,wxALIGN_CENTER);
    mpSizer->SetItemMinSize(mpButton,
                            mpButton->GetSize().GetWidth(),
@@ -748,7 +748,7 @@ void WXFieldChoice::Revert()
 }
 void WXFieldChoice::SetValue(const string&name)
 {
-   mpButton->SetLabel(name.c_str());
+   mpButton->SetLabel(wxString::FromAscii(name.c_str()));
 }
 void WXFieldChoice::ValidateUserInput(){}
 
@@ -772,7 +772,7 @@ WXCrystObjBasic(parent),mIsExpanded(true)
    mpTopSizer= new wxBoxSizer(orient);
    this->SetSizer(mpTopSizer);
    
-   mpCollapseButton=new wxButton(this,ID_WXOBJ_COLLAPSE,"-",
+   mpCollapseButton=new wxButton(this,ID_WXOBJ_COLLAPSE,_T("-"),
                                  wxDefaultPosition,wxSize(14,14));
    mpTopSizer->Add(mpCollapseButton,0, wxALIGN_TOP);//wxRIGHT | wxTOP | wxALIGN_TOP,4
    //mpCollapseButton->PushEventHandler(this);
@@ -933,8 +933,8 @@ void WXCrystMenuBar::AddMenu(const string &name,const int menuId, const string& 
 {
    VFN_DEBUG_MESSAGE("WXCrystMenuBar::AddMenu()",6)
    const long id=ID_CRYST_MENU1+mvpMenu.size();
-   mvpMenu[menuId]=make_pair(new wxMenu(name.c_str()),
-                             new wxButton(this,id,name.c_str()));
+   mvpMenu[menuId]=make_pair(new wxMenu(wxString::FromAscii(name.c_str())),
+                             new wxButton(this,id,wxString::FromAscii(name.c_str())));
    VFN_DEBUG_MESSAGE("WXCrystMenuBar::AddMenu():2",6)
    mvpMenu[menuId].second->Layout();
    mpSizer->Add(mvpMenu[menuId].second,0,wxALIGN_CENTER);
@@ -956,7 +956,7 @@ void WXCrystMenuBar::AddMenuItem(const int menuId, int id, const string& item, c
 {
    VFN_DEBUG_MESSAGE("WXCrystMenuBar::AddMenuItem():",6)
    //:TODO: Check we found the correct menu
-   this->GetMenu(menuId).Append(id,item.c_str(),help.c_str(),checkable);
+   this->GetMenu(menuId).Append(id,wxString::FromAscii(item.c_str()),wxString::FromAscii(help.c_str()),checkable);
 }
 
 void WXCrystMenuBar::AddMenuItem(const int menuId,int id, const wxString&  item,
@@ -964,7 +964,7 @@ void WXCrystMenuBar::AddMenuItem(const int menuId,int id, const wxString&  item,
 {
    VFN_DEBUG_MESSAGE("WXCrystMenuBar::AddMenuItem():",6)
    //:TODO: Check we found the correct menu
-   this->GetMenu(menuId).Append(id,item.c_str(),subMenu,helpString.c_str());
+   this->GetMenu(menuId).Append(id,item,subMenu,helpString);
 }
 
 void WXCrystMenuBar::CrystUpdate(const bool updateUI,const bool mutexlock)

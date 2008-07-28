@@ -494,7 +494,7 @@ class WXCrystMenuBar: public WXCrystObjBasic
                        const bool checkable= false);
       /// Add a sub-menu to a menu
       void AddMenuItem(const int menuId,int id, const wxString&  item,
-                       wxMenu *subMenu, const wxString& helpString = "");
+                       wxMenu *subMenu, const wxString& helpString = _T(""));
       virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false);
       virtual void UpdateUI(const bool mutexlock=false);
       /// Event handler to popu the menu when the button is clicked.

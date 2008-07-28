@@ -100,8 +100,8 @@ void WXScatteringPowerAtom::OnChangeColour(wxCommandEvent & event)
    {
       wxString str;
       str<<r;
-      wxTextEntryDialog dialog(this,"Red",
-                              "Enter Red component (0.<r<1.)",str,wxOK | wxCANCEL);
+      wxTextEntryDialog dialog(this,_T("Red"),
+                              _T("Enter Red component (0.<r<1.)"),str,wxOK | wxCANCEL);
       if(wxID_OK!=dialog.ShowModal())
       {
          VFN_DEBUG_EXIT("WXScatteringPowerAtom::OnChangeColour():Cancelled",6)
@@ -113,8 +113,8 @@ void WXScatteringPowerAtom::OnChangeColour(wxCommandEvent & event)
    {
       wxString str;
       str<<g;
-      wxTextEntryDialog dialog(this,"Green",
-                              "Enter Green component (0.<g<1.)",str,wxOK | wxCANCEL);
+      wxTextEntryDialog dialog(this,_T("Green"),
+                              _T("Enter Green component (0.<g<1.)"),str,wxOK | wxCANCEL);
       if(wxID_OK!=dialog.ShowModal())
       {
          VFN_DEBUG_EXIT("WXScatteringPowerAtom::OnChangeColour():Cancelled",6)
@@ -126,8 +126,8 @@ void WXScatteringPowerAtom::OnChangeColour(wxCommandEvent & event)
    {
       wxString str;
       str<<b;
-      wxTextEntryDialog dialog(this,"Blue",
-                              "Enter Blue component (0.<b<1.)",str,wxOK | wxCANCEL);
+      wxTextEntryDialog dialog(this,_T("Blue"),
+                              _T("Enter Blue component (0.<b<1.)"),str,wxOK | wxCANCEL);
       if(wxID_OK!=dialog.ShowModal())
       {
          VFN_DEBUG_EXIT("WXScatteringPowerAtom::OnChangeColour():Cancelled",6)

@@ -508,11 +508,11 @@ mpCrystalGL(0)
    this->CrystUpdate(true);
    {
       bool val;
-      if(!wxConfigBase::Get()->HasEntry("Crystal/BOOL/Automatically open crystal 3D view"))
-         wxConfigBase::Get()->Write("Crystal/BOOL/Automatically open crystal 3D view", false);
+      if(!wxConfigBase::Get()->HasEntry(_T("Crystal/BOOL/Automatically open crystal 3D view")))
+         wxConfigBase::Get()->Write(_T("Crystal/BOOL/Automatically open crystal 3D view"), false);
       else
       {
-         wxConfigBase::Get()->Read("Crystal/BOOL/Automatically open crystal 3D view", &val);
+         wxConfigBase::Get()->Read(_T("Crystal/BOOL/Automatically open crystal 3D view"), &val);
          if(val)
          {
             wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_CRYSTAL_MENU_DISPLAY_3DVIEW);
@@ -792,12 +792,12 @@ void WXCrystal::OnMenuCrystalGL(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXCrystal::OnMenuCrystalGL()",6)
    if(mpCrystalGL!=0) return;
-   wxFrame* frame= new wxFrame(this,-1,mpCrystal->GetName().c_str(),
+   wxFrame* frame= new wxFrame(this,-1, wxString::FromAscii(mpCrystal->GetName().c_str()),
                                wxDefaultPosition,wxSize(400,400));
    mpCrystalGL=new WXGLCrystalCanvas(this,frame,-1);
    #if wxUSE_STATUSBAR
    frame->CreateStatusBar(1);
-   frame->SetStatusText(mpCrystal->GetName().c_str());
+   frame->SetStatusText( wxString::FromAscii(mpCrystal->GetName().c_str()));
    #endif
    frame->Show(true);
    if(mpCrystalGL!=0)
@@ -821,10 +821,10 @@ WXGLCrystalCanvas * WXCrystal::GetCrystalGL()
 void WXCrystal::OnMenuSaveCIF(wxCommandEvent & WXUNUSED(event))
 {
    WXCrystValidateAllUserInput();
-   wxFileDialog save(this,"Choose a file","","","*.cif",wxSAVE | wxOVERWRITE_PROMPT);
+   wxFileDialog save(this,_T("Choose a file"),_T(""),_T(""),_T("*.cif"),wxSAVE | wxOVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
    
-   ofstream out(save.GetPath().c_str());
+   ofstream out(save.GetPath().ToAscii());
    if(!out) return;//:TODO:
    mpCrystal->CIFOutput(out);
    out.close();
@@ -833,10 +833,10 @@ void WXCrystal::OnMenuSaveCIF(wxCommandEvent & WXUNUSED(event))
 void WXCrystal::OnMenuSaveText(wxCommandEvent & WXUNUSED(event))
 {
    WXCrystValidateAllUserInput();
-   wxFileDialog save(this,"Choose a file","","","*.txt",wxSAVE | wxOVERWRITE_PROMPT);
+   wxFileDialog save(this,_T("Choose a file"),_T(""),_T(""),_T("*.txt"),wxSAVE | wxOVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
    
-   ofstream out(save.GetPath().c_str());
+   ofstream out(save.GetPath().ToAscii());
    if(!out) return;//:TODO:
    mpCrystal->Print(out);
    mpCrystal->PrintMinDistanceTable(.05,out);
@@ -882,8 +882,8 @@ void WXCrystal::OnMenuRemoveScattPow(wxCommandEvent & WXUNUSED(event))
    for(long i=0;i<pList->GetNbComponent();++i)
       if((*pList)(i).mpScattPow==scatt)
       {
-         wxMessageDialog dumbUser(this,"This Scattering Power is still used !",
-                                  "Whooops",wxOK|wxICON_EXCLAMATION);
+         wxMessageDialog dumbUser(this,_T("This Scattering Power is still used !"),
+                                  _T("Whooops"),wxOK|wxICON_EXCLAMATION);
          dumbUser.ShowModal();
          VFN_DEBUG_EXIT("WXCrystal::OnButtonRemoveScattPow()",6)
          return;
@@ -914,13 +914,13 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
    }
    if(event.GetId()== ID_CRYSTAL_MENU_SCATT_IMPORTATOMLIST)
    {
-      wxFileDialog open(this,"Choose a file with a list of atoms: Element x y z occup","","","*",
+      wxFileDialog open(this,_T("Choose a file with a list of atoms: Element x y z occup"),_T(""),_T(""),_T("*"),
                         wxOPEN | wxFILE_MUST_EXIST);
       if(open.ShowModal() != wxID_OK) return;
-      ifstream fin (open.GetPath().c_str());
+      ifstream fin (open.GetPath().ToAscii());
       if(!fin)
       {
-         throw ObjCrystException("WXCrystal::OnMenuAddScatterer() : Error opening file for input:"+string(open.GetPath().c_str()));
+         throw ObjCrystException("WXCrystal::OnMenuAddScatterer() : Error opening file for input:"+string(open.GetPath().ToAscii()));
       }
       string symbol;
       REAL x,y,z,occup;
@@ -977,8 +977,8 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
             return;
          }
       //Bond length
-         wxTextEntryDialog bondLengthDialog(this,"Bond length",
-                                 "Enter bond length (Angstroems)","1",wxOK | wxCANCEL);
+         wxTextEntryDialog bondLengthDialog(this,_T("Bond length"),
+                                 _T("Enter bond length (Angstroems)"),_T("1"),wxOK | wxCANCEL);
          if(wxID_OK!=bondLengthDialog.ShowModal())
          {
             VFN_DEBUG_EXIT("WXZScatterer))OnMenuAddZAtom())Cancelled",6)
@@ -1014,8 +1014,8 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
             return;
          }
       //Bond length
-         wxTextEntryDialog bondLengthDialog(this,"Bond length",
-                                 "Enter bond length (Angstroems)","1",wxOK | wxCANCEL);
+         wxTextEntryDialog bondLengthDialog(this,_T("Bond length"),
+                                 _T("Enter bond length (Angstroems)"),_T("1"),wxOK | wxCANCEL);
          if(wxID_OK!=bondLengthDialog.ShowModal())
          {
             VFN_DEBUG_EXIT("WXZScatterer))OnMenuAddZAtom())Cancelled",6)
@@ -1052,8 +1052,8 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
             return;
          }
       //Bond length
-         wxTextEntryDialog bondLengthDialog(this,"Bond length",
-                                 "Enter bond length (Angstroems)","1",wxOK | wxCANCEL);
+         wxTextEntryDialog bondLengthDialog(this,_T("Bond length"),
+                                 _T("Enter bond length (Angstroems)"),_T("1"),wxOK | wxCANCEL);
          if(wxID_OK!=bondLengthDialog.ShowModal())
          {
             VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom():Cancelled",6)
@@ -1090,8 +1090,8 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
             return;
          }
       //Bond length
-         wxTextEntryDialog bondLengthDialog(this,"Bond length",
-                                 "Enter bond length (Angstroems)","1",wxOK | wxCANCEL);
+         wxTextEntryDialog bondLengthDialog(this,_T("Bond length"),
+                                 _T("Enter bond length (Angstroems)"),_T("1"),wxOK | wxCANCEL);
          if(wxID_OK!=bondLengthDialog.ShowModal())
          {
             VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom():Cancelled",6)
@@ -1127,8 +1127,8 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
             return;
          }
       //Bond length
-         wxTextEntryDialog bondLengthDialog(this,"Bond length",
-                                 "Enter bond length (Angstroems)","1",wxOK | wxCANCEL);
+         wxTextEntryDialog bondLengthDialog(this,_T("Bond length"),
+                                 _T("Enter bond length (Angstroems)"),_T("1"),wxOK | wxCANCEL);
          if(wxID_OK!=bondLengthDialog.ShowModal())
          {
             VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom():Cancelled",6)
@@ -1164,8 +1164,8 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
             return;
          }
       //Bond length
-         wxTextEntryDialog bondLengthDialog(this,"Bond length",
-                                 "Enter bond length (Angstroems)","1",wxOK | wxCANCEL);
+         wxTextEntryDialog bondLengthDialog(this,_T("Bond length"),
+                                 _T("Enter bond length (Angstroems)"),_T("1"),wxOK | wxCANCEL);
          if(wxID_OK!=bondLengthDialog.ShowModal())
          {
             VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom():Cancelled",6)
@@ -1201,8 +1201,8 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
             return;
          }
       //Bond length
-         wxTextEntryDialog bondLengthDialog(this,"Bond length",
-                                 "Enter bond length (Angstroems)","1",wxOK | wxCANCEL);
+         wxTextEntryDialog bondLengthDialog(this,_T("Bond length"),
+                                 _T("Enter bond length (Angstroems)"),_T("1"),wxOK | wxCANCEL);
          if(wxID_OK!=bondLengthDialog.ShowModal())
          {
             VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom())Cancelled",6)
@@ -1238,8 +1238,8 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
             return;
          }
       //Bond length
-         wxTextEntryDialog bondLengthDialog(this,"Bond length",
-                                 "Enter bond length (Angstroems)","1",wxOK | wxCANCEL);
+         wxTextEntryDialog bondLengthDialog(this,_T("Bond length"),
+                                 _T("Enter bond length (Angstroems)"),_T("1"),wxOK | wxCANCEL);
          if(wxID_OK!=bondLengthDialog.ShowModal())
          {
             VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom():Cancelled",6)
@@ -1302,8 +1302,8 @@ void WXCrystal::OnMenuAtoms2Molecule(wxCommandEvent &event)
    const unsigned int nb=v.size();
    wxString *choices = new wxString[nb];
    for(unsigned int i=0;i<nb;i++) 
-      choices[i]=(v[i]->GetName()).c_str();
-   wxMultiChoiceDialog dialog (this,"Choose the molecule's atoms","Select Atoms",nb,choices,wxOK | wxCANCEL);
+      choices[i]= wxString::FromAscii((v[i]->GetName()).c_str());
+   wxMultiChoiceDialog dialog (this,_T("Choose the molecule's atoms"),_T("Select Atoms"),nb,choices,wxOK | wxCANCEL);
    dialog.SetSize(300,300);
    dialog.ShowModal();
    wxArrayInt choice=dialog.GetSelections();
@@ -1320,16 +1320,16 @@ void WXCrystal::OnMenuImportMoleculeFromFenskeHallZMatrix(wxCommandEvent &event)
    WXCrystValidateAllUserInput();
    string tmp("Fenske-Hall z-matrix|*.fhz;*.fh");
    if(event.GetId()==ID_CRYSTAL_MENU_SCATT_IMPORTNAMEDZMATRIX) tmp="Fox z-matrix|*.zmat";
-   wxFileDialog open(this,"Choose a file with a Fenske-Hall Z-matrix","","",tmp.c_str(),
+   wxFileDialog open(this,_T("Choose a file with a Fenske-Hall Z-matrix"),_T(""),_T(""), wxString::FromAscii(tmp.c_str()),
                      wxOPEN | wxFILE_MUST_EXIST);
    if(open.ShowModal() != wxID_OK) return;
-   ifstream fin (open.GetPath().c_str());
+   ifstream fin ( open.GetPath().ToAscii());
    if(!fin)
    {
       throw ObjCrystException("WXCrystal::OnMenuImportFenskeHallZMatrix() : \
-Error opening file for input:"+string(open.GetPath().c_str()));
+Error opening file for input:"+string(open.GetPath().ToAscii()));
    }
-   string filename=open.GetPath().c_str();
+   string filename(open.GetPath().ToAscii());
    string shortName;
    {// Use short name
       std::string::size_type idx =filename.rfind("/");
@@ -1356,9 +1356,9 @@ void WXCrystal::OnMenuSetRelativeXYZLimits(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXCrystal::OnMenuSetRelativeXYZLimits():Cancelled",6)
    WXCrystValidateAllUserInput();
-   wxTextEntryDialog limitDialog(this,"Relative limits",
-                           "Enter relative limits for x,y,z (Angstroems)",
-                           "0.5",wxOK | wxCANCEL);
+   wxTextEntryDialog limitDialog(this,_T("Relative limits"),
+                           _T("Enter relative limits for x,y,z (Angstroems)"),
+                           _T("0.5"),wxOK | wxCANCEL);
    if(wxID_OK!=limitDialog.ShowModal())
    {
       VFN_DEBUG_EXIT("WXCrystal::OnMenuSetRelativeXYZLimits():Cancelled",6)
@@ -1410,7 +1410,7 @@ void WXCrystal::UpdateUI(const bool lock)
       if(lock) mMutex.Lock();
       mpFieldSpacegroup->SetValue(mpCrystal->GetSpaceGroup().GetName());
       #ifdef OBJCRYST_GL
-      if(0!=mpCrystalGL) mpCrystalGL->GetParent()->SetLabel(mpCrystal->GetName().c_str());
+      if(0!=mpCrystalGL) mpCrystalGL->GetParent()->SetLabel( wxString::FromAscii(mpCrystal->GetName().c_str()));
       #endif
       if(lock) mMutex.Unlock();
    }
@@ -1423,21 +1423,21 @@ void WXCrystal::UpdateUI(const bool lock)
          if(pos->second.mNeedUpdateUI==true)
          {
             mIsSelfUpdating=true;
-            mpScattPowWin->SetRowLabelValue(pos->second.mIdx,pos->second.mName.c_str());
+            mpScattPowWin->SetRowLabelValue(pos->second.mIdx, wxString::FromAscii(pos->second.mName.c_str()));
             wxString tmp;
-            tmp.Printf("%f",pos->second.mBiso);
+            tmp.Printf(_T("%f"),pos->second.mBiso);
             mpScattPowWin->SetCellValue(pos->second.mIdx, 0, tmp);
-            tmp.Printf("%f",pos->second.mFormalCharge);
+            tmp.Printf(_T("%f"),pos->second.mFormalCharge);
             mpScattPowWin->SetCellValue(pos->second.mIdx, 1, tmp);
-            tmp.Printf("%f",pos->second.mR);
+            tmp.Printf(_T("%f"),pos->second.mR);
             mpScattPowWin->SetCellValue(pos->second.mIdx, 2, tmp);
-            tmp.Printf("%f",pos->second.mG);
+            tmp.Printf(_T("%f"),pos->second.mG);
             mpScattPowWin->SetCellValue(pos->second.mIdx, 3, tmp);
-            tmp.Printf("%f",pos->second.mB);
+            tmp.Printf(_T("%f"),pos->second.mB);
             mpScattPowWin->SetCellValue(pos->second.mIdx, 4, tmp);
-            tmp.Printf("%f",pos->second.mMaximumLikelihoodError);
+            tmp.Printf(_T("%f"),pos->second.mMaximumLikelihoodError);
             mpScattPowWin->SetCellValue(pos->second.mIdx, 5, tmp);
-            tmp.Printf("%f",pos->second.mNbGhostAtoms);
+            tmp.Printf(_T("%f"),pos->second.mNbGhostAtoms);
             mpScattPowWin->SetCellValue(pos->second.mIdx, 6, tmp);
             mIsSelfUpdating=false;
          }
@@ -1451,8 +1451,8 @@ void WXCrystal::UpdateUI(const bool lock)
          if(pos->second.mNeedUpdateUI==true)
          {
             mIsSelfUpdating=true;
-            mpAntiBumpWin->SetRowLabelValue(pos->second.mIdx,pos->second.mName.c_str());
-            mpAntiBumpWin->SetColLabelValue(pos->second.mIdx,pos->second.mName.c_str());
+            mpAntiBumpWin->SetRowLabelValue(pos->second.mIdx, wxString::FromAscii(pos->second.mName.c_str()));
+            mpAntiBumpWin->SetColLabelValue(pos->second.mIdx, wxString::FromAscii(pos->second.mName.c_str()));
             wxString tmp;
             for(unsigned long j=0;j<pos->second.mvAntiBumpDistance.size();++j)
             {
@@ -1461,9 +1461,9 @@ void WXCrystal::UpdateUI(const bool lock)
                                                                   <<")="<<pos->second.mvAntiBumpDistance[j],3);
                if(pos->second.mvAntiBumpDistance[j]>-998)
                {
-                  tmp.Printf("%f",pos->second.mvAntiBumpDistance[j]);
+                  tmp.Printf(_T("%f"),pos->second.mvAntiBumpDistance[j]);
                   mpAntiBumpWin->SetCellValue(pos->second.mIdx,j,tmp);
-               } else mpAntiBumpWin->SetCellValue(pos->second.mIdx,j,"");
+               } else mpAntiBumpWin->SetCellValue(pos->second.mIdx,j,_T(""));
             }
             mIsSelfUpdating=false;
          }
@@ -1477,8 +1477,8 @@ void WXCrystal::UpdateUI(const bool lock)
          if(pos->second.mNeedUpdateUI==true)
          {
             mIsSelfUpdating=true;
-            mpBondValenceWin->SetRowLabelValue(pos->second.mIdx,pos->second.mName.c_str());
-            mpBondValenceWin->SetColLabelValue(pos->second.mIdx,pos->second.mName.c_str());
+            mpBondValenceWin->SetRowLabelValue(pos->second.mIdx, wxString::FromAscii(pos->second.mName.c_str()));
+            mpBondValenceWin->SetColLabelValue(pos->second.mIdx, wxString::FromAscii(pos->second.mName.c_str()));
             wxString tmp;
             for(unsigned long j=0;j<pos->second.mvBondValenceRo.size();++j)
             {
@@ -1487,9 +1487,9 @@ void WXCrystal::UpdateUI(const bool lock)
                                                                <<")="<<pos->second.mvBondValenceRo[j],3);
                if(pos->second.mvBondValenceRo[j]>-998)
                {
-                  tmp.Printf("%f",pos->second.mvBondValenceRo[j]);
+                  tmp.Printf(_T("%f"),pos->second.mvBondValenceRo[j]);
                   mpBondValenceWin->SetCellValue(pos->second.mIdx,j,tmp);
-               } else mpBondValenceWin->SetCellValue(pos->second.mIdx,j,"");
+               } else mpBondValenceWin->SetCellValue(pos->second.mIdx,j,_T(""));
             }
             mIsSelfUpdating=false;
          }
@@ -1508,34 +1508,34 @@ void WXCrystal::OnMenuShowScattPowWindow(wxCommandEvent &event)
    if(0!=mpScattPowWin) return;
    WXCrystValidateAllUserInput();
    // Frame with notebook
-      wxFrame *frame= new wxFrame(this,-1,("Scattering Powers parameters for: "
-                                  +this->GetCrystal().GetName()).c_str(),
+      wxFrame *frame= new wxFrame(this,-1,_T("Scattering Powers parameters for: ")
+                                  + wxString::FromAscii(this->GetCrystal().GetName().c_str()),
                                   wxDefaultPosition,wxSize(800,300));
 
       wxNotebook *notebook = new wxNotebook(frame, -1);
    {// Individual parameters
       mpScattPowWin = new WXCrystalScrolledGridWindow(notebook,this,ID_CRYSTAL_WIN_SCATTPOW);
-      notebook->AddPage(mpScattPowWin, "Scattering Powers", true);
+      notebook->AddPage(mpScattPowWin, _T("Scattering Powers"), true);
       
       mpScattPowWin->SetDefaultRenderer(new wxGridCellFloatRenderer(5,3));
       mpScattPowWin->SetDefaultEditor(new wxGridCellFloatEditor(5,3));
       mpScattPowWin->SetColMinimalAcceptableWidth(150);
       mpScattPowWin->CreateGrid(0,7);
       
-      mpScattPowWin->SetColLabelValue(0,"Biso");
-      mpScattPowWin->SetColLabelValue(1,"Charge");
-      mpScattPowWin->SetColLabelValue(2,"Red");
-      mpScattPowWin->SetColLabelValue(3,"Green");
-      mpScattPowWin->SetColLabelValue(4,"Blue");
-      mpScattPowWin->SetColLabelValue(5,"ML Error");
-      mpScattPowWin->SetColLabelValue(6,"#ghost");
+      mpScattPowWin->SetColLabelValue(0,_T("Biso"));
+      mpScattPowWin->SetColLabelValue(1,_T("Charge"));
+      mpScattPowWin->SetColLabelValue(2,_T("Red"));
+      mpScattPowWin->SetColLabelValue(3,_T("Green"));
+      mpScattPowWin->SetColLabelValue(4,_T("Blue"));
+      mpScattPowWin->SetColLabelValue(5,_T("ML Error"));
+      mpScattPowWin->SetColLabelValue(6,_T("#ghost"));
       
       mpScattPowWin->AutoSizeRows();
       mpScattPowWin->AutoSizeColumns();
    }
    {// Anti-Bump
       mpAntiBumpWin = new WXCrystalScrolledGridWindow(notebook,this,ID_CRYSTAL_WIN_ANTIBUMP);
-      notebook->AddPage(mpAntiBumpWin, "AntiBump", true);
+      notebook->AddPage(mpAntiBumpWin, _T("AntiBump"), true);
       
       mpAntiBumpWin->SetDefaultRenderer(new wxGridCellFloatRenderer(5,3));
       mpAntiBumpWin->SetDefaultEditor(new wxGridCellFloatEditor(5,3));
@@ -1547,7 +1547,7 @@ void WXCrystal::OnMenuShowScattPowWindow(wxCommandEvent &event)
    }
    {// Bond Valence
       mpBondValenceWin = new WXCrystalScrolledGridWindow(notebook,this,ID_CRYSTAL_WIN_BONDVALENCE);
-      notebook->AddPage(mpBondValenceWin, "BondValence", true);
+      notebook->AddPage(mpBondValenceWin, _T("BondValence"), true);
       
       mpBondValenceWin->SetDefaultRenderer(new wxGridCellFloatRenderer(5,3));
       mpBondValenceWin->SetDefaultEditor(new wxGridCellFloatEditor(5,3));
@@ -1577,7 +1577,7 @@ void WXCrystal::OnEditGridScattPow(wxGridEvent &e)
    {
       case 0:
       {
-         if(s!="")
+         if(s!=_T(""))
          {
             double d;
             s.ToDouble(&d);
@@ -1587,7 +1587,7 @@ void WXCrystal::OnEditGridScattPow(wxGridEvent &e)
       }
       case 1:
       {
-         if(s!="")
+         if(s!=_T(""))
          {
             double d;
             s.ToDouble(&d);
@@ -1597,7 +1597,7 @@ void WXCrystal::OnEditGridScattPow(wxGridEvent &e)
       }
       case 2:
       {
-         if(s!="")
+         if(s!=_T(""))
          {
             double d;
             s.ToDouble(&d);
@@ -1609,7 +1609,7 @@ void WXCrystal::OnEditGridScattPow(wxGridEvent &e)
       }
       case 3:
       {
-         if(s!="")
+         if(s!=_T(""))
          {
             double d;
             s.ToDouble(&d);
@@ -1621,7 +1621,7 @@ void WXCrystal::OnEditGridScattPow(wxGridEvent &e)
       }
       case 4:
       {
-         if(s!="")
+         if(s!=_T(""))
          {
             double d;
             s.ToDouble(&d);
@@ -1633,7 +1633,7 @@ void WXCrystal::OnEditGridScattPow(wxGridEvent &e)
       }
       case 5:
       {
-         if(s!="")
+         if(s!=_T(""))
          {
             double d;
             s.ToDouble(&d);
@@ -1643,7 +1643,7 @@ void WXCrystal::OnEditGridScattPow(wxGridEvent &e)
       }
       case 6:
       {
-         if(s!="")
+         if(s!=_T(""))
          {
             double d;
             s.ToDouble(&d);
@@ -2700,7 +2700,7 @@ WXGLCrystalCanvas::WXGLCrystalCanvas(WXCrystal *wxcryst,
                                      wxFrame *parent, wxWindowID id,
                                      const wxPoint &pos,
                                      const wxSize &size):
-wxGLCanvas(parent,id,pos,size,wxDEFAULT_FRAME_STYLE,"GLCanvas",AttribList),mpParentFrame(parent),
+wxGLCanvas(parent,id,pos,size,wxDEFAULT_FRAME_STYLE,_T("GLCanvas"),AttribList),mpParentFrame(parent),
 mpWXCrystal(wxcryst),mIsGLInit(false),mDist(60),mX0(0),mY0(0),mZ0(0),mViewAngle(15),
 mShowFourier(true),mShowCrystal(true),mShowAtomName(true),mShowCursor(false),mSharpenMap(false),
 mIsGLFontBuilt(false),mGLFontDisplayListBase(0),mpFourierMapListWin(0)
@@ -2716,32 +2716,32 @@ mIsGLFontBuilt(false),mGLFontDisplayListBase(0),mpFourierMapListWin(0)
      // until mmapbbox is changed
    mmapbbox.xMin = mmapbbox.xMax = mmapbbox.yMin = mmapbbox.zMin = 0.;
    mmapbbox.yMax = mmapbbox.zMax = 1.;
-   mpPopUpMenu=new wxMenu("Crystal");
-   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_UPDATE, "&Update");
+   mpPopUpMenu=new wxMenu(_T("Crystal"));
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_UPDATE, _T("&Update"));
    mpPopUpMenu->AppendSeparator();
-   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_CHANGELIMITS, "Change display &Limits");
-   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_LIMITS_FULLCELL, "Show Full Unit Cell +0.1");
-   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_LIMITS_ASYMCELL, "Show Asymmetric Unit Cell +0.1");
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_CHANGELIMITS, _T("Change display &Limits"));
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_LIMITS_FULLCELL, _T("Show Full Unit Cell +0.1"));
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_LIMITS_ASYMCELL, _T("Show Asymmetric Unit Cell +0.1"));
    mpPopUpMenu->AppendSeparator();
-   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWCRYSTAL, "Hide Crystal");
-   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, "Hide Atom Labels");
-   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWCURSOR, "Show Cursor");
-   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SETCURSOR, "Set view cntr and cursor pos.");
-   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_POVRAY, "Create POVRay file");
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWCRYSTAL, _T("Hide Crystal"));
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, _T("Hide Atom Labels"));
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWCURSOR, _T("Show Cursor"));
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SETCURSOR, _T("Set view cntr and cursor pos."));
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_POVRAY, _T("Create POVRay file"));
    mpPopUpMenu->AppendSeparator();
-   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_FOURIER, "Fourier Maps");
-   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_LOADFOURIERGRD, "Load GRD Fourier Map");	
-   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_LOADFOURIERDSN6,"Load DSN6 Fourier Map");	
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_FOURIER, _T("Fourier Maps"));
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_LOADFOURIERGRD, _T("Load GRD Fourier Map"));	
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_LOADFOURIERDSN6,_T("Load DSN6 Fourier Map"));	
    /*
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_UNLOADFOURIER, "Unload Fourier Map(s)");
    mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_UNLOADFOURIER, FALSE);
    */
-   if(!wxConfigBase::Get()->HasEntry("Crystal/BOOL/Default-display only asymmetric unit cell in 3D view"))
-      wxConfigBase::Get()->Write("Crystal/BOOL/Default-display only asymmetric unit cell in 3D view", true);
+   if(!wxConfigBase::Get()->HasEntry(_T("Crystal/BOOL/Default-display only asymmetric unit cell in 3D view")))
+      wxConfigBase::Get()->Write(_T("Crystal/BOOL/Default-display only asymmetric unit cell in 3D view"), true);
    else
    {
       bool val;
-      wxConfigBase::Get()->Read("Crystal/BOOL/Default-display only asymmetric unit cell in 3D view", &val);
+      wxConfigBase::Get()->Read(_T("Crystal/BOOL/Default-display only asymmetric unit cell in 3D view"), &val);
       if(val)
       {
          mcellbbox.xMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmin()-0.1;
@@ -2761,13 +2761,13 @@ mIsGLFontBuilt(false),mGLFontDisplayListBase(0),mpFourierMapListWin(0)
          mcellbbox.zMax =  1.1;
       }
    }
-   if(!wxConfigBase::Get()->HasEntry("Crystal/BOOL/Default-display atom names in 3D view"))
-      wxConfigBase::Get()->Write("Crystal/BOOL/Default-display atom names in 3D view", mShowAtomName);
+   if(!wxConfigBase::Get()->HasEntry(_T("Crystal/BOOL/Default-display atom names in 3D view")))
+      wxConfigBase::Get()->Write(_T("Crystal/BOOL/Default-display atom names in 3D view"), mShowAtomName);
    else
    {
-      wxConfigBase::Get()->Read("Crystal/BOOL/Default-display atom names in 3D view", &mShowAtomName);
-      if(mShowAtomName) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, "Hide Atom Labels");
-      else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, "Show Atom Labels");
+      wxConfigBase::Get()->Read(_T("Crystal/BOOL/Default-display atom names in 3D view"), &mShowAtomName);
+      if(mShowAtomName) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, _T("Hide Atom Labels"));
+      else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, _T("Show Atom Labels"));
    }
 }
 
@@ -2891,14 +2891,11 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
       x=(mcellbbox.xMax+mcellbbox.xMin)/2.-x;
       y=(mcellbbox.yMax+mcellbbox.yMin)/2.-y;
       z=(mcellbbox.zMax+mcellbbox.zMin)/2.-z;
-      statusText.sprintf("Center@(%5.3f,%5.3f,%5.3f)",x,y,z);
+      statusText.Printf(_T("Center@(%5.3f,%5.3f,%5.3f)"),x,y,z);
       for(unsigned int i=0;i<mvpUnitCellMap.size();++i)
       {
-         wxString tmp;
-         tmp=statusText;
-         statusText.sprintf("%s, map(%s)=%5.2fe",tmp.c_str(),
-                            mvpUnitCellMap[i]->GetName().c_str(),
-                            mvpUnitCellMap[i]->GetValue(x,y,z));
+         statusText+=_T(", map(") + wxString::FromAscii(mvpUnitCellMap[i]->GetName().c_str())
+                     +wxString::Format(_T(")=%5.2fe"),mvpUnitCellMap[i]->GetValue(x,y,z));
       }
       mpParentFrame->SetStatusText(statusText);
    }
@@ -3305,14 +3302,14 @@ void WXGLCrystalCanvas::OnUpdateUI(wxUpdateUIEvent& WXUNUSED(event))
       wxArrayString maps;
       for(vector<boost::shared_ptr<UnitCellMap> >::iterator 
           pos=mvpUnitCellMap.begin();pos!=mvpUnitCellMap.end();++pos)
-            maps.Add((*pos)->GetName().c_str());
+            maps.Add( wxString::FromAscii((*pos)->GetName().c_str()));
       if(mpFourierMapListWin->mpAvailableMapList->GetStrings()!=maps)
          mpFourierMapListWin->mpAvailableMapList->Set(maps);
       
       wxArrayString glmaps;
       for(vector<boost::shared_ptr<UnitCellMapGLList> >::iterator 
           pos=mvpUnitCellMapGLList.begin();pos!=mvpUnitCellMapGLList.end();++pos)
-            glmaps.Add((*pos)->GetName().c_str());
+            glmaps.Add( wxString::FromAscii((*pos)->GetName().c_str()));
       if(mpFourierMapListWin->mpDisplayedMapList->GetStrings()!=glmaps)
          mpFourierMapListWin->mpDisplayedMapList->Set(glmaps);
       
@@ -3380,7 +3377,10 @@ void WXGLCrystalCanvas::InitGL()
    if(needglutinit)
    {
       needglutinit=false;
-      glutInit(&(wxApp::GetInstance()->argc),wxApp::GetInstance()->argv);
+      //glutInit(&(wxApp::GetInstance()->argc),wxApp::GetInstance()->argv);
+      char **argv=new char*;
+      int argc=0;
+      glutInit(&argc,argv);// We cannot pass arguments directly in Unicode mode, so...
    }
    #endif
 
@@ -3405,7 +3405,7 @@ void WXGLCrystalCanvas::OnChangeLimits(wxCommandEvent &event)
       vector<boost::shared_ptr<UnitCellMapGLList> >::iterator pos;
       for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();pos++)
       {
-         wxBusyInfo wait("Processing Fourier Map...");
+         wxBusyInfo wait(_T("Processing Fourier Map..."));
          (*pos)->GenList();
       }
    }
@@ -3420,7 +3420,7 @@ void WXGLCrystalCanvas::OnChangeLimits(wxCommandEvent &event)
       vector<boost::shared_ptr<UnitCellMapGLList> >::iterator pos;
       for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();pos++)
       {
-         wxBusyInfo wait("Processing Fourier Map...");
+         wxBusyInfo wait(_T("Processing Fourier Map..."));
          (*pos)->GenList();
       }
    }
@@ -3440,7 +3440,7 @@ void WXGLCrystalCanvas::OnChangeLimits(wxCommandEvent &event)
          vector<boost::shared_ptr<UnitCellMapGLList> >::iterator pos;
          for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();pos++)
          {
-            wxBusyInfo wait("Processing Fourier Map...");
+            wxBusyInfo wait(_T("Processing Fourier Map..."));
             (*pos)->GenList();
          }
          VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnChangeLimits (X: " << 
@@ -3464,24 +3464,24 @@ void WXGLCrystalCanvas::OnChangeLimits(wxCommandEvent &event)
 
 void WXGLCrystalCanvas::OnShowCrystal( wxCommandEvent & WXUNUSED(event))
 {
-   if(mShowCrystal) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWCRYSTAL, "Show Crystal");
-   else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWCRYSTAL, "Hide Crystal");
+   if(mShowCrystal) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWCRYSTAL, _T("Show Crystal"));
+   else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWCRYSTAL, _T("Hide Crystal"));
    mShowCrystal = !mShowCrystal;
    if(!(mpWXCrystal->GetCrystal().IsBeingRefined())) this->CrystUpdate();
 }
 
 void WXGLCrystalCanvas::OnShowAtomLabel( wxCommandEvent & WXUNUSED(event))
 {
-   if(mShowAtomName) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, "Show Atom Labels");
-   else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, "Hide Atom Labels");
+   if(mShowAtomName) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, _T("Show Atom Labels"));
+   else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, _T("Hide Atom Labels"));
    mShowAtomName= !mShowAtomName;
    if(!(mpWXCrystal->GetCrystal().IsBeingRefined())) this->CrystUpdate();
 }
 
 void WXGLCrystalCanvas::OnShowCursor( wxCommandEvent & WXUNUSED(event))
 {
-   if(mShowCursor) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWCURSOR, "Show Cursor");
-   else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWCURSOR, "Hide Cursor");
+   if(mShowCursor) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWCURSOR, _T("Show Cursor"));
+   else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWCURSOR, _T("Hide Cursor"));
    mShowCursor= !mShowCursor;
    if(!(mpWXCrystal->GetCrystal().IsBeingRefined())) this->CrystUpdate();
 }
@@ -3519,10 +3519,10 @@ void WXGLCrystalCanvas::OnFourier(wxCommandEvent &event)
       if(mpFourierMapListWin!=0) return;
       if(mpWXCrystal->GetCrystal().IsBeingRefined())
       {
-         wxMessageBox("The Fourier maps dialog \ncannot be opened during an optimization", "Error", wxOK, this);
+         wxMessageBox(_T("The Fourier maps dialog \ncannot be opened during an optimization"), _T("Error"), wxOK, this);
          return;
       }
-      wxFrame *frame= new wxMiniFrame(this,-1,("Available Fourier maps for "+mpWXCrystal->GetCrystal().GetName()).c_str(),
+      wxFrame *frame= new wxMiniFrame(this,-1, wxString::FromAscii(("Available Fourier maps for "+mpWXCrystal->GetCrystal().GetName()).c_str()),
                                           wxDefaultPosition,wxSize(500,500),wxCLOSE_BOX|wxCAPTION|wxSYSTEM_MENU);
       mpFourierMapListWin=new WXFourierMapList(this,frame);
       mpFourierMapListWin->mpWireFrame->SetValue(true);
@@ -3550,7 +3550,7 @@ void WXGLCrystalCanvas::OnFourier(wxCommandEvent &event)
             mvpUnitCellMapGLList[choice]->SetContour((float)contour);
             if(false==mpWXCrystal->GetCrystal().IsBeingRefined())
             {
-               wxBusyInfo wait("Processing Fourier Map...");
+               wxBusyInfo wait(_T("Processing Fourier Map..."));
                mvpUnitCellMapGLList[choice]->GenList();
             }
          }
@@ -3590,12 +3590,12 @@ void WXGLCrystalCanvas::OnFourier(wxCommandEvent &event)
          boost::shared_ptr<ObjCryst::UnitCellMap> pMap=mvpUnitCellMap[mpFourierMapListWin->mpAvailableMapList->GetSelection()];
          double contour=0;
          wxString scontour=mpFourierMapListWin->mpNewContourValue->GetValue();
-         if(scontour=="") contour=pMap->Min()+pMap->StandardDeviation()*3;
+         if(scontour==_T("")) contour=pMap->Min()+pMap->StandardDeviation()*3;
          else scontour.ToDouble(&contour);
          wxColor ncolor(255,0,0);
          ncolor = wxGetColourFromUser((wxWindow*)this, ncolor);
    
-         wxBusyInfo wait("Processing Fourier Map...");
+         wxBusyInfo wait(_T("Processing Fourier Map..."));
          mvpUnitCellMapGLList.push_back(boost::shared_ptr<UnitCellMapGLList>(new UnitCellMapGLList(*pMap,this,true,(float)contour)));
          mvpUnitCellMapGLList.back()->SetName(pMap->GetName());
          mvpUnitCellMapGLList.back()->SetColour(ncolor.Red()/255.0,ncolor.Green()/255.0,ncolor.Blue()/255.0,0.5);
@@ -3644,17 +3644,17 @@ void WXGLCrystalCanvas::OnFourier(wxCommandEvent &event)
 
 void WXGLCrystalCanvas::OnLoadFourierGRD( wxCommandEvent & WXUNUSED(event))
 {
-   wxFileDialog fd((wxWindow*)this, "Choose a file containing a Fourier Map",
-           "", "", "Fourier Map files (*.grd)|*.grd", wxOPEN | wxFILE_MUST_EXIST);
+   wxFileDialog fd((wxWindow*)this, _T("Choose a file containing a Fourier Map"),
+           _T(""), _T(""), _T("Fourier Map files (*.grd)|*.grd"), wxOPEN | wxFILE_MUST_EXIST);
    //if okay then read Fourier map, run MC on it and display the triangles
    if(fd.ShowModal() == wxID_OK)
    {
-      const string filename=fd.GetPath().c_str();
+      const string filename(fd.GetPath().ToAscii());
       UnitCellMap *pMap=new UnitCellMap(mpWXCrystal->GetCrystal());
       if (pMap->ImportGRD(filename) == 0)
       {
          string tmp="Error reading Fourier file:"+filename;
-         wxMessageBox(tmp.c_str(), "File error", wxOK, this);
+         wxMessageBox( wxString::FromAscii(tmp.c_str()), _T("File error"), wxOK, this);
       return;
       }
       this->AddFourier(pMap);
@@ -3663,17 +3663,17 @@ void WXGLCrystalCanvas::OnLoadFourierGRD( wxCommandEvent & WXUNUSED(event))
 
 void WXGLCrystalCanvas::OnLoadFourierDSN6( wxCommandEvent & WXUNUSED(event))
 {
-   wxFileDialog fd((wxWindow*)this, "Choose a file containing a Fourier Map",
-           "", "", "Fourier Map files (*.DN6)|*.DN6", wxOPEN | wxFILE_MUST_EXIST);
+   wxFileDialog fd((wxWindow*)this, _T("Choose a file containing a Fourier Map"),
+           _T(""), _T(""), _T("Fourier Map files (*.DN6)|*.DN6"), wxOPEN | wxFILE_MUST_EXIST);
    //if okay then read Fourier map, run MC on it and display the triangles
    if(fd.ShowModal() == wxID_OK)
    {
-      const string filename=fd.GetPath().c_str();
+      const string filename(fd.GetPath().ToAscii());
       UnitCellMap *pMap=new UnitCellMap(mpWXCrystal->GetCrystal());
       if (pMap->ImportDSN6(filename) == 0)
       {
          string tmp="Error reading Fourier file:"+filename;
-         wxMessageBox(tmp.c_str(), "File error", wxOK, this);
+         wxMessageBox( wxString::FromAscii(tmp.c_str()), _T("File error"), wxOK, this);
       return;
       }
       this->AddFourier(pMap);
@@ -3683,7 +3683,7 @@ void WXGLCrystalCanvas::OnLoadFourierDSN6( wxCommandEvent & WXUNUSED(event))
 void WXGLCrystalCanvas::AddFourier(UnitCellMap *map)
 {
    mvpUnitCellMap.push_back(boost::shared_ptr<UnitCellMap>(map));
-   wxBusyInfo wait("Processing Fourier Map...");
+   wxBusyInfo wait(_T("Processing Fourier Map..."));
    {
       float contour=map->Mean()+2*map->StandardDeviation();
       if(contour>map->Max()) contour=map->Mean()+0.75*(map->Max()-map->Mean());
@@ -3714,7 +3714,7 @@ void WXGLCrystalCanvas::OnFourierChangeColour(wxColourPickerEvent  &event)
       wxColour col(mpFourierMapListWin->mpColourPicker->GetColour());
       if(abs((float)contour-mvpUnitCellMapGLList[choice]->GetContour())>.0001)
       {
-         wxBusyInfo wait("Processing Fourier Map...");
+         wxBusyInfo wait(_T("Processing Fourier Map..."));
          mvpUnitCellMapGLList[choice]->SetContour((float)contour);
          mvpUnitCellMapGLList[choice]->GenList();
       }
@@ -3753,9 +3753,9 @@ void WXGLCrystalCanvas::OnUnloadFourier( wxCommandEvent & WXUNUSED(event))
 void WXGLCrystalCanvas::OnPOVRay( wxCommandEvent & WXUNUSED(event))
 {
    WXCrystValidateAllUserInput();
-   wxFileDialog save(this,"Choose filename","","","*.pov",wxSAVE | wxOVERWRITE_PROMPT);
+   wxFileDialog save(this,_T("Choose filename"),_T(""),_T(""),_T("*.pov"),wxSAVE | wxOVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
-   this->POVRayOutput(save.GetPath().c_str());
+   this->POVRayOutput(string(save.GetPath().ToAscii()));
 }
 
 void WXGLCrystalCanvas::POVRayOutput(const std::string &filename)
@@ -3875,7 +3875,7 @@ void WXGLCrystalCanvas::POVRayOutput(const std::string &filename)
    }
    if(mShowFourier)
    {
-      wxBusyInfo wait("Processing Fourier Map...");
+      wxBusyInfo wait(_T("Processing Fourier Map..."));
       // use cell bbox if mapbbox has zero volume (default)
       if (mmapbbox.xMin != mmapbbox.xMax)
       {
@@ -4081,48 +4081,48 @@ END_EVENT_TABLE()
 
   UserSelectBoundingBox::UserSelectBoundingBox (wxWindow *parent, char * title,
 					      const BBox bbox)
-  : wxDialog((wxWindow *)parent, -1, "Set bounding box", wxDefaultPosition,
+  : wxDialog((wxWindow *)parent, -1, _T("Set bounding box"), wxDefaultPosition,
   	     wxSize(250, 250), wxDEFAULT_DIALOG_STYLE) 
 {
   wxBoxSizer *dialogSizer = new wxBoxSizer(wxVERTICAL);
   wxFlexGridSizer *inputSizer = new wxFlexGridSizer(4, 3, 10, 10);
   // headers
-  inputSizer->Add(new wxStaticText(this, -1, ""), 0, wxALIGN_CENTRE_VERTICAL);
-  inputSizer->Add(new wxStaticText(this, -1, "minimum"), 0, wxALIGN_CENTER);
-  inputSizer->Add(new wxStaticText(this, -1, "maximum"), 0, wxALIGN_CENTER);
+  inputSizer->Add(new wxStaticText(this, -1, _T("")), 0, wxALIGN_CENTRE_VERTICAL);
+  inputSizer->Add(new wxStaticText(this, -1, _T("minimum")), 0, wxALIGN_CENTER);
+  inputSizer->Add(new wxStaticText(this, -1, _T("maximum")), 0, wxALIGN_CENTER);
   // 1st row
-  inputSizer->Add(new wxStaticText(this, -1, "a"), 0, wxALIGN_CENTRE_VERTICAL);
+  inputSizer->Add(new wxStaticText(this, -1, _T("a")), 0, wxALIGN_CENTRE_VERTICAL);
   inputSizer->Add(mpXminCtrl = new wxTextCtrl(this, -1, 
-					      wxString::Format("%f",bbox.xMin)), 
+					      wxString::Format(_T("%f"),bbox.xMin)), 
 					      0, wxALIGN_CENTRE_VERTICAL);
   inputSizer->Add(mpXmaxCtrl = new wxTextCtrl(this, -1, 
-					      wxString::Format("%f",bbox.xMax)), 
+					      wxString::Format(_T("%f"),bbox.xMax)), 
 					      0, wxALIGN_CENTRE_VERTICAL);
   // 2nd row
-  inputSizer->Add(new wxStaticText(this, -1, "b"), 0, wxALIGN_CENTRE_VERTICAL);
+  inputSizer->Add(new wxStaticText(this, -1, _T("b")), 0, wxALIGN_CENTRE_VERTICAL);
   inputSizer->Add(mpYminCtrl = new wxTextCtrl(this, -1, 
-					      wxString::Format("%f",bbox.yMin)), 
+					      wxString::Format(_T("%f"),bbox.yMin)), 
 					      0, wxALIGN_CENTRE_VERTICAL);
   inputSizer->Add(mpYmaxCtrl = new wxTextCtrl(this, -1, 
-					      wxString::Format("%f",bbox.yMax)), 
+					      wxString::Format(_T("%f"),bbox.yMax)), 
 					      0, wxALIGN_CENTRE_VERTICAL);
   // 3rd row
-  inputSizer->Add(new wxStaticText(this, -1, "c"), 0, wxALIGN_CENTRE_VERTICAL);
+  inputSizer->Add(new wxStaticText(this, -1, _T("c")), 0, wxALIGN_CENTRE_VERTICAL);
   inputSizer->Add(mpZminCtrl = new wxTextCtrl(this, -1, 
-					      wxString::Format("%f",bbox.zMin)), 
+					      wxString::Format(_T("%f"),bbox.zMin)), 
 					      0, wxALIGN_CENTRE_VERTICAL);
   inputSizer->Add(mpZmaxCtrl = new wxTextCtrl(this, -1, 
-					      wxString::Format("%f",bbox.zMax)), 
+					      wxString::Format(_T("%f"),bbox.zMax)), 
 					      0, wxALIGN_CENTRE_VERTICAL);
   // button section
   wxFlexGridSizer *buttonSizer = new wxFlexGridSizer(1, 2, 10, 10);
-  buttonSizer->Add(new wxButton(this, wxID_OK, "OK"), 
+  buttonSizer->Add(new wxButton(this, wxID_OK, _T("OK")), 
 		   0, wxALIGN_CENTRE_VERTICAL);
-  buttonSizer->Add(new wxButton(this, wxID_CANCEL, "Cancel"), 
+  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _T("Cancel")), 
 		   0, wxALIGN_CENTRE_VERTICAL);
 
   dialogSizer->Add(10, 10);
-  dialogSizer->Add(new wxStaticText(this, -1, title), 0, 
+  dialogSizer->Add(new wxStaticText(this, -1,  wxString::FromAscii(title)), 0, 
 		   wxALIGN_CENTER);
   dialogSizer->Add(10, 10);
   dialogSizer->Add(inputSizer, 0, wxALIGN_CENTER);
@@ -4145,13 +4145,13 @@ void UserSelectBoundingBox::OnOk (wxCommandEvent & WXUNUSED(event)) {
   char * strptr;
   const char * val;
 
-  val = mpXminCtrl->GetValue().c_str();
+  val = mpXminCtrl->GetValue().ToAscii();
   mbbox.xMin = strtod(val, &strptr);
-  if (val == strptr) {wxMessageBox("Invalid value for Xmin!", "Bounding volume error", wxOK, this); return;}
-  val = mpXmaxCtrl->GetValue().c_str();
+  if (val == strptr) {wxMessageBox(_T("Invalid value for Xmin!"), _T("Bounding volume error"), wxOK, this); return;}
+  val = mpXmaxCtrl->GetValue().ToAscii();
   mbbox.xMax = strtod(val, &strptr);
-  if (val == strptr) {wxMessageBox("Invalid value for Xmax!", "Bounding volume error", wxOK, this); return;}
-  if (mbbox.xMin == mbbox.xMax) {wxMessageBox("Sorry, Xmin must be less than Xmax!", "Zero bounding volume", wxOK, this); return;}
+  if (val == strptr) {wxMessageBox(_T("Invalid value for Xmax!"), _T("Bounding volume error"), wxOK, this); return;}
+  if (mbbox.xMin == mbbox.xMax) {wxMessageBox(_T("Sorry, Xmin must be less than Xmax!"), _T("Zero bounding volume"), wxOK, this); return;}
   if (mbbox.xMin > mbbox.xMax) {
     float tmp = mbbox.xMax;
     mbbox.xMax = mbbox.xMin;
@@ -4159,13 +4159,13 @@ void UserSelectBoundingBox::OnOk (wxCommandEvent & WXUNUSED(event)) {
   }
   VFN_DEBUG_MESSAGE("Xmin " << mbbox.xMin << " Xmax " << mbbox.xMax,1)
 
-  val = mpYminCtrl->GetValue().c_str();
+  val = mpYminCtrl->GetValue().ToAscii();
   mbbox.yMin = strtod(val, &strptr);
-  if (val == strptr) {wxMessageBox("Invalid value for Ymin!", "Bounding volume error", wxOK, this); return;}
-  val = mpYmaxCtrl->GetValue().c_str();
+  if (val == strptr) {wxMessageBox(_T("Invalid value for Ymin!"), _T("Bounding volume error"), wxOK, this); return;}
+  val = mpYmaxCtrl->GetValue().ToAscii();
   mbbox.yMax = strtod(val, &strptr);
-  if (val == strptr) {wxMessageBox("Invalid value for Ymax!", "Bounding volume error", wxOK, this); return;}
-  if (mbbox.yMin == mbbox.yMax) {wxMessageBox("Sorry, Ymin must be less than Ymax!", "Zero bounding volume", wxOK, this); return;}
+  if (val == strptr) {wxMessageBox(_T("Invalid value for Ymax!"), _T("Bounding volume error"), wxOK, this); return;}
+  if (mbbox.yMin == mbbox.yMax) {wxMessageBox(_T("Sorry, Ymin must be less than Ymax!"), _T("Zero bounding volume"), wxOK, this); return;}
   if (mbbox.yMin > mbbox.yMax) {
     float tmp = mbbox.yMax;
     mbbox.yMax = mbbox.yMin;
@@ -4173,13 +4173,13 @@ void UserSelectBoundingBox::OnOk (wxCommandEvent & WXUNUSED(event)) {
   }
   VFN_DEBUG_MESSAGE("Ymin " << mbbox.yMin << " Ymax " << mbbox.yMax,1)
 
-  val = mpZminCtrl->GetValue().c_str();
+  val = mpZminCtrl->GetValue().ToAscii();
   mbbox.zMin = strtod(val, &strptr);
-  if (val == strptr) {wxMessageBox("Invalid value for Zmin!", "Bounding volume error", wxOK, this); return;}
-  val = mpZmaxCtrl->GetValue().c_str();
+  if (val == strptr) {wxMessageBox(_T("Invalid value for Zmin!"), _T("Bounding volume error"), wxOK, this); return;}
+  val = mpZmaxCtrl->GetValue().ToAscii();
   mbbox.zMax = strtod(val, &strptr);
-  if (val == strptr) {wxMessageBox("Invalid value for Zmax!", "Bounding volume error", wxOK, this); return;}
-  if (mbbox.zMin == mbbox.zMax) {wxMessageBox("Sorry, Zmin must be less than Zmax!", "Zero bounding volume", wxOK, this); return;}
+  if (val == strptr) {wxMessageBox(_T("Invalid value for Zmax!"), _T("Bounding volume error"), wxOK, this); return;}
+  if (mbbox.zMin == mbbox.zMax) {wxMessageBox(_T("Sorry, Zmin must be less than Zmax!"), _T("Zero bounding volume"), wxOK, this); return;}
   if (mbbox.zMin > mbbox.zMax) {
     float tmp = mbbox.zMax;
     mbbox.zMax = mbbox.zMin;
@@ -4207,35 +4207,35 @@ END_EVENT_TABLE()
 
   UserXYZBox::UserXYZBox (wxWindow *parent, char * title,
 					      const Triple xyz)
-  : wxDialog((wxWindow *)parent, -1, "Set position", wxDefaultPosition,
+  : wxDialog((wxWindow *)parent, -1, _T("Set position"), wxDefaultPosition,
   	     wxSize(250, 250), wxDEFAULT_DIALOG_STYLE) 
 {
   wxBoxSizer *dialogSizer = new wxBoxSizer(wxVERTICAL);
   wxFlexGridSizer *inputSizer = new wxFlexGridSizer(3, 2, 10, 10);
   // 1st row
-  inputSizer->Add(new wxStaticText(this, -1, "x"), 0, wxALIGN_CENTRE_VERTICAL);
+  inputSizer->Add(new wxStaticText(this, -1, _T("x")), 0, wxALIGN_CENTRE_VERTICAL);
   inputSizer->Add(mpXCtrl = new wxTextCtrl(this, -1, 
-					   wxString::Format("%.3f",xyz.x)), 
+					   wxString::Format(_T("%.3f"),xyz.x)), 
 					   0, wxALIGN_CENTRE_VERTICAL);
   // 2nd row
-  inputSizer->Add(new wxStaticText(this, -1, "y"), 0, wxALIGN_CENTRE_VERTICAL);
+  inputSizer->Add(new wxStaticText(this, -1, _T("y")), 0, wxALIGN_CENTRE_VERTICAL);
   inputSizer->Add(mpYCtrl = new wxTextCtrl(this, -1, 
-					   wxString::Format("%.3f",xyz.y)), 
+					   wxString::Format(_T("%.3f"),xyz.y)), 
 					   0, wxALIGN_CENTRE_VERTICAL);
   // 3rd row
-  inputSizer->Add(new wxStaticText(this, -1, "z"), 0, wxALIGN_CENTRE_VERTICAL);
+  inputSizer->Add(new wxStaticText(this, -1, _T("z")), 0, wxALIGN_CENTRE_VERTICAL);
   inputSizer->Add(mpZCtrl = new wxTextCtrl(this, -1, 
-					   wxString::Format("%.3f",xyz.z)), 
+					   wxString::Format(_T("%.3f"),xyz.z)), 
 					   0, wxALIGN_CENTRE_VERTICAL);
   // button section
   wxFlexGridSizer *buttonSizer = new wxFlexGridSizer(1, 2, 10, 10);
-  buttonSizer->Add(new wxButton(this, wxID_OK, "OK"), 
+  buttonSizer->Add(new wxButton(this, wxID_OK, _T("OK")), 
 		   0, wxALIGN_CENTRE_VERTICAL);
-  buttonSizer->Add(new wxButton(this, wxID_CANCEL, "Cancel"), 
+  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _T("Cancel")), 
 		   0, wxALIGN_CENTRE_VERTICAL);
 
   dialogSizer->Add(10, 10);
-  dialogSizer->Add(new wxStaticText(this, -1, title), 0, 
+  dialogSizer->Add(new wxStaticText(this, -1,  wxString::FromAscii(title)), 0, 
 		   wxALIGN_CENTER);
   dialogSizer->Add(10, 10);
   dialogSizer->Add(inputSizer, 0, wxALIGN_CENTER);
@@ -4254,17 +4254,17 @@ void UserXYZBox::OnOk (wxCommandEvent & WXUNUSED(event)) {
   char * strptr;
   const char * val;
 
-  val = mpXCtrl->GetValue().c_str();
+  val = mpXCtrl->GetValue().ToAscii();
   mXYZ.x = strtod(val, &strptr);
-  if (val == strptr) {wxMessageBox("Invalid value for X!", "Position error", wxOK, this); return;}
+  if (val == strptr) {wxMessageBox(_T("Invalid value for X!"), _T("Position error"), wxOK, this); return;}
 
-  val = mpYCtrl->GetValue().c_str();
+  val = mpYCtrl->GetValue().ToAscii();
   mXYZ.y = strtod(val, &strptr);
-  if (val == strptr) {wxMessageBox("Invalid value for Y!", "Position error", wxOK, this); return;}
+  if (val == strptr) {wxMessageBox(_T("Invalid value for Y!"), _T("Position error"), wxOK, this); return;}
 
-  val = mpZCtrl->GetValue().c_str();
+  val = mpZCtrl->GetValue().ToAscii();
   mXYZ.z = strtod(val, &strptr);
-  if (val == strptr) {wxMessageBox("Invalid value for Z!", "Position error", wxOK, this); return;}
+  if (val == strptr) {wxMessageBox(_T("Invalid value for Z!"), _T("Position error"), wxOK, this); return;}
 
     // close the dialog
     EndModal(wxID_OK);

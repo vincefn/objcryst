@@ -73,12 +73,21 @@ else
    endif
 endif
 
-#Use static linking to wx and freeglut libraries ?
+#Use static linking to wx and freeglut libraries ? Unicode or ansi ?
+ifneq ($(unicode),1)
 ifneq ($(shared-wxgtk),1)
-WXCONFIG= $(DIR_CRYST)/../static-libs/bin/wx-config
+WXCONFIG= $(DIR_CRYST)/../static-libs/bin/wx-config --unicode=no
 else
-WXCONFIG= wx-config
+WXCONFIG= wx-config --unicode=no
 endif
+else
+ifneq ($(shared-wxgtk),1)
+WXCONFIG= $(DIR_CRYST)/../static-libs/bin/wx-config --unicode=yes
+else
+WXCONFIG= wx-config --unicode=yes
+endif
+endif
+
 # If using glut (freeglut)
 GLUT_FLAGS= -DHAVE_GLUT
 GLUT_LIB= -lglut
@@ -164,14 +173,23 @@ else
 libfreeglut:
 endif
 
-$(BUILD_DIR)/static-libs/bin/wx-config:
+$(BUILD_DIR)/static-libs/lib/libwx_gtk2_core-2.8.a:
 	cd $(BUILD_DIR) && tar -xjf wxGTK.tar.bz2 # wxGtK source, with "demos" "samples" "contrib" removed
 	cd $(BUILD_DIR)/wxGTK && ./configure --with-gtk --with-opengl --prefix=$(BUILD_DIR)/static-libs --disable-unicode --enable-optimise --disable-shared --disable-clipboard --x-includes=/usr/X11R6/include/ && make install
 	rm -Rf wxGTK
 
+$(BUILD_DIR)/static-libs/lib/libwx_gtk2u_core-2.8.a:
+	cd $(BUILD_DIR) && tar -xjf wxGTK.tar.bz2 # wxGtK source, with "demos" "samples" "contrib" removed
+	cd $(BUILD_DIR)/wxGTK && ./configure --with-gtk --with-opengl --prefix=$(BUILD_DIR)/static-libs --enable-unicode  --enable-optimise --disable-shared --disable-clipboard --x-includes=/usr/X11R6/include/ && make install
+	rm -Rf wxGTK
+
 ifneq ($(wxcryst),0)
 ifneq ($(shared-wxgtk),1)
-libwx: $(BUILD_DIR)/static-libs/bin/wx-config libfreeglut
+ifneq ($(unicode),1)
+libwx: $(BUILD_DIR)/static-libs/lib/libwx_gtk2_core-2.8.a  libfreeglut
+else
+libwx: $(BUILD_DIR)/static-libs/lib/libwx_gtk2u_core-2.8.a libfreeglut
+endif
 else
 libwx:
 endif

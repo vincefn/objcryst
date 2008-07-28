@@ -106,7 +106,7 @@ mpVector::operator mp4Vector() const
 
 mpVector::operator char*()  const
 {
-	return (char*)wxString::Format("(%f %f %f)", x, y, z).c_str();
+	return (char*)wxString::Format(_T("(%f %f %f)"), x, y, z).c_str();
 }
 
 

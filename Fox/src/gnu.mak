@@ -18,7 +18,7 @@ ifeq ($(profile),2)
 	@$(MAKEDEPEND)
 	${CXX} ${CPPFLAGS} ${CXXFLAGS} -D'__FOXVERSION__="$(foxversion)"' -c $< -o $@
 else
-%.o : %.cpp libwx
+%.o : %.cpp #libwx
 	@$(MAKEDEPEND)
 	${CXX} ${CPPFLAGS} ${CXXFLAGS} -D'__FOXVERSION__="$(foxversion)"' -c $< -o $@
 endif
