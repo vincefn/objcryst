@@ -23,7 +23,7 @@ ifeq ($(shared),1)
 shared-newmat=1
 shared-wxgtk=1
 shared-fftw=1
-shared-freeglut=1
+shared-glut=1
 endif
 ### Rules for Linux & GCC
 # C compiler
@@ -164,7 +164,7 @@ $(BUILD_DIR)/static-libs/lib/libglut.a:
 	rm -Rf freeglut
 
 ifeq ($(opengl),1)
-ifneq ($(shared-freeglut),1)
+ifneq ($(shared-glut),1)
 libfreeglut: $(BUILD_DIR)/static-libs/lib/libglut.a
 else
 libfreeglut:
