@@ -1950,7 +1950,7 @@ void WXMolecule::OnMenuRotate(wxCommandEvent &event)
       wxFrame *frame= new wxMiniFrame(this,-1,_T("Change dihedral angle"),wxDefaultPosition,
                                           wxDefaultSize,wxCLOSE_BOX|wxSTAY_ON_TOP|wxCAPTION);
       #else
-      wxFrame *frame= new wxFrame(this,-1,_T"Change dihedral angle"),wxDefaultPosition,
+      wxFrame *frame= new wxFrame(this,-1,_T("Change dihedral angle"),wxDefaultPosition,
                                           wxDefaultSize);
       #endif
       WXMoleculeRotationDihed * wxMolRot;
