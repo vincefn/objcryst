@@ -1,7 +1,8 @@
-#### 1.7.X - July 2008 (Revision #1034) (in development)
+#### 1.7.X - July 2008 (Revision #1042) (in development)
 NEW FEATURES
    * Add powder pattern -> Fullprof export (creates .pcr and .dat)
    * Add the ability to convert a list of atoms to a Molecule.
+   * Enable compilation with the unicode version of wxWidgets
 
 IMPROVEMENTS
    * More optimized integration intervals for powder pattern

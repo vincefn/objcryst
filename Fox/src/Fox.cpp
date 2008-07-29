@@ -77,7 +77,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 1034
+#define __FOXREVISION__ 1042
 
 static std::string foxVersion;
 
@@ -549,7 +549,12 @@ int main (int argc, char *argv[])
          #ifdef __WX__CRYST__
          wxString name(argv[i]);
          if(name.Mid(name.size()-4)==wxString(_T(".xml")))
-            XMLCrystFileLoadAllObject(string(name.ToAscii()));
+         {
+            wxFileInputStream is(name);
+            stringstream sst;
+            while (!is.Eof()) sst<<(char)is.GetC();
+            XMLCrystFileLoadAllObject(sst);
+         }
          else
          {//compressed file
             wxFileInputStream is(name);
@@ -571,7 +576,9 @@ int main (int argc, char *argv[])
       {
          cout<<"Loading: "<<argv[i]<<endl;
          #ifdef __WX__CRYST__
-         ifstream in (wxString(argv[i]).ToAscii());
+         wxFileInputStream is(argv[i]);
+         stringstream in;
+         while (!is.Eof()) in<<(char)is.GetC();
          #else
          ifstream in (argv[i]);
          #endif
@@ -1009,11 +1016,18 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
       if(open->ShowModal() != wxID_OK) return;
       wxString name=open->GetPath();
       if(name.Mid(name.size()-4)==wxString(_T(".xml")))
-         XMLCrystFileLoadAllObject(string(name.ToAscii()));
+      {
+         wxFileInputStream is(open->GetPath());
+         stringstream in;
+         while (!is.Eof()) in<<(wxChar)is.GetC();
+         XMLCrystFileLoadAllObject(in);
+      }
       else
          if(name.Mid(name.size()-4)==wxString(_T(".cif")))
          {
-            ifstream in (open->GetPath().ToAscii());
+            wxFileInputStream is(open->GetPath());
+            stringstream in;
+            while (!is.Eof()) in<<(wxChar)is.GetC();
             ObjCryst::CIF cif(in,true,true);
             CreateCrystalFromCIF(cif);
             CreatePowderPatternFromCIF(cif);
@@ -1140,7 +1154,10 @@ void WXCrystMainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
          cout<<name<<" -> "<<name+_T(".xml")<<endl;
          name=name+_T(".xml");
       }
-      XMLCrystFileSaveGlobal(string(name.ToAscii()));
+      stringstream sst;
+      XMLCrystFileSaveGlobal(sst);
+      wxFileOutputStream ostream(name.c_str());
+      ostream.Write(wxString::FromAscii(sst.str().c_str()),sst.str().size());
    }
    mClockLastSave.Click();
 }
