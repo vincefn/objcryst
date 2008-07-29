@@ -19,6 +19,10 @@
 #include "RefinableObj/LSQNumObj.h"
 #include "Quirks/VFNStreamFormat.h"
 
+#ifdef __WX__CRYST__
+   #include "wxCryst/wxLSQ.h"
+#endif
+
 #include "newmat/newmatap.h" //for SVD decomposition
 #include "newmat/newmatio.h"
 
@@ -31,6 +35,9 @@ namespace ObjCryst
 {
 
 LSQNumObj::LSQNumObj(string objName)
+#ifdef __WX__CRYST__
+:mpWXCrystObj(0)
+#endif
 {
    mDampingFactor=1.;
    mSaveReportOnEachCycle=false;
@@ -44,6 +51,9 @@ LSQNumObj::LSQNumObj(string objName)
 
 LSQNumObj::~LSQNumObj()
 {
+   #ifdef __WX__CRYST__
+   this->WXDelete();
+   #endif
 }
 
 void LSQNumObj::SetParIsFixed(const string& parName,const bool fix)
@@ -672,5 +682,32 @@ void LSQNumObj::PrepareRefParList(const bool copy_param)
    if(copy_param) mRefParList.SetDeleteRefParInDestructor(true);
    else mRefParList.SetDeleteRefParInDestructor(false);
 }
+
+#ifdef __WX__CRYST__
+WXCrystObjBasic* LSQNumObj::WXCreate(wxWindow* parent)
+{
+   this->WXDelete();
+   mpWXCrystObj=new WXLSQ(parent,this);
+   return mpWXCrystObj;
+}
+WXCrystObjBasic* LSQNumObj::WXGet()
+{
+   return mpWXCrystObj;
+}
+void LSQNumObj::WXDelete()
+{
+   if(0!=mpWXCrystObj)
+   {
+      VFN_DEBUG_MESSAGE("LSQNumObj::WXDelete()",5)
+      delete mpWXCrystObj;
+   }
+   mpWXCrystObj=0;
+}
+void LSQNumObj::WXNotifyDelete()
+{
+   VFN_DEBUG_MESSAGE("LSQNumObj::WXNotifyDelete():"<<mName,5)
+   mpWXCrystObj=0;
+}
+#endif
 
 }//namespace

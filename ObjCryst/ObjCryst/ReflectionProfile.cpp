@@ -822,71 +822,71 @@ void ReflectionProfileDoubleExponentialPseudoVoigt
    ::InitParameters()
 {
    {
-      RefinablePar tmp("Alpha0",&mInstrumentAlpha0,0,10.,gpRefParTypeScattDataProfile,
-                        REFPAR_DERIV_STEP_ABSOLUTE,false,true,true,false);
+      RefinablePar tmp("Alpha0",&mInstrumentAlpha0,0,1e6,gpRefParTypeScattDataProfile,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
       tmp.AssignClock(mClockMaster);
       tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp("Alpha1",&mInstrumentAlpha1,0,10.,gpRefParTypeScattDataProfile,
-                        REFPAR_DERIV_STEP_ABSOLUTE,false,true,true,false);
+      RefinablePar tmp("Alpha1",&mInstrumentAlpha1,0,1e6,gpRefParTypeScattDataProfile,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
+      tmp.AssignClock(mClockMaster);
+      tmp.SetDerivStep(1e-6);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("Beta0",&mInstrumentBeta0,0,1e6,gpRefParTypeScattDataProfile,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
+      tmp.AssignClock(mClockMaster);
+      tmp.SetDerivStep(1e-6);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("Beta1",&mInstrumentBeta1,0,1e6,gpRefParTypeScattDataProfile,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
+      tmp.AssignClock(mClockMaster);
+      tmp.SetDerivStep(1e-6);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("GaussianSigma0",&mGaussianSigma0,0,1e6,gpRefParTypeScattDataProfileWidth,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
       tmp.AssignClock(mClockMaster);
       tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp("Beta0",&mInstrumentBeta0,0,10.,gpRefParTypeScattDataProfile,
-                        REFPAR_DERIV_STEP_ABSOLUTE,false,true,true,false);
+      RefinablePar tmp("GaussianSigma1",&mGaussianSigma1,0,1e6,gpRefParTypeScattDataProfileWidth,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
       tmp.AssignClock(mClockMaster);
       tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp("Beta1",&mInstrumentBeta1,0,10.,gpRefParTypeScattDataProfile,
-                        REFPAR_DERIV_STEP_ABSOLUTE,false,true,true,false);
+      RefinablePar tmp("GaussianSigma2",&mGaussianSigma2,0,1e6,gpRefParTypeScattDataProfileWidth,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
       tmp.AssignClock(mClockMaster);
       tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp("GaussianSigma0",&mGaussianSigma0,0,100.,gpRefParTypeScattDataProfileWidth,
-                        REFPAR_DERIV_STEP_ABSOLUTE,false,true,true,false);
+      RefinablePar tmp("LorentzianGamma0",&mLorentzianGamma0,0,1e6,gpRefParTypeScattDataProfileWidth,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
       tmp.AssignClock(mClockMaster);
       tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp("GaussianSigma1",&mGaussianSigma1,0,100.,gpRefParTypeScattDataProfileWidth,
-                        REFPAR_DERIV_STEP_ABSOLUTE,false,true,true,false);
+      RefinablePar tmp("LorentzianGamma1",&mLorentzianGamma1,0,1e6,gpRefParTypeScattDataProfileWidth,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
       tmp.AssignClock(mClockMaster);
       tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp("GaussianSigma2",&mGaussianSigma2,0,100.,gpRefParTypeScattDataProfileWidth,
-                        REFPAR_DERIV_STEP_ABSOLUTE,false,true,true,false);
-      tmp.AssignClock(mClockMaster);
-      tmp.SetDerivStep(1e-4);
-      this->AddPar(tmp);
-   }
-   {
-      RefinablePar tmp("LorentzianGamma0",&mLorentzianGamma0,0,100.,gpRefParTypeScattDataProfileWidth,
-                        REFPAR_DERIV_STEP_ABSOLUTE,false,true,true,false);
-      tmp.AssignClock(mClockMaster);
-      tmp.SetDerivStep(1e-4);
-      this->AddPar(tmp);
-   }
-   {
-      RefinablePar tmp("LorentzianGamma1",&mLorentzianGamma1,0,100.,gpRefParTypeScattDataProfileWidth,
-                        REFPAR_DERIV_STEP_ABSOLUTE,false,true,true,false);
-      tmp.AssignClock(mClockMaster);
-      tmp.SetDerivStep(1e-4);
-      this->AddPar(tmp);
-   }
-   {
-      RefinablePar tmp("LorentzianGamma2",&mLorentzianGamma2,0,100.,gpRefParTypeScattDataProfileWidth,
-                        REFPAR_DERIV_STEP_ABSOLUTE,false,true,true,false);
+      RefinablePar tmp("LorentzianGamma2",&mLorentzianGamma2,0,1e6,gpRefParTypeScattDataProfileWidth,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
       tmp.AssignClock(mClockMaster);
       tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);

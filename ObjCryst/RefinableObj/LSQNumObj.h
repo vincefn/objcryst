@@ -165,6 +165,15 @@ class LSQNumObj
       /// Therefore only their values and the parameter's clocks are affected when
       /// working on the copy.
       bool mCopyRefPar;
+#ifdef __WX__CRYST__
+   public:
+      virtual WXCrystObjBasic* WXCreate(wxWindow* parent);
+      WXCrystObjBasic* WXGet();
+      void WXDelete();
+      void WXNotifyDelete();
+   protected:
+      WXCrystObjBasic *mpWXCrystObj;
+#endif
 };
 
 }//namespace
