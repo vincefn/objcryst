@@ -48,7 +48,7 @@ SEARCHDIRS = -I${DIR_CRYST}/.. -I./ -I$(DIR_TAU)/include -I${DIR_CRYST} -I$(DIR_
 #wxWindows flags
 ifeq ($(wxcryst),1)
    WXCRYSTFLAGS = -D__WX__CRYST__ `$(WXCONFIG) --cxxflags`
-   WX_LDFLAGS = -L/usr/X11R6/lib -lwxcryst `$(WXCONFIG) --libs` $(GL_WX_LIB)
+   WX_LDFLAGS = -L/usr/X11R6/lib -lwxcryst `$(WXCONFIG) --libs adv,core,base,net` $(GL_WX_LIB)
 else
    WXCRYSTFLAGS :=
    WX_LDFLAGS :=
@@ -160,7 +160,7 @@ endif
 
 $(BUILD_DIR)/static-libs/lib/libglut.a:
 	cd $(BUILD_DIR) && tar -xjf freeglut.tar.bz2
-	cd $(BUILD_DIR)/freeglut && ./configure --prefix=$(BUILD_DIR)/static-libs --disable-shared --disable-warnings --x-includes=/usr/X11R6/include/ && make install
+	cd $(BUILD_DIR)/freeglut && ./configure --prefix=$(BUILD_DIR)/static-libs --disable-shared --disable-warnings --x-includes=/usr/X11R6/include/ && $(MAKE) install
 	rm -Rf freeglut
 
 ifeq ($(opengl),1)
@@ -173,13 +173,14 @@ else
 libfreeglut:
 endif
 
+# When building wxGTK, use make instead of $(MAKE) to avoid passing -jN which do not work ?
 $(BUILD_DIR)/static-libs/lib/libwx_gtk2_core-2.8.a:
-	cd $(BUILD_DIR) && tar -xjf wxGTK.tar.bz2 # wxGtK source, with "demos" "samples" "contrib" removed
+	cd $(BUILD_DIR) && rm -Rf wxGTK && tar -xjf wxGTK.tar.bz2 # wxGtK source, with "demos" "samples" "contrib" removed
 	cd $(BUILD_DIR)/wxGTK && ./configure --with-gtk --with-opengl --prefix=$(BUILD_DIR)/static-libs --disable-unicode --enable-optimise --disable-shared --disable-clipboard --x-includes=/usr/X11R6/include/ && make install
 	rm -Rf wxGTK
 
 $(BUILD_DIR)/static-libs/lib/libwx_gtk2u_core-2.8.a:
-	cd $(BUILD_DIR) && tar -xjf wxGTK.tar.bz2 # wxGtK source, with "demos" "samples" "contrib" removed
+	cd $(BUILD_DIR) && rm -Rf wxGTK && tar -xjf wxGTK.tar.bz2 # wxGtK source, with "demos" "samples" "contrib" removed
 	cd $(BUILD_DIR)/wxGTK && ./configure --with-gtk --with-opengl --prefix=$(BUILD_DIR)/static-libs --enable-unicode  --enable-optimise --disable-shared --disable-clipboard --x-includes=/usr/X11R6/include/ && make install
 	rm -Rf wxGTK
 
@@ -199,7 +200,8 @@ endif
      
 #cctbx
 $(DIR_STATIC_LIBS)/lib/libcctbx.a:
-	cd $(BUILD_DIR) && tar -xjf cctbx.tar.bz2        
+	mkdir -p $(DIR_STATIC_LIBS)/lib/ $(DIR_STATIC_LIBS)/include/
+	cd $(BUILD_DIR) && tar -xjf cctbx.tar.bz2
 	$(MAKE) -f gnu.mak -C $(BUILD_DIR)/cctbx install
 	#rm -Rf $(BUILD_DIR)/cctbx
 
@@ -207,7 +209,7 @@ libcctbx: $(DIR_STATIC_LIBS)/lib/libcctbx.a
 
 $(DIR_STATIC_LIBS)/lib/libfftw3f.a:
 	cd $(BUILD_DIR) && tar -xjf fftw.tar.bz2
-	cd $(BUILD_DIR)/fftw && ./configure --enable-single --prefix $(DIR_STATIC_LIBS) && make install
+	cd $(BUILD_DIR)/fftw && ./configure --enable-single --prefix $(DIR_STATIC_LIBS) && $(MAKE) install
 	rm -Rf $(BUILD_DIR)/fftw
 
 ifneq ($(fftw),0)
