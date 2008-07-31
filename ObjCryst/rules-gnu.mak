@@ -43,7 +43,7 @@ LDFLAGS   = -L/usr/lib -L/usr/local/lib -L$(DIR_CRYSTVECTOR) -L$(DIR_LIBCRYST) -
 MAKEDEPEND = gcc -MM ${CPPFLAGS} ${CXXFLAGS} ${C_BLITZFLAG} $< > $*.dep
 
 # header files
-SEARCHDIRS = -I${DIR_CRYST}/.. -I./ -I$(DIR_TAU)/include -I${DIR_CRYST} -I$(DIR_STATIC_LIBS)/include
+SEARCHDIRS = -I$(DIR_TAU)/include -I${DIR_CRYST} -I$(DIR_STATIC_LIBS)/include
 
 #wxWindows flags
 ifeq ($(wxcryst),1)
@@ -203,6 +203,7 @@ $(DIR_STATIC_LIBS)/lib/libcctbx.a:
 	mkdir -p $(DIR_STATIC_LIBS)/lib/ $(DIR_STATIC_LIBS)/include/
 	cd $(BUILD_DIR) && tar -xjf cctbx.tar.bz2
 	$(MAKE) -f gnu.mak -C $(BUILD_DIR)/cctbx install
+	ln -sf $(BUILD_DIR)/boost $(DIR_STATIC_LIBS)/include/
 	#rm -Rf $(BUILD_DIR)/cctbx
 
 libcctbx: $(DIR_STATIC_LIBS)/lib/libcctbx.a
