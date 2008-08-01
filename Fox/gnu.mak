@@ -8,7 +8,7 @@ all: Fox
 default: all
 
 Fox:
-	$(MAKE) -f gnu.mak wxcryst=1 opengl=1 fftw=1 debug=$(debug) unicode=$(unicode) shared=$(shared) shared-wxgtk=$(shared-wxgtk) shared-freeglut=$(shared-freeglut) shared-newmat=$(shared-newmat) shared-fftw=$(shared-fftw) -C src Fox
+	$(MAKE) -f gnu.mak wxcryst=1 opengl=1 fftw=1 debug=$(debug) unicode=$(unicode) shared=$(shared) shared-wxgtk=$(shared-wxgtk) shared-glut=$(shared-glut) shared-newmat=$(shared-newmat) shared-fftw=$(shared-fftw) -C src Fox
 
 Fox-nogui:
 	$(MAKE) -f gnu.mak wxcryst=0 opengl=0 fftw=0 debug=$(debug) -C src Fox-nogui
