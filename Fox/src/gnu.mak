@@ -13,12 +13,12 @@ else
 endif
 
 ifeq ($(profile),2)
-%.o : %.cpp libwx
+%.o :  %.cpp libwx libnewmat libcctbx
 	@rm -f $(*F).gcda $(*F).gcno
 	@$(MAKEDEPEND)
 	${CXX} ${CPPFLAGS} ${CXXFLAGS} -D'__FOXVERSION__="$(foxversion)"' -c $< -o $@
 else
-%.o : %.cpp #libwx
+%.o :  %.cpp libwx libnewmat libcctbx
 	@$(MAKEDEPEND)
 	${CXX} ${CPPFLAGS} ${CXXFLAGS} -D'__FOXVERSION__="$(foxversion)"' -c $< -o $@
 endif
@@ -29,10 +29,10 @@ endif
 -include Fox.dep
 
 #Main Application
-Fox: Fox.o libwx libnewmat libCrystVector libQuirks libRefinableObj libcctbx libCryst libwxCryst libfftw
+Fox: libwx libnewmat libcctbx libCrystVector libQuirks libRefinableObj libCryst libwxCryst libfftw Fox.o
 	${LINKER} ${LDFLAGS} -o $@ ${filter-out %.a %.so lib%, $^} ${LOADLIBES} 
 
-Fox-nogui: Fox.o libnewmat libCrystVector libQuirks libRefinableObj libcctbx libCryst
+Fox-nogui: libnewmat libcctbx libCrystVector libQuirks libRefinableObj libCryst Fox.o 
 	${LINKER} ${LDFLAGS} -o $@ ${filter-out %.a %.so lib%, $^} ${LOADLIBES} 
 
 fox: Fox
