@@ -5318,6 +5318,7 @@ void PowderPattern::PrepareIntegratedRfactor()const
          mIntegratedPatternMax.resize(0);
          mNbIntegrationUsed=0;
          mClockIntegratedFactorsPrep.Click();
+         return;
          VFN_DEBUG_EXIT("PowderPattern::PrepareIntegratedRfactor(): no intervals !",3);
       }
       vLimits.sort();
