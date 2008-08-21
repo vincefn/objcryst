@@ -77,7 +77,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 1042
+#define __FOXREVISION__ 1050
 
 static std::string foxVersion;
 
