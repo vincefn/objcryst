@@ -83,6 +83,7 @@
 		BF1DE1540D2297C300A3939D /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF1DE1530D2297C300A3939D /* QuickTime.framework */; };
 		BF3EB05508968F5500E02367 /* uctbx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3EB05408968F5500E02367 /* uctbx.cpp */; };
 		BF3EB063089690D200E02367 /* spoil_optimization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3EB062089690D200E02367 /* spoil_optimization.cpp */; };
+		BFFB474E0E5E0E620027591E /* wxLSQ.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFB474D0E5E0E620027591E /* wxLSQ.cpp */; };
 		BFFCCB670890296D00044EBA /* bandmat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCB660890296D00044EBA /* bandmat.cpp */; };
 		BFFCCBA0089029F400044EBA /* cholesky.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCB6A089029F400044EBA /* cholesky.cpp */; };
 		BFFCCBA1089029F400044EBA /* evalue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCB6B089029F400044EBA /* evalue.cpp */; };
@@ -229,6 +230,7 @@
 		BF3EB05408968F5500E02367 /* uctbx.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = uctbx.cpp; path = ../cctbx/cctbx/uctbx/uctbx.cpp; sourceTree = "<group>"; };
 		BF3EB062089690D200E02367 /* spoil_optimization.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = spoil_optimization.cpp; path = ../cctbx/cctbx/uctbx/spoil_optimization.cpp; sourceTree = "<group>"; };
 		BFE6AC680B886ACA007AFBA8 /* Indexing.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Indexing.cpp; path = ../ObjCryst/ObjCryst/Indexing.cpp; sourceTree = SOURCE_ROOT; };
+		BFFB474D0E5E0E620027591E /* wxLSQ.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxLSQ.cpp; path = ../ObjCryst/wxCryst/wxLSQ.cpp; sourceTree = SOURCE_ROOT; };
 		BFFCCB5D089028E500044EBA /* libnewmat.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libnewmat.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFFCCB660890296D00044EBA /* bandmat.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = bandmat.cpp; path = ../newmat/bandmat.cpp; sourceTree = "<group>"; };
 		BFFCCB6A089029F400044EBA /* cholesky.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = cholesky.cpp; path = ../newmat/cholesky.cpp; sourceTree = "<group>"; };
@@ -1864,6 +1866,7 @@
 		BF347939091505C7006E569C /* wxCryst */ = {
 			isa = PBXGroup;
 			children = (
+				BFFB474D0E5E0E620027591E /* wxLSQ.cpp */,
 				BFFCD8A30890426600044EBA /* mpVector.cpp */,
 				BFFCD97C08904D7D00044EBA /* trackball.c */,
 				BFFCD8A10890426600044EBA /* MC.cpp */,
@@ -4427,6 +4430,7 @@
 				BF1DDE230D228E3700A3939D /* CIF.cpp in Sources */,
 				BF1DDE240D228E3700A3939D /* ci_string.cpp in Sources */,
 				BF1DDE250D228E3700A3939D /* Indexing.cpp in Sources */,
+				BFFB474E0E5E0E620027591E /* wxLSQ.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
