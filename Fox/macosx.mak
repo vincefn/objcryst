@@ -6,15 +6,21 @@
 
 ../static-libs/lib/libfftw3f.a:
 	cd .. && tar -xjf fftw.tar.bz2
-	cd ../fftw && ./configure --enable-single --prefix $(PWD)/../static-libs && make install
+	cd ../fftw && ./configure --enable-single CFLAGS="-arch i386" --prefix $(PWD)/../static-libs && make clean && make install && mv .libs/libfftw3f.a ./libfftw3f-i386.a
+	cd ../fftw && ./configure --enable-single CFLAGS="-arch ppc" --prefix $(PWD)/../static-libs && make clean && make && mv .libs/libfftw3f.a ./libfftw3f-ppc.a
+	rm -f $(PWD)/../static-libs/lib/*fftw*
+	cd ../fftw && lipo -create libfftw3f-i386.a libfftw3f-ppc.a -output $(PWD)/../static-libs/lib/libfftw3f.a
 	rm -Rf ../fftw
 
 
 libfftw: ../static-libs/lib/libfftw3f.a
 
-../static-libs/bin/wx-config:
-	cd .. && tar -xjf wxMac-2.8.7.tar.bz2
-	cd ../wxMac-2.8.7 && ./configure --with-opengl --enable-optimise --disable-shared --enable-monolithic --prefix=$(PWD)/../static-libs && make install
+../wxMac-2.8.8.tar.bz2:
+	cd .. && curl -O http://switch.dl.sourceforge.net/sourceforge/wxwindows/wxMac-2.8.8.tar.bz2
+
+../static-libs/bin/wx-config: ../wxMac-2.8.8.tar.bz2
+	cd .. && tar -xjf wxMac-2.8.8.tar.bz2
+	cd ../wxMac-2.8.8 && ./configure --with-opengl --enable-optimise --disable-shared --enable-monolithic --enable-universal_binary --prefix=$(PWD)/../static-libs && make install
 
 
 libwx: ../static-libs/bin/wx-config
