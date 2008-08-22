@@ -15,13 +15,13 @@
 
 libfftw: ../static-libs/lib/libfftw3f.a
 
-../wxMac-2.8.8.tar.bz2:
-	cd .. && curl -O http://switch.dl.sourceforge.net/sourceforge/wxwindows/wxMac-2.8.8.tar.bz2
+../wxMac-2.8.7.tar.bz2:
+	cd .. && curl -O http://switch.dl.sourceforge.net/sourceforge/wxwindows/wxMac-2.8.7.tar.bz2
 
-../static-libs/bin/wx-config: ../wxMac-2.8.8.tar.bz2
-	cd .. && tar -xjf wxMac-2.8.8.tar.bz2
-	cd ../wxMac-2.8.8 && ./configure --with-opengl --enable-optimise --disable-shared --enable-monolithic --enable-universal_binary --prefix=$(PWD)/../static-libs && make install
-
+../static-libs/bin/wx-config: ../wxMac-2.8.7.tar.bz2
+	cd .. && tar -xjf wxMac-2.8.7.tar.bz2
+	cd ../wxMac-2.8.7 && ./configure --with-opengl --enable-optimise --disable-shared --enable-monolithic --enable-universal_binary --prefix=$(PWD)/../static-libs && make install
+	rm -Rf ../wxMac-2.8.7
 
 libwx: ../static-libs/bin/wx-config
 
