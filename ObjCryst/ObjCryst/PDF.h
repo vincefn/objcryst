@@ -24,6 +24,9 @@
 #include "CrystVector/CrystVector.h"
 
 #include "ObjCryst/Crystal.h"
+#ifdef __WX__CRYST__
+   #include "wxCryst/wxCryst.h"
+#endif
 
 #include <string>
 #include <list>
@@ -31,6 +34,8 @@
 
 namespace ObjCryst
 {
+extern const RefParType *gpRefParTypePDF;
+
 // Forward declaration
 class PDFPhase;
 
@@ -74,7 +79,14 @@ class PDF:public RefinableObj
       CrystVector_REAL mPDFObs;
       /// Contributions to the PDF, with their scale factor
       std::list<std::pair<PDFPhase*,REAL> > mvPDFPhase;
+   #ifdef __WX__CRYST__
+   public:
+      virtual WXCrystObjBasic* WXCreate(wxWindow*);
+   #endif
 };
+
+/// Global registry for all PDF objects
+extern ObjRegistry<PDF> gPDFRegistry;
 
 /** Contribution to a PDF
 *
@@ -94,6 +106,10 @@ class PDFPhase:public RefinableObj
       const PDF *mpPDF;
       /// The calculated PDF
       mutable CrystVector_REAL mPDFCalc;
+   #ifdef __WX__CRYST__
+   public:
+      virtual WXCrystObjBasic* WXCreate(wxWindow*)=0;
+   #endif
 };
 
 /** Class for Pair Distribution Function calculations for a single Crystal object
@@ -105,13 +121,15 @@ class PDFCrystal:public PDFPhase
       /// Constructor
       PDFCrystal(const PDF &pdf, const Crystal &cryst);
    private:
+      /// Initialize all parameters
+      void Init(const PDF &pdf, const Crystal &cryst);
       /// Calculate the pdf
       virtual void CalcPDF()const;
       /// The Crystal
       const Crystal *mpCrystal;
       // Parameters to describe the PDF
-         /// Constant sigma, uncertainty on all interatomic distances- in Angstroems
-         REAL mSigma0;
+         /// Parameters affecting the width & intensity of peaks
+         REAL mDelta1,mDelta2,mQbroad,mQdamp;
       // Cached data to speed up computations
          /// Container of temp data for each atom
          struct pdfAtom
@@ -120,6 +138,8 @@ class PDFCrystal:public PDFPhase
             pdfAtom();
             /// Fractionnal & cartesian unique coordinates
             REAL fx0,fy0,fz0,x0,y0,z0;
+            /// The scattering power
+            const ScatteringPower *pScattPow;
             /// Scattering amplitudes, multiplied by occupancy
             REAL occupBi;
             /// Has this atom changed since last time ?
@@ -130,7 +150,10 @@ class PDFCrystal:public PDFPhase
          };
          /// List of all temp data
          mutable std::vector<pdfAtom> mvPDFAtom;
-      
+   #ifdef __WX__CRYST__
+   public:
+      virtual WXCrystObjBasic* WXCreate(wxWindow*);
+   #endif
 };
 }//namespace
 #endif

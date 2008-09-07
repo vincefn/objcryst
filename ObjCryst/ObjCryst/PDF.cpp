@@ -20,11 +20,15 @@
 */
 #include "ObjCryst/PDF.h"
 #include "Quirks/VFNStreamFormat.h"
+#ifdef __WX__CRYST__
+   #include "wxCryst/wxPDF.h"
+#endif
 
 #include <string>
 
 namespace ObjCryst
 {
+const RefParType *gpRefParTypePDF=0;
 
 PDF::PDF():
 mRadiationType(RAD_XRAY)
@@ -90,6 +94,14 @@ void PDF::AddPDFPhase(PDFPhase &phase)
    mvPDFPhase.push_back(make_pair(&phase,1.0));
 }
 
+#ifdef __WX__CRYST__
+WXCrystObjBasic* PDF::WXCreate(wxWindow* parent)
+{
+   if(mpWXCrystObj==0) mpWXCrystObj=new WXPDF(parent,this);
+   return mpWXCrystObj;
+}
+#endif
+
 
 ////////////////////////// PDFPhase /////////////////////////////
 PDFPhase::PDFPhase(const PDF &pdf):
@@ -106,13 +118,48 @@ const CrystVector_REAL &PDFPhase::GetPDFCalc()const
 ////////////////////////// PDFCrystal /////////////////////////////
 
 PDFCrystal::PDFCrystal(const PDF &pdf, const Crystal &cryst):
-PDFPhase(pdf),mpCrystal(&cryst),mSigma0(0.05)
+PDFPhase(pdf),mpCrystal(&cryst),mDelta1(0.0),mDelta2(0.0),mQbroad(0.0),mQdamp(0.0)
 {
 }
 
 PDFCrystal::pdfAtom::pdfAtom():
 fx0(0),fy0(0),fz0(0),x0(0),y0(0),z0(0),occupBi(1),hasChanged(true)
 {}
+
+void PDFCrystal::Init(const PDF &pdf, const Crystal &cryst)
+{
+   mpCrystal=&cryst;
+   mpPDF=&pdf;
+   this->ResetParList();
+   {
+      RefinablePar tmp("Delta1",&mDelta1,0,1.0,gpRefParTypePDF,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1);
+      tmp.AssignClock(mClockMaster);
+      tmp.SetDerivStep(1e-3);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("Delta2",&mDelta2,0,1.0,gpRefParTypePDF,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1);
+      tmp.AssignClock(mClockMaster);
+      tmp.SetDerivStep(1e-3);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("Qbroad",&mQbroad,0,1.0,gpRefParTypePDF,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1);
+      tmp.AssignClock(mClockMaster);
+      tmp.SetDerivStep(1e-3);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("Qdamp",&mQdamp,0,1.0,gpRefParTypePDF,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1);
+      tmp.AssignClock(mClockMaster);
+      tmp.SetDerivStep(1e-3);
+      this->AddPar(tmp);
+   }
+}
 
 void PDFCrystal::CalcPDF()const
 {
@@ -153,6 +200,7 @@ void PDFCrystal::CalcPDF()const
             rho0+=occ;
             b_av+=occ*b;
             pos->occupBi= occ*b;
+            pos->pScattPow=(*pScatt)(i).mpScattPow;
             pos->hasChanged=true;
          }
          ++i;
@@ -166,6 +214,7 @@ void PDFCrystal::CalcPDF()const
          if(pos->fx0!=(*pScatt)(i).mX){pos->fx0=(*pScatt)(i).mX;pos->hasChanged=true;}
          if(pos->fy0!=(*pScatt)(i).mY){pos->fy0=(*pScatt)(i).mY;pos->hasChanged=true;}
          if(pos->fz0!=(*pScatt)(i).mZ){pos->fz0=(*pScatt)(i).mZ;pos->hasChanged=true;}
+         if(pos->pScattPow!=(*pScatt)(i).mpScattPow){pos->pScattPow=(*pScatt)(i).mpScattPow;pos->hasChanged=true;}
          REAL occupBi;
          if((*pScatt)(i).mpScattPow==0) occupBi=0;
          else
@@ -175,6 +224,7 @@ void PDFCrystal::CalcPDF()const
             rho0+=occ;
             b_av+=occ*b;
             occupBi= occ*b;
+            //:TODO: check if B-factor has changed
          }
          if(pos->occupBi!=occupBi){pos->occupBi=occupBi;pos->hasChanged=true;}
       }
@@ -243,10 +293,9 @@ void PDFCrystal::CalcPDF()const
    // Calculate pdf
    // :TODO: only recalculate the contributions that have changed !
    mPDFCalc=0;
-   const REAL r2max=(mpPDF->GetRMax()+5*mSigma0)*(mpPDF->GetRMax()+5*mSigma0);
+   const REAL r2max=(mpPDF->GetRMax()+0.2)*(mpPDF->GetRMax()+0.2);
    const REAL nsigcut=5;// Cut gaussian at abs(r_ij-r)<3*sigma
-   const REAL i2sig2=1/(2*mSigma0*mSigma0);
-   const REAL norm=1/sqrt(2*M_PI)/mSigma0;
+   const REAL norm=1/sqrt(2*M_PI);
    for(vector<pdfAtom>::iterator pos=mvPDFAtom.begin();pos!=mvPDFAtom.end();++pos)
    {
       if(pos->occupBi==0) continue;
@@ -261,6 +310,7 @@ void PDFCrystal::CalcPDF()const
          const REAL *px=pos1->x.data();
          const REAL *py=pos1->y.data();
          const REAL *pz=pos1->z.data();
+         const REAL sigma2=(pos->pScattPow->GetBiso()+pos1->pScattPow->GetBiso())/(8*M_PI*M_PI);
          for(unsigned long i=0;i<neq;++i)
          {
             const REAL dx=*px++-x0, dy=*py++-y0, dz=*pz++-z0;
@@ -268,16 +318,20 @@ void PDFCrystal::CalcPDF()const
             if((d2<r2max)&&(d2>1))
             {
                const REAL rij=sqrt(d2);
+               REAL s2=sigma2*(1-mDelta1/rij-mDelta2/d2+mQbroad*d2);
+               if(s2<.01) s2=0.01;
+               const REAL sig=sqrt(s2);
                REAL *p=mPDFCalc.data();
                const REAL *pr=mpPDF->GetPDFR().data();
-               const REAL rmin=rij-nsigcut*mSigma0,rmax=rij+nsigcut*mSigma0;
+               const REAL rmin=rij-nsigcut*sig,rmax=rij+nsigcut*sig;
                //cout<<"    "<<rij<<":"<<rmin<<"->"<<rmax<<endl;
+               const REAL n=normij/sig*exp(-0.5*rij*mQdamp*mQdamp);
                for(unsigned long i=0;i<nbr;++i)
                {
                   if(*pr<rmin){pr++;p++;continue;}
                   if(*pr>rmax) break;
                   const REAL dr=rij-*pr;
-                  *p += normij*exp(-dr*dr*i2sig2);
+                  *p += n*exp(-dr*dr/(2*s2));
                   p++;pr++;
                }
             }
@@ -292,6 +346,14 @@ void PDFCrystal::CalcPDF()const
    tmp*=4*M_PI*rho0;
    mPDFCalc-=tmp;
 }
+
+#ifdef __WX__CRYST__
+WXCrystObjBasic* PDFCrystal::WXCreate(wxWindow* parent)
+{
+   if(mpWXCrystObj==0) mpWXCrystObj=new WXPDFCrystal(parent,this);
+   return mpWXCrystObj;
+}
+#endif
 
 }//namespace
 
