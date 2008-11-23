@@ -23,7 +23,7 @@
 
 #include <cmath>
 #include <typeinfo>
-
+#include <cstdlib>
 #include <stdio.h> //for sprintf()
 
 //#include "ObjCryst/ScatteringPower.h"

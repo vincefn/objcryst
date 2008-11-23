@@ -130,10 +130,10 @@ void SimplexObj::MultiRunOptimize(long &nbCycle,long &nbSteps,const bool silent,
    const long nbStep0=nbSteps;
    while(nbCycle--!=0)
    {
-      if(!silent) cout <<"SimplexObj::MultiRunOptimize: Starting Run#"<<abs(nbCycle)<<endl;
+      if(!silent) cout <<"SimplexObj::MultiRunOptimize: Starting Run#"<<abs(float(nbCycle))<<endl;
       nbSteps=nbStep0;
       this->Optimize(nbSteps,silent,finalcost,maxTime);
-      if(!silent) cout <<"SimplexObj::MultiRunOptimize: Finished Run#"<<abs(nbCycle)<<endl;
+      if(!silent) cout <<"SimplexObj::MultiRunOptimize: Finished Run#"<<abs(float(nbCycle))<<endl;
    }
 }
 void SimplexObj::XMLOutput(ostream &os,int indent)const

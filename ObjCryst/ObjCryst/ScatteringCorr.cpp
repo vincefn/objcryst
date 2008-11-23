@@ -19,6 +19,7 @@
 #include "ObjCryst/ScatteringCorr.h"
 #include "Quirks/VFNStreamFormat.h"
 #include <stdio.h> //for sprintf()
+#include <cstdlib>
 #ifdef __WX__CRYST__
 namespace ObjCryst
 {

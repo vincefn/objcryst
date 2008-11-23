@@ -43,6 +43,7 @@
    #include <wx/txtstrm.h>
 #endif
 
+#include <cstdlib>
 #include <locale.h>
 #include <sstream>
 #include <list>
