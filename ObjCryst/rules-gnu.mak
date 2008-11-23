@@ -110,6 +110,12 @@ FFTW_LIB :=
 FFTW_FLAGS :=
 endif
 
+ifneq ($(shared-newmat),1)
+LDNEWMAT := $(DIR_STATIC_LIBS)/lib/libnewmat.a
+else
+LDNEWMAT := -lnewmat
+endif
+
 #Set DEBUG options
 # $(DIR_CRYST)/../static-libs/lib/libfftw3f.a
 ifeq ($(debug),1)
@@ -120,7 +126,7 @@ ifeq ($(debug),1)
       CPPFLAGS = -g -Wall -D__DEBUG__ 
    endif
    DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS} ${FFTW_FLAGS}
-   LOADLIBES = -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx -lnewmat ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS} ${FFTW_LIB}
+   LOADLIBES = -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx ${LDNEWMAT} ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS} ${FFTW_LIB}
 else
 # -march=athlon,pentiumpro
    ifdef RPM_OPT_FLAGS
@@ -135,7 +141,7 @@ else
       CPPFLAGS = -O3 -w -ffast-math -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops
    endif
    DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS} ${FFTW_FLAGS}
-   LOADLIBES = -s -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx -lnewmat ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS} ${FFTW_LIB}
+   LOADLIBES = -s -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx ${LDNEWMAT} ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS} ${FFTW_LIB}
 endif
 # Add to statically link: -nodefaultlibs -lgcc /usr/lib/libstdc++.a
 
