@@ -46,6 +46,7 @@
 #include <locale.h>
 #include <sstream>
 #include <list>
+#include <cstring>
 
 #include "ObjCryst/General.h"
 #include "ObjCryst/IO.h"
@@ -65,9 +66,10 @@
    #if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__) || defined(__WXMGL__) || defined(__WXX11__)
       #include "Fox.xpm"
    #endif
-#endif
-
-#if !wxUSE_UNICODE
+  #if !wxUSE_UNICODE
+  #define _T(x) x
+  #endif
+#else
 #define _T(x) x
 #endif
 
@@ -77,7 +79,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 1050
+#define __FOXREVISION__ 1058
 
 static std::string foxVersion;
 
@@ -279,9 +281,14 @@ IMPLEMENT_APP(MyApp)
 // implementation
 // ============================================================================
 
+int STRCMP(wxChar* s1,wxChar* s2) {return wxStrcmp(s1,s2);}
+
 // 'Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 #else
+
+int STRCMP(const char* s1,const char* s2){ return strcmp(s1,s2);}
+
 int main (int argc, char *argv[])
 #endif
 {
@@ -316,25 +323,25 @@ int main (int argc, char *argv[])
    bool exportfullprof=false;
    for(int i=1;i<argc;i++)
    {
-      if(_T("--nogui")==argv[i])
+      if(STRCMP(_T("--nogui"),argv[i])==0)
       {
          useGUI=false;
          cout << "Running Fox without GUI"<<endl;
          continue;  
       }
-      if(_T("--randomize")==argv[i])
+      if(STRCMP(_T("--randomize"),argv[i])==0)
       {
          randomize=true;
          cout << "Randomizing parameters before running"<<endl;
          continue;  
       }
-      if(_T("--silent")==argv[i])
+      if(STRCMP(_T("--silent"),argv[i])==0)
       {
          silent=true;
          cout << "Running Fox quietly"<<endl;
          continue;  
       }
-      if(_T("--finalcost")==argv[i])
+      if(STRCMP(_T("--finalcost"),argv[i])==0)
       {
          ++i;
          #ifdef __WX__CRYST__
@@ -346,7 +353,7 @@ int main (int argc, char *argv[])
          cout << "Fox will stop after reaching cost:"<<finalCost<<endl;
          continue;  
       }
-      if(_T("-n")==argv[i])
+      if(STRCMP(_T("-n"),argv[i])==0)
       {
          ++i;
          #ifdef __WX__CRYST__
@@ -358,7 +365,7 @@ int main (int argc, char *argv[])
          cout << "Fox will run for "<<nbTrial<<" trials"<<endl;
          continue;
       }
-      if(_T("--nbrun")==argv[i])
+      if(STRCMP(_T("--nbrun"),argv[i])==0)
       {
          ++i;
         #ifdef __WX__CRYST__
@@ -370,7 +377,7 @@ int main (int argc, char *argv[])
          cout << "Fox will do "<<nbRun<<" runs, randomizing before each run"<<endl;
          continue;
       }
-      if(_T("--cif2pattern")==argv[i])
+      if(STRCMP(_T("--cif2pattern"),argv[i])==0)
       {
          ++i;
          cif2pattern=true;
@@ -414,12 +421,12 @@ int main (int argc, char *argv[])
          }
          continue;
       }
-      if(_T("-i")==argv[i])
+      if(STRCMP(_T("-i"),argv[i])==0)
       {// Obsolete, just ignore
          ++i;
          continue;
       }
-      if(_T("-o")==argv[i])
+      if(STRCMP(_T("-o"),argv[i])==0)
       {
          ++i;
          #ifdef __WX__CRYST__
@@ -432,7 +439,7 @@ int main (int argc, char *argv[])
          if((long)(string::npos)==filenameInsertCost) filenameInsertCost=-1;
          continue;
       }
-      if(_T("--loadfouriergrd")==argv[i])
+      if(STRCMP(_T("--loadfouriergrd"),argv[i])==0)
       {
          ++i;
          loadFourierGRD=true;
@@ -443,7 +450,7 @@ int main (int argc, char *argv[])
          #endif
          continue;
       }
-      if(_T("--loadfourierdsn6")==argv[i])
+      if(STRCMP(_T("--loadfourierdsn6"),argv[i])==0)
       {
          ++i;
          loadFourierDSN6=true;
@@ -454,23 +461,23 @@ int main (int argc, char *argv[])
          #endif
          continue;
       }
-      if(_T("--only3d")==argv[i])
+      if(STRCMP(_T("--only3d"),argv[i])==0)
       {
          only3D=true;
          continue;
       }
-      if(_T("--speedtest")==argv[i])
+      if(STRCMP(_T("--speedtest"),argv[i])==0)
       {
          standardSpeedTest();
          TAU_REPORT_STATISTICS();
          exit(0);
       }
-      if(_T("--exportfullprof")==argv[i])
+      if(STRCMP(_T("--exportfullprof"),argv[i])==0)
       {
          exportfullprof=true;
          continue;
       }
-      if(_T("--index")==argv[i])
+      if(STRCMP(_T("--index"),argv[i])==0)
       {
          ++i;
          #ifdef __WX__CRYST__
@@ -525,7 +532,7 @@ int main (int argc, char *argv[])
          exit(0);
       }
       #ifdef __DEBUG__
-      if(_T("--debuglevel")==argv[i])
+      if(STRCMP(_T("--debuglevel"),argv[i])==0)
       {
          long level;
          ++i;
