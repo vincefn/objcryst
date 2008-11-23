@@ -23,6 +23,9 @@
 #include <string>
 #include <vector>
 using namespace std;
+
+#include "ObjCryst/General.h"
+
 namespace ObjCryst
 {
 class XMLCrystTag;
