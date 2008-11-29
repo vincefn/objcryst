@@ -704,8 +704,13 @@ void PowderPatternDiffraction::GenHKLFullSpace()
       stol=mpParentPowderPattern->X2STOL(mpParentPowderPattern->GetPowderPatternXMax());
    if(stol>1) stol=1; // Do not go beyond 0.5 A resolution (mostly for TOF data)
    this->ScatteringData::GenHKLFullSpace2(stol,true);
-   //if(mExtractionMode) mFhklObsSq.resizeAndPreserve(this->GetNbRefl());
-   //else mFhklObsSq.resize(0);
+   if((mExtractionMode) && (mFhklObsSq.numElements()!=this->GetNbRefl()))
+   {// Reflections changed, so ScatteringData::PrepareHKLarrays() probably reseted mFhklObsSq
+      VFN_DEBUG_ENTRY("PowderPatternDiffraction::GenHKLFullSpace(): need to reset observed intensities",7)
+      mFhklObsSq.resize(this->GetNbRefl());
+      mFhklObsSq=100;
+   }
+
    VFN_DEBUG_EXIT("PowderPatternDiffraction::GenHKLFullSpace():"<<this->GetNbRefl(),5)
 }
 void PowderPatternDiffraction::BeginOptimization(const bool allowApproximations,
