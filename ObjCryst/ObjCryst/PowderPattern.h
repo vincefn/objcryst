@@ -740,6 +740,14 @@ class PowderPattern : public RefinableObj
          *  \f$
          */
          REAL GetChi2()const;
+         /** \brief  Return integrated Chi^2 
+         *
+         */
+         REAL GetIntegratedChi2()const;
+         /** Return the conventionnal or integrated Chi^2, depending on the option.
+         *
+         */
+         REAL GetChi2_Option()const;
          /// Fit the scale(s) factor of each component to minimize R
          void FitScaleFactorForR()const;
          void FitScaleFactorForIntegratedR()const;
@@ -993,16 +1001,16 @@ class PowderPattern : public RefinableObj
          mutable CrystVector_REAL mIntegratedVarianceObs;
          mutable RefinableObjClock mClockIntegratedFactorsPrep;
       // Statistical indicators
-         mutable REAL mChi2;
+         mutable REAL mChi2,mIntegratedChi2;
          /// This is the logarithm of the part of log(Likelihood) which corresponds
          /// to the normalization terms of gaussian distribution for each obs/calc
          /// point. In practice, this is the sum of 1/2*log(2pi*sig(i)^2), although
          /// we discard the 2pi terms.
-         mutable REAL mChi2LikeNorm;
+         mutable REAL mChi2LikeNorm,mIntegratedChi2LikeNorm;
          mutable REAL mR;
          mutable REAL mRw;
          ///Clock the last time Chi^2 was computed
-         mutable RefinableObjClock mClockChi2;
+         mutable RefinableObjClock mClockChi2,mClockIntegratedChi2;
       /** Maximum sin(theta)/lambda for all calculations (10 by default).
       *
       * This keeps all data in memory, but only the part which is below

@@ -3351,23 +3351,12 @@ REAL PowderPattern::GetChi2()const
    this->CalcNbPointUsed();
    if(mClockChi2>mClockMaster) return mChi2;
    
-   if(0 == mOptProfileIntegration.GetChoice())
-   {
-      this->CalcPowderPatternIntegrated();
-      if(  (mClockChi2>mClockPowderPatternPar)
-         &&(mClockChi2>mClockScaleFactor)
-         &&(mClockChi2>mClockPowderPatternIntegratedCalc)) return mChi2;
-   }
-   else
-   {
-      this->CalcPowderPattern();
-      if(  (mClockChi2>mClockPowderPatternPar)
-         &&(mClockChi2>mClockScaleFactor)
-         &&(mClockChi2>mClockPowderPatternCalc)) return mChi2;
-   }
+   this->CalcPowderPattern();
+   if(  (mClockChi2>mClockPowderPatternPar)
+      &&(mClockChi2>mClockScaleFactor)
+      &&(mClockChi2>mClockPowderPatternCalc)) return mChi2;
    // We want the best scale factor
-   if(0 == mOptProfileIntegration.GetChoice()) this->FitScaleFactorForIntegratedRw();
-   else this->FitScaleFactorForRw();
+   this->FitScaleFactorForRw();
 
    TAU_PROFILE("PowderPattern::GetChi2()","void ()",TAU_DEFAULT);
    
@@ -3377,78 +3366,50 @@ REAL PowderPattern::GetChi2()const
 
    mChi2=0.;
    mChi2LikeNorm=0.;
-   if(0 == mOptProfileIntegration.GetChoice())
-   {// Integrated profiles
-      VFN_DEBUG_MESSAGE("PowderPattern::GetChi2():Integrated profiles",3);
-      const REAL * RESTRICT p1, * RESTRICT p2, * RESTRICT p3;
-      p1=mPowderPatternIntegratedCalc.data();
-      p2=mIntegratedObs.data();
-      if(mIntegratedWeight.numElements()==0) p3=mIntegratedWeightObs.data();
-      else p3=mIntegratedWeight.data();
-      double weightProd=1.;
-      VFN_DEBUG_MESSAGE("PowderPattern::GetIntegratedRw()",4);
-      for(unsigned long i=0;i<mNbIntegrationUsed;)
+   VFN_DEBUG_MESSAGE("PowderPattern::GetChi2()Integrated profiles",3);
+   const REAL * RESTRICT p1, * RESTRICT p2, * RESTRICT p3;
+   p1=mPowderPatternCalc.data();
+   p2=mPowderPatternObs.data();
+   p3=mPowderPatternWeight.data();
+   const long nbExclude=mExcludedRegionMinX.numElements();
+   if(0==nbExclude)
+   {
+      for(unsigned long i=0;i<maxPoints;i++)
       {
-         // group weights to avoid computing too many log()
-         // group only a limited number to avoid underflow...
-         for(unsigned long j=0;j<32;++j)
-         {
-            mChi2 += *p3 * ((*p1)-(*p2))*((*p1)-(*p2));
-            if(*p3>0) weightProd *= *p3;
-            p1++;p2++;p3++;
-            if(++i == mNbIntegrationUsed) break;
-         }
-         mChi2LikeNorm -= log(weightProd);
-         weightProd=1.;
+         mChi2 += *p3 * ((*p1)-(*p2))*((*p1)-(*p2));
+         if(*p3<=0) p3++;
+         else mChi2LikeNorm -= log(*p3++);
+         p1++;p2++;
       }
    }
    else
-   {// "Full" profiles
-      VFN_DEBUG_MESSAGE("PowderPattern::GetChi2()Integrated profiles",3);
-      const REAL * RESTRICT p1, * RESTRICT p2, * RESTRICT p3;
-      p1=mPowderPatternCalc.data();
-      p2=mPowderPatternObs.data();
-      p3=mPowderPatternWeight.data();
-      const long nbExclude=mExcludedRegionMinX.numElements();
-      if(0==nbExclude)
+   {
+      unsigned long min,max;
+      unsigned long i=0;
+      for(int j=0;j<nbExclude;j++)
       {
-         for(unsigned long i=0;i<maxPoints;i++)
+         min=(unsigned long)floor(this->X2Pixel(mExcludedRegionMinX(j)));
+         max=(unsigned long)ceil (this->X2Pixel(mExcludedRegionMaxX(j)));
+         if(min>maxPoints) break;
+         if(max>maxPoints)max=maxPoints;
+         for(;i<min;i++)//! min is the *beginning* of the excluded region !
          {
             mChi2 += *p3 * ((*p1)-(*p2))*((*p1)-(*p2));
             if(*p3<=0) p3++;
             else mChi2LikeNorm -= log(*p3++);
             p1++;p2++;
          }
+         p1 += max-i;
+         p2 += max-i;
+         p3 += max-i;
+         i  += max-i;
       }
-      else
+      for(;i<maxPoints;i++)
       {
-         unsigned long min,max;
-         unsigned long i=0;
-         for(int j=0;j<nbExclude;j++)
-         {
-            min=(unsigned long)floor(this->X2Pixel(mExcludedRegionMinX(j)));
-            max=(unsigned long)ceil (this->X2Pixel(mExcludedRegionMaxX(j)));
-            if(min>maxPoints) break;
-            if(max>maxPoints)max=maxPoints;
-            for(;i<min;i++)//! min is the *beginning* of the excluded region !
-            {
-               mChi2 += *p3 * ((*p1)-(*p2))*((*p1)-(*p2));
-               if(*p3<=0) p3++;
-               else mChi2LikeNorm -= log(*p3++);
-               p1++;p2++;
-            }
-            p1 += max-i;
-            p2 += max-i;
-            p3 += max-i;
-            i  += max-i;
-         }
-         for(;i<maxPoints;i++)
-         {
-            mChi2 += *p3 * ((*p1)-(*p2))*((*p1)-(*p2));
-            if(*p3<=0) p3++;
-            else mChi2LikeNorm -= log(*p3++);
-            p1++;p2++;
-         }
+         mChi2 += *p3 * ((*p1)-(*p2))*((*p1)-(*p2));
+         if(*p3<=0) p3++;
+         else mChi2LikeNorm -= log(*p3++);
+         p1++;p2++;
       }
    }
    mChi2LikeNorm/=2;
@@ -3456,6 +3417,68 @@ REAL PowderPattern::GetChi2()const
    mClockChi2.Click();
    VFN_DEBUG_EXIT("PowderPattern::GetChi2()="<<mChi2,3);
    return mChi2;
+}
+
+REAL PowderPattern::GetIntegratedChi2()const
+{
+   if(  (0==this->GetPowderPatternObs().numElements())
+      ||(0==GetNbPowderPatternComponent()))
+   {
+      mIntegratedChi2=0.;
+      return mIntegratedChi2;
+   }
+   this->CalcNbPointUsed();
+   if(mClockIntegratedChi2>mClockMaster) return mIntegratedChi2;
+   
+   this->CalcPowderPatternIntegrated();
+   if(  (mClockChi2>mClockPowderPatternPar)
+      &&(mClockChi2>mClockScaleFactor)
+      &&(mClockChi2>mClockPowderPatternIntegratedCalc)) return mIntegratedChi2;
+   
+   // We want the best scale factor
+   this->FitScaleFactorForIntegratedRw();
+
+   TAU_PROFILE("PowderPattern::GetIntegratedChi2()","void ()",TAU_DEFAULT);
+   
+   VFN_DEBUG_ENTRY("PowderPattern::GetIntegratedChi2()",3);
+   
+   const unsigned long maxPoints=mNbPointUsed;
+
+   mIntegratedChi2=0.;
+   mIntegratedChi2LikeNorm=0.;
+   VFN_DEBUG_MESSAGE("PowderPattern::GetIntegratedChi2()",3);
+   const REAL * RESTRICT p1, * RESTRICT p2, * RESTRICT p3;
+   p1=mPowderPatternIntegratedCalc.data();
+   p2=mIntegratedObs.data();
+   if(mIntegratedWeight.numElements()==0) p3=mIntegratedWeightObs.data();
+   else p3=mIntegratedWeight.data();
+   double weightProd=1.;
+   VFN_DEBUG_MESSAGE("PowderPattern::GetIntegratedIntegratedRw()",4);
+   for(unsigned long i=0;i<mNbIntegrationUsed;)
+   {
+      // group weights to avoid computing too many log()
+      // group only a limited number to avoid underflow...
+      for(unsigned long j=0;j<32;++j)
+      {
+         mIntegratedChi2 += *p3 * ((*p1)-(*p2))*((*p1)-(*p2));
+         if(*p3>0) weightProd *= *p3;
+         p1++;p2++;p3++;
+         if(++i == mNbIntegrationUsed) break;
+      }
+      mIntegratedChi2LikeNorm -= log(weightProd);
+      weightProd=1.;
+   }
+   mIntegratedChi2LikeNorm/=2;
+   VFN_DEBUG_MESSAGE("Chi^2="<<mIntegratedChi2<<", log(norm)="<<mIntegratedChi2LikeNorm,3)
+   mClockIntegratedChi2.Click();
+   VFN_DEBUG_EXIT("PowderPattern::GetChi2()="<<mIntegratedChi2,3);
+   return mIntegratedChi2;
+}
+
+REAL PowderPattern::GetChi2_Option()const
+{
+   if(0 == mOptProfileIntegration.GetChoice()) return this->GetIntegratedChi2();
+   else return this->GetChi2();
 }
 
 void PowderPattern::FitScaleFactorForR()const
