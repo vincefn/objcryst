@@ -346,7 +346,6 @@ class Crystal:public UnitCell
       REAL GetBondValenceCost() const;
       std::map<pair<const ScatteringPower*,const ScatteringPower*>, REAL>& GetBondValenceRoList();
       const std::map<pair<const ScatteringPower*,const ScatteringPower*>, REAL>& GetBondValenceRoList()const;
-   private:
       /** \brief Init all Crystal parameters
       *  \param a,b,c : unit cell dimension, in angstroems
       *  \param alpha,beta,gamma : unit cell angles
@@ -356,6 +355,7 @@ class Crystal:public UnitCell
       void Init(const REAL a, const REAL b, const REAL c, const REAL alpha,
                 const REAL beta, const REAL gamma,const string &SpaceGroupId,
                 const string& name);
+   private:
       /** Init options.
       *
       * Need only be done once per Crystal.
