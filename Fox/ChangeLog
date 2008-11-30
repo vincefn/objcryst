@@ -1,8 +1,11 @@
-#### 1.7.X - July 2008 (Revision #1042) (in development)
+#### 1.8.0 - December 2008 (Revision #1068) (in development)
 NEW FEATURES
    * Add powder pattern -> Fullprof export (creates .pcr and .dat)
    * Add the ability to convert a list of atoms to a Molecule.
    * Enable compilation with the unicode version of wxWidgets
+   * Add a "spacegroup explorer" feature to the profile fitting
+     widget, trying all spacegroups compatible with the unit cell,
+     and calculating the corresponding Rwp and GoP.
 
 IMPROVEMENTS
    * More optimized integration intervals for powder pattern
