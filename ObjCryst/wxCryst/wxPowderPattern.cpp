@@ -20,6 +20,8 @@
 #include <fstream>
 #include <algorithm>
 
+#include "cctbx/sgtbx/space_group.h"
+
 // wx headers, with or without precompilation
 #include "wx/wxprec.h"
 #ifdef __BORLANDC__
@@ -41,11 +43,6 @@
 #include "ObjCryst/PowderPatternBackgroundBayesianMinimiser.h"
 #include "Quirks/VFNStreamFormat.h"
 #include "Quirks/Chronometer.h"
-
-#include "cctbx/sgtbx/symbols.h"
-#include "cctbx/sgtbx/space_group.h"
-#include "cctbx/uctbx.h"
-#include "scitbx/array_family/small.h"
 
 //Fixes for Cygwin; where do those stupid macros come from ? Somewhere in wxMSW headers
 #ifdef max
