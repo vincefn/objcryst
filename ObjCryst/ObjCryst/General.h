@@ -45,7 +45,7 @@
 #endif
 
 #ifdef PROFILING_ON
-#include "tau/include/Profile/Profiler.h"
+#include "Profile/Profiler.h"
 #else
 
 #define TAU_PROFILE(name, type, group) 

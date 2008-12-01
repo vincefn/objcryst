@@ -37,7 +37,7 @@ FC     := f77
 FFLAGS  = 
 # linker
 LINKER    := g++
-LDFLAGS   = -L/usr/lib -L/usr/local/lib -L$(DIR_CRYSTVECTOR) -L$(DIR_LIBCRYST) -L$(DIR_REFOBJ) -L$(DIR_STATIC_LIBS)/lib -L$(DIR_VFNQUIRKS) -L$(DIR_WXWCRYST) -L$(DIR_TAU)/i386_linux/lib
+LDFLAGS   = -L/usr/lib -L/usr/local/lib -L$(DIR_CRYSTVECTOR) -L$(DIR_LIBCRYST) -L$(DIR_REFOBJ) -L$(DIR_STATIC_LIBS)/lib -L$(DIR_VFNQUIRKS) -L$(DIR_WXWCRYST) -L$(DIR_TAU)/x86_64/lib
 
 #to automatically generate dependencies
 MAKEDEPEND = gcc -MM ${CPPFLAGS} ${CXXFLAGS} ${C_BLITZFLAG} $< > $*.dep
@@ -56,6 +56,7 @@ endif
 
 #Profiling
 ifeq ($(profile),1) #activate profiling using TAU package
+   DIR_TAU=$(BUILD_DIR)/../../utils/tau
    PROFILEFLAGS := -DPROFILING_ON -DTAU_STDCXXLIB -I$(DIR_TAU)/include
    PROFILELIB := -ltau
 else
