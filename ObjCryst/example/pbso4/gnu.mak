@@ -1,4 +1,8 @@
 BUILD_DIR=$(CURDIR)/../../..
+
+#We do not want to build wx libraries
+wxcryst= 0
+
 include $(BUILD_DIR)/ObjCryst/rules.mak
 
 OBJ= $@.o
@@ -9,13 +13,13 @@ OBJ= $@.o
 
 -include $(OBJ:.o=.dep)
 
-xray-single: xray-single.o libCrystVector libQuirks libRefinableObj libcctbx libCryst libwxCryst
+xray-single: xray-single.o libCrystVector libQuirks libRefinableObj libcctbx libCryst
 	${LINKER} ${LDFLAGS} -o $@.exe ${filter-out %.a %.so lib%, $^} ${LOADLIBES}
 
-xray: xray.o libCrystVector libQuirks libRefinableObj libcctbx libCryst libwxCryst
+xray: xray.o libCrystVector libQuirks libRefinableObj libcctbx libCryst
 	${LINKER} ${LDFLAGS} -o $@.exe ${filter-out %.a %.so lib%, $^} ${LOADLIBES}
 
-neutron: neutron.o libCrystVector libQuirks libRefinableObj libcctbx libCryst libwxCryst
+neutron: neutron.o libCrystVector libQuirks libRefinableObj libcctbx libCryst
 	${LINKER} ${LDFLAGS} -o $@.exe ${filter-out %.a %.so lib%, $^} ${LOADLIBES}
 
 # target for making everything
