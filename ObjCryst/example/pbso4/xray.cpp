@@ -108,9 +108,9 @@ void testPbSO4()
       diffData->SetName("PbSo4-diffraction");
       //approximate (hand-determined) background
       PowderPatternBackground *backgdData= new PowderPatternBackground;
+      data.AddPowderPatternComponent(*backgdData);
       backgdData->ImportUserBackground("xray-background.dat");
       backgdData->SetName("PbSo4-background");
-      data.AddPowderPatternComponent(*backgdData);
       
    //Profile (approximate parameters,again)
    diffData->SetReflectionProfilePar(PROFILE_PSEUDO_VOIGT,

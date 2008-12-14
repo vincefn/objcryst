@@ -203,9 +203,12 @@ Error opening file for input:"+filename);
    fin.close();
    bckgd2Theta.resizeAndPreserve(nbPoints);
    bckgd.resizeAndPreserve(nbPoints);
-   if((this->GetParentPowderPattern().GetRadiation().GetWavelengthType()==WAVELENGTH_MONOCHROMATIC)
-      ||(this->GetParentPowderPattern().GetRadiation().GetWavelengthType()==WAVELENGTH_ALPHA12))
+   if(mpParentPowderPattern!=0)
+   {   if((this->GetParentPowderPattern().GetRadiation().GetWavelengthType()==WAVELENGTH_MONOCHROMATIC)
+         ||(this->GetParentPowderPattern().GetRadiation().GetWavelengthType()==WAVELENGTH_ALPHA12))
       bckgd2Theta*= DEG2RAD;
+   } else bckgd2Theta*= DEG2RAD;
+   
    this->SetInterpPoints(bckgd2Theta,bckgd);
    this->InitRefParList();
    mClockBackgroundPoint.Click();

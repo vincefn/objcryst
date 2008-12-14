@@ -109,9 +109,9 @@ void testPbSO4()
       diffData->SetName("PbSo4-diffraction");
       //approximate (hand-determined) background
       PowderPatternBackground *backgdData= new PowderPatternBackground;
+      data.AddPowderPatternComponent(*backgdData);
       backgdData->ImportUserBackground("neutron-background.dat");
       backgdData->SetName("PbSo4-background");
-      data.AddPowderPatternComponent(*backgdData);
       
    //Set sigma and weight to be used (useless here)
    data.SetSigmaToSqrtIobs();
