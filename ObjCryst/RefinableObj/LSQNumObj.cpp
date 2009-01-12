@@ -26,7 +26,9 @@
 #include "newmat/newmatap.h" //for SVD decomposition
 #include "newmat/newmatio.h"
 
+#ifdef use_namespace
 using namespace NEWMAT;
+#endif
 using namespace std;
 
 #include <iomanip>
