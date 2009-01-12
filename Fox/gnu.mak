@@ -3,6 +3,13 @@ BUILD_DIR := $(CURDIR)/..
 FOXVERSION:=1.7.6
 FOXRELEASE:=SVN$(shell svnversion)_$(shell date "+%Y%m%d")
 
+ifeq ($(shared),1)
+shared-newmat=1
+shared-wxgtk=1
+shared-fftw=1
+shared-glut=1
+endif
+
 all: Fox
 
 default: all
