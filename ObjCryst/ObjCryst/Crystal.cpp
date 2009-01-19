@@ -945,9 +945,14 @@ void Crystal::CIFOutput(ostream &os)const
          for(unsigned long l=0;l<k;++l) if(abs(minDistTable(l,k))<0.5) redundant=true;//-1 means dist > 10A
          if(!redundant)
          {
+            // We can't have spaces in atom labels
+            string s=this->GetScatt(i).GetComponentName(j);
+            size_t posc=s.find(' ');
+            while(posc!=string::npos){s[posc]='~';posc=s.find(' ');}
+            
             os   << "    "
                  << FormatString(list(j).mpScattPow->GetName(),8) << " "
-                 << FormatString(this->GetScatt(i).GetComponentName(j),10) << " "
+                 << FormatString(s,10) << " "
                  << FormatFloat(list(j).mX,7,4) << " "
                  << FormatFloat(list(j).mY,7,4) << " "
                  << FormatFloat(list(j).mZ,7,4) << " "
