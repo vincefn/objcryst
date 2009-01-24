@@ -3909,9 +3909,24 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
          mpLog->AppendText(wxString::Format(_T(" OOPS : refinement diverged ! Aborting.")));
       }
    }
-
+   mLSQ.WXGet()->CrystUpdate(true,true);
    pDiff->GetCrystal().UpdateDisplay();
 }
+
+struct SPGScore
+{
+   SPGScore(const string &s, const REAL r, const REAL g):
+   hm(s),rw(r),gof(g)
+   {}
+   string hm;
+   REAL rw,gof;
+};
+
+bool compareSPGScore(const SPGScore &s1, const SPGScore &s2)
+{
+   return s1.gof < s2.gof;
+}
+
 
 void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
 {
@@ -3970,6 +3985,8 @@ void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
    
    wxProgressDialog dlgProgress(_T("Trying compatible spacegroups"),_T("Starting........\n......\n......"),
                                  nbspg*nbcycle,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME|wxPD_CAN_ABORT);
+   
+   list<SPGScore> vSPG;
    // Try & optimize every spacegroup
    it=cctbx::sgtbx::space_group_symbol_iterator();
    for(int i=0;;)
@@ -4029,14 +4046,26 @@ void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
             //mpLog->AppendText(wxString::Format(_T("%5.2f%%/"),pDiff->GetParentPowderPattern().GetRw()*100));
             pDiff->GetParentPowderPattern().FitScaleFactorForRw();
             pDiff->GetParentPowderPattern().UpdateDisplay();
+            const REAL rw=pDiff->GetParentPowderPattern().GetRw()*100;
+            const REAL gof=pDiff->GetParentPowderPattern().GetChi2()
+                           /(pDiff->GetParentPowderPattern().GetNbPointUsed()-pDiff->GetNbReflBelowMaxSinThetaOvLambda());
             if(dlgProgress.Update(i*nbcycle+j,wxString::Format(_T("%s  (cycle #%u)\n   Rwp=%5.2f%%\n   GoF=%6.3f"),
-                                                               hm.c_str(),j,pDiff->GetParentPowderPattern().GetRw()*100,
-                                                               pDiff->GetParentPowderPattern().GetChi2()/pDiff->GetParentPowderPattern().GetNbPointUsed()
-                                                              ))==false) return;
+                                                               hm.c_str(),j,rw,gof))==false) return;
          }
-         mpLog->AppendText(wxString::Format(_T(" Rwp= %5.2f%%  GoF=%6.3f\n"),pDiff->GetParentPowderPattern().GetRw()*100,
-                                            pDiff->GetParentPowderPattern().GetChi2()/pDiff->GetParentPowderPattern().GetNbPointUsed()));
+         const REAL rw=pDiff->GetParentPowderPattern().GetRw()*100;
+         const REAL gof=pDiff->GetParentPowderPattern().GetChi2()
+                        /(pDiff->GetParentPowderPattern().GetNbPointUsed()-pDiff->GetNbReflBelowMaxSinThetaOvLambda());
+         vSPG.push_back(SPGScore(hm.c_str(),rw,gof));
+         mpLog->AppendText(wxString::Format(_T(" Rwp= %5.2f%%  GoF=%6.3f\n"),rw,gof));
       }
+   }
+   // sort results by GoF
+   vSPG.sort(compareSPGScore);
+   mpLog->AppendText(wxString::Format(_T("\n\n BEST Solutions, from min_GoF to 2*min_Gof:\n")));
+   for(list<SPGScore>::const_iterator pos=vSPG.begin();pos!=vSPG.end();++pos)
+   {
+      if(pos->gof>(2*vSPG.begin()->gof)) break;
+      mpLog->AppendText(wxString::Format(_T(" %-14s: Rwp= %5.2f%%  GoF=%6.3f\n"),pos->hm.c_str(),pos->rw,pos->gof));
    }
    // Back to original spacegroup
    pCrystal->Init(a,b,c,d,e,f,spgname,name);
