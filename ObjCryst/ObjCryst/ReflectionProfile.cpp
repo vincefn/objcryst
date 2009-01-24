@@ -254,6 +254,7 @@ void ReflectionProfilePseudoVoigt::InitParameters()
       tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }
+   #if 0
    {
       RefinablePar tmp("AsymA0",&mAsymBerarBaldinozziA0,-0.05,0.05,gpRefParTypeScattDataProfileAsym,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
@@ -282,6 +283,7 @@ void ReflectionProfilePseudoVoigt::InitParameters()
       tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }
+   #endif
    {
       RefinablePar tmp("Asym0",&mAsym0,0.01,10.0,gpRefParTypeScattDataProfileAsym,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false);
