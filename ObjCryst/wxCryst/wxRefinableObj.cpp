@@ -223,6 +223,7 @@ void WXFieldRefPar::CrystUpdate(const bool uui,const bool lock)
    mValue=mpRefPar->GetHumanValue();
    mNeedUpdateUI=true;
    if(lock) mMutex.Unlock();
+   if(mNeedUpdateUI && wxThread::IsMain()) this->UpdateUI(lock);
 }
 
 void WXFieldRefPar::UpdateUI(const bool lock)
