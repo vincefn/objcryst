@@ -1,5 +1,5 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
-    (c) 2000-2008 Vincent Favre-Nicolin vincefn@users.sourceforge.net
+    (c) 2000-2009 Vincent Favre-Nicolin vincefn@users.sourceforge.net
         2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
@@ -80,7 +80,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 1069
+#define __FOXREVISION__ 1080
 
 static std::string foxVersion;
 
@@ -300,7 +300,7 @@ int main (int argc, char *argv[])
    
    {// Fox version
       char verBuf[200];
-      sprintf(verBuf,"1.7.99-#%d",__FOXREVISION__);
+      sprintf(verBuf,"1.8.0-#%d",__FOXREVISION__);
       foxVersion=verBuf;
    }
    bool useGUI(true);
@@ -995,7 +995,7 @@ void WXCrystMainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
    string msg(string("F.O.X. - Free Objects for Xtallography\n")
               +"Version "+ foxVersion +" \n\n"
-              +"(c) 2000-2008 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n"
+              +"(c) 2000-2009 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n"
               +"    2000-2001 Radovan CERNY, University of Geneva\n\n"
               +"http://objcryst.sourceforge.net\n\n"
               +"FOX comes with ABSOLUTELY NO WARRANTY. It is free software, and you are\n"
@@ -1556,7 +1556,7 @@ void WXCrystMainFrame::OnCheckUpdate(wxCommandEvent& event)
             if(nbcritical>0)
             {
                cout<<wxString::Format(_T("\n%d CRITICAL updates available:\n"),nbcritical)<<endl;
-               wUpdates->AppendText(wxString::Format(_T("\n%d CRITICAL updates available:\n"),nbcritical));
+               wUpdates->AppendText(wxString::Format(_T("WARNING: CRITICAL updates are available !\n\n Changes:\n")));
                for(map<unsigned int,pair<int,wxString> >::const_iterator pos=mvUpdates.begin();pos!=mvUpdates.end();++pos)
                {
                   if(pos->second.first==12)
@@ -1566,36 +1566,41 @@ void WXCrystMainFrame::OnCheckUpdate(wxCommandEvent& event)
                   }
                }
             }
+            else
             if(nbrelease>0)
             {
                cout<<wxString::Format(_T("\n%d new RELEASE available :\n"),nbrelease)<<endl;
-               wUpdates->AppendText(wxString::Format(_T("\n%d new RELEASE available :\n"),nbrelease));
+               wUpdates->AppendText(wxString::Format(_T("A new Fox RELEASE available !\n\n Changes:\n")));
                for(map<unsigned int,pair<int,wxString> >::const_iterator pos=mvUpdates.begin();pos!=mvUpdates.end();++pos)
                {
                   if(pos->second.first==2)
                      wUpdates->AppendText(wxString::Format(_T("  #%d: %s\n"),pos->first,pos->second.second.c_str()));
                }
             }
+            else
             if(nbmajorfeature>0)
             {
                cout<<wxString::Format(_T("\n%d major features updates available:\n"),nbmajorfeature)<<endl;
-               wUpdates->AppendText(wxString::Format(_T("\n%d major features updates available:\n"),nbmajorfeature));
+               wUpdates->AppendText(wxString::Format(_T("A new Fox version with new major features is available !\n\n Changes:\n")));
                for(map<unsigned int,pair<int,wxString> >::const_iterator pos=mvUpdates.begin();pos!=mvUpdates.end();++pos)
                {
                   if(pos->second.first==1)
                      wUpdates->AppendText(wxString::Format(_T("  #%d: %s\n"),pos->first,pos->second.second.c_str()));
                }
             }
+            else
             if(nbminorfeature>0)
             {
                cout<<wxString::Format(_T("\n%d minor features updates available:\n"),nbminorfeature)<<endl;
-               wUpdates->AppendText(wxString::Format(_T("\n%d minor features updates available:\n"),nbminorfeature));
+               wUpdates->AppendText(wxString::Format(_T("A new Fox version with new minor features is available.\n\n Changes:\n")));
                for(map<unsigned int,pair<int,wxString> >::const_iterator pos=mvUpdates.begin();pos!=mvUpdates.end();++pos)
                {
                   if(pos->second.first==0)
                      wUpdates->AppendText(wxString::Format(_T("  #%d: %s\n"),pos->first,pos->second.second.c_str()));
                }
             }
+            wUpdates->AppendText(wxString::Format(_T("\n\n => go to http://objcryst.sf.net/Fox/ to get the new version")));
+            wUpdates->AppendText(wxString::Format(_T("\n\n See the full changelog at: http://objcryst.sf.net/Fox/Changelog")));
          }
          else
          {

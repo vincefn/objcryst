@@ -1,20 +1,26 @@
-#### 1.8.0 - December 2008 (Revision #1068) (in development)
+#### 1.8.0 - January 2009 (Revision #1080)
 NEW FEATURES
-   * Add powder pattern -> Fullprof export (creates .pcr and .dat)
-   * Add the ability to convert a list of atoms to a Molecule.
-   * Enable compilation with the unicode version of wxWidgets
    * Add a "spacegroup explorer" feature to the profile fitting
      widget, trying all spacegroups compatible with the unit cell,
      and calculating the corresponding Rwp and GoP.
+   * Manual selection of profile parameters is now possible during
+     profile fitting.
+   * Add powder pattern -> Fullprof export (creates .pcr and .dat)
+   * Add the ability to convert a list of atoms to a Molecule.
+   * Mac version is now provided as a universal binary
 
 IMPROVEMENTS
    * More optimized integration intervals for powder pattern
    * Allow choosing the number of peaks used for manual indexing
    * Avoid identical triclinic unit cells
+   * Fox can now more easily be compiled with shared libraries for
+     wxWidgets, fftw, (free)glut and newmat
+   * Enable compilation with the unicode version of wxWidgets
 
 BUG FIXES
    * Correctly handle change of Crystal for powder patterns,
      regenerate HKL list.
+   * Correctlky handle change of spacegroups during profile fitting
 
 #### 1.7.7 - June 2008 (Revision #1013)
 NEW FEATURES
