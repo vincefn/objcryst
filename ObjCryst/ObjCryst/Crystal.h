@@ -131,8 +131,8 @@ class Crystal:public UnitCell
       *
       */
       void AddScatterer(Scatterer *scatt);
-      /// Remove a Scatterer. This also deletes the scatterer.
-      void RemoveScatterer(Scatterer *scatt);
+      /// Remove a Scatterer. This also deletes the scatterer unless del=false.
+      void RemoveScatterer(Scatterer *scatt, const bool del=true);
       
       /// Number of scatterers in the crystal
       long GetNbScatterer()const;
@@ -169,9 +169,9 @@ class Crystal:public UnitCell
       /// Add a ScatteringPower for this Crystal. It must be allocated in the heap,
       /// and not used by any other Crystal.
       void AddScatteringPower(ScatteringPower *scattPow);
-      /// Remove a ScatteringPower for this Crystal. (the Scattering power is deleted).
+      /// Remove a ScatteringPower for this Crystal. (the Scattering power is deleted unless del=false).
       /// This function should check that it is not used any more before removing it.
-      void RemoveScatteringPower(ScatteringPower *scattPow);
+      void RemoveScatteringPower(ScatteringPower *scattPow, const bool del=true);
       /// Find a ScatteringPower from its name. Names must be unique in a given Crystal.
       ScatteringPower& GetScatteringPower(const string &name);
       /// Find a ScatteringPower from its name. Names must be unique in a given Crystal.

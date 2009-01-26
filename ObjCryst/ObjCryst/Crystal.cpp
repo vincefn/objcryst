@@ -165,13 +165,13 @@ void Crystal::AddScatterer(Scatterer *scatt)
    VFN_DEBUG_EXIT("Crystal::AddScatterer(&scatt):Finished",5)
 }
 
-void Crystal::RemoveScatterer(Scatterer *scatt)
+void Crystal::RemoveScatterer(Scatterer *scatt, const bool del)
 {
    VFN_DEBUG_MESSAGE("Crystal::RemoveScatterer(&scatt)",5)
    mScattererRegistry.DeRegister(*scatt);
    scatt->DeRegisterClient(*this);
    this->RemoveSubRefObj(*scatt);
-   delete scatt;
+   if(del) delete scatt;
    mClockScattererList.Click();
    VFN_DEBUG_MESSAGE("Crystal::RemoveScatterer(&scatt):Finished",5)
 }
@@ -217,7 +217,7 @@ void Crystal::AddScatteringPower(ScatteringPower *scattPow)
    mMasterClockScatteringPower.AddChild(scattPow->GetClockMaster());
 }
 
-void Crystal::RemoveScatteringPower(ScatteringPower *scattPow)
+void Crystal::RemoveScatteringPower(ScatteringPower *scattPow, const bool del)
 {
    VFN_DEBUG_ENTRY("Crystal::RemoveScatteringPower()",2)
    mScatteringPowerRegistry.DeRegister(*scattPow);
@@ -225,7 +225,7 @@ void Crystal::RemoveScatteringPower(ScatteringPower *scattPow)
    mClockMaster.RemoveChild(scattPow->GetClockMaster());
    mClockMaster.RemoveChild(scattPow->GetMaximumLikelihoodParClock());
    mMasterClockScatteringPower.RemoveChild(scattPow->GetClockMaster());
-   delete scattPow;
+   if(del) delete scattPow;
    
    for(Crystal::VBumpMergePar::iterator pos=mvBumpMergePar.begin();pos!=mvBumpMergePar.end();)
    {
