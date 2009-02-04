@@ -4102,15 +4102,25 @@ void BuildRingRecursive(MolAtom * currentAtom,
                         MolAtom * previousAtom,
                         const map<MolAtom *, set<MolAtom *> > &connect,
                         list<MolAtom *> &atomlist,
-                        set<list<MolAtom *> > &ringlist)
+                        map<set<MolAtom *>,list<MolAtom *> > &ringlist)
 {
    list<MolAtom *>::const_iterator f=find(atomlist.begin(),atomlist.end(),currentAtom);
    if(f!=atomlist.end())
    {// This atom was already in the list ! We have found a ring !
-      list<MolAtom *> ring;
+      #ifdef __DEBUG__
+      cout<<currentAtom->GetName()<<" was already in the list : ring found !"<<endl;
+      for(list<MolAtom *>::const_iterator atom=atomlist.begin();atom!=atomlist.end();++atom)
+         cout<<(*atom)->GetName()<<" ";
+      cout<<endl;
+      #endif
+      set<MolAtom *> ring1;
+      list<MolAtom *> ring2;
       for(list<MolAtom *>::const_iterator pos=f;pos!=atomlist.end();++pos)
-         ring.push_back(*pos);
-      ringlist.insert(ring);
+      {
+         ring1.insert(*pos);
+         ring2.push_back(*pos);
+      }
+      ringlist.insert(make_pair(ring1,ring2));
    }
    else
    {
@@ -4122,7 +4132,7 @@ void BuildRingRecursive(MolAtom * currentAtom,
          if(*pos==previousAtom) continue;
          BuildRingRecursive(*pos,currentAtom,connect,atomlist,ringlist);
       }
-      atomlist.pop_back();
+      atomlist.pop_back(); //??
    }
 }
 
@@ -4134,51 +4144,34 @@ void Molecule::BuildRingList()
    for(vector<MolAtom*>::const_iterator pos=mvpAtom.begin();pos!=mvpAtom.end();++pos)
       (*pos)->SetIsInRing(false);
    list<MolAtom *> atomlist;
-   set<list<MolAtom *> > ringlist;
+   // Use a map with a set for key to eliminate duplicate rings
+   map<set<MolAtom *>,list<MolAtom *> > ringlist;
    for(unsigned long i=0;i<mvpAtom.size();i++)
    {
       atomlist.clear();
       BuildRingRecursive(mvpAtom[i],mvpAtom[i],mConnectivityTable,atomlist,ringlist);
    }
-   // Remove duplicate rings [ necessary because we are using a std::list rather than a std::set,
-   //since a set would naturally sort the atoms and avoid duplicates. But we do NOT want to sort
-   //the atoms to keep their order in the ring.]
-   for(set<list<MolAtom *> >::const_iterator pos0=ringlist.begin();pos0!=ringlist.end();pos0++)
+   for(map<set<MolAtom *>,list<MolAtom *> >::const_iterator pos0=ringlist.begin();pos0!=ringlist.end();pos0++)
    {
-      list<MolAtom *> r0=*pos0;
-      r0.sort();
-      bool keep=true;
-      set<list<MolAtom *> >::const_iterator pos1=pos0;
-      pos1++;
-      for(;pos1!=ringlist.end();pos1++)
+      mvRing.resize(mvRing.size()+1);
+      std::list<MolAtom*> *pList=&(mvRing.back().GetAtomList());
+      #if 1//def __DEBUG__
+      cout<<"Found ring:";
+      #endif
+      for(list<MolAtom *>::const_iterator atom=pos0->second.begin();atom!=pos0->second.end();++atom)
       {
-         list<MolAtom *> r1=*pos1;
-         r1.sort();
-         // erasing a member does not dereference the pos0 iterator for a std::list
-         if(r1==r0) keep=false;
-      }
-      if(keep)
-      {
-         mvRing.resize(mvRing.size()+1);
-         std::list<MolAtom*> *pList=&(mvRing.back().GetAtomList());
-         #ifdef __DEBUG__
-         cout<<"Found ring:";
-         #endif
-         for(list<MolAtom *>::const_iterator atom=pos0->begin();atom!=pos0->end();++atom)
-         {
-            pList->push_back(*atom);
-            (*atom)->SetIsInRing(true);
-            #ifdef __DEBUG__
-            cout<<(*atom)->GetName()<<" ";
-            #endif
-         }
-         #ifdef __DEBUG__
-         cout<<endl;
+         pList->push_back(*atom);
+         (*atom)->SetIsInRing(true);
+         #if 1//def __DEBUG__
+         cout<<(*atom)->GetName()<<" ";
          #endif
       }
+      #if 1//def __DEBUG__
+      cout<<endl;
+      #endif
    }
    
-   //cout<<"Rings found :"<<ringlist.size()<<", "<<mvRing.size()<<" unique."<<endl;
+   cout<<"Rings found :"<<ringlist.size()<<", "<<mvRing.size()<<" unique."<<endl;
    mClockRingList.Click();
    VFN_DEBUG_EXIT("Molecule::BuildRingList()",7)
 }
@@ -5030,8 +5023,8 @@ void Molecule::BuildStretchModeBondAngle()
          cout<<(*atom)->GetName()<<",";
       }
       if(pos->mpBondAngle!=0) cout<< " ; restrained to angle="<<pos->mpBondAngle->GetAngle0()*RAD2DEG
-                                  <<"°, sigma="<<pos->mpBondAngle->GetAngleSigma()*RAD2DEG
-                                  <<"°, delta="<<pos->mpBondAngle->GetAngleDelta()*RAD2DEG<<"°";
+                                  <<"ï¿½, sigma="<<pos->mpBondAngle->GetAngleSigma()*RAD2DEG
+                                  <<"ï¿½, delta="<<pos->mpBondAngle->GetAngleDelta()*RAD2DEG<<"ï¿½";
       if(pos->mvpBrokenBond.size()>0)
       {
          cout<<endl<<"       Broken bonds:";
@@ -5444,8 +5437,8 @@ void Molecule::BuildStretchModeTorsion()
       if(pos->mpDihedralAngle!=0) 
          cout<<endl<< "      ->restrained by dihedral angle "<<pos->mpDihedralAngle->GetName()
              <<"to :"<<pos->mpDihedralAngle->GetAngle0()*RAD2DEG
-             <<"°, sigma="<<pos->mpDihedralAngle->GetAngleSigma()*RAD2DEG
-             <<"°, delta="<<pos->mpDihedralAngle->GetAngleDelta()*RAD2DEG<<"°";
+             <<"ï¿½, sigma="<<pos->mpDihedralAngle->GetAngleSigma()*RAD2DEG
+             <<"ï¿½, delta="<<pos->mpDihedralAngle->GetAngleDelta()*RAD2DEG<<"ï¿½";
       if(pos->mvpBrokenBond.size()>0)
       {
          cout<<endl<<"       Broken bonds:";
@@ -5905,15 +5898,15 @@ void Molecule::TuneGlobalOptimRotationAmplitude()
       {
          mBaseRotationAmplitude=0.02*M_PI/20.;
          //cout <<"WARNING - too low Global BaseRotationAmplitude - setting to: "
-         //     << mBaseAmplitude*RAD2DEG<< " °"<<endl;
+         //     << mBaseAmplitude*RAD2DEG<< " ï¿½"<<endl;
       }
       if(mBaseRotationAmplitude>(0.02*M_PI*20.))
       {
          mBaseRotationAmplitude=0.02*M_PI*20.;
          //cout <<"WARNING - too high Global BaseRotationAmplitude - setting to: "
-         //     << mBaseAmplitude*RAD2DEG<< " °"<<endl;
+         //     << mBaseAmplitude*RAD2DEG<< " ï¿½"<<endl;
       }
-      //cout <<" -> Base rotation="<<mBaseAmplitude*RAD2DEG<<"°"<<endl;
+      //cout <<" -> Base rotation="<<mBaseAmplitude*RAD2DEG<<"ï¿½"<<endl;
 
    // Move back atoms to initial position
    this->RestoreParamSet(initialConfig);
@@ -6000,7 +5993,7 @@ void Molecule::BuildFlipGroup()
          cout <<"Flip group from atom "
               <<pos->mpAtom0->GetName()<<",exchanging bonds with "
               <<pos->mpAtom1->GetName()<<" and "
-              <<pos->mpAtom2->GetName()<<", resulting in a 180° rotation of atoms : ";
+              <<pos->mpAtom2->GetName()<<", resulting in a 180ï¿½ rotation of atoms : ";
          for(set<MolAtom*>::iterator pos1=pos->mvRotatedChainList.begin()->second.begin();
              pos1!=pos->mvRotatedChainList.begin()->second.end();++pos1)
             cout<<(*pos1)->GetName()<<"  ";
@@ -6353,7 +6346,7 @@ void Molecule::FlipAtomGroup(const FlipGroup& group)
 {
    TAU_PROFILE("Molecule::FlipAtomGroup(FlipGroup&)","void (...)",TAU_DEFAULT);
    if(group.mpAtom0==group.mvRotatedChainList.back().first)
-   {// We are doing a 180° rotation exchanging two bonds
+   {// We are doing a 180ï¿½ rotation exchanging two bonds
       const REAL vx=group.mpAtom0->X()-(group.mpAtom1->X()+group.mpAtom2->X())/2.;
       const REAL vy=group.mpAtom0->Y()-(group.mpAtom1->Y()+group.mpAtom2->Y())/2.;
       const REAL vz=group.mpAtom0->Z()-(group.mpAtom1->Z()+group.mpAtom2->Z())/2.;
