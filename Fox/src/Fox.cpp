@@ -80,7 +80,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 1080
+#define __FOXREVISION__ 1085
 
 static std::string foxVersion;
 
@@ -300,7 +300,7 @@ int main (int argc, char *argv[])
    
    {// Fox version
       char verBuf[200];
-      sprintf(verBuf,"1.8.0-#%d",__FOXREVISION__);
+      sprintf(verBuf,"1.8.0.1-#%d",__FOXREVISION__);
       foxVersion=verBuf;
    }
    bool useGUI(true);
@@ -1149,7 +1149,7 @@ void WXCrystMainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
       XMLCrystFileSaveGlobal(sst);
       wxFileOutputStream ostream(name.c_str());
       wxZlibOutputStream zstream(ostream,-1,wxZLIB_GZIP);
-      zstream.Write(wxString::FromAscii(sst.str().c_str()),sst.str().size());
+      zstream.Write(sst.str().c_str(),sst.str().size());
    }
    else
    {
@@ -1165,7 +1165,7 @@ void WXCrystMainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
       stringstream sst;
       XMLCrystFileSaveGlobal(sst);
       wxFileOutputStream ostream(name.c_str());
-      ostream.Write(wxString::FromAscii(sst.str().c_str()),sst.str().size());
+      ostream.Write(sst.str().c_str(),sst.str().size());
    }
    mClockLastSave.Click();
 }
