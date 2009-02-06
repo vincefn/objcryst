@@ -80,7 +80,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 1087
+#define __FOXREVISION__ 1088
 
 static std::string foxVersion;
 
@@ -300,7 +300,7 @@ int main (int argc, char *argv[])
    
    {// Fox version
       char verBuf[200];
-      sprintf(verBuf,"1.8.0.2-#%d",__FOXREVISION__);
+      sprintf(verBuf,"1.8.0.3-#%d",__FOXREVISION__);
       foxVersion=verBuf;
    }
    bool useGUI(true);
@@ -1027,7 +1027,7 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
       {
          wxFileInputStream is(open->GetPath());
          stringstream in;
-         while (!is.Eof()) in<<(wxChar)is.GetC();
+         while (!is.Eof()) in<<(char)is.GetC();
          XMLCrystFileLoadAllObject(in);
       }
       else
@@ -1035,12 +1035,12 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
          {
             wxFileInputStream is(open->GetPath());
             stringstream in;
-            while (!is.Eof()) in<<(wxChar)is.GetC();
+            while (!is.Eof()) in<<(char)is.GetC();
             ObjCryst::CIF cif(in,true,true);
             CreateCrystalFromCIF(cif);
             CreatePowderPatternFromCIF(cif);
             CreateSingleCrystalDataFromCIF(cif);
-}
+         }
          else
             if(name.size()>6)
                if(name.Mid(name.size()-6)==wxString(_T("xml.gz")))
@@ -1048,7 +1048,7 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
                   wxFileInputStream is(name);
                   wxZlibInputStream zstream(is);
                   stringstream sst;
-                  while (!zstream.Eof()) sst<<(wxChar)zstream.GetC();
+                  while (!zstream.Eof()) sst<<(char)zstream.GetC();
                   XMLCrystFileLoadAllObject(sst);
                }
    }
