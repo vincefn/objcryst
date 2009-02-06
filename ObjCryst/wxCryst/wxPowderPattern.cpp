@@ -1363,7 +1363,7 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
                dc.DrawLine(x,y-5,x,y-10);
                if(ct<100)
                {
-                  fontInfo.Printf(_T("%s"),pos->second.c_str());
+                  fontInfo.Printf(wxString::FromAscii(pos->second.c_str()));
                   dc.GetTextExtent(fontInfo, &tmpW, &tmpH);
                   dc.DrawText(fontInfo,x-tmpW/2,y-tmpH*(loop++)-10);
                }
