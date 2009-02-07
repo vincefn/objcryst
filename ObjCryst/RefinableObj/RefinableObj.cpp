@@ -276,6 +276,7 @@ void RefinablePar::Init(const string &name,
    mpValue=refPar;
    mMin=min;
    mMax=max;
+   Restraint::SetType(type);
    mHasLimits=hasLimits;
    mIsFixed=isFixed;
    mIsUsed=isUsed;
