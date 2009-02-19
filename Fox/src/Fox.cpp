@@ -80,7 +80,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 1088
+#define __FOXREVISION__ 1093
 
 static std::string foxVersion;
 
@@ -300,7 +300,7 @@ int main (int argc, char *argv[])
    
    {// Fox version
       char verBuf[200];
-      sprintf(verBuf,"1.8.0.3-#%d",__FOXREVISION__);
+      sprintf(verBuf,"1.8.X-#%d",__FOXREVISION__);
       foxVersion=verBuf;
    }
    bool useGUI(true);
@@ -750,6 +750,7 @@ int main (int argc, char *argv[])
        bool tooltip_enabled;
        wxConfigBase::Get()->Read(_T("Fox/BOOL/Enable tooltips"), &tooltip_enabled);
        wxToolTip::Enable(tooltip_enabled);
+       wxToolTip::SetDelay(500);
    }
    else wxConfigBase::Get()->Write(_T("Fox/BOOL/Enable tooltips"), true);
    
