@@ -1,5 +1,5 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
-    (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
+    (c) 2000-2009 Vincent Favre-Nicolin vincefn@users.sourceforge.net
         2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
@@ -39,6 +39,7 @@
 #include "wx/busyinfo.h"
 #include "wx/config.h"
 
+#include "Quirks/Chronometer.h"
 #include "ObjCryst/Atom.h"
 #include "ObjCryst/ZScatterer.h"
 #include "ObjCryst/Molecule.h"
@@ -281,6 +282,7 @@ static const long ID_CRYSTAL_MENU_DISPLAY                       =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_DISPLAY_3DVIEW                =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT                         =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_PAR_SETRELATIVEXYZLIMITS      =WXCRYST_ID();
+static const long ID_CRYSTAL_MENU_PAR_TEST_RANDOM_MOVES         =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT_REMOVESCATTPOW          =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT_ADDSCATTPOWATOM         =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT_ADDSCATTPOWSPHERE       =WXCRYST_ID();
@@ -319,6 +321,7 @@ BEGIN_EVENT_TABLE(WXCrystal,wxWindow)
    EVT_MENU(ID_REFOBJ_MENU_PAR_UNFIXALL,              WXRefinableObj::OnMenuUnFixAllPar)
    EVT_MENU(ID_REFOBJ_MENU_PAR_RANDOMIZE,             WXRefinableObj::OnMenuParRandomize)
    EVT_MENU(ID_CRYSTAL_MENU_PAR_SETRELATIVEXYZLIMITS, WXCrystal::OnMenuSetRelativeXYZLimits)
+   EVT_MENU(ID_CRYSTAL_MENU_PAR_TEST_RANDOM_MOVES,    WXCrystal::OnMenuTestRandomMoves)
 #ifdef OBJCRYST_GL
    EVT_MENU(ID_CRYSTAL_MENU_DISPLAY_3DVIEW,           WXCrystal::OnMenuCrystalGL)
 #endif
@@ -379,6 +382,9 @@ mpCrystalGL(0)
                                 "Randomize Configuration");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_CRYSTAL_MENU_PAR_SETRELATIVEXYZLIMITS,
                                 "Set Relative Limits On All XYZ Parameters");
+         mpMenuBar->GetMenu(ID_REFOBJ_MENU_PAR).AppendSeparator();
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_CRYSTAL_MENU_PAR_TEST_RANDOM_MOVES,
+                                "Test Random Moves for 30s");
       mpMenuBar->AddMenu("Scatterers",ID_CRYSTAL_MENU_SCATT);
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SHOW_SCATTPOW_WIN,
                                 "Show Scattering Powers Parameters Window");
@@ -1378,6 +1384,47 @@ void WXCrystal::OnMenuSetRelativeXYZLimits(wxCommandEvent & WXUNUSED(event))
                                 -limit/mpCrystal->GetLatticePar(2),
                                 limit/mpCrystal->GetLatticePar(2));
    VFN_DEBUG_EXIT("WXCrystal::OnMenuSetRelativeXYZLimits()",6)
+}
+
+/// Local class for a thread doing random moves to the structure
+class TestCrystalThread: public wxThread
+{
+   public:
+      TestCrystalThread(Crystal &cryst,float seconds):
+         wxThread(wxTHREAD_DETACHED),mpCryst(&cryst),mSeconds(seconds){};
+      virtual void *Entry()
+      {
+         cout<<endl<<"Entering refinement thread "<<endl<<endl;
+         mpCryst->BeginOptimization();
+         Chronometer chrono;
+         float dt0=chrono.seconds();
+         while(chrono.seconds()<30)
+         {
+            cout<<endl<<"Test random moves, t= "<<chrono.seconds()<<endl<<endl;
+            mpCryst->BeginGlobalOptRandomMove();
+            mpCryst->GlobalOptRandomMove(0.05,gpRefParTypeObjCryst);
+            wxMilliSleep(1);// Slow down display for simple structures
+            if((chrono.seconds()-dt0)>0.05) {mpCryst->UpdateDisplay();dt0=chrono.seconds();}
+         }
+         mpCryst->EndOptimization();
+      };
+      virtual void OnExit()
+      {
+         cout <<endl<<"Exiting refinement thread "<<endl<<endl;
+      };
+   private:
+      /// The molecule to randomly
+      Crystal *mpCryst;
+      /// Test duration
+      float mSeconds;
+};
+
+void WXCrystal::OnMenuTestRandomMoves(wxCommandEvent &event)
+{
+   TestCrystalThread *pTest = new TestCrystalThread(*mpCrystal,30);
+   if(pTest->Create() != wxTHREAD_NO_ERROR) 
+      wxLogError(_T("Can't create test optimization thread"));
+   else pTest->Run();
 }
 
 bool WXCrystal::OnChangeName(const int id)

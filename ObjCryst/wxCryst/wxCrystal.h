@@ -1,5 +1,5 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
-    (c) 2000-2002 Vincent Favre-Nicolin vincefn@users.sourceforge.net
+    (c) 2000-2009 Vincent Favre-Nicolin vincefn@users.sourceforge.net
         2000-2001 University of Geneva (Switzerland)
 
     This program is free software; you can redistribute it and/or modify
@@ -111,6 +111,7 @@ class WXCrystal: public WXRefinableObj
       void OnMenuImportMoleculeFromFenskeHallZMatrix(wxCommandEvent &event);
       void OnMenuAtoms2Molecule(wxCommandEvent &event);
       void OnMenuSetRelativeXYZLimits(wxCommandEvent & WXUNUSED(event));
+      void OnMenuTestRandomMoves(wxCommandEvent &event);
       bool OnChangeName(const int id);
       void UpdateUI(const bool mutexlock=false);
       Crystal& GetCrystal();
