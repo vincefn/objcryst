@@ -2318,8 +2318,7 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
       {
          if(mFlexModel.GetChoice()!=1)
          {
-            //if((mvMDAtomGroup.size()>0)&&(rand()>(RAND_MAX*mMDMoveProba)))
-            if(rand()<(RAND_MAX*mMDMoveFreq))
+            if((mvMDFullAtomGroup.size()>3)&&(rand()<(RAND_MAX*mMDMoveFreq)))
             {
                   map<MolAtom*,XYZ> v0;
                   for(set<MolAtom*>::iterator at=mvMDFullAtomGroup.begin();at!=mvMDFullAtomGroup.end();++at)
