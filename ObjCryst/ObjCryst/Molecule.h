@@ -641,6 +641,31 @@ struct StretchModeTwist:public StretchMode
    set<MolAtom *> mvRotatedAtomList;
 };
 
+/** Groups of atoms that can be moved using molecular dynamics 
+* principles, taking a list of restraints as ptential.
+* This is used to move group of atoms for which no adequate stretch mode
+* can be used, such as inside flexible rings.
+*/
+struct MDAtomGroup
+{
+   /// Default constructor
+   MDAtomGroup();
+   /** Constructor.
+   * \param vat: list of atoms inside the group
+   * \param vb,va,vd: list of bond, bond angle and dihedral angle restraints
+   */
+   MDAtomGroup(std::set<MolAtom*> &vat,
+               std::set<MolBond*> &vb,
+               std::set<MolBondAngle*> &va,
+               std::set<MolDihedralAngle*> &vd);
+   /// Print one-line list of atoms moved
+   void Print(ostream &os,bool full=true)const;
+   std::set<MolAtom*> mvpAtom;
+   std::vector<MolBond*> mvpBond;
+   std::vector<MolBondAngle*> mvpBondAngle;
+   std::vector<MolDihedralAngle*> mvpDihedralAngle;
+};
+
 /** Light-weight representation of an atom in the molecule, as a part of a Z-matrix.
 * This is used to export the Molecule structure to a z-matrix.
 *
@@ -807,22 +832,40 @@ class Molecule: public Scatterer
       *\param nbStep: number of steps - the gradient is re-calculated after each step.
       */
       void OptimizeConformationSteepestDescent(const REAL maxStep=0.1,const unsigned nbStep=1);
-      const vector<MolAtom*>& GetAtomList()const;
-      const vector<MolBond*>& GetBondList()const;
-      const vector<MolBondAngle*>& GetBondAngleList()const;
-      const vector<MolDihedralAngle*>& GetDihedralAngleList()const;
-      vector<MolAtom*>& GetAtomList();
-      vector<MolBond*>& GetBondList();
-      vector<MolBondAngle*>& GetBondAngleList();
-      vector<MolDihedralAngle*>& GetDihedralAngleList();
+      /** Change the conformation of the molecule using molecular dynamics principles.
+      * Optionnally, move only a subgroup of atoms and only take into account some restraints.
+      * \param v0: initial speed of all atoms. On return, includes the new speed coordinates.
+      * Only the atoms used as keys in v0 will be moved, so this should be used to work 
+      * only on a subgroup of atoms.
+      * \param nbStep: number of steps to perform.
+      * \param dt: time step. Recommended value are such that v0[].xyz * dt = 0.001
+      * \param vb,va,vd: vector of bond, bond angle and dihedral angle restraints to
+      * be taken into account. If these are empty, the full list of restraints of the Molecule
+      * are taken into account, including rigid groups. If they are not empty, then
+      * it is assumed that no atom moved belongs to a rigid group.
+      * \param nrj0: the total energy the system should try to maintain. If equal to 0,
+      * the initial energy will be used. The speed will be de/increased to compensate
+      * any energy change.
+      */
+      void MolecularDynamicsEvolve(std::map<MolAtom*,XYZ> &v0,const unsigned nbStep,const REAL dt,
+                                   const std::vector<MolBond*> &vb,const std::vector<MolBondAngle*> &va,
+                                   const std::vector<MolDihedralAngle*> &vd, REAL nrj0=0);
+      const std::vector<MolAtom*>& GetAtomList()const;
+      const std::vector<MolBond*>& GetBondList()const;
+      const std::vector<MolBondAngle*>& GetBondAngleList()const;
+      const std::vector<MolDihedralAngle*>& GetDihedralAngleList()const;
+      std::vector<MolAtom*>& GetAtomList();
+      std::vector<MolBond*>& GetBondList();
+      std::vector<MolBondAngle*>& GetBondAngleList();
+      std::vector<MolDihedralAngle*>& GetDihedralAngleList();
       
-      list<StretchModeBondLength>& GetStretchModeBondLengthList();
-      list<StretchModeBondAngle>& GetStretchModeBondAngleList();
-      list<StretchModeTorsion>& GetStretchModeTorsionList();
+      std::list<StretchModeBondLength>& GetStretchModeBondLengthList();
+      std::list<StretchModeBondAngle>& GetStretchModeBondAngleList();
+      std::list<StretchModeTorsion>& GetStretchModeTorsionList();
 
-      const list<StretchModeBondLength>& GetStretchModeBondLengthList()const;
-      const list<StretchModeBondAngle>& GetStretchModeBondAngleList()const;
-      const list<StretchModeTorsion>& GetStretchModeTorsionList()const;
+      const std::list<StretchModeBondLength>& GetStretchModeBondLengthList()const;
+      const std::list<StretchModeBondAngle>& GetStretchModeBondAngleList()const;
+      const std::list<StretchModeTorsion>& GetStretchModeTorsionList()const;
 
       /** List of rigid group of atoms. See Molecule::mvRigidGroup
       */
@@ -876,7 +919,7 @@ class Molecule: public Scatterer
       /** Add dihedral angles so as to rigidify the Molecule.
       *
       * In practice, for every sequence of atoms A-B-C-D, add the dihedral angle
-      * defined by these 4 atoms, unless either ABC or BCD are aligned (angle below 10°).
+      * defined by these 4 atoms, unless either ABC or BCD are aligned (angle below 10ï¿½).
       *
       * No duplicate dihedral angle is generated.
       */
@@ -971,6 +1014,17 @@ class Molecule: public Scatterer
       * See Molecule::mvpStretchModeFree and Molecule::mvpStretchModeNotFree
       */
       void BuildStretchModeGroups();
+      /** Find groups of atoms that cannot be moved relatively to each other
+      * using the free or non-free stretch modes. Usually these will correspond
+      * to atoms inside a flexible ring.
+      *
+      * These atoms (if they are not in a rigid group) are stored in a MDAtomGroup
+      * so that they can still move using molecular dynamics.
+      *
+      *\b this should be called after BuildStretchModeGroups(), to make sure the
+      * list of free/non-free stretch mode has been built.
+      */
+      void BuildMDAtomGroups();
       /** Update the Molecule::mScattCompList from the cartesian coordinates
       * of all atoms, and the orientation parameters.
       */
@@ -1133,7 +1187,7 @@ class Molecule: public Scatterer
       * is only rotated, so that the entire group is not mirrored (no absolute configuration 
       * is broken in the group).
       *
-      * Also, a FlipGroup can correspond to a 180° rotation exchanging Ai and Aj
+      * Also, a FlipGroup can correspond to a 180ï¿½ rotation exchanging Ai and Aj
       * (rotating the two chains around the bissecting angle of bonds A-Ai and A-Aj)
       */
       struct FlipGroup
@@ -1152,7 +1206,7 @@ class Molecule: public Scatterer
          /// with respect to the plane defined by (at1,at0,at2).
          ///
          /// However, if this atom is identical to mpAtom0, then this indicates that
-         /// a 180° rotation exchanging atom1 and atom2 is to be performed.
+         /// a 180ï¿½ rotation exchanging atom1 and atom2 is to be performed.
          list<pair<const MolAtom *,set<MolAtom *> > > mvRotatedChainList;
          /// Number of times this flip has been tried, and the number of times
          /// it has been accepted. Used in Molecule::GlobalOptRandomMove,
@@ -1190,7 +1244,20 @@ class Molecule: public Scatterer
          std::set<const MolBondAngle*> mvpBrokenBondAngle;
          std::set<const MolDihedralAngle*> mvpBrokenDihedralAngle;
       };
+      /** Groups of atoms that should be moved according to molecular dynamics
+      * principles.
+      */
+      mutable list<MDAtomGroup> mvMDAtomGroup;
+      /// Full list of atoms that can be moved using molecular dynamics
+      /// This excludes any atom part of a rigid group
+      mutable std::set<MolAtom*> mvMDFullAtomGroup;
    
+   /// Frequency of using molecular dynamics move during GlobalOptRandomMove()
+   REAL mMDMoveFreq;
+   /// Relative energy of molecule during molecular dynamics move
+   /// Default: 40, 10 (slow conformation change), 200 (large changes)
+   REAL mMDMoveEnergy;
+
    /// The Molecule, as a lightweight ZMatrix, for export purposes.
    mutable std::vector<MolZAtom> mAsZMatrix;
 

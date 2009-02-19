@@ -1400,7 +1400,6 @@ class TestCrystalThread: public wxThread
          float dt0=chrono.seconds();
          while(chrono.seconds()<30)
          {
-            cout<<endl<<"Test random moves, t= "<<chrono.seconds()<<endl<<endl;
             mpCryst->BeginGlobalOptRandomMove();
             mpCryst->GlobalOptRandomMove(0.05,gpRefParTypeObjCryst);
             wxMilliSleep(1);// Slow down display for simple structures

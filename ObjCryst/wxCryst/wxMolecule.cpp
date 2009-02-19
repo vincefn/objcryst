@@ -32,6 +32,7 @@
 #include <fstream>
 #include <algorithm>
 #include "wxCryst/wxMolecule.h"
+
 namespace ObjCryst
 {
 
@@ -831,6 +832,29 @@ mpBondWin(0),mpAngleWin(0),mpDihedralAngleWin(0),mpRigidGroupWin(0),mIsSelfUpdat
       mpSizer->SetItemMinSize(mpMenuBar,
                               mpMenuBar->GetSize().GetWidth(),
                               mpMenuBar->GetSize().GetHeight());
+   // Molecular Dynamics move parameters
+      wxBoxSizer* pMDSizer=new wxBoxSizer(wxHORIZONTAL);
+      WXFieldPar<REAL> *pWXFieldMDEnergy=
+         new WXFieldPar<REAL>(this,"MD moves Energy",-1,&(mpMolecule->mMDMoveEnergy));
+      WXFieldPar<REAL> *pWXFieldMDFrequency=
+         new WXFieldPar<REAL>(this,"MD moves frequency",-1,&(mpMolecule->mMDMoveFreq));
+      pMDSizer->Add(pWXFieldMDFrequency);
+      pMDSizer->Add(pWXFieldMDEnergy);
+      mpSizer->Add(pMDSizer,0,wxALIGN_LEFT);
+      mList.Add(pWXFieldMDEnergy);
+      mList.Add(pWXFieldMDFrequency);
+      
+      pWXFieldMDFrequency->SetToolTip(_T("Frequency of Molecular Dynamics Moves (0.0-1.0)\n\n")
+                                      _T("MD moves are used to alter the conformation of atom groups \n")
+                                      _T("which cannot be changed by simple bond distance\n")
+                                      _T("or bond angle changes.\n\n")
+                                      _T("MD moves are CPU intensive, so a slow value (0.05) is recommended\n")
+                                      _T("Larger frequencies can be used for constrained molecules,\n")
+                                      _T("e.g. with large, flexible cycles."));
+      pWXFieldMDEnergy->SetToolTip(_T("Energy of Molecule for Molecular Dynamics Moves\n\n")
+                                   _T("Standard amplitude=40. \n")
+                                   _T("Small amplitude=10. (small distortion of the Molecule)\n")
+                                   _T("Large amplitude=400. (large distortion of the Molecule)"));
    //Center atom
       mpFieldCenterAtom=new WXFieldChoice(this,ID_MOLECULE_CHANGE_CENTER_ATOM,"Center Atom:",240);
       if(mpMolecule->GetCenterAtom()!=0)
@@ -882,8 +906,8 @@ void WXMolecule::OnMenuOptimizeConformation(wxCommandEvent & WXUNUSED(event))
    WXCrystValidateAllUserInput();
    mpMolecule->OptimizeConformation(100000,mpMolecule->GetAtomList().size());
    mpMolecule->OptimizeConformationSteepestDescent(0.01,100);
-   mpMolecule->GetCrystal().UpdateDisplay();
    mpMolecule->RestraintStatus(cout);
+   mpMolecule->GetCrystal().UpdateDisplay();
    VFN_DEBUG_EXIT("WXMolecule::OnMenuOptimizeConformation()",5)
 }
 
