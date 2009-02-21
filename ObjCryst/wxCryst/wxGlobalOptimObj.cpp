@@ -211,10 +211,10 @@ void WXOptimizationObj::OnBrowseParamSet(wxCommandEvent & WXUNUSED(event))
    wxString *choices = new wxString[nb];
    for(int i=0;i<nb;i++)
    {
+      wxString tmpname=wxString::FromAscii(this->GetOptimizationObj().mRefParList.GetParamSetName
+                                             (this->GetOptimizationObj().mvSavedParamSet[i].first).c_str());
       choices[i].Printf(_T("%d, cost= %f, %s"),i,
-                         this->GetOptimizationObj().mvSavedParamSet[i].second,
-                         this->GetOptimizationObj().mRefParList.GetParamSetName
-                           (this->GetOptimizationObj().mvSavedParamSet[i].first).c_str());
+                         this->GetOptimizationObj().mvSavedParamSet[i].second,tmpname.c_str());
       //cout<<choices[i]<<endl;
    }
    mpwxParamSetList=new wxListBox(frame, ID_BROWSE_WIN, wxDefaultPosition, 
