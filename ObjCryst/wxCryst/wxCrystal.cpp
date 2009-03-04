@@ -3801,7 +3801,7 @@ void WXGLCrystalCanvas::OnPOVRay( wxCommandEvent & WXUNUSED(event))
    WXCrystValidateAllUserInput();
    wxFileDialog save(this,_T("Choose filename"),_T(""),_T(""),_T("*.pov"),wxSAVE | wxOVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
-   this->POVRayOutput(string(save.GetPath().ToAscii()));
+   this->POVRayOutput(string(save.GetPath().char_str()));
 }
 
 void WXGLCrystalCanvas::POVRayOutput(const std::string &filename)
@@ -4188,15 +4188,12 @@ UserSelectBoundingBox::~UserSelectBoundingBox () {
 };
 
 void UserSelectBoundingBox::OnOk (wxCommandEvent & WXUNUSED(event)) {
-  char * strptr;
-  const char * val;
+  double val;
 
-  val = mpXminCtrl->GetValue().ToAscii();
-  mbbox.xMin = strtod(val, &strptr);
-  if (val == strptr) {wxMessageBox(_T("Invalid value for Xmin!"), _T("Bounding volume error"), wxOK, this); return;}
-  val = mpXmaxCtrl->GetValue().ToAscii();
-  mbbox.xMax = strtod(val, &strptr);
-  if (val == strptr) {wxMessageBox(_T("Invalid value for Xmax!"), _T("Bounding volume error"), wxOK, this); return;}
+  mpXminCtrl->GetValue().ToDouble(&val);
+  mbbox.xMin = val;
+  mpXmaxCtrl->GetValue().ToDouble(&val);
+  mbbox.xMax = val;
   if (mbbox.xMin == mbbox.xMax) {wxMessageBox(_T("Sorry, Xmin must be less than Xmax!"), _T("Zero bounding volume"), wxOK, this); return;}
   if (mbbox.xMin > mbbox.xMax) {
     float tmp = mbbox.xMax;
@@ -4205,12 +4202,10 @@ void UserSelectBoundingBox::OnOk (wxCommandEvent & WXUNUSED(event)) {
   }
   VFN_DEBUG_MESSAGE("Xmin " << mbbox.xMin << " Xmax " << mbbox.xMax,1)
 
-  val = mpYminCtrl->GetValue().ToAscii();
-  mbbox.yMin = strtod(val, &strptr);
-  if (val == strptr) {wxMessageBox(_T("Invalid value for Ymin!"), _T("Bounding volume error"), wxOK, this); return;}
-  val = mpYmaxCtrl->GetValue().ToAscii();
-  mbbox.yMax = strtod(val, &strptr);
-  if (val == strptr) {wxMessageBox(_T("Invalid value for Ymax!"), _T("Bounding volume error"), wxOK, this); return;}
+  mpYminCtrl->GetValue().ToDouble(&val);
+  mbbox.yMin = val;
+  mpYmaxCtrl->GetValue().ToDouble(&val);
+  mbbox.yMax = val;
   if (mbbox.yMin == mbbox.yMax) {wxMessageBox(_T("Sorry, Ymin must be less than Ymax!"), _T("Zero bounding volume"), wxOK, this); return;}
   if (mbbox.yMin > mbbox.yMax) {
     float tmp = mbbox.yMax;
@@ -4219,12 +4214,10 @@ void UserSelectBoundingBox::OnOk (wxCommandEvent & WXUNUSED(event)) {
   }
   VFN_DEBUG_MESSAGE("Ymin " << mbbox.yMin << " Ymax " << mbbox.yMax,1)
 
-  val = mpZminCtrl->GetValue().ToAscii();
-  mbbox.zMin = strtod(val, &strptr);
-  if (val == strptr) {wxMessageBox(_T("Invalid value for Zmin!"), _T("Bounding volume error"), wxOK, this); return;}
-  val = mpZmaxCtrl->GetValue().ToAscii();
-  mbbox.zMax = strtod(val, &strptr);
-  if (val == strptr) {wxMessageBox(_T("Invalid value for Zmax!"), _T("Bounding volume error"), wxOK, this); return;}
+  mpZminCtrl->GetValue().ToDouble(&val);
+  mbbox.zMin = val;
+  mpZmaxCtrl->GetValue().ToDouble(&val);
+  mbbox.zMax = val;
   if (mbbox.zMin == mbbox.zMax) {wxMessageBox(_T("Sorry, Zmin must be less than Zmax!"), _T("Zero bounding volume"), wxOK, this); return;}
   if (mbbox.zMin > mbbox.zMax) {
     float tmp = mbbox.zMax;
