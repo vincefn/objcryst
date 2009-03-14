@@ -377,8 +377,12 @@ void CIFData::ExtractPowderPattern(const bool verbose)
             else mPowderPatternSigma[i]=sqrt(fabs(mPowderPatternObs[i]));
             if(pos_mon!=loop->second.end())
             {//VCT or monitor
-               mPowderPatternObs[i]/=CIFNumeric2Float(pos_mon->second[i]);
-               mPowderPatternSigma[i]/=sqrt(fabs(CIFNumeric2Float(pos_mon->second[i])));
+               const float mon=CIFNumeric2Float(pos_mon->second[i]);
+               if(mon>0)
+               {
+                  mPowderPatternObs[i]/=mon;
+                  mPowderPatternSigma[i]/=sqrt(mon);
+               }
             }
             //if((i<10) && verbose) cout<<i<<" "<<mPowderPatternX[i]/mult<<" "<<mPowderPatternObs[i]<<" "<<mPowderPatternSigma[i]<<endl;
          }
