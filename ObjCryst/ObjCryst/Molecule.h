@@ -717,6 +717,13 @@ class Molecule: public Scatterer
       virtual void GlobalOptRandomMove(const REAL mutationAmplitude,
                                        const RefParType *type);
       virtual REAL GetLogLikelihood()const;
+      
+      virtual unsigned int GetNbLSQFunction()const;
+      virtual const CrystVector_REAL& GetLSQCalc(const unsigned int) const;
+      virtual const CrystVector_REAL& GetLSQObs(const unsigned int) const;
+      virtual const CrystVector_REAL& GetLSQWeight(const unsigned int) const;
+      virtual const CrystVector_REAL& GetLSQDeriv(const unsigned int n, RefinablePar&par);
+      
       virtual void TagNewBestConfig()const;
       virtual int GetNbComponent() const;
       virtual const ScatteringComponentList& GetScatteringComponentList() const;
@@ -1263,6 +1270,13 @@ class Molecule: public Scatterer
 
    /// The current log(likelihood)
    mutable REAL mLogLikelihood;
+   /// Current LSQ Calc - one value for each restraint (bond distance, angle or dihedral angle)
+   mutable CrystVector_REAL mLSQCalc;
+   /// Current LSQ Calc - one value for each restraint (bond distance, angle or dihedral angle ideal values)
+   mutable CrystVector_REAL mLSQObs;
+   /// Current LSQ Calc - one value for each restraint(bond distance, angle or dihedral angle sigmas)
+   mutable CrystVector_REAL mLSQWeight;
+
    #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);

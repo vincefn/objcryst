@@ -509,8 +509,8 @@ REAL& MolBond::BondOrder(){return mBondOrder;}
 
 void MolBond::SetLength0(const REAL a){mLength0=a;}
 void MolBond::SetLengthDelta(const REAL a){mDelta=a;}
-void MolBond::SetLengthSigma(const REAL a){mBondOrder=a;}
-void MolBond::SetBondOrder(const REAL a){mSigma=a;}
+void MolBond::SetLengthSigma(const REAL a){mSigma=a;}
+void MolBond::SetBondOrder(const REAL a){mBondOrder=a;}
 
 bool MolBond::IsFreeTorsion()const{return mIsFreeTorsion;}
 void MolBond::SetFreeTorsion(const bool isFreeTorsion)
@@ -1757,7 +1757,7 @@ void MDAtomGroup::Print(ostream &os,bool full)const
 //######################################################################
 Molecule::Molecule(Crystal &cryst, const string &name):
 mBaseRotationAmplitude(M_PI*0.02),mIsSelfOptimizing(false),mpCenterAtom(0),
-mMDMoveFreq(0.05),mMDMoveEnergy(40.)
+mMDMoveFreq(0.0),mMDMoveEnergy(40.)
 {
    VFN_DEBUG_MESSAGE("Molecule::Molecule()",5)
    this->SetName(name);
@@ -2318,6 +2318,7 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
       {
          if(mFlexModel.GetChoice()!=1)
          {
+            #if 0
             if((mvMDFullAtomGroup.size()>3)&&(rand()<(RAND_MAX*mMDMoveFreq)))
             {
                   map<MolAtom*,XYZ> v0;
@@ -2333,6 +2334,26 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                                                 this->GetDihedralAngleList(),
                                                 nrj0);
             }
+            #else
+            if((mvMDAtomGroup.size()>0)&&(rand()<(RAND_MAX*mMDMoveFreq)))
+            {
+               const unsigned int n=rand()%mvMDAtomGroup.size();
+               list<MDAtomGroup>::iterator pos=mvMDAtomGroup.begin();
+               for(unsigned int i=0;i<n;++i)++pos;
+               map<MolAtom*,XYZ> v0;
+               for(set<MolAtom*>::iterator at=pos->mvpAtom.begin();at!=pos->mvpAtom.end();++at)
+                  v0[*at]=XYZ(rand()/(REAL)RAND_MAX+0.5,rand()/(REAL)RAND_MAX+0.5,rand()/(REAL)RAND_MAX+0.5);
+               
+               const REAL nrj0=mMDMoveEnergy*( pos->mvpBond.size()
+                                    +pos->mvpBondAngle.size()
+                                    +pos->mvpDihedralAngle.size());
+               this->MolecularDynamicsEvolve(v0, int(100*sqrt(mutationAmplitude)),0.004,
+                                             pos->mvpBond,
+                                             pos->mvpBondAngle,
+                                             pos->mvpDihedralAngle,
+                                             nrj0);
+            }
+            #endif
             else
             {
             #if 0 // For tests
@@ -2533,6 +2554,58 @@ REAL Molecule::GetLogLikelihood()const
    mClockLogLikelihood.Click();
    return mLogLikelihood;
 }
+
+unsigned int Molecule::GetNbLSQFunction()const
+{
+   return 1;
+}
+
+const CrystVector_REAL& Molecule::GetLSQCalc(const unsigned int) const
+{
+   mLSQCalc.resize(mvpRestraint.size());
+   REAL *p=mLSQCalc.data();
+   for(vector<MolBond*>::const_iterator pos=this->GetBondList().begin();pos!=this->GetBondList().end();++pos)
+      *p++=(*pos)->GetLength();
+   for(vector<MolBondAngle*>::const_iterator pos=this->GetBondAngleList().begin();pos!=this->GetBondAngleList().end();++pos)
+      *p++=(*pos)->GetAngle();
+   for(vector<MolDihedralAngle*>::const_iterator pos=this->GetDihedralAngleList().begin();pos!=this->GetDihedralAngleList().end();++pos)
+      *p++=(*pos)->GetAngle();
+   return mLSQCalc;
+}
+
+const CrystVector_REAL& Molecule::GetLSQObs(const unsigned int) const
+{
+   mLSQObs.resize(mvpRestraint.size());
+   REAL *p=mLSQObs.data();
+   for(vector<MolBond*>::const_iterator pos=this->GetBondList().begin();pos!=this->GetBondList().end();++pos)
+      *p++=(*pos)->GetLength0();
+   for(vector<MolBondAngle*>::const_iterator pos=this->GetBondAngleList().begin();pos!=this->GetBondAngleList().end();++pos)
+      *p++=(*pos)->GetAngle0();
+   for(vector<MolDihedralAngle*>::const_iterator pos=this->GetDihedralAngleList().begin();pos!=this->GetDihedralAngleList().end();++pos)
+      *p++=(*pos)->GetAngle0();
+   return mLSQObs;
+}
+
+const CrystVector_REAL& Molecule::GetLSQWeight(const unsigned int) const
+{
+   //:TODO: USe a clock to avoid re-computation
+   mLSQWeight.resize(mvpRestraint.size());
+   REAL *p=mLSQWeight.data();
+   for(vector<MolBond*>::const_iterator pos=this->GetBondList().begin();pos!=this->GetBondList().end();++pos)
+      *p++=1/((*pos)->GetLengthSigma()* (*pos)->GetLengthSigma()+1e-6);
+   for(vector<MolBondAngle*>::const_iterator pos=this->GetBondAngleList().begin();pos!=this->GetBondAngleList().end();++pos)
+      *p++=1/((*pos)->GetAngleSigma()* (*pos)->GetAngleSigma()+1e-6);
+   for(vector<MolDihedralAngle*>::const_iterator pos=this->GetDihedralAngleList().begin();pos!=this->GetDihedralAngleList().end();++pos)
+      *p++=1/((*pos)->GetAngleSigma()* (*pos)->GetAngleSigma()+1e-6);
+   return mLSQWeight;
+}
+
+const CrystVector_REAL& Molecule::GetLSQDeriv(const unsigned int n, RefinablePar&par)
+{
+   //:TODO: return analytical derivatives
+   return RefinableObj::GetLSQDeriv(n,par);
+}
+
 void Molecule::TagNewBestConfig()const
 {
    #if 0
