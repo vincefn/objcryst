@@ -32,6 +32,7 @@
 #include <fstream>
 #include <algorithm>
 #include "wxCryst/wxMolecule.h"
+#include "RefinableObj/LSQNumObj.h"
 
 namespace ObjCryst
 {
@@ -904,10 +905,22 @@ void WXMolecule::OnMenuOptimizeConformation(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXMolecule::OnMenuOptimizeConformation()",5)
    WXCrystValidateAllUserInput();
-   mpMolecule->OptimizeConformation(100000,mpMolecule->GetAtomList().size());
+   mpMolecule->OptimizeConformation(20000,mpMolecule->GetAtomList().size());
    mpMolecule->OptimizeConformationSteepestDescent(0.01,100);
    mpMolecule->RestraintStatus(cout);
+   
+   LSQNumObj lsq;
+   lsq.SetRefinedObj(*mpMolecule);
+   lsq.PrepareRefParList(true);
+   lsq.SetParIsUsed(gpRefParTypeObjCryst,false);
+   lsq.SetParIsUsed(gpRefParTypeScattConform,true);
+   try {lsq.Refine(10,true,false);}
+   catch(const ObjCrystException &except){}
    mpMolecule->GetCrystal().UpdateDisplay();
+   mpMolecule->RestraintStatus(cout);
+
+   mpMolecule->GetCrystal().UpdateDisplay();
+   
    VFN_DEBUG_EXIT("WXMolecule::OnMenuOptimizeConformation()",5)
 }
 
@@ -971,7 +984,7 @@ void WXMolecule::OnMenuAddBond(wxCommandEvent & WXUNUSED(event))
    }
    static double d=1.5;//static so that last entered value will be used next time
    wxString s;
-   s.Printf(_T("%d"),d);
+   s.Printf(_T("%6.3f"),d);
    // if((at1->IsDummy())||(at2->IsDummy())) d=1.5;
    // else d= (at1->GetScatteringPower().GetRadius()+at2->GetScatteringPower().GetRadius())*0.9;
    string mes="Enter bond distance (Angstroems) for "+at1->GetName()+"-"+at2->GetName();
@@ -1015,7 +1028,7 @@ void WXMolecule::OnMenuAddAngle(wxCommandEvent & WXUNUSED(event))
    
    static double a=109.5;//static so that last entered value will be used next time
    wxString s;
-   s.Printf(_T("%d"),a);
+   s.Printf(_T("%6.2f"),a);
    string mes="Enter bond angle (degrees) for "+at1->GetName()
                                            +"-"+at2->GetName()
                                            +"-"+at3->GetName();
@@ -1063,7 +1076,7 @@ void WXMolecule::OnMenuAddDihedralAngle(wxCommandEvent & WXUNUSED(event))
 
    static double a=180;
    wxString s;
-   s.Printf(_T("%d"),a);
+   s.Printf(_T("%6.2f"),a);
    string mes="Enter dihedral angle (degrees) for "+at1->GetName()
                                                +"-"+at2->GetName()
                                                +"-"+at3->GetName()
