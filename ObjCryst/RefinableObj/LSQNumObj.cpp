@@ -49,6 +49,7 @@ LSQNumObj::LSQNumObj(string objName)
    mRw=0;
    mChiSq=0;
    mStopAfterCycle=false;
+   mRecursiveLSQ=false;
 }
 
 LSQNumObj::~LSQNumObj()
@@ -90,8 +91,8 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
                         const bool silent)
 {
    mpRefinedObj->BeginOptimization();
-   mObs=mpRefinedObj->GetLSQObs(mLSQFuncIndex);
-   mWeight=mpRefinedObj->GetLSQWeight(mLSQFuncIndex);
+   mObs=this->GetLSQObs();
+   mWeight=this->GetLSQWeight();
 
    //Check if we are ready for the refinement
    //:TODO:
@@ -118,7 +119,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
       const REAL marquardtMult=4.;
    //initial Chi^2, needed for Levenberg-Marquardt
    {
-      calc=mpRefinedObj->GetLSQCalc(mLSQFuncIndex);
+      calc=this->GetLSQCalc();
       tmpV1 = mObs;
       tmpV1 -= calc;
       tmpV1 *= tmpV1;
@@ -134,7 +135,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
       mRefParList.SaveParamSet(mIndexValuesSetLast);// end of last cycle
       if(!silent) cout << "LSQNumObj::Refine():Cycle#"<< cycle <<endl;
       //initial value of function
-         calc0=mpRefinedObj->GetLSQCalc(mLSQFuncIndex);
+         calc0=this->GetLSQCalc();
          //R
             tmpV1 =  mObs;
             tmpV1 -= calc0;
@@ -157,7 +158,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
          //:NOTE: Real design matrix is the transposed of the one computed here
          //if(!silent) cout << "........." << mRefParList.GetParNotFixed(i).GetName() <<endl;
          
-         tmpV1=mpRefinedObj->GetLSQDeriv(mLSQFuncIndex,mRefParList.GetParNotFixed(i));
+         tmpV1=this->GetLSQDeriv(mRefParList.GetParNotFixed(i));
          pTmp1=tmpV1.data();
          //cout <<"deriv#"<<i<<":"<<FormatHorizVector<REAL>(tmpV1,10,8);
          for(j=0;j<nbObs;j++) *pTmp2++ = *pTmp1++;
@@ -207,7 +208,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
                {
                   for(i=0;i<nbVar;i++)
                   {
-                     tmpV1=mpRefinedObj->GetLSQDeriv(mLSQFuncIndex,mRefParList.GetParNotFixed(i));
+                     tmpV1=this->GetLSQDeriv(mRefParList.GetParNotFixed(i));
                      cout <<"deriv#"<<i<<":"<<FormatHorizVector<REAL>(tmpV1,10,8);
                   }
                }
@@ -511,7 +512,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
          
       //for statistics...
          //mRefParList.Print();
-         calc=mpRefinedObj->GetLSQCalc(mLSQFuncIndex);
+         calc=this->GetLSQCalc();
          //Chi^2
          {
             REAL oldChiSq=mChiSq;
@@ -627,9 +628,6 @@ void LSQNumObj::PrintRefResults() const
    //this->PrepareRefParList(); activate this when PrepareRefParList() will be more savy
    cout << "Results after last refinement :(" ;
    cout << mRefParList.GetNbParNotFixed()<< " non-fixed parameters)"<<endl;
-   cout << "R-factor  : " << mR<<endl;
-   cout << "Rw-factor : " << mRw<<endl;
-   cout << "Chi-Square: " << mChiSq<<endl;
    cout << "Variable information : Initial, last cycle , current values and sigma"<<endl;
    for (int i=0;i<mRefParList.GetNbPar();i++)
    {
@@ -645,6 +643,10 @@ void LSQNumObj::PrintRefResults() const
       //cout<< "  " << varCurrent(i)<< "  " << sigmaValues(i)<<endl;
       cout << endl;
    }
+   cout << "R-factor  : " << mR<<endl;
+   cout << "Rw-factor : " << mRw<<endl;
+   cout << "Chi-Square: " << mChiSq<<endl;
+   cout << "GoF: " << mChiSq/this->GetLSQWeight().numElements()<<endl;
    cout <<endl;
 }
 
@@ -671,7 +673,7 @@ void LSQNumObj::OptimizeDerivativeSteps()
 const std::map<pair<const RefinablePar*,const RefinablePar*>,REAL > & LSQNumObj::GetVarianceCovarianceMap()const
 { return mvVarCovar;}
 
-void LSQNumObj::PrepareRefParList(const bool copy_param)
+void LSQNumObj::PrepareRefParList(const bool copy_param, const bool recursive_lsq)
 {
    mRefParList.ResetParList();
    for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
@@ -683,6 +685,83 @@ void LSQNumObj::PrepareRefParList(const bool copy_param)
    //mRefParList.Print();
    if(copy_param) mRefParList.SetDeleteRefParInDestructor(true);
    else mRefParList.SetDeleteRefParInDestructor(false);
+   mRecursiveLSQ=recursive_lsq;
+}
+
+const CrystVector_REAL& LSQNumObj::GetLSQCalc() const
+{
+   const CrystVector_REAL *pV;
+   unsigned long nb=0;
+   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
+   {// TODO: take into account the case when the LSQ function used is not the default one
+      if(mRecursiveRefinedObjList.GetObj(i).GetNbLSQFunction()==0) continue;
+      pV=&(mRecursiveRefinedObjList.GetObj(i).GetLSQCalc(mLSQFuncIndex));
+      const unsigned long n2=pV->numElements();
+      if((nb+n2)>mLSQCalc.numElements()) mLSQCalc.resizeAndPreserve(nb+pV->numElements());
+      const REAL *p1=pV->data();
+      REAL *p2=mLSQCalc.data()+nb;
+      for(unsigned long j=0;j<n2;++j) *p2++ = *p1++;
+      nb+=n2;
+   }
+   if(mLSQCalc.numElements()>nb) mLSQCalc.resizeAndPreserve(nb);
+   return mLSQCalc;
+}
+
+const CrystVector_REAL& LSQNumObj::GetLSQObs() const
+{
+   const CrystVector_REAL *pV;
+   unsigned long nb=0;
+   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
+   {// TODO: take into account the case when the LSQ function used is not the default one
+      if(mRecursiveRefinedObjList.GetObj(i).GetNbLSQFunction()==0) continue;
+      pV=&(mRecursiveRefinedObjList.GetObj(i).GetLSQObs(mLSQFuncIndex));
+      const unsigned long n2=pV->numElements();
+      if((nb+n2)>mLSQObs.numElements()) mLSQObs.resizeAndPreserve(nb+pV->numElements());
+      const REAL *p1=pV->data();
+      REAL *p2=mLSQObs.data()+nb;
+      for(unsigned long j=0;j<n2;++j) *p2++ = *p1++;
+      nb+=n2;
+   }
+   if(mLSQObs.numElements()>nb) mLSQObs.resizeAndPreserve(nb);
+   return mLSQObs;
+}
+
+const CrystVector_REAL& LSQNumObj::GetLSQWeight() const
+{
+   const CrystVector_REAL *pV;
+   unsigned long nb=0;
+   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
+   {// TODO: take into account the case when the LSQ function used is not the default one
+      if(mRecursiveRefinedObjList.GetObj(i).GetNbLSQFunction()==0) continue;
+      pV=&(mRecursiveRefinedObjList.GetObj(i).GetLSQWeight(mLSQFuncIndex));
+      const unsigned long n2=pV->numElements();
+      if((nb+n2)>mLSQWeight.numElements()) mLSQWeight.resizeAndPreserve(nb+pV->numElements());
+      const REAL *p1=pV->data();
+      REAL *p2=mLSQWeight.data()+nb;
+      for(unsigned long j=0;j<n2;++j) *p2++ = *p1++;
+      nb+=n2;
+   }
+   if(mLSQWeight.numElements()>nb) mLSQWeight.resizeAndPreserve(nb);
+   return mLSQWeight;
+}
+
+const CrystVector_REAL& LSQNumObj::GetLSQDeriv(RefinablePar&par)
+{
+   const CrystVector_REAL *pV;
+   unsigned long nb=0;
+   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
+   {// TODO: take into account the case when the LSQ function used is not the default one
+      if(mRecursiveRefinedObjList.GetObj(i).GetNbLSQFunction()==0) continue;
+      pV=&(mRecursiveRefinedObjList.GetObj(i).GetLSQDeriv(mLSQFuncIndex,par));
+      const unsigned long n2=pV->numElements();
+      if((nb+n2)>mLSQDeriv.numElements()) mLSQDeriv.resizeAndPreserve(nb+pV->numElements());
+      const REAL *p1=pV->data();
+      REAL *p2=mLSQDeriv.data()+nb;
+      for(unsigned long j=0;j<n2;++j) *p2++ = *p1++;
+      nb+=n2;
+   }
+   if(mLSQDeriv.numElements()>nb) mLSQDeriv.resizeAndPreserve(nb);
+   return mLSQDeriv;
 }
 
 #ifdef __WX__CRYST__

@@ -76,7 +76,7 @@ class LSQNumObj
       void SetRefinedObj(RefinableObj &obj, const unsigned int LSQFuncIndex=0);
       /// Access to the full list of refined objects. The list is initially built
       /// recursively from one object. This function allows to modify the list
-      /// of sub-objects before refinement (such as fore removing certain types
+      /// of sub-objects before refinement (such as for removing certain types
       /// of objects).
       ObjRegistry<RefinableObj> &GetRefinedObjList();
       /** Access to the RefinableObj which is the compilation of all parameters
@@ -119,8 +119,21 @@ class LSQNumObj
       *
       * \note This will be called automatically before starting the refinement only if
       * the parameter list is empty. Otherwise it should be called before refinement.
+      *
+      * \param recursive_lsq: if true, the LSQ refinement will be run taking into account
+      * all the LSQ functions of the recursive object list, otherwise just the LSQ function
+      * from the top object is used.
       */
-      void PrepareRefParList(const bool copy_param=false);
+      void PrepareRefParList(const bool copy_param=false, const bool recursive_lsq=false);
+      
+      /// Get the LSQ calc vector (using either only the top or the hierarchy of object)
+      const CrystVector_REAL& GetLSQCalc() const;
+      /// Get the LSQ obs vector (using either only the top or the hierarchy of object)
+      const CrystVector_REAL& GetLSQObs() const;
+      /// Get the LSQ weight vector (using either only the top or the hierarchy of object)
+      const CrystVector_REAL& GetLSQWeight() const;
+      /// Get the LSQ deriv vector (using either only the top or the hierarchy of object)
+      const CrystVector_REAL& GetLSQDeriv(RefinablePar&par);
    protected:
    private:
       // Refined object
@@ -165,6 +178,13 @@ class LSQNumObj
       /// Therefore only their values and the parameter's clocks are affected when
       /// working on the copy.
       bool mCopyRefPar;
+      /// If true, then the refinement will be done on all LSQ functions from the recursive
+      /// list of objects. Else only the LSQ function of the top object is used.
+      /// This is set in PrepareRefParList()
+      bool mRecursiveLSQ;
+      /// Temporary arrays for LSQ functions evaluation - used when
+      /// using recursive LSQ function
+      mutable CrystVector_REAL mLSQObs,mLSQCalc,mLSQWeight,mLSQDeriv;
 #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow* parent);
