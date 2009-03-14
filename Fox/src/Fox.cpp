@@ -80,7 +80,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 1093
+#define __FOXREVISION__ 1101
 
 static std::string foxVersion;
 
@@ -553,8 +553,8 @@ int main (int argc, char *argv[])
       if(string(argv[i]).find(string(".xml"))!=string::npos)
       #endif
       {
-         cout<<"Loading: "<<argv[i]<<endl;
          #ifdef __WX__CRYST__
+         cout<<"Loading: "<<wxString(argv[i]).ToAscii()<<endl;
          wxString name(argv[i]);
          if(name.Mid(name.size()-4)==wxString(_T(".xml")))
          {
@@ -572,9 +572,11 @@ int main (int argc, char *argv[])
             XMLCrystFileLoadAllObject(sst);
          }
          #else
+         cout<<"Loading: "<<argv[i]<<endl;
          XMLCrystFileLoadAllObject(argv[i]);
          #endif
          if(!cif2pattern)continue;
+         cout<<"Loading: Done"<<endl;
       }
       #ifdef __WX__CRYST__
       if(wxString(argv[i]).find(_T(".cif"))!=wxNOT_FOUND)
@@ -582,12 +584,13 @@ int main (int argc, char *argv[])
       if(string(argv[i]).find(string(".cif"))!=string::npos)
       #endif
       {
-         cout<<"Loading: "<<argv[i]<<endl;
          #ifdef __WX__CRYST__
+         cout<<"Loading: "<<wxString(argv[i]).ToAscii()<<endl;
          wxFileInputStream is(argv[i]);
          stringstream in;
          while (!is.Eof()) in<<(char)is.GetC();
          #else
+         cout<<"Loading: "<<argv[i]<<endl;
          ifstream in (argv[i]);
          #endif
          ObjCryst::CIF cif(in,true,true);
