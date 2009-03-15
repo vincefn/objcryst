@@ -62,7 +62,7 @@
    #endif
    
    #ifdef __WIN32__
-     #include "gl/glaux.h"
+     #include "gl/glu.h"
    #endif
    
    #ifdef HAVE_GLUT
@@ -1406,6 +1406,7 @@ class TestCrystalThread: public wxThread
             if((chrono.seconds()-dt0)>0.05) {mpCryst->UpdateDisplay();dt0=chrono.seconds();}
          }
          mpCryst->EndOptimization();
+         return NULL;
       };
       virtual void OnExit()
       {
