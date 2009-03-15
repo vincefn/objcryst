@@ -6675,7 +6675,7 @@ void Molecule::BuildMDAtomGroups()
    // All atoms listed in at leat one mvMDAtomGroup
    mvMDFullAtomGroup.clear();
    for(list<MDAtomGroup>::const_iterator pos= mvMDAtomGroup.begin();pos!= mvMDAtomGroup.end();++pos)
-      for(set<MolAtom*>::iterator at=pos->mvpAtom.begin();at!=pos->mvpAtom.end();++at)
+      for(set<MolAtom*>::const_iterator at=pos->mvpAtom.begin();at!=pos->mvpAtom.end();++at)
          mvMDFullAtomGroup.insert(*at);
    cout<<"Full MD atom group:"<<endl<<" ";
    for(set<MolAtom*>::const_iterator pos=mvMDFullAtomGroup.begin();pos!=mvMDFullAtomGroup.end();++pos)
