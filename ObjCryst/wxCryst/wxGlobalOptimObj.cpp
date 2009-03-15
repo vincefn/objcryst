@@ -278,10 +278,14 @@ mFinalCost(finalCost),mDoMultiple(multiple)
 void *WXGlobalOptimRunThread::Entry()
 {
    cout <<endl<<"Entering refinement thread "<<endl<<endl;
-   if(mDoMultiple) mpGlobalOptObj->MultiRunOptimize(*mpNbRun,*mpNbTrial,false,mFinalCost);
-   else mpGlobalOptObj->Optimize(*mpNbTrial,false,mFinalCost);
+   try{
+      if(mDoMultiple) mpGlobalOptObj->MultiRunOptimize(*mpNbRun,*mpNbTrial,false,mFinalCost);
+      else mpGlobalOptObj->Optimize(*mpNbTrial,false,mFinalCost);
+   }
+   catch(...){cout<<"Unhandled exception in WXGlobalOptimRunThread::Entry() ?"<<endl;}
    return NULL;
 }
+
 void WXGlobalOptimRunThread::OnExit()
 {
    cout <<endl<<"Exiting refinement thread "<<endl<<endl;

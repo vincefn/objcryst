@@ -28,6 +28,8 @@
 #include "Quirks/VFNDebug.h"
 #include "Quirks/Chronometer.h"
 #include "ObjCryst/IO.h"
+#include "RefinableObj/LSQNumObj.h"
+
 #ifdef __WX__CRYST__
    #include "wxCryst/wxRefinableObj.h"
    #undef GetClassName // Conflict from wxMSW headers ? (cygwin)
@@ -577,12 +579,14 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
       {
          case GLOBAL_OPTIM_SIMULATED_ANNEALING:
          {
-            this->RunSimulatedAnnealing(nbStep,silent,finalcost,maxTime);
+            try{this->RunSimulatedAnnealing(nbStep,silent,finalcost,maxTime);}
+            catch(...){cout<<"Unhandled exception in MonteCarloObj::MultiRunOptimize() ?"<<endl;}
             break;
          }
          case GLOBAL_OPTIM_PARALLEL_TEMPERING:
          {
-            this->RunParallelTempering(nbStep,silent,finalcost,maxTime);
+            try{this->RunParallelTempering(nbStep,silent,finalcost,maxTime);}
+            catch(...){cout<<"Unhandled exception in MonteCarloObj::MultiRunOptimize() ?"<<endl;}
             break;
          }
          case GLOBAL_OPTIM_GENETIC: //:TODO:
@@ -868,6 +872,44 @@ void MonteCarloObj::RunSimulatedAnnealing(long &nbStep,const bool silent,
       }
 
    }
+   #if 0
+   // LSQ
+   cout<<"Beginning LSQ refinement"<<endl;
+   LSQNumObj lsq;
+   for(unsigned int i=0;i<mRecursiveRefinedObjList.GetNb();++i)
+      if(mRecursiveRefinedObjList.GetObj(i).GetClassName()=="PowderPattern")
+         lsq.SetRefinedObj(mRecursiveRefinedObjList.GetObj(i));
+   lsq.PrepareRefParList(true,true);
+   lsq.SetParIsFixed(gpRefParTypeObjCryst,true);
+   lsq.SetParIsFixed(gpRefParTypeScatt,false);
+   lsq.SetParIsFixed(gpRefParTypeScattDataScale,false);
+   //lsq.SetParIsUsed(gpRefParTypeScattDataProfile,true);
+   //lsq.SetParIsUsed(gpRefParTypeScattDataCorrPos,true);
+   //lsq.SetParIsUsed(gpRefParTypeScattDataBackground,true);
+   //lsq.SetParIsUsed(gpRefParTypeUnitCell,true);
+   try {lsq.Refine(20,true,false);}
+   catch(const ObjCrystException &except){};
+   #endif
+   REAL cost=this->GetLogLikelihood();
+   if(cost<mCurrentCost)
+   {
+      mCurrentCost=cost;
+      mRefParList.SaveParamSet(lastParSavedSetIndex);
+      if(mCurrentCost<runBestCost)
+      {
+         runBestCost=mCurrentCost;
+         mRefParList.SaveParamSet(runBestIndex);
+         if(runBestCost<mBestCost)
+         {
+            mBestCost=mCurrentCost;
+            mRefParList.SaveParamSet(mBestParSavedSetIndex);
+            if(!silent) cout << "LSQ : NEW OVERALL Best Cost="<<runBestCost<< endl;
+         }
+         else if(!silent) cout << " LSQ : NEW Run Best Cost="<<runBestCost<< endl;
+      }
+   }
+   cout<<"Finished LSQ refinement"<<endl;
+
    mLastOptimTime=chrono.seconds();
    //Restore Best values
    mRefParList.RestoreParamSet(runBestIndex);
@@ -1418,6 +1460,46 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
       mMutexStopAfterCycle.Unlock();
       #endif
    }//Trials
+   
+   #if 0
+   // LSQ
+   cout<<"Beginning LSQ refinement"<<endl;
+   LSQNumObj lsq;
+   for(unsigned int i=0;i<mRecursiveRefinedObjList.GetNb();++i)
+      if(mRecursiveRefinedObjList.GetObj(i).GetClassName()=="PowderPattern")
+         lsq.SetRefinedObj(mRecursiveRefinedObjList.GetObj(i));
+   lsq.PrepareRefParList(true,true);
+   lsq.SetParIsFixed(gpRefParTypeObjCryst,true);
+   lsq.SetParIsFixed(gpRefParTypeScatt,false);
+   lsq.SetParIsFixed(gpRefParTypeScattDataScale,false);
+   //lsq.SetParIsUsed(gpRefParTypeScattDataProfile,true);
+   //lsq.SetParIsUsed(gpRefParTypeScattDataCorrPos,true);
+   //lsq.SetParIsUsed(gpRefParTypeScattDataBackground,true);
+   //lsq.SetParIsUsed(gpRefParTypeUnitCell,true);
+   try {lsq.Refine(20,true,false);}
+   catch(const ObjCrystException &except){};
+   #endif
+   REAL cost=this->GetLogLikelihood();
+   if(cost<mCurrentCost)
+   {
+      mCurrentCost=cost;
+      mRefParList.SaveParamSet(lastParSavedSetIndex);
+      if(mCurrentCost<runBestCost)
+      {
+         runBestCost=mCurrentCost;
+         mRefParList.SaveParamSet(runBestIndex);
+         if(runBestCost<mBestCost)
+         {
+            mBestCost=mCurrentCost;
+            mRefParList.SaveParamSet(mBestParSavedSetIndex);
+            if(!silent) cout << "LSQ : NEW OVERALL Best Cost="<<runBestCost<< endl;
+         }
+         else if(!silent) cout << " LSQ : NEW Run Best Cost="<<runBestCost<< endl;
+      }
+   }
+   cout<<"Finished LSQ refinement"<<endl;
+   
+   
    mLastOptimTime=chrono.seconds();
    //Restore Best values
       //mRefParList.Print();
