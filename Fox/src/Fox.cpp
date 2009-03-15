@@ -80,7 +80,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 1101
+#define __FOXREVISION__ 1105
 
 static std::string foxVersion;
 
@@ -560,7 +560,14 @@ int main (int argc, char *argv[])
          {
             wxFileInputStream is(name);
             stringstream sst;
-            while (!is.Eof()) sst<<(char)is.GetC();
+            if(is.GetSize()>0)
+            {
+               char * tmpbuf=new char[is.GetSize()];
+               is.Read(tmpbuf,is.GetSize());
+               sst<<tmpbuf;
+               delete[] tmpbuf;
+            }
+            else while (!is.Eof()) sst<<(char)is.GetC();
             XMLCrystFileLoadAllObject(sst);
          }
          else
@@ -588,7 +595,14 @@ int main (int argc, char *argv[])
          cout<<"Loading: "<<wxString(argv[i]).ToAscii()<<endl;
          wxFileInputStream is(argv[i]);
          stringstream in;
-         while (!is.Eof()) in<<(char)is.GetC();
+         if(is.GetSize()>0)
+         {
+            char * tmpbuf=new char[is.GetSize()];
+            is.Read(tmpbuf,is.GetSize());
+            in<<tmpbuf;
+            delete[] tmpbuf;
+         }
+         else while (!is.Eof()) in<<(char)is.GetC();
          #else
          cout<<"Loading: "<<argv[i]<<endl;
          ifstream in (argv[i]);
@@ -1031,7 +1045,14 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
       {
          wxFileInputStream is(open->GetPath());
          stringstream in;
-         while (!is.Eof()) in<<(char)is.GetC();
+         if(is.GetSize()>0)
+         {
+            char * tmpbuf=new char[is.GetSize()];
+            is.Read(tmpbuf,is.GetSize());
+            in<<tmpbuf;
+            delete[] tmpbuf;
+         }
+         else while (!is.Eof()) in<<(char)is.GetC();
          XMLCrystFileLoadAllObject(in);
       }
       else
@@ -1039,7 +1060,14 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
          {
             wxFileInputStream is(open->GetPath());
             stringstream in;
-            while (!is.Eof()) in<<(char)is.GetC();
+            if(is.GetSize()>0)
+            {
+               char * tmpbuf=new char[is.GetSize()];
+               is.Read(tmpbuf,is.GetSize());
+               in<<tmpbuf;
+               delete[] tmpbuf;
+            }
+            else while (!is.Eof()) in<<(char)is.GetC();
             ObjCryst::CIF cif(in,true,true);
             CreateCrystalFromCIF(cif);
             CreatePowderPatternFromCIF(cif);
