@@ -2635,7 +2635,7 @@ void PowderPattern::ImportPowderPatternGSAS(const string &filename)
 Error opening file for input:"+filename);
    }
    {//Get rid of title
-      char title[80];
+      char title[81];
       fin.read(title,80);
       while(isprint(fin.peek())==false)
       {
@@ -2655,7 +2655,7 @@ Error opening file for input:"+filename);
    char bank[5];
    do
    {
-      fin.read(line,80);
+      fin.getline(line,80);
       while(isprint(fin.peek())==false)
       {
          if(fin.eof()) break;
@@ -2757,7 +2757,6 @@ Could not find BANK statement !! In file: "+filename);
             else sscanf(substr.c_str(),"%d",&nc);
             substr=string(line).substr(j*8+2 ,6);
             sscanf(substr.c_str(),"%f",&iobs);
-            
             mPowderPatternObs(point)=iobs;
             mPowderPatternObsSigma(point++)=sqrt(iobs)/sqrt((REAL)nc);
             if(point==mNbPoint) break;
