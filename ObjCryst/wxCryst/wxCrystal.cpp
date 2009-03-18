@@ -2742,7 +2742,7 @@ BEGIN_EVENT_TABLE(WXGLCrystalCanvas, wxGLCanvas)
    EVT_UPDATE_UI(ID_GLCRYSTAL_UPDATEUI,WXGLCrystalCanvas::OnUpdateUI)
 END_EVENT_TABLE()
 
-int AttribList [] = {WX_GL_RGBA , WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 32,0};
+int AttribList [] = {WX_GL_RGBA , WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 16};
 
 WXGLCrystalCanvas::WXGLCrystalCanvas(WXCrystal *wxcryst,
                                      wxFrame *parent, wxWindowID id,
@@ -3433,6 +3433,9 @@ void WXGLCrystalCanvas::InitGL()
    
    //Initialize Trackball
    trackball(mQuat,0.,0.,0.,0.);
+   
+   wxSizeEvent ev;
+   wxPostEvent(this,ev);
    
    //First display
    this->CrystUpdate();
