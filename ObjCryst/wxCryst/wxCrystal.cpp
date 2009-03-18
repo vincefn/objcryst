@@ -805,6 +805,7 @@ void WXCrystal::OnMenuCrystalGL(wxCommandEvent & WXUNUSED(event))
    frame->CreateStatusBar(1);
    frame->SetStatusText( wxString::FromAscii(mpCrystal->GetName().c_str()));
    #endif
+   
    frame->Show(true);
    if(mpCrystalGL!=0)
    {
@@ -2741,7 +2742,7 @@ BEGIN_EVENT_TABLE(WXGLCrystalCanvas, wxGLCanvas)
    EVT_UPDATE_UI(ID_GLCRYSTAL_UPDATEUI,WXGLCrystalCanvas::OnUpdateUI)
 END_EVENT_TABLE()
 
-int AttribList [] = {WX_GL_RGBA , WX_GL_DOUBLEBUFFER};
+int AttribList [] = {WX_GL_RGBA , WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 32,0};
 
 WXGLCrystalCanvas::WXGLCrystalCanvas(WXCrystal *wxcryst,
                                      wxFrame *parent, wxWindowID id,
@@ -2990,7 +2991,6 @@ void WXGLCrystalCanvas::OnSize(wxSizeEvent& event)
       if( (width>0)&&(height>0)) //in case the window is docked...
          gluPerspective(mViewAngle,(float)width/(float)height,1.f,2.*mDist);   
    }
-   this->Refresh(false);
    VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnSize():End",7)
 }
 
@@ -3392,7 +3392,22 @@ void WXGLCrystalCanvas::InitGL()
 {
    VFN_DEBUG_ENTRY("WXGLCrystalCanvas::InitGL()",8)
    this->SetCurrent();
-    
+   #ifdef HAVE_GLUT
+   static bool needglutinit=true;
+   if(needglutinit)
+   {
+      needglutinit=false;
+      //glutInit(&(wxApp::GetInstance()->argc),wxApp::GetInstance()->argv);
+      char **argv=new char*;
+      int argc=0;
+      glutInit(&argc,argv);// We cannot pass arguments directly in Unicode mode, so...
+   }
+   #endif
+   
+   int width, height;
+   GetClientSize(& width, & height);
+   glViewport(0, 0, width, height);
+      
    glEnable(GL_DEPTH_TEST);
    glEnable(GL_LIGHTING);
    //glEnable (GL_BLEND);
@@ -3418,21 +3433,6 @@ void WXGLCrystalCanvas::InitGL()
    
    //Initialize Trackball
    trackball(mQuat,0.,0.,0.,0.);
-   
-   #ifdef HAVE_GLUT
-   static bool needglutinit=true;
-   if(needglutinit)
-   {
-      needglutinit=false;
-      //glutInit(&(wxApp::GetInstance()->argc),wxApp::GetInstance()->argv);
-      char **argv=new char*;
-      int argc=0;
-      glutInit(&argc,argv);// We cannot pass arguments directly in Unicode mode, so...
-   }
-   #endif
-
-   wxSizeEvent event;
-   this->OnSize(event);
    
    //First display
    this->CrystUpdate();
