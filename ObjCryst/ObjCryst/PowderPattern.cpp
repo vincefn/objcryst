@@ -4316,7 +4316,7 @@ void PowderPattern::AddExcludedRegion(const REAL min,const REAL max)
 
 REAL PowderPattern::GetLogLikelihood()const
 {
-   REAL tmp=this->GetChi2();
+   REAL tmp=this->GetChi2_Option();
    tmp+=mChi2LikeNorm;
    return tmp;
 }
