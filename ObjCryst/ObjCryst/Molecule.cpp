@@ -1966,6 +1966,12 @@ void Molecule::XMLOutput(ostream &os,int indent)const
    for(int i=0;i<indent;i++) os << "  " ;
    XMLCrystTag tag("Molecule");
    tag.AddAttribute("Name",mName);
+   stringstream sst;
+   sst<<mMDMoveFreq;
+   tag.AddAttribute("MDMoveFreq",sst.str());
+   sst.str("");
+   sst<<mMDMoveEnergy;
+   tag.AddAttribute("MDMoveEnergy",sst.str());
    os <<tag<<endl;
    indent++;
    
@@ -2045,6 +2051,14 @@ void Molecule::XMLInput(istream &is,const XMLCrystTag &tag)
       if("Name"==tag.GetAttributeName(i))
       {
          mName=tag.GetAttributeValue(i);
+      }
+      if("MDMoveFreq"==tag.GetAttributeName(i))
+      {
+         mMDMoveFreq=atof(tag.GetAttributeValue(i).c_str());
+      }
+      if("MDMoveEnergy"==tag.GetAttributeName(i))
+      {
+         mMDMoveEnergy=atof(tag.GetAttributeValue(i).c_str());
       }
    }
    while(true)
