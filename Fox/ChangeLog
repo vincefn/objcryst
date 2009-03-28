@@ -1,4 +1,20 @@
+#### 1.8.1 - March 2009 (Revision #1113)
+NEW FEATURES
+   * Add an option to use molecular dynamics random moves
+   when generating new molecule conformations, for molecules
+   with severe restraints (e.g. macro-cycles)
+   * Add a menu to test random moves of a crystal structure for 30s
+
+BUG FIXES
+   * Correct calculation speed for powder patterns when using
+   integrated profiles
+   * Correct display of colours in 3D view for Mac OSX
+   * Correct import of gsas raw format
+   * Faster read of uncompressed xml files under windows
+   * Many fixes for the Linux unicode build of Fox
+   
 #### 1.8.0.3 - February 2009 (Revision #1088)
+BUG FIXES
    * Fixed reading, writing files and display of labels in the
    linux unicode version of Fox
 
