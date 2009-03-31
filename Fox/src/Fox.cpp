@@ -80,7 +80,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 1113
+#define __FOXREVISION__ 1115
 
 static std::string foxVersion;
 
@@ -108,11 +108,23 @@ class WXCrystScrolledWindow:public wxScrolledWindow
       WXCrystScrolledWindow(wxWindow* parent);
       virtual bool Layout();
       void SetChild(wxWindow* pChild);
+#if (wxVERSION_NUMBER>=2808) && (wxVERSION_NUMBER<=2811)
+      void OnWXCrystChildFocus(wxChildFocusEvent& event);
+#endif
    private:
       wxWindow* mpChild;
       int mHeight,mWidth;
       wxBoxSizer *mpSizer;
+#if (wxVERSION_NUMBER>=2808) && (wxVERSION_NUMBER<=2811)
+    DECLARE_EVENT_TABLE()
+#endif
 };
+
+#if (wxVERSION_NUMBER>=2808) && (wxVERSION_NUMBER<=2811)
+BEGIN_EVENT_TABLE(WXCrystScrolledWindow, wxScrolledWindow)
+   EVT_CHILD_FOCUS(WXCrystScrolledWindow::OnWXCrystChildFocus)
+END_EVENT_TABLE()
+#endif
 
 // main frame
 class WXCrystMainFrame : public wxFrame
@@ -293,6 +305,7 @@ int STRCMP(const char* s1,const char* s2){ return strcmp(s1,s2);}
 int main (int argc, char *argv[])
 #endif
 {
+cout<<wxVERSION_NUMBER<<endl;
    TAU_PROFILE_SET_NODE(0); // sequential code 
    TAU_PROFILE("main()","int()",TAU_DEFAULT);
    //set locale settings to standard
@@ -300,7 +313,7 @@ int main (int argc, char *argv[])
    
    {// Fox version
       char verBuf[200];
-      sprintf(verBuf,"1.8.1-#%d",__FOXREVISION__);
+      sprintf(verBuf,"1.8.1.1-#%d",__FOXREVISION__);
       foxVersion=verBuf;
    }
    bool useGUI(true);
@@ -868,6 +881,13 @@ void WXCrystScrolledWindow::SetChild(wxWindow* pChild)
    //this->SetScrollbars(40,40,2,2);
 }
 
+#if (wxVERSION_NUMBER>=2808) && (wxVERSION_NUMBER<=2811)
+void WXCrystScrolledWindow::OnWXCrystChildFocus(wxChildFocusEvent& event)
+{
+   // Workaround for wx 2.8.8+ bug
+   //event.Skip();
+}
+#endif
 // ----------------------------------------------------------------------------
 // main frame
 // ----------------------------------------------------------------------------
