@@ -80,7 +80,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 1115
+#define __FOXREVISION__ 1117
 
 static std::string foxVersion;
 
@@ -313,7 +313,7 @@ cout<<wxVERSION_NUMBER<<endl;
    
    {// Fox version
       char verBuf[200];
-      sprintf(verBuf,"1.8.1.1-#%d",__FOXREVISION__);
+      sprintf(verBuf,"1.8.1.2-#%d",__FOXREVISION__);
       foxVersion=verBuf;
    }
    bool useGUI(true);
