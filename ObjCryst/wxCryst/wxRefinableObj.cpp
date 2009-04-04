@@ -85,7 +85,7 @@ END_EVENT_TABLE()
 WXFieldRefPar::WXFieldRefPar(wxWindow *parent,const string& label,
                              RefinablePar *par, const int hsize,
                              const bool enableFixButton, const bool enableLimitedButton):
-WXField(parent,label,ID_WXFIELD_REFPAR),mValue(0.),mpRefPar(par),mIsSelfUpdating(false)
+WXField(parent,label,ID_WXFIELD_REFPAR),mValue(0.),mpRefPar(par),mIsSelfUpdating(false),mFormat(_T("%8f"))
 {
    VFN_DEBUG_MESSAGE("WXFieldRefPar::WXFieldName():End",6)
    if(enableFixButton)
@@ -246,8 +246,8 @@ void WXFieldRefPar::UpdateUI(const bool lock)
    
    //mpField->SetValue(wxString::Printf("%f",mValue));
    wxString tmp;
-   if((abs(mValue)<100)&&(abs(mValue)>0.01)) tmp.Printf(_T("%6.4f"),mValue);
-   else tmp.Printf(_T("%f"),mValue);
+   //if((abs(mValue)<100)&&(abs(mValue)>0.01)) tmp.Printf(_T("%6.4f"),mValue);
+   tmp.Printf(mFormat,mValue);
    mIsSelfUpdating=true;
    mpField->SetValue(tmp);
    mIsSelfUpdating=false;
@@ -277,6 +277,11 @@ void WXFieldRefPar::ValidateUserInput()
 }
 
 void WXFieldRefPar::SetToolTip(const wxString& tip){mpField->SetToolTip(tip);}
+
+void WXFieldRefPar::SetFormat(const wxString &format)
+{
+   mFormat=format;
+}
 
 ////////////////////////////////////////////////////////////////////////
 //

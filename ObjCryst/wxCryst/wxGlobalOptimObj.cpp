@@ -339,6 +339,9 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(10000000),mNbRun(-1)
       mList.Add(tempMax);
       mList.Add(tempMin);
       mList.Add(tempGamma);
+      tempMax->SetFormat(_T("%8f"));
+      tempMin->SetFormat(_T("%8f"));
+      tempGamma->SetFormat(_T("%8f"));
       
       opt=new WXFieldOption(this,-1,&(mpMonteCarloObj->mAnnealingScheduleMutation));
       mpSizer->Add(opt,0,wxALIGN_LEFT);
@@ -358,6 +361,9 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(10000000),mNbRun(-1)
       mList.Add(ampMax);
       mList.Add(ampMin);
       mList.Add(ampGamma);
+      ampMax->SetFormat(_T("%8f"));
+      ampMin->SetFormat(_T("%8f"));
+      ampGamma->SetFormat(_T("%8f"));
       
       opt=new WXFieldOption(this,-1,&(mpMonteCarloObj->mSaveTrackedData));
       mpSizer->Add(opt,0,wxALIGN_LEFT);
@@ -380,6 +386,7 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(10000000),mNbRun(-1)
       mpWXFieldNbTrial=new WXFieldPar<long>(this,"Number of trials per run:",-1,&mNbTrial,70);
       mpSizer->Add(mpWXFieldNbTrial);
       mList.Add(mpWXFieldNbTrial);
+      mpWXFieldNbTrial->SetFormat(_T("%ld"));
       mpWXFieldNbTrial->SetToolTip(_T("Number of triels per run.\n")
              _T("This number will be updated during the optimization.\n\n")
              _T("Using Multiple Runs:\n")
@@ -391,13 +398,15 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(10000000),mNbRun(-1)
       WXFieldPar<long> *pWXFieldNbRun=new WXFieldPar<long>(this,"Number of Runs to perform:",-1,&mNbRun,40);
       mpSizer->Add(pWXFieldNbRun);
       mList.Add(pWXFieldNbRun);
+      pWXFieldNbRun->SetFormat(_T("%ld"));
       pWXFieldNbRun->SetToolTip(_T("Number of runs to perform (for Multiple Runs).\n")
                                 _T("Use -1 (the default) to run an infinite number of Runs.\n\n")
                                 _T("The model will be randomized at the beginning of each run.\n"));
    // Best cost so far
-      WXFieldPar<REAL> *pWXFieldBestCost=new WXFieldPar<REAL>(this,"Overall Best Cost:",-1,&(mpMonteCarloObj->GetBestCost()),70);
+      WXFieldPar<REAL> *pWXFieldBestCost=new WXFieldPar<REAL>(this,"Overall Best Cost:",-1,&(mpMonteCarloObj->GetBestCost()),130);
       mpSizer->Add(pWXFieldBestCost);
       mList.Add(pWXFieldBestCost);
+      pWXFieldBestCost->SetFormat(_T("%12.2f"));
       pWXFieldBestCost->SetToolTip(_T("Overall (all runs) Best Cost"));
    this->BottomLayout(0);
    this->CrystUpdate(true);

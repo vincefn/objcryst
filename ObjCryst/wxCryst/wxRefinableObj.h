@@ -85,6 +85,8 @@ class WXFieldRefPar:public WXField
       virtual void ValidateUserInput();
       /// Set tooltip for this window. It will be activated when going over the entry field.
       virtual void SetToolTip(const wxString& tip);
+      /// Set Format
+      void SetFormat(const wxString &format);
    protected:
       REAL mValue;
       wxCheckBox *mpButtonFix;
@@ -93,6 +95,8 @@ class WXFieldRefPar:public WXField
       RefinablePar *mpRefPar;
       REAL mValueOld;
       bool mIsSelfUpdating;
+      /// Format to be used, default = _T("%8f")
+      wxString mFormat;
    DECLARE_EVENT_TABLE()
 };
 

@@ -445,27 +445,31 @@ mChi2(0.0),mGoF(0.0),mRwp(0.0),mRp(0.0)
    // Statistics
       wxBoxSizer* pStats=new wxBoxSizer(wxHORIZONTAL);
       
-      WXFieldPar<REAL> *pWXFieldChi2=new WXFieldPar<REAL>(this,"Chi^2",-1,&mChi2,100);
+      WXFieldPar<REAL> *pWXFieldChi2=new WXFieldPar<REAL>(this,"Chi^2",-1,&mChi2,140);
       pStats->Add(pWXFieldChi2    ,0,wxALIGN_CENTER);
       mList.Add(pWXFieldChi2);
       pWXFieldChi2->SetToolTip(_T("Chi^2=SUM[(Obs_i-Calc_i)^2/Sigma_i^2]"));
+      dynamic_cast<WXFieldParBase *>(pWXFieldChi2)->SetFormat(_T("%10.2f"));
       
-      WXFieldPar<REAL> *pWXFieldGof=new WXFieldPar<REAL>(this,"GoF",-1,&mGoF,70);
+      WXFieldPar<REAL> *pWXFieldGof=new WXFieldPar<REAL>(this,"GoF",-1,&mGoF,90);
       pStats->Add(pWXFieldGof    ,0,wxALIGN_CENTER);
       mList.Add(pWXFieldGof);
       pWXFieldGof->SetToolTip(_T("GoF=Chi^2/NbPoints"));
+      dynamic_cast<WXFieldParBase *>(pWXFieldGof)->SetFormat(_T("%8.3f"));
       
       WXFieldPar<REAL> *pWXFieldRwp=new WXFieldPar<REAL>(this,"Rwp",-1,&mRwp,70);
       pStats->Add(pWXFieldRwp    ,0,wxALIGN_CENTER);
       mList.Add(pWXFieldRwp);
       pWXFieldRwp->SetToolTip(_T("Full profile R-factor (weighted)\n")
                               _T("Will use integrated profiles if option is set."));
+      dynamic_cast<WXFieldParBase *>(pWXFieldRwp)->SetFormat(_T("%8.4f"));
       
       WXFieldPar<REAL> *pWXFieldRp=new WXFieldPar<REAL>(this,"Rp",-1,&mRp,70);
       pStats->Add(pWXFieldRp    ,0,wxALIGN_CENTER);
       mList.Add(pWXFieldRp);
       pWXFieldRp->SetToolTip(_T("Full profile R-factor (unweighted)\n")
                              _T("Will use integrated profiles if option is set."));
+      dynamic_cast<WXFieldParBase *>(pWXFieldRp)->SetFormat(_T("%8.4f"));
       //pStats->SetSizeHints(this);
       //pStats->Layout();
       
@@ -930,10 +934,28 @@ void WXPowderPattern::OnMenuAddExclude(wxCommandEvent & WXUNUSED(event))
 
 void WXPowderPattern::OnMenuLeBail(wxCommandEvent& event)
 {
+   #if 0
    wxFrame *pFrame=new wxFrame(this,-1,_T("Profile Fitting"));
    WXProfileFitting *pFit;
    pFit=new WXProfileFitting(pFrame,&(this->GetPowderPattern()));
    pFrame->Show(true);
+   #else
+   cout<<"Beginning refinement"<<endl;
+   LSQNumObj lsq;
+   lsq.SetRefinedObj(this->GetPowderPattern());
+   lsq.PrepareRefParList(true,true);
+   lsq.SetParIsFixed(gpRefParTypeObjCryst,true);
+   lsq.SetParIsFixed(gpRefParTypeScatt,false);
+   lsq.SetParIsFixed(gpRefParTypeScattDataScale,false);
+   //lsq.SetParIsUsed(gpRefParTypeScattDataProfile,true);
+   //lsq.SetParIsUsed(gpRefParTypeScattDataCorrPos,true);
+   //lsq.SetParIsUsed(gpRefParTypeScattDataBackground,true);
+   //lsq.SetParIsUsed(gpRefParTypeUnitCell,true);
+   try {lsq.Refine(10,true,false);}
+   catch(const ObjCrystException &except){};
+   cout<<"Finishing refinement"<<endl;
+   this->GetPowderPattern().UpdateDisplay();
+   #endif
 }
 
 void WXPowderPattern::OnMenuExport(wxCommandEvent &event)

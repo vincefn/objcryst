@@ -416,6 +416,8 @@ class WXFieldParBase:public WXField
       virtual void ValidateUserInput();
       /// Set tooltip for this window. It will be activated when going over the entry field.
       virtual void SetToolTip(const wxString& tip);
+      /// Set Format
+      void SetFormat(const wxString &format);
    protected:
       /// Reads the new value when the Enter key is hit
       virtual void ReadNewValue()=0;
@@ -424,6 +426,8 @@ class WXFieldParBase:public WXField
       /// Set to true if the Field is being updated, so that no 
       /// 'EVT_TEXT' is understood as user input.
       bool mIsSelfUpdating;
+      /// Format to be used, default = _T("%8f")
+      wxString mFormat;
    DECLARE_EVENT_TABLE()
 };
 

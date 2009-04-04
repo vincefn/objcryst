@@ -450,6 +450,8 @@ mpCrystalGL(0)
       mpSizer->Add(pAntiBumpSizer,0,wxALIGN_LEFT);
       mList.Add(pWXFieldBumpMerge);
       mList.Add(pAntiBumpScale);
+      dynamic_cast<WXFieldParBase *>(pWXFieldBumpMerge)->SetFormat(_T("%8.2f"));
+      dynamic_cast<WXFieldParBase *>(pAntiBumpScale)->SetFormat(_T("%8.2f"));
    // Bond Valence cost
       wxBoxSizer* pBondValenceSizer=new wxBoxSizer(wxHORIZONTAL);
       WXFieldPar<REAL> *pWXFieldBondValence=
@@ -461,6 +463,8 @@ mpCrystalGL(0)
       mpSizer->Add(pBondValenceSizer,0,wxALIGN_LEFT);
       mList.Add(pWXFieldBondValence);
       mList.Add(pBondValenceScale);
+      dynamic_cast<WXFieldParBase *>(pWXFieldBondValence)->SetFormat(_T("%8.2f"));
+      dynamic_cast<WXFieldParBase *>(pBondValenceScale)->SetFormat(_T("%8.2f"));
    // Lattice
       wxBoxSizer* lattice=new wxBoxSizer(wxHORIZONTAL);
 
@@ -492,6 +496,13 @@ mpCrystalGL(0)
       mList.Add(pFieldLatticeAlpha);
       mList.Add(pFieldLatticeBeta);
       mList.Add(pFieldLatticeGamma);
+      
+      dynamic_cast<WXFieldRefPar *>(pFieldLatticeA)->SetFormat(_T("%8.4f"));
+      dynamic_cast<WXFieldRefPar *>(pFieldLatticeB)->SetFormat(_T("%8.4f"));
+      dynamic_cast<WXFieldRefPar *>(pFieldLatticeC)->SetFormat(_T("%8.4f"));
+      dynamic_cast<WXFieldRefPar *>(pFieldLatticeAlpha)->SetFormat(_T("%8.3f"));
+      dynamic_cast<WXFieldRefPar *>(pFieldLatticeBeta)->SetFormat(_T("%8.3f"));
+      dynamic_cast<WXFieldRefPar *>(pFieldLatticeGamma)->SetFormat(_T("%8.3f"));
       
    // SpaceGroup
       mpFieldSpacegroup=new WXFieldName(this,"SpaceGroup:",this,ID_CRYSTAL_SPACEGROUP,100);

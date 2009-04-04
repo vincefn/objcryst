@@ -549,7 +549,7 @@ END_EVENT_TABLE()
 
 WXFieldParBase::WXFieldParBase(wxWindow *parent,const string& label,
                                const int id, const int hsize):
-WXField(parent,label,id),mIsSelfUpdating(false)
+WXField(parent,label,id),mIsSelfUpdating(false),mFormat(_T("%8f"))
 {
    VFN_DEBUG_MESSAGE("WXFieldParBase::WXFieldName():End",6)
 
@@ -586,6 +586,11 @@ void WXFieldParBase::ValidateUserInput()
 
 void WXFieldParBase::SetToolTip(const wxString& tip){mpField->SetToolTip(tip);}
 
+void WXFieldParBase::SetFormat(const wxString &format)
+{
+   mFormat=format;
+}
+
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXFieldPar<T>
@@ -595,6 +600,14 @@ template<class T> WXFieldPar<T>::WXFieldPar(wxWindow *parent,const string& label
                                             const int id,T *par,const int hsize):
 WXFieldParBase(parent,label,id,hsize),mpValue(par),mValue(*par),mValueOld(*par),mHumanScale(1)
 {
+   this->CrystUpdate(true,true);
+}
+
+template<> WXFieldPar<long>::WXFieldPar(wxWindow *parent,const string& label, 
+                                            const int id,long *par,const int hsize):
+WXFieldParBase(parent,label,id,hsize),mpValue(par),mValue(*par),mValueOld(*par),mHumanScale(1)
+{
+   mFormat=_T("%ld");
    this->CrystUpdate(true,true);
 }
 
@@ -625,8 +638,8 @@ template<> void WXFieldPar<REAL>::UpdateUI(const bool lock)
    }
    VFN_DEBUG_ENTRY("WXFieldPar<REAL>::UpdateUI("<<lock<<")"<<"MainThread="<<wxThread::IsMain(),4)
    wxString tmp;
-   if((abs(mValue*mHumanScale)<100)&&(abs(mValue*mHumanScale)>0.01)) tmp.Printf(_T("%6.4f"),mValue*mHumanScale);
-   else tmp.Printf(_T("%f"),mValue*mHumanScale);
+   if((abs(mValue*mHumanScale)<1000)&&(abs(mValue*mHumanScale)>0.01)) tmp.Printf(_T("%6.4f"),mValue*mHumanScale);
+   else tmp.Printf(mFormat,mValue*mHumanScale);
    mIsSelfUpdating=true;
    mpField->SetValue(tmp);
    mIsSelfUpdating=false;
@@ -645,7 +658,7 @@ template<> void WXFieldPar<long>::UpdateUI(const bool lock)
    }
    VFN_DEBUG_ENTRY("WXFieldPar<long>::UpdateUI("<<lock<<")"<<"MainThread="<<wxThread::IsMain(),4)
    wxString tmp;
-   tmp.Printf(_T("%ld"),mValue*mHumanScale);
+   tmp.Printf(mFormat,mValue*mHumanScale);
    mIsSelfUpdating=true;
    mpField->SetValue(tmp);
    mIsSelfUpdating=false;
