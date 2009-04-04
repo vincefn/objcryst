@@ -1,3 +1,8 @@
+#### 1.8.1.2 - April 2009 (Revision #1117)
+BUG FIXES
+   * Fix auto-scrolling bug with wxWidgets >=2.8.8
+   * Better formatting of some fields (overall cost,...)
+
 #### 1.8.1 - March 2009 (Revision #1113)
 NEW FEATURES
    * Add an option to use molecular dynamics random moves
