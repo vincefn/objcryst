@@ -80,7 +80,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 1117
+#define __FOXREVISION__ 1119
 
 static std::string foxVersion;
 
@@ -305,7 +305,6 @@ int STRCMP(const char* s1,const char* s2){ return strcmp(s1,s2);}
 int main (int argc, char *argv[])
 #endif
 {
-cout<<wxVERSION_NUMBER<<endl;
    TAU_PROFILE_SET_NODE(0); // sequential code 
    TAU_PROFILE("main()","int()",TAU_DEFAULT);
    //set locale settings to standard
