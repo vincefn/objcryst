@@ -1102,6 +1102,7 @@ class Molecule: public Scatterer
          mutable RefinableObjClock mClockStretchModeBondAngle;
          mutable RefinableObjClock mClockStretchModeTorsion;
          mutable RefinableObjClock mClockStretchModeTwist;
+         mutable RefinableObjClock mClockMDAtomGroup;
          
       // For local minimization (EXPERIMENTAL)
          unsigned long mLocalParamSet;

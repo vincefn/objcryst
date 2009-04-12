@@ -2168,7 +2168,27 @@ void Molecule::BeginOptimization(const bool allowApproximations,const bool enabl
       mAutoOptimizeConformation.SetChoice(1);
    }
    #endif
-   if(!mIsSelfOptimizing)
+   
+   RefinableObjClock clockConf, clockMode;
+   clockConf=mClockAtomList;
+   if(clockConf<mClockBondList) clockConf=mClockBondList;
+   if(clockConf<mClockBondAngleList) clockConf=mClockBondAngleList;
+   if(clockConf<mClockDihedralAngleList) clockConf=mClockDihedralAngleList;
+   if(clockConf<mClockRigidGroup) clockConf=mClockRigidGroup;
+   if(clockConf<mClockAtomScattPow) clockConf=mClockAtomScattPow;
+   
+   clockMode=mClockConnectivityTable;
+   if(clockMode<mClockRingList) clockMode=mClockRingList;
+   if(clockMode<mClockRotorGroup) clockMode=mClockRotorGroup;
+   if(clockMode<mClockFlipGroup) clockMode=mClockFlipGroup;
+   if(clockMode<mClockStretchModeBondLength) clockMode=mClockStretchModeBondLength;
+   if(clockMode<mClockStretchModeBondAngle) clockMode=mClockStretchModeBondAngle;
+   if(clockMode<mClockStretchModeTorsion) clockMode=mClockStretchModeTorsion;
+   if(clockMode<mClockStretchModeTwist) clockMode=mClockStretchModeTwist;
+   if(clockMode<mClockMDAtomGroup) clockMode=mClockMDAtomGroup;
+
+
+   if( (!mIsSelfOptimizing) && (clockMode<clockConf))
    {
       #if 0
       this->BuildRotorGroup();
@@ -6696,6 +6716,7 @@ void Molecule::BuildMDAtomGroups()
       cout<<(*pos)->GetName()<<" ";
    cout<<endl;
    #endif
+   mClockMDAtomGroup.Click();
 }
 
 void Molecule::UpdateScattCompList()const
