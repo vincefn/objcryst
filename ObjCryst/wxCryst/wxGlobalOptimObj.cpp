@@ -28,6 +28,8 @@
     #include "wx/wx.h"
 #endif
 
+#include "wx/progdlg.h"
+
 #include "wxCryst/wxGlobalOptimObj.h"
 
 #include "ObjCryst/IO.h"
@@ -63,6 +65,7 @@ static long ID_GLOBALOPT_MENU_OPT=                   WXCRYST_ID();
 static long ID_GLOBALOPT_MENU_OPT_RUN=               WXCRYST_ID(); 
 static long ID_GLOBALOPT_MENU_OPT_RUN_MULTIPLE=      WXCRYST_ID(); 
 static long ID_GLOBALOPT_MENU_OPT_STOP=              WXCRYST_ID(); 
+static long ID_GLOBALOPT_MENU_OPT_LSQ=               WXCRYST_ID(); 
 static long ID_GLOBALOPT_MENU_SOLUTIONS=             WXCRYST_ID(); 
 static long ID_GLOBALOPT_MENU_SOLUTIONS_BROWSE=      WXCRYST_ID(); 
 static long ID_BROWSE_WIN=                           WXCRYST_ID(); 
@@ -95,6 +98,9 @@ WXCrystObj(parent),mpGlobalOptimRunThread(0)
                                 ID_GLOBALOPT_MENU_OPT_RUN,"Single Run");
          mpMenuBar->AddMenuItem(ID_GLOBALOPT_MENU_OPT,
                                 ID_GLOBALOPT_MENU_OPT_STOP,"Stop Optimization");
+         mpMenuBar->GetMenu(ID_GLOBALOPT_MENU_OPT).AppendSeparator();
+         mpMenuBar->AddMenuItem(ID_GLOBALOPT_MENU_OPT,
+                                ID_GLOBALOPT_MENU_OPT_LSQ,"Least Squares Fit");
       mpMenuBar->AddMenu("Solutions",ID_GLOBALOPT_MENU_SOLUTIONS);
          mpMenuBar->AddMenuItem(ID_GLOBALOPT_MENU_SOLUTIONS,
                                 ID_GLOBALOPT_MENU_SOLUTIONS_BROWSE,"Browse Solutions");
@@ -300,12 +306,13 @@ BEGIN_EVENT_TABLE(WXMonteCarloObj, wxWindow)
    EVT_BUTTON(ID_WXOBJ_COLLAPSE,                       WXCrystObj::OnToggleCollapse)
    //EVT_MENU(ID_REFOBJ_MENU_OBJ_SAVE,                   WXOptimizationObj::OnSave)
    //EVT_MENU(ID_REFOBJ_MENU_OBJ_LOAD,                   WXOptimizationObj::OnLoad)
-   EVT_MENU(ID_GLOBALOPT_MENU_OBJECTS_ADDOBJ,        WXOptimizationObj::OnAddRefinedObject)
+   EVT_MENU(ID_GLOBALOPT_MENU_OBJECTS_ADDOBJ,    WXOptimizationObj::OnAddRefinedObject)
    EVT_MENU(ID_GLOBALOPT_MENU_OPT_RUN,           WXOptimizationObj::OnRunOptimization)
    EVT_MENU(ID_GLOBALOPT_MENU_OPT_RUN_MULTIPLE,  WXOptimizationObj::OnRunOptimization)
    EVT_MENU(ID_GLOBALOPT_MENU_OPT_STOP,          WXOptimizationObj::OnStopOptimization)
+   EVT_MENU(ID_GLOBALOPT_MENU_OPT_LSQ,           WXMonteCarloObj::OnLSQRefine)
    EVT_MENU(ID_GLOBALOPT_MENU_SOLUTIONS_BROWSE,  WXOptimizationObj::OnBrowseParamSet)
-   EVT_UPDATE_UI(ID_CRYST_UPDATEUI,                    WXOptimizationObj::OnUpdateUI)
+   EVT_UPDATE_UI(ID_CRYST_UPDATEUI,              WXOptimizationObj::OnUpdateUI)
    EVT_LISTBOX(ID_BROWSE_WIN,                    WXOptimizationObj::OnSelectParamSet)
    EVT_LISTBOX_DCLICK(ID_BROWSE_WIN,             WXOptimizationObj::OnSelectParamSet)
 END_EVENT_TABLE()
@@ -382,6 +389,21 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(10000000),mNbRun(-1)
                       _T("save the *best* configuration overall, except for\n")
                       _T("'After Each Run', for which the configuration\n")
                       _T("saved are the best for each run."));
+
+      opt=new WXFieldOption(this,-1,&(mpMonteCarloObj->mAutoLSQ));
+      mpSizer->Add(opt,0,wxALIGN_LEFT);
+      mList.Add(opt);
+      opt->SetToolTip(_T("Least squares refinement can be run:\n\n")
+                      _T(" - at the end of each run\n")
+                      _T(" - perdiodically during the optimization\n\n")
+                      _T(" This allows to find the global minimum\n")
+                      _T("much faster\n")
+                      _T(" Note that if a LSQ refinement is run but does\n")
+                      _T("not reach the real global minimum, the returned\n")
+                      _T("structure can be very distorted, but this is\n")
+                      _T("harmless (restraints will bring back a correct \n")
+                      _T("conformation after a few thousand tests)"));
+   
    // Number of trials to go
       mpWXFieldNbTrial=new WXFieldPar<long>(this,"Number of trials per run:",-1,&mNbTrial,70);
       mpSizer->Add(mpWXFieldNbTrial);
@@ -415,14 +437,14 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(10000000),mNbRun(-1)
 
 void WXMonteCarloObj::OnRunOptimization(wxCommandEvent & event)
 {
-   VFN_DEBUG_ENTRY("WXGeneticAlgorithm::OnRunOptimization()",6)
+   VFN_DEBUG_ENTRY("WXMonteCarloObj::OnRunOptimization()",6)
    WXCrystValidateAllUserInput();
    if(true==this->GetOptimizationObj().IsOptimizing())
    {
       wxMessageDialog dumbUser(this,_T("The optimization is already running !"),_T("Huh ?"),
                                wxOK|wxICON_EXCLAMATION);
       dumbUser.ShowModal();
-      VFN_DEBUG_EXIT("WXGeneticAlgorithm::OnRunOptimization()",6)
+      VFN_DEBUG_EXIT("WXMonteCarloObj::OnRunOptimization()",6)
       return;
    }
    
@@ -471,6 +493,38 @@ void WXMonteCarloObj::OnRunOptimization(wxCommandEvent & event)
    else mpGlobalOptimRunThread->Run();
    
    VFN_DEBUG_EXIT("WXMonteCarloObj::OnRunOptimization()",6)
+}
+
+void WXMonteCarloObj::OnLSQRefine(wxCommandEvent &event)
+{
+   WXCrystValidateAllUserInput();
+   if(true==this->GetOptimizationObj().IsOptimizing())
+   {
+      wxMessageDialog dumbUser(this,_T("An optimization is already running !"),_T("Huh ?"),
+                               wxOK|wxICON_EXCLAMATION);
+      dumbUser.ShowModal();
+      return;
+   }
+   char buf[200];
+   mpMonteCarloObj->PrepareRefParList();
+   mpMonteCarloObj->InitLSQ(true);
+   
+   sprintf(buf,"LSQ: start");
+   REAL cost=mpMonteCarloObj->GetLogLikelihood();
+   mpMonteCarloObj->mvSavedParamSet.push_back(make_pair(mpMonteCarloObj->mRefParList.CreateParamSet(buf),cost));
+   
+   wxProgressDialog dlgProgress(_T("Least Squares refinement"),wxString::Format(_T("Least Squares refinement, cycle #%02d/20, Chi^2=%012.2f"),0,cost),
+                                 18,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME|wxPD_CAN_ABORT);
+   for(unsigned i=0;i<20;++i)
+   {
+      try {mpMonteCarloObj->GetLSQObj().Refine(1,true,false);}
+      catch(const ObjCrystException &except){};
+      mpMonteCarloObj->UpdateDisplay();
+      sprintf(buf,"LSQ: cycle #%02d",i);
+      cost=mpMonteCarloObj->GetLogLikelihood();
+      mpMonteCarloObj->mvSavedParamSet.push_back(make_pair(mpMonteCarloObj->mRefParList.CreateParamSet(buf),cost));
+      if(dlgProgress.Update(i,wxString::Format(_T("Least Squares refinement, cycle #%02d/20, Chi^2=%012.2f"),i,cost))==false) return;
+   }
 }
 
 void WXMonteCarloObj::UpdateDisplayNbTrial()

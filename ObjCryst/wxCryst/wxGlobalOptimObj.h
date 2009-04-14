@@ -103,6 +103,7 @@ class WXMonteCarloObj: public WXOptimizationObj
       void UpdateDisplayNbTrial();
       virtual OptimizationObj & GetOptimizationObj();
       virtual const OptimizationObj & GetOptimizationObj()const;
+      void OnLSQRefine(wxCommandEvent &event);
    protected:
       /// The algorithm object
       MonteCarloObj *mpMonteCarloObj;

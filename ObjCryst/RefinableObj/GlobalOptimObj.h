@@ -33,6 +33,7 @@ namespace ObjCryst
 }
 
 #include "RefinableObj/RefinableObj.h"
+#include "RefinableObj/LSQNumObj.h"
 #include "RefinableObj/IO.h"
 #include "RefinableObj/Tracker.h"
 #include <string>
@@ -414,6 +415,10 @@ class MonteCarloObj:public OptimizationObj
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
       virtual const string GetClassName()const;
+      /// Access to the builtin LSQ optimization object
+      LSQNumObj & GetLSQObj();
+      /// Access to the builtin LSQ optimization object
+      const LSQNumObj & GetLSQObj() const;
    protected:
       
       /** \brief Make a random change in the configuration.
@@ -433,6 +438,14 @@ class MonteCarloObj:public OptimizationObj
       virtual void NewConfiguration(const RefParType *type=gpRefParTypeObjCryst);
       
       virtual void InitOptions();
+      
+      /** Prepare mLSQ for least-squares refinement during the global optimization
+      *
+      * \param useFullPowderPatternProfile: if true, the refinement will use the full
+      * profile version of powder patterns, otherwise only the integrated powder pattern
+      * will be used (faster).
+      */
+      virtual void InitLSQ(const bool useFullPowderPatternProfile=true);
             
       /// Method used for the global optimization. Should be removed when we switch
       /// to using several classes for different algorithms.
@@ -478,7 +491,10 @@ class MonteCarloObj:public OptimizationObj
          long mNbTrialRetry;
          /// Cost to reach unless an automatic randomization and retry is done
          REAL mMinCostRetry;
-      
+      /// Least squares object
+      LSQNumObj mLSQ;
+      /// Option to run automatic least-squares refinements
+      RefObjOpt mAutoLSQ;
    private:
    #ifdef __WX__CRYST__
    public:
