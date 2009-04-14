@@ -943,7 +943,7 @@ void WXPowderPattern::OnMenuLeBail(wxCommandEvent& event)
    cout<<"Beginning refinement"<<endl;
    LSQNumObj lsq;
    lsq.SetRefinedObj(this->GetPowderPattern());
-   lsq.PrepareRefParList(true,true);
+   lsq.PrepareRefParList(true);
    lsq.SetParIsFixed(gpRefParTypeObjCryst,true);
    lsq.SetParIsFixed(gpRefParTypeScatt,false);
    lsq.SetParIsFixed(gpRefParTypeScattDataScale,false);
