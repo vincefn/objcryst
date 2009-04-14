@@ -16,8 +16,9 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#include "RefinableObj/LSQNumObj.h"
 #include "Quirks/VFNStreamFormat.h"
+
+#include "RefinableObj/LSQNumObj.h"
 
 #ifdef __WX__CRYST__
    #include "wxCryst/wxLSQ.h"
@@ -49,7 +50,6 @@ LSQNumObj::LSQNumObj(string objName)
    mRw=0;
    mChiSq=0;
    mStopAfterCycle=false;
-   mRecursiveLSQ=false;
 }
 
 LSQNumObj::~LSQNumObj()
@@ -90,17 +90,17 @@ void LSQNumObj::SetParIsUsed(const RefParType *type,const bool use)
 void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
                         const bool silent)
 {
-   mpRefinedObj->BeginOptimization();
+   TAU_PROFILE("LSQNumObj::Refine()","void ()",TAU_DEFAULT);
+   this->BeginOptimization();
    mObs=this->GetLSQObs();
    mWeight=this->GetLSQWeight();
 
-   //Check if we are ready for the refinement
-   //:TODO:
    if(!silent) cout << "LSQNumObj::Refine():Beginning "<<endl;
    //Prepare for refinement (get non-fixed parameters)
       if(mRefParList.GetNbPar()==0) this->PrepareRefParList();
       mRefParList.PrepareForRefinement();
       if(!silent) mRefParList.Print();
+      if(mRefParList.GetNbPar()==0) throw ObjCrystException("LSQNumObj::Refine():no parameter to refine !");
 
    //variables
       long nbVar=mRefParList.GetNbParNotFixed();
@@ -194,7 +194,6 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
             const REAL lmfact=1.+marquardt;
             for(i=0;i<nbVar;i++) M(i,i) *= lmfact;
          }
-        
        // Check for singular values
          for(i=0;i<nbVar;i++)
          {
@@ -222,7 +221,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
                if(nbVar<=1)
                {
                   mRefParList.RestoreParamSet(mIndexValuesSetInitial);
-                  mpRefinedObj->EndOptimization();
+                  this->EndOptimization();
                   if(!silent) mRefParList.Print();
                   throw ObjCrystException("LSQNumObj::Refine(): not enough (1) parameters after fixing one...");
                }
@@ -331,9 +330,17 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
          //if(!silent) cout << "LSQNumObj::Refine():Eigenvalue Filtering...3" <<endl;
             
             //Jacobi(newmatA,newmatW,newmatV);
-            EigenValues(newmatA,newmatW,newmatV);
-            ColumnVector newmatDelta(nbVar);
-            DiagonalMatrix newmatInvW(nbVar);
+            try
+            {
+               EigenValues(newmatA,newmatW,newmatV);
+            }
+            catch(...)
+            {
+               cout<<"Caught a Newmat exception :"<<BaseException::what()<<endl;
+               throw ObjCrystException("LSQNumObj::Refine():caught a newmat exception during Eigenvalues computing !");
+            }
+               ColumnVector newmatDelta(nbVar);
+               DiagonalMatrix newmatInvW(nbVar);
         //if(!silent) cout << "LSQNumObj::Refine():Eigenvalue Filtering...4" <<endl;
             //Avoid singular values
             {
@@ -537,7 +544,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
                   if(marquardt>1e8)
                   {
                      mRefParList.RestoreParamSet(mIndexValuesSetInitial);
-                     mpRefinedObj->EndOptimization();
+                     this->EndOptimization();
                      if(!silent) mRefParList.Print();
                      throw ObjCrystException("LSQNumObj::Refine():Levenberg-Marquardt diverging !");
                   }
@@ -582,12 +589,12 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
             tmpV2 *= mWeight;
             mRw=sqrt(tmpV1.sum()/tmpV2.sum());
       //OK, finished
-         if(!silent) cout << "finished cycle #"<<cycle <<"/"<<nbCycle <<". Rw="<<Rw_ini<<"->"<<mRw<<endl;
+         if(!silent) cout << "finished cycle #"<<cycle <<"/"<<nbCycle <<". Rw="<<Rw_ini<<"->"<<mRw<<",    Chi^2="<<mChiSq<<endl;
          if (mSaveReportOnEachCycle) this->WriteReportToFile();
       
       if(!silent)this->PrintRefResults();
    }
-   mpRefinedObj->EndOptimization();
+   this->EndOptimization();
 }
 
 CrystMatrix_REAL LSQNumObj::CorrelMatrix()const{return mCorrelMatrix;};
@@ -598,15 +605,38 @@ REAL LSQNumObj::RwFactor()const{return mRw;};
 
 REAL LSQNumObj::ChiSquare()const{return mChiSq;};
 
-void LSQNumObj::SetRefinedObj(RefinableObj &obj, const unsigned int LSQFuncIndex)
+
+void RecursiveMapFunc(RefinableObj &obj,map<RefinableObj*,unsigned int> &themap, const unsigned int value)
 {
-   mpRefinedObj=&obj;
-   mRefParList.ResetParList();
-   mLSQFuncIndex=LSQFuncIndex;
-   RefObjRegisterRecursive(obj,mRecursiveRefinedObjList);
+   themap[&obj]=value;
+   ObjRegistry<RefinableObj> *pObjReg=&(obj.GetSubObjRegistry());
+   for(int i=0;i<pObjReg->GetNb();i++)
+      RecursiveMapFunc(pObjReg->GetObj(i),themap,value);
+   return;
 }
 
-ObjRegistry<RefinableObj> &LSQNumObj::GetRefinedObjList(){return mRecursiveRefinedObjList;}
+void LSQNumObj::SetRefinedObj(RefinableObj &obj, const unsigned int LSQFuncIndex, const bool init, const bool recursive)
+
+{
+   if(init)
+   {
+      mvRefinedObjMap.clear();
+   }
+   RecursiveMapFunc(obj,mvRefinedObjMap,LSQFuncIndex);
+}
+
+//ObjRegistry<RefinableObj> &LSQNumObj::GetRefinedObjList(){return mRecursiveRefinedObjList;}
+
+const map<RefinableObj*,unsigned int>& LSQNumObj::GetRefinedObjMap() const
+{
+   return mvRefinedObjMap;
+}
+
+map<RefinableObj*,unsigned int>& LSQNumObj::GetRefinedObjMap()
+{
+   return mvRefinedObjMap;
+}
+
 
 RefinableObj& LSQNumObj::GetCompiledRefinedObj(){return mRefParList;}
 
@@ -673,29 +703,28 @@ void LSQNumObj::OptimizeDerivativeSteps()
 const std::map<pair<const RefinablePar*,const RefinablePar*>,REAL > & LSQNumObj::GetVarianceCovarianceMap()const
 { return mvVarCovar;}
 
-void LSQNumObj::PrepareRefParList(const bool copy_param, const bool recursive_lsq)
+void LSQNumObj::PrepareRefParList(const bool copy_param)
 {
    mRefParList.ResetParList();
-   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
+   for(map<RefinableObj*,unsigned int>::iterator pos=mvRefinedObjMap.begin();pos!=mvRefinedObjMap.end();++pos)
    {
-      VFN_DEBUG_MESSAGE("LSQNumObj::PrepareRefParList():"<<mRecursiveRefinedObjList.GetObj(i).GetName(),4);
+      VFN_DEBUG_MESSAGE("LSQNumObj::PrepareRefParList():"<<pos->first->GetName(),4);
       //mRecursiveRefinedObjList.GetObj(i).Print();
-      mRefParList.AddPar(mRecursiveRefinedObjList.GetObj(i),copy_param);
+      mRefParList.AddPar(*(pos->first),copy_param);
    }
    //mRefParList.Print();
    if(copy_param) mRefParList.SetDeleteRefParInDestructor(true);
    else mRefParList.SetDeleteRefParInDestructor(false);
-   mRecursiveLSQ=recursive_lsq;
 }
 
 const CrystVector_REAL& LSQNumObj::GetLSQCalc() const
 {
    const CrystVector_REAL *pV;
    unsigned long nb=0;
-   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
-   {// TODO: take into account the case when the LSQ function used is not the default one
-      if(mRecursiveRefinedObjList.GetObj(i).GetNbLSQFunction()==0) continue;
-      pV=&(mRecursiveRefinedObjList.GetObj(i).GetLSQCalc(mLSQFuncIndex));
+   for(map<RefinableObj*,unsigned int>::const_iterator pos=mvRefinedObjMap.begin();pos!=mvRefinedObjMap.end();++pos)
+   {
+      if(pos->first->GetNbLSQFunction()==0) continue;
+      pV=&(pos->first->GetLSQCalc(pos->second));
       const unsigned long n2=pV->numElements();
       if((nb+n2)>mLSQCalc.numElements()) mLSQCalc.resizeAndPreserve(nb+pV->numElements());
       const REAL *p1=pV->data();
@@ -711,10 +740,10 @@ const CrystVector_REAL& LSQNumObj::GetLSQObs() const
 {
    const CrystVector_REAL *pV;
    unsigned long nb=0;
-   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
-   {// TODO: take into account the case when the LSQ function used is not the default one
-      if(mRecursiveRefinedObjList.GetObj(i).GetNbLSQFunction()==0) continue;
-      pV=&(mRecursiveRefinedObjList.GetObj(i).GetLSQObs(mLSQFuncIndex));
+   for(map<RefinableObj*,unsigned int>::const_iterator pos=mvRefinedObjMap.begin();pos!=mvRefinedObjMap.end();++pos)
+   {
+      if(pos->first->GetNbLSQFunction()==0) continue;
+      pV=&(pos->first->GetLSQObs(pos->second));
       const unsigned long n2=pV->numElements();
       if((nb+n2)>mLSQObs.numElements()) mLSQObs.resizeAndPreserve(nb+pV->numElements());
       const REAL *p1=pV->data();
@@ -730,10 +759,10 @@ const CrystVector_REAL& LSQNumObj::GetLSQWeight() const
 {
    const CrystVector_REAL *pV;
    unsigned long nb=0;
-   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
-   {// TODO: take into account the case when the LSQ function used is not the default one
-      if(mRecursiveRefinedObjList.GetObj(i).GetNbLSQFunction()==0) continue;
-      pV=&(mRecursiveRefinedObjList.GetObj(i).GetLSQWeight(mLSQFuncIndex));
+   for(map<RefinableObj*,unsigned int>::const_iterator pos=mvRefinedObjMap.begin();pos!=mvRefinedObjMap.end();++pos)
+   {
+      if(pos->first->GetNbLSQFunction()==0) continue;
+      pV=&(pos->first->GetLSQWeight(pos->second));
       const unsigned long n2=pV->numElements();
       if((nb+n2)>mLSQWeight.numElements()) mLSQWeight.resizeAndPreserve(nb+pV->numElements());
       const REAL *p1=pV->data();
@@ -749,10 +778,10 @@ const CrystVector_REAL& LSQNumObj::GetLSQDeriv(RefinablePar&par)
 {
    const CrystVector_REAL *pV;
    unsigned long nb=0;
-   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
-   {// TODO: take into account the case when the LSQ function used is not the default one
-      if(mRecursiveRefinedObjList.GetObj(i).GetNbLSQFunction()==0) continue;
-      pV=&(mRecursiveRefinedObjList.GetObj(i).GetLSQDeriv(mLSQFuncIndex,par));
+   for(map<RefinableObj*,unsigned int>::iterator pos=mvRefinedObjMap.begin();pos!=mvRefinedObjMap.end();++pos)
+   {
+      if(pos->first->GetNbLSQFunction()==0) continue;
+      pV=&(pos->first->GetLSQDeriv(pos->second,par));
       const unsigned long n2=pV->numElements();
       if((nb+n2)>mLSQDeriv.numElements()) mLSQDeriv.resizeAndPreserve(nb+pV->numElements());
       const REAL *p1=pV->data();
@@ -762,6 +791,18 @@ const CrystVector_REAL& LSQNumObj::GetLSQDeriv(RefinablePar&par)
    }
    if(mLSQDeriv.numElements()>nb) mLSQDeriv.resizeAndPreserve(nb);
    return mLSQDeriv;
+}
+
+void LSQNumObj::BeginOptimization(const bool allowApproximations, const bool enableRestraints)
+{
+   for(map<RefinableObj*,unsigned int>::iterator pos=mvRefinedObjMap.begin();pos!=mvRefinedObjMap.end();++pos)
+      pos->first->BeginOptimization(allowApproximations, enableRestraints);
+}
+
+void LSQNumObj::EndOptimization()
+{
+   for(map<RefinableObj*,unsigned int>::iterator pos=mvRefinedObjMap.begin();pos!=mvRefinedObjMap.end();++pos)
+      pos->first->EndOptimization();
 }
 
 #ifdef __WX__CRYST__

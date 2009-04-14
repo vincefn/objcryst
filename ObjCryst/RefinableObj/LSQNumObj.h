@@ -68,17 +68,33 @@ class LSQNumObj
       REAL RwFactor()const;
       REAL ChiSquare()const;   //uses the weight if specified
       /** Choose the object to refine. The minimization will be done
-      * against its LSQ function, and its parameters.
+      * against its LSQ function and its parameters, as well as the LSQ functions
+      * and parameters of its sub-objects (if recursive==true)
       *
       * \param LSQFuncIndex: one object can have a choice of several LSQ
       * functions to minimize- this allows to choose which one to minimize.
+      *
+      * \param init: if true, the list of refined objects is first cleared. otherwise
+      * the new object (and its sub-objects) is just added to the list.
+      *
+      * \param recursive: if false, only the supplied object is added, and not its sub-objects
       */
-      void SetRefinedObj(RefinableObj &obj, const unsigned int LSQFuncIndex=0);
-      /// Access to the full list of refined objects. The list is initially built
-      /// recursively from one object. This function allows to modify the list
-      /// of sub-objects before refinement (such as for removing certain types
-      /// of objects).
-      ObjRegistry<RefinableObj> &GetRefinedObjList();
+      void SetRefinedObj(RefinableObj &obj, const unsigned int LSQFuncIndex=0, const bool init=true, const bool recursive=false);
+      // Access to the full list of refined objects. The list is initially built
+      // recursively from one object. This function allows to modify the list
+      // of sub-objects before refinement (such as for removing certain types
+      // of objects).
+      //ObjRegistry<RefinableObj> &GetRefinedObjList();
+      /** Get the map of refined objects - this is a recursive list of all the objects
+      * that are taken into account for the refinement. The key is a pointer to the
+      * object and the value is the LSQ function index for that object.
+      */
+      const std::map<RefinableObj*,unsigned int>& GetRefinedObjMap() const;
+      /** Get the map of refined objects - this is a recursive list of all the objects
+      * that are taken into account for the refinement. The key is a pointer to the
+      * object and the value is the LSQ function index for that object.
+      */
+      std::map<RefinableObj*,unsigned int>& GetRefinedObjMap();
       /** Access to the RefinableObj which is the compilation of all parameters
       * from the object supplied for optimization and its sub-objects.
       *
@@ -119,12 +135,8 @@ class LSQNumObj
       *
       * \note This will be called automatically before starting the refinement only if
       * the parameter list is empty. Otherwise it should be called before refinement.
-      *
-      * \param recursive_lsq: if true, the LSQ refinement will be run taking into account
-      * all the LSQ functions of the recursive object list, otherwise just the LSQ function
-      * from the top object is used.
       */
-      void PrepareRefParList(const bool copy_param=false, const bool recursive_lsq=false);
+      void PrepareRefParList(const bool copy_param=false);
       
       /// Get the LSQ calc vector (using either only the top or the hierarchy of object)
       const CrystVector_REAL& GetLSQCalc() const;
@@ -134,6 +146,10 @@ class LSQNumObj
       const CrystVector_REAL& GetLSQWeight() const;
       /// Get the LSQ deriv vector (using either only the top or the hierarchy of object)
       const CrystVector_REAL& GetLSQDeriv(RefinablePar&par);
+      /// Tell all refined object that the refinement is beginning
+      void BeginOptimization(const bool allowApproximations=false, const bool enableRestraints=false);
+      /// Tell all refined object that the refinement is beginning
+      void EndOptimization();
    protected:
    private:
       // Refined object
@@ -170,18 +186,22 @@ class LSQNumObj
       int mIndexValuesSetInitial, mIndexValuesSetLast;
       /// If true, then stop at the end of the cycle. Used in multi-threading environment
       bool mStopAfterCycle;
-      /// The optimized object
-      RefinableObj *mpRefinedObj;
-      /// The index of the LSQ function in the refined object (if there are several...)
-      unsigned int mLSQFuncIndex;
+      // The optimized object
+      //RefinableObj *mpRefinedObj;
+      // The index of the LSQ function in the refined object (if there are several...)
+      //unsigned int mLSQFuncIndex;
+      
+      /** Map of the recursive list of the objects to be refined. The key is the pointer
+      * to the object and the value the LSQ function index
+      *
+      * Individual LSQ functions can be changed using GetRefinedObjMap().
+      */
+      std::map<RefinableObj*,unsigned int> mvRefinedObjMap;
+      
       /// If true, then parameters to be refined will be copied instead of referenced.
       /// Therefore only their values and the parameter's clocks are affected when
       /// working on the copy.
       bool mCopyRefPar;
-      /// If true, then the refinement will be done on all LSQ functions from the recursive
-      /// list of objects. Else only the LSQ function of the top object is used.
-      /// This is set in PrepareRefParList()
-      bool mRecursiveLSQ;
       /// Temporary arrays for LSQ functions evaluation - used when
       /// using recursive LSQ function
       mutable CrystVector_REAL mLSQObs,mLSQCalc,mLSQWeight,mLSQDeriv;
