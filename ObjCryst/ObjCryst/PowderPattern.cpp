@@ -4321,29 +4321,75 @@ REAL PowderPattern::GetLogLikelihood()const
    return tmp;
 }
 
-unsigned int PowderPattern::GetNbLSQFunction()const{return 1;}
+unsigned int PowderPattern::GetNbLSQFunction()const{return 2;}
 
 const CrystVector_REAL& 
-   PowderPattern::GetLSQCalc(const unsigned int) const
+   PowderPattern::GetLSQCalc(const unsigned int idx) const
 {
-   mPowderPatternUsedCalc=this->GetPowderPatternCalc();
-   mPowderPatternUsedCalc.resizeAndPreserve(mNbPointUsed);
+   TAU_PROFILE("PowderPattern::GetLSQCalc()","void ()",TAU_DEFAULT);
+   switch(idx)
+   {
+      case 1:
+      {
+         this->CalcPowderPatternIntegrated();
+         mPowderPatternUsedCalc=mPowderPatternIntegratedCalc;
+         break;
+      }
+      default:
+      {
+         mPowderPatternUsedCalc=this->GetPowderPatternCalc();
+         mPowderPatternUsedCalc.resizeAndPreserve(mNbPointUsed);
+         break;
+      }
+   }
    return mPowderPatternUsedCalc;
 }
 
 const CrystVector_REAL& 
-   PowderPattern::GetLSQObs(const unsigned int) const
+   PowderPattern::GetLSQObs(const unsigned int idx) const
 {
-   mPowderPatternUsedObs=this->GetPowderPatternObs();
-   mPowderPatternUsedObs.resizeAndPreserve(mNbPointUsed);
+   TAU_PROFILE("PowderPattern::GetLSQObs()","void ()",TAU_DEFAULT);
+   switch(idx)
+   {
+      case 1:
+      {
+         this->PrepareIntegratedRfactor();
+         mPowderPatternUsedObs=mIntegratedObs;
+         break;
+      }
+      default:
+      {
+         mPowderPatternUsedObs=this->GetPowderPatternObs();
+         mPowderPatternUsedObs.resizeAndPreserve(mNbPointUsed);
+         break;
+      }
+   }
    return mPowderPatternUsedObs;
 }
 
 const CrystVector_REAL& 
-   PowderPattern::GetLSQWeight(const unsigned int) const
+   PowderPattern::GetLSQWeight(const unsigned int idx) const
 {
-   mPowderPatternUsedWeight=this->GetPowderPatternWeight();
-   mPowderPatternUsedWeight.resizeAndPreserve(mNbPointUsed);
+   TAU_PROFILE("PowderPattern::GetLSQWeight()","void ()",TAU_DEFAULT);
+   switch(idx)
+   {
+      case 1:
+      {
+         this->PrepareIntegratedRfactor();
+         // :KLUDGE: When variance is used, mIntegratedWeight will change at each powder pattern calculation,
+         // so this might be quite wrong...
+         if(mIntegratedWeight.numElements()==0)
+            mPowderPatternUsedWeight=mIntegratedWeightObs;
+         else mPowderPatternUsedWeight=mIntegratedWeight;
+         break;
+      }
+      default:
+      {
+         mPowderPatternUsedWeight=this->GetPowderPatternWeight();
+         mPowderPatternUsedWeight.resizeAndPreserve(mNbPointUsed);
+         break;
+      }
+   }
    return mPowderPatternUsedWeight;
 }
 
