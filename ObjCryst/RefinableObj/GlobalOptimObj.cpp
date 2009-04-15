@@ -1144,15 +1144,18 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
             for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).EndOptimization();
             for(int i=nbWorld-5;i<nbWorld;i++)
             {
+               #ifdef __WX__CRYST__
                mMutexStopAfterCycle.Lock();
                if(mStopAfterCycle)
                {
                   mMutexStopAfterCycle.Unlock();
                   break;
                }
-
-               mRefParList.RestoreParamSet(worldCurrentSetIndex(i));
+               mMutexStopAfterCycle.Unlock();
+               #endif
                
+               mRefParList.RestoreParamSet(worldCurrentSetIndex(i));
+              
                #if 0
                // Report GoF values (Chi^2 / nbObs) values for all objects
                for(map<RefinableObj*,unsigned int>::iterator pos=mLSQ.GetRefinedObjMap().begin();pos!=mLSQ.GetRefinedObjMap().end();++pos)
