@@ -722,17 +722,26 @@ void PowderPatternDiffraction::BeginOptimization(const bool allowApproximations,
    if(mUseFastLessPreciseFunc!=allowApproximations)
    {
       mClockProfileCalc.Reset();
+      mClockGeomStructFact.Reset();
+      mClockStructFactor.Reset();
+      mClockMaster.Click();
    }
+   mUseFastLessPreciseFunc=allowApproximations;
    this->GetNbReflBelowMaxSinThetaOvLambda();
-   this->ScatteringData::BeginOptimization(allowApproximations,enableRestraints);
+   this->RefinableObj::BeginOptimization(allowApproximations,enableRestraints);
 }
 void PowderPatternDiffraction::EndOptimization()
 {
    if(mUseFastLessPreciseFunc==true)
    {
       mClockProfileCalc.Reset();
+      mClockGeomStructFact.Reset();
+      mClockStructFactor.Reset();
+      mClockMaster.Click();
    }
-   this->ScatteringData::EndOptimization();
+   mUseFastLessPreciseFunc=false;
+   this->GetNbReflBelowMaxSinThetaOvLambda();
+   this->RefinableObj::EndOptimization();
 }
 void PowderPatternDiffraction::GetGeneGroup(const RefinableObj &obj,
                                 CrystVector_uint & groupIndex,
@@ -1237,7 +1246,7 @@ Computing all Profiles",5)
                         x0+2*tan(x0/2.0)*spectrumDeltaLambdaOvLambda(line));
          }
          else center=mpParentPowderPattern->X2XCorr(x0);
-         REAL fact=0.5;
+         REAL fact=1.0;
          if(!mUseFastLessPreciseFunc) fact=5.0;
          const REAL halfwidth=mpReflectionProfile->GetFullProfileWidth(0.04,center,mH(i),mK(i),mL(i))*fact;
          if(line==0)
@@ -1560,8 +1569,8 @@ void PowderPatternDiffraction::PrepareIntegratedProfile()const
             if(pos1->find(j) == pos1->end()) (*pos1)[j]=0.;
             REAL *fact = &((*pos1)[j]);//this creates the 'j' entry if necessary
             const REAL *p2 = mvReflProfile[i].profile.data()+(first-first0);
+            //cout << i<<","<<j<<","<<first<<","<<last<<":"<<*fact<<"/"<<mNbReflUsed<<","<<mNbRefl<<endl;
             for(int k=first;k<=last;k++) *fact += *p2++;
-            //cout << i<<","<<j<<","<<first<<","<<last<<":"<<*fact<<endl;
          }
       }
       pos2->first=firstInterval;
