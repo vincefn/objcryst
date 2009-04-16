@@ -782,6 +782,7 @@ void ScatteringData::BeginOptimization(const bool allowApproximations,
    {
       mClockGeomStructFact.Reset();
       mClockStructFactor.Reset();
+      mClockMaster.Click();
    }
    mUseFastLessPreciseFunc=allowApproximations;
    this->RefinableObj::BeginOptimization(allowApproximations,enableRestraints);
@@ -792,6 +793,7 @@ void ScatteringData::EndOptimization()
    {
       mClockGeomStructFact.Reset();
       mClockStructFactor.Reset();
+      mClockMaster.Click();
    }
    mUseFastLessPreciseFunc=false;
    this->RefinableObj::EndOptimization();
