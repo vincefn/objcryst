@@ -574,7 +574,7 @@ int main (int argc, char *argv[])
             stringstream sst;
             if(is.GetSize()>0)
             {
-               char * tmpbuf=new char[is.GetSize()];
+               char * tmpbuf=new char[is.GetSize()+1];
                is.Read(tmpbuf,is.GetSize());
                sst<<tmpbuf;
                delete[] tmpbuf;
