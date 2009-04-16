@@ -573,7 +573,7 @@ WXCrystObj(parent,wxHORIZONTAL),mpRefinableObj(obj)
    for(unsigned int i=0;i<mpRefinableObj->GetNbOption();i++)
    {
    VFN_DEBUG_MESSAGE("WXRefinableObj::WXRefinableObj():Adding option "<<i,6)
-      WXFieldOption *opt=new WXFieldOption(this,-1,&(mpRefinableObj->GetOption(i)));
+      WXCrystObjBasic *opt=mpRefinableObj->GetOption(i).WXCreate(this);
       mpSizer->Add(opt,0,wxALIGN_LEFT);
       mList.Add(opt);
    }
