@@ -672,10 +672,10 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
             break;
          }
       }
-   
-   this->UpdateDisplay();
       
    for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).EndOptimization();
+
+   this->UpdateDisplay();
    
    if(finalcost>1)
       cout<<endl<<"Finished all runs, number of trials to reach cost="
@@ -1171,7 +1171,8 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
                cout<<endl;
                #endif
                
-               if(!silent) cout<<"LSQ: World="<<worldSwapIndex(i)<<": cost="<<currentCost(i);
+               const REAL cost0=this->GetLogLikelihood();// cannot use currentCost(i), approximations changed...
+               if(!silent) cout<<"LSQ: World="<<worldSwapIndex(i)<<": cost="<<cost0;
                try {mLSQ.Refine(10,true,true);}
                catch(const ObjCrystException &except){};
                #if 0
@@ -1190,10 +1191,20 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
                #endif
                const REAL cost=this->GetLogLikelihood();
                if(!silent) cout<<" -> "<<cost<<endl;
+               if(cost<cost0) mRefParList.SaveParamSet(worldCurrentSetIndex(i));
+            }
+            //  Need to go back to optimization with approximations allowed (they are not during LSQ)
+            for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).BeginOptimization(true);
+            // And recompute LLK - since they will be lower
+            for(int i=nbWorld-5;i<nbWorld;i++)
+            {
+               mRefParList.RestoreParamSet(worldCurrentSetIndex(i));
+               const REAL cost=this->GetLogLikelihood();
+               cout<<"LSQ2:"<<currentCost(i)<<"->"<<cost<<endl;
                if(cost<currentCost(i))
                {
-                  currentCost(i)=cost;
                   mRefParList.SaveParamSet(worldCurrentSetIndex(i));
+                  currentCost(i)=cost;
                   if(cost<runBestCost)
                   {
                      runBestCost=currentCost(i);
@@ -1207,17 +1218,15 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
                         mRefParList.SaveParamSet(mBestParSavedSetIndex);
                         if(!silent) cout << "->Trial :" << mNbTrial 
                                        << " World="<< worldSwapIndex(i)
-                                       << " LSQ: NEW OVERALL Best Cost="<<mBestCost<< endl;
+                                       << " LSQ2: NEW OVERALL Best Cost="<<mBestCost<< endl;
                      }
                      else if(!silent) cout << "->Trial :" << mNbTrial 
                                        << " World="<< worldSwapIndex(i)
-                                       << " LSQ: NEW RUN Best Cost="<<runBestCost<< endl;
+                                       << " LSQ2: NEW RUN Best Cost="<<runBestCost<< endl;
                      if(!silent) this->DisplayReport();
                   }
                }
             }
-            //  Need to go back to optimization with approximations allowed (they are not during LSQ)
-            for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).BeginOptimization(true);
          }
       
       //Try swapping worlds
