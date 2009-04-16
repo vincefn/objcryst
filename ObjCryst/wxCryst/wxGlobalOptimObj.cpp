@@ -514,7 +514,7 @@ void WXMonteCarloObj::OnLSQRefine(wxCommandEvent &event)
    mpMonteCarloObj->mvSavedParamSet.push_back(make_pair(mpMonteCarloObj->mRefParList.CreateParamSet(buf),cost));
    
    wxProgressDialog dlgProgress(_T("Least Squares refinement"),wxString::Format(_T("Least Squares refinement, cycle #%02d/20, Chi^2=%012.2f"),0,cost),
-                                 18,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME|wxPD_CAN_ABORT);
+                                 19,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME|wxPD_CAN_ABORT);
    for(unsigned i=0;i<20;++i)
    {
       try {mpMonteCarloObj->GetLSQObj().Refine(1,true,false);}
