@@ -1200,7 +1200,7 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
             {
                mRefParList.RestoreParamSet(worldCurrentSetIndex(i));
                const REAL cost=this->GetLogLikelihood();
-               cout<<"LSQ2:"<<currentCost(i)<<"->"<<cost<<endl;
+               if(!silent) cout<<"LSQ2:"<<currentCost(i)<<"->"<<cost<<endl;
                if(cost<currentCost(i))
                {
                   mRefParList.SaveParamSet(worldCurrentSetIndex(i));
@@ -1593,7 +1593,7 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
             else if(!silent) cout << " LSQ : NEW Run Best Cost="<<runBestCost<< endl;
          }
       }
-      cout<<"Finished LSQ refinement"<<endl;
+      if(!silent) cout<<"Finished LSQ refinement"<<endl;
    }
    
    mLastOptimTime=chrono.seconds();
