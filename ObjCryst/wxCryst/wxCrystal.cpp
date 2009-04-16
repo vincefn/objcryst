@@ -439,6 +439,34 @@ mpCrystalGL(0)
       mpSizer->SetItemMinSize(mpMenuBar,
                               mpMenuBar->GetSize().GetWidth(),
                               mpMenuBar->GetSize().GetHeight());
+
+      // KLUDGE : this only works as long as the option order does not change !
+      dynamic_cast<WXFieldOption *>(mpCrystal->GetOption(0).WXGet())->SetToolTip(
+         _T("Use this option ONLY if you want to use\n")
+         _T("a higher symmetry than the one allowed by\n")
+         _T("the spacegroup. This can be useful to search\n")
+         _T("structures derived from higher symmetries.\n\n")
+         _T("This option should almost never be used."));
+      
+      dynamic_cast<WXFieldOption *>(mpCrystal->GetOption(1).WXGet())->SetToolTip(
+         _T("This option allows Fox to automatically adjust\n")
+         _T("the occupancy of atoms that are on a special position,\n")
+         _T("or overlapping with another (e.g. two oxygens from\n")
+         _T("two polyhedra).\n\n")
+         _T("Practically you should choose:\n")
+         _T("- Yes for inorganic structures\n\n")
+         _T("This option increases computing time\n")
+         _T("by up to 50%, so only use when necessary\n\n")
+         _T("In doubt, choose Yes"));
+      
+      dynamic_cast<WXFieldOption *>(mpCrystal->GetOption(2).WXGet())->SetToolTip(
+         _T("This option only affects the 3D display,\n")
+         _T("and is used to display the enantiomer\n")
+         _T("of the crystal structure.\n\n")
+         _T("This can be used to compare several\n")
+         _T("crystal structures."));
+
+
    // AntiBump-ProMerge cost
       wxBoxSizer* pAntiBumpSizer=new wxBoxSizer(wxHORIZONTAL);
       WXFieldPar<REAL> *pWXFieldBumpMerge=
@@ -450,8 +478,18 @@ mpCrystalGL(0)
       mpSizer->Add(pAntiBumpSizer,0,wxALIGN_LEFT);
       mList.Add(pWXFieldBumpMerge);
       mList.Add(pAntiBumpScale);
-      dynamic_cast<WXFieldParBase *>(pWXFieldBumpMerge)->SetFormat(_T("%8.2f"));
-      dynamic_cast<WXFieldParBase *>(pAntiBumpScale)->SetFormat(_T("%8.2f"));
+      pWXFieldBumpMerge->SetFormat(_T("%8.2f"));
+      pAntiBumpScale->SetFormat(_T("%8.2f"));
+      pWXFieldBumpMerge->SetToolTip(_T("Current anti-bump cost"));
+      pAntiBumpScale->SetToolTip(
+         _T("Scale (multiplier) for the anti-bump cost.\n")
+         _T("If 0, the anti-bump will be ignored and not calculated\n")
+         _T("during optimization (saving time)\n\n")
+         _T("Use a value larger than 1 to increase the importance\n")
+         _T("of the anti-bump relatively to the diffraction data Chi^2\n\n")
+         _T("Note that anti-bump should only be used if the diffraction data\n\n")
+         _T("is not of good enough quality to ensure finding the correct\n\n")
+         _T("structure."));
    // Bond Valence cost
       wxBoxSizer* pBondValenceSizer=new wxBoxSizer(wxHORIZONTAL);
       WXFieldPar<REAL> *pWXFieldBondValence=
@@ -463,8 +501,18 @@ mpCrystalGL(0)
       mpSizer->Add(pBondValenceSizer,0,wxALIGN_LEFT);
       mList.Add(pWXFieldBondValence);
       mList.Add(pBondValenceScale);
-      dynamic_cast<WXFieldParBase *>(pWXFieldBondValence)->SetFormat(_T("%8.2f"));
-      dynamic_cast<WXFieldParBase *>(pBondValenceScale)->SetFormat(_T("%8.2f"));
+      pWXFieldBondValence->SetFormat(_T("%8.2f"));
+      pBondValenceScale->SetFormat(_T("%8.2f"));
+      pWXFieldBondValence->SetToolTip(_T("Current bond valence cost"));
+      pBondValenceScale->SetToolTip(
+         _T("Scale (multiplier) for the bond valence cost.\n")
+         _T("If 0, the bond valence will be ignored and not calculated\n")
+         _T("during optimization (saving time)\n\n")
+         _T("Use a value larger than 1 to increase the importance\n")
+         _T("of the bond valence relatively to the diffraction data Chi^2\n\n")
+         _T("Note that bond valence should only be used if the diffraction data\n\n")
+         _T("is not of good enough quality to ensure finding the correct\n\n")
+         _T("structure."));
    // Lattice
       wxBoxSizer* lattice=new wxBoxSizer(wxHORIZONTAL);
 
@@ -504,11 +552,29 @@ mpCrystalGL(0)
       dynamic_cast<WXFieldRefPar *>(pFieldLatticeBeta)->SetFormat(_T("%8.3f"));
       dynamic_cast<WXFieldRefPar *>(pFieldLatticeGamma)->SetFormat(_T("%8.3f"));
       
+      pFieldLatticeA->SetToolTip(_T("Lattice length parameter (in Angstroems)"));
+      pFieldLatticeB->SetToolTip(_T("Lattice length parameter (in Angstroems)"));
+      pFieldLatticeC->SetToolTip(_T("Lattice length parameter (in Angstroems)"));
+      pFieldLatticeAlpha->SetToolTip(_T("Lattice angle parameter (in degrees)"));
+      pFieldLatticeBeta->SetToolTip(_T("Lattice angle parameter (in degrees)"));
+      pFieldLatticeGamma->SetToolTip(_T("Lattice angle parameter (in degrees)"));
+      
    // SpaceGroup
       mpFieldSpacegroup=new WXFieldName(this,"SpaceGroup:",this,ID_CRYSTAL_SPACEGROUP,100);
       mpSizer->Add(mpFieldSpacegroup,0,wxALIGN_LEFT);
       mList.Add(mpFieldSpacegroup);
       
+      mpFieldSpacegroup->SetToolTip(_T("Spacegroup Symbol. You can use:\n\n")
+                                    _T("- spacegroup number: \"1\" \"62\" ... \"227\",\"230\"\n")
+                                    _T("- Hermann-Mauguin symbol: \"P1\" \"Pnma\" ... \"Fd3m\",\"Ia3d\"\n")
+                                    _T("- Hall symbol: \"P1\" \"-P 2ac 2n\" ... \"-F 4vw 2vw 3\",\"-I 4bd 2c 3\"\n\n")
+                                    _T("ORIGIN CHOICE: for some spacegroups there are several\n")
+                                    _T("possible origins - the default is the one on \n")
+                                    _T("the center of symmetry (origin 2). You can specify\n")
+                                    _T(" the origin by writing \"Fd3m:1\" or \"Fd3m:2\"\n\n")
+                                    _T("CELL CHOICE: to specify a rhomboedral or hexagonal unit cell,\n")
+                                    _T("append R or H to the symbol:\"R-3:R\"or \"R-3:H\"\n"));
+
    // Scattering Powers
       mpWXScatteringPowerRegistry=mpCrystal
                     ->GetScatteringPowerRegistry().WXCreate(this);
