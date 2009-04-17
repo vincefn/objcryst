@@ -4349,7 +4349,8 @@ void PowderPattern::AddExcludedRegion(const REAL min,const REAL max)
 REAL PowderPattern::GetLogLikelihood()const
 {
    REAL tmp=this->GetChi2_Option();
-   tmp+=mChi2LikeNorm;
+   if(mOptProfileIntegration.GetChoice()==0) tmp+=mIntegratedChi2LikeNorm;
+   else tmp+=mChi2LikeNorm;
    return tmp;
 }
 
