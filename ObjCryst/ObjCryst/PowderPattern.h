@@ -343,6 +343,7 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       virtual void BeginOptimization(const bool allowApproximations=false,
                                      const bool enableRestraints=false);
       virtual void EndOptimization();
+      virtual void SetApproximationFlag(const bool allow);
       virtual const Radiation& GetRadiation()const;
       virtual const CrystVector_REAL& GetPowderPatternCalcVariance()const;
       virtual pair<const CrystVector_REAL*,const RefinableObjClock*>
@@ -782,6 +783,7 @@ class PowderPattern : public RefinableObj
          
       virtual void BeginOptimization(const bool allowApproximations=false,
                                      const bool enableRestraints=false);
+      //virtual void SetApproximationFlag(const bool allow);
       virtual void GlobalOptRandomMove(const REAL mutationAmplitude,
                                        const RefParType *type=gpRefParTypeObjCryst);
       virtual REAL GetLogLikelihood()const;

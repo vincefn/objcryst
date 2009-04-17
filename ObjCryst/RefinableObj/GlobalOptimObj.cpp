@@ -1141,7 +1141,7 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
       if(mAutoLSQ.GetChoice()==2)
          if((mNbTrial%150000)<(nbTryPerWorld*nbWorld))
          {// Try a quick LSQ ?
-            for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).EndOptimization();
+            for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).SetApproximationFlag(false);
             for(int i=nbWorld-5;i<nbWorld;i++)
             {
                #ifdef __WX__CRYST__
@@ -1173,7 +1173,7 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
                
                const REAL cost0=this->GetLogLikelihood();// cannot use currentCost(i), approximations changed...
                if(!silent) cout<<"LSQ: World="<<worldSwapIndex(i)<<": cost="<<cost0;
-               try {mLSQ.Refine(10,true,true);}
+               try {mLSQ.Refine(10,true,true,false);}
                catch(const ObjCrystException &except){};
                #if 0
                // Report GoF values (Chi^2 / nbObs) values for all objects
@@ -1194,7 +1194,7 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
                if(cost<cost0) mRefParList.SaveParamSet(worldCurrentSetIndex(i));
             }
             //  Need to go back to optimization with approximations allowed (they are not during LSQ)
-            for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).BeginOptimization(true);
+            for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).SetApproximationFlag(true);
             // And recompute LLK - since they will be lower
             for(int i=nbWorld-5;i<nbWorld;i++)
             {
@@ -1565,15 +1565,15 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
    if(mAutoLSQ.GetChoice()>0)
    {// LSQ
       if(!silent) cout<<"Beginning final LSQ refinement"<<endl;
-      for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).EndOptimization();
+      for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).SetApproximationFlag(false);
       mRefParList.RestoreParamSet(runBestIndex);
       mCurrentCost=this->GetLogLikelihood();
-      try {mLSQ.Refine(20,true,true);}
+      try {mLSQ.Refine(20,true,true,false);}
       catch(const ObjCrystException &except){};
       if(!silent) cout<<"LSQ cost: "<<mCurrentCost<<" -> "<<this->GetLogLikelihood()<<endl;
       
       // Need to go back to optimization with approximations allowed (they are not during LSQ)
-      for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).BeginOptimization(true);
+      for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).SetApproximationFlag(true);
       
       REAL cost=this->GetLogLikelihood();
       if(cost<mCurrentCost)

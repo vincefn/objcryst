@@ -524,6 +524,7 @@ void WXMultiGraph::OnUpdateUI(wxUpdateUIEvent &event)
 {
    VFN_DEBUG_MESSAGE("WXMultiGraph::OnUpdateUI()",4)
    this->Refresh(false);
+   event.Skip();
 }
 
 void WXMultiGraph::OnSize(wxSizeEvent &event)

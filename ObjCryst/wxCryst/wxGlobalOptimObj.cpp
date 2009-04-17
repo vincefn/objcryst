@@ -188,6 +188,7 @@ void WXOptimizationObj::OnUpdateUI(wxUpdateUIEvent& event)
 {
    VFN_DEBUG_ENTRY("WXOptimizationObj::OnUpdateUI()",5)
    this->UpdateUI(true);
+   event.Skip();
    VFN_DEBUG_EXIT("WXOptimizationObj::OnUpdateUI()",5)
 }
 
@@ -520,7 +521,7 @@ void WXMonteCarloObj::OnLSQRefine(wxCommandEvent &event)
                                  19,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME|wxPD_CAN_ABORT);
    for(unsigned i=0;i<20;++i)
    {
-      try {mpMonteCarloObj->GetLSQObj().Refine(1,true,false);}
+      try {mpMonteCarloObj->GetLSQObj().Refine(1,true,false,false);}
       catch(const ObjCrystException &except){};
       mpMonteCarloObj->UpdateDisplay();
       sprintf(buf,"LSQ: cycle #%02d",i);

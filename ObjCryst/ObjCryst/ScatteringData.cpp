@@ -802,6 +802,18 @@ void ScatteringData::EndOptimization()
    this->RefinableObj::EndOptimization();
 }
 
+void ScatteringData::SetApproximationFlag(const bool allow)
+{
+   if(mUseFastLessPreciseFunc!=allow)
+   {
+      mClockGeomStructFact.Reset();
+      mClockStructFactor.Reset();
+      mClockMaster.Click();
+   }
+   mUseFastLessPreciseFunc=allow;
+   this->RefinableObj::SetApproximationFlag(allow);
+}
+
 void ScatteringData::PrepareHKLarrays()
 {
    VFN_DEBUG_ENTRY("ScatteringData::PrepareHKLarrays()"<<mNbRefl<<" reflections",5)

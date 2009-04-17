@@ -743,6 +743,21 @@ void PowderPatternDiffraction::EndOptimization()
    this->GetNbReflBelowMaxSinThetaOvLambda();
    this->RefinableObj::EndOptimization();
 }
+
+void PowderPatternDiffraction::SetApproximationFlag(const bool allow)
+{
+   if(mUseFastLessPreciseFunc!=allow)
+   {
+      mClockProfileCalc.Reset();
+      mClockGeomStructFact.Reset();
+      mClockStructFactor.Reset();
+      mClockMaster.Click();
+   }
+   mUseFastLessPreciseFunc=allow;
+   this->GetNbReflBelowMaxSinThetaOvLambda();
+   this->RefinableObj::SetApproximationFlag(allow);
+}
+
 void PowderPatternDiffraction::GetGeneGroup(const RefinableObj &obj,
                                 CrystVector_uint & groupIndex,
                                 unsigned int &first) const
@@ -4283,6 +4298,14 @@ void PowderPattern::BeginOptimization(const bool allowApproximations,
    else this->FitScaleFactorForRw();
    this->RefinableObj::BeginOptimization(allowApproximations,enableRestraints);
 }
+
+//void PowderPattern::SetApproximationFlag(const bool allow)
+//{// Do we need this ?
+//   this->Prepare();
+//   if(0 == mOptProfileIntegration.GetChoice()) this->FitScaleFactorForIntegratedRw();
+//   else this->FitScaleFactorForRw();
+//   this->RefinableObj::SetApproximationFlag(allow);
+//}
 
 void PowderPattern::GlobalOptRandomMove(const REAL mutationAmplitude,
                          const RefParType *type)

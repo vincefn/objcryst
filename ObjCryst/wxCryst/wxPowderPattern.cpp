@@ -137,6 +137,7 @@ void WXRadiation::UpdateUI(const bool lock)
 void WXRadiation::OnUpdateUI(wxUpdateUIEvent& event)
 {
    this->UpdateUI(true);
+   event.Skip();
 }
 
 //////////////////////////////////////// WXProfileFitting /////////////////////

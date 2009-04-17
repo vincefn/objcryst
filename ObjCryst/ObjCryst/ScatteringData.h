@@ -438,6 +438,7 @@ class ScatteringData: virtual public RefinableObj
       virtual void BeginOptimization(const bool allowApproximations=false,
                                      const bool enableRestraints=false);
       virtual void EndOptimization();
+      virtual void SetApproximationFlag(const bool allow);
       /// Set the maximum value for sin(theta)/lambda. All data (reflections,..) still
       /// exist but are ignored for all calculations.
       virtual void SetMaxSinThetaOvLambda(const REAL max);

@@ -956,6 +956,17 @@ class RefinableObj
       */
       virtual void EndOptimization();
       
+      /** Enable or disable numerical approximations. This can be used for global optimization
+      * to get faster calculations. Depending on the type of object, this may do something
+      * or not (it does not do anything in a base RefinableObj, except calling this function
+      * for all sub-objects).
+      *
+      * \note Currently there is no mApproximationFlag in the base class, but maybe there should...
+      *
+      * Also see:
+      */
+      virtual void SetApproximationFlag(const bool allow);
+      
       /// Randomize Configuration (before a global optimization). This
       /// Affects only parameters which are limited and not fixed.
       /// The randomization also affects all sub-objects (recursive).

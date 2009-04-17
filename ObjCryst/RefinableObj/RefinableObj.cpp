@@ -1653,6 +1653,12 @@ void RefinableObj::EndOptimization()
    #endif
 }
 
+void RefinableObj::SetApproximationFlag(const bool allow)
+{
+for(int i=0;i<mSubObjRegistry.GetNb();i++)
+      mSubObjRegistry.GetObj(i).SetApproximationFlag(allow);
+}
+
 void RefinableObj::RandomizeConfiguration()
 {
    VFN_DEBUG_ENTRY("RefinableObj::RandomizeConfiguration():"<<mName,5)

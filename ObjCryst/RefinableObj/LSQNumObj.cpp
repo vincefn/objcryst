@@ -88,10 +88,10 @@ void LSQNumObj::SetParIsUsed(const RefParType *type,const bool use)
 }
 
 void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
-                        const bool silent)
+                        const bool silent, const bool callBeginEndOptimization)
 {
    TAU_PROFILE("LSQNumObj::Refine()","void ()",TAU_DEFAULT);
-   this->BeginOptimization();
+   if(callBeginEndOptimization) this->BeginOptimization();
    mObs=this->GetLSQObs();
    mWeight=this->GetLSQWeight();
 
@@ -221,7 +221,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
                if(nbVar<=1)
                {
                   mRefParList.RestoreParamSet(mIndexValuesSetInitial);
-                  this->EndOptimization();
+                  if(callBeginEndOptimization) this->EndOptimization();
                   if(!silent) mRefParList.Print();
                   throw ObjCrystException("LSQNumObj::Refine(): not enough (1) parameters after fixing one...");
                }
@@ -544,7 +544,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
                   if(marquardt>1e8)
                   {
                      mRefParList.RestoreParamSet(mIndexValuesSetInitial);
-                     this->EndOptimization();
+                     if(callBeginEndOptimization) this->EndOptimization();
                      if(!silent) mRefParList.Print();
                      throw ObjCrystException("LSQNumObj::Refine():Levenberg-Marquardt diverging !");
                   }
@@ -594,7 +594,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
       
       if(!silent)this->PrintRefResults();
    }
-   this->EndOptimization();
+   if(callBeginEndOptimization) this->EndOptimization();
 }
 
 CrystMatrix_REAL LSQNumObj::CorrelMatrix()const{return mCorrelMatrix;};

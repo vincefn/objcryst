@@ -59,9 +59,20 @@ class LSQNumObj
       ///
       /// LSQNumObj::PrepareRefParList() must be called first!
       void SetParIsUsed(const RefParType *type,const bool use);
-      
+      /** Do the refinement
+      *
+      * \param nbCycle: number of LSQ cycles
+      * \param useLevenbergMarquardt: enable Levenberg-Marquardt algorithm
+      * to ensure that a decrease of Chi^2 will be obtained (actually a 1%
+      * increase is allowed)
+      * \param callBeginEndOptimization: if true, will call RefinableObj::BeginOptimization(true,...)
+      * and RefinableObj::EndOptimization(). You may not want this if the LSQ is done during another
+      * (e.g. monte-carlo) optimization - but then the calling function \b must ensure
+      * that approximations are disabled (using RefinableObj::SetApproximationFlag)
+      * for objects where that would render derivative calculations imprecise.
+      */
       void Refine (int nbCycle=1,bool useLevenbergMarquardt=false,
-                   const bool silent=false);
+                   const bool silent=false, const bool callBeginEndOptimization=true);
       CrystVector_REAL Sigma()const;
       CrystMatrix_REAL CorrelMatrix()const;
       REAL Rfactor()const;
@@ -146,9 +157,11 @@ class LSQNumObj
       const CrystVector_REAL& GetLSQWeight() const;
       /// Get the LSQ deriv vector (using either only the top or the hierarchy of object)
       const CrystVector_REAL& GetLSQDeriv(RefinablePar&par);
-      /// Tell all refined object that the refinement is beginning
+      /** Tell all refined object that the refinement is beginning
+      */
       void BeginOptimization(const bool allowApproximations=false, const bool enableRestraints=false);
-      /// Tell all refined object that the refinement is beginning
+      /** Tell all refined object that the refinement is finished
+      */
       void EndOptimization();
    protected:
    private:

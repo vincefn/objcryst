@@ -847,6 +847,7 @@ void WXCrystObj::OnEnable(wxUpdateUIEvent &event)
 {
    if(ID_WXOBJ_ENABLE==event.GetId()) this->Enable(true);
    else this->Enable(false);
+   event.Skip();
 }
 bool WXCrystObj::Enable(bool enable)
 {

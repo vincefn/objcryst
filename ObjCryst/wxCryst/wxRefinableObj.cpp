@@ -674,6 +674,7 @@ void WXRefinableObj::OnMenuParRandomize(wxCommandEvent & WXUNUSED(event))
 void WXRefinableObj::OnUpdateUI(wxUpdateUIEvent& event)
 {
    this->UpdateUI(true);
+   event.Skip();
 }
 void WXRefinableObj::UpdateUI(const bool lock)
 {

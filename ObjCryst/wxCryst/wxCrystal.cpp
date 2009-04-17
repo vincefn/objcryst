@@ -812,6 +812,8 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
          mMutexGLUpdate.Lock();
          wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_GLCRYSTAL_MENU_UPDATE);
          wxPostEvent(mpCrystalGL,event);
+         wxWakeUpIdle();
+         wxThread::This()->Yield();
          int ct=0;
          #ifdef __LINUX__
          while(mpConditionGLUpdate->WaitTimeout(200)!=wxCOND_NO_ERROR)
@@ -3416,7 +3418,7 @@ void WXGLCrystalCanvas::CrystUpdate()
    */
 }
 
-void WXGLCrystalCanvas::OnUpdateUI(wxUpdateUIEvent& WXUNUSED(event))
+void WXGLCrystalCanvas::OnUpdateUI(wxUpdateUIEvent&event)
 {
    VFN_DEBUG_ENTRY("WXGLCrystalCanvas::OnUpdateUI()",5)
    if(mpFourierMapListWin!=0)
@@ -3448,6 +3450,7 @@ void WXGLCrystalCanvas::OnUpdateUI(wxUpdateUIEvent& WXUNUSED(event))
       mpFourierMapListWin->mIsUpdating=false;
    }
    this->Refresh(false);
+   event.Skip();
    VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnUpdateUI()",5)
 }
 
