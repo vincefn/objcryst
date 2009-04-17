@@ -345,7 +345,7 @@ void TextureMarchDollase::AddPhase(const REAL f, const REAL c,
    sprintf(buf,"%d",nbPhase);
    {
       RefinablePar tmp("Fraction_"+(string)buf,&(phase->mFraction),0.,1.,
-                        gpRefParTypeScattDataCorrInt,
+                        gpRefParTypeScattDataCorrIntPO_Fraction,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1.);
       tmp.AssignClock(mClockTexturePar);
       tmp.SetDerivStep(1e-7);
@@ -354,7 +354,7 @@ void TextureMarchDollase::AddPhase(const REAL f, const REAL c,
    }
    {
       RefinablePar tmp("MarchCoeff_"+(string)buf,&(phase->mMarchCoeff),.1,10.,
-                        gpRefParTypeScattDataCorrInt,
+                        gpRefParTypeScattDataCorrIntPO_Amplitude,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1.);
       tmp.AssignClock(mClockTexturePar);
       tmp.SetDerivStep(1e-7);
@@ -363,7 +363,7 @@ void TextureMarchDollase::AddPhase(const REAL f, const REAL c,
    }
    {
       RefinablePar tmp("H_"+(string)buf,&(phase->mH),-10.,10.,
-                        gpRefParTypeScattDataCorrInt,
+                        gpRefParTypeScattDataCorrIntPO_Direction,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,true,true,false,1.);
       tmp.AssignClock(mClockTexturePar);
       tmp.SetDerivStep(1e-7);
@@ -372,7 +372,7 @@ void TextureMarchDollase::AddPhase(const REAL f, const REAL c,
    }
    {
       RefinablePar tmp("K_"+(string)buf,&(phase->mK),-10.,10.,
-                        gpRefParTypeScattDataCorrInt,
+                        gpRefParTypeScattDataCorrIntPO_Direction,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,true,true,false,1.);
       tmp.AssignClock(mClockTexturePar);
       tmp.SetDerivStep(1e-7);
@@ -381,7 +381,7 @@ void TextureMarchDollase::AddPhase(const REAL f, const REAL c,
    }
    {
       RefinablePar tmp("L_"+(string)buf,&(phase->mL),-10.,10.,
-                        gpRefParTypeScattDataCorrInt,
+                        gpRefParTypeScattDataCorrIntPO_Direction,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,true,true,false,1.);
       tmp.AssignClock(mClockTexturePar);
       tmp.SetDerivStep(1e-7);

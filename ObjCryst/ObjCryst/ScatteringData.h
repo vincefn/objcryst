@@ -44,18 +44,37 @@ void DeleteLibCrystTabulCosine();
 void InitLibCrystTabulExp();
 void DeleteLibCrystTabulExp();
 
+/// Generic type for scattering data
 extern const RefParType *gpRefParTypeScattData;
+/// Type for scattering data scale factors
 extern const RefParType *gpRefParTypeScattDataScale;
+/// Type for reflection profile
 extern const RefParType *gpRefParTypeScattDataProfile;
+/// Type for reflection profiles type (e.g. gaussian/lorentzian mix)
 extern const RefParType *gpRefParTypeScattDataProfileType;
+/// Type for reflection profile width
 extern const RefParType *gpRefParTypeScattDataProfileWidth;
+/// Type for reflection profile asymmetry
 extern const RefParType *gpRefParTypeScattDataProfileAsym;
+/// Generic type for scattering data correction parameter
 extern const RefParType *gpRefParTypeScattDataCorr;
+/// Generic type for correction to calculated intensities
 extern const RefParType *gpRefParTypeScattDataCorrInt;
+/// Parameter type for preferred orientation direction
+extern const RefParType *gpRefParTypeScattDataCorrIntPO_Direction;
+/// Parameter type for fraction of preferred orientation
+extern const RefParType *gpRefParTypeScattDataCorrIntPO_Fraction;
+/// Parameter type for the amplitude of preferred orientation
+extern const RefParType *gpRefParTypeScattDataCorrIntPO_Amplitude;
+/// Parameter type for absorption correction
 extern const RefParType *gpRefParTypeScattDataCorrIntAbsorp;
+/// Parameter type for polarization correction
 extern const RefParType *gpRefParTypeScattDataCorrIntPolar;
+/// Parameter type for extinction correction
 extern const RefParType *gpRefParTypeScattDataCorrIntExtinc;
+/// Parameter type for correction to peak positions
 extern const RefParType *gpRefParTypeScattDataCorrPos;
+/// Parameter type for background intensity
 extern const RefParType *gpRefParTypeScattDataBackground;
 
 extern const RefParType *gpRefParTypeRadiation;
@@ -78,6 +97,9 @@ class NiftyStaticGlobalObjectsInitializer_ScatteringData
             gpRefParTypeScattDataProfileAsym= new RefParType(gpRefParTypeScattDataProfile,"Asymmetry");
             gpRefParTypeScattDataCorr= new RefParType(gpRefParTypeScattData,"Correction");
             gpRefParTypeScattDataCorrInt= new RefParType(gpRefParTypeScattDataCorr,"Intensities");
+            gpRefParTypeScattDataCorrIntPO_Direction= new RefParType(gpRefParTypeScattDataCorrIntPO_Direction,"Preferred orientation direction");
+            gpRefParTypeScattDataCorrIntPO_Fraction= new RefParType(gpRefParTypeScattDataCorrIntPO_Fraction,"Preferred orientation fraction");
+            gpRefParTypeScattDataCorrIntPO_Amplitude= new RefParType(gpRefParTypeScattDataCorrIntPO_Amplitude,"Preferred orientation amplitude");
             gpRefParTypeScattDataCorrIntAbsorp= new RefParType(gpRefParTypeScattDataCorrInt,"Absorption");
             gpRefParTypeScattDataCorrIntPolar= new RefParType(gpRefParTypeScattDataCorrInt,"Polarization");
             gpRefParTypeScattDataCorrIntExtinc= new RefParType(gpRefParTypeScattDataCorrInt,"Extinction");
