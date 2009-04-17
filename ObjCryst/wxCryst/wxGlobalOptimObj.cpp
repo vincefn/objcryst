@@ -242,30 +242,33 @@ void WXOptimizationObj::OnSelectParamSet(wxCommandEvent &event)
       return;
    }
    const long n=event.GetSelection();
-   if(mClockParamSetWindow>this->GetOptimizationObj().mRefParList.GetRefParListClock())
-   {
-      try
+   if(n>=0)
+   {// n=-1 when window is closed ?
+      if(mClockParamSetWindow>this->GetOptimizationObj().mRefParList.GetRefParListClock())
       {
-         this->GetOptimizationObj().mRefParList
-            .RestoreParamSet(this->GetOptimizationObj().mvSavedParamSet[n].first);
+         try
+         {
+            this->GetOptimizationObj().mRefParList
+               .RestoreParamSet(this->GetOptimizationObj().mvSavedParamSet[n].first);
+         }
+         catch(const ObjCrystException &except)
+         {
+            wxMessageDialog bad(this,_T("Impossible ! Model has been altered !"),
+                                    _T("Impossible ! Model has been altered !"),wxOK|wxICON_EXCLAMATION);
+            mpwxParamSetList->GetParent()->Close();
+            mpwxParamSetList=0;
+         }
+         this->GetOptimizationObj().UpdateDisplay();
+         cout <<"Param set #"<<this->GetOptimizationObj().mvSavedParamSet[n].first<<", cost="
+            <<this->GetOptimizationObj().mvSavedParamSet[n].second
+            <<", now cost="<<this->GetOptimizationObj().GetLogLikelihood()<<endl;
       }
-      catch(const ObjCrystException &except)
+      else
       {
-         wxMessageDialog bad(this,_T("Impossible ! Model has been altered !"),
-                                  _T("Impossible ! Model has been altered !"),wxOK|wxICON_EXCLAMATION);
-         mpwxParamSetList->GetParent()->Close();
-         mpwxParamSetList=0;
+         wxMessageDialog bad(this,_T("Impossible ! The list of parameters has been changed !"),
+                                 _T("Impossible ! The list of parameters has been changed !"),wxOK|wxICON_EXCLAMATION);
+         bad.ShowModal();
       }
-      this->GetOptimizationObj().UpdateDisplay();
-      cout <<"Param set #"<<this->GetOptimizationObj().mvSavedParamSet[n].first<<", cost="
-           <<this->GetOptimizationObj().mvSavedParamSet[n].second
-           <<", now cost="<<this->GetOptimizationObj().GetLogLikelihood()<<endl;
-   }
-   else
-   {
-      wxMessageDialog bad(this,_T("Impossible ! The list of parameters has been changed !"),
-                               _T("Impossible ! The list of parameters has been changed !"),wxOK|wxICON_EXCLAMATION);
-      bad.ShowModal();
    }
 }
 
