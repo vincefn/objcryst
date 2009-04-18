@@ -1643,6 +1643,9 @@ void MonteCarloObj::XMLOutput(ostream &os,int indent)const
    mXMLAutoSave.XMLOutput(os,indent);
    os<<endl;
 
+   mAutoLSQ.XMLOutput(os,indent);
+   os<<endl;
+
    {
       XMLCrystTag tag2("TempMaxMin");
       for(int i=0;i<indent;i++) os << "  " ;
@@ -1727,6 +1730,11 @@ void MonteCarloObj::XMLInput(istream &is,const XMLCrystTag &tagg)
                   mSaveTrackedData.XMLInput(is,tag);
                   break;
                }
+               if("Automatic Least Squares Refinement"==tag.GetAttributeValue(i))
+               {
+                  mAutoLSQ.XMLInput(is,tag);
+                  break;
+               }
             }
          continue;
       }
@@ -1808,7 +1816,7 @@ void MonteCarloObj::InitOptions()
       AnnealingScheduleChoices[4]="Smart";
       AnnealingScheduleChoices[5]="Gamma";
       
-      runAutoLSQName="Try Least Squares refinement";
+      runAutoLSQName="Automatic Least Squares Refinement";
       runAutoLSQChoices[0]="Never";
       runAutoLSQChoices[1]="At the end of each run";
       runAutoLSQChoices[2]="Every 150000 trials, and at the end of each run";

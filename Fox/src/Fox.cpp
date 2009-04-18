@@ -80,7 +80,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 1142
+#define __FOXREVISION__ 1143
 
 static std::string foxVersion;
 
@@ -796,7 +796,7 @@ int main (int argc, char *argv[])
    WXCrystMainFrame *frame ;
    string title(string("FOX: Free Objects for Xtal structures v")+foxVersion);
    frame = new WXCrystMainFrame(wxString::FromAscii(title.c_str()),
-                                 wxPoint(50, 50), wxSize(550, 400),
+                                 wxPoint(50, 50), wxSize(600, 600),
                                  !(loadFourierGRD||loadFourierDSN6));
    // Use the main frame status bar to pass messages to the user
       pMainFrameForUserMessage=frame;
