@@ -606,6 +606,11 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
          cout<<"Finished Run #"<<nbCycle0-nbCycle<<", final cost="
              <<this->GetLogLikelihood()<<", nbTrial="<< nbStep0-nbStep<<" ("<<chrono.seconds()
              <<" seconds), so far <nbTrial>="<< nbTrialCumul/(nbCycle0-nbCycle+1)<<endl;
+      else
+         cout<<"Finished Run #"<<nbCycle0-nbCycle<<", final cost="
+             <<this->GetLogLikelihood()<<", nbTrial="<< nbStep0-nbStep<<" ("<<chrono.seconds()
+             <<" seconds)"<<endl;
+      
       nbStep=nbStep0;
       this->UpdateDisplay();
       stringstream s;
