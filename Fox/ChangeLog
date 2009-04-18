@@ -1,3 +1,14 @@
+#### 1.8.X (Beta version) - April 2009 (Revision #1143)
+NEW FEATURES
+   * Add automatic least-squares refinement of the structure during
+    a global optimization run
+   * Add manual least-squares refinement of the structure in the 
+   global optimization run/stop menu
+
+BUG FIXES
+   * Correct log(likelihood) calculation using integrated intensities
+   (could cause invalid Chi^2 values when used without gui)
+
 #### 1.8.1.2 - April 2009 (Revision #1117)
 BUG FIXES
    * Fix auto-scrolling bug with wxWidgets >=2.8.8
