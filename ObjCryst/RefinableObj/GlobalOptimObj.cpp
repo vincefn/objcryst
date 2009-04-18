@@ -1838,6 +1838,8 @@ void MonteCarloObj::InitLSQ(const bool useFullPowderPatternProfile)
    mLSQ.SetParIsFixed(gpRefParTypeObjCryst,true);
    mLSQ.SetParIsFixed(gpRefParTypeScatt,false);
    mLSQ.SetParIsFixed(gpRefParTypeScattDataScale,false);
+   mLSQ.SetParIsFixed(gpRefParTypeScattDataCorrIntPO_Fraction,false);
+   mLSQ.SetParIsFixed(gpRefParTypeScattDataCorrIntPO_Amplitude,false);
 }
 
 #ifdef __WX__CRYST__
