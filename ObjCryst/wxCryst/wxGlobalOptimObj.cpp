@@ -215,19 +215,18 @@ void WXOptimizationObj::OnBrowseParamSet(wxCommandEvent & WXUNUSED(event))
    wxFrame *frame= new wxFrame(this,-1,_T("Stored Configurations"),
                                wxDefaultPosition,wxSize(250,200));
    const long nb=this->GetOptimizationObj().mvSavedParamSet.size();
-   wxString *choices = new wxString[nb];
+   wxArrayString choices;
+   mpwxParamSetList=new wxListBox(frame, ID_BROWSE_WIN, wxDefaultPosition, 
+                                   wxDefaultSize, choices,
+                                   wxLB_SINGLE|wxLB_NEEDED_SB, wxDefaultValidator,
+                                   _T("listBox"));
    for(int i=0;i<nb;i++)
    {
       wxString tmpname=wxString::FromAscii(this->GetOptimizationObj().mRefParList.GetParamSetName
                                              (this->GetOptimizationObj().mvSavedParamSet[i].first).c_str());
-      choices[i].Printf(_T("%d, cost= %f, %s"),i,
-                         this->GetOptimizationObj().mvSavedParamSet[i].second,tmpname.c_str());
-      //cout<<choices[i]<<endl;
+      mpwxParamSetList->Append(wxString::Format(_T("%d, cost= %f, %s"),i,
+                         this->GetOptimizationObj().mvSavedParamSet[i].second,tmpname.c_str()));
    }
-   mpwxParamSetList=new wxListBox(frame, ID_BROWSE_WIN, wxDefaultPosition, 
-                                   wxDefaultSize, nb, choices,
-                                   wxLB_SINGLE|wxLB_NEEDED_SB, wxDefaultValidator,
-                                   _T("listBox"));
    mpwxParamSetList->SetEventHandler(this);
    mClockParamSetWindow.Click();
    frame->Show(true);
@@ -235,6 +234,7 @@ void WXOptimizationObj::OnBrowseParamSet(wxCommandEvent & WXUNUSED(event))
 
 void WXOptimizationObj::OnSelectParamSet(wxCommandEvent &event)
 {
+   
    if(this->GetOptimizationObj().IsOptimizing())
    {
       wxMessageDialog dumbUser(this,_T("Cannot browse during Optimisation !"),
@@ -245,6 +245,25 @@ void WXOptimizationObj::OnSelectParamSet(wxCommandEvent &event)
    const long n=event.GetSelection();
    if(n>=0)
    {// n=-1 when window is closed ?
+      // Window is alive, check the number of browsable parameters is unchanged
+      if(mpwxParamSetList->GetCount()!=this->GetOptimizationObj().mvSavedParamSet.size())
+      {
+         const long nb=this->GetOptimizationObj().mvSavedParamSet.size();
+         wxArrayString choices;
+         for(int i=0;i<nb;i++)
+         {
+            wxString tmpname=wxString::FromAscii(this->GetOptimizationObj().mRefParList.GetParamSetName
+                                                   (this->GetOptimizationObj().mvSavedParamSet[i].first).c_str());
+            choices.Add(wxString::Format(_T("%d, cost= %f, %s"),i,
+                                                      this->GetOptimizationObj().mvSavedParamSet[i].second,tmpname.c_str()));
+         }
+         mpwxParamSetList->Set(choices);
+         mClockParamSetWindow.Click();
+         //wxMessageDialog bad(mpwxParamSetList,_T("The list has changed. Updating"),
+         //                                     _T("The list has changed. Updating"),wxOK|wxSTAY_ON_TOP);
+         //bad.ShowModal();
+         return;
+      }
       if(mClockParamSetWindow>this->GetOptimizationObj().mRefParList.GetRefParListClock())
       {
          try
@@ -272,6 +291,19 @@ void WXOptimizationObj::OnSelectParamSet(wxCommandEvent &event)
       }
    }
 }
+
+#if 0
+void WXOptimizationObj::OnClose(wxCloseEvent& event)
+{
+   if(event.GetId()==ID_BROWSE_WIN)
+   {
+      cout<<"Closing browse window..."<<endl;
+      mpwxParamSetList=0;
+   }
+   else cout<<event.GetId()<<"?"<<endl;
+   event.Skip();
+}
+#endif
 
 ////////////////////////////////////////////////////////////////////////
 //
@@ -319,6 +351,7 @@ BEGIN_EVENT_TABLE(WXMonteCarloObj, wxWindow)
    EVT_UPDATE_UI(ID_CRYST_UPDATEUI,              WXOptimizationObj::OnUpdateUI)
    EVT_LISTBOX(ID_BROWSE_WIN,                    WXOptimizationObj::OnSelectParamSet)
    EVT_LISTBOX_DCLICK(ID_BROWSE_WIN,             WXOptimizationObj::OnSelectParamSet)
+   //EVT_CLOSE(                                    WXOptimizationObj::OnClose)
 END_EVENT_TABLE()
 
 WXMonteCarloObj::WXMonteCarloObj(wxWindow *parent, MonteCarloObj* obj):
