@@ -4698,9 +4698,11 @@ CrystVector_REAL& PowderPattern::GetScaleFactor(){return mScaleFactor;}
 struct exportAtom
 {
    exportAtom(string n,REAL X, REAL Y, REAL Z,REAL b,REAL o,const ScatteringPower *pow):
-   name(n),x(X),y(Y),z(Z),biso(b),occ(o),mpScattPow(pow){}
+   name(n),x(X),y(Y),z(Z),biso(b),occ(o),occMult(1),mpScattPow(pow){}
    string name;
    REAL x,y,z,biso,occ;
+   /// Number of overlapping atoms - 1 if no overlapping, otherwise we need to multiply by occMult
+   int occMult;
    const ScatteringPower *mpScattPow;
 };
 
@@ -4856,7 +4858,7 @@ void PowderPattern::ExportFullprof(const std::string &prefix)const
                   if(abs(minDistTable(l,k))<0.5)
                   {
                      map<int,exportAtom>::iterator pos=vExportAtom.find(l);
-                     if(pos!=vExportAtom.end()) pos->second.occ*=2;
+                     if(pos!=vExportAtom.end()) pos->second.occMult+=1;
                      redundant=true;//-1 means dist > 10A
                   }
                if(!redundant)
@@ -4935,7 +4937,7 @@ void PowderPattern::ExportFullprof(const std::string &prefix)const
             <<" "<<pos->second.mpScattPow->GetSymbol()<<" "
             <<pos->second.x<<" "<<pos->second.y<<" "<<pos->second.z<<" "
             <<pos->second.biso<<" "
-            <<pos->second.occ<<" 0  0   0   0"<<endl
+            <<pos->second.occ*pos->second.occMult<<" 0  0   0   0"<<endl
             <<"       0 0 0  0    0"<<endl;
       }
       // POWDER DATA-I: PROFILE PARAMETERS FOR EACH PATTERN
@@ -4948,11 +4950,13 @@ void PowderPattern::ExportFullprof(const std::string &prefix)const
          <<" 1.0     0.0  0.0  0.0  0.0  0.0       0"<<endl;
       
       // :TODO: make sure the profile used corrseponds to pseudo-Voigt first !
-         pcr<<"!     U     V     W     X     Y     GauSiz     LorSiz Size-Model"<<endl
-            <<vDiff[i]->GetProfile().GetPar("U").GetHumanValue()<<" "
-            <<vDiff[i]->GetProfile().GetPar("V").GetHumanValue()<<" "
-            <<vDiff[i]->GetProfile().GetPar("W").GetHumanValue()<<" "
-            <<                     "  0.0   0.0      0.0        0.0 "<<endl
+         pcr<<"!     U     V     W     X     Y     GauSiz     LorSiz Size-Model"<<endl;
+         // :NOTE: we need to separate the 3 next lines, or the same number is generated
+         // three times when compiled with Visual c++ express 2008 (compiler bug ?)
+         pcr<<vDiff[i]->GetProfile().GetPar("U").GetHumanValue()<<" ";
+         pcr<<vDiff[i]->GetProfile().GetPar("V").GetHumanValue()<<" ";
+         pcr<<vDiff[i]->GetProfile().GetPar("W").GetHumanValue()<<" ";
+         pcr<<                     "  0.0   0.0      0.0        0.0 "<<endl
             << "    0.0   0.0   0.0   0.0   0.0      0.0        0.0 "<<endl;
       // Cell parameters
       pcr<<"!     a          b         c        alpha      beta       gamma      #Cell Info"<<endl
