@@ -28,6 +28,7 @@ doc:
 clean:
 	$(MAKE) -f gnu.mak -C src clean
 	$(MAKE) -f gnu.mak -C $(BUILD_DIR)/ObjCryst clean
+	@${RM} -Rf ${BUILD_DIR}/static-libs/*
 
 tidy:
 	$(MAKE) -f gnu.mak -C src tidy
