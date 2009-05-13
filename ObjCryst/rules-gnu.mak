@@ -210,7 +210,7 @@ $(DIR_STATIC_LIBS)/lib/libcctbx.a:
 	mkdir -p $(DIR_STATIC_LIBS)/lib/ $(DIR_STATIC_LIBS)/include/
 	cd $(BUILD_DIR) && tar -xjf cctbx.tar.bz2
 	$(MAKE) -f gnu.mak -C $(BUILD_DIR)/cctbx install
-	ln -sf $(BUILD_DIR)/boost $(DIR_STATIC_LIBS)/include/
+	#ln -sf $(BUILD_DIR)/boost $(DIR_STATIC_LIBS)/include/
 	#rm -Rf $(BUILD_DIR)/cctbx
 
 libcctbx: $(DIR_STATIC_LIBS)/lib/libcctbx.a
