@@ -295,7 +295,7 @@ void OptimizationObj::PrepareRefParList()
       mRefParList.ResetParList();
       mRefParList.EraseAllParamSet();
       for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
-         mRefParList.AddPar(mRecursiveRefinedObjList.GetObj(i));
+         mRefParList.AddPar(mRecursiveRefinedObjList.GetObj(i),true);
       mvSavedParamSet.clear();
       mBestParSavedSetIndex=mRefParList.CreateParamSet("Best Configuration");
       mvSavedParamSet.push_back(make_pair(mBestParSavedSetIndex,mBestCost));
@@ -405,7 +405,7 @@ mNbTrialRetry(0),mMinCostRetry(0)
    mAnnealingScheduleTemp.SetChoice(ANNEALING_SMART);
    mAnnealingScheduleMutation.SetChoice(ANNEALING_EXPONENTIAL);
    mXMLAutoSave.SetChoice(5);//Save after each Run
-   mAutoLSQ.SetChoice(2);
+   mAutoLSQ.SetChoice(0);
    gOptimizationObjRegistry.Register(*this);
    VFN_DEBUG_EXIT("MonteCarloObj::MonteCarloObj()",5)
 }
@@ -426,7 +426,7 @@ mNbTrialRetry(0),mMinCostRetry(0)
    mAnnealingScheduleTemp.SetChoice(ANNEALING_SMART);
    mAnnealingScheduleMutation.SetChoice(ANNEALING_EXPONENTIAL);
    mXMLAutoSave.SetChoice(5);//Save after each Run
-   mAutoLSQ.SetChoice(2);
+   mAutoLSQ.SetChoice(0);
    if(false==internalUseOnly) gOptimizationObjRegistry.Register(*this);
    VFN_DEBUG_EXIT("MonteCarloObj::MonteCarloObj(bool)",5)
 }
@@ -1846,13 +1846,13 @@ void MonteCarloObj::InitLSQ(const bool useFullPowderPatternProfile)
       for(map<RefinableObj*,unsigned int>::iterator pos=mLSQ.GetRefinedObjMap().begin();pos!=mLSQ.GetRefinedObjMap().end();++pos)
          if(pos->first->GetClassName()=="PowderPattern") pos->second=1;
    }
-   // Only refine atomic positions and scale factor
+   // Only refine structural parameters (excepting parameters already fixed) and scale factor
    mLSQ.PrepareRefParList(true);
-   mLSQ.SetParIsFixed(gpRefParTypeObjCryst,true);
-   mLSQ.SetParIsFixed(gpRefParTypeScatt,false);
+   mLSQ.SetParIsFixed(gpRefParTypeScattData,true);
    mLSQ.SetParIsFixed(gpRefParTypeScattDataScale,false);
-   mLSQ.SetParIsFixed(gpRefParTypeScattDataCorrIntPO_Fraction,false);
-   mLSQ.SetParIsFixed(gpRefParTypeScattDataCorrIntPO_Amplitude,false);
+   mLSQ.SetParIsFixed(gpRefParTypeUnitCell,true);
+   mLSQ.SetParIsFixed(gpRefParTypeScattPow,true);
+   mLSQ.SetParIsFixed(gpRefParTypeRadiation,true);
 }
 
 #ifdef __WX__CRYST__
