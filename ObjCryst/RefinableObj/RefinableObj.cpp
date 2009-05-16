@@ -1401,7 +1401,7 @@ void RefinableObj::AddPar(const RefinablePar &newRefPar)
    if(this->FindPar(name)>=0)
       while(this->FindPar(name)!=-1)
       {// KLUDGE ? Extend name if another parameter already exists with the same name
-         VFN_DEBUG_MESSAGE("RefinableObj::AddPar(): need to change name ?! -> "<<name<<","<<this->FindPar(name))
+         VFN_DEBUG_MESSAGE("RefinableObj::AddPar(): need to change name ?! -> "<<name<<","<<this->FindPar(name),10)
          name += "~";
          if(++ct==30) break;// KLUDGE, let go and hope for the best...
       }
@@ -1419,7 +1419,7 @@ void RefinableObj::AddPar(RefinablePar *newRefPar)
    if(this->FindPar(name)>=0)
       while(this->FindPar(name)!=-1)
       {// KLUDGE ? Extend name if another parameter already exists with the same name
-         VFN_DEBUG_MESSAGE("RefinableObj::AddPar(): need to change name ?! -> "<<name<<","<<this->FindPar(name))
+         VFN_DEBUG_MESSAGE("RefinableObj::AddPar(): need to change name ?! -> "<<name<<","<<this->FindPar(name),10)
          name += "~";
          if(++ct==30) break;// KLUDGE, let go and hope for the best...
       }
