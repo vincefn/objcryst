@@ -806,11 +806,15 @@ class RefinableObj
       *
       * \deprecated Use the next function, which supplies the parameter as
       * a pointer, and avoids a useless copy.
+      * \note: if a parameter is added and its name is already used by another,
+      * its name will be automatically appended with an ~
       */ 
       void AddPar(const RefinablePar &newRefPar);
       /** Add a refinable parameter. The parameter is \e not copied, so 
       * it should be allocated in the heap.
       *
+      * \note: if a parameter is added and its name is already used by another,
+      * its name will be automatically appended with an ~
       */ 
       void AddPar(RefinablePar *newRefPar);
       /** Add all the parameters in another RefinableObj. Parameters
@@ -827,6 +831,9 @@ class RefinableObj
       * modification to the fixed/limited/used attributes do not affect
       * the original parameter. Only the value and the parameter's clock
       * can then be modified by the copied parameter
+      *
+      * \note: if a parameter is added and its name is already used by another,
+      * its name will be automatically appended with an ~
       */
       void AddPar(RefinableObj &newRefParList, const bool copyParam=false);
       /** Remove a refinable parameter. 

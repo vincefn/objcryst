@@ -1396,14 +1396,35 @@ const RefinablePar& RefinableObj::GetParNotFixed(const long i) const
 void RefinableObj::AddPar(const RefinablePar &newRefPar)
 {
    VFN_DEBUG_MESSAGE("RefinableObj::AddPar(RefPar&)",2)
+   string name=newRefPar.GetName();
+   long ct=0;
+   if(this->FindPar(name)>=0)
+      while(this->FindPar(name)!=-1)
+      {// KLUDGE ? Extend name if another parameter already exists with the same name
+         VFN_DEBUG_MESSAGE("RefinableObj::AddPar(): need to change name ?! -> "<<name<<","<<this->FindPar(name))
+         name += "~";
+         if(++ct==30) break;// KLUDGE, let go and hope for the best...
+      }
+   
    mvpRefPar.push_back(new RefinablePar(newRefPar));
+   mvpRefPar.back()->SetName(name);
    mRefParListClock.Click();
 }
 
 void RefinableObj::AddPar(RefinablePar *newRefPar)
 {
    VFN_DEBUG_MESSAGE("RefinableObj::AddPar(RefPar&)",2)
+   string name=newRefPar->GetName();
+   long ct=0;
+   if(this->FindPar(name)>=0)
+      while(this->FindPar(name)!=-1)
+      {// KLUDGE ? Extend name if another parameter already exists with the same name
+         VFN_DEBUG_MESSAGE("RefinableObj::AddPar(): need to change name ?! -> "<<name<<","<<this->FindPar(name))
+         name += "~";
+         if(++ct==30) break;// KLUDGE, let go and hope for the best...
+      }
    mvpRefPar.push_back(newRefPar);
+   mvpRefPar.back()->SetName(name);
    mRefParListClock.Click();
 }
 
