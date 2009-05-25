@@ -680,7 +680,7 @@ void Crystal::CalcDynPopCorr(const REAL overlapDist, const REAL mergeDist) const
    
    this->CalcDistTable(true);
    if(mClockDynPopCorr>mDistTableClock) return;
-   
+
    const long nbComponent=mScattCompList.GetNbComponent();
    const int nbSymmetrics=this->GetSpaceGroup().GetNbSymmetrics();
    CrystVector_REAL neighborsDist(nbComponent*nbSymmetrics);
@@ -709,7 +709,12 @@ void Crystal::CalcDynPopCorr(const REAL overlapDist, const REAL mergeDist) const
          if(atomicNumber==mScattCompList(pos->mNeighbourIndex).mpScattPow->GetDynPopCorrIndex())
          {
             if(overlapDistSq > pos->mDist2)
+            {
+               //resizing can be necessary if the unit cell is small, so that an atom two unit cells away is
+               //still considered a neighbor...
+               if(nbNeighbors==neighborsDist.numElements()) neighborsDist.resizeAndPreserve(nbNeighbors+20);
                neighborsDist(nbNeighbors++)=sqrt(pos->mDist2);
+            }
          }
       }
       corr=0.;
