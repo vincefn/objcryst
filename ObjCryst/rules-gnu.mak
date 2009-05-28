@@ -27,17 +27,17 @@ shared-glut=1
 endif
 ### Rules for Linux & GCC
 # C compiler
-CC     := gcc
+#CC     := gcc
 CFLAGS  = ${DEPENDFLAGS}
 # C++ compiler
-CXX      := g++
+#CXX      := g++
 CXXFLAGS  = ${DEPENDFLAGS} ${PROFILEFLAGS}
 # FORTRAN compiler
 FC     := f77
 FFLAGS  = 
 # linker
-LINKER    := g++
-LDFLAGS   = -L/usr/lib -L/usr/local/lib -L$(DIR_CRYSTVECTOR) -L$(DIR_LIBCRYST) -L$(DIR_REFOBJ) -L$(DIR_STATIC_LIBS)/lib -L$(DIR_VFNQUIRKS) -L$(DIR_WXWCRYST) -L$(DIR_TAU)/x86_64/lib
+LINKER    := ${CXX}
+CRYST_LDFLAGS   = ${LDFLAGS} -L/usr/lib -L/usr/local/lib -L$(DIR_CRYSTVECTOR) -L$(DIR_LIBCRYST) -L$(DIR_REFOBJ) -L$(DIR_STATIC_LIBS)/lib -L$(DIR_VFNQUIRKS) -L$(DIR_WXWCRYST) -L$(DIR_TAU)/x86_64/lib
 
 #to automatically generate dependencies
 MAKEDEPEND = gcc -MM ${CPPFLAGS} ${CXXFLAGS} ${C_BLITZFLAG} $< > $*.dep

@@ -30,10 +30,10 @@ endif
 
 #Main Application
 Fox: libwx libnewmat libcctbx libCrystVector libQuirks libRefinableObj libCryst libwxCryst libfftw Fox.o
-	${LINKER} ${LDFLAGS} -o $@ ${filter-out %.a %.so lib%, $^} ${LOADLIBES} 
+	${LINKER} ${CRYST_LDFLAGS} -o $@ ${filter-out %.a %.so lib%, $^} ${LOADLIBES} 
 
 Fox-nogui: libnewmat libcctbx libCrystVector libQuirks libRefinableObj libCryst Fox.o 
-	${LINKER} ${LDFLAGS} -o $@ ${filter-out %.a %.so lib%, $^} ${LOADLIBES} 
+	${LINKER} ${CRYST_LDFLAGS} -o $@ ${filter-out %.a %.so lib%, $^} ${LOADLIBES} 
 
 fox: Fox
 

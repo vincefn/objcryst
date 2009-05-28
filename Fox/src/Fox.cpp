@@ -80,7 +80,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 1145
+#define __FOXREVISION__ 1158
 
 static std::string foxVersion;
 
@@ -494,7 +494,8 @@ int main (int argc, char *argv[])
       {
          ++i;
          #ifdef __WX__CRYST__
-         ifstream f(wxString(argv[i]).ToAscii());
+         wxString tmp_argv(argv[i]);
+         ifstream f(tmp_argv.ToAscii());
          #else
          ifstream f(argv[i]);
          #endif
