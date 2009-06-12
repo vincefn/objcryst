@@ -1169,6 +1169,8 @@ mNbRefParNotFixed(-1),mIsbeingRefined(false),mDeleteRefParInDestructor(true)
    
    VFN_DEBUG_MESSAGE("RefinableObj::RefinableObj(bool):End",2)
 }
+
+RefinableObj::RefinableObj(const RefinableObj &old) {}
 /*
 RefinableObj::RefinableObj(const RefinableObj &old):
 mName(old.mName),mMaxNbRefPar(old.mMaxNbRefPar),mSavedValuesSetIsUsed(mMaxNbSavedSets),

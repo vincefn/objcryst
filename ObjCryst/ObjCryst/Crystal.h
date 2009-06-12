@@ -118,7 +118,7 @@ class Crystal:public UnitCell
       /// Crystal destructor
       ~Crystal();
       virtual const string& GetClassName() const;
-      
+
       /** \brief Add a scatterer to the crystal.
       *
       * \warning the scatterer \e must be allocated in the heap, since the scatterer
@@ -355,6 +355,12 @@ class Crystal:public UnitCell
       void Init(const REAL a, const REAL b, const REAL c, const REAL alpha,
                 const REAL beta, const REAL gamma,const string &SpaceGroupId,
                 const string& name);
+
+      /** Set whether to delete the Scatterers and ScatteringPowers in the
+       * destructor. By default these sub-objects are deleted.
+      */
+      void SetDeleteSubObjInDestructor(const bool b);
+
    private:
       /** Init options.
       *
@@ -483,6 +489,10 @@ class Crystal:public UnitCell
       /// List of calculated bond valences, as a map, the key being the index
       /// of the atom in Crystal::mScattCompList.
       mutable std::map<long, REAL> mvBondValenceCalc;
+      // Flag indicating whether to delete Scatterers and ScatteringPowers in
+      // the destructor (default true). Modified by
+      // SetDeleteSubObjInDestructor.
+      bool mDeleteSubObjInDestructor;
 
    #ifdef __WX__CRYST__
    public:

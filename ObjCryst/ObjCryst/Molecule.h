@@ -746,8 +746,11 @@ class Molecule: public Scatterer
       /** Remove an atom. Returns the iterator to the next atom in the list.
       *
       * This also removes all corresponding bonds, bond angles, etc...
+      * If del is true (default), then the MolAtom object is deleted. The del
+      * flag gets sent to the RemoveXXX functions for the corresponding
+      * objects.
       */
-      vector<MolAtom*>::iterator RemoveAtom(MolAtom&);
+      vector<MolAtom*>::iterator RemoveAtom(MolAtom&, const bool del = true);
       /** Add a bond
       *
       *
@@ -756,10 +759,12 @@ class Molecule: public Scatterer
                    const REAL length, const REAL sigma, const REAL delta,
                    const REAL bondOrder=1.,
                    const bool updateDisplay=true);
-      /** Remove a bond. Returns the iterator to the next bond in the list.
+      /** Remove a bond. Returns the iterator to the next bond in the list. 
+      * 
+      * If del is true (default), then the MolBond object is deleted.
       *
       */
-      vector<MolBond*>::iterator RemoveBond(const MolBond&);
+      vector<MolBond*>::iterator RemoveBond(const MolBond&, const bool del = true);
       /** Searches whether a bond between two atoms already exists.
       *
       * If no bond is found, returns Molecule::mvpAtom.end().
@@ -779,8 +784,9 @@ class Molecule: public Scatterer
                         const bool updateDisplay=true);
       /** Remove a BondAngle
       *
+      * If del is true (default), then the MolBondAngle object is deleted.
       */
-      vector<MolBondAngle*>::iterator RemoveBondAngle(const MolBondAngle&);
+      vector<MolBondAngle*>::iterator RemoveBondAngle(const MolBondAngle&, const bool del = true);
       /** Searches whether a bond between three atoms already exists,
       * searching for either (at1,at2,at3) and (at3,at2,at1), as these are equivalent.
       *
@@ -797,8 +803,9 @@ class Molecule: public Scatterer
                             const bool updateDisplay=true);
       /** Remove a dihedral angle
       *
+      * If del is true (default), then the MolDihedralAngle object is deleted.
       */
-      vector<MolDihedralAngle*>::iterator RemoveDihedralAngle(const MolDihedralAngle&);
+      vector<MolDihedralAngle*>::iterator RemoveDihedralAngle(const MolDihedralAngle&, const bool del = true);
       /** Searches whether a dihedral between four atoms already exists,
       * searching for either (at1,at2,at3,at4) and (at4,at3,at2,at1), as these are equivalent.
       *
@@ -812,8 +819,10 @@ class Molecule: public Scatterer
       */
       void AddRigidGroup(const RigidGroup&,const bool updateDisplay=true);
       /** Remove a rigid group of atoms. See Molecule::mvRigidGroup
+      *
+      * If del is true (default), then the RigidGroup object is deleted.
       */
-      std::vector<RigidGroup*>::iterator RemoveRigidGroup(const RigidGroup &group,const bool updateDisplay=true);
+      std::vector<RigidGroup*>::iterator RemoveRigidGroup(const RigidGroup &group,const bool updateDisplay=true, const bool del = true);
 
       MolAtom &GetAtom(unsigned int i);
       const MolAtom &GetAtom(unsigned int i)const;
@@ -967,6 +976,11 @@ class Molecule: public Scatterer
       * the Molecule.
       */
       const std::vector<MolZAtom>& AsZMatrix(const bool keeporder)const;
+      /** Set whether to delete the MolAtoms, MolBonds, MolBondAngles and
+       * MolDihedralAngles in the destructor. By default these sub-objects are
+       * deleted.
+      */
+      void SetDeleteSubObjInDestructor(const bool b);
    public:
       virtual void InitRefParList();
       /** Build the list of rings in the molecule.
@@ -1083,6 +1097,10 @@ class Molecule: public Scatterer
       *
       * Default=0.02*pi
       */
+      // Flag indicating whether to destroy MolAtoms, MolBonds, MolBondAngles,
+      // and MolDihedralAngles in the destructor (default true). Mofified by
+      // SetDeleteSubObjInDestructor.
+      bool mDeleteSubObjInDestructor;
       REAL mBaseRotationAmplitude;
       // Clocks
          RefinableObjClock mClockAtomList;

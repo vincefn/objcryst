@@ -1757,7 +1757,7 @@ void MDAtomGroup::Print(ostream &os,bool full)const
 //######################################################################
 Molecule::Molecule(Crystal &cryst, const string &name):
 mBaseRotationAmplitude(M_PI*0.02),mIsSelfOptimizing(false),mpCenterAtom(0),
-mMDMoveFreq(0.0),mMDMoveEnergy(40.)
+mMDMoveFreq(0.0),mMDMoveEnergy(40.),mDeleteSubObjInDestructor(1)
 {
    VFN_DEBUG_MESSAGE("Molecule::Molecule()",5)
    this->SetName(name);
@@ -1836,7 +1836,7 @@ mMDMoveFreq(0.0),mMDMoveEnergy(40.)
 }
 
 Molecule::Molecule(const Molecule &old):
-mIsSelfOptimizing(false),mpCenterAtom(0)
+mIsSelfOptimizing(false),mpCenterAtom(0),mDeleteSubObjInDestructor(old.mDeleteSubObjInDestructor)
 {
    VFN_DEBUG_ENTRY("Molecule::Molecule(old&)",5)
    // a hack, but const-correct
@@ -1923,21 +1923,24 @@ mIsSelfOptimizing(false),mpCenterAtom(0)
 Molecule::~Molecule()
 {
    VFN_DEBUG_ENTRY("Molecule::~Molecule()",5)
+   if(mDeleteSubObjInDestructor)
    {
-      vector<MolAtom*>::iterator pos;
-      for(pos=mvpAtom.begin();pos!=mvpAtom.end();pos++) delete *pos;
-   }
-   {
-      vector<MolBond*>::iterator pos;
-      for(pos=mvpBond.begin();pos!=mvpBond.end();pos++) delete *pos;
-   }
-   {
-      vector<MolBondAngle*>::iterator pos;
-      for(pos=mvpBondAngle.begin();pos!=mvpBondAngle.end();pos++) delete *pos;
-   }
-   {
-      vector<MolDihedralAngle*>::iterator pos;
-      for(pos=mvpDihedralAngle.begin();pos!=mvpDihedralAngle.end();pos++) delete *pos;
+       {
+          vector<MolAtom*>::iterator pos;
+          for(pos=mvpAtom.begin();pos!=mvpAtom.end();pos++) delete *pos;
+       }
+       {
+          vector<MolBond*>::iterator pos;
+          for(pos=mvpBond.begin();pos!=mvpBond.end();pos++) delete *pos;
+       }
+       {
+          vector<MolBondAngle*>::iterator pos;
+          for(pos=mvpBondAngle.begin();pos!=mvpBondAngle.end();pos++) delete *pos;
+       }
+       {
+          vector<MolDihedralAngle*>::iterator pos;
+          for(pos=mvpDihedralAngle.begin();pos!=mvpDihedralAngle.end();pos++) delete *pos;
+       }
    }
    VFN_DEBUG_EXIT("Molecule::~Molecule()",5)
 }
@@ -3214,7 +3217,7 @@ void Molecule::AddAtom(const REAL x, const REAL y, const REAL z,
    VFN_DEBUG_EXIT("Molecule::AddAtom()",5)
 }
 
-vector<MolAtom*>::iterator Molecule::RemoveAtom(MolAtom &atom)
+vector<MolAtom*>::iterator Molecule::RemoveAtom(MolAtom &atom, const bool del)
 {
    VFN_DEBUG_ENTRY("Molecule::RemoveAtom():"<<atom.GetName(),6)
    vector<MolAtom*>::iterator pos=find(mvpAtom.begin(),mvpAtom.end(),&atom);
@@ -3232,7 +3235,7 @@ vector<MolAtom*>::iterator Molecule::RemoveAtom(MolAtom &atom)
    {
       if( (&atom==&((*posb)->GetAtom1())) || (&atom==&((*posb)->GetAtom2())) )
       {
-         posb=this->RemoveBond(**posb);
+         posb=this->RemoveBond(**posb, del);
       }
       else ++posb;
    }
@@ -3241,7 +3244,7 @@ vector<MolAtom*>::iterator Molecule::RemoveAtom(MolAtom &atom)
       if(  (&atom==&((*posb)->GetAtom1())) || (&atom==&((*posb)->GetAtom2()))
          ||(&atom==&((*posb)->GetAtom3())))
       {
-         posb=this->RemoveBondAngle(**posb);
+         posb=this->RemoveBondAngle(**posb, del);
       }
       else ++posb;
    }
@@ -3250,14 +3253,14 @@ vector<MolAtom*>::iterator Molecule::RemoveAtom(MolAtom &atom)
    {
       if(  (&atom==&((*posb)->GetAtom1())) || (&atom==&((*posb)->GetAtom2()))
          ||(&atom==&((*posb)->GetAtom3())) || (&atom==&((*posb)->GetAtom4())))
-         posb=this->RemoveDihedralAngle(**posb);
+         posb=this->RemoveDihedralAngle(**posb, del);
       else ++posb;
   }
    mClockAtomList.Click();
    mClockScatterer.Click();
    
    if(mpCenterAtom==*pos) mpCenterAtom=0;
-   delete *pos;
+   if(del) delete *pos;
    pos=mvpAtom.erase(pos);
    --mScattCompList;
 
@@ -3279,7 +3282,7 @@ void Molecule::AddBond(MolAtom &atom1, MolAtom &atom2,
    VFN_DEBUG_EXIT("Molecule::AddBond()",5)
 }
 
-vector<MolBond*>::iterator Molecule::RemoveBond(const MolBond &bond)
+vector<MolBond*>::iterator Molecule::RemoveBond(const MolBond &bond, const bool del)
 {
    VFN_DEBUG_ENTRY("Molecule::RemoveBond():"<<bond.GetName(),6)
    vector<MolBond*>::iterator pos=find(mvpBond.begin(),mvpBond.end(),&bond);
@@ -3291,7 +3294,7 @@ vector<MolBond*>::iterator Molecule::RemoveBond(const MolBond &bond)
    }
    this->RemoveRestraint(*pos);
    mClockBondList.Click();
-   delete *pos;
+   if(del) delete *pos;
    pos= mvpBond.erase(pos);
    this->UpdateDisplay();
    VFN_DEBUG_EXIT("Molecule::RemoveBond():",6)
@@ -3331,7 +3334,7 @@ void Molecule::AddBondAngle(MolAtom &atom1, MolAtom &atom2, MolAtom &atom3,
    VFN_DEBUG_EXIT("Molecule::AddBondAngle()",5)
 }
 
-vector<MolBondAngle*>::iterator Molecule::RemoveBondAngle(const MolBondAngle &angle)
+vector<MolBondAngle*>::iterator Molecule::RemoveBondAngle(const MolBondAngle &angle, const bool del)
 {
    VFN_DEBUG_ENTRY("Molecule::RemoveBondAngle():"<<angle.GetName(),6)
    vector<MolBondAngle*>::iterator pos=find(mvpBondAngle.begin(),mvpBondAngle.end(),&angle);
@@ -3343,7 +3346,7 @@ vector<MolBondAngle*>::iterator Molecule::RemoveBondAngle(const MolBondAngle &an
    }
    this->RemoveRestraint(*pos);
    mClockBondAngleList.Click();
-   delete *pos;
+   if(del) delete *pos;
    pos=mvpBondAngle.erase(pos);
    this->UpdateDisplay();
    VFN_DEBUG_EXIT("Molecule::RemoveBondAngle():",6)
@@ -3379,7 +3382,7 @@ void Molecule::AddDihedralAngle(MolAtom &atom1, MolAtom &atom2,
    VFN_DEBUG_EXIT("Molecule::AddDihedralAngle()",5)
 }
 
-vector<MolDihedralAngle*>::iterator Molecule::RemoveDihedralAngle(const MolDihedralAngle &angle)
+vector<MolDihedralAngle*>::iterator Molecule::RemoveDihedralAngle(const MolDihedralAngle &angle, const bool del)
 {
    VFN_DEBUG_ENTRY("Molecule::RemoveDihedralAngle():"<<angle.GetName(),6)
    vector<MolDihedralAngle*>::iterator pos=find(mvpDihedralAngle.begin(),
@@ -3393,7 +3396,7 @@ vector<MolDihedralAngle*>::iterator Molecule::RemoveDihedralAngle(const MolDihed
    }
    this->RemoveRestraint(*pos);
    mClockDihedralAngleList.Click();
-   delete *pos;
+   if(del) delete *pos;
    pos=mvpDihedralAngle.erase(pos);
    this->UpdateDisplay();
    VFN_DEBUG_ENTRY("Molecule::RemoveDihedralAngle():",6)
@@ -3425,11 +3428,11 @@ void Molecule::AddRigidGroup(const RigidGroup &group,
    if(updateDisplay) this->UpdateDisplay();
 }
 
-vector<RigidGroup*>::iterator Molecule::RemoveRigidGroup(const RigidGroup &g,const bool updateDisplay)
+vector<RigidGroup*>::iterator Molecule::RemoveRigidGroup(const RigidGroup &g,const bool updateDisplay, const bool del)
 {
    vector<RigidGroup*>::iterator pos=find(mvRigidGroup.begin(),mvRigidGroup.end(),&g);
    if(pos==mvRigidGroup.end()) return pos;
-   delete *pos;
+   if(del) delete *pos;
    pos=mvRigidGroup.erase(pos);
    if(updateDisplay) this->UpdateDisplay();
    return pos;
@@ -6948,6 +6951,11 @@ void Molecule::FlipAtomGroup(const FlipGroup& group)
       }
    }
 }
+
+void Molecule::SetDeleteSubObjInDestructor(const bool b) {
+    mDeleteSubObjInDestructor=b;
+}
+
 
 #ifdef __WX__CRYST__
 WXCrystObjBasic* Molecule::WXCreate(wxWindow* parent)

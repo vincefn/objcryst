@@ -50,6 +50,9 @@ ScatteringPowerSphere::ScatteringPowerSphere(const string &name,
    this->Init(name,radius,bIso);
 }
 
+ScatteringPowerSphere::ScatteringPowerSphere(const ScatteringPowerSphere& old) 
+{}
+
 ScatteringPowerSphere::~ScatteringPowerSphere()
 {
 }

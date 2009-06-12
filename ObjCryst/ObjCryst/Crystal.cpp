@@ -55,7 +55,7 @@ mScattererRegistry("List of Crystal Scatterers"),
 mBumpMergeCost(0.0),mBumpMergeScale(1.0),
 mDistTableMaxDistance(1.0),
 mScatteringPowerRegistry("List of Crystal ScatteringPowers"),
-mBondValenceCost(0.0),mBondValenceCostScale(1.0)
+mBondValenceCost(0.0),mBondValenceCostScale(1.0),mDeleteSubObjInDestructor(1)
 {
    VFN_DEBUG_MESSAGE("Crystal::Crystal()",10)
    this->InitOptions();
@@ -72,7 +72,7 @@ mScattererRegistry("List of Crystal Scatterers"),
 mBumpMergeCost(0.0),mBumpMergeScale(1.0),
 mDistTableMaxDistance(1.0),
 mScatteringPowerRegistry("List of Crystal ScatteringPowers"),
-mBondValenceCost(0.0),mBondValenceCostScale(1.0)
+mBondValenceCost(0.0),mBondValenceCostScale(1.0),mDeleteSubObjInDestructor(1)
 {
    VFN_DEBUG_MESSAGE("Crystal::Crystal(a,b,c,Sg)",10)
    this->Init(a,b,c,M_PI/2,M_PI/2,M_PI/2,SpaceGroupId,"");
@@ -90,7 +90,7 @@ mScattererRegistry("List of Crystal Scatterers"),
 mBumpMergeCost(0.0),mBumpMergeScale(1.0),
 mDistTableMaxDistance(1.0),
 mScatteringPowerRegistry("List of Crystal ScatteringPowers"),
-mBondValenceCost(0.0),mBondValenceCostScale(1.0)
+mBondValenceCost(0.0),mBondValenceCostScale(1.0),mDeleteSubObjInDestructor(1)
 {
    VFN_DEBUG_MESSAGE("Crystal::Crystal(a,b,c,alpha,beta,gamma,Sg)",10)
    this->Init(a,b,c,alpha,beta,gamma,SpaceGroupId,"");
@@ -107,7 +107,7 @@ mScattererRegistry(old.mScattererRegistry),
 mBumpMergeCost(old.mBumpMergeCost),mBumpMergeScale(old.mBumpMergeScale),
 mDistTableMaxDistance(old.mDistTableMaxDistance),
 mScatteringPowerRegistry(old.mScatteringPowerRegistry),
-mBondValenceCost(old.mBondValenceCost),mBondValenceCostScale(old.mBondValenceCostScale)
+mBondValenceCost(old.mBondValenceCost),mBondValenceCostScale(old.mBondValenceCostScale),mDeleteSubObjInDestructor(old.mDeleteSubObjInDestructor)
 {
    VFN_DEBUG_MESSAGE("Crystal::Crystal(&oldCrystal)",10)
    for(long i=0;i<old.GetNbScatterer();i++)
@@ -134,7 +134,14 @@ Crystal::~Crystal()
       this->RemoveSubRefObj(mScattererRegistry.GetObj(i));
       mScattererRegistry.GetObj(i).DeRegisterClient(*this);
    }
-   mScattererRegistry.DeleteAll();
+   if( mDeleteSubObjInDestructor )
+   {
+       mScattererRegistry.DeleteAll();
+   }
+   else
+   {
+       mScattererRegistry.DeRegisterAll();
+   }
    for(long i=0;i<mScatteringPowerRegistry.GetNb();i++)
    {
       VFN_DEBUG_MESSAGE("Crystal::~Crystal(&scatt):2:"<<i,5)
@@ -142,7 +149,14 @@ Crystal::~Crystal()
       mScatteringPowerRegistry.GetObj(i).DeRegisterClient(*this);
       // :TODO: check if it is not used by another Crystal (forbidden!)
    }
-   mScatteringPowerRegistry.DeleteAll();
+   if( mDeleteSubObjInDestructor )
+   {
+       mScatteringPowerRegistry.DeleteAll();
+   }
+   else
+   {
+       mScatteringPowerRegistry.DeRegisterAll();
+   }
    gCrystalRegistry.DeRegister(*this);
    gTopRefinableObjRegistry.DeRegister(*this);
    VFN_DEBUG_EXIT("Crystal::~Crystal()",5)
@@ -290,6 +304,8 @@ const ScatteringComponentList& Crystal::GetScatteringComponentList()const
       if(1==mUseDynPopCorr.GetChoice()) 
          this->CalcDynPopCorr(1.,.5); else this->ResetDynPopCorr();
       VFN_DEBUG_MESSAGE("Crystal::GetScatteringComponentList():End",2)
+
+
    }
    #ifdef __DEBUG__
    if(gVFNDebugMessageLevel<2) mScattCompList.Print();
@@ -1444,6 +1460,10 @@ void Crystal::CalcDistTable(const bool fast) const
    }
    mDistTableClock.Click();
    VFN_DEBUG_EXIT("Crystal::CalcDistTable()",4)
+}
+
+void Crystal::SetDeleteSubObjInDestructor(const bool b) {
+    mDeleteSubObjInDestructor=b;
 }
 
 #ifdef __WX__CRYST__
