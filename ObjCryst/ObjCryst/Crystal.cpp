@@ -341,13 +341,25 @@ void Crystal::Print(ostream &os)const
               << FormatFloat(list(j).mY,7,4) 
               << FormatFloat(list(j).mZ,7,4) 
               << ", Occup=" << FormatFloat(list(j).mOccupancy,6,4)
-              << " * " << FormatFloat(mScattCompList(k).mDynPopCorr,6,4)
-              << " ,ScattPow:" << FormatString(list(j).mpScattPow->GetName(),16)
+              << " * " << FormatFloat(mScattCompList(k).mDynPopCorr,6,4);
+         // Check for dummy atoms
+         if( NULL != list(j).mpScattPow )
+         {
+           os << ", ScattPow:" << FormatString(list(j).mpScattPow->GetName(),16)
               << ", Biso=" << FormatFloat(list(j).mpScattPow->GetBiso());
-         posBV=this->mvBondValenceCalc.find(k);
-         if(posBV!=this->mvBondValenceCalc.end())
-            os <<": Valence="<<posBV->second<<" (expected="
-               <<this->mScattCompList(k).mpScattPow->GetFormalCharge()<<")";
+         }
+         else
+         {
+           os   << ", ScattPow: dummy";
+         }
+         // Check for dummy atoms
+         if( NULL != this->mScattCompList(k).mpScattPow )
+         {
+             posBV=this->mvBondValenceCalc.find(k);
+             if(posBV!=this->mvBondValenceCalc.end())
+                os <<": Valence="<<posBV->second<<" (expected="
+                   <<this->mScattCompList(k).mpScattPow->GetFormalCharge()<<")";
+         }
          os << endl;
          k++;
       }
