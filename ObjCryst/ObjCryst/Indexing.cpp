@@ -1270,8 +1270,8 @@ void CellExplorer::Evolution(unsigned int ng,const bool randomize,const float f,
          if(score > pos->second)
          {
             pos->second=score;
-            const float *p0=posTrial->first.par;
-            float *p1=pos->first.par;
+            const REAL *p0=posTrial->first.par;
+            REAL *p1=pos->first.par;
             for(unsigned int k=0;k<mnpar;++k) *p1++ = *p0++;
             if(score>bestScore)
             {
@@ -1432,7 +1432,7 @@ const CrystVector_REAL& CellExplorer::GetLSQWeight(const unsigned int) const
 const CrystVector_REAL& CellExplorer::GetLSQDeriv(const unsigned int, RefinablePar &refpar)
 {
    VFN_DEBUG_ENTRY("CellExplorer::GetLSQDeriv()",2)
-   float *par=NULL;
+   REAL *par=NULL;
    if(refpar.GetName()=="Reciprocal unit cell par #0") par=mRecUnitCell.par+1;
    else
       if(refpar.GetName()=="Reciprocal unit cell par #1") par=mRecUnitCell.par+2;

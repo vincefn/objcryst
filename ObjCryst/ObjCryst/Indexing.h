@@ -101,7 +101,7 @@ class RecUnitCell
       * for cubic
       *   d*_hkl^2 = zero + par[0]^2 (h^2 + k^2 + l^2)
       */
-      float par[7];
+      REAL par[7];
       float zero;
       CrystalSystem mlattice;
       CrystalCentering mCentering;
