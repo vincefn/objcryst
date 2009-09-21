@@ -1277,11 +1277,11 @@ void RefinableObj::SetParIsFixed(const long parIndex,const bool fix)
    this->GetPar(parIndex).SetIsFixed(fix);
 }
 
-void RefinableObj::SetParIsFixed(const string& parName,const bool fix)
+void RefinableObj::SetParIsFixed(const string& name,const bool fix)
 {
-   long index=this->FindPar(parName);
-   if(-1==index) return; //:TODO:
-   this->GetPar(index).SetIsFixed(fix);
+   for(long i=this->GetNbPar()-1;i>=0;i--) 
+      if( this->GetPar(i).GetName() == name) 
+         this->GetPar(i).SetIsFixed(fix);
 }
 
 void RefinableObj::SetParIsFixed(const RefParType *type,const bool fix)
@@ -1296,11 +1296,11 @@ void RefinableObj::SetParIsFixed(const RefParType *type,const bool fix)
       this->GetSubObjRegistry().GetObj(i).SetParIsFixed(type,fix);
 }
 
-void RefinableObj::SetParIsUsed(const string& parName,const bool use)
+void RefinableObj::SetParIsUsed(const string& name,const bool use)
 {
-   long i=this->FindPar(parName);
-   if(-1==i) return; //:TODO:
-   this->GetPar(i).SetIsUsed(use);
+   for(long i=this->GetNbPar()-1;i>=0;i--) 
+      if( this->GetPar(i).GetName() == name) 
+         this->GetPar(i).SetIsUsed(use);
 }
 
 void RefinableObj::SetParIsUsed(const RefParType *type,const bool use)
@@ -1334,11 +1334,8 @@ RefinablePar& RefinableObj::GetPar(const string & name)
    const long i=this->FindPar(name);
    if(-1==i)
    {
-      cout << "RefinableObj::GetPar(name):Cannot find parameter :"<<name<<endl;
       this->Print();
-      RefinablePar *p=0;
-      return *p; //:KLUDGE: !
-      //throw 0;
+      throw ObjCrystException("RefinableObj::GetPar(): cannot find parameter: "+name+" in object:"+this->GetName());
    }
    return *(mvpRefPar[i]);
 }
@@ -1348,11 +1345,8 @@ const RefinablePar& RefinableObj::GetPar(const string & name) const
    const long i=this->FindPar(name);
    if(-1==i)
    {
-      cout << "RefinableObj::GetPar(name):Cannot find parameter :"<<name<<endl;
       this->Print();
-      RefinablePar *p=0;
-      return *p; //:KLUDGE: !
-      //throw 0;
+      throw ObjCrystException("RefinableObj::GetPar(): cannot find parameter: "+name+" in object:"+this->GetName());
    }
    return *(mvpRefPar[i]);
 }
@@ -1362,11 +1356,8 @@ RefinablePar& RefinableObj::GetPar(const REAL *p)
    const long i=this->FindPar(p);
    if(-1==i)
    {
-      cout << "RefinableObj::GetPar(*f):Cannot find parameter :"<<p<<endl;
       this->Print();
-      RefinablePar *p=0;
-      return *p; //:KLUDGE: !
-      //throw 0;
+      throw ObjCrystException("RefinableObj::GetPar(*p): cannot find parameter in object:"+this->GetName());
    }
    return *(mvpRefPar[i]);
 }
@@ -1376,11 +1367,8 @@ const RefinablePar& RefinableObj::GetPar(const REAL *p) const
    const long i=this->FindPar(p);
    if(-1==i)
    {
-      cout << "RefinableObj::GetPar(*f):Cannot find parameter :"<<p<<endl;
       this->Print();
-      RefinablePar *p=0;
-      return *p; //:KLUDGE: !
-      //throw 0;
+      throw ObjCrystException("RefinableObj::GetPar(*p): cannot find parameter in object:"+this->GetName());
    }
    return *(mvpRefPar[i]);
 }
@@ -1564,8 +1552,9 @@ const string& RefinableObj::GetParamSetName(const unsigned long id)const
 
 void RefinableObj::SetLimitsAbsolute(const string &name,const REAL min,const REAL max)
 {
-   const long i=this->FindPar(name);
-   this->GetPar(i).SetLimitsAbsolute(min,max);
+   for(long i=this->GetNbPar()-1;i>=0;i--) 
+      if( this->GetPar(i).GetName() == name) 
+         this->GetPar(i).SetLimitsAbsolute(min,max);
 }
 void RefinableObj::SetLimitsAbsolute(const RefParType *type,
                                      const REAL min,const REAL max)
@@ -1578,8 +1567,9 @@ void RefinableObj::SetLimitsAbsolute(const RefParType *type,
 }
 void RefinableObj::SetLimitsRelative(const string &name, const REAL min, const REAL max)
 {
-   const long i=this->FindPar(name);
-   this->GetPar(i).SetLimitsRelative(min,max);
+   for(long i=this->GetNbPar()-1;i>=0;i--) 
+      if( this->GetPar(i).GetName() == name) 
+         this->GetPar(i).SetLimitsRelative(min,max);
 }
 void RefinableObj::SetLimitsRelative(const RefParType *type,
                                      const REAL min, const REAL max)
@@ -1596,8 +1586,9 @@ void RefinableObj::SetLimitsRelative(const RefParType *type,
 }
 void RefinableObj::SetLimitsProportional(const string &name,const REAL min,const REAL max)
 {
-   const long i=this->FindPar(name);
-   this->GetPar(i).SetLimitsProportional(min,max);
+   for(long i=this->GetNbPar()-1;i>=0;i--) 
+      if( this->GetPar(i).GetName() == name) 
+         this->GetPar(i).SetLimitsProportional(min,max);
 }
 void RefinableObj::SetLimitsProportional(const RefParType *type, 
                                          const REAL min, const REAL max)
@@ -1891,19 +1882,8 @@ long RefinableObj::FindPar(const string &name) const
          if(-1 != index) warning=true ;else index=i;
    if(true == warning)
    {
-      cout << "RefinableObj::FindPar(name) : ";
-      cout << "found duplicate refinable variable name ! This *cannot* be !!" ;
-      cout << name <<endl;
-      throw 0;
+      throw ObjCrystException("RefinableObj::FindPar("+name+"): found duplicate refinable variable name in object:"+this->GetName());
    }
-   
-   //if(index == -1)
-   //{
-   //   cout << "RefinableObj::FindPar(name) :";
-   //   cout << "Cannot find refinable variable name :#"<< name << "#"<<endl;
-   //   this->Print();
-   //   //throw 0;
-   //}
    return index;
 }
 
@@ -1916,19 +1896,9 @@ long RefinableObj::FindPar(const REAL *p) const
          if(-1 != index) warning=true ;else index=i;
    if(true == warning)
    {
-      cout << "RefinableObj::FindPar(*f) : ";
-      cout << "found duplicate refinable variable name ! This *cannot* be !!" ;
-      cout << p <<endl;
-      //throw 0;
+      throw ObjCrystException("RefinableObj::FindPar(*p): Found duplicate parameter in object:"+this->GetName());
    }
    
-   //if(index == -1)
-   //{
-   //   cout << "RefinableObj::FindPar(name) :";
-   //   cout << "Cannot find refinable variable name :#"<< name << "#"<<endl;
-   //   this->Print();
-   //   //throw 0;
-   //}
    return index;
 }
 
@@ -1970,7 +1940,7 @@ map<unsigned long,pair<CrystVector_REAL,string> >::iterator
    pos=mvpSavedValuesSet.find(id);
    if(mvpSavedValuesSet.end() == pos)
    {//throw up
-      throw ObjCrystException("RefinableObj::FindParamSet(long): Unknown saved set !");
+      throw ObjCrystException("RefinableObj::FindParamSet(long): Unknown saved set ! In object:"+this->GetName());
    }
    VFN_DEBUG_EXIT("RefinableObj::FindParamSet()",2)
    return pos;
