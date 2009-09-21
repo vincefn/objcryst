@@ -320,7 +320,8 @@ void ZScatterer::AddAtom(const string &name,const ScatteringPower *pow,
              const long atomDihedral, const REAL dihedralAngle,
              const REAL popu)
 {
-   VFN_DEBUG_MESSAGE("ZScatterer::AddAtom():"<<name<<")",5)
+   VFN_DEBUG_MESSAGE("ZScatterer::AddAtom():"<<name<<"):"<<atomBond<<" / "<<atomAngle<<" / "
+                     <<atomDihedral<<" / "<<bondLength<<","<<bondAngle<<","<<dihedralAngle,10)
    ZAtom *zatom =new ZAtom(*this,pow,
                            atomBond,bondLength,
                            atomAngle,bondAngle,
@@ -1140,8 +1141,119 @@ void ZScatterer::EndOptimization()
    mpZMoveMinimizer=0;
    this->RefinableObj::EndOptimization();
 }
+
+std::vector<std::string> SplitString(const std::string &s)
+{
+   const string delim(" ");
+   std::vector<std::string> v;
+   string str=s;
+   unsigned int ct=0;
+   
+   int n=str.find_first_of(delim);
+   while( n != (int) str.npos)
+   {
+      ct++;
+      if(n>0)
+      {
+         v.push_back(str.substr(0,n));
+      }
+      str= str.substr(n+1);
+      n=str.find_first_of(delim);
+   }
+   if(str.length() > 0) v.push_back(str);
+   
+   //cout<<"SplitString: "<<s<<" -> ";
+   //for(std::vector<std::string>::const_iterator pos=v.begin();pos!=v.end();++pos) cout << *pos <<" / ";
+   //cout<<endl;
+   
+   return v;
+}
+
+/** Function to parse one line from a Fenske-Hall zmatrix file
+*
+* The function first trie to read the line by assuming that all fields are separated
+* by at least one space. If the correct number of fields is not found, it then uses
+* the strict formatting (%2s%3u%6f%3u%6f%3u%6f) to find all fields. This is needed
+* for example when there are more than 100 atoms since the atom number fields
+* are only 3-character wide.
+*
+*/
+void ReadFHLine(const char*buf, const unsigned int nb, string &symbol, 
+                int &n1, float &v1, int &n2, float &v2, int &n3, float &v3)
+{
+   char symb[10];
+   string sbuf=string(buf);
+   std::vector<std::string> v=SplitString(sbuf);
+   if(nb==1)
+   {//First atom "C   1"
+      if(v.size()>0) symbol=v[0];
+      else symbol=string(buf).substr(0,2);
+      return;
+   }
+   if(nb==2)
+   {//Second atom "C   1 1.450"
+      if(v.size()==3) 
+      {
+         symbol=v[0];
+         n1=(unsigned int) atoi(v[1].c_str());
+         v1=(float) atof(v[2].c_str());
+      }
+      else
+      {
+         sscanf(buf,"%2s%3d%6f",symb,&n1,&v1);
+         symbol=string(symb);
+      }
+      VFN_DEBUG_MESSAGE("ReadFHLine():#"<<symbol<<"/"<<n1<<"/"<<v1,10);
+      return;
+   }
+   if(nb==3)
+   {//Third atom "C   2 1.450  1 119.995"
+      if(v.size()==5) 
+      {
+         symbol=v[0];
+         n1=(unsigned int) atoi(v[1].c_str());
+         v1=(float) atof(v[2].c_str());
+         n2=(unsigned int) atoi(v[3].c_str());
+         v2=(float) atof(v[4].c_str());
+      }
+      else
+      {
+         sscanf(buf,"%2s%3d%6f%3d%8f",symb,&n1,&v1,&n2,&v2);
+         symbol=string(symb);
+      }
+      VFN_DEBUG_MESSAGE("ReadFHLine():#"<<symbol<<"/"<<n1<<"/"<<v1<<"/"<<n2<<"/"<<v2,10);
+      return;
+   }
+   //Remaining atoms
+   if(v.size()==7)
+   {
+      symbol=v[0];
+      n1=(unsigned int) atoi(v[1].c_str());
+      v1=(float) atof(v[2].c_str());
+      n2=(unsigned int) atoi(v[3].c_str());
+      v2=(float) atof(v[4].c_str());
+      n3=(unsigned int) atoi(v[5].c_str());
+      v3=(float) atof(v[6].c_str());
+   }
+   else
+   {
+      // sscanf ignores whitespace characters, so cannot be used WTF ?? "H 601 1.100600 120.000599 180.0"
+      //sscanf(buf,"%2s%3d%6f%3d%8f%3d%6f",symb,&n1,&v1,&n2,&v2,&n3,&v3);
+      //symbol=string(symb);
+      symbol=sbuf.substr(0,2);
+      n1=(int)   atoi(sbuf.substr(2,3).c_str());
+      v1=(float) atof(sbuf.substr(5,6).c_str());
+      n2=(int)   atoi(sbuf.substr(11,3).c_str());
+      v2=(float) atof(sbuf.substr(14,8).c_str());
+      n3=(int)   atoi(sbuf.substr(22,3).c_str());
+      v3=(float) atof(sbuf.substr(25,6).c_str());
+   }
+   VFN_DEBUG_MESSAGE("ReadFHLine():#"<<symbol<<"/"<<n1<<"/"<<v1<<"/"<<n2<<"/"<<v2<<"/"<<n3<<"/"<<v3,10);
+}
+
 void ZScatterer::ImportFenskeHallZMatrix(istream &is,bool named)
 {
+   char buf[101];
    // Get read of "KEYWORD GO HERE", just in case...
    {
       const char c=is.peek();
@@ -1149,10 +1261,14 @@ void ZScatterer::ImportFenskeHallZMatrix(istream &is,bool named)
       {
          cout<<"ZScatterer::ImportFenskeHallZMatrix()"
              <<":getting rid of first line..."<<endl;
-         char buf[100];
          is.getline(buf,100);
       }
    }
+   int nbAtoms=0;
+   is >> nbAtoms;
+   char c;
+   while(!isgraph(is.peek())) is.get(c); // go to end of line
+   
    // 17
    //C  1
    //N   1 1.465
@@ -1163,13 +1279,10 @@ void ZScatterer::ImportFenskeHallZMatrix(istream &is,bool named)
    //N   3 1.366  2 120.022  1 186.0
    //C   7 1.466  3 119.988  2 354.9
    // ...
-   int nbAtoms=0;
-   is >> nbAtoms;
    string symbol, atomName,bondAtomName,angleAtomName,dihedAtomName,junk;
    int bondAtom=0,angleAtom=0,dihedAtom=0;
    float bond=0,angle=0,dihed=0;
    int scattPow;
-   char buf [10];
    //first
       if(named)
       {
@@ -1177,7 +1290,11 @@ void ZScatterer::ImportFenskeHallZMatrix(istream &is,bool named)
          VFN_DEBUG_MESSAGE("ZScatterer::ImportFenskeHallZMatrix():#"<<2<<",name:"<<atomName
                            <<", bond: "<<bondAtomName<<", angle: "<<angleAtomName<<", dihed: "<<dihedAtomName,10);
       }
-      else is >> symbol >> junk;
+      else
+      {
+         is.getline(buf,100);
+         ReadFHLine(buf,1,symbol,bondAtom,bond,angleAtom,angle,dihedAtom,dihed);
+      }
    {
       scattPow=mpCryst->GetScatteringPowerRegistry().Find
                   (symbol,"ScatteringPowerAtom",true);
@@ -1211,7 +1328,12 @@ void ZScatterer::ImportFenskeHallZMatrix(istream &is,bool named)
          VFN_DEBUG_MESSAGE("ZScatterer::ImportFenskeHallZMatrix():#"<<2<<",name:"<<atomName
                            <<", bond: "<<bondAtomName<<", angle: "<<angleAtomName<<", dihed: "<<dihedAtomName,10);
       }
-      else      is             >> symbol >> bondAtom     >> bond;
+      else
+      {
+         is.getline(buf,100);
+         ReadFHLine(buf,2,symbol,bondAtom,bond,angleAtom,angle,dihedAtom,dihed);
+      }
+
    {
       scattPow=mpCryst->GetScatteringPowerRegistry().Find
                   (symbol,"ScatteringPowerAtom",true);
@@ -1254,9 +1376,12 @@ void ZScatterer::ImportFenskeHallZMatrix(istream &is,bool named)
          VFN_DEBUG_MESSAGE("ZScatterer::ImportFenskeHallZMatrix():#"<<2<<",name:"<<atomName
                            <<", bond: "<<bondAtomName<<", angle: "<<angleAtomName<<", dihed: "<<dihedAtomName,10);
       }
-      else      is >> symbol >>
-                bondAtom  >> bond >>
-                angleAtom >> angle;
+      else
+      {
+         is.getline(buf,100);
+         ReadFHLine(buf,3,symbol,bondAtom,bond,angleAtom,angle,dihedAtom,dihed);
+      }
+
    {
       scattPow=mpCryst->GetScatteringPowerRegistry().Find
                   (symbol,"ScatteringPowerAtom",true);
@@ -1308,11 +1433,11 @@ void ZScatterer::ImportFenskeHallZMatrix(istream &is,bool named)
          VFN_DEBUG_MESSAGE("ZScatterer::ImportFenskeHallZMatrix():#"<<i<<",name:"<<atomName
                            <<", bond: "<<bondAtomName<<", angle: "<<angleAtomName<<", dihed: "<<dihedAtomName,10);
       }
-      else is >> symbol >>
-           bondAtom  >> bond >> 
-           angleAtom >> angle >> 
-           dihedAtom >> dihed;
-      
+      else
+      {
+         is.getline(buf,100);
+         ReadFHLine(buf,i+1,symbol,bondAtom,bond,angleAtom,angle,dihedAtom,dihed);
+      }
       {
          scattPow=mpCryst->GetScatteringPowerRegistry().Find
                      (symbol,"ScatteringPowerAtom",true);
@@ -1363,6 +1488,7 @@ void ZScatterer::ImportFenskeHallZMatrix(istream &is,bool named)
    this->SetLimitsRelative(gpRefParTypeScattConformBondAngle,-.01,.01);
    this->SetLimitsRelative(gpRefParTypeScattConformDihedAngle,-.01,.01);
 }
+
 void ZScatterer::ExportFenskeHallZMatrix(ostream &os)
 {
    if(mNbAtom<1) return;
