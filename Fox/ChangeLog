@@ -1,4 +1,4 @@
-#### 1.8.X (Beta version) - April 2009 (Revision #1143)
+#### 1.8.X (Beta version) - Autumn 2009 (Revision #1169)
 NEW FEATURES
    * Add automatic least-squares refinement of the structure during
     a global optimization run
@@ -8,6 +8,16 @@ NEW FEATURES
 BUG FIXES
    * Correct log(likelihood) calculation using integrated intensities
    (could cause invalid Chi^2 values when used without gui)
+   * Correct Fullprof export when 3 or more independent atoms are
+   overlapping
+   * Work around visual c++ compilation bug during Fullprof export,
+   that would output U U U instead of U V  W parameters
+   * Updated cctbx (and boost) version - fixes compilation with gcc 4.4
+   * Enable importing Fenske-Hall zmatrices file both for human-written
+   files (with whitespace between fields), and for strictly formatted
+   files (sometimes without any space between fields)
+   * Avoid giving up when encountering parameters with the same name,
+   notably for least squares refinements
 
 #### 1.8.1.2 - April 2009 (Revision #1117)
 BUG FIXES
