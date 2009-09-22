@@ -29,13 +29,25 @@
 namespace ObjCryst
 {
 
-ObjCrystException::ObjCrystException()
+bool ObjCrystException::verbose = true;
+
+ObjCrystException::ObjCrystException() : message()
 {
-   cout << "LibCryst ++ exception thrown!!" << endl;
+   if (ObjCrystException::verbose)
+   {
+      cout << "LibCryst ++ exception thrown!!" << endl;
+   }
 }
 
-ObjCrystException::ObjCrystException(const string & message)
+ObjCrystException::ObjCrystException(const string & _message)
 {
+
+   if (!ObjCrystException::verbose)
+   {
+       message = _message;
+       return;
+   }
+
    static bool inException;
    cout << "LibCryst ++ exception thrown!!" << endl;
    cout << "  Message: " + message <<endl;

@@ -146,6 +146,10 @@ class ObjCrystException
       ObjCrystException();
       ObjCrystException(const string & message);
       ~ObjCrystException();
+
+      static bool verbose;
+      string message;
+      
    protected:
    private:
 };
