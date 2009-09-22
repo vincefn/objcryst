@@ -1393,7 +1393,7 @@ void RefinableObj::AddPar(const RefinablePar &newRefPar)
       {// KLUDGE ? Extend name if another parameter already exists with the same name
          VFN_DEBUG_MESSAGE("RefinableObj::AddPar(): need to change name ?! -> "<<name<<","<<this->FindPar(name),10)
          name += "~";
-         if(++ct==30) break;// KLUDGE, let go and hope for the best...
+         if(++ct==100) break;// KLUDGE, let go and hope for the best...
       }
    
    mvpRefPar.push_back(new RefinablePar(newRefPar));
@@ -1411,7 +1411,7 @@ void RefinableObj::AddPar(RefinablePar *newRefPar)
       {// KLUDGE ? Extend name if another parameter already exists with the same name
          VFN_DEBUG_MESSAGE("RefinableObj::AddPar(): need to change name ?! -> "<<name<<","<<this->FindPar(name),10)
          name += "~";
-         if(++ct==30) break;// KLUDGE, let go and hope for the best...
+         if(++ct==100) break;// KLUDGE, let go and hope for the best...
       }
    mvpRefPar.push_back(newRefPar);
    mvpRefPar.back()->SetName(name);
@@ -1878,8 +1878,10 @@ long RefinableObj::FindPar(const string &name) const
    long index=-1;
    bool warning=false;
    for(long i=this->GetNbPar()-1;i>=0;i--) 
-      if( this->GetPar(i).GetName() == name) 
+      if( this->GetPar(i).GetName() == name)
+      {
          if(-1 != index) warning=true ;else index=i;
+      }
    if(true == warning)
    {
       throw ObjCrystException("RefinableObj::FindPar("+name+"): found duplicate refinable variable name in object:"+this->GetName());
@@ -1893,7 +1895,9 @@ long RefinableObj::FindPar(const REAL *p) const
    bool warning=false;
    for(long i=this->GetNbPar()-1;i>=0;i--) 
       if( p == mvpRefPar[i]->mpValue ) //&(this->GetPar(i).GetValue())
+      {
          if(-1 != index) warning=true ;else index=i;
+      }
    if(true == warning)
    {
       throw ObjCrystException("RefinableObj::FindPar(*p): Found duplicate parameter in object:"+this->GetName());

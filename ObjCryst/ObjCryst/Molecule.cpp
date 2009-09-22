@@ -162,7 +162,26 @@ this->WXDelete();
 #endif
 }
 
-void MolAtom::SetName(const string &name){mName=name;}
+void MolAtom::SetName(const string &name)
+{
+   mName=name;
+   // Set parameter's name in the parent molecule
+   // The atom should already be part of a Molecule, but just in case be careful
+   if((mName!="") && (mpMol!=0))
+   {
+      try
+      {
+         mpMol->GetPar(&mX).SetName(mpMol->GetName()+"_"+mName+"_x");
+         mpMol->GetPar(&mY).SetName(mpMol->GetName()+"_"+mName+"_y");
+         mpMol->GetPar(&mZ).SetName(mpMol->GetName()+"_"+mName+"_z");
+      }
+      catch(const ObjCrystException &except)
+      {
+         cout<<"MolAtom::SetName(): Atom parameters not yet declared in a Molecule ?"<<endl;
+      }
+   }
+}
+
 const string& MolAtom::GetName()const{return mName;}
       string& MolAtom::GetName()     {return mName;}
       
@@ -225,11 +244,12 @@ void MolAtom::XMLOutput(ostream &os,int indent)const
 void MolAtom::XMLInput(istream &is,const XMLCrystTag &tag)
 {
    VFN_DEBUG_ENTRY("MolAtom::XMLInput()",7)
+   string name;
    for(unsigned int i=0;i<tag.GetNbAttribute();i++)
    {
       if("Name"==tag.GetAttributeName(i))
       {
-         mName=tag.GetAttributeValue(i);
+         name=tag.GetAttributeValue(i);
       }
       if("ScattPow"==tag.GetAttributeName(i))
       {
@@ -256,6 +276,7 @@ void MolAtom::XMLInput(istream &is,const XMLCrystTag &tag)
          ss >>mOccupancy;
       }
    }
+   this->SetName(name);
    VFN_DEBUG_EXIT("MolAtom::XMLInput()",7)
 }
 
@@ -3183,12 +3204,20 @@ void Molecule::AddAtom(const REAL x, const REAL y, const REAL z,
                        const bool updateDisplay)
 {
    VFN_DEBUG_ENTRY("Molecule::AddAtom():"<<name,5)
-   mvpAtom.push_back(new MolAtom(x,y,z,pPow,name,*this));
+   string thename=name;
+   if(thename==string(""))
+   {// This should not be needed, the atom will reset the parameters name when its name is set
+      char buf[100];
+      if(pPow!=0) sprintf(buf,"%s_%s_%d",this->GetName().c_str(),pPow->GetName().c_str(),mvpAtom.size()+1);
+      else sprintf(buf,"%s_X_%d",this->GetName().c_str(),mvpAtom.size()+1);
+      thename=buf;
+   }
+   mvpAtom.push_back(new MolAtom(x,y,z,pPow,thename,*this));
    mClockAtomPosition.Click();
    mClockAtomScattPow.Click();
    ++mScattCompList;
    {
-      RefinablePar tmp(name+"_x",&(mvpAtom.back()->X()),0.,1.,
+      RefinablePar tmp(thename+"_x",&(mvpAtom.back()->X()),0.,1.,
                         gpRefParTypeScattConformX,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
       tmp.AssignClock(mClockAtomPosition);
@@ -3196,7 +3225,7 @@ void Molecule::AddAtom(const REAL x, const REAL y, const REAL z,
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp(name+"_y",&(mvpAtom.back()->Y()),0.,1.,
+      RefinablePar tmp(thename+"_y",&(mvpAtom.back()->Y()),0.,1.,
                         gpRefParTypeScattConformY,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
       tmp.AssignClock(mClockAtomPosition);
@@ -3204,7 +3233,7 @@ void Molecule::AddAtom(const REAL x, const REAL y, const REAL z,
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp(name+"_z",&(mvpAtom.back()->Z()),0.,1.,
+      RefinablePar tmp(thename+"_z",&(mvpAtom.back()->Z()),0.,1.,
                         gpRefParTypeScattConformZ,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
       tmp.AssignClock(mClockAtomPosition);
