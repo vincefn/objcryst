@@ -1474,7 +1474,7 @@ CrystVector_REAL SavitzkyGolay(const CrystVector_REAL &v, const unsigned int um,
    CrystVector_REAL d(n);
    d=0;
    const unsigned int nm=n-m;
-   float *pd=d.data()+m;
+   REAL *pd=d.data()+m;
    for(unsigned int i=m;i<nm;++i)
    {
       const REAL *c=sgcoeffs,*p=v.data()+i-m;
