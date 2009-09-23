@@ -203,7 +203,38 @@ class ScatteringPower:virtual public RefinableObj
       *
       */
       virtual void SetBiso(const REAL newB);
+      /** \brief Returns the anisotropic temperature B factor for (i, j) pair.
+      *
+      */
+      REAL GetBij(const size_t &i, const size_t &j) const;
+      /** \brief Returns the anisotropic temperature B factor for given index.
+      *
+      * 0 -> (1, 1)
+      * 1 -> (2, 2)
+      * 2 -> (3, 3)
+      * 3 -> (1, 2)
+      * 4 -> (1, 3)
+      * 5 -> (2, 3)
+      *
+      */
+      REAL GetBij(const size_t &idx) const;
+      /** \brief Sets the anisotropic temperature B factor for (i, j) pair.
+      *
+      */
+      virtual void SetBij(const size_t &i, const size_t &j, const REAL newB);
+      /** \brief Sets the anisotropic temperature B factor for given index.
+      *
+      * 0 -> (1, 1)
+      * 1 -> (2, 2)
+      * 2 -> (3, 3)
+      * 3 -> (1, 2)
+      * 4 -> (1, 3)
+      * 5 -> (2, 3)
+      *
+      */
+      virtual void SetBij(const size_t &idx, const REAL newB);
       /** \brief Returns true if the scattering power is isotropic, else false.
+      *
       *
       */
       bool IsIsotropic()const ;

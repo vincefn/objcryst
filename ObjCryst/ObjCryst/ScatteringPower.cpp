@@ -56,7 +56,7 @@ long NiftyStaticGlobalObjectsInitializer_ScatteringPower::mCount=0;
 ObjRegistry<ScatteringPower> gScatteringPowerRegistry("Global ScatteringPower Registry");
 
 ScatteringPower::ScatteringPower():mDynPopCorrIndex(0),mBiso(1.0),mIsIsotropic(true),
-mMaximumLikelihoodNbGhost(0),mFormalCharge(0.0)
+mMaximumLikelihoodNbGhost(0),mFormalCharge(0.0),mBeta(6)
 {
    VFN_DEBUG_MESSAGE("ScatteringPower::ScatteringPower():"<<mName,5)
    gScatteringPowerRegistry.Register(*this);
@@ -105,7 +105,43 @@ bool ScatteringPower::IsResonantScatteringAnisotropic()const{return false;}
 const string& ScatteringPower::GetSymbol() const {return this->GetName();}
 REAL ScatteringPower::GetBiso() const {return mBiso;}
 REAL& ScatteringPower::GetBiso() {mClock.Click();return mBiso;}
-void ScatteringPower::SetBiso(const REAL newB) { mClock.Click();mBiso=newB;}
+void ScatteringPower::SetBiso(const REAL newB) { mClock.Click();mBiso=newB;mIsIsotropic=true;}
+REAL ScatteringPower::GetBij(const size_t &i, const size_t &j) const
+{
+    size_t idx = 0;
+    if(i == j)
+    {
+        idx = i - 1;
+    }
+    else
+    {
+        idx = i + j;
+    }
+    return this->GetBij(idx);
+}
+REAL ScatteringPower::GetBij(const size_t &idx) const
+{
+    return mBeta(idx);
+}
+void ScatteringPower::SetBij(const size_t &i, const size_t &j, const REAL newB)
+{
+    mClock.Click();
+    size_t idx = 0;
+    if(i == j)
+    {
+        idx = i - 1;
+    }
+    else
+    {
+        idx = i + j;
+    }
+    this->SetBij(idx, newB);
+}
+void ScatteringPower::SetBij(const size_t &idx, const REAL newB)
+{
+    mIsIsotropic=false;
+    mBeta(idx) = newB;
+}
 bool ScatteringPower::IsIsotropic() const {return mIsIsotropic;}
 long ScatteringPower::GetDynPopCorrIndex() const {return mDynPopCorrIndex;}
 long ScatteringPower::GetNbScatteringPower()const {return gScatteringPowerRegistry.GetNb();}
