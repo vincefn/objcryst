@@ -686,7 +686,7 @@ void CIF::Parse(stringstream &in)
          string tmp;
          in>>tmp; //should be loop_
          if(vv) cout<<"LOOP : "<<tmp;
-         while(true)
+         while(!in.eof())
          {//read titles
             while(!isgraph(in.peek()) && !in.eof()) in.get(lastc);
             if(in.peek()=='#')
