@@ -80,7 +80,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 1172
+#define __FOXREVISION__ 1175
 
 static std::string foxVersion;
 
@@ -328,7 +328,7 @@ int main (int argc, char *argv[])
    list<string> vFourierFilenameGRD;
    bool loadFourierDSN6(false);
    list<string> vFourierFilenameDSN6;
-   bool cif2pattern=false;
+   bool cif2pattern=false,cif2patternN=false;
    double cif2patternWavelength=1.54056;
    double cif2patternPeakWidth=0.01;
    long cif2patternNbPoint=1000;
@@ -381,7 +381,7 @@ int main (int argc, char *argv[])
       if(STRCMP(_T("--nbrun"),argv[i])==0)
       {
          ++i;
-        #ifdef __WX__CRYST__
+         #ifdef __WX__CRYST__
          wxString(argv[i]).ToLong(&nbRun);
          #else
          stringstream sstr(argv[i]);
@@ -390,8 +390,9 @@ int main (int argc, char *argv[])
          cout << "Fox will do "<<nbRun<<" runs, randomizing before each run"<<endl;
          continue;
       }
-      if(STRCMP(_T("--cif2pattern"),argv[i])==0)
+      if((STRCMP(_T("--cif2pattern"),argv[i])==0) || (STRCMP(_T("--cif2patternN"),argv[i])==0))
       {
+         if(STRCMP(_T("--cif2patternN"),argv[i])==0) cif2patternN=true;
          ++i;
          cif2pattern=true;
          {
@@ -610,7 +611,7 @@ int main (int argc, char *argv[])
          stringstream in;
          if(is.GetSize()>0)
          {
-            char * tmpbuf=new char[is.GetSize()];
+            char * tmpbuf=new char[is.GetSize()+1];
             is.Read(tmpbuf,is.GetSize());
             in<<tmpbuf;
             delete[] tmpbuf;
@@ -626,53 +627,58 @@ int main (int argc, char *argv[])
          CreateSingleCrystalDataFromCIF(cif);
          if(!cif2pattern)continue;
       }
-      if(cif2pattern)
+      if(cif2pattern || cif2patternN)
       {
-            for(int j=0;j<gCrystalRegistry.GetNb();++j)
-            {
-               PowderPattern data;
-               data.SetRadiationType(RAD_XRAY);
-               data.SetWavelength(cif2patternWavelength);
-               data.SetPowderPatternPar(0,cif2patternMax2Theta/cif2patternNbPoint,cif2patternNbPoint);
-               //add CaF2 as a Crystalline phase
-               PowderPatternDiffraction * diffData=new PowderPatternDiffraction;
-               diffData->SetCrystal(gCrystalRegistry.GetObj(j));
-               diffData->SetReflectionProfilePar(PROFILE_PSEUDO_VOIGT,cif2patternPeakWidth*cif2patternPeakWidth);
-               diffData->GetCrystal().SetUseDynPopCorr(true);
-               data.SetMaxSinThetaOvLambda(50.0);
-               data.AddPowderPatternComponent(*diffData);
-               //we don't have data, so just simulate (0->Pi/2)..
-               //give a constant 'obs pattern of unit intensity
-               CrystVector_REAL obs(cif2patternNbPoint);
-               obs=1;
-               data.SetPowderPatternObs(obs);
-               data.Prepare();
-               // Save the powder pattern in text format
-               char buf [200];
-               sprintf(buf,"%s_%06d.dat",argv[i],j);
-               cout<<"Auto-simulating powder pattern:"<<endl
-                   <<"   Crystal #"<<j<<": "<<gCrystalRegistry.GetObj(j).GetName()<<endl
-                   <<"   Wavelength: "<<cif2patternWavelength<<endl
-                   <<"   2theta: 0->"<<cif2patternMax2Theta*RAD2DEG<<"째 ("<<cif2patternNbPoint<<" points)"<<endl
-                   <<"   peak width: "<<cif2patternPeakWidth*RAD2DEG<<"째"<<endl
-                   <<"   to FILE:"<<buf<<endl;
-               ofstream out(buf);
-               CrystVector_REAL ttheta,icalc;
-               icalc=data.GetPowderPatternCalc();
-               icalc*=100/icalc.max();
-               ttheta=data.GetPowderPatternX();
-               if(data.GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF) ttheta *= RAD2DEG;
-               out << "#Simulated data for crystal:"<<gCrystalRegistry.GetObj(j).GetName() << endl;
-               out << "#    2Theta/TOF    ICalc" << endl;
-               out << FormatVertVector<REAL>(ttheta,icalc,12,4);
-               out.close();
-            }
-            // Erase every data in memory
-         gOptimizationObjRegistry.DeleteAll();
-         gDiffractionDataSingleCrystalRegistry.DeleteAll();
-         gPowderPatternRegistry.DeleteAll();
-         gCrystalRegistry.DeleteAll();
-         continue;
+         for(int j=0;j<gCrystalRegistry.GetNb();++j)
+         {
+            PowderPattern data;
+            if(cif2patternN) data.SetRadiationType(RAD_NEUTRON);
+            else data.SetRadiationType(RAD_XRAY);
+            data.SetWavelength(cif2patternWavelength);
+            data.SetPowderPatternPar(0,cif2patternMax2Theta/cif2patternNbPoint,cif2patternNbPoint);
+            //add CaF2 as a Crystalline phase
+            PowderPatternDiffraction * diffData=new PowderPatternDiffraction;
+            diffData->SetCrystal(gCrystalRegistry.GetObj(j));
+            diffData->SetReflectionProfilePar(PROFILE_PSEUDO_VOIGT,cif2patternPeakWidth*cif2patternPeakWidth);
+            diffData->GetCrystal().SetUseDynPopCorr(true);
+            data.SetMaxSinThetaOvLambda(50.0);
+            data.AddPowderPatternComponent(*diffData);
+            //we don't have data, so just simulate (0->Pi/2)..
+            //give a constant 'obs pattern of unit intensity
+            CrystVector_REAL obs(cif2patternNbPoint);
+            obs=1;
+            data.SetPowderPatternObs(obs);
+            data.Prepare();
+            // Save the powder pattern in text format
+            stringstream sst;
+            #ifdef __WX__CRYST__
+            sst<<wxString(argv[i]).ToAscii()<<"_"<<j<<".dat";
+            #else
+            sst<<argv[i]<<"_"<<j<<".dat";
+            #endif
+            cout<<"Auto-simulating powder pattern:("<<cif2patternN<<")"<<endl
+                <<"   Crystal #"<<j<<": "<<gCrystalRegistry.GetObj(j).GetName()<<endl
+                <<"   Wavelength: "<<cif2patternWavelength<<endl
+                <<"   2theta: 0->"<<cif2patternMax2Theta*RAD2DEG<<"� ("<<cif2patternNbPoint<<" points)"<<endl
+                <<"   peak width: "<<cif2patternPeakWidth*RAD2DEG<<"� "<<endl
+                <<"   to FILE:"<<sst.str()<<endl;
+            ofstream out(sst.str().c_str());
+            CrystVector_REAL ttheta,icalc;
+            icalc=data.GetPowderPatternCalc();
+            icalc*=100/icalc.max();
+            ttheta=data.GetPowderPatternX();
+            if(data.GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF) ttheta *= RAD2DEG;
+            out << "#Simulated data for crystal:"<<gCrystalRegistry.GetObj(j).GetName() << endl;
+            out << "#    2Theta/TOF    ICalc" << endl;
+            out << FormatVertVector<REAL>(ttheta,icalc,12,4);
+            out.close();
+         }
+         // Erase every data in memory ?
+         //gOptimizationObjRegistry.DeleteAll();
+         //gDiffractionDataSingleCrystalRegistry.DeleteAll();
+         //gPowderPatternRegistry.DeleteAll();
+         //gCrystalRegistry.DeleteAll();
+         break;
       }
       cout <<"command-line arguments:"<<endl
            <<"   in.xml: input 'in.xml' file"<<endl
@@ -686,8 +692,10 @@ int main (int argc, char *argv[])
            <<"         --randomize  : randomize initial configuration"<<endl
            <<"         --silent     : (almost) no text output"<<endl
            <<"         --finalcost 0.15 : run optimization until cost < 0.15"<<endl
-           <<"         --cif2pattern 1.5406 170 5000 .1 : simulate pattern for input crystal, wavelength=1.5406"<<endl
-           <<"                                            up to 170째 with 500 points and a peak width of 0.1째"<<endl
+           <<"         --cif2pattern 1.5406 170 5000 .1 outfile:"<<endl
+           <<"                               simulate pattern for input crystal, wavelength=1.5406"<<endl
+           <<"                               up to 170� with 500 points and a peak width of 0.1�"<<endl
+           <<"                               and save to file outfile%d.dat"<<endl
            <<endl<<endl<<"           EXAMPLES :"<<endl<<endl
            <<"Load file 'silicon.xml' and launch GUI:"<<endl<<endl
            <<"    Fox silicon.xml"<<endl<<endl
