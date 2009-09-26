@@ -110,6 +110,8 @@ class CIFData
       std::string mSpacegroupSymbolHall;
       /// Spacegroup Hermann-Mauguin symbol (or empty string) (_space_group_name_H-M_alt)
       std::string mSpacegroupHermannMauguin;
+      /// Map of _symmetry_equiv_pos_as_xyz strings
+      std::set<string> mvSymmetry_equiv_pos_as_xyz;
       /// Crystal name. Or empty string if none is available.
       std::string mName;
       /// Formula. Or empty string if none is available.
@@ -174,10 +176,15 @@ class CIF
 class Crystal;
 class PowderPattern;
 
-/// Extract Crystal object(s) from a CIF, if possible.
-/// Returns a null pointer if no crystal structure could be extracted
-/// (the minimum data is the unit cell parameters).
-Crystal* CreateCrystalFromCIF(CIF &cif);
+/** Extract Crystal object(s) from a CIF, if possible.
+* Returns a null pointer if no crystal structure could be extracted
+* (the minimum data is the unit cell parameters).
+*
+* \param checkSymAsXYZ: if true, and the CIF file does not have a Hall symbol
+* but has a list of symmetry_equiv_pos_as_xyz, check we have the correct
+* setting by trying different ones using cctbx
+*/
+Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose=true,const bool checkSymAsXYZ=true);
 
 /// Create PowderPattern object(s) from a CIF, if possible.
 /// Returns a null pointer if no pattern could be extracted.
