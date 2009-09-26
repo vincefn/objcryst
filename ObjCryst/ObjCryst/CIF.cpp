@@ -792,8 +792,9 @@ Crystal* CreateCrystalFromCIF(CIF &cif)
          //asssume we don't want this one - e.g. like some IuCr journals single crystal 
          //data cif files including cell parameters
          if((pos->second.mvAtom.size()==0) && (gCrystalRegistry.GetNb()>0)) continue;
-         string spg=pos->second.mSpacegroupHermannMauguin;
-         if(spg=="") spg=pos->second.mSpacegroupSymbolHall;
+         // Use unambigous Hall symbol if present, otherwise try HM symbol or spg number
+         string spg=pos->second.mSpacegroupSymbolHall;
+         if(spg=="") spg=pos->second.mSpacegroupHermannMauguin;
          if(spg=="") spg=pos->second.mSpacegroupNumberIT;
          if(spg=="") spg="P1";
          cout<<"Create crystal with spacegroup: "<<spg
