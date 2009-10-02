@@ -1510,6 +1510,7 @@ void CellExplorer::LSQRefine(int nbCycle, bool useLevenbergMarquardt, const bool
 {
    VFN_DEBUG_ENTRY("CellExplorer::LSQRefine()",5)
    mLSQObj.SetRefinedObj(*this);
+   mLSQObj.PrepareRefParList(true);
    //this->BeginOptimization();
    //cout<<FormatVertVector<REAL>(this->GetLSQObs(0),this->GetLSQCalc(0),this->GetLSQWeight(0),this->GetLSQDeriv(0,this->GetPar((long)0)))<<endl;
    mLSQObj.Refine(nbCycle,useLevenbergMarquardt,silent);
