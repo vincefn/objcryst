@@ -1,9 +1,14 @@
-#### 1.8.X (Beta version) - Autumn 2009 (Revision #1169)
+#### 1.8.X (Beta version) - Autumn 2009 (Revision #1180)
 NEW FEATURES
    * Add automatic least-squares refinement of the structure during
     a global optimization run
    * Add manual least-squares refinement of the structure in the 
    global optimization run/stop menu
+   * Better import of CIF files, using either the Hall symbol
+   or the symmetry_equiv_pos_as_xyz fields to avoid 
+   ambiguous space group
+   * Enable auto-generation of powder patterns from a CIF file
+   for both X-ray and neutron radiation
 
 BUG FIXES
    * Correct log(likelihood) calculation using integrated intensities
