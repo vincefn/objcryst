@@ -50,6 +50,7 @@
 #include <cstring>
 
 #include "ObjCryst/General.h"
+#include "Quirks/Chronometer.h"
 #include "ObjCryst/IO.h"
 #include "ObjCryst/Crystal.h"
 #include "ObjCryst/PowderPattern.h"
@@ -80,7 +81,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 1180
+#define __FOXREVISION__ 1181
 
 static std::string foxVersion;
 
@@ -528,11 +529,10 @@ int main (int argc, char *argv[])
          
          float lengthmax=pow(vmax,(float)(1/3.0))*4;
          if(lengthmax<25)lengthmax=25;
-         if(lengthmax>(2.1/pl.GetPeakList()[0].dobs)) lengthmax=2.1/pl.GetPeakList()[0].dobs;
-         cout<<"Indexing using TRICLINIC lattice, latt=3.0->"<<lengthmax<<"A, V="<<vmin<<"->"<<vmax<<"A^3"<<endl;
+         //if(lengthmax>(2.1/pl.GetPeakList()[0].dobs)) lengthmax=2.1/pl.GetPeakList()[0].dobs;
          
          cx.SetVolumeMinMax(vmin,vmax);
-         cx.SetLengthMinMax(2,lengthmax);
+         cx.SetLengthMinMax(3,lengthmax);
          
          cx.DicVol(10,4,50,4);
          /*
@@ -543,6 +543,77 @@ int main (int argc, char *argv[])
             if(cx.GetBestScore()>40) break;
          }
          */
+         TAU_REPORT_STATISTICS();
+         exit(0);
+      }
+      if(STRCMP(_T("--index-test"),argv[i])==0)
+      {
+         ofstream out("indexing-results.txt");
+         srand(time(NULL));
+         for(unsigned int k=0;k<100;++k)
+         {
+            PeakList pl;
+            float a,b,c,alpha,beta,gamma;
+            while(true)
+            {
+               a=4+rand()/float(RAND_MAX)*20,
+               b=4+rand()/float(RAND_MAX)*20,
+               c=4+rand()/float(RAND_MAX)*20,
+               alpha=50+rand()/float(RAND_MAX)*80,
+               beta =50+rand()/float(RAND_MAX)*80,
+               gamma=50+rand()/float(RAND_MAX)*80;
+               if( (alpha<(beta+gamma-5)) && (beta<(alpha+gamma-5)) && (gamma<(beta+alpha-5)) && ((alpha+beta+gamma)<355)) break;
+            }
+            const float v=pl.Simulate(0,a,b,c,alpha,beta,gamma,true,20,0,1e-4,0.2,true);
+            //pl.Simulate(0,10.317,9.414,13.178,87.90,89.76,74.10,true,20,0,0.);
+            //pl.Simulate(0,10.451,12.884,7.072,86.91,96.07,83.36,true,20,0,0.);
+            pl.Print(cout);
+            
+            CellExplorer cx(pl,TRICLINIC,LATTICE_P);
+            cx.SetAngleMinMax((float)90*DEG2RAD,(float)120*DEG2RAD);
+            
+            // Use at most 20 lines ?
+            if(pl.GetPeakList().size()>20) pl.GetPeakList().resize(20);
+            unsigned int nb=pl.GetPeakList().size();
+            if(nb>20) nb=20;// Use at most 20 peaks to estimate cell volume
+            const float dmin=pl.GetPeakList()[nb-1].dobs;
+            const float dmax=pl.GetPeakList()[0].dobs;// /10: assume no peaks at lower resolution
+
+            const float vmin=EstimateCellVolume(dmin,dmax,nb,TRICLINIC  ,LATTICE_P,1.2);
+            const float vmax=EstimateCellVolume(dmin,dmax,nb,TRICLINIC  ,LATTICE_P,0.5);
+            
+            float lengthmax=pow(vmax,(float)(1/3.0))*4;
+            if(lengthmax<25)lengthmax=25;
+            //if(lengthmax>(2.1/pl.GetPeakList()[0].dobs)) lengthmax=2.1/pl.GetPeakList()[0].dobs;
+            cout<<"Indexing using TRICLINIC lattice, latt=3.0->"<<lengthmax<<"A, V="<<vmin<<"->"<<vmax<<"A^3"<<endl;
+            
+            cx.SetVolumeMinMax(vmin,vmax);
+            //cx.SetVolumeMinMax(861.06299999999987,1599.117);
+            //cx.SetVolumeMinMax(938.4*0.7,938.4*1.3);
+            cx.SetLengthMinMax(3,lengthmax);
+            Chronometer chrono;
+            cx.DicVol(10,4,50,4);
+            pl.Simulate(0,a,b,c,alpha,beta,gamma,true,20,0,0.);// Just to write the cell parameters
+            const std::list< std::pair< RecUnitCell, float > >::const_iterator pos=cx.GetSolutions().begin();
+            float score=0,vsol=0;
+            if(pos!=cx.GetSolutions().end())
+            {
+               score=pos->second;
+               vsol=pos->first.DirectUnitCell()[6];
+            }
+            char buf[200];
+            sprintf(buf,"a=%6.3f b=%6.3f c=%6.3f alpha=%6.2f beta=%6.2f gamma=%6.2f V=%8.2f Vsol=%8.2f Score=%10.1f dt=%5.1fs (V=%8.2f->%8.2f, L=%6.3f->%6.3f)",
+                    a,b,c,alpha,beta,gamma,v,vsol,score,chrono.seconds(),vmin,vmax,3.0,lengthmax);
+            out<<buf<<endl;
+            /*
+            for(unsigned int i=0;;++i)
+            {
+                cout<<i<<endl;
+                cx.Evolution(100,true,0.7,0.5,50);
+                if(cx.GetBestScore()>40) break;
+            }
+            */
+            }
          TAU_REPORT_STATISTICS();
          exit(0);
       }
@@ -659,8 +730,8 @@ int main (int argc, char *argv[])
             cout<<"Auto-simulating powder pattern:("<<cif2patternN<<")"<<endl
                 <<"   Crystal #"<<j<<": "<<gCrystalRegistry.GetObj(j).GetName()<<endl
                 <<"   Wavelength: "<<cif2patternWavelength<<endl
-                <<"   2theta: 0->"<<cif2patternMax2Theta*RAD2DEG<<"° ("<<cif2patternNbPoint<<" points)"<<endl
-                <<"   peak width: "<<cif2patternPeakWidth*RAD2DEG<<"° "<<endl
+                <<"   2theta: 0->"<<cif2patternMax2Theta*RAD2DEG<<"?("<<cif2patternNbPoint<<" points)"<<endl
+                <<"   peak width: "<<cif2patternPeakWidth*RAD2DEG<<"?"<<endl
                 <<"   to FILE:"<<sst.str()<<endl;
             ofstream out(sst.str().c_str());
             CrystVector_REAL ttheta,icalc;
@@ -694,7 +765,7 @@ int main (int argc, char *argv[])
            <<"         --finalcost 0.15 : run optimization until cost < 0.15"<<endl
            <<"         --cif2pattern 1.5406 170 5000 .1 outfile:"<<endl
            <<"                               simulate pattern for input crystal, wavelength=1.5406"<<endl
-           <<"                               up to 170° with 500 points and a peak width of 0.1°"<<endl
+           <<"                               up to 170°with 500 points and a peak width of 0.1°"<<endl
            <<"                               and save to file outfile%d.dat"<<endl
            <<endl<<endl<<"           EXAMPLES :"<<endl<<endl
            <<"Load file 'silicon.xml' and launch GUI:"<<endl<<endl

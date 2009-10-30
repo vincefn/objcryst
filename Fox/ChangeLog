@@ -1,5 +1,6 @@
 #### 1.8.X (Beta version) - Autumn 2009 (Revision #1180)
 NEW FEATURES
+   * Working triclinic indexing
    * Add automatic least-squares refinement of the structure during
     a global optimization run
    * Add manual least-squares refinement of the structure in the 

@@ -87,7 +87,7 @@ class RecUnitCell
       * d*_hkl^2 = zero + a*^2 h^2 + b*^2 k^2 + c*^2 l^2 + 2 a*.b* hk + 2 b*.c* kl + 2 a*.c* hl
       *
       * for triclinic:
-      *   d*_hkl^2 = zero + par[0]^2 h^2 + par[1]^2 k^2 + par[2]^2 l^2 + par[0]*par[1]*par[3] hk + par[1]*par[2]*par[4] kl + par[0]*par[2]*par[5] hl
+      *   d*_hkl^2 = par[0] + par[1] h^2 + par[1] k^2 + par[2]^2 l^2 + par[3] hk + par[4] kl + par[5] hl
       * for monoclinic:
       *   d*_hkl^2 = zero + par[0]^2 h^2 + par[1]^2 k^2 + par[2]^2 l^2 + par[0]*par[2]*par[3] hl
       * for orthorombic:
@@ -122,6 +122,22 @@ class PeakList
       void ImportDhklIntensity(std::istream &is);
       void ImportDhkl(std::istream &is);
       void Import2ThetaIntensity(std::istream &is, const float wavelength=1.5418);
+      /** Generate a list of simulated peak positions, from given lattice parameters
+      *
+      * \param zero: the zero, given for d*^2 (in Angstroems^-2)
+      * \param a,b,c,alpha,beta,gamma: lattice parameters
+      * \param deg: if true, angles are in degrees instead of radians
+      * \param nb: the number of peak positions to generate
+      * \param nbspurious: number of spurious lines to be included in the list
+      * \param sigma: the maximum relative error for d* - the d* values will be within [d_calc*(1-sigma) ;d_calc*(1+sigma)] 
+      * \param percentMissing: percentage (between 0 and 1) of missing reflections - maximum allowed 0.9
+      * \param verbose: print some info
+      * \return: the volume of the simulated unit cell
+      */
+      float Simulate(float zero, float a, float b, float c, 
+                    float alpha, float beta, float gamma, 
+                    bool deg, unsigned int nb=20, unsigned int nbspurious=0,
+                    float sigma=0, float percentMissing=0, const bool verbose=false);
       void ExportDhklDSigmaIntensity(std::ostream &out)const;
       /// Add one peak
       ///\param d: 1/d for this peak (Angstroem)
