@@ -81,7 +81,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 1181
+#define __FOXREVISION__ 1183
 
 static std::string foxVersion;
 
@@ -562,20 +562,25 @@ int main (int argc, char *argv[])
                alpha=50+rand()/float(RAND_MAX)*80,
                beta =50+rand()/float(RAND_MAX)*80,
                gamma=50+rand()/float(RAND_MAX)*80;
+               
+               //a=21.611; b= 4.407; c=16.848; alpha= 93.27; beta= 71.47; gamma= 87.13; //V= 1514.99   ;                                                        
+
                if( (alpha<(beta+gamma-5)) && (beta<(alpha+gamma-5)) && (gamma<(beta+alpha-5)) && ((alpha+beta+gamma)<355)) break;
             }
-            const float v=pl.Simulate(0,a,b,c,alpha,beta,gamma,true,20,0,1e-4,0.2,true);
-            //pl.Simulate(0,10.317,9.414,13.178,87.90,89.76,74.10,true,20,0,0.);
-            //pl.Simulate(0,10.451,12.884,7.072,86.91,96.07,83.36,true,20,0,0.);
+            const float missing=0.2;
+            const float sigma=1e-4;
+            const unsigned int nb=20;
+            const unsigned int nbspurious=0;
+            const float v=pl.Simulate(0,a,b,c,alpha,beta,gamma,true,nb,nbspurious,1e-4,missing,true);
+            //v=pl.Simulate(0,10.317,9.414,13.178,87.90,89.76,74.10,true,20,0,0.);
+            //v=pl.Simulate(0,10.451,12.884,7.072,86.91,96.07,83.36,true,20,0,0.);
+            //v=pl.Simulate(21.611,4.407,16.848,93.27,71.47,87.13,1514.99,true,20,0,1e-4,0.2,true);                                                 
+
             pl.Print(cout);
             
             CellExplorer cx(pl,TRICLINIC,LATTICE_P);
             cx.SetAngleMinMax((float)90*DEG2RAD,(float)120*DEG2RAD);
             
-            // Use at most 20 lines ?
-            if(pl.GetPeakList().size()>20) pl.GetPeakList().resize(20);
-            unsigned int nb=pl.GetPeakList().size();
-            if(nb>20) nb=20;// Use at most 20 peaks to estimate cell volume
             const float dmin=pl.GetPeakList()[nb-1].dobs;
             const float dmax=pl.GetPeakList()[0].dobs;// /10: assume no peaks at lower resolution
 
@@ -602,8 +607,8 @@ int main (int argc, char *argv[])
                vsol=pos->first.DirectUnitCell()[6];
             }
             char buf[200];
-            sprintf(buf,"a=%6.3f b=%6.3f c=%6.3f alpha=%6.2f beta=%6.2f gamma=%6.2f V=%8.2f Vsol=%8.2f Score=%10.1f dt=%5.1fs (V=%8.2f->%8.2f, L=%6.3f->%6.3f)",
-                    a,b,c,alpha,beta,gamma,v,vsol,score,chrono.seconds(),vmin,vmax,3.0,lengthmax);
+            sprintf(buf,"a=%6.3f b=%6.3f c=%6.3f alpha=%6.2f beta=%6.2f gamma=%6.2f V=%8.2f Vsol=%8.2f %d Score=%5.0f dt=%6.1fs (V=%5.0f->%5.0f, L=%4.1f->%4.1f, nb=%2d, spurious=%2d, missing=%2.0f%%, sigma=%5.3f%%)",
+                    a,b,c,alpha,beta,gamma,v,vsol,int((abs(vsol-v)/v)<0.005),score,chrono.seconds(),vmin,vmax,3.0,lengthmax,nb,nbspurious,missing*100,sigma*100);
             out<<buf<<endl;
             /*
             for(unsigned int i=0;;++i)

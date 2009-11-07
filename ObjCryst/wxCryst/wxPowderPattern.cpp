@@ -1120,7 +1120,7 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
 {
    if((mObs.numElements()<=0)||(mCalc.numElements()<=0)) return;
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint()",5)
-   wxMutexLocker mlock(mMutex);
+   if(wxMUTEX_NO_ERROR!=mMutex.TryLock()) return;
    wxBufferedPaintDC dc(this);
    PrepareDC(dc);
    mpParentFrame->PrepareDC(dc);
@@ -1397,6 +1397,7 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
    }
    
    dc.EndDrawing();
+   mMutex.Unlock();
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():End",5)
 }
 

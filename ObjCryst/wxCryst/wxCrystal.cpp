@@ -820,6 +820,7 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
          {
             cout<<"WXCrystal::UpdateGL():timeout waiting for mpConditionGLUpdate release: #"<<++ct<<":"<<ok<<endl;
             wxWakeUpIdle();
+            if(ct>10) break;//and hope for the best...
          }
          #else
          mpConditionGLUpdate->Wait();
