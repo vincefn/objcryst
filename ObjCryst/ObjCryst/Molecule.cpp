@@ -2177,7 +2177,12 @@ void Molecule::XMLInput(istream &is,const XMLCrystTag &tag)
 
 void Molecule::BeginOptimization(const bool allowApproximations,const bool enableRestraints)
 {
-   if(mIsbeingRefined) return;
+   if(this->IsBeingRefined())
+   {
+      // RefinableObj::BeginOptimization() will increase the optimization depth
+      this->RefinableObj::BeginOptimization(allowApproximations,enableRestraints);
+      return;
+   }
    TAU_PROFILE("Molecule::BeginOptimization()","void (bool,bool)",TAU_DEFAULT);
    #if 1 // Is doing this automatically too dangerous ?
    if(  (!mIsSelfOptimizing)

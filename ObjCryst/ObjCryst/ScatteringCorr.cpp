@@ -702,7 +702,7 @@ void TextureMarchDollase::CalcCorr() const
                }
          }
       }
-   //if(mIsbeingRefined==false)
+   //if(this->IsbeingRefined()==false)
    //{
    //   cout <<FormatVertVectorHKLFloats<REAL>(mpData->GetH(),
    //                                          mpData->GetK(),

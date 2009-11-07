@@ -792,13 +792,16 @@ void ScatteringData::BeginOptimization(const bool allowApproximations,
 }
 void ScatteringData::EndOptimization()
 {
-   if(mUseFastLessPreciseFunc==true)
+   if(mOptimizationDepth==1)
    {
-      mClockGeomStructFact.Reset();
-      mClockStructFactor.Reset();
-      mClockMaster.Click();
+      if(mUseFastLessPreciseFunc==true)
+      {
+         mClockGeomStructFact.Reset();
+         mClockStructFactor.Reset();
+         mClockMaster.Click();
+      }
+      mUseFastLessPreciseFunc=false;
    }
-   mUseFastLessPreciseFunc=false;
    this->RefinableObj::EndOptimization();
 }
 

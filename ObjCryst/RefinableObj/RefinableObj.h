@@ -942,7 +942,11 @@ class RefinableObj
       * This will also check that everything is ready, eg call the RefinableObj::Prepare()
       * function. This also affects all sub-objects.
       * \note this may be called several time for some objects which are used by several
-      * other objects.
+      * other objects, or for nested optimizations (e.g. least-squares optimizations
+      * inside a global one).
+      *
+      * \note EndOptimization() must be called at the end of the optimization, the same
+      * number of time BeginOptimization() was called !
       *
       * \param allowApproximations: if true, then the object can use faster
       * but less precise functions during the optimization. This is useful for
@@ -1186,8 +1190,12 @@ class RefinableObj
          mutable long mNbRefParNotFixed;
          /// Index of not-fixed parameters
          mutable CrystVector_long mRefparNotFixedIndex;
-         /// Is the object being refined ?
-         bool mIsbeingRefined;
+         /// Is the object being refined or optimized ?
+         /// if mOptimizationDepth=0, no optimization is taking place.
+         /// mOptimizationDepth>0 indicates the object is being optimized. Values
+         /// larger than 1 indicate that several level of optimizations are taking place,
+         /// e.g. one least-square optimization during a global optimization, etc...
+         int mOptimizationDepth;
       
       /// Registry of RefinableObject needed for this object (owned by this object or not)
          ObjRegistry<RefinableObj> mSubObjRegistry;

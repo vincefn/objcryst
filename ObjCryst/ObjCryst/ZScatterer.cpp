@@ -1137,8 +1137,11 @@ const CrystVector_REAL& ZScatterer::GetZCoord() const
 
 void ZScatterer::EndOptimization()
 {
-   if(0!=mpZMoveMinimizer) delete mpZMoveMinimizer;
-   mpZMoveMinimizer=0;
+   if(mOptimizationDepth==1)
+   {
+      if(0!=mpZMoveMinimizer) delete mpZMoveMinimizer;
+      mpZMoveMinimizer=0;
+   }
    this->RefinableObj::EndOptimization();
 }
 

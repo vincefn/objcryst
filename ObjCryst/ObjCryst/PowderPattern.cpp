@@ -732,15 +732,18 @@ void PowderPatternDiffraction::BeginOptimization(const bool allowApproximations,
 }
 void PowderPatternDiffraction::EndOptimization()
 {
-   if(mUseFastLessPreciseFunc==true)
+   if(mOptimizationDepth==1)
    {
-      mClockProfileCalc.Reset();
-      mClockGeomStructFact.Reset();
-      mClockStructFactor.Reset();
-      mClockMaster.Click();
+      if(mUseFastLessPreciseFunc==true)
+      {
+         mClockProfileCalc.Reset();
+         mClockGeomStructFact.Reset();
+         mClockStructFactor.Reset();
+         mClockMaster.Click();
+      }
+      mUseFastLessPreciseFunc=false;
+      this->GetNbReflBelowMaxSinThetaOvLambda();
    }
-   mUseFastLessPreciseFunc=false;
-   this->GetNbReflBelowMaxSinThetaOvLambda();
    this->RefinableObj::EndOptimization();
 }
 
@@ -5068,7 +5071,7 @@ void PowderPattern::CalcPowderPattern() const
             REAL * p0 = mPowderPatternCalc.data();
             const REAL s = mScaleFactor(i);
             for(unsigned long j=0;j<mNbPointUsed;j++) *p0++ = s * *p1++;
-            if(!mIsbeingRefined) for(unsigned long j=mNbPointUsed;j<mNbPoint;j++) *p0++ = 0;
+            if(!(this->IsBeingRefined())) for(unsigned long j=mNbPointUsed;j<mNbPoint;j++) *p0++ = 0;
          }
          else
          {
@@ -5089,7 +5092,7 @@ void PowderPattern::CalcPowderPattern() const
                                  .mPowderPatternCalc.data();
             REAL * p0 = mPowderPatternCalc.data();
             for(unsigned long j=0;j<mNbPointUsed;j++) *p0++ = *p1++;
-            if(!mIsbeingRefined) for(unsigned long j=mNbPointUsed;j<mNbPoint;j++) *p0++ = 0;
+            if(!(this->IsBeingRefined())) for(unsigned long j=mNbPointUsed;j<mNbPoint;j++) *p0++ = 0;
          }
          else
          {
@@ -5109,7 +5112,7 @@ void PowderPattern::CalcPowderPattern() const
             const REAL *p1=mPowderPatternComponentRegistry.GetObj(i)
                               .mPowderPatternCalc.data();
             for(unsigned long j=0;j<mNbPointUsed;j++) *p0++ = *p1++;
-            if(!mIsbeingRefined) for(unsigned long j=mNbPointUsed;j<mNbPoint;j++) *p0++ = 0;
+            if(!(this->IsBeingRefined())) for(unsigned long j=mNbPointUsed;j<mNbPoint;j++) *p0++ = 0;
          }
          else
          {

@@ -1143,7 +1143,7 @@ const unsigned long MaxNbSavedSets(1000);
 
 RefinableObj::RefinableObj():
 mName(""),
-mNbRefParNotFixed(-1),mIsbeingRefined(false),mDeleteRefParInDestructor(true)
+mNbRefParNotFixed(-1),mOptimizationDepth(0),mDeleteRefParInDestructor(true)
 #ifdef __WX__CRYST__
 ,mpWXCrystObj(0)
 #endif
@@ -1157,7 +1157,7 @@ mNbRefParNotFixed(-1),mIsbeingRefined(false),mDeleteRefParInDestructor(true)
 }
 RefinableObj::RefinableObj(const bool internalUseOnly):
 mName(""),
-mNbRefParNotFixed(-1),mIsbeingRefined(false),mDeleteRefParInDestructor(true)
+mNbRefParNotFixed(-1),mOptimizationDepth(0),mDeleteRefParInDestructor(true)
 #ifdef __WX__CRYST__
 ,mpWXCrystObj(0)
 #endif
@@ -1174,7 +1174,7 @@ RefinableObj::RefinableObj(const RefinableObj &old) {}
 /*
 RefinableObj::RefinableObj(const RefinableObj &old):
 mName(old.mName),mMaxNbRefPar(old.mMaxNbRefPar),mSavedValuesSetIsUsed(mMaxNbSavedSets),
-mIsbeingRefined(false),mDeleteRefParInDestructor(true)
+mOptimizationDepth(0),mDeleteRefParInDestructor(true)
 #ifdef __WX__CRYST__
 ,mpWXCrystObj(0)
 #endif
@@ -1623,15 +1623,15 @@ void RefinableObj::DeRegisterClient(RefinableObj &obj)const
 const ObjRegistry<RefinableObj>& RefinableObj::GetClientRegistry()const{return mClientObjRegistry;}
       ObjRegistry<RefinableObj>& RefinableObj::GetClientRegistry()     {return mClientObjRegistry;}
 
-bool RefinableObj::IsBeingRefined()const {return mIsbeingRefined;}
+bool RefinableObj::IsBeingRefined()const {return mOptimizationDepth>0;}
 
 extern const long ID_WXOBJ_ENABLE; //These are defined in wxCryst/wxCryst.cpp
 extern const long ID_WXOBJ_DISABLE; 
 void RefinableObj::BeginOptimization(const bool allowApproximations,
                                      const bool enableRestraints)
 {
-   if(mIsbeingRefined) return;
-   mIsbeingRefined=true;
+   mOptimizationDepth++;
+   if(mOptimizationDepth>1) return;
    this->Prepare();
    for(int i=0;i<mSubObjRegistry.GetNb();i++)
       mSubObjRegistry.GetObj(i).BeginOptimization(allowApproximations);
@@ -1650,8 +1650,10 @@ void RefinableObj::BeginOptimization(const bool allowApproximations,
 
 void RefinableObj::EndOptimization()
 {
-   if(!mIsbeingRefined) return;
-   mIsbeingRefined=false;
+   mOptimizationDepth--;
+   if(mOptimizationDepth<0) throw ObjCrystException("RefinableObj::EndOptimization(): mOptimizationDepth<0 !!");
+
+   if(mOptimizationDepth>0) return;
    for(int i=0;i<mSubObjRegistry.GetNb();i++)
       mSubObjRegistry.GetObj(i).EndOptimization();
    #ifdef __WX__CRYST__

@@ -1079,7 +1079,12 @@ void Crystal::GetGeneGroup(const RefinableObj &obj,
 }
 void Crystal::BeginOptimization(const bool allowApproximations,const bool enableRestraints)
 {
-   if(mIsbeingRefined) return;
+   if(this->IsBeingRefined())
+   {
+      // RefinableObj::BeginOptimization() will increase the optimization depth
+      this->RefinableObj::BeginOptimization(allowApproximations,enableRestraints);
+      return;
+   }
    for(int i=0;i<this->GetScattererRegistry().GetNb();i++)
    {
       this->GetScattererRegistry().GetObj(i).
