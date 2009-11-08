@@ -42,6 +42,9 @@
 
 //#include <xmmintrin.h>
 
+// Try new approach for rigid bodies ?
+#define RIGID_BODY_STRICT_EXPERIMENTAL
+
 using namespace std;
 
 namespace ObjCryst
@@ -1224,7 +1227,7 @@ mQ0(q0),mQ1(q1),mQ2(q2),mQ3(q3),mIsUniQuaternion(unit)
 
 Quaternion::~Quaternion()
 {
-   VFN_DEBUG_MESSAGE("Quaternion::~RotationQuaternion()",5)
+   VFN_DEBUG_MESSAGE("Quaternion::~Quaternion()",5)
 }
 
 Quaternion Quaternion::RotationQuaternion(const REAL ang,
@@ -2235,10 +2238,97 @@ void Molecule::BeginOptimization(const bool allowApproximations,const bool enabl
          this->BuildMDAtomGroups();
       }
    }
+   #ifdef RIGID_BODY_STRICT_EXPERIMENTAL
+   // Block individual refinable parameters from atoms in rigid groups
+   // And create the index of the atoms
+   for(vector<RigidGroup *>::iterator pos=this->GetRigidGroupList().begin();pos!=this->GetRigidGroupList().end();++pos)
+   {
+      // Init the translation & rotation parameters (ignored outside an optimization)
+      (*pos)->mX=0;
+      (*pos)->mY=0;
+      (*pos)->mZ=0;
+      (*pos)->mQuat.Q0()=1;
+      (*pos)->mQuat.Q1()=0;
+      (*pos)->mQuat.Q2()=0;
+      (*pos)->mQuat.Q3()=0;
+      (*pos)->mvIdx.clear();
+      for(set<MolAtom *>::iterator at=(*pos)->begin();at!=(*pos)->end();++at)
+      {
+         this->GetPar(&((*at)->X())).SetIsFixed(true);
+         this->GetPar(&((*at)->Y())).SetIsFixed(true);
+         this->GetPar(&((*at)->Z())).SetIsFixed(true);
+         for(unsigned int i=0;i<this->GetNbComponent();++i)
+            if(&(this->GetAtom(i))==*at)
+            {
+              (*pos)->mvIdx.insert(i);
+              break;
+            }
+      }
+   }
+   #endif
+   
    this->RefinableObj::BeginOptimization(allowApproximations,enableRestraints);
    mRandomConformChangeNbTest=0;
    mRandomConformChangeNbAccept=0;
    mRandomConformChangeTemp=1.;//(REAL)this->GetNbComponent();
+}
+
+void Molecule::EndOptimization()
+{
+   if(mOptimizationDepth>1)
+   {
+      this->RefinableObj::EndOptimization();
+      return;
+   }
+   #ifdef RIGID_BODY_STRICT_EXPERIMENTAL
+   // Un-block individual refinable parameters from atoms in rigid groups
+   for(vector<RigidGroup *>::iterator pos=this->GetRigidGroupList().begin();pos!=this->GetRigidGroupList().end();++pos)
+   {
+      for(set<MolAtom *>::iterator at=(*pos)->begin();at!=(*pos)->end();++at)
+      {
+         this->GetPar(&((*at)->X())).SetIsFixed(false);
+         this->GetPar(&((*at)->Y())).SetIsFixed(false);
+         this->GetPar(&((*at)->Z())).SetIsFixed(false);
+      }
+   }
+   // Apply the translations & rotations of the rigid group parameters, and
+   // use this as the newly stored atomic coordinates.
+   for(vector<RigidGroup *>::iterator pos=this->GetRigidGroupList().begin();pos!=this->GetRigidGroupList().end();++pos)
+   {
+      (*pos)->mQuat.Normalize();
+      // Center of atom group
+      REAL x0=0,y0=0,z0=0;
+      for(set<MolAtom *>::iterator at=(*pos)->begin();at!=(*pos)->end();++at)
+      {
+        x0+=(*at)->GetX();
+        y0+=(*at)->GetY();
+        z0+=(*at)->GetZ();
+      }
+      x0/=(*pos)->size();
+      y0/=(*pos)->size();
+      z0/=(*pos)->size();
+      
+      // Apply rotation & translation to all atoms
+      for(set<MolAtom *>::iterator at=(*pos)->begin();at!=(*pos)->end();++at)
+      {
+        REAL x=(*at)->GetX()-x0, y=(*at)->GetY()-y0, z=(*at)->GetZ()-z0;
+        (*pos)->mQuat.RotateVector(x,y,z);
+        (*at)->SetX(x+x0+(*pos)->mX);
+        (*at)->SetY(y+y0+(*pos)->mY);
+        (*at)->SetZ(z+z0+(*pos)->mZ);
+      }
+      
+      // Reset the translation & rotation parameters, only useful during an optimization
+      (*pos)->mX=0;
+      (*pos)->mY=0;
+      (*pos)->mZ=0;
+      (*pos)->mQuat.Q0()=1;
+      (*pos)->mQuat.Q1()=0;
+      (*pos)->mQuat.Q2()=0;
+      (*pos)->mQuat.Q3()=0;
+   }
+   #endif
+   this->RefinableObj::EndOptimization();
 }
 
 void Molecule::RandomizeConfiguration()
@@ -2306,6 +2396,20 @@ void Molecule::RandomizeConfiguration()
    #endif
    // this will only change limited parameters i.e. translation
    this->RefinableObj::RandomizeConfiguration();
+   #ifdef RIGID_BODY_STRICT_EXPERIMENTAL
+   // Init rigid groups translation & rotation parameters to zero
+   for(vector<RigidGroup *>::iterator pos=this->GetRigidGroupList().begin();pos!=this->GetRigidGroupList().end();++pos)
+   {
+      // Init the translation & rotation parameters (ignored outside an optimization
+      (*pos)->mX=0;
+      (*pos)->mY=0;
+      (*pos)->mZ=0;
+      (*pos)->mQuat.Q0()=1;
+      (*pos)->mQuat.Q1()=0;
+      (*pos)->mQuat.Q2()=0;
+      (*pos)->mQuat.Q3()=0;
+   }
+   #endif
    if(mOptimizeOrientation.GetChoice()==0)
    {//Rotate around an arbitrary vector
       const REAL amp=M_PI/RAND_MAX;
@@ -2927,8 +3031,9 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
    //this->BuildStretchModeBondAngle();
    //this->BuildStretchModeTorsion();
    
-   const GLfloat colour_bondnonfree[]= { 0.3, .3, .3, 1.0 };
-   const GLfloat colour_bondfree[]= { 0.7, .7, .7, 1.0 };
+   const GLfloat colour_bondnonfree[]= { 0.2, .2, .2, 1.0 };
+   const GLfloat colour_bondrigid[]= { 0.5, .3, .3, 1.0 };
+   const GLfloat colour_bondfree[]= { 0.8, .8, .8, 1.0 };
    const GLfloat colour0[] = {0.0f, 0.0f, 0.0f, 0.0f}; 
    
    GLUquadricObj* pQuadric = gluNewQuadric();
@@ -3168,10 +3273,26 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                            ||(mvpBond[k]->GetAtom2().IsDummy()) ) continue;
                         const unsigned long n1=rix[&(mvpBond[k]->GetAtom1())],
                                             n2=rix[&(mvpBond[k]->GetAtom2())];
-                        if(mvpBond[k]->IsFreeTorsion())
-                           glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,colour_bondfree);
+                        // Is the bond in a rigid group ?
+                        bool isRigidGroup=false;
+                        for(vector<RigidGroup *>::const_iterator pos=this->GetRigidGroupList().begin();pos!=this->GetRigidGroupList().end();++pos)
+                        {
+                           if(  ((*pos)->find(&(mvpBond[k]->GetAtom1()))!=(*pos)->end()) 
+                              &&((*pos)->find(&(mvpBond[k]->GetAtom2()))!=(*pos)->end()) )
+                           {
+                              isRigidGroup=true;
+                              break;
+                           }
+                        }
+                        if(isRigidGroup)
+                           glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,colour_bondrigid);
                         else
-                           glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,colour_bondnonfree);
+                        {
+                           if(mvpBond[k]->IsFreeTorsion())
+                              glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,colour_bondfree);
+                           else
+                              glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,colour_bondnonfree);
+                        }
                         glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0); 
                         glMaterialfv(GL_FRONT, GL_EMISSION,  colour0); 
                         glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
@@ -3457,15 +3578,94 @@ void Molecule::AddRigidGroup(const RigidGroup &group,
                              const bool updateDisplay)
 {
    
-   mvRigidGroup.push_back(new RigidGroup(group));
-   mClockRigidGroup.Click();
-   if(updateDisplay) this->UpdateDisplay();
+  mvRigidGroup.push_back(new RigidGroup(group));
+  #ifdef RIGID_BODY_STRICT_EXPERIMENTAL
+  char buf[50];
+  const unsigned int i=mvRigidGroup.size();
+  RigidGroup* p=this->GetRigidGroupList().back();
+  p->mX=0;
+  p->mY=0;
+  p->mZ=0;
+  p->mQuat.Q0()=1;
+  p->mQuat.Q1()=0;
+  p->mQuat.Q2()=0;
+  p->mQuat.Q3()=0;
+  {
+    sprintf(buf,"RigidGroup%d_x",i);
+    RefinablePar tmp(buf,&(p->mX),0.,1.,
+                    gpRefParTypeScattConformX,
+                    REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
+    tmp.AssignClock(mClockAtomPosition);
+    tmp.SetGlobalOptimStep(0.05);
+    this->AddPar(tmp);
+  }
+  {
+    sprintf(buf,"RigidGroup%d_y",i);
+    RefinablePar tmp(buf,&(p->mY),0.,1.,
+                    gpRefParTypeScattConformY,
+                    REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
+    tmp.AssignClock(mClockAtomPosition);
+    tmp.SetGlobalOptimStep(0.05);
+    this->AddPar(tmp);
+  }
+  {
+    sprintf(buf,"RigidGroup%d_z",i);
+    RefinablePar tmp(buf,&(p->mZ),0.,1.,
+                    gpRefParTypeScattConformZ,
+                    REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
+    tmp.AssignClock(mClockAtomPosition);
+    tmp.SetGlobalOptimStep(0.05);
+    this->AddPar(tmp);
+  }
+  {
+    sprintf(buf,"RigidGroup%d_Q1",i);
+    RefinablePar tmp(buf,&(p->mQuat.Q1()),-1,1.,
+                    gpRefParTypeScattConform,
+                    REFPAR_DERIV_STEP_ABSOLUTE,true,false,true,false,1.,1.);
+    tmp.AssignClock(mClockAtomPosition);
+    tmp.SetGlobalOptimStep(0.01);
+    this->AddPar(tmp);
+  }
+  {
+    sprintf(buf,"RigidGroup%d_Q2",i);
+    RefinablePar tmp(buf,&(p->mQuat.Q2()),-1,1.,
+                    gpRefParTypeScattConform,
+                    REFPAR_DERIV_STEP_ABSOLUTE,true,false,true,false,1.,1.);
+    tmp.AssignClock(mClockAtomPosition);
+    tmp.SetGlobalOptimStep(0.01);
+    this->AddPar(tmp);
+  }
+  {
+    sprintf(buf,"RigidGroup%d_Q3",i);
+    RefinablePar tmp(buf,&(p->mQuat.Q3()),-1,1.,
+                    gpRefParTypeScattConform,
+                    REFPAR_DERIV_STEP_ABSOLUTE,true,false,true,false,1.,1.);
+    tmp.AssignClock(mClockAtomPosition);
+    tmp.SetGlobalOptimStep(0.01);
+    this->AddPar(tmp);
+  }
+  #endif
+  mClockRigidGroup.Click();
+  if(updateDisplay) this->UpdateDisplay();
 }
 
 vector<RigidGroup*>::iterator Molecule::RemoveRigidGroup(const RigidGroup &g,const bool updateDisplay, const bool del)
 {
    vector<RigidGroup*>::iterator pos=find(mvRigidGroup.begin(),mvRigidGroup.end(),&g);
    if(pos==mvRigidGroup.end()) return pos;
+   #ifdef RIGID_BODY_STRICT_EXPERIMENTAL
+   // Remove the refinable parameters (even if del==False - used for python delayed deletion)
+   // NOTE - this should only be done outside an optimization, since rigid group translationnal 
+   // and rotationnal parameters are resetted at the end of the optimization, and the atomic
+   // parameters are directly the correct ones (thus deletion of the rigid group does not change
+   // the final coordinates).
+   this->RemovePar(&(this->GetPar(&((*pos)->mX))));
+   this->RemovePar(&(this->GetPar(&((*pos)->mY))));
+   this->RemovePar(&(this->GetPar(&((*pos)->mZ))));
+   this->RemovePar(&(this->GetPar(&((*pos)->mQuat.Q1()))));
+   this->RemovePar(&(this->GetPar(&((*pos)->mQuat.Q2()))));
+   this->RemovePar(&(this->GetPar(&((*pos)->mQuat.Q3()))));
+   #endif
    if(del) delete *pos;
    pos=mvRigidGroup.erase(pos);
    if(updateDisplay) this->UpdateDisplay();
@@ -5047,7 +5247,7 @@ void Molecule::BuildStretchModeBondLength()
    }
    this->RestoreParamSet(mLocalParamSet);
    for(unsigned long i=0;i<5;++i) this->ClearParamSet(paramSetRandom[i]);
-   #ifdef __DEBUG__
+   #if 1//def __DEBUG__
    cout<<"List of Bond Length stretch modes"<<endl;
    for(list<StretchModeBondLength>::const_iterator pos=mvStretchModeBondLength.begin();
        pos!=mvStretchModeBondLength.end();++pos)
@@ -6775,6 +6975,38 @@ void Molecule::UpdateScattCompList()const
       mScattCompList(i).mZ=mvpAtom[i]->GetZ();
       mScattCompList(i).mOccupancy=mvpAtom[i]->GetOccupancy()*mOccupancy;
    }
+  
+  #ifdef RIGID_BODY_STRICT_EXPERIMENTAL
+  // During an optimization, apply the translations & rotations of the rigid group parameters
+  if(this->IsBeingRefined())
+  {
+    for(vector<RigidGroup *>::const_iterator pos=this->GetRigidGroupList().begin();pos!=this->GetRigidGroupList().end();++pos)
+    {
+        (*pos)->mQuat.Normalize();
+        // Center of the atom group
+        REAL x0=0,y0=0,z0=0;
+        for(set<unsigned int>::iterator at=(*pos)->mvIdx.begin();at!=(*pos)->mvIdx.end();++at)
+        {
+          x0+=mvpAtom[*at]->GetX();
+          y0+=mvpAtom[*at]->GetY();
+          z0+=mvpAtom[*at]->GetZ();
+        }
+        x0/=(*pos)->size();
+        y0/=(*pos)->size();
+        z0/=(*pos)->size();
+        
+        // Apply rotation & translation to all atoms
+        for(set<unsigned int>::iterator at=(*pos)->mvIdx.begin();at!=(*pos)->mvIdx.end();++at)
+        {
+          REAL x=mvpAtom[*at]->GetX()-x0, y=mvpAtom[*at]->GetY()-y0, z=mvpAtom[*at]->GetZ()-z0;
+          (*pos)->mQuat.RotateVector(x,y,z);
+          mScattCompList(*at).mX=x+x0+(*pos)->mX;
+          mScattCompList(*at).mY=y+y0+(*pos)->mY;
+          mScattCompList(*at).mZ=z+z0+(*pos)->mZ;
+        }
+    }
+  }
+  #endif
    // translate center to (0,0,0)
    REAL x0=0,y0=0,z0=0;
    if((mMoleculeCenter.GetChoice()==0) || (mpCenterAtom==0))

@@ -414,13 +414,6 @@ class MolDihedralAngle:public Restraint
    #endif
 };
 
-//typedef std::set<MolAtom *> RigidGroup;
-class RigidGroup:public std::set<MolAtom *>
-{
-   public:
-      std::string GetName()const;
-};
-
 /** Ring class
 *
 * \note This class could be used to restrain atom positions for
@@ -478,6 +471,24 @@ class Quaternion
       REAL mQ0,mQ1,mQ2,mQ3;
       bool mIsUniQuaternion;
 };
+
+class RigidGroup:public std::set<MolAtom *>
+{
+   public:
+      std::string GetName()const;
+      /// The unit quaternion defining the orientation - this is used
+      /// during optimizations to rotate all atoms as a group.
+      /// The quaternion does not give an absolute position - its value
+      /// will be resetted whenever entering or leaving an optimization.
+      Quaternion mQuat;
+      /// The translation of all the atoms as a group
+      /// The values will be resetted whenever entering or leaving an optimization.
+      REAL mX,mY,mZ;
+      /// Temporary list of the atoms indices in the molecule, used during optimization
+      /// This is created in Molecule::BeginOptimization()
+      mutable std::set<unsigned int> mvIdx;
+};
+
 /** Abstract base Stretch Mode for Molecule objects
 *
 */
@@ -713,6 +724,7 @@ class Molecule: public Scatterer
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       virtual void BeginOptimization(const bool allowApproximations=false,const bool enableRestraints=false);
+      virtual void EndOptimization();
       virtual void RandomizeConfiguration();
       virtual void GlobalOptRandomMove(const REAL mutationAmplitude,
                                        const RefParType *type);
