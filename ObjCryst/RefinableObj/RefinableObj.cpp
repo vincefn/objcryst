@@ -1510,7 +1510,8 @@ void RefinableObj::RestoreParamSet(const unsigned long id)
    REAL *p=pos->second.first.data();
    for(long i=0;i<this->GetNbPar();i++)
    {
-      if( !this->GetPar(i).IsFixed() && this->GetPar(i).IsUsed())
+      //if( !this->GetPar(i).IsFixed() && this->GetPar(i).IsUsed())
+      if(this->GetPar(i).IsUsed())
          this->GetPar(i).SetValue(*p);
       p++;
    }
