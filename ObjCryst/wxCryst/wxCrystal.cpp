@@ -1391,15 +1391,23 @@ void WXCrystal::OnMenuAtoms2Molecule(wxCommandEvent &event)
    wxString *choices = new wxString[nb];
    for(unsigned int i=0;i<nb;i++) 
       choices[i]= wxString::FromAscii((v[i]->GetName()).c_str());
+   #if 0
    wxMultiChoiceDialog dialog (this,_T("Choose the molecule's atoms"),_T("Select Atoms"),nb,choices,wxOK | wxCANCEL);
    dialog.SetSize(300,300);
-   dialog.ShowModal();
+   #else
+   wxMultiChoiceDialog_ListBox dialog(this,_T("Choose the molecule's atoms"),_T("Select Atoms"),nb,choices);
+   #endif
+   if(wxID_OK!=dialog.ShowModal()) return;
    wxArrayInt choice=dialog.GetSelections();
-   list<Atom*> vChoice;
-   for(unsigned int i=0;i<choice.GetCount();++i) vChoice.push_back(v[choice.Item(i)]);
+   if(choice.GetCount()>0)
+   {
+      list<Atom*> vChoice;
+      for(unsigned int i=0;i<choice.GetCount();++i) vChoice.push_back(v[choice.Item(i)]);
 
-   mpCrystal->AddScatterer(Atoms2Molecule(vChoice));
-   for(unsigned int i=0;i<choice.GetCount();++i) mpCrystal->RemoveScatterer(v[choice.Item(i)]);
+      mpCrystal->AddScatterer(Atoms2Molecule(vChoice));
+      for(unsigned int i=0;i<choice.GetCount();++i) mpCrystal->RemoveScatterer(v[choice.Item(i)]);
+      mpCrystal->UpdateDisplay();
+   }
 }
 
 void WXCrystal::OnMenuImportMoleculeFromFenskeHallZMatrix(wxCommandEvent &event)

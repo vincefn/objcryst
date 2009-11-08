@@ -74,9 +74,8 @@ template<class T> list<T *> WXDialogChooseMultipleFromVector(vector<T*> &reg,wxW
    wxString *choices = new wxString[reg.size()];
    for(unsigned int i=0;i<reg.size();i++) 
       choices[i]= wxString::FromAscii((reg[i]->GetName()).c_str());
-   wxMultiChoiceDialog dialog
-         (parent, wxString::FromAscii(message.c_str()),_T("Choose"),reg.size(),choices,wxOK | wxCANCEL);
-   dialog.SetSize(300,300);
+   wxMultiChoiceDialog_ListBox dialog
+         (parent, wxString::FromAscii(message.c_str()),_T("Choose"),reg.size(),choices);
    dialog.ShowModal();
    wxArrayInt choice=dialog.GetSelections();
    list<T*> vChoice;
@@ -90,9 +89,8 @@ template<class T> list<T const*> WXDialogChooseMultipleFromVector(const vector<T
    wxString *choices = new wxString[reg.size()];
    for(unsigned int i=0;i<reg.size();i++) 
       choices[i]= wxString::FromAscii((reg[i]->GetName()).c_str());
-   wxMultiChoiceDialog dialog
-         (parent, wxString::FromAscii(message.c_str()),_T("Choose"),reg.size(),choices,wxOK | wxCANCEL);
-   dialog.SetSize(300,300);
+   wxMultiChoiceDialog_ListBox dialog
+         (parent, wxString::FromAscii(message.c_str()),_T("Choose"),reg.size(),choices);
    dialog.ShowModal();
    wxArrayInt choice=dialog.GetSelections();
    list<T const*> vChoice;

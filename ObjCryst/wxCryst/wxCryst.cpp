@@ -48,6 +48,26 @@
  
 namespace ObjCryst
 {
+wxMultiChoiceDialog_ListBox::wxMultiChoiceDialog_ListBox(wxWindow* parent, const wxString& message, const wxString& caption, 
+                            int n, const wxString* choices):
+wxDialog(parent,-1,_T("Choose the molecule's atoms"),wxDefaultPosition,wxSize(300,400),wxCAPTION|wxSTAY_ON_TOP),
+mListBox(this,-1,wxDefaultPosition,wxSize(250,350),n,choices,wxLB_MULTIPLE)
+{
+   wxBoxSizer *sizer=new wxBoxSizer(wxVERTICAL);
+   sizer->Add(&mListBox);
+   sizer->Add(this->CreateSeparatedButtonSizer(wxOK | wxCANCEL));
+   this->SetSizer(sizer);
+   sizer->SetSizeHints(this);
+   sizer->Fit(this); 
+}
+
+wxArrayInt wxMultiChoiceDialog_ListBox::GetSelections() const
+{
+   wxArrayInt choice;
+   mListBox.GetSelections(choice);
+   return choice;
+}
+
 ////////////////////////////////////////////////////////////////////////
 //
 // Unique ID for menus incrementer

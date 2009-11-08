@@ -43,6 +43,21 @@
 
 namespace ObjCryst
 {
+#if 1
+/** Provides the same functionnality as wxMultiChoiceDialog, but always using
+* a wxListBox, which is much easier when selecting a large number of successive
+* choices (using shift-click).
+*/
+class wxMultiChoiceDialog_ListBox:public wxDialog
+{
+  public:
+    wxMultiChoiceDialog_ListBox(wxWindow* parent, const wxString& message, const wxString& caption, 
+                                int n, const wxString* choices);
+    wxArrayInt GetSelections() const;
+  private:
+    wxListBox mListBox;
+};
+#endif
 ////////////////////////////////////////////////////////////////////////
 //
 // Unique ID for menus incrementer
