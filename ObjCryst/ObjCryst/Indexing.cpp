@@ -68,9 +68,9 @@ float EstimateCellVolume(const float dmin, const float dmax, const float nbrefl,
    if(system==TETRAGONAL) {C0=0.214;D0=1.25 *.85;}
    if((centering==LATTICE_I)||(centering==LATTICE_A)||(centering==LATTICE_B)||(centering==LATTICE_C)) {C0/=2;D0/=2;}
    if(centering==LATTICE_F){C0/=4;D0/=4;}
-   const double alpha=D0*q2/(3*C0*q1), beta=nbrefl/(2*kappa*C0*q1);
-   const double eta=beta-alpha*alpha*alpha,gamma=sqrt(beta*beta-2*beta*alpha*alpha*alpha);
-   const float v=pow(pow(eta+gamma,(double)1/3.)+pow((eta-gamma),(double)1/3.)-alpha,(double)3);
+   const float alpha=D0*q2/(3*C0*q1), beta=nbrefl/(2*kappa*C0*q1);
+   const float eta=beta-alpha*alpha*alpha,gamma=sqrt(beta*beta-2*beta*alpha*alpha*alpha);
+   const float v=pow(pow(eta+gamma,(float)(1/3.))+pow((eta-gamma),(float)(1/3.))-alpha,(float)3);
    return v;
 }
 
@@ -1145,7 +1145,8 @@ mVolumeMin(0),mVolumeMax(1600),
 mZeroShiftMin(0),mZeroShiftMax(0),
 mlattice(lattice),mCentering(LATTICE_P),mNbSpurious(nbSpurious),
 mObs(0),mCalc(0),mWeight(0),mDeriv(0),mBestScore(0.0),
-mMinScoreReport(10),mMaxDicVolDepth(6),mDicVolDepthReport(6)
+mMinScoreReport(10),mMaxDicVolDepth(6),mDicVolDepthReport(6),
+mNbLSQExcept(0)
 {
    this->Init();
 }
@@ -1517,13 +1518,21 @@ void CellExplorer::BeginOptimization(const bool allowApproximations, const bool 
 
 void CellExplorer::LSQRefine(int nbCycle, bool useLevenbergMarquardt, const bool silent)
 {
+   if(mNbLSQExcept>100)
+   {
+      if(!silent) cout<<"CellExplorer::LSQRefine(): LSQ was disabled, too many (>100) exceptions caught. Weird unit cell parameters ?";
+      return;
+   }
    VFN_DEBUG_ENTRY("CellExplorer::LSQRefine()",5)
    mLSQObj.SetRefinedObj(*this);
    mLSQObj.PrepareRefParList(true);
    //this->BeginOptimization();
    //cout<<FormatVertVector<REAL>(this->GetLSQObs(0),this->GetLSQCalc(0),this->GetLSQWeight(0),this->GetLSQDeriv(0,this->GetPar((long)0)))<<endl;
    try {mLSQObj.Refine(nbCycle,useLevenbergMarquardt,silent);}
-   catch(const ObjCrystException &except){};
+   catch(const ObjCrystException &except)
+   { 
+      if(++mNbLSQExcept>100) cout<<"WARNING CellExplorer::LSQRefine(): LSQ was disabled, too many (>100) exceptions caught. Weird unit cell parameters ?"<<endl ;
+   }
    if(!silent) mpPeakList->Print(cout);
    VFN_DEBUG_EXIT("CellExplorer::LSQRefine()",5)
 }
@@ -1743,10 +1752,11 @@ std::list<std::pair<RecUnitCell,float> >& CellExplorer::GetSolutions() {return m
 unsigned int CellExplorer::RDicVol(RecUnitCell par0,RecUnitCell dpar, unsigned int depth,unsigned long &nbCalc,const float minV,const float maxV,vector<unsigned int> vdepth)
 {
    static bool localverbose=false;
-      const float p1m=par0.par[1]-dpar.par[1], p2m=par0.par[2]-dpar.par[2], p3m=par0.par[3]-dpar.par[3], p4m=par0.par[4]-dpar.par[4], p5m=par0.par[5]-dpar.par[5], p6m=par0.par[6]-dpar.par[6];
-      const float p1p=par0.par[1]+dpar.par[1], p2p=par0.par[2]+dpar.par[2], p3p=par0.par[3]+dpar.par[3], p4p=par0.par[4]+dpar.par[4], p5p=par0.par[5]+dpar.par[5], p6p=par0.par[6]+dpar.par[6];
    if(mlattice==TRICLINIC)
    {
+      const float p1=par0.par[1]    , p2=par0.par[2]    , p3=par0.par[3]    , p4=par0.par[4]    , p5=par0.par[5]    , p6=par0.par[6];
+      const float p1m=p1-dpar.par[1], p2m=p2-dpar.par[2], p3m=p3-dpar.par[3], p4m=p4-dpar.par[4], p5m=p5-dpar.par[5], p6m=p6-dpar.par[6];
+      const float p1p=p1+dpar.par[1], p2p=p2+dpar.par[2], p3p=p3+dpar.par[3], p4p=p4+dpar.par[4], p5p=p5+dpar.par[5], p6p=p6+dpar.par[6];
       
       // a*<b*<c*
       if((p1m>p2p)||(p2m>p3p)) return 0;
@@ -1755,12 +1765,26 @@ unsigned int CellExplorer::RDicVol(RecUnitCell par0,RecUnitCell dpar, unsigned i
       if((p4m>p1p)||(-p4p>p1p)) return 0;//abs(p4)<p1 <=> b* < b*+/-a*
       if((p5m>p2p)||(-p5p>p2p)) return 0;//abs(p5)<p2 <=> c* < c*+/-b*
       if((p6m>p1p)||(-p6p>p1p)) return 0;//abs(p6)<p1 <=> c* < c*+/-a*
-      //const float vmin1=1/sqrt(p1p*p2p*p3p*(1-p5m*p5m/(4*p2p*p3p)-p6m*p6m/(4*p1p*p3p)-p4m*p4m/(4*p1p*p2p)+p4m*p5m*p6m/(4*p1m*p2m*p3m)));
-      //const float vmax1=1/sqrt(p1m*p2m*p3m*(1-p5p*p5p/(4*p2m*p3m)-p6p*p6p/(4*p1m*p3m)-p4p*p4p/(4*p1m*p2m)+p4p*p5p*p6p/(4*p1p*p2p*p3p)));
-      //if((vmin1>(maxV))||(vmax1<(minV))) return 0;
-     const float vmin0=1/sqrt(abs(p1p*p2p*p3p*(1-p5m*p5m/(4*p2p*p3p)-p6m*p6m/(4*p1p*p3p)-p4m*p4m/(4*p1p*p2p)+p4m*p5m*p6m/(4*p1m*p2m*p3m))));
-     const float vmax0=1/sqrt(abs(p1m*p2m*p3m*(1-p5p*p5p/(4*p2m*p3m)-p6p*p6p/(4*p1m*p3m)-p4p*p4p/(4*p1m*p2m)+p4p*p5p*p6p/(4*p1p*p2p*p3p))));
-     if((vmin0>maxV)||(vmax0<minV)) return 0;
+      
+      const float max6=p1p+p2p-p4m-p5m;
+      if((p6m>max6)||(-p6p>max6)) return 0;//abs(p6)<p1+p2-p4-p5 <=> c* < c*+/-a*+/-b*
+      
+      float p6mm,p6pp,p5mm,p5pp,p4mm,p4pp; // p6pp: smaller V*, larger V, etc..
+      // derivative of V*^2 with p6
+      if((p4*p5-2*p2*p6)>0) {p6pp=p6p;p6mm=p6m;}
+      else{p6pp=p6m;p6mm=p6p;}
+      // derivative of V*^2 with p5
+      if((p4*p6-2*p1*p5)>0) {p5pp=p5p;p5mm=p5m;}
+      else{p5pp=p5m;p5mm=p5p;}
+      // derivative of V*^2 with p5
+      if((p5*p6-2*p3*p4)>0) {p4pp=p4p;p4mm=p4m;}
+      else{p4pp=p4m;p4mm=p4p;}
+      
+      //const float vmin0=1/sqrt(abs(p1p*p2p*p3p*(1-p5mm*p5mm/(4*p2p*p3p)-p6mm*p6mm/(4*p1p*p3p)-p4mm*p4mm/(4*p1p*p2p)+p4mm*p5mm*p6mm/(4*p1m*p2m*p3m))));
+      //const float vmax0=1/sqrt(abs(p1m*p2m*p3m*(1-p5pp*p5pp/(4*p2m*p3m)-p6pp*p6pp/(4*p1m*p3m)-p4pp*p4pp/(4*p1m*p2m)+p4pp*p5pp*p6pp/(4*p1m*p2m*p3m))));
+      const float vmin0=1/sqrt(abs(p1p*p2p*p3p*(1-p5mm*p5mm/(4*p2p*p3p)-p6mm*p6mm/(4*p1p*p3p)-p4mm*p4mm/(4*p1p*p2p)+p4mm*p5mm*p6mm/(4*p1m*p2m*p3m))));
+      const float vmax0=1/sqrt(abs(p1m*p2m*p3m*(1-p5pp*p5pp/(4*p2m*p3m)-p6pp*p6pp/(4*p1m*p3m)-p4pp*p4pp/(4*p1m*p2m)+p4pp*p5pp*p6pp/(4*p1m*p2m*p3m))));
+      if((vmin0>maxV)||(vmax0<minV)) return 0;
    }
    else
       if((depth>0)&&(depth<=2))// test if volume is within range
@@ -2087,6 +2111,7 @@ vector<float> linspace(float min, float max,unsigned int nb)
 
 void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const float stopOnScore,const unsigned int stopOnDepth)
 {
+   mNbLSQExcept=0;
    mDicVolDepthReport=minDepth;
    mMinScoreReport=minScore;
    this->Init();
@@ -2241,7 +2266,7 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                      //const float vmax3=v1[i1+1]*v2[i2+1]*v3[i3+1];
                      //const float vmin3=v1[i1]*v2[i2]*v3[i3]/5;
                      const float vmin3=1/sqrt((p1+dp1)*(p2+dp2)*(p3+dp3));
-                     const float vmax3=1/sqrt((p1-dp1)*(p2-dp2)*(p3-dp3))*sqrt(2);
+                     const float vmax3=1/sqrt((p1-dp1)*(p2-dp2)*(p3-dp3))*2; // *2 - sufficient margin to take into account angles
                      if(vmax3<minv) continue;
                      if(vmin3>maxv) continue;
                      

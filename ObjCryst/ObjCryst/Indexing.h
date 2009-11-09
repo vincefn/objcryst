@@ -286,6 +286,8 @@ class CellExplorer:public RefinableObj
       /// Stored value of cos(max ang) for tricilinic search - we do
       /// not want to recompute the cos at every dicvol iteration
       mutable float mCosAngMax;
+      /// Number of exceptions caught during LSQ, in a given search - above 20 LSQ is disabled
+      unsigned int mNbLSQExcept;
 };
 
 
