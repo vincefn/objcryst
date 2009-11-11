@@ -1,8 +1,9 @@
-#### 1.8.X (Beta version) - Autumn 2009 (Revision #1180)
+#### 1.8.X (Beta version) - Autumn 2009 (Revision #1195)
 NEW FEATURES
    * Working triclinic indexing
    * Add automatic least-squares refinement of the structure during
     a global optimization run
+   * Take into account rigid groups during least-squares refinement
    * Add manual least-squares refinement of the structure in the 
    global optimization run/stop menu
    * Better import of CIF files, using either the Hall symbol
@@ -12,6 +13,8 @@ NEW FEATURES
    for both X-ray and neutron radiation
 
 BUG FIXES
+   * Avoid deadlock (freezing fox) when using the 3D crystal view or
+   the powder pattern graph
    * Correct log(likelihood) calculation using integrated intensities
    (could cause invalid Chi^2 values when used without gui)
    * Correct Fullprof export when 3 or more independent atoms are
