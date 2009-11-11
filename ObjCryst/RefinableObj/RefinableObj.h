@@ -864,8 +864,9 @@ class RefinableObj
       /** \brief Restore a saved set of values.
       *
       * \param id : the number identifying the set.
-      * \warning this only affects parameters which are used and not fixed. Others 
-      * remain unchanged.
+      * \warning this only affects parameters which are used. Others 
+      * remain unchanged. Parameters which are fixed are also restored,
+      * although generally they will not be altered.
       */
       void RestoreParamSet(const unsigned long id);
       /** \brief Access one save refpar set
@@ -951,7 +952,7 @@ class RefinableObj
       * \param allowApproximations: if true, then the object can use faster
       * but less precise functions during the optimization. This is useful for
       * global optimization not using derivatives.
-      * \param enableRestraints: if true, then restrained parameters will be allowed
+      * \param enableRestraints: \deprecated if true, then restrained parameters will be allowed
       * to go beyond theur hard limits. This implies that the algorithm will take
       * into account the cost (penalty) related to the restraints. Objects which do not
       * use restraints will simply ignore this. WARNING: this parameter may be removed 
