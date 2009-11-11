@@ -543,13 +543,13 @@ void WXMonteCarloObj::OnLSQRefine(wxCommandEvent &event)
       return;
    }
    char buf[200];
+   mpMonteCarloObj->BeginOptimization();
    mpMonteCarloObj->PrepareRefParList();
    mpMonteCarloObj->InitLSQ(true);
    
    sprintf(buf,"LSQ: start");
    REAL cost=mpMonteCarloObj->GetLogLikelihood();
    mpMonteCarloObj->mvSavedParamSet.push_back(make_pair(mpMonteCarloObj->mRefParList.CreateParamSet(buf),cost));
-   
    wxProgressDialog dlgProgress(_T("Least Squares refinement"),wxString::Format(_T("Least Squares refinement, cycle #%02d/20, Chi^2=%012.2f"),0,cost),
                                  19,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME|wxPD_CAN_ABORT);
    for(unsigned i=0;i<20;++i)
@@ -560,8 +560,9 @@ void WXMonteCarloObj::OnLSQRefine(wxCommandEvent &event)
       sprintf(buf,"LSQ: cycle #%02d",i);
       cost=mpMonteCarloObj->GetLogLikelihood();
       mpMonteCarloObj->mvSavedParamSet.push_back(make_pair(mpMonteCarloObj->mRefParList.CreateParamSet(buf),cost));
-      if(dlgProgress.Update(i,wxString::Format(_T("Least Squares refinement, cycle #%02d/20, Chi^2=%012.2f"),i,cost))==false) return;
+      if(dlgProgress.Update(i,wxString::Format(_T("Least Squares refinement, cycle #%02d/20, Chi^2=%012.2f"),i,cost))==false) break;
    }
+   mpMonteCarloObj->EndOptimization();
 }
 
 void WXMonteCarloObj::UpdateDisplayNbTrial()
