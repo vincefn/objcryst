@@ -84,9 +84,16 @@ class MolAtom
       REAL GetY()const;
       REAL GetZ()const;
       REAL GetOccupancy()const;
-      void SetX(const REAL);
-      void SetY(const REAL);
-      void SetZ(const REAL);
+      //@{
+      /// Set the X,Y,Z coordinate - this is const because sometimes their
+      /// coordinate must be changed even though the atom does not move,
+      /// if the atom is part of a rigid group (its position is then described
+      /// by a combination of atomic cooordinates, plus a global
+      /// translation and rotation...
+      void SetX(const REAL)const;
+      void SetY(const REAL)const;
+      void SetZ(const REAL)const;
+      //@}
       void SetOccupancy(const REAL);
       /** Returns true if this is a dummy atom, i.e. without an associated scattering power.
       *
@@ -108,8 +115,12 @@ class MolAtom
       /* Get the atom at the other end of bond #i
       MolAtom & GetBondedAtom(unsigned int i);
       */
-      /// Cartesian oordinates in the Molecule reference frame.
-      REAL mX,mY,mZ;
+      /** Cartesian oordinates in the Molecule reference frame.
+      *
+      * mutable because they may need to be changed when in a rigid group,
+      * even though the end position of the atom remains the same.
+      */
+      mutable REAL mX,mY,mZ;
       /// Occupancy
       REAL mOccupancy;
       /// ScatteringPower
@@ -472,6 +483,16 @@ class Quaternion
       bool mIsUniQuaternion;
 };
 
+/** Rigid groups of atoms inside a molecule.
+*
+* These atoms can be moved as a group using
+* one rotation and one translation.
+* \warning: the rotation (quaternion) and translation parameters
+* are not saved or displayed, so any time this must be done
+* Molecule::ResetRigidGroupsPar() \b must be called beforehand -
+* this will use the rotation and translation parameters 
+* to generate the final atomic coordinates, and reset mQuat,mX,mY and mZ.
+*/
 class RigidGroup:public std::set<MolAtom *>
 {
    public:
@@ -480,10 +501,10 @@ class RigidGroup:public std::set<MolAtom *>
       /// during optimizations to rotate all atoms as a group.
       /// The quaternion does not give an absolute position - its value
       /// will be resetted whenever entering or leaving an optimization.
-      Quaternion mQuat;
+      mutable Quaternion mQuat;
       /// The translation of all the atoms as a group
       /// The values will be resetted whenever entering or leaving an optimization.
-      REAL mX,mY,mZ;
+      mutable REAL mX,mY,mZ;
       /// Temporary list of the atoms indices in the molecule, used during optimization
       /// This is created in Molecule::BeginOptimization()
       mutable std::set<unsigned int> mvIdx;
@@ -723,6 +744,7 @@ class Molecule: public Scatterer
       virtual void Print()const;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
+      virtual void UpdateDisplay()const;
       virtual void BeginOptimization(const bool allowApproximations=false,const bool enableRestraints=false);
       virtual void EndOptimization();
       virtual void RandomizeConfiguration();
@@ -862,6 +884,10 @@ class Molecule: public Scatterer
       void OptimizeConformationSteepestDescent(const REAL maxStep=0.1,const unsigned nbStep=1);
       /** Change the conformation of the molecule using molecular dynamics principles.
       * Optionnally, move only a subgroup of atoms and only take into account some restraints.
+      *
+      * The atoms actually moved are those included as keys in v0, and those part of the
+      * rigid bodies in vr.
+      *
       * \param v0: initial speed of all atoms. On return, includes the new speed coordinates.
       * Only the atoms used as keys in v0 will be moved, so this should be used to work 
       * only on a subgroup of atoms.
@@ -871,13 +897,18 @@ class Molecule: public Scatterer
       * be taken into account. If these are empty, the full list of restraints of the Molecule
       * are taken into account, including rigid groups. If they are not empty, then
       * it is assumed that no atom moved belongs to a rigid group.
+      * \param vr: initial speed for the angular and translation parameters of rigid groups
+      * included in the evolution. For each entry of the map the first XYZ coordinates are the speed
+      * for RigidGroup::mX,mY,mZ, and the second are the speed for the angular coordinates
+      * of the quaternion Q1,Q2,Q3
       * \param nrj0: the total energy the system should try to maintain. If equal to 0,
       * the initial energy will be used. The speed will be de/increased to compensate
       * any energy change.
       */
       void MolecularDynamicsEvolve(std::map<MolAtom*,XYZ> &v0,const unsigned nbStep,const REAL dt,
                                    const std::vector<MolBond*> &vb,const std::vector<MolBondAngle*> &va,
-                                   const std::vector<MolDihedralAngle*> &vd, REAL nrj0=0);
+                                   const std::vector<MolDihedralAngle*> &vd,
+                                   std::map<RigidGroup*,std::pair<XYZ,XYZ> > &vr, REAL nrj0=0);
       const std::vector<MolAtom*>& GetAtomList()const;
       const std::vector<MolBond*>& GetBondList()const;
       const std::vector<MolBondAngle*>& GetBondAngleList()const;
@@ -1064,6 +1095,12 @@ class Molecule: public Scatterer
       void UpdateScattCompList()const;
       /// Build options for this object
       void InitOptions();
+      /** Set the orientation & translation parameters of all rigid
+      * groups to 0, after correcting the atomic positions.
+      * This is \b required before saving the structure, as these
+      * parameters are not saved.
+      */
+      void ResetRigidGroupsPar()const;
       /** The list of scattering components
       *
       * this is mutable since it only reflects the list of atoms.
@@ -1301,6 +1338,13 @@ class Molecule: public Scatterer
 
    /// The current log(likelihood)
    mutable REAL mLogLikelihood;
+   /** Scale (multiplier) for the log(likelihood)
+   *
+   * Changing this scale is equivalent to changing the sigma values of all bonds,
+   * bond angles and dihedral angles - but it allows a simple global scaling for the
+   * user.
+   */
+   REAL mLogLikelihoodScale;
    /// Current LSQ Calc - one value for each restraint (bond distance, angle or dihedral angle)
    mutable CrystVector_REAL mLSQCalc;
    /// Current LSQ Calc - one value for each restraint (bond distance, angle or dihedral angle ideal values)

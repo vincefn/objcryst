@@ -831,6 +831,21 @@ mpBondWin(0),mpAngleWin(0),mpDihedralAngleWin(0),mpRigidGroupWin(0),mIsSelfUpdat
       mpSizer->SetItemMinSize(mpMenuBar,
                               mpMenuBar->GetSize().GetWidth(),
                               mpMenuBar->GetSize().GetHeight());
+      WXFieldPar<REAL> *pLLKScale= new WXFieldPar<REAL>(this,"Log(likelihood) scale",-1,&(mpMolecule->mLogLikelihoodScale));
+      mList.Add(pLLKScale);
+      mpSizer->Add(pLLKScale,0,wxALIGN_LEFT);
+      pLLKScale->SetToolTip(_T("The log(likelihood) of the molecule, i.e. the sum\n")
+                            _T("of the restraints costs for all bonds and angles \n")
+                            _T("are multiplied by this scale.\n\n")
+                            _T("The default value is 1.\n\n")
+                            _T("Multiplying this value by 4 is equivalent to dividing the\n")
+                            _T("sigma of all bonds and angles by a factor 2.\n")
+                            _T("This can be increased if the molecule presents too\n")
+                            _T("much distortion.\n\n")
+                            _T("Note that a too large value (e.g.>100) will decrease the\n")
+                            _T("convergence speed of the algorithm, as distortion of the\n")
+                            _T("structure is necessary for an efficient minimisation."));
+
    // Molecular Dynamics move parameters
       wxBoxSizer* pMDSizer=new wxBoxSizer(wxHORIZONTAL);
       WXFieldPar<REAL> *pWXFieldMDEnergy=

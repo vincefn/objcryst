@@ -45,6 +45,9 @@
 // Try new approach for rigid bodies ?
 #define RIGID_BODY_STRICT_EXPERIMENTAL
 
+// Tighter restraints x**2+x**4+x**6 instead of just X**2
+#undef RESTRAINT_X2_X4_X6
+
 using namespace std;
 
 namespace ObjCryst
@@ -204,9 +207,9 @@ REAL MolAtom::GetY()const{return mY;}
 REAL MolAtom::GetZ()const{return mZ;}
 REAL MolAtom::GetOccupancy()const{return mOccupancy;}
 
-void MolAtom::SetX(const REAL a){ mX=a;mpMol->GetAtomPositionClock().Click();}
-void MolAtom::SetY(const REAL a){ mY=a;mpMol->GetAtomPositionClock().Click();}
-void MolAtom::SetZ(const REAL a){ mZ=a;mpMol->GetAtomPositionClock().Click();}
+void MolAtom::SetX(const REAL a)const{ mX=a;mpMol->GetAtomPositionClock().Click();}
+void MolAtom::SetY(const REAL a)const{ mY=a;mpMol->GetAtomPositionClock().Click();}
+void MolAtom::SetZ(const REAL a)const{ mZ=a;mpMol->GetAtomPositionClock().Click();}
 void MolAtom::SetOccupancy(const REAL a){ mOccupancy=a;}
 
 bool MolAtom::IsDummy()const{return mpScattPow==0;}
@@ -441,7 +444,16 @@ REAL MolBond::GetLogLikelihood(const bool calcDeriv, const bool recalc)const
    {
       mLLK /= mSigma;
       if(calcDeriv) mDerivLLKCoeff=2*mLLK/mSigma;
+      #ifdef RESTRAINT_X2_X4_X6
+      const float mLLK2=mLLK*mLLK;
+      //if(calcDeriv) mDerivLLKCoeff=(2*mLLK+4*mLLK2+6*mLLK2*mLLK2)/mSigma;
+      //mLLK=mLLK2*(1+mLLK2+mLLK2*mLLK2);
+      if(calcDeriv) mDerivLLKCoeff=(2*mLLK+4*mLLK2)/mSigma;
+      mLLK=mLLK2*(1+mLLK2);
+      #else
+      if(calcDeriv) mDerivLLKCoeff=2*mLLK/mSigma;
       mLLK *= mLLK;
+      #endif
       VFN_DEBUG_EXIT("MolBond::GetLogLikelihood():",2)
       return mLLK;
    }
@@ -449,8 +461,16 @@ REAL MolBond::GetLogLikelihood(const bool calcDeriv, const bool recalc)const
    if(mLLK<0)
    {
       mLLK /= mSigma;
+      #ifdef RESTRAINT_X2_X4_X6
+      const float mLLK2=mLLK*mLLK;
+      //if(calcDeriv) mDerivLLKCoeff=(2*mLLK+4*mLLK2+6*mLLK2*mLLK2)/mSigma;
+      //mLLK=mLLK2*(1+mLLK2+mLLK2*mLLK2);
+      if(calcDeriv) mDerivLLKCoeff=(2*mLLK+4*mLLK2)/mSigma;
+      mLLK=mLLK2*(1+mLLK2);
+      #else
       if(calcDeriv) mDerivLLKCoeff=2*mLLK/mSigma;
       mLLK *= mLLK;
+      #endif
       VFN_DEBUG_EXIT("MolBond::GetLogLikelihood():",2)
       return mLLK;
    }
@@ -734,8 +754,16 @@ REAL MolBondAngle::GetLogLikelihood(const bool calcDeriv, const bool recalc)cons
    if(mLLK>0)
    {
       mLLK/=mSigma;
+      #ifdef RESTRAINT_X2_X4_X6
+      const float mLLK2=mLLK*mLLK;
+      //if(calcDeriv) mDerivLLKCoeff=(2*mLLK+4*mLLK2+6*mLLK2*mLLK2)/mSigma;
+      //mLLK=mLLK2*(1+mLLK2+mLLK2*mLLK2);
+      if(calcDeriv) mDerivLLKCoeff=(2*mLLK+4*mLLK2)/mSigma;
+      mLLK=mLLK2*(1+mLLK2);
+      #else
       if(calcDeriv) mDerivLLKCoeff=2*mLLK/mSigma;
-      mLLK*=mLLK;
+      mLLK *= mLLK;
+      #endif
       VFN_DEBUG_EXIT("MolBondAngle::GetLogLikelihood():",2)
       return mLLK;
    }
@@ -743,8 +771,16 @@ REAL MolBondAngle::GetLogLikelihood(const bool calcDeriv, const bool recalc)cons
    if(mLLK<0)
    {
       mLLK/=mSigma;
+      #ifdef RESTRAINT_X2_X4_X6
+      const float mLLK2=mLLK*mLLK;
+      //if(calcDeriv) mDerivLLKCoeff=(2*mLLK+4*mLLK2+6*mLLK2*mLLK2)/mSigma;
+      //mLLK=mLLK2*(1+mLLK2+mLLK2*mLLK2);
+      if(calcDeriv) mDerivLLKCoeff=(2*mLLK+4*mLLK2)/mSigma;
+      mLLK=mLLK2*(1+mLLK2);
+      #else
       if(calcDeriv) mDerivLLKCoeff=2*mLLK/mSigma;
-      mLLK*=mLLK;
+      mLLK *= mLLK;
+      #endif
       VFN_DEBUG_EXIT("MolBondAngle::GetLogLikelihood():",2)
       return mLLK;
    }
@@ -1058,8 +1094,16 @@ REAL MolDihedralAngle::GetLogLikelihood(const bool calcDeriv, const bool recalc)
    if(mLLK>0)
    {
       mLLK/=mSigma;
+      #ifdef RESTRAINT_X2_X4_X6
+      const float mLLK2=mLLK*mLLK;
+      //if(calcDeriv) mDerivLLKCoeff=(2*mLLK+4*mLLK2+6*mLLK2*mLLK2)/mSigma;
+      //mLLK=mLLK2*(1+mLLK2+mLLK2*mLLK2);
+      if(calcDeriv) mDerivLLKCoeff=(2*mLLK+4*mLLK2)/mSigma;
+      mLLK=mLLK2*(1+mLLK2);
+      #else
       if(calcDeriv) mDerivLLKCoeff=2*mLLK/mSigma;
-      mLLK*=mLLK;
+      mLLK *= mLLK;
+      #endif
       VFN_DEBUG_EXIT("MolDihedralAngle::GetLogLikelihood():",2)
       return mLLK;
    }
@@ -1069,8 +1113,16 @@ REAL MolDihedralAngle::GetLogLikelihood(const bool calcDeriv, const bool recalc)
    if(mLLK<0)
    {
       mLLK/=mSigma;
+      #ifdef RESTRAINT_X2_X4_X6
+      const float mLLK2=mLLK*mLLK;
+      //if(calcDeriv) mDerivLLKCoeff=(2*mLLK+4*mLLK2+6*mLLK2*mLLK2)/mSigma;
+      //mLLK=mLLK2*(1+mLLK2+mLLK2*mLLK2);
+      if(calcDeriv) mDerivLLKCoeff=(2*mLLK+4*mLLK2)/mSigma;
+      mLLK=mLLK2*(1+mLLK2);
+      #else
       if(calcDeriv) mDerivLLKCoeff=2*mLLK/mSigma;
-      mLLK*=mLLK;
+      mLLK *= mLLK;
+      #endif
       VFN_DEBUG_EXIT("MolDihedralAngle::GetLogLikelihood():",2)
       return mLLK;
    }
@@ -1781,7 +1833,7 @@ void MDAtomGroup::Print(ostream &os,bool full)const
 //######################################################################
 Molecule::Molecule(Crystal &cryst, const string &name):
 mBaseRotationAmplitude(M_PI*0.02),mIsSelfOptimizing(false),mpCenterAtom(0),
-mMDMoveFreq(0.0),mMDMoveEnergy(40.),mDeleteSubObjInDestructor(1)
+mMDMoveFreq(0.0),mMDMoveEnergy(40.),mDeleteSubObjInDestructor(1),mLogLikelihoodScale(1.0)
 {
    VFN_DEBUG_MESSAGE("Molecule::Molecule()",5)
    this->SetName(name);
@@ -1990,6 +2042,7 @@ void Molecule::Print()const
 void Molecule::XMLOutput(ostream &os,int indent)const
 {
    VFN_DEBUG_ENTRY("Molecule::XMLOutput()",4)
+   this->ResetRigidGroupsPar();
    for(int i=0;i<indent;i++) os << "  " ;
    XMLCrystTag tag("Molecule");
    tag.AddAttribute("Name",mName);
@@ -1999,6 +2052,9 @@ void Molecule::XMLOutput(ostream &os,int indent)const
    sst.str("");
    sst<<mMDMoveEnergy;
    tag.AddAttribute("MDMoveEnergy",sst.str());
+   sst.str("");
+   sst<<mLogLikelihoodScale;
+   tag.AddAttribute("LogLikelihoodScale",sst.str());
    os <<tag<<endl;
    indent++;
    
@@ -2050,6 +2106,15 @@ void Molecule::XMLOutput(ostream &os,int indent)const
          XMLCrystTag tagg("RigidGroup",false,true);
          for(set<MolAtom *>::const_iterator at=(*pos)->begin();at!=(*pos)->end();++at)
             tagg.AddAttribute("Atom",(*at)->GetName());
+         /*
+         tagg.AddAttribute("Q0",(*pos)->mQuat.Q0());
+         tagg.AddAttribute("Q1",(*pos)->mQuat.Q1());
+         tagg.AddAttribute("Q2",(*pos)->mQuat.Q2());
+         tagg.AddAttribute("Q3",(*pos)->mQuat.Q3());
+         tagg.AddAttribute("dX",(*pos)->mX);
+         tagg.AddAttribute("dY",(*pos)->mY);
+         tagg.AddAttribute("dZ",(*pos)->mZ);
+         */
          for(int i=0;i<indent;i++) os << "  " ;
          os <<tagg<<endl;
       }
@@ -2086,6 +2151,10 @@ void Molecule::XMLInput(istream &is,const XMLCrystTag &tag)
       if("MDMoveEnergy"==tag.GetAttributeName(i))
       {
          mMDMoveEnergy=atof(tag.GetAttributeValue(i).c_str());
+      }
+      if("LogLikelihoodScale"==tag.GetAttributeName(i))
+      {
+         mLogLikelihoodScale=atof(tag.GetAttributeValue(i).c_str());
       }
    }
    while(true)
@@ -2178,6 +2247,12 @@ void Molecule::XMLInput(istream &is,const XMLCrystTag &tag)
    VFN_DEBUG_EXIT("Molecule::XMLInput()",5)
 }
 
+void Molecule::UpdateDisplay()const
+{
+   this->ResetRigidGroupsPar();
+   this->RefinableObj::UpdateDisplay();
+}
+
 void Molecule::BeginOptimization(const bool allowApproximations,const bool enableRestraints)
 {
    if(this->IsBeingRefined())
@@ -2238,7 +2313,7 @@ void Molecule::BeginOptimization(const bool allowApproximations,const bool enabl
          this->BuildMDAtomGroups();
       }
    }
-   #ifdef RIGID_BODY_STRICT_EXPERIMENTAL
+   #if 1 //def RIGID_BODY_STRICT_EXPERIMENTAL
    // Block individual refinable parameters from atoms in rigid groups
    // And create the index of the atoms
    for(vector<RigidGroup *>::iterator pos=this->GetRigidGroupList().begin();pos!=this->GetRigidGroupList().end();++pos)
@@ -2275,11 +2350,13 @@ void Molecule::BeginOptimization(const bool allowApproximations,const bool enabl
 
 void Molecule::EndOptimization()
 {
+   /*
    if(mOptimizationDepth>1)
    {
       this->RefinableObj::EndOptimization();
       return;
    }
+   */
    #ifdef RIGID_BODY_STRICT_EXPERIMENTAL
    // Un-block individual refinable parameters from atoms in rigid groups
    for(vector<RigidGroup *>::iterator pos=this->GetRigidGroupList().begin();pos!=this->GetRigidGroupList().end();++pos)
@@ -2293,40 +2370,7 @@ void Molecule::EndOptimization()
    }
    // Apply the translations & rotations of the rigid group parameters, and
    // use this as the newly stored atomic coordinates.
-   for(vector<RigidGroup *>::iterator pos=this->GetRigidGroupList().begin();pos!=this->GetRigidGroupList().end();++pos)
-   {
-      (*pos)->mQuat.Normalize();
-      // Center of atom group
-      REAL x0=0,y0=0,z0=0;
-      for(set<MolAtom *>::iterator at=(*pos)->begin();at!=(*pos)->end();++at)
-      {
-        x0+=(*at)->GetX();
-        y0+=(*at)->GetY();
-        z0+=(*at)->GetZ();
-      }
-      x0/=(*pos)->size();
-      y0/=(*pos)->size();
-      z0/=(*pos)->size();
-      
-      // Apply rotation & translation to all atoms
-      for(set<MolAtom *>::iterator at=(*pos)->begin();at!=(*pos)->end();++at)
-      {
-        REAL x=(*at)->GetX()-x0, y=(*at)->GetY()-y0, z=(*at)->GetZ()-z0;
-        (*pos)->mQuat.RotateVector(x,y,z);
-        (*at)->SetX(x+x0+(*pos)->mX);
-        (*at)->SetY(y+y0+(*pos)->mY);
-        (*at)->SetZ(z+z0+(*pos)->mZ);
-      }
-      
-      // Reset the translation & rotation parameters, only useful during an optimization
-      (*pos)->mX=0;
-      (*pos)->mY=0;
-      (*pos)->mZ=0;
-      (*pos)->mQuat.Q0()=1;
-      (*pos)->mQuat.Q1()=0;
-      (*pos)->mQuat.Q2()=0;
-      (*pos)->mQuat.Q3()=0;
-   }
+   this->ResetRigidGroupsPar();
    #endif
    this->RefinableObj::EndOptimization();
 }
@@ -2386,11 +2430,12 @@ void Molecule::RandomizeConfiguration()
       const REAL nrj0=40*( this->GetBondList().size()
                            +this->GetBondAngleList().size()
                            +this->GetDihedralAngleList().size());
+      map<RigidGroup*,std::pair<XYZ,XYZ> > vr;
       this->MolecularDynamicsEvolve(v0, 5000,0.002,
                                     this->GetBondList(),
                                     this->GetBondAngleList(),
                                     this->GetDihedralAngleList(),
-                                    nrj0);
+                                    vr,nrj0);
    }
    
    #endif
@@ -2495,11 +2540,12 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                   const REAL nrj0=mMDMoveEnergy*( this->GetBondList().size()
                                       +this->GetBondAngleList().size()
                                       +this->GetDihedralAngleList().size());
+                  map<RigidGroup*,std::pair<XYZ,XYZ> > vr;
                   this->MolecularDynamicsEvolve(v0, int(100*sqrt(mutationAmplitude)),0.004,
                                                 this->GetBondList(),
                                                 this->GetBondAngleList(),
                                                 this->GetDihedralAngleList(),
-                                                nrj0);
+                                                vr,nrj0);
             }
             #else
             if((mvMDAtomGroup.size()>0)&&(rand()<(RAND_MAX*mMDMoveFreq)))
@@ -2514,11 +2560,12 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                const REAL nrj0=mMDMoveEnergy*( pos->mvpBond.size()
                                     +pos->mvpBondAngle.size()
                                     +pos->mvpDihedralAngle.size());
+               map<RigidGroup*,std::pair<XYZ,XYZ> > vr;
                this->MolecularDynamicsEvolve(v0, int(100*sqrt(mutationAmplitude)),0.004,
                                              pos->mvpBond,
                                              pos->mvpBondAngle,
                                              pos->mvpDihedralAngle,
-                                             nrj0);
+                                             vr,nrj0);
             }
             #endif
             else
@@ -2652,6 +2699,7 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                      (*mode)->Stretch(change);
                   }
                }
+               // Here we do not take mLogLikelihoodScale into account
                if( ((rand()%10)==0) && (mLogLikelihood>(mvpRestraint.size()*10)))
                   this->OptimizeConformationSteepestDescent(0.02,5);
                TAU_PROFILE_STOP(timer4);
@@ -2668,11 +2716,12 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                      v0[*at]=XYZ(rand()/(REAL)RAND_MAX+0.5,rand()/(REAL)RAND_MAX+0.5,rand()/(REAL)RAND_MAX+0.5);
                   
                   const REAL nrj0=20*(pos->mvpBond.size()+pos->mvpBondAngle.size()+pos->mvpDihedralAngle.size());
+                  map<RigidGroup*,std::pair<XYZ,XYZ> > vr;
                   this->MolecularDynamicsEvolve(v0, int(100*sqrt(mutationAmplitude)),0.002,
                                                 (const vector<MolBond*>) (pos->mvpBond),
                                                 (const vector<MolBondAngle*>) (pos->mvpBondAngle),
                                                 (const vector<MolDihedralAngle*>) (pos->mvpDihedralAngle),
-                                                nrj0);
+                                                vr,nrj0);
                }
             }
             #endif
@@ -2715,11 +2764,11 @@ REAL Molecule::GetLogLikelihood()const
       &&(mClockLogLikelihood>mClockBondAngleList)
       &&(mClockLogLikelihood>mClockDihedralAngleList)
       &&(mClockLogLikelihood>mClockAtomPosition)
-      &&(mClockLogLikelihood>mClockScatterer)) return mLogLikelihood;
+      &&(mClockLogLikelihood>mClockScatterer)) return mLogLikelihood*mLogLikelihoodScale;
    TAU_PROFILE("Molecule::GetLogLikelihood()","REAL ()",TAU_DEFAULT);
    mLogLikelihood=this->RefinableObj::GetLogLikelihood();
    mClockLogLikelihood.Click();
-   return mLogLikelihood;
+   return mLogLikelihood*mLogLikelihoodScale;
 }
 
 unsigned int Molecule::GetNbLSQFunction()const
@@ -2764,6 +2813,7 @@ const CrystVector_REAL& Molecule::GetLSQWeight(const unsigned int) const
       *p++=1/((*pos)->GetAngleSigma()* (*pos)->GetAngleSigma()+1e-6);
    for(vector<MolDihedralAngle*>::const_iterator pos=this->GetDihedralAngleList().begin();pos!=this->GetDihedralAngleList().end();++pos)
       *p++=1/((*pos)->GetAngleSigma()* (*pos)->GetAngleSigma()+1e-6);
+   mLSQWeight*=mLogLikelihoodScale;
    return mLSQWeight;
 }
 
@@ -2775,6 +2825,7 @@ const CrystVector_REAL& Molecule::GetLSQDeriv(const unsigned int n, RefinablePar
 
 void Molecule::TagNewBestConfig()const
 {
+   this->ResetRigidGroupsPar();
    #if 0
    cout<<"Molecule::TagNewBestConfig()"<<endl;
    {
@@ -3577,7 +3628,6 @@ vector<MolDihedralAngle*>::const_iterator Molecule::FindDihedralAngle(const MolA
 void Molecule::AddRigidGroup(const RigidGroup &group,
                              const bool updateDisplay)
 {
-   
   mvRigidGroup.push_back(new RigidGroup(group));
   #ifdef RIGID_BODY_STRICT_EXPERIMENTAL
   char buf[50];
@@ -3776,22 +3826,26 @@ void Molecule::OptimizeConformationSteepestDescent(const REAL maxStep,const unsi
 
 void Molecule::MolecularDynamicsEvolve(map<MolAtom*,XYZ> &v0,const unsigned nbStep,const REAL dt,
                                        const vector<MolBond*> &vb,const vector<MolBondAngle*> &va,
-                                       const vector<MolDihedralAngle*> &vd, REAL nrj0)
+                                       const vector<MolDihedralAngle*> &vd,
+                                       map<RigidGroup*,std::pair<XYZ,XYZ> > &vr, REAL nrj0)
 {
    const vector<MolBond*> *pvb=&vb;
    const vector<MolBondAngle*> *pva=&va;
    const vector<MolDihedralAngle*> *pvd=&vd;
+   map<RigidGroup*,std::pair<XYZ,XYZ> > *pvr=&vr;
    if((pvb->size()==0)&&(pva->size()==0)&&(pvd->size()==0))
    {
       pvb=&(this->GetBondList());
       pva=&(this->GetBondAngleList());
       pvd=&(this->GetDihedralAngleList());
+      for(vector<RigidGroup *>::iterator pos=this->GetRigidGroupList().begin();pos!=this->GetRigidGroupList().end();++pos)
+         (*pvr)[*pos]=make_pair(XYZ(0,0,0),XYZ(0,0,0));
    }
    const REAL m=500;// mass
    const REAL im=1./m;
    
    // Try to keep total energy constant
-   REAL e_v,e_k,vr=1.0;
+   REAL e_v,e_k,v_r=1.0;
    for(int i=0;i<nbStep;++i)
    {
       // Calc full gradient
@@ -3828,8 +3882,8 @@ void Molecule::MolecularDynamicsEvolve(map<MolAtom*,XYZ> &v0,const unsigned nbSt
       {
          // Apply a coefficient to the speed to keep the overall energy constant
          const REAL de=e_k+e_v-nrj0;
-         if(de<e_k) vr=sqrt((e_k-de)/e_k);
-         else vr=0.0;
+         if(de<e_k) v_r=sqrt((e_k-de)/e_k);
+         else v_r=0.0;
       }
 
       #if 0
@@ -3853,17 +3907,17 @@ void Molecule::MolecularDynamicsEvolve(map<MolAtom*,XYZ> &v0,const unsigned nbSt
       for(map<MolAtom*,XYZ>::const_iterator pos=v0.begin();pos!=v0.end();++pos)
       {
          const XYZ *pa=&(grad[pos->first]);
-         pos->first->SetX(pos->first->GetX()+pos->second.x*dt*vr-0.5*im*dt*dt*pa->x);
-         pos->first->SetY(pos->first->GetY()+pos->second.y*dt*vr-0.5*im*dt*dt*pa->y);
-         pos->first->SetZ(pos->first->GetZ()+pos->second.z*dt*vr-0.5*im*dt*dt*pa->z);
+         pos->first->SetX(pos->first->GetX()+pos->second.x*dt*v_r-0.5*im*dt*dt*pa->x);
+         pos->first->SetY(pos->first->GetY()+pos->second.y*dt*v_r-0.5*im*dt*dt*pa->y);
+         pos->first->SetZ(pos->first->GetZ()+pos->second.z*dt*v_r-0.5*im*dt*dt*pa->z);
       }
       // Compute new speed
       for(map<MolAtom*,XYZ>::iterator pos=v0.begin();pos!=v0.end();++pos)
       {
          const XYZ *pa=&(grad[pos->first]);
-         pos->second.x = vr*pos->second.x - pa->x*dt*im;
-         pos->second.y = vr*pos->second.y - pa->y*dt*im;
-         pos->second.z = vr*pos->second.z - pa->z*dt*im;
+         pos->second.x = v_r*pos->second.x - pa->x*dt*im;
+         pos->second.y = v_r*pos->second.y - pa->y*dt*im;
+         pos->second.z = v_r*pos->second.z - pa->z*dt*im;
       }
    }
 }
@@ -6978,7 +7032,7 @@ void Molecule::UpdateScattCompList()const
   
   #ifdef RIGID_BODY_STRICT_EXPERIMENTAL
   // During an optimization, apply the translations & rotations of the rigid group parameters
-  if(this->IsBeingRefined())
+  if(true)//this->IsBeingRefined())
   {
     for(vector<RigidGroup *>::const_iterator pos=this->GetRigidGroupList().begin();pos!=this->GetRigidGroupList().end();++pos)
     {
@@ -7222,6 +7276,47 @@ void Molecule::SetDeleteSubObjInDestructor(const bool b) {
     mDeleteSubObjInDestructor=b;
 }
 
+void Molecule::ResetRigidGroupsPar()const
+{
+   #ifdef RIGID_BODY_STRICT_EXPERIMENTAL
+   // Apply the translations & rotations of all rigid group parameters, and
+   // use this as the newly stored atomic coordinates.
+   for(vector<RigidGroup *>::const_iterator pos=this->GetRigidGroupList().begin();pos!=this->GetRigidGroupList().end();++pos)
+   {
+      (*pos)->mQuat.Normalize();
+      // Center of atom group
+      REAL x0=0,y0=0,z0=0;
+      for(set<MolAtom *>::iterator at=(*pos)->begin();at!=(*pos)->end();++at)
+      {
+        x0+=(*at)->GetX();
+        y0+=(*at)->GetY();
+        z0+=(*at)->GetZ();
+      }
+      x0/=(*pos)->size();
+      y0/=(*pos)->size();
+      z0/=(*pos)->size();
+      
+      // Apply rotation & translation to all atoms
+      for(set<MolAtom *>::iterator at=(*pos)->begin();at!=(*pos)->end();++at)
+      {
+        REAL x=(*at)->GetX()-x0, y=(*at)->GetY()-y0, z=(*at)->GetZ()-z0;
+        (*pos)->mQuat.RotateVector(x,y,z);
+        (*at)->SetX(x+x0+(*pos)->mX);
+        (*at)->SetY(y+y0+(*pos)->mY);
+        (*at)->SetZ(z+z0+(*pos)->mZ);
+      }
+      
+      // Reset the translation & rotation parameters, only useful during an optimization
+      (*pos)->mX=0;
+      (*pos)->mY=0;
+      (*pos)->mZ=0;
+      (*pos)->mQuat.Q0()=1;
+      (*pos)->mQuat.Q1()=0;
+      (*pos)->mQuat.Q2()=0;
+      (*pos)->mQuat.Q3()=0;
+   }
+   #endif
+}
 
 #ifdef __WX__CRYST__
 WXCrystObjBasic* Molecule::WXCreate(wxWindow* parent)
