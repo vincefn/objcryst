@@ -88,12 +88,20 @@ void LSQNumObj::SetParIsUsed(const RefParType *type,const bool use)
 }
 
 void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
-                        const bool silent, const bool callBeginEndOptimization)
+                        const bool silent, const bool callBeginEndOptimization,
+                        const float minChi2var)
 {
    TAU_PROFILE("LSQNumObj::Refine()","void ()",TAU_DEFAULT);
    if(callBeginEndOptimization) this->BeginOptimization();
    mObs=this->GetLSQObs();
    mWeight=this->GetLSQWeight();
+   
+   bool terminateOnDeltaChi2=false;
+   if(nbCycle<0)
+   {
+      nbCycle=-nbCycle;
+      terminateOnDeltaChi2=true;
+   }
 
    if(!silent) cout << "LSQNumObj::Refine():Beginning "<<endl;
    //Prepare for refinement (get non-fixed parameters)
@@ -132,6 +140,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
    //refine
    for(int cycle=1 ; cycle <=nbCycle;cycle++)
    {
+      const REAL ChisSqPreviousCycle=mChiSq;
       mRefParList.SaveParamSet(mIndexValuesSetLast);// end of last cycle
       if(!silent) cout << "LSQNumObj::Refine():Cycle#"<< cycle <<endl;
       //initial value of function
@@ -337,7 +346,9 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
             catch(...)
             {
                cout<<"Caught a Newmat exception :"<<BaseException::what()<<endl;
-               throw ObjCrystException("LSQNumObj::Refine():caught a newmat exception during Eigenvalues computing !");
+               cout<<"A:"<<endl<<newmatA<<endl<<"W:"<<endl<<newmatW<<endl<<"V:"<<endl<<newmatV<<endl;
+               exit(0);
+               //throw ObjCrystException("LSQNumObj::Refine():caught a newmat exception during Eigenvalues computing !");
             }
                ColumnVector newmatDelta(nbVar);
                DiagonalMatrix newmatInvW(nbVar);
@@ -570,9 +581,9 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
          {
             RefinablePar *pi=&(mRefParList.GetParNotFixed(i));
             for(j=0;j<nbVar;j++)
-	         {
+            {
                RefinablePar *pj=&(mRefParList.GetParNotFixed(j));
-	            mCorrelMatrix(i,j)=sqrt(N(i,j)*N(i,j)/N(i,i)/N(j,j));
+               mCorrelMatrix(i,j)=sqrt(N(i,j)*N(i,j)/N(i,i)/N(j,j));
                if(nbObs!=nbVar) 
                mvVarCovar[make_pair(pi,pj)]=N(i,j)*mChiSq/(nbObs-nbVar);
             }
@@ -592,7 +603,8 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
          if(!silent) cout << "finished cycle #"<<cycle <<"/"<<nbCycle <<". Rw="<<Rw_ini<<"->"<<mRw<<",    Chi^2="<<mChiSq<<endl;
          if (mSaveReportOnEachCycle) this->WriteReportToFile();
       
-      if(!silent)this->PrintRefResults();
+      if(!silent) this->PrintRefResults();
+      if( terminateOnDeltaChi2 && (minChi2var>( (ChisSqPreviousCycle-mChiSq)/abs(ChisSqPreviousCycle+1e-6) ) ) ) break;
    }
    if(callBeginEndOptimization) this->EndOptimization();
 }

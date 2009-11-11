@@ -61,7 +61,9 @@ class LSQNumObj
       void SetParIsUsed(const RefParType *type,const bool use);
       /** Do the refinement
       *
-      * \param nbCycle: number of LSQ cycles
+      * \param nbCycle: number of LSQ cycles - if negative, the algorithm will continue
+      * until it reaches (-nbcycle) or until the relative variation in Chi2 is less
+      * than minChi2var
       * \param useLevenbergMarquardt: enable Levenberg-Marquardt algorithm
       * to ensure that a decrease of Chi^2 will be obtained (actually a 1%
       * increase is allowed)
@@ -70,9 +72,12 @@ class LSQNumObj
       * (e.g. monte-carlo) optimization - but then the calling function \b must ensure
       * that approximations are disabled (using RefinableObj::SetApproximationFlag)
       * for objects where that would render derivative calculations imprecise.
+      * \param minChi2var: used for termination of the refinement if the relative variation
+      * of Chi2 between two successive cyles is less than minChi2var
       */
       void Refine (int nbCycle=1,bool useLevenbergMarquardt=false,
-                   const bool silent=false, const bool callBeginEndOptimization=true);
+                   const bool silent=false, const bool callBeginEndOptimization=true,
+                   const float minChi2var=0.01);
       CrystVector_REAL Sigma()const;
       CrystMatrix_REAL CorrelMatrix()const;
       REAL Rfactor()const;
