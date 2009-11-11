@@ -279,6 +279,19 @@ const RefObjOpt& OptimizationObj::GetXMLAutoSaveOption()const {return mXMLAutoSa
 const REAL& OptimizationObj::GetBestCost()const{return mBestCost;}
 REAL& OptimizationObj::GetBestCost(){return mBestCost;}
 
+void OptimizationObj::BeginOptimization(const bool allowApproximations, const bool enableRestraints)
+{
+   for(int i=0;i<mRefinedObjList.GetNb();i++)
+   {
+      mRefinedObjList.GetObj(i).BeginOptimization(allowApproximations,enableRestraints);
+   }
+}
+
+void OptimizationObj::EndOptimization()
+{
+   for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).EndOptimization();
+}
+
 void OptimizationObj::PrepareRefParList()
 {
    VFN_DEBUG_ENTRY("OptimizationObj::PrepareRefParList()",6)
@@ -482,7 +495,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
    //:TODO: Other algorithms !
    TAU_PROFILE("MonteCarloObj::Optimize()","void (long)",TAU_DEFAULT);
    VFN_DEBUG_ENTRY("MonteCarloObj::Optimize()",5)
-   for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).BeginOptimization(true);
+   this->BeginOptimization(true);
    this->PrepareRefParList();
 
    this->InitLSQ(false);
@@ -524,7 +537,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
    #endif
       
    mRefParList.RestoreParamSet(mBestParSavedSetIndex);
-   for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).EndOptimization();
+   this->EndOptimization();
    
    if(mSaveTrackedData.GetChoice()==1)
    {
@@ -558,7 +571,7 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
    VFN_DEBUG_ENTRY("MonteCarloObj::MultiRunOptimize()",5)
    //Keep a copy of the total number of steps, and decrement nbStep
    const long nbStep0=nbStep;
-   for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).BeginOptimization(true);
+   this->BeginOptimization(true);
    this->PrepareRefParList();
    
    this->InitLSQ(false);
@@ -678,7 +691,7 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
          }
       }
       
-   for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).EndOptimization();
+   this->EndOptimization();
 
    this->UpdateDisplay();
    
@@ -943,7 +956,10 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
    mNbTrial=0;
    // time (in seconds) when last autoSave was made (if enabled)
       unsigned long secondsWhenAutoSave=0;
-
+   
+   // Periodicity of the automatic LSQ refinements (if the option is set)
+   const unsigned int autoLSQPeriod=150000;
+   
    if(!silent) cout << "Starting Parallel Tempering Optimization"<<endl;
    //Total number of parallel refinements,each is a 'World'. The most stable
    // world must be i=nbWorld-1, and the most changing World (high mutation,
@@ -1144,7 +1160,7 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
       }//For each World
       
       if(mAutoLSQ.GetChoice()==2)
-         if((mNbTrial%150000)<(nbTryPerWorld*nbWorld))
+         if((mNbTrial%autoLSQPeriod)<(nbTryPerWorld*nbWorld))
          {// Try a quick LSQ ?
             for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).SetApproximationFlag(false);
             for(int i=nbWorld-5;i<nbWorld;i++)
@@ -1178,7 +1194,7 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
                
                const REAL cost0=this->GetLogLikelihood();// cannot use currentCost(i), approximations changed...
                if(!silent) cout<<"LSQ: World="<<worldSwapIndex(i)<<": cost="<<cost0;
-               try {mLSQ.Refine(10,true,true,false);}
+               try {mLSQ.Refine(-30,true,true,false,0.001);}
                catch(const ObjCrystException &except){};
                #if 0
                // Report GoF values (Chi^2 / nbObs) values for all objects
@@ -1208,6 +1224,7 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
                if(!silent) cout<<"LSQ2:"<<currentCost(i)<<"->"<<cost<<endl;
                if(cost<currentCost(i))
                {
+                  const REAL oldcost=currentCost(i);
                   mRefParList.SaveParamSet(worldCurrentSetIndex(i));
                   currentCost(i)=cost;
                   if(cost<runBestCost)
@@ -1230,6 +1247,21 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
                                        << " LSQ2: NEW RUN Best Cost="<<runBestCost<< endl;
                      if(!silent) this->DisplayReport();
                   }
+                  // KLUDGE - after a successful LSQ, we will be close to a minimum,
+                  // which will make most successive global optimization trials to
+                  // be rejected, until the temperature is increased a lot - this
+                  // is a problem as the temperature increases so much that the
+                  // benefit of the LSQ is essentially negated.
+                  // So we need to use a higher recorded cost, so that successive trials 
+                  // may be accepted
+                  #if 0
+                  mMutationAmplitude=mutationAmplitude(i);
+                  for(unsigned int ii=0;ii<4;ii++) this->NewConfiguration(gpRefParTypeObjCryst,false);
+                  currentCost(i)=(this->GetLogLikelihood()+cost)/2;
+                  if(!silent) cout<<"LSQ3: #"<<worldSwapIndex(i)<<":"<<cost<<"->"<<currentCost(i)<<endl;
+                  #else
+                  currentCost(i)=oldcost;
+                  #endif
                }
             }
          }
@@ -1528,7 +1560,7 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
                if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)<0.10)
                   simAnnealTemp(i)*=1.5;
                if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)<0.04)
-                  simAnnealTemp(i)*=1.5;
+                   simAnnealTemp(i)*=1.5;
                //if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)<0.01)
                //   simAnnealTemp(i)*=1.5;
                //cout<<"World#"<<i<<":"<<worldNbAcceptedMoves(i)<<":"<<nbTrialsReport<<endl;
@@ -1566,14 +1598,14 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
       mMutexStopAfterCycle.Unlock();
       #endif
    }//Trials
-   
+
    if(mAutoLSQ.GetChoice()>0)
    {// LSQ
       if(!silent) cout<<"Beginning final LSQ refinement"<<endl;
       for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).SetApproximationFlag(false);
       mRefParList.RestoreParamSet(runBestIndex);
       mCurrentCost=this->GetLogLikelihood();
-      try {mLSQ.Refine(20,true,true,false);}
+      try {mLSQ.Refine(-50,true,true,false,0.001);}
       catch(const ObjCrystException &except){};
       if(!silent) cout<<"LSQ cost: "<<mCurrentCost<<" -> "<<this->GetLogLikelihood()<<endl;
       

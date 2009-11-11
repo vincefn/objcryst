@@ -213,6 +213,11 @@ class OptimizationObj
       const REAL& GetBestCost()const;
       /// Access to current best cost
       REAL& GetBestCost();
+      /// Begin optimization for all objects
+      virtual void BeginOptimization(const bool allowApproximations=false,
+                                     const bool enableRestraints=false);
+      /// End optimization for all objects
+      virtual void EndOptimization();
    protected:
       /// \internal Prepare mRefParList for the refinement
       void PrepareRefParList();
