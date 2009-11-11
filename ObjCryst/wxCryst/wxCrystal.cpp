@@ -2958,6 +2958,8 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
    {
       int w, h;
       GetClientSize(& w, & h);
+      const GLfloat colour2 [] = {1.00, 1.00, 1.00, 1.00}; 
+      glMaterialfv(GL_FRONT, GL_EMISSION,  colour2); 
       glPushMatrix();
          glLoadIdentity();
          glMatrixMode(GL_PROJECTION);
