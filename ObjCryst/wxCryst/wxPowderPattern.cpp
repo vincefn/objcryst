@@ -1120,7 +1120,13 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
 {
    if((mObs.numElements()<=0)||(mCalc.numElements()<=0)) return;
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint()",5)
-   if(wxMUTEX_NO_ERROR!=mMutex.TryLock()) return;
+   unsigned int ct=0;
+   while(wxMUTEX_NO_ERROR!=mMutex.TryLock())
+   {
+     if(++ct>10) return;
+     wxMilliSleep(50);
+   }
+   
    wxBufferedPaintDC dc(this);
    PrepareDC(dc);
    mpParentFrame->PrepareDC(dc);
@@ -1416,7 +1422,7 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
       mpParentFrame->PrepareDC(dc);
 
       wxPoint pos=event.GetPosition();
-        const long x= dc.DeviceToLogicalX(pos.x);
+      const long x= dc.DeviceToLogicalX(pos.x);
       const long y= dc.DeviceToLogicalY(pos.y);
  
       wxCoord width,height;
@@ -1432,14 +1438,17 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
    const REAL intensity=this->Screen2DataY(y);
    if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
    {
-
       wxString str;
       const long pixel=
          (long)(mpPattern->GetPowderPattern().X2PixelCorr(x0));
       str.Printf(_T("tof=%6.2f    ,I=%12.2f.   pixel=#%ld"),x0,intensity,pixel);
+      mMutex.Unlock();
       mpParentFrame->SetStatusText(str);
+      mMutex.Lock();
       str.Printf(_T("d=%6.3fA"),0.5/mpPattern->GetPowderPattern().X2STOL(x0));
+      mMutex.Unlock();
       mpParentFrame->SetStatusText(str,1);
+      mMutex.Lock();
    }
    else
    {
@@ -1449,9 +1458,14 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
       const long pixel=
          (long)(mpPattern->GetPowderPattern().X2PixelCorr(x0*DEG2RAD));
       str.Printf(_T("2theta=%6.2f    ,I=%12.2f.   pixel=#%ld"),x0,intensity,pixel);
+      // SetStatusText() triggers an OnPaint event ? Avoid deadlock by releasing the data mutex..
+      mMutex.Unlock();
       mpParentFrame->SetStatusText(str);
+      mMutex.Lock();
       str.Printf(_T("d=%6.3fA"),0.5/mpPattern->GetPowderPattern().X2STOL(x0*DEG2RAD));
+      mMutex.Unlock();
       mpParentFrame->SetStatusText(str,1);
+      mMutex.Lock();
    }
    if (event.Dragging() && event.LeftIsDown() && (!mIsDragging))
    {//Begin zooming
