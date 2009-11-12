@@ -467,7 +467,9 @@ class Quaternion
       /// Re-normalize the quaternion to unity. This should not be useful, except
       /// on individual component input, or after long calculations. And even
       /// if wrong, the rotation is independent of the norm of the quaternion.
-      void Normalize();
+      ///
+      /// This is markerd const because we use only unit quaternions
+      void Normalize()const ;
       REAL GetNorm()const;
       const REAL& Q0()const;
       const REAL& Q1()const;
@@ -479,7 +481,9 @@ class Quaternion
       REAL& Q3();
    private:
       /// The components of the quaternion z=(q0,v) with v=(q1,q2,q3)
-      REAL mQ0,mQ1,mQ2,mQ3;
+      ///
+      /// These are mutable so that the quaternion can be normalized in a const method.
+      mutable REAL mQ0,mQ1,mQ2,mQ3;
       bool mIsUniQuaternion;
 };
 

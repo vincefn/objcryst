@@ -1415,7 +1415,7 @@ void Quaternion::RotateVector(REAL &v1,REAL &v2, REAL &v3)const
    v3           =-p0*mQ3 + p3*mQ0 - p1*mQ2 + p2*mQ1;
 }
 
-void Quaternion::Normalize()
+void Quaternion::Normalize()const
 {
    const REAL norm=sqrt( this->Q0()*this->Q0()
                         +this->Q1()*this->Q1()
@@ -2058,6 +2058,7 @@ void Molecule::XMLOutput(ostream &os,int indent)const
    os <<tag<<endl;
    indent++;
    
+   mQuat.Normalize();
    mQuat.XMLOutput(os,indent);
    
    this->GetPar(mXYZ.data()+0).XMLOutput(os,"x",indent);
@@ -7089,6 +7090,7 @@ void Molecule::UpdateScattCompList()const
    }
    //VFN_DEBUG_MESSAGE("Molecule::UpdateScattCompList()",10)
    // rotate
+   mQuat.Normalize();
    for(long i=0;i<nb;++i)
    {
       //#error the vector must not be normalized !
