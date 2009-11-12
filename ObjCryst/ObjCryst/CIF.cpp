@@ -362,8 +362,11 @@ void CIFData::ExtractPowderPattern(const bool verbose)
       {
          map<ci_string,string>::const_iterator pos_min,pos_max,pos_inc;
          pos_min=mvItem.find("_pd_proc_2theta_range_min");
+         if(pos_min==mvItem.end()) pos_min=mvItem.find("_pd_meas_2theta_range_min");
          pos_max=mvItem.find("_pd_proc_2theta_range_max");
+         if(pos_max==mvItem.end()) pos_max=mvItem.find("_pd_meas_2theta_range_max");
          pos_inc=mvItem.find("_pd_proc_2theta_range_inc");
+         if(pos_inc==mvItem.end()) pos_inc=mvItem.find("_pd_meas_2theta_range_inc");
          if((pos_min!=mvItem.end()) && (pos_max!=mvItem.end()) && (pos_inc!=mvItem.end()) )
          {
             x_fixed_step=true;
@@ -374,6 +377,7 @@ void CIFData::ExtractPowderPattern(const bool verbose)
       }
       pos_mon=loop->second.find("_pd_meas_intensity_monitor");
       if(pos_mon==loop->second.end()) pos_mon=loop->second.find("_pd_meas_step_count_time");
+
       if( (pos_iobs!=loop->second.end()) && ( (pos_x!=loop->second.end()) || (x_fixed_step)) )
       {// Found powder data !
          const long nb=pos_iobs->second.size();
