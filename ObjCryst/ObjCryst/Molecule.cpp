@@ -2314,7 +2314,39 @@ void Molecule::BeginOptimization(const bool allowApproximations,const bool enabl
          this->BuildMDAtomGroups();
       }
    }
-   #if 1 //def RIGID_BODY_STRICT_EXPERIMENTAL
+   if(mOptimizeOrientation.GetChoice()==1)
+   {
+     this->GetPar(&(mQuat.Q0())).SetIsFixed(true);
+     this->GetPar(&(mQuat.Q1())).SetIsFixed(true);
+     this->GetPar(&(mQuat.Q2())).SetIsFixed(true);
+     this->GetPar(&(mQuat.Q3())).SetIsFixed(true);
+   }
+   else
+   {
+     this->GetPar(&(mQuat.Q0())).SetIsFixed(false);
+     this->GetPar(&(mQuat.Q1())).SetIsFixed(false);
+     this->GetPar(&(mQuat.Q2())).SetIsFixed(false);
+     this->GetPar(&(mQuat.Q3())).SetIsFixed(false);
+   }
+   if(1==mFlexModel.GetChoice())
+   {// Molecule is a rigid body - fix all individual atomic parameters
+      for(vector<MolAtom*>::iterator at=this->GetAtomList().begin();at!=this->GetAtomList().end();++at)
+      {
+         this->GetPar(&((*at)->X())).SetIsFixed(true);
+         this->GetPar(&((*at)->Y())).SetIsFixed(true);
+         this->GetPar(&((*at)->Z())).SetIsFixed(true);
+      }
+   }
+   else
+   {// Molecule is flexible - rigid groups are handled below
+      for(vector<MolAtom*>::iterator at=this->GetAtomList().begin();at!=this->GetAtomList().end();++at)
+      {
+         this->GetPar(&((*at)->X())).SetIsFixed(false);
+         this->GetPar(&((*at)->Y())).SetIsFixed(false);
+         this->GetPar(&((*at)->Z())).SetIsFixed(false);
+      }
+   }
+   #ifdef RIGID_BODY_STRICT_EXPERIMENTAL
    // Block individual refinable parameters from atoms in rigid groups
    // And create the index of the atoms
    for(vector<RigidGroup *>::iterator pos=this->GetRigidGroupList().begin();pos!=this->GetRigidGroupList().end();++pos)
