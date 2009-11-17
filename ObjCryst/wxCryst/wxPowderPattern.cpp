@@ -1061,7 +1061,7 @@ mIsDragging(false),mDisplayLabel(true),mDisplayPeak(true)
    mpPopUpMenu->Append(ID_POWDERGRAPH_MENU_REMOVEPEAK, _T("&Remove peak"));
    mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_SAVEPEAKS, FALSE);
    mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_TOGGPEAK, FALSE);
-   mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_ADDPEAK, FALSE);
+   mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_ADDPEAK, TRUE);
    mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_REMOVEPEAK, FALSE);
    mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_INDEX, FALSE);
    #endif
@@ -1680,7 +1680,6 @@ void WXPowderPatternGraph::OnSavePeaks(wxCommandEvent& WXUNUSED(event))
 
 void WXPowderPatternGraph::OnChangePeak(wxCommandEvent& event)
 {
-   if(mPeakList.GetPeakList().size()<=0) return;
    if(event.GetId()==ID_POWDERGRAPH_MENU_REMOVEPEAK)
    {
       unsigned int idx=0;
@@ -1703,6 +1702,13 @@ void WXPowderPatternGraph::OnChangePeak(wxCommandEvent& event)
       if(dist>5)       mpParentFrame->SetStatusText(_T("Could not find peak close enough"),1);
       else
       {
+         if(mPeakList.GetPeakList().size()<5) mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_INDEX, FALSE);
+         if(mPeakList.GetPeakList().size()==0)
+         {
+            mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_TOGGPEAK, FALSE);
+            mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_SAVEPEAKS, FALSE);
+            mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_REMOVEPEAK, FALSE);
+         }
          wxString buf;
          buf.Printf(_T("Removing peak at d=%6.3f"),1/mPeakList.GetPeakList()[idx].dobs);
          mpParentFrame->SetStatusText(buf,1);
@@ -1712,15 +1718,29 @@ void WXPowderPatternGraph::OnChangePeak(wxCommandEvent& event)
    }
    if(event.GetId()==ID_POWDERGRAPH_MENU_ADDPEAK)
    {
-      float d;
+      float d,sig;
       if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
-         d=2*mpPattern->GetPowderPattern().X2STOL(this->Screen2DataX((long)mDraggingX0)*DEG2RAD);
-      else d=2*mpPattern->GetPowderPattern().X2STOL(this->Screen2DataX((long)mDraggingX0));
+      {
+         d  =    2*mpPattern->GetPowderPattern().X2STOL(this->Screen2DataX((long)mDraggingX0  )*DEG2RAD);
+         sig=abs(2*mpPattern->GetPowderPattern().X2STOL(this->Screen2DataX((long)mDraggingX0+1)*DEG2RAD)-d);
+      }
+      else 
+      {
+         d  =    2*mpPattern->GetPowderPattern().X2STOL(this->Screen2DataX((long)mDraggingX0  ));
+         sig=abs(2*mpPattern->GetPowderPattern().X2STOL(this->Screen2DataX((long)mDraggingX0+1))-d);
+      }
+      
+      mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_SAVEPEAKS, TRUE);
+      mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_TOGGPEAK, TRUE);
+      if(mPeakList.GetPeakList().size()>=5) mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_INDEX, TRUE);
+      mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_REMOVEPEAK, TRUE);
+      
       wxString buf;
       buf.Printf(_T("Added peak at d=%6.3f"),1/d);
-      mPeakList.AddPeak(d);
+      mPeakList.AddPeak(d,1.0,sig);
       mpParentFrame->SetStatusText(buf,1);
       this->Refresh(false);
+      mPeakList.Print(cout);
    }
 }
 //////////////////////////////////////// WXCellExplorer /////////////////////
