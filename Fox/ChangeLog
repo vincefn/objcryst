@@ -12,6 +12,8 @@ NEW FEATURES
    ambiguous space group
    * Enable auto-generation of powder patterns from a CIF file
    for both X-ray and neutron radiation
+   * When importing powder pattern CIF files, recognize both
+   _pd_proc_2theta_range_XXX and _pd_meas_2theta_range_XXX
 
 BUG FIXES
    * Avoid deadlock (freezing fox) when using the 3D crystal view or
