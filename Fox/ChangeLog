@@ -1,9 +1,10 @@
-#### 1.8.X (Beta version) - Autumn 2009 (Revision #1198)
+#### 1.8.5 - November 2009 (Revision #1202)
 NEW FEATURES
-   * Working triclinic indexing
    * Add automatic least-squares refinement of the structure during
-    a global optimization run
+   a global optimization run
    * Take into account rigid groups during least-squares refinement
+   * Working triclinic indexing
+   * Allow manual adding of peaks for indexing without a peak search
    * Add manual least-squares refinement of the structure in the 
    global optimization run/stop menu
    * Better import of CIF files, using either the Hall symbol
