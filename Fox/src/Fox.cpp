@@ -81,7 +81,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 1202
+#define __FOXREVISION__ 1204
 
 static std::string foxVersion;
 
@@ -202,6 +202,7 @@ static const long MENU_DEBUG_LEVEL10=                  WXCRYST_ID();
 static const long MENU_DEBUG_TEST1=                    WXCRYST_ID();
 static const long MENU_DEBUG_TEST2=                    WXCRYST_ID();
 static const long MENU_DEBUG_TEST3=                    WXCRYST_ID();
+static const long ID_ABOUT_FOX_BUTTON_UPDATE=          WXCRYST_ID();
 
 /// Separate thread to check for updates////////////////////////////////////////////////////////////
 static const long ID_FOX_UPDATES_RESULT=               WXCRYST_ID();
@@ -313,7 +314,7 @@ int main (int argc, char *argv[])
    
    {// Fox version
       char verBuf[200];
-      sprintf(verBuf,"1.9.0-#%d",__FOXREVISION__);
+      sprintf(verBuf,"1.9.0.1-#%d",__FOXREVISION__);
       foxVersion=verBuf;
    }
    bool useGUI(true);
@@ -1114,8 +1115,22 @@ void WXCrystMainFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
    this->SafeClose();
 }
 
-void WXCrystMainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
+class WXDialogFoxAbout:public wxDialog
 {
+  public:
+    WXDialogFoxAbout(wxWindow* parent);
+    void OnButtonCheckUpdate(wxCommandEvent &ev);
+    DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(WXDialogFoxAbout, wxDialog)
+   EVT_BUTTON(ID_ABOUT_FOX_BUTTON_UPDATE,             WXDialogFoxAbout::OnButtonCheckUpdate)
+END_EVENT_TABLE()
+
+WXDialogFoxAbout::WXDialogFoxAbout(wxWindow* parent):
+wxDialog(parent,-1,_T("About Fox"),wxDefaultPosition,wxDefaultSize,wxCAPTION|wxSTAY_ON_TOP|wxCLOSE_BOX)
+{
+   wxBoxSizer *sizer=new wxBoxSizer(wxVERTICAL);
    string msg(string("F.O.X. - Free Objects for Xtallography\n")
               +"Version "+ foxVersion +" \n\n"
               +"(c) 2000-2009 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n"
@@ -1123,10 +1138,31 @@ void WXCrystMainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
               +"http://objcryst.sourceforge.net\n\n"
               +"FOX comes with ABSOLUTELY NO WARRANTY. It is free software, and you are\n"
               +"welcome to redistribute it under certain conditions. \n"
-              +"See the LICENSE file for details.");
+              +"See the LICENSE file for details.\n\n");
+   wxStaticText *txt=new wxStaticText(this,-1,wxString::FromAscii(msg.c_str()),wxDefaultPosition,wxDefaultSize,wxALIGN_LEFT);
+   sizer->Add(txt);
+   wxBoxSizer *sizer2=new wxBoxSizer(wxHORIZONTAL);
+   sizer2->Add(this->CreateButtonSizer(wxOK));
+   sizer2->Add(new wxButton(this,ID_ABOUT_FOX_BUTTON_UPDATE,_T("Check for Updates")) );
+   sizer->Add(0,4,0);
+   sizer->Add(sizer2);
+   this->SetSizer(sizer);
+   this->Fit();
+}
 
-   wxMessageDialog ab(this,wxString::FromAscii(msg.c_str()), _T("About Fox"), wxOK | wxICON_INFORMATION | wxSTAY_ON_TOP );
-   ab.ShowModal();
+void WXDialogFoxAbout::OnButtonCheckUpdate(wxCommandEvent &ev)
+{
+   this->EndModal(int(ID_ABOUT_FOX_BUTTON_UPDATE));
+}
+
+void WXCrystMainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
+{
+   WXDialogFoxAbout ab(this);
+   if(ab.ShowModal()==ID_ABOUT_FOX_BUTTON_UPDATE)
+   {
+      wxCommandEvent ev(0,MENU_HELP_UPDATE);
+      this->OnCheckUpdate(ev);
+   }
 }
 void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
 {
