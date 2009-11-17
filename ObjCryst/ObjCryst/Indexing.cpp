@@ -889,7 +889,8 @@ void PeakList::AddPeak(const float d, const float iobs,const float dobssigma,con
       for(vector<hkl>::const_iterator pos=mvHKL.begin();pos!=mvHKL.end();++pos)
          s+= pos->dobssigma;
       s/=mvHKL.size();
-      mvHKL.push_back(hkl(d,iobs,s,iobssigma,h,k,l,d2calc));
+      if(s>0) mvHKL.push_back(hkl(d,iobs,s,iobssigma,h,k,l,d2calc));
+      else mvHKL.push_back(hkl(d,iobs,1e-4,iobssigma,h,k,l,d2calc));
    }
    else mvHKL.push_back(hkl(d,iobs,dobssigma,iobssigma,h,k,l,d2calc));
    sort(mvHKL.begin(),mvHKL.end(),compareHKL_d);
