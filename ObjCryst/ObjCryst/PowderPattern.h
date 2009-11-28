@@ -333,6 +333,8 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       void SetProfile(ReflectionProfile *prof);
       /// Get reflection profile
       const ReflectionProfile& GetProfile()const;
+      /// Get reflection profile
+      ReflectionProfile& GetProfile();
       virtual void GenHKLFullSpace();
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);

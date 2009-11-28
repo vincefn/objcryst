@@ -697,6 +697,11 @@ const ReflectionProfile& PowderPatternDiffraction::GetProfile()const
    return *mpReflectionProfile;
 }
 
+ReflectionProfile& PowderPatternDiffraction::GetProfile()
+{
+   return *mpReflectionProfile;
+}
+
 void PowderPatternDiffraction::GenHKLFullSpace()
 {
    VFN_DEBUG_ENTRY("PowderPatternDiffraction::GenHKLFullSpace():",5)
