@@ -787,8 +787,11 @@ int main (int argc, char *argv[])
       }
       cout <<"command-line arguments:"<<endl
            <<"   in.xml: input 'in.xml' file"<<endl
+           <<"   structure.cif: input 'structure.cif' CIF file"<<endl
            <<"   --loadfouriergrd map.grd: load and display 'map.grd' fourier map with (first) crystal structure"<<endl
+           <<"                             the --loadfouriergrd keyword can be omitted if the file extension is .grd"<<endl
            <<"   --loadfourierdsn6 map.DN6: load and display a DSN6 fourier map with (first) crystal structure"<<endl
+           <<"                             the --loadfourierdsn6 keyword can be omitted if the file extension is .dsn6 or .dn6"<<endl
            <<"   --nogui: run without GUI, automatically launches optimization"<<endl
            <<"      options with --nogui:"<<endl
            <<"         -n 10000     : run for 10000 trials at most (default: 1000000)"<<endl
@@ -804,6 +807,12 @@ int main (int argc, char *argv[])
            <<endl<<endl<<"           EXAMPLES :"<<endl<<endl
            <<"Load file 'silicon.xml' and launch GUI:"<<endl<<endl
            <<"    Fox silicon.xml"<<endl<<endl
+
+           <<"Load file 'alumina.cif' and launch GUI:"<<endl<<endl
+           <<"    Fox alumina.xml"<<endl<<endl
+
+           <<"Load file 'alumina.cif', import Fourier map from the 'alumina.grd' file, and launch GUI with the automatic 3D display:"<<endl<<endl
+           <<"    Fox alumina.cif alumina.grd"<<endl<<endl
            
            <<"Load file 'ktartrate.xml', randomize, then make 1 optimization of "<<endl
            <<"1 million trials, and save the best structure in 'best.xml' :"<<endl<<endl
