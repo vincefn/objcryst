@@ -252,7 +252,7 @@ class UnitCellMap
       REAL mMean;
       /// Standard Deviation of the map
       REAL mStandardDeviation;
-      /// Type of map (-1=imported, 0=obs, 1=calc,2=diff)
+      /// Type of map (-1=imported, 0=obs, 1=calc, 2=diff, 3=static from file (e.g. GRD or DSN6 from gsas))
       int mType;
 };
 
