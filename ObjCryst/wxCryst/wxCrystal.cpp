@@ -2179,8 +2179,9 @@ int UnitCellMap::ImportGRD(const string&filename)
          mName=filename.substr(idx+1);
       }
    }
+   mType=3;
    VFN_DEBUG_EXIT("UnitCellMap::ImportGRD()",7)
-     return 1;
+   return 1;
 }
 
 /// Byte-swapping function for DSN6 import
@@ -2320,6 +2321,7 @@ int UnitCellMap::ImportDSN6(const string&filename)
       }
    }
    VFN_DEBUG_EXIT("UnitCellMap::ImportDSN6()",7)
+   mType=3;
    return 1;
 }
 #ifdef HAVE_FFTW
@@ -3057,7 +3059,7 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
          vector<boost::shared_ptr<UnitCellMapGLList> >::const_iterator pos;
          for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();++pos)
             if((*pos)->Show()) (*pos)->Draw();
-      glPopMatrix();
+     glPopMatrix();
    }
    glFlush();
    SwapBuffers();
@@ -3323,6 +3325,7 @@ void WXGLCrystalCanvas::CrystUpdate()
    for(vector<boost::shared_ptr<UnitCellMap> >::iterator pos=mvpUnitCellMap.begin();pos!=mvpUnitCellMap.end();)
    {
       bool keep=false;
+      if((*pos)->GetType()==3) keep=true;
       if(((*pos)->GetType()==0)||((*pos)->GetType()==2))
       {
          /*
@@ -3356,15 +3359,18 @@ void WXGLCrystalCanvas::CrystUpdate()
          }
          pos=mvpUnitCellMap.erase(pos);
       }
-      else if((*pos)->GetType()!=-1)
+      else 
       {
-         #ifdef HAVE_FFTW
-         // During optimization, only update Fourier maps if one is displayed or the Fourier win is opened
-         if(  (mvpUnitCellMapGLList.size()>0)
-            ||(!(mpWXCrystal->GetCrystal().IsBeingRefined()))
-            ||(mpFourierMapListWin!=0))
-            (*pos)->CalcFourierMap(*((*pos)->GetData()),(*pos)->GetType(),mSharpenMap);
-         #endif
+         if((*pos)->GetType()!=3)
+         {
+            #ifdef HAVE_FFTW
+            // During optimization, only update Fourier maps if one is displayed or the Fourier win is opened
+            if(  (mvpUnitCellMapGLList.size()>0)
+               ||(!(mpWXCrystal->GetCrystal().IsBeingRefined()))
+               ||(mpFourierMapListWin!=0))
+               (*pos)->CalcFourierMap(*((*pos)->GetData()),(*pos)->GetType(),mSharpenMap);
+            #endif
+         }
          ++pos;
       }
    }
