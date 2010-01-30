@@ -81,7 +81,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 1204
+#define __FOXREVISION__ 1215
 
 static std::string foxVersion;
 
@@ -314,7 +314,7 @@ int main (int argc, char *argv[])
    
    {// Fox version
       char verBuf[200];
-      sprintf(verBuf,"1.9.0.1-#%d",__FOXREVISION__);
+      sprintf(verBuf,"1.9.0.2-#%d",__FOXREVISION__);
       foxVersion=verBuf;
    }
    bool useGUI(true);
@@ -703,6 +703,34 @@ int main (int argc, char *argv[])
          CreatePowderPatternFromCIF(cif);
          CreateSingleCrystalDataFromCIF(cif);
          if(!cif2pattern)continue;
+      }
+      #ifdef __WX__CRYST__
+      if(wxString(argv[i]).find(_T(".grd"))!=wxNOT_FOUND)
+      #else
+      if(string(argv[i]).find(string(".grd"))!=string::npos)
+      #endif
+      {
+         loadFourierGRD=true;
+         #ifdef __WX__CRYST__
+         vFourierFilenameGRD.push_back(string(wxString(argv[i]).ToAscii()));
+         #else
+         vFourierFilenameGRD.push_back(argv[i]);
+         #endif
+         continue;
+      }
+      #ifdef __WX__CRYST__
+      if( (wxString(argv[i]).find(_T(".dsn6"))!=wxNOT_FOUND)    || (wxString(argv[i]).find(_T(".dn6"))!=wxNOT_FOUND) )
+      #else
+      if( (string(argv[i]).find(string(".dsn6"))!=string::npos) || (string(argv[i]).find(string(".dn6"))!=string::npos) )
+      #endif
+      {
+         loadFourierDSN6=true;
+         #ifdef __WX__CRYST__
+         vFourierFilenameDSN6.push_back(string(wxString(argv[i]).ToAscii()));
+         #else
+         vFourierFilenameDSN6.push_back(argv[i]);
+         #endif
+         continue;
       }
       if(cif2pattern || cif2patternN)
       {
@@ -1133,7 +1161,7 @@ wxDialog(parent,-1,_T("About Fox"),wxDefaultPosition,wxDefaultSize,wxCAPTION|wxS
    wxBoxSizer *sizer=new wxBoxSizer(wxVERTICAL);
    string msg(string("F.O.X. - Free Objects for Xtallography\n")
               +"Version "+ foxVersion +" \n\n"
-              +"(c) 2000-2009 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n"
+              +"(c) 2000-2010 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n"
               +"    2000-2001 Radovan CERNY, University of Geneva\n\n"
               +"http://objcryst.sourceforge.net\n\n"
               +"FOX comes with ABSOLUTELY NO WARRANTY. It is free software, and you are\n"
