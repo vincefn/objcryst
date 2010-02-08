@@ -1888,7 +1888,7 @@ REAL PowderPattern::GetPowderPatternXMin()const
 REAL PowderPattern::GetPowderPatternXStep()const
 {
    if(mNbPoint==0) return 0;//:KLUDGE: ?
-   return abs((mX(0)+mX(mNbPoint-1))/(mNbPoint-1));
+   return abs((-mX(0)+mX(mNbPoint-1))/(mNbPoint-1));
 }
 
 REAL PowderPattern::GetPowderPatternXMax()const 
