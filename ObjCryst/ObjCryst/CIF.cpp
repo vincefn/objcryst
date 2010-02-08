@@ -827,7 +827,7 @@ Crystal* CreateCrystalFromCIF(CIF &cif,bool verbose,bool checkSymAsXYZ)
              <<" / "<<pos->second.mSpacegroupSymbolHall
              <<" / "<<pos->second.mSpacegroupNumberIT
              <<endl;
-         Crystal *pCryst=new Crystal(pos->second.mvLatticePar[0],pos->second.mvLatticePar[1],pos->second.mvLatticePar[2],
+         pCryst=new Crystal(pos->second.mvLatticePar[0],pos->second.mvLatticePar[1],pos->second.mvLatticePar[2],
                                      pos->second.mvLatticePar[3],pos->second.mvLatticePar[4],pos->second.mvLatticePar[5],spg);
          if(  (pos->second.mSpacegroupSymbolHall=="")
             &&(pos->second.mvSymmetry_equiv_pos_as_xyz.size()>0)
