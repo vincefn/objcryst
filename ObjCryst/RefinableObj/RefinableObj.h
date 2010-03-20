@@ -314,6 +314,12 @@ class RefinablePar:public Restraint
          */
          REAL GetValue()const;
 
+         /** Access to a const pointer to the refined value
+         *
+         * This can be used to identify the parameter
+         */
+         const REAL* GetPointer()const;
+
          /** of the parameter. Use the The Mutate() and MutateTo() function
          *  to change this value.
          */

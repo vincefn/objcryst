@@ -344,6 +344,11 @@ REAL RefinablePar::GetValue()const
    return *mpValue;
 }
 
+const REAL* RefinablePar::GetPointer()const
+{
+   return mpValue;
+}
+
 void RefinablePar::SetValue(const REAL value)
 {
    if(*mpValue == value) return;
