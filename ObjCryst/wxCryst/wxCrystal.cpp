@@ -709,7 +709,7 @@ void WXCrystal::CrystUpdate(const bool uui,const bool lock)
             const string name=pos->first->GetName();
             const REAL biso=pos->first->GetBiso();
             const REAL formalCharge=pos->first->GetFormalCharge();
-            const REAL *pRGB=pos->first->GetColourRGB();
+            const float *pRGB=pos->first->GetColourRGB();
             const REAL mlerror=pos->first->GetMaximumLikelihoodPositionError();
             const REAL nbghost=pos->first->GetMaximumLikelihoodNbGhostAtom();
             if(  (name   !=pos->second.mName)
@@ -1931,7 +1931,7 @@ void UnitCellMap::GLInitDisplayList(const float minValue,
       const unsigned int sny_snz = sny*snz;
       int i, j, k;
       unsigned int ni, nj, si, sj, sk, sni, snj, sind;
-      float x, y, z;
+      REAL x, y, z;
 
       //create new set of points
       mp4Vector * subPoints = new mp4Vector[snx*sny*snz];
@@ -2022,7 +2022,7 @@ void UnitCellMap::POVRayDescription(ostream &os,const float minValue,
       const unsigned int sny_snz = sny*snz;
       int i, j, k;
       unsigned int ni, nj, si, sj, sk, sni, snj, sind;
-      float x, y, z;
+      REAL x, y, z;
 
       //create new set of points
       mp4Vector * subPoints = new mp4Vector[snx*sny*snz];

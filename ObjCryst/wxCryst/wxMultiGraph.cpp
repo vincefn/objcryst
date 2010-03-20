@@ -334,8 +334,8 @@ void WXMultiGraph::OnMouse(wxMouseEvent &event)
       mpParentFrame->PrepareDC(dc);
 
       wxPoint pos=event.GetPosition();
-      REAL x= REAL(dc.DeviceToLogicalX(pos.x));
-      REAL y= REAL(dc.DeviceToLogicalY(pos.y));
+      float x= float(dc.DeviceToLogicalX(pos.x));
+      float y= float(dc.DeviceToLogicalY(pos.y));
 
       if((x>width)||(y>height))
       {

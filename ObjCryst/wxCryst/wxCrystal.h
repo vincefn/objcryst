@@ -399,7 +399,7 @@ class WXGLCrystalCanvas : public wxGLCanvas
       float mTrackBallLastX,mTrackBallLastY;
       /// Distance from viewer to crystal (Z)
       float mDist;
-      float mX0, mY0,mZ0;
+      REAL mX0, mY0,mZ0;
       /// View Angle, in degrees
       float mViewAngle;
       /// Pop-up menu
