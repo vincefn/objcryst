@@ -16,7 +16,7 @@
 #ifndef MARCHINGCUBES_H_
 #define MARCHINGCUBES_H_
 
-#include "wxCryst/mpVector.h"
+#include "ObjCryst/wxCryst/mpVector.h"
 
 //struct for storing triangle information - 3 vertices and 3 normal vectors for each vertex
 typedef struct {

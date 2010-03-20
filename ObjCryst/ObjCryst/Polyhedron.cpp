@@ -1,4 +1,4 @@
-#include "ObjCryst/Polyhedron.h"
+#include "ObjCryst/ObjCryst/Polyhedron.h"
 
 namespace ObjCryst
 {

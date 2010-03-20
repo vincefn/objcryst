@@ -26,8 +26,8 @@
 #ifndef _VFN_WX_SCATTERER_OBJ_H_
 #define _VFN_WX_SCATTERER_OBJ_H_
 
-#include "wxCryst/wxRefinableObj.h"
-#include "ObjCryst/Scatterer.h"
+#include "ObjCryst/wxCryst/wxRefinableObj.h"
+#include "ObjCryst/ObjCryst/Scatterer.h"
 namespace ObjCryst
 {
 

@@ -20,10 +20,10 @@
 #define _OBJCRYST_REFLECTIONPROFILE_H_
 
 #include <complex>
-#include "CrystVector/CrystVector.h"
-#include "ObjCryst/General.h"
-#include "ObjCryst/UnitCell.h"
-#include "RefinableObj/RefinableObj.h"
+#include "ObjCryst/CrystVector/CrystVector.h"
+#include "ObjCryst/ObjCryst/General.h"
+#include "ObjCryst/ObjCryst/UnitCell.h"
+#include "ObjCryst/RefinableObj/RefinableObj.h"
 
 namespace ObjCryst
 {

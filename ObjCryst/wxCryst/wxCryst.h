@@ -39,7 +39,7 @@
     #include "wx/wx.h"
 #endif
 
-#include "CrystVector/CrystVector.h"
+#include "ObjCryst/CrystVector/CrystVector.h"
 
 namespace ObjCryst
 {

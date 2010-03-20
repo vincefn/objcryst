@@ -32,20 +32,20 @@
 #include "wx/notebook.h"
 #include "wx/minifram.h"
 
-#include "wxCryst/wxCrystal.h"
+#include "ObjCryst/wxCryst/wxCrystal.h"
 
 #include "wx/colordlg.h"
 #include "wx/progdlg.h"
 #include "wx/busyinfo.h"
 #include "wx/config.h"
 
-#include "Quirks/Chronometer.h"
-#include "ObjCryst/Atom.h"
-#include "ObjCryst/ZScatterer.h"
-#include "ObjCryst/Molecule.h"
-#include "ObjCryst/PowderPattern.h"
-#include "ObjCryst/ScatteringPowerSphere.h"
-#include "ObjCryst/Polyhedron.h"
+#include "ObjCryst/Quirks/Chronometer.h"
+#include "ObjCryst/ObjCryst/Atom.h"
+#include "ObjCryst/ObjCryst/ZScatterer.h"
+#include "ObjCryst/ObjCryst/Molecule.h"
+#include "ObjCryst/ObjCryst/PowderPattern.h"
+#include "ObjCryst/ObjCryst/ScatteringPowerSphere.h"
+#include "ObjCryst/ObjCryst/Polyhedron.h"
 
 #ifdef OBJCRYST_GL
    #ifdef __WXGTK__
@@ -78,7 +78,7 @@
 #endif
 
 extern "C" {
-#include "wxCryst/trackball.h"
+#include "ObjCryst/wxCryst/trackball.h"
 }
 
 //Fixes for Cygwin; where do those stupid macros come from ? Somewhere in wxMSW headers
@@ -92,7 +92,7 @@ extern "C" {
 #undef DrawText
 #endif
 
-//#include "ObjCryst/Map.cpp"
+//#include "ObjCryst/ObjCryst/Map.cpp"
 
 namespace ObjCryst
 {

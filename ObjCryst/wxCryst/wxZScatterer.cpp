@@ -29,8 +29,8 @@
     #include "wx/wx.h"
 #endif
 
-#include "wxCryst/wxZScatterer.h"
-#include "ObjCryst/Molecule.h"
+#include "ObjCryst/wxCryst/wxZScatterer.h"
+#include "ObjCryst/ObjCryst/Molecule.h"
 
 //Fixes for Cygwin; where do those stupid macros come from ? Somewhere in wxMSW headers
 #ifdef max

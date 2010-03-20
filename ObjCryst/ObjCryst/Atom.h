@@ -23,12 +23,12 @@
 #ifndef _OBJCRYST_ATOM_H_
 #define _OBJCRYST_ATOM_H_
 
-#include "CrystVector/CrystVector.h"
+#include "ObjCryst/CrystVector/CrystVector.h"
 
-#include "ObjCryst/General.h"
+#include "ObjCryst/ObjCryst/General.h"
 
-#include "ObjCryst/ScatteringPower.h"
-#include "ObjCryst/Scatterer.h"
+#include "ObjCryst/ObjCryst/ScatteringPower.h"
+#include "ObjCryst/ObjCryst/Scatterer.h"
 
 //#include <stdlib.h>
 #include <string>
@@ -164,6 +164,6 @@ class Atom: public Scatterer
 }//namespace Objcryst
 
 // do we need this ?
-#include "ObjCryst/Crystal.h"
+#include "ObjCryst/ObjCryst/Crystal.h"
 
 #endif //_OBJCRYST_ATOM_H_

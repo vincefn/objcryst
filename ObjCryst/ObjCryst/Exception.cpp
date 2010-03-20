@@ -21,10 +21,10 @@
 *
 */
 
-#include "ObjCryst/General.h"
+#include "ObjCryst/ObjCryst/General.h"
 #include <iostream>
 #include <ctime>
-#include "ObjCryst/IO.h"
+#include "ObjCryst/ObjCryst/IO.h"
 
 namespace ObjCryst
 {

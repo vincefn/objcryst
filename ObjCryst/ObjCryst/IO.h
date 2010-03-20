@@ -23,8 +23,8 @@
 #define _OBJCRYST_IOCRYST_H_
 #endif //_OBJCRYST_IOCRYST_H_
 
-#include "RefinableObj/IO.h"
-#include "RefinableObj/RefinableObj.h"
+#include "ObjCryst/RefinableObj/IO.h"
+#include "ObjCryst/RefinableObj/RefinableObj.h"
 
 
 namespace ObjCryst

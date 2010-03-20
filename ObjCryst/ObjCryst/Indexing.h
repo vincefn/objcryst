@@ -28,8 +28,8 @@
 #include <vector>
 #include <list>
 #include <time.h>
-#include "RefinableObj/RefinableObj.h"
-#include "RefinableObj/LSQNumObj.h"
+#include "ObjCryst/RefinableObj/RefinableObj.h"
+#include "ObjCryst/RefinableObj/LSQNumObj.h"
 namespace ObjCryst
 {
 /** Different lattice types.

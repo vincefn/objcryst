@@ -24,8 +24,8 @@
 #ifndef _OBJCRYST_SCATTPOWERSPHERE_H_
 #define _OBJCRYST_SCATTPOWERSPHERE_H_
 
-#include "CrystVector/CrystVector.h"
-#include "ObjCryst/ScatteringPower.h"
+#include "ObjCryst/CrystVector/CrystVector.h"
+#include "ObjCryst/ObjCryst/ScatteringPower.h"
 
 namespace ObjCryst
 {

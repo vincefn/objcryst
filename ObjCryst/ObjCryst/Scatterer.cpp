@@ -24,18 +24,18 @@
 
 #include <stdio.h> //for sprintf()
 
-#include "ObjCryst/Crystal.h"
-#include "ObjCryst/Scatterer.h"
+#include "ObjCryst/ObjCryst/Crystal.h"
+#include "ObjCryst/ObjCryst/Scatterer.h"
 
-#include "Quirks/VFNStreamFormat.h" //simple formatting of integers, REALs..
+#include "ObjCryst/Quirks/VFNStreamFormat.h" //simple formatting of integers, REALs..
 
-#include "Quirks/VFNDebug.h"
+#include "ObjCryst/Quirks/VFNDebug.h"
 
 #ifdef __WX__CRYST__
-   #include "wxCryst/wxScatterer.h"
+   #include "ObjCryst/wxCryst/wxScatterer.h"
 #endif
 
-#include "ObjCryst/Colours.h"
+#include "ObjCryst/ObjCryst/Colours.h"
 
 #include <iomanip>
 #include <fstream>

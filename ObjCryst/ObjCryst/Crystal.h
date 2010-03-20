@@ -22,13 +22,13 @@
 #ifndef _OBJCRYST_CRYSTAL_H_
 #define _OBJCRYST_CRYSTAL_H_
 
-#include "CrystVector/CrystVector.h"
+#include "ObjCryst/CrystVector/CrystVector.h"
 
-#include "ObjCryst/General.h"
-#include "RefinableObj/RefinableObj.h"
-#include "ObjCryst/UnitCell.h"
-#include "ObjCryst/ScatteringPower.h"
-#include "ObjCryst/Scatterer.h"
+#include "ObjCryst/ObjCryst/General.h"
+#include "ObjCryst/RefinableObj/RefinableObj.h"
+#include "ObjCryst/ObjCryst/UnitCell.h"
+#include "ObjCryst/ObjCryst/ScatteringPower.h"
+#include "ObjCryst/ObjCryst/Scatterer.h"
 
 //#include <stdlib.h>
 #include <string>

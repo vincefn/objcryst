@@ -26,7 +26,7 @@
 #include <set>
 #include <vector>
 #include <utility>
-#include "RefinableObj/RefinableObj.h"
+#include "ObjCryst/RefinableObj/RefinableObj.h"
 
 #ifdef __WX__CRYST__
 namespace ObjCryst
@@ -34,7 +34,7 @@ namespace ObjCryst
 class MainTracker;
 class Tracker;
 }
-#include "wxCryst/wxTrackerGraph.h"
+#include "ObjCryst/wxCryst/wxTrackerGraph.h"
 #endif
 namespace ObjCryst
 {

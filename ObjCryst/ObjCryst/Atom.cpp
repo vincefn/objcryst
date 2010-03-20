@@ -24,10 +24,10 @@
 #include <typeinfo>
 #include <stdio.h> //for sprintf()
 
-#include "ObjCryst/Atom.h"
+#include "ObjCryst/ObjCryst/Atom.h"
 
-#include "Quirks/VFNStreamFormat.h" //simple formatting of integers, REALs..
-#include "Quirks/VFNDebug.h"
+#include "ObjCryst/Quirks/VFNStreamFormat.h" //simple formatting of integers, REALs..
+#include "ObjCryst/Quirks/VFNDebug.h"
 
 #ifdef OBJCRYST_GL
    #ifdef __DARWIN__
@@ -38,7 +38,7 @@
 #endif
 
 #ifdef __WX__CRYST__
-   #include "wxCryst/wxAtom.h"
+   #include "ObjCryst/wxCryst/wxAtom.h"
 #endif
 
 #include <fstream>

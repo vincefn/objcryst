@@ -23,7 +23,7 @@
 
 #ifdef __DEBUG__
 
-#include "Quirks/VFNDebug.h"
+#include "ObjCryst/Quirks/VFNDebug.h"
 //#include <stdlib.h>
 #include <iostream>
 using namespace std;

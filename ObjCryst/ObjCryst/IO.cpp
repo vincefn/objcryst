@@ -23,22 +23,22 @@
 
 #include <stdio.h>//for sprintf
 
-#include "ObjCryst/General.h"
-#include "ObjCryst/IO.h"
-#include "RefinableObj/IO.h"
-#include "RefinableObj/GlobalOptimObj.h"
-//#include "ObjCryst/SpaceGroup.h"
-#include "ObjCryst/Scatterer.h"
-#include "ObjCryst/Crystal.h"
-#include "ObjCryst/ZScatterer.h"
-//#include "ObjCryst/ScatteringData.h"
-#include "ObjCryst/ScatteringPower.h"
-#include "ObjCryst/ScatteringPowerSphere.h"
-#include "ObjCryst/Atom.h"
-#include "ObjCryst/DiffractionDataSingleCrystal.h"
-#include "ObjCryst/PowderPattern.h"
-#include "Quirks/VFNStreamFormat.h"
-#include "ObjCryst/Molecule.h"
+#include "ObjCryst/ObjCryst/General.h"
+#include "ObjCryst/ObjCryst/IO.h"
+#include "ObjCryst/RefinableObj/IO.h"
+#include "ObjCryst/RefinableObj/GlobalOptimObj.h"
+//#include "ObjCryst/ObjCryst/SpaceGroup.h"
+#include "ObjCryst/ObjCryst/Scatterer.h"
+#include "ObjCryst/ObjCryst/Crystal.h"
+#include "ObjCryst/ObjCryst/ZScatterer.h"
+//#include "ObjCryst/ObjCryst/ScatteringData.h"
+#include "ObjCryst/ObjCryst/ScatteringPower.h"
+#include "ObjCryst/ObjCryst/ScatteringPowerSphere.h"
+#include "ObjCryst/ObjCryst/Atom.h"
+#include "ObjCryst/ObjCryst/DiffractionDataSingleCrystal.h"
+#include "ObjCryst/ObjCryst/PowderPattern.h"
+#include "ObjCryst/Quirks/VFNStreamFormat.h"
+#include "ObjCryst/ObjCryst/Molecule.h"
 
 #include <iostream>
 #include <fstream>

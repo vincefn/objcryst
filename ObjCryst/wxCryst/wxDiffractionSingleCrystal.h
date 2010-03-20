@@ -20,9 +20,9 @@
 #ifndef _VFN_WX_DIFFRACTIONSINGLECRYSTAL_H_
 #define _VFN_WX_DIFFRACTIONSINGLECRYSTAL_H_
 
-#include "ObjCryst/DiffractionDataSingleCrystal.h"
-#include "wxCryst/wxRefinableObj.h"
-#include "wxCryst/wxMultiGraph.h"
+#include "ObjCryst/ObjCryst/DiffractionDataSingleCrystal.h"
+#include "ObjCryst/wxCryst/wxRefinableObj.h"
+#include "ObjCryst/wxCryst/wxMultiGraph.h"
 namespace ObjCryst
 {
 

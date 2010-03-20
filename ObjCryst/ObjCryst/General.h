@@ -61,7 +61,7 @@
 
 #endif
 
-#include "Quirks/VFNDebug.h"
+#include "ObjCryst/Quirks/VFNDebug.h"
 
 using namespace std;
 /** The namespace which includes all objects (crystallographic and

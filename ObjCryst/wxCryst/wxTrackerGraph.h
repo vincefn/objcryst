@@ -35,8 +35,8 @@ namespace ObjCryst
 class WXTrackerGraph;
 } //namespace
 
-#include "wxCryst/wxMultiGraph.h"
-#include "RefinableObj/Tracker.h"
+#include "ObjCryst/wxCryst/wxMultiGraph.h"
+#include "ObjCryst/RefinableObj/Tracker.h"
 
 namespace ObjCryst
 {

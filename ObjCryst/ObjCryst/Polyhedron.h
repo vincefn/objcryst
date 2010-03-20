@@ -19,9 +19,9 @@
 *  header file for the Polyhdron creation
 *
 */
-#include "ObjCryst/ScatteringPower.h"
-#include "ObjCryst/Crystal.h"
-#include "ObjCryst/Molecule.h"
+#include "ObjCryst/ObjCryst/ScatteringPower.h"
+#include "ObjCryst/ObjCryst/Crystal.h"
+#include "ObjCryst/ObjCryst/Molecule.h"
 namespace ObjCryst
 {
 Molecule* MakeTetrahedron(Crystal &cryst,const string &name,

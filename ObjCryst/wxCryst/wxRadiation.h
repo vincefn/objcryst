@@ -20,8 +20,8 @@
 #ifndef _VFN_WX_RADIATION_H_
 #define _VFN_WX_RADIATION_H_
 
-#include "wxCryst/wxRefinableObj.h"
-#include "ObjCryst/ScatteringData.h"
+#include "ObjCryst/wxCryst/wxRefinableObj.h"
+#include "ObjCryst/ObjCryst/ScatteringData.h"
 namespace ObjCryst
 {
 

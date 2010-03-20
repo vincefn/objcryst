@@ -22,11 +22,11 @@
 
 #include <cmath>
 
-#include "ObjCryst/ScatteringPowerSphere.h"
-#include "Quirks/VFNStreamFormat.h"
+#include "ObjCryst/ObjCryst/ScatteringPowerSphere.h"
+#include "ObjCryst/Quirks/VFNStreamFormat.h"
 
 #ifdef __WX__CRYST__
-#include "wxCryst/wxScatteringPowerSphere.h"
+#include "ObjCryst/wxCryst/wxScatteringPowerSphere.h"
 #endif
 
 namespace ObjCryst

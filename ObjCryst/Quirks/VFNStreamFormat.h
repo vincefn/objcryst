@@ -25,7 +25,7 @@
 #include <iostream>
 #include <vector>
 
-#include "CrystVector/CrystVector.h"
+#include "ObjCryst/CrystVector/CrystVector.h"
 
 /** output a number as a formatted integer: 
 *

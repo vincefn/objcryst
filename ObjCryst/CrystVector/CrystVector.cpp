@@ -16,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#include "CrystVector/CrystVector.h"
-#include "Quirks/VFNStreamFormat.h"
+#include "ObjCryst/CrystVector/CrystVector.h"
+#include "ObjCryst/Quirks/VFNStreamFormat.h"
 
 #ifdef __LIBCRYST_VECTOR_USE_BLITZ__
 
@@ -40,8 +40,8 @@ template<class T> T MaxDifference(const Array<T,2> &a,const Array<T,2> &b)
 //due to huge memory requirements with gcc when using blitz.
 #define __VFN_GEOM_STRUCT_FACTOR_USE_POINTERS
 
-#include "Quirks/VFNDebug.h"
-#include "Quirks/VFNStreamFormat.h"
+#include "ObjCryst/Quirks/VFNDebug.h"
+#include "ObjCryst/Quirks/VFNStreamFormat.h"
 
 //######################################################################
 //  CrystVector

@@ -21,10 +21,10 @@
 */
 #include <algorithm>
 
-#include "ObjCryst/Indexing.h"
-#include "Quirks/VFNDebug.h"
-#include "Quirks/VFNStreamFormat.h"
-#include "Quirks/Chronometer.h"
+#include "ObjCryst/ObjCryst/Indexing.h"
+#include "ObjCryst/Quirks/VFNDebug.h"
+#include "ObjCryst/Quirks/VFNStreamFormat.h"
+#include "ObjCryst/Quirks/Chronometer.h"
 
 using namespace std;
 

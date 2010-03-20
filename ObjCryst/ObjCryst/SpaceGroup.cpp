@@ -30,10 +30,10 @@
 #include "cctbx/miller/sym_equiv.h"
 #include "boost/rational.hpp"
 
-#include "ObjCryst/SpaceGroup.h"
-#include "Quirks/VFNStreamFormat.h" //simple formatting of integers, REALs..
-#include "ObjCryst/GeomStructFactor.h" //Geometrical Struct Factor definitions
-#include "Quirks/VFNDebug.h"
+#include "ObjCryst/ObjCryst/SpaceGroup.h"
+#include "ObjCryst/Quirks/VFNStreamFormat.h" //simple formatting of integers, REALs..
+#include "ObjCryst/ObjCryst/GeomStructFactor.h" //Geometrical Struct Factor definitions
+#include "ObjCryst/Quirks/VFNDebug.h"
 
 
 #include <fstream>

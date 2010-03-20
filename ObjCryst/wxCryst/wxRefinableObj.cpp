@@ -28,22 +28,22 @@
     #include "wx/wx.h"
 #endif
 
-#include "wxCryst/wxRefinableObj.h"
+#include "ObjCryst/wxCryst/wxRefinableObj.h"
 
-#include "wxCryst/wxRefinableObj.h"
-#include "Quirks/VFNStreamFormat.h"
+#include "ObjCryst/wxCryst/wxRefinableObj.h"
+#include "ObjCryst/Quirks/VFNStreamFormat.h"
 
-#include "RefinableObj/GlobalOptimObj.h"
+#include "ObjCryst/RefinableObj/GlobalOptimObj.h"
 
 //These are only for explicit instantiation
-#include "ObjCryst/Atom.h"
-#include "ObjCryst/Crystal.h"
-#include "ObjCryst/DiffractionDataSingleCrystal.h"
-#include "ObjCryst/PowderPattern.h"
-#include "ObjCryst/ScatteringPower.h"
-#include "ObjCryst/ZScatterer.h"
-#include "ObjCryst/ScatteringCorr.h"
-#include "ObjCryst/ReflectionProfile.h"
+#include "ObjCryst/ObjCryst/Atom.h"
+#include "ObjCryst/ObjCryst/Crystal.h"
+#include "ObjCryst/ObjCryst/DiffractionDataSingleCrystal.h"
+#include "ObjCryst/ObjCryst/PowderPattern.h"
+#include "ObjCryst/ObjCryst/ScatteringPower.h"
+#include "ObjCryst/ObjCryst/ZScatterer.h"
+#include "ObjCryst/ObjCryst/ScatteringCorr.h"
+#include "ObjCryst/ObjCryst/ReflectionProfile.h"
 
 //Fixes for Cygwin; where do those stupid macros come from ? Somewhere in wxMSW headers
 #ifdef max

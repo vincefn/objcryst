@@ -21,8 +21,8 @@
 
 #include <iomanip>
 
-#include "Quirks/VFNStreamFormat.h"
-#include "Quirks/VFNDebug.h"
+#include "ObjCryst/Quirks/VFNStreamFormat.h"
+#include "ObjCryst/Quirks/VFNDebug.h"
 
 using namespace std;
 

@@ -28,15 +28,15 @@
 
 #include "cctbx/sgtbx/space_group.h" // For fullprof export
 
-#include "ObjCryst/PowderPattern.h"
-#include "ObjCryst/Molecule.h" // For fullprof export
-#include "ObjCryst/PowderPatternBackgroundBayesianMinimiser.h"
-#include "RefinableObj/Simplex.h"
-#include "Quirks/VFNDebug.h"
-#include "Quirks/VFNStreamFormat.h"
-#include "ObjCryst/CIF.h"
+#include "ObjCryst/ObjCryst/PowderPattern.h"
+#include "ObjCryst/ObjCryst/Molecule.h" // For fullprof export
+#include "ObjCryst/ObjCryst/PowderPatternBackgroundBayesianMinimiser.h"
+#include "ObjCryst/RefinableObj/Simplex.h"
+#include "ObjCryst/Quirks/VFNDebug.h"
+#include "ObjCryst/Quirks/VFNStreamFormat.h"
+#include "ObjCryst/ObjCryst/CIF.h"
 #ifdef __WX__CRYST__
-   #include "wxCryst/wxPowderPattern.h"
+   #include "ObjCryst/wxCryst/wxPowderPattern.h"
 #endif
 
 #include <fstream>

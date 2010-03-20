@@ -22,10 +22,10 @@
 
 #include "wx/grid.h"
 
-#include "wxCryst/wxRefinableObj.h"
-#include "ObjCryst/ScatteringCorr.h"
-#include "ObjCryst/PowderPattern.h"
-#include "ObjCryst/Indexing.h"
+#include "ObjCryst/wxCryst/wxRefinableObj.h"
+#include "ObjCryst/ObjCryst/ScatteringCorr.h"
+#include "ObjCryst/ObjCryst/PowderPattern.h"
+#include "ObjCryst/ObjCryst/Indexing.h"
 namespace ObjCryst
 {
 class WXPowderPatternGraph;

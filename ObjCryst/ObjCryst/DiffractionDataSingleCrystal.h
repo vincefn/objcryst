@@ -13,15 +13,15 @@
 #ifndef _OBJCRYST_DIFFDATA_SINGLECRYSTAL_H_
 #define _OBJCRYST_DIFFDATA_SINGLECRYSTAL_H_
 
-#include "CrystVector/CrystVector.h"
+#include "ObjCryst/CrystVector/CrystVector.h"
 
-#include "ObjCryst/General.h"
+#include "ObjCryst/ObjCryst/General.h"
 
-#include "ObjCryst/ScatteringPower.h"
-#include "ObjCryst/Crystal.h"
-#include "ObjCryst/ScatteringData.h"
-//#include "ObjCryst/SpaceGroup.h"
-//#include "ObjCryst/Scatterer.h"
+#include "ObjCryst/ObjCryst/ScatteringPower.h"
+#include "ObjCryst/ObjCryst/Crystal.h"
+#include "ObjCryst/ObjCryst/ScatteringData.h"
+//#include "ObjCryst/ObjCryst/SpaceGroup.h"
+//#include "ObjCryst/ObjCryst/Scatterer.h"
 
 //#include <stdlib.h>
 #include <string>

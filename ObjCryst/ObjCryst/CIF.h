@@ -9,15 +9,15 @@
 #include <map>
 #include <set>
 
-#include "Quirks/ci_string.h"
+#include "ObjCryst/Quirks/ci_string.h"
 namespace ObjCryst
 {// Forward declaration
    class CIF;
 }
-#include "ObjCryst/PowderPattern.h" // For CreatePowderPatternFromCIF only.
-#include "ObjCryst/DiffractionDataSingleCrystal.h" // For CreateSingleCrystalDataFromCIF only.
-#include "ObjCryst/Crystal.h" // For CreateCrystalFromCIF only.
-#include "ObjCryst/General.h" // TO identify wavelength type in CIFData::ExtractPowderPattern.
+#include "ObjCryst/ObjCryst/PowderPattern.h" // For CreatePowderPatternFromCIF only.
+#include "ObjCryst/ObjCryst/DiffractionDataSingleCrystal.h" // For CreateSingleCrystalDataFromCIF only.
+#include "ObjCryst/ObjCryst/Crystal.h" // For CreateCrystalFromCIF only.
+#include "ObjCryst/ObjCryst/General.h" // TO identify wavelength type in CIFData::ExtractPowderPattern.
 
 namespace ObjCryst
 {

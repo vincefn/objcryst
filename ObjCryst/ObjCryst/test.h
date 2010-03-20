@@ -22,7 +22,7 @@
 #ifndef _OBJCRYST_TEST_H_
 #define _OBJCRYST_TEST_H_
 
-#include "ObjCryst/General.h"
+#include "ObjCryst/ObjCryst/General.h"
 
 namespace ObjCryst
 {

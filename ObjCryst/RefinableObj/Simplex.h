@@ -24,7 +24,7 @@
 #ifndef _SIMPLEX_H
 #define _SIMPLEX_H
 
-#include "RefinableObj/GlobalOptimObj.h"
+#include "ObjCryst/RefinableObj/GlobalOptimObj.h"
 
 namespace ObjCryst
 {

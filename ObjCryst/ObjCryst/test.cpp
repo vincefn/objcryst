@@ -21,13 +21,13 @@
 */
 #include <stdlib.h>
 #include <list>
-#include "ObjCryst/test.h"
-#include "ObjCryst/Crystal.h"
-#include "ObjCryst/Atom.h"
-#include "ObjCryst/DiffractionDataSingleCrystal.h"
-#include "ObjCryst/PowderPattern.h"
-#include "RefinableObj/GlobalOptimObj.h"
-#include "Quirks/VFNStreamFormat.h"
+#include "ObjCryst/ObjCryst/test.h"
+#include "ObjCryst/ObjCryst/Crystal.h"
+#include "ObjCryst/ObjCryst/Atom.h"
+#include "ObjCryst/ObjCryst/DiffractionDataSingleCrystal.h"
+#include "ObjCryst/ObjCryst/PowderPattern.h"
+#include "ObjCryst/RefinableObj/GlobalOptimObj.h"
+#include "ObjCryst/Quirks/VFNStreamFormat.h"
 
 namespace ObjCryst
 {

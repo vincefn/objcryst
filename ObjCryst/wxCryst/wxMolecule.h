@@ -21,8 +21,8 @@
 #define _VFN_WX_MOLECULE_H_
 
 #include "wx/grid.h"
-#include "wxCryst/wxScatterer.h"
-#include "ObjCryst/Molecule.h"
+#include "ObjCryst/wxCryst/wxScatterer.h"
+#include "ObjCryst/ObjCryst/Molecule.h"
 
 namespace ObjCryst
 {

@@ -31,8 +31,8 @@
 #include <sstream>
 #include <fstream>
 #include <algorithm>
-#include "wxCryst/wxMolecule.h"
-#include "RefinableObj/LSQNumObj.h"
+#include "ObjCryst/wxCryst/wxMolecule.h"
+#include "ObjCryst/RefinableObj/LSQNumObj.h"
 
 namespace ObjCryst
 {

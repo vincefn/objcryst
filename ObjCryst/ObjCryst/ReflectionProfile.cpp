@@ -21,10 +21,10 @@
 *
 */
 #include <limits>
-#include "ObjCryst/ReflectionProfile.h"
-#include "Quirks/VFNStreamFormat.h"
+#include "ObjCryst/ObjCryst/ReflectionProfile.h"
+#include "ObjCryst/Quirks/VFNStreamFormat.h"
 #ifdef __WX__CRYST__
-   #include "wxCryst/wxPowderPattern.h"
+   #include "ObjCryst/wxCryst/wxPowderPattern.h"
 #endif
 
 namespace ObjCryst

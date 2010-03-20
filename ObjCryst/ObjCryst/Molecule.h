@@ -28,9 +28,9 @@
 #include <set>
 #include <list>
 
-#include "ObjCryst/General.h"
-#include "ObjCryst/ScatteringPower.h"
-#include "ObjCryst/Scatterer.h"
+#include "ObjCryst/ObjCryst/General.h"
+#include "ObjCryst/ObjCryst/ScatteringPower.h"
+#include "ObjCryst/ObjCryst/Scatterer.h"
 
 
 namespace ObjCryst

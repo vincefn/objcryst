@@ -24,9 +24,9 @@
 #include <iterator>
 #include <algorithm>
 
-#include "Quirks/VFNStreamFormat.h"
-#include "ObjCryst/Molecule.h"
-#include "RefinableObj/GlobalOptimObj.h"
+#include "ObjCryst/Quirks/VFNStreamFormat.h"
+#include "ObjCryst/ObjCryst/Molecule.h"
+#include "ObjCryst/RefinableObj/GlobalOptimObj.h"
 
 #ifdef OBJCRYST_GL
    #ifdef __DARWIN__
@@ -37,7 +37,7 @@
 #endif
 
 #ifdef __WX__CRYST__
-   #include "wxCryst/wxMolecule.h"
+   #include "ObjCryst/wxCryst/wxMolecule.h"
 #endif
 
 //#include <xmmintrin.h>

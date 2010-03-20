@@ -30,14 +30,14 @@
 #include "cctbx/miller/sym_equiv.h"
 #include "cctbx/eltbx/wavelengths.h"
 
-#include "ObjCryst/ScatteringData.h"
-#include "Quirks/VFNDebug.h"
-#include "Quirks/VFNStreamFormat.h"
-#include "Quirks/Chronometer.h"
+#include "ObjCryst/ObjCryst/ScatteringData.h"
+#include "ObjCryst/Quirks/VFNDebug.h"
+#include "ObjCryst/Quirks/VFNStreamFormat.h"
+#include "ObjCryst/Quirks/Chronometer.h"
 
 #ifdef __WX__CRYST__
-   #include "wxCryst/wxPowderPattern.h"
-   #include "wxCryst/wxRadiation.h"
+   #include "ObjCryst/wxCryst/wxPowderPattern.h"
+   #include "ObjCryst/wxCryst/wxRadiation.h"
 #endif
 
 #include <fstream>

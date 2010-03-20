@@ -20,8 +20,8 @@
 #ifndef _VFN_WX_ZSCATTERER_H_
 #define _VFN_WX_ZSCATTERER_H_
 
-#include "wxCryst/wxScatterer.h"
-#include "ObjCryst/ZScatterer.h"
+#include "ObjCryst/wxCryst/wxScatterer.h"
+#include "ObjCryst/ObjCryst/ZScatterer.h"
 
 namespace ObjCryst
 {

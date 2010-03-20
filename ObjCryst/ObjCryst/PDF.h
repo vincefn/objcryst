@@ -21,11 +21,11 @@
 #ifndef _OBJCRYST_PDF_H_
 #define _OBJCRYST_PDF_H_
 
-#include "CrystVector/CrystVector.h"
+#include "ObjCryst/CrystVector/CrystVector.h"
 
-#include "ObjCryst/Crystal.h"
+#include "ObjCryst/ObjCryst/Crystal.h"
 #ifdef __WX__CRYST__
-   #include "wxCryst/wxCryst.h"
+   #include "ObjCryst/wxCryst/wxCryst.h"
 #endif
 
 #include <string>

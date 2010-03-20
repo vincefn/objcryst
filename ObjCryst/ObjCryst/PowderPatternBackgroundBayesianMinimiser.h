@@ -23,9 +23,9 @@
 #ifndef __POWDERPATTERNBACKGROUNDBAYESIANMINIMISER_H
 #define __POWDERPATTERNBACKGROUNDBAYESIANMINIMISER_H
 
-#include "CrystVector/CrystVector.h"
-#include "RefinableObj/RefinableObj.h"
-#include "ObjCryst/PowderPattern.h"
+#include "ObjCryst/CrystVector/CrystVector.h"
+#include "ObjCryst/RefinableObj/RefinableObj.h"
+#include "ObjCryst/ObjCryst/PowderPattern.h"
 
 namespace ObjCryst
 {

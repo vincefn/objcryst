@@ -49,21 +49,21 @@
 #include <list>
 #include <cstring>
 
-#include "ObjCryst/General.h"
-#include "Quirks/Chronometer.h"
-#include "ObjCryst/IO.h"
-#include "ObjCryst/Crystal.h"
-#include "ObjCryst/PowderPattern.h"
-#include "ObjCryst/DiffractionDataSingleCrystal.h"
-#include "ObjCryst/Polyhedron.h"
-#include "ObjCryst/test.h"
-#include "ObjCryst/CIF.h"
-//#include "ObjCryst/PDF.h"
-#include "RefinableObj/GlobalOptimObj.h"
-#include "Quirks/VFNStreamFormat.h"
+#include "ObjCryst/ObjCryst/General.h"
+#include "ObjCryst/Quirks/Chronometer.h"
+#include "ObjCryst/ObjCryst/IO.h"
+#include "ObjCryst/ObjCryst/Crystal.h"
+#include "ObjCryst/ObjCryst/PowderPattern.h"
+#include "ObjCryst/ObjCryst/DiffractionDataSingleCrystal.h"
+#include "ObjCryst/ObjCryst/Polyhedron.h"
+#include "ObjCryst/ObjCryst/test.h"
+#include "ObjCryst/ObjCryst/CIF.h"
+//#include "ObjCryst/ObjCryst/PDF.h"
+#include "ObjCryst/RefinableObj/GlobalOptimObj.h"
+#include "ObjCryst/Quirks/VFNStreamFormat.h"
 
 #ifdef __WX__CRYST__
-   #include "wxCryst/wxCrystal.h"
+   #include "ObjCryst/wxCryst/wxCrystal.h"
 
    #if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__) || defined(__WXMGL__) || defined(__WXX11__)
       #include "Fox.xpm"

@@ -25,7 +25,7 @@
 //the Int. Tables for X-Ray Crystallography (1969) : one line of equation
 //should correspond to one line in the table, for easier check.
 
-#include "CrystVector/CrystVector.h"
+#include "ObjCryst/CrystVector/CrystVector.h"
 
 namespace ObjCryst
 {

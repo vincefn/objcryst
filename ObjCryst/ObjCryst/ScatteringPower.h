@@ -19,9 +19,9 @@
 #ifndef _OBJCRYST_SCATTPOWER_H_
 #define _OBJCRYST_SCATTPOWER_H_
 
-#include "CrystVector/CrystVector.h"
-#include "ObjCryst/General.h"
-#include "RefinableObj/RefinableObj.h"
+#include "ObjCryst/CrystVector/CrystVector.h"
+#include "ObjCryst/ObjCryst/General.h"
+#include "ObjCryst/RefinableObj/RefinableObj.h"
 
 
 //#include <stdlib.h>
@@ -502,6 +502,6 @@ class ScatteringComponentList
 };
 
 }//namespace
-#include "ObjCryst/ScatteringData.h"
+#include "ObjCryst/ObjCryst/ScatteringData.h"
 
 #endif //_OBJCRYST_SCATTPOWER_H_

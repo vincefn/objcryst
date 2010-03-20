@@ -22,10 +22,10 @@
 #ifndef _OBJCRYST_SPACEGROUP_H_
 #define _OBJCRYST_SPACEGROUP_H_
 
-#include "CrystVector/CrystVector.h"
+#include "ObjCryst/CrystVector/CrystVector.h"
 
-#include "ObjCryst/General.h"
-#include "RefinableObj/RefinableObj.h"
+#include "ObjCryst/ObjCryst/General.h"
+#include "ObjCryst/RefinableObj/RefinableObj.h"
 #include <complex>
 
 //#include "cctbx/sgtbx/space_group.h"

@@ -33,10 +33,10 @@ class WXFieldOption;
 class WXFieldRefPar;
 } //namespace
 
-#include "wxCryst/wxCryst.h"
+#include "ObjCryst/wxCryst/wxCryst.h"
 
 // We should not have to put this here. !! :TODO:
-#include "RefinableObj/RefinableObj.h"
+#include "ObjCryst/RefinableObj/RefinableObj.h"
 
 namespace ObjCryst
 {

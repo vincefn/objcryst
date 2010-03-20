@@ -24,7 +24,7 @@
 #define _GLOBALOPTIMOBJ_H
 
 #include <map>
-#include "ObjCryst/General.h"
+#include "ObjCryst/ObjCryst/General.h"
 
 namespace ObjCryst
 {
@@ -32,15 +32,15 @@ namespace ObjCryst
    class MonteCarloObj;
 }
 
-#include "RefinableObj/RefinableObj.h"
-#include "RefinableObj/LSQNumObj.h"
-#include "RefinableObj/IO.h"
-#include "RefinableObj/Tracker.h"
+#include "ObjCryst/RefinableObj/RefinableObj.h"
+#include "ObjCryst/RefinableObj/LSQNumObj.h"
+#include "ObjCryst/RefinableObj/IO.h"
+#include "ObjCryst/RefinableObj/Tracker.h"
 #include <string>
 #include <iostream>
 #ifdef __WX__CRYST__
    //#undef GetClassName // Conflict from wxMSW headers ? (cygwin)
-#include "wxCryst/wxGlobalOptimObj.h"
+#include "ObjCryst/wxCryst/wxGlobalOptimObj.h"
 #endif
 
 namespace ObjCryst

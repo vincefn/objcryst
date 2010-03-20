@@ -28,9 +28,9 @@
 #endif
 #include "wx/dcbuffer.h"
 #include "wx/gdicmn.h"
-#include "ObjCryst/General.h"
-#include "wxCryst/wxMultiGraph.h"
-#include "wxCryst/wxCryst.h"
+#include "ObjCryst/ObjCryst/General.h"
+#include "ObjCryst/wxCryst/wxMultiGraph.h"
+#include "ObjCryst/wxCryst/wxCryst.h"
 
 using namespace std;
 

@@ -34,7 +34,7 @@
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
-#include "wxCryst/wxCryst.h"
+#include "ObjCryst/wxCryst/wxCryst.h"
 
 /* WX
 

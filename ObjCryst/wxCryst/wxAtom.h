@@ -26,8 +26,8 @@
 #ifndef _VFN_WX_ATOM_H_
 #define _VFN_WX_ATOM_H_
 
-#include "wxCryst/wxScatterer.h"
-#include "ObjCryst/Atom.h"
+#include "ObjCryst/wxCryst/wxScatterer.h"
+#include "ObjCryst/ObjCryst/Atom.h"
 namespace ObjCryst
 {
 /// wxCryst class for Atoms

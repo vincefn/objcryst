@@ -19,7 +19,7 @@
 #ifndef _OBJCRYST_SCATTERING_CORR_H_
 #define _OBJCRYST_SCATTERING_CORR_H_
 
-#include "ObjCryst/ScatteringData.h"
+#include "ObjCryst/ObjCryst/ScatteringData.h"
 
 namespace ObjCryst
 {

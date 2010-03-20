@@ -23,8 +23,8 @@
 #ifndef _VFN_WX_LSQ_H_
 #define _VFN_WX_LSQ_H_
 
-#include "RefinableObj/LSQNumObj.h"
-#include "wxCryst/wxCryst.h"
+#include "ObjCryst/RefinableObj/LSQNumObj.h"
+#include "ObjCryst/wxCryst/wxCryst.h"
 
 namespace ObjCryst
 {

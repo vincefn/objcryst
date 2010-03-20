@@ -25,12 +25,12 @@
 
 #include <typeinfo>
 
-#include "ObjCryst/DiffractionDataSingleCrystal.h"
-#include "Quirks/VFNDebug.h"
-#include "Quirks/VFNStreamFormat.h"
+#include "ObjCryst/ObjCryst/DiffractionDataSingleCrystal.h"
+#include "ObjCryst/Quirks/VFNDebug.h"
+#include "ObjCryst/Quirks/VFNStreamFormat.h"
 
 #ifdef __WX__CRYST__
-#include "wxCryst/wxDiffractionSingleCrystal.h"
+#include "ObjCryst/wxCryst/wxDiffractionSingleCrystal.h"
 #endif
 
 #include <fstream>

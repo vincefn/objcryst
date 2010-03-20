@@ -21,7 +21,7 @@
 *
 */
 
-#include "ObjCryst/PowderPatternBackgroundBayesianMinimiser.h"
+#include "ObjCryst/ObjCryst/PowderPatternBackgroundBayesianMinimiser.h"
 namespace ObjCryst
 {
 PowderPatternBackgroundBayesianMinimiser::

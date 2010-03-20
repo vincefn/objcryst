@@ -28,8 +28,8 @@
     #include "wx/wx.h"
 #endif
 
-#include "wxCryst/wxDiffractionSingleCrystal.h"
-#include "wxCryst/wxRadiation.h"
+#include "ObjCryst/wxCryst/wxDiffractionSingleCrystal.h"
+#include "ObjCryst/wxCryst/wxRadiation.h"
 
 //Fixes for Cygwin; where do those stupid macros come from ? Somewhere in wxMSW headers
 #ifdef max

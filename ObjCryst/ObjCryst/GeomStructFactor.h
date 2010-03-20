@@ -29,7 +29,7 @@
 #ifndef _VFN_RC_CRISTALLO_GEOM_STRUCT_FACTOR_H_
 #define _VFN_RC_CRISTALLO_GEOM_STRUCT_FACTOR_H_
 
-#include "CrystVector/CrystVector.h"
+#include "ObjCryst/CrystVector/CrystVector.h"
 
 #include <cmath>
 

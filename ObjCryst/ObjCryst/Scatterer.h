@@ -19,11 +19,11 @@
 #ifndef _OBJCRYST_SCATTERER_H_
 #define _OBJCRYST_SCATTERER_H_
 
-#include "CrystVector/CrystVector.h"
+#include "ObjCryst/CrystVector/CrystVector.h"
 
-#include "ObjCryst/General.h"
+#include "ObjCryst/ObjCryst/General.h"
 
-#include "ObjCryst/ScatteringPower.h"
+#include "ObjCryst/ObjCryst/ScatteringPower.h"
 
 #include <string>
 
@@ -305,6 +305,6 @@ extern ObjRegistry<Scatterer> gScattererRegistry;
 
 }//namespace
 
-#include "ObjCryst/Crystal.h"
+#include "ObjCryst/ObjCryst/Crystal.h"
 
 #endif //_OBJCRYST_SCATTERER_H_

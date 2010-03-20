@@ -16,12 +16,12 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#include "Quirks/VFNStreamFormat.h"
+#include "ObjCryst/Quirks/VFNStreamFormat.h"
 
-#include "RefinableObj/LSQNumObj.h"
+#include "ObjCryst/RefinableObj/LSQNumObj.h"
 
 #ifdef __WX__CRYST__
-   #include "wxCryst/wxLSQ.h"
+   #include "ObjCryst/wxCryst/wxLSQ.h"
 #endif
 
 #include "newmat/newmatap.h" //for SVD decomposition

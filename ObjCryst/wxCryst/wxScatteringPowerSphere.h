@@ -20,8 +20,8 @@
 #ifndef _VFN_WX_SCATTERINGPOWERSPHERE_OBJ_H_
 #define _VFN_WX_SCATTERINGPOWERSPHERE_OBJ_H_
 
-#include "wxCryst/wxRefinableObj.h"
-#include "ObjCryst/ScatteringPowerSphere.h"
+#include "ObjCryst/wxCryst/wxRefinableObj.h"
+#include "ObjCryst/ObjCryst/ScatteringPowerSphere.h"
 
 namespace ObjCryst
 {

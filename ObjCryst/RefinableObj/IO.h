@@ -24,14 +24,14 @@
 #include <vector>
 using namespace std;
 
-#include "ObjCryst/General.h"
+#include "ObjCryst/ObjCryst/General.h"
 
 namespace ObjCryst
 {
 class XMLCrystTag;
 }
 #ifdef __WX__CRYST__
-   #include "wxCryst/wxCryst.h"
+   #include "ObjCryst/wxCryst/wxCryst.h"
 #endif
 
 namespace ObjCryst

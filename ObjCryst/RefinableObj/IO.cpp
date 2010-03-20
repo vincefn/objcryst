@@ -23,8 +23,8 @@
 
 
 #include <sstream>
-#include "RefinableObj/RefinableObj.h"
-#include "RefinableObj/IO.h"
+#include "ObjCryst/RefinableObj/RefinableObj.h"
+#include "ObjCryst/RefinableObj/IO.h"
 
 namespace ObjCryst
 {

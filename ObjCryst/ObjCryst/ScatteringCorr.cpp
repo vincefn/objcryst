@@ -16,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#include "ObjCryst/ScatteringCorr.h"
-#include "Quirks/VFNStreamFormat.h"
+#include "ObjCryst/ObjCryst/ScatteringCorr.h"
+#include "ObjCryst/Quirks/VFNStreamFormat.h"
 #include <stdio.h> //for sprintf()
 #include <cstdlib>
 #ifdef __WX__CRYST__
@@ -25,7 +25,7 @@ namespace ObjCryst
 {
    class TexturePhaseMarchDollase;
 }
-#include "wxCryst/wxPowderPattern.h"
+#include "ObjCryst/wxCryst/wxPowderPattern.h"
 #endif
 namespace ObjCryst
 {

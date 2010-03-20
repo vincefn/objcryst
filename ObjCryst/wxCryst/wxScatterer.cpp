@@ -28,7 +28,7 @@
     #include "wx/wx.h"
 #endif
 
-#include "wxCryst/wxScatterer.h"
+#include "ObjCryst/wxCryst/wxScatterer.h"
 
 //Fixes for Cygwin; where do those stupid macros come from ? Somewhere in wxMSW headers
 #ifdef max

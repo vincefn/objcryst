@@ -20,8 +20,8 @@
 *  source file for Conjugate Gradient Algorithm object
 *
 */
-#include "RefinableObj/Simplex.h"
-#include "Quirks/VFNStreamFormat.h"
+#include "ObjCryst/RefinableObj/Simplex.h"
+#include "ObjCryst/Quirks/VFNStreamFormat.h"
 
 namespace ObjCryst
 {

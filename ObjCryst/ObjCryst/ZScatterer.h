@@ -19,13 +19,13 @@
 #ifndef _OBJCRYST_ZSCATTERER_H_
 #define _OBJCRYST_ZSCATTERER_H_
 
-#include "CrystVector/CrystVector.h"
+#include "ObjCryst/CrystVector/CrystVector.h"
 
-#include "ObjCryst/General.h"
+#include "ObjCryst/ObjCryst/General.h"
 
-#include "ObjCryst/ScatteringPower.h"
-#include "ObjCryst/Scatterer.h"
-#include "RefinableObj/GlobalOptimObj.h"
+#include "ObjCryst/ObjCryst/ScatteringPower.h"
+#include "ObjCryst/ObjCryst/Scatterer.h"
+#include "ObjCryst/RefinableObj/GlobalOptimObj.h"
 
 #include <string>
 
@@ -512,6 +512,6 @@ class ZPolyhedron: public ZScatterer
 };
 
 }//namespace
-#include "ObjCryst/Crystal.h"
+#include "ObjCryst/ObjCryst/Crystal.h"
 
 #endif //_OBJCRYST_ZSCATTERER_H_

@@ -20,14 +20,14 @@
 #ifndef _VFN_WX_GLOBALOPTIM_OBJ_H_
 #define _VFN_WX_GLOBALOPTIM_OBJ_H_
 
-#include "wxCryst/wxCryst.h"
-#include "wxCryst/wxMultiGraph.h"
+#include "ObjCryst/wxCryst/wxCryst.h"
+#include "ObjCryst/wxCryst/wxMultiGraph.h"
 namespace ObjCryst
 {
    class WXOptimizationObj;
    class WXMonteCarloObj;
 }
-#include "RefinableObj/GlobalOptimObj.h"
+#include "ObjCryst/RefinableObj/GlobalOptimObj.h"
 namespace ObjCryst
 {
 class WXGlobalOptimRunThread;

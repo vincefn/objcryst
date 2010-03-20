@@ -23,8 +23,8 @@
 #ifndef _LSQOBJNUM_H
 #define _LSQOBJNUM_H
 
-#include "CrystVector/CrystVector.h"
-#include "RefinableObj/RefinableObj.h"
+#include "ObjCryst/CrystVector/CrystVector.h"
+#include "ObjCryst/RefinableObj/RefinableObj.h"
 #include <string>
 #include <map>
 

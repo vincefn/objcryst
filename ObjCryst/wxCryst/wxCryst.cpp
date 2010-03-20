@@ -28,12 +28,12 @@
     #include "wx/wx.h"
 #endif
 
-#include "wxCryst/wxCryst.h"
+#include "ObjCryst/wxCryst/wxCryst.h"
 
-//#include "Quirks/VFNStreamFormat.h"
-#include "Quirks/VFNDebug.h"
+//#include "ObjCryst/Quirks/VFNStreamFormat.h"
+#include "ObjCryst/Quirks/VFNDebug.h"
 
-//#include "RefinableObj/GlobalOptimObj.h"
+//#include "ObjCryst/RefinableObj/GlobalOptimObj.h"
 
 //Fixes for Cygwin; where do those stupid macros come from ? Somewhere in wxMSW headers
 #ifdef max

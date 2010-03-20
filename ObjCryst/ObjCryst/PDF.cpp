@@ -18,10 +18,10 @@
 /*   PDF.cpp - Pair Distribution calculations
 *
 */
-#include "ObjCryst/PDF.h"
-#include "Quirks/VFNStreamFormat.h"
+#include "ObjCryst/ObjCryst/PDF.h"
+#include "ObjCryst/Quirks/VFNStreamFormat.h"
 #ifdef __WX__CRYST__
-   #include "wxCryst/wxPDF.h"
+   #include "ObjCryst/wxCryst/wxPDF.h"
 #endif
 
 #include <string>

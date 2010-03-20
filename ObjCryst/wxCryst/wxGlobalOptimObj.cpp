@@ -30,12 +30,12 @@
 
 #include "wx/progdlg.h"
 
-#include "wxCryst/wxGlobalOptimObj.h"
+#include "ObjCryst/wxCryst/wxGlobalOptimObj.h"
 
-#include "ObjCryst/IO.h"
+#include "ObjCryst/ObjCryst/IO.h"
 // Next two just to fix some parameters during global optimization
-#include "ObjCryst/Crystal.h"
-#include "ObjCryst/ScatteringData.h"
+#include "ObjCryst/ObjCryst/Crystal.h"
+#include "ObjCryst/ObjCryst/ScatteringData.h"
 
 //Fixes for Cygwin; where do those stupid macros come from ? Somewhere in wxMSW headers
 #ifdef max

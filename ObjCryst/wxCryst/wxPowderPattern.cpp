@@ -36,13 +36,13 @@
 #include "wx/progdlg.h"
 #include "wx/filename.h"
 
-#include "wxCryst/wxPowderPattern.h"
-#include "wxCryst/wxRadiation.h"
-#include "RefinableObj/Simplex.h"
-#include "RefinableObj/LSQNumObj.h"
-#include "ObjCryst/PowderPatternBackgroundBayesianMinimiser.h"
-#include "Quirks/VFNStreamFormat.h"
-#include "Quirks/Chronometer.h"
+#include "ObjCryst/wxCryst/wxPowderPattern.h"
+#include "ObjCryst/wxCryst/wxRadiation.h"
+#include "ObjCryst/RefinableObj/Simplex.h"
+#include "ObjCryst/RefinableObj/LSQNumObj.h"
+#include "ObjCryst/ObjCryst/PowderPatternBackgroundBayesianMinimiser.h"
+#include "ObjCryst/Quirks/VFNStreamFormat.h"
+#include "ObjCryst/Quirks/Chronometer.h"
 
 //Fixes for Cygwin; where do those stupid macros come from ? Somewhere in wxMSW headers
 #ifdef max

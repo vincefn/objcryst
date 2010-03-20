@@ -29,16 +29,16 @@
 #include <list>
 #include "boost/shared_ptr.hpp"
 
-#include "wxCryst/wxRefinableObj.h"
+#include "ObjCryst/wxCryst/wxRefinableObj.h"
 
 #include "wx/glcanvas.h"
 #include "wx/grid.h"
 #include "wx/clrpicker.h"
 
-#include "ObjCryst/Crystal.h"
-//#include "ObjCryst/PDF.h"
+#include "ObjCryst/ObjCryst/Crystal.h"
+//#include "ObjCryst/ObjCryst/PDF.h"
 
-#include "wxCryst/MC.h"
+#include "ObjCryst/wxCryst/MC.h"
 
 namespace ObjCryst
 {

@@ -31,9 +31,9 @@
 #include <map>
 #include <set>
 
-#include "CrystVector/CrystVector.h"
-#include "ObjCryst/General.h"
-#include "RefinableObj/IO.h"
+#include "ObjCryst/CrystVector/CrystVector.h"
+#include "ObjCryst/ObjCryst/General.h"
+#include "ObjCryst/RefinableObj/IO.h"
 
 #ifdef __WX__CRYST__
    class wxWindow;
@@ -44,7 +44,7 @@ namespace ObjCryst
    template<class T> class RefObjOption;
    class RefinableObj;
 }
-#include "wxCryst/wxRefinableObj.h"
+#include "ObjCryst/wxCryst/wxRefinableObj.h"
 #endif
 
 namespace ObjCryst

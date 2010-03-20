@@ -22,7 +22,7 @@
 #ifndef __LIBCRYST_VECTOR_H
 #define __LIBCRYST_VECTOR_H
 
-#include "ObjCryst/General.h"
+#include "ObjCryst/ObjCryst/General.h"
 
 #undef __LIBCRYST_VECTOR_USE_BLITZ__
 //#define __LIBCRYST_VECTOR_USE_BLITZ__

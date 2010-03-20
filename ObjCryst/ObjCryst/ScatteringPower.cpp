@@ -30,13 +30,13 @@
 #include "cctbx/eltbx/henke.h"
 #include "cctbx/eltbx/neutron.h"
 
-#include "ObjCryst/ScatteringPower.h"
-#include "Quirks/VFNStreamFormat.h"
-#include "Quirks/VFNDebug.h"
-#include "ObjCryst/Colours.h" 
+#include "ObjCryst/ObjCryst/ScatteringPower.h"
+#include "ObjCryst/Quirks/VFNStreamFormat.h"
+#include "ObjCryst/Quirks/VFNDebug.h"
+#include "ObjCryst/ObjCryst/Colours.h" 
 
 #ifdef __WX__CRYST__
-   #include "wxCryst/wxScatteringPower.h"
+   #include "ObjCryst/wxCryst/wxScatteringPower.h"
 #endif
 
 namespace ObjCryst

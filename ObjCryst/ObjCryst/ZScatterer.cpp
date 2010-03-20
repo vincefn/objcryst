@@ -26,15 +26,15 @@
 #include <cstdlib>
 #include <stdio.h> //for sprintf()
 
-//#include "ObjCryst/ScatteringPower.h"
-//#include "ObjCryst/Scatterer.h"
-//#include "ObjCryst/Atom.h"
-#include "ObjCryst/ZScatterer.h"
-#include "ObjCryst/ScatteringData.h"
+//#include "ObjCryst/ObjCryst/ScatteringPower.h"
+//#include "ObjCryst/ObjCryst/Scatterer.h"
+//#include "ObjCryst/ObjCryst/Atom.h"
+#include "ObjCryst/ObjCryst/ZScatterer.h"
+#include "ObjCryst/ObjCryst/ScatteringData.h"
 
-#include "Quirks/VFNStreamFormat.h" //simple formatting of integers, REALs..
+#include "ObjCryst/Quirks/VFNStreamFormat.h" //simple formatting of integers, REALs..
 
-#include "Quirks/VFNDebug.h"
+#include "ObjCryst/Quirks/VFNDebug.h"
 
 #include <fstream>
 #include <iomanip>
@@ -48,7 +48,7 @@
 #endif
 
 #ifdef __WX__CRYST__
-   #include "wxCryst/wxZScatterer.h"
+   #include "ObjCryst/wxCryst/wxZScatterer.h"
    #undef GetClassName // Conflict from wxMSW headers ? (cygwin)
 #endif
 

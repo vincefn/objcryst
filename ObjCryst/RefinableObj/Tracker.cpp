@@ -19,7 +19,7 @@
 *  source file ObjCryst++ Tracker class
 *
 */
-#include "RefinableObj/Tracker.h"
+#include "ObjCryst/RefinableObj/Tracker.h"
 
 using namespace std;
 

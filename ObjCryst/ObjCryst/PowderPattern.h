@@ -23,14 +23,14 @@
 #include <list>
 #include <string>
 
-#include "CrystVector/CrystVector.h"
-#include "ObjCryst/General.h"
-#include "ObjCryst/Crystal.h"
-#include "ObjCryst/ScatteringCorr.h"
-#include "ObjCryst/ReflectionProfile.h"
-#include "ObjCryst/CIF.h"
-#include "ObjCryst/Indexing.h"
-#include "ObjCryst/DiffractionDataSingleCrystal.h"
+#include "ObjCryst/CrystVector/CrystVector.h"
+#include "ObjCryst/ObjCryst/General.h"
+#include "ObjCryst/ObjCryst/Crystal.h"
+#include "ObjCryst/ObjCryst/ScatteringCorr.h"
+#include "ObjCryst/ObjCryst/ReflectionProfile.h"
+#include "ObjCryst/ObjCryst/CIF.h"
+#include "ObjCryst/ObjCryst/Indexing.h"
+#include "ObjCryst/ObjCryst/DiffractionDataSingleCrystal.h"
 
 namespace ObjCryst
 {

@@ -20,8 +20,8 @@
 *  source file ObjCryst++ Crystal class
 *
 */
-#include "ObjCryst/UnitCell.h"
-#include "Quirks/VFNStreamFormat.h"
+#include "ObjCryst/ObjCryst/UnitCell.h"
+#include "ObjCryst/Quirks/VFNStreamFormat.h"
 
 namespace ObjCryst
 {

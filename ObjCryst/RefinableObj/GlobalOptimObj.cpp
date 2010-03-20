@@ -22,16 +22,16 @@
 */
 #include <iomanip>
 
-#include "RefinableObj/GlobalOptimObj.h"
-#include "ObjCryst/Crystal.h"
-#include "Quirks/VFNStreamFormat.h"
-#include "Quirks/VFNDebug.h"
-#include "Quirks/Chronometer.h"
-#include "ObjCryst/IO.h"
-#include "RefinableObj/LSQNumObj.h"
+#include "ObjCryst/RefinableObj/GlobalOptimObj.h"
+#include "ObjCryst/ObjCryst/Crystal.h"
+#include "ObjCryst/Quirks/VFNStreamFormat.h"
+#include "ObjCryst/Quirks/VFNDebug.h"
+#include "ObjCryst/Quirks/Chronometer.h"
+#include "ObjCryst/ObjCryst/IO.h"
+#include "ObjCryst/RefinableObj/LSQNumObj.h"
 
 #ifdef __WX__CRYST__
-   #include "wxCryst/wxRefinableObj.h"
+   #include "ObjCryst/wxCryst/wxRefinableObj.h"
    #undef GetClassName // Conflict from wxMSW headers ? (cygwin)
 #endif
 

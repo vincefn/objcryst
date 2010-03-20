@@ -21,11 +21,11 @@
 *
 */
 #include <ctime>
-#include "RefinableObj/RefinableObj.h"
-#include "Quirks/VFNStreamFormat.h"
-#include "Quirks/VFNDebug.h"
+#include "ObjCryst/RefinableObj/RefinableObj.h"
+#include "ObjCryst/Quirks/VFNStreamFormat.h"
+#include "ObjCryst/Quirks/VFNDebug.h"
 #ifdef __WX__CRYST__
-   #include "wxCryst/wxRefinableObj.h"
+   #include "ObjCryst/wxCryst/wxRefinableObj.h"
    #undef GetClassName // Conflict from wxMSW headers ? (cygwin)
 #endif
 #include <algorithm>
@@ -2001,16 +2001,16 @@ void GetRefParListClockRecursive(ObjRegistry<RefinableObj> &reg,RefinableObjCloc
 //***********EXPLICIT INSTANTIATION*******************//
 template void RefObjRegisterRecursive(RefinableObj &obj,ObjRegistry<RefinableObj> &reg);
 }//namespace
-#include "ObjCryst/Crystal.h"
-#include "ObjCryst/Scatterer.h"
-#include "ObjCryst/ScatteringPower.h"
-#include "ObjCryst/ZScatterer.h"
-#include "ObjCryst/PowderPattern.h"
-#include "ObjCryst/DiffractionDataSingleCrystal.h"
-#include "ObjCryst/ScatteringCorr.h"
-#include "RefinableObj/GlobalOptimObj.h"
-#include "RefinableObj/IO.h"
-#include "ObjCryst/ReflectionProfile.h"
+#include "ObjCryst/ObjCryst/Crystal.h"
+#include "ObjCryst/ObjCryst/Scatterer.h"
+#include "ObjCryst/ObjCryst/ScatteringPower.h"
+#include "ObjCryst/ObjCryst/ZScatterer.h"
+#include "ObjCryst/ObjCryst/PowderPattern.h"
+#include "ObjCryst/ObjCryst/DiffractionDataSingleCrystal.h"
+#include "ObjCryst/ObjCryst/ScatteringCorr.h"
+#include "ObjCryst/RefinableObj/GlobalOptimObj.h"
+#include "ObjCryst/RefinableObj/IO.h"
+#include "ObjCryst/ObjCryst/ReflectionProfile.h"
 using namespace ObjCryst;
 template class ObjRegistry<RefObjOpt>;
 template class ObjRegistry<RefinableObj>;

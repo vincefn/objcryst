@@ -4,10 +4,10 @@
 #include "cctbx/sgtbx/space_group.h"
 #include "cctbx/miller/sym_equiv.h"
 
-#include "ObjCryst/CIF.h"
-#include "ObjCryst/Crystal.h"
-#include "ObjCryst/Atom.h"
-#include "ObjCryst/PowderPattern.h"
+#include "ObjCryst/ObjCryst/CIF.h"
+#include "ObjCryst/ObjCryst/Crystal.h"
+#include "ObjCryst/ObjCryst/Atom.h"
+#include "ObjCryst/ObjCryst/PowderPattern.h"
 
 using namespace std;
 

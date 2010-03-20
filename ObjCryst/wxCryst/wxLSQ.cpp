@@ -20,7 +20,7 @@
 *
 */
 
-#include "wxCryst/wxLSQ.h"
+#include "ObjCryst/wxCryst/wxLSQ.h"
 
 namespace ObjCryst
 {
