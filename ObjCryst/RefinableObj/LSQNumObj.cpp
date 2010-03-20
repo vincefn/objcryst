@@ -69,7 +69,21 @@ void LSQNumObj::SetParIsFixed(const RefParType *type,const bool fix)
    if(mRefParList.GetNbPar()==0) this->PrepareRefParList();
    mRefParList.SetParIsFixed(type,fix);
 }
-   
+
+void LSQNumObj::SetParIsFixed(RefinablePar &par,const bool fix)
+{
+   if(mRefParList.GetNbPar()==0) this->PrepareRefParList();
+   mRefParList.GetPar(par.GetPointer()).SetIsFixed(fix);
+}
+
+void LSQNumObj::SetParIsFixed(RefinableObj &obj,const bool fix)
+
+{
+   if(mRefParList.GetNbPar()==0) this->PrepareRefParList();
+   for(unsigned int i=0;i<obj.GetNbPar();++i)
+      this->SetParIsFixed(obj.GetPar(i),fix);
+}
+
 void LSQNumObj::UnFixAllPar()
 {
    if(mRefParList.GetNbPar()==0) this->PrepareRefParList();
@@ -634,7 +648,8 @@ void LSQNumObj::SetRefinedObj(RefinableObj &obj, const unsigned int LSQFuncIndex
    {
       mvRefinedObjMap.clear();
    }
-   RecursiveMapFunc(obj,mvRefinedObjMap,LSQFuncIndex);
+   if(recursive) RecursiveMapFunc(obj,mvRefinedObjMap,LSQFuncIndex);
+   else mvRefinedObjMap[&obj]=LSQFuncIndex;
 }
 
 //ObjRegistry<RefinableObj> &LSQNumObj::GetRefinedObjList(){return mRecursiveRefinedObjList;}

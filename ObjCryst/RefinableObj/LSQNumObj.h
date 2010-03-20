@@ -47,6 +47,23 @@ class LSQNumObj
       ///
       /// LSQNumObj::PrepareRefParList() must be called first!
       void SetParIsFixed(const RefParType *type,const bool fix);
+      /** Fix one parameter
+      *
+      * Note that this will fix the copied parameter, not the one
+      * in the original object. The supplied RefinablePar
+      * may be either the copied one or the original.
+      *
+      * LSQNumObj::PrepareRefParList() must be called first!
+      **/ 
+      void SetParIsFixed(RefinablePar &par,const bool fix);
+      /** Fix all parameters within an object
+      *
+      * Note that this will fix the copied parameters, not the one
+      * in the original objects.
+      *
+      * LSQNumObj::PrepareRefParList() must be called first!
+      **/ 
+      void SetParIsFixed(RefinableObj &obj,const bool fix);
       /// UnFix All parameters
       ///
       /// LSQNumObj::PrepareRefParList() must be called first!
