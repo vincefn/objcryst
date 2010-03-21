@@ -943,7 +943,7 @@ void WXPowderPattern::OnMenuLeBail(wxCommandEvent& event)
    #else
    cout<<"Beginning refinement"<<endl;
    LSQNumObj lsq;
-   lsq.SetRefinedObj(this->GetPowderPattern());
+   lsq.SetRefinedObj(this->GetPowderPattern(),0,true,true);
    lsq.PrepareRefParList(true);
    lsq.SetParIsFixed(gpRefParTypeObjCryst,true);
    lsq.SetParIsFixed(gpRefParTypeScatt,false);
@@ -2396,7 +2396,7 @@ void WXCellExplorer::OnSelectCell(wxCommandEvent &event)
                                              /mpDiff->GetParentPowderPattern().GetNbPointUsed()));
             
             LSQNumObj lsqobj("Profile Fitting object");
-            lsqobj.SetRefinedObj(mpDiff->GetParentPowderPattern());
+            lsqobj.SetRefinedObj(mpDiff->GetParentPowderPattern(),0,true,true);
             lsqobj.PrepareRefParList(true);
             lsqobj.SetParIsUsed(gpRefParTypeObjCryst,false);
             lsqobj.SetParIsUsed(gpRefParTypeScattDataScale,true);
@@ -3551,7 +3551,7 @@ wxWindow(parent,-1),mpPattern(pPattern),mpDiff(pDiff),mLSQ("Profile Fitting obje
    wxBoxSizer *pSizer0=new wxBoxSizer(wxVERTICAL);
    this->SetSizer(pSizer0);
 
-   wxNotebook *pNotebook = new wxNotebook(this, -1);
+   wxNotebook *pNotebook = new wxNotebook(this, -1,wxDefaultPosition,wxSize(400,400));
    pSizer0->Add(pNotebook,0,wxALIGN_CENTER);
    // Quick interface
       wxWindow *pQuick=new wxWindow(pNotebook,-1);
@@ -3672,7 +3672,7 @@ wxWindow(parent,-1),mpPattern(pPattern),mpDiff(pDiff),mLSQ("Profile Fitting obje
 
    // Manual interface
       // prepare LSQ object
-         mLSQ.SetRefinedObj(pDiff->GetParentPowderPattern());
+         mLSQ.SetRefinedObj(pDiff->GetParentPowderPattern(),0,true,true);
          mLSQ.PrepareRefParList(true);
          //mLSQ.SetParIsUsed(gpRefParTypeObjCryst,false);
          //mLSQ.SetParIsUsed(gpRefParTypeScattDataScale,true);
@@ -3848,7 +3848,7 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
          fitcell=mpFitCheckList->IsChecked(7);
       }
       try{
-         //mLSQ.SetParIsFixed(gpRefParTypeScattDataScale,false);
+         mLSQ.SetParIsFixed(gpRefParTypeScattDataScale,false);
          
          // :TODO: take care of other profiles than pseudo-voigt (DE-PV)
          if(fitzero) mLSQ.SetParIsFixed(mpDiff->GetParentPowderPattern().GetPar("Zero"),false);
@@ -4172,7 +4172,7 @@ void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
             //mpLog->AppendText(wxString::Format(_T("/%5.2f"),pDiff->GetParentPowderPattern().GetRw()*100));
             // LSQ refinement
             LSQNumObj lsq;
-            lsq.SetRefinedObj(pDiff->GetParentPowderPattern());
+            lsq.SetRefinedObj(pDiff->GetParentPowderPattern(),0,true,true);
             lsq.PrepareRefParList(true);
             lsq.SetParIsFixed(gpRefParTypeObjCryst,true);
             lsq.SetParIsFixed(gpRefParTypeScattDataScale,false);
@@ -4209,14 +4209,14 @@ void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
             const REAL rw=pDiff->GetParentPowderPattern().GetRw()*100;
             const REAL gof=pDiff->GetParentPowderPattern().GetChi2()
                            /(pDiff->GetParentPowderPattern().GetNbPointUsed()-pDiff->GetNbReflBelowMaxSinThetaOvLambda());
-            if(dlgProgress.Update(i*nbcycle+j,wxString::Format(_T("%s  (cycle #%u)\n   Rwp=%5.2f%%\n   GoF=%6.3f"),
-                                                               hm.c_str(),j,rw,gof))==false) return;
+            if(dlgProgress.Update(i*nbcycle+j,wxString::FromAscii(hm.c_str())+wxString::Format(_T("  (cycle #%u)\n   Rwp=%5.2f%%\n   GoF=%9.2f"),
+                                                               j,rw,gof))==false) return;
          }
          const REAL rw=pDiff->GetParentPowderPattern().GetRw()*100;
          const REAL gof=pDiff->GetParentPowderPattern().GetChi2()
                         /(pDiff->GetParentPowderPattern().GetNbPointUsed()-pDiff->GetNbReflBelowMaxSinThetaOvLambda());
          vSPG.push_back(SPGScore(hm.c_str(),rw,gof));
-         mpLog->AppendText(wxString::Format(_T(" Rwp= %5.2f%%  GoF=%6.3f\n"),rw,gof));
+         mpLog->AppendText(wxString::Format(_T(" Rwp= %5.2f%%  GoF=%9.2f: "),rw,gof)+wxString::FromAscii(hm.c_str())+_T("\n"));
       }
    }
    // sort results by GoF
@@ -4225,7 +4225,7 @@ void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
    for(list<SPGScore>::const_iterator pos=vSPG.begin();pos!=vSPG.end();++pos)
    {
       if(pos->gof>(2*vSPG.begin()->gof)) break;
-      mpLog->AppendText(wxString::Format(_T(" %-14s: Rwp= %5.2f%%  GoF=%6.3f\n"),pos->hm.c_str(),pos->rw,pos->gof));
+      mpLog->AppendText(wxString::Format(_T(" Rwp= %5.2f%%  GoF=%9.2f: "),pos->rw,pos->gof)+wxString::FromAscii(pos->hm.c_str())+_T("\n"));
    }
    // Back to original spacegroup
    pCrystal->Init(a,b,c,d,e,f,spgname,name);
