@@ -43,7 +43,7 @@ CRYST_LDFLAGS   = ${LDFLAGS} -L/usr/lib -L/usr/local/lib -L$(DIR_CRYSTVECTOR) -L
 MAKEDEPEND = gcc -MM ${CPPFLAGS} ${CXXFLAGS} ${C_BLITZFLAG} $< > $*.dep
 
 # header files
-SEARCHDIRS = -I$(DIR_TAU)/include -I${DIR_CRYST} -I$(DIR_STATIC_LIBS)/include
+SEARCHDIRS = -I$(DIR_TAU)/include -I${DIR_CRYST}/.. -I$(DIR_STATIC_LIBS)/include
 
 #wxWindows flags
 ifeq ($(wxcryst),1)
@@ -93,6 +93,12 @@ endif
 GLUT_FLAGS= -DHAVE_GLUT
 GLUT_LIB= -lglut
 
+#Specifiy REAL= float or double
+ifeq ($(real_double),1)
+REAL_FLAG= -DREAL=double
+else
+REAL_FLAG= -DREAL=float
+endif
 #Using OpenGL ?
 ifeq ($(opengl),1)
 GL_WX_LIB = `$(WXCONFIG) --gl-libs` -lGL -lGLU $(GLUT_LIB)
@@ -117,32 +123,37 @@ else
 LDNEWMAT := -lnewmat
 endif
 
-#Set DEBUG options
-# $(DIR_CRYST)/../static-libs/lib/libfftw3f.a
-ifeq ($(debug),1)
+ifeq ($(shared_libcryst),1)
+ CPPFLAGS = -O3 -w -fPIC -g -ffast-math -fstrict-aliasing -pipe -funroll-loops
+ DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS} ${FFTW_FLAGS} ${REAL_FLAG}
+else
+ ifeq ($(debug),1)
+ #Set DEBUG options
    ifdef RPM_OPT_FLAGS
       # we are building a RPM !
       CPPFLAGS = ${RPM_OPT_FLAGS} 
    else
       CPPFLAGS = -g -Wall -D__DEBUG__ 
    endif
-   DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS} ${FFTW_FLAGS}
+   DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS} ${FFTW_FLAGS} ${REAL_FLAG}
    LOADLIBES = -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx ${LDNEWMAT} ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS} ${FFTW_LIB}
-else
-# -march=athlon,pentiumpro
+ else
    ifdef RPM_OPT_FLAGS
       # we are building a RPM !
-      CPPFLAGS = ${RPM_OPT_FLAGS} 
+      CPPFLAGS = ${RPM_OPT_FLAGS}
    else
       # Athlon XP, with auto-vectorization
       #CPPFLAGS = -O3 -w -ffast-math -march=athlon-xp -mmmx -msse -m3dnow -mfpmath=sse -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops -ftree-vectorize -ftree-vectorizer-verbose=0
       # AMD64 Opteron , with auto-vectorization
       #CPPFLAGS = -O3 -w -ffast-math -march=opteron -mmmx -msse -msse2 -m3dnow -mfpmath=sse -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops -ftree-vectorize -ftree-vectorizer-verbose=0
+      # native (activates SSE, etc...)
+      CPPFLAGS = -O3 -march=native -w -ffast-math -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops
       #default flags
-      CPPFLAGS = -O3 -w -ffast-math -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops
+      #CPPFLAGS = -O3 -w -ffast-math -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops
    endif
-   DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS} ${FFTW_FLAGS}
+   DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS} ${FFTW_FLAGS} ${REAL_FLAG}
    LOADLIBES = -s -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx ${LDNEWMAT} ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS} ${FFTW_LIB}
+ endif
 endif
 # Add to statically link: -nodefaultlibs -lgcc /usr/lib/libstdc++.a
 

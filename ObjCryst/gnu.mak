@@ -49,6 +49,9 @@ clean::
 	$(MAKE) -f gnu.mak -C ${DIR_WXWCRYST} clean
 	$(MAKE) -f gnu.mak -C ${DIR_EXAMPLE} clean
 
+# Build *shared* library - the "shared_libcryst=1" option is mandatory
+lib:libnewmat libcctbx libCrystVector libQuirks libRefinableObj libCryst
+	gcc -shared -Wl,-soname,libObjCryst.so.1 -o libObjCryst.so.1.0.0 */*.o
 
 #target to make documentation (requires doxygen)
 #also makes tags file, although it is not related to doxygen
