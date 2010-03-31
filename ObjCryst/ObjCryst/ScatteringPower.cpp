@@ -56,9 +56,11 @@ long NiftyStaticGlobalObjectsInitializer_ScatteringPower::mCount=0;
 ObjRegistry<ScatteringPower> gScatteringPowerRegistry("Global ScatteringPower Registry");
 
 ScatteringPower::ScatteringPower():mDynPopCorrIndex(0),mBiso(1.0),mIsIsotropic(true),
-mMaximumLikelihoodNbGhost(0),mFormalCharge(0.0),mBeta(6)
+mMaximumLikelihoodNbGhost(0),mFormalCharge(0.0)
 {
    VFN_DEBUG_MESSAGE("ScatteringPower::ScatteringPower():"<<mName,5)
+   mBeta.resize(6);
+   mBeta = 0;
    gScatteringPowerRegistry.Register(*this);
    this->Init();
    mClockMaster.AddChild(mClock);
@@ -125,7 +127,6 @@ REAL ScatteringPower::GetBij(const size_t &idx) const
 }
 void ScatteringPower::SetBij(const size_t &i, const size_t &j, const REAL newB)
 {
-    mClock.Click();
     size_t idx = 0;
     if(i == j)
     {
@@ -139,6 +140,7 @@ void ScatteringPower::SetBij(const size_t &i, const size_t &j, const REAL newB)
 }
 void ScatteringPower::SetBij(const size_t &idx, const REAL newB)
 {
+    mClock.Click();
     mIsIsotropic=false;
     mBeta(idx) = newB;
 }
