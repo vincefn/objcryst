@@ -45,6 +45,8 @@ int CIFNumeric2Int(const std::string &s);
 *  - atom coordinates: _atom_site_fract_{x} ; _atom_site_Cartn_{x,y,z}
 *  - atom occupancy: _atom_site_occupancy
 *  - atom label & symbol: _atom_site_type_symbol ; _atom_site_label
+*  - atom adps: _atom_site_aniso_{U,B}_{11,22,33,12,13,23} > _atom_site_{U,B}_iso_or_equiv
+*
 *
 * Cartesian coordinates are stored in Angstroems, angles in radians.
 *
@@ -75,6 +77,9 @@ class CIFData
       /// Extract all atomic positions. Will generate cartesian from fractional
       /// coordinates or vice-versa if only cartesian coordinates are available.
       void ExtractAtomicPositions(const bool verbose=false);
+      /// Extract anisotropic atomic displacement parameters. Isotropic ADPs
+      //  may be extracted in ExtractAtomicPositions. This takes prescedent.
+      void ExtractAnisotropicADPs(const bool verbose=false);
       /// Extract Powder Diffraction data, with Iobs, sigma(Iobs) and either 2theta
       /// or time-of-flight position.
       void ExtractPowderPattern(const bool verbose=false);
@@ -132,6 +137,12 @@ class CIFData
          std::vector<float> mCoordCart;
          /// Site occupancy, or -1
          float mOccupancy;
+
+         /// ADP tensor
+         std::vector<float> mBeta;
+
+         /// Biso
+         float mBiso;
       };
       /// Atoms, if any are found
       std::vector<CIFAtom> mvAtom;

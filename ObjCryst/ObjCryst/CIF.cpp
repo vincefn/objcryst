@@ -14,7 +14,7 @@ using namespace std;
 namespace ObjCryst
 {
 CIFData::CIFAtom::CIFAtom():
-mLabel(""),mSymbol(""),mOccupancy(1.0)
+mLabel(""),mSymbol(""),mOccupancy(1.0),mBiso(0.0)
 {}
 
 CIFData::CIFData()
@@ -28,6 +28,7 @@ void CIFData::ExtractAll(const bool verbose)
    this->ExtractUnitCell(verbose);
    this->ExtractSpacegroup(verbose);
    this->ExtractAtomicPositions(verbose);
+   this->ExtractAnisotropicADPs(verbose);
    this->ExtractPowderPattern(verbose);
    this->ExtractSingleCrystalData(verbose);
 }
@@ -213,7 +214,7 @@ void CIFData::ExtractAtomicPositions(const bool verbose)
        loop!=mvLoop.end();++loop)
    {
       if(mvAtom.size()>0) break;// only extract ONE list of atoms, preferably fractional coordinates
-      map<ci_string,vector<string> >::const_iterator posx,posy,posz,poslabel,possymbol,posoccup;
+      map<ci_string,vector<string> >::const_iterator posx,posy,posz,poslabel,possymbol,posoccup,posadp;
       posx=loop->second.find("_atom_site_fract_x");
       posy=loop->second.find("_atom_site_fract_y");
       posz=loop->second.find("_atom_site_fract_z");
@@ -251,7 +252,7 @@ void CIFData::ExtractAtomicPositions(const bool verbose)
          }
       }
       if(mvAtom.size()>0)
-      {// Got the atoms, get names and symbols
+      {// Got the atoms, get names, symbols and adps
          possymbol=loop->second.find("_atom_site_type_symbol");
          if(possymbol!=loop->second.end())
             for(unsigned int i=0;i<nb;++i)
@@ -280,6 +281,17 @@ void CIFData::ExtractAtomicPositions(const bool verbose)
          if(posoccup!=loop->second.end())
             for(unsigned int i=0;i<nb;++i)
                mvAtom[i].mOccupancy=CIFNumeric2Float(posoccup->second[i]);
+         // ADPs - Record ani, ovl or mpl as iso.
+         float mult = 1.0;
+         posadp=loop->second.find("_atom_site_B_iso_or_equiv");
+         if(posadp==loop->second.end())
+         {
+            mult = 8 * M_PI * M_PI;
+            posadp=loop->second.find("_atom_site_U_iso_or_equiv");
+         }
+         if(posadp!=loop->second.end())
+            for(unsigned int i=0;i<nb;++i)
+               mvAtom[i].mBiso = mult*CIFNumeric2Float(posadp->second[i]);
          // Now be somewhat verbose
          if(verbose)
          {
@@ -300,11 +312,127 @@ void CIFData::ExtractAtomicPositions(const bool verbose)
                      cout<<mvAtom[i].mCoordCart[j]<<" ";
                }
                cout<<" , Occupancy= "<<mvAtom[i].mOccupancy<<endl;
+               cout<<" , Biso= "<<mvAtom[i].mBiso<<endl;
             }
          }
       }
    }
 }
+
+void CIFData::ExtractAnisotropicADPs(const bool verbose)
+{
+
+   typedef map<set<ci_string>,map<ci_string,vector<string> > >::const_iterator LoopIter;
+   typedef map<ci_string,vector<string> >::const_iterator EntryIter;
+
+   const float utob = 8 * M_PI * M_PI;
+
+   const char* uijlabels[] = {
+       "_atom_site_aniso_U_11",
+       "_atom_site_aniso_U_22",
+       "_atom_site_aniso_U_33",
+       "_atom_site_aniso_U_12",
+       "_atom_site_aniso_U_13",
+       "_atom_site_aniso_U_23",
+   };
+
+   const char* bijlabels[] = {
+       "_atom_site_aniso_B_11",
+       "_atom_site_aniso_B_22",
+       "_atom_site_aniso_B_33",
+       "_atom_site_aniso_B_12",
+       "_atom_site_aniso_B_13",
+       "_atom_site_aniso_B_23"
+   };
+
+   float mult[6];
+
+   EntryIter anisolabels, beta11, beta22, beta33, beta12, beta13, beta23;
+
+   EntryIter* betaiters[] = {&beta11, &beta22, &beta33, &beta12, &beta13, &beta23};
+
+   for(LoopIter loop=mvLoop.begin(); loop!=mvLoop.end();++loop)
+   {
+      
+      // Start with anisotropic factors. If we can find the the
+      // "_atom_site_aniso_label" tag, we then want to look for the aniso
+      // information. 
+      anisolabels = loop->second.find("_atom_site_aniso_label");
+
+      // Move to the next loop if we can't find it here.
+      if (anisolabels == loop->second.end()) continue;
+      if(verbose) cout << "Found labels!" << endl;
+
+      // We have a list of labels. Position the iterators for each of the
+      // adps.
+      for (int idx = 0; idx < 6; ++idx)
+      {
+         EntryIter& betaiter = *betaiters[idx];
+         betaiter = loop->second.find(bijlabels[idx]);
+         mult[idx] = 1.0;
+         if(betaiter == loop->second.end())
+         {
+            betaiter = loop->second.find(uijlabels[idx]);
+            mult[idx] = utob;
+         }
+         if(betaiter == loop->second.end()) mult[idx] = 0.0;
+      }
+
+      // Check that we have values. If not, then we can get out of here.
+      bool havedata = false;
+      for (int i = 0; i < 6; ++i)
+      {
+         if( mult[i] != 0 ) havedata = true;
+      }
+      if (!havedata) return;
+
+      // Now loop over the labels, find the corresponding CIFAtom, and fill in
+      // its information.
+      int nb = anisolabels->second.size();
+      if(verbose) cout << "Have " << nb << " labels." << endl;
+      for (int i = 0; i < nb; ++i)
+      {
+         string label = anisolabels->second[i];
+         if(verbose) cout << label << endl;
+
+         // See if we have a CIFAtom with this label. If so, initialize the mBeta
+         // vector.
+         vector<CIFAtom>::iterator atom = mvAtom.begin();
+         for (; atom != mvAtom.end(); ++atom)
+         {
+            if (atom->mLabel == label)
+            {
+               atom->mBeta.resize(6, 0.0);
+               break;
+            }
+         }
+         // If we didn't find the mvAtom, then we should move on to the next
+         // label.
+         if (atom == mvAtom.end()) continue;
+      
+         // Fill in what we've got, one entry at a time.
+         for (int idx=0; idx<6; ++idx)
+         {
+            if (mult[idx] == 0) 
+            {
+               if(verbose) cout << "skipping index " << idx << endl;
+               continue;
+            }
+
+            EntryIter& betaiter = *betaiters[idx];
+
+            if (betaiter->second.size() <= i) continue;
+         
+            double beta = CIFNumeric2Float(betaiter->second[i]);
+            atom->mBeta[idx] = mult[idx] * beta;
+         
+            if(verbose) cout << "mBeta " << idx << " " << atom->mBeta[idx] << endl;
+         }
+      }
+   }
+   return;
+}
+
 
 /// This is the default wavelength - whenever a "_diffrn_radiation_wavelength" or 
 /// "_pd_proc_wavelength"entry is found,
@@ -903,13 +1031,23 @@ Crystal* CreateCrystalFromCIF(CIF &cif,bool verbose,bool checkSymAsXYZ)
          
          for(vector<CIFData::CIFAtom>::const_iterator posat=pos->second.mvAtom.begin();posat!=pos->second.mvAtom.end();++posat)
          {
-            if(pCryst->GetScatteringPowerRegistry().Find(posat->mSymbol,"ScatteringPowerAtom",true)<0)
+            if(pCryst->GetScatteringPowerRegistry().Find(posat->mLabel,"ScatteringPowerAtom",true)<0)
             {
-               cout<<"Scattering power "<<posat->mSymbol<<" not found, creating it..."<<endl;
-               pCryst->AddScatteringPower(new ScatteringPowerAtom(posat->mSymbol,posat->mSymbol));
+               cout<<"Scattering power "<<posat->mLabel<<" not found, creating it..."<<endl;
+               ScatteringPowerAtom* sp = new ScatteringPowerAtom(posat->mLabel,posat->mSymbol);
+               // Check for mBeta or Biso
+               if(posat->mBeta.size() == 6)
+               {
+                  for (int idx=0; idx<6; ++idx) sp->SetBij(idx, posat->mBeta[idx]);
+               }
+               else
+               {
+                  sp->SetBiso(posat->mBiso);
+               }
+               pCryst->AddScatteringPower(sp);
             }
             pCryst->AddScatterer(new Atom(posat->mCoordFrac[0],posat->mCoordFrac[1],posat->mCoordFrac[2],
-                                          posat->mLabel,&(pCryst->GetScatteringPower(posat->mSymbol)),
+                                          posat->mLabel,&(pCryst->GetScatteringPower(posat->mLabel)),
                                           posat->mOccupancy));
          }
       }
