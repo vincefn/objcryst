@@ -277,7 +277,7 @@ void CIFData::ExtractAtomicPositions(const bool verbose)
                }
             }
          // Occupancy ?
-         posoccup=loop->second.find("atom_site_occupancy");
+         posoccup=loop->second.find("_atom_site_occupancy");
          if(posoccup!=loop->second.end())
             for(unsigned int i=0;i<nb;++i)
                mvAtom[i].mOccupancy=CIFNumeric2Float(posoccup->second[i]);
