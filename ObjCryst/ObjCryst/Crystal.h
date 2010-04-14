@@ -326,12 +326,14 @@ class Crystal:public UnitCell
                                        const RefParType *type=gpRefParTypeObjCryst);
       virtual REAL GetLogLikelihood()const;
       /** \brief output Crystal structure as a cif file (EXPERIMENTAL !)
+      *  \param mindist : minimum distance between atoms to consider them
+      *  overlapping. Overlapping atoms are only included as comments in the
+      *  CIF file.
       *
-      * \warning This is very crude and EXPERIMENTAL so far: only isotropic scattering power
-      * are supported, and there is not much information beside atom
-      * positions... 
+      * \warning This is very crude and EXPERIMENTAL so far:  there is not much
+      * information beside atom positions... 
       */
-      virtual void CIFOutput(ostream &os)const;
+      virtual void CIFOutput(ostream &os, double mindist = 0.5)const;
       
       virtual void GetGeneGroup(const RefinableObj &obj, 
                                 CrystVector_uint & groupIndex,

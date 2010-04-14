@@ -900,7 +900,7 @@ REAL Crystal::GetLogLikelihood()const
    return this->GetBumpMergeCost()+this->GetBondValenceCost();
 }
 
-void Crystal::CIFOutput(ostream &os)const
+void Crystal::CIFOutput(ostream &os, double mindist)const
 {
    VFN_DEBUG_ENTRY("Crystal::OutputCIF()",5)
 
@@ -918,7 +918,7 @@ void Crystal::CIFOutput(ostream &os)const
    { 
      tempname.replace(where,1,"_");
      where = tempname.find(" ",0);
-     cout << tempname << endl;
+     //cout << tempname << endl;
    }
    os << "data_" << tempname <<endl<<endl;
 
@@ -955,15 +955,18 @@ void Crystal::CIFOutput(ostream &os)const
    this->GetScatteringComponentList();
    
    os << "loop_" << endl
-      << "    _atom_site_type_symbol" <<endl
       << "    _atom_site_label" <<endl
+      << "    _atom_site_type_symbol" <<endl
       << "    _atom_site_fract_x"<<endl
       << "    _atom_site_fract_y" <<endl
       << "    _atom_site_fract_z" <<endl
       << "    _atom_site_U_iso_or_equiv" <<endl
       << "    _atom_site_occupancy" <<endl
       << "    _atom_site_adp_type" <<endl;
-   
+
+   const double BtoU = 1.0 / (8 * M_PI * M_PI);
+   std::vector<const ScatteringPower*> anisovec;
+   std::vector<std::string> namevec;
    CrystMatrix_REAL minDistTable;
    minDistTable=this->GetMinDistanceTable(-1.);
    unsigned long k=0;
@@ -975,28 +978,63 @@ void Crystal::CIFOutput(ostream &os)const
       {
          if(0==list(j).mpScattPow) continue;
          bool redundant=false;
-         for(unsigned long l=0;l<k;++l) if(abs(minDistTable(l,k))<0.5) redundant=true;//-1 means dist > 10A
+         for(unsigned long l=0;l<k;++l) if(abs(minDistTable(l,k))<mindist) redundant=true;//-1 means dist > 10A
          if(!redundant)
          {
             // We can't have spaces in atom labels
             string s=this->GetScatt(i).GetComponentName(j);
             size_t posc=s.find(' ');
             while(posc!=string::npos){s[posc]='~';posc=s.find(' ');}
+
+            bool isiso = list(j).mpScattPow->IsIsotropic();
+            if(!isiso) 
+            {
+               anisovec.push_back(list(j).mpScattPow);
+               namevec.push_back(s);
+            }
             
             os   << "    "
-                 << FormatString(list(j).mpScattPow->GetName(),8) << " "
                  << FormatString(s,10) << " "
+                 << FormatString(list(j).mpScattPow->GetSymbol(),8) << " "
                  << FormatFloat(list(j).mX,7,4) << " "
                  << FormatFloat(list(j).mY,7,4) << " "
                  << FormatFloat(list(j).mZ,7,4) << " "
-                 << FormatFloat(list(j).mpScattPow->GetBiso()/8./M_PI/M_PI) << " "
+                 << FormatFloat(list(j).mpScattPow->GetBiso()*BtoU) << " "
                  << FormatFloat(list(j).mOccupancy,6,4)
-                 << " Uiso"
+                 << (isiso ? " Uiso" : " Uani")
                  << endl;
          }
          k++;
       }
    }
+
+
+   // Handle anisotropic atoms
+   if( anisovec.size() > 0 )
+   {
+
+      os << endl
+         << "loop_" << endl
+         << "    _atom_site_aniso_label" << endl
+         << "    _atom_site_aniso_type_symbol" << endl
+         << "    _atom_site_aniso_U_11" << endl
+         << "    _atom_site_aniso_U_22" << endl
+         << "    _atom_site_aniso_U_33" << endl
+         << "    _atom_site_aniso_U_12" << endl
+         << "    _atom_site_aniso_U_13" << endl
+         << "    _atom_site_aniso_U_23" << endl;
+
+
+      for(size_t i = 0; i < anisovec.size(); ++i)
+      {
+         os << "    " << FormatString(namevec[i],8) << " ";
+         os << "    " << FormatString(anisovec[i]->GetSymbol(),8) << " ";
+         for(int j=0; j<6; ++j)
+            os << FormatFloat(anisovec[i]->GetBij(j)*BtoU,7,4) << " ";
+         os << endl;
+      }
+   }
+
    
    bool first=true;
    k=0;
@@ -1007,7 +1045,7 @@ void Crystal::CIFOutput(ostream &os)const
       {
          if(0==list(j).mpScattPow) continue;
          bool redundant=false;
-         for(unsigned long l=0;l<k;++l) if(abs(minDistTable(l,k))<0.5) redundant=true;//-1 means dist > 10A
+         for(unsigned long l=0;l<k;++l) if(abs(minDistTable(l,k))<mindist) redundant=true;//-1 means dist > 10A
          if(redundant)
          {
             if(first)
@@ -1015,7 +1053,7 @@ void Crystal::CIFOutput(ostream &os)const
                first=false;
                os <<endl
                   << "# The following atoms have been excluded by Fox because they are"<<endl
-                  << "# almost fully overlapping with another atom (d<0.5A)"<< endl;
+                  << "# almost fully overlapping with another atom (d<" << mindist << "A)"<< endl;
             }
             os   << "#    "
                  << FormatString(list(j).mpScattPow->GetName(),8) << " "
@@ -1055,7 +1093,7 @@ void Crystal::CIFOutput(ostream &os)const
       }
       os << "#"<<endl;
    }
-   
+
    VFN_DEBUG_EXIT("Crystal::OutputCIF()",5)
 }
 void Crystal::GetGeneGroup(const RefinableObj &obj,
