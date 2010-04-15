@@ -909,10 +909,15 @@ void Crystal::CIFOutput(ostream &os, double mindist)const
    int where, size;
    size = tempname.size();
    if (size > 32) 
-     {
-       tempname = tempname.substr(0,32);
-       size = tempname.size();
-     }
+   {
+      tempname = tempname.substr(0,32);
+      size = tempname.size();
+   }
+   if (size == 0)
+   {
+      tempname = "3D";
+      size = 2;
+   }
    where = tempname.find(" ",0);
    while (where != (int)string::npos)
    { 
@@ -996,10 +1001,10 @@ void Crystal::CIFOutput(ostream &os, double mindist)const
             os   << "    "
                  << FormatString(s,10) << " "
                  << FormatString(list(j).mpScattPow->GetSymbol(),8) << " "
-                 << FormatFloat(list(j).mX,7,4) << " "
-                 << FormatFloat(list(j).mY,7,4) << " "
-                 << FormatFloat(list(j).mZ,7,4) << " "
-                 << FormatFloat(list(j).mpScattPow->GetBiso()*BtoU) << " "
+                 << FormatFloat(list(j).mX,9,6) << " "
+                 << FormatFloat(list(j).mY,9,6) << " "
+                 << FormatFloat(list(j).mZ,9,6) << " "
+                 << FormatFloat(list(j).mpScattPow->GetBiso()*BtoU,9,6) << " "
                  << FormatFloat(list(j).mOccupancy,6,4)
                  << (isiso ? " Uiso" : " Uani")
                  << endl;
@@ -1016,7 +1021,6 @@ void Crystal::CIFOutput(ostream &os, double mindist)const
       os << endl
          << "loop_" << endl
          << "    _atom_site_aniso_label" << endl
-         << "    _atom_site_aniso_type_symbol" << endl
          << "    _atom_site_aniso_U_11" << endl
          << "    _atom_site_aniso_U_22" << endl
          << "    _atom_site_aniso_U_33" << endl
@@ -1028,9 +1032,8 @@ void Crystal::CIFOutput(ostream &os, double mindist)const
       for(size_t i = 0; i < anisovec.size(); ++i)
       {
          os << "    " << FormatString(namevec[i],8) << " ";
-         os << "    " << FormatString(anisovec[i]->GetSymbol(),8) << " ";
          for(int j=0; j<6; ++j)
-            os << FormatFloat(anisovec[i]->GetBij(j)*BtoU,7,4) << " ";
+            os << FormatFloat(anisovec[i]->GetBij(j)*BtoU,9,6) << " ";
          os << endl;
       }
    }
@@ -1058,10 +1061,10 @@ void Crystal::CIFOutput(ostream &os, double mindist)const
             os   << "#    "
                  << FormatString(list(j).mpScattPow->GetName(),8) << " "
                  << FormatString(this->GetScatt(i).GetComponentName(j),10) << " "
-                 << FormatFloat(list(j).mX,7,4) << " "
-                 << FormatFloat(list(j).mY,7,4) << " "
-                 << FormatFloat(list(j).mZ,7,4) << " "
-                 << FormatFloat(list(j).mpScattPow->GetBiso()/8./M_PI/M_PI) << " "
+                 << FormatFloat(list(j).mX,9,6) << " "
+                 << FormatFloat(list(j).mY,9,6) << " "
+                 << FormatFloat(list(j).mZ,9,6) << " "
+                 << FormatFloat(list(j).mpScattPow->GetBiso()*BtoU,9,6) << " "
                  << FormatFloat(list(j).mOccupancy,6,4)
                  << " Uiso"
                  << endl;
