@@ -773,6 +773,11 @@ void Crystal::SetUseDynPopCorr(const int b)
    mClockDynPopCorr.Reset();
 }
 
+int Crystal::GetUseDynPopCorr() const
+{
+   return mUseDynPopCorr.GetChoice();
+}
+
 int Crystal::FindScatterer(const string &scattName)const
 {
    VFN_DEBUG_MESSAGE("Crystal::FindScatterer(name)",0)

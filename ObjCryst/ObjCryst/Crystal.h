@@ -276,6 +276,10 @@ class Crystal:public UnitCell
       * \param use set to 1 to use, 0 not to use it.
       */
       void SetUseDynPopCorr(const int use);
+      /** Get dynamical population correction setting.
+      * See SetUseDynPopCorr.
+      */
+      int GetUseDynPopCorr() const;
       /** Get the Anti-bumping/pro-Merging cost function. Only works (ie returnes a non-null
       * value) if you have added antibump distances using Crystal::SetBumpMergeDistance().
       *
