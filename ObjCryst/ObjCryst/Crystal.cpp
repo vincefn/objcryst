@@ -1104,6 +1104,7 @@ void Crystal::CIFOutput(ostream &os, double mindist)const
 
    VFN_DEBUG_EXIT("Crystal::OutputCIF()",5)
 }
+
 void Crystal::GetGeneGroup(const RefinableObj &obj,
                                 CrystVector_uint & groupIndex,
                                 unsigned int &first) const

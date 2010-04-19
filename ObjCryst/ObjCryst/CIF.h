@@ -23,7 +23,7 @@ namespace ObjCryst
 {
 /// Convert one CIF value to a floating-point value
 /// Return 0 if no value can be converted (e.g. if '.' or '?' is encountered)
-float CIFNumeric2Float(const std::string &s);
+REAL CIFNumeric2REAL(const std::string &s);
 /// Convert one CIF value to a floating-point value
 /// Return 0 if no value can be converted (e.g. if '.' or '?' is encountered)
 int CIFNumeric2Int(const std::string &s);
@@ -93,10 +93,10 @@ class CIFData
       void Fractional2CartesianCoord();
       /// Convert from fractional to cartesian coordinates
       /// CIFData::CalcMatrices() must be called first
-      void f2c(float &x,float &y, float &z);
+      void f2c(REAL &x,REAL &y, REAL &z);
       /// Convert from cartesia to fractional coordinates
       /// CIFData::CalcMatrices() must be called first
-      void c2f(float &x,float &y, float &z);
+      void c2f(REAL &x,REAL &y, REAL &z);
       /// Calculate real space transformation matrices
       /// requires unit cell parameters
       void CalcMatrices(const bool verbose=false);
@@ -108,7 +108,7 @@ class CIFData
       std::map<std::set<ci_string>,std::map<ci_string,std::vector<std::string> > > mvLoop;
       /// Lattice parameters, in ansgtroem and degrees - vector size is 0 if no
       /// parameters have been obtained yet.
-      std::vector<float> mvLatticePar;
+      std::vector<REAL> mvLatticePar;
       /// Spacegroup number from International Tables (_space_group_IT_number), or -1.
       std::string mSpacegroupNumberIT;
       /// Spacegroup Hall symbol (or empty string) (_space_group_name_Hall)
@@ -130,28 +130,28 @@ class CIFData
          /// Symbol of the atom, or empty string (_atom_type_symbol or _atom_site_type_symbol).
          std::string mSymbol;
          /// Fractionnal coordinates (_atom_site_fract_{x,y,z}) or empty vector.
-         std::vector<float> mCoordFrac;
+         std::vector<REAL> mCoordFrac;
          /// Cartesian coordinates in Angstroem (_atom_site_Cartn_{x,y,z}) or empty vector.
          /// Transformation to fractionnal coordinates currently assumes 
          /// "a parallel to x; b in the plane of y and z" (see _atom_sites_Cartn_transform_axes)
-         std::vector<float> mCoordCart;
+         std::vector<REAL> mCoordCart;
          /// Site occupancy, or -1
-         float mOccupancy;
+         REAL mOccupancy;
 
          /// ADP tensor
-         std::vector<float> mBeta;
+         std::vector<REAL> mBeta;
 
          /// Biso
-         float mBiso;
+         REAL mBiso;
       };
       /// Atoms, if any are found
       std::vector<CIFAtom> mvAtom;
       /// Fractionnal2Cartesian matrix
-      float mOrthMatrix[3][3];
+      REAL mOrthMatrix[3][3];
       /// Cartesian2Fractionnal matrix
-      float mOrthMatrixInvert[3][3];
+      REAL mOrthMatrixInvert[3][3];
       /// Powder pattern data
-      std::vector<float> mPowderPatternObs,mPowderPatternX,mPowderPatternSigma;
+      std::vector<REAL> mPowderPatternObs,mPowderPatternX,mPowderPatternSigma;
       /// Single crystal data
       CrystVector_long mH,mK,mL;
       /// Single crystal data
@@ -159,7 +159,7 @@ class CIFData
       /// Is this X-Ray 2theta, time-of-flight ?
       WavelengthType mDataType;
       /// Wavelength
-      float mWavelength;
+      REAL mWavelength;
 };
 
 /** Main CIF class - parses the stream and separates data blocks, comments, items, loops.

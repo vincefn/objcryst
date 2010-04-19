@@ -40,22 +40,22 @@ void CIFData::ExtractUnitCell(const bool verbose)
    if(positem!=mvItem.end())
    {
       mvLatticePar.resize(6);
-      mvLatticePar[0]=CIFNumeric2Float(positem->second);
+      mvLatticePar[0]=CIFNumeric2REAL(positem->second);
       positem=mvItem.find("_cell_length_b");
       if(positem!=mvItem.end())
-         mvLatticePar[1]=CIFNumeric2Float(positem->second);
+         mvLatticePar[1]=CIFNumeric2REAL(positem->second);
       positem=mvItem.find("_cell_length_c");
       if(positem!=mvItem.end())
-         mvLatticePar[2]=CIFNumeric2Float(positem->second);
+         mvLatticePar[2]=CIFNumeric2REAL(positem->second);
       positem=mvItem.find("_cell_angle_alpha");
       if(positem!=mvItem.end())
-         mvLatticePar[3]=CIFNumeric2Float(positem->second);
+         mvLatticePar[3]=CIFNumeric2REAL(positem->second);
       positem=mvItem.find("_cell_angle_beta");
       if(positem!=mvItem.end())
-         mvLatticePar[4]=CIFNumeric2Float(positem->second);
+         mvLatticePar[4]=CIFNumeric2REAL(positem->second);
       positem=mvItem.find("_cell_angle_gamma");
       if(positem!=mvItem.end())
-         mvLatticePar[5]=CIFNumeric2Float(positem->second);
+         mvLatticePar[5]=CIFNumeric2REAL(positem->second);
       if(verbose) cout<<"Found Lattice parameters:" <<mvLatticePar[0]<<" , "<<mvLatticePar[1]<<" , "<<mvLatticePar[2]
                       <<" , "<<mvLatticePar[3]<<" , "<<mvLatticePar[4]<<" , "<<mvLatticePar[5]<<endl;
       mvLatticePar[3]*=0.017453292519943295;// pi/180
@@ -226,9 +226,9 @@ void CIFData::ExtractAtomicPositions(const bool verbose)
          for(unsigned int i=0;i<nb;++i)
          {
             mvAtom[i].mCoordFrac.resize(3);
-            mvAtom[i].mCoordFrac[0]=CIFNumeric2Float(posx->second[i]);
-            mvAtom[i].mCoordFrac[1]=CIFNumeric2Float(posy->second[i]);
-            mvAtom[i].mCoordFrac[2]=CIFNumeric2Float(posz->second[i]);
+            mvAtom[i].mCoordFrac[0]=CIFNumeric2REAL(posx->second[i]);
+            mvAtom[i].mCoordFrac[1]=CIFNumeric2REAL(posy->second[i]);
+            mvAtom[i].mCoordFrac[2]=CIFNumeric2REAL(posz->second[i]);
          }
          this->Fractional2CartesianCoord();
       }
@@ -244,9 +244,9 @@ void CIFData::ExtractAtomicPositions(const bool verbose)
             for(unsigned int i=0;i<nb;++i)
             {
                mvAtom[i].mCoordCart.resize(3);
-               mvAtom[i].mCoordCart[0]=CIFNumeric2Float(posx->second[i]);
-               mvAtom[i].mCoordCart[1]=CIFNumeric2Float(posy->second[i]);
-               mvAtom[i].mCoordCart[2]=CIFNumeric2Float(posz->second[i]);
+               mvAtom[i].mCoordCart[0]=CIFNumeric2REAL(posx->second[i]);
+               mvAtom[i].mCoordCart[1]=CIFNumeric2REAL(posy->second[i]);
+               mvAtom[i].mCoordCart[2]=CIFNumeric2REAL(posz->second[i]);
             }
             this->Cartesian2FractionalCoord();
          }
@@ -280,9 +280,9 @@ void CIFData::ExtractAtomicPositions(const bool verbose)
          posoccup=loop->second.find("_atom_site_occupancy");
          if(posoccup!=loop->second.end())
             for(unsigned int i=0;i<nb;++i)
-               mvAtom[i].mOccupancy=CIFNumeric2Float(posoccup->second[i]);
+               mvAtom[i].mOccupancy=CIFNumeric2REAL(posoccup->second[i]);
          // ADPs - Record ani, ovl or mpl as iso.
-         float mult = 1.0;
+         REAL mult = 1.0;
          posadp=loop->second.find("_atom_site_B_iso_or_equiv");
          if(posadp==loop->second.end())
          {
@@ -291,7 +291,7 @@ void CIFData::ExtractAtomicPositions(const bool verbose)
          }
          if(posadp!=loop->second.end())
             for(unsigned int i=0;i<nb;++i)
-               mvAtom[i].mBiso = mult*CIFNumeric2Float(posadp->second[i]);
+               mvAtom[i].mBiso = mult*CIFNumeric2REAL(posadp->second[i]);
          // Now be somewhat verbose
          if(verbose)
          {
@@ -325,7 +325,7 @@ void CIFData::ExtractAnisotropicADPs(const bool verbose)
    typedef map<set<ci_string>,map<ci_string,vector<string> > >::const_iterator LoopIter;
    typedef map<ci_string,vector<string> >::const_iterator EntryIter;
 
-   const float utob = 8 * M_PI * M_PI;
+   const REAL utob = 8 * M_PI * M_PI;
 
    const char* uijlabels[] = {
        "_atom_site_aniso_U_11",
@@ -345,7 +345,7 @@ void CIFData::ExtractAnisotropicADPs(const bool verbose)
        "_atom_site_aniso_B_23"
    };
 
-   float mult[6];
+   REAL mult[6];
 
    EntryIter anisolabels, beta11, beta22, beta33, beta12, beta13, beta23;
 
@@ -423,7 +423,7 @@ void CIFData::ExtractAnisotropicADPs(const bool verbose)
 
             if (betaiter->second.size() <= i) continue;
          
-            double beta = CIFNumeric2Float(betaiter->second[i]);
+            double beta = CIFNumeric2REAL(betaiter->second[i]);
             atom->mBeta[idx] = mult[idx] * beta;
          
             if(verbose) cout << "mBeta " << idx << " " << atom->mBeta[idx] << endl;
@@ -439,7 +439,7 @@ void CIFData::ExtractAnisotropicADPs(const bool verbose)
 /// it is used as a new value for the default wavelength. Since the powder CIFs do not 
 /// include the wavelength, this could be useful if the crystal structure CIF (including
 /// the wavelength) is parsed right before the powder pattern one.
-static float defaultWavelength=1.0;
+static REAL defaultWavelength=1.0;
 
 void CIFData::ExtractPowderPattern(const bool verbose)
 {
@@ -448,7 +448,7 @@ void CIFData::ExtractPowderPattern(const bool verbose)
    if(positem==mvItem.end()) positem=mvItem.find("_pd_proc_wavelength");
    if(positem!=mvItem.end())
    {
-      mWavelength=CIFNumeric2Float(positem->second);
+      mWavelength=CIFNumeric2REAL(positem->second);
       defaultWavelength=mWavelength;
       cout<<"Found wavelength:"<<defaultWavelength<<endl;
    }
@@ -464,7 +464,7 @@ void CIFData::ExtractPowderPattern(const bool verbose)
       if(pos_wavelength!=loop->second.end())
       {
          cout<<"Found wavelength (in loop):"<<pos_wavelength->second[0];
-         mWavelength=CIFNumeric2Float(pos_wavelength->second[0]);
+         mWavelength=CIFNumeric2REAL(pos_wavelength->second[0]);
          defaultWavelength=mWavelength;
          cout<<" -> "<<defaultWavelength<<endl;
       }
@@ -485,7 +485,7 @@ void CIFData::ExtractPowderPattern(const bool verbose)
       }
       
       bool x_fixed_step=false;
-      float xmin,xmax,xinc;
+      REAL xmin,xmax,xinc;
       if(pos_x==loop->second.end())
       {
          map<ci_string,string>::const_iterator pos_min,pos_max,pos_inc;
@@ -498,9 +498,9 @@ void CIFData::ExtractPowderPattern(const bool verbose)
          if((pos_min!=mvItem.end()) && (pos_max!=mvItem.end()) && (pos_inc!=mvItem.end()) )
          {
             x_fixed_step=true;
-            xmin=CIFNumeric2Float(pos_min->second);
-            xmax=CIFNumeric2Float(pos_max->second);
-            xinc=CIFNumeric2Float(pos_inc->second);
+            xmin=CIFNumeric2REAL(pos_min->second);
+            xmax=CIFNumeric2REAL(pos_max->second);
+            xinc=CIFNumeric2REAL(pos_inc->second);
          }
       }
       pos_mon=loop->second.find("_pd_meas_intensity_monitor");
@@ -513,24 +513,24 @@ void CIFData::ExtractPowderPattern(const bool verbose)
          mPowderPatternObs.resize(nb);
          mPowderPatternX.resize(nb);
          mPowderPatternSigma.resize(nb);
-         float mult=1.0;
+         REAL mult=1.0;
          if(mDataType!=WAVELENGTH_TOF) mult=0.017453292519943295;
          for(long i=0;i<nb;++i)
          {
-            mPowderPatternObs[i]=CIFNumeric2Float(pos_iobs->second[i]);
+            mPowderPatternObs[i]=CIFNumeric2REAL(pos_iobs->second[i]);
             if(x_fixed_step) mPowderPatternX[i]=(xmin+i*xinc)*mult;
-            else mPowderPatternX[i]=CIFNumeric2Float(pos_x->second[i])*mult;
+            else mPowderPatternX[i]=CIFNumeric2REAL(pos_x->second[i])*mult;
             // :TODO: use esd on observed intensity, if available.
             if(pos_weight!=loop->second.end())
             {
-               mPowderPatternSigma[i]=CIFNumeric2Float(pos_weight->second[i]);
+               mPowderPatternSigma[i]=CIFNumeric2REAL(pos_weight->second[i]);
                if(mPowderPatternSigma[i]>0) mPowderPatternSigma[i]=1/sqrt(fabs(mPowderPatternSigma[i]));
                else mPowderPatternSigma[i]=sqrt(fabs(mPowderPatternObs[i])); // :KLUDGE: ?
             }
             else mPowderPatternSigma[i]=sqrt(fabs(mPowderPatternObs[i]));
             if(pos_mon!=loop->second.end())
             {//VCT or monitor
-               const float mon=CIFNumeric2Float(pos_mon->second[i]);
+               const REAL mon=CIFNumeric2REAL(pos_mon->second[i]);
                if(mon>0)
                {
                   mPowderPatternObs[i]/=mon;
@@ -550,7 +550,7 @@ void CIFData::ExtractSingleCrystalData(const bool verbose)
    if(positem==mvItem.end()) positem=mvItem.find("_pd_proc_wavelength");
    if(positem!=mvItem.end())
    {
-      mWavelength=CIFNumeric2Float(positem->second);
+      mWavelength=CIFNumeric2REAL(positem->second);
       defaultWavelength=mWavelength;
       cout<<"Found wavelength:"<<defaultWavelength<<endl;
    }
@@ -566,7 +566,7 @@ void CIFData::ExtractSingleCrystalData(const bool verbose)
       if(pos_wavelength!=loop->second.end())
       {
          cout<<"Found wavelength (in loop):"<<pos_wavelength->second[0];
-         mWavelength=CIFNumeric2Float(pos_wavelength->second[0]);
+         mWavelength=CIFNumeric2REAL(pos_wavelength->second[0]);
          defaultWavelength=mWavelength;
          cout<<" -> "<<defaultWavelength<<endl;
       }
@@ -589,11 +589,11 @@ void CIFData::ExtractSingleCrystalData(const bool verbose)
          if(pos_sigma!=loop->second.end()) mSigma.resize(nb);
          for(long i=0;i<nb;++i)
          {
-            mIobs(i)=CIFNumeric2Float(pos_iobs->second[i]);
+            mIobs(i)=CIFNumeric2REAL(pos_iobs->second[i]);
             mH(i)=CIFNumeric2Int(pos_h->second[i]);
             mK(i)=CIFNumeric2Int(pos_k->second[i]);
             mL(i)=CIFNumeric2Int(pos_l->second[i]);
-            if(pos_iobs!=loop->second.end()) mSigma(i)=CIFNumeric2Float(pos_sigma->second[i]);
+            if(pos_iobs!=loop->second.end()) mSigma(i)=CIFNumeric2REAL(pos_sigma->second[i]);
             else mSigma(i)=sqrt(fabs(abs(mIobs(i))));
          }
       }
@@ -603,9 +603,9 @@ void CIFData::ExtractSingleCrystalData(const bool verbose)
 void CIFData::CalcMatrices(const bool verbose)
 {
    if(mvLatticePar.size()==0) return;//:TODO: throw error
-   float a,b,c,alpha,beta,gamma;//direct space parameters
-   float aa,bb,cc,alphaa,betaa,gammaa;//reciprocal space parameters
-   float v;//volume of the unit cell
+   REAL a,b,c,alpha,beta,gamma;//direct space parameters
+   REAL aa,bb,cc,alphaa,betaa,gammaa;//reciprocal space parameters
+   REAL v;//volume of the unit cell
    a=mvLatticePar[0];
    b=mvLatticePar[1];
    c=mvLatticePar[2];
@@ -637,7 +637,7 @@ void CIFData::CalcMatrices(const bool verbose)
    mOrthMatrix[2][2]=1/cc;
    
    // Invert upper triangular matrix
-   float cm[3][3];
+   REAL cm[3][3];
    cm[0][0]=mOrthMatrix[0][0];
    cm[0][1]=mOrthMatrix[0][1];
    cm[0][2]=mOrthMatrix[0][2];
@@ -655,7 +655,7 @@ void CIFData::CalcMatrices(const bool verbose)
          else mOrthMatrixInvert[i][j]=0;
    for(long i=0;i<3;i++)
    {
-      float a;
+      REAL a;
       for(long j=i-1;j>=0;j--)
       {
          a=cm[j][i]/cm[i][i];
@@ -684,17 +684,17 @@ void CIFData::CalcMatrices(const bool verbose)
    }
 }
 
-void CIFData::f2c(float &x,float &y, float &z)
+void CIFData::f2c(REAL &x,REAL &y, REAL &z)
 {
-   const float x0=x,y0=y,z0=z;
+   const REAL x0=x,y0=y,z0=z;
    x=mOrthMatrix[0][0]*x0+mOrthMatrix[0][1]*y0+mOrthMatrix[0][2]*z0;
    y=mOrthMatrix[1][0]*x0+mOrthMatrix[1][1]*y0+mOrthMatrix[1][2]*z0;
    z=mOrthMatrix[2][0]*x0+mOrthMatrix[2][1]*y0+mOrthMatrix[2][2]*z0;
 }
 
-void CIFData::c2f(float &x,float &y, float &z)
+void CIFData::c2f(REAL &x,REAL &y, REAL &z)
 {
-   const float x0=x,y0=y,z0=z;
+   const REAL x0=x,y0=y,z0=z;
    x=mOrthMatrixInvert[0][0]*x0+mOrthMatrixInvert[0][1]*y0+mOrthMatrixInvert[0][2]*z0;
    y=mOrthMatrixInvert[1][0]*x0+mOrthMatrixInvert[1][1]*y0+mOrthMatrixInvert[1][2]*z0;
    z=mOrthMatrixInvert[2][0]*x0+mOrthMatrixInvert[2][1]*y0+mOrthMatrixInvert[2][2]*z0;
@@ -917,13 +917,16 @@ void CIF::Parse(stringstream &in)
    }
 }
 
-float CIFNumeric2Float(const string &s)
+REAL CIFNumeric2REAL(const string &s)
 {
    if((s==".") || (s=="?")) return 0.0;
-   float v;
-   const int n=sscanf(s.c_str(),"%f",&v);
+
+   // Err on the side of caution here. Scan for double, but return requested
+   // REAL.
+   double v;
+   const int n=sscanf(s.c_str(),"%lf",&v);
    if(n!=1) return 0.0;
-   return v;
+   return (REAL) v;
 }
 
 int CIFNumeric2Int(const string &s)
