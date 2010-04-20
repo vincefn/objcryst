@@ -249,6 +249,10 @@ const std::vector<SpaceGroup::TRx>& SpaceGroup::GetTranslationVectors()const
    return mvTrans;
 }
 
+const std::vector<SpaceGroup::SMx>& SpaceGroup::GetSymmetryOperations()const
+{
+   return mvSym;
+}
 
 CrystMatrix_REAL SpaceGroup::GetAllSymmetrics(const REAL x, const REAL y, const REAL z,
                                 const bool noCenter,const bool noTransl,

@@ -147,6 +147,13 @@ class SpaceGroup
       {
          REAL tr[3];
       };
+
+      /// Struct to store rot+trans matrix
+      struct SMx
+      {
+         REAL mx[9];
+         REAL tr[3];
+      };
       
       /** Return all Translation Vectors, as a 3 columns-array
       *
@@ -164,6 +171,10 @@ class SpaceGroup
       *for a 'F' cell,etc...
       */
       const std::vector<SpaceGroup::TRx>& GetTranslationVectors()const;
+
+      /** Get all symmetry operations stored in vector of struct SMx.
+       */
+      const std::vector<SpaceGroup::SMx>& GetSymmetryOperations()const;
       
       /** \brief Get all equivalent positions of a (xyz) position
       *
@@ -302,12 +313,6 @@ class SpaceGroup
       unsigned long mSpgNumber;
       /// Extension to space group symbol (1,2:origin choice ; R,H=rhomboedral/hexagonal)
       char mExtension;
-      /// Struct to store rot+trans matrix
-      struct SMx
-      {
-         REAL mx[9];
-         REAL tr[3];
-      };
       /// Store floating-point matrices for faster use
       std::vector<SMx> mvSym;
       /// Store floating-point translation vectors for faster use
