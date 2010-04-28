@@ -532,9 +532,9 @@ struct StretchMode
    /// Print one-line list of atoms moved
    virtual void Print(ostream &os,bool full=true)const=0;
    /// Move the atoms according to this mode
-   virtual void Stretch(const REAL change)=0;
+   virtual void Stretch(const REAL change, const bool keepCenter=true)=0;
    /// Move the atoms according to this mode, randomly
-   virtual void RandomStretch(const REAL amplitude)=0;
+   virtual void RandomStretch(const REAL amplitude, const bool keepCenter=true)=0;
    /// List of bond restraints affected by this mode
    /// The key is the restraint, the value is the derivative of the LLK associated
    std::map<const MolBond*,REAL> mvpBrokenBond;
@@ -575,9 +575,9 @@ struct StretchModeBondLength:public StretchMode
    /// Print one-line list of atoms moved
    virtual void Print(ostream &os,bool full=true)const;
    /// Move the atoms according to this mode
-   virtual void Stretch(const REAL change);
+   virtual void Stretch(const REAL change, const bool keepCenter=true);
    /// Move the atoms according to this mode, randomly
-   virtual void RandomStretch(const REAL amplitude);
+   virtual void RandomStretch(const REAL amplitude, const bool keepCenter=true);
    /// The first atom (fixed).
    MolAtom * mpAtom0;
    /// The second atom  (first atom moved)
@@ -604,9 +604,9 @@ struct StretchModeBondAngle:public StretchMode
    /// Print one-line list of atoms moved
    virtual void Print(ostream &os,bool full=true)const;
    /// Move the atoms according to this mode
-   virtual void Stretch(const REAL change);
+   virtual void Stretch(const REAL change, const bool keepCenter=true);
    /// Move the atoms according to this mode, randomly
-   virtual void RandomStretch(const REAL amplitude);
+   virtual void RandomStretch(const REAL amplitude, const bool keepCenter=true);
    /// The first atom
    MolAtom * mpAtom0;
    /// The second atom 
@@ -635,9 +635,9 @@ struct StretchModeTorsion:public StretchMode
    /// Print one-line list of atoms moved
    virtual void Print(ostream &os,bool full=true)const;
    /// Move the atoms according to this mode
-   virtual void Stretch(const REAL change);
+   virtual void Stretch(const REAL change, const bool keepCenter=true);
    /// Move the atoms according to this mode, randomly
-   virtual void RandomStretch(const REAL amplitude);
+   virtual void RandomStretch(const REAL amplitude, const bool keepCenter=true);
    /// The first atom
    MolAtom * mpAtom1;
    /// The second atom 
@@ -666,9 +666,9 @@ struct StretchModeTwist:public StretchMode
    /// Print one-line list of atoms moved
    virtual void Print(ostream &os,bool full=true)const;
    /// Move the atoms according to this mode
-   virtual void Stretch(const REAL change);
+   virtual void Stretch(const REAL change, const bool keepCenter=true);
    /// Move the atoms according to this mode, randomly
-   virtual void RandomStretch(const REAL amplitude);
+   virtual void RandomStretch(const REAL amplitude, const bool keepCenter=true);
    /// The first atom
    MolAtom * mpAtom1;
    /// The second atom 

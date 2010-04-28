@@ -1505,7 +1505,8 @@ void StretchModeBondLength::Print(ostream &os,bool full)const
    }
 }
 
-void StretchModeBondLength::Stretch(const REAL amplitude)
+void StretchModeBondLength::Stretch(const REAL amplitude, 
+                                    const bool keepCenter)
 {
    REAL dx=mpAtom1->GetX()-mpAtom0->GetX();
    REAL dy=mpAtom1->GetY()-mpAtom0->GetY();
@@ -1516,12 +1517,13 @@ void StretchModeBondLength::Stretch(const REAL amplitude)
    dx*=change;
    dy*=change;
    dz*=change;
-   mpMol->TranslateAtomGroup(mvTranslatedAtomList,dx,dy,dz,true);
+   mpMol->TranslateAtomGroup(mvTranslatedAtomList,dx,dy,dz,keepCenter);
 }
 
-void StretchModeBondLength::RandomStretch(const REAL amplitude)
+void StretchModeBondLength::RandomStretch(const REAL amplitude, 
+                                          const bool keepCenter)
 {
-   mpMol->BondLengthRandomChange(*this,amplitude,true);
+   mpMol->BondLengthRandomChange(*this,amplitude,keepCenter);
 }
 
 StretchModeBondAngle::StretchModeBondAngle(MolAtom &at0,MolAtom &at1,MolAtom &at2,
@@ -1602,7 +1604,8 @@ void StretchModeBondAngle::Print(ostream &os,bool full)const
    }
 }
 
-void StretchModeBondAngle::Stretch(const REAL amplitude)
+void StretchModeBondAngle::Stretch(const REAL amplitude, 
+                                   const bool keepCenter)
 {
    REAL dx10=mpAtom0->GetX()-mpAtom1->GetX();
    REAL dy10=mpAtom0->GetY()-mpAtom1->GetY();
@@ -1614,12 +1617,13 @@ void StretchModeBondAngle::Stretch(const REAL amplitude)
    const REAL vx=dy10*dz12-dz10*dy12;
    const REAL vy=dz10*dx12-dx10*dz12;
    const REAL vz=dx10*dy12-dy10*dx12;
-   mpMol->RotateAtomGroup(*mpAtom1,vx,vy,vz,mvRotatedAtomList,amplitude,true);
+   mpMol->RotateAtomGroup(*mpAtom1,vx,vy,vz,mvRotatedAtomList,amplitude,keepCenter);
 }
 
-void StretchModeBondAngle::RandomStretch(const REAL amplitude)
+void StretchModeBondAngle::RandomStretch(const REAL amplitude, 
+                                         const bool keepCenter)
 {
-   mpMol->BondAngleRandomChange(*this,amplitude,true);
+   mpMol->BondAngleRandomChange(*this,amplitude,keepCenter);
 }
 
 StretchModeTorsion::StretchModeTorsion(MolAtom &at1,MolAtom &at2,
@@ -1688,14 +1692,15 @@ void StretchModeTorsion::Print(ostream &os,bool full)const
    }
 }
 
-void StretchModeTorsion::Stretch(const REAL amplitude)
+void StretchModeTorsion::Stretch(const REAL amplitude, const bool keepCenter)
 {
-   mpMol->RotateAtomGroup(*mpAtom1,*mpAtom2,mvRotatedAtomList,amplitude,true);
+   mpMol->RotateAtomGroup(*mpAtom1,*mpAtom2,mvRotatedAtomList,amplitude,keepCenter);
 }
 
-void StretchModeTorsion::RandomStretch(const REAL amplitude)
+void StretchModeTorsion::RandomStretch(const REAL amplitude, 
+                                       const bool keepCenter)
 {
-   mpMol->DihedralAngleRandomChange(*this,amplitude,true);
+   mpMol->DihedralAngleRandomChange(*this,amplitude,keepCenter);
 }
 
 
@@ -1768,19 +1773,20 @@ void StretchModeTwist::Print(ostream &os,bool full)const
    }
 }
 
-void StretchModeTwist::Stretch(const REAL amplitude)
+void StretchModeTwist::Stretch(const REAL amplitude, const bool keepCenter)
 {
-   mpMol->RotateAtomGroup(*mpAtom1,*mpAtom2,mvRotatedAtomList,amplitude,true);
+   mpMol->RotateAtomGroup(*mpAtom1,*mpAtom2,mvRotatedAtomList,amplitude,keepCenter);
 }
 
-void StretchModeTwist::RandomStretch(const REAL amplitude)
+void StretchModeTwist::RandomStretch(const REAL amplitude, 
+                                     const bool keepCenter)
 {
    const REAL dx=mpAtom2->GetX()-mpAtom1->GetX();
    const REAL dy=mpAtom2->GetY()-mpAtom1->GetY();
    const REAL dz=mpAtom2->GetZ()-mpAtom1->GetZ();
    if((abs(dx)+abs(dy)+abs(dz))<1e-6) return;// :KLUDGE:
    const REAL change=(REAL)(2.*rand()-RAND_MAX)/(REAL)RAND_MAX*mBaseAmplitude*amplitude;
-   mpMol->RotateAtomGroup(*mpAtom1,*mpAtom2,mvRotatedAtomList,change,true);
+   mpMol->RotateAtomGroup(*mpAtom1,*mpAtom2,mvRotatedAtomList,change,keepCenter);
 }
 
 //######################################################################
