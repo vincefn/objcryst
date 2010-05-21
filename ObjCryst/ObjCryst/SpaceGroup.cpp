@@ -401,6 +401,14 @@ unsigned int SpaceGroup::GetUniqueAxis()const{return mUniqueAxisId;}
 
 char SpaceGroup::GetExtension()const{return mExtension;}
 
+CrystVector_REAL SpaceGroup::GetInversionCenter()const { 
+   CrystVector_REAL center(3);
+   center(0) =((REAL)this->GetCCTbxSpg().inv_t()[0])/(REAL)this->GetCCTbxSpg().inv_t().den();//inversion not at the origin
+   center(1) =((REAL)this->GetCCTbxSpg().inv_t()[1])/(REAL)this->GetCCTbxSpg().inv_t().den();
+   center(2) =((REAL)this->GetCCTbxSpg().inv_t()[2])/(REAL)this->GetCCTbxSpg().inv_t().den();
+   return center;
+}
+
 unsigned int SpaceGroup::AreReflEquiv(const REAL h1, const REAL k1, const REAL l1,
                                       const REAL h2, const REAL k2, const REAL l2)const
 {

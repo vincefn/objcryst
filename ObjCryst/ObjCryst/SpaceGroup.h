@@ -226,6 +226,8 @@ class SpaceGroup
       unsigned int GetUniqueAxis()const;
       /// Extension to space group symbol ('1','2':origin choice ; 'R','H'=rhomboedral/hexagonal)
       char GetExtension()const;
+      /// Get the inversion center
+      CrystVector_REAL GetInversionCenter()const;
       /** Are these reflections equivalent ?
       *
       * \return 1 if they are equivalent, 2 if they are Friedel/Bijvoet mates, and else 0.
