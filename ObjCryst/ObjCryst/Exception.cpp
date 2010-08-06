@@ -42,9 +42,9 @@ ObjCrystException::ObjCrystException() : message()
 ObjCrystException::ObjCrystException(const string & _message)
 {
 
+   message = _message;
    if (!ObjCrystException::verbose)
    {
-       message = _message;
        return;
    }
 
