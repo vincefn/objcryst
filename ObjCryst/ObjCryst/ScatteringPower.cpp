@@ -767,6 +767,57 @@ void ScatteringPowerAtom::InitRefParList()
       this->AddPar(tmp);
    }
    {
+      REAL* bdata = (REAL*) mBeta.data();
+
+      RefinablePar B11("B11",&bdata[0],0.1,5.,
+              gpRefParTypeScattPowTemperatureAniso,REFPAR_DERIV_STEP_ABSOLUTE,
+              true,true,false,false);
+      B11.SetDerivStep(1e-3);
+      B11.SetGlobalOptimStep(.5);
+      B11.AssignClock(mClock);
+      this->AddPar(B11);
+
+      RefinablePar B22("B22",&bdata[1],0.1,5.,
+              gpRefParTypeScattPowTemperatureAniso,REFPAR_DERIV_STEP_ABSOLUTE,
+              true,true,false,false);
+      B22.SetDerivStep(1e-3);
+      B22.SetGlobalOptimStep(.5);
+      B22.AssignClock(mClock);
+      this->AddPar(B22);
+
+      RefinablePar B33("B33",&bdata[2],0.1,5.,
+              gpRefParTypeScattPowTemperatureAniso,REFPAR_DERIV_STEP_ABSOLUTE,
+              true,true,false,false);
+      B33.SetDerivStep(1e-3);
+      B33.SetGlobalOptimStep(.5);
+      B33.AssignClock(mClock);
+      this->AddPar(B33);
+
+      RefinablePar B12("B12",&bdata[3],-5,5.,
+              gpRefParTypeScattPowTemperatureAniso,REFPAR_DERIV_STEP_ABSOLUTE,
+              true,true,false,false);
+      B12.SetDerivStep(1e-3);
+      B12.SetGlobalOptimStep(.5);
+      B12.AssignClock(mClock);
+      this->AddPar(B12);
+
+      RefinablePar B13("B13",&bdata[4],-5,5.,
+              gpRefParTypeScattPowTemperatureAniso,REFPAR_DERIV_STEP_ABSOLUTE,
+              true,true,false,false);
+      B13.SetDerivStep(1e-3);
+      B13.SetGlobalOptimStep(.5);
+      B13.AssignClock(mClock);
+      this->AddPar(B13);
+
+      RefinablePar B23("B23",&bdata[5],-5,5.,
+              gpRefParTypeScattPowTemperatureAniso,REFPAR_DERIV_STEP_ABSOLUTE,
+              true,true,false,false);
+      B23.SetDerivStep(1e-3);
+      B23.SetGlobalOptimStep(.5);
+      B23.AssignClock(mClock);
+      this->AddPar(B23);
+   }
+   {
       RefinablePar tmp("ML Error",&mMaximumLikelihoodPositionError,0.,1.,
                         gpRefParTypeScattPow,REFPAR_DERIV_STEP_ABSOLUTE,
                         false,true,true,false);

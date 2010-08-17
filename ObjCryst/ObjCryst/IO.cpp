@@ -244,8 +244,25 @@ void ScatteringPowerAtom::XMLOutput(ostream &os,int indent)const
    os <<tag<<endl;
    
    if(true==this->mIsIsotropic)
+   {
       this->GetPar(&mBiso).XMLOutput(os,"Biso",indent+1);
-   os<<endl;
+      os<<endl;
+   } else
+   {
+      REAL* bdata = (REAL*) mBeta.data();
+      this->GetPar(&bdata[0]).XMLOutput(os,"B11",indent+1);
+      os<<endl;
+      this->GetPar(&bdata[1]).XMLOutput(os,"B22",indent+1);
+      os<<endl;
+      this->GetPar(&bdata[2]).XMLOutput(os,"B33",indent+1);
+      os<<endl;
+      this->GetPar(&bdata[3]).XMLOutput(os,"B12",indent+1);
+      os<<endl;
+      this->GetPar(&bdata[4]).XMLOutput(os,"B13",indent+1);
+      os<<endl;
+      this->GetPar(&bdata[5]).XMLOutput(os,"B23",indent+1);
+      os<<endl;
+   }
 
    this->GetPar("ML Error").XMLOutput(os,"ML Error",indent+1);
    os <<endl;
@@ -304,6 +321,43 @@ void ScatteringPowerAtom::XMLInput(istream &is,const XMLCrystTag &tagg)
                if("Biso"==tag.GetAttributeValue(i))
                {
                   this->GetPar(&mBiso).XMLInput(is,tag);
+                  this->mIsIsotropic = true;
+                  break;
+               }
+               if("B11"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar(&mBeta.data()[0]).XMLInput(is,tag);
+                  this->mIsIsotropic = false;
+                  break;
+               }
+               if("B22"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar(&mBeta.data()[1]).XMLInput(is,tag);
+                  this->mIsIsotropic = false;
+                  break;
+               }
+               if("B33"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar(&mBeta.data()[2]).XMLInput(is,tag);
+                  this->mIsIsotropic = false;
+                  break;
+               }
+               if("B12"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar(&mBeta.data()[3]).XMLInput(is,tag);
+                  this->mIsIsotropic = false;
+                  break;
+               }
+               if("B13"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar(&mBeta.data()[4]).XMLInput(is,tag);
+                  this->mIsIsotropic = false;
+                  break;
+               }
+               if("B23"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar(&mBeta.data()[5]).XMLInput(is,tag);
+                  this->mIsIsotropic = false;
                   break;
                }
                if("ML Error"==tag.GetAttributeValue(i))
