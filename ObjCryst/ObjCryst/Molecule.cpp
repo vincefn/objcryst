@@ -50,6 +50,7 @@
 
 using namespace std;
 
+
 namespace ObjCryst
 {
 XYZ::XYZ(REAL x0,REAL y0,REAL z0):x(x0),y(y0),z(z0){};
@@ -225,21 +226,25 @@ void MolAtom::XMLOutput(ostream &os,int indent)const
    if(!this->IsDummy())tag.AddAttribute("ScattPow",this->GetScatteringPower().GetName());
    {
       stringstream ss;
+      ss.precision(os.precision());
       ss <<mX;
       tag.AddAttribute("x",ss.str());
    }
    {
       stringstream ss;
+      ss.precision(os.precision());
       ss <<mY;
       tag.AddAttribute("y",ss.str());
    }
    {
       stringstream ss;
+      ss.precision(os.precision());
       ss <<mZ;
       tag.AddAttribute("z",ss.str());
    }
    {
       stringstream ss;
+      ss.precision(os.precision());
       ss <<mOccupancy;
       tag.AddAttribute("Occup",ss.str());
    }
@@ -339,26 +344,31 @@ void MolBond::XMLOutput(ostream &os,int indent)const
    tag.AddAttribute("Atom2",mAtomPair.second->GetName());
    {
       stringstream ss;
+      ss.precision(os.precision());
       ss <<mLength0;
       tag.AddAttribute("Length",ss.str());
    }
    {
       stringstream ss;
+      ss.precision(os.precision());
       ss <<mDelta;
       tag.AddAttribute("Delta",ss.str());
    }
    {
       stringstream ss;
+      ss.precision(os.precision());
       ss <<mSigma;
       tag.AddAttribute("Sigma",ss.str());
    }
    {
       stringstream ss;
+      ss.precision(os.precision());
       ss <<mBondOrder;
       tag.AddAttribute("BondOrder",ss.str());
    }
    {
       stringstream ss;
+      ss.precision(os.precision());
       ss <<mIsFreeTorsion;
       tag.AddAttribute("FreeTorsion",ss.str());
    }
@@ -620,16 +630,19 @@ void MolBondAngle::XMLOutput(ostream &os,int indent)const
    tag.AddAttribute("Atom3",this->GetAtom3().GetName());
    {
       stringstream ss;
+      ss.precision(os.precision());
       ss <<mAngle0*RAD2DEG;
       tag.AddAttribute("Angle",ss.str());
    }
    {
       stringstream ss;
+      ss.precision(os.precision());
       ss <<mDelta*RAD2DEG;
       tag.AddAttribute("Delta",ss.str());
    }
    {
       stringstream ss;
+      ss.precision(os.precision());
       ss <<mSigma*RAD2DEG;
       tag.AddAttribute("Sigma",ss.str());
    }
@@ -896,7 +909,7 @@ mAngle0(angle),mDelta(delta),mSigma(sigma),mpMol(&parent)
    mvpAtom.push_back(&atom3);
    mvpAtom.push_back(&atom4);
    // We want the angle in [-pi;pi]
-   mAngle0=fmod((float)mAngle0,(float)(2*M_PI));
+   mAngle0=fmod((REAL)mAngle0,(REAL)(2*M_PI));
    if(mAngle0<(-M_PI)) mAngle0+=2*M_PI;
    if(mAngle0>M_PI) mAngle0-=2*M_PI;
    VFN_DEBUG_EXIT("MolDihedralAngle::MolDihedralAngle()",5)
@@ -931,16 +944,19 @@ void MolDihedralAngle::XMLOutput(ostream &os,int indent)const
    tag.AddAttribute("Atom4",this->GetAtom4().GetName());
    {
       stringstream ss;
+      ss.precision(os.precision());
       ss <<mAngle0*RAD2DEG;
       tag.AddAttribute("Angle",ss.str());
    }
    {
       stringstream ss;
+      ss.precision(os.precision());
       ss <<mDelta*RAD2DEG;
       tag.AddAttribute("Delta",ss.str());
    }
    {
       stringstream ss;
+      ss.precision(os.precision());
       ss <<mSigma*RAD2DEG;
       tag.AddAttribute("Sigma",ss.str());
    }
@@ -1330,26 +1346,31 @@ void Quaternion::XMLOutput(ostream &os,int indent)const
    //#error "which atoms for this bond ?"
    {
       stringstream ss;
+      ss.precision(os.precision());
       ss <<mQ0;
       tag.AddAttribute("Q0",ss.str());
    }
    {
       stringstream ss;
+      ss.precision(os.precision());
       ss <<mQ1;
       tag.AddAttribute("Q1",ss.str());
    }
    {
       stringstream ss;
+      ss.precision(os.precision());
       ss <<mQ2;
       tag.AddAttribute("Q2",ss.str());
    }
    {
       stringstream ss;
+      ss.precision(os.precision());
       ss <<mQ3;
       tag.AddAttribute("Q3",ss.str());
    }
    {
       stringstream ss;
+      ss.precision(os.precision());
       ss <<mIsUniQuaternion;
       tag.AddAttribute("IsUnitQuaternion",ss.str());
    }
