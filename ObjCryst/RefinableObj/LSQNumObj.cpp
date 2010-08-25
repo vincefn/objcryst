@@ -222,9 +222,9 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
          {
             if( (M(i,i) < 1e-20)||(ISNAN_OR_INF(M(i,i)))) //:TODO: Check what value to use as a limit
             {  
-               if(!silent) cout << "LSQNumObj::Refine() Singular parameter !";
-               if(!silent) cout << "(null derivate in all points) : "<<M(i,i)<<":";
-               if(!silent) cout << mRefParList.GetParNotFixed(i).GetName() << endl;
+               if(!silent) cout << "LSQNumObj::Refine() Singular parameter !"
+                                    << "(null derivate in all points) : "<<M(i,i)<<":"
+                                    << mRefParList.GetParNotFixed(i).GetName() << endl;
                /*
                if(!silent)
                {
@@ -568,17 +568,21 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
                   mChiSq=oldChiSq;
                   if(marquardt>1e8)
                   {
-                     mRefParList.RestoreParamSet(mIndexValuesSetInitial);
+                     //mRefParList.RestoreParamSet(mIndexValuesSetInitial);
                      if(callBeginEndOptimization) this->EndOptimization();
-                     if(!silent) mRefParList.Print();
-                     throw ObjCrystException("LSQNumObj::Refine():Levenberg-Marquardt diverging !");
+                     //if(!silent) mRefParList.Print();
+                     return;
+                     //throw ObjCrystException("LSQNumObj::Refine():Levenberg-Marquardt diverging !");
                   }
                   goto LSQNumObj_Refine_Restart;
                }
-               else marquardt /= marquardtMult;
-               if(marquardt<1e-2) marquardt=1e-2;
-               if(!silent) cout << "LSQNumObj::Refine():new Levenberg-Marquardt factor :" ;
-               if(!silent) cout << FormatFloat(marquardt,18,14) <<endl;
+               else
+               {
+                  marquardt /= marquardtMult;
+                  if(marquardt<1e-2) marquardt=1e-2;
+                  if(!silent) cout << "LSQNumObj::Refine():new Levenberg-Marquardt factor :" ;
+                  if(!silent) cout << FormatFloat(marquardt,18,14) <<endl;
+               }
             }
          }
             
@@ -589,7 +593,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
                for(i=0;i<nbVar;i++) mRefParList.GetParNotFixed(i).SetSigma(sqrt(N(i,i)*mChiSq/(nbObs-nbVar)));
          //Correlations :TODO: re-compute M and N if using Levenberg-Marquardt
          mCorrelMatrix.resize(nbVar,nbVar);
-          mvVarCovar.clear();
+         mvVarCovar.clear();
          
          for(i=0;i<nbVar;i++)
          {
