@@ -2069,7 +2069,13 @@ void Molecule::Print()const
 void Molecule::XMLOutput(ostream &os,int indent)const
 {
    VFN_DEBUG_ENTRY("Molecule::XMLOutput()",4)
-   this->ResetRigidGroupsPar();
+   
+   // KLUDGE: 
+   if(this->IsBeingRefined())
+   cout <<"Molecule::XMLOutput() KLUDGE - cannot reset rigid groups parameters because the molecule is still breing refined !"<<endl
+        <<"  => the XML output will be incorrect"<<endl;
+   else this->ResetRigidGroupsPar();
+   
    for(int i=0;i<indent;i++) os << "  " ;
    XMLCrystTag tag("Molecule");
    tag.AddAttribute("Name",mName);
@@ -2481,15 +2487,16 @@ void Molecule::RandomizeConfiguration()
       this->DihedralAngleRandomChange(*pos,amp,true);
    }
    // Molecular dynamics moves
-   if((mvMDAtomGroup.size()>0)&&(rand()%100)==0)
+   if((mvMDAtomGroup.size()>0)&&(mMDMoveFreq>0)&&(mMDMoveEnergy>0))
    {
+      // Random initial speed for all atoms
       map<MolAtom*,XYZ> v0;
       for(vector<MolAtom*>::iterator at=this->GetAtomList().begin();at!=this->GetAtomList().end();++at)
          v0[*at]=XYZ(rand()/(REAL)RAND_MAX+0.5,rand()/(REAL)RAND_MAX+0.5,rand()/(REAL)RAND_MAX+0.5);
       
-      const REAL nrj0=40*( this->GetBondList().size()
-                           +this->GetBondAngleList().size()
-                           +this->GetDihedralAngleList().size());
+      const REAL nrj0=mMDMoveEnergy*( this->GetBondList().size()
+                                     +this->GetBondAngleList().size()
+                                     +this->GetDihedralAngleList().size());
       map<RigidGroup*,std::pair<XYZ,XYZ> > vr;
       this->MolecularDynamicsEvolve(v0, 5000,0.002,
                                     this->GetBondList(),
