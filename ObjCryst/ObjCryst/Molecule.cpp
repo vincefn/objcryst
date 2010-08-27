@@ -2070,11 +2070,8 @@ void Molecule::XMLOutput(ostream &os,int indent)const
 {
    VFN_DEBUG_ENTRY("Molecule::XMLOutput()",4)
    
-   // KLUDGE: 
-   if(this->IsBeingRefined())
-   cout <<"Molecule::XMLOutput() KLUDGE - cannot reset rigid groups parameters because the molecule is still breing refined !"<<endl
-        <<"  => the XML output will be incorrect"<<endl;
-   else this->ResetRigidGroupsPar();
+   // :KLUDGE: this may be dangerous if the molecule is beaing refined !
+   this->ResetRigidGroupsPar();
    
    for(int i=0;i<indent;i++) os << "  " ;
    XMLCrystTag tag("Molecule");
