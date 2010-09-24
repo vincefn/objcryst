@@ -586,14 +586,14 @@ void CIFData::ExtractSingleCrystalData(const bool verbose)
          mH.resize(nb);
          mK.resize(nb);
          mL.resize(nb);
-         if(pos_sigma!=loop->second.end()) mSigma.resize(nb);
+         mSigma.resize(nb);
          for(long i=0;i<nb;++i)
          {
             mIobs(i)=CIFNumeric2REAL(pos_iobs->second[i]);
             mH(i)=CIFNumeric2Int(pos_h->second[i]);
             mK(i)=CIFNumeric2Int(pos_k->second[i]);
             mL(i)=CIFNumeric2Int(pos_l->second[i]);
-            if(pos_iobs!=loop->second.end()) mSigma(i)=CIFNumeric2REAL(pos_sigma->second[i]);
+            if(pos_sigma!=loop->second.end()) mSigma(i)=CIFNumeric2REAL(pos_sigma->second[i]);
             else mSigma(i)=sqrt(fabs(abs(mIobs(i))));
          }
       }
