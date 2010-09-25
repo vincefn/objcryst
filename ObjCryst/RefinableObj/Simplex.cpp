@@ -82,7 +82,7 @@ void SimplexObj::Optimize(long &nbSteps,const bool silent,const REAL finalcost,
          worstdiff-=center;
          for(unsigned long i=0;i<n;i++) worstdiff(i)/=mRefParList.GetParNotFixed(i).GetGlobalOptimStep();
          
-         if(!silent) cout<<"Simplex:cycle="<<nbSteps<<", cost="<<vLLK(best)
+         if(!silent && (nbSteps%100==0)) cout<<"Simplex:cycle="<<nbSteps<<", cost="<<vLLK(best)
                          <<",best="<<best<<",worst="<<worst<<",nextworst="<<nextworst
                          <<", Worst diff="<<abs(worstdiff.min())+abs(worstdiff.max())<<endl;
          if((abs(worstdiff.min())+abs(worstdiff.max()))<0.01) break;
