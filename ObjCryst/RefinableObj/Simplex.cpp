@@ -85,7 +85,7 @@ void SimplexObj::Optimize(long &nbSteps,const bool silent,const REAL finalcost,
          if(!silent) cout<<"Simplex:cycle="<<nbSteps<<", cost="<<vLLK(best)
                          <<",best="<<best<<",worst="<<worst<<",nextworst="<<nextworst
                          <<", Worst diff="<<abs(worstdiff.min())+abs(worstdiff.max())<<endl;
-         if((abs(worstdiff.min())+abs(worstdiff.max()))<0.1) break;
+         if((abs(worstdiff.min())+abs(worstdiff.max()))<0.01) break;
       }
       #if 0
       cout<<FormatHorizVector<REAL>(vLLK)<<endl;

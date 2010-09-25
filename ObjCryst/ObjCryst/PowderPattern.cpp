@@ -314,7 +314,7 @@ void PowderPatternBackground::OptimizeBayesianBackground()
    long ct=0;
    cout<<"Initial Chi^2(BayesianBackground)="<<llk<<endl;
    this->SetGlobalOptimStep(gpRefParTypeScattDataBackground,
-                            mBackgroundInterpPointIntensity.max()/100.0);
+                            mBackgroundInterpPointIntensity.max()/1000.0);
    
    {
       char buf [200];
@@ -322,8 +322,8 @@ void PowderPatternBackground::OptimizeBayesianBackground()
               (int)ct,(float)llk);
       (*fpObjCrystInformUser)((string)buf);
    }
-   nbcycle=200*mBackgroundNbPoint;
-   simplex.Optimize(nbcycle,true);
+   nbcycle=500*mBackgroundNbPoint;
+   simplex.Optimize(nbcycle,false);
    llk=simplex.GetLogLikelihood();
    cout<<ct<<", Chi^2(BayesianBackground)="<<llk<<endl;
    
