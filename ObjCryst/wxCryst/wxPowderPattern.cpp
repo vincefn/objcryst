@@ -3560,7 +3560,6 @@ wxWindow(parent,-1),mpPattern(pPattern),mpDiff(pDiff),mLSQ("Profile Fitting obje
       
       wxButton *pButton1=new wxButton(pQuick,ID_PROFILEFITTING_RUN,_T("Le Bail + Fit Profile !"));
       pSizer->Add(pButton1,0,wxALIGN_CENTER);
-      
       if(mpDiff==0)
       {
          // List crystal phases
@@ -3583,6 +3582,15 @@ wxWindow(parent,-1),mpPattern(pPattern),mpDiff(pDiff),mLSQ("Profile Fitting obje
                      //cout<<"WXProfileFitting::WXProfileFitting():"<<choices[choices.Count()-1]<<","<<pDiff<<endl;
                   }
                }
+         }
+         if(choices.GetCount()==0)
+         {
+            wxMessageBox(_T("To run Le Bail & Profile fitting, you \n")
+                         _T("need at least one crystalline phase !"),
+                         _T("Missing crystalline phase !"),
+                         wxYES_NO|wxICON_ERROR);
+            this->GetParent()->Destroy();
+            return;
          }
          if(choices.GetCount()==1)
          {
