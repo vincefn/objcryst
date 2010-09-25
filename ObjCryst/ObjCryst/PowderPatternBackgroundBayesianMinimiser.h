@@ -40,6 +40,10 @@ class PowderPatternBackgroundBayesianMinimiser:public RefinableObj
       ~PowderPatternBackgroundBayesianMinimiser();
       virtual const string& GetClassName()const;
       virtual REAL GetLogLikelihood()const;
+      virtual unsigned int  GetNbLSQFunction () const ;
+      virtual const CrystVector_REAL &  GetLSQCalc (const unsigned int) const;
+      virtual const CrystVector_REAL &  GetLSQObs (const unsigned int) const;
+      virtual const CrystVector_REAL &  GetLSQWeight (const unsigned int) const;
    //private:
    /** Returns the log(likelihood) of a background by marginalizing the effect of Bragg peaks,
    following the method described by David and Sivia (\e J.Appl.Cryst. \b 34(2001), 318).
@@ -68,6 +72,12 @@ class PowderPatternBackgroundBayesianMinimiser:public RefinableObj
    */
    static REAL BayesianBackgroundLogLikelihood(const REAL t);
    PowderPatternBackground *mpBackground;
+   /// Bayesian cost (-log(likelihood)) for each point
+   mutable CrystVector_REAL mBayesianCalc;
+   /// Obs==0 (desired -log(likelihood))
+   mutable CrystVector_REAL mBayesianObs;
+   /// Weight=1
+   mutable CrystVector_REAL mBayesianWeight;
 };
 
 }//namespace

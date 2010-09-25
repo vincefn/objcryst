@@ -334,6 +334,13 @@ void PowderPatternBackground::OptimizeBayesianBackground()
       (*fpObjCrystInformUser)((string)buf);
    }
    
+   LSQNumObj lsq;
+   lsq.SetRefinedObj(min,0,true,true);
+   lsq.PrepareRefParList(true);
+   lsq.SetParIsUsed(gpRefParTypeScattDataBackground,true);
+   try {lsq.Refine(10,true,false);}
+   catch(const ObjCrystException &except){};
+
    this->GetParentPowderPattern().UpdateDisplay();
    VFN_DEBUG_EXIT("PowderPatternBackground::OptimizeBayesianBackground()",5);
 }

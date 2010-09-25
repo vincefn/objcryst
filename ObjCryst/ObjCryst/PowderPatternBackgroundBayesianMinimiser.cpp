@@ -47,7 +47,7 @@ REAL PowderPatternBackgroundBayesianMinimiser::GetLogLikelihood()const
    TAU_PROFILE("PowderPatternBackgroundBayesianMinimiser::GetLogLikelihood()","void ()",TAU_DEFAULT);
    REAL llk=0;
    const long nb=mpBackground->GetPowderPatternCalc().numElements();
-   const long step=nb/500+1;
+   const long step=1;
    {// Calc (obs-calc)/sigma
       const REAL *pBackgd=mpBackground->GetPowderPatternCalc().data();
       const REAL *pObs=mpBackground->GetParentPowderPattern().GetPowderPatternObs().data();
@@ -66,6 +66,55 @@ REAL PowderPatternBackgroundBayesianMinimiser::GetLogLikelihood()const
       }
    }
    return llk;
+}
+
+unsigned int PowderPatternBackgroundBayesianMinimiser::GetNbLSQFunction () const {return 1;}
+
+const CrystVector_REAL& PowderPatternBackgroundBayesianMinimiser::GetLSQCalc (const unsigned int id) const
+{
+  const long nb=mpBackground->GetPowderPatternCalc().numElements();
+  const long step=1;
+  if(mBayesianCalc.numElements()!=nb) mBayesianCalc.resize(nb);
+  
+  const REAL *pBackgd=mpBackground->GetPowderPatternCalc().data();
+  const REAL *pObs=mpBackground->GetParentPowderPattern().GetPowderPatternObs().data();
+  const REAL *pSigma=mpBackground->GetParentPowderPattern().GetPowderPatternObsSigma().data();
+  REAL *pBayesCalc=mBayesianCalc.data();
+  for(long i=0;i<nb;i+=step)
+  {
+    if(*pSigma>0)
+    {
+      *pBayesCalc = PowderPatternBackgroundBayesianMinimiser::BayesianBackgroundLogLikelihood((*pObs-*pBackgd) / (1.4142135623730951**pSigma));
+    }
+    else *pBayesCalc =0;
+    pObs+=step;
+    pBackgd+=step;
+    pSigma+=step;
+    pBayesCalc+=step;
+  }
+  return mBayesianCalc;
+}
+
+const CrystVector_REAL& PowderPatternBackgroundBayesianMinimiser::GetLSQObs (const unsigned int) const
+{
+  const long nb=mpBackground->GetPowderPatternCalc().numElements();
+  if(mBayesianObs.numElements()!=nb)
+  {
+    mBayesianObs.resize(nb);
+    mBayesianObs=0;
+  }
+  return mBayesianObs;
+}
+
+const CrystVector_REAL& PowderPatternBackgroundBayesianMinimiser::GetLSQWeight (const unsigned int) const
+{
+  const long nb=mpBackground->GetPowderPatternCalc().numElements();
+  if(mBayesianWeight.numElements()!=nb)
+  {
+     mBayesianWeight.resize(nb);
+     mBayesianWeight=1;
+  }
+  return mBayesianWeight;
 }
 
 REAL PowderPatternBackgroundBayesianMinimiser::BayesianBackgroundLogLikelihood(const REAL t)
