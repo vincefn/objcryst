@@ -1034,10 +1034,28 @@ Crystal* CreateCrystalFromCIF(CIF &cif,bool verbose,bool checkSymAsXYZ)
          
          for(vector<CIFData::CIFAtom>::const_iterator posat=pos->second.mvAtom.begin();posat!=pos->second.mvAtom.end();++posat)
          {
-            if(pCryst->GetScatteringPowerRegistry().Find(posat->mLabel,"ScatteringPowerAtom",true)<0)
+            // Try to find an existing scattering power with the same properties, or create a new one
+            ScatteringPower* sp=NULL;
+            for(unsigned int i=0;i<pCryst->GetScatteringPowerRegistry().GetNb();++i)
+            {
+              if(pCryst->GetScatteringPowerRegistry().GetObj(i).GetSymbol()!=posat->mSymbol) continue;
+              if(posat->mBeta.size() == 6)
+              {
+                 if(  (pCryst->GetScatteringPowerRegistry().GetObj(i).GetBij(0)!=posat->mBeta[0])
+                    ||(pCryst->GetScatteringPowerRegistry().GetObj(i).GetBij(1)!=posat->mBeta[1])
+                    ||(pCryst->GetScatteringPowerRegistry().GetObj(i).GetBij(2)!=posat->mBeta[2])
+                    ||(pCryst->GetScatteringPowerRegistry().GetObj(i).GetBij(3)!=posat->mBeta[3])
+                    ||(pCryst->GetScatteringPowerRegistry().GetObj(i).GetBij(4)!=posat->mBeta[4])
+                    ||(pCryst->GetScatteringPowerRegistry().GetObj(i).GetBij(5)!=posat->mBeta[5])) continue;
+              }
+              else if(posat->mBiso!=pCryst->GetScatteringPowerRegistry().GetObj(i).GetBiso()) continue;
+              sp=&(pCryst->GetScatteringPowerRegistry().GetObj(i));
+              break;
+            }
+            if(sp==NULL)
             {
                cout<<"Scattering power "<<posat->mLabel<<" not found, creating it..."<<endl;
-               ScatteringPowerAtom* sp = new ScatteringPowerAtom(posat->mLabel,posat->mSymbol);
+               sp = new ScatteringPowerAtom(posat->mLabel,posat->mSymbol);
                // Check for mBeta or Biso
                if(posat->mBeta.size() == 6)
                {
@@ -1050,8 +1068,7 @@ Crystal* CreateCrystalFromCIF(CIF &cif,bool verbose,bool checkSymAsXYZ)
                pCryst->AddScatteringPower(sp);
             }
             pCryst->AddScatterer(new Atom(posat->mCoordFrac[0],posat->mCoordFrac[1],posat->mCoordFrac[2],
-                                          posat->mLabel,&(pCryst->GetScatteringPower(posat->mLabel)),
-                                          posat->mOccupancy));
+                                          posat->mLabel,sp,posat->mOccupancy));
          }
       }
    return pCryst;
