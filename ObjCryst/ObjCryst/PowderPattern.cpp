@@ -4697,7 +4697,7 @@ PeakList PowderPattern::FindPeaks(const float dmin,const float maxratio,const un
          ||((nbav>=nbav_min)  &&(iobs_max>min_iobs)&&((iobs/nbav)>min_iobs*.2)&&((iobs/nbav)>3*sigma))
          ||((nbav>=nbav_min/2)&&(iobs_max>min_iobs)&&((iobs/nbav)>min_iobs*2 )&&((iobs/nbav)>6*sigma)))
       {
-         pl.AddPeak(dmax,iobs,abs(dright-dleft)*.5);
+         pl.AddPeak(dmax,iobs,abs(dright-dleft)*.25);
          if((pl.GetPeakList().size()==1)&&(maxratio<0)&&(min_iobs<0.005*iobs/nbav)) min_iobs=0.005*iobs/nbav;
       }
    }

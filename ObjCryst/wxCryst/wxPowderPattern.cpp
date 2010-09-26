@@ -1722,12 +1722,21 @@ void WXPowderPatternGraph::OnChangePeak(wxCommandEvent& event)
       if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
       {
          d  =    2*mpPattern->GetPowderPattern().X2STOL(this->Screen2DataX((long)mDraggingX0  )*DEG2RAD);
-         sig=abs(2*mpPattern->GetPowderPattern().X2STOL(this->Screen2DataX((long)mDraggingX0+1)*DEG2RAD)-d);
+         // Use 2*local step as sigma
+         long x1=(long)(mpPattern->GetPowderPattern().STOL2Pixel(d/2));
+         if(x1<1) x1+=1;
+         sig=2*abs( mpPattern->GetPowderPattern().X2STOL(mpPattern->GetPowderPattern().GetPowderPatternX()(x1  ))
+                   -mpPattern->GetPowderPattern().X2STOL(mpPattern->GetPowderPattern().GetPowderPatternX()(x1-1)));
       }
       else 
       {
          d  =    2*mpPattern->GetPowderPattern().X2STOL(this->Screen2DataX((long)mDraggingX0  ));
-         sig=abs(2*mpPattern->GetPowderPattern().X2STOL(this->Screen2DataX((long)mDraggingX0+1))-d);
+         long x1=(long)(mpPattern->GetPowderPattern().STOL2Pixel(d/2));
+         cout<<__FILE__<<":"<<__LINE__<<":"<<x1<<endl;
+         if(x1<1) x1+=1;
+         sig=2*abs( mpPattern->GetPowderPattern().X2STOL(mpPattern->GetPowderPattern().GetPowderPatternX()(x1  ))
+                   -mpPattern->GetPowderPattern().X2STOL(mpPattern->GetPowderPattern().GetPowderPatternX()(x1-1)));
+         cout<<__FILE__<<":"<<__LINE__<<":"<<sig<<endl;
       }
       
       mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_SAVEPEAKS, TRUE);
