@@ -40,8 +40,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="C:\Dev\Fox;C:\Dev\Fox\cctbx;C:\Dev\Fox\cctbx\cctbx\include;C:\Dev\Fox\cctbx\scitbx\include;C:\Dev\Fox\ObjCryst;C:\Dev\wxWidgets\include;C:\Dev\wxWidgets\lib\vc_lib\msw"
-				PreprocessorDefinitions="WIN32;NDEBUG;__DEBUG__;_CONSOLE;__WX__CRYST__;OBJCRYST_GL"
+				AdditionalIncludeDirectories="C:\Dev;C:\Dev\cctbx;C:\Dev\cctbx\cctbx\include;C:\Dev\cctbx\scitbx\include;C:\Dev\ObjCryst;&quot;d:\wxWidgets-2.8.7\include&quot;;&quot;d:\wxWidgets-2.8.7\lib\vc_lib\msw&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG;__DEBUG__;_CONSOLE;__WX__CRYST__;OBJCRYST_GL;__TESTING__"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -55,17 +55,18 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				AdditionalIncludeDirectories="&quot;d:\wxWidgets-2.8.7\include&quot;"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="wxbase28.lib wxmsw28_core.lib wxmsw28_adv.lib wxmsw28_gl.lib opengl32.lib glu32.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregex.lib wxexpat.lib winmm.lib comctl32.lib rpcrt4.lib wsock32.lib oleacc.lib odbc32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib shell32.lib oldnames.lib ole32.lib oleaut32.lib uuid.lib advapi32.lib"
+				AdditionalDependencies="wxbase28.lib wxbase28_net.lib wxmsw28_core.lib wxmsw28_adv.lib wxmsw28_gl.lib opengl32.lib glu32.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregex.lib wxexpat.lib winmm.lib comctl32.lib rpcrt4.lib wsock32.lib oleacc.lib odbc32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib shell32.lib oldnames.lib ole32.lib oleaut32.lib uuid.lib advapi32.lib"
 				OutputFile="$(OutDir)\$(ProjectName)-DEBUG.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="C:\Dev\wxWidgets\lib\vc_lib"
-				IgnoreDefaultLibraryNames="libcmt"
+				AdditionalLibraryDirectories="d:\wxWidgets-2.8.7\lib\vc_lib"
+				IgnoreDefaultLibraryNames="libboost_date_time-vc80-mt-sgd-1_33_1.lib;LIBCMT"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -144,7 +145,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				AdditionalIncludeDirectories="C:\Dev\wxWidgets\include"
+				AdditionalIncludeDirectories="&quot;d:\wxWidgets-2.8.7\include&quot;"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -156,11 +157,185 @@
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="C:\Dev\wxWidgets\lib\vc_lib;C:\Dev\Fox\fftw"
 				IgnoreAllDefaultLibraries="false"
-				IgnoreDefaultLibraryNames=""
+				IgnoreDefaultLibraryNames="LIBC.LIB"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release UNICODE|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			CharacterSet="1"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				InlineFunctionExpansion="2"
+				EnableIntrinsicFunctions="true"
+				FavorSizeOrSpeed="1"
+				OmitFramePointers="true"
+				EnableFiberSafeOptimizations="true"
+				AdditionalIncludeDirectories="C:\Dev;C:\Dev\cctbx\cctbx\include;C:\Dev\cctbx\scitbx\include;C:\Dev\ObjCryst;&quot;d:\wxWidgets-2.8.7\include&quot;;&quot;d:\wxWidgets-2.8.7\lib\vc_lib\msw&quot;;C:\Dev\fftw\api"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;__WX__CRYST__;OBJCRYST_GL;BOOST_ALL_NO_LIB;HAVE_FFTW"
+				MinimalRebuild="true"
+				RuntimeLibrary="0"
+				BufferSecurityCheck="false"
+				EnableEnhancedInstructionSet="1"
+				FloatingPointModel="2"
+				FloatingPointExceptions="false"
+				UsePrecompiledHeader="0"
+				WarningLevel="0"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				AdditionalIncludeDirectories="&quot;d:\wxWidgets-2.8.7\include&quot;"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="wxbase28u.lib wxbase28u_net.lib wxmsw28u_core.lib wxmsw28u_adv.lib wxmsw28u_gl.lib opengl32.lib glu32.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregex.lib wxexpat.lib winmm.lib comctl32.lib rpcrt4.lib wsock32.lib oleacc.lib odbc32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib shell32.lib oldnames.lib ole32.lib oleaut32.lib uuid.lib advapi32.lib libfftwf.lib"
+				ShowProgress="2"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="&quot;d:\wxWidgets-2.8.7\lib\vc_lib&quot;;C:\Dev\fftw\lib"
+				IgnoreAllDefaultLibraries="false"
+				IgnoreDefaultLibraryNames="LIBC.LIB"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug UNICODE|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			CharacterSet="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="C:\Dev;C:\Dev\cctbx;C:\Dev\cctbx\cctbx\include;C:\Dev\cctbx\scitbx\include;C:\Dev\ObjCryst;&quot;d:\wxWidgets-2.8.7\include&quot;;&quot;d:\wxWidgets-2.8.7\lib\vc_lib\msw&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG;__DEBUG__;_CONSOLE;__WX__CRYST__;OBJCRYST_GL"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="1"
+				UsePrecompiledHeader="0"
+				WarningLevel="0"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="4"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				AdditionalIncludeDirectories="&quot;d:\wxWidgets-2.8.7\include&quot;"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="wxbase28u.lib wxbase28u_net.lib wxmsw28u_core.lib wxmsw28u_adv.lib wxmsw28u_gl.lib opengl32.lib glu32.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregex.lib wxexpat.lib winmm.lib comctl32.lib rpcrt4.lib wsock32.lib oleacc.lib odbc32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib shell32.lib oldnames.lib ole32.lib oleaut32.lib uuid.lib advapi32.lib"
+				OutputFile="$(OutDir)\$(ProjectName)-DEBUG.exe"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="d:\wxWidgets-2.8.7\lib\vc_lib"
+				IgnoreDefaultLibraryNames="libboost_date_time-vc80-mt-sgd-1_33_1.lib;LIBCMT"
+				GenerateDebugInformation="true"
+				SubSystem="2"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -230,7 +405,27 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FoxClient.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\FoxJob.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\FoxServer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\FoxServerThread.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\ObjCryst\RefinableObj\GlobalOptimObj.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GridResult.cpp"
 				>
 			</File>
 			<File
@@ -258,9 +453,31 @@
 						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release UNICODE|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug UNICODE|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\ObjCryst\ObjCryst\IO.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\IOSocket.cpp"
 				>
 			</File>
 			<File
@@ -368,7 +585,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\WXFoxClient.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\WXFoxServer.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\ObjCryst\wxCryst\wxGlobalOptimObj.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\WXGridWindow.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\ObjCryst\wxCryst\wxLSQ.cpp"
 				>
 			</File>
 			<File
@@ -450,6 +683,22 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FoxClient.h"
+				>
+			</File>
+			<File
+				RelativePath=".\FoxJob.h"
+				>
+			</File>
+			<File
+				RelativePath=".\FoxServer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\FoxServerThread.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\ObjCryst\ObjCryst\General.h"
 				>
 			</File>
@@ -466,6 +715,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GridResult.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\ObjCryst\ObjCryst\Indexing.h"
 				>
 			</File>
@@ -475,6 +728,10 @@
 			</File>
 			<File
 				RelativePath="..\..\ObjCryst\ObjCryst\IO.h"
+				>
+			</File>
+			<File
+				RelativePath=".\IOSocket.h"
 				>
 			</File>
 			<File
@@ -590,11 +847,27 @@
 				>
 			</File>
 			<File
+				RelativePath=".\WXFoxClient.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WXFoxServer.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\ObjCryst\wxCryst\wxGeneticAlgorithm.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\ObjCryst\wxCryst\wxGlobalOptimObj.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WXGridWindow.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\ObjCryst\wxCryst\wxLSQ.h"
 				>
 			</File>
 			<File
@@ -660,6 +933,14 @@
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCResourceCompilerTool"
+						AdditionalIncludeDirectories="C:\Dev\wxWidgets\include"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug UNICODE|Win32"
 					>
 					<Tool
 						Name="VCResourceCompilerTool"

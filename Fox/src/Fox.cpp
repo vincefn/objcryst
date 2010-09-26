@@ -1,6 +1,7 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
-    (c) 2000-2009 Vincent Favre-Nicolin vincefn@users.sourceforge.net
+    (c) 2000-2010 Vincent Favre-Nicolin vincefn@users.sourceforge.net
         2000-2001 University of Geneva (Switzerland)
+        2008-2010 Jan Rohlicek - Inst. of Chemical Technology, Prague
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -64,7 +65,8 @@
 
 #ifdef __WX__CRYST__
    #include "ObjCryst/wxCryst/wxCrystal.h"
-
+//FOXGrid
+   #include "WXGridWindow.h"
    #if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__) || defined(__WXMGL__) || defined(__WXX11__)
       #include "Fox.xpm"
    #endif
@@ -151,6 +153,12 @@ public:
    void OnToggleTooltips(wxCommandEvent& event);
    void OnPreferences(wxCommandEvent& event);
    void OnCheckUpdate(wxCommandEvent& event);
+   //FoxGrid////////////////////////////////////////
+   void OnStartGridServer(wxCommandEvent &event);
+   void OnStartGridClient(wxCommandEvent &event);
+
+    //FoxGrid////////////////////////////////////////
+   WXGrigWindow *mpGridWindow;
 private:
     DECLARE_EVENT_TABLE()
     RefinableObjClock mClockLastSave;
@@ -203,6 +211,11 @@ static const long MENU_DEBUG_TEST1=                    WXCRYST_ID();
 static const long MENU_DEBUG_TEST2=                    WXCRYST_ID();
 static const long MENU_DEBUG_TEST3=                    WXCRYST_ID();
 static const long ID_ABOUT_FOX_BUTTON_UPDATE=          WXCRYST_ID();
+
+//FoxGrid///////////////////////////////////////////////////////////
+static const long MENU_GRID_SERVER_RUN=                WXCRYST_ID();
+static const long MENU_GRID_CLIENT_START=              WXCRYST_ID();
+
 
 /// Separate thread to check for updates////////////////////////////////////////////////////////////
 static const long ID_FOX_UPDATES_RESULT=               WXCRYST_ID();
@@ -288,6 +301,9 @@ BEGIN_EVENT_TABLE(WXCrystMainFrame, wxFrame)
    EVT_MENU(MENU_DEBUG_TEST2,                      WXCrystMainFrame::OnDebugTest)
    EVT_MENU(MENU_DEBUG_TEST3,                      WXCrystMainFrame::OnDebugTest)
    EVT_UPDATE_UI(ID_CRYST_UPDATEUI,                WXCrystMainFrame::OnUpdateUI)
+   //FoxGrid///////////////////////////////////////////////////////////////////////////////
+   EVT_MENU(MENU_GRID_SERVER_RUN, WXCrystMainFrame::OnStartGridServer)
+   EVT_MENU(MENU_GRID_CLIENT_START, WXCrystMainFrame::OnStartGridClient)
 END_EVENT_TABLE()
 
 IMPLEMENT_APP(MyApp)
@@ -336,8 +352,33 @@ int main (int argc, char *argv[])
    long cif2patternNbPoint=1000;
    double cif2patternMax2Theta=M_PI*.9;
    bool exportfullprof=false;
+    //FoxGrid
+   bool runclient(false);
+   long nbCPUs = -1;
+   string IP;
    for(int i=1;i<argc;i++)
    {
+       #ifdef __WX__CRYST__
+      //FoxGrid
+      if(STRCMP(_T("--runclient"),argv[i])==0)
+      {
+         
+         if(!useGUI) {
+            cout << "Client output: Run client with GUI only!"<<endl;
+            cout << "i.e. Fox --runclient 10.0.0.1 --CPUs 4"<<endl;
+            exit(0);
+         }
+         runclient = true;
+         i++;
+         IP = string(wxString(argv[i]).ToAscii());
+         //get nb of CPUs to use
+         if(STRCMP(_T("--CPUs"),argv[i+1])==0) {
+             i=i+2;
+             wxString(argv[i]).ToLong(&nbCPUs);
+         }
+         continue;
+      }
+      #endif
       if(STRCMP(_T("--nogui"),argv[i])==0)
       {
          useGUI=false;
@@ -802,7 +843,7 @@ int main (int argc, char *argv[])
            <<"         --finalcost 0.15 : run optimization until cost < 0.15"<<endl
            <<"         --cif2pattern 1.5406 170 5000 .1 outfile:"<<endl
            <<"                               simulate pattern for input crystal, wavelength=1.5406"<<endl
-           <<"                               up to 170°with 500 points and a peak width of 0.1°"<<endl
+           <<"                               up to 170deg with 5000 points and a peak width of 0.1 deg"<<endl
            <<"                               and save to file outfile%d.dat"<<endl
            <<endl<<endl<<"           EXAMPLES :"<<endl<<endl
            <<"Load file 'silicon.xml' and launch GUI:"<<endl<<endl
@@ -920,7 +961,7 @@ int main (int argc, char *argv[])
    string title(string("FOX: Free Objects for Xtal structures v")+foxVersion);
    frame = new WXCrystMainFrame(wxString::FromAscii(title.c_str()),
                                  wxPoint(50, 50), wxSize(600, 600),
-                                 !(loadFourierGRD||loadFourierDSN6));
+                                 !(loadFourierGRD||loadFourierDSN6||runclient));
    // Use the main frame status bar to pass messages to the user
       pMainFrameForUserMessage=frame;
       fpObjCrystInformUser=&WXCrystInformUserStdOut;
@@ -965,6 +1006,19 @@ int main (int argc, char *argv[])
          pWXCryst->GetCrystalGL()->AddFourier(pMap);
       }
    }
+   if(runclient)
+   { 
+      wxString dir = wxPathOnly(argv[0]);
+      wxSetWorkingDirectory(dir);
+      wxCommandEvent com;
+      frame->OnStartGridClient(com);
+      if(nbCPUs!=-1) {
+          frame->mpGridWindow->m_WXFoxClient->setNbCPU(nbCPUs);
+      }
+      frame->mpGridWindow->m_WXFoxClient->m_IPWindow->SetValue(wxString::FromAscii(IP.c_str()));
+      frame->mpGridWindow->m_WXFoxClient->OnConnectClient(com);
+   }
+
    return TRUE;
 #else
    return 0;
@@ -1041,6 +1095,12 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
                            _T("Add a new Single Crystal Diffraction Object"));
          objectMenu->Append(MENU_OBJECT_CREATE_GLOBALOPTOBJ, _T("New Monte-Carlo Object"),
                            _T("Add a new Monte-Carlo Object"));
+
+         //FoxGrid////////////////////////////////////////////////////////////////////
+      wxMenu *gridMenu = new wxMenu;
+         gridMenu->Append(MENU_GRID_SERVER_RUN, _T("&Run Server"), _T("Start Fox Grid Server"));
+         gridMenu->AppendSeparator();
+         gridMenu->Append(MENU_GRID_CLIENT_START, _T("&Start Client"), _T("Start Fox Grid Client"));
       
       wxMenu *prefsMenu = new wxMenu;
          prefsMenu->Append(MENU_PREFS_PREFERENCES, _T("&Preferences..."), _T("Fox Preferences..."));
@@ -1052,6 +1112,8 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
       wxMenuBar *menuBar = new wxMenuBar();
          menuBar->Append(menuFile,  _T("&File"));
          menuBar->Append(objectMenu,_T("&Objects"));
+         //FoxGrid/////////////////////////////
+         menuBar->Append(gridMenu,_T("&FOXGrid"));
          menuBar->Append(prefsMenu, _T("&Preferences"));
          menuBar->Append(helpMenu,  _T("&Help"));
          #ifdef __DEBUG__
@@ -1121,6 +1183,13 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
       mpWin4->SetChild(gOptimizationObjRegistry.WXCreate(mpWin4));
       mpWin4->Layout();
       mpNotebook->AddPage(mpWin4,_T("Global Optimization"),true);
+       // Fift window - FoxGrid
+      WXCrystScrolledWindow *mpWin5 = new WXCrystScrolledWindow(mpNotebook);
+      mpGridWindow = new WXGrigWindow(mpWin5);
+      mpWin5->SetChild(mpGridWindow);
+      mpWin5->Layout();
+      mpNotebook->AddPage(mpWin5,_T("FOXGrid"),true);
+
 
    this->SetIcon(wxICON(Fox));
    this->Show(TRUE);
@@ -1232,6 +1301,8 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
          }
          else while (!is.Eof()) in<<(char)is.GetC();
          XMLCrystFileLoadAllObject(in);
+         //FoxGrid
+         mpGridWindow->DataLoaded();
       }
       else
          if(name.Mid(name.size()-4)==wxString(_T(".cif")))
@@ -1250,6 +1321,8 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
             CreateCrystalFromCIF(cif);
             CreatePowderPatternFromCIF(cif);
             CreateSingleCrystalDataFromCIF(cif);
+            //FoxGrid
+            mpGridWindow->DataLoaded();
          }
          else
             if(name.size()>6)
@@ -1260,6 +1333,8 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
                   stringstream sst;
                   while (!zstream.Eof()) sst<<(char)zstream.GetC();
                   XMLCrystFileLoadAllObject(sst);
+                  //FoxGrid
+                    mpGridWindow->DataLoaded();
                }
    }
    open->Destroy();
@@ -1304,6 +1379,16 @@ void WXCrystMainFrame::OnClose(wxCloseEvent& event)
 }
 void WXCrystMainFrame::SafeClose()
 {
+   if(mpGridWindow->m_WXFoxServer!=NULL)
+   {
+      wxMessageDialog d(this,_T("You are trying to close server. Are you sure?"), _T(""), wxYES | wxNO);
+      if(wxID_YES!=d.ShowModal()) return;
+   }
+   if(mpGridWindow->m_WXFoxClient!=NULL){
+       wxMessageDialog d(this,_T("You are trying to close client. Are you sure?"), _T(""), wxYES | wxNO);
+       if(wxID_YES!=d.ShowModal()) return;
+       mpGridWindow->m_WXFoxClient->CloseClient();
+   }
    bool safe=true;
    wxConfigBase::Get()->Read(_T("Fox/BOOL/Ask confirmation before exiting Fox"),&safe);
    if(!safe)
@@ -1336,7 +1421,10 @@ void WXCrystMainFrame::SafeClose()
    gPowderPatternRegistry.DeleteAll();
    cout<<"Removing all Crystal objects..."<<endl;
    gCrystalRegistry.DeleteAll();
+   //FoxGrid
+   mpGridWindow->Clear();
    this->Destroy();
+   mpGridWindow->Destroy();
 }
 void WXCrystMainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
 {
@@ -1444,6 +1532,21 @@ void WXCrystMainFrame::OnAddGeneticAlgorithm(wxCommandEvent& WXUNUSED(event))
 {
    //GeneticAlgorithm* obj;
    //obj=new GeneticAlgorithm("Change Me!");
+}
+//FOXGrid
+void WXCrystMainFrame::OnStartGridServer(wxCommandEvent &event)
+{
+   VFN_DEBUG_ENTRY("WXCrystMainFrame::OnStartGridServer()",10)
+   if(!wxDirExists(_T("GridRslt"))) wxMkdir(_T("GridRslt"));
+   if(mpGridWindow->StartServer()==NULL) return;
+   VFN_DEBUG_EXIT("WXCrystMainFrame::OnStartGridServer()",10)
+   mpGridWindow->Layout();
+   mpNotebook->SetSelection(4);
+}
+void WXCrystMainFrame::OnStartGridClient(wxCommandEvent &event)
+{
+   if(mpGridWindow->StartClientWindow()==NULL) return;
+   mpNotebook->SetSelection(4);
 }
 void WXCrystMainFrame::OnSetDebugLevel(wxCommandEvent& event)
 {
