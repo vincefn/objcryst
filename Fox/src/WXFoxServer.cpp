@@ -786,7 +786,7 @@ void WXFoxServer::OnShowResults(wxCommandEvent& event)
    cmd += file;
    #else
    //TODO:
-   //cmd = wxGetCwd()+"/"+wxApp::GetInstance()->argv[0] +" ";
+   cmd = wxGetCwd()+_T("/")+wxApp::GetInstance()->argv[0] +_T(" ")+file;
    #endif
 
    wxExecute(cmd);
