@@ -1320,14 +1320,14 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
          if(pos->isSpurious)
          {
             if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
-               sprintf(buf,"#%2u,x=%6.3f° d=%6.3fA SPURIOUS?",ix,x*RAD2DEG,1/pos->dobs);
+               sprintf(buf,"#%2u,x=%6.3f d=%6.3fA SPURIOUS?",ix,x*RAD2DEG,1/pos->dobs);
             else
                sprintf(buf,"#%2u,x=%6.3f d=%6.3fA SPURIOUS?",ix,x        ,1/pos->dobs);
          }
          else
          {
             if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
-               sprintf(buf,"#%2u,x=%6.2f° d=%6.3fA",ix,x*RAD2DEG,1/pos->dobs);
+               sprintf(buf,"#%2u,x=%6.2f d=%6.3fA",ix,x*RAD2DEG,1/pos->dobs);
             else
                sprintf(buf,"#%2u,x=%6.2f d=%6.3fA",ix,x        ,1/pos->dobs);
          }
@@ -1866,7 +1866,7 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
       pSizerAdvanced->Add(pLengthSizer,0,wxALIGN_CENTER);
    
       wxBoxSizer *pAngleSizer=new wxBoxSizer(wxHORIZONTAL);
-      wxStaticText *pAngleText=new wxStaticText(pAdvanced,-1,_T("Angle max(90< <179°):"));
+      wxStaticText *pAngleText=new wxStaticText(pAdvanced,-1,_T("Angle max(90< <179):"));
       pAngleSizer->Add(pAngleText,0,wxALIGN_CENTER);
       //mpAngleMin=new wxTextCtrl(this,-1,"90",wxDefaultPosition,wxSize(40,-1),0,
       //                          wxTextValidator(wxFILTER_NUMERIC));
