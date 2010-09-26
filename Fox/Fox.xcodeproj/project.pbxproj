@@ -83,6 +83,15 @@
 		BF1DE1540D2297C300A3939D /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF1DE1530D2297C300A3939D /* QuickTime.framework */; };
 		BF3EB05508968F5500E02367 /* uctbx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3EB05408968F5500E02367 /* uctbx.cpp */; };
 		BF3EB063089690D200E02367 /* spoil_optimization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3EB062089690D200E02367 /* spoil_optimization.cpp */; };
+		BF69C4D1124F8C310035CF57 /* FoxClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4C8124F8C310035CF57 /* FoxClient.cpp */; };
+		BF69C4D2124F8C310035CF57 /* FoxJob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4C9124F8C310035CF57 /* FoxJob.cpp */; };
+		BF69C4D3124F8C310035CF57 /* FoxServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4CA124F8C310035CF57 /* FoxServer.cpp */; };
+		BF69C4D4124F8C310035CF57 /* FoxServerThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4CB124F8C310035CF57 /* FoxServerThread.cpp */; };
+		BF69C4D5124F8C310035CF57 /* GridResult.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4CC124F8C310035CF57 /* GridResult.cpp */; };
+		BF69C4D6124F8C310035CF57 /* IOSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4CD124F8C310035CF57 /* IOSocket.cpp */; };
+		BF69C4D7124F8C310035CF57 /* WXFoxClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4CE124F8C310035CF57 /* WXFoxClient.cpp */; };
+		BF69C4D8124F8C310035CF57 /* WXFoxServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4CF124F8C310035CF57 /* WXFoxServer.cpp */; };
+		BF69C4D9124F8C310035CF57 /* WXGridWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4D0124F8C310035CF57 /* WXGridWindow.cpp */; };
 		BFFB474E0E5E0E620027591E /* wxLSQ.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFB474D0E5E0E620027591E /* wxLSQ.cpp */; };
 		BFFCCB670890296D00044EBA /* bandmat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCB660890296D00044EBA /* bandmat.cpp */; };
 		BFFCCBA0089029F400044EBA /* cholesky.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCB6A089029F400044EBA /* cholesky.cpp */; };
@@ -229,6 +238,15 @@
 		BF3611540BD6E4BE000C0EE9 /* wxWindows.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = wxWindows.xcodeproj; path = ../../wxMac/src/wxWindows.xcodeproj; sourceTree = SOURCE_ROOT; };
 		BF3EB05408968F5500E02367 /* uctbx.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = uctbx.cpp; path = ../cctbx/cctbx/uctbx/uctbx.cpp; sourceTree = "<group>"; };
 		BF3EB062089690D200E02367 /* spoil_optimization.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = spoil_optimization.cpp; path = ../cctbx/cctbx/uctbx/spoil_optimization.cpp; sourceTree = "<group>"; };
+		BF69C4C8124F8C310035CF57 /* FoxClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FoxClient.cpp; path = src/FoxClient.cpp; sourceTree = "<group>"; };
+		BF69C4C9124F8C310035CF57 /* FoxJob.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FoxJob.cpp; path = src/FoxJob.cpp; sourceTree = "<group>"; };
+		BF69C4CA124F8C310035CF57 /* FoxServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FoxServer.cpp; path = src/FoxServer.cpp; sourceTree = "<group>"; };
+		BF69C4CB124F8C310035CF57 /* FoxServerThread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FoxServerThread.cpp; path = src/FoxServerThread.cpp; sourceTree = "<group>"; };
+		BF69C4CC124F8C310035CF57 /* GridResult.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GridResult.cpp; path = src/GridResult.cpp; sourceTree = "<group>"; };
+		BF69C4CD124F8C310035CF57 /* IOSocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IOSocket.cpp; path = src/IOSocket.cpp; sourceTree = "<group>"; };
+		BF69C4CE124F8C310035CF57 /* WXFoxClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WXFoxClient.cpp; path = src/WXFoxClient.cpp; sourceTree = "<group>"; };
+		BF69C4CF124F8C310035CF57 /* WXFoxServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WXFoxServer.cpp; path = src/WXFoxServer.cpp; sourceTree = "<group>"; };
+		BF69C4D0124F8C310035CF57 /* WXGridWindow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WXGridWindow.cpp; path = src/WXGridWindow.cpp; sourceTree = "<group>"; };
 		BFE6AC680B886ACA007AFBA8 /* Indexing.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Indexing.cpp; path = ../ObjCryst/ObjCryst/Indexing.cpp; sourceTree = SOURCE_ROOT; };
 		BFFB474D0E5E0E620027591E /* wxLSQ.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxLSQ.cpp; path = ../ObjCryst/wxCryst/wxLSQ.cpp; sourceTree = SOURCE_ROOT; };
 		BFFCCB5D089028E500044EBA /* libnewmat.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libnewmat.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2024,6 +2042,15 @@
 		BF3EAF90089628D200E02367 /* Fox */ = {
 			isa = PBXGroup;
 			children = (
+				BF69C4C8124F8C310035CF57 /* FoxClient.cpp */,
+				BF69C4C9124F8C310035CF57 /* FoxJob.cpp */,
+				BF69C4CA124F8C310035CF57 /* FoxServer.cpp */,
+				BF69C4CB124F8C310035CF57 /* FoxServerThread.cpp */,
+				BF69C4CC124F8C310035CF57 /* GridResult.cpp */,
+				BF69C4CD124F8C310035CF57 /* IOSocket.cpp */,
+				BF69C4CE124F8C310035CF57 /* WXFoxClient.cpp */,
+				BF69C4CF124F8C310035CF57 /* WXFoxServer.cpp */,
+				BF69C4D0124F8C310035CF57 /* WXGridWindow.cpp */,
 				BF26F598089306500008175B /* Fox.icns */,
 				BFFCD88E0890422000044EBA /* Fox.cpp */,
 			);
@@ -4431,6 +4458,15 @@
 				BF1DDE240D228E3700A3939D /* ci_string.cpp in Sources */,
 				BF1DDE250D228E3700A3939D /* Indexing.cpp in Sources */,
 				BFFB474E0E5E0E620027591E /* wxLSQ.cpp in Sources */,
+				BF69C4D1124F8C310035CF57 /* FoxClient.cpp in Sources */,
+				BF69C4D2124F8C310035CF57 /* FoxJob.cpp in Sources */,
+				BF69C4D3124F8C310035CF57 /* FoxServer.cpp in Sources */,
+				BF69C4D4124F8C310035CF57 /* FoxServerThread.cpp in Sources */,
+				BF69C4D5124F8C310035CF57 /* GridResult.cpp in Sources */,
+				BF69C4D6124F8C310035CF57 /* IOSocket.cpp in Sources */,
+				BF69C4D7124F8C310035CF57 /* WXFoxClient.cpp in Sources */,
+				BF69C4D8124F8C310035CF57 /* WXFoxServer.cpp in Sources */,
+				BF69C4D9124F8C310035CF57 /* WXGridWindow.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
