@@ -29,9 +29,9 @@ void MyProcess::OnTerminate(int pid, int status)
     delete this;
 }
 ///////////////////////////////////////////////
-FoxProcess::FoxProcess(wxString relDir)
+FoxProcess::FoxProcess(wxString tmpDir)
 {
-    relDIR = relDir;
+    tmpDIR = tmpDir;
     running = false;
     pid = -1;
 }
@@ -46,13 +46,13 @@ int FoxProcess::getPid()
 {
     return pid;
 }
-void FoxProcess::setRelDir(wxString dir)
+void FoxProcess::setTmpDir(wxString dir)
 {
-    relDIR = dir;
+    tmpDIR = dir;
 }
-wxString FoxProcess::getRelDir()
+wxString FoxProcess::getTmpDir()
 {
-    return relDIR;
+    return tmpDIR;
 }
 void FoxProcess::setRunning(bool run)
 {
@@ -128,7 +128,12 @@ void FoxClient::resetProcesses(int nbProcesses)
     m_processes.clear();
     for(int i=0;i<nbProcesses;i++) {
       wxString dir;
-      dir.Printf(_T("process_%d"), i);
+      #ifdef __WIN32__
+      dir.Printf(_T("\\ObjCryst-FoxGrid-process_%d"), i);
+      #else
+      dir.Printf(_T("/ObjCryst-FoxGrid-process_%d"), i);
+      #endif
+      dir=wxStandardPaths::Get().GetTempDir()+dir;
       if(!wxDirExists(dir.c_str())) {
          wxMkdir(dir);
       }
@@ -516,21 +521,21 @@ int FoxClient::runNewJob(wxString job, int id, int nbTrial, bool rand)
     if(proc!=0) {
         WriteMessageLog(_T("process found"));
         #ifdef WIN32
-        //saving input file to the process directory
-        SaveDataAsFile(job, wxGetCwd() + _T("\\") + proc->getRelDir() + _T("\\input.xml"));
+        //saving input file to the temporary directory
+        SaveDataAsFile(job,proc->getTmpDir() + _T("\\input.xml"));
         //creating bat file
-        //wxFile *batFile = new wxFile(wxGetCwd() + _T("\\") + proc->getRelDir() + _T("\\!run.bat"), wxFile::write);
+        //wxFile *batFile = new wxFile(proc->getTmpDir() + _T("\\!run.bat"), wxFile::write);
         //creating bat file content
         wxString cmd_content;
         if(rand) {
-            cmd_content.Printf(_T("Fox.exe %1$s\\input.xml --nogui -n %2$d --randomize -o %1$s\\out#cost.xml"), proc->getRelDir(), nbTrial);
+            cmd_content.Printf(_T("Fox.exe %1$s\\input.xml --nogui -n %2$d --randomize -o %1$s\\out#cost.xml"), proc->getTmpDir(), nbTrial);
         } else {
-            cmd_content.Printf(_T("Fox.exe %1$s\\input.xml --nogui -n %2$d -o %1$s\\out#cost.xml"), proc->getRelDir(), nbTrial);
+            cmd_content.Printf(_T("Fox.exe %1$s\\input.xml --nogui -n %2$d -o %1$s\\out#cost.xml"), proc->getTmpDir(), nbTrial);
         }
         #else
         WriteMessageLog(_T("saving data as file - input.xml"));
-        SaveDataAsFile(job, wxGetCwd() + _T("/") + proc->getRelDir() + _T("/input.xml"));
-        wxFile *batFile = new wxFile(wxGetCwd() + _T("/") + proc->getRelDir() + _T("/run.sh"), wxFile::write);
+        SaveDataAsFile(job, proc->getTmpDir() + _T("/input.xml"));
+        wxFile *batFile = new wxFile(proc->getTmpDir() + _T("/run.sh"), wxFile::write);
         wxString content;
         wxString appname = wxApp::GetInstance()->argv[0];
         WriteMessageLog(appname);
@@ -539,12 +544,12 @@ int FoxClient::runNewJob(wxString job, int id, int nbTrial, bool rand)
         wxString tr;
         tr.Printf(_T("%d"), nbTrial);
         if(rand) {
-            content = appname+_T(" ")+proc->getRelDir()+_T("/input.xml --nogui -n ")+tr+_T(" --randomize --silent -o ")+wxGetCwd()+_T("/")+proc->getRelDir()+_T("/out#cost.xml > ")+wxGetCwd()+_T("/")+proc->getRelDir()+_T("/out.txt");
+            content = appname+_T(" ")+proc->getTmpDir()+_T("/input.xml --nogui -n ")+tr+_T(" --randomize --silent -o ")+proc->getTmpDir()+_T("/out#cost.xml > ")+proc->getTmpDir()+_T("/out.txt");
         } else {
-            content = appname+_T(" ")+proc->getRelDir()+_T("/input.xml --nogui -n ")+tr+_T(" --silent -o ")+wxGetCwd()+_T("/")+proc->getRelDir()+_T("/out#cost.xml > ")+wxGetCwd()+_T("/")+proc->getRelDir()+_T("/out.txt");
+            content = appname+_T(" ")+proc->getTmpDir()+_T("/input.xml --nogui -n ")+tr+_T(" --silent -o ")            +proc->getTmpDir()+_T("/out#cost.xml > ")+proc->getTmpDir()+_T("/out.txt");
         }
         //wxString path_to_input;
-        //path_to_input = wxGetCwd() + _T("/") + proc->getRelDir();
+        //path_to_input = proc->getTmpDir();
         //WriteMessageLog(path_to_input);
 /*
         if(rand) {
@@ -562,12 +567,12 @@ int FoxClient::runNewJob(wxString job, int id, int nbTrial, bool rand)
         
 
         #ifdef WIN32
-        //wxString cmd = proc->getRelDir() + _T("\\!run.bat");
+        //wxString cmd = proc->getTmpDir() + _T("\\!run.bat");
         #else
-        wxString cmd_content = _T("sh ")+ proc->getRelDir() + _T("/run.sh");
+        wxString cmd_content = _T("sh ")+ proc->getTmpDir() + _T("/run.sh");
         #endif 
         WriteMessageLog(_T("creating process"));
-        wxProcess *process = new MyProcess(this, cmd_content, proc->getRelDir());
+        wxProcess *process = new MyProcess(this, cmd_content, proc->getTmpDir());
         WriteMessageLog(_T("executing process"));
         int pid = wxExecute(cmd_content, wxEXEC_ASYNC|wxEXEC_MAKE_GROUP_LEADER, process);
         if ( !pid ) {

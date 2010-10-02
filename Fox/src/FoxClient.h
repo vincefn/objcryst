@@ -29,6 +29,7 @@
    #include "wx/thread.h"
    #include "wx/stream.h"
    #include "wx/dir.h"
+   #include "wx/stdpaths.h"
    //#include "wx/dynarray.h"
 #endif
 
@@ -62,8 +63,8 @@ public:
 
     void setPid(int pid);
     int  getPid();
-    void     setRelDir(wxString dir);
-    wxString getRelDir();
+    void     setTmpDir(wxString dir);
+    wxString getTmpDir();
     void setRunning(bool run);
     bool isRunning();
     void setJobID(int id);
@@ -72,7 +73,7 @@ public:
 private:
 
     int      pid;
-    wxString relDIR;
+    wxString tmpDIR;
     bool     running;
     int      jobID;
 };
