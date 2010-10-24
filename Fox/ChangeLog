@@ -1,5 +1,9 @@
 #### 1.9.X - September 2010 (Revision #)
 NEW FEATURES
+   * Add Fox.Grid extension allowing distributed computing
+   for Fox, with a server and a client graphical interface.
+   It also allows distributing computation on all the cores
+   of a single computer. (J. Rohlicek, M Husak)
 IMPROVEMENTS
    * More accurate Bayesian estimation of background
    * Use a better evaluation of peak positions for indexing

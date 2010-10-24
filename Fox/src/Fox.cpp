@@ -83,7 +83,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 1247
+#define __FOXREVISION__ 1269
 
 static std::string foxVersion;
 
@@ -330,7 +330,7 @@ int main (int argc, char *argv[])
    
    {// Fox version
       char verBuf[200];
-      sprintf(verBuf,"1.9.0.X-#%d",__FOXREVISION__);
+      sprintf(verBuf,"1.9.X-#%d",__FOXREVISION__);
       foxVersion=verBuf;
    }
    bool useGUI(true);
@@ -1240,7 +1240,8 @@ wxDialog(parent,-1,_T("About Fox"),wxDefaultPosition,wxDefaultSize,wxCAPTION|wxS
    string msg(string("F.O.X. - Free Objects for Xtallography\n")
               +"Version "+ foxVersion +" \n\n"
               +"(c) 2000-2010 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n"
-              +"    2000-2001 Radovan CERNY, University of Geneva\n\n"
+              +"    2000-2001 Radovan CERNY, University of Geneva\n"
+              +"    2009-2010 Jan Rohlicek, Michal Husak (Inst. Chem. Tech, Prague)\n\n"
               +"http://objcryst.sourceforge.net\n\n"
               +"FOX comes with ABSOLUTELY NO WARRANTY. It is free software, and you are\n"
               +"welcome to redistribute it under certain conditions. \n"
