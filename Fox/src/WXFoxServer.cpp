@@ -611,17 +611,17 @@ void WXFoxServer::RunLocalClient(wxCommandEvent& event)
    wxTextEntryDialog dlg(m_parent, message, _T("Set a number of available CPUs"), nbCPUs, wxCANCEL | wxOK );
    if(wxID_OK==dlg.ShowModal()){
        nbCPUs = dlg.GetValue();
+	   wxString appname = wxApp::GetInstance()->argv[0];
        #ifdef WIN32
        wxString dir = wxGetCwd() + _T("\\client");
-       if(!wxDirExists(dir.c_str())) 
+       if(!wxDirExists(dir.c_str())) {
            wxMkdir(dir.c_str());
-       if(!wxFileExists(dir + _T("\\Fox.exe")))
-           wxCopyFile(wxGetCwd()+_T("\\")+_T("Fox.exe"),dir+_T("\\Fox.exe"));
+	   }
+       //if(!wxFileExists(dir + _T("\\Fox.exe"))) - 
+       wxCopyFile(appname,dir+_T("\\Fox.exe"));
        wxString cmd = dir + _T("\\Fox.exe --runclient localhost --CPUs ") + nbCPUs;
-       message.Printf(_T("Executing client(s) with this command:" + cmd + "\n"));
        wxExecute(cmd);  
        #else
-       wxString appname = wxApp::GetInstance()->argv[0];
        if(appname(0,1)!=_T("/")) appname=wxGetCwd()+_T("/")+appname;
        wxExecute(appname+_T(" --runclient localhost --CPUs ") + nbCPUs);  
        #endif
