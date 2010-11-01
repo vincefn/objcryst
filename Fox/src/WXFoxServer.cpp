@@ -613,13 +613,13 @@ void WXFoxServer::RunLocalClient(wxCommandEvent& event)
        nbCPUs = dlg.GetValue();
 	   wxString appname = wxApp::GetInstance()->argv[0];
        #ifdef WIN32
-       wxString dir = wxGetCwd() + _T("\\client");
-       if(!wxDirExists(dir.c_str())) {
-           wxMkdir(dir.c_str());
-	   }
+       //wxString dir = wxGetCwd() + _T("\\client");
+       //if(!wxDirExists(dir.c_str())) {
+       //    wxMkdir(dir.c_str());
+	   //}
        //if(!wxFileExists(dir + _T("\\Fox.exe"))) - 
-       wxCopyFile(appname,dir+_T("\\Fox.exe"));
-       wxString cmd = dir + _T("\\Fox.exe --runclient localhost --CPUs ") + nbCPUs;
+       //wxCopyFile(appname,dir+_T("\\Fox.exe"));
+       wxString cmd = appname + _T(" --runclient localhost --CPUs ") + nbCPUs;
        wxExecute(cmd);  
        #else
        if(appname(0,1)!=_T("/")) appname=wxGetCwd()+_T("/")+appname;
@@ -782,7 +782,8 @@ void WXFoxServer::OnShowResults(wxCommandEvent& event)
    }
    wxString cmd;
    #ifdef WIN32
-   cmd = _T("Fox.exe ");
+   cmd = wxApp::GetInstance()->argv[0];
+   cmd +=_T(" ");
    cmd += file;
    #else
    //TODO:

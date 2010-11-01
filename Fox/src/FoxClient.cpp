@@ -527,10 +527,11 @@ int FoxClient::runNewJob(wxString job, int id, int nbTrial, bool rand)
         //wxFile *batFile = new wxFile(proc->getTmpDir() + _T("\\!run.bat"), wxFile::write);
         //creating bat file content
         wxString cmd_content;
+		wxString appname = wxApp::GetInstance()->argv[0];
         if(rand) {
-            cmd_content.Printf(_T("Fox.exe %1$s\\input.xml --nogui -n %2$d --randomize -o %1$s\\out#cost.xml"), proc->getTmpDir(), nbTrial);
+			cmd_content.Printf(_T("%3$s %1$s\\input.xml --nogui -n %2$d --randomize -o %1$s\\out#cost.xml"), proc->getTmpDir(), nbTrial, appname);
         } else {
-            cmd_content.Printf(_T("Fox.exe %1$s\\input.xml --nogui -n %2$d -o %1$s\\out#cost.xml"), proc->getTmpDir(), nbTrial);
+            cmd_content.Printf(_T("%3$s %1$s\\input.xml --nogui -n %2$d -o %1$s\\out#cost.xml"), proc->getTmpDir(), nbTrial, appname);
         }
         #else
         WriteMessageLog(_T("saving data as file - input.xml"));
