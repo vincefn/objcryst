@@ -4137,12 +4137,12 @@ void PowderPattern::FitScaleFactorForIntegratedRw()const
                if(mIntegratedWeight.numElements()==0)
                {
                   p3=mIntegratedWeightObs.data();
-                  if(ctagain>0) cout <<"ctagain="<<ctagain<<", using mIntegratedWeightObs"<<endl;
+                  if(ctagain>5) VFN_DEBUG_MESSAGE("ctagain="<<ctagain<<", using mIntegratedWeightObs",5);
                }
                else
                {
                   p3=mIntegratedWeight.data();
-                  if(ctagain>0) cout <<"ctagain="<<ctagain<<", using mIntegratedWeight"<<endl;
+                  if(ctagain>5) VFN_DEBUG_MESSAGE("ctagain="<<ctagain<<", using mIntegratedWeight",5);
                }
                REAL m=0.;
                if(j==i)
@@ -4251,15 +4251,25 @@ void PowderPattern::FitScaleFactorForIntegratedRw()const
             }
          }
          for(unsigned long j=mNbIntegrationUsed;j>0;j--) *p0++ += s * *p1++;
-         VFN_DEBUG_MESSAGE("->log(scale) Old :"<<log(mScaleFactor(mScalableComponentIndex(i))) <<" New:"<<log(mFitScaleFactorX(i)),3);
+         if(ctagain>5)
+         {
+           VFN_DEBUG_MESSAGE("->log(scale) Old :"<<log(mScaleFactor(mScalableComponentIndex(i))) <<" New:"<<log(mFitScaleFactorX(i)),10);
+         }
          mScaleFactor(mScalableComponentIndex(i)) = mFitScaleFactorX(i);
       }
       
       mClockScaleFactor.Click();
       mClockPowderPatternIntegratedCalc.Click();//we *did* correct the spectrum
    }
-   if(again)
-      goto RECALC_SCALE_FACTOR_VARIANCE_FitScaleFactorForIntegratedRw;
+   if(again && (ctagain<20))
+   {
+     ctagain++;
+     if(ctagain>5)
+     {
+       VFN_DEBUG_MESSAGE("PowderPattern::FitScaleFactorForIntegratedRw(), scaling again #"<<ctagain,10)
+     }
+     goto RECALC_SCALE_FACTOR_VARIANCE_FitScaleFactorForIntegratedRw;
+   }
    VFN_DEBUG_EXIT("PowderPattern::FitScaleFactorForIntegratedRw():End",3);
 }
 

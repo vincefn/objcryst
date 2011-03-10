@@ -1,4 +1,4 @@
-#### 1.9.X - September 2010 (Revision #)
+#### 1.9.5 - March 2010 (Revision 1274)
 NEW FEATURES
    * Add Fox.Grid extension allowing distributed computing
    for Fox, with a server and a client graphical interface.
@@ -11,6 +11,8 @@ IMPROVEMENTS
 BUG FIXES
    * Prevent running Le Bail/profile fitting in the absence of
    a crystalline phase
+   * Fix rare infinite loop when scaling ill-conditionned multiphase
+   powder patterns
 
 #### 1.9.0.2 - January 2010 (Revision #1215)
 BUG FIXES
