@@ -1024,8 +1024,10 @@ void ScatteringData::CalcSinThetaLambda()const
    if( 0 == this->GetNbRefl()) throw ObjCrystException("ScatteringData::CalcSinThetaLambda() \
       Cannot compute sin(theta)/lambda : there are no reflections !");
 
-   if(  (mClockTheta>this->GetRadiation().GetClockWavelength()) && (mClockTheta>mClockHKL)
-      &&(mClockTheta>mpCrystal->GetClockLatticePar())) return;
+   if(  (mClockTheta>this->GetRadiation().GetClockWavelength()) 
+      &&(mClockTheta>mClockHKL)
+      &&(mClockTheta>mpCrystal->GetClockLatticePar())
+      &&(mClockTheta>mpCrystal->GetSpaceGroup().GetClockSpaceGroup())) return;
    
    VFN_DEBUG_ENTRY("ScatteringData::CalcSinThetaLambda()",3)
    TAU_PROFILE("ScatteringData::CalcSinThetaLambda()","void (bool)",TAU_DEFAULT);

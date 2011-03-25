@@ -629,7 +629,7 @@ void TextureMarchDollase::CalcCorr() const
 {
    const long nbReflUsed=mpData->GetNbReflBelowMaxSinThetaOvLambda();
    if(  (mClockTexturePar<mClockCorrCalc)
-      &&(mpData->GetClockNbReflBelowMaxSinThetaOvLambda()<mClockCorrCalc)) return;
+      &&(mpData->GetClockTheta()<mClockCorrCalc)) return;
    VFN_DEBUG_ENTRY("TextureMarchDollase::CalcCorr()",3)
    TAU_PROFILE("TextureMarchDollase::CalcCorr()","void ()",TAU_DEFAULT);
    // normalizer for the sum of fractions, and non-texture fraction
