@@ -1,3 +1,9 @@
+#### 1.9.5.1 - 2011 (Revision 1279)
+NEW FEATURES
+IMPROVEMENTS
+BUG FIXES
+   * Update cctbx & boost for compilation with gcc >=4.6
+
 #### 1.9.5 - March 2010 (Revision 1274)
 NEW FEATURES
    * Add Fox.Grid extension allowing distributed computing

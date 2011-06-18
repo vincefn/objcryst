@@ -83,7 +83,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 1274
+#define __FOXREVISION__ 1279
 
 static std::string foxVersion;
 
@@ -330,7 +330,7 @@ int main (int argc, char *argv[])
    
    {// Fox version
       char verBuf[200];
-      sprintf(verBuf,"1.9.5.0-#%d",__FOXREVISION__);
+      sprintf(verBuf,"1.9.5.1-#%d",__FOXREVISION__);
       foxVersion=verBuf;
    }
    bool useGUI(true);
@@ -352,6 +352,7 @@ int main (int argc, char *argv[])
    long cif2patternNbPoint=1000;
    double cif2patternMax2Theta=M_PI*.9;
    bool exportfullprof=false;
+   bool fitprofile=false;
     //FoxGrid
    bool runclient(false);
    long nbCPUs = -1;
@@ -532,6 +533,11 @@ int main (int argc, char *argv[])
       if(STRCMP(_T("--exportfullprof"),argv[i])==0)
       {
          exportfullprof=true;
+         continue;
+      }
+      if(STRCMP(_T("--fitprofile"),argv[i])==0)
+      {
+         fitprofile=true;
          continue;
       }
       if(STRCMP(_T("--index"),argv[i])==0)
@@ -871,7 +877,182 @@ int main (int argc, char *argv[])
            <<endl;
       exit(0);  
    }
-   
+   if(fitprofile)
+   {
+      // Do a Le Bail + profile fitting on all powder patterns which have at least one crystalline phase
+      const unsigned int nbLeBail=2;//2*5
+      for(unsigned int i=0;i<gPowderPatternRegistry.GetNb();++i)
+      {
+        set<PowderPatternDiffraction *> vpDiff;
+        // Multiple phases ?
+        unsigned int nbcomp=gPowderPatternRegistry.GetObj(i).GetNbPowderPatternComponent();
+        for(unsigned int k=0;k<nbcomp;++k)
+          if(gPowderPatternRegistry.GetObj(i).GetPowderPatternComponent(k).GetClassName()==string("PowderPatternDiffraction"))
+          {
+            PowderPatternDiffraction *pDiff=dynamic_cast<PowderPatternDiffraction*>(&(gPowderPatternRegistry.GetObj(i).GetPowderPatternComponent(k)));
+            if(pDiff!=0) vpDiff.insert(pDiff);
+          }
+        LSQNumObj lsq;
+        lsq.SetRefinedObj(gPowderPatternRegistry.GetObj(i),0,true,true);
+        lsq.PrepareRefParList(true);
+        lsq.SetParIsUsed(gpRefParTypeScatt,false);
+        lsq.SetParIsUsed(gpRefParTypeScattPow,false);
+
+        bool fitzero=false,fitwidth0=false,fitwidth=false,fiteta=false,
+             fitasym=false,fitdispltransp=false,fitbackgd=false,fitcell=false,
+             fitTOFInstWidth=false,fitTOFBroadening=false;
+        if(gPowderPatternRegistry.GetObj(i).GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
+        {
+          fitzero=true;
+          fitTOFInstWidth=true;
+          fitTOFBroadening=true;
+          fitbackgd=true;
+          fitcell=true;
+        }
+        else
+        {
+          fitzero=true;
+          fitwidth0=true;
+          fitwidth=true;
+          fiteta=true;
+          fitasym=true;
+          fitdispltransp=true;
+          fitbackgd=true;
+          fitcell=true;
+        }
+        cout<<endl<<endl<<"Performing Le Bail + Profile Fit on:"<<gPowderPatternRegistry.GetObj(i).GetName()<<",   including the crystalline phases:"<<endl;
+        for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
+           cout<<"    "<<(*pos)->GetName()<<"(Crystal:"<<(*pos)->GetCrystal().GetName()<<")"<<endl;
+        try
+        {
+          lsq.SetParIsFixed(gpRefParTypeScattDataScale,false);
+          
+          if(fitzero) lsq.SetParIsFixed(gPowderPatternRegistry.GetObj(i).GetPar("Zero"),false);
+          if(fitwidth0) 
+            for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
+              lsq.SetParIsFixed((*pos)->GetProfile().GetPar("W"),false);
+          if(fitzero||fitwidth0)
+          {
+            lsq.Refine(5,true,true);
+            for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
+              (*pos)->ExtractLeBail(2);
+          }
+          if(fitwidth) 
+            for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
+              lsq.SetParIsFixed((*pos)->GetProfile().GetPar("U"),false);
+          if(fitwidth) 
+            for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
+              lsq.SetParIsFixed((*pos)->GetProfile().GetPar("V"),false);
+          if(fiteta) 
+            for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
+              lsq.SetParIsFixed((*pos)->GetProfile().GetPar("Eta0"),false);
+          if(fitwidth||fiteta)
+          {
+              lsq.Refine(5,true,true);
+              for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
+                (*pos)->ExtractLeBail(2);
+          }
+          
+          if(fitTOFInstWidth)
+          {// TOF
+            for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
+            {
+              lsq.SetParIsFixed((*pos)->GetProfile().GetPar("Alpha1"),false);
+              lsq.SetParIsFixed((*pos)->GetProfile().GetPar("Beta0"),false);
+              lsq.SetParIsFixed((*pos)->GetProfile().GetPar("Beta1"),false);
+            }
+            lsq.Refine(5,true,true);
+            for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
+              (*pos)->ExtractLeBail(2);
+          }
+          if(fitTOFBroadening)
+          {// TOF
+            for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
+            {
+              lsq.SetParIsFixed((*pos)->GetProfile().GetPar("GaussianSigma1"),false);
+              //lsq.SetParIsFixed(pos->GetProfile().GetPar("LorentzianGamma2"),false);
+              //lsq.SetParIsFixed(pos->GetProfile().GetPar("GaussianSigma1"),0,1e6);
+              //lsq.SetParIsFixed(pos->GetProfile().GetPar("LorentzianGamma2"),0,1e6);
+            }
+            lsq.Refine(5,true,true);
+            for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
+              (*pos)->ExtractLeBail(2);
+            for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
+              lsq.SetParIsFixed((*pos)->GetProfile().GetPar("GaussianSigma1"),true);
+          }
+          
+          if(fiteta) 
+            for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
+              lsq.SetParIsFixed((*pos)->GetProfile().GetPar("Eta1"),false);
+          if(fiteta)
+          {
+            lsq.Refine(5,true,true);
+            for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
+              (*pos)->ExtractLeBail(2);
+          }
+          
+          if(fitasym) 
+            for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
+              lsq.SetParIsFixed((*pos)->GetProfile().GetPar("Asym0"),false);
+          if(fitasym) 
+            for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
+              lsq.SetParIsFixed((*pos)->GetProfile().GetPar("Asym1"),false);
+          if(fitasym) 
+            for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
+              lsq.SetParIsFixed((*pos)->GetProfile().GetPar("Asym2"),false);
+          if(fitdispltransp) 
+            for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
+              lsq.SetParIsFixed((*pos)->GetParentPowderPattern().GetPar("2ThetaDispl"),false);
+          if(fitdispltransp)  
+            for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
+              lsq.SetParIsFixed((*pos)->GetParentPowderPattern().GetPar("2ThetaTransp"),false);
+          if(fitdispltransp||fitasym)
+          {
+            lsq.Refine(5,true,true);
+            for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
+              (*pos)->ExtractLeBail(2);
+          }
+          
+          if(fitbackgd)
+          {
+            lsq.SetParIsFixed(gpRefParTypeScattDataBackground,false);
+            // Make sure points beyond max resolution are not optimized
+            for(unsigned int k=0;k<nbcomp;++k)
+              if(gPowderPatternRegistry.GetObj(i).GetPowderPatternComponent(k).GetClassName()=="PowderPatternBackground")
+              {
+                PowderPatternBackground *pback=dynamic_cast<PowderPatternBackground *> (&(gPowderPatternRegistry.GetObj(i).GetPowderPatternComponent(k)));
+                pback->FixParametersBeyondMaxresolution(lsq.GetCompiledRefinedObj());
+              }
+  
+            lsq.Refine(5,true,true);
+            for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
+              (*pos)->ExtractLeBail(2);
+          }
+          
+          if(fitcell)
+          {
+              lsq.SetParIsFixed(gpRefParTypeUnitCell,false);
+              
+              lsq.Refine(5,true,true);
+              for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
+                (*pos)->ExtractLeBail(2);
+          }
+        }
+        catch(const ObjCrystException &except)
+        {
+           cout<<"Oups: automatic profile fit + Le Bail went wrong, please try manual fit within GUI"<<endl;
+        }
+      }
+      /*
+      XMLCrystFileSaveGlobal(outfilename);
+      #ifdef __WX__CRYST__
+      this->OnExit();
+      #else
+      TAU_REPORT_STATISTICS();
+      #endif
+      exit(0);
+      */
+   }
    if(exportfullprof)
    {
       // Find every powder pattern, export to fullprof
@@ -929,8 +1110,10 @@ int main (int argc, char *argv[])
       TAU_REPORT_STATISTICS();
       #ifdef __WX__CRYST__
       this->OnExit();
-      exit(0);
+      #else
+      TAU_REPORT_STATISTICS();
       #endif
+      exit(0);
    }
 #ifdef __WX__CRYST__
    this->SetVendorName(_T("http://objcryst.sf.net/Fox"));
@@ -1239,7 +1422,8 @@ wxDialog(parent,-1,_T("About Fox"),wxDefaultPosition,wxDefaultSize,wxCAPTION|wxS
    wxBoxSizer *sizer=new wxBoxSizer(wxVERTICAL);
    string msg(string("F.O.X. - Free Objects for Xtallography\n")
               +"Version "+ foxVersion +" \n\n"
-              +"(c) 2000-2010 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n"
+              +"(c) 2000-2011 Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n"
+              +"                                   , University of Grenoble\n"
               +"    2000-2001 Radovan CERNY, University of Geneva\n"
               +"    2009-2010 Jan Rohlicek, Michal Husak (Inst. Chem. Tech, Prague)\n\n"
               +"http://objcryst.sourceforge.net\n\n"
