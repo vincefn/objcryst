@@ -152,11 +152,11 @@ void DiffractionDataSingleCrystal::SetHklIobs(const CrystVector_long &h,
    mFhklObsSq=mObsIntensity;
    mClockFhklObsSq.Click();
    
-   {
+   /*{
       char buf [200];
       sprintf(buf,"Changed HKL list, with %d reflections",(int)mNbRefl);
       (*fpObjCrystInformUser)((string)buf);
-   }
+   }*/
    VFN_DEBUG_EXIT("DiffractionDataSingleCrystal::SetHklIobs(h,k,l,i,s)",5)
 }
 
