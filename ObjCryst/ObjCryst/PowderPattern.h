@@ -353,8 +353,12 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       virtual bool HasPowderPatternCalcVariance()const;
       virtual void SetCrystal(Crystal &crystal);
       /** Prepare intensity extraction (Le Bail or Pawley)
+      *
+      *
       *\param extract: if true, begin extraction mode, else enable structure factor calculations
-      *\param init: if true and extract=true, intensities are set to 100
+      *\param init: if true and extract=true, intensities are set to 100. Otherwise if extract==true
+      * and init=false, the program will try to re-use existing extracted data (in mpLeBailData),
+      * but only if the list of HKL is unchanged. Otherwise initilization to 100 will be forced.
       */
       void SetExtractionMode(const bool extract=true,const bool init=false);
       /// Return true if in extraction mode, i.e. using extracted intensities instead of computed structure factors.

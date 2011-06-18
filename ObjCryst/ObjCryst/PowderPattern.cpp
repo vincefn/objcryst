@@ -835,10 +835,44 @@ void PowderPatternDiffraction::SetExtractionMode(const bool extract,const bool i
 {
    VFN_DEBUG_ENTRY("PowderPatternDiffraction::SetExtractionMode(),ExtractionMode="<<mExtractionMode<<", nbrefl="<<this->GetNbRefl(),7)
    mExtractionMode=extract;
-   if(extract && init)
+   bool needInit=false;
+   if(extract)
    {
       this->Prepare();
-      mFhklObsSq.resize(this->GetNbRefl());
+      mFhklObsSq.resizeAndPreserve(this->GetNbRefl());
+   }
+   if(extract && (!init) && (mpLeBailData!=0))
+   {
+      // Re-use existing Le Bail data, if list of hkl's is consistent
+      const unsigned long nbrefl=this->GetNbReflBelowMaxSinThetaOvLambda();
+      if(nbrefl==mpLeBailData->GetNbRefl())
+      {
+         for(unsigned int i=0;i<nbrefl;++i)
+         {
+            if(  (mpLeBailData->GetH()(i)==this->GetH()(i))
+               &&(mpLeBailData->GetK()(i)==this->GetK()(i))
+               &&(mpLeBailData->GetL()(i)==this->GetL()(i)))
+            {
+               mFhklObsSq(i)=mpLeBailData->GetFhklObsSq()(i);
+            }
+            else
+            {
+               needInit=true;
+               cout<<"PowderPatternDiffraction::SetExtractionMode():: Forcing initialize, cannot re-use: hkl list differs"<<endl;
+               break;
+            }
+              
+         }
+      }
+      else 
+      {
+        needInit=true;
+        cout<<"PowderPatternDiffraction::SetExtractionMode():: Forcing initialize, cannot re-use: different number of reflections"<<endl;
+      }
+   }
+   if((extract && init) || needInit)
+   {
+      cout<<"PowderPatternDiffraction::SetExtractionMode():: Initializing intensities to 100"<<endl;
       mFhklObsSq=100;
    }
    if((mExtractionMode==false)&&(mFhklObsSq.numElements()>0))
@@ -877,6 +911,8 @@ bool PowderPatternDiffraction::GetExtractionMode()const{return mExtractionMode;}
 void PowderPatternDiffraction::ExtractLeBail(unsigned int nbcycle)
 {
    VFN_DEBUG_ENTRY("PowderPatternDiffraction::ExtractLeBail()",7)
+   TAU_PROFILE("PowderPatternDiffraction::ExtractLeBail()","void (int)",TAU_DEFAULT);
+
    if(mExtractionMode==false) this->SetExtractionMode(true,true);// Should not have to do this here !
    if(mFhklObsSq.numElements()!=this->GetNbRefl())
    {//Something went wrong !
@@ -2967,7 +3003,7 @@ void PowderPattern::SavePowderPattern(const string &filename) const
                     mPowderPatternObs,
                     mPowderPatternCalc,
                     diff,mPowderPatternWeight,
-                    mPowderPatternComponentRegistry.GetObj(0).mPowderPatternCalc,12,4);
+                    mPowderPatternComponentRegistry.GetObj(0).mPowderPatternCalc,16,8);
    out.close();
    VFN_DEBUG_MESSAGE("DiffractionDataPowder::SavePowderPattern:End",3)
 }
@@ -2981,7 +3017,7 @@ void PowderPattern::PrintObsCalcData(ostream&os)const
    os << "PowderPattern : " << mName <<endl;
    os << "      2Theta/TOF  Obs          Sigma        Calc        Weight" <<endl;
    os << FormatVertVector<REAL>(ttheta,mPowderPatternObs,mPowderPatternObsSigma,
-               mPowderPatternCalc,mPowderPatternWeight,12,4);
+               mPowderPatternCalc,mPowderPatternWeight,16,8);
    //            mPowderPatternComponentRegistry.GetObj(0).mPowderPatternCalc,12,4);
 }
 
