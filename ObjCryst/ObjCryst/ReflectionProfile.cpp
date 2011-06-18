@@ -935,15 +935,48 @@ CrystVector_REAL PowderProfileGauss  (const CrystVector_REAL ttheta,const REAL f
       for(i=0;i<nbPoints;i++){ *p++ *= c1;if(*pt++>center) break;}
       i++;
       for(   ;i<nbPoints;i++)  *p++ *= c2;
-   }   p=result.data();
+   }
+   p=result.data();
    #ifdef _MSC_VER
    // Bug from Hell (in MSVC++) !
    // The *last* point ends up sometimes with an arbitrary large value...
    for(long i=0;i<nbPoints;i++) { *p = pow((float)2.71828182846,(float)*p) ; p++ ;}
    #else
-   for(long i=0;i<nbPoints;i++) { *p = exp(*p) ; p++ ;}
+   long i=nbPoints;
+   for(;i>3;i-=4)
+   {
+     for(unsigned int j=0;j<4;++j)
+     {// Fixed-length loop enables vectorization
+       *p = exp(*p) ; 
+       p++ ;
+     }
+   }
+   for(;i>0;i--) { *p = exp(*p) ; p++ ;}
    #endif
    
+#if 0
+   #if 1 //def _MSC_VER
+   // Bug from Hell (in MSVC++) !
+   // The *last* point ends up sometimes with an arbitrary large value...
+   long i=0;
+   for(;i<nbPoints;i+=4) 
+      for(unsigned int j=0;j<4;++j)
+      {// Fixed-length loop enables vectorization
+        *p = pow((float)2.71828182846,(float)*p) ;
+        p++ ;
+      }
+   #else
+   long i=0;
+   for(;i<nbPoints;i+=1)
+   {
+     //for(unsigned int j=0;j<4;++j)
+     {// Fixed-length loop enables vectorization
+       *p = exp(*p) ; 
+       p++ ;
+     }
+   }
+   #endif
+#endif
    result *= 2. / fwhm * sqrt(log(2.)/M_PI);
    return result;
 }
