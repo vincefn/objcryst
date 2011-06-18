@@ -472,7 +472,7 @@ void ScatteringData::SetHKL(const CrystVector_REAL &h,
 
 void ScatteringData::GenHKLFullSpace2(const REAL maxSTOL,const bool unique)
 {
-   (*fpObjCrystInformUser)("Generating Full HKL list...");
+   //(*fpObjCrystInformUser)("Generating Full HKL list...");
    VFN_DEBUG_ENTRY("ScatteringData::GenHKLFullSpace2()",5)
    TAU_PROFILE("ScatteringData::GenHKLFullSpace2()","void (REAL,bool)",TAU_DEFAULT);
    if(0==mpCrystal)
@@ -558,11 +558,11 @@ void ScatteringData::GenHKLFullSpace2(const REAL maxSTOL,const bool unique)
       this->SortReflectionBySinThetaOverLambda(maxSTOL);
    }
    mClockHKL.Click();
-   {
+   /*{
       char buf [200];
       sprintf(buf,"Generating Full HKL list...Done (kept %d reflections)",(int)mNbRefl);
       (*fpObjCrystInformUser)((string)buf);
-   }
+   }*/
    VFN_DEBUG_EXIT("ScatteringData::GenHKLFullSpace2():End",5)
 }
 
