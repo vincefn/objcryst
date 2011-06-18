@@ -147,9 +147,9 @@ else
       # AMD64 Opteron , with auto-vectorization
       #CPPFLAGS = -O3 -w -ffast-math -march=opteron -mmmx -msse -msse2 -m3dnow -mfpmath=sse -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops -ftree-vectorize -ftree-vectorizer-verbose=0
       # native (activates SSE, etc...)
-      #CPPFLAGS = -O3 -march=native -w -ffast-math -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops
+      CPPFLAGS = -O3 -march=native -w -ffast-math -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops -funroll-loops -ftree-vectorize -ftree-vectorizer-verbose=0
       #default flags
-      CPPFLAGS = -O3 -w -ffast-math -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops
+      #CPPFLAGS = -O3 -w -ffast-math -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops
    endif
    DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS} ${FFTW_FLAGS} ${REAL_FLAG}
    LOADLIBES = -s -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx ${LDNEWMAT} ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS} ${FFTW_LIB}
@@ -171,9 +171,9 @@ $(DIR_STATIC_LIBS)/lib/libnewmat.a:
 	#rm -Rf $(BUILD_DIR)/newmat
 
 ifneq ($(shared-newmat),1)
-libnewmat: $(DIR_STATIC_LIBS)/lib/libnewmat.a
+libnewmat= $(DIR_STATIC_LIBS)/lib/libnewmat.a
 else
-libnewmat:
+libnewmat=
 endif
 
 $(BUILD_DIR)/static-libs/lib/libglut.a:
@@ -183,37 +183,40 @@ $(BUILD_DIR)/static-libs/lib/libglut.a:
 
 ifeq ($(opengl),1)
 ifneq ($(shared-glut),1)
-libfreeglut: $(BUILD_DIR)/static-libs/lib/libglut.a
+libfreeglut= $(DIR_STATIC_LIBS)/lib/libglut.a
 else
-libfreeglut:
+libfreeglut=
 endif
 else
-libfreeglut:
+libfreeglut=
 endif
+
+$(BUILD_DIR)/wxGTK-2.8.12.tar.bz2:
+	cd $(BUILD_DIR) && wget  ftp://ftp.wxwidgets.org/pub/2.8.12/wxGTK-2.8.12.tar.bz2
 
 # When building wxGTK, use make instead of $(MAKE) to avoid passing -jN which do not work ?
-$(BUILD_DIR)/static-libs/lib/libwx_gtk2_core-2.8.a:
-	cd $(BUILD_DIR) && rm -Rf wxGTK && tar -xjf wxGTK.tar.bz2 # wxGtK source, with "demos" "samples" "contrib" removed
-	cd $(BUILD_DIR)/wxGTK && ./configure --with-gtk --with-opengl --prefix=$(BUILD_DIR)/static-libs --disable-unicode --enable-optimise --disable-shared --disable-clipboard --x-includes=/usr/X11R6/include/ && make install
+$(BUILD_DIR)/static-libs/lib/libwx_gtk2_core-2.8.a: $(BUILD_DIR)/wxGTK-2.8.12.tar.bz2
+	cd $(BUILD_DIR) && rm -Rf wxGTK && tar -xjf wxGTK-2.8.12.tar.bz2 # wxGtK source, with "demos" "samples" "contrib" removed
+	cd $(BUILD_DIR)/wxGTK-2.8.12 && ./configure --with-gtk --with-opengl --prefix=$(BUILD_DIR)/static-libs --disable-unicode --enable-optimise --disable-shared --disable-clipboard --x-includes=/usr/X11R6/include/ && make install
 	rm -Rf wxGTK
 
-$(BUILD_DIR)/static-libs/lib/libwx_gtk2u_core-2.8.a:
-	cd $(BUILD_DIR) && rm -Rf wxGTK && tar -xjf wxGTK.tar.bz2 # wxGtK source, with "demos" "samples" "contrib" removed
-	cd $(BUILD_DIR)/wxGTK && ./configure --with-gtk --with-opengl --prefix=$(BUILD_DIR)/static-libs --enable-unicode  --enable-optimise --disable-shared --disable-clipboard --x-includes=/usr/X11R6/include/ && make install
+$(BUILD_DIR)/static-libs/lib/libwx_gtk2u_core-2.8.a: $(BUILD_DIR)/wxGTK-2.8.12.tar.bz2
+	cd $(BUILD_DIR) && rm -Rf wxGTK && tar -xjf wxGTK-2.8.12.tar.bz2 # wxGtK source, with "demos" "samples" "contrib" removed
+	cd $(BUILD_DIR)/wxGTK-2.8.12 && ./configure --with-gtk --with-opengl --prefix=$(BUILD_DIR)/static-libs --enable-unicode  --enable-optimise --disable-shared --disable-clipboard --x-includes=/usr/X11R6/include/ && make install
 	rm -Rf wxGTK
 
 ifneq ($(wxcryst),0)
 ifneq ($(shared-wxgtk),1)
 ifneq ($(unicode),1)
-libwx: $(BUILD_DIR)/static-libs/lib/libwx_gtk2_core-2.8.a  libfreeglut
+libwx = $(BUILD_DIR)/static-libs/lib/libwx_gtk2_core-2.8.a
 else
-libwx: $(BUILD_DIR)/static-libs/lib/libwx_gtk2u_core-2.8.a libfreeglut
+libwx = $(BUILD_DIR)/static-libs/lib/libwx_gtk2u_core-2.8.a
 endif
 else
-libwx:
+libwx=
 endif
 else
-libwx:
+libwx=
 endif
      
 #cctbx
@@ -233,33 +236,33 @@ $(DIR_STATIC_LIBS)/lib/libfftw3f.a:
 
 ifneq ($(fftw),0)
 ifneq ($(shared-fftw),1)
-libfftw: $(DIR_STATIC_LIBS)/lib/libfftw3f.a
+libfftw = $(DIR_STATIC_LIBS)/lib/libfftw3f.a
 else
-libfftw:
+libfftw=
 endif
 else
-libfftw:
+libfftw=
 endif
 
 #ObjCryst++
-libCryst: libwx libcctbx
+libCryst: $(libwx) libcctbx
 	$(MAKE) -f gnu.mak -C ${DIR_LIBCRYST} lib
 
 libcryst: libCryst
 
 #wxCryst++
-libwxCryst: libwx libfreeglut libfftw libcctbx
+libwxCryst: $(libwx) $(libfreeglut) $(libfftw) libcctbx
 	$(MAKE) -f gnu.mak -C ${DIR_WXWCRYST} lib
 
 #Vector computation library
-libCrystVector: libwx
+libCrystVector: $(libwx)
 	$(MAKE) -f gnu.mak -C ${DIR_CRYSTVECTOR} lib
 
 #Quirks, including a (crude) library to display float, vectors, matrices, strings with some formatting..
-libQuirks: libwx
+libQuirks: $(libwx)
 	$(MAKE) -f gnu.mak -C ${DIR_VFNQUIRKS} lib
 
 #Library to take care of refinable parameters, plus Global optimization and Least Squares refinements
-libRefinableObj:libnewmat libwx libcctbx
-	$(MAKE) -f gnu.mak -C ${DIR_REFOBJ} lib
+libRefinableObj:$(libnewmat) $(libwx) libcctbx
+	$(MAKE) -f gnu.mak -C ${DIR_REFOBJ}/ lib
 
