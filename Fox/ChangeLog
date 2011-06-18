@@ -1,6 +1,8 @@
 #### 1.9.5.1 - 2011 (Revision 1279)
 NEW FEATURES
 IMPROVEMENTS
+   * More efficient Le Bail extraction
+   * Nicer color display of crystalline phases in powder graph
 BUG FIXES
    * Update cctbx & boost for compilation with gcc >=4.6
 
