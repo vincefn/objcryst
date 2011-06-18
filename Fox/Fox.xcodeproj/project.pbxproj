@@ -174,7 +174,6 @@
 		BFFCCC8D0890324D00044EBA /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCC5D0890324D00044EBA /* utils.cpp */; };
 		BFFCCC8F0890324D00044EBA /* wyckoff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCC5F0890324D00044EBA /* wyckoff.cpp */; };
 		BFFCCC900890324D00044EBA /* wyckoff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCC600890324D00044EBA /* wyckoff.cpp */; };
-		BFFCCC920890326700044EBA /* error.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCC910890326700044EBA /* error.cpp */; };
 		BFFCCC990890328F00044EBA /* asu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCC930890328F00044EBA /* asu.cpp */; };
 		BFFCCC9A0890328F00044EBA /* bins.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCC940890328F00044EBA /* bins.cpp */; };
 		BFFCCC9B0890328F00044EBA /* index_generator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCC950890328F00044EBA /* index_generator.cpp */; };
@@ -4562,7 +4561,6 @@
 				BFFCCC8D0890324D00044EBA /* utils.cpp in Sources */,
 				BFFCCC8F0890324D00044EBA /* wyckoff.cpp in Sources */,
 				BFFCCC900890324D00044EBA /* wyckoff.cpp in Sources */,
-				BFFCCC920890326700044EBA /* error.cpp in Sources */,
 				BFFCCC990890328F00044EBA /* asu.cpp in Sources */,
 				BFFCCC9A0890328F00044EBA /* bins.cpp in Sources */,
 				BFFCCC9B0890328F00044EBA /* index_generator.cpp in Sources */,
@@ -4607,8 +4605,7 @@
 					"$(SRCROOT)/../static-libs/include/wx-2.8",
 					"$(SRCROOT)/../static-libs/lib/wx/include/mac-ansi-release-static-2.8",
 					"$(SRCROOT)/../ObjCryst",
-					"$(SRCROOT)/../cctbx/cctbx/include",
-					"$(SRCROOT)/../cctbx/scitbx/include",
+					"$(SRCROOT)/../cctbx/include",
 					"$(SRCROOT)/../",
 				);
 				INFOPLIST_FILE = "Fox-Info.plist";
@@ -4805,11 +4802,7 @@
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
-				HEADER_SEARCH_PATHS = (
-					../cctbx/cctbx/include/,
-					../cctbx/scitbx/include/,
-					../,
-				);
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/../cctbx/include/";
 				INSTALL_PATH = /usr/local/lib;
 				LIBRARY_STYLE = STATIC;
 				OTHER_CFLAGS = "";
