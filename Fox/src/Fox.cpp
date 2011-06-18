@@ -1,5 +1,5 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
-    (c) 2000-2010 Vincent Favre-Nicolin vincefn@users.sourceforge.net
+    (c) 2000-2011 Vincent Favre-Nicolin vincefn@users.sourceforge.net
         2000-2001 University of Geneva (Switzerland)
         2008-2010 Jan Rohlicek - Inst. of Chemical Technology, Prague
 
@@ -83,7 +83,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 1279
+#define __FOXREVISION__ 1286
 
 static std::string foxVersion;
 
@@ -330,7 +330,7 @@ int main (int argc, char *argv[])
    
    {// Fox version
       char verBuf[200];
-      sprintf(verBuf,"1.9.5.1-#%d",__FOXREVISION__);
+      sprintf(verBuf,"1.9.6-#%d",__FOXREVISION__);
       foxVersion=verBuf;
    }
    bool useGUI(true);
