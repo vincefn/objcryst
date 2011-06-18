@@ -15,11 +15,11 @@
 
 libfftw: ../static-libs/lib/libfftw3f.a
 
-../wxMac-2.8.12.tar.gz:
-	cd .. && curl -O  http://switch.dl.sourceforge.net/project/wxwindows/2.8.12/wxMac-2.8.12.tar.gz
+../wxMac-2.8.12.tar.bz2:
+	cd .. && curl -O  ftp://ftp.wxwidgets.org/pub/2.8.12/wxMac-2.8.12.tar.bz2
 
-../static-libs/bin/wx-config: ../wxMac-2.8.12.tar.gz
-	cd .. && tar -xzf wxMac-2.8.12.tar.gz
+../static-libs/bin/wx-config: ../wxMac-2.8.12.tar.bz2
+	cd .. && tar -xjf wxMac-2.8.12.tar.bz2
 	cd ../wxMac-2.8.12 && ./configure --with-opengl --enable-optimise --disable-shared --enable-monolithic --enable-universal_binary --prefix=$(PWD)/../static-libs && make install
 	rm -Rf ../wxMac-2.8.12
 
