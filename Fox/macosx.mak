@@ -4,8 +4,11 @@
 ../newmat:
 	cd .. && tar -xjf newmat.tar.bz2
 
-../static-libs/lib/libfftw3f.a:
-	cd .. && tar -xjf fftw.tar.bz2
+../fftw-3.2.2.tar.gz:
+	cd .. &&  curl -O http://www.fftw.org/fftw-3.2.2.tar.gz
+
+../static-libs/lib/libfftw3f.a: ../fftw-3.2.2.tar.gz
+	cd .. && tar -xzf fftw-3.2.2.tar.gz && mv fftw-3.2.2 fftw
 	cd ../fftw && ./configure --enable-single CFLAGS="-arch i386" --prefix $(PWD)/../static-libs && make clean && make install && mv .libs/libfftw3f.a ./libfftw3f-i386.a
 	cd ../fftw && ./configure --enable-single CFLAGS="-arch ppc" --prefix $(PWD)/../static-libs && make clean && make && mv .libs/libfftw3f.a ./libfftw3f-ppc.a
 	rm -f $(PWD)/../static-libs/lib/*fftw*
