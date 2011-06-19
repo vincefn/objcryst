@@ -1,6 +1,8 @@
 BUILD_DIR = $(CURDIR)/../..
 include $(BUILD_DIR)/ObjCryst/rules.mak
 
+OBJ = Fox.o FoxJob.o GridResult.o IOSocket.o FoxServerThread.o FoxServer.o FoxClient.o WXFoxClient.o WXFoxServer.o WXGridWindow.o
+
 ifeq ($(profile),2)
 %.o : %.c
 	@rm -f $(*F).gcda $(*F).gcno
@@ -18,7 +20,7 @@ ifeq ($(profile),2)
 	@$(MAKEDEPEND)
 	${CXX} ${CPPFLAGS} ${CXXFLAGS} -D'__FOXVERSION__="$(foxversion)"' -c $< -o $@
 else
-%.o :  %.cpp $(libwx) $(libnewmat) libcctbx
+%.o :  %.cpp
 	@$(MAKEDEPEND)
 	${CXX} ${CPPFLAGS} ${CXXFLAGS} -D'__FOXVERSION__="$(foxversion)"' -c $< -o $@
 endif
@@ -26,11 +28,14 @@ endif
 %.o : %.rc
 	windres -i $< -o $@ --include-dir ${DIR_WXWINDOWS}/include
 	
--include Fox.dep
+-include $(OBJ:.o=.dep)
+
+libFox: $(OBJ)
 
 #Main Application
-Fox: Fox.o FoxJob.o GridResult.o IOSocket.o FoxServerThread.o FoxServer.o FoxClient.o WXFoxClient.o WXFoxServer.o WXGridWindow.o $(libwx) $(libnewmat) libCrystVector libQuirks libRefinableObj libcctbx libCryst libwxCryst $(libfftw)
-	${LINKER} ${CRYST_LDFLAGS} -o $@ ${filter-out %.a %.so lib%, $^} ${LOADLIBES} 
+Fox: $(libwx) $(libnewmat)  $(libfftw) libCrystVector libQuirks libRefinableObj libcctbx libCryst libwxCryst
+	$(MAKE) -f gnu.mak libFox
+	${LINKER} ${CRYST_LDFLAGS} -o $@ ${filter-out %.a %.so lib%, $^} $(OBJ) ${LOADLIBES} 
 
 Fox-nogui: $(libnewmat) libcctbx libCrystVector libQuirks libRefinableObj libCryst Fox.o 
 	${LINKER} ${CRYST_LDFLAGS} -o $@ ${filter-out %.a %.so lib%, $^} ${LOADLIBES} 
