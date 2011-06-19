@@ -230,7 +230,7 @@ $(DIR_STATIC_LIBS)/lib/libcctbx.a:
 libcctbx: $(DIR_STATIC_LIBS)/lib/libcctbx.a
 
 $(BUILD_DIR)/fftw-3.2.2.tar.gz:
-	curl -O http://www.fftw.org/fftw-3.2.2.tar.gz
+	cd $(BUILD_DIR) && curl -O http://www.fftw.org/fftw-3.2.2.tar.gz
 
 $(DIR_STATIC_LIBS)/lib/libfftw3f.a: $(BUILD_DIR)/fftw-3.2.2.tar.gz
 	cd $(BUILD_DIR) && tar -xzf fftw-3.2.2.tar.gz
