@@ -229,10 +229,13 @@ $(DIR_STATIC_LIBS)/lib/libcctbx.a:
 
 libcctbx: $(DIR_STATIC_LIBS)/lib/libcctbx.a
 
-$(DIR_STATIC_LIBS)/lib/libfftw3f.a:
-	cd $(BUILD_DIR) && tar -xjf fftw.tar.bz2
-	cd $(BUILD_DIR)/fftw && ./configure --enable-single --prefix $(DIR_STATIC_LIBS) && $(MAKE) install
-	rm -Rf $(BUILD_DIR)/fftw
+$(BUILD_DIR)/fftw-3.2.2.tar.gz:
+	curl -O http://www.fftw.org/fftw-3.2.2.tar.gz
+
+$(DIR_STATIC_LIBS)/lib/libfftw3f.a: $(BUILD_DIR)/fftw-3.2.2.tar.gz
+	cd $(BUILD_DIR) && tar -xzf fftw-3.2.2.tar.gz
+	cd $(BUILD_DIR)/fftw-3.2.2 && ./configure --enable-single --prefix $(DIR_STATIC_LIBS) && $(MAKE) install
+	rm -Rf $(BUILD_DIR)/fftw-3.2.2
 
 ifneq ($(fftw),0)
 ifneq ($(shared-fftw),1)
