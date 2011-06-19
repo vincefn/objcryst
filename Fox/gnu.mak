@@ -25,14 +25,15 @@ doc:
 	rm -Rf wikihtml
 	mv FoxWiki.pdf ../
 
-clean:
+clean: tidy
 	$(MAKE) -f gnu.mak -C src clean
 	$(MAKE) -f gnu.mak -C $(BUILD_DIR)/ObjCryst clean
-	@${RM} -Rf ${BUILD_DIR}/static-libs/*
+	${RM} -Rf ${BUILD_DIR}/static-libs/* ${BUILD_DIR}/fftw-3.3.2 ${BUILD_DIR}/newmat ${BUILD_DIR}/wxGTK-2.8.12
 
 tidy:
 	$(MAKE) -f gnu.mak -C src tidy
 	$(MAKE) -f gnu.mak -C ${BUILD_DIR}/ObjCryst tidy
+	${RM} -Rf ${BUILD_DIR}/fftw-3.3.2 ${BUILD_DIR}/newmat ${BUILD_DIR}/wxGTK-2.8.12
 
 #install Fox in /usr/local/bin
 install:
