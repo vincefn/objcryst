@@ -147,9 +147,9 @@ else
       # AMD64 Opteron , with auto-vectorization
       #CPPFLAGS = -O3 -w -ffast-math -march=opteron -mmmx -msse -msse2 -m3dnow -mfpmath=sse -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops -ftree-vectorize -ftree-vectorizer-verbose=0
       # native (activates SSE, etc...)
-      CPPFLAGS = -O3 -march=native -w -ffast-math -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops -funroll-loops -ftree-vectorize -ftree-vectorizer-verbose=0
+      #CPPFLAGS = -O3 -march=native -w -ffast-math -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops -funroll-loops -ftree-vectorize -ftree-vectorizer-verbose=0
       #default flags
-      #CPPFLAGS = -O3 -w -ffast-math -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops
+      CPPFLAGS = -O3 -w -ffast-math -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops
    endif
    DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS} ${FFTW_FLAGS} ${REAL_FLAG}
    LOADLIBES = -s -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx ${LDNEWMAT} ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS} ${FFTW_LIB}
