@@ -950,9 +950,9 @@ Crystal* CreateCrystalFromCIF(CIF &cif,bool verbose,bool checkSymAsXYZ)
          if((pos->second.mvAtom.size()==0) && (gCrystalRegistry.GetNb()>0)) continue;
          // Use unambigous Hall symbol if present, otherwise try HM symbol or spg number
          string spg=pos->second.mSpacegroupSymbolHall;
-         if(spg=="") spg=pos->second.mSpacegroupHermannMauguin;
-         if(spg=="") spg=pos->second.mSpacegroupNumberIT;
-         if(spg=="") spg="P1";
+         if(spg.size()<2) spg=pos->second.mSpacegroupHermannMauguin;
+         if(spg.size()<2) spg=pos->second.mSpacegroupNumberIT;
+         if(spg.size()<2) spg="P1";
          cout<<"Create crystal with spacegroup: "<<spg
              <<" / "<<pos->second.mSpacegroupHermannMauguin
              <<" / "<<pos->second.mSpacegroupSymbolHall
