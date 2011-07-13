@@ -1203,9 +1203,11 @@ void ReadFHLine(const char*buf, const unsigned int nb, string &symbol,
       }
       else
       {
-         sscanf(buf,"%2s%3d%6f",symb,&n1,&v1);
-         symbol=string(symb);
+         symbol=string(buf).substr(0,2);
+         n1=(int)   atoi(string(buf).substr(2,3).c_str());
+         v1=(float) atof(string(buf).substr(5,6).c_str());
       }
+      cout<<"ReadFHLine():"<<buf<<"#"<<symbol<<"/"<<n1<<"/"<<v1<<";"<<v.size()<<endl
       VFN_DEBUG_MESSAGE("ReadFHLine():#"<<symbol<<"/"<<n1<<"/"<<v1,10);
       return;
    }
@@ -1214,15 +1216,18 @@ void ReadFHLine(const char*buf, const unsigned int nb, string &symbol,
       if(v.size()==5) 
       {
          symbol=v[0];
-         n1=(unsigned int) atoi(v[1].c_str());
+         n1=(int) atoi(v[1].c_str());
          v1=(float) atof(v[2].c_str());
-         n2=(unsigned int) atoi(v[3].c_str());
+         n2=(int) atoi(v[3].c_str());
          v2=(float) atof(v[4].c_str());
       }
       else
       {
-         sscanf(buf,"%2s%3d%6f%3d%8f",symb,&n1,&v1,&n2,&v2);
-         symbol=string(symb);
+         symbol=sbuf.substr(0,2);
+         n1=(int)   atoi(sbuf.substr(2,3).c_str());
+         v1=(float) atof(sbuf.substr(5,6).c_str());
+         n2=(int)   atoi(sbuf.substr(11,3).c_str());
+         v2=(float) atof(sbuf.substr(14,8).c_str());
       }
       VFN_DEBUG_MESSAGE("ReadFHLine():#"<<symbol<<"/"<<n1<<"/"<<v1<<"/"<<n2<<"/"<<v2,10);
       return;
@@ -1231,11 +1236,11 @@ void ReadFHLine(const char*buf, const unsigned int nb, string &symbol,
    if(v.size()==7)
    {
       symbol=v[0];
-      n1=(unsigned int) atoi(v[1].c_str());
+      n1=(int)   atoi(v[1].c_str());
       v1=(float) atof(v[2].c_str());
-      n2=(unsigned int) atoi(v[3].c_str());
+      n2=(int)   atoi(v[3].c_str());
       v2=(float) atof(v[4].c_str());
-      n3=(unsigned int) atoi(v[5].c_str());
+      n3=(int)   atoi(v[5].c_str());
       v3=(float) atof(v[6].c_str());
    }
    else
