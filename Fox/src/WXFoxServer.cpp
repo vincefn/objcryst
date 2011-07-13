@@ -622,8 +622,12 @@ void WXFoxServer::RunLocalClient(wxCommandEvent& event)
        wxString cmd = appname + _T(" --runclient localhost --CPUs ") + nbCPUs;
        wxExecute(cmd);  
        #else
-       if(appname(0,1)!=_T("/")) appname=wxGetCwd()+_T("/")+appname;
-       wxExecute(appname+_T(" --runclient localhost --CPUs ") + nbCPUs);  
+       //if(appname(0,1)!=_T("/")) appname=wxGetCwd()+_T("/")+appname;
+       //wxExecute(appname+_T(" --runclient localhost --CPUs ") + nbCPUs);  
+       long result= wxExecute(appname+_T(" --runclient localhost --CPUs ") + nbCPUs);
+       if(result==0) result=wxExecute(wxGetCwd()+_T("/")+appname+_T(" --runclient localhost --CPUs ") + nbCPUs);
+       if(result==0) result=wxExecute(_T("/usr/bin/")+appname+_T(" --runclient localhost --CPUs ") + nbCPUs);
+       if(result==0) result=wxExecute(_T("/usr/local/bin/")+appname+_T(" --runclient localhost --CPUs ") + nbCPUs);
        #endif
    }
 }
@@ -785,12 +789,16 @@ void WXFoxServer::OnShowResults(wxCommandEvent& event)
    cmd = wxApp::GetInstance()->argv[0];
    cmd +=_T(" ");
    cmd += file;
+   wxExecute(cmd);
    #else
-   //TODO:
-   cmd = wxGetCwd()+_T("/")+wxApp::GetInstance()->argv[0] +_T(" ")+file;
+   wxString appname = wxApp::GetInstance()->argv[0];
+   long result= wxExecute(appname+_T(" ")+file);
+   if(result==0) result=wxExecute(wxGetCwd()+_T("/")+appname+_T(" ")+file);
+   if(result==0) result=wxExecute(_T("/usr/bin/")+appname+_T(" ")+file);
+   if(result==0) result=wxExecute(_T("/usr/local/bin/")+appname+_T(" ")+file);
    #endif
 
-   wxExecute(cmd);
+  
 
     /*
    wxString files=_T(" ");
