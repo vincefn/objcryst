@@ -43,6 +43,11 @@
 
 namespace ObjCryst
 {
+/** Used to remember window positions
+*
+*
+*/
+extern std::map<wxWindowID,std::pair<wxPoint,wxSize> > gvWindowPosition;
 #if 1
 /** Provides the same functionnality as wxMultiChoiceDialog, but always using
 * a wxListBox, which is much easier when selecting a large number of successive

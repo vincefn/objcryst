@@ -48,6 +48,8 @@
  
 namespace ObjCryst
 {
+std::map<wxWindowID,std::pair<wxPoint,wxSize> > gvWindowPosition;
+
 wxMultiChoiceDialog_ListBox::wxMultiChoiceDialog_ListBox(wxWindow* parent, const wxString& message, const wxString& caption, 
                             int n, const wxString* choices):
 wxDialog(parent,-1,_T("Choose the molecule's atoms"),wxDefaultPosition,wxSize(300,400),wxCAPTION|wxSTAY_ON_TOP),

@@ -305,6 +305,7 @@ static const long ID_CRYSTAL_MENU_SCATT_REMOVESCATTERER         =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT_DUPLICSCATTERER         =WXCRYST_ID();
 static const long ID_CRYSTAL_SPACEGROUP                         =WXCRYST_ID();
 static const long ID_GLCRYSTAL_MENU_UPDATE                      =WXCRYST_ID();
+static const long ID_GLCRYSTAL_WINDOW                           =WXCRYST_ID();
 static const long ID_CRYSTAL_WIN_SCATTPOW                       =WXCRYST_ID();
 static const long ID_CRYSTAL_WIN_ANTIBUMP                       =WXCRYST_ID();
 static const long ID_CRYSTAL_WIN_BONDVALENCE                    =WXCRYST_ID();
@@ -879,8 +880,15 @@ void WXCrystal::OnMenuCrystalGL(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXCrystal::OnMenuCrystalGL()",6)
    if(mpCrystalGL!=0) return;
-   wxFrame* frame= new wxFrame(this,-1, wxString::FromAscii(mpCrystal->GetName().c_str()),
-                               wxDefaultPosition,wxSize(400,400));
+   wxFrame* frame;
+   if(gvWindowPosition.count(ID_GLCRYSTAL_WINDOW))
+     frame= new wxFrame(this,ID_GLCRYSTAL_WINDOW, wxString::FromAscii(mpCrystal->GetName().c_str()),
+                        gvWindowPosition[ID_GLCRYSTAL_WINDOW].first,
+                        gvWindowPosition[ID_GLCRYSTAL_WINDOW].second);
+   else
+     frame= new wxFrame(this,ID_GLCRYSTAL_WINDOW, wxString::FromAscii(mpCrystal->GetName().c_str()),
+                        wxDefaultPosition,wxSize(400,400));
+
    mpCrystalGL=new WXGLCrystalCanvas(this,frame,-1);
    #if wxUSE_STATUSBAR
    frame->CreateStatusBar(1);
@@ -2778,6 +2786,28 @@ WXGLCrystalCanvas::WXFourierMapList::~WXFourierMapList()
    mpGLCrystalCanvas->NotifyDeleteFourierWin();
 }
 
+struct GLCrystalConfig
+{
+  GLCrystalConfig(const bool saved=false);
+  float mDist;
+  REAL mX0, mY0,mZ0;
+  float mViewAngle;
+  float mQuat [4];
+  bool mSaved;
+  bool mShowAtomName;
+  bool mShowCursor;
+  BBox mcellbbox;
+  BBox mmapbbox;
+  Triple mViewCntr;
+};
+
+GLCrystalConfig::GLCrystalConfig(const bool saved)
+{
+  mSaved=saved;
+}
+
+static GLCrystalConfig sGLCrystalConfig;
+
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXGLCrystalCanvas
@@ -2845,12 +2875,44 @@ mShowFourier(true),mShowCrystal(true),mShowAtomName(true),mShowCursor(false),mSh
 mIsGLFontBuilt(false),mGLFontDisplayListBase(0),mpFourierMapListWin(0)
 {
    VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::WXGLCrystalCanvas()",3)
-   mcellbbox.xMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmin()-0.1;
-   mcellbbox.yMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Ymin()-0.1;
-   mcellbbox.zMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Zmin()-0.1;
-   mcellbbox.xMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmax()+0.1;
-   mcellbbox.yMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Ymax()+0.1;
-   mcellbbox.zMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Zmax()+0.1;
+   if(sGLCrystalConfig.mSaved)
+   {
+      mDist=sGLCrystalConfig.mDist;
+      mX0=sGLCrystalConfig.mX0;
+      mY0=sGLCrystalConfig.mY0;
+      mZ0=sGLCrystalConfig.mZ0;
+      mViewAngle=sGLCrystalConfig.mViewAngle;
+      for(int i=0;i<4;++i) mQuat[i]=sGLCrystalConfig.mQuat[i];
+      mShowAtomName=sGLCrystalConfig.mShowAtomName;
+      mShowCursor=sGLCrystalConfig.mShowCursor;
+      
+      mcellbbox.xMin=sGLCrystalConfig.mcellbbox.xMin;
+      mcellbbox.xMax=sGLCrystalConfig.mcellbbox.xMax;
+      mcellbbox.yMin=sGLCrystalConfig.mcellbbox.yMin;
+      mcellbbox.yMax=sGLCrystalConfig.mcellbbox.yMax;
+      mcellbbox.zMin=sGLCrystalConfig.mcellbbox.zMin;
+      mcellbbox.zMax=sGLCrystalConfig.mcellbbox.zMax;
+      
+      mmapbbox.xMin=sGLCrystalConfig.mmapbbox.xMin;
+      mmapbbox.xMax=sGLCrystalConfig.mmapbbox.xMax;
+      mmapbbox.yMin=sGLCrystalConfig.mmapbbox.yMin;
+      mmapbbox.yMax=sGLCrystalConfig.mmapbbox.yMax;
+      mmapbbox.zMin=sGLCrystalConfig.mmapbbox.zMin;
+      mmapbbox.zMax=sGLCrystalConfig.mmapbbox.zMax;
+      
+      mViewCntr.x=sGLCrystalConfig.mViewCntr.x;
+      mViewCntr.y=sGLCrystalConfig.mViewCntr.y;
+      mViewCntr.z=sGLCrystalConfig.mViewCntr.z;
+   }
+   else
+   {
+      mcellbbox.xMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmin()-0.1;
+      mcellbbox.yMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Ymin()-0.1;
+      mcellbbox.zMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Zmin()-0.1;
+      mcellbbox.xMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmax()+0.1;
+      mcellbbox.yMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Ymax()+0.1;
+      mcellbbox.zMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Zmax()+0.1;
+   }
      // N.B. xMin=xMax so that the previous cell bbox is used for Maps 
      // until mmapbbox is changed
    mmapbbox.xMin = mmapbbox.xMax = mmapbbox.yMin = mmapbbox.zMin = 0.;
@@ -2875,39 +2937,42 @@ mIsGLFontBuilt(false),mGLFontDisplayListBase(0),mpFourierMapListWin(0)
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_UNLOADFOURIER, "Unload Fourier Map(s)");
    mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_UNLOADFOURIER, FALSE);
    */
-   if(!wxConfigBase::Get()->HasEntry(_T("Crystal/BOOL/Default-display only asymmetric unit cell in 3D view")))
-      wxConfigBase::Get()->Write(_T("Crystal/BOOL/Default-display only asymmetric unit cell in 3D view"), true);
-   else
+   if(sGLCrystalConfig.mSaved==false)
    {
-      bool val;
-      wxConfigBase::Get()->Read(_T("Crystal/BOOL/Default-display only asymmetric unit cell in 3D view"), &val);
-      if(val)
-      {
-         mcellbbox.xMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmin()-0.1;
-         mcellbbox.yMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Ymin()-0.1;
-         mcellbbox.zMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Zmin()-0.1;
-         mcellbbox.xMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmax()+0.1;
-         mcellbbox.yMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Ymax()+0.1;
-         mcellbbox.zMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Zmax()+0.1;
-      }
+      if(!wxConfigBase::Get()->HasEntry(_T("Crystal/BOOL/Default-display only asymmetric unit cell in 3D view")))
+          wxConfigBase::Get()->Write(_T("Crystal/BOOL/Default-display only asymmetric unit cell in 3D view"), true);
       else
       {
-         mcellbbox.xMin = -0.1;
-         mcellbbox.yMin = -0.1;
-         mcellbbox.zMin = -0.1;
-         mcellbbox.xMax =  1.1;
-         mcellbbox.yMax =  1.1;
-         mcellbbox.zMax =  1.1;
+          bool val;
+          wxConfigBase::Get()->Read(_T("Crystal/BOOL/Default-display only asymmetric unit cell in 3D view"), &val);
+          if(val)
+          {
+            mcellbbox.xMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmin()-0.1;
+            mcellbbox.yMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Ymin()-0.1;
+            mcellbbox.zMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Zmin()-0.1;
+            mcellbbox.xMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmax()+0.1;
+            mcellbbox.yMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Ymax()+0.1;
+            mcellbbox.zMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Zmax()+0.1;
+          }
+          else
+          {
+            mcellbbox.xMin = -0.1;
+            mcellbbox.yMin = -0.1;
+            mcellbbox.zMin = -0.1;
+            mcellbbox.xMax =  1.1;
+            mcellbbox.yMax =  1.1;
+            mcellbbox.zMax =  1.1;
+          }
+      }
+      if(!wxConfigBase::Get()->HasEntry(_T("Crystal/BOOL/Default-display atom names in 3D view")))
+          wxConfigBase::Get()->Write(_T("Crystal/BOOL/Default-display atom names in 3D view"), mShowAtomName);
+      else
+      {
+          wxConfigBase::Get()->Read(_T("Crystal/BOOL/Default-display atom names in 3D view"), &mShowAtomName);
       }
    }
-   if(!wxConfigBase::Get()->HasEntry(_T("Crystal/BOOL/Default-display atom names in 3D view")))
-      wxConfigBase::Get()->Write(_T("Crystal/BOOL/Default-display atom names in 3D view"), mShowAtomName);
-   else
-   {
-      wxConfigBase::Get()->Read(_T("Crystal/BOOL/Default-display atom names in 3D view"), &mShowAtomName);
-      if(mShowAtomName) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, _T("Hide Atom Labels"));
-      else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, _T("Show Atom Labels"));
-   }
+   if(mShowAtomName) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, _T("Hide Atom Labels"));
+   else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, _T("Show Atom Labels"));
 }
 
 WXGLCrystalCanvas::~WXGLCrystalCanvas()
@@ -2916,6 +2981,39 @@ WXGLCrystalCanvas::~WXGLCrystalCanvas()
    #ifndef HAVE_GLUT
    this->DeleteGLFont();
    #endif
+/*   cout<<"WXGLCrystalCanvas:Store window pos&size:"<<this->GetParent()->GetId()
+       <<":"<<this->GetParent()->GetPosition().x<<","
+       <<":"<<this->GetParent()->GetPosition().y<<"-"
+       <<":"<<this->GetParent()->GetSize().x<<","
+       <<":"<<this->GetParent()->GetSize().y<<endl;*/
+   gvWindowPosition[this->GetParent()->GetId()]=make_pair(this->GetParent()->GetPosition(),this->GetParent()->GetSize());
+   sGLCrystalConfig.mDist=mDist;
+   sGLCrystalConfig.mX0=mX0;
+   sGLCrystalConfig.mY0=mY0;
+   sGLCrystalConfig.mZ0=mZ0;
+   sGLCrystalConfig.mViewAngle=mViewAngle;
+   for(int i=0;i<4;++i) sGLCrystalConfig.mQuat[i]=mQuat[i];
+   sGLCrystalConfig.mShowAtomName=mShowAtomName;
+   sGLCrystalConfig.mShowCursor=mShowCursor;
+    
+   sGLCrystalConfig.mcellbbox.xMin=mcellbbox.xMin;
+   sGLCrystalConfig.mcellbbox.xMax=mcellbbox.xMax;
+   sGLCrystalConfig.mcellbbox.yMin=mcellbbox.yMin;
+   sGLCrystalConfig.mcellbbox.yMax=mcellbbox.yMax;
+   sGLCrystalConfig.mcellbbox.zMin=mcellbbox.zMin;
+   sGLCrystalConfig.mcellbbox.zMax=mcellbbox.zMax;
+    
+   sGLCrystalConfig.mmapbbox.xMin=mmapbbox.xMin;
+   sGLCrystalConfig.mmapbbox.xMax=mmapbbox.xMax;
+   sGLCrystalConfig.mmapbbox.yMin=mmapbbox.yMin;
+   sGLCrystalConfig.mmapbbox.yMax=mmapbbox.yMax;
+   sGLCrystalConfig.mmapbbox.zMin=mmapbbox.zMin;
+   sGLCrystalConfig.mmapbbox.zMax=mmapbbox.zMax;
+   
+   sGLCrystalConfig.mViewCntr.x=mViewCntr.x;
+   sGLCrystalConfig.mViewCntr.y=mViewCntr.y;
+   sGLCrystalConfig.mViewCntr.z=mViewCntr.z;
+   sGLCrystalConfig.mSaved=true;
 }
 
 void WXGLCrystalCanvas::OnExit(wxCommandEvent &event)
@@ -3529,9 +3627,11 @@ void WXGLCrystalCanvas::InitGL()
    glHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);//GL_FASTEST
    glHint(GL_POLYGON_SMOOTH_HINT,GL_NICEST);//GL_FASTEST
    
-   //Initialize Trackball
-   trackball(mQuat,0.,0.,0.,0.);
-   
+   if(sGLCrystalConfig.mSaved==false)
+   {
+      //Initialize Trackball
+      trackball(mQuat,0.,0.,0.,0.);
+   }
    wxSizeEvent ev;
    wxPostEvent(this,ev);
    

@@ -192,7 +192,7 @@ void XMLCrystFileLoadAllObject(const string & filename)
 {
    VFN_DEBUG_ENTRY("XMLCrystFileLoadAllObject(filename,)",5)
    ifstream is(filename.c_str());
-   if(!is){};//:TODO:
+   if(is.fail()) throw ObjCrystException("XMLCrystFileLoadAllObject()   failed input");
    XMLCrystFileLoadAllObject(is);
    VFN_DEBUG_EXIT("XMLCrystFileLoadAllObject(filename,)",5)
 }
@@ -200,7 +200,7 @@ void XMLCrystFileLoadAllObject(istream &is)
 {
    VFN_DEBUG_ENTRY("XMLCrystFileLoadAllObject(istream)",5)
    XMLCrystTag tag;
-   do {is>>tag;} while("ObjCryst"!=tag.GetName());
+   do {is>>tag;} while(("ObjCryst"!=tag.GetName()) && (false==is.eof()));
    
    while(true)
    {

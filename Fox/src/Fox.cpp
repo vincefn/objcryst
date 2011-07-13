@@ -42,6 +42,7 @@
    #include "wx/filesys.h"
    #include <wx/fs_inet.h>
    #include <wx/txtstrm.h>
+   #include <wx/minifram.h>
 #endif
 
 #include <cstdlib>
@@ -138,9 +139,13 @@ public:
    void OnQuit(wxCommandEvent& WXUNUSED(event));
    void OnAbout(wxCommandEvent& WXUNUSED(event));
    void OnLoad(wxCommandEvent& event);
+   void Load(const wxString &filename);
+   void OnBrowse(wxCommandEvent& event);
+   void OnBrowseSelect(wxCommandEvent& event);
    void OnMenuClose(wxCommandEvent& event);
-   void OnClose(wxCloseEvent& event);
-   void SafeClose();
+   void Close(const bool safe=true);
+   void OnQuit(wxCloseEvent& event);
+   void SafeQuit();
    void OnSave(wxCommandEvent& WXUNUSED(event));
    void OnAddCrystal(wxCommandEvent& WXUNUSED(event));
    void OnAddPowderPattern(wxCommandEvent& WXUNUSED(event));
@@ -167,6 +172,10 @@ private:
    std::map<unsigned int,pair<int,wxString> > mvUpdates;
    /// Are we during an autocheck ?
    bool mvUpdatesAutoCheck;
+   /// Browsing dir
+   wxString mBrowseDir;
+   /// List of files in browsing dir
+   wxListBox *mpBrowseList;
 };
 
 // ----------------------------------------------------------------------------
@@ -189,6 +198,7 @@ static const long MENU_HELP_TOGGLETOOLTIP=             WXCRYST_ID();
 static const long MENU_HELP_UPDATE=                    WXCRYST_ID();
 static const long MENU_PREFS_PREFERENCES=              WXCRYST_ID();
 static const long MENU_FILE_LOAD=                      WXCRYST_ID();
+static const long MENU_FILE_BROWSE=                    WXCRYST_ID(); 
 static const long MENU_FILE_CLOSE=                     WXCRYST_ID();
 static const long MENU_FILE_SAVE=                      WXCRYST_ID();
 static const long MENU_OBJECT_CREATE_CRYSTAL=          WXCRYST_ID();
@@ -211,6 +221,7 @@ static const long MENU_DEBUG_TEST1=                    WXCRYST_ID();
 static const long MENU_DEBUG_TEST2=                    WXCRYST_ID();
 static const long MENU_DEBUG_TEST3=                    WXCRYST_ID();
 static const long ID_ABOUT_FOX_BUTTON_UPDATE=          WXCRYST_ID();
+static const long ID_FOX_BROWSE=                       WXCRYST_ID(); 
 
 //FoxGrid///////////////////////////////////////////////////////////
 static const long MENU_GRID_SERVER_RUN=                WXCRYST_ID();
@@ -278,8 +289,11 @@ BEGIN_EVENT_TABLE(WXCrystMainFrame, wxFrame)
    EVT_MENU(ID_FOX_UPDATES_RESULT,                 WXCrystMainFrame::OnCheckUpdate)
    EVT_MENU(MENU_PREFS_PREFERENCES,                WXCrystMainFrame::OnPreferences)
    EVT_MENU(MENU_FILE_LOAD,                        WXCrystMainFrame::OnLoad)
+   EVT_MENU(MENU_FILE_BROWSE,                      WXCrystMainFrame::OnBrowse)
+   EVT_LISTBOX(ID_FOX_BROWSE,                      WXCrystMainFrame::OnBrowseSelect)
+   EVT_LISTBOX_DCLICK(ID_FOX_BROWSE,               WXCrystMainFrame::OnBrowseSelect)
    EVT_MENU(MENU_FILE_CLOSE,                       WXCrystMainFrame::OnMenuClose)
-   EVT_CLOSE(                                      WXCrystMainFrame::OnClose)
+   EVT_CLOSE(                                      WXCrystMainFrame::OnQuit)
    EVT_MENU(MENU_FILE_SAVE,                        WXCrystMainFrame::OnSave)
    EVT_MENU(MENU_OBJECT_CREATE_CRYSTAL,            WXCrystMainFrame::OnAddCrystal)
    EVT_MENU(MENU_OBJECT_CREATE_POWDERSPECTRUM,     WXCrystMainFrame::OnAddPowderPattern)
@@ -694,28 +708,41 @@ int main (int argc, char *argv[])
          #ifdef __WX__CRYST__
          cout<<"Loading: "<<wxString(argv[i]).ToAscii()<<endl;
          wxString name(argv[i]);
-         if(name.Mid(name.size()-4)==wxString(_T(".xml")))
-         {
-            wxFileInputStream is(name);
-            stringstream sst;
-            if(is.GetSize()>0)
+         if(name.size()>4)
+            if(name.Mid(name.size()-4)==wxString(_T(".xml")))
             {
-               char * tmpbuf=new char[is.GetSize()+1];
-               is.Read(tmpbuf,is.GetSize());
-               sst<<tmpbuf;
-               delete[] tmpbuf;
+               wxFileInputStream is(name);
+               stringstream sst;
+               if(is.GetSize()>0)
+               {
+                  char * tmpbuf=new char[is.GetSize()+1];
+                  is.Read(tmpbuf,is.GetSize());
+                  sst<<tmpbuf;
+                  delete[] tmpbuf;
+               }
+               else while (!is.Eof()) sst<<(char)is.GetC();
+               try{XMLCrystFileLoadAllObject(sst);}
+               catch(const ObjCrystException &except)
+               {
+                 wxMessageDialog d(NULL,_T("Failed loading file:\n")+name,_T("Error"),wxOK|wxICON_ERROR);
+                 d.ShowModal();
+              };
             }
-            else while (!is.Eof()) sst<<(char)is.GetC();
-            XMLCrystFileLoadAllObject(sst);
-         }
-         else
-         {//compressed file
-            wxFileInputStream is(name);
-            wxZlibInputStream zstream(is);
-            stringstream sst;
-            while (!zstream.Eof()) sst<<(char)zstream.GetC();
-            XMLCrystFileLoadAllObject(sst);
-         }
+            else
+              if(name.size()>7)
+                  if(name.Mid(name.size()-7)==wxString(_T(".xml.gz")))
+                  {//compressed file
+                      wxFileInputStream is(name);
+                      wxZlibInputStream zstream(is);
+                      stringstream sst;
+                      while (!zstream.Eof()) sst<<(char)zstream.GetC();
+                      try{XMLCrystFileLoadAllObject(sst);}
+                      catch(const ObjCrystException &except)
+                      {
+                        wxMessageDialog d(NULL,_T("Failed loading file:\n")+name,_T("Error"),wxOK|wxICON_ERROR);
+                        d.ShowModal();
+                      };
+                  }
          #else
          cout<<"Loading: "<<argv[i]<<endl;
          XMLCrystFileLoadAllObject(argv[i]);
@@ -1268,6 +1295,8 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
          menuFile->Append(MENU_FILE_CLOSE, _T("Close\tCtrl-W"), _T("Close all"));
          menuFile->Append(MENU_FILE_SAVE, _T("&Save\tCtrl-S"), _T("Save Everything..."));
          menuFile->Append(MENU_FILE_QUIT, _T("E&xit\tCtrl-Q"), _T("Quit "));
+         menuFile->AppendSeparator();
+         menuFile->Append(MENU_FILE_BROWSE, _T("Browse .xml, .xml.gz or .cif files..."), _T("Browse .xml, .xml.gz or .cif files..."));
       
       wxMenu *objectMenu = new wxMenu(_T(""), wxMENU_TEAROFF);
          objectMenu->Append(MENU_OBJECT_CREATE_CRYSTAL, _T("New Crystal"),
@@ -1401,7 +1430,7 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
 
 void WXCrystMainFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
-   this->SafeClose();
+   this->SafeQuit();
 }
 
 class WXDialogFoxAbout:public wxDialog
@@ -1473,63 +1502,138 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
                              _T(""),_T(""),_T("FOX files (*.xml,*.xml.gz) or CIF (*.cif)|*.xml;*.xml.gz;*.cif"),wxOPEN | wxFILE_MUST_EXIST);
       if(open->ShowModal() != wxID_OK) return;
       wxString name=open->GetPath();
-      if(name.Mid(name.size()-4)==wxString(_T(".xml")))
-      {
-         wxFileInputStream is(open->GetPath());
-         stringstream in;
-         if(is.GetSize()>0)
-         {
-            char * tmpbuf=new char[is.GetSize()];
-            is.Read(tmpbuf,is.GetSize());
-            in<<tmpbuf;
-            delete[] tmpbuf;
-         }
-         else while (!is.Eof()) in<<(char)is.GetC();
-         XMLCrystFileLoadAllObject(in);
-         //FoxGrid
-         mpGridWindow->DataLoaded();
-      }
-      else
-         if(name.Mid(name.size()-4)==wxString(_T(".cif")))
-         {
-            wxFileInputStream is(open->GetPath());
-            stringstream in;
-            if(is.GetSize()>0)
-            {
-               char * tmpbuf=new char[is.GetSize()];
-               is.Read(tmpbuf,is.GetSize());
-               in<<tmpbuf;
-               delete[] tmpbuf;
-            }
-            else while (!is.Eof()) in<<(char)is.GetC();
-            ObjCryst::CIF cif(in,true,true);
-            CreateCrystalFromCIF(cif);
-            CreatePowderPatternFromCIF(cif);
-            CreateSingleCrystalDataFromCIF(cif);
-            //FoxGrid
-            mpGridWindow->DataLoaded();
-         }
-         else
-            if(name.size()>6)
-               if(name.Mid(name.size()-6)==wxString(_T("xml.gz")))
-               {//compressed file
-                  wxFileInputStream is(name);
-                  wxZlibInputStream zstream(is);
-                  stringstream sst;
-                  while (!zstream.Eof()) sst<<(char)zstream.GetC();
-                  XMLCrystFileLoadAllObject(sst);
-                  //FoxGrid
-                    mpGridWindow->DataLoaded();
-               }
+      this->Load(name);
    }
    open->Destroy();
    if(saved) mClockLastSave.Click();
 }
 
+void WXCrystMainFrame::Load(const wxString &filename)
+{
+  if(filename.size()>4)
+    if(filename.Mid(filename.size()-4)==wxString(_T(".xml")))
+    {
+        wxFileInputStream is(filename);
+        stringstream in;
+        if(is.GetSize()>0)
+        {
+          char * tmpbuf=new char[is.GetSize()];
+          is.Read(tmpbuf,is.GetSize());
+          in<<tmpbuf;
+          delete[] tmpbuf;
+        }
+        else while (!is.Eof()) in<<(char)is.GetC();
+        try{XMLCrystFileLoadAllObject(in);}
+        catch(const ObjCrystException &except)
+        {
+          wxMessageDialog d(this,_T("Failed loading file1:\n")+filename,_T("Error loading file"),wxOK|wxICON_ERROR);
+          d.ShowModal();
+          return;
+        };
+        //FoxGrid
+        mpGridWindow->DataLoaded();
+    }
+    else
+      if(filename.Mid(filename.size()-4)==wxString(_T(".cif")))
+      {
+        wxFileInputStream is(filename);
+        stringstream in;
+        if(is.GetSize()>0)
+        {
+            char * tmpbuf=new char[is.GetSize()];
+            is.Read(tmpbuf,is.GetSize());
+            in<<tmpbuf;
+            delete[] tmpbuf;
+        }
+        else while (!is.Eof()) in<<(char)is.GetC();
+        ObjCryst::CIF cif(in,true,true);
+        CreateCrystalFromCIF(cif);
+        CreatePowderPatternFromCIF(cif);
+        CreateSingleCrystalDataFromCIF(cif);
+        //FoxGrid
+        mpGridWindow->DataLoaded();
+      }
+      else
+        if(filename.size()>6)
+            if(filename.Mid(filename.size()-6)==wxString(_T("xml.gz")))
+            {//compressed file
+              wxFileInputStream is(filename);
+              wxZlibInputStream zstream(is);
+              stringstream sst;
+              while (!zstream.Eof()) sst<<(char)zstream.GetC();
+              try{XMLCrystFileLoadAllObject(sst);}
+              catch(const ObjCrystException &except)
+              {
+                wxMessageDialog d(this,_T("Failed loading file2:\n")+filename,_T("Error loading file"),wxOK|wxICON_ERROR);
+                d.ShowModal();
+                return;
+              };
+              //FoxGrid
+              mpGridWindow->DataLoaded();
+            }
+}
+
+void WXCrystMainFrame::OnBrowse(wxCommandEvent& event)
+{
+  wxDirDialog dirdialog(this,_T("Choose directory with Fox .xml files"));
+  const int result=dirdialog.ShowModal();
+  if(result==wxID_CANCEL) return;
+  mBrowseDir=dirdialog.GetPath();
+  wxDir wxBrowseDir;
+  if(wxBrowseDir.Open(mBrowseDir)==false) return;
+  wxMiniFrame *frame= new wxMiniFrame(this,ID_FOX_BROWSE, _T("Fox .xml file browsing"),
+                                      wxDefaultPosition,wxSize(500,500),wxCLOSE_BOX|wxCAPTION);
+  wxArrayString choices;
+  mpBrowseList=new wxListBox(frame, ID_FOX_BROWSE, wxDefaultPosition, 
+                             wxDefaultSize, choices,
+                             wxLB_SINGLE|wxLB_NEEDED_SB, wxDefaultValidator,
+                             _T("listBox"));
+  wxString filename;
+  bool cont = wxBrowseDir.GetFirst(&filename,_T(""), wxDIR_FILES);
+  while(cont)
+  {
+    if(wxNOT_FOUND==filename.Find(_T("~")))
+    {
+      if(wxNOT_FOUND!=filename.Find(_T(".xml"))) 
+      {
+        mpBrowseList->Append(filename);
+      }
+      if(wxNOT_FOUND!=filename.Find(_T(".cif")))
+      {
+        mpBrowseList->Append(filename);
+      }
+    }
+    cont = wxBrowseDir.GetNext(&filename);
+  }
+  mpBrowseList->SetEventHandler(this);
+  frame->Show(true);
+}
+
+void WXCrystMainFrame::OnBrowseSelect(wxCommandEvent &event)
+{
+  if(false==event.IsSelection()) return;
+  this->Close(false);
+  wxArrayInt selections;
+  mpBrowseList->GetSelections(selections);
+  for(int i=0;i<selections.GetCount();++i)
+  {
+    #ifdef WIN32
+    this->Load(mBrowseDir+_T("\\")+mpBrowseList->GetString(selections.Item(i)));
+    #else
+    this->Load(mBrowseDir+_T("/")+mpBrowseList->GetString(selections.Item(i)));
+    #endif
+  }
+}
+
 void WXCrystMainFrame::OnMenuClose(wxCommandEvent& event)
 {
-   bool safe=true;
-   wxConfigBase::Get()->Read(_T("Fox/BOOL/Ask confirmation before exiting Fox"),&safe);
+  bool safe;
+  wxConfigBase::Get()->Read(_T("Fox/BOOL/Ask confirmation before exiting Fox"),&safe);
+  this->Close(safe);
+}
+
+void WXCrystMainFrame::Close(bool safe)
+{
    if(safe)
    {
       bool saved=true;
@@ -1558,11 +1662,13 @@ void WXCrystMainFrame::OnMenuClose(wxCommandEvent& event)
    cout<<"Removing all Crystal objects..."<<endl;
    gCrystalRegistry.DeleteAll();
 }
-void WXCrystMainFrame::OnClose(wxCloseEvent& event)
+
+
+void WXCrystMainFrame::OnQuit(wxCloseEvent& event)
 {
-   this->SafeClose();
+   this->SafeQuit();
 }
-void WXCrystMainFrame::SafeClose()
+void WXCrystMainFrame::SafeQuit()
 {
    if(mpGridWindow->m_WXFoxServer!=NULL)
    {

@@ -124,8 +124,8 @@ istream& operator>> (istream& is, XMLCrystTag &tag)
    tag.mIsEndTag=false;
    char tmp;
    is>>tmp;
-   while ((tmp!='<') && !(is.eof()) )is>>tmp;
-   if(is.eof()) return is;//:TODO: throw exception ?
+   while ((tmp!='<') && !(is.eof()) && !(is.fail()) )is>>tmp;
+   if(is.eof() || (is.fail())) return is;//:TODO: throw exception ?
    while ((tmp==' ')||(tmp=='<'))is>>tmp;
    
    if('/'==tmp)
@@ -135,7 +135,13 @@ istream& operator>> (istream& is, XMLCrystTag &tag)
    }
    
    string str="";
-   do {str+=tmp;is>>tmp;VFN_DEBUG_MESSAGE(str,1)} while ((tmp!=' ')&&(tmp!='>')&&(tmp!='/'));
+   do 
+   {
+     str+=tmp;
+     is>>tmp;
+     VFN_DEBUG_MESSAGE(str,1);
+     if(is.fail()) {throw ObjCrystException("XMLCrystTag::>>   failed input");cout<<"throw:"<<__FILE__<<":"<<__LINE__<<endl;}
+   } while ((tmp!=' ')&&(tmp!='>')&&(tmp!='/'));
    tag.mName=str;
    
    string str2;
