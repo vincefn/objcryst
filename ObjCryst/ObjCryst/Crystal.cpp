@@ -103,18 +103,27 @@ mBondValenceCost(0.0),mBondValenceCostScale(1.0),mDeleteSubObjInDestructor(1)
 }
 
 Crystal::Crystal(const Crystal &old):
-mScattererRegistry(old.mScattererRegistry),
+mScattererRegistry("List of Crystal Scatterers"),
 mBumpMergeCost(old.mBumpMergeCost),mBumpMergeScale(old.mBumpMergeScale),
 mDistTableMaxDistance(old.mDistTableMaxDistance),
+#if 0
+mScatteringPowerRegistry("List of Crystal ScatteringPowers"),
+#else
 mScatteringPowerRegistry(old.mScatteringPowerRegistry),
+#endif
 mBondValenceCost(old.mBondValenceCost),mBondValenceCostScale(old.mBondValenceCostScale),mDeleteSubObjInDestructor(old.mDeleteSubObjInDestructor)
 {
    VFN_DEBUG_MESSAGE("Crystal::Crystal(&oldCrystal)",10)
    for(long i=0;i<old.GetNbScatterer();i++)
    {
-      mScattererRegistry.Register(*(old.GetScatt(i).CreateCopy()));
+      this->AddScatterer(old.GetScatt(i).CreateCopy());
    }
-   
+   #if 0 // TODO
+   for(long i=0;i<old.GetScatteringPowerRegistry().GetNb();i++)
+   {
+      this->AddScatteringPower(old.GetScatteringPowerRegistry().GetObj(i).CreateCopy());
+   }
+   #endif
    mUseDynPopCorr.SetChoice(old.mUseDynPopCorr.GetChoice());
    mDisplayEnantiomer.SetChoice(old.mDisplayEnantiomer.GetChoice());
    
