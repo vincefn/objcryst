@@ -104,34 +104,25 @@ mBondValenceCost(0.0),mBondValenceCostScale(1.0),mDeleteSubObjInDestructor(1)
 
 Crystal::Crystal(const Crystal &old):
 mScattererRegistry("List of Crystal Scatterers"),
-mBumpMergeCost(old.mBumpMergeCost),mBumpMergeScale(old.mBumpMergeScale),
-mDistTableMaxDistance(old.mDistTableMaxDistance),
-#if 0
+mBumpMergeCost(0.0),mBumpMergeScale(1.0),
+mDistTableMaxDistance(1.0),
 mScatteringPowerRegistry("List of Crystal ScatteringPowers"),
-#else
-mScatteringPowerRegistry(old.mScatteringPowerRegistry),
-#endif
-mBondValenceCost(old.mBondValenceCost),mBondValenceCostScale(old.mBondValenceCostScale),mDeleteSubObjInDestructor(old.mDeleteSubObjInDestructor)
+mBondValenceCost(0.0),mBondValenceCostScale(1.0),mDeleteSubObjInDestructor(1)
 {
-   VFN_DEBUG_MESSAGE("Crystal::Crystal(&oldCrystal)",10)
-   for(long i=0;i<old.GetNbScatterer();i++)
-   {
-      this->AddScatterer(old.GetScatt(i).CreateCopy());
-   }
-   #if 0 // TODO
-   for(long i=0;i<old.GetScatteringPowerRegistry().GetNb();i++)
-   {
-      this->AddScatteringPower(old.GetScatteringPowerRegistry().GetObj(i).CreateCopy());
-   }
-   #endif
-   mUseDynPopCorr.SetChoice(old.mUseDynPopCorr.GetChoice());
-   mDisplayEnantiomer.SetChoice(old.mDisplayEnantiomer.GetChoice());
-   
+   VFN_DEBUG_MESSAGE("Crystal::Crystal()",10)
+   // Only create a default crystal, then copy old using XML
+   this->InitOptions();
+   this->Init(10,11,12,M_PI/2+.1,M_PI/2+.2,M_PI/2+.3,"P1","");
    gCrystalRegistry.Register(*this);
    gTopRefinableObjRegistry.Register(*this);
    mClockMaster.AddChild(mLatticeClock);
    mClockMaster.AddChild(this->mScattererRegistry.GetRegistryClock());
    mClockMaster.AddChild(this->mScatteringPowerRegistry.GetRegistryClock());
+   
+   stringstream sst;
+   old.XMLOutput(sst);
+   XMLCrystTag tag(sst);
+   this->XMLInput(sst,tag);
 }
 
 Crystal::~Crystal()
