@@ -556,8 +556,9 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
    {
       string ch=this->GetCCTbxSpg().match_tabulated_settings().hall();
       if(ch.find("x")!=std::string::npos) {mUniqueAxisId=0;}
-      if(ch.find("y")!=std::string::npos) {mUniqueAxisId=1;}
-      if(ch.find("z")!=std::string::npos) {mUniqueAxisId=2;}
+      else 
+        if(ch.find("y")!=std::string::npos) {mUniqueAxisId=1;}
+        else mUniqueAxisId=2;
    }
 
    mNbSym    =this->GetCCTbxSpg().n_smx();
