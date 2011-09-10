@@ -719,7 +719,7 @@ void WXPowderPattern::OnMenuSaveText(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuSaveText()",6)
    WXCrystValidateAllUserInput();
-   wxFileDialog save(this,_T("Choose a file"),_T(""),_T(""),_T("*.txt"),wxSAVE | wxOVERWRITE_PROMPT);
+   wxFileDialog save(this,_T("Choose a file"),_T(""),_T(""),_T("*.txt"),wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
    
    ofstream out(save.GetPath().ToAscii());
@@ -784,7 +784,7 @@ void WXPowderPattern::OnMenuSimulate(wxCommandEvent & WXUNUSED(event))
 void WXPowderPattern::OnMenuImportPattern(wxCommandEvent &event)
 {
    VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuImportPattern()",6)
-   wxFileDialog open(this,_T("Choose a file"),_T(""),_T(""),_T("*.*"),wxOPEN | wxFILE_MUST_EXIST);
+   wxFileDialog open(this,_T("Choose a file"),_T(""),_T(""),_T("*.*"),wxFD_OPEN | wxFD_FILE_MUST_EXIST);
    if(open.ShowModal() != wxID_OK) return;
    if(event.GetId()==(long)ID_POWDER_MENU_IMPORT_FULLPROF)
       mpPowderPattern->ImportPowderPatternFullprof(string(open.GetPath().ToAscii()));
@@ -968,7 +968,7 @@ void WXPowderPattern::OnMenuLeBail(wxCommandEvent& event)
 void WXPowderPattern::OnMenuExport(wxCommandEvent &event)
 {
    WXCrystValidateAllUserInput();
-   wxFileDialog save(this,_T("Choose a .pcr file"),_T(""),_T(""),_T("*.pcr"),wxSAVE | wxOVERWRITE_PROMPT);
+   wxFileDialog save(this,_T("Choose a .pcr file"),_T(""),_T(""),_T("*.pcr"),wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
    
    wxString path,name,ext;
@@ -1137,8 +1137,6 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
    wxBufferedPaintDC dc(this);
    PrepareDC(dc);
    mpParentFrame->PrepareDC(dc);
-   
-   dc.BeginDrawing();
    
    dc.DestroyClippingRegion();
    dc.SetBackground(wxBrush(_T("white"), wxSOLID));
@@ -1435,7 +1433,6 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
       dc.DrawText(fontInfo,(wxCoord)mMargin*3,(wxCoord)(mMargin+tmpH*(dec++)));
       //cout<<"Label("<<pDiff->GetCrystal().GetName()<<"):"<<mMargin*3<<","<<(height-mMargin)-tmpH*(i)-10<<endl;
    }
-   dc.EndDrawing();
    mMutex.Unlock();
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():End",5)
 }
@@ -1683,7 +1680,7 @@ void WXPowderPatternGraph::OnFindPeaks(wxCommandEvent& WXUNUSED(event))
 
 void WXPowderPatternGraph::OnLoadPeaks(wxCommandEvent& WXUNUSED(event))
 {
-   wxFileDialog fn(this,_T("Choose a file"),_T(""),_T(""),_T("*"),wxOPEN);
+   wxFileDialog fn(this,_T("Choose a file"),_T(""),_T(""),_T("*"),wxFD_OPEN);
    if(fn.ShowModal() != wxID_OK) return;
    ifstream f(fn.GetPath().ToAscii());
    if(!f) return;//:TODO:
@@ -1701,7 +1698,7 @@ void WXPowderPatternGraph::OnLoadPeaks(wxCommandEvent& WXUNUSED(event))
 
 void WXPowderPatternGraph::OnSavePeaks(wxCommandEvent& WXUNUSED(event))
 {
-   wxFileDialog save(this,_T("Choose a file"),_T(""),_T(""),_T("*.txt"),wxSAVE | wxOVERWRITE_PROMPT);
+   wxFileDialog save(this,_T("Choose a file"),_T(""),_T(""),_T("*.txt"),wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
    
    ofstream out(save.GetPath().ToAscii());
@@ -3148,7 +3145,7 @@ void WXPowderPatternBackground::OnMenuImportUserBackground(wxCommandEvent & WXUN
 {
    VFN_DEBUG_MESSAGE("WXPowderPatternBackground::OnMenuImportUserBackground()",6)
    wxFileDialog *open= new wxFileDialog(this,_T("Choose background file with 2Theta Ibackgd"),
-                                        _T(""),_T(""),_T("*.*"),wxOPEN | wxFILE_MUST_EXIST);
+                                        _T(""),_T(""),_T("*.*"),wxFD_OPEN | wxFD_FILE_MUST_EXIST);
    if(open->ShowModal() != wxID_OK) return;
    mpPowderPatternBackground->ImportUserBackground(string(open->GetPath().ToAscii()));
    open->Destroy();
@@ -3507,7 +3504,7 @@ void WXPowderPatternDiffraction::OnMenuSaveHKLFcalc(wxCommandEvent & WXUNUSED(ev
 {
    VFN_DEBUG_MESSAGE("WXPowderPatternDiffraction::OnMenuSaveHKLFcalc()",6)
    WXCrystValidateAllUserInput();
-   wxFileDialog save(this,_T("Choose a file to save to"),_T(""),_T(""),_T("*.txt"),wxSAVE | wxOVERWRITE_PROMPT);
+   wxFileDialog save(this,_T("Choose a file to save to"),_T(""),_T(""),_T("*.txt"),wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
    
    ofstream out(save.GetPath().ToAscii());

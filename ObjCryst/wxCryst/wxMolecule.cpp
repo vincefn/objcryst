@@ -1565,7 +1565,7 @@ void WXMolecule::OnMenuExport2ZMatrix(wxCommandEvent &event)
    if(event.GetId()==ID_MOLECULE_MENU_FILE_2ZMATRIX)
    {
       wxFileDialog open(this,_T("Choose a file to save the Z-matrix to"),_T(""),_T(""),_T("*.fhz"),
-                        wxSAVE | wxOVERWRITE_PROMPT);
+                        wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
       if(open.ShowModal() != wxID_OK) return;
       ofstream fout (open.GetPath().ToAscii());
       if(fout)
@@ -1602,7 +1602,7 @@ void WXMolecule::OnMenuExport2ZMatrix(wxCommandEvent &event)
    else
    {
       wxFileDialog open(this,_T("Choose a file to save the (named) Z-matrix to"),_T(""),_T(""),_T("*.zmat"),
-                        wxSAVE | wxOVERWRITE_PROMPT);
+                        wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
       
       if(open.ShowModal() != wxID_OK) return;
       

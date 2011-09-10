@@ -582,7 +582,7 @@ void WXZScatterer::OnMenuChangePivotAtom(wxCommandEvent &WXUNUSED(event))
 void WXZScatterer::OnMenuImportZMatrix(wxCommandEvent &WXUNUSED(event))
 {
    wxFileDialog open(this,_T("Choose a file"),_T(""),_T(""),_T("*.fhz"),
-                                        wxOPEN | wxFILE_MUST_EXIST);
+                                        wxFD_OPEN | wxFD_FILE_MUST_EXIST);
    if(open.ShowModal() != wxID_OK) return;
    ifstream fin (open.GetPath().ToAscii());
    if(!fin)
@@ -595,7 +595,7 @@ Error opening file for input:"+string(open.GetPath().ToAscii()));
 }
 void WXZScatterer::OnMenuExportZMatrix(wxCommandEvent &WXUNUSED(event))
 {
-   wxFileDialog save(this,_T("Choose a file"),_T(""),_T(""),_T("*.fhz"),wxSAVE);
+   wxFileDialog save(this,_T("Choose a file"),_T(""),_T(""),_T("*.fhz"),wxFD_SAVE);
    if(save.ShowModal() != wxID_OK) return;
    ofstream fout (save.GetPath().ToAscii());
    if(!fout)

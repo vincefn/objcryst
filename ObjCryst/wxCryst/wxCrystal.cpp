@@ -917,7 +917,7 @@ WXGLCrystalCanvas * WXCrystal::GetCrystalGL()
 void WXCrystal::OnMenuSaveCIF(wxCommandEvent & WXUNUSED(event))
 {
    WXCrystValidateAllUserInput();
-   wxFileDialog save(this,_T("Choose a file"),_T(""),_T(""),_T("*.cif"),wxSAVE | wxOVERWRITE_PROMPT);
+   wxFileDialog save(this,_T("Choose a file"),_T(""),_T(""),_T("*.cif"),wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
    
    ofstream out(save.GetPath().ToAscii());
@@ -929,7 +929,7 @@ void WXCrystal::OnMenuSaveCIF(wxCommandEvent & WXUNUSED(event))
 void WXCrystal::OnMenuSaveText(wxCommandEvent & WXUNUSED(event))
 {
    WXCrystValidateAllUserInput();
-   wxFileDialog save(this,_T("Choose a file"),_T(""),_T(""),_T("*.txt"),wxSAVE | wxOVERWRITE_PROMPT);
+   wxFileDialog save(this,_T("Choose a file"),_T(""),_T(""),_T("*.txt"),wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
    
    ofstream out(save.GetPath().ToAscii());
@@ -1011,7 +1011,7 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
    if(event.GetId()== ID_CRYSTAL_MENU_SCATT_IMPORTATOMLIST)
    {
       wxFileDialog open(this,_T("Choose a file with a list of atoms: Element x y z occup"),_T(""),_T(""),_T("*"),
-                        wxOPEN | wxFILE_MUST_EXIST);
+                        wxFD_OPEN | wxFD_FILE_MUST_EXIST);
       if(open.ShowModal() != wxID_OK) return;
       ifstream fin (open.GetPath().ToAscii());
       if(!fin)
@@ -1425,7 +1425,7 @@ void WXCrystal::OnMenuImportMoleculeFromFenskeHallZMatrix(wxCommandEvent &event)
    string tmp("Fenske-Hall z-matrix|*.fhz;*.fh");
    if(event.GetId()==ID_CRYSTAL_MENU_SCATT_IMPORTNAMEDZMATRIX) tmp="Fox z-matrix|*.zmat";
    wxFileDialog open(this,_T("Choose a file with a Fenske-Hall Z-matrix"),_T(""),_T(""), wxString::FromAscii(tmp.c_str()),
-                     wxOPEN | wxFILE_MUST_EXIST);
+                     wxFD_OPEN | wxFD_FILE_MUST_EXIST);
    if(open.ShowModal() != wxID_OK) return;
    ifstream fin ( open.GetPath().ToAscii());
    if(!fin)
@@ -3228,8 +3228,8 @@ void WXGLCrystalCanvas::OnKeyDown(wxKeyEvent& event)
       case(WXK_DELETE): mY0 -= 0.1; Refresh(FALSE); break;
       case(WXK_HOME): mX0 -= 0.1; Refresh(FALSE); break;
       case(WXK_END): mX0 += 0.1; Refresh(FALSE); break;
-      case(WXK_PRIOR): mZ0 -= 0.1; Refresh(FALSE); break;
-      case(WXK_NEXT): mZ0 += 0.1; Refresh(FALSE); break;
+      case(WXK_PAGEUP): mZ0 -= 0.1; Refresh(FALSE); break;
+      case(WXK_PAGEDOWN): mZ0 += 0.1; Refresh(FALSE); break;
       case(52):// 4
       {
          VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnKeyDown():rotate left",2)
@@ -3893,7 +3893,7 @@ void WXGLCrystalCanvas::OnFourier(wxCommandEvent &event)
 void WXGLCrystalCanvas::OnLoadFourierGRD( wxCommandEvent & WXUNUSED(event))
 {
    wxFileDialog fd((wxWindow*)this, _T("Choose a file containing a Fourier Map"),
-           _T(""), _T(""), _T("Fourier Map files (*.grd)|*.grd"), wxOPEN | wxFILE_MUST_EXIST);
+           _T(""), _T(""), _T("Fourier Map files (*.grd)|*.grd"), wxFD_OPEN | wxFD_FILE_MUST_EXIST);
    //if okay then read Fourier map, run MC on it and display the triangles
    if(fd.ShowModal() == wxID_OK)
    {
@@ -3912,7 +3912,7 @@ void WXGLCrystalCanvas::OnLoadFourierGRD( wxCommandEvent & WXUNUSED(event))
 void WXGLCrystalCanvas::OnLoadFourierDSN6( wxCommandEvent & WXUNUSED(event))
 {
    wxFileDialog fd((wxWindow*)this, _T("Choose a file containing a Fourier Map"),
-           _T(""), _T(""), _T("Fourier Map files (*.DN6)|*.DN6"), wxOPEN | wxFILE_MUST_EXIST);
+           _T(""), _T(""), _T("Fourier Map files (*.DN6)|*.DN6"), wxFD_OPEN | wxFD_FILE_MUST_EXIST);
    //if okay then read Fourier map, run MC on it and display the triangles
    if(fd.ShowModal() == wxID_OK)
    {
@@ -4001,7 +4001,7 @@ void WXGLCrystalCanvas::OnUnloadFourier( wxCommandEvent & WXUNUSED(event))
 void WXGLCrystalCanvas::OnPOVRay( wxCommandEvent & WXUNUSED(event))
 {
    WXCrystValidateAllUserInput();
-   wxFileDialog save(this,_T("Choose filename"),_T(""),_T(""),_T("*.pov"),wxSAVE | wxOVERWRITE_PROMPT);
+   wxFileDialog save(this,_T("Choose filename"),_T(""),_T(""),_T("*.pov"),wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
    this->POVRayOutput(string(save.GetPath().char_str()));
 }

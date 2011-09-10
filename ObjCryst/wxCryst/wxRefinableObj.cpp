@@ -396,7 +396,7 @@ template<class T> void WXRegistry<T>::Remove(WXCrystObjBasic *obj)
    if(obj==0) return;
    VFN_DEBUG_ENTRY("WXCrystRegistry::RemoveWXCrystObj(WXCrystObj*)",6)
    mList.Remove(obj);
-   mpSizer->Remove(obj);
+   mpSizer->Detach((wxWindow*)obj);
    obj->Destroy();
    this->BottomLayout(0);
    VFN_DEBUG_EXIT("WXCrystRegistry::RemoveWXCrystObj(WXCrystObj*):End",6)
@@ -625,7 +625,7 @@ bool WXRefinableObj::OnChangeName(const int id)
 void WXRefinableObj::OnMenuSave(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXRefinableObj::OnButtonSave()",6)
-   wxFileDialog save(this,_T("Choose a file"),_T(""),_T(""),_T("*.xml"),wxSAVE | wxOVERWRITE_PROMPT);
+   wxFileDialog save(this,_T("Choose a file"),_T(""),_T(""),_T("*.xml"),wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
    
    ofstream out(save.GetPath().ToAscii());
@@ -640,7 +640,7 @@ void WXRefinableObj::OnMenuLoad(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXRefinableObj::OnButtonLoad()",6)
    wxFileDialog *open= new wxFileDialog(this,_T("Choose a file"),_T(""),_T(""),_T("*.xml"),
-                                        wxOPEN | wxFILE_MUST_EXIST);
+                                        wxFD_OPEN | wxFD_FILE_MUST_EXIST);
    if(open->ShowModal() != wxID_OK) return;
    
    ifstream fin(open->GetPath().ToAscii());

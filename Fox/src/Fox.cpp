@@ -144,7 +144,7 @@ public:
    void OnBrowseSelect(wxCommandEvent& event);
    void OnMenuClose(wxCommandEvent& event);
    void Close(const bool safe=true);
-   void OnQuit(wxCloseEvent& event);
+   void OnClose(wxCloseEvent& event);
    void SafeQuit();
    void OnSave(wxCommandEvent& WXUNUSED(event));
    void OnAddCrystal(wxCommandEvent& WXUNUSED(event));
@@ -293,7 +293,7 @@ BEGIN_EVENT_TABLE(WXCrystMainFrame, wxFrame)
    EVT_LISTBOX(ID_FOX_BROWSE,                      WXCrystMainFrame::OnBrowseSelect)
    EVT_LISTBOX_DCLICK(ID_FOX_BROWSE,               WXCrystMainFrame::OnBrowseSelect)
    EVT_MENU(MENU_FILE_CLOSE,                       WXCrystMainFrame::OnMenuClose)
-   EVT_CLOSE(                                      WXCrystMainFrame::OnQuit)
+   EVT_CLOSE(                                      WXCrystMainFrame::OnClose)
    EVT_MENU(MENU_FILE_SAVE,                        WXCrystMainFrame::OnSave)
    EVT_MENU(MENU_OBJECT_CREATE_CRYSTAL,            WXCrystMainFrame::OnAddCrystal)
    EVT_MENU(MENU_OBJECT_CREATE_POWDERSPECTRUM,     WXCrystMainFrame::OnAddPowderPattern)
@@ -1499,7 +1499,7 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
    if(event.GetId()==MENU_FILE_LOAD)
    {
       open= new wxFileDialog(this,_T("Choose File :"),
-                             _T(""),_T(""),_T("FOX files (*.xml,*.xml.gz) or CIF (*.cif)|*.xml;*.xml.gz;*.cif"),wxOPEN | wxFILE_MUST_EXIST);
+                             _T(""),_T(""),_T("FOX files (*.xml,*.xml.gz) or CIF (*.cif)|*.xml;*.xml.gz;*.cif"),wxFD_OPEN | wxFD_FILE_MUST_EXIST);
       if(open->ShowModal() != wxID_OK) return;
       wxString name=open->GetPath();
       this->Load(name);
@@ -1664,7 +1664,7 @@ void WXCrystMainFrame::Close(bool safe)
 }
 
 
-void WXCrystMainFrame::OnQuit(wxCloseEvent& event)
+void WXCrystMainFrame::OnClose(wxCloseEvent& event)
 {
    this->SafeQuit();
 }
@@ -1725,7 +1725,7 @@ void WXCrystMainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
    if(compressed)
    {
       wxFileDialog open(this,_T("Choose File to save all objects:"),
-                        _T(""),_T(""),_T("FOX compressed files (*.xml.gz)|*.xml.gz"), wxSAVE | wxOVERWRITE_PROMPT);
+                        _T(""),_T(""),_T("FOX compressed files (*.xml.gz)|*.xml.gz"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
       if(open.ShowModal() != wxID_OK) return;
       wxString name=open.GetPath();
       if(name.substr(name.size()-7,7)!=_T(".xml.gz"))
@@ -1743,7 +1743,7 @@ void WXCrystMainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
    else
    {
       wxFileDialog open(this,_T("Choose File to save all objects:"),
-                        _T(""),_T(""),_T("*.xml"), wxSAVE | wxOVERWRITE_PROMPT);
+                        _T(""),_T(""),_T("*.xml"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
       if(open.ShowModal() != wxID_OK) return;
       wxString name=open.GetPath();
       if(name.substr(name.size()-4,4)!=_T(".xml"))

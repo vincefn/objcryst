@@ -202,7 +202,6 @@ void WXMultiGraph::OnPaint(wxPaintEvent &event)
    wxBufferedPaintDC dc(this);
    this->PrepareDC(dc);
    mpParentFrame->PrepareDC(dc);
-   dc.BeginDrawing();
    
    dc.DestroyClippingRegion();
    dc.SetBackground(wxBrush(_T("white"), wxSOLID));
@@ -291,7 +290,7 @@ void WXMultiGraph::OnPaint(wxPaintEvent &event)
       if((pos->second.vx.size()<1)||(pos->second.vx.size()!=pos->second.vy.size())) continue;
       wxColour *pc;//=dynamic_cast<wxColour*>(wxTheColourDatabase->Item(ix++)->GetData());
       
-      pc=wxTheColourDatabase->FindColour(wxString::FromAscii(swxColourNameList[ix]));
+      pc=&(wxTheColourDatabase->Find(wxString::FromAscii(swxColourNameList[ix])));
       if(pc==0) dc.SetPen(*wxGREY_PEN);
       else dc.SetPen(wxPen(*pc,1,wxSOLID));
       float x1,y1,x2,y2;

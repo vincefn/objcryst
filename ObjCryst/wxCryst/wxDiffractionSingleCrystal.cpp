@@ -331,7 +331,7 @@ void WXDiffractionSingleCrystal::OnMenuImport(wxCommandEvent & event)
    if(event.GetId()== ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBS)
    {
       wxFileDialog open(this,_T("Choose file to import from"),
-                                     _T(""),_T(""),_T("*.*"),wxOPEN | wxFILE_MUST_EXIST);
+                                     _T(""),_T(""),_T("*.*"),wxFD_OPEN | wxFD_FILE_MUST_EXIST);
       if(open.ShowModal() != wxID_OK) return;
       long nb=0;
       {
@@ -352,7 +352,7 @@ void WXDiffractionSingleCrystal::OnMenuImport(wxCommandEvent & event)
    if(event.GetId()== ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBSSIGMA)
    {
       wxFileDialog open(this,_T("Choose file to import from"),
-                                     _T(""),_T(""),_T("*.*"),wxOPEN | wxFILE_MUST_EXIST);
+                                     _T(""),_T(""),_T("*.*"),wxFD_OPEN | wxFD_FILE_MUST_EXIST);
       if(open.ShowModal() != wxID_OK) return;
       long nb=0;
       {
@@ -373,7 +373,7 @@ void WXDiffractionSingleCrystal::OnMenuImport(wxCommandEvent & event)
    if(event.GetId()== ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBSGROUP)
    {
       wxFileDialog open(this,_T("Choose data file"),
-                                     _T(""),_T(""),_T("*.*"),wxOPEN | wxFILE_MUST_EXIST);
+                                     _T(""),_T(""),_T("*.*"),wxFD_OPEN | wxFD_FILE_MUST_EXIST);
       if(open.ShowModal() != wxID_OK) return;
       mpData->ImportHklIobsGroup(string(open.GetPath().ToAscii()));
       mpData->UpdateDisplay();
@@ -382,7 +382,7 @@ void WXDiffractionSingleCrystal::OnMenuImport(wxCommandEvent & event)
    if(event.GetId()== ID_DIFFSINGLECRYST_MENU_IMPORT_JANAM91)
    {
       wxFileDialog open(this,_T("Choose data file"),
-                                     _T(""),_T(""),_T("*.*"),wxOPEN | wxFILE_MUST_EXIST);
+                                     _T(""),_T(""),_T("*.*"),wxFD_OPEN | wxFD_FILE_MUST_EXIST);
       if(open.ShowModal() != wxID_OK) return;
       mpData->ImportHklIobsSigmaJanaM91(string(open.GetPath().ToAscii()));
       mpData->UpdateDisplay();
@@ -393,7 +393,7 @@ void WXDiffractionSingleCrystal::OnMenuSaveHKLIobsIcalc(wxCommandEvent & WXUNUSE
 {
    VFN_DEBUG_MESSAGE("WXDiffractionSingleCrystal::OnMenuSaveHKLIobsIcalc()",6)
    WXCrystValidateAllUserInput();
-   wxFileDialog save(this,_T("Choose a file"),_T(""),_T(""),_T("*.txt"),wxSAVE | wxOVERWRITE_PROMPT);
+   wxFileDialog save(this,_T("Choose a file"),_T(""),_T(""),_T("*.txt"),wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
    mpData->SaveHKLIobsIcalc(string(save.GetPath().ToAscii()));
 }
@@ -401,7 +401,7 @@ void WXDiffractionSingleCrystal::OnMenuSaveHKLFcalc(wxCommandEvent & WXUNUSED(ev
 {
    VFN_DEBUG_MESSAGE("WXDiffractionSingleCrystal::OnMenuSaveHKLFcalc()",6)
    WXCrystValidateAllUserInput();
-   wxFileDialog save(this,_T("Choose a file"),_T(""),_T(""),_T("*.txt"),wxSAVE | wxOVERWRITE_PROMPT);
+   wxFileDialog save(this,_T("Choose a file"),_T(""),_T(""),_T("*.txt"),wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
    ofstream os(save.GetPath().ToAscii());
    mpData->PrintFhklCalcDetail(os);

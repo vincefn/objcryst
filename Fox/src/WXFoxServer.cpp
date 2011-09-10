@@ -403,7 +403,7 @@ void WXFoxServer::OnLoadJob(wxCommandEvent& event)
 {
     wxFileDialog *dlg;
     dlg = new wxFileDialog(this,_T("Choose File :"),
-                             _T(""),_T(""),_T("FOX files (*.xml,*.xml.gz)|*.xml;*.xml.gz"),wxOPEN | wxFILE_MUST_EXIST);
+                             _T(""),_T(""),_T("FOX files (*.xml,*.xml.gz)|*.xml;*.xml.gz"),wxFD_OPEN | wxFD_FILE_MUST_EXIST);
     if(dlg->ShowModal() != wxID_OK) return;
     wxString path=dlg->GetPath();
 
