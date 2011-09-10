@@ -1207,7 +1207,7 @@ void ReadFHLine(const char*buf, const unsigned int nb, string &symbol,
          n1=(int)   atoi(string(buf).substr(2,3).c_str());
          v1=(float) atof(string(buf).substr(5,6).c_str());
       }
-      cout<<"ReadFHLine():"<<buf<<"#"<<symbol<<"/"<<n1<<"/"<<v1<<";"<<v.size()<<endl
+      cout<<"ReadFHLine():"<<buf<<"#"<<symbol<<"/"<<n1<<"/"<<v1<<";"<<v.size()<<endl;
       VFN_DEBUG_MESSAGE("ReadFHLine():#"<<symbol<<"/"<<n1<<"/"<<v1,10);
       return;
    }
