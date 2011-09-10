@@ -3375,6 +3375,17 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                            gluSphere(pQuadric,
                               mvpAtom[k]->GetScatteringPower().GetRadius()/3.,20,20);
                         }
+                        else
+                        {
+                           const GLfloat colourAtom [] = {r, g, b, 1.0}; 
+                           glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE,colourAtom); 
+                           glMaterialfv(GL_FRONT, GL_SPECULAR,           colour0); 
+                           glMaterialfv(GL_FRONT, GL_EMISSION,           colour0); 
+                           glMaterialfv(GL_FRONT, GL_SHININESS,          colour0);
+                           glPolygonMode(GL_FRONT, GL_FILL);
+                           glTranslatef(x(k)*en, y(k), z(k));
+                           gluSphere(pQuadric,.15,10,10);
+                        }
                      }
                   glPopMatrix();
                }
@@ -3400,6 +3411,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                         const GLfloat colourAtom2 [] = {r2, g2, b2, 1.0};
                         const unsigned long n1=rix[&(mvpBond[k]->GetAtom1())],
                                             n2=rix[&(mvpBond[k]->GetAtom2())];
+                        #if 0
                         glPushMatrix();
                            glBegin(GL_LINE_STRIP);
                               glMaterialfv(GL_FRONT, GL_SPECULAR,  colourAtom1); 
@@ -3413,6 +3425,30 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                               glVertex3f(x(n2)*en,y(n2),z(n2));
                            glEnd();
                         glPopMatrix();
+                        #else
+                        const REAL height= sqrt(abs(  (x(n2)-x(n1))*(x(n2)-x(n1))
+                                                     +(y(n2)-y(n1))*(y(n2)-y(n1))
+                                                     +(z(n2)-z(n1))*(z(n2)-z(n1))));
+                        glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0); 
+                        glMaterialfv(GL_FRONT, GL_EMISSION,  colour0); 
+                        glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
+                        glPolygonMode(GL_FRONT, GL_FILL);
+                        glPushMatrix();
+                           glTranslatef(x(n1)*en, y(n1), z(n1));
+                           GLUquadricObj *quadobj = gluNewQuadric();
+                           glRotatef(180,(x(n2)-x(n1))*en,y(n2)-y(n1),z(n2)-z(n1)+height);// ?!?!?!
+                           
+                           glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,colourAtom1);
+                           gluCylinder(quadobj,.1,.1,height/2,10,1 );
+                           gluDeleteQuadric(quadobj);
+                           
+                           glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,colourAtom2);
+                           GLUquadricObj *quadobj2 = gluNewQuadric();
+                           glTranslatef(0, 0, height/2);
+                           gluCylinder(quadobj2,.1,.1,height/2,10,1 );
+                           gluDeleteQuadric(quadobj2);
+                        glPopMatrix();
+                        #endif
                      }
                   }
                   else
