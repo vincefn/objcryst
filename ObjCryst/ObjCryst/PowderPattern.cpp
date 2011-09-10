@@ -858,7 +858,7 @@ void PowderPatternDiffraction::SetExtractionMode(const bool extract,const bool i
             else
             {
                needInit=true;
-               cout<<"PowderPatternDiffraction::SetExtractionMode():: Forcing initialize, cannot re-use: hkl list differs"<<endl;
+               VFN_DEBUG_MESSAGE("PowderPatternDiffraction::SetExtractionMode():: Forcing initialize, cannot re-use: hkl list differs",10);
                break;
             }
               
@@ -867,12 +867,12 @@ void PowderPatternDiffraction::SetExtractionMode(const bool extract,const bool i
       else 
       {
         needInit=true;
-        cout<<"PowderPatternDiffraction::SetExtractionMode():: Forcing initialize, cannot re-use: different number of reflections"<<endl;
+        VFN_DEBUG_MESSAGE("PowderPatternDiffraction::SetExtractionMode():: Forcing initialize, cannot re-use: different number of reflections",10);
       }
    }
    if((extract && init) || needInit)
    {
-      cout<<"PowderPatternDiffraction::SetExtractionMode():: Initializing intensities to 100"<<endl;
+      VFN_DEBUG_MESSAGE("PowderPatternDiffraction::SetExtractionMode():: Initializing intensities to 100",10);
       mFhklObsSq=100;
    }
    if((mExtractionMode==false)&&(mFhklObsSq.numElements()>0))
