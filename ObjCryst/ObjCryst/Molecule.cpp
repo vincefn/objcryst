@@ -2561,10 +2561,43 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
       this->SaveParamSet(mLocalParamSet);
       const REAL llk0=this->GetLogLikelihood();
       const unsigned long i=rand() % mvFlipGroup.size();
-      list<FlipGroup>::iterator posFlip=mvFlipGroup.begin();
-      for(unsigned long j=0;j<i;++j)++posFlip;
-      this->FlipAtomGroup(*posFlip);
-      if((this->GetLogLikelihood()-llk0)>100) this->RestoreParamSet(mLocalParamSet);
+      list<FlipGroup>::iterator pos=mvFlipGroup.begin();
+      for(unsigned long j=0;j<i;++j)++pos;
+      this->FlipAtomGroup(*pos);
+      #if 0
+      if(pos->mvRotatedChainList.begin()->first==pos->mpAtom0)
+      {
+         cout <<"TRYING: Flip group from atom "
+              <<pos->mpAtom0->GetName()<<",exchanging bonds with "
+              <<pos->mpAtom1->GetName()<<" and "
+              <<pos->mpAtom2->GetName()<<", resulting in a 180� rotation of atoms : ";
+         for(set<MolAtom*>::iterator pos1=pos->mvRotatedChainList.begin()->second.begin();
+             pos1!=pos->mvRotatedChainList.begin()->second.end();++pos1)
+            cout<<(*pos1)->GetName()<<"  ";
+      }
+      else
+      {
+         cout <<"TRYING: Flip group with respect to: "
+              <<pos->mpAtom1->GetName()<<"-"
+              <<pos->mpAtom0->GetName()<<"-"
+              <<pos->mpAtom2->GetName()<<" : ";
+         for(list<pair<const MolAtom *,set<MolAtom*> > >::const_iterator 
+             chain=pos->mvRotatedChainList.begin();
+             chain!=pos->mvRotatedChainList.end();++chain)
+         {
+            cout<<"    -"<<chain->first->GetName()<<":";
+            for(set<MolAtom*>::const_iterator pos1=chain->second.begin();
+                pos1!=chain->second.end();++pos1)
+               cout<<(*pos1)->GetName()<<"  ";
+         }
+      }
+      #endif
+      if((this->GetLogLikelihood()-llk0)>100)
+      {
+        //cout<<"      FLIP REJECTED: llk="<<llk0<<"  ->  "<<this->GetLogLikelihood()<<endl;
+        this->RestoreParamSet(mLocalParamSet);
+      }
+      //else cout<<"      FLIP ACCEPTED"<<endl;
    }
    else
    #endif
@@ -2625,11 +2658,13 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                                     +pos->mvpBondAngle.size()
                                     +pos->mvpDihedralAngle.size());
                map<RigidGroup*,std::pair<XYZ,XYZ> > vr;
+               float nrjMult=1.0;
+               if((rand()%20)==0) nrjMult=4.0;
                this->MolecularDynamicsEvolve(v0, int(100*sqrt(mutationAmplitude)),0.004,
                                              pos->mvpBond,
                                              pos->mvpBondAngle,
                                              pos->mvpDihedralAngle,
-                                             vr,nrj0);
+                                             vr,nrj0*nrjMult);
             }
             #endif
             else
@@ -3137,7 +3172,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
       return;
    }
    bool large=false;
-   if(mvpAtom.size()>100) large=true;
+   if(mvpAtom.size()>200) large=true;
    REAL en=1;
    if(displayEnantiomer==true) en=-1;
    this->UpdateScattCompList();
