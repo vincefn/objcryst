@@ -288,11 +288,8 @@ void WXMultiGraph::OnPaint(wxPaintEvent &event)
       ix++;
       VFN_DEBUG_MESSAGE("WXMultiGraph::OnPaint():Data#"<<ix,3)
       if((pos->second.vx.size()<1)||(pos->second.vx.size()!=pos->second.vy.size())) continue;
-      wxColour *pc;//=dynamic_cast<wxColour*>(wxTheColourDatabase->Item(ix++)->GetData());
       
-      pc=&(wxTheColourDatabase->Find(wxString::FromAscii(swxColourNameList[ix])));
-      if(pc==0) dc.SetPen(*wxGREY_PEN);
-      else dc.SetPen(wxPen(*pc,1,wxSOLID));
+      dc.SetPen(wxPen(wxTheColourDatabase->Find(wxString::FromAscii(swxColourNameList[ix])),1,wxSOLID));
       float x1,y1,x2,y2;
       x2=pos->second.vx[0];
       y2=pos->second.vy[0];
@@ -309,8 +306,7 @@ void WXMultiGraph::OnPaint(wxPaintEvent &event)
             dc.DrawLine(wxCoord(x1),wxCoord(y1),wxCoord(x2),wxCoord(y2));
       }
       // Print Name
-      if(pc==0) dc.SetTextForeground(wxGREY_PEN->GetColour());
-      else dc.SetTextForeground(wxPen(*pc,1,wxSOLID).GetColour());
+      dc.SetTextForeground(wxPen(wxTheColourDatabase->Find(wxString::FromAscii(swxColourNameList[ix])),1,wxSOLID).GetColour());
       wxCoord tmpW,tmpH;
       fontInfo.Printf(wxString::FromAscii(pos->second.name.c_str()));
       dc.GetTextExtent(fontInfo, &tmpW, &tmpH);
