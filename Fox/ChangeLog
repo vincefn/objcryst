@@ -1,3 +1,19 @@
+#### 1.9.7 - 2011 (Revision 1305)
+NEW FEATURES
+   * Add Browser to quickly open Fox and cif files
+   * When closing & re-opening a 3D Crystal view, keep the same
+   window size and view.
+   * When exploring spacegroups, also give the number of
+   systematic extinct reflections for each spacegroup
+IMPROVEMENTS
+   * Handle cases when xml or cif files do not open correctly
+   * Nicer display of large molecules (>200 atoms)
+   * When exploring spacegroups, exploit extinction conditions to avoid
+   performing redundant Le Bail fits 
+BUG FIXES
+   * Correct file opening from the Fox.Grid server window
+   * Correct identification of monoclinic spacegroups with unique axis=c
+
 #### 1.9.6 - 2011 (Revision 1295)
 NEW FEATURES
 IMPROVEMENTS
