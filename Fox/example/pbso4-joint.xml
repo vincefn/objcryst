@@ -2843,7 +2843,7 @@
     <Radiation>
       <Option Name="Radiation" Choice="0" ChoiceName="Neutron"/>
       <Option Name="Spectrum" Choice="0" ChoiceName="Monochromatic"/>
-      <LinearPolarRate>2.8026e-45</LinearPolarRate>
+      <LinearPolarRate>0</LinearPolarRate>
       <Par Refined="0" Limited="1" Min="0.05" Max="20" Name="Wavelength">1.909</Par>
     </Radiation>
     <MaxSinThetaOvLambda>0.3</MaxSinThetaOvLambda>
