@@ -77,6 +77,8 @@ static long ID_DIFFSINGLECRYST_MENU_SAVEHKLFCALC=          WXCRYST_ID();
 static long ID_DIFFSINGLECRYST_MENU_SIMULATE=              WXCRYST_ID(); 
 static long ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBS=        WXCRYST_ID(); 
 static long ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBSSIGMA=   WXCRYST_ID(); 
+static long ID_DIFFSINGLECRYST_MENU_IMPORT_SHELXHKLF4=     WXCRYST_ID(); 
+static long ID_DIFFSINGLECRYST_MENU_IMPORT_CIF=            WXCRYST_ID(); 
 static long ID_DIFFSINGLECRYST_MENU_IMPORT_JANAM91=        WXCRYST_ID(); 
 static long ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBSGROUP=   WXCRYST_ID(); 
 static long ID_DIFFSINGLECRYST_MENU_FITSCALE_R=            WXCRYST_ID(); 
@@ -113,6 +115,8 @@ BEGIN_EVENT_TABLE(WXDiffractionSingleCrystal, wxWindow)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_SIMULATE,           WXDiffractionSingleCrystal::OnMenuSimulate)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBS,     WXDiffractionSingleCrystal::OnMenuImport)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBSSIGMA,WXDiffractionSingleCrystal::OnMenuImport)
+   EVT_MENU(ID_DIFFSINGLECRYST_MENU_IMPORT_SHELXHKLF4,  WXDiffractionSingleCrystal::OnMenuImport)
+   EVT_MENU(ID_DIFFSINGLECRYST_MENU_IMPORT_CIF       ,  WXDiffractionSingleCrystal::OnMenuImport)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_IMPORT_JANAM91,     WXDiffractionSingleCrystal::OnMenuImport)
    EVT_MENU(ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBSGROUP,WXDiffractionSingleCrystal::OnMenuImport)
    EVT_BUTTON(ID_DIFFSINGLECRYST_CRYSTAL,               WXDiffractionSingleCrystal::OnChangeCrystal)
@@ -154,13 +158,18 @@ WXRefinableObj(parent,data),mpData(data),mpGraph(0),mGrapIdObs(0),mGrapIdCalc(0)
                                 "Save HKL Iobs Icalc (text)");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_DIFFSINGLECRYST_MENU_SAVEHKLFCALC,
                                 "Save HKL Fcalc (text)");
+         mpMenuBar->GetMenu(ID_REFOBJ_MENU_OBJ).AppendSeparator();
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_DIFFSINGLECRYST_MENU_SIMULATE,
                                 "Simulation mode (generate HKL list)");
-         //mpMenuBar->AppendSeparator();
+         mpMenuBar->GetMenu(ID_REFOBJ_MENU_OBJ).AppendSeparator();
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBS,
                                  "Import HKL Iobs");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBSSIGMA,
-                                 "Import HKL Iobs Sigma");
+                                 "Import HKL Iobs Sigma (space or tab-separated)");
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_DIFFSINGLECRYST_MENU_IMPORT_SHELXHKLF4,
+                                 "Import HKL Iobs Sigma (HKLF 4 Shelx format)");
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_DIFFSINGLECRYST_MENU_IMPORT_CIF,
+                                 "Import CIF single crystal data");
          //mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_DIFFSINGLECRYST_MENU_IMPORT_JANAM91,
          //                        "Import Jana M91");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBSGROUP,
@@ -367,6 +376,24 @@ void WXDiffractionSingleCrystal::OnMenuImport(wxCommandEvent & event)
          dialog.GetValue().ToLong(&nb);
       }
       mpData->ImportHklIobsSigma(string(open.GetPath().ToAscii()),nb);
+      mpData->UpdateDisplay();
+      return;
+   }
+   if(event.GetId()== ID_DIFFSINGLECRYST_MENU_IMPORT_SHELXHKLF4)
+   {
+      wxFileDialog open(this,_T("Choose Shelx file to import from"),
+                                     _T(""),_T(""),_T("*.hkl"),wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+      if(open.ShowModal() != wxID_OK) return;
+      mpData->ImportShelxHKLF4(string(open.GetPath().ToAscii()));
+      mpData->UpdateDisplay();
+      return;
+   }
+   if(event.GetId()== ID_DIFFSINGLECRYST_MENU_IMPORT_CIF)
+   {
+      wxFileDialog open(this,_T("Choose CIF file to import from"),
+                                     _T(""),_T(""),_T("*.cif"),wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+      if(open.ShowModal() != wxID_OK) return;
+      mpData->ImportCIF(string(open.GetPath().ToAscii()));
       mpData->UpdateDisplay();
       return;
    }

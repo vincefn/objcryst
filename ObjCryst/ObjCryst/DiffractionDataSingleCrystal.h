@@ -130,6 +130,20 @@ class DiffractionDataSingleCrystal:public ScatteringData
       *  \param skipLines The number of lines to skip at the beginning of the file.
       */
       void ImportHklIobsSigma(const string &fileName,const long nbRefl,const int skipLines=0);
+      /** \brief Import h,k,l,I,Sigma from a file using shelx HKLF 4 format
+      *
+      *The file is assumed to correspond to a single crystal diffraction file.This file 
+      * should be formatted with H,k,l, Iobs and Sigma using a strict formatting 3I4+2F8,
+      * and the last line should contain 0 0 0 for hkl values.
+      *  \param fileName The name of the data file. 
+      */
+      void ImportShelxHKLF4(const string &fileName);
+      /** \brief Import diffraction data from a CIF file
+      *
+      *The file is assumed to correspond to a single crystal diffraction file.
+      *  \param fileName The name of the data file. 
+      */
+      void ImportCIF(const string &fileName);
       /** \brief Import h,k,l,I,Sigma from a Jana98 '*.m91' file
       *
       *The file is assumed to correspond to a single crystal diffraction file.

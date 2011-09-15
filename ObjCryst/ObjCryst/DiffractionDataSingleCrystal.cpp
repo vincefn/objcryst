@@ -26,6 +26,7 @@
 #include <typeinfo>
 
 #include "ObjCryst/ObjCryst/DiffractionDataSingleCrystal.h"
+#include "ObjCryst/ObjCryst/CIF.h"
 #include "ObjCryst/Quirks/VFNDebug.h"
 #include "ObjCryst/Quirks/VFNStreamFormat.h"
 
@@ -138,12 +139,16 @@ void DiffractionDataSingleCrystal::SetHklIobs(const CrystVector_long &h,
    mL=l;
    mObsIntensity=iObs;
    mObsSigma=sigma;
-   mWeight=0;
    mMultiplicity=1;
    
    this->PrepareHKLarrays();
    
    this->CalcSinThetaLambda();
+   this->SortReflectionBySinThetaOverLambda();
+   const REAL minSigma=mObsSigma.max()*1e-6;// :KLUDGE: ?
+   for(int i=0;i<mNbRefl;i++) 
+      if(mObsSigma(i)<minSigma) mWeight(i)=1./minSigma/minSigma;
+      else mWeight(i)=1./mObsSigma(i)/mObsSigma(i);
    
    mHasObservedData=true;
    
@@ -347,6 +352,108 @@ Error opening file for input:"+fileName);
 
    cout << "Finished storing data..."<< endl ;
 
+}
+
+void DiffractionDataSingleCrystal::ImportShelxHKLF4(const string &fileName)
+{
+   VFN_DEBUG_ENTRY("DiffractionDataSingleCrystal::ImportShelxHKLF4():"<<fileName,10);
+   char buf[101];
+   //configure members
+      mNbRefl=100;
+      mH.resize(mNbRefl);
+      mK.resize(mNbRefl);
+      mL.resize(mNbRefl);
+      mObsIntensity.resize(mNbRefl);
+      mObsSigma.resize(mNbRefl);
+   long h=1,k=1,l=1,i=0;
+   float iobs,sigma;
+   //Import data
+   {   
+      VFN_DEBUG_MESSAGE("inputing reflections from file (HKLF4): "<<fileName,10);
+      ifstream fin (fileName.c_str());
+      if(!fin)
+      {
+         throw ObjCrystException("DiffractionDataSingleCrystal::ImportShelxHKLF4() : Error opening file for input:"+fileName);
+      }
+      for(;;)
+      {
+         fin.getline(buf,100);
+         h=(int)   atoi(string(buf).substr(0,4).c_str());
+         k=(int)   atoi(string(buf).substr(4,4).c_str());
+         l=(int)   atoi(string(buf).substr(8,4).c_str());
+         iobs=(float) atof(string(buf).substr(12,8).c_str());
+         sigma=(float) atof(string(buf).substr(20,8).c_str());
+         if((abs(h)+abs(k)+abs(l))==0) break;
+         if(i==mNbRefl)
+         {
+            mNbRefl+=100;
+            mH.resizeAndPreserve(mNbRefl);
+            mK.resizeAndPreserve(mNbRefl);
+            mL.resizeAndPreserve(mNbRefl);
+            mObsIntensity.resizeAndPreserve(mNbRefl);
+            mObsSigma.resizeAndPreserve(mNbRefl);
+         }
+         mH(i)=REAL(h);
+         mK(i)=REAL(k);
+         mL(i)=REAL(l);
+         mObsIntensity(i)=REAL(iobs);
+         mObsSigma(i)=REAL(sigma);
+         i++;
+      }
+      VFN_DEBUG_MESSAGE("Finished reading from file (HKLF4) ",10);
+      fin.close();
+   }
+   //Finish
+   mNbRefl=i;
+   mH.resizeAndPreserve(mNbRefl);
+   mK.resizeAndPreserve(mNbRefl);
+   mL.resizeAndPreserve(mNbRefl);
+   mObsIntensity.resizeAndPreserve(mNbRefl);
+   mObsSigma.resizeAndPreserve(mNbRefl);
+   
+   mWeight.resize(mNbRefl);
+   const REAL minSigma=mObsSigma.max()*1e-6;// :KLUDGE: ?
+   for(int i=0;i<mNbRefl;i++) 
+      if(mObsSigma(i)<minSigma) mWeight(i)=1./minSigma/minSigma;
+      else mWeight(i)=1./mObsSigma(i)/mObsSigma(i);
+   mHasObservedData=true;
+
+   mMultiplicity.resize(mNbRefl);
+   mMultiplicity=1;
+
+   // Keep a copy as squared F(hkl), to enable fourier maps
+   // :TODO: stop using mObsIntensity and just keep mFhklObsSq ?
+   mFhklObsSq=mObsIntensity;
+   mClockFhklObsSq.Click();
+   
+   this->PrepareHKLarrays();
+   this->SortReflectionBySinThetaOverLambda();
+   {
+      char buf [200];
+      sprintf(buf,"Imported Shelx HKLF 4 file, with %d reflections",(int)mNbRefl);
+      (*fpObjCrystInformUser)((string)buf);
+   }
+   VFN_DEBUG_EXIT("DiffractionDataSingleCrystal::ImportShelxHKLF4() read "<<mNbRefl<<" reflections",10);
+}
+
+void DiffractionDataSingleCrystal::ImportCIF(const string &fileName)
+{
+   VFN_DEBUG_EXIT("DiffractionDataSingleCrystal::ImportCIF(): "<<fileName,10);
+   ifstream fin (fileName.c_str());
+   if(!fin)
+   {
+      throw ObjCrystException("DiffractionDataSingleCrystal::ImportCIF(): Error opening file for input:"+fileName);
+   }
+   ObjCryst::CIF cif(fin,true,true);
+   for(map<string,CIFData>::iterator pos=cif.mvData.begin();pos!=cif.mvData.end();++pos)
+   {
+      if(pos->second.mH.numElements()>0)
+      {
+         this->SetHklIobs(pos->second.mH,pos->second.mK,pos->second.mL,pos->second.mIobs,pos->second.mSigma);
+         break;
+      }
+   }
+   VFN_DEBUG_EXIT("DiffractionDataSingleCrystal::ImportCIF() read "<<mNbRefl<<" reflections",10);
 }
 
 void DiffractionDataSingleCrystal::ImportHklIobsSigmaJanaM91(const string &fileName)
