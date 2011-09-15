@@ -823,6 +823,9 @@ void ScatteringData::PrepareHKLarrays()
    mFhklCalcReal.resize(mNbRefl);
    mFhklCalcImag.resize(mNbRefl);
    mFhklCalcSq.resize(mNbRefl);
+   mFhklCalcReal=0;
+   mFhklCalcImag=0;
+   mFhklCalcSq=0;
    
    mIntH=mH;
    mIntK=mK;
