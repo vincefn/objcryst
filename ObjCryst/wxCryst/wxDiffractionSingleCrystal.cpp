@@ -491,9 +491,14 @@ void WXDiffractionSingleCrystal::OnMenuShowGraph(wxCommandEvent &event)
    if(mpGraph!=0) return;
    if(mpData->GetNbRefl()<=0) return;
    WXCrystValidateAllUserInput();
-   wxFrame *frame= new wxFrame(this,-1,wxString::FromAscii(mpData->GetName().c_str()),
+   std::string s=mpData->GetName();
+   if(s.size()==0) s=mpData->GetCrystal().GetName();
+   s="Single Crystal data:"+s;
+   wxFrame *frame= new wxFrame(this,-1,wxString::FromAscii(s.c_str()),
                                wxDefaultPosition,wxSize(500,300));
    mpGraph = new WXDiffractionSingleCrystalGraph(frame,this);
+   mpGraph->SetXLabel(_T("1/d (A)"));
+   mpGraph->SetYLabel(_T("Intensity"));
    mGrapIdObs =mpGraph->AddGraph("Iobs");
    mGrapIdCalc=mpGraph->AddGraph("Icalc");
    
