@@ -243,11 +243,9 @@ void ScatteringPowerAtom::XMLOutput(ostream &os,int indent)const
    tag.AddAttribute("Symbol",mSymbol);
    os <<tag<<endl;
    
-   if(true==this->mIsIsotropic)
-   {
-      this->GetPar(&mBiso).XMLOutput(os,"Biso",indent+1);
-      os<<endl;
-   } else
+   this->GetPar(&mBiso).XMLOutput(os,"Biso",indent+1);
+   os<<endl;
+   if(false==this->mIsIsotropic)
    {
       REAL* bdata = (REAL*) mBeta.data();
       this->GetPar(&bdata[0]).XMLOutput(os,"B11",indent+1);
