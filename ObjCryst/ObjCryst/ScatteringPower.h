@@ -103,6 +103,8 @@ static NiftyStaticGlobalObjectsInitializer_ScatteringPower NiftyStaticGlobalObje
 * TemperatureFactor, ScatteringFactor, and ResonantScatteringFactor. In any way
 * the design of this class should not evolve, so that code using the ScatteringPower
 * interface will remain compatible whatever modifications are made.
+* \warning: there is currently a storage for Anisotropic Displacement Parameters,
+* but Debye-Waller calculation is \e only isotropic.
 */
 //######################################################################
 class ScatteringPower:virtual public RefinableObj
@@ -205,6 +207,7 @@ class ScatteringPower:virtual public RefinableObj
       virtual void SetBiso(const REAL newB);
       /** \brief Returns the anisotropic temperature B factor for (i, j) pair.
       *
+      * \warning: this is ambiguous, as it is Beta_ij which are stored, and not Bij...
       */
       REAL GetBij(const size_t &i, const size_t &j) const;
       /** \brief Returns the anisotropic temperature B factor for given index.
@@ -216,10 +219,12 @@ class ScatteringPower:virtual public RefinableObj
       * 4 -> (1, 3)
       * 5 -> (2, 3)
       *
+      * \warning: this is ambiguous, as it is Beta_ij which are stored, and not Bij...
       */
       REAL GetBij(const size_t &idx) const;
       /** \brief Sets the anisotropic temperature B factor for (i, j) pair.
       *
+      * \warning: this is ambiguous, as it is Beta_ij which are stored, and not Bij...
       */
       virtual void SetBij(const size_t &i, const size_t &j, const REAL newB);
       /** \brief Sets the anisotropic temperature B factor for given index.
@@ -231,6 +236,7 @@ class ScatteringPower:virtual public RefinableObj
       * 4 -> (1, 3)
       * 5 -> (2, 3)
       *
+      * \warning: this is ambiguous, as it is Beta_ij which are stored, and not Bij...
       */
       virtual void SetBij(const size_t &idx, const REAL newB);
       /** \brief Returns true if the scattering power is isotropic, else false.
@@ -287,8 +293,14 @@ class ScatteringPower:virtual public RefinableObj
       REAL mBiso;
       /// Is the scattering isotropic ?
       bool mIsIsotropic;
-      /// Anisotropic Beta(ij)
-      CrystVector_REAL mBeta;
+      /** Anisotropic Beta(ij)
+      *
+      * \internal
+      * These are stored temporarily, and derived from the Bij
+      */
+      mutable CrystVector_REAL mBeta;
+      /// Anisotropic B(ij)
+      CrystVector_REAL mB;
       /// Clock.
       RefinableObjClock mClock;
       /// Colour for this ScatteringPower (from POVRay)

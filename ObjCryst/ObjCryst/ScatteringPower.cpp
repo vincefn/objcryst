@@ -50,6 +50,36 @@ const RefParType *gpRefParTypeScattPowTemperatureAniso=0;
 long NiftyStaticGlobalObjectsInitializer_ScatteringPower::mCount=0;
 //######################################################################
 //
+//      Bij to Betaij conversion
+//
+//######################################################################
+CrystVector_REAL Bij2Betaij(const CrystVector_REAL &Bij, const UnitCell &cell)
+{
+   // Willis & Pryor,p 101: (betaij) = 2*pi^2 * transpose(cell.Bmatrix) * (Bij) * cell.Bmatrix
+   // :TODO: this needs to be checked before being used
+   const REAL B11=Bij(0);
+   const REAL B22=Bij(1);
+   const REAL B33=Bij(2);
+   const REAL B12=Bij(3);
+   const REAL B13=Bij(4);
+   const REAL B23=Bij(5);
+   CrystMatrix_REAL B(3,3);
+   B(0,0)=B11;
+   B(0,1)=B12;
+   B(0,1)=B13;
+   B(1,0)=B12;
+   B(1,1)=B22;
+   B(1,1)=B23;
+   B(2,0)=B13;
+   B(2,1)=B23;
+   B(2,1)=B33;
+   CrystMatrix_REAL b(3,3);
+   b=cell.GetBMatrix().transpose().Mult(B.Mult(cell.GetBMatrix()));
+   b*=2*M_PI*M_PI;
+}
+
+//######################################################################
+//
 //      SCATTERING POWER
 //
 //######################################################################
@@ -61,6 +91,8 @@ mMaximumLikelihoodNbGhost(0),mFormalCharge(0.0)
    VFN_DEBUG_MESSAGE("ScatteringPower::ScatteringPower():"<<mName,5)
    mBeta.resize(6);
    mBeta = 0;
+   mB.resize(6);
+   mB = 0;
    gScatteringPowerRegistry.Register(*this);
    this->Init();
    mClockMaster.AddChild(mClock);
@@ -68,7 +100,7 @@ mMaximumLikelihoodNbGhost(0),mFormalCharge(0.0)
 }
 ScatteringPower::ScatteringPower(const ScatteringPower& old):
 mDynPopCorrIndex(old.mDynPopCorrIndex),mBiso(old.mBiso),mIsIsotropic(old.mIsIsotropic),
-mBeta(old.mBeta),
+mBeta(old.mBeta),mB(old.mB),
 mFormalCharge(old.mFormalCharge)
 {
    VFN_DEBUG_MESSAGE("ScatteringPower::ScatteringPower(&old):"<<mName,5)
@@ -98,6 +130,7 @@ void ScatteringPower::operator=(const ScatteringPower& rhs)
    mBiso=rhs.mBiso;
    mIsIsotropic=rhs.mIsIsotropic;
    mBeta=rhs.mBeta;
+   mB=rhs.mB;
 }
 
 bool ScatteringPower::IsScatteringFactorAnisotropic()const{return false;}
@@ -123,7 +156,7 @@ REAL ScatteringPower::GetBij(const size_t &i, const size_t &j) const
 }
 REAL ScatteringPower::GetBij(const size_t &idx) const
 {
-    return mBeta(idx);
+    return mB(idx);
 }
 void ScatteringPower::SetBij(const size_t &i, const size_t &j, const REAL newB)
 {
@@ -142,7 +175,7 @@ void ScatteringPower::SetBij(const size_t &idx, const REAL newB)
 {
     mClock.Click();
     mIsIsotropic=false;
-    mBeta(idx) = newB;
+    mB(idx) = newB;
 }
 bool ScatteringPower::IsIsotropic() const {return mIsIsotropic;}
 long ScatteringPower::GetDynPopCorrIndex() const {return mDynPopCorrIndex;}
@@ -506,22 +539,31 @@ REAL ScatteringPowerAtom::GetForwardScatteringFactor(const RadiationType type) c
       case(RAD_ELECTRON):
       {
          const REAL z=this->GetAtomicNumber();
-         (z-mpGaussian->at_stol(0.0001))/(.0001 * .0001);
+         sf=(z-mpGaussian->at_stol(0.0001))/(.0001 * .0001);
       }
    }
    VFN_DEBUG_MESSAGE("ScatteringPower::GetScatteringFactor(&data):End",3)
    return sf;
 }
 
+static bool warnADP=true;
 CrystVector_REAL ScatteringPowerAtom::GetTemperatureFactor(const ScatteringData &data,
                                                              const int spgSymPosIndex) const
 {
    VFN_DEBUG_MESSAGE("ScatteringPower::GetTemperatureFactor(&data):"<<mName,3)
    CrystVector_REAL sf(data.GetNbRefl());
-   if(mIsIsotropic)
+   if((mIsIsotropic==false) && warnADP)
+   {  // Warn once
+      cout<<"========================== WARNING ========================="<<endl
+          <<"   In ScatteringPowerAtom::GetTemperatureFactor():"<<endl
+          <<"   Anisotropic Displacement Parameters are not currently properly handled"<<endl
+          <<"   for Debye-Waller calculations (no symmetry handling for ADPs)."<<endl
+          <<"   =>The Debye-Waller calculations will instead use only isotropic DPs"<<endl<<endl;
+      warnADP=false;
+   }
+
+   if(true)//(mIsIsotropic)
    {
-      // :NOTE: can't use 'return exp(-mBiso*pow2(diffData.GetSinThetaOverLambda()))'
-      //using kcc (OK with gcc)
       CrystVector_REAL stolsq(data.GetNbRefl());
       const CrystVector_REAL stol=data.GetSinThetaOverLambda();
       stolsq=stol;
@@ -555,14 +597,13 @@ CrystVector_REAL ScatteringPowerAtom::GetTemperatureFactor(const ScatteringData 
       #undef STOLSQ
    }
    else
-   {
+   {// :TODO: handle ADP - requires taking into account symmetries... 
       const REAL b11=mBeta(0);
       const REAL b22=mBeta(1);
       const REAL b33=mBeta(2);
       const REAL b12=mBeta(3);
       const REAL b13=mBeta(4);
       const REAL b23=mBeta(5);
-      
       #ifdef __VFN_VECTOR_USE_BLITZ__
          #define HH data.H()
          #define KK data.K()
@@ -767,7 +808,7 @@ void ScatteringPowerAtom::InitRefParList()
       this->AddPar(tmp);
    }
    {
-      REAL* bdata = (REAL*) mBeta.data();
+      REAL* bdata = (REAL*) mB.data();
 
       RefinablePar B11("B11",&bdata[0],0.1,5.,
               gpRefParTypeScattPowTemperatureAniso,REFPAR_DERIV_STEP_ABSOLUTE,

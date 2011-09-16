@@ -247,7 +247,7 @@ void ScatteringPowerAtom::XMLOutput(ostream &os,int indent)const
    os<<endl;
    if(false==this->mIsIsotropic)
    {
-      REAL* bdata = (REAL*) mBeta.data();
+      REAL* bdata = (REAL*) mB.data();
       this->GetPar(&bdata[0]).XMLOutput(os,"B11",indent+1);
       os<<endl;
       this->GetPar(&bdata[1]).XMLOutput(os,"B22",indent+1);
@@ -324,37 +324,37 @@ void ScatteringPowerAtom::XMLInput(istream &is,const XMLCrystTag &tagg)
                }
                if("B11"==tag.GetAttributeValue(i))
                {
-                  this->GetPar(&mBeta.data()[0]).XMLInput(is,tag);
+                  this->GetPar(&mB.data()[0]).XMLInput(is,tag);
                   this->mIsIsotropic = false;
                   break;
                }
                if("B22"==tag.GetAttributeValue(i))
                {
-                  this->GetPar(&mBeta.data()[1]).XMLInput(is,tag);
+                  this->GetPar(&mB.data()[1]).XMLInput(is,tag);
                   this->mIsIsotropic = false;
                   break;
                }
                if("B33"==tag.GetAttributeValue(i))
                {
-                  this->GetPar(&mBeta.data()[2]).XMLInput(is,tag);
+                  this->GetPar(&mB.data()[2]).XMLInput(is,tag);
                   this->mIsIsotropic = false;
                   break;
                }
                if("B12"==tag.GetAttributeValue(i))
                {
-                  this->GetPar(&mBeta.data()[3]).XMLInput(is,tag);
+                  this->GetPar(&mB.data()[3]).XMLInput(is,tag);
                   this->mIsIsotropic = false;
                   break;
                }
                if("B13"==tag.GetAttributeValue(i))
                {
-                  this->GetPar(&mBeta.data()[4]).XMLInput(is,tag);
+                  this->GetPar(&mB.data()[4]).XMLInput(is,tag);
                   this->mIsIsotropic = false;
                   break;
                }
                if("B23"==tag.GetAttributeValue(i))
                {
-                  this->GetPar(&mBeta.data()[5]).XMLInput(is,tag);
+                  this->GetPar(&mB.data()[5]).XMLInput(is,tag);
                   this->mIsIsotropic = false;
                   break;
                }
