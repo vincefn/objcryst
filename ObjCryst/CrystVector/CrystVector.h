@@ -358,12 +358,19 @@ template<class T> class CrystMatrix
    void resizeAndPreserve(const long ySize,const long xSize);
    
    //void operator=(const T num);
+   /// Element-by element multiplication (array-like)
    void operator*=(const T num);
+   /// Element-by element multiplication (array-like)
    void operator*=(const CrystMatrix &vect);
+   /// Element-by element division (array-like)
    void operator/=(const T num);
+   /// Element-by element addition (array-like)
    void operator+=(const T num);
+   /// Element-by element substraction (array-like)
    void operator-=(const T num);
    
+   /// matrix multiplication (linear algebra)
+   CrystMatrix Mult(const CrystMatrix &rhs);
    //:TODO: Check the following...
    
    // ListInitializer & ListInitializerSwitch are a simplified
@@ -431,7 +438,7 @@ template<class T> class CrystMatrix
 
    T& operator()(const long i,const long j);
 
-   CrystMatrix transpose(const int dim1, const int dim2)const;
+   CrystMatrix transpose()const;
    
    protected:
    private:

@@ -18,6 +18,7 @@
 */
 #include "ObjCryst/CrystVector/CrystVector.h"
 #include "ObjCryst/Quirks/VFNStreamFormat.h"
+#include "ObjCryst/ObjCryst/General.h"
 
 #ifdef __LIBCRYST_VECTOR_USE_BLITZ__
 
@@ -607,6 +608,24 @@ template<class T> void CrystMatrix<T>::operator-=(const T num)
    for(int i=0;i<mNumElements;i++) *p++ -= num;
 }
 
+template<class T> CrystMatrix<T> CrystMatrix<T>::Mult(const CrystMatrix<T> &rhs)
+{
+   if((this->cols()!=rhs.rows())||(this->rows()!=rhs.cols()))
+   {
+     //throw ObjCrystException("CrystMatrix<T>::Mult(...): matrix sizes do not match !!");
+   }
+   CrystMatrix<T> mult(this->rows(),rhs.cols());
+   for(unsigned int r=0;r<this->rows();r++)
+     for(unsigned int c=0;r<rhs.cols();c++)
+     {
+       T tmp=0;
+       for(unsigned int i=0;i<this->cols();i++)
+         tmp+=(*this)(r,i)*rhs(i,c);
+       mult(r,c)=tmp;
+     }
+  return mult;
+}
+
 template<class T> T CrystMatrix<T>::operator()(const long i) const
 {
    #ifdef __DEBUG__
@@ -656,7 +675,7 @@ template<class T> T& CrystMatrix<T>::operator()(const long i,const long j)
    return mpData[i*mXSize+j];
 }
 
-template<class T> CrystMatrix<T> CrystMatrix<T>::transpose(const int dim1, const int dim2)const
+template<class T> CrystMatrix<T> CrystMatrix<T>::transpose()const
 {
    CrystMatrix<T> newM(this->cols(),this->rows());
    for(long i=0;i<this->cols();i++)
