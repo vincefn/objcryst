@@ -81,6 +81,8 @@ class WXMultiGraph:public wxWindow
                                       const bool ymin=true,const bool ymax=true);
       void OnUpdateUI(wxUpdateUIEvent &event);
       void OnSize(wxSizeEvent &event);
+      void SetXLabel(const wxString &xlabel);
+      void SetYLabel(const wxString &ylabel);
       virtual void UpdateDisplay();
    private:
       /// Convert data to screen (pixel) coordinates
@@ -109,6 +111,10 @@ class WXMultiGraph:public wxWindow
       CrystMutex mMutexData;
       /// parent frame
       wxFrame *mpParentFrame;
+      /// X label
+      wxString mXLabel;
+      /// Y label
+      wxString mYLabel;
    DECLARE_EVENT_TABLE()
 };
 

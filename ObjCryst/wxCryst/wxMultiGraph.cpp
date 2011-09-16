@@ -220,10 +220,10 @@ void WXMultiGraph::OnPaint(wxPaintEvent &event)
    // Draw Axis
    VFN_DEBUG_MESSAGE("WXMultiGraph::OnPaint():Axis",3)
    {
-      wxCoord tmpW,tmpH;
       dc.SetPen(*wxBLACK_PEN);
       dc.SetTextForeground(*wxBLACK);
       int nbTick=5;//approx.
+      wxCoord tmpW,tmpH;
       float xs,ys;
       // X & Y margins.
          float yStep,xStep,dx,dy;
@@ -277,8 +277,16 @@ void WXMultiGraph::OnPaint(wxPaintEvent &event)
             dc.DrawLine(wxCoord(xs),wxCoord(ys-3),wxCoord(xs),wxCoord(ys+3));
             fontInfo.Printf(_T("%g"),x);
             dc.GetTextExtent(fontInfo, &tmpW, &tmpH);
-            dc.DrawText(fontInfo,wxCoord(xs-tmpW/2),wxCoord(ys+tmpH/2+3));
+            dc.DrawText(fontInfo,wxCoord(xs-tmpW/2),wxCoord(ys+tmpH/2));
          }
+      // Axis labels;
+      dc.GetTextExtent(mYLabel, &tmpW, &tmpH);
+      dc.DrawText(mYLabel,wxCoord(0),wxCoord(0));
+      xs=xStep*ceil(mMinX/xStep)+(nbTick-1.5)*xStep;
+      ys=mMinY;
+      this->Data2Screen(xs,ys);
+      dc.GetTextExtent(mXLabel, &tmpW, &tmpH);
+      dc.DrawText(mXLabel,wxCoord(xs-tmpW/2),wxCoord(ys+tmpH/2+3));
    }
    // Draw data
    map<unsigned long, GraphData >::const_iterator pos;
@@ -525,6 +533,15 @@ void WXMultiGraph::OnUpdateUI(wxUpdateUIEvent &event)
 void WXMultiGraph::OnSize(wxSizeEvent &event)
 {
    this->Refresh(false);
+}
+void WXMultiGraph::SetXLabel(const wxString &xlabel)
+{
+   mXLabel=xlabel;
+}
+
+void WXMultiGraph::SetYLabel(const wxString &ylabel)
+{
+   mYLabel=ylabel;
 }
 
 void WXMultiGraph::UpdateDisplay()
