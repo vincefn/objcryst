@@ -217,8 +217,11 @@ class DiffractionDataSingleCrystal:public ScatteringData
       *
       *For sigmas which are smaller than minRelatSigma times the max value of sigma,
       *the output weight is set to 0.
+      *
+      * For reflections where the intensity is below minIobsSigmaRatio*sigma, the weight is set to zero
+      * so that this reflection is ignored.
       */
-      virtual void SetWeightToInvSigma2(const REAL minRelatSigma=1e-4);
+      virtual void SetWeightToInvSigma2(const REAL minRelatSigma=1e-4, const REAL minIobsSigmaRatio=0);
       
       /// Scale factor (applied to Icalc to match Iobs)
       REAL GetScaleFactor()const;

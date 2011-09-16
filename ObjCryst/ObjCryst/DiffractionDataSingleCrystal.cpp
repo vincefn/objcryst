@@ -17,7 +17,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 /*
-*  source file for LibCryst++ DiffractionData class
+*  source file for ObjCryst++ DiffractionData class
 *
 */
 
@@ -145,10 +145,7 @@ void DiffractionDataSingleCrystal::SetHklIobs(const CrystVector_long &h,
    
    this->CalcSinThetaLambda();
    this->SortReflectionBySinThetaOverLambda();
-   const REAL minSigma=mObsSigma.max()*1e-6;// :KLUDGE: ?
-   for(int i=0;i<mNbRefl;i++) 
-      if(mObsSigma(i)<minSigma) mWeight(i)=1./minSigma/minSigma;
-      else mWeight(i)=1./mObsSigma(i)/mObsSigma(i);
+   this->SetWeightToInvSigma2(1e-4,0);
    
    mHasObservedData=true;
    
@@ -328,10 +325,7 @@ Error opening file for input:"+fileName);
    }
   //Finish
    mWeight.resize(mNbRefl);
-   const REAL minSigma=mObsSigma.max()*1e-3;
-   for(int i=0;i<mNbRefl;i++) 
-      if(mObsSigma(i)<minSigma) mWeight(i)=1./minSigma/minSigma;
-      else mWeight(i)=1./mObsSigma(i)/mObsSigma(i);
+   this->SetWeightToInvSigma2(1e-4,0);
    mHasObservedData=true;
 
    mMultiplicity.resize(mNbRefl);
@@ -412,10 +406,7 @@ void DiffractionDataSingleCrystal::ImportShelxHKLF4(const string &fileName)
    mObsSigma.resizeAndPreserve(mNbRefl);
    
    mWeight.resize(mNbRefl);
-   const REAL minSigma=mObsSigma.max()*1e-6;// :KLUDGE: ?
-   for(int i=0;i<mNbRefl;i++) 
-      if(mObsSigma(i)<minSigma) mWeight(i)=1./minSigma/minSigma;
-      else mWeight(i)=1./mObsSigma(i)/mObsSigma(i);
+   this->SetWeightToInvSigma2(1e-4,0);
    mHasObservedData=true;
 
    mMultiplicity.resize(mNbRefl);
@@ -799,7 +790,6 @@ REAL DiffractionDataSingleCrystal::GetChi2()const
       p1++;p2++;
    }
    */
-   
    mClockChi2.Click();
    VFN_DEBUG_EXIT("DiffractionData::Chi2()="<<mChi2,3);
    return mChi2;
@@ -907,13 +897,14 @@ void DiffractionDataSingleCrystal::SetSigmaToSqrtIobs()
    // This is not needed for mGroupOption==2
 }
 
-void DiffractionDataSingleCrystal::SetWeightToInvSigma2(const REAL minRelatSigma)
+void DiffractionDataSingleCrystal::SetWeightToInvSigma2(const REAL minRelatSigma, const REAL minIobsSigmaRatio)
 {
    //:KLUDGE: If less than 1e-6*max, set to 0.... Do not give weight to unobserved points
    const REAL min=MaxAbs(mObsSigma)*minRelatSigma;
    for(long i=0;i<mObsSigma.numElements();i++)
    {
       if(mObsSigma(i)<min) mWeight(i)=0 ; else  mWeight(i) =1./mObsSigma(i)/mObsSigma(i);
+      if(mObsIntensity(i)<(minIobsSigmaRatio*mObsSigma(i))) mWeight(i)=0;
    }
    if(1==mGroupOption.GetChoice()) mClockPrepareTwinningCorr.Reset();
    // This is not needed for mGroupOption==2
