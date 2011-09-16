@@ -727,7 +727,7 @@ void ScatteringData::PrintFhklCalc(ostream &os)const
    os <<"       H        K        L     F(hkl)^2     Re(F)         Im(F)";
    os <<"        Theta       1/2d"<<endl;
    os << FormatVertVectorHKLFloats<REAL>
-               (mH,mK,mL,mFhklCalcSq,mFhklCalcReal,mFhklCalcImag,theta,mSinThetaLambda,12,4);
+               (mH,mK,mL,mFhklCalcSq,mFhklCalcReal,mFhklCalcImag,theta,mSinThetaLambda,12,4,mNbReflUsed);
    VFN_DEBUG_EXIT("ScatteringData::PrintFhklCalc()",5)
 }
 
@@ -774,7 +774,7 @@ void ScatteringData::PrintFhklCalcDetail(ostream &os)const
       i++;
    }
    os<<endl;
-   os << FormatVertVectorHKLFloats<REAL>(v,12,4);
+   os << FormatVertVectorHKLFloats<REAL>(v,12,4,mNbReflUsed);
    VFN_DEBUG_EXIT("ScatteringData::PrintFhklCalcDetail()",5)
 }
 
@@ -1111,7 +1111,7 @@ void ScatteringData::CalcScattFactor()const
       mvScatteringFactor[pScattPow]+= this->mvFprime[pScattPow];
       VFN_DEBUG_MESSAGE("->   H      K      L   sin(t/l)     f0+f'"
                         <<FormatVertVectorHKLFloats<REAL>(mH,mK,mL,mSinThetaLambda,
-                                                          mvScatteringFactor[pScattPow]),1);
+                                                          mvScatteringFactor[pScattPow],10,4,mNbReflUsed),1);
    }
    mClockScattFactor.Click();
    VFN_DEBUG_EXIT("ScatteringData::CalcScattFactor()",4)
@@ -1132,6 +1132,9 @@ void ScatteringData::CalcTemperatureFactor()const
    {
       const ScatteringPower *pScattPow=&(mpCrystal->GetScatteringPowerRegistry().GetObj(i));
       mvTemperatureFactor[pScattPow]=pScattPow->GetTemperatureFactor(*this);
+      VFN_DEBUG_MESSAGE("->   H      K      L   sin(t/l)     DebyeWaller"<<endl
+                        <<FormatVertVectorHKLFloats<REAL>(mH,mK,mL,mSinThetaLambda,
+                                                          mvTemperatureFactor[pScattPow],10,4,mNbReflUsed),10);
    }
    mClockThermicFact.Click();
    VFN_DEBUG_EXIT("ScatteringData::CalcTemperatureFactor()",4)
@@ -1268,7 +1271,7 @@ void ScatteringData::CalcStructFactor() const
                                                         mvRealGeomSF[pScattPow],
                                                         mvImagGeomSF[pScattPow],
                                                         mvScatteringFactor[pScattPow],
-                                                        mvTemperatureFactor[pScattPow] 
+                                                        mvTemperatureFactor[pScattPow],10,4,mNbReflUsed
                                                         ),1);
       if(mvLuzzatiFactor[pScattPow].numElements()>0)
       {// using maximum likelihood
@@ -1301,7 +1304,7 @@ void ScatteringData::CalcStructFactor() const
                                                            mvTemperatureFactor[pScattPow], 
                                                            mvLuzzatiFactor[pScattPow],
                                                            mFhklCalcReal, 
-                                                           mFhklCalcImag
+                                                           mFhklCalcImag,10,4,mNbReflUsed
                                                            ),2);
       }
       else
@@ -1332,7 +1335,7 @@ void ScatteringData::CalcStructFactor() const
                                                             mvScatteringFactor[pScattPow],
                                                             mvTemperatureFactor[pScattPow], 
                                                             mFhklCalcReal, 
-                                                            mFhklCalcImag
+                                                            mFhklCalcImag,10,4,mNbReflUsed
                                                             ),2);
       }
    }
@@ -1700,7 +1703,7 @@ void ScatteringData::CalcLuzzatiFactor()const
          VFN_DEBUG_MESSAGE("ScatteringData::CalcLuzzatiFactor():"<<pScattPow->GetName()<<endl<<
                            FormatVertVectorHKLFloats<REAL>(mH,mK,mL,mSinThetaLambda,
                            mvRealGeomSF[pScattPow],mvImagGeomSF[pScattPow],
-                           mvScatteringFactor[pScattPow],mvLuzzatiFactor[pScattPow]
+                           mvScatteringFactor[pScattPow],mvLuzzatiFactor[pScattPow],10,4,mNbReflUsed
                            ),2);
       }
    }
