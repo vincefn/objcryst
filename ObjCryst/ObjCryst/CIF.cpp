@@ -1056,14 +1056,13 @@ Crystal* CreateCrystalFromCIF(CIF &cif,bool verbose,bool checkSymAsXYZ)
             {
                cout<<"Scattering power "<<posat->mLabel<<" not found, creating it..."<<endl;
                sp = new ScatteringPowerAtom(posat->mLabel,posat->mSymbol);
-               // Check for mBeta or Biso
+               // Always extract isotropic DP, even with ADPs present
+               // :TODO: if only ADP are listed, calculate isotropic DP
+               sp->SetBiso(posat->mBiso);
+               // ADPs ?
                if(posat->mBeta.size() == 6)
                {
                   for (int idx=0; idx<6; ++idx) sp->SetBij(idx, posat->mBeta[idx]);
-               }
-               else
-               {
-                  sp->SetBiso(posat->mBiso);
                }
                pCryst->AddScatteringPower(sp);
             }
