@@ -1870,6 +1870,7 @@ mMDMoveFreq(0.0),mMDMoveEnergy(40.),mDeleteSubObjInDestructor(1),mLogLikelihoodS
                         gpRefParTypeScattTranslX,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,1.,1.);
       tmp.AssignClock(mClockScatterer);
+      tmp.SetDerivStep(1e-5);
       this->AddPar(tmp);
    }
    {
@@ -1877,6 +1878,7 @@ mMDMoveFreq(0.0),mMDMoveEnergy(40.),mDeleteSubObjInDestructor(1),mLogLikelihoodS
                         gpRefParTypeScattTranslY,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,1.,1.);
       tmp.AssignClock(mClockScatterer);
+      tmp.SetDerivStep(1e-5);
       this->AddPar(tmp);
    }
    {
@@ -1884,6 +1886,7 @@ mMDMoveFreq(0.0),mMDMoveEnergy(40.),mDeleteSubObjInDestructor(1),mLogLikelihoodS
                         gpRefParTypeScattTranslZ,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,1.,1.);
       tmp.AssignClock(mClockScatterer);
+      tmp.SetDerivStep(1e-5);
       this->AddPar(tmp);
    }
    {
@@ -1891,6 +1894,7 @@ mMDMoveFreq(0.0),mMDMoveEnergy(40.),mDeleteSubObjInDestructor(1),mLogLikelihoodS
                         gpRefParTypeScattOccup,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1.,1.);
       tmp.AssignClock(mClockScatterer);
+      tmp.SetDerivStep(1e-5);
       this->AddPar(tmp);
    }
    {
@@ -1899,6 +1903,7 @@ mMDMoveFreq(0.0),mMDMoveEnergy(40.),mDeleteSubObjInDestructor(1),mLogLikelihoodS
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
       tmp.AssignClock(mClockScatterer);
       tmp.SetGlobalOptimStep(0.04);
+      tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }
    {
@@ -1907,6 +1912,7 @@ mMDMoveFreq(0.0),mMDMoveEnergy(40.),mDeleteSubObjInDestructor(1),mLogLikelihoodS
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
       tmp.AssignClock(mClockScatterer);
       tmp.SetGlobalOptimStep(0.04);
+      tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }
    {
@@ -1915,6 +1921,7 @@ mMDMoveFreq(0.0),mMDMoveEnergy(40.),mDeleteSubObjInDestructor(1),mLogLikelihoodS
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
       tmp.AssignClock(mClockScatterer);
       tmp.SetGlobalOptimStep(0.04);
+      tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }
    {
@@ -1923,6 +1930,7 @@ mMDMoveFreq(0.0),mMDMoveEnergy(40.),mDeleteSubObjInDestructor(1),mLogLikelihoodS
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
       tmp.AssignClock(mClockScatterer);
       tmp.SetGlobalOptimStep(0.04);
+      tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }
    mLocalParamSet=this->CreateParamSet("saved parameters for local minimization");
@@ -1949,6 +1957,7 @@ mIsSelfOptimizing(false),mpCenterAtom(0),mDeleteSubObjInDestructor(old.mDeleteSu
                         gpRefParTypeScattTranslX,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,1.,1.);
       tmp.AssignClock(mClockScatterer);
+      tmp.SetDerivStep(1e-5);
       this->AddPar(tmp);
    }
    {
@@ -1956,6 +1965,7 @@ mIsSelfOptimizing(false),mpCenterAtom(0),mDeleteSubObjInDestructor(old.mDeleteSu
                         gpRefParTypeScattTranslY,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,1.,1.);
       tmp.AssignClock(mClockScatterer);
+      tmp.SetDerivStep(1e-5);
       this->AddPar(tmp);
    }
    {
@@ -1963,6 +1973,7 @@ mIsSelfOptimizing(false),mpCenterAtom(0),mDeleteSubObjInDestructor(old.mDeleteSu
                         gpRefParTypeScattTranslZ,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,1.,1.);
       tmp.AssignClock(mClockScatterer);
+      tmp.SetDerivStep(1e-5);
       this->AddPar(tmp);
    }
    {
@@ -1970,6 +1981,7 @@ mIsSelfOptimizing(false),mpCenterAtom(0),mDeleteSubObjInDestructor(old.mDeleteSu
                         gpRefParTypeScattOccup,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1.,1.);
       tmp.AssignClock(mClockScatterer);
+      tmp.SetDerivStep(1e-5);
       this->AddPar(tmp);
    }
    {
@@ -1978,6 +1990,7 @@ mIsSelfOptimizing(false),mpCenterAtom(0),mDeleteSubObjInDestructor(old.mDeleteSu
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
       tmp.AssignClock(mClockScatterer);
       tmp.SetGlobalOptimStep(0.04);
+      tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }
    {
@@ -1986,6 +1999,7 @@ mIsSelfOptimizing(false),mpCenterAtom(0),mDeleteSubObjInDestructor(old.mDeleteSu
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
       tmp.AssignClock(mClockScatterer);
       tmp.SetGlobalOptimStep(0.04);
+      tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }
    {
@@ -1994,6 +2008,7 @@ mIsSelfOptimizing(false),mpCenterAtom(0),mDeleteSubObjInDestructor(old.mDeleteSu
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
       tmp.AssignClock(mClockScatterer);
       tmp.SetGlobalOptimStep(0.04);
+      tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }
    {
@@ -2002,6 +2017,7 @@ mIsSelfOptimizing(false),mpCenterAtom(0),mDeleteSubObjInDestructor(old.mDeleteSu
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
       tmp.AssignClock(mClockScatterer);
       tmp.SetGlobalOptimStep(0.04);
+      tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }
    mLocalParamSet=this->CreateParamSet("saved parameters for local minimization");
@@ -3534,6 +3550,7 @@ void Molecule::AddAtom(const REAL x, const REAL y, const REAL z,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
       tmp.AssignClock(mClockAtomPosition);
       tmp.SetGlobalOptimStep(0.05);
+      tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }
    {
@@ -3542,6 +3559,7 @@ void Molecule::AddAtom(const REAL x, const REAL y, const REAL z,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
       tmp.AssignClock(mClockAtomPosition);
       tmp.SetGlobalOptimStep(0.05);
+      tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }
    {
@@ -3550,6 +3568,7 @@ void Molecule::AddAtom(const REAL x, const REAL y, const REAL z,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
       tmp.AssignClock(mClockAtomPosition);
       tmp.SetGlobalOptimStep(0.05);
+      tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }
    
@@ -3782,6 +3801,7 @@ void Molecule::AddRigidGroup(const RigidGroup &group,
                     REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
     tmp.AssignClock(mClockAtomPosition);
     tmp.SetGlobalOptimStep(0.05);
+    tmp.SetDerivStep(1e-4);
     this->AddPar(tmp);
   }
   {
@@ -3791,6 +3811,7 @@ void Molecule::AddRigidGroup(const RigidGroup &group,
                     REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
     tmp.AssignClock(mClockAtomPosition);
     tmp.SetGlobalOptimStep(0.05);
+    tmp.SetDerivStep(1e-4);
     this->AddPar(tmp);
   }
   {
@@ -3800,6 +3821,7 @@ void Molecule::AddRigidGroup(const RigidGroup &group,
                     REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
     tmp.AssignClock(mClockAtomPosition);
     tmp.SetGlobalOptimStep(0.05);
+    tmp.SetDerivStep(1e-4);
     this->AddPar(tmp);
   }
   {
@@ -3809,6 +3831,7 @@ void Molecule::AddRigidGroup(const RigidGroup &group,
                     REFPAR_DERIV_STEP_ABSOLUTE,true,false,true,false,1.,1.);
     tmp.AssignClock(mClockAtomPosition);
     tmp.SetGlobalOptimStep(0.01);
+    tmp.SetDerivStep(1e-4);
     this->AddPar(tmp);
   }
   {
@@ -3818,6 +3841,7 @@ void Molecule::AddRigidGroup(const RigidGroup &group,
                     REFPAR_DERIV_STEP_ABSOLUTE,true,false,true,false,1.,1.);
     tmp.AssignClock(mClockAtomPosition);
     tmp.SetGlobalOptimStep(0.01);
+    tmp.SetDerivStep(1e-4);
     this->AddPar(tmp);
   }
   {
@@ -3827,6 +3851,7 @@ void Molecule::AddRigidGroup(const RigidGroup &group,
                     REFPAR_DERIV_STEP_ABSOLUTE,true,false,true,false,1.,1.);
     tmp.AssignClock(mClockAtomPosition);
     tmp.SetGlobalOptimStep(0.01);
+    tmp.SetDerivStep(1e-4);
     this->AddPar(tmp);
   }
   #endif
