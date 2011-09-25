@@ -99,21 +99,19 @@ ostream& operator<< (ostream& os, const FormatString& fStr)
 template<class T> FormatVertVector<T>::FormatVertVector( const CrystVector<T> &fVect,
                                     const int width,
                                     const int precision, const int nb):
-mNbVectors(1),mWidth(width),mPrecision(precision),mNb(nb)
+mWidth(width),mPrecision(precision),mNb(nb)
 {
-   mpVectors=new const CrystVector<T>*[mNbVectors];
-   mpVectors[0]=&fVect;
+   mvpVectors.push_back(&fVect);
 }
 
 template<class T> FormatVertVector<T>::FormatVertVector( const CrystVector<T> &fVect1,
                                                          const CrystVector<T> &fVect2,
                                     const int width,
                                     const int precision, const int nb):
-mNbVectors(2),mWidth(width),mPrecision(precision),mNb(nb)
+mWidth(width),mPrecision(precision),mNb(nb)
 {
-   mpVectors=new const CrystVector<T>*[mNbVectors];
-   mpVectors[0]=&fVect1;
-   mpVectors[1]=&fVect2;
+   mvpVectors.push_back(&fVect1);
+   mvpVectors.push_back(&fVect2);
 }
 
 template<class T> FormatVertVector<T>::FormatVertVector( const CrystVector<T> &fVect1,
@@ -121,12 +119,11 @@ template<class T> FormatVertVector<T>::FormatVertVector( const CrystVector<T> &f
                                                          const CrystVector<T> &fVect3,
                                     const int width,
                                     const int precision, const int nb):
-mNbVectors(3),mWidth(width),mPrecision(precision),mNb(nb)
+mWidth(width),mPrecision(precision),mNb(nb)
 {
-   mpVectors=new const CrystVector<T>*[mNbVectors];
-   mpVectors[0]=&fVect1;
-   mpVectors[1]=&fVect2;
-   mpVectors[2]=&fVect3;
+   mvpVectors.push_back(&fVect1);
+   mvpVectors.push_back(&fVect2);
+   mvpVectors.push_back(&fVect3);
 }
 
 template<class T> FormatVertVector<T>::FormatVertVector( const CrystVector<T> &fVect1,
@@ -135,13 +132,12 @@ template<class T> FormatVertVector<T>::FormatVertVector( const CrystVector<T> &f
                                                          const CrystVector<T> &fVect4,
                                     const int width,
                                     const int precision, const int nb):
-mNbVectors(4),mWidth(width),mPrecision(precision),mNb(nb)
+mWidth(width),mPrecision(precision),mNb(nb)
 {
-   mpVectors=new const CrystVector<T>*[mNbVectors];
-   mpVectors[0]=&fVect1;
-   mpVectors[1]=&fVect2;
-   mpVectors[2]=&fVect3;
-   mpVectors[3]=&fVect4;
+   mvpVectors.push_back(&fVect1);
+   mvpVectors.push_back(&fVect2);
+   mvpVectors.push_back(&fVect3);
+   mvpVectors.push_back(&fVect4);
 }
 template<class T> FormatVertVector<T>::FormatVertVector( const CrystVector<T> &fVect1,
                                                          const CrystVector<T> &fVect2,
@@ -150,14 +146,13 @@ template<class T> FormatVertVector<T>::FormatVertVector( const CrystVector<T> &f
                                                          const CrystVector<T> &fVect5,
                                     const int width,
                                     const int precision, const int nb):
-mNbVectors(5),mWidth(width),mPrecision(precision),mNb(nb)
+mWidth(width),mPrecision(precision),mNb(nb)
 {
-   mpVectors=new const CrystVector<T>*[mNbVectors];
-   mpVectors[0]=&fVect1;
-   mpVectors[1]=&fVect2;
-   mpVectors[2]=&fVect3;
-   mpVectors[3]=&fVect4;
-   mpVectors[4]=&fVect5;
+   mvpVectors.push_back(&fVect1);
+   mvpVectors.push_back(&fVect2);
+   mvpVectors.push_back(&fVect3);
+   mvpVectors.push_back(&fVect4);
+   mvpVectors.push_back(&fVect5);
 }
 template<class T> FormatVertVector<T>::FormatVertVector( const CrystVector<T> &fVect1,
                                                          const CrystVector<T> &fVect2,
@@ -167,25 +162,23 @@ template<class T> FormatVertVector<T>::FormatVertVector( const CrystVector<T> &f
                                                          const CrystVector<T> &fVect6,
                                     const int width,
                                     const int precision, const int nb):
-mNbVectors(6),mWidth(width),mPrecision(precision),mNb(nb)
+mWidth(width),mPrecision(precision),mNb(nb)
 {
-   mpVectors=new const CrystVector<T>*[mNbVectors];
-   mpVectors[0]=&fVect1;
-   mpVectors[1]=&fVect2;
-   mpVectors[2]=&fVect3;
-   mpVectors[3]=&fVect4;
-   mpVectors[4]=&fVect5;
-   mpVectors[5]=&fVect6;
+   mvpVectors.push_back(&fVect1);
+   mvpVectors.push_back(&fVect2);
+   mvpVectors.push_back(&fVect3);
+   mvpVectors.push_back(&fVect4);
+   mvpVectors.push_back(&fVect5);
+   mvpVectors.push_back(&fVect6);
 }
 
 template<class T> FormatVertVector<T>::FormatVertVector( const CrystVector<T> *pVect,
                                    const int nbVect,
                                    const int width,
                                    const int precision, const int nb):
-mNbVectors(nbVect),mWidth(width),mPrecision(precision),mNb(nb)
+mWidth(width),mPrecision(precision),mNb(nb)
 {
-   mpVectors=new const CrystVector<T>*[mNbVectors];
-   for(int i=0;i<mNbVectors;i++) mpVectors[i]=&(pVect[i]);
+   for(int i=0;i<nbVect;i++) mvpVectors.push_back(&(pVect[i]));
 }
 
 template<class T> FormatVertVector<T>::FormatVertVector( const CrystVector<T> &fVect1,
@@ -193,16 +186,23 @@ template<class T> FormatVertVector<T>::FormatVertVector( const CrystVector<T> &f
                                    const int nbVect,
                                    const int width,
                                    const int precision, const int nb):
-mNbVectors(nbVect+1),mWidth(width),mPrecision(precision),mNb(nb)
+mWidth(width),mPrecision(precision),mNb(nb)
 {
-   mpVectors=new const CrystVector<T>*[mNbVectors];
-   mpVectors[0]=&fVect1;
-   for(int i=1;i<mNbVectors;i++) mpVectors[i]=&(pVect[i-1]);
+   mvpVectors.push_back(&fVect1);
+   for(int i=1;i<nbVect;i++) mvpVectors.push_back(&(pVect[i-1]));
+}
+
+template<class T> FormatVertVector<T>::FormatVertVector(
+                              vector<const CrystVector<T> *>& v,
+                              const int width,
+                              const int precision, const int nb):
+mWidth(width),mPrecision(precision),mNb(nb)
+{
+   mvpVectors=v;
 }
 
 template<class T> FormatVertVector<T>::~FormatVertVector()
 {
-   delete[] mpVectors;
 }
 
 template<class T> ostream& operator<< (ostream &os, const FormatVertVector<T> &fVect)
@@ -215,12 +215,12 @@ template<class T> ostream& operator<< (ostream &os, const FormatVertVector<T> &f
    std::streamsize old_prec = os.precision(fVect.mPrecision);
    std::streamsize old_width = os.width();
    long nb=fVect.mNb;
-   if(nb==0)nb=(fVect.mpVectors[0])->numElements();
+   if(nb==0)nb=(fVect.mvpVectors[0])->numElements();
    for(i=0;i<nb;i++)
    {
-      for(j=0;j<fVect.mNbVectors;j++)
+      for(j=0;j<fVect.mvpVectors.size();j++)
       {
-         os <<setw(fVect.mWidth)<< (*fVect.mpVectors[j])(i) << " ";
+         os <<setw(fVect.mWidth)<< (*fVect.mvpVectors[j])(i) << " ";
       }
       os << endl;
    }

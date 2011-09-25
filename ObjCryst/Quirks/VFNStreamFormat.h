@@ -146,11 +146,14 @@ template<class T> class FormatVertVector
                         const int width=10,
                         const int precision=4,
                         const int nb=0);
+      FormatVertVector( std::vector<const CrystVector<T> *>& v,
+                        const int width=10,
+                        const int precision=4,
+                        const int nb=0);
       ~FormatVertVector();
       //int length() const;
    //private:
-      const CrystVector<T> **mpVectors;
-      const int mNbVectors;
+      std::vector<const CrystVector<T> *>mvpVectors;
       const int mWidth;
       const int mPrecision;
       const int mNb;
