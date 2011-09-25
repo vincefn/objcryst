@@ -346,6 +346,58 @@ CrystMatrix_REAL SpaceGroup::GetAllSymmetrics(const REAL x, const REAL y, const 
    VFN_DEBUG_MESSAGE("SpaceGroup::GetAllSymmetrics():End",0)
    return coords;
 }
+void SpaceGroup::GetSymmetric(unsigned int idx, REAL &x, REAL &y, REAL &z,
+                              const bool noCenter,const bool noTransl,
+                              const bool derivative) const
+{
+   int coeffInvert;
+   const int nbMatrix=this->GetCCTbxSpg().n_smx();
+   int nbTrans=this->GetNbTranslationVectors();
+   if(this->IsCentrosymmetric()) coeffInvert=2 ; else coeffInvert=1;
+   
+   if(noCenter==true) coeffInvert=1;   //skip center of symmetry
+   if(noTransl==true) nbTrans=1; //skip translation operations
+
+   unsigned int idx0=idx;
+   if(idx>(nbTrans*nbMatrix)) idx0=idx%(nbTrans*nbMatrix);
+   const int i=idx/nbMatrix;//translation index
+   const int j=idx%nbMatrix;
+   
+   const REAL ltr_den=1/(REAL)(this->GetCCTbxSpg().ltr(i).den());
+   const REAL tx=this->GetCCTbxSpg().ltr(i)[0]*ltr_den;
+   const REAL ty=this->GetCCTbxSpg().ltr(i)[1]*ltr_den;
+   const REAL tz=this->GetCCTbxSpg().ltr(i)[2]*ltr_den;
+   const cctbx::sgtbx::rt_mx *pMatrix=&(this->GetCCTbxSpg().smx(j));
+   const cctbx::sgtbx::rot_mx *pRot=&(pMatrix->r());
+   const cctbx::sgtbx::tr_vec *pTrans=&(pMatrix->t());
+   const REAL r_den=1/(REAL)(pMatrix->r().den());
+   const REAL t_den=1/(REAL)(pMatrix->t().den());
+   const REAL x1= ((*pRot)[0]*x+(*pRot)[1]*y+(*pRot)[2]*z)*r_den;
+   const REAL y1= ((*pRot)[3]*x+(*pRot)[4]*y+(*pRot)[5]*z)*r_den;
+   const REAL z1= ((*pRot)[6]*x+(*pRot)[7]*y+(*pRot)[8]*z)*r_den;
+   if(derivative==false)
+   {
+      x=x1+(*pTrans)[0]*t_den+tx;
+      y=y1+(*pTrans)[1]*t_den+ty;
+      z=z1+(*pTrans)[2]*t_den+tz;
+   }
+   else
+   {
+      x=x1;
+      y=y1;
+      z=z1;
+   }
+   if(coeffInvert==2) //inversion center not in ListSeitzMx, but to be applied
+   {
+      int shift=nbMatrix*nbTrans;
+      const REAL dx=((REAL)this->GetCCTbxSpg().inv_t()[0])/(REAL)this->GetCCTbxSpg().inv_t().den();//inversion not at the origin
+      const REAL dy=((REAL)this->GetCCTbxSpg().inv_t()[1])/(REAL)this->GetCCTbxSpg().inv_t().den();
+      const REAL dz=((REAL)this->GetCCTbxSpg().inv_t()[2])/(REAL)this->GetCCTbxSpg().inv_t().den();
+      x=dx-x;
+      y=dy-y;
+      z=dz-z;
+   }
+}
 
 int SpaceGroup::GetNbSymmetrics(const bool noCenter,const bool noTransl)const
 {

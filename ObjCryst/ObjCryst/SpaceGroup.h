@@ -200,6 +200,27 @@ class SpaceGroup
       CrystMatrix_REAL GetAllSymmetrics(const REAL x, const REAL y, const REAL z,
                                 const bool noCenter=false,const bool noTransl=false,
                                 const bool noIdentical=false) const;
+      /** \brief Get all equivalent positions of a (xyz) position
+      *
+      * \param x,y,z: fractional coordinates of the position. On return,
+      * these will contain the new values.
+      * \param  noCenter if set to 'false' (the default), then the center of
+      * symmetry (if any) is used to generate ALL positions. If 'true', then
+      * only one half of equivalent positions are generated. This has 
+      * no influence if the group is not centrosymmetric. (\b note Not generating
+      * symmetrical positions from center of symmetry is useful to speed up computation
+      * of structure factor, but is a bit tricky if the inversion is not at the origin.
+      * This is taken into account)
+      *  \param  noTransl if set to 'false' (the default), then translation are
+      * taken into account to generate all atom positions. This affect
+      * only body or face(s)-centered spacegroups.
+      * \param derivative: if true, then this is used to calculate the displacement
+      * vector of s symmetric, given the orginal (dx,dy,dz)=> the translation
+      * components of gliding axis/plane are then ignored.
+      */
+      void GetSymmetric(unsigned int i, REAL &x, REAL &y, REAL &z,
+                        const bool noCenter=false,const bool noTransl=false,
+                        const bool derivative=false) const;
       
       /** \brief Return the number of equivalent positions in the spacegroup,
       *ie the multilicity of the general position.
