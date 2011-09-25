@@ -70,6 +70,7 @@ class PowderPatternComponent : virtual public RefinableObj
       /// Note that the pattern is \e not scaled.
       /// 
       virtual const CrystVector_REAL& GetPowderPatternCalc()const=0;
+      virtual std::map<RefinablePar*,CrystVector_REAL>& GetPowderPattern_FullDeriv(std::set<RefinablePar *> &vPar);
       /** Get the integrated values of the powder pattern
       *
       * \note: the integration intervals are those given by the parent
@@ -78,8 +79,8 @@ class PowderPatternComponent : virtual public RefinableObj
       *
       *   This avoids explicitely calculating the full profile powder pattern.
       */ 
-      virtual pair<const CrystVector_REAL*,const RefinableObjClock*>
-         GetPowderPatternIntegratedCalc()const=0;
+      virtual pair<const CrystVector_REAL*,const RefinableObjClock*> GetPowderPatternIntegratedCalc()const=0;
+      virtual std::map<RefinablePar*,CrystVector_REAL>& GetPowderPatternIntegrated_FullDeriv(std::set<RefinablePar *> &vPar);
       /** \brief Is this component scalable ?
       *
       * This is used by the PowderPattern class, which fits all
@@ -120,9 +121,10 @@ class PowderPatternComponent : virtual public RefinableObj
       /// done if necessary (ie if a parameter has changed since the last
       /// computation)
       virtual void CalcPowderPattern() const=0;
+      virtual void CalcPowderPattern_FullDeriv(std::set<RefinablePar *> &vPar);
       /// Calc the integrated powder pattern. This should be optimized so that
       /// the full powder pattern is not explicitely computed.
-      virtual void CalcPowderPatternIntegrated() const=0;
+      virtual void CalcPowderPatternIntegrated_FullDeriv(std::set<RefinablePar *> &vPar);
       
       /** Get the pixel positions separating the integration intervals around reflections.
       *
@@ -179,6 +181,8 @@ class PowderPatternComponent : virtual public RefinableObj
       /// The labels associated to different points of the pattern
       mutable list<pair<const REAL ,const string > > mvLabel;
       
+      mutable std::map<RefinablePar*,CrystVector_REAL> mPowderPattern_FullDeriv;
+      mutable std::map<RefinablePar*,CrystVector_REAL> mPowderPatternIntegrated_FullDeriv;
       //Eventually this should be removed (?)
       friend class PowderPattern;
 };
@@ -240,7 +244,9 @@ class PowderPatternBackground : public PowderPatternComponent
       void FixParametersBeyondMaxresolution(RefinableObj &obj);
    protected:
       virtual void CalcPowderPattern() const;
+      virtual void CalcPowderPattern_FullDeriv(std::set<RefinablePar *> &vPar);
       virtual void CalcPowderPatternIntegrated() const;
+      virtual void CalcPowderPatternIntegrated_FullDeriv(std::set<RefinablePar *> &vPar);
       virtual void Prepare();
       virtual const CrystVector_long& GetBraggLimits()const;
       virtual void SetMaxSinThetaOvLambda(const REAL max);
@@ -373,7 +379,9 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       virtual long GetNbReflBelowMaxSinThetaOvLambda()const;
    protected:
       virtual void CalcPowderPattern() const;
+      virtual void CalcPowderPattern_FullDeriv(std::set<RefinablePar *> &vPar);
       virtual void CalcPowderPatternIntegrated() const;
+      virtual void CalcPowderPatternIntegrated_FullDeriv(std::set<RefinablePar *> &vPar);
       
       /// \internal Calc reflection profiles for ALL reflections (powder diffraction)
       void CalcPowderReflProfile()const;
@@ -382,6 +390,7 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       /// \internal Compute the intensity for all reflections (taking into account
       /// corrections, but not the multiplicity)
       virtual void CalcIhkl() const;
+      virtual void CalcIhkl_FullDeriv(std::set<RefinablePar*> &vPar);
       virtual void Prepare();
       virtual void InitOptions();
       virtual const CrystVector_long& GetBraggLimits()const;
@@ -437,6 +446,7 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
          
       /// Computed intensities for all reflections
          mutable CrystVector_REAL mIhklCalc;
+         mutable std::map<RefinablePar*,CrystVector_REAL> mIhkl_FullDeriv;
       /// Variance on computed intensities for all reflections
          mutable CrystVector_REAL mIhklCalcVariance;
       
@@ -600,6 +610,7 @@ class PowderPattern : public RefinableObj
       //Access to pattern data
          /// Get the calculated powder pattern
          const CrystVector_REAL& GetPowderPatternCalc()const;
+         std::map<RefinablePar*,CrystVector_REAL>& GetPowderPattern_FullDeriv(std::set<RefinablePar *> &vPar);
          /// Get the observed powder pattern
          const CrystVector_REAL& GetPowderPatternObs()const;
          /// Get the sigma for each point of the observed powder pattern 
@@ -798,6 +809,7 @@ class PowderPattern : public RefinableObj
          virtual const CrystVector_REAL& GetLSQCalc(const unsigned int) const;
          virtual const CrystVector_REAL& GetLSQObs(const unsigned int) const;
          virtual const CrystVector_REAL& GetLSQWeight(const unsigned int) const;
+         virtual std::map<RefinablePar*, CrystVector_REAL>& GetLSQ_FullDeriv(const unsigned int,std::set<RefinablePar *> &vPar);
       // I/O   
          virtual void XMLOutput(ostream &os,int indent=0)const;
          virtual void XMLInput(istream &is,const XMLCrystTag &tag);
@@ -882,8 +894,10 @@ class PowderPattern : public RefinableObj
    protected:
       /// Calc the powder pattern
       void CalcPowderPattern() const;
+      void CalcPowderPattern_FullDeriv(std::set<RefinablePar *> &vPar);
       /// Calc the integrated powder pattern
       void CalcPowderPatternIntegrated() const;
+      void CalcPowderPatternIntegrated_FullDeriv(std::set<RefinablePar *> &vPar);
       /// Init parameters and options
       virtual void Init();
       /// Prepare  the calculation of the integrated R-factors
@@ -897,8 +911,10 @@ class PowderPattern : public RefinableObj
       /// The calculated powder pattern. It is mutable since it is
       /// completely defined by other parameters (eg it is not an 'independent parameter')
       mutable CrystVector_REAL mPowderPatternCalc;
+      mutable std::map<RefinablePar*,CrystVector_REAL> mPowderPattern_FullDeriv;
       /// The calculated powder pattern, integrated
       mutable CrystVector_REAL mPowderPatternIntegratedCalc;
+      mutable std::map<RefinablePar*,CrystVector_REAL> mPowderPatternIntegrated_FullDeriv;
       /// The calculated powder pattern part which corresponds to 'background' 
       /// (eg non-scalable components). It is already included in mPowderPatternCalc
       mutable CrystVector_REAL mPowderPatternBackgroundCalc;
@@ -923,6 +939,7 @@ class PowderPattern : public RefinableObj
 
       /// The calculated powder pattern. Cropped to the maximum sin(theta)/lambda for LSQ
       mutable CrystVector_REAL mPowderPatternUsedCalc;
+      mutable std::map<RefinablePar*,CrystVector_REAL> mPowderPatternUsed_FullDeriv;
       /// The calculated powder pattern. Cropped to the maximum sin(theta)/lambda for LSQ
       mutable CrystVector_REAL mPowderPatternUsedObs;
       /// The weight for each point of the pattern. Cropped to the maximum sin(theta)/lambda for LSQ

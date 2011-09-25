@@ -105,7 +105,15 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
                         const bool silent, const bool callBeginEndOptimization,
                         const float minChi2var)
 {
-   TAU_PROFILE("LSQNumObj::Refine()","void ()",TAU_DEFAULT);
+   TAU_PROFILE("LSQNumObj::Refine()","void ()",TAU_USER);
+   TAU_PROFILE_TIMER(timer1,"LSQNumObj::Refine() 1 - Init","", TAU_FIELD);
+   TAU_PROFILE_TIMER(timer2,"LSQNumObj::Refine() 2 - LSQ Deriv","", TAU_FIELD);
+   TAU_PROFILE_TIMER(timer3,"LSQNumObj::Refine() 3 - LSQ MB","", TAU_FIELD);
+   TAU_PROFILE_TIMER(timer4,"LSQNumObj::Refine() 4 - LSQ Singular Values","", TAU_FIELD);
+   TAU_PROFILE_TIMER(timer5,"LSQNumObj::Refine() 5 - LSQ Newmat, eigenvalues...","", TAU_FIELD);
+   TAU_PROFILE_TIMER(timer6,"LSQNumObj::Refine() 6 - LSQ Apply","", TAU_FIELD);
+   TAU_PROFILE_TIMER(timer7,"LSQNumObj::Refine() 7 - LSQ Finish","", TAU_FIELD);
+   TAU_PROFILE_START(timer1);
    if(callBeginEndOptimization) this->BeginOptimization();
    mObs=this->GetLSQObs();
    mWeight=this->GetLSQWeight();
@@ -151,9 +159,11 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
    //store old values
    mIndexValuesSetInitial=mRefParList.CreateParamSet("LSQ Refinement-Initial Values");
    mIndexValuesSetLast=mRefParList.CreateParamSet("LSQ Refinement-Last Cycle Values");
+   TAU_PROFILE_STOP(timer1);
    //refine
    for(int cycle=1 ; cycle <=nbCycle;cycle++)
    {
+      TAU_PROFILE_START(timer2);
       const REAL ChisSqPreviousCycle=mChiSq;
       mRefParList.SaveParamSet(mIndexValuesSetLast);// end of last cycle
       if(!silent) cout << "LSQNumObj::Refine():Cycle#"<< cycle <<endl;
@@ -171,11 +181,12 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
             tmpV2 *= mWeight;
             Rw_ini=sqrt(tmpV1.sum()/tmpV2.sum());
       //derivatives
-      designMatrix=0.;
+      //designMatrix=0.;
       pTmp2=designMatrix.data();
       //cout <<"obs:"<<FormatHorizVector<REAL>(calc0,10,8);
       //cout <<"calc:"<<FormatHorizVector<REAL>(mObs,10,8);
       //cout <<"weight:"<<FormatHorizVector<REAL>(mWeight,10,8);
+      #if 1
       for(i=0;i<nbVar;i++)
       {
          //:NOTE: Real design matrix is the transposed of the one computed here
@@ -186,15 +197,48 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
          //cout <<"deriv#"<<i<<":"<<FormatHorizVector<REAL>(tmpV1,10,8);
          for(j=0;j<nbObs;j++) *pTmp2++ = *pTmp1++;
       }
+      #else
+      this->GetLSQ_FullDeriv();
+      for(i=0;i<nbVar;i++)
+      {
+         pTmp1=mLSQ_FullDeriv[&(mRefParList.GetParNotFixed(i))].data();
+         //if(i>=(nbVar-2)) cout<<__FILE__<<":"<<__LINE__<<":"<<(mRefParList.GetParNotFixed(i)).GetName()<<"size="<<mLSQ_FullDeriv[&(mRefParList.GetParNotFixed(i))].size()<<":"<<mLSQ_FullDeriv[&(mRefParList.GetParNotFixed(i))]<<endl;
+         for(j=0;j<nbObs;j++) *pTmp2++ = *pTmp1++;
+      }
+      #endif
          //cout << designMatrix;
          
+      TAU_PROFILE_STOP(timer2);
       LSQNumObj_Refine_Restart: //Used in case of singular matrix or for Marquardt
+      TAU_PROFILE_START(timer3);
       
       //Calculate M and B matrices
          tmpV1.resize(nbObs);
          tmpV2.resize(nbObs);
          for(i=0;i<nbVar;i++) 
          {
+            #if 1
+            {
+               const register REAL * RESTRICT pD=designMatrix.data()+i*designMatrix.cols();
+               const register REAL * RESTRICT pW=mWeight.data();
+               REAL * RESTRICT p=tmpV1.data();
+               for(k=0;k<nbObs;k++) *p++ = *pD++ * *pW++;
+            }
+            const register REAL * pD=designMatrix.data();
+            for(j=0;j<nbVar;j++)
+            {
+               const register REAL * p1=tmpV1.data();
+               REAL v2=0;
+               for(k=0;k<nbObs;k++) v2+= *pD++ * *p1++;
+               M(j,i)=v2;
+            }
+            REAL b=0;
+            const register REAL * pObs=mObs.data();
+            const register REAL * pCalc=calc0.data();
+            const register REAL * p1=tmpV1.data();
+            for(k=0;k<nbObs;k++) b+= (*pObs++ - *pCalc++)* *p1++;
+            B(i)=b;
+            #else
             for(k=0;k<nbObs;k++) tmpV1(k)=designMatrix(i,k);
             tmpV1 *= mWeight;
             for(j=0;j<nbVar;j++)
@@ -204,12 +248,15 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
                M(j,i)= tmpV2.sum();
                   //M(i,j)=total(designMatrix.row(i)*designMatrix.row(j)*weight);
             }
-            
             tmpV2=mObs;
             tmpV2 -= calc0;
             tmpV2 *= tmpV1;
             B(i)=tmpV2.sum();//total((obs-calc0)*weight*designMatrix.row(i))
+            #endif
+            
          }
+      TAU_PROFILE_STOP(timer3);
+      TAU_PROFILE_START(timer4);
          
        //Apply LevenBerg-Marquardt factor
          if(true==useLevenbergMarquardt)
@@ -220,6 +267,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
        // Check for singular values
          for(i=0;i<nbVar;i++)
          {
+            //cout<<__FILE__<<":"<<__LINE__<<":"<<i<<":"<<mRefParList.GetParNotFixed(i).GetName()<<":"<<mRefParList.GetParNotFixed(i).GetPointer()<<":"<<M(i,i)<<endl;
             if( (M(i,i) < 1e-20)||(ISNAN_OR_INF(M(i,i)))) //:TODO: Check what value to use as a limit
             {  
                if(!silent) cout << "LSQNumObj::Refine() Singular parameter !"
@@ -278,9 +326,11 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
                */
                M.resize(nbVar,nbVar);
                B.resize(nbVar);
+               TAU_PROFILE_STOP(timer4);
                goto LSQNumObj_Refine_Restart;
             }
          }
+      TAU_PROFILE_STOP(timer4);
          
 /*
       //Solve with Singular value Decomposition on design matrix (using newmat)
@@ -325,6 +375,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
          cout << newmatW << endl;
       }
 */
+      TAU_PROFILE_START(timer5);
       //Perform "Eigenvalue Filtering" on normal matrix (using newmat library)
       {
          //if(!silent) cout << "LSQNumObj::Refine():Eigenvalue Filtering..." <<endl;
@@ -360,7 +411,21 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
             catch(...)
             {
                cout<<"Caught a Newmat exception :"<<BaseException::what()<<endl;
-               cout<<"A:"<<endl<<newmatA<<endl<<"W:"<<endl<<newmatW<<endl<<"V:"<<endl<<newmatV<<endl;
+               cout<<"A:"<<endl<<newmatA<<endl<<"W:"<<endl<<newmatW<<endl<<"V:"<<endl<<newmatV<<endl<<"Dscale:"<<newmatDscale*1e6<<endl;
+               cout<<setw(5)<<"B:"<<endl;
+               for(unsigned int i=0;i<B.size();i++) cout<<B(i)<<" ";
+               cout<<endl<<endl<<"M:"<<endl;
+               for(unsigned int i=0;i<M.rows();i++)
+               {
+                  for(unsigned int j=0;j<M.cols();j++) cout<<M(i,j)<<" ";
+                  cout<<endl;
+               }
+               cout<<endl<<endl<<"D:"<<endl;
+               for(unsigned int i=0;i<designMatrix.rows();i++)
+               {
+                  for(unsigned int j=0;j<designMatrix.cols();j++) cout<<designMatrix(i,j)<<" ";
+                  cout<<endl;
+               }
                exit(0);
                //throw ObjCrystException("LSQNumObj::Refine():caught a newmat exception during Eigenvalues computing !");
             }
@@ -438,6 +503,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
             //cout << newmatB <<endl;
          }
       }//End EigenValue filtering
+      TAU_PROFILE_STOP(timer5);
 /*
 */
 /*
@@ -533,6 +599,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
             //cout << deltaVar  << endl;
          }
          */
+      TAU_PROFILE_START(timer6);
       /// Applying new computed values :TODO: & Check if a limit has been hit
          for(i=0;i<nbVar;i++)
          {
@@ -574,6 +641,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
                      return;
                      //throw ObjCrystException("LSQNumObj::Refine():Levenberg-Marquardt diverging !");
                   }
+                  TAU_PROFILE_STOP(timer6);
                   goto LSQNumObj_Refine_Restart;
                }
                else
@@ -585,6 +653,8 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
                }
             }
          }
+      TAU_PROFILE_STOP(timer6);
+      TAU_PROFILE_START(timer7);
             
          //Sigmas
             if(nbObs==nbVar) 
@@ -622,6 +692,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
          if (mSaveReportOnEachCycle) this->WriteReportToFile();
       
       if(!silent) this->PrintRefResults();
+      TAU_PROFILE_STOP(timer7);
       if( terminateOnDeltaChi2 && (minChi2var>( (ChisSqPreviousCycle-mChiSq)/abs(ChisSqPreviousCycle+1e-6) ) ) ) break;
    }
    if(callBeginEndOptimization) this->EndOptimization();
@@ -751,7 +822,7 @@ void LSQNumObj::PrepareRefParList(const bool copy_param)
 const CrystVector_REAL& LSQNumObj::GetLSQCalc() const
 {
    const CrystVector_REAL *pV;
-   unsigned long nb=0;
+   long nb=0;
    for(map<RefinableObj*,unsigned int>::const_iterator pos=mvRefinedObjMap.begin();pos!=mvRefinedObjMap.end();++pos)
    {
       if(pos->first->GetNbLSQFunction()==0) continue;
@@ -770,12 +841,13 @@ const CrystVector_REAL& LSQNumObj::GetLSQCalc() const
 const CrystVector_REAL& LSQNumObj::GetLSQObs() const
 {
    const CrystVector_REAL *pV;
-   unsigned long nb=0;
+   long nb=0;
    for(map<RefinableObj*,unsigned int>::const_iterator pos=mvRefinedObjMap.begin();pos!=mvRefinedObjMap.end();++pos)
    {
       if(pos->first->GetNbLSQFunction()==0) continue;
       pV=&(pos->first->GetLSQObs(pos->second));
       const unsigned long n2=pV->numElements();
+      mvRefinedObjLSQSize[pos->first]=n2;
       if((nb+n2)>mLSQObs.numElements()) mLSQObs.resizeAndPreserve(nb+pV->numElements());
       const REAL *p1=pV->data();
       REAL *p2=mLSQObs.data()+nb;
@@ -789,7 +861,7 @@ const CrystVector_REAL& LSQNumObj::GetLSQObs() const
 const CrystVector_REAL& LSQNumObj::GetLSQWeight() const
 {
    const CrystVector_REAL *pV;
-   unsigned long nb=0;
+   long nb=0;
    for(map<RefinableObj*,unsigned int>::const_iterator pos=mvRefinedObjMap.begin();pos!=mvRefinedObjMap.end();++pos)
    {
       if(pos->first->GetNbLSQFunction()==0) continue;
@@ -808,7 +880,7 @@ const CrystVector_REAL& LSQNumObj::GetLSQWeight() const
 const CrystVector_REAL& LSQNumObj::GetLSQDeriv(RefinablePar&par)
 {
    const CrystVector_REAL *pV;
-   unsigned long nb=0;
+   long nb=0;
    for(map<RefinableObj*,unsigned int>::iterator pos=mvRefinedObjMap.begin();pos!=mvRefinedObjMap.end();++pos)
    {
       if(pos->first->GetNbLSQFunction()==0) continue;
@@ -822,6 +894,42 @@ const CrystVector_REAL& LSQNumObj::GetLSQDeriv(RefinablePar&par)
    }
    if(mLSQDeriv.numElements()>nb) mLSQDeriv.resizeAndPreserve(nb);
    return mLSQDeriv;
+}
+
+const std::map<RefinablePar*,CrystVector_REAL>& LSQNumObj::GetLSQ_FullDeriv()
+{
+   long nbVar=mRefParList.GetNbParNotFixed();
+   std::set<RefinablePar*> vPar;
+   for(unsigned int i=0;i<nbVar;++i)
+      vPar.insert(&(mRefParList.GetParNotFixed(i)));
+   mLSQ_FullDeriv.clear();
+   unsigned long nb=0;// full length of derivative vector
+   for(map<RefinableObj*,unsigned int>::iterator pos=mvRefinedObjMap.begin();pos!=mvRefinedObjMap.end();++pos)
+   {
+      if(pos->first->GetNbLSQFunction()==0) continue;
+      const unsigned long n2=mvRefinedObjLSQSize[pos->first];
+      if(n2==0) continue;//this object does not have an LSQ function
+      
+      const std::map<RefinablePar*,CrystVector_REAL> *pvV=&(pos->first->GetLSQ_FullDeriv(pos->second,vPar));
+      for(std::map<RefinablePar*,CrystVector_REAL>::const_iterator d=pvV->begin();d!=pvV->end();d++)
+      {
+         if(mLSQ_FullDeriv[d->first].size()==0) mLSQ_FullDeriv[d->first].resize(mLSQObs.size());
+         REAL *p2=mLSQ_FullDeriv[d->first].data()+nb;
+         if(d->second.size()==0)
+         {  //derivative can be null and then the vector missing
+            // But we must still fill in zeros
+            cout<<__FILE__<<":"<<__LINE__<<":"<<pos->first->GetClassName()<<":"<<pos->first->GetName()<<":"<<d->first->GetName()<<" (all deriv=0)"<<endl;
+            for(unsigned long j=0;j<n2;++j) *p2++ = 0;
+         }
+         else
+         {
+            const REAL *p1=d->second.data();
+            for(unsigned long j=0;j<n2;++j) *p2++ = *p1++;
+         }
+      }
+      nb+=n2;
+   }
+   return mLSQ_FullDeriv;
 }
 
 void LSQNumObj::BeginOptimization(const bool allowApproximations, const bool enableRestraints)

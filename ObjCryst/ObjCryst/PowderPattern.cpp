@@ -96,6 +96,18 @@ const PowderPattern& PowderPatternComponent::GetParentPowderPattern()const
    return *mpParentPowderPattern;
 }
 
+std::map<RefinablePar*,CrystVector_REAL>& PowderPatternComponent::GetPowderPattern_FullDeriv(std::set<RefinablePar *> &vPar)
+{
+   this->CalcPowderPattern_FullDeriv(vPar);
+   return mPowderPattern_FullDeriv;
+}
+
+std::map<RefinablePar*,CrystVector_REAL>& PowderPatternComponent::GetPowderPatternIntegrated_FullDeriv(std::set<RefinablePar *> &vPar)
+{
+   this->CalcPowderPatternIntegrated_FullDeriv(vPar);
+   return mPowderPatternIntegrated_FullDeriv;
+}
+
 PowderPattern& PowderPatternComponent::GetParentPowderPattern()
 {
    return *mpParentPowderPattern;
@@ -115,6 +127,52 @@ const RefinableObjClock& PowderPatternComponent::GetClockBraggLimits()const
 const list<pair<const REAL, const string> >& PowderPatternComponent::GetPatternLabelList()const
 {
    return mvLabel;
+}
+
+void PowderPatternComponent::CalcPowderPattern_FullDeriv(std::set<RefinablePar *> &vPar)
+{
+   TAU_PROFILE("PowderPatternComponent::CalcPowderPattern_FullDeriv()","void ()",TAU_DEFAULT);
+   mPowderPattern_FullDeriv.clear();
+   for(std::set<RefinablePar *>::iterator par=vPar.begin();par!=vPar.end();par++)
+   {
+      if(*par==0) 
+      {
+         mPowderPattern_FullDeriv[*par]=this->GetPowderPatternCalc();
+         continue;
+      }
+      const REAL step=(*par)->GetDerivStep();
+      (*par)->Mutate(step);
+      mPowderPattern_FullDeriv[*par] =this->GetPowderPatternCalc();
+      (*par)->Mutate(-2*step);
+      mPowderPattern_FullDeriv[*par]-=this->GetPowderPatternCalc();
+      (*par)->Mutate(step);
+      mPowderPattern_FullDeriv[*par]/= step*2;
+      if(MaxAbs(mPowderPattern_FullDeriv[*par])==0)
+         mPowderPattern_FullDeriv[*par].resize(0);
+   }
+}
+
+void PowderPatternComponent::CalcPowderPatternIntegrated_FullDeriv(std::set<RefinablePar *> &vPar)
+{
+   TAU_PROFILE("PowderPatternComponent::CalcPowderPatternIntegrated_FullDeriv()","void ()",TAU_DEFAULT);
+   mPowderPatternIntegrated_FullDeriv.clear();
+   for(std::set<RefinablePar *>::iterator par=vPar.begin();par!=vPar.end();par++)
+   {
+      if(*par==0) 
+      {
+         mPowderPatternIntegrated_FullDeriv[*par]=*(this->GetPowderPatternIntegratedCalc().first);
+         continue;
+      }
+      const REAL step=(*par)->GetDerivStep();
+      (*par)->Mutate(step);
+      mPowderPatternIntegrated_FullDeriv[*par] =*(this->GetPowderPatternIntegratedCalc().first);
+      (*par)->Mutate(-2*step);
+      mPowderPatternIntegrated_FullDeriv[*par]-=*(this->GetPowderPatternIntegratedCalc().first);
+      (*par)->Mutate(step);
+      mPowderPatternIntegrated_FullDeriv[*par]/= step*2;
+      if(MaxAbs(mPowderPatternIntegrated_FullDeriv[*par])==0)
+         mPowderPatternIntegrated_FullDeriv[*par].resize(0);
+   }
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -435,6 +493,32 @@ void PowderPatternBackground::CalcPowderPattern() const
    VFN_DEBUG_MESSAGE("PowderPatternBackground::CalcPowderPattern():End",3);
 }
 
+void PowderPatternBackground::CalcPowderPattern_FullDeriv(std::set<RefinablePar*> &vPar)
+{
+   TAU_PROFILE("PowderPatternBackground::CalcPowderPattern_FullDeriv()","void ()",TAU_DEFAULT);
+   const unsigned long nb=mpParentPowderPattern->GetNbPoint();
+   mPowderPattern_FullDeriv.clear();
+   if((nb==0)||(mBackgroundNbPoint==0)) return;
+   for(std::set<RefinablePar*>::iterator par=vPar.begin();par!=vPar.end();++par)
+   {
+      if((*par)==0) mPowderPattern_FullDeriv[*par]=this->GetPowderPatternCalc();
+      else
+         for(unsigned int j=0;j<mBackgroundNbPoint;j++)
+         {
+            if((*par)->GetPointer()!=mBackgroundInterpPointIntensity.data()+j) continue;
+            const REAL step=(*par)->GetDerivStep();
+            (*par)->Mutate(step);
+            mPowderPattern_FullDeriv[*par] =this->GetPowderPatternCalc();
+            (*par)->Mutate(-2*step);
+            mPowderPattern_FullDeriv[*par]-=this->GetPowderPatternCalc();
+            (*par)->Mutate(step);
+            mPowderPattern_FullDeriv[*par]/= step*2;
+            if(MaxAbs(mPowderPattern_FullDeriv[*par])==0)
+               mPowderPattern_FullDeriv[*par].resize(0);
+         }
+   }
+}
+
 void PowderPatternBackground::CalcPowderPatternIntegrated() const
 {
    if(mClockPowderPatternCalc>mClockMaster) return;
@@ -475,6 +559,49 @@ void PowderPatternBackground::CalcPowderPatternIntegrated() const
    #endif
    mClockPowderPatternIntegratedCalc.Click();
    VFN_DEBUG_EXIT("PowderPatternBackground::CalcPowderPatternIntegrated()",3)
+}
+
+void PowderPatternBackground::CalcPowderPatternIntegrated_FullDeriv(std::set<RefinablePar*> &vPar)
+{
+   TAU_PROFILE("PowderPatternBackground::CalcPowderPatternIntegrated_FullDeriv()","void ()",TAU_DEFAULT);
+   //cout<<"PowderPatternBackground::CalcPowderPatternIntegrated_FullDeriv"<<endl;
+   const unsigned long nb=mpParentPowderPattern->GetNbPoint();
+   mPowderPatternIntegrated_FullDeriv.clear();
+   if((nb==0)||(mBackgroundNbPoint==0)) return;
+   for(std::set<RefinablePar*>::iterator par=vPar.begin();par!=vPar.end();++par)
+   {
+      if((*par)==0) mPowderPattern_FullDeriv[*par]=this->GetPowderPatternCalc();
+      else
+         for(unsigned int j=0;j<mBackgroundNbPoint;j++)
+         {
+            if((*par)->GetPointer()!=mBackgroundInterpPointIntensity.data()+j) continue;
+            const REAL step=(*par)->GetDerivStep();
+            (*par)->Mutate(step);
+            mPowderPatternIntegrated_FullDeriv[*par] =*(this->GetPowderPatternIntegratedCalc().first);
+            (*par)->Mutate(-2*step);
+            mPowderPatternIntegrated_FullDeriv[*par]-=*(this->GetPowderPatternIntegratedCalc().first);
+            (*par)->Mutate(step);
+            mPowderPatternIntegrated_FullDeriv[*par]/= step*2;
+            if(MaxAbs(mPowderPatternIntegrated_FullDeriv[*par])==0)
+               mPowderPatternIntegrated_FullDeriv[*par].resize(0);
+         }
+   }
+   #if 0
+   std::map<RefinablePar*, CrystVector_REAL> newDeriv=mPowderPatternIntegrated_FullDeriv;
+   this->PowderPatternComponent::CalcPowderPatternIntegrated_FullDeriv(vPar);
+   std::vector<const CrystVector_REAL*> v;
+   int n=0;
+   for(std::map<RefinablePar*, CrystVector_REAL>::reverse_iterator pos=mPowderPatternIntegrated_FullDeriv.rbegin();pos!=mPowderPatternIntegrated_FullDeriv.rend();++pos)
+   {
+      cout<<pos->first->GetName()<<":"<<pos->second.size()<<","<<newDeriv[pos->first].size()<<endl;
+      if(pos->second.size()==0) continue;
+      v.push_back(&(pos->second));
+      v.push_back(&(newDeriv[pos->first]));
+      if(++n>8) break;
+   }
+   if(v.size()>0) cout<<"PowderPatternBackground::CalcPowderPatternIntegrated_FullDeriv():"<<endl<<FormatVertVector<REAL>(v,12,1,20)<<endl;
+   //exit(0);
+   #endif
 }
 
 void PowderPatternBackground::Prepare()
@@ -844,10 +971,10 @@ void PowderPatternDiffraction::SetExtractionMode(const bool extract,const bool i
    if(extract && (!init) && (mpLeBailData!=0))
    {
       // Re-use existing Le Bail data, if list of hkl's is consistent
-      const unsigned long nbrefl=this->GetNbReflBelowMaxSinThetaOvLambda();
+      const long nbrefl=this->GetNbReflBelowMaxSinThetaOvLambda();
       if(nbrefl==mpLeBailData->GetNbRefl())
       {
-         for(unsigned int i=0;i<nbrefl;++i)
+         for(int i=0;i<nbrefl;++i)
          {
             if(  (mpLeBailData->GetH()(i)==this->GetH()(i))
                &&(mpLeBailData->GetK()(i)==this->GetK()(i))
@@ -1120,6 +1247,75 @@ Applying profiles for "<<nbRefl<<" reflections",2)
    VFN_DEBUG_EXIT("PowderPatternDiffraction::CalcPowderPattern: End.",3)
 }
 
+void PowderPatternDiffraction::CalcPowderPattern_FullDeriv(std::set<RefinablePar*> &vPar)
+{
+   TAU_PROFILE("PowderPatternDiffraction::CalcPowderPattern_FullDeriv()","void ()",TAU_DEFAULT);
+   //cout<<"PowderPatternDiffraction::CalcPowderPattern_FullDeriv"<<endl;
+   this->CalcPowderPattern();
+   this->CalcIhkl_FullDeriv(vPar);
+   
+   this->CalcPowderReflProfile();//:TODO: profile derivatives
+   mPowderPattern_FullDeriv.clear();
+   for(std::set<RefinablePar*>::iterator par=vPar.begin();par!=vPar.end();++par)
+   {
+      if(*par==0) mPowderPattern_FullDeriv[*par]=this->GetPowderPatternCalc();
+      else
+      {
+         if(mIhkl_FullDeriv[*par].size()==0) continue;
+         const long nbRefl=this->GetNbRefl();
+         long step; // number of reflections at the same place and with the same (assumed) profile
+         const long  specNbPoints=mpParentPowderPattern->GetNbPoint();
+         mPowderPattern_FullDeriv[*par].resize(specNbPoints);
+         mPowderPattern_FullDeriv[*par]=0;
+
+         for(long i=0;i<mNbRefl;i += step)
+         {
+            if(mvReflProfile[i].profile.numElements()==0)
+            {
+               step=1;
+               if(i>=mNbReflUsed) break;
+               else continue;
+            }
+                  
+            REAL intensity=0.;
+            //check if the next reflection is at the same theta. If this is true,
+            //Then assume that the profile is exactly the same, unless it is anisotropic
+            for(step=0; ;)
+            {
+               intensity += mIhkl_FullDeriv[*par](i + step);
+               step++;
+               if(mpReflectionProfile->IsAnisotropic()) break;// Anisotropic profiles
+               if( (i+step) >= nbRefl) break;
+               if(mSinThetaLambda(i+step) > (mSinThetaLambda(i)+1e-5) ) break;
+            }
+            {//:TODO: handle profile derivatives
+               const unsigned long first=mvReflProfile[i].first,last=mvReflProfile[i].last;
+               const REAL *p2 = mvReflProfile[i].profile.data();
+               REAL *p3 = mPowderPattern_FullDeriv[*par].data()+first;
+               for(unsigned long j=first;j<=last;j++) *p3++ += *p2++ * intensity;
+            }
+         }
+      }
+   }
+   #if 0
+   std::map<RefinablePar*, CrystVector_REAL> newDeriv=mPowderPattern_FullDeriv;
+   this->PowderPatternComponent::CalcPowderPattern_FullDeriv(vPar);
+   std::vector<const CrystVector_REAL*> v;
+   int n=0;
+   for(std::map<RefinablePar*, CrystVector_REAL>::reverse_iterator pos=mPowderPattern_FullDeriv.rbegin();pos!=mPowderPattern_FullDeriv.rend();++pos)
+   {
+      if(pos->first==0) continue;
+      if(pos->second.size()==0) continue;
+      v.push_back(&(newDeriv[pos->first]));
+      v.push_back(&(pos->second));
+      cout<<pos->first->GetName()<<":"<<pos->second.size()<<","<<newDeriv[pos->first].size()<<endl;
+      if(++n>8) break;
+   }
+   cout<<FormatVertVector<REAL>(v,16,4,1000)<<endl;
+   //exit(0);
+   #endif
+}
+
 void PowderPatternDiffraction::CalcPowderPatternIntegrated() const
 {
    this->GetNbReflBelowMaxSinThetaOvLambda();
@@ -1220,6 +1416,91 @@ void PowderPatternDiffraction::CalcPowderPatternIntegrated() const
    #endif
    mClockPowderPatternIntegratedCalc.Click();
    VFN_DEBUG_EXIT("PowderPatternDiffraction::CalcPowderPatternIntegrated",3)
+}
+
+void PowderPatternDiffraction::CalcPowderPatternIntegrated_FullDeriv(std::set<RefinablePar*> &vPar)
+{
+   TAU_PROFILE("PowderPatternDiffraction::CalcPowderPatternIntegrated_FullDeriv()","void ()",TAU_DEFAULT);
+   //cout<<"PowderPatternDiffraction::CalcPowderPatternIntegrated_FullDeriv"<<endl;
+   //this->PowderPatternComponent::CalcPowderPatternIntegrated_FullDeriv(vPar);
+   //return;
+   
+   this->CalcPowderPatternIntegrated();
+   this->CalcIhkl_FullDeriv(vPar);
+   const long nbRefl=this->GetNbRefl();
+   //#define PowderPatternDiffraction_CalcPowderPatternIntegrated_FullDerivDEBUG
+   #ifdef PowderPatternDiffraction_CalcPowderPatternIntegrated_FullDerivDEBUG
+   this->PowderPatternComponent::CalcPowderPatternIntegrated_FullDeriv(vPar);
+   std::map<RefinablePar*, CrystVector_REAL> oldDeriv=mPowderPatternIntegrated_FullDeriv;
+   #endif
+   const long  nbprof=mpParentPowderPattern->GetIntegratedProfileMin().size();
+   long ctpar=0;
+   mPowderPatternIntegrated_FullDeriv.clear();
+   for(std::set<RefinablePar*>::iterator par=vPar.begin();par!=vPar.end();++par)
+   {
+      if(*par==0) mPowderPatternIntegrated_FullDeriv[*par]=mPowderPatternIntegratedCalc;
+      else
+      {
+         if(mIhkl_FullDeriv[*par].size()==0) continue;
+         if(mPowderPatternIntegrated_FullDeriv[*par].size()==0) 
+         {
+            mPowderPatternIntegrated_FullDeriv[*par].resize(nbprof);
+            mPowderPatternIntegrated_FullDeriv[*par]=0;
+         }
+         const REAL * RESTRICT psith=mSinThetaLambda.data();
+         const REAL * RESTRICT pI=mIhkl_FullDeriv[*par].data();
+         // :TODO: also handle derivatives of profile parameters ? Though one should not
+         // refine profiles using integrated profiles !
+         vector< pair<unsigned long, CrystVector_REAL> >::const_iterator pos=mIntegratedProfileFactor.begin();
+         
+         for(long i=0;i<mNbReflUsed;)
+         {
+            REAL intensity=0.;
+            const REAL thmax=*psith+1e-5;
+            for(;;)
+            {
+               intensity += *pI++;
+               if( ++i >= nbRefl) break;
+               if( *(++psith) > thmax ) break;
+               if(mpReflectionProfile->IsAnisotropic()) break;// Anisotropic profile
+               ++pos;
+            }
+            REAL * RESTRICT pData=mPowderPatternIntegrated_FullDeriv[*par].data()+pos->first;
+            const REAL * RESTRICT pFact=pos->second.data();
+            const unsigned long nb=pos->second.numElements();
+            #ifdef PowderPatternDiffraction_CalcPowderPatternIntegrated_FullDerivDEBUG
+            if((i<5)&&(ctpar<8)) cout<<__FILE__<<":"<<__LINE__<<":"<<(*par)->GetName()<<"i="<<setw(16)<<i<<":I="<<setw(16)<<intensity<<endl;
+            #endif
+            for(unsigned long j=nb;j>0;j--)
+            {
+               #ifdef PowderPatternDiffraction_CalcPowderPatternIntegrated_FullDerivDEBUG
+               *pData += intensity * *pFact ;
+               if((i<5)&&((*par)->GetName()=="Cimetidine_C11_x")&&(pos->first==0)&&(nb==j)) cout<<nb-j<<" SUM1"<<setw(16)<<*pData<<", dI="<<setw(16)<<intensity<<", prof="<<setw(16)<<*pFact<<endl;
+               pData++;pFact++ ;
+               #else
+               *pData++ += intensity * *pFact++ ;
+               #endif
+            }
+            ++pos;
+            ctpar++;
+         }
+      }
+   }
+   #ifdef PowderPatternDiffraction_CalcPowderPatternIntegrated_FullDerivDEBUG
+   std::vector<const CrystVector_REAL*> v;
+   int n=0;
+   cout<<"PowderPatternDiffraction::CalcPowderPatternIntegrated_FullDeriv():parameters:"<<endl;
+   for(std::set<RefinablePar*>::iterator par=vPar.begin();par!=vPar.end();++par)
+   {
+      if(mPowderPatternIntegrated_FullDeriv[*par].size()==0) continue;
+      v.push_back(&(mPowderPatternIntegrated_FullDeriv[*par]));
+      v.push_back(&(oldDeriv[*par]));
+      cout<<(*par)->GetName()<<":"<<mPowderPatternIntegrated_FullDeriv[*par].size()<<","<<oldDeriv[*par].size()<<endl;
+      if(++n>6) break;
+   }
+   cout<<"PowderPatternDiffraction::CalcPowderPatternIntegrated_FullDeriv():"<<endl<<FormatVertVector<REAL>(v,12,1,20)<<endl;
+   //exit(0);
+   #endif
 }
 
 void PowderPatternDiffraction::CalcPowderReflProfile()const
@@ -1542,6 +1823,79 @@ void PowderPatternDiffraction::CalcIhkl() const
    //                               mFhklCalcReal,mFhklCalcImag,mIntensityCorr);
    mClockIhklCalc.Click();
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcIhkl():End",3)
+}
+void PowderPatternDiffraction::CalcIhkl_FullDeriv(std::set<RefinablePar*> &vPar)
+{
+   TAU_PROFILE("PowderPatternDiffraction::CalcIhkl_FullDeriv()","void ()",TAU_DEFAULT);
+   //cout<<"PowderPatternDiffraction::CalcIhkl_FullDeriv()"<<endl;
+   this->CalcIntensityCorr();//:TODO: derivatives of intensity corrections (Texture, displacement parameters,...)
+   mIhkl_FullDeriv.clear();
+   if(mExtractionMode==true)
+   {
+      //:TODO: handle Pawley refinements of I(hkl)
+      return;
+   }
+   this->CalcStructFactor_FullDeriv(vPar);
+   
+   for(std::set<RefinablePar*>::iterator par=vPar.begin();par!=vPar.end();++par)
+   {
+      if(*par==0) mIhkl_FullDeriv[*par]=mIhklCalc;
+      else
+      {
+         if(mFhklCalcReal_FullDeriv[*par].size()==0) continue;
+         const REAL * RESTRICT pr,* RESTRICT pi,* RESTRICT prd,* RESTRICT pid,* RESTRICT pcorr;
+         const int * RESTRICT mult;
+         REAL * RESTRICT p;
+         
+         pr=mFhklCalcReal.data();
+         pi=mFhklCalcImag.data();
+         prd=mFhklCalcReal_FullDeriv[*par].data();
+         pid=mFhklCalcImag_FullDeriv[*par].data();
+         pcorr=mIntensityCorr.data();//:TODO: derivatives of intensity corrections (Texture, displacement parameters,...)
+         
+         mult=mMultiplicity.data();
+         mIhkl_FullDeriv[*par].resize(mNbRefl);
+         p=mIhkl_FullDeriv[*par].data();
+         if(mFhklCalcImag_FullDeriv[*par].size()==0)
+            for(long i=mNbReflUsed;i>0;i--) *p++ = *mult++ * 2 * *pr++ * *prd++ * *pcorr++;
+         else
+            for(long i=mNbReflUsed;i>0;i--) *p++ = *mult++ * 2 *(*pr++ * *prd++ + *pi++ * *pid++) * *pcorr++;
+      }
+   }
+   #if 0
+   std::map<RefinablePar*, CrystVector_REAL> oldDeriv;
+   std::vector<const CrystVector_REAL*> v;
+   v.push_back(&mH);
+   v.push_back(&mK);
+   v.push_back(&mL);
+   CrystVector_REAL m;
+   m=mMultiplicity;
+   v.push_back(&m);
+   v.push_back(&mIntensityCorr);
+   int n=0;
+   for(std::set<RefinablePar*>::iterator par=vPar.begin();par!=vPar.end();++par)
+   {
+      if((*par)==0) continue;
+      if(mIhkl_FullDeriv[*par].size()==0) continue;
+      
+      const REAL step=(*par)->GetDerivStep();
+      (*par)->Mutate(step);
+      this->CalcIhkl();
+      oldDeriv[*par]=mIhklCalc;
+      (*par)->Mutate(-2*step);
+      this->CalcIhkl();
+      oldDeriv[*par]-=mIhklCalc;
+      oldDeriv[*par]/=2*step;
+      (*par)->Mutate(step);
+      
+      v.push_back(&(mIhkl_FullDeriv[*par]));
+      v.push_back(&(oldDeriv[*par]));
+      cout<<(*par)->GetName()<<":"<<mIhkl_FullDeriv[*par].size()<<","<<oldDeriv[*par].size()<<",  step="<<setw(16)<<step<<endl;
+      if(++n>5) break;
+   }
+   cout<<"PowderPatternDiffraction::CalcIhkl_FullDeriv():"<<endl<<FormatVertVectorHKLFloats<REAL>(v,12,1,20)<<endl;
+   //exit(0);
+   #endif
 }
 
 void PowderPatternDiffraction::Prepare()
@@ -1899,6 +2253,12 @@ const CrystVector_REAL& PowderPattern::GetPowderPatternCalc()const
 {
    this->CalcPowderPattern();
    return mPowderPatternCalc;
+}
+
+std::map<RefinablePar*,CrystVector_REAL>& PowderPattern::GetPowderPattern_FullDeriv(std::set<RefinablePar *> &vPar)
+{
+   this->CalcPowderPattern_FullDeriv(vPar);
+   return mPowderPattern_FullDeriv;
 }
 
 const CrystVector_REAL& PowderPattern::GetPowderPatternObs()const
@@ -3519,8 +3879,6 @@ REAL PowderPattern::GetIntegratedChi2()const
    
    VFN_DEBUG_ENTRY("PowderPattern::GetIntegratedChi2()",3);
    
-   const unsigned long maxPoints=mNbPointUsed;
-
    mIntegratedChi2=0.;
    mIntegratedChi2LikeNorm=0.;
    VFN_DEBUG_MESSAGE("PowderPattern::GetIntegratedChi2()",3);
@@ -4487,6 +4845,36 @@ const CrystVector_REAL&
    return mPowderPatternUsedWeight;
 }
 
+std::map<RefinablePar*, CrystVector_REAL>& PowderPattern::GetLSQ_FullDeriv(const unsigned int idx,std::set<RefinablePar *> &vPar)
+{
+   TAU_PROFILE("PowderPattern::GetLSQ_FullDeriv()","void ()",TAU_DEFAULT);
+   //return this->RefinableObj::GetLSQ_FullDeriv(idx,vPar);
+   if(idx==1)
+   {
+      this->CalcPowderPatternIntegrated_FullDeriv(vPar);
+      #if 0
+      std::map<RefinablePar*, CrystVector_REAL> fullderiv_old;
+      std::vector<const CrystVector_REAL*> v;
+      int n=0;
+      //cout<<"PowderPattern::GetLSQ_FullDeriv(integrated):scales:"<<mScaleFactor<<endl;
+      cout<<"PowderPattern::GetLSQ_FullDeriv(integrated):parameters:"<<endl;
+      for(std::set<RefinablePar*>::iterator par=vPar.begin();par!=vPar.end();++par)
+      {
+         v.push_back(&(mPowderPatternIntegrated_FullDeriv[*par]));
+         fullderiv_old[*par]=this->GetLSQDeriv(idx,*(*par));
+         v.push_back(&(fullderiv_old[*par]));
+         cout<<(*par)->GetName()<<":"<<mPowderPatternIntegrated_FullDeriv[*par].size()<<","<<fullderiv_old[*par].size()<<endl;
+         if(++n>8) break;
+      }
+      cout<<"PowderPattern::GetLSQ_FullDeriv(integrated):"<<endl<<FormatVertVector<REAL>(v,12,1,20)<<endl;
+      //exit(0);
+      #endif
+      return mPowderPatternIntegrated_FullDeriv;
+   }
+   mPowderPattern_FullDeriv=this->GetPowderPattern_FullDeriv(vPar);
+   return mPowderPattern_FullDeriv;
+}
+
 void PowderPattern::Prepare()
 {
    VFN_DEBUG_MESSAGE("PowderPattern::Prepare()",5);
@@ -4869,7 +5257,7 @@ void PowderPattern::ExportFullprof(const std::string &prefix)const
       <<"    0     0    0    0    0"<<endl;
    // Background points
    pcr<<"!2Theta Background for Pattern #1"<<endl;
-   for(unsigned long i=0;i<pBackground->GetInterpPoints().first->numElements();i++)
+   for(long i=0;i<pBackground->GetInterpPoints().first->numElements();i++)
       pcr<<(*(pBackground->GetInterpPoints().first))(i)*RAD2DEG<<" "
       <<(*(pBackground->GetInterpPoints().second))(i)<<" 0.0"<<endl;
    // Number of refined parameters - just use one for the scale factor !
@@ -4968,7 +5356,7 @@ void PowderPattern::ExportFullprof(const std::string &prefix)const
 
       // Main control codes line for the phase
       //:TODO:  extract distance (Dis) and bond angle (Ang) restraints whenever possible
-      const ScatteringComponentList *pSC=&(vDiff[i]->GetCrystal().GetScatteringComponentList());
+      //const ScatteringComponentList *pSC=&(vDiff[i]->GetCrystal().GetScatteringComponentList());
       pcr<<"!Nat Dis Ang Jbt Isy Str Furth  ATZ Nvk More"<<endl
          <<  vExportAtom.size() <<"  "<<vExportBond.size()<<"  "<<vExportAngle.size()
                     <<"   0   0   0    0    1.0  0   1"<<endl;
@@ -5221,6 +5609,98 @@ void PowderPattern::CalcPowderPattern() const
    VFN_DEBUG_EXIT("PowderPattern::CalcPowderPattern():End",3);
 }
 
+void PowderPattern::CalcPowderPattern_FullDeriv(std::set<RefinablePar*> &vPar)
+{
+   TAU_PROFILE("PowderPattern::CalcPowderPattern_FullDeriv()","void ()",TAU_DEFAULT);
+   this->CalcPowderPattern();
+   mPowderPattern_FullDeriv.clear();
+   if(mPowderPatternComponentRegistry.GetNb()==0) return;
+   std::vector<std::map<RefinablePar*,CrystVector_REAL>*> comps;
+   for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++)
+      comps.push_back(&(mPowderPatternComponentRegistry.GetObj(i).GetPowderPattern_FullDeriv(vPar)));
+   
+   for(std::set<RefinablePar *>::iterator par=vPar.begin();par!=vPar.end();++par)
+   {
+      if(*par==0) continue;
+      for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++)
+      {
+         if((*par)->GetPointer()==mScaleFactor.data()+i)
+         {
+            mPowderPattern_FullDeriv[*par]=mPowderPatternComponentRegistry.GetObj(i).GetPowderPatternCalc();
+            continue;
+         }
+         else
+         {
+            if((*(comps[i]))[*par].size()==0) continue;
+         }
+         if(true==mPowderPatternComponentRegistry.GetObj(i).IsScalable())
+         {
+            if(mPowderPattern_FullDeriv[*par].size()==0)
+            {
+               mPowderPattern_FullDeriv[*par].resize(mNbPoint);// :TODO: only use mNbPointUsed
+               const REAL * p1=(*comps[i])[*par].data();
+               REAL * p0 = mPowderPattern_FullDeriv[*par].data();
+               const REAL s = mScaleFactor(i);
+               for(unsigned long j=0;j<mNbPointUsed;j++) *p0++ = s * *p1++;
+               for(unsigned long j=mNbPointUsed;j<mNbPoint;j++) *p0++ = 0;// :TODO: only use mNbPointUsed
+            }
+            else
+            {
+               const REAL * p1=(*comps[i])[*par].data();
+               REAL * p0 = mPowderPattern_FullDeriv[*par].data();
+               const REAL s = mScaleFactor(i);
+               for(unsigned long j=0;j<mNbPointUsed;j++) *p0++ += s * *p1++;
+            }
+         }
+         else
+         {// This is a background phase
+            if(mPowderPattern_FullDeriv[*par].size()==0)
+            {
+               mPowderPattern_FullDeriv[*par].resize(mNbPoint);// :TODO: only use mNbPointUsed
+               const REAL * p1=(*comps[i])[*par].data();
+               REAL * p0 = mPowderPattern_FullDeriv[*par].data();
+               for(unsigned long j=0;j<mNbPointUsed;j++) *p0++ = *p1++;
+               for(unsigned long j=mNbPointUsed;j<mNbPoint;j++) *p0++ = 0;
+            }
+            else
+            {
+               const REAL * p1=(*comps[i])[*par].data();
+               REAL * p0 = mPowderPattern_FullDeriv[*par].data();
+               for(unsigned long j=0;j<mNbPointUsed;j++) *p0++ += *p1++;
+
+            }
+         }
+      }
+   }
+   #if 0
+   std::map<RefinablePar*, CrystVector_REAL> oldDeriv;
+   std::vector<const CrystVector_REAL*> v;
+   int n=0;
+   for(std::map<RefinablePar*, CrystVector_REAL>::reverse_iterator pos=mPowderPattern_FullDeriv.rbegin();pos!=mPowderPattern_FullDeriv.rend();++pos)
+   {
+      if(pos->first==0) continue;
+      if(pos->second.size()==0) continue;
+      
+      const REAL step=pos->first->GetDerivStep();
+      pos->first->Mutate(step);
+      this->CalcPowderPattern();
+      oldDeriv[pos->first]=mPowderPatternCalc;
+      pos->first->Mutate(-2*step);
+      this->CalcPowderPattern();
+      oldDeriv[pos->first]-=mPowderPatternCalc;
+      oldDeriv[pos->first]/=2*step;
+      pos->first->Mutate(step);
+      
+      v.push_back(&(pos->second));
+      v.push_back(&(oldDeriv[pos->first]));
+      cout<<pos->first->GetName()<<":"<<pos->second.size()<<","<<oldDeriv[pos->first].size()<<endl;
+      if(++n>8) break;
+   }
+   cout<<FormatVertVector<REAL>(v,16)<<endl;
+   exit(0);
+   #endif
+}
+
 void PowderPattern::CalcPowderPatternIntegrated() const
 {
    this->CalcNbPointUsed();
@@ -5414,6 +5894,123 @@ void PowderPattern::CalcPowderPatternIntegrated() const
    }
    */
    VFN_DEBUG_EXIT("PowderPattern::CalcPowderPatternIntegrated():End",4);
+}
+
+void PowderPattern::CalcPowderPatternIntegrated_FullDeriv(std::set<RefinablePar *> &vPar)
+{
+   TAU_PROFILE("PowderPattern::CalcPowderPatternIntegrated_FullDeriv()","void ()",TAU_DEFAULT);
+   this->CalcPowderPatternIntegrated();
+   this->CalcNbPointUsed();
+   
+   this->PrepareIntegratedRfactor();
+   mPowderPatternUsed_FullDeriv.clear();
+   if(mPowderPatternComponentRegistry.GetNb()==0) return;
+   std::vector<map<RefinablePar*,CrystVector_REAL>*> comps;
+   for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++)
+   {
+      comps.push_back(&(mPowderPatternComponentRegistry.GetObj(i).
+                        GetPowderPatternIntegrated_FullDeriv(vPar)));
+   }
+   //RefinablePar *scalePar;
+   //cout<<"PowderPattern::CalcPowderPatternIntegrated_FullDeriv():"<<endl;
+   mPowderPatternIntegrated_FullDeriv.clear();
+   for(std::set<RefinablePar *>::iterator par=vPar.begin();par!=vPar.end();++par)
+   {
+      if(*par==0) continue; //:TODO: store the calculated (non-derived) pattern here ?
+      for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++)
+      {
+         if((*par)->GetPointer()==mScaleFactor.data()+i)
+         {
+            //scalePar=*par;
+            mPowderPatternIntegrated_FullDeriv[*par]=*(mPowderPatternComponentRegistry.GetObj(i).GetPowderPatternIntegratedCalc().first);
+            //cout<<"PowderPattern::CalcPowderPatternIntegrated_FullDeriv():scale #"<<i<<":"<<(*par)->GetName()<<":"<<(*par)->GetPointer()<<":"<<mPowderPatternUsed_FullDeriv[*par]<<endl;
+            continue;
+         }
+         else
+         {
+            if((*(comps[i]))[*par].size()==0) continue;
+         }
+         if(true==mPowderPatternComponentRegistry.GetObj(i).IsScalable())
+         {
+            if(mPowderPatternIntegrated_FullDeriv[*par].size()==0)
+            {
+               mPowderPatternIntegrated_FullDeriv[*par].resize(mNbIntegrationUsed);
+               const REAL * RESTRICT p1= (*(comps[i]))[*par].data();
+               REAL * RESTRICT p0 = mPowderPatternIntegrated_FullDeriv[*par].data();
+               const REAL s = mScaleFactor(i);
+               for(unsigned long j=mNbIntegrationUsed;j>0;j--) 
+               {
+                  #if 1
+                  *p0++ = s * *p1++;
+                  #else
+                  *p0 = s * *p1;
+                  if((j==mNbIntegrationUsed)&&((*par)->GetName()=="Cimetidine_C11_x")) cout<<__FILE__<<":"<<__LINE__<<":"<<*p0<<","<<s<<"*"<<*p1<<endl;
+                  p0++;p1++;
+                  #endif
+               }
+            }
+            else
+            {
+               const REAL * RESTRICT p1= (*(comps[i]))[*par].data();
+               REAL * RESTRICT p0 = mPowderPatternIntegrated_FullDeriv[*par].data();
+               const REAL s = mScaleFactor(i);
+               for(unsigned long j=mNbIntegrationUsed;j>0;j--)
+               {
+                  #if 1
+                  *p0++ += s * *p1++;
+                  #else
+                  *p0 += s * *p1;
+                  if((j==mNbIntegrationUsed)&&((*par)->GetName()=="Cimetidine_C11_x")) cout<<__FILE__<<":"<<__LINE__<<":"<<*p0<<","<<s<<"*"<<*p1<<endl;
+                  p0++;p1++;
+                  #endif
+               }
+            }
+         }
+         else
+         {// This is a background phase
+            if(mPowderPatternIntegrated_FullDeriv[*par].size()==0)
+            {
+               mPowderPatternIntegrated_FullDeriv[*par].resize(mNbIntegrationUsed);
+               const REAL * RESTRICT p1= (*(comps[i]))[*par].data();
+               REAL * RESTRICT p0 = mPowderPatternIntegrated_FullDeriv[*par].data();
+               for(unsigned long j=mNbIntegrationUsed;j>0;j--) 
+               {
+                  #if 1
+                  *p0++ = *p1++;
+                  #else
+                  *p0 = *p1;
+                  if((j==mNbIntegrationUsed)&&((*par)->GetName()=="Cimetidine_C11_x")) cout<<__FILE__<<":"<<__LINE__<<":"<<*p0<<","<<*p1<<endl;
+                  p0++;p1++;
+                  #endif
+               }
+            }
+            else
+            {
+               const REAL * RESTRICT p1= (*(comps[i]))[*par].data();
+               REAL * RESTRICT p0 = mPowderPatternIntegrated_FullDeriv[*par].data();
+               for(unsigned long j=mNbIntegrationUsed;j>0;j--) 
+               {
+                  #if 1
+                  *p0++ += *p1++;
+                  #else
+                  *p0 += *p1;
+                  if((j==mNbIntegrationUsed)&&((*par)->GetName()=="Cimetidine_C11_x")) cout<<__FILE__<<":"<<__LINE__<<":"<<*p0<<","<<*p1<<endl;
+                  p0++;p1++;
+                  #endif
+               }
+            }
+         }
+         #if 0
+         if((*par)->GetName()=="Cimetidine_C11_x")
+         cout<<"PowderPattern::CalcPowderPatternIntegrated_FullDeriv():"
+             <<(*par)->GetName()<<":s="<<mScaleFactor(i)<<", d[0]="<<(*(comps[i]))[*par](0)
+             <<", integ="<<mPowderPatternIntegrated_FullDeriv[*par](0)<<endl;
+         #endif
+      }
+   }
+   
+   
+   //cout<<"PowderPattern::CalcPowderPatternIntegrated_FullDeriv():scale #"<<1<<":"<<scalePar->GetName()<<":"<<scalePar->GetPointer()<<":"<<mPowderPatternUsed_FullDeriv[scalePar]<<endl;
 }
 
 void PowderPattern::Init()

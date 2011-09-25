@@ -22,6 +22,7 @@
 */
 
 #include <cmath>
+#include <stdlib.h>
 
 #include <typeinfo>
 
@@ -167,6 +168,13 @@ const CrystVector_REAL& DiffractionDataSingleCrystal::GetIcalc()const
    this->CalcIcalc();
    return mCalcIntensity;
 }
+
+std::map<RefinablePar*, CrystVector_REAL> & DiffractionDataSingleCrystal::GetIcalc_FullDeriv(std::set<RefinablePar *> &vPar)
+{
+   this->CalcIcalc_FullDeriv(vPar);
+   return mCalcIntensity_FullDeriv;
+}
+
 const CrystVector_REAL& DiffractionDataSingleCrystal::GetIobs()const
 {
    //if(mHasObservedData==false) DoSomething
@@ -1027,6 +1035,27 @@ const CrystVector_REAL&
    DiffractionDataSingleCrystal::GetLSQWeight(const unsigned int) const
 {return this->GetWeight();}
 
+std::map<RefinablePar*, CrystVector_REAL> & DiffractionDataSingleCrystal::GetLSQ_FullDeriv(const unsigned int,std::set<RefinablePar *> &vPar)
+{
+   #if 0
+   this->GetIcalc_FullDeriv(vPar);
+   std::map<RefinablePar*, CrystVector_REAL> fullderiv_old;
+   std::vector<const CrystVector_REAL*> v;
+   int n=0;
+   for(std::map<RefinablePar*, CrystVector_REAL>::reverse_iterator pos=mCalcIntensity_FullDeriv.rbegin();pos!=mCalcIntensity_FullDeriv.rend();++pos)
+   {
+      v.push_back(&(pos->second));
+      fullderiv_old[pos->first]=this->GetLSQDeriv(0,*(pos->first));
+      v.push_back(&(fullderiv_old[pos->first]));
+      cout<<pos->first->GetName()<<":"<<pos->second.size()<<","<<mFhklCalcSq_FullDeriv[pos->first].size()<<endl;
+      if(++n>8) break;
+   }
+   cout<<FormatVertVector<REAL>(v,10)<<endl;
+   //exit(0);
+   #endif
+   return this->GetIcalc_FullDeriv(vPar);
+}
+
 const Radiation& DiffractionDataSingleCrystal::GetRadiation()const { return mRadiation;}
 Radiation& DiffractionDataSingleCrystal::GetRadiation() { return mRadiation;}
 void DiffractionDataSingleCrystal::SetRadiationType(const RadiationType radiation)
@@ -1082,6 +1111,54 @@ void DiffractionDataSingleCrystal::CalcIcalc() const
       }
    }
    mClockIcalc.Click();
+}
+void DiffractionDataSingleCrystal::CalcIcalc_FullDeriv(std::set<RefinablePar *> &vPar)
+{
+   TAU_PROFILE("DiffractionDataSingleCrystal::CalcIcalc_FullDeriv()","void ()",TAU_DEFAULT);
+   this->GetFhklCalcSq_FullDeriv(vPar);
+   // :TODO: instead of clear(), only add/remove when necessary ?
+   mCalcIntensity_FullDeriv.clear();
+   mCalcIntensity_FullDeriv=mFhklCalcSq_FullDeriv;
+   //:TODO: multiplication only up to mNbReflUsed
+   for(std::map<RefinablePar*, CrystVector_REAL>::iterator pos=mCalcIntensity_FullDeriv.begin(); pos!=mCalcIntensity_FullDeriv.end();pos++) 
+   {
+      if(pos->first==0)
+      {// This is Icalc, not derived
+         pos->second *=mScaleFactor;
+         continue;
+      }
+      if(pos->first->GetPointer()!=&mScaleFactor) 
+      {
+         /*if(pos->second.size()>0) */ // not needed
+         pos->second *=mScaleFactor;
+      }
+      else 
+      {
+         pos->second=mFhklCalcSq;
+      }
+   }
+   
+   if(0!=mGroupOption.GetChoice())
+   {//:TODO:
+      if(1==mGroupOption.GetChoice()) this->PrepareTwinningCalc();
+      // :TODO: instead of clear(), only add/remove when necessary ?
+      mGroupIcalc_FullDeriv.clear();
+      for(std::map<RefinablePar*, CrystVector_REAL>::iterator pos=mCalcIntensity_FullDeriv.begin(); pos!=mCalcIntensity_FullDeriv.end();pos++)
+      {
+         mGroupIcalc_FullDeriv[pos->first].resize(mNbGroup);
+         mGroupIcalc_FullDeriv[pos->first]=0;
+         long first=0;
+         
+         for(long i=0;i<mNbGroup;i++)
+         {
+            for(long j=first;j<mGroupIndex(i);j++)
+            {
+               mGroupIcalc_FullDeriv[pos->first](i)+=mCalcIntensity_FullDeriv[pos->first](j);
+            }
+            first=mGroupIndex(i);
+         }
+      }
+   }
 }
 
 CrystVector_long DiffractionDataSingleCrystal::SortReflectionBySinThetaOverLambda(const REAL maxSTOL)

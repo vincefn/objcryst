@@ -398,6 +398,7 @@ class ScatteringData: virtual public RefinableObj
    
       ///  Returns the Array of calculated |F(hkl)|^2 for all reflections.
       const CrystVector_REAL& GetFhklCalcSq() const;
+      std::map<RefinablePar*, CrystVector_REAL> & GetFhklCalcSq_FullDeriv(std::set<RefinablePar *> &vPar);
       /// Access to real part of F(hkl)calc
       const CrystVector_REAL& GetFhklCalcReal() const;
       /// Access to imaginary part of F(hkl)calc
@@ -495,12 +496,13 @@ class ScatteringData: virtual public RefinableObj
       * (mRealFhklCalc, mImagFhklCalc) are stored in ScatteringData.
       */
       void CalcStructFactor() const;
-
+      void CalcStructFactor_FullDeriv(std::set<RefinablePar *> &vPar);
       /** \brief Compute the 'Geometrical Structure Factor' for each ScatteringPower
       * of the Crystal
       *
       */
       void CalcGeomStructFactor() const;
+      void CalcGeomStructFactor_FullDeriv(std::set<RefinablePar*> &vPar);
       /** Calculate the Luzzati factor associated to each ScatteringPower and
       * each reflection, for maximum likelihood optimization.
       * 
@@ -533,8 +535,10 @@ class ScatteringData: virtual public RefinableObj
       
       /// real &imaginary parts of F(HKL)calc
       mutable CrystVector_REAL mFhklCalcReal, mFhklCalcImag ;
-      ///F(HKL)^2 calc for each reflection
+      mutable std::map<RefinablePar*, CrystVector_REAL> mFhklCalcReal_FullDeriv, mFhklCalcImag_FullDeriv ;
+      /// F(HKL)^2 calc for each reflection
       mutable CrystVector_REAL mFhklCalcSq ;
+      mutable std::map<RefinablePar*, CrystVector_REAL> mFhklCalcSq_FullDeriv;
       
       /** Pointer to the crystal corresponding to this experiment.
       *
@@ -583,6 +587,7 @@ class ScatteringData: virtual public RefinableObj
       
          /// Geometrical Structure factor for each ScatteringPower, as vectors with NbRefl elements
          mutable map<const ScatteringPower*,CrystVector_REAL> mvRealGeomSF,mvImagGeomSF;
+         mutable map<RefinablePar*,map<const ScatteringPower*,CrystVector_REAL> > mvRealGeomSF_FullDeriv,mvImagGeomSF_FullDeriv;
       
       //Public Clocks
          /// Clock for the list of hkl

@@ -179,6 +179,7 @@ class LSQNumObj
       const CrystVector_REAL& GetLSQWeight() const;
       /// Get the LSQ deriv vector (using either only the top or the hierarchy of object)
       const CrystVector_REAL& GetLSQDeriv(RefinablePar&par);
+      const std::map<RefinablePar*,CrystVector_REAL>& GetLSQ_FullDeriv();
       /** Tell all refined object that the refinement is beginning
       */
       void BeginOptimization(const bool allowApproximations=false, const bool enableRestraints=false);
@@ -232,6 +233,8 @@ class LSQNumObj
       * Individual LSQ functions can be changed using GetRefinedObjMap().
       */
       std::map<RefinableObj*,unsigned int> mvRefinedObjMap;
+      /// Size of each object LSQ data. This is initialized in LSQNumObj::GetLSQObs()
+      mutable std::map<RefinableObj*,unsigned int> mvRefinedObjLSQSize;
       
       /// If true, then parameters to be refined will be copied instead of referenced.
       /// Therefore only their values and the parameter's clocks are affected when
@@ -240,6 +243,7 @@ class LSQNumObj
       /// Temporary arrays for LSQ functions evaluation - used when
       /// using recursive LSQ function
       mutable CrystVector_REAL mLSQObs,mLSQCalc,mLSQWeight,mLSQDeriv;
+      mutable std::map<RefinablePar*,CrystVector_REAL> mLSQ_FullDeriv;
 #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow* parent);

@@ -79,6 +79,8 @@ class DiffractionDataSingleCrystal:public ScatteringData
       * for powder diffraction.
       */
       const CrystVector_REAL& GetIcalc() const;
+      /// \todo
+      std::map<RefinablePar*, CrystVector_REAL> & GetIcalc_FullDeriv(std::set<RefinablePar *> &vPar);
 
       /// Return the array of observed intensities for all peaks
       const CrystVector_REAL& GetIobs() const;
@@ -251,6 +253,7 @@ class DiffractionDataSingleCrystal:public ScatteringData
          virtual const CrystVector_REAL& GetLSQCalc(const unsigned int) const;
          virtual const CrystVector_REAL& GetLSQObs(const unsigned int) const;
          virtual const CrystVector_REAL& GetLSQWeight(const unsigned int) const;
+         virtual std::map<RefinablePar*, CrystVector_REAL> & GetLSQ_FullDeriv(const unsigned int,std::set<RefinablePar *> &vPar);
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
@@ -287,6 +290,7 @@ class DiffractionDataSingleCrystal:public ScatteringData
       virtual void InitRefParList();
       /// Calc intensities
       void CalcIcalc() const;
+      void CalcIcalc_FullDeriv(std::set<RefinablePar *> &vPar);
       virtual CrystVector_long SortReflectionBySinThetaOverLambda(const REAL maxTheta=-1.);
       /// Init options (currently only twinning).
       void InitOptions();
@@ -308,6 +312,8 @@ class DiffractionDataSingleCrystal:public ScatteringData
       CrystVector_REAL mWeight ;
       /// Calculated intensities
       mutable CrystVector_REAL mCalcIntensity ;  
+      ///
+      mutable std::map<RefinablePar*, CrystVector_REAL> mCalcIntensity_FullDeriv;
       /// Scale factor. It is applied when computing intensities. The scale
       ///applies to intensities
       mutable REAL mScaleFactor;
@@ -330,6 +336,7 @@ class DiffractionDataSingleCrystal:public ScatteringData
          mutable CrystVector_REAL mGroupSigma;
          /// The calculated intensities summed on all reflections that are grouped
          mutable CrystVector_REAL mGroupIcalc;
+         mutable std::map<RefinablePar*, CrystVector_REAL> mGroupIcalc_FullDeriv;
          /// The weight on each reflection sum in case of grouped reflections. The sum is the
          /// inverse of the sum of all sigma^2
          mutable CrystVector_REAL mGroupWeight;
@@ -351,7 +358,7 @@ class DiffractionDataSingleCrystal:public ScatteringData
          mutable long mNbGroup;
           /// Number of groups below max[sin(theta)/lambda]
          mutable long mNbGroupUsed;
-        /// Clock for twinning, when the preparation of twinning correction was last made.
+         /// Clock for twinning, when the preparation of twinning correction was last made.
          mutable RefinableObjClock mClockPrepareTwinningCorr;
          
       // The Radiation for this object
