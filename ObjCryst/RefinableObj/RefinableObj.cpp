@@ -220,7 +220,8 @@ RefinablePar::RefinablePar():
 Restraint(),
 mName(""),mpValue(0),mMin(0),mMax(0),
 mHasLimits(false),mIsFixed(true),mIsUsed(true),mIsPeriodic(false),
-mPeriod(0.),mHumanScale(1.),mHasAssignedClock(false),mpClock(0)
+mPeriod(0.),mGlobalOptimStep(1.),mDerivStep(1e-5),mRefParDerivStepModel(REFPAR_DERIV_STEP_ABSOLUTE),
+mSigma(0.),mHumanScale(1.),mHasAssignedClock(false),mpClock(0)
 #ifdef __WX__CRYST__
 ,mpWXFieldRefPar(0)
 #endif
@@ -1751,6 +1752,12 @@ REAL RefinableObj::GetLogLikelihood()const
    return loglike;
 }
 
+// std::map<RefinablePar*, REAL>& RefinableObj::GetLogLikelihood_FullDeriv(std::set<RefinablePar *> &vPar)
+// {
+//    //TODO
+//    return mLogLikelihood_FullDeriv;
+// }
+
 const CrystVector_REAL& RefinableObj::GetLSQCalc(const unsigned int) const
 {
    throw ObjCrystException("Error: called RefinableObj::GetLSQCalc()");
@@ -1775,13 +1782,24 @@ const CrystVector_REAL& RefinableObj::GetLSQWeight(const unsigned int) const
 const CrystVector_REAL& RefinableObj::GetLSQDeriv(const unsigned int n, RefinablePar&par)
 {
    // By default, use numerical derivatives
-   par.Mutate(par.GetDerivStep());
+   const REAL step=par.GetDerivStep();
+   par.Mutate(step);
    mLSQDeriv  =this->GetLSQCalc(n);
-   par.Mutate(-2*par.GetDerivStep());
+   par.Mutate(-2*step);
    mLSQDeriv -=this->GetLSQCalc(n);
-   par.Mutate(par.GetDerivStep());
-   mLSQDeriv /= par.GetDerivStep()/2;
+   par.Mutate(step);
+   mLSQDeriv /= step*2;
    return mLSQDeriv;
+}
+
+std::map<RefinablePar*, CrystVector_REAL> & RefinableObj::GetLSQ_FullDeriv(const unsigned int n,std::set<RefinablePar *> &vPar)
+{
+   mLSQ_FullDeriv[n].clear();
+   mLSQ_FullDeriv[n][(RefinablePar*)0]=this->GetLSQCalc(n);
+   for(std::set<RefinablePar *>::const_iterator pos=vPar.begin();pos!=vPar.end();pos++)
+      mLSQ_FullDeriv[n][*pos]=this->GetLSQDeriv(n,**pos);
+
+   return mLSQ_FullDeriv[n];
 }
 
 void RefinableObj::ResetParList()

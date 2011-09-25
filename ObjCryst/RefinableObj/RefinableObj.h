@@ -1032,10 +1032,24 @@ class RefinableObj
          * \note contrary to the old "Cost Function" approach, with log(Likelihood)
          * there is no 'choice' of cost function, so that it is the task of the 
          * object to give the optimized likelihood (possibly with user options).
-         *
-         * \warning: this is in under heavy development, so expect changes...
          */
          virtual REAL GetLogLikelihood()const;
+         /* Get log(likelihood) and all its first derivative versus a list of parameters.
+         *
+         *  \return: a map, with a RefinablePar pointer as key, and as value the corresponding
+         * derivative. Note that the value of the map for the NULL key is the current value 
+         * for the log(likelihood), which is also returned. The map will include derivatives
+         * only for parameters which have been supplied in vPar - but if a parameter
+         * is listed in vPar and has a null derivative, it may be missing in the returned map.
+         *
+         * \warning: currently in development, to provide faster, analytic derivatives
+         * 
+         * \note:ideally, this function should be const - but since numerical derivatives
+         * may be used before all analytical formulas are entered, a non-const version is
+         * required.
+         * \todo
+         */
+         //virtual std::map<RefinablePar*, REAL>& GetLogLikelihood_FullDeriv(std::set<RefinablePar *> &vPar);
       //LSQ functions
          /// Number of LSQ functions
          virtual unsigned int GetNbLSQFunction()const;
@@ -1057,6 +1071,23 @@ class RefinableObj
          * \todo This should be a const method, and the given RefPar should be const too...
          */
          virtual const CrystVector_REAL& GetLSQDeriv(const unsigned int, RefinablePar&);
+         /** Get the first derivative for the LSQ function for each parameter supplied
+         * in a list.
+         *
+         *  \return: a map, with a RefinablePar pointer as key, and as value the corresponding
+         * derivative vector. Note that the value of the map for the NULL key is the current value 
+         * for the LSQ function, which is also returned. The map will include derivatives
+         * only for parameters which have been supplied in vPar - but if a parameter
+         * is listed in vPar and has a null derivative, the returned vecor will be empty.
+         *
+         * \warning: currently in development, to provide faster, analytic derivatives
+         * 
+         * \note:ideally, this function should be const - but since numerical derivatives
+         * may be used before all analytical formulas are entered, a non-const version is
+         * required.
+         * \todo
+         */
+         virtual std::map<RefinablePar*, CrystVector_REAL> & GetLSQ_FullDeriv(const unsigned int,std::set<RefinablePar *> &vPar);
 
       /// Re-init the list of refinable parameters, removing all parameters.
       /// This does \e not delete the RefinablePar if 
@@ -1227,6 +1258,17 @@ class RefinableObj
       /// Temporary array used to return derivative values of the LSQ function for given
       /// parameters.
       mutable CrystVector_REAL mLSQDeriv;
+      /// Temporary map to return the derivative of the LSQ function versus a list of parameters
+      ///
+      /// Several LSQ functions can be stored.
+      ///
+      /// \todo In development
+      mutable std::map< unsigned int,std::map<RefinablePar*, CrystVector_REAL> > mLSQ_FullDeriv;
+      // Temporary map to return the derivative of log(likelihood) versus a list of parameters
+      //
+      // \todo In development
+      //mutable std::map<RefinablePar*, REAL> mLogLikelihood_FullDeriv;
+
       
       /// Master clock, which is changed whenever the object has been altered.
       /// It should be parent to all clocks recording changes in derived classes.
