@@ -93,6 +93,7 @@ template<class T> void CrystVector<T>::reference(CrystVector &old)
 }
    
 template<class T> long CrystVector<T>::numElements()const {return mNumElements;}
+template<class T> long CrystVector<T>::size()const {return mNumElements;}
    
 template<class T> T CrystVector<T>::sum()const
 {
@@ -138,7 +139,7 @@ template<class T> unsigned long CrystVector<T>::imin(const unsigned long start0,
    register const T *p=this->data()+start;
    tmp=*p++;
    long im=0;
-   for(long i=start+1;i<finish;i++)
+   for(unsigned long i=start+1;i<finish;i++)
    {
       if(tmp>*p) {tmp=*p;im=i;}
       p++;
@@ -157,7 +158,7 @@ template<class T> unsigned long CrystVector<T>::imax(const unsigned long start0,
    register const T *p=this->data()+start;
    tmp=*p++;
    long im=start;
-   for(long i=start+1;i<finish;i++)
+   for(unsigned long i=start+1;i<finish;i++)
    {
       if(tmp<*p) {tmp=*p;im=i;}
       p++;
@@ -482,6 +483,7 @@ template<class T> void CrystMatrix<T>::reference(CrystMatrix<T> &old)
 }
 
 template<class T> long CrystMatrix<T>::numElements()const {return mNumElements;}
+template<class T> long CrystMatrix<T>::size()const {return mNumElements;}
 
 template<class T> T CrystMatrix<T>::sum()const
 {
@@ -738,6 +740,7 @@ template<class T> void CrystArray3D<T>::reference(CrystArray3D<T> &old)
 }
 
 template<class T> long CrystArray3D<T>::numElements()const{return mNumElements;}
+template<class T> long CrystArray3D<T>::size()const{return mNumElements;}
 
 template<class T> T CrystArray3D<T>::sum()const
 {
@@ -1059,7 +1062,7 @@ CrystMatrix_REAL InvertMatrix(const CrystMatrix_REAL &m)
 {//:TODO: Check Pivoting...
    VFN_DEBUG_ENTRY("InvertMatrix()",2)
    VFN_DEBUG_MESSAGE("->Matrix to invert :"<<endl<<m,1)
-   REAL eps = 1e-8;
+   //REAL eps = 1e-8;
    //check matrix is square
       if( (m.rows() != m.cols()) || (m.rows() <2))
       {//DoSomethingBad

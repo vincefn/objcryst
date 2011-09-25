@@ -188,6 +188,7 @@ template<class T> class CrystVector
    void reference(CrystVector &old);
    
    long numElements()const;
+   long size()const;
    T sum()const;
    T min()const;
    T max()const;
@@ -344,6 +345,7 @@ template<class T> class CrystMatrix
 
    void reference(CrystMatrix &old);
    long numElements()const;
+   long size()const;
    T sum()const;
    T min()const;
    T max()const;
@@ -496,6 +498,7 @@ template<class T> class CrystArray3D
 
    void reference(CrystArray3D &old);
    long numElements()const;
+   long size()const;
    T sum()const;
    T min()const;
    T max()const;
