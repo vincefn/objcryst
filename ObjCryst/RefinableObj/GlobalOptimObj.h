@@ -424,6 +424,14 @@ class MonteCarloObj:public OptimizationObj
       LSQNumObj & GetLSQObj();
       /// Access to the builtin LSQ optimization object
       const LSQNumObj & GetLSQObj() const;
+      
+      /** Prepare mLSQ for least-squares refinement during the global optimization
+      *
+      * \param useFullPowderPatternProfile: if true, the refinement will use the full
+      * profile version of powder patterns, otherwise only the integrated powder pattern
+      * will be used (faster).
+      */
+      virtual void InitLSQ(const bool useFullPowderPatternProfile=true);
    protected:
       
       /** \brief Make a random change in the configuration.
@@ -443,14 +451,6 @@ class MonteCarloObj:public OptimizationObj
       virtual void NewConfiguration(const RefParType *type=gpRefParTypeObjCryst);
       
       virtual void InitOptions();
-      
-      /** Prepare mLSQ for least-squares refinement during the global optimization
-      *
-      * \param useFullPowderPatternProfile: if true, the refinement will use the full
-      * profile version of powder patterns, otherwise only the integrated powder pattern
-      * will be used (faster).
-      */
-      virtual void InitLSQ(const bool useFullPowderPatternProfile=true);
             
       /// Method used for the global optimization. Should be removed when we switch
       /// to using several classes for different algorithms.
