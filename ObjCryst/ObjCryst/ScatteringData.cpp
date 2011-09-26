@@ -1145,6 +1145,20 @@ void ScatteringData::CalcSinThetaLambda()const
    VFN_DEBUG_EXIT("ScatteringData::CalcSinThetaLambda()",3)
 }
 
+REAL ScatteringData::CalcSinThetaLambda(REAL h, REAL k, REAL l)const
+{
+   const REAL a=mpCrystal->GetLatticePar(0);
+   const REAL b=mpCrystal->GetLatticePar(1);
+   const REAL c=mpCrystal->GetLatticePar(2);
+   const REAL ca=cos(mpCrystal->GetLatticePar(3));
+   const REAL sa=sin(mpCrystal->GetLatticePar(3));
+   const REAL cb=cos(mpCrystal->GetLatticePar(4));
+   const REAL sb=sin(mpCrystal->GetLatticePar(4));
+   const REAL cg=cos(mpCrystal->GetLatticePar(5));
+   const REAL sg=sin(mpCrystal->GetLatticePar(5));
+   return 0.5*sqrt((h*h/(a*a)*sa*sa+k*k/(b*b)*sb*sb+l*l/(c*c)*sg*sg+2*k*l/(b*c)*(cb*cg-ca)+2*l*h/(c*a)*(cg*ca-cb)+2*h*k/(a*b)*(ca*cb-cg))/(1-ca*ca-cb*cb-cg*cg+2*ca*cb*cg));
+}
+
 void ScatteringData::CalcScattFactor()const
 {
    //if(mClockScattFactor>mClockMaster) return;

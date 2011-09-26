@@ -472,6 +472,8 @@ class ScatteringData: virtual public RefinableObj
          /// for all reflections. theta and tan(theta), 
          /// are also re-computed, provided a wavelength has been supplied.
          virtual void CalcSinThetaLambda()const;
+         /// Calculate sin(theta)/lambda for a single reflection
+         REAL CalcSinThetaLambda(REAL h, REAL k, REAL l)const;
          /// \internal Get scattering factors for all ScatteringPower & reflections
          void CalcScattFactor()const;
          /// \internal Compute thermic factors for all ScatteringPower & reflections
