@@ -1252,47 +1252,112 @@ void PowderPatternDiffraction::CalcPowderPattern_FullDeriv(std::set<RefinablePar
    TAU_PROFILE("PowderPatternDiffraction::CalcPowderPattern_FullDeriv()","void ()",TAU_DEFAULT);
    //cout<<"PowderPatternDiffraction::CalcPowderPattern_FullDeriv"<<endl;
    this->CalcPowderPattern();
-   this->CalcIhkl_FullDeriv(vPar);
-   
-   this->CalcPowderReflProfile();//:TODO: profile derivatives
+   bool notYetDerivIhkl=true,notYetDerivProfiles=true;
+   mIhkl_FullDeriv.clear();
+   mvReflProfile_FullDeriv.clear();
    mPowderPattern_FullDeriv.clear();
+   for(std::set<RefinablePar*>::iterator par=vPar.begin();par!=vPar.end();++par)
+   {
+      if(*par==0) continue;
+      if((*par)->IsFixed()) continue;
+      if((*par)->IsUsed()==false) continue;
+      if(  (*par)->GetType()->IsDescendantFromOrSameAs(gpRefParTypeScatt)
+         ||(*par)->GetType()->IsDescendantFromOrSameAs(gpRefParTypeScattPow))
+      {
+         this->CalcIhkl_FullDeriv(vPar);
+      }
+      if(notYetDerivProfiles)
+      {
+         if(  (*par)->GetType()->IsDescendantFromOrSameAs(gpRefParTypeRadiation)
+            ||(*par)->GetType()->IsDescendantFromOrSameAs(gpRefParTypeUnitCell)
+            ||(*par)->GetType()->IsDescendantFromOrSameAs(gpRefParTypeScattDataCorrPos)
+            ||(*par)->GetType()->IsDescendantFromOrSameAs(gpRefParTypeScattDataProfile))
+         {
+            this->CalcPowderReflProfile_FullDeriv(vPar);
+            notYetDerivProfiles=false;
+         }
+      }
+   }
+   
+   //this->CalcPowderReflProfile();
    for(std::set<RefinablePar*>::iterator par=vPar.begin();par!=vPar.end();++par)
    {
       if(*par==0) mPowderPattern_FullDeriv[*par]=this->GetPowderPatternCalc();
       else
       {
-         if(mIhkl_FullDeriv[*par].size()==0) continue;
-         const long nbRefl=this->GetNbRefl();
-         long step; // number of reflections at the same place and with the same (assumed) profile
-         const long  specNbPoints=mpParentPowderPattern->GetNbPoint();
-         mPowderPattern_FullDeriv[*par].resize(specNbPoints);
-         mPowderPattern_FullDeriv[*par]=0;
-
-         for(long i=0;i<mNbRefl;i += step)
+         if((*par)->IsFixed()) continue;
+         if((*par)->IsUsed()==false) continue;
+         if(mIhkl_FullDeriv[*par].size()!=0)
          {
-            if(mvReflProfile[i].profile.numElements()==0)
+            const long nbRefl=this->GetNbRefl();
+            long step; // number of reflections at the same place and with the same (assumed) profile
+            const long  specNbPoints=mpParentPowderPattern->GetNbPoint();
+            mPowderPattern_FullDeriv[*par].resize(specNbPoints);
+            mPowderPattern_FullDeriv[*par]=0;
+
+            for(long i=0;i<mNbReflUsed;i += step)
             {
-               step=1;
-               if(i>=mNbReflUsed) break;
-               else continue;
+               if(mvReflProfile[i].profile.numElements()==0)
+               {
+                  step=1;
+                  if(i>=mNbReflUsed) break;
+                  else continue;
+               }
+                     
+               REAL intensity=0.;
+               //check if the next reflection is at the same theta. If this is true,
+               //Then assume that the profile is exactly the same, unless it is anisotropic
+               for(step=0; ;)
+               {
+                  intensity += mIhkl_FullDeriv[*par](i + step);
+                  step++;
+                  if(mpReflectionProfile->IsAnisotropic()) break;// Anisotropic profiles
+                  if( (i+step) >= nbRefl) break;
+                  if(mSinThetaLambda(i+step) > (mSinThetaLambda(i)+1e-5) ) break;
+               }
+               {
+                  const unsigned long first=mvReflProfile[i].first,last=mvReflProfile[i].last;
+                  const REAL *p2 = mvReflProfile[i].profile.data();
+                  REAL *p3 = mPowderPattern_FullDeriv[*par].data()+first;
+                  for(unsigned long j=first;j<=last;j++) *p3++ += *p2++ * intensity;
+               }
             }
-                  
-            REAL intensity=0.;
-            //check if the next reflection is at the same theta. If this is true,
-            //Then assume that the profile is exactly the same, unless it is anisotropic
-            for(step=0; ;)
+         }
+         if(mvReflProfile_FullDeriv[*par].size()!=0)
+         {
+            const long nbRefl=this->GetNbRefl();
+            long step; // number of reflections at the same place and with the same (assumed) profile
+            const long  specNbPoints=mpParentPowderPattern->GetNbPoint();
+            mPowderPattern_FullDeriv[*par].resize(specNbPoints);
+            mPowderPattern_FullDeriv[*par]=0;// :TODO: use only the number of points actually used
+            cout<<__FILE__<<":"<<__LINE__<<":PowderPatternDiffraction::CalcPowderPattern_FullDeriv():par="<<(*par)->GetName()<<endl;
+            for(long i=0;i<mNbReflUsed;i += step)
             {
-               intensity += mIhkl_FullDeriv[*par](i + step);
-               step++;
-               if(mpReflectionProfile->IsAnisotropic()) break;// Anisotropic profiles
-               if( (i+step) >= nbRefl) break;
-               if(mSinThetaLambda(i+step) > (mSinThetaLambda(i)+1e-5) ) break;
-            }
-            {//:TODO: handle profile derivatives
-               const unsigned long first=mvReflProfile[i].first,last=mvReflProfile[i].last;
-               const REAL *p2 = mvReflProfile[i].profile.data();
-               REAL *p3 = mPowderPattern_FullDeriv[*par].data()+first;
-               for(unsigned long j=first;j<=last;j++) *p3++ += *p2++ * intensity;
+               if(mvReflProfile[i].profile.numElements()==0)
+               {
+                  step=1;
+                  if(i>=mNbReflUsed) break;
+                  else continue;
+               }
+                     
+               REAL intensity=0.;
+               //check if the next reflection is at the same theta. If this is true,
+               //Then assume that the profile is exactly the same, unless it is anisotropic
+               for(step=0; ;)
+               {
+                  intensity += mIhklCalc(i + step);
+                  step++;
+                  if(mpReflectionProfile->IsAnisotropic()) break;// Anisotropic profiles
+                  if( (i+step) >= nbRefl) break;
+                  if(mSinThetaLambda(i+step) > (mSinThetaLambda(i)+1e-5) ) break;
+               }
+               if(mvReflProfile_FullDeriv[*par][i].size()>0)// Some profiles may be unaffected by a given parameter
+               {
+                  const unsigned long first=mvReflProfile[i].first,last=mvReflProfile[i].last;
+                  const REAL *p2 = mvReflProfile_FullDeriv[*par][i].data();
+                  REAL *p3 = mPowderPattern_FullDeriv[*par].data()+first;
+                  for(unsigned long j=first;j<=last;j++) *p3++ += *p2++ * intensity;
+               }
             }
          }
       }
@@ -1678,6 +1743,162 @@ Computing all Profiles: Reflection #"<<i,5)
    VFN_DEBUG_EXIT("PowderPatternDiffraction::CalcPowderReflProfile()",5)
 }
 
+void PowderPatternDiffraction::CalcPowderReflProfile_FullDeriv(std::set<RefinablePar *> &vPar)
+{
+   TAU_PROFILE("PowderPatternDiffraction::CalcPowderReflProfile_FullDeriv()","void (bool)",TAU_DEFAULT);
+   cout<<__FILE__<<":"<<__LINE__<<":PowderPatternDiffraction::CalcPowderReflProfile_FullDeriv()"<<endl;
+   this->CalcPowderReflProfile();
+   unsigned int nbLine=1;
+   CrystVector_REAL spectrumDeltaLambdaOvLambda;
+   CrystVector_REAL spectrumFactor;//relative weigths of different lines of X-Ray tube
+   switch(this->GetRadiation().GetWavelengthType())
+   {
+      case WAVELENGTH_MONOCHROMATIC:
+      {
+         spectrumDeltaLambdaOvLambda.resize(1);spectrumDeltaLambdaOvLambda=0.0;
+         spectrumFactor.resize(1);spectrumFactor=1.0;
+         break;
+      }
+      case WAVELENGTH_ALPHA12:
+      {
+         nbLine=2;
+         spectrumDeltaLambdaOvLambda.resize(2);
+         spectrumDeltaLambdaOvLambda(0)
+            =-this->GetRadiation().GetXRayTubeDeltaLambda()
+             *this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio()
+             /(1+this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio())
+             /this->GetRadiation().GetWavelength()(0);
+         spectrumDeltaLambdaOvLambda(1)
+            = this->GetRadiation().GetXRayTubeDeltaLambda()
+             /(1+this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio())
+             /this->GetRadiation().GetWavelength()(0);
+         
+         spectrumFactor.resize(2);
+         spectrumFactor(0)=1./(1.+this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio());
+         spectrumFactor(1)=this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio()
+                           /(1.+this->GetRadiation().GetXRayTubeAlpha2Alpha1Ratio());
+         break;
+      }
+      case WAVELENGTH_TOF:
+      {
+         spectrumDeltaLambdaOvLambda.resize(1);spectrumDeltaLambdaOvLambda=0.0;
+         spectrumFactor.resize(1);spectrumFactor=1.0;
+         break;
+      }
+      default: throw ObjCrystException("PowderPatternDiffraction::CalcPowderReflProfile_FullDeriv():\
+Radiation must be either monochromatic, from an X-Ray Tube, or neutron TOF !!");
+   }
+   REAL center,// center of current reflection (depends on line if several)
+        x0;    // theoretical (uncorrected for zero's, etc..) position of center of line
+   long first,last;// first & last point of the stored profile
+   CrystVector_REAL vx,reflProfile,tmpV;
+   
+   // Derivative vs the shift of the reflection center
+   vector<CrystVector_REAL> vReflProfile_DerivCenter(mNbReflUsed);
+   
+   mvReflProfile_FullDeriv.clear();
+   for(std::set<RefinablePar*>::iterator par=vPar.begin();par!=vPar.end();++par)
+   {
+      if(*par==0) continue;
+      if(  (*par)->GetType()->IsDescendantFromOrSameAs(gpRefParTypeRadiation)
+         ||(*par)->GetType()->IsDescendantFromOrSameAs(gpRefParTypeUnitCell)
+         ||(*par)->GetType()->IsDescendantFromOrSameAs(gpRefParTypeScattDataCorrPos)
+         ||(*par)->GetType()->IsDescendantFromOrSameAs(gpRefParTypeScattDataProfile))
+      {
+         mvReflProfile_FullDeriv[*par].resize(mNbReflUsed);
+         
+         for(unsigned int line=0;line<nbLine;line++)
+         {
+            for(long i=0;i<mNbReflUsed;i++)
+            {
+               x0=mpParentPowderPattern->STOL2X(mSinThetaLambda(i));
+
+               if(nbLine>1)
+               {// we have several lines, not centered on the profile range
+                  center = mpParentPowderPattern->X2XCorr(
+                              x0+2*tan(x0/2.0)*spectrumDeltaLambdaOvLambda(line));
+               }
+               else center=mpParentPowderPattern->X2XCorr(x0);
+               REAL fact=1.0;
+               if(!mUseFastLessPreciseFunc) fact=5.0;
+               const REAL halfwidth=mpReflectionProfile->GetFullProfileWidth(0.04,center,mH(i),mK(i),mL(i))*fact;
+
+               first=mvReflProfile[i].first;
+               last=mvReflProfile[i].last;
+               if((last>=0)&&(first<(long)(mpParentPowderPattern->GetNbPoint())))
+                  vx.resize(last-first+1);
+               else vx.resize(0);
+               vx.resize(last-first+1);
+               if((last>=0)&&(first<(long)(mpParentPowderPattern->GetNbPoint())))
+               {
+                  {
+                     const REAL *p0=mpParentPowderPattern->GetPowderPatternX().data()+first;
+                     REAL *p1=vx.data();
+                     for(long i=first;i<=last;i++) *p1++ = *p0++;
+                  }
+                  
+                  if((*par)->GetType()->IsDescendantFromOrSameAs(gpRefParTypeScattDataProfile))
+                  {// Parameter only affects profile
+                     //if(i==0) cout<<"PowderPatternDiffraction::CalcPowderReflProfile_FullDeriv()par="<<(*par)->GetName()<<":refl #"<<i<<endl;
+                     //:TODO: analytical derivatives
+                     const REAL step=(*par)->GetDerivStep();
+                     (*par)->Mutate(step);
+                     reflProfile=mpReflectionProfile->GetProfile(vx,center,mH(i),mK(i),mL(i));
+                     (*par)->Mutate(-2*step);
+                     reflProfile-=mpReflectionProfile->GetProfile(vx,center,mH(i),mK(i),mL(i));
+                     (*par)->Mutate(step);
+                     reflProfile/=2*step;
+                  }
+                  else 
+                  {// Parameter affects reflection center
+                     REAL dcenter=0;
+                     {
+                        //:TODO: analytical derivatives
+                        const REAL step=(*par)->GetDerivStep();
+                        (*par)->Mutate(step);
+                        REAL x1=mpParentPowderPattern->STOL2X(this->CalcSinThetaLambda(mH(i),mK(i),mL(i)));
+                        if(nbLine>1) dcenter = mpParentPowderPattern->X2XCorr(x1+2*tan(x1/2.0)*spectrumDeltaLambdaOvLambda(line));
+                        else         dcenter = mpParentPowderPattern->X2XCorr(x1);
+                        (*par)->Mutate(-2*step);
+                        x1=mpParentPowderPattern->STOL2X(this->CalcSinThetaLambda(mH(i),mK(i),mL(i)));
+                        if(nbLine>1) dcenter-= mpParentPowderPattern->X2XCorr(x1+2*tan(x1/2.0)*spectrumDeltaLambdaOvLambda(line));
+                        else         dcenter-= mpParentPowderPattern->X2XCorr(x1);
+                        (*par)->Mutate(step);
+                        dcenter/=2*step;
+                     }
+               
+                     if(dcenter!=0)
+                     {
+                        //if(i==0) cout<<"PowderPatternDiffraction::CalcPowderReflProfile_FullDeriv()par="<<(*par)->GetName()<<":refl #"<<i<<", dcenter="<<setw(8)<<dcenter<<endl;
+                        if(vReflProfile_DerivCenter[i].size()==0)
+                        {
+                           const REAL step=1e-4;//:TODO: adapt for TOF
+                           vReflProfile_DerivCenter[i] =mpReflectionProfile->GetProfile(vx,center+step,mH(i),mK(i),mL(i));
+                           vReflProfile_DerivCenter[i]-=mpReflectionProfile->GetProfile(vx,center-step,mH(i),mK(i),mL(i));
+                           vReflProfile_DerivCenter[i]/=2*step;
+                        }
+                        reflProfile=vReflProfile_DerivCenter[i];
+                        reflProfile*=dcenter;
+                     }
+                     else 
+                     {
+                        //if(i==0) cout<<"PowderPatternDiffraction::CalcPowderReflProfile_FullDeriv()par="<<(*par)->GetName()<<":refl #"<<i<<" => Parameter affects nothing ?"<<endl;
+                        reflProfile.resize(0);
+                     }
+                  }
+                  if(reflProfile.size()>0)
+                  {
+                     if(nbLine>1) reflProfile *=spectrumFactor(line);
+                     if(line==0) mvReflProfile_FullDeriv[*par][i] = reflProfile;
+                     else mvReflProfile_FullDeriv[*par][i] += reflProfile;
+                  }
+               }
+            }
+         }
+      }
+   }
+}
+
 void PowderPatternDiffraction::CalcIntensityCorr()const
 {
    bool needRecalc=false;
@@ -1824,6 +2045,7 @@ void PowderPatternDiffraction::CalcIhkl() const
    mClockIhklCalc.Click();
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcIhkl():End",3)
 }
+
 void PowderPatternDiffraction::CalcIhkl_FullDeriv(std::set<RefinablePar*> &vPar)
 {
    TAU_PROFILE("PowderPatternDiffraction::CalcIhkl_FullDeriv()","void ()",TAU_DEFAULT);

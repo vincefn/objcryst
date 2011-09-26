@@ -385,7 +385,10 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       
       /// \internal Calc reflection profiles for ALL reflections (powder diffraction)
       void CalcPowderReflProfile()const;
-      /// \internal Calc Lorentz-Polarisation-APerture correction
+      /// \internal Calc derivatives of reflection profiles for all used reflections,
+      /// for a given list of refinable parameters
+      void CalcPowderReflProfile_FullDeriv(std::set<RefinablePar *> &vPar);
+      /// \internal Calc Lorentz-Polarisation-Aperture correction
       void CalcIntensityCorr()const;
       /// \internal Compute the intensity for all reflections (taking into account
       /// corrections, but not the multiplicity)
@@ -463,6 +466,10 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
          };
          ///Reflection profiles for ALL reflections during the last powder pattern generation
          mutable vector<ReflProfile> mvReflProfile;
+         /// Derivatives of reflection profiles versus a list of parameters. This will be limited
+         /// to the reflections actually used. First and last point of each profile
+         /// are the same as in mvReflProfile.
+         mutable std::map<RefinablePar*,vector<CrystVector_REAL> > mvReflProfile_FullDeriv;
       
       // When using integrated profiles
          /** For each reflection, store the integrated value of the normalized
