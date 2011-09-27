@@ -21,7 +21,7 @@
 *
 */
 
-#include <cmath>
+#include <cstdlib>
 
 #include <typeinfo>
 #include <stdio.h> //for sprintf()
