@@ -27,6 +27,10 @@
    #include "ObjCryst/wxCryst/wxPowderPattern.h"
 #endif
 
+#ifdef HAVE_SSE_MATHFUN
+#include "ObjCryst/Quirks/sse_mathfun.h"
+#endif
+
 namespace ObjCryst
 {
 #if defined(_MSC_VER) || defined(__BORLANDC__)
@@ -945,11 +949,17 @@ CrystVector_REAL PowderProfileGauss  (const CrystVector_REAL ttheta,const REAL f
    long i=nbPoints;
    for(;i>3;i-=4)
    {
+     #ifdef HAVE_SSE_MATHFUN
+     v4sf x=_mm_load_ps(p);
+     _mm_store_ps(p,exp_ps(x));
+     p+=4;
+     #else
      for(unsigned int j=0;j<4;++j)
      {// Fixed-length loop enables vectorization
        *p = exp(*p) ; 
        p++ ;
      }
+     #endif
    }
    for(;i>0;i--) { *p = exp(*p) ; p++ ;}
    #endif

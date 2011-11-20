@@ -44,6 +44,10 @@
 #include <iomanip>
 #include <stdio.h> //for sprintf()
 
+#ifdef HAVE_SSE_MATHFUN
+#include "ObjCryst/Quirks/sse_mathfun.h"
+#endif
+
 namespace ObjCryst
 {
 const RefParType *gpRefParTypeScattData= 0;
@@ -67,6 +71,8 @@ const RefParType *gpRefParTypeRadiation=0;
 const RefParType *gpRefParTypeRadiationWavelength=0;
 
 long NiftyStaticGlobalObjectsInitializer_ScatteringData::mCount=0;
+
+#ifndef HAVE_SSE_MATHFUN
 //######################################################################
 //    Tabulated math functions for faster (&less precise) F(hkl) calculation
 //These function are defined and used in cristallo-spacegroup.cpp
@@ -128,7 +134,7 @@ void DeleteLibCrystTabulExp() { delete[] spLibCrystTabulExp;}
 
 //:KLUDGE: The allocated memory for cos and sin table is never freed...
 // This should be done after the last ScatteringData object is deleted.
-
+#endif
 ////////////////////////////////////////////////////////////////////////
 //
 //    Radiation
@@ -1615,10 +1621,10 @@ void ScatteringData::CalcGeomStructFactor() const
       const int nbRefl=this->GetNbRefl();
       const std::vector<SpaceGroup::TRx> *pTransVect=&(pSpg->GetTranslationVectors());
       CrystMatrix_REAL allCoords(nbSymmetrics,3);
-      CrystVector_REAL tmpVect(nbRefl);
-      
+      CrystVector_REAL tmpVect(mNbReflUsed);
+      #ifndef HAVE_SSE_MATHFUN
       CrystVector_long intVect(nbRefl);//not used if mUseFastLessPreciseFunc==false
-      
+      #endif
       // which scattering powers are actually used ?
       map<const ScatteringPower*,bool> vUsed;
       // Add existing previously used scattering power to the test;
@@ -1638,8 +1644,8 @@ void ScatteringData::CalcGeomStructFactor() const
       {
          if(pos->second)
          {// this will create the entry if it does not already exist
-            mvRealGeomSF[pos->first].resize(nbRefl);
-            mvImagGeomSF[pos->first].resize(nbRefl);
+            mvRealGeomSF[pos->first].resize(mNbReflUsed);
+            mvImagGeomSF[pos->first].resize(mNbReflUsed);
             mvRealGeomSF[pos->first]=0;
             mvImagGeomSF[pos->first]=0;
          }
@@ -1654,6 +1660,8 @@ void ScatteringData::CalcGeomStructFactor() const
          }
       }
       
+      REAL centrMult=1.0;
+      if(true==pSpg->HasInversionCenter()) centrMult=2.0;
       for(long i=0;i<nbComp;i++)
       {
          VFN_DEBUG_MESSAGE("ScatteringData::GeomStructFactor(),comp"<<i,3)
@@ -1661,8 +1669,6 @@ void ScatteringData::CalcGeomStructFactor() const
          const REAL y=(*pScattCompList)(i).mY;
          const REAL z=(*pScattCompList)(i).mZ;
          const ScatteringPower *pScattPow=(*pScattCompList)(i).mpScattPow;
-         REAL centrMult=1.0;
-         if(true==pSpg->HasInversionCenter()) centrMult=2.0;
          const REAL popu= (*pScattCompList)(i).mOccupancy 
                          *(*pScattCompList)(i).mDynPopCorr
                          *centrMult;
@@ -1684,6 +1690,7 @@ void ScatteringData::CalcGeomStructFactor() const
          {
             VFN_DEBUG_MESSAGE("ScatteringData::GeomStructFactor(),comp #"<<i<<", sym #"<<j,3)
             
+            #ifndef HAVE_SSE_MATHFUN
             if(mUseFastLessPreciseFunc==true)
             {
                REAL * RESTRICT rrsf=mvRealGeomSF[pScattPow].data();
@@ -1727,6 +1734,7 @@ void ScatteringData::CalcGeomStructFactor() const
                }
             }
             else
+            #endif
             {
                const REAL x=allCoords(j,0);
                const REAL y=allCoords(j,1);
@@ -1734,9 +1742,55 @@ void ScatteringData::CalcGeomStructFactor() const
                const register REAL *hh=mH2Pi.data();
                const register REAL *kk=mK2Pi.data();
                const register REAL *ll=mL2Pi.data();
+               
+               
+               #ifdef HAVE_SSE_MATHFUN
+               const v4sf v4popu=_mm_load1_ps(&popu);// Can't multiply directly a vector by a scalar ?
+               if(false==pSpg->HasInversionCenter())
+               {
+                  REAL *rsf=mvRealGeomSF[pScattPow].data();
+                  REAL *isf=mvImagGeomSF[pScattPow].data();
+                  int jj=mNbReflUsed;
+                  for(;jj>3;jj-=4)
+                  {
+                      v4sf v4sin,v4cos;
+                      sincos_ps(_mm_setr_ps(*(hh  )*x+ *(kk  )*y + *(ll  )*z,
+                                            *(hh+1)*x+ *(kk+1)*y + *(ll+1)*z,
+                                            *(hh+2)*x+ *(kk+2)*y + *(ll+2)*z,
+                                            *(hh+3)*x+ *(kk+3)*y + *(ll+3)*z),&v4sin,&v4cos);
+                      _mm_store_ps(rsf,_mm_add_ps(_mm_mul_ps(v4cos,v4popu),_mm_load_ps(rsf)));
+                      _mm_store_ps(rsf,_mm_add_ps(_mm_mul_ps(v4sin,v4popu),_mm_load_ps(isf)));
+                      
+                      hh+=4;kk+=4;ll+=4;rsf+=4;isf+=4;
+                  }
+                  for(;jj>0;jj--)
+                  {
+                    const REAL tmp = *hh++ * x + *kk++ * y + *ll++ *z;
+                    *rsf++ += popu * cos(tmp);
+                    *isf++ += popu * sin(tmp);
+                  }
+               }
+               else
+               {
+                  REAL *rsf=mvRealGeomSF[pScattPow].data();
+                  int jj=mNbReflUsed;
+                  for(;jj>3;jj-=4)
+                  {
+                      const v4sf v4cos=cos_ps(_mm_setr_ps(*(hh  )*x+ *(kk  )*y + *(ll  )*z,
+                                                          *(hh+1)*x+ *(kk+1)*y + *(ll+1)*z,
+                                                          *(hh+2)*x+ *(kk+2)*y + *(ll+2)*z,
+                                                          *(hh+3)*x+ *(kk+3)*y + *(ll+3)*z));
+                      _mm_store_ps(rsf,_mm_add_ps(_mm_load_ps(rsf),_mm_mul_ps(v4cos,v4popu)));
+                      hh+=4;kk+=4;ll+=4;rsf+=4;
+                  }
+                  for(;jj>0;jj--)
+                  {
+                    const REAL tmp = *hh++ * x + *kk++ * y + *ll++ *z;
+                    *rsf++ += popu * cos(tmp);
+                  }
+               }
+               #else
                register REAL *tmp=tmpVect.data();
-               
-               
                for(int jj=0;jj<mNbReflUsed;jj++) *tmp++ = *hh++ * x + *kk++ * y + *ll++ *z;
                
                REAL *sf=mvRealGeomSF[pScattPow].data();
@@ -1750,6 +1804,7 @@ void ScatteringData::CalcGeomStructFactor() const
                   tmp=tmpVect.data();
                   for(int jj=0;jj<mNbReflUsed;jj++) *sf++ += popu * sin(*tmp++);
                }
+               #endif
             }
          }
       }//for all components...

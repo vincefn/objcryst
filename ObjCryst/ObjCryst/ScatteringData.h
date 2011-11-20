@@ -38,12 +38,13 @@
 
 namespace ObjCryst
 {
+#ifndef HAVE_SSE_MATHFUN
 //initialize tabulated values of cosine
 void InitLibCrystTabulCosine();
 void DeleteLibCrystTabulCosine();
 void InitLibCrystTabulExp();
 void DeleteLibCrystTabulExp();
-
+#endif
 /// Generic type for scattering data
 extern const RefParType *gpRefParTypeScattData;
 /// Type for scattering data scale factors
@@ -87,8 +88,10 @@ class NiftyStaticGlobalObjectsInitializer_ScatteringData
       {
          if (mCount++ == 0)
          {
+            #ifndef HAVE_SSE_MATHFUN
             InitLibCrystTabulCosine();
             InitLibCrystTabulExp();
+            #endif
             gpRefParTypeScattData= new RefParType(gpRefParTypeObjCryst,"Scattering Data");
             gpRefParTypeScattDataScale= new RefParType(gpRefParTypeObjCryst,"Scale Factor");
             gpRefParTypeScattDataProfile= new RefParType(gpRefParTypeScattData,"Profile");
@@ -113,8 +116,10 @@ class NiftyStaticGlobalObjectsInitializer_ScatteringData
       {
          if (--mCount == 0)
          {
+            #ifndef HAVE_SSE_MATHFUN
             DeleteLibCrystTabulCosine();
             DeleteLibCrystTabulExp();
+            #endif
             delete gpRefParTypeScattData;
             delete gpRefParTypeScattDataScale;
             delete gpRefParTypeScattDataProfile;
@@ -151,7 +156,6 @@ class NiftyStaticGlobalObjectsInitializer_ScatteringData
       static long mCount;
 };
 static NiftyStaticGlobalObjectsInitializer_ScatteringData NiftyStaticGlobalObjectsInitializer_ScatteringData_counter;
-
 //######################################################################
 /** \brief Class to define the radiation (type, monochromaticity, wavelength(s)) of an experiment
 *
