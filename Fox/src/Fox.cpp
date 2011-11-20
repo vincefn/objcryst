@@ -327,6 +327,7 @@ IMPLEMENT_APP(MyApp)
 // ============================================================================
 
 int STRCMP(wxChar* s1,wxChar* s2) {return wxStrcmp(s1,s2);}
+int STRCMP(wxChar* s1,wxString s2) {return wxStrcmp(s1,s2.c_str());}
 
 // 'Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
