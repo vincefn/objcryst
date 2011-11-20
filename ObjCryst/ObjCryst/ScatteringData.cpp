@@ -1759,7 +1759,7 @@ void ScatteringData::CalcGeomStructFactor() const
                                             *(hh+2)*x+ *(kk+2)*y + *(ll+2)*z,
                                             *(hh+3)*x+ *(kk+3)*y + *(ll+3)*z),&v4sin,&v4cos);
                       _mm_store_ps(rsf,_mm_add_ps(_mm_mul_ps(v4cos,v4popu),_mm_load_ps(rsf)));
-                      _mm_store_ps(rsf,_mm_add_ps(_mm_mul_ps(v4sin,v4popu),_mm_load_ps(isf)));
+                      _mm_store_ps(isf,_mm_add_ps(_mm_mul_ps(v4sin,v4popu),_mm_load_ps(isf)));
                       
                       hh+=4;kk+=4;ll+=4;rsf+=4;isf+=4;
                   }
@@ -2027,12 +2027,35 @@ void ScatteringData::CalcGeomStructFactor_FullDeriv(std::set<RefinablePar*> &vPa
             const register REAL *hh=mH2Pi.data();
             const register REAL *kk=mK2Pi.data();
             const register REAL *ll=mL2Pi.data();
+            #ifdef HAVE_SSE_MATHFUN
+            const v4sf v4popu=_mm_load1_ps(&popu);// Can't multiply directly a vector by a scalar ?
+            int jj=mNbReflUsed;
+            for(;jj>3;jj-=4)
+            {
+                v4sf v4sin,v4cos;
+                sincos_ps(_mm_setr_ps(*(hh  )*x+ *(kk  )*y + *(ll  )*z,
+                                      *(hh+1)*x+ *(kk+1)*y + *(ll+1)*z,
+                                      *(hh+2)*x+ *(kk+2)*y + *(ll+2)*z,
+                                      *(hh+3)*x+ *(kk+3)*y + *(ll+3)*z),&v4sin,&v4cos);
+                _mm_store_ps(pc,v4cos);
+                _mm_store_ps(ps,v4sin);
+                
+                hh+=4;kk+=4;ll+=4;pc+=4;ps+=4;
+            }
+            for(;jj>0;jj--)
+            {
+               const REAL tmp = *hh++ * x + *kk++ * y + *ll++ *z;
+               *pc++ =cos(tmp);
+               *ps++ =sin(tmp);
+            }
+            #else
             for(int jj=0;jj<mNbReflUsed;jj++)
             {
                const REAL tmp = *hh++ * x + *kk++ * y + *ll++ *z;
                *pc++ =cos(tmp);
                *ps++ =sin(tmp);
             }
+            #endif
          }
          for(std::set<RefinablePar*>::iterator par=vPar.begin();par!=vPar.end();++par)
          {
