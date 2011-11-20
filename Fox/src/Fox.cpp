@@ -337,8 +337,8 @@ int STRCMP(const char* s1,const char* s2){ return strcmp(s1,s2);}
 int main (int argc, char *argv[])
 #endif
 {
-   TAU_PROFILE_SET_NODE(0); // sequential code 
    TAU_PROFILE("main()","int()",TAU_DEFAULT);
+   TAU_PROFILE_SET_NODE(0);
    //set locale settings to standard
    setlocale(LC_NUMERIC,"C");
    
@@ -371,6 +371,9 @@ int main (int argc, char *argv[])
    bool runclient(false);
    long nbCPUs = -1;
    string IP;
+   bool testLSQ=false;
+   bool testMC=false;
+   bool testSPEED=false;
    for(int i=1;i<argc;i++)
    {
        #ifdef __WX__CRYST__
@@ -540,9 +543,18 @@ int main (int argc, char *argv[])
       }
       if(STRCMP(_T("--speedtest"),argv[i])==0)
       {
-         standardSpeedTest();
-         TAU_REPORT_STATISTICS();
-         exit(0);
+         testSPEED=true;
+         continue;
+      }
+      if(STRCMP(_T("--test-lsq"),argv[i])==0)
+      {
+         testLSQ=true;
+         continue;
+      }
+      if(STRCMP(_T("--test-mc"),argv[i])==0)
+      {
+         testMC=true;
+         continue;
       }
       if(STRCMP(_T("--exportfullprof"),argv[i])==0)
       {
@@ -1107,6 +1119,50 @@ int main (int argc, char *argv[])
 #ifndef __WX__CRYST__
    useGUI=false;
 #endif
+   if(testLSQ)
+   {
+      for(int i=0;i<gOptimizationObjRegistry.GetNb();i++)
+      {
+         MonteCarloObj *pMonteCarloObj=dynamic_cast<MonteCarloObj *>(&(gOptimizationObjRegistry.GetObj(i)));
+         Chronometer chrono;
+         pMonteCarloObj->InitLSQ(false);
+         cout<<"Fox: running LSQ test for profiling"<<endl;
+         chrono.start();
+         pMonteCarloObj->GetLSQObj().Refine(100,true,true,true);
+         cout<<" LSQ tests - SUCCESS -, elapsed time for 100 cycles (full pattern=true ):"<<chrono.seconds()<<endl;
+      }
+      //TAU_REPORT_STATISTICS();
+      #ifdef __WX__CRYST__
+      this->OnExit();
+      #endif
+      return 0;
+   }
+   if(testMC)
+   {
+      for(int i=0;i<gOptimizationObjRegistry.GetNb();i++)
+      {
+         Chronometer chrono;
+         cout<<"Fox: running LSQ test for profiling"<<endl;
+         chrono.start();
+         long nbtrial=50000;
+         gOptimizationObjRegistry.GetObj(i).Optimize(nbtrial,true,0);
+         cout<<" LSQ tests - SUCCESS -, elapsed time for 100 cycles (full pattern=true ):"<<chrono.seconds()<<endl;
+      }
+      //TAU_REPORT_STATISTICS();
+      #ifdef __WX__CRYST__
+      this->OnExit();
+      #endif
+      return 0;
+   }
+   if(testSPEED)
+   {
+      standardSpeedTest();
+      //TAU_REPORT_STATISTICS();
+      #ifdef __WX__CRYST__
+      this->OnExit();
+      #endif
+      return 0;
+   }
    if(!useGUI)
    {
       if(nbTrial!=0)
@@ -1134,11 +1190,9 @@ int main (int argc, char *argv[])
       }
       XMLCrystFileSaveGlobal(tmpstr);
       cout <<"End of Fox execution. Bye !"<<endl;
-      TAU_REPORT_STATISTICS();
+      //TAU_REPORT_STATISTICS();
       #ifdef __WX__CRYST__
       this->OnExit();
-      #else
-      TAU_REPORT_STATISTICS();
       #endif
       exit(0);
    }
