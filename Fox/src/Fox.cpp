@@ -84,7 +84,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 //:TODO: supply __FOXREVISION__ from the command line (at least under Linux)
-#define __FOXREVISION__ 1313
+#define __FOXREVISION__ 1340
 
 static std::string foxVersion;
 
@@ -345,7 +345,7 @@ int main (int argc, char *argv[])
    
    {// Fox version
       char verBuf[200];
-      sprintf(verBuf,"1.9.7-#%d",__FOXREVISION__);
+      sprintf(verBuf,"1.9.X-#%d",__FOXREVISION__);
       foxVersion=verBuf;
    }
    bool useGUI(true);
@@ -1145,9 +1145,9 @@ int main (int argc, char *argv[])
          Chronometer chrono;
          cout<<"Fox: running LSQ test for profiling"<<endl;
          chrono.start();
-         long nbtrial=50000;
+         long nbtrial=10000;
          gOptimizationObjRegistry.GetObj(i).Optimize(nbtrial,true,0);
-         cout<<" LSQ tests - SUCCESS -, elapsed time for 100 cycles (full pattern=true ):"<<chrono.seconds()<<endl;
+         cout<<" MC tests - SUCCESS -, elapsed time for 10000 trials:"<<chrono.seconds()<<endl;
       }
       //TAU_REPORT_STATISTICS();
       #ifdef __WX__CRYST__
@@ -2282,69 +2282,58 @@ void WXCrystMainFrame::OnCheckUpdate(wxCommandEvent& event)
 ///////////////////////////////////////// Speed Test////////////////////
 void standardSpeedTest()
 {
-	cout << " Beginning Speed tests" << endl ;
-   
+  cout << " Beginning Speed tests" << endl ;
+   const float dt=2.5;
    std::list<SpeedTestReport> vReport;
-   vReport.push_back(SpeedTest(20,4,"P1"  ,RAD_NEUTRON,100,0,5.));
-   vReport.push_back(SpeedTest(20,4,"P-1" ,RAD_NEUTRON,100,0,5.));
-   vReport.push_back(SpeedTest(20,4,"Pnma",RAD_NEUTRON,100,0,5.));
-   vReport.push_back(SpeedTest(20,4,"Ia3d",RAD_NEUTRON,100,0,5.));
-   vReport.push_back(SpeedTest(20,4,"P1"  ,RAD_XRAY   ,100,0,5.));
-   vReport.push_back(SpeedTest(20,4,"P-1" ,RAD_XRAY   ,100,0,5.));
-   vReport.push_back(SpeedTest(20,4,"Pnma",RAD_XRAY   ,100,0,5.));
-   vReport.push_back(SpeedTest(20,4,"Ia3d",RAD_XRAY   ,100,0,5.));
+   vReport.push_back(SpeedTest(20,4,"P1"  ,RAD_NEUTRON,100,0,dt));
+   vReport.push_back(SpeedTest(20,4,"P-1" ,RAD_NEUTRON,100,0,dt));
+   vReport.push_back(SpeedTest(20,4,"Pnma",RAD_NEUTRON,100,0,dt));
+   vReport.push_back(SpeedTest(20,4,"Ia3d",RAD_NEUTRON,100,0,dt));
+   vReport.push_back(SpeedTest(20,4,"P1"  ,RAD_XRAY   ,100,0,dt));
+   vReport.push_back(SpeedTest(20,4,"P-1" ,RAD_XRAY   ,100,0,dt));
+   vReport.push_back(SpeedTest(20,4,"Pnma",RAD_XRAY   ,100,0,dt));
+   vReport.push_back(SpeedTest(20,4,"Ia3d",RAD_XRAY   ,100,0,dt));
+   vReport.push_back(SpeedTest(100,4,"P21",RAD_XRAY   ,500,0,dt));
+   vReport.push_back(SpeedTest(100,4,"P21/n",RAD_XRAY ,500,0,dt));
 
-   vReport.push_back(SpeedTest(20,4,"P1"  ,RAD_NEUTRON,100,1,5.));
-   vReport.push_back(SpeedTest(20,4,"P-1" ,RAD_NEUTRON,100,1,5.));
-   vReport.push_back(SpeedTest(20,4,"Pnma",RAD_NEUTRON,100,1,5.));
-   vReport.push_back(SpeedTest(20,4,"Ia3d",RAD_NEUTRON,100,1,5.));
-   vReport.push_back(SpeedTest(20,4,"P1"  ,RAD_XRAY   ,100,1,5.));
-   vReport.push_back(SpeedTest(20,4,"P-1" ,RAD_XRAY   ,100,1,5.));
-   vReport.push_back(SpeedTest(20,4,"Pnma",RAD_XRAY   ,100,1,5.));
-   vReport.push_back(SpeedTest(20,4,"Ia3d",RAD_XRAY   ,100,1,5.));
+   vReport.push_back(SpeedTest(20,4,"P1"  ,RAD_NEUTRON,100,1,dt));
+   vReport.push_back(SpeedTest(20,4,"P-1" ,RAD_NEUTRON,100,1,dt));
+   vReport.push_back(SpeedTest(20,4,"Pnma",RAD_NEUTRON,100,1,dt));
+   vReport.push_back(SpeedTest(20,4,"Ia3d",RAD_NEUTRON,100,1,dt));
+   vReport.push_back(SpeedTest(20,4,"P1"  ,RAD_XRAY   ,100,1,dt));
+   vReport.push_back(SpeedTest(20,4,"P-1" ,RAD_XRAY   ,100,1,dt));
+   vReport.push_back(SpeedTest(20,4,"Pnma",RAD_XRAY   ,100,1,dt));
+   vReport.push_back(SpeedTest(20,4,"Ia3d",RAD_XRAY   ,100,1,dt));
+   vReport.push_back(SpeedTest(100,4,"P21",RAD_XRAY   ,500,1,dt));
+   vReport.push_back(SpeedTest(100,4,"P21/n",RAD_XRAY ,500,1,dt));
 
-   // Results from november 2003 on Vincent's Athlon TB 1.4 GHz,
-   //with gcc 3.3.1 with -O3 -ffast-math -march=athlon -funroll-all-loops
+   // Compared to results on a Core2 Quad Q6600 running @2.4 GHz, gcc 4.6.2 with an old version of Fox 1.9.0.2
+   CrystVector_REAL vfnBogoMRAPS_n_201001(20);
+   vfnBogoMRAPS_n_201001(0)=47;
+   vfnBogoMRAPS_n_201001(1)=49;
+   vfnBogoMRAPS_n_201001(2)=86;
+   vfnBogoMRAPS_n_201001(3)=106;
+   vfnBogoMRAPS_n_201001(4)=46;
+   vfnBogoMRAPS_n_201001(5)=49;
+   vfnBogoMRAPS_n_201001(6)=85;
+   vfnBogoMRAPS_n_201001(7)=107;
+   vfnBogoMRAPS_n_201001(8)=89;
+   vfnBogoMRAPS_n_201001(9)=105;
    
+   vfnBogoMRAPS_n_201001(10)=39;
+   vfnBogoMRAPS_n_201001(11)=41;
+   vfnBogoMRAPS_n_201001(12)=79;
+   vfnBogoMRAPS_n_201001(13)=105;
+   vfnBogoMRAPS_n_201001(14)=38;
+   vfnBogoMRAPS_n_201001(15)=42;
+   vfnBogoMRAPS_n_201001(16)=73;
+   vfnBogoMRAPS_n_201001(17)=105;
+   vfnBogoMRAPS_n_201001(18)=86;
+   vfnBogoMRAPS_n_201001(19)=102;
    
-   //Spacegroup NbAtoms NbAtType Radiation Type  NbRefl  BogoSPS     BogoMRAPS   BogoMRAPS(n)
-   //P1          10       2      neutron Single   100  30359.2832     30.3593     30.3593
-   //P-1         10       2      neutron Single   100  32215.5703     64.4311     32.2156
-   //Pnma        10       4      neutron Single   100  11115.5381     88.9243     44.4622
-   //Ia3d        10       4      neutron Single   100   2775.5906    266.4567     66.6142
-   //P1          10       2      X-ray   Single   100  29940.1211     29.9401     29.9401
-   //P-1         10       2      X-ray   Single   100  31437.1270     62.8743     31.4371
-   //Pnma        10       4      X-ray   Single   100  10914.5127     87.3161     43.6581
-   //Ia3d        10       4      X-ray   Single   100   2797.6191    268.5714     67.1429
-   //P1          10       2      neutron Powder   100  12155.6895     12.1557     12.1557
-   //P-1         10       2      neutron Powder   100  12584.4922     25.1690     12.5845
-   //Pnma        10       4      neutron Powder   100   7157.0571     57.2565     28.6282
-   //Ia3d        10       4      neutron Powder   100   2470.5884    237.1765     59.2941
-   //P1          10       2      X-ray   Powder   100  11749.5029     11.7495     11.7495
-   //P-1         10       2      X-ray   Powder   100  12250.9961     24.5020     12.2510
-   //Pnma        10       4      X-ray   Powder   100   7097.4150     56.7793     28.3897
-   //Ia3d        10       4      X-ray   Powder   100   2485.2070    238.5799     59.6450
-   CrystVector_REAL vfnBogoMRAPS_n_200311(16);
-   vfnBogoMRAPS_n_200311(0)=30.3593;
-   vfnBogoMRAPS_n_200311(1)=32.2156;
-   vfnBogoMRAPS_n_200311(2)=44.4622;
-   vfnBogoMRAPS_n_200311(3)=66.6142;
-   vfnBogoMRAPS_n_200311(4)=29.9401;
-   vfnBogoMRAPS_n_200311(5)=31.4371;
-   vfnBogoMRAPS_n_200311(6)=43.6581;
-   vfnBogoMRAPS_n_200311(7)=67.1429;
-   vfnBogoMRAPS_n_200311(8)=12.1557;
-   vfnBogoMRAPS_n_200311(9)=12.5845;
-   vfnBogoMRAPS_n_200311(10)=28.6282;
-   vfnBogoMRAPS_n_200311(11)=59.2941;
-   vfnBogoMRAPS_n_200311(12)=11.7495;
-   vfnBogoMRAPS_n_200311(13)=12.2510;
-   vfnBogoMRAPS_n_200311(14)=28.3897;
-   vfnBogoMRAPS_n_200311(15)=59.6450;
-   
-   cout<<" Spacegroup NbAtoms NbAtType Radiation Type  NbRefl  BogoSPS     BogoMRAPS   BogoMRAPS(n)  relat"<<endl;
+   cout<<" Spacegroup NbAtoms NbAtType Radiation Type  NbRefl  BogoSPS    BogoMRAPS   BogoMRAPS(n)  relat%"<<endl;
    unsigned int i=0;
-   REAL vfnCompar=0.;
+   REAL vfnCompar2010=0.;
    for(std::list<SpeedTestReport>::const_iterator pos=vReport.begin();
        pos != vReport.end();++pos)
    {
@@ -2362,18 +2351,18 @@ void standardSpeedTest()
          case(0): cout<<FormatString("Single",6)<<" ";break;
          case(1): cout<<FormatString("Powder",6)<<" ";break;
       }
-      const REAL relat=pos->mBogoMRAPS_reduced/vfnBogoMRAPS_n_200311(i++);
+      const REAL relat2010=pos->mBogoMRAPS_reduced/vfnBogoMRAPS_n_201001(i);
       cout<<FormatInt(pos->mNbReflections)<<" "
           <<FormatFloat(pos->mBogoSPS)<<" "
           <<FormatFloat(pos->mBogoMRAPS)<<" "
           <<FormatFloat(pos->mBogoMRAPS_reduced)<<" "
-          <<FormatFloat(relat*100.,8,2)
+          <<FormatFloat(relat2010*100.,8,2)
           <<endl;
-      vfnCompar+=relat;
+      vfnCompar2010+=relat2010;
+      i++;
    }
-   vfnCompar/=vfnBogoMRAPS_n_200311.numElements();
-   cout<<endl<<"Your FOX/ObjCryst++ speed index is "<<FormatFloat(vfnCompar*100.,8,2)
-       <<"% (100% = Athlon 1.4GHz with Linux/gcc 3.3.1, november 2003)"<<endl;
-	cout << " End of Crystallographic Speeding !" << endl ;
+   vfnCompar2010/=vfnBogoMRAPS_n_201001.numElements();
+   cout<<endl<<"Your FOX/ObjCryst++ speed index is "<<FormatFloat(vfnCompar2010*100.,8,2)
+       <<"% (100% = Core2 Q6600 (1 core@2.4GHz) with Linux/gcc 4.6.1 - Fox 1.9.0.2)"<<endl;
+  cout << " End of Crystallographic Speeding !" << endl ;
 }
-
