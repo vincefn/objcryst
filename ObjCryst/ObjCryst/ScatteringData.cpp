@@ -923,9 +923,8 @@ long ScatteringData::GetNbReflBelowMaxSinThetaOvLambda()const
          &&(mSinThetaLambda(mNbReflUsed-1)<=mMaxSinThetaOvLambda)) return mNbReflUsed;
    }
    
-   if((mNbReflUsed==mNbRefl)&&(mSinThetaLambda(mNbRefl-1)<=mMaxSinThetaOvLambda))
+   if((mNbReflUsed==mNbRefl)&&(mSinThetaLambda(mNbRefl-1)<=mMaxSinThetaOvLambda)) 
       return mNbReflUsed;
-   
    long i;
    for(i=0;i<mNbRefl;i++) if(mSinThetaLambda(i)>mMaxSinThetaOvLambda) break;
    if(i!=mNbReflUsed)
@@ -1743,8 +1742,102 @@ void ScatteringData::CalcGeomStructFactor() const
                const register REAL *kk=mK2Pi.data();
                const register REAL *ll=mL2Pi.data();
                
-               
                #ifdef HAVE_SSE_MATHFUN
+               #if 0
+               // This not much faster and is incorrect (does not take into account sign of h k l)
+               
+               //cout<<__FILE__<<":"<<__LINE__<<":"<<mMaxHKL<<","<<mMaxH<<","<<mMaxK<<","<<mMaxL<<":"<<mNbReflUsed<<endl;
+               // cos&sin for 2pix 2piy 2piz
+               static const float twopi=6.283185307179586f;
+               sincos_ps(_mm_mul_ps(_mm_load1_ps(&twopi),_mm_set_ps(x,y,z,0)),cnxyz0,snxyz0);
+               // harmonics: cos&sin for 2npix 2npiy 2npiz
+               for(long k=1;k<mMaxHKL;k++)
+               {
+                  cnxyz0[k]=_mm_sub_ps(_mm_mul_ps(cnxyz0[k-1],cnxyz0[0]),_mm_mul_ps(snxyz0[k-1],snxyz0[0]));//cos((n+1)x)=cos(nx)cos(x)-sin(nx)sinx
+                  snxyz0[k]=_mm_add_ps(_mm_mul_ps(snxyz0[k-1],cnxyz0[0]),_mm_mul_ps(cnxyz0[k-1],snxyz0[0]));//sin((n+1)x)=sin(nx)cos(x)+cos(nx)sinx
+               }
+               //
+               for(long k=0;k<4;++k){*(pcnxyz0+k)=1.0f;*(psnxyz0+k)=0.0f;}
+               for(long k=1;k<mMaxHKL;k++)
+               {
+                  _mm_store_ps(pcnxyz0+4*k,cnxyz0[k-1]);
+                  _mm_store_ps(psnxyz0+4*k,snxyz0[k-1]);
+               }
+               // Actual structure factor calculations
+               if(false==pSpg->HasInversionCenter())
+               {// Slow ?
+                  REAL *rsf=mvRealGeomSF[pScattPow].data();
+                  REAL *isf=mvImagGeomSF[pScattPow].data();
+                  const long *h=mIntH.data();
+                  const long *k=mIntK.data();
+                  const long *l=mIntL.data();
+                  int jj;
+                  const v4sf v4popu=_mm_set1_ps(popu);
+                  for(jj=mNbReflUsed;jj>3;jj-=4)
+                  {
+                     //cout<<__FILE__<<":"<<__LINE__<<":"<<mNbReflUsed<<","<<jj<<"("<<*h<<','<<*k<<","<<*l<<")"<<endl;
+                     const v4sf ck=_mm_set_ps(pcnxyz0[(*(k))*4+1],pcnxyz0[(*(k+1))*4+1],pcnxyz0[(*(k+2))*4+1],pcnxyz0[(*(k+3))*4+1]);//cos 2pi kx =ck
+                     const v4sf cl=_mm_set_ps(pcnxyz0[(*(l))*4+1],pcnxyz0[(*(l+1))*4+1],pcnxyz0[(*(l+2))*4+1],pcnxyz0[(*(l+3))*4+1]);//cos 2pi lz =cl
+                     const v4sf sk=_mm_set_ps(psnxyz0[(*(k))*4+1],psnxyz0[(*(k+1))*4+1],psnxyz0[(*(k+2))*4+1],psnxyz0[(*(k+3))*4+1]);//sin 2pi kx =sk
+                     const v4sf sl=_mm_set_ps(psnxyz0[(*(l))*4+1],psnxyz0[(*(l+1))*4+1],psnxyz0[(*(l+2))*4+1],psnxyz0[(*(l+3))*4+1]);//sin 2pi lz =sl
+                     #define CH _mm_set_ps(pcnxyz0[*(h)*4],pcnxyz0[*(h+1)*4],pcnxyz0[*(h+2)*4],pcnxyz0[*(h+3)*4])
+                     #define SH _mm_set_ps(psnxyz0[*(h)*4],psnxyz0[*(h+1)*4],psnxyz0[*(h+2)*4],psnxyz0[*(h+3)*4])
+                     //                           popu *(                    ch*(                      ck*cl    -        sk*sl)         -    sh*(                     ck*sl + sk*cl))
+                     _mm_store_ps(rsf,_mm_mul_ps(v4popu,_mm_sub_ps(_mm_mul_ps(CH,_mm_sub_ps(_mm_mul_ps(ck,cl),_mm_mul_ps(sk,sl))),_mm_mul_ps(SH,_mm_add_ps(_mm_mul_ps(ck,sl),_mm_mul_ps(sk,cl))))));
+                     //                           popu *(                    sh*(                      ck*cl    -        sk*sl)         +    ch*(                     ck*sl + sk*cl))
+                     _mm_store_ps(isf,_mm_mul_ps(v4popu,_mm_add_ps(_mm_mul_ps(SH,_mm_sub_ps(_mm_mul_ps(ck,cl),_mm_mul_ps(sk,sl))),_mm_mul_ps(CH,_mm_add_ps(_mm_mul_ps(ck,sl),_mm_mul_ps(sk,cl))))));
+                     rsf+=4;isf+=4;h+=4;k+=4,l+=4;
+                  }
+                  for(;jj>0;jj--)
+                  {
+                     const float ch=pcnxyz0[*h   *4];
+                     const float sh=psnxyz0[*h++ *4];
+                     const float ck=pcnxyz0[*k   *4+1];
+                     const float sk=psnxyz0[*k++ *4+1];
+                     const float cl=pcnxyz0[*l   *4+2];
+                     const float sl=psnxyz0[*l++ *4+2];
+                     *rsf++ += popu*(ch*(ck*cl-sk*sl)-sh*(sk*cl+ck*sl));
+                     *isf++ += popu*(sh*(ck*cl-sk*sl)+ch*(sk*cl+ck*sl));
+                  }
+               }
+               else
+               {
+                  REAL *rsf=mvRealGeomSF[pScattPow].data();
+                  const long *h=mIntH.data();
+                  const long *k=mIntK.data();
+                  const long *l=mIntL.data();
+                  int jj;
+                  const v4sf v4popu=_mm_set1_ps(popu);
+                  for(jj=mNbReflUsed;jj>3;jj-=4)
+                  {
+                     //cout<<__FILE__<<":"<<__LINE__<<":"<<mNbReflUsed<<","<<jj<<"("<<*h<<','<<*k<<","<<*l<<")"<<endl;
+                     const v4sf ck=_mm_set_ps(pcnxyz0[(*(k))*4+1],pcnxyz0[(*(k+1))*4+1],pcnxyz0[(*(k+2))*4+1],pcnxyz0[(*(k+3))*4+1]);//cos 2pi kx =ck
+                     const v4sf cl=_mm_set_ps(pcnxyz0[(*(l))*4+1],pcnxyz0[(*(l+1))*4+1],pcnxyz0[(*(l+2))*4+1],pcnxyz0[(*(l+3))*4+1]);//cos 2pi lz =cl
+                     const v4sf sk=_mm_set_ps(psnxyz0[(*(k))*4+1],psnxyz0[(*(k+1))*4+1],psnxyz0[(*(k+2))*4+1],psnxyz0[(*(k+3))*4+1]);//sin 2pi kx =sk
+                     const v4sf sl=_mm_set_ps(psnxyz0[(*(l))*4+1],psnxyz0[(*(l+1))*4+1],psnxyz0[(*(l+2))*4+1],psnxyz0[(*(l+3))*4+1]);//sin 2pi lz =sl
+                     #define CH _mm_set_ps(pcnxyz0[*(h)*4],pcnxyz0[*(h+1)*4],pcnxyz0[*(h+2)*4],pcnxyz0[*(h+3)*4])
+                     #define SH _mm_set_ps(psnxyz0[*(h)*4],psnxyz0[*(h+1)*4],psnxyz0[*(h+2)*4],psnxyz0[*(h+3)*4])
+                     //                           popu *(                    ch*(                      ck*cl    -        sk*sl)         -    sh*(                     ck*sl + sk*cl))
+                     _mm_store_ps(rsf,_mm_mul_ps(v4popu,_mm_sub_ps(_mm_mul_ps(CH,_mm_sub_ps(_mm_mul_ps(ck,cl),_mm_mul_ps(sk,sl))),_mm_mul_ps(SH,_mm_add_ps(_mm_mul_ps(ck,sl),_mm_mul_ps(sk,cl))))));
+                     rsf+=4;h+=4;k+=4,l+=4;
+                  }
+                  for(;jj>0;jj--)
+                  {
+                     const float ch=pcnxyz0[*h   *4];
+                     const float sh=psnxyz0[*h++ *4];
+                     const float ck=pcnxyz0[*k   *4+1];
+                     const float sk=psnxyz0[*k++ *4+1];
+                     const float cl=pcnxyz0[*l   *4+2];
+                     const float sl=psnxyz0[*l++ *4+2];
+                     *rsf++ += popu*(ch*(ck*cl-sk*sl)-sh*(sk*cl+ck*sl));
+                  }
+               }
+                  
+
+               #else
+               const v4sf v4x=_mm_load1_ps(&x);
+               const v4sf v4y=_mm_load1_ps(&y);
+               const v4sf v4z=_mm_load1_ps(&z);
                const v4sf v4popu=_mm_load1_ps(&popu);// Can't multiply directly a vector by a scalar ?
                if(false==pSpg->HasInversionCenter())
                {
@@ -1754,14 +1847,19 @@ void ScatteringData::CalcGeomStructFactor() const
                   for(;jj>3;jj-=4)
                   {
                       v4sf v4sin,v4cos;
-                      sincos_ps(_mm_setr_ps(*(hh  )*x+ *(kk  )*y + *(ll  )*z,
-                                            *(hh+1)*x+ *(kk+1)*y + *(ll+1)*z,
-                                            *(hh+2)*x+ *(kk+2)*y + *(ll+2)*z,
-                                            *(hh+3)*x+ *(kk+3)*y + *(ll+3)*z),&v4sin,&v4cos);
-                      _mm_store_ps(rsf,_mm_add_ps(_mm_mul_ps(v4cos,v4popu),_mm_load_ps(rsf)));
-                      _mm_store_ps(isf,_mm_add_ps(_mm_mul_ps(v4sin,v4popu),_mm_load_ps(isf)));
+//                       sincos_ps(_mm_setr_ps(*(hh  )*x+ *(kk  )*y + *(ll  )*z,
+//                                             *(hh+1)*x+ *(kk+1)*y + *(ll+1)*z,
+//                                             *(hh+2)*x+ *(kk+2)*y + *(ll+2)*z,
+//                                             *(hh+3)*x+ *(kk+3)*y + *(ll+3)*z),&v4sin,&v4cos);
+                     sincos_ps(_mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_load_ps(hh),v4x),
+                                                     _mm_mul_ps(_mm_load_ps(kk),v4y)
+                                                   ),
+                                          _mm_mul_ps(_mm_load_ps(ll),v4z)
+                                          ),&v4sin,&v4cos);// A bit faster
+                     _mm_store_ps(rsf,_mm_add_ps(_mm_mul_ps(v4cos,v4popu),_mm_load_ps(rsf)));
+                     _mm_store_ps(isf,_mm_add_ps(_mm_mul_ps(v4sin,v4popu),_mm_load_ps(isf)));
                       
-                      hh+=4;kk+=4;ll+=4;rsf+=4;isf+=4;
+                     hh+=4;kk+=4;ll+=4;rsf+=4;isf+=4;
                   }
                   for(;jj>0;jj--)
                   {
@@ -1776,12 +1874,16 @@ void ScatteringData::CalcGeomStructFactor() const
                   int jj=mNbReflUsed;
                   for(;jj>3;jj-=4)
                   {
-                      const v4sf v4cos=cos_ps(_mm_setr_ps(*(hh  )*x+ *(kk  )*y + *(ll  )*z,
-                                                          *(hh+1)*x+ *(kk+1)*y + *(ll+1)*z,
-                                                          *(hh+2)*x+ *(kk+2)*y + *(ll+2)*z,
-                                                          *(hh+3)*x+ *(kk+3)*y + *(ll+3)*z));
-                      _mm_store_ps(rsf,_mm_add_ps(_mm_load_ps(rsf),_mm_mul_ps(v4cos,v4popu)));
-                      hh+=4;kk+=4;ll+=4;rsf+=4;
+//                      const v4sf v4cos=cos_ps(_mm_setr_ps(*(hh  )*x+ *(kk  )*y + *(ll  )*z,
+//                                                           *(hh+1)*x+ *(kk+1)*y + *(ll+1)*z,
+//                                                           *(hh+2)*x+ *(kk+2)*y + *(ll+2)*z,
+//                                                           *(hh+3)*x+ *(kk+3)*y + *(ll+3)*z));
+                     const v4sf v4cos=cos_ps(_mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_load_ps(hh),v4x),
+                                                        _mm_mul_ps(_mm_load_ps(kk),v4y)
+                                                   ),
+                                          _mm_mul_ps(_mm_load_ps(ll),v4z)));
+                     _mm_store_ps(rsf,_mm_add_ps(_mm_load_ps(rsf),_mm_mul_ps(v4cos,v4popu)));
+                     hh+=4;kk+=4;ll+=4;rsf+=4;
                   }
                   for(;jj>0;jj--)
                   {
@@ -1789,6 +1891,7 @@ void ScatteringData::CalcGeomStructFactor() const
                     *rsf++ += popu * cos(tmp);
                   }
                }
+               #endif
                #else
                register REAL *tmp=tmpVect.data();
                for(int jj=0;jj<mNbReflUsed;jj++) *tmp++ = *hh++ * x + *kk++ * y + *ll++ *z;
@@ -1808,7 +1911,6 @@ void ScatteringData::CalcGeomStructFactor() const
             }
          }
       }//for all components...
-      
       if(nbTranslationVectors > 1)
       {
          tmpVect=1;
@@ -2028,15 +2130,23 @@ void ScatteringData::CalcGeomStructFactor_FullDeriv(std::set<RefinablePar*> &vPa
             const register REAL *kk=mK2Pi.data();
             const register REAL *ll=mL2Pi.data();
             #ifdef HAVE_SSE_MATHFUN
+            const v4sf v4x=_mm_load1_ps(&x);
+            const v4sf v4y=_mm_load1_ps(&y);
+            const v4sf v4z=_mm_load1_ps(&z);
             const v4sf v4popu=_mm_load1_ps(&popu);// Can't multiply directly a vector by a scalar ?
             int jj=mNbReflUsed;
             for(;jj>3;jj-=4)
             {
                 v4sf v4sin,v4cos;
-                sincos_ps(_mm_setr_ps(*(hh  )*x+ *(kk  )*y + *(ll  )*z,
-                                      *(hh+1)*x+ *(kk+1)*y + *(ll+1)*z,
-                                      *(hh+2)*x+ *(kk+2)*y + *(ll+2)*z,
-                                      *(hh+3)*x+ *(kk+3)*y + *(ll+3)*z),&v4sin,&v4cos);
+//                 sincos_ps(_mm_setr_ps(*(hh  )*x+ *(kk  )*y + *(ll  )*z,
+//                                       *(hh+1)*x+ *(kk+1)*y + *(ll+1)*z,
+//                                       *(hh+2)*x+ *(kk+2)*y + *(ll+2)*z,
+//                                       *(hh+3)*x+ *(kk+3)*y + *(ll+3)*z),&v4sin,&v4cos);
+                sincos_ps(_mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_load_ps(hh),v4x),
+                                                _mm_mul_ps(_mm_load_ps(kk),v4y)
+                                               ),
+                                     _mm_mul_ps(_mm_load_ps(ll),v4z)
+                                    ),&v4sin,&v4cos);
                 _mm_store_ps(pc,v4cos);
                 _mm_store_ps(ps,v4sin);
                 
