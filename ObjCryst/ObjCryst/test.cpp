@@ -41,7 +41,7 @@ SpeedTestReport SpeedTest(const unsigned int nbAtom, const int nbAtomType,const 
    {
       cryst.AddScatteringPower(new ScatteringPowerAtom("O","O",1.5));
    }
-   for(int i=0;i<nbAtomType;++i)
+   for(int i=0;i<nbAtom;++i)
    {
       cryst.AddScatterer(new Atom(.0,.0,.0,"O",
                                   &(cryst.GetScatteringPowerRegistry().GetObj(i%nbAtomType)),
