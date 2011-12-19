@@ -950,6 +950,11 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
                                          const REAL finalcost,const REAL maxTime)
 {
    TAU_PROFILE("MonteCarloObj::RunParallelTempering()","void ()",TAU_DEFAULT);
+   TAU_PROFILE_TIMER(timer0a,"MonteCarloObj::RunParallelTempering() Begin 1","", TAU_FIELD);
+   TAU_PROFILE_TIMER(timer0b,"MonteCarloObj::RunParallelTempering() Begin 2","", TAU_FIELD);
+   TAU_PROFILE_TIMER(timer1,"MonteCarloObj::RunParallelTempering() New Config + LLK","", TAU_FIELD);
+   TAU_PROFILE_TIMER(timerN,"MonteCarloObj::RunParallelTempering() Finish","", TAU_FIELD);
+   TAU_PROFILE_START(timer0a);
    //Keep a copy of the total number of steps, and decrement nbStep
    const long nbSteps=nbStep;
    unsigned int accept;// 1 if last trial was accepted? 2 if new best config ? else 0
@@ -1038,6 +1043,8 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
          worldCurrentSetIndex(i)=mRefParList.CreateParamSet();
          mRefParList.RestoreParamSet(worldCurrentSetIndex(nbWorld-1));
       }
+   TAU_PROFILE_STOP(timer0a);
+   TAU_PROFILE_START(timer0b);
       //mNbTrial=nbSteps;;
       const long lastParSavedSetIndex=mRefParList.CreateParamSet("MonteCarloObj:Last parameters (PT)");
       const long runBestIndex=mRefParList.CreateParamSet("Best parameters for current run (PT)");
@@ -1078,6 +1085,7 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
    Chronometer chrono;
    chrono.start();
    float lastUpdateDisplayTime=chrono.seconds();
+   TAU_PROFILE_STOP(timer0b);
    for(;mNbTrial<nbSteps;)
    {
       for(int i=0;i<nbWorld;i++)
@@ -1089,10 +1097,12 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
          for(int j=0;j<nbTryPerWorld;j++)
          {
             //mRefParList.SaveParamSet(lastParSavedSetIndex);
+            TAU_PROFILE_START(timer1);
             mRefParList.RestoreParamSet(worldCurrentSetIndex(i));
             this->NewConfiguration();
             accept=0;
             REAL cost=this->GetLogLikelihood();
+            TAU_PROFILE_STOP(timer1);
             //trialsDensity((long)(cost*100.),i+1)+=1;
             if(cost<currentCost(i))
             {
@@ -1598,7 +1608,8 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
       mMutexStopAfterCycle.Unlock();
       #endif
    }//Trials
-
+   
+   TAU_PROFILE_START(timerN);
    if(mAutoLSQ.GetChoice()>0)
    {// LSQ
       if(!silent) cout<<"Beginning final LSQ refinement"<<endl;
@@ -1654,6 +1665,7 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
       }
       mRefParList.ClearParamSet(lastParSavedSetIndex);
       mRefParList.ClearParamSet(runBestIndex);
+   TAU_PROFILE_STOP(timerN);
 }
 
 void MonteCarloObj::XMLOutput(ostream &os,int indent)const
@@ -1805,6 +1817,7 @@ const LSQNumObj& MonteCarloObj::GetLSQObj() const{return mLSQ;}
 
 void MonteCarloObj::NewConfiguration(const RefParType *type)
 {
+   TAU_PROFILE("MonteCarloObj::NewConfiguration()","void ()",TAU_DEFAULT);
    VFN_DEBUG_ENTRY("MonteCarloObj::NewConfiguration()",4)
    for(int i=0;i<mRefinedObjList.GetNb();i++)
       mRefinedObjList.GetObj(i).BeginGlobalOptRandomMove();
