@@ -1,3 +1,8 @@
+#### 1.9.8 - 2011 (Revision 1350)
+NEW FEATURES
+   * Add import of Single crystal diffraction data (hklf4 format)
+IMPROVEMENTS
+   * Add SSE optimization using sse_mathfun. Need compile with sse=1
 #### 1.9.7 - 2011 (Revision 1312)
 NEW FEATURES
    * Add Browser to quickly open Fox and cif files
