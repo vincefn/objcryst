@@ -57,7 +57,7 @@ endif
 #Profiling
 ifeq ($(profile),1) #activate profiling using TAU package
    DIR_TAU=$(BUILD_DIR)/../../utils/tau
-   PROFILEFLAGS := -DPROFILING_ON -DTAU_STDCXXLIB -I$(DIR_TAU)/include
+   PROFILEFLAGS := -DPROFILING_ON -DTAU_GNU -DTAU_DOT_H_LESS_HEADERS -DTAU_LINUX_TIMERS -DTAU_LARGEFILE -D_LARGEFILE64_SOURCE -DHAVE_TR1_HASH_MAP -UTAU_MPI -I$(DIR_TAU)/include
    PROFILELIB := -ltau
 else
    ifeq ($(profile),2) # *generate* profiling using gcc
@@ -117,6 +117,12 @@ FFTW_LIB :=
 FFTW_FLAGS :=
 endif
 
+ifeq ($(sse),1)
+SSE_FLAGS = -DHAVE_SSE_MATHFUN -DUSE_SSE2 -march=native 
+else
+SSE_FLAGS =
+endif
+
 ifneq ($(shared-newmat),1)
 LDNEWMAT := $(DIR_STATIC_LIBS)/lib/libnewmat.a
 else
@@ -124,7 +130,7 @@ LDNEWMAT := -lnewmat
 endif
 
 ifeq ($(shared_libcryst),1)
- CPPFLAGS = -O3 -w -fPIC -g -ffast-math -fstrict-aliasing -pipe -funroll-loops
+ CPPFLAGS = -O3 -w -fPIC -g -ffast-math -fstrict-aliasing -pipe -funroll-loops ${SSE_FLAGS}
  DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS} ${FFTW_FLAGS} ${REAL_FLAG}
 else
  ifeq ($(debug),1)
@@ -133,7 +139,7 @@ else
       # we are building a RPM !
       CPPFLAGS = ${RPM_OPT_FLAGS} 
    else
-      CPPFLAGS = -g -Wall -D__DEBUG__ 
+      CPPFLAGS = -g -Wall -D__DEBUG__ ${SSE_FLAGS}
    endif
    DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS} ${FFTW_FLAGS} ${REAL_FLAG}
    LOADLIBES = -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx ${LDNEWMAT} ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS} ${FFTW_LIB}
@@ -142,14 +148,8 @@ else
       # we are building a RPM !
       CPPFLAGS = ${RPM_OPT_FLAGS}
    else
-      # Athlon XP, with auto-vectorization
-      #CPPFLAGS = -O3 -w -ffast-math -march=athlon-xp -mmmx -msse -m3dnow -mfpmath=sse -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops -ftree-vectorize -ftree-vectorizer-verbose=0
-      # AMD64 Opteron , with auto-vectorization
-      #CPPFLAGS = -O3 -w -ffast-math -march=opteron -mmmx -msse -msse2 -m3dnow -mfpmath=sse -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops -ftree-vectorize -ftree-vectorizer-verbose=0
-      # native (activates SSE, etc...)
-      #CPPFLAGS = -O3 -march=native -w -ffast-math -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops -funroll-loops -ftree-vectorize -ftree-vectorizer-verbose=0
-      #default flags
-      CPPFLAGS = -O3 -w -ffast-math -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops
+      #default flags - use "sse=1" to enable SSE optimizations
+      CPPFLAGS = -O3 -w -ffast-math -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops -ftree-vectorize ${SSE_FLAGS}
    endif
    DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS} ${FFTW_FLAGS} ${REAL_FLAG}
    LOADLIBES = -s -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx ${LDNEWMAT} ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS} ${FFTW_LIB}
