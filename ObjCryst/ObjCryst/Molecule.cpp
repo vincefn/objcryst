@@ -2456,6 +2456,7 @@ void Molecule::EndOptimization()
 
 void Molecule::RandomizeConfiguration()
 {
+   TAU_PROFILE("Molecule::RandomizeConfiguration()","void ()",TAU_DEFAULT);
    VFN_DEBUG_ENTRY("Molecule::RandomizeConfiguration()",4)
    if(  (!mIsSelfOptimizing)
       &&(this->GetLogLikelihood()>(mvpRestraint.size()*500))
@@ -2815,7 +2816,9 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                   }
                }
                // Here we do not take mLogLikelihoodScale into account
-               if( ((rand()%10)==0) && (mLogLikelihood>(mvpRestraint.size()*10)))
+               // :TODO: take into account cases where the lllk cannot go down to 0 because of 
+               // combined restraints.
+               if( ((rand()%100)==0) && (mLogLikelihood>(mvpRestraint.size()*10)))
                   this->OptimizeConformationSteepestDescent(0.02,5);
                TAU_PROFILE_STOP(timer4);
             }
@@ -4123,13 +4126,50 @@ void Molecule::RotateAtomGroup(const MolAtom &at,const REAL vx,const REAL vy,con
    const REAL z0=at.Z();
    // :KLUDGE: ? Refuse to do anything if vector is not well defined
    if((fabs(vx)+fabs(vy)+fabs(vz))<1e-6) return;
-   const Quaternion quat=Quaternion::RotationQuaternion(angle,vx,vy,vz);
    REAL dx=0.,dy=0.,dz=0.;
    bool keepc=keepCenter;
    if(keepc)
       if(  (this->GetPar(mXYZ.data()  ).IsFixed())
          ||(this->GetPar(mXYZ.data()+1).IsFixed())
          ||(this->GetPar(mXYZ.data()+2).IsFixed())) keepc=false;
+   #if 0
+   const REAL ca=cos(angle),sa=sin(angle);
+   const REAL ca1=1-ca;
+   const REAL vnorm=1/sqrt(vx*vx+vy*vy+vz*vz);
+   const REAL ux=vx*vnorm,uy=vy*vnorm,uz=vz*vnorm;
+   const REAL m00=ca+ux*ux*ca1;// See http://en.wikipedia.org/wiki/Rotation_matrix
+   const REAL m01=ux*uy*ca1-uz*sa;
+   const REAL m02=ux*uz*ca1+uy*sa;
+   const REAL m10=uy*ux*ca1+uz*sa; // :TODO: Check formulas !
+   const REAL m11=ca+uy*uy*ca1;
+   const REAL m12=uy*uz*ca1-ux*sa;
+   const REAL m20=uz*ux*ca1-uy*sa;
+   const REAL m21=uz*uy*ca1+ux*sa;
+   const REAL m22=ca+uz*uz*ca1;
+   for(set<MolAtom *>::const_iterator pos=atoms.begin();pos!=atoms.end();++pos)
+   {
+      if(keepc)
+      {
+         dx -= (*pos)->X();
+         dy -= (*pos)->Y();
+         dz -= (*pos)->Z();
+      }
+      const REAL x=(*pos)->X() - x0;
+      const REAL y=(*pos)->Y() - y0;
+      const REAL z=(*pos)->Z() - z0;
+      
+      (*pos)->X() = m00*x+m01*y+m02*z+x0;
+      (*pos)->Y() = m10*x+m11*y+m12*z+y0;
+      (*pos)->Z() = m20*x+m21*y+m22*z+z0;
+      if(keepc)
+      {
+         dx += (*pos)->X();
+         dy += (*pos)->Y();
+         dz += (*pos)->Z();
+      }
+   }
+   #else
+   const Quaternion quat=Quaternion::RotationQuaternion(angle,vx,vy,vz);
    for(set<MolAtom *>::const_iterator pos=atoms.begin();pos!=atoms.end();++pos)
    {
       if(keepc)
@@ -4152,6 +4192,7 @@ void Molecule::RotateAtomGroup(const MolAtom &at,const REAL vx,const REAL vy,con
          dz += (*pos)->Z();
       }
    }
+   #endif
    // (dx,dy,dz) = vector of the translation of the center of the molecule due to the rotation
    if(keepc)
    {
