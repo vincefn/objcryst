@@ -1851,13 +1851,13 @@ void ScatteringData::CalcGeomStructFactor() const
 //                                             *(hh+1)*x+ *(kk+1)*y + *(ll+1)*z,
 //                                             *(hh+2)*x+ *(kk+2)*y + *(ll+2)*z,
 //                                             *(hh+3)*x+ *(kk+3)*y + *(ll+3)*z),&v4sin,&v4cos);
-                     sincos_ps(_mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_load_ps(hh),v4x),
-                                                     _mm_mul_ps(_mm_load_ps(kk),v4y)
+                     sincos_ps(_mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_loadu_ps(hh),v4x),
+                                                     _mm_mul_ps(_mm_loadu_ps(kk),v4y)
                                                    ),
-                                          _mm_mul_ps(_mm_load_ps(ll),v4z)
+                                          _mm_mul_ps(_mm_loadu_ps(ll),v4z)
                                           ),&v4sin,&v4cos);// A bit faster
-                     _mm_store_ps(rsf,_mm_add_ps(_mm_mul_ps(v4cos,v4popu),_mm_load_ps(rsf)));
-                     _mm_store_ps(isf,_mm_add_ps(_mm_mul_ps(v4sin,v4popu),_mm_load_ps(isf)));
+                     _mm_storeu_ps(rsf,_mm_add_ps(_mm_mul_ps(v4cos,v4popu),_mm_loadu_ps(rsf)));
+                     _mm_storeu_ps(isf,_mm_add_ps(_mm_mul_ps(v4sin,v4popu),_mm_loadu_ps(isf)));
                       
                      hh+=4;kk+=4;ll+=4;rsf+=4;isf+=4;
                   }
@@ -1878,11 +1878,11 @@ void ScatteringData::CalcGeomStructFactor() const
 //                                                           *(hh+1)*x+ *(kk+1)*y + *(ll+1)*z,
 //                                                           *(hh+2)*x+ *(kk+2)*y + *(ll+2)*z,
 //                                                           *(hh+3)*x+ *(kk+3)*y + *(ll+3)*z));
-                     const v4sf v4cos=cos_ps(_mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_load_ps(hh),v4x),
-                                                        _mm_mul_ps(_mm_load_ps(kk),v4y)
+                     const v4sf v4cos=cos_ps(_mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_loadu_ps(hh),v4x),
+                                                        _mm_mul_ps(_mm_loadu_ps(kk),v4y)
                                                    ),
-                                          _mm_mul_ps(_mm_load_ps(ll),v4z)));
-                     _mm_store_ps(rsf,_mm_add_ps(_mm_load_ps(rsf),_mm_mul_ps(v4cos,v4popu)));
+                                          _mm_mul_ps(_mm_loadu_ps(ll),v4z)));
+                     _mm_storeu_ps(rsf,_mm_add_ps(_mm_loadu_ps(rsf),_mm_mul_ps(v4cos,v4popu)));
                      hh+=4;kk+=4;ll+=4;rsf+=4;
                   }
                   for(;jj>0;jj--)

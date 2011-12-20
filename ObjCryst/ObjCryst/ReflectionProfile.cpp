@@ -950,8 +950,8 @@ CrystVector_REAL PowderProfileGauss  (const CrystVector_REAL ttheta,const REAL f
    for(;i>3;i-=4)
    {
      #ifdef HAVE_SSE_MATHFUN
-     v4sf x=_mm_load_ps(p);
-     _mm_store_ps(p,exp_ps(x));
+     v4sf x=_mm_loadu_ps(p);
+     _mm_storeu_ps(p,exp_ps(x));
      p+=4;
      #else
      for(unsigned int j=0;j<4;++j)
