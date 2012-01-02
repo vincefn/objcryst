@@ -22,6 +22,7 @@
    #include "wx/socket.h"
    #include "wx/grid.h"
    #include "wx/dynarray.h"
+   #include "wx/stdpaths.h"
 #endif
 
 #include "ObjCryst/ObjCryst/IO.h"
@@ -31,12 +32,13 @@
 #include "ObjCryst/RefinableObj/GlobalOptimObj.h"
 #include "FoxServer.h"
 
+
 #define __FOX_SERVER__
 
 class WXFoxServer : public wxFrame
 {
 public:
-   WXFoxServer(wxWindow* parent);
+   WXFoxServer(wxWindow* parent, wxString workingDir);
    ~WXFoxServer(void);
    void Clear();
    
@@ -78,6 +80,7 @@ private:
    std::vector<FoxJob >         m_jobs;
    std::vector<GridResult >     m_results;
    wxMutex            * m_WXFoxServerDataMutex;
+   wxString             m_working_dir;
 
    DECLARE_EVENT_TABLE()
 };

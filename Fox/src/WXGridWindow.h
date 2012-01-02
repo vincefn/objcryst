@@ -38,5 +38,7 @@ public:
    WXFoxServer *m_WXFoxServer;
    WXFoxClient *m_WXFoxClient;
    bool dataLoaded;
+   wxString m_working_dir;
+
 
 };

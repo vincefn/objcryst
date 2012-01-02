@@ -42,7 +42,7 @@ WXFoxServer *WXGrigWindow::StartServer()
    //if client or server exist return NULL
    if(m_WXFoxClient!=NULL) return NULL;
    if(m_WXFoxServer!=NULL) return NULL;
-   m_WXFoxServer = new WXFoxServer(this);
+   m_WXFoxServer = new WXFoxServer(this, m_working_dir);
    m_WXFoxServer->m_dataLoaded = dataLoaded;
    return m_WXFoxServer;
 }
@@ -52,7 +52,7 @@ WXFoxClient *WXGrigWindow::StartClientWindow()
    //if client or server exist return NULL
    if(m_WXFoxClient!=NULL) return NULL;
    if(m_WXFoxServer!=NULL) return NULL;
-   m_WXFoxClient = new WXFoxClient(this);
+   m_WXFoxClient = new WXFoxClient(this, m_working_dir);
    return m_WXFoxClient;
 }
 void WXGrigWindow::DataLoaded()

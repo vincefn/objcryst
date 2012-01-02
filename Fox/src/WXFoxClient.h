@@ -43,7 +43,7 @@
 class WXFoxClient : public wxFrame
 {
 public:
-   WXFoxClient(wxWindow* parent);
+   WXFoxClient(wxWindow* parent, wxString working_dir);
    ~WXFoxClient(void);
    void Clear();
    void ConnectClient(wxString IP);
@@ -65,6 +65,7 @@ private:
    wxButton     * m_ConnectButton;
    wxTimer      * m_ConnectTimer;
    bool           m_connecting;
+   wxString       m_working_dir;
 
       DECLARE_EVENT_TABLE()
 };

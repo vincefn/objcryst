@@ -93,7 +93,7 @@ class FoxClient: public wxFrame
 {
 
 public:
-     FoxClient();
+     FoxClient(wxString working_dir);
      ~FoxClient();
      bool ConnectClient(int nbOfTrial, wxString hostname);
      void OnSendResults(wxTimerEvent& event);
@@ -102,6 +102,7 @@ public:
      bool IsClientConnected();
      void Disconnect();
      void onProcessTerminate(int pid, int status, wxString dir);
+     wxString getWorkingDir();
 
      //set nb of all available CPUs or cores on this PC
      void setNbOfAvailCPUs(int nb);
@@ -133,6 +134,7 @@ protected:
    void SaveDataAsFile(wxString out, wxString filename);
    bool LoadFile(wxString filename, wxString &in);
    wxString getMyHostname();
+   wxString addToPath(wxString str1, wxString str2);
 
    //reconnect client
    void Reconnect();
@@ -167,6 +169,7 @@ protected:
    //int                    m_ID;
    int                    m_nbOfAvailCPUs;
    IOSocket               m_IOSocket;
+   wxString               m_working_dir;
    DECLARE_EVENT_TABLE()
 };
 class MyProcess : public wxProcess

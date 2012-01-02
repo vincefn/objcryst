@@ -47,11 +47,12 @@ BEGIN_EVENT_TABLE(WXFoxServer, wxFrame)
 
 END_EVENT_TABLE()
 
-WXFoxServer::WXFoxServer(wxWindow* parent):
+WXFoxServer::WXFoxServer(wxWindow* parent, wxString workingDir):
 m_parent(parent)
 {
    m_dataLoaded = false;
    m_WXFoxServerDataMutex = new wxMutex();
+   m_working_dir = workingDir;
    InitServer();
 }
 WXFoxServer::~WXFoxServer(void)
@@ -72,6 +73,7 @@ void WXFoxServer::InitServer()
    m_parent->PushEventHandler(this);
    //starting server
    m_FoxServer = new FoxServer();
+   m_FoxServer->SetWorkingDir(m_working_dir);
    m_FoxServer->StartGridServer();
    
    //Start update timer
@@ -313,17 +315,28 @@ void WXFoxServer::OnNewJob(wxCommandEvent& event)
       cout<<nbRun<<","<<nbOfTrial<<","<<Name<<endl;
    }while((nbRun<=0)||(nbOfTrial<=0)||(Name==_T("")));
    
+   /*
    wxString filename;
    filename.Printf(_T("JOB_%d.xml"), newID);
+   #ifdef WIN32
+       filename = m_working_dir + _T("\\") + filename;
+   #else
+       filename = m_working_dir + _T("/") + filename;
+   #endif
+   */
    //for unicode only
    std::string tmp("");
    std::stringstream str;
-   str<<"JOB_"<<newID<<".xml";
+   #ifdef WIN32
+   str<<m_working_dir<<"\\"<<"JOB_"<<newID<<".xml";
+   #else
+   str<<m_working_dir<<"/"<<"JOB_"<<newID<<".xml";
+   #endif
    tmp = str.str();
    //unicode
    XMLCrystFileSaveGlobal(tmp); 
-   saveJobHeader(filename, newID, Name, nbOfTrial, nbRun, randomize);
-   AddJob(filename, Name, newID, nbOfTrial, nbRun, randomize);
+   saveJobHeader(tmp, newID, Name, nbOfTrial, nbRun, randomize);
+   AddJob(tmp, Name, newID, nbOfTrial, nbRun, randomize);
 }
 bool WXFoxServer::isFileFoxJob(wxString path, wxString &name, int &id, long &nbOfTrial, long &nbRun, bool &rand) {
     wxString ID, Tr, Run, Rand;
@@ -422,9 +435,11 @@ void WXFoxServer::OnLoadJob(wxCommandEvent& event)
             }while((nbRun<=0)||(nbOfTrial<=0)||(Name==_T("")));
             filename.Printf(_T("JOB_%d.xml"), newID);
             #ifdef WIN32
-            if(!wxFileExists(filename)) wxCopyFile(path, wxGetCwd() + _T("\\") + filename);
+            filename = m_working_dir + _T("\\") + filename;
+            if(!wxFileExists(filename)) wxCopyFile(path, filename);
             #else
-            if(!wxFileExists(filename)) wxCopyFile(path, wxGetCwd() + _T("/") + filename);
+             filename = m_working_dir + _T("/") + filename;
+            if(!wxFileExists(filename)) wxCopyFile(path, filename);
             #endif
             ChangeJobHeader(path, newID, Name, nbOfTrial, nbRun, randomize);
             AddJob(filename, Name, newID, nbOfTrial, nbRun, randomize);
@@ -443,9 +458,11 @@ void WXFoxServer::OnLoadJob(wxCommandEvent& event)
 
         filename.Printf(_T("JOB_%d.xml"), newID);
         #ifdef WIN32
-        wxCopyFile(path, wxGetCwd() + _T("\\") + filename);
+        filename = m_working_dir + _T("\\") + filename;
+        wxCopyFile(path, filename);
         #else
-        wxCopyFile(path, wxGetCwd() + _T("/") + filename);
+        filename = m_working_dir + _T("/") + filename;
+        wxCopyFile(path, filename);
         #endif
         saveJobHeader(filename, newID, Name, nbOfTrial, nbRun, randomize);
         AddJob(filename, Name, newID, nbOfTrial, nbRun, randomize);
@@ -465,8 +482,12 @@ void WXFoxServer::OnLoadJob(wxCommandEvent& event)
         }while((nbRun<=0)||(nbOfTrial<=0)||(Name==_T("")));
 
         filename.Printf(_T("JOB_%d.xml"), newID);
-        
-        SaveDataAsFile(wxString::FromAscii(sst.str().c_str()), wxGetCwd() + _T("\\") + filename);
+        #ifdef WIN32
+        filename = m_working_dir + _T("\\") + filename;
+        #else
+        filename = m_working_dir + _T("/") + filename;
+        #endif
+        SaveDataAsFile(wxString::FromAscii(sst.str().c_str()), filename);
         saveJobHeader(filename, newID, Name, nbOfTrial, nbRun, randomize);
         AddJob(filename, Name, newID, nbOfTrial, nbRun, randomize);
     }
@@ -607,11 +628,14 @@ void WXFoxServer::RunLocalClient(wxCommandEvent& event)
    nbCPUs.Printf(_T("%d"), nCPU);
 
    wxString message;
+   wxStandardPaths sp;
+
    message.Printf(_T("Would you also like to run client on this PC?\nSet the number of CPUs available for client or cancel this operation.\n%d CPUs has been detected on this PC.") , nCPU);
    wxTextEntryDialog dlg(m_parent, message, _T("Set a number of available CPUs"), nbCPUs, wxCANCEL | wxOK );
    if(wxID_OK==dlg.ShowModal()){
        nbCPUs = dlg.GetValue();
-	   wxString appname = wxApp::GetInstance()->argv[0];
+	   //wxString appname = wxApp::GetInstance()->argv[0];
+       wxString appname = sp.GetExecutablePath();
        #ifdef WIN32
        //wxString dir = wxGetCwd() + _T("\\client");
        //if(!wxDirExists(dir.c_str())) {
@@ -619,15 +643,21 @@ void WXFoxServer::RunLocalClient(wxCommandEvent& event)
 	   //}
        //if(!wxFileExists(dir + _T("\\Fox.exe"))) - 
        //wxCopyFile(appname,dir+_T("\\Fox.exe"));
-       wxString cmd = appname + _T(" --runclient localhost --CPUs ") + nbCPUs;
+       wxString ClientDir = m_working_dir + _T("\\client");
+       if(!wxDirExists(ClientDir)) wxMkdir(ClientDir);
+       wxString cmd = appname + _T(" --runclient localhost --CPUs ") + nbCPUs + _T(" --working_dir ") + ClientDir;
        wxExecute(cmd);  
        #else
        //if(appname(0,1)!=_T("/")) appname=wxGetCwd()+_T("/")+appname;
+       //wxExecute(appname+_T(" --runclient localhost --CPUs ") + nbCPUs); 
+       wxString ClientDir = m_working_dir + _T("/client");
+       if(!wxDirExists(ClientDir)) wxMkdir(ClientDir);
+       long result= wxExecute(appname+_T(" --runclient localhost --CPUs ") + nbCPUs + _T(" --working_dir ") + ClientDir);
+       //if(result==0) result=wxExecute(wxGetCwd()+_T("/")+appname+_T(" --runclient localhost --CPUs ") + nbCPUs);
+       //if(result==0) result=wxExecute(_T("/usr/bin/")+appname+_T(" --runclient localhost --CPUs ") + nbCPUs);
+       //if(result==0) result=wxExecute(_T("/usr/local/bin/")+appname+_T(" --runclient localhost --CPUs ") + nbCPUs);
+       //if(appname(0,1)!=_T("/")) appname=wxGetCwd()+_T("/")+appname;
        //wxExecute(appname+_T(" --runclient localhost --CPUs ") + nbCPUs);  
-       long result= wxExecute(appname+_T(" --runclient localhost --CPUs ") + nbCPUs);
-       if(result==0) result=wxExecute(wxGetCwd()+_T("/")+appname+_T(" --runclient localhost --CPUs ") + nbCPUs);
-       if(result==0) result=wxExecute(_T("/usr/bin/")+appname+_T(" --runclient localhost --CPUs ") + nbCPUs);
-       if(result==0) result=wxExecute(_T("/usr/local/bin/")+appname+_T(" --runclient localhost --CPUs ") + nbCPUs);
        #endif
    }
 }

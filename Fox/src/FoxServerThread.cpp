@@ -15,12 +15,14 @@ FoxServerThread::FoxServerThread(   wxSocketBase* pSocket,
                            FoxServerEvents evt,
                            wxMutex *pMutex,
                            std::vector<GridResult > *pResults,
-                           std::vector<FoxJob > *pJobs) :
+                           std::vector<FoxJob > *pJobs,
+                           wxString workingDir) :
 m_pSocket(pSocket),
 m_sckt_ntf(evt),
 m_tMutexObj(pMutex),
 m_results(pResults),
-m_jobs(pJobs)
+m_jobs(pJobs),
+m_working_directory(workingDir)
 //m_parent(parent),
 //m_parentEvnt(parentEvnt)
 {
@@ -160,7 +162,13 @@ bool FoxServerThread::AnalyzeMessage(std::string message)
    WriteLogMessage(_T("Saving message from client"));
    //wxString xtmp;
    //xtmp.Printf(_T("Server_msg_in%d.txt"), (long long) time(0));
-   SaveDataAsFile(wxString::FromAscii(message.c_str()), _T("Server_msg_in.txt"));
+   wxString tmp_path;
+   #ifdef WIN32
+   tmp_path = m_working_directory + _T("\\server_msg_in.txt");
+   #else
+   tmp_path = m_working_directory + _T("/server_msg_in.txt");
+   #endif
+   SaveDataAsFile(wxString::FromAscii(message.c_str()), tmp_path);
 
    stringstream in_string;
    
@@ -299,8 +307,10 @@ void FoxServerThread::SaveResult(wxString result, int JobID, float ResultCost)
    int r = (int) ResultCost;
    #ifdef WIN32
       name.Printf(_T("GridRslt\\ID-%d_Cost-%d_Thread-%d_Time-%d.xml"), JobID, r, this->GetId(), t);
+      name = m_working_directory + _T("\\") + name;
    #else
       name.Printf(_T("GridRslt/ID-%d_Cost-%d_Thread-%d_Time-%d.xml"), JobID, r, this->GetId(), t);
+      name = m_working_directory + _T("/") + name;
    #endif
    WriteLogMessage(_T("Saving result as file"));
    VFN_DEBUG_MESSAGE(__FUNCTION__<<name.ToAscii(),10)
@@ -436,6 +446,12 @@ void FoxServerThread::WriteLogMessage(wxString msg)
 #if __SERVER_LOGS
    wxString filename;
    filename.Printf(_T("thread_log_%d.txt"), GetId());
+#ifdef WIN32
+   filename = m_working_directory + _T("\\") + filename;
+#else
+   filename = m_working_directory + _T("/") + filename;
+#endif
+   
    wxFile logfile(filename, wxFile::write_append);
    if(logfile.IsOpened())
    {

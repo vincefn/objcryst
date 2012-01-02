@@ -43,6 +43,7 @@
    #include <wx/fs_inet.h>
    #include <wx/txtstrm.h>
    #include <wx/minifram.h>
+   #include <wx/dirdlg.h>
 #endif
 
 #include <cstdlib>
@@ -354,6 +355,7 @@ int main (int argc, char *argv[])
    double finalCost=0.;
    bool silent=false;
    string outfilename("Fox-out.xml");
+   string working_dir("");
    long filenameInsertCost=-1;
    bool randomize(false);
    bool only3D(false);
@@ -384,7 +386,7 @@ int main (int argc, char *argv[])
          
          if(!useGUI) {
             cout << "Client output: Run client with GUI only!"<<endl;
-            cout << "i.e. Fox --runclient 10.0.0.1 --CPUs 4"<<endl;
+            cout << "i.e. Fox --runclient 10.0.0.1 --CPUs 4 --working_dir c:\\FOXGrid"<<endl;
             exit(0);
          }
          runclient = true;
@@ -398,6 +400,13 @@ int main (int argc, char *argv[])
          continue;
       }
       #endif
+      if(STRCMP(_T("--working_dir"),argv[i])==0)
+      {
+          i++;
+          working_dir = string(wxString(argv[i]).ToAscii());
+          cout << "Working directory is: "<<working_dir<<endl;
+          continue;
+      }
       if(STRCMP(_T("--nogui"),argv[i])==0)
       {
          useGUI=false;
@@ -1276,7 +1285,10 @@ int main (int argc, char *argv[])
       wxString dir = wxPathOnly(argv[0]);
       wxSetWorkingDirectory(dir);
       wxCommandEvent com;
-      frame->OnStartGridClient(com);
+      //frame->OnStartGridClient(com);   
+      frame->mpGridWindow->m_working_dir = working_dir;
+      frame->mpGridWindow->StartClientWindow();    
+
       if(nbCPUs!=-1) {
           frame->mpGridWindow->m_WXFoxClient->setNbCPU(nbCPUs);
       }
@@ -1883,7 +1895,16 @@ void WXCrystMainFrame::OnAddGeneticAlgorithm(wxCommandEvent& WXUNUSED(event))
 void WXCrystMainFrame::OnStartGridServer(wxCommandEvent &event)
 {
    VFN_DEBUG_ENTRY("WXCrystMainFrame::OnStartGridServer()",10)
-   if(!wxDirExists(_T("GridRslt"))) wxMkdir(_T("GridRslt"));
+   wxDirDialog dlg(this, _T("Choose working directory (check write and read permissions!)"));
+   if(dlg.ShowModal()!=wxID_OK) return;
+   wxString dirName;
+#ifdef WIN32
+   dirName = dlg.GetPath() + _T("\\GridRslt");
+#else
+   dirName = dlg.GetPath() + _T("/GridRslt");
+#endif
+   if(!wxDirExists(dirName)) wxMkdir(dirName);
+   mpGridWindow->m_working_dir = dlg.GetPath();
    if(mpGridWindow->StartServer()==NULL) return;
    VFN_DEBUG_EXIT("WXCrystMainFrame::OnStartGridServer()",10)
    mpGridWindow->Layout();
@@ -1891,6 +1912,9 @@ void WXCrystMainFrame::OnStartGridServer(wxCommandEvent &event)
 }
 void WXCrystMainFrame::OnStartGridClient(wxCommandEvent &event)
 {
+   wxDirDialog dlg(this, _T("Choose working directory (check write and read permissions!)"));
+   if(dlg.ShowModal()!=wxID_OK) return;
+   mpGridWindow->m_working_dir = dlg.GetPath();
    if(mpGridWindow->StartClientWindow()==NULL) return;
    mpNotebook->SetSelection(4);
 }

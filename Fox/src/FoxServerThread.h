@@ -53,7 +53,8 @@ public:
                   FoxServerEvents evt,
                   wxMutex *pMutex,
                   std::vector<GridResult > *pResults,
-                  std::vector<FoxJob > *pJobs);              
+                  std::vector<FoxJob > *pJobs,
+                  wxString workingDir);              
 
    ~FoxServerThread();
    //bool GetJobID(int &ID);
@@ -96,6 +97,7 @@ private:
    long                 m_allCPUs;
    long                 m_availableCPUs;   
    ServerThreadStatus   m_status;
+   wxString             m_working_directory;
 
 };
 

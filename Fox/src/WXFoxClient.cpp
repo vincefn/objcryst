@@ -22,10 +22,11 @@ BEGIN_EVENT_TABLE(WXFoxClient, wxFrame)
    EVT_TIMER(CONNECT_TIMER,                         WXFoxClient::OnConnectTimer)
 END_EVENT_TABLE()
 
-WXFoxClient::WXFoxClient(wxWindow* parent)
+WXFoxClient::WXFoxClient(wxWindow* parent, wxString working_dir)
 {
    m_parent = parent;
-   m_FoxClient = new FoxClient();
+   m_working_dir = working_dir;
+   m_FoxClient = new FoxClient(m_working_dir);
    InitClient();
    m_ConnectTimer = new wxTimer(this, CONNECT_TIMER);
    m_connecting = false;
@@ -60,7 +61,7 @@ void WXFoxClient::InitClient()
    wxStaticText *labelIP = new wxStaticText(m_parent, NULL, _T("Server IP:"), wxDefaultPosition, wxDefaultSize, 0 , _T("label"));
    IPSizer->Add(labelIP, 0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
 
-    m_IPWindow = new wxComboBox(m_parent, NULL, _T("localhost"), wxDefaultPosition, 
+   m_IPWindow = new wxComboBox(m_parent, NULL, _T("localhost"), wxDefaultPosition, 
                        wxDefaultSize, 0,0, 
                        wxCB_DROPDOWN, wxDefaultValidator, _T("TextBox"));
 

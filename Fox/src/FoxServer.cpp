@@ -31,6 +31,7 @@ mpServer(0)
    m_needUpdate = false;
    m_isRunning = false;
    srand( (unsigned)time( NULL ) );
+   m_working_dir = "";
 }
 FoxServer::~FoxServer()
 {
@@ -43,7 +44,13 @@ void FoxServer::WriteLogMessage(wxString msg)
 {
 #if __SERVER_LOGS
    if(mutexMessageLog->Lock()!=wxMUTEX_NO_ERROR) return;
-   wxFile *logfile = new wxFile(_T("server.log"), wxFile::write_append);
+   wxString filename;
+#ifdef WIN32
+   filename = GetWorkingDir() + _T("\\server.log");
+#else
+   filename = GetWorkingDir() + _T("/server.log");
+#endif
+   wxFile *logfile = new wxFile(filename, wxFile::write_append);
    if(logfile != 0)
    {
       wxDateTime datetime = wxDateTime::Now(); 
@@ -53,6 +60,14 @@ void FoxServer::WriteLogMessage(wxString msg)
    delete logfile;
    mutexMessageLog->Unlock();
 #endif
+}
+void FoxServer::SetWorkingDir(wxString path)
+{
+    m_working_dir = path;
+}
+wxString FoxServer::GetWorkingDir()
+{
+    return m_working_dir;
 }
 void FoxServer::StartGridServer()
 {
@@ -250,7 +265,8 @@ void FoxServer::OnServerEvent(wxSocketEvent &event)
                                              EMPTY_MSG,
                                              s_mutexProtectingTheGlobalData,
                                              &m_results,
-                                             &m_jobs);
+                                             &m_jobs,
+                                             m_working_dir);
          
          if(pThread->Create()!=wxTHREAD_NO_ERROR) {
             s_mutexProtectingTheGlobalData->Unlock();

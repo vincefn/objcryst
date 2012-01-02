@@ -85,8 +85,11 @@ GrdRslt::~GrdRslt()
 
 
 ///////////////////////////////////////////////
-FoxClient::FoxClient()
+FoxClient::FoxClient(wxString working_dir)
 {
+   m_working_dir = working_dir;
+   wxString dirName = addToPath(getWorkingDir(), _T("processes"));
+   if(!wxDirExists(dirName)) wxMkdir(dirName);
    m_DataMutex = new wxMutex();
    m_ResultsMutex = new wxMutex();
    mpClient = new wxSocketClient();
@@ -128,6 +131,14 @@ void FoxClient::resetProcesses(int nbProcesses)
     m_processes.clear();
     for(int i=0;i<nbProcesses;i++) {
       wxString dir;
+      dir = addToPath(getWorkingDir(), _T("processes"));
+      wxString tmpDir;
+      tmpDir.Printf(_T("process_%d"), i);
+      dir = addToPath(dir, tmpDir);
+      if(!wxDirExists(dir.c_str())) {
+         wxMkdir(dir);
+      }
+/*
       #ifdef __WIN32__
       dir.Printf(_T("\\ObjCryst-FoxGrid-process_%d"), i);
       #else
@@ -137,6 +148,7 @@ void FoxClient::resetProcesses(int nbProcesses)
       if(!wxDirExists(dir.c_str())) {
          wxMkdir(dir);
       }
+*/
       FoxProcess proc(dir);
       m_processes.push_back(proc);
    }
@@ -144,7 +156,8 @@ void FoxClient::resetProcesses(int nbProcesses)
 void FoxClient::WriteMessageLog(wxString msg)
 {
 #if __CLIENT_LOGS 
-   wxFile logfile(_T("Client.log"), wxFile::write_append);
+   wxString filename = addToPath(this->getWorkingDir(), _T("client.log"));   
+   wxFile logfile(filename, wxFile::write_append);
    wxDateTime datetime = wxDateTime::Now();
    logfile.Write(datetime.Format(_T("%X ")) + msg + _T("\n"));
    logfile.Close();
@@ -355,7 +368,7 @@ bool FoxClient::AnalyzeMessage(wxSocketBase* tmpSock)
        Reconnect();
        return false;
    }
-   SaveDataAsFile(wxString::FromAscii(inmsg.c_str()), _T("client_msg_in.txt"));
+   SaveDataAsFile(wxString::FromAscii(inmsg.c_str()), addToPath(getWorkingDir(), _T("client_msg_in.txt")));
    //jobs = getJobs(inmsg);
    in_string<<inmsg;
    WriteMessageLog(_T("Start parsing file"));
@@ -473,7 +486,7 @@ void FoxClient::answerToAsk(vector<wxString> ask)
     out += _T(" />\n</FoxGrid>\n");
     
     WriteMessageLog(_T("Saving answer to the file"));
-    SaveDataAsFile(out, _T("client_out.txt"));
+    SaveDataAsFile(out, addToPath(getWorkingDir(), _T("client_out.txt")));
 
     WriteMessageLog(_T("waiting 2 seconds..."));
     wxSleep(2);
@@ -610,7 +623,7 @@ void FoxClient::rejectJobs(std::vector<int> ids)
     }
     out+=_T("</FoxGrid>\n");
     WriteMessageLog(_T("Saving output message to the file"));
-    SaveDataAsFile(out, _T("client_out.txt"));
+    SaveDataAsFile(out, addToPath(getWorkingDir(), _T("client_out.txt")));
 
     WriteMessageLog(_T("sending message..."));
     wxSleep(2);
@@ -621,13 +634,27 @@ void FoxClient::rejectJobs(std::vector<int> ids)
     WriteMessageLog(_T("Rejecting jobs...end"));
 }
 void FoxClient::SaveDataAsFile(wxString out, wxString filename)
-{
+{  
    wxFile outFile(filename, wxFile::write);
    if(outFile.IsOpened())
    {
       outFile.Write(out);
       outFile.Close();
    }
+}
+wxString FoxClient::getWorkingDir()
+{
+    return m_working_dir;
+}
+wxString FoxClient::addToPath(wxString str1, wxString str2)
+{
+    wxString res;
+    #ifdef WIN32
+       res = str1 + _T("\\") + str2;
+    #else
+       res = str1 + _T("/") + str2;
+    #endif
+    return res;
 }
 bool FoxClient::LoadFile(wxString filename, wxString &in)
 {
@@ -718,7 +745,7 @@ bool FoxClient::SendResult(wxString result)
    {
       mpClient->SetNotify(wxSOCKET_LOST_FLAG);
       WriteMessageLog(_T("Saving output message to the file"));
-      SaveDataAsFile(result, _T("client_out.txt"));
+      SaveDataAsFile(result, addToPath(getWorkingDir(), _T("client_out.txt")));
       
       WriteMessageLog(_T("sending message"));
       if(!m_IOSocket.WriteStringToSocket(mpClient, string(result.ToAscii()))) {

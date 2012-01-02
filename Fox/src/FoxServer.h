@@ -45,6 +45,8 @@ class FoxServer: public wxFrame
      FoxServer();
      ~FoxServer();
      void StartGridServer();
+     void SetWorkingDir(wxString path);
+     wxString GetWorkingDir();
      void OnServerEvent(wxSocketEvent &event);
      void OnSocketEvent(wxSocketEvent &event);
      void WriteProtocol();
@@ -68,5 +70,6 @@ class FoxServer: public wxFrame
      bool                 m_isRunning;
      bool                 m_needUpdate;
      std::vector<FoxJob > m_jobs;
+     wxString             m_working_dir;
      DECLARE_EVENT_TABLE()
 };
