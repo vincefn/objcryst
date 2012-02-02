@@ -335,8 +335,8 @@ void WXFoxServer::OnNewJob(wxCommandEvent& event)
    tmp = str.str();
    //unicode
    XMLCrystFileSaveGlobal(tmp); 
-   saveJobHeader(tmp, newID, Name, nbOfTrial, nbRun, randomize);
-   AddJob(tmp, Name, newID, nbOfTrial, nbRun, randomize);
+   saveJobHeader(wxString::FromAscii(tmp.c_str()), newID, Name, nbOfTrial, nbRun, randomize);
+   AddJob(wxString::FromAscii(tmp.c_str()), Name, newID, nbOfTrial, nbRun, randomize);
 }
 bool WXFoxServer::isFileFoxJob(wxString path, wxString &name, int &id, long &nbOfTrial, long &nbRun, bool &rand) {
     wxString ID, Tr, Run, Rand;

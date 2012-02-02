@@ -31,7 +31,7 @@ mpServer(0)
    m_needUpdate = false;
    m_isRunning = false;
    srand( (unsigned)time( NULL ) );
-   m_working_dir = "";
+   m_working_dir = _T("");
 }
 FoxServer::~FoxServer()
 {

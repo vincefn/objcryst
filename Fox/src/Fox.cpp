@@ -1286,7 +1286,7 @@ int main (int argc, char *argv[])
       wxSetWorkingDirectory(dir);
       wxCommandEvent com;
       //frame->OnStartGridClient(com);   
-      frame->mpGridWindow->m_working_dir = working_dir;
+      frame->mpGridWindow->m_working_dir = wxString::FromAscii(working_dir.c_str());
       frame->mpGridWindow->StartClientWindow();    
 
       if(nbCPUs!=-1) {
