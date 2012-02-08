@@ -963,6 +963,8 @@ class Molecule: public Scatterer
                               const bool keepCenter=true);
       /// Print the status of all restraints (bond length, angles...)
       void RestraintStatus(ostream &os)const;
+      /// Print the restraints (bond length, angles...) as whole labels and number in column text format which accessible to other programs
+      void RestraintExport(ostream &os)const;
       /// Get the connectivity table
       const map<MolAtom *,set<MolAtom *> > & GetConnectivityTable();
       /// get the clock associated to the list of bonds

@@ -4235,25 +4235,49 @@ void Molecule::TranslateAtomGroup(const set<MolAtom *> &atoms,
    mClockAtomPosition.Click();
    mClockScatterer.Click();
 }
-
+void Molecule::RestraintExport(ostream &os)const
+{
+   VFN_DEBUG_ENTRY("Molecule::RestraintExport()",5)
+   os<<"BondName, IdealLength, Length, log(likelihood)"<<endl;
+   for(vector<MolBond*>::const_iterator pos=mvpBond.begin();pos!=mvpBond.end();++pos)
+        os <<(*pos)->GetName()
+           <<", "<<(*pos)->GetLength0()
+           <<", "<<(*pos)->GetLength()
+           <<", "<<(*pos)->GetLogLikelihood()<<endl;
+   os<<"BondAngle, IdealAngle, Angle, log(likelihood)"<<endl;
+   for(vector<MolBondAngle*>::const_iterator pos=mvpBondAngle.begin();
+       pos!=mvpBondAngle.end();++pos)
+        os <<(*pos)->GetName()
+           <<", "<<(*pos)->Angle0()*180/M_PI
+           <<", "<<(*pos)->GetAngle()*180/M_PI
+           <<", "<<(*pos)->GetLogLikelihood()<<endl;
+   os<<"DihedralAngle, IdealAngle, Angle, log(likelihood)"<<endl;
+   for(vector<MolDihedralAngle*>::const_iterator pos=mvpDihedralAngle.begin();
+       pos!=mvpDihedralAngle.end();++pos)
+        os <<(*pos)->GetName()
+           <<", "<<(*pos)->Angle0()*180/M_PI
+           <<", "<<(*pos)->GetAngle()*180/M_PI
+           <<", "<<(*pos)->GetLogLikelihood()<<endl;
+   VFN_DEBUG_EXIT("Molecule::RestraintExport()",5)
+}
 void Molecule::RestraintStatus(ostream &os)const
 {
    VFN_DEBUG_ENTRY("Molecule::RestraintStatus()",5)
    for(vector<MolBond*>::const_iterator pos=mvpBond.begin();pos!=mvpBond.end();++pos)
       cout <<"Bond "<<(*pos)->GetName()
-           <<"IdealLength="<<(*pos)->GetLength0()
+           <<", IdealLength="<<(*pos)->GetLength0()
            <<", Length="<<(*pos)->GetLength()
            <<", log(likelihood)="<<(*pos)->GetLogLikelihood()<<endl;
    for(vector<MolBondAngle*>::const_iterator pos=mvpBondAngle.begin();
        pos!=mvpBondAngle.end();++pos)
       cout <<"Bond Angle "<<(*pos)->GetName()
-           <<"IdealAngle="<<(*pos)->Angle0()*180/M_PI
+           <<", IdealAngle="<<(*pos)->Angle0()*180/M_PI
            <<", Angle="<<(*pos)->GetAngle()*180/M_PI
            <<", log(likelihood)="<<(*pos)->GetLogLikelihood()<<endl;
    for(vector<MolDihedralAngle*>::const_iterator pos=mvpDihedralAngle.begin();
        pos!=mvpDihedralAngle.end();++pos)
       cout <<"Dihedral Angle "<<(*pos)->GetName()
-           <<"IdealAngle="<<(*pos)->Angle0()*180/M_PI
+           <<", IdealAngle="<<(*pos)->Angle0()*180/M_PI
            <<", Angle="<<(*pos)->GetAngle()*180/M_PI
            <<", log(likelihood)="<<(*pos)->GetLogLikelihood()<<endl;
    VFN_DEBUG_EXIT("Molecule::RestraintStatus()",5)

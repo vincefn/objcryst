@@ -27,6 +27,7 @@
 #endif
 #include "wx/notebook.h"
 #include "wx/minifram.h"
+#include <wx/wfstream.h>
 
 #include <sstream>
 #include <fstream>
@@ -711,6 +712,7 @@ WXCRYST_ID ID_MOLECULE_MENU_FILE_2ZMATRIXNAMED;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_OPTIMIZECONFORMATION;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_STATUS;
+WXCRYST_ID ID_MOLECULE_MENU_EXPORT_RESTRAINTS;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_ADD_ATOM;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_ADD_BOND;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_ADD_ANGLE;
@@ -745,6 +747,7 @@ BEGIN_EVENT_TABLE(WXMolecule,wxWindow)
    EVT_MENU(ID_REFOBJ_MENU_PAR_RANDOMIZE,                 WXRefinableObj::OnMenuParRandomize)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_OPTIMIZECONFORMATION,WXMolecule::OnMenuOptimizeConformation)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_STATUS,              WXMolecule::OnMenuPrintRestraintStatus)
+   EVT_MENU(ID_MOLECULE_MENU_EXPORT_RESTRAINTS,           WXMolecule::OnMenuExportRestraints)  
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_ADD_ATOM,            WXMolecule::OnMenuAddAtom)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_ADD_BOND,            WXMolecule::OnMenuAddBond)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_ADD_ANGLE,           WXMolecule::OnMenuAddAngle)
@@ -793,6 +796,8 @@ mpBondWin(0),mpAngleWin(0),mpDihedralAngleWin(0),mpRigidGroupWin(0),mIsSelfUpdat
                                 "Set Restraints delta && sigma for all bonds && angles");
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_STATUS,
                                 "Print Detailed Restraint Values");
+         mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_EXPORT_RESTRAINTS,
+                                "Export Restraints in CVS File format");         
          mpMenuBar->GetMenu(ID_MOLECULE_MENU_FORMULA).AppendSeparator();
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_ADD_ATOM,
                                 "Add an Atom");
@@ -936,7 +941,29 @@ void WXMolecule::OnMenuOptimizeConformation(wxCommandEvent & WXUNUSED(event))
    
    VFN_DEBUG_EXIT("WXMolecule::OnMenuOptimizeConformation()",5)
 }
+void WXMolecule::OnMenuExportRestraints(wxCommandEvent & WXUNUSED(event))
+{
+   VFN_DEBUG_ENTRY("WXMolecule::OnMenuExportRestraints()",5)
+   WXCrystValidateAllUserInput();
 
+   stringstream ss;
+   mpMolecule->RestraintExport(ss);
+   
+   wxFileDialog open(this,_T("Choose File to save restraints:"),
+                        _T(""),_T(""),_T("*.csv"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+   if(open.ShowModal() != wxID_OK) return;
+   wxString name=open.GetPath();
+   if(name.substr(name.size()-4,4)!=_T(".csv"))
+   {
+       cout<<name<<" -> "<<name+_T(".csv")<<endl;
+       name=name+_T(".csv");
+   }
+
+   wxFileOutputStream ostream(name.c_str());
+   ostream.Write(ss.str().c_str(),ss.str().size());
+
+   VFN_DEBUG_EXIT("WXMolecule::OnMenuExportRestraints()",5)
+}
 void WXMolecule::OnMenuPrintRestraintStatus(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXMolecule::OnMenuPrintRestraintStatus()",5)

@@ -4296,7 +4296,7 @@ void WXGLCrystalCanvas::BuildGLFont()
                         CLIP_DEFAULT_PRECIS,       // Clipping precision
                         ANTIALIASED_QUALITY,       // Output quality
                         FF_DONTCARE|DEFAULT_PITCH, // Family and pitch
-                        "Helvetica");              // Font name
+                        _T("Helvetica"));          // Font name
 
       oldfont = (HFONT)SelectObject(hDC, font);
       wglUseFontBitmaps(hDC, 32, 96, mGLFontDisplayListBase);
