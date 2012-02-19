@@ -2458,14 +2458,33 @@ void Molecule::RandomizeConfiguration()
 {
    TAU_PROFILE("Molecule::RandomizeConfiguration()","void ()",TAU_DEFAULT);
    VFN_DEBUG_ENTRY("Molecule::RandomizeConfiguration()",4)
+   
    if(  (!mIsSelfOptimizing)
       &&(this->GetLogLikelihood()>(mvpRestraint.size()*500))
       &&(mAutoOptimizeConformation.GetChoice()==0))
-   {
+   {// This is only done once, for a newly-created molecule with atoms not conforming to restraints
       (*fpObjCrystInformUser)("Optimizing initial conformation of Molecule:"+this->GetName());
       this->OptimizeConformation(100000,(REAL)(mvpRestraint.size()));
       (*fpObjCrystInformUser)("");
    }
+   
+   if(   (!(this->IsBeingRefined())) 
+      && (mvStretchModeTorsion.size()==0)
+      &&(mvStretchModeBondAngle.size()==0)
+      &&(mvStretchModeBondLength.size()==0)
+      &&(mvStretchModeTwist.size()==0)
+      &&(mvMDAtomGroup.size()==0))
+   {
+      //This will build stretch modes & MD groups
+      if(mFlexModel.GetChoice()!=1)
+      {
+         this->BuildStretchModeTorsion();
+         this->TuneGlobalOptimRotationAmplitude();
+         //this->BuildStretchModeGroups();
+         this->BuildMDAtomGroups();
+      }
+   }
+   
    #if 0
    this->BuildRotorGroup();
    if((mFlexModel.GetChoice()==0)||(mFlexModel.GetChoice()==2))
@@ -2512,7 +2531,7 @@ void Molecule::RandomizeConfiguration()
                                      +this->GetBondAngleList().size()
                                      +this->GetDihedralAngleList().size());
       map<RigidGroup*,std::pair<XYZ,XYZ> > vr;
-      this->MolecularDynamicsEvolve(v0, 5000,0.002,
+      this->MolecularDynamicsEvolve(v0, 5000,0.004,
                                     this->GetBondList(),
                                     this->GetBondAngleList(),
                                     this->GetDihedralAngleList(),
@@ -2675,7 +2694,7 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                                     +pos->mvpBondAngle.size()
                                     +pos->mvpDihedralAngle.size());
                map<RigidGroup*,std::pair<XYZ,XYZ> > vr;
-               float nrjMult=1.0;
+               float nrjMult=1.0+mutationAmplitude*0.2;
                if((rand()%20)==0) nrjMult=4.0;
                this->MolecularDynamicsEvolve(v0, int(100*sqrt(mutationAmplitude)),0.004,
                                              pos->mvpBond,
