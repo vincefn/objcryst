@@ -185,7 +185,13 @@ template<class T> class CrystVector
       return vect;
    }
    #endif
-   void reference(CrystVector &old);
+   /** Define this vector as a reference to another vector, or part of another vector
+   *
+   * \param old: the vector this one should point to
+   * \param imin,imax: imax>imin, this vector will point to a part of the other
+   * vector, from old(i) to old(imax-1)
+   */
+   void reference(CrystVector &old, const long imin=0, const long imax=0);
    
    long numElements()const;
    long size()const;

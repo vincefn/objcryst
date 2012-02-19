@@ -81,14 +81,22 @@ template<class T> void CrystVector<T>::operator=(const CrystVector &old)
    for(long i=0;i<mNumElements;i++) *p1++=*p2++;
 }
 
-template<class T> void CrystVector<T>::reference(CrystVector &old)
+template<class T> void CrystVector<T>::reference(CrystVector &old, const long imin, const long imax)
 {
    if(!mIsAreference)
    {
       delete[] mpData ;
    }
-   mNumElements=old.numElements();
-   mpData=old.data();
+   if(imax>imin)
+   {
+      mNumElements=imax-imin;
+      mpData=old.data()+imin;
+   }
+   else
+   {
+      mNumElements=old.numElements();
+      mpData=old.data();
+   }
    mIsAreference=true;
 }
    
