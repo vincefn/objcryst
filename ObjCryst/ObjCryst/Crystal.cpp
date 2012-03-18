@@ -281,12 +281,14 @@ const ScatteringComponentList& Crystal::GetScatteringComponentList()const
 {
    if(mClockScattCompList>mClockMaster) return mScattCompList;
    bool update=false;
-   for(long i=0;i<mScattererRegistry.GetNb();i++)
-   {
-      //mClockScattCompList.Print();
-      //this->GetScatt(i).GetClockScatterer().Print();
-      if(mClockScattCompList<this->GetScatt(i).GetClockScatterer()) {update=true;break;}
-   }
+   if(mClockScattCompList<this->GetClockLatticePar()) update=true;
+   if(update==false)
+      for(long i=0;i<mScattererRegistry.GetNb();i++)
+      {
+         //mClockScattCompList.Print();
+         //this->GetScatt(i).GetClockScatterer().Print();
+         if(mClockScattCompList<this->GetScatt(i).GetClockScatterer()) {update=true;break;}
+      }
    if(true==update)
    {
       VFN_DEBUG_MESSAGE("Crystal::GetScatteringComponentList()",2)
@@ -304,8 +306,6 @@ const ScatteringComponentList& Crystal::GetScatteringComponentList()const
       if(1==mUseDynPopCorr.GetChoice()) 
          this->CalcDynPopCorr(1.,.5); else this->ResetDynPopCorr();
       VFN_DEBUG_MESSAGE("Crystal::GetScatteringComponentList():End",2)
-
-
    }
    #ifdef __DEBUG__
    if(gVFNDebugMessageLevel<2) mScattCompList.Print();
