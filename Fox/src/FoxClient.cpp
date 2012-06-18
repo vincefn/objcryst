@@ -6,6 +6,7 @@ using namespace ObjCryst;
 using namespace std;
 
 #include "FoxClient.h"
+#include "wx/stdpaths.h"
 
 static const long GRID_CLIENT_SOCKET_ID=                  WXCRYST_ID();
 static const long ID_UPDATE_TIMER_CLIENT=                   WXCRYST_ID();
@@ -549,12 +550,16 @@ int FoxClient::runNewJob(wxString job, int id, int nbTrial, bool rand)
         #else
         WriteMessageLog(_T("saving data as file - input.xml"));
         SaveDataAsFile(job, proc->getTmpDir() + _T("/input.xml"));
-        wxFile *batFile = new wxFile(proc->getTmpDir() + _T("/run.sh"), wxFile::write);
+        wxFile *batFile = new wxFile();
+        batFile->Create(proc->getTmpDir() + _T("/run.sh"), true, wxS_IRUSR|wxS_IWUSR|wxS_IXUSR|wxS_IRGRP|wxS_IWGRP|wxS_IXGRP|wxS_IROTH|wxS_IWOTH|wxS_IXOTH);
+        if(!batFile->IsOpened()) {
+            batFile->Open(proc->getTmpDir() + _T("/run.sh"),  wxFile::write);
+        }
         wxString content;
-        wxString appname = wxApp::GetInstance()->argv[0];
+        wxString appname = wxStandardPaths::Get().GetExecutablePath();
         WriteMessageLog(appname);
-        if(appname(0,1)!=_T("/")) appname=wxGetCwd()+_T("/")+appname;
-        WriteMessageLog(appname);
+        //if(appname(0,1)!=_T("/")) appname=wxGetCwd()+_T("/")+appname;
+        //WriteMessageLog(appname);
         wxString tr;
         tr.Printf(_T("%d"), nbTrial);
         if(rand) {
@@ -574,7 +579,7 @@ int FoxClient::runNewJob(wxString job, int id, int nbTrial, bool rand)
 */
         WriteMessageLog(content);
         //cout<<content.ToAscii()<<endl;
-	batFile->Write(content);
+	    batFile->Write(content);
         batFile->Close();
         delete batFile;
         #endif 
