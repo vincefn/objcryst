@@ -403,7 +403,11 @@ int main (int argc, char *argv[])
       if(STRCMP(_T("--working_dir"),argv[i])==0)
       {
           i++;
+          #ifdef __WX__CRYST__
           working_dir = string(wxString(argv[i]).ToAscii());
+          #else
+          working_dir = string(argv[i]);
+          #endif;
           cout << "Working directory is: "<<working_dir<<endl;
           continue;
       }
