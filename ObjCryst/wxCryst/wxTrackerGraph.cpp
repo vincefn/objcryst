@@ -65,15 +65,20 @@ void WXTrackerGraph::UpdateDisplay()
          std::map<long,REAL>::const_iterator pos2;
          valarray<float> vx(nb),vy(nb);
          unsigned long i=0;
+         bool allnull=true;
          for(pos2=(*pos)->GetValues().begin();pos2!=(*pos)->GetValues().end();pos2++)
          {
             vx[i]=pos2->first;
             vy[i]=pos2->second;
+            if(pos2->second!=0) allnull=false;
             i++;
          }
-         this->SetGraphData(mvId[*pos],vx,vy);
-         mClockGraphValues.Click();
-         if(nbxMax<vx.size()) nbxMax=vx.size();
+         if(!allnull)
+         {// Only display graph if some values are non-null
+            this->SetGraphData(mvId[*pos],vx,vy);
+            mClockGraphValues.Click();
+            if(nbxMax<vx.size()) nbxMax=vx.size();
+         }
       }
       if(nbxMax==1) this->AutoScale(-1);// first drawing, so rescale everything
       else this->AutoScale(-1,false,true,false,false);//just rescale xmax
