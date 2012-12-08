@@ -290,13 +290,13 @@ void WXMultiGraph::OnPaint(wxPaintEvent &event)
    }
    // Draw data
    map<unsigned long, GraphData >::const_iterator pos;
-   long ix=-1;
+   long ix=-1,ixdrawn=-1;
    for(pos=mvData.begin();pos!=mvData.end();++pos)
    {
       ix++;
       VFN_DEBUG_MESSAGE("WXMultiGraph::OnPaint():Data#"<<ix,3)
       if((pos->second.vx.size()<1)||(pos->second.vx.size()!=pos->second.vy.size())) continue;
-      
+      ixdrawn++;
       dc.SetPen(wxPen(wxTheColourDatabase->Find(wxString::FromAscii(swxColourNameList[ix])),1,wxSOLID));
       float x1,y1,x2,y2;
       x2=pos->second.vx[0];
@@ -318,7 +318,7 @@ void WXMultiGraph::OnPaint(wxPaintEvent &event)
       wxCoord tmpW,tmpH;
       fontInfo.Printf(wxString::FromAscii(pos->second.name.c_str()));
       dc.GetTextExtent(fontInfo, &tmpW, &tmpH);
-      dc.DrawText(fontInfo,wxCoord(width-tmpW-2),wxCoord(tmpH*(ix)+2));
+      dc.DrawText(fontInfo,wxCoord(width-tmpW-2),wxCoord(tmpH*(ixdrawn)+2));
    }
 
    VFN_DEBUG_EXIT("WXMultiGraph::OnPaint()",4)
