@@ -2871,7 +2871,7 @@ WXGLCrystalCanvas::WXGLCrystalCanvas(WXCrystal *wxcryst,
                                      const wxSize &size):
 wxGLCanvas(parent,id,pos,size,wxDEFAULT_FRAME_STYLE,_T("GLCanvas"),AttribList),mpParentFrame(parent),
 mpWXCrystal(wxcryst),mIsGLInit(false),mDist(60),mX0(0),mY0(0),mZ0(0),mViewAngle(15),
-mShowFourier(true),mShowCrystal(true),mShowAtomName(true),mShowCursor(false),mSharpenMap(false),
+mShowFourier(true),mShowCrystal(true),mShowAtomName(true),mShowCursor(false),mSharpenMap(true),
 mIsGLFontBuilt(false),mGLFontDisplayListBase(0),mpFourierMapListWin(0)
 {
    VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::WXGLCrystalCanvas()",3)
