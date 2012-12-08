@@ -153,7 +153,7 @@ void OptimizationObj::SetParIsUsed(const string& parName,const bool use)
 void OptimizationObj::SetParIsUsed(const RefParType *type,const bool use)
 {
    this->BuildRecursiveRefObjList();
-   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
+   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
       mRecursiveRefinedObjList.GetObj(i).SetParIsUsed(type,use);
 }
 void OptimizationObj::SetLimitsRelative(const string &parName,
@@ -320,17 +320,17 @@ void OptimizationObj::PrepareRefParList()
       mMainTracker.AddTracker(new TrackerObject<OptimizationObj>
          (this->GetName()+"::Overall LogLikelihood",*this,fl));
 
-      for(long i=0;i<mRefinedObjList.GetNb();i++)
+      for(long i=0;i<mRecursiveRefinedObjList.GetNb();i++)
       {
          REAL (RefinableObj::*fp)() const;
          fp=&RefinableObj::GetLogLikelihood;
          mMainTracker.AddTracker(new TrackerObject<RefinableObj>
-            (mRefinedObjList.GetObj(i).GetName()+"::LogLikelihood",mRefinedObjList.GetObj(i),fp));
+            (mRecursiveRefinedObjList.GetObj(i).GetName()+"::LogLikelihood",mRecursiveRefinedObjList.GetObj(i),fp));
          
-         if(mRefinedObjList.GetObj(i).GetClassName()=="Crystal")
+         if(mRecursiveRefinedObjList.GetObj(i).GetClassName()=="Crystal")
          {
             REAL (Crystal::*fc)() const;
-            const Crystal *pCryst=dynamic_cast<const Crystal *>(&(mRefinedObjList.GetObj(i)));
+            const Crystal *pCryst=dynamic_cast<const Crystal *>(&(mRecursiveRefinedObjList.GetObj(i)));
             fc=&Crystal::GetBumpMergeCost;
             mMainTracker.AddTracker(new TrackerObject<Crystal>
                (pCryst->GetName()+"::BumpMergeCost",*pCryst,fc));
@@ -1146,6 +1146,7 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
                   worldNbAcceptedMoves(i)++;
                }
             }
+            //if(accept==1 && i==(nbWorld-1)){this->UpdateDisplay();}
             if(  ((mXMLAutoSave.GetChoice()==1)&&((chrono.seconds()-secondsWhenAutoSave)>86400))
                ||((mXMLAutoSave.GetChoice()==2)&&((chrono.seconds()-secondsWhenAutoSave)>3600))
                ||((mXMLAutoSave.GetChoice()==3)&&((chrono.seconds()-secondsWhenAutoSave)> 600))
@@ -1592,7 +1593,6 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
          needUpdateDisplay=false;
          lastUpdateDisplayTime=chrono.seconds();
       }
-      
       #ifdef __WX__CRYST__
       mMutexStopAfterCycle.Lock();
       #endif
