@@ -22,6 +22,7 @@ CIFData::CIFData()
 
 void CIFData::ExtractAll(const bool verbose)
 {
+   (*fpObjCrystInformUser)("CIF: Extract Data...");
    // :TODO: convert cartesian to fractional coordinates and vice-versa, if unit cell is known
    // :TODO: Take care of values listed as "." and "?" instead of a real value.
    this->ExtractName(verbose);
@@ -31,6 +32,7 @@ void CIFData::ExtractAll(const bool verbose)
    this->ExtractAnisotropicADPs(verbose);
    this->ExtractPowderPattern(verbose);
    this->ExtractSingleCrystalData(verbose);
+   (*fpObjCrystInformUser)("CIF: Finished Extracting Data...");
 }
 
 void CIFData::ExtractUnitCell(const bool verbose)
@@ -39,6 +41,7 @@ void CIFData::ExtractUnitCell(const bool verbose)
    positem=mvItem.find("_cell_length_a");
    if(positem!=mvItem.end())
    {
+      (*fpObjCrystInformUser)("CIF: Extract Unit Cell...");
       mvLatticePar.resize(6);
       mvLatticePar[0]=CIFNumeric2REAL(positem->second);
       positem=mvItem.find("_cell_length_b");
@@ -253,6 +256,7 @@ void CIFData::ExtractAtomicPositions(const bool verbose)
       }
       if(mvAtom.size()>0)
       {// Got the atoms, get names, symbols and adps
+         (*fpObjCrystInformUser)("CIF: Extract Atoms...");
          possymbol=loop->second.find("_atom_site_type_symbol");
          if(possymbol!=loop->second.end())
             for(unsigned int i=0;i<nb;++i)
@@ -729,15 +733,19 @@ void CIFData::Fractional2CartesianCoord()
 
 CIF::CIF(istream &is, const bool interpret,const bool verbose)
 {
+   (*fpObjCrystInformUser)("CIF: Opening CIF");
    //Copy to an iostream so that we can put back characters if necessary
    stringstream in;
    char c;
    while(is.get(c))in.put(c);
+   (*fpObjCrystInformUser)("CIF: Parsing CIF");
    this->Parse(in);
+   (*fpObjCrystInformUser)("CIF: Finished Parsing, Extracting...");
    // Extract structure from blocks
    if(interpret)
       for(map<string,CIFData>::iterator posd=mvData.begin();posd!=mvData.end();++posd)
          posd->second.ExtractAll(verbose);
+   (*fpObjCrystInformUser)("CIF: Finished Import");
 }
 
 bool iseol(const char c) { return ((c=='\n')||(c=='\r'));}
@@ -799,6 +807,7 @@ void CIF::Parse(stringstream &in)
    string block="";// Current block data
    while(!in.eof())
    {
+      (*fpObjCrystInformUser)("CIF: Parsing:"+in.tellg());
       while(!isgraph(in.peek()) && !in.eof()) in.get(lastc);
       if(in.eof()) break;
       if(vv) cout<<endl;
@@ -958,6 +967,7 @@ Crystal* CreateCrystalFromCIF(CIF &cif,bool verbose,bool checkSymAsXYZ)
              <<" / "<<pos->second.mSpacegroupSymbolHall
              <<" / "<<pos->second.mSpacegroupNumberIT
              <<endl;
+         (*fpObjCrystInformUser)("CIF: Create Crystal=");
          pCryst=new Crystal(pos->second.mvLatticePar[0],pos->second.mvLatticePar[1],pos->second.mvLatticePar[2],
                                      pos->second.mvLatticePar[3],pos->second.mvLatticePar[4],pos->second.mvLatticePar[5],spg);
          if(  (pos->second.mSpacegroupSymbolHall=="")
@@ -1031,6 +1041,7 @@ Crystal* CreateCrystalFromCIF(CIF &cif,bool verbose,bool checkSymAsXYZ)
          }
          if(pos->second.mName!="") pCryst->SetName(pos->second.mName);
          else if(pos->second.mFormula!="") pCryst->SetName(pos->second.mFormula);
+         (*fpObjCrystInformUser)("CIF: Create Crystal:"+pCryst->GetName()+"("+pCryst->GetSpaceGroup().GetName()+")");
          
          for(vector<CIFData::CIFAtom>::const_iterator posat=pos->second.mvAtom.begin();posat!=pos->second.mvAtom.end();++posat)
          {
@@ -1066,6 +1077,7 @@ Crystal* CreateCrystalFromCIF(CIF &cif,bool verbose,bool checkSymAsXYZ)
                }
                pCryst->AddScatteringPower(sp);
             }
+            (*fpObjCrystInformUser)("CIF: Add Atom:"+posat->mLabel+"("+sp->GetName()+")");
             pCryst->AddScatterer(new Atom(posat->mCoordFrac[0],posat->mCoordFrac[1],posat->mCoordFrac[2],
                                           posat->mLabel,sp,posat->mOccupancy));
          }
