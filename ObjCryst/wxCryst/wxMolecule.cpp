@@ -28,12 +28,14 @@
 #include "wx/notebook.h"
 #include "wx/minifram.h"
 #include <wx/wfstream.h>
+#include "wx/progdlg.h"
 
 #include <sstream>
 #include <fstream>
 #include <algorithm>
 #include "ObjCryst/wxCryst/wxMolecule.h"
 #include "ObjCryst/RefinableObj/LSQNumObj.h"
+#include "ObjCryst/Quirks/Chronometer.h"
 
 namespace ObjCryst
 {
@@ -61,7 +63,7 @@ template<class T> T * WXDialogChooseFromVector(vector<T*> &reg,wxWindow*parent,
    for(unsigned int i=0;i<reg.size();i++) 
       choices[i]= wxString::FromAscii((reg[i]->GetName()).c_str());
    wxSingleChoiceDialog dialog
-         (parent, wxString::FromAscii(message.c_str()),_T("Choose"),reg.size(),choices,0,wxOK | wxCANCEL);
+         (parent, wxString::FromAscii(message.c_str()),_T("Choose"),reg.size(),choices,(void**)NULL,wxOK | wxCANCEL);
    dialog.SetSize(300,300);
    if(wxID_OK!=dialog.ShowModal()) return 0;
    choice=dialog.GetSelection();
@@ -709,6 +711,7 @@ WXCRYST_ID ID_MENU_SETLIMITS;
 WXCRYST_ID ID_MOLECULE_MENU_FILE;
 WXCRYST_ID ID_MOLECULE_MENU_FILE_2ZMATRIX;
 WXCRYST_ID ID_MOLECULE_MENU_FILE_2ZMATRIXNAMED;
+WXCRYST_ID ID_MOLECULE_MENU_PAR_MDTEST;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_OPTIMIZECONFORMATION;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_STATUS;
@@ -745,6 +748,7 @@ BEGIN_EVENT_TABLE(WXMolecule,wxWindow)
    EVT_MENU(ID_REFOBJ_MENU_PAR_FIXALL,                    WXRefinableObj::OnMenuFixAllPar)
    EVT_MENU(ID_REFOBJ_MENU_PAR_UNFIXALL,                  WXRefinableObj::OnMenuUnFixAllPar)
    EVT_MENU(ID_REFOBJ_MENU_PAR_RANDOMIZE,                 WXRefinableObj::OnMenuParRandomize)
+   EVT_MENU(ID_MOLECULE_MENU_PAR_MDTEST,                  WXMolecule::OnMenuMDTest)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_OPTIMIZECONFORMATION,WXMolecule::OnMenuOptimizeConformation)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_STATUS,              WXMolecule::OnMenuPrintRestraintStatus)
    EVT_MENU(ID_MOLECULE_MENU_EXPORT_RESTRAINTS,           WXMolecule::OnMenuExportRestraints)  
@@ -787,8 +791,10 @@ mpBondWin(0),mpAngleWin(0),mpDihedralAngleWin(0),mpRigidGroupWin(0),mIsSelfUpdat
       mpMenuBar->AddMenu("Parameters",ID_REFOBJ_MENU_PAR);
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_FIXALL,"Fix all");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_UNFIXALL,"Unfix all");
-         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_RANDOMIZE,
-                                "Randomize Configuration");
+      mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_REFOBJ_MENU_PAR_RANDOMIZE,
+                          "Randomize Configuration");
+      mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_PAR,ID_MOLECULE_MENU_PAR_MDTEST,
+                          "Test Molecular Dynamics moves for 30s");
       mpMenuBar->AddMenu("Formula && Restraints",ID_MOLECULE_MENU_FORMULA);
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_OPTIMIZECONFORMATION,
                                 "Optimize Starting Conformation");
@@ -1733,6 +1739,163 @@ void WXMolecule::OnMenuTest(wxCommandEvent & WXUNUSED(event))
    VFN_DEBUG_EXIT("WXMolecule::OnMenuTest()",6)
 }
 
+class MoleculeMDTestThread: public wxThread
+{
+public:
+   MoleculeMDTestThread(Molecule  &mol,float seconds):
+   wxThread(wxTHREAD_DETACHED),mpMolecule(&mol),mSeconds(seconds){};
+   virtual void *Entry()
+   {
+      cout<<endl<<"Entering refinement thread "<<endl<<endl;
+      const const map<MolAtom *,set<MolAtom *> > *pConnect=&(mpMolecule-> GetConnectivityTable());
+      Chronometer chrono;
+      float dt0=chrono.seconds();
+      unsigned long ct=0;
+      while(chrono.seconds()<30)
+      {
+         cout<<"MD Test, cycle #"<<ct++<<endl;
+         // Use Same procedure as in Molecule::GLobalOptRandomMove
+         #if 0
+         // Use one center for the position of an impulsion, applied to all atoms with an exponential decrease
+         REAL xmin=(*mpMolecule->mvMDFullAtomGroup.begin())->GetX();
+         REAL xmax=(*mpMolecule->mvMDFullAtomGroup.begin())->GetX();
+         REAL ymin=(*mpMolecule->mvMDFullAtomGroup.begin())->GetY();
+         REAL ymax=(*mpMolecule->mvMDFullAtomGroup.begin())->GetY();
+         REAL zmin=(*mpMolecule->mvMDFullAtomGroup.begin())->GetZ();
+         REAL zmax=(*mpMolecule->mvMDFullAtomGroup.begin())->GetZ();
+         for(set<MolAtom*>::iterator at=mpMolecule->mvMDFullAtomGroup.begin();at!=mpMolecule->mvMDFullAtomGroup.end();++at)
+         {
+            if((*at)->GetX()<xmin) xmin=(*at)->GetX();
+            if((*at)->GetX()>xmax) xmax=(*at)->GetX();
+            if((*at)->GetY()<ymin) ymin=(*at)->GetY();
+            if((*at)->GetY()>ymax) ymax=(*at)->GetY();
+            if((*at)->GetZ()<zmin) zmin=(*at)->GetZ();
+            if((*at)->GetZ()>zmax) zmax=(*at)->GetZ();
+         }
+         // Apply a gaussian impulsion to part of the atom group (FWHM=1/5 of group size)
+         REAL dx=(xmax-xmin)/5.,dy=(ymax-ymin)/5.,dz=(zmax-zmin)/5.;
+         if(dx<2) dx=2;
+         if(dy<2) dy=2;
+         if(dz<2) dz=2;
+         const REAL xc=xmin+rand()/(REAL)RAND_MAX*(xmax-xmin);
+         const REAL yc=ymin+rand()/(REAL)RAND_MAX*(ymax-ymin);
+         const REAL zc=zmin+rand()/(REAL)RAND_MAX*(zmax-zmin);
+         map<MolAtom*,XYZ> v0;
+         const REAL ax=-4.*log(2.)/(dx*dx);
+         const REAL ay=-4.*log(2.)/(dy*dy);
+         const REAL az=-4.*log(2.)/(dz*dz);
+         REAL ux,uy,uz,n=0;
+         while(n<1)
+         {
+            ux=REAL(rand()-RAND_MAX/2);
+            uy=REAL(rand()-RAND_MAX/2);
+            uz=REAL(rand()-RAND_MAX/2);
+            n=sqrt(ux*ux+uy*uy+uz*uz);
+         }
+         ux=ux/n;uy=uy/n;uz=uz/n;
+         if(rand()%2==0)
+            for(set<MolAtom*>::iterator at=mpMolecule->mvMDFullAtomGroup.begin();at!=mpMolecule->mvMDFullAtomGroup.end();++at)
+               v0[*at]=XYZ(ux*exp(ax*((*at)->GetX()-xc)*((*at)->GetX()-xc)),
+                           uy*exp(ay*((*at)->GetY()-yc)*((*at)->GetY()-yc)),
+                           uz*exp(az*((*at)->GetZ()-zc)*((*at)->GetZ()-zc)));
+         else
+            for(set<MolAtom*>::iterator at=mpMolecule->mvMDFullAtomGroup.begin();at!=mpMolecule->mvMDFullAtomGroup.end();++at)
+               v0[*at]=XYZ(((*at)->GetX()-xc)*ux*exp(ax*((*at)->GetX()-xc)*((*at)->GetX()-xc)),
+                           ((*at)->GetY()-yc)*uy*exp(ay*((*at)->GetY()-yc)*((*at)->GetY()-yc)),
+                           ((*at)->GetZ()-zc)*uz*exp(az*((*at)->GetZ()-zc)*((*at)->GetZ()-zc)));
+         #else
+         map<MolAtom*,XYZ> v0;
+         // Use one atom for the center of the impulsion, 'push' atoms depending on distance & connectivity table
+         for(set<MolAtom*>::iterator at=mpMolecule->mvMDFullAtomGroup.begin();at!=mpMolecule->mvMDFullAtomGroup.end();++at)
+            v0[*at]=XYZ(0,0,0);
+         map<MolAtom*,unsigned long> pushedAtoms;
+         unsigned long idx=rand()%v0.size();
+         set<MolAtom*>::iterator at0=mpMolecule->mvMDFullAtomGroup.begin();
+         for(unsigned int i=0;i<idx;i++) at0++;
+         const REAL xc=(*at0)->GetX();
+         const REAL yc=(*at0)->GetY();
+         const REAL zc=(*at0)->GetZ();
+         ExpandAtomGroupRecursive(*at0,*pConnect,pushedAtoms,3);
+         REAL ux,uy,uz,n=0;
+         while(n<1)
+         {
+            ux=REAL(rand()-RAND_MAX/2);
+            uy=REAL(rand()-RAND_MAX/2);
+            uz=REAL(rand()-RAND_MAX/2);
+            n=sqrt(ux*ux+uy*uy+uz*uz);
+         }
+         ux=ux/n;uy=uy/n;uz=uz/n;
+         const REAL a=-4.*log(2.)/(2*2);//FWHM=2 Angstroems
+         if(rand()%2==0)
+            for(map<MolAtom*,unsigned long>::iterator at=pushedAtoms.begin() ;at!=pushedAtoms.end();++at)
+               v0[at->first]=XYZ(ux*exp(a*(at->first->GetX()-xc)*(at->first->GetX()-xc)),
+                           uy*exp(a*(at->first->GetY()-yc)*(at->first->GetY()-yc)),
+                           uz*exp(a*(at->first->GetZ()-zc)*(at->first->GetZ()-zc)));
+         else
+            for(map<MolAtom*,unsigned long>::iterator at=pushedAtoms.begin() ;at!=pushedAtoms.end();++at)
+               v0[at->first]=XYZ((at->first->GetX()-xc)*ux*exp(a*(at->first->GetX()-xc)*(at->first->GetX()-xc)),
+                                 (at->first->GetY()-yc)*uy*exp(a*(at->first->GetY()-yc)*(at->first->GetY()-yc)),
+                                 (at->first->GetZ()-zc)*uz*exp(a*(at->first->GetZ()-zc)*(at->first->GetZ()-zc)));
+
+         #endif
+         const REAL nrj0=40*( mpMolecule->GetBondList().size()
+                             +mpMolecule->GetBondAngleList().size()
+                             +mpMolecule->GetDihedralAngleList().size());
+         map<RigidGroup*,std::pair<XYZ,XYZ> > vr;
+         mpMolecule->MolecularDynamicsEvolve(v0, 200,0.004,
+                                             mpMolecule->GetBondList(),
+                                             mpMolecule->GetBondAngleList(),
+                                             mpMolecule->GetDihedralAngleList(),
+                                             vr,nrj0);
+         
+         // Display
+         wxMilliSleep(1);// Slow down display for simple structures
+         if((chrono.seconds()-dt0)>0.05) {mpMolecule->GetCrystal().UpdateDisplay();dt0=chrono.seconds();}
+      }
+      return NULL;
+   };
+   virtual void OnExit()
+   {
+      cout <<endl<<"Exiting refinement thread "<<endl<<endl;
+   };
+private:
+   /// The molecule to randomly
+   Molecule *mpMolecule;
+   /// Test duration
+   float mSeconds;
+};
+
+void WXMolecule::OnMenuMDTest(wxCommandEvent & WXUNUSED(event))
+{
+   VFN_DEBUG_ENTRY("WXMolecule::OnMenuMDTest()",6)
+   {
+      wxProgressDialog dlgProgress(_T("Beginning MD Test..."),_T("Building Flip Groups"),
+                                   7,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME);//|wxPD_CAN_ABORT
+      mpMolecule->BuildFlipGroup();
+      dlgProgress.Update(0,"Build Ring List") ;
+      mpMolecule->BuildRingList();
+      dlgProgress.Update(1,"Build Stretch Modes: Bond Length") ;
+      mpMolecule->BuildStretchModeBondLength();
+      dlgProgress.Update(2,"Build Stretch Modes: Bond Angle") ;
+      mpMolecule->BuildStretchModeBondAngle();
+      dlgProgress.Update(3,"Build Stretch Modes: Torsion") ;
+      mpMolecule->BuildStretchModeTorsion();
+      //mpMolecule->BuildStretchModeTwist();
+      dlgProgress.Update(4,"Build Stretch Modes: Optimize Rotation Amplitudes") ;
+      mpMolecule->TuneGlobalOptimRotationAmplitude();
+      dlgProgress.Update(5,"Build Stretch Modes Groups") ;
+      mpMolecule->BuildStretchModeGroups();
+      dlgProgress.Update(6,"Build MD Atom Groups") ;
+      mpMolecule->BuildMDAtomGroups();
+   }
+   
+   MoleculeMDTestThread *pTest = new MoleculeMDTestThread(*mpMolecule,30);
+   if(pTest->Create() != wxTHREAD_NO_ERROR)
+      wxLogError(_T("Can't create test optimization thread"));
+   else pTest->Run();
+   VFN_DEBUG_EXIT("WXMolecule::OnMenuMDTest()",6)
+}
+   
 static const long ID_MOLECULE_ROTATE_BOND_GO   =WXCRYST_ID();
 static const long ID_MOLECULE_ROTATE_BOND_ATOMS=WXCRYST_ID();
 

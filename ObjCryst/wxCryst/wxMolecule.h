@@ -154,6 +154,7 @@ class WXMolecule: public WXScatterer
       void OnEditGridRigidGroup(wxGridEvent &e);
       void OnMenuExport2ZMatrix(wxCommandEvent &event);
       void OnMenuTest(wxCommandEvent &event);
+      void OnMenuMDTest(wxCommandEvent &event);
       void OnMenuRotate(wxCommandEvent &event);
       /// Notify that either the bond, bond angle or dihedral angle list window has
       /// been destroyed
