@@ -194,6 +194,7 @@ void XMLCrystFileLoadAllObject(const string & filename)
    ifstream is(filename.c_str());
    if(is.fail()) throw ObjCrystException("XMLCrystFileLoadAllObject()   failed input");
    XMLCrystFileLoadAllObject(is);
+   (*fpObjCrystInformUser)("Finished loading XML file:"+filename);
    VFN_DEBUG_EXIT("XMLCrystFileLoadAllObject(filename,)",5)
 }
 void XMLCrystFileLoadAllObject(istream &is)
@@ -227,6 +228,7 @@ void XMLCrystFileLoadAllObject(istream &is)
          obj->XMLInput(is,tag);
       }
    }
+   (*fpObjCrystInformUser)("Finished loading XML");
    VFN_DEBUG_EXIT("XMLCrystFileLoadAllObject(istream)",5)
 }
 ////////////////////////////////////////////////////////////////////////
@@ -294,6 +296,7 @@ void ScatteringPowerAtom::XMLInput(istream &is,const XMLCrystTag &tagg)
       if("Name"==tagg.GetAttributeName(i)) this->SetName(tagg.GetAttributeValue(i));
       if("Symbol"==tagg.GetAttributeName(i)) mSymbol=tagg.GetAttributeValue(i);
    }
+   (*fpObjCrystInformUser)("Input ScatteringPowerAtom:"+mName+"("+mSymbol+")");
    this->Init(mName,mSymbol,mBiso);
    while(true)
    {
@@ -424,6 +427,7 @@ void Atom::XMLInput(istream &is,const XMLCrystTag &tagg)
       if("Name"==tagg.GetAttributeName(i)) this->SetName(tagg.GetAttributeValue(i));
       if("ScattPow"==tagg.GetAttributeName(i)) scattPowName=tagg.GetAttributeValue(i);
    }
+   (*fpObjCrystInformUser)("XML: Loading Atom:"+this->GetName());
    const ScatteringPower* scattPow=
          &(this->GetCrystal().GetScatteringPowerRegistry().GetObj(scattPowName));
    VFN_DEBUG_MESSAGE("Found Scattering Power:"<< scattPowName<<" at "<<scattPow,4);
@@ -652,6 +656,7 @@ void ZScatterer::XMLInput(istream &is,const XMLCrystTag &tagg)
    {
       if("Name"==tagg.GetAttributeName(i)) this->SetName(tagg.GetAttributeValue(i));
    }
+   (*fpObjCrystInformUser)("XML: Loading ZScatterer:"+this->GetName());
    while(true)
    {
       XMLCrystTag tag(is);
@@ -847,6 +852,7 @@ void Crystal::XMLOutput(ostream &os,int indent)const
 void Crystal::XMLInput(istream &is,const XMLCrystTag &tagg)
 {
    VFN_DEBUG_ENTRY("Crystal::XMLInput():"<<this->GetName(),5)
+   (*fpObjCrystInformUser)("XML: Loading Crystal:");
    //Remove Scatterers and Scattering Powers
       for(long i=0;i<mScatteringPowerRegistry.GetNb();i++)
       {
@@ -867,6 +873,7 @@ void Crystal::XMLInput(istream &is,const XMLCrystTag &tagg)
       if("SpaceGroup"==tagg.GetAttributeName(i))
           this->Init(1,2,3,M_PI/2,M_PI/2,M_PI/2,tagg.GetAttributeValue(i),this->GetName());
    }
+   (*fpObjCrystInformUser)("XML: Loading Crystal:"+this->GetName()+"(spg:"+this->GetSpaceGroup().GetName()+")");
    while(true)
    {
       XMLCrystTag tag(is);
@@ -1002,6 +1009,7 @@ void Crystal::XMLInput(istream &is,const XMLCrystTag &tagg)
          continue;
       }
    }
+   (*fpObjCrystInformUser)("XML: Finished loading Crystal:"+this->GetName());
 }
 ////////////////////////////////////////////////////////////////////////
 //
@@ -1245,6 +1253,7 @@ void DiffractionDataSingleCrystal::XMLInput(istream &is,const XMLCrystTag &tagg)
       if("Crystal"==tagg.GetAttributeName(i)) 
          this->SetCrystal(gCrystalRegistry.GetObj(tagg.GetAttributeValue(i)));
    }
+   (*fpObjCrystInformUser)("XML: Loading Single Crystall data:"+this->GetName());
    while(true)
    {
       XMLCrystTag tag(is);
@@ -1436,6 +1445,7 @@ void DiffractionDataSingleCrystal::XMLInput(istream &is,const XMLCrystTag &tagg)
          this->SortReflectionBySinThetaOverLambda();
       }
    }
+   (*fpObjCrystInformUser)("XML: Finished loading Single Crystal Data:"+this->GetName());
 }
 ////////////////////////////////////////////////////////////////////////
 //
@@ -1954,6 +1964,7 @@ void PowderPattern::XMLInput(istream &is,const XMLCrystTag &tagg)
    {
       if("Name"==tagg.GetAttributeName(i)) this->SetName(tagg.GetAttributeValue(i));
    }
+   (*fpObjCrystInformUser)("XML: Loading Powder Pattern:"+this->GetName());
    while(true)
    {
       XMLCrystTag tag(is);
