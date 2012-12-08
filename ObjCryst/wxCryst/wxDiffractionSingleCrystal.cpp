@@ -329,7 +329,7 @@ void WXDiffractionSingleCrystal::OnMenuSimulate(wxCommandEvent & WXUNUSED(event)
    choices[1]=_T("only unique reflections");
    wxSingleChoiceDialog dialog(this,_T("Choose method"),
                                _T("Choose method for Reflection generation"),
-                               2,choices,0,wxOK | wxCANCEL);
+                               2,choices,(void **)NULL,wxOK | wxCANCEL);
    if(wxID_OK!=dialog.ShowModal()) return;
    const int choice=dialog.GetSelection();
    if(0==choice) mpData->GenHKLFullSpace(theta*DEG2RAD,false);
