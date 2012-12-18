@@ -62,8 +62,13 @@ template<class T> T * WXDialogChooseFromVector(vector<T*> &reg,wxWindow*parent,
    wxString *choices = new wxString[reg.size()];
    for(unsigned int i=0;i<reg.size();i++) 
       choices[i]= wxString::FromAscii((reg[i]->GetName()).c_str());
+   #if wxCHECK_VERSION( 2, 9, 4 )
    wxSingleChoiceDialog dialog
-         (parent, wxString::FromAscii(message.c_str()),_T("Choose"),reg.size(),choices,(void**)NULL,wxOK | wxCANCEL);
+   (parent, wxString::FromAscii(message.c_str()),_T("Choose"),reg.size(),choices,(void**)NULL,wxOK | wxCANCEL);   
+   #else
+   wxSingleChoiceDialog dialog
+         (parent, wxString::FromAscii(message.c_str()),_T("Choose"),reg.size(),choices,NULL,wxOK | wxCANCEL);
+   #endif
    dialog.SetSize(300,300);
    if(wxID_OK!=dialog.ShowModal()) return 0;
    choice=dialog.GetSelection();

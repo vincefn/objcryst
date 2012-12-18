@@ -441,8 +441,13 @@ template<class T> T* WXDialogChooseFromRegistry(ObjRegistry<T> &reg,wxWindow*par
    wxString* choices=new wxString[reg.GetNb()];
    for(int i=0;i<reg.GetNb();i++) 
       *(choices+i)=wxString::FromAscii((reg.GetObj(i).GetClassName()+":"+reg.GetObj(i).GetName()).c_str());
+   #if wxCHECK_VERSION( 2, 9, 4 )
    wxSingleChoiceDialog dialog
          (parent,wxString::FromAscii(message.c_str()),_T("Choose"),reg.GetNb(),choices,(void**)NULL,wxOK | wxCANCEL);
+   #else
+   wxSingleChoiceDialog dialog
+         (parent,wxString::FromAscii(message.c_str()),_T("Choose"),reg.GetNb(),choices,NULL,wxOK | wxCANCEL);
+   #endif
    dialog.SetSize(300,300);
    if(wxID_OK!=dialog.ShowModal())
    {
@@ -488,8 +493,13 @@ template<class T> const T* WXDialogChooseFromRegistry(const ObjRegistry<T> &reg,
    wxString* choices=new wxString[reg.GetNb()];
    for(int i=0;i<reg.GetNb();i++) 
       *(choices+i)=wxString::FromAscii((reg.GetObj(i).GetClassName()+":"+reg.GetObj(i).GetName()).c_str());
+   #if wxCHECK_VERSION( 2, 9, 4 )
    wxSingleChoiceDialog dialog
          (parent,wxString::FromAscii(message.c_str()),_T("Choose"),reg.GetNb(),choices,(void**)NULL,wxOK | wxCANCEL);
+   #else
+   wxSingleChoiceDialog dialog
+         (parent,wxString::FromAscii(message.c_str()),_T("Choose"),reg.GetNb(),choices,NULL,wxOK | wxCANCEL);
+   #endif
    dialog.SetSize(300,300);
    if(wxID_OK!=dialog.ShowModal())
    {
