@@ -1747,7 +1747,7 @@ public:
    virtual void *Entry()
    {
       cout<<endl<<"Entering refinement thread "<<endl<<endl;
-      const const map<MolAtom *,set<MolAtom *> > *pConnect=&(mpMolecule-> GetConnectivityTable());
+      const map<MolAtom *,set<MolAtom *> > *pConnect=&(mpMolecule-> GetConnectivityTable());
       Chronometer chrono;
       float dt0=chrono.seconds();
       unsigned long ct=0;
@@ -1872,20 +1872,20 @@ void WXMolecule::OnMenuMDTest(wxCommandEvent & WXUNUSED(event))
       wxProgressDialog dlgProgress(_T("Beginning MD Test..."),_T("Building Flip Groups"),
                                    7,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME);//|wxPD_CAN_ABORT
       mpMolecule->BuildFlipGroup();
-      dlgProgress.Update(0,"Build Ring List") ;
+      dlgProgress.Update(0,_T("Build Ring List")) ;
       mpMolecule->BuildRingList();
-      dlgProgress.Update(1,"Build Stretch Modes: Bond Length") ;
+      dlgProgress.Update(1,_T("Build Stretch Modes: Bond Length")) ;
       mpMolecule->BuildStretchModeBondLength();
-      dlgProgress.Update(2,"Build Stretch Modes: Bond Angle") ;
+      dlgProgress.Update(2,_T("Build Stretch Modes: Bond Angle")) ;
       mpMolecule->BuildStretchModeBondAngle();
-      dlgProgress.Update(3,"Build Stretch Modes: Torsion") ;
+      dlgProgress.Update(3,_T("Build Stretch Modes: Torsion")) ;
       mpMolecule->BuildStretchModeTorsion();
       //mpMolecule->BuildStretchModeTwist();
-      dlgProgress.Update(4,"Build Stretch Modes: Optimize Rotation Amplitudes") ;
+      dlgProgress.Update(4,_T("Build Stretch Modes: Optimize Rotation Amplitudes")) ;
       mpMolecule->TuneGlobalOptimRotationAmplitude();
-      dlgProgress.Update(5,"Build Stretch Modes Groups") ;
+      dlgProgress.Update(5,_T("Build Stretch Modes Groups")) ;
       mpMolecule->BuildStretchModeGroups();
-      dlgProgress.Update(6,"Build MD Atom Groups") ;
+      dlgProgress.Update(6,_T("Build MD Atom Groups")) ;
       mpMolecule->BuildMDAtomGroups();
    }
    
