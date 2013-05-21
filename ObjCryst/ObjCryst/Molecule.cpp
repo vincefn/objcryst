@@ -2076,6 +2076,21 @@ const string& Molecule::GetClassName() const
    return className;
 }
 
+void Molecule::SetName(const string &name)
+{
+   if(mName==name) return;
+   this->RefinableObj::SetName(name);
+   // Set parameter's name including the Molecule's name
+   this->GetPar(&mXYZ(0)).SetName(mName+"_x");
+   this->GetPar(&mXYZ(1)).SetName(mName+"_y");
+   this->GetPar(&mXYZ(2)).SetName(mName+"_z");
+   this->GetPar(&mOccupancy).SetName(mName+"_Occ");
+   this->GetPar(&(mQuat.Q0())).SetName(mName+"Q0");
+   this->GetPar(&(mQuat.Q1())).SetName(mName+"Q1");
+   this->GetPar(&(mQuat.Q2())).SetName(mName+"Q2");
+   this->GetPar(&(mQuat.Q3())).SetName(mName+"Q3");
+}
+
 void Molecule::Print()const
 {
    VFN_DEBUG_MESSAGE("Molecule::Print()",5)

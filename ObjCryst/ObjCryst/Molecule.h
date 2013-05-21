@@ -745,6 +745,7 @@ class Molecule: public Scatterer
       ~Molecule();
       virtual Molecule* CreateCopy() const;
       virtual const string& GetClassName() const;
+      virtual void SetName(const string &name);
       virtual void Print()const;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
