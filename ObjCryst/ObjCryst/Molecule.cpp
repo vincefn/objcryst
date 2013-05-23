@@ -216,7 +216,7 @@ void MolAtom::SetName(const string &name)
       }
       catch(const ObjCrystException &except)
       {
-         cout<<"MolAtom::SetName(): Atom parameters not yet declared in a Molecule ?"<<endl;
+         cerr<<"MolAtom::SetName(): Atom parameters not yet declared in a Molecule ?"<<endl;
       }
    }
 }
@@ -1895,10 +1895,9 @@ mBaseRotationAmplitude(M_PI*0.02),mIsSelfOptimizing(false),mpCenterAtom(0),
 mMDMoveFreq(0.0),mMDMoveEnergy(40.),mDeleteSubObjInDestructor(1),mLogLikelihoodScale(1.0)
 {
    VFN_DEBUG_MESSAGE("Molecule::Molecule()",5)
-   this->SetName(name);
    mpCryst=&cryst;
    {
-      RefinablePar tmp(this->GetName()+"_x",&mXYZ(0),0.,1.,
+      RefinablePar tmp(name+"_x",&mXYZ(0),0.,1.,
                         gpRefParTypeScattTranslX,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,1.,1.);
       tmp.AssignClock(mClockScatterer);
@@ -1906,7 +1905,7 @@ mMDMoveFreq(0.0),mMDMoveEnergy(40.),mDeleteSubObjInDestructor(1),mLogLikelihoodS
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp(this->GetName()+"_y",&mXYZ(1),0,1,
+      RefinablePar tmp(name+"_y",&mXYZ(1),0,1,
                         gpRefParTypeScattTranslY,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,1.,1.);
       tmp.AssignClock(mClockScatterer);
@@ -1914,7 +1913,7 @@ mMDMoveFreq(0.0),mMDMoveEnergy(40.),mDeleteSubObjInDestructor(1),mLogLikelihoodS
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp(this->GetName()+"_z",&mXYZ(2),0,1,
+      RefinablePar tmp(name+"_z",&mXYZ(2),0,1,
                         gpRefParTypeScattTranslZ,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,true,1.,1.);
       tmp.AssignClock(mClockScatterer);
@@ -1922,7 +1921,7 @@ mMDMoveFreq(0.0),mMDMoveEnergy(40.),mDeleteSubObjInDestructor(1),mLogLikelihoodS
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp(this->GetName()+"_Occ",&mOccupancy,0,1,
+      RefinablePar tmp(name+"_Occ",&mOccupancy,0,1,
                         gpRefParTypeScattOccup,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1.,1.);
       tmp.AssignClock(mClockScatterer);
@@ -1930,7 +1929,7 @@ mMDMoveFreq(0.0),mMDMoveEnergy(40.),mDeleteSubObjInDestructor(1),mLogLikelihoodS
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp(this->GetName()+"Q0",&(mQuat.Q0()),0,1,
+      RefinablePar tmp(name+"_Q0",&(mQuat.Q0()),0,1,
                         gpRefParTypeScattOrient,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
       tmp.AssignClock(mClockScatterer);
@@ -1939,7 +1938,7 @@ mMDMoveFreq(0.0),mMDMoveEnergy(40.),mDeleteSubObjInDestructor(1),mLogLikelihoodS
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp(this->GetName()+"Q1",&(mQuat.Q1()),0,1,
+      RefinablePar tmp(name+"_Q1",&(mQuat.Q1()),0,1,
                         gpRefParTypeScattOrient,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
       tmp.AssignClock(mClockScatterer);
@@ -1948,7 +1947,7 @@ mMDMoveFreq(0.0),mMDMoveEnergy(40.),mDeleteSubObjInDestructor(1),mLogLikelihoodS
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp(this->GetName()+"Q2",&(mQuat.Q2()),0,1,
+      RefinablePar tmp(name+"_Q2",&(mQuat.Q2()),0,1,
                         gpRefParTypeScattOrient,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
       tmp.AssignClock(mClockScatterer);
@@ -1957,7 +1956,7 @@ mMDMoveFreq(0.0),mMDMoveEnergy(40.),mDeleteSubObjInDestructor(1),mLogLikelihoodS
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp(this->GetName()+"Q3",&(mQuat.Q3()),0,1,
+      RefinablePar tmp(name+"_Q3",&(mQuat.Q3()),0,1,
                         gpRefParTypeScattOrient,
                         REFPAR_DERIV_STEP_ABSOLUTE,false,false,true,false,1.,1.);
       tmp.AssignClock(mClockScatterer);
@@ -1965,6 +1964,7 @@ mMDMoveFreq(0.0),mMDMoveEnergy(40.),mDeleteSubObjInDestructor(1),mLogLikelihoodS
       tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }
+   this->SetName(name);
    mLocalParamSet=this->CreateParamSet("saved parameters for local minimization");
    this->InitOptions();
    mClockScatterer.AddChild(mClockAtomList);
@@ -2113,14 +2113,21 @@ void Molecule::SetName(const string &name)
    if(mName==name) return;
    this->RefinableObj::SetName(name);
    // Set parameter's name including the Molecule's name
-   this->GetPar(&mXYZ(0)).SetName(mName+"_x");
-   this->GetPar(&mXYZ(1)).SetName(mName+"_y");
-   this->GetPar(&mXYZ(2)).SetName(mName+"_z");
-   this->GetPar(&mOccupancy).SetName(mName+"_Occ");
-   this->GetPar(&(mQuat.Q0())).SetName(mName+"Q0");
-   this->GetPar(&(mQuat.Q1())).SetName(mName+"Q1");
-   this->GetPar(&(mQuat.Q2())).SetName(mName+"Q2");
-   this->GetPar(&(mQuat.Q3())).SetName(mName+"Q3");
+   try
+   {
+      this->GetPar(&mXYZ(0)).SetName(mName+"_x");
+      this->GetPar(&mXYZ(1)).SetName(mName+"_y");
+      this->GetPar(&mXYZ(2)).SetName(mName+"_z");
+      this->GetPar(&mOccupancy).SetName(mName+"_Occ");
+      this->GetPar(&(mQuat.Q0())).SetName(mName+"_Q0");
+      this->GetPar(&(mQuat.Q1())).SetName(mName+"_Q1");
+      this->GetPar(&(mQuat.Q2())).SetName(mName+"_Q2");
+      this->GetPar(&(mQuat.Q3())).SetName(mName+"_Q3");
+   }
+   catch(const ObjCrystException &except)
+   {
+      cerr<<"Molecule::SetName(): parameters not yet declared in a Molecule ?"<<endl;
+   }
 }
 
 void Molecule::Print()const
