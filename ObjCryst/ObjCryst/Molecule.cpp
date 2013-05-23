@@ -146,6 +146,38 @@ REAL GetDihedralAngle(const MolAtom &at1,const MolAtom &at2,const MolAtom &at3,c
    return angle;
 }
 
+   
+void ExpandAtomGroupRecursive(MolAtom* atom,
+                              const map<MolAtom*,set<MolAtom*> > &connect,
+                              set<MolAtom*> &atomlist,const MolAtom* finalAtom)
+{
+   const pair<set<MolAtom*>::iterator,bool> status=atomlist.insert(atom);
+   if(false==status.second) return;
+   if(finalAtom==atom) return;
+   map<MolAtom*,set<MolAtom*> >::const_iterator c=connect.find(atom);
+   set<MolAtom*>::const_iterator pos;
+   for(pos=c->second.begin();pos!=c->second.end();++pos)
+   {
+      ExpandAtomGroupRecursive(*pos,connect,atomlist,finalAtom);
+   }
+}
+
+void ExpandAtomGroupRecursive(MolAtom* atom,
+                              const map<MolAtom*,set<MolAtom*> > &connect,
+                              map<MolAtom*,unsigned long> &atomlist,const unsigned long maxdepth,unsigned long depth)
+{
+   if(atomlist.count(atom)>0)
+     if(atomlist[atom]<=depth) return;
+   atomlist[atom]=depth;
+   if(depth==maxdepth) return;//maxdepth reached
+   map<MolAtom*,set<MolAtom*> >::const_iterator c=connect.find(atom);
+   set<MolAtom*>::const_iterator pos;
+   for(pos=c->second.begin();pos!=c->second.end();++pos)
+   {
+      ExpandAtomGroupRecursive(*pos,connect,atomlist,maxdepth,depth+1);
+   }
+}
+
 //######################################################################
 //
 //      MolAtom
@@ -2610,18 +2642,19 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
       &&(((rand()%100)==0)))
    {
       this->SaveParamSet(mLocalParamSet);
-      const REAL llk0=this->GetLogLikelihood();
+      const REAL llk0=this->GetLogLikelihood()/mLogLikelihoodScale;
       const unsigned long i=rand() % mvFlipGroup.size();
       list<FlipGroup>::iterator pos=mvFlipGroup.begin();
       for(unsigned long j=0;j<i;++j)++pos;
-      this->FlipAtomGroup(*pos);
+      this->FlipAtomGroup(*pos,true);
       #if 0
+      static unsigned long ctflip1=0,ctflip2=0;
       if(pos->mvRotatedChainList.begin()->first==pos->mpAtom0)
       {
          cout <<"TRYING: Flip group from atom "
               <<pos->mpAtom0->GetName()<<",exchanging bonds with "
               <<pos->mpAtom1->GetName()<<" and "
-              <<pos->mpAtom2->GetName()<<", resulting in a 180� rotation of atoms : ";
+              <<pos->mpAtom2->GetName()<<", resulting in a 180deg rotation of atoms : ";
          for(set<MolAtom*>::iterator pos1=pos->mvRotatedChainList.begin()->second.begin();
              pos1!=pos->mvRotatedChainList.begin()->second.end();++pos1)
             cout<<(*pos1)->GetName()<<"  ";
@@ -2642,13 +2675,21 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                cout<<(*pos1)->GetName()<<"  ";
          }
       }
-      #endif
-      if((this->GetLogLikelihood()-llk0)>100)
+      ctflip1++;
+      if((this->GetLogLikelihood()/mLogLikelihoodScale-llk0)>.3*llk0)
       {
-        //cout<<"      FLIP REJECTED: llk="<<llk0<<"  ->  "<<this->GetLogLikelihood()<<endl;
+        cout<<"      FLIP REJECTED ("<<int(float(ctflip2)/ctflip1*100)<<"% accepted): llk="<<llk0<<"  ->  "<<this->GetLogLikelihood()/mLogLikelihoodScale<<endl;
         this->RestoreParamSet(mLocalParamSet);
       }
-      //else cout<<"      FLIP ACCEPTED"<<endl;
+      else
+      {
+         ctflip2++;
+         cout<<"      FLIP ACCEPTED ("<<float(ctflip2)/ctflip1*100<<"% accepted)"<<endl;
+      }
+      #else
+      if((this->GetLogLikelihood()/mLogLikelihoodScale-llk0)>.3*llk0)
+         this->RestoreParamSet(mLocalParamSet);
+      #endif
    }
    else
    #endif
@@ -2678,24 +2719,91 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
       {
          if(mFlexModel.GetChoice()!=1)
          {
-            #if 0
+            #if 1 // Move as many atoms as possible
             if((mvMDFullAtomGroup.size()>3)&&(rand()<(RAND_MAX*mMDMoveFreq)))
             {
-                  map<MolAtom*,XYZ> v0;
-                  for(set<MolAtom*>::iterator at=mvMDFullAtomGroup.begin();at!=mvMDFullAtomGroup.end();++at)
-                     v0[*at]=XYZ(rand()/(REAL)RAND_MAX+0.5,rand()/(REAL)RAND_MAX+0.5,rand()/(REAL)RAND_MAX+0.5);
-                  
-                  const REAL nrj0=mMDMoveEnergy*( this->GetBondList().size()
+               #if 0
+               // Use one center for the position of an impulsion, applied to all atoms with an exponential decrease
+               // Determine extent of atom group
+               REAL xmin=(*mvMDFullAtomGroup.begin())->GetX();
+               REAL xmax=(*mvMDFullAtomGroup.begin())->GetX();
+               REAL ymin=(*mvMDFullAtomGroup.begin())->GetY();
+               REAL ymax=(*mvMDFullAtomGroup.begin())->GetY();
+               REAL zmin=(*mvMDFullAtomGroup.begin())->GetZ();
+               REAL zmax=(*mvMDFullAtomGroup.begin())->GetZ();
+               for(set<MolAtom*>::iterator at=mvMDFullAtomGroup.begin();at!=mvMDFullAtomGroup.end();++at)
+               {
+                  if((*at)->GetX()<xmin) xmin=(*at)->GetX();
+                  if((*at)->GetX()>xmax) xmax=(*at)->GetX();
+                  if((*at)->GetY()<ymin) ymin=(*at)->GetY();
+                  if((*at)->GetY()>ymax) ymax=(*at)->GetY();
+                  if((*at)->GetZ()<zmin) zmin=(*at)->GetZ();
+                  if((*at)->GetZ()>zmax) zmax=(*at)->GetZ();
+               }
+               // Apply a gaussian impulsion to part of the atom group (FWHM=1/3 of group size)
+               REAL dx=(xmax-xmin)/5.,dy=(ymax-ymin)/5.,dz=(zmax-zmin)/5.;
+               if(dx<2) dx=2;
+               if(dy<2) dy=2;
+               if(dz<2) dz=2;
+               const REAL xc=xmin+rand()/(REAL)RAND_MAX*(xmax-xmin);
+               const REAL yc=ymin+rand()/(REAL)RAND_MAX*(ymax-ymin);
+               const REAL zc=zmin+rand()/(REAL)RAND_MAX*(zmax-zmin);
+               map<MolAtom*,XYZ> v0;
+               const REAL ax=-4.*log(2.)/(dx*dx);
+               const REAL ay=-4.*log(2.)/(dy*dy);
+               const REAL az=-4.*log(2.)/(dz*dz);
+               for(set<MolAtom*>::iterator at=mvMDFullAtomGroup.begin();at!=mvMDFullAtomGroup.end();++at)
+                  v0[*at]=XYZ(exp(ax*((*at)->GetX()-xc)*((*at)->GetX()-xc)),
+                              exp(ay*((*at)->GetY()-yc)*((*at)->GetY()-yc)),
+                              exp(az*((*at)->GetZ()-zc)*((*at)->GetZ()-zc)));
+               #else
+               // Use one atom for the center of the impulsion, 'push' atoms depending on distance & connectivity table
+               map<MolAtom*,XYZ> v0;
+               for(set<MolAtom*>::iterator at=this->mvMDFullAtomGroup.begin();at!=this->mvMDFullAtomGroup.end();++at)
+                  v0[*at]=XYZ(0,0,0);
+               std::map<MolAtom*,unsigned long> pushedAtoms;
+               unsigned long idx=rand()%v0.size();
+               set<MolAtom*>::iterator at0=this->mvMDFullAtomGroup.begin();
+               for(unsigned int i=0;i<idx;i++) at0++;
+               const REAL xc=(*at0)->GetX();
+               const REAL yc=(*at0)->GetY();
+               const REAL zc=(*at0)->GetZ();
+               const map<MolAtom *,set<MolAtom *> > *pConnect=&(this-> GetConnectivityTable());
+               ExpandAtomGroupRecursive(*at0,*pConnect,pushedAtoms,3);
+               REAL ux,uy,uz,n=0;
+               while(n<1)
+               {
+                  ux=REAL(rand()-RAND_MAX/2);
+                  uy=REAL(rand()-RAND_MAX/2);
+                  uz=REAL(rand()-RAND_MAX/2);
+                  n=sqrt(ux*ux+uy*uy+uz*uz);
+               }
+               ux=ux/n;uy=uy/n;uz=uz/n;
+               const REAL a=-4.*log(2.)/(2*2);//FWHM=2 Angstroems
+               if(rand()%2==0)
+                  for(map<MolAtom*,unsigned long>::iterator at=pushedAtoms.begin() ;at!=pushedAtoms.end();++at)
+                     v0[at->first]=XYZ(ux*exp(a*(at->first->GetX()-xc)*(at->first->GetX()-xc)),
+                                 uy*exp(a*(at->first->GetY()-yc)*(at->first->GetY()-yc)),
+                                 uz*exp(a*(at->first->GetZ()-zc)*(at->first->GetZ()-zc)));
+               else
+                  for(map<MolAtom*, unsigned long>::iterator at=pushedAtoms.begin() ;at!=pushedAtoms.end();++at)
+                     v0[at->first]=XYZ((at->first->GetX()-xc)*ux*exp(a*(at->first->GetX()-xc)*(at->first->GetX()-xc)),
+                                       (at->first->GetY()-yc)*uy*exp(a*(at->first->GetY()-yc)*(at->first->GetY()-yc)),
+                                       (at->first->GetZ()-zc)*uz*exp(a*(at->first->GetZ()-zc)*(at->first->GetZ()-zc)));
+               
+
+               #endif
+               const REAL nrj0=mMDMoveEnergy*( this->GetBondList().size()
                                       +this->GetBondAngleList().size()
                                       +this->GetDihedralAngleList().size());
-                  map<RigidGroup*,std::pair<XYZ,XYZ> > vr;
-                  this->MolecularDynamicsEvolve(v0, int(100*sqrt(mutationAmplitude)),0.004,
-                                                this->GetBondList(),
-                                                this->GetBondAngleList(),
-                                                this->GetDihedralAngleList(),
-                                                vr,nrj0);
+               map<RigidGroup*,std::pair<XYZ,XYZ> > vr;
+               this->MolecularDynamicsEvolve(v0, int(100*sqrt(mutationAmplitude)),0.004,
+                                             this->GetBondList(),
+                                             this->GetBondAngleList(),
+                                             this->GetDihedralAngleList(),
+                                             vr,nrj0);
             }
-            #else
+            #else // Move atoms belonging to a MD group
             if((mvMDAtomGroup.size()>0)&&(rand()<(RAND_MAX*mMDMoveFreq)))
             {
                const unsigned int n=rand()%mvMDAtomGroup.size();
@@ -5077,21 +5185,6 @@ void Molecule::BuildConnectivityTable()const
    VFN_DEBUG_EXIT("Molecule::BuildConnectivityTable()",5)
 }
 
-void ExpandAtomGroupRecursive(MolAtom* atom,
-                              const map<MolAtom*,set<MolAtom*> > &connect,
-                              set<MolAtom*> &atomlist,const MolAtom* finalAtom)
-{
-   const pair<set<MolAtom*>::iterator,bool> status=atomlist.insert(atom);
-   if(false==status.second) return;
-   if(finalAtom==atom) return;
-   map<MolAtom*,set<MolAtom*> >::const_iterator c=connect.find(atom);
-   set<MolAtom*>::const_iterator pos;
-   for(pos=c->second.begin();pos!=c->second.end();++pos)
-   {
-      ExpandAtomGroupRecursive(*pos,connect,atomlist,finalAtom);
-   }
-}
-
 Molecule::RotorGroup::RotorGroup(const MolAtom &at1,const MolAtom &at2):
 mpAtom1(&at1),mpAtom2(&at2),mBaseRotationAmplitude(M_PI*0.04)
 {}
@@ -7244,7 +7337,7 @@ void Molecule::BuildMDAtomGroups()
    
    // Create mvMDFullAtomGroup
    mvMDFullAtomGroup.clear();
-   #if 0
+   #if 1
    // All atoms except those in rigid groups
    for(vector<MolAtom*>::iterator at=this->GetAtomList().begin();at!=this->GetAtomList().end();++at)
       mvMDFullAtomGroup.insert(*at);
@@ -7274,8 +7367,7 @@ void Molecule::UpdateScattCompList()const
    if(  (mClockAtomPosition<mClockScattCompList)
       &&(mClockOrientation <mClockScattCompList)
       &&(mClockAtomScattPow<mClockScattCompList)
-      &&(mClockScatterer   <mClockScattCompList)
-      &&(this->GetCrystal().GetClockLatticePar()<mClockScattCompList))return;
+      &&(mClockScatterer   <mClockScattCompList))return;
    VFN_DEBUG_ENTRY("Molecule::UpdateScattCompList()",5)
    TAU_PROFILE("Molecule::UpdateScattCompList()","void ()",TAU_DEFAULT);
    const long nb=this->GetNbComponent();
@@ -7453,7 +7545,7 @@ mpAtom0(&at0),mpAtom1(&at1),mpAtom2(&at2),mNbTest(0),mNbAccept(0)
 {
 }
 
-void Molecule::FlipAtomGroup(const FlipGroup& group)
+void Molecule::FlipAtomGroup(const FlipGroup& group, const bool keepCenter)
 {
    TAU_PROFILE("Molecule::FlipAtomGroup(FlipGroup&)","void (...)",TAU_DEFAULT);
    if(group.mpAtom0==group.mvRotatedChainList.back().first)
@@ -7462,7 +7554,7 @@ void Molecule::FlipAtomGroup(const FlipGroup& group)
       const REAL vy=group.mpAtom0->Y()-(group.mpAtom1->Y()+group.mpAtom2->Y())/2.;
       const REAL vz=group.mpAtom0->Z()-(group.mpAtom1->Z()+group.mpAtom2->Z())/2.;
       this->RotateAtomGroup(*(group.mpAtom0),vx,vy,vz,
-                            group.mvRotatedChainList.back().second,M_PI);
+                            group.mvRotatedChainList.back().second,M_PI,keepCenter);
    }
    else
    {// we are flipping bonds with respect to a plane defined by other bonds
@@ -7527,7 +7619,7 @@ void Molecule::FlipAtomGroup(const FlipGroup& group)
             }
             if(a2<0) angle=M_PI-angle;
             this->RotateAtomGroup(*(group.mpAtom0),v12x,v12y,v12z,
-                                  chain->second,2*angle);
+                                  chain->second,2*angle,keepCenter);
          }
       }
    }
