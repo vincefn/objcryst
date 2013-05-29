@@ -962,7 +962,7 @@ Crystal* CreateCrystalFromCIF(CIF &cif,bool verbose,bool checkSymAsXYZ)
          if(spg.size()<2) spg=pos->second.mSpacegroupHermannMauguin;
          if(spg.size()<2) spg=pos->second.mSpacegroupNumberIT;
          if(spg.size()<2) spg="P1";
-         cout<<"Create crystal with spacegroup: "<<spg
+         if(verbose) cout<<"Create crystal with spacegroup: "<<spg
              <<" / "<<pos->second.mSpacegroupHermannMauguin
              <<" / "<<pos->second.mSpacegroupSymbolHall
              <<" / "<<pos->second.mSpacegroupNumberIT
@@ -990,7 +990,7 @@ Crystal* CreateCrystalFromCIF(CIF &cif,bool verbose,bool checkSymAsXYZ)
             string hmorig=pos->second.mSpacegroupHermannMauguin;
             if(hmorig=="") hmorig=pCryst->GetSpaceGroup().GetCCTbxSpg().match_tabulated_settings().hermann_mauguin();
             
-            cout<<" Symmetry checking using symmetry_equiv_pos_as_xyz:"<<endl;
+            if(verbose) cout<<" Symmetry checking using symmetry_equiv_pos_as_xyz:"<<endl;
             string bestsymbol=hmorig;
             unsigned int bestscore=0;
             for(vector<string>::const_iterator posOrig=origin_list.begin();posOrig!=origin_list.end();++posOrig)
@@ -1021,7 +1021,7 @@ Crystal* CreateCrystalFromCIF(CIF &cif,bool verbose,bool checkSymAsXYZ)
                         }
                      }
                   }
-                  cout<<"   Trying: "<<pCryst->GetSpaceGroup().GetName()
+                  if(verbose) cout<<"   Trying: "<<pCryst->GetSpaceGroup().GetName()
                       <<" nbsym:"<<nbSymSpg<<"(cctbx), "
                       <<pos->second.mvSymmetry_equiv_pos_as_xyz.size()<<"(CIF)"
                       <<",common:"<<nbSymCommon<<endl;
@@ -1036,7 +1036,7 @@ Crystal* CreateCrystalFromCIF(CIF &cif,bool verbose,bool checkSymAsXYZ)
                   cout<<"WOOPS: cctbx error ! Wrong symmetry_equiv_pos_as_xyz strings ?"<<endl;
                }
             }
-            cout<<endl<<"Finally using spacegroup name:"<<bestsymbol<<endl;
+            if(verbose) cout<<endl<<"Finally using spacegroup name:"<<bestsymbol<<endl;
             pCryst->GetSpaceGroup().ChangeSpaceGroup(bestsymbol);
          }
          if(pos->second.mName!="") pCryst->SetName(pos->second.mName);
@@ -1065,7 +1065,7 @@ Crystal* CreateCrystalFromCIF(CIF &cif,bool verbose,bool checkSymAsXYZ)
             }
             if(sp==NULL)
             {
-               cout<<"Scattering power "<<posat->mLabel<<" not found, creating it..."<<endl;
+               if(verbose) cout<<"Scattering power "<<posat->mLabel<<" not found, creating it..."<<endl;
                sp = new ScatteringPowerAtom(posat->mLabel,posat->mSymbol);
                // Always extract isotropic DP, even with ADPs present
                // :TODO: if only ADP are listed, calculate isotropic DP

@@ -568,14 +568,13 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
    {
       try
       {
-         cout<<"Failed lookup symbol, try Hall symbol ?"<<endl;
+         (*fpObjCrystInformUser)("Failed lookup symbol, try Hall symbol ?");
          if(mpCCTbxSpaceGroup!=0) delete mpCCTbxSpaceGroup;
          mpCCTbxSpaceGroup=0;
          mpCCTbxSpaceGroup = new cctbx::sgtbx::space_group(spgId);
       }
       catch(cctbx::error)
       {
-         cout << "WARNING: Could not interpret Spacegroup name:"<<spgId<<endl;
          (*fpObjCrystInformUser)("Could not interpret Spacegroup Symbol:"+spgId);
          this->InitSpaceGroup(mId);
          VFN_DEBUG_EXIT("SpaceGroup::InitSpaceGroup():"<<spgId,8)
