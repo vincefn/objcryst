@@ -7374,7 +7374,8 @@ void Molecule::UpdateScattCompList()const
    if(  (mClockAtomPosition<mClockScattCompList)
       &&(mClockOrientation <mClockScattCompList)
       &&(mClockAtomScattPow<mClockScattCompList)
-      &&(mClockScatterer   <mClockScattCompList))return;
+      &&(mClockScatterer   <mClockScattCompList)
+      &&(this->GetCrystal().GetClockLatticePar()<mClockScattCompList))return;
    VFN_DEBUG_ENTRY("Molecule::UpdateScattCompList()",5)
    TAU_PROFILE("Molecule::UpdateScattCompList()","void ()",TAU_DEFAULT);
    const long nb=this->GetNbComponent();
