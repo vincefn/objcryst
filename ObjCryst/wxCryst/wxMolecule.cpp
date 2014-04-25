@@ -2683,7 +2683,7 @@ void WXMolecule::OnMenuSetDeltaSigma(wxCommandEvent &event)
    double sigma=0.01,delta=0.02;
    {
       wxString s;
-      s.Printf(_T("%d"),delta);
+      s.Printf(_T("%f"),delta);
       wxString title=_T("Choose 'delta' value");
       wxString info;
       info.Printf(_T("The 'delta' value is the allowed range \n")
@@ -2704,7 +2704,7 @@ void WXMolecule::OnMenuSetDeltaSigma(wxCommandEvent &event)
    }
    {
       wxString s;
-      s.Printf(_T("%d"),sigma);
+      s.Printf(_T("%f"),sigma);
       wxString title=_T("Choose 'sigma' value");
       wxString info;
       info.Printf(_T("The 'sigma' value is used to compute \n")
@@ -2732,14 +2732,14 @@ void WXMolecule::OnMenuSetDeltaSigma(wxCommandEvent &event)
    for(vector<MolBondAngle*>::iterator pos=mpMolecule->GetBondAngleList().begin();
        pos != mpMolecule->GetBondAngleList().end();++pos)
    {
-      (*pos)->AngleDelta()=delta;
-      (*pos)->AngleSigma()=sigma;
+      (*pos)->SetAngleDelta(delta*DEG2RAD);
+      (*pos)->SetAngleSigma(sigma*DEG2RAD);
    }
    for(vector<MolDihedralAngle*>::iterator pos=mpMolecule->GetDihedralAngleList().begin();
        pos != mpMolecule->GetDihedralAngleList().end();++pos)
    {
-      (*pos)->AngleDelta()=delta;
-      (*pos)->AngleSigma()=sigma;
+      //(*pos)->AngleDelta()=delta;
+      //(*pos)->AngleSigma()=sigma;
    }
    mpMolecule->GetBondListClock().Click();
    this->CrystUpdate(true);

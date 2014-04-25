@@ -30,6 +30,8 @@
 #include "ObjCryst/ObjCryst/IO.h"
 #include "ObjCryst/RefinableObj/LSQNumObj.h"
 
+#include "ObjCryst/ObjCryst/Molecule.h"
+
 #ifdef __WX__CRYST__
    #include "ObjCryst/wxCryst/wxRefinableObj.h"
    #undef GetClassName // Conflict from wxMSW headers ? (cygwin)
@@ -523,8 +525,11 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
          this->RunParallelTempering(nbStep,silent,finalcost,maxTime);
          break;
       }//case GLOBAL_OPTIM_PARALLEL_TEMPERING
-      case GLOBAL_OPTIM_GENETIC: //:TODO:
+      case GLOBAL_OPTIM_RANDOM_LSQ: //:TODO:
       {
+          long cycles = 1;
+          this->RunRandomLSQMethod(cycles);
+          break;
       }//case GLOBAL_OPTIM_GENETIC
    }
    mIsOptimizing=false;
@@ -610,8 +615,12 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
             catch(...){cout<<"Unhandled exception in MonteCarloObj::MultiRunOptimize() ?"<<endl;}
             break;
          }
-         case GLOBAL_OPTIM_GENETIC: //:TODO:
-         {
+         case GLOBAL_OPTIM_RANDOM_LSQ:
+         {            
+            try{this->RunRandomLSQMethod(nbCycle);}
+            catch(...){cout<<"Unhandled exception in MonteCarloObj::RunRandomLSQMethod() ?"<<endl;}
+            //nbCycle=1;
+            break;
          }
       }
       nbTrialCumul+=(nbStep0-nbStep);
@@ -898,43 +907,66 @@ void MonteCarloObj::RunSimulatedAnnealing(long &nbStep,const bool silent,
       }
 
    }
-   #if 0
-   // LSQ
-   cout<<"Beginning LSQ refinement"<<endl;
-   LSQNumObj lsq;
-   for(unsigned int i=0;i<mRecursiveRefinedObjList.GetNb();++i)
-      if(mRecursiveRefinedObjList.GetObj(i).GetClassName()=="PowderPattern")
-         lsq.SetRefinedObj(mRecursiveRefinedObjList.GetObj(i));
-   lsq.PrepareRefParList(true,true);
-   lsq.SetParIsFixed(gpRefParTypeObjCryst,true);
-   lsq.SetParIsFixed(gpRefParTypeScatt,false);
-   lsq.SetParIsFixed(gpRefParTypeScattDataScale,false);
-   //lsq.SetParIsUsed(gpRefParTypeScattDataProfile,true);
-   //lsq.SetParIsUsed(gpRefParTypeScattDataCorrPos,true);
-   //lsq.SetParIsUsed(gpRefParTypeScattDataBackground,true);
-   //lsq.SetParIsUsed(gpRefParTypeUnitCell,true);
-   try {lsq.Refine(20,true,false);}
-   catch(const ObjCrystException &except){};
-   REAL cost=this->GetLogLikelihood();
-   if(cost<mCurrentCost)
-   {
-      mCurrentCost=cost;
-      mRefParList.SaveParamSet(lastParSavedSetIndex);
-      if(mCurrentCost<runBestCost)
-      {
-         runBestCost=mCurrentCost;
-         mRefParList.SaveParamSet(runBestIndex);
-         if(runBestCost<mBestCost)
-         {
-            mBestCost=mCurrentCost;
-            mRefParList.SaveParamSet(mBestParSavedSetIndex);
-            if(!silent) cout << "LSQ : NEW OVERALL Best Cost="<<runBestCost<< endl;
-         }
-         else if(!silent) cout << " LSQ : NEW Run Best Cost="<<runBestCost<< endl;
-      }
+   //cout<<"Beginning final LSQ refinement? ... ";
+   if(mAutoLSQ.GetChoice()>0) {
+       //cout<<" yes"<<endl;
+      if(!silent) cout<<"Beginning final LSQ refinement"<<endl;
+      for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).SetApproximationFlag(false);
+      //mRefParList.RestoreParamSet(runBestIndex);
+      mCurrentCost=this->GetLogLikelihood();
+      RunNondestructiveLSQRefinement(20,true,true,false,0.001);
+      //try {
+      //    mLSQ.Refine(20,true,true,false,0.001);
+          //cout<<"Refine"<<endl;
+      //}
+      //catch(const ObjCrystException &except) {
+      //    //cout<<"Something wrong?"<<endl;
+      //};
+      if(!silent) cout<<"LSQ cost: "<<mCurrentCost<<" -> "<<this->GetLogLikelihood()<<endl;
+      //cout<<"LSQ cost: "<<mCurrentCost<<" -> "<<this->GetLogLikelihood()<<endl;
+      REAL cost=this->GetLogLikelihood();
+      // Need to go back to optimization with approximations allowed (they are not during LSQ)
+      for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).SetApproximationFlag(true);
+
+       // LSQ
+      /*
+       cout<<"Beginning LSQ refinement"<<endl;
+       LSQNumObj lsq;
+       for(unsigned int i=0;i<mRecursiveRefinedObjList.GetNb();++i)
+          if(mRecursiveRefinedObjList.GetObj(i).GetClassName()=="PowderPattern")
+             lsq.SetRefinedObj(mRecursiveRefinedObjList.GetObj(i));
+       lsq.PrepareRefParList(true);
+       lsq.SetParIsFixed(gpRefParTypeObjCryst,true);
+       lsq.SetParIsFixed(gpRefParTypeScatt,false);
+       lsq.SetParIsFixed(gpRefParTypeScattDataScale,false);
+       //lsq.SetParIsUsed(gpRefParTypeScattDataProfile,true);
+       //lsq.SetParIsUsed(gpRefParTypeScattDataCorrPos,true);
+       //lsq.SetParIsUsed(gpRefParTypeScattDataBackground,true);
+       //lsq.SetParIsUsed(gpRefParTypeUnitCell,true);
+       try {lsq.Refine(20,true,false);}
+       catch(const ObjCrystException &except){};
+       REAL cost=this->GetLogLikelihood();
+       */
+       if(cost<mCurrentCost)
+       {
+          mCurrentCost=cost;
+          mRefParList.SaveParamSet(lastParSavedSetIndex);
+          if(mCurrentCost<runBestCost)
+          {
+             runBestCost=mCurrentCost;
+             mRefParList.SaveParamSet(runBestIndex);
+             if(runBestCost<mBestCost)
+             {
+                mBestCost=mCurrentCost;
+                mRefParList.SaveParamSet(mBestParSavedSetIndex);
+                if(!silent) cout << "LSQ : NEW OVERALL Best Cost="<<runBestCost<< endl;
+             }
+             else if(!silent) cout << " LSQ : NEW Run Best Cost="<<runBestCost<< endl;
+          }
+       }
+       cout<<"Finished LSQ refinement"<<endl;
    }
-   cout<<"Finished LSQ refinement"<<endl;
-   #endif
+   
 
    mLastOptimTime=chrono.seconds();
    //Restore Best values
@@ -945,7 +977,185 @@ void MonteCarloObj::RunSimulatedAnnealing(long &nbStep,const bool silent,
    if(!silent) this->DisplayReport();
    if(!silent) chrono.print();
 }
+void MonteCarloObj::RunNondestructiveLSQRefinement(  int nbCycle,bool useLevenbergMarquardt, 
+                                            const bool silent, const bool callBeginEndOptimization, 
+                                            const float minChi2var )
+{
+    float bsigma=-1, bdelta=-1;
+    float asigma=-1, adelta=-1;
+    //set the sigma values lower - it makes the molecular model more stable for LSQ
+    for(int i=0;i<mRefinedObjList.GetNb();i++) {
+        if(mRefinedObjList.GetObj(i).GetClassName()=="Crystal") {
+            try {
+                Crystal * pCryst = dynamic_cast<Crystal *>(&(mRefinedObjList.GetObj(i)));
+                for(int s=0;s<pCryst->GetScattererRegistry().GetNb();s++) {
+                    Molecule *pMol=dynamic_cast<Molecule*>(&(pCryst->GetScatt(s)));
+                    for(vector<MolBond*>::iterator pos = pMol->GetBondList().begin(); pos != pMol->GetBondList().end();++pos) {
+                        bsigma = (*pos)->GetLengthSigma();
+                        bdelta = (*pos)->GetLengthDelta();
+                        (*pos)->SetLengthDelta(0.02);
+                        (*pos)->SetLengthSigma(0.001);
+                    }
+                    for(vector<MolBondAngle*>::iterator pos=pMol->GetBondAngleList().begin();pos != pMol->GetBondAngleList().end();++pos)
+                    {
+                        asigma = (*pos)->GetAngleSigma();
+                        adelta = (*pos)->GetAngleDelta();
+                        (*pos)->SetAngleDelta(0.2*DEG2RAD);
+                        (*pos)->SetAngleSigma(0.01*DEG2RAD);
+                    }
+                }
+            } catch (const std::bad_cast& e) {
 
+            }            
+        }
+    }
+    for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).SetApproximationFlag(false);    
+    try {
+        mLSQ.Refine(nbCycle,useLevenbergMarquardt,silent,callBeginEndOptimization,minChi2var);        
+    }
+    catch(const ObjCrystException &except) {
+
+    };
+    for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).SetApproximationFlag(true); 
+
+    if(bsigma<0 || bdelta<0 || asigma<0 || adelta<0) return;
+    //restore the delta and sigma values
+    for(int i=0;i<mRefinedObjList.GetNb();i++) {
+        if(mRefinedObjList.GetObj(i).GetClassName()=="Crystal") {
+            try {
+                Crystal * pCryst = dynamic_cast<Crystal *>(&(mRefinedObjList.GetObj(i)));
+                for(int s=0;s<pCryst->GetScattererRegistry().GetNb();s++) {
+                    Molecule *pMol=dynamic_cast<Molecule*>(&(pCryst->GetScatt(s)));
+                    for(vector<MolBond*>::iterator pos = pMol->GetBondList().begin(); pos != pMol->GetBondList().end();++pos) {
+                        (*pos)->SetLengthDelta(bdelta);
+                        (*pos)->SetLengthSigma(bsigma);
+                    }
+                    for(vector<MolBondAngle*>::iterator pos=pMol->GetBondAngleList().begin();pos != pMol->GetBondAngleList().end();++pos)
+                    {
+                        (*pos)->SetAngleDelta(adelta);
+                        (*pos)->SetAngleSigma(asigma);
+                    }
+                }
+            } catch (const std::bad_cast& e) {
+
+            }            
+        }
+    }
+}
+void MonteCarloObj::RunRandomLSQMethod(long &nbCycle)
+{    
+    //perform random move
+    mMutationAmplitude=mMutationAmplitudeMax;
+    float bsigma=-1, bdelta=-1;
+    float asigma=-1, adelta=-1;
+    
+    //set the delta and sigma values - low values are good for LSQ!
+    for(int i=0;i<mRefinedObjList.GetNb();i++) {
+        if(mRefinedObjList.GetObj(i).GetClassName()=="Crystal") {
+            try {
+                Crystal * pCryst = dynamic_cast<Crystal *>(&(mRefinedObjList.GetObj(i)));
+                for(int s=0;s<pCryst->GetScattererRegistry().GetNb();s++) {
+                    Molecule *pMol=dynamic_cast<Molecule*>(&(pCryst->GetScatt(s)));
+                    for(vector<MolBond*>::iterator pos = pMol->GetBondList().begin(); pos != pMol->GetBondList().end();++pos) {
+                        bsigma = (*pos)->GetLengthSigma();
+                        bdelta = (*pos)->GetLengthDelta();
+                        (*pos)->SetLengthDelta(0.02);
+                        (*pos)->SetLengthSigma(0.001);
+                    }
+                    for(vector<MolBondAngle*>::iterator pos=pMol->GetBondAngleList().begin();pos != pMol->GetBondAngleList().end();++pos)
+                    {
+                        asigma = (*pos)->GetAngleSigma();
+                        adelta = (*pos)->GetAngleDelta();
+                        (*pos)->SetAngleDelta(0.2*DEG2RAD);
+                        (*pos)->SetAngleSigma(0.01*DEG2RAD);
+                    }
+                }
+            } catch (const std::bad_cast& e){
+
+            }            
+        }
+    }
+   
+    const long starting_point=mRefParList.CreateParamSet("MonteCarloObj:Last parameters (RANDOM-LSQ)");
+    mRefParList.SaveParamSet(starting_point);
+    while(nbCycle!=0) {
+        nbCycle--;    
+        mRefParList.RestoreParamSet(starting_point);
+        //this->NewConfiguration();
+        for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).RandomizeConfiguration();
+        this->UpdateDisplay();        
+        REAL starting_cost=this->GetLogLikelihood();
+
+        //perform LSQ          
+        for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).SetApproximationFlag(false);    
+        //mCurrentCost=this->GetLogLikelihood();
+        try {
+            mLSQ.Refine(20,true,true,false,0.001);        
+        }
+        catch(const ObjCrystException &except) {
+            //cout<<"Something wrong?"<<endl;
+        };
+        for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).SetApproximationFlag(true);  
+        //cout<<"LSQ cost: "<<mCurrentCost<<" -> "<<this->GetLogLikelihood()<<endl;
+        REAL lsq_cost=this->GetLogLikelihood();
+        mCurrentCost = lsq_cost;
+        //mRefParList.SaveParamSet(lsqtParSavedSetIndex);
+        if(mCurrentCost<mBestCost)
+        {
+            mBestCost=mCurrentCost;
+            mRefParList.SaveParamSet(mBestParSavedSetIndex);        
+        }
+        this->UpdateDisplay();
+
+        //save it to the file
+        string saveFileName=this->GetName();
+        time_t date=time(0);
+        char strDate[40];
+        strftime(strDate,sizeof(strDate),"%Y-%m-%d_%H-%M-%S",localtime(&date));//%Y-%m-%dT%H:%M:%S%Z
+        char costAsChar[30];    
+        sprintf(costAsChar,"#Run%d-Cost-%f",nbCycle, mCurrentCost);
+        saveFileName=saveFileName+(string)strDate+(string)costAsChar+(string)".xml";
+        XMLCrystFileSaveGlobal(saveFileName);
+        
+         #ifdef __WX__CRYST__
+          mMutexStopAfterCycle.Lock();
+          #endif
+          if(mStopAfterCycle) 
+          {
+             #ifdef __WX__CRYST__
+             mMutexStopAfterCycle.Unlock();
+             #endif             
+             break;
+          }
+          #ifdef __WX__CRYST__
+          mMutexStopAfterCycle.Unlock();
+          #endif
+    }
+
+    if(bsigma<0 || bdelta<0 || asigma<0 || adelta<0) return;
+    //restore the delta and sigma values
+    for(int i=0;i<mRefinedObjList.GetNb();i++) {
+        if(mRefinedObjList.GetObj(i).GetClassName()=="Crystal") {
+            try {
+                Crystal * pCryst = dynamic_cast<Crystal *>(&(mRefinedObjList.GetObj(i)));
+                for(int s=0;s<pCryst->GetScattererRegistry().GetNb();s++) {
+                    Molecule *pMol=dynamic_cast<Molecule*>(&(pCryst->GetScatt(s)));
+                    for(vector<MolBond*>::iterator pos = pMol->GetBondList().begin(); pos != pMol->GetBondList().end();++pos) {
+                        (*pos)->SetLengthDelta(bdelta);
+                        (*pos)->SetLengthSigma(bsigma);
+                    }
+                    for(vector<MolBondAngle*>::iterator pos=pMol->GetBondAngleList().begin();pos != pMol->GetBondAngleList().end();++pos)
+                    {
+                        (*pos)->SetAngleDelta(adelta);
+                        (*pos)->SetAngleSigma(asigma);
+                    }
+                }
+            } catch (const std::bad_cast& e){
+
+            }            
+        }
+    }
+}
 void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
                                          const REAL finalcost,const REAL maxTime)
 {
@@ -1205,8 +1415,10 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
                
                const REAL cost0=this->GetLogLikelihood();// cannot use currentCost(i), approximations changed...
                if(!silent) cout<<"LSQ: World="<<worldSwapIndex(i)<<": cost="<<cost0;
-               try {mLSQ.Refine(-30,true,true,false,0.001);}
-               catch(const ObjCrystException &except){};
+               
+               RunNondestructiveLSQRefinement(-30,true,true,false,0.001);
+               //try {mLSQ.Refine(-30,true,true,false,0.001);}
+               //catch(const ObjCrystException &except){};
                #if 0
                // Report GoF values (Chi^2 / nbObs) values for all objects
                for(map<RefinableObj*,unsigned int>::iterator pos=mLSQ.GetRefinedObjMap().begin();pos!=mLSQ.GetRefinedObjMap().end();++pos)
@@ -1616,8 +1828,9 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
       for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).SetApproximationFlag(false);
       mRefParList.RestoreParamSet(runBestIndex);
       mCurrentCost=this->GetLogLikelihood();
-      try {mLSQ.Refine(-50,true,true,false,0.001);}
-      catch(const ObjCrystException &except){};
+      RunNondestructiveLSQRefinement(-50,true,true,false,0.001);
+      //try {mLSQ.Refine(-50,true,true,false,0.001);}
+      //catch(const ObjCrystException &except){};
       if(!silent) cout<<"LSQ cost: "<<mCurrentCost<<" -> "<<this->GetLogLikelihood()<<endl;
       
       // Need to go back to optimization with approximations allowed (they are not during LSQ)
@@ -1850,7 +2063,7 @@ void MonteCarloObj::InitOptions()
       GlobalOptimTypeName="Algorithm";
       GlobalOptimTypeChoices[0]="Simulated Annealing";
       GlobalOptimTypeChoices[1]="Parallel Tempering";
-      //GlobalOptimTypeChoices[2]="Genetic";
+      //GlobalOptimTypeChoices[2]="Random-LSQ";
 
       AnnealingScheduleTempName="Temperature Schedule";
       AnnealingScheduleMutationName="Displacement Amplitude Schedule";

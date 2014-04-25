@@ -83,9 +83,9 @@ enum GlobalOptimType
 {
    GLOBAL_OPTIM_SIMULATED_ANNEALING,
    GLOBAL_OPTIM_PARALLEL_TEMPERING,
-   GLOBAL_OPTIM_GENETIC,
+   GLOBAL_OPTIM_RANDOM_LSQ,
    GLOBAL_OPTIM_SIMULATED_ANNEALING_MULTI,
-   GLOBAL_OPTIM_PARALLEL_TEMPERING_MULTI
+   GLOBAL_OPTIM_PARALLEL_TEMPERING_MULTI,   
 };
 
 /** \brief Base object for Optimization methods.
@@ -409,6 +409,13 @@ class MonteCarloObj:public OptimizationObj
       */
       void RunParallelTempering(long &nbSteps,const bool silent=false,const REAL finalcost=0,
                                 const REAL maxTime=-1);
+
+      void RunRandomLSQMethod(long &nbCycle);
+
+      void RunNondestructiveLSQRefinement(  int nbCycle=1,bool useLevenbergMarquardt=false, 
+                                            const bool silent=false, const bool callBeginEndOptimization=true, 
+                                            const float minChi2var=0.01 );
+
       
       //Parameter Access by name
       //RefinablePar& GetPar(const string& parName);
