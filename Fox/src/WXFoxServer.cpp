@@ -628,7 +628,7 @@ void WXFoxServer::RunLocalClient(wxCommandEvent& event)
    nbCPUs.Printf(_T("%d"), nCPU);
 
    wxString message;
-   wxStandardPaths sp;
+    wxStandardPaths sp=wxStandardPaths::Get();
 
    message.Printf(_T("Would you also like to run client on this PC?\nSet the number of CPUs available for client or cancel this operation.\n%d CPUs has been detected on this PC.") , nCPU);
    wxTextEntryDialog dlg(m_parent, message, _T("Set a number of available CPUs"), nbCPUs, wxCANCEL | wxOK );

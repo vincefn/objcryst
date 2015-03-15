@@ -263,7 +263,7 @@ void ScatteringPower::InitRGBColour()
          break;
       }
       i++;
-      if(gPOVRayColours[i].mName=="")
+      if(strncmp(gPOVRayColours[i].mName,"",3)==0)
       {//could not find colour !
          cout << "Could not find colour:"<<mColourName<<" for ScatteringPower "<<mName<<endl;
          mColourRGB[0]=1;

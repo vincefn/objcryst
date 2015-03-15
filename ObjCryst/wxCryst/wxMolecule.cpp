@@ -48,7 +48,7 @@ template<class T> T const* WXDialogChooseFromVector(const vector<T*> &reg,wxWind
    for(unsigned int i=0;i<reg.size();i++) 
       choices[i]= wxString::FromAscii((reg[i]->GetName()).c_str());
    wxSingleChoiceDialog dialog
-         (parent,message.c_str(),"Choose",reg.size(),choices,0,wxOK | wxCANCEL);
+         (parent,message.c_str(),"Choose",reg.size(),choices,NULL,wxOK | wxCANCEL);
    dialog.SetSize(300,300);
    if(wxID_OK!=dialog.ShowModal()) return 0;
    choice=dialog.GetSelection();
@@ -904,8 +904,8 @@ mpBondWin(0),mpAngleWin(0),mpDihedralAngleWin(0),mpRigidGroupWin(0),mIsSelfUpdat
       mpAtomWin->SetSize(800,300);
       mpAtomWin->EnableScrolling(true,true);
       mpAtomWin->SetSizeHints(-1,300,-1,300);
-      mpAtomWin->SetColSize(0,120);
       mpAtomWin->CreateGrid(0,5);
+      mpAtomWin->SetDefaultColSize(120);
       mpAtomWin->SetColAttr(0,cellAttrName);
       mpAtomWin->SetColAttr(1,cellAttrName);
       mpAtomWin->SetColAttr(3,cellAttrFloat);

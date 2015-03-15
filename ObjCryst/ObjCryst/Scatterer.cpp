@@ -151,7 +151,7 @@ void Scatterer::InitRGBColour()
          break;
       }
       i++;
-      if(gPOVRayColours[i].mName=="")
+      if(strncmp(gPOVRayColours[i].mName,"",3 )==0)
       {//could not find colour !
          cout << "Could not find colour:"<<mColourName<<" for scaterrer "<<mName<<endl;
          mColourRGB[0]=1;

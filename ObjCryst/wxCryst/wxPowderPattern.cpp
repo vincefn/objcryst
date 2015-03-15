@@ -3129,7 +3129,7 @@ WXRefinableObj(parent,b),mpPowderPatternBackground(b),mNeedUpdateUI(false),mIsSe
       mpGridBackgroundPoint->SetSize(400,300);
       mpGridBackgroundPoint->EnableScrolling(true,true);
       mpGridBackgroundPoint->SetSizeHints(-1,300,-1,300);
-      mpGridBackgroundPoint->SetColSize(0,150);
+      mpGridBackgroundPoint->SetDefaultColSize(150);
       mpGridBackgroundPoint->CreateGrid(0,2);
       mpGridBackgroundPoint->SetColAttr(0,cellAttrFloat);
       mpGridBackgroundPoint->SetColAttr(1,cellAttrFloat);
@@ -3746,7 +3746,7 @@ wxWindow(parent,-1),mpPattern(pPattern),mpDiff(pDiff),mLSQ("Profile Fitting obje
          pManual->SetScrollRate(10,10);
          pManual->SetSizer(pSizerManual);
          pManual->Layout();
-         pSizerManual->SetVirtualSizeHints(pManual);
+         pSizerManual->FitInside(pManual);
       
       pNotebook->AddPage(pManual,_T("Manual Fit"),true);
    
@@ -3762,7 +3762,7 @@ wxWindow(parent,-1),mpPattern(pPattern),mpDiff(pDiff),mLSQ("Profile Fitting obje
       
       pSpgExplor->SetSizer(pSizerSpgExplor);
       pSpgExplor->Layout();
-      pSizerSpgExplor->SetVirtualSizeHints(pSpgExplor);
+      pSizerSpgExplor->FitInside(pSpgExplor);
       
       pNotebook->AddPage(pSpgExplor,_T("Spacegroup Explorer"),true);
    

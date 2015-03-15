@@ -3688,8 +3688,8 @@ void Molecule::AddAtom(const REAL x, const REAL y, const REAL z,
    if(thename==string(""))
    {// This should not be needed, the atom will reset the parameters name when its name is set
       char buf[100];
-      if(pPow!=0) sprintf(buf,"%s_%s_%d",this->GetName().c_str(),pPow->GetName().c_str(),mvpAtom.size()+1);
-      else sprintf(buf,"%s_X_%d",this->GetName().c_str(),mvpAtom.size()+1);
+      if(pPow!=0) sprintf(buf,"%s_%s_%lu",this->GetName().c_str(),pPow->GetName().c_str(),mvpAtom.size()+1);
+      else sprintf(buf,"%s_X_%lu",this->GetName().c_str(),mvpAtom.size()+1);
       thename=buf;
    }
    mvpAtom.push_back(new MolAtom(x,y,z,pPow,thename,*this));

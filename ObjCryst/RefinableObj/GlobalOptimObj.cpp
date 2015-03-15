@@ -1113,7 +1113,7 @@ void MonteCarloObj::RunRandomLSQMethod(long &nbCycle)
         char strDate[40];
         strftime(strDate,sizeof(strDate),"%Y-%m-%d_%H-%M-%S",localtime(&date));//%Y-%m-%dT%H:%M:%S%Z
         char costAsChar[30];    
-        sprintf(costAsChar,"#Run%d-Cost-%f",nbCycle, mCurrentCost);
+        sprintf(costAsChar,"#Run%ld-Cost-%f",nbCycle, mCurrentCost);
         saveFileName=saveFileName+(string)strDate+(string)costAsChar+(string)".xml";
         XMLCrystFileSaveGlobal(saveFileName);
         

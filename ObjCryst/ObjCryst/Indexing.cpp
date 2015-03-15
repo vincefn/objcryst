@@ -912,12 +912,12 @@ void PeakList::Print(std::ostream &os) const
    {
       const float sigma=1/(pos->dobs-pos->dobssigma/2)-1/(pos->dobs+pos->dobssigma/2);
       if(pos->isIndexed)
-         sprintf(buf,"#%3d d=%6.3f+/-%7.4f dcalc=%6.3f, diff=%7.4f, iobs=%6.3f HKL=%2d %2d %2d Spurious=%1d stats=%6d",
+         sprintf(buf,"#%3d d=%6.3f+/-%7.4f dcalc=%6.3f, diff=%7.4f, iobs=%6.3f HKL=%2d %2d %2d Spurious=%1d stats=%6lu",
                  i++,1/pos->dobs,sigma,
                  1/sqrt(abs(pos->d2calc)),1/sqrt(abs(pos->d2calc))-1/pos->dobs,
                  pos->iobs,pos->h,pos->k,pos->l,pos->isSpurious,pos->stats);
       else
-         sprintf(buf,"#%3d d=%6.3f+/-%6.3f              iobs=%6.3f  UNINDEXED   Spurious=%1d stats=%6d",
+         sprintf(buf,"#%3d d=%6.3f+/-%6.3f              iobs=%6.3f  UNINDEXED   Spurious=%1d stats=%6lu",
                  i++,1/pos->dobs,1/(pos->dobs-pos->dobssigma/2)-1/(pos->dobs+pos->dobssigma/2),
                  pos->iobs,pos->isSpurious,pos->stats);
       os<<buf<<endl;
@@ -2082,7 +2082,7 @@ unsigned int CellExplorer::RDicVol(RecUnitCell par0,RecUnitCell dpar, unsigned i
                      for(int i=0;i<depth;++i) cout<<" ";
                      cout<<buf<<"level="<<depth<<", indexed="<<indexed<<"("<<mvSolution.size()<<" sol.)"<<endl;
                   }
-                  sprintf(buf," Solution ? a=%7.3f b=%7.3f c=%7.3f alpha=%7.3f beta=%7.3f gamma=%7.3f V=%8.2f score=%6.2f #%4i",
+                  sprintf(buf," Solution ? a=%7.3f b=%7.3f c=%7.3f alpha=%7.3f beta=%7.3f gamma=%7.3f V=%8.2f score=%6.2f #%4lu",
                           par[0],par[1],par[2],par[3]*RAD2DEG,par[4]*RAD2DEG,par[5]*RAD2DEG,par[6],score,mvSolution.size());
                   cout<<buf<<endl;
                   mBestScore=score;

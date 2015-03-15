@@ -150,7 +150,7 @@ WXMultiGraph::~WXMultiGraph()
 unsigned long WXMultiGraph::AddGraph(const string &name)
 {
    wxMutexLocker mlock(mMutexData);
-   unsigned long id;
+   long id;
    for(id=mvData.size();id>=0;id--)
       if(mvData.end()==mvData.find(id)) break;
    mvData[id].name=name;

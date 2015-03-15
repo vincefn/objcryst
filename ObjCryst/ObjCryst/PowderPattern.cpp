@@ -1066,9 +1066,10 @@ void PowderPatternDiffraction::ExtractLeBail(unsigned int nbcycle)
       {
          REAL s1=0;
          //cout<<mH(k0)<<" "<<mK(k0)<<" "<<mL(k0)<<" , Iobs=??"<<endl;
-         unsigned int last=mvReflProfile[k0].last,first=mvReflProfile[k0].first;
+         long last=mvReflProfile[k0].last,first;
          if(last>=mpParentPowderPattern->GetNbPointUsed()) last=mpParentPowderPattern->GetNbPointUsed();
-         if(first<0)first=0;
+         if(mvReflProfile[k0].first<0)first=0;
+         else first=(unsigned long)(mvReflProfile[k0].first);
          for(unsigned int i=first;i<=last;++i)
          {
             if(mvReflProfile[k0].profile(i-mvReflProfile[k0].first)<=0) continue;
