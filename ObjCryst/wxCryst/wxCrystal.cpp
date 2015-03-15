@@ -2863,17 +2863,20 @@ BEGIN_EVENT_TABLE(WXGLCrystalCanvas, wxGLCanvas)
    EVT_UPDATE_UI(ID_GLCRYSTAL_UPDATEUI,WXGLCrystalCanvas::OnUpdateUI)
 END_EVENT_TABLE()
 
-int AttribList [] = {WX_GL_RGBA , WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 16};
+int AttribList [] = {WX_GL_RGBA , WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 16,0};
 
 WXGLCrystalCanvas::WXGLCrystalCanvas(WXCrystal *wxcryst,
                                      wxFrame *parent, wxWindowID id,
                                      const wxPoint &pos,
                                      const wxSize &size):
-wxGLCanvas(parent,id,pos,size,wxDEFAULT_FRAME_STYLE,_T("GLCanvas"),AttribList),mpParentFrame(parent),
+wxGLCanvas(parent, id,AttribList,pos,size,wxDEFAULT_FRAME_STYLE | wxFULL_REPAINT_ON_RESIZE,_T("GLCanvas"),wxNullPalette),
+//wxGLCanvas(parent,id,pos,size,wxDEFAULT_FRAME_STYLE,_T("GLCanvas"),AttribList),
+mpParentFrame(parent),
 mpWXCrystal(wxcryst),mIsGLInit(false),mDist(60),mX0(0),mY0(0),mZ0(0),mViewAngle(15),
 mShowFourier(true),mShowCrystal(true),mShowAtomName(true),mShowCursor(false),mSharpenMap(true),
 mIsGLFontBuilt(false),mGLFontDisplayListBase(0),mpFourierMapListWin(0)
 {
+   mpwxGLContext=new wxGLContext(this);
    VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::WXGLCrystalCanvas()",3)
    if(sGLCrystalConfig.mSaved)
    {
@@ -3024,15 +3027,8 @@ void WXGLCrystalCanvas::OnExit(wxCommandEvent &event)
 void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
 {
    VFN_DEBUG_ENTRY("WXGLCrystalCanvas::OnPaint()",7)
-   this->SetCurrent();
    wxPaintDC dc(this);
-   //PrepareDC(dc);
-   //this->GetParent()->PrepareDC(dc);
-
-   #ifndef __WXMOTIF__
-   if (!GetContext()) return;
-   #endif
-
+   this->SetCurrent();
    if(false==mIsGLInit)
    {
       mIsGLInit=true;
@@ -3170,18 +3166,13 @@ void WXGLCrystalCanvas::OnSize(wxSizeEvent& event)
    int width, height;
    GetClientSize(& width, & height);
 
-   #ifndef __WXMOTIF__
-   if (GetContext())
-   #endif
-   {
-      SetCurrent();
-      glViewport(0, 0, width, height);
-      glMatrixMode(GL_PROJECTION);
-      glLoadIdentity();
-      VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnSize():"<<mViewAngle<<","<<width<<","<<height<<","<<mDist,2)
-      if( (width>0)&&(height>0)) //in case the window is docked...
-         gluPerspective(mViewAngle,(float)width/(float)height,1.f,2.*mDist);   
-   }
+   this->SetCurrent();
+   glViewport(0, 0, width, height);
+   glMatrixMode(GL_PROJECTION);
+   glLoadIdentity();
+   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnSize():"<<mViewAngle<<","<<width<<","<<height<<","<<mDist,2)
+   if( (width>0)&&(height>0)) //in case the window is docked...
+      gluPerspective(mViewAngle,(float)width/(float)height,1.f,2.*mDist);
    VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnSize():End",7)
 }
 
@@ -3630,7 +3621,7 @@ void WXGLCrystalCanvas::OnUpdateUI(wxUpdateUIEvent&event)
 void WXGLCrystalCanvas::SetCurrent()
 {
    VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::SetCurrent()",4)
-   this->wxGLCanvas::SetCurrent();
+   this->wxGLCanvas::SetCurrent(*mpwxGLContext);
    #ifndef HAVE_GLUT
    this->BuildGLFont();
    sFontDisplayListBase=mGLFontDisplayListBase;

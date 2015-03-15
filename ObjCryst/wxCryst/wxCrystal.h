@@ -391,6 +391,8 @@ class WXGLCrystalCanvas : public wxGLCanvas
       wxFrame* mpParentFrame;
       /// The owner WXCrystal
       WXCrystal* mpWXCrystal;
+      /// The wxGLContext
+      wxGLContext *mpwxGLContext;
       /// \internal
       bool mIsGLInit;
       /// quaternion for the orientation of the display
