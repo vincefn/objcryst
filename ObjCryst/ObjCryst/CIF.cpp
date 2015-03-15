@@ -807,7 +807,9 @@ void CIF::Parse(stringstream &in)
    string block="";// Current block data
    while(!in.eof())
    {
-      (*fpObjCrystInformUser)("CIF: Parsing:"+in.tellg());
+      stringstream mess;
+      mess<<"CIF: Parsing:"<<in.tellg();
+      (*fpObjCrystInformUser)(mess.str());
       while(!isgraph(in.peek()) && !in.eof()) in.get(lastc);
       if(in.eof()) break;
       if(vv) cout<<endl;
