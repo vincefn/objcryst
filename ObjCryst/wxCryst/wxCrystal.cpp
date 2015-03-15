@@ -2669,7 +2669,7 @@ void UnitCellMapGLList::Draw()const
       // and non-orthogonal unit cells
       glMaterialf( GL_FRONT, GL_SHININESS, 0.0); 
 
-      const GLfloat colorBack [] = {mColour[0]/3., mColour[1]/3., mColour[2]/3., 0.5}; 
+      const GLfloat colorBack [] = {mColour[0]/3., mColour[1]/3., mColour[2]/3., mColour[3]};
       glMaterialfv(GL_BACK, GL_AMBIENT, colorBack);
       glMaterialfv(GL_BACK, GL_DIFFUSE, colorBack);
       glMaterialfv(GL_BACK, GL_SPECULAR, colorBack);
@@ -3148,9 +3148,9 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
       glPushMatrix();
          // The display origin is the center of the Crystal BoundingBox, so translate
             BBox cellbbox = this->GetCellBBox();
-            REAL xc=(cellbbox.xMin+cellbbox.xMax)/2.;  
-            REAL yc=(cellbbox.yMin+cellbbox.yMax)/2.; 
-            REAL zc=(cellbbox.zMin+cellbbox.zMax)/2.; 
+            REAL xc=(cellbbox.xMin+cellbbox.xMax)/2.;
+            REAL yc=(cellbbox.yMin+cellbbox.yMax)/2.;
+            REAL zc=(cellbbox.zMin+cellbbox.zMax)/2.;
             mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(xc, yc, zc);
             glTranslatef(-xc, -yc, -zc);
          // Draw all Fourier maps
@@ -3319,7 +3319,18 @@ void WXGLCrystalCanvas::OnEnterWindow( wxMouseEvent& event )
 void WXGLCrystalCanvas::OnMouse( wxMouseEvent& event )
 {
    if(event.Leaving()) return;// wxMSW2.4 bug ?
-   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnMouse()",7)
+   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnMouse()"
+                     <<endl<<"IsButton():"<<event.IsButton()
+                     <<endl<<"ButtonDown():"<<event.ButtonDown()
+                     <<endl<<"Dragging():"<<event.Dragging()
+                     <<endl<<"Entering():"<<event.Entering()
+                     <<endl<<"Leaving():"<<event.Leaving()
+                     <<endl<<"GetButton()"<<event.GetButton()
+                     <<endl<<"GetWheelAxis():"<<event.GetWheelAxis()
+                     <<endl<<"GetWheelDelta():"<<event.GetWheelDelta()
+                     <<endl<<"GetWheelRotation():"<<event.GetWheelRotation()
+                     <<endl<<"Moving():"<<event.Moving()
+                     <<endl,7)
    if (event.Dragging())
    {
       int width, height;
@@ -3376,8 +3387,8 @@ void WXGLCrystalCanvas::OnMouse( wxMouseEvent& event )
          VFN_DEBUG_MESSAGE(mViewAngle <<" "<<mDist,2)
       }
    }
-   if(event.Leaving()) cout<<"Mouse is leaving window!!"<<endl;
-   if(event.RightIsDown())
+   //else if(event.Leaving()) cout<<"Mouse is leaving window!!"<<endl;
+   else if(event.RightIsDown())
    {
       VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnMouse():Right Button",2)
       if(mpWXCrystal->GetCrystal().IsBeingRefined())
@@ -3396,6 +3407,53 @@ void WXGLCrystalCanvas::OnMouse( wxMouseEvent& event )
       }
 
       this->PopupMenu(mpPopUpMenu, event.GetX(), event.GetY() );
+   }
+   else if (event.GetWheelDelta()>0)
+   {// Double-touch event on OSX + trackpad
+      if(event.ControlDown())
+      {
+         VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnMouse(): Mouse Wheel / double touch + control (OSX: command)",2)
+         //Change zoom / angle
+         int width, height;
+         GetClientSize(& width, & height);
+         const int delta=event.GetWheelDelta();
+         const int rotation=event.GetWheelRotation();
+         
+         if(event.GetWheelAxis()==0) mDist *= (1.+float(rotation)/100.);
+         else
+         {
+            mDist /= (1.+float(rotation)/100.);
+            mViewAngle *=(1.+float(rotation)/100.);
+         }
+         SetCurrent();
+         glMatrixMode(GL_PROJECTION);
+         glLoadIdentity();
+         if( (width>0)&&(height>0)) //in case size is null...
+            gluPerspective(mViewAngle,(float)width/(float)height,
+                           (mDist>101)?(mDist-100):1.,mDist+100);
+         Refresh(FALSE);
+         VFN_DEBUG_MESSAGE(mViewAngle <<" "<<mDist,2)
+      }
+      else
+      {
+         VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnMouse(): Mouse Wheel / double touch",2)
+         // Rotate view with trackball
+         int width, height;
+         GetClientSize(& width, & height);
+         const int delta=event.GetWheelDelta();
+         int dx=0,dy=0;
+         if(event.GetWheelAxis()==1) dx=-event.GetWheelRotation();
+         else dy=event.GetWheelRotation();
+         float spin_quat[4];
+         trackball(spin_quat,
+                   (2.0*mTrackBallLastX -       width) / (width+.001),  //normalizing from -1 to 1
+                   (     height - 2.0*mTrackBallLastY) / (height+.001),
+                   (2.0*(mTrackBallLastX+dx) -       width) / (width+.001),
+                   (     height - 2.0*(mTrackBallLastY+dy)) / (height+.001));
+         
+         add_quats( spin_quat, mQuat, mQuat );
+         Refresh(FALSE);
+      }
    }
 
    mTrackBallLastX = event.GetX();
