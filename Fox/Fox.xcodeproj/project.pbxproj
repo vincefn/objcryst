@@ -87,12 +87,12 @@
 		BF69C4D7124F8C310035CF57 /* WXFoxClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4CE124F8C310035CF57 /* WXFoxClient.cpp */; };
 		BF69C4D8124F8C310035CF57 /* WXFoxServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4CF124F8C310035CF57 /* WXFoxServer.cpp */; };
 		BF69C4D9124F8C310035CF57 /* WXGridWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4D0124F8C310035CF57 /* WXGridWindow.cpp */; };
-		BFF7D0C61478047800799F7A /* libwx_osx_cocoau_gl-2.9.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BFF7D0BF1478047800799F7A /* libwx_osx_cocoau_gl-2.9.a */; };
-		BFF7D0C71478047800799F7A /* libwx_osx_cocoau-2.9.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BFF7D0C01478047800799F7A /* libwx_osx_cocoau-2.9.a */; };
-		BFF7D0C81478047800799F7A /* libwxjpeg-2.9.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BFF7D0C11478047800799F7A /* libwxjpeg-2.9.a */; };
-		BFF7D0C91478047800799F7A /* libwxpng-2.9.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BFF7D0C21478047800799F7A /* libwxpng-2.9.a */; };
-		BFF7D0CA1478047800799F7A /* libwxregexu-2.9.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BFF7D0C31478047800799F7A /* libwxregexu-2.9.a */; };
-		BFF7D0CC1478047800799F7A /* libwxtiff-2.9.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BFF7D0C51478047800799F7A /* libwxtiff-2.9.a */; };
+		BFF7D0C61478047800799F7A /* libwx_osx_cocoau_gl-3.0.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BFF7D0BF1478047800799F7A /* libwx_osx_cocoau_gl-3.0.a */; };
+		BFF7D0C71478047800799F7A /* libwx_osx_cocoau-3.0.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BFF7D0C01478047800799F7A /* libwx_osx_cocoau-3.0.a */; };
+		BFF7D0C81478047800799F7A /* libwxjpeg-3.0.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BFF7D0C11478047800799F7A /* libwxjpeg-3.0.a */; };
+		BFF7D0C91478047800799F7A /* libwxpng-3.0.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BFF7D0C21478047800799F7A /* libwxpng-3.0.a */; };
+		BFF7D0CA1478047800799F7A /* libwxregexu-3.0.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BFF7D0C31478047800799F7A /* libwxregexu-3.0.a */; };
+		BFF7D0CC1478047800799F7A /* libwxtiff-3.0.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BFF7D0C51478047800799F7A /* libwxtiff-3.0.a */; };
 		BFFB474E0E5E0E620027591E /* wxLSQ.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFB474D0E5E0E620027591E /* wxLSQ.cpp */; };
 		BFFCCB670890296D00044EBA /* bandmat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCB660890296D00044EBA /* bandmat.cpp */; };
 		BFFCCBA0089029F400044EBA /* cholesky.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCCB6A089029F400044EBA /* cholesky.cpp */; };
@@ -228,12 +228,12 @@
 		BF69C4CF124F8C310035CF57 /* WXFoxServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WXFoxServer.cpp; path = src/WXFoxServer.cpp; sourceTree = "<group>"; };
 		BF69C4D0124F8C310035CF57 /* WXGridWindow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WXGridWindow.cpp; path = src/WXGridWindow.cpp; sourceTree = "<group>"; };
 		BFE6AC680B886ACA007AFBA8 /* Indexing.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Indexing.cpp; path = ../ObjCryst/ObjCryst/Indexing.cpp; sourceTree = SOURCE_ROOT; };
-		BFF7D0BF1478047800799F7A /* libwx_osx_cocoau_gl-2.9.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libwx_osx_cocoau_gl-2.9.a"; path = "../static-libs/lib/libwx_osx_cocoau_gl-2.9.a"; sourceTree = "<group>"; };
-		BFF7D0C01478047800799F7A /* libwx_osx_cocoau-2.9.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libwx_osx_cocoau-2.9.a"; path = "../static-libs/lib/libwx_osx_cocoau-2.9.a"; sourceTree = "<group>"; };
-		BFF7D0C11478047800799F7A /* libwxjpeg-2.9.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libwxjpeg-2.9.a"; path = "../static-libs/lib/libwxjpeg-2.9.a"; sourceTree = "<group>"; };
-		BFF7D0C21478047800799F7A /* libwxpng-2.9.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libwxpng-2.9.a"; path = "../static-libs/lib/libwxpng-2.9.a"; sourceTree = "<group>"; };
-		BFF7D0C31478047800799F7A /* libwxregexu-2.9.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libwxregexu-2.9.a"; path = "../static-libs/lib/libwxregexu-2.9.a"; sourceTree = "<group>"; };
-		BFF7D0C51478047800799F7A /* libwxtiff-2.9.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libwxtiff-2.9.a"; path = "../static-libs/lib/libwxtiff-2.9.a"; sourceTree = "<group>"; };
+		BFF7D0BF1478047800799F7A /* libwx_osx_cocoau_gl-3.0.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libwx_osx_cocoau_gl-3.0.a"; path = "../static-libs/lib/libwx_osx_cocoau_gl-3.0.a"; sourceTree = "<group>"; };
+		BFF7D0C01478047800799F7A /* libwx_osx_cocoau-3.0.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libwx_osx_cocoau-3.0.a"; path = "../static-libs/lib/libwx_osx_cocoau-3.0.a"; sourceTree = "<group>"; };
+		BFF7D0C11478047800799F7A /* libwxjpeg-3.0.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libwxjpeg-3.0.a"; path = "../static-libs/lib/libwxjpeg-3.0.a"; sourceTree = "<group>"; };
+		BFF7D0C21478047800799F7A /* libwxpng-3.0.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libwxpng-3.0.a"; path = "../static-libs/lib/libwxpng-3.0.a"; sourceTree = "<group>"; };
+		BFF7D0C31478047800799F7A /* libwxregexu-3.0.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libwxregexu-3.0.a"; path = "../static-libs/lib/libwxregexu-3.0.a"; sourceTree = "<group>"; };
+		BFF7D0C51478047800799F7A /* libwxtiff-3.0.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libwxtiff-3.0.a"; path = "../static-libs/lib/libwxtiff-3.0.a"; sourceTree = "<group>"; };
 		BFFB474D0E5E0E620027591E /* wxLSQ.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = wxLSQ.cpp; path = ../ObjCryst/wxCryst/wxLSQ.cpp; sourceTree = SOURCE_ROOT; };
 		BFFCCB5D089028E500044EBA /* libnewmat.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libnewmat.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFFCCB660890296D00044EBA /* bandmat.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = bandmat.cpp; path = ../newmat/bandmat.cpp; sourceTree = "<group>"; };
@@ -1835,12 +1835,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BFF7D0C61478047800799F7A /* libwx_osx_cocoau_gl-2.9.a in Frameworks */,
-				BFF7D0C71478047800799F7A /* libwx_osx_cocoau-2.9.a in Frameworks */,
-				BFF7D0C81478047800799F7A /* libwxjpeg-2.9.a in Frameworks */,
-				BFF7D0C91478047800799F7A /* libwxpng-2.9.a in Frameworks */,
-				BFF7D0CA1478047800799F7A /* libwxregexu-2.9.a in Frameworks */,
-				BFF7D0CC1478047800799F7A /* libwxtiff-2.9.a in Frameworks */,
+				BFF7D0C61478047800799F7A /* libwx_osx_cocoau_gl-3.0.a in Frameworks */,
+				BFF7D0C71478047800799F7A /* libwx_osx_cocoau-3.0.a in Frameworks */,
+				BFF7D0C81478047800799F7A /* libwxjpeg-3.0.a in Frameworks */,
+				BFF7D0C91478047800799F7A /* libwxpng-3.0.a in Frameworks */,
+				BFF7D0CA1478047800799F7A /* libwxregexu-3.0.a in Frameworks */,
+				BFF7D0CC1478047800799F7A /* libwxtiff-3.0.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2072,12 +2072,12 @@
 			isa = PBXGroup;
 			children = (
 				BF1DE1530D2297C300A3939D /* QuickTime.framework */,
-				BFF7D0BF1478047800799F7A /* libwx_osx_cocoau_gl-2.9.a */,
-				BFF7D0C01478047800799F7A /* libwx_osx_cocoau-2.9.a */,
-				BFF7D0C11478047800799F7A /* libwxjpeg-2.9.a */,
-				BFF7D0C21478047800799F7A /* libwxpng-2.9.a */,
-				BFF7D0C31478047800799F7A /* libwxregexu-2.9.a */,
-				BFF7D0C51478047800799F7A /* libwxtiff-2.9.a */,
+				BFF7D0BF1478047800799F7A /* libwx_osx_cocoau_gl-3.0.a */,
+				BFF7D0C01478047800799F7A /* libwx_osx_cocoau-3.0.a */,
+				BFF7D0C11478047800799F7A /* libwxjpeg-3.0.a */,
+				BFF7D0C21478047800799F7A /* libwxpng-3.0.a */,
+				BFF7D0C31478047800799F7A /* libwxregexu-3.0.a */,
+				BFF7D0C51478047800799F7A /* libwxtiff-3.0.a */,
 				BF1DE1230D228EA500A3939D /* libfftw3f.a */,
 				BF36112F0BD6E409000C0EE9 /* WebKit.framework */,
 				BF36112B0BD6E3F5000C0EE9 /* GLUT.framework */,
@@ -2100,7 +2100,9 @@
 				BFFCD88A089041A600044EBA /* Fox-Info.plist */,
 				BF1DDDEB0D228DCF00A3939D /* FoxCocoa-Info.plist */,
 			);
+			indentWidth = 3;
 			sourceTree = "<group>";
+			tabWidth = 3;
 		};
 		BFFCCB5E089028E500044EBA /* Products */ = {
 			isa = PBXGroup;
@@ -4324,7 +4326,7 @@
 		BFFCCB51089028D300044EBA /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0420;
+				LastUpgradeCheck = 0620;
 			};
 			buildConfigurationList = BFFCCB52089028D300044EBA /* Build configuration list for PBXProject "Fox" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -4552,20 +4554,21 @@
 		BF1DDDEC0D228DD000A3939D /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_AUTO_VECTORIZATION = YES;
 				GCC_ENABLE_SSE3_EXTENSIONS = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = fast;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_UNROLL_LOOPS = YES;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/../static-libs/include",
-					"$(SRCROOT)/../static-libs/include/wx-2.9",
-					"$(SRCROOT)/../static-libs/lib/wx/include/osx_cocoa-unicode-static-2.9",
+					"$(SRCROOT)/../static-libs/include/wx-3.0",
+					"$(SRCROOT)/../static-libs/lib/wx/include/osx_cocoa-unicode-static-3.0",
 					"$(SRCROOT)/../ObjCryst",
 					"$(SRCROOT)/../cctbx/include",
 					"$(SRCROOT)/../",
@@ -4618,13 +4621,19 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_STRICT_ALIASING = NO;
 				"INSTALL_PATH[sdk=*]" = "";
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				ONLY_ACTIVE_ARCH = YES;
+				"OTHER_CPLUSPLUSFLAGS[arch=*]" = (
+					"$(OTHER_CFLAGS)",
+					"-D__DEBUG__",
+				);
 			};
 			name = Debug;
 		};
 		BF1DE1820D229D0800A3939D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_ENABLE_SSE3_EXTENSIONS = YES;
@@ -4632,7 +4641,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
 				GCC_MODEL_TUNING = G3;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = fast;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
@@ -4664,7 +4673,7 @@
 		BF1DE1830D229D0800A3939D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_ENABLE_SSE3_EXTENSIONS = YES;
@@ -4704,7 +4713,7 @@
 		BF1DE1840D229D0800A3939D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_ENABLE_SSE3_EXTENSIONS = YES;
@@ -4715,8 +4724,8 @@
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/../",
 					"$(SRCROOT)/../static-libs/include",
-					"$(SRCROOT)/../static-libs/include/wx-2.9",
-					"$(SRCROOT)/../static-libs/lib/wx/include/osx_cocoa-unicode-static-2.9",
+					"$(SRCROOT)/../static-libs/include/wx-3.0",
+					"$(SRCROOT)/../static-libs/lib/wx/include/osx_cocoa-unicode-static-3.0",
 					"$(SRCROOT)/../ObjCryst",
 					"$(SRCROOT)/../cctbx/include",
 					"$(SRCROOT)/../cctbx/scitbx/include",
@@ -4762,7 +4771,7 @@
 		BF48AEF808924F3F0060B5BE /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_ENABLE_SSE3_EXTENSIONS = YES;
@@ -4770,7 +4779,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
 				GCC_MODEL_TUNING = G3;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = fast;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
 				GCC_UNROLL_LOOPS = YES;
@@ -4801,7 +4810,7 @@
 		BF48AEF908924F3F0060B5BE /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_ENABLE_SSE3_EXTENSIONS = YES;
@@ -4847,6 +4856,8 @@
 				GCC_MODEL_TUNING = "";
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_STRICT_ALIASING = NO;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				ONLY_ACTIVE_ARCH = YES;
 			};
 			name = Deployment;
 		};
