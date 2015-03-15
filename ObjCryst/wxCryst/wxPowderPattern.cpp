@@ -1050,6 +1050,7 @@ WXPowderPatternGraph::WXPowderPatternGraph(wxFrame *frame, WXPowderPattern* pare
 wxWindow(frame,-1,wxPoint(-1,-1),wxSize(-1,-1)),
 mpPattern(parent),mMargin(20),mDiffPercentShift(.20),
 mMaxIntensity(-1),mMinIntensity(-1),mMinX(-1),mMaxX(-1),
+mDefaultIntensityScale(true),
 mpParentFrame(frame),
 mIsDragging(false),mDisplayLabel(true),mDisplayPeak(true)
 {
@@ -1445,7 +1446,18 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
       mIsDragging=false;
       return;
    }
-       VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnMouse()",5)
+   VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnMouse()"
+                     <<endl<<"IsButton():"<<event.IsButton()
+                     <<endl<<"ButtonDown():"<<event.ButtonDown()
+                     <<endl<<"Dragging():"<<event.Dragging()
+                     <<endl<<"Entering():"<<event.Entering()
+                     <<endl<<"Leaving():"<<event.Leaving()
+                     <<endl<<"GetButton()"<<event.GetButton()
+                     <<endl<<"GetWheelAxis():"<<event.GetWheelAxis()
+                     <<endl<<"GetWheelDelta():"<<event.GetWheelDelta()
+                     <<endl<<"GetWheelRotation():"<<event.GetWheelRotation()
+                     <<endl<<"Moving():"<<event.Moving()
+                     <<endl,7)
    // Write mouse pointer coordinates
       wxClientDC dc(this);
       PrepareDC(dc);
@@ -1545,6 +1557,7 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
          mMinX=mDraggingX0;
          mMaxX=x0;
       }
+      mDefaultIntensityScale=false;
       mClockAxisLimits.Click();
       mMutex.Unlock();
       wxUpdateUIEvent event(ID_POWDER_GRAPH_NEW_PATTERN);
@@ -1575,6 +1588,121 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
       mDraggingX0=x;
       this->PopupMenu(mpPopUpMenu, event.GetX(), event.GetY() );
       return;
+   }
+   if (event.GetWheelDelta()>0)
+   {// Wheel or double-touch event on OSX + trackpad
+      if(event.ControlDown())
+      {
+         VFN_DEBUG_MESSAGE("WXPowderPatternGraph::OnMouse(): Mouse Wheel / double touch + control (OSX: command)",2)
+      }
+      else
+      {
+         VFN_DEBUG_MESSAGE("WXPowderPatternGraph::OnMouse(): Mouse Wheel / double touch",2)
+         const int delta=event.GetWheelDelta();
+         int dx=0,dy=0;
+         if(event.GetWheelAxis()==1) dx=event.GetWheelRotation();
+         else dy=event.GetWheelRotation();
+         if(dx>16) dx=16;
+         if(dx<-16)dx=-16;
+         if(dy>16) dy=16;
+         if(dy<-16)dy=-16;
+
+         const long nbPoint=mX.numElements();
+         if(dx>0)
+         {
+            const REAL range=mMaxX-mMinX;
+            mMaxX += range/128.*abs(dx);
+            if(mX(nbPoint-1)>mX(0))
+            {
+               if(mMaxX>=mX(nbPoint-1)) mMaxX=mX(nbPoint-1);
+            }
+            else
+            {
+               if(mMaxX>=mX(0)) mMaxX=mX(0);
+            }
+            mMinX=mMaxX-range;
+            cout<<"dx<0:"<<mMinX<<","<<mMaxX<<endl;
+         }
+         else if(dx<0)
+         {
+            const REAL range=mMaxX-mMinX;
+            mMinX -= range/128.*abs(dx);
+            if(mX(nbPoint-1)>mX(0))
+            {
+               if(mMinX<mX(0)) mMinX=mX(0);
+            }
+            else 
+            {
+               if(mMinX<mX(nbPoint-1)) mMinX=mX(nbPoint-1);
+            }
+            mMaxX=mMinX+range;
+            cout<<"dx>0:"<<mMinX<<","<<mMaxX<<endl;
+         }
+         
+         if(dy<0)
+         {
+            if(abs(mMaxX-mMinX)>1)
+            {
+               const REAL halfrange=(mMaxX-mMinX)/2;
+               const REAL middle=(mMaxX+mMinX)/2;
+               mMinX= middle-halfrange*(32-abs(dy))/32.;
+               mMaxX= middle+halfrange*(32-abs(dy))/32.;
+               cout<<"dy<0:"<<mMinX<<","<<mMaxX<<":"<<abs(mpPattern->GetPowderPattern().X2Pixel(mMaxX)-mpPattern->GetPowderPattern().X2Pixel(mMinX))<<endl;
+            }
+         }
+         else if(dy>0)
+         {
+            const REAL halfrange=(mMaxX-mMinX)/2;
+            const REAL middle=(mMaxX+mMinX)/2;
+            mMinX= middle-halfrange*(32+abs(dy))/32.;
+            mMaxX= middle+halfrange*(32+abs(dy))/32.;
+            if(mX(nbPoint-1)>mX(0))
+            {
+               if(mMinX<mX(0)) mMinX=mX(0);
+               if(mMaxX>mX(nbPoint-1)) mMaxX=mX(nbPoint-1);
+            }
+            else
+            {
+               if(mMinX<mX(nbPoint-1)) mMinX=mX(nbPoint-1);
+               if(mMaxX>mX(0)) mMaxX=mX(0);
+            }
+            cout<<"dy>0:"<<mMinX<<","<<mMaxX<<endl;
+         }
+         if(mDefaultIntensityScale)
+         {// Adapt max intensity as well
+            float x0=mMinX,x1=mMaxX;
+            if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
+            {
+               x0 *= DEG2RAD;
+               x1 *= DEG2RAD;
+            }
+            long ix0=long(this->mpPattern->GetPowderPattern().X2Pixel(x0));
+            long ix1=long(this->mpPattern->GetPowderPattern().X2Pixel(x1));
+            //cout<<"Switch default intensity 1: "<<"["<<ix0<<"] - "<<"["<<ix1<<"]"<<endl;
+            if(ix0<0) ix0=0;
+            if(ix0>=mX.numElements()) ix0=mX.numElements()-1;
+            if(ix1<0) ix1=0;
+            if(ix1>=mX.numElements()) ix1=mX.numElements()-1;
+            if(ix0>ix1)
+            {
+               const long ixtmp=ix0;
+               ix0=ix1;
+               ix1=ixtmp;
+            }
+            const long imin=mObs.imin(ix0,ix1);
+            const long imax=mObs.imax(ix0,ix1);
+            //cout<<"Switch default intensity 3: "<<mObs(imin)<<"["<<ix0<<"] - "<<mObs(imax)<<"["<<ix1<<"]"<<endl;
+            mMinIntensity=mObs(imin);
+            mMaxIntensity=mObs(imax);
+         }
+         
+         mMutex.Unlock();
+         mClockAxisLimits.Click();
+         wxUpdateUIEvent event(ID_POWDER_GRAPH_NEW_PATTERN);
+         wxPostEvent(this,event);
+         event.Skip();
+         return;
+      }
    }
    mMutex.Unlock();
    event.Skip();
@@ -2863,10 +2991,13 @@ void WXPowderPatternGraph::OnKeyDown(wxKeyEvent& event)
       }
       case(43):// WXK_ADD ?
       {
-         const REAL halfrange=(mMaxX-mMinX)/2;
-         const REAL middle=(mMaxX+mMinX)/2;
-         mMinX= (long)(middle-halfrange*4./5.);
-         mMaxX = (long)(middle+halfrange*4./5.);
+         if(abs(mMaxX-mMinX)>1)
+         {
+            const REAL halfrange=(mMaxX-mMinX)/2;
+            const REAL middle=(mMaxX+mMinX)/2;
+            mMinX= (long)(middle-halfrange*4./5.);
+            mMaxX = (long)(middle+halfrange*4./5.);
+         }
          break;
       }
       case(45):// WXK_SUBTRACT ?
@@ -2985,6 +3116,7 @@ void WXPowderPatternGraph::ResetAxisLimits()
    if(mMinIntensity<=0) mMinIntensity=max/1e6;
    mMaxX=mX.max();
    mMinX=mX.min();
+   mDefaultIntensityScale=true;
    mClockAxisLimits.Click();
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph::ResetAxisLimits():"<<mMinIntensity<<","<<mMaxIntensity<<","<<mMinX<<","<<mMaxX,10)
 }

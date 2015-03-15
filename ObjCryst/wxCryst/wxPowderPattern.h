@@ -140,6 +140,8 @@ class WXPowderPatternGraph: public wxWindow
       const long mMargin;
       const REAL mDiffPercentShift;
       REAL mMaxIntensity,mMinIntensity,mMinX,mMaxX;
+      /// True if no vertical zoom has been used
+      bool mDefaultIntensityScale;
       wxFrame *mpParentFrame;
       /// Mutex to lock the pattern and associated data
       CrystMutex mMutex;
