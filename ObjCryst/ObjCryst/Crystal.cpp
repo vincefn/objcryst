@@ -936,6 +936,7 @@ void Crystal::CIFOutput(ostream &os, double mindist)const
    os <<"_computing_structure_solution     'FOX http://objcryst.sourceforge.net'"<<endl<<endl;
 
    //Scattering powers
+   /* This is making troubles when the cif file is imported to the JANA2006
    os << "loop_"<<endl
       << "    _atom_type_symbol" <<endl
       << "    _atom_type_description"<<endl
@@ -947,7 +948,8 @@ void Crystal::CIFOutput(ostream &os, double mindist)const
          <<"'International Tables for Crystallography (Vol. IV)'"
          <<endl;
    os <<endl;
-   
+   */
+
    //Symmetry
    os <<"_symmetry_space_group_name_H-M    '"
       << this->GetSpaceGroup().GetCCTbxSpg().match_tabulated_settings().hermann_mauguin()<<"'"<<endl;
@@ -960,10 +962,19 @@ void Crystal::CIFOutput(ostream &os, double mindist)const
       << "_cell_length_c    " << FormatFloat(this->GetLatticePar(2),8,5) << endl
       << "_cell_angle_alpha " << FormatFloat(this->GetLatticePar(3)*RAD2DEG,7,3) << endl 
       << "_cell_angle_beta  " << FormatFloat(this->GetLatticePar(4)*RAD2DEG,7,3) << endl 
-      << "_cell_angle_gamma " << FormatFloat(this->GetLatticePar(5)*RAD2DEG,7,3) << endl ;
+      << "_cell_angle_gamma " << FormatFloat(this->GetLatticePar(5)*RAD2DEG,7,3) << endl
+      << "_cell_volume      " << FormatFloat(this->GetVolume(),7,2);   
    os <<endl;
    this->GetScatteringComponentList();
    
+   /*
+   TODO:
+   loop_
+ _symmetry_equiv_pos_site_id
+ _symmetry_equiv_pos_as_xyz
+
+   */   
+
    os << "loop_" << endl
       << "    _atom_site_label" <<endl
       << "    _atom_site_type_symbol" <<endl

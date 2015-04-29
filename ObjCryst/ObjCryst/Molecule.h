@@ -790,6 +790,11 @@ class Molecule: public Scatterer
       * objects.
       */
       vector<MolAtom*>::iterator RemoveAtom(MolAtom&, const bool del = true);
+
+      void AddNonFlipAtom(MolAtom &atom);
+      void removeNonFlipAtom(MolAtom &atom);
+      vector<MolAtom*> getNonFlipAtomList();
+
       /** Add a bond
       *
       *
@@ -937,7 +942,7 @@ class Molecule: public Scatterer
       /** List of rigid group of atoms. See Molecule::mvRigidGroup
       */
       std::vector<RigidGroup *>& GetRigidGroupList();
-      
+
       /** Rotate a group of atoms around an axis defined by two atoms
       *
       * \param keepCenter: if true, the coordinates of the molecule are modified
@@ -1113,6 +1118,8 @@ class Molecule: public Scatterer
       * this is mutable since it only reflects the list of atoms.
       */
       mutable ScatteringComponentList mScattCompList;
+
+      vector<MolAtom*> mvNonFlipAtom;
       /** The list of atoms
       *
       */
@@ -1189,6 +1196,8 @@ class Molecule: public Scatterer
       /// molecule: rigid body, free atoms + restraints, torsion angles...
       /// \warning still EXPERIMENTAL !
       RefObjOpt mFlexModel;
+
+      RefObjOpt mFlipModel;
 
       /** Option to automatically optimize the starting conformation, if the
       * total restraint cost is too high. This is done in BeginOptimization().

@@ -705,6 +705,7 @@ WXMolecule::CellRigidGroup::CellRigidGroup():
 mpGroup(0),mNeedUpdateUI(false)
 {}
 
+
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXMolecule
@@ -726,6 +727,7 @@ WXCRYST_ID ID_MOLECULE_MENU_FORMULA_ADD_BOND;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_ADD_ANGLE;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_ADD_DIHEDRAL;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_ADD_RIGID_GROUP;
+WXCRYST_ID ID_MOLECULE_MENU_FORMULA_ADD_NONFLIP_ATOM;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_RIGIDIFY_WITH_DIHEDRALANGLES;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_TEST;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_REMOVE_ATOM;
@@ -733,6 +735,7 @@ WXCRYST_ID ID_MOLECULE_MENU_FORMULA_REMOVE_BOND;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_REMOVE_ANGLE;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_REMOVE_DIHEDRAL;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_REMOVE_RIGID_GROUP;
+WXCRYST_ID ID_MOLECULE_MENU_FORMULA_REMOVE_NONFLIPATOM;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_SHOW_RESTRAINT;
 WXCRYST_ID ID_MOLECULE_MENU_FORMULA_SET_DELTA_SIGMA;
 WXCRYST_ID ID_MOLECULE_MENU_GEOMETRY;
@@ -747,6 +750,7 @@ WXCRYST_ID ID_WINDOW_BONDLENGTH;
 WXCRYST_ID ID_WINDOW_BONDANGLE;
 WXCRYST_ID ID_WINDOW_DIHEDRALANGLE;
 WXCRYST_ID ID_WINDOW_RIGIDGROUP;
+WXCRYST_ID ID_WINDOW_NONFLIPATOM;
 
 BEGIN_EVENT_TABLE(WXMolecule,wxWindow)
    EVT_BUTTON(ID_WXOBJ_COLLAPSE,                          WXCrystObj::OnToggleCollapse)
@@ -762,12 +766,14 @@ BEGIN_EVENT_TABLE(WXMolecule,wxWindow)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_ADD_ANGLE,           WXMolecule::OnMenuAddAngle)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_ADD_DIHEDRAL,        WXMolecule::OnMenuAddDihedralAngle)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_ADD_RIGID_GROUP,     WXMolecule::OnMenuAddRigidGroup)
+   EVT_MENU(ID_MOLECULE_MENU_FORMULA_ADD_NONFLIP_ATOM,    WXMolecule::OnMenuAddNonFlipAtom)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_RIGIDIFY_WITH_DIHEDRALANGLES,WXMolecule::OnMenuRigidfyWithDihedralAngles)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_REMOVE_ATOM,         WXMolecule::OnMenuRemoveAtom)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_REMOVE_BOND,         WXMolecule::OnMenuRemoveBond)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_REMOVE_ANGLE,        WXMolecule::OnMenuRemoveAngle)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_REMOVE_DIHEDRAL,     WXMolecule::OnMenuRemoveDihedralAngle)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_REMOVE_RIGID_GROUP,  WXMolecule::OnMenuRemoveRigidGroup)
+   EVT_MENU(ID_MOLECULE_MENU_FORMULA_REMOVE_NONFLIPATOM,  WXMolecule::OnMenuRemoveNonFlipAtom)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_TEST        ,        WXMolecule::OnMenuTest)
    EVT_MENU(ID_MENU_SETLIMITS,                            WXMolecule::OnMenuSetLimits)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_SHOW_RESTRAINT,      WXMolecule::OnMenuShowRestraintWindow)
@@ -786,7 +792,7 @@ END_EVENT_TABLE()
 
 WXMolecule::WXMolecule(wxWindow *parent, Molecule *mol):
 WXScatterer(parent,mol),mpMolecule(mol),
-mpBondWin(0),mpAngleWin(0),mpDihedralAngleWin(0),mpRigidGroupWin(0),mIsSelfUpdating(false)
+mpBondWin(0),mpAngleWin(0),mpDihedralAngleWin(0),mpRigidGroupWin(0),mpNonFlipAtomWin(0),mIsSelfUpdating(false)
 {
    VFN_DEBUG_ENTRY("WXMolecule::WXMolecule():"<<mol->GetName(),6)
    //Menus
@@ -820,19 +826,24 @@ mpBondWin(0),mpAngleWin(0),mpDihedralAngleWin(0),mpRigidGroupWin(0),mIsSelfUpdat
                                 "Add Dihedral Angle Restraint");
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_ADD_RIGID_GROUP,
                                 "Add Rigid Group");
+         mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_ADD_NONFLIP_ATOM,
+                                "Add Non-Flip Atom");         
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_RIGIDIFY_WITH_DIHEDRALANGLES,
                                 "Rigidify with Dihedral Angles");
          mpMenuBar->GetMenu(ID_MOLECULE_MENU_FORMULA).AppendSeparator();
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_REMOVE_ATOM,
                                 "Remove an Atom");
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_REMOVE_BOND,
-                                "Remove a Bond Restraint");
+                                "Remove a Bond Restraint");         
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_REMOVE_ANGLE,
                                 "Remove a Bond Angle Restraint");
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_REMOVE_DIHEDRAL,
                                 "Remove a Dihedral Angle Restraint");
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_REMOVE_RIGID_GROUP,
-                                "Remove Rigid Group");
+                                "Remove Rigid Group"); 
+         mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_REMOVE_NONFLIPATOM,
+                                "Remove Non-Flip Atom"); 
+         
          mpMenuBar->GetMenu(ID_MOLECULE_MENU_FORMULA).AppendSeparator();
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_SHOW_RESTRAINT,
                                 "Show Restraint Window");
@@ -1156,7 +1167,41 @@ void WXMolecule::OnMenuAddRigidGroup(wxCommandEvent & WXUNUSED(event))
    mpMolecule->AddRigidGroup(s);
    VFN_DEBUG_EXIT("WXMolecule::OnMenuAddRigidGroup()",6)
 }
+void WXMolecule::OnMenuAddNonFlipAtom(wxCommandEvent & WXUNUSED(event))
+{
+   VFN_DEBUG_ENTRY("WXMolecule::OnMenuAddNonFlipAtom()",6)
+   WXCrystValidateAllUserInput();
+   int choice;
+   vector<MolAtom*> v=mpMolecule->GetAtomList();
+   vector<MolAtom*> nf = mpMolecule->getNonFlipAtomList();
+   for(vector<MolAtom*>::iterator pos=v.begin();pos!=v.end();) {
+       bool erase=false;
+       for(int i=0;i<nf.size();i++) {
+           if(nf[i]->GetName().compare((*pos)->GetName())==0) {
+               erase=true;
+               break;
+           }
+       }
+       if(erase) {
+           pos=v.erase(pos);
+       } else {
+           pos++;
+       }
+   }
 
+   MolAtom *at1=WXDialogChooseFromVector(v,
+                               (wxWindow*)this,"Choose the Optical active Atom",choice);
+
+   if(0==at1) {
+      wxMessageDialog dumbUser(this,_T("Atom not selected !"),
+                               _T("Whooops"),wxOK|wxICON_EXCLAMATION);
+      dumbUser.ShowModal();
+      return;
+   }
+      
+   mpMolecule->AddNonFlipAtom(*at1);
+   VFN_DEBUG_EXIT("WXMolecule::OnMenuAddNonFlipAtom()",6)
+}
 void WXMolecule::OnMenuRemoveAtom(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXMolecule::OnMenuRemoveAtom()",6)
@@ -1239,7 +1284,30 @@ void WXMolecule::OnMenuRemoveDihedralAngle(wxCommandEvent & WXUNUSED(event))
    this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXMolecule::OnMenuRemoveDihedralAngle()",6)
 }
+void WXMolecule::OnMenuRemoveNonFlipAtom(wxCommandEvent & WXUNUSED(event))
+{
+    VFN_DEBUG_ENTRY("WXMolecule::OnMenuRemoveNonFlipAtom()",6)
+   int choice;
+   vector<MolAtom*> v = mpMolecule->getNonFlipAtomList();
 
+   if(v.size()==0) {
+      wxMessageDialog dumbUser(this,_T("The list of optical active atoms is empty !"),
+                               _T("Whooops"),wxOK|wxICON_EXCLAMATION);
+      dumbUser.ShowModal();
+      return;
+   }
+   MolAtom *at1=WXDialogChooseFromVector(v, (wxWindow*)this,"Choose the Optical active Atom to be removed",choice);
+   if(0==at1) {
+      wxMessageDialog dumbUser(this,_T("Atom not selected !"),
+                               _T("Whooops"),wxOK|wxICON_EXCLAMATION);
+      dumbUser.ShowModal();
+      return;
+   }
+    
+   mpMolecule->removeNonFlipAtom(*at1);
+   this->CrystUpdate(true);
+   VFN_DEBUG_EXIT("WXMolecule::OnMenuRemoveNonFlipAtom()",6)
+}
 void WXMolecule::OnMenuRemoveRigidGroup(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXMolecule::OnMenuRemoveRigidGroup()",6)
@@ -1253,7 +1321,44 @@ void WXMolecule::OnMenuRemoveRigidGroup(wxCommandEvent & WXUNUSED(event))
    this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXMolecule::OnMenuRemoveRigidGroup()",6)
 }
+/*
+void WXMolecule::OnMenuRemoveFlipGroup(wxCommandEvent & WXUNUSED(event))
+{
+   VFN_DEBUG_ENTRY("WXMolecule::OnMenuRemoveFlipGroup()",6)
+   WXCrystValidateAllUserInput();
+   mpMolecule->BuildFlipGroup();
+   list<Molecule::FlipGroup> v = mpMolecule->GetFlipGroupList();
 
+   wxString *choices = new wxString[v.size()];
+   int i=0;
+   for(list<Molecule::FlipGroup>::iterator pos=v.begin();pos!=v.end();++pos) {       
+       if(pos->mvRotatedChainList.begin()->first==pos->mpAtom0) {
+           choices[i] = pos->mpAtom0->GetName();
+           choices[i] += ": ";
+           choices[i] += pos->mpAtom1->GetName();
+           choices[i] += " <-> ";
+           choices[i] += pos->mpAtom2->GetName();
+       } else {
+           choices[i] = pos->mpAtom0->GetName();
+           for(list<pair<const MolAtom *,set<MolAtom*> > >::const_iterator chain=pos->mvRotatedChainList.begin(); chain!=pos->mvRotatedChainList.end();++chain) {
+               choices[i] += chain->first->GetName();
+               choices[i] += " <-> ";
+           }
+           choices[i].Remove(choices[i].size()-5, choices[i].size());
+       }
+       i++;
+   }    
+   
+   wxMultiChoiceDialog_ListBox dialog ((wxWindow*)this, "Choose the Flip Group(s) to be removed",_T("Choose"),v.size(),choices);
+   dialog.ShowModal();
+   wxArrayInt choice=dialog.GetSelections();
+       
+   delete[] choices;
+
+   this->CrystUpdate(true);
+   VFN_DEBUG_EXIT("WXMolecule::OnMenuRemoveFlipGroup()",6)
+}
+*/
 void WXMolecule::OnEditGridAtom(wxGridEvent &e)
 {
    if(mIsSelfUpdating) return;
@@ -2341,6 +2446,10 @@ void WXMolecule::CrystUpdate(const bool uui,const bool lock)
             }
          }
       }
+      if(0!=mpNonFlipAtomWin) 
+      {
+          mpNonFlipAtomWin->DeleteRows(0, mpNonFlipAtomWin->GetRows(), true);   
+      }
       //Add any atom, bond, bond angle or dihedral angle that could have been added
       {
          bool needLayout=false;
@@ -2408,6 +2517,15 @@ void WXMolecule::CrystUpdate(const bool uui,const bool lock)
                pos->mNeedUpdateUI=true;
             }
          }
+      }
+      if(0!=mpNonFlipAtomWin) 
+      {
+          vector<MolAtom*> v = mpMolecule->getNonFlipAtomList();
+          for(unsigned long i=0;i<v.size();i++)
+          {             
+              mpNonFlipAtomWin->AppendRows(1, true);
+              mpNonFlipAtomWin->SetCellValue(i, 0, v[i]->GetName());
+          }
       }
    }
    // Update values
@@ -2524,6 +2642,10 @@ void WXMolecule::CrystUpdate(const bool uui,const bool lock)
             pos->mNeedUpdateUI=true;
          }
       }
+   }
+   if(0!=mpNonFlipAtomWin) 
+   {
+
    }
    this->WXRefinableObj::CrystUpdate(uui,false);
    if(lock) mMutex.Unlock();
@@ -2653,6 +2775,22 @@ void WXMolecule::OnMenuShowRestraintWindow(wxCommandEvent &event)
       mpRigidGroupWin->SetColLabelValue(0,_T("Atoms in Rigid Group"));
       //mpRigidGroupWin->ForceRefresh();
       //mpRigidGroupWin->AutoSizeRows();
+   }
+
+   //non-flip atoms
+   {
+      wxGridCellAttr* cellAttrName = new wxGridCellAttr;
+      cellAttrName->SetReadOnly();
+      cellAttrName->SetRenderer(new wxGridCellStringRenderer);
+      cellAttrName->SetEditor(new wxGridCellTextEditor);
+      
+      mpNonFlipAtomWin = new WXMolScrolledWindow(notebook,this,ID_WINDOW_NONFLIPATOM);
+      notebook->AddPage(mpNonFlipAtomWin, _T("Optical active atoms"), true);
+      mpNonFlipAtomWin->CreateGrid(0,1);
+      mpNonFlipAtomWin->SetColMinimalWidth(0,600);
+      mpNonFlipAtomWin->SetColSize(0,600);
+      mpNonFlipAtomWin->SetColAttr(0,cellAttrName);
+      mpNonFlipAtomWin->SetColLabelValue(0,_T("Optical active atom"));
    }
    notebook->SetSelection(0);
    this->CrystUpdate(true);
@@ -2898,6 +3036,11 @@ void WXMolecule::UpdateUI(const bool lock)
          }
          ++i;
       }
+   }
+   if(0!=mpNonFlipAtomWin)
+   {
+       //for(unsigned long i=0;i<
+       //              mpNonFlipAtomWin->SetCellValue(v[i]->GetName(), i, 1);
    }
    if(mpMolecule->GetCenterAtom()!=0)
       mpFieldCenterAtom->SetValue(mpMolecule->GetCenterAtom()->GetName());

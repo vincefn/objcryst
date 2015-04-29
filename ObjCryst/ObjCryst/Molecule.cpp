@@ -2641,13 +2641,16 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
    VFN_DEBUG_ENTRY("Molecule::GlobalOptRandomMove()",4)
    mClockScatterer.Click();
    
+   
    #if 1
    // From time to time, just do one flip
    if(  (mFlexModel.GetChoice()!=1)
+      &&(mFlipModel.GetChoice()==0)
       &&(gpRefParTypeScattConform->IsDescendantFromOrSameAs(type))
       &&(mvFlipGroup.size()>0)
       &&(((rand()%100)==0)))
    {
+      
       this->SaveParamSet(mLocalParamSet);
       const REAL llk0=this->GetLogLikelihood()/mLogLikelihoodScale;
       const unsigned long i=rand() % mvFlipGroup.size();
@@ -2700,7 +2703,7 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
    }
    else
    #endif
-   {
+   {       
       TAU_PROFILE_START(timer1);
       if(mOptimizeOrientation.GetChoice()==0)
       {//Rotate around an arbitrary vector
@@ -3781,6 +3784,31 @@ vector<MolAtom*>::iterator Molecule::RemoveAtom(MolAtom &atom, const bool del)
    return pos;
 }
 
+void Molecule::AddNonFlipAtom(MolAtom &atom)
+{
+   VFN_DEBUG_ENTRY("Molecule::AddNonFlipAtom()",5)
+   mvNonFlipAtom.push_back(&atom);
+   //mvNonFlipAtom.push_back(new MolAtom(atom.x,y,z,pPow,thename,*this));
+   
+   mClockFlipGroup.Reset();
+   this->UpdateDisplay();
+   VFN_DEBUG_EXIT("Molecule::AddNonFlipAtom()",5)
+}
+void Molecule::removeNonFlipAtom(MolAtom &atom)
+{
+    for(vector<MolAtom*>::iterator pos=mvNonFlipAtom.begin();pos!=mvNonFlipAtom.end();) {
+        if(atom.GetName().compare((*pos)->GetName())==0) {
+            pos = mvNonFlipAtom.erase(pos);
+            break;
+        } else {
+            pos++;
+        }
+    }
+}
+vector<MolAtom*> Molecule::getNonFlipAtomList()
+{
+    return mvNonFlipAtom;
+}
 void Molecule::AddBond(MolAtom &atom1, MolAtom &atom2,
                        const REAL length, const REAL sigma, const REAL delta,
                        const REAL bondOrder,
@@ -4253,7 +4281,7 @@ const list<StretchModeBondAngle>& Molecule::GetStretchModeBondAngleList()const{r
 const list<StretchModeTorsion>& Molecule::GetStretchModeTorsionList()const{return mvStretchModeTorsion;}
 
 const std::vector<RigidGroup*>& Molecule::GetRigidGroupList()const{return mvRigidGroup;}
-std::vector<RigidGroup*>& Molecule::GetRigidGroupList(){return mvRigidGroup;}
+std::vector<RigidGroup*>& Molecule::GetRigidGroupList() {return mvRigidGroup;}
 
 void Molecule::RotateAtomGroup(const MolAtom &at1,const MolAtom &at2,
                                const set<MolAtom *> &atoms, const REAL angle,
@@ -7000,6 +7028,23 @@ void Molecule::BuildFlipGroup()
       }
       else pos++;
    }
+   //Exclude flip groups where the central atom is in the non-flip atom list
+   for(list<FlipGroup>::iterator pos=mvFlipGroup.begin(); pos!=mvFlipGroup.end();)
+   {
+       bool erase = false;
+       for(int i=0;i<mvNonFlipAtom.size();i++) {
+           if(pos->mpAtom0->GetName().compare(mvNonFlipAtom[i]->GetName())==0) {
+              erase = true;
+              break;
+           }
+       }
+       if(erase) {
+           cout <<"EXCLUDING flip group (central atom is in the non-flip list)"<<endl;
+           pos=mvFlipGroup.erase(pos);
+       } else {
+           pos++;
+       }       
+   }
    // List them
    this->SaveParamSet(mLocalParamSet);
    #if 1//def __DEBUG__
@@ -7499,6 +7544,9 @@ void Molecule::InitOptions()
    static string Flexname;
    static string Flexchoices[3];
 
+   static string FlipName;
+   static string FlipChoice[2];
+
    static string autoOptimizeConformationName;
    static string autoOptimizeConformationChoices[2];
 
@@ -7516,6 +7564,10 @@ void Molecule::InitOptions()
       Flexchoices[1]="Rigid Body";
       Flexchoices[2]="Automatic from Restraints, strict";
       //Flexchoices[3]="Molecular Dynamics";
+
+      FlipName="Enable Flipping";
+      FlipChoice[0]="Yes";
+      FlipChoice[1]="No";
       
       autoOptimizeConformationName="Auto Optimize Starting Conformation";
       autoOptimizeConformationChoices[0]="Yes";
@@ -7534,6 +7586,10 @@ void Molecule::InitOptions()
    mFlexModel.Init(3,&Flexname,Flexchoices);
    mFlexModel.SetChoice(0);
    this->AddOption(&mFlexModel);
+
+   mFlipModel.Init(2, &FlipName, FlipChoice);
+   mFlipModel.SetChoice(0);
+   this->AddOption(&mFlipModel);
    
    mAutoOptimizeConformation.Init(2,&autoOptimizeConformationName,
                                   autoOptimizeConformationChoices);
