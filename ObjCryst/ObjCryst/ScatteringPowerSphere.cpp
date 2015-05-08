@@ -121,7 +121,7 @@ CrystVector_REAL ScatteringPowerSphere::GetScatteringFactor(const ScatteringData
    for(long i=0;i<data.GetNbReflBelowMaxSinThetaOvLambda();i++)
    {
       *pSF = sin(*pSF) / *pSF;
-      *pSF++;
+      pSF++;
    }
    #endif
    return sf;
