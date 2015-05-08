@@ -121,7 +121,7 @@ Molecule *ZScatterer2Molecule(ZScatterer *scatt);
 // dialog to get a bounding box
   class UserSelectBoundingBox : public wxDialog {
   public:
-    UserSelectBoundingBox(wxWindow * parent, char * title, BBox bbox);
+    UserSelectBoundingBox(wxWindow * parent, const char * title, BBox bbox);
     ~UserSelectBoundingBox ();
     BBox GetBBox ();
   private:
@@ -3723,7 +3723,6 @@ void WXGLCrystalCanvas::OnChangeLimits(wxCommandEvent &event)
    }
    if(event.GetId()==ID_GLCRYSTAL_MENU_CHANGELIMITS)
    {
-
       UserSelectBoundingBox *BoxDlg = new UserSelectBoundingBox(this,
 	       "Set bounding box for display of\natoms (fractional coordinates)",
 			    mcellbbox);
@@ -4376,7 +4375,7 @@ BEGIN_EVENT_TABLE(UserSelectBoundingBox, wxDialog)
    EVT_BUTTON(wxID_OK, UserSelectBoundingBox::OnOk)
 END_EVENT_TABLE()
 
-  UserSelectBoundingBox::UserSelectBoundingBox (wxWindow *parent, char * title,
+  UserSelectBoundingBox::UserSelectBoundingBox (wxWindow *parent, const char * title,
 					      const BBox bbox)
   : wxDialog((wxWindow *)parent, -1, _T("Set bounding box"), wxDefaultPosition,
   	     wxSize(250, 250), wxDEFAULT_DIALOG_STYLE) 
