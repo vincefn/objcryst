@@ -804,7 +804,7 @@ void WXFoxServer::OnShowResults(wxCommandEvent& event)
    if(nb!=1) return;
 
    int r = m_ResultTable->GetSelectedRows().Item(0);
-   if(!r>=m_results.size()) return;
+   if(!(r>=m_results.size())) return;
 
    wxString file = m_results[r].filename;
 
