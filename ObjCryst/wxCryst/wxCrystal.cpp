@@ -909,19 +909,15 @@ void WXCrystal::OnMenuCrystalGL(wxCommandEvent & WXUNUSED(event))
    #endif
    
    frame->Show(true);
-   mpCrystalGL->Show(true);
    
-   if(mpCrystalGL!=0)
-   {
-      #if 1
-      // Posting an event allows the window to actually be shown before triggering the update
-      wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_GLCRYSTAL_FOURIER_UPDATE);
-      wxPostEvent(mpCrystalGL,event);
-      #else
-      BBox box=mpCrystalGL->GetCellBBox();
-      this->UpdateGL(false,box.xMin,box.xMax,box.yMin,box.yMax,box.zMin,box.zMax);
-      #endif
-  }
+   #if 1
+   // Posting an event allows the window to actually be shown before triggering the update
+   wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_GLCRYSTAL_MENU_UPDATE);
+   wxPostEvent(mpCrystalGL,event);
+   #else
+   BBox box=mpCrystalGL->GetCellBBox();
+   this->UpdateGL(false,box.xMin,box.xMax,box.yMin,box.yMax,box.zMin,box.zMax);
+   #endif
 }
 void WXCrystal::NotifyCrystalGLDelete()
 {
