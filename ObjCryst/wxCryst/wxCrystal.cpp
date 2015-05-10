@@ -312,6 +312,19 @@ static const long ID_CRYSTAL_WIN_BONDVALENCE                    =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SHOW_SCATTPOW_WIN             =WXCRYST_ID();
 //static const long ID_CRYSTAL_MENU_SHOW_PDF                      =WXCRYST_ID();
 
+static const long ID_GLCRYSTAL_FOURIER_ADD=            WXCRYST_ID();
+static const long ID_GLCRYSTAL_FOURIER_REMOVE=         WXCRYST_ID();
+static const long ID_GLCRYSTAL_FOURIER_UPDATE=         WXCRYST_ID();
+static const long ID_GLCRYSTAL_FOURIER_WIREFRAME=      WXCRYST_ID();
+static const long ID_GLCRYSTAL_FOURIER_SHOW=           WXCRYST_ID();
+static const long ID_GLCRYSTAL_FOURIER_SHARPEN=        WXCRYST_ID();
+static const long ID_GLCRYSTAL_FOURIER_LISTMAP=        WXCRYST_ID();
+static const long ID_GLCRYSTAL_FOURIER_LISTGLMAP=      WXCRYST_ID();
+static const long ID_GLCRYSTAL_FOURIER_CONTOUR=        WXCRYST_ID();
+static const long ID_GLCRYSTAL_FOURIER_NEWCONTOUR=     WXCRYST_ID();
+static const long ID_GLCRYSTAL_FOURIER_COLOURPICKER=   WXCRYST_ID();
+
+
 BEGIN_EVENT_TABLE(WXCrystal,wxWindow)
    EVT_BUTTON(ID_WXOBJ_COLLAPSE,                      WXCrystObj::OnToggleCollapse)
    EVT_MENU(ID_REFOBJ_MENU_OBJ_SAVE,                  WXRefinableObj::OnMenuSave)
@@ -832,13 +845,13 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
          VFN_DEBUG_EXIT("WXCrystal::UpdateGL()-Not in main thread :End",8)
          return;
       }
+      mpCrystalGL->SetCurrent();
       if(mCrystalGLDisplayList==0)
       {
          mCrystalGLDisplayList=glGenLists(1);
          mCrystalGLNameDisplayList=glGenLists(1);
          VFN_DEBUG_MESSAGE("WXCrystal::UpdateGL():created mCrystalGLDisplayList="<<mCrystalGLDisplayList,7)
       }
-      mpCrystalGL->SetCurrent();
       glNewList(mCrystalGLDisplayList,GL_COMPILE);
          glPushMatrix();
             mpCrystal->GLInitDisplayList(onlyIndependentAtoms,xMin,xMax,yMin,yMax,zMin,zMax);
@@ -896,11 +909,19 @@ void WXCrystal::OnMenuCrystalGL(wxCommandEvent & WXUNUSED(event))
    #endif
    
    frame->Show(true);
+   mpCrystalGL->Show(true);
+   
    if(mpCrystalGL!=0)
    {
+      #if 1
+      // Posting an event allows the window to actually be shown before triggering the update
+      wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_GLCRYSTAL_FOURIER_UPDATE);
+      wxPostEvent(mpCrystalGL,event);
+      #else
       BBox box=mpCrystalGL->GetCellBBox();
       this->UpdateGL(false,box.xMin,box.xMax,box.yMin,box.yMax,box.zMin,box.zMax);
-   }
+      #endif
+  }
 }
 void WXCrystal::NotifyCrystalGLDelete()
 {
@@ -2699,17 +2720,6 @@ const UnitCellMap & UnitCellMapGLList::GetMap()const {return *mpUCMap;}
 //    WXGLCrystalCanvas::WXFourierMapList
 //
 ////////////////////////////////////////////////////////////////////////
-static const long ID_GLCRYSTAL_FOURIER_ADD=            WXCRYST_ID();
-static const long ID_GLCRYSTAL_FOURIER_REMOVE=         WXCRYST_ID();
-static const long ID_GLCRYSTAL_FOURIER_UPDATE=         WXCRYST_ID();
-static const long ID_GLCRYSTAL_FOURIER_WIREFRAME=      WXCRYST_ID();
-static const long ID_GLCRYSTAL_FOURIER_SHOW=           WXCRYST_ID();
-static const long ID_GLCRYSTAL_FOURIER_SHARPEN=        WXCRYST_ID();
-static const long ID_GLCRYSTAL_FOURIER_LISTMAP=        WXCRYST_ID();
-static const long ID_GLCRYSTAL_FOURIER_LISTGLMAP=      WXCRYST_ID();
-static const long ID_GLCRYSTAL_FOURIER_CONTOUR=        WXCRYST_ID();
-static const long ID_GLCRYSTAL_FOURIER_NEWCONTOUR=     WXCRYST_ID();
-static const long ID_GLCRYSTAL_FOURIER_COLOURPICKER=   WXCRYST_ID();
 
 WXGLCrystalCanvas::WXFourierMapList::WXFourierMapList(WXGLCrystalCanvas *pGLCrystalCanvas,wxWindow *parent):
 wxWindow(parent,-1),mpGLCrystalCanvas(pGLCrystalCanvas),mIsUpdating(false)
@@ -3017,6 +3027,7 @@ WXGLCrystalCanvas::~WXGLCrystalCanvas()
    sGLCrystalConfig.mViewCntr.y=mViewCntr.y;
    sGLCrystalConfig.mViewCntr.z=mViewCntr.z;
    sGLCrystalConfig.mSaved=true;
+   delete mpwxGLContext;
 }
 
 void WXGLCrystalCanvas::OnExit(wxCommandEvent &event)
@@ -3035,6 +3046,18 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
       this->InitGL();
    }
 
+   {
+      int width, height;
+      GetClientSize(& width, & height);
+
+      this->SetCurrent();
+      glViewport(0, 0, width, height);
+      glMatrixMode(GL_PROJECTION);
+      glLoadIdentity();
+      if( (width>0)&&(height>0)) //in case the window is docked...
+	  gluPerspective(mViewAngle,(float)width/(float)height,1.f,2.*mDist);
+
+   }
    glMatrixMode( GL_MODELVIEW );
 
    //clear
@@ -3048,7 +3071,7 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
    build_rotmatrix( m,mQuat);
    glMultMatrixf( &m[0][0] );
    glTranslatef( mX0, mY0, mZ0 );
-
+   
    //Draw
    //Show display limits
    {
@@ -3159,7 +3182,7 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
    SwapBuffers();
    VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnPaint():End",7)
 }
-
+/*
 void WXGLCrystalCanvas::OnSize(wxSizeEvent& event)
 {
    VFN_DEBUG_ENTRY("WXGLCrystalCanvas::OnSize()",7)
@@ -3175,7 +3198,7 @@ void WXGLCrystalCanvas::OnSize(wxSizeEvent& event)
       gluPerspective(mViewAngle,(float)width/(float)height,1.f,2.*mDist);
    VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnSize():End",7)
 }
-
+*/
 void WXGLCrystalCanvas::OnEraseBackground(wxEraseEvent& event)
 {
 }
@@ -3620,12 +3643,13 @@ void WXGLCrystalCanvas::OnUpdateUI(wxUpdateUIEvent&event)
 
 void WXGLCrystalCanvas::SetCurrent()
 {
-   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::SetCurrent()",4)
+   VFN_DEBUG_ENTRY("WXGLCrystalCanvas::SetCurrent()",4)
    this->wxGLCanvas::SetCurrent(*mpwxGLContext);
    #ifndef HAVE_GLUT
    this->BuildGLFont();
    sFontDisplayListBase=mGLFontDisplayListBase;
    #endif
+   VFN_DEBUG_EXIT("WXGLCrystalCanvas::SetCurrent()",4)
 }
 
 void WXGLCrystalCanvas::NotifyDeleteFourierWin()

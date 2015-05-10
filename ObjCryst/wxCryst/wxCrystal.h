@@ -322,7 +322,7 @@ class WXGLCrystalCanvas : public wxGLCanvas
       ~WXGLCrystalCanvas();
       void OnExit(wxCommandEvent &event);
       void OnPaint(wxPaintEvent &event);
-      void OnSize(wxSizeEvent& event);
+      //void OnSize(wxSizeEvent& event);
       void OnEraseBackground(wxEraseEvent& event);
       void OnKeyDown(wxKeyEvent& event);
       void OnKeyUp(wxKeyEvent& event);
