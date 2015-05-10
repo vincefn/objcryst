@@ -1425,12 +1425,6 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
    SetStatusText(_T("Welcome to FOX/ObjCryst++!"));
 #endif // wxUSE_STATUSBAR
 
-   //Splash Screen
-   if(true==splashscreen)
-   {
-      wxCommandEvent event;
-      this->OnAbout(event);
-   }
    // Create the notebook
 
       mpNotebook = new wxNotebook(this, -1);
@@ -1497,6 +1491,12 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
       mvUpdatesAutoCheck=true;
    }
    #endif
+   //Splash Screen
+   if(true==splashscreen)
+   {
+      wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,MENU_HELP_ABOUT);
+      wxPostEvent(this,event);
+   }
 }
 
 void WXCrystMainFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
@@ -1509,11 +1509,17 @@ class WXDialogFoxAbout:public wxDialog
   public:
     WXDialogFoxAbout(wxWindow* parent);
     void OnButtonCheckUpdate(wxCommandEvent &ev);
+#ifdef __WXGTK__
+    void OnWindowCreate(wxWindowCreateEvent &WXUNUSED(evt));
+#endif
     DECLARE_EVENT_TABLE()
 };
 
 BEGIN_EVENT_TABLE(WXDialogFoxAbout, wxDialog)
    EVT_BUTTON(ID_ABOUT_FOX_BUTTON_UPDATE,             WXDialogFoxAbout::OnButtonCheckUpdate)
+#ifdef __WXGTK__
+   EVT_WINDOW_CREATE(WXDialogFoxAbout::OnWindowCreate)
+#endif
 END_EVENT_TABLE()
 
 WXDialogFoxAbout::WXDialogFoxAbout(wxWindow* parent):
@@ -1540,7 +1546,12 @@ wxDialog(parent,-1,_T("About Fox"),wxDefaultPosition,wxDefaultSize,wxCAPTION|wxS
    this->SetSizer(sizer);
    this->Fit();
 }
-
+#ifdef __WXGTK__
+void WXDialogFoxAbout::OnWindowCreate(wxWindowCreateEvent &WXUNUSED(evt))
+{  // necessary because of delayed decorations (see wx book, page 61-62)
+   this->Fit();
+}
+#endif
 void WXDialogFoxAbout::OnButtonCheckUpdate(wxCommandEvent &ev)
 {
    this->EndModal(int(ID_ABOUT_FOX_BUTTON_UPDATE));
