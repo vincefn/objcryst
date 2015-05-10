@@ -3264,7 +3264,7 @@ WXRefinableObj(parent,b),mpPowderPatternBackground(b),mNeedUpdateUI(false),mIsSe
       mpGridBackgroundPoint->SetDefaultColSize(150);
       mpGridBackgroundPoint->CreateGrid(0,2);
       mpGridBackgroundPoint->SetColAttr(0,cellAttrFloat);
-      mpGridBackgroundPoint->SetColAttr(1,cellAttrFloat);
+      mpGridBackgroundPoint->SetColAttr(1,cellAttrFloat->Clone());
       mpGridBackgroundPoint->SetColLabelValue(0,_T("Position"));
       mpGridBackgroundPoint->SetColLabelValue(1,_T("Intensity"));
       mpGridBackgroundPoint->AutoSizeRows();
