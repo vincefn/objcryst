@@ -74,19 +74,11 @@ else
    endif
 endif
 
-#Use static linking to wx and freeglut libraries ? Unicode or ansi ?
-ifneq ($(unicode),1)
-ifneq ($(shared-wxgtk),1)
-WXCONFIG= $(DIR_CRYST)/../static-libs/bin/wx-config --unicode=no
-else
-WXCONFIG= wx-config --unicode=no
-endif
-else
+#Use static linking to wx and freeglut libraries ? Unicode
 ifneq ($(shared-wxgtk),1)
 WXCONFIG= $(DIR_CRYST)/../static-libs/bin/wx-config --unicode=yes
 else
 WXCONFIG= wx-config --unicode=yes
-endif
 endif
 
 # If using glut (freeglut)
@@ -191,27 +183,17 @@ else
 libfreeglut=
 endif
 
-$(BUILD_DIR)/wxGTK-2.8.12.tar.bz2:
-	cd $(BUILD_DIR) && wget  ftp://ftp.wxwidgets.org/pub/2.8.12/wxGTK-2.8.12.tar.bz2
+$(BUILD_DIR)/wxWidgets-3.0.2.tar.bz2:
+	cd $(BUILD_DIR) && wget  ftp://ftp.wxwidgets.org/pub/3.0.2/wxWidgets-3.0.2.tar.bz2
 
-# When building wxGTK, use make instead of $(MAKE) to avoid passing -jN which do not work ?
-$(BUILD_DIR)/static-libs/lib/libwx_gtk2_core-2.8.a: $(BUILD_DIR)/wxGTK-2.8.12.tar.bz2
-	cd $(BUILD_DIR) && rm -Rf wxGTK && tar -xjf wxGTK-2.8.12.tar.bz2 # wxGtK source, with "demos" "samples" "contrib" removed
-	cd $(BUILD_DIR)/wxGTK-2.8.12 && ./configure --with-gtk --with-opengl --prefix=$(BUILD_DIR)/static-libs --disable-unicode --enable-optimise --disable-shared --disable-clipboard --x-includes=/usr/X11R6/include/ && make install
-	rm -Rf wxGTK
-
-$(BUILD_DIR)/static-libs/lib/libwx_gtk2u_core-2.8.a: $(BUILD_DIR)/wxGTK-2.8.12.tar.bz2
-	cd $(BUILD_DIR) && rm -Rf wxGTK && tar -xjf wxGTK-2.8.12.tar.bz2 # wxGtK source, with "demos" "samples" "contrib" removed
-	cd $(BUILD_DIR)/wxGTK-2.8.12 && ./configure --with-gtk --with-opengl --prefix=$(BUILD_DIR)/static-libs --enable-unicode  --enable-optimise --disable-shared --disable-clipboard --x-includes=/usr/X11R6/include/ && make install
-	rm -Rf wxGTK
+$(BUILD_DIR)/static-libs/lib/libwx_gtk2u_core-3.0.a: $(BUILD_DIR)/wxWidgets-3.0.2.tar.bz2
+	cd $(BUILD_DIR) && rm -Rf wxWidgets-3.0.2 && tar -xjf wxWidgets-3.0.2.tar.bz2
+	cd $(BUILD_DIR)/wxWidgets-3.0.2 && ./configure --with-gtk --with-opengl --prefix=$(BUILD_DIR)/static-libs --enable-unicode  --enable-optimise --disable-shared --x-includes=/usr/X11R6/include/ && $(MAKE) install
+	#rm -Rf wxGTK
 
 ifneq ($(wxcryst),0)
 ifneq ($(shared-wxgtk),1)
-ifneq ($(unicode),1)
-libwx = $(BUILD_DIR)/static-libs/lib/libwx_gtk2_core-2.8.a
-else
-libwx = $(BUILD_DIR)/static-libs/lib/libwx_gtk2u_core-2.8.a
-endif
+libwx = $(BUILD_DIR)/static-libs/lib/libwx_gtk2u_core-3.0.a
 else
 libwx=
 endif
@@ -229,13 +211,13 @@ $(DIR_STATIC_LIBS)/lib/libcctbx.a:
 
 libcctbx: $(DIR_STATIC_LIBS)/lib/libcctbx.a
 
-$(BUILD_DIR)/fftw-3.2.2.tar.gz:
-	cd $(BUILD_DIR) && curl -O http://www.fftw.org/fftw-3.2.2.tar.gz
+$(BUILD_DIR)/fftw-3.3.4.tar.gz:
+	cd $(BUILD_DIR) && curl -O http://fftw.org/fftw-3.3.4.tar.gz
 
-$(DIR_STATIC_LIBS)/lib/libfftw3f.a: $(BUILD_DIR)/fftw-3.2.2.tar.gz
-	cd $(BUILD_DIR) && tar -xzf fftw-3.2.2.tar.gz
-	cd $(BUILD_DIR)/fftw-3.2.2 && ./configure --enable-single --prefix $(DIR_STATIC_LIBS) && $(MAKE) install
-	rm -Rf $(BUILD_DIR)/fftw-3.2.2
+$(DIR_STATIC_LIBS)/lib/libfftw3f.a: $(BUILD_DIR)/fftw-3.3.4.tar.gz
+	cd $(BUILD_DIR) && tar -xzf fftw-3.3.4.tar.gz
+	cd $(BUILD_DIR)/fftw-3.3.4 && ./configure --enable-single --prefix $(DIR_STATIC_LIBS) && $(MAKE) install
+	rm -Rf $(BUILD_DIR)/fftw-3.3.4
 
 ifneq ($(fftw),0)
 ifneq ($(shared-fftw),1)
