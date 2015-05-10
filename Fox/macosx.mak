@@ -29,7 +29,7 @@ libfftw: ../static-libs/lib/libfftw3f.a
 
 ../static-libs/bin/wx-config: ../wxWidgets-3.0.2.tar.bz2
 	cd .. && tar -xjf wxWidgets-3.0.2.tar.bz2
-	cd ../wxWidgets-3.0.2 && ./configure --with-opengl --disable-webviewwebkit --enable-optimise --disable-shared --enable-debug --prefix=$(PWD)/../static-libs && make -j4 install
+	cd ../wxWidgets-3.0.2 && ./configure --with-opengl --disable-webviewwebkit --enable-optimise --disable-shared  --enable-monolithic --prefix=$(PWD)/../static-libs && make -j4 install
 	rm -Rf ../wxWidgets-3.0.2
 
 libwx: ../static-libs/bin/wx-config
