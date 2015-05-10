@@ -1211,6 +1211,7 @@ int main (int argc, char *argv[])
       exit(0);
    }
 #ifdef __WX__CRYST__
+   wxSocketBase::Initialize();// Need this for threaded check of updates
    this->SetVendorName(_T("http://objcryst.sf.net/Fox"));
    this->SetAppName(_T("FOX-Free Objects for Crystallography"));
    // Read (and automatically create if necessary) global Fox preferences
@@ -2214,7 +2215,7 @@ void WXCrystMainFrame::OnPreferences(wxCommandEvent& event)
 
 void WXCrystMainFrame::OnCheckUpdate(wxCommandEvent& event)
 {
-   cout<<"WXCrystMainFrame::OnCheckUpdate"<<endl;
+   VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnCheckUpdate",10);
    if(event.GetId()==ID_FOX_UPDATES_RESULT)
    {
       unsigned int nbminorfeature=0,nbmajorfeature=0,nbrelease=0,nbminorbug=0,nbmajorbug=0,nbcritical=0;
