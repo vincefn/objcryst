@@ -365,7 +365,7 @@ mpCrystalGL(0)
 ,mpConditionGLUpdate(0)
 //,mpPDF(0)
 {
-   VFN_DEBUG_MESSAGE("WXCrystal::WXCrystal()",6)
+   VFN_DEBUG_ENTRY("WXCrystal::WXCrystal()",6)
    //this->SetBackgroundColour("Red");
    //mpWXTitle->SetBackgroundColour(wxColour(255,200,200));
    mpWXTitle->SetForegroundColour(wxColour(255,0,0));
@@ -605,7 +605,7 @@ mpCrystalGL(0)
          }
       }
    }
-   VFN_DEBUG_MESSAGE("WXCrystal::WXCrystal():End",6)
+   VFN_DEBUG_EXIT("WXCrystal::WXCrystal()",6)
 }
 
 WXCrystal::~WXCrystal()

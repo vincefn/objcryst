@@ -1544,8 +1544,10 @@ void Crystal::SetDeleteSubObjInDestructor(const bool b) {
 #ifdef __WX__CRYST__
 WXCrystObjBasic* Crystal::WXCreate(wxWindow* parent)
 {
+   VFN_DEBUG_ENTRY("Crystal::WXCreate(wxWindow*)",6)
    //:TODO: Check mpWXCrystObj==0
    mpWXCrystObj=new WXCrystal(parent,this);
+   VFN_DEBUG_EXIT("Crystal::WXCreate(wxWindow*)",6)
    return mpWXCrystObj;
 }
 #endif

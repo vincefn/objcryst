@@ -293,16 +293,14 @@ void WXCrystValidateAllUserInput()
 WXField::WXField(wxWindow *parent,const string& label,const int id):
 WXCrystObjBasic(parent),mId(id)
 {
-   VFN_DEBUG_MESSAGE("WXField::WXField()",6)
+   VFN_DEBUG_ENTRY("WXField::WXField()",6)
    mpSizer = new wxBoxSizer(wxHORIZONTAL);
    mpLabel=new wxStaticText(this,-1,wxString::FromAscii(label.c_str()));
-   #ifndef __DARWIN__   // *KLUDGE*
-   mpLabel->SetEventHandler(this);
-   #endif
    mpSizer->Add(mpLabel,0,wxALIGN_CENTER);
    this->SetSizer(mpSizer);
    mpSizer->SetSizeHints(this);
    this->Layout();
+   VFN_DEBUG_EXIT("WXField::WXField()",6)
 }
 void WXField::SetLabel(const string& s)
 {
@@ -458,8 +456,7 @@ WXFieldName::WXFieldName(wxWindow *parent,const string& label, WXCrystObj* owner
                          const int id,const int hsize, bool isEditable):
 WXField(parent,label,id),mpWXObj(owner),mValue(""),mIsSelfUpdating(false)
 {
-   VFN_DEBUG_MESSAGE("WXFieldName::WXFieldName():End",6)
-
+   VFN_DEBUG_ENTRY("WXFieldName::WXFieldName()",6)
    if(true==isEditable)
       mpField=new wxTextCtrl(this,ID_WXFIELD,wxString::FromAscii(mValue.c_str()),
                              wxDefaultPosition,wxSize(hsize,-1),wxTE_PROCESS_ENTER,
@@ -472,6 +469,7 @@ WXField(parent,label,id),mpWXObj(owner),mValue(""),mIsSelfUpdating(false)
    mpSizer->Add(mpField,0,wxALIGN_CENTER);
    mpSizer->SetSizeHints(this);
    this->BottomLayout(this);
+   VFN_DEBUG_EXIT("WXFieldName::WXFieldName()",6)
 }
 
 void WXFieldName::OnEnter(wxCommandEvent & WXUNUSED(event))
@@ -803,7 +801,7 @@ END_EVENT_TABLE()
 WXCrystObj::WXCrystObj(wxWindow* parent,int orient,bool showName):
 WXCrystObjBasic(parent),mIsExpanded(true)
 {
-   VFN_DEBUG_MESSAGE("WXCrystObj::WXCrystObj()",6)
+   VFN_DEBUG_ENTRY("WXCrystObj::WXCrystObj()",6)
    mpTopSizer= new wxBoxSizer(orient);
    this->SetSizer(mpTopSizer);
    
@@ -822,7 +820,7 @@ WXCrystObjBasic(parent),mIsExpanded(true)
    }else mpWXTitle=0;
    
    this->Layout();
-   VFN_DEBUG_MESSAGE("WXCrystObj::WXCrystObj():End",6)
+   VFN_DEBUG_EXIT("WXCrystObj::WXCrystObj():End",6)
 }
 
 WXCrystObj::~WXCrystObj()

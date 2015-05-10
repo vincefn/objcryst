@@ -367,7 +367,7 @@ void WXFieldOption::SetToolTip(const wxString& tip){mpList->SetToolTip(tip);}
 template<class T> WXRegistry<T>::WXRegistry(wxWindow *parent,ObjRegistry<T>* reg):
 WXCrystObj(parent,wxHORIZONTAL,false),mpRegistry(reg)
 {
-   VFN_DEBUG_MESSAGE("WXCrystRegistry::WXCrystRegistry(wxWindow*)",6)
+   VFN_DEBUG_ENTRY("WXCrystRegistry::WXCrystRegistry(wxWindow*)",6)
    #ifdef VFN_CRYST_MUTEX
    cout <<"new CrystMutex("<<&mMutex<<")for WXCrystRegistry:"<<reg->GetName()<<endl;
    #endif
@@ -375,7 +375,7 @@ WXCrystObj(parent,wxHORIZONTAL,false),mpRegistry(reg)
    mpSizer->Add(mpLabel,0,wxALIGN_LEFT);
    mpLabel->SetForegroundColour(wxColour(0,0,255));
    this->BottomLayout(0);
-   VFN_DEBUG_MESSAGE("WXCrystRegistry::WXCrystRegistry(wxWindow*):End",6)
+   VFN_DEBUG_EXIT("WXCrystRegistry::WXCrystRegistry(wxWindow*):End",6)
 }
 template<class T> WXRegistry<T>::~WXRegistry()
 {
@@ -386,10 +386,11 @@ template<class T> WXRegistry<T>::~WXRegistry()
 }
 template<class T> void WXRegistry<T>::Add(WXCrystObjBasic *obj)
 {
-   VFN_DEBUG_MESSAGE("WXCrystRegistry::AddWXCrystObj(WXCrystObj*)",6)
+   VFN_DEBUG_ENTRY("WXCrystRegistry::AddWXCrystObj(WXCrystObj*)",6)
    mList.Add(obj);
    obj->Show(mIsExpanded);
    this->AddChild(obj);
+   VFN_DEBUG_EXIT("WXCrystRegistry::AddWXCrystObj(WXCrystObj*)",6)
 }
 template<class T> void WXRegistry<T>::Remove(WXCrystObjBasic *obj)
 {
@@ -568,7 +569,7 @@ END_EVENT_TABLE()
 WXRefinableObj::WXRefinableObj(wxWindow* parent, RefinableObj*obj):
 WXCrystObj(parent,wxHORIZONTAL),mpRefinableObj(obj)
 {
-   VFN_DEBUG_MESSAGE("WXRefinableObj::WXRefinableObj():"<<obj->GetName(),6)
+   VFN_DEBUG_ENTRY("WXRefinableObj::WXRefinableObj():"<<obj->GetName(),6)
    #ifdef VFN_CRYST_MUTEX
    cout <<"new CrystMutex("<<&mMutex<<")for :"<<obj->GetClassName()<<":"<<obj->GetName()<<endl;
    #endif
@@ -589,7 +590,7 @@ WXCrystObj(parent,wxHORIZONTAL),mpRefinableObj(obj)
    }
    this->BottomLayout(0);
    this->CrystUpdate(true,true);
-   VFN_DEBUG_MESSAGE("WXRefinableObj::WXRefinableObj():End",6)
+   VFN_DEBUG_EXIT("WXRefinableObj::WXRefinableObj()",6)
 }
 
 WXRefinableObj::~WXRefinableObj()
