@@ -81,6 +81,14 @@ else
 WXCONFIG= wx-config --unicode=yes
 endif
 
+# Which command to use for download ?
+CURL=$(shell which curl 2>/dev/null)
+ifneq ($(CURL),)
+DOWNLOAD_COMMAND=curl -L -O
+else
+DOWNLOAD_COMMAND=wget
+endif
+
 # If using glut (freeglut)
 GLUT_FLAGS= -DHAVE_GLUT
 GLUT_LIB= -lglut
@@ -153,7 +161,11 @@ endif
 #####################      LIBRAIRIES         ########################
 ######################################################################
 #Newmat Matrix Algebra library (used for SVD)
-$(DIR_STATIC_LIBS)/lib/libnewmat.a:
+
+$(BUILD_DIR)/newmat.tar.bz2:
+	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND) http://downloads.sourceforge.net/project/objcryst/3rdPartyLibraries/newmat.tar.bz2
+
+$(DIR_STATIC_LIBS)/lib/libnewmat.a: $(BUILD_DIR)/newmat.tar.bz2
 	cd $(BUILD_DIR) && tar -xjf newmat.tar.bz2
 	$(MAKE) -f nm_gnu.mak -C $(BUILD_DIR)/newmat libnewmat.a
 	mkdir -p $(DIR_STATIC_LIBS)/lib/
@@ -168,7 +180,10 @@ else
 libnewmat=
 endif
 
-$(BUILD_DIR)/static-libs/lib/libglut.a:
+$(BUILD_DIR)/freeglut.tar.bz2:
+	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND) http://downloads.sourceforge.net/project/objcryst/3rdPartyLibraries/freeglut.tar.bz2
+
+$(BUILD_DIR)/static-libs/lib/libglut.a: $(BUILD_DIR)/freeglut.tar.bz2
 	cd $(BUILD_DIR) && tar -xjf freeglut.tar.bz2
 	cd $(BUILD_DIR)/freeglut && ./configure --prefix=$(BUILD_DIR)/static-libs --disable-shared --disable-warnings --x-includes=/usr/X11R6/include/ && $(MAKE) install
 	rm -Rf freeglut
@@ -184,7 +199,7 @@ libfreeglut=
 endif
 
 $(BUILD_DIR)/wxWidgets-3.0.2.tar.bz2:
-	cd $(BUILD_DIR) && wget  ftp://ftp.wxwidgets.org/pub/3.0.2/wxWidgets-3.0.2.tar.bz2
+	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND) ftp://ftp.wxwidgets.org/pub/3.0.2/wxWidgets-3.0.2.tar.bz2
 
 $(BUILD_DIR)/static-libs/lib/libwx_gtk2u_core-3.0.a: $(BUILD_DIR)/wxWidgets-3.0.2.tar.bz2
 	cd $(BUILD_DIR) && rm -Rf wxWidgets-3.0.2 && tar -xjf wxWidgets-3.0.2.tar.bz2
@@ -202,7 +217,10 @@ libwx=
 endif
      
 #cctbx
-$(DIR_STATIC_LIBS)/lib/libcctbx.a:
+$(BUILD_DIR)/cctbx.tar.bz2:
+	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND) http://downloads.sourceforge.net/project/objcryst/3rdPartyLibraries/cctbx.tar.bz2
+	
+$(DIR_STATIC_LIBS)/lib/libcctbx.a: $(BUILD_DIR)/cctbx.tar.bz2
 	mkdir -p $(DIR_STATIC_LIBS)/lib/ $(DIR_STATIC_LIBS)/include/
 	cd $(BUILD_DIR) && tar -xjf cctbx.tar.bz2
 	$(MAKE) -f gnu.mak -C $(BUILD_DIR)/cctbx install
@@ -212,7 +230,7 @@ $(DIR_STATIC_LIBS)/lib/libcctbx.a:
 libcctbx: $(DIR_STATIC_LIBS)/lib/libcctbx.a
 
 $(BUILD_DIR)/fftw-3.3.4.tar.gz:
-	cd $(BUILD_DIR) && curl -O http://fftw.org/fftw-3.3.4.tar.gz
+	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND) http://fftw.org/fftw-3.3.4.tar.gz
 
 $(DIR_STATIC_LIBS)/lib/libfftw3f.a: $(BUILD_DIR)/fftw-3.3.4.tar.gz
 	cd $(BUILD_DIR) && tar -xzf fftw-3.3.4.tar.gz
