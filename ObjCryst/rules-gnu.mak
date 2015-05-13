@@ -152,7 +152,7 @@ else
       CPPFLAGS = -O3 -w -ffast-math -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops -ftree-vectorize ${SSE_FLAGS}
    endif
    DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS} ${FFTW_FLAGS} ${REAL_FLAG}
-   LOADLIBES = -s -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx ${LDNEWMAT} ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS} ${FFTW_LIB}
+   LOADLIBES = -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx ${LDNEWMAT} ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS} ${FFTW_LIB}
  endif
 endif
 # Add to statically link: -nodefaultlibs -lgcc /usr/lib/libstdc++.a
@@ -199,7 +199,7 @@ libfreeglut=
 endif
 
 $(BUILD_DIR)/wxWidgets-3.0.2.tar.bz2:
-	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND) ftp://ftp.wxwidgets.org/pub/3.0.2/wxWidgets-3.0.2.tar.bz2
+	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND) http://ftp.wxwidgets.org/pub/3.0.2/wxWidgets-3.0.2.tar.bz2
 
 $(BUILD_DIR)/static-libs/lib/libwx_gtk2u_core-3.0.a: $(BUILD_DIR)/wxWidgets-3.0.2.tar.bz2
 	cd $(BUILD_DIR) && rm -Rf wxWidgets-3.0.2 && tar -xjf wxWidgets-3.0.2.tar.bz2
