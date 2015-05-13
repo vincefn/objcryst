@@ -55,6 +55,3 @@ tidy::
 .PHONY : clean
 clean:: tidy
 	@${RM} *.a Fox
-
-cvsignore:
-	cp -f ${DIR_CRYST}/.cvsignore ./
