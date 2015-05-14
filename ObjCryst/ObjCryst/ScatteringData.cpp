@@ -600,7 +600,10 @@ void ScatteringData::SetCrystal(Crystal &crystal)
    mClockStructFactor.Reset();
 }
 const Crystal& ScatteringData::GetCrystal()const {return *mpCrystal;}
+
 Crystal& ScatteringData::GetCrystal() {return *mpCrystal;}
+
+bool ScatteringData::HasCrystal()const {return mpCrystal!=0;}
 
 long ScatteringData::GetNbRefl() const {return mNbRefl;}
 

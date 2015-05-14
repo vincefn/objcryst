@@ -370,7 +370,9 @@ class ScatteringData: virtual public RefinableObj
       const Crystal& GetCrystal()const ;
       /// Access to the data's crystal
       Crystal& GetCrystal() ;
-      
+      /// Has a Crystal structure associated yet ?
+      bool HasCrystal()const;
+    
       ///Return the number of reflections in this experiment.
       long GetNbRefl() const;
       ///Return the 1D array of H coordinates for all reflections
