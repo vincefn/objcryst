@@ -430,6 +430,7 @@ template class WXRegistry<XMLCrystTag>;
 //template class WXRegistry<IOCrystTag>;//to be removed
 template class WXRegistry<ZAtom>;
 template class WXRegistry<TexturePhaseMarchDollase>;
+template class WXRegistry<TextureEllipsoid>;
 template class WXRegistry<ReflectionProfile>;
 ////////////////////////////////////////////////////////////////////////
 //

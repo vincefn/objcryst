@@ -2044,6 +2044,7 @@ template class ObjRegistry<OptimizationObj>;
 template class ObjRegistry<XMLCrystTag>;
 template class ObjRegistry<ZAtom>;
 template class ObjRegistry<TexturePhaseMarchDollase>;
+template class ObjRegistry<TextureEllipsoid>;
 template class ObjRegistry<ReflectionProfile>;
 
 template class RefObjOption<RefinableObj>;

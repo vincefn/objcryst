@@ -3542,6 +3542,68 @@ void WXTextureMarchDollase::OnDeleteTexturePhase(wxCommandEvent & WXUNUSED(event
 
 ////////////////////////////////////////////////////////////////////////
 //
+//    WXTextureEllipsoid
+//
+////////////////////////////////////////////////////////////////////////
+WXTextureEllipsoid::WXTextureEllipsoid(wxWindow *parent, TextureEllipsoid *pObj):
+WXCrystObj(parent),mpTextureEllipsoid(pObj)
+{
+   VFN_DEBUG_ENTRY("WXTextureEllipsoid::WXTextureEllipsoid()",6)
+   mpWXTitle->SetLabel("Texture ellipsoid");
+   mpWXTitle->SetForegroundColour(wxColour(0,0,255));
+   // First line
+      wxBoxSizer* sizer1=new wxBoxSizer(wxHORIZONTAL);
+      WXCrystObjBasic* pFieldEPR1=mpTextureEllipsoid->GetPar((long)0).WXCreate(this);
+      WXCrystObjBasic* pFieldEPR2=mpTextureEllipsoid->GetPar(1).WXCreate(this);
+      WXCrystObjBasic* pFieldEPR3=mpTextureEllipsoid->GetPar(2).WXCreate(this);
+      sizer1->Add(pFieldEPR1,0);
+      sizer1->Add(pFieldEPR2,0);
+      sizer1->Add(pFieldEPR3,0);
+      mList.Add(pFieldEPR1);
+      mList.Add(pFieldEPR2);
+      mList.Add(pFieldEPR3);
+      mpSizer->Add(sizer1);
+      pFieldEPR1->SetToolTip(_T("Texture Ellipsoidal function parameters:\n")
+                             _T("Icorr = Iobs[ 1 + (EPR1*h^2 + EPR2*k^2 + EPR3*l^2 + EPR4*2hk + EPR5*2hl + EPR6*2kl) * 0.001d^2 ]^-1.5"));
+      pFieldEPR2->SetToolTip(_T("Texture Ellipsoidal function parameters:\n")
+                             _T("Icorr = Iobs[ 1 + (EPR1*h^2 + EPR2*k^2 + EPR3*l^2 + EPR4*2hk + EPR5*2hl + EPR6*2kl) * 0.001d^2 ]^-1.5"));
+      pFieldEPR3->SetToolTip(_T("Texture Ellipsoidal function parameters:\n")
+                             _T("Icorr = Iobs[ 1 + (EPR1*h^2 + EPR2*k^2 + EPR3*l^2 + EPR4*2hk + EPR5*2hl + EPR6*2kl) * 0.001d^2 ]^-1.5"));
+   // Second line
+      wxBoxSizer* sizer2=new wxBoxSizer(wxHORIZONTAL);
+      WXCrystObjBasic* pFieldEPR4=mpTextureEllipsoid->GetPar(3).WXCreate(this);
+      WXCrystObjBasic* pFieldEPR5=mpTextureEllipsoid->GetPar(4).WXCreate(this);
+      WXCrystObjBasic* pFieldEPR6=mpTextureEllipsoid->GetPar(5).WXCreate(this);
+      sizer2->Add(pFieldEPR4,0);
+      sizer2->Add(pFieldEPR5,0);
+      sizer2->Add(pFieldEPR6,0);
+      mList.Add(pFieldEPR4);
+      mList.Add(pFieldEPR5);
+      mList.Add(pFieldEPR6);
+      mpSizer->Add(sizer2);
+      pFieldEPR4->SetToolTip(_T("Texture Ellipsoidal function parameters:\n")
+                             _T("Icorr = Iobs[ 1 + (EPR1*h^2 + EPR2*k^2 + EPR3*l^2 + EPR4*2hk + EPR5*2hl + EPR6*2kl) * 0.001d^2 ]^-1.5"));
+      pFieldEPR5->SetToolTip(_T("Texture Ellipsoidal function parameters:\n")
+                             _T("Icorr = Iobs[ 1 + (EPR1*h^2 + EPR2*k^2 + EPR3*l^2 + EPR4*2hk + EPR5*2hl + EPR6*2kl) * 0.001d^2 ]^-1.5"));
+      pFieldEPR6->SetToolTip(_T("Texture Ellipsoidal function parameters:\n")
+                             _T("Icorr = Iobs[ 1 + (EPR1*h^2 + EPR2*k^2 + EPR3*l^2 + EPR4*2hk + EPR5*2hl + EPR6*2kl) * 0.001d^2 ]^-1.5"));
+   
+   this->BottomLayout(0);
+   this->CrystUpdate(true);
+   VFN_DEBUG_EXIT("WXTextureEllipsoid::WXTextureEllipsoid()",6)
+}
+WXTextureEllipsoid::~WXTextureEllipsoid()
+{
+   mpTextureEllipsoid->WXNotifyDelete();
+}
+bool WXTextureEllipsoid::OnChangeName(const int id)
+{
+   return false;
+}
+
+
+////////////////////////////////////////////////////////////////////////
+//
 //    WXPowderPatternDiffraction
 //
 ////////////////////////////////////////////////////////////////////////
@@ -3598,11 +3660,16 @@ WXRefinableObj(parent,p),mpPowderPatternDiffraction(p)
             .WXCreate(this);
       mList.Add(fieldGlobalBiso);
       mpSizer->Add(fieldGlobalBiso);
-   // Texture
-      WXTextureMarchDollase* pTex
+   // Texture (March Dollase
+      WXTextureMarchDollase* pTexMD
          =new WXTextureMarchDollase(this,&(mpPowderPatternDiffraction->mCorrTextureMarchDollase));
-      mList.Add(pTex);
-      mpSizer->Add(pTex);
+      mList.Add(pTexMD);
+      mpSizer->Add(pTexMD);
+   // Texture Ellipsoid
+         WXTextureEllipsoid* pTexEllips
+         =new WXTextureEllipsoid(this,&(mpPowderPatternDiffraction->mCorrTextureEllipsoid));
+      mList.Add(pTexEllips);
+      mpSizer->Add(pTexEllips);
    // Profile
       
       if(mpPowderPatternDiffraction->mpReflectionProfile!=0)
@@ -3649,6 +3716,7 @@ void WXPowderPatternDiffraction::UpdateUI(const bool lock)
    if(lock) mMutex.Lock();
    mpFieldCrystal->SetValue(mpPowderPatternDiffraction->GetCrystal().GetName());
    mpProfileFittingMode->SetValue(mpPowderPatternDiffraction->GetExtractionMode());
+   mpPowderPatternDiffraction->mCorrTextureEllipsoid.UpdateEllipsoidPar();
    if(lock) mMutex.Unlock();
    this->WXRefinableObj::UpdateUI(lock);
 }

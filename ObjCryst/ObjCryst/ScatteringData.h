@@ -67,6 +67,8 @@ extern const RefParType *gpRefParTypeScattDataCorrIntPO_Direction;
 extern const RefParType *gpRefParTypeScattDataCorrIntPO_Fraction;
 /// Parameter type for the amplitude of preferred orientation
 extern const RefParType *gpRefParTypeScattDataCorrIntPO_Amplitude;
+/// Parameter type for the ellipsoid coefficient
+extern const RefParType *gpRefParTypeScattDataCorrInt_Ellipsoid;
 /// Parameter type for absorption correction
 extern const RefParType *gpRefParTypeScattDataCorrIntAbsorp;
 /// Parameter type for polarization correction
@@ -103,6 +105,7 @@ class NiftyStaticGlobalObjectsInitializer_ScatteringData
             gpRefParTypeScattDataCorrIntPO_Direction= new RefParType(gpRefParTypeScattDataCorrIntPO_Direction,"Preferred orientation direction");
             gpRefParTypeScattDataCorrIntPO_Fraction= new RefParType(gpRefParTypeScattDataCorrIntPO_Fraction,"Preferred orientation fraction");
             gpRefParTypeScattDataCorrIntPO_Amplitude= new RefParType(gpRefParTypeScattDataCorrIntPO_Amplitude,"Preferred orientation amplitude");
+            gpRefParTypeScattDataCorrInt_Ellipsoid= new RefParType(gpRefParTypeScattDataCorrInt_Ellipsoid,"Preferred orientation ellipsoid");
             gpRefParTypeScattDataCorrIntAbsorp= new RefParType(gpRefParTypeScattDataCorrInt,"Absorption");
             gpRefParTypeScattDataCorrIntPolar= new RefParType(gpRefParTypeScattDataCorrInt,"Polarization");
             gpRefParTypeScattDataCorrIntExtinc= new RefParType(gpRefParTypeScattDataCorrInt,"Extinction");

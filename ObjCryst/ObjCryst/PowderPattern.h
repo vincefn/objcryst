@@ -444,6 +444,8 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
          PowderSlitApertureCorr mCorrSlitAperture;
          /// Preferred orientation (texture) correction following the March-Dollase model
          TextureMarchDollase mCorrTextureMarchDollase;
+         /// Preferred orientation (texture) correction following the Ellipsoidal function
+         TextureEllipsoid mCorrTextureEllipsoid;
          /// Time-Of-Flight intensity correction
          TOFCorr mCorrTOF;
          

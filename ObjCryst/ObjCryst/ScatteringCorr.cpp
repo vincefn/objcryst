@@ -726,6 +726,385 @@ WXCrystObjBasic* TextureMarchDollase::WXCreate(wxWindow* parent)
    return mpWXCrystObj;
 }
 #endif
+
+////////////////////////////////////////////////////////////////////////
+//
+//        TextureEllipsoid
+//
+////////////////////////////////////////////////////////////////////////
+TextureEllipsoid::TextureEllipsoid(const ScatteringData & data,
+                                   const REAL EPR1, const REAL EPR2, const REAL EPR3,
+                                   const REAL EPR4, const REAL EPR5, const REAL EPR6):
+ScatteringCorr(data),mNbReflUsed(0)
+{
+   mEPR[0]=EPR1;
+   mEPR[1]=EPR2;
+   mEPR[2]=EPR3;
+   mEPR[3]=EPR4;
+   mEPR[4]=EPR5;
+   mEPR[5]=EPR6;
+   InitRefParList();
+}
+
+TextureEllipsoid::~TextureEllipsoid()
+{
+   #ifdef __WX__CRYST__
+   if(mpWXCrystObj!=0)
+   {
+      delete mpWXCrystObj;
+      mpWXCrystObj=0;
+   }
+   #endif
+}
+
+const string & TextureEllipsoid::GetName() const
+{
+   //So far, we do not need a personalized name...
+   const static string name="TextureEllipsoid";
+   return name;
+}
+
+const string & TextureEllipsoid::GetClassName() const
+{
+   //So far, we do not need a personalized name...
+   const static string name="TextureEllipsoid";
+   return name;
+}
+
+void TextureEllipsoid::SetParams(const REAL EPR1, const REAL EPR2, const REAL EPR3,
+                                 const REAL EPR4, const REAL EPR5, const REAL EPR6)
+{
+    mEPR[0]=EPR1;
+    mEPR[1]=EPR2;
+    mEPR[2]=EPR3;
+    mEPR[3]=EPR4;
+    mEPR[4]=EPR5;
+    mEPR[5]=EPR6;
+    UpdateEllipsoidPar();
+}
+
+void TextureEllipsoid::GlobalOptRandomMove(const REAL mutationAmplitude,
+                                              const RefParType *type)
+{
+   if(mRandomMoveIsDone) return;
+   /*
+   if(!(gpRefParTypeScattDataCorrInt->IsDescendantFromOrSameAs(type)))
+   {
+      mRandomMoveIsDone=true;
+      return;
+   }
+   */
+   {
+      VFN_DEBUG_MESSAGE("TextureEllipsoid::GlobalOptRandomMove()",1)
+
+      RefinablePar *pEPR[6];
+      for (int i=0; i<6; i++)
+      {
+         pEPR[i] = &(this->GetPar(&(mEPR[i])));
+         if (pEPR[i]->IsFixed()==false)
+            pEPR[i]->Mutate(pEPR[i]->GetGlobalOptimStep()*2*(rand()/(REAL)RAND_MAX-0.5)*mutationAmplitude);
+      }
+      UpdateEllipsoidPar();
+   }
+   //this->RefinableObj::Print();
+   mRandomMoveIsDone=true;
+}
+void TextureEllipsoid::XMLOutput(ostream &os,int indent)const
+{
+   VFN_DEBUG_ENTRY("TextureEllipsoid::XMLOutput():"<<this->GetName(),5)
+   for(int i=0;i<indent;i++) os << "  " ;
+   XMLCrystTag tag("TextureEllipsoid");
+   os <<tag<<endl;
+   indent++;
+
+   GetPar(&mEPR[0]).XMLOutput(os,"EPR1",indent);
+   os <<endl;
+   GetPar(&mEPR[1]).XMLOutput(os,"EPR2",indent);
+   os <<endl;
+   GetPar(&mEPR[2]).XMLOutput(os,"EPR3",indent);
+   os <<endl;
+   GetPar(&mEPR[3]).XMLOutput(os,"EPR4",indent);
+   os <<endl;
+   GetPar(&mEPR[4]).XMLOutput(os,"EPR5",indent);
+   os <<endl;
+   GetPar(&mEPR[5]).XMLOutput(os,"EPR6",indent);
+   os <<endl;
+
+   indent--;
+   tag.SetIsEndTag(true);
+   for(int i=0;i<indent;i++) os << "  " ;
+   os <<tag<<endl;
+   VFN_DEBUG_EXIT("TextureEllipsoid::XMLOutput():"<<this->GetName(),5)
+}
+
+void TextureEllipsoid::XMLInput(istream &is,const XMLCrystTag &tagg)
+{
+   VFN_DEBUG_ENTRY("TextureEllipsoid::XMLInput():"<<this->GetName(),5)
+   for(unsigned int i=0;i<tagg.GetNbAttribute();i++)
+   {
+      //No attribute to read
+   }
+   while(true)
+   {
+      XMLCrystTag tag(is);
+      if(("TextureEllipsoid"==tag.GetName())&&tag.IsEndTag())
+      {
+         VFN_DEBUG_EXIT("TextureEllipsoid::XMLInput()",5)
+         return;
+      }
+      if("Par"==tag.GetName())
+      {
+         for(unsigned int i=0;i<tag.GetNbAttribute();i++)
+         {
+            if("Name"==tag.GetAttributeName(i))
+            {
+               if("EPR1"==tag.GetAttributeValue(i))
+               {
+                  GetPar(&mEPR[0]).XMLInput(is,tag);
+                  break;
+               }
+               if("EPR2"==tag.GetAttributeValue(i))
+               {
+                  GetPar(&mEPR[1]).XMLInput(is,tag);
+                  break;
+               }
+               if("EPR3"==tag.GetAttributeValue(i))
+               {
+                  GetPar(&mEPR[2]).XMLInput(is,tag);
+                  break;
+               }
+               if("EPR4"==tag.GetAttributeValue(i))
+               {
+                  GetPar(&mEPR[3]).XMLInput(is,tag);
+                  break;
+               }
+               if("EPR5"==tag.GetAttributeValue(i))
+               {
+                  GetPar(&mEPR[4]).XMLInput(is,tag);
+                  break;
+               }
+               if("EPR6"==tag.GetAttributeValue(i))
+               {
+                  GetPar(&mEPR[5]).XMLInput(is,tag);
+                  break;
+               }
+            }
+         }
+         continue;
+      }
+   }
+   UpdateEllipsoidPar();
+}
+void TextureEllipsoid::BeginOptimization(const bool allowApproximations,
+                                            const bool enableRestraints)
+{
+   this->RefinableObj::BeginOptimization(allowApproximations,enableRestraints);
+}
+
+void TextureEllipsoid::CalcCorr() const
+{
+   const long nbReflUsed=mpData->GetNbReflBelowMaxSinThetaOvLambda();
+   if(  (mClockTextureEllipsoidPar<mClockCorrCalc)
+      &&(mpData->GetClockTheta()<mClockCorrCalc)) return;
+   VFN_DEBUG_ENTRY("TextureEllipsoid::CalcCorr()",3)
+   TAU_PROFILE("TextureEllipsoid::CalcCorr()","void ()",TAU_DEFAULT)
+
+   //compute correction for each phase
+      const long nbRefl=mpData->GetNbRefl();
+      mCorr.resize(nbRefl);
+      mCorr=1.0;
+      /// Icorr = Iobs[1 + (EPR1*h^2 + EPR2*k^2 + EPR3*l^2 + EPR4*2hk + EPR5*2hl + EPR6*2kl) * 0.001d^2]^-1.5
+      REAL tmp, dhkl;
+      //fstream ofs;
+      //ofs.open("EllipsCalc_log.txt", ios::out|ios::app);
+      for(long i=0;i<nbReflUsed;i++)
+      {
+            dhkl=1.0/(2*mpData->GetSinThetaOverLambda()(i));
+            tmp=(mEPR[0]*mpData->GetH()(i)*mpData->GetH()(i) +
+                 mEPR[1]*mpData->GetK()(i)*mpData->GetK()(i) +
+                 mEPR[2]*mpData->GetL()(i)*mpData->GetL()(i) +
+                 mEPR[3]*2*mpData->GetH()(i)*mpData->GetK()(i) +
+                 mEPR[4]*2*mpData->GetH()(i)*mpData->GetL()(i) +
+                 mEPR[5]*2*mpData->GetK()(i)*mpData->GetL()(i)) *
+                 0.001*dhkl*dhkl;
+            if(tmp<0) tmp=0;// rounding errors ?
+            mCorr(i)=pow((float)(1.0+tmp),(float)-1.5);
+			//ofs<<mCorr(i)<<endl;
+      }
+	  //ofs<<endl<<" * "<<endl<<endl;
+	  //ofs.close();
+   mClockCorrCalc.Click();
+   VFN_DEBUG_EXIT("TextureEllipsoid::CalcCorr()",3)
+}
+
+void TextureEllipsoid::UpdateEllipsoidPar()
+{
+   VFN_DEBUG_ENTRY("TextureEllipsoid::UpdateEllipsoidPar().",3)
+
+   int num = 1;
+   if (mpData!=NULL)
+	   if (&mpData->GetCrystal()!=NULL)
+		   num = mpData->GetCrystal().GetSpaceGroup().GetSpaceGroupNumber();
+
+   if(num <=2)
+   {
+      return;
+   }
+   if((num <=15) && (0==mpData->GetCrystal().GetSpaceGroup().GetUniqueAxis()))
+   {
+      mEPR[4]=0.0;
+      mEPR[5]=0.0;
+      //mClockLatticeParUpdate.Click();
+      return;
+   }
+   if((num <=15) && (1==mpData->GetCrystal().GetSpaceGroup().GetUniqueAxis()))
+   {
+      mEPR[3]=0.0;
+      mEPR[5]=0.0;
+      //mClockLatticeParUpdate.Click();
+      return;
+   }
+   if((num <=15) && (2==mpData->GetCrystal().GetSpaceGroup().GetUniqueAxis()))
+   {
+      mEPR[3]=0.0;
+      mEPR[4]=0.0;
+      //mClockLatticeParUpdate.Click();
+      return;
+   }
+   if(num <=74)
+   {
+      mEPR[3]=0.0;
+      mEPR[4]=0.0;
+      mEPR[5]=0.0;
+      //mClockLatticeParUpdate.Click();
+      return;
+   }
+   if(num <= 142) 
+   {
+      mEPR[1]=mEPR[0];
+      mEPR[3]=0.0;
+      mEPR[4]=0.0;
+      mEPR[5]=0.0;
+      //mClockLatticeParUpdate.Click();
+      return;
+   }
+   if(num <= 194)
+   {//Hexagonal axes, for hexagonal and non-rhomboedral trigonal cells
+      mEPR[1]=mEPR[0]; 
+      mEPR[3]=mEPR[0]*0.5;
+      mEPR[4]=0.0;
+      mEPR[5]=0.0;
+      //mClockLatticeParUpdate.Click();
+      return;
+   }
+   mEPR[1]=mEPR[0]; 
+   mEPR[2]=mEPR[0];
+   mEPR[3]=0.0;
+   mEPR[4]=0.0;
+   mEPR[5]=0.0;
+   //mClockLatticeParUpdate.Click();
+   VFN_DEBUG_EXIT("TextureEllipsoid::UpdateEllipsoidPar().",3)
+   return;
+}
+
+void TextureEllipsoid::InitRefParList()
+{
+   VFN_DEBUG_ENTRY("TextureEllipsoid::InitRefParList()",5)
+   int num = 1;
+   if (mpData!=NULL)
+	   if (&mpData->GetCrystal()!=NULL)
+		   num = mpData->GetCrystal().GetSpaceGroup().GetSpaceGroupNumber();
+
+   bool bEPR [6];
+   for (int i=0; i<6; i++)
+	   bEPR[i] = true;
+
+   //if(mConstrainLatticeToSpaceGroup.GetChoice()==0)
+   {
+      if(num <=2)
+      {
+      }
+      else if((num <=15) && (0==mpData->GetCrystal().GetSpaceGroup().GetUniqueAxis()))
+      {
+         bEPR[4]=false;
+		 bEPR[5]=false;
+      }
+      else if((num <=15) && (1==mpData->GetCrystal().GetSpaceGroup().GetUniqueAxis()))
+      {
+         bEPR[3]=false;
+		 bEPR[5]=false;
+      }
+      else if((num <=15) && (2==mpData->GetCrystal().GetSpaceGroup().GetUniqueAxis()))
+      {
+         bEPR[3]=false;
+		 bEPR[4]=false;
+      }
+      else if(num <=74)
+      {
+         bEPR[3]=false;
+		 bEPR[4]=false;
+		 bEPR[5]=false;
+      }
+      else if(num <= 142) 
+      {
+		 bEPR[1]=false;
+		 bEPR[3]=false;
+		 bEPR[4]=false;
+		 bEPR[5]=false;
+      }
+      else if(num <= 194) 
+      {//Hexagonal axes, for hexagonal and non-rhomboedral trigonal cells
+         bEPR[1]=false;
+		 bEPR[3]=false;
+		 bEPR[4]=false;
+		 bEPR[5]=false;
+      }
+      else
+      {
+         bEPR[1]=false;
+		 bEPR[2]=false;
+		 bEPR[3]=false;
+		 bEPR[4]=false;
+		 bEPR[5]=false;
+      }
+   }
+   
+   if(this->GetNbPar()==0)
+   {//:KLUDGE:
+      char buf [5];
+	   for (int i=0; i<6; i++)
+      {
+         sprintf(buf,"%d",i+1);
+         RefinablePar tmp("EPR"+(string)buf, &(mEPR[i]), -10., 10.,
+                           gpRefParTypeScattDataCorrInt_Ellipsoid, REFPAR_DERIV_STEP_ABSOLUTE,
+						   false, true, bEPR[i], false, 1.0);
+         tmp.AssignClock(mClockTextureEllipsoidPar);
+         tmp.SetDerivStep(1e-7);
+         tmp.SetGlobalOptimStep(0.1);
+         this->AddPar(tmp);
+      }
+   }
+   else
+   {//Just Fix the 'used' status
+	  for (int i=0; i<6; i++)
+		  this->GetPar(i).SetIsUsed(bEPR[i]);
+   }
+   UpdateEllipsoidPar();
+   VFN_DEBUG_EXIT("TextureEllipsoid::InitRefParList():Finished",5)
+}
+
+#ifdef __WX__CRYST__
+WXCrystObjBasic* TextureEllipsoid::WXCreate(wxWindow* parent)
+{
+   VFN_DEBUG_ENTRY("TextureEllipsoid::WXCreate()",6)
+   if(mpWXCrystObj==0)
+      mpWXCrystObj=new WXTextureEllipsoid(parent,this);
+   VFN_DEBUG_EXIT("TextureEllipsoid::WXCreate()",6)
+   return mpWXCrystObj;
+}
+#endif
+
+
 ////////////////////////////////////////////////////////////////////////
 //
 //        Time Of Flight correction

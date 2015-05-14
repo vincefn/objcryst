@@ -61,6 +61,7 @@ const RefParType *gpRefParTypeScattDataCorrInt=0;
 const RefParType *gpRefParTypeScattDataCorrIntPO_Direction=0;
 const RefParType *gpRefParTypeScattDataCorrIntPO_Fraction=0;
 const RefParType *gpRefParTypeScattDataCorrIntPO_Amplitude=0;
+const RefParType *gpRefParTypeScattDataCorrInt_Ellipsoid=0;
 const RefParType *gpRefParTypeScattDataCorrIntAbsorp=0;
 const RefParType *gpRefParTypeScattDataCorrIntPolar=0;
 const RefParType *gpRefParTypeScattDataCorrIntExtinc=0;

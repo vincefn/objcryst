@@ -1605,6 +1605,9 @@ void PowderPatternDiffraction::XMLOutput(ostream &os,int indent)const
    {
       mCorrTextureMarchDollase.XMLOutput(os,indent);
    }
+   
+   mCorrTextureEllipsoid.XMLOutput(os,indent);
+   
    #if 0
    if(mFhklObsSq.numElements()>0)
    {
@@ -1764,6 +1767,11 @@ void PowderPatternDiffraction::XMLInput(istream &is,const XMLCrystTag &tagg)
       if("TextureMarchDollase"==tag.GetName())
       {
          mCorrTextureMarchDollase.XMLInput(is,tag);
+         continue;
+      }
+      if("TextureEllipsoid"==tag.GetName())
+      {
+         mCorrTextureEllipsoid.XMLInput(is,tag);
          continue;
       }
       if("ReflectionProfilePseudoVoigt"==tag.GetName())

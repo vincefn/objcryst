@@ -230,6 +230,20 @@ class WXTextureMarchDollase: public WXRefinableObj
    DECLARE_EVENT_TABLE()
 };
 
+/** Class to display one Preferred Orientation phase using
+* the Ellipsoid model
+*
+*/
+class WXTextureEllipsoid: public WXCrystObj
+{
+   public:
+      WXTextureEllipsoid(wxWindow *parent, TextureEllipsoid *prof);
+      virtual ~WXTextureEllipsoid();
+      virtual bool OnChangeName(const int id);
+   private:
+      TextureEllipsoid* mpTextureEllipsoid;
+};
+
 /** Class to display a Powder Pattern for a crystalline phase
 *
 * Allows to choose the Crystal, as well as the profile

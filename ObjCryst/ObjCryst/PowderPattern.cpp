@@ -725,7 +725,7 @@ WXCrystObjBasic* PowderPatternBackground::WXCreate(wxWindow* parent)
 PowderPatternDiffraction::PowderPatternDiffraction():
 mpReflectionProfile(0),
 mCorrLorentz(*this),mCorrPolar(*this),mCorrSlitAperture(*this),
-mCorrTextureMarchDollase(*this),mCorrTOF(*this),mExtractionMode(false),
+mCorrTextureMarchDollase(*this),mCorrTextureEllipsoid(*this),mCorrTOF(*this),mExtractionMode(false),
 mpLeBailData(0)
 {
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::PowderPatternDiffraction()",10)
@@ -734,6 +734,7 @@ mpLeBailData(0)
    this->SetProfile(new ReflectionProfilePseudoVoigt);
    this->SetIsIgnoringImagScattFact(true);
    this->AddSubRefObj(mCorrTextureMarchDollase);
+   this->AddSubRefObj(mCorrTextureEllipsoid);
    mClockMaster.AddChild(mClockProfilePar);
    mClockMaster.AddChild(mClockLorentzPolarSlitCorrPar);
    mClockMaster.AddChild(mpReflectionProfile->GetClockMaster());
@@ -742,10 +743,11 @@ mpLeBailData(0)
 PowderPatternDiffraction::PowderPatternDiffraction(const PowderPatternDiffraction &old):
 mpReflectionProfile(0),
 mCorrLorentz(*this),mCorrPolar(*this),mCorrSlitAperture(*this),
-mCorrTextureMarchDollase(*this),mCorrTOF(*this),mExtractionMode(false),
+mCorrTextureMarchDollase(*this),mCorrTextureEllipsoid(*this),mCorrTOF(*this),mExtractionMode(false),
 mpLeBailData(0)
 {
    this->AddSubRefObj(mCorrTextureMarchDollase);
+   this->AddSubRefObj(mCorrTextureEllipsoid);
    this->SetIsIgnoringImagScattFact(true);
    this->SetProfile(old.mpReflectionProfile->CreateCopy());
    #if 0 //:TODO:
@@ -852,7 +854,7 @@ void PowderPatternDiffraction::GenHKLFullSpace()
       mFhklObsSq.resize(this->GetNbRefl());
       mFhklObsSq=100;
    }
-
+   mCorrTextureEllipsoid.InitRefParList();// #TODO: SHould this be here ?
    VFN_DEBUG_EXIT("PowderPatternDiffraction::GenHKLFullSpace():"<<this->GetNbRefl(),5)
 }
 void PowderPatternDiffraction::BeginOptimization(const bool allowApproximations,
@@ -1907,7 +1909,7 @@ void PowderPatternDiffraction::CalcIntensityCorr()const
    this->CalcSinThetaLambda();
    if(mClockIntensityCorr<mClockTheta) needRecalc=true;
    
-   const CrystVector_REAL *mpCorr[4];
+   const CrystVector_REAL *mpCorr[5];
    
    if(this->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
    {
@@ -1934,6 +1936,8 @@ void PowderPatternDiffraction::CalcIntensityCorr()const
       mpCorr[3]=&(mCorrTextureMarchDollase.GetCorr());
       if(mClockIntensityCorr<mCorrTextureMarchDollase.GetClockCorr()) needRecalc=true;
    }
+   mpCorr[4]=&(mCorrTextureEllipsoid.GetCorr());
+   if(mClockIntensityCorr<mCorrTextureEllipsoid.GetClockCorr()) needRecalc=true;
    
    
    if(needRecalc==false) return;
@@ -1947,6 +1951,7 @@ void PowderPatternDiffraction::CalcIntensityCorr()const
       mIntensityCorr *= *(mpCorr[2]);
    }
    if(mCorrTextureMarchDollase.GetNbPhase()>0) mIntensityCorr *= *mpCorr[3];
+   mIntensityCorr *= *mpCorr[4];
    mClockIntensityCorr.Click();
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcIntensityCorr():finished",2)
 }
