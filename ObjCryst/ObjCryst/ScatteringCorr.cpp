@@ -954,6 +954,13 @@ void TextureEllipsoid::CalcCorr() const
       sum+=tmp;
       pH++;pK++;pL++;
    }
+   // Normalize correction to 1
+   tmp=nbReflUsed/sum;
+   pCorr=mCorr.data();
+   for(long i=0;i<nbReflUsed;i++)
+   {
+      *pCorr++ *=tmp;
+   }
    mClockCorrCalc.Click();
    VFN_DEBUG_EXIT("TextureEllipsoid::CalcCorr()",3)
 }
