@@ -312,7 +312,9 @@ void TexturePhaseMarchDollase::WXNotifyDelete(){mpWXCrystObj=0;}
 ////////////////////////////////////////////////////////////////////////
 TextureMarchDollase::TextureMarchDollase(const ScatteringData & data):
 ScatteringCorr(data),mNbReflUsed(0)
-{}
+{
+   mClockMaster.AddChild(mClockTexturePar);
+}
 
 TextureMarchDollase::~TextureMarchDollase()
 {
@@ -737,6 +739,7 @@ TextureEllipsoid::TextureEllipsoid(const ScatteringData & data,
                                    const REAL EPR4, const REAL EPR5, const REAL EPR6):
 ScatteringCorr(data),mNbReflUsed(0)
 {
+   mClockMaster.AddChild(mClockTextureEllipsoidPar);
    mEPR[0]=EPR1;
    mEPR[1]=EPR2;
    mEPR[2]=EPR3;
@@ -909,30 +912,25 @@ void TextureEllipsoid::CalcCorr() const
    VFN_DEBUG_ENTRY("TextureEllipsoid::CalcCorr()",3)
    TAU_PROFILE("TextureEllipsoid::CalcCorr()","void ()",TAU_DEFAULT)
 
-   //compute correction for each phase
-      const long nbRefl=mpData->GetNbRefl();
-      mCorr.resize(nbRefl);
-      mCorr=1.0;
-      /// Icorr = Iobs[1 + (EPR1*h^2 + EPR2*k^2 + EPR3*l^2 + EPR4*2hk + EPR5*2hl + EPR6*2kl) * 0.001d^2]^-1.5
-      REAL tmp, dhkl;
-      //fstream ofs;
-      //ofs.open("EllipsCalc_log.txt", ios::out|ios::app);
-      for(long i=0;i<nbReflUsed;i++)
-      {
-            dhkl=1.0/(2*mpData->GetSinThetaOverLambda()(i));
-            tmp=(mEPR[0]*mpData->GetH()(i)*mpData->GetH()(i) +
-                 mEPR[1]*mpData->GetK()(i)*mpData->GetK()(i) +
-                 mEPR[2]*mpData->GetL()(i)*mpData->GetL()(i) +
-                 mEPR[3]*2*mpData->GetH()(i)*mpData->GetK()(i) +
-                 mEPR[4]*2*mpData->GetH()(i)*mpData->GetL()(i) +
-                 mEPR[5]*2*mpData->GetK()(i)*mpData->GetL()(i)) *
-                 0.001*dhkl*dhkl;
-            if(tmp<0) tmp=0;// rounding errors ?
-            mCorr(i)=pow((float)(1.0+tmp),(float)-1.5);
-			//ofs<<mCorr(i)<<endl;
-      }
-	  //ofs<<endl<<" * "<<endl<<endl;
-	  //ofs.close();
+   //compute correction
+   const long nbRefl=mpData->GetNbRefl();
+   mCorr.resize(nbRefl);
+   mCorr=1.0;
+   /// Icorr = Iobs[1 + (EPR1*h^2 + EPR2*k^2 + EPR3*l^2 + EPR4*2hk + EPR5*2hl + EPR6*2kl) * 0.001d^2]^-1.5
+   REAL tmp, dhkl;
+   for(long i=0;i<nbReflUsed;i++)
+   {
+      dhkl=1.0/(2*mpData->GetSinThetaOverLambda()(i));
+      tmp=(mEPR[0]*mpData->GetH()(i)*mpData->GetH()(i) +
+           mEPR[1]*mpData->GetK()(i)*mpData->GetK()(i) +
+           mEPR[2]*mpData->GetL()(i)*mpData->GetL()(i) +
+           mEPR[3]*2*mpData->GetH()(i)*mpData->GetK()(i) +
+           mEPR[4]*2*mpData->GetH()(i)*mpData->GetL()(i) +
+           mEPR[5]*2*mpData->GetK()(i)*mpData->GetL()(i)) *
+           0.001*dhkl*dhkl;
+      if(tmp<0) tmp=0;// rounding errors ?
+         mCorr(i)=pow((float)(1.0+tmp),(float)-1.5);
+   }
    mClockCorrCalc.Click();
    VFN_DEBUG_EXIT("TextureEllipsoid::CalcCorr()",3)
 }
@@ -940,156 +938,106 @@ void TextureEllipsoid::CalcCorr() const
 void TextureEllipsoid::UpdateEllipsoidPar()
 {
    VFN_DEBUG_ENTRY("TextureEllipsoid::UpdateEllipsoidPar().",3)
-
    int num = 1;
    if (mpData!=NULL)
-	   if (&mpData->GetCrystal()!=NULL)
-		   num = mpData->GetCrystal().GetSpaceGroup().GetSpaceGroupNumber();
+      if (mpData->HasCrystal())
+         num = mpData->GetCrystal().GetSpaceGroup().GetSpaceGroupNumber();
+   
+   bool bEPR [6];
+   for (int i=0; i<6; i++)
+      bEPR[i] = true;
 
    if(num <=2)
    {
-      return;
    }
-   if((num <=15) && (0==mpData->GetCrystal().GetSpaceGroup().GetUniqueAxis()))
+   else if((num <=15) && (0==mpData->GetCrystal().GetSpaceGroup().GetUniqueAxis()))
    {
       mEPR[4]=0.0;
       mEPR[5]=0.0;
-      //mClockLatticeParUpdate.Click();
-      return;
+      bEPR[4]=false;
+      bEPR[5]=false;
    }
-   if((num <=15) && (1==mpData->GetCrystal().GetSpaceGroup().GetUniqueAxis()))
+   else if((num <=15) && (1==mpData->GetCrystal().GetSpaceGroup().GetUniqueAxis()))
    {
       mEPR[3]=0.0;
       mEPR[5]=0.0;
-      //mClockLatticeParUpdate.Click();
-      return;
+      bEPR[3]=false;
+      bEPR[5]=false;
    }
-   if((num <=15) && (2==mpData->GetCrystal().GetSpaceGroup().GetUniqueAxis()))
+   else if((num <=15) && (2==mpData->GetCrystal().GetSpaceGroup().GetUniqueAxis()))
    {
       mEPR[3]=0.0;
       mEPR[4]=0.0;
-      //mClockLatticeParUpdate.Click();
-      return;
+      bEPR[3]=false;
+      bEPR[4]=false;
    }
-   if(num <=74)
+   else if(num <=74)
    {
       mEPR[3]=0.0;
       mEPR[4]=0.0;
       mEPR[5]=0.0;
-      //mClockLatticeParUpdate.Click();
-      return;
+      bEPR[3]=false;
+      bEPR[4]=false;
+      bEPR[5]=false;
    }
-   if(num <= 142) 
+   else if(num <= 142)
    {
       mEPR[1]=mEPR[0];
       mEPR[3]=0.0;
       mEPR[4]=0.0;
       mEPR[5]=0.0;
-      //mClockLatticeParUpdate.Click();
-      return;
+      bEPR[1]=false;
+      bEPR[3]=false;
+      bEPR[4]=false;
+      bEPR[5]=false;
    }
-   if(num <= 194)
+   else if(num <= 194)
    {//Hexagonal axes, for hexagonal and non-rhomboedral trigonal cells
       mEPR[1]=mEPR[0]; 
       mEPR[3]=mEPR[0]*0.5;
       mEPR[4]=0.0;
       mEPR[5]=0.0;
-      //mClockLatticeParUpdate.Click();
-      return;
+      bEPR[1]=false;
+      bEPR[3]=false;
+      bEPR[4]=false;
+      bEPR[5]=false;
    }
-   mEPR[1]=mEPR[0]; 
-   mEPR[2]=mEPR[0];
-   mEPR[3]=0.0;
-   mEPR[4]=0.0;
-   mEPR[5]=0.0;
-   //mClockLatticeParUpdate.Click();
+   else
+   {
+      mEPR[1]=mEPR[0];
+      mEPR[2]=mEPR[0];
+      mEPR[3]=0.0;
+      mEPR[4]=0.0;
+      mEPR[5]=0.0;
+      bEPR[1]=false;
+      bEPR[2]=false;
+      bEPR[3]=false;
+      bEPR[4]=false;
+      bEPR[5]=false;
+   }
+   for (int i=0; i<6; i++)
+      this->GetPar(i).SetIsUsed(bEPR[i]);
    VFN_DEBUG_EXIT("TextureEllipsoid::UpdateEllipsoidPar().",3)
-   return;
 }
 
 void TextureEllipsoid::InitRefParList()
 {
    VFN_DEBUG_ENTRY("TextureEllipsoid::InitRefParList()",5)
-   int num = 1;
-   if (mpData!=NULL)
-	   if (&mpData->GetCrystal()!=NULL)
-		   num = mpData->GetCrystal().GetSpaceGroup().GetSpaceGroupNumber();
-
-   bool bEPR [6];
-   for (int i=0; i<6; i++)
-	   bEPR[i] = true;
-
-   //if(mConstrainLatticeToSpaceGroup.GetChoice()==0)
-   {
-      if(num <=2)
-      {
-      }
-      else if((num <=15) && (0==mpData->GetCrystal().GetSpaceGroup().GetUniqueAxis()))
-      {
-         bEPR[4]=false;
-		 bEPR[5]=false;
-      }
-      else if((num <=15) && (1==mpData->GetCrystal().GetSpaceGroup().GetUniqueAxis()))
-      {
-         bEPR[3]=false;
-		 bEPR[5]=false;
-      }
-      else if((num <=15) && (2==mpData->GetCrystal().GetSpaceGroup().GetUniqueAxis()))
-      {
-         bEPR[3]=false;
-		 bEPR[4]=false;
-      }
-      else if(num <=74)
-      {
-         bEPR[3]=false;
-		 bEPR[4]=false;
-		 bEPR[5]=false;
-      }
-      else if(num <= 142) 
-      {
-		 bEPR[1]=false;
-		 bEPR[3]=false;
-		 bEPR[4]=false;
-		 bEPR[5]=false;
-      }
-      else if(num <= 194) 
-      {//Hexagonal axes, for hexagonal and non-rhomboedral trigonal cells
-         bEPR[1]=false;
-		 bEPR[3]=false;
-		 bEPR[4]=false;
-		 bEPR[5]=false;
-      }
-      else
-      {
-         bEPR[1]=false;
-		 bEPR[2]=false;
-		 bEPR[3]=false;
-		 bEPR[4]=false;
-		 bEPR[5]=false;
-      }
-   }
-   
    if(this->GetNbPar()==0)
-   {//:KLUDGE:
+   {
       char buf [5];
 	   for (int i=0; i<6; i++)
       {
          sprintf(buf,"%d",i+1);
          RefinablePar tmp("EPR"+(string)buf, &(mEPR[i]), -10., 10.,
                            gpRefParTypeScattDataCorrInt_Ellipsoid, REFPAR_DERIV_STEP_ABSOLUTE,
-						   false, true, bEPR[i], false, 1.0);
+						   false, true, true, false, 1.0);
          tmp.AssignClock(mClockTextureEllipsoidPar);
          tmp.SetDerivStep(1e-7);
          tmp.SetGlobalOptimStep(0.1);
          this->AddPar(tmp);
       }
    }
-   else
-   {//Just Fix the 'used' status
-	  for (int i=0; i<6; i++)
-		  this->GetPar(i).SetIsUsed(bEPR[i]);
-   }
-   UpdateEllipsoidPar();
    VFN_DEBUG_EXIT("TextureEllipsoid::InitRefParList():Finished",5)
 }
 
