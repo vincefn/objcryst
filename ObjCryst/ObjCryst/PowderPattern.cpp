@@ -1907,7 +1907,7 @@ void PowderPatternDiffraction::CalcIntensityCorr()const
    bool needRecalc=false;
    
    this->CalcSinThetaLambda();
-   if(mClockIntensityCorr<mClockTheta) needRecalc=true;
+   if((mClockIntensityCorr<mClockTheta)||(mClockIntensityCorr<this->GetClockNbReflBelowMaxSinThetaOvLambda())) needRecalc=true;
    
    const CrystVector_REAL *mpCorr[5];
    
@@ -1944,6 +1944,7 @@ void PowderPatternDiffraction::CalcIntensityCorr()const
    
    TAU_PROFILE("PowderPatternDiffraction::CalcIntensityCorr()","void ()",TAU_DEFAULT);
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcIntensityCorr()",2)
+   //:TODO: Only take into account used reflections
    mIntensityCorr = *(mpCorr[0]);
    if(this->GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
    {
@@ -1951,7 +1952,7 @@ void PowderPatternDiffraction::CalcIntensityCorr()const
       mIntensityCorr *= *(mpCorr[2]);
    }
    if(mCorrTextureMarchDollase.GetNbPhase()>0) mIntensityCorr *= *mpCorr[3];
-   mIntensityCorr *= *mpCorr[4];
+   if(mpCorr[4]->numElements()>0) mIntensityCorr *= *mpCorr[4];
    mClockIntensityCorr.Click();
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcIntensityCorr():finished",2)
 }

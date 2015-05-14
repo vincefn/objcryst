@@ -629,6 +629,11 @@ void TextureMarchDollase::TagNewBestConfig()const
 
 void TextureMarchDollase::CalcCorr() const
 {
+   if(this->GetNbPhase()==0)
+   {
+      mCorr.resize(0);
+      return;
+   }
    const long nbReflUsed=mpData->GetNbReflBelowMaxSinThetaOvLambda();
    if(  (mClockTexturePar<mClockCorrCalc)
       &&(mpData->GetClockTheta()<mClockCorrCalc)) return;
@@ -908,6 +913,11 @@ void TextureEllipsoid::BeginOptimization(const bool allowApproximations,
 
 void TextureEllipsoid::CalcCorr() const
 {
+   if((mEPR[0]==0) && (mEPR[1]==0) && (mEPR[2]==0) && (mEPR[3]==0) && (mEPR[4]==0) && (mEPR[5]==0))
+   {
+      mCorr.resize(0);
+      return;
+   }
    const long nbReflUsed=mpData->GetNbReflBelowMaxSinThetaOvLambda();
    if(  (mClockTextureEllipsoidPar<mClockCorrCalc)
       &&(mpData->GetClockTheta()<mClockCorrCalc)) return;

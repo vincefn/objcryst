@@ -44,6 +44,7 @@ class ScatteringCorr
       virtual const string & GetClassName() const=0;
       /// Get the vector of corrections for all reflections. Calculated values must
       /// be multiplied by these values.
+      /// If the vector is empty (size==0), then no correction should be applied
       const CrystVector_REAL& GetCorr() const;
       /// Get the value of the clock corresponding to the last time the correction
       /// was actually computed
