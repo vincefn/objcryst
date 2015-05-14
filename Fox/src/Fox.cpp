@@ -2196,7 +2196,7 @@ void WXFoxPreferences::OnClose(wxCloseEvent& event)
          }
       }
    }
-   this->Destroy();
+   event.Skip(true);
 }
 
 
