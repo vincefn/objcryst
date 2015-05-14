@@ -99,13 +99,6 @@ void standardSpeedTest();
 // private classes
 // ----------------------------------------------------------------------------
 
-class MyApp : public wxApp
-{
-public:
-    virtual bool OnInit();
-    virtual int OnExit();
-};
-
 // WXCrystScr
 class WXCrystScrolledWindow:public wxScrolledWindow
 {
@@ -172,6 +165,19 @@ private:
    /// List of files in browsing dir
    wxListBox *mpBrowseList;
 };
+
+class MyApp : public wxApp
+{
+   public:
+      virtual bool OnInit();
+      virtual int OnExit();
+#ifdef __DARWIN__
+      virtual void MacOpenFile(const wxString &fileName);
+#endif
+   private:
+      WXCrystMainFrame *mpFrame;
+};
+
 
 // ----------------------------------------------------------------------------
 // For messaging the user
@@ -1230,13 +1236,12 @@ int main (int argc, char *argv[])
    if(!wxConfigBase::Get()->HasEntry(_T("Fox/BOOL/Check for Fox updates")))
       wxConfigBase::Get()->Write(_T("Fox/BOOL/Check for Fox updates"), true);
 
-   WXCrystMainFrame *frame ;
    string title(string("FOX: Free Objects for Xtal structures v")+foxVersion);
-   frame = new WXCrystMainFrame(wxString::FromAscii(title.c_str()),
+   mpFrame = new WXCrystMainFrame(wxString::FromAscii(title.c_str()),
                                  wxPoint(50, 50), wxSize(600, 600),
                                  !(loadFourierGRD||loadFourierDSN6||runclient));
    // Use the main frame status bar to pass messages to the user
-      pMainFrameForUserMessage=frame;
+      pMainFrameForUserMessage=mpFrame;
       fpObjCrystInformUser=&WXCrystInformUserStdOut;
    
    WXCrystal *pWXCryst;
@@ -1284,15 +1289,15 @@ int main (int argc, char *argv[])
       wxString dir = wxPathOnly(argv[0]);
       wxSetWorkingDirectory(dir);
       wxCommandEvent com;
-      //frame->OnStartGridClient(com);   
-      frame->mpGridWindow->m_working_dir = wxString::FromAscii(working_dir.c_str());
-      frame->mpGridWindow->StartClientWindow();    
+      //mpFrame->OnStartGridClient(com);
+      mpFrame->mpGridWindow->m_working_dir = wxString::FromAscii(working_dir.c_str());
+      mpFrame->mpGridWindow->StartClientWindow();
 
       if(nbCPUs!=-1) {
-          frame->mpGridWindow->m_WXFoxClient->setNbCPU(nbCPUs);
+          mpFrame->mpGridWindow->m_WXFoxClient->setNbCPU(nbCPUs);
       }
-      frame->mpGridWindow->m_WXFoxClient->m_IPWindow->SetValue(wxString::FromAscii(IP.c_str()));
-      frame->mpGridWindow->m_WXFoxClient->OnConnectClient(com);
+      mpFrame->mpGridWindow->m_WXFoxClient->m_IPWindow->SetValue(wxString::FromAscii(IP.c_str()));
+      mpFrame->mpGridWindow->m_WXFoxClient->OnConnectClient(com);
    }
 
    return TRUE;
@@ -1307,7 +1312,13 @@ int MyApp::OnExit()
    TAU_REPORT_STATISTICS();
    return this->wxApp::OnExit();
 }
+#ifdef __DARWIN__
+void MyApp::MacOpenFile(const wxString &fileName)
+{
+   mpFrame->Load(fileName);
+}
 
+#endif
 // ----------------------------------------------------------------------------
 // WXCrystScrolledWindow
 // ----------------------------------------------------------------------------
