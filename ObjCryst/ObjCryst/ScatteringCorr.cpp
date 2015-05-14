@@ -920,28 +920,39 @@ void TextureEllipsoid::CalcCorr() const
    }
    const long nbReflUsed=mpData->GetNbReflBelowMaxSinThetaOvLambda();
    if(  (mClockTextureEllipsoidPar<mClockCorrCalc)
-      &&(mpData->GetClockTheta()<mClockCorrCalc)) return;
+      &&(mpData->GetClockTheta()<mClockCorrCalc)
+      &&(mpData->GetClockNbReflBelowMaxSinThetaOvLambda()<mClockCorrCalc)) return;
    VFN_DEBUG_ENTRY("TextureEllipsoid::CalcCorr()",3)
    TAU_PROFILE("TextureEllipsoid::CalcCorr()","void ()",TAU_DEFAULT)
 
    //compute correction
    const long nbRefl=mpData->GetNbRefl();
    mCorr.resize(nbRefl);
-   mCorr=1.0;
+   ///mCorr=1.0;
    /// Icorr = Iobs[1 + (EPR1*h^2 + EPR2*k^2 + EPR3*l^2 + EPR4*2hk + EPR5*2hl + EPR6*2kl) * 0.001d^2]^-1.5
    REAL tmp, dhkl;
+   REAL sum=0;
+   REAL *pCorr=mCorr.data();
+   const REAL *pH=mpData->GetH().data();
+   const REAL *pK=mpData->GetH().data();
+   const REAL *pL=mpData->GetH().data();
+   const REAL *pstol=mpData->GetSinThetaOverLambda().data();
    for(long i=0;i<nbReflUsed;i++)
    {
-      dhkl=1.0/(2*mpData->GetSinThetaOverLambda()(i));
-      tmp=(mEPR[0]*mpData->GetH()(i)*mpData->GetH()(i) +
-           mEPR[1]*mpData->GetK()(i)*mpData->GetK()(i) +
-           mEPR[2]*mpData->GetL()(i)*mpData->GetL()(i) +
-           mEPR[3]*2*mpData->GetH()(i)*mpData->GetK()(i) +
-           mEPR[4]*2*mpData->GetH()(i)*mpData->GetL()(i) +
-           mEPR[5]*2*mpData->GetK()(i)*mpData->GetL()(i)) *
-           0.001*dhkl*dhkl;
+      dhkl=1.0/(2* (*pstol++));
+      dhkl=0.001*dhkl*dhkl;
+      tmp=(mEPR[0]* (*pH) * (*pH) +
+           mEPR[1]* (*pK) * (*pK) +
+           mEPR[2]* (*pL) * (*pL) +
+           mEPR[3]*2* (*pH) * (*pK) +
+           mEPR[4]*2* (*pH) * (*pL) +
+           mEPR[5]*2* (*pK) * (*pL)) *
+           dhkl;
       if(tmp<0) tmp=0;// rounding errors ?
-         mCorr(i)=pow((float)(1.0+tmp),(float)-1.5);
+      tmp=pow((float)(1.0+tmp),(float)-1.5);
+      *pCorr++=tmp;
+      sum+=tmp;
+      pH++;pK++;pL++;
    }
    mClockCorrCalc.Click();
    VFN_DEBUG_EXIT("TextureEllipsoid::CalcCorr()",3)

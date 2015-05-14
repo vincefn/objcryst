@@ -1944,15 +1944,38 @@ void PowderPatternDiffraction::CalcIntensityCorr()const
    
    TAU_PROFILE("PowderPatternDiffraction::CalcIntensityCorr()","void ()",TAU_DEFAULT);
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcIntensityCorr()",2)
-   //:TODO: Only take into account used reflections
-   mIntensityCorr = *(mpCorr[0]);
+   mIntensityCorr.resize(mNbRefl);
+   REAL *pCorr=mIntensityCorr.data();
+   const REAL *p=mpCorr[0]->data();
+   for(long i=mNbReflUsed;i>0;i--) *pCorr++ = *p++;
    if(this->GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
    {
-      if(this->GetRadiation().GetRadiationType()==RAD_XRAY) mIntensityCorr *= *(mpCorr[1]);
-      mIntensityCorr *= *(mpCorr[2]);
+      if(this->GetRadiation().GetRadiationType()==RAD_XRAY)
+      {
+         pCorr=mIntensityCorr.data();
+         p=mpCorr[1]->data();
+         const REAL* p2=mpCorr[2]->data();
+         for(long i=mNbReflUsed;i>0;i--) *pCorr++ *= *p++ * *p2++;
+      }
+      else
+      {
+         pCorr=mIntensityCorr.data();
+         p=mpCorr[2]->data();
+         for(long i=mNbReflUsed;i>0;i--) *pCorr++ *= *p++;
+      }
    }
-   if(mCorrTextureMarchDollase.GetNbPhase()>0) mIntensityCorr *= *mpCorr[3];
-   if(mpCorr[4]->numElements()>0) mIntensityCorr *= *mpCorr[4];
+   if(mCorrTextureMarchDollase.GetNbPhase()>0)
+   {
+      pCorr=mIntensityCorr.data();
+      p=mpCorr[3]->data();
+      for(long i=mNbReflUsed;i>0;i--) *pCorr++ *= *p++;
+   }
+   if(mpCorr[4]->numElements()>0)
+   {
+      pCorr=mIntensityCorr.data();
+      p=mpCorr[4]->data();
+      for(long i=mNbReflUsed;i>0;i--) *pCorr++ *= *p++;
+   }
    mClockIntensityCorr.Click();
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcIntensityCorr():finished",2)
 }
