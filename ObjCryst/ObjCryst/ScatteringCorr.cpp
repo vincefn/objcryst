@@ -814,6 +814,8 @@ void TextureEllipsoid::GlobalOptRandomMove(const REAL mutationAmplitude,
 }
 void TextureEllipsoid::XMLOutput(ostream &os,int indent)const
 {
+   if((mEPR[0]==0) && (mEPR[1]==0) && (mEPR[2]==0) && (mEPR[3]==0) && (mEPR[4]==0) && (mEPR[5]==0))
+      return;
    VFN_DEBUG_ENTRY("TextureEllipsoid::XMLOutput():"<<this->GetName(),5)
    for(int i=0;i<indent;i++) os << "  " ;
    XMLCrystTag tag("TextureEllipsoid");
