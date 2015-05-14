@@ -113,23 +113,17 @@ class WXCrystScrolledWindow:public wxScrolledWindow
       WXCrystScrolledWindow(wxWindow* parent);
       virtual bool Layout();
       void SetChild(wxWindow* pChild);
-#if (wxVERSION_NUMBER>=2808) && (wxVERSION_NUMBER<=2811)
       void OnWXCrystChildFocus(wxChildFocusEvent& event);
-#endif
    private:
       wxWindow* mpChild;
       int mHeight,mWidth;
       wxBoxSizer *mpSizer;
-#if (wxVERSION_NUMBER>=2808) && (wxVERSION_NUMBER<=2811)
     DECLARE_EVENT_TABLE()
-#endif
 };
 
-#if (wxVERSION_NUMBER>=2808) && (wxVERSION_NUMBER<=2811)
 BEGIN_EVENT_TABLE(WXCrystScrolledWindow, wxScrolledWindow)
    EVT_CHILD_FOCUS(WXCrystScrolledWindow::OnWXCrystChildFocus)
 END_EVENT_TABLE()
-#endif
 
 // main frame
 class WXCrystMainFrame : public wxFrame
@@ -1340,13 +1334,12 @@ void WXCrystScrolledWindow::SetChild(wxWindow* pChild)
    //this->SetScrollbars(40,40,2,2);
 }
 
-#if (wxVERSION_NUMBER>=2808) && (wxVERSION_NUMBER<=2811)
 void WXCrystScrolledWindow::OnWXCrystChildFocus(wxChildFocusEvent& event)
 {
-   // Workaround for wx 2.8.8+ bug
-   //event.Skip();
+   // Workaround for   wx 2.8.8+ bug
+   event.Skip(false);
 }
-#endif
+
 // ----------------------------------------------------------------------------
 // main frame
 // ----------------------------------------------------------------------------
