@@ -20,7 +20,7 @@
 #include <typeinfo>
 #include <iomanip>
 #include <fstream>
-
+#include <cstring>
 #include <stdio.h> //for sprintf()
 
 

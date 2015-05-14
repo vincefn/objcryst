@@ -21,7 +21,7 @@
 
 #include <cmath>
 #include <typeinfo>
-
+#include <cstring>
 #include <stdio.h> //for sprintf()
 
 #include "ObjCryst/ObjCryst/Crystal.h"
