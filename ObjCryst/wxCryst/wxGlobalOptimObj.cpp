@@ -227,7 +227,7 @@ void WXOptimizationObj::OnBrowseParamSet(wxCommandEvent & WXUNUSED(event))
       mpwxParamSetList->Append(wxString::Format(_T("%d, cost= %f, %s"),i,
                          this->GetOptimizationObj().mvSavedParamSet[i].second,tmpname.c_str()));
    }
-   mpwxParamSetList->SetEventHandler(this);
+   //mpwxParamSetList->SetEventHandler(this);
    mClockParamSetWindow.Click();
    frame->Show(true);
 }
