@@ -389,9 +389,9 @@ mChi2(0.0),mGoF(0.0),mRwp(0.0),mRp(0.0)
          mpMenuBar->AddMenuItem(ID_POWDERPATTERN_MENU_PATTERN,
                                 ID_POWDER_MENU_LEBAIL,
                                 "Fit profile + Le Bail extract");
-      mpSizer->SetItemMinSize(mpMenuBar,
-                              mpMenuBar->GetSize().GetWidth(),
-                              mpMenuBar->GetSize().GetHeight());
+      //mpSizer->SetItemMinSize(mpMenuBar,
+      //                        mpMenuBar->GetSize().GetWidth(),
+      //                        mpMenuBar->GetSize().GetHeight());
    //Radiation
       mpSizer->Add(mpPowderPattern->mRadiation.WXCreate(this),0);
       mList.Add(mpPowderPattern->mRadiation.WXGet());
@@ -482,7 +482,6 @@ mChi2(0.0),mGoF(0.0),mRwp(0.0),mRp(0.0)
       mList.Add(mpWXComponent);
    
    VFN_DEBUG_MESSAGE("WXPowderPattern::WXPowderPattern():1",6)
-   this->BottomLayout(0);
    this->CrystUpdate(true);
    {
       if(!wxConfigBase::Get()->HasEntry(_T("PowderPattern/BOOL/Automatically open powder pattern graph")))
@@ -574,7 +573,8 @@ void WXPowderPattern::OnMenuAddCompBackgd(wxCommandEvent & WXUNUSED(event))
    PowderPatternBackground *backgdData= new PowderPatternBackground;
    mpPowderPattern->AddPowderPatternComponent(*backgdData);
    if(mpGraph!=0) mpPowderPattern->Prepare();//else this will be done when opening the graph
-   //this->Layout();
+   wxTheApp->GetTopWindow()->Layout();
+   wxTheApp->GetTopWindow()->SendSizeEvent();
 }
 
 void WXPowderPattern::OnMenuAddCompBackgdBayesian(wxCommandEvent & WXUNUSED(event))
@@ -652,7 +652,8 @@ void WXPowderPattern::OnMenuAddCompBackgdBayesian(wxCommandEvent & WXUNUSED(even
    pBckgd->OptimizeBayesianBackground();
    pBckgd->FixAllPar();
 
-   //this->Layout();
+   wxTheApp->GetTopWindow()->Layout();
+   wxTheApp->GetTopWindow()->SendSizeEvent();
    VFN_DEBUG_EXIT("WXPowderPattern::OnMenuAddCompBackgdBayesian()",6)
 }
 
@@ -683,6 +684,8 @@ void WXPowderPattern::OnMenuAddCompCryst(wxCommandEvent & WXUNUSED(event))
    }
    VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompCryst()",10)
    if(mpGraph!=0) mpPowderPattern->Prepare();//else this will be done when opening the graph
+   wxTheApp->GetTopWindow()->Layout();
+   wxTheApp->GetTopWindow()->SendSizeEvent();
    this->CrystUpdate();
    VFN_DEBUG_EXIT("WXPowderPattern::OnMenuAddCompCryst()",10)
 }
@@ -3242,9 +3245,9 @@ WXRefinableObj(parent,b),mpPowderPatternBackground(b),mNeedUpdateUI(false),mIsSe
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERBACKGROUND_NEWBAYESIAN,
          "New Automatic Background (Change Number of Points)");
    VFN_DEBUG_MESSAGE(mpMenuBar->GetSize().GetWidth()<<","<<mpMenuBar->GetSize().GetHeight(),10);
-   mpSizer->SetItemMinSize(mpMenuBar,
-                           mpMenuBar->GetSize().GetWidth(),
-                           mpMenuBar->GetSize().GetHeight());
+   //mpSizer->SetItemMinSize(mpMenuBar,
+   //                        mpMenuBar->GetSize().GetWidth(),
+   //                        mpMenuBar->GetSize().GetHeight());
    
    #ifdef USE_BACKGROUND_MAXLIKE_ERROR
    WXCrystObjBasic* pFieldModelSigma=mpPowderPatternBackground
@@ -3474,7 +3477,6 @@ WXCrystObjBasic(parent),mpTexturePhaseMarchDollase(pObj)
    mpSizer->Add(pFieldL,0,wxALIGN_LEFT);
    mList.Add(pFieldL);
 
-   this->BottomLayout(0);
    this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXTexturePhaseMarchDollase::WXTexturePhaseMarchDollase()",5)
 }
@@ -3520,7 +3522,6 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpTextureMarchDollase(obj)
          =mpTextureMarchDollase->mPhaseRegistry.WXCreate(this);
       mpSizer->Add(pWXPhaseRegistry,0,wxALIGN_LEFT);
       mList.Add(pWXPhaseRegistry);
-   this->BottomLayout(0);
    this->CrystUpdate(true);
    this->SetToolTip(_T("Texture for this crystalline phase.\n")
                     _T("You can describe the preferred orientation using ")
@@ -3588,7 +3589,6 @@ WXCrystObj(parent),mpTextureEllipsoid(pObj)
       pFieldEPR6->SetToolTip(_T("Texture Ellipsoidal function parameters:\n")
                              _T("Icorr = Iobs[ 1 + (EPR1*h^2 + EPR2*k^2 + EPR3*l^2 + EPR4*2hk + EPR5*2hl + EPR6*2kl) * 0.001d^2 ]^-1.5"));
    
-   this->BottomLayout(0);
    this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXTextureEllipsoid::WXTextureEllipsoid()",6)
 }
@@ -3641,9 +3641,9 @@ WXRefinableObj(parent,p),mpPowderPatternDiffraction(p)
          mpMenuBar->GetMenu(ID_POWDERDIFF_PROFILE).AppendSeparator();
          mpMenuBar->AddMenuItem(ID_POWDERDIFF_PROFILE,ID_POWDERDIFF_LEBAIL,
                                 "Profile Fitting + Le Bail Extraction");
-      mpSizer->SetItemMinSize(mpMenuBar,
-                              mpMenuBar->GetSize().GetWidth(),
-                              mpMenuBar->GetSize().GetHeight());
+      //mpSizer->SetItemMinSize(mpMenuBar,
+      //                        mpMenuBar->GetSize().GetWidth(),
+      //                        mpMenuBar->GetSize().GetHeight());
     // Profile Fitting Mode
       mpProfileFittingMode= new wxCheckBox(this,ID_POWDERDIFF_PROFILEFITTINGMODE,
                                            _T("Profile Fitting (Le Bail) Mode"));
@@ -3682,7 +3682,6 @@ WXRefinableObj(parent,p),mpPowderPatternDiffraction(p)
          VFN_DEBUG_EXIT("WXPowderPatternDiffraction::WXPowderPatternDiffraction()",6)
       }
       
-   this->BottomLayout(0);
    this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXPowderPatternDiffraction::WXPowderPatternDiffraction()",6)
 }
@@ -3767,7 +3766,8 @@ void WXPowderPatternDiffraction::OnChangeProfile(wxCommandEvent & event)
       mpPowderPatternDiffraction->mpReflectionProfile->WXCreate(this);
       mList.Add(mpPowderPatternDiffraction->mpReflectionProfile->WXGet());
       mpSizer->Add(mpPowderPatternDiffraction->mpReflectionProfile->WXGet());
-      this->BottomLayout(mpPowderPatternDiffraction->mpReflectionProfile->WXGet());
+      wxTheApp->GetTopWindow()->Layout();
+      wxTheApp->GetTopWindow()->SendSizeEvent();
       mpPowderPatternDiffraction->GetParentPowderPattern().UpdateDisplay();
    }
    VFN_DEBUG_EXIT("WXPowderPatternDiffraction::OnChangeProfile()",6)
@@ -4645,7 +4645,6 @@ WXCrystObj(parent),mpProfile(prof)
       pFieldAsym2->SetToolTip(_T("Asymmetry parameters:\n\n")
                               _T("A=A0+A1/sin(2theta)+A2/sin^2(2theta) "));
    
-   this->BottomLayout(0);
    this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXProfilePseudoVoigt::WXProfilePseudoVoigt()",6)
 }
@@ -4669,7 +4668,6 @@ WXCrystObj(parent),mpProfile(prof)
    VFN_DEBUG_ENTRY("WXProfileDoubleExponentialPseudoVoigt::WXProfileDoubleExponentialPseudoVoigt()",6)
    mpWXTitle->SetLabel("Double-Exponential Pseudo-Voigt profile (for neutron TOF)");
    mpWXTitle->SetForegroundColour(wxColour(0,0,255));
-   mpWXTitle->BottomLayout(0);
    // Instrumental
       wxBoxSizer* sizer1=new wxBoxSizer(wxHORIZONTAL);
       WXCrystObjBasic* pFieldCagliotiA0=mpProfile->GetPar("Alpha0").WXCreate(this);
@@ -4710,7 +4708,6 @@ WXCrystObj(parent),mpProfile(prof)
       mList.Add(pFieldGamma2);
       mpSizer->Add(sizer3);
    
-   this->BottomLayout(0);
    this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXProfileDoubleExponentialPseudoVoigt::WXProfileDoubleExponentialPseudoVoigt()",6)
 }

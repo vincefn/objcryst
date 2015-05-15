@@ -232,9 +232,9 @@ WXRefinableObj(parent,data),mpData(data),mpGraph(0),mGrapIdObs(0),mGrapIdCalc(0)
       mpMenuBar->AddMenu("Data",ID_DIFFSINGLECRYST_MENU_DATA);
          mpMenuBar->AddMenuItem(ID_DIFFSINGLECRYST_MENU_DATA,ID_DIFFSINGLECRYST_MENU_DATA_GRAPH,
                                 "Show Graph");
-      mpSizer->SetItemMinSize(mpMenuBar,
-                              mpMenuBar->GetSize().GetWidth(),
-                              mpMenuBar->GetSize().GetHeight());
+      //mpSizer->SetItemMinSize(mpMenuBar,
+      //                        mpMenuBar->GetSize().GetWidth(),
+      //                        mpMenuBar->GetSize().GetHeight());
    //Radiation
       mpSizer->Add(mpData->mRadiation.WXCreate(this),0);
       mList.Add(mpData->mRadiation.WXGet());
@@ -268,7 +268,6 @@ WXRefinableObj(parent,data),mpData(data),mpGraph(0),mGrapIdObs(0),mGrapIdCalc(0)
       
       mpSizer->Add(pStats);
          
-   this->BottomLayout(0);
    this->CrystUpdate(true);
    VFN_DEBUG_MESSAGE("WXDiffractionSingleCrystal::WXDiffractionSingleCrystal():End",6)
 }

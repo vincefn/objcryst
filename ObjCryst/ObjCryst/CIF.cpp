@@ -8,6 +8,7 @@
 #include "ObjCryst/ObjCryst/Crystal.h"
 #include "ObjCryst/ObjCryst/Atom.h"
 #include "ObjCryst/ObjCryst/PowderPattern.h"
+#include "ObjCryst/Quirks/Chronometer.h"
 
 using namespace std;
 
@@ -733,19 +734,28 @@ void CIFData::Fractional2CartesianCoord()
 
 CIF::CIF(istream &is, const bool interpret,const bool verbose)
 {
+   char buf[100];
    (*fpObjCrystInformUser)("CIF: Opening CIF");
+   Chronometer chrono;
+   chrono.start();
    //Copy to an iostream so that we can put back characters if necessary
    stringstream in;
    char c;
    while(is.get(c))in.put(c);
-   (*fpObjCrystInformUser)("CIF: Parsing CIF");
+   const float t0read=chrono.seconds();
+   snprintf(buf,100,"CIF: Parsing CIF (reading dt=%5.3fs)",t0read);
+   (*fpObjCrystInformUser)(buf);
    this->Parse(in);
-   (*fpObjCrystInformUser)("CIF: Finished Parsing, Extracting...");
+   const float t1parse=chrono.seconds();
+   snprintf(buf,100,"CIF: Finished Parsing, Extracting...(parsing dt=%5.3fs)",t1parse-t0read);
+   (*fpObjCrystInformUser)(buf);
    // Extract structure from blocks
    if(interpret)
       for(map<string,CIFData>::iterator posd=mvData.begin();posd!=mvData.end();++posd)
          posd->second.ExtractAll(verbose);
-   (*fpObjCrystInformUser)("CIF: Finished Import");
+   const float t2interpret=chrono.seconds();
+   snprintf(buf,100,"CIF: Finished Import...(interpret dt=%5.3fs, total CIF import=%5.3fs)",t2interpret-t1parse,t2interpret);
+   (*fpObjCrystInformUser)(buf);
 }
 
 bool iseol(const char c) { return ((c=='\n')||(c=='\r'));}
@@ -951,6 +961,10 @@ int CIFNumeric2Int(const string &s)
 
 Crystal* CreateCrystalFromCIF(CIF &cif,bool verbose,bool checkSymAsXYZ)
 {
+   char buf[200];
+   (*fpObjCrystInformUser)("CIF: Opening CIF");
+   Chronometer chrono;
+   chrono.start();
    Crystal *pCryst=NULL;
    for(map<string,CIFData>::iterator pos=cif.mvData.begin();pos!=cif.mvData.end();++pos)
       if(pos->second.mvLatticePar.size()==6)
@@ -1043,10 +1057,13 @@ Crystal* CreateCrystalFromCIF(CIF &cif,bool verbose,bool checkSymAsXYZ)
          }
          if(pos->second.mName!="") pCryst->SetName(pos->second.mName);
          else if(pos->second.mFormula!="") pCryst->SetName(pos->second.mFormula);
-         (*fpObjCrystInformUser)("CIF: Create Crystal:"+pCryst->GetName()+"("+pCryst->GetSpaceGroup().GetName()+")");
+         const float t1=chrono.seconds();
+         snprintf(buf,200,"CIF: Create Crystal:%s(%s)(dt=%6.3fs)",pCryst->GetName().c_str(),pCryst->GetSpaceGroup().GetName().c_str(),t1);
+         (*fpObjCrystInformUser)(buf);
          
          for(vector<CIFData::CIFAtom>::const_iterator posat=pos->second.mvAtom.begin();posat!=pos->second.mvAtom.end();++posat)
          {
+            const float t20=chrono.seconds();
             // Try to find an existing scattering power with the same properties, or create a new one
             ScatteringPower* sp=NULL;
             for(unsigned int i=0;i<pCryst->GetScatteringPowerRegistry().GetNb();++i)
@@ -1078,10 +1095,16 @@ Crystal* CreateCrystalFromCIF(CIF &cif,bool verbose,bool checkSymAsXYZ)
                   for (int idx=0; idx<6; ++idx) sp->SetBij(idx, posat->mBeta[idx]);
                }
                pCryst->AddScatteringPower(sp);
+               const float t21=chrono.seconds();
+               snprintf(buf,200,"CIF: Add scattering power: %s (dt=%6.3fsCrystal creation=%6.3fs total)",posat->mLabel.c_str(),t21-t20,t21);
+               (*fpObjCrystInformUser)(buf);
             }
             (*fpObjCrystInformUser)("CIF: Add Atom:"+posat->mLabel+"("+sp->GetName()+")");
             pCryst->AddScatterer(new Atom(posat->mCoordFrac[0],posat->mCoordFrac[1],posat->mCoordFrac[2],
                                           posat->mLabel,sp,posat->mOccupancy));
+            const float t22=chrono.seconds();
+            snprintf(buf,200,"CIF: new Atom: %s (%s) (dt=%6.3fs, Crystal creation=%6.3fs total)",posat->mLabel.c_str(),sp->GetName().c_str(),t22-t20,t22);
+            (*fpObjCrystInformUser)(buf);
          }
       }
    return pCryst;

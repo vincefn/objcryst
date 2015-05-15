@@ -450,9 +450,9 @@ mpCrystalGL(0)
          //mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_DISPLAY,ID_CRYSTAL_MENU_SHOW_PDF,
          //                       "PDF");
 
-      mpSizer->SetItemMinSize(mpMenuBar,
-                              mpMenuBar->GetSize().GetWidth(),
-                              mpMenuBar->GetSize().GetHeight());
+      //mpSizer->SetItemMinSize(mpMenuBar,
+      //                        mpMenuBar->GetSize().GetWidth(),
+      //                        mpMenuBar->GetSize().GetHeight());
 
       // KLUDGE : this only works as long as the option order does not change !
       dynamic_cast<WXFieldOption *>(mpCrystal->GetOption(0).WXGet())->SetToolTip(
@@ -601,8 +601,6 @@ mpCrystalGL(0)
                     ->GetScattererRegistry().WXCreate(this);
       mpSizer->Add(mpWXScattererRegistry,0,wxALIGN_LEFT);
       mList.Add(mpWXScattererRegistry);
-   
-   this->BottomLayout(0);
    this->CrystUpdate(true);
    {
       bool val;
@@ -618,6 +616,8 @@ mpCrystalGL(0)
          }
       }
    }
+   wxTheApp->GetTopWindow()->Layout();
+   wxTheApp->GetTopWindow()->SendSizeEvent();
    VFN_DEBUG_EXIT("WXCrystal::WXCrystal()",6)
 }
 
@@ -965,6 +965,8 @@ void WXCrystal::OnMenuAddScattPowAtom(wxCommandEvent & WXUNUSED(event))
    VFN_DEBUG_MESSAGE("WXCrystal::OnMenuAddScattPowAtom():End",6)
    this->Layout();
    this->CrystUpdate(true,false);
+   wxTheApp->GetTopWindow()->Layout();
+   wxTheApp->GetTopWindow()->SendSizeEvent();
 }
 
 void WXCrystal::OnMenuAddScattPowSphere(wxCommandEvent & WXUNUSED(event))
@@ -976,6 +978,8 @@ void WXCrystal::OnMenuAddScattPowSphere(wxCommandEvent & WXUNUSED(event))
    this->Layout();
    this->CrystUpdate(true,false);
    VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScattPowSphere()",6)
+   wxTheApp->GetTopWindow()->Layout();
+   wxTheApp->GetTopWindow()->SendSizeEvent();
 }
 
 void WXCrystal::OnMenuRemoveScattPow(wxCommandEvent & WXUNUSED(event))
@@ -1005,6 +1009,8 @@ void WXCrystal::OnMenuRemoveScattPow(wxCommandEvent & WXUNUSED(event))
    VFN_DEBUG_EXIT("WXCrystal::OnButtonRemoveScattPow()",6)
    this->Layout();
    this->CrystUpdate(true,false);
+   wxTheApp->GetTopWindow()->Layout();
+   wxTheApp->GetTopWindow()->SendSizeEvent();
 }
 
 void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
@@ -1370,6 +1376,8 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
    VFN_DEBUG_MESSAGE("WXCrystal::OnMenuAddScatterer():calling Layout()",6)
    //this->CrystUpdate();
    this->Layout();
+   wxTheApp->GetTopWindow()->Layout();
+   wxTheApp->GetTopWindow()->SendSizeEvent();
    VFN_DEBUG_EXIT("WXCrystal::OnMenuAddScatterer()",6)
 }
 
@@ -1384,6 +1392,8 @@ void WXCrystal::OnMenuRemoveScatterer(wxCommandEvent & WXUNUSED(event))
    mpCrystal->RemoveScatterer(scatt);
    VFN_DEBUG_MESSAGE("WXCrystal::OnButtonRemoveScatterer():End",6)
    this->Layout();
+   wxTheApp->GetTopWindow()->Layout();
+   wxTheApp->GetTopWindow()->SendSizeEvent();
    this->CrystUpdate(true);
 }
 
@@ -1399,6 +1409,8 @@ void WXCrystal::OnMenuDuplicateScatterer(wxCommandEvent & WXUNUSED(event))
    scatt->SetName(scatt->GetName()+(string)"(copy)");
    mpCrystal->AddScatterer(copy);
    this->Layout();
+   wxTheApp->GetTopWindow()->Layout();
+   wxTheApp->GetTopWindow()->SendSizeEvent();
    VFN_DEBUG_EXIT("WXCrystal::OnMenuDuplicateScatterer():End",6)
 }
 
@@ -1433,6 +1445,8 @@ void WXCrystal::OnMenuAtoms2Molecule(wxCommandEvent &event)
       for(unsigned int i=0;i<choice.GetCount();++i) mpCrystal->RemoveScatterer(v[choice.Item(i)]);
       mpCrystal->UpdateDisplay();
    }
+   wxTheApp->GetTopWindow()->Layout();
+   wxTheApp->GetTopWindow()->SendSizeEvent();
 }
 
 void WXCrystal::OnMenuImportMoleculeFromFenskeHallZMatrix(wxCommandEvent &event)
@@ -1469,6 +1483,8 @@ Error opening file for input:"+string(open.GetPath().ToAscii()));
    scatt.ImportFenskeHallZMatrix(fin,named);
    fin.close();
    mpCrystal->AddScatterer(ZScatterer2Molecule(&scatt));
+   wxTheApp->GetTopWindow()->Layout();
+   wxTheApp->GetTopWindow()->SendSizeEvent();
    this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXCrystal::OnMenuImportFenskeHallZMatrix()",6)
 }

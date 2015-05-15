@@ -68,7 +68,7 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpScatteringPowerAtom(obj)
 
       mpTopSizer->Add(mpFieldSymbol  ,0,wxALIGN_TOP);
       mList.Add(mpFieldSymbol);
-      
+   this->Layout();
    this->BottomLayout(0);
    this->CrystUpdate(true);
 }

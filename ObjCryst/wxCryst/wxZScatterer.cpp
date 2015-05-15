@@ -358,9 +358,9 @@ WXScatterer(parent,obj),mpZScatterer(obj)
                                 "Add an Atom");
          mpMenuBar->AddMenuItem(ID_ZSCATTERER_MENU_ATOM,ID_ZSCATTERER_MENU_ATOM_CHANGE_PIVOT,
                                 "Change Pivot Atom");
-      mpSizer->SetItemMinSize(mpMenuBar,
-                              mpMenuBar->GetSize().GetWidth(),
-                              mpMenuBar->GetSize().GetHeight());
+      //mpSizer->SetItemMinSize(mpMenuBar,
+      //                        mpMenuBar->GetSize().GetWidth(),
+      //                        mpMenuBar->GetSize().GetHeight());
    //Orientation
       wxBoxSizer* sizer=new wxBoxSizer(wxHORIZONTAL);
 

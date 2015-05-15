@@ -105,9 +105,9 @@ WXCrystObj(parent),mpGlobalOptimRunThread(0)
          mpMenuBar->AddMenuItem(ID_GLOBALOPT_MENU_SOLUTIONS,
                                 ID_GLOBALOPT_MENU_SOLUTIONS_BROWSE,"Browse Solutions");
       mpMenuBar->Layout();
-      mpSizer->SetItemMinSize(mpMenuBar,
-                              mpMenuBar->GetSize().GetWidth(),
-                              mpMenuBar->GetSize().GetHeight());
+      //mpSizer->SetItemMinSize(mpMenuBar,
+      //                        mpMenuBar->GetSize().GetWidth(),
+      //                        mpMenuBar->GetSize().GetHeight());
     //Refined Objects
    for(int i=0;i<obj->mRefinedObjList.GetNb();i++)
    {
@@ -172,7 +172,8 @@ void WXOptimizationObj::AddRefinedObject(RefinableObj &obj)
    refobj->SetValue(obj.GetClassName()+":"+obj.GetName());
    mpSizer->Add(refobj);
    mList.Add(refobj);
-   this->BottomLayout(0);
+   wxTheApp->GetTopWindow()->Layout();
+   wxTheApp->GetTopWindow()->SendSizeEvent();
    refobj->UpdateUI(true);
 }
 
@@ -467,7 +468,6 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(10000000),mNbRun(-1)
       mList.Add(pWXFieldBestCost);
       pWXFieldBestCost->SetFormat(_T("%12.2f"));
       pWXFieldBestCost->SetToolTip(_T("Overall (all runs) Best Cost"));
-   this->BottomLayout(0);
    this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXMonteCarloObj::WXMonteCarloObj()",7)
 }

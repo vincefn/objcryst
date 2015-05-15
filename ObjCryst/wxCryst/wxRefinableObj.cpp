@@ -589,8 +589,8 @@ WXCrystObj(parent,wxHORIZONTAL),mpRefinableObj(obj)
       mpSizer->Add(opt,0,wxALIGN_LEFT);
       mList.Add(opt);
    }
-   this->BottomLayout(0);
-   this->CrystUpdate(true,true);
+   //this->BottomLayout(0);
+   //this->CrystUpdate(true,true);
    VFN_DEBUG_EXIT("WXRefinableObj::WXRefinableObj()",6)
 }
 
@@ -696,8 +696,8 @@ void WXRefinableObj::UpdateUI(const bool lock)
       if(lock) mMutex.Lock();
       mpWXTitle->SetValue(mpRefinableObj->GetName());
       mpWXTitle->UpdateUI(false);
-      mpSizer->SetItemMinSize
-            (mpWXTitle, mpWXTitle->GetSize().GetWidth(),mpWXTitle->GetSize().GetHeight());
+      //mpSizer->SetItemMinSize
+      //      (mpWXTitle, mpWXTitle->GetSize().GetWidth(),mpWXTitle->GetSize().GetHeight());
       //mpWXTitle->Layout();
       if(lock) mMutex.Unlock();
    }

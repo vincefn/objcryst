@@ -187,7 +187,7 @@ wxFrame *pMainFrameForUserMessage;
 void WXCrystInformUserStdOut(const string &str)
 {
    if(wxThread::IsMain()) pMainFrameForUserMessage->SetStatusText(wxString::FromAscii(str.c_str()));
-   else cout<<"Message for user (outside main thread):"<<str<<endl;
+   cout<<str<<endl;
 }
 
 // ----------------------------------------------------------------------------
@@ -1615,6 +1615,7 @@ void WXCrystMainFrame::Load(const wxString &filename)
         {
           wxMessageDialog d(this,_T("Failed loading file1:\n")+filename,_T("Error loading file"),wxOK|wxICON_ERROR);
           d.ShowModal();
+          wxTheApp->GetTopWindow()->SendSizeEvent();
           return;
         };
         //FoxGrid
@@ -1653,11 +1654,15 @@ void WXCrystMainFrame::Load(const wxString &filename)
               {
                 wxMessageDialog d(this,_T("Failed loading file2:\n")+filename,_T("Error loading file"),wxOK|wxICON_ERROR);
                 d.ShowModal();
+                wxTheApp->GetTopWindow()->SendSizeEvent();
                 return;
               };
               //FoxGrid
               mpGridWindow->DataLoaded();
             }
+   (*fpObjCrystInformUser)("Sending size event");
+   wxTheApp->GetTopWindow()->Layout();
+   wxTheApp->GetTopWindow()->SendSizeEvent();
 }
 
 void WXCrystMainFrame::OnBrowse(wxCommandEvent& event)
@@ -1709,6 +1714,8 @@ void WXCrystMainFrame::OnBrowseSelect(wxCommandEvent &event)
     #else
     this->Load(mBrowseDir+_T("/")+mpBrowseList->GetString(selections.Item(i)));
     #endif
+    wxTheApp->GetTopWindow()->Layout();
+    wxTheApp->GetTopWindow()->SendSizeEvent();
   }
 }
 
@@ -1866,6 +1873,8 @@ void WXCrystMainFrame::OnAddCrystal(wxCommandEvent& WXUNUSED(event))
    // Fake pdf for linking ?
    //PDF pdf;
    //pdf.GetPDFR();
+   wxTheApp->GetTopWindow()->Layout();
+   wxTheApp->GetTopWindow()->SendSizeEvent();
 }
 void WXCrystMainFrame::OnAddPowderPattern(wxCommandEvent& WXUNUSED(event))
 {
@@ -1876,6 +1885,8 @@ void WXCrystMainFrame::OnAddPowderPattern(wxCommandEvent& WXUNUSED(event))
    obj->SetMaxSinThetaOvLambda(0.4);
    obj->UpdateDisplay();
    mpNotebook->SetSelection(1);
+   wxTheApp->GetTopWindow()->Layout();
+   wxTheApp->GetTopWindow()->SendSizeEvent();
 }
 
 void WXCrystMainFrame::OnAddSingleCrystalData(wxCommandEvent& WXUNUSED(event))
@@ -1899,12 +1910,16 @@ void WXCrystMainFrame::OnAddSingleCrystalData(wxCommandEvent& WXUNUSED(event))
    obj->SetMaxSinThetaOvLambda(0.4);
    obj->UpdateDisplay();
    mpNotebook->SetSelection(2);
+   wxTheApp->GetTopWindow()->Layout();
+   wxTheApp->GetTopWindow()->SendSizeEvent();
 }
 void WXCrystMainFrame::OnAddGlobalOptimObj(wxCommandEvent& WXUNUSED(event))
 {
    stringstream s;s<<"OptimizationObj #"<<gOptimizationObjRegistry.GetNb();
    MonteCarloObj* obj=new MonteCarloObj(s.str());
    mpNotebook->SetSelection(3);
+   wxTheApp->GetTopWindow()->Layout();
+   wxTheApp->GetTopWindow()->SendSizeEvent();
 }
 void WXCrystMainFrame::OnAddGeneticAlgorithm(wxCommandEvent& WXUNUSED(event))
 {
@@ -2014,6 +2029,8 @@ void WXCrystMainFrame::OnDebugTest(wxCommandEvent& event)
       WXCrystal *pWXCryst=dynamic_cast<WXCrystal*> (gCrystalRegistry.GetObj(0).WXGet());
       wxCommandEvent com;
       pWXCryst->OnMenuCrystalGL(com);
+      wxTheApp->GetTopWindow()->Layout();
+      wxTheApp->GetTopWindow()->SendSizeEvent();
    }
 }
 

@@ -158,14 +158,11 @@ class WXCrystObjBasic: public wxWindow
       * will also lock the data in the sub-objects.
       */
       virtual void UpdateUI(const bool mutexlock=false)=0;
-      /** Ask for a new Layout with recalculated size hints, because
-      * a child has been changed or added
+      /** Redo the Layout for the object and ask parent to take it into account
       *
-      * \param pChild: the modified child. If null, this will mean we are
-      * asking for a new layout of the window itself (useful when a sub-window
-      * is deleted).
+      * \deprecated: use instead wxWindow::Layout() + wxTheApp->GetTopWindow()->SendSizeEvent();
       */
-      virtual void BottomLayout(WXCrystObjBasic *pChild);
+      wxDEPRECATED(virtual void BottomLayout(WXCrystObjBasic *pChild));
       /// Notify that a new children has been added, also adding it to the
       /// correct sizer (which can be the top sizer or not).
       ///
@@ -266,7 +263,6 @@ class WXCrystObj: public WXCrystObjBasic
       virtual void UpdateUI(const bool mutexlock=false);
       virtual void OnEnable(wxUpdateUIEvent &event);
       virtual bool Enable(bool enable);
-      virtual void BottomLayout(WXCrystObjBasic *pChild);
       virtual void AddChild(WXCrystObjBasic *pChild, bool doBottomLayout=true);
    protected:
       /// Top sizer including the title and WXCrystObj::mpSizer

@@ -855,9 +855,9 @@ mpBondWin(0),mpAngleWin(0),mpDihedralAngleWin(0),mpRigidGroupWin(0),mpNonFlipAto
                                 "Rotate around bond");
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_GEOMETRY,ID_MOLECULE_MENU_GEOMETRY_ROTATE_DIHED,
                                 "Set dihedral angle");
-      mpSizer->SetItemMinSize(mpMenuBar,
-                              mpMenuBar->GetSize().GetWidth(),
-                              mpMenuBar->GetSize().GetHeight());
+      //mpSizer->SetItemMinSize(mpMenuBar,
+      //                        mpMenuBar->GetSize().GetWidth(),
+      //                        mpMenuBar->GetSize().GetHeight());
       WXFieldPar<REAL> *pLLKScale= new WXFieldPar<REAL>(this,"Log(likelihood) scale",-1,&(mpMolecule->mLogLikelihoodScale));
       mList.Add(pLLKScale);
       mpSizer->Add(pLLKScale,0,wxALIGN_LEFT);
@@ -929,7 +929,6 @@ mpBondWin(0),mpAngleWin(0),mpDihedralAngleWin(0),mpRigidGroupWin(0),mpNonFlipAto
       mpAtomWin->SetColLabelValue(4,_T("Z"));
       mpAtomWin->AutoSizeRows();
       mpSizer->Add(mpAtomWin,0,wxALIGN_LEFT);
-   this->BottomLayout(0);
    this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXMolecule::WXMolecule():"<<mol->GetName(),6)
 }
