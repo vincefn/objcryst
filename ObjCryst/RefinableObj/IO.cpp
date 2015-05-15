@@ -125,7 +125,8 @@ istream& operator>> (istream& is, XMLCrystTag &tag)
    char tmp;
    is>>tmp;
    while ((tmp!='<') && !(is.eof()) && !(is.fail()) )is>>tmp;
-   if(is.eof() || (is.fail())) return is;//:TODO: throw exception ?
+   if(is.eof()) return is;
+   if(is.fail()) {throw ObjCrystException("XMLCrystTag::>>   failed input");cout<<"throw:"<<__FILE__<<":"<<__LINE__<<endl;}
    while ((tmp==' ')||(tmp=='<'))is>>tmp;
    
    if('/'==tmp)
