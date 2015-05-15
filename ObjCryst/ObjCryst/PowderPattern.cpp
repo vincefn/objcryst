@@ -1069,9 +1069,9 @@ void PowderPatternDiffraction::ExtractLeBail(unsigned int nbcycle)
          REAL s1=0;
          //cout<<mH(k0)<<" "<<mK(k0)<<" "<<mL(k0)<<" , Iobs=??"<<endl;
          long last=mvReflProfile[k0].last,first;
-         if(last>=mpParentPowderPattern->GetNbPointUsed()) last=mpParentPowderPattern->GetNbPointUsed();
+         if(last>=(long)(mpParentPowderPattern->GetNbPointUsed())) last=mpParentPowderPattern->GetNbPointUsed();
          if(mvReflProfile[k0].first<0)first=0;
-         else first=(unsigned long)(mvReflProfile[k0].first);
+         else first=(mvReflProfile[k0].first);
          for(unsigned int i=first;i<=last;++i)
          {
             if(mvReflProfile[k0].profile(i-mvReflProfile[k0].first)<=0) continue;
@@ -2235,7 +2235,7 @@ void PowderPatternDiffraction::PrepareIntegratedProfile()const
          const long last0  = mvReflProfile[i].last ;
          const long first= first0>(*pMin)(j) ? first0:(*pMin)(j);
          const long last = last0 <(*pMax)(j) ? last0 :(*pMax)(j);
-         if(first<=last)
+         if((first<=last) && (mvReflProfile[i].profile.size()>0))
          {
             if(firstInterval>j) firstInterval=j;
             if(pos1->find(j) == pos1->end()) (*pos1)[j]=0.;
