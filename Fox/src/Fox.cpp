@@ -171,7 +171,7 @@ class MyApp : public wxApp
    public:
       virtual bool OnInit();
       virtual int OnExit();
-#ifdef __DARWIN__
+#ifdef __WXMAC__
       virtual void MacOpenFile(const wxString &fileName);
 #endif
    private:
@@ -330,6 +330,10 @@ IMPLEMENT_APP(MyApp)
 int STRCMP(wxChar* s1,wxChar* s2) {return wxStrcmp(s1,s2);}
 int STRCMP(wxChar* s1,wxString s2) {return wxStrcmp(s1,s2.c_str());}
 
+#ifdef __WXMAC__
+/// Set of files to ignore in MacOpenFile, because they were given on the command line and thus already loaded in OnInit()
+std::set<wxString> vMacOpenFile_Ignore;
+#endif
 // 'Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 #else
@@ -747,7 +751,13 @@ int main (int argc, char *argv[])
                   delete[] tmpbuf;
                }
                else while (!is.Eof()) sst<<(char)is.GetC();
-               try{XMLCrystFileLoadAllObject(sst);}
+               try
+               {
+                  XMLCrystFileLoadAllObject(sst);
+                  #ifdef __WXMAC__
+                  vMacOpenFile_Ignore.insert(name);
+                  #endif
+               }
                catch(const ObjCrystException &except)
                {
                  wxMessageDialog d(NULL,_T("Failed loading file:\n")+name,_T("Error"),wxOK|wxICON_ERROR);
@@ -762,7 +772,13 @@ int main (int argc, char *argv[])
                       wxZlibInputStream zstream(is);
                       stringstream sst;
                       while (!zstream.Eof()) sst<<(char)zstream.GetC();
-                      try{XMLCrystFileLoadAllObject(sst);}
+                      try
+                      {
+                         XMLCrystFileLoadAllObject(sst);
+                         #ifdef __WXMAC__
+                         vMacOpenFile_Ignore.insert(name);
+                         #endif
+                      }
                       catch(const ObjCrystException &except)
                       {
                         wxMessageDialog d(NULL,_T("Failed loading file:\n")+name,_T("Error"),wxOK|wxICON_ERROR);
@@ -783,6 +799,9 @@ int main (int argc, char *argv[])
       #endif
       {
          #ifdef __WX__CRYST__
+         #ifdef __WXMAC__
+         vMacOpenFile_Ignore.insert(wxString(argv[i]).ToAscii());
+         #endif
          cout<<"Loading: "<<wxString(argv[i]).ToAscii()<<endl;
          wxFileInputStream is(argv[i]);
          stringstream in;
@@ -1312,10 +1331,11 @@ int MyApp::OnExit()
    TAU_REPORT_STATISTICS();
    return this->wxApp::OnExit();
 }
-#ifdef __DARWIN__
+#ifdef __WXMAC__
 void MyApp::MacOpenFile(const wxString &fileName)
 {
-   mpFrame->Load(fileName);
+   if(vMacOpenFile_Ignore.count(fileName)>0) vMacOpenFile_Ignore.erase(fileName);
+   else mpFrame->Load(fileName);
 }
 
 #endif
