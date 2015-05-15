@@ -14,9 +14,11 @@
 			<key>CFBundleTypeIconFile</key>
 			<string>Fox.icns</string>
 			<key>CFBundleTypeName</key>
-			<string>Crystallogrphic Information File</string>
-			<key>CFBundleTypeRole</key>
-			<string>Viewer</string>
+			<string>Crystallographic Information File</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string></string>
+			</array>
 			<key>LSTypeIsPackage</key>
 			<false/>
 			<key>NSPersistentStoreTypeKey</key>
@@ -26,6 +28,7 @@
 			<key>CFBundleTypeExtensions</key>
 			<array>
 				<string>xml</string>
+				<string>xml.gz</string>
 			</array>
 			<key>CFBundleTypeIconFile</key>
 			<string>Fox.icns</string>
@@ -52,6 +55,6 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>1.9.8SVN</string>
+	<string>1.10-dev</string>
 </dict>
 </plist>
