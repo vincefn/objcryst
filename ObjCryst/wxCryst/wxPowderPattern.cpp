@@ -602,7 +602,7 @@ void WXPowderPattern::OnMenuAddCompBackgdBayesian(wxCommandEvent & WXUNUSED(even
    long nbPointSpline=20;
    wxString mes=_T("Number of Interpolation Points");
    wxString s;
-   s.Printf(_T("%i"),nbPointSpline);
+   s.Printf(_T("%ld"),nbPointSpline);
    wxTextEntryDialog dialog(this,mes,_T("Automatic Bayesian (David-Sivia) Background"),
                             s,wxOK | wxCANCEL);
    if(wxID_OK!=dialog.ShowModal())
@@ -2252,12 +2252,12 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
             mpCellExplorer->SetCrystalCentering(cent);
             mpLog->AppendText(wxString::Format(_T("CUBIC %c      : V= %6.0f -> %6.0f A^3, max length=%6.2fA"),centc,minv,maxv,lengthmax));
             t0=chrono.seconds();
-            if(dlgProgress.Update(0,wxString::Format(_T("CUBIC %c (%d spurious), V=%6.0f-%6.0f, l<%6.2fA\n")
+            if(dlgProgress.Update(0,wxString::Format(_T("CUBIC %c (%u spurious), V=%6.0f-%6.0f, l<%6.2fA\n")
                                                    _T("Best Score=%6.1f"),centc,
                                                    nbSpurious,minv,maxv,lengthmax,mpCellExplorer->GetBestScore()))==false) break;
             mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
             mpLog->AppendText(wxString::Format(_T(" -> %3u sols in %6.2fs, best score=%6.1f\n"),
-                     mpCellExplorer->GetSolutions().size(),chrono.seconds()-t0,mpCellExplorer->GetBestScore()));
+                     (unsigned int)(mpCellExplorer->GetSolutions().size()),chrono.seconds()-t0,mpCellExplorer->GetBestScore()));
             mpLog->Update();
             if(noCentered) break;
          }
@@ -2279,12 +2279,12 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
             mpCellExplorer->SetCrystalCentering(cent);
             mpLog->AppendText(wxString::Format(_T("TETRAGONAL %c : V= %6.0f -> %6.0f A^3, max length=%6.2fA"),centc,minv,maxv,lengthmax));
             t0=chrono.seconds();
-            if(dlgProgress.Update(1,wxString::Format(_T("TETRAGONAL %c (%d spurious), V=%6.0f-%6.0f, l<%6.2fA\n")
+            if(dlgProgress.Update(1,wxString::Format(_T("TETRAGONAL %c (%u spurious), V=%6.0f-%6.0f, l<%6.2fA\n")
                                                    _T("Best Score=%6.1f"),centc,
                                                    nbSpurious,minv,maxv,lengthmax,mpCellExplorer->GetBestScore()))==false) break;
             mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
             mpLog->AppendText(wxString::Format(_T(" -> %3u sols in %6.2fs, best score=%6.1f\n"),
-                     mpCellExplorer->GetSolutions().size(),chrono.seconds()-t0,mpCellExplorer->GetBestScore()));
+                     (unsigned int)(mpCellExplorer->GetSolutions().size()),chrono.seconds()-t0,mpCellExplorer->GetBestScore()));
             mpLog->Update();
             if(noCentered) break;
          }
@@ -2300,12 +2300,12 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
             mpCellExplorer->SetCrystalCentering(LATTICE_P);
             mpLog->AppendText(wxString::Format(_T("RHOMBOEDRAL  : V= %6.0f -> %6.0f A^3, max length=%6.2fA"),minv,maxv,lengthmax));
             t0=chrono.seconds();
-            if(dlgProgress.Update(2,wxString::Format(_T("RHOMBOEDRAL (%d spurious), V=%6.0f-%6.0f, l<%6.2fA\n")
+            if(dlgProgress.Update(2,wxString::Format(_T("RHOMBOEDRAL (%u spurious), V=%6.0f-%6.0f, l<%6.2fA\n")
                                                    _T("Best Score=%6.1f"),
                                                    nbSpurious,minv,maxv,lengthmax,mpCellExplorer->GetBestScore()))==false) break;
             mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
             mpLog->AppendText(wxString::Format(_T(" -> %3u sols in %6.2fs, best score=%6.1f\n"),
-                     mpCellExplorer->GetSolutions().size(),chrono.seconds()-t0,mpCellExplorer->GetBestScore()));
+                     (unsigned int)(mpCellExplorer->GetSolutions().size()),chrono.seconds()-t0,mpCellExplorer->GetBestScore()));
             mpLog->Update();
          }
          if((mpCellExplorer->GetBestScore()<=stopOnScore)||continueOnSolution)
@@ -2320,12 +2320,12 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
             mpCellExplorer->SetCrystalCentering(LATTICE_P);
             mpLog->AppendText(wxString::Format(_T("HEXAGONAL    : V= %6.0f -> %6.0f A^3, max length=%6.2fA"),minv,maxv,lengthmax));
             t0=chrono.seconds();
-            if(dlgProgress.Update(3,wxString::Format(_T("HEXAGONAL (%d spurious), V=%6.0f-%6.0f, l<%6.2fA\n")
+            if(dlgProgress.Update(3,wxString::Format(_T("HEXAGONAL (%u spurious), V=%6.0f-%6.0f, l<%6.2fA\n")
                                                    _T("Best Score=%6.1f"),
                                                    nbSpurious,minv,maxv,lengthmax,mpCellExplorer->GetBestScore()))==false) break;
             mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
             mpLog->AppendText(wxString::Format(_T(" -> %3u sols in %6.2fs, best score=%6.1f\n"),
-                     mpCellExplorer->GetSolutions().size(),chrono.seconds()-t0,mpCellExplorer->GetBestScore()));
+                     (unsigned int)(mpCellExplorer->GetSolutions().size()),chrono.seconds()-t0,mpCellExplorer->GetBestScore()));
             mpLog->Update();
          }
          for(int lat=0;lat<=5;++lat)
@@ -2350,12 +2350,12 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
             mpCellExplorer->SetCrystalCentering(cent);
             mpLog->AppendText(wxString::Format(_T("ORTHOROMBIC %c: V= %6.0f -> %6.0f A^3, max length=%6.2fA"),centc,minv,maxv,lengthmax));
             t0=chrono.seconds();
-            if(dlgProgress.Update(4,wxString::Format(_T("ORTHOROMBIC %c (%d spurious), V=%6.0f-%6.0f, l<%6.2fA\n")
+            if(dlgProgress.Update(4,wxString::Format(_T("ORTHOROMBIC %c (%u spurious), V=%6.0f-%6.0f, l<%6.2fA\n")
                                                    _T("Best Score=%6.1f"),centc,
                                                    nbSpurious,minv,maxv,lengthmax,mpCellExplorer->GetBestScore()))==false) break;
             mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
             mpLog->AppendText(wxString::Format(_T(" -> %3u sols in %6.2fs, best score=%6.1f\n"),
-                     mpCellExplorer->GetSolutions().size(),chrono.seconds()-t0,mpCellExplorer->GetBestScore()));
+                     (unsigned int)(mpCellExplorer->GetSolutions().size()),chrono.seconds()-t0,mpCellExplorer->GetBestScore()));
             mpLog->Update();
             if(noCentered) break;
          }
@@ -2379,12 +2379,12 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
             mpCellExplorer->SetCrystalCentering(cent);
             mpLog->AppendText(wxString::Format(_T("MONOCLINIC %c : V= %6.0f -> %6.0f A^3, max length=%6.2fA"),centc,minv,maxv,lengthmax));
             t0=chrono.seconds();
-            if(dlgProgress.Update(5,wxString::Format(_T("MONOCLINIC %c (%d spurious), V=%6.0f-%6.0f, l<%6.2fA\n")
+            if(dlgProgress.Update(5,wxString::Format(_T("MONOCLINIC %c (%u spurious), V=%6.0f-%6.0f, l<%6.2fA\n")
                                                    _T("Best Score=%6.1f"),centc,
                                                    nbSpurious,minv,maxv,lengthmax,mpCellExplorer->GetBestScore()))==false) break;
             mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
             mpLog->AppendText(wxString::Format(_T(" -> %3u sols in %6.2fs, best score=%6.1f\n"),
-                  mpCellExplorer->GetSolutions().size(),chrono.seconds()-t0,mpCellExplorer->GetBestScore()));
+                  (unsigned int)(mpCellExplorer->GetSolutions().size()),chrono.seconds()-t0,mpCellExplorer->GetBestScore()));
             mpLog->Update();
             if(noCentered) break;
          }
@@ -2788,6 +2788,8 @@ void WXCellExplorer::OnAutoLeBail(wxCommandEvent &event)
       {
          mpCrystal=new Crystal(4,5,6,"P1");
          mpCrystal->SetName("Indexing Result");
+         wxTheApp->GetTopWindow()->Layout();
+         wxTheApp->GetTopWindow()->SendSizeEvent();
       }
       else
       {
@@ -2801,6 +2803,8 @@ void WXCellExplorer::OnAutoLeBail(wxCommandEvent &event)
          {
             mpCrystal=new Crystal(4,5,6,"P1");
             mpCrystal->SetName("Indexing Result");
+            wxTheApp->GetTopWindow()->Layout();
+            wxTheApp->GetTopWindow()->SendSizeEvent();
          }
          else
          {
@@ -2862,6 +2866,8 @@ void WXCellExplorer::OnAutoLeBail(wxCommandEvent &event)
          }
          mpGraph->GetWXPowderPattern().GetPowderPattern().Prepare();
          mpGraph->GetWXPowderPattern().CrystUpdate();
+         wxTheApp->GetTopWindow()->Layout();
+         wxTheApp->GetTopWindow()->SendSizeEvent();
       }
    }
    // Limit resolution (:TODO: Take into account density of peask to limit to ~100 reflections)
@@ -4422,7 +4428,7 @@ void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
       if(spg.is_compatible_unit_cell(uc,0.01,0.1)) nbspg++;
       //if(s.universal_hermann_mauguin().size()>hmlen) hmlen=s.universal_hermann_mauguin().size();
    }
-   mpLog->AppendText(wxString::Format(_T("Beginning spacegroup exploration... %d to go...\n"),nbspg));
+   mpLog->AppendText(wxString::Format(_T("Beginning spacegroup exploration... %u to go...\n"),nbspg));
    //cout<<"Max HM symbol length:"<<hmlen<<endl;
    unsigned int nbcycle=1;
    if(event.GetId()==ID_PROFILEFITTING_EXPLORE_SPG) nbcycle=3;
@@ -4529,7 +4535,7 @@ void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
             unsigned int nbextinct446=0;
             for(unsigned int i=6;i<fgp.size();++i) nbextinct446+=(unsigned int)(fgp[i]);
             vSPG.push_back(SPGScore(hm.c_str(),rw,gof,nbextinct446));
-            mpLog->AppendText(wxString::Format(_T(" Rwp= %5.2f%%  GoF=%9.2f  (%2d extinct refls)\n"),rw,gof,nbextinct446));
+            mpLog->AppendText(wxString::Format(_T(" Rwp= %5.2f%%  GoF=%9.2f  (%2u extinct refls)\n"),rw,gof,nbextinct446));
             vSPGExtinctionFingerprint.insert(make_pair(fgp,SPGScore(hm.c_str(),rw,gof,nbextinct446)));
           }
         }
@@ -4543,7 +4549,7 @@ void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
    for(list<SPGScore>::const_iterator pos=vSPG.begin();pos!=vSPG.end();++pos)
    {
       if(pos->gof>(2*vSPG.begin()->gof)) break;
-      mpLog->AppendText(wxString::Format(_T(" Rwp= %5.2f%%  GoF=%9.2f: (extinct refls=%2d )"),pos->rw,pos->gof,pos->nbextinct446)+wxString::FromAscii(pos->hm.c_str())+_T(" \n"));
+      mpLog->AppendText(wxString::Format(_T(" Rwp= %5.2f%%  GoF=%9.2f: (extinct refls=%2u )"),pos->rw,pos->gof,pos->nbextinct446)+wxString::FromAscii(pos->hm.c_str())+_T(" \n"));
    }
    // Back to original spacegroup
    pCrystal->Init(a,b,c,d,e,f,spgname,name);
