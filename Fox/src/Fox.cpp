@@ -1626,7 +1626,7 @@ void WXCrystMainFrame::Load(const wxString &filename)
         {
           char * tmpbuf=new char[is.GetSize()];
           is.Read(tmpbuf,is.GetSize());
-          in<<tmpbuf;
+          in.write(tmpbuf,is.GetSize());
           delete[] tmpbuf;
         }
         else while (!is.Eof()) in<<(char)is.GetC();
@@ -1650,7 +1650,7 @@ void WXCrystMainFrame::Load(const wxString &filename)
         {
             char * tmpbuf=new char[is.GetSize()];
             is.Read(tmpbuf,is.GetSize());
-            in<<tmpbuf;
+            in.write(tmpbuf,is.GetSize());
             delete[] tmpbuf;
         }
         else while (!is.Eof()) in<<(char)is.GetC();
