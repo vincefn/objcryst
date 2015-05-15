@@ -4557,6 +4557,8 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEPLOYMENT_LOCATION = NO;
+				DEPLOYMENT_POSTPROCESSING = NO;
 				GCC_AUTO_VECTORIZATION = YES;
 				GCC_ENABLE_SSE3_EXTENSIONS = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
@@ -4564,7 +4566,7 @@
 				GCC_OPTIMIZATION_LEVEL = fast;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_UNROLL_LOOPS = YES;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_VERSION = "";
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/../static-libs/include",
 					"$(SRCROOT)/../static-libs/include/wx-3.0",
@@ -4574,7 +4576,7 @@
 					"$(SRCROOT)/../",
 				);
 				INFOPLIST_FILE = "Fox-Info.plist";
-				INSTALL_PATH = "$(SRCROOT)";
+				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../static-libs/lib",
@@ -4605,6 +4607,7 @@
 				PRODUCT_NAME = Fox;
 				SDKROOT = macosx;
 				SEPARATE_STRIP = NO;
+				SKIP_INSTALL = YES;
 				STRIP_STYLE = all;
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
@@ -4615,6 +4618,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
+				DEPLOYMENT_LOCATION = NO;
+				DEPLOYMENT_POSTPROCESSING = NO;
 				GCC_ENABLE_SSE3_EXTENSIONS = YES;
 				GCC_ENABLE_SUPPLEMENTAL_SSE3_INSTRUCTIONS = YES;
 				GCC_FAST_MATH = YES;
@@ -4627,6 +4632,7 @@
 					"$(OTHER_CFLAGS)",
 					"-D__DEBUG__",
 				);
+				SKIP_INSTALL = YES;
 			};
 			name = Debug;
 		};
@@ -4716,11 +4722,13 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEPLOYMENT_LOCATION = NO;
+				DEPLOYMENT_POSTPROCESSING = NO;
 				GCC_ENABLE_SSE3_EXTENSIONS = YES;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_UNROLL_LOOPS = YES;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_VERSION = "";
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/../",
 					"$(SRCROOT)/../static-libs/include",
@@ -4762,6 +4770,7 @@
 				PRODUCT_NAME = Fox;
 				SDKROOT = macosx;
 				SEPARATE_STRIP = NO;
+				SKIP_INSTALL = YES;
 				STRIP_STYLE = all;
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
@@ -4850,6 +4859,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
+				DEPLOYMENT_LOCATION = NO;
+				DEPLOYMENT_POSTPROCESSING = NO;
 				GCC_ENABLE_SSE3_EXTENSIONS = YES;
 				GCC_ENABLE_SUPPLEMENTAL_SSE3_INSTRUCTIONS = YES;
 				GCC_FAST_MATH = YES;
@@ -4858,6 +4869,7 @@
 				GCC_STRICT_ALIASING = NO;
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				ONLY_ACTIVE_ARCH = YES;
+				SKIP_INSTALL = YES;
 			};
 			name = Deployment;
 		};
