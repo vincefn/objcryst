@@ -616,8 +616,7 @@ mpCrystalGL(0)
          }
       }
    }
-   wxTheApp->GetTopWindow()->Layout();
-   wxTheApp->GetTopWindow()->SendSizeEvent();
+   wxTheApp->GetTopWindow()->PostSizeEvent();
    VFN_DEBUG_EXIT("WXCrystal::WXCrystal()",6)
 }
 

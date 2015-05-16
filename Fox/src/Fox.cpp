@@ -149,7 +149,7 @@ public:
    //FoxGrid////////////////////////////////////////
    void OnStartGridServer(wxCommandEvent &event);
    void OnStartGridClient(wxCommandEvent &event);
-
+   virtual void OnSize(wxSizeEvent &event);
     //FoxGrid////////////////////////////////////////
    WXGrigWindow *mpGridWindow;
 private:
@@ -319,6 +319,7 @@ BEGIN_EVENT_TABLE(WXCrystMainFrame, wxFrame)
    //FoxGrid///////////////////////////////////////////////////////////////////////////////
    EVT_MENU(MENU_GRID_SERVER_RUN, WXCrystMainFrame::OnStartGridServer)
    EVT_MENU(MENU_GRID_CLIENT_START, WXCrystMainFrame::OnStartGridClient)
+   EVT_SIZE(WXCrystMainFrame::OnSize)
 END_EVENT_TABLE()
 
 IMPLEMENT_APP(MyApp)
@@ -1347,7 +1348,7 @@ wxScrolledWindow(parent),mpChild((wxWindow*)0),mHeight(-1),mWidth(-1)
 {
    mpSizer=new wxBoxSizer(wxHORIZONTAL);
    this->SetSizer(mpSizer);
-   this->FitInside();
+   //this->FitInside();
    this->SetScrollRate(10,10);
 }
 
@@ -1450,17 +1451,17 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
    SetStatusText(_T("Welcome to FOX/ObjCryst++!"));
 #endif // wxUSE_STATUSBAR
 
+   
+      wxSizer* s0 = new wxBoxSizer(wxHORIZONTAL);
+      this->SetSizer(s0);
+      this->SetAutoLayout(true);
    // Create the notebook
 
       mpNotebook = new wxNotebook(this, -1);
+      s0->Add(mpNotebook,1,wxEXPAND);
 
-      wxLayoutConstraints* c = new wxLayoutConstraints;
-      c->left.SameAs(this, wxLeft, 2);
-      c->right.SameAs(this, wxRight, 2);
-      c->top.SameAs(this, wxTop, 2);
-      c->bottom.SameAs(this, wxBottom, 2);
-
-      mpNotebook->SetConstraints(c);
+      //wxSizer* s = new wxBoxSizer(wxHORIZONTAL);
+      //mpNotebook->SetSizer(s);
 
    // First window -Crystals
       WXCrystScrolledWindow *mpWin1 = new WXCrystScrolledWindow(mpNotebook);
@@ -1635,7 +1636,7 @@ void WXCrystMainFrame::Load(const wxString &filename)
         {
           wxMessageDialog d(this,_T("Failed loading file1:\n")+filename,_T("Error loading file"),wxOK|wxICON_ERROR);
           d.ShowModal();
-          wxTheApp->GetTopWindow()->SendSizeEvent();
+          this->PostSizeEvent();
           return;
         };
         //FoxGrid
@@ -1674,15 +1675,13 @@ void WXCrystMainFrame::Load(const wxString &filename)
               {
                 wxMessageDialog d(this,_T("Failed loading file2:\n")+filename,_T("Error loading file"),wxOK|wxICON_ERROR);
                 d.ShowModal();
-                wxTheApp->GetTopWindow()->SendSizeEvent();
+                this->PostSizeEvent();
                 return;
               };
               //FoxGrid
               mpGridWindow->DataLoaded();
             }
-   (*fpObjCrystInformUser)("Sending size event");
-   wxTheApp->GetTopWindow()->Layout();
-   wxTheApp->GetTopWindow()->SendSizeEvent();
+   this->PostSizeEvent();
 }
 
 void WXCrystMainFrame::OnBrowse(wxCommandEvent& event)
@@ -1734,8 +1733,7 @@ void WXCrystMainFrame::OnBrowseSelect(wxCommandEvent &event)
       this->Load(mBrowseDir+_T("/")+mpBrowseList->GetString(selections.Item(i)));
       #endif
    }
-   wxTheApp->GetTopWindow()->Layout();
-   wxTheApp->GetTopWindow()->SendSizeEvent();
+   this->PostSizeEvent();
 }
 
 void WXCrystMainFrame::OnMenuClose(wxCommandEvent& event)
@@ -1892,8 +1890,8 @@ void WXCrystMainFrame::OnAddCrystal(wxCommandEvent& WXUNUSED(event))
    // Fake pdf for linking ?
    //PDF pdf;
    //pdf.GetPDFR();
-   wxTheApp->GetTopWindow()->Layout();
-   wxTheApp->GetTopWindow()->SendSizeEvent();
+
+   this->PostSizeEvent();
 }
 void WXCrystMainFrame::OnAddPowderPattern(wxCommandEvent& WXUNUSED(event))
 {
@@ -1904,8 +1902,7 @@ void WXCrystMainFrame::OnAddPowderPattern(wxCommandEvent& WXUNUSED(event))
    obj->SetMaxSinThetaOvLambda(0.4);
    obj->UpdateDisplay();
    mpNotebook->SetSelection(1);
-   wxTheApp->GetTopWindow()->Layout();
-   wxTheApp->GetTopWindow()->SendSizeEvent();
+   this->PostSizeEvent();
 }
 
 void WXCrystMainFrame::OnAddSingleCrystalData(wxCommandEvent& WXUNUSED(event))
@@ -1929,16 +1926,14 @@ void WXCrystMainFrame::OnAddSingleCrystalData(wxCommandEvent& WXUNUSED(event))
    obj->SetMaxSinThetaOvLambda(0.4);
    obj->UpdateDisplay();
    mpNotebook->SetSelection(2);
-   wxTheApp->GetTopWindow()->Layout();
-   wxTheApp->GetTopWindow()->SendSizeEvent();
+   this->PostSizeEvent();
 }
 void WXCrystMainFrame::OnAddGlobalOptimObj(wxCommandEvent& WXUNUSED(event))
 {
    stringstream s;s<<"OptimizationObj #"<<gOptimizationObjRegistry.GetNb();
    MonteCarloObj* obj=new MonteCarloObj(s.str());
    mpNotebook->SetSelection(3);
-   wxTheApp->GetTopWindow()->Layout();
-   wxTheApp->GetTopWindow()->SendSizeEvent();
+   this->PostSizeEvent();
 }
 void WXCrystMainFrame::OnAddGeneticAlgorithm(wxCommandEvent& WXUNUSED(event))
 {
@@ -2059,8 +2054,7 @@ void WXCrystMainFrame::OnDebugTest(wxCommandEvent& event)
       WXCrystal *pWXCryst=dynamic_cast<WXCrystal*> (gCrystalRegistry.GetObj(0).WXGet());
       wxCommandEvent com;
       pWXCryst->OnMenuCrystalGL(com);
-      wxTheApp->GetTopWindow()->Layout();
-      wxTheApp->GetTopWindow()->SendSizeEvent();
+      this->PostSizeEvent();
    }
 }
 
@@ -2133,7 +2127,7 @@ WXFoxPreferences::WXFoxPreferences(wxWindow *parent):
 wxDialog(parent,-1,_T("FOX Preferences: "),wxDefaultPosition,wxSize(400,300),wxDEFAULT_DIALOG_STYLE)
 {
    wxScrolledWindow *sw=new wxScrolledWindow(this);
-   sw->FitInside();
+   //sw->FitInside();
    sw->SetScrollRate(10,10);
    //sw=this;
    wxBoxSizer *sizer=new wxBoxSizer(wxVERTICAL);
@@ -2367,6 +2361,14 @@ void WXCrystMainFrame::OnCheckUpdate(wxCommandEvent& event)
          wxLogError(_T("Can't create updates check thread"));
       else pThreadCheckUpdates->Run();
    }
+}
+
+void WXCrystMainFrame::OnSize(wxSizeEvent &event)
+{
+   if(mpNotebook!=NULL)
+     for(unsigned int i=0;i<mpNotebook->GetPageCount();i++) mpNotebook->GetPage(i)->PostSizeEvent();
+
+   this->wxFrame::OnSize(event);
 }
 
 #endif
