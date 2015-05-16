@@ -1694,7 +1694,7 @@ void WXCrystMainFrame::OnBrowse(wxCommandEvent& event)
   wxDir wxBrowseDir;
   if(wxBrowseDir.Open(mBrowseDir)==false) return;
   wxMiniFrame *frame= new wxMiniFrame(this,ID_FOX_BROWSE, _T("Fox .xml file browsing"),
-                                      wxDefaultPosition,wxSize(500,500),wxCLOSE_BOX|wxCAPTION);
+                                      wxDefaultPosition,wxSize(500,500),wxCLOSE_BOX|wxCAPTION|wxSTAY_ON_TOP);
   wxArrayString choices;
   mpBrowseList=new wxListBox(frame, ID_FOX_BROWSE, wxDefaultPosition, 
                              wxDefaultSize, choices,
@@ -1717,26 +1717,25 @@ void WXCrystMainFrame::OnBrowse(wxCommandEvent& event)
     }
     cont = wxBrowseDir.GetNext(&filename);
   }
-  mpBrowseList->SetEventHandler(this);
   frame->Show(true);
 }
 
 void WXCrystMainFrame::OnBrowseSelect(wxCommandEvent &event)
 {
-  if(false==event.IsSelection()) return;
-  this->Close(false);
-  wxArrayInt selections;
-  mpBrowseList->GetSelections(selections);
-  for(int i=0;i<selections.GetCount();++i)
-  {
-    #ifdef WIN32
-    this->Load(mBrowseDir+_T("\\")+mpBrowseList->GetString(selections.Item(i)));
-    #else
-    this->Load(mBrowseDir+_T("/")+mpBrowseList->GetString(selections.Item(i)));
-    #endif
-    wxTheApp->GetTopWindow()->Layout();
-    wxTheApp->GetTopWindow()->SendSizeEvent();
-  }
+   if(false==event.IsSelection()) return;
+   this->Close(false);
+   wxArrayInt selections;
+   mpBrowseList->GetSelections(selections);
+   for(int i=0;i<selections.GetCount();++i)
+   {
+      #ifdef WIN32
+      this->Load(mBrowseDir+_T("\\")+mpBrowseList->GetString(selections.Item(i)));
+      #else
+      this->Load(mBrowseDir+_T("/")+mpBrowseList->GetString(selections.Item(i)));
+      #endif
+   }
+   wxTheApp->GetTopWindow()->Layout();
+   wxTheApp->GetTopWindow()->SendSizeEvent();
 }
 
 void WXCrystMainFrame::OnMenuClose(wxCommandEvent& event)
