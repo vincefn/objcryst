@@ -109,12 +109,7 @@ FoxClient::~FoxClient()
       delete m_sendingTimer;
    }
 
-   if(mpClient!=0) {
-      
-      mpClient->Destroy();
-      delete mpClient;
-      mpClient = 0;
-   }
+   if(mpClient!=0) mpClient->Destroy();
    delete m_DataMutex;
 }
 void FoxClient::setNbOfAvailCPUs(int nb)
