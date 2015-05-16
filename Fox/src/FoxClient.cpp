@@ -11,7 +11,7 @@ using namespace std;
 static const long GRID_CLIENT_SOCKET_ID=                  WXCRYST_ID();
 static const long ID_UPDATE_TIMER_CLIENT=                   WXCRYST_ID();
 static const long ID_SEND_TIMER=                         WXCRYST_ID();
-BEGIN_EVENT_TABLE(FoxClient, wxFrame)
+BEGIN_EVENT_TABLE(FoxClient, wxEvtHandler)
    EVT_SOCKET(GRID_CLIENT_SOCKET_ID,                FoxClient::OnSocketEvent)
    EVT_TIMER(ID_SEND_TIMER,                  FoxClient::OnSendResults)
     //EVT_UPDATE_UI(ID_CRYST_UPDATEUI,                FoxClient::OnUpdateUI)
@@ -86,7 +86,8 @@ GrdRslt::~GrdRslt()
 
 
 ///////////////////////////////////////////////
-FoxClient::FoxClient(wxString working_dir)
+FoxClient::FoxClient(wxString working_dir):
+wxEvtHandler()
 {
    m_working_dir = working_dir;
    wxString dirName = addToPath(getWorkingDir(), _T("processes"));
@@ -285,7 +286,7 @@ bool FoxClient::ConnectClient(int nbOfTrial, wxString hostname)
    if(!ip.Hostname(m_hostname)) return false;
    
    if(mpClient==0) mpClient = new wxSocketClient(); 
-   mpClient->SetEventHandler(*this, GRID_CLIENT_SOCKET_ID);
+   //mpClient->SetEventHandler(*this, GRID_CLIENT_SOCKET_ID);
    mpClient->SetNotify( wxSOCKET_CONNECTION_FLAG |
                         wxSOCKET_INPUT_FLAG |
                         wxSOCKET_LOST_FLAG | wxSOCKET_OUTPUT_FLAG);

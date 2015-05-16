@@ -89,7 +89,7 @@ public:
     bool sent;
 };
 
-class FoxClient: public wxFrame
+class FoxClient: public wxEvtHandler
 {
 
 public:

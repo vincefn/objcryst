@@ -35,7 +35,7 @@
 
 #define __FOX_SERVER__
 
-class WXFoxServer : public wxFrame
+class WXFoxServer : public wxWindow
 {
 public:
    WXFoxServer(wxWindow* parent, wxString workingDir);

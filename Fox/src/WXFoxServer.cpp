@@ -32,7 +32,7 @@ static long GRID_RESULT_LIST=                     WXCRYST_ID();
 static long GRID_JOB_LIST=                        WXCRYST_ID();
 static long SHOW_RESULTS=                        WXCRYST_ID();
 
-BEGIN_EVENT_TABLE(WXFoxServer, wxFrame)
+BEGIN_EVENT_TABLE(WXFoxServer, wxWindow)
   //EVT_BUTTON(STOP_TO_CLIENT,                  WXFoxServer::StopAllClients) 
   EVT_BUTTON(RUN_LOCAL_CLIENT,                 WXFoxServer::RunLocalClient) 
   EVT_BUTTON(RUN_TO_CLIENT,                 WXFoxServer::RunALLClient) 
@@ -48,7 +48,7 @@ BEGIN_EVENT_TABLE(WXFoxServer, wxFrame)
 END_EVENT_TABLE()
 
 WXFoxServer::WXFoxServer(wxWindow* parent, wxString workingDir):
-m_parent(parent)
+wxWindow(parent,-1),m_parent(parent)
 {
    m_dataLoaded = false;
    m_WXFoxServerDataMutex = new wxMutex();
@@ -69,8 +69,6 @@ void WXFoxServer::Clear()
 }
 void WXFoxServer::InitServer()
 {
-   //m_parent->SetEventHandler(this);
-   m_parent->PushEventHandler(this);
    //starting server
    m_FoxServer = new FoxServer();
    m_FoxServer->SetWorkingDir(m_working_dir);
@@ -81,9 +79,7 @@ void WXFoxServer::InitServer()
    m_UpdateTimer->Start(10*1000, false);
 
    //display all necessary controls
-   //wxSizer *Parentsizer = m_parent->GetSizer();
    wxBoxSizer *topSizer = new wxBoxSizer( wxVERTICAL );
-   wxBoxSizer *eventSizer = new wxBoxSizer( wxVERTICAL );
 
    unsigned int xsize=650;
    //Job List table
@@ -92,7 +88,7 @@ void WXFoxServer::InitServer()
    JobSizer->Add(JobLabel,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
 
 
-   m_JobListTable = new wxGrid(m_parent,GRID_JOB_LIST, wxDefaultPosition, wxSize(xsize,150), wxWANTS_CHARS, _T("m_JobListTable")); 
+   m_JobListTable = new wxGrid(this,GRID_JOB_LIST, wxDefaultPosition, wxSize(xsize,150), wxWANTS_CHARS, _T("m_JobListTable"));
    m_JobListTable->CreateGrid(1,5,wxGrid::wxGridSelectRows);
    m_JobListTable->SetColLabelValue(0, _T("Job ID"));
    m_JobListTable->SetColLabelValue(1, _T("Job name"));
@@ -111,55 +107,48 @@ void WXFoxServer::InitServer()
    JobSizer->Add(m_JobListTable,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
 
    wxBoxSizer *JobButtonSizer = new wxBoxSizer( wxHORIZONTAL );
-   wxButton *LoadJobButton = new wxButton(m_parent, LOAD_JOB, _T("Create Job (from xml)"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T(""));
-   LoadJobButton->Show();
+   wxButton *LoadJobButton = new wxButton(this, LOAD_JOB, _T("Create Job (from xml)"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T(""));
    JobButtonSizer->Add(LoadJobButton,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
    LoadJobButton->SetToolTip(_T("Create a job from an existing xml file"));
 
-   wxButton *AddJobButton = new wxButton(m_parent, NEW_JOB, _T("Create Job (from mem)"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T(""));
-   AddJobButton->Show();
+   wxButton *AddJobButton = new wxButton(this, NEW_JOB, _T("Create Job (from mem)"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T(""));
    JobButtonSizer->Add(AddJobButton,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
    AddJobButton->SetToolTip(_T("Create job from objects currently in memory\n\n")
                             _T("This requires that you have one global \n")
                             _T("optimization obect in memory."));
    
-   wxButton *EditJobButton = new wxButton(m_parent, EDIT_JOB, _T("Edit Job"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T(""));
-   EditJobButton->Show();
+   wxButton *EditJobButton = new wxButton(this, EDIT_JOB, _T("Edit Job"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T(""));
    JobButtonSizer->Add(EditJobButton,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
 
-   wxButton *DeleteJobButton = new wxButton(m_parent, DELETE_JOB, _T("Delete Job"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T(""));
-   DeleteJobButton->Show();
+   wxButton *DeleteJobButton = new wxButton(this, DELETE_JOB, _T("Delete Job"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T(""));
    JobButtonSizer->Add(DeleteJobButton,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
    JobSizer->Add(JobButtonSizer,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
 
    //run Run local client button
-   wxButton *RunClientButton = new wxButton(m_parent, RUN_LOCAL_CLIENT, _T("Run local client"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("Button2"));
-   RunClientButton->Show();
+   wxButton *RunClientButton = new wxButton(this, RUN_LOCAL_CLIENT, _T("Run local client"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("Button2"));
    JobButtonSizer->Add(RunClientButton,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
    RunClientButton->SetToolTip(_T("Gives you the option to run the job \n")
                                _T("locally, using multiple processors or cores"));
    //run button
-   wxButton *RunButton = new wxButton(m_parent, RUN_TO_CLIENT, _T("Ping clients"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("Button2"));
-   RunButton->Show();
+   wxButton *RunButton = new wxButton(this, RUN_TO_CLIENT, _T("Ping clients"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("Button2"));
    JobButtonSizer->Add(RunButton,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
    RunButton->SetToolTip(_T("It asks connected clients whether they compute.\n If not, it sends them job\n\n")
                          _T("This is useful when some client does not compute.\n Use it carefully, it increases traffic on the server."));
 
    //stop button
    /*
-   wxButton *StopButton = new wxButton(m_parent, STOP_TO_CLIENT, _T("Stop"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("Button1"));
-   StopButton->Show();
+   wxButton *StopButton = new wxButton(this, STOP_TO_CLIENT, _T("Stop"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("Button1"));
    JobButtonSizer->Add(StopButton,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
    */
    
    //client list label
    wxBoxSizer *listClientSizer = new wxBoxSizer( wxVERTICAL );
-   wxStaticText *label2 = new wxStaticText(m_parent, NULL, _T("Client list: "), wxDefaultPosition, wxDefaultSize, 0 , _T("label"));
+   wxStaticText *label2 = new wxStaticText(this, NULL, _T("Client list: "), wxDefaultPosition, wxDefaultSize, 0 , _T("label"));
    listClientSizer->Add(label2,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
 
 
    //client list table
-   m_ClientTable = new wxGrid(m_parent, NULL, wxDefaultPosition, wxSize(xsize/2-5,150), wxWANTS_CHARS, _T("m_ClientTable")); 
+   m_ClientTable = new wxGrid(this, NULL, wxDefaultPosition, wxSize(xsize/2-5,150), wxWANTS_CHARS, _T("m_ClientTable"));
    m_ClientTable->CreateGrid(1,4,wxGrid::wxGridSelectRows);
    m_ClientTable->SetColLabelValue(0, _T("Name"));
    m_ClientTable->SetColLabelValue(1, _T("ID"));
@@ -174,7 +163,7 @@ void WXFoxServer::InitServer()
    m_ClientTable->DeleteRows(0, 1, false);
    listClientSizer->Add(m_ClientTable,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
    /*
-   m_ClientWindow = new wxTextCtrl(m_parent, NULL, wxEmptyString, wxDefaultPosition, 
+   m_ClientWindow = new wxTextCtrl(this, NULL, wxEmptyString, wxDefaultPosition,
                                                 wxSize(xsize/2-5,150), wxTE_MULTILINE|wxTE_READONLY, 
                                                 wxDefaultValidator, _T("TextBox"));
    listClientSizer->Add(m_ClientWindow,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
@@ -182,11 +171,11 @@ void WXFoxServer::InitServer()
    
    //result list label
    wxBoxSizer *listResultSizer = new wxBoxSizer( wxVERTICAL );
-   wxStaticText *label3 = new wxStaticText(m_parent, NULL, _T("Result list: "), wxDefaultPosition, wxDefaultSize, 0 , _T("label"));
+   wxStaticText *label3 = new wxStaticText(this, NULL, _T("Result list: "), wxDefaultPosition, wxDefaultSize, 0 , _T("label"));
    listResultSizer->Add(label3,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
 
    //result list table   
-   m_ResultTable = new wxGrid(m_parent, GRID_RESULT_LIST, wxDefaultPosition, wxSize(xsize/2-5,150), wxWANTS_CHARS, _T("m_ResultTable")); 
+   m_ResultTable = new wxGrid(this, GRID_RESULT_LIST, wxDefaultPosition, wxSize(xsize/2-5,150), wxWANTS_CHARS, _T("m_ResultTable"));
    m_ResultTable->CreateGrid(1,3,wxGrid::wxGridSelectCells);
    m_ResultTable->SetColLabelValue(0, _T("Nb"));
    m_ResultTable->SetColLabelValue(1, _T("Job ID"));
@@ -202,30 +191,22 @@ void WXFoxServer::InitServer()
    listResultSizer->Add(m_ResultTable,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
 
 
-   wxButton *ShowButtom = new wxButton(m_parent, SHOW_RESULTS, _T("Show Result"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("Button3"));
-   ShowButtom->Show();
+   wxButton *ShowButtom = new wxButton(this, SHOW_RESULTS, _T("Show Result"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("Button3"));
    listResultSizer->Add(ShowButtom,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
    
-   //wxBoxSizer *ButtonSizer = new wxBoxSizer( wxHORIZONTAL );
-
    wxBoxSizer *listsSizer = new wxBoxSizer( wxHORIZONTAL );
 
    listsSizer->Add(listClientSizer, 0, wxALL|wxALIGN_TOP);
    listsSizer->Add(listResultSizer, 0, wxALL|wxALIGN_TOP);
 
-   topSizer->Add(eventSizer, 0, wxALL|wxALIGN_TOP);
+   //topSizer->Add(eventSizer, 0, wxALL|wxALIGN_TOP);
    topSizer->Add(JobSizer, 0, wxALL|wxALIGN_TOP);
    topSizer->Add(listsSizer, 0, wxALL|wxALIGN_TOP);
    //topSizer->Add(ButtonSizer, 0, wxALL|wxALIGN_TOP);
-   //Parentsizer->Add(topSizer, 0, wxALL|wxALIGN_TOP);
 
-   SetSizer( topSizer );
-   //SetAutoLayout( TRUE );
-   this->Layout();
-   //SetSizer( Parentsizer );
-   topSizer->SetSizeHints( this );
-   topSizer->SetSizeHints( m_parent );
-   topSizer->Fit( m_parent );
+   this->SetSizer( topSizer );
+   wxTheApp->GetTopWindow()->Layout();
+   wxTheApp->GetTopWindow()->SendSizeEvent();
 }
 int WXFoxServer::GenerateJobID()
 {
@@ -250,7 +231,7 @@ void WXFoxServer::saveJobHeader(wxString filename, int ID, wxString name, long n
     wxString file;
     if(this->LoadFile(filename, file)) {
         int r = (int) rand;
-        data.Printf(_T("<FoxJob Name=\"%s\" ID=\"%d\" nbOfTrial=\"%d\" nbRun=\"%d\" rand=\"%d\"></FoxJob>\n"), name.c_str(), ID, nbOfTrial, nbRun, r);
+        data.Printf(_T("<FoxJob Name=\"%s\" ID=\"%d\" nbOfTrial=\"%ld\" nbRun=\"%d\" rand=\"%d\"></FoxJob>\n"), name.c_str(), ID, nbOfTrial, nbRun, r);
         data +=file;
         SaveDataAsFile(data, filename);
     }
@@ -265,7 +246,7 @@ void WXFoxServer::ChangeJobHeader(wxString filename, int ID, wxString name, long
             pos +=9;
             file = file.Mid(pos);
         } 
-        data.Printf(_T("<FoxJob Name=\"%s\" ID=\"%d\" nbOfTrial=\"%d\" nbRun=\"%d\" rand=\"%d\"></FoxJob>\n"), name.c_str(), ID, nbOfTrial, nbRun, r);
+        data.Printf(_T("<FoxJob Name=\"%s\" ID=\"%d\" nbOfTrial=\"%d\" nbRun=\"%d\" rand=\"%ld\"></FoxJob>\n"), name.c_str(), ID, nbOfTrial, nbRun, r);
         data +=file;
         SaveDataAsFile(data, filename);
     }
@@ -512,13 +493,13 @@ bool WXFoxServer::ShowSetJobWindow(int ID, wxString &name, long &trials, long &r
 
    wxStaticText *label2 = new wxStaticText(InfoWindow, NULL, _T("Number of trials:"));
    sizer->Add(label2, 0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
-   tmp.Printf(_T("%d"), trials);
+   tmp.Printf(_T("%ld"), trials);
    wxTextCtrl *TrialText = new wxTextCtrl(InfoWindow, NULL, tmp, wxDefaultPosition, wxDefaultSize);
    sizer->Add(TrialText, 0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
 
    wxStaticText *label3 = new wxStaticText(InfoWindow, NULL, _T("Number of runs:"));
    sizer->Add(label3, 0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
-   tmp.Printf(_T("%d"), runs);
+   tmp.Printf(_T("%ld"), runs);
    wxTextCtrl *RunText = new wxTextCtrl(InfoWindow, NULL, tmp, wxDefaultPosition, wxDefaultSize);
    sizer->Add(RunText, 0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
 
@@ -664,7 +645,7 @@ void WXFoxServer::RunLocalClient(wxCommandEvent& event)
 void WXFoxServer::UpdateJobList()
 {
    int nbRow = m_JobListTable->GetRows();
-   m_JobListTable->DeleteRows(0, nbRow, true);
+   if(nbRow>0) m_JobListTable->DeleteRows(0, nbRow, true);
    wxString tmp;
 
    for(int i=0;i<m_jobs.size();i++){
@@ -675,14 +656,14 @@ void WXFoxServer::UpdateJobList()
       m_JobListTable->SetReadOnly(i,0);
       m_JobListTable->SetCellValue(i,1,m_jobs[i].getName());//name
       m_JobListTable->SetReadOnly(i,1);
-      tmp.Printf(_T("%d"), m_jobs[i].getNbTrial());
+      tmp.Printf(_T("%ld"), m_jobs[i].getNbTrial());
       m_JobListTable->SetCellValue(i,2,tmp);//nbtrial
       m_JobListTable->SetReadOnly(i,1);
       //rand
       if(m_jobs[i].randomize()) {
-          tmp.Printf(_T("TRUE"), m_jobs[i].getNbTrial());
+          tmp.Printf(_T("TRUE"), m_jobs[i].getNbTrial());//???? :TODO:
       } else {
-          tmp.Printf(_T("FALSE"), m_jobs[i].getNbTrial());
+          tmp.Printf(_T("FALSE"), m_jobs[i].getNbTrial());//???? :TODO:
       }
       m_JobListTable->SetCellValue(i,3,tmp);//nbtrial
       m_JobListTable->SetReadOnly(i,1);
@@ -722,7 +703,7 @@ void WXFoxServer::UpdateLists(wxTimerEvent& event)
 
    //update client list
    int nbRow = m_ClientTable->GetRows();
-   m_ClientTable->DeleteRows(0, nbRow, true);
+   if(nbRow>0) m_ClientTable->DeleteRows(0, nbRow, true);
    for(int i=0;i<clients.size();i++){
         m_ClientTable->InsertRows(i,1,false);
         wxString tmp;

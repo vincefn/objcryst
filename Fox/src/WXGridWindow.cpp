@@ -44,6 +44,11 @@ WXFoxServer *WXGrigWindow::StartServer()
    if(m_WXFoxServer!=NULL) return NULL;
    m_WXFoxServer = new WXFoxServer(this, m_working_dir);
    m_WXFoxServer->m_dataLoaded = dataLoaded;
+   if(this->GetSizer()==NULL) this->SetSizer(new wxBoxSizer(wxVERTICAL));
+   this->GetSizer()->Add(m_WXFoxServer);
+   this->Layout();
+   wxTheApp->GetTopWindow()->Layout();
+   wxTheApp->GetTopWindow()->SendSizeEvent();
    return m_WXFoxServer;
 }
 
@@ -53,6 +58,11 @@ WXFoxClient *WXGrigWindow::StartClientWindow()
    if(m_WXFoxClient!=NULL) return NULL;
    if(m_WXFoxServer!=NULL) return NULL;
    m_WXFoxClient = new WXFoxClient(this, m_working_dir);
+   if(this->GetSizer()==NULL) this->SetSizer(new wxBoxSizer(wxVERTICAL));
+   this->GetSizer()->Add(m_WXFoxClient);
+   this->Layout();
+   wxTheApp->GetTopWindow()->Layout();
+   wxTheApp->GetTopWindow()->SendSizeEvent();
    return m_WXFoxClient;
 }
 void WXGrigWindow::DataLoaded()

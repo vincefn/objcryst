@@ -40,7 +40,7 @@
 #include "FoxClient.h"
 
 
-class WXFoxClient : public wxFrame
+class WXFoxClient : public wxWindow
 {
 public:
    WXFoxClient(wxWindow* parent, wxString working_dir);

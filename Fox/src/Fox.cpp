@@ -1948,6 +1948,12 @@ void WXCrystMainFrame::OnAddGeneticAlgorithm(wxCommandEvent& WXUNUSED(event))
 //FOXGrid
 void WXCrystMainFrame::OnStartGridServer(wxCommandEvent &event)
 {
+   if((mpGridWindow->m_WXFoxServer!=NULL)||(mpGridWindow->m_WXFoxClient!=NULL))
+   {
+      wxMessageDialog d(this,"You have already either a Grid client or server\n running in this instance of Fox !","Error",wxOK|wxICON_ERROR);
+      d.ShowModal();
+      return;
+   }
    VFN_DEBUG_ENTRY("WXCrystMainFrame::OnStartGridServer()",10)
    wxDirDialog dlg(this, _T("Choose working directory (check write and read permissions!)"));
    if(dlg.ShowModal()!=wxID_OK) return;
@@ -1961,11 +1967,16 @@ void WXCrystMainFrame::OnStartGridServer(wxCommandEvent &event)
    mpGridWindow->m_working_dir = dlg.GetPath();
    if(mpGridWindow->StartServer()==NULL) return;
    VFN_DEBUG_EXIT("WXCrystMainFrame::OnStartGridServer()",10)
-   mpGridWindow->Layout();
    mpNotebook->SetSelection(4);
 }
 void WXCrystMainFrame::OnStartGridClient(wxCommandEvent &event)
 {
+   if((mpGridWindow->m_WXFoxServer!=NULL)||(mpGridWindow->m_WXFoxClient!=NULL))
+   {
+      wxMessageDialog d(this,"You have already either a Grid client or server\n running in this instance of Fox !","Error",wxOK|wxICON_ERROR);
+      d.ShowModal();
+      return;
+   }
    wxDirDialog dlg(this, _T("Choose working directory (check write and read permissions!)"));
    if(dlg.ShowModal()!=wxID_OK) return;
    mpGridWindow->m_working_dir = dlg.GetPath();

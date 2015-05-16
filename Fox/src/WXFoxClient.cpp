@@ -17,12 +17,13 @@ using namespace std;
 static long CONNECT_CLIENT_BUTTON=                        WXCRYST_ID();
 static long CONNECT_TIMER=                          WXCRYST_ID();
 
-BEGIN_EVENT_TABLE(WXFoxClient, wxFrame)
+BEGIN_EVENT_TABLE(WXFoxClient, wxWindow)
    EVT_BUTTON(CONNECT_CLIENT_BUTTON,                  WXFoxClient::OnConnectClient) 
    EVT_TIMER(CONNECT_TIMER,                         WXFoxClient::OnConnectTimer)
 END_EVENT_TABLE()
 
-WXFoxClient::WXFoxClient(wxWindow* parent, wxString working_dir)
+WXFoxClient::WXFoxClient(wxWindow* parent, wxString working_dir):
+wxWindow(parent,-1)
 {
    m_parent = parent;
    m_working_dir = working_dir;
@@ -49,19 +50,16 @@ void WXFoxClient::Clear()
 }
 void WXFoxClient::InitClient()
 {
-   m_parent->PushEventHandler(this);
-
    unsigned int xsize=400;
 
-   //wxSizer *parentSizer = m_parent->GetSizer();
    wxBoxSizer *topSizer = new wxBoxSizer( wxVERTICAL);
    wxBoxSizer *IPSizer = new wxBoxSizer( wxVERTICAL);
    
    //Editbox for IP
-   wxStaticText *labelIP = new wxStaticText(m_parent, NULL, _T("Server IP:"), wxDefaultPosition, wxDefaultSize, 0 , _T("label"));
+   wxStaticText *labelIP = new wxStaticText(this, NULL, _T("Server IP:"), wxDefaultPosition, wxDefaultSize, 0 , _T("label"));
    IPSizer->Add(labelIP, 0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
 
-   m_IPWindow = new wxComboBox(m_parent, NULL, _T("localhost"), wxDefaultPosition, 
+   m_IPWindow = new wxComboBox(this, NULL, _T("localhost"), wxDefaultPosition,
                        wxDefaultSize, 0,0, 
                        wxCB_DROPDOWN, wxDefaultValidator, _T("TextBox"));
 
@@ -70,9 +68,9 @@ void WXFoxClient::InitClient()
    //nbCPUs window
    wxString nbCPUs;
    nbCPUs << wxThread::GetCPUCount();
-   wxStaticText *label2 = new wxStaticText(m_parent, NULL, _T("Set number of available CPUs or cores: "), wxDefaultPosition, wxDefaultSize, 0 , _T("label"));
+   wxStaticText *label2 = new wxStaticText(this, NULL, _T("Set number of available CPUs or cores: "), wxDefaultPosition, wxDefaultSize, 0 , _T("label"));
    IPSizer->Add(label2, 0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
-   m_nbCPUs = new wxTextCtrl(m_parent, NULL, nbCPUs, wxDefaultPosition, 
+   m_nbCPUs = new wxTextCtrl(this, NULL, nbCPUs, wxDefaultPosition,
                                                 wxDefaultSize, 0, 
                                                 wxDefaultValidator, _T("TextBox"));
 
@@ -80,7 +78,7 @@ void WXFoxClient::InitClient()
    
    //Connect Button
    wxBoxSizer *IPButtonSizer = new wxBoxSizer( wxVERTICAL);
-   m_ConnectButton = new wxButton(m_parent, CONNECT_CLIENT_BUTTON, _T("Connect"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("Button1"));
+   m_ConnectButton = new wxButton(this, CONNECT_CLIENT_BUTTON, _T("Connect"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("Button1"));
    m_ConnectButton->Show();
    IPButtonSizer->Add(m_ConnectButton,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
 
@@ -92,10 +90,10 @@ void WXFoxClient::InitClient()
    wxBoxSizer *eventSizer = new wxBoxSizer( wxVERTICAL );
    
    //events window
-   wxStaticText *label1 = new wxStaticText(m_parent, NULL, _T("Client events: "), wxDefaultPosition, wxDefaultSize, 0 , _T("label"));
+   wxStaticText *label1 = new wxStaticText(this, NULL, _T("Client events: "), wxDefaultPosition, wxDefaultSize, 0 , _T("label"));
    eventSizer->Add(label1,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
    
-   m_EventsWindow = new wxTextCtrl(m_parent, NULL, wxEmptyString, wxDefaultPosition, 
+   m_EventsWindow = new wxTextCtrl(this, NULL, wxEmptyString, wxDefaultPosition,
                                                 wxSize(xsize,50), wxTE_MULTILINE|wxTE_READONLY, 
                                                 wxDefaultValidator, _T("TextBox"));
 
@@ -106,12 +104,11 @@ void WXFoxClient::InitClient()
    topSizer->Add(eventSizer, 0, wxALL|wxALIGN_TOP);
    topSizer->Add(ConnectSizer, 0, wxALL|wxALIGN_TOP);
 
-   SetAutoLayout( TRUE );
    SetSizer(topSizer);
-   topSizer->SetSizeHints( m_parent );
-   topSizer->Fit( m_parent );
 
    //this->LoadUsedIPs();
+   wxTheApp->GetTopWindow()->Layout();
+   wxTheApp->GetTopWindow()->SendSizeEvent();
 }
 void WXFoxClient::OnConnectClient(wxCommandEvent& event)
 {
