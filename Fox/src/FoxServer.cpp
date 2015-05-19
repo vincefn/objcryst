@@ -77,7 +77,7 @@ void FoxServer::StartGridServer()
 
    WriteLogMessage(_T("Starting server...")); 
    mpServer = new wxSocketServer(ip);
-   mpServer->SetEventHandler(*this, GRID_SERVER_ID);
+   //mpServer->SetEventHandler(*this, GRID_SERVER_ID);
    mpServer->SetNotify(wxSOCKET_CONNECTION_FLAG);
    mpServer->Notify(true);
 
@@ -256,7 +256,7 @@ void FoxServer::OnServerEvent(wxSocketEvent &event)
          
          wxIPV4address tmp_addr;
          wxSocketBase *pSocket =  mpServer->Accept(false);
-         pSocket->SetEventHandler(*this, GRID_SERVER_SOCKET_ID);
+         //pSocket->SetEventHandler(*this, GRID_SERVER_SOCKET_ID);
          pSocket->SetNotify(wxSOCKET_INPUT_FLAG | wxSOCKET_LOST_FLAG);
          pSocket->Notify(true);
 
