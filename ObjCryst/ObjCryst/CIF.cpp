@@ -961,6 +961,7 @@ int CIFNumeric2Int(const string &s)
 
 Crystal* CreateCrystalFromCIF(CIF &cif,bool verbose,bool checkSymAsXYZ)
 {
+   gCrystalRegistry.AutoUpdateUI(false);
    char buf[200];
    (*fpObjCrystInformUser)("CIF: Opening CIF");
    Chronometer chrono;
@@ -1107,6 +1108,10 @@ Crystal* CreateCrystalFromCIF(CIF &cif,bool verbose,bool checkSymAsXYZ)
             (*fpObjCrystInformUser)(buf);
          }
       }
+   
+   pCryst->ConnectAtoms();
+   gCrystalRegistry.AutoUpdateUI(true);
+   gCrystalRegistry.UpdateUI();
    return pCryst;
 }
 
