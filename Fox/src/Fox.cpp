@@ -1655,10 +1655,13 @@ void WXCrystMainFrame::Load(const wxString &filename)
             delete[] tmpbuf;
         }
         else while (!is.Eof()) in<<(char)is.GetC();
+        gCrystalRegistry.AutoUpdateUI(false);
         ObjCryst::CIF cif(in,true,true);
         CreateCrystalFromCIF(cif);
         CreatePowderPatternFromCIF(cif);
         CreateSingleCrystalDataFromCIF(cif);
+        gCrystalRegistry.AutoUpdateUI(true);
+        gCrystalRegistry.UpdateUI();
         //FoxGrid
         mpGridWindow->DataLoaded();
       }
