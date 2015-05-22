@@ -859,7 +859,7 @@ bool operator==(const string&str,const wxString&wx)
 #endif
 
 template<class T> ObjRegistry<T>::ObjRegistry():
-mName("")
+mName(""),mAutoUpdateUI(true)
 #ifdef __WX__CRYST__
 ,mpWXRegistry(0)
 #endif
@@ -868,7 +868,7 @@ mName("")
 }
 
 template<class T> ObjRegistry<T>::ObjRegistry(const string &name):
-mName(name)
+mName(name),mAutoUpdateUI(true)
 #ifdef __WX__CRYST__
 ,mpWXRegistry(0)
 #endif
@@ -897,7 +897,7 @@ template<class T> void ObjRegistry<T>::Register(T &obj)
    mvpRegistry.push_back(&obj);
    mListClock.Click();
    #ifdef __WX__CRYST__
-   if(0!=mpWXRegistry) 
+   if((0!=mpWXRegistry) && mAutoUpdateUI)
       mpWXRegistry->Add(obj.WXCreate(mpWXRegistry));
    #endif
    //this->Print();
@@ -1088,6 +1088,22 @@ template<class T> long ObjRegistry<T>::Find(const T *pobj) const
 }
 
 template<class T> const RefinableObjClock& ObjRegistry<T>::GetRegistryClock()const{return mListClock;}
+
+template<class T> void ObjRegistry<T>::AutoUpdateUI(const bool autoup)
+{
+   mAutoUpdateUI=autoup;
+}
+
+template<class T> void ObjRegistry<T>::UpdateUI()
+{
+   #ifdef __WX__CRYST__
+   for(unsigned int i=0;i<this->GetNb();i++)
+   {
+      if((this->GetObj(i).WXGet()==NULL) && (0!=mpWXRegistry))
+            mpWXRegistry->Add(this->GetObj(i).WXCreate(mpWXRegistry));
+   }
+   #endif
+}
 
 #ifdef __WX__CRYST__
 template<class T> WXRegistry<T>* ObjRegistry<T>::WXCreate(wxWindow *parent)

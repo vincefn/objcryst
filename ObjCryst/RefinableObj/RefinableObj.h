@@ -706,6 +706,15 @@ template<class T> class ObjRegistry
       long Find(const T *pobj)const;
       /// Last time an object was added or removed from the registry
       const RefinableObjClock& GetRegistryClock()const;
+      /** Enable the UI automatic update, so that objects in the registry are
+      * automatically added to the UI.
+      */
+      void AutoUpdateUI(const bool autoup=true);
+      /** Manually update the UI, making sure all objects in the registry are displayed
+      * This is useful when the automatic adding of objects has been disabled.
+      *
+      */
+      void UpdateUI();
    private:
       /// The registry of objects
       vector<T*> mvpRegistry;
@@ -713,7 +722,14 @@ template<class T> class ObjRegistry
       string mName;
       /// Last time an object was added or removed
       RefinableObjClock mListClock;
-      
+      /** Enable the user interface update.
+      * If true, any time an object is added, it will be added to the user interface (wx...).
+      * If objects have not been added to the user interface, this can be done asynchronously
+      * using UpdateUI() which will go through the list of objects and add those not yet displayed.
+      *
+      * This does not affect the removal of objects.
+      */
+      bool mAutoUpdateUI;
    #ifdef __WX__CRYST__
    public:
       WXRegistry<T>* WXCreate(wxWindow *parent);
