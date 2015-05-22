@@ -2447,7 +2447,8 @@ void WXMolecule::CrystUpdate(const bool uui,const bool lock)
       }
       if(0!=mpNonFlipAtomWin) 
       {
-          mpNonFlipAtomWin->DeleteRows(0, mpNonFlipAtomWin->GetRows(), true);   
+         if(mpNonFlipAtomWin->GetNumberRows()>0)
+            mpNonFlipAtomWin->DeleteRows(0, mpNonFlipAtomWin->GetRows(), true);   
       }
       //Add any atom, bond, bond angle or dihedral angle that could have been added
       {
@@ -2675,8 +2676,8 @@ void WXMolecule::OnMenuShowRestraintWindow(wxCommandEvent &event)
 
       mpBondWin = new WXMolScrolledWindow(notebook,this,ID_WINDOW_BONDLENGTH);
       notebook->AddPage(mpBondWin, _T("Bond Lengths"), true);
-      mpBondWin->SetColSize(0,120);
       mpBondWin->CreateGrid(0,6);
+      mpBondWin->SetColSize(0,120);
       mpBondWin->SetColAttr(0,cellAttrName);
       mpBondWin->SetColAttr(1,cellAttrName->Clone());
       mpBondWin->SetColAttr(2,cellAttrFloatReadOnly);
@@ -2706,8 +2707,8 @@ void WXMolecule::OnMenuShowRestraintWindow(wxCommandEvent &event)
 
       mpAngleWin = new WXMolScrolledWindow(notebook,this,ID_WINDOW_BONDANGLE);
       notebook->AddPage(mpAngleWin, _T("Bond Angles"), true);
-      mpAngleWin->SetColSize(0,120);
       mpAngleWin->CreateGrid(0,7);
+      mpAngleWin->SetColSize(0,120);
       mpAngleWin->SetColAttr(0,cellAttrName);
       mpAngleWin->SetColAttr(1,cellAttrName->Clone());
       mpAngleWin->SetColAttr(2,cellAttrName->Clone());
@@ -2739,8 +2740,8 @@ void WXMolecule::OnMenuShowRestraintWindow(wxCommandEvent &event)
 
       mpDihedralAngleWin = new WXMolScrolledWindow(notebook,this,ID_WINDOW_DIHEDRALANGLE);
       notebook->AddPage(mpDihedralAngleWin, _T("Dihedral Angles"), true);
-      mpDihedralAngleWin->SetColSize(0,120);
       mpDihedralAngleWin->CreateGrid(0,8);
+      mpDihedralAngleWin->SetColSize(0,120);
       mpDihedralAngleWin->SetColAttr(0,cellAttrName);
       mpDihedralAngleWin->SetColAttr(1,cellAttrName->Clone());
       mpDihedralAngleWin->SetColAttr(2,cellAttrName->Clone());
