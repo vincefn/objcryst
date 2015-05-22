@@ -109,7 +109,6 @@ WXField(parent,label,ID_WXFIELD_REFPAR),mValue(0.),mpRefPar(par),mIsSelfUpdating
                             wxDefaultPosition,wxSize(hsize,-1),wxTE_PROCESS_ENTER,
                             wxTextValidator(wxFILTER_NUMERIC));
    mpSizer->Add(mpField,0,wxALIGN_CENTER);
-   this->BottomLayout(0);
 }
 WXFieldRefPar::~WXFieldRefPar()
 {
@@ -304,7 +303,6 @@ mChoice(-1),mChoiceOld(-1),mpOption(option),mpList(0)
    mpList= new wxChoice(this,ID_WXFIELD,wxDefaultPosition,wxDefaultSize,
                         mpOption->GetNbChoice(),choices);
    mpSizer->Add(mpList,0,wxALIGN_CENTER);
-   this->BottomLayout(0);
 }
 WXFieldOption::~WXFieldOption()
 {
@@ -374,7 +372,6 @@ WXCrystObj(parent,wxHORIZONTAL,false),mpRegistry(reg)
    wxStaticText* mpLabel=new wxStaticText(this,-1,wxString::FromAscii(reg->GetName().c_str()));
    mpSizer->Add(mpLabel,0,wxALIGN_LEFT);
    mpLabel->SetForegroundColour(wxColour(0,0,255));
-   this->BottomLayout(0);
    VFN_DEBUG_EXIT("WXCrystRegistry::WXCrystRegistry(wxWindow*):End",6)
 }
 template<class T> WXRegistry<T>::~WXRegistry()
@@ -397,7 +394,7 @@ template<class T> void WXRegistry<T>::Remove(WXCrystObjBasic *obj)
    if(obj==0) return;
    VFN_DEBUG_ENTRY("WXCrystRegistry::RemoveWXCrystObj(WXCrystObj*)",6)
    mList.Remove(obj);
-   mpSizer->Detach((wxWindow*)obj);
+   //mpSizer->Detach((wxWindow*)obj);
    obj->Destroy();
    this->BottomLayout(0);
    VFN_DEBUG_EXIT("WXCrystRegistry::RemoveWXCrystObj(WXCrystObj*):End",6)
