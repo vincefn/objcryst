@@ -472,6 +472,99 @@ void ScatteringPowerAtom::Init(const string &name,const string &symbol,const REA
       default : mColourName="White";           break;   
    }
    this->InitRGBColour();
+   switch(mAtomicNumber)
+   {// Values from OpenBabel element.txt
+      case 0: mMaxCovBonds=0;break;break;break;//Xx
+      case 1: mMaxCovBonds=1;break;break;break;//H
+      case 2: mMaxCovBonds=0;break;break;break;//He
+      case 3: mMaxCovBonds=1;break;break;break;//Li
+      case 4: mMaxCovBonds=2;break;//Be
+      case 5: mMaxCovBonds=4;break;//B
+      case 6: mMaxCovBonds=4;break;//C
+      case 7: mMaxCovBonds=4;break;//N
+      case 8: mMaxCovBonds=2;break;//O
+      case 9: mMaxCovBonds=1;break;//F
+      case 10: mMaxCovBonds=0;break;//Ne
+      case 11: mMaxCovBonds=1;break;//Na
+      case 12: mMaxCovBonds=2;break;//Mg
+      case 13: mMaxCovBonds=6;break;//Al
+      case 14: mMaxCovBonds=6;break;//Si
+      case 15: mMaxCovBonds=6;break;//P
+      case 16: mMaxCovBonds=6;break;//S
+      case 17: mMaxCovBonds=1;break;//Cl
+      case 18: mMaxCovBonds=0;break;//Ar
+      case 19: mMaxCovBonds=1;break;//K
+      case 20: mMaxCovBonds=2;break;//Ca
+      case 21: mMaxCovBonds=6;break;//Sc
+      case 22: mMaxCovBonds=6;break;//Ti
+      case 23: mMaxCovBonds=6;break;//V
+      case 24: mMaxCovBonds=6;break;//Cr
+      case 25: mMaxCovBonds=8;break;//Mn
+      case 26: mMaxCovBonds=6;break;//Fe
+      case 27: mMaxCovBonds=6;break;//Co
+      case 28: mMaxCovBonds=6;break;//Ni
+      case 29: mMaxCovBonds=6;break;//Cu
+      case 30: mMaxCovBonds=6;break;//Zn
+      case 31: mMaxCovBonds=3;break;//Ga
+      case 32: mMaxCovBonds=4;break;//Ge
+      case 33: mMaxCovBonds=3;break;//As
+      case 34: mMaxCovBonds=2;break;//Se
+      case 35: mMaxCovBonds=1;break;//Br
+      case 36: mMaxCovBonds=0;break;//Kr
+      case 37: mMaxCovBonds=1;break;//Rb
+      case 38: mMaxCovBonds=2;break;//Sr
+      case 39: mMaxCovBonds=6;break;//Y
+      case 40: mMaxCovBonds=6;break;//Zr
+      case 41: mMaxCovBonds=6;break;//Nb
+      case 42: mMaxCovBonds=6;break;//Mo
+      case 43: mMaxCovBonds=6;break;//Tc
+      case 44: mMaxCovBonds=6;break;//Ru
+      case 45: mMaxCovBonds=6;break;//Rh
+      case 46: mMaxCovBonds=6;break;//Pd
+      case 47: mMaxCovBonds=6;break;//Ag
+      case 48: mMaxCovBonds=6;break;//Cd
+      case 49: mMaxCovBonds=3;break;//In
+      case 50: mMaxCovBonds=4;break;//Sn
+      case 51: mMaxCovBonds=3;break;//Sb
+      case 52: mMaxCovBonds=2;break;//Te
+      case 53: mMaxCovBonds=1;break;//I
+      case 54: mMaxCovBonds=0;break;//Xe
+      case 55: mMaxCovBonds=1;break;//Cs
+      case 56: mMaxCovBonds=2;break;//Ba
+      case 57: mMaxCovBonds=12;break;//La
+      case 58: mMaxCovBonds=6;break;//Ce
+      case 59: mMaxCovBonds=6;break;//Pr
+      case 60: mMaxCovBonds=6;break;//Nd
+      case 61: mMaxCovBonds=6;break;//Pm
+      case 62: mMaxCovBonds=6;break;//Sm
+      case 63: mMaxCovBonds=6;break;//Eu
+      case 64: mMaxCovBonds=6;break;//Gd
+      case 65: mMaxCovBonds=6;break;//Tb
+      case 66: mMaxCovBonds=6;break;//Dy
+      case 67: mMaxCovBonds=6;break;//Ho
+      case 68: mMaxCovBonds=6;break;//Er
+      case 69: mMaxCovBonds=6;break;//Tm
+      case 70: mMaxCovBonds=6;break;//Yb
+      case 71: mMaxCovBonds=6;break;//Lu
+      case 72: mMaxCovBonds=6;break;//Hf
+      case 73: mMaxCovBonds=6;break;//Ta
+      case 74: mMaxCovBonds=6;break;//W
+      case 75: mMaxCovBonds=6;break;//Re
+      case 76: mMaxCovBonds=6;break;//Os
+      case 77: mMaxCovBonds=6;break;//Ir
+      case 78: mMaxCovBonds=6;break;//Pt
+      case 79: mMaxCovBonds=6;break;//Au
+      case 80: mMaxCovBonds=6;break;//Hg
+      case 81: mMaxCovBonds=3;break;//Tl
+      case 82: mMaxCovBonds=4;break;//Pb
+      case 83: mMaxCovBonds=3;break;//Bi
+      case 84: mMaxCovBonds=2;break;//Po
+      case 85: mMaxCovBonds=1;break;//At
+      case 86: mMaxCovBonds=0;break;//Rn
+      case 87: mMaxCovBonds=1;break;//Fr
+      case 88: mMaxCovBonds=2;break;//Ra
+      default: mMaxCovBonds=6;break;
+   }
 
    VFN_DEBUG_MESSAGE("ScatteringPowerAtom::Init(n,s,b):End",3)
 }
@@ -770,6 +863,7 @@ string ScatteringPowerAtom::GetElementName() const
 int ScatteringPowerAtom::GetAtomicNumber() const {return mAtomicNumber;}
 REAL ScatteringPowerAtom::GetRadius() const {return mRadius;}
 REAL ScatteringPowerAtom::GetCovalentRadius() const {return mCovalentRadius;}
+unsigned int ScatteringPowerAtom::GetMaxCovBonds()const{ return mMaxCovBonds;}
 
 void ScatteringPowerAtom::Print()const
 {

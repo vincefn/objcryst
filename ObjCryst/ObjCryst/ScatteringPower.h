@@ -379,6 +379,8 @@ class ScatteringPowerAtom:virtual public ScatteringPower
       REAL GetRadius() const;
       /// Covalent Radius for this atom, in Angstroems (from cctbx)
       REAL GetCovalentRadius() const;
+      /// Maximum number of covalent bonds (from openbabel element.txt)
+      unsigned int GetMaxCovBonds() const;
       virtual void Print()const;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
@@ -420,6 +422,8 @@ class ScatteringPowerAtom:virtual public ScatteringPower
       REAL mRadius;
       /// Covalent Radius for this atom, in Angstroems (from cctbx)
       REAL mCovalentRadius;
+      /// Maximum number of covalent bonds
+      unsigned int mMaxCovBonds;
     
       /** \brief Neutron Absorption cross section (barn)
       *
