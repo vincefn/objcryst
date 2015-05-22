@@ -375,8 +375,10 @@ class ScatteringPowerAtom:virtual public ScatteringPower
       string GetElementName() const;
       ///Atomic number for this atom
       int GetAtomicNumber() const;
-      ///Atomic radius for this atom, in Angstroems
+      /// Atomic radius for this atom or ion, in Angstroems (ICSD table from cctbx)
       REAL GetRadius() const;
+      /// Covalent Radius for this atom, in Angstroems (from cctbx)
+      REAL GetCovalentRadius() const;
       virtual void Print()const;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
@@ -414,9 +416,11 @@ class ScatteringPowerAtom:virtual public ScatteringPower
       */
       REAL mNeutronScattLengthReal,mNeutronScattLengthImag;
       
-      /// Radius of the atom, in Angstroems
+      /// Radius of the atom or ion, in Angstroems (ICSD table from cctbx)
       REAL mRadius;
-      
+      /// Covalent Radius for this atom, in Angstroems (from cctbx)
+      REAL mCovalentRadius;
+    
       /** \brief Neutron Absorption cross section (barn)
       *
       *For 2200 m/s neutrons.

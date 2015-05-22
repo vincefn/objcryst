@@ -27,6 +27,7 @@
 #include "cctbx/eltbx/xray_scattering.h"
 #include "cctbx/eltbx/tiny_pse.h"
 #include "cctbx/eltbx/icsd_radii.h"
+#include "cctbx/eltbx/covalent_radii.h"
 #include "cctbx/eltbx/henke.h"
 #include "cctbx/eltbx/neutron.h"
 
@@ -345,6 +346,8 @@ void ScatteringPowerAtom::Init(const string &name,const string &symbol,const REA
 
       cctbx::eltbx::icsd_radii::table ticsd(mSymbol);
       mRadius= ticsd.radius();
+      cctbx::eltbx::covalent_radii::table tcov(mSymbol);
+      mCovalentRadius=tcov.radius();
    }
    catch(cctbx::error)
    {
@@ -766,6 +769,7 @@ string ScatteringPowerAtom::GetElementName() const
 
 int ScatteringPowerAtom::GetAtomicNumber() const {return mAtomicNumber;}
 REAL ScatteringPowerAtom::GetRadius() const {return mRadius;}
+REAL ScatteringPowerAtom::GetCovalentRadius() const {return mCovalentRadius;}
 
 void ScatteringPowerAtom::Print()const
 {
