@@ -5212,7 +5212,8 @@ void Molecule::BuildConnectivityTable()const
             cout<<(*pos1)->GetName()<<"  ";
          }
          cout<<endl;
-         if(pos->second.size()>10) exit(0);
+         if(pos->second.size()>24)
+            throw ObjCrystException("Molecule: one atom ("+pos->first->GetName()+") has more than 24 bonds !");
       }
    }
    #endif
