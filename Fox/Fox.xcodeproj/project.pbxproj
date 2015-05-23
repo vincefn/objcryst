@@ -78,6 +78,7 @@
 		BF1DE1540D2297C300A3939D /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF1DE1530D2297C300A3939D /* QuickTime.framework */; };
 		BF3EB05508968F5500E02367 /* uctbx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3EB05408968F5500E02367 /* uctbx.cpp */; };
 		BF3EB063089690D200E02367 /* spoil_optimization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3EB062089690D200E02367 /* spoil_optimization.cpp */; };
+		BF49CDF01B0BC56E0012BF3B /* covalent_radii.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF49CDEF1B0BC56E0012BF3B /* covalent_radii.cpp */; };
 		BF69C4D1124F8C310035CF57 /* FoxClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4C8124F8C310035CF57 /* FoxClient.cpp */; };
 		BF69C4D2124F8C310035CF57 /* FoxJob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4C9124F8C310035CF57 /* FoxJob.cpp */; };
 		BF69C4D3124F8C310035CF57 /* FoxServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4CA124F8C310035CF57 /* FoxServer.cpp */; };
@@ -218,6 +219,7 @@
 		BF36112F0BD6E409000C0EE9 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = ../../../../../System/Library/Frameworks/WebKit.framework; sourceTree = SOURCE_ROOT; };
 		BF3EB05408968F5500E02367 /* uctbx.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = uctbx.cpp; path = ../cctbx/cctbx/uctbx/uctbx.cpp; sourceTree = "<group>"; };
 		BF3EB062089690D200E02367 /* spoil_optimization.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = spoil_optimization.cpp; path = ../cctbx/cctbx/uctbx/spoil_optimization.cpp; sourceTree = "<group>"; };
+		BF49CDEF1B0BC56E0012BF3B /* covalent_radii.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = covalent_radii.cpp; path = ../cctbx/cctbx/eltbx/covalent_radii.cpp; sourceTree = "<group>"; };
 		BF69C4C8124F8C310035CF57 /* FoxClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FoxClient.cpp; path = src/FoxClient.cpp; sourceTree = "<group>"; };
 		BF69C4C9124F8C310035CF57 /* FoxJob.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FoxJob.cpp; path = src/FoxJob.cpp; sourceTree = "<group>"; };
 		BF69C4CA124F8C310035CF57 /* FoxServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FoxServer.cpp; path = src/FoxServer.cpp; sourceTree = "<group>"; };
@@ -1905,6 +1907,7 @@
 		BF3479410915064E006E569C /* cctbx */ = {
 			isa = PBXGroup;
 			children = (
+				BF49CDEF1B0BC56E0012BF3B /* covalent_radii.cpp */,
 				BFFCCC950890328F00044EBA /* index_generator.cpp */,
 				BFFCCC960890328F00044EBA /* match_bijvoet_mates.cpp */,
 				BFFCCC970890328F00044EBA /* match_indices.cpp */,
@@ -4529,6 +4532,7 @@
 				BFFCCC9B0890328F00044EBA /* index_generator.cpp in Sources */,
 				BFFCCC9C0890328F00044EBA /* match_bijvoet_mates.cpp in Sources */,
 				BFFCCC9D0890328F00044EBA /* match_indices.cpp in Sources */,
+				BF49CDF01B0BC56E0012BF3B /* covalent_radii.cpp in Sources */,
 				BFFCCC9E0890328F00044EBA /* sym_equiv.cpp in Sources */,
 				BF3EB05508968F5500E02367 /* uctbx.cpp in Sources */,
 				BF3EB063089690D200E02367 /* spoil_optimization.cpp in Sources */,
