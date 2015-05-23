@@ -819,7 +819,10 @@ int main (int argc, char *argv[])
          ifstream in (argv[i]);
          #endif
          ObjCryst::CIF cif(in,true,true);
-         CreateCrystalFromCIF(cif);
+         bool oneScatteringPowerPerElement, connectAtoms;
+         wxConfigBase::Get()->Read(_T("Fox/BOOL/CIF import: automatically convert to molecules"), &connectAtoms);
+         wxConfigBase::Get()->Read(_T("Fox/BOOL/CIF import: only one scattering power per element"), &oneScatteringPowerPerElement);
+         CreateCrystalFromCIF(cif, true, true, oneScatteringPowerPerElement, connectAtoms);
          CreatePowderPatternFromCIF(cif);
          CreateSingleCrystalDataFromCIF(cif);
          if(!cif2pattern)continue;
@@ -1256,6 +1259,12 @@ int main (int argc, char *argv[])
    if(!wxConfigBase::Get()->HasEntry(_T("Fox/BOOL/Check for Fox updates")))
       wxConfigBase::Get()->Write(_T("Fox/BOOL/Check for Fox updates"), true);
 
+   if(!wxConfigBase::Get()->HasEntry(_T("Fox/BOOL/CIF import: automatically convert to molecules")))
+      wxConfigBase::Get()->Write(_T("Fox/BOOL/CIF import: automatically convert to molecules"), true);
+
+   if(!wxConfigBase::Get()->HasEntry(_T("Fox/BOOL/CIF import: only one scattering power per element")))
+      wxConfigBase::Get()->Write(_T("Fox/BOOL/CIF import: only one scattering power per element"), true);
+
    string title(string("FOX: Free Objects for Xtal structures v")+foxVersion);
    mpFrame = new WXCrystMainFrame(wxString::FromAscii(title.c_str()),
                                  wxPoint(50, 50), wxSize(600, 600),
@@ -1656,7 +1665,10 @@ void WXCrystMainFrame::Load(const wxString &filename)
         }
         else while (!is.Eof()) in<<(char)is.GetC();
         ObjCryst::CIF cif(in,true,true);
-        CreateCrystalFromCIF(cif);
+        bool oneScatteringPowerPerElement, connectAtoms;
+        wxConfigBase::Get()->Read(_T("Fox/BOOL/CIF import: automatically convert to molecules"), &connectAtoms);
+        wxConfigBase::Get()->Read(_T("Fox/BOOL/CIF import: only one scattering power per element"), &oneScatteringPowerPerElement);
+        CreateCrystalFromCIF(cif, true, true, oneScatteringPowerPerElement, connectAtoms);
         CreatePowderPatternFromCIF(cif);
         CreateSingleCrystalDataFromCIF(cif);
         //FoxGrid
