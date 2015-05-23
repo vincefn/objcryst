@@ -197,6 +197,22 @@ class PowderPattern;
 */
 Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose=true,const bool checkSymAsXYZ=true);
 
+/** Extract Crystal object(s) from a CIF, if possible.
+* Returns a null pointer if no crystal structure could be extracted
+* (the minimum data is the unit cell parameters).
+*
+* \param checkSymAsXYZ: if true, and the CIF file does not have a Hall symbol
+* but has a list of symmetry_equiv_pos_as_xyz, check we have the correct
+* setting by trying different ones using cctbx
+* \param oneScatteringPowerPerElement: if false (the default), then there will be as many
+* ScatteringPowerAtom created as there are different Debye-Waller parameters. If true,
+* only one will be created per element, avoiding a large number of scattering powers
+* e.g. when importing CIFs obtained from single crystal data refinement.
+* \param connectAtoms: if true, call Crystal::ConnectAtoms to try to create as many Molecules
+* as possible from the list of imported atoms.
+*/
+Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsXYZ, const bool oneScatteringPowerPerElement, const bool connectAtoms);
+
 /// Create PowderPattern object(s) from a CIF, if possible.
 /// Returns a null pointer if no pattern could be extracted.
 /// No components (background, crystal data) are created.

@@ -961,11 +961,20 @@ int CIFNumeric2Int(const string &s)
 
 Crystal* CreateCrystalFromCIF(CIF &cif,bool verbose,bool checkSymAsXYZ)
 {
+   return CreateCrystalFromCIF(cif,verbose,checkSymAsXYZ,false,false);
+}
+
+Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsXYZ, const bool oneScatteringPowerPerElement, const bool connectAtoms)
+{
    gCrystalRegistry.AutoUpdateUI(false);
    char buf[200];
    (*fpObjCrystInformUser)("CIF: Opening CIF");
    Chronometer chrono;
    chrono.start();
+   
+   // If oneScatteringPowerPerElement==true, we hold this to compute the average Biso per element
+   std::map<ScatteringPower*,std::pair<REAL,unsigned int> > vElementBiso;
+   
    Crystal *pCryst=NULL;
    for(map<string,CIFData>::iterator pos=cif.mvData.begin();pos!=cif.mvData.end();++pos)
       if(pos->second.mvLatticePar.size()==6)
@@ -1067,38 +1076,65 @@ Crystal* CreateCrystalFromCIF(CIF &cif,bool verbose,bool checkSymAsXYZ)
             const float t20=chrono.seconds();
             // Try to find an existing scattering power with the same properties, or create a new one
             ScatteringPower* sp=NULL;
-            for(unsigned int i=0;i<pCryst->GetScatteringPowerRegistry().GetNb();++i)
+            if(oneScatteringPowerPerElement)
             {
-              if(pCryst->GetScatteringPowerRegistry().GetObj(i).GetSymbol()!=posat->mSymbol) continue;
-              if(posat->mBeta.size() == 6)
-              {
-                 if(  (pCryst->GetScatteringPowerRegistry().GetObj(i).GetBij(0)!=posat->mBeta[0])
-                    ||(pCryst->GetScatteringPowerRegistry().GetObj(i).GetBij(1)!=posat->mBeta[1])
-                    ||(pCryst->GetScatteringPowerRegistry().GetObj(i).GetBij(2)!=posat->mBeta[2])
-                    ||(pCryst->GetScatteringPowerRegistry().GetObj(i).GetBij(3)!=posat->mBeta[3])
-                    ||(pCryst->GetScatteringPowerRegistry().GetObj(i).GetBij(4)!=posat->mBeta[4])
-                    ||(pCryst->GetScatteringPowerRegistry().GetObj(i).GetBij(5)!=posat->mBeta[5])) continue;
-              }
-              else if(posat->mBiso!=pCryst->GetScatteringPowerRegistry().GetObj(i).GetBiso()) continue;
-              sp=&(pCryst->GetScatteringPowerRegistry().GetObj(i));
-              break;
-            }
-            if(sp==NULL)
-            {
-               if(verbose) cout<<"Scattering power "<<posat->mLabel<<" not found, creating it..."<<endl;
-               sp = new ScatteringPowerAtom(posat->mLabel,posat->mSymbol);
-               // Always extract isotropic DP, even with ADPs present
-               // :TODO: if only ADP are listed, calculate isotropic DP
-               sp->SetBiso(posat->mBiso);
-               // ADPs ?
-               if(posat->mBeta.size() == 6)
+               for(unsigned int i=0;i<pCryst->GetScatteringPowerRegistry().GetNb();++i)
                {
-                  for (int idx=0; idx<6; ++idx) sp->SetBij(idx, posat->mBeta[idx]);
+                  if(pCryst->GetScatteringPowerRegistry().GetObj(i).GetSymbol()!=posat->mSymbol) continue;
+                  vElementBiso[&(pCryst->GetScatteringPowerRegistry().GetObj(i))].first+=posat->mBiso;
+                  vElementBiso[&(pCryst->GetScatteringPowerRegistry().GetObj(i))].second+=1;
+                  sp=&(pCryst->GetScatteringPowerRegistry().GetObj(i));
+                  break;
                }
-               pCryst->AddScatteringPower(sp);
-               const float t21=chrono.seconds();
-               snprintf(buf,200,"CIF: Add scattering power: %s (dt=%6.3fsCrystal creation=%6.3fs total)",posat->mLabel.c_str(),t21-t20,t21);
-               (*fpObjCrystInformUser)(buf);
+               if(sp==NULL)
+               {
+                  if(verbose) cout<<"Scattering power "<<posat->mLabel<<" not found, creating it..."<<endl;
+                  sp = new ScatteringPowerAtom(posat->mSymbol,posat->mSymbol);
+                  // Always extract isotropic DP, even with ADPs present
+                  // :TODO: if only ADP are listed, calculate isotropic DP
+                  vElementBiso[sp].first+=posat->mBiso;
+                  vElementBiso[sp].second=1;
+                  pCryst->AddScatteringPower(sp);
+                  const float t21=chrono.seconds();
+                  snprintf(buf,200,"CIF: Add scattering power: %s (dt=%6.3fsCrystal creation=%6.3fs total)",posat->mLabel.c_str(),t21-t20,t21);
+                  (*fpObjCrystInformUser)(buf);
+               }
+            }
+            else
+            {
+               for(unsigned int i=0;i<pCryst->GetScatteringPowerRegistry().GetNb();++i)
+               {
+                  if(pCryst->GetScatteringPowerRegistry().GetObj(i).GetSymbol()!=posat->mSymbol) continue;
+                  if(posat->mBeta.size() == 6)
+                  {
+                     if(  (pCryst->GetScatteringPowerRegistry().GetObj(i).GetBij(0)!=posat->mBeta[0])
+                        ||(pCryst->GetScatteringPowerRegistry().GetObj(i).GetBij(1)!=posat->mBeta[1])
+                        ||(pCryst->GetScatteringPowerRegistry().GetObj(i).GetBij(2)!=posat->mBeta[2])
+                        ||(pCryst->GetScatteringPowerRegistry().GetObj(i).GetBij(3)!=posat->mBeta[3])
+                        ||(pCryst->GetScatteringPowerRegistry().GetObj(i).GetBij(4)!=posat->mBeta[4])
+                        ||(pCryst->GetScatteringPowerRegistry().GetObj(i).GetBij(5)!=posat->mBeta[5])) continue;
+                  }
+                  else if(posat->mBiso!=pCryst->GetScatteringPowerRegistry().GetObj(i).GetBiso()) continue;
+                  sp=&(pCryst->GetScatteringPowerRegistry().GetObj(i));
+                  break;
+               }
+               if(sp==NULL)
+               {
+                  if(verbose) cout<<"Scattering power "<<posat->mLabel<<" not found, creating it..."<<endl;
+                  sp = new ScatteringPowerAtom(posat->mLabel,posat->mSymbol);
+                  // Always extract isotropic DP, even with ADPs present
+                  // :TODO: if only ADP are listed, calculate isotropic DP
+                  sp->SetBiso(posat->mBiso);
+                  // ADPs ?
+                  if(posat->mBeta.size() == 6)
+                  {
+                     for (int idx=0; idx<6; ++idx) sp->SetBij(idx, posat->mBeta[idx]);
+                  }
+                  pCryst->AddScatteringPower(sp);
+                  const float t21=chrono.seconds();
+                  snprintf(buf,200,"CIF: Add scattering power: %s (dt=%6.3fsCrystal creation=%6.3fs total)",posat->mLabel.c_str(),t21-t20,t21);
+                  (*fpObjCrystInformUser)(buf);
+               }
             }
             (*fpObjCrystInformUser)("CIF: Add Atom:"+posat->mLabel+"("+sp->GetName()+")");
             pCryst->AddScatterer(new Atom(posat->mCoordFrac[0],posat->mCoordFrac[1],posat->mCoordFrac[2],
@@ -1108,8 +1144,12 @@ Crystal* CreateCrystalFromCIF(CIF &cif,bool verbose,bool checkSymAsXYZ)
             (*fpObjCrystInformUser)(buf);
          }
       }
-   
-   pCryst->ConnectAtoms();
+   if(oneScatteringPowerPerElement)
+   {
+      for(std::map<ScatteringPower*,std::pair<REAL,unsigned int> >::iterator pos=vElementBiso.begin();pos!=vElementBiso.end();++pos)
+         pos->first->SetBiso(pos->second.first/pos->second.second);
+   }
+   if(connectAtoms) pCryst->ConnectAtoms();
    gCrystalRegistry.AutoUpdateUI(true);
    gCrystalRegistry.UpdateUI();
    return pCryst;
