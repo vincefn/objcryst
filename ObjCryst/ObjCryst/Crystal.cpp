@@ -1300,7 +1300,8 @@ void Crystal::ConnectAtoms(const REAL min_relat_dist, const REAL max_relat_dist,
    // Create first Molecule
    // start from start_carbon
    Molecule *pmol=NULL;
-   std::set<int> vAssignedAtoms;
+   std::set<int> vAssignedAtoms;//atoms already assigned to a Molecule
+   std::set<int> vTriedAtom0;//atoms already tried as starting point for a Molecule
    unsigned int nb_unsigned_atoms_last=0;
    VFN_DEBUG_MESSAGE("Crystal::ConnectAtoms(...)",10)
    while(vAssignedAtoms.size()!=mScattererRegistry.GetNb())
@@ -1308,13 +1309,23 @@ void Crystal::ConnectAtoms(const REAL min_relat_dist, const REAL max_relat_dist,
       VFN_DEBUG_MESSAGE("Crystal::ConnectAtoms(...): new Molecule ?",7)
       // We need at least one carbon atom to start
       int atom0=-1;
+      unsigned int maxAtomicNumber=0;
       for(unsigned int i=0;i<mScattCompList.GetNbComponent();i++)
       {
-         if(vAssignedAtoms.count(i)>0) continue;
+         if((vAssignedAtoms.count(i)>0) || (vTriedAtom0.find(i)!=vTriedAtom0.end()) ) continue;
          if(mScattCompList(i).mpScattPow->GetClassName()=="ScatteringPowerAtom")
          {
             const ScatteringPowerAtom *p=dynamic_cast<const ScatteringPowerAtom*>(mScattCompList(i).mpScattPow);
-            if(p->GetAtomicNumber()==6) atom0=i;
+            if((p->GetAtomicNumber()==6)&&(maxAtomicNumber!=6))
+            {// Start from the first Carbon found
+               atom0=i;
+               maxAtomicNumber=6;
+            }
+            else if((p->GetAtomicNumber()>maxAtomicNumber) && (maxAtomicNumber!=6))
+            {// Else we'll try from the heaviest atom
+               maxAtomicNumber=p->GetAtomicNumber();
+               atom0=i;
+            }
          }
          else
          {
@@ -1323,7 +1334,6 @@ void Crystal::ConnectAtoms(const REAL min_relat_dist, const REAL max_relat_dist,
             VFN_DEBUG_EXIT("Crystal::ConnectAtoms(...):cannot connect atoms unless there are only Atoms in th structure:"<<i<<":"<<mScattCompList(i).mpScattPow->GetClassName(),10)
             return;
          }
-         if(atom0>=0)break;
       }
       if(atom0<0)
       {
@@ -1335,9 +1345,12 @@ void Crystal::ConnectAtoms(const REAL min_relat_dist, const REAL max_relat_dist,
          }
          break;
       }
+      vTriedAtom0.insert(atom0);
       // Atoms in Molecule but for which neighbors have not yet been searched
       // first: index in the Crystal's scatt comp list, second: index in the Molecule
       std::map<int,int>newAtoms;
+      // List of all atoms in the Molecule, except atom0
+      std::set<int> molAtoms;
 
       pmol=new Molecule(*this);
 
@@ -1350,12 +1363,18 @@ void Crystal::ConnectAtoms(const REAL min_relat_dist, const REAL max_relat_dist,
       const REAL x0=m00 * x + m01 * y + m02 * z;
       const REAL y0=          m11 * y + m12 * z;
       const REAL z0=                    m22 * z;
-      pmol->AddAtom(x0,y0,z0,mScattCompList(atom0).mpScattPow,mScattCompList(atom0).mpScattPow->GetName(),false);
+      const ScatteringPowerAtom *p0=dynamic_cast<const ScatteringPowerAtom*>(mScattCompList(atom0).mpScattPow);
+      pmol->AddAtom(x0,y0,z0,p0,mScattererRegistry.GetObj(atom0).GetName(),false);
+      molAtoms.insert(atom0);
       REAL xc=x0,yc=y0,zc=z0;
+      // Count atoms in the Molecule per element type
+      vector<unsigned int> vElementCount(140);// Should be safe pending a trans-uranian breakthrough
+      for(vector<unsigned int>::iterator pos=vElementCount.begin();pos!=vElementCount.end();++pos) *pos=0;
+      vElementCount[p0->GetAtomicNumber()]+=1;
       while(newAtoms.size()>0)
       {
          atom0=newAtoms.begin()->first;
-         const ScatteringPowerAtom *p0=dynamic_cast<const ScatteringPowerAtom*>(mScattCompList(atom0).mpScattPow);
+         p0=dynamic_cast<const ScatteringPowerAtom*>(mScattCompList(atom0).mpScattPow);
          VFN_DEBUG_MESSAGE("Crystal::ConnectAtoms(...):atom0="<<atom0<<","<<newAtoms.size()<<" new atoms",7)
          // Add neigbours if between min and max * sum of covalent bonds
          for(std::vector<Crystal::Neighbour>::const_iterator pos=mvDistTableSq[atom0].mvNeighbour.begin();
@@ -1379,12 +1398,53 @@ void Crystal::ConnectAtoms(const REAL min_relat_dist, const REAL max_relat_dist,
                xc+=x0;
                yc+=y0;
                zc+=z0;
-               pmol->AddAtom(x0,y0,z0,mScattCompList(pos->mNeighbourIndex).mpScattPow,mScattererRegistry.GetObj(pos->mNeighbourIndex).GetName(),false);
+               pmol->AddAtom(x0,y0,z0,p1,mScattererRegistry.GetObj(pos->mNeighbourIndex).GetName(),false);
                newAtoms[pos->mNeighbourIndex]=pmol->GetNbComponent()-1;
+               molAtoms.insert(pos->mNeighbourIndex);
+               vElementCount[p1->GetAtomicNumber()]+=1;
             }
          }
          newAtoms.erase(atom0);
       }
+      // Check this is a valid Molecule object
+      bool keep=false;
+      if((vElementCount[6]>0) && (pmol->GetNbComponent()>=3)) keep=true;
+      else
+      {// no carbon ?
+         unsigned int nbElement=0; // number of distinct elements
+         #ifdef __DEBUG__
+         cout<<"  Crystal::ConnectAtoms(..): Molecule ?";
+         #endif
+         for(unsigned int i=0;i<vElementCount.size();++i)
+            if(vElementCount[i]!=0)
+            {
+               nbElement+=1;
+               #ifdef __DEBUG__
+               cout<<"Z="<<i<<"("<< vElementCount[i]<<") ";
+               #endif
+            }
+         #ifdef __DEBUG__
+         cout<<endl;
+         #endif
+         if(nbElement==2)
+         {
+            if((vElementCount[8]==1) && (vElementCount[1]==2)) keep=true; //H2O
+            if((vElementCount[8]==1) && (vElementCount[1]==3)) keep=true; //H3O+
+            if((vElementCount[7]==1) && (vElementCount[1]==3)) keep=true; //NH3
+            if((vElementCount[7]==1) && (vElementCount[1]==4)) keep=true; //NH4+
+            if((vElementCount[5]==1) && (vElementCount[1]==3)) keep=true; //BH3
+            if((vElementCount[5]==1) && (vElementCount[1]==4)) keep=true; //BH4-
+            if((vElementCount[14]==1) && (vElementCount[8]==4)) keep=true; //SiO4
+            if((vElementCount[15]==1) && (vElementCount[8]==4)) keep=true; //PO4
+         }
+      }
+      if(!keep)
+      {
+         delete pmol;
+         for(std::set<int>::const_iterator pos=molAtoms.begin();pos!=molAtoms.end();++pos) vAssignedAtoms.erase((int)(*pos));
+         continue;// Will start from another atom to build a molecule
+      }
+
       // Add bonds
       for(unsigned int i=0;i<pmol->GetAtomList().size();i++)
       {
