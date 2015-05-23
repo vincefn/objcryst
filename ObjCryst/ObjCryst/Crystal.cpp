@@ -22,12 +22,15 @@
 */
 
 #include <cmath>
-
+#include <set>
+#include <vector>
 #include <typeinfo>
 
 #include "cctbx/sgtbx/space_group.h"
 
 #include "ObjCryst/ObjCryst/Crystal.h"
+#include "ObjCryst/ObjCryst/Molecule.h"
+#include "ObjCryst/ObjCryst/Atom.h"
 
 #include "ObjCryst/Quirks/VFNStreamFormat.h" //simple formatting of integers, REALs..
 #include "ObjCryst/Quirks/VFNDebug.h"
@@ -1263,6 +1266,203 @@ void Crystal::Init(const REAL a, const REAL b, const REAL c, const REAL alpha,
    mClockDynPopCorr.Reset();
    
    VFN_DEBUG_MESSAGE("Crystal::Init(a,b,c,alpha,beta,gamma,Sg,name):End",10)
+}
+
+bool CompareBondDist(MolBond* b1, MolBond* b2)
+{
+   return b1->GetLength()<b2->GetLength();
+}
+
+void Crystal::ConnectAtoms(const REAL min_relat_dist, const REAL max_relat_dist, const bool warnuser_fail)
+{
+   VFN_DEBUG_ENTRY("Crystal::ConnectAtoms(...)",10)
+   // Make sure there are only atoms
+   for(unsigned int i=0;i<mScattererRegistry.GetNb();i++)
+   {
+      if(mScattererRegistry.GetObj(i).GetClassName()!="Atom")
+      {
+         if(warnuser_fail) (*fpObjCrystInformUser)("Crystal::ConnectAtoms(): cannot connect atoms unless there are only Atoms in a Crystal");
+         return;
+      }
+   }
+   this->CalcDistTable(true);
+   this->GetScatteringComponentList();
+
+   const CrystMatrix_REAL* pOrthMatrix=&(this->GetOrthMatrix());
+   
+   const REAL m00=(*pOrthMatrix)(0,0);
+   const REAL m01=(*pOrthMatrix)(0,1);
+   const REAL m02=(*pOrthMatrix)(0,2);
+   const REAL m11=(*pOrthMatrix)(1,1);
+   const REAL m12=(*pOrthMatrix)(1,2);
+   const REAL m22=(*pOrthMatrix)(2,2);
+
+   // Create first Molecule
+   // start from start_carbon
+   Molecule *pmol=NULL;
+   std::set<int> vAssignedAtoms;
+   unsigned int nb_unsigned_atoms_last=0;
+   VFN_DEBUG_MESSAGE("Crystal::ConnectAtoms(...)",10)
+   while(vAssignedAtoms.size()!=mScattererRegistry.GetNb())
+   {
+      VFN_DEBUG_MESSAGE("Crystal::ConnectAtoms(...): new Molecule ?",7)
+      // We need at least one carbon atom to start
+      int atom0=-1;
+      for(unsigned int i=0;i<mScattCompList.GetNbComponent();i++)
+      {
+         if(vAssignedAtoms.count(i)>0) continue;
+         if(mScattCompList(i).mpScattPow->GetClassName()=="ScatteringPowerAtom")
+         {
+            const ScatteringPowerAtom *p=dynamic_cast<const ScatteringPowerAtom*>(mScattCompList(i).mpScattPow);
+            if(p->GetAtomicNumber()==6) atom0=i;
+         }
+         else
+         {
+            if(warnuser_fail)
+               (*fpObjCrystInformUser)("Crystal::ConnectAtoms(): cannot connect atoms unless there are only Atoms in a Crystal");
+            VFN_DEBUG_EXIT("Crystal::ConnectAtoms(...):cannot connect atoms unless there are only Atoms in th structure:"<<i<<":"<<mScattCompList(i).mpScattPow->GetClassName(),10)
+            return;
+         }
+         if(atom0>=0)break;
+      }
+      if(atom0<0)
+      {
+         if((pmol==NULL) && warnuser_fail) // We did not create any Molecule :-(
+         {
+            (*fpObjCrystInformUser)("Crystal::ConnectAtoms(): cannot connect atoms unless there is at least one carbon atom");
+            VFN_DEBUG_EXIT("Crystal::ConnectAtoms(...):cannot connect atoms unless there is at least one carbon atom",10)
+            return;
+         }
+         break;
+      }
+      // Atoms in Molecule but for which neighbors have not yet been searched
+      // first: index in the Crystal's scatt comp list, second: index in the Molecule
+      std::map<int,int>newAtoms;
+
+      pmol=new Molecule(*this);
+
+      // Add atom0 to Molecule.
+      newAtoms[atom0]=0;
+      vAssignedAtoms.insert(atom0);
+      const REAL x=mScattCompList(atom0).mX;
+      const REAL y=mScattCompList(atom0).mY;
+      const REAL z=mScattCompList(atom0).mZ;
+      const REAL x0=m00 * x + m01 * y + m02 * z;
+      const REAL y0=          m11 * y + m12 * z;
+      const REAL z0=                    m22 * z;
+      pmol->AddAtom(x0,y0,z0,mScattCompList(atom0).mpScattPow,mScattCompList(atom0).mpScattPow->GetName(),false);
+      REAL xc=x0,yc=y0,zc=z0;
+      while(newAtoms.size()>0)
+      {
+         atom0=newAtoms.begin()->first;
+         const ScatteringPowerAtom *p0=dynamic_cast<const ScatteringPowerAtom*>(mScattCompList(atom0).mpScattPow);
+         VFN_DEBUG_MESSAGE("Crystal::ConnectAtoms(...):atom0="<<atom0<<","<<newAtoms.size()<<" new atoms",7)
+         // Add neigbours if between min and max * sum of covalent bonds
+         for(std::vector<Crystal::Neighbour>::const_iterator pos=mvDistTableSq[atom0].mvNeighbour.begin();
+             pos!=mvDistTableSq[atom0].mvNeighbour.end();pos++)
+         {
+            const ScatteringPowerAtom *p1=dynamic_cast<const ScatteringPowerAtom*>(mScattCompList(pos->mNeighbourIndex).mpScattPow);
+            const REAL dcov= p0->GetCovalentRadius()+p1->GetCovalentRadius();
+            if(  (vAssignedAtoms.count(pos->mNeighbourIndex)!=0) || (p1->GetMaxCovBonds()==0))
+               continue;
+            VFN_DEBUG_MESSAGE("Crystal::ConnectAtoms(...):atom0="<<p0->GetName()<<"-"<<p1->GetName()<<"("<<p1->GetMaxCovBonds()<<"):dcov="<<dcov<<",d="<<sqrt(pos->mDist2),7)
+            if(  ((min_relat_dist*dcov)<sqrt(pos->mDist2))
+               &&((max_relat_dist*dcov)>sqrt(pos->mDist2)))
+            {
+               vAssignedAtoms.insert(pos->mNeighbourIndex);
+               const REAL x=mScattCompList(pos->mNeighbourIndex).mX;
+               const REAL y=mScattCompList(pos->mNeighbourIndex).mY;
+               const REAL z=mScattCompList(pos->mNeighbourIndex).mZ;
+               const REAL x0=m00 * x + m01 * y + m02 * z;
+               const REAL y0=          m11 * y + m12 * z;
+               const REAL z0=                    m22 * z;
+               xc+=x0;
+               yc+=y0;
+               zc+=z0;
+               pmol->AddAtom(x0,y0,z0,mScattCompList(pos->mNeighbourIndex).mpScattPow,mScattererRegistry.GetObj(pos->mNeighbourIndex).GetName(),false);
+               newAtoms[pos->mNeighbourIndex]=pmol->GetNbComponent()-1;
+            }
+         }
+         newAtoms.erase(atom0);
+      }
+      // Add bonds
+      for(unsigned int i=0;i<pmol->GetAtomList().size();i++)
+      {
+         for(unsigned int j=i+1;j<pmol->GetAtomList().size();j++)
+         {
+            const REAL d=GetBondLength(pmol->GetAtom(i), pmol->GetAtom(j));
+            const REAL dcov= dynamic_cast<const ScatteringPowerAtom*>(&(pmol->GetAtom(i).GetScatteringPower()))->GetCovalentRadius()
+                            +dynamic_cast<const ScatteringPowerAtom*>(&(pmol->GetAtom(j).GetScatteringPower()))->GetCovalentRadius();
+            if(  ((min_relat_dist*dcov)<d) && ((max_relat_dist*dcov)>d))
+            {
+               VFN_DEBUG_MESSAGE("Crystal::ConnectAtoms(...):Add bond="<<pmol->GetAtom(i).GetName()<<"-"<<pmol->GetAtom(j).GetName()<<", d="<<d<<"(dcov="<<dcov<<")",6)
+               pmol->AddBond(pmol->GetAtom(i),pmol->GetAtom(j),d,.01,.02,false);
+            }
+         }
+      }
+      // Remove longest bonds if it exceeds the expected coordination
+      for(vector<MolAtom*>::iterator pos=pmol->GetAtomList().begin();pos!=pmol->GetAtomList().end();++pos)
+      {
+         pmol->BuildConnectivityTable();
+         map<MolAtom *,set<MolAtom *> >::const_iterator p=pmol->GetConnectivityTable().find(*pos);
+         const unsigned int maxbonds=dynamic_cast<const ScatteringPowerAtom*>(&(p->first->GetScatteringPower()))->GetMaxCovBonds();
+         int extra=p->second.size()-maxbonds;
+         if(extra>0)
+         {
+            std::vector<MolBond*> vbonds;
+            for(std::set<MolAtom*>::iterator p1=p->second.begin();p1!=p->second.end();++p1)
+               vbonds.push_back(*(pmol->FindBond(**pos,**p1)));// We can assume that exactly one bond is found
+            std::sort(vbonds.begin(), vbonds.end(),CompareBondDist);
+            std::vector<MolBond*>::reverse_iterator p=vbonds.rbegin();
+            for(int j=0;j<extra;j++)
+            {
+               VFN_DEBUG_MESSAGE("Crystal::ConnectAtoms(...): Remove bond="<<(*p)->GetAtom1().GetName()<<"-"<<(*p)->GetAtom2().GetName()<<", d="<<(*p)->GetLength(),10)
+               pmol->RemoveBond(**p++);
+               VFN_DEBUG_MESSAGE("Crystal::ConnectAtoms(...): Next bond  ="<<(*p)->GetAtom1().GetName()<<"-"<<(*p)->GetAtom2().GetName()<<", d="<<(*p)->GetLength(),10)
+            }
+         }
+      }
+
+      // Add all bond angles
+      pmol->BuildConnectivityTable();
+      for(map<MolAtom*,set<MolAtom*> >::const_iterator pos=pmol->GetConnectivityTable().begin();
+          pos!=pmol->GetConnectivityTable().end();++pos)
+      {
+         for(set<MolAtom*>::const_iterator pos1=pos->second.begin();
+             pos1!=pos->second.end();++pos1)
+         {
+            for(set<MolAtom*>::const_iterator pos2=pos1;
+                pos2!=pos->second.end();++pos2)
+            {
+               if(pos2==pos1) continue;
+               if(pmol->FindBondAngle(**pos1,*(pos->first),**pos2)== pmol->GetBondAngleList().end())
+               pmol->AddBondAngle(**pos1,*(pos->first),**pos2,
+                                 GetBondAngle(**pos1,*(pos->first),**pos2),0.01,0.02,false);
+            }
+         }
+      }
+      xc /= pmol->GetNbComponent();
+      yc /= pmol->GetNbComponent();
+      zc /= pmol->GetNbComponent();
+      this->OrthonormalToFractionalCoords(xc,yc,zc);
+      pmol->SetX(xc);
+      pmol->SetY(yc);
+      pmol->SetZ(zc);
+      this->AddScatterer(pmol);
+   }
+   std::set<Scatterer*> vpAtom;
+   for(std::set<int>::const_iterator pos=vAssignedAtoms.begin();pos!=vAssignedAtoms.end();++pos)
+   {
+      Scatterer *s=&(this->GetScattererRegistry().GetObj(*pos));
+      vpAtom.insert(s);
+   }
+   while(vpAtom.size()>0)
+   {
+      VFN_DEBUG_MESSAGE("Crystal::ConnectAtoms(...): remove atom:"<<(*vpAtom.begin())->GetName()<<","<<vpAtom.size()<<" remaining...",6)
+      this->RemoveScatterer(*vpAtom.begin(),true);
+      vpAtom.erase(vpAtom.begin());
+   }
+   VFN_DEBUG_EXIT("Crystal::ConnectAtoms(...)",10)
 }
 
 void Crystal::InitOptions()

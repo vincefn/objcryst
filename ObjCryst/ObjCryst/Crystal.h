@@ -366,7 +366,15 @@ class Crystal:public UnitCell
        * destructor. By default these sub-objects are deleted.
       */
       void SetDeleteSubObjInDestructor(const bool b);
-
+      /** Convert as much as possible the crystal's atoms to molecule(s).
+      *
+      * \param min_relat_dist, max_relat_dist: this compares all interatomic distances with the sum of atomic covalent radii d_cov,
+      *if d_cov*min_relat_dist < d < d_cov*max_relat_dist, the atoms are assumed to be connected by a bond.
+      * This function only works if the Crystal contains only atoms.
+      * \param warnuser_fail: if true, will pass a message to the end user that auto-creating at least one Molecule failed.
+      * \warning: experimental, unstable
+      */
+      void ConnectAtoms(const REAL min_relat_dist=0.4, const REAL max_relat_dist=1.3, const bool warnuser_fail=false);
    private:
       /** Init options.
       *
