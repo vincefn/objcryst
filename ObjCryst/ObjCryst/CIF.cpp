@@ -172,6 +172,24 @@ void CIFData::ExtractName(const bool verbose)
                mName=positem->second;
                if(verbose) cout<<"Found chemical name:"<<mName<<endl;
             }
+            else
+            {
+               positem=mvItem.find("_chemical_formula_moiety");
+               if(positem!=mvItem.end())
+               {
+                  mName=positem->second;
+                  if(verbose) cout<<"Found chemical name:"<<mName<<endl;
+               }
+               else
+               {
+                  positem=mvItem.find("_chemical_formula_sum");
+                  if(positem!=mvItem.end())
+                  {
+                     mName=positem->second;
+                     if(verbose) cout<<"Found chemical name:"<<mName<<endl;
+                  }
+               }
+            }
          }
       }
    }
@@ -760,6 +778,14 @@ CIF::CIF(istream &is, const bool interpret,const bool verbose)
 
 bool iseol(const char c) { return ((c=='\n')||(c=='\r'));}
 
+std::string trimString(const std::string &s)
+{
+   const auto i0 = s.find_first_not_of(" \t\r\n");
+   if (i0 == std::string::npos) return "";
+   const auto i1 = s.find_last_not_of(" \t\r\n");
+   return s.substr(i0, i1-i0+1);
+}
+
 /// Read one value, whether it is numeric, string or text
 string CIFReadValue(stringstream &in,char &lastc)
 {
@@ -789,7 +815,7 @@ string CIFReadValue(stringstream &in,char &lastc)
       in.get(lastc);
       if(vv) cout<<"SemiColonTextField:"<<value<<endl;
       if(warning && !vv) cout<<"SemiColonTextField:"<<value<<endl;
-      return value;
+      return trimString(value);
    }
    if((in.peek()=='\'') || (in.peek()=='\"'))
    {//QuotedString
@@ -802,7 +828,7 @@ string CIFReadValue(stringstream &in,char &lastc)
          value+=lastc;
       }
       if(vv) cout<<"QuotedString:"<<value<<endl;
-      return value.substr(0,value.size()-1);
+      return trimString(value.substr(0,value.size()-1));
    }
    // If we got here, we have an ordinary value, numeric or unquoted string
    in>>value;
@@ -841,6 +867,7 @@ void CIF::Parse(stringstream &in)
          for (string::size_type pos = tag.find('.'); pos != string::npos; pos = tag.find('.', ++ pos))
             tag.replace(pos, 1, 1, '_');
          value=CIFReadValue(in,lastc);
+         if(value==string("?")) continue;//useless
          mvData[block].mvItem[ci_string(tag.c_str())]=value;
          if(vv)cout<<"New Tag:"<<tag<<" ("<<value.size()<<"):"<<value<<endl;
          continue;
