@@ -910,15 +910,7 @@ void WXCrystal::OnMenuCrystalGL(wxCommandEvent & WXUNUSED(event))
    #endif
    
    frame->Show(true);
-   
-   #if 1
-   // Posting an event allows the window to actually be shown before triggering the update
-   wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_GLCRYSTAL_MENU_UPDATE);
-   wxPostEvent(mpCrystalGL,event);
-   #else
-   BBox box=mpCrystalGL->GetCellBBox();
-   this->UpdateGL(false,box.xMin,box.xMax,box.yMin,box.yMax,box.zMin,box.zMax);
-   #endif
+   //The contents to be displayed will be generated on the first OnPaint event, in InitGL
 }
 void WXCrystal::NotifyCrystalGLDelete()
 {
@@ -3672,6 +3664,10 @@ void WXGLCrystalCanvas::NotifyDeleteFourierWin()
 
 void WXGLCrystalCanvas::InitGL()
 {
+   // This is called once, when the window is actually displayed
+   wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_GLCRYSTAL_MENU_UPDATE);
+   wxPostEvent(this,event);
+
    VFN_DEBUG_ENTRY("WXGLCrystalCanvas::InitGL()",8)
    this->SetCurrent();
    #ifdef HAVE_GLUT
