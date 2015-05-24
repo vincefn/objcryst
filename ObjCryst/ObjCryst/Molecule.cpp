@@ -3371,6 +3371,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
          const float r=(*pos)->GetScatteringPower().GetColourRGB()[0];
          const float g=(*pos)->GetScatteringPower().GetColourRGB()[1];
          const float b=(*pos)->GetScatteringPower().GetColourRGB()[2];
+         const float f=(*pos)->GetOccupancy();
          glPushMatrix();
             if(displayNames)
             {
@@ -3395,7 +3396,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
             }
             else
             {
-               const GLfloat colourAtom [] = {r, g, b, 1.0}; 
+               const GLfloat colourAtom [] = {r, g, b, f};
                glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE,   colourAtom); 
                glMaterialfv(GL_FRONT, GL_SPECULAR,              colour0); 
                glMaterialfv(GL_FRONT, GL_EMISSION,              colour0); 
@@ -3511,6 +3512,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                      const float r=mvpAtom[k]->GetScatteringPower().GetColourRGB()[0];
                      const float g=mvpAtom[k]->GetScatteringPower().GetColourRGB()[1];
                      const float b=mvpAtom[k]->GetScatteringPower().GetColourRGB()[2];
+                     const float f=mvpAtom[k]->GetOccupancy();
                      if(displayNames)
                      {
                         GLfloat colourChar [] = {1.0, 1.0, 1.0, 1.0}; 
@@ -3536,7 +3538,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                      {
                         if(!large)
                         {
-                           const GLfloat colourAtom [] = {r, g, b, 1.0}; 
+                           const GLfloat colourAtom [] = {r, g, b, f};
                            glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE,colourAtom); 
                            glMaterialfv(GL_FRONT, GL_SPECULAR,           colour0); 
                            glMaterialfv(GL_FRONT, GL_EMISSION,           colour0); 
@@ -3548,7 +3550,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                         }
                         else
                         {
-                           const GLfloat colourAtom [] = {r, g, b, 1.0}; 
+                           const GLfloat colourAtom [] = {r, g, b, f};
                            glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE,colourAtom); 
                            glMaterialfv(GL_FRONT, GL_SPECULAR,           colour0); 
                            glMaterialfv(GL_FRONT, GL_EMISSION,           colour0); 
@@ -3575,11 +3577,13 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                         const float r1=mvpBond[k]->GetAtom1().GetScatteringPower().GetColourRGB()[0];
                         const float g1=mvpBond[k]->GetAtom1().GetScatteringPower().GetColourRGB()[1];
                         const float b1=mvpBond[k]->GetAtom1().GetScatteringPower().GetColourRGB()[2];
+                        const float f1=mvpBond[k]->GetAtom1().GetOccupancy();
                         const float r2=mvpBond[k]->GetAtom2().GetScatteringPower().GetColourRGB()[0];
                         const float g2=mvpBond[k]->GetAtom2().GetScatteringPower().GetColourRGB()[1];
                         const float b2=mvpBond[k]->GetAtom2().GetScatteringPower().GetColourRGB()[2];
-                        const GLfloat colourAtom1 [] = {r1, g1, b1, 1.0};
-                        const GLfloat colourAtom2 [] = {r2, g2, b2, 1.0};
+                        const float f2=mvpBond[k]->GetAtom2().GetOccupancy();
+                        const GLfloat colourAtom1 [] = {r1, g1, b1, f1};
+                        const GLfloat colourAtom2 [] = {r2, g2, b2, f2};
                         const unsigned long n1=rix[&(mvpBond[k]->GetAtom1())],
                                             n2=rix[&(mvpBond[k]->GetAtom2())];
                         #if 0

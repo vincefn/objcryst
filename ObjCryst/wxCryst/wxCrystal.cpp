@@ -104,6 +104,7 @@ static int sFontDisplayListBase=0;
 
 GLvoid crystGLPrint(const string &s)
 {
+   glDisable (GL_BLEND);
    #ifdef HAVE_GLUT
    for(unsigned int l=0;l<s.size();l++)
       glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12,*(s.c_str()+l));
@@ -113,6 +114,7 @@ GLvoid crystGLPrint(const string &s)
       glCallLists(s.size(), GL_UNSIGNED_BYTE, s.c_str());
    glPopAttrib();
    #endif
+   glEnable (GL_BLEND);
 }
 
 /// Conversion from ZScatterer to the newer Molecule object. (in WXZScatterer.cpp)
@@ -3690,8 +3692,8 @@ void WXGLCrystalCanvas::InitGL()
       
    glEnable(GL_DEPTH_TEST);
    glEnable(GL_LIGHTING);
-   //glEnable (GL_BLEND);
-   //glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+   glEnable (GL_BLEND);
+   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
    
    const GLfloat colour_Ambient [] = {0.4, 0.4, 0.4, 1.00}; 
    const GLfloat colour_Diffuse [] = {0.6, 0.6, 0.6, 1.00}; 

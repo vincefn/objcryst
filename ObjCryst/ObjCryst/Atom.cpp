@@ -286,9 +286,10 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
       const float r=mpScattPowAtom->GetColourRGB()[0];
       const float g=mpScattPowAtom->GetColourRGB()[1];
       const float b=mpScattPowAtom->GetColourRGB()[2];
+      const float f=mOccupancy;
    
       const GLfloat colour0[] = {.0, .0, .0, 0.0}; 
-      const GLfloat colourAtom [] = {r, g, b, 1.0}; 
+      const GLfloat colourAtom [] = {r, g, b, f};
       GLfloat colourChar [] = {1.0, 1.0, 1.0, 1.0}; 
       if((r>0.8)&&(g>0.8)&&(b>0.8))
       {
