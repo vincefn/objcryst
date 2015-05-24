@@ -4095,7 +4095,8 @@ void WXGLCrystalCanvas::POVRayOutput(const std::string &filename)
 {
    ofstream os(filename.c_str());
    
-   os << "// This File was created by FOX/ObjCryst++ (http://objcryst.sf.net)"<<endl
+   os << "#version 3.6 ;"<<endl
+      << "// This File was created by FOX/ObjCryst++ (http://objcryst.sf.net)"<<endl
       << "//"<<endl
       << "// You can produce a ray-traced image using POV-Ray, freely available"<<endl
       << "//from http://www.povray.org"<<endl
