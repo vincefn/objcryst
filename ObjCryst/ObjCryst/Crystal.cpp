@@ -1349,24 +1349,25 @@ void Crystal::ConnectAtoms(const REAL min_relat_dist, const REAL max_relat_dist,
       // Atoms in Molecule but for which neighbors have not yet been searched
       // first: index in the Crystal's scatt comp list, second: index in the Molecule
       std::map<int,int>newAtoms;
-      // List of all atoms in the Molecule, except atom0
-      std::set<int> molAtoms;
+      // List of all atoms in the Molecule. First is the MolAtom* in the molecule, second is the index in the Crystal
+      std::map<MolAtom*,int> molAtoms;
 
       pmol=new Molecule(*this);
 
       // Add atom0 to Molecule.
       newAtoms[atom0]=0;
       vAssignedAtoms.insert(atom0);
-      const REAL x=mScattCompList(atom0).mX;
-      const REAL y=mScattCompList(atom0).mY;
-      const REAL z=mScattCompList(atom0).mZ;
-      const REAL x0=m00 * x + m01 * y + m02 * z;
-      const REAL y0=          m11 * y + m12 * z;
-      const REAL z0=                    m22 * z;
       const ScatteringPowerAtom *p0=dynamic_cast<const ScatteringPowerAtom*>(mScattCompList(atom0).mpScattPow);
-      pmol->AddAtom(x0,y0,z0,p0,mScattererRegistry.GetObj(atom0).GetName(),false);
-      molAtoms.insert(atom0);
-      REAL xc=x0,yc=y0,zc=z0;
+      {
+         REAL x=mScattCompList(atom0).mX;
+         REAL y=mScattCompList(atom0).mY;
+         REAL z=mScattCompList(atom0).mZ;
+         const REAL occ=mScattCompList(atom0).mOccupancy;
+         this->FractionalToOrthonormalCoords(x,y,z);
+         pmol->AddAtom(x,y,z,p0,mScattererRegistry.GetObj(atom0).GetName(),false);
+         pmol->GetAtomList().back()->SetOccupancy(occ);
+      }
+      molAtoms[pmol->GetAtomList().back()]=atom0;
       // Count atoms in the Molecule per element type
       vector<unsigned int> vElementCount(140);// Should be safe pending a trans-uranian breakthrough
       for(vector<unsigned int>::iterator pos=vElementCount.begin();pos!=vElementCount.end();++pos) *pos=0;
@@ -1389,18 +1390,15 @@ void Crystal::ConnectAtoms(const REAL min_relat_dist, const REAL max_relat_dist,
                &&((max_relat_dist*dcov)>sqrt(pos->mDist2)))
             {
                vAssignedAtoms.insert(pos->mNeighbourIndex);
-               const REAL x=mScattCompList(pos->mNeighbourIndex).mX;
-               const REAL y=mScattCompList(pos->mNeighbourIndex).mY;
-               const REAL z=mScattCompList(pos->mNeighbourIndex).mZ;
-               const REAL x0=m00 * x + m01 * y + m02 * z;
-               const REAL y0=          m11 * y + m12 * z;
-               const REAL z0=                    m22 * z;
-               xc+=x0;
-               yc+=y0;
-               zc+=z0;
-               pmol->AddAtom(x0,y0,z0,p1,mScattererRegistry.GetObj(pos->mNeighbourIndex).GetName(),false);
+               REAL x=mScattCompList(pos->mNeighbourIndex).mX;
+               REAL y=mScattCompList(pos->mNeighbourIndex).mY;
+               REAL z=mScattCompList(pos->mNeighbourIndex).mZ;
+               this->FractionalToOrthonormalCoords(x,y,z);
+               const REAL occ=mScattCompList(pos->mNeighbourIndex).mOccupancy;
+               pmol->AddAtom(x,y,z,p1,mScattererRegistry.GetObj(pos->mNeighbourIndex).GetName(),false);
+               pmol->GetAtomList().back()->SetOccupancy(occ);
                newAtoms[pos->mNeighbourIndex]=pmol->GetNbComponent()-1;
-               molAtoms.insert(pos->mNeighbourIndex);
+               molAtoms[pmol->GetAtomList().back()]=pos->mNeighbourIndex;
                vElementCount[p1->GetAtomicNumber()]+=1;
             }
          }
@@ -1411,14 +1409,15 @@ void Crystal::ConnectAtoms(const REAL min_relat_dist, const REAL max_relat_dist,
       if((vElementCount[6]>0) && (pmol->GetNbComponent()>=3)) keep=true;
       else
       {// no carbon ?
-         unsigned int nbElement=0; // number of distinct elements
+         
+         std::vector<unsigned int> vnb;
          #ifdef __DEBUG__
          cout<<"  Crystal::ConnectAtoms(..): Molecule ?";
          #endif
          for(unsigned int i=0;i<vElementCount.size();++i)
             if(vElementCount[i]!=0)
             {
-               nbElement+=1;
+               vnb.push_back(vElementCount[i]);
                #ifdef __DEBUG__
                cout<<"Z="<<i<<"("<< vElementCount[i]<<") ";
                #endif
@@ -1426,22 +1425,29 @@ void Crystal::ConnectAtoms(const REAL min_relat_dist, const REAL max_relat_dist,
          #ifdef __DEBUG__
          cout<<endl;
          #endif
-         if(nbElement==2)
+         if(vnb.size()==2)
          {
+            #if 0
             if((vElementCount[8]==1) && (vElementCount[1]==2)) keep=true; //H2O
             if((vElementCount[8]==1) && (vElementCount[1]==3)) keep=true; //H3O+
             if((vElementCount[7]==1) && (vElementCount[1]==3)) keep=true; //NH3
             if((vElementCount[7]==1) && (vElementCount[1]==4)) keep=true; //NH4+
+            if((vElementCount[7]==1) && (vElementCount[8]==2)) keep=true; //NO2
+            if((vElementCount[7]==1) && (vElementCount[8]==3)) keep=true; //NO3-
             if((vElementCount[5]==1) && (vElementCount[1]==3)) keep=true; //BH3
             if((vElementCount[5]==1) && (vElementCount[1]==4)) keep=true; //BH4-
             if((vElementCount[14]==1) && (vElementCount[8]==4)) keep=true; //SiO4
             if((vElementCount[15]==1) && (vElementCount[8]==4)) keep=true; //PO4
+            #else
+            // Accept any type of small molecule/polyedra with one center atom
+            if( ((vnb[0]==1)||(vnb[1]==1)) &&((vnb[0]+vnb[1])>2)) keep=true;
+            #endif
          }
       }
       if(!keep)
       {
          delete pmol;
-         for(std::set<int>::const_iterator pos=molAtoms.begin();pos!=molAtoms.end();++pos) vAssignedAtoms.erase((int)(*pos));
+         for(std::map<MolAtom*,int>::const_iterator pos=molAtoms.begin();pos!=molAtoms.end();++pos) vAssignedAtoms.erase(pos->second);
          continue;// Will start from another atom to build a molecule
       }
 
@@ -1461,26 +1467,46 @@ void Crystal::ConnectAtoms(const REAL min_relat_dist, const REAL max_relat_dist,
          }
       }
       // Remove longest bonds if it exceeds the expected coordination
-      for(vector<MolAtom*>::iterator pos=pmol->GetAtomList().begin();pos!=pmol->GetAtomList().end();++pos)
+      for(vector<MolAtom*>::iterator pos=pmol->GetAtomList().begin();pos!=pmol->GetAtomList().end();)
       {
          pmol->BuildConnectivityTable();
          map<MolAtom *,set<MolAtom *> >::const_iterator p=pmol->GetConnectivityTable().find(*pos);
+         VFN_DEBUG_MESSAGE("Crystal::ConnectAtoms(...):max bonds for:"<<(*pos)->GetName()<<"?",10)
+         if(p==pmol->GetConnectivityTable().end())
+         {// While cleaning the longest bond, this atom had all his bonds removed !
+            VFN_DEBUG_MESSAGE("Crystal::ConnectAtoms(...):no bond remaining for:"<<(*pos)->GetName()<<"! Removing atom from Molecule",10)
+            //Remove MolAtom from Molecule and keep in Crystal.
+            vAssignedAtoms.erase(molAtoms[*pos]);
+            molAtoms.erase(*pos);
+            pos=pmol->RemoveAtom(**pos);
+            continue;
+         }
          const unsigned int maxbonds=dynamic_cast<const ScatteringPowerAtom*>(&(p->first->GetScatteringPower()))->GetMaxCovBonds();
          int extra=p->second.size()-maxbonds;
          if(extra>0)
          {
+            // Check real number of bonds taking into account occupancy, and sort bonds by length
             std::vector<MolBond*> vbonds;
+            REAL nbbond=0;
             for(std::set<MolAtom*>::iterator p1=p->second.begin();p1!=p->second.end();++p1)
-               vbonds.push_back(*(pmol->FindBond(**pos,**p1)));// We can assume that exactly one bond is found
-            std::sort(vbonds.begin(), vbonds.end(),CompareBondDist);
-            std::vector<MolBond*>::reverse_iterator p=vbonds.rbegin();
-            for(int j=0;j<extra;j++)
             {
-               VFN_DEBUG_MESSAGE("Crystal::ConnectAtoms(...): Remove bond="<<(*p)->GetAtom1().GetName()<<"-"<<(*p)->GetAtom2().GetName()<<", d="<<(*p)->GetLength(),10)
-               pmol->RemoveBond(**p++);
-               VFN_DEBUG_MESSAGE("Crystal::ConnectAtoms(...): Next bond  ="<<(*p)->GetAtom1().GetName()<<"-"<<(*p)->GetAtom2().GetName()<<", d="<<(*p)->GetLength(),10)
+               vbonds.push_back(*(pmol->FindBond(**pos,**p1)));// We can assume that exactly one bond is found
+               nbbond+=(*p1)->GetOccupancy();
+            }
+            VFN_DEBUG_MESSAGE("Crystal::ConnectAtoms(...): too many bonds for"<<(*pos)->GetName()<<" ?(allowed="<<maxbonds<<",nb="<<p->second.size()<<",nb_occ="<<nbbond<<")", 10)
+            if((nbbond-maxbonds)>0.2)
+            {
+               std::sort(vbonds.begin(), vbonds.end(),CompareBondDist);
+               std::vector<MolBond*>::reverse_iterator p=vbonds.rbegin();
+               for(int j=0;j<extra;j++)
+               {
+                  VFN_DEBUG_MESSAGE("Crystal::ConnectAtoms(...): Remove bond="<<(*p)->GetAtom1().GetName()<<"-"<<(*p)->GetAtom2().GetName()<<", d="<<(*p)->GetLength(),10)
+                  pmol->RemoveBond(**p++);
+                  VFN_DEBUG_MESSAGE("Crystal::ConnectAtoms(...): Next bond  ="<<(*p)->GetAtom1().GetName()<<"-"<<(*p)->GetAtom2().GetName()<<", d="<<(*p)->GetLength(),10)
+               }
             }
          }
+         ++pos;
       }
 
       // Add all bond angles
@@ -1501,10 +1527,23 @@ void Crystal::ConnectAtoms(const REAL min_relat_dist, const REAL max_relat_dist,
             }
          }
       }
+      // Correct center of Molecule
+      REAL xc=0,yc=0,zc=0;
+      for(std::map<MolAtom*,int>::const_iterator pos=molAtoms.begin();pos!=molAtoms.end();++pos)
+      {
+         REAL x=mScattCompList(pos->second).mX;
+         REAL y=mScattCompList(pos->second).mY;
+         REAL z=mScattCompList(pos->second).mZ;
+         this->FractionalToOrthonormalCoords(x,y,z);
+         xc+=x;
+         yc+=y;
+         zc+=z;
+      }
       xc /= pmol->GetNbComponent();
       yc /= pmol->GetNbComponent();
       zc /= pmol->GetNbComponent();
       this->OrthonormalToFractionalCoords(xc,yc,zc);
+      VFN_DEBUG_MESSAGE("Crystal::ConnectAtoms(...): center?"<<pmol->GetNbComponent()<<","<<molAtoms.size()<<":"<<xc<<","<<yc<<","<<zc,10)
       pmol->SetX(xc);
       pmol->SetY(yc);
       pmol->SetZ(zc);
