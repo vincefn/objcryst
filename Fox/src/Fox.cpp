@@ -281,12 +281,16 @@ private:
    wxListBox *mpBrowseList;
 #ifdef __FOX_COD__
    std::list<wxTextCtrl*> mvpCOD_Elements;
+   std::list<wxTextCtrl*> mvpCOD_Authors;
+   std::list<wxTextCtrl*> mvpCOD_TitleWords;
    wxTextCtrl* mpCOD_MinNel;
    wxTextCtrl* mpCOD_MaxNel;
+   wxTextCtrl* mpCOD_MinVol;
+   wxTextCtrl* mpCOD_MaxVol;
    wxListBox* mpCOD_List;
    wxMiniFrame *mpCODFrame;
    wxGrid *mpCODGrid;
-   std::map<long,cod_record> mvCOD_Record;
+   std::vector<cod_record> mvCOD_Record;
 #endif
 };
 
@@ -2534,17 +2538,57 @@ void WXCrystMainFrame::OnCOD(wxCommandEvent &event)
    mpNotebook->AddPage(pWinCOD,_T("COD"),true);
    wxBoxSizer *topsizer=new wxBoxSizer(wxVERTICAL);
    pWinCOD->SetSizer(topsizer);
-   wxBoxSizer *sizer1=new wxBoxSizer(wxHORIZONTAL);
-   topsizer->Add(sizer1);
-   wxStaticText *pElements=new wxStaticText(pWinCOD,-1,"Elements");
-   sizer1->Add(pElements);
+
+   wxBoxSizer *tmpsizer;
+   
+   tmpsizer=new wxBoxSizer(wxHORIZONTAL);
+   topsizer->Add(tmpsizer);
+   wxStaticText *pWords=new wxStaticText(pWinCOD,-1,"Words (title, crystal name):");
+   tmpsizer->Add(pWords);
+   for(unsigned int i=0;i<3;i++)
+   {
+      mvpCOD_TitleWords.push_back(new wxTextCtrl(pWinCOD,-1));
+      tmpsizer->Add(mvpCOD_TitleWords.back());
+   }
+
+   tmpsizer=new wxBoxSizer(wxHORIZONTAL);
+   topsizer->Add(tmpsizer);
+   wxStaticText *pElements=new wxStaticText(pWinCOD,-1,"Elements ('C', 'O6'..):");
+   tmpsizer->Add(pElements);
    for(unsigned int i=0;i<6;i++)
    {
-      wxTextCtrl* ptxt=new wxTextCtrl(pWinCOD,-1);
-      mvpCOD_Elements.push_back(ptxt);
-      sizer1->Add(ptxt);
+      mvpCOD_Elements.push_back(new wxTextCtrl(pWinCOD,-1));
+      tmpsizer->Add(mvpCOD_Elements.back());
    }
-   
+
+   tmpsizer=new wxBoxSizer(wxHORIZONTAL);
+   topsizer->Add(tmpsizer);
+   wxStaticText *pAuthors=new wxStaticText(pWinCOD,-1,"Author names:");
+   tmpsizer->Add(pAuthors);
+   for(unsigned int i=0;i<3;i++)
+   {
+      mvpCOD_Authors.push_back(new wxTextCtrl(pWinCOD,-1));
+      tmpsizer->Add(mvpCOD_Authors.back());
+   }
+
+   tmpsizer=new wxBoxSizer(wxHORIZONTAL);
+   topsizer->Add(tmpsizer);
+   wxStaticText *pNbElements=new wxStaticText(pWinCOD,-1,"Min and Max number of elements:");
+   tmpsizer->Add(pNbElements);
+   mpCOD_MinNel=new wxTextCtrl(pWinCOD,-1);
+   tmpsizer->Add(mpCOD_MinNel);
+   mpCOD_MaxNel=new wxTextCtrl(pWinCOD,-1);
+   tmpsizer->Add(mpCOD_MaxNel);
+
+   tmpsizer=new wxBoxSizer(wxHORIZONTAL);
+   topsizer->Add(tmpsizer);
+   wxStaticText *pVolume=new wxStaticText(pWinCOD,-1,"Min and Max unit cell volume (A^3):");
+   tmpsizer->Add(pVolume);
+   mpCOD_MinVol=new wxTextCtrl(pWinCOD,-1);
+   tmpsizer->Add(mpCOD_MinVol);
+   mpCOD_MaxVol=new wxTextCtrl(pWinCOD,-1);
+   tmpsizer->Add(mpCOD_MaxVol);
+
    wxButton *pbut=new wxButton(pWinCOD,ID_FOX_BUTTON_COD,"Query COD");
    topsizer->Add(pbut);
    pWinCOD->Layout();
@@ -2569,22 +2613,101 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
           <<"   message:"<<except.msg<<endl
           <<"   sqlstate:"<<except.sqlstate<<endl;
    }
+   if(mpCODFrame!=0) mpCODFrame->Close();
    VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton()",10)
-   try {
-      otl_stream i(50, // buffer size may be > 1
-                   "select file,a,b,c,alpha,beta,gamma,vol,sg,sgHall,nel,commonname,chemname,mineral,formula,calcformula,authors,title,journal,volume,year,firstpage from data where (formula rlike '[[:blank:]]W[[:digit:]]' or formula rlike '[[:blank:]]W[[:blank:]]') and (formula rlike '[[:blank:]]O[[:digit:]]' or formula rlike '[[:blank:]]O[[:blank:]]') and nel=2 order by formula",
-                   // SELECT statement
-                   db // connect object
-                   );
+   try
+   {
+      stringstream query;
+      query<<"select file,a,b,c,alpha,beta,gamma,vol,sg,sgHall,nel,commonname,chemname,mineral,formula,calcformula,authors,title,journal,volume,year,firstpage from data where ";
+      //Read parameters from GUI
+      wxString v;
+      bool notfirst=false;
+      //Elements
+      for(std::list<wxTextCtrl*>::iterator pos=mvpCOD_Elements.begin();pos!=mvpCOD_Elements.end();++pos)
+      {
+         v=(*pos)->GetValue();
+         if(v.IsEmpty()==false)
+         {
+            if(notfirst) query<<"and ";notfirst=true;
+            query<<"(formula rlike '[[:blank:]]"<<v<<"[[:digit:]]' or formula rlike '[[:blank:]]"<<v<<"[[:blank:]]') ";
+            
+         }
+      }
+      //Nb elements
+      v=mpCOD_MinNel->GetValue();
+      if(v.IsEmpty()==false)
+      {
+         if(notfirst) query<<"and ";notfirst=true;
+         query<<"nel>="<<v<<" ";
+      }
+      v=mpCOD_MaxNel->GetValue();
+      if(v.IsEmpty()==false)
+      {
+         if(notfirst) query<<"and ";notfirst=true;
+         query<<"nel<="<<v<<" ";
+      }
+
+      //Volume
+      v=mpCOD_MinVol->GetValue();
+      if(v.IsEmpty()==false)
+      {
+         if(notfirst) query<<"and ";notfirst=true;
+         query<<"vol>="<<v<<" ";
+      }
+      v=mpCOD_MaxVol->GetValue();
+      if(v.IsEmpty()==false)
+      {
+         if(notfirst) query<<"and ";notfirst=true;
+         query<<"vol<="<<v<<" ";
+      }
+
+      //Authors
+      for(std::list<wxTextCtrl*>::iterator pos=mvpCOD_Authors.begin();pos!=mvpCOD_Authors.end();++pos)
+      {
+         v=(*pos)->GetValue();
+         if(v.IsEmpty()==false)
+         {
+            if(notfirst) query<<"and ";notfirst=true;
+            query<<"authors rlike '"<<v<<"' ";
+         }
+      }
+
+      //Words
+      for(std::list<wxTextCtrl*>::iterator pos=mvpCOD_TitleWords.begin();pos!=mvpCOD_TitleWords.end();++pos)
+      {
+         v=(*pos)->GetValue();
+         if(v.IsEmpty()==false)
+         {
+            if(notfirst) query<<"and ";notfirst=true;
+            query<<"(title rlike '"<<v<<"' ";
+            query<<"or mineral rlike '"<<v<<"' ";
+            query<<"or chemname rlike '"<<v<<"' ";
+            query<<"or commonname rlike '"<<v<<"') ";
+         }
+      }
+
+      if(notfirst==false)
+      {
+         wxMessageDialog d(this,_T("COD: Empty request !"),_T("Error"),wxOK|wxICON_ERROR);
+         d.ShowModal();
+         return;
+      }
+      query<<"order by formula limit 500";
+      
+      VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton():Query="<<query.str(), 10)
+      
+      otl_stream i(50, query.str().c_str(),db);
       long codid;//'file' record in COD
       
       i; // Writing input values into the stream
+      mvCOD_Record.clear();
       while(!i.eof())
       { // while not end-of-data
-         i>>codid;
          //mvCOD_Record[codid]=cod_record();
-         cod_record *p=&(mvCOD_Record[codid]);
-         cout<<"COD id="<<codid<<"("<<mvCOD_Record.size()<<")"<<endl;
+         mvCOD_Record.push_back(cod_record());
+         cod_record *p=&(mvCOD_Record.back());
+         i>> p->file;
+         //cout<<"COD id="<<p->file<<"("<<mvCOD_Record.size()<<")"<<endl;
          i>> p->a;
          i>> p->b;
          i>> p->c;
@@ -2617,29 +2740,36 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
       cout<<"OTL Exception!"<<endl
       <<"   message:"<<except.msg<<endl
       <<"   sqlstate:"<<except.sqlstate<<endl;
+      wxMessageDialog d(this,_T("COD: SQL Error ?")+wxString(except.msg),_T("Error"),wxOK|wxICON_ERROR);
+      d.ShowModal();
+      return;
    }
-   if(mpCODFrame==0)
+   if(mvCOD_Record.size()==0)
    {
-      mpCODFrame= new wxMiniFrame(this,-1, _T("Crystallography Open Database results"),
-                                  wxDefaultPosition,wxSize(700,500),wxCLOSE_BOX|wxCAPTION|wxSTAY_ON_TOP);
-      wxSizer *pSizer=new wxBoxSizer(wxHORIZONTAL);
-      mpCODFrame->SetSizer(pSizer);
-      mpCODGrid=new wxGrid(mpCODFrame,ID_FOX_COD_LIST,wxDefaultPosition,wxDefaultSize);
-      mpCODGrid->SetDefaultCellFont(wxFont(10,wxTELETYPE,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_BOLD));
-      mpCODGrid->EnableEditing(false);
-      mpCODFrame->Show();
-      pSizer->Add(mpCODGrid,wxEXPAND);
-      mpCODFrame->PostSizeEvent();
+      wxMessageDialog d(this,_T("COD: No results !"),_T("No results"),wxOK|wxICON_ERROR);
+      d.ShowModal();
+      return;
    }
+   mpCODFrame= new wxMiniFrame(this,-1, _T("Crystallography Open Database results"),
+                                  wxDefaultPosition,wxSize(700,500),wxCLOSE_BOX|wxCAPTION|wxSTAY_ON_TOP);
+   wxSizer *pSizer=new wxBoxSizer(wxHORIZONTAL);
+   mpCODFrame->SetSizer(pSizer);
+   mpCODGrid=new wxGrid(mpCODFrame,ID_FOX_COD_LIST,wxDefaultPosition,wxDefaultSize);
+   mpCODGrid->SetDefaultCellFont(wxFont(10,wxTELETYPE,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_BOLD));
+   mpCODGrid->EnableEditing(false);
+   mpCODFrame->Show();
+   pSizer->Add(mpCODGrid,wxEXPAND);
+   mpCODFrame->PostSizeEvent();
    mpCODGrid->SetColLabelSize(0);
    mpCODGrid->SetRowLabelSize(0);
+   VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton()"<<mpCODGrid<<","<<mvCOD_Record.size(), 10)
    mpCODGrid->CreateGrid(3*mvCOD_Record.size(),2);
-   std::map<long,cod_record>::const_iterator ps=mvCOD_Record.begin();
+   std::vector<cod_record>::const_iterator ps=mvCOD_Record.begin();
    for(unsigned int i=0;i<mvCOD_Record.size();i++)
    {
       mpCODGrid->SetCellSize(i*3,0,3,1);
       mpCODGrid->SetCellAlignment(i*3,0, wxALIGN_CENTER, wxALIGN_CENTER);
-      const cod_record *c=&(ps->second);
+      const cod_record *c=(cod_record*)&(*ps);
       mpCODGrid->SetCellValue(i*3,0,wxString::Format("%s",c->formula.substr(2,c->formula.size()-4).c_str()));
       mpCODGrid->SetCellValue(i*3,1,wxString::Format("%.2f %.2f %.2f %.1f %.1f %.1f %s",c->a,c->b,c->c,c->alpha,c->beta,c->gamma,c->sg));
       mpCODGrid->SetCellValue(i*3+1,1,wxString::Format("%s %ld (%ld), %s: %s",c->journal,c->volume,c->year,c->firstpage,c->authors));
@@ -2653,9 +2783,9 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
 
 void WXCrystMainFrame::OnCODSelect(wxGridEvent &ev)
 {
-   std::map<long,cod_record>::const_iterator pos=mvCOD_Record.begin();
-   for(unsigned int i=0;i<ev.GetRow();i++) pos++;
-   wxString cifurl=wxString::Format("http://www.crystallography.net/%ld.cif",pos->first);
+   std::vector<cod_record>::const_iterator pos=mvCOD_Record.begin();
+   for(unsigned int i=ev.GetRow()/3;i>0;i--) pos++;
+   wxString cifurl=wxString::Format("http://www.crystallography.net/%ld.cif",pos->file);
    cout<<cifurl<<endl;
    if(!(wxFileSystem::HasHandlerForPath(cifurl)))
       wxFileSystem::AddHandler(new wxInternetFSHandler);
@@ -2672,12 +2802,16 @@ void WXCrystMainFrame::OnCODSelect(wxGridEvent &ev)
       std::stringstream in;
       in<<wxcif.GetString();
       ObjCryst::CIF cif(in,true,true);
-      CreateCrystalFromCIF(cif);
+      bool oneScatteringPowerPerElement, connectAtoms;
+      wxConfigBase::Get()->Read(_T("Fox/BOOL/CIF import: automatically convert to molecules"), &connectAtoms);
+      wxConfigBase::Get()->Read(_T("Fox/BOOL/CIF import: only one scattering power per element"), &oneScatteringPowerPerElement);
+      CreateCrystalFromCIF(cif, true, true, oneScatteringPowerPerElement, connectAtoms);
       CreatePowderPatternFromCIF(cif);
       CreateSingleCrystalDataFromCIF(cif);
       //FoxGrid
       mpGridWindow->DataLoaded();
    }
+   cout<<cifurl<<endl;
 }
 
 #endif
