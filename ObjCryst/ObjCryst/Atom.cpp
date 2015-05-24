@@ -262,8 +262,9 @@ ostream& Atom::POVRayDescription(ostream &os,
                <<x<<","
                <<y<<","
                <<z<<","
-               <<this->GetScatteringPower().GetRadius()<<","
-               <<"colour_"+this->GetScatteringPower().GetName()
+               <<this->GetScatteringPower().GetRadius()/3.0<<","
+               <<"colour_"+this->GetScatteringPower().GetName()<<","
+               <<1-this->GetOccupancy()
                <<")"<<endl;
          }
       }

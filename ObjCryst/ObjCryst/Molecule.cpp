@@ -3295,8 +3295,9 @@ ostream& Molecule::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opt
                   <<x(k)<<","
                   <<y(k)<<","
                   <<z(k)<<","
-                  <<mvpAtom[k]->GetScatteringPower().GetRadius()<<","
-                  <<"colour_"+mvpAtom[k]->GetScatteringPower().GetName()
+                  <<mvpAtom[k]->GetScatteringPower().GetRadius()/3.0<<","
+                  <<"colour_"+mvpAtom[k]->GetScatteringPower().GetName()<<","
+                  <<1-this->GetOccupancy()*mvpAtom[k]->GetOccupancy()
                   <<")"<<endl;
             }
             for(unsigned int k=0;k<mvpBond.size();k++)
@@ -3309,13 +3310,26 @@ ostream& Molecule::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opt
                   if(mvpAtom[n1]==&(mvpBond[k]->GetAtom1())) break;
                for(n2=0;n2<mvpAtom.size();n2++)
                   if(mvpAtom[n2]==&(mvpBond[k]->GetAtom2())) break;
+               REAL x1=x(n1),y1=y(n1),z1=z(n1),
+                    x2=x(n2),y2=y(n2),z2=z(n2);
+               REAL dx=x2-x1,dy=y2-y1,dz=z2-z1;
+               const REAL r=sqrt(abs(dx*dx+dy*dy+dz*dz))+1e-6;
+               const REAL r1=mvpAtom[n1]->GetScatteringPower().GetRadius()/3.0;
+               const REAL r2=mvpAtom[n2]->GetScatteringPower().GetRadius()/3.0;
+               x1+=dx/r*r1*sqrt(abs(1-0.1/r1));
+               y1+=dy/r*r1*sqrt(abs(1-0.1/r1));
+               z1+=dz/r*r1*sqrt(abs(1-0.1/r1));
+               x2-=dx/r*r2*sqrt(abs(1-0.1/r2));
+               y2-=dy/r*r2*sqrt(abs(1-0.1/r2));
+               z2-=dz/r*r2*sqrt(abs(1-0.1/r2));
+               const REAL f=1-this->GetOccupancy()*(mvpAtom[n1]->GetOccupancy()+mvpAtom[n2]->GetOccupancy())/2.0;
                os << "    ObjCrystBond("
-                  <<x(n1)<<","<<y(n1)<<","<<z(n1)<< ","
-                  <<x(n2)<<","<<y(n2)<<","<<z(n2)<< ","
+                  <<x1<<","<<y1<<","<<z1<< ","
+                  <<x2<<","<<y2<<","<<z2<< ","
                   << "0.1,";
-               if(mvpBond[k]->IsFreeTorsion()) os<<"colour_freebond)"<<endl;
-               else os<<"colour_nonfreebond)"<<endl;
-
+               if(mvpBond[k]->IsFreeTorsion()) os<<"colour_freebond,";
+               else os<<"colour_nonfreebond,";
+               os<<f<<")"<<endl;
             }
          }//if in limits
          x=xSave;
@@ -3371,7 +3385,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
          const float r=(*pos)->GetScatteringPower().GetColourRGB()[0];
          const float g=(*pos)->GetScatteringPower().GetColourRGB()[1];
          const float b=(*pos)->GetScatteringPower().GetColourRGB()[2];
-         const float f=(*pos)->GetOccupancy();
+         const float f=(*pos)->GetOccupancy()*this->GetOccupancy();
          glPushMatrix();
             if(displayNames)
             {
@@ -3512,7 +3526,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                      const float r=mvpAtom[k]->GetScatteringPower().GetColourRGB()[0];
                      const float g=mvpAtom[k]->GetScatteringPower().GetColourRGB()[1];
                      const float b=mvpAtom[k]->GetScatteringPower().GetColourRGB()[2];
-                     const float f=mvpAtom[k]->GetOccupancy();
+                     const float f=mvpAtom[k]->GetOccupancy()*this->GetOccupancy();
                      if(displayNames)
                      {
                         GLfloat colourChar [] = {1.0, 1.0, 1.0, 1.0}; 
@@ -3658,14 +3672,28 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                         glMaterialfv(GL_FRONT, GL_EMISSION,  colour0); 
                         glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
                         glPolygonMode(GL_FRONT, GL_FILL);
+                        // ACtually make the bond start/end at the surface of the spheres (matters when transparent)
+                        REAL x1=x(n1),y1=y(n1),z1=z(n1),
+                        x2=x(n2),y2=y(n2),z2=z(n2);
+                        REAL dx=x2-x1,dy=y2-y1,dz=z2-z1;
+                        const REAL r=sqrt(abs(dx*dx+dy*dy+dz*dz))+1e-6;
+                        const REAL r1=mvpAtom[n1]->GetScatteringPower().GetRadius()/3.0;
+                        const REAL r2=mvpAtom[n2]->GetScatteringPower().GetRadius()/3.0;
+                        x1+=dx/r*r1*sqrt(abs(1-0.1/r1));
+                        y1+=dy/r*r1*sqrt(abs(1-0.1/r1));
+                        z1+=dz/r*r1*sqrt(abs(1-0.1/r1));
+                        x2-=dx/r*r2*sqrt(abs(1-0.1/r2));
+                        y2-=dy/r*r2*sqrt(abs(1-0.1/r2));
+                        z2-=dz/r*r2*sqrt(abs(1-0.1/r2));
+                        const REAL f=1-this->GetOccupancy()*(mvpAtom[n1]->GetOccupancy()+mvpAtom[n2]->GetOccupancy())/2.0;
                         glPushMatrix();
-                           glTranslatef(x(n1)*en, y(n1), z(n1));
+                           glTranslatef(x1*en, y1, z1);
                            GLUquadricObj *quadobj = gluNewQuadric();
                            //glColor4f(1.0f,1.0f,1.0f,1.0);
-                           const REAL height= sqrt(abs(  (x(n2)-x(n1))*(x(n2)-x(n1))
-                                                        +(y(n2)-y(n1))*(y(n2)-y(n1))
-                                                        +(z(n2)-z(n1))*(z(n2)-z(n1))));
-                           glRotatef(180,(x(n2)-x(n1))*en,y(n2)-y(n1),z(n2)-z(n1)+height);// ?!?!?!
+                           const REAL height= sqrt(abs(  (x2-x1)*(x2-x1)
+                                                        +(y2-y1)*(y2-y1)
+                                                        +(z2-z1)*(z2-z1)));
+                           glRotatef(180,(x2-x1)*en,y2-y1,z2-z1+height);// ?!?!?!
                            gluCylinder(quadobj,.1,.1,height,10,1 );
                            gluDeleteQuadric(quadobj);
                         glPopMatrix();
