@@ -1795,11 +1795,11 @@ void WXCrystMainFrame::SafeQuit()
 {
    if(mpGridWindow->m_WXFoxServer!=NULL)
    {
-      wxMessageDialog d(this,_T("You are trying to close server. Are you sure?"), _T(""), wxYES | wxNO);
+      wxMessageDialog d(this,_T("You are trying to close server. Are you sure?"), _T(""), wxYES | wxNO | wxCENTER | wxSTAY_ON_TOP);
       if(wxID_YES!=d.ShowModal()) return;
    }
    if(mpGridWindow->m_WXFoxClient!=NULL){
-       wxMessageDialog d(this,_T("You are trying to close client. Are you sure?"), _T(""), wxYES | wxNO);
+       wxMessageDialog d(this,_T("You are trying to close client. Are you sure?"), _T(""), wxYES | wxNO | wxCENTER | wxSTAY_ON_TOP);
        if(wxID_YES!=d.ShowModal()) return;
        mpGridWindow->m_WXFoxClient->CloseClient();
    }
@@ -1824,7 +1824,7 @@ void WXCrystMainFrame::SafeQuit()
       msg.Printf( _T("Some objects have not been saved\n")
                _T("Do you really want to Exit ?"));
 
-      wxMessageDialog d(this,msg, _T("Really Exit ?"), wxYES | wxNO);
+      wxMessageDialog d(this,msg, _T("Really Exit ?"), wxYES | wxNO | wxCENTER | wxSTAY_ON_TOP);
       if(wxID_YES!=d.ShowModal()) return;
    }
    cout<<"Removing all Optimization objects..."<<endl;
