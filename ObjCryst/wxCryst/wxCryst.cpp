@@ -499,6 +499,13 @@ void WXFieldName::UpdateUI(const bool lock)
    VFN_DEBUG_ENTRY("WXFieldName::UpdateUI("<<lock<<")"<<"MainThread="<<wxThread::IsMain(),4)
    mIsSelfUpdating=true;
    mpField->SetValue(wxString::FromAscii(mValue.c_str()));
+   //:TODO: Some way of resizing the field which is less of a kludge...
+   int w=mpField->GetTextExtent(wxString::FromAscii(mValue.c_str())).GetWidth();
+   const int wmax=wxTheApp->GetTopWindow()->GetSize().GetWidth();
+   if(w>wmax)w=wmax;
+   if(w>mpField->GetSize().GetWidth())
+      this->GetSizer()->SetItemMinSize(mpField,w+30,-1);
+   
    mIsSelfUpdating=false;
    mNeedUpdateUI=false;
    if(lock) mMutex.Unlock();
@@ -548,7 +555,6 @@ WXField(parent,label,id),mIsSelfUpdating(false),mFormat(_T("%8f"))
                             wxTextValidator(wxFILTER_NUMERIC));
    mpSizer->Add(mpField,0,wxALIGN_CENTER);
    
-   mpSizer->SetSizeHints(this);
    this->Layout();
 }
 
