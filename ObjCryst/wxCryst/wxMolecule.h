@@ -179,7 +179,7 @@ class WXMolecule: public WXScatterer
          MolAtom* mpAtom;
          std::string mName;
          const ScatteringPower* mpScatteringPower;
-         REAL mX,mY,mZ;
+         REAL mX,mY,mZ,mOcc;
          /// True if we need to update the displayed values
          bool mNeedUpdateUI;
       };

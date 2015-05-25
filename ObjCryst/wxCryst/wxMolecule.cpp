@@ -908,18 +908,20 @@ mpBondWin(0),mpAngleWin(0),mpDihedralAngleWin(0),mpRigidGroupWin(0),mpNonFlipAto
       cellAttrName->SetRenderer(new wxGridCellStringRenderer);
       cellAttrName->SetEditor(new wxGridCellTextEditor);
       wxGridCellAttr* cellAttrFloat = new wxGridCellAttr;
-      cellAttrFloat->SetRenderer(new wxGridCellFloatRenderer);
-      cellAttrFloat->SetEditor(new wxGridCellFloatEditor);
+      cellAttrFloat->SetRenderer(new wxGridCellFloatRenderer(6,3));
+      //cellAttrFloat->SetEditor(new wxGridCellFloatEditor(6,3));// Does not work, locale issue ?
 
       mpAtomWin= new WXMolScrolledWindow(this,this,ID_WINDOW_ATOM);
-      mpAtomWin->SetSize(800,300);
+      //mpAtomWin->SetSize(800,300);
       mpAtomWin->EnableScrolling(true,true);
-      mpAtomWin->SetSizeHints(-1,300,-1,300);
-      mpAtomWin->CreateGrid(0,5);
-      mpAtomWin->SetDefaultColSize(120);
+      //mpAtomWin->SetSizeHints(-1,300,-1,300);
+      mpAtomWin->CreateGrid(0,6);
+      mpAtomWin->SetRowLabelSize(40);
+      mpAtomWin->SetDefaultColSize(60);
       mpAtomWin->SetColAttr(0,cellAttrName);
       mpAtomWin->SetColAttr(1,cellAttrName->Clone());
-      mpAtomWin->SetColAttr(3,cellAttrFloat);
+      mpAtomWin->SetColAttr(2,cellAttrFloat);
+      mpAtomWin->SetColAttr(3,cellAttrFloat->Clone());
       mpAtomWin->SetColAttr(4,cellAttrFloat->Clone());
       mpAtomWin->SetColAttr(5,cellAttrFloat->Clone());
       mpAtomWin->SetColLabelValue(0,_T("Name"));
@@ -927,6 +929,7 @@ mpBondWin(0),mpAngleWin(0),mpDihedralAngleWin(0),mpRigidGroupWin(0),mpNonFlipAto
       mpAtomWin->SetColLabelValue(2,_T("X"));
       mpAtomWin->SetColLabelValue(3,_T("Y"));
       mpAtomWin->SetColLabelValue(4,_T("Z"));
+      mpAtomWin->SetColLabelValue(5,_T("Occup"));
       mpAtomWin->AutoSizeRows();
       mpSizer->Add(mpAtomWin,0,wxALIGN_LEFT);
    this->CrystUpdate(true);
@@ -1390,8 +1393,8 @@ void WXMolecule::OnEditGridAtom(wxGridEvent &e)
       if(s!=_T(""))
       {
          double d;
-         s.ToDouble(&d);
-         mpMolecule->GetAtomList()[r]->SetX(d);
+         if(s.ToCDouble(&d))
+            mpMolecule->GetAtomList()[r]->SetX(d);
       }
    }
    if(c==3)
@@ -1400,8 +1403,8 @@ void WXMolecule::OnEditGridAtom(wxGridEvent &e)
       if(s!=_T(""))
       {
          double d;
-         s.ToDouble(&d);
-         mpMolecule->GetAtomList()[r]->SetY(d);
+         if(s.ToCDouble(&d))
+            mpMolecule->GetAtomList()[r]->SetY(d);
       }
    }
    if(c==4)
@@ -1410,8 +1413,22 @@ void WXMolecule::OnEditGridAtom(wxGridEvent &e)
       if(s!=_T(""))
       {
          double d;
-         s.ToDouble(&d);
-         mpMolecule->GetAtomList()[r]->SetZ(d);
+         if(s.ToCDouble(&d))
+            mpMolecule->GetAtomList()[r]->SetZ(d);
+      }
+   }
+   if(c==5)
+   {
+      wxString s=mpAtomWin->GetCellValue(r,c);
+      if(s!=_T(""))
+      {
+         double d;
+         if(s.ToCDouble(&d))
+         {
+            if(d>1)d=1;
+            else if(d<0)d=0;
+            mpMolecule->GetAtomList()[r]->SetOccupancy(d);
+         }
       }
    }
    mpMolecule->GetCrystal().UpdateDisplay();
@@ -1458,8 +1475,8 @@ void WXMolecule::OnEditGridBondLength(wxGridEvent &e)
       if(s!=_T(""))
       {
          double d;
-         s.ToDouble(&d);
-         mpMolecule->GetBondList()[r]->SetLength0(d);
+         if(s.ToCDouble(&d))
+            if(d>0) mpMolecule->GetBondList()[r]->SetLength0(d);
       }
    }
    if(c==4)
@@ -1468,8 +1485,8 @@ void WXMolecule::OnEditGridBondLength(wxGridEvent &e)
       if(s!=_T(""))
       {
          double d;
-         s.ToDouble(&d);
-         mpMolecule->GetBondList()[r]->SetLengthSigma(d);
+         if(s.ToCDouble(&d))
+            if(d>0) mpMolecule->GetBondList()[r]->SetLengthSigma(d);
       }
    }
    if(c==5)
@@ -1478,8 +1495,8 @@ void WXMolecule::OnEditGridBondLength(wxGridEvent &e)
       if(s!=_T(""))
       {
          double d;
-         s.ToDouble(&d);
-         mpMolecule->GetBondList()[r]->SetLengthDelta(d);
+         if(s.ToCDouble(&d))
+            if(d>0) mpMolecule->GetBondList()[r]->SetLengthDelta(d);
       }
    }
    this->CrystUpdate(true);
@@ -1543,8 +1560,8 @@ void WXMolecule::OnEditGridBondAngle(wxGridEvent &e)
       if(s!=_T(""))
       {
          double d;
-         s.ToDouble(&d);
-         mpMolecule->GetBondAngleList()[r]->SetAngle0(d*DEG2RAD);
+         if(s.ToCDouble(&d))
+            if(d>0) mpMolecule->GetBondAngleList()[r]->SetAngle0(d*DEG2RAD);
       }
    }
    if(c==5)
@@ -1553,8 +1570,8 @@ void WXMolecule::OnEditGridBondAngle(wxGridEvent &e)
       if(s!=_T(""))
       {
          double d;
-         s.ToDouble(&d);
-         mpMolecule->GetBondAngleList()[r]->SetAngleSigma(d*DEG2RAD);
+         if(s.ToCDouble(&d))
+            if(d>0) mpMolecule->GetBondAngleList()[r]->SetAngleSigma(d*DEG2RAD);
       }
    }
    if(c==6)
@@ -1563,8 +1580,8 @@ void WXMolecule::OnEditGridBondAngle(wxGridEvent &e)
       if(s!=_T(""))
       {
          double d;
-         s.ToDouble(&d);
-         mpMolecule->GetBondAngleList()[r]->SetAngleDelta(d*DEG2RAD);
+         if(s.ToCDouble(&d))
+            if(d>0) mpMolecule->GetBondAngleList()[r]->SetAngleDelta(d*DEG2RAD);
       }
    }
    this->CrystUpdate(true);
@@ -1643,8 +1660,8 @@ void WXMolecule::OnEditGridDihedralAngle(wxGridEvent &e)
       if(s!=_T(""))
       {
          double d;
-         s.ToDouble(&d);
-         mpMolecule->GetDihedralAngleList()[r]->SetAngle0(d*DEG2RAD);
+         if(s.ToCDouble(&d))
+            mpMolecule->GetDihedralAngleList()[r]->SetAngle0(d*DEG2RAD);
       }
    }
    if(c==6)
@@ -1653,8 +1670,8 @@ void WXMolecule::OnEditGridDihedralAngle(wxGridEvent &e)
       if(s!=_T(""))
       {
          double d;
-         s.ToDouble(&d);
-         mpMolecule->GetDihedralAngleList()[r]->SetAngleSigma(d*DEG2RAD);
+         if(s.ToCDouble(&d))
+            if(d>0) mpMolecule->GetDihedralAngleList()[r]->SetAngleSigma(d*DEG2RAD);
       }
    }
    if(c==7)
@@ -1663,8 +1680,8 @@ void WXMolecule::OnEditGridDihedralAngle(wxGridEvent &e)
       if(s!=_T(""))
       {
          double d;
-         s.ToDouble(&d);
-         mpMolecule->GetDihedralAngleList()[r]->SetAngleDelta(d*DEG2RAD);
+         if(s.ToCDouble(&d))
+            if(d>0) mpMolecule->GetDihedralAngleList()[r]->SetAngleDelta(d*DEG2RAD);
       }
    }
    this->CrystUpdate(true);
@@ -2537,17 +2554,20 @@ void WXMolecule::CrystUpdate(const bool uui,const bool lock)
          const REAL x=pos->mpAtom->X();
          const REAL y=pos->mpAtom->Y();
          const REAL z=pos->mpAtom->Z();
+         const REAL occ=pos->mpAtom->GetOccupancy();
          if(  (name !=pos->mName)
             ||(pow  !=pos->mpScatteringPower)
             ||(x    !=pos->mX)
             ||(y    !=pos->mY)
-            ||(z    !=pos->mZ))
+            ||(z    !=pos->mZ)
+            ||(occ  !=pos->mOcc))
          {
             pos->mName  =name;
             pos->mpScatteringPower  =pow;
             pos->mX =x;
             pos->mY =y;
             pos->mZ =z;
+            pos->mOcc =occ;
             pos->mNeedUpdateUI=true;
          }
       }
@@ -2667,17 +2687,17 @@ void WXMolecule::OnMenuShowRestraintWindow(wxCommandEvent &event)
       cellAttrName->SetRenderer(new wxGridCellStringRenderer);
       cellAttrName->SetEditor(new wxGridCellTextEditor);
       wxGridCellAttr* cellAttrFloat = new wxGridCellAttr;
-      cellAttrFloat->SetRenderer(new wxGridCellFloatRenderer);
-      cellAttrFloat->SetEditor(new wxGridCellFloatEditor);
+      cellAttrFloat->SetRenderer(new wxGridCellFloatRenderer(-1,3));
+      //cellAttrFloat->SetEditor(new wxGridCellFloatEditor);
       wxGridCellAttr* cellAttrFloatReadOnly = new wxGridCellAttr;
-      cellAttrFloatReadOnly->SetRenderer(new wxGridCellFloatRenderer);
-      cellAttrFloatReadOnly->SetEditor(new wxGridCellFloatEditor);
+      cellAttrFloatReadOnly->SetRenderer(new wxGridCellFloatRenderer(-1,3));
+      //cellAttrFloatReadOnly->SetEditor(new wxGridCellFloatEditor);
       cellAttrFloatReadOnly->SetReadOnly();
 
       mpBondWin = new WXMolScrolledWindow(notebook,this,ID_WINDOW_BONDLENGTH);
       notebook->AddPage(mpBondWin, _T("Bond Lengths"), true);
       mpBondWin->CreateGrid(0,6);
-      mpBondWin->SetColSize(0,120);
+      mpBondWin->SetColSize(0,80);
       mpBondWin->SetColAttr(0,cellAttrName);
       mpBondWin->SetColAttr(1,cellAttrName->Clone());
       mpBondWin->SetColAttr(2,cellAttrFloatReadOnly);
@@ -2698,17 +2718,17 @@ void WXMolecule::OnMenuShowRestraintWindow(wxCommandEvent &event)
       cellAttrName->SetRenderer(new wxGridCellStringRenderer);
       cellAttrName->SetEditor(new wxGridCellTextEditor);
       wxGridCellAttr* cellAttrFloat = new wxGridCellAttr;
-      cellAttrFloat->SetRenderer(new wxGridCellFloatRenderer);
-      cellAttrFloat->SetEditor(new wxGridCellFloatEditor);
+      cellAttrFloat->SetRenderer(new wxGridCellFloatRenderer(-1,3));
+      //cellAttrFloat->SetEditor(new wxGridCellFloatEditor);
       wxGridCellAttr* cellAttrFloatReadOnly = new wxGridCellAttr;
-      cellAttrFloatReadOnly->SetRenderer(new wxGridCellFloatRenderer);
-      cellAttrFloatReadOnly->SetEditor(new wxGridCellFloatEditor);
+      cellAttrFloatReadOnly->SetRenderer(new wxGridCellFloatRenderer(-1,3));
+      //cellAttrFloatReadOnly->SetEditor(new wxGridCellFloatEditor);
       cellAttrFloatReadOnly->SetReadOnly();
 
       mpAngleWin = new WXMolScrolledWindow(notebook,this,ID_WINDOW_BONDANGLE);
       notebook->AddPage(mpAngleWin, _T("Bond Angles"), true);
       mpAngleWin->CreateGrid(0,7);
-      mpAngleWin->SetColSize(0,120);
+      mpAngleWin->SetColSize(0,80);
       mpAngleWin->SetColAttr(0,cellAttrName);
       mpAngleWin->SetColAttr(1,cellAttrName->Clone());
       mpAngleWin->SetColAttr(2,cellAttrName->Clone());
@@ -2731,17 +2751,17 @@ void WXMolecule::OnMenuShowRestraintWindow(wxCommandEvent &event)
       cellAttrName->SetRenderer(new wxGridCellStringRenderer);
       cellAttrName->SetEditor(new wxGridCellTextEditor);
       wxGridCellAttr* cellAttrFloat = new wxGridCellAttr;
-      cellAttrFloat->SetRenderer(new wxGridCellFloatRenderer);
-      cellAttrFloat->SetEditor(new wxGridCellFloatEditor);
+      cellAttrFloat->SetRenderer(new wxGridCellFloatRenderer(-1,3));
+      //cellAttrFloat->SetEditor(new wxGridCellFloatEditor);
       wxGridCellAttr* cellAttrFloatReadOnly = new wxGridCellAttr;
-      cellAttrFloatReadOnly->SetRenderer(new wxGridCellFloatRenderer);
-      cellAttrFloatReadOnly->SetEditor(new wxGridCellFloatEditor);
+      cellAttrFloatReadOnly->SetRenderer(new wxGridCellFloatRenderer(-1,3));
+      //cellAttrFloatReadOnly->SetEditor(new wxGridCellFloatEditor);
       cellAttrFloatReadOnly->SetReadOnly();
 
       mpDihedralAngleWin = new WXMolScrolledWindow(notebook,this,ID_WINDOW_DIHEDRALANGLE);
       notebook->AddPage(mpDihedralAngleWin, _T("Dihedral Angles"), true);
       mpDihedralAngleWin->CreateGrid(0,8);
-      mpDihedralAngleWin->SetColSize(0,120);
+      mpDihedralAngleWin->SetColSize(0,80);
       mpDihedralAngleWin->SetColAttr(0,cellAttrName);
       mpDihedralAngleWin->SetColAttr(1,cellAttrName->Clone());
       mpDihedralAngleWin->SetColAttr(2,cellAttrName->Clone());
@@ -2937,12 +2957,14 @@ void WXMolecule::UpdateUI(const bool lock)
             mpAtomWin->SetCellValue(i, 0, wxString::FromAscii(pos->mName.c_str()));
             mpAtomWin->SetCellValue(i, 1, wxString::FromAscii(pos->mpScatteringPower->GetName().c_str()));
             wxString tmp;
-            tmp.Printf(_T("%f"),pos->mX);
+            tmp.Printf(_T("%.3f"),pos->mX);
             mpAtomWin->SetCellValue(i, 2, tmp);
-            tmp.Printf(_T("%f"),pos->mY);
+            tmp.Printf(_T("%.3f"),pos->mY);
             mpAtomWin->SetCellValue(i, 3, tmp);
-            tmp.Printf(_T("%f"),pos->mZ);
+            tmp.Printf(_T("%.3f"),pos->mZ);
             mpAtomWin->SetCellValue(i, 4, tmp);
+            tmp.Printf(_T("%.3f"),pos->mOcc);
+            mpAtomWin->SetCellValue(i, 5, tmp);
             mIsSelfUpdating=false;
          }
          ++i;
