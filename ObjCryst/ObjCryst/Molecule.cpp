@@ -23,6 +23,7 @@
 #include <fstream>
 #include <iterator>
 #include <algorithm>
+#include <iomanip>
 
 #include "ObjCryst/Quirks/VFNStreamFormat.h"
 #include "ObjCryst/ObjCryst/Molecule.h"
@@ -2130,6 +2131,34 @@ void Molecule::SetName(const string &name)
    }
 }
 
+std::string Molecule::GetFormula() const
+{
+   if(this->GetNbComponent()==0) return "";
+   std::map<std::string,float> velts;
+   for(std::vector<MolAtom*>::const_iterator pos=mvpAtom.begin();pos!=mvpAtom.end();++pos)
+   {
+      if((*pos)->IsDummy()) continue;
+      string p;
+      if((*pos)->GetScatteringPower().GetClassName()=="ScatteringPowerAtom")
+         p=dynamic_cast<const ScatteringPowerAtom*>(&((*pos)->GetScatteringPower()))->GetSymbol();
+      else p=(*pos)->GetScatteringPower().GetName();
+      if(velts.count(p)==0)
+         velts[(*pos)->GetScatteringPower().GetName()]=(*pos)->GetOccupancy();
+      else velts[(*pos)->GetScatteringPower().GetName()]+=(*pos)->GetOccupancy();
+   }
+   stringstream s;
+   s<<std::setprecision(2);
+   char c[10];
+   for(std::map<std::string,float>::const_iterator pos=velts.begin();pos!=velts.end();++pos)
+   {
+      if(pos!=velts.begin()) s<<" ";
+      float nb=pos->second;
+      if((abs(nb)-nb)<0.01) s<<pos->first<<int(round(nb));
+      else s<<pos->first<<nb;
+   }
+   return s.str();
+}
+
 void Molecule::Print()const
 {
    VFN_DEBUG_MESSAGE("Molecule::Print()",5)
@@ -3761,6 +3790,8 @@ void Molecule::AddAtom(const REAL x, const REAL y, const REAL z,
                        const bool updateDisplay)
 {
    VFN_DEBUG_ENTRY("Molecule::AddAtom():"<<name,5)
+   const bool molnameasformula= this->GetName()==this->GetFormula();
+   
    string thename=name;
    if(thename==string(""))
    {// This should not be needed, the atom will reset the parameters name when its name is set
@@ -3802,6 +3833,10 @@ void Molecule::AddAtom(const REAL x, const REAL y, const REAL z,
    }
    
    mClockScatterer.Click();
+   
+   if(molnameasformula || (this->GetName().size()==0))
+      this->SetName(this->GetFormula());
+   
    if(updateDisplay) this->UpdateDisplay();
    VFN_DEBUG_EXIT("Molecule::AddAtom()",5)
 }
@@ -3815,6 +3850,7 @@ vector<MolAtom*>::iterator Molecule::RemoveAtom(MolAtom &atom, const bool del)
       throw ObjCrystException("Molecule::RemoveAtom():"+atom.GetName()
                         +" is not in this Molecule:"+this->GetName());
    }
+   const bool molnameasformula= this->GetName()==this->GetFormula();
    // Delete parameters
       this->RemovePar(&(this->GetPar(&(atom.X()))));
       this->RemovePar(&(this->GetPar(&(atom.Y()))));
@@ -3852,6 +3888,9 @@ vector<MolAtom*>::iterator Molecule::RemoveAtom(MolAtom &atom, const bool del)
    if(del) delete *pos;
    pos=mvpAtom.erase(pos);
    --mScattCompList;
+
+   if(molnameasformula || (this->GetName().size()==0))
+      this->SetName(this->GetFormula());
 
    this->UpdateDisplay();
    VFN_DEBUG_EXIT("Molecule::RemoveAtom()",6)

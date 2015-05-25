@@ -746,6 +746,8 @@ class Molecule: public Scatterer
       virtual Molecule* CreateCopy() const;
       virtual const string& GetClassName() const;
       virtual void SetName(const string &name);
+      /// Formula with atoms in alphabetic order
+      std::string GetFormula() const;
       virtual void Print()const;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
