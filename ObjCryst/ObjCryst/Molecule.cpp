@@ -3175,6 +3175,10 @@ ostream& Molecule::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opt
    const float colour_bondnonfree[]= { 0.3, .3, .3, 1.0 };
    const float colour_bondfree[]= { 0.7, .7, .7, 1.0 };
    const float colour0[] = {0.0f, 0.0f, 0.0f, 0.0f}; 
+
+   const REAL aa=this->GetCrystal().GetLatticePar(0);
+   const REAL bb=this->GetCrystal().GetLatticePar(1);
+   const REAL cc=this->GetCrystal().GetLatticePar(2);
    
    os << "// Description of Molecule :" << this->GetName() <<endl;
    vector<CrystMatrix_REAL> vXYZCoords;
@@ -3257,21 +3261,43 @@ ostream& Molecule::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opt
          x += translate(j,0);
          y += translate(j,1);
          z += translate(j,2);
+         CrystVector<bool> isinside(x.numElements());
+         CrystVector<REAL> borderdist(x.numElements());//distance to display limit
+         CrystVector<REAL> x0,y0,z0;
+         x0=x;y0=y;z0=z;
          const REAL tmpxc=x.sum()/(REAL)x.numElements();
          const REAL tmpyc=y.sum()/(REAL)y.numElements();
          const REAL tmpzc=z.sum()/(REAL)z.numElements();
-         if(   (tmpxc>xMin) && (tmpxc<xMax)
-             &&(tmpyc>yMin) && (tmpyc<yMax)
-             &&(tmpzc>zMin) && (tmpzc<zMax))
+         if(  ((x.min()<xMax) && (x.max()>xMin))
+            &&((y.min()<yMax) && (y.max()>yMin))
+            &&((z.min()<zMax) && (z.max()>zMin)))
          {
             os<<"  //Symetric#"<<++ct<<endl;
             for(unsigned int k=0;k<mvpAtom.size();k++)
             {
+               isinside(k)=((x(k)>=xMin) && (x(k)<=xMax)) && ((y(k)>=yMin) && (y(k)<=yMax)) && ((z(k)>=zMin) && (z(k)<=zMax));
+               if(isinside(k)) borderdist(k)=0;
+               else
+               {
+                  borderdist(k)=0;
+                  if(xMin>x(k)) borderdist(k)+=(xMin-x(k))*aa*(xMin-x(k))*aa;
+                  if(yMin>y(k)) borderdist(k)+=(yMin-y(k))*bb*(yMin-y(k))*bb;
+                  if(zMin>z(k)) borderdist(k)+=(zMin-z(k))*cc*(zMin-z(k))*cc;
+                  if(xMax<x(k)) borderdist(k)+=(xMax-x(k))*aa*(xMax-x(k))*aa;
+                  if(yMax<y(k)) borderdist(k)+=(yMax-y(k))*bb*(yMax-y(k))*bb;
+                  if(zMax<z(k)) borderdist(k)+=(zMax-z(k))*cc*(zMax-z(k))*cc;
+                  borderdist(k)=sqrt(borderdist(k));
+               }
+               REAL fout=1.0;
+               char ch[100];
+               if(isinside(k)==false) fout=exp(-borderdist(k));
+
                this->GetCrystal().FractionalToOrthonormalCoords(x(k),y(k),z(k));
-               if(mvpAtom[k]->IsDummy()) continue;
+               if((mvpAtom[k]->IsDummy()) || (fout<0.001)) continue;
                const float r=mvpAtom[k]->GetScatteringPower().GetColourRGB()[0];
                const float g=mvpAtom[k]->GetScatteringPower().GetColourRGB()[1];
                const float b=mvpAtom[k]->GetScatteringPower().GetColourRGB()[2];
+               const float f=mvpAtom[k]->GetOccupancy()*this->GetOccupancy();
                if(options.mShowLabel)
                {
                   /*
@@ -3297,7 +3323,7 @@ ostream& Molecule::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opt
                   <<z(k)<<","
                   <<mvpAtom[k]->GetScatteringPower().GetRadius()/3.0<<","
                   <<"colour_"+mvpAtom[k]->GetScatteringPower().GetName()<<","
-                  <<1-this->GetOccupancy()*mvpAtom[k]->GetOccupancy()
+                  <<f<<","<<fout
                   <<")"<<endl;
             }
             for(unsigned int k=0;k<mvpBond.size();k++)
@@ -3310,6 +3336,9 @@ ostream& Molecule::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opt
                   if(mvpAtom[n1]==&(mvpBond[k]->GetAtom1())) break;
                for(n2=0;n2<mvpAtom.size();n2++)
                   if(mvpAtom[n2]==&(mvpBond[k]->GetAtom2())) break;
+               REAL fout=1.0;
+               if((isinside(n1)==false) || (isinside(n2)==false)) fout=exp(-(borderdist(n1)+borderdist(n2))/2);
+               if(fout<0.001) continue;
                REAL x1=x(n1),y1=y(n1),z1=z(n1),
                     x2=x(n2),y2=y(n2),z2=z(n2);
                REAL dx=x2-x1,dy=y2-y1,dz=z2-z1;
@@ -3322,14 +3351,14 @@ ostream& Molecule::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opt
                x2-=dx/r*r2*sqrt(abs(1-0.1/r2));
                y2-=dy/r*r2*sqrt(abs(1-0.1/r2));
                z2-=dz/r*r2*sqrt(abs(1-0.1/r2));
-               const REAL f=1-this->GetOccupancy()*(mvpAtom[n1]->GetOccupancy()+mvpAtom[n2]->GetOccupancy())/2.0;
+               const REAL f=this->GetOccupancy()*(mvpAtom[n1]->GetOccupancy()+mvpAtom[n2]->GetOccupancy())/2.0;
                os << "    ObjCrystBond("
                   <<x1<<","<<y1<<","<<z1<< ","
                   <<x2<<","<<y2<<","<<z2<< ","
                   << "0.1,";
                if(mvpBond[k]->IsFreeTorsion()) os<<"colour_freebond,";
                else os<<"colour_nonfreebond,";
-               os<<f<<")"<<endl;
+               os<<f<<","<<fout<<")"<<endl;
             }
          }//if in limits
          x=xSave;
@@ -3366,10 +3395,15 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
    //this->BuildStretchModeBondAngle();
    //this->BuildStretchModeTorsion();
    
-   const GLfloat colour_bondnonfree[]= { 0.2, .2, .2, 1.0 };
-   const GLfloat colour_bondrigid[]= { 0.5, .3, .3, 1.0 };
-   const GLfloat colour_bondfree[]= { 0.8, .8, .8, 1.0 };
-   const GLfloat colour0[] = {0.0f, 0.0f, 0.0f, 0.0f}; 
+   const REAL aa=this->GetCrystal().GetLatticePar(0);
+   const REAL bb=this->GetCrystal().GetLatticePar(1);
+   const REAL cc=this->GetCrystal().GetLatticePar(2);
+   
+   const GLfloat colour0[] = {0.0f, 0.0f, 0.0f, 0.0f};
+   glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0);
+   glMaterialfv(GL_FRONT, GL_EMISSION,  colour0);
+   glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
+   glPolygonMode(GL_FRONT, GL_FILL);
    
    GLUquadricObj* pQuadric = gluNewQuadric();
    
@@ -3397,9 +3431,6 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                   colourChar[1] = 0.5;
                   colourChar[2] = 0.5;
                }
-               glMaterialfv(GL_FRONT, GL_AMBIENT,   colour0); 
-               glMaterialfv(GL_FRONT, GL_DIFFUSE,   colour0); 
-               glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0);
                if((*pos)->IsInRing())
                   glMaterialfv(GL_FRONT, GL_EMISSION,  colourCharRing); 
                else
@@ -3412,10 +3443,6 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
             {
                const GLfloat colourAtom [] = {r, g, b, f};
                glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE,   colourAtom); 
-               glMaterialfv(GL_FRONT, GL_SPECULAR,              colour0); 
-               glMaterialfv(GL_FRONT, GL_EMISSION,              colour0); 
-               glMaterialfv(GL_FRONT, GL_SHININESS,             colour0);
-               glPolygonMode(GL_FRONT, GL_FILL);
                glTranslatef((*pos)->X()*en+xc, (*pos)->Y()+yc, (*pos)->Z()+zc);
                gluSphere(pQuadric,(*pos)->GetScatteringPower().GetRadius()/3.,20,20);
             }
@@ -3504,24 +3531,43 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
             }
          //Generate also translated atoms near the unit cell
          xSave=x;
-         ySave=y;
+         ySave=y;// Keep untranslated, fractionnal values
          zSave=z;
          for(int j=0;j<translate.rows();j++)
          {
             x += translate(j,0);
             y += translate(j,1);
             z += translate(j,2);
-            const REAL tmpxc=x.sum()/(REAL)x.numElements();
-            const REAL tmpyc=y.sum()/(REAL)y.numElements();
-            const REAL tmpzc=z.sum()/(REAL)z.numElements();
-            if(   (tmpxc>xMin) && (tmpxc<xMax)
-                &&(tmpyc>yMin) && (tmpyc<yMax)
-                &&(tmpzc>zMin) && (tmpzc<zMax))
+            CrystVector<bool> isinside(x.numElements());
+            CrystVector<REAL> borderdist(x.numElements());//distance to display limit
+            if(  ((x.min()<xMax) && (x.max()>xMin))
+               &&((y.min()<yMax) && (y.max()>yMin))
+               &&((z.min()<zMax) && (z.max()>zMin)))
             {
                for(unsigned int k=0;k<mvpAtom.size();k++)
                {
+                  isinside(k)=((x(k)>=xMin) && (x(k)<=xMax)) && ((y(k)>=yMin) && (y(k)<=yMax)) && ((z(k)>=zMin) && (z(k)<=zMax));
+                  if(isinside(k)) borderdist(k)=0;
+                  else
+                  {
+                     borderdist(k)=0;
+                     if(xMin>x(k)) borderdist(k)+=(xMin-x(k))*aa*(xMin-x(k))*aa;
+                     if(yMin>y(k)) borderdist(k)+=(yMin-y(k))*bb*(yMin-y(k))*bb;
+                     if(zMin>z(k)) borderdist(k)+=(zMin-z(k))*cc*(zMin-z(k))*cc;
+                     if(xMax<x(k)) borderdist(k)+=(xMax-x(k))*aa*(xMax-x(k))*aa;
+                     if(yMax<y(k)) borderdist(k)+=(yMax-y(k))*bb*(yMax-y(k))*bb;
+                     if(zMax<z(k)) borderdist(k)+=(zMax-z(k))*cc*(zMax-z(k))*cc;
+                     borderdist(k)=sqrt(borderdist(k));
+                  }
+                  REAL fout=1.0;
+                  char ch[100];
+                  if(isinside(k)==false) fout=exp(-borderdist(k));
+                  sprintf(ch,"%d %d %d %s %5.2f %5.2f %5.2f d=%5.2f  fout=%5.3f",i,j,k,mvpAtom[k]->GetName().c_str(),x(k),y(k),z(k),borderdist(k),fout);
+                  if((mvpAtom[k]->GetName()[0]=='S')&&(!displayNames)) cout<<ch<<endl;
+                  
                   this->GetCrystal().FractionalToOrthonormalCoords(x(k),y(k),z(k));
                   if(mvpAtom[k]->IsDummy()) continue;
+                  if(fout<0.01) continue;
                   glPushMatrix();
                      const float r=mvpAtom[k]->GetScatteringPower().GetColourRGB()[0];
                      const float g=mvpAtom[k]->GetScatteringPower().GetColourRGB()[1];
@@ -3529,47 +3575,38 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                      const float f=mvpAtom[k]->GetOccupancy()*this->GetOccupancy();
                      if(displayNames)
                      {
-                        GLfloat colourChar [] = {1.0, 1.0, 1.0, 1.0}; 
-                        GLfloat colourCharRing [] = {1.0, 1.0, 0.8, 1.0}; 
-                        if((r>0.8)&&(g>0.8)&&(b>0.8))
+                        if(fout>0.99)
                         {
-                           colourChar[0] = 0.5;
-                           colourChar[1] = 0.5;
-                           colourChar[2] = 0.5;
+                           GLfloat colourChar [] = {1.0, 1.0, 1.0, f*fout};
+                           GLfloat colourCharRing [] = {1.0, 1.0, 0.8, f*fout};
+                           if((r>0.8)&&(g>0.8)&&(b>0.8))
+                           {
+                              colourChar[0] = 0.5;
+                              colourChar[1] = 0.5;
+                              colourChar[2] = 0.5;
+                           }
+                           if(mvpAtom[k]->IsInRing())
+                              glMaterialfv(GL_FRONT, GL_EMISSION,  colourCharRing);
+                           else
+                              glMaterialfv(GL_FRONT, GL_EMISSION,  colourChar);
+                           glRasterPos3f(x(k)*en, y(k), z(k));
+                           crystGLPrint(mvpAtom[k]->GetName());
                         }
-                        glMaterialfv(GL_FRONT, GL_AMBIENT,  colour0); 
-                        glMaterialfv(GL_FRONT, GL_DIFFUSE,  colour0); 
-                        glMaterialfv(GL_FRONT, GL_SPECULAR, colour0); 
-                        if(mvpAtom[k]->IsInRing())
-                           glMaterialfv(GL_FRONT, GL_EMISSION,  colourCharRing); 
-                        else
-                           glMaterialfv(GL_FRONT, GL_EMISSION,  colourChar); 
-                        glMaterialfv(GL_FRONT, GL_SHININESS,colour0);
-                        glRasterPos3f(x(k)*en, y(k), z(k));
-                        crystGLPrint(mvpAtom[k]->GetName());
                      }
                      else
                      {
                         if(!large)
                         {
-                           const GLfloat colourAtom [] = {r, g, b, f};
-                           glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE,colourAtom); 
-                           glMaterialfv(GL_FRONT, GL_SPECULAR,           colour0); 
-                           glMaterialfv(GL_FRONT, GL_EMISSION,           colour0); 
-                           glMaterialfv(GL_FRONT, GL_SHININESS,          colour0);
-                           glPolygonMode(GL_FRONT, GL_FILL);
+                           const GLfloat colourAtom [] = {r*fout, g*fout, b*fout, f*fout};
+                           glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE,colourAtom);
                            glTranslatef(x(k)*en, y(k), z(k));
                            gluSphere(pQuadric,
                               mvpAtom[k]->GetScatteringPower().GetRadius()/3.,20,20);
                         }
                         else
                         {
-                           const GLfloat colourAtom [] = {r, g, b, f};
-                           glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE,colourAtom); 
-                           glMaterialfv(GL_FRONT, GL_SPECULAR,           colour0); 
-                           glMaterialfv(GL_FRONT, GL_EMISSION,           colour0); 
-                           glMaterialfv(GL_FRONT, GL_SHININESS,          colour0);
-                           glPolygonMode(GL_FRONT, GL_FILL);
+                           const GLfloat colourAtom [] = {r*fout, g*fout, b*fout, f*fout};
+                           glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE,colourAtom); 
                            glTranslatef(x(k)*en, y(k), z(k));
                            gluSphere(pQuadric,.15,10,10);
                         }
@@ -3580,26 +3617,29 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                {
                   if(large)
                   {
-                     glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0); 
-                     glMaterialfv(GL_FRONT, GL_EMISSION,  colour0); 
-                     glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
-                     //glPolygonMode(GL_FRONT, GL_FILL);
                      for(unsigned int k=0;k<mvpBond.size();k++)
                      {
                         if(  (mvpBond[k]->GetAtom1().IsDummy())
                            ||(mvpBond[k]->GetAtom2().IsDummy()) ) continue;
+                        const unsigned long n1=rix[&(mvpBond[k]->GetAtom1())],
+                                            n2=rix[&(mvpBond[k]->GetAtom2())];
+                        REAL fout=1.0;
+                        if((isinside(n1)==false) || (isinside(n2)==false)) fout=exp(-(borderdist(n1)+borderdist(n2))/2);
+                        if(fout<0.01) continue;
+
                         const float r1=mvpBond[k]->GetAtom1().GetScatteringPower().GetColourRGB()[0];
                         const float g1=mvpBond[k]->GetAtom1().GetScatteringPower().GetColourRGB()[1];
                         const float b1=mvpBond[k]->GetAtom1().GetScatteringPower().GetColourRGB()[2];
-                        const float f1=mvpBond[k]->GetAtom1().GetOccupancy();
+                        const float f1=mvpBond[k]->GetAtom1().GetOccupancy()*this->GetOccupancy();
                         const float r2=mvpBond[k]->GetAtom2().GetScatteringPower().GetColourRGB()[0];
                         const float g2=mvpBond[k]->GetAtom2().GetScatteringPower().GetColourRGB()[1];
                         const float b2=mvpBond[k]->GetAtom2().GetScatteringPower().GetColourRGB()[2];
-                        const float f2=mvpBond[k]->GetAtom2().GetOccupancy();
-                        const GLfloat colourAtom1 [] = {r1, g1, b1, f1};
-                        const GLfloat colourAtom2 [] = {r2, g2, b2, f2};
-                        const unsigned long n1=rix[&(mvpBond[k]->GetAtom1())],
-                                            n2=rix[&(mvpBond[k]->GetAtom2())];
+                        const float f2=mvpBond[k]->GetAtom2().GetOccupancy()*this->GetOccupancy();
+                        const GLfloat colourAtom1 [] = {r1, g1, b1, f1*fout};
+                        const GLfloat colourAtom2 [] = {r2, g2, b2, f2*fout};
+                        const GLfloat colour_bondnonfree[]= { 0.2, .2, .2, (f1+f2)/2*fout };
+                        const GLfloat colour_bondrigid[]=   { 0.5, .3, .3, (f1+f2)/2*fout };
+                        const GLfloat colour_bondfree[]=    { 0.8, .8, .8, (f1+f2)/2*fout };
                         #if 0
                         glPushMatrix();
                            glBegin(GL_LINE_STRIP);
@@ -3618,10 +3658,6 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                         const REAL height= sqrt(abs(  (x(n2)-x(n1))*(x(n2)-x(n1))
                                                      +(y(n2)-y(n1))*(y(n2)-y(n1))
                                                      +(z(n2)-z(n1))*(z(n2)-z(n1))));
-                        glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0); 
-                        glMaterialfv(GL_FRONT, GL_EMISSION,  colour0); 
-                        glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
-                        glPolygonMode(GL_FRONT, GL_FILL);
                         glPushMatrix();
                            glTranslatef(x(n1)*en, y(n1), z(n1));
                            GLUquadricObj *quadobj = gluNewQuadric();
@@ -3648,6 +3684,9 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                            ||(mvpBond[k]->GetAtom2().IsDummy()) ) continue;
                         const unsigned long n1=rix[&(mvpBond[k]->GetAtom1())],
                                             n2=rix[&(mvpBond[k]->GetAtom2())];
+                        REAL fout=1.0;
+                        if((isinside(n1)==false) || (isinside(n2)==false)) fout=exp(-(borderdist(n1)+borderdist(n2))/2);
+                        if(fout<0.01) continue;
                         // Is the bond in a rigid group ?
                         bool isRigidGroup=false;
                         for(vector<RigidGroup *>::const_iterator pos=this->GetRigidGroupList().begin();pos!=this->GetRigidGroupList().end();++pos)
@@ -3659,6 +3698,10 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                               break;
                            }
                         }
+                        const float f=(mvpBond[k]->GetAtom1().GetOccupancy()+mvpBond[k]->GetAtom2().GetOccupancy())/2*this->GetOccupancy();
+                        const GLfloat colour_bondnonfree[]= { 0.2*fout, .2*fout, .2*fout, f*fout };
+                        const GLfloat colour_bondrigid[]=   { 0.5*fout, .3*fout, .3*fout, f*fout };
+                        const GLfloat colour_bondfree[]=    { 0.8*fout, .8*fout, .8*fout, f*fout };
                         if(isRigidGroup)
                            glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,colour_bondrigid);
                         else
@@ -3668,11 +3711,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                            else
                               glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,colour_bondnonfree);
                         }
-                        glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0); 
-                        glMaterialfv(GL_FRONT, GL_EMISSION,  colour0); 
-                        glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
-                        glPolygonMode(GL_FRONT, GL_FILL);
-                        // ACtually make the bond start/end at the surface of the spheres (matters when transparent)
+                        // Actually make the bond start/end at the surface of the spheres (matters when transparent)
                         REAL x1=x(n1),y1=y(n1),z1=z(n1),
                         x2=x(n2),y2=y(n2),z2=z(n2);
                         REAL dx=x2-x1,dy=y2-y1,dz=z2-z1;
@@ -3685,7 +3724,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                         x2-=dx/r*r2*sqrt(abs(1-0.1/r2));
                         y2-=dy/r*r2*sqrt(abs(1-0.1/r2));
                         z2-=dz/r*r2*sqrt(abs(1-0.1/r2));
-                        const REAL f=1-this->GetOccupancy()*(mvpAtom[n1]->GetOccupancy()+mvpAtom[n2]->GetOccupancy())/2.0;
+                        
                         glPushMatrix();
                            glTranslatef(x1*en, y1, z1);
                            GLUquadricObj *quadobj = gluNewQuadric();

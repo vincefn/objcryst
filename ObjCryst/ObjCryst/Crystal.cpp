@@ -463,24 +463,24 @@ ostream& Crystal::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opti
    VFN_DEBUG_MESSAGE("Crystal::POVRayDescription(os,bool)",5)
    os <<"/////////////////////// MACROS////////////////////"<<endl;
    
-   os << "#macro ObjCrystAtom(atomx,atomy,atomz,atomr,atomc,atomf)"
+   os << "#macro ObjCrystAtom(atomx,atomy,atomz,atomr,atomc,occ,atten)"
       << "   sphere"<<endl
       << "   { <atomx,atomy,atomz>,atomr"<<endl
-      << "      finish {ambient 0.5 diffuse 0.4 phong 1 specular 0.2 "
+      << "      finish {ambient 0.5*occ*atten diffuse 0.4*occ*atten phong occ*atten specular 0.2*occ*atten "
       << "roughness 0.02 metallic reflection 0.0}"<<endl
-      << "      pigment { colour atomc transmit atomf}"<<endl
+      << "      pigment { colour atomc transmit (1-occ*atten)}"<<endl
       << "      no_shadow"<<endl
       << "   }"<<endl
       << "#end"<<endl<<endl;
       
-   os << "#macro ObjCrystBond(x1,y1,z1,x2,y2,z2,bondradius,bondColour,bondf)"<<endl
+   os << "#macro ObjCrystBond(x1,y1,z1,x2,y2,z2,bondradius,bondColour,occ,atten)"<<endl
       << "   cylinder"<<endl
       << "   {  <x1,y1,z1>,"<<endl
       << "      <x2,y2,z2>,"<<endl
       << "      bondradius"<<endl
-      << "      finish {ambient 0.5 diffuse 0.4 phong 1 specular 0.2 "
+      << "      finish {ambient 0.5*occ*atten diffuse 0.4*occ*atten phong occ*atten specular 0.2*occ*atten "
       << "roughness 0.02 metallic reflection 0.0}"<<endl
-      << "      pigment { colour bondColour transmit bondf}"<<endl
+      << "      pigment { colour bondColour transmit (1-occ*atten)}"<<endl
       << "      no_shadow"<<endl
       << "   }"<<endl
       << "#end"<<endl<<endl;
@@ -501,7 +501,7 @@ ostream& Crystal::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opti
       os << "    ObjCrystBond("\
          <<x0<<","<<y0<<","<<z0<< ","\
          <<x1<<","<<y1<<","<<z1<< ","\
-         << "0.02,rgb<1.0,1.0,1.0>,0.0)"<<endl;\
+         << "0.02,rgb<1.0,1.0,1.0>,1.0,1.0)"<<endl;\
    }
    
    UNITCELL_EDGE(0,0,0,1,0,0)

@@ -2923,12 +2923,12 @@ mIsGLFontBuilt(false),mGLFontDisplayListBase(0),mpFourierMapListWin(0)
    }
    else
    {
-      mcellbbox.xMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmin()-0.1;
-      mcellbbox.yMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Ymin()-0.1;
-      mcellbbox.zMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Zmin()-0.1;
-      mcellbbox.xMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmax()+0.1;
-      mcellbbox.yMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Ymax()+0.1;
-      mcellbbox.zMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Zmax()+0.1;
+      mcellbbox.xMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmin();
+      mcellbbox.yMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Ymin();
+      mcellbbox.zMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Zmin();
+      mcellbbox.xMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmax();
+      mcellbbox.yMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Ymax();
+      mcellbbox.zMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Zmax();
    }
      // N.B. xMin=xMax so that the previous cell bbox is used for Maps 
      // until mmapbbox is changed
@@ -2938,8 +2938,8 @@ mIsGLFontBuilt(false),mGLFontDisplayListBase(0),mpFourierMapListWin(0)
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_UPDATE, _T("&Update"));
    mpPopUpMenu->AppendSeparator();
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_CHANGELIMITS, _T("Change display &Limits"));
-   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_LIMITS_FULLCELL, _T("Show Full Unit Cell +0.1"));
-   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_LIMITS_ASYMCELL, _T("Show Asymmetric Unit Cell +0.1"));
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_LIMITS_FULLCELL, _T("Show Full Unit Cell"));
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_LIMITS_ASYMCELL, _T("Show Asymmetric Unit Cell"));
    mpPopUpMenu->AppendSeparator();
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWCRYSTAL, _T("Hide Crystal"));
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, _T("Hide Atom Labels"));
@@ -3076,112 +3076,126 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
    glMultMatrixf( &m[0][0] );
    glTranslatef( mX0, mY0, mZ0 );
    
-   //Draw
-   //Show display limits
+   //Draw first non-transparent object then transparent ones
+   for(unsigned int i=0;i<2;i++)
    {
-      int w, h;
-      GetClientSize(& w, & h);
-      const GLfloat colour2 [] = {1.00, 1.00, 1.00, 1.00}; 
-      glMaterialfv(GL_FRONT, GL_EMISSION,  colour2); 
-      glPushMatrix();
+      if(i==0)
+      {
+         glDepthMask(GL_TRUE);
+         glAlphaFunc(GL_GREATER,0.99);
+      }
+      else
+      {
+         glDepthMask(GL_FALSE);
+         glAlphaFunc(GL_LEQUAL,0.99);
+      }
+      {//Show display limits
+         int w, h;
+         GetClientSize(& w, & h);
+         const GLfloat colour2 [] = {1.00, 1.00, 1.00, 0.3};
+         glMaterialfv(GL_FRONT, GL_EMISSION,  colour2);
+         glPushMatrix();
          glLoadIdentity();
          glMatrixMode(GL_PROJECTION);
          glPushMatrix();
-            glLoadIdentity();
-            gluOrtho2D(0,w,0,h);
-            glColor3f(1.0,1.0,1.0);
-            glRasterPos2i(2,h-12);
-            char c[128];
-            sprintf(c,"%5.3f<x<%5.3f\n",mcellbbox.xMin,mcellbbox.xMax);
-            crystGLPrint(c);
-            
-            glRasterPos2i(2, h-24);
-            sprintf(c,"%5.3f<y<%5.3f\n",mcellbbox.yMin,mcellbbox.yMax);
-            crystGLPrint(c);
-            
-            glRasterPos2i(2, h-36);
-            sprintf(c,"%5.3f<z<%5.3f\n",mcellbbox.zMin,mcellbbox.zMax);
-            crystGLPrint(c);
+         glLoadIdentity();
+         gluOrtho2D(0,w,0,h);
+         glColor3f(1.0,1.0,1.0);
+         glRasterPos2i(2,h-12);
+         char c[128];
+         sprintf(c,"%5.3f<x<%5.3f\n",mcellbbox.xMin,mcellbbox.xMax);
+         crystGLPrint(c);
+         
+         glRasterPos2i(2, h-24);
+         sprintf(c,"%5.3f<y<%5.3f\n",mcellbbox.yMin,mcellbbox.yMax);
+         crystGLPrint(c);
+         
+         glRasterPos2i(2, h-36);
+         sprintf(c,"%5.3f<z<%5.3f\n",mcellbbox.zMin,mcellbbox.zMax);
+         crystGLPrint(c);
          glPopMatrix();
          glMatrixMode( GL_MODELVIEW );
-      glPopMatrix();
-   }
-   if(mShowCrystal)
-   {
-      glCallList(mpWXCrystal->GetCrystalGLDisplayList());  //Draw Crystal
-      if(mShowAtomName)
+         glPopMatrix();
+      }
+      if(mShowCrystal)
+      {
+         glCallList(mpWXCrystal->GetCrystalGLDisplayList());  //Draw Crystal
+         if(mShowAtomName)
+         {
+            glLoadIdentity();
+            glColor3f(1.0,1.0,1.0);
+            glTranslatef( -0.3, 0, -mDist+1. );// Put labels in front of the atom position
+            glMultMatrixf( &m[0][0] );
+            glTranslatef( mX0, mY0, mZ0 );
+            glCallList(mpWXCrystal->GetCrystalGLDisplayList(true));  //Draw Atom Names
+         }
+         
+      }
+      if(mShowCursor)
       {
          glLoadIdentity();
-         glColor3f(1.0,1.0,1.0);
-         glTranslatef( -0.3, 0, -mDist+1. );// Put labels in front of the atom position
+         glTranslatef( 0, 0, -mDist);
          glMultMatrixf( &m[0][0] );
-         glTranslatef( mX0, mY0, mZ0 );
-         glCallList(mpWXCrystal->GetCrystalGLDisplayList(true));  //Draw Atom Names
-      }
-         
-   }
-   if(mShowCursor)
-   {
-      glLoadIdentity();
-      glTranslatef( 0, 0, -mDist);
-      glMultMatrixf( &m[0][0] );
-      const GLfloat colour0 [] = {0.00, 0.00, 0.00, 0.00}; 
-      const GLfloat colour1 [] = {1.0f, 1.0f, 1.0f, 1.00}; 
-      glMaterialfv(GL_FRONT, GL_AMBIENT,   colour0); 
-      glMaterialfv(GL_FRONT, GL_DIFFUSE,   colour0); 
-      glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0); 
-      glMaterialfv(GL_FRONT, GL_EMISSION,  colour1); 
-      glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
-      glBegin(GL_LINES);
+         const GLfloat colour0 [] = {0.00, 0.00, 0.00, 0.00};
+         const GLfloat colour1 [] = {1.0f, 1.0f, 1.0f, 1.00};
+         glMaterialfv(GL_FRONT, GL_AMBIENT,   colour0);
+         glMaterialfv(GL_FRONT, GL_DIFFUSE,   colour0);
+         glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0);
+         glMaterialfv(GL_FRONT, GL_EMISSION,  colour1);
+         glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
+         glBegin(GL_LINES);
          glVertex3f(-1.0f, 0.0f, 0.0f);
          glVertex3f( 1.0f, 0.0f, 0.0f);
-
+         
          glVertex3f( 0.0f,-1.0f, 0.0f);
          glVertex3f( 0.0f, 1.0f, 0.0f);
-
+         
          glVertex3f( 0.0f, 0.0f,-1.0f);
          glVertex3f( 0.0f, 0.0f, 1.0f);
-      glEnd();
-   }
-   // Print position of center of image, plus intensity of Fourier maps (if any)
-   {
-      wxString statusText;
-      REAL x=mX0;
-      REAL y=mY0;
-      REAL z=mZ0;
-      mpWXCrystal->GetCrystal().OrthonormalToFractionalCoords(x,y,z);
-      x=(mcellbbox.xMax+mcellbbox.xMin)/2.-x;
-      y=(mcellbbox.yMax+mcellbbox.yMin)/2.-y;
-      z=(mcellbbox.zMax+mcellbbox.zMin)/2.-z;
-      statusText.Printf(_T("Center@(%5.3f,%5.3f,%5.3f)"),x,y,z);
-      for(unsigned int i=0;i<mvpUnitCellMap.size();++i)
-      {
-         statusText+=_T(", map(") + wxString::FromAscii(mvpUnitCellMap[i]->GetName().c_str())
-                     +wxString::Format(_T(")=%5.2fe"),mvpUnitCellMap[i]->GetValue(x,y,z));
+         glEnd();
       }
-      mpParentFrame->SetStatusText(statusText);
-   }
-   if(mShowFourier)
-   {
-      glLoadIdentity();
-      glTranslatef( 0, 0, -mDist );
-      build_rotmatrix( m,mQuat);
-      glMultMatrixf( &m[0][0] );
-      glTranslatef( mX0, mY0, mZ0 );
-      glPushMatrix();
+      // Print position of center of image, plus intensity of Fourier maps (if any)
+      {
+         wxString statusText;
+         REAL x=mX0;
+         REAL y=mY0;
+         REAL z=mZ0;
+         mpWXCrystal->GetCrystal().OrthonormalToFractionalCoords(x,y,z);
+         x=(mcellbbox.xMax+mcellbbox.xMin)/2.-x;
+         y=(mcellbbox.yMax+mcellbbox.yMin)/2.-y;
+         z=(mcellbbox.zMax+mcellbbox.zMin)/2.-z;
+         statusText.Printf(_T("Center@(%5.3f,%5.3f,%5.3f)"),x,y,z);
+         for(unsigned int i=0;i<mvpUnitCellMap.size();++i)
+         {
+            statusText+=_T(", map(") + wxString::FromAscii(mvpUnitCellMap[i]->GetName().c_str())
+            +wxString::Format(_T(")=%5.2fe"),mvpUnitCellMap[i]->GetValue(x,y,z));
+         }
+         mpParentFrame->SetStatusText(statusText);
+      }
+      if(mShowFourier)
+      {
+         glLoadIdentity();
+         glTranslatef( 0, 0, -mDist );
+         build_rotmatrix( m,mQuat);
+         glMultMatrixf( &m[0][0] );
+         glTranslatef( mX0, mY0, mZ0 );
+         glPushMatrix();
          // The display origin is the center of the Crystal BoundingBox, so translate
-            BBox cellbbox = this->GetCellBBox();
-            REAL xc=(cellbbox.xMin+cellbbox.xMax)/2.;
-            REAL yc=(cellbbox.yMin+cellbbox.yMax)/2.;
-            REAL zc=(cellbbox.zMin+cellbbox.zMax)/2.;
-            mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(xc, yc, zc);
-            glTranslatef(-xc, -yc, -zc);
+         BBox cellbbox = this->GetCellBBox();
+         REAL xc=(cellbbox.xMin+cellbbox.xMax)/2.;
+         REAL yc=(cellbbox.yMin+cellbbox.yMax)/2.;
+         REAL zc=(cellbbox.zMin+cellbbox.zMax)/2.;
+         mpWXCrystal->GetCrystal().FractionalToOrthonormalCoords(xc, yc, zc);
+         glTranslatef(-xc, -yc, -zc);
          // Draw all Fourier maps
          vector<boost::shared_ptr<UnitCellMapGLList> >::const_iterator pos;
          for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();++pos)
             if((*pos)->Show()) (*pos)->Draw();
-     glPopMatrix();
+         glPopMatrix();
+      }
    }
+   glDepthMask(GL_TRUE);
+   glAlphaFunc(GL_ALWAYS,1);
    glFlush();
    SwapBuffers();
    VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnPaint():End",7)
@@ -3686,6 +3700,7 @@ void WXGLCrystalCanvas::InitGL()
    glViewport(0, 0, width, height);
       
    glEnable(GL_DEPTH_TEST);
+   glEnable(GL_ALPHA_TEST);
    glEnable(GL_LIGHTING);
    glEnable (GL_BLEND);
    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -3725,12 +3740,12 @@ void WXGLCrystalCanvas::OnChangeLimits(wxCommandEvent &event)
   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnChangeLimits()",10)
    if(event.GetId()==ID_GLCRYSTAL_MENU_LIMITS_FULLCELL)
    {
-      mcellbbox.xMin = -0.1;
-      mcellbbox.yMin = -0.1;
-      mcellbbox.zMin = -0.1;
-      mcellbbox.xMax =  1.1;
-      mcellbbox.yMax =  1.1;
-      mcellbbox.zMax =  1.1;
+      mcellbbox.xMin = 0;
+      mcellbbox.yMin = 0;
+      mcellbbox.zMin = 0;
+      mcellbbox.xMax = 1;
+      mcellbbox.yMax = 1;
+      mcellbbox.zMax = 1;
       vector<boost::shared_ptr<UnitCellMapGLList> >::iterator pos;
       for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();pos++)
       {
@@ -3740,12 +3755,12 @@ void WXGLCrystalCanvas::OnChangeLimits(wxCommandEvent &event)
    }
    if(event.GetId()==ID_GLCRYSTAL_MENU_LIMITS_ASYMCELL)
    {
-      mcellbbox.xMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmin()-0.1;
-      mcellbbox.yMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Ymin()-0.1;
-      mcellbbox.zMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Zmin()-0.1;
-      mcellbbox.xMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmax()+0.1;
-      mcellbbox.yMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Ymax()+0.1;
-      mcellbbox.zMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Zmax()+0.1;
+      mcellbbox.xMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmin();
+      mcellbbox.yMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Ymin();
+      mcellbbox.zMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Zmin();
+      mcellbbox.xMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmax();
+      mcellbbox.yMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Ymax();
+      mcellbbox.zMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Zmax();
       vector<boost::shared_ptr<UnitCellMapGLList> >::iterator pos;
       for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();pos++)
       {

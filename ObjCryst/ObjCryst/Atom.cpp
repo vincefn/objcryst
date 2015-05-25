@@ -207,6 +207,9 @@ ostream& Atom::POVRayDescription(ostream &os,
    x0=mXYZ(0);
    y0=mXYZ(1);
    z0=mXYZ(2);
+   const REAL aa=this->GetCrystal().GetLatticePar(0);
+   const REAL bb=this->GetCrystal().GetLatticePar(1);
+   const REAL cc=this->GetCrystal().GetLatticePar(2);
    CrystMatrix_REAL xyzCoords ;
    xyzCoords=this->GetCrystal().GetSpaceGroup().GetAllSymmetrics(x0,y0,z0,false,false,true);
    int nbSymmetrics=xyzCoords.rows();
@@ -253,9 +256,23 @@ ostream& Atom::POVRayDescription(ostream &os,
          REAL x=x0+translate(j,0);
          REAL y=y0+translate(j,1);
          REAL z=z0+translate(j,2);
-         if(   (x>xMin) && (x<xMax)
-             &&(y>yMin) && (y<yMax)
-             &&(z>zMin) && (z<zMax))
+         const bool isinside=((x>=xMin) && (x<=xMax)) && ((y>=yMin) && (y<=yMax)) && ((z>=zMin) && (z<=zMax));
+         REAL borderdist;
+         if(isinside) borderdist=0;
+         else
+         {
+            borderdist=0;
+            if(xMin>x) borderdist+=(xMin-x)*aa*(xMin-x)*aa;
+            if(yMin>y) borderdist+=(yMin-y)*bb*(yMin-y)*bb;
+            if(zMin>z) borderdist+=(zMin-z)*cc*(zMin-z)*cc;
+            if(xMax<x) borderdist+=(xMax-x)*aa*(xMax-x)*aa;
+            if(yMax<y) borderdist+=(yMax-y)*bb*(yMax-y)*bb;
+            if(zMax<z) borderdist+=(zMax-z)*cc*(zMax-z)*cc;
+            borderdist=sqrt(borderdist);
+         }
+         REAL fout=1.0;
+         if(isinside==false) fout=exp(-borderdist);
+         if(fout>0.001)
          {
             this->GetCrystal().FractionalToOrthonormalCoords(x,y,z);
             os << "   ObjCrystAtom("
@@ -264,7 +281,7 @@ ostream& Atom::POVRayDescription(ostream &os,
                <<z<<","
                <<this->GetScatteringPower().GetRadius()/3.0<<","
                <<"colour_"+this->GetScatteringPower().GetName()<<","
-               <<1-this->GetOccupancy()
+               <<this->GetOccupancy()<<","<<fout
                <<")"<<endl;
          }
       }
@@ -290,19 +307,22 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
       const float f=mOccupancy;
    
       const GLfloat colour0[] = {.0, .0, .0, 0.0}; 
-      const GLfloat colourAtom [] = {r, g, b, f};
-      GLfloat colourChar [] = {1.0, 1.0, 1.0, 1.0}; 
+      GLfloat colourChar [] = {1.0, 1.0, 1.0, 1.0};
       if((r>0.8)&&(g>0.8)&&(b>0.8))
       {
          colourChar[0] = 0.5;
          colourChar[1] = 0.5;
          colourChar[2] = 0.5;
       }
+   const REAL aa=this->GetCrystal().GetLatticePar(0);
+   const REAL bb=this->GetCrystal().GetLatticePar(1);
+   const REAL cc=this->GetCrystal().GetLatticePar(2);
 
    if(this->IsDummy()) return ;
    GLUquadricObj* pQuadric = gluNewQuadric();
    if(true==onlyIndependentAtoms)
    {
+      const GLfloat colourAtom [] = {r, g, b, f};
       REAL x,y,z;
       x=mXYZ(0);
       y=mXYZ(1);
@@ -385,14 +405,29 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
             REAL x=x0+translate(j,0);
             REAL y=y0+translate(j,1);
             REAL z=z0+translate(j,2);
-            if(   (x>xMin) && (x<xMax)
-                &&(y>yMin) && (y<yMax)
-                &&(z>zMin) && (z<zMax))
+            const bool isinside=((x>=xMin) && (x<=xMax)) && ((y>=yMin) && (y<=yMax)) && ((z>=zMin) && (z<=zMax));
+            REAL borderdist;
+            if(isinside) borderdist=0;
+            else
             {
+               borderdist=0;
+               if(xMin>x) borderdist+=(xMin-x)*aa*(xMin-x)*aa;
+               if(yMin>y) borderdist+=(yMin-y)*bb*(yMin-y)*bb;
+               if(zMin>z) borderdist+=(zMin-z)*cc*(zMin-z)*cc;
+               if(xMax<x) borderdist+=(xMax-x)*aa*(xMax-x)*aa;
+               if(yMax<y) borderdist+=(yMax-y)*bb*(yMax-y)*bb;
+               if(zMax<z) borderdist+=(zMax-z)*cc*(zMax-z)*cc;
+               borderdist=sqrt(borderdist);
+            }
+            REAL fout=1.0;
+            if(isinside==false) fout=exp(-borderdist);
+            if(fout>0.01)
+            {
+               const GLfloat colourAtom [] = {r, g, b, f*fout};
                this->GetCrystal().FractionalToOrthonormalCoords(x,y,z);
                glPushMatrix();
                   glTranslatef(x*en, y, z);
-                  if(displayNames)
+                  if((displayNames)&&(fout>0.99))
                   {
                      glMaterialfv(GL_FRONT, GL_AMBIENT,   colour0); 
                      glMaterialfv(GL_FRONT, GL_DIFFUSE,   colour0); 
