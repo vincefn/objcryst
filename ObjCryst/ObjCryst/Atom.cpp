@@ -271,7 +271,7 @@ ostream& Atom::POVRayDescription(ostream &os,
             borderdist=sqrt(borderdist);
          }
          REAL fout=1.0;
-         if(isinside==false) fout=exp(-borderdist);
+         if(isinside==false) fout=exp(-borderdist)*this->GetCrystal().GetDynPopCorr(this,0);
          if(fout>0.001)
          {
             this->GetCrystal().FractionalToOrthonormalCoords(x,y,z);
@@ -419,8 +419,11 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
                if(zMax<z) borderdist+=(zMax-z)*cc*(zMax-z)*cc;
                borderdist=sqrt(borderdist);
             }
-            REAL fout=1.0;
-            if(isinside==false) fout=exp(-borderdist);
+            REAL fout=1;
+            // NB about dyn pop corr: it's not taken into account for atoms inside the view range,
+            // to avoid transparency for fully occupied atoms.
+            // :TODO: Maybe it should for partially occupied atoms ?
+            if(isinside==false) fout*=exp(-borderdist)*this->GetCrystal().GetDynPopCorr(this,0);
             if(fout>0.01)
             {
                const GLfloat colourAtom [] = {r, g, b, f*fout};

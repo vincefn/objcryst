@@ -769,6 +769,24 @@ void Crystal::ResetDynPopCorr() const
    for(long i=0;i<nbComponent;i++) mScattCompList(i).mDynPopCorr=1.;
 }
 
+REAL Crystal::GetDynPopCorr(const Scatterer* pscatt, unsigned int component)const
+{
+   if(this->GetUseDynPopCorr()==0) return 1.0;
+   this->GetScatteringComponentList();
+   unsigned int j=0;
+   for(long i=0;i<mScattererRegistry.GetNb();i++)
+   {
+      if(pscatt==&(this->GetScatt(i)))
+      {
+         return mScattCompList(j+component).mDynPopCorr;
+      }
+      else j+=this->GetScatt(i).GetScatteringComponentList().GetNbComponent();
+   }
+   // Something is wrong if we got here !
+   throw ObjCrystException("Crystal::GetDynPopCorr(): did not find this scatterer !");
+   return 1.0;
+}
+
 void Crystal::SetUseDynPopCorr(const int b)
 {
    VFN_DEBUG_MESSAGE("Crystal::SetUseDynPopCorr()",1)

@@ -3290,7 +3290,7 @@ ostream& Molecule::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opt
                }
                REAL fout=1.0;
                char ch[100];
-               if(isinside(k)==false) fout=exp(-borderdist(k));
+               if(isinside(k)==false) fout=exp(-borderdist(k))*this->GetCrystal().GetDynPopCorr(this,k);
 
                this->GetCrystal().FractionalToOrthonormalCoords(x(k),y(k),z(k));
                if((mvpAtom[k]->IsDummy()) || (fout<0.001)) continue;
@@ -3337,7 +3337,8 @@ ostream& Molecule::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opt
                for(n2=0;n2<mvpAtom.size();n2++)
                   if(mvpAtom[n2]==&(mvpBond[k]->GetAtom2())) break;
                REAL fout=1.0;
-               if((isinside(n1)==false) || (isinside(n2)==false)) fout=exp(-(borderdist(n1)+borderdist(n2))/2);
+               if((isinside(n1)==false) || (isinside(n2)==false))
+                  fout=exp(-(borderdist(n1)+borderdist(n2))/2)*(this->GetCrystal().GetDynPopCorr(this,n1)+this->GetCrystal().GetDynPopCorr(this,n2))/2;
                if(fout<0.001) continue;
                REAL x1=x(n1),y1=y(n1),z1=z(n1),
                     x2=x(n2),y2=y(n2),z2=z(n2);
@@ -3561,10 +3562,11 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                   }
                   REAL fout=1.0;
                   char ch[100];
-                  if(isinside(k)==false) fout=exp(-borderdist(k));
+                  if(isinside(k)==false) fout=exp(-borderdist(k))*this->GetCrystal().GetDynPopCorr(this,k);
+                  #ifdef __DEBUG__
                   sprintf(ch,"%d %d %d %s %5.2f %5.2f %5.2f d=%5.2f  fout=%5.3f",i,j,k,mvpAtom[k]->GetName().c_str(),x(k),y(k),z(k),borderdist(k),fout);
-                  if((mvpAtom[k]->GetName()[0]=='S')&&(!displayNames)) cout<<ch<<endl;
-                  
+                  VFN_DEBUG_MESSAGE(ch,4)
+                  #endif
                   this->GetCrystal().FractionalToOrthonormalCoords(x(k),y(k),z(k));
                   if(mvpAtom[k]->IsDummy()) continue;
                   if(fout<0.01) continue;
@@ -3624,7 +3626,8 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                         const unsigned long n1=rix[&(mvpBond[k]->GetAtom1())],
                                             n2=rix[&(mvpBond[k]->GetAtom2())];
                         REAL fout=1.0;
-                        if((isinside(n1)==false) || (isinside(n2)==false)) fout=exp(-(borderdist(n1)+borderdist(n2))/2);
+                        if((isinside(n1)==false) || (isinside(n2)==false))
+                           fout=exp(-(borderdist(n1)+borderdist(n2))/2)*(this->GetCrystal().GetDynPopCorr(this,n1)+this->GetCrystal().GetDynPopCorr(this,n2))/2;
                         if(fout<0.01) continue;
 
                         const float r1=mvpBond[k]->GetAtom1().GetScatteringPower().GetColourRGB()[0];

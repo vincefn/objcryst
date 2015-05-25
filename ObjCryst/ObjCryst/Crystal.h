@@ -263,6 +263,10 @@ class Crystal:public UnitCell
       void CalcDynPopCorr(const REAL overlapDist=1., const REAL mergeDist=.0)const ;
       /// Reset Dynamical Population Correction factors (ie set it to 1)
       void ResetDynPopCorr()const ;
+      /** Access the Dynamical Occupancy Correction for a given component (atom)
+      * in a given Scatterer
+      */
+      REAL GetDynPopCorr(const Scatterer* pscatt, unsigned int component)const;
       /** Set the use of dynamical population correction (Crystal::mUseDynPopCorr).
       * Atoms which are considered "equivalent" (ie currently with the same Z number)
       * and which are overlapping see their Dynamical occupancy changed so that when they
