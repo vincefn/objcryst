@@ -53,7 +53,6 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpScatterer(obj)
 {
    VFN_DEBUG_MESSAGE("WXScatterer::WXScatterer()",6)
    mpWXTitle->SetForegroundColour(wxColour(0,100,0));
-   mpWXTitle->SetSize(400,-1);
    //Lattice
       wxBoxSizer* sizer=new wxBoxSizer(wxHORIZONTAL);
 

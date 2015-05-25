@@ -505,6 +505,7 @@ void WXFieldName::UpdateUI(const bool lock)
    if(w>wmax)w=wmax;
    if(w>mpField->GetSize().GetWidth())
       this->GetSizer()->SetItemMinSize(mpField,w+30,-1);
+   this->GetSizer()->Fit(this);
    
    mIsSelfUpdating=false;
    mNeedUpdateUI=false;
