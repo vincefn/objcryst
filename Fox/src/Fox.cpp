@@ -1402,7 +1402,7 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
          menuFile->Append(MENU_FILE_SAVE, _T("&Save\tCtrl-S"), _T("Save Everything..."));
          menuFile->Append(MENU_FILE_QUIT, _T("E&xit\tCtrl-Q"), _T("Quit "));
          menuFile->AppendSeparator();
-         menuFile->Append(MENU_FILE_BROWSE, _T("Browse .xml, .xml.gz or .cif files..."), _T("Browse .xml, .xml.gz or .cif files..."));
+         menuFile->Append(MENU_FILE_BROWSE, _T("&Browse .xml, .xml.gz or .cif files...\tCtrl-B"), _T("Browse .xml, .xml.gz or .cif files..."));
       
       wxMenu *objectMenu = new wxMenu(_T(""), wxMENU_TEAROFF);
          objectMenu->Append(MENU_OBJECT_CREATE_CRYSTAL, _T("New Crystal"),
