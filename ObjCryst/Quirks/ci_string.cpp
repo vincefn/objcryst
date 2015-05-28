@@ -34,7 +34,9 @@ bool ci_char_traits::lt( char c1, char c2 )
    {return tolower(c1) < tolower(c2);}
 
 int ci_char_traits::compare(const char* s1,const char* s2,size_t n )
-   {return strnicmp( s1, s2, n );}
+{
+	return _strnicmp(s1, s2, n);
+}
 
 const char* ci_char_traits::find( const char* s, int n, char a )
 {
