@@ -176,6 +176,7 @@ class MyApp : public wxApp
 #endif
    private:
       WXCrystMainFrame *mpFrame;
+      wxLocale mLocale;
 };
 
 
@@ -347,8 +348,12 @@ int main (int argc, char *argv[])
    TAU_PROFILE("main()","int()",TAU_DEFAULT);
    TAU_PROFILE_SET_NODE(0);
    //set locale settings to standard
-   setlocale(LC_NUMERIC,"C");
-   
+   //setlocale(LC_NUMERIC,"C");
+   //std::locale::global(std::locale(""));
+   mLocale.Init(wxLANGUAGE_DEFAULT); 
+   std::cout.imbue(std::locale::classic());
+   std::cin.imbue(std::locale::classic());
+
    {// Fox version
       char verBuf[200];
       sprintf(verBuf,"1.10-devel (#%d)",__FOXREVISION__);

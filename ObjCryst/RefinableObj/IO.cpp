@@ -126,7 +126,7 @@ istream& operator>> (istream& is, XMLCrystTag &tag)
    is>>tmp;
    while ((tmp!='<') && !(is.eof()) && !(is.fail()) )is>>tmp;
    if(is.eof()) return is;
-   if(is.fail()) {throw ObjCrystException("XMLCrystTag::>>   failed input");cout<<"throw:"<<__FILE__<<":"<<__LINE__<<endl;}
+   if(is.fail()) {cout<<"throw:"<<__FILE__<<":"<<__LINE__<<":"<<tag<<endl;throw ObjCrystException("XMLCrystTag::>>   failed input");}
    while ((tmp==' ')||(tmp=='<'))is>>tmp;
    
    if('/'==tmp)
@@ -141,7 +141,7 @@ istream& operator>> (istream& is, XMLCrystTag &tag)
      str+=tmp;
      is>>tmp;
      VFN_DEBUG_MESSAGE(str,1);
-     if(is.fail()) {throw ObjCrystException("XMLCrystTag::>>   failed input");cout<<"throw:"<<__FILE__<<":"<<__LINE__<<endl;}
+      if(is.fail()) {cout<<"throw:"<<__FILE__<<":"<<__LINE__<<":"<<tag<<endl;throw ObjCrystException("XMLCrystTag::>>   failed input");}
    } while ((tmp!=' ')&&(tmp!='>')&&(tmp!='/'));
    tag.mName=str;
    
@@ -236,6 +236,7 @@ void RefinablePar::XMLInput(istream &is,const XMLCrystTag &tag)
       {
          bool b;
          stringstream ss(tag.GetAttributeValue(i));
+         ss.imbue(std::locale::classic());
          ss >>b;
          this->SetIsFixed(!b);
          continue;
@@ -244,6 +245,7 @@ void RefinablePar::XMLInput(istream &is,const XMLCrystTag &tag)
       {
          bool b;
          stringstream ss(tag.GetAttributeValue(i));
+         ss.imbue(std::locale::classic());
          ss >>b;
          this->SetIsLimited(b);
          continue;
@@ -252,6 +254,7 @@ void RefinablePar::XMLInput(istream &is,const XMLCrystTag &tag)
       {
          REAL f;
          stringstream ss(tag.GetAttributeValue(i));
+         ss.imbue(std::locale::classic());
          ss >>f;
          this->SetHumanMin(f);
          continue;
@@ -260,6 +263,7 @@ void RefinablePar::XMLInput(istream &is,const XMLCrystTag &tag)
       {
          REAL f;
          stringstream ss(tag.GetAttributeValue(i));
+         ss.imbue(std::locale::classic());
          ss >>f;
          this->SetHumanMax(f);
          continue;
@@ -268,15 +272,18 @@ void RefinablePar::XMLInput(istream &is,const XMLCrystTag &tag)
       {
          bool b;
          stringstream ss(tag.GetAttributeValue(i));
+         ss.imbue(std::locale::classic());
          ss >>b;
          this->SetIsPeriodic(b);
          continue;
       }
    }
+   VFN_DEBUG_MESSAGE(tag, 10)
    REAL f=InputFloat(is,'<');
    if(ISNAN_OR_INF(f)) f=1.0;
    this->SetHumanValue(f);
    XMLCrystTag junk(is);//read end tag
+   VFN_DEBUG_MESSAGE(tag, 10)
    VFN_DEBUG_EXIT("RefinablePar::XMLInput():"<<this->GetName(),5)
 }
 

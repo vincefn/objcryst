@@ -752,7 +752,7 @@ void CIFData::Fractional2CartesianCoord()
 
 CIF::CIF(istream &is, const bool interpret,const bool verbose)
 {
-   char buf[100];
+   string s;
    (*fpObjCrystInformUser)("CIF: Opening CIF");
    Chronometer chrono;
    chrono.start();
@@ -761,19 +761,19 @@ CIF::CIF(istream &is, const bool interpret,const bool verbose)
    char c;
    while(is.get(c))in.put(c);
    const float t0read=chrono.seconds();
-   snprintf(buf,100,"CIF: Parsing CIF (reading dt=%5.3fs)",t0read);
-   (*fpObjCrystInformUser)(buf);
+   s=(boost::format("CIF: Parsing CIF (reading dt=%5.3fs)")%t0read).str();
+   (*fpObjCrystInformUser)(s);
    this->Parse(in);
    const float t1parse=chrono.seconds();
-   snprintf(buf,100,"CIF: Finished Parsing, Extracting...(parsing dt=%5.3fs)",t1parse-t0read);
-   (*fpObjCrystInformUser)(buf);
+   s=(boost::format("CIF: Finished Parsing, Extracting...(parsing dt=%5.3fs)") % (t1parse-t0read)).str();
+   (*fpObjCrystInformUser)(s);
    // Extract structure from blocks
    if(interpret)
       for(map<string,CIFData>::iterator posd=mvData.begin();posd!=mvData.end();++posd)
          posd->second.ExtractAll(verbose);
    const float t2interpret=chrono.seconds();
-   snprintf(buf,100,"CIF: Finished Import...(interpret dt=%5.3fs, total CIF import=%5.3fs)",t2interpret-t1parse,t2interpret);
-   (*fpObjCrystInformUser)(buf);
+   s=(boost::format("CIF: Finished Import...(interpret dt=%5.3fs, total CIF import=%5.3fs)")%(t2interpret-t1parse)%t2interpret).str();
+   (*fpObjCrystInformUser)(s);
 }
 
 bool iseol(const char c) { return ((c=='\n')||(c=='\r'));}
@@ -968,21 +968,22 @@ void CIF::Parse(stringstream &in)
 REAL CIFNumeric2REAL(const string &s)
 {
    if((s==".") || (s=="?")) return 0.0;
-
-   // Err on the side of caution here. Scan for double, but return requested
-   // REAL.
-   double v;
-   const int n=sscanf(s.c_str(),"%lf",&v);
-   if(n!=1) return 0.0;
-   return (REAL) v;
+   // Use stream rather than sscanf to rely on C++ locale to read C-locale values
+   REAL v=0;
+   stringstream ss(s);
+   ss.imbue(std::locale::classic());
+   ss>>v;
+   return v;
 }
 
 int CIFNumeric2Int(const string &s)
 {
    if((s==".") || (s=="?")) return 0;
-   int v;
-   const int n=sscanf(s.c_str(),"%d",&v);
-   if(n!=1) return 0;
+   // Use stream rather than sscanf to rely on C++ locale to read C-locale values
+   int v=0;
+   stringstream ss(s);
+   ss.imbue(std::locale::classic());
+   ss>>v;
    return v;
 }
 
@@ -994,7 +995,6 @@ Crystal* CreateCrystalFromCIF(CIF &cif,bool verbose,bool checkSymAsXYZ)
 Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsXYZ, const bool oneScatteringPowerPerElement, const bool connectAtoms)
 {
    gCrystalRegistry.AutoUpdateUI(false);
-   char buf[200];
    (*fpObjCrystInformUser)("CIF: Opening CIF");
    Chronometer chrono;
    chrono.start();
@@ -1095,8 +1095,7 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
          if(pos->second.mName!="") pCryst->SetName(pos->second.mName);
          else if(pos->second.mFormula!="") pCryst->SetName(pos->second.mFormula);
          const float t1=chrono.seconds();
-         snprintf(buf,200,"CIF: Create Crystal:%s(%s)(dt=%6.3fs)",pCryst->GetName().c_str(),pCryst->GetSpaceGroup().GetName().c_str(),t1);
-         (*fpObjCrystInformUser)(buf);
+         (*fpObjCrystInformUser)((boost::format("CIF: Create Crystal:%s(%s)(dt=%6.3fs)")%pCryst->GetName() % pCryst->GetSpaceGroup().GetName() % t1).str());
          
          for(vector<CIFData::CIFAtom>::const_iterator posat=pos->second.mvAtom.begin();posat!=pos->second.mvAtom.end();++posat)
          {
@@ -1123,8 +1122,7 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
                   vElementBiso[sp].second=1;
                   pCryst->AddScatteringPower(sp);
                   const float t21=chrono.seconds();
-                  snprintf(buf,200,"CIF: Add scattering power: %s (dt=%6.3fsCrystal creation=%6.3fs total)",posat->mLabel.c_str(),t21-t20,t21);
-                  (*fpObjCrystInformUser)(buf);
+                  (*fpObjCrystInformUser)((boost::format("CIF: Add scattering power: %s (dt=%6.3fsCrystal creation=%6.3fs total)")% posat->mLabel % (t21-t20) % t21).str());
                }
             }
             else
@@ -1159,16 +1157,14 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
                   }
                   pCryst->AddScatteringPower(sp);
                   const float t21=chrono.seconds();
-                  snprintf(buf,200,"CIF: Add scattering power: %s (dt=%6.3fsCrystal creation=%6.3fs total)",posat->mLabel.c_str(),t21-t20,t21);
-                  (*fpObjCrystInformUser)(buf);
+                  (*fpObjCrystInformUser)((boost::format("CIF: Add scattering power: %s (dt=%6.3fsCrystal creation=%6.3fs total)") % posat->mLabel % (t21-t20) % t21).str());
                }
             }
             (*fpObjCrystInformUser)("CIF: Add Atom:"+posat->mLabel+"("+sp->GetName()+")");
             pCryst->AddScatterer(new Atom(posat->mCoordFrac[0],posat->mCoordFrac[1],posat->mCoordFrac[2],
                                           posat->mLabel,sp,posat->mOccupancy));
             const float t22=chrono.seconds();
-            snprintf(buf,200,"CIF: new Atom: %s (%s) (dt=%6.3fs, Crystal creation=%6.3fs total)",posat->mLabel.c_str(),sp->GetName().c_str(),t22-t20,t22);
-            (*fpObjCrystInformUser)(buf);
+            (*fpObjCrystInformUser)((boost::format("CIF: new Atom: %s (%s) (dt=%6.3fs, Crystal creation=%6.3fs total)") % posat->mLabel % sp->GetName() % (t22-t20) % t22).str());
          }
       }
    if(oneScatteringPowerPerElement)

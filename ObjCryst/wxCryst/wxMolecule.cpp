@@ -909,7 +909,7 @@ mpBondWin(0),mpAngleWin(0),mpDihedralAngleWin(0),mpRigidGroupWin(0),mpNonFlipAto
       cellAttrName->SetEditor(new wxGridCellTextEditor);
       wxGridCellAttr* cellAttrFloat = new wxGridCellAttr;
       cellAttrFloat->SetRenderer(new wxGridCellFloatRenderer(6,3));
-      //cellAttrFloat->SetEditor(new wxGridCellFloatEditor(6,3));// Does not work, locale issue ?
+      cellAttrFloat->SetEditor(new wxGridCellFloatEditor(6,3));// Does not work, locale issue ?
 
       mpAtomWin= new WXMolScrolledWindow(this,this,ID_WINDOW_ATOM);
       //mpAtomWin->SetSize(800,300);
@@ -2688,10 +2688,10 @@ void WXMolecule::OnMenuShowRestraintWindow(wxCommandEvent &event)
       cellAttrName->SetEditor(new wxGridCellTextEditor);
       wxGridCellAttr* cellAttrFloat = new wxGridCellAttr;
       cellAttrFloat->SetRenderer(new wxGridCellFloatRenderer(-1,3));
-      //cellAttrFloat->SetEditor(new wxGridCellFloatEditor);
+      cellAttrFloat->SetEditor(new wxGridCellFloatEditor);
       wxGridCellAttr* cellAttrFloatReadOnly = new wxGridCellAttr;
       cellAttrFloatReadOnly->SetRenderer(new wxGridCellFloatRenderer(-1,3));
-      //cellAttrFloatReadOnly->SetEditor(new wxGridCellFloatEditor);
+      cellAttrFloatReadOnly->SetEditor(new wxGridCellFloatEditor);
       cellAttrFloatReadOnly->SetReadOnly();
 
       mpBondWin = new WXMolScrolledWindow(notebook,this,ID_WINDOW_BONDLENGTH);
@@ -2719,10 +2719,10 @@ void WXMolecule::OnMenuShowRestraintWindow(wxCommandEvent &event)
       cellAttrName->SetEditor(new wxGridCellTextEditor);
       wxGridCellAttr* cellAttrFloat = new wxGridCellAttr;
       cellAttrFloat->SetRenderer(new wxGridCellFloatRenderer(-1,3));
-      //cellAttrFloat->SetEditor(new wxGridCellFloatEditor);
+      cellAttrFloat->SetEditor(new wxGridCellFloatEditor);
       wxGridCellAttr* cellAttrFloatReadOnly = new wxGridCellAttr;
       cellAttrFloatReadOnly->SetRenderer(new wxGridCellFloatRenderer(-1,3));
-      //cellAttrFloatReadOnly->SetEditor(new wxGridCellFloatEditor);
+      cellAttrFloatReadOnly->SetEditor(new wxGridCellFloatEditor);
       cellAttrFloatReadOnly->SetReadOnly();
 
       mpAngleWin = new WXMolScrolledWindow(notebook,this,ID_WINDOW_BONDANGLE);
@@ -2752,10 +2752,10 @@ void WXMolecule::OnMenuShowRestraintWindow(wxCommandEvent &event)
       cellAttrName->SetEditor(new wxGridCellTextEditor);
       wxGridCellAttr* cellAttrFloat = new wxGridCellAttr;
       cellAttrFloat->SetRenderer(new wxGridCellFloatRenderer(-1,3));
-      //cellAttrFloat->SetEditor(new wxGridCellFloatEditor);
+      cellAttrFloat->SetEditor(new wxGridCellFloatEditor);
       wxGridCellAttr* cellAttrFloatReadOnly = new wxGridCellAttr;
       cellAttrFloatReadOnly->SetRenderer(new wxGridCellFloatRenderer(-1,3));
-      //cellAttrFloatReadOnly->SetEditor(new wxGridCellFloatEditor);
+      cellAttrFloatReadOnly->SetEditor(new wxGridCellFloatEditor);
       cellAttrFloatReadOnly->SetReadOnly();
 
       mpDihedralAngleWin = new WXMolScrolledWindow(notebook,this,ID_WINDOW_DIHEDRALANGLE);

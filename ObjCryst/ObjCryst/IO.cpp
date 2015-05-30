@@ -56,12 +56,30 @@ namespace ObjCryst
 ////////////////////////////////////////////////////////////////////////
 float InputFloat(istream &is, const char endchar)
 {
+   float f;
    // Get rid of spaces, returns etc...
-   while(0==isgraph(is.peek())) is.get();
-   string tmp;
-   while((endchar!=is.peek())&&(' '!=is.peek())) tmp+=is.get();
-   const float f=atof(tmp.c_str());
-   VFN_DEBUG_MESSAGE("InputFloat(..):"<<tmp<<" -> "<<f,3);
+   while(0==isgraph(is.peek())) cout<<is.get();
+   stringstream tmp;
+   char c;
+   while((endchar!=is.peek())&&(' '!=is.peek()))
+   {
+      is.get(c) ;
+      // Explicit typecasting to char otherwise it is understood as an integer number from type charT...
+      tmp<<(char)(std::tolower(c)) ;
+   }
+   if(tmp.str().find("nan")!=string::npos)
+   {
+      VFN_DEBUG_MESSAGE("InputFloat(..):"<<tmp.str()<<" -> NAN ! -> 1",9);
+      return 1;
+   }
+   if(tmp.str().find("inf")!=string::npos)
+   {
+      VFN_DEBUG_MESSAGE("InputFloat(..):"<<tmp.str()<<" -> INF ! -> 1",9);
+      return 1;
+   }
+   tmp.imbue(std::locale::classic());
+   tmp>>f;
+   VFN_DEBUG_MESSAGE("InputFloat(..):"<<f<<","<<is.good(),3);
    return f;
 }
 
@@ -87,7 +105,8 @@ void XMLCrystFileSaveGlobal(const string & filename)
 
 void XMLCrystFileSaveGlobal(ostream &out)
 {
-   VFN_DEBUG_ENTRY("XMLCrystFileSaveGlobal(ostream)",5)  
+   VFN_DEBUG_ENTRY("XMLCrystFileSaveGlobal(ostream)",5)
+   out.imbue(std::locale::classic());
    XMLCrystTag tag("ObjCryst");
    time_t date=time(0);
    char strDate[40];
@@ -119,6 +138,7 @@ ObjRegistry<XMLCrystTag> XMLCrystFileLoadObjectList(const string & filename)
 
    ifstream is(filename.c_str());
    if(!is){};//:TODO:
+   is.imbue(std::locale::classic());
    ObjRegistry<XMLCrystTag> reg;
    for(;;)
    {
@@ -149,6 +169,7 @@ template<class T> void XMLCrystFileLoadObject(const string & filename,
 
    ifstream is(filename.c_str());
    if(!is){};//:TODO:
+   is.imbue(std::locale::classic());
    XMLCrystTag tag;
    while(true)
    {
@@ -200,6 +221,7 @@ void XMLCrystFileLoadAllObject(const string & filename)
 void XMLCrystFileLoadAllObject(istream &is)
 {
    VFN_DEBUG_ENTRY("XMLCrystFileLoadAllObject(istream)",5)
+   is.imbue(std::locale::classic());
    XMLCrystTag tag;
    do {is>>tag;} while(("ObjCryst"!=tag.GetName()) && (false==is.eof()));
    
