@@ -1392,7 +1392,7 @@ void WXCrystScrolledWindow::OnWXCrystChildFocus(wxChildFocusEvent& event)
 
 WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, const wxSize& size,
                                    const bool splashscreen)
-       : wxFrame((wxFrame *)NULL, -1, title, pos, size),mvUpdatesAutoCheck(false)
+: wxFrame((wxFrame *)NULL, -1, title, pos, size), mpNotebook(NULL), mvUpdatesAutoCheck(false)
 {
 #ifdef __WXMAC__
    // we need this in order to allow the about menu relocation, since ABOUT is
@@ -2383,7 +2383,7 @@ void WXCrystMainFrame::OnCheckUpdate(wxCommandEvent& event)
 void WXCrystMainFrame::OnSize(wxSizeEvent &event)
 {
    if(mpNotebook!=NULL)
-     for(unsigned int i=0;i<mpNotebook->GetPageCount();i++) mpNotebook->GetPage(i)->PostSizeEvent();
+        for(unsigned int i=0;i<mpNotebook->GetPageCount();i++) mpNotebook->GetPage(i)->PostSizeEvent();
 
    this->wxFrame::OnSize(event);
 }

@@ -1009,10 +1009,10 @@ template class CrystMatrix<REAL>;
 template REAL MaxDifference(const CrystMatrix<REAL>&,const CrystMatrix<REAL>&);
 template CrystMatrix<REAL> product(const CrystMatrix<REAL>&,const CrystMatrix<REAL>&);
 template ostream& operator<<(ostream &os, const CrystMatrix<REAL> &vect);
-template CrystVector<REAL> cos(const CrystVector<REAL>&);
-template CrystVector<REAL> sin(const CrystVector<REAL>&);
-template CrystVector<REAL> tan(const CrystVector<REAL>&);
-template CrystVector<REAL> sqrt(const CrystVector<REAL>&);
+template CrystVector<REAL> cos<REAL>(const CrystVector<REAL>&);
+template CrystVector<REAL> sin<REAL>(const CrystVector<REAL>&);
+template CrystVector<REAL> tan<REAL>(const CrystVector<REAL>&);
+template CrystVector<REAL> sqrt<REAL>(const CrystVector<REAL>&);
 template class CrystArray3D<REAL>;
 template ostream& operator<<(ostream &os, const CrystArray3D<REAL> &vect);
 
