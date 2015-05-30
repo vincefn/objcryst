@@ -65,7 +65,7 @@ float InputFloat(istream &is, const char endchar)
    {
       is.get(c) ;
       // Explicit typecasting to char otherwise it is understood as an integer number from type charT...
-      tmp<<(char)(std::tolower(c)) ;
+      tmp<<(char)(tolower(c)) ;
    }
    if(tmp.str().find("nan")!=string::npos)
    {
