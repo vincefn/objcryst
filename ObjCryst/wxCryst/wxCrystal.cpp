@@ -127,7 +127,7 @@ GLvoid crystGLPrint(const string &s)
    }
    #endif
    for (unsigned int i = 0; i < s.size(); ++i) glCallList(sFontDisplayListBase + (unsigned int)s.c_str()[i]);
-   VFN_DEBUG_MESSAGE("crystGLPrint():"<<s<<", Vendor:"<<glGetString(GL_VENDOR)<<", Renderer"<<glGetString(GL_RENDERER)<<"(shift="<<shift<<", base="<<sFontDisplayListBase<<")",10)
+   //VFN_DEBUG_MESSAGE("crystGLPrint():"<<s<<", Vendor:"<<glGetString(GL_VENDOR)<<", Renderer"<<glGetString(GL_RENDERER)<<"(shift="<<shift<<", base="<<sFontDisplayListBase<<")",10)
    #else
    glPushAttrib(GL_LIST_BIT);
    glListBase(sFontDisplayListBase);
