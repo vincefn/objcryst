@@ -54,7 +54,7 @@ long NiftyStaticGlobalObjectsInitializer_ScatteringPower::mCount=0;
 //      Bij to Betaij conversion
 //
 //######################################################################
-CrystVector_REAL Bij2Betaij(const CrystVector_REAL &Bij, const UnitCell &cell)
+CrystMatrix_REAL Bij2Betaij(const CrystVector_REAL &Bij, const UnitCell &cell)
 {
    // Willis & Pryor,p 101: (betaij) = 2*pi^2 * transpose(cell.Bmatrix) * (Bij) * cell.Bmatrix
    // :TODO: this needs to be checked before being used
@@ -77,6 +77,7 @@ CrystVector_REAL Bij2Betaij(const CrystVector_REAL &Bij, const UnitCell &cell)
    CrystMatrix_REAL b(3,3);
    b=cell.GetBMatrix().transpose().Mult(B.Mult(cell.GetBMatrix()));
    b*=2*M_PI*M_PI;
+   return b;
 }
 
 //######################################################################
