@@ -3098,9 +3098,9 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
    glTranslatef( mX0, mY0, mZ0 );
    
    //Draw first non-transparent object then transparent ones
-   for(unsigned int i=0;i<2;i++)
+   for(unsigned int passnum = 0; passnum<2; passnum++)
    {
-      if(i==0)
+	   if (passnum == 0)
       {
          glDepthMask(GL_TRUE);
          glAlphaFunc(GL_GREATER,0.99);
@@ -3140,7 +3140,12 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
       }
       if(mShowCrystal)
       {
-         glCallList(mpWXCrystal->GetCrystalGLDisplayList());  //Draw Crystal
+		  glLoadIdentity();
+		  glColor3f(1.0, 1.0, 1.0);
+		  glTranslatef(-0.3, 0, -mDist);
+		  glMultMatrixf(&m[0][0]);
+		  glTranslatef(mX0, mY0, mZ0);
+		  glCallList(mpWXCrystal->GetCrystalGLDisplayList());  //Draw Crystal
          if(mShowAtomName)
          {
             glLoadIdentity();
@@ -3193,9 +3198,10 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
          }
          mpParentFrame->SetStatusText(statusText);
       }
-      if(mShowFourier)
+	  if (mShowFourier && (passnum==0))
       {
-         glLoadIdentity();
+		 glAlphaFunc(GL_ALWAYS,1);
+		 glLoadIdentity();
          glTranslatef( 0, 0, -mDist );
          build_rotmatrix( m,mQuat);
          glMultMatrixf( &m[0][0] );
