@@ -2985,21 +2985,21 @@ mIsGLFontBuilt(false),mGLFontDisplayListBase(0),mpFourierMapListWin(0)
           wxConfigBase::Get()->Read(_T("Crystal/BOOL/Default-display only asymmetric unit cell in 3D view"), &val);
           if(val)
           {
-            mcellbbox.xMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmin()-0.1;
-            mcellbbox.yMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Ymin()-0.1;
-            mcellbbox.zMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Zmin()-0.1;
-            mcellbbox.xMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmax()+0.1;
-            mcellbbox.yMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Ymax()+0.1;
-            mcellbbox.zMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Zmax()+0.1;
+            mcellbbox.xMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmin();
+            mcellbbox.yMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Ymin();
+            mcellbbox.zMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Zmin();
+            mcellbbox.xMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmax();
+            mcellbbox.yMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Ymax();
+            mcellbbox.zMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Zmax();
           }
           else
           {
-            mcellbbox.xMin = -0.1;
-            mcellbbox.yMin = -0.1;
-            mcellbbox.zMin = -0.1;
-            mcellbbox.xMax =  1.1;
-            mcellbbox.yMax =  1.1;
-            mcellbbox.zMax =  1.1;
+            mcellbbox.xMin = 0;
+            mcellbbox.yMin = 0;
+            mcellbbox.zMin = 0;
+            mcellbbox.xMax = 1;
+            mcellbbox.yMax = 1;
+            mcellbbox.zMax = 1;
           }
       }
       if(!wxConfigBase::Get()->HasEntry(_T("Crystal/BOOL/Default-display atom names in 3D view")))
@@ -3142,7 +3142,7 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
       {
 		  glLoadIdentity();
 		  glColor3f(1.0, 1.0, 1.0);
-		  glTranslatef(-0.3, 0, -mDist);
+		  glTranslatef(0, 0, -mDist);
 		  glMultMatrixf(&m[0][0]);
 		  glTranslatef(mX0, mY0, mZ0);
 		  glCallList(mpWXCrystal->GetCrystalGLDisplayList());  //Draw Crystal
