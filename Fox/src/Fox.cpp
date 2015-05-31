@@ -1524,7 +1524,11 @@ void WXCrystScrolledWindow::OnWXCrystChildFocus(wxChildFocusEvent& event)
 
 WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, const wxSize& size,
                                    const bool splashscreen)
+<<<<<<< HEAD
 : wxFrame((wxFrame *)NULL, -1, title, pos, size), mpNotebook(NULL), mvUpdatesAutoCheck(false)
+=======
+       : wxFrame((wxFrame *)NULL, -1, title, pos, size),mvUpdatesAutoCheck(false)
+>>>>>>> Begin GUI interface to search & import structures from the crystallography open database.
 #ifdef __FOX_COD__
 ,mpCODFrame(0)
 #endif
