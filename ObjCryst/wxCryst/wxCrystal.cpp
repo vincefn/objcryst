@@ -109,10 +109,31 @@ GLvoid crystGLPrint(const string &s)
    for(unsigned int l=0;l<s.size();l++)
       glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12,*(s.c_str()+l));
    #else
+   #ifdef __WINDOWS__
+   // Work around a bug in the generic software windows openGL renderer ?
+   // Use a fixed index for the OpenGL display list of characters
+   // See http://stackoverflow.com/questions/10782067/opengl-glcalllists-drawing-incorrect-characters-on-windows-7
+   #if 0
+   static int shift = 0;
+   static bool microsoft_opengl_bug_init = true;
+   if (microsoft_opengl_bug_init)
+   {
+	  stringstream sv, sr;
+	  sv << glGetString(GL_VENDOR);
+	  sr << glGetString(GL_RENDERER);
+	  if((sv.str().find("Microsoft Corporation") != std::string::npos) && (sr.str().find("GDI Generic") != std::string::npos))
+		 shift = 0;
+	  microsoft_opengl_bug_init = false;
+   }
+   #endif
+   for (unsigned int i = 0; i < s.size(); ++i) glCallList(sFontDisplayListBase + (unsigned int)s.c_str()[i]);
+   VFN_DEBUG_MESSAGE("crystGLPrint():"<<s<<", Vendor:"<<glGetString(GL_VENDOR)<<", Renderer"<<glGetString(GL_RENDERER)<<"(shift="<<shift<<", base="<<sFontDisplayListBase<<")",10)
+   #else
    glPushAttrib(GL_LIST_BIT);
-      glListBase(sFontDisplayListBase - 32);
-      glCallLists(s.size(), GL_UNSIGNED_BYTE, s.c_str());
+   glListBase(sFontDisplayListBase);
+   glCallLists(s.size(), GL_UNSIGNED_BYTE, s.c_str());
    glPopAttrib();
+   #endif
    #endif
    glEnable (GL_BLEND);
 }
@@ -850,7 +871,7 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
       {
          mCrystalGLDisplayList=glGenLists(1);
          mCrystalGLNameDisplayList=glGenLists(1);
-         VFN_DEBUG_MESSAGE("WXCrystal::UpdateGL():created mCrystalGLDisplayList="<<mCrystalGLDisplayList,7)
+		 VFN_DEBUG_MESSAGE("WXCrystal::UpdateGL():created mCrystalGLDisplayList=" << mCrystalGLDisplayList << ",mCrystalGLNameDisplayList=" << mCrystalGLNameDisplayList, 10)
       }
       glNewList(mCrystalGLDisplayList,GL_COMPILE);
          glPushMatrix();
@@ -4378,7 +4399,7 @@ void WXGLCrystalCanvas::BuildGLFont()
       HFONT   oldfont;
       wxPaintDC dc(this);
       HDC hDC = (HDC)dc.GetHDC();
-      mGLFontDisplayListBase = glGenLists(96);
+      mGLFontDisplayListBase = 100;
       font = CreateFont(-12,                       // Height of font
                         0,                         // Width of font
                         0,                         // Angle of escapement
@@ -4395,7 +4416,7 @@ void WXGLCrystalCanvas::BuildGLFont()
                         _T("Helvetica"));          // Font name
 
       oldfont = (HFONT)SelectObject(hDC, font);
-      wglUseFontBitmaps(hDC, 32, 96, mGLFontDisplayListBase);
+      wglUseFontBitmaps(hDC, 0, 128, mGLFontDisplayListBase);
       SelectObject(hDC, oldfont);
       DeleteObject(font);
    #endif
