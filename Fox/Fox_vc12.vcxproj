@@ -1,0 +1,193 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{2775CD9F-FFF3-4373-A229-94DD4B6D7747}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Fox</RootNamespace>
+    <ProjectName>Fox</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IntDir>$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <IntDir>$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_WINDOWS;%(PreprocessorDefinitions);__WX__CRYST__;HAVE_SSE_MATHFUN;USE_SSE2;OBJCRYST_GL;HAVE_FFTW;__DEBUG__</PreprocessorDefinitions>
+      <SDLCheck>false</SDLCheck>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\;$(SolutionDir)..\cctbx\include;$(SolutionDir)..\ObjCryst;$(SolutionDir)..\wxWidgets\include\msvc;$(SolutionDir)..\wxWidgets\include;$(SolutionDir)..\fftw\api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ObjectFileName>$(IntDir)\%(RelativeDir)</ObjectFileName>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <FloatingPointExceptions>
+      </FloatingPointExceptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\fftw\fftw-3.3-libs\Static-Debug;$(SolutionDir)..\wxWidgets\lib\vc_lib;$(SolutionDir)$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>newmat.lib;cctbx.lib;libfftwf-3.3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>libboost_date_time-vc100-mt-sgd-1_47.lib;libcmt.lib</IgnoreSpecificDefaultLibraries>
+    </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\wxWidgets\include\msvc;$(SolutionDir)..\wxWidgets\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;_WINDOWS;%(PreprocessorDefinitions);__WX__CRYST__;HAVE_SSE_MATHFUN;USE_SSE2;OBJCRYST_GL;HAVE_FFTW</PreprocessorDefinitions>
+      <SDLCheck>false</SDLCheck>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\;$(SolutionDir)..\cctbx\include;$(SolutionDir)..\ObjCryst;$(SolutionDir)..\wxWidgets\include\msvc;$(SolutionDir)..\wxWidgets\include;$(SolutionDir)..\fftw\api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ObjectFileName>$(IntDir)\%(RelativeDir)</ObjectFileName>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <FloatingPointExceptions>
+      </FloatingPointExceptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\wxWidgets\lib\vc_lib;$(SolutionDir)$(Configuration);$(SolutionDir)..\fftw\fftw-3.3-libs\Static-Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>libboost_date_time-vc100-mt-s-1_47.lib</IgnoreSpecificDefaultLibraries>
+      <AdditionalDependencies>newmat.lib;cctbx.lib;libfftwf-3.3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\wxWidgets\include\msvc;$(SolutionDir)..\wxWidgets\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\ObjCryst\CrystVector\CrystVector.cpp" />
+    <ClCompile Include="..\ObjCryst\ObjCryst\Atom.cpp" />
+    <ClCompile Include="..\ObjCryst\ObjCryst\CIF.cpp" />
+    <ClCompile Include="..\ObjCryst\ObjCryst\Crystal.cpp" />
+    <ClCompile Include="..\ObjCryst\ObjCryst\DiffractionDataSingleCrystal.cpp" />
+    <ClCompile Include="..\ObjCryst\ObjCryst\Exception.cpp" />
+    <ClCompile Include="..\ObjCryst\ObjCryst\geomStructFactor.cpp" />
+    <ClCompile Include="..\ObjCryst\ObjCryst\geomStructFactor_001.cpp" />
+    <ClCompile Include="..\ObjCryst\ObjCryst\geomStructFactor_002.cpp" />
+    <ClCompile Include="..\ObjCryst\ObjCryst\geomStructFactor_067.cpp" />
+    <ClCompile Include="..\ObjCryst\ObjCryst\geomStructFactor_097.cpp" />
+    <ClCompile Include="..\ObjCryst\ObjCryst\geomStructFactor_230.cpp" />
+    <ClCompile Include="..\ObjCryst\ObjCryst\geomStructFactor_centro.cpp" />
+    <ClCompile Include="..\ObjCryst\ObjCryst\Indexing.cpp" />
+    <ClCompile Include="..\ObjCryst\ObjCryst\IO.cpp" />
+    <ClCompile Include="..\ObjCryst\ObjCryst\Molecule.cpp" />
+    <ClCompile Include="..\ObjCryst\ObjCryst\Polyhedron.cpp" />
+    <ClCompile Include="..\ObjCryst\ObjCryst\PowderPattern.cpp" />
+    <ClCompile Include="..\ObjCryst\ObjCryst\PowderPatternBackgroundBayesianMinimiser.cpp" />
+    <ClCompile Include="..\ObjCryst\ObjCryst\ReflectionProfile.cpp" />
+    <ClCompile Include="..\ObjCryst\ObjCryst\Scatterer.cpp" />
+    <ClCompile Include="..\ObjCryst\ObjCryst\ScatteringCorr.cpp" />
+    <ClCompile Include="..\ObjCryst\ObjCryst\ScatteringData.cpp" />
+    <ClCompile Include="..\ObjCryst\ObjCryst\ScatteringPower.cpp" />
+    <ClCompile Include="..\ObjCryst\ObjCryst\ScatteringPowerSphere.cpp" />
+    <ClCompile Include="..\ObjCryst\ObjCryst\SpaceGroup.cpp" />
+    <ClCompile Include="..\ObjCryst\ObjCryst\test.cpp" />
+    <ClCompile Include="..\ObjCryst\ObjCryst\UnitCell.cpp" />
+    <ClCompile Include="..\ObjCryst\ObjCryst\ZScatterer.cpp" />
+    <ClCompile Include="..\ObjCryst\Quirks\ci_string.cpp" />
+    <ClCompile Include="..\ObjCryst\Quirks\VFNDebug.cpp" />
+    <ClCompile Include="..\ObjCryst\Quirks\VFNStreamFormat.cpp" />
+    <ClCompile Include="..\ObjCryst\RefinableObj\GlobalOptimObj.cpp" />
+    <ClCompile Include="..\ObjCryst\RefinableObj\IO.cpp" />
+    <ClCompile Include="..\ObjCryst\RefinableObj\LSQNumObj.cpp" />
+    <ClCompile Include="..\ObjCryst\RefinableObj\RefinableObj.cpp" />
+    <ClCompile Include="..\ObjCryst\RefinableObj\Simplex.cpp" />
+    <ClCompile Include="..\ObjCryst\RefinableObj\Tracker.cpp" />
+    <ClCompile Include="..\ObjCryst\wxCryst\MC.cpp" />
+    <ClCompile Include="..\ObjCryst\wxCryst\mpVector.cpp" />
+    <ClCompile Include="..\ObjCryst\wxCryst\trackball.c" />
+    <ClCompile Include="..\ObjCryst\wxCryst\wxAtom.cpp" />
+    <ClCompile Include="..\ObjCryst\wxCryst\wxCryst.cpp" />
+    <ClCompile Include="..\ObjCryst\wxCryst\wxCrystal.cpp" />
+    <ClCompile Include="..\ObjCryst\wxCryst\wxDiffractionSingleCrystal.cpp" />
+    <ClCompile Include="..\ObjCryst\wxCryst\wxGlobalOptimObj.cpp" />
+    <ClCompile Include="..\ObjCryst\wxCryst\wxLSQ.cpp" />
+    <ClCompile Include="..\ObjCryst\wxCryst\wxMolecule.cpp" />
+    <ClCompile Include="..\ObjCryst\wxCryst\wxMultiGraph.cpp" />
+    <ClCompile Include="..\ObjCryst\wxCryst\wxPowderPattern.cpp" />
+    <ClCompile Include="..\ObjCryst\wxCryst\wxRefinableObj.cpp" />
+    <ClCompile Include="..\ObjCryst\wxCryst\wxScatterer.cpp" />
+    <ClCompile Include="..\ObjCryst\wxCryst\wxScatteringPower.cpp" />
+    <ClCompile Include="..\ObjCryst\wxCryst\wxScatteringPowerSphere.cpp" />
+    <ClCompile Include="..\ObjCryst\wxCryst\wxTrackerGraph.cpp" />
+    <ClCompile Include="..\ObjCryst\wxCryst\wxZScatterer.cpp" />
+    <ClCompile Include="src\Fox.cpp" />
+    <ClCompile Include="src\FoxClient.cpp" />
+    <ClCompile Include="src\FoxJob.cpp" />
+    <ClCompile Include="src\FoxServer.cpp" />
+    <ClCompile Include="src\FoxServerThread.cpp" />
+    <ClCompile Include="src\GridResult.cpp" />
+    <ClCompile Include="src\IOSocket.cpp" />
+    <ClCompile Include="src\WXFoxClient.cpp" />
+    <ClCompile Include="src\WXFoxServer.cpp" />
+    <ClCompile Include="src\WXGridWindow.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\Fox.icns" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="src\Fox.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="src\Fox.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

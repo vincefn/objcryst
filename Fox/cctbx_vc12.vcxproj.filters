@@ -1,0 +1,232 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\eltbx">
+      <UniqueIdentifier>{0973d8e0-7c3e-4a1a-97ab-d3a81e184698}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\sgtbx">
+      <UniqueIdentifier>{69d0e41e-ab3f-4df9-b9b3-ee6e1c9de679}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\uctbx">
+      <UniqueIdentifier>{b4a8a378-bde2-465f-bf0b-0045f9d06893}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\miller">
+      <UniqueIdentifier>{8845c27e-1be7-4f7f-a374-eddc788d0499}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\sgtbx\reference_settings">
+      <UniqueIdentifier>{98b58b94-2ea0-4789-992c-b3dae45a1e1c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\cctbx\cctbx\eltbx\basic.cpp">
+      <Filter>Source Files\eltbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\eltbx\covalent_radii.cpp">
+      <Filter>Source Files\eltbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\eltbx\fp_fdp.cpp">
+      <Filter>Source Files\eltbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\eltbx\henke.cpp">
+      <Filter>Source Files\eltbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\eltbx\henke_tables_01_12.cpp">
+      <Filter>Source Files\eltbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\eltbx\henke_tables_13_24.cpp">
+      <Filter>Source Files\eltbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\eltbx\henke_tables_25_36.cpp">
+      <Filter>Source Files\eltbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\eltbx\henke_tables_37_48.cpp">
+      <Filter>Source Files\eltbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\eltbx\henke_tables_49_60.cpp">
+      <Filter>Source Files\eltbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\eltbx\henke_tables_61_72.cpp">
+      <Filter>Source Files\eltbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\eltbx\henke_tables_73_84.cpp">
+      <Filter>Source Files\eltbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\eltbx\henke_tables_85_92.cpp">
+      <Filter>Source Files\eltbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\eltbx\icsd_radii.cpp">
+      <Filter>Source Files\eltbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\eltbx\neutron.cpp">
+      <Filter>Source Files\eltbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\eltbx\sasaki.cpp">
+      <Filter>Source Files\eltbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\eltbx\sasaki_tables_01_12.cpp">
+      <Filter>Source Files\eltbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\eltbx\sasaki_tables_13_24.cpp">
+      <Filter>Source Files\eltbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\eltbx\sasaki_tables_25_36.cpp">
+      <Filter>Source Files\eltbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\eltbx\sasaki_tables_37_48.cpp">
+      <Filter>Source Files\eltbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\eltbx\sasaki_tables_49_60.cpp">
+      <Filter>Source Files\eltbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\eltbx\sasaki_tables_61_72.cpp">
+      <Filter>Source Files\eltbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\eltbx\sasaki_tables_73_82.cpp">
+      <Filter>Source Files\eltbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\eltbx\tiny_pse.cpp">
+      <Filter>Source Files\eltbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\eltbx\wavelengths.cpp">
+      <Filter>Source Files\eltbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\miller\asu.cpp">
+      <Filter>Source Files\miller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\miller\bins.cpp">
+      <Filter>Source Files\miller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\miller\index_generator.cpp">
+      <Filter>Source Files\miller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\miller\index_span.cpp">
+      <Filter>Source Files\miller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\miller\match_bijvoet_mates.cpp">
+      <Filter>Source Files\miller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\miller\match_indices.cpp">
+      <Filter>Source Files\miller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\miller\sym_equiv.cpp">
+      <Filter>Source Files\miller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\uctbx\spoil_optimization.cpp">
+      <Filter>Source Files\uctbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\uctbx\uctbx.cpp">
+      <Filter>Source Files\uctbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\bricks.cpp">
+      <Filter>Source Files\sgtbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\change_of_basis_op.cpp">
+      <Filter>Source Files\sgtbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\find_affine.cpp">
+      <Filter>Source Files\sgtbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\group_codes.cpp">
+      <Filter>Source Files\sgtbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\hall_in.cpp">
+      <Filter>Source Files\sgtbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\lattice_symmetry.cpp">
+      <Filter>Source Files\sgtbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\lattice_tr.cpp">
+      <Filter>Source Files\sgtbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\miller.cpp">
+      <Filter>Source Files\sgtbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\reciprocal_space_asu.cpp">
+      <Filter>Source Files\sgtbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\reciprocal_space_ref_asu.cpp">
+      <Filter>Source Files\sgtbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\rot_mx.cpp">
+      <Filter>Source Files\sgtbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\rot_mx_info.cpp">
+      <Filter>Source Files\sgtbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\row_echelon_solve.cpp">
+      <Filter>Source Files\sgtbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\rt_mx.cpp">
+      <Filter>Source Files\sgtbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\select_generators.cpp">
+      <Filter>Source Files\sgtbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\seminvariant.cpp">
+      <Filter>Source Files\sgtbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\site_symmetry.cpp">
+      <Filter>Source Files\sgtbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\space_group.cpp">
+      <Filter>Source Files\sgtbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\space_group_type.cpp">
+      <Filter>Source Files\sgtbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\symbols.cpp">
+      <Filter>Source Files\sgtbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\tensor_rank_2.cpp">
+      <Filter>Source Files\sgtbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\tr_group.cpp">
+      <Filter>Source Files\sgtbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\tr_vec.cpp">
+      <Filter>Source Files\sgtbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\utils.cpp">
+      <Filter>Source Files\sgtbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\wyckoff.cpp">
+      <Filter>Source Files\sgtbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\eltbx\xray_scattering\it1992.cpp">
+      <Filter>Source Files\eltbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\eltbx\xray_scattering\n_gaussian.cpp">
+      <Filter>Source Files\eltbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\eltbx\xray_scattering\n_gaussian_raw.cpp">
+      <Filter>Source Files\eltbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\eltbx\xray_scattering\wk1995.cpp">
+      <Filter>Source Files\eltbx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\reference_settings\wyckoff.cpp">
+      <Filter>Source Files\sgtbx\reference_settings</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\reference_settings\normalizer.cpp">
+      <Filter>Source Files\sgtbx\reference_settings</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\reference_settings\matrix_group_code_table.cpp">
+      <Filter>Source Files\sgtbx\reference_settings</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\reference_settings\hall_symbol_table.cpp">
+      <Filter>Source Files\sgtbx\reference_settings</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

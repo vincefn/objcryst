@@ -1,0 +1,158 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\cctbx\cctbx\eltbx\basic.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\eltbx\covalent_radii.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\eltbx\fp_fdp.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\eltbx\henke.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\eltbx\henke_tables_01_12.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\eltbx\henke_tables_13_24.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\eltbx\henke_tables_25_36.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\eltbx\henke_tables_37_48.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\eltbx\henke_tables_49_60.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\eltbx\henke_tables_61_72.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\eltbx\henke_tables_73_84.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\eltbx\henke_tables_85_92.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\eltbx\icsd_radii.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\eltbx\neutron.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\eltbx\sasaki.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\eltbx\sasaki_tables_01_12.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\eltbx\sasaki_tables_13_24.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\eltbx\sasaki_tables_25_36.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\eltbx\sasaki_tables_37_48.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\eltbx\sasaki_tables_49_60.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\eltbx\sasaki_tables_61_72.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\eltbx\sasaki_tables_73_82.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\eltbx\tiny_pse.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\eltbx\wavelengths.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\eltbx\xray_scattering\it1992.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\eltbx\xray_scattering\n_gaussian.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\eltbx\xray_scattering\n_gaussian_raw.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\eltbx\xray_scattering\wk1995.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\miller\asu.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\miller\bins.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\miller\index_generator.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\miller\index_span.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\miller\match_bijvoet_mates.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\miller\match_indices.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\miller\sym_equiv.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\bricks.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\change_of_basis_op.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\find_affine.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\group_codes.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\hall_in.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\lattice_symmetry.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\lattice_tr.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\miller.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\reciprocal_space_asu.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\reciprocal_space_ref_asu.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\reference_settings\hall_symbol_table.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\reference_settings\matrix_group_code_table.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\reference_settings\normalizer.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\reference_settings\wyckoff.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\rot_mx.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\rot_mx_info.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\row_echelon_solve.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\rt_mx.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\select_generators.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\seminvariant.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\site_symmetry.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\space_group.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\space_group_type.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\symbols.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\tensor_rank_2.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\tr_group.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\tr_vec.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\utils.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\sgtbx\wyckoff.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\uctbx\spoil_optimization.cpp" />
+    <ClCompile Include="..\cctbx\cctbx\uctbx\uctbx.cpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{BA6FA16F-837D-4869-90B9-44ACCD4EC001}</ProjectGuid>
+    <RootNamespace>cctbx</RootNamespace>
+    <ProjectName>cctbx</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120_xp</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120_xp</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <TargetExt>.lib</TargetExt>
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <TargetExt>.lib</TargetExt>
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>false</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\cctbx\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+      <ObjectFileName>$(IntDir)\%(RelativeDir)</ObjectFileName>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>false</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\cctbx\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ObjectFileName>$(IntDir)\%(RelativeDir)</ObjectFileName>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

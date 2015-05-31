@@ -1,0 +1,253 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\ObjCryst">
+      <UniqueIdentifier>{efec9bf6-742c-47ab-9d58-824fbbf7f02f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\CrystVector">
+      <UniqueIdentifier>{aac0ffa9-cb92-4507-811d-69ed19eeadd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\RefinableObj">
+      <UniqueIdentifier>{dd435419-8afa-43c3-9ed3-2cdfa0992ab2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\wxCryst">
+      <UniqueIdentifier>{75f49389-5c92-4dd1-ba54-f607eae108dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Fox">
+      <UniqueIdentifier>{ce5c0e26-779e-4439-bbbd-1df7ea7ac45a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Quirks">
+      <UniqueIdentifier>{9df5b357-4498-40ed-9fb3-a376703d7fde}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\ObjCryst\Quirks\ci_string.cpp">
+      <Filter>Source Files\Quirks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\Quirks\VFNDebug.cpp">
+      <Filter>Source Files\Quirks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\Quirks\VFNStreamFormat.cpp">
+      <Filter>Source Files\Quirks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\CrystVector\CrystVector.cpp">
+      <Filter>Source Files\CrystVector</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\wxCryst\MC.cpp">
+      <Filter>Source Files\wxCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\wxCryst\mpVector.cpp">
+      <Filter>Source Files\wxCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\wxCryst\trackball.c">
+      <Filter>Source Files\wxCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\wxCryst\wxAtom.cpp">
+      <Filter>Source Files\wxCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\wxCryst\wxCryst.cpp">
+      <Filter>Source Files\wxCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\wxCryst\wxCrystal.cpp">
+      <Filter>Source Files\wxCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\wxCryst\wxDiffractionSingleCrystal.cpp">
+      <Filter>Source Files\wxCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\wxCryst\wxGlobalOptimObj.cpp">
+      <Filter>Source Files\wxCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\wxCryst\wxLSQ.cpp">
+      <Filter>Source Files\wxCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\wxCryst\wxMolecule.cpp">
+      <Filter>Source Files\wxCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\wxCryst\wxMultiGraph.cpp">
+      <Filter>Source Files\wxCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\wxCryst\wxPowderPattern.cpp">
+      <Filter>Source Files\wxCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\wxCryst\wxRefinableObj.cpp">
+      <Filter>Source Files\wxCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\wxCryst\wxScatterer.cpp">
+      <Filter>Source Files\wxCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\wxCryst\wxScatteringPower.cpp">
+      <Filter>Source Files\wxCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\wxCryst\wxScatteringPowerSphere.cpp">
+      <Filter>Source Files\wxCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\wxCryst\wxTrackerGraph.cpp">
+      <Filter>Source Files\wxCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\wxCryst\wxZScatterer.cpp">
+      <Filter>Source Files\wxCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\RefinableObj\GlobalOptimObj.cpp">
+      <Filter>Source Files\RefinableObj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\RefinableObj\IO.cpp">
+      <Filter>Source Files\RefinableObj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\RefinableObj\LSQNumObj.cpp">
+      <Filter>Source Files\RefinableObj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\RefinableObj\RefinableObj.cpp">
+      <Filter>Source Files\RefinableObj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\RefinableObj\Simplex.cpp">
+      <Filter>Source Files\RefinableObj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\RefinableObj\Tracker.cpp">
+      <Filter>Source Files\RefinableObj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\ObjCryst\Atom.cpp">
+      <Filter>Source Files\ObjCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\ObjCryst\CIF.cpp">
+      <Filter>Source Files\ObjCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\ObjCryst\Crystal.cpp">
+      <Filter>Source Files\ObjCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\ObjCryst\DiffractionDataSingleCrystal.cpp">
+      <Filter>Source Files\ObjCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\ObjCryst\Exception.cpp">
+      <Filter>Source Files\ObjCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\ObjCryst\geomStructFactor.cpp">
+      <Filter>Source Files\ObjCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\ObjCryst\geomStructFactor_001.cpp">
+      <Filter>Source Files\ObjCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\ObjCryst\geomStructFactor_002.cpp">
+      <Filter>Source Files\ObjCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\ObjCryst\geomStructFactor_067.cpp">
+      <Filter>Source Files\ObjCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\ObjCryst\geomStructFactor_097.cpp">
+      <Filter>Source Files\ObjCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\ObjCryst\geomStructFactor_230.cpp">
+      <Filter>Source Files\ObjCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\ObjCryst\geomStructFactor_centro.cpp">
+      <Filter>Source Files\ObjCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\ObjCryst\Indexing.cpp">
+      <Filter>Source Files\ObjCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\ObjCryst\IO.cpp">
+      <Filter>Source Files\ObjCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\ObjCryst\Molecule.cpp">
+      <Filter>Source Files\ObjCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\ObjCryst\Polyhedron.cpp">
+      <Filter>Source Files\ObjCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\ObjCryst\PowderPattern.cpp">
+      <Filter>Source Files\ObjCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\ObjCryst\PowderPatternBackgroundBayesianMinimiser.cpp">
+      <Filter>Source Files\ObjCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\ObjCryst\ReflectionProfile.cpp">
+      <Filter>Source Files\ObjCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\ObjCryst\Scatterer.cpp">
+      <Filter>Source Files\ObjCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\ObjCryst\ScatteringCorr.cpp">
+      <Filter>Source Files\ObjCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\ObjCryst\ScatteringData.cpp">
+      <Filter>Source Files\ObjCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\ObjCryst\ScatteringPower.cpp">
+      <Filter>Source Files\ObjCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\ObjCryst\ScatteringPowerSphere.cpp">
+      <Filter>Source Files\ObjCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\ObjCryst\SpaceGroup.cpp">
+      <Filter>Source Files\ObjCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\ObjCryst\test.cpp">
+      <Filter>Source Files\ObjCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\ObjCryst\UnitCell.cpp">
+      <Filter>Source Files\ObjCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjCryst\ObjCryst\ZScatterer.cpp">
+      <Filter>Source Files\ObjCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Fox.cpp">
+      <Filter>Source Files\Fox</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FoxClient.cpp">
+      <Filter>Source Files\Fox</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FoxJob.cpp">
+      <Filter>Source Files\Fox</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FoxServer.cpp">
+      <Filter>Source Files\Fox</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FoxServerThread.cpp">
+      <Filter>Source Files\Fox</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GridResult.cpp">
+      <Filter>Source Files\Fox</Filter>
+    </ClCompile>
+    <ClCompile Include="src\IOSocket.cpp">
+      <Filter>Source Files\Fox</Filter>
+    </ClCompile>
+    <ClCompile Include="src\WXFoxClient.cpp">
+      <Filter>Source Files\Fox</Filter>
+    </ClCompile>
+    <ClCompile Include="src\WXFoxServer.cpp">
+      <Filter>Source Files\Fox</Filter>
+    </ClCompile>
+    <ClCompile Include="src\WXGridWindow.cpp">
+      <Filter>Source Files\Fox</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\Fox.icns">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="src\Fox.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="src\Fox.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

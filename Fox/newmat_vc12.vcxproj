@@ -1,0 +1,124 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{39353CCC-A61A-47C9-8C1F-30FA52D3A1A2}</ProjectGuid>
+    <RootNamespace>Project1</RootNamespace>
+    <ProjectName>newmat</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120_xp</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120_xp</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <TargetExt>.lib</TargetExt>
+    <IntDir>$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <TargetExt>.lib</TargetExt>
+    <IntDir>$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PreprocessorDefinitions>_USING_V110_SDK71_;%(PreprocessorDefinitions); _CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+      <ObjectFileName>$(IntDir)\%(RelativeDir)</ObjectFileName>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>false</SDLCheck>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PreprocessorDefinitions>_USING_V110_SDK71_;%(PreprocessorDefinitions); _CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ObjectFileName>$(IntDir)\%(RelativeDir)</ObjectFileName>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\newmat\bandmat.cpp" />
+    <ClCompile Include="..\newmat\cholesky.cpp" />
+    <ClCompile Include="..\newmat\evalue.cpp" />
+    <ClCompile Include="..\newmat\fft.cpp" />
+    <ClCompile Include="..\newmat\hholder.cpp" />
+    <ClCompile Include="..\newmat\jacobi.cpp" />
+    <ClCompile Include="..\newmat\myexcept.cpp" />
+    <ClCompile Include="..\newmat\newfft.cpp" />
+    <ClCompile Include="..\newmat\newmat1.cpp" />
+    <ClCompile Include="..\newmat\newmat2.cpp" />
+    <ClCompile Include="..\newmat\newmat3.cpp" />
+    <ClCompile Include="..\newmat\newmat4.cpp" />
+    <ClCompile Include="..\newmat\newmat5.cpp" />
+    <ClCompile Include="..\newmat\newmat6.cpp" />
+    <ClCompile Include="..\newmat\newmat7.cpp" />
+    <ClCompile Include="..\newmat\newmat8.cpp" />
+    <ClCompile Include="..\newmat\newmat9.cpp" />
+    <ClCompile Include="..\newmat\newmatex.cpp" />
+    <ClCompile Include="..\newmat\newmatnl.cpp" />
+    <ClCompile Include="..\newmat\newmatrm.cpp" />
+    <ClCompile Include="..\newmat\nm_misc.cpp" />
+    <ClCompile Include="..\newmat\solution.cpp" />
+    <ClCompile Include="..\newmat\sort.cpp" />
+    <ClCompile Include="..\newmat\submat.cpp" />
+    <ClCompile Include="..\newmat\svd.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\newmat\include.h" />
+    <ClInclude Include="..\newmat\myexcept.h" />
+    <ClInclude Include="..\newmat\newmat.h" />
+    <ClInclude Include="..\newmat\newmatap.h" />
+    <ClInclude Include="..\newmat\newmatio.h" />
+    <ClInclude Include="..\newmat\newmatnl.h" />
+    <ClInclude Include="..\newmat\newmatrm.h" />
+    <ClInclude Include="..\newmat\precisio.h" />
+    <ClInclude Include="..\newmat\solution.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
