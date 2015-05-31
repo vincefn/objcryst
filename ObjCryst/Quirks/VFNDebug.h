@@ -25,6 +25,11 @@
 
 #ifdef __DEBUG__
 
+#ifdef _MSC_VER
+#include "windows.h"
+#include <sstream>
+#endif
+
 /// Set the Global debug level for messages
 void LibCrystDebugGlobalLevel(const int level);
 
@@ -42,7 +47,48 @@ extern unsigned int gVFNDebugMessageIndent;
 //  0 : messages from low-level routines, 
 //  5
 // 10 : messages from top LibCryst++ routines 
+#ifdef _MSC_VER
+#define VFN_DEBUG_MESSAGE(message,level) \
+   if(level >= gVFNDebugMessageLevel) \
+   {\
+	  stringstream ss;\
+      for(unsigned int iii=0;iii<gVFNDebugMessageIndent;iii++) ss <<"  ";\
+      ss << "%DEBUG:"<< level << "  "\
+      << message << " (at " << __FILE__ << "," << __LINE__ << ")" <<endl;\
+	  OutputDebugStringA(ss.str().c_str());\
+   }
 
+#define VFN_DEBUG_MESSAGE_SHORT(message,level) \
+   if(level >= gVFNDebugMessageLevel)\
+   {\
+	  stringstream ss;\
+	  ss << message;\
+	  OutputDebugStringA(ss.str().c_str());\
+   }
+
+#define VFN_DEBUG_ENTRY(message,level) \
+   if(level >= gVFNDebugMessageLevel) \
+   {\
+	  stringstream ss;\
+      for(unsigned int iii=0;iii<gVFNDebugMessageIndent;iii++) ss <<"  ";\
+      ss << "%DEBUG:"<< level << " <"\
+      << message << " (at " << __FILE__ << "," << __LINE__ << ")" <<endl;\
+      gVFNDebugMessageIndent++;\
+	  OutputDebugStringA(ss.str().c_str());\
+   }
+
+#define VFN_DEBUG_EXIT(message,level) \
+   if(level >= gVFNDebugMessageLevel) \
+   {\
+	  stringstream ss;\
+      if(gVFNDebugMessageIndent>0) gVFNDebugMessageIndent--;\
+      for(unsigned int iii=0;iii<gVFNDebugMessageIndent;iii++) ss <<"  ";\
+      ss << "%DEBUG:"<< level << " \\"\
+      << message << "> (at " << __FILE__ << "," << __LINE__ << ")" <<endl;\
+	  OutputDebugStringA(ss.str().c_str());\
+   }
+
+#else
 #define VFN_DEBUG_MESSAGE(message,level) \
    if(level >= gVFNDebugMessageLevel) \
    {\
@@ -71,7 +117,7 @@ extern unsigned int gVFNDebugMessageIndent;
       cout << "%DEBUG:"<< level << " \\"\
       << message << "> (at " << __FILE__ << "," << __LINE__ << ")" <<endl;\
    }
-
+#endif
     
 #define VFN_DEBUG_GLOBAL_LEVEL(level) gVFNDebugMessageGlobalLevel=level;\
    gVFNDebugMessageLevel=gVFNDebugMessageGlobalLevel;
