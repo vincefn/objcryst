@@ -44,10 +44,6 @@
    #include <wx/txtstrm.h>
    #include <wx/minifram.h>
    #include <wx/dirdlg.h>
-   #ifdef __DEBUG__
-   // GUI access to the crystallography open database
-   #define __FOX_COD__
-   #endif
 #endif
 
 #include <cstdlib>
@@ -352,7 +348,7 @@ static const long MENU_DEBUG_TEST2=                    WXCRYST_ID();
 static const long MENU_DEBUG_TEST3=                    WXCRYST_ID();
 static const long ID_ABOUT_FOX_BUTTON_UPDATE=          WXCRYST_ID();
 static const long ID_FOX_BROWSE=                       WXCRYST_ID();
-static const long MENU_DEBUG_COD=                      WXCRYST_ID();
+static const long MENU_COD=                            WXCRYST_ID();
 static const long ID_FOX_BUTTON_COD=                   WXCRYST_ID();
 static const long ID_FOX_COD_LIST=                     WXCRYST_ID();
 
@@ -448,7 +444,7 @@ BEGIN_EVENT_TABLE(WXCrystMainFrame, wxFrame)
    EVT_MENU(MENU_DEBUG_TEST2,                      WXCrystMainFrame::OnDebugTest)
    EVT_MENU(MENU_DEBUG_TEST3,                      WXCrystMainFrame::OnDebugTest)
 #ifdef __FOX_COD__
-   EVT_MENU(MENU_DEBUG_COD,                        WXCrystMainFrame::OnCOD)
+   EVT_MENU(MENU_COD,                              WXCrystMainFrame::OnCOD)
    EVT_BUTTON(ID_FOX_BUTTON_COD,                   WXCrystMainFrame::OnButton)
    EVT_GRID_CELL_LEFT_DCLICK(                      WXCrystMainFrame::OnCODSelect)
 #endif
@@ -1571,9 +1567,14 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
          helpMenu->Append(MENU_HELP_ABOUT, _T("&About..."), _T("About ObjCryst..."));
          helpMenu->Append(MENU_HELP_TOGGLETOOLTIP, _T("Toggle Tooltips"), _T("Set Tooltips on/off"));
          helpMenu->Append(MENU_HELP_UPDATE, _T("Check for Updates"), _T("Check for a newer version of Fox"));
+      #ifdef __FOX_COD__
+      wxMenu *codMenu = new wxMenu;
+         codMenu->Append(MENU_COD,_T("Cryst. Open Database"));
+      #endif
       wxMenuBar *menuBar = new wxMenuBar();
          menuBar->Append(menuFile,  _T("&File"));
          menuBar->Append(objectMenu,_T("&Objects"));
+         menuBar->Append(codMenu,_T("&COD"));
          //FoxGrid/////////////////////////////
          menuBar->Append(gridMenu,_T("&FOXGrid"));
          menuBar->Append(prefsMenu, _T("&Preferences"));
@@ -1594,9 +1595,6 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
             debugMenu->Append(MENU_DEBUG_LEVEL8, _T("Debug level 8"));
             debugMenu->Append(MENU_DEBUG_LEVEL9, _T("Debug level 9"));
             debugMenu->Append(MENU_DEBUG_LEVEL10,_T("Debug level 10 (few messages)"));
-#ifdef __FOX_COD__
-            debugMenu->Append(MENU_DEBUG_COD,_T("Cryst. Open Database"));
-#endif
          menuBar->Append(debugMenu,  _T("&Debug"));
          #endif
 
