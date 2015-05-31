@@ -688,7 +688,7 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
       glPushMatrix();
          if(displayNames) this->FractionalToOrthonormalCoords(xc,yc,zc);
          glTranslatef(-xc*en, -yc, -zc);
-         //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
          {
             bool displayEnantiomer=false;
             if(mDisplayEnantiomer.GetChoice()==1) displayEnantiomer=true;
