@@ -780,9 +780,9 @@ bool iseol(const char c) { return ((c=='\n')||(c=='\r'));}
 
 std::string trimString(const std::string &s)
 {
-   const auto i0 = s.find_first_not_of(" \t\r\n");
+   const size_t i0 = s.find_first_not_of(" \t\r\n");
    if (i0 == std::string::npos) return "";
-   const auto i1 = s.find_last_not_of(" \t\r\n");
+   const size_t i1 = s.find_last_not_of(" \t\r\n");
    return s.substr(i0, i1-i0+1);
 }
 
