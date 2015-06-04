@@ -247,6 +247,18 @@ else
 libfftw=
 endif
 
+# MySQL for ODBC ??
+$(BUILD_DIR)/mysql-5.6.24.tar.gz:
+	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND) http://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.24.tar.gz
+
+#iODBC library for COD access ??
+$(BUILD_DIR)/libiodbc-3.52.10.tar.gz:
+	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND) http://downloads.sourceforge.net/project/iodbc/iodbc/3.52.10/libiodbc-3.52.10.tar.gz
+
+libiodbc: $(BUILD_DIR)/libiodbc-3.52.10.tar.gz
+	cd $(BUILD_DIR) && tar -xzf libiodbc-3.52.10.tar.gz
+	./configure --prefix=$(DIR_STATIC_LIBS) --disable-shared --enable-static --disable-gui  && $(MAKE) install
+
 #ObjCryst++
 libCryst: $(libwx) libcctbx
 	$(MAKE) -f gnu.mak -C ${DIR_LIBCRYST} lib

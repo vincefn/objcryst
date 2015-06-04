@@ -52,6 +52,21 @@
 #include <list>
 #include <cstring>
 
+#ifdef __FOX_COD__
+//   #ifdef __BSD__
+      // for iODBC (pre-installed on Mac OSX)
+      //#define OTL_IODBC_BSD
+//   #else
+      // Windows, *nix
+      #define OTL_ODBC
+//      #ifdef __LINUX__
+         #define OTL_ODBC_UNIX
+//      #endif
+//   #endif
+   #define OTL_STL
+   #include <otlv4.h>
+#endif
+
 #include "ObjCryst/ObjCryst/General.h"
 #include "ObjCryst/Quirks/Chronometer.h"
 #include "ObjCryst/ObjCryst/IO.h"
@@ -118,6 +133,97 @@ BEGIN_EVENT_TABLE(WXCrystScrolledWindow, wxScrolledWindow)
    EVT_CHILD_FOCUS(WXCrystScrolledWindow::OnWXCrystChildFocus)
 END_EVENT_TABLE()
 
+#ifdef __FOX_COD__
+/*
++------------------+----------------------------------------------------------------------+------+-----+---------+-------+
+| Field            | Type                                                                 | Null | Key | Default | Extra |
++------------------+----------------------------------------------------------------------+------+-----+---------+-------+
+| file             | mediumint(7) unsigned                                                | NO   | PRI | 0       |       |
+| a                | double unsigned                                                      | YES  | MUL | NULL    |       |
+| siga             | float unsigned                                                       | YES  |     | NULL    |       |
+| b                | double unsigned                                                      | YES  | MUL | NULL    |       |
+| sigb             | float unsigned                                                       | YES  |     | NULL    |       |
+| c                | double unsigned                                                      | YES  | MUL | NULL    |       |
+| sigc             | float unsigned                                                       | YES  |     | NULL    |       |
+| alpha            | float unsigned                                                       | YES  | MUL | NULL    |       |
+| sigalpha         | float unsigned                                                       | YES  |     | NULL    |       |
+| beta             | float unsigned                                                       | YES  | MUL | NULL    |       |
+| sigbeta          | float unsigned                                                       | YES  |     | NULL    |       |
+| gamma            | float unsigned                                                       | YES  | MUL | NULL    |       |
+| siggamma         | float unsigned                                                       | YES  |     | NULL    |       |
+| vol              | float unsigned                                                       | YES  | MUL | NULL    |       |
+| sigvol           | float unsigned                                                       | YES  |     | NULL    |       |
+| celltemp         | float unsigned                                                       | YES  |     | NULL    |       |
+| sigcelltemp      | float unsigned                                                       | YES  |     | NULL    |       |
+| diffrtemp        | float unsigned                                                       | YES  |     | NULL    |       |
+| sigdiffrtemp     | float unsigned                                                       | YES  |     | NULL    |       |
+| cellpressure     | float unsigned                                                       | YES  |     | NULL    |       |
+| sigcellpressure  | float unsigned                                                       | YES  |     | NULL    |       |
+| diffrpressure    | float unsigned                                                       | YES  |     | NULL    |       |
+| sigdiffrpressure | float unsigned                                                       | YES  |     | NULL    |       |
+| thermalhist      | varchar(255)                                                         | YES  |     | NULL    |       |
+| pressurehist     | varchar(255)                                                         | YES  |     | NULL    |       |
+| nel              | varchar(4)                                                           | YES  | MUL | NULL    |       |
+| sg               | varchar(32)                                                          | YES  | MUL | NULL    |       |
+| sgHall           | varchar(64)                                                          | YES  | MUL | NULL    |       |
+| commonname       | varchar(1024)                                                        | YES  | MUL | NULL    |       |
+| chemname         | varchar(2048)                                                        | YES  | MUL | NULL    |       |
+| mineral          | varchar(255)                                                         | YES  | MUL | NULL    |       |
+| formula          | varchar(255)                                                         | YES  | MUL | NULL    |       |
+| calcformula      | varchar(255)                                                         | YES  | MUL | NULL    |       |
+| Z                | smallint(5) unsigned                                                 | YES  | MUL | NULL    |       |
+| Zprime           | float unsigned                                                       | YES  | MUL | NULL    |       |
+| acce_code        | char(6)                                                              | YES  | MUL | NULL    |       |
+| authors          | text                                                                 | YES  |     | NULL    |       |
+| title            | text                                                                 | YES  |     | NULL    |       |
+| journal          | varchar(255)                                                         | YES  | MUL | NULL    |       |
+| year             | smallint(4) unsigned                                                 | YES  |     | NULL    |       |
+| volume           | smallint(5) unsigned                                                 | YES  |     | NULL    |       |
+| issue            | varchar(10)                                                          | YES  |     | NULL    |       |
+| firstpage        | varchar(20)                                                          | YES  |     | NULL    |       |
+| lastpage         | varchar(20)                                                          | YES  |     | NULL    |       |
+| doi              | varchar(127)                                                         | YES  | MUL | NULL    |       |
+| method           | enum('single crystal','powder diffraction','theoretical prediction') | YES  | MUL | NULL    |       |
+| radiation        | varchar(32)                                                          | YES  |     | NULL    |       |
+| wavelength       | float unsigned                                                       | YES  |     | NULL    |       |
+| radType          | varchar(80)                                                          | YES  |     | NULL    |       |
+| radSymbol        | varchar(20)                                                          | YES  |     | NULL    |       |
+| Rall             | float unsigned                                                       | YES  |     | NULL    |       |
+| Robs             | float unsigned                                                       | YES  |     | NULL    |       |
+| Rref             | float unsigned                                                       | YES  |     | NULL    |       |
+| wRall            | float unsigned                                                       | YES  |     | NULL    |       |
+| wRobs            | float unsigned                                                       | YES  |     | NULL    |       |
+| wRref            | float unsigned                                                       | YES  |     | NULL    |       |
+| RFsqd            | float unsigned                                                       | YES  |     | NULL    |       |
+| RI               | float unsigned                                                       | YES  |     | NULL    |       |
+| gofall           | float                                                                | YES  |     | NULL    |       |
+| gofobs           | float                                                                | YES  |     | NULL    |       |
+| gofgt            | float                                                                | YES  |     | NULL    |       |
+| duplicateof      | mediumint(7) unsigned                                                | YES  |     | NULL    |       |
+| optimal          | mediumint(7) unsigned                                                | YES  |     | NULL    |       |
+| status           | enum('warnings','errors','retracted')                                | YES  |     | NULL    |       |
+| flags            | set('has coordinates','has disorder','has Fobs')                     | YES  |     | NULL    |       |
+| text             | text                                                                 | NO   | MUL | NULL    |       |
+| svnrevision      | int(11)                                                              | YES  | MUL | NULL    |       |
+| date             | date                                                                 | YES  | MUL | NULL    |       |
+| time             | time                                                                 | YES  | MUL | NULL    |       |
+| onhold           | date                                                                 | YES  |     | NULL    |       |
++------------------+----------------------------------------------------------------------+------+-----+---------+-------+
+*/
+struct cod_record
+{
+   float a,b,c,alpha,beta,gamma,vol;
+   std::string sg,sgHall;
+   long file;
+   std::string nel;
+   std::string commonname,chemname,mineral,formula,calcformula;
+   std::string authors,title,journal;
+   long volume,year;
+   string firstpage;
+   std::string cif;
+};
+#endif
+
 // main frame
 class WXCrystMainFrame : public wxFrame
 {
@@ -150,7 +256,12 @@ public:
    void OnStartGridServer(wxCommandEvent &event);
    void OnStartGridClient(wxCommandEvent &event);
    virtual void OnSize(wxSizeEvent &event);
-    //FoxGrid////////////////////////////////////////
+#ifdef __FOX_COD__
+   void OnCOD(wxCommandEvent &event);
+   void OnButton(wxCommandEvent &event);
+   void OnCODSelect(wxGridEvent &event);
+#endif
+   //FoxGrid////////////////////////////////////////
    WXGrigWindow *mpGridWindow;
 private:
     DECLARE_EVENT_TABLE()
@@ -164,6 +275,19 @@ private:
    wxString mBrowseDir;
    /// List of files in browsing dir
    wxListBox *mpBrowseList;
+#ifdef __FOX_COD__
+   std::list<wxTextCtrl*> mvpCOD_Elements;
+   std::list<wxTextCtrl*> mvpCOD_Authors;
+   std::list<wxTextCtrl*> mvpCOD_TitleWords;
+   wxTextCtrl* mpCOD_MinNel;
+   wxTextCtrl* mpCOD_MaxNel;
+   wxTextCtrl* mpCOD_MinVol;
+   wxTextCtrl* mpCOD_MaxVol;
+   wxListBox* mpCOD_List;
+   wxMiniFrame *mpCODFrame;
+   wxGrid *mpCODGrid;
+   std::vector<cod_record> mvCOD_Record;
+#endif
 };
 
 class MyApp : public wxApp
@@ -223,7 +347,10 @@ static const long MENU_DEBUG_TEST1=                    WXCRYST_ID();
 static const long MENU_DEBUG_TEST2=                    WXCRYST_ID();
 static const long MENU_DEBUG_TEST3=                    WXCRYST_ID();
 static const long ID_ABOUT_FOX_BUTTON_UPDATE=          WXCRYST_ID();
-static const long ID_FOX_BROWSE=                       WXCRYST_ID(); 
+static const long ID_FOX_BROWSE=                       WXCRYST_ID();
+static const long MENU_COD=                            WXCRYST_ID();
+static const long ID_FOX_BUTTON_COD=                   WXCRYST_ID();
+static const long ID_FOX_COD_LIST=                     WXCRYST_ID();
 
 //FoxGrid///////////////////////////////////////////////////////////
 static const long MENU_GRID_SERVER_RUN=                WXCRYST_ID();
@@ -316,6 +443,11 @@ BEGIN_EVENT_TABLE(WXCrystMainFrame, wxFrame)
    EVT_MENU(MENU_DEBUG_TEST1,                      WXCrystMainFrame::OnDebugTest)
    EVT_MENU(MENU_DEBUG_TEST2,                      WXCrystMainFrame::OnDebugTest)
    EVT_MENU(MENU_DEBUG_TEST3,                      WXCrystMainFrame::OnDebugTest)
+#ifdef __FOX_COD__
+   EVT_MENU(MENU_COD,                              WXCrystMainFrame::OnCOD)
+   EVT_BUTTON(ID_FOX_BUTTON_COD,                   WXCrystMainFrame::OnButton)
+   EVT_GRID_CELL_LEFT_DCLICK(                      WXCrystMainFrame::OnCODSelect)
+#endif
    EVT_UPDATE_UI(ID_CRYST_UPDATEUI,                WXCrystMainFrame::OnUpdateUI)
    //FoxGrid///////////////////////////////////////////////////////////////////////////////
    EVT_MENU(MENU_GRID_SERVER_RUN, WXCrystMainFrame::OnStartGridServer)
@@ -1393,6 +1525,9 @@ void WXCrystScrolledWindow::OnWXCrystChildFocus(wxChildFocusEvent& event)
 WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, const wxSize& size,
                                    const bool splashscreen)
 : wxFrame((wxFrame *)NULL, -1, title, pos, size), mpNotebook(NULL), mvUpdatesAutoCheck(false)
+#ifdef __FOX_COD__
+,mpCODFrame(0)
+#endif
 {
 #ifdef __WXMAC__
    // we need this in order to allow the about menu relocation, since ABOUT is
@@ -1432,9 +1567,14 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
          helpMenu->Append(MENU_HELP_ABOUT, _T("&About..."), _T("About ObjCryst..."));
          helpMenu->Append(MENU_HELP_TOGGLETOOLTIP, _T("Toggle Tooltips"), _T("Set Tooltips on/off"));
          helpMenu->Append(MENU_HELP_UPDATE, _T("Check for Updates"), _T("Check for a newer version of Fox"));
+      #ifdef __FOX_COD__
+      wxMenu *codMenu = new wxMenu;
+         codMenu->Append(MENU_COD,_T("Cryst. Open Database"));
+      #endif
       wxMenuBar *menuBar = new wxMenuBar();
          menuBar->Append(menuFile,  _T("&File"));
          menuBar->Append(objectMenu,_T("&Objects"));
+         menuBar->Append(codMenu,_T("&COD"));
          //FoxGrid/////////////////////////////
          menuBar->Append(gridMenu,_T("&FOXGrid"));
          menuBar->Append(prefsMenu, _T("&Preferences"));
@@ -2387,6 +2527,292 @@ void WXCrystMainFrame::OnSize(wxSizeEvent &event)
 
    this->wxFrame::OnSize(event);
 }
+
+#ifdef __FOX_COD__
+
+void WXCrystMainFrame::OnCOD(wxCommandEvent &event)
+{
+   WXCrystScrolledWindow *pWinCOD = new WXCrystScrolledWindow(mpNotebook);
+   mpNotebook->AddPage(pWinCOD,_T("COD"),true);
+   wxBoxSizer *topsizer=new wxBoxSizer(wxVERTICAL);
+   pWinCOD->SetSizer(topsizer);
+
+   wxBoxSizer *tmpsizer;
+   
+   tmpsizer=new wxBoxSizer(wxHORIZONTAL);
+   topsizer->Add(tmpsizer);
+   wxStaticText *pWords=new wxStaticText(pWinCOD,-1,"Words (title, crystal name):");
+   tmpsizer->Add(pWords);
+   for(unsigned int i=0;i<3;i++)
+   {
+      mvpCOD_TitleWords.push_back(new wxTextCtrl(pWinCOD,-1));
+      tmpsizer->Add(mvpCOD_TitleWords.back());
+   }
+
+   tmpsizer=new wxBoxSizer(wxHORIZONTAL);
+   topsizer->Add(tmpsizer);
+   wxStaticText *pElements=new wxStaticText(pWinCOD,-1,"Elements ('C', 'O6'..):");
+   tmpsizer->Add(pElements);
+   for(unsigned int i=0;i<6;i++)
+   {
+      mvpCOD_Elements.push_back(new wxTextCtrl(pWinCOD,-1));
+      tmpsizer->Add(mvpCOD_Elements.back());
+   }
+
+   tmpsizer=new wxBoxSizer(wxHORIZONTAL);
+   topsizer->Add(tmpsizer);
+   wxStaticText *pAuthors=new wxStaticText(pWinCOD,-1,"Author names:");
+   tmpsizer->Add(pAuthors);
+   for(unsigned int i=0;i<3;i++)
+   {
+      mvpCOD_Authors.push_back(new wxTextCtrl(pWinCOD,-1));
+      tmpsizer->Add(mvpCOD_Authors.back());
+   }
+
+   tmpsizer=new wxBoxSizer(wxHORIZONTAL);
+   topsizer->Add(tmpsizer);
+   wxStaticText *pNbElements=new wxStaticText(pWinCOD,-1,"Min and Max number of elements:");
+   tmpsizer->Add(pNbElements);
+   mpCOD_MinNel=new wxTextCtrl(pWinCOD,-1);
+   tmpsizer->Add(mpCOD_MinNel);
+   mpCOD_MaxNel=new wxTextCtrl(pWinCOD,-1);
+   tmpsizer->Add(mpCOD_MaxNel);
+
+   tmpsizer=new wxBoxSizer(wxHORIZONTAL);
+   topsizer->Add(tmpsizer);
+   wxStaticText *pVolume=new wxStaticText(pWinCOD,-1,"Min and Max unit cell volume (A^3):");
+   tmpsizer->Add(pVolume);
+   mpCOD_MinVol=new wxTextCtrl(pWinCOD,-1);
+   tmpsizer->Add(mpCOD_MinVol);
+   mpCOD_MaxVol=new wxTextCtrl(pWinCOD,-1);
+   tmpsizer->Add(mpCOD_MaxVol);
+
+   wxButton *pbut=new wxButton(pWinCOD,ID_FOX_BUTTON_COD,"Query COD");
+   topsizer->Add(pbut);
+   pWinCOD->Layout();
+   this->PostSizeEvent();
+}
+
+void WXCrystMainFrame::OnButton(wxCommandEvent &event)
+{
+   VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton()",10)
+   otl_connect db;
+   otl_connect::otl_initialize();
+   std::string s(wxStandardPaths::Get().GetExecutablePath().c_str());//"somwhere/Fox.app/Contents/MacOS/Fox"
+   std::size_t pos=s.rfind("/Contents/");
+   s="driver="+s.substr(0,pos)+"/Contents/Resources/libmyodbc5a.so;server=www.crystallography.net;user=cod_reader;database=cod";
+   VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton()"+s,10)
+   try {
+      db.rlogon(s.c_str());
+   }
+   catch (otl_exception &except)
+   {
+      cout<<"OTL Exception!"<<endl
+          <<"   message:"<<except.msg<<endl
+          <<"   sqlstate:"<<except.sqlstate<<endl;
+   }
+   if(mpCODFrame!=0) mpCODFrame->Close();
+   VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton()",10)
+   try
+   {
+      stringstream query;
+      query<<"select file,a,b,c,alpha,beta,gamma,vol,sg,sgHall,nel,commonname,chemname,mineral,formula,calcformula,authors,title,journal,volume,year,firstpage from data where ";
+      //Read parameters from GUI
+      wxString v;
+      bool notfirst=false;
+      //Elements
+      for(std::list<wxTextCtrl*>::iterator pos=mvpCOD_Elements.begin();pos!=mvpCOD_Elements.end();++pos)
+      {
+         v=(*pos)->GetValue();
+         if(v.IsEmpty()==false)
+         {
+            if(notfirst) query<<"and ";notfirst=true;
+            query<<"(formula rlike '[[:blank:]]"<<v<<"[[:digit:]]' or formula rlike '[[:blank:]]"<<v<<"[[:blank:]]') ";
+            
+         }
+      }
+      //Nb elements
+      v=mpCOD_MinNel->GetValue();
+      if(v.IsEmpty()==false)
+      {
+         if(notfirst) query<<"and ";notfirst=true;
+         query<<"nel>="<<v<<" ";
+      }
+      v=mpCOD_MaxNel->GetValue();
+      if(v.IsEmpty()==false)
+      {
+         if(notfirst) query<<"and ";notfirst=true;
+         query<<"nel<="<<v<<" ";
+      }
+
+      //Volume
+      v=mpCOD_MinVol->GetValue();
+      if(v.IsEmpty()==false)
+      {
+         if(notfirst) query<<"and ";notfirst=true;
+         query<<"vol>="<<v<<" ";
+      }
+      v=mpCOD_MaxVol->GetValue();
+      if(v.IsEmpty()==false)
+      {
+         if(notfirst) query<<"and ";notfirst=true;
+         query<<"vol<="<<v<<" ";
+      }
+
+      //Authors
+      for(std::list<wxTextCtrl*>::iterator pos=mvpCOD_Authors.begin();pos!=mvpCOD_Authors.end();++pos)
+      {
+         v=(*pos)->GetValue();
+         if(v.IsEmpty()==false)
+         {
+            if(notfirst) query<<"and ";notfirst=true;
+            query<<"authors rlike '"<<v<<"' ";
+         }
+      }
+
+      //Words
+      for(std::list<wxTextCtrl*>::iterator pos=mvpCOD_TitleWords.begin();pos!=mvpCOD_TitleWords.end();++pos)
+      {
+         v=(*pos)->GetValue();
+         if(v.IsEmpty()==false)
+         {
+            if(notfirst) query<<"and ";notfirst=true;
+            query<<"(title rlike '"<<v<<"' ";
+            query<<"or mineral rlike '"<<v<<"' ";
+            query<<"or chemname rlike '"<<v<<"' ";
+            query<<"or commonname rlike '"<<v<<"') ";
+         }
+      }
+
+      if(notfirst==false)
+      {
+         wxMessageDialog d(this,_T("COD: Empty request !"),_T("Error"),wxOK|wxICON_ERROR);
+         d.ShowModal();
+         return;
+      }
+      query<<"order by formula limit 500";
+      
+      VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton():Query="<<query.str(), 10)
+      
+      otl_stream i(50, query.str().c_str(),db);
+      long codid;//'file' record in COD
+      
+      i; // Writing input values into the stream
+      mvCOD_Record.clear();
+      while(!i.eof())
+      { // while not end-of-data
+         //mvCOD_Record[codid]=cod_record();
+         mvCOD_Record.push_back(cod_record());
+         cod_record *p=&(mvCOD_Record.back());
+         i>> p->file;
+         //cout<<"COD id="<<p->file<<"("<<mvCOD_Record.size()<<")"<<endl;
+         i>> p->a;
+         i>> p->b;
+         i>> p->c;
+         i>> p->alpha;
+         i>> p->beta;
+         i>> p->gamma;
+         i>> p->vol;
+         i>> p->sg;
+         i>> p->sgHall;
+         i>> p->nel;
+         i>> p->commonname;
+         i>> p->chemname;
+         i>> p->mineral;
+         i>> p->formula;
+         i>> p->calcformula;
+         i>> p->authors;
+         i>> p->title;
+         i>> p->journal;
+         i>> p->volume;
+         i>> p->year;
+         i>> p->firstpage;
+         cout<<"   Formula: "<<p->formula<<" a="<<p->a<<" b="<<p->b<<" c="<<p->c<<endl
+             <<"   Journal: "<<p->journal<<" "<<p->volume<<"("<<p->year<<"), "<<p->firstpage<<":"<<p->authors<<endl
+             <<"   Title:   "<<p->title<<endl;
+      }
+      cout<<endl<<"Total: "<<mvCOD_Record.size()<<endl;
+   }
+   catch (otl_exception &except)
+   {
+      cout<<"OTL Exception!"<<endl
+      <<"   message:"<<except.msg<<endl
+      <<"   sqlstate:"<<except.sqlstate<<endl;
+      wxMessageDialog d(this,_T("COD: SQL Error ?")+wxString(except.msg),_T("Error"),wxOK|wxICON_ERROR);
+      d.ShowModal();
+      return;
+   }
+   if(mvCOD_Record.size()==0)
+   {
+      wxMessageDialog d(this,_T("COD: No results !"),_T("No results"),wxOK|wxICON_ERROR);
+      d.ShowModal();
+      return;
+   }
+   mpCODFrame= new wxMiniFrame(this,-1, _T("Crystallography Open Database results"),
+                                  wxDefaultPosition,wxSize(700,500),wxCLOSE_BOX|wxCAPTION|wxSTAY_ON_TOP);
+   wxSizer *pSizer=new wxBoxSizer(wxHORIZONTAL);
+   mpCODFrame->SetSizer(pSizer);
+   mpCODGrid=new wxGrid(mpCODFrame,ID_FOX_COD_LIST,wxDefaultPosition,wxDefaultSize);
+   mpCODGrid->SetDefaultCellFont(wxFont(10,wxTELETYPE,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_BOLD));
+   mpCODGrid->EnableEditing(false);
+   mpCODFrame->Show();
+   pSizer->Add(mpCODGrid,wxEXPAND);
+   mpCODFrame->PostSizeEvent();
+   mpCODGrid->SetColLabelSize(0);
+   mpCODGrid->SetRowLabelSize(0);
+   VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton()"<<mpCODGrid<<","<<mvCOD_Record.size(), 10)
+   mpCODGrid->CreateGrid(3*mvCOD_Record.size(),2);
+   std::vector<cod_record>::const_iterator ps=mvCOD_Record.begin();
+   for(unsigned int i=0;i<mvCOD_Record.size();i++)
+   {
+      mpCODGrid->SetCellSize(i*3,0,3,1);
+      mpCODGrid->SetCellAlignment(i*3,0, wxALIGN_CENTER, wxALIGN_CENTER);
+      const cod_record *c=(cod_record*)&(*ps);
+      mpCODGrid->SetCellValue(i*3,0,wxString::Format("%s",c->formula.substr(2,c->formula.size()-4).c_str()));
+      mpCODGrid->SetCellValue(i*3,1,wxString::Format("%.2f %.2f %.2f %.1f %.1f %.1f %s",c->a,c->b,c->c,c->alpha,c->beta,c->gamma,c->sg));
+      mpCODGrid->SetCellValue(i*3+1,1,wxString::Format("%s %ld (%ld), %s: %s",c->journal,c->volume,c->year,c->firstpage,c->authors));
+      mpCODGrid->SetCellValue(i*3+2,1,wxString::Format("%s",c->title));
+      ps++;
+      cout<<i<<":"<<i*3<<endl;
+   }
+   mpCODGrid->AutoSize();
+
+}
+
+void WXCrystMainFrame::OnCODSelect(wxGridEvent &ev)
+{
+   std::vector<cod_record>::const_iterator pos=mvCOD_Record.begin();
+   for(unsigned int i=ev.GetRow()/3;i>0;i--) pos++;
+   wxString cifurl=wxString::Format("http://www.crystallography.net/%ld.cif",pos->file);
+   cout<<cifurl<<endl;
+   if(!(wxFileSystem::HasHandlerForPath(cifurl)))
+      wxFileSystem::AddHandler(new wxInternetFSHandler);
+   wxFSFile *fp= NULL;
+   wxFileSystem fs;
+   fp= fs.OpenFile(cifurl,wxFS_READ);
+   if(fp!=NULL)
+   {
+      wxInputStream *fstream = fp->GetStream();
+      wxStringOutputStream wxcif;
+      fstream->Read(wxcif);
+      cout<<wxcif.GetString()<<endl;
+      this->Close(false);
+      std::stringstream in;
+      in<<wxcif.GetString();
+      ObjCryst::CIF cif(in,true,true);
+      bool oneScatteringPowerPerElement, connectAtoms;
+      wxConfigBase::Get()->Read(_T("Fox/BOOL/CIF import: automatically convert to molecules"), &connectAtoms);
+      wxConfigBase::Get()->Read(_T("Fox/BOOL/CIF import: only one scattering power per element"), &oneScatteringPowerPerElement);
+      CreateCrystalFromCIF(cif, true, true, oneScatteringPowerPerElement, connectAtoms);
+      CreatePowderPatternFromCIF(cif);
+      CreateSingleCrystalDataFromCIF(cif);
+      //FoxGrid
+      mpGridWindow->DataLoaded();
+   }
+   cout<<cifurl<<endl;
+}
+
+#endif
 
 #endif
 ///////////////////////////////////////// Speed Test////////////////////

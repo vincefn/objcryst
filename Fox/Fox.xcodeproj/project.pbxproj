@@ -78,7 +78,9 @@
 		BF1DE1540D2297C300A3939D /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF1DE1530D2297C300A3939D /* QuickTime.framework */; };
 		BF3EB05508968F5500E02367 /* uctbx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3EB05408968F5500E02367 /* uctbx.cpp */; };
 		BF3EB063089690D200E02367 /* spoil_optimization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3EB062089690D200E02367 /* spoil_optimization.cpp */; };
+		BF468DB81B08B29A00D44C7D /* libiodbc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF468DB71B08B29A00D44C7D /* libiodbc.a */; };
 		BF49CDF01B0BC56E0012BF3B /* covalent_radii.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF49CDEF1B0BC56E0012BF3B /* covalent_radii.cpp */; };
+		BF468DB81B08B29A00D44C7D /* libiodbc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF468DB71B08B29A00D44C7D /* libiodbc.a */; };
 		BF69C4D1124F8C310035CF57 /* FoxClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4C8124F8C310035CF57 /* FoxClient.cpp */; };
 		BF69C4D2124F8C310035CF57 /* FoxJob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4C9124F8C310035CF57 /* FoxJob.cpp */; };
 		BF69C4D3124F8C310035CF57 /* FoxServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4CA124F8C310035CF57 /* FoxServer.cpp */; };
@@ -88,6 +90,7 @@
 		BF69C4D7124F8C310035CF57 /* WXFoxClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4CE124F8C310035CF57 /* WXFoxClient.cpp */; };
 		BF69C4D8124F8C310035CF57 /* WXFoxServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4CF124F8C310035CF57 /* WXFoxServer.cpp */; };
 		BF69C4D9124F8C310035CF57 /* WXGridWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4D0124F8C310035CF57 /* WXGridWindow.cpp */; };
+		BFB0470A1B1BA2FB00FF2185 /* libmyodbc5a.so in Resources */ = {isa = PBXBuildFile; fileRef = BFB047091B1BA2FB00FF2185 /* libmyodbc5a.so */; };
 		BFF7D0C61478047800799F7A /* libwx_osx_cocoau_gl-3.0.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BFF7D0BF1478047800799F7A /* libwx_osx_cocoau_gl-3.0.a */; };
 		BFF7D0C71478047800799F7A /* libwx_osx_cocoau-3.0.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BFF7D0C01478047800799F7A /* libwx_osx_cocoau-3.0.a */; };
 		BFF7D0C81478047800799F7A /* libwxjpeg-3.0.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BFF7D0C11478047800799F7A /* libwxjpeg-3.0.a */; };
@@ -219,7 +222,9 @@
 		BF36112F0BD6E409000C0EE9 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = ../../../../../System/Library/Frameworks/WebKit.framework; sourceTree = SOURCE_ROOT; };
 		BF3EB05408968F5500E02367 /* uctbx.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = uctbx.cpp; path = ../cctbx/cctbx/uctbx/uctbx.cpp; sourceTree = "<group>"; };
 		BF3EB062089690D200E02367 /* spoil_optimization.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = spoil_optimization.cpp; path = ../cctbx/cctbx/uctbx/spoil_optimization.cpp; sourceTree = "<group>"; };
+		BF468DB71B08B29A00D44C7D /* libiodbc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libiodbc.a; path = "../static-libs/lib/libiodbc.a"; sourceTree = "<group>"; };
 		BF49CDEF1B0BC56E0012BF3B /* covalent_radii.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = covalent_radii.cpp; path = ../cctbx/cctbx/eltbx/covalent_radii.cpp; sourceTree = "<group>"; };
+		BF468DB71B08B29A00D44C7D /* libiodbc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libiodbc.a; path = "../static-libs/lib/libiodbc.a"; sourceTree = "<group>"; };
 		BF69C4C8124F8C310035CF57 /* FoxClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FoxClient.cpp; path = src/FoxClient.cpp; sourceTree = "<group>"; };
 		BF69C4C9124F8C310035CF57 /* FoxJob.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FoxJob.cpp; path = src/FoxJob.cpp; sourceTree = "<group>"; };
 		BF69C4CA124F8C310035CF57 /* FoxServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FoxServer.cpp; path = src/FoxServer.cpp; sourceTree = "<group>"; };
@@ -229,6 +234,7 @@
 		BF69C4CE124F8C310035CF57 /* WXFoxClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WXFoxClient.cpp; path = src/WXFoxClient.cpp; sourceTree = "<group>"; };
 		BF69C4CF124F8C310035CF57 /* WXFoxServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WXFoxServer.cpp; path = src/WXFoxServer.cpp; sourceTree = "<group>"; };
 		BF69C4D0124F8C310035CF57 /* WXGridWindow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WXGridWindow.cpp; path = src/WXGridWindow.cpp; sourceTree = "<group>"; };
+		BFB047091B1BA2FB00FF2185 /* libmyodbc5a.so */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.bundle"; path = libmyodbc5a.so; sourceTree = "<group>"; };
 		BFE6AC680B886ACA007AFBA8 /* Indexing.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Indexing.cpp; path = ../ObjCryst/ObjCryst/Indexing.cpp; sourceTree = SOURCE_ROOT; };
 		BFF7D0BF1478047800799F7A /* libwx_osx_cocoau_gl-3.0.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libwx_osx_cocoau_gl-3.0.a"; path = "../static-libs/lib/libwx_osx_cocoau_gl-3.0.a"; sourceTree = "<group>"; };
 		BFF7D0C01478047800799F7A /* libwx_osx_cocoau-3.0.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libwx_osx_cocoau-3.0.a"; path = "../static-libs/lib/libwx_osx_cocoau-3.0.a"; sourceTree = "<group>"; };
@@ -1830,6 +1836,7 @@
 				BF1DE1120D228E5D00A3939D /* libnewmat.a in Frameworks */,
 				BF1DE1240D228EA500A3939D /* libfftw3f.a in Frameworks */,
 				BF1DE1540D2297C300A3939D /* QuickTime.framework in Frameworks */,
+				BF468DB81B08B29A00D44C7D /* libiodbc.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2074,6 +2081,7 @@
 		BFFCCB4F089028D300044EBA = {
 			isa = PBXGroup;
 			children = (
+				BFB047091B1BA2FB00FF2185 /* libmyodbc5a.so */,
 				BF1DE1530D2297C300A3939D /* QuickTime.framework */,
 				BFF7D0BF1478047800799F7A /* libwx_osx_cocoau_gl-3.0.a */,
 				BFF7D0C01478047800799F7A /* libwx_osx_cocoau-3.0.a */,
@@ -2082,6 +2090,7 @@
 				BFF7D0C31478047800799F7A /* libwxregexu-3.0.a */,
 				BFF7D0C51478047800799F7A /* libwxtiff-3.0.a */,
 				BF1DE1230D228EA500A3939D /* libfftw3f.a */,
+				BF468DB71B08B29A00D44C7D /* libiodbc.a */,
 				BF36112F0BD6E409000C0EE9 /* WebKit.framework */,
 				BF36112B0BD6E3F5000C0EE9 /* GLUT.framework */,
 				BF3611280BD6E3CA000C0EE9 /* AppKit.framework */,
@@ -4355,6 +4364,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BFB0470A1B1BA2FB00FF2185 /* libmyodbc5a.so in Resources */,
 				BF1DDE260D228E4100A3939D /* Fox.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -4584,6 +4594,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../static-libs/lib",
+					"/Users/vincent/dev/Fox/static-libs/lib",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				OTHER_CFLAGS = (
@@ -4598,6 +4609,7 @@
 					"-DHAVE_GLUT",
 					"-D__WXOSX__",
 					"-D__WXOSX_COCOA__",
+					"-D__FOX_COD__",
 				);
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -4747,6 +4759,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../static-libs/lib",
+					"/Users/vincent/dev/Fox/static-libs/lib",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				OTHER_CFLAGS = (
@@ -4761,6 +4774,7 @@
 					"-DHAVE_GLUT",
 					"-D__WXOSX__",
 					"-D__WXOSX_COCOA__",
+					"-D__FOX_COD__",
 				);
 				OTHER_LDFLAGS = (
 					"-framework",
