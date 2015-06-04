@@ -1574,7 +1574,9 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
       wxMenuBar *menuBar = new wxMenuBar();
          menuBar->Append(menuFile,  _T("&File"));
          menuBar->Append(objectMenu,_T("&Objects"));
+      #ifdef __FOX_COD__
          menuBar->Append(codMenu,_T("&COD"));
+      #endif
          //FoxGrid/////////////////////////////
          menuBar->Append(gridMenu,_T("&FOXGrid"));
          menuBar->Append(prefsMenu, _T("&Preferences"));
