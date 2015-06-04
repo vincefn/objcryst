@@ -80,7 +80,6 @@
 		BF3EB063089690D200E02367 /* spoil_optimization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3EB062089690D200E02367 /* spoil_optimization.cpp */; };
 		BF468DB81B08B29A00D44C7D /* libiodbc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF468DB71B08B29A00D44C7D /* libiodbc.a */; };
 		BF49CDF01B0BC56E0012BF3B /* covalent_radii.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF49CDEF1B0BC56E0012BF3B /* covalent_radii.cpp */; };
-		BF468DB81B08B29A00D44C7D /* libiodbc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF468DB71B08B29A00D44C7D /* libiodbc.a */; };
 		BF69C4D1124F8C310035CF57 /* FoxClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4C8124F8C310035CF57 /* FoxClient.cpp */; };
 		BF69C4D2124F8C310035CF57 /* FoxJob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4C9124F8C310035CF57 /* FoxJob.cpp */; };
 		BF69C4D3124F8C310035CF57 /* FoxServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4CA124F8C310035CF57 /* FoxServer.cpp */; };
@@ -224,7 +223,6 @@
 		BF3EB062089690D200E02367 /* spoil_optimization.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = spoil_optimization.cpp; path = ../cctbx/cctbx/uctbx/spoil_optimization.cpp; sourceTree = "<group>"; };
 		BF468DB71B08B29A00D44C7D /* libiodbc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libiodbc.a; path = "../static-libs/lib/libiodbc.a"; sourceTree = "<group>"; };
 		BF49CDEF1B0BC56E0012BF3B /* covalent_radii.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = covalent_radii.cpp; path = ../cctbx/cctbx/eltbx/covalent_radii.cpp; sourceTree = "<group>"; };
-		BF468DB71B08B29A00D44C7D /* libiodbc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libiodbc.a; path = "../static-libs/lib/libiodbc.a"; sourceTree = "<group>"; };
 		BF69C4C8124F8C310035CF57 /* FoxClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FoxClient.cpp; path = src/FoxClient.cpp; sourceTree = "<group>"; };
 		BF69C4C9124F8C310035CF57 /* FoxJob.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FoxJob.cpp; path = src/FoxJob.cpp; sourceTree = "<group>"; };
 		BF69C4CA124F8C310035CF57 /* FoxServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FoxServer.cpp; path = src/FoxServer.cpp; sourceTree = "<group>"; };
