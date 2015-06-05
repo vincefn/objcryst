@@ -33,9 +33,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\ObjCryst\Quirks\ci_string.cpp">
       <Filter>Source Files\Quirks</Filter>
     </ClCompile>

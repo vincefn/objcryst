@@ -2616,7 +2616,7 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
    catch (otl_exception &except)
    {
       VFN_DEBUG_MESSAGE("OTL Exception!"<<endl<<"   message:"<<except.msg<<endl<<"   sqlstate:"<<except.sqlstate,10)
-	  wxMessageDialog d(this, _T("COD: SQL Error ?") + wxString(except.msg), _T("Error"), wxOK | wxICON_ERROR);
+	  wxMessageDialog d(this, _T("COD: Error loading ODBC driver or connecting to database server ? Message:\n") + wxString(except.msg), _T("Error"), wxOK | wxICON_ERROR);
 	  d.ShowModal();
 	  return;
    }
