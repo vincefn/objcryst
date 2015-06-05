@@ -53,18 +53,18 @@
 #include <cstring>
 
 #ifdef __FOX_COD__
-//   #ifdef __BSD__
-      // for iODBC (pre-installed on Mac OSX)
-      //#define OTL_IODBC_BSD
-//   #else
-      // Windows, *nix
+   #if defined(__DARWIN__) 
+		#define OTL_ODBC
+		#define OTL_ODBC_UNIX
+   #endif
+   #ifdef _MSC_VER
       #define OTL_ODBC
-//      #ifdef __LINUX__
-         #define OTL_ODBC_UNIX
-//      #endif
-//   #endif
+	  //#define OTL_ANSI_CPP
+      //#define OTL_UNICODE
+	  //#define OTL_ODBC_SELECT_STM_EXECUTE_BEFORE_DESCRIBE
+   #endif
    #define OTL_STL
-   #include <otlv4.h>
+   #include "otlv4.h"
 #endif
 
 #include "ObjCryst/ObjCryst/General.h"
@@ -2600,18 +2600,25 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
    VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton()",10)
    otl_connect db;
    otl_connect::otl_initialize();
-   std::string s(wxStandardPaths::Get().GetExecutablePath().c_str());//"somwhere/Fox.app/Contents/MacOS/Fox"
+   std::string s;
+   #ifdef __DARWIN__
+   s=wxStandardPaths::Get().GetExecutablePath().c_str();//"somwhere/Fox.app/Contents/MacOS/Fox"
    std::size_t pos=s.rfind("/Contents/");
    s="driver="+s.substr(0,pos)+"/Contents/Resources/libmyodbc5a.so;server=www.crystallography.net;user=cod_reader;database=cod";
-   VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton()"+s,10)
+   #endif
+   #ifdef _MSC_VER
+   s = "driver={MySQL ODBC 5.3 Unicode Driver};server=www.crystallography.net;user=cod_reader;database=cod";
+   #endif
+   VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton()" + s, 10)
    try {
       db.rlogon(s.c_str());
    }
    catch (otl_exception &except)
    {
-      cout<<"OTL Exception!"<<endl
-          <<"   message:"<<except.msg<<endl
-          <<"   sqlstate:"<<except.sqlstate<<endl;
+      VFN_DEBUG_MESSAGE("OTL Exception!"<<endl<<"   message:"<<except.msg<<endl<<"   sqlstate:"<<except.sqlstate,10)
+	  wxMessageDialog d(this, _T("COD: SQL Error ?") + wxString(except.msg), _T("Error"), wxOK | wxICON_ERROR);
+	  d.ShowModal();
+	  return;
    }
    if(mpCODFrame!=0) mpCODFrame->Close();
    VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton()",10)
@@ -2707,7 +2714,7 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
          mvCOD_Record.push_back(cod_record());
          cod_record *p=&(mvCOD_Record.back());
          i>> p->file;
-         //cout<<"COD id="<<p->file<<"("<<mvCOD_Record.size()<<")"<<endl;
+         VFN_DEBUG_MESSAGE("COD id="<<p->file<<"("<<mvCOD_Record.size()<<")",10)
          i>> p->a;
          i>> p->b;
          i>> p->c;
@@ -2729,14 +2736,15 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
          i>> p->volume;
          i>> p->year;
          i>> p->firstpage;
-         cout<<"   Formula: "<<p->formula<<" a="<<p->a<<" b="<<p->b<<" c="<<p->c<<endl
-             <<"   Journal: "<<p->journal<<" "<<p->volume<<"("<<p->year<<"), "<<p->firstpage<<":"<<p->authors<<endl
-             <<"   Title:   "<<p->title<<endl;
+		 VFN_DEBUG_MESSAGE("   Formula: " << p->formula << " a=" << p->a << " b=" << p->b << " c=" << p->c << endl
+			               << "   Journal: " << p->journal << " " << p->volume << "(" << p->year << "), " << p->firstpage << ":" << p->authors << endl
+			               << "   Title:   " << p->title << endl, 10)
       }
       cout<<endl<<"Total: "<<mvCOD_Record.size()<<endl;
    }
    catch (otl_exception &except)
    {
+	  VFN_DEBUG_MESSAGE("OTL Exception!" << endl << "   message:" << except.msg << endl << "   sqlstate:" << except.sqlstate << endl,10)
       cout<<"OTL Exception!"<<endl
       <<"   message:"<<except.msg<<endl
       <<"   sqlstate:"<<except.sqlstate<<endl;
