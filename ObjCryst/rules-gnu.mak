@@ -24,6 +24,7 @@ shared-newmat=1
 shared-wxgtk=1
 shared-fftw=1
 shared-glut=1
+shared-mysql=1
 endif
 ### Rules for Linux & GCC
 # C compiler
@@ -117,7 +118,7 @@ FFTW_LIB :=
 FFTW_FLAGS :=
 endif
 
-ifeq ($(sse),1)
+ifneq ($(sse),0)
 SSE_FLAGS = -DHAVE_SSE_MATHFUN -DUSE_SSE2 -march=native 
 else
 SSE_FLAGS =
@@ -127,6 +128,19 @@ ifneq ($(shared-newmat),1)
 LDNEWMAT := $(DIR_STATIC_LIBS)/lib/libnewmat.a
 else
 LDNEWMAT := -lnewmat
+endif
+
+#Using COD, with MySQL
+ifneq ($(cod),0)
+ ifneq ($(shared-mysql),1)
+  COD_LIB = $(DIR_STATIC_LIBS)/lib/libmysqlclient.a
+ else
+  COD_LIB = -lmysqlclient
+ endif
+ COD_FLAGS = -D__FOX_COD__ -I/usr/include/mysql
+else
+ COD_LIB :=
+ COD_FLAGS :=
 endif
 
 ifeq ($(shared_libcryst),1)
@@ -139,20 +153,20 @@ else
       # we are building a RPM !
       CPPFLAGS = ${RPM_OPT_FLAGS} 
    else
-      CPPFLAGS = -g -Wall -D__DEBUG__ ${SSE_FLAGS}
+      CPPFLAGS = -g -Wall -D__DEBUG__ ${SSE_FLAGS} ${COD_FLAGS}
    endif
    DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS} ${FFTW_FLAGS} ${REAL_FLAG}
-   LOADLIBES = -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx ${LDNEWMAT} ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS} ${FFTW_LIB}
+   LOADLIBES = -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx ${LDNEWMAT} ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS} ${FFTW_LIB} ${COD_LIB}
  else
    ifdef RPM_OPT_FLAGS
       # we are building a RPM !
       CPPFLAGS = ${RPM_OPT_FLAGS}
    else
       #default flags - use "sse=1" to enable SSE optimizations
-      CPPFLAGS = -O3 -w -ffast-math -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops -ftree-vectorize ${SSE_FLAGS}
+      CPPFLAGS = -O3 -w -ffast-math -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops -ftree-vectorize ${SSE_FLAGS} ${COD_FLAGS}
    endif
    DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS} ${FFTW_FLAGS} ${REAL_FLAG}
-   LOADLIBES = -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx ${LDNEWMAT} ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS} ${FFTW_LIB}
+   LOADLIBES = -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx ${LDNEWMAT} ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS} ${FFTW_LIB} ${COD_LIB}
  endif
 endif
 # Add to statically link: -nodefaultlibs -lgcc /usr/lib/libstdc++.a
@@ -204,7 +218,7 @@ $(BUILD_DIR)/wxWidgets-3.0.2.tar.bz2:
 $(BUILD_DIR)/static-libs/lib/libwx_gtk2u_core-3.0.a: $(BUILD_DIR)/wxWidgets-3.0.2.tar.bz2
 	cd $(BUILD_DIR) && rm -Rf wxWidgets-3.0.2 && tar -xjf wxWidgets-3.0.2.tar.bz2
 	cd $(BUILD_DIR)/wxWidgets-3.0.2 && ./configure --with-gtk --with-opengl --prefix=$(BUILD_DIR)/static-libs --enable-unicode  --enable-optimise --disable-shared --x-includes=/usr/X11R6/include/ && $(MAKE) install
-	#rm -Rf wxGTK
+	rm -Rf $(BUILD_DIR)wxWidgets-3.0.2
 
 ifneq ($(wxcryst),0)
 ifneq ($(shared-wxgtk),1)
@@ -251,7 +265,7 @@ endif
 $(BUILD_DIR)/boost_1_58_0.tar.bz2:
 	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND)  http://downloads.sourceforge.net/project/boost/boost/1.58.0/boost_1_58_0.tar.bz2
 
-libboost:$(BUILD_DIR)/boost_1_58_0.tar.bz2:
+libboost:$(BUILD_DIR)/boost_1_58_0.tar.bz2
 	cd $(BUILD_DIR) && tar -xjf boost_1_58_0.tar.bz2
 	cd $(BUILD_DIR)/boost_1_58_0 && rsync -ar boost --exclude="accumulators/" --exclude="archive/" --exclude="asio/" --exclude="asign/" --exclude="bimap/" --exclude="bind/" --exclude="circular_buffer/" --exclude="concept_check/" --exclude="dynamic_bitset/" --exclude="filesystem/" --exclude="flyweight/" --exclude="function/" --exclude="function_types/"  --exclude="gil/" --exclude="graph/" --exclude="interprocess/" --exclude="intrusive/" --exclude="iostreams/" --exclude="lambda/" --exclude="logic/" --exclude="mpi/" --exclude="parameter/" --exclude="pending/" --exclude="pool/" --exclude="program_options/" --exclude="property_tree/" --exclude="proto/" --exclude="ptr_container/" --exclude="python/" --exclude="random/" --exclude="regex/" --exclude="serialization/" --exclude="signals/" --exclude="spirit/" --exclude="statechart/" --exclude="system/" --exclude="test/" --exclude="thread/" --exclude="units/" --exclude="unordered/" --exclude="wave/" --exclude="xpressive/" --filter="+ */" --filter="+ *.hpp"  --filter="+ *.ipp" $(DIR_STATIC_LIBS)/include/
 	rm -Rf $(BUILD_DIR)/boost_1_58_0
@@ -269,10 +283,12 @@ libboost:$(BUILD_DIR)/boost_1_58_0.tar.bz2:
 $(BUILD_DIR)/mysql-5.6.24.tar.gz:
 	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND) http://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.24.tar.gz
 
-#:TODO: find a way to only compile the static version of libmysqlclient
+#We only build and install libmysql and development headers here (OK on Linux)
 $(DIR_STATIC_LIBS)/lib/libmysqlclient.a: $(BUILD_DIR)/mysql-5.6.24.tar.gz
 	cd $(BUILD_DIR) && tar -xzf mysql-5.6.24.tar.gz
-	cd $(BUILD_DIR)/mysql-5.6.24 && cmake -DCMAKE_INSTALL_PREFIX=$(DIR_STATIC_LIBS) && $(MAKE) -j4 install
+	cd $(BUILD_DIR)/mysql-5.6.24 && rm -f CMakeCache.txt && cmake -DCMAKE_INSTALL_PREFIX=$(DIR_STATIC_LIBS) && $(MAKE) libmysql
+	cd $(BUILD_DIR)/mysql-5.6.24/include && make install
+	cd $(BUILD_DIR)/mysql-5.6.24/libmysql && make install
 	rm -Rf $(BUILD_DIR)/mysql-5.6.24
 
 ifneq ($(shared-mysql),1)

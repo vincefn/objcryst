@@ -33,7 +33,7 @@ endif
 libFox: $(OBJ)
 
 #Main Application
-Fox: $(libwx) $(libnewmat)  $(libfftw) libCrystVector libQuirks libRefinableObj libcctbx libCryst libwxCryst
+Fox: $(libwx) $(libnewmat)  $(libfftw) $(COD_LIB) libCrystVector libQuirks libRefinableObj libcctbx libCryst libwxCryst
 	$(MAKE) -f gnu.mak libFox
 	${LINKER} ${CRYST_LDFLAGS} -o $@ ${filter-out %.a %.so lib%, $^} $(OBJ) ${LOADLIBES} 
 
