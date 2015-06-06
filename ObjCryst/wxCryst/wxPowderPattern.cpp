@@ -701,10 +701,10 @@ void WXPowderPattern::OnMenuShowGraph(wxCommandEvent & WXUNUSED(event))
    if(gvWindowPosition.count(ID_POWDER_GRAPH_WIN))
      frame= new wxFrame(this,ID_POWDER_GRAPH_WIN, wxString::FromAscii(mpPowderPattern->GetName().c_str()),
                         gvWindowPosition[ID_POWDER_GRAPH_WIN].first,
-                        gvWindowPosition[ID_POWDER_GRAPH_WIN].second);
+                        gvWindowPosition[ID_POWDER_GRAPH_WIN].second,wxCLOSE_BOX|wxRESIZE_BORDER|wxCAPTION|wxFRAME_FLOAT_ON_PARENT);
    else
      frame= new wxFrame(this,ID_POWDER_GRAPH_WIN, wxString::FromAscii(mpPowderPattern->GetName().c_str()),
-                        wxDefaultPosition,wxSize(500,300));
+                        wxDefaultPosition,wxSize(500,300),wxCLOSE_BOX|wxRESIZE_BORDER|wxCAPTION|wxFRAME_FLOAT_ON_PARENT);
    mpGraph = new WXPowderPatternGraph(frame,this);
    
    wxSizer *ps=new wxBoxSizer(wxHORIZONTAL);
@@ -714,6 +714,7 @@ void WXPowderPattern::OnMenuShowGraph(wxCommandEvent & WXUNUSED(event))
    
    frame->CreateStatusBar(2);
    frame->Show(true);
+   frame->Raise();
    this->CrystUpdate(true);
    //frame->SetStatusText("");
 }

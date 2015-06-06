@@ -918,10 +918,10 @@ void WXCrystal::OnMenuCrystalGL(wxCommandEvent & WXUNUSED(event))
    if(gvWindowPosition.count(ID_GLCRYSTAL_WINDOW))
      frame= new wxFrame(this,ID_GLCRYSTAL_WINDOW, wxString::FromAscii(mpCrystal->GetName().c_str()),
                         gvWindowPosition[ID_GLCRYSTAL_WINDOW].first,
-                        gvWindowPosition[ID_GLCRYSTAL_WINDOW].second);
+                        gvWindowPosition[ID_GLCRYSTAL_WINDOW].second,wxCLOSE_BOX|wxRESIZE_BORDER|wxCAPTION|wxFRAME_FLOAT_ON_PARENT);
    else
      frame= new wxFrame(this,ID_GLCRYSTAL_WINDOW, wxString::FromAscii(mpCrystal->GetName().c_str()),
-                        wxDefaultPosition,wxSize(400,400));
+                        wxDefaultPosition,wxSize(400,400),wxCLOSE_BOX|wxRESIZE_BORDER|wxCAPTION|wxFRAME_FLOAT_ON_PARENT);
 
    mpCrystalGL=new WXGLCrystalCanvas(this,frame,-1);
    #if wxUSE_STATUSBAR
@@ -930,6 +930,7 @@ void WXCrystal::OnMenuCrystalGL(wxCommandEvent & WXUNUSED(event))
    #endif
    
    frame->Show(true);
+   frame->Raise();
    //The contents to be displayed will be generated on the first OnPaint event, in InitGL
 }
 void WXCrystal::NotifyCrystalGLDelete()
