@@ -55,7 +55,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_WINDOWS;%(PreprocessorDefinitions);__WX__CRYST__;HAVE_SSE_MATHFUN;USE_SSE2;OBJCRYST_GL;HAVE_FFTW;__FOX_COD__;__DEBUG__</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\;$(SolutionDir)..\cctbx\include;$(SolutionDir)..\ObjCryst;$(SolutionDir)..\wxWidgets\include\msvc;$(SolutionDir)..\wxWidgets\include;$(SolutionDir)..\fftw\api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\;$(SolutionDir)..\cctbx\include;$(SolutionDir)..\ObjCryst;$(SolutionDir)..\wxWidgets\include\msvc;$(SolutionDir)..\wxWidgets\include;$(SolutionDir)..\fftw\api;$(SolutionDir)..\mysql-connector-c-src\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)\%(RelativeDir)</ObjectFileName>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
@@ -68,8 +68,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\fftw\fftw-3.3-libs\Static-Debug;$(SolutionDir)..\wxWidgets\lib\vc_lib;$(SolutionDir)$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>newmat.lib;cctbx.lib;libfftwf-3.3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\wxWidgets\lib\vc_lib;$(SolutionDir)$(Configuration);$(SolutionDir)..\fftw\fftw-3.3-libs\Static-Release;$(SolutionDir)..\mysql-connector-c-src\libmysql\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>newmat.lib;cctbx.lib;libfftwf-3.3.lib;mysqlclient.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>libboost_date_time-vc100-mt-sgd-1_47.lib;libcmt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <ResourceCompile>
@@ -85,7 +85,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;_WINDOWS;%(PreprocessorDefinitions);__WX__CRYST__;HAVE_SSE_MATHFUN;USE_SSE2;OBJCRYST_GL;HAVE_FFTW;__FOX_COD__</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\;$(SolutionDir)..\cctbx\include;$(SolutionDir)..\ObjCryst;$(SolutionDir)..\wxWidgets\include\msvc;$(SolutionDir)..\wxWidgets\include;$(SolutionDir)..\fftw\api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\;$(SolutionDir)..\cctbx\include;$(SolutionDir)..\ObjCryst;$(SolutionDir)..\wxWidgets\include\msvc;$(SolutionDir)..\wxWidgets\include;$(SolutionDir)..\fftw\api;$(SolutionDir)..\mysql-connector-c-src\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)\%(RelativeDir)</ObjectFileName>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
@@ -99,9 +99,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\wxWidgets\lib\vc_lib;$(SolutionDir)$(Configuration);$(SolutionDir)..\fftw\fftw-3.3-libs\Static-Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\wxWidgets\lib\vc_lib;$(SolutionDir)$(Configuration);$(SolutionDir)..\fftw\fftw-3.3-libs\Static-Release;$(SolutionDir)..\mysql-connector-c-src\libmysql\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>libboost_date_time-vc100-mt-s-1_47.lib</IgnoreSpecificDefaultLibraries>
-      <AdditionalDependencies>newmat.lib;cctbx.lib;libfftwf-3.3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>newmat.lib;cctbx.lib;libfftwf-3.3.lib;mysqlclient.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>$(SolutionDir)..\wxWidgets\include\msvc;$(SolutionDir)..\wxWidgets\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
