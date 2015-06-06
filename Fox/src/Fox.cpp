@@ -44,6 +44,8 @@
    #include <wx/txtstrm.h>
    #include <wx/minifram.h>
    #include <wx/dirdlg.h>
+   #include "wx/progdlg.h"
+   #include "wx/tokenzr.h"
 #endif
 
 #include <cstdlib>
@@ -53,6 +55,18 @@
 #include <cstring>
 
 #ifdef __FOX_COD__
+#if 1
+// Using MySQL C++ connector
+//#include "mysql_connection.h"
+//#include "cppconn/driver.h"
+//#include "cppconn/exception.h"
+//#include "cppconn/resultset.h"
+//#include "cppconn/statement.h"
+//#include "mysql_driver.h"
+// Using MySQL native API
+#include <mysql.h>
+#else
+// Using otlv4, requires installing an ODBC connector...
    #if defined(__DARWIN__) 
 		#define OTL_ODBC
 		#define OTL_ODBC_UNIX
@@ -65,6 +79,7 @@
    #endif
    #define OTL_STL
    #include "otlv4.h"
+#endif
 #endif
 
 #include "ObjCryst/ObjCryst/General.h"
@@ -284,7 +299,7 @@ private:
    wxTextCtrl* mpCOD_MinVol;
    wxTextCtrl* mpCOD_MaxVol;
    wxListBox* mpCOD_List;
-   wxMiniFrame *mpCODFrame;
+   wxFrame *mpCODFrame;
    wxGrid *mpCODGrid;
    std::vector<cod_record> mvCOD_Record;
 #endif
@@ -2595,9 +2610,266 @@ void WXCrystMainFrame::OnCOD(wxCommandEvent &event)
    this->PostSizeEvent();
 }
 
+/// Almost a copy of wxGridCellAutoWrapStringRenderer, just based on a fixed width rather than the golden ratio
+class WXGridCellAutoWrapStringRendererFixedWidth: public wxGridCellAutoWrapStringRenderer
+{
+   public:
+      WXGridCellAutoWrapStringRendererFixedWidth(unsigned int w):
+         wxGridCellAutoWrapStringRenderer(),mFixedWidth(w){};
+      virtual wxSize GetBestSize(wxGrid& grid, wxGridCellAttr& attr, wxDC& dc, int row, int col);
+   virtual wxGridCellRenderer *Clone() const
+   { return new WXGridCellAutoWrapStringRendererFixedWidth(mFixedWidth); }
+   private:
+      wxArrayString GetTextLines( wxGrid& grid,
+                              wxDC& dc,
+                              const wxGridCellAttr& attr,
+                              const wxRect& rect,
+                              int row, int col);
+   
+      void BreakLine(wxDC& dc,
+                  const wxString& logicalLine,
+                  wxCoord maxWidth,
+                  wxArrayString& lines);
+   
+      wxCoord BreakWord(wxDC& dc,
+                     const wxString& word,
+                     wxCoord maxWidth,
+                     wxArrayString& lines,
+                     wxString& line);
+      unsigned int mFixedWidth;
+};
+
+// Same as WXGridCellAutoWrapStringRenderer::GetTextLines, unfortunately private...
+wxArrayString
+WXGridCellAutoWrapStringRendererFixedWidth::GetTextLines(wxGrid& grid,
+                                               wxDC& dc,
+                                               const wxGridCellAttr& attr,
+                                               const wxRect& rect,
+                                               int row, int col)
+{
+   dc.SetFont(attr.GetFont());
+   const wxCoord maxWidth = rect.GetWidth();
+   
+   // Transform logical lines into physical ones, wrapping the longer ones.
+   const wxArrayString
+   logicalLines = wxSplit(grid.GetCellValue(row, col), '\n', '\0');
+   
+   // Trying to do anything if the column is hidden anyhow doesn't make sense
+   // and we run into problems in BreakLine() in this case.
+   if ( maxWidth <= 0 )
+      return logicalLines;
+   
+   wxArrayString physicalLines;
+   for ( wxArrayString::const_iterator it = logicalLines.begin();
+        it != logicalLines.end();
+        ++it )
+   {
+      const wxString& line = *it;
+      
+      if ( dc.GetTextExtent(line).x > maxWidth )
+      {
+         // Line does not fit, break it up.
+         BreakLine(dc, line, maxWidth, physicalLines);
+      }
+      else // The entire line fits as is
+      {
+         physicalLines.push_back(line);
+      }
+   }
+   
+   return physicalLines;
+}
+
+// Same as WXGridCellAutoWrapStringRenderer::BreakLine, unfortunately private...
+void WXGridCellAutoWrapStringRendererFixedWidth::BreakLine(wxDC& dc,
+                                            const wxString& logicalLine,
+                                            wxCoord maxWidth,
+                                            wxArrayString& lines)
+{
+   wxCoord lineWidth = 0;
+   wxString line;
+   
+   // For each word
+   wxStringTokenizer wordTokenizer(logicalLine, wxS(" \t"), wxTOKEN_RET_DELIMS);
+   while ( wordTokenizer.HasMoreTokens() )
+   {
+      const wxString word = wordTokenizer.GetNextToken();
+      const wxCoord wordWidth = dc.GetTextExtent(word).x;
+      if ( lineWidth + wordWidth < maxWidth )
+      {
+         // Word fits, just add it to this line.
+         line += word;
+         lineWidth += wordWidth;
+      }
+      else
+      {
+         // Word does not fit, check whether the word is itself wider that
+         // available width
+         if ( wordWidth < maxWidth )
+         {
+            // Word can fit in a new line, put it at the beginning
+            // of the new line.
+            lines.push_back(line);
+            line = word;
+            lineWidth = wordWidth;
+         }
+         else // Word cannot fit in available width at all.
+         {
+            if ( !line.empty() )
+            {
+               lines.push_back(line);
+               line.clear();
+               lineWidth = 0;
+            }
+            
+            // Break it up in several lines.
+            lineWidth = BreakWord(dc, word, maxWidth, lines, line);
+         }
+      }
+   }
+   
+   if ( !line.empty() )
+      lines.push_back(line);
+}
+
+
+// Same as WXGridCellAutoWrapStringRenderer::BreakWord, unfortunately private...
+wxCoord WXGridCellAutoWrapStringRendererFixedWidth::BreakWord(wxDC& dc,
+                                            const wxString& word,
+                                            wxCoord maxWidth,
+                                            wxArrayString& lines,
+                                            wxString& line)
+{
+   wxArrayInt widths;
+   dc.GetPartialTextExtents(word, widths);
+   
+   const unsigned count = widths.size();
+   unsigned n;
+   for ( n = 0; n < count; n++ )
+   {
+      if ( widths[n] > maxWidth )
+         break;
+   }
+   
+   if ( n == 0 )
+   {
+      n = 1;
+   }
+   
+   lines.push_back(word.substr(0, n));
+   
+   const wxString rest = word.substr(n);
+   const wxCoord restWidth = dc.GetTextExtent(rest).x;
+   if ( restWidth <= maxWidth )
+   {
+      line = rest;
+      return restWidth;
+   }
+   
+   return BreakWord(dc, rest, maxWidth, lines, line);
+}
+
+
+wxSize WXGridCellAutoWrapStringRendererFixedWidth::GetBestSize(wxGrid& grid, wxGridCellAttr& attr,wxDC& dc,int row, int col)
+{
+   const int lineHeight = dc.GetCharHeight();
+   
+   // Search for a shape no taller than the golden ratio.
+   wxSize size;
+   size.x=mFixedWidth;
+   const size_t numLines = GetTextLines(grid, dc, attr, size, row, col).size();
+   size.y = numLines * lineHeight;
+   
+   return size;
+}
+
 void WXCrystMainFrame::OnButton(wxCommandEvent &event)
 {
    VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton()",10)
+   wxProgressDialog dlgProgress(_T("Querying Crystallographic Open Database"),_T("Building query...."),
+                                106,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME);//|wxPD_CAN_ABORT
+   Chronometer chrono;
+   chrono.start();
+   stringstream query;
+   query<<"select file,a,b,c,alpha,beta,gamma,vol,sg,sgHall,nel,commonname,chemname,mineral,formula,calcformula,authors,title,journal,volume,year,firstpage from data where ";
+   //Read parameters from GUI
+   wxString v;
+   bool notfirst=false;
+   //Elements
+   for(std::list<wxTextCtrl*>::iterator pos=mvpCOD_Elements.begin();pos!=mvpCOD_Elements.end();++pos)
+   {
+      v=(*pos)->GetValue();
+      if(v.IsEmpty()==false)
+      {
+         if(notfirst) query<<"and ";notfirst=true;
+         query<<"(formula rlike '[[:blank:]]"<<v<<"[[:digit:]]' or formula rlike '[[:blank:]]"<<v<<"[[:blank:]]') ";
+         
+      }
+   }
+   //Nb elements
+   v=mpCOD_MinNel->GetValue();
+   if(v.IsEmpty()==false)
+   {
+      if(notfirst) query<<"and ";notfirst=true;
+      query<<"nel>="<<v<<" ";
+   }
+   v=mpCOD_MaxNel->GetValue();
+   if(v.IsEmpty()==false)
+   {
+      if(notfirst) query<<"and ";notfirst=true;
+      query<<"nel<="<<v<<" ";
+   }
+   
+   //Volume
+   v=mpCOD_MinVol->GetValue();
+   if(v.IsEmpty()==false)
+   {
+      if(notfirst) query<<"and ";notfirst=true;
+      query<<"vol>="<<v<<" ";
+   }
+   v=mpCOD_MaxVol->GetValue();
+   if(v.IsEmpty()==false)
+   {
+      if(notfirst) query<<"and ";notfirst=true;
+      query<<"vol<="<<v<<" ";
+   }
+   
+   //Authors
+   for(std::list<wxTextCtrl*>::iterator pos=mvpCOD_Authors.begin();pos!=mvpCOD_Authors.end();++pos)
+   {
+      v=(*pos)->GetValue();
+      if(v.IsEmpty()==false)
+      {
+         if(notfirst) query<<"and ";notfirst=true;
+         query<<"authors rlike '"<<v<<"' ";
+      }
+   }
+   
+   //Words
+   for(std::list<wxTextCtrl*>::iterator pos=mvpCOD_TitleWords.begin();pos!=mvpCOD_TitleWords.end();++pos)
+   {
+      v=(*pos)->GetValue();
+      if(v.IsEmpty()==false)
+      {
+         if(notfirst) query<<"and ";notfirst=true;
+         query<<"(title rlike '"<<v<<"' ";
+         query<<"or mineral rlike '"<<v<<"' ";
+         query<<"or chemname rlike '"<<v<<"' ";
+         query<<"or commonname rlike '"<<v<<"') ";
+      }
+   }
+   
+   if(notfirst==false)
+   {
+      wxMessageDialog d(this,_T("COD: Empty request !"),_T("Error"),wxOK|wxICON_ERROR);
+      d.ShowModal();
+      return;
+   }
+   query<<"order by formula limit 500";
+   
+   VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton():Query="<<query.str()<<" (dt="<<chrono.seconds()<<")", 10)
+   if(mpCODFrame!=0) mpCODFrame->Close();
+#ifdef OTL_ODBC
    otl_connect db;
    otl_connect::otl_initialize();
    std::string s;
@@ -2605,6 +2877,7 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
    s=wxStandardPaths::Get().GetExecutablePath().c_str();//"somwhere/Fox.app/Contents/MacOS/Fox"
    std::size_t pos=s.rfind("/Contents/");
    s="driver="+s.substr(0,pos)+"/Contents/Resources/libmyodbc5a.so;server=www.crystallography.net;user=cod_reader;database=cod";
+   s = "driver={MySQL ODBC 5.2 Unicode Driver};server=www.crystallography.net;user=cod_reader;database=cod";
    #endif
    #ifdef _MSC_VER
    s = "driver={MySQL ODBC 5.3 Unicode Driver};server=www.crystallography.net;user=cod_reader;database=cod";
@@ -2620,88 +2893,9 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
 	  d.ShowModal();
 	  return;
    }
-   if(mpCODFrame!=0) mpCODFrame->Close();
    VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton()",10)
    try
    {
-      stringstream query;
-      query<<"select file,a,b,c,alpha,beta,gamma,vol,sg,sgHall,nel,commonname,chemname,mineral,formula,calcformula,authors,title,journal,volume,year,firstpage from data where ";
-      //Read parameters from GUI
-      wxString v;
-      bool notfirst=false;
-      //Elements
-      for(std::list<wxTextCtrl*>::iterator pos=mvpCOD_Elements.begin();pos!=mvpCOD_Elements.end();++pos)
-      {
-         v=(*pos)->GetValue();
-         if(v.IsEmpty()==false)
-         {
-            if(notfirst) query<<"and ";notfirst=true;
-            query<<"(formula rlike '[[:blank:]]"<<v<<"[[:digit:]]' or formula rlike '[[:blank:]]"<<v<<"[[:blank:]]') ";
-            
-         }
-      }
-      //Nb elements
-      v=mpCOD_MinNel->GetValue();
-      if(v.IsEmpty()==false)
-      {
-         if(notfirst) query<<"and ";notfirst=true;
-         query<<"nel>="<<v<<" ";
-      }
-      v=mpCOD_MaxNel->GetValue();
-      if(v.IsEmpty()==false)
-      {
-         if(notfirst) query<<"and ";notfirst=true;
-         query<<"nel<="<<v<<" ";
-      }
-
-      //Volume
-      v=mpCOD_MinVol->GetValue();
-      if(v.IsEmpty()==false)
-      {
-         if(notfirst) query<<"and ";notfirst=true;
-         query<<"vol>="<<v<<" ";
-      }
-      v=mpCOD_MaxVol->GetValue();
-      if(v.IsEmpty()==false)
-      {
-         if(notfirst) query<<"and ";notfirst=true;
-         query<<"vol<="<<v<<" ";
-      }
-
-      //Authors
-      for(std::list<wxTextCtrl*>::iterator pos=mvpCOD_Authors.begin();pos!=mvpCOD_Authors.end();++pos)
-      {
-         v=(*pos)->GetValue();
-         if(v.IsEmpty()==false)
-         {
-            if(notfirst) query<<"and ";notfirst=true;
-            query<<"authors rlike '"<<v<<"' ";
-         }
-      }
-
-      //Words
-      for(std::list<wxTextCtrl*>::iterator pos=mvpCOD_TitleWords.begin();pos!=mvpCOD_TitleWords.end();++pos)
-      {
-         v=(*pos)->GetValue();
-         if(v.IsEmpty()==false)
-         {
-            if(notfirst) query<<"and ";notfirst=true;
-            query<<"(title rlike '"<<v<<"' ";
-            query<<"or mineral rlike '"<<v<<"' ";
-            query<<"or chemname rlike '"<<v<<"' ";
-            query<<"or commonname rlike '"<<v<<"') ";
-         }
-      }
-
-      if(notfirst==false)
-      {
-         wxMessageDialog d(this,_T("COD: Empty request !"),_T("Error"),wxOK|wxICON_ERROR);
-         d.ShowModal();
-         return;
-      }
-      query<<"order by formula limit 500";
-      
-      VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton():Query="<<query.str(), 10)
       
       otl_stream i(50, query.str().c_str(),db);
       long codid;//'file' record in COD
@@ -2752,26 +2946,134 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
       d.ShowModal();
       return;
    }
+#else
+   // Using MySQL native C API
+   MYSQL *connection, mysql;
+   
+   int state;
+   dlgProgress.Update(2,"Connecting to COD database");
+   
+   mysql_init(&mysql);
+   
+   connection = mysql_real_connect(&mysql,"www.crystallography.net","cod_reader","","cod",3306,0,0);
+   if (connection == NULL)
+   {
+      stringstream s;
+      s<<"MySQL: error opening connection to COD database"<<endl<<"MySQL ErrNo:"<<mysql_errno(&mysql)<<endl<<"MySQL ErrMsg:"<<mysql_error(&mysql)<<endl<<"MySQL state:"<<mysql_sqlstate(&mysql);
+      VFN_DEBUG_MESSAGE(s.str(), 10)
+      wxMessageDialog d(this,wxString(s.str()),_T("Error connecting to COD database"),wxOK|wxICON_ERROR);
+      d.ShowModal();
+      return ;
+   }
+   VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton(): MySQL connection OK"<<" (dt="<<chrono.seconds()<<")", 10)
+   
+   dlgProgress.Update(4,"Query COD database");
+   state = mysql_query(connection, query.str().c_str());
+   if (state !=0)
+   {
+      stringstream s;
+      s<<"MySQL: querying COD database"<<endl<<"MySQL ErrNo:"<<mysql_errno(&mysql)<<endl<<"MySQL ErrMsg:"<<mysql_error(&mysql)<<endl<<"MySQL state:"<<mysql_sqlstate(&mysql);
+      VFN_DEBUG_MESSAGE(s.str(), 10)
+      wxMessageDialog d(this,wxString(s.str()),_T("Error querying COD database"),wxOK|wxICON_ERROR);
+      d.ShowModal();
+      return ;
+   }
+   
+   MYSQL_RES *result = mysql_store_result(connection);
+   
+   const unsigned int nbresult = mysql_num_fields(result);
+   VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton(): Got "<<nbresult<<"rows (dt="<<chrono.seconds()<<")", 10)
+   mvCOD_Record.clear();
+   stringstream s;
+   s.imbue(std::locale::classic());
+   unsigned int ct=0;
+   MYSQL_ROW row;
+   while ( ( row=mysql_fetch_row(result)) != NULL )
+   {
+      try
+      {
+         mvCOD_Record.push_back(cod_record());
+         cod_record *p=&(mvCOD_Record.back());
+         unsigned int i=0;
+         if(row[i  ]!=NULL){stringstream s; s<<row[i]; s.imbue(std::locale::classic()); s >>p->file;}
+         if(row[++i]!=NULL){stringstream s; s<<row[i]; s.imbue(std::locale::classic()); s >> p->a;}
+         if(row[++i]!=NULL){stringstream s; s<<row[i]; s.imbue(std::locale::classic()); s >> p->b;}
+         if(row[++i]!=NULL){stringstream s; s<<row[i]; s.imbue(std::locale::classic()); s >> p->c;}
+         if(row[++i]!=NULL){stringstream s; s<<row[i]; s.imbue(std::locale::classic()); s >> p->alpha;}
+         if(row[++i]!=NULL){stringstream s; s<<row[i]; s.imbue(std::locale::classic()); s >> p->beta;}
+         if(row[++i]!=NULL){stringstream s; s<<row[i]; s.imbue(std::locale::classic()); s >> p->gamma;}
+         if(row[++i]!=NULL){stringstream s; s<<row[i]; s.imbue(std::locale::classic()); s >> p->vol;}
+         if(row[++i]!=NULL){p->sg=row[i];}
+         if(row[++i]!=NULL){p->sgHall=row[i];}
+         if(row[++i]!=NULL){p->nel;}
+         if(row[++i]!=NULL){p->commonname=row[i];}
+         if(row[++i]!=NULL){p->chemname=row[i];}
+         if(row[++i]!=NULL){p->mineral=row[i];}
+         if(row[++i]!=NULL){p->formula=row[i];}
+         if(row[++i]!=NULL){p->calcformula=row[i];}
+         
+         if(row[++i]!=NULL){p->authors=row[i];}
+         if(row[++i]!=NULL){p->title=row[i];}
+         if(row[++i]!=NULL){p->journal=row[i];}
+         if(row[++i]!=NULL){stringstream s; s<<row[i]; s.imbue(std::locale::classic()); s >> p->volume;}
+         if(row[++i]!=NULL){stringstream s; s<<row[i]; s.imbue(std::locale::classic()); s >> p->year;}
+         if(row[++i]!=NULL){stringstream s; s<<row[i]; s.imbue(std::locale::classic()); s >> p->firstpage;}
+         VFN_DEBUG_MESSAGE("   Formula: " << p->formula << " a=" << p->a << " b=" << p->b << " c=" << p->c << endl
+                           << "   Journal: " << p->journal << " " << p->volume << "(" << p->year << "), " << p->firstpage << ":" << p->authors << endl
+                           << "   Title:   " << p->title << endl<<" (dt="<<chrono.seconds()<<")", 10)
+         dlgProgress.Update(4+(ct*100)/nbresult,wxString::Format("Getting result #%ud/%ud, cod:%ld, formula:%s", ct,nbresult,p->file,p->formula));
+      } catch (exception &ex)
+      {
+         VFN_DEBUG_MESSAGE("Error reading record #"<<ct<<endl<<"MySQL ErrNo:"<<mysql_errno(&mysql)<<endl<<"MySQL ErrMsg:"<<mysql_error(&mysql)<<endl<<"MySQL state:"<<mysql_sqlstate(&mysql), 10)
+         cod_record *p=&(mvCOD_Record.back());
+         VFN_DEBUG_MESSAGE("   Formula: " << p->formula << " a=" << p->a << " b=" << p->b << " c=" << p->c << endl
+                           << "   Journal: " << p->journal << " " << p->volume << "(" << p->year << "), " << p->firstpage << ":" << p->authors << endl
+                           << "   Title:   " << p->title << endl, 10)
+      }
+      ct++;
+   }
+   
+   dlgProgress.Update(105,"Closing database connection");
+   mysql_free_result(result);
+   
+   mysql_close(connection);
+
+#endif
    if(mvCOD_Record.size()==0)
    {
       wxMessageDialog d(this,_T("COD: No results !"),_T("No results"),wxOK|wxICON_ERROR);
       d.ShowModal();
       return;
    }
-   mpCODFrame= new wxMiniFrame(this,-1, _T("Crystallography Open Database results"),
-                                  wxDefaultPosition,wxSize(700,500),wxCLOSE_BOX|wxCAPTION|wxSTAY_ON_TOP);
+   dlgProgress.Update(106,"Displaying results");
+   mpCODFrame= new wxMiniFrame(this,-1, _T("Crystallography Open Database results (double-click on formula to load CIF)"),
+                                  wxDefaultPosition,wxSize(700,500),wxCLOSE_BOX|wxCAPTION|wxRESIZE_BORDER);//|wxSTAY_ON_TOP
    wxSizer *pSizer=new wxBoxSizer(wxHORIZONTAL);
    mpCODFrame->SetSizer(pSizer);
    mpCODGrid=new wxGrid(mpCODFrame,ID_FOX_COD_LIST,wxDefaultPosition,wxDefaultSize);
    mpCODGrid->SetDefaultCellFont(wxFont(10,wxTELETYPE,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_BOLD));
+   //mpCODGrid->SetDefaultRenderer(new WXGridCellAutoWrapStringRendererFixedWidth(200));
    mpCODGrid->EnableEditing(false);
    mpCODFrame->Show();
    pSizer->Add(mpCODGrid,wxEXPAND);
-   mpCODFrame->PostSizeEvent();
+   
    mpCODGrid->SetColLabelSize(0);
    mpCODGrid->SetRowLabelSize(0);
-   VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton()"<<mpCODGrid<<","<<mvCOD_Record.size(), 10)
    mpCODGrid->CreateGrid(3*mvCOD_Record.size(),2);
+   mpCODGrid->SetColumnWidth(0,190);
+   mpCODGrid->SetColumnWidth(1,500);
+   mpCODGrid->SetColMinimalWidth(0,120);
+   mpCODGrid->SetColMinimalWidth(1,300);
+   mpCODGrid->DisableDragRowSize();
+   
+   wxGridCellAttr* cellAttrFormula = new wxGridCellAttr;
+   cellAttrFormula->SetRenderer(new WXGridCellAutoWrapStringRendererFixedWidth(190));
+   mpCODGrid->SetColAttr(0,cellAttrFormula);
+   
+   wxGridCellAttr* cellAttrInfo = new wxGridCellAttr;
+   cellAttrInfo->SetRenderer(new WXGridCellAutoWrapStringRendererFixedWidth(500));
+   mpCODGrid->SetColAttr(1,cellAttrInfo);
+   
    std::vector<cod_record>::const_iterator ps=mvCOD_Record.begin();
    for(unsigned int i=0;i<mvCOD_Record.size();i++)
    {
@@ -2782,11 +3084,12 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
       mpCODGrid->SetCellValue(i*3,1,wxString::Format("%.2f %.2f %.2f %.1f %.1f %.1f %s",c->a,c->b,c->c,c->alpha,c->beta,c->gamma,c->sg));
       mpCODGrid->SetCellValue(i*3+1,1,wxString::Format("%s %ld (%ld), %s: %s",c->journal,c->volume,c->year,c->firstpage,c->authors));
       mpCODGrid->SetCellValue(i*3+2,1,wxString::Format("%s",c->title));
+      //VFN_DEBUG_MESSAGE(i<<":"<<mpCODGrid->GetRowSize(i*3+2),10)
       ps++;
-      cout<<i<<":"<<i*3<<endl;
    }
-   mpCODGrid->AutoSize();
-
+   mpCODGrid->AutoSizeRows(false);
+   mpCODFrame->SetAutoLayout(true);
+   mpCODFrame->PostSizeEvent();
 }
 
 void WXCrystMainFrame::OnCODSelect(wxGridEvent &ev)
@@ -2818,6 +3121,7 @@ void WXCrystMainFrame::OnCODSelect(wxGridEvent &ev)
       CreateSingleCrystalDataFromCIF(cif);
       //FoxGrid
       mpGridWindow->DataLoaded();
+      mpNotebook->SetSelection(0);
    }
    cout<<cifurl<<endl;
 }
