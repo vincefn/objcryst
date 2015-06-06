@@ -269,10 +269,17 @@ libboost:$(BUILD_DIR)/boost_1_58_0.tar.bz2:
 $(BUILD_DIR)/mysql-5.6.24.tar.gz:
 	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND) http://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.24.tar.gz
 
-libmysql: $(BUILD_DIR)/mysql-5.6.24.tar.gz
+#:TODO: find a way to only compile the static version of libmysqlclient
+$(DIR_STATIC_LIBS)/lib/libmysqlclient.a: $(BUILD_DIR)/mysql-5.6.24.tar.gz
 	cd $(BUILD_DIR) && tar -xzf mysql-5.6.24.tar.gz
-	cmake -DCMAKE_INSTALL_PREFIX=$(DIR_STATIC_LIBS)
-	$(MAKE) -j4 install
+	cd $(BUILD_DIR)/mysql-5.6.24 && cmake -DCMAKE_INSTALL_PREFIX=$(DIR_STATIC_LIBS) && $(MAKE) -j4 install
+	rm -Rf $(BUILD_DIR)/mysql-5.6.24
+
+ifneq ($(shared-mysql),1)
+libmysql=$(DIR_STATIC_LIBS)/lib/libmysqlclient.a
+else
+libmysql=
+endif
 
 #iODBC library for COD access ??
 #$(BUILD_DIR)/libiodbc-3.52.10.tar.gz:

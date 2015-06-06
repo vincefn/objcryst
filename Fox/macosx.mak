@@ -1,3 +1,11 @@
+# Which command to use for download ?
+CURL=$(shell which curl 2>/dev/null)
+ifneq ($(CURL),)
+DOWNLOAD_COMMAND=curl -L -O
+else
+DOWNLOAD_COMMAND=wget
+endif
+
 ../cctbx:
 	cd .. && tar -xjf cctbx.tar.bz2
 
@@ -16,16 +24,24 @@
 	#cd ../fftw && lipo -create libfftw3f-i386.a libfftw3f-ppc.a -output $(PWD)/../static-libs/lib/libfftw3f.a
 	rm -Rf ../fftw
 
-
 libfftw: ../static-libs/lib/libfftw3f.a
+
+# MySQL
+../mysql-5.6.24.tar.gz:
+	cd .. && $(DOWNLOAD_COMMAND) http://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.24.tar.gz
+
+#:TODO: find a way to only compile the static version of libmysqlclient ?
+../static-libs/lib/libmysqlclient.a: ../mysql-5.6.24.tar.gz
+	cd .. && tar -xzf mysql-5.6.24.tar.gz
+	cd ../mysql-5.6.24 && cmake -DCMAKE_INSTALL_PREFIX=$(PWD)/../static-libs && $(MAKE) -j4 install
+	rm -f $(PWD)/../static-libs/lib/libmysql*.dylib
+	rm -Rf ../mysql-5.6.24
+
+libmysql=$(DIR_STATIC_LIBS)/lib/libmysqlclient.a
+
 
 ../wxWidgets-3.0.2.tar.bz2:
 	cd .. && curl -O  ftp://ftp.wxwidgets.org/pub/3.0.2/wxWidgets-3.0.2.tar.bz2
-
-#../static-libs/bin/wx-config: ../wxMac-2.8.12.tar.bz2
-#	cd .. && tar -xjf wxMac-2.8.12.tar.bz2
-#	cd ../wxMac-2.8.12 && ./configure --with-opengl --enable-optimise --disable-shared --enable-monolithic --enable-universal_binary --prefix=$(PWD)/../static-libs && make install
-#	rm -Rf ../wxMac-2.8.12
 
 ../static-libs/bin/wx-config: ../wxWidgets-3.0.2.tar.bz2
 	cd .. && tar -xjf wxWidgets-3.0.2.tar.bz2
@@ -36,7 +52,7 @@ libwx: ../static-libs/bin/wx-config
 
 default: Fox
 
-Fox: libfftw libwx ../cctbx ../newmat
+Fox: libfftw libwx ../cctbx ../newmat libmysql
 	xcodebuild -project Fox.xcodeproj -target Fox -configuration Deployment
 
 Fox-nogui: ../cctbx ../newmat
