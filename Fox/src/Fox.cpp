@@ -2786,7 +2786,7 @@ wxSize WXGridCellAutoWrapStringRendererFixedWidth::GetBestSize(wxGrid& grid, wxG
 void WXCrystMainFrame::OnButton(wxCommandEvent &event)
 {
    VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton()",10)
-   wxProgressDialog dlgProgress(_T("Querying Crystallographic Open Database"),_T("Building query...."),
+   wxProgressDialog dlgProgress(_T("Querying Crystallographic Open Database"),_T("Building query.............................................................\n\n"),
                                 106,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME);//|wxPD_CAN_ABORT
    Chronometer chrono;
    chrono.start();
@@ -2981,7 +2981,7 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
    
    MYSQL_RES *result = mysql_store_result(connection);
    
-   const unsigned int nbresult = mysql_num_fields(result);
+   const unsigned int nbresult = mysql_num_rows(result);
    VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton(): Got "<<nbresult<<"rows (dt="<<chrono.seconds()<<")", 10)
    mvCOD_Record.clear();
    stringstream s;
@@ -3021,7 +3021,7 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
          VFN_DEBUG_MESSAGE("   Formula: " << p->formula << " a=" << p->a << " b=" << p->b << " c=" << p->c << endl
                            << "   Journal: " << p->journal << " " << p->volume << "(" << p->year << "), " << p->firstpage << ":" << p->authors << endl
                            << "   Title:   " << p->title << endl<<" (dt="<<chrono.seconds()<<")", 10)
-         dlgProgress.Update(4+(ct*100)/nbresult,wxString::Format("Getting result #%ud/%ud, cod:%ld, formula:%s", ct,nbresult,p->file,p->formula));
+         dlgProgress.Update(4+(ct*100)/nbresult,wxString::Format("Getting result #%u/%u, cod:%ld, formula:%s", ct,nbresult,p->file,p->formula));
       } catch (exception &ex)
       {
          VFN_DEBUG_MESSAGE("Error reading record #"<<ct<<endl<<"MySQL ErrNo:"<<mysql_errno(&mysql)<<endl<<"MySQL ErrMsg:"<<mysql_error(&mysql)<<endl<<"MySQL state:"<<mysql_sqlstate(&mysql), 10)
