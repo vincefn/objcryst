@@ -208,7 +208,6 @@
 		BF1DDDE90D228DCF00A3939D /* Fox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Fox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF1DDDEB0D228DCF00A3939D /* FoxCocoa-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "FoxCocoa-Info.plist"; sourceTree = "<group>"; };
 		BF1DE1230D228EA500A3939D /* libfftw3f.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfftw3f.a; path = "../static-libs/lib/libfftw3f.a"; sourceTree = SOURCE_ROOT; };
-		BF1DE1530D2297C300A3939D /* QuickTime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = /System/Library/Frameworks/QuickTime.framework; sourceTree = "<absolute>"; };
 		BF26F598089306500008175B /* Fox.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = Fox.icns; path = src/Fox.icns; sourceTree = "<group>"; };
 		BF3611180BD6E30F000C0EE9 /* AGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AGL.framework; path = ../../../../../System/Library/Frameworks/AGL.framework; sourceTree = SOURCE_ROOT; };
 		BF36111A0BD6E326000C0EE9 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = ../../../../../System/Library/Frameworks/Carbon.framework; sourceTree = SOURCE_ROOT; };
@@ -2075,7 +2074,6 @@
 		BFFCCB4F089028D300044EBA = {
 			isa = PBXGroup;
 			children = (
-				BF1DE1530D2297C300A3939D /* QuickTime.framework */,
 				BFF7D0BF1478047800799F7A /* libwx_osx_cocoau_gl-3.0.a */,
 				BFF7D0C01478047800799F7A /* libwx_osx_cocoau-3.0.a */,
 				BFF7D0C11478047800799F7A /* libwxjpeg-3.0.a */,
