@@ -1555,12 +1555,12 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
          menuFile->Append(MENU_FILE_LOAD, _T("&Open .xml or .cif\tCtrl-O"), _T("Open Fox (.xml, .xml.gz) or CIF file"));
          menuFile->Append(MENU_FILE_CLOSE, _T("Close\tCtrl-W"), _T("Close all"));
          menuFile->Append(MENU_FILE_SAVE, _T("&Save\tCtrl-S"), _T("Save Everything..."));
-         menuFile->Append(MENU_FILE_QUIT, _T("E&xit\tCtrl-Q"), _T("Quit "));
+         menuFile->Append(MENU_FILE_QUIT, _T("Exit\tCtrl-Q"), _T("Quit "));
          menuFile->AppendSeparator();
          menuFile->Append(MENU_FILE_BROWSE, _T("&Browse .xml, .xml.gz or .cif files...\tCtrl-B"), _T("Browse .xml, .xml.gz or .cif files..."));
       
       wxMenu *objectMenu = new wxMenu(_T(""), wxMENU_TEAROFF);
-         objectMenu->Append(MENU_OBJECT_CREATE_CRYSTAL, _T("New Crystal"),
+         objectMenu->Append(MENU_OBJECT_CREATE_CRYSTAL, _T("&New Crystal\tCtrl-N"),
                            _T("Add a new Crystal structure"));
          objectMenu->Append(MENU_OBJECT_CREATE_POWDERSPECTRUM, _T("New PowderPattern"),
                            _T("Add a new PowderPattern Object"));
@@ -1584,16 +1584,16 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
          helpMenu->Append(MENU_HELP_UPDATE, _T("Check for Updates"), _T("Check for a newer version of Fox"));
       #ifdef __FOX_COD__
       wxMenu *codMenu = new wxMenu;
-         codMenu->Append(MENU_COD,_T("Cryst. Open Database"));
+         codMenu->Append(MENU_COD,_T("Cryst. Open &Database\tCtrl-D"),_T("Search structures on the Crystallographic Open Database (COD)"));
       #endif
       wxMenuBar *menuBar = new wxMenuBar();
          menuBar->Append(menuFile,  _T("&File"));
          menuBar->Append(objectMenu,_T("&Objects"));
       #ifdef __FOX_COD__
-         menuBar->Append(codMenu,_T("&COD"));
+         menuBar->Append(codMenu,_T("COD"));
       #endif
          //FoxGrid/////////////////////////////
-         menuBar->Append(gridMenu,_T("&FOXGrid"));
+         menuBar->Append(gridMenu,_T("FOX&Grid"));
          menuBar->Append(prefsMenu, _T("&Preferences"));
          menuBar->Append(helpMenu,  _T("&Help"));
          #ifdef __DEBUG__
@@ -2868,7 +2868,7 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
    query<<"order by formula limit 500";
    
    VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton():Query="<<query.str()<<" (dt="<<chrono.seconds()<<")", 10)
-   if(mpCODFrame!=0) mpCODFrame->Close();
+   if( (mpCODFrame!=0)  && (wxWindow::FindWindowById(ID_FOX_COD_LIST)!=NULL)) mpCODFrame->Close();
 #ifdef OTL_ODBC
    otl_connect db;
    otl_connect::otl_initialize();
