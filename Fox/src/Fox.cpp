@@ -2549,6 +2549,12 @@ void WXCrystMainFrame::OnSize(wxSizeEvent &event)
 
 void WXCrystMainFrame::OnCOD(wxCommandEvent &event)
 {
+   for(unsigned int i=0;i<mpNotebook->GetPageCount();i++)
+      if(mpNotebook->GetPageText(i)=="COD")
+      {
+         mpNotebook->SetSelection(i);
+         return;
+      }
    WXCrystScrolledWindow *pWinCOD = new WXCrystScrolledWindow(mpNotebook);
    mpNotebook->AddPage(pWinCOD,_T("COD"),true);
    wxBoxSizer *topsizer=new wxBoxSizer(wxVERTICAL);
