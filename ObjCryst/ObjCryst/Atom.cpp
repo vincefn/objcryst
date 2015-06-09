@@ -430,15 +430,18 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
                this->GetCrystal().FractionalToOrthonormalCoords(x,y,z);
                glPushMatrix();
                   glTranslatef(x*en, y, z);
-                  if((displayNames)&&(fout>0.99))
+                  if(displayNames)
                   {
-                     glMaterialfv(GL_FRONT, GL_AMBIENT,   colour0); 
-                     glMaterialfv(GL_FRONT, GL_DIFFUSE,   colour0); 
-                     glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0); 
-                     glMaterialfv(GL_FRONT, GL_EMISSION,  colourChar); 
-                     glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
-                     glRasterPos3f(0,0,0);
-                     crystGLPrint(this->GetName());
+                     if(fout>0.99)
+                     {
+                        glMaterialfv(GL_FRONT, GL_AMBIENT,   colour0);
+                        glMaterialfv(GL_FRONT, GL_DIFFUSE,   colour0);
+                        glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0);
+                        glMaterialfv(GL_FRONT, GL_EMISSION,  colourChar);
+                        glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
+                        glRasterPos3f(0,0,0);
+                        crystGLPrint(this->GetName());
+                     }
                   }
                   else
                   {
