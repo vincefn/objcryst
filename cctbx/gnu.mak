@@ -23,7 +23,7 @@ endif
 	# Copy boost from the cctbx bundle
 	rsync -ar ../cctbx_sources/boost/boost --exclude="accumulators/" --exclude="archive/" --exclude="asio/" --exclude="asign/" --exclude="bimap/" --exclude="bind/" --exclude="circular_buffer/" --exclude="concept_check/" --exclude="dynamic_bitset/" --exclude="filesystem/" --exclude="flyweight/" --exclude="function/" --exclude="function_types/"  --exclude="gil/" --exclude="graph/" --exclude="interprocess/" --exclude="intrusive/" --exclude="iostreams/" --exclude="lambda/" --exclude="logic/" --exclude="mpi/" --exclude="parameter/" --exclude="pending/" --exclude="pool/" --exclude="program_options/" --exclude="property_tree/" --exclude="proto/" --exclude="ptr_container/" --exclude="python/" --exclude="random/" --exclude="regex/" --exclude="serialization/" --exclude="signals/" --exclude="spirit/" --exclude="statechart/" --exclude="system/" --exclude="test/" --exclude="thread/" --exclude="units/" --exclude="unordered/" --exclude="wave/" --exclude="xpressive/" --filter="+ */" --filter="+ *.hpp"  --filter="+ *.ipp" include/
 	cd .. && tar -cjf cctbx.tar.bz2 cctbx
-	#rm -Rf ../cctbx_install_script.csh ../cctbx_sources ../cctbx_build
+	rm -Rf ../cctbx_install_script.csh ../cctbx_sources ../cctbx_build
 
 
 #Boost library - if we want to use a more recent version from boost.org
