@@ -4406,12 +4406,15 @@ void WXGLCrystalCanvas::BuildGLFont()
       HFONT   oldfont;
       wxPaintDC dc(this);
       HDC hDC = (HDC)dc.GetHDC();
+	  // Use 3mm font size
+	  wxSize s = dc.GetPPI();
+	  int height = int(round(3 * (s.GetHeight() + s.GetWidth()) / 2 / 25.4));
       mGLFontDisplayListBase = 100;
-      font = CreateFont(-12,                       // Height of font
+      font = CreateFont(-height,                       // Height of font
                         0,                         // Width of font
                         0,                         // Angle of escapement
                         0,                         // Orientation angle
-                        FW_BOLD,                   // Font weight
+                        FW_NORMAL,                   // Font weight
                         FALSE,                     // Italic
                         FALSE,                     // Underline
                         FALSE,                     // Strikeout
