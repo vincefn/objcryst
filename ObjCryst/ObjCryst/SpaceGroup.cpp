@@ -41,6 +41,22 @@
 namespace ObjCryst
 {
 
+#include "ObjCryst/Quirks/VFNDebug.h"
+
+// We need to force the C locale when using cctbx (when interpreting xyz strings)
+tmp_C_Numeric_locale::tmp_C_Numeric_locale()
+{
+   char *old;
+   old=setlocale(LC_NUMERIC,NULL);
+   mLocale=old;
+   setlocale(LC_NUMERIC,"C");
+}
+   
+tmp_C_Numeric_locale::~tmp_C_Numeric_locale()
+{
+   setlocale(LC_NUMERIC,mLocale.c_str());
+}
+
 ////////////////////////////////////////////////////////////////////////
 //
 //   AsymmetricUnit
@@ -71,6 +87,7 @@ AsymmetricUnit::~AsymmetricUnit()
 void AsymmetricUnit::SetSpaceGroup(const SpaceGroup &spg)
 {
    VFN_DEBUG_MESSAGE("AsymmetricUnit::SetSpaceGroup(SpGroup)",5)
+   tmp_C_Numeric_locale tmploc;
    # if 0
    TAU_PROFILE("(AsymmetricUnit::SetSpaceGroup)","void (SpaceGroup)",TAU_DEFAULT);
    mXmin=0.;
@@ -564,57 +581,68 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
       mpCCTbxSpaceGroup=0;
       mpCCTbxSpaceGroup = new cctbx::sgtbx::space_group(sgs);
    }
-   catch(cctbx::error)
+   catch(exception &ex1)
    {
       try
       {
-         (*fpObjCrystInformUser)("Failed lookup symbol, try Hall symbol ?");
+         (*fpObjCrystInformUser)("Failed lookup symbol ! try Hall symbol ?");
          if(mpCCTbxSpaceGroup!=0) delete mpCCTbxSpaceGroup;
          mpCCTbxSpaceGroup=0;
          mpCCTbxSpaceGroup = new cctbx::sgtbx::space_group(spgId);
       }
-      catch(cctbx::error)
+      catch(exception &ex2)
       {
          (*fpObjCrystInformUser)("Could not interpret Spacegroup Symbol:"+spgId);
          this->InitSpaceGroup(mId);
-         VFN_DEBUG_EXIT("SpaceGroup::InitSpaceGroup():"<<spgId,8)
+         VFN_DEBUG_EXIT("SpaceGroup::InitSpaceGroup() could not interpret spacegroup:"<<spgId<<":"<<ex1.what()<<":"<<ex2.what(),8)
          return;
       }
    }
    
+   try
+   {
+      //Inversion center
+      if(this->GetCCTbxSpg().f_inv() == 2)
+      {
+         mHasInversionCenter=true ;
+         if( (this->GetCCTbxSpg().inv_t()[0] !=0) ||
+            (this->GetCCTbxSpg().inv_t()[1] !=0) ||
+            (this->GetCCTbxSpg().inv_t()[2] !=0)   ) mIsInversionCenterAtOrigin=false;
+         else mIsInversionCenterAtOrigin=true;
+      }
+      else
+      {
+         mHasInversionCenter=false ;
+         mIsInversionCenterAtOrigin=true;
+      }
       
-   //Inversion center
-   if(this->GetCCTbxSpg().f_inv() == 2)
-   {
-      mHasInversionCenter=true ;
-      if( (this->GetCCTbxSpg().inv_t()[0] !=0) || 
-          (this->GetCCTbxSpg().inv_t()[1] !=0) || 
-          (this->GetCCTbxSpg().inv_t()[2] !=0)   ) mIsInversionCenterAtOrigin=false;
-      else mIsInversionCenterAtOrigin=true;
+      //initialize asymmetric unit
+      mAsymmetricUnit.SetSpaceGroup(*this);
+      
+      mUniqueAxisId=0;
+      if(  (this->GetCCTbxSpg().type().number() >2)
+         &&(this->GetCCTbxSpg().type().number() <16))
+      {
+         string ch=this->GetCCTbxSpg().type().hall_symbol();
+         if(ch.find("x")!=std::string::npos) {mUniqueAxisId=0;}
+         else
+            if(ch.find("y")!=std::string::npos) {mUniqueAxisId=1;}
+            else mUniqueAxisId=2;
+      }
+      
+      mNbSym    =this->GetCCTbxSpg().n_smx();
+      mNbTrans  =this->GetCCTbxSpg().n_ltr();
+      mSpgNumber=this->GetCCTbxSpg().type().number();
+      
+      mExtension='\0'; //this->GetCCTbxSpg().type().extension();
    }
-   else
+   catch(exception &ex)
    {
-      mHasInversionCenter=false ;
-      mIsInversionCenterAtOrigin=true;
-   }   
-   
-   //initialize asymmetric unit
-   mAsymmetricUnit.SetSpaceGroup(*this);
-   
-   mUniqueAxisId=0;
-   if(  (this->GetCCTbxSpg().match_tabulated_settings().number() >2) 
-      &&(this->GetCCTbxSpg().match_tabulated_settings().number() <16))
-   {
-      string ch=this->GetCCTbxSpg().match_tabulated_settings().hall();
-      if(ch.find("x")!=std::string::npos) {mUniqueAxisId=0;}
-      else 
-        if(ch.find("y")!=std::string::npos) {mUniqueAxisId=1;}
-        else mUniqueAxisId=2;
+      (*fpObjCrystInformUser)("Error initializing spacegroup (Incorrect Hall symbol ?):"+spgId);
+      this->InitSpaceGroup(mId);
+      VFN_DEBUG_EXIT("SpaceGroup::InitSpaceGroup() could not interpret spacegroup:"<<spgId<<":"<<ex.what(),8)
+      return;
    }
-
-   mNbSym    =this->GetCCTbxSpg().n_smx();
-   mNbTrans  =this->GetCCTbxSpg().n_ltr();
-   mSpgNumber=this->GetCCTbxSpg().match_tabulated_settings().number();
    
    mExtension=this->GetCCTbxSpg().match_tabulated_settings().extension();
    

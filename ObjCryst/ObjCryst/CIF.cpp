@@ -2,7 +2,9 @@
 #include <cmath>
 
 #include "cctbx/sgtbx/space_group.h"
+#include "cctbx/sgtbx/space_group_type.h"
 #include "cctbx/miller/sym_equiv.h"
+#include "cctbx/sgtbx/brick.h"
 
 #include "ObjCryst/ObjCryst/CIF.h"
 #include "ObjCryst/ObjCryst/Crystal.h"
@@ -75,7 +77,7 @@ void CIFData::ExtractSpacegroup(const bool verbose)
    positem=mvItem.find("_space_group_IT_number");
    if(positem!=mvItem.end())
    {
-      mSpacegroupNumberIT=CIFNumeric2Int(positem->second);
+      mSpacegroupNumberIT=positem->second;//CIFNumeric2Int()
       if(verbose) cout<<"Found spacegroup IT number:"<<mSpacegroupNumberIT<<endl;
    }
    else
@@ -83,7 +85,7 @@ void CIFData::ExtractSpacegroup(const bool verbose)
       positem=mvItem.find("_symmetry_Int_Tables_number");
       if(positem!=mvItem.end())
       {
-         mSpacegroupNumberIT=CIFNumeric2Int(positem->second);
+         mSpacegroupNumberIT=positem->second;//CIFNumeric2Int()
          if(verbose) cout<<"Found spacegroup IT number (with OBSOLETE CIF #1.0 TAG):"<<mSpacegroupNumberIT<<endl;
       }
    }
@@ -1011,14 +1013,77 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
          //data cif files including cell parameters
          if((pos->second.mvAtom.size()==0) && (gCrystalRegistry.GetNb()>0)) continue;
          // Use unambigous Hall symbol if present, otherwise try HM symbol or spg number
-         string spg=pos->second.mSpacegroupSymbolHall;
-         if(spg.size()<2) spg=pos->second.mSpacegroupHermannMauguin;
-         if(spg.size()<2) spg=pos->second.mSpacegroupNumberIT;
-         if(spg.size()<2) spg="P1";
+         string spg;
+         if(pos->second.mSpacegroupSymbolHall!="") try
+         {
+            tmp_C_Numeric_locale tmploc;
+            cctbx::sgtbx::space_group cctbxspg(pos->second.mSpacegroupSymbolHall);
+            cctbxspg.t_den();
+            cctbxspg.n_smx();
+            cctbxspg.n_ltr();
+            cctbxspg.type();
+            cctbxspg.type().number();
+            cctbxspg.type().hall_symbol();
+            cctbxspg.type().lookup_symbol();
+            cctbxspg.match_tabulated_settings().extension();
+            cctbxspg.match_tabulated_settings().hermann_mauguin();
+            cctbxspg.type().universal_hermann_mauguin_symbol();
+            cctbx::sgtbx::brick b(cctbxspg.type());
+            spg=pos->second.mSpacegroupSymbolHall;
+         }
+         catch(exception)
+         {
+            VFN_DEBUG_MESSAGE("CreateCrystalFromCIF(): could not interpret Hall symbol:"<<pos->second.mSpacegroupSymbolHall, 10)
+         }
+         if((spg=="") && (pos->second.mSpacegroupHermannMauguin!="")) try
+         {
+            tmp_C_Numeric_locale tmploc;
+            cctbx::sgtbx::space_group cctbxspg(cctbx::sgtbx::space_group_symbols(pos->second.mSpacegroupHermannMauguin));
+            cctbxspg.t_den();
+            cctbxspg.n_smx();
+            cctbxspg.n_ltr();
+            cctbxspg.type();
+            cctbxspg.type().number();
+            cctbxspg.type().hall_symbol();
+            cctbxspg.type().lookup_symbol();
+            cctbxspg.type().universal_hermann_mauguin_symbol();
+            cctbxspg.match_tabulated_settings().extension();
+            cctbxspg.match_tabulated_settings().hermann_mauguin();
+            cctbx::sgtbx::brick b(cctbxspg.type());
+            spg=pos->second.mSpacegroupHermannMauguin;
+         }
+         catch(exception)
+         {
+            VFN_DEBUG_MESSAGE("CreateCrystalFromCIF(): could not interpret Hermann-Mauguin symbol:"<<pos->second.mSpacegroupHermannMauguin, 10)
+         }
+         if((spg=="") && (pos->second.mSpacegroupNumberIT!=""))
+         try
+         {
+            tmp_C_Numeric_locale tmploc;
+            cctbx::sgtbx::space_group cctbxspg(cctbx::sgtbx::space_group_symbols(pos->second.mSpacegroupNumberIT));
+            cctbxspg.t_den();
+            cctbxspg.n_smx();
+            cctbxspg.n_ltr();
+            cctbxspg.type();
+            cctbxspg.type().number();
+            cctbxspg.type().hall_symbol();
+            cctbxspg.type().lookup_symbol();
+            cctbxspg.type().universal_hermann_mauguin_symbol();
+            cctbxspg.match_tabulated_settings().extension();
+            cctbxspg.match_tabulated_settings().hermann_mauguin();
+            cctbx::sgtbx::brick b(cctbxspg.type());
+            spg=pos->second.mSpacegroupNumberIT;
+         }
+         catch(exception)
+         {
+            VFN_DEBUG_MESSAGE("CreateCrystalFromCIF(): could not interpret spacegroup number (!) :"<<pos->second.mSpacegroupNumberIT, 10)
+         }
+         if(spg=="") spg="P1";
          if(verbose) cout<<"Create crystal with spacegroup: "<<spg
              <<" / "<<pos->second.mSpacegroupHermannMauguin
              <<" / "<<pos->second.mSpacegroupSymbolHall
              <<" / "<<pos->second.mSpacegroupNumberIT
+             <<"-> "<<spg
              <<endl;
          (*fpObjCrystInformUser)("CIF: Create Crystal=");
          pCryst=new Crystal(pos->second.mvLatticePar[0],pos->second.mvLatticePar[1],pos->second.mvLatticePar[2],
@@ -1029,6 +1094,7 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
             &&checkSymAsXYZ)
          {// Could not use a Hall symbol, but we have a list of symmetry_equiv_pos_as_xyz,
           // so check we have used the best possible origin
+            tmp_C_Numeric_locale tmploc;
             static vector<string> origin_list;
             if(origin_list.size()==0)
             {//ugly ?
