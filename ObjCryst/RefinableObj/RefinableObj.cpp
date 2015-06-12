@@ -906,7 +906,14 @@ template<class T> void ObjRegistry<T>::Register(T &obj)
 
 template<class T> void ObjRegistry<T>::DeRegister(T &obj)
 {
-   VFN_DEBUG_ENTRY("ObjRegistry("<<mName<<")::Deregister(&obj)",2)
+   VFN_DEBUG_ENTRY("ObjRegistry("<<mName<<")::Deregister(&obj)"<<mvpRegistry.size(),2)
+   if (mvpRegistry.size() == 0)
+   {// This may happen if an object is deleted several times due to inherited destructors 
+    // :TODO: make sure it does not happen, while making sure WXGet() below 
+    //is not pure virtual because the child destructor has already done its job...
+      VFN_DEBUG_EXIT("ObjRegistry(" << mName << ")::Deregister(&obj): EMPTY registry", 2)
+      return;
+   }
    //this->Print();
    typename vector<T*>::iterator pos=find(mvpRegistry.begin(),mvpRegistry.end(),&obj);
    if(pos==mvpRegistry.end())
