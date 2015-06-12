@@ -910,17 +910,33 @@ int WXCrystal::GetCrystalGLDisplayList(const bool atomName)const
    return mCrystalGLDisplayList;
 }
 
+class WXGLCrystalCanvasFrame :public wxFrame
+{
+   public:
+	  WXGLCrystalCanvasFrame(wxWindow *parent, wxWindowID id, const wxString& title, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE, const wxString& name = wxFrameNameStr) :
+	  wxFrame(parent, id, title, pos, size, style, name)
+	  {}
+     ~WXGLCrystalCanvasFrame()
+     {
+        gvWindowPosition[ID_GLCRYSTAL_WINDOW] = make_pair(this->GetScreenPosition(), this->GetSize());
+        //VFN_DEBUG_MESSAGE("~ @(" << gvWindowPosition[ID_GLCRYSTAL_WINDOW].first.x << "," << gvWindowPosition[ID_GLCRYSTAL_WINDOW].first.y << ")",10)
+     }
+};
+
 void WXCrystal::OnMenuCrystalGL(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXCrystal::OnMenuCrystalGL()",6)
    if(mpCrystalGL!=0) return;
    wxFrame* frame;
-   if(gvWindowPosition.count(ID_GLCRYSTAL_WINDOW))
-     frame= new wxFrame(this,ID_GLCRYSTAL_WINDOW, wxString::FromAscii(mpCrystal->GetName().c_str()),
-                        gvWindowPosition[ID_GLCRYSTAL_WINDOW].first,
-                        gvWindowPosition[ID_GLCRYSTAL_WINDOW].second,wxCLOSE_BOX|wxRESIZE_BORDER|wxCAPTION|wxFRAME_FLOAT_ON_PARENT);
+   if (gvWindowPosition.count(ID_GLCRYSTAL_WINDOW))
+   {
+	   //cout << "WXCrystal::OnMenuCrystalGL():@(" << gvWindowPosition[ID_GLCRYSTAL_WINDOW].first.x << "," << gvWindowPosition[ID_GLCRYSTAL_WINDOW].first.y << ")" << endl;
+	   frame = new WXGLCrystalCanvasFrame(this, ID_GLCRYSTAL_WINDOW, wxString::FromAscii(mpCrystal->GetName().c_str()),
+		   gvWindowPosition[ID_GLCRYSTAL_WINDOW].first,
+		   gvWindowPosition[ID_GLCRYSTAL_WINDOW].second, wxCLOSE_BOX | wxRESIZE_BORDER | wxCAPTION | wxFRAME_FLOAT_ON_PARENT);
+   }
    else
-     frame= new wxFrame(this,ID_GLCRYSTAL_WINDOW, wxString::FromAscii(mpCrystal->GetName().c_str()),
+	   frame = new WXGLCrystalCanvasFrame(this, ID_GLCRYSTAL_WINDOW, wxString::FromAscii(mpCrystal->GetName().c_str()),
                         wxDefaultPosition,wxSize(400,400),wxCLOSE_BOX|wxRESIZE_BORDER|wxCAPTION|wxFRAME_FLOAT_ON_PARENT);
 
    mpCrystalGL=new WXGLCrystalCanvas(this,frame,-1);
@@ -3015,18 +3031,13 @@ mIsGLFontBuilt(false),mGLFontDisplayListBase(0),mpFourierMapListWin(0)
 }
 
 WXGLCrystalCanvas::~WXGLCrystalCanvas()
-{
+{	
    mpWXCrystal->NotifyCrystalGLDelete();
    #ifndef HAVE_GLUT
    this->DeleteGLFont();
    #endif
-/*   cout<<"WXGLCrystalCanvas:Store window pos&size:"<<this->GetParent()->GetId()
-       <<":"<<this->GetParent()->GetPosition().x<<","
-       <<":"<<this->GetParent()->GetPosition().y<<"-"
-       <<":"<<this->GetParent()->GetSize().x<<","
-       <<":"<<this->GetParent()->GetSize().y<<endl;*/
-   gvWindowPosition[this->GetParent()->GetId()]=make_pair(this->GetParent()->GetPosition(),this->GetParent()->GetSize());
-   sGLCrystalConfig.mDist=mDist;
+   // The frame position is saved in ~WXGLCrystalCanvasFrame() to store position before the frame decoration are destroyed
+   sGLCrystalConfig.mDist = mDist;
    sGLCrystalConfig.mX0=mX0;
    sGLCrystalConfig.mY0=mY0;
    sGLCrystalConfig.mZ0=mZ0;

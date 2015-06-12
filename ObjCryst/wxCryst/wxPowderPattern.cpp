@@ -690,6 +690,18 @@ void WXPowderPattern::OnMenuAddCompCryst(wxCommandEvent & WXUNUSED(event))
    VFN_DEBUG_EXIT("WXPowderPattern::OnMenuAddCompCryst()",10)
 }
 
+class WXPowderPatternGraphFrame :public wxFrame
+{
+public:
+   WXPowderPatternGraphFrame(wxWindow *parent, wxWindowID id, const wxString& title, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE, const wxString& name = wxFrameNameStr) :
+      wxFrame(parent, id, title, pos, size, style, name)
+   {}
+   ~WXPowderPatternGraphFrame()
+   {
+      gvWindowPosition[ID_POWDER_GRAPH_WIN] = make_pair(this->GetScreenPosition(), this->GetSize());
+   }
+};
+
 void WXPowderPattern::OnMenuShowGraph(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuShowGraph()"<<mpGraph,6)
@@ -699,11 +711,11 @@ void WXPowderPattern::OnMenuShowGraph(wxCommandEvent & WXUNUSED(event))
    mpPowderPattern->Prepare();
    wxFrame* frame;
    if(gvWindowPosition.count(ID_POWDER_GRAPH_WIN))
-     frame= new wxFrame(this,ID_POWDER_GRAPH_WIN, wxString::FromAscii(mpPowderPattern->GetName().c_str()),
+      frame = new WXPowderPatternGraphFrame(this, ID_POWDER_GRAPH_WIN, wxString::FromAscii(mpPowderPattern->GetName().c_str()),
                         gvWindowPosition[ID_POWDER_GRAPH_WIN].first,
                         gvWindowPosition[ID_POWDER_GRAPH_WIN].second,wxCLOSE_BOX|wxRESIZE_BORDER|wxCAPTION|wxFRAME_FLOAT_ON_PARENT);
    else
-     frame= new wxFrame(this,ID_POWDER_GRAPH_WIN, wxString::FromAscii(mpPowderPattern->GetName().c_str()),
+      frame = new WXPowderPatternGraphFrame(this, ID_POWDER_GRAPH_WIN, wxString::FromAscii(mpPowderPattern->GetName().c_str()),
                         wxDefaultPosition,wxSize(500,300),wxCLOSE_BOX|wxRESIZE_BORDER|wxCAPTION|wxFRAME_FLOAT_ON_PARENT);
    mpGraph = new WXPowderPatternGraph(frame,this);
    
@@ -1125,7 +1137,6 @@ mIsDragging(false),mDisplayLabel(true),mDisplayPeak(true)
 WXPowderPatternGraph::~WXPowderPatternGraph()
 {
    mpPattern->NotifyDeleteGraph();
-   gvWindowPosition[this->GetParent()->GetId()]=make_pair(this->GetParent()->GetPosition(),this->GetParent()->GetSize());
 }
 
 void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
