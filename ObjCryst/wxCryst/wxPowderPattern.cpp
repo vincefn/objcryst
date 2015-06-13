@@ -1381,7 +1381,7 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
       int loop=1;
       REAL yr;
       list<list<pair<const REAL ,const string > > >::const_iterator comp=vLabel.begin();
-      unsigned int pen=(this->GetSize().GetHeight()/8)%14;
+      unsigned int pen=0;
       for(unsigned int i=0;i<mpPattern->GetPowderPattern().GetNbPowderPatternComponent();++i)
       {
          PowderPatternDiffraction *pDiff;
