@@ -623,7 +623,7 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
       if(  (this->GetCCTbxSpg().type().number() >2)
          &&(this->GetCCTbxSpg().type().number() <16))
       {
-         string ch=this->GetCCTbxSpg().type().hall_symbol();
+         string ch=this->GetCCTbxSpg().match_tabulated_settings().hall();
          if(ch.find("x")!=std::string::npos) {mUniqueAxisId=0;}
          else
             if(ch.find("y")!=std::string::npos) {mUniqueAxisId=1;}
@@ -678,7 +678,7 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
    if(mExtension=='R') extension=" (Using Rhombohedral cell)";
    if(mExtension=='H') extension=" (Using Hexagonal cell)";
    #ifdef __DEBUG__
-  (*fpObjCrystInformUser)("Initialized spacegroup: "+spgId+extension);
+  (*fpObjCrystInformUser)("Initialized spacegroup, HM: "+spgId+extension+" , Hall:"+this->GetCCTbxSpg().type().hall_symbol());
    #endif
    VFN_DEBUG_EXIT("SpaceGroup::InitSpaceGroup():"<<spgId,8)
 }
