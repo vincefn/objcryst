@@ -58,7 +58,7 @@ float InputFloat(istream &is, const char endchar)
 {
    float f;
    // Get rid of spaces, returns etc...
-   while(0==isgraph(is.peek())) cout<<is.get();
+   while(0==isgraph(is.peek())) is.get();
    stringstream tmp;
    char c;
    while((endchar!=is.peek())&&(' '!=is.peek()))
