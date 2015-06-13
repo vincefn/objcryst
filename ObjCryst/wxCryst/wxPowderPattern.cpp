@@ -1380,21 +1380,39 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
       wxCoord tmpW,tmpH;
       int loop=1;
       REAL yr;
-      list<list<pair<const REAL ,const string > > >::const_iterator comp;
-      list<pair<const REAL ,const string > >::const_iterator pos;
-      unsigned int pen=0;
-      for(comp=vLabel.begin();comp!=vLabel.end();++comp)
+      list<list<pair<const REAL ,const string > > >::const_iterator comp=vLabel.begin();
+      unsigned int pen=(this->GetSize().GetHeight()/8)%14;
+      for(unsigned int i=0;i<mpPattern->GetPowderPattern().GetNbPowderPatternComponent();++i)
       {
-         switch(pen++)
+         PowderPatternDiffraction *pDiff;
+         if(mpPattern->GetPowderPattern().GetPowderPatternComponent(i).GetClassName()=="PowderPatternDiffraction")
          {
-            case 0: dc.SetPen(*wxBLACK_PEN);dc.SetTextForeground(*wxBLACK);break;
-            case 1: dc.SetPen(bluePen );dc.SetTextForeground(blue);break;
-            case 2: dc.SetPen(*wxGREEN_PEN);dc.SetTextForeground(*wxGREEN);break;
-            case 3: dc.SetPen(*wxRED_PEN  );dc.SetTextForeground(*wxRED  );break;
-            default:dc.SetPen(*wxGREY_PEN );dc.SetTextForeground(*wxLIGHT_GREY );break;
+            pDiff=dynamic_cast<PowderPatternDiffraction*> (&(mpPattern->GetPowderPattern().GetPowderPatternComponent(i)));
+         }
+         else
+         {
+            ++comp;
+            continue;
+         }
+         switch(pen)
+         {
+            case 0 : dc.SetPen(wxPen(wxColour(  0,  0,  0)));dc.SetTextForeground(wxColour(  0,  0,  0));break;
+            case 1 : dc.SetPen(wxPen(wxColour(  0,  0,128)));dc.SetTextForeground(wxColour(  0,  0,128));break;
+            case 2 : dc.SetPen(wxPen(wxColour(  0,128,  0)));dc.SetTextForeground(wxColour(  0,128,  0));break;
+            case 3 : dc.SetPen(wxPen(wxColour(128,  0,  0)));dc.SetTextForeground(wxColour(128,  0,  0));break;
+            case 4 : dc.SetPen(wxPen(wxColour(  0,128,128)));dc.SetTextForeground(wxColour(  0,128,128));break;
+            case 5 : dc.SetPen(wxPen(wxColour(128,  0,128)));dc.SetTextForeground(wxColour(128,  0,128));break;
+            case 6 : dc.SetPen(wxPen(wxColour(128, 64,  0)));dc.SetTextForeground(wxColour(128, 64,  0));break;
+            case 7 : dc.SetPen(wxPen(wxColour(  0,  0,255)));dc.SetTextForeground(wxColour(  0,  0,255));break;
+            case 8 : dc.SetPen(wxPen(wxColour(  0,255,  0)));dc.SetTextForeground(wxColour(  0,255,  0));break;
+            case 9 : dc.SetPen(wxPen(wxColour(255,  0,  0)));dc.SetTextForeground(wxColour(255,  0,  0));break;
+            case 10: dc.SetPen(wxPen(wxColour(  0,255,255)));dc.SetTextForeground(wxColour(  0,255,255));break;
+            case 11: dc.SetPen(wxPen(wxColour(255,  0,255)));dc.SetTextForeground(wxColour(255,  0,255));break;
+            case 12: dc.SetPen(wxPen(wxColour(255,128,  0)));dc.SetTextForeground(wxColour(255,128,  0));break;
+            default: dc.SetPen(wxPen(wxColour(128,128,128)));dc.SetTextForeground(wxColour(128,128,128));break;
          }
          unsigned long ct=0;
-         for(pos=comp->begin();pos!=comp->end();++pos)
+         for(list<pair<const REAL ,const string > >::const_iterator pos=comp->begin();pos!=comp->end();++pos)
          {
             REAL point=pos->first;
             if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
@@ -1422,32 +1440,14 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
                if(loop==5) loop=1;
             }
          }
+         // Draw crystal names, Indicate Le Bail mode
+         if(pDiff->GetExtractionMode()) fontInfo.Printf(wxString::FromAscii((pDiff->GetCrystal().GetName()+" (LE BAIL MODE)").c_str()));
+         else fontInfo.Printf(wxString::FromAscii(pDiff->GetCrystal().GetName().c_str()));
+         wxCoord tmpW,tmpH;
+         dc.GetTextExtent(fontInfo, &tmpW, &tmpH);
+         dc.DrawText(fontInfo,(wxCoord)mMargin*3,(wxCoord)(mMargin+tmpH*(pen)));
+         ++comp;++pen;
       }
-   }
-   // Draw crystal names, Indicate Le Bail mode
-   unsigned int dec=0;
-   for(unsigned int i=0;i<mpPattern->GetPowderPattern().GetNbPowderPatternComponent();++i)
-   {
-      PowderPatternDiffraction *pDiff;
-      if(mpPattern->GetPowderPattern().GetPowderPatternComponent(i).GetClassName()=="PowderPatternDiffraction")
-      {
-         pDiff=dynamic_cast<PowderPatternDiffraction*> (&(mpPattern->GetPowderPattern().GetPowderPatternComponent(i)));
-      }
-      else continue;
-      wxCoord tmpW,tmpH;
-      switch(i)
-      {
-        case 0: dc.SetPen(*wxBLACK_PEN);dc.SetTextForeground(*wxBLACK);break;
-        case 1: dc.SetPen(bluePen);dc.SetTextForeground(blue);break;
-        case 2: dc.SetPen(*wxGREEN_PEN);dc.SetTextForeground(*wxGREEN);break;
-        case 3: dc.SetPen(*wxRED_PEN  );dc.SetTextForeground(*wxRED  );break;
-        default:dc.SetPen(*wxGREY_PEN );dc.SetTextForeground(*wxLIGHT_GREY );break;
-      }
-      if(pDiff->GetExtractionMode()) fontInfo.Printf(wxString::FromAscii((pDiff->GetCrystal().GetName()+" (LE BAIL MODE)").c_str()));
-      else fontInfo.Printf(wxString::FromAscii(pDiff->GetCrystal().GetName().c_str()));
-      dc.GetTextExtent(fontInfo, &tmpW, &tmpH);
-      dc.DrawText(fontInfo,(wxCoord)mMargin*3,(wxCoord)(mMargin+tmpH*(dec++)));
-      //cout<<"Label("<<pDiff->GetCrystal().GetName()<<"):"<<mMargin*3<<","<<(height-mMargin)-tmpH*(i)-10<<endl;
    }
    mMutex.Unlock();
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():End",5)
