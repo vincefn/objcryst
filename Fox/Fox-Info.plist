@@ -28,7 +28,8 @@
 			<key>CFBundleTypeExtensions</key>
 			<array>
 				<string>xml</string>
-				<string>xml.gz</string>
+				<string>gz</string>
+				<string>xmlgz</string>
 			</array>
 			<key>CFBundleTypeIconFile</key>
 			<string>Fox.icns</string>

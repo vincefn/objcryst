@@ -918,26 +918,30 @@ int main (int argc, char *argv[])
               };
             }
             else
-              if(name.size()>7)
-                  if(name.Mid(name.size()-7)==wxString(_T(".xml.gz")))
-                  {//compressed file
-                      wxFileInputStream is(name);
-                      wxZlibInputStream zstream(is);
-                      stringstream sst;
-                      while (!zstream.Eof()) sst<<(char)zstream.GetC();
-                      try
-                      {
-                         XMLCrystFileLoadAllObject(sst);
-                         #ifdef __WXMAC__
-                         vMacOpenFile_Ignore.insert(name);
-                         #endif
-                      }
-                      catch(const ObjCrystException &except)
-                      {
-                        wxMessageDialog d(NULL,_T("Failed loading file:\n")+name,_T("Error"),wxOK|wxICON_ERROR);
-                        d.ShowModal();
-                      };
+            {
+               bool gz=false;
+               if(name.size()>6) if(name.Mid(name.size()-6)==wxString(_T(".xmlgz"))) gz=true;
+               if(name.size()>7) if(name.Mid(name.size()-7)==wxString(_T(".xml.gz"))) gz=true;
+               if(gz)
+               {//compressed file
+                  wxFileInputStream is(name);
+                  wxZlibInputStream zstream(is);
+                  stringstream sst;
+                  while (!zstream.Eof()) sst<<(char)zstream.GetC();
+                  try
+                  {
+                     XMLCrystFileLoadAllObject(sst);
+                     #ifdef __WXMAC__
+                     vMacOpenFile_Ignore.insert(name);
+                     #endif
                   }
+                  catch(const ObjCrystException &except)
+                  {
+                     wxMessageDialog d(NULL,_T("Failed loading file:\n")+name,_T("Error"),wxOK|wxICON_ERROR);
+                     d.ShowModal();
+                  };
+               }
+            }
          #else
          cout<<"Loading: "<<argv[i]<<endl;
          XMLCrystFileLoadAllObject(argv[i]);
@@ -1405,8 +1409,8 @@ int main (int argc, char *argv[])
    if(!wxConfigBase::Get()->HasEntry(_T("Fox/BOOL/Ask confirmation before exiting Fox")))
       wxConfigBase::Get()->Write(_T("Fox/BOOL/Ask confirmation before exiting Fox"), true);
    
-   if(!wxConfigBase::Get()->HasEntry(_T("Fox/BOOL/Use compressed file format (.xml.gz)")))
-      wxConfigBase::Get()->Write(_T("Fox/BOOL/Use compressed file format (.xml.gz)"), true);
+   if(!wxConfigBase::Get()->HasEntry(_T("Fox/BOOL/Use compressed file format (.xmlgz)")))
+      wxConfigBase::Get()->Write(_T("Fox/BOOL/Use compressed file format (.xmlgz)"), true);
 
    if(!wxConfigBase::Get()->HasEntry(_T("Fox/BOOL/Check for Fox updates")))
       wxConfigBase::Get()->Write(_T("Fox/BOOL/Check for Fox updates"), true);
@@ -1552,12 +1556,12 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
 
    // create a menu bar
       wxMenu *menuFile = new wxMenu;//
-         menuFile->Append(MENU_FILE_LOAD, _T("&Open .xml or .cif\tCtrl-O"), _T("Open Fox (.xml, .xml.gz) or CIF file"));
+         menuFile->Append(MENU_FILE_LOAD, _T("&Open .xml or .cif\tCtrl-O"), _T("Open Fox (.xml, .xmlgz) or CIF file"));
          menuFile->Append(MENU_FILE_CLOSE, _T("Close\tCtrl-W"), _T("Close all"));
          menuFile->Append(MENU_FILE_SAVE, _T("&Save\tCtrl-S"), _T("Save Everything..."));
          menuFile->Append(MENU_FILE_QUIT, _T("Exit\tCtrl-Q"), _T("Quit "));
          menuFile->AppendSeparator();
-         menuFile->Append(MENU_FILE_BROWSE, _T("&Browse .xml, .xml.gz or .cif files...\tCtrl-B"), _T("Browse .xml, .xml.gz or .cif files..."));
+         menuFile->Append(MENU_FILE_BROWSE, _T("&Browse .xml, .xmlgz or .cif files...\tCtrl-B"), _T("Browse .xml, .xmlgz or .cif files..."));
       
       wxMenu *objectMenu = new wxMenu(_T(""), wxMENU_TEAROFF);
          objectMenu->Append(MENU_OBJECT_CREATE_CRYSTAL, _T("&New Crystal\tCtrl-N"),
@@ -1778,7 +1782,7 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
    if(event.GetId()==MENU_FILE_LOAD)
    {
       open= new wxFileDialog(this,_T("Choose File :"),
-                             _T(""),_T(""),_T("FOX files (*.xml,*.xml.gz) or CIF (*.cif)|*.xml;*.xml.gz;*.cif"),wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+                             _T(""),_T(""),_T("FOX files (*.xml,*.xmlgz) or CIF (*.cif)|*.xml;*.xmlgz;*.gz;*.cif"),wxFD_OPEN | wxFD_FILE_MUST_EXIST);
       if(open->ShowModal() != wxID_OK) return;
       wxString name=open->GetPath();
       this->Load(name);
@@ -1837,24 +1841,28 @@ void WXCrystMainFrame::Load(const wxString &filename)
         mpGridWindow->DataLoaded();
       }
       else
-        if(filename.size()>6)
-            if(filename.Mid(filename.size()-6)==wxString(_T("xml.gz")))
-            {//compressed file
-              wxFileInputStream is(filename);
-              wxZlibInputStream zstream(is);
-              stringstream sst;
-              while (!zstream.Eof()) sst<<(char)zstream.GetC();
-              try{XMLCrystFileLoadAllObject(sst);}
-              catch(const ObjCrystException &except)
-              {
-                wxMessageDialog d(this,_T("Failed loading file2:\n")+filename,_T("Error loading file"),wxOK|wxICON_ERROR);
-                d.ShowModal();
-                this->PostSizeEvent();
-                return;
-              };
-              //FoxGrid
-              mpGridWindow->DataLoaded();
-            }
+      {
+         bool gz=false;
+         if(filename.size()>6) if(filename.Mid(filename.size()-6)==wxString(_T("xml.gz"))) gz=true;
+         if(filename.size()>6) if(filename.Mid(filename.size()-6)==wxString(_T(".xmlgz"))) gz=true;
+         if(gz)
+         {//compressed file
+            wxFileInputStream is(filename);
+            wxZlibInputStream zstream(is);
+            stringstream sst;
+            while (!zstream.Eof()) sst<<(char)zstream.GetC();
+            try{XMLCrystFileLoadAllObject(sst);}
+            catch(const ObjCrystException &except)
+            {
+               wxMessageDialog d(this,_T("Failed loading file2:\n")+filename,_T("Error loading file"),wxOK|wxICON_ERROR);
+               d.ShowModal();
+               this->PostSizeEvent();
+               return;
+            };
+            //FoxGrid
+            mpGridWindow->DataLoaded();
+         }
+      }
    this->PostSizeEvent();
 }
 
@@ -2006,18 +2014,18 @@ void WXCrystMainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
 {
    WXCrystValidateAllUserInput();
    bool compressed;
-   wxConfigBase::Get()->Read(_T("Fox/BOOL/Use compressed file format (.xml.gz)"),&compressed);
+   wxConfigBase::Get()->Read(_T("Fox/BOOL/Use compressed file format (.xmlgz)"),&compressed);
    if(compressed)
    {
       wxFileDialog open(this,_T("Choose File to save all objects:"),
-                        _T(""),_T(""),_T("FOX compressed files (*.xml.gz)|*.xml.gz"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+                        _T(""),_T(""),_T("FOX compressed files (*.xmlgz)|*.xmlgz"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
       if(open.ShowModal() != wxID_OK) return;
       wxString name=open.GetPath();
-      if(name.substr(name.size()-7,7)!=_T(".xml.gz"))
+      if(name.substr(name.size()-6,6)!=_T(".xmlgz"))
       {
          cout<<name<<" -> "<<name+_T(".gz")<<endl;
-         if(name.substr(name.size()-4,4)==_T(".xml")) name=name+_T(".gz");
-         else name=name+_T(".xml.gz");
+         if(name.substr(name.size()-4,4)==_T(".xml")) name=name+_T("gz");
+         else name=name+_T(".xmlgz");
       }
       stringstream sst;
       XMLCrystFileSaveGlobal(sst);
@@ -3100,6 +3108,13 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
 
 void WXCrystMainFrame::OnCODSelect(wxGridEvent &ev)
 {
+   // We don't want to get double-click events from other grids
+   if(ev.GetId()!=ID_FOX_COD_LIST)
+   {
+      VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnCODSelect(): wrong wxGrid !", 10)
+      return;
+   }
+   
    std::vector<cod_record>::const_iterator pos=mvCOD_Record.begin();
    for(unsigned int i=ev.GetRow()/3;i>0;i--) pos++;
    wxString cifurl=wxString::Format("http://www.crystallography.net/%ld.cif",pos->file);
