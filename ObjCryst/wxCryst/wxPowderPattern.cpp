@@ -3461,6 +3461,13 @@ void WXPowderPatternBackground::UpdateUI(const bool lock)
    this->WXRefinableObj::UpdateUI(false);
    if(lock) mMutex.Unlock();
 }
+
+bool WXPowderPatternBackground::Enable(bool e)
+{
+   if(0!=mpGridBackgroundPoint) mpGridBackgroundPoint->Enable(e);
+   return this->::wxWindow::Enable(e);
+}
+
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXTexturePhaseMarchDollase
@@ -3789,7 +3796,12 @@ void WXPowderPatternDiffraction::UpdateUI(const bool lock)
    if(lock) mMutex.Unlock();
    this->WXRefinableObj::UpdateUI(lock);
 }
-   
+bool WXPowderPatternDiffraction::Enable(bool e)
+{
+   if(0!=mpGridFrozenLatticePar) mpGridFrozenLatticePar->Enable(e);
+   return this->::wxWindow::Enable(e);
+}
+
 void WXPowderPatternDiffraction::OnChangeProfile(wxCommandEvent & event)
 {
    VFN_DEBUG_ENTRY("WXPowderPatternDiffraction::OnChangeProfile()",6)

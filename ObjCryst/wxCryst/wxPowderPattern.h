@@ -187,6 +187,7 @@ class WXPowderPatternBackground: public WXRefinableObj
       void OnEditGridBackgroundPoint(wxGridEvent &e);
       virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false);
       virtual void UpdateUI(const bool mutexlock=false);
+      virtual bool Enable(bool enable=true);
    private:
       PowderPatternBackground *mpPowderPatternBackground;
       wxGrid *mpGridBackgroundPoint;
@@ -258,6 +259,7 @@ class WXPowderPatternDiffraction: public WXRefinableObj
       void OnChangeProfile(wxCommandEvent & event);
       virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false);
       virtual void UpdateUI(const bool mutexlock=false);
+      virtual bool Enable(bool enable=true);
       /// Perform Le Bail extraction
       void OnLeBail(wxCommandEvent &event);
       /// Freeze lattice parameter, which will not follow anymore the Crystal Unitcell values
