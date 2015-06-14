@@ -41,6 +41,7 @@
 #include <fstream>
 #include <sstream>
 #include <stdio.h>
+#include "boost/format.hpp"
 
 namespace ObjCryst
 {
@@ -67,7 +68,7 @@ ObjRegistry<OptimizationObj> gOptimizationObjRegistry("List of all Optimization 
 
 OptimizationObj::OptimizationObj(const string name):
 mName(name),mSaveFileName("GlobalOptim.save"),
-mNbTrial(0),mBestCost(-1),
+mNbTrialPerRun(10000000),mNbTrial(0),mBestCost(-1),
 mBestParSavedSetIndex(-1),
 mContext(0),
 mIsOptimizing(false),mStopAfterCycle(false),
@@ -293,6 +294,10 @@ void OptimizationObj::EndOptimization()
 {
    for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).EndOptimization();
 }
+
+long& OptimizationObj::NbTrialPerRun() {return mNbTrialPerRun;}
+
+const long& OptimizationObj::NbTrialPerRun() const {return mNbTrialPerRun;}
 
 void OptimizationObj::PrepareRefParList()
 {
@@ -1887,6 +1892,7 @@ void MonteCarloObj::XMLOutput(ostream &os,int indent)const
    for(int i=0;i<indent;i++) os << "  " ;
    XMLCrystTag tag("GlobalOptimObj");
    tag.AddAttribute("Name",this->GetName());
+   tag.AddAttribute("NbTrialPerRun",(boost::format("%d")%(this->NbTrialPerRun())).str());
    
    os <<tag<<endl;
    indent++;
@@ -1947,6 +1953,13 @@ void MonteCarloObj::XMLInput(istream &is,const XMLCrystTag &tagg)
    for(unsigned int i=0;i<tagg.GetNbAttribute();i++)
    {
       if("Name"==tagg.GetAttributeName(i)) this->SetName(tagg.GetAttributeValue(i));
+      if("NbTrialPerRun"==tagg.GetAttributeName(i))
+      {
+         stringstream ss(tagg.GetAttributeValue(i));
+         long v;
+         ss>>v;
+         this->NbTrialPerRun()=v;
+      }
    }
    while(true)
    {

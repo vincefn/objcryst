@@ -78,7 +78,7 @@ class WXGlobalOptimRunThread: public wxThread
       virtual void OnExit();
    private:
       OptimizationObj *mpGlobalOptObj;
-      ///This points to the mNbTrial member in WXOptimizationObj
+      ///This points to OptimizationObj::mNbTrialPerRun
       long *mpNbTrial;
       ///This points to the mNbRun member in WXOptimizationObj
       long *mpNbRun;
@@ -107,8 +107,6 @@ class WXMonteCarloObj: public WXOptimizationObj
    protected:
       /// The algorithm object
       MonteCarloObj *mpMonteCarloObj;
-      /// The number of trials asked by the user
-      long mNbTrial;
       /// The number of cycles
       long mNbRun;
       WXFieldPar<long> *mpWXFieldNbTrial;
