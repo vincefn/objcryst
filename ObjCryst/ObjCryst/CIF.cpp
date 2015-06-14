@@ -1232,13 +1232,13 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
             const float t22=chrono.seconds();
             (*fpObjCrystInformUser)((boost::format("CIF: new Atom: %s (%s) (dt=%6.3fs, Crystal creation=%6.3fs total)") % posat->mLabel % sp->GetName() % (t22-t20) % t22).str());
          }
+         if(oneScatteringPowerPerElement)
+         {
+            for(std::map<ScatteringPower*,std::pair<REAL,unsigned int> >::iterator pos=vElementBiso.begin();pos!=vElementBiso.end();++pos)
+               pos->first->SetBiso(pos->second.first/pos->second.second);
+         }
+         if(connectAtoms) pCryst->ConnectAtoms();
       }
-   if(oneScatteringPowerPerElement)
-   {
-      for(std::map<ScatteringPower*,std::pair<REAL,unsigned int> >::iterator pos=vElementBiso.begin();pos!=vElementBiso.end();++pos)
-         pos->first->SetBiso(pos->second.first/pos->second.second);
-   }
-   if(connectAtoms) pCryst->ConnectAtoms();
    gCrystalRegistry.AutoUpdateUI(true);
    gCrystalRegistry.UpdateUI();
    return pCryst;
