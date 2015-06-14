@@ -1079,7 +1079,7 @@ void ScatteringData::CalcSinThetaLambda()const
    TAU_PROFILE("ScatteringData::CalcSinThetaLambda()","void (bool)",TAU_DEFAULT);
    mSinThetaLambda.resize(mNbRefl);
    
-   const CrystMatrix_REAL bMatrix= mpCrystal->GetBMatrix();
+   const CrystMatrix_REAL bMatrix= this->GetBMatrix();
    mX.resize(this->GetNbRefl());
    mY.resize(this->GetNbRefl());
    mZ.resize(this->GetNbRefl());
@@ -1156,16 +1156,16 @@ void ScatteringData::CalcSinThetaLambda()const
 
 REAL ScatteringData::CalcSinThetaLambda(REAL h, REAL k, REAL l)const
 {
-   const REAL a=mpCrystal->GetLatticePar(0);
-   const REAL b=mpCrystal->GetLatticePar(1);
-   const REAL c=mpCrystal->GetLatticePar(2);
-   const REAL ca=cos(mpCrystal->GetLatticePar(3));
-   const REAL sa=sin(mpCrystal->GetLatticePar(3));
-   const REAL cb=cos(mpCrystal->GetLatticePar(4));
-   const REAL sb=sin(mpCrystal->GetLatticePar(4));
-   const REAL cg=cos(mpCrystal->GetLatticePar(5));
-   const REAL sg=sin(mpCrystal->GetLatticePar(5));
-   return 0.5*sqrt((h*h/(a*a)*sa*sa+k*k/(b*b)*sb*sb+l*l/(c*c)*sg*sg+2*k*l/(b*c)*(cb*cg-ca)+2*l*h/(c*a)*(cg*ca-cb)+2*h*k/(a*b)*(ca*cb-cg))/(1-ca*ca-cb*cb-cg*cg+2*ca*cb*cg));
+   const CrystMatrix_REAL bMatrix= this->GetBMatrix();
+   const REAL x=bMatrix(0,0)*h+bMatrix(0,1)*k+bMatrix(0,2)*l;
+   const REAL y=bMatrix(1,0)*h+bMatrix(1,1)*k+bMatrix(1,2)*l;
+   const REAL z=bMatrix(2,0)*h+bMatrix(2,1)*k+bMatrix(2,2)*l;
+   return sqrt(x*x+y*y+z*z)/2;
+}
+
+const CrystMatrix_REAL& ScatteringData::GetBMatrix() const
+{
+   return this->GetCrystal().GetBMatrix();
 }
 
 void ScatteringData::CalcScattFactor()const

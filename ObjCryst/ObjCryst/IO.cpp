@@ -44,6 +44,7 @@
 #include <fstream>
 #include <sstream>
 #include <cstdlib>
+#include "boost/format.hpp"
 
 //#define USE_BACKGROUND_MAXLIKE_ERROR
 
@@ -1618,6 +1619,20 @@ void PowderPatternDiffraction::XMLOutput(ostream &os,int indent)const
    os <<tag<<endl;
    indent++;
 
+   if(mFreezeLatticePar)
+   {
+      XMLCrystTag t("FrozenLatticePar");
+      t.AddAttribute("a", (boost::format("%f")%mFrozenLatticePar(0)).str() );
+      t.AddAttribute("b", (boost::format("%f")%mFrozenLatticePar(1)).str() );
+      t.AddAttribute("c", (boost::format("%f")%mFrozenLatticePar(2)).str() );
+      t.AddAttribute("alpha", (boost::format("%f")%(mFrozenLatticePar(3)*180/M_PI)).str() );
+      t.AddAttribute("beta" , (boost::format("%f")%(mFrozenLatticePar(4)*180/M_PI)).str() );
+      t.AddAttribute("gamma", (boost::format("%f")%(mFrozenLatticePar(5)*180/M_PI)).str() );
+      t.SetIsEmptyTag(true);
+      for(int i=0;i<indent;i++) os << "  " ;
+      os<<t<<endl;
+   }
+   
    if(mpReflectionProfile!=0) mpReflectionProfile->XMLOutput(os,indent);
 
    this->GetPar(&mGlobalBiso).XMLOutput(os,"globalBiso",indent);
@@ -1872,6 +1887,61 @@ void PowderPatternDiffraction::XMLInput(istream &is,const XMLCrystTag &tagg)
       {// Le Bail data
          if(mpLeBailData==0) mpLeBailData=new DiffractionDataSingleCrystal(this->GetCrystal(),false);
          mpLeBailData->XMLInput(is,tag);
+      }
+      if("FrozenLatticePar"==tag.GetName())
+      {
+         this->FreezeLatticePar(true);
+         for(unsigned int i=0;i<tag.GetNbAttribute();i++)
+         {
+            if("a"==tag.GetAttributeName(i))
+            {
+               stringstream ss(tag.GetAttributeValue(i));
+               //ss.imbue(std::locale::classic());
+               float v;
+               ss>>v;
+               this->SetFrozenLatticePar(0,v);
+            }
+            if("b"==tag.GetAttributeName(i))
+            {
+               stringstream ss(tag.GetAttributeValue(i));
+               //ss.imbue(std::locale::classic());
+               float v;
+               ss>>v;
+               this->SetFrozenLatticePar(1,v);
+            }
+            if("c"==tag.GetAttributeName(i))
+            {
+               stringstream ss(tag.GetAttributeValue(i));
+               //ss.imbue(std::locale::classic());
+               float v;
+               ss>>v;
+               this->SetFrozenLatticePar(2,v);
+            }
+            if("alpha"==tag.GetAttributeName(i))
+            {
+               stringstream ss(tag.GetAttributeValue(i));
+               //ss.imbue(std::locale::classic());
+               float v;
+               ss>>v;
+               this->SetFrozenLatticePar(3,v*M_PI/180);
+            }
+            if("beta"==tag.GetAttributeName(i))
+            {
+               stringstream ss(tag.GetAttributeValue(i));
+               //ss.imbue(std::locale::classic());
+               float v;
+               ss>>v;
+               this->SetFrozenLatticePar(4,v*M_PI/180);
+            }
+            if("gamma"==tag.GetAttributeName(i))
+            {
+               stringstream ss(tag.GetAttributeValue(i));
+               //ss.imbue(std::locale::classic());
+               float v;
+               ss>>v;
+               this->SetFrozenLatticePar(5,v*M_PI/180);
+            }
+         }
       }
    }
 }

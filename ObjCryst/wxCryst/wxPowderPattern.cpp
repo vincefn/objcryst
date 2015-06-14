@@ -3629,6 +3629,7 @@ static const long ID_POWDERDIFF_PROFILE=                       WXCRYST_ID();
 static const long ID_POWDERDIFF_PROFILE_PV=                    WXCRYST_ID();
 static const long ID_POWDERDIFF_LEBAIL=                        WXCRYST_ID(); 
 static const long ID_POWDERDIFF_PROFILEFITTINGMODE=            WXCRYST_ID(); 
+static const long ID_POWDERDIFF_USELOCALLATTICEPAR=             WXCRYST_ID();
 
 BEGIN_EVENT_TABLE(WXPowderPatternDiffraction, wxWindow)
    EVT_BUTTON(ID_POWDERDIFF_CRYSTAL,WXPowderPatternDiffraction::OnChangeCrystal)
@@ -3638,12 +3639,14 @@ BEGIN_EVENT_TABLE(WXPowderPatternDiffraction, wxWindow)
    EVT_MENU(ID_POWDERDIFF_PROFILE_DEPV,     WXPowderPatternDiffraction::OnChangeProfile)
    EVT_MENU(ID_POWDERDIFF_LEBAIL,           WXPowderPatternDiffraction::OnLeBail)
    EVT_CHECKBOX(ID_POWDERDIFF_PROFILEFITTINGMODE,WXPowderPatternDiffraction::OnLeBail)
+   EVT_CHECKBOX(ID_POWDERDIFF_USELOCALLATTICEPAR,WXPowderPatternDiffraction::OnFreezeLatticePar)
    EVT_UPDATE_UI(ID_CRYST_UPDATEUI,         WXRefinableObj::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXPowderPatternDiffraction::WXPowderPatternDiffraction(wxWindow *parent,
                                                          PowderPatternDiffraction *p):
-WXRefinableObj(parent,p),mpPowderPatternDiffraction(p)
+WXRefinableObj(parent,p),mpPowderPatternDiffraction(p),
+mFreezeLatticePar(false),mFrozenLatticePar(6),mNeedLayout(false)
 {
    VFN_DEBUG_ENTRY("WXPowderPatternDiffraction::WXPowderPatternDiffraction()",6)
    mpWXTitle->SetForegroundColour(wxColour(0,255,0));
@@ -3672,6 +3675,26 @@ WXRefinableObj(parent,p),mpPowderPatternDiffraction(p)
       mList.Add(mpFieldCrystal);
       mpFieldCrystal->SetToolTip(_T("Crystal structure for this diffraction phase\n")
                                  _T("Click on the button to select another structure"));
+   // Freeze lattice par ?
+      wxSizer *pSizerFreezePar=new wxBoxSizer(wxHORIZONTAL);
+      mpFreezeLatticePar= new wxCheckBox(this,ID_POWDERDIFF_USELOCALLATTICEPAR, _T("Freeze lattice par."));
+      pSizerFreezePar->Add(mpFreezeLatticePar);
+      mpGridFrozenLatticePar=new wxGrid(this,-1,wxDefaultPosition,wxDefaultSize);
+      mpGridFrozenLatticePar->SetColLabelSize(0);
+      mpGridFrozenLatticePar->SetRowLabelSize(0);
+      mpGridFrozenLatticePar->DisableDragRowSize();
+      pSizerFreezePar->Add(mpGridFrozenLatticePar);
+      mpGridFrozenLatticePar->SetDefaultEditor(new wxGridCellFloatEditor(7,4));
+      mpGridFrozenLatticePar->SetDefaultRenderer(new wxGridCellFloatRenderer(7,4));
+      mpGridFrozenLatticePar->EnableScrolling(false,false);
+      mpGridFrozenLatticePar->ShowScrollbars(wxSHOW_SB_NEVER ,wxSHOW_SB_NEVER );
+      mpGridFrozenLatticePar->CreateGrid(1,6);
+      mpGridFrozenLatticePar->SetDefaultColSize(60);
+      mpGridFrozenLatticePar->EnableEditing(false);
+      mpSizer->AddSpacer(1);
+      mpSizer->Add(pSizerFreezePar);
+      mpSizer->AddSpacer(1);
+
    //Global Biso factor
       WXCrystObjBasic* fieldGlobalBiso
          =mpPowderPatternDiffraction->GetPar(&(mpPowderPatternDiffraction->mGlobalBiso))
@@ -3728,15 +3751,45 @@ void WXPowderPatternDiffraction::OnMenuSaveHKLFcalc(wxCommandEvent & WXUNUSED(ev
    mpPowderPatternDiffraction->PrintFhklCalc(out);
    out.close();
 }
+   
+void WXPowderPatternDiffraction::CrystUpdate(const bool uui,const bool lock)
+{
+   VFN_DEBUG_MESSAGE("WXPowderPatternDiffraction::CrystUpdate()",10)
+   if(lock) mMutex.Lock();
+   for(unsigned int i=0;i<6;i++) mFrozenLatticePar(i)=mpPowderPatternDiffraction->GetFrozenLatticePar(i);
+   if(mFreezeLatticePar!=mpPowderPatternDiffraction->FreezeLatticePar())
+   {
+      mFreezeLatticePar=mpPowderPatternDiffraction->FreezeLatticePar();
+      mNeedLayout=true;
+   }
+   this->WXRefinableObj::CrystUpdate(uui,false);
+   if(lock) mMutex.Unlock();
+}
+   
 void WXPowderPatternDiffraction::UpdateUI(const bool lock)
 {
+   VFN_DEBUG_MESSAGE("WXPowderPatternDiffraction::UpdateUI()",10)
    if(lock) mMutex.Lock();
    mpFieldCrystal->SetValue(mpPowderPatternDiffraction->GetCrystal().GetName());
    mpProfileFittingMode->SetValue(mpPowderPatternDiffraction->GetExtractionMode());
    mpPowderPatternDiffraction->mCorrTextureEllipsoid.UpdateEllipsoidPar();
+   mpGridFrozenLatticePar->Show(mFreezeLatticePar);
+   if(mFreezeLatticePar)
+   {
+      for(unsigned int i=0;i<3;++i) mpGridFrozenLatticePar->SetCellValue(0, i, wxString::Format("%.4f",mFrozenLatticePar(i)));
+      for(unsigned int i=3;i<6;++i) mpGridFrozenLatticePar->SetCellValue(0, i, wxString::Format("%.3f",mFrozenLatticePar(i)*180/M_PI));
+   }
+   mpFreezeLatticePar->SetValue(mFreezeLatticePar);
+   if(mNeedLayout)
+   {
+      VFN_DEBUG_MESSAGE("WXPowderPatternDiffraction::UpdateUI():Layout !", 10)
+      this->Layout();
+      mNeedLayout=false;
+   }
    if(lock) mMutex.Unlock();
    this->WXRefinableObj::UpdateUI(lock);
 }
+   
 void WXPowderPatternDiffraction::OnChangeProfile(wxCommandEvent & event)
 {
    VFN_DEBUG_ENTRY("WXPowderPatternDiffraction::OnChangeProfile()",6)
@@ -3931,7 +3984,7 @@ wxWindow(parent,-1),mpPattern(pPattern),mpDiff(pDiff),mLSQ("Profile Fitting obje
          mpFitCheckList->Check(6,true);
          mpFitCheckList->Check(7,true);
       }
-      pSizer->Add(mpFitCheckList,0,wxALIGN_CENTER);
+      pSizer->Add(mpFitCheckList,1,wxEXPAND|wxALIGN_CENTER);
       
       pQuick->SetSizer(pSizer);
       pSizer->SetSizeHints(pQuick);
@@ -4584,6 +4637,11 @@ void WXPowderPatternDiffraction::OnLeBail(wxCommandEvent &event)
    WXProfileFitting *pFit;
    pFit=new WXProfileFitting(pFrame,&(mpPowderPatternDiffraction->GetParentPowderPattern()),mpPowderPatternDiffraction);
    pFrame->Show(true);
+}
+
+void WXPowderPatternDiffraction::OnFreezeLatticePar(wxCommandEvent &event)
+{
+   mpPowderPatternDiffraction->FreezeLatticePar(mpFreezeLatticePar->GetValue());
 }
 
 

@@ -726,7 +726,7 @@ PowderPatternDiffraction::PowderPatternDiffraction():
 mpReflectionProfile(0),
 mCorrLorentz(*this),mCorrPolar(*this),mCorrSlitAperture(*this),
 mCorrTextureMarchDollase(*this),mCorrTextureEllipsoid(*this),mCorrTOF(*this),mExtractionMode(false),
-mpLeBailData(0)
+mpLeBailData(0),mFrozenLatticePar(6),mFreezeLatticePar(false),mFrozenBMatrix(3,3)
 {
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::PowderPatternDiffraction()",10)
    mIsScalable=true;
@@ -738,13 +738,15 @@ mpLeBailData(0)
    mClockMaster.AddChild(mClockProfilePar);
    mClockMaster.AddChild(mClockLorentzPolarSlitCorrPar);
    mClockMaster.AddChild(mpReflectionProfile->GetClockMaster());
+   for(unsigned int i=0;i<3;++i) mFrozenLatticePar(i)=5;
+   for(unsigned int i=3;i<6;++i) mFrozenLatticePar(i)=M_PI/2;
 }
 
 PowderPatternDiffraction::PowderPatternDiffraction(const PowderPatternDiffraction &old):
 mpReflectionProfile(0),
 mCorrLorentz(*this),mCorrPolar(*this),mCorrSlitAperture(*this),
 mCorrTextureMarchDollase(*this),mCorrTextureEllipsoid(*this),mCorrTOF(*this),mExtractionMode(false),
-mpLeBailData(0)
+mpLeBailData(0),mFrozenLatticePar(6),mFreezeLatticePar(old.FreezeLatticePar()),mFrozenBMatrix(3,3)
 {
    this->AddSubRefObj(mCorrTextureMarchDollase);
    this->AddSubRefObj(mCorrTextureEllipsoid);
@@ -760,6 +762,8 @@ mpLeBailData(0)
    mClockMaster.AddChild(mClockProfilePar);
    mClockMaster.AddChild(mClockLorentzPolarSlitCorrPar);
    mClockMaster.AddChild(mpReflectionProfile->GetClockMaster());
+   for(unsigned int i=0;i<6;++i) mFrozenLatticePar(i)=old.GetFrozenLatticePar(i);
+   mFrozenBMatrix=old.GetBMatrix();
 }
 
 PowderPatternDiffraction::~PowderPatternDiffraction()
@@ -967,6 +971,7 @@ void PowderPatternDiffraction::SetExtractionMode(const bool extract,const bool i
    bool needInit=false;
    if(extract)
    {
+      this->FreezeLatticePar(false);
       this->Prepare();
       mFhklObsSq.resizeAndPreserve(this->GetNbRefl());
    }
@@ -1159,6 +1164,30 @@ long PowderPatternDiffraction::GetNbReflBelowMaxSinThetaOvLambda()const
    return mNbReflUsed;
 }
 
+void PowderPatternDiffraction::SetFrozenLatticePar(const unsigned int i, REAL v)
+{
+   const REAL old=mFrozenLatticePar(i);
+   cout<<"PowderPatternDiffraction::SetFrozenLatticePar("<<i<<":"<<v<<")"<<endl;
+   if(old==v) return;
+   mFrozenLatticePar(i)=v;
+   this->CalcFrozenBMatrix();
+}
+
+REAL PowderPatternDiffraction::GetFrozenLatticePar(const unsigned int i) const {return mFrozenLatticePar(i);}
+
+void PowderPatternDiffraction::FreezeLatticePar(const bool use)
+{
+   cout<<"PowderPatternDiffraction::FreezeLatticePar("<<use<<")"<<endl;
+   VFN_DEBUG_MESSAGE("PowderPatternDiffraction::FreezeLatticePar("<<use<<")", 10)
+   if(use==mFreezeLatticePar) return;
+   mFreezeLatticePar=use;
+   mFrozenLatticePar=this->GetCrystal().GetLatticePar();
+   if(use) this->CalcFrozenBMatrix();
+   mClockTheta.Reset();
+   this->UpdateDisplay();
+}
+
+bool PowderPatternDiffraction::FreezeLatticePar() const {return mFreezeLatticePar;}
 
 void PowderPatternDiffraction::CalcPowderPattern() const
 {
@@ -2201,6 +2230,41 @@ const CrystVector_long& PowderPatternDiffraction::GetBraggLimits()const
 
 void PowderPatternDiffraction::SetMaxSinThetaOvLambda(const REAL max)
 {this->ScatteringData::SetMaxSinThetaOvLambda(max);}
+
+const CrystMatrix_REAL& PowderPatternDiffraction::GetBMatrix()const
+{
+   if(mFreezeLatticePar) return mFrozenBMatrix;
+   return this->ScatteringData::GetBMatrix();
+}
+
+void PowderPatternDiffraction::CalcFrozenBMatrix()const
+{
+   VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcFrozenBMatrix()", 10)
+   REAL a,b,c,alpha,beta,gamma;//direct space parameters
+   REAL aa,bb,cc,alphaa,betaa,gammaa;//reciprocal space parameters
+   REAL v;//volume of the unit cell
+   a=mFrozenLatticePar(0);
+   b=mFrozenLatticePar(1);
+   c=mFrozenLatticePar(2);
+   alpha=mFrozenLatticePar(3);
+   beta=mFrozenLatticePar(4);
+   gamma=mFrozenLatticePar(5);
+   
+   v=sqrt(1-cos(alpha)*cos(alpha)-cos(beta)*cos(beta)-cos(gamma)*cos(gamma)
+          +2*cos(alpha)*cos(beta)*cos(gamma));
+   
+   aa=sin(alpha)/a/v;
+   bb=sin(beta )/b/v;
+   cc=sin(gamma)/c/v;
+   
+   alphaa=acos( (cos(beta )*cos(gamma)-cos(alpha))/sin(beta )/sin(gamma) );
+   betaa =acos( (cos(alpha)*cos(gamma)-cos(beta ))/sin(alpha)/sin(gamma) );
+   gammaa=acos( (cos(alpha)*cos(beta )-cos(gamma))/sin(alpha)/sin(beta ) );
+   
+   mFrozenBMatrix = aa ,  bb*cos(gammaa) , cc*cos(betaa) ,
+                   0  , bb*sin(gammaa) ,-cc*sin(betaa)*cos(alpha),
+                   0  , 0              ,1/c;
+}
 
 void PowderPatternDiffraction::PrepareIntegratedProfile()const
 {

@@ -377,6 +377,16 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       /// Recalc, and get the number of reflections which should be actually used, 
       /// due to the maximuml sin(theta)/lambda value set.
       virtual long GetNbReflBelowMaxSinThetaOvLambda()const;
+      /// Change one parameter in mFrozenLatticePar. This triggers a call to CalcLocalBMatrix() if the parameter has changed
+      void SetFrozenLatticePar(const unsigned int i, REAL v);
+      /// Access to one parameter in mFrozenLatticePar
+      REAL GetFrozenLatticePar(const unsigned int i) const;
+      /// Set the use local cell parameters ? (see mFrozenLatticePar)
+      /// If this changes mUseLocalLatticePar from false to true, this triggers a copy
+      /// of the Crystal's lattice parameters into mFrozenLatticePar
+      void FreezeLatticePar(const bool use);
+      /// Do we use local cell parameters ? (see mFrozenLatticePar)
+      bool FreezeLatticePar() const;
    protected:
       virtual void CalcPowderPattern() const;
       virtual void CalcPowderPattern_FullDeriv(std::set<RefinablePar *> &vPar);
@@ -398,12 +408,16 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       virtual void InitOptions();
       virtual const CrystVector_long& GetBraggLimits()const;
       virtual void SetMaxSinThetaOvLambda(const REAL max);
-      
+      /// This can use either locally stored lattice parameters from mLocalLatticePar,
+      /// or the Crystal's, depending on mUseLocalLatticePar.
+      virtual const CrystMatrix_REAL& GetBMatrix()const;
+      /// Calculate the local BMatrix, used if mFreezeLatticePar is true.
+      void CalcFrozenBMatrix()const;
       void PrepareIntegratedProfile()const;
       //Clocks
          /// Last time the reflection parameters were changed
          RefinableObjClock mClockProfilePar;
-         /// Last time the 
+         /// Last time the Lorentz-Polarization and slit parameters were changed
          RefinableObjClock mClockLorentzPolarSlitCorrPar;
       //Clocks (internal, mutable)
          /// Last time the Lorentz-Polar-Slit correction was computed
@@ -484,10 +498,19 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
          mutable vector< pair<unsigned long, CrystVector_REAL> > mIntegratedProfileFactor;
          /// Last time the integrated values of normalized profiles was calculated.
          mutable RefinableObjClock mClockIntegratedProfileFactor;
-      // Extraction mode (Le Bail, Pawley)
+      /// Extraction mode (Le Bail, Pawley)
       bool mExtractionMode;
       /// Single crystal data extracted from the powder pattern.
       DiffractionDataSingleCrystal *mpLeBailData;
+      /// a,b and c in Angstroems, angles (stored) in radians
+      /// This is used to override lattice parameter from the Crystal structure,
+      /// e.g. for multiple datasets collected at different temperatures
+      /// Ignored unless mFreezeLatticePar is true
+      mutable CrystVector_REAL mFrozenLatticePar;
+      /// If true, use local cell parameters from mFrozenLatticePar rather than the Crystal
+      bool mFreezeLatticePar;
+      /// Local B Matrix, used if mFreezeLatticePar is true
+      mutable CrystMatrix_REAL mFrozenBMatrix;
    #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);

@@ -256,13 +256,22 @@ class WXPowderPatternDiffraction: public WXRefinableObj
       void OnChangeCrystal(wxCommandEvent & WXUNUSED(event));
       void OnMenuSaveHKLFcalc(wxCommandEvent & WXUNUSED(event));
       void OnChangeProfile(wxCommandEvent & event);
+      virtual void CrystUpdate(const bool updateUI=false,const bool mutexlock=false);
       virtual void UpdateUI(const bool mutexlock=false);
       /// Perform Le Bail extraction
       void OnLeBail(wxCommandEvent &event);
+      /// Freeze lattice parameter, which will not follow anymore the Crystal Unitcell values
+      void OnFreezeLatticePar(wxCommandEvent &event);
    private:
       PowderPatternDiffraction *mpPowderPatternDiffraction;
       WXFieldChoice* mpFieldCrystal;
       wxCheckBox *mpProfileFittingMode;
+      wxCheckBox *mpFreezeLatticePar;
+      wxGrid *mpGridFrozenLatticePar;
+      bool mFreezeLatticePar;
+      CrystVector_REAL mFrozenLatticePar;
+      //Need Layout if we show/hide frozen lattice parameters
+      bool mNeedLayout;
    DECLARE_EVENT_TABLE()
 };
 
