@@ -1636,7 +1636,6 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
                if(mMaxX>=mX(0)) mMaxX=mX(0);
             }
             mMinX=mMaxX-range;
-            cout<<"dx<0:"<<mMinX<<","<<mMaxX<<endl;
          }
          else if(dx<0)
          {
@@ -1651,7 +1650,6 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
                if(mMinX<mX(nbPoint-1)) mMinX=mX(nbPoint-1);
             }
             mMaxX=mMinX+range;
-            cout<<"dx>0:"<<mMinX<<","<<mMaxX<<endl;
          }
          
          if(dy<0)
@@ -1660,28 +1658,31 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
             {
                const REAL halfrange=(mMaxX-mMinX)/2;
                const REAL middle=(mMaxX+mMinX)/2;
-               mMinX= middle-halfrange*(32-abs(dy))/32.;
-               mMaxX= middle+halfrange*(32-abs(dy))/32.;
-               cout<<"dy<0:"<<mMinX<<","<<mMaxX<<":"<<abs(mpPattern->GetPowderPattern().X2Pixel(mMaxX)-mpPattern->GetPowderPattern().X2Pixel(mMinX))<<endl;
+               //d1,d2 are used to zoom from the mouse position rather than the middle
+               const REAL d1=(x0-mMinX)/halfrange;
+               const REAL d2=(mMaxX-x0)/halfrange;
+               mMinX= middle-halfrange*(64-abs(dy)*d1)/64.;
+               mMaxX= middle+halfrange*(64-abs(dy)*d2)/64.;
             }
          }
          else if(dy>0)
          {
             const REAL halfrange=(mMaxX-mMinX)/2;
             const REAL middle=(mMaxX+mMinX)/2;
-            mMinX= middle-halfrange*(32+abs(dy))/32.;
-            mMaxX= middle+halfrange*(32+abs(dy))/32.;
-            if(mX(nbPoint-1)>mX(0))
-            {
-               if(mMinX<mX(0)) mMinX=mX(0);
-               if(mMaxX>mX(nbPoint-1)) mMaxX=mX(nbPoint-1);
-            }
-            else
-            {
-               if(mMinX<mX(nbPoint-1)) mMinX=mX(nbPoint-1);
-               if(mMaxX>mX(0)) mMaxX=mX(0);
-            }
-            cout<<"dy>0:"<<mMinX<<","<<mMaxX<<endl;
+            const REAL d1=(x0-mMinX)/halfrange;
+            const REAL d2=(mMaxX-x0)/halfrange;
+            mMinX= middle-halfrange*(64+abs(dy)*d1)/64.;
+            mMaxX= middle+halfrange*(64+abs(dy)*d2)/64.;
+         }
+         if(mX(nbPoint-1)>mX(0))
+         {
+            if(mMinX<mX(0)) mMinX=mX(0);
+            if(mMaxX>mX(nbPoint-1)) mMaxX=mX(nbPoint-1);
+         }
+         else
+         {
+            if(mMinX<mX(nbPoint-1)) mMinX=mX(nbPoint-1);
+            if(mMaxX>mX(0)) mMaxX=mX(0);
          }
          if(mDefaultIntensityScale)
          {// Adapt max intensity as well
