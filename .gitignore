@@ -12,6 +12,9 @@ build
 /cctbx
 /newmat
 /freeglut*
+/fftw*
+/mysql*
+*.tlog
 /static-libs
 *.tar.bz2
 *.tar.gz
