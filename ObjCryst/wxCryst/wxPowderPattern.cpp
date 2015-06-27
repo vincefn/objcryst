@@ -1396,20 +1396,20 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
          }
          switch(pen)
          {
-            case 0 : dc.SetPen(wxPen(wxColour(  0,  0,  0)));dc.SetTextForeground(wxColour(  0,  0,  0));break;
-            case 1 : dc.SetPen(wxPen(wxColour(  0,  0,128)));dc.SetTextForeground(wxColour(  0,  0,128));break;
-            case 2 : dc.SetPen(wxPen(wxColour(  0,128,  0)));dc.SetTextForeground(wxColour(  0,128,  0));break;
-            case 3 : dc.SetPen(wxPen(wxColour(128,  0,  0)));dc.SetTextForeground(wxColour(128,  0,  0));break;
-            case 4 : dc.SetPen(wxPen(wxColour(  0,128,128)));dc.SetTextForeground(wxColour(  0,128,128));break;
-            case 5 : dc.SetPen(wxPen(wxColour(128,  0,128)));dc.SetTextForeground(wxColour(128,  0,128));break;
-            case 6 : dc.SetPen(wxPen(wxColour(128, 64,  0)));dc.SetTextForeground(wxColour(128, 64,  0));break;
-            case 7 : dc.SetPen(wxPen(wxColour(  0,  0,255)));dc.SetTextForeground(wxColour(  0,  0,255));break;
-            case 8 : dc.SetPen(wxPen(wxColour(  0,255,  0)));dc.SetTextForeground(wxColour(  0,255,  0));break;
-            case 9 : dc.SetPen(wxPen(wxColour(255,  0,  0)));dc.SetTextForeground(wxColour(255,  0,  0));break;
-            case 10: dc.SetPen(wxPen(wxColour(  0,255,255)));dc.SetTextForeground(wxColour(  0,255,255));break;
-            case 11: dc.SetPen(wxPen(wxColour(255,  0,255)));dc.SetTextForeground(wxColour(255,  0,255));break;
-            case 12: dc.SetPen(wxPen(wxColour(255,128,  0)));dc.SetTextForeground(wxColour(255,128,  0));break;
-            default: dc.SetPen(wxPen(wxColour(128,128,128)));dc.SetTextForeground(wxColour(128,128,128));break;
+            case 0 : dc.SetPen(wxPen(wxColour(  0,  0,  0),2));dc.SetTextForeground(wxColour(  0,  0,  0));break;
+            case 1 : dc.SetPen(wxPen(wxColour(  0,  0,255),2));dc.SetTextForeground(wxColour(  0,  0,255));break;
+            case 2 : dc.SetPen(wxPen(wxColour(  0,255,  0),2));dc.SetTextForeground(wxColour(  0,255,  0));break;
+            case 3 : dc.SetPen(wxPen(wxColour(255,  0,  0),2));dc.SetTextForeground(wxColour(255,  0,  0));break;
+            case 4 : dc.SetPen(wxPen(wxColour(  0,255,255),2));dc.SetTextForeground(wxColour(  0,255,255));break;
+            case 5 : dc.SetPen(wxPen(wxColour(255,  0,255),2));dc.SetTextForeground(wxColour(255,  0,255));break;
+            case 6 : dc.SetPen(wxPen(wxColour(255,160,  0),2));dc.SetTextForeground(wxColour(255,160,  0));break;
+            case 7 : dc.SetPen(wxPen(wxColour(128,128,255),2));dc.SetTextForeground(wxColour(128,128,255));break;
+            case 8 : dc.SetPen(wxPen(wxColour(128,255,128),2));dc.SetTextForeground(wxColour(128,255,128));break;
+            case 9 : dc.SetPen(wxPen(wxColour(255,128,128),2));dc.SetTextForeground(wxColour(255,128,128));break;
+            case 10: dc.SetPen(wxPen(wxColour(  0,  0,128),2));dc.SetTextForeground(wxColour(  0,  0,128));break;
+            case 11: dc.SetPen(wxPen(wxColour(  0, 80,  0),2));dc.SetTextForeground(wxColour(  0, 80,  0));break;
+            case 12: dc.SetPen(wxPen(wxColour(128,  0,  0),2));dc.SetTextForeground(wxColour(128,  0,  0));break;
+            default: dc.SetPen(wxPen(wxColour(128,128,128),2));dc.SetTextForeground(wxColour(128,128,128));break;
          }
          unsigned long ct=0;
          for(list<pair<const REAL ,const string > >::const_iterator pos=comp->begin();pos!=comp->end();++pos)
@@ -1707,9 +1707,12 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
             }
             const long imin=mObs.imin(ix0,ix1);
             const long imax=mObs.imax(ix0,ix1);
+            const long iminc=mCalc.imin(ix0,ix1);
+            const long imaxc=mCalc.imax(ix0,ix1);
             //cout<<"Switch default intensity 3: "<<mObs(imin)<<"["<<ix0<<"] - "<<mObs(imax)<<"["<<ix1<<"]"<<endl;
-            mMinIntensity=mObs(imin);
-            mMaxIntensity=mObs(imax);
+            if(mObs(imin)<mCalc(iminc)) mMinIntensity=mObs(imin); else mMinIntensity=mCalc(iminc);
+            if(mObs(imax)>mCalc(imaxc)) mMaxIntensity=mObs(imax); else mMaxIntensity=mCalc(imaxc);
+            mMaxIntensity=mMaxIntensity+(mMaxIntensity-mMinIntensity)*0.1;
          }
          
          mMutex.Unlock();
@@ -3136,6 +3139,7 @@ void WXPowderPatternGraph::ResetAxisLimits()
    if(max>mMaxIntensity) mMaxIntensity=max;
    if(min<mMinIntensity) mMinIntensity=min;
    if(mMinIntensity<=0) mMinIntensity=max/1e6;
+   mMaxIntensity=mMaxIntensity+(mMaxIntensity-mMinIntensity)*0.1;
    mMaxX=mX.max();
    mMinX=mX.min();
    mDefaultIntensityScale=true;
