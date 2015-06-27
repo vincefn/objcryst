@@ -1165,6 +1165,12 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
          
          for(vector<CIFData::CIFAtom>::const_iterator posat=pos->second.mvAtom.begin();posat!=pos->second.mvAtom.end();++posat)
          {
+            if( (posat->mLabel==".") || (posat->mSymbol==".") || (posat->mLabel.find("dummy")!=std::string::npos) || (posat->mSymbol.find("dummy")!=std::string::npos) )
+            {
+               (*fpObjCrystInformUser)("CIF: Ignoring DUMMY Atom:"+posat->mLabel+"(symbol="+posat->mSymbol+")");
+               continue;
+            }
+
             const float t20=chrono.seconds();
             // Try to find an existing scattering power with the same properties, or create a new one
             ScatteringPower* sp=NULL;
@@ -1180,7 +1186,7 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
                }
                if(sp==NULL)
                {
-                  if(verbose) cout<<"Scattering power "<<posat->mLabel<<" not found, creating it..."<<endl;
+                  if(verbose) cout<<"Scattering power "<<posat->mSymbol<<" not found, creating it..."<<endl;
                   sp = new ScatteringPowerAtom(posat->mSymbol,posat->mSymbol);
                   // Always extract isotropic DP, even with ADPs present
                   // :TODO: if only ADP are listed, calculate isotropic DP
@@ -1188,7 +1194,7 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
                   vElementBiso[sp].second=1;
                   pCryst->AddScatteringPower(sp);
                   const float t21=chrono.seconds();
-                  (*fpObjCrystInformUser)((boost::format("CIF: Add scattering power: %s (dt=%6.3fsCrystal creation=%6.3fs total)")% posat->mLabel % (t21-t20) % t21).str());
+                  (*fpObjCrystInformUser)((boost::format("CIF: Add scattering power: %s (dt=%6.3fsCrystal creation=%6.3fs total)")% posat->mSymbol % (t21-t20) % t21).str());
                }
             }
             else
