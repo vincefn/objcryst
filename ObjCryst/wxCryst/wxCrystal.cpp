@@ -4269,6 +4269,7 @@ void WXGLCrystalCanvas::POVRayOutput(const std::string &filename)
    options.mZmin=mcellbbox.zMin;
    options.mZmax=mcellbbox.zMax;
    options.mShowLabel=mShowAtomName;
+   options.mShowHydrogens=mShowHydrogens;
    if(mShowCrystal)
    {
       mpWXCrystal->GetCrystal().POVRayDescription(os,options);

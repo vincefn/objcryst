@@ -200,6 +200,8 @@ struct CrystalPOVRayOptions
    REAL mXmin, mXmax, mYmin, mYmax, mZmin, mZmax;
    /// Show labels ?
    bool mShowLabel;
+   /// Show hydrogens ?
+   bool mShowHydrogens;
 };
     
 /// This class only serves to temporarilly set the LC_NUMERIC C locale to "C",

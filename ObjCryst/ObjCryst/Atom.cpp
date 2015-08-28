@@ -200,6 +200,7 @@ ostream& Atom::POVRayDescription(ostream &os,
                                  const CrystalPOVRayOptions &options)const
 {
    if(this->IsDummy()) return os;
+   if(options.mShowHydrogens==false && (mpScattPowAtom->GetForwardScatteringFactor(RAD_XRAY)<1.5)) return os;
    const REAL xMin=options.mXmin; const REAL xMax=options.mXmax;
    const REAL yMin=options.mYmin; const REAL yMax=options.mYmax;
    const REAL zMin=options.mZmin; const REAL zMax=options.mZmax;

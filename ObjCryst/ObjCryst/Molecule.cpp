@@ -3323,6 +3323,7 @@ ostream& Molecule::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opt
 
                this->GetCrystal().FractionalToOrthonormalCoords(x(k),y(k),z(k));
                if((mvpAtom[k]->IsDummy()) || (fout<0.001)) continue;
+               if(options.mShowHydrogens==false && (mvpAtom[k]->GetScatteringPower().GetForwardScatteringFactor(RAD_XRAY)<1.5)) continue;
                const float r=mvpAtom[k]->GetScatteringPower().GetColourRGB()[0];
                const float g=mvpAtom[k]->GetScatteringPower().GetColourRGB()[1];
                const float b=mvpAtom[k]->GetScatteringPower().GetColourRGB()[2];
@@ -3359,6 +3360,8 @@ ostream& Molecule::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opt
             {
                if(  (mvpBond[k]->GetAtom1().IsDummy())
                   ||(mvpBond[k]->GetAtom2().IsDummy()) ) continue;
+               if(options.mShowHydrogens==false && (  (mvpBond[k]->GetAtom1().GetScatteringPower().GetForwardScatteringFactor(RAD_XRAY)<1.5)
+                                                    ||(mvpBond[k]->GetAtom2().GetScatteringPower().GetForwardScatteringFactor(RAD_XRAY)<1.5))) continue;
                unsigned long n1,n2;
                //:KLUDGE: Get the atoms
                for(n1=0;n1<mvpAtom.size();n1++)
