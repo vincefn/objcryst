@@ -3406,7 +3406,8 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                                const REAL yMin,const REAL yMax,
                                const REAL zMin,const REAL zMax,
                                const bool displayEnantiomer,
-                               const bool displayNames)const
+                               const bool displayNames,
+                               const bool hideHydrogens)const
 {
    #ifdef OBJCRYST_GL
    VFN_DEBUG_ENTRY("Molecule::GLInitDisplayList()",3)
@@ -3446,6 +3447,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
       {
          
          if((*pos)->IsDummy())continue;
+         if(hideHydrogens  && ((*pos)->GetScatteringPower().GetForwardScatteringFactor(RAD_XRAY)<1.5)) continue;
          const float r=(*pos)->GetScatteringPower().GetColourRGB()[0];
          const float g=(*pos)->GetScatteringPower().GetColourRGB()[1];
          const float b=(*pos)->GetScatteringPower().GetColourRGB()[2];
@@ -3598,6 +3600,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                   #endif
                   this->GetCrystal().FractionalToOrthonormalCoords(x(k),y(k),z(k));
                   if(mvpAtom[k]->IsDummy()) continue;
+                  if(hideHydrogens  && (mvpAtom[k]->GetScatteringPower().GetForwardScatteringFactor(RAD_XRAY)<1.5)) continue;
                   if(fout<0.01) continue;
                   glPushMatrix();
                      const float r=mvpAtom[k]->GetScatteringPower().GetColourRGB()[0];
@@ -3652,6 +3655,8 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                      {
                         if(  (mvpBond[k]->GetAtom1().IsDummy())
                            ||(mvpBond[k]->GetAtom2().IsDummy()) ) continue;
+                        if(hideHydrogens  && (  (mvpBond[k]->GetAtom1().GetScatteringPower().GetForwardScatteringFactor(RAD_XRAY)<1.5)
+                                              ||(mvpBond[k]->GetAtom2().GetScatteringPower().GetForwardScatteringFactor(RAD_XRAY)<1.5))) continue;
                         const unsigned long n1=rix[&(mvpBond[k]->GetAtom1())],
                                             n2=rix[&(mvpBond[k]->GetAtom2())];
                         REAL fout=1.0;
@@ -3714,6 +3719,8 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                      {
                         if(  (mvpBond[k]->GetAtom1().IsDummy())
                            ||(mvpBond[k]->GetAtom2().IsDummy()) ) continue;
+                        if(hideHydrogens  && (  (mvpBond[k]->GetAtom1().GetScatteringPower().GetForwardScatteringFactor(RAD_XRAY)<1.5)
+                                              ||(mvpBond[k]->GetAtom2().GetScatteringPower().GetForwardScatteringFactor(RAD_XRAY)<1.5))) continue;
                         const unsigned long n1=rix[&(mvpBond[k]->GetAtom1())],
                                             n2=rix[&(mvpBond[k]->GetAtom2())];
                         REAL fout=1.0;

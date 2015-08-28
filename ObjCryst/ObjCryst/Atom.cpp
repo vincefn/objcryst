@@ -294,7 +294,8 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
                              const REAL yMin,const REAL yMax,
                              const REAL zMin,const REAL zMax,
                              const bool displayEnantiomer,
-                             const bool displayNames)const
+                             const bool displayNames,
+                             const bool hideHydrogens)const
 {
    #ifdef OBJCRYST_GL
    VFN_DEBUG_MESSAGE("Atom::GLInitDisplayList():"<<this->GetName(),5)
@@ -319,6 +320,7 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
    const REAL cc=this->GetCrystal().GetLatticePar(2);
 
    if(this->IsDummy()) return ;
+   if(hideHydrogens  && (mpScattPowAtom->GetForwardScatteringFactor(RAD_XRAY)<1.5)) return;
    GLUquadricObj* pQuadric = gluNewQuadric();
    if(true==onlyIndependentAtoms)
    {

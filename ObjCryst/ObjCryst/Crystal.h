@@ -233,12 +233,14 @@ class Crystal:public UnitCell
       * \param displayNames: if true, only the names of the scatterers will be displayed,
       * at the position of the scatterers (to actually see them, they will have to
       * be translated with respect to the drawing of the scatterers).
+      * \param hideHydrogens: if true, do not display hydrogens/deuterium and their bonds
       */
       virtual void GLInitDisplayList(const bool onlyIndependentAtoms=false,
                                      const REAL xMin=-.1,const REAL xMax=1.1,
                                      const REAL yMin=-.1,const REAL yMax=1.1,
                                      const REAL zMin=-.1,const REAL zMax=1.1,
-                                     const bool displayNames=false)const;
+                                     const bool displayNames=false,
+                                     const bool hideHydrogens=false)const;
       
       /** \internal \brief Compute the 'Dynamical population correction for all atoms.
       * Atoms which are considered "equivalent" (ie currently with the same Z number)

@@ -546,7 +546,8 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
                                 const REAL xMin,const REAL xMax,
                                 const REAL yMin,const REAL yMax,
                                 const REAL zMin,const REAL zMax,
-                                const bool displayNames)const
+                                const bool displayNames,
+                                const bool hideHydrogens)const
 {
    VFN_DEBUG_ENTRY("Crystal::GLInitDisplayList()",5)
    #ifdef OBJCRYST_GL
@@ -695,7 +696,7 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
             for(int i=0;i<mScattererRegistry.GetNb();i++) 
                this->GetScatt(i).GLInitDisplayList(onlyIndependentAtoms,
                                                    xMin,xMax,yMin,yMax,zMin,zMax,
-                                                   displayEnantiomer,displayNames);
+                                                   displayEnantiomer,displayNames,hideHydrogens);
          }
       glPopMatrix();
    #else

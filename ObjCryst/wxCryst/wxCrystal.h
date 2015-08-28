@@ -337,6 +337,9 @@ class WXGLCrystalCanvas : public wxGLCanvas
       void OnUpdateUI(wxUpdateUIEvent& WXUNUSED(event));
       void OnShowCrystal(wxCommandEvent & WXUNUSED(event));
       void OnShowAtomLabel(wxCommandEvent & WXUNUSED(event));
+      void OnShowHydrogens(wxCommandEvent & WXUNUSED(event));
+      /// Access to mShowHydrogens
+      bool GetShowHydrogens()const;
       void OnShowCursor(wxCommandEvent & WXUNUSED(event));
       void OnSetCursor(wxCommandEvent & WXUNUSED(event));
       /// Handle Fourier maps (display dialog, etc...)
@@ -408,7 +411,7 @@ class WXGLCrystalCanvas : public wxGLCanvas
       wxMenu* mpPopUpMenu;
       
       /// To display Fourier map
-      bool mShowFourier, mShowCrystal, mShowAtomName, mShowCursor,mSharpenMap;
+      bool mShowFourier, mShowCrystal, mShowAtomName, mShowHydrogens, mShowCursor,mSharpenMap;
       /// bounding box for atoms to be included
       BBox mcellbbox;
       /// bounding box for display of Fourier map

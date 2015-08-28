@@ -875,7 +875,7 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
       }
       glNewList(mCrystalGLDisplayList,GL_COMPILE);
          glPushMatrix();
-            mpCrystal->GLInitDisplayList(onlyIndependentAtoms,xMin,xMax,yMin,yMax,zMin,zMax);
+            mpCrystal->GLInitDisplayList(onlyIndependentAtoms,xMin,xMax,yMin,yMax,zMin,zMax,false,!(mpCrystalGL->GetShowHydrogens()));
             //ScatteringPowerMap map1(mpCrystal->GetScatteringPowerRegistry().GetObj(0),
             //                            *mpCrystal,.02,.05,.05,RAD_XRAY);
             //map1.GLInitDisplayList(xMin,xMax,yMin,yMax,zMin,zMax);
@@ -886,7 +886,7 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
       glEndList();
       glNewList(mCrystalGLNameDisplayList,GL_COMPILE);
          glPushMatrix();
-            mpCrystal->GLInitDisplayList(onlyIndependentAtoms,xMin,xMax,yMin,yMax,zMin,zMax,true);
+            mpCrystal->GLInitDisplayList(onlyIndependentAtoms,xMin,xMax,yMin,yMax,zMin,zMax,true,!(mpCrystalGL->GetShowHydrogens()));
          glPopMatrix();
       glEndList();
       mpCrystalGL->CrystUpdate();
@@ -2866,8 +2866,9 @@ static GLCrystalConfig sGLCrystalConfig;
 //
 ////////////////////////////////////////////////////////////////////////
 static const long ID_GLCRYSTAL_MENU_SHOWATOMLABEL=     WXCRYST_ID();
+static const long ID_GLCRYSTAL_MENU_SHOWHYDROGENS=     WXCRYST_ID();
 static const long ID_GLCRYSTAL_MENU_SHOWCURSOR=        WXCRYST_ID();
-static const long ID_GLCRYSTAL_MENU_SETCURSOR=        WXCRYST_ID();
+static const long ID_GLCRYSTAL_MENU_SETCURSOR=         WXCRYST_ID();
 static const long ID_GLCRYSTAL_UPDATEUI=               WXCRYST_ID();
 static const long ID_GLCRYSTAL_MENU_CHANGELIMITS=      WXCRYST_ID();
 static const long ID_GLCRYSTAL_MENU_LIMITS_FULLCELL=   WXCRYST_ID();
@@ -2891,6 +2892,7 @@ BEGIN_EVENT_TABLE(WXGLCrystalCanvas, wxGLCanvas)
    EVT_MENU             (ID_GLCRYSTAL_MENU_LIMITS_ASYMCELL,     WXGLCrystalCanvas::OnChangeLimits)
    EVT_MENU             (ID_GLCRYSTAL_MENU_SHOWCRYSTAL,         WXGLCrystalCanvas::OnShowCrystal)
    EVT_MENU             (ID_GLCRYSTAL_MENU_SHOWATOMLABEL,       WXGLCrystalCanvas::OnShowAtomLabel)
+   EVT_MENU             (ID_GLCRYSTAL_MENU_SHOWHYDROGENS,       WXGLCrystalCanvas::OnShowHydrogens)
    EVT_MENU             (ID_GLCRYSTAL_MENU_SHOWCURSOR,          WXGLCrystalCanvas::OnShowCursor)
    EVT_MENU             (ID_GLCRYSTAL_MENU_SETCURSOR,           WXGLCrystalCanvas::OnSetCursor)
    EVT_MENU             (ID_GLCRYSTAL_MENU_LOADFOURIERGRD,      WXGLCrystalCanvas::OnLoadFourierGRD)
@@ -2925,7 +2927,7 @@ wxGLCanvas(parent, id,AttribList,pos,size,wxDEFAULT_FRAME_STYLE | wxFULL_REPAINT
 //wxGLCanvas(parent,id,pos,size,wxDEFAULT_FRAME_STYLE,_T("GLCanvas"),AttribList),
 mpParentFrame(parent),
 mpWXCrystal(wxcryst),mIsGLInit(false),mDist(60),mX0(0),mY0(0),mZ0(0),mViewAngle(15),
-mShowFourier(true),mShowCrystal(true),mShowAtomName(true),mShowCursor(false),mSharpenMap(true),
+mShowFourier(true),mShowCrystal(true),mShowAtomName(true),mShowHydrogens(true),mShowCursor(false),mSharpenMap(true),
 mIsGLFontBuilt(false),mGLFontDisplayListBase(0),mpFourierMapListWin(0)
 {
    mpwxGLContext=new wxGLContext(this);
@@ -2981,6 +2983,7 @@ mIsGLFontBuilt(false),mGLFontDisplayListBase(0),mpFourierMapListWin(0)
    mpPopUpMenu->AppendSeparator();
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWCRYSTAL, _T("Hide Crystal"));
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, _T("Hide Atom Labels"));
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWHYDROGENS, _T("Hide Hydrogens"));
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWCURSOR, _T("Show Cursor"));
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SETCURSOR, _T("Set view cntr and cursor pos."));
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_POVRAY, _T("Create POVRay file"));
@@ -3859,6 +3862,20 @@ void WXGLCrystalCanvas::OnShowAtomLabel( wxCommandEvent & WXUNUSED(event))
    mShowAtomName= !mShowAtomName;
    if(!(mpWXCrystal->GetCrystal().IsBeingRefined())) this->CrystUpdate();
 }
+
+void WXGLCrystalCanvas::OnShowHydrogens( wxCommandEvent & WXUNUSED(event))
+{
+   if(mShowHydrogens) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWHYDROGENS, _T("Show Hydrogens"));
+   else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWHYDROGENS, _T("Hide Hydrogens"));
+   mShowHydrogens= !mShowHydrogens;
+   if(!(mpWXCrystal->GetCrystal().IsBeingRefined()))
+   {
+      wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_GLCRYSTAL_MENU_UPDATE);
+      wxPostEvent(this,event);
+   }
+}
+
+bool WXGLCrystalCanvas::GetShowHydrogens() const {return mShowHydrogens;}
 
 void WXGLCrystalCanvas::OnShowCursor( wxCommandEvent & WXUNUSED(event))
 {
