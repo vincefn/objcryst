@@ -56,16 +56,16 @@ wxSocketBase* FoxServerThread::GetSocket()
 void *FoxServerThread::Entry()
 { 
    m_exit = false;
-   do{
+   do {
 
       if(TestDestroy()) 
          break;
 
-      //is still connected?
-      //TODO: this destroy does not sent the CLOSE event to the server
-      //It has no effect in special cases...
+      //is still connected?      
       if(!m_pSocket->IsConnected()) {
           CloseConnection();
+          wxThread::Sleep(1000);
+          break;
       }
 
       if(m_tThreadMutex->Lock()!=wxMUTEX_NO_ERROR) {
@@ -89,8 +89,9 @@ void *FoxServerThread::Entry()
            }
            case LOST_CONNECTION:
            {
-              WriteLogMessage(_T("LOST"));
-              m_pSocket->Destroy();
+              //probably, this code will be never used due to the previous line: if(!m_pSocket->IsConnected()) {...
+              WriteLogMessage(_T("LOST_CONNECTION"));
+              CloseConnection();
               m_exit=true;
               break;
            }
@@ -116,7 +117,7 @@ void *FoxServerThread::Entry()
       wxThread::Sleep(1000);
 
       if(m_exit) break;
-   }while(true);
+   } while(true);
 
    return 0;
 } 
@@ -149,6 +150,7 @@ void FoxServerThread::CloseConnection()
 {   
     WriteLogMessage(_T("Closing Connection"));
     m_pSocket->Destroy();
+    m_pSocket = 0;
 }
 void FoxServerThread::OnExit() 
 {

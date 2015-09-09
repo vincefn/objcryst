@@ -87,6 +87,7 @@ public:
     wxString cost;
     wxString content;
     bool sent;
+	bool pending;
 };
 
 class FoxClient: public wxEvtHandler

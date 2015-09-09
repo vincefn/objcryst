@@ -1998,9 +1998,11 @@ void WXCrystMainFrame::SafeQuit()
    cout<<"Removing all Crystal objects..."<<endl;
    gCrystalRegistry.DeleteAll();
    //FoxGrid
-   mpGridWindow->Clear();
-   this->Destroy();
+   mpGridWindow->Clear(); 
+
    mpGridWindow->Destroy();
+   this->Destroy();
+   
 }
 void WXCrystMainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
 {
