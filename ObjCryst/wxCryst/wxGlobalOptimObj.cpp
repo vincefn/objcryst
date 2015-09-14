@@ -356,7 +356,7 @@ BEGIN_EVENT_TABLE(WXMonteCarloObj, wxWindow)
 END_EVENT_TABLE()
 
 WXMonteCarloObj::WXMonteCarloObj(wxWindow *parent, MonteCarloObj* obj):
-WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(10000000),mNbRun(-1)
+WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbRun(-1)
 {
    VFN_DEBUG_ENTRY("WXMonteCarloObj::WXMonteCarloObj()",7)
    //options
@@ -443,7 +443,7 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbTrial(10000000),mNbRun(-1)
                       _T("conformation after a few thousand tests)"));
    
    // Number of trials to go
-      mpWXFieldNbTrial=new WXFieldPar<long>(this,"Number of trials per run:",-1,&mNbTrial,70);
+      mpWXFieldNbTrial=new WXFieldPar<long>(this,"Number of trials per run:",-1,&(mpMonteCarloObj->NbTrialPerRun()),70);
       mpSizer->Add(mpWXFieldNbTrial);
       mList.Add(mpWXFieldNbTrial);
       mpWXFieldNbTrial->SetFormat(_T("%ld"));
@@ -498,19 +498,19 @@ void WXMonteCarloObj::OnRunOptimization(wxCommandEvent & event)
       mpMonteCarloObj->UpdateDisplay();
    
    double finalCost=0;
-   if(mNbTrial<0)
+   if(mpMonteCarloObj->NbTrialPerRun()<0)
    {
-      mNbTrial = - mNbTrial;
+      mpMonteCarloObj->NbTrialPerRun() = - mpMonteCarloObj->NbTrialPerRun();
       wxTextEntryDialog costDialog(this,_T("Enter desired cost for the optimization to stop"),
                               _T("Goal Cost"),_T(".20"),wxOK | wxCANCEL);
       if(wxID_OK==costDialog.ShowModal()) costDialog.GetValue().ToDouble(&finalCost);
    }
    if(event.GetId()==ID_GLOBALOPT_MENU_OPT_RUN_MULTIPLE)
       mpGlobalOptimRunThread = new WXGlobalOptimRunThread(this->GetOptimizationObj(),
-                                                          mNbTrial,finalCost,mNbRun,true);
+                                                          mpMonteCarloObj->NbTrialPerRun(),finalCost,mNbRun,true);
    else
       mpGlobalOptimRunThread = new WXGlobalOptimRunThread(this->GetOptimizationObj(),
-                                                          mNbTrial,finalCost,mNbRun,false);
+                                                          mpMonteCarloObj->NbTrialPerRun(),finalCost,mNbRun,false);
    // Tracker window
    if(this->GetOptimizationObj().GetMainTracker().WXGet()==0)
    {

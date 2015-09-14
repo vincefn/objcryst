@@ -240,13 +240,15 @@ class Scatterer:virtual public RefinableObj
       * \param displayNames: if true, only the names of the scatterers will be displayed,
       * at the position of the scatterers (to actually see them, they will have to
       * be translated with respect to the drawing of the scatterers).
+      * \param hideHydrogens: if true, do not display hydrogens/deuterium and their bonds
       */
       virtual void GLInitDisplayList(const bool noSymmetrics=false,
                                      const REAL xMin=-.1,const REAL xMax=1.1,
                                      const REAL yMin=-.1,const REAL yMax=1.1,
                                      const REAL zMin=-.1,const REAL zMax=1.1,
                                      const bool displayEnantiomer=false,
-                                     const bool displayNames=false)const=0;
+                                     const bool displayNames=false,
+                                     const bool hideHydrogens=false)const=0;
       /// Last time anything in the scatterer was changed (atoms, positions, scattering power)
       const RefinableObjClock& GetClockScatterer()const;
       /// Last time anything in the scatterer was changed (atoms, positions, scattering power)

@@ -690,6 +690,18 @@ void WXPowderPattern::OnMenuAddCompCryst(wxCommandEvent & WXUNUSED(event))
    VFN_DEBUG_EXIT("WXPowderPattern::OnMenuAddCompCryst()",10)
 }
 
+class WXPowderPatternGraphFrame :public wxFrame
+{
+public:
+   WXPowderPatternGraphFrame(wxWindow *parent, wxWindowID id, const wxString& title, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE, const wxString& name = wxFrameNameStr) :
+      wxFrame(parent, id, title, pos, size, style, name)
+   {}
+   ~WXPowderPatternGraphFrame()
+   {
+      gvWindowPosition[ID_POWDER_GRAPH_WIN] = make_pair(this->GetScreenPosition(), this->GetSize());
+   }
+};
+
 void WXPowderPattern::OnMenuShowGraph(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuShowGraph()"<<mpGraph,6)
@@ -699,11 +711,11 @@ void WXPowderPattern::OnMenuShowGraph(wxCommandEvent & WXUNUSED(event))
    mpPowderPattern->Prepare();
    wxFrame* frame;
    if(gvWindowPosition.count(ID_POWDER_GRAPH_WIN))
-     frame= new wxFrame(this,ID_POWDER_GRAPH_WIN, wxString::FromAscii(mpPowderPattern->GetName().c_str()),
+      frame = new WXPowderPatternGraphFrame(this, ID_POWDER_GRAPH_WIN, wxString::FromAscii(mpPowderPattern->GetName().c_str()),
                         gvWindowPosition[ID_POWDER_GRAPH_WIN].first,
                         gvWindowPosition[ID_POWDER_GRAPH_WIN].second,wxCLOSE_BOX|wxRESIZE_BORDER|wxCAPTION|wxFRAME_FLOAT_ON_PARENT);
    else
-     frame= new wxFrame(this,ID_POWDER_GRAPH_WIN, wxString::FromAscii(mpPowderPattern->GetName().c_str()),
+      frame = new WXPowderPatternGraphFrame(this, ID_POWDER_GRAPH_WIN, wxString::FromAscii(mpPowderPattern->GetName().c_str()),
                         wxDefaultPosition,wxSize(500,300),wxCLOSE_BOX|wxRESIZE_BORDER|wxCAPTION|wxFRAME_FLOAT_ON_PARENT);
    mpGraph = new WXPowderPatternGraph(frame,this);
    
@@ -1125,7 +1137,6 @@ mIsDragging(false),mDisplayLabel(true),mDisplayPeak(true)
 WXPowderPatternGraph::~WXPowderPatternGraph()
 {
    mpPattern->NotifyDeleteGraph();
-   gvWindowPosition[this->GetParent()->GetId()]=make_pair(this->GetParent()->GetPosition(),this->GetParent()->GetSize());
 }
 
 void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
@@ -1369,21 +1380,39 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
       wxCoord tmpW,tmpH;
       int loop=1;
       REAL yr;
-      list<list<pair<const REAL ,const string > > >::const_iterator comp;
-      list<pair<const REAL ,const string > >::const_iterator pos;
+      list<list<pair<const REAL ,const string > > >::const_iterator comp=vLabel.begin();
       unsigned int pen=0;
-      for(comp=vLabel.begin();comp!=vLabel.end();++comp)
+      for(unsigned int i=0;i<mpPattern->GetPowderPattern().GetNbPowderPatternComponent();++i)
       {
-         switch(pen++)
+         PowderPatternDiffraction *pDiff;
+         if(mpPattern->GetPowderPattern().GetPowderPatternComponent(i).GetClassName()=="PowderPatternDiffraction")
          {
-            case 0: dc.SetPen(*wxBLACK_PEN);dc.SetTextForeground(*wxBLACK);break;
-            case 1: dc.SetPen(bluePen );dc.SetTextForeground(blue);break;
-            case 2: dc.SetPen(*wxGREEN_PEN);dc.SetTextForeground(*wxGREEN);break;
-            case 3: dc.SetPen(*wxRED_PEN  );dc.SetTextForeground(*wxRED  );break;
-            default:dc.SetPen(*wxGREY_PEN );dc.SetTextForeground(*wxLIGHT_GREY );break;
+            pDiff=dynamic_cast<PowderPatternDiffraction*> (&(mpPattern->GetPowderPattern().GetPowderPatternComponent(i)));
+         }
+         else
+         {
+            ++comp;
+            continue;
+         }
+         switch(pen)
+         {
+            case 0 : dc.SetPen(wxPen(wxColour(  0,  0,  0),2));dc.SetTextForeground(wxColour(  0,  0,  0));break;
+            case 1 : dc.SetPen(wxPen(wxColour(  0,  0,255),2));dc.SetTextForeground(wxColour(  0,  0,255));break;
+            case 2 : dc.SetPen(wxPen(wxColour(  0,255,  0),2));dc.SetTextForeground(wxColour(  0,255,  0));break;
+            case 3 : dc.SetPen(wxPen(wxColour(255,  0,  0),2));dc.SetTextForeground(wxColour(255,  0,  0));break;
+            case 4 : dc.SetPen(wxPen(wxColour(  0,255,255),2));dc.SetTextForeground(wxColour(  0,255,255));break;
+            case 5 : dc.SetPen(wxPen(wxColour(255,  0,255),2));dc.SetTextForeground(wxColour(255,  0,255));break;
+            case 6 : dc.SetPen(wxPen(wxColour(255,160,  0),2));dc.SetTextForeground(wxColour(255,160,  0));break;
+            case 7 : dc.SetPen(wxPen(wxColour(128,128,255),2));dc.SetTextForeground(wxColour(128,128,255));break;
+            case 8 : dc.SetPen(wxPen(wxColour(128,255,128),2));dc.SetTextForeground(wxColour(128,255,128));break;
+            case 9 : dc.SetPen(wxPen(wxColour(255,128,128),2));dc.SetTextForeground(wxColour(255,128,128));break;
+            case 10: dc.SetPen(wxPen(wxColour(  0,  0,128),2));dc.SetTextForeground(wxColour(  0,  0,128));break;
+            case 11: dc.SetPen(wxPen(wxColour(  0, 80,  0),2));dc.SetTextForeground(wxColour(  0, 80,  0));break;
+            case 12: dc.SetPen(wxPen(wxColour(128,  0,  0),2));dc.SetTextForeground(wxColour(128,  0,  0));break;
+            default: dc.SetPen(wxPen(wxColour(128,128,128),2));dc.SetTextForeground(wxColour(128,128,128));break;
          }
          unsigned long ct=0;
-         for(pos=comp->begin();pos!=comp->end();++pos)
+         for(list<pair<const REAL ,const string > >::const_iterator pos=comp->begin();pos!=comp->end();++pos)
          {
             REAL point=pos->first;
             if(mpPattern->GetPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
@@ -1411,32 +1440,14 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
                if(loop==5) loop=1;
             }
          }
+         // Draw crystal names, Indicate Le Bail mode
+         if(pDiff->GetExtractionMode()) fontInfo.Printf(wxString::FromAscii((pDiff->GetCrystal().GetName()+" (LE BAIL MODE)").c_str()));
+         else fontInfo.Printf(wxString::FromAscii(pDiff->GetCrystal().GetName().c_str()));
+         wxCoord tmpW,tmpH;
+         dc.GetTextExtent(fontInfo, &tmpW, &tmpH);
+         dc.DrawText(fontInfo,(wxCoord)mMargin*3,(wxCoord)(mMargin+tmpH*(pen)));
+         ++comp;++pen;
       }
-   }
-   // Draw crystal names, Indicate Le Bail mode
-   unsigned int dec=0;
-   for(unsigned int i=0;i<mpPattern->GetPowderPattern().GetNbPowderPatternComponent();++i)
-   {
-      PowderPatternDiffraction *pDiff;
-      if(mpPattern->GetPowderPattern().GetPowderPatternComponent(i).GetClassName()=="PowderPatternDiffraction")
-      {
-         pDiff=dynamic_cast<PowderPatternDiffraction*> (&(mpPattern->GetPowderPattern().GetPowderPatternComponent(i)));
-      }
-      else continue;
-      wxCoord tmpW,tmpH;
-      switch(i)
-      {
-        case 0: dc.SetPen(*wxBLACK_PEN);dc.SetTextForeground(*wxBLACK);break;
-        case 1: dc.SetPen(bluePen);dc.SetTextForeground(blue);break;
-        case 2: dc.SetPen(*wxGREEN_PEN);dc.SetTextForeground(*wxGREEN);break;
-        case 3: dc.SetPen(*wxRED_PEN  );dc.SetTextForeground(*wxRED  );break;
-        default:dc.SetPen(*wxGREY_PEN );dc.SetTextForeground(*wxLIGHT_GREY );break;
-      }
-      if(pDiff->GetExtractionMode()) fontInfo.Printf(wxString::FromAscii((pDiff->GetCrystal().GetName()+" (LE BAIL MODE)").c_str()));
-      else fontInfo.Printf(wxString::FromAscii(pDiff->GetCrystal().GetName().c_str()));
-      dc.GetTextExtent(fontInfo, &tmpW, &tmpH);
-      dc.DrawText(fontInfo,(wxCoord)mMargin*3,(wxCoord)(mMargin+tmpH*(dec++)));
-      //cout<<"Label("<<pDiff->GetCrystal().GetName()<<"):"<<mMargin*3<<","<<(height-mMargin)-tmpH*(i)-10<<endl;
    }
    mMutex.Unlock();
    VFN_DEBUG_MESSAGE("WXPowderPatternGraph:OnPaint():End",5)
@@ -1625,7 +1636,6 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
                if(mMaxX>=mX(0)) mMaxX=mX(0);
             }
             mMinX=mMaxX-range;
-            cout<<"dx<0:"<<mMinX<<","<<mMaxX<<endl;
          }
          else if(dx<0)
          {
@@ -1640,7 +1650,6 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
                if(mMinX<mX(nbPoint-1)) mMinX=mX(nbPoint-1);
             }
             mMaxX=mMinX+range;
-            cout<<"dx>0:"<<mMinX<<","<<mMaxX<<endl;
          }
          
          if(dy<0)
@@ -1649,28 +1658,31 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
             {
                const REAL halfrange=(mMaxX-mMinX)/2;
                const REAL middle=(mMaxX+mMinX)/2;
-               mMinX= middle-halfrange*(32-abs(dy))/32.;
-               mMaxX= middle+halfrange*(32-abs(dy))/32.;
-               cout<<"dy<0:"<<mMinX<<","<<mMaxX<<":"<<abs(mpPattern->GetPowderPattern().X2Pixel(mMaxX)-mpPattern->GetPowderPattern().X2Pixel(mMinX))<<endl;
+               //d1,d2 are used to zoom from the mouse position rather than the middle
+               const REAL d1=(x0-mMinX)/halfrange;
+               const REAL d2=(mMaxX-x0)/halfrange;
+               mMinX= middle-halfrange*(64-abs(dy)*d1)/64.;
+               mMaxX= middle+halfrange*(64-abs(dy)*d2)/64.;
             }
          }
          else if(dy>0)
          {
             const REAL halfrange=(mMaxX-mMinX)/2;
             const REAL middle=(mMaxX+mMinX)/2;
-            mMinX= middle-halfrange*(32+abs(dy))/32.;
-            mMaxX= middle+halfrange*(32+abs(dy))/32.;
-            if(mX(nbPoint-1)>mX(0))
-            {
-               if(mMinX<mX(0)) mMinX=mX(0);
-               if(mMaxX>mX(nbPoint-1)) mMaxX=mX(nbPoint-1);
-            }
-            else
-            {
-               if(mMinX<mX(nbPoint-1)) mMinX=mX(nbPoint-1);
-               if(mMaxX>mX(0)) mMaxX=mX(0);
-            }
-            cout<<"dy>0:"<<mMinX<<","<<mMaxX<<endl;
+            const REAL d1=(x0-mMinX)/halfrange;
+            const REAL d2=(mMaxX-x0)/halfrange;
+            mMinX= middle-halfrange*(64+abs(dy)*d1)/64.;
+            mMaxX= middle+halfrange*(64+abs(dy)*d2)/64.;
+         }
+         if(mX(nbPoint-1)>mX(0))
+         {
+            if(mMinX<mX(0)) mMinX=mX(0);
+            if(mMaxX>mX(nbPoint-1)) mMaxX=mX(nbPoint-1);
+         }
+         else
+         {
+            if(mMinX<mX(nbPoint-1)) mMinX=mX(nbPoint-1);
+            if(mMaxX>mX(0)) mMaxX=mX(0);
          }
          if(mDefaultIntensityScale)
          {// Adapt max intensity as well
@@ -1695,9 +1707,12 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
             }
             const long imin=mObs.imin(ix0,ix1);
             const long imax=mObs.imax(ix0,ix1);
+            const long iminc=mCalc.imin(ix0,ix1);
+            const long imaxc=mCalc.imax(ix0,ix1);
             //cout<<"Switch default intensity 3: "<<mObs(imin)<<"["<<ix0<<"] - "<<mObs(imax)<<"["<<ix1<<"]"<<endl;
-            mMinIntensity=mObs(imin);
-            mMaxIntensity=mObs(imax);
+            if(mObs(imin)<mCalc(iminc)) mMinIntensity=mObs(imin); else mMinIntensity=mCalc(iminc);
+            if(mObs(imax)>mCalc(imaxc)) mMaxIntensity=mObs(imax); else mMaxIntensity=mCalc(imaxc);
+            mMaxIntensity=mMaxIntensity+(mMaxIntensity-mMinIntensity)*0.1;
          }
          
          mMutex.Unlock();
@@ -3124,6 +3139,7 @@ void WXPowderPatternGraph::ResetAxisLimits()
    if(max>mMaxIntensity) mMaxIntensity=max;
    if(min<mMinIntensity) mMinIntensity=min;
    if(mMinIntensity<=0) mMinIntensity=max/1e6;
+   mMaxIntensity=mMaxIntensity+(mMaxIntensity-mMinIntensity)*0.1;
    mMaxX=mX.max();
    mMinX=mX.min();
    mDefaultIntensityScale=true;
@@ -3450,6 +3466,13 @@ void WXPowderPatternBackground::UpdateUI(const bool lock)
    this->WXRefinableObj::UpdateUI(false);
    if(lock) mMutex.Unlock();
 }
+
+bool WXPowderPatternBackground::Enable(bool e)
+{
+   if(0!=mpGridBackgroundPoint) mpGridBackgroundPoint->Enable(e);
+   return this->::wxWindow::Enable(e);
+}
+
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXTexturePhaseMarchDollase
@@ -3618,6 +3641,7 @@ static const long ID_POWDERDIFF_PROFILE=                       WXCRYST_ID();
 static const long ID_POWDERDIFF_PROFILE_PV=                    WXCRYST_ID();
 static const long ID_POWDERDIFF_LEBAIL=                        WXCRYST_ID(); 
 static const long ID_POWDERDIFF_PROFILEFITTINGMODE=            WXCRYST_ID(); 
+static const long ID_POWDERDIFF_USELOCALLATTICEPAR=             WXCRYST_ID();
 
 BEGIN_EVENT_TABLE(WXPowderPatternDiffraction, wxWindow)
    EVT_BUTTON(ID_POWDERDIFF_CRYSTAL,WXPowderPatternDiffraction::OnChangeCrystal)
@@ -3627,12 +3651,14 @@ BEGIN_EVENT_TABLE(WXPowderPatternDiffraction, wxWindow)
    EVT_MENU(ID_POWDERDIFF_PROFILE_DEPV,     WXPowderPatternDiffraction::OnChangeProfile)
    EVT_MENU(ID_POWDERDIFF_LEBAIL,           WXPowderPatternDiffraction::OnLeBail)
    EVT_CHECKBOX(ID_POWDERDIFF_PROFILEFITTINGMODE,WXPowderPatternDiffraction::OnLeBail)
+   EVT_CHECKBOX(ID_POWDERDIFF_USELOCALLATTICEPAR,WXPowderPatternDiffraction::OnFreezeLatticePar)
    EVT_UPDATE_UI(ID_CRYST_UPDATEUI,         WXRefinableObj::OnUpdateUI)
 END_EVENT_TABLE()
 
 WXPowderPatternDiffraction::WXPowderPatternDiffraction(wxWindow *parent,
                                                          PowderPatternDiffraction *p):
-WXRefinableObj(parent,p),mpPowderPatternDiffraction(p)
+WXRefinableObj(parent,p),mpPowderPatternDiffraction(p),
+mFreezeLatticePar(false),mFrozenLatticePar(6),mNeedLayout(false)
 {
    VFN_DEBUG_ENTRY("WXPowderPatternDiffraction::WXPowderPatternDiffraction()",6)
    mpWXTitle->SetForegroundColour(wxColour(0,255,0));
@@ -3661,6 +3687,26 @@ WXRefinableObj(parent,p),mpPowderPatternDiffraction(p)
       mList.Add(mpFieldCrystal);
       mpFieldCrystal->SetToolTip(_T("Crystal structure for this diffraction phase\n")
                                  _T("Click on the button to select another structure"));
+   // Freeze lattice par ?
+      wxSizer *pSizerFreezePar=new wxBoxSizer(wxHORIZONTAL);
+      mpFreezeLatticePar= new wxCheckBox(this,ID_POWDERDIFF_USELOCALLATTICEPAR, _T("Freeze lattice par."));
+      pSizerFreezePar->Add(mpFreezeLatticePar);
+      mpGridFrozenLatticePar=new wxGrid(this,-1,wxDefaultPosition,wxDefaultSize);
+      mpGridFrozenLatticePar->SetColLabelSize(0);
+      mpGridFrozenLatticePar->SetRowLabelSize(0);
+      mpGridFrozenLatticePar->DisableDragRowSize();
+      pSizerFreezePar->Add(mpGridFrozenLatticePar);
+      mpGridFrozenLatticePar->SetDefaultEditor(new wxGridCellFloatEditor(7,4));
+      mpGridFrozenLatticePar->SetDefaultRenderer(new wxGridCellFloatRenderer(7,4));
+      mpGridFrozenLatticePar->EnableScrolling(false,false);
+      mpGridFrozenLatticePar->ShowScrollbars(wxSHOW_SB_NEVER ,wxSHOW_SB_NEVER );
+      mpGridFrozenLatticePar->CreateGrid(1,6);
+      mpGridFrozenLatticePar->SetDefaultColSize(60);
+      mpGridFrozenLatticePar->EnableEditing(false);
+      mpSizer->AddSpacer(1);
+      mpSizer->Add(pSizerFreezePar);
+      mpSizer->AddSpacer(1);
+
    //Global Biso factor
       WXCrystObjBasic* fieldGlobalBiso
          =mpPowderPatternDiffraction->GetPar(&(mpPowderPatternDiffraction->mGlobalBiso))
@@ -3717,15 +3763,50 @@ void WXPowderPatternDiffraction::OnMenuSaveHKLFcalc(wxCommandEvent & WXUNUSED(ev
    mpPowderPatternDiffraction->PrintFhklCalc(out);
    out.close();
 }
+   
+void WXPowderPatternDiffraction::CrystUpdate(const bool uui,const bool lock)
+{
+   VFN_DEBUG_MESSAGE("WXPowderPatternDiffraction::CrystUpdate()",10)
+   if(lock) mMutex.Lock();
+   for(unsigned int i=0;i<6;i++) mFrozenLatticePar(i)=mpPowderPatternDiffraction->GetFrozenLatticePar(i);
+   if(mFreezeLatticePar!=mpPowderPatternDiffraction->FreezeLatticePar())
+   {
+      mFreezeLatticePar=mpPowderPatternDiffraction->FreezeLatticePar();
+      mNeedLayout=true;
+   }
+   this->WXRefinableObj::CrystUpdate(uui,false);
+   if(lock) mMutex.Unlock();
+}
+   
 void WXPowderPatternDiffraction::UpdateUI(const bool lock)
 {
+   VFN_DEBUG_MESSAGE("WXPowderPatternDiffraction::UpdateUI()",10)
    if(lock) mMutex.Lock();
    mpFieldCrystal->SetValue(mpPowderPatternDiffraction->GetCrystal().GetName());
    mpProfileFittingMode->SetValue(mpPowderPatternDiffraction->GetExtractionMode());
    mpPowderPatternDiffraction->mCorrTextureEllipsoid.UpdateEllipsoidPar();
+   mpGridFrozenLatticePar->Show(mFreezeLatticePar);
+   if(mFreezeLatticePar)
+   {
+      for(unsigned int i=0;i<3;++i) mpGridFrozenLatticePar->SetCellValue(0, i, wxString::Format("%.4f",mFrozenLatticePar(i)));
+      for(unsigned int i=3;i<6;++i) mpGridFrozenLatticePar->SetCellValue(0, i, wxString::Format("%.3f",mFrozenLatticePar(i)*180/M_PI));
+   }
+   mpFreezeLatticePar->SetValue(mFreezeLatticePar);
+   if(mNeedLayout)
+   {
+      VFN_DEBUG_MESSAGE("WXPowderPatternDiffraction::UpdateUI():Layout !", 10)
+      this->Layout();
+      mNeedLayout=false;
+   }
    if(lock) mMutex.Unlock();
    this->WXRefinableObj::UpdateUI(lock);
 }
+bool WXPowderPatternDiffraction::Enable(bool e)
+{
+   if(0!=mpGridFrozenLatticePar) mpGridFrozenLatticePar->Enable(e);
+   return this->::wxWindow::Enable(e);
+}
+
 void WXPowderPatternDiffraction::OnChangeProfile(wxCommandEvent & event)
 {
    VFN_DEBUG_ENTRY("WXPowderPatternDiffraction::OnChangeProfile()",6)
@@ -3920,7 +4001,7 @@ wxWindow(parent,-1),mpPattern(pPattern),mpDiff(pDiff),mLSQ("Profile Fitting obje
          mpFitCheckList->Check(6,true);
          mpFitCheckList->Check(7,true);
       }
-      pSizer->Add(mpFitCheckList,0,wxALIGN_CENTER);
+      pSizer->Add(mpFitCheckList,1,wxEXPAND|wxALIGN_CENTER);
       
       pQuick->SetSizer(pSizer);
       pSizer->SetSizeHints(pQuick);
@@ -4573,6 +4654,11 @@ void WXPowderPatternDiffraction::OnLeBail(wxCommandEvent &event)
    WXProfileFitting *pFit;
    pFit=new WXProfileFitting(pFrame,&(mpPowderPatternDiffraction->GetParentPowderPattern()),mpPowderPatternDiffraction);
    pFrame->Show(true);
+}
+
+void WXPowderPatternDiffraction::OnFreezeLatticePar(wxCommandEvent &event)
+{
+   mpPowderPatternDiffraction->FreezeLatticePar(mpFreezeLatticePar->GetValue());
 }
 
 

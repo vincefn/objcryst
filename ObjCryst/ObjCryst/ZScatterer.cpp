@@ -648,7 +648,8 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                                    const REAL yMin,const REAL yMax,
                                    const REAL zMin,const REAL zMax,
                                    const bool displayEnantiomer,
-                                   const bool displayNames)const
+                                   const bool displayNames,
+                                   const bool hideHydrogens)const
 {
    #ifdef OBJCRYST_GL
    VFN_DEBUG_ENTRY("ZScatterer::GLInitDisplayList()",4)
@@ -690,6 +691,7 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                {
                   const int n1=m3DDisplayIndex(k,1);
                   if(0==mZAtomRegistry.GetObj(n1).GetScatteringPower())break;
+                  if(hideHydrogens  && (mZAtomRegistry.GetObj(n1).GetScatteringPower()->GetForwardScatteringFactor(RAD_XRAY)<1.5)) continue;
                   glMaterialfv (GL_FRONT, GL_AMBIENT_AND_DIFFUSE,
                                 mZAtomRegistry.GetObj(n1).GetScatteringPower()->GetColourRGB());
                   glPushMatrix();
@@ -703,6 +705,8 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                   long n1,n2;
                   n1=m3DDisplayIndex(k,1);
                   n2=m3DDisplayIndex(k,2);
+                  if(hideHydrogens  && (mZAtomRegistry.GetObj(n1).GetScatteringPower()->GetForwardScatteringFactor(RAD_XRAY)<1.5)) continue;
+                  if(hideHydrogens  && (mZAtomRegistry.GetObj(n2).GetScatteringPower()->GetForwardScatteringFactor(RAD_XRAY)<1.5)) continue;
                   glPushMatrix();
                      glTranslatef(x(n1)*en, y(n1), z(n1));
                      glMaterialfv (GL_FRONT, GL_AMBIENT_AND_DIFFUSE,colour_bond);
@@ -808,6 +812,7 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
          for(int k=0;k<mNbAtom;k++)
          {
             if(0==mZAtomRegistry.GetObj(k).GetScatteringPower())continue;
+            if(hideHydrogens  && (mZAtomRegistry.GetObj(k).GetScatteringPower()->GetForwardScatteringFactor(RAD_XRAY)<1.5)) continue;
             const float r=mZAtomRegistry.GetObj(k).GetScatteringPower()->GetColourRGB()[0];
             const float g=mZAtomRegistry.GetObj(k).GetScatteringPower()->GetColourRGB()[1];
             const float b=mZAtomRegistry.GetObj(k).GetScatteringPower()->GetColourRGB()[2];
@@ -996,6 +1001,7 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                   for(int k=0;k<mNbAtom;k++)
                   {
                      if(0==mZAtomRegistry.GetObj(k).GetScatteringPower())continue;
+                     if(hideHydrogens  && (mZAtomRegistry.GetObj(k).GetScatteringPower()->GetForwardScatteringFactor(RAD_XRAY)<1.5)) continue;
                      const float r=mZAtomRegistry.GetObj(k).GetScatteringPower()->GetColourRGB()[0];
                      const float g=mZAtomRegistry.GetObj(k).GetScatteringPower()->GetColourRGB()[1];
                      const float b=mZAtomRegistry.GetObj(k).GetScatteringPower()->GetColourRGB()[2];

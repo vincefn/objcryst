@@ -483,6 +483,10 @@ class ScatteringData: virtual public RefinableObj
          virtual void CalcSinThetaLambda()const;
          /// Calculate sin(theta)/lambda for a single reflection
          REAL CalcSinThetaLambda(REAL h, REAL k, REAL l)const;
+         /// Get access to the B matrix used to compute reflection positions.
+         /// May be overridden by derived classes to use different lattice parameters
+         /// than the Crystal's unitcell (used for multiple datasets).
+         virtual const CrystMatrix_REAL& GetBMatrix()const;
          /// \internal Get scattering factors for all ScatteringPower & reflections
          void CalcScattFactor()const;
          /// \internal Compute thermic factors for all ScatteringPower & reflections

@@ -37,7 +37,7 @@ libfftw: ../static-libs/lib/libfftw3f.a
 	rm -f $(PWD)/../static-libs/lib/libmysql*.dylib
 	rm -Rf ../mysql-5.6.24
 
-libmysql=$(DIR_STATIC_LIBS)/lib/libmysqlclient.a
+libmysql: ../static-libs/lib/libmysqlclient.a
 
 
 ../wxWidgets-3.0.2.tar.bz2:
@@ -59,11 +59,11 @@ Fox-nogui: ../cctbx ../newmat
 	make -f gnu.mak Fox-nogui
 
 dist:Fox
-	rm -Rf Fox-Universal-`date "+%Y-%m-%d"` Fox-Universal-`date "+%Y-%m-%d"`.dmg
-	mkdir Fox-Universal-`date "+%Y-%m-%d"`
-	cp -R build/Deployment/Fox.app example Fox-Universal-`date "+%Y-%m-%d"`/
-	hdiutil create -srcfolder Fox-Universal-`date "+%Y-%m-%d"` Fox-Universal-`date "+%Y-%m-%d"`.dmg
-	rm -Rf Fox-Universal-`date "+%Y-%m-%d"`
+	rm -Rf Fox-`date "+%Y-%m-%d"` Fox-`date "+%Y-%m-%d"`.dmg
+	mkdir Fox-`date "+%Y-%m-%d"`
+	cp -R build/Deployment/Fox.app example Fox-`date "+%Y-%m-%d"`/
+	hdiutil create -srcfolder Fox-`date "+%Y-%m-%d"` Fox-`date "+%Y-%m-%d"`.dmg
+	rm -Rf Fox-`date "+%Y-%m-%d"`
 
 all: Fox Fox-nogui
 

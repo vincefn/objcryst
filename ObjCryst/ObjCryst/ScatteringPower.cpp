@@ -350,7 +350,7 @@ void ScatteringPowerAtom::Init(const string &name,const string &symbol,const REA
       cctbx::eltbx::covalent_radii::table tcov(mSymbol);
       mCovalentRadius=tcov.radius();
    }
-   catch(cctbx::error)
+   catch(exception &err)
    {
       cout << "WARNING: could not interpret Symbol name !"<<mSymbol<<endl
            << "         Reverting to H !"<<endl;

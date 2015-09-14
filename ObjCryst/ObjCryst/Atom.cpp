@@ -200,6 +200,7 @@ ostream& Atom::POVRayDescription(ostream &os,
                                  const CrystalPOVRayOptions &options)const
 {
    if(this->IsDummy()) return os;
+   if(options.mShowHydrogens==false && (mpScattPowAtom->GetForwardScatteringFactor(RAD_XRAY)<1.5)) return os;
    const REAL xMin=options.mXmin; const REAL xMax=options.mXmax;
    const REAL yMin=options.mYmin; const REAL yMax=options.mYmax;
    const REAL zMin=options.mZmin; const REAL zMax=options.mZmax;
@@ -294,7 +295,8 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
                              const REAL yMin,const REAL yMax,
                              const REAL zMin,const REAL zMax,
                              const bool displayEnantiomer,
-                             const bool displayNames)const
+                             const bool displayNames,
+                             const bool hideHydrogens)const
 {
    #ifdef OBJCRYST_GL
    VFN_DEBUG_MESSAGE("Atom::GLInitDisplayList():"<<this->GetName(),5)
@@ -319,6 +321,7 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
    const REAL cc=this->GetCrystal().GetLatticePar(2);
 
    if(this->IsDummy()) return ;
+   if(hideHydrogens  && (mpScattPowAtom->GetForwardScatteringFactor(RAD_XRAY)<1.5)) return;
    GLUquadricObj* pQuadric = gluNewQuadric();
    if(true==onlyIndependentAtoms)
    {
@@ -430,15 +433,18 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
                this->GetCrystal().FractionalToOrthonormalCoords(x,y,z);
                glPushMatrix();
                   glTranslatef(x*en, y, z);
-                  if((displayNames)&&(fout>0.99))
+                  if(displayNames)
                   {
-                     glMaterialfv(GL_FRONT, GL_AMBIENT,   colour0); 
-                     glMaterialfv(GL_FRONT, GL_DIFFUSE,   colour0); 
-                     glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0); 
-                     glMaterialfv(GL_FRONT, GL_EMISSION,  colourChar); 
-                     glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
-                     glRasterPos3f(0,0,0);
-                     crystGLPrint(this->GetName());
+                     if(fout>0.99)
+                     {
+                        glMaterialfv(GL_FRONT, GL_AMBIENT,   colour0);
+                        glMaterialfv(GL_FRONT, GL_DIFFUSE,   colour0);
+                        glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0);
+                        glMaterialfv(GL_FRONT, GL_EMISSION,  colourChar);
+                        glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
+                        glRasterPos3f(0,0,0);
+                        crystGLPrint(this->GetName());
+                     }
                   }
                   else
                   {

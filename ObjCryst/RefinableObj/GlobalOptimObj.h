@@ -218,6 +218,10 @@ class OptimizationObj
                                      const bool enableRestraints=false);
       /// End optimization for all objects
       virtual void EndOptimization();
+      /// Number of trial per run
+      virtual long& NbTrialPerRun();
+      /// Number of trial per run
+      virtual const long& NbTrialPerRun() const;
    protected:
       /// \internal Prepare mRefParList for the refinement
       void PrepareRefParList();
@@ -242,6 +246,8 @@ class OptimizationObj
       string mSaveFileName;
       
       //Status of optimization
+         /// Number of trial per run, to be saved/restored in XML output
+         long mNbTrialPerRun;
          /// Number of trials so far
          long mNbTrial;
          /// Best value of the cost function so far
@@ -412,11 +418,6 @@ class MonteCarloObj:public OptimizationObj
 
       void RunRandomLSQMethod(long &nbCycle);
 
-      void RunNondestructiveLSQRefinement(  int nbCycle=1,bool useLevenbergMarquardt=false, 
-                                            const bool silent=false, const bool callBeginEndOptimization=true, 
-                                            const float minChi2var=0.01 );
-
-      
       //Parameter Access by name
       //RefinablePar& GetPar(const string& parName);
       

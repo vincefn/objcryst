@@ -200,7 +200,23 @@ struct CrystalPOVRayOptions
    REAL mXmin, mXmax, mYmin, mYmax, mZmin, mZmax;
    /// Show labels ?
    bool mShowLabel;
+   /// Show hydrogens ?
+   bool mShowHydrogens;
 };
+    
+/// This class only serves to temporarilly set the LC_NUMERIC C locale to "C",
+/// in order to use '.' as the decimal separator.
+/// Just creating one object of type tmp_C_Numeric_locale will switch to the C locale,
+/// and when the object gets destroyed it will restore the old locale.
+class tmp_C_Numeric_locale
+{// Implemented in SpaceGroup.cpp
+    public:
+        tmp_C_Numeric_locale();
+        ~tmp_C_Numeric_locale();
+    private:
+        std::string mLocale;
+};
+
 }//Namespace
 
 #endif //_VFN_OBJCRYST_H_

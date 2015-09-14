@@ -546,7 +546,8 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
                                 const REAL xMin,const REAL xMax,
                                 const REAL yMin,const REAL yMax,
                                 const REAL zMin,const REAL zMax,
-                                const bool displayNames)const
+                                const bool displayNames,
+                                const bool hideHydrogens)const
 {
    VFN_DEBUG_ENTRY("Crystal::GLInitDisplayList()",5)
    #ifdef OBJCRYST_GL
@@ -695,7 +696,7 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
             for(int i=0;i<mScattererRegistry.GetNb();i++) 
                this->GetScatt(i).GLInitDisplayList(onlyIndependentAtoms,
                                                    xMin,xMax,yMin,yMax,zMin,zMax,
-                                                   displayEnantiomer,displayNames);
+                                                   displayEnantiomer,displayNames,hideHydrogens);
          }
       glPopMatrix();
    #else
@@ -973,7 +974,7 @@ void Crystal::CIFOutput(ostream &os, double mindist)const
 
    //Symmetry
    os <<"_symmetry_space_group_name_H-M    '"
-      << this->GetSpaceGroup().GetCCTbxSpg().match_tabulated_settings().hermann_mauguin()<<"'"<<endl;
+      << this->GetSpaceGroup().GetCCTbxSpg().match_tabulated_settings().hermann_mauguin()<<":"<<this->GetSpaceGroup().GetExtension()<<"'"<<endl;
    os <<"_symmetry_space_group_name_Hall   '"
       << this->GetSpaceGroup().GetCCTbxSpg().match_tabulated_settings().hall()<<"'"<<endl;
    os <<endl;
