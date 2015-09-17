@@ -121,7 +121,7 @@ mBondValenceCost(0.0),mBondValenceCostScale(1.0),mDeleteSubObjInDestructor(1)
    mClockMaster.AddChild(mLatticeClock);
    mClockMaster.AddChild(this->mScattererRegistry.GetRegistryClock());
    mClockMaster.AddChild(this->mScatteringPowerRegistry.GetRegistryClock());
-   
+
    stringstream sst;
    old.XMLOutput(sst);
    XMLCrystTag tag(sst);
@@ -219,7 +219,7 @@ ObjRegistry<Scatterer>& Crystal::GetScattererRegistry() {return mScattererRegist
 
 const ObjRegistry<Scatterer>& Crystal::GetScattererRegistry() const {return mScattererRegistry;}
 
-ObjRegistry<ScatteringPower>& Crystal::GetScatteringPowerRegistry() 
+ObjRegistry<ScatteringPower>& Crystal::GetScatteringPowerRegistry()
 {return mScatteringPowerRegistry;}
 const ObjRegistry<ScatteringPower>& Crystal::GetScatteringPowerRegistry() const
 {return mScatteringPowerRegistry;}
@@ -243,7 +243,7 @@ void Crystal::RemoveScatteringPower(ScatteringPower *scattPow, const bool del)
    mClockMaster.RemoveChild(scattPow->GetMaximumLikelihoodParClock());
    mMasterClockScatteringPower.RemoveChild(scattPow->GetClockMaster());
    if(del) delete scattPow;
-   
+
    for(Crystal::VBumpMergePar::iterator pos=mvBumpMergePar.begin();pos!=mvBumpMergePar.end();)
    {
       if((pos->first.first==scattPow)||(pos->first.second==scattPow))
@@ -253,7 +253,7 @@ void Crystal::RemoveScatteringPower(ScatteringPower *scattPow, const bool del)
       }
       else ++pos;// See Josuttis Std C++ Lib p.205 for safe method
    }
-   
+
    for(map<pair<const ScatteringPower*,const ScatteringPower*>, REAL>::iterator
          pos=mvBondValenceRo.begin();pos!=mvBondValenceRo.end();)
    {
@@ -302,11 +302,11 @@ const ScatteringComponentList& Crystal::GetScatteringComponentList()const
          //this->GetScatt(i).GetScatteringComponentList().Print();
          mScattCompList += this->GetScatt(i).GetScatteringComponentList();
       }
-         
+
       //:KLUDGE: this must be *before* calling CalcDynPopCorr() to avoid an infinite loop..
       mClockScattCompList.Click();
-      
-      if(1==mUseDynPopCorr.GetChoice()) 
+
+      if(1==mUseDynPopCorr.GetChoice())
          this->CalcDynPopCorr(1.,.5); else this->ResetDynPopCorr();
       VFN_DEBUG_MESSAGE("Crystal::GetScatteringComponentList():End",2)
    }
@@ -325,24 +325,24 @@ void Crystal::Print(ostream &os)const
 {
    VFN_DEBUG_MESSAGE("Crystal::Print()",5)
    this->UnitCell::Print(os);
-   
+
    this->GetScatteringComponentList();
    this->CalcBondValenceSum();
-   
+
    os << "List of scattering components (atoms): " << mScattCompList.GetNbComponent() << endl ;
-   
+
    long k=0;
    std::map<long, REAL>::const_iterator posBV;
-   for(int i=0;i<mScattererRegistry.GetNb();i++) 
+   for(int i=0;i<mScattererRegistry.GetNb();i++)
    {
       //mpScatterrer[i]->Print();
       const ScatteringComponentList list=this->GetScatt(i).GetScatteringComponentList();
       for(int j=0;j<list.GetNbComponent();j++)
       {
          os   << FormatString(this->GetScatt(i).GetComponentName(j),16) << " at : "
-              << FormatFloat(list(j).mX,7,4) 
-              << FormatFloat(list(j).mY,7,4) 
-              << FormatFloat(list(j).mZ,7,4) 
+              << FormatFloat(list(j).mX,7,4)
+              << FormatFloat(list(j).mY,7,4)
+              << FormatFloat(list(j).mZ,7,4)
               << ", Occup=" << FormatFloat(list(j).mOccupancy,6,4)
               << " * " << FormatFloat(mScattCompList(k).mDynPopCorr,6,4);
          // Check for dummy atoms
@@ -367,20 +367,20 @@ void Crystal::Print(ostream &os)const
          k++;
       }
    }
-   os <<endl 
+   os <<endl
       << "Occupancy = occ * dyn, where:"<<endl
-      << "        - occ is the 'real' occupancy"<< endl 
-      << "        - dyn is the dynamical occupancy correction, indicating  either"<< endl 
-      << "          an atom on a special position, or several identical atoms "<< endl 
-      << "          overlapping (dyn=0.5 -> atom on a symetry plane / 2fold axis.."<< endl 
-      << "                               -> OR 2 atoms strictly overlapping)"<< endl 
+      << "        - occ is the 'real' occupancy"<< endl
+      << "        - dyn is the dynamical occupancy correction, indicating  either"<< endl
+      << "          an atom on a special position, or several identical atoms "<< endl
+      << "          overlapping (dyn=0.5 -> atom on a symetry plane / 2fold axis.."<< endl
+      << "                               -> OR 2 atoms strictly overlapping)"<< endl
       <<endl;
    REAL nbAtoms=0;
    const long genMult=this->GetSpaceGroup().GetNbSymmetrics();
-   for(int i=0;i<mScattCompList.GetNbComponent();i++) 
+   for(int i=0;i<mScattCompList.GetNbComponent();i++)
       nbAtoms += genMult * mScattCompList(i).mOccupancy * mScattCompList(i).mDynPopCorr;
    os << " Total number of components (atoms) in one unit cell : " << nbAtoms<<endl<<endl;
-   
+
    VFN_DEBUG_MESSAGE("Crystal::Print():End",5)
 }
 
@@ -389,7 +389,7 @@ CrystMatrix_REAL Crystal::GetMinDistanceTable(const REAL minDistance) const
    VFN_DEBUG_MESSAGE("Crystal::MinDistanceTable()",5)
    this->CalcDistTable(true);
    const long nbComponent=mScattCompList.GetNbComponent();
-   
+
    CrystMatrix_REAL minDistTable(nbComponent,nbComponent);
    REAL dist;
    REAL tmp;
@@ -405,7 +405,7 @@ CrystMatrix_REAL Crystal::GetMinDistanceTable(const REAL minDistance) const
       {
          tmp=pos->mDist2;
          dist=minDistTable(i,pos->mNeighbourIndex);
-         if(  (tmp<dist) 
+         if(  (tmp<dist)
             && ((tmp>min) || (  (mvDistTableSq[i].mIndex !=pos->mNeighbourIndex)
                               &&(mvDistTableSq[i].mUniquePosSymmetryIndex
                                  !=pos->mNeighbourSymmetryIndex))))
@@ -462,7 +462,7 @@ ostream& Crystal::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opti
 {
    VFN_DEBUG_MESSAGE("Crystal::POVRayDescription(os,bool)",5)
    os <<"/////////////////////// MACROS////////////////////"<<endl;
-   
+
    os << "#macro ObjCrystAtom(atomx,atomy,atomz,atomr,atomc,occ,atten)"
       << "   sphere"<<endl
       << "   { <atomx,atomy,atomz>,atomr"<<endl
@@ -472,7 +472,7 @@ ostream& Crystal::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opti
       << "      no_shadow"<<endl
       << "   }"<<endl
       << "#end"<<endl<<endl;
-      
+
    os << "#macro ObjCrystBond(x1,y1,z1,x2,y2,z2,bondradius,bondColour,occ,atten)"<<endl
       << "   cylinder"<<endl
       << "   {  <x1,y1,z1>,"<<endl
@@ -492,7 +492,7 @@ ostream& Crystal::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opti
    os << "   //      pigment {colour rgbf<1,1,1,0.9>}" << endl;
    os << "   //      hollow" << endl;
    os << "   //}" <<endl<<endl;
-   
+
    #define UNITCELL_EDGE(X0,Y0,Z0,X1,Y1,Z1)\
    {\
       REAL x0=X0,y0=Y0,z0=Z0,x1=X1,y1=Y1,z1=Z1;\
@@ -503,21 +503,21 @@ ostream& Crystal::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opti
          <<x1<<","<<y1<<","<<z1<< ","\
          << "0.02,rgb<1.0,1.0,1.0>,1.0,1.0)"<<endl;\
    }
-   
+
    UNITCELL_EDGE(0,0,0,1,0,0)
    UNITCELL_EDGE(0,0,0,0,1,0)
    UNITCELL_EDGE(0,0,0,0,0,1)
-   
+
    UNITCELL_EDGE(1,1,1,0,1,1)
    UNITCELL_EDGE(1,1,1,1,0,1)
    UNITCELL_EDGE(1,1,1,1,1,0)
-   
+
    UNITCELL_EDGE(1,0,0,1,1,0)
    UNITCELL_EDGE(1,0,0,1,0,1)
-   
+
    UNITCELL_EDGE(0,1,0,1,1,0)
    UNITCELL_EDGE(0,1,0,0,1,1)
-   
+
    UNITCELL_EDGE(0,0,1,1,0,1)
    UNITCELL_EDGE(0,0,1,0,1,1)
 
@@ -528,7 +528,7 @@ ostream& Crystal::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opti
       const float r=mScatteringPowerRegistry.GetObj(i).GetColourRGB()[0];
       const float g=mScatteringPowerRegistry.GetObj(i).GetColourRGB()[1];
       const float b=mScatteringPowerRegistry.GetObj(i).GetColourRGB()[2];
-      os << "   #declare colour_"<< mScatteringPowerRegistry.GetObj(i).GetName() 
+      os << "   #declare colour_"<< mScatteringPowerRegistry.GetObj(i).GetName()
          <<"= rgb <"<< r<<","<<g<<","<<b<<">;"<< endl;
    }
    os << "// Bond colours"<<endl
@@ -553,7 +553,7 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
    #ifdef OBJCRYST_GL
       REAL en=1;// if -1, display enantiomeric structure
       if(mDisplayEnantiomer.GetChoice()==1) en=-1;
-      
+
       //Center of displayed unit
          REAL xc=(xMin+xMax)/2.;
          REAL yc=(yMin+yMax)/2.;
@@ -600,13 +600,13 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
             xM*=2;yM*=2;zM*=2;
          glPushMatrix();
          //Add Axis & axis names
-            const GLfloat colour0 [] = {0.00, 0.00, 0.00, 0.00}; 
-            const GLfloat colour1 [] = {0.50, 0.50, 0.50, 1.00}; 
-            const GLfloat colour2 [] = {1.00, 1.00, 1.00, 1.00}; 
-            glMaterialfv(GL_FRONT, GL_AMBIENT,   colour2); 
-            glMaterialfv(GL_FRONT, GL_DIFFUSE,   colour0); 
-            glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0); 
-            glMaterialfv(GL_FRONT, GL_EMISSION,  colour2); 
+            const GLfloat colour0 [] = {0.00, 0.00, 0.00, 0.00};
+            const GLfloat colour1 [] = {0.50, 0.50, 0.50, 1.00};
+            const GLfloat colour2 [] = {1.00, 1.00, 1.00, 1.00};
+            glMaterialfv(GL_FRONT, GL_AMBIENT,   colour2);
+            glMaterialfv(GL_FRONT, GL_DIFFUSE,   colour0);
+            glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0);
+            glMaterialfv(GL_FRONT, GL_EMISSION,  colour2);
             glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
             REAL x,y,z;
             x=1.2-xc;y=-yc;z=-zc;
@@ -624,15 +624,15 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
             glRasterPos3f(en*x,y,z);
             crystGLPrint("c");
          // Cell
-            glMaterialfv(GL_FRONT, GL_AMBIENT,   colour1); 
-            glMaterialfv(GL_FRONT, GL_DIFFUSE,   colour2); 
-            glMaterialfv(GL_FRONT, GL_SPECULAR,  colour2); 
-            glMaterialfv(GL_FRONT, GL_EMISSION,  colour0); 
+            glMaterialfv(GL_FRONT, GL_AMBIENT,   colour1);
+            glMaterialfv(GL_FRONT, GL_DIFFUSE,   colour2);
+            glMaterialfv(GL_FRONT, GL_SPECULAR,  colour2);
+            glMaterialfv(GL_FRONT, GL_EMISSION,  colour0);
             glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
             this->FractionalToOrthonormalCoords(xc,yc,zc);
             glTranslatef(-xc*en, -yc, -zc);
             glBegin(GL_LINES);
-               //top    
+               //top
                glNormal3f((x110+x010-xM)*en,y110+y010-yM,z110+z010-zM);
                glVertex3f(    x110*en,    y110,    z110);
                glVertex3f(    x010*en,    y010,    z010);
@@ -693,7 +693,7 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
          {
             bool displayEnantiomer=false;
             if(mDisplayEnantiomer.GetChoice()==1) displayEnantiomer=true;
-            for(int i=0;i<mScattererRegistry.GetNb();i++) 
+            for(int i=0;i<mScattererRegistry.GetNb();i++)
                this->GetScatt(i).GLInitDisplayList(onlyIndependentAtoms,
                                                    xMin,xMax,yMin,yMax,zMin,zMax,
                                                    displayEnantiomer,displayNames,hideHydrogens);
@@ -709,7 +709,7 @@ void Crystal::CalcDynPopCorr(const REAL overlapDist, const REAL mergeDist) const
 {
    VFN_DEBUG_ENTRY("Crystal::CalcDynPopCorr(REAL)",4)
    TAU_PROFILE("Crystal::CalcDynPopCorr()","void (REAL)",TAU_DEFAULT);
-   
+
    this->CalcDistTable(true);
    if(mClockDynPopCorr>mDistTableClock) return;
 
@@ -718,7 +718,7 @@ void Crystal::CalcDynPopCorr(const REAL overlapDist, const REAL mergeDist) const
    CrystVector_REAL neighborsDist(nbComponent*nbSymmetrics);
    long nbNeighbors=0;
    REAL corr;
-   
+
    int atomicNumber;
    const REAL overlapDistSq=overlapDist*overlapDist;
    REAL dist;
@@ -750,7 +750,7 @@ void Crystal::CalcDynPopCorr(const REAL overlapDist, const REAL mergeDist) const
          }
       }
       corr=0.;
-      for(long j=0;j<nbNeighbors;j++) 
+      for(long j=0;j<nbNeighbors;j++)
       {
          dist=neighborsDist(j)-mergeDist;
          if(dist<0.) dist=0.;
@@ -826,9 +826,9 @@ REAL Crystal::GetBumpMergeCost() const
    if(  (mBumpMergeCostClock>mBumpMergeParClock)
       &&(mBumpMergeCostClock>mDistTableClock)) return mBumpMergeCost*mBumpMergeScale;
    TAU_PROFILE("Crystal::GetBumpMergeCost()","REAL (REAL)",TAU_DEFAULT);
-   
+
    mBumpMergeCost=0;
-   
+
    std::vector<NeighbourHood>::const_iterator pos;
    std::vector<Crystal::Neighbour>::const_iterator neigh;
    REAL tmp;
@@ -887,7 +887,7 @@ void Crystal::RemoveBumpMergeDistance(const ScatteringPower &scatt1,
 }
 
 const Crystal::VBumpMergePar& Crystal::GetBumpMergeParList()const{return mvBumpMergePar;}
-Crystal::VBumpMergePar& Crystal::GetBumpMergeParList(){return mvBumpMergePar;}      
+Crystal::VBumpMergePar& Crystal::GetBumpMergeParList(){return mvBumpMergePar;}
 
 const RefinableObjClock& Crystal::GetClockScattererList()const {return mClockScattererList;}
 
@@ -923,7 +923,7 @@ void Crystal::GlobalOptRandomMove(const REAL mutationAmplitude,
 }
 
 REAL Crystal::GetLogLikelihood()const
-{  
+{
    return this->GetBumpMergeCost()+this->GetBondValenceCost();
 }
 
@@ -935,7 +935,7 @@ void Crystal::CIFOutput(ostream &os, double mindist)const
    string tempname = mName;
    int where, size;
    size = tempname.size();
-   if (size > 32) 
+   if (size > 32)
    {
       tempname = tempname.substr(0,32);
       size = tempname.size();
@@ -947,7 +947,7 @@ void Crystal::CIFOutput(ostream &os, double mindist)const
    }
    where = tempname.find(" ",0);
    while (where != (int)string::npos)
-   { 
+   {
      tempname.replace(where,1,"_");
      where = tempname.find(" ",0);
      //cout << tempname << endl;
@@ -978,24 +978,24 @@ void Crystal::CIFOutput(ostream &os, double mindist)const
    os <<"_symmetry_space_group_name_Hall   '"
       << this->GetSpaceGroup().GetCCTbxSpg().match_tabulated_settings().hall()<<"'"<<endl;
    os <<endl;
-      
+
    os << "_cell_length_a    " << FormatFloat(this->GetLatticePar(0),8,5) << endl
       << "_cell_length_b    " << FormatFloat(this->GetLatticePar(1),8,5) << endl
       << "_cell_length_c    " << FormatFloat(this->GetLatticePar(2),8,5) << endl
-      << "_cell_angle_alpha " << FormatFloat(this->GetLatticePar(3)*RAD2DEG,7,3) << endl 
-      << "_cell_angle_beta  " << FormatFloat(this->GetLatticePar(4)*RAD2DEG,7,3) << endl 
+      << "_cell_angle_alpha " << FormatFloat(this->GetLatticePar(3)*RAD2DEG,7,3) << endl
+      << "_cell_angle_beta  " << FormatFloat(this->GetLatticePar(4)*RAD2DEG,7,3) << endl
       << "_cell_angle_gamma " << FormatFloat(this->GetLatticePar(5)*RAD2DEG,7,3) << endl
-      << "_cell_volume      " << FormatFloat(this->GetVolume(),7,2);   
+      << "_cell_volume      " << FormatFloat(this->GetVolume(),7,2);
    os <<endl;
    this->GetScatteringComponentList();
-   
+
    /*
    TODO:
    loop_
  _symmetry_equiv_pos_site_id
  _symmetry_equiv_pos_as_xyz
 
-   */   
+   */
 
    os << "loop_" << endl
       << "    _atom_site_label" <<endl
@@ -1013,7 +1013,7 @@ void Crystal::CIFOutput(ostream &os, double mindist)const
    CrystMatrix_REAL minDistTable;
    minDistTable=this->GetMinDistanceTable(-1.);
    unsigned long k=0;
-   for(int i=0;i<mScattererRegistry.GetNb();i++) 
+   for(int i=0;i<mScattererRegistry.GetNb();i++)
    {
       //mpScatterrer[i]->Print();
       const ScatteringComponentList list=this->GetScatt(i).GetScatteringComponentList();
@@ -1030,12 +1030,12 @@ void Crystal::CIFOutput(ostream &os, double mindist)const
             while(posc!=string::npos){s[posc]='~';posc=s.find(' ');}
 
             bool isiso = list(j).mpScattPow->IsIsotropic();
-            if(!isiso) 
+            if(!isiso)
             {
                anisovec.push_back(list(j).mpScattPow);
                namevec.push_back(s);
             }
-            
+
             os   << "    "
                  << FormatString(s,10) << " "
                  << FormatString(list(j).mpScattPow->GetSymbol(),8) << " "
@@ -1076,10 +1076,10 @@ void Crystal::CIFOutput(ostream &os, double mindist)const
       }
    }
 
-   
+
    bool first=true;
    k=0;
-   for(int i=0;i<mScattererRegistry.GetNb();i++) 
+   for(int i=0;i<mScattererRegistry.GetNb();i++)
    {
       const ScatteringComponentList list=this->GetScatt(i).GetScatteringComponentList();
       for(int j=0;j<list.GetNbComponent();j++)
@@ -1119,7 +1119,7 @@ void Crystal::CIFOutput(ostream &os, double mindist)const
          << "#  values below 1. (100%) indicate a correction,"<<endl
          << "#  which means either that the atom is on a special position,"<<endl
          << "#  or that it is overlapping with another identical atom."<<endl;
-      for(int i=0;i<mScattererRegistry.GetNb();i++) 
+      for(int i=0;i<mScattererRegistry.GetNb();i++)
       {
          //mpScatterrer[i]->Print();
          const ScatteringComponentList list=this->GetScatt(i).GetScatteringComponentList();
@@ -1283,7 +1283,7 @@ void Crystal::Init(const REAL a, const REAL b, const REAL c, const REAL alpha,
    mClockScattCompList.Reset();
    mClockNeighborTable.Reset();
    mClockDynPopCorr.Reset();
-   
+
    VFN_DEBUG_MESSAGE("Crystal::Init(a,b,c,alpha,beta,gamma,Sg,name):End",10)
 }
 
@@ -1308,7 +1308,7 @@ void Crystal::ConnectAtoms(const REAL min_relat_dist, const REAL max_relat_dist,
    this->GetScatteringComponentList();
 
    const CrystMatrix_REAL* pOrthMatrix=&(this->GetOrthMatrix());
-   
+
    const REAL m00=(*pOrthMatrix)(0,0);
    const REAL m01=(*pOrthMatrix)(0,1);
    const REAL m02=(*pOrthMatrix)(0,2);
@@ -1428,7 +1428,7 @@ void Crystal::ConnectAtoms(const REAL min_relat_dist, const REAL max_relat_dist,
       if((vElementCount[6]>0) && (pmol->GetNbComponent()>=3)) keep=true;
       else
       {// no carbon ?
-         
+
          std::vector<unsigned int> vnb;
          #ifdef __DEBUG__
          cout<<"  Crystal::ConnectAtoms(..): Molecule ?";
@@ -1588,7 +1588,7 @@ void Crystal::InitOptions()
    VFN_DEBUG_ENTRY("Crystal::InitOptions",10)
    static string UseDynPopCorrname;
    static string UseDynPopCorrchoices[2];
-   
+
    static string DisplayEnantiomername;
    static string DisplayEnantiomerchoices[2];
 
@@ -1598,7 +1598,7 @@ void Crystal::InitOptions()
       UseDynPopCorrname="Use Dynamical Occupancy Correction";
       UseDynPopCorrchoices[0]="No";
       UseDynPopCorrchoices[1]="Yes";
-      
+
       DisplayEnantiomername="Display Enantiomer";
       DisplayEnantiomerchoices[0]="No";
       DisplayEnantiomerchoices[1]="Yes";
@@ -1609,7 +1609,7 @@ void Crystal::InitOptions()
    mUseDynPopCorr.Init(2,&UseDynPopCorrname,UseDynPopCorrchoices);
    mUseDynPopCorr.SetChoice(1);
    this->AddOption(&mUseDynPopCorr);
-   
+
    mDisplayEnantiomer.Init(2,&DisplayEnantiomername,DisplayEnantiomerchoices);
    mDisplayEnantiomer.SetChoice(0);
    this->AddOption(&mDisplayEnantiomer);
@@ -1643,13 +1643,13 @@ void Crystal::CalcDistTable(const bool fast) const
       if(mDistTableMaxDistance!=10) mDistTableClock.Reset();
       mDistTableMaxDistance=10;
    }
-   
+
    if(  (mDistTableClock>mClockScattCompList)
       &&(mDistTableClock>this->GetClockMetricMatrix())) return;
    VFN_DEBUG_ENTRY("Crystal::CalcDistTable(fast="<<fast<<"),maxDist="<<mDistTableMaxDistance,4)
-      
+
    const long nbComponent=mScattCompList.GetNbComponent();
-   
+
    mvDistTableSq.resize(nbComponent);
    {
       std::vector<NeighbourHood>::iterator pos;
@@ -1657,33 +1657,33 @@ void Crystal::CalcDistTable(const bool fast) const
          pos->mvNeighbour.clear();
    }
    VFN_DEBUG_MESSAGE("Crystal::CalcDistTable():1",3)
-   
+
    // Get range and origin of the (pseudo) asymmetric unit
       const REAL asux0=this->GetSpaceGroup().GetAsymUnit().Xmin();
       const REAL asuy0=this->GetSpaceGroup().GetAsymUnit().Ymin();
       const REAL asuz0=this->GetSpaceGroup().GetAsymUnit().Zmin();
-      
+
       const REAL asux1=this->GetSpaceGroup().GetAsymUnit().Xmax();
       const REAL asuy1=this->GetSpaceGroup().GetAsymUnit().Ymax();
       const REAL asuz1=this->GetSpaceGroup().GetAsymUnit().Zmax();
-      
+
       const REAL halfasuxrange=(asux1-asux0)*0.5+1e-5;
       const REAL halfasuyrange=(asuy1-asuy0)*0.5+1e-5;
       const REAL halfasuzrange=(asuz1-asuz0)*0.5+1e-5;
-      
+
       const REAL asuxc=0.5*(asux0+asux1);
       const REAL asuyc=0.5*(asuy0+asuy1);
       const REAL asuzc=0.5*(asuz0+asuz1);
-      
+
       const REAL maxdx=halfasuxrange+mDistTableMaxDistance/GetLatticePar(0);
       const REAL maxdy=halfasuyrange+mDistTableMaxDistance/GetLatticePar(1);
       const REAL maxdz=halfasuzrange+mDistTableMaxDistance/GetLatticePar(2);
-   
+
    // List of all positions within or near the first atom generated
    std::vector<DistTableInternalPosition> vPos;
    // index of unique atoms in vPos, which are strictly in the asymmetric unit
    std::vector<unsigned long> vUniqueIndex(nbComponent);
-   
+
    const REAL asymUnitMargin2 = mDistTableMaxDistance*mDistTableMaxDistance;
 
    if(true)//(true==fast)
@@ -1692,7 +1692,7 @@ void Crystal::CalcDistTable(const bool fast) const
       TAU_PROFILE("Crystal::CalcDistTable(fast=true)","Matrix (string&)",TAU_DEFAULT);
       TAU_PROFILE_TIMER(timer1,"DiffractionData::CalcDistTable1","", TAU_FIELD);
       TAU_PROFILE_TIMER(timer2,"DiffractionData::CalcDistTable2","", TAU_FIELD);
-      
+
       TAU_PROFILE_START(timer1);
 
       // No need to loop on a,b,c translations if mDistTableMaxDistance is small enough
@@ -1700,7 +1700,7 @@ void Crystal::CalcDistTable(const bool fast) const
       if(  ((this->GetLatticePar(0)*.5)>mDistTableMaxDistance)
          &&((this->GetLatticePar(1)*.5)>mDistTableMaxDistance)
          &&((this->GetLatticePar(2)*.5)>mDistTableMaxDistance)) loopOnLattice=false;
-      
+
       CrystMatrix_REAL symmetricsCoords;
 
       const int nbSymmetrics=this->GetSpaceGroup().GetNbSymmetrics(false,false);
@@ -1709,7 +1709,7 @@ void Crystal::CalcDistTable(const bool fast) const
       for(long i=0;i<nbComponent;i++)
       {
          VFN_DEBUG_MESSAGE("Crystal::CalcDistTable(fast):3:component "<<i,0)
-         // generate all symmetrics, excluding translations 
+         // generate all symmetrics, excluding translations
          symmetricsCoords=this->GetSpaceGroup().GetAllSymmetrics(mScattCompList(i).mX,
                                                                  mScattCompList(i).mY,
                                                                  mScattCompList(i).mZ,
@@ -1722,7 +1722,7 @@ void Crystal::CalcDistTable(const bool fast) const
             REAL x=fmod(symmetricsCoords(j,0)-asuxc,(REAL)1.0);if(x<-.5)x+=1;else if(x>.5)x-=1;
             REAL y=fmod(symmetricsCoords(j,1)-asuyc,(REAL)1.0);if(y<-.5)y+=1;else if(y>.5)y-=1;
             REAL z=fmod(symmetricsCoords(j,2)-asuzc,(REAL)1.0);if(z<-.5)z+=1;else if(z>.5)z-=1;
-            
+
             //cout<<i<<","<<j<<":"<<FormatFloat(x,8,5)<<","<<FormatFloat(y,8,5)<<","<<FormatFloat(z,8,5)<<endl;
             if( (abs(x)<maxdx) && (abs(y)<maxdy) && (abs(z)<maxdz) )
                vPos.push_back(DistTableInternalPosition(i, j, x+asuxc, y+asuyc, z+asuzc));
@@ -1742,9 +1742,9 @@ void Crystal::CalcDistTable(const bool fast) const
       }
       TAU_PROFILE_STOP(timer1);
       TAU_PROFILE_START(timer2);
-      // Compute interatomic vectors & distance 
+      // Compute interatomic vectors & distance
       // between (i) unique atoms and (ii) all remaining atoms
-      
+
       const CrystMatrix_REAL* pOrthMatrix=&(this->GetOrthMatrix());
 
       const REAL m00=(*pOrthMatrix)(0,0);
@@ -1777,11 +1777,11 @@ void Crystal::CalcDistTable(const bool fast) const
             REAL x=fmod(vPos[j].mX - x0i,(REAL)1.0);if(x<-.5)x+=1;if(x>.5)x-=1;
             REAL y=fmod(vPos[j].mY - y0i,(REAL)1.0);if(y<-.5)y+=1;if(y>.5)y-=1;
             REAL z=fmod(vPos[j].mZ - z0i,(REAL)1.0);if(z<-.5)z+=1;if(z>.5)z-=1;
-            
+
             const REAL x0=m00 * x + m01 * y + m02 * z;
             const REAL y0=          m11 * y + m12 * z;
             const REAL z0=                    m22 * z;
-               
+
             if(loopOnLattice)// distance to self !
             {//Now loop over lattice translations
                for(int sz=-1;sz<=1;sz+=2)// Sign of translation

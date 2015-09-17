@@ -89,7 +89,7 @@ void CIFData::ExtractSpacegroup(const bool verbose)
          if(verbose) cout<<"Found spacegroup IT number (with OBSOLETE CIF #1.0 TAG):"<<mSpacegroupNumberIT<<endl;
       }
    }
-   
+
    positem=mvItem.find("_space_group_name_Hall");
    if(positem!=mvItem.end())
    {
@@ -105,7 +105,7 @@ void CIFData::ExtractSpacegroup(const bool verbose)
          if(verbose) cout<<"Found spacegroup Hall symbol (with OBSOLETE CIF #1.0 TAG):"<<mSpacegroupSymbolHall<<endl;
       }
    }
-   
+
    positem=mvItem.find("_space_group_name_H-M_alt");
    if(positem!=mvItem.end())
    {
@@ -378,10 +378,10 @@ void CIFData::ExtractAnisotropicADPs(const bool verbose)
 
    for(LoopIter loop=mvLoop.begin(); loop!=mvLoop.end();++loop)
    {
-      
+
       // Start with anisotropic factors. If we can find the the
       // "_atom_site_aniso_label" tag, we then want to look for the aniso
-      // information. 
+      // information.
       anisolabels = loop->second.find("_atom_site_aniso_label");
 
       // Move to the next loop if we can't find it here.
@@ -434,11 +434,11 @@ void CIFData::ExtractAnisotropicADPs(const bool verbose)
          // If we didn't find the mvAtom, then we should move on to the next
          // label.
          if (atom == mvAtom.end()) continue;
-      
+
          // Fill in what we've got, one entry at a time.
          for (int idx=0; idx<6; ++idx)
          {
-            if (mult[idx] == 0) 
+            if (mult[idx] == 0)
             {
                if(verbose) cout << "skipping index " << idx << endl;
                continue;
@@ -447,10 +447,10 @@ void CIFData::ExtractAnisotropicADPs(const bool verbose)
             EntryIter& betaiter = *betaiters[idx];
 
             if (betaiter->second.size() <= i) continue;
-         
+
             double beta = CIFNumeric2REAL(betaiter->second[i]);
             atom->mBeta[idx] = mult[idx] * beta;
-         
+
             if(verbose) cout << "mBeta " << idx << " " << atom->mBeta[idx] << endl;
          }
       }
@@ -459,9 +459,9 @@ void CIFData::ExtractAnisotropicADPs(const bool verbose)
 }
 
 
-/// This is the default wavelength - whenever a "_diffrn_radiation_wavelength" or 
+/// This is the default wavelength - whenever a "_diffrn_radiation_wavelength" or
 /// "_pd_proc_wavelength"entry is found,
-/// it is used as a new value for the default wavelength. Since the powder CIFs do not 
+/// it is used as a new value for the default wavelength. Since the powder CIFs do not
 /// include the wavelength, this could be useful if the crystal structure CIF (including
 /// the wavelength) is parsed right before the powder pattern one.
 static REAL defaultWavelength=1.0;
@@ -478,7 +478,7 @@ void CIFData::ExtractPowderPattern(const bool verbose)
       cout<<"Found wavelength:"<<defaultWavelength<<endl;
    }
    else mWavelength=defaultWavelength;
-   
+
    /// Now find the data
    for(map<set<ci_string>,map<ci_string,vector<string> > >::const_iterator loop=mvLoop.begin();
        loop!=mvLoop.end();++loop)
@@ -493,7 +493,7 @@ void CIFData::ExtractPowderPattern(const bool verbose)
          defaultWavelength=mWavelength;
          cout<<" -> "<<defaultWavelength<<endl;
       }
-         
+
       pos_iobs=loop->second.find("_pd_meas_counts_total");
       if(pos_iobs==loop->second.end()) pos_iobs=loop->second.find("_pd_meas_intensity_total");
       if(pos_iobs==loop->second.end()) pos_iobs=loop->second.find("_pd_proc_intensity_total");
@@ -508,7 +508,7 @@ void CIFData::ExtractPowderPattern(const bool verbose)
          pos_x=loop->second.find("_pd_meas_time_of_flight");
          if(pos_x!=loop->second.end()) mDataType=WAVELENGTH_TOF;
       }
-      
+
       bool x_fixed_step=false;
       REAL xmin,xmax,xinc;
       if(pos_x==loop->second.end())
@@ -580,7 +580,7 @@ void CIFData::ExtractSingleCrystalData(const bool verbose)
       cout<<"Found wavelength:"<<defaultWavelength<<endl;
    }
    else mWavelength=defaultWavelength;
-   
+
    /// Now find the data
    for(map<set<ci_string>,map<ci_string,vector<string> > >::const_iterator loop=mvLoop.begin();
        loop!=mvLoop.end();++loop)
@@ -595,14 +595,14 @@ void CIFData::ExtractSingleCrystalData(const bool verbose)
          defaultWavelength=mWavelength;
          cout<<" -> "<<defaultWavelength<<endl;
       }
-         
+
       pos_iobs=loop->second.find("_refln_F_squared_meas");
       if(pos_iobs==loop->second.end()) continue;//no observed powder data found
       pos_sigma=loop->second.find("_refln_F_squared_sigma");
       pos_h=loop->second.find("_refln_index_h");
       pos_k=loop->second.find("_refln_index_k");
       pos_l=loop->second.find("_refln_index_l");
-      
+
       if( (pos_iobs!=loop->second.end()) && (pos_h!=loop->second.end()) && (pos_k!=loop->second.end()) && (pos_l!=loop->second.end()))
       {// Found single crystal data !
          const long nb=pos_iobs->second.size();
@@ -637,40 +637,40 @@ void CIFData::CalcMatrices(const bool verbose)
    alpha=mvLatticePar[3];
    beta=mvLatticePar[4];
    gamma=mvLatticePar[5];
-   
+
    v=sqrt(fabs(1-cos(alpha)*cos(alpha)-cos(beta)*cos(beta)-cos(gamma)*cos(gamma)
                +2*cos(alpha)*cos(beta)*cos(gamma)));
-   
+
    aa=sin(alpha)/a/v;
    bb=sin(beta )/b/v;
    cc=sin(gamma)/c/v;
-   
+
    alphaa=acos( (cos(beta )*cos(gamma)-cos(alpha))/sin(beta )/sin(gamma) );
    betaa =acos( (cos(alpha)*cos(gamma)-cos(beta ))/sin(alpha)/sin(gamma) );
    gammaa=acos( (cos(alpha)*cos(beta )-cos(gamma))/sin(alpha)/sin(beta ) );
-   
+
    mOrthMatrix[0][0]=a;
    mOrthMatrix[0][1]=b*cos(gamma);
    mOrthMatrix[0][2]=c*cos(beta);
-   
+
    mOrthMatrix[1][0]=0;
    mOrthMatrix[1][1]=b*sin(gamma);
    mOrthMatrix[1][2]=-c*sin(beta)*cos(alphaa);
-   
+
    mOrthMatrix[2][0]=0;
    mOrthMatrix[2][1]=0;
    mOrthMatrix[2][2]=1/cc;
-   
+
    // Invert upper triangular matrix
    REAL cm[3][3];
    cm[0][0]=mOrthMatrix[0][0];
    cm[0][1]=mOrthMatrix[0][1];
    cm[0][2]=mOrthMatrix[0][2];
-   
+
    cm[1][0]=mOrthMatrix[1][0];
    cm[1][1]=mOrthMatrix[1][1];
    cm[1][2]=mOrthMatrix[1][2];
-   
+
    cm[2][0]=mOrthMatrix[2][0];
    cm[2][1]=mOrthMatrix[2][1];
    cm[2][2]=mOrthMatrix[2][2];
@@ -1000,16 +1000,16 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
    (*fpObjCrystInformUser)("CIF: Opening CIF");
    Chronometer chrono;
    chrono.start();
-   
+
    // If oneScatteringPowerPerElement==true, we hold this to compute the average Biso per element
    std::map<ScatteringPower*,std::pair<REAL,unsigned int> > vElementBiso;
-   
+
    Crystal *pCryst=NULL;
    for(map<string,CIFData>::iterator pos=cif.mvData.begin();pos!=cif.mvData.end();++pos)
       if(pos->second.mvLatticePar.size()==6)
       {
          // If no atoms are listed and we already have a crystal structure defined,
-         //asssume we don't want this one - e.g. like some IuCr journals single crystal 
+         //asssume we don't want this one - e.g. like some IuCr journals single crystal
          //data cif files including cell parameters
          if((pos->second.mvAtom.size()==0) && (gCrystalRegistry.GetNb()>0)) continue;
          // Use unambigous Hall symbol if present, otherwise try HM symbol or spg number
@@ -1108,7 +1108,7 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
             // If we do not have an HM symbol, then use the one generated by cctbx (normally from spg number)
             string hmorig=pos->second.mSpacegroupHermannMauguin;
             if(hmorig=="") hmorig=pCryst->GetSpaceGroup().GetCCTbxSpg().match_tabulated_settings().hermann_mauguin();
-            
+
             if(verbose) cout<<" Symmetry checking using symmetry_equiv_pos_as_xyz:"<<endl;
             string bestsymbol=hmorig;
             unsigned int bestscore=0;
@@ -1116,10 +1116,10 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
             {
                // The origin extension may not make sense, but this will be handled internally in SpaceGroup
                pCryst->GetSpaceGroup().ChangeSpaceGroup(hmorig+*posOrig);
-               
+
                // If the symbol is the same as before, the origin probably was not understood - no need to test
                if((posOrig!=origin_list.begin())&&(pCryst->GetSpaceGroup().GetName()==bestsymbol)) continue;
-               
+
                unsigned int nbSymSpg=pCryst->GetSpaceGroup().GetCCTbxSpg().all_ops().size();
                unsigned int nbSymCommon=0;
                try
@@ -1162,7 +1162,7 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
          else if(pos->second.mFormula!="") pCryst->SetName(pos->second.mFormula);
          const float t1=chrono.seconds();
          (*fpObjCrystInformUser)((boost::format("CIF: Create Crystal:%s(%s)(dt=%6.3fs)")%pCryst->GetName() % pCryst->GetSpaceGroup().GetName() % t1).str());
-         
+
          for(vector<CIFData::CIFAtom>::const_iterator posat=pos->second.mvAtom.begin();posat!=pos->second.mvAtom.end();++posat)
          {
             if( (posat->mLabel==".") || (posat->mSymbol==".") || (posat->mLabel.find("dummy")!=std::string::npos) || (posat->mSymbol.find("dummy")!=std::string::npos) )

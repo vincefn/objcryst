@@ -169,10 +169,10 @@ void PowderSlitApertureCorr::CalcCorr() const
 //        TexturePhaseMarchDollase
 //
 ////////////////////////////////////////////////////////////////////////
-TexturePhaseMarchDollase::TexturePhaseMarchDollase(const REAL f, 
+TexturePhaseMarchDollase::TexturePhaseMarchDollase(const REAL f,
                                                    const REAL c,
                                                    const REAL h,
-                                                   const REAL k, 
+                                                   const REAL k,
                                                    const REAL l,
                                                    TextureMarchDollase &tex):
 mFraction(f),mMarchCoeff(c),mH(h),mK(k),mL(l),mpTextureMarchDollase(&tex)
@@ -207,22 +207,22 @@ void TexturePhaseMarchDollase::XMLOutput(ostream &os,int indent)const
    XMLCrystTag tag("TexturePhaseMarchDollase");
    os <<tag<<endl;
    indent++;
-   
+
    mpTextureMarchDollase->GetPar(&mFraction).XMLOutput(os,"Fraction",indent);
    os <<endl;
-   
+
    mpTextureMarchDollase->GetPar(&mMarchCoeff).XMLOutput(os,"MarchCoeff",indent);
    os <<endl;
-   
+
    mpTextureMarchDollase->GetPar(&mH).XMLOutput(os,"H",indent);
    os <<endl;
-   
+
    mpTextureMarchDollase->GetPar(&mK).XMLOutput(os,"K",indent);
    os <<endl;
-   
+
    mpTextureMarchDollase->GetPar(&mL).XMLOutput(os,"L",indent);
    os <<endl;
-   
+
    indent--;
    tag.SetIsEndTag(true);
    for(int i=0;i<indent;i++) os << "  " ;
@@ -336,7 +336,7 @@ const string & TextureMarchDollase::GetClassName() const
 
 void TextureMarchDollase::AddPhase(const REAL f, const REAL c,
                                    const REAL h,const REAL k, const REAL l)
- 
+
 {
    VFN_DEBUG_ENTRY("TextureMarchDollase::AddPhase()",5)
    TexturePhaseMarchDollase* phase=new TexturePhaseMarchDollase(f,c,h,k,l,*this);
@@ -437,7 +437,7 @@ void TextureMarchDollase::GlobalOptRandomMove(const REAL mutationAmplitude,
       {
          // :TODO: Give some probability (1% ?) to invert the March coefficient
          // with a direction perpendicular to the current one ?
-         
+
          RefinablePar *pF=&(this->GetPar(&(mPhaseRegistry.GetObj(i).mFraction)));
          RefinablePar *pM=&(this->GetPar(&(mPhaseRegistry.GetObj(i).mMarchCoeff)));
          RefinablePar *pH=&(this->GetPar(&(mPhaseRegistry.GetObj(i).mH)));
@@ -450,7 +450,7 @@ void TextureMarchDollase::GlobalOptRandomMove(const REAL mutationAmplitude,
             const REAL y0=mPhaseRegistry.GetObj(i).mBiasFraction;
             REAL y,ymin,ymax;
             y=pF->GetValue();
-            
+
             ymax=.5+1/M_PI*atan((y+delta-y0)/(2.*sig));
             ymin=.5+1/M_PI*atan((y-delta-y0)/(2.*sig));
             y=ymin+rand()/(REAL)RAND_MAX*(ymax-ymin);
@@ -537,15 +537,15 @@ REAL TextureMarchDollase::GetBiasingCost()const
    {
       tmp =(mPhaseRegistry.GetObj(i).mBiasFraction-mPhaseRegistry.GetObj(i).mFraction)/.04;
       cost += tmp*tmp;
-      
+
       tmp =log10(mPhaseRegistry.GetObj(i).mBiasMarchCoeff/mPhaseRegistry.GetObj(i).mMarchCoeff)/.04;
       cost += tmp*tmp;
-      
+
       REAL tx=mPhaseRegistry.GetObj(i).mH-mPhaseRegistry.GetObj(i).mBiasH;
       REAL ty=mPhaseRegistry.GetObj(i).mK-mPhaseRegistry.GetObj(i).mBiasK;
       REAL tz=mPhaseRegistry.GetObj(i).mL-mPhaseRegistry.GetObj(i).mBiasL;
       mpData->GetCrystal().MillerToOrthonormalCoords(tx,ty,tz);
-      
+
       cost +=(tx*tx+ty*ty+tz*tz)/mPhaseRegistry.GetObj(i).mNorm/.04;
    }
    VFN_DEBUG_MESSAGE("TextureMarchDollase::GetBiasingCost()="<<cost<<"("<<mName<<")",1)
@@ -558,9 +558,9 @@ void TextureMarchDollase::XMLOutput(ostream &os,int indent)const
    XMLCrystTag tag("TextureMarchDollase");
    os <<tag<<endl;
    indent++;
-   
+
    for(int i=0;i<mPhaseRegistry.GetNb();i++) mPhaseRegistry.GetObj(i).XMLOutput(os,indent);
-   
+
    indent--;
    tag.SetIsEndTag(true);
    for(int i=0;i<indent;i++) os << "  " ;
@@ -679,7 +679,7 @@ void TextureMarchDollase::CalcCorr() const
             const REAL march2=this->GetMarchCoeff(i)*this->GetMarchCoeff(i)-march;
             // Normalized by the number of symmetrical reflections
             const REAL frac=this->GetFraction(i)/(fractionNorm+1e-6)/hkl.rows();
-         
+
          for(long j=0;j<hkl.rows();j++)
          {
             //orthonormal coordinates for T (texture) vector
@@ -972,7 +972,7 @@ void TextureEllipsoid::UpdateEllipsoidPar()
    if (mpData!=NULL)
       if (mpData->HasCrystal())
          num = mpData->GetCrystal().GetSpaceGroup().GetSpaceGroupNumber();
-   
+
    bool bEPR [6];
    for (int i=0; i<6; i++)
       bEPR[i] = true;
@@ -1023,7 +1023,7 @@ void TextureEllipsoid::UpdateEllipsoidPar()
    }
    else if(num <= 194)
    {//Hexagonal axes, for hexagonal and non-rhomboedral trigonal cells
-      mEPR[1]=mEPR[0]; 
+      mEPR[1]=mEPR[0];
       mEPR[3]=mEPR[0]*0.5;
       mEPR[4]=0.0;
       mEPR[5]=0.0;

@@ -108,7 +108,7 @@ void MainTracker::SaveAll(std::ostream &os)const
    os<<"#Trial ";
    for(posT=mvpTracker.begin();posT!=mvpTracker.end();++posT) os<<(*posT)->GetName()<<" ";
    os<<endl;
-   
+
    posT0=mvpTracker.begin();
    std::map<long,REAL>::const_iterator pos0,pos;
    for(pos0=(*posT0)->GetValues().begin();pos0!=(*posT0)->GetValues().end();++pos0)

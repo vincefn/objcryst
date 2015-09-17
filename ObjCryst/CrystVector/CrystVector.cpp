@@ -37,7 +37,7 @@ template<class T> T MaxDifference(const Array<T,2> &a,const Array<T,2> &b)
 
 #else  // __LIBCRYST_VECTOR_USE_BLITZ__
 
-//Still using pointers instead of blitz for geometrical structure factor, 
+//Still using pointers instead of blitz for geometrical structure factor,
 //due to huge memory requirements with gcc when using blitz.
 #define __VFN_GEOM_STRUCT_FACTOR_USE_POINTERS
 
@@ -48,13 +48,13 @@ template<class T> T MaxDifference(const Array<T,2> &a,const Array<T,2> &b)
 //  CrystVector
 //######################################################################
 template<class T> CrystVector<T>::CrystVector():mpData(0),mNumElements(0),mIsAreference(false) {}
-   
+
 template<class T> CrystVector<T>::CrystVector(const long nbElements):
 mNumElements(nbElements),mIsAreference(false)
 {
    mpData=new T[mNumElements];
 }
-   
+
 template<class T> CrystVector<T>::CrystVector(const CrystVector &old):
 mNumElements(old.numElements()),mIsAreference(false)
 {
@@ -63,9 +63,9 @@ mNumElements(old.numElements()),mIsAreference(false)
    const T *p2=old.data();
    for(long i=0;i<mNumElements;i++) *p1++=*p2++;
 }
-   
+
 template<class T> CrystVector<T>::~CrystVector()
-{ 
+{
    if(!mIsAreference)
    {
       delete[] mpData;
@@ -99,10 +99,10 @@ template<class T> void CrystVector<T>::reference(CrystVector &old, const long im
    }
    mIsAreference=true;
 }
-   
+
 template<class T> long CrystVector<T>::numElements()const {return mNumElements;}
 template<class T> long CrystVector<T>::size()const {return mNumElements;}
-   
+
 template<class T> T CrystVector<T>::sum()const
 {
    register T tmp=0;
@@ -178,7 +178,7 @@ template<class T> T * CrystVector<T>::data() {return mpData;}
 template<class T> const T * CrystVector<T>::data() const {return mpData;}
 
 template<class T> void CrystVector<T>::resize(const long newNbElements)
-{  
+{
    if(mNumElements==newNbElements) return;
    VFN_DEBUG_MESSAGE("CrystVector<T>::resize():("<<mNumElements<<"->"
       <<newNbElements<<").",0)
@@ -383,7 +383,7 @@ template<class T> long QuickSortSubs(CrystVector<T> &vect,
    low = first;
    high = last;
    sepValeur = vect( (first + last) / 2 );
-   do 
+   do
    {
       while( vect(low) < sepValeur ) low++;
       while( vect(high) > sepValeur ) high--;
@@ -649,7 +649,7 @@ template<class T> T CrystMatrix<T>::operator()(const long i) const
 }
 
 template<class T> T CrystMatrix<T>::operator()(const long i,const long j) const
-{  
+{
    #ifdef __DEBUG__
    if( (i<0) || (j<0) || (i>=mYSize) || (j>=mXSize) )
    {
@@ -673,8 +673,8 @@ template<class T> T& CrystMatrix<T>::operator()(const long i)
    return mpData[i];
 }
 
-template<class T> T& CrystMatrix<T>::operator()(const long i,const long j) 
-{  
+template<class T> T& CrystMatrix<T>::operator()(const long i,const long j)
+{
    #ifdef __DEBUG__
    if( (i<0) || (j<0) || (i>=mYSize) || (j>=mXSize) )
    {
@@ -884,7 +884,7 @@ template<class T> T CrystArray3D<T>::operator()(const long i) const
 }
 
 template<class T> T CrystArray3D<T>::operator()(const long i,const long j,const long k) const
-{  
+{
    #ifdef __DEBUG__
    if( (i<0) || (j<0) || (k<0) || (i>=mZSize) || (j>=mYSize) || (k>=mXSize))
    {
@@ -908,8 +908,8 @@ template<class T> T& CrystArray3D<T>::operator()(const long i)
    return mpData[i];
 }
 
-template<class T> T& CrystArray3D<T>::operator()(const long i,const long j,const long k) 
-{  
+template<class T> T& CrystArray3D<T>::operator()(const long i,const long j,const long k)
+{
    #ifdef __DEBUG__
    if( (i<0) || (j<0) || (k<0) || (i>=mZSize) || (j>=mYSize) || (k>=mXSize))
    {
@@ -928,7 +928,7 @@ template<class T> T& CrystArray3D<T>::operator()(const long i,const long j,const
 template<class T> ostream& operator<<(ostream &os, const CrystMatrix<T> &vect)
 {
    //return os << FormatHorizVector(vect);
-   for(long i=0;i<vect.rows();i++) 
+   for(long i=0;i<vect.rows();i++)
    {
       for(long j=0;j<vect.cols();j++) os << FormatFloat(vect(i,j)) ;
       os << endl;
@@ -940,7 +940,7 @@ template<class T> ostream& operator<<(ostream &os, const CrystArray3D<T> &vect)
 {
    for(long i=0;i<vect.depth();i++)
    {
-      for(long j=0;j<vect.rows();j++) 
+      for(long j=0;j<vect.rows();j++)
       {
        for(long k=0;k<vect.cols();k++) os << FormatFloat(vect(i,j,k)) ;
        os << endl;
@@ -1098,7 +1098,7 @@ CrystMatrix_REAL InvertMatrix(const CrystMatrix_REAL &m)
                      max=fabs(m(j,i));
                      rowMax=j;
                   }
-                  
+
                //Check if pivot is non-singular :TODO:
                /*
                if(max < eps)
@@ -1225,13 +1225,13 @@ CubicSpline::CubicSpline():
 mX(0),mY(0),mYsecond(0)
 {}
 
-CubicSpline::CubicSpline(const CrystVector_REAL &x, const CrystVector_REAL &y, 
+CubicSpline::CubicSpline(const CrystVector_REAL &x, const CrystVector_REAL &y,
                          const REAL yp0, const REAL ypn)
 {
    this->Init(x,y,yp0,ypn);
 }
 
-CubicSpline::CubicSpline(const REAL *px, const REAL *py, const unsigned long nbPoints, 
+CubicSpline::CubicSpline(const REAL *px, const REAL *py, const unsigned long nbPoints,
                          const REAL yp0, const REAL ypn)
 {
    this->Init(px,py,nbPoints,yp0,ypn);
@@ -1247,7 +1247,7 @@ CubicSpline::CubicSpline(const REAL *px, const REAL *py, const unsigned long nbP
    this->Init(px,py,nbPoints);
 }
 
-void CubicSpline::Init(const CrystVector_REAL &x, const CrystVector_REAL &y, 
+void CubicSpline::Init(const CrystVector_REAL &x, const CrystVector_REAL &y,
                        const REAL yp0, const REAL ypn)
 {
    VFN_DEBUG_ENTRY("CubicSpline::Init(x,y,yp0,ypn)",5)
@@ -1257,7 +1257,7 @@ void CubicSpline::Init(const CrystVector_REAL &x, const CrystVector_REAL &y,
    this->InitSpline(yp0,ypn);
    VFN_DEBUG_EXIT("CubicSpline::Init(x,y,yp0,ypn)",5)
 }
-void CubicSpline::Init(const REAL *px, const REAL *py, const unsigned long nbPoints, 
+void CubicSpline::Init(const REAL *px, const REAL *py, const unsigned long nbPoints,
                        const REAL yp0, const REAL ypn)
 {
    VFN_DEBUG_ENTRY("CubicSpline::Init(px,py,yp0,ypn)",5)
@@ -1338,7 +1338,7 @@ CrystVector_REAL CubicSpline::operator()(const CrystVector_REAL &x) const
    {
       *py++=*pY;px++;i++;
    }
-   
+
    for(long j=0;j<(mX.numElements()-1);j++)
    {
       while((*px<*(pX+1))&&(i<nb))
@@ -1371,7 +1371,7 @@ CrystVector_REAL CubicSpline::operator()(const REAL xmin,const REAL xstep, const
    {
       *py++=*pY;x += xstep;i++;
    }
-   
+
    for(long j=0;j<(mX.numElements()-1);j++)
    {
       while((x<*(pX+1))&&(i<nb))

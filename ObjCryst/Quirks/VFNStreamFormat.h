@@ -27,7 +27,7 @@
 
 #include "ObjCryst/CrystVector/CrystVector.h"
 
-/** output a number as a formatted integer: 
+/** output a number as a formatted integer:
 *
 * \code os << FormatInt(mynumber,5);\endcode
 *
@@ -56,7 +56,7 @@ class FormatFloat
    public:
       FormatFloat(const REAL num,const int width=10,const int precision=4);
       ~FormatFloat();
-      
+
    //private:
       const REAL mValue;
       const int mWidth;
@@ -66,7 +66,7 @@ class FormatFloat
 std::ostream& operator<< (std::ostream& os, const FormatFloat &fFloat);
 
 /** output a string with a fixed length (adding necessary space or removing
-* excess characters) : 
+* excess characters) :
 *
 * \code os << FormatString(myString,15);\endcode
 */
@@ -83,9 +83,9 @@ class FormatString
 
 std::ostream& operator<< (std::ostream& os, const FormatString& fStr);
 
-/** output one or several vectors as (a) column(s): 
+/** output one or several vectors as (a) column(s):
 *
-* \code 
+* \code
 *  os << FormatVertVector<REAL>(vect,8,3);
 *  os << FormatVertVector<REAL>(vect1,vect2,vetc3,12,6);
 *  // For 7 vectors with width 12 and precision 4,
@@ -310,4 +310,3 @@ template<class T> std::ostream& operator<< (std::ostream& os, const FormatVertVe
 
 
 #endif
-

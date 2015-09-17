@@ -80,7 +80,7 @@ mLastOptimTime(0)
    // This must be done in a real class to avoid calling a pure virtual method
    // if a graphical representation is automatically called upon registration.
    //  gOptimizationObjRegistry.Register(*this);
-   
+
    static bool need_initRandomSeed=true;
    if(need_initRandomSeed==true)
    {
@@ -123,34 +123,34 @@ void OptimizationObj::FixAllPar()
 {
    VFN_DEBUG_ENTRY("OptimizationObj::FixAllPar()",5)
    this->BuildRecursiveRefObjList();
-   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
+   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
       mRecursiveRefinedObjList.GetObj(i).FixAllPar();
    VFN_DEBUG_EXIT("OptimizationObj::FixAllPar():End",5)
 }
 void OptimizationObj::SetParIsFixed(const string& parName,const bool fix)
 {
    this->BuildRecursiveRefObjList();
-   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
+   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
       mRecursiveRefinedObjList.GetObj(i).SetParIsFixed(parName,fix);
 }
 void OptimizationObj::SetParIsFixed(const RefParType *type,const bool fix)
 {
    this->BuildRecursiveRefObjList();
-   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
+   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
       mRecursiveRefinedObjList.GetObj(i).SetParIsFixed(type,fix);
 }
-   
+
 void OptimizationObj::UnFixAllPar()
 {
    this->BuildRecursiveRefObjList();
-   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
+   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
       mRecursiveRefinedObjList.GetObj(i).UnFixAllPar();
 }
-   
+
 void OptimizationObj::SetParIsUsed(const string& parName,const bool use)
 {
    this->BuildRecursiveRefObjList();
-   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
+   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
       mRecursiveRefinedObjList.GetObj(i).SetParIsUsed(parName,use);
 }
 void OptimizationObj::SetParIsUsed(const RefParType *type,const bool use)
@@ -163,28 +163,28 @@ void OptimizationObj::SetLimitsRelative(const string &parName,
                                        const REAL min, const REAL max)
 {
    this->BuildRecursiveRefObjList();
-   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
+   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
       mRecursiveRefinedObjList.GetObj(i).SetLimitsRelative(parName,min,max);
 }
 void OptimizationObj::SetLimitsRelative(const RefParType *type,
                                        const REAL min, const REAL max)
 {
    this->BuildRecursiveRefObjList();
-   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
+   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
       mRecursiveRefinedObjList.GetObj(i).SetLimitsRelative(type,min,max);
 }
 void OptimizationObj::SetLimitsAbsolute(const string &parName,
                                        const REAL min, const REAL max)
 {
    this->BuildRecursiveRefObjList();
-   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
+   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
       mRecursiveRefinedObjList.GetObj(i).SetLimitsAbsolute(parName,min,max);
 }
 void OptimizationObj::SetLimitsAbsolute(const RefParType *type,
                                        const REAL min, const REAL max)
 {
    this->BuildRecursiveRefObjList();
-   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
+   for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
       mRecursiveRefinedObjList.GetObj(i).SetLimitsAbsolute(type,min,max);
 }
 
@@ -208,10 +208,10 @@ REAL OptimizationObj::GetLogLikelihood() const
    }
    return cost;
 }
-void OptimizationObj::StopAfterCycle() 
+void OptimizationObj::StopAfterCycle()
 {
    VFN_DEBUG_MESSAGE("OptimizationObj::StopAfterCycle()",5)
-   if(mIsOptimizing) 
+   if(mIsOptimizing)
    {
       #ifdef __WX__CRYST__
       wxMutexLocker lock(mMutexStopAfterCycle);
@@ -220,7 +220,7 @@ void OptimizationObj::StopAfterCycle()
    }
 }
 
-void OptimizationObj::DisplayReport() 
+void OptimizationObj::DisplayReport()
 {
    //:TODO: ask all objects to print their own report ?
 }
@@ -230,7 +230,7 @@ void OptimizationObj::AddRefinableObj(RefinableObj &obj)
    VFN_DEBUG_MESSAGE("OptimizationObj::AddRefinableObj():"<<obj.GetName(),5)
    //in case some object has been modified, to avoid rebuilding the entire list
       this->BuildRecursiveRefObjList();
-      
+
    mRefinedObjList.Register(obj);
    RefObjRegisterRecursive(obj,mRecursiveRefinedObjList);
    #ifdef __WX__CRYST__
@@ -302,7 +302,7 @@ const long& OptimizationObj::NbTrialPerRun() const {return mNbTrialPerRun;}
 void OptimizationObj::PrepareRefParList()
 {
    VFN_DEBUG_ENTRY("OptimizationObj::PrepareRefParList()",6)
-   
+
    this->BuildRecursiveRefObjList();
    // As any parameter been added in the recursive list of objects ?
    // or has any object been added/removed ?
@@ -319,9 +319,9 @@ void OptimizationObj::PrepareRefParList()
       mvSavedParamSet.clear();
       mBestParSavedSetIndex=mRefParList.CreateParamSet("Best Configuration");
       mvSavedParamSet.push_back(make_pair(mBestParSavedSetIndex,mBestCost));
-      
+
       mMainTracker.ClearTrackers();
-      
+
       REAL (OptimizationObj::*fl)() const;
       fl=&OptimizationObj::GetLogLikelihood;
       mMainTracker.AddTracker(new TrackerObject<OptimizationObj>
@@ -333,7 +333,7 @@ void OptimizationObj::PrepareRefParList()
          fp=&RefinableObj::GetLogLikelihood;
          mMainTracker.AddTracker(new TrackerObject<RefinableObj>
             (mRecursiveRefinedObjList.GetObj(i).GetName()+"::LogLikelihood",mRecursiveRefinedObjList.GetObj(i),fp));
-         
+
          if(mRecursiveRefinedObjList.GetObj(i).GetClassName()=="Crystal")
          {
             REAL (Crystal::*fc)() const;
@@ -360,7 +360,7 @@ void OptimizationObj::InitOptions()
    VFN_DEBUG_MESSAGE("OptimizationObj::InitOptions()",5)
    static string xmlAutoSaveName;
    static string xmlAutoSaveChoices[6];
-   
+
    static bool needInitNames=true;
    if(true==needInitNames)
    {
@@ -371,7 +371,7 @@ void OptimizationObj::InitOptions()
       xmlAutoSaveChoices[3]="Every 10mn";
       xmlAutoSaveChoices[4]="Every new best config (a lot ! Not Recommended !)";
       xmlAutoSaveChoices[5]="Every Run (Recommended)";
-      
+
       needInitNames=false;//Only once for the class
    }
    mXMLAutoSave.Init(6,&xmlAutoSaveName,xmlAutoSaveChoices);
@@ -384,7 +384,7 @@ void OptimizationObj::UpdateDisplay()
    #ifdef __WX__CRYST__
    if(0!=this->WXGet()) this->WXGet()->CrystUpdate(true,true);
    #endif
-   for(int i=0;i<mRefinedObjList.GetNb();i++) 
+   for(int i=0;i<mRefinedObjList.GetNb();i++)
       mRefinedObjList.GetObj(i).UpdateDisplay();
    mMainTracker.UpdateDisplay();
 }
@@ -545,10 +545,10 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
    #ifdef __WX__CRYST__
    mMutexStopAfterCycle.Unlock();
    #endif
-      
+
    mRefParList.RestoreParamSet(mBestParSavedSetIndex);
    this->EndOptimization();
-   
+
    if(mSaveTrackedData.GetChoice()==1)
    {
       ofstream outTracker;
@@ -557,7 +557,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
       mMainTracker.SaveAll(outTracker);
       outTracker.close();
    }
-   
+
    for(vector<pair<long,REAL> >::iterator pos=mvSavedParamSet.begin();pos!=mvSavedParamSet.end();++pos)
       if(pos->first==mBestParSavedSetIndex)
       {
@@ -568,9 +568,9 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
             break;
          }
       }
-   
+
    this->UpdateDisplay();
-   
+
    VFN_DEBUG_EXIT("MonteCarloObj::Optimize()",5)
 }
 void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silent,
@@ -583,9 +583,9 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
    const long nbStep0=nbStep;
    this->BeginOptimization(true);
    this->PrepareRefParList();
-   
+
    this->InitLSQ(false);
-   
+
    mIsOptimizing=true;
    if(mTemperatureGamma<0.1) mTemperatureGamma= 0.1;
    if(mTemperatureGamma>10.0)mTemperatureGamma=10.0;
@@ -621,7 +621,7 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
             break;
          }
          case GLOBAL_OPTIM_RANDOM_LSQ:
-         {            
+         {
             try{this->RunRandomLSQMethod(nbCycle);}
             catch(...){cout<<"Unhandled exception in MonteCarloObj::RunRandomLSQMethod() ?"<<endl;}
             //nbCycle=1;
@@ -637,7 +637,7 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
          cout<<"Finished Run #"<<nbCycle0-nbCycle<<", final cost="
              <<this->GetLogLikelihood()<<", nbTrial="<< nbStep0-nbStep<<" ("<<chrono.seconds()
              <<" seconds)"<<endl;
-      
+
       nbStep=nbStep0;
       this->UpdateDisplay();
       stringstream s;
@@ -683,7 +683,7 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
       #endif
    }
    mIsOptimizing=false;
-   
+
    #ifdef __WX__CRYST__
    mMutexStopAfterCycle.Lock();
    #endif
@@ -693,7 +693,7 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
    #endif
 
    mRefParList.RestoreParamSet(mBestParSavedSetIndex);
-   
+
    for(vector<pair<long,REAL> >::iterator pos=mvSavedParamSet.begin();pos!=mvSavedParamSet.end();++pos)
       if(pos->first==mBestParSavedSetIndex)
       {
@@ -704,11 +704,11 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
             break;
          }
       }
-      
+
    this->EndOptimization();
 
    this->UpdateDisplay();
-   
+
    if(finalcost>1)
       cout<<endl<<"Finished all runs, number of trials to reach cost="
           <<finalcost<<" : <nbTrial>="<<nbTrialCumul/(nbCycle0-nbCycle)<<endl;
@@ -802,9 +802,9 @@ void MonteCarloObj::RunSimulatedAnnealing(long &nbStep,const bool silent,
             case ANNEALING_SMART:
                if((nbAcceptedMovesTemp/(REAL)nbTryPerTemp)>0.3) mMutationAmplitude*=2.;
                if((nbAcceptedMovesTemp/(REAL)nbTryPerTemp)<0.1) mMutationAmplitude/=2.;
-               if(mMutationAmplitude>mMutationAmplitudeMax) 
+               if(mMutationAmplitude>mMutationAmplitudeMax)
                   mMutationAmplitude=mMutationAmplitudeMax;
-               if(mMutationAmplitude<mMutationAmplitudeMin) 
+               if(mMutationAmplitude<mMutationAmplitudeMin)
                   mMutationAmplitude=mMutationAmplitudeMax;
                nbAcceptedMovesTemp=0;
                break;
@@ -831,12 +831,12 @@ void MonteCarloObj::RunSimulatedAnnealing(long &nbStep,const bool silent,
             {
                mBestCost=mCurrentCost;
                mRefParList.SaveParamSet(mBestParSavedSetIndex);
-               if(!silent) cout << "Trial :" << mNbTrial 
+               if(!silent) cout << "Trial :" << mNbTrial
                              << " Temp="<< mTemperature
                              << " Mutation Ampl.: "<<mMutationAmplitude
                              << " NEW OVERALL Best Cost="<<runBestCost<< endl;
             }
-            else if(!silent) cout << "Trial :" << mNbTrial 
+            else if(!silent) cout << "Trial :" << mNbTrial
                              << " Temp="<< mTemperature
                              << " Mutation Ampl.: "<<mMutationAmplitude
                              << " NEW Run Best Cost="<<runBestCost<< endl;
@@ -861,8 +861,8 @@ void MonteCarloObj::RunSimulatedAnnealing(long &nbStep,const bool silent,
       if( (mNbTrial % nbTryReport) == 0)
       {
          if(!silent) cout <<"Trial :" << mNbTrial << " Temp="<< mTemperature;
-         if(!silent) cout <<" Mutation Ampl.: " <<mMutationAmplitude<< " Best Cost=" << runBestCost 
-                          <<" Current Cost=" << mCurrentCost 
+         if(!silent) cout <<" Mutation Ampl.: " <<mMutationAmplitude<< " Best Cost=" << runBestCost
+                          <<" Current Cost=" << mCurrentCost
                           <<" Accepting "<<(int)((REAL)nbAcceptedMoves/nbTryReport*100)
                           <<"% moves" << endl;
          nbAcceptedMoves=0;
@@ -875,7 +875,7 @@ void MonteCarloObj::RunSimulatedAnnealing(long &nbStep,const bool silent,
       #ifdef __WX__CRYST__
       mMutexStopAfterCycle.Lock();
       #endif
-      if((runBestCost<finalcost) || mStopAfterCycle ||( (maxTime>0)&&(chrono.seconds()>maxTime))) 
+      if((runBestCost<finalcost) || mStopAfterCycle ||( (maxTime>0)&&(chrono.seconds()>maxTime)))
       {
          #ifdef __WX__CRYST__
          mMutexStopAfterCycle.Unlock();
@@ -922,10 +922,10 @@ void MonteCarloObj::RunSimulatedAnnealing(long &nbStep,const bool silent,
       try {mLSQ.Refine(-50,true,true,false,0.001);}
       catch(const ObjCrystException &except){};
       if(!silent) cout<<"LSQ cost: "<<mCurrentCost<<" -> "<<this->GetLogLikelihood()<<endl;
-      
+
       // Need to go back to optimization with approximations allowed (they are not during LSQ)
       for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).SetApproximationFlag(true);
-      
+
       REAL cost=this->GetLogLikelihood();
       if(cost<mCurrentCost)
       {
@@ -946,7 +946,7 @@ void MonteCarloObj::RunSimulatedAnnealing(long &nbStep,const bool silent,
       }
       if(!silent) cout<<"Finished LSQ refinement"<<endl;
    }
-   
+
 
    mLastOptimTime=chrono.seconds();
    //Restore Best values
@@ -958,8 +958,8 @@ void MonteCarloObj::RunSimulatedAnnealing(long &nbStep,const bool silent,
    if(!silent) chrono.print();
 }
 /*
-void MonteCarloObj::RunNondestructiveLSQRefinement(  int nbCycle,bool useLevenbergMarquardt, 
-                                            const bool silent, const bool callBeginEndOptimization, 
+void MonteCarloObj::RunNondestructiveLSQRefinement(  int nbCycle,bool useLevenbergMarquardt,
+                                            const bool silent, const bool callBeginEndOptimization,
                                             const float minChi2var )
 {
     float bsigma=-1, bdelta=-1;
@@ -988,17 +988,17 @@ void MonteCarloObj::RunNondestructiveLSQRefinement(  int nbCycle,bool useLevenbe
                 }
             } catch (const std::bad_cast& e) {
 
-            }            
+            }
         }
     }
-    for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).SetApproximationFlag(false);    
+    for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).SetApproximationFlag(false);
     try {
-        mLSQ.Refine(nbCycle,useLevenbergMarquardt,silent,callBeginEndOptimization,minChi2var);        
+        mLSQ.Refine(nbCycle,useLevenbergMarquardt,silent,callBeginEndOptimization,minChi2var);
     }
     catch(const ObjCrystException &except) {
 
     };
-    for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).SetApproximationFlag(true); 
+    for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).SetApproximationFlag(true);
 
     if(bsigma<0 || bdelta<0 || asigma<0 || adelta<0) return;
     //restore the delta and sigma values
@@ -1021,18 +1021,18 @@ void MonteCarloObj::RunNondestructiveLSQRefinement(  int nbCycle,bool useLevenbe
                 }
             } catch (const std::bad_cast& e) {
 
-            }            
+            }
         }
     }
 }
 */
 void MonteCarloObj::RunRandomLSQMethod(long &nbCycle)
-{    
+{
     //perform random move
     mMutationAmplitude=mMutationAmplitudeMax;
     float bsigma=-1, bdelta=-1;
     float asigma=-1, adelta=-1;
-    
+
     //set the delta and sigma values - low values are good for LSQ!
     for(int i=0;i<mRefinedObjList.GetNb();i++) {
         if(mRefinedObjList.GetObj(i).GetClassName()=="Crystal") {
@@ -1058,30 +1058,30 @@ void MonteCarloObj::RunRandomLSQMethod(long &nbCycle)
                 }
             } catch (const std::bad_cast& e){
 
-            }            
+            }
         }
     }
-   
+
     const long starting_point=mRefParList.CreateParamSet("MonteCarloObj:Last parameters (RANDOM-LSQ)");
     mRefParList.SaveParamSet(starting_point);
     while(nbCycle!=0) {
-        nbCycle--;    
+        nbCycle--;
         mRefParList.RestoreParamSet(starting_point);
         //this->NewConfiguration();
         for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).RandomizeConfiguration();
-        this->UpdateDisplay();        
+        this->UpdateDisplay();
         REAL starting_cost=this->GetLogLikelihood();
 
-        //perform LSQ          
-        for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).SetApproximationFlag(false);    
+        //perform LSQ
+        for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).SetApproximationFlag(false);
         //mCurrentCost=this->GetLogLikelihood();
         try {
-            mLSQ.Refine(20,true,true,false,0.001);        
+            mLSQ.Refine(20,true,true,false,0.001);
         }
         catch(const ObjCrystException &except) {
             //cout<<"Something wrong?"<<endl;
         };
-        for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).SetApproximationFlag(true);  
+        for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).SetApproximationFlag(true);
         //cout<<"LSQ cost: "<<mCurrentCost<<" -> "<<this->GetLogLikelihood()<<endl;
         REAL lsq_cost=this->GetLogLikelihood();
         mCurrentCost = lsq_cost;
@@ -1089,7 +1089,7 @@ void MonteCarloObj::RunRandomLSQMethod(long &nbCycle)
         if(mCurrentCost<mBestCost)
         {
             mBestCost=mCurrentCost;
-            mRefParList.SaveParamSet(mBestParSavedSetIndex);        
+            mRefParList.SaveParamSet(mBestParSavedSetIndex);
         }
         this->UpdateDisplay();
 
@@ -1098,19 +1098,19 @@ void MonteCarloObj::RunRandomLSQMethod(long &nbCycle)
         time_t date=time(0);
         char strDate[40];
         strftime(strDate,sizeof(strDate),"%Y-%m-%d_%H-%M-%S",localtime(&date));//%Y-%m-%dT%H:%M:%S%Z
-        char costAsChar[30];    
+        char costAsChar[30];
         sprintf(costAsChar,"#Run%ld-Cost-%f",nbCycle, mCurrentCost);
         saveFileName=saveFileName+(string)strDate+(string)costAsChar+(string)".xml";
         XMLCrystFileSaveGlobal(saveFileName);
-        
+
          #ifdef __WX__CRYST__
           mMutexStopAfterCycle.Lock();
           #endif
-          if(mStopAfterCycle) 
+          if(mStopAfterCycle)
           {
              #ifdef __WX__CRYST__
              mMutexStopAfterCycle.Unlock();
-             #endif             
+             #endif
              break;
           }
           #ifdef __WX__CRYST__
@@ -1140,7 +1140,7 @@ void MonteCarloObj::RunRandomLSQMethod(long &nbCycle)
                 }
             } catch (const std::bad_cast& e){
 
-            }            
+            }
         }
     }
 }
@@ -1160,10 +1160,10 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
    mNbTrial=0;
    // time (in seconds) when last autoSave was made (if enabled)
       unsigned long secondsWhenAutoSave=0;
-   
+
    // Periodicity of the automatic LSQ refinements (if the option is set)
    const unsigned int autoLSQPeriod=150000;
-   
+
    if(!silent) cout << "Starting Parallel Tempering Optimization"<<endl;
    //Total number of parallel refinements,each is a 'World'. The most stable
    // world must be i=nbWorld-1, and the most changing World (high mutation,
@@ -1257,10 +1257,10 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
       //Get gene groups list :TODO: check for missing groups
          CrystVector_uint refParGeneGroupIndex(mRefParList.GetNbPar());
          unsigned int first=1;
-         for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++) 
+         for(int i=0;i<mRecursiveRefinedObjList.GetNb();i++)
             mRecursiveRefinedObjList.GetObj(i).GetGeneGroup(mRefParList,refParGeneGroupIndex,first);
          #if 0
-         if(!silent) 
+         if(!silent)
             for(int i=0;i<mRefParList.GetNbPar();i++)
             {
                cout << "Gene Group:"<<refParGeneGroupIndex(i)<<" :";
@@ -1314,19 +1314,19 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
                   runBestCost=currentCost(i);
                   this->TagNewBestConfig();
                   needUpdateDisplay=true;
-                  
+
                   mRefParList.SaveParamSet(runBestIndex);
                   if(runBestCost<mBestCost)
                   {
                      mBestCost=currentCost(i);
                      mRefParList.SaveParamSet(mBestParSavedSetIndex);
-                     if(!silent) cout << "->Trial :" << mNbTrial 
+                     if(!silent) cout << "->Trial :" << mNbTrial
                                    << " World="<< worldSwapIndex(i)
                                    << " Temp="<< mTemperature
                                    << " Mutation Ampl.: "<<mMutationAmplitude
                                    << " NEW OVERALL Best Cost="<<mBestCost<< endl;
                   }
-                  else if(!silent) cout << "->Trial :" << mNbTrial 
+                  else if(!silent) cout << "->Trial :" << mNbTrial
                                    << " World="<< worldSwapIndex(i)
                                    << " Temp="<< mTemperature
                                    << " Mutation Ampl.: "<<mMutationAmplitude
@@ -1368,7 +1368,7 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
             if((mNbTrial%nbTrialsReport)==0) makeReport=true;
          }//nbTryPerWorld trials
       }//For each World
-      
+
       if(mAutoLSQ.GetChoice()==2)
          if((mNbTrial%autoLSQPeriod)<(nbTryPerWorld*nbWorld))
          {// Try a quick LSQ ?
@@ -1384,9 +1384,9 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
                }
                mMutexStopAfterCycle.Unlock();
                #endif
-               
+
                mRefParList.RestoreParamSet(worldCurrentSetIndex(i));
-              
+
                #if 0
                // Report GoF values (Chi^2 / nbObs) values for all objects
                for(map<RefinableObj*,unsigned int>::iterator pos=mLSQ.GetRefinedObjMap().begin();pos!=mLSQ.GetRefinedObjMap().end();++pos)
@@ -1401,7 +1401,7 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
                   }
                cout<<endl;
                #endif
-               
+
                const REAL cost0=this->GetLogLikelihood();// cannot use currentCost(i), approximations changed...
                if(!silent) cout<<"LSQ: World="<<worldSwapIndex(i)<<": cost="<<cost0;
                try {mLSQ.Refine(-30,true,true,false,0.001);}
@@ -1442,17 +1442,17 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
                      runBestCost=currentCost(i);
                      this->TagNewBestConfig();
                      needUpdateDisplay=true;
-                     
+
                      mRefParList.SaveParamSet(runBestIndex);
                      if(runBestCost<mBestCost)
                      {
                         mBestCost=currentCost(i);
                         mRefParList.SaveParamSet(mBestParSavedSetIndex);
-                        if(!silent) cout << "->Trial :" << mNbTrial 
+                        if(!silent) cout << "->Trial :" << mNbTrial
                                        << " World="<< worldSwapIndex(i)
                                        << " LSQ2: NEW OVERALL Best Cost="<<mBestCost<< endl;
                      }
-                     else if(!silent) cout << "->Trial :" << mNbTrial 
+                     else if(!silent) cout << "->Trial :" << mNbTrial
                                        << " World="<< worldSwapIndex(i)
                                        << " LSQ2: NEW RUN Best Cost="<<runBestCost<< endl;
                      if(!silent) this->DisplayReport();
@@ -1462,7 +1462,7 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
                   // be rejected, until the temperature is increased a lot - this
                   // is a problem as the temperature increases so much that the
                   // benefit of the LSQ is essentially negated.
-                  // So we need to use a higher recorded cost, so that successive trials 
+                  // So we need to use a higher recorded cost, so that successive trials
                   // may be accepted
                   #if 0
                   mMutationAmplitude=mutationAmplitude(i);
@@ -1475,7 +1475,7 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
                }
             }
          }
-      
+
       //Try swapping worlds
       for(int i=1;i<nbWorld;i++)
       {
@@ -1495,7 +1495,7 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
          if( log((rand()+1)/(REAL)RAND_MAX)
                 < (-(this->GetLogLikelihood()-currentCost(i))/simAnnealTemp(i)))
          #endif
-         {  
+         {
          /*
             if(i>2)
             {
@@ -1537,7 +1537,7 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
          {
             #if 0
             // Random switching of gene groups
-            for(unsigned int j=0;j<nbGeneGroup;j++) 
+            for(unsigned int j=0;j<nbGeneGroup;j++)
                crossoverGroupIndex(j)= (int) floor(rand()/((REAL)RAND_MAX-1)*2);
             for(int j=0;j<mRefParList.GetNbPar();j++)
             {
@@ -1599,7 +1599,7 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
                if(cost<currentCost(k))
                {
                   // Also exchange genes for higher-temperature World ?
-                  //if(junk==0) 
+                  //if(junk==0)
                   //   mRefParList.GetParamSet(worldCurrentSetIndex(i))=
                   //      mRefParList.GetParamSet(parSetOffspringB);
                   //else
@@ -1611,7 +1611,7 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
                   if(!silent) cout << "Accepted mating :"<<k<<"(with"<<i<<")"
                        <<" (crossoverGene1="<< crossoverPoint1<<","
                        <<" crossoverGene2="<< crossoverPoint2<<")"
-                       <<endl; 
+                       <<endl;
                   if(cost<runBestCost)
                   {
                      runBestCost=cost;
@@ -1622,20 +1622,20 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
                      {
                         mBestCost=cost;
                         mRefParList.SaveParamSet(mBestParSavedSetIndex);
-                        if(!silent) cout << "->Trial :" << mNbTrial 
+                        if(!silent) cout << "->Trial :" << mNbTrial
                           << " World="<< worldSwapIndex(k)
                           << " Temp="<< simAnnealTemp(k)
                           << " Mutation Ampl.: "<<mMutationAmplitude
                           << " NEW OVERALL Best Cost="<<mBestCost<< "(MATING !)"<<endl;
                      }
-                     else if(!silent) cout << "->Trial :" << mNbTrial 
+                     else if(!silent) cout << "->Trial :" << mNbTrial
                           << " World="<< worldSwapIndex(k)
                           << " Temp="<< simAnnealTemp(k)
                           << " Mutation Ampl.: "<<mMutationAmplitude
                           << " NEW RUN Best Cost="<<runBestCost<< "(MATING !)"<<endl;
                      bestConfigNb=mNbTrial;
                      if(!silent) this->DisplayReport();
-                     //for(int i=0;i<mRefinedObjList.GetNb();i++) 
+                     //for(int i=0;i<mRefinedObjList.GetNb();i++)
                      //   mRefinedObjList.GetObj(i).Print();
                   }
                   i=k;//Don't test other Worlds
@@ -1711,7 +1711,7 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
                map<const RefinableObj*,LogLikelihoodStats>::iterator pos;
                for(pos=mvContextObjStats[i].begin();pos!=mvContextObjStats[i].end();++pos)
                {
-                  cout << pos->first->GetName() 
+                  cout << pos->first->GetName()
                        << "(LLK="
                        << pos->second.mLastLogLikelihood
                        //<< "(<LLK>="
@@ -1750,7 +1750,7 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
                   mutationAmplitude(i)*=2.;
                if((worldNbAcceptedMoves(i)/(REAL)nbTrialsReport)<0.10)
                   mutationAmplitude(i)/=2.;
-               if(mutationAmplitude(i)>mMutationAmplitudeMax) 
+               if(mutationAmplitude(i)>mMutationAmplitudeMax)
                   mutationAmplitude(i)=mMutationAmplitudeMax;
                if(mutationAmplitude(i)<mMutationAmplitudeMin)
                   mutationAmplitude(i)=mMutationAmplitudeMin;
@@ -1795,7 +1795,7 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
       #ifdef __WX__CRYST__
       mMutexStopAfterCycle.Lock();
       #endif
-      if((runBestCost<finalcost) || mStopAfterCycle ||( (maxTime>0)&&(chrono.seconds()>maxTime))) 
+      if((runBestCost<finalcost) || mStopAfterCycle ||( (maxTime>0)&&(chrono.seconds()>maxTime)))
       {
          #ifdef __WX__CRYST__
          mMutexStopAfterCycle.Unlock();
@@ -1807,7 +1807,7 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
       mMutexStopAfterCycle.Unlock();
       #endif
    }//Trials
-   
+
    TAU_PROFILE_START(timerN);
    if(mAutoLSQ.GetChoice()>0)
    {// LSQ
@@ -1818,10 +1818,10 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
       try {mLSQ.Refine(-50,true,true,false,0.001);}
       catch(const ObjCrystException &except){};
       if(!silent) cout<<"LSQ cost: "<<mCurrentCost<<" -> "<<this->GetLogLikelihood()<<endl;
-      
+
       // Need to go back to optimization with approximations allowed (they are not during LSQ)
       for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).SetApproximationFlag(true);
-      
+
       REAL cost=this->GetLogLikelihood();
       if(cost<mCurrentCost)
       {
@@ -1842,7 +1842,7 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
       }
       if(!silent) cout<<"Finished LSQ refinement"<<endl;
    }
-   
+
    mLastOptimTime=chrono.seconds();
    //Restore Best values
       //mRefParList.Print();
@@ -1874,10 +1874,10 @@ void MonteCarloObj::XMLOutput(ostream &os,int indent)const
    XMLCrystTag tag("GlobalOptimObj");
    tag.AddAttribute("Name",this->GetName());
    tag.AddAttribute("NbTrialPerRun",(boost::format("%d")%(this->NbTrialPerRun())).str());
-   
+
    os <<tag<<endl;
    indent++;
-   
+
    mGlobalOptimType.XMLOutput(os,indent);
    os<<endl;
 
@@ -1900,10 +1900,10 @@ void MonteCarloObj::XMLOutput(ostream &os,int indent)const
 
    mAnnealingScheduleMutation.XMLOutput(os,indent);
    os<<endl;
-   
+
    mSaveTrackedData.XMLOutput(os,indent);
    os<<endl;
-   
+
    {
       XMLCrystTag tag2("MutationMaxMin");
       for(int i=0;i<indent;i++) os << "  " ;
@@ -1920,7 +1920,7 @@ void MonteCarloObj::XMLOutput(ostream &os,int indent)const
       for(int i=0;i<indent;i++) os << "  " ;
       os<<tag2<<endl;
    }
-   
+
    indent--;
    tag.SetIsEndTag(true);
    for(int i=0;i<indent;i++) os << "  " ;
@@ -2039,15 +2039,15 @@ void MonteCarloObj::InitOptions()
    this->OptimizationObj::InitOptions();
    static string GlobalOptimTypeName;
    static string GlobalOptimTypeChoices[2];//:TODO: Add Genetic Algorithm
-   
+
    static string AnnealingScheduleChoices[6];
-   
+
    static string AnnealingScheduleTempName;
    static string AnnealingScheduleMutationName;
 
    static string runAutoLSQName;
    static string runAutoLSQChoices[3];
-   
+
    static string saveTrackedDataName;
    static string saveTrackedDataChoices[2];
 
@@ -2067,12 +2067,12 @@ void MonteCarloObj::InitOptions()
       AnnealingScheduleChoices[3]="Exponential";
       AnnealingScheduleChoices[4]="Smart";
       AnnealingScheduleChoices[5]="Gamma";
-      
+
       runAutoLSQName="Automatic Least Squares Refinement";
       runAutoLSQChoices[0]="Never";
       runAutoLSQChoices[1]="At the end of each run";
       runAutoLSQChoices[2]="Every 150000 trials, and at the end of each run";
-      
+
       saveTrackedDataName="Save Tracked Data";
       saveTrackedDataChoices[0]="No (recommended!)";
       saveTrackedDataChoices[1]="Yes (for tests ONLY)";
@@ -2092,7 +2092,7 @@ void MonteCarloObj::InitLSQ(const bool useFullPowderPatternProfile)
    mLSQ.SetRefinedObj(mRecursiveRefinedObjList.GetObj(0),0,true,true);
    for(unsigned int i=1;i<mRefinedObjList.GetNb();++i)
       mLSQ.SetRefinedObj(mRefinedObjList.GetObj(i),0,false,true);
-   
+
    if(!useFullPowderPatternProfile)
    {// Use LSQ function #1 for powder patterns (integrated patterns - faster !)
       for(map<RefinableObj*,unsigned int>::iterator pos=mLSQ.GetRefinedObjMap().begin();pos!=mLSQ.GetRefinedObjMap().end();++pos)

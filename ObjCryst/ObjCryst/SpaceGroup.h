@@ -86,21 +86,21 @@ class AsymmetricUnit
 * This class included a pointer to a function calculating the "geometrical
 * structure factor" (ie the sum of sin() and cos() for all symetrics, as
 * could be found in the old version of the (red) International Tables),
-* which was used to speed up computation of structure factors 
+* which was used to speed up computation of structure factors
 * by using pre-factorised formulas.
 * This is not used anymore, since methods can be used to speed up computations.
 *
 * This class uses R. Grosse-Kunstleve 'SgLite' package,
 * which is part of the Pymol package : http://pymol.sourceforge.net/
 *
-*\warning: the interface of the class will somewhat change when switching 
+*\warning: the interface of the class will somewhat change when switching
 * from sgLite to cctbx (http://cctbx.sourceforge.net). Particularly
 * functions Spacegroup::GetSgOps() and Spacegroup::GetHM_as_Hall() will
 * be removed.
 */
 //######################################################################
 
-   
+
 class SpaceGroup
 {
    public:
@@ -129,19 +129,19 @@ class SpaceGroup
       void ChangeToAsymmetricUnit(REAL x, REAL y, REAL z) const;//:TODO:
       /// Get the AsymmetricUnit for this spacegroup
       const AsymmetricUnit& GetAsymUnit() const;
-      
+
       /// Id number of the spacegroup
       int GetSpaceGroupNumber()const;
-      
+
       /// Is the crystal centrosymmetric ?
       bool IsCentrosymmetric()const;
-      
+
       /** \brief Number of translation vectors
       * (1 for 'P' cells, 2 for 'I', 4 for 'F',etc..)
       *
       */
       int GetNbTranslationVectors()const;
-      
+
       /// Struct to store trans matrix
       struct TRx
       {
@@ -154,16 +154,16 @@ class SpaceGroup
          REAL mx[9];
          REAL tr[3];
       };
-      
+
       /** Return all Translation Vectors, as a 3 columns-array
       *
       * The first vector is always [0,0,0]
-      *  \return 
+      *  \return
       *    \f$ \left[ \begin {array}{ccc}  0 & 0 & 0 \end{array} \right] \f$
       * for a 'P' Cell,
       *    \f$ \left[ \begin {array}{ccc}  0 & 0 & 0 \\
       *                \frac{1}{2} & \frac{1}{2} & \frac{1}{2} \\ \end{array} \right] \f$
-      * for a 'I' cell, and 
+      * for a 'I' cell, and
       *    \f$ \left[ \begin {array}{ccc}  0 & 0 & 0 \\
       *                       \frac{1}{2} & \frac{1}{2} & 0 \\
       *                       \frac{1}{2} & 0 & \frac{1}{2} \\
@@ -175,13 +175,13 @@ class SpaceGroup
       /** Get all symmetry operations stored in vector of struct SMx.
        */
       const std::vector<SpaceGroup::SMx>& GetSymmetryOperations()const;
-      
+
       /** \brief Get all equivalent positions of a (xyz) position
       *
       *  \param x,y,z fractional coordinates of the position
       *  \param  noCenter if set to 'false' (the default), then the center of
       * symmetry (if any) is used to generate ALL positions. If 'true', then
-      * only one half of equivalent positions are generated. This has 
+      * only one half of equivalent positions are generated. This has
       * no influence if the group is not centrosymmetric. (\b note Not generating
       * symmetrical positions from center of symmetry is useful to speed up computation
       * of structure factor, but is a bit tricky if the inversion is not at the origin.
@@ -206,7 +206,7 @@ class SpaceGroup
       * these will contain the new values.
       * \param  noCenter if set to 'false' (the default), then the center of
       * symmetry (if any) is used to generate ALL positions. If 'true', then
-      * only one half of equivalent positions are generated. This has 
+      * only one half of equivalent positions are generated. This has
       * no influence if the group is not centrosymmetric. (\b note Not generating
       * symmetrical positions from center of symmetry is useful to speed up computation
       * of structure factor, but is a bit tricky if the inversion is not at the origin.
@@ -221,7 +221,7 @@ class SpaceGroup
       void GetSymmetric(unsigned int i, REAL &x, REAL &y, REAL &z,
                         const bool noCenter=false,const bool noTransl=false,
                         const bool derivative=false) const;
-      
+
       /** \brief Return the number of equivalent positions in the spacegroup,
       *ie the multilicity of the general position.
       *
@@ -229,10 +229,10 @@ class SpaceGroup
       *  \param noTransl if 'true', do not take into account translations
       */
       int GetNbSymmetrics(const bool noCenter=false,const bool noTransl=false)const;
-      
+
       /// Prints a description of the spacegroup (symbol, properties).
       ///
-      /// \todo 
+      /// \todo
       void Print()const;
       /// Is centrosymmetric ?
       bool HasInversionCenter()const;
@@ -257,13 +257,13 @@ class SpaceGroup
                                 const REAL h2, const REAL k2, const REAL l2)const;
       /** Get the list of all equivalent reflections.
       *
-      * \return a matrix with 5 columns for h,k,l,Re(F),Im(F) and as many rows as there are 
+      * \return a matrix with 5 columns for h,k,l,Re(F),Im(F) and as many rows as there are
       * reflections (the input reflection is included), with the associated structure factor,
       * from the structure factor of the input reflection.
       * \param excludeFriedelMate if true, then Friedel mates of reflections will not
       * be listed, even if there is a center of symmetry.
       * \param forceFriedelLaw if true, a center of symmetry will be added (to force
-      * considering Friedel mates as equivalent). This as no effect if 
+      * considering Friedel mates as equivalent). This as no effect if
       * excludeFriedelMate=true
       *
       * \param sf_re, sf_im: the real & imaginary part of the structure factor of the original reflection
@@ -298,12 +298,12 @@ class SpaceGroup
       *compute the geometrical structure factors.
       */
       void InitSpaceGroup(const string &spgId);
-      
+
       /// Spacegroup's name ( 'I422', 'D2^8','230')
       /// Maybe we should only store the Hermann-Mauguin symbol, rather than storing
       /// the string which was initially given by the user/program for the initialization.
       string mId;
-      
+
       /** \brief  SgOps structure for this spacegroup. (Symmetry operations)
       *
       * See sglite subdirectory for more information.
@@ -311,7 +311,7 @@ class SpaceGroup
       * http://pymol.sourceforge.net/
       */
       cctbx::sgtbx::space_group *mpCCTbxSpaceGroup;
-      
+
       /** \brief Is spacegroup centrosymmetric ?
       *
       */
@@ -323,7 +323,7 @@ class SpaceGroup
 
       /// The spacegroup asymmetric unit
       AsymmetricUnit mAsymmetricUnit;
-      
+
       /// The Spacegroup clock
       RefinableObjClock mClock;
       /// Unique axis number (0=a,1=b,2=c)

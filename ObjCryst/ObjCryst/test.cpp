@@ -48,7 +48,7 @@ SpeedTestReport SpeedTest(const unsigned int nbAtom, const int nbAtomType,const 
                                   1.));
    }
    cryst.SetUseDynPopCorr(false);
-   
+
    RefinableObj *pData;
    switch(dataType)
    {
@@ -81,7 +81,7 @@ SpeedTestReport SpeedTest(const unsigned int nbAtom, const int nbAtomType,const 
 
          pDataTmp->SetHklIobs (h, k, l, iobs, sigma);
          pDataTmp->SetWeightToInvSigma2();
-         
+
          pData=pDataTmp;
          break;
       }
@@ -105,7 +105,7 @@ SpeedTestReport SpeedTest(const unsigned int nbAtom, const int nbAtomType,const 
             backgdData->SetInterpPoints(tth,backgd);
          }
          pDataTmp->AddPowderPatternComponent(*backgdData);
-         
+
          PowderPatternDiffraction * diffData=new PowderPatternDiffraction;
          diffData->SetCrystal(cryst);
          pDataTmp->AddPowderPatternComponent(*diffData);
@@ -131,7 +131,7 @@ SpeedTestReport SpeedTest(const unsigned int nbAtom, const int nbAtomType,const 
          break;
       }
    }
-   
+
    //Create the global optimization object
       MonteCarloObj *pGlobalOptObj=new MonteCarloObj;
       pGlobalOptObj->AddRefinableObj(*pData);
@@ -144,17 +144,17 @@ SpeedTestReport SpeedTest(const unsigned int nbAtom, const int nbAtomType,const 
 
    //Don't cheat ;-)
       pGlobalOptObj->RandomizeStartingConfig();
-   
-   //Annealing parameters (schedule, Tmax, Tmin, displacement schedule, 
+
+   //Annealing parameters (schedule, Tmax, Tmin, displacement schedule,
       pGlobalOptObj->SetAlgorithmParallTempering(ANNEALING_SMART,1e8,1e-8,
-                                               ANNEALING_EXPONENTIAL,8,.125);      
-      
+                                               ANNEALING_EXPONENTIAL,8,.125);
+
    //Global Optimization
       //The real job-first test
       long nbTrial=50000000;
       pGlobalOptObj->Optimize(nbTrial,true,0,time);
-      
-   
+
+
    SpeedTestReport report;
    report.mNbAtom=nbAtom;
    report.mNbAtomType=nbAtomType;

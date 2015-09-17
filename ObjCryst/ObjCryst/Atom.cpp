@@ -116,7 +116,7 @@ void Atom::operator=(const Atom &rhs)
    //:TODO: Check if this is enough (copy constructor for Scatterer ??)
    mScattCompList.Reset();
    ++mScattCompList;
-   
+
    this->Init(rhs.mXYZ(0),rhs.mXYZ(1),rhs.mXYZ(2),
               rhs.mName,rhs.mpScattPowAtom,
               rhs.mOccupancy);
@@ -145,9 +145,9 @@ void Atom::Init(const REAL x, const REAL y, const REAL z,
    }
    mpScattPowAtom->RegisterClient(*this);
    mOccupancy=popu;
-   
+
    if(this->GetNbPar()<4) this->InitRefParList();
-   
+
    mClockScatterer.Click();
    VFN_DEBUG_MESSAGE("Atom::Init():End.",5)
 }
@@ -168,16 +168,16 @@ string Atom::GetComponentName(const int i) const{ return this->GetName();}
 void Atom::Print() const
 {
    VFN_DEBUG_MESSAGE("Atom::Print()",1)
-   cout << "Atom (" 
+   cout << "Atom ("
         << FormatString(mpScattPowAtom->GetSymbol(),4) << ") :"
-        << FormatString(this->GetName(),16)  << " at : " 
-        << FormatFloat(this->GetX()) 
-        << FormatFloat(this->GetY()) 
+        << FormatString(this->GetName(),16)  << " at : "
+        << FormatFloat(this->GetX())
+        << FormatFloat(this->GetY())
         << FormatFloat(this->GetZ());
    if(this->IsDummy()) cout << " DUMMY! ";
    else
    {
-      cout << ", Biso=" 
+      cout << ", Biso="
            << FormatFloat(mpScattPowAtom->GetBiso())
            << ", Popu=" << FormatFloat(this->GetOccupancy());
    }
@@ -307,8 +307,8 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
       const float g=mpScattPowAtom->GetColourRGB()[1];
       const float b=mpScattPowAtom->GetColourRGB()[2];
       const float f=mOccupancy;
-   
-      const GLfloat colour0[] = {.0, .0, .0, 0.0}; 
+
+      const GLfloat colour0[] = {.0, .0, .0, 0.0};
       GLfloat colourChar [] = {1.0, 1.0, 1.0, 1.0};
       if((r>0.8)&&(g>0.8)&&(b>0.8))
       {
@@ -338,19 +338,19 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
          glTranslatef(x*en, y, z);
          if(displayNames)
          {
-            glMaterialfv(GL_FRONT, GL_AMBIENT,   colour0); 
-            glMaterialfv(GL_FRONT, GL_DIFFUSE,   colour0); 
-            glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0); 
-            glMaterialfv(GL_FRONT, GL_EMISSION,  colourChar); 
+            glMaterialfv(GL_FRONT, GL_AMBIENT,   colour0);
+            glMaterialfv(GL_FRONT, GL_DIFFUSE,   colour0);
+            glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0);
+            glMaterialfv(GL_FRONT, GL_EMISSION,  colourChar);
             glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
             glRasterPos3f(0,0,0);
             crystGLPrint(this->GetName());
          }
          else
          {
-            glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE,   colourAtom); 
-            glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0); 
-            glMaterialfv(GL_FRONT, GL_EMISSION,  colour0); 
+            glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE,   colourAtom);
+            glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0);
+            glMaterialfv(GL_FRONT, GL_EMISSION,  colour0);
             glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
             glPolygonMode(GL_FRONT, GL_FILL);
             gluSphere(pQuadric,this->GetRadius()/3.,20,20);
@@ -448,9 +448,9 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
                   }
                   else
                   {
-                     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE,   colourAtom); 
-                     glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0); 
-                     glMaterialfv(GL_FRONT, GL_EMISSION,  colour0); 
+                     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE,   colourAtom);
+                     glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0);
+                     glMaterialfv(GL_FRONT, GL_EMISSION,  colour0);
                      glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
                      glPolygonMode(GL_FRONT, GL_FILL);
                      gluSphere(pQuadric,this->GetRadius()/3.,20,20);

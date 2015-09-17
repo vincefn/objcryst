@@ -48,7 +48,7 @@ Molecule* MakeAntiPrismTetragonal(Crystal &cryst,const string &name,
                      const ScatteringPower *centralAtom,
                      const ScatteringPower *peripheralAtom,
                      const REAL dist);
-                     
+
 Molecule* MakePrismTrigonal(Crystal &cryst,const string &name,
                      const ScatteringPower *centralAtom,
                      const ScatteringPower *peripheralAtom,

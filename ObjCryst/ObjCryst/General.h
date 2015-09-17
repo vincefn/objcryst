@@ -36,7 +36,7 @@
 #elif defined(_MSC_VER) || defined(__ICL) // MS and VC++ compiler
    #define RESTRICT __restrict
 #else
-   #define RESTRICT 
+   #define RESTRICT
 #endif
 
 //profiling
@@ -48,7 +48,7 @@
 #include "Profile/Profiler.h"
 #else
 
-#define TAU_PROFILE(name, type, group) 
+#define TAU_PROFILE(name, type, group)
 #define TAU_PROFILE_START(var)
 #define TAU_PROFILE_TIMER(var, name, type, group)
 #define TAU_PROFILE_STOP(var)
@@ -147,7 +147,7 @@ class ObjCrystException
 
       static bool verbose;
       string message;
-      
+
    protected:
    private:
 };
@@ -164,7 +164,7 @@ void ObjCrystInformUserStdOut(const string &);
 * This function pointer is by default assigned to ObjCrystInformUserStdOut,
 * which outputs the message to the standard output. If a user interface is
 * used (eg in Fox), this pointer should be reassigned at the beginning of the
-* application to a more user-suitable function. 
+* application to a more user-suitable function.
 */
 extern void (*fpObjCrystInformUser)(const string &);
 
@@ -203,7 +203,7 @@ struct CrystalPOVRayOptions
    /// Show hydrogens ?
    bool mShowHydrogens;
 };
-    
+
 /// This class only serves to temporarilly set the LC_NUMERIC C locale to "C",
 /// in order to use '.' as the decimal separator.
 /// Just creating one object of type tmp_C_Numeric_locale will switch to the C locale,

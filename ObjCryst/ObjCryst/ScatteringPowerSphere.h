@@ -45,8 +45,8 @@ class ScatteringPowerSphere: public ScatteringPower
       ScatteringPowerSphere();
       /**   \brief constructor
       *  \param name : name of the ScatteringPower ('C60','France 98'...).
-      *The name can have \e any format 
-      * \param nbAtom: the number of atoms 
+      *The name can have \e any format
+      * \param nbAtom: the number of atoms
       *  \param biso : Isotropic thermic coefficient
       * \param AxisLengthX,AxisLengthY,AxisLengthZ: length of the different
       * main axis of the ellipsoid

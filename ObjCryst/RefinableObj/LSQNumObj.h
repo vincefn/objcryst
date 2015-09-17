@@ -54,7 +54,7 @@ class LSQNumObj
       * may be either the copied one or the original.
       *
       * LSQNumObj::PrepareRefParList() must be called first!
-      **/ 
+      **/
       void SetParIsFixed(RefinablePar &par,const bool fix);
       /** Fix all parameters within an object
       *
@@ -62,7 +62,7 @@ class LSQNumObj
       * in the original objects.
       *
       * LSQNumObj::PrepareRefParList() must be called first!
-      **/ 
+      **/
       void SetParIsFixed(RefinableObj &obj,const bool fix);
       /// UnFix All parameters
       ///
@@ -152,7 +152,7 @@ class LSQNumObj
       void SetDampingFactor(const REAL newDampFact);
       void PurgeSaveFile();
       void WriteReportToFile()const;
-      
+
       void OptimizeDerivativeSteps();
       const std::map<pair<const RefinablePar*,const RefinablePar*>,REAL > &GetVarianceCovarianceMap()const;
       /** Prepare the full parameter list for the refinement
@@ -170,7 +170,7 @@ class LSQNumObj
       * the parameter list is empty. Otherwise it should be called before refinement.
       */
       void PrepareRefParList(const bool copy_param=false);
-      
+
       /// Get the LSQ calc vector (using either only the top or the hierarchy of object)
       const CrystVector_REAL& GetLSQCalc() const;
       /// Get the LSQ obs vector (using either only the top or the hierarchy of object)
@@ -203,7 +203,7 @@ class LSQNumObj
       /// Damping factor for the refinement (unused yet...)
       REAL mDampingFactor;
       ///Save result to file after each cycle ?
-      bool mSaveReportOnEachCycle;   
+      bool mSaveReportOnEachCycle;
       /// Name of the refined object
       std::string mName;
       /// File name where refinement info is saved
@@ -226,7 +226,7 @@ class LSQNumObj
       //RefinableObj *mpRefinedObj;
       // The index of the LSQ function in the refined object (if there are several...)
       //unsigned int mLSQFuncIndex;
-      
+
       /** Map of the recursive list of the objects to be refined. The key is the pointer
       * to the object and the value the LSQ function index
       *
@@ -235,7 +235,7 @@ class LSQNumObj
       std::map<RefinableObj*,unsigned int> mvRefinedObjMap;
       /// Size of each object LSQ data. This is initialized in LSQNumObj::GetLSQObs()
       mutable std::map<RefinableObj*,unsigned int> mvRefinedObjLSQSize;
-      
+
       /// If true, then parameters to be refined will be copied instead of referenced.
       /// Therefore only their values and the parameter's clocks are affected when
       /// working on the copy.

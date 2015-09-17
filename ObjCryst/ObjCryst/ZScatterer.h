@@ -97,7 +97,7 @@ class ZAtom
       const ZScatterer& GetZScatterer()const;
       /// Get the ZScatterer associated to this ZAtom
       ZScatterer& GetZScatterer();
-      
+
       /// Index of the 1st atom used to define the atom in the Z-Matrix (the one from
       /// which the bondlength is calculated)
       long GetZBondAtom()const;
@@ -107,7 +107,7 @@ class ZAtom
       /// Index of the 3rd atom used to define the atom in the Z-Matrix (the one from
       /// which the dihedral angle is calculated)
       long GetZDihedralAngleAtom()const;
-      
+
       ///Const access to bondlength parameter.
       const REAL& GetZBondLength()const;
       ///Const access to the angle parameter.
@@ -118,7 +118,7 @@ class ZAtom
       const REAL& GetOccupancy()const;
       ///ScatteringPower for this atom.
       const ScatteringPower* GetScatteringPower()const;
-      
+
       ///Access to bondlength parameter.
       void SetZBondLength(const REAL);
       ///Access to the angle parameter.
@@ -143,9 +143,9 @@ class ZAtom
       string mName;
       /// the ZScatterer in which this atom is included.
       ZScatterer *mpScatt;
-      
+
       friend class ZScatterer; //So that RefinablePar can be declared in ZScatterer
-      
+
    #ifdef __WX__CRYST__
    public:
       WXCrystObjBasic* WXCreate(wxWindow *parent);
@@ -196,7 +196,7 @@ class ZScatterer: public Scatterer
       *  \param x,y,z: fractionnal coordinates of the scatterer
       *  \param phi,chi: angles defining the orientation of the scatterer
       */
-      ZScatterer(const string &name,Crystal &cryst, 
+      ZScatterer(const string &name,Crystal &cryst,
                  const REAL x=0.,const REAL y=0.,const REAL z=0.,
                  const REAL phi=0.,const REAL chi=0., const REAL psi=0.);
       /** \brief Copy constructor
@@ -216,14 +216,14 @@ class ZScatterer: public Scatterer
                    const long atomAngle, const REAL bondAngle,
                    const long atomDihedral, const REAL dihedralAngle,
                    const REAL popu=1.);
-      
+
       virtual int GetNbComponent() const;
       virtual const ScatteringComponentList& GetScatteringComponentList() const;
       virtual string GetComponentName(const int i) const;
-      
+
       ///Print a single line of information about this scatterer
       void Print() const;
-            
+
       ///Access to phi parameter (overall orientation of the scatterer)
       REAL GetPhi()const;
       ///Access to chi parameter (overall orientation of the scatterer)
@@ -252,14 +252,14 @@ class ZScatterer: public Scatterer
       /// Index of the 3rd atom used to define the i-th atom in the Z-Matrix (the one from
       /// which the dihedral angle is calculated)
       long GetZDihedralAngleAtom(const int i)const;
-      
+
       ///Const access to bondlength parameter, for the i-th row in the Z-Matrix.
       REAL GetZBondLength(const int i)const;
       ///Const access to the angle parameter, for the i-th row in the Z-Matrix.
       REAL GetZAngle(const int i)const;
       ///Const access to the dihedral angle parameter, for the i-th row in the Z-Matrix.
       REAL GetZDihedralAngle(const int i)const;
-      
+
       ///Access to bondlength parameter, for the i-th row in the Z-Matrix.
       void SetZBondLength(const int i,const REAL);
       ///Access to the angle parameter, for the i-th row in the Z-Matrix.
@@ -282,7 +282,7 @@ class ZScatterer: public Scatterer
                                      const bool hideHydrogens=false)const;
       /** \brief use a Global scattering power for this scatterer ?
       *
-      * If true, then the overall scattering power of this ZScatterer will be 
+      * If true, then the overall scattering power of this ZScatterer will be
       * approximated to an isotropic scattering power computed for this scatterer.
       * Of course, only use this if the "isotropic" approximation is reasonable for
       * this scatterer (typically true for 'large' polyhedra). See GlobalScatteringPower.
@@ -293,7 +293,7 @@ class ZScatterer: public Scatterer
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
-      virtual void GetGeneGroup(const RefinableObj &obj, 
+      virtual void GetGeneGroup(const RefinableObj &obj,
                                 CrystVector_uint & groupIndex,
                                 unsigned int &firstGroup) const;
       virtual void GlobalOptRandomMove(const REAL mutationAmplitude,
@@ -312,7 +312,7 @@ class ZScatterer: public Scatterer
       * hydrogen atoms)
       *
       * \param is: the input stream from which to read the z-matrix
-      * \param names: if true, instead of reading a standard Fenske-Hall 
+      * \param names: if true, instead of reading a standard Fenske-Hall
       * z-matrix, the file will be read with names, i.e. with an added first
       * column with the names of the atoms, and the number used to reference
       * the bond, bond angle and dihedral angle atoms are replaced by the
@@ -335,7 +335,7 @@ class ZScatterer: public Scatterer
       */
       void ImportFenskeHallZMatrix(istream &is,bool named=false);
       /** Export to Fenske-Hall ZMatrix file
-      * 
+      *
       * \todo USe more strict formatting than space-delimited.
       */
       void ExportFenskeHallZMatrix(ostream &os);
@@ -346,7 +346,7 @@ class ZScatterer: public Scatterer
    protected:
       /** Update the atom coordinates (in real units, in Angstroems).
       *
-      * This takes into account the translation and global 
+      * This takes into account the translation and global
       * rotation of the scatterer (ie this does not generate 'internal
       * coordinates).
       */
@@ -355,15 +355,15 @@ class ZScatterer: public Scatterer
       * positions from the bonds/angles/dihedral angles, and convert
       * the coordinates to fractionnal coordinates of the Crystal.
       *
-      * 
+      *
       */
       void UpdateScattCompList() const;
       /** For 3D display of the structure, bonds, triangular and quadric
       * faces can be displayed. This matrix determines what is drawn.
       * This is a 5-column matrix. The first column indicates the type of
-      * drawing (0: : nothing, 1: display the atom (a sphere),  2: bond, 
+      * drawing (0: : nothing, 1: display the atom (a sphere),  2: bond,
       * 3: triangular face, 4: quadric face)
-      * the other columns indicate the index of the atoms involved in the 
+      * the other columns indicate the index of the atoms involved in the
       * drawing (2 atoms for a bond, 3 for....)
       *
       * If the matrix is empty only the individual atoms are displayed.
@@ -380,17 +380,17 @@ class ZScatterer: public Scatterer
    private:
       ///Prepare refinable parameters for the scatterer object
       virtual void InitRefParList();
-            
+
       ///Number of "dummy" atoms in the structure
       long mNbDummyAtom;
-      
+
       /// Index of atoms in the ScatteringComponentList. We need this list because
       /// Dummy atoms are not included in it. So this is an integer array with
       /// [ 0 1 2 4 5 6].. where the missing '3' marks a Dummy atom. Thus
       /// to get the name of component 'i' in the component list, you must
       /// take the mComponentIndex(i) atom in the ZAtom Registry.
       CrystVector_int mComponentIndex;
-      
+
       /** \brief Angles giving the orientation of the ZScatterer (stored in radian)
       *
       * The position of any atom can be transformed from internal coordinates (orthonormal
@@ -416,24 +416,24 @@ class ZScatterer: public Scatterer
       * The rotation is performed around a 'pivot' atom (see ZScatterer::mPivotAtom)
       */
       REAL mPhi,mChi,mPsi;
-      
+
       /// Registry for ZAtoms in this Scatterer.
       ObjRegistry<ZAtom> mZAtomRegistry;
       /// Index of the atom used as a pivot (the scatterer is rotated around this atom).
       /// This should more or less be at the center of the Scatterer.
       long mCenterAtomIndex;
-      
+
       /// Rotation matrix for the orientation of the scatterer
       mutable CrystMatrix_REAL mPhiChiPsiMatrix;
-      
+
       /// Does the ZScatterer use a global scattering power ?
       /// \warning EXPERIMENTAL.
       bool mUseGlobalScattPow;
-      
+
       /// the global scattering power used, if mUseGlobalScattPow=true
       /// \warning EXPERIMENTAL.
       GlobalScatteringPower* mpGlobalScattPow;
-      
+
       /// Storage for Cartesian coordinates. The (0,0,0) is on the central atom. This
       /// includes Dummy atoms.
       mutable CrystVector_REAL mXCoord,mYCoord,mZCoord;
@@ -482,7 +482,7 @@ class ZPolyhedron: public ZScatterer
       * central and peripheral atoms, respectively.
       *  \param centralPeriphDist: the distance, in angstroems, from the central
       * to the peripheral atoms
-      * \param ligandPopu : the relative population of ligand atoms, equal to 1/n if 
+      * \param ligandPopu : the relative population of ligand atoms, equal to 1/n if
       * ligand atoms are shared by n polyhedra. If you are using the 'Dynamical Polpulation
       * Correction', then keep this parameter to 1.
       * \param phi,chi,psi: initial angles for this polyhedron
@@ -498,7 +498,7 @@ class ZPolyhedron: public ZScatterer
       /// \internal so-called Virtual copy constructor, needed to make copies
       ///of arrays of Scatterers
       virtual ZPolyhedron* CreateCopy() const;
-      
+
       /* \brief Copy constructor
       *
       ZPolyhedron(const ZPolyhedron &old);
@@ -507,7 +507,7 @@ class ZPolyhedron: public ZScatterer
    private:
       //Prepare refinable parameters for the scatterer object
       //virtual void InitRefParList();
-      
+
       ///
       RegularPolyhedraType mPolyhedraType;
 };

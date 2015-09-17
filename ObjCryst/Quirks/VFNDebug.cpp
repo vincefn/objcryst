@@ -32,7 +32,7 @@ int gDebugMessageLevel=gDebugMessageLevel;
 unsigned int gVFNDebugMessageIndent=0;
 /*
 void LibCrystDebugMessage(const string &message, const int level=0)
-{  
+{
    if(level >= sDebugMessageLevel) cout << "DEBUG MSG:" << message <<endl;
 }
 */
@@ -47,7 +47,7 @@ void LibCrystDebugGlobalLevel(const int level)
 //to revert to the default global debug level.
 void LibCrystDebugLocalLevel(const int level)
 {
-   if(level != -1) gDebugMessageLevel=level; 
+   if(level != -1) gDebugMessageLevel=level;
    else gDebugMessageLevel=gDebugMessageGlobalLevel;
    cout << "DEBUG MSG: Setting debug level to " << gDebugMessageLevel <<endl;
 }
@@ -56,4 +56,3 @@ int gVFNDebugMessageGlobalLevel=10;//The default : few messages.
 int gVFNDebugMessageLevel=gVFNDebugMessageGlobalLevel;
 
 #endif //__DEBUG__
-

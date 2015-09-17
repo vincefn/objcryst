@@ -48,7 +48,7 @@ enum CrystalCentering
 * \param nbrefl: number of observed reflections
 * \param kappa: estimated percentage of reflections actually observed (default=1.0)
 */
-float EstimateCellVolume(const float dmin, const float dmax, const float nbrefl, 
+float EstimateCellVolume(const float dmin, const float dmax, const float nbrefl,
                          const CrystalSystem system,const CrystalCentering centering,const float kappa=1);
 
 /** Lightweight class describing the reciprocal unit cell, for the fast computation of d*_hkl^2.
@@ -129,13 +129,13 @@ class PeakList
       * \param deg: if true, angles are in degrees instead of radians
       * \param nb: the number of peak positions to generate
       * \param nbspurious: number of spurious lines to be included in the list
-      * \param sigma: the maximum relative error for d* - the d* values will be within [d_calc*(1-sigma) ;d_calc*(1+sigma)] 
+      * \param sigma: the maximum relative error for d* - the d* values will be within [d_calc*(1-sigma) ;d_calc*(1+sigma)]
       * \param percentMissing: percentage (between 0 and 1) of missing reflections - maximum allowed 0.9
       * \param verbose: print some info
       * \return: the volume of the simulated unit cell
       */
-      float Simulate(float zero, float a, float b, float c, 
-                    float alpha, float beta, float gamma, 
+      float Simulate(float zero, float a, float b, float c,
+                    float alpha, float beta, float gamma,
                     bool deg, unsigned int nb=20, unsigned int nbspurious=0,
                     float sigma=0, float percentMissing=0, const bool verbose=false);
       void ExportDhklDSigmaIntensity(std::ostream &out)const;
@@ -233,15 +233,15 @@ class CellExplorer:public RefinableObj
       virtual const CrystVector_REAL & GetLSQDeriv(const unsigned int, RefinablePar &);
       virtual void BeginOptimization(const bool allowApproximations=false, const bool enableRestraints=false);
       void LSQRefine(int nbCycle=1, bool useLevenbergMarquardt=true, const bool silent=false);
-      /// Run DicVOl algorithm, store only solutions with score >minScore or depth>=minDepth, 
-      /// stop at the end of one volume interval (~400 A^3) if best score>stopOnScore, 
+      /// Run DicVOl algorithm, store only solutions with score >minScore or depth>=minDepth,
+      /// stop at the end of one volume interval (~400 A^3) if best score>stopOnScore,
       /// or if one solution was found at depth>=stopOnDepth
       ///
       /// If stopOnDepth==0, do not stop for any depth
       void DicVol(const float minScore=10,const unsigned int minDepth=3,const float stopOnScore=50.0,const unsigned int stopOnDepth=6);
       /** Sort all solutions by score, remove duplicates
       *
-      * \param updateReportThreshold: if true, when too many solutions are produced, 
+      * \param updateReportThreshold: if true, when too many solutions are produced,
       * the threshold above which solutions are reported will be updated to get less solutions.
       */
       void ReduceSolutions(const bool updateReportThreshold=false);

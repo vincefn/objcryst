@@ -63,7 +63,7 @@ class Tracker
 
 /** A class to hold all trackers
 *
-* All trackers need not have the same 
+* All trackers need not have the same
 */
 class MainTracker
 {
@@ -103,7 +103,7 @@ class MainTracker
    #endif
 };
 
-/** Tracker for objects (RefinableObj, Crystal, PowderPattern, RefPar,...) 
+/** Tracker for objects (RefinableObj, Crystal, PowderPattern, RefPar,...)
 *
 */
 template <class T> class TrackerObject:public Tracker

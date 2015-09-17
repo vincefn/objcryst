@@ -186,17 +186,17 @@ class Radiation: public RefinableObj
       /** \ brief Constructor for X-Ray tube radiation
       *
       *\param XRayTubeElementName : name of the anticathode element name. Known
-      *ones are Cr, Fe, Cu, Mo, Ag. 
+      *ones are Cr, Fe, Cu, Mo, Ag.
       *\param alpha2Alpha2ratio: Kalpha2/Kalpha1 ratio (0.5 by default)
       *
       *the average wavelength is calculated
-      *using the alpha2/alpha1 weight. All structure factors computation are made 
+      *using the alpha2/alpha1 weight. All structure factors computation are made
       *using the average wavelength, and for powder diffraction, profiles are output
       *at the alpha1 and alpha2 ratio for the calculated pattern.
       *
-      *NOTE : if the name of the wavelength is generic (eg"Cu"), 
-      *then the program considers that 
-      *there are both Alpha1 and Alpha2, and thus automatically changes the WavelengthType 
+      *NOTE : if the name of the wavelength is generic (eg"Cu"),
+      *then the program considers that
+      *there are both Alpha1 and Alpha2, and thus automatically changes the WavelengthType
       *to WAVELENGTH_ALPHA12. If instead either alpha1 or alpha2 (eg "CuA1") is asked for,
       *the WavelengthType is set to WAVELENGTH_MONOCHROMATIC. In both cases,
       * the radiation type is set to X-Ray.
@@ -206,9 +206,9 @@ class Radiation: public RefinableObj
       Radiation(const Radiation&);
       ~Radiation();
       virtual const string& GetClassName() const;
-      
+
       void operator=(const Radiation&);
-      
+
       /// Get the radiation type (X-Rays, Neutron)
       RadiationType GetRadiationType()const;
       /// Set the radiation type (X-Rays, Neutron)
@@ -226,28 +226,28 @@ class Radiation: public RefinableObj
       /** \ brief Set X-Ray tube radiation.
       *
       *\param XRayTubeElementName : name of the anticathode element name. Known
-      *ones are Cr, Fe, Cu, Mo, Ag. 
+      *ones are Cr, Fe, Cu, Mo, Ag.
       *\param alpha2Alpha2ratio: Kalpha2/Kalpha1 ratio (0.5 by default)
       *
       *the average wavelength is calculated
-      *using the alpha2/alpha1 weight. All structure factors computation are made 
+      *using the alpha2/alpha1 weight. All structure factors computation are made
       *using the average wavelength, and for powder diffraction, profiles are output
       *at the alpha1 and alpha2 ratio for the calculated pattern.
       *
-      *NOTE : if the name of the wavelength is generic (eg"Cu"), 
-      *then the program considers that 
-      *there are both Alpha1 and Alpha2, and thus automatically changes the WavelengthType 
+      *NOTE : if the name of the wavelength is generic (eg"Cu"),
+      *then the program considers that
+      *there are both Alpha1 and Alpha2, and thus automatically changes the WavelengthType
       *to WAVELENGTH_ALPHA12. If instead either alpha1 or alpha2 (eg "CuA1") is asked for,
       *the WavelengthType is set to WAVELENGTH_MONOCHROMATIC. In both cases,
       * the radiation type is set to X-Ray.
       */
       void SetWavelength(const string &XRayTubeElementName,const REAL alpha2Alpha2ratio=0.5);
-      
+
       /// Get the wavelength difference for Alpha1 and Alpha2
       REAL GetXRayTubeDeltaLambda()const;
       /// Get the Kalpha2/Kalpha1 ratio
       REAL GetXRayTubeAlpha2Alpha1Ratio()const;
-      
+
       /// Last time the wavelength has been changed
       const RefinableObjClock& GetClockWavelength()const ;
       /// Last time the nature (X-Rays/Neutron, number of wavelengths)radiation has been changed
@@ -267,7 +267,7 @@ class Radiation: public RefinableObj
       RefObjOpt mWavelengthType;
       ///Wavelength of the Experiment, in Angstroems.
       CrystVector_REAL mWavelength;
-      ///Name of the X-Ray tube used, if relevant. ie "Cu", "Fe",etc... 
+      ///Name of the X-Ray tube used, if relevant. ie "Cu", "Fe",etc...
       /// "CuA1" for Cu-alpha1, etc...
       string mXRayTubeName;
       ///Absolute difference between alpha1 and alpha2, in angstroems
@@ -310,7 +310,7 @@ class ScatteringData: virtual public RefinableObj
       ~ScatteringData();
       /// So-called virtual copy constructor
       virtual ScatteringData* CreateCopy()const=0;
-      
+
       /** \brief input H,K,L
       *
       * \param h,k,l: REAL arrays (vectors with NbRefl elements -same size),
@@ -319,36 +319,36 @@ class ScatteringData: virtual public RefinableObj
       virtual void SetHKL( const CrystVector_REAL &h,
                            const CrystVector_REAL &k,
                            const CrystVector_REAL &l);
-      /** \brief Generate a list of h,k,l to describe a full reciprocal space, 
+      /** \brief Generate a list of h,k,l to describe a full reciprocal space,
       * up to a given maximum theta value
       *
       * \param maxTheta:maximum theta value
       * \param unique: if set to true, only unique reflections will be listed.
       * Bijvoet (Friedel) pairs
       * are NOT merged, for 'anomalous' reasons, unless you have chosen to ignore the
-      * imaginary part of the scattering factor. 
+      * imaginary part of the scattering factor.
       *
       * The multiplicity is always stored in ScatteringData::mMultiplicity.
       *
-      * \warning The ScatteringData object must already have been assigned 
-      * a crystal object using SetCrystal(), and the experimental wavelength 
+      * \warning The ScatteringData object must already have been assigned
+      * a crystal object using SetCrystal(), and the experimental wavelength
       * must also have been set before calling this function.
       */
       virtual void GenHKLFullSpace2(const REAL maxsithsl,
                                    const bool unique=false);
-      /** \brief Generate a list of h,k,l to describe a full reciprocal space, 
+      /** \brief Generate a list of h,k,l to describe a full reciprocal space,
       * up to a given maximum theta value
       *
       * \param maxsithsl:maximum sin(theta)/lambda=1/2d value
       * \param unique: if set to true, only unique reflections will be listed.
       * Bijvoet (Friedel) pairs
       * are NOT merged, for 'anomalous' reasons, unless you have chosen to ignore the
-      * imaginary part of the scattering factor. 
+      * imaginary part of the scattering factor.
       *
       * The multiplicity is always stored in ScatteringData::mMultiplicity.
       *
-      * \warning The ScatteringData object must already have been assigned 
-      * a crystal object using SetCrystal(), and the experimental wavelength 
+      * \warning The ScatteringData object must already have been assigned
+      * a crystal object using SetCrystal(), and the experimental wavelength
       * must also have been set before calling this function.
       *
       * \deprecated Rather use PowderPattern::GenHKLFullSpace2,
@@ -356,12 +356,12 @@ class ScatteringData: virtual public RefinableObj
       */
       virtual void GenHKLFullSpace(const REAL maxTheta,
                                    const bool unique=false);
-      
+
       ///Neutron or x-ray experiment ? Wavelength ?
       RadiationType GetRadiationType()const;
       /// Get the radiation object for this data
       virtual const Radiation& GetRadiation()const=0;
-      
+
       /**Set the crystal for this experiment
       *
       */
@@ -372,7 +372,7 @@ class ScatteringData: virtual public RefinableObj
       Crystal& GetCrystal() ;
       /// Has a Crystal structure associated yet ?
       bool HasCrystal()const;
-    
+
       ///Return the number of reflections in this experiment.
       long GetNbRefl() const;
       ///Return the 1D array of H coordinates for all reflections
@@ -396,15 +396,15 @@ class ScatteringData: virtual public RefinableObj
       const CrystVector_REAL& GetReflY() const;
       ///Return the 1D array of orthonormal z coordinates for all reflections (recipr. space)
       const CrystVector_REAL& GetReflZ() const;
-      
-      /// Return an array with \f$ \frac{sin(\theta)}{\lambda} = \frac{1}{2d_{hkl}}\f$ 
+
+      /// Return an array with \f$ \frac{sin(\theta)}{\lambda} = \frac{1}{2d_{hkl}}\f$
       ///for all reflections
       const CrystVector_REAL& GetSinThetaOverLambda()const;
       /// Return an array with theta values for all reflections
       const CrystVector_REAL& GetTheta()const;
       /// Clock the last time the sin(theta)/lambda and theta arrays were re-computed
       const RefinableObjClock& GetClockTheta()const;
-   
+
       ///  Returns the Array of calculated |F(hkl)|^2 for all reflections.
       const CrystVector_REAL& GetFhklCalcSq() const;
       std::map<RefinablePar*, CrystVector_REAL> & GetFhklCalcSq_FullDeriv(std::set<RefinablePar *> &vPar);
@@ -412,7 +412,7 @@ class ScatteringData: virtual public RefinableObj
       const CrystVector_REAL& GetFhklCalcReal() const;
       /// Access to imaginary part of F(hkl)calc
       const CrystVector_REAL& GetFhklCalcImag() const;
-      
+
       ///  Returns the Array of observed |F(hkl)|^2 for all reflections.
       const CrystVector_REAL& GetFhklObsSq() const;
 
@@ -421,7 +421,7 @@ class ScatteringData: virtual public RefinableObj
 
       ///wavelength of the experiment (in Angstroems)
       CrystVector_REAL GetWavelength()const;
-      
+
       /// If true, then the imaginary part of the scattering factor is ignored during
       /// Structure factor computation. (default value=false)
       ///
@@ -454,13 +454,13 @@ class ScatteringData: virtual public RefinableObj
       virtual void SetMaxSinThetaOvLambda(const REAL max);
       /// Get the maximum value for sin(theta)/lambda.
       REAL GetMaxSinThetaOvLambda()const;
-      /// Recalc, and get the number of reflections which should be actually used, 
+      /// Recalc, and get the number of reflections which should be actually used,
       /// due to the maximuml sin(theta)/lambda value set.
       virtual long GetNbReflBelowMaxSinThetaOvLambda()const;
       /// Clock the last time the number of reflections used was changed
       const RefinableObjClock& GetClockNbReflBelowMaxSinThetaOvLambda()const;
    protected:
-      /// \internal This function is called after H,K and L arrays have 
+      /// \internal This function is called after H,K and L arrays have
       /// been initialized or modified.
       virtual void PrepareHKLarrays() ;
       /// \internal sort reflections by theta values (also get rid of [0,0,0] if present)
@@ -475,10 +475,10 @@ class ScatteringData: virtual public RefinableObj
       ///
       /// \return an array with the subscript of the kept reflections (for inherited classes)
       CrystVector_long EliminateExtinctReflections();
-      
+
       //The following functions are used during the calculation of structure factors,
-         /// \internal Compute sin(theta)/lambda as well a orthonormal coordinates 
-         /// for all reflections. theta and tan(theta), 
+         /// \internal Compute sin(theta)/lambda as well a orthonormal coordinates
+         /// for all reflections. theta and tan(theta),
          /// are also re-computed, provided a wavelength has been supplied.
          virtual void CalcSinThetaLambda()const;
          /// Calculate sin(theta)/lambda for a single reflection
@@ -498,9 +498,9 @@ class ScatteringData: virtual public RefinableObj
          /**\brief Compute the overall temperature factor affecting all reflections
          */
          void CalcGlobalTemperatureFactor() const;
-         
+
       /**\brief Compute the overall structure factor (real \b and imaginary part).
-      *This function is \e optimized \e for \e speed (geometrical structure factors are 
+      *This function is \e optimized \e for \e speed (geometrical structure factors are
       *computed for all atoms and all reflections in two loops, avoiding re-calculation).
       *So use this function for repetitive calculations.
       *
@@ -520,14 +520,14 @@ class ScatteringData: virtual public RefinableObj
       void CalcGeomStructFactor_FullDeriv(std::set<RefinablePar*> &vPar);
       /** Calculate the Luzzati factor associated to each ScatteringPower and
       * each reflection, for maximum likelihood optimization.
-      * 
+      *
       */
       void CalcLuzzatiFactor()const;
       /** Calculate the variance associated to the calculated structure factor
       *
       */
       void CalcStructFactVariance()const;
-      
+
       /// Number of H,K,L reflections
       long mNbRefl;
       /// H,K,L coordinates
@@ -541,27 +541,27 @@ class ScatteringData: virtual public RefinableObj
 
       ///Multiplicity for each reflections (mostly for powder diffraction)
       CrystVector_int mMultiplicity ;
-      
+
       /** Expected intensity factor for all reflections.
       *
       * See SpaceGroup::GetExpectedIntensityFactor()
       */
       CrystVector_int mExpectedIntensityFactor;
-      
+
       /// real &imaginary parts of F(HKL)calc
       mutable CrystVector_REAL mFhklCalcReal, mFhklCalcImag ;
       mutable std::map<RefinablePar*, CrystVector_REAL> mFhklCalcReal_FullDeriv, mFhklCalcImag_FullDeriv ;
       /// F(HKL)^2 calc for each reflection
       mutable CrystVector_REAL mFhklCalcSq ;
       mutable std::map<RefinablePar*, CrystVector_REAL> mFhklCalcSq_FullDeriv;
-      
+
       /** Pointer to the crystal corresponding to this experiment.
       *
       *  This gives an access to the UB matrix for the crystal,
       * as well as to the list of Scatterer.
       */
       Crystal *mpCrystal;
-      
+
       /** Global Biso, affecting the overall structure factor for all
       * reflections (but not the structure factors of individual atoms or
       * type of atomes).
@@ -570,25 +570,25 @@ class ScatteringData: virtual public RefinableObj
       REAL mGlobalBiso;
       /// Global Biso factor
       mutable CrystVector_REAL  mGlobalTemperatureFactor;
-      
+
       ///Use faster, but less precise, approximations for functions? (integer
       ///approximations to compute sin and cos in structure factors, and also
       ///to compute interatomic distances).
-      /// This is activated by global optimization algortithms, only during the 
+      /// This is activated by global optimization algortithms, only during the
       /// optimization.
       bool mUseFastLessPreciseFunc;
-      
+
       //The Following members are only kept to avoid useless re-computation
-      //during global refinements. They are used \b only by CalcStructFactor() 
-      
-         ///  \f$ \frac{sin(\theta)}{\lambda} = \frac{1}{2d_{hkl}}\f$ 
+      //during global refinements. They are used \b only by CalcStructFactor()
+
+         ///  \f$ \frac{sin(\theta)}{\lambda} = \frac{1}{2d_{hkl}}\f$
          ///for the crystal and the reflections in ReciprSpace
          mutable CrystVector_REAL mSinThetaLambda;
 
          /// theta for the crystal and the HKL in ReciprSpace (in radians)
          mutable CrystVector_REAL mTheta;
 
-         /// Anomalous X-Ray scattering term f' and f" are stored here for each ScatteringPower 
+         /// Anomalous X-Ray scattering term f' and f" are stored here for each ScatteringPower
          /// We store here only a value. For multi-wavelength support this should be changed
          /// to a vector... or to a matrix to take into account anisotropy of anomalous
          /// scattering...
@@ -599,11 +599,11 @@ class ScatteringData: virtual public RefinableObj
 
          /// Scattering factors for each ScatteringPower, as vectors with NbRefl elements
          mutable map<const ScatteringPower*,CrystVector_REAL> mvScatteringFactor;
-      
+
          /// Geometrical Structure factor for each ScatteringPower, as vectors with NbRefl elements
          mutable map<const ScatteringPower*,CrystVector_REAL> mvRealGeomSF,mvImagGeomSF;
          mutable map<RefinablePar*,map<const ScatteringPower*,CrystVector_REAL> > mvRealGeomSF_FullDeriv,mvImagGeomSF_FullDeriv;
-      
+
       //Public Clocks
          /// Clock for the list of hkl
          RefinableObjClock mClockHKL;
@@ -622,12 +622,12 @@ class ScatteringData: virtual public RefinableObj
          mutable RefinableObjClock mClockGeomStructFact;
          /// Clock the last time temperature factors were computed
          mutable RefinableObjClock mClockThermicFact;
-         
+
          /// last time the global Biso factor was modified
          RefinableObjClock mClockGlobalBiso;
          /// last time the global temperature factor was computed
          mutable RefinableObjClock mClockGlobalTemperatureFact;
-      
+
       /** \brief Ignore imaginary part of scattering factor.
       *
       * This can be used either to speed up computation, or when f"
@@ -641,8 +641,8 @@ class ScatteringData: virtual public RefinableObj
       * This may be removed later on...
       */
       bool mIgnoreImagScattFact;
-      
-      // Maximum sin(theta)/lambda 
+
+      // Maximum sin(theta)/lambda
          /** Maximum sin(theta)/lambda for all calculations (10 by default).
          *
          * This keeps all data in memory, but only the part which is below
@@ -660,7 +660,7 @@ class ScatteringData: virtual public RefinableObj
          mutable long mNbReflUsed;
          /// Clock recording the last time the number of reflections used has increased.
          mutable RefinableObjClock mClockNbReflUsed;
-      
+
       // Maximum Likelihood
          /// The Luzzati 'D' factor for each scattering power and each reflection
          mutable map<const ScatteringPower*,CrystVector_REAL> mvLuzzatiFactor;

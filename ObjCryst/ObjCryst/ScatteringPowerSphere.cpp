@@ -50,7 +50,7 @@ ScatteringPowerSphere::ScatteringPowerSphere(const string &name,
    this->Init(name,radius,bIso);
 }
 
-ScatteringPowerSphere::ScatteringPowerSphere(const ScatteringPowerSphere& old) 
+ScatteringPowerSphere::ScatteringPowerSphere(const ScatteringPowerSphere& old)
 {}
 
 ScatteringPowerSphere::~ScatteringPowerSphere()
@@ -77,8 +77,8 @@ const string& ScatteringPowerSphere::GetClassName() const
 
 CrystVector_REAL ScatteringPowerSphere::GetScatteringFactor(const ScatteringData &data,
                                        const int spgSymPosIndex) const
-{  
-   
+{
+
    CrystVector_REAL sf;
    #if 0
    // :TODO: Support anisotropic form factor. For the moment use only mAxisLengthX
@@ -191,7 +191,7 @@ REAL ScatteringPowerSphere::GetRadius()const{return mRadius;}
 
 void ScatteringPowerSphere::Print()const
 {
-   
+
 }
 
 void ScatteringPowerSphere::XMLOutput(ostream &os,int indent)const
@@ -201,15 +201,15 @@ void ScatteringPowerSphere::XMLOutput(ostream &os,int indent)const
    XMLCrystTag tag("ScatteringPowerSphere");
    tag.AddAttribute("Name",mName);
    os <<tag<<endl;
-      
+
    for(int i=0;i<=indent;i++) os << "  " ;
       this->GetPar(&mRadius).XMLOutput(os,"Radius",0);
    os<<endl;
-   
+
    for(int i=0;i<=indent;i++) os << "  " ;
       this->GetPar(&mBiso).XMLOutput(os,"Biso",0);
    os<<endl;
-   
+
    for(int i=0;i<=indent;i++) os << "  " ;
    XMLCrystTag tag2("RGBColour");
    os << tag2
@@ -218,7 +218,7 @@ void ScatteringPowerSphere::XMLOutput(ostream &os,int indent)const
       << mColourRGB[2];
    tag2.SetIsEndTag(true);
    os << tag2<<endl;
-   
+
    tag.SetIsEndTag(true);
    for(int i=0;i<indent;i++) os << "  " ;
    os <<tag<<endl;

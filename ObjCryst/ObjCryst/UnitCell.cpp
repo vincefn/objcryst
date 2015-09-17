@@ -92,7 +92,7 @@ const string& UnitCell::GetClassName() const
 CrystVector_REAL UnitCell::GetLatticePar() const
 {
    VFN_DEBUG_MESSAGE("UnitCell::GetLatticePar()",0)
-   
+
    if(mClockLatticeParUpdate>mClockLatticePar) return mCellDim;
    else
    {
@@ -125,7 +125,7 @@ CrystVector_REAL UnitCell::GetLatticePar() const
          cellDim(5)=M_PI/2.;
          return cellDim;
       }
-      if(num <= 142) 
+      if(num <= 142)
       {
          cellDim(3)=M_PI/2.;
          cellDim(4)=M_PI/2.;
@@ -163,7 +163,7 @@ REAL UnitCell::GetLatticePar(int whichPar)const
    VFN_DEBUG_MESSAGE("UnitCell::LatticePar(i)",0)
    if( (whichPar<0) || (whichPar>5))
       throw ObjCrystException("UnitCell::LatticePar(int) :trying to access parameter>5!");
-      
+
    if(mClockLatticeParUpdate>mClockLatticePar) return mCellDim(whichPar);
    else
    {
@@ -199,7 +199,7 @@ REAL UnitCell::GetLatticePar(int whichPar)const
          cellDim(5)=M_PI/2.;
          return cellDim(whichPar);
       }
-      if(num <= 142) 
+      if(num <= 142)
       {
          cellDim(3)=M_PI/2.;
          cellDim(4)=M_PI/2.;
@@ -308,18 +308,18 @@ void UnitCell::Print(ostream &os)const
    int width =8 ;
    os << "UnitCell : " << mName <<"("<<this->GetSpaceGroup().GetName()<<")"<< endl;
    os.width(width);
-   os   << "    Cell dimensions : " 
-        << FormatFloat(this->GetLatticePar(0),8,5) << "  " 
-        << FormatFloat(this->GetLatticePar(1),8,5) << "  " 
+   os   << "    Cell dimensions : "
+        << FormatFloat(this->GetLatticePar(0),8,5) << "  "
+        << FormatFloat(this->GetLatticePar(1),8,5) << "  "
         << FormatFloat(this->GetLatticePar(2),8,5) << "  "
-        << FormatFloat(this->GetLatticePar(3)*RAD2DEG,8,5) << "  " 
-        << FormatFloat(this->GetLatticePar(4)*RAD2DEG,8,5) << "  " 
+        << FormatFloat(this->GetLatticePar(3)*RAD2DEG,8,5) << "  "
+        << FormatFloat(this->GetLatticePar(4)*RAD2DEG,8,5) << "  "
         << FormatFloat(this->GetLatticePar(5)*RAD2DEG,8,5) << endl ;
 }
 
 const SpaceGroup & UnitCell::GetSpaceGroup() const {return mSpaceGroup;}
 SpaceGroup & UnitCell::GetSpaceGroup()  {return mSpaceGroup;}
- 
+
 const RefinableObjClock& UnitCell::GetClockLatticePar()const {return mClockLatticePar;}
 const RefinableObjClock& UnitCell::GetClockMetricMatrix()const {return mClockMetricMatrix;}
 
@@ -331,7 +331,7 @@ REAL UnitCell::GetVolume()const
    const REAL alpha=this->GetLatticePar(3);
    const REAL beta=this->GetLatticePar(4);
    const REAL gamma=this->GetLatticePar(5);
-   
+
    return a*b*c*sqrt(1-cos(alpha)*cos(alpha)-cos(beta)*cos(beta)-cos(gamma)*cos(gamma)
             +2*cos(alpha)*cos(beta)*cos(gamma));
 }
@@ -350,15 +350,15 @@ void UnitCell::Init(const REAL a, const REAL b, const REAL c, const REAL alpha,
    mCellDim(3)=alpha;
    mCellDim(4)=beta;
    mCellDim(5)=gamma;
-   
+
    mClockMetricMatrix.Reset();
    mClockLatticeParUpdate.Reset();
-   
+
    this->InitRefParList();
    this->InitMatrices();
    this->UpdateLatticePar();
    this->SetName(name);
-   
+
    VFN_DEBUG_EXIT("UnitCell::Init(a,b,c,alpha,beta,gamma,Sg,name):End",10)
 }
 
@@ -367,7 +367,7 @@ void UnitCell::InitOptions()
    VFN_DEBUG_ENTRY("UnitCell::InitOptions",10)
    static string ConstrainLatticeToSpaceGroupName;
    static string ConstrainLatticeToSpaceGroupChoices[2];
-   
+
    static bool needInitNames=true;
    if(true==needInitNames)
    {
@@ -391,7 +391,7 @@ void UnitCell::InitMatrices() const
    //optimization purposes in some procedures.
    if(mClockMetricMatrix>mClockLatticePar) return;//no need to update
    //this->UpdateLatticePar(); we should be able to do this...
-   
+
    VFN_DEBUG_MESSAGE("UnitCell::InitMatrices() for crystal : "+this->GetName(),5)
    //mClockMetricMatrix.Print();
    //mClockLatticePar.Print();
@@ -405,20 +405,20 @@ void UnitCell::InitMatrices() const
    alpha=this->GetLatticePar(3);
    beta=this->GetLatticePar(4);
    gamma=this->GetLatticePar(5);
-   
+
    //cout <<a<<" "<<b<<" "<<c<<" "<<alpha<<" "<<beta<<" "<<gamma<<endl;
-   
+
    v=sqrt(1-cos(alpha)*cos(alpha)-cos(beta)*cos(beta)-cos(gamma)*cos(gamma)
             +2*cos(alpha)*cos(beta)*cos(gamma));
-            
+
    aa=sin(alpha)/a/v;
    bb=sin(beta )/b/v;
    cc=sin(gamma)/c/v;
-   
+
    alphaa=acos( (cos(beta )*cos(gamma)-cos(alpha))/sin(beta )/sin(gamma) );
    betaa =acos( (cos(alpha)*cos(gamma)-cos(beta ))/sin(alpha)/sin(gamma) );
    gammaa=acos( (cos(alpha)*cos(beta )-cos(gamma))/sin(alpha)/sin(beta ) );
-   
+
    //cout <<aa<<" "<<bb<<" "<<cc<<" "<<alphaa<<" "<<betaa<<" "<<gammaa<<endl;
 
    mBMatrix = aa ,  bb*cos(gammaa) , cc*cos(betaa) ,
@@ -429,7 +429,7 @@ void UnitCell::InitMatrices() const
    mOrthMatrix = a  , b*cos(gamma) , c*cos(beta) ,
                  0  , b*sin(gamma) ,-c*sin(beta)*cos(alphaa),
                  0  , 0              ,1/cc;
-   
+
    mOrthMatrixInvert=InvertMatrix(mOrthMatrix);
    mBMatrixInvert=InvertMatrix(mBMatrix);
    //cout << "Orth Matrix :"<<endl<<mOrthMatrix <<endl;
@@ -481,7 +481,7 @@ void UnitCell::UpdateLatticePar()
       mClockLatticeParUpdate.Click();
       return;
    }
-   if(num <= 142) 
+   if(num <= 142)
    {
       mCellDim(3)=M_PI/2.;
       mCellDim(4)=M_PI/2.;
@@ -555,7 +555,7 @@ void UnitCell::InitRefParList()
          beta=false;
          gamma=false;
       }
-      else if(num <= 142) 
+      else if(num <= 142)
       {
          b=false;
          alpha=false;
@@ -570,7 +570,7 @@ void UnitCell::InitRefParList()
          beta=false;
          gamma=false;
       }
-      else if(num <= 194) 
+      else if(num <= 194)
       {//Hexagonal axes, for hexagonal and non-rhomboedral trigonal cells
          b=false;
          alpha=false;

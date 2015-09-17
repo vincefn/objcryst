@@ -51,9 +51,9 @@ using namespace blitz;
 #define CrystMatrix_uint   Array<unsigned int,2>
 #define CrystMatrix_bool   Array<bool,2>
 
-#define CrystVector_T    Array<T,1> 
-#define CrystMatrix_T    Array<T,2> 
-#define CrystArray3D_T    Array<T,3> 
+#define CrystVector_T    Array<T,1>
+#define CrystMatrix_T    Array<T,2>
+#define CrystArray3D_T    Array<T,3>
 
 template<class T> T MaxDifference(const Array<T,1> &a,const Array<T,1> &b);
 
@@ -80,9 +80,9 @@ template<class T> T MaxDifference(const Array<T,2> &a,const Array<T,2> &b);
 
 #define CrystArray3D_REAL CrystArray3D<REAL>
 
-#define CrystVector_T    CrystVector<T> 
-#define CrystMatrix_T    CrystMatrix<T> 
-#define CrystArray3D_T    CrystMatrix<T> 
+#define CrystVector_T    CrystVector<T>
+#define CrystMatrix_T    CrystMatrix<T>
+#define CrystArray3D_T    CrystMatrix<T>
 
 #define __VFN_GEOM_STRUCT_FACTOR_USE_POINTERS
 
@@ -99,9 +99,9 @@ using namespace std;
 //  CrystVector
 //######################################################################
 /** \brief Vector library (Blitz++ mimic) for ObjCryst++
-*  
+*
 *  The CrystVector library is not a new array computation library, despite
-* the appearances. ObjCryst++ should used the 
+* the appearances. ObjCryst++ should used the
 *  <a href="http://www.oonumerics.org/blitz/"> Blitz++ array library</a> , which yields
 * excellent performance \e and simple array expressions. Unfortunately, the memory
 * required to \e compile the library using gcc is far too high to be reasonable
@@ -109,7 +109,7 @@ using namespace std;
 * The CrystVector and CrystMatrix library have been created, and these emulate
 * (supposedly exactly) the Blitz++ interface (but not the smart handling of
 * mathematical expressions, so pointers must be used). For documentation about these
-* two libraries you should read the <a href="http://www.oonumerics.org/blitz/manual/"> 
+* two libraries you should read the <a href="http://www.oonumerics.org/blitz/manual/">
 * Blitz++ documentation</a>. CrystVector and CrystMatrix use the same kind of storage
 * in memory.
 *
@@ -123,15 +123,15 @@ template<class T> class CrystVector
 {
    public:
    CrystVector();
-   
+
    CrystVector(const long nbElements);
-   
+
    CrystVector(const CrystVector &old);
-   
+
    ~CrystVector();
 
    void operator=(const CrystVector &old);
-   
+
    template<class U> void operator=(const CrystVector<U> &old)
    {
       if(mNumElements != old.numElements())
@@ -145,7 +145,7 @@ template<class T> class CrystVector
       const U *p2=old.data();
       for(long i=0;i<mNumElements;i++) *p1++ = (T) *p2++;
    }
-   
+
    #ifdef __MWERKS__
    operator CrystVector<bool>() const
    {
@@ -192,7 +192,7 @@ template<class T> class CrystVector
    * vector, from old(i) to old(imax-1)
    */
    void reference(CrystVector &old, const long imin=0, const long imax=0);
-   
+
    long numElements()const;
    long size()const;
    T sum()const;
@@ -202,26 +202,26 @@ template<class T> class CrystVector
    unsigned long imin(const unsigned long start=0,const unsigned long finish=0)const;
    /// Find index of maximum, between start and end (if start==end, use full vector)
    unsigned long imax(const unsigned long start=0,const unsigned long finish=0)const;
-   
+
    T * data();
    const T * data() const;
-   
+
    void resize(const long newNbElements);
-   
+
    void resizeAndPreserve(const long newNbElements);
-   
+
    void operator*=(const T num);
-   
+
    void operator*=(const CrystVector &vect);
-   
+
    void operator/=(const T num);
-   
+
    void operator/=(const CrystVector &vect);
-   
+
    void operator+=(const T num);
-   
+
    void operator+=(const CrystVector &vect);
-   
+
    void operator-=(const CrystVector &vect);
 /* Buggy ? (my version, not Blitz's!)
    // ListInitializer & ListInitializerSwitch are a simplified
@@ -273,8 +273,8 @@ template<class T> class CrystVector
          long mNumElements;
          bool wipeOnDestruct;
    };
-   
-   
+
+
    ListInitializerSwitch operator=(const T num)
    {
       return ListInitializerSwitch(*this,num);
@@ -286,7 +286,7 @@ template<class T> class CrystVector
 
    T& operator()(const long i);
 
-   
+
    protected:
    private:
    T *mpData;
@@ -304,7 +304,7 @@ template<class T> CrystVector<long> SortSubs(const CrystVector<T> &vect);
 template<class T> long QuickSortSubs(CrystVector<T> &vect,
                                      CrystVector<long> &subscript,
                                      long last,long first=0, int depth=0);
-                                     
+
 ///Cosinus (slow routine, not memory-savy..)
 template<class T> CrystVector<T> cos(const CrystVector<T> &vect);
 ///Sinus (slow routine, not memory-savy...)
@@ -318,9 +318,9 @@ template<class T> CrystVector<T> sqrt(const CrystVector<T> &vect);
 //  CrystMatrix
 //######################################################################
 /** \brief 2D Vector library (Blitz++ mimic) for ObjCryst++
-*  
+*
 *  The CrystVector library is not a new array computation library, despite
-* the appearances. ObjCryst++ should used the 
+* the appearances. ObjCryst++ should used the
 *  <a href="http://www.oonumerics.org/blitz/"> Blitz++ array library</a> , which yields
 * excellent performance \e and simple array expressions. Unfortunately, the memory
 * required to \e compile the library using gcc is far too high to be reasonable
@@ -328,7 +328,7 @@ template<class T> CrystVector<T> sqrt(const CrystVector<T> &vect);
 * The CrystVector and CrystMatrix library have been created, and these emulate
 * (supposedly exactly) the Blitz++ interface (but not the smart handling of
 * mathematical expressions, so pointers must be used). For documentation about these
-* two libraries you should read the <a href="http://www.oonumerics.org/blitz/manual/"> 
+* two libraries you should read the <a href="http://www.oonumerics.org/blitz/manual/">
 * Blitz++ documentation</a>. CrystVector and CrystMatrix use the same kind of storage
 * in memory.
 *
@@ -342,11 +342,11 @@ template<class T> class CrystMatrix
    CrystMatrix();
    //ySize : number of rows, xSize : number of columns
    CrystMatrix(const long ySize,const long xSize);
-   
+
    CrystMatrix(const CrystMatrix &old);
-   
+
    ~CrystMatrix();
-   
+
    void operator=(const CrystMatrix &old);
 
    void reference(CrystMatrix &old);
@@ -357,14 +357,14 @@ template<class T> class CrystMatrix
    T max()const;
    long rows()const;
    long cols()const;
-   
+
    T * data();
    const T * data() const;
-   
+
    void resize(const long ySize,const long xSize);
 
    void resizeAndPreserve(const long ySize,const long xSize);
-   
+
    //void operator=(const T num);
    /// Element-by element multiplication (array-like)
    void operator*=(const T num);
@@ -376,11 +376,11 @@ template<class T> class CrystMatrix
    void operator+=(const T num);
    /// Element-by element substraction (array-like)
    void operator-=(const T num);
-   
+
    /// matrix multiplication (linear algebra)
    CrystMatrix Mult(const CrystMatrix &rhs);
    //:TODO: Check the following...
-   
+
    // ListInitializer & ListInitializerSwitch are a simplified
    //version borrowed from the blitz++ library (see the blitz/listinit.h file)
    //
@@ -430,31 +430,31 @@ template<class T> class CrystMatrix
          long mNumElements;
          bool wipeOnDestruct;
    };
-   
-   
+
+
    ListInitializerSwitch operator=(const T num)
    {
       return ListInitializerSwitch(*this,num);
    }
-   
-   
+
+
    T operator()(const long i) const;
 
    T operator()(const long row,const long col) const;
-   
+
    T& operator()(const long i);
 
    T& operator()(const long i,const long j);
 
    CrystMatrix transpose()const;
-   
+
    protected:
    private:
    T *mpData;
    long mNumElements;
    long mXSize,mYSize;
    bool mIsAreference;//is a reference to another vector ?
-   
+
    //friend ostream& operator<<(ostream &os,const CrystMatrix &vect);
 
 };
@@ -471,9 +471,9 @@ template<class T> CrystMatrix<T> product(const CrystMatrix<T> &a,const CrystMatr
 //  CrystArray3D
 //######################################################################
 /** \brief 3D Vector (Blitz++ mimic) for ObjCryst++
-*  
+*
 *  The CrystVector library is not a new array computation library, despite
-* the appearances. ObjCryst++ should used the 
+* the appearances. ObjCryst++ should used the
 *  <a href="http://www.oonumerics.org/blitz/"> Blitz++ array library</a> , which yields
 * excellent performance \e and simple array expressions. Unfortunately, the memory
 * required to \e compile the library using gcc is far too high to be reasonable
@@ -481,7 +481,7 @@ template<class T> CrystMatrix<T> product(const CrystMatrix<T> &a,const CrystMatr
 * The CrystVector and CrystMatrix library have been created, and these emulate
 * (supposedly exactly) the Blitz++ interface (but not the smart handling of
 * mathematical expressions, so pointers must be used). For documentation about these
-* two libraries you should read the <a href="http://www.oonumerics.org/blitz/manual/"> 
+* two libraries you should read the <a href="http://www.oonumerics.org/blitz/manual/">
 * Blitz++ documentation</a>. CrystVector and CrystMatrix use the same kind of storage
 * in memory.
 *
@@ -495,11 +495,11 @@ template<class T> class CrystArray3D
    CrystArray3D();
    //ySize : number of rows, xSize : number of columns
    CrystArray3D(const long zSize,const long ySize,const long xSize);
-   
+
    CrystArray3D(const CrystArray3D &old);
-   
+
    ~CrystArray3D();
-   
+
    void operator=(const CrystArray3D &old);
 
    void reference(CrystArray3D &old);
@@ -511,27 +511,27 @@ template<class T> class CrystArray3D
    long rows()const;
    long cols()const;
    long depth()const;
-   
+
    T * data();
    const T * data() const;
-   
+
    void resize(const long zSize,const long ySize,const long xSize);
 
    void resizeAndPreserve(const long zSize,const long ySize,const long xSize);
-   
+
    void operator=(const T num);
    void operator*=(const T num);
    void operator*=(const CrystArray3D &vect);
    void operator/=(const T num);
    void operator+=(const T num);
    void operator-=(const T num);
-      
+
    //void operator=(const T num);
-   
+
    T operator()(const long i) const;
 
    T operator()(const long depth,const long row,const long col) const;
-   
+
    T& operator()(const long i);
 
    T& operator()(const long depth,const long row,const long col);
@@ -567,7 +567,7 @@ class CubicSpline
       /// Default constructor - CubicSpline::Init() should be called afterwards
       CubicSpline();
       /// Spline with given extremum derivatives
-      CubicSpline(const CrystVector_REAL &x, const CrystVector_REAL &y, 
+      CubicSpline(const CrystVector_REAL &x, const CrystVector_REAL &y,
                   const REAL yp1, const REAL ypn);
       /// Spline with given extremum derivatives
       CubicSpline(const REAL *px, const REAL *py, const unsigned long nbPoints,
@@ -577,9 +577,9 @@ class CubicSpline
       /// Natural cubic spline
       CubicSpline(const REAL *px, const REAL *py, const unsigned long nbPoints);
       ~CubicSpline();
-      
+
       /// Spline with given extremum derivatives
-      void Init(const CrystVector_REAL &x, const CrystVector_REAL &y, 
+      void Init(const CrystVector_REAL &x, const CrystVector_REAL &y,
                 const REAL yp1, const REAL ypn);
       /// Spline with given extremum derivatives
       void Init(const REAL *px, const REAL *py, const unsigned long nbPoints,
@@ -588,7 +588,7 @@ class CubicSpline
       void Init(const CrystVector_REAL &x, const CrystVector_REAL &y);
       /// Natural cubic spline
       void Init(const REAL *px, const REAL *py, const unsigned long nbPoints);
-      
+
       /// Get spline value at a series of point - x is assumed to be sorted by increasing values
       CrystVector_REAL operator()(const CrystVector_REAL &x) const;
       /// Get spline value on a range of values with a fixed step

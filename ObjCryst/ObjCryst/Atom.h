@@ -100,7 +100,7 @@ class Atom: public Scatterer
       void Init(const REAL x, const REAL y, const REAL z,
             const string &name, const ScatteringPower *pow,
             const REAL popu=1);
-      
+
       virtual int GetNbComponent() const;
       virtual const ScatteringComponentList& GetScatteringComponentList() const;
       virtual string GetComponentName(const int i) const;
@@ -143,14 +143,14 @@ class Atom: public Scatterer
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
       /// Get the ScatteringPowerAtom corresponding to this atom.
       const ScatteringPower& GetScatteringPower()const;
-      virtual void GetGeneGroup(const RefinableObj &obj, 
+      virtual void GetGeneGroup(const RefinableObj &obj,
                                 CrystVector_uint & groupIndex,
                                 unsigned int &firstGroup) const;
    protected:
    private:
       /// Prepare refinable parameters for the scatterer object
       virtual void InitRefParList();
-   
+
       /// The list of scattering components.
       mutable ScatteringComponentList mScattCompList;
       /// The ScatteringPowerAtom associated to that atom

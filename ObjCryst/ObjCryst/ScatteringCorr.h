@@ -28,7 +28,7 @@ namespace ObjCryst
 * absorption, texcture, extinction, etc...
 *
 * The computed intensities are to be multiplied by all the ScatteringCorr calculated.
-* 
+*
 *
 * This is an abstract base class.
 */
@@ -81,8 +81,8 @@ class LorentzCorr:public ScatteringCorr
 * So far, it only considers the correction for equatorial diffraction:
 *\f$ P = \frac{1}{1+A}\left(1+A\cos^2(2\theta)\right) \f$ (Polarization factor), with
 * \f$ A = \frac{1-f}{1+f} \f$, where f is the polarization rate of the incident
-*beam in the plane which (i) includes the incident beam, and (ii) is perpendicular to  
-*the diffracting plane. For an X-Ray Tube without monochromator, A=1, and 
+*beam in the plane which (i) includes the incident beam, and (ii) is perpendicular to
+*the diffracting plane. For an X-Ray Tube without monochromator, A=1, and
 *if there is a monochromator : \f$ A = \cos^2(2\theta_{mono}) \f$
 *
 * Currently, the linear polarization factor is directly read from the radiation object,
@@ -106,7 +106,7 @@ class PolarizationCorr:public ScatteringCorr
 /** Slit aperture correction (for powder)
 *
 * This correction takes into account the fact that diffraction
-* rings (cones) have a portion of the ring proportionnal to 
+* rings (cones) have a portion of the ring proportionnal to
 * \f$ SlitAp = \frac{1}{\sin(\theta)} \f$ which falls into the detector
 * (due to slits in the direction perpendicular to the incident beam/ detector plane).
 */
@@ -199,7 +199,7 @@ class TextureMarchDollase:public ScatteringCorr,public RefinableObj
    friend class WXTextureMarchDollase;
    #endif
 };
-    
+
 /** Texture correction using the Ellipsoidal preferred orientation function.
 *
 *  Icorr = Iobs[ 1 + (EPR1*h^2 + EPR2*k^2 + EPR3*l^2 + EPR4*2hk + EPR5*2hl + EPR6*2kl) * 0.001d^2 ]^-1.5
@@ -244,7 +244,7 @@ class TextureEllipsoid:public ScatteringCorr,public RefinableObj
 
 /** Time-Of-Flight Correction
 *
-* 
+*
 * \f$ T = d^4\sin(\theta) \f$
 *
 * The \theta angle of the detector is ignored, as it is just a scale factor.

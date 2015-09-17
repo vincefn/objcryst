@@ -32,12 +32,12 @@ namespace ObjCryst
 //######################################################################
 
 ///Gaussian, normalized (ie integral is equal to 1), as a function of theta
-/// and of the FWHM. The input is an array of the theta values. The maximum of the 
+/// and of the FWHM. The input is an array of the theta values. The maximum of the
 ///function is in theta=center. If asymmetry is used, negative tth values must be first.
 CrystVector_REAL PowderProfileGauss  (const CrystVector_REAL theta,
                                       const REAL fwhm, const REAL center, const REAL asym=1.0);
 ///Lorentzian, normalized (ie integral is equal to 1), as a function of theta
-/// and of the FWHM. The input is an array of the theta values. The maximum of the 
+/// and of the FWHM. The input is an array of the theta values. The maximum of the
 ///function is in theta=center. If asymmetry is used, negative tth values must be first.
 CrystVector_REAL PowderProfileLorentz(const CrystVector_REAL theta,
                                       const REAL fwhm, const REAL center, const REAL asym=1.0);
@@ -54,7 +54,7 @@ CrystVector_REAL AsymmetryBerarBaldinozzi(const CrystVector_REAL theta,
 template <class T> std::complex<T>ExponentialIntegral1(const complex<T> z);
 /** E1(z)*exp(z)
 *
-* This can be computed for large z values to avoid floating-point exceptions. 
+* This can be computed for large z values to avoid floating-point exceptions.
 */
 template <class T> std::complex<T>ExponentialIntegral1_ExpZ(const complex<T> z);
 
@@ -79,7 +79,7 @@ class ReflectionProfile:public RefinableObj
       */
       virtual CrystVector_REAL GetProfile(const CrystVector_REAL &x, const REAL xcenter,
                                   const REAL h, const REAL k, const REAL l)const=0;
-      /// Get the (approximate) full profile width at a given percentage 
+      /// Get the (approximate) full profile width at a given percentage
       /// of the profile maximum (e.g. FWHM=GetFullProfileWidth(0.5)).
       virtual REAL GetFullProfileWidth(const REAL relativeIntensity, const REAL xcenter,
                                        const REAL h, const REAL k, const REAL l)=0;

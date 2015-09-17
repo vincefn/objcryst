@@ -174,10 +174,10 @@ void PDFCrystal::CalcPDF()const
    const ScatteringComponentList *pScatt=&(mpCrystal->GetScatteringComponentList());
    unsigned long nb=pScatt->GetNbComponent();
    pScatt->Print();
-   
+
    // Calc <b> and rho0
    REAL rho0=0,b_av=0;
-   
+
    // Note: We cannot use the dynamical occupancy as computed in a Crystal Object,
    //as we need the real occupancy for each *unique* poisition.
    // :TODO: So we need to compute a new dynamical occupancy that only corrects the overlap
@@ -229,23 +229,23 @@ void PDFCrystal::CalcPDF()const
          if(pos->occupBi!=occupBi){pos->occupBi=occupBi;pos->hasChanged=true;}
       }
    }
-   
-   // Determine number of translations needed 
+
+   // Determine number of translations needed
    //to get all interatomic distances up to Rmax
-   // :TODO: faster by smarter limits on translations ? 
+   // :TODO: faster by smarter limits on translations ?
    const int nx=int(ceil(mpPDF->GetRMax()/mpCrystal->GetLatticePar(0))+.001);
    const int ny=int(ceil(mpPDF->GetRMax()/mpCrystal->GetLatticePar(1))+.001);
    const int nz=int(ceil(mpPDF->GetRMax()/mpCrystal->GetLatticePar(2))+.001);
    const unsigned int nbSymmetrics=mpCrystal->GetSpaceGroup().GetNbSymmetrics();
    const unsigned int neq=(2*nx+1)*(2*ny+1)*(2*nz+1)*nbSymmetrics;
-   
+
    b_av/=rho0;
-   
+
    cout<<"rho0="<<rho0<<"*"<<nbSymmetrics<<"="<<rho0*nbSymmetrics
        <<"/"<<mpCrystal->GetVolume()<<"="<<rho0*nbSymmetrics/mpCrystal->GetVolume()<<endl;
-   
+
    rho0*=nbSymmetrics/mpCrystal->GetVolume();
-   
+
    // Calc all equivalent positions & translations
    // TODO: Use knowledge of special positions, rather than use dynamical occupancy ?
    {
@@ -340,7 +340,7 @@ void PDFCrystal::CalcPDF()const
    }
    cout<<rho0<<","<<b_av<<endl;
    mPDFCalc/=mpPDF->GetPDFR();
-   
+
    CrystVector_REAL tmp;
    tmp=mpPDF->GetPDFR();
    tmp*=4*M_PI*rho0;
@@ -356,4 +356,3 @@ WXCrystObjBasic* PDFCrystal::WXCreate(wxWindow* parent)
 #endif
 
 }//namespace
-
