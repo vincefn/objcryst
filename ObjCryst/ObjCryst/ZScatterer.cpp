@@ -1190,7 +1190,6 @@ std::vector<std::string> SplitString(const std::string &s)
 void ReadFHLine(const char*buf, const unsigned int nb, string &symbol,
                 int &n1, float &v1, int &n2, float &v2, int &n3, float &v3)
 {
-   char symb[10];
    string sbuf=string(buf);
    std::vector<std::string> v=SplitString(sbuf);
    if(nb==1)

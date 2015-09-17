@@ -1106,7 +1106,7 @@ float Score(const PeakList &dhkl, const RecUnitCell &rpar, const unsigned int nb
    if(verbose)
    {
       float epstmp=0;
-      unsigned long i=0;
+      //unsigned long i=0;
       for(pos=dhkl.GetPeakList().begin();pos!=dhkl.GetPeakList().end();++pos)
       {
          epstmp+=fabs(pos->d2diff-zero);

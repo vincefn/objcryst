@@ -128,7 +128,6 @@ void CIFData::ExtractSpacegroup(const bool verbose)
       if(mvSymmetry_equiv_pos_as_xyz.size()>0) break;// only extract ONE list of symmetry strings
       map<ci_string,vector<string> >::const_iterator pos;
       pos=loop->second.find("_symmetry_equiv_pos_as_xyz");
-      unsigned int nb;
       if(pos!=loop->second.end())
       {
          if(verbose) cout<<"Found list of _symmetry_equiv_pos_as_xyz:"<<endl;

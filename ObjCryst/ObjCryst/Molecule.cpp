@@ -2148,7 +2148,6 @@ std::string Molecule::GetFormula() const
    }
    stringstream s;
    s<<std::setprecision(2);
-   char c[10];
    for(std::map<std::string,float>::const_iterator pos=velts.begin();pos!=velts.end();++pos)
    {
       if(pos!=velts.begin()) s<<" ";
@@ -3198,12 +3197,7 @@ ostream& Molecule::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opt
       VFN_DEBUG_EXIT("Molecule::POVRayDescription():No atom to display !",4)
       return os;
    }
-   REAL en=1;
    this->UpdateScattCompList();
-
-   const float colour_bondnonfree[]= { 0.3, .3, .3, 1.0 };
-   const float colour_bondfree[]= { 0.7, .7, .7, 1.0 };
-   const float colour0[] = {0.0f, 0.0f, 0.0f, 0.0f};
 
    const REAL aa=this->GetCrystal().GetLatticePar(0);
    const REAL bb=this->GetCrystal().GetLatticePar(1);
@@ -3294,9 +3288,6 @@ ostream& Molecule::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opt
          CrystVector<REAL> borderdist(x.numElements());//distance to display limit
          CrystVector<REAL> x0,y0,z0;
          x0=x;y0=y;z0=z;
-         const REAL tmpxc=x.sum()/(REAL)x.numElements();
-         const REAL tmpyc=y.sum()/(REAL)y.numElements();
-         const REAL tmpzc=z.sum()/(REAL)z.numElements();
          if(  ((x.min()<xMax) && (x.max()>xMin))
             &&((y.min()<yMax) && (y.max()>yMin))
             &&((z.min()<zMax) && (z.max()>zMin)))
@@ -3318,19 +3309,19 @@ ostream& Molecule::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opt
                   borderdist(k)=sqrt(borderdist(k));
                }
                REAL fout=1.0;
-               char ch[100];
                if(isinside(k)==false) fout=exp(-borderdist(k))*this->GetCrystal().GetDynPopCorr(this,k);
 
                this->GetCrystal().FractionalToOrthonormalCoords(x(k),y(k),z(k));
                if((mvpAtom[k]->IsDummy()) || (fout<0.001)) continue;
                if(options.mShowHydrogens==false && (mvpAtom[k]->GetScatteringPower().GetForwardScatteringFactor(RAD_XRAY)<1.5)) continue;
-               const float r=mvpAtom[k]->GetScatteringPower().GetColourRGB()[0];
-               const float g=mvpAtom[k]->GetScatteringPower().GetColourRGB()[1];
-               const float b=mvpAtom[k]->GetScatteringPower().GetColourRGB()[2];
+               // const float r=mvpAtom[k]->GetScatteringPower().GetColourRGB()[0];
+               // const float g=mvpAtom[k]->GetScatteringPower().GetColourRGB()[1];
+               // const float b=mvpAtom[k]->GetScatteringPower().GetColourRGB()[2];
                const float f=mvpAtom[k]->GetOccupancy()*this->GetOccupancy();
                if(options.mShowLabel)
                {
                   /*
+                  const float colour0[] = {0.0f, 0.0f, 0.0f, 0.0f};
                   GLfloat colourChar [] = {1.0, 1.0, 1.0, 1.0};
                   if((r>0.8)&&(g>0.8)&&(b>0.8))
                   {
@@ -3343,7 +3334,7 @@ ostream& Molecule::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opt
                   glMaterialfv(GL_FRONT, GL_SPECULAR, colour0);
                   glMaterialfv(GL_FRONT, GL_EMISSION, colourChar);
                   glMaterialfv(GL_FRONT, GL_SHININESS,colour0);
-                  glRasterPos3f(x(k)*en, y(k), z(k));
+                  glRasterPos3f(x(k), y(k), z(k));
                   crystGLPrint(mvpAtom[k]->GetName());
                   */
                }
@@ -3677,9 +3668,6 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                         const float f2=mvpBond[k]->GetAtom2().GetOccupancy()*this->GetOccupancy();
                         const GLfloat colourAtom1 [] = {r1, g1, b1, f1*fout};
                         const GLfloat colourAtom2 [] = {r2, g2, b2, f2*fout};
-                        const GLfloat colour_bondnonfree[]= { 0.2, .2, .2, (f1+f2)/2*fout };
-                        const GLfloat colour_bondrigid[]=   { 0.5, .3, .3, (f1+f2)/2*fout };
-                        const GLfloat colour_bondfree[]=    { 0.8, .8, .8, (f1+f2)/2*fout };
                         #if 0
                         glPushMatrix();
                            glBegin(GL_LINE_STRIP);
@@ -5061,7 +5049,6 @@ void BuildZMatrixRecursive(long &z,const long curr,
    zmatrix[z].mpPow=&(vpAtom[curr]->GetScatteringPower());
    vZIndex[curr]=z;
    vrZIndex[z]=curr;
-   const long n=vpAtom.size();
    // Get the list of connected atoms and sort them
       map<MolAtom *, set<MolAtom *> >::const_iterator pConn=connT.find(vpAtom[curr]);
       const long nc=pConn->second.size();
@@ -5325,7 +5312,6 @@ void Molecule::BuildConnectivityTable()const
    #ifdef __DEBUG__
    {
       map<MolAtom *,set<MolAtom *> >::const_iterator pos;
-      unsigned long at=0;
       for(pos=mConnectivityTable.begin();pos!=mConnectivityTable.end();++pos)
       {
          cout<<"Atom "<<pos->first->GetName()<<" is connected to atoms: ";
@@ -7172,7 +7158,7 @@ void Molecule::BuildFlipGroup()
    // List them
    this->SaveParamSet(mLocalParamSet);
    #if 1//def __DEBUG__
-   const REAL llk0=this->GetLogLikelihood();
+   // const REAL llk0=this->GetLogLikelihood();
    for(list<FlipGroup>::iterator pos=mvFlipGroup.begin();
        pos!=mvFlipGroup.end();++pos)
    {

@@ -1167,9 +1167,6 @@ void GetSubRefObjListClockRecursive(ObjRegistry<RefinableObj> &reg,RefinableObjC
 ObjRegistry<RefinableObj> gRefinableObjRegistry("Global RefinableObj registry");
 ObjRegistry<RefinableObj> gTopRefinableObjRegistry("Global Top RefinableObj registry");
 
-/// Maximum number of saved sets of parameters
-const unsigned long MaxNbSavedSets(1000);
-
 RefinableObj::RefinableObj():
 mName(""),
 mNbRefParNotFixed(-1),mOptimizationDepth(0),mDeleteRefParInDestructor(true)

@@ -1070,7 +1070,6 @@ void MonteCarloObj::RunRandomLSQMethod(long &nbCycle)
         //this->NewConfiguration();
         for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).RandomizeConfiguration();
         this->UpdateDisplay();
-        REAL starting_cost=this->GetLogLikelihood();
 
         //perform LSQ
         for(int i=0;i<mRefinedObjList.GetNb();i++) mRefinedObjList.GetObj(i).SetApproximationFlag(false);

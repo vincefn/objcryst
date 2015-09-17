@@ -1307,21 +1307,11 @@ void Crystal::ConnectAtoms(const REAL min_relat_dist, const REAL max_relat_dist,
    this->CalcDistTable(true);
    this->GetScatteringComponentList();
 
-   const CrystMatrix_REAL* pOrthMatrix=&(this->GetOrthMatrix());
-
-   const REAL m00=(*pOrthMatrix)(0,0);
-   const REAL m01=(*pOrthMatrix)(0,1);
-   const REAL m02=(*pOrthMatrix)(0,2);
-   const REAL m11=(*pOrthMatrix)(1,1);
-   const REAL m12=(*pOrthMatrix)(1,2);
-   const REAL m22=(*pOrthMatrix)(2,2);
-
    // Create first Molecule
    // start from start_carbon
    Molecule *pmol=NULL;
    std::set<int> vAssignedAtoms;//atoms already assigned to a Molecule
    std::set<int> vTriedAtom0;//atoms already tried as starting point for a Molecule
-   unsigned int nb_unsigned_atoms_last=0;
    VFN_DEBUG_MESSAGE("Crystal::ConnectAtoms(...)",10)
    while(vAssignedAtoms.size()!=mScattererRegistry.GetNb())
    {

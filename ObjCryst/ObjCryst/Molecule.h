@@ -401,7 +401,7 @@ class MolDihedralAngle:public Restraint
    private:
       /// The vector of the 4 atoms involved in the bond angle.
       vector<MolAtom*> mvpAtom;
-      REAL mAngle,mAngle0,mDelta,mSigma;
+      REAL mAngle0, mDelta, mSigma;
       /// Parent Molecule
       Molecule *mpMol;
       /// Stored log(likelihood)

@@ -796,7 +796,6 @@ void ScatteringData::PrintFhklCalcDetail(ostream &os)const
    os <<"     Re(F)         Im(F)       ";
    vector<CrystVector_REAL> sf;
    sf.resize(mvRealGeomSF.size()*2);
-   map<const ScatteringPower*,CrystVector_REAL>::const_iterator pos=mvRealGeomSF.begin();
    long i=0;
    for(map<const ScatteringPower*,CrystVector_REAL>::const_iterator
          pos=mvRealGeomSF.begin();pos!=mvRealGeomSF.end();++pos)

@@ -43,7 +43,11 @@ mvPDFPhase(old.mvPDFPhase)
 
 PDF::~PDF(){}
 
-const string& PDF::GetClassName() const {return "PDF";}
+const string& PDF::GetClassName() const
+{
+    static const string className = "PDF";
+    return className;
+}
 
 void PDF::SetPDFObs(const CrystVector_REAL &r,const CrystVector_REAL &obs)
 {

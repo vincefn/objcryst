@@ -406,7 +406,6 @@ void SpaceGroup::GetSymmetric(unsigned int idx, REAL &x, REAL &y, REAL &z,
    }
    if(coeffInvert==2) //inversion center not in ListSeitzMx, but to be applied
    {
-      int shift=nbMatrix*nbTrans;
       const REAL dx=((REAL)this->GetCCTbxSpg().inv_t()[0])/(REAL)this->GetCCTbxSpg().inv_t().den();//inversion not at the origin
       const REAL dy=((REAL)this->GetCCTbxSpg().inv_t()[1])/(REAL)this->GetCCTbxSpg().inv_t().den();
       const REAL dz=((REAL)this->GetCCTbxSpg().inv_t()[2])/(REAL)this->GetCCTbxSpg().inv_t().den();

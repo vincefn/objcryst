@@ -1284,7 +1284,7 @@ void PowderPatternDiffraction::CalcPowderPattern_FullDeriv(std::set<RefinablePar
    TAU_PROFILE("PowderPatternDiffraction::CalcPowderPattern_FullDeriv()","void ()",TAU_DEFAULT);
    //cout<<"PowderPatternDiffraction::CalcPowderPattern_FullDeriv"<<endl;
    this->CalcPowderPattern();
-   bool notYetDerivIhkl=true,notYetDerivProfiles=true;
+   bool notYetDerivProfiles=true;
    mIhkl_FullDeriv.clear();
    mvReflProfile_FullDeriv.clear();
    mPowderPattern_FullDeriv.clear();
@@ -1853,7 +1853,6 @@ Radiation must be either monochromatic, from an X-Ray Tube, or neutron TOF !!");
                else center=mpParentPowderPattern->X2XCorr(x0);
                REAL fact=1.0;
                if(!mUseFastLessPreciseFunc) fact=5.0;
-               const REAL halfwidth=mpReflectionProfile->GetFullProfileWidth(0.04,center,mH(i),mK(i),mL(i))*fact;
 
                first=mvReflProfile[i].first;
                last=mvReflProfile[i].last;
