@@ -1892,8 +1892,8 @@ void MDAtomGroup::Print(ostream &os,bool full)const
 //
 //######################################################################
 Molecule::Molecule(Crystal &cryst, const string &name):
-mBaseRotationAmplitude(M_PI*0.02),mIsSelfOptimizing(false),mpCenterAtom(0),
-mMDMoveFreq(0.0),mMDMoveEnergy(40.),mDeleteSubObjInDestructor(1),mLogLikelihoodScale(1.0)
+mDeleteSubObjInDestructor(1), mBaseRotationAmplitude(M_PI*0.02), mIsSelfOptimizing(false),
+mpCenterAtom(0), mMDMoveFreq(0.0), mMDMoveEnergy(40.), mLogLikelihoodScale(1.0)
 {
    VFN_DEBUG_MESSAGE("Molecule::Molecule()",5)
    mpCryst=&cryst;
@@ -1980,7 +1980,7 @@ mMDMoveFreq(0.0),mMDMoveEnergy(40.),mDeleteSubObjInDestructor(1),mLogLikelihoodS
 }
 
 Molecule::Molecule(const Molecule &old):
-mIsSelfOptimizing(false),mpCenterAtom(0),mDeleteSubObjInDestructor(old.mDeleteSubObjInDestructor)
+mDeleteSubObjInDestructor(old.mDeleteSubObjInDestructor), mIsSelfOptimizing(false), mpCenterAtom(0)
 {
    VFN_DEBUG_ENTRY("Molecule::Molecule(old&)",5)
    // a hack, but const-correct
