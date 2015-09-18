@@ -48,6 +48,8 @@
 #include "ObjCryst/Quirks/sse_mathfun.h"
 #endif
 
+#define POSSIBLY_UNUSED(expr) (void)(expr);
+
 namespace ObjCryst
 {
 const RefParType *gpRefParTypeScattData= 0;
@@ -1620,11 +1622,11 @@ void ScatteringData::CalcGeomStructFactor() const
       const int nbSymmetrics=pSpg->GetNbSymmetrics(true,true);
       const int nbTranslationVectors=pSpg->GetNbTranslationVectors();
       const long nbComp=pScattCompList->GetNbComponent();
-      const int nbRefl=this->GetNbRefl();
       const std::vector<SpaceGroup::TRx> *pTransVect=&(pSpg->GetTranslationVectors());
       CrystMatrix_REAL allCoords(nbSymmetrics,3);
       CrystVector_REAL tmpVect(mNbReflUsed);
       #ifndef HAVE_SSE_MATHFUN
+      const int nbRefl=this->GetNbRefl();
       CrystVector_long intVect(nbRefl);//not used if mUseFastLessPreciseFunc==false
       #endif
       // which scattering powers are actually used ?
@@ -2136,7 +2138,8 @@ void ScatteringData::CalcGeomStructFactor_FullDeriv(std::set<RefinablePar*> &vPa
             const v4sf v4x=_mm_load1_ps(&x);
             const v4sf v4y=_mm_load1_ps(&y);
             const v4sf v4z=_mm_load1_ps(&z);
-            const v4sf v4popu=_mm_load1_ps(&popu);// Can't multiply directly a vector by a scalar ?
+            // Can't multiply directly a vector by a scalar ?
+            const v4sf v4popu=_mm_load1_ps(&popu);  POSSIBLY_UNUSED(v4popu)
             int jj=mNbReflUsed;
             for(;jj>3;jj-=4)
             {

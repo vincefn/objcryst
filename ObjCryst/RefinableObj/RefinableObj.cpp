@@ -29,6 +29,9 @@
    #undef GetClassName // Conflict from wxMSW headers ? (cygwin)
 #endif
 #include <algorithm>
+
+#define POSSIBLY_UNUSED(expr) (void)(expr);
+
 namespace ObjCryst
 {
 //######################################################################
@@ -154,7 +157,7 @@ void RefinableObjClock::AddChild(const RefinableObjClock &clock)
 {mvChild.insert(&clock);clock.AddParent(*this);this->Click();}
 void RefinableObjClock::RemoveChild(const RefinableObjClock &clock)
 {
-   const unsigned int i=mvChild.erase(&clock);
+   const unsigned int i = mvChild.erase(&clock);  POSSIBLY_UNUSED(i);
    VFN_DEBUG_MESSAGE("RefinableObjClock::RemoveChild():"<<i,5)
    clock.RemoveParent(*this);
    this->Click();
@@ -170,7 +173,8 @@ void RefinableObjClock::AddParent(RefinableObjClock &clock)const
 }
 void RefinableObjClock::RemoveParent(RefinableObjClock &clock)const
 {
-   const unsigned int i=mvParent.erase(&clock);
+   // avoid warnings about unused i when not debugging.
+   const unsigned int i = mvParent.erase(&clock);  POSSIBLY_UNUSED(i);
    VFN_DEBUG_MESSAGE("RefinableObjClock::RemoveParent():"<<i,5)
 }
 

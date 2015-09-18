@@ -3586,9 +3586,9 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                      borderdist(k)=sqrt(borderdist(k));
                   }
                   REAL fout=1.0;
-                  char ch[100];
                   if(isinside(k)==false) fout=exp(-borderdist(k))*this->GetCrystal().GetDynPopCorr(this,k);
                   #ifdef __DEBUG__
+                  char ch[100];
                   sprintf(ch,"%d %d %d %s %5.2f %5.2f %5.2f d=%5.2f  fout=%5.3f",i,j,k,mvpAtom[k]->GetName().c_str(),x(k),y(k),z(k),borderdist(k),fout);
                   VFN_DEBUG_MESSAGE(ch,4)
                   #endif
