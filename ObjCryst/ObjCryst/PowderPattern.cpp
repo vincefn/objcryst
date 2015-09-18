@@ -3463,9 +3463,9 @@ Could not find BANK statement !! In file: "+filename);
             sscanf(substr.c_str(),"%8f%8f",&iobs,&isig);
             */
             substr=string(line).substr(j*16+0 ,8);
-            sscanf(substr.c_str(),"%f",&iobs);
+            istringstream(substr) >> iobs;
             substr=string(line).substr(j*16+8 ,8);
-            sscanf(substr.c_str(),"%f",&isig);
+            istringstream(substr) >> isig;
 
             mPowderPatternObs(point)=iobs;
             mPowderPatternObsSigma(point++)=isig;
@@ -3506,7 +3506,7 @@ Could not find BANK statement !! In file: "+filename);
             if(substr=="  ") nc=1;
             else sscanf(substr.c_str(),"%d",&nc);
             substr=string(line).substr(j*8+2 ,6);
-            sscanf(substr.c_str(),"%f",&iobs);
+            istringstream(substr) >> iobs;
             mPowderPatternObs(point)=iobs;
             mPowderPatternObsSigma(point++)=sqrt(iobs)/sqrt((REAL)nc);
             if(point==mNbPoint) break;
@@ -3540,11 +3540,11 @@ Could not find BANK statement !! In file: "+filename);
             sscanf(substr.c_str(),"%8f%7f%5f",&x,&iobs,&iobssigma);
             */
             substr=string(line).substr(j*20+0 ,8);
-            sscanf(substr.c_str(),"%f",&x);
+            istringstream(substr) >> x;
             substr=string(line).substr(j*20+8 ,7);
-            sscanf(substr.c_str(),"%f",&iobs);
+            istringstream(substr) >> iobs;
             substr=string(line).substr(j*20+15,5);
-            sscanf(substr.c_str(),"%f",&iobssigma);
+            istringstream(substr) >> iobssigma;
             mPowderPatternObs(point)=iobs;
             mPowderPatternObsSigma(point)=iobssigma;
             mX(point)=x/32;

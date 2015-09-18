@@ -565,7 +565,11 @@ Error opening file for input:"+fileName);
       while(true)
       {
          getline(fin,buffer);
-         const int n=sscanf(buffer.c_str(),"%f %f %f %f %f",&h,&k,&l,&iobs,&sigma);
+         istringstream linestream(buffer);
+         int nn = (linestream >> h >> k >> l) ? 3 : 0;
+         nn += bool(linestream >> iobs);
+         nn += bool(linestream >> sigma);
+         const int n = nn;
          if(n<3) break;
          mH(mNbRefl)=h;
          mK(mNbRefl)=k;
