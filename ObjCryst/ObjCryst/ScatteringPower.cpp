@@ -326,6 +326,13 @@ const string& ScatteringPowerAtom::GetClassName() const
    return className;
 }
 
+// Disable the base-class function.
+void ScatteringPowerAtom::Init()
+{
+   // This should be never called.
+   abort();
+}
+
 void ScatteringPowerAtom::Init(const string &name,const string &symbol,const REAL bIso)
 {
    VFN_DEBUG_MESSAGE("ScatteringPowerAtom::Init(n,s,b)"<<mName,4)

@@ -154,8 +154,9 @@ class UnitCell:public RefinableObj
       *
       * \param os the stream to which the information is outputed (default=cout)
       */
-      virtual void Print(ostream &os=cout) const;
-
+      virtual void Print(ostream &os) const;
+      // Avoid compiler warnings about hidden base class method.
+      virtual void Print() const  { this->Print(cout); }
       /// Access to the SpaceGroup object
       const SpaceGroup & GetSpaceGroup()const;
       /// Access to the SpaceGroup object.

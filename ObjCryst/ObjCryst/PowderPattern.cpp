@@ -842,6 +842,14 @@ ReflectionProfile& PowderPatternDiffraction::GetProfile()
    return *mpReflectionProfile;
 }
 
+// Disable the base-class function.
+void PowderPatternDiffraction::GenHKLFullSpace(
+        const REAL maxTheta, const bool useMultiplicity)
+{
+   // This should be never called.
+   abort();
+}
+
 void PowderPatternDiffraction::GenHKLFullSpace()
 {
    VFN_DEBUG_ENTRY("PowderPatternDiffraction::GenHKLFullSpace():",5)

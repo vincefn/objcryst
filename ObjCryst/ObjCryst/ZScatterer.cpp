@@ -2790,6 +2790,13 @@ GlobalScatteringPower::~GlobalScatteringPower()
    if(mpZScatterer!=0) delete mpZScatterer;
 }
 
+// Disable the base-class function.
+void GlobalScatteringPower::Init()
+{
+   // This should be never called.
+   abort();
+}
+
 void GlobalScatteringPower::Init(const ZScatterer &scatt)
 {
    this->SetName(scatt.GetName()+(string)"_Global");

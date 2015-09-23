@@ -73,6 +73,8 @@ class ScatteringPowerSphere: public ScatteringPower
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
    private:
       virtual void InitRefParList();
+      // Avoid compiler warnings.  Explicitly hide the base-class method.
+      void Init();
       /// Isotropic temperature B-factor.
       REAL mBiso;
       /** Radius of the sphere.

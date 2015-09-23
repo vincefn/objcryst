@@ -73,6 +73,8 @@ class GlobalScatteringPower:virtual public ScatteringPower
       /// a copy of the ZScatterer associated to this object
       ZScatterer *mpZScatterer;
    private:
+      // Avoid compiler warnings.  Explicitly hide the base-class method.
+      void Init();
 };
 
 //######################################################################

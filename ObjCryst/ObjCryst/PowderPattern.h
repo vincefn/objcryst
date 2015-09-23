@@ -516,6 +516,9 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       virtual WXCrystObjBasic* WXCreate(wxWindow*);
       friend class WXPowderPatternDiffraction;
    #endif
+   private:
+      // Avoid compiler warnings.  Explicitly hide the base-class method.
+      void GenHKLFullSpace(const REAL, const bool);
 };
 
 

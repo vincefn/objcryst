@@ -433,6 +433,8 @@ class ScatteringPowerAtom:virtual public ScatteringPower
       */
       REAL mNeutronAbsCrossSection;
    private:
+      // Avoid compiler warnings.  Explicitly hide the base-class method.
+      void Init();
    #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);

@@ -21,6 +21,7 @@
 */
 
 #include <cmath>
+#include <cstdlib>
 
 #include "ObjCryst/ObjCryst/ScatteringPowerSphere.h"
 #include "ObjCryst/Quirks/VFNStreamFormat.h"
@@ -55,6 +56,13 @@ ScatteringPowerSphere::ScatteringPowerSphere(const ScatteringPowerSphere& old)
 
 ScatteringPowerSphere::~ScatteringPowerSphere()
 {
+}
+
+// Disable the base-class function.
+void ScatteringPowerSphere::Init()
+{
+   // This should be never called.
+   abort();
 }
 
 void ScatteringPowerSphere::Init(const string &name,
