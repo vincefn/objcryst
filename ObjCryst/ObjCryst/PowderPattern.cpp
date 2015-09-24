@@ -503,7 +503,7 @@ void PowderPatternBackground::CalcPowderPattern_FullDeriv(std::set<RefinablePar*
    {
       if((*par)==0) mPowderPattern_FullDeriv[*par]=this->GetPowderPatternCalc();
       else
-         for(unsigned int j=0;j<mBackgroundNbPoint;j++)
+         for(int j = 0; j < mBackgroundNbPoint; j++)
          {
             if((*par)->GetPointer()!=mBackgroundInterpPointIntensity.data()+j) continue;
             const REAL step=(*par)->GetDerivStep();
@@ -572,7 +572,7 @@ void PowderPatternBackground::CalcPowderPatternIntegrated_FullDeriv(std::set<Ref
    {
       if((*par)==0) mPowderPattern_FullDeriv[*par]=this->GetPowderPatternCalc();
       else
-         for(unsigned int j=0;j<mBackgroundNbPoint;j++)
+         for(int j = 0; j < mBackgroundNbPoint; j++)
          {
             if((*par)->GetPointer()!=mBackgroundInterpPointIntensity.data()+j) continue;
             const REAL step=(*par)->GetDerivStep();
@@ -2224,7 +2224,7 @@ const CrystVector_long& PowderPatternDiffraction::GetBraggLimits()const
       VFN_DEBUG_ENTRY("PowderPatternDiffraction::GetBraggLimits(*min,*max)",3)
       TAU_PROFILE("PowderPatternDiffraction::GetBraggLimits()","void ()",TAU_DEFAULT);
       mIntegratedReflLimits.resize(this->GetNbReflBelowMaxSinThetaOvLambda());
-      unsigned long i=0;
+      long i = 0;
       mIntegratedReflLimits(i)=mvReflProfile[0].first;
       for(;i<(this->GetNbReflBelowMaxSinThetaOvLambda()-1);++i)
          mIntegratedReflLimits(i+1)=(mvReflProfile[i].first+mvReflProfile[i].last+mvReflProfile[i+1].first+mvReflProfile[i+1].last)/4;
@@ -6423,7 +6423,7 @@ void PowderPattern::PrepareIntegratedRfactor()const
       }
       for(list<long>::iterator pos=vLimits.begin();pos!=vLimits.end();)
       {
-         if( (*pos<0) || (*pos>=mNbPointUsed) ) pos=vLimits.erase(pos);
+         if( (*pos<0) || (*pos>=long(mNbPointUsed)) ) pos=vLimits.erase(pos);
          else ++pos;
       }
 
@@ -6466,7 +6466,7 @@ void PowderPattern::PrepareIntegratedRfactor()const
       pos2=pos1;pos2++;
       for(;pos2!=vLimits2.end();)
       {
-         if(*pos2!=(mNbPointUsed-1)) vLimits3.push_back(make_pair(*pos1++,*pos2++-1));
+         if(*pos2!=(long(mNbPointUsed)-1)) vLimits3.push_back(make_pair(*pos1++,*pos2++-1));
          else vLimits3.push_back(make_pair(*pos1++,*pos2++));
          //cout<<__FILE__<<":"<<__LINE__<<":"<<vLimits3.back().first<<" -> "<<vLimits3.back().second<<endl;
       }
@@ -6480,7 +6480,7 @@ void PowderPattern::PrepareIntegratedRfactor()const
          mIntegratedPatternMax(i++)=pos->second;
       }
    }
-   unsigned long numInterval=mIntegratedPatternMin.numElements();
+   long numInterval=mIntegratedPatternMin.numElements();
    CrystVector_bool keep(numInterval);
    keep=true;
    // Take care of excluded regions (change integration areas accordingly)

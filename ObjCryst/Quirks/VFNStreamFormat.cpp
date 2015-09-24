@@ -209,7 +209,7 @@ template<class T> ostream& operator<< (ostream &os, const FormatVertVector<T> &f
 {
    VFN_DEBUG_MESSAGE("ostream& operator<<(os,FormatVertVector<T>)",3)
    long i;
-   int j;
+   size_t j;
    std::istream::fmtflags old_flags=os.flags();
    os.setf( std::istream::fixed | std::istream::right | std::istream::showpoint);
    std::streamsize old_prec = os.precision(fVect.mPrecision);

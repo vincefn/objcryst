@@ -412,9 +412,9 @@ void CIFData::ExtractAnisotropicADPs(const bool verbose)
 
       // Now loop over the labels, find the corresponding CIFAtom, and fill in
       // its information.
-      int nb = anisolabels->second.size();
+      size_t nb = anisolabels->second.size();
       if(verbose) cout << "Have " << nb << " labels." << endl;
-      for (int i = 0; i < nb; ++i)
+      for (size_t i = 0; i < nb; ++i)
       {
          string label = anisolabels->second[i];
          if(verbose) cout << label << endl;

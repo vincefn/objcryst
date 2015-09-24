@@ -2493,7 +2493,7 @@ void Molecule::BeginOptimization(const bool allowApproximations,const bool enabl
          this->GetPar(&((*at)->X())).SetIsFixed(true);
          this->GetPar(&((*at)->Y())).SetIsFixed(true);
          this->GetPar(&((*at)->Z())).SetIsFixed(true);
-         for(unsigned int i=0;i<this->GetNbComponent();++i)
+         for(int i = 0; i < this->GetNbComponent(); ++i)
             if(&(this->GetAtom(i))==*at)
             {
               (*pos)->mvIdx.insert(i);
@@ -4202,7 +4202,7 @@ void Molecule::OptimizeConformation(const long nbTrial,const REAL stopCost)
 void Molecule::OptimizeConformationSteepestDescent(const REAL maxStep,const unsigned nbStep)
 {
    //cout<<"LLK="<<this->GetLogLikelihood()<<endl;
-   for(int i=0;i<nbStep;++i)
+   for(unsigned i = 0; i < nbStep; ++i)
    {
       // Calc full gradient
       //Calculate & display gradient
@@ -4297,7 +4297,7 @@ void Molecule::MolecularDynamicsEvolve(map<MolAtom*,XYZ> &v0,const unsigned nbSt
 
    // Try to keep total energy constant
    REAL e_v,e_k,v_r=1.0;
-   for(int i=0;i<nbStep;++i)
+   for(unsigned i = 0; i < nbStep; ++i)
    {
       // Calc full gradient
       map<MolAtom*,XYZ> grad;
@@ -7142,7 +7142,7 @@ void Molecule::BuildFlipGroup()
    for(list<FlipGroup>::iterator pos=mvFlipGroup.begin(); pos!=mvFlipGroup.end();)
    {
        bool erase = false;
-       for(int i=0;i<mvNonFlipAtom.size();i++) {
+       for(size_t i = 0; i < mvNonFlipAtom.size(); i++) {
            if(pos->mpAtom0->GetName().compare(mvNonFlipAtom[i]->GetName())==0) {
               erase = true;
               break;

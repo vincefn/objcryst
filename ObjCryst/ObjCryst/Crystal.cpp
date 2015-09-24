@@ -1313,12 +1313,12 @@ void Crystal::ConnectAtoms(const REAL min_relat_dist, const REAL max_relat_dist,
    std::set<int> vAssignedAtoms;//atoms already assigned to a Molecule
    std::set<int> vTriedAtom0;//atoms already tried as starting point for a Molecule
    VFN_DEBUG_MESSAGE("Crystal::ConnectAtoms(...)",10)
-   while(vAssignedAtoms.size()!=mScattererRegistry.GetNb())
+   while(long(vAssignedAtoms.size()) != mScattererRegistry.GetNb())
    {
       VFN_DEBUG_MESSAGE("Crystal::ConnectAtoms(...): new Molecule ?",7)
       // We need at least one carbon atom to start
       int atom0=-1;
-      unsigned int maxAtomicNumber=0;
+      int maxAtomicNumber = 0;
       for(unsigned int i=0;i<mScattCompList.GetNbComponent();i++)
       {
          if((vAssignedAtoms.count(i)>0) || (vTriedAtom0.find(i)!=vTriedAtom0.end()) ) continue;

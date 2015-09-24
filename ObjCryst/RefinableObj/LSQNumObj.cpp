@@ -827,11 +827,11 @@ const CrystVector_REAL& LSQNumObj::GetLSQCalc() const
    {
       if(pos->first->GetNbLSQFunction()==0) continue;
       pV=&(pos->first->GetLSQCalc(pos->second));
-      const unsigned long n2=pV->numElements();
+      const long n2 = pV->numElements();
       if((nb+n2)>mLSQCalc.numElements()) mLSQCalc.resizeAndPreserve(nb+pV->numElements());
       const REAL *p1=pV->data();
       REAL *p2=mLSQCalc.data()+nb;
-      for(unsigned long j=0;j<n2;++j) *p2++ = *p1++;
+      for(long j = 0; j < n2; ++j)  *p2++ = *p1++;
       nb+=n2;
    }
    if(mLSQCalc.numElements()>nb) mLSQCalc.resizeAndPreserve(nb);
@@ -846,12 +846,12 @@ const CrystVector_REAL& LSQNumObj::GetLSQObs() const
    {
       if(pos->first->GetNbLSQFunction()==0) continue;
       pV=&(pos->first->GetLSQObs(pos->second));
-      const unsigned long n2=pV->numElements();
+      const long n2 = pV->numElements();
       mvRefinedObjLSQSize[pos->first]=n2;
       if((nb+n2)>mLSQObs.numElements()) mLSQObs.resizeAndPreserve(nb+pV->numElements());
       const REAL *p1=pV->data();
       REAL *p2=mLSQObs.data()+nb;
-      for(unsigned long j=0;j<n2;++j) *p2++ = *p1++;
+      for(long j = 0; j < n2; ++j)  *p2++ = *p1++;
       nb+=n2;
    }
    if(mLSQObs.numElements()>nb) mLSQObs.resizeAndPreserve(nb);
@@ -866,11 +866,11 @@ const CrystVector_REAL& LSQNumObj::GetLSQWeight() const
    {
       if(pos->first->GetNbLSQFunction()==0) continue;
       pV=&(pos->first->GetLSQWeight(pos->second));
-      const unsigned long n2=pV->numElements();
+      const long n2 = pV->numElements();
       if((nb+n2)>mLSQWeight.numElements()) mLSQWeight.resizeAndPreserve(nb+pV->numElements());
       const REAL *p1=pV->data();
       REAL *p2=mLSQWeight.data()+nb;
-      for(unsigned long j=0;j<n2;++j) *p2++ = *p1++;
+      for(long j = 0; j < n2; ++j)  *p2++ = *p1++;
       nb+=n2;
    }
    if(mLSQWeight.numElements()>nb) mLSQWeight.resizeAndPreserve(nb);
@@ -885,11 +885,11 @@ const CrystVector_REAL& LSQNumObj::GetLSQDeriv(RefinablePar&par)
    {
       if(pos->first->GetNbLSQFunction()==0) continue;
       pV=&(pos->first->GetLSQDeriv(pos->second,par));
-      const unsigned long n2=pV->numElements();
+      const long n2 = pV->numElements();
       if((nb+n2)>mLSQDeriv.numElements()) mLSQDeriv.resizeAndPreserve(nb+pV->numElements());
       const REAL *p1=pV->data();
       REAL *p2=mLSQDeriv.data()+nb;
-      for(unsigned long j=0;j<n2;++j) *p2++ = *p1++;
+      for(long j = 0; j < n2; ++j)  *p2++ = *p1++;
       nb+=n2;
    }
    if(mLSQDeriv.numElements()>nb) mLSQDeriv.resizeAndPreserve(nb);

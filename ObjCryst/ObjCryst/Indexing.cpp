@@ -1565,7 +1565,7 @@ bool DichoIndexed(const PeakList &dhkl, const RecUnitCell &par,const RecUnitCell
    vector<PeakList::hkl>::const_iterator pos,first,last,end;
    if(useStoredHKL==1)
    {// We already now possible Miller indices for all reflections
-      int nbUnIx=0;
+      unsigned int nbUnIx = 0;
       for(pos=dhkl.GetPeakList().begin();pos!=dhkl.GetPeakList().end();++pos)
       {
          pos->isIndexed=false;
@@ -1909,7 +1909,7 @@ unsigned int CellExplorer::RDicVol(RecUnitCell par0,RecUnitCell dpar, unsigned i
                sprintf(buf,"orig:   a=%5.2f-%5.2f b=%5.2f-%5.2f c=%5.2f-%5.2f alpha=%5.2f-%5.2f beta=%5.2f-%5.2f gamma=%5.2f-%5.2f V=%5.2f-%5.2f",
                         parpd[0],parmd[0],parpd[1],parmd[1],parpd[2],parmd[2],parpd[3]*RAD2DEG,parmd[3]*RAD2DEG,
                         parpd[4]*RAD2DEG,parmd[4]*RAD2DEG,parpd[5]*RAD2DEG,parmd[5]*RAD2DEG,parpd[6],parmd[6]);
-               for(int i=0;i<depth;++i) cout<<" ";
+               for(unsigned int i = 0; i < depth; ++i)  cout << " ";
                cout<<buf<<"level="<<depth<<", indexed="<<indexed<<endl;
             }
             {
@@ -1921,7 +1921,7 @@ unsigned int CellExplorer::RDicVol(RecUnitCell par0,RecUnitCell dpar, unsigned i
                sprintf(buf,"bypass: a=%5.2f-%5.2f b=%5.2f-%5.2f c=%5.2f-%5.2f alpha=%5.2f-%5.2f beta=%5.2f-%5.2f gamma=%5.2f-%5.2f V=%5.2f-%5.2f",
                         parpd[0],parmd[0],parpd[1],parmd[1],parpd[2],parmd[2],parpd[3]*RAD2DEG,parmd[3]*RAD2DEG,
                         parpd[4]*RAD2DEG,parmd[4]*RAD2DEG,parpd[5]*RAD2DEG,parmd[5]*RAD2DEG,parpd[6],parmd[6]);
-               for(int i=0;i<depth;++i) cout<<" ";
+               for(unsigned int i = 0; i < depth; ++i)  cout << " ";
                cout<<buf<<"level="<<depth<<", indexed="<<indexed<<endl;
             }
          }
@@ -1939,7 +1939,7 @@ unsigned int CellExplorer::RDicVol(RecUnitCell par0,RecUnitCell dpar, unsigned i
       sprintf(buf,"a=%5.2f-%5.2f b=%5.2f-%5.2f c=%5.2f-%5.2f alpha=%6.2f-%6.2f beta=%6.2f-%6.2f gamma=%6.2f-%6.2f V=%6.2f-%6.2f",
                parpd[0],parmd[0],parpd[1],parmd[1],parpd[2],parmd[2],parpd[3]*RAD2DEG,parmd[3]*RAD2DEG,
                parpd[4]*RAD2DEG,parmd[4]*RAD2DEG,parpd[5]*RAD2DEG,parmd[5]*RAD2DEG,parpd[6],parmd[6]);
-      for(int i=0;i<depth;++i) cout<<" ";
+      for(unsigned int i = 0; i < depth; ++i)  cout << " ";
       cout<<buf<<"level="<<depth<<", indexed="<<indexed<<"("<<mvSolution.size()<<" sol.)"<<endl;
    }
    nbCalc++;
@@ -2073,13 +2073,13 @@ unsigned int CellExplorer::RDicVol(RecUnitCell par0,RecUnitCell dpar, unsigned i
                      sprintf(buf,"a=%5.2f-%5.2f b=%5.2f-%5.2f c=%5.2f-%5.2f alpha=%6.2f-%6.2f beta=%6.2f-%6.2f gamma=%6.2f-%6.2f V=%6.2f-%6.2f",
                               parpd[0],parmd[0],parpd[1],parmd[1],parpd[2],parmd[2],parpd[3]*RAD2DEG,parmd[3]*RAD2DEG,
                               parpd[4]*RAD2DEG,parmd[4]*RAD2DEG,parpd[5]*RAD2DEG,parmd[5]*RAD2DEG,parpd[6],parmd[6]);
-                     for(int i=0;i<depth;++i) cout<<" ";
+                     for(unsigned int i = 0; i < depth; ++i)  cout << " ";
 
                      cout<<buf<<"level="<<depth<<", indexed="<<indexed<<"("<<mvSolution.size()<<" sol.)"<<endl;
                      sprintf(buf,"a=%7.5f-%7.5f b=%7.5f-%7.5f c=%7.5f-%7.5f alpha=%7.5f-%7.5f beta=%7.5f-%7.5f gamma=%7.5f-%7.5f",
                               parp.par[1],parm.par[1],parp.par[2],parm.par[2],parp.par[3],parm.par[3],parp.par[4],parm.par[4],
                               parp.par[5],parm.par[5],parp.par[6],parm.par[6]);
-                     for(int i=0;i<depth;++i) cout<<" ";
+                     for(unsigned int i = 0; i < depth; ++i)  cout << " ";
                      cout<<buf<<"level="<<depth<<", indexed="<<indexed<<"("<<mvSolution.size()<<" sol.)"<<endl;
                   }
                   sprintf(buf," Solution ? a=%7.3f b=%7.3f c=%7.3f alpha=%7.3f beta=%7.3f gamma=%7.3f V=%8.2f score=%6.2f #%4lu",

@@ -376,7 +376,8 @@ void SpaceGroup::GetSymmetric(unsigned int idx, REAL &x, REAL &y, REAL &z,
    if(noTransl==true) nbTrans=1; //skip translation operations
 
    unsigned int idx0=idx;
-   if(idx>(nbTrans*nbMatrix)) idx0=idx%(nbTrans*nbMatrix);
+   const unsigned int mxidx = nbTrans * nbMatrix;
+   if(idx > mxidx) idx0 = idx % mxidx;
    const int i=idx/nbMatrix;//translation index
    const int j=idx%nbMatrix;
 
@@ -491,8 +492,10 @@ unsigned int SpaceGroup::AreReflEquiv(const REAL h1, const REAL k1, const REAL l
    cctbx::miller::sym_equiv_indices sei(this->GetCCTbxSpg(),k0);
    int equiv=0;
    //cout<<h0.as_string()<<" - "<<k0.as_string()<<","<<sei.f_mates(false)<<","<<sei.f_mates(true)<<endl;
-   for(std::size_t i_indices=0;i_indices<sei.indices().size();i_indices++)
-      for(std::size_t i_mate=0;i_mate<sei.f_mates(false);i_mate++)
+   for(size_t i_indices=0;i_indices<sei.indices().size();i_indices++)
+   {
+      const size_t sfm = sei.f_mates(false);
+      for(size_t i_mate = 0; i_mate < sfm; i_mate++)
       {
          cctbx::miller::index<long> k = sei(i_mate, i_indices).h();
          //cout<<" ->("<<i_indices<<","<<i_mate<<")"<<k.as_string()<<endl;
@@ -503,6 +506,7 @@ unsigned int SpaceGroup::AreReflEquiv(const REAL h1, const REAL k1, const REAL l
             break;
          }
       }
+   }
    VFN_DEBUG_MESSAGE("SpaceGroup::AreReflEquiv("<<ih1<<","<<ik1<<","<<il1<<"),("<<ih2<<","<<ik2<<","<<il2<<"):"<<equiv,2)
    return equiv;
 }
