@@ -279,7 +279,7 @@ void Radiation::SetWavelength(const string &XRayTubeElementName,
    {
       mWavelengthType.SetChoice(WAVELENGTH_ALPHA12);
       mXRayTubeAlpha2Alpha1Ratio=alpha2Alpha2ratio;
-      REAL lambda1,lambda2;
+      REAL lambda1 = 0, lambda2 = 0;
       if(XRayTubeElementName=="Co")
       {
          lambda1=1.78901;

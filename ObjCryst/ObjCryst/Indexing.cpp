@@ -656,6 +656,9 @@ vector<float> RecUnitCell::DirectUnitCell(const bool equiv)const
          sgammaa=1;
          break;
       }
+      // This should never happen.  Avoid using unitialized cell parameters.
+      default:
+         throw 0;
    }
    // Volume of reciprocal unit cell
    const float vv=sqrt(abs(1-calphaa*calphaa-cbetaa*cbetaa-cgammaa*cgammaa+2*calphaa*cbetaa*cgammaa));
@@ -973,6 +976,9 @@ float Score(const PeakList &dhkl, const RecUnitCell &rpar, const unsigned int nb
       case CUBIC:
          sk0=1;sl0=1;
          break;
+      // This should never happen.  Avoid using unitialized values.
+      default:
+         throw 0;
    }
    int stepk,stepl;// steps in k,l to use for centered lattices
    switch(rpar.mCentering)
@@ -983,6 +989,8 @@ float Score(const PeakList &dhkl, const RecUnitCell &rpar, const unsigned int nb
       case LATTICE_B:stepk=1;stepl=2;break;
       case LATTICE_C:stepk=2;stepl=1;break;
       case LATTICE_F:stepk=2;stepl=2;break;
+      // This should never happen.  Avoid using unitialized values.
+      default: throw 0;
    }
    first=dhkl.GetPeakList().begin();last=dhkl.GetPeakList().end();
    unsigned long nbCalcH,nbCalcK;// Number of calculated lines below dmax for each h,k
@@ -1627,6 +1635,9 @@ bool DichoIndexed(const PeakList &dhkl, const RecUnitCell &par,const RecUnitCell
       case CUBIC:
          sk0=1;sl0=1;
          break;
+      // This should never happen.  Avoid using unitialized values.
+      default:
+         throw 0;
    }
    int stepk,stepl;// steps in k,l to use for centered lattices
    switch(par.mCentering)
@@ -1637,6 +1648,8 @@ bool DichoIndexed(const PeakList &dhkl, const RecUnitCell &par,const RecUnitCell
       case LATTICE_B:stepk=1;stepl=2;break;
       case LATTICE_C:stepk=2;stepl=1;break;
       case LATTICE_F:stepk=2;stepl=2;break;
+      // This should never happen.  Avoid using unitialized values.
+      default: throw 0;
    }
    //RecUnitCell par0(par),par1(par);
    //for(unsigned int i=0;i<7;++i) {par0.par[i]-=dpar.par[i];par1.par[i]+=dpar.par[i];}

@@ -241,7 +241,7 @@ void CIFData::ExtractAtomicPositions(const bool verbose)
       posx=loop->second.find("_atom_site_fract_x");
       posy=loop->second.find("_atom_site_fract_y");
       posz=loop->second.find("_atom_site_fract_z");
-      unsigned int nb;
+      unsigned int nb = 0;
       if( (posx!=loop->second.end()) && (posy!=loop->second.end()) && (posz!=loop->second.end()))
       {
          nb=posx->second.size();
@@ -509,7 +509,7 @@ void CIFData::ExtractPowderPattern(const bool verbose)
       }
 
       bool x_fixed_step=false;
-      REAL xmin,xmax,xinc;
+      REAL xmin = 0, xmax = 0, xinc = 0;
       if(pos_x==loop->second.end())
       {
          map<ci_string,string>::const_iterator pos_min,pos_max,pos_inc;

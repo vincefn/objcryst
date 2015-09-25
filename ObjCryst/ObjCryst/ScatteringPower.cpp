@@ -520,7 +520,7 @@ CrystVector_REAL ScatteringPowerAtom::GetScatteringFactor(const ScatteringData &
 
 REAL ScatteringPowerAtom::GetForwardScatteringFactor(const RadiationType type) const
 {
-   REAL sf;
+   REAL sf = 0;
    switch(type)
    {
       case(RAD_NEUTRON):

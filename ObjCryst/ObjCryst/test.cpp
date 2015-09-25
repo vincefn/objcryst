@@ -49,7 +49,7 @@ SpeedTestReport SpeedTest(const unsigned int nbAtom, const int nbAtomType,const 
    }
    cryst.SetUseDynPopCorr(false);
 
-   RefinableObj *pData;
+   RefinableObj *pData = NULL;
    switch(dataType)
    {
       case 0:

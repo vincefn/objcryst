@@ -1945,7 +1945,7 @@ void PowderPatternDiffraction::CalcIntensityCorr()const
    this->CalcSinThetaLambda();
    if((mClockIntensityCorr<mClockTheta)||(mClockIntensityCorr<this->GetClockNbReflBelowMaxSinThetaOvLambda())) needRecalc=true;
 
-   const CrystVector_REAL *mpCorr[5];
+   const CrystVector_REAL *mpCorr[5] = {0, 0, 0, 0, 0};
 
    if(this->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
    {
