@@ -26,6 +26,32 @@
 
 namespace ObjCryst
 {
+
+/** Storage of a Molecule description
+*/
+struct MoleculeFragment
+{
+    /// Constructor
+    MoleculeFragment(Molecule * pmol,std::string formula);
+    /// Points to the real Molecule object as long as it resides in memory and is displayed
+    Molecule *mpMolecule;
+    /// The formula
+    std::string mFormula;
+    /// The XML description as a string
+    std::string mXML;
+    #ifdef __DEBUG__
+    /// Count how many times we updated this (for testing)
+    unsigned long ct;
+    #endif
+};
+/** Global storage for molecule descriptions. Each molecule used is stored as a
+* stringstream of its XML description. It can then be used in another Crystal.
+* The molecule descriptions are stored as long as the GUI application runs,
+* but unless a large number of Molecules are displayed this should not use
+* too much memory.
+*/
+extern std::list<MoleculeFragment> gvMoleculeFragment;
+
 class WXMolecule;
 // Scrolled window for bonds, bond angles and dihedral angles
 class WXMolScrolledWindow:public wxGrid

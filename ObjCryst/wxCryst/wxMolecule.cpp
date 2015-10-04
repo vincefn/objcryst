@@ -39,6 +39,14 @@
 
 namespace ObjCryst
 {
+std::list<MoleculeFragment> gvMoleculeFragment;
+
+MoleculeFragment::MoleculeFragment(Molecule * pmol,std::string formula):
+mpMolecule(pmol),mFormula(formula)
+#ifdef __DEBUG__
+,ct(0)
+#endif
+{};
 
 //:TODO: Move this to wxCryst.h
 template<class T> T const* WXDialogChooseFromVector(const vector<T*> &reg,wxWindow*parent,
@@ -939,6 +947,15 @@ mpBondWin(0),mpAngleWin(0),mpDihedralAngleWin(0),mpRigidGroupWin(0),mpNonFlipAto
 WXMolecule::~WXMolecule()
 {
    VFN_DEBUG_ENTRY("WXMolecule::~WXMolecule()",10)
+   // We store or update the Molecule description in gvMoleculeFragment
+   std::list<MoleculeFragment>::iterator pos;
+   for(pos=gvMoleculeFragment.begin();pos!=gvMoleculeFragment.end();++pos)
+      if(pos->mpMolecule==mpMolecule)
+      {
+         VFN_DEBUG_MESSAGE("WXMolecule::~WXMolecule(): fragment description ("<<gvMoleculeFragment.back().mFormula<<") #"<<gvMoleculeFragment.back().ct<<" ("<< gvMoleculeFragment.size()<<" fragments recorded)", 10)
+         pos->mpMolecule=NULL;
+         break;
+      }
    if(0!=mpBondWin) mpBondWin->GetParent()->Destroy();
    VFN_DEBUG_EXIT("WXMolecule::~WXMolecule()",10)
 }
@@ -2543,6 +2560,23 @@ void WXMolecule::CrystUpdate(const bool uui,const bool lock)
               mpNonFlipAtomWin->AppendRows(1, true);
               mpNonFlipAtomWin->SetCellValue(i, 0, v[i]->GetName());
           }
+      }
+      // We store or update the Molecule description in gvMoleculeFragment
+      std::list<MoleculeFragment>::iterator pos;
+      for(pos=gvMoleculeFragment.begin();pos!=gvMoleculeFragment.end();++pos)
+         if(pos->mpMolecule==mpMolecule) break;
+      stringstream s;
+      mpMolecule->XMLOutput(s);
+      if(pos==gvMoleculeFragment.end())
+      {
+         gvMoleculeFragment.push_back(MoleculeFragment(mpMolecule,mpMolecule->GetFormula()));
+         gvMoleculeFragment.back().mXML=s.str();
+         VFN_DEBUG_MESSAGE("WXMolecule::CrystUpdate(): Update fragment description ("<<gvMoleculeFragment.back().mFormula<<") #"<<gvMoleculeFragment.back().ct++<<" ("<< gvMoleculeFragment.size()<<" fragments recorded)", 10)
+      }
+      else
+      {
+         pos->mXML=s.str();
+         VFN_DEBUG_MESSAGE("WXMolecule::CrystUpdate(): Update fragment description ("<<pos->mFormula<<") #"<<pos->ct++<<" ("<< gvMoleculeFragment.size()<<" fragments recorded)", 10)
       }
    }
    // Update values
