@@ -1793,6 +1793,7 @@ void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
 
 void WXCrystMainFrame::Load(const wxString &filename)
 {
+  VFN_DEBUG_ENTRY("WXCrystMainFrame::Load("<<filename<<")", 10)
   if(filename.size()>4)
     if(filename.Mid(filename.size()-4)==wxString(_T(".xml")))
     {
@@ -1812,6 +1813,7 @@ void WXCrystMainFrame::Load(const wxString &filename)
           wxMessageDialog d(this,_T("Failed loading file1:\n")+filename,_T("Error loading file"),wxOK|wxICON_ERROR);
           d.ShowModal();
           this->PostSizeEvent();
+          VFN_DEBUG_EXIT("WXCrystMainFrame::Load("<<filename<<"): error loading file", 10)
           return;
         };
         //FoxGrid
@@ -1857,13 +1859,16 @@ void WXCrystMainFrame::Load(const wxString &filename)
                wxMessageDialog d(this,_T("Failed loading file2:\n")+filename,_T("Error loading file"),wxOK|wxICON_ERROR);
                d.ShowModal();
                this->PostSizeEvent();
+               VFN_DEBUG_EXIT("WXCrystMainFrame::Load("<<filename<<"): error loading file", 10)
                return;
             };
             //FoxGrid
             mpGridWindow->DataLoaded();
          }
       }
+   VFN_DEBUG_MESSAGE("WXCrystMainFrame::Load():sending event", 10)
    this->PostSizeEvent();
+   VFN_DEBUG_EXIT("WXCrystMainFrame::Load("<<filename<<")", 10)
 }
 
 void WXCrystMainFrame::OnBrowse(wxCommandEvent& event)
@@ -3130,7 +3135,7 @@ void WXCrystMainFrame::OnCODSelect(wxGridEvent &ev)
       wxStringOutputStream wxcif;
       fstream->Read(wxcif);
       cout<<wxcif.GetString()<<endl;
-      this->Close(false);
+      //this->Close(false);
       std::stringstream in;
       in<<wxcif.GetString();
       ObjCryst::CIF cif(in,true,true);
