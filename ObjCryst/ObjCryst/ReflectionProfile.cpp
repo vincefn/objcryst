@@ -71,7 +71,7 @@ ObjRegistry<ReflectionProfile>
    gReflectionProfileRegistry("List of all ReflectionProfile types");;
 ////////////////////////////////////////////////////////////////////////
 //
-//    ReflectionProfile    
+//    ReflectionProfile
 //
 ////////////////////////////////////////////////////////////////////////
 ReflectionProfile::ReflectionProfile():
@@ -85,7 +85,7 @@ bool ReflectionProfile::IsAnisotropic()const
 {return false;}
 ////////////////////////////////////////////////////////////////////////
 //
-//    ReflectionProfilePseudoVoigt    
+//    ReflectionProfilePseudoVoigt
 //
 ////////////////////////////////////////////////////////////////////////
 ReflectionProfilePseudoVoigt::ReflectionProfilePseudoVoigt():
@@ -321,37 +321,37 @@ void ReflectionProfilePseudoVoigt::XMLOutput(ostream &os,int indent)const
 
    this->GetPar(&mCagliotiU).XMLOutput(os,"U",indent);
    os <<endl;
-   
+
    this->GetPar(&mCagliotiV).XMLOutput(os,"V",indent);
    os <<endl;
-   
+
    this->GetPar(&mCagliotiW).XMLOutput(os,"W",indent);
    os <<endl;
-   
+
    this->GetPar(&mPseudoVoigtEta0).XMLOutput(os,"Eta0",indent);
    os <<endl;
-   
+
    this->GetPar(&mPseudoVoigtEta1).XMLOutput(os,"Eta1",indent);
    os <<endl;
-   
+
    this->GetPar(&mAsym0).XMLOutput(os,"Asym0",indent);
    os <<endl;
-   
+
    this->GetPar(&mAsym1).XMLOutput(os,"Asym1",indent);
    os <<endl;
-   
+
    this->GetPar(&mAsym2).XMLOutput(os,"Asym2",indent);
    os <<endl;
    #if 0
    this->GetPar(&mAsymBerarBaldinozziA0).XMLOutput(os,"AsymA0",indent);
    os <<endl;
-   
+
    this->GetPar(&mAsymBerarBaldinozziA1).XMLOutput(os,"AsymA1",indent);
    os <<endl;
-   
+
    this->GetPar(&mAsymBerarBaldinozziB0).XMLOutput(os,"AsymB0",indent);
    os <<endl;
-   
+
    this->GetPar(&mAsymBerarBaldinozziB1).XMLOutput(os,"AsymB1",indent);
    os <<endl;
    #endif
@@ -452,7 +452,7 @@ void ReflectionProfilePseudoVoigt::XMLInput(istream &is,const XMLCrystTag &tagg)
       if("Option"==tag.GetName())
       {
          for(unsigned int i=0;i<tag.GetNbAttribute();i++)
-            if("Name"==tag.GetAttributeName(i)) 
+            if("Name"==tag.GetAttributeName(i))
                mOptionRegistry.GetObj(tag.GetAttributeValue(i)).XMLInput(is,tag);
          continue;
       }
@@ -471,7 +471,7 @@ WXCrystObjBasic* ReflectionProfilePseudoVoigt::WXCreate(wxWindow* parent)
 
 ////////////////////////////////////////////////////////////////////////
 //
-//    ReflectionProfileDoubleExponentialPseudoVoigt    
+//    ReflectionProfileDoubleExponentialPseudoVoigt
 //
 ////////////////////////////////////////////////////////////////////////
 ReflectionProfileDoubleExponentialPseudoVoigt::ReflectionProfileDoubleExponentialPseudoVoigt():
@@ -607,10 +607,10 @@ CrystVector_REAL ReflectionProfileDoubleExponentialPseudoVoigt
       // Use asymptotic value for erfc(x) = 1/(sqrt(pi)*x*exp(x^2)) [A&S 7.1.23]
       if(z>10.0) expnu_erfcz=exp(nu-z*z)/(z*sqrt(M_PI));
       else expnu_erfcz=exp(nu)*erfc(z);
-      
+
       if(y>10.0) expu_erfcy=exp(u-y*y)/(y*sqrt(M_PI));
       else expu_erfcy=exp(u)*erfc(y);
-      
+
       #if 0
       double tmp=(1-eta)*alpha*beta/(2*(alpha+beta))*(expu_erfcy+expnu_erfcz)
            -eta*alpha*beta/(M_PI*(alpha+beta))*(e1p.imag()+e1q.imag());
@@ -745,34 +745,34 @@ void ReflectionProfileDoubleExponentialPseudoVoigt
 
    this->GetPar(&mInstrumentAlpha0).XMLOutput(os,"Alpha0",indent);
    os <<endl;
-   
+
    this->GetPar(&mInstrumentAlpha1).XMLOutput(os,"Alpha1",indent);
    os <<endl;
-   
+
    this->GetPar(&mInstrumentBeta0).XMLOutput(os,"Beta0",indent);
    os <<endl;
-   
+
    this->GetPar(&mInstrumentBeta1).XMLOutput(os,"Beta1",indent);
    os <<endl;
-   
+
    this->GetPar(&mGaussianSigma0).XMLOutput(os,"GaussianSigma0",indent);
    os <<endl;
-   
+
    this->GetPar(&mGaussianSigma1).XMLOutput(os,"GaussianSigma1",indent);
    os <<endl;
-   
+
    this->GetPar(&mGaussianSigma2).XMLOutput(os,"GaussianSigma2",indent);
    os <<endl;
-   
+
    this->GetPar(&mLorentzianGamma0).XMLOutput(os,"LorentzianGamma0",indent);
    os <<endl;
-   
+
    this->GetPar(&mLorentzianGamma1).XMLOutput(os,"LorentzianGamma1",indent);
    os <<endl;
-   
+
    this->GetPar(&mLorentzianGamma2).XMLOutput(os,"LorentzianGamma2",indent);
    os <<endl;
-   
+
    indent--;
    tag.SetIsEndTag(true);
    for(int i=0;i<indent;i++) os << "  " ;
@@ -811,7 +811,7 @@ void ReflectionProfileDoubleExponentialPseudoVoigt
       if("Option"==tag.GetName())
       {
          for(unsigned int i=0;i<tag.GetNbAttribute();i++)
-            if("Name"==tag.GetAttributeName(i)) 
+            if("Name"==tag.GetAttributeName(i))
                mOptionRegistry.GetObj(tag.GetAttributeValue(i)).XMLInput(is,tag);
          continue;
       }
@@ -956,20 +956,20 @@ CrystVector_REAL PowderProfileGauss  (const CrystVector_REAL ttheta,const REAL f
      #else
      for(unsigned int j=0;j<4;++j)
      {// Fixed-length loop enables vectorization
-       *p = exp(*p) ; 
+       *p = exp(*p) ;
        p++ ;
      }
      #endif
    }
    for(;i>0;i--) { *p = exp(*p) ; p++ ;}
    #endif
-   
+
 #if 0
    #if 1 //def _MSC_VER
    // Bug from Hell (in MSVC++) !
    // The *last* point ends up sometimes with an arbitrary large value...
    long i=0;
-   for(;i<nbPoints;i+=4) 
+   for(;i<nbPoints;i+=4)
       for(unsigned int j=0;j<4;++j)
       {// Fixed-length loop enables vectorization
         *p = pow((float)2.71828182846,(float)*p) ;
@@ -981,7 +981,7 @@ CrystVector_REAL PowderProfileGauss  (const CrystVector_REAL ttheta,const REAL f
    {
      //for(unsigned int j=0;j<4;++j)
      {// Fixed-length loop enables vectorization
-       *p = exp(*p) ; 
+       *p = exp(*p) ;
        p++ ;
      }
    }
@@ -1043,7 +1043,7 @@ CrystVector_REAL AsymmetryBerarBaldinozzi(const CrystVector_REAL x,
    const REAL a=a0/tan(center/2)+a1/tan(center);
    const REAL b=b0/tan(center/2)+b1/tan(center);
    for(long i=0;i<nbPoints;i++)
-   { 
+   {
       *p = 1+*p * exp(-*p * *p)*(2*a+b*(8* *p * *p-12));
       p++ ;
    }

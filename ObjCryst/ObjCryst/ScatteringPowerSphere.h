@@ -45,8 +45,8 @@ class ScatteringPowerSphere: public ScatteringPower
       ScatteringPowerSphere();
       /**   \brief constructor
       *  \param name : name of the ScatteringPower ('C60','France 98'...).
-      *The name can have \e any format 
-      * \param nbAtom: the number of atoms 
+      *The name can have \e any format
+      * \param nbAtom: the number of atoms
       *  \param biso : Isotropic thermic coefficient
       * \param AxisLengthX,AxisLengthY,AxisLengthZ: length of the different
       * main axis of the ellipsoid
@@ -73,6 +73,8 @@ class ScatteringPowerSphere: public ScatteringPower
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
    private:
       virtual void InitRefParList();
+      // Avoid compiler warnings.  Explicitly hide the base-class method.
+      void Init();
       /// Isotropic temperature B-factor.
       REAL mBiso;
       /** Radius of the sphere.

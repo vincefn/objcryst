@@ -47,7 +47,7 @@ namespace ObjCryst
 {
 /** Annealing schedule type. Used to determine the variation of the
 * temperature and the mutation amplitude
-* 
+*
 * With A=Temperature or A=MutationAMplitude, and the corresponding
 , min and max values supplied (the latter is ignored for constant,
 * Cauchy and Boltzmann), with 'step' being the current step, and
@@ -85,7 +85,7 @@ enum GlobalOptimType
    GLOBAL_OPTIM_PARALLEL_TEMPERING,
    GLOBAL_OPTIM_RANDOM_LSQ,
    GLOBAL_OPTIM_SIMULATED_ANNEALING_MULTI,
-   GLOBAL_OPTIM_PARALLEL_TEMPERING_MULTI,   
+   GLOBAL_OPTIM_PARALLEL_TEMPERING_MULTI,
 };
 
 /** \brief Base object for Optimization methods.
@@ -95,7 +95,7 @@ enum GlobalOptimType
 * for Genetic Algorithms.
 *
 * \remarks Instead of keeping a copy of the list of parameters here,
-* maybe it would be better to delegate all parameter handling to the refined 
+* maybe it would be better to delegate all parameter handling to the refined
 * objects (they would also have to keep in memory the saved parameter sets, so
 * that could be difficult to administrate...).
 */
@@ -106,7 +106,7 @@ class OptimizationObj
       OptimizationObj(const string name="");
       /// Destructor
       virtual ~OptimizationObj();
-      
+
       /** \brief Randomize starting configuration. Only affects limited and periodic parameters.
       */
       virtual void RandomizeStartingConfig();
@@ -153,7 +153,7 @@ class OptimizationObj
       void SetLimitsAbsolute(const string &parName, const REAL min, const REAL max);
       /// Change the absolute limits for a family of parameter
       void SetLimitsAbsolute(const RefParType *type, const REAL min, const REAL max);
-      
+
       /** \brief The optimized (minimized, actually) function.
       *
       * This function is the weighted sum of the chosen Cost Functions for
@@ -225,7 +225,7 @@ class OptimizationObj
    protected:
       /// \internal Prepare mRefParList for the refinement
       void PrepareRefParList();
-      
+
       /// Initialization of options.
       virtual void InitOptions();
       /// Update Display (if any display is available), when a new 'relevant' configuration
@@ -244,7 +244,7 @@ class OptimizationObj
       string mName;
       /// File name where refinement info is saved (NOT USED so far...)
       string mSaveFileName;
-      
+
       //Status of optimization
          /// Number of trial per run, to be saved/restored in XML output
          long mNbTrialPerRun;
@@ -287,22 +287,22 @@ class OptimizationObj
          /// The first member of each pair is the \e index of the parameter set,
          /// and the second is the overall cost for that set.
          std::vector<pair<long,REAL> > mvSavedParamSet;
-         
+
       /// True if a refinement is being done. For multi-threaded environment
       bool mIsOptimizing;
       /// If true, then stop at the end of the cycle. Used in multi-threaded environment
       bool mStopAfterCycle;
-      
+
       // Refined objects
          /// The refined objects
          ObjRegistry<RefinableObj> mRefinedObjList;
          /// The refined objects, recursively including all sub-objects.
          /// This is mutable, since it is a function of mRefinedObjList only.
          mutable ObjRegistry<RefinableObj> mRecursiveRefinedObjList;
-         
+
       /// Periodic save of complete environment as an xml file
          RefObjOpt mXMLAutoSave;
-      
+
       /// The time elapsed after the last optimization, in seconds
          REAL mLastOptimTime;
       /// MainTracker object to track the evolution of cost functions, likelihood,
@@ -344,7 +344,7 @@ class MonteCarloObj:public OptimizationObj
       MonteCarloObj(const bool internalUseOnly);
       /// Destructor
       virtual ~MonteCarloObj();
-      
+
       /** \brief  Set the refinement method to simulated Annealing. Note that
       * Parellel Tempering is more efficient to get out of local minima, so you sould
       * rather use that method.
@@ -366,8 +366,8 @@ class MonteCarloObj:public OptimizationObj
       * since the best configuration was recorded, then revert to that configuration. This
       * should be large enough to have an ergodic search (the default is never to revert..)
       *
-      * \warning do not use the 'smart' option for the temperature schedule, it is not yet 
-      * implemented. Later it will be used to set the temperatures as a function of 
+      * \warning do not use the 'smart' option for the temperature schedule, it is not yet
+      * implemented. Later it will be used to set the temperatures as a function of
       * the amplitude schedule, so that we accept between 30% and 70%  moves.
       * \note this will be removed when we separate the different algorithms in different
       * classes.
@@ -387,10 +387,10 @@ class MonteCarloObj:public OptimizationObj
       * variation of each refinable parameter is less than its RefinablePar::GlobalOptimStep(),
       * multiplied by the current mutation amplitude. By default this mutation is equal to 1.,
       * but making bigger steps can be a good idea at the beginning of the refinement. Thus
-      * you can choose a schedule for the amplitude, exactly like for the temperature. 
-      *\param mutMax,mutMin: Max and Min mutation amplitudes. 
-      * \warning do not use the 'smart' option for the temperature schedule, it is not yet 
-      * implemented. Later it will be used to set the temperatures as a function of 
+      * you can choose a schedule for the amplitude, exactly like for the temperature.
+      *\param mutMax,mutMin: Max and Min mutation amplitudes.
+      * \warning do not use the 'smart' option for the temperature schedule, it is not yet
+      * implemented. Later it will be used to set the temperatures as a function of
       * the amplitude schedule, so that we keep accepted move between 30% and 70%.
       * \note this will be removed when we separate the different algorithms in different
       * classes.
@@ -399,12 +399,12 @@ class MonteCarloObj:public OptimizationObj
                                  const REAL tMax, const REAL tMin,
                                  const AnnealingSchedule scheduleMutation=ANNEALING_CONSTANT,
                                  const REAL mutMax=16., const REAL mutMin=.125);
-      
+
       virtual void Optimize(long &nbSteps,const bool silent=false,const REAL finalcost=0,
                             const REAL maxTime=-1);
       virtual void MultiRunOptimize(long &nbCycle,long &nbSteps,const bool silent=false,const REAL finalcost=0,
                                     const REAL maxTime=-1);
-      
+
       /** \internal Do a single simulated annealing run. This is called by Optimize(...) and
       * MultiRunOptimize(), which must also prepare the optimization (PrepareRefParList(), etc..).
       */
@@ -420,8 +420,8 @@ class MonteCarloObj:public OptimizationObj
 
       //Parameter Access by name
       //RefinablePar& GetPar(const string& parName);
-      
-      // Print information about the current state of optimization (parameters value, 
+
+      // Print information about the current state of optimization (parameters value,
       // characteristic figures...)
       //virtual ostream& operator<<(ostream& os)const;
       virtual void XMLOutput(ostream &os,int indent=0)const;
@@ -432,7 +432,7 @@ class MonteCarloObj:public OptimizationObj
       LSQNumObj & GetLSQObj();
       /// Access to the builtin LSQ optimization object
       const LSQNumObj & GetLSQObj() const;
-      
+
       /** Prepare mLSQ for least-squares refinement during the global optimization
       *
       * \param useFullPowderPatternProfile: if true, the refinement will use the full
@@ -441,9 +441,9 @@ class MonteCarloObj:public OptimizationObj
       */
       virtual void InitLSQ(const bool useFullPowderPatternProfile=true);
    protected:
-      
+
       /** \brief Make a random change in the configuration.
-      * 
+      *
       * \internal
       *  This just generates a new configuration with random changes (according
       * to current parameters). The new configuration is \e not tested \e in \e this \e function
@@ -453,26 +453,26 @@ class MonteCarloObj:public OptimizationObj
       * Random moves are made by the objects and not by this function,
       * because the new configuration can be specific
       * (like, for example, permutations between some of the parameters (atoms)).
-      * 
+      *
       * \param type: can be used to restrict the move to a given category of parameters.
       */
       virtual void NewConfiguration(const RefParType *type=gpRefParTypeObjCryst);
-      
+
       virtual void InitOptions();
-            
+
       /// Method used for the global optimization. Should be removed when we switch
       /// to using several classes for different algorithms.
       RefObjOpt mGlobalOptimType;
-      
+
       //Status of optimization
          /// Current value of the cost function
          REAL mCurrentCost;
-         
+
       // History, for experimental purposes only !
          /// Option to save the evolution of tracked data (cost functions,
          /// likelihhod, individual parameters,...)
          RefObjOpt mSaveTrackedData;
-         
+
       // Annealing parameters
          /// Current temperature for annealing
          REAL mTemperature;
@@ -498,7 +498,7 @@ class MonteCarloObj:public OptimizationObj
          RefObjOpt mAnnealingScheduleMutation;
          /// Gamma for the 'gamma' Mutation amplitude schedule
          REAL mMutationAmplitudeGamma;
-      //Automatic retry 
+      //Automatic retry
          /// Number of trials before testing if we are below the given minimum cost.
          /// If <=0, this will be ignored.
          long mNbTrialRetry;

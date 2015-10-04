@@ -32,7 +32,7 @@
 //#include <fstream>
 //#include <ctime>
 
-// forward declaration to avoid including boost headers 
+// forward declaration to avoid including boost headers
 namespace cctbx { namespace eltbx { namespace xray_scattering {class gaussian;}}}
 
 namespace ObjCryst
@@ -115,7 +115,7 @@ class ScatteringPower:virtual public RefinableObj
       virtual ~ScatteringPower();
       virtual const string& GetClassName() const;
       virtual void operator=(const ScatteringPower& rhs);
-      /** \brief Get the Scattering factor for all reflections of a given 
+      /** \brief Get the Scattering factor for all reflections of a given
       * ScatteringData object.
       *
       * \return a vector with the scattering factor for all reflections, in the same
@@ -134,7 +134,7 @@ class ScatteringPower:virtual public RefinableObj
       /// Get the scattering factor at (0,0,0). Used for scatterer (electron, nucleus)
       /// density generation.
       virtual REAL GetForwardScatteringFactor(const RadiationType) const=0;
-      /** \brief Get the temperature factor for all reflections of a given 
+      /** \brief Get the temperature factor for all reflections of a given
       * ScatteringData object.
       *
       * \return a vector with the temperature factor for all reflections, in the same
@@ -262,7 +262,7 @@ class ScatteringPower:virtual public RefinableObj
       /// Return the physical radius of this type of scatterer (for 3D display purposes).
       /// \warning this may be removed later.
       virtual REAL GetRadius()const=0;
-      virtual void GetGeneGroup(const RefinableObj &obj, 
+      virtual void GetGeneGroup(const RefinableObj &obj,
                                 CrystVector_uint & groupIndex,
                                 unsigned int &firstGroup) const;
       /// Maximum Likelihood: get the estimated error (sigma) on the positions
@@ -310,7 +310,7 @@ class ScatteringPower:virtual public RefinableObj
       // Maximum Likelihood
          /// estimated error (sigma) on the positions for this type of element.
          REAL mMaximumLikelihoodPositionError;
-         /// 
+         ///
          RefinableObjClock mMaximumLikelihoodParClock;
          /// Number of ghost atoms in the asymmetric unit.
          /// These contribute to the variance of the structure factor, but not to the structure
@@ -404,12 +404,12 @@ class ScatteringPowerAtom:virtual public ScatteringPower
       string mSymbol;
       /// atomic number (Z) for the atom
       int mAtomicNumber;
-      
+
       /** Pointer to cctbx's gaussian describing the thomson x-ray
       * scattering factor.
       */
       cctbx::eltbx::xray_scattering::gaussian *mpGaussian;
-      
+
       /** \brief Neutron Bond Coherent Scattering lengths
       *
       *Real and imaginary (for atoms who have an imaginary part)
@@ -417,14 +417,14 @@ class ScatteringPowerAtom:virtual public ScatteringPower
       *Reference : Neutron News, Vol. 3, No. 3, 1992, pp. 29-37.
       */
       REAL mNeutronScattLengthReal,mNeutronScattLengthImag;
-      
+
       /// Radius of the atom or ion, in Angstroems (ICSD table from cctbx)
       REAL mRadius;
       /// Covalent Radius for this atom, in Angstroems (from cctbx)
       REAL mCovalentRadius;
       /// Maximum number of covalent bonds
       unsigned int mMaxCovBonds;
-    
+
       /** \brief Neutron Absorption cross section (barn)
       *
       *For 2200 m/s neutrons.
@@ -433,6 +433,8 @@ class ScatteringPowerAtom:virtual public ScatteringPower
       */
       REAL mNeutronAbsCrossSection;
    private:
+      // Avoid compiler warnings.  Explicitly hide the base-class method.
+      void Init();
    #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);
@@ -446,7 +448,7 @@ extern ObjRegistry<ScatteringPowerAtom> gScatteringPowerAtomRegistry;
 //
 //      SCATTERING COMPONENT
 /** \brief A scattering position in a crystal, associated with the corresponding
-* occupancy and a pointer to the ScatteringPower. Also given is the 
+* occupancy and a pointer to the ScatteringPower. Also given is the
 *
 */
 //######################################################################
@@ -464,12 +466,12 @@ struct ScatteringComponent
    const ScatteringPower *mpScattPow;
    /// Dynamical Population Correction.
    ///
-   /// The population of any atom is given by mOccupancy*mDynPopCorr. 
-   /// mPopu is the \e real mOccupancy (0<.<1), and should be the only one 
-   /// used during a refinement. However during a \e model \e search for the structure, 
-   /// atoms may fall unexpectedly in a special position or with an overlap of 
-   /// two atoms (the shared oxygen between two polyhedras, for example). In these 
-   /// cases it is necessary to dynamically correct the population during the 
+   /// The population of any atom is given by mOccupancy*mDynPopCorr.
+   /// mPopu is the \e real mOccupancy (0<.<1), and should be the only one
+   /// used during a refinement. However during a \e model \e search for the structure,
+   /// atoms may fall unexpectedly in a special position or with an overlap of
+   /// two atoms (the shared oxygen between two polyhedras, for example). In these
+   /// cases it is necessary to dynamically correct the population during the
    /// generation of structural models.
    /// See also Crystal::CalcDynPopCorr
    ///

@@ -48,7 +48,7 @@ class PowderPatternBackgroundBayesianMinimiser:public RefinableObj
    /** Returns the log(likelihood) of a background by marginalizing the effect of Bragg peaks,
    following the method described by David and Sivia (\e J.Appl.Cryst. \b 34(2001), 318).
    *
-   * \returns 
+   * \returns
    * - \f$ L(t) = \frac{\left(y^{calc}_{Background}-y^{obs}\right)^2}{2\sigma^2}\f$
    * for \t<0
    * - \f$ L(t) =  A-\log{\int_\epsilon^{\infty} {\frac{1}{u} e^{-(t-u)^2} du}}\f$ for t>0,

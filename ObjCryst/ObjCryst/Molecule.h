@@ -39,7 +39,7 @@ class MolAtom;
 class MolBond;
 class Molecule;
 
-/// Structure holding 3 coordinates, or deriviatives with respect to each of these coordinates 
+/// Structure holding 3 coordinates, or deriviatives with respect to each of these coordinates
 struct XYZ
 {
    XYZ(REAL x=0,REAL y=0,REAL z=0);
@@ -49,7 +49,7 @@ struct XYZ
 /** MolAtom : atom inside a Molecule
 *
 * This keeps coordinates, recorded in a cartesian frame (in Angstroem),
-* the associated scattering power 
+* the associated scattering power
 * and it also keeps in a list of all bonds in which this atom is involved.
 *
 * \note maybe it's not a great idea to keep a reference of bonds for this
@@ -152,7 +152,7 @@ REAL GetDihedralAngle(const MolAtom&,const MolAtom&,const MolAtom&,const MolAtom
 class MolBond:public Restraint
 {
    public:
-      /** Constructor 
+      /** Constructor
       *
       * Both atoms of the bond are told of the creation of the bond, so that
       * they can keep a list of bonds they are involved in.
@@ -168,7 +168,7 @@ class MolBond:public Restraint
       * - if \f$length < length_{0}-\delta\f$:
       * \f$ -\log(likelihood)= \log\left(2\delta+\sqrt{2\pi\sigma^2}\right)
       * + \left(\frac{(length+\delta)-length_{0}}{\sigma} \right)^2\f$
-      * 
+      *
       */
       MolBond(MolAtom &atom1, MolAtom &atom2,
               const REAL length, const REAL sigma, const REAL delta,
@@ -256,7 +256,7 @@ class MolBond:public Restraint
 class MolBondAngle:public Restraint
 {
    public:
-      /** Constructor 
+      /** Constructor
       *
       */
       MolBondAngle(MolAtom &atom1,MolAtom &atom2,MolAtom &atom3,
@@ -346,7 +346,7 @@ class MolBondAngle:public Restraint
 class MolDihedralAngle:public Restraint
 {
    public:
-      /** Constructor 
+      /** Constructor
       *
       */
       MolDihedralAngle(MolAtom &atom1, MolAtom &atom2,
@@ -401,7 +401,7 @@ class MolDihedralAngle:public Restraint
    private:
       /// The vector of the 4 atoms involved in the bond angle.
       vector<MolAtom*> mvpAtom;
-      REAL mAngle,mAngle0,mDelta,mSigma;
+      REAL mAngle0, mDelta, mSigma;
       /// Parent Molecule
       Molecule *mpMol;
       /// Stored log(likelihood)
@@ -443,7 +443,7 @@ class MolRing
 
 /** A quaternion class, used to represent the orientation of the molecule.
 * It may or may not be a unit quaternion.
-* 
+*
 */
 class Quaternion
 {
@@ -453,7 +453,7 @@ class Quaternion
       /// Creates a unit quaternion from its components (normalized automatically)
       Quaternion(const REAL q0,const REAL q1,const REAL q2,const REAL q3,bool unit=true);
       ~Quaternion();
-      /// Create a rotation quaternion around a given vector for a given angle 
+      /// Create a rotation quaternion around a given vector for a given angle
       static Quaternion  RotationQuaternion(const REAL ang,const REAL v1,const REAL v2,const REAL v3);
       /// Get the conjugate of this quaternion (== the inverse if unit quaternion)
       Quaternion  GetConjugate()const;
@@ -494,7 +494,7 @@ class Quaternion
 * \warning: the rotation (quaternion) and translation parameters
 * are not saved or displayed, so any time this must be done
 * Molecule::ResetRigidGroupsPar() \b must be called beforehand -
-* this will use the rotation and translation parameters 
+* this will use the rotation and translation parameters
 * to generate the final atomic coordinates, and reset mQuat,mX,mY and mZ.
 */
 class RigidGroup:public std::set<MolAtom *>
@@ -527,7 +527,7 @@ struct StretchMode
    * \param derivllk: if false, the derivative of the overall llk will not be computed, only
    * the derivative of the atomic positions.
    **/
-   
+
    virtual void CalcDeriv(const bool derivllk=true)const=0;
    /// Print one-line list of atoms moved
    virtual void Print(ostream &os,bool full=true)const=0;
@@ -560,7 +560,7 @@ struct StretchMode
    REAL mBaseAmplitude;
 };
 
-/** Group of atoms for random moves changing a bond length. 
+/** Group of atoms for random moves changing a bond length.
 *
 * This should be merged (or have an inheritance relation) with MolBond.
 */
@@ -609,7 +609,7 @@ struct StretchModeBondAngle:public StretchMode
    virtual void RandomStretch(const REAL amplitude, const bool keepCenter=true);
    /// The first atom
    MolAtom * mpAtom0;
-   /// The second atom 
+   /// The second atom
    MolAtom * mpAtom1;
    /// The third atom
    MolAtom * mpAtom2;
@@ -640,7 +640,7 @@ struct StretchModeTorsion:public StretchMode
    virtual void RandomStretch(const REAL amplitude, const bool keepCenter=true);
    /// The first atom
    MolAtom * mpAtom1;
-   /// The second atom 
+   /// The second atom
    MolAtom * mpAtom2;
    /// The (optional) bond angle restraint which this stretch mode should respect.
    /// The mpAtom1 and mpAtom2 must be the central atoms of this restraint.
@@ -671,13 +671,13 @@ struct StretchModeTwist:public StretchMode
    virtual void RandomStretch(const REAL amplitude, const bool keepCenter=true);
    /// The first atom
    MolAtom * mpAtom1;
-   /// The second atom 
+   /// The second atom
    MolAtom * mpAtom2;
    /// The set of atoms that are to be rotated around at1-at2
    set<MolAtom *> mvRotatedAtomList;
 };
 
-/** Groups of atoms that can be moved using molecular dynamics 
+/** Groups of atoms that can be moved using molecular dynamics
 * principles, taking a list of restraints as ptential.
 * This is used to move group of atoms for which no adequate stretch mode
 * can be used, such as inside flexible rings.
@@ -719,8 +719,8 @@ struct MolZAtom
 * moves either of individual atoms or using torsion bonds.
 *
 * This can also be used for non-organic compounds (polyhedras etc...)
-* \note the parametrization is very different from ZScatterer: we keep 
-* a list of x,y,z which do not use limits (they must not), but the 
+* \note the parametrization is very different from ZScatterer: we keep
+* a list of x,y,z which do not use limits (they must not), but the
 * coordinates must be restrained or constrained from the expected
 * bond lengths, angles and dihedral angles. The list of parameters is
 * re-created in BeginOptimization() (except for the global x y z parameters
@@ -758,13 +758,13 @@ class Molecule: public Scatterer
       virtual void GlobalOptRandomMove(const REAL mutationAmplitude,
                                        const RefParType *type);
       virtual REAL GetLogLikelihood()const;
-      
+
       virtual unsigned int GetNbLSQFunction()const;
       virtual const CrystVector_REAL& GetLSQCalc(const unsigned int) const;
       virtual const CrystVector_REAL& GetLSQObs(const unsigned int) const;
       virtual const CrystVector_REAL& GetLSQWeight(const unsigned int) const;
       virtual const CrystVector_REAL& GetLSQDeriv(const unsigned int n, RefinablePar&par);
-      
+
       virtual void TagNewBestConfig()const;
       virtual int GetNbComponent() const;
       virtual const ScatteringComponentList& GetScatteringComponentList() const;
@@ -806,8 +806,8 @@ class Molecule: public Scatterer
                    const REAL length, const REAL sigma, const REAL delta,
                    const REAL bondOrder=1.,
                    const bool updateDisplay=true);
-      /** Remove a bond. Returns the iterator to the next bond in the list. 
-      * 
+      /** Remove a bond. Returns the iterator to the next bond in the list.
+      *
       * If del is true (default), then the MolBond object is deleted.
       *
       */
@@ -885,7 +885,7 @@ class Molecule: public Scatterer
 
       /** Minimize configuration from internal restraints (bond lengths, angles
       * and dihedral angles). Useful when adding manually atoms to get an initial
-      * reasonable configuration. 
+      * reasonable configuration.
       */
       void OptimizeConformation(const long nbTrial=10000,const REAL stopCost=0.);
       /** Optimize the conformation from internal restraints (bond lengths, angles
@@ -902,7 +902,7 @@ class Molecule: public Scatterer
       * rigid bodies in vr.
       *
       * \param v0: initial speed of all atoms. On return, includes the new speed coordinates.
-      * Only the atoms used as keys in v0 will be moved, so this should be used to work 
+      * Only the atoms used as keys in v0 will be moved, so this should be used to work
       * only on a subgroup of atoms.
       * \param nbStep: number of steps to perform.
       * \param dt: time step. Recommended value are such that v0[].xyz * dt = 0.001
@@ -930,7 +930,7 @@ class Molecule: public Scatterer
       std::vector<MolBond*>& GetBondList();
       std::vector<MolBondAngle*>& GetBondAngleList();
       std::vector<MolDihedralAngle*>& GetDihedralAngleList();
-      
+
       std::list<StretchModeBondLength>& GetStretchModeBondLengthList();
       std::list<StretchModeBondAngle>& GetStretchModeBondAngleList();
       std::list<StretchModeTorsion>& GetStretchModeTorsionList();
@@ -967,7 +967,7 @@ class Molecule: public Scatterer
       * \param keepCenter: if true, the coordinates of the molecule are modified
       * so that only the translated atoms are moved.
       */
-      void TranslateAtomGroup(const set<MolAtom *> &atoms, 
+      void TranslateAtomGroup(const set<MolAtom *> &atoms,
                               const REAL dx,const REAL dy,const REAL dz,
                               const bool keepCenter=true);
       /// Print the status of all restraints (bond length, angles...)
@@ -1030,7 +1030,7 @@ class Molecule: public Scatterer
       void SetCenterAtom(const MolAtom &at);
       /** Molecule as Z-matrix
       *
-      * \param keeporder: if true, the order of the atoms is exactly the same as in 
+      * \param keeporder: if true, the order of the atoms is exactly the same as in
       * the Molecule.
       */
       const std::vector<MolZAtom>& AsZMatrix(const bool keeporder)const;
@@ -1046,7 +1046,7 @@ class Molecule: public Scatterer
       * The list is \e only rebuilt if the bond or atom list has changed,so
       * it should be safe to call again this function.
       *
-      * \note So far this is a const method as the ring list just reflects the bond list 
+      * \note So far this is a const method as the ring list just reflects the bond list
       * and therefore is mutable (see Molecule::mvRing)... but maybe this could
       * change...
       */
@@ -1187,7 +1187,7 @@ class Molecule: public Scatterer
          mutable RefinableObjClock mClockStretchModeTorsion;
          mutable RefinableObjClock mClockStretchModeTwist;
          mutable RefinableObjClock mClockMDAtomGroup;
-         
+
       // For local minimization (EXPERIMENTAL)
          unsigned long mLocalParamSet;
          mutable unsigned long mRandomConformChangeNbTest;
@@ -1219,12 +1219,12 @@ class Molecule: public Scatterer
       * either as the geometrical center, or as a given atom.
       */
       RefObjOpt mMoleculeCenter;
-      
+
       /** Atom chosen as center of rotation, if mRotationCenter is set to use
       * an atom rather than the geometrical center.
       */
       const MolAtom* mpCenterAtom;
-      
+
       /// Connectivity table: for each atom, keep the list of atoms
       /// bonded to it. All atoms are referenced from their index.
       mutable map<MolAtom *,set<MolAtom *> > mConnectivityTable;
@@ -1244,7 +1244,7 @@ class Molecule: public Scatterer
          /// The set of atoms that are to be rotated
          set<MolAtom *> mvRotatedAtomList;
          /** The recommended rotation amplitude, for a base global optimization
-         * displacement, to obtain an average 0.1 Angstroem displacement 
+         * displacement, to obtain an average 0.1 Angstroem displacement
          * per atom (pi*0.04 by default)
          *
          * This is learnt at the beginning of an optimization, i.e. in
@@ -1278,7 +1278,7 @@ class Molecule: public Scatterer
       * a 'flip' group, where it is possible to rotate bonds to their symmetric
       * with respect to one plane defined by atoms Ai-A-Aj. This is useful to
       * flip the absolute configuration for asymmetric centers. Note that the bond
-      * is only rotated, so that the entire group is not mirrored (no absolute configuration 
+      * is only rotated, so that the entire group is not mirrored (no absolute configuration
       * is broken in the group).
       *
       * Also, a FlipGroup can correspond to a 180� rotation exchanging Ai and Aj
@@ -1314,7 +1314,7 @@ class Molecule: public Scatterer
       *
       */
       mutable list<FlipGroup> mvFlipGroup;
-      
+
       // Group of atoms for random moves naturally respecting restraints
          /// List of StretchModeBondLength
          mutable list<StretchModeBondLength> mvStretchModeBondLength;
@@ -1324,7 +1324,7 @@ class Molecule: public Scatterer
          mutable list<StretchModeTorsion> mvStretchModeTorsion;
          /// List of StretchModeTwist
          mutable list<StretchModeTwist> mvStretchModeTwist;
-      
+
       /// Groups of StretchMode not breaking any restraint (unless the one they are associated to)
       mutable std::list<StretchMode*> mvpStretchModeFree;
       /// Groups of StretchMode breaking restraints (beyond the one they are associated to)
@@ -1345,7 +1345,7 @@ class Molecule: public Scatterer
       /// Full list of atoms that can be moved using molecular dynamics
       /// This excludes any atom part of a rigid group
       mutable std::set<MolAtom*> mvMDFullAtomGroup;
-   
+
    /// Frequency of using molecular dynamics move during GlobalOptRandomMove()
    REAL mMDMoveFreq;
    /// Relative energy of molecule during molecular dynamics move

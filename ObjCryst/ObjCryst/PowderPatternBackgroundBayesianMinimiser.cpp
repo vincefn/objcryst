@@ -75,7 +75,7 @@ const CrystVector_REAL& PowderPatternBackgroundBayesianMinimiser::GetLSQCalc (co
   const long nb=mpBackground->GetPowderPatternCalc().numElements();
   const long step=1;
   if(mBayesianCalc.numElements()!=nb) mBayesianCalc.resize(nb);
-  
+
   const REAL *pBackgd=mpBackground->GetPowderPatternCalc().data();
   const REAL *pObs=mpBackground->GetParentPowderPattern().GetPowderPatternObs().data();
   const REAL *pSigma=mpBackground->GetParentPowderPattern().GetPowderPatternObsSigma().data();
@@ -129,7 +129,7 @@ REAL PowderPatternBackgroundBayesianMinimiser::BayesianBackgroundLogLikelihood(c
                                 4.16063018e+00,
                                 4.34600620e+00,
                                 4.50155649e+00,
-                                4.63573160e+00}; 
+                                4.63573160e+00};
    static const REAL vt[11]={  0. ,   0.01,  0.1 ,  1.1 ,  2.1 ,  3.1 ,  4.1 ,  5.1 ,  6.1 ,  7.1 ,  8.1};
    static const CubicSpline spline(vt,vllk,11);
    static const REAL s1=spline(8)-log((REAL)8);

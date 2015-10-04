@@ -122,7 +122,7 @@ void RealGeomStructFactor_67bca(const REAL x,
                                 const CrystVector_REAL&k,
                                 const CrystVector_REAL&l,
                                 CrystVector_REAL& rsf);
-                                
+
 /// \deprecated
 void RealGeomStructFactor_67a_cb(const REAL x,
                                 const REAL y,
@@ -131,7 +131,7 @@ void RealGeomStructFactor_67a_cb(const REAL x,
                                 const CrystVector_REAL&k,
                                 const CrystVector_REAL&l,
                                 CrystVector_REAL& rsf);
-                                
+
 /// \deprecated
 void RealGeomStructFactor_97   (const REAL x,
                                 const REAL y,
@@ -224,7 +224,7 @@ void ImagGeomStructFactor_67bca(const REAL x,
                                 const CrystVector_REAL&k,
                                 const CrystVector_REAL&l,
                                 CrystVector_REAL& rsf);
-                                
+
 /// \deprecated
 void ImagGeomStructFactor_67a_cb(const REAL x,
                                 const REAL y,
@@ -233,7 +233,7 @@ void ImagGeomStructFactor_67a_cb(const REAL x,
                                 const CrystVector_REAL&k,
                                 const CrystVector_REAL&l,
                                 CrystVector_REAL& rsf);
-                                
+
 /// \deprecated
 void ImagGeomStructFactor_97   (const REAL x,
                                 const REAL y,

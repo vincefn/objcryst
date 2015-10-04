@@ -140,13 +140,13 @@ class Scatterer:virtual public RefinableObj
       /// of arrays of Scatterers
       virtual Scatterer* CreateCopy() const=0;
       virtual const string& GetClassName() const;
-            
+
       /// Number of components in the scatterer (eg number of point scatterers)
       virtual int GetNbComponent() const=0;
-      
+
       /** \brief Get the list of all scattering components for this scatterer.
       *
-      * This is the most important function of this class, giving the list of 
+      * This is the most important function of this class, giving the list of
       * scattering positions along with the associated ScatteringPower.
       *
       */
@@ -168,12 +168,12 @@ class Scatterer:virtual public RefinableObj
       /// Y coordinate (fractionnal) of the scatterer (for complex scatterers,
       /// this corresponds to the position of one atom of the Scatterer, ideally
       /// it should be near the center of the Scatterer.
-      REAL GetY() const;  
+      REAL GetY() const;
       /// Z coordinate (fractionnal) of the scatterer (for complex scatterers,
       /// this corresponds to the position of one atom of the Scatterer, ideally
       /// it should be near the center of the Scatterer.
       REAL GetZ() const;
-      
+
       /** \brief Get the occupancy of the scatterer (0. -> 1.0)
       *
       * The occupancy is given in %, and must take into account the
@@ -191,7 +191,7 @@ class Scatterer:virtual public RefinableObj
       /// Y coordinate (fractionnal) of the scatterer (for complex scatterers,
       /// this corresponds to the position of one atom of the Scatterer, ideally
       /// it should be near the center of the Scatterer.
-      virtual void SetY(const REAL y);  
+      virtual void SetY(const REAL y);
       /// Z coordinate (fractionnal) of the scatterer (for complex scatterers,
       /// this corresponds to the position of one atom of the Scatterer, ideally
       /// it should be near the center of the Scatterer.
@@ -205,14 +205,14 @@ class Scatterer:virtual public RefinableObj
       * of the scatterer, affecting all atoms.
       */
       virtual void SetOccupancy(const REAL occupancy) ;
-      
+
       /// Conversion function.-> returns the scatt name
       ///
       /// \warning EXPERIMENTAL. DO NOT USE, as this may be removed.
       operator string()const;
       /// Print some info about the scatterer (ideally this should be one line...).
       virtual void Print() const=0;
-            
+
       /** \brief Colour associated to this scatterer (using POVRay names)
       *
       */
@@ -221,7 +221,7 @@ class Scatterer:virtual public RefinableObj
       *
       */
       virtual const float* GetColourRGB()const;
-      
+
       /** \brief \internal Output a description of the scatterer for POVRay.
       * This should only be called by the Crystal Object to which belongs this
       * scatterer.
@@ -271,12 +271,12 @@ class Scatterer:virtual public RefinableObj
       const RefinableObjClock& GetClockScattCompList()const;
       ///coordinates of the scatterer (or of its center..)
       CrystVector_REAL mXYZ;
-      
+
       /** \brief  Occupancy : 0 <= occ <= 1
       * For a multi-atom scatterer (polyhedron,..), this is the \b overall occupancy
       * of the scatterer (affects all components of the scatterer).
       */
-      REAL mOccupancy; 
+      REAL mOccupancy;
       /// Colour for this scatterer (from POVRay)
       string mColourName;
       /// Colour for this scatterer using RGB
@@ -292,7 +292,7 @@ class Scatterer:virtual public RefinableObj
       /// It cannot be const since some scatterers may want to modify
       /// the list of scattering powers of the crystal...
       Crystal *mpCryst;
-      
+
    private:
    #ifdef __WX__CRYST__
    public:

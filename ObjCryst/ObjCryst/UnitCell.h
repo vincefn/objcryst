@@ -86,28 +86,28 @@ class UnitCell:public RefinableObj
       */
       UnitCell(const REAL a, const REAL b, const REAL c, const REAL alpha,
               const REAL beta, const REAL gamma,const string &SpaceGroupId);
-              
+
       /// UnitCell copy constructor
       UnitCell(const UnitCell &oldCryst);
       /// Destructor
       ~UnitCell();
       virtual const string& GetClassName() const;
-      /// Lattice parameters (a,b,c,alpha,beta,gamma) as a 6-element vector in Angstroems 
+      /// Lattice parameters (a,b,c,alpha,beta,gamma) as a 6-element vector in Angstroems
       /// and radians.
       CrystVector_REAL GetLatticePar() const;
       /// Return one of the 6 Lattice parameters, 0<= whichPar <6 (a,b,c,alpha,beta,gamma),
-      /// returned in Angstroems and radians. 
+      /// returned in Angstroems and radians.
       REAL GetLatticePar(const int whichPar)const;
       /// last time the Lattice parameters were changed
       const RefinableObjClock& GetClockLatticePar()const;
-      /** \brief Get the 'B' matrix (UnitCell::mBMatrix)for the UnitCell (orthogonalization 
+      /** \brief Get the 'B' matrix (UnitCell::mBMatrix)for the UnitCell (orthogonalization
       * matrix for the given lattice, in the reciprocal space)
       *
       * The convention is taken following Giacovazzo, "Fundamentals of Crystallography", p.69
       * "e1 is chosen along a*, e2 in the (a*,b*) plane, then e3 is along c".
       */
       const CrystMatrix_REAL& GetBMatrix() const;
-      /** \brief Get the orthogonalization matrix (UnitCell::mOrthMatrix)for the UnitCell 
+      /** \brief Get the orthogonalization matrix (UnitCell::mOrthMatrix)for the UnitCell
       * in real space
       *
       */
@@ -138,7 +138,7 @@ class UnitCell:public RefinableObj
       * e1 is chosen along a, e2 in the (a,b) plane, then e3 is along c*
       */
       void OrthonormalToFractionalCoords(REAL &x,REAL &y,REAL &z) const;
-      /** \brief Get Miller H,K, L indices from orthonormal coordinates 
+      /** \brief Get Miller H,K, L indices from orthonormal coordinates
       * in reciprocal space.
       *
       * Result is stored into x,y and z
@@ -154,17 +154,18 @@ class UnitCell:public RefinableObj
       *
       * \param os the stream to which the information is outputed (default=cout)
       */
-      virtual void Print(ostream &os=cout) const;
-            
+      virtual void Print(ostream &os) const;
+      // Avoid compiler warnings about hidden base class method.
+      virtual void Print() const  { this->Print(cout); }
       /// Access to the SpaceGroup object
       const SpaceGroup & GetSpaceGroup()const;
       /// Access to the SpaceGroup object.
       SpaceGroup & GetSpaceGroup();
-      
+
       // :TODO: ?
       //virtual void XMLOutput(ostream &os,int indent=0)const;
       //virtual void XMLInput(istream &is,const XMLCrystTag &tag);
-      
+
       /// Volume of Unit Cell (in Angstroems)
       REAL GetVolume()const;
    protected:
@@ -188,7 +189,7 @@ class UnitCell:public RefinableObj
       * Need only be done once per UnitCell.
       */
       virtual void InitOptions();
-      /// \internal.Init the (de)orthogonalization matrices. 
+      /// \internal.Init the (de)orthogonalization matrices.
       /// They are re-computed only if parameters have changed since last call.
       void InitMatrices() const;
       /// \internal
@@ -205,12 +206,12 @@ class UnitCell:public RefinableObj
       CrystVector_REAL mCellDim;
       /// The space group of the UnitCell
       SpaceGroup mSpaceGroup ;
-      
+
       /** \brief B Matrix (Orthogonalization matrix for reciprocal space)
       * \f[ B= \left[ \begin {array}{ccc} a^* & b^*\cos(\gamma^*) & c^*\cos(\beta^*) \\
       *                            0 & b^*\sin(\gamma^*) & -c^*\sin(\beta^*)\cos(\alpha) \\
       *                            0 & 0 & \frac{1}{c}\end{array} \right]\f]
-      *\f[ \left[ \begin{array}{c} k_x \\ k_y \\ k_z \end{array} \right]_{orthonormal}  
+      *\f[ \left[ \begin{array}{c} k_x \\ k_y \\ k_z \end{array} \right]_{orthonormal}
       *  = B \times \left[ \begin{array}{c} h \\ k \\ l \end{array}\right]_{integer} \f]
       * \note this matrix is and must remain upper triangular. this is assumed for
       * some optimizations.
@@ -222,7 +223,7 @@ class UnitCell:public RefinableObj
       * \f[ M_{orth}= \left[ \begin {array}{ccc} a & b\cos(\gamma) & c\cos(\beta) \\
       *                            0 & b\sin(\gamma) & -c\sin(\beta)\cos(\alpha^*) \\
       *                            0 & 0 & \frac{1}{c^*}\end{array} \right]\f]
-      * \f[ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right]_{orthonormal}  
+      * \f[ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right]_{orthonormal}
       *  = M_{orth} \times \left[ \begin{array}{c} x \\ y \\ z \end{array}
       *                    \right]_{fractional coords}\f]
       * \note this matrix is and must remain upper triangular. this is assumed for
@@ -238,7 +239,7 @@ class UnitCell:public RefinableObj
       mutable RefinableObjClock mClockMetricMatrix;
       /// \internal Last time the lattice parameters whre updated
       mutable RefinableObjClock mClockLatticeParUpdate;
-      
+
       /** Option to override lattice parameters constraints from spacegroup choice.
       *
       * \warning EXPERIMENTAL
@@ -254,7 +255,7 @@ class UnitCell:public RefinableObj
       * for final refinement the 'real' symmetry should be imposed.
       */
       RefObjOpt mConstrainLatticeToSpaceGroup;
-      
+
 };
 
 

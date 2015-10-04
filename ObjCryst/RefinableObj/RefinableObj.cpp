@@ -29,6 +29,9 @@
    #undef GetClassName // Conflict from wxMSW headers ? (cygwin)
 #endif
 #include <algorithm>
+
+#define POSSIBLY_UNUSED(expr) (void)(expr);
+
 namespace ObjCryst
 {
 //######################################################################
@@ -48,7 +51,7 @@ mpParent(parent),mName(name),mId(0)
    this->InitId();
 }
 
-RefParType::~RefParType(){}; 
+RefParType::~RefParType(){};
 
 bool RefParType::IsDescendantFromOrSameAs(const RefParType *type) const
 {
@@ -75,7 +78,7 @@ const RefParType *gpRefParTypeObjCryst=0;
 long NiftyStaticGlobalObjectsInitializer_RefinableObj::mCount=0;
 //######################################################################
 //
-//      
+//
 //
 //######################################################################
 
@@ -154,7 +157,7 @@ void RefinableObjClock::AddChild(const RefinableObjClock &clock)
 {mvChild.insert(&clock);clock.AddParent(*this);this->Click();}
 void RefinableObjClock::RemoveChild(const RefinableObjClock &clock)
 {
-   const unsigned int i=mvChild.erase(&clock);
+   const unsigned int i = mvChild.erase(&clock);  POSSIBLY_UNUSED(i);
    VFN_DEBUG_MESSAGE("RefinableObjClock::RemoveChild():"<<i,5)
    clock.RemoveParent(*this);
    this->Click();
@@ -170,7 +173,8 @@ void RefinableObjClock::AddParent(RefinableObjClock &clock)const
 }
 void RefinableObjClock::RemoveParent(RefinableObjClock &clock)const
 {
-   const unsigned int i=mvParent.erase(&clock);
+   // avoid warnings about unused i when not debugging.
+   const unsigned int i = mvParent.erase(&clock);  POSSIBLY_UNUSED(i);
    VFN_DEBUG_MESSAGE("RefinableObjClock::RemoveParent():"<<i,5)
 }
 
@@ -209,7 +213,7 @@ Restraint::~Restraint()
 const RefParType* Restraint::GetType()const{return mpRefParType;}
 
 void Restraint::SetType(const RefParType *type){mpRefParType=type;}
-      
+
 REAL Restraint::GetLogLikelihood()const{return 0.;}
 
 //######################################################################
@@ -226,7 +230,7 @@ mSigma(0.),mHumanScale(1.),mHasAssignedClock(false),mpClock(0)
 ,mpWXFieldRefPar(0)
 #endif
 {}
-                     
+
 RefinablePar::RefinablePar(  const string &name,
                      REAL *refPar,
                      const REAL min,
@@ -337,7 +341,7 @@ REAL RefinablePar::GetValue()const
    {
       VFN_DEBUG_MESSAGE("RefinablePar::Value():Evaluating Equation",0)
       REAL tmp=mEquationCoeff(0);
-      for(int i=0;i<mEquationNbRefPar;i++) 
+      for(int i=0;i<mEquationNbRefPar;i++)
          tmp += mEquationCoeff(i+1) * mEquationRefPar[i]->GetValue();
       *mpValue = tmp;
    }
@@ -576,7 +580,7 @@ REAL  RefinablePar::GetDerivStep()const
 {
    if(REFPAR_DERIV_STEP_ABSOLUTE==mRefParDerivStepModel) return mDerivStep;
    REAL d=mDerivStep* (*mpValue);
-   
+
    //:KLUDGE: Parameter will probably has a singular value, so it should not matter..
    if(d == 0.) return 1e-8;
    return d;
@@ -908,8 +912,8 @@ template<class T> void ObjRegistry<T>::DeRegister(T &obj)
 {
    VFN_DEBUG_ENTRY("ObjRegistry("<<mName<<")::Deregister(&obj)"<<mvpRegistry.size(),2)
    if (mvpRegistry.size() == 0)
-   {// This may happen if an object is deleted several times due to inherited destructors 
-    // :TODO: make sure it does not happen, while making sure WXGet() below 
+   {// This may happen if an object is deleted several times due to inherited destructors
+    // :TODO: make sure it does not happen, while making sure WXGet() below
     //is not pure virtual because the child destructor has already done its job...
       VFN_DEBUG_EXIT("ObjRegistry(" << mName << ")::Deregister(&obj): EMPTY registry", 2)
       return;
@@ -932,7 +936,7 @@ template<class T> void ObjRegistry<T>::DeRegister(T &obj)
 template<class T> void ObjRegistry<T>::DeRegister(const string &objName)
 {
    VFN_DEBUG_ENTRY("ObjRegistry("<<mName<<")::Deregister(name):"<<objName,2)
-   
+
    const long i=this->Find(objName);
    if(-1==i)
    {
@@ -941,7 +945,7 @@ template<class T> void ObjRegistry<T>::DeRegister(const string &objName)
    }
    //:KLUDGE: should directly do an iterator search on the name...
    typename vector<T*>::iterator pos=find(mvpRegistry.begin(),mvpRegistry.end(),mvpRegistry[i]);
-   
+
    #ifdef __WX__CRYST__
    if(0!=mpWXRegistry) mpWXRegistry->Remove((*pos)->WXGet());
    #endif
@@ -1019,7 +1023,7 @@ template<class T> void ObjRegistry<T>::Print()const
 {
    VFN_DEBUG_MESSAGE("ObjRegistry::Print():",2)
    cout <<mName<<" :"<<this->GetNb()<<" object registered:" <<endl;
-   
+
    for(long i=0;i<this->GetNb();++i)
       cout <<i<<"("<<this->GetObj(i).GetName()<<")"<<endl;
 }
@@ -1033,7 +1037,7 @@ template<class T> long ObjRegistry<T>::Find(const string &objName) const
    VFN_DEBUG_MESSAGE("ObjRegistry::Find(objName)",2)
    long index=-1;
    //bool error=false;
-   for(long i=this->GetNb()-1;i>=0;i--) 
+   for(long i=this->GetNb()-1;i>=0;i--)
       if( mvpRegistry[i]->GetName() == objName) return i;
    //      if(-1 != index) error=true ;else index=i;
    //if(true == error)
@@ -1057,8 +1061,8 @@ template<class T> long ObjRegistry<T>::Find(const string &objName,
    VFN_DEBUG_MESSAGE("ObjRegistry::Find(objName,className)",2)
    long index=-1;
    //bool error=false;
-   for(long i=this->GetNb()-1;i>=0;i--) 
-      if( mvpRegistry[i]->GetName() == objName) 
+   for(long i=this->GetNb()-1;i>=0;i--)
+      if( mvpRegistry[i]->GetName() == objName)
          if(className==mvpRegistry[i]->GetClassName()) return i;
    //      if(-1 != index) error=true ;else index=i;
    //if(true == error)
@@ -1079,7 +1083,7 @@ template<class T> long ObjRegistry<T>::Find(const string &objName,
 template<class T> long ObjRegistry<T>::Find(const T &obj) const
 {
    VFN_DEBUG_MESSAGE("ObjRegistry::Find(&obj)",2)
-   for(long i=this->GetNb()-1;i>=0;i--) 
+   for(long i=this->GetNb()-1;i>=0;i--)
       if( mvpRegistry[i]== &obj)  return i;
    //:TODO: throw something
    return -1;
@@ -1088,7 +1092,7 @@ template<class T> long ObjRegistry<T>::Find(const T &obj) const
 template<class T> long ObjRegistry<T>::Find(const T *pobj) const
 {
    VFN_DEBUG_MESSAGE("ObjRegistry::Find(&obj)",2)
-   for(long i=this->GetNb()-1;i>=0;i--) 
+   for(long i=this->GetNb()-1;i>=0;i--)
       if( mvpRegistry[i]== pobj)  return i;
    //:TODO: throw something
    return -1;
@@ -1117,7 +1121,7 @@ template<class T> WXRegistry<T>* ObjRegistry<T>::WXCreate(wxWindow *parent)
 {
    VFN_DEBUG_MESSAGE("ObjRegistry<T>::WXCreate()",2)
    mpWXRegistry=new WXRegistry<T> (parent,this);
-   for(int i=0;i<this->GetNb();i++) 
+   for(int i=0;i<this->GetNb();i++)
       mpWXRegistry->Add(this->GetObj(i).WXCreate(mpWXRegistry));
    return mpWXRegistry;
 }
@@ -1167,9 +1171,6 @@ void GetSubRefObjListClockRecursive(ObjRegistry<RefinableObj> &reg,RefinableObjC
 ObjRegistry<RefinableObj> gRefinableObjRegistry("Global RefinableObj registry");
 ObjRegistry<RefinableObj> gTopRefinableObjRegistry("Global Top RefinableObj registry");
 
-/// Maximum number of saved sets of parameters
-const unsigned long MaxNbSavedSets(1000);
-
 RefinableObj::RefinableObj():
 mName(""),
 mNbRefParNotFixed(-1),mOptimizationDepth(0),mDeleteRefParInDestructor(true)
@@ -1181,7 +1182,7 @@ mNbRefParNotFixed(-1),mOptimizationDepth(0),mDeleteRefParInDestructor(true)
    gRefinableObjRegistry.Register(*this);
    mSubObjRegistry.SetName("Registry for sub-objects");
    mClientObjRegistry.SetName("Registry for Clients");
-   
+
    VFN_DEBUG_MESSAGE("RefinableObj::RefinableObj():End",2)
 }
 RefinableObj::RefinableObj(const bool internalUseOnly):
@@ -1195,7 +1196,7 @@ mNbRefParNotFixed(-1),mOptimizationDepth(0),mDeleteRefParInDestructor(true)
    if(false==internalUseOnly) gRefinableObjRegistry.Register(*this);
    mSubObjRegistry.SetName("Registry for sub-objects");
    mClientObjRegistry.SetName("Registry for Clients");
-   
+
    VFN_DEBUG_MESSAGE("RefinableObj::RefinableObj(bool):End",2)
 }
 
@@ -1308,14 +1309,14 @@ void RefinableObj::SetParIsFixed(const long parIndex,const bool fix)
 
 void RefinableObj::SetParIsFixed(const string& name,const bool fix)
 {
-   for(long i=this->GetNbPar()-1;i>=0;i--) 
-      if( this->GetPar(i).GetName() == name) 
+   for(long i=this->GetNbPar()-1;i>=0;i--)
+      if( this->GetPar(i).GetName() == name)
          this->GetPar(i).SetIsFixed(fix);
 }
 
 void RefinableObj::SetParIsFixed(const RefParType *type,const bool fix)
 {
-   for(long i=0;i<this->GetNbPar();i++) 
+   for(long i=0;i<this->GetNbPar();i++)
       if( this->GetPar(i).GetType()->IsDescendantFromOrSameAs(type))
       {
          //cout << " Fixing ..." << this->GetPar(i).Name()<<endl;
@@ -1327,14 +1328,14 @@ void RefinableObj::SetParIsFixed(const RefParType *type,const bool fix)
 
 void RefinableObj::SetParIsUsed(const string& name,const bool use)
 {
-   for(long i=this->GetNbPar()-1;i>=0;i--) 
-      if( this->GetPar(i).GetName() == name) 
+   for(long i=this->GetNbPar()-1;i>=0;i--)
+      if( this->GetPar(i).GetName() == name)
          this->GetPar(i).SetIsUsed(use);
 }
 
 void RefinableObj::SetParIsUsed(const RefParType *type,const bool use)
 {
-   for(long i=0;i<this->GetNbPar();i++) 
+   for(long i=0;i<this->GetNbPar();i++)
       if( this->GetPar(i).GetType()->IsDescendantFromOrSameAs(type))
       {
          //cout << " Now used (Waow!) : ..." << this->GetPar(i).Name()<<endl;
@@ -1424,7 +1425,7 @@ void RefinableObj::AddPar(const RefinablePar &newRefPar)
          name += "~";
          if(++ct==100) break;// KLUDGE, let go and hope for the best...
       }
-   
+
    mvpRefPar.push_back(new RefinablePar(newRefPar));
    mvpRefPar.back()->SetName(name);
    mRefParListClock.Click();
@@ -1482,9 +1483,9 @@ void RefinableObj::Print() const
       cout << "#"<<i<<"#" << this->GetPar(i).GetName() << ": " ;
       cout << FormatFloat(this->GetPar(i).GetHumanValue(),18,12) << " ";
       if(true == this->GetPar(i).IsFixed()) cout << "Fixed";
-      else 
+      else
          if(true == this->GetPar(i).IsLimited())
-         { 
+         {
             cout << "Limited (" << this->GetPar(i).GetHumanMin()<<","
                  <<this->GetPar(i).GetHumanMax()<<")";
             if(true == this->GetPar(i).IsPeriodic()) cout << ",Periodic" ;
@@ -1505,11 +1506,11 @@ unsigned long RefinableObj::CreateParamSet(const string name) const
    unsigned long id;
    for(id=0;id<=mvpSavedValuesSet.size();id++)
       if(mvpSavedValuesSet.end()==mvpSavedValuesSet.find(id)) break;
-      
+
    pair< CrystVector_REAL ,string> p;
    p.second=name;
    mvpSavedValuesSet.insert(make_pair(id,p));
-   
+
    this->SaveParamSet(id);
    VFN_DEBUG_MESSAGE("RefinableObj::CreateParamSet(): new parameter set with id="<<id<<" and name:"<<name,2)
    VFN_DEBUG_EXIT("RefinableObj::CreateParamSet()",3)
@@ -1582,8 +1583,8 @@ const string& RefinableObj::GetParamSetName(const unsigned long id)const
 
 void RefinableObj::SetLimitsAbsolute(const string &name,const REAL min,const REAL max)
 {
-   for(long i=this->GetNbPar()-1;i>=0;i--) 
-      if( this->GetPar(i).GetName() == name) 
+   for(long i=this->GetNbPar()-1;i>=0;i--)
+      if( this->GetPar(i).GetName() == name)
          this->GetPar(i).SetLimitsAbsolute(min,max);
 }
 void RefinableObj::SetLimitsAbsolute(const RefParType *type,
@@ -1597,8 +1598,8 @@ void RefinableObj::SetLimitsAbsolute(const RefParType *type,
 }
 void RefinableObj::SetLimitsRelative(const string &name, const REAL min, const REAL max)
 {
-   for(long i=this->GetNbPar()-1;i>=0;i--) 
-      if( this->GetPar(i).GetName() == name) 
+   for(long i=this->GetNbPar()-1;i>=0;i--)
+      if( this->GetPar(i).GetName() == name)
          this->GetPar(i).SetLimitsRelative(min,max);
 }
 void RefinableObj::SetLimitsRelative(const RefParType *type,
@@ -1616,15 +1617,15 @@ void RefinableObj::SetLimitsRelative(const RefParType *type,
 }
 void RefinableObj::SetLimitsProportional(const string &name,const REAL min,const REAL max)
 {
-   for(long i=this->GetNbPar()-1;i>=0;i--) 
-      if( this->GetPar(i).GetName() == name) 
+   for(long i=this->GetNbPar()-1;i>=0;i--)
+      if( this->GetPar(i).GetName() == name)
          this->GetPar(i).SetLimitsProportional(min,max);
 }
-void RefinableObj::SetLimitsProportional(const RefParType *type, 
+void RefinableObj::SetLimitsProportional(const RefParType *type,
                                          const REAL min, const REAL max)
 {
    for(long i=0;i<this->GetNbPar();i++)
-      if(this->GetPar(i).GetType()->IsDescendantFromOrSameAs(type)) 
+      if(this->GetPar(i).GetType()->IsDescendantFromOrSameAs(type))
          this->GetPar(i).SetLimitsProportional(min,max);
    for(int i=0;i<this->GetSubObjRegistry().GetNb();i++)
       this->GetSubObjRegistry().GetObj(i).SetLimitsProportional(type,min,max);
@@ -1632,7 +1633,7 @@ void RefinableObj::SetLimitsProportional(const RefParType *type,
 void RefinableObj::SetGlobalOptimStep(const RefParType *type, const REAL step)
 {
    for(long i=0;i<this->GetNbPar();i++)
-      if(this->GetPar(i).GetType()->IsDescendantFromOrSameAs(type)) 
+      if(this->GetPar(i).GetType()->IsDescendantFromOrSameAs(type))
          this->GetPar(i).SetGlobalOptimStep(step);
    for(int i=0;i<this->GetSubObjRegistry().GetNb();i++)
       this->GetSubObjRegistry().GetObj(i).SetGlobalOptimStep(type,step);
@@ -1641,10 +1642,10 @@ void RefinableObj::SetGlobalOptimStep(const RefParType *type, const REAL step)
 ObjRegistry<RefinableObj>& RefinableObj::GetSubObjRegistry()
 {return mSubObjRegistry;}
 
-const ObjRegistry<RefinableObj>& RefinableObj::GetSubObjRegistry()const 
+const ObjRegistry<RefinableObj>& RefinableObj::GetSubObjRegistry()const
 {return mSubObjRegistry;}
 
-void RefinableObj::RegisterClient(RefinableObj &obj)const 
+void RefinableObj::RegisterClient(RefinableObj &obj)const
 {mClientObjRegistry.Register(obj);}
 
 void RefinableObj::DeRegisterClient(RefinableObj &obj)const
@@ -1656,7 +1657,7 @@ const ObjRegistry<RefinableObj>& RefinableObj::GetClientRegistry()const{return m
 bool RefinableObj::IsBeingRefined()const {return mOptimizationDepth>0;}
 
 extern const long ID_WXOBJ_ENABLE; //These are defined in wxCryst/wxCryst.cpp
-extern const long ID_WXOBJ_DISABLE; 
+extern const long ID_WXOBJ_DISABLE;
 void RefinableObj::BeginOptimization(const bool allowApproximations,
                                      const bool enableRestraints)
 {
@@ -1926,7 +1927,7 @@ long RefinableObj::FindPar(const string &name) const
 {
    long index=-1;
    bool warning=false;
-   for(long i=this->GetNbPar()-1;i>=0;i--) 
+   for(long i=this->GetNbPar()-1;i>=0;i--)
       if( this->GetPar(i).GetName() == name)
       {
          if(-1 != index) warning=true ;else index=i;
@@ -1942,7 +1943,7 @@ long RefinableObj::FindPar(const REAL *p) const
 {
    long index=-1;
    bool warning=false;
-   for(long i=this->GetNbPar()-1;i>=0;i--) 
+   for(long i=this->GetNbPar()-1;i>=0;i--)
       if( p == mvpRefPar[i]->mpValue ) //&(this->GetPar(i).GetValue())
       {
          if(-1 != index) warning=true ;else index=i;
@@ -1951,7 +1952,7 @@ long RefinableObj::FindPar(const REAL *p) const
    {
       throw ObjCrystException("RefinableObj::FindPar(*p): Found duplicate parameter in object:"+this->GetName());
    }
-   
+
    return index;
 }
 
@@ -2033,7 +2034,7 @@ void GetRefParListClockRecursive(ObjRegistry<RefinableObj> &reg,RefinableObjCloc
 {
    for(int i=0;i<reg.GetNb();i++)
    {
-      if(reg.GetObj(i).GetRefParListClock()>clock) 
+      if(reg.GetObj(i).GetRefParListClock()>clock)
          clock=reg.GetObj(i).GetRefParListClock();
       GetRefParListClockRecursive(reg.GetObj(i).GetSubObjRegistry(),clock);
    }
@@ -2083,4 +2084,3 @@ template class RefObjOption<DiffractionDataSingleCrystal>;
 template class RefObjOption<PowderPatternDiffraction>;
 //template class RefObjOption<GlobalOptimObj>;
 //template class RefObjOption<IOCrystTag>;
-

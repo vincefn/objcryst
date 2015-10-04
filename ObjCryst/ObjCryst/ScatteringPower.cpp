@@ -34,7 +34,7 @@
 #include "ObjCryst/ObjCryst/ScatteringPower.h"
 #include "ObjCryst/Quirks/VFNStreamFormat.h"
 #include "ObjCryst/Quirks/VFNDebug.h"
-#include "ObjCryst/ObjCryst/Colours.h" 
+#include "ObjCryst/ObjCryst/Colours.h"
 
 #ifdef __WX__CRYST__
    #include "ObjCryst/wxCryst/wxScatteringPower.h"
@@ -213,13 +213,13 @@ void ScatteringPower::GetGeneGroup(const RefinableObj &obj,
          }
 }
 
-REAL ScatteringPower::GetMaximumLikelihoodPositionError()const 
+REAL ScatteringPower::GetMaximumLikelihoodPositionError()const
 {return mMaximumLikelihoodPositionError;}
 
 const RefinableObjClock& ScatteringPower::GetMaximumLikelihoodParClock()const
 {return mMaximumLikelihoodParClock;}
 
-void ScatteringPower::SetMaximumLikelihoodPositionError(const REAL mle) 
+void ScatteringPower::SetMaximumLikelihoodPositionError(const REAL mle)
 {
    if(mle!=mMaximumLikelihoodPositionError)
    {
@@ -282,7 +282,7 @@ void ScatteringPower::InitRGBColour()
 //      SCATTERING POWER ATOM
 //
 //######################################################################
-ObjRegistry<ScatteringPowerAtom> 
+ObjRegistry<ScatteringPowerAtom>
    gScatteringPowerAtomRegistry("Global ScatteringPowerAtom Registry");
 
 ScatteringPowerAtom::ScatteringPowerAtom():
@@ -326,6 +326,13 @@ const string& ScatteringPowerAtom::GetClassName() const
    return className;
 }
 
+// Disable the base-class function.
+void ScatteringPowerAtom::Init()
+{
+   // This should be never called.
+   abort();
+}
+
 void ScatteringPowerAtom::Init(const string &name,const string &symbol,const REAL bIso)
 {
    VFN_DEBUG_MESSAGE("ScatteringPowerAtom::Init(n,s,b)"<<mName,4)
@@ -357,11 +364,11 @@ void ScatteringPowerAtom::Init(const string &name,const string &symbol,const REA
       (*fpObjCrystInformUser)("Symbol not understood:"+mSymbol);
       this->Init(name,"H",bIso);
    }
-   
-   
+
+
    VFN_DEBUG_MESSAGE("ScatteringPowerAtom::Init():/Name="<<this->GetName() \
       <<" /Symbol="<<mSymbol<<" /Atomic Number=" << mAtomicNumber,4)
-   
+
    mDynPopCorrIndex=mAtomicNumber;
 
    //Init default atom colours for POVRay/GUI
@@ -513,7 +520,7 @@ CrystVector_REAL ScatteringPowerAtom::GetScatteringFactor(const ScatteringData &
 
 REAL ScatteringPowerAtom::GetForwardScatteringFactor(const RadiationType type) const
 {
-   REAL sf;
+   REAL sf = 0;
    switch(type)
    {
       case(RAD_NEUTRON):
@@ -560,7 +567,7 @@ CrystVector_REAL ScatteringPowerAtom::GetTemperatureFactor(const ScatteringData 
       const CrystVector_REAL stol=data.GetSinThetaOverLambda();
       stolsq=stol;
       stolsq*=stol;
-      
+
       #ifdef __VFN_VECTOR_USE_BLITZ__
          #define SF sf
          #define STOLSQ stolsq
@@ -574,9 +581,9 @@ CrystVector_REAL ScatteringPowerAtom::GetTemperatureFactor(const ScatteringData 
          for(long ii=0;ii<sf.numElements();ii++)
          {
       #endif
-      
+
          SF=exp(-mBiso*STOLSQ);
-         
+
       #ifdef __VFN_VECTOR_USE_BLITZ__
 
       #else
@@ -589,7 +596,7 @@ CrystVector_REAL ScatteringPowerAtom::GetTemperatureFactor(const ScatteringData 
       #undef STOLSQ
    }
    else
-   {// :TODO: handle ADP - requires taking into account symmetries... 
+   {// :TODO: handle ADP - requires taking into account symmetries...
       const REAL b11=mBeta(0);
       const REAL b22=mBeta(1);
       const REAL b33=mBeta(2);
@@ -615,14 +622,14 @@ CrystVector_REAL ScatteringPowerAtom::GetTemperatureFactor(const ScatteringData 
          for(long ii=0;ii<sf.numElements();ii++)
          {
       #endif
-   
+
       SF=   exp( -b11*pow(HH,2)
                  -b22*pow(KK,2)
                  -b33*pow(LL,2)
                  -2*b12*HH*KK
                  -2*b13*HH*LL
                  -2*b23*KK*LL);
-                 
+
       #ifdef __VFN_VECTOR_USE_BLITZ__
 
       #else
@@ -785,7 +792,7 @@ void ScatteringPowerAtom::InitAtNeutronScattCoeffs()
    {
       cout << "WARNING: could not interpret symbol for neutron coeefs:"<<mSymbol<<endl;
    }
-   
+
    VFN_DEBUG_MESSAGE("ScatteringPowerAtom::InitAtNeutronScattCoeffs():End",3)
 }
 
@@ -984,7 +991,7 @@ bool ScatteringComponentList::operator==(const ScatteringComponentList &rhs)cons
 
 void ScatteringComponentList::operator+=(const ScatteringComponentList &rhs)
 {
-   for(long i=0;i<rhs.GetNbComponent();i++) 
+   for(long i=0;i<rhs.GetNbComponent();i++)
       mvScattComp.push_back(rhs(i));
 }
 void ScatteringComponentList::operator+=(const ScatteringComponent &rhs)

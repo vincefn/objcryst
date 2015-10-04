@@ -96,7 +96,7 @@ bool ISNAN_OR_INF(REAL r)
 void XMLCrystFileSaveGlobal(const string & filename)
 {
    VFN_DEBUG_ENTRY("XMLCrystFileSaveGlobal(filename)",5)
-   
+
    ofstream out(filename.c_str());
    if(!out){};//:TODO:
    XMLCrystFileSaveGlobal(out);
@@ -115,19 +115,19 @@ void XMLCrystFileSaveGlobal(ostream &out)
    tag.AddAttribute("Date",strDate);
    tag.AddAttribute("Revision","1280");
    out<<tag<<endl;
-   
+
    for(int i=0;i<gCrystalRegistry.GetNb();i++)
       gCrystalRegistry.GetObj(i).XMLOutput(out,1);
-   
+
    for(int i=0;i<gDiffractionDataSingleCrystalRegistry.GetNb();i++)
       gDiffractionDataSingleCrystalRegistry.GetObj(i).XMLOutput(out,1);
-   
+
    for(int i=0;i<gPowderPatternRegistry.GetNb();i++)
       gPowderPatternRegistry.GetObj(i).XMLOutput(out,1);
-   
+
    for(int i=0;i<gOptimizationObjRegistry.GetNb();i++)
       gOptimizationObjRegistry.GetObj(i).XMLOutput(out,1);
-   
+
    tag.SetIsEndTag(true);
    out<<tag;
    VFN_DEBUG_EXIT("XMLCrystFileSaveGlobal(ostream)",5)
@@ -225,7 +225,7 @@ void XMLCrystFileLoadAllObject(istream &is)
    is.imbue(std::locale::classic());
    XMLCrystTag tag;
    do {is>>tag;} while(("ObjCryst"!=tag.GetName()) && (false==is.eof()));
-   
+
    while(true)
    {
       XMLCrystTag tag(is);
@@ -267,7 +267,7 @@ void ScatteringPowerAtom::XMLOutput(ostream &os,int indent)const
    tag.AddAttribute("Name",mName);
    tag.AddAttribute("Symbol",mSymbol);
    os <<tag<<endl;
-   
+
    this->GetPar(&mBiso).XMLOutput(os,"Biso",indent+1);
    os<<endl;
    if(false==this->mIsIsotropic)
@@ -292,10 +292,10 @@ void ScatteringPowerAtom::XMLOutput(ostream &os,int indent)const
 
    this->GetPar("ML-Nb Ghost Atoms").XMLOutput(os,"ML-NbGhost",indent+1);
    os <<endl;
-   
+
    this->GetPar("Formal Charge").XMLOutput(os,"Formal Charge",indent+1);
    os <<endl;
-   
+
    for(int i=0;i<=indent;i++) os << "  " ;
    XMLCrystTag tag2("RGBColour");
    os << tag2
@@ -304,7 +304,7 @@ void ScatteringPowerAtom::XMLOutput(ostream &os,int indent)const
       << mColourRGB[2];
    tag2.SetIsEndTag(true);
    os << tag2<<endl;
-   
+
    tag.SetIsEndTag(true);
    for(int i=0;i<indent;i++) os << "  " ;
    os <<tag<<endl;
@@ -420,24 +420,24 @@ void Atom::XMLOutput(ostream &os,int indent)const
    os <<tag;
    os <<endl;
    indent++;
-   
+
    this->GetPar(mXYZ.data()+0).XMLOutput(os,"x",indent);
    os <<endl;
-   
+
    this->GetPar(mXYZ.data()+1).XMLOutput(os,"y",indent);
    os <<endl;
-   
+
    this->GetPar(mXYZ.data()+2).XMLOutput(os,"z",indent);
    os <<endl;
-   
+
    this->GetPar(&mOccupancy).XMLOutput(os,"Occup",indent);
    os <<endl;
-   
+
    tag.SetIsEndTag(true);
    indent--;
    for(int i=0;i<indent;i++) os << "  " ;
    os <<tag<<endl;
-   
+
    VFN_DEBUG_EXIT("Atom::XMLOutput():"<<this->GetName(),5)
 }
 
@@ -508,7 +508,7 @@ void ZAtom::XMLOutput(ostream &os,int indent)const
    tag.AddAttribute("Name",mName);
    if(0!=this->GetScatteringPower())//else it is a dummy atom
       tag.AddAttribute("ScattPow",this->GetScatteringPower()->GetName());
-      
+
    tag.AddAttribute("BondAtom",this->GetZScatterer()
                                        .GetZAtomRegistry()
                                           .GetObj(this->GetZBondAtom())
@@ -523,20 +523,20 @@ void ZAtom::XMLOutput(ostream &os,int indent)const
                                              .GetName());
    os <<tag<<endl;
    indent++;
-   
-   
+
+
    this->GetZScatterer().GetPar(&mBondLength).XMLOutput(os,"BondLength",indent);
    os <<endl;
-   
+
    this->GetZScatterer().GetPar(&mAngle).XMLOutput(os,"Angle",indent);
    os <<endl;
-   
+
    this->GetZScatterer().GetPar(&mDihed).XMLOutput(os,"DihedAng",indent);
    os <<endl;
-   
+
    this->GetZScatterer().GetPar(&mOccupancy).XMLOutput(os,"Occup",indent);
    os <<endl;
-   
+
    indent--;
    tag.SetIsEndTag(true);
    for(int i=0;i<indent;i++) os << "  " ;
@@ -633,30 +633,30 @@ void ZScatterer::XMLOutput(ostream &os,int indent)const
    tag.AddAttribute("Name",mName);
    os <<tag<<endl;
    indent++;
-   
+
    this->GetPar(mXYZ.data()+0).XMLOutput(os,"x",indent);
    os <<endl;
-   
+
    this->GetPar(mXYZ.data()+1).XMLOutput(os,"y",indent);
    os <<endl;
-   
+
    this->GetPar(mXYZ.data()+2).XMLOutput(os,"z",indent);
    os <<endl;
-   
+
    this->GetPar(&mOccupancy).XMLOutput(os,"Occup",indent);
    os <<endl;
-   
+
    this->GetPar(&mPhi).XMLOutput(os,"Phi",indent);
    os <<endl;
-   
+
    this->GetPar(&mChi).XMLOutput(os,"Chi",indent);
    os <<endl;
-   
+
    this->GetPar(&mPsi).XMLOutput(os,"Psi",indent);
    os <<endl;
-   
+
    for(int i=0;i<mZAtomRegistry.GetNb();i++) mZAtomRegistry.GetObj(i).XMLOutput(os,indent);
-   
+
    if(mZAtomRegistry.GetNb()>0)
    {
       for(int i=0;i<=indent;i++) os << "  " ;
@@ -664,7 +664,7 @@ void ZScatterer::XMLOutput(ostream &os,int indent)const
       tag2.AddAttribute("Name",this->GetZAtomRegistry().GetObj(mCenterAtomIndex).GetName());
       os <<tag2<<endl;
    }
-   
+
    indent--;
    tag.SetIsEndTag(true);
    for(int i=0;i<indent;i++) os << "  " ;
@@ -750,12 +750,12 @@ void ZScatterer::XMLInput(istream &is,const XMLCrystTag &tagg)
             sprintf(buf,"%d-%d",(int)nb,(int)(mZAtomRegistry.GetObj(nb).GetZBondAtom()));
             this->GetPar(&(mZAtomRegistry.GetObj(nb).mBondLength))
                .SetName("Length"+(string)buf);
-               
+
             sprintf(buf,"%d-%d-%d",(int)nb,(int)(mZAtomRegistry.GetObj(nb).GetZBondAtom()),
                                    (int)(mZAtomRegistry.GetObj(nb).GetZAngleAtom()));
             this->GetPar(&(mZAtomRegistry.GetObj(nb).mAngle))
                .SetName("Angle"+(string)buf);
-               
+
             sprintf(buf,"%d-%d-%d-%d",(int)nb,(int)(mZAtomRegistry.GetObj(nb).GetZBondAtom()),
                                       (int)(mZAtomRegistry.GetObj(nb).GetZAngleAtom()),
                                       (int)(mZAtomRegistry.GetObj(nb).GetZDihedralAngleAtom()));
@@ -781,43 +781,43 @@ void ZScatterer::XMLInput(istream &is,const XMLCrystTag &tagg)
 void Crystal::XMLOutput(ostream &os,int indent)const
 {
    VFN_DEBUG_ENTRY("Crystal::XMLOutput():"<<this->GetName(),5)
-   
+
    for(int i=0;i<indent;i++) os << "  " ;
    XMLCrystTag tag("Crystal");
    tag.AddAttribute("Name",mName);
    tag.AddAttribute("SpaceGroup",this->GetSpaceGroup().GetName());
    os <<tag<<endl;
    indent++;
-   
-   // :TODO: 
+
+   // :TODO:
    this->GetPar("a").XMLOutput(os,"a",indent);
    os <<endl;
-   
+
    this->GetPar("b").XMLOutput(os,"b",indent);
    os <<endl;
-   
+
    this->GetPar("c").XMLOutput(os,"c",indent);
    os <<endl;
-   
+
    this->GetPar("alpha").XMLOutput(os,"alpha",indent);
    os <<endl;
-   
+
    this->GetPar("beta").XMLOutput(os,"beta",indent);
    os <<endl;
-   
+
    this->GetPar("gamma").XMLOutput(os,"gamma",indent);
    os <<endl;
-   
+
    for(unsigned int i=0;i<this->GetNbOption();i++)
    {
       this->GetOption(i).XMLOutput(os,indent);
       os <<endl<<endl;
    }
-   
-   for(int i=0;i<mScatteringPowerRegistry.GetNb();i++) 
+
+   for(int i=0;i<mScatteringPowerRegistry.GetNb();i++)
       mScatteringPowerRegistry.GetObj(i).XMLOutput(os,indent);
    os <<endl;
-   for(int i=0;i<mScattererRegistry.GetNb();i++) 
+   for(int i=0;i<mScattererRegistry.GetNb();i++)
       mScattererRegistry.GetObj(i).XMLOutput(os,indent);
    os <<endl;
 
@@ -864,7 +864,7 @@ void Crystal::XMLOutput(ostream &os,int indent)const
       tag2.SetIsEndTag(true);
       os << tag2<<endl;
    }
-   
+
    indent--;
    tag.SetIsEndTag(true);
    for(int i=0;i<indent;i++) os << "  " ;
@@ -920,7 +920,7 @@ void Crystal::XMLInput(istream &is,const XMLCrystTag &tagg)
       if("Option"==tag.GetName())
       {
          for(unsigned int i=0;i<tag.GetNbAttribute();i++)
-            if("Name"==tag.GetAttributeName(i)) 
+            if("Name"==tag.GetAttributeName(i))
                mOptionRegistry.GetObj(tag.GetAttributeValue(i)).XMLInput(is,tag);
          this->InitRefParList();// Fix the "used" tag of refinable par after options
          continue;
@@ -1051,10 +1051,10 @@ void Radiation::XMLOutput(ostream &os,int indent)const
 
    mRadiationType.XMLOutput(os,indent);
    os<<endl;
-   
+
    mWavelengthType.XMLOutput(os,indent);
    os<<endl;
-   
+
    for(int i=0;i<indent;i++) os << "  " ;
    {
       XMLCrystTag tag2("LinearPolarRate");
@@ -1062,7 +1062,7 @@ void Radiation::XMLOutput(ostream &os,int indent)const
       tag2.SetIsEndTag(true);
       os << tag2<<endl;
    }
-   
+
    if(WAVELENGTH_ALPHA12==this->GetWavelengthType())
    {
       for(int i=0;i<indent;i++) os << "  " ;
@@ -1093,12 +1093,12 @@ void Radiation::XMLOutput(ostream &os,int indent)const
       default: throw ObjCrystException("This radiation is not implemented !!");
    }
    os<<endl;
-   
+
    indent--;
    tag.SetIsEndTag(true);
    for(int i=0;i<indent;i++) os << "  " ;
    os <<tag;
-   
+
    VFN_DEBUG_EXIT("Radiation::XMLOutput():"<<this->GetName(),5)
 }
 
@@ -1112,7 +1112,7 @@ void Radiation::XMLInput(istream &is,const XMLCrystTag &tagg)
          if(tagg.GetAttributeValue(i)!="") // Something went wrong !
             this->SetWavelength(tagg.GetAttributeValue(i));
    }
-   
+
    while(true)
    {
       XMLCrystTag tag(is);
@@ -1176,31 +1176,31 @@ void DiffractionDataSingleCrystal::XMLOutput(ostream &os,int indent)const
    tag.AddAttribute("Crystal",this->GetCrystal().GetName());
    os <<tag<<endl;
    indent++;
-   
+
    this->GetPar("Scale factor").XMLOutput(os,"Scale factor",indent);
    os <<endl;
-   
+
    mRadiation.XMLOutput(os,indent);
    os <<endl;
 
    this->GetPar(&mGlobalBiso).XMLOutput(os,"globalBiso",indent);
    os <<endl;
-   
+
    mGroupOption.XMLOutput(os,indent);
    os <<endl;
-   
+
    for(int i=0;i<indent;i++) os << "  " ;
    XMLCrystTag tag2("MaxSinThetaOvLambda");
    os << tag2<< mMaxSinThetaOvLambda;
    tag2.SetIsEndTag(true);
    os << tag2<<endl<<endl;
-   
+
    if(mGroupOption.GetChoice()!=2)
    {
       XMLCrystTag tag3("HKLIobsSigmaWeightList");
       for(int i=0;i<indent;i++) os << "  " ;
       os <<tag3<<endl;
-      
+
       for(long j=0;j<this->GetNbRefl();j++)
       {
          for(int i=0;i<=indent;i++) os << "  " ;
@@ -1212,7 +1212,7 @@ void DiffractionDataSingleCrystal::XMLOutput(ostream &os,int indent)const
             << mWeight(j) <<" "
             <<endl;
       }
-      
+
       tag3.SetIsEndTag(true);
       for(int i=0;i<indent;i++) os << "  " ;
       os <<tag3<<endl;
@@ -1222,7 +1222,7 @@ void DiffractionDataSingleCrystal::XMLOutput(ostream &os,int indent)const
       XMLCrystTag tag3("HKLIobsSigmaWeightGROUPList");
       for(int i=0;i<indent;i++) os << "  " ;
       os <<tag3<<endl;
-      
+
       long first=0;
       for(long j=0;j<mNbGroup;j++)
       {
@@ -1254,12 +1254,12 @@ void DiffractionDataSingleCrystal::XMLOutput(ostream &os,int indent)const
          os<<tag4<<endl;
          first=mGroupIndex(j);
       }
-      
+
       tag3.SetIsEndTag(true);
       for(int i=0;i<indent;i++) os << "  " ;
       os <<tag3<<endl;
    }
-   
+
    indent--;
    tag.SetIsEndTag(true);
    for(int i=0;i<indent;i++) os << "  " ;
@@ -1273,7 +1273,7 @@ void DiffractionDataSingleCrystal::XMLInput(istream &is,const XMLCrystTag &tagg)
    for(unsigned int i=0;i<tagg.GetNbAttribute();i++)
    {
       if("Name"==tagg.GetAttributeName(i)) this->SetName(tagg.GetAttributeValue(i));
-      if("Crystal"==tagg.GetAttributeName(i)) 
+      if("Crystal"==tagg.GetAttributeName(i))
          this->SetCrystal(gCrystalRegistry.GetObj(tagg.GetAttributeValue(i)));
    }
    (*fpObjCrystInformUser)("XML: Loading Single Crystall data:"+this->GetName());
@@ -1289,7 +1289,7 @@ void DiffractionDataSingleCrystal::XMLInput(istream &is,const XMLCrystTag &tagg)
       if("Option"==tag.GetName())
       {
          for(unsigned int i=0;i<tag.GetNbAttribute();i++)
-            if("Name"==tag.GetAttributeName(i)) 
+            if("Name"==tag.GetAttributeName(i))
             {
                string name=tag.GetAttributeValue(i);
                if(name=="Twinning correction") name="Group Reflections";
@@ -1342,7 +1342,7 @@ void DiffractionDataSingleCrystal::XMLInput(istream &is,const XMLCrystTag &tagg)
             iobs  (nbrefl)=InputFloat(is); if(ISNAN_OR_INF(iobs  (nbrefl))||(iobs  (nbrefl)<0)) iobs  (nbrefl)=1e-8;
             sigma (nbrefl)=InputFloat(is); if(ISNAN_OR_INF(sigma (nbrefl))||(sigma (nbrefl)<0)) sigma (nbrefl)=1e-8;
             weight(nbrefl)=InputFloat(is); if(ISNAN_OR_INF(weight(nbrefl))||(weight(nbrefl)<0)) weight(nbrefl)=1e-8;
-            
+
             nbrefl++;
             if(nbrefl==iobs.numElements())
             {
@@ -1358,7 +1358,7 @@ void DiffractionDataSingleCrystal::XMLInput(istream &is,const XMLCrystTag &tagg)
          }
          while(is.peek()!='<');//until next tag
          XMLCrystTag junkEndTag(is);
-         
+
          h.resizeAndPreserve(nbrefl);
          k.resizeAndPreserve(nbrefl);
          l.resizeAndPreserve(nbrefl);
@@ -1454,16 +1454,16 @@ void DiffractionDataSingleCrystal::XMLInput(istream &is,const XMLCrystTag &tagg)
          mObsSigma.resizeAndPreserve(mNbRefl);
          mWeight.resizeAndPreserve(mNbRefl);
          mGroupIndex.resizeAndPreserve(mNbRefl);
-         
+
          mGroupIobs.resizeAndPreserve(mNbGroup);
          mGroupWeight.resizeAndPreserve(mNbGroup);
          mGroupSigma.resizeAndPreserve(mNbGroup);
-      
+
          mHasObservedData=true;
-         
+
          mMultiplicity.resize(mNbRefl);
          mMultiplicity=1;
-         
+
          this->PrepareHKLarrays();
          this->SortReflectionBySinThetaOverLambda();
       }
@@ -1483,32 +1483,32 @@ void PowderPatternBackground::XMLOutput(ostream &os,int indent)const
    tag.AddAttribute("Name",this->GetName());
    os <<tag<<endl;
    indent++;
-   
+
    mInterpolationModel.XMLOutput(os,indent);
    os<<endl;
 
    XMLCrystTag tag2("XIntensityList");
    for(int i=0;i<indent;i++) os << "  " ;
    os <<tag2<<endl;
-   
+
    REAL scale=1.0;
    if(this->GetParentPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
       scale=RAD2DEG;
 
    for(long j=0;j<mBackgroundNbPoint;j++)
    {
-   
+
       for(int i=0;i<=indent;i++) os << "  " ;
       os << mBackgroundInterpPointX(j)*scale <<" "
          << mBackgroundInterpPointIntensity(j) <<" "
          << !this->GetPar(mBackgroundInterpPointIntensity.data()+j).IsFixed()<<" "
          <<endl;
    }
-   
+
    tag2.SetIsEndTag(true);
    for(int i=0;i<indent;i++) os << "  " ;
    os <<tag2<<endl;
-   
+
    #ifdef USE_BACKGROUND_MAXLIKE_ERROR
    this->GetPar("ML Model Error").XMLOutput(os,"ML Model Error",indent);
    os <<endl;
@@ -1567,7 +1567,7 @@ void PowderPatternBackground::XMLInput(istream &is,const XMLCrystTag &tagg)
          while(is.peek()!='<');//until next tag
          bckgd2Theta.resizeAndPreserve(nbPoint);
          bckgd.resizeAndPreserve(nbPoint);
-         if(this->GetParentPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF) 
+         if(this->GetParentPowderPattern().GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
             bckgd2Theta*= DEG2RAD;
          this->SetInterpPoints(bckgd2Theta,bckgd);
          this->InitRefParList();
@@ -1593,7 +1593,7 @@ void PowderPatternBackground::XMLInput(istream &is,const XMLCrystTag &tagg)
       if("Option"==tag.GetName())
       {
          for(unsigned int i=0;i<tag.GetNbAttribute();i++)
-            if("Name"==tag.GetAttributeName(i)) 
+            if("Name"==tag.GetAttributeName(i))
                mOptionRegistry.GetObj(tag.GetAttributeValue(i)).XMLInput(is,tag);
          continue;
       }
@@ -1632,26 +1632,26 @@ void PowderPatternDiffraction::XMLOutput(ostream &os,int indent)const
       for(int i=0;i<indent;i++) os << "  " ;
       os<<t<<endl;
    }
-   
+
    if(mpReflectionProfile!=0) mpReflectionProfile->XMLOutput(os,indent);
 
    this->GetPar(&mGlobalBiso).XMLOutput(os,"globalBiso",indent);
    os <<endl;
-   
+
    if(mCorrTextureMarchDollase.GetNbPhase()>0)
    {
       mCorrTextureMarchDollase.XMLOutput(os,indent);
    }
-   
+
    mCorrTextureEllipsoid.XMLOutput(os,indent);
-   
+
    #if 0
    if(mFhklObsSq.numElements()>0)
    {
       XMLCrystTag tag2("FhklObsSq");
       for(int i=0;i<indent;i++) os << "  " ;
       os <<tag2<<endl;
-      
+
       for(long j=0;j<this->GetNbRefl();j++)
       {
          for(int i=0;i<=indent;i++) os << "  " ;
@@ -1660,7 +1660,7 @@ void PowderPatternDiffraction::XMLOutput(ostream &os,int indent)const
             << mIntL(j) <<" "
             << mFhklObsSq(j) <<endl;
       }
-      
+
       tag2.SetIsEndTag(true);
       for(int i=0;i<indent;i++) os << "  " ;
       os <<tag2<<endl;
@@ -1668,7 +1668,7 @@ void PowderPatternDiffraction::XMLOutput(ostream &os,int indent)const
    #else
    if(mpLeBailData!=0) mpLeBailData->XMLOutput(os,indent);
    #endif
-   
+
    indent--;
    tag.SetIsEndTag(true);
    for(int i=0;i<indent;i++) os << "  " ;
@@ -1682,7 +1682,7 @@ void PowderPatternDiffraction::XMLInput(istream &is,const XMLCrystTag &tagg)
    for(unsigned int i=0;i<tagg.GetNbAttribute();i++)
    {
       if("Name"==tagg.GetAttributeName(i)) this->SetName(tagg.GetAttributeValue(i));
-      if("Crystal"==tagg.GetAttributeName(i)) 
+      if("Crystal"==tagg.GetAttributeName(i))
          this->SetCrystal(gCrystalRegistry.GetObj(tagg.GetAttributeValue(i)));
       if("NeedLorentzCorr"==tagg.GetAttributeName(i))
       {
@@ -1793,7 +1793,7 @@ void PowderPatternDiffraction::XMLInput(istream &is,const XMLCrystTag &tagg)
       {
          for(unsigned int i=0;i<tag.GetNbAttribute();i++)
          {
-            if("Name"==tag.GetAttributeName(i)) 
+            if("Name"==tag.GetAttributeName(i))
             {
                if("Profile Type"!=tag.GetAttributeValue(i))
                   mOptionRegistry.GetObj(tag.GetAttributeValue(i)).XMLInput(is,tag);
@@ -1867,13 +1867,13 @@ void PowderPatternDiffraction::XMLInput(istream &is,const XMLCrystTag &tagg)
          iobs.resizeAndPreserve(nbrefl);
          sigma.resizeAndPreserve(nbrefl);
          sigma=1;
-         
+
          if(mpLeBailData==0)  mpLeBailData=new DiffractionDataSingleCrystal(this->GetCrystal(),false);
-         
+
          mpLeBailData->SetHklIobs(h,k,l,iobs,sigma);
          mpLeBailData->SetWavelength(this->GetRadiation().GetWavelength()(0));
          mpLeBailData->SetRadiationType(this->GetRadiation().GetRadiationType());
-         
+
          // Estimate resolution
          const REAL min=iobs.max()*1e-6;
          unsigned long iresol=0;
@@ -1958,7 +1958,7 @@ void PowderPattern::XMLOutput(ostream &os,int indent)const
    tag.AddAttribute("Name",mName);
    os <<tag<<endl;
    indent++;
-   
+
    this->GetPar(&mXZero).XMLOutput(os,"Zero",indent);
    os <<endl;
    if(this->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
@@ -1977,13 +1977,13 @@ void PowderPattern::XMLOutput(ostream &os,int indent)const
       this->GetPar(&m2ThetaTransparency).XMLOutput(os,"2ThetaTransparency",indent);
       os <<endl;
    }
-   
+
    for(unsigned int i=0;i<this->GetNbOption();i++)
    {
       this->GetOption(i).XMLOutput(os,indent);
       os <<endl<<endl;
    }
-   
+
    mRadiation.XMLOutput(os,indent);
    os <<endl;
    {
@@ -1993,7 +1993,7 @@ void PowderPattern::XMLOutput(ostream &os,int indent)const
       tag2.SetIsEndTag(true);
       os << tag2<<endl<<endl;
    }
-   
+
    for(int j=0;j<mPowderPatternComponentRegistry.GetNb();j++)
    {
       mPowderPatternComponentRegistry.GetObj(j).XMLOutput(os,indent);
@@ -2013,7 +2013,7 @@ void PowderPattern::XMLOutput(ostream &os,int indent)const
       os<<tag2<<endl;
 
       REAL scale=1.0;
-      if(this->GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF) 
+      if(this->GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
          scale=RAD2DEG;
 
       for(unsigned long j=0;j<this->GetNbPoint();j++)
@@ -2028,28 +2028,28 @@ void PowderPattern::XMLOutput(ostream &os,int indent)const
       tag2.SetIsEndTag(true);
       for(int i=0;i<indent;i++) os << "  " ;
       os<<tag2<<endl;
-   
+
    for(int j=0;j<mExcludedRegionMinX.numElements();j++)
    {
       XMLCrystTag tag3("ExcludeX");
       for(int i=0;i<indent;i++) os << "  " ;
       if(this->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
       {
-         os << tag3 
+         os << tag3
             << mExcludedRegionMinX(j) <<" "
             << mExcludedRegionMaxX(j) ;
       }
       else
       {
-         os << tag3 
+         os << tag3
             << mExcludedRegionMinX(j)*RAD2DEG <<" "
             << mExcludedRegionMaxX(j)*RAD2DEG ;
       }
       tag3.SetIsEndTag(true);
       os<<tag3<<endl;
    }
-   
-   
+
+
    indent--;
    tag.SetIsEndTag(true);
    for(int i=0;i<indent;i++) os << "  " ;
@@ -2118,7 +2118,7 @@ void PowderPattern::XMLInput(istream &is,const XMLCrystTag &tagg)
       if("Option"==tag.GetName())
       {
          for(unsigned int i=0;i<tag.GetNbAttribute();i++)
-            if("Name"==tag.GetAttributeName(i)) 
+            if("Name"==tag.GetAttributeName(i))
                mOptionRegistry.GetObj(tag.GetAttributeValue(i)).XMLInput(is,tag);
          continue;
       }
@@ -2217,7 +2217,7 @@ void PowderPattern::XMLInput(istream &is,const XMLCrystTag &tagg)
          while(is.peek()!='<');//until next tag
          this->SetPowderPatternPar(min,step,mNbPoint);
          mClockPowderPatternPar.Click();
-         
+
          XMLCrystTag junk(is);
          VFN_DEBUG_EXIT("Loading Iobs-Sigma-Weight List...",8);
          continue;
@@ -2257,10 +2257,10 @@ void PowderPattern::XMLInput(istream &is,const XMLCrystTag &tagg)
          }
          while(is.peek()!='<');//until next tag
          mX.resizeAndPreserve(mNbPoint);
-         if(this->GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF) 
+         if(this->GetRadiation().GetWavelengthType()!=WAVELENGTH_TOF)
             mX*=DEG2RAD;
          this->SetPowderPatternX(mX);
-         
+
          XMLCrystTag junk(is);
          VFN_DEBUG_EXIT("Loading X-Iobs-Sigma-Weight List...",8);
          continue;

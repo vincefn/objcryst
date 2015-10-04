@@ -107,7 +107,7 @@ Molecule* MakeCube(Crystal &cryst,const string &name,
    mol->AddBond(mol->GetAtom(0),mol->GetAtom(6),d,0.01,0.05);
    mol->AddBond(mol->GetAtom(0),mol->GetAtom(7),d,0.01,0.05);
    mol->AddBond(mol->GetAtom(0),mol->GetAtom(8),d,0.01,0.05);
-   
+
    mol->AddBond(mol->GetAtom(1),mol->GetAtom(2),2*d0,0.01,0.05);
    mol->AddBond(mol->GetAtom(2),mol->GetAtom(3),2*d0,0.01,0.05);
    mol->AddBond(mol->GetAtom(3),mol->GetAtom(4),2*d0,0.01,0.05);
@@ -162,7 +162,7 @@ Molecule* MakeAntiPrismTetragonal(Crystal &cryst,const string &name,
    mol->AddBond(mol->GetAtom(0),mol->GetAtom(6),d,0.01,0.05);
    mol->AddBond(mol->GetAtom(0),mol->GetAtom(7),d,0.01,0.05);
    mol->AddBond(mol->GetAtom(0),mol->GetAtom(8),d,0.01,0.05);
-   
+
    mol->AddBond(mol->GetAtom(1),mol->GetAtom(2),2*d0,0.01,0.05);
    mol->AddBond(mol->GetAtom(2),mol->GetAtom(3),2*d0,0.01,0.05);
    mol->AddBond(mol->GetAtom(3),mol->GetAtom(4),2*d0,0.01,0.05);
@@ -171,7 +171,7 @@ Molecule* MakeAntiPrismTetragonal(Crystal &cryst,const string &name,
    mol->AddBond(mol->GetAtom(6),mol->GetAtom(7),2*d0,0.01,0.05);
    mol->AddBond(mol->GetAtom(7),mol->GetAtom(8),2*d0,0.01,0.05);
    mol->AddBond(mol->GetAtom(8),mol->GetAtom(5),2*d0,0.01,0.05);
-   
+
    mol->AddBond(mol->GetAtom(5),mol->GetAtom(1),d0*sqrt(5.),0.01,0.05);
    mol->AddBond(mol->GetAtom(5),mol->GetAtom(2),d0*sqrt(5.),0.01,0.05);
    mol->AddBond(mol->GetAtom(6),mol->GetAtom(2),d0*sqrt(5.),0.01,0.05);
@@ -239,7 +239,7 @@ Molecule* MakeIcosahedron(Crystal &cryst,const string &name,
                      const REAL d)
 {
    Molecule *mol=new Molecule(cryst,name);
-   
+
    const REAL g0=(1.+sqrt(5.))/2.;
    const REAL a=d/sqrt(1.+g0*g0);
    const REAL g=g0*a;
@@ -254,7 +254,7 @@ Molecule* MakeIcosahedron(Crystal &cryst,const string &name,
    mol->AddAtom(-a,0., g,peripheralAtom,peripheralAtom->GetName()+"6");
    mol->AddAtom( a,0.,-g,peripheralAtom,peripheralAtom->GetName()+"7");
    mol->AddAtom(-a,0.,-g,peripheralAtom,peripheralAtom->GetName()+"8");
-   
+
    mol->AddAtom( g, a,0.,peripheralAtom,peripheralAtom->GetName()+"9");
    mol->AddAtom( g,-a,0.,peripheralAtom,peripheralAtom->GetName()+"10");
    mol->AddAtom(-g, a,0.,peripheralAtom,peripheralAtom->GetName()+"11");
@@ -297,7 +297,7 @@ Molecule* MakeIcosahedron(Crystal &cryst,const string &name,
 
    mol->AddBond(mol->GetAtom(3),mol->GetAtom(5),2*a,0.01,0.05);
    mol->AddBond(mol->GetAtom(3),mol->GetAtom(6),2*a,0.01,0.05);
-   
+
    mol->AddBond(mol->GetAtom(12),mol->GetAtom(6),2*a,0.01,0.05);
    mol->AddBond(mol->GetAtom(12),mol->GetAtom(11),2*a,0.01,0.05);
    mol->AddBond(mol->GetAtom(8),mol->GetAtom(11),2*a,0.01,0.05);

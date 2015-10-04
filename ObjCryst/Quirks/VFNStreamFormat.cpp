@@ -48,7 +48,7 @@ ostream& operator<< (ostream& os, const FormatInt& fInt)
 ////////////////////////////////////////////////////////////////////////
 
 FormatFloat::FormatFloat(const REAL num,const int width,const int precision)
-         :mValue(num),mWidth(width),mPrecision(precision) 
+         :mValue(num),mWidth(width),mPrecision(precision)
          {
          }
 FormatFloat::~FormatFloat(){}
@@ -71,8 +71,8 @@ ostream& operator<< (ostream& os, const FormatFloat &fFloat)
 //    FormatString
 //
 ////////////////////////////////////////////////////////////////////////
-FormatString::FormatString(const string &str,const unsigned int width): 
-            /*mString(str,1,width),*/mWidth(width) 
+FormatString::FormatString(const string &str,const unsigned int width):
+            /*mString(str,1,width),*/mWidth(width)
 {
    mString=str;
    //:KLUDGE:
@@ -209,7 +209,7 @@ template<class T> ostream& operator<< (ostream &os, const FormatVertVector<T> &f
 {
    VFN_DEBUG_MESSAGE("ostream& operator<<(os,FormatVertVector<T>)",3)
    long i;
-   int j;
+   size_t j;
    std::istream::fmtflags old_flags=os.flags();
    os.setf( std::istream::fixed | std::istream::right | std::istream::showpoint);
    std::streamsize old_prec = os.precision(fVect.mPrecision);
@@ -270,7 +270,7 @@ template<class T> ostream& operator<< (ostream &os, const FormatHorizVector<T> &
 //    FormatVertVectorHKLFloats
 //
 ////////////////////////////////////////////////////////////////////////
-template<class T> FormatVertVectorHKLFloats<T>::FormatVertVectorHKLFloats( 
+template<class T> FormatVertVectorHKLFloats<T>::FormatVertVectorHKLFloats(
                                                       const CrystVector<T> &h,
                                                       const CrystVector<T> &k,
                                                       const CrystVector<T> &l,
@@ -283,7 +283,7 @@ mWidth(width),mPrecision(precision),mNb(nb)
    mvpVectors.push_back(&k);
    mvpVectors.push_back(&l);
 }
-template<class T> FormatVertVectorHKLFloats<T>::FormatVertVectorHKLFloats( 
+template<class T> FormatVertVectorHKLFloats<T>::FormatVertVectorHKLFloats(
                                                       const CrystVector<T> &h,
                                                       const CrystVector<T> &k,
                                                       const CrystVector<T> &l,

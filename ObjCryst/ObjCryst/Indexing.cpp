@@ -42,7 +42,7 @@ using namespace std;
 namespace ObjCryst
 {
 
-float EstimateCellVolume(const float dmin, const float dmax, const float nbrefl, 
+float EstimateCellVolume(const float dmin, const float dmax, const float nbrefl,
                          const CrystalSystem system,const CrystalCentering centering,const float kappa)
 {
    const float q1=dmin*dmin*dmin-dmax*dmax*dmax;
@@ -656,6 +656,9 @@ vector<float> RecUnitCell::DirectUnitCell(const bool equiv)const
          sgammaa=1;
          break;
       }
+      // This should never happen.  Avoid using unitialized cell parameters.
+      default:
+         throw 0;
    }
    // Volume of reciprocal unit cell
    const float vv=sqrt(abs(1-calphaa*calphaa-cbetaa*cbetaa-cgammaa*cgammaa+2*calphaa*cbetaa*cgammaa));
@@ -667,13 +670,13 @@ vector<float> RecUnitCell::DirectUnitCell(const bool equiv)const
    const float calpha=(cbetaa *cgammaa-calphaa)/(sbetaa *sgammaa);
    const float cbeta =(calphaa*cgammaa-cbetaa )/(salphaa*sgammaa);
    const float cgamma=(calphaa*cbetaa -cgammaa)/(salphaa*sbetaa );
-   
+
    const float alpha=acos( calpha );
    const float beta =acos( cbeta );
    const float gamma=acos( cgamma );
 
    const float v=a*b*c*sqrt(1-calpha*calpha-cbeta*cbeta-cgamma*cgamma+2*calpha*cbeta*cgamma);
-   
+
    vector<float> par(7);
    par[0]=a;
    par[1]=b;
@@ -798,26 +801,26 @@ void PeakList::Import2ThetaIntensity(istream &is, const float wavelength)
    sort(mvHKL.begin(),mvHKL.end(),compareHKL_d);
    cout<<"Imported "<<v.size()<<" observed reflection positions."<<endl;
 }
-float PeakList::Simulate(float zero, float a, float b, float c, 
-              float alpha, float beta, float gamma, 
+float PeakList::Simulate(float zero, float a, float b, float c,
+              float alpha, float beta, float gamma,
               bool deg, unsigned int nb, unsigned int nbspurious,
               float sigma,float percentMissing, const bool verbose)
 {
    if(deg){alpha*=DEG2RAD;beta*=DEG2RAD;gamma*=DEG2RAD;}
    const float v=sqrt(1-cos(alpha)*cos(alpha)-cos(beta)*cos(beta)-cos(gamma)*cos(gamma)
             +2*cos(alpha)*cos(beta)*cos(gamma));
-            
+
    const float aa=sin(alpha)/a/v;
    const float bb=sin(beta )/b/v;
    const float cc=sin(gamma)/c/v;
-   
+
    const float alphaa=acos( (cos(beta )*cos(gamma)-cos(alpha))/sin(beta )/sin(gamma) );
    const float betaa =acos( (cos(alpha)*cos(gamma)-cos(beta ))/sin(alpha)/sin(gamma) );
    const float gammaa=acos( (cos(alpha)*cos(beta )-cos(gamma))/sin(alpha)/sin(beta ) );
-   
+
    RecUnitCell ruc(zero,aa*aa,bb*bb,cc*cc,2*aa*bb*cos(gammaa),2*bb*cc*cos(alphaa),2*aa*cc*cos(betaa),TRICLINIC,LATTICE_P);
    std::list<float> vd2;
-   
+
    for(int h=0;h<=20;h++)
       for(int k=-20;k<=20;k++)
       {
@@ -828,7 +831,7 @@ float PeakList::Simulate(float zero, float a, float b, float c,
            vd2.push_back(sqrt(ruc.hkl2d(h,k,l)));
          }
       }
-   // 
+   //
    std::list<float>::iterator pos=vd2.begin();
    if(percentMissing>0.90) percentMissing=0.90;
    for(;pos!=vd2.end();++pos)
@@ -840,7 +843,7 @@ float PeakList::Simulate(float zero, float a, float b, float c,
    const float dmin=*pos/2;
    for(unsigned int i=0;i<nb;++i)pos++;
    const float dmax=*pos;
-   
+
    for(unsigned int i=0;i<nbspurious;++i)
    {
       const unsigned int idx=1+i*nb/nbspurious+(rand()%nbspurious);
@@ -848,7 +851,7 @@ float PeakList::Simulate(float zero, float a, float b, float c,
       for(unsigned int j=0;j<idx;++j) pos++;
       *pos=dmin+rand()/float(RAND_MAX)*(dmax-dmin);
    }
-   
+
    pos=vd2.begin();
    for(unsigned int i=0;i<nb;++i)
    {
@@ -943,7 +946,7 @@ float Score(const PeakList &dhkl, const RecUnitCell &rpar, const unsigned int nb
    }
    const unsigned long nb=dhkl.GetPeakList().size();
    if(storePredictedHKL) dhkl.mvPredictedHKL.clear();
-   
+
    unsigned long nbCalc=0;
    int h,k,l;
    float predict_coeff=1;
@@ -973,6 +976,9 @@ float Score(const PeakList &dhkl, const RecUnitCell &rpar, const unsigned int nb
       case CUBIC:
          sk0=1;sl0=1;
          break;
+      // This should never happen.  Avoid using unitialized values.
+      default:
+         throw 0;
    }
    int stepk,stepl;// steps in k,l to use for centered lattices
    switch(rpar.mCentering)
@@ -983,6 +989,8 @@ float Score(const PeakList &dhkl, const RecUnitCell &rpar, const unsigned int nb
       case LATTICE_B:stepk=1;stepl=2;break;
       case LATTICE_C:stepk=2;stepl=1;break;
       case LATTICE_F:stepk=2;stepl=2;break;
+      // This should never happen.  Avoid using unitialized values.
+      default: throw 0;
    }
    first=dhkl.GetPeakList().begin();last=dhkl.GetPeakList().end();
    unsigned long nbCalcH,nbCalcK;// Number of calculated lines below dmax for each h,k
@@ -1031,7 +1039,7 @@ float Score(const PeakList &dhkl, const RecUnitCell &rpar, const unsigned int nb
                   if(d2>dmax)
                   {
                      //cout<<__FILE__<<":"<<__LINE__<<" hkl: "<<h<<" "<<sk*k<<" "<<sl*l<<":"<<sqrt(d2)<<" deriv="<<sl*rpar.hkl2d(h,sk*k,sl*l,NULL,3)<<"/"<<sqrt(dmax)<<endl;
-                     // Only break if d is increasing with l 
+                     // Only break if d is increasing with l
                      if((sl*rpar.hkl2d(h,sk*k,sl*l,NULL,3))>=0) break;
                      else continue;
                   }
@@ -1048,7 +1056,7 @@ float Score(const PeakList &dhkl, const RecUnitCell &rpar, const unsigned int nb
                      {
                         if(tmp<-.1) break;
                         if(fabs(tmp)<fabs(pos->d2diff))
-                        {  
+                        {
                            pos->d2diff=tmp;
                            if(storehkl)
                            {
@@ -1106,7 +1114,7 @@ float Score(const PeakList &dhkl, const RecUnitCell &rpar, const unsigned int nb
    if(verbose)
    {
       float epstmp=0;
-      unsigned long i=0;
+      //unsigned long i=0;
       for(pos=dhkl.GetPeakList().begin();pos!=dhkl.GetPeakList().end();++pos)
       {
          epstmp+=fabs(pos->d2diff-zero);
@@ -1164,7 +1172,7 @@ void CellExplorer::Evolution(unsigned int ng,const bool randomize,const float f,
    vector<pair<RecUnitCell,float> >::iterator bestpos=vRUC.begin();
 
    const clock_t mTime0=clock();
-   
+
    if(randomize)
    {
       for(unsigned int i=0;i<vRUC.size();++i)
@@ -1235,7 +1243,7 @@ void CellExplorer::Evolution(unsigned int ng,const bool randomize,const float f,
             RecUnitCell *t0=&(vTrial[j].first);
             for(unsigned int k=0;k<6;++k)
             {
-               
+
                t0->par[k] = mMin[k]+ fmod((float)(amp*mAmp[k]*(rand()/(float)RAND_MAX-0.5)+5*mAmp[k]),(float)mAmp[k]);
             }
          }
@@ -1333,7 +1341,7 @@ void CellExplorer::Evolution(unsigned int ng,const bool randomize,const float f,
    }
    Score(*mpPeakList,bestpos->first,mNbSpurious,true);
    */
-   
+
    //this->ReduceSolutions(true);
 
    mRecUnitCell=bestpos->first;
@@ -1455,7 +1463,7 @@ const CrystVector_REAL& CellExplorer::GetLSQDeriv(const unsigned int, RefinableP
                if(refpar.GetName()=="Reciprocal unit cell par #4") par=mRecUnitCell.par+5;
                else
                   if(refpar.GetName()=="Reciprocal unit cell par #5") par=mRecUnitCell.par+6;
-                  else 
+                  else
                      if(refpar.GetName()=="Zero") par=mRecUnitCell.par+0;
                      else cout<<__FILE__<<":"<<__LINE__<<":Parameter not found:"<<refpar.GetName()<<endl;
    unsigned int j=0;
@@ -1463,7 +1471,7 @@ const CrystVector_REAL& CellExplorer::GetLSQDeriv(const unsigned int, RefinableP
    {
       VFN_DEBUG_MESSAGE("CellExplorer::GetLSQDeriv():"<<j<<"/"<<mpPeakList->GetPeakList().size(),2)
       VFN_DEBUG_MESSAGE("CellExplorer::GetLSQDeriv():"<<pos->h<<","<<pos->k<<","<<pos->l,2)
-      if(pos->isIndexed) 
+      if(pos->isIndexed)
          mDeriv(j++)=mRecUnitCell.hkl2d(pos->h,pos->k,pos->l,par);
    }
    VFN_DEBUG_EXIT("CellExplorer::GetLSQDeriv()",2)
@@ -1531,7 +1539,7 @@ void CellExplorer::LSQRefine(int nbCycle, bool useLevenbergMarquardt, const bool
    //cout<<FormatVertVector<REAL>(this->GetLSQObs(0),this->GetLSQCalc(0),this->GetLSQWeight(0),this->GetLSQDeriv(0,this->GetPar((long)0)))<<endl;
    try {mLSQObj.Refine(nbCycle,useLevenbergMarquardt,silent);}
    catch(const ObjCrystException &except)
-   { 
+   {
       if(++mNbLSQExcept>100) cout<<"WARNING CellExplorer::LSQRefine(): LSQ was disabled, too many (>100) exceptions caught. Weird unit cell parameters ?"<<endl ;
    }
    if(!silent) mpPeakList->Print(cout);
@@ -1546,8 +1554,8 @@ void CellExplorer::LSQRefine(int nbCycle, bool useLevenbergMarquardt, const bool
 *    for each observed line as the only possible indices.
 *    - if useStoredHKL=2, search all the possible Miller indices for all reflections
 *    and store them in hkl.vDicVolHKL for each observed line.
-* \param maxNbMissingBelow5: the maximum number of lines that have been calculated before 
-* the d-value of the 5th observed line, but which have not been observed. 
+* \param maxNbMissingBelow5: the maximum number of lines that have been calculated before
+* the d-value of the 5th observed line, but which have not been observed.
 * If nbMissingBelow5>0 and more than nbMissingBelow5 lines have not been observed,
 * return false. Recommended to speed up triclinic, with nbMissingBelow5=5
 */
@@ -1565,7 +1573,7 @@ bool DichoIndexed(const PeakList &dhkl, const RecUnitCell &par,const RecUnitCell
    vector<PeakList::hkl>::const_iterator pos,first,last,end;
    if(useStoredHKL==1)
    {// We already now possible Miller indices for all reflections
-      int nbUnIx=0;
+      unsigned int nbUnIx = 0;
       for(pos=dhkl.GetPeakList().begin();pos!=dhkl.GetPeakList().end();++pos)
       {
          pos->isIndexed=false;
@@ -1586,7 +1594,7 @@ bool DichoIndexed(const PeakList &dhkl, const RecUnitCell &par,const RecUnitCell
       return false;
    }
    const bool storePossibleHKL=(useStoredHKL==2);
-   
+
    if(storePossibleHKL)
       for(pos=dhkl.GetPeakList().begin();pos!=dhkl.GetPeakList().end();++pos)
       {
@@ -1595,12 +1603,12 @@ bool DichoIndexed(const PeakList &dhkl, const RecUnitCell &par,const RecUnitCell
       }
    else
       for(pos=dhkl.GetPeakList().begin();pos!=dhkl.GetPeakList().end();++pos) pos->isIndexed=false;
-   
+
    int h,k,l;
    float dmax=dhkl.GetPeakList()[nb-1].d2obs;
    float dmin=dhkl.GetPeakList()[0   ].d2obs;
-   
-   
+
+
    int sk0,sl0;// do we need >0 *and* <0 indices for k,l ?
    switch(par.mlattice)
    {
@@ -1627,6 +1635,9 @@ bool DichoIndexed(const PeakList &dhkl, const RecUnitCell &par,const RecUnitCell
       case CUBIC:
          sk0=1;sl0=1;
          break;
+      // This should never happen.  Avoid using unitialized values.
+      default:
+         throw 0;
    }
    int stepk,stepl;// steps in k,l to use for centered lattices
    switch(par.mCentering)
@@ -1637,13 +1648,15 @@ bool DichoIndexed(const PeakList &dhkl, const RecUnitCell &par,const RecUnitCell
       case LATTICE_B:stepk=1;stepl=2;break;
       case LATTICE_C:stepk=2;stepl=1;break;
       case LATTICE_F:stepk=2;stepl=2;break;
+      // This should never happen.  Avoid using unitialized values.
+      default: throw 0;
    }
    //RecUnitCell par0(par),par1(par);
    //for(unsigned int i=0;i<7;++i) {par0.par[i]-=dpar.par[i];par1.par[i]+=dpar.par[i];}
-   
+
    //currently first & last unindexed dhkl
    first=dhkl.GetPeakList().begin(),last=dhkl.GetPeakList().end(),end=dhkl.GetPeakList().end();
-   
+
    unsigned long nbCalcH,nbCalcK;// Number of calculated lines below dmax for each h,k
    for(h=0;;++h)
    {
@@ -1758,18 +1771,18 @@ unsigned int CellExplorer::RDicVol(RecUnitCell par0,RecUnitCell dpar, unsigned i
       const float p1=par0.par[1]    , p2=par0.par[2]    , p3=par0.par[3]    , p4=par0.par[4]    , p5=par0.par[5]    , p6=par0.par[6];
       const float p1m=p1-dpar.par[1], p2m=p2-dpar.par[2], p3m=p3-dpar.par[3], p4m=p4-dpar.par[4], p5m=p5-dpar.par[5], p6m=p6-dpar.par[6];
       const float p1p=p1+dpar.par[1], p2p=p2+dpar.par[2], p3p=p3+dpar.par[3], p4p=p4+dpar.par[4], p5p=p5+dpar.par[5], p6p=p6+dpar.par[6];
-      
+
       // a*<b*<c*
       if((p1m>p2p)||(p2m>p3p)) return 0;
-      
+
       // max/min absolute values for p4,p5,p6
       if((p4m>p1p)||(-p4p>p1p)) return 0;//abs(p4)<p1 <=> b* < b*+/-a*
       if((p5m>p2p)||(-p5p>p2p)) return 0;//abs(p5)<p2 <=> c* < c*+/-b*
       if((p6m>p1p)||(-p6p>p1p)) return 0;//abs(p6)<p1 <=> c* < c*+/-a*
-      
+
       const float max6=p1p+p2p-p4m-p5m;
       if((p6m>max6)||(-p6p>max6)) return 0;//abs(p6)<p1+p2-p4-p5 <=> c* < c*+/-a*+/-b*
-      
+
       float p6mm,p6pp,p5mm,p5pp,p4mm,p4pp; // p6pp: smaller V*, larger V, etc..
       // derivative of V*^2 with p6
       if((p4*p5-2*p2*p6)>0) {p6pp=p6p;p6mm=p6m;}
@@ -1780,7 +1793,7 @@ unsigned int CellExplorer::RDicVol(RecUnitCell par0,RecUnitCell dpar, unsigned i
       // derivative of V*^2 with p5
       if((p5*p6-2*p3*p4)>0) {p4pp=p4p;p4mm=p4m;}
       else{p4pp=p4m;p4mm=p4p;}
-      
+
       //const float vmin0=1/sqrt(abs(p1p*p2p*p3p*(1-p5mm*p5mm/(4*p2p*p3p)-p6mm*p6mm/(4*p1p*p3p)-p4mm*p4mm/(4*p1p*p2p)+p4mm*p5mm*p6mm/(4*p1m*p2m*p3m))));
       //const float vmax0=1/sqrt(abs(p1m*p2m*p3m*(1-p5pp*p5pp/(4*p2m*p3m)-p6pp*p6pp/(4*p1m*p3m)-p4pp*p4pp/(4*p1m*p2m)+p4pp*p5pp*p6pp/(4*p1m*p2m*p3m))));
       const float vmin0=1/sqrt(abs(p1p*p2p*p3p*(1-p5mm*p5mm/(4*p2p*p3p)-p6mm*p6mm/(4*p1p*p3p)-p4mm*p4mm/(4*p1p*p2p)+p4mm*p5mm*p6mm/(4*p1m*p2m*p3m))));
@@ -1798,23 +1811,23 @@ unsigned int CellExplorer::RDicVol(RecUnitCell par0,RecUnitCell dpar, unsigned i
       }
    unsigned int useStoredHKL=1;//Use already stored hkl
    if(depth==0) useStoredHKL=2; //Store possible hkl for all observed lines
-   
+
    unsigned int maxMissingBelow5=0;
    // In the triclinic case, accept a maximum of 5 missing reflections below the 5th observed line
    if(mlattice==TRICLINIC) maxMissingBelow5=5;
-   
+
    bool indexed=DichoIndexed(*mpPeakList,par0,dpar,mNbSpurious,localverbose,useStoredHKL,maxMissingBelow5);
-   
+
    #if 0
    // If indexation failed but depth>=4, try adding a zero ?
    if( (!indexed) && (depth>=4))
-   {//:TODO: Check if this is OK ! Vary value with depth 
+   {//:TODO: Check if this is OK ! Vary value with depth
       dpar.par[0]=.0001;
       indexed=DichoIndexed(*mpPeakList,par0,dpar,mNbSpurious,false,useStoredHKL,maxMissingBelow5);
       //if(indexed) cout<<"Added zero - SUCCESS !"<<endl;
    }
    #endif
-   
+
    if((indexed)&&(useStoredHKL==2))
    {
       // Test if two successive lines have been indexed exclusively with the same hkl
@@ -1835,7 +1848,7 @@ unsigned int CellExplorer::RDicVol(RecUnitCell par0,RecUnitCell dpar, unsigned i
          else ++pos;
       }
    }
-   
+
    // if we can zoom in for one parameter directly, we need per-parameter depth
    if(vdepth.size()==0)
    {
@@ -1877,8 +1890,8 @@ unsigned int CellExplorer::RDicVol(RecUnitCell par0,RecUnitCell dpar, unsigned i
             if(vq0[0].first>0) {par0.par[1]=vq0[0].second/vq0[0].first ; vdepth[0]=mDicVolDepthReport;dpar.par[1]*=.0625;}
             if(vq0[1].first>0) {par0.par[2]=vq0[1].second/vq0[1].first ; vdepth[1]=mDicVolDepthReport;dpar.par[2]*=.0625;}
             if(vq0[2].first>0) {par0.par[3]=vq0[2].second/vq0[2].first ; vdepth[2]=mDicVolDepthReport;dpar.par[3]*=.0625;}
-            break;                                           
-         }                                                   
+            break;
+         }
          case ORTHOROMBIC:
          {
             if(vq0[0].first>0) {par0.par[1]=vq0[0].second/vq0[0].first ; vdepth[0]=mDicVolDepthReport;dpar.par[1]*=.0625;}//pow((float)0.5,(int)(mDicVolDepthReport-depth));}
@@ -1909,7 +1922,7 @@ unsigned int CellExplorer::RDicVol(RecUnitCell par0,RecUnitCell dpar, unsigned i
                sprintf(buf,"orig:   a=%5.2f-%5.2f b=%5.2f-%5.2f c=%5.2f-%5.2f alpha=%5.2f-%5.2f beta=%5.2f-%5.2f gamma=%5.2f-%5.2f V=%5.2f-%5.2f",
                         parpd[0],parmd[0],parpd[1],parmd[1],parpd[2],parmd[2],parpd[3]*RAD2DEG,parmd[3]*RAD2DEG,
                         parpd[4]*RAD2DEG,parmd[4]*RAD2DEG,parpd[5]*RAD2DEG,parmd[5]*RAD2DEG,parpd[6],parmd[6]);
-               for(int i=0;i<depth;++i) cout<<" ";
+               for(unsigned int i = 0; i < depth; ++i)  cout << " ";
                cout<<buf<<"level="<<depth<<", indexed="<<indexed<<endl;
             }
             {
@@ -1921,7 +1934,7 @@ unsigned int CellExplorer::RDicVol(RecUnitCell par0,RecUnitCell dpar, unsigned i
                sprintf(buf,"bypass: a=%5.2f-%5.2f b=%5.2f-%5.2f c=%5.2f-%5.2f alpha=%5.2f-%5.2f beta=%5.2f-%5.2f gamma=%5.2f-%5.2f V=%5.2f-%5.2f",
                         parpd[0],parmd[0],parpd[1],parmd[1],parpd[2],parmd[2],parpd[3]*RAD2DEG,parmd[3]*RAD2DEG,
                         parpd[4]*RAD2DEG,parmd[4]*RAD2DEG,parpd[5]*RAD2DEG,parmd[5]*RAD2DEG,parpd[6],parmd[6]);
-               for(int i=0;i<depth;++i) cout<<" ";
+               for(unsigned int i = 0; i < depth; ++i)  cout << " ";
                cout<<buf<<"level="<<depth<<", indexed="<<indexed<<endl;
             }
          }
@@ -1939,7 +1952,7 @@ unsigned int CellExplorer::RDicVol(RecUnitCell par0,RecUnitCell dpar, unsigned i
       sprintf(buf,"a=%5.2f-%5.2f b=%5.2f-%5.2f c=%5.2f-%5.2f alpha=%6.2f-%6.2f beta=%6.2f-%6.2f gamma=%6.2f-%6.2f V=%6.2f-%6.2f",
                parpd[0],parmd[0],parpd[1],parmd[1],parpd[2],parmd[2],parpd[3]*RAD2DEG,parmd[3]*RAD2DEG,
                parpd[4]*RAD2DEG,parmd[4]*RAD2DEG,parpd[5]*RAD2DEG,parmd[5]*RAD2DEG,parpd[6],parmd[6]);
-      for(int i=0;i<depth;++i) cout<<" ";
+      for(unsigned int i = 0; i < depth; ++i)  cout << " ";
       cout<<buf<<"level="<<depth<<", indexed="<<indexed<<"("<<mvSolution.size()<<" sol.)"<<endl;
    }
    nbCalc++;
@@ -1976,15 +1989,15 @@ unsigned int CellExplorer::RDicVol(RecUnitCell par0,RecUnitCell dpar, unsigned i
             cout<<"Depth="<<depth<<" "<<buf<<endl;
             for(int i=0;i<=6;++i)cout<<par0.par[i]<<",";
             for(int i=0;i<=6;++i)cout<<dpar.par[i]<<",";
-            cout<<endl;         
+            cout<<endl;
          }
          RecUnitCell par=par0;
          // zero (if used...)
          dpar.par[0]=0.5*dpar.par[0];
-         // Divide interval by 2, except if this parameter is already at a higher depth 
+         // Divide interval by 2, except if this parameter is already at a higher depth
          // because a main axis has been indexed already.
          for(unsigned int i=1;i<mnpar;++i) dpar.par[i]*=(0.5+0.5*(vdepth[i-1]>depth));
-         
+
          for(int i0=-1;i0<=1;i0+=2)
          {
             //:TODO: dichotomy on zero shift ?
@@ -2050,11 +2063,11 @@ unsigned int CellExplorer::RDicVol(RecUnitCell par0,RecUnitCell dpar, unsigned i
                   <<par[3]*RAD2DEG<<", beta="<<par[4]*RAD2DEG<<", gamma="<<par[5]*RAD2DEG<<", V="<<par[6]
                   <<", score="<<score<<endl;
             this->LSQRefine(5,true,true);
-            
+
             // Re-score (may change to a better hkl indexing), and refine again
             score=Score(*mpPeakList,mRecUnitCell,mNbSpurious,false,true,false);
             this->LSQRefine(5,true,true);
-            
+
             par=mRecUnitCell.DirectUnitCell();
             score=Score(*mpPeakList,mRecUnitCell,mNbSpurious,false,true,false);
             if(  ((score>mMinScoreReport)||(depth>=mDicVolDepthReport))
@@ -2073,13 +2086,13 @@ unsigned int CellExplorer::RDicVol(RecUnitCell par0,RecUnitCell dpar, unsigned i
                      sprintf(buf,"a=%5.2f-%5.2f b=%5.2f-%5.2f c=%5.2f-%5.2f alpha=%6.2f-%6.2f beta=%6.2f-%6.2f gamma=%6.2f-%6.2f V=%6.2f-%6.2f",
                               parpd[0],parmd[0],parpd[1],parmd[1],parpd[2],parmd[2],parpd[3]*RAD2DEG,parmd[3]*RAD2DEG,
                               parpd[4]*RAD2DEG,parmd[4]*RAD2DEG,parpd[5]*RAD2DEG,parmd[5]*RAD2DEG,parpd[6],parmd[6]);
-                     for(int i=0;i<depth;++i) cout<<" ";
-                     
+                     for(unsigned int i = 0; i < depth; ++i)  cout << " ";
+
                      cout<<buf<<"level="<<depth<<", indexed="<<indexed<<"("<<mvSolution.size()<<" sol.)"<<endl;
                      sprintf(buf,"a=%7.5f-%7.5f b=%7.5f-%7.5f c=%7.5f-%7.5f alpha=%7.5f-%7.5f beta=%7.5f-%7.5f gamma=%7.5f-%7.5f",
                               parp.par[1],parm.par[1],parp.par[2],parm.par[2],parp.par[3],parm.par[3],parp.par[4],parm.par[4],
                               parp.par[5],parm.par[5],parp.par[6],parm.par[6]);
-                     for(int i=0;i<depth;++i) cout<<" ";
+                     for(unsigned int i = 0; i < depth; ++i)  cout << " ";
                      cout<<buf<<"level="<<depth<<", indexed="<<indexed<<"("<<mvSolution.size()<<" sol.)"<<endl;
                   }
                   sprintf(buf," Solution ? a=%7.3f b=%7.3f c=%7.3f alpha=%7.3f beta=%7.3f gamma=%7.3f V=%8.2f score=%6.2f #%4lu",
@@ -2119,14 +2132,14 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
    if(minDepth>mMaxDicVolDepth) mMaxDicVolDepth=minDepth;
    mvNbSolutionDepth.resize(mMaxDicVolDepth+1);
    for(unsigned int i=0;i<=mMaxDicVolDepth;++i) mvNbSolutionDepth[i]=0;
-   
+
    float latstep=0.5,
          vstep=(mVolumeMax-mVolumeMin)/(ceil((mVolumeMax-mVolumeMin)/500)-0.0001);
    mCosAngMax=abs(cos(mAngleMax));
    const float cosangstep=mCosAngMax/(ceil(mCosAngMax/.08)-.0001);
    if(((mVolumeMax-mVolumeMin)/vstep)>10) vstep=(mVolumeMax-mVolumeMin)/9.999;
    if(((mLengthMax-mLengthMin)/latstep)>25) latstep=(mLengthMax-mLengthMin)/24.9999;
-   
+
    cout<<mLengthMin<<"->"<<mLengthMax<<","<<latstep<<","<<(mLengthMax-mLengthMin)/latstep<<endl;
    cout<<mAngleMin<<"->"<<mAngleMax<<","<<cosangstep<<","<<mCosAngMax<<","<<(mAngleMax-mAngleMin)/cosangstep<<endl;
    cout<<mVolumeMin<<"->"<<mVolumeMax<<","<<vstep<<","<<(mVolumeMax-mVolumeMin)/vstep<<endl;
@@ -2198,7 +2211,7 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                         dpar.par[4]=step4r*0.51;
                         dpar.par[5]=step5r*0.51;
                         dpar.par[6]=step6r*0.51;
-                        
+
                         par0.par[0]=0;
                         par0.par[1]=p1;
                         par0.par[2]=p2;
@@ -2263,14 +2276,14 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                   {
                      const float p3 =(1/(v3[i3]*v3[i3])+1/(v3[i3+1]*v3[i3+1]))/2;
                      const float dp3=(1/(v3[i3]*v3[i3])-1/(v3[i3+1]*v3[i3+1]))/2;
-                     
+
                      //const float vmax3=v1[i1+1]*v2[i2+1]*v3[i3+1];
                      //const float vmin3=v1[i1]*v2[i2]*v3[i3]/5;
                      const float vmin3=1/sqrt((p1+dp1)*(p2+dp2)*(p3+dp3));
                      const float vmax3=1/sqrt((p1-dp1)*(p2-dp2)*(p3-dp3))*2; // *2 - sufficient margin to take into account angles
                      if(vmax3<minv) continue;
                      if(vmin3>maxv) continue;
-                     
+
                      //cout<<"  p3="<<p3<<endl;
                      //char buf[200];
                      //sprintf(buf,"a1=%6.4f +/-%6.4f (%6.3f-%6.3f) a2=%6.4f +/-%6.4f (%6.3f-%6.3f) a3=%6.4f +/-%6.4f (%6.3f-%6.3f), V=%6.2f-%6.2f",
@@ -2291,7 +2304,7 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                            const float p5 =(v5[i5+1]+v5[i5])/2;
                            const float dp5=(v5[i5+1]-v5[i5])/2;
                            //cout<<"        p5="<<p5<<endl;
-                           
+
                            float vmax6=(p1+dp1)+(p2+dp2)-(p4-dp4)-(p5-dp5);
                            if(vmax6>(p1+dp1))  vmax6=p1+dp1;
                            if(vmax6<0) continue;
@@ -2303,7 +2316,7 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                               const float p6 =(v6[i6+1]+v6[i6])/2;
                               const float dp6=(v6[i6+1]-v6[i6])/2;
                               //cout<<"          p6="<<p6<<endl;
-                              
+
                               //char buf[200];
                               //sprintf(buf,"%6.4f-%6.4f  %6.4f-%6.4f  %6.4f-%6.4f  %6.4f-%6.4f  %6.4f-%6.4f  %6.4f-%6.4f  ",
                               //       p1-dp1,p1+dp1,p2-dp2,p2+dp2,p3-dp3,p3+dp3,p4-dp4,p4+dp4,p5-dp5,p5+dp5,p6-dp6,p6+dp6);
@@ -2315,7 +2328,7 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                               dpar.par[4]=dp4;
                               dpar.par[5]=dp5;
                               dpar.par[6]=dp6;
-                              
+
                               par0.par[0]=0;
                               par0.par[1]=p1;
                               par0.par[2]=p2;
@@ -2323,7 +2336,7 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                               par0.par[4]=p4;
                               par0.par[5]=p5;
                               par0.par[6]=p6;
-                              
+
                               RDicVol(par0,dpar,0,nbCalc,minv,maxv);
                            }
                         }
@@ -2357,13 +2370,13 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                         dpar.par[2]=(1/(x2)-1/(x2+latstep))*0.5/sinbeta;
                         dpar.par[3]=(1/(x3)-1/(x3+x3step ))*0.5/sinbeta;
                         dpar.par[4]=cosangstep*0.5;
-                        
+
                         par0.par[0]=0;
                         par0.par[1]=(1/(x1)+1/(x1+latstep))*0.5/sinbeta;
                         par0.par[2]=(1/(x2)+1/(x2+latstep))*0.5/sinbeta;
                         par0.par[3]=(1/(x3)+1/(x3+x3step ))*0.5/sinbeta;
                         par0.par[4]=x4+cosangstep*.5;
-                        
+
                         const float smallv=x1*x2*x3*sinbeta;
                         if(smallv>maxv) break;
                         const float largev=(x1+latstep)*(x2+latstep)*(x3+latstep)*(sinbeta+cosangstep);
@@ -2422,12 +2435,12 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                      dpar.par[1]=(1/(x1)-1/(x1+latstep))*0.5;
                      dpar.par[2]=(1/(x2)-1/(x2+latstep))*0.5;
                      dpar.par[3]=(1/(x3)-1/(x3+latstep))*0.5;
-                     
+
                      par0.par[0]=0;
                      par0.par[1]=(1/(x1)+1/(x1+latstep))*0.5;
                      par0.par[2]=(1/(x2)+1/(x2+latstep))*0.5;
                      par0.par[3]=(1/(x3)+1/(x3+latstep))*0.5;
-                     
+
                      const float vmin=x1*x2*x3,vmax=(x1+latstep)*(x2+latstep)*(x3+latstep);
                      if(vmin>maxv) break;
                      if(vmax>=minv) RDicVol(par0,dpar,0,nbCalc,minv,maxv);
@@ -2448,11 +2461,11 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                {
                   dpar.par[1]=(1/(x1)-1/(x1+latstep))*0.5;
                   dpar.par[2]=(1/(x2)-1/(x2+latstep))*0.5;
-                     
+
                   par0.par[0]=0;
                   par0.par[1]=(1/(x1)+1/(x1+latstep))*0.5;
                   par0.par[2]=(1/(x2)+1/(x2+latstep))*0.5;
-                  
+
                   RecUnitCell parlarge=par0,parsmall=par0;
                   for(unsigned int i=0;i<6;++i) {parlarge.par[i]-=dpar.par[i];parsmall.par[i]+=dpar.par[i];}
                   parlarged=parlarge.DirectUnitCell();
@@ -2483,7 +2496,7 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                {
                   dpar.par[1]=latstep/2*1.1;
                   dpar.par[2]=cosangstep/2*1.1;
-                  
+
                   par0.par[0]=0;
                   par0.par[1]=x1-latstep/2*1.1;
                   par0.par[2]=x2-cosangstep/2*1.1;
@@ -2506,11 +2519,11 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
                {
                   dpar.par[1]=(1/(x1)-1/(x1+latstep))*0.5;
                   dpar.par[2]=(1/(x2)-1/(x2+latstep))*0.5;
-                     
+
                   par0.par[0]=0;
                   par0.par[1]=(1/(x1)+1/(x1+latstep))*0.5;
                   par0.par[2]=(1/(x2)+1/(x2+latstep))*0.5;
-                  
+
                   RecUnitCell parlarge=par0,parsmall=par0;
                   for(unsigned int i=0;i<6;++i) {parlarge.par[i]-=dpar.par[i];parsmall.par[i]+=dpar.par[i];}
                   parlarged=parlarge.DirectUnitCell();
@@ -2538,10 +2551,10 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
             for(float x1=mLengthMin;x1<(mLengthMax+latstep);x1+=latstep)
             {
                dpar.par[1]=(1/(x1)-1/(x1+latstep))*0.5;
-                  
+
                par0.par[0]=0;
                par0.par[1]=(1/(x1)+1/(x1+latstep))*0.5;
-               
+
                const float vmin=x1*x1*x1,vmax=(x1+latstep)*(x1+latstep)*(x1+latstep);
                if(vmin>maxv)break;
                if(vmax>minv) RDicVol(par0,dpar,0,nbCalc,minv,maxv);
@@ -2616,20 +2629,20 @@ void CellExplorer::ReduceSolutions(const bool updateReportThreshold)
 {
    const bool verbose=false;
    std::list<std::pair<RecUnitCell,float> > vSolution2;
-   
+
    // keep only solutions above mBestScore/5
    for(list<pair<RecUnitCell,float> >::iterator pos=mvSolution.begin();pos!=mvSolution.end();)
    {
       if(pos->second<(mBestScore/5)) pos=mvSolution.erase(pos);
       else ++pos;
    }
-   if(updateReportThreshold&& ((mBestScore/5)>mMinScoreReport)) 
+   if(updateReportThreshold&& ((mBestScore/5)>mMinScoreReport))
    {
       cout<<"CellExplorer::ReduceSolutions(): update threshold for report from "
           <<mMinScoreReport<<" to "<<mBestScore/5<<endl;
       mMinScoreReport=mBestScore/5;
    }
-   
+
    while(mvSolution.size()>0)
    {
       vSolution2.push_back(mvSolution.front());
@@ -2668,7 +2681,7 @@ void CellExplorer::ReduceSolutions(const bool updateReportThreshold)
    }
    mvSolution=vSolution2;
    mvSolution.sort(compareRUCScore);
-   
+
    // keep at most 100 solutions, update mDicVolDepthReport and mMinScoreReport if necessary
    if(mvSolution.size()>100)
    {
@@ -2740,7 +2753,7 @@ void CellExplorer::Init()
          break;
    }
    //for(unsigned int k=0;k<mnpar;++k) cout<<"par["<<k<<"]: "<<mMin[k]<<"->"<<mMin[k]+mAmp[k]<<endl;
-   
+
    unsigned int nb1=0,nb2=0;
    switch(mlattice)
    {

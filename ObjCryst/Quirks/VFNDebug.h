@@ -44,9 +44,9 @@ extern unsigned int gVFNDebugMessageIndent;
 
 //Debug messages are printed only if __DEBUG__ is on, and if their level
 //is greater or equal to debugMessageGlobalLevel
-//  0 : messages from low-level routines, 
+//  0 : messages from low-level routines,
 //  5
-// 10 : messages from top LibCryst++ routines 
+// 10 : messages from top LibCryst++ routines
 #ifdef _MSC_VER
 #define VFN_DEBUG_MESSAGE(message,level) \
    if(level >= gVFNDebugMessageLevel) \
@@ -96,10 +96,10 @@ extern unsigned int gVFNDebugMessageIndent;
       cout << "%DEBUG:"<< level << "  "\
       << message << " (at " << __FILE__ << "," << __LINE__ << ")" <<endl;\
    }
-      
+
 #define VFN_DEBUG_MESSAGE_SHORT(message,level) \
    if(level >= gVFNDebugMessageLevel) cout << message;
-   
+
 #define VFN_DEBUG_ENTRY(message,level) \
    if(level >= gVFNDebugMessageLevel) \
    {\
@@ -118,10 +118,10 @@ extern unsigned int gVFNDebugMessageIndent;
       << message << "> (at " << __FILE__ << "," << __LINE__ << ")" <<endl;\
    }
 #endif
-    
+
 #define VFN_DEBUG_GLOBAL_LEVEL(level) gVFNDebugMessageGlobalLevel=level;\
    gVFNDebugMessageLevel=gVFNDebugMessageGlobalLevel;
-   
+
 #define VFN_DEBUG_LOCAL_LEVEL(level) if(level != -1) gVFNDebugMessageLevel=level; else gVFNDebugMessageLevel=gVFNDebugMessageGlobalLevel;
 
 #else //__DEBUG__

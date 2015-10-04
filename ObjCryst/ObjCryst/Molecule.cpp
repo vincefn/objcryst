@@ -55,11 +55,11 @@ using namespace std;
 namespace ObjCryst
 {
 XYZ::XYZ(REAL x0,REAL y0,REAL z0):x(x0),y(y0),z(z0){};
-   
+
 REAL GetBondLength(const MolAtom&at1,const MolAtom&at2)
 {
    //TAU_PROFILE("GetBondLength()","REAL (...)",TAU_DEFAULT);
-   
+
    /*
    __m128 m128=_mm_set_ps(0.0f,
                           at1.GetZ()-at2.GetZ(),
@@ -82,7 +82,7 @@ REAL GetBondLength(const MolAtom&at1,const MolAtom&at2)
    };
    union m128_float l;
    l.m128 = _mm_sqrt_ss(b);
-   
+
    return l.x;
    */
    return  sqrt( (at1.GetX()-at2.GetX())
@@ -114,20 +114,20 @@ REAL GetDihedralAngle(const MolAtom &at1,const MolAtom &at2,const MolAtom &at3,c
    const REAL x21=at1.GetX()-at2.GetX();
    const REAL y21=at1.GetY()-at2.GetY();
    const REAL z21=at1.GetZ()-at2.GetZ();
-   
+
    const REAL x34=at4.GetX()-at3.GetX();
    const REAL y34=at4.GetY()-at3.GetY();
    const REAL z34=at4.GetZ()-at3.GetZ();
-   
+
    const REAL x23=at3.GetX()-at2.GetX();
    const REAL y23=at3.GetY()-at2.GetY();
    const REAL z23=at3.GetZ()-at2.GetZ();
-   
+
    // v21 x v23
    const REAL x123= y21*z23-z21*y23;
    const REAL y123= z21*x23-x21*z23;
    const REAL z123= x21*y23-y21*x23;
-   
+
    // v32 x v34 (= -v23 x v34)
    const REAL x234= -(y23*z34-z23*y34);
    const REAL y234= -(z23*x34-x23*z34);
@@ -135,10 +135,10 @@ REAL GetDihedralAngle(const MolAtom &at1,const MolAtom &at2,const MolAtom &at3,c
 
    const REAL norm123_norm234= sqrt( (x123*x123+y123*y123+z123*z123)
                                     *(x234*x234+y234*y234+z234*z234)+1e-6);
-   
+
    REAL angle=(x123*x234+y123*y234+z123*z234)/norm123_norm234;
    if(angle>= 1) angle=0;
-   else 
+   else
    {
       if(angle<=-1) angle=M_PI;
       else angle=acos(angle);
@@ -147,7 +147,7 @@ REAL GetDihedralAngle(const MolAtom &at1,const MolAtom &at2,const MolAtom &at3,c
    return angle;
 }
 
-   
+
 void ExpandAtomGroupRecursive(MolAtom* atom,
                               const map<MolAtom*,set<MolAtom*> > &connect,
                               set<MolAtom*> &atomlist,const MolAtom* finalAtom)
@@ -224,7 +224,7 @@ void MolAtom::SetName(const string &name)
 
 const string& MolAtom::GetName()const{return mName;}
       string& MolAtom::GetName()     {return mName;}
-      
+
 const Molecule& MolAtom::GetMolecule()const{return *mpMol;}
       Molecule& MolAtom::GetMolecule()     {return *mpMol;}
 
@@ -463,7 +463,7 @@ REAL MolBond::GetLogLikelihood(const bool calcDeriv, const bool recalc)const
    const REAL y=this->GetAtom2().GetY()-this->GetAtom1().GetY();
    const REAL z=this->GetAtom2().GetZ()-this->GetAtom1().GetZ();
    const REAL length=sqrt(abs(x*x+y*y+z*z));
-   
+
    if(calcDeriv)
    {
       const REAL tmp2=1/(length+1e-10);
@@ -756,11 +756,11 @@ REAL MolBondAngle::GetLogLikelihood(const bool calcDeriv, const bool recalc)cons
    const REAL x23=this->GetAtom3().GetX()-this->GetAtom2().GetX();
    const REAL y23=this->GetAtom3().GetY()-this->GetAtom2().GetY();
    const REAL z23=this->GetAtom3().GetZ()-this->GetAtom2().GetZ();
-   
+
    const REAL n1=sqrt(abs(x21*x21+y21*y21+z21*z21));
    const REAL n3=sqrt(abs(x23*x23+y23*y23+z23*z23));
    const REAL p=x21*x23+y21*y23+z21*z23;
-   
+
    const REAL a0=p/(n1*n3+1e-10);
    REAL angle;
    if(a0>=1)  angle=0;
@@ -769,7 +769,7 @@ REAL MolBondAngle::GetLogLikelihood(const bool calcDeriv, const bool recalc)cons
       if(a0<=-1) angle=M_PI;
       else angle=acos(a0);
    }
-   
+
    if(calcDeriv)
    {
       const REAL s=1/(sqrt(1-a0*a0+1e-6));
@@ -795,7 +795,7 @@ REAL MolBondAngle::GetLogLikelihood(const bool calcDeriv, const bool recalc)cons
       mLLK=0;
       return 0;
    }
-   
+
    mLLK=angle-(mAngle0+mDelta);
    if(mLLK>0)
    {
@@ -1073,20 +1073,20 @@ REAL MolDihedralAngle::GetLogLikelihood(const bool calcDeriv, const bool recalc)
    const REAL x21=this->GetAtom1().GetX()-this->GetAtom2().GetX();
    const REAL y21=this->GetAtom1().GetY()-this->GetAtom2().GetY();
    const REAL z21=this->GetAtom1().GetZ()-this->GetAtom2().GetZ();
-   
+
    const REAL x34=this->GetAtom4().GetX()-this->GetAtom3().GetX();
    const REAL y34=this->GetAtom4().GetY()-this->GetAtom3().GetY();
    const REAL z34=this->GetAtom4().GetZ()-this->GetAtom3().GetZ();
-   
+
    const REAL x23=this->GetAtom3().GetX()-this->GetAtom2().GetX();
    const REAL y23=this->GetAtom3().GetY()-this->GetAtom2().GetY();
    const REAL z23=this->GetAtom3().GetZ()-this->GetAtom2().GetZ();
-   
+
    // v21 x v23
    const REAL x123= y21*z23-z21*y23;
    const REAL y123= z21*x23-x21*z23;
    const REAL z123= x21*y23-y21*x23;
-   
+
    // v32 x v34 (= -v23 x v34)
    const REAL x234= -(y23*z34-z23*y34);
    const REAL y234= -(z23*x34-x23*z34);
@@ -1094,20 +1094,20 @@ REAL MolDihedralAngle::GetLogLikelihood(const bool calcDeriv, const bool recalc)
 
    const REAL n123= sqrt(x123*x123+y123*y123+z123*z123+1e-7);
    const REAL n234= sqrt(x234*x234+y234*y234+z234*z234+1e-6);
-   
+
    const REAL p=x123*x234+y123*y234+z123*z234;
    const REAL a0=p/(n123*n234+1e-10);
    REAL angle;
    if(a0>= 1) angle=0;
-   else 
+   else
    {
       if(a0<=-1) angle=M_PI;
       else angle=acos(a0);
    }
    REAL sgn=1.0;
    if((x21*x34 + y21*y34 + z21*z34)<0) {angle=-angle;sgn=-1;}
-   
-   
+
+
    if(calcDeriv)
    {
       const REAL s=sgn/(sqrt(1-a0*a0+1e-6));
@@ -1130,7 +1130,7 @@ REAL MolDihedralAngle::GetLogLikelihood(const bool calcDeriv, const bool recalc)
       mDerivAtom3.y=-(mDerivAtom1.y+mDerivAtom2.y+mDerivAtom4.y);
       mDerivAtom3.z=-(mDerivAtom1.z+mDerivAtom2.z+mDerivAtom4.z);
    }
-   
+
    if(mSigma<1e-6)
    {
       if(calcDeriv) mDerivLLKCoeff=0;
@@ -1463,7 +1463,7 @@ void Quaternion::RotateVector(REAL &v1,REAL &v2, REAL &v3)const
    const REAL p1= mQ0*v1          + mQ2*v3 - mQ3*v2;
    const REAL p2= mQ0*v2          - mQ1*v3 + mQ3*v1;
    const REAL p3= mQ0*v3          + mQ1*v2 - mQ2*v1;
-   
+
    v1           =-p0*mQ1 + p1*mQ0 - p2*mQ3 + p3*mQ2;
    v2           =-p0*mQ2 + p2*mQ0 + p1*mQ3 - p3*mQ1;
    v3           =-p0*mQ3 + p3*mQ0 - p1*mQ2 + p2*mQ1;
@@ -1559,7 +1559,7 @@ void StretchModeBondLength::Print(ostream &os,bool full)const
    }
 }
 
-void StretchModeBondLength::Stretch(const REAL amplitude, 
+void StretchModeBondLength::Stretch(const REAL amplitude,
                                     const bool keepCenter)
 {
    REAL dx=mpAtom1->GetX()-mpAtom0->GetX();
@@ -1574,7 +1574,7 @@ void StretchModeBondLength::Stretch(const REAL amplitude,
    mpMol->TranslateAtomGroup(mvTranslatedAtomList,dx,dy,dz,keepCenter);
 }
 
-void StretchModeBondLength::RandomStretch(const REAL amplitude, 
+void StretchModeBondLength::RandomStretch(const REAL amplitude,
                                           const bool keepCenter)
 {
    mpMol->BondLengthRandomChange(*this,amplitude,keepCenter);
@@ -1658,7 +1658,7 @@ void StretchModeBondAngle::Print(ostream &os,bool full)const
    }
 }
 
-void StretchModeBondAngle::Stretch(const REAL amplitude, 
+void StretchModeBondAngle::Stretch(const REAL amplitude,
                                    const bool keepCenter)
 {
    REAL dx10=mpAtom0->GetX()-mpAtom1->GetX();
@@ -1667,14 +1667,14 @@ void StretchModeBondAngle::Stretch(const REAL amplitude,
    REAL dx12=mpAtom2->GetX()-mpAtom1->GetX();
    REAL dy12=mpAtom2->GetY()-mpAtom1->GetY();
    REAL dz12=mpAtom2->GetZ()-mpAtom1->GetZ();
-   
+
    const REAL vx=dy10*dz12-dz10*dy12;
    const REAL vy=dz10*dx12-dx10*dz12;
    const REAL vz=dx10*dy12-dy10*dx12;
    mpMol->RotateAtomGroup(*mpAtom1,vx,vy,vz,mvRotatedAtomList,amplitude,keepCenter);
 }
 
-void StretchModeBondAngle::RandomStretch(const REAL amplitude, 
+void StretchModeBondAngle::RandomStretch(const REAL amplitude,
                                          const bool keepCenter)
 {
    mpMol->BondAngleRandomChange(*this,amplitude,keepCenter);
@@ -1751,7 +1751,7 @@ void StretchModeTorsion::Stretch(const REAL amplitude, const bool keepCenter)
    mpMol->RotateAtomGroup(*mpAtom1,*mpAtom2,mvRotatedAtomList,amplitude,keepCenter);
 }
 
-void StretchModeTorsion::RandomStretch(const REAL amplitude, 
+void StretchModeTorsion::RandomStretch(const REAL amplitude,
                                        const bool keepCenter)
 {
    mpMol->DihedralAngleRandomChange(*this,amplitude,keepCenter);
@@ -1832,7 +1832,7 @@ void StretchModeTwist::Stretch(const REAL amplitude, const bool keepCenter)
    mpMol->RotateAtomGroup(*mpAtom1,*mpAtom2,mvRotatedAtomList,amplitude,keepCenter);
 }
 
-void StretchModeTwist::RandomStretch(const REAL amplitude, 
+void StretchModeTwist::RandomStretch(const REAL amplitude,
                                      const bool keepCenter)
 {
    const REAL dx=mpAtom2->GetX()-mpAtom1->GetX();
@@ -1892,8 +1892,8 @@ void MDAtomGroup::Print(ostream &os,bool full)const
 //
 //######################################################################
 Molecule::Molecule(Crystal &cryst, const string &name):
-mBaseRotationAmplitude(M_PI*0.02),mIsSelfOptimizing(false),mpCenterAtom(0),
-mMDMoveFreq(0.0),mMDMoveEnergy(40.),mDeleteSubObjInDestructor(1),mLogLikelihoodScale(1.0)
+mDeleteSubObjInDestructor(1), mBaseRotationAmplitude(M_PI*0.02), mIsSelfOptimizing(false),
+mpCenterAtom(0), mMDMoveFreq(0.0), mMDMoveEnergy(40.), mLogLikelihoodScale(1.0)
 {
    VFN_DEBUG_MESSAGE("Molecule::Molecule()",5)
    mpCryst=&cryst;
@@ -1980,7 +1980,7 @@ mMDMoveFreq(0.0),mMDMoveEnergy(40.),mDeleteSubObjInDestructor(1),mLogLikelihoodS
 }
 
 Molecule::Molecule(const Molecule &old):
-mIsSelfOptimizing(false),mpCenterAtom(0),mDeleteSubObjInDestructor(old.mDeleteSubObjInDestructor)
+mDeleteSubObjInDestructor(old.mDeleteSubObjInDestructor), mIsSelfOptimizing(false), mpCenterAtom(0)
 {
    VFN_DEBUG_ENTRY("Molecule::Molecule(old&)",5)
    // a hack, but const-correct
@@ -2064,7 +2064,7 @@ mIsSelfOptimizing(false),mpCenterAtom(0),mDeleteSubObjInDestructor(old.mDeleteSu
    mClockScatterer.AddChild(mClockAtomPosition);
    mClockScatterer.AddChild(mClockAtomScattPow);
    mClockScatterer.AddChild(mClockOrientation);
-   
+
    stringstream str;
    old.XMLOutput(str);
    XMLCrystTag tag(str);
@@ -2148,7 +2148,6 @@ std::string Molecule::GetFormula() const
    }
    stringstream s;
    s<<std::setprecision(2);
-   char c[10];
    for(std::map<std::string,float>::const_iterator pos=velts.begin();pos!=velts.end();++pos)
    {
       if(pos!=velts.begin()) s<<" ";
@@ -2168,10 +2167,10 @@ void Molecule::Print()const
 void Molecule::XMLOutput(ostream &os,int indent)const
 {
    VFN_DEBUG_ENTRY("Molecule::XMLOutput()",4)
-   
+
    // :KLUDGE: this may be dangerous if the molecule is beaing refined !
    this->ResetRigidGroupsPar();
-   
+
    for(int i=0;i<indent;i++) os << "  " ;
    XMLCrystTag tag("Molecule");
    tag.AddAttribute("Name",mName);
@@ -2186,29 +2185,29 @@ void Molecule::XMLOutput(ostream &os,int indent)const
    tag.AddAttribute("LogLikelihoodScale",sst.str());
    os <<tag<<endl;
    indent++;
-   
+
    mQuat.Normalize();
    mQuat.XMLOutput(os,indent);
-   
+
    this->GetPar(mXYZ.data()+0).XMLOutput(os,"x",indent);
    os <<endl;
-   
+
    this->GetPar(mXYZ.data()+1).XMLOutput(os,"y",indent);
    os <<endl;
-   
+
    this->GetPar(mXYZ.data()+2).XMLOutput(os,"z",indent);
    os <<endl;
-   
+
    this->GetPar(&mOccupancy).XMLOutput(os,"Occup",indent);
    os <<endl<<endl;
-   
+
    for(unsigned int i=0;i<this->GetNbOption();i++)
    {
       this->GetOption(i).XMLOutput(os,indent);
       os <<endl;
    }
    os <<endl;
-   
+
    {
       vector<MolAtom*>::const_iterator pos;
       for(pos=mvpAtom.begin();pos!=mvpAtom.end();++pos)
@@ -2251,13 +2250,13 @@ void Molecule::XMLOutput(ostream &os,int indent)const
    }
    if(this->GetCenterAtom()!=0)
    {
-         
+
       XMLCrystTag tagg("CenterAtom",false,true);
       tagg.AddAttribute("Name",this->GetCenterAtom()->GetName());
       for(int i=0;i<indent;i++) os << "  " ;
       os <<tagg<<endl;
    }
-   
+
    indent--;
    tag.SetIsEndTag(true);
    for(int i=0;i<indent;i++) os << "  " ;
@@ -2340,7 +2339,7 @@ void Molecule::XMLInput(istream &is,const XMLCrystTag &tag)
       if("Option"==tagg.GetName())
       {
          for(unsigned int i=0;i<tagg.GetNbAttribute();i++)
-            if("Name"==tagg.GetAttributeName(i)) 
+            if("Name"==tagg.GetAttributeName(i))
                mOptionRegistry.GetObj(tagg.GetAttributeValue(i)).XMLInput(is,tagg);
          continue;
       }
@@ -2405,7 +2404,7 @@ void Molecule::BeginOptimization(const bool allowApproximations,const bool enabl
       mAutoOptimizeConformation.SetChoice(1);
    }
    #endif
-   
+
    RefinableObjClock clockConf, clockMode;
    clockConf=mClockAtomList;
    if(clockConf<mClockBondList) clockConf=mClockBondList;
@@ -2413,7 +2412,7 @@ void Molecule::BeginOptimization(const bool allowApproximations,const bool enabl
    if(clockConf<mClockDihedralAngleList) clockConf=mClockDihedralAngleList;
    if(clockConf<mClockRigidGroup) clockConf=mClockRigidGroup;
    if(clockConf<mClockAtomScattPow) clockConf=mClockAtomScattPow;
-   
+
    clockMode=mClockConnectivityTable;
    if(clockMode<mClockRingList) clockMode=mClockRingList;
    if(clockMode<mClockRotorGroup) clockMode=mClockRotorGroup;
@@ -2494,7 +2493,7 @@ void Molecule::BeginOptimization(const bool allowApproximations,const bool enabl
          this->GetPar(&((*at)->X())).SetIsFixed(true);
          this->GetPar(&((*at)->Y())).SetIsFixed(true);
          this->GetPar(&((*at)->Z())).SetIsFixed(true);
-         for(unsigned int i=0;i<this->GetNbComponent();++i)
+         for(int i = 0; i < this->GetNbComponent(); ++i)
             if(&(this->GetAtom(i))==*at)
             {
               (*pos)->mvIdx.insert(i);
@@ -2503,7 +2502,7 @@ void Molecule::BeginOptimization(const bool allowApproximations,const bool enabl
       }
    }
    #endif
-   
+
    this->RefinableObj::BeginOptimization(allowApproximations,enableRestraints);
    mRandomConformChangeNbTest=0;
    mRandomConformChangeNbAccept=0;
@@ -2541,7 +2540,7 @@ void Molecule::RandomizeConfiguration()
 {
    TAU_PROFILE("Molecule::RandomizeConfiguration()","void ()",TAU_DEFAULT);
    VFN_DEBUG_ENTRY("Molecule::RandomizeConfiguration()",4)
-   
+
    if(  (!mIsSelfOptimizing)
       &&(this->GetLogLikelihood()>(mvpRestraint.size()*500))
       &&(mAutoOptimizeConformation.GetChoice()==0))
@@ -2550,8 +2549,8 @@ void Molecule::RandomizeConfiguration()
       this->OptimizeConformation(100000,(REAL)(mvpRestraint.size()));
       (*fpObjCrystInformUser)("");
    }
-   
-   if(   (!(this->IsBeingRefined())) 
+
+   if(   (!(this->IsBeingRefined()))
       && (mvStretchModeTorsion.size()==0)
       &&(mvStretchModeBondAngle.size()==0)
       &&(mvStretchModeBondLength.size()==0)
@@ -2567,7 +2566,7 @@ void Molecule::RandomizeConfiguration()
          this->BuildMDAtomGroups();
       }
    }
-   
+
    #if 0
    this->BuildRotorGroup();
    if((mFlexModel.GetChoice()==0)||(mFlexModel.GetChoice()==2))
@@ -2609,7 +2608,7 @@ void Molecule::RandomizeConfiguration()
       map<MolAtom*,XYZ> v0;
       for(vector<MolAtom*>::iterator at=this->GetAtomList().begin();at!=this->GetAtomList().end();++at)
          v0[*at]=XYZ(rand()/(REAL)RAND_MAX+0.5,rand()/(REAL)RAND_MAX+0.5,rand()/(REAL)RAND_MAX+0.5);
-      
+
       const REAL nrj0=mMDMoveEnergy*( this->GetBondList().size()
                                      +this->GetBondAngleList().size()
                                      +this->GetDihedralAngleList().size());
@@ -2620,7 +2619,7 @@ void Molecule::RandomizeConfiguration()
                                     this->GetDihedralAngleList(),
                                     vr,nrj0);
    }
-   
+
    #endif
    // this will only change limited parameters i.e. translation
    this->RefinableObj::RandomizeConfiguration();
@@ -2654,7 +2653,7 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                                        const RefParType *type)
 {
    if(mRandomMoveIsDone) return;
-   if(mIsSelfOptimizing) 
+   if(mIsSelfOptimizing)
    {
       this->RefinableObj::GlobalOptRandomMove(mutationAmplitude,type);
       mQuat.Normalize();
@@ -2669,8 +2668,8 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
    TAU_PROFILE_TIMER(timer5,"Molecule::GlobalOptRandomMove 5","", TAU_FIELD);
    VFN_DEBUG_ENTRY("Molecule::GlobalOptRandomMove()",4)
    mClockScatterer.Click();
-   
-   
+
+
    #if 1
    // From time to time, just do one flip
    if(  (mFlexModel.GetChoice()!=1)
@@ -2679,7 +2678,7 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
       &&(mvFlipGroup.size()>0)
       &&(((rand()%100)==0)))
    {
-      
+
       this->SaveParamSet(mLocalParamSet);
       const REAL llk0=this->GetLogLikelihood()/mLogLikelihoodScale;
       const unsigned long i=rand() % mvFlipGroup.size();
@@ -2704,7 +2703,7 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
               <<pos->mpAtom1->GetName()<<"-"
               <<pos->mpAtom0->GetName()<<"-"
               <<pos->mpAtom2->GetName()<<" : ";
-         for(list<pair<const MolAtom *,set<MolAtom*> > >::const_iterator 
+         for(list<pair<const MolAtom *,set<MolAtom*> > >::const_iterator
              chain=pos->mvRotatedChainList.begin();
              chain!=pos->mvRotatedChainList.end();++chain)
          {
@@ -2732,7 +2731,7 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
    }
    else
    #endif
-   {       
+   {
       TAU_PROFILE_START(timer1);
       if(mOptimizeOrientation.GetChoice()==0)
       {//Rotate around an arbitrary vector
@@ -2829,7 +2828,7 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                      v0[at->first]=XYZ((at->first->GetX()-xc)*ux*exp(a*(at->first->GetX()-xc)*(at->first->GetX()-xc)),
                                        (at->first->GetY()-yc)*uy*exp(a*(at->first->GetY()-yc)*(at->first->GetY()-yc)),
                                        (at->first->GetZ()-zc)*uz*exp(a*(at->first->GetZ()-zc)*(at->first->GetZ()-zc)));
-               
+
 
                #endif
                const REAL nrj0=mMDMoveEnergy*( this->GetBondList().size()
@@ -2851,7 +2850,7 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                map<MolAtom*,XYZ> v0;
                for(set<MolAtom*>::iterator at=pos->mvpAtom.begin();at!=pos->mvpAtom.end();++at)
                   v0[*at]=XYZ(rand()/(REAL)RAND_MAX+0.5,rand()/(REAL)RAND_MAX+0.5,rand()/(REAL)RAND_MAX+0.5);
-               
+
                const REAL nrj0=mMDMoveEnergy*( pos->mvpBond.size()
                                     +pos->mvpBondAngle.size()
                                     +pos->mvpDihedralAngle.size());
@@ -2911,7 +2910,7 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                   llk=0;
                   //(*mode)->RandomStretch(change * mutationAmplitude * (*mode)->mBaseAmplitude);
                   for(map<const MolBond*,REAL>::const_iterator pos=(*mode)->mvpBrokenBond.begin();
-                      pos!=(*mode)->mvpBrokenBond.end();++pos) 
+                      pos!=(*mode)->mvpBrokenBond.end();++pos)
                   {
                       cout<<"      "<<pos->first->GetName()<<", llk= "<<pos->first->GetLogLikelihood(false,false)
                           <<"   ?->"<<pos->first->GetLogLikelihood(false,false)+pos->first->GetDeriv((*mode)->mDerivXYZ,true)*change
@@ -2920,7 +2919,7 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                      llk+=pos->first->GetLogLikelihood(false,false);
                   }
                   for(map<const MolBondAngle*,REAL>::const_iterator pos=(*mode)->mvpBrokenBondAngle.begin();
-                      pos!=(*mode)->mvpBrokenBondAngle.end();++pos) 
+                      pos!=(*mode)->mvpBrokenBondAngle.end();++pos)
                   {
                       cout<<"      "<<pos->first->GetName()<<", llk= "<<pos->first->GetLogLikelihood(false,false)
                           <<"   ?->"<<pos->first->GetLogLikelihood(false,false)+pos->first->GetDeriv((*mode)->mDerivXYZ,true)*change
@@ -2929,7 +2928,7 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                      llk+=pos->first->GetLogLikelihood(false,false);
                   }
                   for(map<const MolDihedralAngle*,REAL>::const_iterator pos=(*mode)->mvpBrokenDihedralAngle.begin();
-                      pos!=(*mode)->mvpBrokenDihedralAngle.end();++pos) 
+                      pos!=(*mode)->mvpBrokenDihedralAngle.end();++pos)
                   {
                       cout<<"      "<<pos->first->GetName()<<", llk= "<<pos->first->GetLogLikelihood(false,false)
                           <<"   ?->"<<pos->first->GetLogLikelihood(false,false)+pos->first->GetDeriv((*mode)->mDerivXYZ,true)*change
@@ -2997,13 +2996,13 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                   }
                }
                // Here we do not take mLogLikelihoodScale into account
-               // :TODO: take into account cases where the lllk cannot go down to 0 because of 
+               // :TODO: take into account cases where the lllk cannot go down to 0 because of
                // combined restraints.
                if( ((rand()%100)==0) && (mLogLikelihood>(mvpRestraint.size()*10)))
                   this->OptimizeConformationSteepestDescent(0.02,5);
                TAU_PROFILE_STOP(timer4);
             }
-            
+
             // Perform MD moves if there are MDAtomGroups
             #if 0
             for(list<MDAtomGroup>::iterator pos=mvMDAtomGroup.begin();pos!=mvMDAtomGroup.end();++pos)
@@ -3013,7 +3012,7 @@ void Molecule::GlobalOptRandomMove(const REAL mutationAmplitude,
                   map<MolAtom*,XYZ> v0;
                   for(set<MolAtom*>::iterator at=pos->mvpAtom.begin();at!=pos->mvpAtom.end();++at)
                      v0[*at]=XYZ(rand()/(REAL)RAND_MAX+0.5,rand()/(REAL)RAND_MAX+0.5,rand()/(REAL)RAND_MAX+0.5);
-                  
+
                   const REAL nrj0=20*(pos->mvpBond.size()+pos->mvpBondAngle.size()+pos->mvpDihedralAngle.size());
                   map<RigidGroup*,std::pair<XYZ,XYZ> > vr;
                   this->MolecularDynamicsEvolve(v0, int(100*sqrt(mutationAmplitude)),0.002,
@@ -3151,7 +3150,7 @@ void Molecule::TagNewBestConfig()const
          (*pos)->XMLOutput(cout);
       }
    }
-   
+
    for(list<MDAtomGroup>::iterator pos=mvMDAtomGroup.begin();pos!=mvMDAtomGroup.end();++pos)
    {
       char buf[100];
@@ -3185,7 +3184,7 @@ string Molecule::GetComponentName(const int i) const
 {
    //if(mvpAtom[i]->IsDummy()) return "Dummy";
    return mvpAtom[i]->GetName();
-} 
+}
 
 ostream& Molecule::POVRayDescription(ostream &os,const CrystalPOVRayOptions &options)const
 {
@@ -3198,17 +3197,12 @@ ostream& Molecule::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opt
       VFN_DEBUG_EXIT("Molecule::POVRayDescription():No atom to display !",4)
       return os;
    }
-   REAL en=1;
    this->UpdateScattCompList();
-   
-   const float colour_bondnonfree[]= { 0.3, .3, .3, 1.0 };
-   const float colour_bondfree[]= { 0.7, .7, .7, 1.0 };
-   const float colour0[] = {0.0f, 0.0f, 0.0f, 0.0f}; 
 
    const REAL aa=this->GetCrystal().GetLatticePar(0);
    const REAL bb=this->GetCrystal().GetLatticePar(1);
    const REAL cc=this->GetCrystal().GetLatticePar(2);
-   
+
    os << "// Description of Molecule :" << this->GetName() <<endl;
    vector<CrystMatrix_REAL> vXYZCoords;
    {
@@ -3294,9 +3288,6 @@ ostream& Molecule::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opt
          CrystVector<REAL> borderdist(x.numElements());//distance to display limit
          CrystVector<REAL> x0,y0,z0;
          x0=x;y0=y;z0=z;
-         const REAL tmpxc=x.sum()/(REAL)x.numElements();
-         const REAL tmpyc=y.sum()/(REAL)y.numElements();
-         const REAL tmpzc=z.sum()/(REAL)z.numElements();
          if(  ((x.min()<xMax) && (x.max()>xMin))
             &&((y.min()<yMax) && (y.max()>yMin))
             &&((z.min()<zMax) && (z.max()>zMin)))
@@ -3318,32 +3309,32 @@ ostream& Molecule::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opt
                   borderdist(k)=sqrt(borderdist(k));
                }
                REAL fout=1.0;
-               char ch[100];
                if(isinside(k)==false) fout=exp(-borderdist(k))*this->GetCrystal().GetDynPopCorr(this,k);
 
                this->GetCrystal().FractionalToOrthonormalCoords(x(k),y(k),z(k));
                if((mvpAtom[k]->IsDummy()) || (fout<0.001)) continue;
                if(options.mShowHydrogens==false && (mvpAtom[k]->GetScatteringPower().GetForwardScatteringFactor(RAD_XRAY)<1.5)) continue;
-               const float r=mvpAtom[k]->GetScatteringPower().GetColourRGB()[0];
-               const float g=mvpAtom[k]->GetScatteringPower().GetColourRGB()[1];
-               const float b=mvpAtom[k]->GetScatteringPower().GetColourRGB()[2];
+               // const float r=mvpAtom[k]->GetScatteringPower().GetColourRGB()[0];
+               // const float g=mvpAtom[k]->GetScatteringPower().GetColourRGB()[1];
+               // const float b=mvpAtom[k]->GetScatteringPower().GetColourRGB()[2];
                const float f=mvpAtom[k]->GetOccupancy()*this->GetOccupancy();
                if(options.mShowLabel)
                {
                   /*
-                  GLfloat colourChar [] = {1.0, 1.0, 1.0, 1.0}; 
+                  const float colour0[] = {0.0f, 0.0f, 0.0f, 0.0f};
+                  GLfloat colourChar [] = {1.0, 1.0, 1.0, 1.0};
                   if((r>0.8)&&(g>0.8)&&(b>0.8))
                   {
                      colourChar[0] = 0.5;
                      colourChar[1] = 0.5;
                      colourChar[2] = 0.5;
                   }
-                  glMaterialfv(GL_FRONT, GL_AMBIENT,  colour0); 
-                  glMaterialfv(GL_FRONT, GL_DIFFUSE,  colour0); 
-                  glMaterialfv(GL_FRONT, GL_SPECULAR, colour0); 
-                  glMaterialfv(GL_FRONT, GL_EMISSION, colourChar); 
+                  glMaterialfv(GL_FRONT, GL_AMBIENT,  colour0);
+                  glMaterialfv(GL_FRONT, GL_DIFFUSE,  colour0);
+                  glMaterialfv(GL_FRONT, GL_SPECULAR, colour0);
+                  glMaterialfv(GL_FRONT, GL_EMISSION, colourChar);
                   glMaterialfv(GL_FRONT, GL_SHININESS,colour0);
-                  glRasterPos3f(x(k)*en, y(k), z(k));
+                  glRasterPos3f(x(k), y(k), z(k));
                   crystGLPrint(mvpAtom[k]->GetName());
                   */
                }
@@ -3428,19 +3419,19 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
    //this->BuildStretchModeBondLength();
    //this->BuildStretchModeBondAngle();
    //this->BuildStretchModeTorsion();
-   
+
    const REAL aa=this->GetCrystal().GetLatticePar(0);
    const REAL bb=this->GetCrystal().GetLatticePar(1);
    const REAL cc=this->GetCrystal().GetLatticePar(2);
-   
+
    const GLfloat colour0[] = {0.0f, 0.0f, 0.0f, 0.0f};
    glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0);
    glMaterialfv(GL_FRONT, GL_EMISSION,  colour0);
    glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
    glPolygonMode(GL_FRONT, GL_FILL);
-   
+
    GLUquadricObj* pQuadric = gluNewQuadric();
-   
+
    if(true==onlyIndependentAtoms)//
    {
       REAL xc=mXYZ(0),yc=mXYZ(1),zc=mXYZ(2);
@@ -3448,7 +3439,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
       vector<MolAtom*>::const_iterator pos;
       for(pos=mvpAtom.begin();pos!=mvpAtom.end();pos++)
       {
-         
+
          if((*pos)->IsDummy())continue;
          if(hideHydrogens  && ((*pos)->GetScatteringPower().GetForwardScatteringFactor(RAD_XRAY)<1.5)) continue;
          const float r=(*pos)->GetScatteringPower().GetColourRGB()[0];
@@ -3458,8 +3449,8 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
          glPushMatrix();
             if(displayNames)
             {
-               GLfloat colourChar [] = {1.0, 1.0, 1.0, 1.0}; 
-               GLfloat colourCharRing [] = {1.0, 1.0, 0.8, 1.0}; 
+               GLfloat colourChar [] = {1.0, 1.0, 1.0, 1.0};
+               GLfloat colourCharRing [] = {1.0, 1.0, 0.8, 1.0};
                if((r>0.8)&&(g>0.8)&&(b>0.8))
                {
                   colourChar[0] = 0.5;
@@ -3467,9 +3458,9 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                   colourChar[2] = 0.5;
                }
                if((*pos)->IsInRing())
-                  glMaterialfv(GL_FRONT, GL_EMISSION,  colourCharRing); 
+                  glMaterialfv(GL_FRONT, GL_EMISSION,  colourCharRing);
                else
-                  glMaterialfv(GL_FRONT, GL_EMISSION,  colourChar); 
+                  glMaterialfv(GL_FRONT, GL_EMISSION,  colourChar);
                glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
                glTranslatef((*pos)->X()*en+xc, (*pos)->Y()+yc, (*pos)->Z()+zc);
                crystGLPrint((*pos)->GetName());
@@ -3477,7 +3468,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
             else
             {
                const GLfloat colourAtom [] = {r, g, b, f};
-               glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE,   colourAtom); 
+               glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE,   colourAtom);
                glTranslatef((*pos)->X()*en+xc, (*pos)->Y()+yc, (*pos)->Z()+zc);
                gluSphere(pQuadric,(*pos)->GetScatteringPower().GetRadius()/3.,20,20);
             }
@@ -3595,9 +3586,9 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                      borderdist(k)=sqrt(borderdist(k));
                   }
                   REAL fout=1.0;
-                  char ch[100];
                   if(isinside(k)==false) fout=exp(-borderdist(k))*this->GetCrystal().GetDynPopCorr(this,k);
                   #ifdef __DEBUG__
+                  char ch[100];
                   sprintf(ch,"%d %d %d %s %5.2f %5.2f %5.2f d=%5.2f  fout=%5.3f",i,j,k,mvpAtom[k]->GetName().c_str(),x(k),y(k),z(k),borderdist(k),fout);
                   VFN_DEBUG_MESSAGE(ch,4)
                   #endif
@@ -3643,7 +3634,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                         else
                         {
                            const GLfloat colourAtom [] = {r*fout, g*fout, b*fout, f*fout};
-                           glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE,colourAtom); 
+                           glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE,colourAtom);
                            glTranslatef(x(k)*en, y(k), z(k));
                            gluSphere(pQuadric,.15,10,10);
                         }
@@ -3677,19 +3668,16 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                         const float f2=mvpBond[k]->GetAtom2().GetOccupancy()*this->GetOccupancy();
                         const GLfloat colourAtom1 [] = {r1, g1, b1, f1*fout};
                         const GLfloat colourAtom2 [] = {r2, g2, b2, f2*fout};
-                        const GLfloat colour_bondnonfree[]= { 0.2, .2, .2, (f1+f2)/2*fout };
-                        const GLfloat colour_bondrigid[]=   { 0.5, .3, .3, (f1+f2)/2*fout };
-                        const GLfloat colour_bondfree[]=    { 0.8, .8, .8, (f1+f2)/2*fout };
                         #if 0
                         glPushMatrix();
                            glBegin(GL_LINE_STRIP);
-                              glMaterialfv(GL_FRONT, GL_SPECULAR,  colourAtom1); 
-                              glMaterialfv(GL_FRONT, GL_EMISSION,  colourAtom1); 
+                              glMaterialfv(GL_FRONT, GL_SPECULAR,  colourAtom1);
+                              glMaterialfv(GL_FRONT, GL_EMISSION,  colourAtom1);
                               glMaterialfv(GL_FRONT, GL_SHININESS, colourAtom1);
                               glVertex3f(x(n1)*en,y(n1),z(n1));
                               glVertex3f((x(n1)+x(n2))/2*en,(y(n1)+y(n2))/2,(z(n1)+z(n2))/2);
-                              glMaterialfv(GL_FRONT, GL_SPECULAR,  colourAtom2); 
-                              glMaterialfv(GL_FRONT, GL_EMISSION,  colourAtom2); 
+                              glMaterialfv(GL_FRONT, GL_SPECULAR,  colourAtom2);
+                              glMaterialfv(GL_FRONT, GL_EMISSION,  colourAtom2);
                               glMaterialfv(GL_FRONT, GL_SHININESS, colourAtom2);
                               glVertex3f(x(n2)*en,y(n2),z(n2));
                            glEnd();
@@ -3702,11 +3690,11 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                            glTranslatef(x(n1)*en, y(n1), z(n1));
                            GLUquadricObj *quadobj = gluNewQuadric();
                            glRotatef(180,(x(n2)-x(n1))*en,y(n2)-y(n1),z(n2)-z(n1)+height);// ?!?!?!
-                           
+
                            glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,colourAtom1);
                            gluCylinder(quadobj,.1,.1,height/2,10,1 );
                            gluDeleteQuadric(quadobj);
-                           
+
                            glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,colourAtom2);
                            GLUquadricObj *quadobj2 = gluNewQuadric();
                            glTranslatef(0, 0, height/2);
@@ -3733,7 +3721,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                         bool isRigidGroup=false;
                         for(vector<RigidGroup *>::const_iterator pos=this->GetRigidGroupList().begin();pos!=this->GetRigidGroupList().end();++pos)
                         {
-                           if(  ((*pos)->find(&(mvpBond[k]->GetAtom1()))!=(*pos)->end()) 
+                           if(  ((*pos)->find(&(mvpBond[k]->GetAtom1()))!=(*pos)->end())
                               &&((*pos)->find(&(mvpBond[k]->GetAtom2()))!=(*pos)->end()) )
                            {
                               isRigidGroup=true;
@@ -3766,7 +3754,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                         x2-=dx/r*r2*sqrt(abs(1-0.1/r2));
                         y2-=dy/r*r2*sqrt(abs(1-0.1/r2));
                         z2-=dz/r*r2*sqrt(abs(1-0.1/r2));
-                        
+
                         glPushMatrix();
                            glTranslatef(x1*en, y1, z1);
                            GLUquadricObj *quadobj = gluNewQuadric();
@@ -3801,7 +3789,7 @@ void Molecule::AddAtom(const REAL x, const REAL y, const REAL z,
 {
    VFN_DEBUG_ENTRY("Molecule::AddAtom():"<<name,5)
    const bool molnameasformula= this->GetName()==this->GetFormula();
-   
+
    string thename=name;
    if(thename==string(""))
    {// This should not be needed, the atom will reset the parameters name when its name is set
@@ -3841,12 +3829,12 @@ void Molecule::AddAtom(const REAL x, const REAL y, const REAL z,
       tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }
-   
+
    mClockScatterer.Click();
-   
+
    if(molnameasformula || (this->GetName().size()==0))
       this->SetName(this->GetFormula());
-   
+
    if(updateDisplay) this->UpdateDisplay();
    VFN_DEBUG_EXIT("Molecule::AddAtom()",5)
 }
@@ -3893,7 +3881,7 @@ vector<MolAtom*>::iterator Molecule::RemoveAtom(MolAtom &atom, const bool del)
   }
    mClockAtomList.Click();
    mClockScatterer.Click();
-   
+
    if(mpCenterAtom==*pos) mpCenterAtom=0;
    if(del) delete *pos;
    pos=mvpAtom.erase(pos);
@@ -3912,7 +3900,7 @@ void Molecule::AddNonFlipAtom(MolAtom &atom)
    VFN_DEBUG_ENTRY("Molecule::AddNonFlipAtom()",5)
    mvNonFlipAtom.push_back(&atom);
    //mvNonFlipAtom.push_back(new MolAtom(atom.x,y,z,pPow,thename,*this));
-   
+
    mClockFlipGroup.Reset();
    this->UpdateDisplay();
    VFN_DEBUG_EXIT("Molecule::AddNonFlipAtom()",5)
@@ -4168,7 +4156,7 @@ vector<RigidGroup*>::iterator Molecule::RemoveRigidGroup(const RigidGroup &g,con
    if(pos==mvRigidGroup.end()) return pos;
    #ifdef RIGID_BODY_STRICT_EXPERIMENTAL
    // Remove the refinable parameters (even if del==False - used for python delayed deletion)
-   // NOTE - this should only be done outside an optimization, since rigid group translationnal 
+   // NOTE - this should only be done outside an optimization, since rigid group translationnal
    // and rotationnal parameters are resetted at the end of the optimization, and the atomic
    // parameters are directly the correct ones (thus deletion of the rigid group does not change
    // the final coordinates).
@@ -4199,7 +4187,7 @@ void Molecule::OptimizeConformation(const long nbTrial,const REAL stopCost)
    MonteCarloObj globalOptObj(true);
    globalOptObj.AddRefinableObj(*this);
    globalOptObj.SetAlgorithmParallTempering(ANNEALING_EXPONENTIAL,10000.,1.,
-                                            ANNEALING_EXPONENTIAL,10,.1);      
+                                            ANNEALING_EXPONENTIAL,10,.1);
 
    long nb=nbTrial;
    mIsSelfOptimizing=true;
@@ -4214,24 +4202,24 @@ void Molecule::OptimizeConformation(const long nbTrial,const REAL stopCost)
 void Molecule::OptimizeConformationSteepestDescent(const REAL maxStep,const unsigned nbStep)
 {
    //cout<<"LLK="<<this->GetLogLikelihood()<<endl;
-   for(int i=0;i<nbStep;++i)
+   for(unsigned i = 0; i < nbStep; ++i)
    {
       // Calc full gradient
       //Calculate & display gradient
       map<MolAtom*,XYZ> grad;
       for(vector<MolAtom*>::iterator pos=this->GetAtomList().begin();
          pos!=this->GetAtomList().end();++pos) grad[*pos]=XYZ(0,0,0);
-      
+
       // :TODO: remove atoms that are in rigid groups ?
       for(vector<MolBond*>::iterator pos=this->GetBondList().begin();
          pos!=this->GetBondList().end();++pos)          (*pos)->CalcGradient(grad);
-      
+
       for(vector<MolBondAngle*>::iterator pos=this->GetBondAngleList().begin();
          pos!=this->GetBondAngleList().end();++pos)     (*pos)->CalcGradient(grad);
-      
+
       for(vector<MolDihedralAngle*>::iterator pos=this->GetDihedralAngleList().begin();
          pos!=this->GetDihedralAngleList().end();++pos) (*pos)->CalcGradient(grad);
-      
+
       #if 0
       // Display gradient - for tests
       for(map<MolAtom*,XYZ>::const_iterator pos=grad.begin();pos!=grad.end();++pos)
@@ -4306,15 +4294,15 @@ void Molecule::MolecularDynamicsEvolve(map<MolAtom*,XYZ> &v0,const unsigned nbSt
    }
    const REAL m=500;// mass
    const REAL im=1./m;
-   
+
    // Try to keep total energy constant
    REAL e_v,e_k,v_r=1.0;
-   for(int i=0;i<nbStep;++i)
+   for(unsigned i = 0; i < nbStep; ++i)
    {
       // Calc full gradient
       map<MolAtom*,XYZ> grad;
       for(map<MolAtom*,XYZ>::iterator pos=v0.begin();pos!=v0.end();++pos) grad[pos->first]=XYZ(0,0,0);
-      
+
       // :TODO: handle rigid groups ?
       e_v=0;
       for(vector<MolBond*>::const_iterator pos=pvb->begin();pos!=pvb->end();++pos)
@@ -4322,19 +4310,19 @@ void Molecule::MolecularDynamicsEvolve(map<MolAtom*,XYZ> &v0,const unsigned nbSt
          (*pos)->CalcGradient(grad);
          e_v+=(*pos)->GetLogLikelihood(false,false);
       }
-      
+
       for(vector<MolBondAngle*>::const_iterator pos=pva->begin();pos!=pva->end();++pos)
       {
          (*pos)->CalcGradient(grad);
          e_v+=(*pos)->GetLogLikelihood(false,false);
       }
-      
+
       for(vector<MolDihedralAngle*>::const_iterator pos=pvd->begin();pos!=pvd->end();++pos)
       {
          (*pos)->CalcGradient(grad);
          e_v+=(*pos)->GetLogLikelihood(false,false);
       }
-      
+
       //kinetic energy
       e_k=0;
       for(map<MolAtom*,XYZ>::const_iterator pos=v0.begin();pos!=v0.end();++pos)
@@ -4353,7 +4341,7 @@ void Molecule::MolecularDynamicsEvolve(map<MolAtom*,XYZ> &v0,const unsigned nbSt
       char buf[100];
       sprintf(buf,"(i) LLK + Ek = %10.3f + %10.3f =%10.3f (nrj0=%10.3f)",e_v,e_k,e_v+e_k,nrj0);
       cout<<buf<<endl;
-      
+
       // Display gradient & speed - for tests
       for(map<MolAtom*,XYZ>::iterator pos=v0.begin();pos!=v0.end();++pos)
       {
@@ -4457,7 +4445,7 @@ void Molecule::RotateAtomGroup(const MolAtom &at,const REAL vx,const REAL vy,con
       const REAL x=(*pos)->X() - x0;
       const REAL y=(*pos)->Y() - y0;
       const REAL z=(*pos)->Z() - z0;
-      
+
       (*pos)->X() = m00*x+m01*y+m02*z+x0;
       (*pos)->Y() = m10*x+m11*y+m12*z+y0;
       (*pos)->Z() = m20*x+m21*y+m22*z+z0;
@@ -4508,7 +4496,7 @@ void Molecule::RotateAtomGroup(const MolAtom &at,const REAL vx,const REAL vy,con
    mClockAtomPosition.Click();
    mClockScatterer.Click();
 }
-void Molecule::TranslateAtomGroup(const set<MolAtom *> &atoms, 
+void Molecule::TranslateAtomGroup(const set<MolAtom *> &atoms,
                                   const REAL dx,const REAL dy,const REAL dz,
                                   const bool keepCenter)
 {
@@ -4786,7 +4774,7 @@ REAL LorentzianBiasedRandomMove(const REAL x0,const REAL sigma,const REAL delta,
    }
    if(xmin<=-delta)
    {
-      if(xmax<=delta) 
+      if(xmax<=delta)
       {
          //probability of being in [xmin;-delta] rather than [-delta;xmax]
          REAL p0=atan((abs(xmin)-delta)/sigma)*sigma;
@@ -4894,7 +4882,7 @@ void TestLorentzianBiasedRandomMove()
    //
    //hx,hy=histogram(y)
    //gplt.plot(hx,hy)
-}  
+}
 
 REAL Molecule::BondLengthRandomChange(const StretchModeBondLength& mode, const REAL amplitude,
                                       const bool respectRestraint)
@@ -4949,11 +4937,11 @@ REAL Molecule::BondAngleRandomChange(const StretchModeBondAngle& mode, const REA
    REAL dx12=mode.mpAtom2->GetX()-mode.mpAtom1->GetX();
    REAL dy12=mode.mpAtom2->GetY()-mode.mpAtom1->GetY();
    REAL dz12=mode.mpAtom2->GetZ()-mode.mpAtom1->GetZ();
-   
+
    const REAL vx=dy10*dz12-dz10*dy12;
    const REAL vy=dz10*dx12-dx10*dz12;
    const REAL vz=dx10*dy12-dy10*dx12;
-   
+
    REAL change=0.0;
    if((abs(vx)+abs(vy)+abs(vz))<1e-6) return change;// :KLUDGE:
    REAL angle0;
@@ -4962,12 +4950,12 @@ REAL Molecule::BondAngleRandomChange(const StretchModeBondAngle& mode, const REA
       const REAL norm= sqrt( (dx10*dx10+dy10*dy10+dz10*dz10)*(dx12*dx12+dy12*dy12+dz12*dz12)+1e-6);
       angle0=(dx10*dx12+dy10*dy12+dz10*dz12)/norm;
       if(angle0>=1)  angle0=0;
-      else 
+      else
       {
          if(angle0<=-1) angle0=M_PI;
          else angle0= acos(angle0);
       }
-      
+
       const REAL a0=angle0-mode.mpBondAngle->GetAngle0();
       const REAL sigma=mode.mpBondAngle->GetAngleSigma();
       const REAL delta=mode.mpBondAngle->GetAngleDelta();
@@ -5061,7 +5049,6 @@ void BuildZMatrixRecursive(long &z,const long curr,
    zmatrix[z].mpPow=&(vpAtom[curr]->GetScatteringPower());
    vZIndex[curr]=z;
    vrZIndex[z]=curr;
-   const long n=vpAtom.size();
    // Get the list of connected atoms and sort them
       map<MolAtom *, set<MolAtom *> >::const_iterator pConn=connT.find(vpAtom[curr]);
       const long nc=pConn->second.size();
@@ -5303,7 +5290,7 @@ void Molecule::BuildRingList()
       cout<<endl;
       #endif
    }
-   
+
    cout<<"Rings found :"<<ringlist.size()<<", "<<mvRing.size()<<" unique."<<endl;
    mClockRingList.Click();
    VFN_DEBUG_EXIT("Molecule::BuildRingList()",7)
@@ -5321,11 +5308,10 @@ void Molecule::BuildConnectivityTable()const
       mConnectivityTable[&(mvpBond[i]->GetAtom1())].insert(&(mvpBond[i]->GetAtom2()));
       mConnectivityTable[&(mvpBond[i]->GetAtom2())].insert(&(mvpBond[i]->GetAtom1()));
    }
-   
+
    #ifdef __DEBUG__
    {
       map<MolAtom *,set<MolAtom *> >::const_iterator pos;
-      unsigned long at=0;
       for(pos=mConnectivityTable.begin();pos!=mConnectivityTable.end();++pos)
       {
          cout<<"Atom "<<pos->first->GetName()<<" is connected to atoms: ";
@@ -5360,7 +5346,7 @@ void Molecule::BuildRotorGroup()
    mvRotorGroupTorsion.clear();
    mvRotorGroupTorsionSingleChain.clear();
    mvRotorGroupInternal.clear();
-   
+
    // Build Rotation groups around bonds
    for(unsigned long i=0;i<mvpBond.size();++i)
    {
@@ -5372,12 +5358,12 @@ void Molecule::BuildRotorGroup()
          const set<MolAtom*> *pConn;
          if(j==1) pConn=&(mConnectivityTable[atom1]);
          else pConn=&(mConnectivityTable[atom2]);
-         
+
          mvRotorGroupTorsion.push_back(RotorGroup(mvpBond[i]->GetAtom1(),
                                                   mvpBond[i]->GetAtom2()));
          mvRotorGroupTorsion.back().mvRotatedAtomList.insert(atom1);
          mvRotorGroupTorsion.back().mvRotatedAtomList.insert(atom2);
-         
+
          for(set<MolAtom*>::const_iterator pos=pConn->begin();pos!=pConn->end();++pos)
          {
             if((j==1)&&(*pos==atom2)) continue;
@@ -5448,7 +5434,7 @@ void Molecule::BuildRotorGroup()
       }
    }
    #endif
-   
+
    // Remove identical groups
    for(unsigned int i=1;i<=3;++i)
    {
@@ -5476,7 +5462,7 @@ void Molecule::BuildRotorGroup()
             {
                if(pos2==pos1) {++pos2;continue;}
                if((  ((pos1->mpAtom1 == pos2->mpAtom1) && (pos1->mpAtom2 == pos2->mpAtom2))
-                   ||((pos1->mpAtom2 == pos2->mpAtom1) && (pos1->mpAtom1 == pos2->mpAtom2))) 
+                   ||((pos1->mpAtom2 == pos2->mpAtom1) && (pos1->mpAtom1 == pos2->mpAtom2)))
                   &&pos1->mvRotatedAtomList.size() == pos2->mvRotatedAtomList.size())
                {
                   bool ident=true;
@@ -5568,7 +5554,7 @@ void Molecule::BuildRotorGroup()
       }
    }
    //cout<<endl;
-   
+
    // Label free torsions
    for(vector<MolBond*>::iterator pos=mvpBond.begin();pos!=mvpBond.end();++pos)
       (*pos)->SetFreeTorsion(false);
@@ -5578,7 +5564,7 @@ void Molecule::BuildRotorGroup()
       vector<MolBond*>::iterator  bd=this->FindBond((*pos->mpAtom1),(*pos->mpAtom2));
       if(bd!=mvpBond.end()) (*bd)->SetFreeTorsion(true);
    }
-   
+
    mClockRotorGroup.Click();
    VFN_DEBUG_EXIT("Molecule::BuildRotorGroup()",5)
 }
@@ -5613,7 +5599,7 @@ void Molecule::BuildStretchModeBondLength()
          const set<MolAtom*> *pConn;
          if(j==1) pConn=&(mConnectivityTable[atom1]);
          else pConn=&(mConnectivityTable[atom2]);
-         
+
          if(j==1)
             mvStretchModeBondLength.push_back(StretchModeBondLength(mvpBond[i]->GetAtom2(),
                                                                     mvpBond[i]->GetAtom1(),
@@ -5624,7 +5610,7 @@ void Molecule::BuildStretchModeBondLength()
                                                                     mvpBond[i]));
          if(j==1) mvStretchModeBondLength.back().mvTranslatedAtomList.insert(atom1);
          if(j==2) mvStretchModeBondLength.back().mvTranslatedAtomList.insert(atom2);
-         
+
          for(set<MolAtom*>::const_iterator pos=pConn->begin();pos!=pConn->end();++pos)
          {
             if((j==1)&&(*pos==atom2)) continue;
@@ -5654,7 +5640,7 @@ void Molecule::BuildStretchModeBondLength()
       }
    }
    TAU_PROFILE_STOP(timer1);
-   
+
    // find rigid groups broken by each mode
    for(list<StretchModeBondLength>::iterator pos=mvStretchModeBondLength.begin();
        pos!=mvStretchModeBondLength.end();)
@@ -5843,7 +5829,7 @@ void Molecule::BuildStretchModeBondLength()
       if(pos->mvpBrokenDihedralAngle.size()>0)
       {
          cout<<endl<<"       Broken dihedral angles:";
-         for(map<const MolDihedralAngle*,REAL>::const_iterator 
+         for(map<const MolDihedralAngle*,REAL>::const_iterator
              angle=pos->mvpBrokenDihedralAngle.begin();
              angle!=pos->mvpBrokenDihedralAngle.end();++angle)
             cout<<angle->first->GetName()<<", ";
@@ -5933,7 +5919,7 @@ void Molecule::BuildStretchModeBondAngle()
                //if(j==1)mvStretchModeBondAngle.back().mvRotatedAtomList.erase(*pos2);
                //if(j==2)mvStretchModeBondAngle.back().mvRotatedAtomList.erase(*pos1);
                mvStretchModeBondAngle.back().mvRotatedAtomList.erase(mvpAtom[i]);
-               
+
                if(  (mvStretchModeBondAngle.back().mvRotatedAtomList.size()>=((mvpAtom.size()+1)/2))
                   ||(mvStretchModeBondAngle.back().mvRotatedAtomList.size()==0))
                {
@@ -5961,7 +5947,7 @@ void Molecule::BuildStretchModeBondAngle()
                      mvStretchModeBondAngle.pop_back();
                   }
                }
-               
+
             }
          }
       }
@@ -6180,7 +6166,7 @@ void Molecule::BuildStretchModeBondAngle()
       if(pos->mvpBrokenDihedralAngle.size()>0)
       {
          cout<<endl<<"       Broken dihedral angles:";
-         for(map<const MolDihedralAngle*,REAL>::const_iterator 
+         for(map<const MolDihedralAngle*,REAL>::const_iterator
              angle=pos->mvpBrokenDihedralAngle.begin();
              angle!=pos->mvpBrokenDihedralAngle.end();++angle)
             cout<<angle->first->GetName()<<", ";
@@ -6224,7 +6210,7 @@ void Molecule::BuildStretchModeTorsion()
          mvStretchModeTorsion.push_back(StretchModeTorsion(*atom1,*atom2,0));
          mvStretchModeTorsion.back().mvRotatedAtomList.insert(atom1);
          mvStretchModeTorsion.back().mvRotatedAtomList.insert(atom2);
-         
+
          for(set<MolAtom*>::const_iterator pos=pConn->begin();pos!=pConn->end();++pos)
          {
             if((*pos==atom2)||(*pos==atom1)) continue;
@@ -6233,7 +6219,7 @@ void Molecule::BuildStretchModeTorsion()
          }
          mvStretchModeTorsion.back().mvRotatedAtomList.erase(atom1);
          mvStretchModeTorsion.back().mvRotatedAtomList.erase(atom2);
-         
+
          for(vector<MolDihedralAngle*>::const_iterator dih=mvpDihedralAngle.begin();dih!=mvpDihedralAngle.end();++dih)
          {
             // :TODO: There are some other weird cases to take into account,
@@ -6262,7 +6248,7 @@ void Molecule::BuildStretchModeTorsion()
                }
             }
          }
-         
+
          if(mvStretchModeTorsion.size()>1)
          {//Duplicate ?
             // Does not work with a const_reverse_iterator ?
@@ -6271,7 +6257,7 @@ void Molecule::BuildStretchModeTorsion()
             ++mode;
             for(;mode!=mvStretchModeTorsion.rend();++mode)
             {
-               if( (  ((mode->mpAtom1==atom1)&&(mode->mpAtom2==atom2)) 
+               if( (  ((mode->mpAtom1==atom1)&&(mode->mpAtom2==atom2))
                     ||((mode->mpAtom1==atom2)&&(mode->mpAtom2==atom1)))
                   &&(mode->mvRotatedAtomList==mvStretchModeTorsion.back().mvRotatedAtomList))
                {
@@ -6304,7 +6290,7 @@ void Molecule::BuildStretchModeTorsion()
          const set<MolAtom*> *pConn;
          if(j==1) pConn=&(mConnectivityTable[atom1]);
          else pConn=&(mConnectivityTable[atom2]);
-         
+
          for(set<MolAtom*>::const_iterator pos=pConn->begin();pos!=pConn->end();++pos)
          {
             if((*pos==atom2)||(*pos==atom1)) continue;
@@ -6315,7 +6301,7 @@ void Molecule::BuildStretchModeTorsion()
                                      mvStretchModeTorsion.back().mvRotatedAtomList);
             mvStretchModeTorsion.back().mvRotatedAtomList.erase(atom1);
             mvStretchModeTorsion.back().mvRotatedAtomList.erase(atom2);
-            
+
             for(vector<MolDihedralAngle*>::const_iterator dih=mvpDihedralAngle.begin();dih!=mvpDihedralAngle.end();++dih)
             {
                // :TODO: There are some other weird cases to take into account,
@@ -6344,7 +6330,7 @@ void Molecule::BuildStretchModeTorsion()
                   }
                }
             }
-            
+
             if(mvStretchModeTorsion.size()>1)
             {//Duplicate ?
                // Does not work with a const_reverse_iterator ?
@@ -6353,7 +6339,7 @@ void Molecule::BuildStretchModeTorsion()
                ++mode;
                for(;mode!=mvStretchModeTorsion.rend();++mode)
                {
-                  if( (  ((mode->mpAtom1==atom1)&&(mode->mpAtom2==atom2)) 
+                  if( (  ((mode->mpAtom1==atom1)&&(mode->mpAtom2==atom2))
                        ||((mode->mpAtom1==atom2)&&(mode->mpAtom2==atom1)))
                      &&(mode->mvRotatedAtomList==mvStretchModeTorsion.back().mvRotatedAtomList))
                   {
@@ -6558,7 +6544,7 @@ void Molecule::BuildStretchModeTorsion()
 
    for(unsigned long i=0;i<5;++i) this->ClearParamSet(paramSetRandom[i]);
    this->RestoreParamSet(mLocalParamSet);
-   
+
    #ifdef __DEBUG__
    cout<<"List of Dihedral Angle stretch modes("<<mvStretchModeTorsion.size()<<")"<<endl;
    for(list<StretchModeTorsion>::const_iterator pos=mvStretchModeTorsion.begin();
@@ -6572,7 +6558,7 @@ void Molecule::BuildStretchModeTorsion()
       {
          cout<<(*atom)->GetName()<<",";
       }
-      if(pos->mpDihedralAngle!=0) 
+      if(pos->mpDihedralAngle!=0)
          cout<<endl<< "      ->restrained by dihedral angle "<<pos->mpDihedralAngle->GetName()
              <<"to :"<<pos->mpDihedralAngle->GetAngle0()*RAD2DEG
              <<"�, sigma="<<pos->mpDihedralAngle->GetAngleSigma()*RAD2DEG
@@ -6594,7 +6580,7 @@ void Molecule::BuildStretchModeTorsion()
       if(pos->mvpBrokenDihedralAngle.size()>0)
       {
          cout<<endl<<"       Broken dihedral angles:";
-         for(map<const MolDihedralAngle*,REAL>::const_iterator 
+         for(map<const MolDihedralAngle*,REAL>::const_iterator
              angle=pos->mvpBrokenDihedralAngle.begin();
              angle!=pos->mvpBrokenDihedralAngle.end();++angle)
             cout<<angle->first->GetName()<<", ";
@@ -6617,7 +6603,7 @@ void Molecule::BuildStretchModeTwist()
    VFN_DEBUG_ENTRY("Molecule::BuildStretchModeTwist()",7)
    this->BuildConnectivityTable();
    mvStretchModeTwist.clear();
-   
+
    // For each pair of atoms, build an internal chain to twist.
    for(vector<MolAtom*>::const_iterator atom1=this->GetAtomList().begin();
        atom1!=this->GetAtomList().end();++atom1)
@@ -6669,7 +6655,7 @@ void Molecule::BuildStretchModeTwist()
                   ++mode;
                   for(;mode!=mvStretchModeTwist.rend();++mode)
                   {
-                     if( (  ((mode->mpAtom1==*atom1)&&(mode->mpAtom2==*atom2)) 
+                     if( (  ((mode->mpAtom1==*atom1)&&(mode->mpAtom2==*atom2))
                           ||((mode->mpAtom1==*atom2)&&(mode->mpAtom2==*atom1)))
                         &&(mode->mvRotatedAtomList==mvStretchModeTwist.back().mvRotatedAtomList))
                      {
@@ -6691,7 +6677,7 @@ void Molecule::BuildStretchModeTwist()
                   list<StretchModeTorsion>::reverse_iterator mode;
                   for(mode=mvStretchModeTorsion.rbegin();mode!=mvStretchModeTorsion.rend();++mode)
                   {
-                     if( (  ((mode->mpAtom1==*atom1)&&(mode->mpAtom2==*atom2)) 
+                     if( (  ((mode->mpAtom1==*atom1)&&(mode->mpAtom2==*atom2))
                           ||((mode->mpAtom1==*atom2)&&(mode->mpAtom2==*atom1)))
                         &&(mode->mvRotatedAtomList==mvStretchModeTwist.back().mvRotatedAtomList))
                      {
@@ -6829,7 +6815,7 @@ void Molecule::BuildStretchModeTwist()
    }
    for(unsigned long i=0;i<5;++i) this->ClearParamSet(paramSetRandom[i]);
    this->RestoreParamSet(mLocalParamSet);
-   
+
    #ifdef __DEBUG__
    cout<<"List of Twist stretch modes("<<mvStretchModeTwist.size()<<")"<<endl;
    for(list<StretchModeTwist>::const_iterator pos=mvStretchModeTwist.begin();
@@ -6860,7 +6846,7 @@ void Molecule::BuildStretchModeTwist()
       if(pos->mvpBrokenDihedralAngle.size()>0)
       {
          cout<<endl<<"       Broken dihedral angles:";
-         for(map<const MolDihedralAngle*,REAL>::const_iterator 
+         for(map<const MolDihedralAngle*,REAL>::const_iterator
              angle=pos->mvpBrokenDihedralAngle.begin();
              angle!=pos->mvpBrokenDihedralAngle.end();++angle)
             cout<<angle->first->GetName()<<", ";
@@ -6878,7 +6864,7 @@ void Molecule::TuneGlobalOptimRotationAmplitude()
    unsigned long initialConfig=this->CreateParamSet("Initial Configuration");
    const unsigned int nbTest=100;
 
-   // First we store in mBaseRotationAmplitude the cumulated atomic displacement 
+   // First we store in mBaseRotationAmplitude the cumulated atomic displacement
    // for nbTest rotations of 0.01 rad
    for(list<StretchModeBondAngle>::iterator pos=mvStretchModeBondAngle.begin();
        pos!=mvStretchModeBondAngle.end();++pos) pos->mBaseAmplitude=0;
@@ -7059,7 +7045,7 @@ void Molecule::BuildFlipGroup()
    VFN_DEBUG_ENTRY("Molecule::BuildFlipGroup()",5)
    TAU_PROFILE("Molecule::BuildFlipGroup()","void ()",TAU_DEFAULT);
    mvFlipGroup.clear();
-   
+
    for(vector<MolAtom*>::const_iterator atom0=this->GetAtomList().begin();
        atom0!=this->GetAtomList().end();++atom0)
    {
@@ -7096,7 +7082,7 @@ void Molecule::BuildFlipGroup()
                      foundRing=true;
                }
                unsigned long flipSize=0;
-               for(list<pair<const MolAtom *,set<MolAtom*> > >::const_iterator 
+               for(list<pair<const MolAtom *,set<MolAtom*> > >::const_iterator
                    chain=mvFlipGroup.back().mvRotatedChainList.begin();
                    chain!=mvFlipGroup.back().mvRotatedChainList.end();++chain)
                    flipSize+=chain->second.size();
@@ -7127,17 +7113,17 @@ void Molecule::BuildFlipGroup()
             chain!=pos->mvRotatedChainList.end();++chain)
          for(set<MolAtom *>::const_iterator at=chain->second.begin();at!=chain->second.end();++at)
             fullset.insert(*at);
-      
+
       bool keep=true;
       for(vector<RigidGroup*>::const_iterator group=mvRigidGroup.begin(); group!=mvRigidGroup.end();++group)
       {
          unsigned long ct=0;
          for(set<MolAtom *>::const_iterator at=fullset.begin();at!=fullset.end();++at)
             ct+=(*group)->count(*at);
-         
+
          if((ct>0)&&(ct<(*group)->size())) {keep=false; break;}
       }
-      
+
       if(!keep)
       {
          cout <<"EXCLUDING flip group (breaking a rigid group): "
@@ -7156,7 +7142,7 @@ void Molecule::BuildFlipGroup()
    for(list<FlipGroup>::iterator pos=mvFlipGroup.begin(); pos!=mvFlipGroup.end();)
    {
        bool erase = false;
-       for(int i=0;i<mvNonFlipAtom.size();i++) {
+       for(size_t i = 0; i < mvNonFlipAtom.size(); i++) {
            if(pos->mpAtom0->GetName().compare(mvNonFlipAtom[i]->GetName())==0) {
               erase = true;
               break;
@@ -7167,12 +7153,12 @@ void Molecule::BuildFlipGroup()
            pos=mvFlipGroup.erase(pos);
        } else {
            pos++;
-       }       
+       }
    }
    // List them
    this->SaveParamSet(mLocalParamSet);
    #if 1//def __DEBUG__
-   const REAL llk0=this->GetLogLikelihood();
+   // const REAL llk0=this->GetLogLikelihood();
    for(list<FlipGroup>::iterator pos=mvFlipGroup.begin();
        pos!=mvFlipGroup.end();++pos)
    {
@@ -7192,7 +7178,7 @@ void Molecule::BuildFlipGroup()
               <<pos->mpAtom1->GetName()<<"-"
               <<pos->mpAtom0->GetName()<<"-"
               <<pos->mpAtom2->GetName()<<" : ";
-         for(list<pair<const MolAtom *,set<MolAtom*> > >::const_iterator 
+         for(list<pair<const MolAtom *,set<MolAtom*> > >::const_iterator
              chain=pos->mvRotatedChainList.begin();
              chain!=pos->mvRotatedChainList.end();++chain)
          {
@@ -7281,8 +7267,8 @@ void Molecule::BuildStretchModeGroups()
           pos!=mode->mvpBrokenBondAngle.end();++pos)
           vpAngle[pos->first].insert(&(*mode));
 
-   
-   
+
+
    map<const MolDihedralAngle*,set<const StretchMode*> > vpDihed;
    for(list<StretchModeBondLength>::const_iterator mode=mvStretchModeBondLength.begin();
        mode!=mvStretchModeBondLength.end();++mode)
@@ -7343,7 +7329,7 @@ void Molecule::BuildStretchModeGroups()
    #endif
    mvpStretchModeFree.clear();
    mvpStretchModeNotFree.clear();
-   
+
    for(list<StretchModeBondLength>::iterator mode=mvStretchModeBondLength.begin();
        mode!=mvStretchModeBondLength.end();++mode)
    {
@@ -7352,7 +7338,7 @@ void Molecule::BuildStretchModeGroups()
       if(nb==0) mvpStretchModeFree.push_back(&(*mode));
       else mvpStretchModeNotFree.push_back(&(*mode));
    }
-   
+
    for(list<StretchModeBondAngle>::iterator mode=mvStretchModeBondAngle.begin();
        mode!=mvStretchModeBondAngle.end();++mode)
    {
@@ -7387,14 +7373,14 @@ void Molecule::BuildMDAtomGroups()
    set<MolAtom*> set0;
    for(vector<MolAtom*>::iterator pos=this->GetAtomList().begin();pos!=this->GetAtomList().end();++pos)
       set0.insert(*pos);
-   
+
    for(vector<MolAtom*>::iterator pat1=this->GetAtomList().begin();pat1!=this->GetAtomList().end();++pat1)
    {
       vBoundAtoms[*pat1]=set0;
       for(vector<MolAtom*>::iterator pat2=this->GetAtomList().begin();pat2!=this->GetAtomList().end();++pat2)
       {
          bool cont=false;
-         
+
          for(list<StretchModeBondLength>::iterator pstretch=this->GetStretchModeBondLengthList().begin();
             pstretch!=this->GetStretchModeBondLengthList().end();++pstretch)
          {
@@ -7411,13 +7397,13 @@ void Molecule::BuildMDAtomGroups()
             }
          }
          if(cont) continue;
-         
+
          for(list<StretchModeBondAngle>::iterator pstretch=this->GetStretchModeBondAngleList().begin();
             pstretch!=this->GetStretchModeBondAngleList().end();++pstretch)
          {
             //pstretch->mpAtom1 does not move relatively to any atom
             if((*pat1==pstretch->mpAtom1)||(*pat2==pstretch->mpAtom1)) continue;
-            
+
             set<MolAtom *>::iterator pos1=pstretch->mvRotatedAtomList.find(*pat1),
                                      pos2=pstretch->mvRotatedAtomList.find(*pat2);
             //:TODO: Take into account the special case of the atoms defining the bond angle
@@ -7432,13 +7418,13 @@ void Molecule::BuildMDAtomGroups()
             }
          }
          if(cont) continue;
-         
+
          for(list<StretchModeTorsion>::iterator pstretch=this->GetStretchModeTorsionList().begin();
             pstretch!=this->GetStretchModeTorsionList().end();++pstretch)
          {
             set<MolAtom *>::iterator pos1=pstretch->mvRotatedAtomList.find(*pat1),
                                      pos2=pstretch->mvRotatedAtomList.find(*pat2);
-            
+
             if(  (pos1!=pstretch->mvRotatedAtomList.end())&&(pos2==pstretch->mvRotatedAtomList.end())
                &&(*pat2!=pstretch->mpAtom1) &&(*pat2!=pstretch->mpAtom2) )
             {
@@ -7458,7 +7444,7 @@ void Molecule::BuildMDAtomGroups()
          }
       }
    }
-   
+
    // List remaining group of atoms, take care of rigid groups
    set<set<MolAtom*> > vBoundGroups;
    for(map<MolAtom*,set<MolAtom*> >::iterator pos=vBoundAtoms.begin();pos!=vBoundAtoms.end();++pos)
@@ -7492,25 +7478,25 @@ void Molecule::BuildMDAtomGroups()
       for(vector<MolBond*>::iterator pr=this->GetBondList().begin();pr!=this->GetBondList().end();++pr)
          if(  (pos->find(&(*pr)->GetAtom1())!=pos->end())
             ||(pos->find(&(*pr)->GetAtom2())!=pos->end())) vb.insert(*pr);
-      
+
       set<MolBondAngle*> va;
       for(vector<MolBondAngle*>::iterator pr=this->GetBondAngleList().begin();pr!=this->GetBondAngleList().end();++pr)
          if(  (pos->find(&(*pr)->GetAtom1())!=pos->end())
             ||(pos->find(&(*pr)->GetAtom2())!=pos->end())
             ||(pos->find(&(*pr)->GetAtom3())!=pos->end())) va.insert(*pr);
-      
+
       set<MolDihedralAngle*> vd;
       for(vector<MolDihedralAngle*>::iterator pr=this->GetDihedralAngleList().begin();pr!=this->GetDihedralAngleList().end();++pr)
          if(  (pos->find(&(*pr)->GetAtom1())!=pos->end())
             ||(pos->find(&(*pr)->GetAtom2())!=pos->end())
             ||(pos->find(&(*pr)->GetAtom3())!=pos->end())
             ||(pos->find(&(*pr)->GetAtom4())!=pos->end())) vd.insert(*pr);
-      
+
       set<MolAtom*> tmp= *pos;// Cannot pass *pos directly ? gcc bug evaluating const-ness?
       mvMDAtomGroup.push_back(MDAtomGroup(tmp,vb,va,vd));
       mvMDAtomGroup.back().Print(cout);
    }
-   
+
    // Create mvMDFullAtomGroup
    mvMDFullAtomGroup.clear();
    #if 1
@@ -7558,7 +7544,7 @@ void Molecule::UpdateScattCompList()const
       mScattCompList(i).mZ=mvpAtom[i]->GetZ();
       mScattCompList(i).mOccupancy=mvpAtom[i]->GetOccupancy()*mOccupancy;
    }
-  
+
   #ifdef RIGID_BODY_STRICT_EXPERIMENTAL
   // During an optimization, apply the translations & rotations of the rigid group parameters
   if(true)//this->IsBeingRefined())
@@ -7577,7 +7563,7 @@ void Molecule::UpdateScattCompList()const
         x0/=(*pos)->size();
         y0/=(*pos)->size();
         z0/=(*pos)->size();
-        
+
         // Apply rotation & translation to all atoms
         for(set<unsigned int>::iterator at=(*pos)->mvIdx.begin();at!=(*pos)->mvIdx.end();++at)
         {
@@ -7676,10 +7662,10 @@ void Molecule::InitOptions()
 
    static string optimizeOrientationName;
    static string optimizeOrientationChoices[2];
-   
+
    static string moleculeCenterName;
    static string moleculeCenterChoices[2];
-   
+
    static bool needInitNames=true;
    if(true==needInitNames)
    {
@@ -7692,7 +7678,7 @@ void Molecule::InitOptions()
       FlipName="Enable Flipping";
       FlipChoice[0]="Yes";
       FlipChoice[1]="No";
-      
+
       autoOptimizeConformationName="Auto Optimize Starting Conformation";
       autoOptimizeConformationChoices[0]="Yes";
       autoOptimizeConformationChoices[1]="No";
@@ -7700,11 +7686,11 @@ void Molecule::InitOptions()
       optimizeOrientationName="Optimize Orientation";
       optimizeOrientationChoices[0]="Yes";
       optimizeOrientationChoices[1]="No";
-      
+
       moleculeCenterName="Rotation Center";
       moleculeCenterChoices[0]="Geometrical center (recommended)";
       moleculeCenterChoices[1]="User-chosen Atom";
-      
+
       needInitNames=false;
    }
    mFlexModel.Init(3,&Flexname,Flexchoices);
@@ -7714,7 +7700,7 @@ void Molecule::InitOptions()
    mFlipModel.Init(2, &FlipName, FlipChoice);
    mFlipModel.SetChoice(0);
    this->AddOption(&mFlipModel);
-   
+
    mAutoOptimizeConformation.Init(2,&autoOptimizeConformationName,
                                   autoOptimizeConformationChoices);
    this->AddOption(&mAutoOptimizeConformation);
@@ -7724,7 +7710,7 @@ void Molecule::InitOptions()
 
    mMoleculeCenter.Init(2,&moleculeCenterName,moleculeCenterChoices);
    this->AddOption(&mMoleculeCenter);
-   
+
    VFN_DEBUG_EXIT("Molecule::InitOptions",7)
 }
 
@@ -7757,13 +7743,13 @@ void Molecule::FlipAtomGroup(const FlipGroup& group, const bool keepCenter)
       REAL v02z=group.mpAtom2->Z()-group.mpAtom0->Z();
       const REAL norm02=sqrt(v02x*v02x+v02y*v02y+v02z*v02z+1e-7);
       v02x /= norm02;v02y /= norm02;v02z /= norm02;
-      
+
       REAL v12x=group.mpAtom2->X()-group.mpAtom1->X();
       REAL v12y=group.mpAtom2->Y()-group.mpAtom1->Y();
       REAL v12z=group.mpAtom2->Z()-group.mpAtom1->Z();
       const REAL norm12=sqrt(v12x*v12x+v12y*v12y+v12z*v12z+1e-7);
       v12x /= norm12;v12y /= norm12;v12z /= norm12;
-      
+
       REAL v0mx=group.mpAtom0->X()-(group.mpAtom1->X()+group.mpAtom2->X())/2.;
       REAL v0my=group.mpAtom0->Y()-(group.mpAtom1->Y()+group.mpAtom2->Y())/2.;
       REAL v0mz=group.mpAtom0->Z()-(group.mpAtom1->Z()+group.mpAtom2->Z())/2.;
@@ -7779,8 +7765,8 @@ void Molecule::FlipAtomGroup(const FlipGroup& group, const bool keepCenter)
          REAL v012z=v01x*v02y-v01y*v02x;
          const REAL norm012=sqrt(v012x*v012x+v012y*v012y+v012z*v012z+1e-7);
          v012x /= norm012;v012y /= norm012;v012z /= norm012;
-         
-      
+
+
          for(list<pair<const MolAtom *,set<MolAtom*> > >::const_iterator
              chain=group.mvRotatedChainList.begin();
              chain!=group.mvRotatedChainList.end();++chain)
@@ -7836,7 +7822,7 @@ void Molecule::ResetRigidGroupsPar()const
       x0/=(*pos)->size();
       y0/=(*pos)->size();
       z0/=(*pos)->size();
-      
+
       // Apply rotation & translation to all atoms
       for(set<MolAtom *>::iterator at=(*pos)->begin();at!=(*pos)->end();++at)
       {
@@ -7846,7 +7832,7 @@ void Molecule::ResetRigidGroupsPar()const
         (*at)->SetY(y+y0+(*pos)->mY);
         (*at)->SetZ(z+z0+(*pos)->mZ);
       }
-      
+
       // Reset the translation & rotation parameters, only useful during an optimization
       (*pos)->mX=0;
       (*pos)->mY=0;
