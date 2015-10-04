@@ -230,6 +230,7 @@
 		BF69C4CF124F8C310035CF57 /* WXFoxServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WXFoxServer.cpp; path = src/WXFoxServer.cpp; sourceTree = "<group>"; };
 		BF69C4D0124F8C310035CF57 /* WXGridWindow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WXGridWindow.cpp; path = src/WXGridWindow.cpp; sourceTree = "<group>"; };
 		BFE6AC680B886ACA007AFBA8 /* Indexing.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Indexing.cpp; path = ../ObjCryst/ObjCryst/Indexing.cpp; sourceTree = SOURCE_ROOT; };
+		BFF28EF51B2B2D6B00BAF012 /* libstdc++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.dylib"; path = "usr/lib/libstdc++.dylib"; sourceTree = SDKROOT; };
 		BFF7D0BF1478047800799F7A /* libwx_osx_cocoau_gl-3.0.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libwx_osx_cocoau_gl-3.0.a"; path = "../static-libs/lib/libwx_osx_cocoau_gl-3.0.a"; sourceTree = "<group>"; };
 		BFF7D0C01478047800799F7A /* libwx_osx_cocoau-3.0.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libwx_osx_cocoau-3.0.a"; path = "../static-libs/lib/libwx_osx_cocoau-3.0.a"; sourceTree = "<group>"; };
 		BFF7D0C11478047800799F7A /* libwxjpeg-3.0.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libwxjpeg-3.0.a"; path = "../static-libs/lib/libwxjpeg-3.0.a"; sourceTree = "<group>"; };
@@ -2074,6 +2075,7 @@
 		BFFCCB4F089028D300044EBA = {
 			isa = PBXGroup;
 			children = (
+				BFF28EF51B2B2D6B00BAF012 /* libstdc++.dylib */,
 				BFF7D0BF1478047800799F7A /* libwx_osx_cocoau_gl-3.0.a */,
 				BFF7D0C01478047800799F7A /* libwx_osx_cocoau-3.0.a */,
 				BFF7D0C11478047800799F7A /* libwxjpeg-3.0.a */,
