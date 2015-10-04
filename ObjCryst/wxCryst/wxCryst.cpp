@@ -413,7 +413,7 @@ void WXFieldString::ValidateUserInput()
 void WXFieldString::SetSize(int width, int height)
 {
    mpField->SetSize(width,height);
-   wxTheApp->GetTopWindow()->SendSizeEvent();
+   //wxTheApp->GetTopWindow()->SendSizeEvent();
 }
 
 void WXFieldString::SetToolTip(const wxString& tip){mpField->SetToolTip(tip);}
