@@ -78,6 +78,7 @@ GrdRslt::GrdRslt(int ID, wxString cost, wxString content)
     this->cost = cost;
     this->content = content;
     sent = false;
+	pending = false;
 }
 GrdRslt::~GrdRslt()
 {
@@ -109,8 +110,16 @@ FoxClient::~FoxClient()
       delete m_sendingTimer;
    }
 
-   if(mpClient!=0) mpClient->Destroy();
    delete m_DataMutex;
+   delete m_ResultsMutex;
+
+   if (mpClient != 0) {
+      mpClient->Destroy();
+	  //delete mpClient;
+	  mpClient = 0;
+   }
+   //if(mpClient!=0) mpClient->Destroy();
+  
 }
 void FoxClient::setNbOfAvailCPUs(int nb)
 {
@@ -264,7 +273,7 @@ void FoxClient::Disconnect()
     WriteMessageLog(_T("Disconnecting"));
     if(mpClient!=0) {
        mpClient->Destroy();
-       delete mpClient;
+       //delete mpClient;
        mpClient = 0;
     }
     m_DataMutex->Unlock();
@@ -281,7 +290,7 @@ bool FoxClient::ConnectClient(int nbOfTrial, wxString hostname)
    if(!ip.Hostname(m_hostname)) return false;
    
    if(mpClient==0) mpClient = new wxSocketClient(); 
-   //mpClient->SetEventHandler(*this, GRID_CLIENT_SOCKET_ID);
+   mpClient->SetEventHandler(*this, GRID_CLIENT_SOCKET_ID);
    mpClient->SetNotify( wxSOCKET_CONNECTION_FLAG |
                         wxSOCKET_INPUT_FLAG |
                         wxSOCKET_LOST_FLAG | wxSOCKET_OUTPUT_FLAG);
@@ -699,12 +708,11 @@ void FoxClient::OnSendResults(wxTimerEvent& event)
     bool newResults = false;
 
     //send all result with value sent=false
-    //don't set sent=true!
     for(int i=0;i<m_results.size();i++) {
-        if(!m_results[i].sent) {
+        if(m_results[i].sent==false && m_results[i].pending==false) {
             WriteMessageLog(_T("result found"));
             message+=m_results[i].content+_T("\n");
-            //m_results[i].sent=true;
+            m_results[i].pending=true;
             newResults = true;
         }
     }
@@ -715,15 +723,33 @@ void FoxClient::OnSendResults(wxTimerEvent& event)
     if(newResults) {
         //if results were sent
         if(SendResult(message)) {
-            WriteMessageLog(_T("result(s) sent"));
-            //set sent=true
+			WriteMessageLog(_T("result(s) sent"));
+			if (m_ResultsMutex->Lock() != wxMUTEX_NO_ERROR) {
+				WriteMessageLog(_T("Error: Mutex Locked (FoxClient::OnSendResults)"));
+				WriteMessageLog(_T("Results will be sent again!"));
+				return;
+			}
             for(int i=0;i<m_results.size();i++) {
-                if(!m_results[i].sent) {
+                if(m_results[i].pending) {
                     m_results[i].sent=true;
+					m_results[i].pending = false;
                 }
             }
+			m_ResultsMutex->Unlock();
+
         } else {
-            WriteMessageLog(_T("result(s) NOT sent"));
+			if (m_ResultsMutex->Lock() != wxMUTEX_NO_ERROR) {
+				WriteMessageLog(_T("Error: Mutex Locked (FoxClient::OnSendResults)"));
+				return;
+			}
+			for (int i = 0; i<m_results.size(); i++) {
+				if(m_results[i].pending) {
+					m_results[i].sent = false;
+					m_results[i].pending = false;
+				}
+			}
+			m_ResultsMutex->Unlock();
+            WriteMessageLog(_T("result(s) NOT sent, they will be sent again later..."));
         }
     }
 }

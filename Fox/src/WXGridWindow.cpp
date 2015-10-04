@@ -35,7 +35,14 @@ wxWindow(parent,-1)
 }
 WXGrigWindow::~WXGrigWindow(void)
 {
-   
+    if (m_WXFoxServer != NULL) {
+        m_WXFoxServer->Clear();
+        delete m_WXFoxServer;        
+    }
+    if (m_WXFoxClient != NULL) {
+        m_WXFoxClient->Clear();
+        delete m_WXFoxClient;
+    }
 }
 WXFoxServer *WXGrigWindow::StartServer()
 {
@@ -71,18 +78,19 @@ void WXGrigWindow::DataLoaded()
    
    if(m_WXFoxServer!=NULL) {
       m_WXFoxServer->m_dataLoaded = true;
-   }   
-   
+   }      
 }
 void WXGrigWindow::Clear()
 {
    if(m_WXFoxServer!=NULL) {
       m_WXFoxServer->Clear();
+      delete m_WXFoxServer;
       m_WXFoxServer=NULL;
    }
    
    if(m_WXFoxClient!=NULL) {
       m_WXFoxClient->Clear();
+      delete m_WXFoxClient;
       m_WXFoxClient=NULL;
    }
 }

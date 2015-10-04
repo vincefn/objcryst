@@ -34,19 +34,18 @@ wxWindow(parent,-1)
 }
 WXFoxClient::~WXFoxClient(void)
 {
-   if(m_connecting) {
-      m_connecting=false;
-      if(m_ConnectTimer->IsRunning()) m_ConnectTimer->Stop();
-   }
+    Clear();
 }
 void WXFoxClient::Clear()
 {
    if(m_connecting) {
       m_connecting=false;
       if(m_ConnectTimer->IsRunning()) m_ConnectTimer->Stop();
+   }   
+   if (m_FoxClient != 0) {
+       delete m_FoxClient;
+       m_FoxClient = 0;
    }
-
-   delete m_FoxClient;
 }
 void WXFoxClient::InitClient()
 {
