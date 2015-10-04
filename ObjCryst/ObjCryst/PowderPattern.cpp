@@ -1148,7 +1148,6 @@ long PowderPatternDiffraction::GetNbReflBelowMaxSinThetaOvLambda()const
    const long nbpoint=mpParentPowderPattern->GetNbPointUsed();
    if((mNbReflUsed>0)&&(mNbReflUsed<mNbRefl))
    {
-      //:TODO: handle anisotropic profiles ?
       if(  (mvReflProfile[mNbReflUsed  ].first>nbpoint)
          &&(mvReflProfile[mNbReflUsed-1].first<=nbpoint)) return mNbReflUsed;
    }

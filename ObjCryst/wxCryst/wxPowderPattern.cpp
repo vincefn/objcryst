@@ -3639,6 +3639,7 @@ bool WXTextureEllipsoid::OnChangeName(const int id)
 ////////////////////////////////////////////////////////////////////////
 static const long ID_POWDERDIFF_PROFILE=                       WXCRYST_ID();
 static const long ID_POWDERDIFF_PROFILE_PV=                    WXCRYST_ID();
+static const long ID_POWDERDIFF_PROFILE_PV_ANISO=              WXCRYST_ID();
 static const long ID_POWDERDIFF_LEBAIL=                        WXCRYST_ID(); 
 static const long ID_POWDERDIFF_PROFILEFITTINGMODE=            WXCRYST_ID(); 
 static const long ID_POWDERDIFF_USELOCALLATTICEPAR=             WXCRYST_ID();
@@ -3648,6 +3649,7 @@ BEGIN_EVENT_TABLE(WXPowderPatternDiffraction, wxWindow)
    EVT_MENU(ID_POWDERDIFF_SAVEHKLFCALC, 
                                             WXPowderPatternDiffraction::OnMenuSaveHKLFcalc)
    EVT_MENU(ID_POWDERDIFF_PROFILE_PV,       WXPowderPatternDiffraction::OnChangeProfile)
+   EVT_MENU(ID_POWDERDIFF_PROFILE_PV_ANISO, WXPowderPatternDiffraction::OnChangeProfile)
    EVT_MENU(ID_POWDERDIFF_PROFILE_DEPV,     WXPowderPatternDiffraction::OnChangeProfile)
    EVT_MENU(ID_POWDERDIFF_LEBAIL,           WXPowderPatternDiffraction::OnLeBail)
    EVT_CHECKBOX(ID_POWDERDIFF_PROFILEFITTINGMODE,WXPowderPatternDiffraction::OnLeBail)
@@ -3668,7 +3670,9 @@ mFreezeLatticePar(false),mFrozenLatticePar(6),mNeedLayout(false)
                                 "Save HKL Fcalc");
       mpMenuBar->AddMenu("Profile",ID_POWDERDIFF_PROFILE);
          mpMenuBar->AddMenuItem(ID_POWDERDIFF_PROFILE,ID_POWDERDIFF_PROFILE_PV,
-                                "Pseudo-Voigt (X-Ray & monochromatic neutron)");
+                          "Pseudo-Voigt (X-Ray & monochromatic neutron)");
+         mpMenuBar->AddMenuItem(ID_POWDERDIFF_PROFILE,ID_POWDERDIFF_PROFILE_PV_ANISO,
+                          "Anisotropic Pseudo-Voigt (X-Ray & monochromatic neutron)");
          mpMenuBar->AddMenuItem(ID_POWDERDIFF_PROFILE,ID_POWDERDIFF_PROFILE_DEPV,
                                 "Double-Exponential Pseudo-Voigt (neutron TOF)");
          mpMenuBar->GetMenu(ID_POWDERDIFF_PROFILE).AppendSeparator();
@@ -3824,6 +3828,46 @@ void WXPowderPatternDiffraction::OnChangeProfile(wxCommandEvent & event)
             !="ReflectionProfilePseudoVoigt")
          {
             ReflectionProfilePseudoVoigt *p= new ReflectionProfilePseudoVoigt;
+            if(mpPowderPatternDiffraction->mpReflectionProfile->GetClassName()=="ReflectionProfilePseudoVoigtAnisotropic")
+            {
+               p->GetPar("U").SetValue(mpPowderPatternDiffraction->mpReflectionProfile->GetPar("U").GetValue());
+               p->GetPar("V").SetValue(mpPowderPatternDiffraction->mpReflectionProfile->GetPar("V").GetValue());
+               p->GetPar("W").SetValue(mpPowderPatternDiffraction->mpReflectionProfile->GetPar("W").GetValue());
+               p->GetPar("Eta0").SetValue(mpPowderPatternDiffraction->mpReflectionProfile->GetPar("Eta0").GetValue());
+               p->GetPar("Eta1").SetValue(mpPowderPatternDiffraction->mpReflectionProfile->GetPar("Eta1").GetValue());
+               p->GetPar("Asym0").SetValue(mpPowderPatternDiffraction->mpReflectionProfile->GetPar("Asym0").GetValue());
+               p->GetPar("Asym1").SetValue(mpPowderPatternDiffraction->mpReflectionProfile->GetPar("Asym1").GetValue());
+               p->GetPar("Asym2").SetValue(mpPowderPatternDiffraction->mpReflectionProfile->GetPar("Asym2").GetValue());
+            }
+            mpPowderPatternDiffraction->SetProfile(p);
+            add=true;
+         }
+   }
+   if(event.GetId()==ID_POWDERDIFF_PROFILE_PV_ANISO)
+   {
+      if(mpPowderPatternDiffraction->mpReflectionProfile==0)
+      {
+         ReflectionProfilePseudoVoigtAnisotropic *p= new ReflectionProfilePseudoVoigtAnisotropic;
+         mpPowderPatternDiffraction->SetProfile(p);
+         add=true;
+      }
+      else
+         if(mpPowderPatternDiffraction->mpReflectionProfile->GetClassName()
+            !="ReflectionProfilePseudoVoigtAnisotropic")
+         {
+            ReflectionProfilePseudoVoigtAnisotropic *p= new ReflectionProfilePseudoVoigtAnisotropic;
+            if(mpPowderPatternDiffraction->mpReflectionProfile->GetClassName()=="ReflectionProfilePseudoVoigt")
+            {
+               p->GetPar("U").SetValue(mpPowderPatternDiffraction->mpReflectionProfile->GetPar("U").GetValue());
+               p->GetPar("V").SetValue(mpPowderPatternDiffraction->mpReflectionProfile->GetPar("V").GetValue());
+               p->GetPar("W").SetValue(mpPowderPatternDiffraction->mpReflectionProfile->GetPar("W").GetValue());
+               p->GetPar("Eta0").SetValue(mpPowderPatternDiffraction->mpReflectionProfile->GetPar("Eta0").GetValue());
+               p->GetPar("Eta1").SetValue(mpPowderPatternDiffraction->mpReflectionProfile->GetPar("Eta1").GetValue());
+               p->GetPar("Asym0").SetValue(mpPowderPatternDiffraction->mpReflectionProfile->GetPar("Asym0").GetValue());
+               p->GetPar("Asym1").SetValue(mpPowderPatternDiffraction->mpReflectionProfile->GetPar("Asym1").GetValue());
+               p->GetPar("Asym2").SetValue(mpPowderPatternDiffraction->mpReflectionProfile->GetPar("Asym2").GetValue());
+               p->GetPar("X").SetValue(sqrt(mpPowderPatternDiffraction->mpReflectionProfile->GetPar("W").GetValue()));
+            }
             mpPowderPatternDiffraction->SetProfile(p);
             add=true;
          }
@@ -4170,7 +4214,9 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
    {
       bool fitzero=false,fitwidth0=false,fitwidth=false,fiteta=false,
          fitasym=false,fitdispltransp=false,fitbackgd=false,fitcell=false,
+         fitanisotropic=false,
          fitTOFInstWidth=false,fitTOFBroadening=false;
+
       if(mpDiff->GetProfile().GetClassName()=="ReflectionProfileDoubleExponentialPseudoVoigt")
       {
          mpDiff->GetProfile().Print();
@@ -4194,11 +4240,14 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
       try{
          mLSQ.SetParIsFixed(gpRefParTypeScattDataScale,false);
          
-         // :TODO: take care of other profiles than pseudo-voigt (DE-PV)
          if(fitzero) mLSQ.SetParIsFixed(mpDiff->GetParentPowderPattern().GetPar("Zero"),false);
          if(fitwidth0) 
            for(map<PowderPatternDiffraction *,bool>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
              if(pos->second) mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("W"),false);
+         // This will be ignored for profiles other than ReflectionProfilePseudoVoigtAnisotropic (parameter not found)
+         if(fitwidth0)
+            for(map<PowderPatternDiffraction *,bool>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
+               if(pos->second) mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("X"),false);
          if(fitzero||fitwidth0)
          {
             mpLog->AppendText(wxString::Format(_T("Fitting zero shift && constant width\n")));
@@ -4218,7 +4267,14 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
          if(fitwidth) 
            for(map<PowderPatternDiffraction *,bool>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
              if(pos->second) mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("V"),false);
-         if(fiteta) 
+         // This will be ignored for profiles other than ReflectionProfilePseudoVoigtAnisotropic (parameter not found)
+         if(fitwidth)
+            for(map<PowderPatternDiffraction *,bool>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
+               if(pos->second) mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("Y"),false);
+         if(fitwidth)
+            for(map<PowderPatternDiffraction *,bool>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
+               if(pos->second) mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("P"),false);
+         if(fiteta)
            for(map<PowderPatternDiffraction *,bool>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
              if(pos->second) mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("Eta0"),false);
          if(fitwidth||fiteta)
@@ -4392,16 +4448,16 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
                                                 mpDiff->GetParentPowderPattern().GetChi2()
                                                 /mpDiff->GetParentPowderPattern().GetNbPointUsed()));
          mpLog->AppendText(wxString::Format(_T("2 Le Bail cycles...\n")));
-         if(dlgProgress.Update(13,_T("Manual Le Bail + Profile fitting"))==false) return;
+         if(dlgProgress.Update(9,_T("Manual Le Bail + Profile fitting"))==false) return;
          mpDiff->ExtractLeBail(2);
          mpLog->AppendText(wxString::Format(_T("                  => Rwp=%6.3f%%, GoF=%7.3f\n"),
                                                 mpDiff->GetParentPowderPattern().GetRw()*100,
                                                 mpDiff->GetParentPowderPattern().GetChi2()
                                                 /mpDiff->GetParentPowderPattern().GetNbPointUsed()));
          mpLog->AppendText(wxString::Format(_T("3 LSQ cycles...\n")));
-         if(dlgProgress.Update(16,_T("Manual Le Bail + Profile fitting"))==false) return;
+         if(dlgProgress.Update(13,_T("Manual Le Bail + Profile fitting"))==false) return;
          mLSQ.Refine(3,true,false);
-         if(dlgProgress.Update(19,_T("Manual Le Bail + Profile fitting"))==false) return;
+         if(dlgProgress.Update(17,_T("Manual Le Bail + Profile fitting"))==false) return;
          mpDiff->GetParentPowderPattern().UpdateDisplay();
          mpLog->AppendText(wxString::Format(_T("                  => Rwp=%6.3f%%, GoF=%7.3f\n"),
                                                 mpDiff->GetParentPowderPattern().GetRw()*100,
@@ -4749,6 +4805,154 @@ bool WXProfilePseudoVoigt::OnChangeName(const int id)
 {
    return false;
 }
+
+////////////////////////////////////////////////////////////////////////
+//
+//    WXProfilePseudoVoigtAnisotropic
+//
+////////////////////////////////////////////////////////////////////////
+WXProfilePseudoVoigtAnisotropic::WXProfilePseudoVoigtAnisotropic(wxWindow *parent, ReflectionProfilePseudoVoigtAnisotropic *prof):
+WXCrystObj(parent),mpProfile(prof)
+{
+   VFN_DEBUG_ENTRY("WXProfilePseudoVoigtAnisotropic::WXProfilePseudoVoigtAnisotropic()",6)
+   mpWXTitle->SetLabel("Pseudo-Voigt Anisotropic profile");
+   mpWXTitle->SetForegroundColour(wxColour(0,0,255));
+   // Gaussian Width
+   wxBoxSizer* sizer1=new wxBoxSizer(wxHORIZONTAL);
+   WXCrystObjBasic* pFieldCagliotiU=mpProfile->GetPar("U").WXCreate(this);
+   WXCrystObjBasic* pFieldCagliotiV=mpProfile->GetPar("V").WXCreate(this);
+   WXCrystObjBasic* pFieldCagliotiW=mpProfile->GetPar("W").WXCreate(this);;
+   WXCrystObjBasic* pFieldScherrerP=mpProfile->GetPar("P").WXCreate(this);;
+   sizer1->Add(pFieldCagliotiU,0);
+   sizer1->Add(pFieldCagliotiV,0);
+   sizer1->Add(pFieldCagliotiW,0);
+   sizer1->Add(pFieldScherrerP,0);
+   mList.Add(pFieldCagliotiU);
+   mList.Add(pFieldCagliotiV);
+   mList.Add(pFieldCagliotiW);
+   mList.Add(pFieldScherrerP);
+   mpSizer->Add(sizer1);
+   pFieldCagliotiU->SetToolTip(_T("Gaussian Width Parameters:\n")
+                               _T("fwhm=[W+V*tan(theta)+U*tan^2(theta)+P/cos^2(theta)]^1/2"));
+   pFieldCagliotiV->SetToolTip(_T("Gaussian Width Parameters:\n")
+                               _T("fwhm=[W+V*tan(theta)+U*tan^2(theta)+P/cos^2(theta)]^1/2"));
+   pFieldCagliotiW->SetToolTip(_T("Gaussian Width Parameters:\n")
+                               _T("fwhm=[W+V*tan(theta)+U*tan^2(theta)+P/cos^2(theta)]^1/2"));
+   pFieldScherrerP->SetToolTip(_T("Gaussian Width Parameters:\n")
+                               _T("fwhm=[W+V*tan(theta)+U*tan^2(theta)+P/cos^2(theta)]^1/2"));
+   // Lorentzian & Mixing parameter
+   wxBoxSizer* sizer2=new wxBoxSizer(wxHORIZONTAL);
+   WXCrystObjBasic* pFieldEta0=mpProfile->GetPar("Eta0").WXCreate(this);
+   WXCrystObjBasic* pFieldEta1=mpProfile->GetPar("Eta1").WXCreate(this);
+   WXCrystObjBasic* pFieldX=mpProfile->GetPar("X").WXCreate(this);
+   WXCrystObjBasic* pFieldY=mpProfile->GetPar("Y").WXCreate(this);
+   sizer2->Add(pFieldEta0,0);
+   sizer2->Add(pFieldEta1,0);
+   sizer2->Add(pFieldX,0);
+   sizer2->Add(pFieldY,0);
+   mList.Add(pFieldX);
+   mList.Add(pFieldY);
+   mList.Add(pFieldEta0);
+   mList.Add(pFieldEta1);
+   mpSizer->Add(sizer2);
+   pFieldEta0->SetToolTip(_T("Gaussian/Lorentzian mixing parameters:\n")
+                          _T(" PV(x) = eta*L(x) + (1-eta)*G(x)\n\n")
+                          _T("eta=Eta0+Eta11*2theta"));
+
+   pFieldEta1->SetToolTip(_T("Gaussian/Lorentzian mixing parameters:\n")
+                          _T(" PV(x) = eta*L(x) + (1-eta)*G(x)\n\n")
+                          _T("eta=Eta0+Eta1*2theta"));
+
+   pFieldX->SetToolTip(_T("Lorentzian width:\n")
+                       _T(" FWHM(x) = X/cos(theta) + (Y + gam_L/sin^2(theta))*tan(theta)\n\n")
+                       _T("gam_L=gam_hh*H^2 + gam_kk*K^2 + gam_ll*L^2\n")
+                       _T("      +gam_hk*HK + gam_hl*HL + gam_kl*HL"));
+
+   pFieldY->SetToolTip(_T("Lorentzian width:\n")
+                       _T(" FWHM(x) = X/cos(theta) + (Y + gam_L/sin^2(theta))*tan(theta)\n\n")
+                       _T("gam_L=gam_hh*H^2 + gam_kk*K^2 + gam_ll*L^2\n")
+                       _T("      +gam_hk*HK + gam_hl*HL + gam_kl*HL"));
+
+   // Anisotropic coefficients
+   wxBoxSizer* sizerA=new wxBoxSizer(wxHORIZONTAL);
+   WXCrystObjBasic* pFieldGHH=mpProfile->GetPar("G_HH").WXCreate(this);
+   WXCrystObjBasic* pFieldGKK=mpProfile->GetPar("G_KK").WXCreate(this);
+   WXCrystObjBasic* pFieldGLL=mpProfile->GetPar("G_LL").WXCreate(this);
+   WXCrystObjBasic* pFieldGHK=mpProfile->GetPar("G_HK").WXCreate(this);
+   WXCrystObjBasic* pFieldGHL=mpProfile->GetPar("G_HL").WXCreate(this);
+   WXCrystObjBasic* pFieldGKL=mpProfile->GetPar("G_KL").WXCreate(this);
+   sizerA->Add(pFieldGHH,0);
+   sizerA->Add(pFieldGKK,0);
+   sizerA->Add(pFieldGLL,0);
+   sizerA->Add(pFieldGHK,0);
+   sizerA->Add(pFieldGHL,0);
+   sizerA->Add(pFieldGKL,0);
+   mList.Add(pFieldGHH);
+   mList.Add(pFieldGKK);
+   mList.Add(pFieldGLL);
+   mList.Add(pFieldGHK);
+   mList.Add(pFieldGHL);
+   mList.Add(pFieldGKL);
+   mpSizer->Add(sizerA);
+   pFieldGHH->SetToolTip(_T("Lorentzian width:\n")
+                         _T(" FWHM(x) = X/cos(theta) + (Y + gam_L/sin^2(theta))*tan(theta)\n\n")
+                         _T("gam_L=gam_hh*H^2 + gam_kk*K^2 + gam_ll*L^2\n")
+                         _T("      +gam_hk*HK + gam_hl*HL + gam_kl*HL"));
+   pFieldGKK->SetToolTip(_T("Lorentzian width:\n")
+                         _T(" FWHM(x) = X/cos(theta) + (Y + gam_L/sin^2(theta))*tan(theta)\n\n")
+                         _T("gam_L=gam_hh*H^2 + gam_kk*K^2 + gam_ll*L^2\n")
+                         _T("      +gam_hk*HK + gam_hl*HL + gam_kl*HL"));
+   pFieldGLL->SetToolTip(_T("Lorentzian width:\n")
+                         _T(" FWHM(x) = X/cos(theta) + (Y + gam_L/sin^2(theta))*tan(theta)\n\n")
+                         _T("gam_L=gam_hh*H^2 + gam_kk*K^2 + gam_ll*L^2\n")
+                         _T("      +gam_hk*HK + gam_hl*HL + gam_kl*HL"));
+   pFieldGHK->SetToolTip(_T("Lorentzian width:\n")
+                         _T(" FWHM(x) = X/cos(theta) + (Y + gam_L/sin^2(theta))*tan(theta)\n\n")
+                         _T("gam_L=gam_hh*H^2 + gam_kk*K^2 + gam_ll*L^2\n")
+                         _T("      +gam_hk*HK + gam_hl*HL + gam_kl*HL"));
+   pFieldGHL->SetToolTip(_T("Lorentzian width:\n")
+                         _T(" FWHM(x) = X/cos(theta) + (Y + gam_L/sin^2(theta))*tan(theta)\n\n")
+                         _T("gam_L=gam_hh*H^2 + gam_kk*K^2 + gam_ll*L^2\n")
+                         _T("      +gam_hk*HK + gam_hl*HL + gam_kl*HL"));
+   pFieldGKL->SetToolTip(_T("Lorentzian width:\n")
+                         _T(" FWHM(x) = X/cos(theta) + (Y + gam_L/sin^2(theta))*tan(theta)\n\n")
+                         _T("gam_L=gam_hh*H^2 + gam_kk*K^2 + gam_ll*L^2\n")
+                         _T("      +gam_hk*HK + gam_hl*HL + gam_kl*HL"));
+
+   // Asymmetry parameters
+   wxBoxSizer* sizer3=new wxBoxSizer(wxHORIZONTAL);
+   WXCrystObjBasic* pFieldAsym0=mpProfile->GetPar("Asym0").WXCreate(this);
+   WXCrystObjBasic* pFieldAsym1=mpProfile->GetPar("Asym1").WXCreate(this);
+   WXCrystObjBasic* pFieldAsym2=mpProfile->GetPar("Asym2").WXCreate(this);
+   sizer3->Add(pFieldAsym0,0);
+   sizer3->Add(pFieldAsym1,0);
+   sizer3->Add(pFieldAsym2,0);
+   mList.Add(pFieldAsym0);
+   mList.Add(pFieldAsym1);
+   mList.Add(pFieldAsym2);
+   mpSizer->Add(sizer3);
+   
+   pFieldAsym0->SetToolTip(_T("Asymmetry parameters:\n\n")
+                           _T("A=A0+A1/sin(2theta)+A2/sin^2(2theta) "));
+   pFieldAsym1->SetToolTip(_T("Asymmetry parameters:\n\n")
+                           _T("A=A0+A1/sin(2theta)+A2/sin^2(2theta) "));
+   pFieldAsym2->SetToolTip(_T("Asymmetry parameters:\n\n")
+                           _T("A=A0+A1/sin(2theta)+A2/sin^2(2theta) "));
+   
+   this->CrystUpdate(true);
+   VFN_DEBUG_EXIT("WXProfilePseudoVoigtAnisotropic::WXProfilePseudoVoigtAnisotropic()",6)
+}
+
+WXProfilePseudoVoigtAnisotropic::~WXProfilePseudoVoigtAnisotropic()
+{
+   mpProfile->WXNotifyDelete();
+}
+
+bool WXProfilePseudoVoigtAnisotropic::OnChangeName(const int id)
+{
+   return false;
+}
+
 ////////////////////////////////////////////////////////////////////////
 //
 //    WXProfileDoubleExponentialPseudoVoigt

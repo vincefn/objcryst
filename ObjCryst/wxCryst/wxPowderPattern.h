@@ -290,6 +290,19 @@ class WXProfilePseudoVoigt: public WXCrystObj
       ReflectionProfilePseudoVoigt *mpProfile;
 };
 
+/** Class to display a Powder Pattern Pseudo-Voigt Profile with Anisotropic broadening
+*
+*/
+class WXProfilePseudoVoigtAnisotropic: public WXCrystObj
+{
+   public:
+      WXProfilePseudoVoigtAnisotropic(wxWindow *parent, ReflectionProfilePseudoVoigtAnisotropic *prof);
+      virtual ~WXProfilePseudoVoigtAnisotropic();
+      virtual bool OnChangeName(const int id);
+   private:
+      ReflectionProfilePseudoVoigtAnisotropic *mpProfile;
+};
+
 /** Class to display a Powder Pattern Pseudo-Voigt Profile
 *
 */
