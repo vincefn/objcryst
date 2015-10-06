@@ -847,7 +847,7 @@ void ReflectionProfilePseudoVoigtAnisotropic::InitParameters()
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp("P",&mScherrerP,0,1./RAD2DEG/RAD2DEG,
+      RefinablePar tmp("P",&mScherrerP,-1./RAD2DEG/RAD2DEG,1./RAD2DEG/RAD2DEG,
                        gpRefParTypeScattDataProfileWidth,
                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG*RAD2DEG);
       tmp.AssignClock(mClockMaster);
@@ -863,7 +863,7 @@ void ReflectionProfilePseudoVoigtAnisotropic::InitParameters()
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp("Y",&mLorentzY,0,1./RAD2DEG,
+      RefinablePar tmp("Y",&mLorentzY,-1./RAD2DEG,1./RAD2DEG,
                        gpRefParTypeScattDataProfileWidth,
                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG);
       tmp.AssignClock(mClockMaster);
@@ -871,7 +871,7 @@ void ReflectionProfilePseudoVoigtAnisotropic::InitParameters()
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp("G_HH",&mLorentzGammaHH,0,1./RAD2DEG,
+      RefinablePar tmp("G_HH",&mLorentzGammaHH,-1./RAD2DEG,1./RAD2DEG,
                        gpRefParTypeScattDataProfileWidth,
                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG);
       tmp.AssignClock(mClockMaster);
@@ -879,7 +879,7 @@ void ReflectionProfilePseudoVoigtAnisotropic::InitParameters()
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp("G_KK",&mLorentzGammaKK,0,1./RAD2DEG,
+      RefinablePar tmp("G_KK",&mLorentzGammaKK,-1./RAD2DEG,1./RAD2DEG,
                        gpRefParTypeScattDataProfileWidth,
                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG);
       tmp.AssignClock(mClockMaster);
@@ -887,7 +887,7 @@ void ReflectionProfilePseudoVoigtAnisotropic::InitParameters()
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp("G_LL",&mLorentzGammaLL,0,1./RAD2DEG,
+      RefinablePar tmp("G_LL",&mLorentzGammaLL,-1./RAD2DEG,1./RAD2DEG,
                        gpRefParTypeScattDataProfileWidth,
                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG);
       tmp.AssignClock(mClockMaster);
@@ -895,7 +895,7 @@ void ReflectionProfilePseudoVoigtAnisotropic::InitParameters()
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp("G_HK",&mLorentzGammaHK,0,1./RAD2DEG,
+      RefinablePar tmp("G_HK",&mLorentzGammaHK,-1./RAD2DEG,1./RAD2DEG,
                        gpRefParTypeScattDataProfileWidth,
                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG);
       tmp.AssignClock(mClockMaster);
@@ -903,7 +903,7 @@ void ReflectionProfilePseudoVoigtAnisotropic::InitParameters()
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp("G_HL",&mLorentzGammaHL,0,1./RAD2DEG,
+      RefinablePar tmp("G_HL",&mLorentzGammaHL,-1./RAD2DEG,1./RAD2DEG,
                        gpRefParTypeScattDataProfileWidth,
                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG);
       tmp.AssignClock(mClockMaster);
@@ -911,7 +911,7 @@ void ReflectionProfilePseudoVoigtAnisotropic::InitParameters()
       this->AddPar(tmp);
    }
    {
-      RefinablePar tmp("G_KL",&mLorentzGammaKL,0,1./RAD2DEG,
+      RefinablePar tmp("G_KL",&mLorentzGammaKL,-1./RAD2DEG,1./RAD2DEG,
                        gpRefParTypeScattDataProfileWidth,
                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG);
       tmp.AssignClock(mClockMaster);
