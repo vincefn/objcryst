@@ -4244,10 +4244,10 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
          if(fitwidth0) 
            for(map<PowderPatternDiffraction *,bool>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
              if(pos->second) mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("W"),false);
-         // This will be ignored for profiles other than ReflectionProfilePseudoVoigtAnisotropic (parameter not found)
          if(fitwidth0)
             for(map<PowderPatternDiffraction *,bool>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
-               if(pos->second) mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("X"),false);
+               if((pos->second) && (pos->first->GetProfile().GetClassName()=="ReflectionProfilePseudoVoigtAnisotropic"))
+                  mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("X"),false);
          if(fitzero||fitwidth0)
          {
             mpLog->AppendText(wxString::Format(_T("Fitting zero shift && constant width\n")));
@@ -4267,13 +4267,14 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
          if(fitwidth) 
            for(map<PowderPatternDiffraction *,bool>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
              if(pos->second) mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("V"),false);
-         // This will be ignored for profiles other than ReflectionProfilePseudoVoigtAnisotropic (parameter not found)
          if(fitwidth)
             for(map<PowderPatternDiffraction *,bool>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
-               if(pos->second) mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("Y"),false);
+               if((pos->second) && (pos->first->GetProfile().GetClassName()=="ReflectionProfilePseudoVoigtAnisotropic"))
+                  mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("Y"),false);
          if(fitwidth)
             for(map<PowderPatternDiffraction *,bool>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
-               if(pos->second) mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("P"),false);
+               if((pos->second) && (pos->first->GetProfile().GetClassName()=="ReflectionProfilePseudoVoigtAnisotropic"))
+                  mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("P"),false);
          if(fiteta)
            for(map<PowderPatternDiffraction *,bool>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
              if(pos->second) mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("Eta0"),false);
