@@ -1063,7 +1063,7 @@ void PowderPatternDiffraction::ExtractLeBail(unsigned int nbcycle)
       mFhklObsSq=100;
    }
    // First get the observed powder pattern, minus the contribution of all other phases.
-   CrystVector_REAL obs,iextract;
+   CrystVector_REAL obs,iextract,calc;
    iextract=mFhklObsSq;
    mFhklObsSq=0;
    mClockFhklObsSq.Click();
@@ -1077,6 +1077,7 @@ void PowderPatternDiffraction::ExtractLeBail(unsigned int nbcycle)
    for(;nbcycle>0;nbcycle--)
    {
       //cout<<"PowderPatternDiffraction::ExtractLeBail(): cycle #"<<nbcycle<<endl;
+      calc=this->GetPowderPatternCalc();
       for(unsigned int k0=0;k0<nbrefl;++k0)
       {
          REAL s1=0;
@@ -1085,22 +1086,17 @@ void PowderPatternDiffraction::ExtractLeBail(unsigned int nbcycle)
          if(last>=(long)(mpParentPowderPattern->GetNbPointUsed())) last=mpParentPowderPattern->GetNbPointUsed();
          if(mvReflProfile[k0].first<0)first=0;
          else first=(mvReflProfile[k0].first);
+         const REAL *p1=mvReflProfile[k0].profile.data()+(first-mvReflProfile[k0].first);
+         const REAL *p2=calc.data()+first;
+         const REAL *pobs=obs.data()+first;
          for(unsigned int i=first;i<=last;++i)
          {
-            if(mvReflProfile[k0].profile(i-mvReflProfile[k0].first)<=0) continue;
-            REAL s2=0;
-            for(unsigned int k=0;k<nbrefl;++k)
-            {
-               if((mvReflProfile[k].last<i) || (mvReflProfile[k].profile.numElements()==0)) continue;
-               if(mvReflProfile[k].first>i) break;
-               s2 += mMultiplicity(k)*mIntensityCorr(k)*mvReflProfile[k].profile(i-mvReflProfile[k].first)*mFhklObsSq(k);
-               //cout<<"     "<<mH(k)<<" "<<mK(k)<<" "<<mL(k)<<" :#"<<k<<","<<i<<" "<<mMultiplicity(k)<<" "<<mIntensityCorr(k)
-               //    <<" "<<mvReflProfile[k].profile(i-mvReflProfile[k].first)<<" "<<mFhklObsSq(k)<<" ->"<<s2<<endl;
-            }
-            s1 += obs(i)*mvReflProfile[k0].profile(i-mvReflProfile[k0].first)*mFhklObsSq(k0)/s2;
+            REAL s2=*p2++;
+            if(s2<1e-8) s2=1e-8;//This should not happen, as reflection k0 contributes here...
+            s1 += *pobs++ * *p1++ /s2;
             //cout<<"   "<<s2<<" "<<obs(i)<<" "<<mvReflProfile[k0].profile(i-mvReflProfile[k0].first)<<" "<<mFhklObsSq(k0)<<endl;
          }
-         if((s1>1e-8)&&(!ISNAN_OR_INF(s1))) iextract(k0)=s1;
+         if((s1>1e-8)&&(!ISNAN_OR_INF(s1))) iextract(k0)=s1*mFhklObsSq(k0);
          else iextract(k0)=1e-8;//:KLUDGE: should <0 intensities be allowed ?
          //if(nbcycle==1) cout<<"  "<<int(mH(k0))<<" "<<int(mK(k0))<<" "<<int(mL(k0))<<" , Iobs="<<iextract(k0)<<endl;
       }
