@@ -115,7 +115,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 // Now using YYYY### (4-digit year + 3 number for the version)
-#define __FOXREVISION__ 2015001
+#define __FOXREVISION__ 2015002
 
 static std::string foxVersion;
 
@@ -1729,8 +1729,8 @@ wxDialog(parent,-1,_T("About Fox"),wxDefaultPosition,wxDefaultSize,wxCAPTION|wxS
    wxBoxSizer *sizer=new wxBoxSizer(wxVERTICAL);
    string msg(string("F.O.X. - Free Objects for Xtallography\n")
               +"Version "+ foxVersion +" \n\n"
-              +"(c) 2000-     Vincent FAVRE-NICOLIN, vincefn@users.sourceforge.net\n"
-              +"                                   , University of Grenoble\n"
+              +"(c) 2000-     Vincent FAVRE-NICOLIN, vincefn@ujf-grenoble.fr\n"
+              +"                                   , Univ. Grenoble Alpes\n"
               +"    2000-2001 Radovan CERNY, University of Geneva\n"
               +"    2009-     Jan Rohlicek, Michal Husak (Inst. Chem. Tech, Prague)\n\n"
               +"http://objcryst.sourceforge.net\n\n"
