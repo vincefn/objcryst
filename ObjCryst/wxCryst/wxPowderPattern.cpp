@@ -3325,7 +3325,7 @@ void WXPowderPatternBackground::OnMenuAutomaticBayesianBackground(wxCommandEvent
    long nbPointSpline=20;
    wxString mes(_T("Number of Interpolation Points"));
    wxString s;
-   s.Printf(_T("%d"),nbPointSpline);
+   s.Printf(_T("%ld"),nbPointSpline);
    wxTextEntryDialog dialog(this,mes,_T("Automatic Bayesian (David-Sivia) Background"),
                             s,wxOK | wxCANCEL);
    if(wxID_OK!=dialog.ShowModal())
