@@ -494,7 +494,7 @@ void WXDiffractionSingleCrystal::OnMenuShowGraph(wxCommandEvent &event)
    if(s.size()==0) s=mpData->GetCrystal().GetName();
    s="Single Crystal data:"+s;
    wxFrame *frame= new wxFrame(this,-1,wxString::FromAscii(s.c_str()),
-                               wxDefaultPosition,wxSize(500,300),wxCLOSE_BOX|wxRESIZE_BORDER|wxCAPTION|wxFRAME_FLOAT_ON_PARENT);
+                               wxDefaultPosition,wxSize(500,300),wxCLOSE_BOX|wxRESIZE_BORDER|wxCAPTION);//wxFRAME_FLOAT_ON_PARENT
    frame->CreateStatusBar(1);
    mpGraph = new WXDiffractionSingleCrystalGraph(frame,this);
    mpGraph->SetXLabel(_T("1/d (A)"));
