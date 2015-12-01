@@ -91,7 +91,7 @@ bool ReflectionProfile::IsAnisotropic()const
 ReflectionProfilePseudoVoigt::ReflectionProfilePseudoVoigt():
 ReflectionProfile(),
 mCagliotiU(0),mCagliotiV(0),mCagliotiW(.01*DEG2RAD*DEG2RAD),
-mPseudoVoigtEta0(0.0),mPseudoVoigtEta1(0.0),
+mPseudoVoigtEta0(0.5),mPseudoVoigtEta1(0.0),
 mAsymBerarBaldinozziA0(0.0),mAsymBerarBaldinozziA1(0.0),
 mAsymBerarBaldinozziB0(0.0),mAsymBerarBaldinozziB1(0.0),
 mAsym0(1.0),mAsym1(0.0),mAsym2(0.0)
@@ -480,7 +480,7 @@ WXCrystObjBasic* ReflectionProfilePseudoVoigt::WXCreate(wxWindow* parent)
 ReflectionProfilePseudoVoigtAnisotropic::ReflectionProfilePseudoVoigtAnisotropic():
 mCagliotiU(0),mCagliotiV(0),mCagliotiW(.01*DEG2RAD*DEG2RAD),mScherrerP(0),mLorentzX(0),mLorentzY(0),
 mLorentzGammaHH(0),mLorentzGammaKK(0),mLorentzGammaLL(0),mLorentzGammaHK(0),mLorentzGammaHL(0),mLorentzGammaKL(0),
-mPseudoVoigtEta0(0),mPseudoVoigtEta1(0),mAsym0(1.0),mAsym1(0),mAsym2(0)
+mPseudoVoigtEta0(0.5),mPseudoVoigtEta1(0),mAsym0(1.0),mAsym1(0),mAsym2(0)
 {
    this->InitParameters();
 }
