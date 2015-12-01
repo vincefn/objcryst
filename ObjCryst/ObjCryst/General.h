@@ -82,32 +82,10 @@ namespace ObjCryst
 
 #define REAL float
 
-// forward declarations... These should be removed...
-   //class AsymmetricUnit;
-   //class Atom;
-   //class Crystal ;
-   //class IOCrystTag;
-   //class PowderPattern;
-   //class RefinableObj;
-   //class RefinableObjClock;
-   //template<class T> class ObjRegistry;
-   //class RefinablePar;
-   //class Scatterer ;
-   //class ScatteringComponent;
-   //class ScatteringComponentList;
-   //class ScatteringData ;
-   //class ScatteringPower;
-   //class ScatteringPowerAtom;
-   //class SpaceGroup;
-   //class ZPolyhedron ;
-   //class ZScatterer ;
-   #ifdef __WX__CRYST__
-   //class WXCrystObj;
-   //class WXRefinableObj;
-   //class WXCrystRegistry;
-   #endif
-/*
-*/
+// Implemented in IO.cpp
+/// Function to convert a substring to a floating point value, imposing a C locale (using '.' as decimal separator).
+/// This is used for input/output from data file, which are only using the C locale, contrary to the GUI.
+float string2floatC(const string &s);
 
 //######################################################################
 

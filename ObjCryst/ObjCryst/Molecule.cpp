@@ -2275,15 +2275,15 @@ void Molecule::XMLInput(istream &is,const XMLCrystTag &tag)
       }
       if("MDMoveFreq"==tag.GetAttributeName(i))
       {
-         mMDMoveFreq=atof(tag.GetAttributeValue(i).c_str());
+         mMDMoveFreq=string2floatC(tag.GetAttributeValue(i));
       }
       if("MDMoveEnergy"==tag.GetAttributeName(i))
       {
-         mMDMoveEnergy=atof(tag.GetAttributeValue(i).c_str());
+         mMDMoveEnergy=string2floatC(tag.GetAttributeValue(i));
       }
       if("LogLikelihoodScale"==tag.GetAttributeName(i))
       {
-         mLogLikelihoodScale=atof(tag.GetAttributeValue(i).c_str());
+         mLogLikelihoodScale=string2floatC(tag.GetAttributeValue(i));
       }
    }
    while(true)

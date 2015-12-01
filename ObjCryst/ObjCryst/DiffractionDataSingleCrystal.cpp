@@ -383,8 +383,8 @@ void DiffractionDataSingleCrystal::ImportShelxHKLF4(const string &fileName)
          h=(int)   atoi(string(buf).substr(0,4).c_str());
          k=(int)   atoi(string(buf).substr(4,4).c_str());
          l=(int)   atoi(string(buf).substr(8,4).c_str());
-         iobs=(float) atof(string(buf).substr(12,8).c_str());
-         sigma=(float) atof(string(buf).substr(20,8).c_str());
+         iobs=string2floatC(string(buf).substr(12,8));
+         sigma=string2floatC(string(buf).substr(20,8));
          if((abs(h)+abs(k)+abs(l))==0) break;
          if(i==mNbRefl)
          {

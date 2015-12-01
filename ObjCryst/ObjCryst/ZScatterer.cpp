@@ -1204,13 +1204,13 @@ void ReadFHLine(const char*buf, const unsigned int nb, string &symbol,
       {
          symbol=v[0];
          n1=(unsigned int) atoi(v[1].c_str());
-         v1=(float) atof(v[2].c_str());
+         v1=string2floatC(v[2]);
       }
       else
       {
          symbol=string(buf).substr(0,2);
          n1=(int)   atoi(string(buf).substr(2,3).c_str());
-         v1=(float) atof(string(buf).substr(5,6).c_str());
+         v1=string2floatC(string(buf).substr(5,6));
       }
       cout<<"ReadFHLine():"<<buf<<"#"<<symbol<<"/"<<n1<<"/"<<v1<<";"<<v.size()<<endl;
       VFN_DEBUG_MESSAGE("ReadFHLine():#"<<symbol<<"/"<<n1<<"/"<<v1,10);
@@ -1222,17 +1222,17 @@ void ReadFHLine(const char*buf, const unsigned int nb, string &symbol,
       {
          symbol=v[0];
          n1=(int) atoi(v[1].c_str());
-         v1=(float) atof(v[2].c_str());
+         v1=string2floatC(v[2]);
          n2=(int) atoi(v[3].c_str());
-         v2=(float) atof(v[4].c_str());
+         v2=string2floatC(v[4]);
       }
       else
       {
          symbol=sbuf.substr(0,2);
          n1=(int)   atoi(sbuf.substr(2,3).c_str());
-         v1=(float) atof(sbuf.substr(5,6).c_str());
+         v1=string2floatC(sbuf.substr(5,6));
          n2=(int)   atoi(sbuf.substr(11,3).c_str());
-         v2=(float) atof(sbuf.substr(14,8).c_str());
+         v2=string2floatC(sbuf.substr(14,8));
       }
       VFN_DEBUG_MESSAGE("ReadFHLine():#"<<symbol<<"/"<<n1<<"/"<<v1<<"/"<<n2<<"/"<<v2,10);
       return;
@@ -1242,24 +1242,24 @@ void ReadFHLine(const char*buf, const unsigned int nb, string &symbol,
    {
       symbol=v[0];
       n1=(int)   atoi(v[1].c_str());
-      v1=(float) atof(v[2].c_str());
+      v1=string2floatC(v[2]);
       n2=(int)   atoi(v[3].c_str());
-      v2=(float) atof(v[4].c_str());
+      v2=string2floatC(v[4]);
       n3=(int)   atoi(v[5].c_str());
-      v3=(float) atof(v[6].c_str());
+      v3=string2floatC(v[6]);
    }
    else
    {
-      // sscanf ignores whitespace characters, so cannot be used WTF ?? "H 601 1.100600 120.000599 180.0"
+      // sscanf ignores whitespace characters, so cannot be used ?? "H 601 1.100600 120.000599 180.0"
       //sscanf(buf,"%2s%3d%6f%3d%8f%3d%6f",symb,&n1,&v1,&n2,&v2,&n3,&v3);
       //symbol=string(symb);
       symbol=sbuf.substr(0,2);
       n1=(int)   atoi(sbuf.substr(2,3).c_str());
-      v1=(float) atof(sbuf.substr(5,6).c_str());
+      v1=string2floatC(sbuf.substr(5,6));
       n2=(int)   atoi(sbuf.substr(11,3).c_str());
-      v2=(float) atof(sbuf.substr(14,8).c_str());
+      v2=string2floatC(sbuf.substr(14,8));
       n3=(int)   atoi(sbuf.substr(22,3).c_str());
-      v3=(float) atof(sbuf.substr(25,6).c_str());
+      v3=string2floatC(sbuf.substr(25,6));
    }
    VFN_DEBUG_MESSAGE("ReadFHLine():#"<<symbol<<"/"<<n1<<"/"<<v1<<"/"<<n2<<"/"<<v2<<"/"<<n3<<"/"<<v3,10);
 }

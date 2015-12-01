@@ -55,6 +55,16 @@ namespace ObjCryst
 //    Global functions
 //
 ////////////////////////////////////////////////////////////////////////
+
+float string2floatC(const string &s)
+{
+   float v=0;
+   stringstream ss(s);
+   ss.imbue(std::locale::classic());
+   ss>>v;
+   return v;
+}
+
 float InputFloat(istream &is, const char endchar)
 {
    float f;
