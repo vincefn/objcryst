@@ -892,6 +892,7 @@ int main (int argc, char *argv[])
          cout<<"Loading: "<<wxString(argv[i]).ToAscii()<<endl;
          wxString name(argv[i]);
          if(name.size()>4)
+         {
             if(name.Mid(name.size()-4)==wxString(_T(".xml")))
             {
                wxFileInputStream is(name);
@@ -942,6 +943,7 @@ int main (int argc, char *argv[])
                   };
                }
             }
+         }
          #else
          cout<<"Loading: "<<argv[i]<<endl;
          XMLCrystFileLoadAllObject(argv[i]);
@@ -1795,6 +1797,7 @@ void WXCrystMainFrame::Load(const wxString &filename)
 {
   VFN_DEBUG_ENTRY("WXCrystMainFrame::Load("<<filename<<")", 10)
   if(filename.size()>4)
+  {
     if(filename.Mid(filename.size()-4)==wxString(_T(".xml")))
     {
         wxFileInputStream is(filename);
@@ -1866,6 +1869,7 @@ void WXCrystMainFrame::Load(const wxString &filename)
             mpGridWindow->DataLoaded();
          }
       }
+   }
    VFN_DEBUG_MESSAGE("WXCrystMainFrame::Load():sending event", 10)
    this->PostSizeEvent();
    VFN_DEBUG_EXIT("WXCrystMainFrame::Load("<<filename<<")", 10)
