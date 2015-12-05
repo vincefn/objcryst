@@ -159,7 +159,7 @@ Molecule *ZScatterer2Molecule(ZScatterer *scatt);
 // dialog to get a triplet of values box
   class UserXYZBox : public wxDialog {
   public:
-    UserXYZBox(wxWindow * parent, char * title, Triple xyz);
+    UserXYZBox(wxWindow * parent, const wxString &title, Triple xyz);
     ~UserXYZBox ();
     Triple GetXYZ ();
   private:
@@ -2882,7 +2882,6 @@ static const long ID_GLCRYSTAL_MENU_POVRAY=            WXCRYST_ID();
       
 
 BEGIN_EVENT_TABLE(WXGLCrystalCanvas, wxGLCanvas)
-   EVT_SIZE             (WXGLCrystalCanvas::OnSize)
    EVT_PAINT            (WXGLCrystalCanvas::OnPaint)
    EVT_ERASE_BACKGROUND (WXGLCrystalCanvas::OnEraseBackground)
    EVT_MOUSE_EVENTS     (WXGLCrystalCanvas::OnMouse)
@@ -3242,23 +3241,7 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
    SwapBuffers();
    VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnPaint():End",7)
 }
-/*
-void WXGLCrystalCanvas::OnSize(wxSizeEvent& event)
-{
-   VFN_DEBUG_ENTRY("WXGLCrystalCanvas::OnSize()",7)
-   int width, height;
-   GetClientSize(& width, & height);
 
-   this->SetCurrent();
-   glViewport(0, 0, width, height);
-   glMatrixMode(GL_PROJECTION);
-   glLoadIdentity();
-   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnSize():"<<mViewAngle<<","<<width<<","<<height<<","<<mDist,2)
-   if( (width>0)&&(height>0)) //in case the window is docked...
-      gluPerspective(mViewAngle,(float)width/(float)height,1.f,2.*mDist);
-   VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnSize():End",7)
-}
-*/
 void WXGLCrystalCanvas::OnEraseBackground(wxEraseEvent& event)
 {
 }
@@ -3897,7 +3880,7 @@ void WXGLCrystalCanvas::OnSetCursor( wxCommandEvent & WXUNUSED(event))
   mViewCntr.y = (mcellbbox.yMax+mcellbbox.yMin)/2. - y;
   mViewCntr.z = (mcellbbox.zMax+mcellbbox.zMin)/2. - z;
   UserXYZBox *BoxDlg = new UserXYZBox(this,
-       "Set fractional coordinates for view\ncenter and cursor position",
+       wxString("Set fractional coordinates for view\ncenter and cursor position"),
 			 mViewCntr);
   if (BoxDlg->ShowModal() == wxID_OK ) {
      mViewCntr =  BoxDlg->GetXYZ();
@@ -4602,7 +4585,7 @@ BEGIN_EVENT_TABLE(UserXYZBox, wxDialog)
    EVT_BUTTON(wxID_OK, UserXYZBox::OnOk)
 END_EVENT_TABLE()
 
-  UserXYZBox::UserXYZBox (wxWindow *parent, char * title,
+  UserXYZBox::UserXYZBox (wxWindow *parent, const wxString &title,
 					      const Triple xyz)
   : wxDialog((wxWindow *)parent, -1, _T("Set position"), wxDefaultPosition,
   	     wxSize(250, 250), wxDEFAULT_DIALOG_STYLE) 
@@ -4632,7 +4615,7 @@ END_EVENT_TABLE()
 		   0, wxALIGN_CENTRE_VERTICAL);
 
   dialogSizer->Add(10, 10);
-  dialogSizer->Add(new wxStaticText(this, -1,  wxString::FromAscii(title)), 0, 
+  dialogSizer->Add(new wxStaticText(this, -1, title), 0,
 		   wxALIGN_CENTER);
   dialogSizer->Add(10, 10);
   dialogSizer->Add(inputSizer, 0, wxALIGN_CENTER);
