@@ -909,7 +909,7 @@ mpBondWin(0),mpAngleWin(0),mpDihedralAngleWin(0),mpRigidGroupWin(0),mpNonFlipAto
       cellAttrName->SetEditor(new wxGridCellTextEditor);
       wxGridCellAttr* cellAttrFloat = new wxGridCellAttr;
       cellAttrFloat->SetRenderer(new wxGridCellFloatRenderer(6,3));
-      cellAttrFloat->SetEditor(new wxGridCellFloatEditor(6,3));// Does not work, locale issue ?
+      cellAttrFloat->SetEditor(new wxGridCellFloatEditor(6,3));
 
       mpAtomWin= new WXMolScrolledWindow(this,this,ID_WINDOW_ATOM);
       //mpAtomWin->SetSize(800,300);
@@ -1192,7 +1192,7 @@ void WXMolecule::OnMenuAddNonFlipAtom(wxCommandEvent & WXUNUSED(event))
    }
 
    MolAtom *at1=WXDialogChooseFromVector(v,
-                               (wxWindow*)this,"Choose the Optical active Atom",choice);
+                               (wxWindow*)this,"Choose the Optically active Atom",choice);
 
    if(0==at1) {
       wxMessageDialog dumbUser(this,_T("Atom not selected !"),
@@ -1293,12 +1293,12 @@ void WXMolecule::OnMenuRemoveNonFlipAtom(wxCommandEvent & WXUNUSED(event))
    vector<MolAtom*> v = mpMolecule->getNonFlipAtomList();
 
    if(v.size()==0) {
-      wxMessageDialog dumbUser(this,_T("The list of optical active atoms is empty !"),
+      wxMessageDialog dumbUser(this,_T("The list of optically active atoms is empty !"),
                                _T("Whooops"),wxOK|wxICON_EXCLAMATION);
       dumbUser.ShowModal();
       return;
    }
-   MolAtom *at1=WXDialogChooseFromVector(v, (wxWindow*)this,"Choose the Optical active Atom to be removed",choice);
+   MolAtom *at1=WXDialogChooseFromVector(v, (wxWindow*)this,"Choose the Optically active Atom to be removed",choice);
    if(0==at1) {
       wxMessageDialog dumbUser(this,_T("Atom not selected !"),
                                _T("Whooops"),wxOK|wxICON_EXCLAMATION);
@@ -1393,7 +1393,7 @@ void WXMolecule::OnEditGridAtom(wxGridEvent &e)
       if(s!=_T(""))
       {
          double d;
-         if(s.ToCDouble(&d))
+         if(s.ToDouble(&d))
             mpMolecule->GetAtomList()[r]->SetX(d);
       }
    }
@@ -1403,7 +1403,7 @@ void WXMolecule::OnEditGridAtom(wxGridEvent &e)
       if(s!=_T(""))
       {
          double d;
-         if(s.ToCDouble(&d))
+         if(s.ToDouble(&d))
             mpMolecule->GetAtomList()[r]->SetY(d);
       }
    }
@@ -1413,7 +1413,7 @@ void WXMolecule::OnEditGridAtom(wxGridEvent &e)
       if(s!=_T(""))
       {
          double d;
-         if(s.ToCDouble(&d))
+         if(s.ToDouble(&d))
             mpMolecule->GetAtomList()[r]->SetZ(d);
       }
    }
@@ -1423,7 +1423,7 @@ void WXMolecule::OnEditGridAtom(wxGridEvent &e)
       if(s!=_T(""))
       {
          double d;
-         if(s.ToCDouble(&d))
+         if(s.ToDouble(&d))
          {
             if(d>1)d=1;
             else if(d<0)d=0;
@@ -1475,7 +1475,7 @@ void WXMolecule::OnEditGridBondLength(wxGridEvent &e)
       if(s!=_T(""))
       {
          double d;
-         if(s.ToCDouble(&d))
+         if(s.ToDouble(&d))
             if(d>0) mpMolecule->GetBondList()[r]->SetLength0(d);
       }
    }
@@ -1485,7 +1485,7 @@ void WXMolecule::OnEditGridBondLength(wxGridEvent &e)
       if(s!=_T(""))
       {
          double d;
-         if(s.ToCDouble(&d))
+         if(s.ToDouble(&d))
             if(d>0) mpMolecule->GetBondList()[r]->SetLengthSigma(d);
       }
    }
@@ -1495,7 +1495,7 @@ void WXMolecule::OnEditGridBondLength(wxGridEvent &e)
       if(s!=_T(""))
       {
          double d;
-         if(s.ToCDouble(&d))
+         if(s.ToDouble(&d))
             if(d>0) mpMolecule->GetBondList()[r]->SetLengthDelta(d);
       }
    }
@@ -1560,7 +1560,7 @@ void WXMolecule::OnEditGridBondAngle(wxGridEvent &e)
       if(s!=_T(""))
       {
          double d;
-         if(s.ToCDouble(&d))
+         if(s.ToDouble(&d))
             if(d>0) mpMolecule->GetBondAngleList()[r]->SetAngle0(d*DEG2RAD);
       }
    }
@@ -1570,7 +1570,7 @@ void WXMolecule::OnEditGridBondAngle(wxGridEvent &e)
       if(s!=_T(""))
       {
          double d;
-         if(s.ToCDouble(&d))
+         if(s.ToDouble(&d))
             if(d>0) mpMolecule->GetBondAngleList()[r]->SetAngleSigma(d*DEG2RAD);
       }
    }
@@ -1580,7 +1580,7 @@ void WXMolecule::OnEditGridBondAngle(wxGridEvent &e)
       if(s!=_T(""))
       {
          double d;
-         if(s.ToCDouble(&d))
+         if(s.ToDouble(&d))
             if(d>0) mpMolecule->GetBondAngleList()[r]->SetAngleDelta(d*DEG2RAD);
       }
    }
@@ -1660,7 +1660,7 @@ void WXMolecule::OnEditGridDihedralAngle(wxGridEvent &e)
       if(s!=_T(""))
       {
          double d;
-         if(s.ToCDouble(&d))
+         if(s.ToDouble(&d))
             mpMolecule->GetDihedralAngleList()[r]->SetAngle0(d*DEG2RAD);
       }
    }
@@ -1670,7 +1670,7 @@ void WXMolecule::OnEditGridDihedralAngle(wxGridEvent &e)
       if(s!=_T(""))
       {
          double d;
-         if(s.ToCDouble(&d))
+         if(s.ToDouble(&d))
             if(d>0) mpMolecule->GetDihedralAngleList()[r]->SetAngleSigma(d*DEG2RAD);
       }
    }
@@ -1680,7 +1680,7 @@ void WXMolecule::OnEditGridDihedralAngle(wxGridEvent &e)
       if(s!=_T(""))
       {
          double d;
-         if(s.ToCDouble(&d))
+         if(s.ToDouble(&d))
             if(d>0) mpMolecule->GetDihedralAngleList()[r]->SetAngleDelta(d*DEG2RAD);
       }
    }
@@ -2805,12 +2805,12 @@ void WXMolecule::OnMenuShowRestraintWindow(wxCommandEvent &event)
       cellAttrName->SetEditor(new wxGridCellTextEditor);
       
       mpNonFlipAtomWin = new WXMolScrolledWindow(notebook,this,ID_WINDOW_NONFLIPATOM);
-      notebook->AddPage(mpNonFlipAtomWin, _T("Optical active atoms"), true);
+      notebook->AddPage(mpNonFlipAtomWin, _T("Optically active atoms"), true);
       mpNonFlipAtomWin->CreateGrid(0,1);
       mpNonFlipAtomWin->SetColMinimalWidth(0,600);
       mpNonFlipAtomWin->SetColSize(0,600);
       mpNonFlipAtomWin->SetColAttr(0,cellAttrName);
-      mpNonFlipAtomWin->SetColLabelValue(0,_T("Optical active atom"));
+      mpNonFlipAtomWin->SetColLabelValue(0,_T("Optically active atom"));
    }
    notebook->SetSelection(0);
    this->CrystUpdate(true);
