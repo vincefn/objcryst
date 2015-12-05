@@ -1380,18 +1380,14 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
       wxCoord tmpW,tmpH;
       int loop=1;
       REAL yr;
-      list<list<pair<const REAL ,const string > > >::const_iterator comp=vLabel.begin();
       unsigned int pen=0;
-      for(unsigned int i=0;i<mpPattern->GetPowderPattern().GetNbPowderPatternComponent();++i)
+      unsigned int icomp=0;
+      // First, Crystalline phases, background (empty), then list of peaks and predicted hkl list
+      for(list<list<pair<const REAL ,const string > > >::const_iterator comp=vLabel.begin();comp!=vLabel.end();comp++)
       {
-         PowderPatternDiffraction *pDiff;
-         if(mpPattern->GetPowderPattern().GetPowderPatternComponent(i).GetClassName()=="PowderPatternDiffraction")
-         {
-            pDiff=dynamic_cast<PowderPatternDiffraction*> (&(mpPattern->GetPowderPattern().GetPowderPatternComponent(i)));
-         }
-         else
-         {
-            ++comp;
+         if(comp->size()==0)
+         {// Only background components should be empty
+            icomp++;
             continue;
          }
          switch(pen)
@@ -1440,13 +1436,30 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
                if(loop==5) loop=1;
             }
          }
-         // Draw crystal names, Indicate Le Bail mode
-         if(pDiff->GetExtractionMode()) fontInfo.Printf(wxString::FromAscii((pDiff->GetCrystal().GetName()+" (LE BAIL MODE)").c_str()));
-         else fontInfo.Printf(wxString::FromAscii(pDiff->GetCrystal().GetName().c_str()));
+         // Draw legend (crystal names, Le Bail mode,...)
+         wxString legend;
+         if(icomp<mpPattern->GetPowderPattern().GetNbPowderPatternComponent())
+         {
+            PowderPatternDiffraction *pDiff=0;
+            if(mpPattern->GetPowderPattern().GetPowderPatternComponent(icomp).GetClassName()=="PowderPatternDiffraction")
+            {
+               pDiff=dynamic_cast<PowderPatternDiffraction*> (&(mpPattern->GetPowderPattern().GetPowderPatternComponent(icomp)));
+               if(pDiff->GetExtractionMode()) legend=wxString::FromAscii((pDiff->GetCrystal().GetName()+" (LE BAIL MODE)").c_str());
+               else legend=wxString::FromAscii(pDiff->GetCrystal().GetName().c_str());
+            }
+         }
+         else
+         {
+            if((icomp-mpPattern->GetPowderPattern().GetNbPowderPatternComponent())==0)
+               legend="Found Peaks";
+            else legend="Indexed HKL";
+         }
+         fontInfo.Printf(legend);
          wxCoord tmpW,tmpH;
          dc.GetTextExtent(fontInfo, &tmpW, &tmpH);
-         dc.DrawText(fontInfo,(wxCoord)mMargin*3,(wxCoord)(mMargin+tmpH*(pen)));
-         ++comp;++pen;
+         dc.DrawText(fontInfo,(wxCoord)mMargin*3+5,(wxCoord)(mMargin+tmpH*(pen)));
+         
+         ++pen;++icomp;
       }
    }
    mMutex.Unlock();
