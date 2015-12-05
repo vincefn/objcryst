@@ -476,8 +476,8 @@ IMPLEMENT_APP(MyApp)
 // implementation
 // ============================================================================
 
-int STRCMP(wxChar* s1,wxChar* s2) {return wxStrcmp(s1,s2);}
-int STRCMP(wxChar* s1,wxString s2) {return wxStrcmp(s1,s2.c_str());}
+int STRCMP(const char* s1,const char* s2) {return wxStrcmp(wxString(s1),wxString(s2));}
+int STRCMP(const char* s1,wxChar* s2) {return wxStrcmp(wxString(s1),wxString(s2));}
 
 #ifdef __WXMAC__
 /// Set of files to ignore in MacOpenFile, because they were given on the command line and thus already loaded in OnInit()
@@ -538,7 +538,7 @@ int main (int argc, char *argv[])
    {
        #ifdef __WX__CRYST__
       //FoxGrid
-      if(STRCMP(_T("--runclient"),argv[i])==0)
+      if(STRCMP("--runclient",argv[i])==0)
       {
          
          if(!useGUI) {
@@ -550,43 +550,43 @@ int main (int argc, char *argv[])
          i++;
          IP = string(wxString(argv[i]).ToAscii());
          //get nb of CPUs to use
-         if(STRCMP(_T("--CPUs"),argv[i+1])==0) {
+         if(STRCMP(wxString("--CPUs"),argv[i+1])==0) {
              i=i+2;
              wxString(argv[i]).ToLong(&nbCPUs);
          }
          continue;
       }
       #endif
-      if(STRCMP(_T("--working_dir"),argv[i])==0)
+      if(STRCMP("--working_dir",argv[i])==0)
       {
           i++;
           #ifdef __WX__CRYST__
           working_dir = string(wxString(argv[i]).ToAscii());
           #else
           working_dir = string(argv[i]);
-          #endif;
+          #endif
           cout << "Working directory is: "<<working_dir<<endl;
           continue;
       }
-      if(STRCMP(_T("--nogui"),argv[i])==0)
+      if(STRCMP("--nogui",argv[i])==0)
       {
          useGUI=false;
          cout << "Running Fox without GUI"<<endl;
          continue;  
       }
-      if(STRCMP(_T("--randomize"),argv[i])==0)
+      if(STRCMP("--randomize",argv[i])==0)
       {
          randomize=true;
          cout << "Randomizing parameters before running"<<endl;
          continue;  
       }
-      if(STRCMP(_T("--silent"),argv[i])==0)
+      if(STRCMP("--silent",argv[i])==0)
       {
          silent=true;
          cout << "Running Fox quietly"<<endl;
          continue;  
       }
-      if(STRCMP(_T("--finalcost"),argv[i])==0)
+      if(STRCMP("--finalcost",argv[i])==0)
       {
          ++i;
          #ifdef __WX__CRYST__
@@ -598,7 +598,7 @@ int main (int argc, char *argv[])
          cout << "Fox will stop after reaching cost:"<<finalCost<<endl;
          continue;  
       }
-      if(STRCMP(_T("-n"),argv[i])==0)
+      if(STRCMP("-n",argv[i])==0)
       {
          ++i;
          #ifdef __WX__CRYST__
@@ -610,7 +610,7 @@ int main (int argc, char *argv[])
          cout << "Fox will run for "<<nbTrial<<" trials"<<endl;
          continue;
       }
-      if(STRCMP(_T("--nbrun"),argv[i])==0)
+      if(STRCMP("--nbrun",argv[i])==0)
       {
          ++i;
          #ifdef __WX__CRYST__
@@ -622,9 +622,9 @@ int main (int argc, char *argv[])
          cout << "Fox will do "<<nbRun<<" runs, randomizing before each run"<<endl;
          continue;
       }
-      if((STRCMP(_T("--cif2pattern"),argv[i])==0) || (STRCMP(_T("--cif2patternN"),argv[i])==0))
+      if((STRCMP("--cif2pattern",argv[i])==0) || (STRCMP("--cif2patternN",argv[i])==0))
       {
-         if(STRCMP(_T("--cif2patternN"),argv[i])==0) cif2patternN=true;
+         if(STRCMP("--cif2patternN",argv[i])==0) cif2patternN=true;
          ++i;
          cif2pattern=true;
          {
@@ -667,12 +667,12 @@ int main (int argc, char *argv[])
          }
          continue;
       }
-      if(STRCMP(_T("-i"),argv[i])==0)
+      if(STRCMP("-i",argv[i])==0)
       {// Obsolete, just ignore
          ++i;
          continue;
       }
-      if(STRCMP(_T("-o"),argv[i])==0)
+      if(STRCMP("-o",argv[i])==0)
       {
          ++i;
          #ifdef __WX__CRYST__
@@ -685,7 +685,7 @@ int main (int argc, char *argv[])
          if((long)(string::npos)==filenameInsertCost) filenameInsertCost=-1;
          continue;
       }
-      if(STRCMP(_T("--loadfouriergrd"),argv[i])==0)
+      if(STRCMP("--loadfouriergrd",argv[i])==0)
       {
          ++i;
          loadFourierGRD=true;
@@ -696,7 +696,7 @@ int main (int argc, char *argv[])
          #endif
          continue;
       }
-      if(STRCMP(_T("--loadfourierdsn6"),argv[i])==0)
+      if(STRCMP("--loadfourierdsn6",argv[i])==0)
       {
          ++i;
          loadFourierDSN6=true;
@@ -707,37 +707,37 @@ int main (int argc, char *argv[])
          #endif
          continue;
       }
-      if(STRCMP(_T("--only3d"),argv[i])==0)
+      if(STRCMP("--only3d",argv[i])==0)
       {
          only3D=true;
          continue;
       }
-      if(STRCMP(_T("--speedtest"),argv[i])==0)
+      if(STRCMP("--speedtest",argv[i])==0)
       {
          testSPEED=true;
          continue;
       }
-      if(STRCMP(_T("--test-lsq"),argv[i])==0)
+      if(STRCMP("--test-lsq",argv[i])==0)
       {
          testLSQ=true;
          continue;
       }
-      if(STRCMP(_T("--test-mc"),argv[i])==0)
+      if(STRCMP("--test-mc",argv[i])==0)
       {
          testMC=true;
          continue;
       }
-      if(STRCMP(_T("--exportfullprof"),argv[i])==0)
+      if(STRCMP("--exportfullprof",argv[i])==0)
       {
          exportfullprof=true;
          continue;
       }
-      if(STRCMP(_T("--fitprofile"),argv[i])==0)
+      if(STRCMP("--fitprofile",argv[i])==0)
       {
          fitprofile=true;
          continue;
       }
-      if(STRCMP(_T("--index"),argv[i])==0)
+      if(STRCMP("--index",argv[i])==0)
       {
          ++i;
          #ifdef __WX__CRYST__
@@ -791,7 +791,7 @@ int main (int argc, char *argv[])
          TAU_REPORT_STATISTICS();
          exit(0);
       }
-      if(STRCMP(_T("--index-test"),argv[i])==0)
+      if(STRCMP("--index-test",argv[i])==0)
       {
          ofstream out("indexing-results.txt");
          srand(time(NULL));
@@ -868,7 +868,7 @@ int main (int argc, char *argv[])
          exit(0);
       }
       #ifdef __DEBUG__
-      if(STRCMP(_T("--debuglevel"),argv[i])==0)
+      if(STRCMP("--debuglevel",argv[i])==0)
       {
          long level;
          ++i;
@@ -3030,7 +3030,7 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
          if(row[++i]!=NULL){stringstream s; s<<row[i]; s.imbue(std::locale::classic()); s >> p->vol;}
          if(row[++i]!=NULL){p->sg=row[i];}
          if(row[++i]!=NULL){p->sgHall=row[i];}
-         if(row[++i]!=NULL){p->nel;}
+         if(row[++i]!=NULL){p->nel=row[i];}
          if(row[++i]!=NULL){p->commonname=row[i];}
          if(row[++i]!=NULL){p->chemname=row[i];}
          if(row[++i]!=NULL){p->mineral=row[i];}
