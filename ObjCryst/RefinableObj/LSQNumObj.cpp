@@ -699,7 +699,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
          if(!silent) cout << "finished cycle #"<<cycle <<"/"<<nbCycle <<". Rw="<<Rw_ini<<"->"<<mRw<<",    Chi^2="<<ChisSqPreviousCycle<<"->"<<mChiSq<<endl;
          if (mSaveReportOnEachCycle) this->WriteReportToFile();
 
-      //if(!silent) this->PrintRefResults();
+      if(!silent) this->PrintRefResults();
       TAU_PROFILE_STOP(timer7);
       if( terminateOnDeltaChi2 && (minChi2var>( (ChisSqPreviousCycle-mChiSq)/abs(ChisSqPreviousCycle+1e-6) ) ) ) break;
    }
