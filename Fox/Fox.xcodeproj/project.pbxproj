@@ -4331,7 +4331,7 @@
 		BFFCCB51089028D300044EBA /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0620;
+				LastUpgradeCheck = 0710;
 			};
 			buildConfigurationList = BFFCCB52089028D300044EBA /* Build configuration list for PBXProject "Fox" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -4612,6 +4612,7 @@
 					"-lpthread",
 					"-liconv",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = objcryst.sourceforge.net;
 				PRODUCT_NAME = Fox;
 				SDKROOT = macosx;
 				SEPARATE_STRIP = NO;
@@ -4628,6 +4629,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_LOCATION = NO;
 				DEPLOYMENT_POSTPROCESSING = NO;
+				ENABLE_TESTABILITY = YES;
 				GCC_ENABLE_SSE3_EXTENSIONS = YES;
 				GCC_ENABLE_SUPPLEMENTAL_SSE3_INSTRUCTIONS = YES;
 				GCC_FAST_MATH = YES;
@@ -4777,6 +4779,7 @@
 					"-lpthread",
 					"-liconv",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = objcryst.sourceforge.net;
 				PRODUCT_NAME = Fox;
 				SDKROOT = macosx;
 				SEPARATE_STRIP = NO;
