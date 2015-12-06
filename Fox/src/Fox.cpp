@@ -1,6 +1,7 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
-    (c) 2000-2011 Vincent Favre-Nicolin vincefn@users.sourceforge.net
+    (c) 2000- Vincent Favre-Nicolin vincent.favre-nicolin@ujf-grenoble.fr
         2000-2001 University of Geneva (Switzerland)
+        2002- Univ. Grenoble Alpes
         2008-2010 Jan Rohlicek - Inst. of Chemical Technology, Prague
 
     This program is free software; you can redistribute it and/or modify
@@ -1731,7 +1732,7 @@ wxDialog(parent,-1,_T("About Fox"),wxDefaultPosition,wxDefaultSize,wxCAPTION|wxS
    wxBoxSizer *sizer=new wxBoxSizer(wxVERTICAL);
    string msg(string("F.O.X. - Free Objects for Xtallography\n")
               +"Version "+ foxVersion +" \n\n"
-              +"(c) 2000-     Vincent FAVRE-NICOLIN, vincefn@ujf-grenoble.fr\n"
+              +"(c) 2000-     Vincent FAVRE-NICOLIN, vincent.favre-nicolin@ujf-grenoble.fr\n"
               +"                                   , Univ. Grenoble Alpes\n"
               +"    2000-2001 Radovan CERNY, University of Geneva\n"
               +"    2009-     Jan Rohlicek, Michal Husak (Inst. Chem. Tech, Prague)\n\n"
