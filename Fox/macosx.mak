@@ -18,10 +18,7 @@ endif
 ../static-libs/lib/libfftw3f.a: ../fftw-3.3.4.tar.gz
 	rm -f $(PWD)/../static-libs/lib/*fftw*
 	cd .. && tar -xzf fftw-3.3.4.tar.gz && mv fftw-3.3.4 fftw
-	cd ../fftw && ./configure --enable-single --prefix $(PWD)/../static-libs && make clean && make -j4 install
-	#cd ../fftw && ./configure --enable-single CFLAGS="-arch i386" --prefix $(PWD)/../static-libs && make clean && make install && mv .libs/libfftw3f.a ./libfftw3f-i386.a
-	#cd ../fftw && ./configure --enable-single CFLAGS="-arch ppc" --prefix $(PWD)/../static-libs && make clean && make && mv .libs/libfftw3f.a ./libfftw3f-ppc.a
-	#cd ../fftw && lipo -create libfftw3f-i386.a libfftw3f-ppc.a -output $(PWD)/../static-libs/lib/libfftw3f.a
+	cd ../fftw && MACOSX_DEPLOYMENT_TARGET=10.5 ./configure --enable-single --prefix $(PWD)/../static-libs && MACOSX_DEPLOYMENT_TARGET=10.5 make clean && MACOSX_DEPLOYMENT_TARGET=10.5 make -j4 install
 	rm -Rf ../fftw
 
 libfftw: ../static-libs/lib/libfftw3f.a
@@ -33,7 +30,7 @@ libfftw: ../static-libs/lib/libfftw3f.a
 #:TODO: find a way to only compile the static version of libmysqlclient ?
 ../static-libs/lib/libmysqlclient.a: ../mysql-5.6.24.tar.gz
 	cd .. && tar -xzf mysql-5.6.24.tar.gz
-	cd ../mysql-5.6.24 && cmake -DCMAKE_INSTALL_PREFIX=$(PWD)/../static-libs && $(MAKE) -j4 install
+	cd ../mysql-5.6.24 && MACOSX_DEPLOYMENT_TARGET=10.5 cmake -DCMAKE_INSTALL_PREFIX=$(PWD)/../static-libs && MACOSX_DEPLOYMENT_TARGET=10.5 $(MAKE) -j4 install
 	rm -f $(PWD)/../static-libs/lib/libmysql*.dylib
 	rm -Rf ../mysql-5.6.24
 
