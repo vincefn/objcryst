@@ -143,17 +143,23 @@ CrystVector_REAL ReflectionProfilePseudoVoigt::GetProfile(const CrystVector_REAL
              +mCagliotiU*pow(tan(center/2.0),2);
    if(fwhm<=0)
    {
-      cout<<"ReflectionProfilePseudoVoigt::GetProfile(): fwhm**2<0 ! "
-          <<h<<","<<k<<","<<l<<":"<<center<<","<<mCagliotiU<<","<<mCagliotiV<<","<<","<<mCagliotiW<<":"<<fwhm<<endl;
+      VFN_DEBUG_MESSAGE("ReflectionProfilePseudoVoigt::GetProfile(): fwhm**2<0 ! "
+          <<h<<","<<k<<","<<l<<":"<<center<<","<<mCagliotiU<<","<<mCagliotiV<<","<<","<<mCagliotiW<<":"<<fwhm,10);
       fwhm=1e-6;
    }
    else fwhm=sqrt(fwhm);
    CrystVector_REAL profile,tmpV;
    const REAL asym=mAsym0+mAsym1/sin(center)+mAsym2/pow((REAL)sin(center),(REAL)2.0);
    profile=PowderProfileGauss(x,fwhm,center,asym);
-   profile *= 1-(mPseudoVoigtEta0+center*mPseudoVoigtEta1);
+   
+   // Eta for gaussian/lorentzian mix. Make sure 0<=eta<=1, else profiles could be <0 !
+   REAL eta=mPseudoVoigtEta0+center*mPseudoVoigtEta1;
+   if(eta>1) eta=1;
+   if(eta<0) eta=0;
+   
+   profile *= 1-eta;
    tmpV=PowderProfileLorentz(x,fwhm,center,asym);
-   tmpV *= mPseudoVoigtEta0+center*mPseudoVoigtEta1;
+   tmpV *= eta;
    profile += tmpV;
    //profile *= AsymmetryBerarBaldinozzi(x,fwhm,center,
    //                                    mAsymBerarBaldinozziA0,mAsymBerarBaldinozziA1,
@@ -524,7 +530,11 @@ CrystVector_REAL ReflectionProfilePseudoVoigtAnisotropic::GetProfile(const Cryst
    const REAL fwhmG=sqrt(abs( mCagliotiW+mCagliotiV*tantheta+mCagliotiU*tantheta*tantheta+mScherrerP/(costheta*costheta)));
    const REAL gam=mLorentzGammaHH*h*h+mLorentzGammaKK*k*k+mLorentzGammaLL*l*l+2*mLorentzGammaHK*h*k+2*mLorentzGammaHL*h*l+2*mLorentzGammaKL*k*l;
    const REAL fwhmL= mLorentzX/costheta+(mLorentzY+gam/(sintheta*sintheta))*tantheta;
-   const REAL eta=mPseudoVoigtEta0+mPseudoVoigtEta1*center;
+   // Eta for gaussian/lorentzian mix. Make sure 0<=eta<=1, else profiles could be <0 !
+   REAL eta=mPseudoVoigtEta0+center*mPseudoVoigtEta1;
+   if(eta>1) eta=1;
+   if(eta<0) eta=0;
+
    CrystVector_REAL profile(x.numElements()),tmpV(x.numElements());
    const REAL asym=mAsym0+mAsym1/sin(center)+mAsym2/pow((REAL)sin(center),(REAL)2.0);
    VFN_DEBUG_MESSAGE("ReflectionProfilePseudoVoigtAnisotropic::GetProfile():("<<int(h)<<","<<int(k)<<","<<int(l)<<"),fwhmG="<<fwhmG<<",fwhmL="<<fwhmL<<",gam="<<gam<<",asym="<<asym<<",center="<<center<<",eta="<<eta, 2)
