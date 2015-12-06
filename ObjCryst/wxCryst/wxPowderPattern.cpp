@@ -4202,7 +4202,7 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
    cout<<"Selected PowderPatternDiffraction:"<<mpDiff->GetName()<<","<<mpDiff->GetCrystal().GetName()<<endl;
 
    for(map<PowderPatternDiffraction *,bool>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
-      if(pos->second) pos->first->SetExtractionMode(true,false);
+      if(pos->second) pos->first->SetExtractionMode(true,true);
    
    mpLog->AppendText(wxString::Format(_T("Starting 20 Le Bail cycles\n")));
    wxProgressDialog dlgProgress(_T("Le Bail and Profile Fitting"),_T("Le Bail Fitting, cycle #0/20"),
@@ -4267,7 +4267,6 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
             if(dlgProgress.Update(11,_T("Fitting zero shift && constant width"))==false) return;
             mLSQ.Refine(5,true,false);
             mpDiff->ExtractLeBail(2);
-            //mpDiff->GetParentPowderPattern().FitScaleFactorForRw();
             mpDiff->GetParentPowderPattern().UpdateDisplay();
             mpLog->AppendText(wxString::Format(_T("                  => Rwp=%6.3f%%, GoF=%7.3f\n"),
                                              mpDiff->GetParentPowderPattern().GetRw()*100,
@@ -4297,7 +4296,6 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
             if(dlgProgress.Update(12,_T("Fitting variable width and gaussian/lorentzian fixed mix"))==false) return;
             mLSQ.Refine(5,true,false);
             mpDiff->ExtractLeBail(2);
-            //pDiff->GetParentPowderPattern().FitScaleFactorForRw();
             mpDiff->GetParentPowderPattern().UpdateDisplay();
             mpLog->AppendText(wxString::Format(_T("                  => Rwp=%6.3f%%, GoF=%7.3f\n"),
                                              mpDiff->GetParentPowderPattern().GetRw()*100,
@@ -4319,7 +4317,6 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
             if(dlgProgress.Update(12,_T("Fitting TOF instrumental width (alpha1,beta0,beta1)"))==false) return;
             mLSQ.Refine(5,true,false);
             mpDiff->ExtractLeBail(2);
-            //mpDiff->GetParentPowderPattern().FitScaleFactorForRw();
             mpDiff->GetParentPowderPattern().UpdateDisplay();
             mpLog->AppendText(wxString::Format(_T("                  => Rwp=%6.3f%%, GoF=%7.3f\n"),
                                              mpDiff->GetParentPowderPattern().GetRw()*100,
@@ -4341,7 +4338,6 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
             if(dlgProgress.Update(12,_T("Fitting size/strain broadening parameters (sigma1,gamma2)"))==false) return;
             mLSQ.Refine(5,true,false);
             mpDiff->ExtractLeBail(2);
-            //mpDiff->GetParentPowderPattern().FitScaleFactorForRw();
             mpDiff->GetParentPowderPattern().UpdateDisplay();
             mpLog->AppendText(wxString::Format(_T("                  => Rwp=%6.3f%%, GoF=%7.3f\n"),
                                              mpDiff->GetParentPowderPattern().GetRw()*100,
@@ -4359,7 +4355,6 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
             if(dlgProgress.Update(13,_T("Fitting variable width and gaussian/lorentzian mix"))==false) return;
             mLSQ.Refine(5,true,false);
             mpDiff->ExtractLeBail(2);
-            //mpDiff->GetParentPowderPattern().FitScaleFactorForRw();
             mpDiff->GetParentPowderPattern().UpdateDisplay();
             mpLog->AppendText(wxString::Format(_T("                  => Rwp=%6.3f%%, GoF=%7.3f\n"),
                                              mpDiff->GetParentPowderPattern().GetRw()*100,
@@ -4388,7 +4383,6 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
             if(dlgProgress.Update(14,_T("Fitting assymetry and sample displacement/transparency"))==false) return;
             mLSQ.Refine(5,true,false);
             mpDiff->ExtractLeBail(2);
-            //mpDiff->GetParentPowderPattern().FitScaleFactorForRw();
             mpDiff->GetParentPowderPattern().UpdateDisplay();
             mpLog->AppendText(wxString::Format(_T("                  => Rwp=%6.3f%%, GoF=%7.3f\n"),
                                              mpDiff->GetParentPowderPattern().GetRw()*100,
@@ -4413,7 +4407,6 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
             if(dlgProgress.Update(15,_T("Fitting background"))==false) return;
             mLSQ.Refine(5,true,false);
             mpDiff->ExtractLeBail(2);
-            //mpDiff->GetParentPowderPattern().FitScaleFactorForRw();
             mpDiff->GetParentPowderPattern().UpdateDisplay();
             mpLog->AppendText(wxString::Format(_T("                  => Rwp=%6.3f%%, GoF=%7.3f\n"),
                                              mpDiff->GetParentPowderPattern().GetRw()*100,
@@ -4433,7 +4426,6 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
             if(dlgProgress.Update(16,_T("Fitting unit cell"))==false) return;
             mLSQ.Refine(5,true,false);
             mpDiff->ExtractLeBail(2);
-            //mpDiff->GetParentPowderPattern().FitScaleFactorForRw();
             mpDiff->GetParentPowderPattern().UpdateDisplay();
             mpLog->AppendText(wxString::Format(_T("                  => Rwp=%6.3f%%, GoF=%7.3f\n"),
                                              mpDiff->GetParentPowderPattern().GetRw()*100,
