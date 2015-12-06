@@ -1067,13 +1067,16 @@ void PowderPatternDiffraction::ExtractLeBail(unsigned int nbcycle)
    iextract=mFhklObsSq;
    mFhklObsSq=0;
    mClockFhklObsSq.Click();
+   // Get the observed and calculated powder pattern (excluding this diffraction phase)
    obs=mpParentPowderPattern->GetPowderPatternObs();
    obs-=mpParentPowderPattern->GetPowderPatternCalc();
    mFhklObsSq=iextract;
    mClockFhklObsSq.Click();
-   // NB: nbreflused < number of calculated profiles (see PowderPatternDiffraction::CalcPowderReflProfile())
-   const unsigned long nbrefl=this->GetNbReflBelowMaxSinThetaOvLambda();
-   for(unsigned int k0=nbrefl;k0<this->GetNbRefl();++k0) iextract(k0)=0;
+   // We take here the reflections which are centered below the max(sin(theta)/lambda)
+   // actually more reflections are calculated, but the pattern is only calculated up to
+   // max(sin(theta)/lambda).
+   const unsigned long nbrefl=this->ScatteringData::GetNbReflBelowMaxSinThetaOvLambda();
+   iextract=0;
    for(;nbcycle>0;nbcycle--)
    {
       //cout<<"PowderPatternDiffraction::ExtractLeBail(): cycle #"<<nbcycle<<endl;
@@ -1091,14 +1094,19 @@ void PowderPatternDiffraction::ExtractLeBail(unsigned int nbcycle)
          const REAL *pobs=obs.data()+first;
          for(unsigned int i=first;i<=last;++i)
          {
-            REAL s2=*p2++;
-            if(s2<1e-8) s2=1e-8;//This should not happen, as reflection k0 contributes here...
-            s1 += *pobs++ * *p1++ /s2;
+            const REAL s2=*p2++;
+            const REAL tmp=*pobs++ * *p1++;
+            if( (s2<1e-8) ) // || (tmp<=0)
+            {// Avoid <0 intensities (should not happen, it means profile is <0)
+               //cout<<"S2? "<< int(mH(k0))<<" "<<int(mK(k0))<<" "<<int(mL(k0)) <<" calc(i="<<i<<")"<<calc(i)<<" obs(i="<<i<<")="<<obs(i)<<", tmp="<<tmp<<" profile(i)="<<mvReflProfile[k0].profile(i-mvReflProfile[k0].first)<<" "<<mFhklObsSq(k0)<<endl;
+               continue ;
+            }
+            s1 += tmp /s2;
             //cout<<"   "<<s2<<" "<<obs(i)<<" "<<mvReflProfile[k0].profile(i-mvReflProfile[k0].first)<<" "<<mFhklObsSq(k0)<<endl;
          }
          if((s1>1e-8)&&(!ISNAN_OR_INF(s1))) iextract(k0)=s1*mFhklObsSq(k0);
          else iextract(k0)=1e-8;//:KLUDGE: should <0 intensities be allowed ?
-         //if(nbcycle==1) cout<<"  "<<int(mH(k0))<<" "<<int(mK(k0))<<" "<<int(mL(k0))<<" , Iobs="<<iextract(k0)<<endl;
+         //if(nbcycle==1) cout<<" Le Bail "<<int(mH(k0))<<" "<<int(mK(k0))<<" "<<int(mL(k0))<<" , Iobs="<<iextract(k0)<<endl;
       }
       mFhklObsSq=iextract;
       if(this->GetCrystal().GetScatteringComponentList().GetNbComponent()>0)
@@ -1112,11 +1120,11 @@ void PowderPatternDiffraction::ExtractLeBail(unsigned int nbcycle)
             tmp2 += (*p1) * (*p1);
             p1++;
          }
+         //cout<<"SCALING: tmp2="<<tmp2<<",tmp1="<<tmp1<<endl;
          mFhklObsSq*=tmp2/tmp1;
       }
       mClockFhklObsSq.Click();
-      //cout<<"PowderPatternDiffraction::ExtractLeBail():results (scale factor="<<mpParentPowderPattern->GetScaleFactor(*this)*1e6<<")"
-      //    <<endl<< FormatVertVectorHKLFloats<REAL>(mH,mK,mL,this->GetFhklCalcSq(),mFhklObsSq)<<endl;
+      //cout<<"PowderPatternDiffraction::ExtractLeBail():results (scale factor="<<mpParentPowderPattern->GetScaleFactor(*this)*1e6<<")" <<endl<< FormatVertVectorHKLFloats<REAL>(mH,mK,mL,this->GetFhklCalcSq(),mFhklObsSq,10,4,nbrefl)<<endl;
    }
    // Store extracted data in a single crystal data object
    if(mpLeBailData==0) mpLeBailData=new DiffractionDataSingleCrystal(*mpCrystal,false);
