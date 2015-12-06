@@ -129,7 +129,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
    //Prepare for refinement (get non-fixed parameters)
       if(mRefParList.GetNbPar()==0) this->PrepareRefParList();
       mRefParList.PrepareForRefinement();
-      if(!silent) mRefParList.Print();
+      //if(!silent) mRefParList.Print();
       if(mRefParList.GetNbPar()==0) throw ObjCrystException("LSQNumObj::Refine():no parameter to refine !");
 
    //variables
@@ -209,7 +209,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
          //cout << designMatrix;
 
       TAU_PROFILE_STOP(timer2);
-      LSQNumObj_Refine_Restart: //Used in case of singular matrix or for Marquardt
+      LSQNumObj_Refine_Restart: //Used in case of singular matrix
       TAU_PROFILE_START(timer3);
 
       //Calculate M and B matrices
@@ -256,12 +256,16 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
 
          }
       TAU_PROFILE_STOP(timer3);
+      bool increaseMarquardt=false;
+      LSQNumObj_Refine_RestartMarquardt: //Used in case of singular matrix or for Marquardt
       TAU_PROFILE_START(timer4);
 
        //Apply LevenBerg-Marquardt factor
          if(true==useLevenbergMarquardt)
          {
-            const REAL lmfact=1.+marquardt;
+            const REAL marquardtOLD=marquardt;
+            if(increaseMarquardt) marquardt=marquardt*marquardtMult;
+            const REAL lmfact=(1+marquardt)/(1+marquardtOLD);
             for(i=0;i<nbVar;i++) M(i,i) *= lmfact;
          }
        // Check for singular values
@@ -625,31 +629,35 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
                if(mChiSq > (oldChiSq*1.0001))
                {
                   mRefParList.RestoreParamSet(mIndexValuesSetLast);
-                  marquardt *= marquardtMult;
+                  increaseMarquardt=true;
                   if(!silent)
                   {
                      cout << "LSQNumObj::Refine(Chi^2="<<oldChiSq<<"->"<<mChiSq
-                          <<")=>new Levenberg-Marquardt factor :"
-                          << FormatFloat(marquardt,18,14) <<endl;
+                          <<")=>Increasing Levenberg-Marquardt factor :"
+                          << FormatFloat(marquardt*marquardtMult,18,14) <<endl;
                   }
                   mChiSq=oldChiSq;
-                  if(marquardt>1e8)
+                  if(marquardt>1e4)
                   {
-                     //mRefParList.RestoreParamSet(mIndexValuesSetInitial);
+                     // :TODO: Revert to previous parameters. Or initial ?
+                     mRefParList.RestoreParamSet(mIndexValuesSetLast);
                      if(callBeginEndOptimization) this->EndOptimization();
                      //if(!silent) mRefParList.Print();
                      return;
                      //throw ObjCrystException("LSQNumObj::Refine():Levenberg-Marquardt diverging !");
                   }
                   TAU_PROFILE_STOP(timer6);
-                  goto LSQNumObj_Refine_Restart;
+                  goto LSQNumObj_Refine_RestartMarquardt;
                }
                else
                {
+                  if(!silent && (marquardt>1e-2))
+                  {
+                     cout << "LSQNumObj::Refine(Chi^2="<<oldChiSq<<"->"<<mChiSq
+                          <<")=>Decreasing Levenberg-Marquardt factor :" << FormatFloat(marquardt/marquardtMult,18,14) <<endl;
+                  }
                   marquardt /= marquardtMult;
                   if(marquardt<1e-2) marquardt=1e-2;
-                  if(!silent) cout << "LSQNumObj::Refine():new Levenberg-Marquardt factor :" ;
-                  if(!silent) cout << FormatFloat(marquardt,18,14) <<endl;
                }
             }
          }
@@ -688,10 +696,10 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
             tmpV2 *= mWeight;
             mRw=sqrt(tmpV1.sum()/tmpV2.sum());
       //OK, finished
-         if(!silent) cout << "finished cycle #"<<cycle <<"/"<<nbCycle <<". Rw="<<Rw_ini<<"->"<<mRw<<",    Chi^2="<<mChiSq<<endl;
+         if(!silent) cout << "finished cycle #"<<cycle <<"/"<<nbCycle <<". Rw="<<Rw_ini<<"->"<<mRw<<",    Chi^2="<<ChisSqPreviousCycle<<"->"<<mChiSq<<endl;
          if (mSaveReportOnEachCycle) this->WriteReportToFile();
 
-      if(!silent) this->PrintRefResults();
+      //if(!silent) this->PrintRefResults();
       TAU_PROFILE_STOP(timer7);
       if( terminateOnDeltaChi2 && (minChi2var>( (ChisSqPreviousCycle-mChiSq)/abs(ChisSqPreviousCycle+1e-6) ) ) ) break;
    }
