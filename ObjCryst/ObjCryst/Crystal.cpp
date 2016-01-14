@@ -974,7 +974,7 @@ void Crystal::CIFOutput(ostream &os, double mindist)const
 
    //Symmetry
    os <<"_symmetry_space_group_name_H-M    '"
-      << this->GetSpaceGroup().GetCCTbxSpg().match_tabulated_settings().hermann_mauguin()<<":"<<this->GetSpaceGroup().GetExtension()<<"'"<<endl;
+      << this->GetSpaceGroup().GetName() << "'" << endl;
    os <<"_symmetry_space_group_name_Hall   '"
       << this->GetSpaceGroup().GetCCTbxSpg().match_tabulated_settings().hall()<<"'"<<endl;
    os <<endl;
