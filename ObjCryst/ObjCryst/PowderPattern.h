@@ -672,8 +672,10 @@ class PowderPattern : public RefinableObj
          *it will be calculated in an integrated manner or not.
          *
          * The vector is recomputed on every call, so this is \e slow.
+         * \param mode: if -1 (the default), the calculation mode uses the value of mOptProfileIntegration.
+         * if 0, the integrated mode is used. If 1, the full powder pattern mode is used.
          */
-         const CrystVector_REAL& GetChi2Cumul()const;
+         const CrystVector_REAL& GetChi2Cumul(const int mode=-1)const;
 
       // Clocks
          /// Last time the pattern was calculated

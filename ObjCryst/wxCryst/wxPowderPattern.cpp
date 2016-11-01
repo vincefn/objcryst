@@ -542,7 +542,7 @@ void WXPowderPattern::CrystUpdate(const bool uui,const bool lock)
                            mpPowderPattern->GetPowderPatternObs(),
                            mpPowderPattern->GetPowderPatternCalc(),
                            tmp,
-                           mpPowderPattern->GetChi2Cumul());
+                           mpPowderPattern->GetChi2Cumul(1));
    }
    if(lock) mMutex.Unlock();
    this->WXRefinableObj::CrystUpdate(uui,lock);

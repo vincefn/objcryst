@@ -2631,11 +2631,13 @@ const CrystVector_REAL& PowderPattern::GetPowderPatternX()const
    return mX;
 }
 
-const CrystVector_REAL& PowderPattern::GetChi2Cumul()const
+const CrystVector_REAL& PowderPattern::GetChi2Cumul(const int m)const
 {
    VFN_DEBUG_ENTRY("PowderPattern::GetChi2Cumul()",3)
    mChi2Cumul.resize(mNbPoint);
-   if(0 == mOptProfileIntegration.GetChoice())
+   int mode = m;
+   if((mode!=0) && (mode!=1)) mode = mOptProfileIntegration.GetChoice();
+   if(0 == mode)
    {
       this->CalcPowderPatternIntegrated();
       if(mNbIntegrationUsed==0)
