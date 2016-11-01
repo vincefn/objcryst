@@ -430,8 +430,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
                   for(unsigned int j=0;j<designMatrix.cols();j++) cout<<designMatrix(i,j)<<" ";
                   cout<<endl;
                }
-               exit(0);
-               //throw ObjCrystException("LSQNumObj::Refine():caught a newmat exception during Eigenvalues computing !");
+               throw ObjCrystException("LSQNumObj::Refine():caught a newmat exception during Eigenvalues computing !");
             }
                ColumnVector newmatDelta(nbVar);
                DiagonalMatrix newmatInvW(nbVar);

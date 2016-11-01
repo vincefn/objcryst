@@ -4473,6 +4473,9 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
       catch(const ObjCrystException &except)
       {
          mpLog->AppendText(wxString::Format(_T(" OOPS : refinement diverged ! Aborting.\n")));
+         if(mLSQ.GetCompiledRefinedObj().GetNbParNotFixed() <= 1)
+            mpLog->AppendText(wxString::Format(_T(" You had selected only %ld parameters to refine !!\n"), mLSQ.GetCompiledRefinedObj().GetNbParNotFixed()));
+         else mpLog->AppendText(wxString::Format(_T(" Change selection of parameters to refine ?\n")));
       }
    }
    mLSQ.WXGet()->CrystUpdate(true,true);
