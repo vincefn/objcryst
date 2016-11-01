@@ -42,6 +42,7 @@
    #include "wx/fileconf.h"
    #include "wx/filesys.h"
    #include <wx/fs_inet.h>
+   #include <wx/url.h>
    #include <wx/txtstrm.h>
    #include <wx/minifram.h>
    #include <wx/dirdlg.h>
@@ -386,28 +387,37 @@ class WXThreadCheckUpdates:public wxThread
       {
          //cout<<"WXThreadCheckUpdates:: OnEntry()"<<endl;
          mpvUpdates->clear();
-         if(!(wxFileSystem::HasHandlerForPath(wxString::FromAscii("http://objcryst.sourceforge.net/FoxUpdates.txt"))))
-            wxFileSystem::AddHandler(new wxInternetFSHandler);
+         #if 0
          wxFileSystem fs;
          wxFSFile *fp= NULL;
          fp= fs.OpenFile(wxString::FromAscii("http://objcryst.sourceforge.net/FoxUpdates.txt"),wxFS_READ);
          if(fp!=NULL)
          {
             wxInputStream *fstream = fp->GetStream();
-            wxTextInputStream txtis(*fstream);
-            txtis.ReadLine();//first line
-            while(!fstream->Eof())
+         #else
+         wxURL url("http://objcryst.sourceforge.net/FoxUpdates.txt");
+         if(url.GetError()==wxURL_NOERR)
+         {
+            wxInputStream *fstream = url.GetInputStream();
+         #endif
+            if(fstream->IsOk())
             {
-               unsigned int revisionfix=txtis.Read16();
-               unsigned int revisionbug=txtis.Read16();
-               unsigned int severity=txtis.Read16();
-               wxString reason=txtis.ReadLine();
-               if((revisionfix>__FOXREVISION__)&&(__FOXREVISION__>revisionbug))
+               wxTextInputStream txtis(*fstream);
+               txtis.ReadLine();//first line
+               while(!fstream->Eof())
                {
-                  //cout<<"Revision:"<<revisionfix<<", severity="<<severity<<",reason="<<reason<<endl;
-                  (*mpvUpdates)[revisionfix]=make_pair(severity,reason);
+                  unsigned int revisionfix=txtis.Read16();
+                  unsigned int revisionbug=txtis.Read16();
+                  unsigned int severity=txtis.Read16();
+                  wxString reason=txtis.ReadLine();
+                  if((revisionfix>__FOXREVISION__)&&(__FOXREVISION__>revisionbug))
+                  {
+                     //cout<<"Revision:"<<revisionfix<<", severity="<<severity<<",reason="<<reason<<endl;
+                     (*mpvUpdates)[revisionfix]=make_pair(severity,reason);
+                  }
                }
             }
+            delete fstream;
          }
          return NULL;
       }
@@ -1766,8 +1776,8 @@ void WXCrystMainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
    WXDialogFoxAbout ab(this);
    if(ab.ShowModal()==ID_ABOUT_FOX_BUTTON_UPDATE)
    {
-      wxCommandEvent ev(0,MENU_HELP_UPDATE);
-      this->OnCheckUpdate(ev);
+      wxCommandEvent ev(wxEVT_COMMAND_MENU_SELECTED,MENU_HELP_UPDATE);
+      wxPostEvent(this,ev);
    }
 }
 void WXCrystMainFrame::OnLoad(wxCommandEvent& event)
@@ -2549,6 +2559,10 @@ void WXCrystMainFrame::OnCheckUpdate(wxCommandEvent& event)
    }
    else
    {
+      #if 0
+      if(false == wxFileSystem::HasHandlerForPath(_T("http://objcryst.sourceforge.net/FoxUpdates.txt")))
+         wxFileSystem::AddHandler(new wxInternetFSHandler);
+      #endif
       mvUpdatesAutoCheck=false;
       WXThreadCheckUpdates *pThreadCheckUpdates = new WXThreadCheckUpdates(mvUpdates,*this);
       if(pThreadCheckUpdates->Create() != wxTHREAD_NO_ERROR) 
