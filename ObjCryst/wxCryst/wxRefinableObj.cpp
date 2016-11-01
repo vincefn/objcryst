@@ -453,8 +453,13 @@ template<class T> T* WXDialogChooseFromRegistry(ObjRegistry<T> &reg,wxWindow*par
       delete[] choices;
       return 0;
    }
-   delete[] choices;
    choice=dialog.GetSelection();
+   if(dialog.GetSelection()<0)
+   {
+      delete[] choices;
+      return 0;
+   }
+   delete[] choices;
    return &(reg.GetObj(choice));
 }
 

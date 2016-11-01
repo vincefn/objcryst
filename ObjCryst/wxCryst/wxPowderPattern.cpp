@@ -2770,11 +2770,15 @@ void WXCellExplorer::OnChooseCrystal(wxCommandEvent &event)
    VFN_DEBUG_MESSAGE("WXCellExplorer::OnChooseCrystal()",6)
    WXCrystValidateAllUserInput();
    int choice;
-   mpCrystal=dynamic_cast<Crystal*>
-      ( WXDialogChooseFromRegistry(gCrystalRegistry,(wxWindow*)this,
-         "Choose a Crystal Structure:",choice));
-   if(0==mpCrystal) return;
-   mpFieldCrystal->SetValue(mpCrystal->GetName());
+   
+   mpCrystal=WXDialogChooseFromRegistry(gCrystalRegistry,(wxWindow*)this, "Choose a Crystal Structure:",choice);
+   if(0==mpCrystal)
+   {
+      mpFieldCrystal->SetValue("No Crystal chosen");
+      mpAutomaticLeBail->SetValue(false);
+   }
+   else
+      mpFieldCrystal->SetValue(mpCrystal->GetName());
 }
 
 void WXCellExplorer::OnAutoLeBail(wxCommandEvent &event)
@@ -2839,9 +2843,11 @@ void WXCellExplorer::OnAutoLeBail(wxCommandEvent &event)
          {
             wxCommandEvent ev;
             this->OnChooseCrystal(ev);
+            if(0==mpCrystal) return;
          }
       }
    }
+
    // Now make sure this Crystal structure is used by the powder pattern object
    bool needPowderPatternDiffraction=true;
    unsigned int nbPowderPatternDiffraction=0;
