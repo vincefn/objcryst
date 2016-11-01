@@ -64,10 +64,10 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpScatterer(obj)
          =mpScatterer->GetPar(mpScatterer->mXYZ.data()+2).WXCreate(this);
       WXCrystObjBasic* pFieldPopu 
          =mpScatterer->GetPar(&(mpScatterer->mOccupancy)).WXCreate(this);
-      dynamic_cast<WXField *> (pFieldX)->SetLabel("X R");
-      dynamic_cast<WXField *> (pFieldY)->SetLabel("Y R");
-      dynamic_cast<WXField *> (pFieldZ)->SetLabel("Z R");
-      dynamic_cast<WXField *> (pFieldPopu)->SetLabel("Occup R");
+      dynamic_cast<WXField *> (pFieldX)->SetLabel("X: R");
+      dynamic_cast<WXField *> (pFieldY)->SetLabel("Y: R");
+      dynamic_cast<WXField *> (pFieldZ)->SetLabel("Z: R");
+      dynamic_cast<WXField *> (pFieldPopu)->SetLabel("Occup: R");
       sizer->Add(pFieldX    ,0,wxALIGN_CENTER);
       sizer->Add(pFieldY    ,0,wxALIGN_CENTER);
       sizer->Add(pFieldZ    ,0,wxALIGN_CENTER);

@@ -90,7 +90,7 @@ WXField(parent,label,ID_WXFIELD_REFPAR),mValue(0.),mpRefPar(par),mIsSelfUpdating
    VFN_DEBUG_MESSAGE("WXFieldRefPar::WXFieldName():End",6)
    if(enableFixButton)
    {
-      this->SetLabel(label+"R");
+      this->SetLabel(label+":R");
       mpButtonFix=new wxCheckBox(this,ID_WXFIELD_REFPAR_FIXBUTTON,_T("L"),wxDefaultPosition, wxDefaultSize);
       //mpButtonFix->Fit();
       mpButtonFix->SetToolTip(_T("Check this box to enable optimizing this parameter.\n") 
