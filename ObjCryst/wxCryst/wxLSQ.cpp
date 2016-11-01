@@ -29,7 +29,7 @@ BEGIN_EVENT_TABLE(WXLSQ, wxWindow)
 END_EVENT_TABLE()
 
 WXLSQ::WXLSQ(wxWindow *parent, LSQNumObj*p):
-WXCrystObj(parent),mpLSQ(p)
+WXCrystObj(parent, wxVERTICAL, false),mpLSQ(p)
 {
    // Add all individual refinable parameters
    for(unsigned int i=0;i<mpLSQ->GetCompiledRefinedObj().GetNbPar();++i)
@@ -37,11 +37,10 @@ WXCrystObj(parent),mpLSQ(p)
       if(mpLSQ->GetCompiledRefinedObj().GetPar(i).IsUsed())
       {
          WXCrystObjBasic* pRefPar=mpLSQ->GetCompiledRefinedObj().GetPar(i).WXCreate(this);
-         mpSizer->Add(pRefPar,0);
+         mpSizer->Add(pRefPar, 1, wxALIGN_RIGHT);
          mList.Add(pRefPar);
       }
    }
-   this->BottomLayout(0);
    this->CrystUpdate(true,true);
 }
 

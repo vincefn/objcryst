@@ -4086,7 +4086,7 @@ wxWindow(parent,-1),mpPattern(pPattern),mpDiff(pDiff),mLSQ("Profile Fitting obje
          wxButton *pButton2=new wxButton(pManual,ID_PROFILEFITTING_RUN_MANUAL,_T("Le Bail + Fit Profile !"));
          pSizerManual->Add(pButton2,0,wxALIGN_CENTER);
          //pManual->SetSize(pQuick->GetSize());
-         pSizerManual->Add(mLSQ.WXCreate(pManual),0,wxALIGN_CENTER);
+         pSizerManual->Add(mLSQ.WXCreate(pManual),1,wxALIGN_CENTER);
          mLSQ.WXGet()->CrystUpdate(true,true);
          pManual->SetScrollRate(10,10);
          pManual->SetSizer(pSizerManual);
@@ -4113,9 +4113,23 @@ wxWindow(parent,-1),mpPattern(pPattern),mpDiff(pDiff),mLSQ("Profile Fitting obje
    
    pNotebook->ChangeSelection(0);
    mpLog =new wxTextCtrl(this,-1,_T(""),wxDefaultPosition,wxSize(600,300),wxTE_MULTILINE|wxTE_READONLY|wxTE_DONTWRAP);
-   mpLog->SetFont(wxFont(9,wxTELETYPE,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL));
+   mpLog->SetFont(wxFont(10,wxTELETYPE,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL));
    pSizer0->Add(mpLog,0,wxALIGN_CENTER|wxEXPAND);
-
+   mpLog->AppendText(wxString::Format(_T("Profile fitting & Space Group exploration:\n")));
+   mpLog->AppendText(wxString::Format(_T("\nTo perform a QUICK fit:\n")));
+   mpLog->AppendText(wxString::Format(_T("  - if you are not too far to a reasonable fit, just use 'Le Bail + Fit profile',\n")));
+   mpLog->AppendText(wxString::Format(_T("    the parameters will be progressively relaxed to avoid divergence\n")));
+   mpLog->AppendText(wxString::Format(_T("  - you can also choose to only refine some groups of parameters for more safety\n")));
+   mpLog->AppendText(wxString::Format(_T("\nYou can also perform a MANUAL fit (nececessary for advanced fit, or anisotropic profiles):\n")));
+   mpLog->AppendText(wxString::Format(_T("  - select the Manual Fit tab\n")));
+   mpLog->AppendText(wxString::Format(_T("  - select the individual parameters to refine (check the 'R')\n")));
+   mpLog->AppendText(wxString::Format(_T("  - you can also set some limits by right-clicking on 'L'\n")));
+   mpLog->AppendText(wxString::Format(_T("\n Spacegroup exploration:\n")));
+   mpLog->AppendText(wxString::Format(_T("  - use this after a good profile fitting has been obtained.\n")));
+   mpLog->AppendText(wxString::Format(_T("  - Fox will try a le Bail Fit on all possible spacegroup settings.\n")));
+   mpLog->AppendText(wxString::Format(_T("    which are compatible with the current unit cell.\n")));
+   mpLog->AppendText(wxString::Format(_T("  - try the 'Le Bail only' option first (much faster, no profile fitting for each spacegroup)\n")));
+   mpLog->AppendText(wxString::Format(_T("---------------------------------------------------------------------------------------------\n\n")));
 
    //pSizer0->Layout();
    pSizer0->SetSizeHints(this);
@@ -4435,7 +4449,8 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
       }
       catch(const ObjCrystException &except)
       {
-         mpLog->AppendText(wxString::Format(_T(" OOPS : refinement diverged ! Aborting.\n")));
+         mpLog->AppendText(wxString::Format(_T(" OOPS : refinement diverged ! Aborting. Try with fewer parameters ?\n")));
+         mLSQ.EndOptimization();
       }
    }
    else
@@ -4476,6 +4491,7 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
          if(mLSQ.GetCompiledRefinedObj().GetNbParNotFixed() <= 1)
             mpLog->AppendText(wxString::Format(_T(" You had selected only %ld parameters to refine !!\n"), mLSQ.GetCompiledRefinedObj().GetNbParNotFixed()));
          else mpLog->AppendText(wxString::Format(_T(" Change selection of parameters to refine ?\n")));
+         mLSQ.EndOptimization();
       }
    }
    mLSQ.WXGet()->CrystUpdate(true,true);
@@ -4698,6 +4714,7 @@ void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
       if(pos->gof>(2*vSPG.begin()->gof)) break;
       mpLog->AppendText(wxString::Format(_T(" Rwp= %5.2f%%  GoF=%9.2f: (extinct refls=%2u )"),pos->rw,pos->gof,pos->nbextinct446)+wxString::FromAscii(pos->hm.c_str())+_T(" \n"));
    }
+   mpLog->AppendText(wxString::Format(_T("\n\n You can copy the chosen spacegroup symbol in the Crystal window\n")));
    // Back to original spacegroup
    pCrystal->Init(a,b,c,d,e,f,spgname,name);
    pDiff->GetParentPowderPattern().UpdateDisplay();
