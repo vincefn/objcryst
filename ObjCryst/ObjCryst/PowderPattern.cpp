@@ -5328,6 +5328,16 @@ PeakList PowderPattern::FindPeaks(const float dmin,const float maxratio,const un
       CrystVector_long width(nbwidth);
       width=0;
       obs=this->GetPowderPatternObs();
+      // Zero excluded regions.
+      for(long i= 0;i<mExcludedRegionMinX.numElements();i++)
+      {
+         long min,max;
+         min=(long)floor(this->X2Pixel(mExcludedRegionMinX(i)));
+         max=(long)ceil (this->X2Pixel(mExcludedRegionMaxX(i)));
+         if(min<0) min = 0;
+         if(max>=obs.numElements()) max = obs.numElements();
+         for(long j=min;j<max;j++) obs(j) = 0;
+      }
       const long nb=obs.numElements();
       for(int j=0;j<nbwidth;j++)
       {
@@ -5376,6 +5386,16 @@ PeakList PowderPattern::FindPeaks(const float dmin,const float maxratio,const un
    // get 2nd derivative
    CrystVector_REAL obsd2;
    obsd2=SavitzkyGolay(this->GetPowderPatternObs(),width_golay,2);
+   // Zero excluded regions.
+   for(long i= 0;i<mExcludedRegionMinX.numElements();i++)
+   {
+      long min,max;
+      min=(long)floor(this->X2Pixel(mExcludedRegionMinX(i)));
+      max=(long)ceil (this->X2Pixel(mExcludedRegionMaxX(i)));
+      if(min<0) min = 0;
+      if(max>=obsd2.numElements()) max = obsd2.numElements();
+      for(long j=min;j<max;j++) obsd2(j) = 0;
+   }
    const float norm=-obsd2.min();
    // Normalize, so that the derivative has the same extent as the observed pattern
    obsd2 *= mPowderPatternObs.max()/(-norm);
