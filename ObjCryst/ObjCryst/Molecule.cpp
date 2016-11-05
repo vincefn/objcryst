@@ -3590,7 +3590,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                   REAL fout=1.0;
                   if(isinside(k)==false)
                   {
-                     if((fadeDistance==0) or borderdist(k)>fadeDistance) fout = 0;
+                     if ((fadeDistance == 0) || borderdist(k)>fadeDistance) fout = 0;
                      else fout*=(fadeDistance-borderdist(k))/fadeDistance*this->GetCrystal().GetDynPopCorr(this,k);
                   }
                   #ifdef __DEBUG__
@@ -3728,7 +3728,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                         //if((isinside(n1)==false) || (isinside(n2)==false)) fout=exp(-(borderdist(n1)+borderdist(n2))/2);
                         if((isinside(n1)==false) || (isinside(n2)==false))
                         {
-                           if((fadeDistance==0) or ((borderdist(n1)+borderdist(n2))/2)>fadeDistance)
+                           if ((fadeDistance == 0) || ((borderdist(n1) + borderdist(n2)) / 2)>fadeDistance)
                               fout = 0;
                            else
                               fout=(fadeDistance-(borderdist(n1)+borderdist(n2))/2)/fadeDistance*

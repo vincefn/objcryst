@@ -429,7 +429,7 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
             // :TODO: Maybe it should for partially occupied atoms ?
             if(isinside==false)
             {
-               if((fadeDistance==0) or borderdist>fadeDistance) fout = 0;
+               if ((fadeDistance == 0) || borderdist>fadeDistance) fout = 0;
                else fout*=(fadeDistance-borderdist)/fadeDistance*this->GetCrystal().GetDynPopCorr(this,0);
             }
             if(fout>0.01)
