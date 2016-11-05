@@ -1263,10 +1263,13 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
          }
       }
    #ifdef __WX__CRYST__
-   if(pCryst->GetNbScatterer()>20)
-      (*fpObjCrystInformUser)((boost::format("CIF: updating graphical user interface for Crystal. This could take a while, there are %d independent scatterers...") % pCryst->GetNbScatterer()).str());
-   else
-      (*fpObjCrystInformUser)("CIF: updating graphical user interface for Crystal");
+   if(NULL!=pCryst)
+   {
+      if(pCryst->GetNbScatterer()>20)
+         (*fpObjCrystInformUser)((boost::format("CIF: updating graphical user interface for Crystal. This could take a while, there are %d independent scatterers...") % pCryst->GetNbScatterer()).str());
+      else
+         (*fpObjCrystInformUser)("CIF: updating graphical user interface for Crystal");
+   }
    #endif
    gCrystalRegistry.AutoUpdateUI(true);
    gCrystalRegistry.UpdateUI();
