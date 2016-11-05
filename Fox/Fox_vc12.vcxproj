@@ -90,7 +90,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)..\wxWidgets\lib\vc_lib;$(SolutionDir)$(Configuration);$(SolutionDir)..\fftw\fftw-3.3-libs\Static-Release;$(SolutionDir)..\mysql-connector-c-src\libmysql\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>newmat.lib;cctbx.lib;libfftwf-3.3.lib;mysqlclient.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <IgnoreSpecificDefaultLibraries>libboost_date_time-vc100-mt-sgd-1_47.lib;MSVCRT.lib</IgnoreSpecificDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>libboost_date_time-vc100-mt-sgd-1_47.lib;MSVCRT.lib;LIBCMT.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>$(SolutionDir)..\wxWidgets\include\msvc;$(SolutionDir)..\wxWidgets\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
