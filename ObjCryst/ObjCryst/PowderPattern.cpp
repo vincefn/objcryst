@@ -2412,13 +2412,13 @@ mMaxSinThetaOvLambda(old.mMaxSinThetaOvLambda),mNbPointUsed(old.mNbPointUsed)
 
 PowderPattern::~PowderPattern()
 {
+   gPowderPatternRegistry.DeRegister(*this);
    for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++)
    {
       mPowderPatternComponentRegistry.GetObj(i).DeRegisterClient(*this);
       this->RemoveSubRefObj(mPowderPatternComponentRegistry.GetObj(i));
       delete &(mPowderPatternComponentRegistry.GetObj(i));
    }
-   gPowderPatternRegistry.DeRegister(*this);
    gTopRefinableObjRegistry.DeRegister(*this);
 }
 const string& PowderPattern::GetClassName() const
