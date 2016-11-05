@@ -596,6 +596,7 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
       catch(exception &ex2)
       {
          (*fpObjCrystInformUser)("Could not interpret Spacegroup Symbol:"+spgId);
+         (*fpObjCrystInformUser)("Reverting to spacegroup symbol:"+mId);
          this->InitSpaceGroup(mId);
          VFN_DEBUG_EXIT("SpaceGroup::InitSpaceGroup() could not interpret spacegroup:"<<spgId<<":"<<ex1.what()<<":"<<ex2.what(),8)
          return;
@@ -643,6 +644,7 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
    {
       (*fpObjCrystInformUser)("Error initializing spacegroup (Incorrect Hall symbol ?):"+spgId);
       this->InitSpaceGroup(mId);
+      (*fpObjCrystInformUser)("Reverting to spacegroup symbol:"+mId);
       VFN_DEBUG_EXIT("SpaceGroup::InitSpaceGroup() could not interpret spacegroup:"<<spgId<<":"<<ex.what(),8)
       return;
    }

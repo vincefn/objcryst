@@ -633,8 +633,10 @@ mpCrystalGL(0)
          wxConfigBase::Get()->Read(_T("Crystal/BOOL/Automatically open crystal 3D view"), &val);
          if(val)
          {
+            (*fpObjCrystInformUser)("Automatically opening 3D Crystal view");
             wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_CRYSTAL_MENU_DISPLAY_3DVIEW);
             wxPostEvent(this,event);
+            (*fpObjCrystInformUser)("Finished opening 3D Crystal view");
          }
       }
    }

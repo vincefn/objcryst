@@ -1562,6 +1562,7 @@ void Crystal::ConnectAtoms(const REAL min_relat_dist, const REAL max_relat_dist,
       pmol->SetY(yc);
       pmol->SetZ(zc);
       this->AddScatterer(pmol);
+      (*fpObjCrystInformUser)("ConnectAtoms: found Molecule: "+pmol->GetFormula());
    }
    std::set<Scatterer*> vpAtom;
    for(std::set<int>::const_iterator pos=vAssignedAtoms.begin();pos!=vAssignedAtoms.end();++pos)

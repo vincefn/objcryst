@@ -518,6 +518,8 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
    mBestCost=mCurrentCost;
    mvObjWeight.clear();
    mMainTracker.ClearValues();
+   Chronometer chrono;
+   chrono.start();
    switch(mGlobalOptimType.GetChoice())
    {
       case GLOBAL_OPTIM_SIMULATED_ANNEALING:
@@ -548,6 +550,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
 
    mRefParList.RestoreParamSet(mBestParSavedSetIndex);
    this->EndOptimization();
+   (*fpObjCrystInformUser)((boost::format("Finished Optimization, final cost=%12.2f (dt=%.1fs)") % this->GetLogLikelihood() % chrono.seconds()).str());
 
    if(mSaveTrackedData.GetChoice()==1)
    {
@@ -630,13 +633,12 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
       }
       nbTrialCumul+=(nbStep0-nbStep);
       if(finalcost>1)
-         cout<<"Finished Run #"<<nbCycle0-nbCycle<<", final cost="
-             <<this->GetLogLikelihood()<<", nbTrial="<< nbStep0-nbStep<<" ("<<chrono.seconds()
-             <<" seconds), so far <nbTrial>="<< nbTrialCumul/(nbCycle0-nbCycle+1)<<endl;
+         (*fpObjCrystInformUser)((boost::format("Finished Run #%d, final cost=%12.2f, nbTrial=%d (dt=%.1fs), so far <nbTrial>=%d")
+                                  % (nbCycle0-nbCycle) % this->GetLogLikelihood() % (nbStep0-nbStep) % chrono.seconds() % (nbTrialCumul/(nbCycle0-nbCycle+1))).str());
       else
-         cout<<"Finished Run #"<<nbCycle0-nbCycle<<", final cost="
-             <<this->GetLogLikelihood()<<", nbTrial="<< nbStep0-nbStep<<" ("<<chrono.seconds()
-             <<" seconds)"<<endl;
+         (*fpObjCrystInformUser)((boost::format("Finished Run #%d, final cost=%12.2f, nbTrial=%d (dt=%.1fs)")
+                                  % (nbCycle0-nbCycle) % this->GetLogLikelihood() % (nbStep0-nbStep) % chrono.seconds()).str());
+
 
       nbStep=nbStep0;
       this->UpdateDisplay();

@@ -273,6 +273,9 @@ public:
    void OnStartGridServer(wxCommandEvent &event);
    void OnStartGridClient(wxCommandEvent &event);
    virtual void OnSize(wxSizeEvent &event);
+   /// Handle event to pass a user message from a secondary thread.
+   void OnUserMessage(wxCommandEvent &event);
+   wxTextCtrl* GetLogWindow();
 #ifdef __FOX_COD__
    void OnCOD(wxCommandEvent &event);
    void OnButton(wxCommandEvent &event);
@@ -305,6 +308,8 @@ private:
    wxGrid *mpCODGrid;
    std::vector<cod_record> mvCOD_Record;
 #endif
+   /// Log window for the main FOX frame
+   wxTextCtrl *mpLog;
 };
 
 class MyApp : public wxApp
@@ -324,11 +329,22 @@ class MyApp : public wxApp
 // ----------------------------------------------------------------------------
 // For messaging the user
 // ----------------------------------------------------------------------------
-wxFrame *pMainFrameForUserMessage;
+wxTextCtrl *pLogWindowForUserMessage;
+wxDEFINE_EVENT(ID_FOX_USER_MESSAGE, wxCommandEvent);
 
 void WXCrystInformUserStdOut(const string &str)
 {
-   if(wxThread::IsMain()) pMainFrameForUserMessage->SetStatusText(wxString::FromAscii(str.c_str()));
+   if(wxThread::IsMain())
+   {
+      pLogWindowForUserMessage->AppendText(wxString::Format(_T("%s\n"), str.c_str()));
+      wxSafeYield(NULL,true);
+   }
+   else
+   {
+      wxCommandEvent event(ID_FOX_USER_MESSAGE);
+      event.SetString(str);
+      wxPostEvent(pLogWindowForUserMessage,event);
+   }
    cout<<str<<endl;
 }
 
@@ -435,7 +451,6 @@ class WXThreadCheckUpdates:public wxThread
 // ----------------------------------------------------------------------------
 // event tables and other macros for wxWindows
 // ----------------------------------------------------------------------------
-
 BEGIN_EVENT_TABLE(WXCrystMainFrame, wxFrame)
    EVT_MENU(MENU_FILE_QUIT,                        WXCrystMainFrame::OnQuit)
    EVT_MENU(MENU_HELP_ABOUT,                       WXCrystMainFrame::OnAbout)
@@ -479,6 +494,7 @@ BEGIN_EVENT_TABLE(WXCrystMainFrame, wxFrame)
    EVT_MENU(MENU_GRID_SERVER_RUN, WXCrystMainFrame::OnStartGridServer)
    EVT_MENU(MENU_GRID_CLIENT_START, WXCrystMainFrame::OnStartGridClient)
    EVT_SIZE(WXCrystMainFrame::OnSize)
+   EVT_COMMAND(wxID_ANY, ID_FOX_USER_MESSAGE,      WXCrystMainFrame::OnUserMessage)
 END_EVENT_TABLE()
 
 IMPLEMENT_APP(MyApp)
@@ -1439,7 +1455,7 @@ int main (int argc, char *argv[])
                                  wxPoint(50, 50), wxSize(600, 600),
                                  !(loadFourierGRD||loadFourierDSN6||runclient));
    // Use the main frame status bar to pass messages to the user
-      pMainFrameForUserMessage=mpFrame;
+      pLogWindowForUserMessage=mpFrame->GetLogWindow();
       fpObjCrystInformUser=&WXCrystInformUserStdOut;
    
    WXCrystal *pWXCryst;
@@ -1634,13 +1650,13 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
 
    SetMenuBar(menuBar);
 
-#if wxUSE_STATUSBAR
+#if 0 // wxUSE_STATUSBAR
    CreateStatusBar(1);
    SetStatusText(_T("Welcome to FOX/ObjCryst++!"));
 #endif // wxUSE_STATUSBAR
 
    
-      wxSizer* s0 = new wxBoxSizer(wxHORIZONTAL);
+      wxSizer* s0 = new wxBoxSizer(wxVERTICAL);
       this->SetSizer(s0);
       this->SetAutoLayout(true);
    // Create the notebook
@@ -1681,17 +1697,23 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
       mpWin5->Layout();
       mpNotebook->AddPage(mpWin5,_T("FOXGrid"),true);
 
-
+   mpNotebook->SetSelection(0);
+   
+   // Log windows
+   mpLog =new wxTextCtrl(this,-1,_T(""),wxDefaultPosition,wxSize(600,100),wxTE_MULTILINE|wxTE_READONLY|wxTE_DONTWRAP);
+   mpLog->SetFont(wxFont(10,wxTELETYPE,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL));
+   s0->Add(mpLog,0,wxALIGN_CENTER|wxEXPAND);
+   mpLog->AppendText(wxString::Format(_T("Welcome to FOX !\n")));
+   
    this->SetIcon(wxICON(Fox));
    this->Show(TRUE);
    this->Layout();
-   mpNotebook->SetSelection(0);
-   
+
    // Set tooltip delay
    wxToolTip::SetDelay(500);
    // Reset "last save" clock, in the case we loaded an xml file on startup
    mClockLastSave.Click();
-   
+
    #if 0
    // Check for updates in a separate thread
    bool check;
@@ -1974,6 +1996,9 @@ void WXCrystMainFrame::Close(bool safe)
    gPowderPatternRegistry.DeleteAll();
    cout<<"Removing all Crystal objects..."<<endl;
    gCrystalRegistry.DeleteAll();
+   (*fpObjCrystInformUser)("");
+   (*fpObjCrystInformUser)("Closed all objects");
+   (*fpObjCrystInformUser)("");
 }
 
 
@@ -2606,6 +2631,16 @@ void WXCrystMainFrame::OnSize(wxSizeEvent &event)
         for(unsigned int i=0;i<mpNotebook->GetPageCount();i++) mpNotebook->GetPage(i)->PostSizeEvent();
 
    this->wxFrame::OnSize(event);
+}
+
+void WXCrystMainFrame::OnUserMessage(wxCommandEvent &event)
+{
+   (*fpObjCrystInformUser)(std::string(event.GetString().c_str()));
+}
+
+wxTextCtrl* WXCrystMainFrame::GetLogWindow()
+{
+   return mpLog;
 }
 
 #ifdef __FOX_COD__

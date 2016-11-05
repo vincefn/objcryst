@@ -184,6 +184,7 @@ void WXOptimizationObj::OnRemoveRefinedObject(wxCommandEvent & WXUNUSED(event))
 void WXOptimizationObj::OnStopOptimization(wxCommandEvent & WXUNUSED(event))
 {
    this->GetOptimizationObj().StopAfterCycle();
+   (*fpObjCrystInformUser)("Stopped global optimization");
 }
 void WXOptimizationObj::OnUpdateUI(wxUpdateUIEvent& event)
 {
@@ -320,10 +321,11 @@ mFinalCost(finalCost),mDoMultiple(multiple)
 
 void *WXGlobalOptimRunThread::Entry()
 {
-   cout <<endl<<"Entering refinement thread "<<endl<<endl;
+   (*fpObjCrystInformUser)("Entering refinement thread");
    try{
       if(mDoMultiple) mpGlobalOptObj->MultiRunOptimize(*mpNbRun,*mpNbTrial,false,mFinalCost);
       else mpGlobalOptObj->Optimize(*mpNbTrial,false,mFinalCost);
+      (*fpObjCrystInformUser)("Finished global optimization");
    }
    catch(...){cout<<"Unhandled exception in WXGlobalOptimRunThread::Entry() ?"<<endl;}
    return NULL;
@@ -331,8 +333,9 @@ void *WXGlobalOptimRunThread::Entry()
 
 void WXGlobalOptimRunThread::OnExit()
 {
-   cout <<endl<<"Exiting refinement thread "<<endl<<endl;
+   (*fpObjCrystInformUser)("Exiting refinement thread");
    XMLCrystFileSaveGlobal("Fox-LastOptimizationStop.xml");
+   (*fpObjCrystInformUser)("Optimization result saved to Fox-LastOptimizationStop.xml");
 }
 ////////////////////////////////////////////////////////////////////////
 //
@@ -484,7 +487,8 @@ void WXMonteCarloObj::OnRunOptimization(wxCommandEvent & event)
       VFN_DEBUG_EXIT("WXMonteCarloObj::OnRunOptimization()",6)
       return;
    }
-   
+   (*fpObjCrystInformUser)("Beginning global optimization");
+
    //Fix parameters than really should not be global-optimized
       mpMonteCarloObj->SetParIsFixed(gpRefParTypeUnitCell,true);
       mpMonteCarloObj->SetParIsFixed(gpRefParTypeScattDataScale,true);
@@ -551,7 +555,8 @@ void WXMonteCarloObj::OnLSQRefine(wxCommandEvent &event)
    REAL cost=mpMonteCarloObj->GetLogLikelihood();
    mpMonteCarloObj->mvSavedParamSet.push_back(make_pair(mpMonteCarloObj->mRefParList.CreateParamSet(buf),cost));
    wxProgressDialog dlgProgress(_T("Least Squares refinement"),wxString::Format(_T("Least Squares refinement, cycle #%02d/20, Chi^2=%012.2f"),0,cost),
-                                 19,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME|wxPD_CAN_ABORT);
+                                19,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME|wxPD_CAN_ABORT);
+   (*fpObjCrystInformUser)(std::string(wxString::Format(_T("Least Squares refinement, cycle #%02d/20, Chi^2=%012.2f"),0,cost)));
    for(unsigned i=0;i<20;++i)
    {
       try {mpMonteCarloObj->GetLSQObj().Refine(1,true,false,false);}
@@ -560,6 +565,7 @@ void WXMonteCarloObj::OnLSQRefine(wxCommandEvent &event)
       sprintf(buf,"LSQ: cycle #%02d",i);
       cost=mpMonteCarloObj->GetLogLikelihood();
       mpMonteCarloObj->mvSavedParamSet.push_back(make_pair(mpMonteCarloObj->mRefParList.CreateParamSet(buf),cost));
+      (*fpObjCrystInformUser)(std::string(wxString::Format(_T("Least Squares refinement, cycle #%02d/20, Chi^2=%012.2f"),i,cost)));
       if(dlgProgress.Update(i,wxString::Format(_T("Least Squares refinement, cycle #%02d/20, Chi^2=%012.2f"),i,cost))==false) break;
    }
    mpMonteCarloObj->EndOptimization();

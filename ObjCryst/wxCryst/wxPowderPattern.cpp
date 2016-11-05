@@ -21,6 +21,7 @@
 #include <algorithm>
 
 #include "cctbx/sgtbx/space_group.h"
+#include "boost/format.hpp"
 
 // wx headers, with or without precompilation
 #include "wx/wxprec.h"
@@ -1804,6 +1805,9 @@ void WXPowderPatternGraph::OnToggleLabel(wxCommandEvent &event)
 
 void WXPowderPatternGraph::OnFindPeaks(wxCommandEvent& WXUNUSED(event))
 {
+   Chronometer chrono;
+   chrono.start();
+   (*fpObjCrystInformUser)("Powder pattern: searching for peaks");
    float dmin=1.5;
    while(true)
    {
@@ -1811,8 +1815,8 @@ void WXPowderPatternGraph::OnFindPeaks(wxCommandEvent& WXUNUSED(event))
       dmin*=0.75;
       if((mPeakList.GetPeakList().size()>30)||(dmin<0.3)) break;
    }
-   
    const unsigned int nb=mPeakList.GetPeakList().size();
+   (*fpObjCrystInformUser)((boost::format("Powder pattern: found %u peaks (dt=%6.3fs)") % nb % chrono.seconds()).str());
    //if(nb<5) return;
    
    mpPopUpMenu->Enable(ID_POWDERGRAPH_MENU_SAVEPEAKS, TRUE);
