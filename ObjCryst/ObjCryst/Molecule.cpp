@@ -3401,7 +3401,8 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                                const REAL zMin,const REAL zMax,
                                const bool displayEnantiomer,
                                const bool displayNames,
-                               const bool hideHydrogens)const
+                               const bool hideHydrogens,
+                               const REAL fadeDistance)const
 {
    #ifdef OBJCRYST_GL
    VFN_DEBUG_ENTRY("Molecule::GLInitDisplayList()",3)
@@ -3586,7 +3587,11 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                      borderdist(k)=sqrt(borderdist(k));
                   }
                   REAL fout=1.0;
-                  if(isinside(k)==false) fout=exp(-borderdist(k))*this->GetCrystal().GetDynPopCorr(this,k);
+                  if(isinside(k)==false)
+                  {
+                     if((fadeDistance==0) or borderdist(k)>fadeDistance) fout = 0;
+                     else fout*=(fadeDistance-borderdist(k))/fadeDistance*this->GetCrystal().GetDynPopCorr(this,k);
+                  }
                   #ifdef __DEBUG__
                   char ch[100];
                   sprintf(ch,"%d %d %d %s %5.2f %5.2f %5.2f d=%5.2f  fout=%5.3f",i,j,k,mvpAtom[k]->GetName().c_str(),x(k),y(k),z(k),borderdist(k),fout);
@@ -3655,7 +3660,11 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                                             n2=rix[&(mvpBond[k]->GetAtom2())];
                         REAL fout=1.0;
                         if((isinside(n1)==false) || (isinside(n2)==false))
-                           fout=exp(-(borderdist(n1)+borderdist(n2))/2)*(this->GetCrystal().GetDynPopCorr(this,n1)+this->GetCrystal().GetDynPopCorr(this,n2))/2;
+                        {
+                           if((fadeDistance==0) || ((borderdist(n1)+borderdist(n2))/2)>fadeDistance) fout = 0;
+                           else fout*=(fadeDistance-(borderdist(n1)+borderdist(n2))/2)/fadeDistance*
+                                       (this->GetCrystal().GetDynPopCorr(this,n1)+this->GetCrystal().GetDynPopCorr(this,n2))/2;
+                        }
                         if(fout<0.01) continue;
 
                         const float r1=mvpBond[k]->GetAtom1().GetScatteringPower().GetColourRGB()[0];
@@ -3715,7 +3724,16 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                         const unsigned long n1=rix[&(mvpBond[k]->GetAtom1())],
                                             n2=rix[&(mvpBond[k]->GetAtom2())];
                         REAL fout=1.0;
-                        if((isinside(n1)==false) || (isinside(n2)==false)) fout=exp(-(borderdist(n1)+borderdist(n2))/2);
+                        //if((isinside(n1)==false) || (isinside(n2)==false)) fout=exp(-(borderdist(n1)+borderdist(n2))/2);
+                        if((isinside(n1)==false) || (isinside(n2)==false))
+                        {
+                           if((fadeDistance==0) or ((borderdist(n1)+borderdist(n2))/2)>fadeDistance)
+                              fout = 0;
+                           else
+                              fout=(fadeDistance-(borderdist(n1)+borderdist(n2))/2)/fadeDistance*
+                                    (this->GetCrystal().GetDynPopCorr(this,n1)+this->GetCrystal().GetDynPopCorr(this,n2))/2;
+                        }
+
                         if(fout<0.01) continue;
                         // Is the bond in a rigid group ?
                         bool isRigidGroup=false;

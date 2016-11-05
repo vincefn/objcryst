@@ -662,8 +662,9 @@ void WXCrystal::CrystUpdate(const bool uui,const bool lock)
    {
       if(lock) mMutex.Lock();
       BBox box=mpCrystalGL->GetCellBBox();
+      const REAL fadeDistance=mpCrystalGL->GetFadeDistance();
       if(lock) mMutex.Unlock();
-      this->UpdateGL(false,box.xMin,box.xMax,box.yMin,box.yMax,box.zMin,box.zMax);
+      this->UpdateGL(false,box.xMin,box.xMax,box.yMin,box.yMax,box.zMin,box.zMax,fadeDistance);
    }
    #endif
    if(lock) mMutex.Lock();
@@ -832,7 +833,8 @@ void WXCrystal::CrystUpdate(const bool uui,const bool lock)
 void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
                          const REAL xMin,const REAL xMax,
                          const REAL yMin,const REAL yMax,
-                         const REAL zMin,const REAL zMax)
+                         const REAL zMin,const REAL zMax,
+                         const REAL fadeDistance)
 {
    // :KLUDGE: !!! UGLY !!! This should be done in WXGLCrystalCanvas !
    VFN_DEBUG_ENTRY("WXCrystal::UpdateGL()",8)
@@ -875,7 +877,7 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
       }
       glNewList(mCrystalGLDisplayList,GL_COMPILE);
          glPushMatrix();
-            mpCrystal->GLInitDisplayList(onlyIndependentAtoms,xMin,xMax,yMin,yMax,zMin,zMax,false,!(mpCrystalGL->GetShowHydrogens()));
+            mpCrystal->GLInitDisplayList(onlyIndependentAtoms,xMin,xMax,yMin,yMax,zMin,zMax,false,!(mpCrystalGL->GetShowHydrogens()),fadeDistance);
             //ScatteringPowerMap map1(mpCrystal->GetScatteringPowerRegistry().GetObj(0),
             //                            *mpCrystal,.02,.05,.05,RAD_XRAY);
             //map1.GLInitDisplayList(xMin,xMax,yMin,yMax,zMin,zMax);
@@ -886,7 +888,7 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
       glEndList();
       glNewList(mCrystalGLNameDisplayList,GL_COMPILE);
          glPushMatrix();
-            mpCrystal->GLInitDisplayList(onlyIndependentAtoms,xMin,xMax,yMin,yMax,zMin,zMax,true,!(mpCrystalGL->GetShowHydrogens()));
+            mpCrystal->GLInitDisplayList(onlyIndependentAtoms,xMin,xMax,yMin,yMax,zMin,zMax,true,!(mpCrystalGL->GetShowHydrogens()),fadeDistance);
          glPopMatrix();
       glEndList();
       mpCrystalGL->CrystUpdate();
@@ -2927,7 +2929,7 @@ wxGLCanvas(parent, id,AttribList,pos,size,wxDEFAULT_FRAME_STYLE | wxFULL_REPAINT
 mpParentFrame(parent),
 mpWXCrystal(wxcryst),mIsGLInit(false),mDist(60),mX0(0),mY0(0),mZ0(0),mViewAngle(15),
 mShowFourier(true),mShowCrystal(true),mShowAtomName(true),mShowHydrogens(true),mShowCursor(false),mSharpenMap(true),
-mIsGLFontBuilt(false),mGLFontDisplayListBase(0),mpFourierMapListWin(0)
+mIsGLFontBuilt(false),mGLFontDisplayListBase(0),mpFourierMapListWin(0),mFadeDistance(0)
 {
    mpwxGLContext=new wxGLContext(this);
    VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::WXGLCrystalCanvas()",3)
@@ -3028,6 +3030,11 @@ mIsGLFontBuilt(false),mGLFontDisplayListBase(0),mpFourierMapListWin(0)
           wxConfigBase::Get()->Read(_T("Crystal/BOOL/Default-display atom names in 3D view"), &mShowAtomName);
       }
    }
+   // Fade distance for showing transparent atoms beyond display limit
+   if(!wxConfigBase::Get()->HasEntry(_T("Crystal/REAL/3D fade distance")))
+      wxConfigBase::Get()->Write(_T("Crystal/REAL/3D fade distance"), 4);
+   
+   wxConfigBase::Get()->Read(_T("Crystal/REAL/3D fade distance"), &mFadeDistance);
    if(mShowAtomName) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, _T("Hide Atom Labels"));
    else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, _T("Show Atom Labels"));
 }
@@ -3524,7 +3531,7 @@ void WXGLCrystalCanvas::OnUpdate(wxCommandEvent & WXUNUSED(event))
    mpWXCrystal->UpdateGL(false,
 			 mcellbbox.xMin,mcellbbox.xMax,
 			 mcellbbox.yMin,mcellbbox.yMax,
-			 mcellbbox.zMin,mcellbbox.zMax);
+			 mcellbbox.zMin,mcellbbox.zMax, mFadeDistance);
    VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnUpdate()",4)
 }
 
@@ -3804,7 +3811,7 @@ void WXGLCrystalCanvas::OnChangeLimits(wxCommandEvent &event)
          mpWXCrystal->UpdateGL(false,
 			    mcellbbox.xMin,mcellbbox.xMax,
 			    mcellbbox.yMin,mcellbbox.yMax,
-			    mcellbbox.zMin,mcellbbox.zMax);
+			    mcellbbox.zMin,mcellbbox.zMax, mFadeDistance);
          vector<boost::shared_ptr<UnitCellMapGLList> >::iterator pos;
          for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();pos++)
          {
@@ -3825,7 +3832,7 @@ void WXGLCrystalCanvas::OnChangeLimits(wxCommandEvent &event)
       mpWXCrystal->UpdateGL(false,
 			                   mcellbbox.xMin,mcellbbox.xMax,
 			                   mcellbbox.yMin,mcellbbox.yMax,
-			                   mcellbbox.zMin,mcellbbox.zMax);
+			                   mcellbbox.zMin,mcellbbox.zMax, mFadeDistance);
 
   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnChangeLimits():UserSelectBoundingBox done",10)
 }
@@ -4347,7 +4354,12 @@ BBox WXGLCrystalCanvas::GetCellBBox() {
 BBox WXGLCrystalCanvas::GetMapBBox() {
   return mmapbbox;
 }
-
+   
+REAL WXGLCrystalCanvas::GetFadeDistance()
+{
+  return mFadeDistance;
+}
+   
 void WXGLCrystalCanvas::UnProject(REAL &x, REAL &y, REAL &z)
 {
    GLdouble vx,vy,vz,junk;

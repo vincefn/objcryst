@@ -296,7 +296,8 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
                              const REAL zMin,const REAL zMax,
                              const bool displayEnantiomer,
                              const bool displayNames,
-                             const bool hideHydrogens)const
+                             const bool hideHydrogens,
+                             const REAL fadeDistance)const
 {
    #ifdef OBJCRYST_GL
    VFN_DEBUG_MESSAGE("Atom::GLInitDisplayList():"<<this->GetName(),5)
@@ -426,7 +427,11 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
             // NB about dyn pop corr: it's not taken into account for atoms inside the view range,
             // to avoid transparency for fully occupied atoms.
             // :TODO: Maybe it should for partially occupied atoms ?
-            if(isinside==false) fout*=exp(-borderdist)*this->GetCrystal().GetDynPopCorr(this,0);
+            if(isinside==false)
+            {
+               if((fadeDistance==0) or borderdist>fadeDistance) fout = 0;
+               else fout*=(fadeDistance-borderdist)/fadeDistance*this->GetCrystal().GetDynPopCorr(this,0);
+            }
             if(fout>0.01)
             {
                const GLfloat colourAtom [] = {r, g, b, f*fout};

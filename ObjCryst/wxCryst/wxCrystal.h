@@ -88,7 +88,8 @@ class WXCrystal: public WXRefinableObj
       void UpdateGL(const bool onlyIndependentAtoms=false,
                     const REAL xMin=-.1,const REAL xMax=1.1,
                     const REAL yMin=-.1,const REAL yMax=1.1,
-                    const REAL zMin=-.1,const REAL zMax=1.1);
+                    const REAL zMin=-.1,const REAL zMax=1.1,
+                    const REAL fadeDistance=0);
       /// Gets the integer index of the OpenGL display list. Wait, if necessary, for the list
       /// not to be used any more. When finished, ReleaseCrystalGLDisplayList() must be called.
       /// if AtomName=true, then the display list returned is the one with the atom names.
@@ -359,10 +360,12 @@ class WXGLCrystalCanvas : public wxGLCanvas
       void OnPOVRay(wxCommandEvent & WXUNUSED(event));
       /// Save view as povray file
       void POVRayOutput(const std::string &filename);
-      // get bounding box for atoms display
+      /// get bounding box for atoms display
       BBox GetCellBBox();
-      // get bounding box for display of Fourier map
+      /// get bounding box for display of Fourier map
       BBox GetMapBBox();
+      /// Access to fade distance for 3D display
+      REAL GetFadeDistance();
       virtual void SetCurrent();
       void NotifyDeleteFourierWin();
    private:
@@ -453,6 +456,8 @@ class WXGLCrystalCanvas : public wxGLCanvas
          bool mIsUpdating;
    };
    WXFourierMapList *mpFourierMapListWin;
+      /// Fade distance to display transparent atoms/molecules beyond display limit.
+      REAL mFadeDistance;
    DECLARE_EVENT_TABLE()
 };
 #endif

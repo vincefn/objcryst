@@ -241,6 +241,8 @@ class Scatterer:virtual public RefinableObj
       * at the position of the scatterers (to actually see them, they will have to
       * be translated with respect to the drawing of the scatterers).
       * \param hideHydrogens: if true, do not display hydrogens/deuterium and their bonds
+      * \param fadeDistance: atoms which are beyond the display limits are still showm, but
+      * with transparency which is progressively fading up to a certain distance.
       */
       virtual void GLInitDisplayList(const bool noSymmetrics=false,
                                      const REAL xMin=-.1,const REAL xMax=1.1,
@@ -248,7 +250,8 @@ class Scatterer:virtual public RefinableObj
                                      const REAL zMin=-.1,const REAL zMax=1.1,
                                      const bool displayEnantiomer=false,
                                      const bool displayNames=false,
-                                     const bool hideHydrogens=false)const=0;
+                                     const bool hideHydrogens=false,
+                                     const REAL fadeDistance=0)const=0;
       /// Last time anything in the scatterer was changed (atoms, positions, scattering power)
       const RefinableObjClock& GetClockScatterer()const;
       /// Last time anything in the scatterer was changed (atoms, positions, scattering power)

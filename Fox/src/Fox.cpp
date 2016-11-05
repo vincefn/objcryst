@@ -2300,7 +2300,7 @@ void GetRecursiveConfigEntryList(list<pair<wxString,wxString> > &l)
    }
 }
 
-enum FOX_PREF_TYPE {PREF_BOOL,PREF_STRING,PREF_LONG} ;
+enum FOX_PREF_TYPE {PREF_BOOL,PREF_STRING,PREF_LONG,PREF_REAL} ;
 struct FoxPref
 {
    FoxPref(wxString &comp,FOX_PREF_TYPE &t,wxString &e,wxWindow *w):
@@ -2328,7 +2328,7 @@ BEGIN_EVENT_TABLE(WXFoxPreferences, wxDialog)
 END_EVENT_TABLE()
 
 WXFoxPreferences::WXFoxPreferences(wxWindow *parent):
-wxDialog(parent,-1,_T("FOX Preferences: "),wxDefaultPosition,wxSize(400,300),wxDEFAULT_DIALOG_STYLE)
+wxDialog(parent,-1,_T("FOX Preferences: "),wxDefaultPosition,wxSize(400,400),wxDEFAULT_DIALOG_STYLE)
 {
    wxScrolledWindow *sw=new wxScrolledWindow(this);
    //sw->FitInside();
@@ -2354,6 +2354,7 @@ wxDialog(parent,-1,_T("FOX Preferences: "),wxDefaultPosition,wxSize(400,300),wxD
       if(pos->first.find(_T("BOOL")  ,1)!=wxString::npos) type=PREF_BOOL;
       if(pos->first.find(_T("STRING"),1)!=wxString::npos) type=PREF_STRING;
       if(pos->first.find(_T("LONG")  ,1)!=wxString::npos) type=PREF_LONG;
+      if(pos->first.find(_T("REAL")  ,1)!=wxString::npos) type=PREF_REAL;
       
       switch(type)
       {
@@ -2391,6 +2392,22 @@ wxDialog(parent,-1,_T("FOX Preferences: "),wxDefaultPosition,wxSize(400,300),wxD
             wxStaticText *txt=new wxStaticText(w,-1,component+_T(":")+entry);
             wxString val;
             wxConfigBase::Get()->Read(_T("/")+component+_T("/LONG/")+entry,&val);
+            wxTextCtrl *win=new wxTextCtrl(w,-1,val,wxDefaultPosition,wxDefaultSize,0,wxTextValidator(wxFILTER_NUMERIC));
+            s->Add(txt,0,wxALIGN_CENTER);
+            s->Add(win,0,wxALIGN_CENTER);
+            w->Layout();
+            sizer->Add(w,0,wxLEFT);
+            w=win;
+            break;
+         }
+         case PREF_REAL:
+         {
+            w=new wxWindow(sw,-1);
+            wxBoxSizer *s=new wxBoxSizer(wxHORIZONTAL);
+            w->SetSizer(s);
+            wxStaticText *txt=new wxStaticText(w,-1,component+_T(":")+entry);
+            wxString val;
+            wxConfigBase::Get()->Read(_T("/")+component+_T("/REAL/")+entry,&val);
             wxTextCtrl *win=new wxTextCtrl(w,-1,val,wxDefaultPosition,wxDefaultSize,0,wxTextValidator(wxFILTER_NUMERIC));
             s->Add(txt,0,wxALIGN_CENTER);
             s->Add(win,0,wxALIGN_CENTER);
@@ -2447,6 +2464,18 @@ void WXFoxPreferences::OnClose(wxCloseEvent& event)
             wxTextCtrl *w=dynamic_cast<wxTextCtrl *>(pos->win);
             s=w->GetValue();
             s.ToLong(&val);
+            wxConfigBase::Get()->Write(full,val);
+            break;
+         }
+         case PREF_REAL:
+         {
+            wxString full=_T("/")+pos->component+_T("/REAL/")+pos->entry;
+            wxString s;
+            double val;
+            wxConfigBase::Get()->Read(full,&val);
+            wxTextCtrl *w=dynamic_cast<wxTextCtrl *>(pos->win);
+            s=w->GetValue();
+            s.ToDouble(&val);
             wxConfigBase::Get()->Write(full,val);
             break;
          }

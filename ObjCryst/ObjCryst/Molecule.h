@@ -777,7 +777,8 @@ class Molecule: public Scatterer
                                      const REAL zMin=-.1,const REAL zMax=1.1,
                                      const bool displayEnantiomer=false,
                                      const bool displayNames=false,
-                                     const bool hideHydrogens=false)const;
+                                     const bool hideHydrogens=false,
+                                     const REAL fadeDistance=0)const;
       /** Add an atom
       *
       *
