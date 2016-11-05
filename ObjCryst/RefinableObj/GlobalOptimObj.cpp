@@ -641,7 +641,7 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
 
 
       nbStep=nbStep0;
-      this->UpdateDisplay();
+      if(false==mStopAfterCycle) this->UpdateDisplay();
       stringstream s;
       s<<"Run #"<<abs(nbCycle);
       mvSavedParamSet.push_back(make_pair(mRefParList.CreateParamSet(s.str()),mCurrentCost));
@@ -686,14 +686,6 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
    }
    mIsOptimizing=false;
 
-   #ifdef __WX__CRYST__
-   mMutexStopAfterCycle.Lock();
-   #endif
-   mStopAfterCycle=false;
-   #ifdef __WX__CRYST__
-   mMutexStopAfterCycle.Unlock();
-   #endif
-
    mRefParList.RestoreParamSet(mBestParSavedSetIndex);
 
    for(vector<pair<long,REAL> >::iterator pos=mvSavedParamSet.begin();pos!=mvSavedParamSet.end();++pos)
@@ -709,8 +701,16 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
 
    this->EndOptimization();
 
-   this->UpdateDisplay();
+   if(false==mStopAfterCycle) this->UpdateDisplay();
 
+   #ifdef __WX__CRYST__
+   mMutexStopAfterCycle.Lock();
+   #endif
+   mStopAfterCycle=false;
+   #ifdef __WX__CRYST__
+   mMutexStopAfterCycle.Unlock();
+   #endif
+   
    if(finalcost>1)
       cout<<endl<<"Finished all runs, number of trials to reach cost="
           <<finalcost<<" : <nbTrial>="<<nbTrialCumul/(nbCycle0-nbCycle)<<endl;

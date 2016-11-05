@@ -183,8 +183,19 @@ void WXOptimizationObj::OnRemoveRefinedObject(wxCommandEvent & WXUNUSED(event))
 
 void WXOptimizationObj::OnStopOptimization(wxCommandEvent & WXUNUSED(event))
 {
-   this->GetOptimizationObj().StopAfterCycle();
-   (*fpObjCrystInformUser)("Stopped global optimization");
+   if(0!=mpGlobalOptimRunThread)
+   {
+      if(mpGlobalOptimRunThread->IsAlive())
+      {
+         (*fpObjCrystInformUser)("Waiting for global optimization to stop...");
+         this->GetOptimizationObj().StopAfterCycle();
+         mpGlobalOptimRunThread->Wait(wxTHREAD_WAIT_YIELD);
+         this->GetOptimizationObj().UpdateDisplay();
+         (*fpObjCrystInformUser)("Global optimization halted...");
+      }
+      delete mpGlobalOptimRunThread;
+      mpGlobalOptimRunThread=0;
+   }
 }
 void WXOptimizationObj::OnUpdateUI(wxUpdateUIEvent& event)
 {
@@ -314,7 +325,7 @@ void WXOptimizationObj::OnClose(wxCloseEvent& event)
 ////////////////////////////////////////////////////////////////////////
 WXGlobalOptimRunThread::WXGlobalOptimRunThread(OptimizationObj &globalOptObj,long &nbTrial,
                              const REAL finalCost,long &nbRun,const bool multiple):
-wxThread(wxTHREAD_DETACHED),mpGlobalOptObj(&globalOptObj),mpNbTrial(&nbTrial),mpNbRun(&nbRun),
+wxThread(wxTHREAD_JOINABLE),mpGlobalOptObj(&globalOptObj),mpNbTrial(&nbTrial),mpNbRun(&nbRun),
 mFinalCost(finalCost),mDoMultiple(multiple)
 {
 }
@@ -475,6 +486,23 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbRun(-1)
    VFN_DEBUG_EXIT("WXMonteCarloObj::WXMonteCarloObj()",7)
 }
 
+WXMonteCarloObj::~WXMonteCarloObj()
+{
+   if(0!=mpGlobalOptimRunThread)
+   {
+      if(mpGlobalOptimRunThread->IsAlive())
+      {
+         (*fpObjCrystInformUser)("Waiting for global optimization to stop...");
+         this->GetOptimizationObj().StopAfterCycle();
+         mpGlobalOptimRunThread->Wait(wxTHREAD_WAIT_YIELD);
+         (*fpObjCrystInformUser)("Global optimization halted...");
+      }
+      delete mpGlobalOptimRunThread;
+      mpGlobalOptimRunThread=0;
+   }
+}
+   
+
 void WXMonteCarloObj::OnRunOptimization(wxCommandEvent & event)
 {
    VFN_DEBUG_ENTRY("WXMonteCarloObj::OnRunOptimization()",6)
@@ -509,6 +537,9 @@ void WXMonteCarloObj::OnRunOptimization(wxCommandEvent & event)
                               _T("Goal Cost"),_T(".20"),wxOK | wxCANCEL);
       if(wxID_OK==costDialog.ShowModal()) costDialog.GetValue().ToDouble(&finalCost);
    }
+   if(0!=mpGlobalOptimRunThread)
+      delete mpGlobalOptimRunThread;
+
    if(event.GetId()==ID_GLOBALOPT_MENU_OPT_RUN_MULTIPLE)
       mpGlobalOptimRunThread = new WXGlobalOptimRunThread(this->GetOptimizationObj(),
                                                           mpMonteCarloObj->NbTrialPerRun(),finalCost,mNbRun,true);

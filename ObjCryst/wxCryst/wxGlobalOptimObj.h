@@ -97,6 +97,7 @@ class WXMonteCarloObj: public WXOptimizationObj
 {
    public:
       WXMonteCarloObj(wxWindow *parent, MonteCarloObj*);
+      ~WXMonteCarloObj();
       //virtual void CrystUpdate();
       virtual void OnRunOptimization(wxCommandEvent &event);
       /// Called during optimization, to show the user something's still going on...
