@@ -2399,7 +2399,7 @@ void Molecule::BeginOptimization(const bool allowApproximations,const bool enabl
       {
          (*fpObjCrystInformUser)("Optimizing initial conformation of Molecule:"+this->GetName());
          this->OptimizeConformation(100000,(REAL)(mvpRestraint.size()));
-         (*fpObjCrystInformUser)("");
+         (*fpObjCrystInformUser)("Finished optimizing initial conformation of Molecule:"+this->GetName());
       }
       mAutoOptimizeConformation.SetChoice(1);
    }
@@ -2547,7 +2547,8 @@ void Molecule::RandomizeConfiguration()
    {// This is only done once, for a newly-created molecule with atoms not conforming to restraints
       (*fpObjCrystInformUser)("Optimizing initial conformation of Molecule:"+this->GetName());
       this->OptimizeConformation(100000,(REAL)(mvpRestraint.size()));
-      (*fpObjCrystInformUser)("");
+      (*fpObjCrystInformUser)("Finished optimizing initial conformation of Molecule:"+this->GetName());
+      mAutoOptimizeConformation.SetChoice(1);
    }
 
    if(   (!(this->IsBeingRefined()))

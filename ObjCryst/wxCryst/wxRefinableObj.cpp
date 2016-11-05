@@ -44,6 +44,7 @@
 #include "ObjCryst/ObjCryst/ZScatterer.h"
 #include "ObjCryst/ObjCryst/ScatteringCorr.h"
 #include "ObjCryst/ObjCryst/ReflectionProfile.h"
+#include "ObjCryst/Quirks/Chronometer.h"
 
 //Fixes for Cygwin; where do those stupid macros come from ? Somewhere in wxMSW headers
 #ifdef max
@@ -681,8 +682,14 @@ void WXRefinableObj::OnMenuUnFixAllPar(wxCommandEvent & WXUNUSED(event))
 
 void WXRefinableObj::OnMenuParRandomize(wxCommandEvent & WXUNUSED(event))
 {
+   (*fpObjCrystInformUser)("Randomizing object:"+mpRefinableObj->GetName());
+   Chronometer chrono;
+   chrono.start();
    mpRefinableObj->RandomizeConfiguration();
    this->CrystUpdate(true);
+   char buf [200];
+   sprintf(buf,"Finished randomizing object: %s, dt=%6.2fs",mpRefinableObj->GetName().c_str(),chrono.seconds());
+   (*fpObjCrystInformUser)(buf);
 }
 
 void WXRefinableObj::OnUpdateUI(wxUpdateUIEvent& event)
