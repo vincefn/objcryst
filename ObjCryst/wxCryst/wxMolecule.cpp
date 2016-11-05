@@ -827,7 +827,7 @@ mpBondWin(0),mpAngleWin(0),mpDihedralAngleWin(0),mpRigidGroupWin(0),mpNonFlipAto
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_ADD_RIGID_GROUP,
                                 "Add Rigid Group");
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_ADD_NONFLIP_ATOM,
-                                "Add Non-Flip Atom");         
+                                "Add Non-Flip (optically active) Atom");
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_RIGIDIFY_WITH_DIHEDRALANGLES,
                                 "Rigidify with Dihedral Angles");
          mpMenuBar->GetMenu(ID_MOLECULE_MENU_FORMULA).AppendSeparator();
@@ -842,7 +842,7 @@ mpBondWin(0),mpAngleWin(0),mpDihedralAngleWin(0),mpRigidGroupWin(0),mpNonFlipAto
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_REMOVE_RIGID_GROUP,
                                 "Remove Rigid Group"); 
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_REMOVE_NONFLIPATOM,
-                                "Remove Non-Flip Atom"); 
+                                "Remove Non-Flip (optically active) Atom");
          
          mpMenuBar->GetMenu(ID_MOLECULE_MENU_FORMULA).AppendSeparator();
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_SHOW_RESTRAINT,
@@ -2940,6 +2940,11 @@ void WXMolecule::NotifyDeleteListWin(WXMolScrolledWindow *win)
       VFN_DEBUG_MESSAGE("WXMolecule::NotifyDeleteListWin(): Dihedral Angle List window",5)
       mpRigidGroupWin=0;
       mvpRigidGroup.clear();
+   }
+   if(win==mpNonFlipAtomWin)
+   {
+      VFN_DEBUG_MESSAGE("WXMolecule::NotifyDeleteListWin(): non-flip atom list window",5)
+      mpNonFlipAtomWin=0;
    }
    VFN_DEBUG_EXIT("WXMolecule::NotifyDeleteListWin()",6)
 }
