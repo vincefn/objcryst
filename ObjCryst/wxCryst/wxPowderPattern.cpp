@@ -485,6 +485,7 @@ mChi2(0.0),mGoF(0.0),mRwp(0.0),mRp(0.0)
    VFN_DEBUG_MESSAGE("WXPowderPattern::WXPowderPattern():1",6)
    this->CrystUpdate(true);
    {
+      mPowderPatternWasPreviouslyEmpty = true;
       if(!wxConfigBase::Get()->HasEntry(_T("PowderPattern/BOOL/Automatically open powder pattern graph")))
          wxConfigBase::Get()->Write(_T("PowderPattern/BOOL/Automatically open powder pattern graph"), false);
       else
@@ -495,6 +496,10 @@ mChi2(0.0),mGoF(0.0),mRwp(0.0),mRp(0.0)
          {
             wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_POWDER_MENU_GRAPH);
             wxPostEvent(this,event);
+         }
+         else
+         {
+            mPowderPatternWasPreviouslyEmpty=false;
          }
       }
    }
@@ -514,39 +519,58 @@ void WXPowderPattern::CrystUpdate(const bool uui,const bool lock)
       this->WXRefinableObj::CrystUpdate(uui,lock);
       return;// nothing to display yet
    }
-   
-   // Will force re-generating reflection list if the wavelength,
-   // or lattice par, or the spacegroup has changed.
-   VFN_DEBUG_MESSAGE("WXPowderPattern::CrystUpdate()",7)
-   mpPowderPattern->Prepare();
-   VFN_DEBUG_MESSAGE("WXPowderPattern::CrystUpdate()",7)
-   
-   mChi2=mpPowderPattern->GetChi2_Option();
-   if(mpPowderPattern->mNbPointUsed>0)
-      mGoF=mpPowderPattern->GetChi2()/mpPowderPattern->mNbPointUsed;
-   else mGoF=0;
-   //cout<<"WXPowderPattern::CrystUpdate():"<<mpPowderPattern->GetChi2()<<"/"<<mpPowderPattern->mNbPointUsed<<"="<<mGoF<<endl;
-   mRwp=mpPowderPattern->GetRw();
-   mRp=mpPowderPattern->GetR();
-   
-   if(mpGraph!=0)
+   else
    {
-      CrystVector_REAL tmp;
-      mpPowderPattern->CalcPowderPattern();
-      tmp=mpPowderPattern->GetPowderPatternVariance();
-      for(long i=0;i<tmp.numElements();i++)
+      bool val=false;
+      if(mPowderPatternWasPreviouslyEmpty)
       {
-         if(tmp(i)<0) tmp(i)=0;
-         else tmp(i)=sqrt(tmp(i));
+         wxConfigBase::Get()->Read(_T("PowderPattern/BOOL/Automatically open powder pattern graph"), &val);
       }
-      mpGraph->SetPattern( mpPowderPattern->GetPowderPatternX(),
-                           mpPowderPattern->GetPowderPatternObs(),
-                           mpPowderPattern->GetPowderPatternCalc(),
-                           tmp,
-                           mpPowderPattern->GetChi2Cumul(1));
+      if(mPowderPatternWasPreviouslyEmpty && val)
+      {
+         // We are supposed to automatically open powder pattern graph, but this could not be done
+         // when initializing this window because there were no points.
+         // WXPowderPattern::CrystUpdate() will be called again from WXPowderPattern::OnMenuShowGraph()
+         mPowderPatternWasPreviouslyEmpty = false;
+         wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_POWDER_MENU_GRAPH);
+         wxPostEvent(this,event);
+      }
+      else
+      {
+         // Will force re-generating reflection list if the wavelength,
+         // or lattice par, or the spacegroup has changed.
+         VFN_DEBUG_MESSAGE("WXPowderPattern::CrystUpdate()",7)
+         mpPowderPattern->Prepare();
+         VFN_DEBUG_MESSAGE("WXPowderPattern::CrystUpdate()",7)
+         
+         mChi2=mpPowderPattern->GetChi2_Option();
+         if(mpPowderPattern->mNbPointUsed>0)
+            mGoF=mpPowderPattern->GetChi2()/mpPowderPattern->mNbPointUsed;
+         else mGoF=0;
+         //cout<<"WXPowderPattern::CrystUpdate():"<<mpPowderPattern->GetChi2()<<"/"<<mpPowderPattern->mNbPointUsed<<"="<<mGoF<<endl;
+         mRwp=mpPowderPattern->GetRw();
+         mRp=mpPowderPattern->GetR();
+         
+         if(mpGraph!=0)
+         {
+            CrystVector_REAL tmp;
+            mpPowderPattern->CalcPowderPattern();
+            tmp=mpPowderPattern->GetPowderPatternVariance();
+            for(long i=0;i<tmp.numElements();i++)
+            {
+               if(tmp(i)<0) tmp(i)=0;
+               else tmp(i)=sqrt(tmp(i));
+            }
+            mpGraph->SetPattern( mpPowderPattern->GetPowderPatternX(),
+                                 mpPowderPattern->GetPowderPatternObs(),
+                                 mpPowderPattern->GetPowderPatternCalc(),
+                                 tmp,
+                                 mpPowderPattern->GetChi2Cumul(1));
+         }
+         if(lock) mMutex.Unlock();
+         this->WXRefinableObj::CrystUpdate(uui,lock);
+      }
    }
-   if(lock) mMutex.Unlock();
-   this->WXRefinableObj::CrystUpdate(uui,lock);
    VFN_DEBUG_EXIT("WXPowderPattern::CrystUpdate()",7)
 } 
 
@@ -1469,6 +1493,7 @@ void WXPowderPatternGraph::OnPaint(wxPaintEvent& WXUNUSED(event))
 
 void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
 {
+   if(0 == mpPattern->GetPowderPattern().GetNbPoint()) return;
    if(event.Leaving()) return;// wxMSW2.4 bug ?
    if(wxMUTEX_NO_ERROR!=mMutex.TryLock())
    {
@@ -1742,6 +1767,7 @@ void WXPowderPatternGraph::OnMouse(wxMouseEvent &event)
 }
 void WXPowderPatternGraph::OnMouseWheel(wxMouseEvent &event)
 {
+   if(0 == mpPattern->GetPowderPattern().GetNbPoint()) return;
    VFN_DEBUG_ENTRY("WXPowderPatternGraph::OnMouseWheel()",6)
    wxMutexLocker mlock(mMutex);
    const long nbPoint=mX.numElements();

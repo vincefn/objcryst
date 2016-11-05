@@ -64,6 +64,8 @@ class WXPowderPattern: public WXRefinableObj
       REAL mGoF;
       REAL mRwp;
       REAL mRp;
+      /// This flag is used to automatically open the powder pattern graph once data has been loaded.
+      bool mPowderPatternWasPreviouslyEmpty;
    DECLARE_EVENT_TABLE()
 };
 /** Class to display a Powder Pattern (calc,obs) in a graphic window.
