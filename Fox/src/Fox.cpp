@@ -117,7 +117,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 // Now using YYYY### (4-digit year + 3 number for the version)
-#define __FOXREVISION__ 2015003
+#define __FOXREVISION__ 2016001
 
 static std::string foxVersion;
 
@@ -530,7 +530,9 @@ int main (int argc, char *argv[])
 
    {// Fox version
       char verBuf[200];
-      sprintf(verBuf,"1.10-devel (#%d)",__FOXREVISION__);
+      unsigned int foxv0 = __FOXREVISION__ / 1000;
+      unsigned int foxv1 = __FOXREVISION__ % 1000;
+      sprintf(verBuf,"%u.%u", foxv0, foxv1);
       foxVersion=verBuf;
    }
    bool useGUI(true);
@@ -1764,10 +1766,12 @@ wxDialog(parent,-1,_T("About Fox"),wxDefaultPosition,wxDefaultSize,wxCAPTION|wxS
    wxBoxSizer *sizer=new wxBoxSizer(wxVERTICAL);
    string msg(string("F.O.X. - Free Objects for Xtallography\n")
               +"Version "+ foxVersion +" \n\n"
-              +"(c) 2000-     Vincent FAVRE-NICOLIN, vincent.favre-nicolin@ujf-grenoble.fr\n"
-              +"                                   , Univ. Grenoble Alpes\n"
+              +"(c) 2000-     Vincent FAVRE-NICOLIN, vincent.favre-nicolin@univ-grenoble-alpes.fr\n"
+              +"                                   , Univ. Grenoble Alpes & ESRF\n"
               +"    2000-2001 Radovan CERNY, University of Geneva\n"
               +"    2009-     Jan Rohlicek, Michal Husak (Inst. Chem. Tech, Prague)\n\n"
+              +"http://fox.vincefn.net\n"
+              +"https://github.com/vincefn/objcryst\n"
               +"http://objcryst.sourceforge.net\n\n"
               +"FOX comes with ABSOLUTELY NO WARRANTY. It is free software, and you are\n"
               +"welcome to redistribute it under certain conditions. \n"
@@ -3207,7 +3211,7 @@ void WXCrystMainFrame::OnCODSelect(wxGridEvent &ev)
    
    std::vector<cod_record>::const_iterator pos=mvCOD_Record.begin();
    for(unsigned int i=ev.GetRow()/3;i>0;i--) pos++;
-   wxString cifurl=wxString::Format("http://www.crystallography.net/%ld.cif",pos->file);
+   wxString cifurl=wxString::Format("http://www.crystallography.net/cod/%ld.cif",pos->file);
    cout<<cifurl<<endl;
    if(!(wxFileSystem::HasHandlerForPath(cifurl)))
       wxFileSystem::AddHandler(new wxInternetFSHandler);

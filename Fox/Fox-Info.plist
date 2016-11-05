@@ -23,6 +23,8 @@
 			<false/>
 			<key>NSPersistentStoreTypeKey</key>
 			<string>XML</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
 		</dict>
 		<dict>
 			<key>CFBundleTypeExtensions</key>
@@ -56,6 +58,6 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>1.10-dev</string>
+	<string>2016.1</string>
 </dict>
 </plist>
