@@ -1092,7 +1092,7 @@ void PowderPatternDiffraction::ExtractLeBail(unsigned int nbcycle)
          const REAL *p1=mvReflProfile[k0].profile.data()+(first-mvReflProfile[k0].first);
          const REAL *p2=calc.data()+first;
          const REAL *pobs=obs.data()+first;
-         for(unsigned int i=first;i<=last;++i)
+         for(long i=first;i<=last;++i)
          {
             const REAL s2=*p2++;
             const REAL tmp=*pobs++ * *p1++;
@@ -1267,15 +1267,15 @@ Applying profiles for "<<nbRefl<<" reflections",2)
             <<"  I="<<intensity<<"  stol="<<mSinThetaLambda(i)\
             <<",pixel #"<<mvReflProfile[i].first<<"->"<<mvReflProfile[i].last,2)
          {
-            const unsigned long first=mvReflProfile[i].first,last=mvReflProfile[i].last;
+            const long first=mvReflProfile[i].first,last=mvReflProfile[i].last;
             const REAL *p2 = mvReflProfile[i].profile.data();
             REAL *p3 = mPowderPatternCalc.data()+first;
-            for(unsigned long j=first;j<=last;j++) *p3++ += *p2++ * intensity;
+            for(long j=first;j<=last;j++) *p3++ += *p2++ * intensity;
             if(useML)
             {
                const REAL *p2 = mvReflProfile[i].profile.data();
                REAL *p3 = mPowderPatternCalcVariance.data()+first;
-               for(unsigned long j=first;j<=last;j++) *p3++ += *p2++ * var;
+               for(long j=first;j<=last;j++) *p3++ += *p2++ * var;
             }
          }
       }
@@ -1359,10 +1359,10 @@ void PowderPatternDiffraction::CalcPowderPattern_FullDeriv(std::set<RefinablePar
                   if(mSinThetaLambda(i+step) > (mSinThetaLambda(i)+1e-5) ) break;
                }
                {
-                  const unsigned long first=mvReflProfile[i].first,last=mvReflProfile[i].last;
+                  const long first=mvReflProfile[i].first,last=mvReflProfile[i].last;
                   const REAL *p2 = mvReflProfile[i].profile.data();
                   REAL *p3 = mPowderPattern_FullDeriv[*par].data()+first;
-                  for(unsigned long j=first;j<=last;j++) *p3++ += *p2++ * intensity;
+                  for(long j=first;j<=last;j++) *p3++ += *p2++ * intensity;
                }
             }
          }
@@ -1396,10 +1396,10 @@ void PowderPatternDiffraction::CalcPowderPattern_FullDeriv(std::set<RefinablePar
                }
                if(mvReflProfile_FullDeriv[*par][i].size()>0)// Some profiles may be unaffected by a given parameter
                {
-                  const unsigned long first=mvReflProfile[i].first,last=mvReflProfile[i].last;
+                  const long first=mvReflProfile[i].first,last=mvReflProfile[i].last;
                   const REAL *p2 = mvReflProfile_FullDeriv[*par][i].data();
                   REAL *p3 = mPowderPattern_FullDeriv[*par].data()+first;
-                  for(unsigned long j=first;j<=last;j++) *p3++ += *p2++ * intensity;
+                  for(long j=first;j<=last;j++) *p3++ += *p2++ * intensity;
                }
             }
          }
@@ -2316,7 +2316,7 @@ void PowderPatternDiffraction::PrepareIntegratedProfile()const
             REAL *fact = &((*pos1)[j]);//this creates the 'j' entry if necessary
             const REAL *p2 = mvReflProfile[i].profile.data()+(first-first0);
             //cout << i<<","<<j<<","<<first<<","<<last<<":"<<*fact<<"/"<<mNbReflUsed<<","<<mNbRefl<<endl;
-            for(int k=first;k<=last;k++) *fact += *p2++;
+            for(long k=first;k<=last;k++) *fact += *p2++;
          }
       }
       pos2->first=firstInterval;
