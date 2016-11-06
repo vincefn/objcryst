@@ -532,7 +532,11 @@ int main (int argc, char *argv[])
       char verBuf[200];
       unsigned int foxv0 = __FOXREVISION__ / 1000;
       unsigned int foxv1 = __FOXREVISION__ % 1000;
+      #ifdef __DEBUG__
+      sprintf(verBuf,"%u.%u(DEBUG)", foxv0, foxv1);
+      #else
       sprintf(verBuf,"%u.%u", foxv0, foxv1);
+      #endif
       foxVersion=verBuf;
    }
    bool useGUI(true);
