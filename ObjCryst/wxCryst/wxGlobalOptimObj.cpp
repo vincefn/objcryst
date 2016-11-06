@@ -494,7 +494,7 @@ WXMonteCarloObj::~WXMonteCarloObj()
       {
          (*fpObjCrystInformUser)("Waiting for global optimization to stop...");
          this->GetOptimizationObj().StopAfterCycle();
-         mpGlobalOptimRunThread->Wait(wxTHREAD_WAIT_YIELD);
+         mpGlobalOptimRunThread->Wait(wxTHREAD_WAIT_BLOCK);
          (*fpObjCrystInformUser)("Global optimization halted...");
       }
       delete mpGlobalOptimRunThread;
