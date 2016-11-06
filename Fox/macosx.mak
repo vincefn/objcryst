@@ -58,7 +58,7 @@ Fox-nogui: ../cctbx ../newmat
 dist:Fox
 	rm -Rf Fox-`date "+%Y-%m-%d"` Fox-`date "+%Y-%m-%d"`.dmg
 	mkdir Fox-`date "+%Y-%m-%d"`
-	cp -R build/Deployment/Fox.app example Fox-`date "+%Y-%m-%d"`/
+	cp -R build/Deployment/Fox.app example ../LICENSE.txt ../ChangeLog.txt ../README.txt Fox-`date "+%Y-%m-%d"`/
 	hdiutil create -srcfolder Fox-`date "+%Y-%m-%d"` Fox-`date "+%Y-%m-%d"`.dmg
 	rm -Rf Fox-`date "+%Y-%m-%d"`
 
