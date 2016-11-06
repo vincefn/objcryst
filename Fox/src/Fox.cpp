@@ -2333,6 +2333,8 @@ void GetRecursiveConfigEntryList(list<pair<wxString,wxString> > &l)
    }
 }
 
+static const long ID_FOX_PREFS_OK=WXCRYST_ID();
+
 enum FOX_PREF_TYPE {PREF_BOOL,PREF_STRING,PREF_LONG,PREF_REAL} ;
 struct FoxPref
 {
@@ -2351,6 +2353,7 @@ class WXFoxPreferences:public wxDialog
       WXFoxPreferences(wxWindow *parent);
       ~WXFoxPreferences();
       void OnClose(wxCloseEvent& event);
+      void OnButton(wxCommandEvent &event);
    private:
       list<FoxPref> l;
    DECLARE_EVENT_TABLE()
@@ -2358,6 +2361,7 @@ class WXFoxPreferences:public wxDialog
 
 BEGIN_EVENT_TABLE(WXFoxPreferences, wxDialog)
    EVT_CLOSE(WXFoxPreferences::OnClose)
+   EVT_BUTTON(ID_FOX_PREFS_OK, WXFoxPreferences::OnButton)
 END_EVENT_TABLE()
 
 WXFoxPreferences::WXFoxPreferences(wxWindow *parent):
@@ -2452,10 +2456,13 @@ wxDialog(parent,-1,_T("FOX Preferences: "),wxDefaultPosition,wxSize(400,400),wxD
       }
       l.push_back(FoxPref(component,type,entry,w));
    }
+   wxButton *pbut=new wxButton(this,ID_FOX_PREFS_OK,"OK");
+   sizer->Add(pbut);
    sw->Layout();
    sizer->Fit(sw);
    this->Layout();
 }
+
 WXFoxPreferences::~WXFoxPreferences()
 {
    cout<<"WXFoxPreferences::~WXFoxPreferences()"<<endl;
@@ -2463,7 +2470,7 @@ WXFoxPreferences::~WXFoxPreferences()
 
 void WXFoxPreferences::OnClose(wxCloseEvent& event)
 {
-   cout<<"WXFoxPreferences::OnClose()"<<endl;
+   VFN_DEBUG_MESSAGE("WXFoxPreferences::OnClose()",5);
    for(list<FoxPref>::const_iterator pos=l.begin();pos!=l.end();++pos)
    {
       switch(pos->type)
@@ -2517,9 +2524,15 @@ void WXFoxPreferences::OnClose(wxCloseEvent& event)
    event.Skip(true);
 }
 
+void WXFoxPreferences::OnButton(wxCommandEvent &event)
+{
+   VFN_DEBUG_MESSAGE("WXFoxPreferences::OnButton()",5);
+   this->Close();
+}
 
 void WXCrystMainFrame::OnPreferences(wxCommandEvent& event)
 {
+   event.Skip(true);
    WXFoxPreferences *prefs= new WXFoxPreferences(this);
    prefs->ShowModal();
 }
