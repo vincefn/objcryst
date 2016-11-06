@@ -337,7 +337,7 @@ void WXCrystInformUserStdOut(const string &str)
    if(wxThread::IsMain())
    {
       pLogWindowForUserMessage->AppendText(wxString::Format(_T("%s\n"), str.c_str()));
-      wxSafeYield(pLogWindowForUserMessage->MacGetTopLevelWindow(), true);
+      wxSafeYield(wxTheApp->GetTopWindow(), true);
    }
    else
    {
@@ -2007,6 +2007,7 @@ void WXCrystMainFrame::Close(bool safe)
    (*fpObjCrystInformUser)("");
    (*fpObjCrystInformUser)("Closed all objects");
    (*fpObjCrystInformUser)("");
+   mClockLastSave.Click();
 }
 
 
