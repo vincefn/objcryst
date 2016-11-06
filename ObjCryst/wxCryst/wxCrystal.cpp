@@ -854,16 +854,12 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
          wxWakeUpIdle();
          wxThread::This()->Yield();
          int ct=0;
-         #ifdef __LINUX__
          while(mpConditionGLUpdate->WaitTimeout(200)!=wxCOND_NO_ERROR)
          {
             cout<<"WXCrystal::UpdateGL():timeout waiting for mpConditionGLUpdate release: #"<<++ct<<":"<<ok<<endl;
             wxWakeUpIdle();
             if(ct>10) break;//and hope for the best...
          }
-         #else
-         mpConditionGLUpdate->Wait();
-         #endif
          mMutexGLUpdate.Unlock();
          delete mpConditionGLUpdate;
          mpConditionGLUpdate=0;
