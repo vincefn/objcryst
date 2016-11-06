@@ -337,7 +337,7 @@ void WXCrystInformUserStdOut(const string &str)
    if(wxThread::IsMain())
    {
       pLogWindowForUserMessage->AppendText(wxString::Format(_T("%s\n"), str.c_str()));
-      wxSafeYield(NULL,true);
+      wxYield();
    }
    else
    {
