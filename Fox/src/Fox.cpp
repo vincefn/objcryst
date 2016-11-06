@@ -2367,10 +2367,13 @@ END_EVENT_TABLE()
 WXFoxPreferences::WXFoxPreferences(wxWindow *parent):
 wxDialog(parent,-1,_T("FOX Preferences: "),wxDefaultPosition,wxSize(400,400),wxDEFAULT_DIALOG_STYLE)
 {
+   #if 1
+   wxWindow *sw = this;
+   #else
    wxScrolledWindow *sw=new wxScrolledWindow(this);
-   //sw->FitInside();
+   sw->FitInside();
    sw->SetScrollRate(10,10);
-   //sw=this;
+   #endif
    wxBoxSizer *sizer=new wxBoxSizer(wxVERTICAL);
    sw->SetSizer(sizer);
    list<pair<wxString,wxString> > ltmp;
@@ -2456,8 +2459,8 @@ wxDialog(parent,-1,_T("FOX Preferences: "),wxDefaultPosition,wxSize(400,400),wxD
       }
       l.push_back(FoxPref(component,type,entry,w));
    }
-   wxButton *pbut=new wxButton(this,ID_FOX_PREFS_OK,"OK");
-   sizer->Add(pbut);
+   wxButton *pbut=new wxButton(sw,ID_FOX_PREFS_OK,"OK");
+   sizer->Add(pbut,0,wxCENTER);
    sw->Layout();
    sizer->Fit(sw);
    this->Layout();
