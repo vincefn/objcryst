@@ -11,26 +11,18 @@ The FOX program (for Linux, MacOS X and windows) was made for the ab initio crys
 Features
 ========
 The most interesting features for ab initio structure determination are:
-
- * a versatile description of the crystal contents: either isolated atoms , molecules described using a bond length, bond angles and dihedral angles, and polyhedra for inorganic compounds. You can describe your structure by using any combination of groups of atoms, using a chemist's or crystallographer knowledge about the connectivity in your sample to constrain possible solutions..
- 
- * an automatic correction for special positions and shared atoms between polyhedra, suitable for global optimization algorithms.
- 
- * the ability to use simultaneously multiple powder patterns (X-rays, neutrons), as well as single crystal data (e.g. extracted from a powder pattern)
- 
- * smart global optimization algorithms which can get out of false minima.
- 
- * a graphical interface (see the screenshots) with a 3D crystal structure view, with live updates during the optimization process.
- 
-  * the ability to view CIF files
+- a versatile description of the crystal contents: either isolated atoms , molecules described using a bond length, bond angles and dihedral angles, and polyhedra for inorganic compounds. You can describe your structure by using any combination of groups of atoms, using a chemist's or crystallographer knowledge about the connectivity in your sample to constrain possible solutions..
+- an automatic correction for special positions and shared atoms between polyhedra, suitable for global optimization algorithms.
+- the ability to find peaks in a powder pattern, index the unit cell, and explore possible spacegroups
+- the ability to use simultaneously multiple powder patterns (X-rays, neutrons), as well as single crystal data (e.g. extracted from a powder pattern)
+- smart global optimization algorithms which can get out of false minima.
+- a graphical interface (see the screenshots) with a 3D crystal structure view, with live updates during the optimization process.
+- the ability to view CIF files
 
 So, if you:
-
- * have an unknown compound but with (approximately) known composition.
- 
- * have a powder pattern (X-Ray or neutron or both)
-
- * would like to solve the structure (i.e. find the atom -or group of atoms- positions, before refining them with another package).
+- have an unknown compound but with (approximately) known composition.
+- have a powder pattern (X-Ray or neutron or both)
+- would like to solve the structure (i.e. find the atom -or group of atoms- positions, before refining them with another package).
  
 Then Fox can help you.
 
