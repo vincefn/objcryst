@@ -1,8 +1,44 @@
+#### 2016.1 (November 2016)
+NEW FEATURES
+  * direct search on the Crystallography Open Database:
+    - search using keywords, formula or lattice parameters
+    - double-click to display the Crystal structure
+    (this requires access to the default database port, 3306. Some firewalls
+    may prevent that)
+  * automatically recognizing Molecules and isolated polyhedra from CIF files
+  * ability to combine several powder diffraction data sets from different 
+    temperatures (or any other variable condition) to solve a single crystal 
+    structure (it is possible to override the lattice parameters in 
+    the powder pattern diffraction)
+  * the extension for .xml.gz files is now .xmlgz
+  * define 'optically active atoms' than will no be flipped during global (Jan Rohlicek)
+    optimization (previously this was only possible using dihedral restraints)
+  * support for anisotropic pseudo-Voigt profiles
+  * support for ellipsoid texture description (Alexandr Zaloga)
+
+IMPROVEMENTS
+  * faster, more robust CIF import
+  * better flexibility search for Molecules
+  * 3D display: 
+    - nicer using transparency (can be disabled from preferences)
+    - standard atom colors from jmol
+  * drag & drop files on MacOSX
+  * take into account excluded regions when searching for peaks.
+  * faster initial optimization (and randomization) of Molecules
+  * Unicode interface (should be more friendly to directories with accents, symbols..)
+  * localized number display (using , rather than . for decimal separation)
+  
+BUG FIXES
+  * Avoid crashes during profile fitting and indexing
+  * internal fixes (Pavol Juhas)
+
 #### 1.9.8 - 2011 (Revision 1350)
 NEW FEATURES
    * Add import of Single crystal diffraction data (hklf4 format)
+
 IMPROVEMENTS
    * Add SSE optimization using sse_mathfun. Need compile with sse=1
+
 #### 1.9.7 - 2011 (Revision 1312)
 NEW FEATURES
    * Add Browser to quickly open Fox and cif files

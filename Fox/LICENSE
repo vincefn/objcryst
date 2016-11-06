@@ -1,6 +1,7 @@
-NOTE: This is the main FOX license. Please read also the license
-information of used libraries at :
-http://objcryst.sourceforge.net/ObjCryst/page_legal.html .
+NOTE: This is the main FOX/ObjCryst++ license. Please also refer to 
+the license of the (also open-source) libraries used by Fox: 
+
+	cctbx, newmat,, wxwidgets, fftw3, mysql, freeglut.
 
 #######
 		    GNU GENERAL PUBLIC LICENSE
