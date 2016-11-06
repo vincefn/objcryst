@@ -5,15 +5,15 @@ import os
 from time import sleep
 
 class MoinSpider:
-   def __init__(self,site='objcryst.sourceforge.net',
+   def __init__(self,site='fox.vincefn.net',
                 exclude=["RecentChanges","action=",
                          "FindPage","TitleIndex","WordIndex",
                          "Help","template","Template","MoinMoin",
                          "UserPreferences","WikiSandBox",
                          "ScriptAlias","ScriptAlias"]):
       self.u=urllib.URLopener()
-      self.u.addheader(('USER_AGENT', 'Mozilla/4.0'))
-      self.base='href=\"/Fox/'
+      #self.u.addheader(('USER_AGENT', 'Mozilla/4.0'))
+      self.base='href=\"/'
       self.suffix="?action=print"
       self.site=site
       self.pages=[] # list of pairs [relative URL, page content]
@@ -28,9 +28,9 @@ class MoinSpider:
          return
       self.d[lnk]="wiki_%i.html"%(1000+len(self.d))
       url="http://"+self.site+lnk+self.suffix #:TODO: use urlparse !
-      print
-      print "Getting page: %s"%url
-      print "         -> %s"%(self.d[lnk])
+      print()
+      print("Getting page: %s"%url)
+      print("         -> %s"%(self.d[lnk]))
       nb=nbtry
       cont=True
       while(nb>0):
@@ -40,14 +40,14 @@ class MoinSpider:
             nb=-1
          except IOError:
             nb-=1
-            print "IOError..... retry #%i"%(nbtry-nb)
+            print("IOError..... retry #%i"%(nbtry-nb))
             sleep(1)
       if nb==0:
-         print "Failed to load page, after %i trials:"%nbtry,lnk
+         print("Failed to load page, after %i trials:"%nbtry,lnk)
          self.nbFail+=1
          return
       if re.search("This page does not exist yet",page)!=None:
-         print "  -> Page has not been written yet !"
+         print("  -> Page has not been written yet !")
          self.d[lnk]="http://"+self.site+lnk # Link directly to site
          return
       self.pages.append([lnk,page])
@@ -61,12 +61,12 @@ class MoinSpider:
                      keep=False
                      break
                if keep:
-                  #print "    ->%s"%newlink
+                  #print("    ->%s"%newlink)
                   newlink=newlink[6:-1]# [6:-1] -> exlude ' href=" ' and the end ' " '
                   newlink=re.split('#',newlink)[0] # exclude anchors
                   self.Weave(newlink) 
                #else:
-               #   print "    ->%s ?  NO"%newlink
+               #   print("    ->%s ?  NO"%newlink)
             
    def WeaveStatic(self, pagelist,nbtry=3):
       """ Alternative to weave: download a pre-selected list of pages
@@ -74,22 +74,23 @@ class MoinSpider:
       for lnk in pagelist:
          self.d[lnk]="wiki_%i.html"%(1000+len(self.d))
          url="http://"+self.site+lnk+self.suffix #:TODO: use urlparse !
-         print "Getting page: %s         -> %s"%(url,self.d[lnk])
+         print("Getting page: %s         -> %s"%(url,self.d[lnk]))
          nb=nbtry
          cont=True
          while(nb>0):
             try:
+               print(url)
                p=self.u.open(url)
                page=p.read()
                nb=-1
             except IOError:
                nb-=1
-               print "IOError..... retry #%i"%(nbtry-nb)
+               print("IOError..... retry #%i"%(nbtry-nb))
                sleep(1)
             if nb==0:
-               print "Failed to load page, after %i trials:"%nbtry,lnk
+               print("Failed to load page, after %i trials:"%nbtry,lnk)
             if re.search("This page does not exist yet",page)!=None:
-               print "  -> Page has not been written yet !"
+               print("  -> Page has not been written yet !")
                self.d[lnk]="http://"+self.site+lnk # Link directly to site
                nb=0
             else:
@@ -103,13 +104,12 @@ class MoinSpider:
       #are replaced first
       ks=self.d.keys()
       ks.sort(reverse=True)
-      
       for p in self.pages:
          for m in re.finditer(r"img .*? src\=\"(.*?)\"",p[1]):
-            print re.findall(r"src\=\"(.*?)\"",m.group())
+            print(re.findall(r"src\=\"(.*?)\"",m.group()))
             url=re.findall(r"src\=\"(.*?)\"",m.group())[0]
             up=urlparse.urlparse(url)
-            print url
+            print(url)
             up0,up1,up2,up3,up4,up5=up[0],up[1],up[2],up[3],up[4],up[5]
             if up4 != '':
                name=re.split('=',up4).pop()
@@ -121,8 +121,8 @@ class MoinSpider:
                   up0='http'
                if up1=='':
                   up1=self.site
-               urlimg=urlparse.urlunparse((up0,up1,up2,up3,up4,up5))
-               print "   %s -> %s"%(urlimg,name)
+               urlimg=urlparse.urlunparse((up0,up1,up2,up3,up4,up5)).replace('&amp;','&')
+               print("   %s -> %s"%(urlimg,name))
                nbTry=3
                nb=nbTry
                while nb>0:
@@ -131,13 +131,13 @@ class MoinSpider:
                      nb=-1
                   except IOError:
                      nb-=1
-                     print "IOError..... retry #%i to get %s"%(nbTry-nb,name)
+                     print("IOError..... retry #%i to get %s"%(nbTry-nb,name))
                      sleep(1)
                if nb==0:
-                      print "Failed to load image, after %i trials: %s"%(nbtry,name)
+                      print("Failed to load image, after %i trials: %s"%(nbtry,name))
                else: # KLUDGE png->png cause htmldoc chokes on these...
                   if name[-4:]==".png":
-                    print "convert %s %s"%(d+"/"+name,d+"/"+name[:-3]+"jpg")
+                    print("convert %s %s"%(d+"/"+name,d+"/"+name[:-3]+"jpg"))
                     os.system("convert %s %s"%(d+"/"+name,d+"/"+name[:-3]+"jpg"))
                     os.system("rm -f %s"%(d+"/"+name))
             p[1]=p[1].replace(url,name)
@@ -152,43 +152,44 @@ class MoinSpider:
    def Html2pdf(self,d="wikihtml"):
       os.system("mogrify -resize '600x>' wikihtml/*.jpg")
       #os.system("htmldoc --jpeg=85 --webpage %s/*.html --linkcolor blue -f wiki.pdf"%d)
-      os.system("htmldoc --jpeg=85 --webpage %s/*.html --linkcolor blue --size a4 --format pdf14 --links --book --toclevels 3 --left 1.5cm --right 1.5cm --top 1.5cm --bottom 1.5cm --footer Dc1 -f wiki.pdf"%d)   
+      os.system("htmldoc --jpeg=85 --webpage %s/*.html --linkcolor blue --size a4 --format pdf14 --links --book --toclevels 3 --left 1.5cm --right 1.5cm --top 1.5cm --bottom 1.5cm --footer Dc1 -f FoxManual.pdf"%d)   
       #os.system("rm -f wikihtml/*")
 
 #m=MoinSpider(site="objcryst.sourceforge.net")
-m=MoinSpider(site="vincefn.net")
+m=MoinSpider(site="fox.vincefn.net")
 
-m.WeaveStatic(["/Fox/FoxWiki",
-               "/Fox/BiblioReferences",
-               "/Fox/Screenshots",
-               "/Fox/Download",
-               "/Fox/Install",
-               "/Fox/Install/Linux",
-               "/Fox/Install/MacOSX",
-               "/Fox/Install/Windows",
-               "/Fox/Tutorials",
-               "/Fox/Tutorials/Cimetidine",
-               "/Fox/Tutorials/PbSO4",
-               "/Fox/Tutorials/YLID",
-               "/Fox/Manual",
-               "/Fox/Manual/Crystal",
-               "/Fox/Manual/Powder",
-               "/Fox/Manual/Indexing",
-               "/Fox/Manual/ProfileFitting",
-               "/Fox/Manual/SingleCrystalDiffraction",
-               "/Fox/Manual/Algorithm",
-               "/Fox/Manual/CIF",
-               "/Fox/Manual/Fox.Grid",
-               "/Fox/Manual/Tips",
-               "/Fox/MailingList",
-               "/Fox/Changelog",
-               "/Fox/FoxCompile",
-               "/Fox/Compile/Linux",
-               "/Fox/Compile/MacOSX",
-               "/Fox/Compile/Windows",
-               #"/Fox/BiblioStructures",
-               #"/Fox/VincentFavreNicolin"
+m.WeaveStatic(["/FoxWiki",
+               "/BiblioReferences",
+               "/Screenshots",
+               "/Download",
+               "/Install",
+               "/Install/Linux",
+               "/Install/MacOSX",
+               "/Install/Windows",
+               "/Tutorials",
+               "/Tutorials/Cimetidine",
+               "/Tutorials/PbSO4",
+               "/Tutorials/YLID",
+               "/Manual",
+               "/Manual/Crystal",
+               "/Manual/Powder",
+               "/Manual/Indexing",
+               "/Manual/ProfileFitting",
+               "/Manual/SingleCrystalDiffraction",
+               "/Manual/Algorithm",
+               "/Manual/CIF",
+               "/Manual/Fox.Grid",
+               "/Manual/Tips",
+               "/MailingList",
+               "/Changelog",
+               "/FoxCompile",
+               "/Compile/Linux",
+               "/Compile/MacOSX",
+               #"/Compile/Windows"
+               #"/BiblioStructures",
+               #"/VincentFavreNicolin"
                ])
+               
 
 m.Pages2Html()
 m.Html2pdf()
