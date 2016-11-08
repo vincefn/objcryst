@@ -1169,41 +1169,33 @@ void WXMolecule::OnMenuAddRigidGroup(wxCommandEvent & WXUNUSED(event))
    mpMolecule->AddRigidGroup(s);
    VFN_DEBUG_EXIT("WXMolecule::OnMenuAddRigidGroup()",6)
 }
+
 void WXMolecule::OnMenuAddNonFlipAtom(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXMolecule::OnMenuAddNonFlipAtom()",6)
    WXCrystValidateAllUserInput();
    int choice;
-   vector<MolAtom*> v=mpMolecule->GetAtomList();
-   vector<MolAtom*> nf = mpMolecule->getNonFlipAtomList();
-   for(vector<MolAtom*>::iterator pos=v.begin();pos!=v.end();) {
-       bool erase=false;
-       for(int i=0;i<nf.size();i++) {
-           if(nf[i]->GetName().compare((*pos)->GetName())==0) {
-               erase=true;
-               break;
-           }
-       }
-       if(erase) {
-           pos=v.erase(pos);
-       } else {
-           pos++;
-       }
+   vector<MolAtom*> v;
+   for(vector<MolAtom*>::const_iterator pos=mpMolecule->GetAtomList().begin();pos!=mpMolecule->GetAtomList().end();++pos)
+   {
+      if((*pos)->IsNonFlipAtom()==false) v.push_back(*pos);
    }
 
    MolAtom *at1=WXDialogChooseFromVector(v,
                                (wxWindow*)this,"Choose the Optically active Atom",choice);
 
    if(0==at1) {
-      wxMessageDialog dumbUser(this,_T("Atom not selected !"),
+      wxMessageDialog dumbUser(this,_T("No atom selected !"),
                                _T("Whooops"),wxOK|wxICON_EXCLAMATION);
       dumbUser.ShowModal();
       return;
    }
       
-   mpMolecule->AddNonFlipAtom(*at1);
+   at1->SetNonFlipAtom(true);
+   this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXMolecule::OnMenuAddNonFlipAtom()",6)
 }
+
 void WXMolecule::OnMenuRemoveAtom(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXMolecule::OnMenuRemoveAtom()",6)
@@ -1286,11 +1278,16 @@ void WXMolecule::OnMenuRemoveDihedralAngle(wxCommandEvent & WXUNUSED(event))
    this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXMolecule::OnMenuRemoveDihedralAngle()",6)
 }
+
 void WXMolecule::OnMenuRemoveNonFlipAtom(wxCommandEvent & WXUNUSED(event))
 {
     VFN_DEBUG_ENTRY("WXMolecule::OnMenuRemoveNonFlipAtom()",6)
    int choice;
-   vector<MolAtom*> v = mpMolecule->getNonFlipAtomList();
+   vector<MolAtom*> v;
+   for(vector<MolAtom*>::const_iterator pos=mpMolecule->GetAtomList().begin();pos!=mpMolecule->GetAtomList().end();++pos)
+   {
+      if((*pos)->IsNonFlipAtom()) v.push_back(*pos);
+   }
 
    if(v.size()==0) {
       wxMessageDialog dumbUser(this,_T("The list of optically active atoms is empty !"),
@@ -1300,16 +1297,17 @@ void WXMolecule::OnMenuRemoveNonFlipAtom(wxCommandEvent & WXUNUSED(event))
    }
    MolAtom *at1=WXDialogChooseFromVector(v, (wxWindow*)this,"Choose the Optically active Atom to be removed",choice);
    if(0==at1) {
-      wxMessageDialog dumbUser(this,_T("Atom not selected !"),
+      wxMessageDialog dumbUser(this,_T("No atom selected !"),
                                _T("Whooops"),wxOK|wxICON_EXCLAMATION);
       dumbUser.ShowModal();
       return;
    }
     
-   mpMolecule->removeNonFlipAtom(*at1);
+   at1->SetNonFlipAtom(false);
    this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXMolecule::OnMenuRemoveNonFlipAtom()",6)
 }
+
 void WXMolecule::OnMenuRemoveRigidGroup(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXMolecule::OnMenuRemoveRigidGroup()",6)
@@ -2537,11 +2535,16 @@ void WXMolecule::CrystUpdate(const bool uui,const bool lock)
       }
       if(0!=mpNonFlipAtomWin) 
       {
-          vector<MolAtom*> v = mpMolecule->getNonFlipAtomList();
-          for(unsigned long i=0;i<v.size();i++)
-          {             
-              mpNonFlipAtomWin->AppendRows(1, true);
-              mpNonFlipAtomWin->SetCellValue(i, 0, v[i]->GetName());
+          vector<MolAtom*> v = mpMolecule->GetAtomList();
+          unsigned int i=0;
+          for(std::vector<MolAtom*>::const_iterator pos=mpMolecule->GetAtomList().begin();pos!=mpMolecule->GetAtomList().end();++pos)
+          {
+              if((*pos)->IsNonFlipAtom())
+              {
+                 mpNonFlipAtomWin->AppendRows(1, true);
+                 mpNonFlipAtomWin->SetCellValue(i, 0, (*pos)->GetName());
+                 i++;
+              }
           }
       }
    }

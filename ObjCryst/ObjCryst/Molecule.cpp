@@ -187,7 +187,7 @@ void ExpandAtomGroupRecursive(MolAtom* atom,
 
 MolAtom::MolAtom(const REAL x, const REAL y, const REAL z,
                  const ScatteringPower *pPow, const string &name, Molecule &parent):
-mName(name),mX(x),mY(y),mZ(z),mOccupancy(1.),mpScattPow(pPow),mpMol(&parent),mIsInRing(false)
+mName(name),mX(x),mY(y),mZ(z),mOccupancy(1.),mpScattPow(pPow),mpMol(&parent),mIsInRing(false),mIsNonFlipAtom(false)
 #ifdef __WX__CRYST__
 ,mpWXCrystObj(0)
 #endif
@@ -281,6 +281,7 @@ void MolAtom::XMLOutput(ostream &os,int indent)const
       ss <<mOccupancy;
       tag.AddAttribute("Occup",ss.str());
    }
+   if(mIsNonFlipAtom) tag.AddAttribute("NonFlip","1");
    os <<tag<<endl;
    VFN_DEBUG_EXIT("MolAtom::XMLOutput()",4)
 }
@@ -319,6 +320,11 @@ void MolAtom::XMLInput(istream &is,const XMLCrystTag &tag)
          stringstream ss(tag.GetAttributeValue(i));
          ss >>mOccupancy;
       }
+      if("NonFlip"==tag.GetAttributeName(i))
+      {
+         stringstream ss(tag.GetAttributeValue(i));
+         ss >>mIsNonFlipAtom;
+      }
    }
    this->SetName(name);
    VFN_DEBUG_EXIT("MolAtom::XMLInput()",7)
@@ -327,6 +333,18 @@ void MolAtom::XMLInput(istream &is,const XMLCrystTag &tag)
 void MolAtom::SetIsInRing(const bool r)const{mIsInRing=r;}
 bool MolAtom::IsInRing()const{return mIsInRing;}
 
+void MolAtom::SetNonFlipAtom(const bool nonflip)
+{
+   // :KLUDGE: should be using a specific clock ?
+   if(mIsNonFlipAtom != nonflip) this->GetMolecule().GetRigidGroupClock().Click();
+   mIsNonFlipAtom = nonflip;
+}
+
+bool MolAtom::IsNonFlipAtom() const
+{
+   return mIsNonFlipAtom;
+}
+   
 #ifdef __WX__CRYST__
 WXCrystObjBasic* MolAtom::WXCreate(wxWindow* parent)
 {
@@ -3914,31 +3932,6 @@ vector<MolAtom*>::iterator Molecule::RemoveAtom(MolAtom &atom, const bool del)
    return pos;
 }
 
-void Molecule::AddNonFlipAtom(MolAtom &atom)
-{
-   VFN_DEBUG_ENTRY("Molecule::AddNonFlipAtom()",5)
-   mvNonFlipAtom.push_back(&atom);
-   //mvNonFlipAtom.push_back(new MolAtom(atom.x,y,z,pPow,thename,*this));
-
-   mClockFlipGroup.Reset();
-   this->UpdateDisplay();
-   VFN_DEBUG_EXIT("Molecule::AddNonFlipAtom()",5)
-}
-void Molecule::removeNonFlipAtom(MolAtom &atom)
-{
-    for(vector<MolAtom*>::iterator pos=mvNonFlipAtom.begin();pos!=mvNonFlipAtom.end();) {
-        if(atom.GetName().compare((*pos)->GetName())==0) {
-            pos = mvNonFlipAtom.erase(pos);
-            break;
-        } else {
-            pos++;
-        }
-    }
-}
-vector<MolAtom*> Molecule::getNonFlipAtomList()
-{
-    return mvNonFlipAtom;
-}
 void Molecule::AddBond(MolAtom &atom1, MolAtom &atom2,
                        const REAL length, const REAL sigma, const REAL delta,
                        const REAL bondOrder,
@@ -7153,6 +7146,8 @@ void Molecule::BuildFlipGroup()
              pos1!=pos->mvRotatedChainList.begin()->second.end();++pos1)
             cout<<(*pos1)->GetName()<<"  ";
 
+         cout<<endl;
+
          pos=mvFlipGroup.erase(pos);
       }
       else pos++;
@@ -7160,19 +7155,23 @@ void Molecule::BuildFlipGroup()
    //Exclude flip groups where the central atom is in the non-flip atom list
    for(list<FlipGroup>::iterator pos=mvFlipGroup.begin(); pos!=mvFlipGroup.end();)
    {
-       bool erase = false;
-       for(size_t i = 0; i < mvNonFlipAtom.size(); i++) {
-           if(pos->mpAtom0->GetName().compare(mvNonFlipAtom[i]->GetName())==0) {
-              erase = true;
-              break;
-           }
-       }
-       if(erase) {
-           cout <<"EXCLUDING flip group (central atom is in the non-flip list)"<<endl;
-           pos=mvFlipGroup.erase(pos);
-       } else {
+      if(pos->mpAtom0->IsNonFlipAtom())
+      {
+         cout <<"EXCLUDING flip group (central atom is in the non-flip list): "
+              <<pos->mpAtom0->GetName()<<",exchanging bonds with "
+              <<pos->mpAtom1->GetName()<<" and "
+              <<pos->mpAtom2->GetName()<<", resulting in a 180deg rotation of atoms : ";
+         for(set<MolAtom*>::iterator pos1=pos->mvRotatedChainList.begin()->second.begin();
+            pos1!=pos->mvRotatedChainList.begin()->second.end();++pos1)
+            cout<<(*pos1)->GetName()<<"  ";
+         
+         cout<<endl;
+
+         pos=mvFlipGroup.erase(pos);
+      } else
+      {
            pos++;
-       }
+      }
    }
    // List them
    this->SaveParamSet(mLocalParamSet);
