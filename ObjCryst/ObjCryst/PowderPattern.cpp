@@ -2679,7 +2679,6 @@ const CrystVector_REAL& PowderPattern::GetChi2Cumul(const int m)const
       REAL chi2cumul=0,tmp;
       for(unsigned int i=0;i<mNbPointUsed;i++)
       {
-         VFN_DEBUG_MESSAGE("PowderPattern::GetChi2Cumul():"<<mIntegratedPatternMin(i)<<"->"<<mIntegratedPatternMax(i)<<":obs-calc="<<*pObs - *pCalc<<", weight="<<*pWeight,5);
          tmp = (*pObs++ - *pCalc++) ;
          chi2cumul += *pWeight++ * tmp*tmp;
          *pC2Cu++ = chi2cumul;
