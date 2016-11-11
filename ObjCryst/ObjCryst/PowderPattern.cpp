@@ -1147,7 +1147,7 @@ void PowderPatternDiffraction::ExtractLeBail(unsigned int nbcycle)
 long PowderPatternDiffraction::GetNbReflBelowMaxSinThetaOvLambda()const
 {
    if(this->IsBeingRefined()) return mNbReflUsed;
-   VFN_DEBUG_MESSAGE("PowderPattern::GetNbReflBelowMaxSinThetaOvLambda()",4)
+   VFN_DEBUG_MESSAGE("PowderPatternDiffraction::GetNbReflBelowMaxSinThetaOvLambda(): "<<mNbReflUsed<<"/"<<mNbRefl<<" [max sin(theta)/lambda="<<mMaxSinThetaOvLambda<<"]",4)
    this->CalcPowderReflProfile();
    const long nbpoint=mpParentPowderPattern->GetNbPointUsed();
    if((mNbReflUsed>0)&&(mNbReflUsed<mNbRefl))
@@ -5236,7 +5236,14 @@ void PowderPattern::GetGeneGroup(const RefinableObj &obj,
          }
 }
 
-void PowderPattern::SetMaxSinThetaOvLambda(const REAL max){mMaxSinThetaOvLambda=max;}
+void PowderPattern::SetMaxSinThetaOvLambda(const REAL max)
+{
+   mMaxSinThetaOvLambda=max;
+   for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++)
+   {
+      mPowderPatternComponentRegistry.GetObj(i).SetMaxSinThetaOvLambda(mMaxSinThetaOvLambda);
+   }
+}
 
 REAL PowderPattern::GetMaxSinThetaOvLambda()const{return mMaxSinThetaOvLambda;}
 
@@ -6608,6 +6615,7 @@ void PowderPattern::CalcNbPointUsed()const
    {
       mNbPointUsed=tmp;
       mClockNbPointUsed.Click();
+      VFN_DEBUG_MESSAGE("PowderPattern::CalcNbPointUsed():"<<mNbPointUsed<<" max(sin(theta)/lambda)="<<mMaxSinThetaOvLambda, 3)
    }
 
 }
