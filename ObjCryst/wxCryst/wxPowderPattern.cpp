@@ -2937,6 +2937,8 @@ void WXCellExplorer::OnAutoLeBail(wxCommandEvent &event)
    }
    // Limit resolution (:TODO: Take into account density of peask to limit to ~100 reflections)
    mpDiff->GetParentPowderPattern().SetMaxSinThetaOvLambda(0.25);
+   mpLog->AppendText(wxString::Format(_T("\n\nNOTE: automatically set max(sin(theta)/lambda)=0.25 for automatic Le Bail & profile fitting\n\n")));
+   mpDiff->GetParentPowderPattern().UpdateDisplay();
    // If one cell is already selected, do optimization immediately
    if(mpCell->GetSelection()>=0)
    {
