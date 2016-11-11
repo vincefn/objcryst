@@ -215,7 +215,7 @@ REAL ReflectionProfilePseudoVoigt::GetFullProfileWidth(const REAL relativeIntens
          while(*p<test){ p++; n1++;n2++;}
          n1--;
          while(*p>test){ p++; n2++;}
-         VFN_DEBUG_EXIT("ReflectionProfilePseudoVoigt::GetFullProfileWidth():"<<x(n2)-x(n1),10)
+         VFN_DEBUG_EXIT("ReflectionProfilePseudoVoigt::GetFullProfileWidth():"<<x(n2)-x(n1),2)
          return x(n2)-x(n1);
       }
       VFN_DEBUG_MESSAGE("ReflectionProfilePseudoVoigt::GetFullProfileWidth():"<<relativeIntensity<<","
