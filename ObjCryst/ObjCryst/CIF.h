@@ -205,11 +205,14 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose=true,const bool checkS
 * but has a list of symmetry_equiv_pos_as_xyz, check we have the correct
 * setting by trying different ones using cctbx
 * \param oneScatteringPowerPerElement: if false (the default), then there will be as many
-* ScatteringPowerAtom created as there are different Debye-Waller parameters. If true,
+* ScatteringPowerAtom created as there are different elements. If true,
 * only one will be created per element, avoiding a large number of scattering powers
 * e.g. when importing CIFs obtained from single crystal data refinement.
 * \param connectAtoms: if true, call Crystal::ConnectAtoms to try to create as many Molecules
 * as possible from the list of imported atoms.
+* \warning The behaviour of oneScatteringPowerPerElement has changed [2016/11/11]:
+* when set to false, it will return one scattering power per atom, where as prior to this
+* change, scattering powers where identical for identical Debye-Waller factors.
 */
 Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsXYZ, const bool oneScatteringPowerPerElement, const bool connectAtoms);
 

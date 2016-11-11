@@ -1202,6 +1202,7 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
             }
             else
             {
+               #if 0
                for(unsigned int i=0;i<pCryst->GetScatteringPowerRegistry().GetNb();++i)
                {
                   if(pCryst->GetScatteringPowerRegistry().GetObj(i).GetSymbol()!=posat->mSymbol) continue;
@@ -1219,8 +1220,9 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
                   break;
                }
                if(sp==NULL)
+               #endif
                {
-                  if(verbose) cout<<"Scattering power "<<posat->mLabel<<" not found, creating it..."<<endl;
+                  if(verbose) cout<<"Creating new scattering power for:"<<posat->mLabel<<endl;
                   sp = new ScatteringPowerAtom(posat->mLabel,posat->mSymbol);
                   // Always extract isotropic DP, even with ADPs present
                   // :TODO: if only ADP are listed, calculate isotropic DP
