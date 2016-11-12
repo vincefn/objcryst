@@ -3586,9 +3586,12 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
             z += translate(j,2);
             CrystVector<bool> isinside(x.numElements());
             CrystVector<REAL> borderdist(x.numElements());//distance to display limit
-            if(  ((x.min()<xMax) && (x.max()>xMin))
-               &&((y.min()<yMax) && (y.max()>yMin))
-               &&((z.min()<zMax) && (z.max()>zMin)))
+            const bool molcenter_isinside =    ((mXYZ(0)+translate(j,0))>=xMin) && ((mXYZ(0)+translate(j,0))<=xMax)
+                                            && ((mXYZ(1)+translate(j,1))>=yMin) && ((mXYZ(1)+translate(j,1))<=yMax)
+                                            && ((mXYZ(2)+translate(j,2))>=zMin) && ((mXYZ(2)+translate(j,2))<=zMax);
+            if(  ((x.min()<(xMax+fadeDistance/aa)) && (x.max()>(xMin-fadeDistance/aa)))
+               &&((y.min()<(yMax+fadeDistance/bb)) && (y.max()>(yMin-fadeDistance/bb)))
+               &&((z.min()<(zMax+fadeDistance/cc)) && (z.max()>(zMin-fadeDistance/cc))))
             {
                for(unsigned int k=0;k<mvpAtom.size();k++)
                {
@@ -3627,7 +3630,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                      const float f=mvpAtom[k]->GetOccupancy()*this->GetOccupancy();
                      if(displayNames)
                      {
-                        if(fout>0.99)
+                        if((fout>0.99) || molcenter_isinside)
                         {
                            GLfloat colourChar [] = {1.0, 1.0, 1.0, f*fout};
                            GLfloat colourCharRing [] = {1.0, 1.0, 0.8, f*fout};
