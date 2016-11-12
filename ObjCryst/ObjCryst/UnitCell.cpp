@@ -36,7 +36,7 @@ mBMatrix(3,3),mOrthMatrix(3,3),mOrthMatrixInvert(3,3)
 {
    VFN_DEBUG_MESSAGE("UnitCell::UnitCell()",10)
    this->InitOptions();
-   this->Init(10,11,12,M_PI/2+.1,M_PI/2+.2,M_PI/2+.3,"P1","");
+   this->Init(10,11,12,M_PI/2+.1,M_PI/2+.2,M_PI/2+.3,"P 1","");
    mClockMaster.AddChild(mClockLatticePar);
    mClockMaster.AddChild(this->GetSpaceGroup().GetClockSpaceGroup());
 }

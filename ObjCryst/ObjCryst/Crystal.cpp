@@ -62,7 +62,7 @@ mBondValenceCost(0.0),mBondValenceCostScale(1.0),mDeleteSubObjInDestructor(1)
 {
    VFN_DEBUG_MESSAGE("Crystal::Crystal()",10)
    this->InitOptions();
-   this->Init(10,11,12,M_PI/2+.1,M_PI/2+.2,M_PI/2+.3,"P1","");
+   this->Init(10,11,12,M_PI/2+.1,M_PI/2+.2,M_PI/2+.3,"P 1","");
    gCrystalRegistry.Register(*this);
    gTopRefinableObjRegistry.Register(*this);
    mClockMaster.AddChild(mLatticeClock);
@@ -115,7 +115,7 @@ mBondValenceCost(0.0),mBondValenceCostScale(1.0),mDeleteSubObjInDestructor(1)
    VFN_DEBUG_MESSAGE("Crystal::Crystal()",10)
    // Only create a default crystal, then copy old using XML
    this->InitOptions();
-   this->Init(10,11,12,M_PI/2+.1,M_PI/2+.2,M_PI/2+.3,"P1","");
+   this->Init(10,11,12,M_PI/2+.1,M_PI/2+.2,M_PI/2+.3,"P 1","");
    gCrystalRegistry.Register(*this);
    gTopRefinableObjRegistry.Register(*this);
    mClockMaster.AddChild(mLatticeClock);
