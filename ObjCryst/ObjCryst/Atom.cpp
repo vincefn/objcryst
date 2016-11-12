@@ -475,6 +475,12 @@ bool Atom::IsDummy()const { if(0==mScattCompList(0).mpScattPow) return true; ret
 const ScatteringPower& Atom::GetScatteringPower()const
 { return *mpScattPowAtom;}
 
+void Atom::SetScatteringPower(const ScatteringPower &p)
+{
+   if(mpScattPowAtom!=0) mpScattPowAtom->DeRegisterClient(*this);
+   mpScattPowAtom = &p;
+}
+
 void Atom::GetGeneGroup(const RefinableObj &obj,
                                 CrystVector_uint & groupIndex,
                                 unsigned int &first) const

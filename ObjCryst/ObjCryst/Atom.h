@@ -144,6 +144,8 @@ class Atom: public Scatterer
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
       /// Get the ScatteringPowerAtom corresponding to this atom.
       const ScatteringPower& GetScatteringPower()const;
+      /// Change the ScatteringPower for this atom
+      void SetScatteringPower(const ScatteringPower &pow);
       virtual void GetGeneGroup(const RefinableObj &obj,
                                 CrystVector_uint & groupIndex,
                                 unsigned int &firstGroup) const;
