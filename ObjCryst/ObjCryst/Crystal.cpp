@@ -1579,6 +1579,88 @@ void Crystal::ConnectAtoms(const REAL min_relat_dist, const REAL max_relat_dist,
    VFN_DEBUG_EXIT("Crystal::ConnectAtoms(...)",10)
 }
 
+void Crystal::MergeEqualScatteringPowers(const bool oneScatteringPowerPerElement)
+{
+   // Find identical scattering powers.
+   std::set<ScatteringPower*> vremovedpow;
+   std::map<ScatteringPower*,std::set<ScatteringPower*> > vequivpow;
+   for(unsigned int i=0;i<this->GetScatteringPowerRegistry().GetNb();i++)
+   {
+      ScatteringPower *p1 = &(this->GetScatteringPowerRegistry().GetObj(i));
+      if(vremovedpow.find(p1)!=vremovedpow.end()) continue;
+      vequivpow[p1] = std::set<ScatteringPower*>();
+      for(unsigned int j=i+1;j<this->GetScatteringPowerRegistry().GetNb();j++)
+      {
+         ScatteringPower *p2 = &(this->GetScatteringPowerRegistry().GetObj(j));
+         if(!oneScatteringPowerPerElement)
+         {
+            if(p1->GetClassName() != p2->GetClassName()) continue;
+            if(p1->GetSymbol() != p2->GetSymbol()) continue;
+         }
+         else
+         {
+            if(*p1 != *p2) continue;
+         }
+         vequivpow[p1].insert(p2);
+         vremovedpow.insert(p2);
+      }
+   }
+   if(oneScatteringPowerPerElement)
+   {
+      // Average Biso and Bij
+      for(std::map<ScatteringPower*,std::set<ScatteringPower*> >::iterator pos=vequivpow.begin();pos!=vequivpow.end();++pos)
+      {
+         if(pos->second.size()==0) continue;
+         float b = pos->first->GetBiso();
+         CrystVector<float> bij(6);
+         for(unsigned int i=0;i<6;i++) bij(i) = pos->first->GetBij(i);
+         for(std::set<ScatteringPower*>::const_iterator pos2=pos->second.begin(); pos2!=pos->second.end();++pos2)
+         {
+            b += (*pos2)->GetBiso();
+            for(unsigned int i=0;i<6;i++) bij(i) += (*pos2)->GetBij(i);
+         }
+         b   /= pos->second.size() + 1;
+         bij /= pos->second.size() + 1;
+         pos->first->SetBiso(b);
+         for(unsigned int i=0;i<6;i++) if(abs(bij(i)) > 1e-6) pos->first->SetBij(i,bij(i));
+      }
+   }
+   // Update Atoms or MolAtoms with new ScatteringPower
+   for(std::map<ScatteringPower*,std::set<ScatteringPower*> >::iterator pos=vequivpow.begin();pos!=vequivpow.end();++pos)
+   {
+      for(std::set<ScatteringPower*>::const_iterator pos2=pos->second.begin(); pos2!=pos->second.end();++pos2)
+      {
+         for(unsigned int i=0;i<(*pos2)->GetClientRegistry().GetNb();i++)
+         {
+            RefinableObj *p = &((*pos2)->GetClientRegistry().GetObj(i));
+            if(p->GetClassName()=="Atom")
+            {
+               Atom *pat=dynamic_cast<Atom*>(p);
+               pat->SetScatteringPower(*(pos->first));
+            }
+            else if (p->GetClassName()=="MolAtom")
+            {
+               MolAtom *pat=dynamic_cast<MolAtom*>(p);
+               pat->SetScatteringPower(*(pos->first));
+            }
+            else
+            {
+               // This should only happen is used in a class not an Atom or a MolAtom...
+               cout<<"WARNING: Could not merge scattering power for:"<<(*pos2)->GetName()
+                   <<" It is used in: "<<p->GetName()<<" ["<<p->GetClassName()<<"]"<<endl;
+               vremovedpow.erase(*pos2);
+            }
+         }
+      }
+   }
+   // Delete duplicate scattering powers
+   for(std::set<ScatteringPower*>::iterator pos=vremovedpow.begin();pos!=vremovedpow.end();++pos)
+   {
+      this->RemoveScatteringPower(*pos,true);
+   }
+   this->UpdateDisplay();
+}
+
 void Crystal::InitOptions()
 {
    VFN_DEBUG_ENTRY("Crystal::InitOptions",10)
