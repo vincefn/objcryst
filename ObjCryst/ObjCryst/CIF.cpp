@@ -1290,6 +1290,7 @@ PowderPattern* CreatePowderPatternFromCIF(CIF &cif)
       {
          pPow=new PowderPattern();
          pPow->ImportPowderPatternCIF(cif);
+         (*fpObjCrystInformUser)((boost::format("CIF: Imported POWDER PATTERN, with %d points") % pPow->GetNbPoint()).str());
       }
    }
    return pPow;
@@ -1302,20 +1303,24 @@ DiffractionDataSingleCrystal* CreateSingleCrystalDataFromCIF(CIF &cif, Crystal *
    {
       if(pos->second.mH.numElements()>0)
       {
+         (*fpObjCrystInformUser)((boost::format("CIF: Importing SINGLE CRYSTAL DIFFRACTION data")).str());
          if(pcryst==0)
          {
             if(gCrystalRegistry.GetNb()>0)
             {  // Use last Crystal created
                pcryst=&(gCrystalRegistry.GetObj(gCrystalRegistry.GetNb()-1));
+               (*fpObjCrystInformUser)((boost::format("CIF: Importing SINGLE CRYSTAL DIFFRACTION data: using last Crystal structure as corresponding crystal [%s]") % pcryst->GetName().c_str()).str());
             }
             else
             {
                pcryst=new Crystal;
-               pcryst->SetName("Dummy");
+               pcryst->SetName("Crystal data for Single Crystal Diffraction data imported from CIF");
+               (*fpObjCrystInformUser)((boost::format("CIF: Importing SINGLE CRYSTAL DIFFRACTION data: creating new empty Crystal structure")).str());
             }
          }
          pData=new DiffractionDataSingleCrystal(*pcryst);
          pData->SetHklIobs(pos->second.mH,pos->second.mK,pos->second.mL,pos->second.mIobs,pos->second.mSigma);
+         (*fpObjCrystInformUser)((boost::format("CIF: Imported SINGLE CRYSTAL DIFFRACTION data, with %d reflections") % pData->GetNbRefl()).str());
       }
    }
    return pData;
