@@ -135,6 +135,21 @@ void ScatteringPower::operator=(const ScatteringPower& rhs)
    mB=rhs.mB;
 }
 
+bool ScatteringPower::operator==(const ScatteringPower& rhs) const
+{
+   if(mBiso!=rhs.GetBiso()) return false;
+   for(unsigned int i=0;i<6;i++)
+      if(this->GetBij(i) != rhs.GetBij(i)) return false;
+   if(this->GetClassName() != rhs.GetClassName()) return false;
+   if(this->GetSymbol() != rhs.GetSymbol()) return false;
+   return true;
+}
+
+bool ScatteringPower::operator!=(const ScatteringPower& rhs) const
+{
+   return not(*this == rhs);
+}
+
 bool ScatteringPower::IsScatteringFactorAnisotropic()const{return false;}
 bool ScatteringPower::IsTemperatureFactorAnisotropic()const{return false;}
 bool ScatteringPower::IsResonantScatteringAnisotropic()const{return false;}

@@ -115,6 +115,14 @@ class ScatteringPower:virtual public RefinableObj
       virtual ~ScatteringPower();
       virtual const string& GetClassName() const;
       virtual void operator=(const ScatteringPower& rhs);
+      /** Comparison operator. Two scattering powers are equal if they have the same
+      * displacement parameter, correspond to same element, and are of the same class.
+      */
+      virtual bool operator==(const ScatteringPower& rhs) const;
+      /** Comparison operator. Two scattering powers are equal if they have the same
+      * displacement parameter, correspond to same element, and are of the same class.
+      */
+      virtual bool operator!=(const ScatteringPower& rhs) const;
       /** \brief Get the Scattering factor for all reflections of a given
       * ScatteringData object.
       *
