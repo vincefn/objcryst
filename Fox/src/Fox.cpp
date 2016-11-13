@@ -147,7 +147,7 @@ void FoxLoadCIF(std::istream &in)
    if(pCryst!=0)
    {
       pCryst->MergeEqualScatteringPowers(oneScatteringPowerPerElement);
-      pCryst->ConnectAtoms();
+      if(connectAtoms) pCryst->ConnectAtoms();
       #ifdef __WX__CRYST__
       if(pCryst->GetNbScatterer()>20)
          (*fpObjCrystInformUser)((boost::format("CIF: updating graphical user interface for Crystal. This could take a while, there are %d independent scatterers...") % pCryst->GetNbScatterer()).str());
