@@ -143,9 +143,12 @@ void FoxLoadCIF(std::istream &in)
    wxConfigBase::Get()->Read(_T("Fox/BOOL/CIF import: automatically convert to molecules"), &connectAtoms);
    wxConfigBase::Get()->Read(_T("Fox/BOOL/CIF import: only one scattering power per element"), &oneScatteringPowerPerElement);
    #endif
-   Crystal *pCryst = CreateCrystalFromCIF(cif, true, true, false, false);
-   if(pCryst!=0)
+   // In case several Crystal structures are loaded, record the number of crystal structures rather than rely on the last one returned by the function
+   const int nb0 = gCrystalRegistry.GetNb();
+    CreateCrystalFromCIF(cif, true, true, false, false);
+   for(int i=nb0;i<gCrystalRegistry.GetNb();i++)
    {
+      Crystal *pCryst = &(gCrystalRegistry.GetObj(i));
       pCryst->MergeEqualScatteringPowers(oneScatteringPowerPerElement);
       if(connectAtoms) pCryst->ConnectAtoms();
       #ifdef __WX__CRYST__
