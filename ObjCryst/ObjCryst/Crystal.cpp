@@ -1511,14 +1511,18 @@ void Crystal::ConnectAtoms(const REAL min_relat_dist, const REAL max_relat_dist,
             if((vElementCount[5]==1) && (vElementCount[1]==4)) keep=true; //BH4-
             if((vElementCount[14]==1) && (vElementCount[8]==4)) keep=true; //SiO4
             if((vElementCount[15]==1) && (vElementCount[8]==4)) keep=true; //PO4
-            #else
-            // Accept any type of small molecule/polyedra with one center atom
-            if( ((vnb[0]==1)||(vnb[1]==1)) &&((vnb[0]+vnb[1])>2)) keep=true;
             #endif
+            #if 0
+            // Accept any type of small molecule/polyedra with one center atom
+            if( ((vnb[0]==1)||(vnb[1]==1)) && ((vnb[0]+vnb[1])>2)) keep=true;
+            #endif
+            // Accept any type of cluster with exactly two types of atoms
+            keep=true;
          }
       }
       if(!keep)
       {
+         VFN_DEBUG_MESSAGE("Crystal::ConnectAtoms(...):Rejected molecule: "<<pmol->GetFormula(),10)
          delete pmol;
          for(std::map<MolAtom*,int>::const_iterator pos=molAtoms.begin();pos!=molAtoms.end();++pos) vAssignedAtoms.erase(pos->second);
          continue;// Will start from another atom to build a molecule
