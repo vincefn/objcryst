@@ -995,7 +995,6 @@ Crystal* CreateCrystalFromCIF(CIF &cif,bool verbose,bool checkSymAsXYZ)
 
 Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsXYZ, const bool oneScatteringPowerPerElement, const bool connectAtoms)
 {
-   gCrystalRegistry.AutoUpdateUI(false);
    (*fpObjCrystInformUser)("CIF: Opening CIF");
    Chronometer chrono;
    chrono.start();
@@ -1264,20 +1263,6 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
             (*fpObjCrystInformUser)((boost::format("CIF: finished connecting atoms (%u isolated atoms, %u molecules) (Crystal creation=%6.3fs total)") % ctat % ctmol % chrono.seconds()).str());
          }
       }
-   #ifdef __WX__CRYST__
-   if(NULL!=pCryst)
-   {
-      if(pCryst->GetNbScatterer()>20)
-         (*fpObjCrystInformUser)((boost::format("CIF: updating graphical user interface for Crystal. This could take a while, there are %d independent scatterers...") % pCryst->GetNbScatterer()).str());
-      else
-         (*fpObjCrystInformUser)("CIF: updating graphical user interface for Crystal");
-   }
-   #endif
-   gCrystalRegistry.AutoUpdateUI(true);
-   gCrystalRegistry.UpdateUI();
-   #ifdef __WX__CRYST__
-   (*fpObjCrystInformUser)((boost::format("CIF: finished updating graphical user interface for Crystal (Crystal creation=%6.3fs total)") % chrono.seconds()).str());
-   #endif
    return pCryst;
 }
 
