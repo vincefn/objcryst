@@ -147,7 +147,7 @@ bool ScatteringPower::operator==(const ScatteringPower& rhs) const
 
 bool ScatteringPower::operator!=(const ScatteringPower& rhs) const
 {
-   return not(*this == rhs);
+   return !(*this == rhs);
 }
 
 bool ScatteringPower::IsScatteringFactorAnisotropic()const{return false;}
