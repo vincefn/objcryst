@@ -482,6 +482,7 @@ void Atom::SetScatteringPower(const ScatteringPower &p)
    {
       if(mpScattPowAtom!=0) mpScattPowAtom->DeRegisterClient(*this);
       mpScattPowAtom = &p;
+      mScattCompList(0).mpScattPow=mpScattPowAtom;
       mClockScatterer.Click();
       if(mpScattPowAtom!=0) mpScattPowAtom->RegisterClient(*this);
    }
