@@ -563,9 +563,12 @@ int main (int argc, char *argv[])
    TAU_PROFILE("main()","int()",TAU_DEFAULT);
    TAU_PROFILE_SET_NODE(0);
    //set locale settings to standard
-   //setlocale(LC_NUMERIC,"C");
    //std::locale::global(std::locale(""));
-   mLocale.Init(wxLANGUAGE_DEFAULT); 
+   #ifdef __WX__CRYST__
+   mLocale.Init(wxLANGUAGE_DEFAULT);
+   #else
+   setlocale(LC_NUMERIC,"C");
+   #endif
    std::cout.imbue(std::locale::classic());
    std::cin.imbue(std::locale::classic());
 
