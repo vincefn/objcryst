@@ -25,6 +25,7 @@
 #include <set>
 #include <vector>
 #include <typeinfo>
+#include "boost/format.hpp"
 
 #include "cctbx/sgtbx/space_group.h"
 
@@ -1581,6 +1582,7 @@ void Crystal::ConnectAtoms(const REAL min_relat_dist, const REAL max_relat_dist,
 
 void Crystal::MergeEqualScatteringPowers(const bool oneScatteringPowerPerElement)
 {
+   VFN_DEBUG_ENTRY("Crystal::MergeEqualScatteringPowers("<<oneScatteringPowerPerElement<<")", 10)
    // Find identical scattering powers.
    std::set<ScatteringPower*> vremovedpow;
    std::map<ScatteringPower*,std::set<ScatteringPower*> > vequivpow;
@@ -1592,7 +1594,7 @@ void Crystal::MergeEqualScatteringPowers(const bool oneScatteringPowerPerElement
       for(unsigned int j=i+1;j<this->GetScatteringPowerRegistry().GetNb();j++)
       {
          ScatteringPower *p2 = &(this->GetScatteringPowerRegistry().GetObj(j));
-         if(!oneScatteringPowerPerElement)
+         if(oneScatteringPowerPerElement)
          {
             if(p1->GetClassName() != p2->GetClassName()) continue;
             if(p1->GetSymbol() != p2->GetSymbol()) continue;
@@ -1628,27 +1630,34 @@ void Crystal::MergeEqualScatteringPowers(const bool oneScatteringPowerPerElement
    // Update Atoms or MolAtoms with new ScatteringPower
    for(std::map<ScatteringPower*,std::set<ScatteringPower*> >::iterator pos=vequivpow.begin();pos!=vequivpow.end();++pos)
    {
+      const unsigned int nb = pos->second.size();
+      if(nb>0)
+         (*fpObjCrystInformUser)((boost::format("Merging ScatteringPower: %s (%d identical scattering powers)") % pos->first->GetName().c_str() % pos->second.size()).str());
       for(std::set<ScatteringPower*>::const_iterator pos2=pos->second.begin(); pos2!=pos->second.end();++pos2)
       {
-         for(unsigned int i=0;i<(*pos2)->GetClientRegistry().GetNb();i++)
+         for(unsigned int i=0;i<this->GetNbScatterer();++i)
          {
-            RefinableObj *p = &((*pos2)->GetClientRegistry().GetObj(i));
+            Scatterer *p = &(this->GetScatt(i));
             if(p->GetClassName()=="Atom")
             {
                Atom *pat=dynamic_cast<Atom*>(p);
-               pat->SetScatteringPower(*(pos->first));
+               if(&(pat->GetScatteringPower()) == (*pos2))
+                  pat->SetScatteringPower(*(pos->first));
             }
-            else if (p->GetClassName()=="MolAtom")
+            else if (p->GetClassName()=="Molecule")
             {
-               MolAtom *pat=dynamic_cast<MolAtom*>(p);
-               pat->SetScatteringPower(*(pos->first));
+               Molecule *pmol=dynamic_cast<Molecule*>(p);
+               for(std::vector<MolAtom*>::iterator pat=pmol->GetAtomList().begin();pat!=pmol->GetAtomList().end();++pat)
+               {
+                  if(&((*pat)->GetScatteringPower()) ==  (*pos2))
+                     (*pat)->SetScatteringPower(*(pos->first));
+               }
             }
             else
             {
-               // This should only happen is used in a class not an Atom or a MolAtom...
-               cout<<"WARNING: Could not merge scattering power for:"<<(*pos2)->GetName()
-                   <<" It is used in: "<<p->GetName()<<" ["<<p->GetClassName()<<"]"<<endl;
-               vremovedpow.erase(*pos2);
+               // This should only happen if a new type of scatterer was derived
+               cout<<__FILE__<<":"<<__LINE__<<":Crystal::MergeEqualScatteringPowers(): unidentified scatterer, cannot merge scattering power..."
+                   <<(*pos2)->GetName()<<"["<<(*pos2)->GetClassName()<<"]"<<endl;
             }
          }
       }
@@ -1656,9 +1665,21 @@ void Crystal::MergeEqualScatteringPowers(const bool oneScatteringPowerPerElement
    // Delete duplicate scattering powers
    for(std::set<ScatteringPower*>::iterator pos=vremovedpow.begin();pos!=vremovedpow.end();++pos)
    {
+      #ifdef __DEBUG__
+      const unsigned int nb=(*pos)->GetClientRegistry().GetNb();
+      if(nb>0)
+      {
+         VFN_DEBUG_MESSAGE("Crystal::MergeEqualScatteringPowers(): "<<nb<<" clients remaining for scattering power: "<<(*pos)->GetName()<<"["<<(*pos)->GetClassName()<<"]", 5)
+         for(unsigned int i=0; i<nb;i++)
+         {
+            VFN_DEBUG_MESSAGE("                                       "<<&((*pos)->GetClientRegistry().GetObj(i))<<":"<<(*pos)->GetClientRegistry().GetObj(i).GetName()<<"["<<(*pos)->GetClientRegistry().GetObj(i).GetClassName()<<"]", 5)
+         }
+      }
+      #endif
       this->RemoveScatteringPower(*pos,true);
    }
    this->UpdateDisplay();
+   VFN_DEBUG_EXIT("Crystal::MergeEqualScatteringPowers()", 10)
 }
 
 void Crystal::InitOptions()
