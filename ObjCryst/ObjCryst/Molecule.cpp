@@ -2164,10 +2164,7 @@ std::string Molecule::GetFormula() const
    for(std::vector<MolAtom*>::const_iterator pos=mvpAtom.begin();pos!=mvpAtom.end();++pos)
    {
       if((*pos)->IsDummy()) continue;
-      string p;
-      if((*pos)->GetScatteringPower().GetClassName()=="ScatteringPowerAtom")
-         p=dynamic_cast<const ScatteringPowerAtom*>(&((*pos)->GetScatteringPower()))->GetSymbol();
-      else p=(*pos)->GetScatteringPower().GetName();
+      string p=(*pos)->GetScatteringPower().GetSymbol();
       if(velts.count(p)==0)
          velts[(*pos)->GetScatteringPower().GetName()]=(*pos)->GetOccupancy();
       else velts[(*pos)->GetScatteringPower().GetName()]+=(*pos)->GetOccupancy();
