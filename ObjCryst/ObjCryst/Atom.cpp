@@ -102,6 +102,7 @@ Atom* Atom::CreateCopy() const
 Atom::~Atom()
 {
    VFN_DEBUG_MESSAGE("Atom::~Atom():("<<mName<<")",5)
+   if(mpScattPowAtom!=0) mpScattPowAtom->DeRegisterClient(*this);
 }
 
 const string& Atom::GetClassName()const
@@ -479,6 +480,7 @@ void Atom::SetScatteringPower(const ScatteringPower &p)
 {
    if(mpScattPowAtom!=0) mpScattPowAtom->DeRegisterClient(*this);
    mpScattPowAtom = &p;
+   if(mpScattPowAtom!=0) mpScattPowAtom->RegisterClient(*this);
 }
 
 void Atom::GetGeneGroup(const RefinableObj &obj,
