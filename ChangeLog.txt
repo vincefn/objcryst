@@ -1,4 +1,16 @@
-#### 2016.1 (November 2016)
+#### 2016.2 (13 November 2016)
+IMPROVEMENTS
+  * faded atoms which are part of a Molecule which is centered in the display region
+    are displayed with their names (if displaying names is activated).
+  * CIF import: more informative messages when loading diffraction data
+  * CIF import: better recognition of Molecules with higher coordination centers (Li,..),
+                accept more polyhedra
+
+BUG FIXES
+  * correctly save optically active/non-flip atom status in .xmlgz files
+  * correct bug in Le Bail mode/profile fitting which could lead to a crash
+  
+#### 2016.1 (6 November 2016)
 NEW FEATURES
   * direct search on the Crystallography Open Database:
     - search using keywords, formula or lattice parameters
