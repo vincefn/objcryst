@@ -1631,8 +1631,9 @@ void Crystal::MergeEqualScatteringPowers(const bool oneScatteringPowerPerElement
    for(std::map<ScatteringPower*,std::set<ScatteringPower*> >::iterator pos=vequivpow.begin();pos!=vequivpow.end();++pos)
    {
       const unsigned int nb = pos->second.size();
+      if(oneScatteringPowerPerElement) pos->first->SetName(pos->first->GetSymbol());
       if(nb>0)
-         (*fpObjCrystInformUser)((boost::format("Merging ScatteringPower: %s (%d identical scattering powers)") % pos->first->GetName().c_str() % pos->second.size()).str());
+         (*fpObjCrystInformUser)((boost::format("Merging ScatteringPower: %s[%s] (%d identical scattering powers)") % pos->first->GetName().c_str() % pos->first->GetSymbol().c_str() % pos->second.size()).str());
       for(std::set<ScatteringPower*>::const_iterator pos2=pos->second.begin(); pos2!=pos->second.end();++pos2)
       {
          for(unsigned int i=0;i<this->GetNbScatterer();++i)
@@ -1642,7 +1643,10 @@ void Crystal::MergeEqualScatteringPowers(const bool oneScatteringPowerPerElement
             {
                Atom *pat=dynamic_cast<Atom*>(p);
                if(&(pat->GetScatteringPower()) == (*pos2))
+               {
+                  VFN_DEBUG_MESSAGE("Crystal:MergeEqualScatteringPowers() Atom "<<pat->GetName()<<": "<<pat->GetScatteringPower().GetName()<<"->"<<pos->first->GetName(), 10)
                   pat->SetScatteringPower(*(pos->first));
+               }
             }
             else if (p->GetClassName()=="Molecule")
             {
