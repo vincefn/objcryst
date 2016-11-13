@@ -55,6 +55,7 @@
 #include <sstream>
 #include <list>
 #include <cstring>
+#include "boost/format.hpp"
 
 #ifdef __FOX_COD__
 #if 1
@@ -125,6 +126,43 @@ static std::string foxVersion;
 // Speed test
 // ----------------------------------------------------------------------------
 void standardSpeedTest();
+
+/** Load CIF data (crystal structure, powder and single crystal diffraction data).
+* \param in: the input stream (can be an ifstream, stringstream, etc..)
+* \note: this function will disable automatic UI update when loading the Crystal structure,
+* until after the scattering powers have been merged and the atoms connected.
+*/
+void FoxLoadCIF(std::istream &in)
+{
+   Chronometer chrono;
+   chrono.start();
+   gCrystalRegistry.AutoUpdateUI(false);
+   ObjCryst::CIF cif(in,true,true);
+   bool oneScatteringPowerPerElement=true, connectAtoms=true;
+   #ifdef __WX__CRYST__
+   wxConfigBase::Get()->Read(_T("Fox/BOOL/CIF import: automatically convert to molecules"), &connectAtoms);
+   wxConfigBase::Get()->Read(_T("Fox/BOOL/CIF import: only one scattering power per element"), &oneScatteringPowerPerElement);
+   #endif
+   Crystal *pCryst = CreateCrystalFromCIF(cif, true, true, false, false);
+   if(pCryst!=0)
+   {
+      pCryst->MergeEqualScatteringPowers(oneScatteringPowerPerElement);
+      pCryst->ConnectAtoms();
+      #ifdef __WX__CRYST__
+      if(pCryst->GetNbScatterer()>20)
+         (*fpObjCrystInformUser)((boost::format("CIF: updating graphical user interface for Crystal. This could take a while, there are %d independent scatterers...") % pCryst->GetNbScatterer()).str());
+      else
+         (*fpObjCrystInformUser)("CIF: updating graphical user interface for Crystal");
+      #endif
+   }
+   gCrystalRegistry.AutoUpdateUI(true);
+   gCrystalRegistry.UpdateUI();
+   #ifdef __WX__CRYST__
+   (*fpObjCrystInformUser)((boost::format("CIF: finished updating graphical user interface for Crystal (Crystal creation=%6.3fs total)") % chrono.seconds()).str());
+   #endif
+   CreatePowderPatternFromCIF(cif);
+   CreateSingleCrystalDataFromCIF(cif);
+}
 
 #ifdef __WX__CRYST__
 // ----------------------------------------------------------------------------
@@ -241,6 +279,7 @@ struct cod_record
 };
 #endif
 
+
 // main frame
 class WXCrystMainFrame : public wxFrame
 {
@@ -324,7 +363,6 @@ class MyApp : public wxApp
       WXCrystMainFrame *mpFrame;
       wxLocale mLocale;
 };
-
 
 // ----------------------------------------------------------------------------
 // For messaging the user
@@ -1009,13 +1047,7 @@ int main (int argc, char *argv[])
          cout<<"Loading: "<<argv[i]<<endl;
          ifstream in (argv[i]);
          #endif
-         ObjCryst::CIF cif(in,true,true);
-         bool oneScatteringPowerPerElement, connectAtoms;
-         wxConfigBase::Get()->Read(_T("Fox/BOOL/CIF import: automatically convert to molecules"), &connectAtoms);
-         wxConfigBase::Get()->Read(_T("Fox/BOOL/CIF import: only one scattering power per element"), &oneScatteringPowerPerElement);
-         CreateCrystalFromCIF(cif, true, true, oneScatteringPowerPerElement, connectAtoms);
-         CreatePowderPatternFromCIF(cif);
-         CreateSingleCrystalDataFromCIF(cif);
+         FoxLoadCIF(in);
          if(!cif2pattern)continue;
       }
       #ifdef __WX__CRYST__
@@ -1876,13 +1908,7 @@ void WXCrystMainFrame::Load(const wxString &filename)
             delete[] tmpbuf;
         }
         else while (!is.Eof()) in<<(char)is.GetC();
-        ObjCryst::CIF cif(in,true,true);
-        bool oneScatteringPowerPerElement, connectAtoms;
-        wxConfigBase::Get()->Read(_T("Fox/BOOL/CIF import: automatically convert to molecules"), &connectAtoms);
-        wxConfigBase::Get()->Read(_T("Fox/BOOL/CIF import: only one scattering power per element"), &oneScatteringPowerPerElement);
-        CreateCrystalFromCIF(cif, true, true, oneScatteringPowerPerElement, connectAtoms);
-        CreatePowderPatternFromCIF(cif);
-        CreateSingleCrystalDataFromCIF(cif);
+        FoxLoadCIF(in);
         //FoxGrid
         mpGridWindow->DataLoaded();
       }
@@ -3248,13 +3274,7 @@ void WXCrystMainFrame::OnCODSelect(wxGridEvent &ev)
       //this->Close(false);
       std::stringstream in;
       in<<wxcif.GetString();
-      ObjCryst::CIF cif(in,true,true);
-      bool oneScatteringPowerPerElement, connectAtoms;
-      wxConfigBase::Get()->Read(_T("Fox/BOOL/CIF import: automatically convert to molecules"), &connectAtoms);
-      wxConfigBase::Get()->Read(_T("Fox/BOOL/CIF import: only one scattering power per element"), &oneScatteringPowerPerElement);
-      CreateCrystalFromCIF(cif, true, true, oneScatteringPowerPerElement, connectAtoms);
-      CreatePowderPatternFromCIF(cif);
-      CreateSingleCrystalDataFromCIF(cif);
+      FoxLoadCIF(in);
       //FoxGrid
       mpGridWindow->DataLoaded();
       mpNotebook->SetSelection(0);
