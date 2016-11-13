@@ -991,6 +991,10 @@ class Molecule: public Scatterer
       RefinableObjClock& GetAtomPositionClock();
       /// Get the clock associated to the atomic positions
       const RefinableObjClock& GetAtomPositionClock()const;
+      /// Get the clock associated to the scattering powers
+      const RefinableObjClock& GetAtomScattPowClock()const;
+      /// Get the clock associated to the scattering powers
+      RefinableObjClock& GetAtomScattPowClock();
       /// Get the clock associated to the list of rigid groups
       ///(clicked also whenever a rigid group is modified)
       RefinableObjClock& GetRigidGroupClock();

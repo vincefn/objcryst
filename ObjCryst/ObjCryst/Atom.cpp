@@ -478,9 +478,13 @@ const ScatteringPower& Atom::GetScatteringPower()const
 
 void Atom::SetScatteringPower(const ScatteringPower &p)
 {
-   if(mpScattPowAtom!=0) mpScattPowAtom->DeRegisterClient(*this);
-   mpScattPowAtom = &p;
-   if(mpScattPowAtom!=0) mpScattPowAtom->RegisterClient(*this);
+   if(mpScattPowAtom!=&p)
+   {
+      if(mpScattPowAtom!=0) mpScattPowAtom->DeRegisterClient(*this);
+      mpScattPowAtom = &p;
+      mClockScatterer.Click();
+      if(mpScattPowAtom!=0) mpScattPowAtom->RegisterClient(*this);
+   }
 }
 
 void Atom::GetGeneGroup(const RefinableObj &obj,

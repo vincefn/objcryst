@@ -248,7 +248,15 @@ void MolAtom::SetOccupancy(const REAL a){ mOccupancy=a;}
 
 bool MolAtom::IsDummy()const{return mpScattPow==0;}
 const ScatteringPower& MolAtom::GetScatteringPower()const{return *mpScattPow;}
-void MolAtom::SetScatteringPower(const ScatteringPower& pow){mpScattPow=&pow;}
+
+void MolAtom::SetScatteringPower(const ScatteringPower& pow)
+{
+   if(mpScattPow!=&pow)
+   {
+      mpScattPow=&pow;
+      this->GetMolecule().GetAtomScattPowClock().Click();
+   }
+}
 
 void MolAtom::XMLOutput(ostream &os,int indent)const
 {
@@ -4597,6 +4605,9 @@ const RefinableObjClock& Molecule::GetBondListClock()const{return mClockBondList
 
 RefinableObjClock& Molecule::GetAtomPositionClock(){return mClockAtomPosition;}
 const RefinableObjClock& Molecule::GetAtomPositionClock()const{return mClockAtomPosition;}
+
+const RefinableObjClock& Molecule::GetAtomScattPowClock()const { return mClockAtomScattPow;}
+      RefinableObjClock& Molecule::GetAtomScattPowClock() { return mClockAtomScattPow;}
 
       RefinableObjClock& Molecule::GetRigidGroupClock(){return mClockRigidGroup;}
 const RefinableObjClock& Molecule::GetRigidGroupClock()const{return mClockRigidGroup;}
