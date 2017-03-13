@@ -397,7 +397,7 @@ void WXFoxServer::OnLoadJob(wxCommandEvent& event)
 {
     wxFileDialog *dlg;
     dlg = new wxFileDialog(this,_T("Choose File :"),
-                             _T(""),_T(""),_T("FOX files (*.xml,*.xml.gz)|*.xml;*.xml.gz"),wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+                             _T(""),_T(""),_T("FOX files (*.xml,*.xmlgz)|*.xml;*.xmlgz;*.gz"),wxFD_OPEN | wxFD_FILE_MUST_EXIST);
     if(dlg->ShowModal() != wxID_OK) return;
     wxString path=dlg->GetPath();
 
@@ -447,30 +447,40 @@ void WXFoxServer::OnLoadJob(wxCommandEvent& event)
         #endif
         saveJobHeader(filename, newID, Name, nbOfTrial, nbRun, randomize);
         AddJob(filename, Name, newID, nbOfTrial, nbRun, randomize);
-    } else if(path.size()>6 && path.Mid(path.size()-6)==wxString(_T("xml.gz"))) {
-        wxFileInputStream is(path);
-        wxZlibInputStream zstream(is);
-        stringstream sst;
-        while (!zstream.Eof()) sst<<(char)zstream.GetC();
+    }
+    else
+    {
+        bool gz = false;
+        if(path.size()>7)
+           if(path.Mid(path.size()-6)==wxString(_T(".xml.gz"))) gz=true;
+        if(path.size()>6)
+           if(path.Mid(path.size()-6)==wxString(_T(".xmlgz"))) gz=true;
+        if(gz)
+        {
+           wxFileInputStream is(path);
+           wxZlibInputStream zstream(is);
+           stringstream sst;
+           while (!zstream.Eof()) sst<<(char)zstream.GetC();
 
-        newID = GenerateJobID();
-        nbOfTrial = 1000000;
-        nbRun = 10;
+           newID = GenerateJobID();
+           nbOfTrial = 1000000;
+           nbRun = 10;
 
-        do{//show setup window
-            if(!ShowSetJobWindow(newID, Name, nbOfTrial, nbRun, randomize)) return;
-            cout<<nbRun<<","<<nbOfTrial<<","<<Name<<endl;
-        }while((nbRun<=0)||(nbOfTrial<=0)||(Name==_T("")));
+           do{//show setup window
+               if(!ShowSetJobWindow(newID, Name, nbOfTrial, nbRun, randomize)) return;
+               cout<<nbRun<<","<<nbOfTrial<<","<<Name<<endl;
+           }while((nbRun<=0)||(nbOfTrial<=0)||(Name==_T("")));
 
-        filename.Printf(_T("JOB_%d.xml"), newID);
-        #ifdef WIN32
-        filename = m_working_dir + _T("\\") + filename;
-        #else
-        filename = m_working_dir + _T("/") + filename;
-        #endif
-        SaveDataAsFile(wxString::FromAscii(sst.str().c_str()), filename);
-        saveJobHeader(filename, newID, Name, nbOfTrial, nbRun, randomize);
-        AddJob(filename, Name, newID, nbOfTrial, nbRun, randomize);
+           filename.Printf(_T("JOB_%d.xml"), newID);
+           #ifdef WIN32
+           filename = m_working_dir + _T("\\") + filename;
+           #else
+           filename = m_working_dir + _T("/") + filename;
+           #endif
+           SaveDataAsFile(wxString(sst.str().c_str()), filename);
+           saveJobHeader(filename, newID, Name, nbOfTrial, nbRun, randomize);
+           AddJob(filename, Name, newID, nbOfTrial, nbRun, randomize);
+        }
     }
     dlg->Destroy();
 }
