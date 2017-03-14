@@ -1,11 +1,7 @@
 
-//#include <wx/datetime.h>
-
-
 #include <wx/textdlg.h>
-//#include <wx/utils.h>
-//#include <wx/filefn.h>
 #include "wx/filename.h"
+#include "wx/sstream.h"
 
 #ifdef __WX__CRYST__
    #include "ObjCryst/wxCryst/wxCrystal.h"
@@ -459,8 +455,8 @@ void WXFoxServer::OnLoadJob(wxCommandEvent& event)
         {
            wxFileInputStream is(path);
            wxZlibInputStream zstream(is);
-           stringstream sst;
-           while (!zstream.Eof()) sst<<(char)zstream.GetC();
+           wxStringOutputStream wxos;
+           zstream.Read(wxos);
 
            newID = GenerateJobID();
            nbOfTrial = 1000000;
@@ -477,7 +473,7 @@ void WXFoxServer::OnLoadJob(wxCommandEvent& event)
            #else
            filename = m_working_dir + _T("/") + filename;
            #endif
-           SaveDataAsFile(wxString(sst.str().c_str()), filename);
+           SaveDataAsFile(wxos.GetString(), filename);
            saveJobHeader(filename, newID, Name, nbOfTrial, nbRun, randomize);
            AddJob(filename, Name, newID, nbOfTrial, nbRun, randomize);
         }
