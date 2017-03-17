@@ -27,6 +27,7 @@
 #include "ObjCryst/RefinableObj/RefinableObj.h"
 #include <string>
 #include <map>
+#include <list>
 
 namespace ObjCryst
 {
@@ -95,6 +96,23 @@ class LSQNumObj
       void Refine (int nbCycle=1,bool useLevenbergMarquardt=false,
                    const bool silent=false, const bool callBeginEndOptimization=true,
                    const float minChi2var=0.01);
+      /** Run a refinement in a 'safe' way: if the Chi2 value increases by more that a given factor
+      * the parameters are reverted to their initial values. Moreover, the listed 'new' parameters
+      * or parameter types are then fixed.
+      * \param vnewpar: list of parameters added for this optimization, which will be unfixed at the 
+      * beginning, and will be fixed at the end if Chi2 increases. This can be empty.
+      * \param vnewpartype: list of parameter types, which will be unfixed at the
+      * beginning, and will be fixed at the end if Chi2 increases. This can be empty.
+      * \param maxChi2factor: if Chi2_end> maxChi2factor * Chi2_begin, parameters are reverted to their 
+      * initial value, and new parameters are fixed.
+      * All the other parameters are the same as in LSQNumObj::Refine.
+      * \return: true if the minimization was succesful, false otherwise.
+      */
+      bool SafeRefine(std::list<RefinablePar*> vnewpar, std::list<const RefParType*> vnewpartype,
+                      REAL maxChi2factor=1.01,
+                      int nbCycle=1, bool useLevenbergMarquardt=false,
+                      const bool silent=false, const bool callBeginEndOptimization=true,
+                      const float minChi2var=0.01);
       CrystVector_REAL Sigma()const;
       CrystMatrix_REAL CorrelMatrix()const;
       void CalcRfactor()const;

@@ -705,6 +705,43 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
    if(callBeginEndOptimization) this->EndOptimization();
 }
 
+bool LSQNumObj::SafeRefine(std::list<RefinablePar*> vnewpar, std::list<const RefParType*> vnewpartype,
+                                 REAL maxChi2factor,
+                                 int nbCycle, bool useLevenbergMarquardt,
+                                 const bool silent, const bool callBeginEndOptimization,
+                                 const float minChi2var)
+{
+   const REAL chi2_0 = mChiSq;
+   for(std::list<RefinablePar*>::iterator pos=vnewpar.begin(); pos!=vnewpar.end(); pos++)
+   {
+      this->SetParIsFixed(**pos, false);
+   }
+   for(std::list<const RefParType*>::iterator pos=vnewpartype.begin(); pos!=vnewpartype.end(); pos++)
+   {
+      this->SetParIsFixed(*pos, false);
+   }
+   this->Refine(nbCycle, useLevenbergMarquardt, silent, callBeginEndOptimization, minChi2var);
+   const REAL deltachi2 = (mChiSq-chi2_0)/(chi2_0+1e-6);
+   if(deltachi2>maxChi2factor)
+   {
+      mRefParList.RestoreParamSet(mIndexValuesSetInitial);
+      for(std::list<RefinablePar*>::iterator pos=vnewpar.begin(); pos!=vnewpar.end(); pos++)
+      {
+         this->SetParIsFixed(**pos, true);
+      }
+      for(std::list<const RefParType*>::iterator pos=vnewpartype.begin(); pos!=vnewpartype.end(); pos++)
+      {
+         this->SetParIsFixed(*pos, true);
+      }
+      this->CalcRfactor();
+      this->CalcRwFactor();
+      this->CalcChiSquare();
+      cout << "Refinement did not converge ! Chi2 increase by a factor: "<< deltachi2<<endl
+           <<"=> REVERTING to initial parameters values and fixing new parameters"<<endl;
+   }
+   return true;
+}
+
 CrystMatrix_REAL LSQNumObj::CorrelMatrix()const{return mCorrelMatrix;};
 
 void LSQNumObj::CalcRfactor()const
