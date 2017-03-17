@@ -28,3 +28,6 @@ JOB*.xml*
 /Fox/src/Fox
 /Fox/src/Fox-nogui
 
+*.dmg
+Fox/wikihtml
+*.pov
