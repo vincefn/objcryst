@@ -97,8 +97,11 @@ class LSQNumObj
                    const float minChi2var=0.01);
       CrystVector_REAL Sigma()const;
       CrystMatrix_REAL CorrelMatrix()const;
+      void CalcRfactor()const;
       REAL Rfactor()const;
+      void CalcRwFactor()const;
       REAL RwFactor()const;
+      void CalcChiSquare() const;
       REAL ChiSquare()const;   //uses the weight if specified
       /** Choose the object to refine. The minimization will be done
       * against its LSQ function and its parameters, as well as the LSQ functions
@@ -208,7 +211,7 @@ class LSQNumObj
       std::string mName;
       /// File name where refinement info is saved
       std::string mSaveFileName;
-      REAL mR,mRw,mChiSq;
+      mutable REAL mR,mRw,mChiSq;
       /// Correlation matrix between all refined parameters.
       CrystMatrix_REAL mCorrelMatrix;
       ///Variance-Covariance matrix, as a std::map

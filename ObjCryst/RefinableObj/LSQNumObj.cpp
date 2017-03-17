@@ -707,9 +707,46 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
 
 CrystMatrix_REAL LSQNumObj::CorrelMatrix()const{return mCorrelMatrix;};
 
+void LSQNumObj::CalcRfactor()const
+{
+   CrystVector_REAL calc, tmpV1, tmpV2;
+   calc=this->GetLSQCalc();
+   tmpV1 = this->GetLSQObs();
+   tmpV1 -= calc;
+   tmpV1 *= tmpV1;
+   tmpV2 = this->GetLSQObs();
+   tmpV2 *= tmpV2;
+   mR=sqrt(tmpV1.sum()/tmpV2.sum());
+}
+
 REAL LSQNumObj::Rfactor()const{return mR;};
 
+void LSQNumObj::CalcRwFactor()const
+{
+   CrystVector_REAL calc, tmpV1, tmpV2;
+   calc=this->GetLSQCalc();
+   tmpV1 = this->GetLSQObs();
+   tmpV1 -= calc;
+   tmpV1 *= tmpV1;
+   tmpV2 = this->GetLSQObs();
+   tmpV2 *= tmpV2;
+   tmpV1 *= mWeight;
+   tmpV2 *= mWeight;
+   mRw=sqrt(tmpV1.sum()/tmpV2.sum());
+}
+
 REAL LSQNumObj::RwFactor()const{return mRw;};
+
+void LSQNumObj::CalcChiSquare()const
+{
+   CrystVector_REAL calc, tmpV1;
+   calc=this->GetLSQCalc();
+   tmpV1 = mObs;
+   tmpV1 -= calc;
+   tmpV1 *= tmpV1;
+   tmpV1 *= mWeight;
+   mChiSq=tmpV1.sum();
+}
 
 REAL LSQNumObj::ChiSquare()const{return mChiSq;};
 
