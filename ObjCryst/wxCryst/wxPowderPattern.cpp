@@ -2288,7 +2288,7 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
       
       unsigned int nbSpurious=0;
       wxProgressDialog dlgProgress(_T("Indexing..."),_T("Starting Indexing in Quick Mode"),
-                                   7,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME|wxPD_CAN_ABORT);
+                                   7,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME|wxPD_CAN_ABORT|wxPD_APP_MODAL);
       while(nbSpurious<=3)
       {
          float t0,minv,maxv,lengthmax;
