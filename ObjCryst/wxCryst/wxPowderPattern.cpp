@@ -2543,9 +2543,12 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
             case LATTICE_C:centc='C'; break;
             case LATTICE_F:centc='F'; break;
          }
+         stringstream spurious;
+         if(pos->first.mNbSpurious>0)
+            spurious<<"(nbspurious = "<<pos->first.mNbSpurious<<")";
          
-         sprintf(buf,"Score=%6.1f V=%6.1f(%3.1fV) %6.3f %6.3f %6.3f %6.2f %6.2f %6.2f %s %c",pos->second,
-               uc[6],relvol,uc[0],uc[1],uc[2],uc[3]*RAD2DEG,uc[4]*RAD2DEG,uc[5]*RAD2DEG,sys.c_str(),centc);
+         sprintf(buf,"Score=%6.1f V=%6.1f(%3.1fV) %6.3f %6.3f %6.3f %6.2f %6.2f %6.2f %s %c %s",pos->second,
+               uc[6],relvol,uc[0],uc[1],uc[2],uc[3]*RAD2DEG,uc[4]*RAD2DEG,uc[5]*RAD2DEG,sys.c_str(),centc,spurious.str().c_str());
          //cout<<buf<<endl;
          sols.Add(wxString::FromAscii(buf));
       }

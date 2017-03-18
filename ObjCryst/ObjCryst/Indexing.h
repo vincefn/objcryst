@@ -60,7 +60,7 @@ class RecUnitCell
    public:
       RecUnitCell(const float zero=0,const float par0=0,const float par1=0,const float par2=0,
                   const float par3=0,const float par4=0,const float par5=0,CrystalSystem lattice=CUBIC,
-                  const CrystalCentering cent=LATTICE_P);
+                  const CrystalCentering cent=LATTICE_P, const unsigned int nbspurious=0);
       RecUnitCell(const RecUnitCell &old);
       void operator=(const RecUnitCell &rhs);
       // access to ith parameter
@@ -102,9 +102,10 @@ class RecUnitCell
       *   d*_hkl^2 = zero + par[0]^2 (h^2 + k^2 + l^2)
       */
       REAL par[7];
-      float zero;
       CrystalSystem mlattice;
       CrystalCentering mCentering;
+      /// The number of spurious lines used to match this RecUnitCell
+      unsigned int mNbSpurious;
 };
 
 /** Class to store positions of observed reflections.

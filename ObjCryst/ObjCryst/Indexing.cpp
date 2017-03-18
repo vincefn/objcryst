@@ -80,16 +80,16 @@ float EstimateCellVolume(const float dmin, const float dmax, const float nbrefl,
 
 RecUnitCell::RecUnitCell(const float zero,const float p0,const float p1,const float p2,
                          const float p3,const float p4,const float p5,CrystalSystem lattice,
-                         const CrystalCentering cent):
-mlattice(lattice),mCentering(cent)
+                         const CrystalCentering cent, const unsigned int nbspurious):
+mlattice(lattice),mCentering(cent),mNbSpurious(nbspurious)
 {
-   par[0]=zero;
-   par[1]=p0;
-   par[2]=p1;
-   par[3]=p2;
-   par[4]=p3;
-   par[5]=p4;
-   par[6]=p5;
+   this->par[0]=zero;
+   this->par[1]=p0;
+   this->par[2]=p1;
+   this->par[3]=p2;
+   this->par[4]=p3;
+   this->par[5]=p4;
+   this->par[6]=p5;
 }
 
 RecUnitCell::RecUnitCell(const RecUnitCell &old)
@@ -102,6 +102,7 @@ void RecUnitCell::operator=(const RecUnitCell &rhs)
    for(unsigned int i=0;i<7;++i) par[i]=rhs.par[i];
    mlattice=rhs.mlattice;
    mCentering=rhs.mCentering;
+   mNbSpurious=rhs.mNbSpurious;
 }
 
 float RecUnitCell::hkl2d(const float h,const float k,const float l,REAL *derivpar,const unsigned int derivhkl) const
@@ -1366,6 +1367,7 @@ void CellExplorer::Evolution(unsigned int ng,const bool randomize,const float f,
       {
          if(score>mBestScore) mBestScore=score;
          mvSolution.push_back(make_pair(mRecUnitCell,score));
+         mvSolution.back().first.mNbSpurious = mNbSpurious;
          this->ReduceSolutions(true);// We may have solutions from previous runs
       }
    }
@@ -2102,6 +2104,7 @@ unsigned int CellExplorer::RDicVol(RecUnitCell par0,RecUnitCell dpar, unsigned i
                   mBestScore=score;
                }
                mvSolution.push_back(make_pair(mRecUnitCell,score));
+               mvSolution.back().first.mNbSpurious = mNbSpurious;
                mvNbSolutionDepth[depth]+=1;
                if((mvSolution.size()>1100)&&(rand()%1000==0))
                {
@@ -2614,6 +2617,7 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
 
 bool SimilarRUC(const RecUnitCell &c0,const RecUnitCell &c1, const float delta=0.005)
 {
+   if(c0.mNbSpurious != c1.mNbSpurious) return false;
    vector<float> par0=c0.DirectUnitCell();
    vector<float> par1=c1.DirectUnitCell();
    float diff=0;
