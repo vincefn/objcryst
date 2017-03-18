@@ -931,18 +931,18 @@ void WXCrystal::OnMenuCrystalGL(wxCommandEvent & WXUNUSED(event))
    if (gvWindowPosition.count(ID_GLCRYSTAL_WINDOW))
    {
 	   //cout << "WXCrystal::OnMenuCrystalGL():@(" << gvWindowPosition[ID_GLCRYSTAL_WINDOW].first.x << "," << gvWindowPosition[ID_GLCRYSTAL_WINDOW].first.y << ")" << endl;
-	   frame = new WXGLCrystalCanvasFrame(this, ID_GLCRYSTAL_WINDOW, wxString::FromAscii(mpCrystal->GetName().c_str()),
+	   frame = new WXGLCrystalCanvasFrame(this, ID_GLCRYSTAL_WINDOW, wxString::Format("%s [%s]",mpCrystal->GetName().c_str(), mpCrystal->GetSpaceGroup().GetName().c_str()),
 		   gvWindowPosition[ID_GLCRYSTAL_WINDOW].first,
 		   gvWindowPosition[ID_GLCRYSTAL_WINDOW].second, wxCLOSE_BOX | wxRESIZE_BORDER | wxCAPTION);//wxFRAME_FLOAT_ON_PARENT
    }
    else
-	   frame = new WXGLCrystalCanvasFrame(this, ID_GLCRYSTAL_WINDOW, wxString::FromAscii(mpCrystal->GetName().c_str()),
+	   frame = new WXGLCrystalCanvasFrame(this, ID_GLCRYSTAL_WINDOW, wxString::Format("%s [%s]",mpCrystal->GetName().c_str(), mpCrystal->GetSpaceGroup().GetName().c_str()),
                         wxDefaultPosition,wxSize(400,400),wxCLOSE_BOX|wxRESIZE_BORDER|wxCAPTION);//wxFRAME_FLOAT_ON_PARENT
 
    mpCrystalGL=new WXGLCrystalCanvas(this,frame,-1);
    #if wxUSE_STATUSBAR
    frame->CreateStatusBar(1);
-   frame->SetStatusText( wxString::FromAscii(mpCrystal->GetName().c_str()));
+   frame->SetStatusText(wxString::Format("%s [%s]",mpCrystal->GetName().c_str(), mpCrystal->GetSpaceGroup().GetName().c_str()));
    #endif
    
    frame->Show(true);
@@ -1618,7 +1618,7 @@ void WXCrystal::UpdateUI(const bool lock)
       if(lock) mMutex.Lock();
       mpFieldSpacegroup->SetValue(mpCrystal->GetSpaceGroup().GetName());
       #ifdef OBJCRYST_GL
-      if(0!=mpCrystalGL) mpCrystalGL->GetParent()->SetLabel( wxString::FromAscii(mpCrystal->GetName().c_str()));
+      if(0!=mpCrystalGL) mpCrystalGL->GetParent()->SetLabel(wxString::Format("%s [%s]",mpCrystal->GetName().c_str(), mpCrystal->GetSpaceGroup().GetName().c_str()));
       #endif
       if(lock) mMutex.Unlock();
    }
