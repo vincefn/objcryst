@@ -639,7 +639,7 @@ void WXPowderPattern::OnMenuAddCompBackgdBayesian(wxCommandEvent & WXUNUSED(even
    if(nbPointSpline<=1)nbPointSpline=2;
    
    wxProgressDialog dlgProgress(_T("Automatic Bayesian Background"),_T("Automatic Background: Initializing..."),
-                                4,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME|wxPD_CAN_ABORT);
+                                4,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME|wxPD_CAN_ABORT|wxPD_APP_MODAL);
 
    PowderPatternBackground *pBckgd= new PowderPatternBackground;
    VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuAddCompBackgdBayesian()",6)
@@ -2038,6 +2038,9 @@ BEGIN_EVENT_TABLE(WXCellExplorer, wxWindow)
    EVT_CHECKBOX(ID_CELLEXPLORER_LEBAIL,          WXCellExplorer::OnAutoLeBail)
 END_EVENT_TABLE()
 
+//:TODO: allow sorting solutions by number of spurious lines or score
+//:TODO: make systematic Le Bail + profile fitting of all solutions, and allow to sort by GoF
+
 WXCellExplorer::WXCellExplorer(wxWindow *parent, PeakList &peaklist, WXPowderPatternGraph *graph):
 wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCrystal(0),mpDiff(0)
 {
@@ -2664,7 +2667,7 @@ void WXCellExplorer::OnSelectCell(wxCommandEvent &event)
                      fitcell=true;
             
             wxProgressDialog dlgProgress(_T("Le Bail and Profile Fitting"),_T("Le Bail Fitting, cycle #0/20"),
-                                       25,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME|wxPD_CAN_ABORT);
+                                       25,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME|wxPD_CAN_ABORT|wxPD_APP_MODAL);
             mpDiff->SetExtractionMode(true,true);
             VFN_DEBUG_MESSAGE("WXCellExplorer::OnSelectCell():auto-Le Bail",7);
             
@@ -3531,7 +3534,7 @@ void WXPowderPatternBackground::OnMenuAutomaticBayesianBackground(wxCommandEvent
    }
    dialog.GetValue().ToLong(&nbPointSpline);
    wxProgressDialog dlgProgress(_T("Automatic Bayesian Background"),_T("Automatic Background, Initializing..."),
-                                      4,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME|wxPD_CAN_ABORT);
+                                      4,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME|wxPD_CAN_ABORT|wxPD_APP_MODAL);
    if(nbPointSpline<2) nbPointSpline=2;
    {
       CrystVector_REAL x(nbPointSpline),backgd(nbPointSpline);
@@ -4403,7 +4406,7 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
    
    mpLog->AppendText(wxString::Format(_T("Starting 20 Le Bail cycles\n")));
    wxProgressDialog dlgProgress(_T("Le Bail and Profile Fitting"),_T("Le Bail Fitting, cycle #0/20"),
-                                 18,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME|wxPD_CAN_ABORT);
+                                 18,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME|wxPD_CAN_ABORT|wxPD_APP_MODAL);
    for(int i=0;i<10;++i)
    {
       for(map<PowderPatternDiffraction *,bool>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
@@ -4779,7 +4782,7 @@ void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
    unsigned int nbcycle=1;
    if(event.GetId()==ID_PROFILEFITTING_EXPLORE_SPG) nbcycle=3;
    wxProgressDialog dlgProgress(_T("Trying compatible spacegroups"),_T("Starting........\n......\n......"),
-                                 nbspg*nbcycle,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME|wxPD_CAN_ABORT);
+                                 nbspg*nbcycle,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME|wxPD_CAN_ABORT|wxPD_APP_MODAL);
    
    list<SPGScore> vSPG;
    // we don't have the extinction symbols, so do it the stupid way
