@@ -2014,6 +2014,7 @@ class WXCellExplorer:public wxWindow
       wxCheckBox *mpWeakDiffraction;
       wxCheckBox *mpContinueOnSolution;
       wxCheckBox *mpTryCenteredLattice;
+      wxCheckBox *mpTrySpurious;
       wxCheckBox *mpAutomaticLeBail;
       DECLARE_EVENT_TABLE()
 };
@@ -2025,6 +2026,7 @@ static const long ID_CELLEXPLORER_APPLYCELL= WXCRYST_ID();
 static const long ID_CELLEXPLORER_CHOOSECRYSTAL= WXCRYST_ID();
 static const long ID_CELLEXPLORER_LEBAIL= WXCRYST_ID();
 static const long ID_CELLEXPLORER_CENTERED= WXCRYST_ID();
+static const long ID_CELLEXPLORER_SPURIOUS= WXCRYST_ID();
 
 BEGIN_EVENT_TABLE(WXCellExplorer, wxWindow)
    EVT_BUTTON(ID_CELLEXPLORER_INDEX,             WXCellExplorer::OnIndex)
@@ -2063,7 +2065,11 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
       
       mpTryCenteredLattice=new wxCheckBox(pQuick,ID_CELLEXPLORER_CENTERED,_T("Try Centered Lattices"));
       pSizerQuick->Add(mpTryCenteredLattice,0,wxALIGN_CENTER);
-      
+      mpTryCenteredLattice->SetValue(true);
+   
+      mpTrySpurious=new wxCheckBox(pQuick,ID_CELLEXPLORER_SPURIOUS,_T("Try with 1 and 2 spurious lines"));
+      pSizerQuick->Add(mpTrySpurious,0,wxALIGN_CENTER);
+   
       pQuick->SetSizer(pSizerQuick);
       pSizerQuick->Fit(pQuick);
       pSizerQuick->RecalcSizes();
@@ -2289,7 +2295,10 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
       unsigned int nbSpurious=0;
       wxProgressDialog dlgProgress(_T("Indexing..."),_T("Starting Indexing in Quick Mode"),
                                    7,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME|wxPD_CAN_ABORT|wxPD_APP_MODAL);
-      while(nbSpurious<=3)
+
+      unsigned int maxNbSpurious=0;
+      if(mpTrySpurious->GetValue()) maxNbSpurious=2;
+      while(nbSpurious<=maxNbSpurious)
       {
          float t0,minv,maxv,lengthmax;
          mpCellExplorer->SetNbSpurious(nbSpurious);

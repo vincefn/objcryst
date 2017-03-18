@@ -2634,7 +2634,7 @@ void CellExplorer::ReduceSolutions(const bool updateReportThreshold)
 {
    const bool verbose=false;
    std::list<std::pair<RecUnitCell,float> > vSolution2;
-
+   // TODO: take into account number of spurious lines for cutoff value.
    // keep only solutions above mBestScore/5
    for(list<pair<RecUnitCell,float> >::iterator pos=mvSolution.begin();pos!=mvSolution.end();)
    {
