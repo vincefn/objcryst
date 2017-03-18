@@ -4605,17 +4605,17 @@ END_EVENT_TABLE()
   // 1st row
   inputSizer->Add(new wxStaticText(this, -1, _T("x")), 0, wxALIGN_CENTRE_VERTICAL);
   inputSizer->Add(mpXCtrl = new wxTextCtrl(this, -1, 
-					   wxString::Format(_T("%.3f"),xyz.x)), 
+					   wxString::Format(_T("%.3f"),xyz.x), wxDefaultPosition, wxDefaultSize, wxTE_CENTRE, wxTextValidator(wxFILTER_NUMERIC)),
 					   0, wxALIGN_CENTRE_VERTICAL);
   // 2nd row
   inputSizer->Add(new wxStaticText(this, -1, _T("y")), 0, wxALIGN_CENTRE_VERTICAL);
   inputSizer->Add(mpYCtrl = new wxTextCtrl(this, -1, 
-					   wxString::Format(_T("%.3f"),xyz.y)), 
+					   wxString::Format(_T("%.3f"),xyz.y), wxDefaultPosition, wxDefaultSize, wxTE_CENTRE, wxTextValidator(wxFILTER_NUMERIC)),
 					   0, wxALIGN_CENTRE_VERTICAL);
   // 3rd row
   inputSizer->Add(new wxStaticText(this, -1, _T("z")), 0, wxALIGN_CENTRE_VERTICAL);
   inputSizer->Add(mpZCtrl = new wxTextCtrl(this, -1, 
-					   wxString::Format(_T("%.3f"),xyz.z)), 
+					   wxString::Format(_T("%.3f"),xyz.z), wxDefaultPosition, wxDefaultSize, wxTE_CENTRE, wxTextValidator(wxFILTER_NUMERIC)), 
 					   0, wxALIGN_CENTRE_VERTICAL);
   // button section
   wxFlexGridSizer *buttonSizer = new wxFlexGridSizer(1, 2, 10, 10);
@@ -4640,24 +4640,20 @@ END_EVENT_TABLE()
 UserXYZBox::~UserXYZBox () {
 };
 
-void UserXYZBox::OnOk (wxCommandEvent & WXUNUSED(event)) {
-  char * strptr;
-  const char * val;
+void UserXYZBox::OnOk (wxCommandEvent & WXUNUSED(event))
+{
+   double tmp;
+   mpXCtrl->GetValue().ToDouble(&tmp);
+   mXYZ.x = tmp;
 
-  val = mpXCtrl->GetValue().ToAscii();
-  mXYZ.x = strtod(val, &strptr);
-  if (val == strptr) {wxMessageBox(_T("Invalid value for X!"), _T("Position error"), wxOK, this); return;}
+   mpYCtrl->GetValue().ToDouble(&tmp);
+   mXYZ.y = tmp;
 
-  val = mpYCtrl->GetValue().ToAscii();
-  mXYZ.y = strtod(val, &strptr);
-  if (val == strptr) {wxMessageBox(_T("Invalid value for Y!"), _T("Position error"), wxOK, this); return;}
+   mpZCtrl->GetValue().ToDouble(&tmp);
+   mXYZ.z = tmp;
 
-  val = mpZCtrl->GetValue().ToAscii();
-  mXYZ.z = strtod(val, &strptr);
-  if (val == strptr) {wxMessageBox(_T("Invalid value for Z!"), _T("Position error"), wxOK, this); return;}
-
-    // close the dialog
-    EndModal(wxID_OK);
+   // close the dialog
+   EndModal(wxID_OK);
 }
 
 Triple UserXYZBox::GetXYZ () {
