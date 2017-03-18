@@ -1875,6 +1875,7 @@ void WXPowderPatternGraph::OnLoadPeaks(wxCommandEvent& WXUNUSED(event))
    ifstream f(fn.GetPath().ToAscii());
    if(!f) return;//:TODO:
    mPeakList.GetPeakList().clear();
+   f.imbue(std::locale::classic());
    mPeakList.ImportDhklDSigmaIntensity(f);
    f.close();
    
@@ -1893,6 +1894,7 @@ void WXPowderPatternGraph::OnSavePeaks(wxCommandEvent& WXUNUSED(event))
    
    ofstream out(save.GetPath().ToAscii());
    if(!out) return;//:TODO:
+   out.imbue(std::locale::classic());
    mPeakList.ExportDhklDSigmaIntensity(out);
    out.close();
 }

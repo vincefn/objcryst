@@ -20,6 +20,7 @@
 *
 */
 #include <algorithm>
+#include <iomanip>
 
 #include "ObjCryst/ObjCryst/Indexing.h"
 #include "ObjCryst/Quirks/VFNDebug.h"
@@ -732,15 +733,16 @@ void PeakList::ImportDhklDSigmaIntensity(istream &is,float defaultsigma)
    while(true)
    {// :TODO: use readline to make sure when the end is reached
       is >>d;
-      if(is.eof()) break;
+      cout<<__FILE__<<":"<<__LINE__<<"  "<<mvHKL.size()<<":d="<<d;
+      if(is.good()==false) break;
       is>>sigma;
-      if(is.eof()) break;
+      if(is.good()==false) break;
       is>>iobs;
       if(sigma<=0) sigma=d*defaultsigma;
       if(iobs<=0) iobs=1.0;
       mvHKL.push_back(hkl(1/d,iobs,1/(d-sigma/2)-1/(d+sigma/2)));
-      cout<<__FILE__<<":"<<__LINE__<<"  "<<mvHKL.size()<<":d="<<d<<"+/-"<<sigma<<", I="<<iobs<<" 1/d="<<1/d<<endl;
-      if(is.eof()) break;
+      cout<<"+/-"<<sigma<<", I="<<iobs<<" 1/d="<<1/d<<endl;
+      if(is.good()==false) break;
    }
    sort(mvHKL.begin(),mvHKL.end(),compareHKL_d);
    cout<<"Imported "<<mvHKL.size()<<" observed reflection positions."<<endl;
@@ -878,8 +880,7 @@ void PeakList::ExportDhklDSigmaIntensity(std::ostream &os)const
    for(vector<PeakList::hkl>::const_iterator pos=mvHKL.begin();pos!=mvHKL.end();++pos)
    {
       const float sigma=1/(pos->dobs-pos->dobssigma/2)-1/(pos->dobs+pos->dobssigma/2);
-      sprintf(buf,"%6.3f %6.3f %f",1/pos->dobs,sigma,pos->iobs);
-      os<<buf<<endl;
+      os<< std::fixed << setw(6) << setprecision(3) << 1/pos->dobs <<" "<< sigma <<" "<< std::scientific << pos->iobs <<endl;
    }
 }
 
