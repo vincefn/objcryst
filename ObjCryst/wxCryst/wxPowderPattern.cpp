@@ -4818,6 +4818,10 @@ void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
          else
          {
             pDiff->GetParentPowderPattern().UpdateDisplay();
+            // Number of free parameters (not taking into account refined profile/background parameters)
+            unsigned int nbfreepar=pDiff->GetProfileFitNetNbObs();
+            if(nbfreepar<1) nbfreepar=1; // Should not happen !
+            
             for(unsigned int j=0;j<nbcycle;j++)
             {
                 // First, Le Bail
@@ -4870,8 +4874,7 @@ void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
                 }
                 pDiff->GetParentPowderPattern().UpdateDisplay();
                 const REAL rw=pDiff->GetParentPowderPattern().GetRw()*100;
-                const REAL gof=pDiff->GetParentPowderPattern().GetChi2()
-                              /(pDiff->GetParentPowderPattern().GetNbPointUsed()-pDiff->GetNbReflBelowMaxSinThetaOvLambda());
+                const REAL gof=pDiff->GetParentPowderPattern().GetChi2()/nbfreepar;
                 if(dlgProgress.Update(i*nbcycle+j,wxString::FromAscii(hm.c_str())+wxString::Format(_T("  (cycle #%u)\n   Rwp=%5.2f%%\n   GoF=%9.2f"),
                                                                   j,rw,gof))==false) user_stop=true;
             
@@ -4879,8 +4882,7 @@ void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
             }
             if(user_stop) break;  
             const REAL rw=pDiff->GetParentPowderPattern().GetRw()*100;
-            const REAL gof=pDiff->GetParentPowderPattern().GetChi2()
-                            /(pDiff->GetParentPowderPattern().GetNbPointUsed()-pDiff->GetNbReflBelowMaxSinThetaOvLambda());
+            const REAL gof=pDiff->GetParentPowderPattern().GetChi2()/nbfreepar;
             unsigned int nbextinct446=0;
             for(unsigned int i=6;i<fgp.size();++i) nbextinct446+=(unsigned int)(fgp[i]);
             vSPG.push_back(SPGScore(hm.c_str(),rw,gof,nbextinct446));
@@ -4895,6 +4897,9 @@ void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
    mpLog->AppendText(wxString::Format(_T("\n\n BEST Solutions, from min_GoF to 2*min_Gof:\n")));
    mpLog->AppendText(wxString::Format(_T("\n\'extinct refls\' gives the number of extinct reflections\n")));
    mpLog->AppendText(wxString::Format(_T("for 0<=H<=4 0<=K<=4 0<=L<=6 \n\n")));
+   mpLog->AppendText(wxString::Format(_T("Note that the listed GoF takes into account the net observed points\n")));
+   mpLog->AppendText(wxString::Format(_T("so that spacegroups (P1) with a high ration of nb reflections/nb points\n")));
+   mpLog->AppendText(wxString::Format(_T("can have an optimal Chi2 or Rwp and yet ranked lower in terms of GoF\n\n")));
    for(list<SPGScore>::const_iterator pos=vSPG.begin();pos!=vSPG.end();++pos)
    {
       if(pos->gof>(2*vSPG.begin()->gof)) break;

@@ -387,6 +387,15 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       void FreezeLatticePar(const bool use);
       /// Do we use local cell parameters ? (see mFrozenLatticePar)
       bool FreezeLatticePar() const;
+      /** Get the 'net' number of observed intensities, minus the number of reflections, for a profile fit.
+      * This calculation takes into account where each reflection appears:
+      * - if in a low angle region there are 500 points and 2 reflections, this will contribute 498 net
+      * - if at high angle there are 200 points and 250 reflections, this will contribute to 0 net oberved.
+      * - reflections appearing at exactly the same angle count as one
+      * Note that the calculation only includes the region below max(sin(theta)/lambda).
+      * No over paremeters (profile, background) are taken into account
+      */
+      unsigned int GetProfileFitNetNbObs()const;
    protected:
       virtual void CalcPowderPattern() const;
       virtual void CalcPowderPattern_FullDeriv(std::set<RefinablePar *> &vPar);

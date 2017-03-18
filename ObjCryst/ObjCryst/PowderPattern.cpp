@@ -1200,6 +1200,35 @@ void PowderPatternDiffraction::FreezeLatticePar(const bool use)
 
 bool PowderPatternDiffraction::FreezeLatticePar() const {return mFreezeLatticePar;}
 
+unsigned int PowderPatternDiffraction::GetProfileFitNetNbObs()const
+{
+   unsigned int nb=0;
+   unsigned int irefl=0;
+   unsigned int ilast=0;
+   while(this->GetParentPowderPattern().STOL2Pixel(mSinThetaLambda(irefl))<0)
+   {
+      irefl++;
+      if(irefl>=this->GetNbReflBelowMaxSinThetaOvLambda()) break;
+   }
+   REAL stol=mSinThetaLambda(irefl);
+   while(irefl<this->GetNbReflBelowMaxSinThetaOvLambda())
+   {
+      while(mSinThetaLambda(irefl)==stol)
+      {
+         //cout<<int(mH(irefl))<<" "<<int(mK(irefl))<<" "<<int(mL(irefl))<<endl;
+         irefl++;
+         if(irefl>=this->GetNbReflBelowMaxSinThetaOvLambda()) break;
+      }
+      const int nbnew =this->GetParentPowderPattern().STOL2Pixel(stol)-ilast;
+      if(nbnew>1) nb += nbnew-1;
+      //cout<<"     => Added "<< nbnew-1<< "net observed points ("<<this->GetParentPowderPattern().STOL2Pixel(stol)<<"-"<<ilast<<")"<<endl;
+      ilast=this->GetParentPowderPattern().STOL2Pixel(stol);
+      stol = mSinThetaLambda(irefl);
+   }
+   //cout<<"Final number of net observed points: "<<nb<<endl;
+   return nb;
+}
+
 void PowderPatternDiffraction::CalcPowderPattern() const
 {
    this->GetNbReflBelowMaxSinThetaOvLambda();
