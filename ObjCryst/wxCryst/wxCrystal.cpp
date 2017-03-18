@@ -3183,11 +3183,11 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
          glMultMatrixf( &m[0][0] );
          const GLfloat colour0 [] = {0.00, 0.00, 0.00, 0.00};
          const GLfloat colour1 [] = {1.0f, 1.0f, 1.0f, 1.00};
-         glMaterialfv(GL_FRONT, GL_AMBIENT,   colour0);
-         glMaterialfv(GL_FRONT, GL_DIFFUSE,   colour0);
+         glMaterialfv(GL_FRONT, GL_AMBIENT,   colour1);
+         glMaterialfv(GL_FRONT, GL_DIFFUSE,   colour1);
          glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0);
          glMaterialfv(GL_FRONT, GL_EMISSION,  colour1);
-         glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
+         glMaterialfv(GL_FRONT, GL_SHININESS, colour1);
          glBegin(GL_LINES);
          glVertex3f(-1.0f, 0.0f, 0.0f);
          glVertex3f( 1.0f, 0.0f, 0.0f);
