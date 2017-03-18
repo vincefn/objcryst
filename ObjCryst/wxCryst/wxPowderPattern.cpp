@@ -4452,20 +4452,26 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
       }
       try{
          mLSQ.SetParIsFixed(gpRefParTypeScattDataScale,false);
+         std::list<RefinablePar*> vnewpar;
+         std::list<const RefParType*> vnewpartype;
+         mLSQ.SafeRefine(vnewpar,vnewpartype,2,true,false);
          
-         if(fitzero) mLSQ.SetParIsFixed(mpDiff->GetParentPowderPattern().GetPar("Zero"),false);
-         if(fitwidth0) 
+         if(fitzero) vnewpar.push_back(&mLSQ.GetCompiledRefinedObj().GetPar("Zero"));
+         if(fitwidth0)
            for(map<PowderPatternDiffraction *,bool>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
-             if(pos->second) mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("W"),false);
+             if(pos->second) vnewpar.push_back(&mLSQ.GetCompiledRefinedObj().GetPar("W"));
          if(fitwidth0)
             for(map<PowderPatternDiffraction *,bool>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
                if((pos->second) && (pos->first->GetProfile().GetClassName()=="ReflectionProfilePseudoVoigtAnisotropic"))
-                  mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("X"),false);
+                  vnewpar.push_back(&mLSQ.GetCompiledRefinedObj().GetPar("X"));
          if(fitzero||fitwidth0)
          {
             mpLog->AppendText(wxString::Format(_T("Fitting zero shift && constant width\n")));
             if(dlgProgress.Update(11,_T("Fitting zero shift && constant width"))==false) return;
-            mLSQ.Refine(5,true,false);
+            const bool result = mLSQ.SafeRefine(vnewpar, vnewpartype, 1.01, 5,true,false);
+            if(!result) mpLog->AppendText(_T(" OUPS: parameter did not improve fit => fix & continue\n"));
+            vnewpar.clear();
+            vnewpartype.clear();
             mpDiff->ExtractLeBail(2);
             mpDiff->GetParentPowderPattern().UpdateDisplay();
             mpLog->AppendText(wxString::Format(_T("                  => Rwp=%6.3f%%, GoF=%7.3f\n"),
@@ -4475,26 +4481,29 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
          }
          if(fitwidth) 
            for(map<PowderPatternDiffraction *,bool>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
-             if(pos->second) mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("U"),false);
+             if(pos->second) vnewpar.push_back(&mLSQ.GetCompiledRefinedObj().GetPar("U"));
          if(fitwidth) 
            for(map<PowderPatternDiffraction *,bool>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
-             if(pos->second) mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("V"),false);
+             if(pos->second) vnewpar.push_back(&mLSQ.GetCompiledRefinedObj().GetPar("V"));
          if(fitwidth)
             for(map<PowderPatternDiffraction *,bool>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
                if((pos->second) && (pos->first->GetProfile().GetClassName()=="ReflectionProfilePseudoVoigtAnisotropic"))
-                  mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("Y"),false);
+                  vnewpar.push_back(&mLSQ.GetCompiledRefinedObj().GetPar("Y"));
          if(fitwidth)
             for(map<PowderPatternDiffraction *,bool>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
                if((pos->second) && (pos->first->GetProfile().GetClassName()=="ReflectionProfilePseudoVoigtAnisotropic"))
-                  mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("P"),false);
+                  vnewpar.push_back(&mLSQ.GetCompiledRefinedObj().GetPar("P"));
          if(fiteta)
            for(map<PowderPatternDiffraction *,bool>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
-             if(pos->second) mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("Eta0"),false);
+             if(pos->second) vnewpar.push_back(&mLSQ.GetCompiledRefinedObj().GetPar("Eta0"));
          if(fitwidth||fiteta)
          {
             mpLog->AppendText(wxString::Format(_T("Fitting width and gaussian/lorentzian fixed mix\n")));
             if(dlgProgress.Update(12,_T("Fitting variable width and gaussian/lorentzian fixed mix"))==false) return;
-            mLSQ.Refine(5,true,false);
+            const bool result = mLSQ.SafeRefine(vnewpar, vnewpartype, 1.01, 5,true,false);
+            if(!result) mpLog->AppendText(_T(" OUPS: parameter did not improve fit => fix & continue\n"));
+            vnewpar.clear();
+            vnewpartype.clear();
             mpDiff->ExtractLeBail(2);
             mpDiff->GetParentPowderPattern().UpdateDisplay();
             mpLog->AppendText(wxString::Format(_T("                  => Rwp=%6.3f%%, GoF=%7.3f\n"),
@@ -4509,13 +4518,16 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
             for(map<PowderPatternDiffraction *,bool>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
                if(pos->second)
                {
-                  mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("Alpha1"),false);
-                  mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("Beta0"),false);
-                  mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("Beta1"),false);
+                  vnewpar.push_back(&mLSQ.GetCompiledRefinedObj().GetPar("Alpha1"));
+                  vnewpar.push_back(&mLSQ.GetCompiledRefinedObj().GetPar("Beta0"));
+                  vnewpar.push_back(&mLSQ.GetCompiledRefinedObj().GetPar("Beta1"));
                }
             mpLog->AppendText(wxString::Format(_T("Fitting TOF instrumental width (alpha1,beta0,beta1)\n")));
             if(dlgProgress.Update(12,_T("Fitting TOF instrumental width (alpha1,beta0,beta1)"))==false) return;
-            mLSQ.Refine(5,true,false);
+            const bool result = mLSQ.SafeRefine(vnewpar, vnewpartype, 1.01, 5,true,false);
+            if(!result) mpLog->AppendText(_T(" OUPS: parameter did not improve fit => fix & continue\n"));
+            vnewpar.clear();
+            vnewpartype.clear();
             mpDiff->ExtractLeBail(2);
             mpDiff->GetParentPowderPattern().UpdateDisplay();
             mpLog->AppendText(wxString::Format(_T("                  => Rwp=%6.3f%%, GoF=%7.3f\n"),
@@ -4529,14 +4541,17 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
             for(map<PowderPatternDiffraction *,bool>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
                if(pos->second)
                {
-                  mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("GaussianSigma1"),false);
-                  //mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("LorentzianGamma2"),false);
-                  //mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("GaussianSigma1"),0,1e6);
-                  //mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("LorentzianGamma2"),0,1e6);
+                  vnewpar.push_back(&mLSQ.GetCompiledRefinedObj().GetPar("GaussianSigma1"));
+                  //vnewpar.push_back(&mLSQ.GetCompiledRefinedObj().GetPar("LorentzianGamma2"));
+                  //vnewpar.push_back(&mLSQ.GetCompiledRefinedObj().GetPar("GaussianSigma1"));
+                  //vnewpar.push_back(&mLSQ.GetCompiledRefinedObj().GetPar("LorentzianGamma2"));
                }
             mpLog->AppendText(wxString::Format(_T("Fitting size/strain broadening parameters (sigma1,gamma2)\n")));
             if(dlgProgress.Update(12,_T("Fitting size/strain broadening parameters (sigma1,gamma2)"))==false) return;
-            mLSQ.Refine(5,true,false);
+            const bool result = mLSQ.SafeRefine(vnewpar, vnewpartype, 1.01, 5,true,false);
+            if(!result) mpLog->AppendText(_T(" OUPS: parameter did not improve fit => fix & continue\n"));
+            vnewpar.clear();
+            vnewpartype.clear();
             mpDiff->ExtractLeBail(2);
             mpDiff->GetParentPowderPattern().UpdateDisplay();
             mpLog->AppendText(wxString::Format(_T("                  => Rwp=%6.3f%%, GoF=%7.3f\n"),
@@ -4545,7 +4560,7 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
                                              /mpDiff->GetParentPowderPattern().GetNbPointUsed()));
             for(map<PowderPatternDiffraction *,bool>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
                if(pos->second)
-                  mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("GaussianSigma1"),true);
+                  vnewpar.push_back(&mLSQ.GetCompiledRefinedObj().GetPar("GaussianSigma1"));
          }
          
          if(fiteta) mLSQ.SetParIsFixed(mpDiff->GetProfile().GetPar("Eta1"),false);
@@ -4553,7 +4568,10 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
          {
             mpLog->AppendText(wxString::Format(_T("Fitting gaussian/lorentzian mix\n")));
             if(dlgProgress.Update(13,_T("Fitting variable width and gaussian/lorentzian mix"))==false) return;
-            mLSQ.Refine(5,true,false);
+            const bool result = mLSQ.SafeRefine(vnewpar, vnewpartype, 1.01, 5,true,false);
+            if(!result) mpLog->AppendText(_T(" OUPS: parameter did not improve fit => fix & continue\n"));
+            vnewpar.clear();
+            vnewpartype.clear();
             mpDiff->ExtractLeBail(2);
             mpDiff->GetParentPowderPattern().UpdateDisplay();
             mpLog->AppendText(wxString::Format(_T("                  => Rwp=%6.3f%%, GoF=%7.3f\n"),
@@ -4564,24 +4582,27 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
          
          if(fitasym) 
            for(map<PowderPatternDiffraction *,bool>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
-             if(pos->second) mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("Asym0"),false);
+             if(pos->second) vnewpar.push_back(&mLSQ.GetCompiledRefinedObj().GetPar("Asym0"));
          if(fitasym) 
            for(map<PowderPatternDiffraction *,bool>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
-             if(pos->second) mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("Asym1"),false);
+             if(pos->second) vnewpar.push_back(&mLSQ.GetCompiledRefinedObj().GetPar("Asym1"));
          if(fitasym) 
            for(map<PowderPatternDiffraction *,bool>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
-             if(pos->second) mLSQ.SetParIsFixed(pos->first->GetProfile().GetPar("Asym2"),false);
+             if(pos->second) vnewpar.push_back(&mLSQ.GetCompiledRefinedObj().GetPar("Asym2"));
          if(fitdispltransp) 
            for(map<PowderPatternDiffraction *,bool>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
-             if(pos->second) mLSQ.SetParIsFixed(pos->first->GetParentPowderPattern().GetPar("2ThetaDispl"),false);
+             if(pos->second) vnewpar.push_back(&mLSQ.GetCompiledRefinedObj().GetPar("2ThetaDispl"));
          if(fitdispltransp)  
            for(map<PowderPatternDiffraction *,bool>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
-             if(pos->second) mLSQ.SetParIsFixed(pos->first->GetParentPowderPattern().GetPar("2ThetaTransp"),false);
+             if(pos->second) vnewpar.push_back(&mLSQ.GetCompiledRefinedObj().GetPar("2ThetaTransp"));
          if(fitdispltransp||fitasym)
          {
             mpLog->AppendText(wxString::Format(_T("Fitting assymetry and sample displacement/transparency\n")));
             if(dlgProgress.Update(14,_T("Fitting assymetry and sample displacement/transparency"))==false) return;
-            mLSQ.Refine(5,true,false);
+            const bool result = mLSQ.SafeRefine(vnewpar, vnewpartype, 1.01, 5,true,false);
+            if(!result) mpLog->AppendText(_T(" OUPS: parameter did not improve fit => fix & continue\n"));
+            vnewpar.clear();
+            vnewpartype.clear();
             mpDiff->ExtractLeBail(2);
             mpDiff->GetParentPowderPattern().UpdateDisplay();
             mpLog->AppendText(wxString::Format(_T("                  => Rwp=%6.3f%%, GoF=%7.3f\n"),
@@ -4602,10 +4623,17 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
                      (&(mpDiff->GetParentPowderPattern().GetPowderPatternComponent(i)));
                   pback->FixParametersBeyondMaxresolution(mLSQ.GetCompiledRefinedObj());
                }
+            for(unsigned int i=0; i<mLSQ.GetCompiledRefinedObj().GetNbPar();i++)
+               if(  (mLSQ.GetCompiledRefinedObj().GetPar(i).IsFixed()==false)
+                  &&(mLSQ.GetCompiledRefinedObj().GetPar(i).GetType()==gpRefParTypeScattDataBackground))
+                  vnewpar.push_back(&mLSQ.GetCompiledRefinedObj().GetPar(i));
    
             mpLog->AppendText(wxString::Format(_T("Fitting background\n")));
             if(dlgProgress.Update(15,_T("Fitting background"))==false) return;
-            mLSQ.Refine(5,true,false);
+            const bool result = mLSQ.SafeRefine(vnewpar, vnewpartype, 1.01, 5,true,false);
+            if(!result) mpLog->AppendText(_T(" OUPS: parameter did not improve fit => fix & continue\n"));
+            vnewpar.clear();
+            vnewpartype.clear();
             mpDiff->ExtractLeBail(2);
             mpDiff->GetParentPowderPattern().UpdateDisplay();
             mpLog->AppendText(wxString::Format(_T("                  => Rwp=%6.3f%%, GoF=%7.3f\n"),
@@ -4616,15 +4644,18 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
          
          if(fitcell)
          {
-            mLSQ.SetParIsFixed(gpRefParTypeUnitCell,false);
-             
+            vnewpartype.push_back(gpRefParTypeUnitCell);
+            
             // Fix uc parameters of unrefined phases
             for(map<PowderPatternDiffraction *,bool>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
                 if(!(pos->second)) mLSQ.SetParIsFixed(pos->first->GetCrystal(),true);
             
             mpLog->AppendText(wxString::Format(_T("Fitting unit cell\n")));
             if(dlgProgress.Update(16,_T("Fitting unit cell"))==false) return;
-            mLSQ.Refine(5,true,false);
+            const bool result = mLSQ.SafeRefine(vnewpar, vnewpartype, 1.01, 5,true,false);
+            if(!result) mpLog->AppendText(_T(" OUPS: parameter did not improve fit => fix & continue\n"));
+            vnewpar.clear();
+            vnewpartype.clear();
             mpDiff->ExtractLeBail(2);
             mpDiff->GetParentPowderPattern().UpdateDisplay();
             mpLog->AppendText(wxString::Format(_T("                  => Rwp=%6.3f%%, GoF=%7.3f\n"),
@@ -4643,13 +4674,16 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
    {// Manual fit
       try
       {
+         std::list<RefinablePar*> vnewpar;
+         std::list<const RefParType*> vnewpartype;
          mpLog->AppendText(wxString::Format(_T("Profile fitting (manual):\n")));
          mpLog->AppendText(wxString::Format(_T("    Initial values:  Rwp=%6.3f%%, GoF=%7.3f\n"),
                                                 mpDiff->GetParentPowderPattern().GetRw()*100,
                                                 mpDiff->GetParentPowderPattern().GetChi2()
                                                 /mpDiff->GetParentPowderPattern().GetNbPointUsed()));
          mpLog->AppendText(wxString::Format(_T("3 LSQ cycles...\n")));
-         mLSQ.Refine(3,true,false);
+         if(false==mLSQ.SafeRefine(vnewpar, vnewpartype, 1.05, 5,true,false))
+            mpLog->AppendText(_T(" OUPS: Fit did not improve fit => reverting\n"));
          mpLog->AppendText(wxString::Format(_T("                  => Rwp=%6.3f%%, GoF=%7.3f\n"),
                                                 mpDiff->GetParentPowderPattern().GetRw()*100,
                                                 mpDiff->GetParentPowderPattern().GetChi2()
@@ -4663,7 +4697,8 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
                                                 /mpDiff->GetParentPowderPattern().GetNbPointUsed()));
          mpLog->AppendText(wxString::Format(_T("3 LSQ cycles...\n")));
          if(dlgProgress.Update(13,_T("Manual Le Bail + Profile fitting"))==false) return;
-         mLSQ.Refine(3,true,false);
+         if(false==mLSQ.SafeRefine(vnewpar, vnewpartype, 1.05, 5,true,false))
+            mpLog->AppendText(_T(" OUPS: Fit did not improve fit => reverting\n"));
          if(dlgProgress.Update(17,_T("Manual Le Bail + Profile fitting"))==false) return;
          mpDiff->GetParentPowderPattern().UpdateDisplay();
          mpLog->AppendText(wxString::Format(_T("                  => Rwp=%6.3f%%, GoF=%7.3f\n"),
@@ -4839,17 +4874,21 @@ void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
                   lsq.PrepareRefParList(true);
                   lsq.SetParIsFixed(gpRefParTypeObjCryst,true);
                   lsq.SetParIsFixed(gpRefParTypeScattDataScale,false);
+                  std::list<RefinablePar*> vnewpar;
+                  std::list<const RefParType*> vnewpartype;
                   // Only do the full monty for P1, keep the parameters for other spacegroups
-                  if(s.number()==1) lsq.SetParIsFixed("Zero",false);
+                  if(s.number()==1) vnewpar.push_back(&lsq.GetCompiledRefinedObj().GetPar("Zero"));
                   lsq.SetParIsFixed(gpRefParTypeUnitCell,false);
-                  lsq.Refine(2,true,true);
+                  lsq.SafeRefine(vnewpar, vnewpartype,2,true,false);
+                  vnewpar.clear();
                   TAU_PROFILE_STOP(timer2);
                   if(s.number()==1) 
                   {
                       TAU_PROFILE_START(timer1);
-                      lsq.SetParIsFixed("2ThetaDispl",false);
-                      lsq.SetParIsFixed("2ThetaTransp",false);
-                      lsq.Refine(2,true,true);
+                      vnewpar.push_back(&lsq.GetCompiledRefinedObj().GetPar("2ThetaDispl"));
+                      vnewpar.push_back(&lsq.GetCompiledRefinedObj().GetPar("2ThetaTransp"));
+                      lsq.SafeRefine(vnewpar, vnewpartype,2,true,false);
+                      vnewpar.clear();
                       lsq.SetParIsFixed(gpRefParTypeScattDataBackground,false);
                       // Fix background point beyond optimized domain
                       const unsigned int nbcomp= pDiff->GetParentPowderPattern().GetNbPowderPatternComponent();
@@ -4860,14 +4899,19 @@ void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
                             (&(pDiff->GetParentPowderPattern().GetPowderPatternComponent(i)));
                             pback->FixParametersBeyondMaxresolution(lsq.GetCompiledRefinedObj());
                         }
-                      lsq.Refine(2,true,false);
+                     for(unsigned int i=0; i<lsq.GetCompiledRefinedObj().GetNbPar();i++)
+                        if(  (lsq.GetCompiledRefinedObj().GetPar(i).IsFixed()==false)
+                           &&(lsq.GetCompiledRefinedObj().GetPar(i).GetType()==gpRefParTypeScattDataBackground))
+                           vnewpar.push_back(&lsq.GetCompiledRefinedObj().GetPar(i));
+                      lsq.SafeRefine(vnewpar,vnewpartype,2,true,false);
+                      vnewpar.clear();
                       TAU_PROFILE_STOP(timer1);
                   }
                   // restart from equal intensities
                   pDiff->SetExtractionMode(true,true);
                   pDiff->ExtractLeBail(5);
                   TAU_PROFILE_START(timer3);
-                  lsq.Refine(3,true,true);
+                  lsq.SafeRefine(vnewpar,vnewpartype,3,true,false);
                   TAU_PROFILE_STOP(timer3);
                   //mpLog->AppendText(wxString::Format(_T("%5.2f%%/"),pDiff->GetParentPowderPattern().GetRw()*100));
                   pDiff->GetParentPowderPattern().FitScaleFactorForRw();
