@@ -2580,15 +2580,60 @@ void WXCellExplorer::OnSelectCell(wxCommandEvent &event)
          mpCrystal->GetPar("alpha").SetValue(uc[3]);
          mpCrystal->GetPar("beta").SetValue(uc[4]);
          mpCrystal->GetPar("gamma").SetValue(uc[5]);
-         switch(pos->first.mlattice)
+         // Choose the spcegroup wuth the highest possible symmetry given the centering used.
+         // We only try P, I, F, but also handle others, just in case
+         switch(pos->first.mCentering)
          {
-            case TRICLINIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("P-1");break;
-            case MONOCLINIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("P2/m");break;
-            case ORTHOROMBIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("Pmmm");break;
-            case HEXAGONAL:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("P6/mmm");break;
-            case RHOMBOEDRAL:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("R-3m");break;
-            case TETRAGONAL:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("P4/mmm");break;
-            case CUBIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("Pm-3m");break;
+            case LATTICE_P:
+            {
+               switch(pos->first.mlattice)
+               {
+                  case TRICLINIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("P-1");break;
+                  case MONOCLINIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("P2/m");break;
+                  case ORTHOROMBIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("Pmmm");break;
+                  case HEXAGONAL:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("P6/mmm");break;
+                  case RHOMBOEDRAL:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("R-3m");break;
+                  case TETRAGONAL:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("P4/mmm");break;
+                  case CUBIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("Pm-3m");break;
+               }
+               break;
+            }
+            case LATTICE_I:
+            {
+               switch(pos->first.mlattice)
+               {
+                  case ORTHOROMBIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("I222");break;
+                  case TETRAGONAL:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("I4/mmm");break;
+                  case CUBIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("Im-3m");break;
+               }
+               break;
+            }
+            case LATTICE_A:
+            {
+               switch(pos->first.mlattice)
+               {
+                  case ORTHOROMBIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("Amm2");break;
+               }
+               break;
+            }
+            case LATTICE_C:
+            {
+               switch(pos->first.mlattice)
+               {
+                  case MONOCLINIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("C2/m");break;
+                  case ORTHOROMBIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("Cmmm");break;
+               }
+               break;
+            }
+            case LATTICE_F://,LATTICE_A,LATTICE_B,LATTICE_C};
+            {
+               switch(pos->first.mlattice)
+               {
+                  case ORTHOROMBIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("Fmmm");break;
+                  case CUBIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("Fm-3m");break;
+               }
+               break;
+            }
          }
          mpCrystal->UpdateDisplay();
       }
