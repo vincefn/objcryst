@@ -738,6 +738,14 @@ const CrystVector_REAL& ScatteringData::GetFhklObsSq() const
    return mFhklObsSq;
 }
 
+void ScatteringData::SetFhklObsSq(const CrystVector_REAL &obs)
+{
+   if(obs.numElements() != mNbRefl)
+      throw ObjCrystException("ScatteringData::SetFhklObsSq(): incorrect number of reflections !");
+   mFhklObsSq = obs;
+   mClockFhklObsSq.Click();
+}
+
 const map<const ScatteringPower*,CrystVector_REAL>& ScatteringData::GetScatteringFactor() const
 {
    this->CalcScattFactor();

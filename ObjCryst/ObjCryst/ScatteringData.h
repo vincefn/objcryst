@@ -413,8 +413,11 @@ class ScatteringData: virtual public RefinableObj
       /// Access to imaginary part of F(hkl)calc
       const CrystVector_REAL& GetFhklCalcImag() const;
 
-      ///  Returns the Array of observed |F(hkl)|^2 for all reflections.
+      ///  Returns the vector of observed |F(hkl)|^2 for all reflections.
       const CrystVector_REAL& GetFhklObsSq() const;
+      ///  Set the vector of observed |F(hkl)|^2 for all reflections. The supplied vector must have the same size
+      /// as the mH, mK, mL vectors.
+      void SetFhklObsSq(const CrystVector_REAL &obs);
 
       /// Scattering factors for each ScatteringPower, as vectors with NbRefl elements
       const map<const ScatteringPower*,CrystVector_REAL> &GetScatteringFactor() const;
