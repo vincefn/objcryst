@@ -720,9 +720,23 @@ bool LSQNumObj::SafeRefine(std::list<RefinablePar*> vnewpar, std::list<const Ref
    {
       this->SetParIsFixed(*pos, false);
    }
-   this->Refine(nbCycle, useLevenbergMarquardt, silent, callBeginEndOptimization, minChi2var);
+   bool diverged = false;
+   try
+   {
+      this->Refine(nbCycle, useLevenbergMarquardt, silent, callBeginEndOptimization, minChi2var);
+   }
+   catch(const ObjCrystException &except)
+   {
+      diverged = true;
+      cout << "Refinement did not converge !";
+   }
    const REAL deltachi2 = (mChiSq-chi2_0)/(chi2_0+1e-6);
    if(deltachi2>maxChi2factor)
+   {
+      cout << "Refinement did not converge ! Chi2 increase by a factor: "<< deltachi2<<endl;
+      diverged = true;
+   }
+   if(diverged)
    {
       mRefParList.RestoreParamSet(mIndexValuesSetInitial);
       for(std::list<RefinablePar*>::iterator pos=vnewpar.begin(); pos!=vnewpar.end(); pos++)
@@ -736,8 +750,8 @@ bool LSQNumObj::SafeRefine(std::list<RefinablePar*> vnewpar, std::list<const Ref
       this->CalcRfactor();
       this->CalcRwFactor();
       this->CalcChiSquare();
-      cout << "Refinement did not converge ! Chi2 increase by a factor: "<< deltachi2<<endl
-           <<"=> REVERTING to initial parameters values and fixing new parameters"<<endl;
+      cout <<"=> REVERTING to initial parameters values and fixing new parameters"<<endl;
+      return false;
    }
    return true;
 }
