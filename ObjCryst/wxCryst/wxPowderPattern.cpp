@@ -1831,6 +1831,7 @@ void WXPowderPatternGraph::OnToggleLabel(wxCommandEvent &event)
 
 void WXPowderPatternGraph::OnFindPeaks(wxCommandEvent& WXUNUSED(event))
 {
+   WXCrystValidateAllUserInput();
    Chronometer chrono;
    chrono.start();
    (*fpObjCrystInformUser)("Powder pattern: searching for peaks");
