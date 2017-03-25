@@ -2879,7 +2879,8 @@ static const long ID_GLCRYSTAL_MENU_LOADFOURIERGRD=    WXCRYST_ID();
 static const long ID_GLCRYSTAL_MENU_LOADFOURIERDSN6=   WXCRYST_ID();
 //static const long ID_GLCRYSTAL_MENU_UNLOADFOURIER=     WXCRYST_ID();
 static const long ID_GLCRYSTAL_MENU_POVRAY=            WXCRYST_ID();
-      
+static const long ID_GLCRYSTAL_MENU_SHOWHELP=        WXCRYST_ID();
+   
 
 BEGIN_EVENT_TABLE(WXGLCrystalCanvas, wxGLCanvas)
    EVT_PAINT            (WXGLCrystalCanvas::OnPaint)
@@ -2894,6 +2895,7 @@ BEGIN_EVENT_TABLE(WXGLCrystalCanvas, wxGLCanvas)
    EVT_MENU             (ID_GLCRYSTAL_MENU_SHOWHYDROGENS,       WXGLCrystalCanvas::OnShowHydrogens)
    EVT_MENU             (ID_GLCRYSTAL_MENU_SHOWCURSOR,          WXGLCrystalCanvas::OnShowCursor)
    EVT_MENU             (ID_GLCRYSTAL_MENU_SETCURSOR,           WXGLCrystalCanvas::OnSetCursor)
+   EVT_MENU             (ID_GLCRYSTAL_MENU_SHOWHELP,            WXGLCrystalCanvas::OnShowHelp)
    EVT_MENU             (ID_GLCRYSTAL_MENU_LOADFOURIERGRD,      WXGLCrystalCanvas::OnLoadFourierGRD)
    EVT_MENU             (ID_GLCRYSTAL_MENU_LOADFOURIERDSN6,     WXGLCrystalCanvas::OnLoadFourierDSN6)
 //   EVT_MENU             (ID_GLCRYSTAL_MENU_UNLOADFOURIER,       WXGLCrystalCanvas::OnUnloadFourier)
@@ -2988,8 +2990,10 @@ mIsGLFontBuilt(false),mGLFontDisplayListBase(0),mpFourierMapListWin(0),mFadeDist
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_POVRAY, _T("Create POVRay file"));
    mpPopUpMenu->AppendSeparator();
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_FOURIER, _T("Fourier Maps"));
-   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_LOADFOURIERGRD, _T("Load GRD Fourier Map"));	
-   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_LOADFOURIERDSN6,_T("Load DSN6 Fourier Map"));	
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_LOADFOURIERGRD, _T("Load GRD Fourier Map"));
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_LOADFOURIERDSN6,_T("Load DSN6 Fourier Map"));
+   mpPopUpMenu->AppendSeparator();
+   mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_SHOWHELP, _T("Show &Help"));
    /*
    mpPopUpMenu->Append(ID_GLCRYSTAL_MENU_UNLOADFOURIER, "Unload Fourier Map(s)");
    mpPopUpMenu->Enable(ID_GLCRYSTAL_MENU_UNLOADFOURIER, FALSE);
@@ -3129,35 +3133,7 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
          glDepthMask(GL_FALSE);
          glAlphaFunc(GL_LEQUAL,0.99);
       }
-      {//Show display limits
-         int w, h;
-         GetClientSize(& w, & h);
-         const GLfloat colour2 [] = {1.00, 1.00, 1.00, 0.3};
-         glMaterialfv(GL_FRONT, GL_EMISSION,  colour2);
-         glPushMatrix();
-         glLoadIdentity();
-         glMatrixMode(GL_PROJECTION);
-         glPushMatrix();
-         glLoadIdentity();
-         gluOrtho2D(0,w,0,h);
-         glColor3f(1.0,1.0,1.0);
-         glRasterPos2i(2,h-12);
-         char c[128];
-         sprintf(c,"%5.3f<x<%5.3f\n",mcellbbox.xMin,mcellbbox.xMax);
-         crystGLPrint(c);
-         
-         glRasterPos2i(2, h-24);
-         sprintf(c,"%5.3f<y<%5.3f\n",mcellbbox.yMin,mcellbbox.yMax);
-         crystGLPrint(c);
-         
-         glRasterPos2i(2, h-36);
-         sprintf(c,"%5.3f<z<%5.3f\n",mcellbbox.zMin,mcellbbox.zMax);
-         crystGLPrint(c);
-         glPopMatrix();
-         glMatrixMode( GL_MODELVIEW );
-         glPopMatrix();
-      }
-      if(mShowCrystal)
+       if(mShowCrystal)
       {
 		  glLoadIdentity();
 		  glColor3f(1.0, 1.0, 1.0);
@@ -3175,6 +3151,100 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
             glCallList(mpWXCrystal->GetCrystalGLDisplayList(true));  //Draw Atom Names
          }
          
+      }
+      {//Show display limits and help text
+         int w, h;
+         GetClientSize(& w, & h);
+         const GLfloat colour2 [] = {1.00, 1.00, 1.00, 0.3};
+         glMaterialfv(GL_FRONT, GL_EMISSION,  colour2);
+         glPushMatrix();
+         glLoadIdentity();
+         glMatrixMode(GL_PROJECTION);
+         glPushMatrix();
+         glLoadIdentity();
+         gluOrtho2D(0,w,0,h);
+         glColor3f(1.0,1.0,1.0);
+         unsigned int i=1;
+         glRasterPos2i(2,h-12*i);
+         char c[256];
+         sprintf(c,"%5.3f<x<%5.3f\n",mcellbbox.xMin,mcellbbox.xMax);
+         crystGLPrint(c);
+         i++;
+         
+         glRasterPos2i(2, h-12*i);
+         sprintf(c,"%5.3f<y<%5.3f\n",mcellbbox.yMin,mcellbbox.yMax);
+         crystGLPrint(c);
+         i++;
+         
+         glRasterPos2i(2, h-12*i);
+         sprintf(c,"%5.3f<z<%5.3f\n",mcellbbox.zMin,mcellbbox.zMax);
+         crystGLPrint(c);
+         i++;
+         
+         if(mShowHelp)
+         {
+            glRasterPos2i(2, h-12*i);
+            sprintf(c,"Mouse");
+            crystGLPrint(c);
+            i++;
+            glRasterPos2i(2, h-12*i);
+            sprintf(c,"   left-click & drag: change orientation");
+            crystGLPrint(c);
+            i++;
+            glRasterPos2i(2, h-12*i);
+            sprintf(c,"   middle-click & drag: zoom (vert) change depth perception (horiz)");
+            crystGLPrint(c);
+            i++;
+            glRasterPos2i(2, h-12*i);
+            sprintf(c,"   wheel: rotate");
+            crystGLPrint(c);
+            i++;
+            
+            glRasterPos2i(2, h-12*i);
+            sprintf(c,"Trackpad");
+            crystGLPrint(c);
+            i++;
+            glRasterPos2i(2, h-12*i);
+            sprintf(c,"   two-finger drag: change orientation");
+            crystGLPrint(c);
+            i++;
+            
+            glRasterPos2i(2, h-12*i);
+            sprintf(c,"Keyboard");
+            crystGLPrint(c);
+            i++;
+            glRasterPos2i(2, h-12*i);
+            sprintf(c,"   +,-: change zoom");
+            crystGLPrint(c);
+            i++;
+            glRasterPos2i(2, h-12*i);
+            sprintf(c,"   2,4,6,8,D,C,F,R: rotate");
+            crystGLPrint(c);
+            i++;
+            glRasterPos2i(2, h-12*i);
+            sprintf(c,"   F1,F2,F3,F4,F5,F6: increase/decrease display area");
+            crystGLPrint(c);
+            i++;
+            glRasterPos2i(2, h-12*i);
+            sprintf(c,"   shift+F1,F2,F3,F4,F5,F6: shift display area");
+            crystGLPrint(c);
+            i++;
+            glRasterPos2i(2, h-12*i);
+            sprintf(c,"   F7,F8: increase/decrease fade distance");
+            crystGLPrint(c);
+            i++;
+            glRasterPos2i(2, h-12*i);
+            sprintf(c,"   F9,F10: display area=asymmetric or full unit cell");
+            crystGLPrint(c);
+            i++;
+            glRasterPos2i(2, h-12*i);
+            sprintf(c,"   H: toggle help display");
+            crystGLPrint(c);
+            i++;
+         }
+         glPopMatrix();
+         glMatrixMode( GL_MODELVIEW );
+         glPopMatrix();
       }
       if(mShowCursor)
       {
@@ -3364,6 +3434,160 @@ void WXGLCrystalCanvas::OnKeyDown(wxKeyEvent& event)
          Refresh(FALSE);
          break;
       }
+      case(72):// H
+      {
+         VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnKeyDown():toggle help",2)
+         mShowHelp = !mShowHelp;
+         Refresh(FALSE);
+         break;
+      }
+      case(WXK_F1):
+      {
+         VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnKeyDown():F1",2)
+         if(event.ShiftDown())
+         {
+            mcellbbox.xMin -= 0.05;
+            mcellbbox.xMax -= 0.05;
+         }
+         else
+         {
+            if((mcellbbox.xMax-mcellbbox.xMin)>0.1)
+            {
+               mcellbbox.xMin += 0.05;
+               mcellbbox.xMax -= 0.05;
+            }
+         }
+         break;
+      }
+      case(WXK_F2):
+      {
+         VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnKeyDown():F2",2)
+         if(event.ShiftDown())
+         {
+            mcellbbox.xMin += 0.05;
+            mcellbbox.xMax += 0.05;
+         }
+         else
+         {
+            mcellbbox.xMin -= 0.05;
+            mcellbbox.xMax += 0.05;
+         }
+         break;
+      }
+      case(WXK_F3):
+      {
+         VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnKeyDown():F3",2)
+         if(event.ShiftDown())
+         {
+            mcellbbox.yMin -= 0.05;
+            mcellbbox.yMax -= 0.05;
+         }
+         else
+         {
+            if((mcellbbox.yMax-mcellbbox.yMin)>0.1)
+            {
+               mcellbbox.yMin += 0.05;
+               mcellbbox.yMax -= 0.05;
+            }
+         }
+         break;
+      }
+      case(WXK_F4):
+      {
+         VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnKeyDown():F4",2)
+         if(event.ShiftDown())
+         {
+            mcellbbox.yMin += 0.05;
+            mcellbbox.yMax += 0.05;
+         }
+         else
+         {
+            mcellbbox.yMin -= 0.05;
+            mcellbbox.yMax += 0.05;
+         }
+         break;
+      }
+      case(WXK_F5):
+      {
+         VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnKeyDown():F5",2)
+         if(event.ShiftDown())
+         {
+            mcellbbox.zMin -= 0.05;
+            mcellbbox.zMax -= 0.05;
+         }
+         else
+         {
+            if((mcellbbox.zMax-mcellbbox.zMin)>0.1)
+            {
+               mcellbbox.zMin += 0.05;
+               mcellbbox.zMax -= 0.05;
+            }
+         }
+         break;
+      }
+      case(WXK_F6):
+      {
+         VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnKeyDown():F6",2)
+         if(event.ShiftDown())
+         {
+            mcellbbox.zMin += 0.05;
+            mcellbbox.zMax += 0.05;
+         }
+         else
+         {
+            mcellbbox.zMin -= 0.05;
+            mcellbbox.zMax += 0.05;
+         }
+         break;
+      }
+      case(WXK_F7):
+      {
+         VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnKeyDown():F5",2)
+         mFadeDistance -=0.5;
+         if(mFadeDistance<0)
+         {
+            mFadeDistance=0;
+         }
+         break;
+      }
+      case(WXK_F8):
+      {
+         VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnKeyDown():F6",2)
+         mFadeDistance+=0.5;
+         break;
+      }
+      case(WXK_F9):
+      {
+         VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnKeyDown():F9",2)
+         mcellbbox.xMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmin();
+         mcellbbox.yMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Ymin();
+         mcellbbox.zMin = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Zmin();
+         mcellbbox.xMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Xmax();
+         mcellbbox.yMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Ymax();
+         mcellbbox.zMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Zmax();
+         break;
+      }
+      case(WXK_F10):
+      {
+         VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnKeyDown():F10",2)
+         mcellbbox.xMin = 0;
+         mcellbbox.yMin = 0;
+         mcellbbox.zMin = 0;
+         mcellbbox.xMax = 1;
+         mcellbbox.yMax = 1;
+         mcellbbox.zMax = 1;
+         break;
+      }
+   }
+   if(  (event.GetKeyCode()==WXK_F1)||(event.GetKeyCode()==WXK_F2)||(event.GetKeyCode()==WXK_F3)||(event.GetKeyCode()==WXK_F4)
+      ||(event.GetKeyCode()==WXK_F5)||(event.GetKeyCode()==WXK_F6)||(event.GetKeyCode()==WXK_F7)||(event.GetKeyCode()==WXK_F8)
+      ||(event.GetKeyCode()==WXK_F9)||(event.GetKeyCode()==WXK_F10))
+   {
+      if(!(mpWXCrystal->GetCrystal().IsBeingRefined()))
+         mpWXCrystal->UpdateGL(false,
+                               mcellbbox.xMin,mcellbbox.xMax,
+                               mcellbbox.yMin,mcellbbox.yMax,
+                               mcellbbox.zMin,mcellbbox.zMax, mFadeDistance);
    }
    event.Skip();
 }
@@ -3899,6 +4123,15 @@ void WXGLCrystalCanvas::OnSetCursor( wxCommandEvent & WXUNUSED(event))
      Refresh(FALSE);
   }
 }
+   
+void WXGLCrystalCanvas::OnShowHelp(wxCommandEvent &event)
+{
+   if(mShowHelp) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWHELP, _T("Show Help"));
+   else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWCURSOR, _T("Hide Help"));
+   mShowHelp= !mShowHelp;
+   if(!(mpWXCrystal->GetCrystal().IsBeingRefined())) this->CrystUpdate();
+}
+
 void WXGLCrystalCanvas::OnFourier(wxCommandEvent &event)
 {
    if(event.GetId()==ID_GLCRYSTAL_MENU_FOURIER)
