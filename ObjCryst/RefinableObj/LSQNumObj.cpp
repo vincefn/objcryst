@@ -148,14 +148,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
       REAL marquardt=1e-2;
       const REAL marquardtMult=4.;
    //initial Chi^2, needed for Levenberg-Marquardt
-   {
-      calc=this->GetLSQCalc();
-      tmpV1 = mObs;
-      tmpV1 -= calc;
-      tmpV1 *= tmpV1;
-      tmpV1 *= mWeight;
-      mChiSq=tmpV1.sum();
-   }
+   this->CalcChiSquare();
    //store old values
    mIndexValuesSetInitial=mRefParList.CreateParamSet("LSQ Refinement-Initial Values");
    mIndexValuesSetLast=mRefParList.CreateParamSet("LSQ Refinement-Last Cycle Values");
@@ -424,7 +417,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
                   for(unsigned int j=0;j<M.cols();j++) cout<<M(i,j)<<" ";
                   cout<<endl;
                }
-               cout<<endl<<endl<<"D:"<<endl;
+               cout<<endl<<endl<<"D("<<designMatrix.rows()<<"x"<<designMatrix.cols()<<"):"<<endl;
                for(unsigned int i=0;i<designMatrix.rows();i++)
                {
                   for(unsigned int j=0;j<designMatrix.cols();j++) cout<<designMatrix(i,j)<<" ";
@@ -711,6 +704,17 @@ bool LSQNumObj::SafeRefine(std::list<RefinablePar*> vnewpar, std::list<const Ref
                                  const bool silent, const bool callBeginEndOptimization,
                                  const float minChi2var)
 {
+   if(callBeginEndOptimization) this->BeginOptimization();
+   // :TODO: update mObs and mWeight in a centralized way... Not in BeginOptimization() (not always called)
+   mObs=this->GetLSQObs();
+   mWeight=this->GetLSQWeight();
+   
+   //Prepare for refinement (get non-fixed parameters)
+   if(mRefParList.GetNbPar()==0) this->PrepareRefParList();
+   mRefParList.PrepareForRefinement();
+   if(mRefParList.GetNbPar()==0) throw ObjCrystException("LSQNumObj::SafeRefine():no parameter to refine !");
+
+   this->CalcChiSquare();
    const REAL chi2_0 = mChiSq;
    for(std::list<RefinablePar*>::iterator pos=vnewpar.begin(); pos!=vnewpar.end(); pos++)
    {
@@ -723,7 +727,7 @@ bool LSQNumObj::SafeRefine(std::list<RefinablePar*> vnewpar, std::list<const Ref
    bool diverged = false;
    try
    {
-      this->Refine(nbCycle, useLevenbergMarquardt, silent, callBeginEndOptimization, minChi2var);
+      this->Refine(nbCycle, useLevenbergMarquardt, silent, false, minChi2var);
    }
    catch(const ObjCrystException &except)
    {
@@ -733,7 +737,7 @@ bool LSQNumObj::SafeRefine(std::list<RefinablePar*> vnewpar, std::list<const Ref
    const REAL deltachi2 = (mChiSq-chi2_0)/(chi2_0+1e-6);
    if(deltachi2>maxChi2factor)
    {
-      cout << "Refinement did not converge ! Chi2 increase by a factor: "<< deltachi2<<endl;
+      cout << "Refinement did not converge ! Chi2 increase("<<chi2_0<<"->"<<mChiSq<<") by a factor: "<< deltachi2<<endl;
       diverged = true;
    }
    if(diverged)
