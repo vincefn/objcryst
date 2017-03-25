@@ -2617,6 +2617,7 @@ void WXCellExplorer::OnSelectCell(wxCommandEvent &event)
             {
                switch(pos->first.mlattice)
                {
+                  case MONOCLINIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("I2/m");break;
                   case ORTHOROMBIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("I222");break;
                   case TETRAGONAL:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("I4/mmm");break;
                   case CUBIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("Im-3m");break;
@@ -2627,6 +2628,7 @@ void WXCellExplorer::OnSelectCell(wxCommandEvent &event)
             {
                switch(pos->first.mlattice)
                {
+                  case MONOCLINIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("A2/m");break;
                   case ORTHOROMBIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("Amm2");break;
                }
                break;
