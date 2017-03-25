@@ -1083,6 +1083,7 @@ void PowderPatternDiffraction::ExtractLeBail(unsigned int nbcycle)
       calc=this->GetPowderPatternCalc();
       for(unsigned int k0=0;k0<nbrefl;++k0)
       {
+         if(mvReflProfile[k0].profile.numElements()==0) continue; // May happen for reflections near limits ?
          REAL s1=0;
          //cout<<mH(k0)<<" "<<mK(k0)<<" "<<mL(k0)<<" , Iobs=??"<<endl;
          long last=mvReflProfile[k0].last,first;
