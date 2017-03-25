@@ -735,6 +735,7 @@ bool LSQNumObj::SafeRefine(std::list<RefinablePar*> vnewpar, std::list<const Ref
       cout << "Refinement did not converge !";
    }
    const REAL deltachi2 = (mChiSq-chi2_0)/(chi2_0+1e-6);
+   if(callBeginEndOptimization) this->EndOptimization();
    if(deltachi2>maxChi2factor)
    {
       cout << "Refinement did not converge ! Chi2 increase("<<chi2_0<<"->"<<mChiSq<<") by a factor: "<< deltachi2<<endl;
