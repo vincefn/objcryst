@@ -2928,7 +2928,7 @@ wxGLCanvas(parent, id,AttribList,pos,size,wxDEFAULT_FRAME_STYLE | wxFULL_REPAINT
 //wxGLCanvas(parent,id,pos,size,wxDEFAULT_FRAME_STYLE,_T("GLCanvas"),AttribList),
 mpParentFrame(parent),
 mpWXCrystal(wxcryst),mIsGLInit(false),mDist(60),mX0(0),mY0(0),mZ0(0),mViewAngle(15),
-mShowFourier(true),mShowCrystal(true),mShowAtomName(true),mShowHydrogens(true),mShowCursor(false),mSharpenMap(true),
+mShowFourier(true),mShowCrystal(true),mShowAtomName(true),mShowHydrogens(true),mShowCursor(false),mSharpenMap(true),mShowHelp(false),
 mIsGLFontBuilt(false),mGLFontDisplayListBase(0),mpFourierMapListWin(0),mFadeDistance(0)
 {
    mpwxGLContext=new wxGLContext(this);
