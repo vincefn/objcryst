@@ -84,9 +84,9 @@ const CrystVector_REAL& PowderPatternBackgroundBayesianMinimiser::GetLSQCalc (co
   {
     if(*pSigma>0)
     {
-      *pBayesCalc = PowderPatternBackgroundBayesianMinimiser::BayesianBackgroundLogLikelihood((*pObs-*pBackgd) / (1.4142135623730951**pSigma));
+      *pBayesCalc = 1 + PowderPatternBackgroundBayesianMinimiser::BayesianBackgroundLogLikelihood((*pObs-*pBackgd) / (1.4142135623730951**pSigma));
     }
-    else *pBayesCalc =0;
+    else *pBayesCalc = 1;
     pObs+=step;
     pBackgd+=step;
     pSigma+=step;
@@ -101,7 +101,7 @@ const CrystVector_REAL& PowderPatternBackgroundBayesianMinimiser::GetLSQObs (con
   if(mBayesianObs.numElements()!=nb)
   {
     mBayesianObs.resize(nb);
-    mBayesianObs=0;
+    mBayesianObs=1; // Avoid having all observed values==0, raises issues when computing R and Rw in LSQNumObj
   }
   return mBayesianObs;
 }
