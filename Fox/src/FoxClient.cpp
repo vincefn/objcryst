@@ -168,6 +168,7 @@ void FoxClient::WriteMessageLog(wxString msg)
    logfile.Write(datetime.Format(_T("%X ")) + msg + _T("\n"));
    logfile.Close();
 #endif
+   (*fpObjCrystInformUser)(msg.ToStdString());
 }
 void FoxClient::onProcessTerminate(int pid, int status, wxString dir)
 {

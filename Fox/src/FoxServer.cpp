@@ -60,6 +60,7 @@ void FoxServer::WriteLogMessage(wxString msg)
    delete logfile;
    mutexMessageLog->Unlock();
 #endif
+   (*fpObjCrystInformUser)(msg.ToStdString());
 }
 void FoxServer::SetWorkingDir(wxString path)
 {

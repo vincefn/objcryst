@@ -54,6 +54,16 @@ WXFoxServer *WXGrigWindow::StartServer()
    if(this->GetSizer()==NULL) this->SetSizer(new wxBoxSizer(wxVERTICAL));
    this->GetSizer()->Add(m_WXFoxServer);
    this->Layout();
+   wxTopLevelWindow *ptopwin = dynamic_cast<wxTopLevelWindow*>( wxTheApp->GetTopWindow());
+   if(ptopwin!=NULL)
+   {
+      wxString title=ptopwin->GetTitle();
+      if(wxNOT_FOUND==title.Find("GRID"))
+      {
+         title +=" [GRID SERVER]";
+         ptopwin->SetTitle(title);
+      }
+   }
    wxTheApp->GetTopWindow()->Layout();
    wxTheApp->GetTopWindow()->SendSizeEvent();
    return m_WXFoxServer;
@@ -68,6 +78,16 @@ WXFoxClient *WXGrigWindow::StartClientWindow()
    if(this->GetSizer()==NULL) this->SetSizer(new wxBoxSizer(wxVERTICAL));
    this->GetSizer()->Add(m_WXFoxClient);
    this->Layout();
+   wxTopLevelWindow *ptopwin = dynamic_cast<wxTopLevelWindow*>( wxTheApp->GetTopWindow());
+   if(ptopwin!=NULL)
+   {
+      wxString title=ptopwin->GetTitle();
+      if(wxNOT_FOUND==title.Find("GRID"))
+      {
+         title +=" [GRID CLIENT]";
+         ptopwin->SetTitle(title);
+      }
+   }
    wxTheApp->GetTopWindow()->Layout();
    wxTheApp->GetTopWindow()->SendSizeEvent();
    return m_WXFoxClient;
