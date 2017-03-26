@@ -788,12 +788,22 @@ void WXFoxServer::OnShowResults(wxCommandEvent& event)
 {
    if(m_WXFoxServerDataMutex->Lock()!=wxMUTEX_NO_ERROR) return;
    int nb = m_ResultTable->GetSelectedRows().Count();
-   if(nb!=1) return;
+   #ifdef __DEBUG__
+   (*fpObjCrystInformUser)(wxString::Format("Show Results: %d rows selected",nb).ToStdString());
+   #endif
+   if(nb!=1)
+   {
+      return;
+   }
 
    int r = m_ResultTable->GetSelectedRows().Item(0);
-   if(!(r>=m_results.size())) return;
+   #ifdef __DEBUG__
+   (*fpObjCrystInformUser)(wxString::Format("Show Results: result %d/%zd selected",r,m_results.size()).ToStdString());
+   #endif
+   if(r>=m_results.size()) return;
 
    wxString file = m_results[r].filename;
+   (*fpObjCrystInformUser)(wxString::Format("Show Results: opening file: "+file).ToStdString());
 
    m_WXFoxServerDataMutex->Unlock();
 
@@ -808,11 +818,13 @@ void WXFoxServer::OnShowResults(wxCommandEvent& event)
    cmd += file;
    wxExecute(cmd);
    #else
-   wxString appname = wxApp::GetInstance()->argv[0];
-   long result= wxExecute(appname+_T(" ")+file);
-   if(result==0) result=wxExecute(wxGetCwd()+_T("/")+appname+_T(" ")+file);
-   if(result==0) result=wxExecute(_T("/usr/bin/")+appname+_T(" ")+file);
-   if(result==0) result=wxExecute(_T("/usr/local/bin/")+appname+_T(" ")+file);
+   wxString appname = wxStandardPaths::Get().GetExecutablePath();
+   wxString com=appname+_T(" ")+file;
+   long result= wxExecute(com);
+   (*fpObjCrystInformUser)(com.ToStdString());
+   //if(result==0) result=wxExecute(wxGetCwd()+_T("/")+appname+_T(" ")+file);
+   //if(result==0) result=wxExecute(_T("/usr/bin/")+appname+_T(" ")+file);
+   //if(result==0) result=wxExecute(_T("/usr/local/bin/")+appname+_T(" ")+file);
    #endif
 
   
