@@ -77,7 +77,7 @@ void FoxServer::StartGridServer()
    ip.Service(2854);
 
    WriteLogMessage(_T("Starting server...")); 
-   mpServer = new wxSocketServer(ip);
+   mpServer = new wxSocketServer(ip,wxSOCKET_REUSEADDR);
    mpServer->SetEventHandler(*this, GRID_SERVER_ID);
    mpServer->SetNotify(wxSOCKET_CONNECTION_FLAG);
    mpServer->Notify(true);
