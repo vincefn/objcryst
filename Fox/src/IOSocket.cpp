@@ -33,7 +33,7 @@ bool IOSocket::ReadStringFromSocket(wxSocketBase *pSocket, std::string &message,
     unsigned int len = getMessageLen(pSocket);
 
     //alloc memory for message
-#ifdef __WIN32__
+#if 1 //def __WIN32__
     char *buf;
     buf = (char *) calloc(len+1, sizeof(char) ); 
     if(buf==NULL)  {
@@ -50,7 +50,7 @@ bool IOSocket::ReadStringFromSocket(wxSocketBase *pSocket, std::string &message,
         pSocket->Discard();
         m_error << _T("ReadStringFromSocket error: ") << (int) pSocket->LastError() << _T(", ") << pSocket->GetLastIOSize() <<_T(", ") << pSocket->LastCount();
         m_error << _T(" (sending message)\n");
-        #ifdef __WIN32__
+        #if 1//def __WIN32__
             free(buf);
         #endif
         return false;
@@ -83,7 +83,7 @@ bool IOSocket::ReadStringFromSocket(wxSocketBase *pSocket, std::string &message,
     VFN_DEBUG_MESSAGE(__FUNCTION__<<":"<<message,10)
 
     //free memory
-#ifdef __WIN32__
+#if 1 //def __WIN32__
     free(buf);
 #endif
 
