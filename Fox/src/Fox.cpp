@@ -2051,11 +2051,11 @@ void WXCrystMainFrame::SafeQuit()
 {
    if(mpGridWindow->m_WXFoxServer!=NULL)
    {
-      wxMessageDialog d(this,_T("You are trying to close server. Are you sure?"), _T(""), wxYES | wxNO | wxCENTER | wxSTAY_ON_TOP);
+      wxMessageDialog d(this,_T("You are trying to close the FOX GRID server. Are you sure?"), _T(""), wxYES | wxNO | wxCENTER | wxSTAY_ON_TOP);
       if(wxID_YES!=d.ShowModal()) return;
    }
    if(mpGridWindow->m_WXFoxClient!=NULL){
-       wxMessageDialog d(this,_T("You are trying to close client. Are you sure?"), _T(""), wxYES | wxNO | wxCENTER | wxSTAY_ON_TOP);
+       wxMessageDialog d(this,_T("You are trying to close the FOX GRID client. Are you sure?"), _T(""), wxYES | wxNO | wxCENTER | wxSTAY_ON_TOP);
        if(wxID_YES!=d.ShowModal()) return;
        mpGridWindow->m_WXFoxClient->CloseClient();
    }
