@@ -375,9 +375,6 @@ void SpaceGroup::GetSymmetric(unsigned int idx, REAL &x, REAL &y, REAL &z,
    if(noCenter==true) coeffInvert=1;   //skip center of symmetry
    if(noTransl==true) nbTrans=1; //skip translation operations
 
-   unsigned int idx0=idx;
-   const unsigned int mxidx = nbTrans * nbMatrix;
-   if(idx > mxidx) idx0 = idx % mxidx;
    const int i=idx/nbMatrix;//translation index
    const int j=idx%nbMatrix;
 

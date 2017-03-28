@@ -1235,7 +1235,8 @@ REAL ReflectionProfileDoubleExponentialPseudoVoigt
       n*=2.0;
       //if(n>200) exit(0);
    }
-   VFN_DEBUG_EXIT("ReflectionProfileDoubleExponentialPseudoVoigt::GetFullProfileWidth()",5)
+   // unreachable code.
+   // VFN_DEBUG_EXIT("ReflectionProfileDoubleExponentialPseudoVoigt::GetFullProfileWidth()",5)
 }
 
 bool ReflectionProfileDoubleExponentialPseudoVoigt

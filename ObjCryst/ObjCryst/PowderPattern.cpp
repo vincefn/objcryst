@@ -1892,8 +1892,6 @@ Radiation must be either monochromatic, from an X-Ray Tube, or neutron TOF !!");
                               x0+2*tan(x0/2.0)*spectrumDeltaLambdaOvLambda(line));
                }
                else center=mpParentPowderPattern->X2XCorr(x0);
-               REAL fact=1.0;
-               if(!mUseFastLessPreciseFunc) fact=5.0;
 
                first=mvReflProfile[i].first;
                last=mvReflProfile[i].last;
