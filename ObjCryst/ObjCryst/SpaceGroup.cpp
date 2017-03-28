@@ -38,6 +38,8 @@
 
 #include <fstream>
 
+#define POSSIBLY_UNUSED(expr) (void)(expr)
+
 namespace ObjCryst
 {
 
@@ -369,7 +371,7 @@ void SpaceGroup::GetSymmetric(unsigned int idx, REAL &x, REAL &y, REAL &z,
 {
    int coeffInvert;
    const int nbMatrix=this->GetCCTbxSpg().n_smx();
-   int nbTrans=this->GetNbTranslationVectors();
+   int nbTrans=this->GetNbTranslationVectors();  POSSIBLY_UNUSED(nbTrans);
    if(this->IsCentrosymmetric()) coeffInvert=2 ; else coeffInvert=1;
 
    if(noCenter==true) coeffInvert=1;   //skip center of symmetry

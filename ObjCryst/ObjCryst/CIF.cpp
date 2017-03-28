@@ -12,6 +12,8 @@
 #include "ObjCryst/ObjCryst/PowderPattern.h"
 #include "ObjCryst/Quirks/Chronometer.h"
 
+#define POSSIBLY_UNUSED(expr) (void)(expr)
+
 using namespace std;
 
 namespace ObjCryst
@@ -510,6 +512,7 @@ void CIFData::ExtractPowderPattern(const bool verbose)
 
       bool x_fixed_step=false;
       REAL xmin = 0, xmax = 0, xinc = 0;
+      POSSIBLY_UNUSED(xmax);
       if(pos_x==loop->second.end())
       {
          map<ci_string,string>::const_iterator pos_min,pos_max,pos_inc;
@@ -629,6 +632,10 @@ void CIFData::CalcMatrices(const bool verbose)
    if(mvLatticePar.size()==0) return;//:TODO: throw error
    REAL a,b,c,alpha,beta,gamma;//direct space parameters
    REAL aa,bb,cc,alphaa,betaa,gammaa;//reciprocal space parameters
+   POSSIBLY_UNUSED(aa);
+   POSSIBLY_UNUSED(bb);
+   POSSIBLY_UNUSED(betaa);
+   POSSIBLY_UNUSED(gammaa);
    REAL v;//volume of the unit cell
    a=mvLatticePar[0];
    b=mvLatticePar[1];

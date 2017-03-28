@@ -48,7 +48,7 @@
 #include "ObjCryst/Quirks/sse_mathfun.h"
 #endif
 
-#define POSSIBLY_UNUSED(expr) (void)(expr);
+#define POSSIBLY_UNUSED(expr) (void)(expr)
 
 namespace ObjCryst
 {
@@ -2147,7 +2147,7 @@ void ScatteringData::CalcGeomStructFactor_FullDeriv(std::set<RefinablePar*> &vPa
             const v4sf v4y=_mm_load1_ps(&y);
             const v4sf v4z=_mm_load1_ps(&z);
             // Can't multiply directly a vector by a scalar ?
-            const v4sf v4popu=_mm_load1_ps(&popu);  POSSIBLY_UNUSED(v4popu)
+            const v4sf v4popu=_mm_load1_ps(&popu);  POSSIBLY_UNUSED(v4popu);
             int jj=mNbReflUsed;
             for(;jj>3;jj-=4)
             {

@@ -30,7 +30,7 @@
 #endif
 #include <algorithm>
 
-#define POSSIBLY_UNUSED(expr) (void)(expr);
+#define POSSIBLY_UNUSED(expr) (void)(expr)
 
 namespace ObjCryst
 {

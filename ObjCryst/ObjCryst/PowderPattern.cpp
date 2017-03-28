@@ -50,6 +50,8 @@
 
 //#define USE_BACKGROUND_MAXLIKE_ERROR
 
+#define POSSIBLY_UNUSED(expr) (void)(expr)
+
 namespace ObjCryst
 {
 ////////////////////////////////////////////////////////////////////////
@@ -2280,6 +2282,7 @@ void PowderPatternDiffraction::CalcFrozenBMatrix()const
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcFrozenBMatrix()", 10)
    REAL a,b,c,alpha,beta,gamma;//direct space parameters
    REAL aa,bb,cc,alphaa,betaa,gammaa;//reciprocal space parameters
+   POSSIBLY_UNUSED(alphaa);
    REAL v;//volume of the unit cell
    a=mFrozenLatticePar(0);
    b=mFrozenLatticePar(1);
