@@ -89,7 +89,7 @@ class WXGlobalOptimRunThread: public wxThread
       const bool mDoMultiple;
 };
 
-/** Class for Graphical interface to Monte-Carlo objects 
+/** Class for Graphical interface to Monte-Carlo objects
 * (Simulated Annealing, Parallel Tempering)
 *
 */

@@ -47,7 +47,7 @@
 #ifdef DrawText
 #undef DrawText
 #endif
- 
+
 namespace ObjCryst
 {
 
@@ -56,19 +56,19 @@ namespace ObjCryst
 //    WXOptimizationObj
 //
 ////////////////////////////////////////////////////////////////////////
-static long ID_GLOBALOPT_MENU_OBJECTS=               WXCRYST_ID(); 
-static long ID_GLOBALOPT_MENU_OBJECTS_ADDOBJ=        WXCRYST_ID(); 
-static long ID_GLOBALOPT_MENU_OBJECTS_REMOVEOBJ=     WXCRYST_ID(); 
-static long ID_GLOBALOPT_MENU_OBJECTS_ADDCOSTFUNC=   WXCRYST_ID(); 
-static long ID_GLOBALOPT_MENU_OBJECTS_REMOVECOSTFUNC=WXCRYST_ID(); 
-static long ID_GLOBALOPT_MENU_OPT=                   WXCRYST_ID(); 
-static long ID_GLOBALOPT_MENU_OPT_RUN=               WXCRYST_ID(); 
-static long ID_GLOBALOPT_MENU_OPT_RUN_MULTIPLE=      WXCRYST_ID(); 
-static long ID_GLOBALOPT_MENU_OPT_STOP=              WXCRYST_ID(); 
-static long ID_GLOBALOPT_MENU_OPT_LSQ=               WXCRYST_ID(); 
-static long ID_GLOBALOPT_MENU_SOLUTIONS=             WXCRYST_ID(); 
-static long ID_GLOBALOPT_MENU_SOLUTIONS_BROWSE=      WXCRYST_ID(); 
-static long ID_BROWSE_WIN=                           WXCRYST_ID(); 
+static long ID_GLOBALOPT_MENU_OBJECTS=               WXCRYST_ID();
+static long ID_GLOBALOPT_MENU_OBJECTS_ADDOBJ=        WXCRYST_ID();
+static long ID_GLOBALOPT_MENU_OBJECTS_REMOVEOBJ=     WXCRYST_ID();
+static long ID_GLOBALOPT_MENU_OBJECTS_ADDCOSTFUNC=   WXCRYST_ID();
+static long ID_GLOBALOPT_MENU_OBJECTS_REMOVECOSTFUNC=WXCRYST_ID();
+static long ID_GLOBALOPT_MENU_OPT=                   WXCRYST_ID();
+static long ID_GLOBALOPT_MENU_OPT_RUN=               WXCRYST_ID();
+static long ID_GLOBALOPT_MENU_OPT_RUN_MULTIPLE=      WXCRYST_ID();
+static long ID_GLOBALOPT_MENU_OPT_STOP=              WXCRYST_ID();
+static long ID_GLOBALOPT_MENU_OPT_LSQ=               WXCRYST_ID();
+static long ID_GLOBALOPT_MENU_SOLUTIONS=             WXCRYST_ID();
+static long ID_GLOBALOPT_MENU_SOLUTIONS_BROWSE=      WXCRYST_ID();
+static long ID_BROWSE_WIN=                           WXCRYST_ID();
 
 WXOptimizationObj::WXOptimizationObj(wxWindow* parent, OptimizationObj *obj):
 WXCrystObj(parent),mpGlobalOptimRunThread(0)
@@ -84,7 +84,7 @@ WXCrystObj(parent),mpGlobalOptimRunThread(0)
       mpMenuBar=new WXCrystMenuBar(this,this);
       mpSizer->Add(mpMenuBar);
       mList.Add(mpMenuBar);
-      
+
       //mpMenuBar->AddMenu("Object",ID_REFOBJ_MENU_OBJ);
          //mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_REFOBJ_MENU_OBJ_SAVE,"Save");
          //mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_REFOBJ_MENU_OBJ_LOAD,"Load");
@@ -117,7 +117,7 @@ WXCrystObj(parent),mpGlobalOptimRunThread(0)
       mpSizer->Add(refobj);
       mList.Add(refobj);
    }
-      
+
    // This will be done later
    //this->CrystUpdate();
    VFN_DEBUG_EXIT("WXOptimizationObj::WXOptimizationObj(wxWindow*,GlobalOptimObj*,)",7)
@@ -229,7 +229,7 @@ void WXOptimizationObj::OnBrowseParamSet(wxCommandEvent & WXUNUSED(event))
                                wxDefaultPosition,wxSize(250,200));
    const long nb=this->GetOptimizationObj().mvSavedParamSet.size();
    wxArrayString choices;
-   mpwxParamSetList=new wxListBox(frame, ID_BROWSE_WIN, wxDefaultPosition, 
+   mpwxParamSetList=new wxListBox(frame, ID_BROWSE_WIN, wxDefaultPosition,
                                    wxDefaultSize, choices,
                                    wxLB_SINGLE|wxLB_NEEDED_SB, wxDefaultValidator,
                                    _T("listBox"));
@@ -247,7 +247,7 @@ void WXOptimizationObj::OnBrowseParamSet(wxCommandEvent & WXUNUSED(event))
 
 void WXOptimizationObj::OnSelectParamSet(wxCommandEvent &event)
 {
-   
+
    if(this->GetOptimizationObj().IsOptimizing())
    {
       wxMessageDialog dumbUser(this,_T("Cannot browse during Optimisation !"),
@@ -375,11 +375,11 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbRun(-1)
    VFN_DEBUG_ENTRY("WXMonteCarloObj::WXMonteCarloObj()",7)
    //options
       WXFieldOption *opt;
-      
+
       opt=new WXFieldOption(this,-1,&(mpMonteCarloObj->mGlobalOptimType));
       mpSizer->Add(opt,0,wxALIGN_LEFT);
       mList.Add(opt);
-      
+
       opt=new WXFieldOption(this,-1,&(mpMonteCarloObj->mAnnealingScheduleTemp));
       mpSizer->Add(opt,0,wxALIGN_LEFT);
       mList.Add(opt);
@@ -401,11 +401,11 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbRun(-1)
       tempMax->SetFormat(_T("%8f"));
       tempMin->SetFormat(_T("%8f"));
       tempGamma->SetFormat(_T("%8f"));
-      
+
       opt=new WXFieldOption(this,-1,&(mpMonteCarloObj->mAnnealingScheduleMutation));
       mpSizer->Add(opt,0,wxALIGN_LEFT);
       mList.Add(opt);
-      
+
       wxBoxSizer *sizerAmp=new wxBoxSizer(wxHORIZONTAL);
       WXFieldPar<REAL> *ampMax=
          new WXFieldPar<REAL>(this,"Amplitude Max:",-1,&(mpMonteCarloObj->mMutationAmplitudeMax));
@@ -423,7 +423,7 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbRun(-1)
       ampMax->SetFormat(_T("%8f"));
       ampMin->SetFormat(_T("%8f"));
       ampGamma->SetFormat(_T("%8f"));
-      
+
       opt=new WXFieldOption(this,-1,&(mpMonteCarloObj->mSaveTrackedData));
       mpSizer->Add(opt,0,wxALIGN_LEFT);
       mList.Add(opt);
@@ -455,7 +455,7 @@ WXOptimizationObj(parent,obj),mpMonteCarloObj(obj),mNbRun(-1)
                       _T("structure can be very distorted, but this is\n")
                       _T("harmless (restraints will bring back a correct \n")
                       _T("conformation after a few thousand tests)"));
-   
+
    // Number of trials to go
       mpWXFieldNbTrial=new WXFieldPar<long>(this,"Number of trials per run:",-1,&(mpMonteCarloObj->NbTrialPerRun()),70);
       mpSizer->Add(mpWXFieldNbTrial);
@@ -501,7 +501,7 @@ WXMonteCarloObj::~WXMonteCarloObj()
       mpGlobalOptimRunThread=0;
    }
 }
-   
+
 
 void WXMonteCarloObj::OnRunOptimization(wxCommandEvent & event)
 {
@@ -528,7 +528,7 @@ void WXMonteCarloObj::OnRunOptimization(wxCommandEvent & event)
       mpMonteCarloObj->SetParIsFixed(gpRefParTypeScattDataBackground,true);
       mpMonteCarloObj->SetParIsFixed(gpRefParTypeRadiation,true);
       mpMonteCarloObj->UpdateDisplay();
-   
+
    double finalCost=0;
    if(mpMonteCarloObj->NbTrialPerRun()<0)
    {
@@ -560,10 +560,10 @@ void WXMonteCarloObj::OnRunOptimization(wxCommandEvent & event)
       frame->SetAutoLayout(true);
       frame->Show(true);
    }
-   if(mpGlobalOptimRunThread->Create() != wxTHREAD_NO_ERROR) 
+   if(mpGlobalOptimRunThread->Create() != wxTHREAD_NO_ERROR)
       wxLogError(_T("Can't create optimization thread"));
    else mpGlobalOptimRunThread->Run();
-   
+
    VFN_DEBUG_EXIT("WXMonteCarloObj::OnRunOptimization()",6)
 }
 
@@ -581,7 +581,7 @@ void WXMonteCarloObj::OnLSQRefine(wxCommandEvent &event)
    mpMonteCarloObj->BeginOptimization();
    mpMonteCarloObj->PrepareRefParList();
    mpMonteCarloObj->InitLSQ(true);
-   
+
    sprintf(buf,"LSQ: start");
    REAL cost=mpMonteCarloObj->GetLogLikelihood();
    mpMonteCarloObj->mvSavedParamSet.push_back(make_pair(mpMonteCarloObj->mRefParList.CreateParamSet(buf),cost));
@@ -624,5 +624,4 @@ const OptimizationObj & WXMonteCarloObj::GetOptimizationObj()const
 }
 
 
-}// namespace 
-
+}// namespace

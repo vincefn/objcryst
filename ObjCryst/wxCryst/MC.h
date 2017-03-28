@@ -4,7 +4,7 @@
 //	email	:	myp@andrew.cmu.edu  or  mikepolyakov@hotmail.com
 //	website	:	www.angelfire.com/linux/myp
 //	date	:	July 2002
-//	
+//
 //	Description:	'Straight' and Recursive Marching Cubes Algorithms
 //				Normal vectors are defined for each vertex as a gradients
 //				For function definitions see MarchingCubes.h
@@ -59,9 +59,9 @@ TRIANGLE* MC(int ncellsX, int ncellsY, int ncellsZ, float gradFactorX, float gra
 //This function starts the Recursive Marching Cubes
 // numCubes: number of intersecting cubes passed as starting points
 // ii, jj, kk: arrays of size numCubes. Contain respective indexes of cubes that are intersected
-TRIANGLE* MarchingCubesRec(int ncellsX, int ncellsY, int ncellsZ, 
+TRIANGLE* MarchingCubesRec(int ncellsX, int ncellsY, int ncellsZ,
 							float gradFactorX, float gradFactorY, float gradFactorZ,
-							int numCubes, int *ii, int *jj, int *kk, 
+							int numCubes, int *ii, int *jj, int *kk,
 							float minValue, mp4Vector * points, int &numTriangles);
 
 //Next 6 functions are called by the corresponding face of each cube (e.g. face 0 calls MCFace0 etc...)
@@ -76,7 +76,7 @@ TRIANGLE* MarchingCubesRec(int ncellsX, int ncellsY, int ncellsZ,
 //	triangle: array of triangles which is being built and returned at the end of recursion
 //	numTriangles: number of triangles formed
 //	prevVerts: adjacent 4 vertices of the previous cube, passed in the special order which the correspoding
-//		MCFace function recognizes. For specificatino on which indexes passed from the last cube go to 
+//		MCFace function recognizes. For specificatino on which indexes passed from the last cube go to
 //		which vertexes of the current cube visit my website at www.angelfire.com/linux/myp
 //	prevIntVerts: array of 4 linearly interpolated vertices on 4 adjacent edges
 //	edgeIndex: integer, bits of which correspond to the edges of the current cube which have been computed
@@ -99,42 +99,42 @@ TRIANGLE* MarchingCubesRec(int ncellsX, int ncellsY, int ncellsZ,
 //FACE 0 Marching Cubes
 TRIANGLE* MCFace0(int ncellsX, int ncellsY, int ncellsZ,
 						float gradFactorX, float gradFactorY, float gradFactorZ,
-						int ind, int i, int j, int k, 									
+						int ind, int i, int j, int k,
 						float minValue, mp4Vector * points, TRIANGLE *triangles, int &numTriangles,
 						mp4Vector prevVerts[4], mpVector prevIntVerts[4], int edgeIndex,
 						mp4Vector prevGradVerts[4], mpVector prevGrads[4], int gradIndex, bool* marchedCubes);
 //FACE 1 Marching Cubes
 TRIANGLE* MCFace1(int ncellsX, int ncellsY, int ncellsZ,
 						float gradFactorX, float gradFactorY, float gradFactorZ,
-						int ind, int i, int j, int k, 									
+						int ind, int i, int j, int k,
 						float minValue, mp4Vector * points, TRIANGLE *triangles, int &numTriangles,
 						mp4Vector prevVerts[4], mpVector prevIntVerts[4], int edgeIndex,
 						mp4Vector prevGradVerts[4], mpVector prevGrads[4], int gradIndex, bool* marchedCubes);
 //FACE 2 Marching Cubes
 TRIANGLE* MCFace2(int ncellsX, int ncellsY, int ncellsZ,
 						float gradFactorX, float gradFactorY, float gradFactorZ,
-						int ind, int i, int j, int k, 									
+						int ind, int i, int j, int k,
 						float minValue, mp4Vector * points, TRIANGLE *triangles, int &numTriangles,
 						mp4Vector prevVerts[4], mpVector prevIntVerts[4], int edgeIndex,
 						mp4Vector prevGradVerts[4], mpVector prevGrads[4], int gradIndex, bool* marchedCubes);
 //FACE 3 Marching Cubes
 TRIANGLE* MCFace3(int ncellsX, int ncellsY, int ncellsZ,
 						float gradFactorX, float gradFactorY, float gradFactorZ,
-						int ind, int i, int j, int k, 									
+						int ind, int i, int j, int k,
 						float minValue, mp4Vector * points, TRIANGLE *triangles, int &numTriangles,
 						mp4Vector prevVerts[4], mpVector prevIntVerts[4], int edgeIndex,
 						mp4Vector prevGradVerts[4], mpVector prevGrads[4], int gradIndex, bool* marchedCubes);
 //FACE 4 Marching Cubes
 TRIANGLE* MCFace4(int ncellsX, int ncellsY, int ncellsZ,
 						float gradFactorX, float gradFactorY, float gradFactorZ,
-						int ind, int i, int j, int k, 									
+						int ind, int i, int j, int k,
 						float minValue, mp4Vector * points, TRIANGLE *triangles, int &numTriangles,
 						mp4Vector prevVerts[4], mpVector prevIntVerts[4], int edgeIndex,
 						mp4Vector prevGradVerts[4], mpVector prevGrads[4], int gradIndex, bool* marchedCubes);
 //FACE 5 Marching Cubes
 TRIANGLE* MCFace5(int ncellsX, int ncellsY, int ncellsZ,
 						float gradFactorX, float gradFactorY, float gradFactorZ,
-						int ind, int i, int j, int k, 									
+						int ind, int i, int j, int k,
 						float minValue, mp4Vector * points, TRIANGLE *triangles, int &numTriangles,
 						mp4Vector prevVerts[4], mpVector prevIntVerts[4], int edgeIndex,
 						mp4Vector prevGradVerts[4], mpVector prevGrads[4], int gradIndex, bool* marchedCubes);
@@ -151,9 +151,9 @@ TRIANGLE* MCFace5(int ncellsX, int ncellsY, int ncellsZ,
 //	Global variables YtimeZ should be initialized to (ncellsZ+1)*(ncellsY+1) and pointsZ should be ncellsZ+1
 TRIANGLE* MarchOneCube(int ncellsX, int ncellsY, int ncellsZ,
 						float gradFactorX, float gradFactorY, float gradFactorZ,
-						int ind, int i, int j, int k, 
+						int ind, int i, int j, int k,
 						float minValue, mp4Vector * points, TRIANGLE *triangles, int &numTriangles,
-						mp4Vector verts[8], mpVector intVerts[12], int &edgeIndex, 
+						mp4Vector verts[8], mpVector intVerts[12], int &edgeIndex,
 						mp4Vector gradVerts[8], mpVector grads[12], int &indGrad);
 
 

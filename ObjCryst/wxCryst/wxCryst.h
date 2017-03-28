@@ -56,7 +56,7 @@ extern std::map<wxWindowID,std::pair<wxPoint,wxSize> > gvWindowPosition;
 class wxMultiChoiceDialog_ListBox:public wxDialog
 {
   public:
-    wxMultiChoiceDialog_ListBox(wxWindow* parent, const wxString& message, const wxString& caption, 
+    wxMultiChoiceDialog_ListBox(wxWindow* parent, const wxString& message, const wxString& caption,
                                 int n, const wxString* choices);
     wxArrayInt GetSelections() const;
   private:
@@ -187,7 +187,7 @@ class WXCrystObjBasic: public wxWindow
       bool mNeedUpdateUI;
       /// Mutex used to lock data when preparing to update the UI in non-main thread
       CrystMutex mMutex;
-      /// WXCrystObjBasicList which are aware of this object, 
+      /// WXCrystObjBasicList which are aware of this object,
       /// and which should be told on destruction.
       std::set<WXCrystObjBasicList*> mvpList;
 };
@@ -238,7 +238,7 @@ class WXFieldName;
 *
 * A button (which should be used to collapse the object) is used
 * to create an indentation for the sub-objects.
-* 
+*
 * \todo Allow the objects to be collabsable. The difficulty is that
 * even if the object is not shown, it is not removed by the Sizer as long
 * as it is not deleted... Needs some testing ! Otherwise it would also
@@ -248,7 +248,7 @@ class WXFieldName;
 class WXCrystObj: public WXCrystObjBasic
 {
    public:
-      /// Constructor, with a 
+      /// Constructor, with a
       WXCrystObj(wxWindow* parent,int orient=wxHORIZONTAL,bool showName=true);
       virtual ~WXCrystObj();
       /// Only display the title, and collapse everything else.
@@ -284,7 +284,7 @@ class WXCrystObj: public WXCrystObjBasic
 * a floating-point parameter, or a string,... All WXField have a title
 * and an entry field.
 *
-* Note that WXField::CrystUpdate() and WXField::UpdateUI() should be done 
+* Note that WXField::CrystUpdate() and WXField::UpdateUI() should be done
 * from the parent object. Notably using WXField::CrystUpdate(updateui=true)
 * will not trigger an update of the UI.
 */
@@ -308,7 +308,7 @@ class WXField: public WXCrystObjBasic
       /// Change the size of the field (excluding the title)
       virtual void SetSize(int width, int height);
    protected:
-      /// The horizontal sizer in which the title, button, fields, are put. 
+      /// The horizontal sizer in which the title, button, fields, are put.
       wxBoxSizer *mpSizer;
       /// The label
       wxStaticText *mpLabel;
@@ -316,14 +316,14 @@ class WXField: public WXCrystObjBasic
       const int mId;
 };
 
-/// This function validates all user input (in a WXField) 
+/// This function validates all user input (in a WXField)
 /// not yet taken into account, if needs be. This should be called by \b ALL
 /// functions using data stored in fields (basically all functions !)
 void WXCrystValidateAllUserInput();
 
 /** A field which directly links to a string.
 *
-* 
+*
 */
 class WXFieldString:public WXField
 {
@@ -359,14 +359,14 @@ class WXFieldString:public WXField
       /// Last name displayed, before the value was changed by the user. Not used yet,
       /// could be useful for undo.
       string mValueOld;
-      /// Set to true if the Field is being updated, so that no 
+      /// Set to true if the Field is being updated, so that no
       /// 'EVT_TEXT' is understood as user input.
       bool mIsSelfUpdating;
    DECLARE_EVENT_TABLE()
 };
 /** A field with the name of a WXCrystObj. Updating must be done by the WXCrystObj owner.
 * For a simple string field linked directly to a string, use ObjCryst::WXFieldString
-* 
+*
 */
 class WXFieldName:public WXField
 {
@@ -404,7 +404,7 @@ class WXFieldName:public WXField
       /// Last name displayed, before the value was changed by the user. Not used yet,
       /// could be useful for undo.
       string mValueOld;
-      /// Set to true if the Field is being updated, so that no 
+      /// Set to true if the Field is being updated, so that no
       /// 'EVT_TEXT' is understood as user input.
       bool mIsSelfUpdating;
    DECLARE_EVENT_TABLE()
@@ -420,7 +420,7 @@ class WXFieldParBase:public WXField
       WXFieldParBase(wxWindow *parent,const string& label, const int field_id,
                      const int hsize=65);
       /// When a new value is entered (must type it and then hit the 'enter' key).
-      /// The Field reads the new value, 
+      /// The Field reads the new value,
       /// and directly changes the RefinablePar value (contrary to what happens
       /// for WXFieldName)by using RefinablePar::SetHumanValue().
       void OnEnter(wxCommandEvent & WXUNUSED(event));
@@ -439,7 +439,7 @@ class WXFieldParBase:public WXField
       virtual void ReadNewValue()=0;
       /// The field in which the value is written.
       wxTextCtrl *mpField;
-      /// Set to true if the Field is being updated, so that no 
+      /// Set to true if the Field is being updated, so that no
       /// 'EVT_TEXT' is understood as user input.
       bool mIsSelfUpdating;
       /// Format to be used, default = _T("%8f")

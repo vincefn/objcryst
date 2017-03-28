@@ -39,7 +39,7 @@
 #ifdef DrawText
 #undef DrawText
 #endif
- 
+
 namespace ObjCryst
 {
 ////////////////////////////////////////////////////////////////////////
@@ -61,7 +61,7 @@ WXScatterer(parent,obj),mpAtom(obj)
       mpFieldScattPower=new WXFieldChoice(this,ID_ATOM_SCATTPOW,"Scattering Power:");
       mpSizer->Add(mpFieldScattPower,0,wxALIGN_LEFT);
       mList.Add(mpFieldScattPower);
-   
+
    this->BottomLayout(0);
    this->CrystUpdate(true,true);
 }
@@ -91,5 +91,4 @@ void WXAtom::UpdateUI(const bool lock)
 }
 
 
-}// namespace 
-
+}// namespace

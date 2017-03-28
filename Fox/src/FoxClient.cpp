@@ -26,7 +26,7 @@ MyProcess::MyProcess(FoxClient *parent, const wxString& cmd, wxString dir)
 }
 void MyProcess::OnTerminate(int pid, int status)
 {
-    m_parent->onProcessTerminate(pid, status, m_dir);    
+    m_parent->onProcessTerminate(pid, status, m_dir);
     delete this;
 }
 ///////////////////////////////////////////////
@@ -119,7 +119,7 @@ FoxClient::~FoxClient()
 	  mpClient = 0;
    }
    //if(mpClient!=0) mpClient->Destroy();
-  
+
 }
 void FoxClient::setNbOfAvailCPUs(int nb)
 {
@@ -161,8 +161,8 @@ void FoxClient::resetProcesses(int nbProcesses)
 }
 void FoxClient::WriteMessageLog(wxString msg)
 {
-#if __CLIENT_LOGS 
-   wxString filename = addToPath(this->getWorkingDir(), _T("client.log"));   
+#if __CLIENT_LOGS
+   wxString filename = addToPath(this->getWorkingDir(), _T("client.log"));
    wxFile logfile(filename, wxFile::write_append);
    wxDateTime datetime = wxDateTime::Now();
    logfile.Write(datetime.Format(_T("%X ")) + msg + _T("\n"));
@@ -190,7 +190,7 @@ void FoxClient::onProcessTerminate(int pid, int status, wxString dir)
        WriteMessageLog(_T("process terminated with an error => no result will be sent to the server"));
        return;
    }
-  
+
    wxString filename = getOutputFile(dir);
    wxString cost = getCost(filename);
    #ifdef WIN32
@@ -243,11 +243,11 @@ void FoxClient::Reconnect()
 
     //clear results
     //m_results.clear();
-    
+
     //wait a few seconds...
     wxSleep(10);
     ConnectClient(3, m_hostname);
-    
+
     //start timer
     if(m_sendingTimer!=NULL) {
         m_sendingTimer->Start(30*1000, false);
@@ -289,14 +289,14 @@ bool FoxClient::ConnectClient(int nbOfTrial, wxString hostname)
    m_hostname = hostname;
    ip.Service(2854);
    if(!ip.Hostname(m_hostname)) return false;
-   
-   if(mpClient==0) mpClient = new wxSocketClient(); 
+
+   if(mpClient==0) mpClient = new wxSocketClient();
    mpClient->SetEventHandler(*this, GRID_CLIENT_SOCKET_ID);
    mpClient->SetNotify( wxSOCKET_CONNECTION_FLAG |
                         wxSOCKET_INPUT_FLAG |
                         wxSOCKET_LOST_FLAG | wxSOCKET_OUTPUT_FLAG);
    mpClient->Notify(true);
-   
+
    do
    {
       i++;
@@ -323,7 +323,7 @@ void FoxClient::OnSocketEvent(wxSocketEvent &event)
 
    WriteMessageLog(_T("OnSocketEvent Begin"));
    wxSocketBase *tmpSock = event.GetSocket();
-   
+
    if(m_DataMutex->Lock()!=wxMUTEX_NO_ERROR) return;
    tmpSock->SetNotify(wxSOCKET_LOST_FLAG);
 
@@ -361,7 +361,7 @@ bool FoxClient::AnalyzeMessage(wxSocketBase* tmpSock)
    wxString ID, nbTrial, nbRuns, Rand;
    string inmsg;
    stringstream in_string;
-   
+
    bool newJob = false, ask=false;
    vector<wxString> asks;
    vector<wxString> jobs;
@@ -369,7 +369,7 @@ bool FoxClient::AnalyzeMessage(wxSocketBase* tmpSock)
    vector<long> trials;
    vector<long> ids;
    vector<bool> rands;
-   
+
    if(!m_IOSocket.ReadStringFromSocket(tmpSock, inmsg)) {
        WriteMessageLog(m_IOSocket.getError());
        Reconnect();
@@ -384,7 +384,7 @@ bool FoxClient::AnalyzeMessage(wxSocketBase* tmpSock)
           in_string>>tag;
           if(true==in_string.eof()) break;
           if( ("ClientJob"==tag.GetName()) && (!tag.IsEndTag()) ){
-             
+
              WriteMessageLog(_T("New job found"));
              newJob = true;
              long runs=0, trial=0, id=0, rand;
@@ -409,7 +409,7 @@ bool FoxClient::AnalyzeMessage(wxSocketBase* tmpSock)
                     wxString Rand = wxString::FromAscii(tag.GetAttributeValue(i).c_str());
                     if(!Rand.ToLong((long *) &rand)) WriteMessageLog(_T("Can't convert rand attribute to long"));
                 }
-                
+
              }
              long pos = in_string.tellg();
              wxString tmp = getJob(wxString::FromAscii(inmsg.c_str()), pos);
@@ -436,7 +436,7 @@ bool FoxClient::AnalyzeMessage(wxSocketBase* tmpSock)
    if(ask) {
        answerToAsk(asks);
    }
-   
+
    if(newJob){
 	WriteMessageLog(_T("if new job..."));
         std::vector<int> jobsForRejecting;
@@ -491,7 +491,7 @@ void FoxClient::answerToAsk(vector<wxString> ask)
     }
     //end tag
     out += _T(" />\n</FoxGrid>\n");
-    
+
     WriteMessageLog(_T("Saving answer to the file"));
     SaveDataAsFile(out, addToPath(getWorkingDir(), _T("client_out.txt")));
 
@@ -517,7 +517,7 @@ wxString FoxClient::getJob(wxString inmsg, long pos)
     if(p==-1) return _T("");
     //save it
     job = in.Left(p);
-    return job;    
+    return job;
 }
 int FoxClient::getNbOfUnusedProcesses()
 {
@@ -588,14 +588,14 @@ int FoxClient::runNewJob(wxString job, int id, int nbTrial, bool rand)
 	    batFile->Write(content);
         batFile->Close();
         delete batFile;
-        #endif 
-        
+        #endif
+
 
         #ifdef WIN32
         //wxString cmd = proc->getTmpDir() + _T("\\!run.bat");
         #else
         wxString cmd_content = _T("sh ")+ proc->getTmpDir() + _T("/run.sh");
-        #endif 
+        #endif
         WriteMessageLog(_T("creating process"));
         wxProcess *process = new MyProcess(this, cmd_content, proc->getTmpDir());
         WriteMessageLog(_T("executing process"));
@@ -645,7 +645,7 @@ void FoxClient::rejectJobs(std::vector<int> ids)
     WriteMessageLog(_T("Rejecting jobs...end"));
 }
 void FoxClient::SaveDataAsFile(wxString out, wxString filename)
-{  
+{
    wxFile outFile(filename, wxFile::write);
    if(outFile.IsOpened())
    {
@@ -686,7 +686,7 @@ void FoxClient::SaveResult(wxString fileName, wxString Cost, int ID)
     if(m_ResultsMutex->Lock()!=wxMUTEX_NO_ERROR) return;
     WriteMessageLog(_T("Saving Result..."));
     wxString in;
-    if(!LoadFile(fileName, in)) { 
+    if(!LoadFile(fileName, in)) {
         WriteMessageLog(_T("can't load the file"));
         m_ResultsMutex->Unlock();
         return;
@@ -697,7 +697,7 @@ void FoxClient::SaveResult(wxString fileName, wxString Cost, int ID)
     out += _T("</result>\n");
 
     GrdRslt res(ID, Cost, out);
-    m_results.push_back(res);     
+    m_results.push_back(res);
     WriteMessageLog(_T("Result saved"));
     m_ResultsMutex->Unlock();
 }
@@ -719,7 +719,7 @@ void FoxClient::OnSendResults(wxTimerEvent& event)
     }
     message+=_T("</FoxGrid>\n");
     m_ResultsMutex->Unlock();
-    
+
     //if some result send it
     if(newResults) {
         //if results were sent
@@ -774,7 +774,7 @@ bool FoxClient::SendResult(wxString result)
       mpClient->SetNotify(wxSOCKET_LOST_FLAG);
       WriteMessageLog(_T("Saving output message to the file"));
       SaveDataAsFile(result, addToPath(getWorkingDir(), _T("client_out.txt")));
-      
+
       WriteMessageLog(_T("sending message"));
       if(!m_IOSocket.WriteStringToSocket(mpClient, string(result.ToAscii()))) {
           WriteMessageLog(m_IOSocket.getError());
@@ -784,8 +784,8 @@ bool FoxClient::SendResult(wxString result)
           return false;
       }
       WriteMessageLog(_T("Sending result end"));
-      mpClient->SetNotify(wxSOCKET_LOST_FLAG | wxSOCKET_INPUT_FLAG | wxSOCKET_OUTPUT_FLAG);      
-   }   
+      mpClient->SetNotify(wxSOCKET_LOST_FLAG | wxSOCKET_INPUT_FLAG | wxSOCKET_OUTPUT_FLAG);
+   }
    m_DataMutex->Unlock();
    return true;
 }

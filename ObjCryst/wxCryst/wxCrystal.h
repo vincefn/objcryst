@@ -149,17 +149,17 @@ class WXCrystal: public WXRefinableObj
          /// Current position in the list of rows or columns
          int mIdx;
       };
-      
+
       WXCrystalScrolledGridWindow* mpScattPowWin;
       WXCrystalScrolledGridWindow* mpAntiBumpWin;
       WXCrystalScrolledGridWindow* mpBondValenceWin;
-      
+
       std::map<ScatteringPowerAtom*,RowScattPow> mvpRowScattPow;
-      
+
       /// Flag to indicate that we are updating values in the wxGrid data,
       /// and that it is not the user inputing data.
       bool mIsSelfUpdating;
-      
+
       #ifdef OBJCRYST_GL
       //OpenGl
          /// OpenGL Display of the Crystal-Display List. Updated each time CrystUpdate() is called.
@@ -174,7 +174,7 @@ class WXCrystal: public WXRefinableObj
       wxMutex mMutexGLUpdate;
       /// wxCondition used when updating the OpenGL display List, between background and main thread
       wxCondition *mpConditionGLUpdate;
-      
+
       /// PDF, for tests
       //PDF *mpPDF;
    DECLARE_EVENT_TABLE()
@@ -188,12 +188,12 @@ class UnitCellMap
    public:
       /** Creator
       *
-      * \param crystal: the crystal correponding to this map 
+      * \param crystal: the crystal correponding to this map
       */
       UnitCellMap(const Crystal&crystal);
       ~UnitCellMap();
       /// Perform the OpenGL drawing, to be stored in an OpenGL Display List.
-      /// Assumes the color and type of drawing (GL_LINE or GL_FILL) 
+      /// Assumes the color and type of drawing (GL_LINE or GL_FILL)
       /// is chosen before calling this display list.
       void GLInitDisplayList(const float contourValue,
 			     WXGLCrystalCanvas * parentCrystal) const;
@@ -203,18 +203,18 @@ class UnitCellMap
       /** Import map from a '.grd' GSAS/EXPGUI map.
       * Returns 0 on error, 1 on success
       * \param filename: the file with the fourier map
-      */ 
+      */
       int ImportGRD(const string&filename);
       /** Import map with DSN6 format.
       * Returns 0 on error, 1 on success
       * \param filename: the file with the fourier map
-      */ 
+      */
       int ImportDSN6(const string&filename);
       #ifdef HAVE_FFTW
       /** Calculate Fourier map (type0=obs,1=calc,2=diff) for a given scattering data object
       *
       * \param type: 0=obs,1=calc,2=diff (Fobs-Fcalc)
-      * \param normalized_sf: if true, normalize structure factors 
+      * \param normalized_sf: if true, normalize structure factors
       * by the sum of the squared scattering factor to sharpen the map.
       */
       int CalcFourierMap(const ScatteringData& data, unsigned int type=0, const bool normalized_sf=false);
@@ -237,7 +237,7 @@ class UnitCellMap
       const Crystal &GetCrystal()const;
       /// For computed maps, the scattering data it corresponds to - otherwise NULL.
       const ScatteringData *GetData()const;
-      
+
    private:
       /// The crystal corresponding to this map
       const Crystal *mpCrystal;
@@ -347,7 +347,7 @@ class WXGLCrystalCanvas : public wxGLCanvas
       void OnShowHelp(wxCommandEvent & WXUNUSED(event));
       /// Handle Fourier maps (display dialog, etc...)
       void OnFourier(wxCommandEvent &event);
-      
+
       void OnLoadFourierGRD(wxCommandEvent & WXUNUSED(event));
       void OnLoadFourierDSN6(wxCommandEvent & WXUNUSED(event));
       void AddFourier(UnitCellMap*);
@@ -384,7 +384,7 @@ class WXGLCrystalCanvas : public wxGLCanvas
       * \param x,y: on input, these contain the mouse screen coordinates,
       * and in return these are the x and y coordinates in the Crystal orthonormal
       * frame.
-      * \param z: ignored on input (the z coordinate taken is that of the 
+      * \param z: ignored on input (the z coordinate taken is that of the
       * center of rotation).
       *
       * \note: this should be const, but we use SetCurrent() and build_rotmatrix( ,mQuat)...
@@ -414,7 +414,7 @@ class WXGLCrystalCanvas : public wxGLCanvas
       float mViewAngle;
       /// Pop-up menu
       wxMenu* mpPopUpMenu;
-      
+
       /// Display options
       bool mShowFourier, mShowCrystal, mShowAtomName, mShowHydrogens, mShowCursor, mSharpenMap, mShowHelp;
       /// bounding box for atoms to be included
@@ -434,7 +434,7 @@ class WXGLCrystalCanvas : public wxGLCanvas
       *
       */
       vector<boost::shared_ptr<UnitCellMapGLList> > mvpUnitCellMapGLList;
-      
+
       /// Display lists for the font used to display strings
       mutable bool mIsGLFontBuilt;
       mutable int mGLFontDisplayListBase;

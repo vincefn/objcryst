@@ -84,7 +84,7 @@ class WXPowderPatternGraph: public wxWindow
       void OnPaint(wxPaintEvent& WXUNUSED(event));
       /// Display the Theta and intensity values at the mouse position, in the status bar
       void OnMouse(wxMouseEvent &event);
-      /// Wheel wan be used to scroll the pattern 
+      /// Wheel wan be used to scroll the pattern
       void OnMouseWheel(wxMouseEvent &event);
       /// Update the powder spectrum, at the user's request. This calls
       /// the WXPowderPattern::CrystUpdate().
@@ -176,7 +176,7 @@ class WXPowderPatternGraph: public wxWindow
 *
 * Still very limited ! Only allows to import a list of background
 * points...
-* \todo Display the list of background points with the refinable 
+* \todo Display the list of background points with the refinable
 * intensity. Add th possibility to change the points.
 */
 class WXPowderPatternBackground: public WXRefinableObj

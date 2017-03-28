@@ -35,15 +35,15 @@ bool IOSocket::ReadStringFromSocket(wxSocketBase *pSocket, std::string &message,
     //alloc memory for message
 #if 1 //def __WIN32__
     char *buf;
-    buf = (char *) calloc(len+1, sizeof(char) ); 
+    buf = (char *) calloc(len+1, sizeof(char) );
     if(buf==NULL)  {
         m_error << _T("Can't alloc memory\n");
-        return false; 
+        return false;
     }
 #else
     char buf[len+1];
 #endif
-    
+
     //try to read message
     pSocket->ReadMsg(buf,len);
     if (pSocket->Error()) {
@@ -110,7 +110,7 @@ bool IOSocket::WriteStringToSocket(wxSocketBase *pSocket, std::string s, bool re
        m_error << _T(" (sending message)\n");
        return false;
     }
-    
+
     if(!receipt) return true;
 /*
     //wait for receipt
@@ -130,7 +130,7 @@ bool IOSocket::WriteStringToSocket(wxSocketBase *pSocket, std::string s, bool re
     wxString tmp = wxString::FromAscii(sreceipt.c_str());
     tmp.ToLong((long *) &lreceipt);
     if(lreceipt!=s.size()) {
-        m_error << _T("WriteStringToSocket error: returned size does not match ") << (int) s.size() <<_T(" != ") << (int) lreceipt << _T("\n");   
+        m_error << _T("WriteStringToSocket error: returned size does not match ") << (int) s.size() <<_T(" != ") << (int) lreceipt << _T("\n");
         return false;
     }
 */

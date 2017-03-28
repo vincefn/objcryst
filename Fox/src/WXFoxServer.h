@@ -41,7 +41,7 @@ public:
    WXFoxServer(wxWindow* parent, wxString workingDir);
    ~WXFoxServer(void);
    void Clear();
-   
+
    bool            m_dataLoaded;
 
 private:
@@ -49,8 +49,8 @@ private:
    void OnGridResultClick(wxGridEvent &event);
    void OnGridJobClick(wxGridEvent &event);
    void OnShowResults(wxCommandEvent& event);
-   void RunLocalClient(wxCommandEvent& event); 
-   void RunALLClient(wxCommandEvent& event); 
+   void RunLocalClient(wxCommandEvent& event);
+   void RunALLClient(wxCommandEvent& event);
    void UpdateLists(wxTimerEvent& event);
    void OnNewJob(wxCommandEvent& event);
    void OnEditJob(wxCommandEvent& event);

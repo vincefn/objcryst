@@ -13,7 +13,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 //Tables used by Marching Cubes Algorithm
-//these tables came from Paul Baurke's web page at 
+//these tables came from Paul Baurke's web page at
 //				http://astronomy.swin.edu.au/~pbourke/modelling/polygonise/
 #ifndef MCTABLE_H_
 #define MCTABLE_H_

@@ -321,4 +321,3 @@ build_rotmatrix(float m[4][4], float q[4])
     m[3][2] = 0.0;
     m[3][3] = 1.0;
 }
-

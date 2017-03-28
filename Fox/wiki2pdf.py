@@ -64,10 +64,10 @@ class MoinSpider:
                   #print("    ->%s"%newlink)
                   newlink=newlink[6:-1]# [6:-1] -> exlude ' href=" ' and the end ' " '
                   newlink=re.split('#',newlink)[0] # exclude anchors
-                  self.Weave(newlink) 
+                  self.Weave(newlink)
                #else:
                #   print("    ->%s ?  NO"%newlink)
-            
+
    def WeaveStatic(self, pagelist,nbtry=3):
       """ Alternative to weave: download a pre-selected list of pages
       """
@@ -95,7 +95,7 @@ class MoinSpider:
                nb=0
             else:
                self.pages.append([lnk,page])
-         
+
    def Pages2Html(self,d="wikihtml"):
       #TODO : remove links to non-written pages
       if not os.path.exists(d):
@@ -152,7 +152,7 @@ class MoinSpider:
    def Html2pdf(self,d="wikihtml"):
       os.system("mogrify -resize '600x>' wikihtml/*.jpg")
       #os.system("htmldoc --jpeg=85 --webpage %s/*.html --linkcolor blue -f wiki.pdf"%d)
-      os.system("htmldoc --jpeg=85 --webpage %s/*.html --linkcolor blue --size a4 --format pdf14 --links --book --toclevels 3 --left 1.5cm --right 1.5cm --top 1.5cm --bottom 1.5cm --footer Dc1 -f FoxManual.pdf"%d)   
+      os.system("htmldoc --jpeg=85 --webpage %s/*.html --linkcolor blue --size a4 --format pdf14 --links --book --toclevels 3 --left 1.5cm --right 1.5cm --top 1.5cm --bottom 1.5cm --footer Dc1 -f FoxManual.pdf"%d)
       #os.system("rm -f wikihtml/*")
 
 #m=MoinSpider(site="objcryst.sourceforge.net")
@@ -189,8 +189,7 @@ m.WeaveStatic(["/FoxWiki",
                #"/BiblioStructures",
                #"/VincentFavreNicolin"
                ])
-               
+
 
 m.Pages2Html()
 m.Html2pdf()
-

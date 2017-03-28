@@ -53,7 +53,7 @@ void FoxServer::WriteLogMessage(wxString msg)
    wxFile *logfile = new wxFile(filename, wxFile::write_append);
    if(logfile != 0)
    {
-      wxDateTime datetime = wxDateTime::Now(); 
+      wxDateTime datetime = wxDateTime::Now();
       logfile->Write(datetime.Format(_T("%X ")) + msg + _T("\n"));
       logfile->Close();
    }
@@ -76,7 +76,7 @@ void FoxServer::StartGridServer()
    wxIPV4address ip;
    ip.Service(2854);
 
-   WriteLogMessage(_T("Starting server...")); 
+   WriteLogMessage(_T("Starting server..."));
    mpServer = new wxSocketServer(ip,wxSOCKET_REUSEADDR);
    mpServer->SetEventHandler(*this, GRID_SERVER_ID);
    mpServer->SetNotify(wxSOCKET_CONNECTION_FLAG);
@@ -84,15 +84,15 @@ void FoxServer::StartGridServer()
 
    if (! mpServer->Ok())
    {
-      WriteLogMessage(_T("Server starting failure")); 
+      WriteLogMessage(_T("Server starting failure"));
       m_isRunning = false;
    }
    else
    {
-        WriteLogMessage(_T("Server started")); 
-        m_isRunning = true;     
+        WriteLogMessage(_T("Server started"));
+        m_isRunning = true;
    }
-   
+
 }
 void FoxServer::WriteProtocol()
 {
@@ -102,7 +102,7 @@ void FoxServer::WriteProtocol()
       if(logfile != 0){
          logfile->Write(_T("List of threads - clients\n"));
 
-         if(m_threadMutex->Lock()!=wxMUTEX_NO_ERROR) { 
+         if(m_threadMutex->Lock()!=wxMUTEX_NO_ERROR) {
             logfile->Close();
             delete logfile;
             s_mutexProtectingTheGlobalData->Unlock();
@@ -119,7 +119,7 @@ void FoxServer::WriteProtocol()
          logfile->Write(_T("List of Results\n"));
          for(int i=0;i<m_results.size();i++){
             wxString tmp;
-            
+
             tmp.Printf(_T("\nJob nb: %d\n Job ID: %d\n Thread ID: %d\n Filename: %s\n"), i,
                          m_results[i].JobID,
                          m_results[i].threadID,
@@ -137,7 +137,7 @@ void FoxServer::GetData( std::vector<GridClient> &clients, std::vector<GridResul
 {
    VFN_DEBUG_MESSAGE(__FUNCTION__,10)
    if(s_mutexProtectingTheGlobalData->Lock()!=wxMUTEX_NO_ERROR) return;
-   
+
    if(m_threadMutex->Lock()!=wxMUTEX_NO_ERROR) {
       s_mutexProtectingTheGlobalData->Unlock();
       WriteLogMessage(_T("lock thread error (GetData)"));
@@ -178,7 +178,7 @@ void FoxServer::GetData( std::vector<GridClient> &clients, std::vector<GridResul
     for(int i=0;i<m_jobs.size();i++) {
        Joblist.push_back(m_jobs[i]);
     }
-   
+
    s_mutexProtectingTheGlobalData->Unlock();
 }
 void FoxServer::ChangeJob(int index, FoxJob *cjob)
@@ -188,7 +188,7 @@ void FoxServer::ChangeJob(int index, FoxJob *cjob)
 //You can't change jobID
 
    if(s_mutexProtectingTheGlobalData->Lock()!=wxMUTEX_NO_ERROR) return;
-   
+
    if(index >= m_jobs.size()) {
       s_mutexProtectingTheGlobalData->Unlock();
       return;
@@ -197,23 +197,23 @@ void FoxServer::ChangeJob(int index, FoxJob *cjob)
    if(cjob->getNbRuns() >= (m_jobs[index].getNbDone() + m_jobs[index].getNbThread()))
       m_jobs[index].setNbRuns(cjob->getNbRuns());
    else m_jobs[index].setNbRuns(m_jobs[index].getNbDone() + m_jobs[index].getNbThread());
-   
+
    m_jobs[index].setNbTrial(cjob->getNbTrial());
    m_jobs[index].setName(cjob->getName());
    m_jobs[index].setRand(cjob->randomize());
 
-   s_mutexProtectingTheGlobalData->Unlock();   
+   s_mutexProtectingTheGlobalData->Unlock();
 }
 int FoxServer::DeleteJob(int index)
 {
    VFN_DEBUG_MESSAGE(__FUNCTION__,10)
 //you should call GetData(...) after this function...
-/* return: -1 = can't delete - not found, 
+/* return: -1 = can't delete - not found,
  *          0 = can't delete - found, but sent to client. Number of runs changed.
- *         1 = Job deleted 
+ *         1 = Job deleted
  */
    if(s_mutexProtectingTheGlobalData->Lock()!=wxMUTEX_NO_ERROR) return -1;
-   
+
    if(index >= m_jobs.size()) {
       s_mutexProtectingTheGlobalData->Unlock();
       return -1;
@@ -227,9 +227,9 @@ int FoxServer::DeleteJob(int index)
 
    //todo: test this removing from vector!!!
    std::vector<FoxJob >::iterator it = m_jobs.begin()+index;
-   m_jobs.erase(it);   
+   m_jobs.erase(it);
 
-   s_mutexProtectingTheGlobalData->Unlock();   
+   s_mutexProtectingTheGlobalData->Unlock();
    return 1;
 }
 void FoxServer::AddJobToList(FoxJob newjob)
@@ -239,7 +239,7 @@ void FoxServer::AddJobToList(FoxJob newjob)
 
    m_jobs.push_back(newjob);
 
-   s_mutexProtectingTheGlobalData->Unlock();   
+   s_mutexProtectingTheGlobalData->Unlock();
 }
 bool FoxServer::IsServerRunning()
 {
@@ -255,7 +255,7 @@ void FoxServer::OnServerEvent(wxSocketEvent &event)
      {
          WriteLogMessage(_T("New Client"));
          if(s_mutexProtectingTheGlobalData->Lock()!=wxMUTEX_NO_ERROR) return;
-         
+
          wxIPV4address tmp_addr;
          wxSocketBase *pSocket =  mpServer->Accept(false);
          pSocket->SetEventHandler(*this, GRID_SERVER_SOCKET_ID);
@@ -269,13 +269,13 @@ void FoxServer::OnServerEvent(wxSocketEvent &event)
                                              &m_results,
                                              &m_jobs,
                                              m_working_dir);
-         
+
          if(pThread->Create()!=wxTHREAD_NO_ERROR) {
             s_mutexProtectingTheGlobalData->Unlock();
             return;
          }
          else pThread->Run();
-                  
+
          if(m_threadMutex->Lock()!=wxMUTEX_NO_ERROR) {
              s_mutexProtectingTheGlobalData->Unlock();
             return;
@@ -286,7 +286,7 @@ void FoxServer::OnServerEvent(wxSocketEvent &event)
 
          m_threadMutex->Unlock();
          s_mutexProtectingTheGlobalData->Unlock();
-         
+
          break;
      }
       default:
@@ -311,7 +311,7 @@ void FoxServer::OnSocketEvent(wxSocketEvent &event)
        return;
    }
    //who sent this socket?
-   for(i=0; i<m_threads.size(); i++) {   
+   for(i=0; i<m_threads.size(); i++) {
       if(tmpSock==m_threads[i]->GetSocket()) {
          No = i;
          break;
@@ -322,11 +322,11 @@ void FoxServer::OnSocketEvent(wxSocketEvent &event)
       WriteLogMessage(_T("error: Bad client identification"));
       m_threadMutex->Unlock();
       return;
-   } 
-   switch(event.GetSocketEvent()) 
+   }
+   switch(event.GetSocketEvent())
    {
      case wxSOCKET_INPUT:
-     {      
+     {
         WriteLogMessage(_T("wxSOCKET_INPUT"));
         //call the thread.
         m_threads[i]->NewEvent(INPUT_MSG, m_threadMutex);
@@ -334,24 +334,24 @@ void FoxServer::OnSocketEvent(wxSocketEvent &event)
         break;
      }
      case wxSOCKET_LOST:
-     {      
-         wxString tmp;         
+     {
+         wxString tmp;
          int id;
          id = m_threads[i]->GetId();
          tmp.Printf(_T("Client disconnected, thread id=%d"), id);
          WriteLogMessage(tmp);
-         //call the thread "socket lost". 
+         //call the thread "socket lost".
          m_threads[i]->NewEvent(LOST_CONNECTION, m_threadMutex);
-        
+
          std::vector<FoxServerThread *>::iterator it;
          it = m_threads.begin()+i;
-         m_threads.erase(it); 
+         m_threads.erase(it);
 
          //ulocking before locking global data!
          m_threadMutex->Unlock();
 
          if(s_mutexProtectingTheGlobalData->Lock()!=wxMUTEX_NO_ERROR) return;
-         
+
          tmp.Printf(_T("removing thread %d from jobs..."), id);
          WriteLogMessage(tmp);
          //reduce nbSolving number
@@ -373,7 +373,7 @@ void FoxServer::OnSocketEvent(wxSocketEvent &event)
         break;
      }
    }
-   
+
    m_needUpdate=true;
    WriteLogMessage(_T("OnSocketEvent_end"));
 }
@@ -383,7 +383,7 @@ void FoxServer::RunAllClients()
    if(m_threadMutex->Lock()!=wxMUTEX_NO_ERROR) return;
 
    for(int i=0; i<m_threads.size(); i++)
-   {   
+   {
       m_threads[i]->NewEvent(SEND_JOB, m_threadMutex);
    }
    m_threadMutex->Unlock();

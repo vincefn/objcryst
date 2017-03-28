@@ -9,7 +9,7 @@ IMPROVEMENTS
 BUG FIXES
   * correctly save optically active/non-flip atom status in .xmlgz files
   * correct bug in Le Bail mode/profile fitting which could lead to a crash
-  
+
 #### 2016.1 (6 November 2016)
 NEW FEATURES
   * direct search on the Crystallography Open Database:
@@ -18,9 +18,9 @@ NEW FEATURES
     (this requires access to the default database port, 3306. Some firewalls
     may prevent that)
   * automatically recognizing Molecules and isolated polyhedra from CIF files
-  * ability to combine several powder diffraction data sets from different 
-    temperatures (or any other variable condition) to solve a single crystal 
-    structure (it is possible to override the lattice parameters in 
+  * ability to combine several powder diffraction data sets from different
+    temperatures (or any other variable condition) to solve a single crystal
+    structure (it is possible to override the lattice parameters in
     the powder pattern diffraction)
   * the extension for .xml.gz files is now .xmlgz
   * define 'optically active atoms' than will no be flipped during global (Jan Rohlicek)
@@ -31,7 +31,7 @@ NEW FEATURES
 IMPROVEMENTS
   * faster, more robust CIF import
   * better flexibility search for Molecules
-  * 3D display: 
+  * 3D display:
     - nicer using transparency (can be disabled from preferences)
     - standard atom colors from jmol
   * drag & drop files on MacOSX
@@ -39,7 +39,7 @@ IMPROVEMENTS
   * faster initial optimization (and randomization) of Molecules
   * Unicode interface (should be more friendly to directories with accents, symbols..)
   * localized number display (using , rather than . for decimal separation)
-  
+
 BUG FIXES
   * Avoid crashes during profile fitting and indexing
   * internal fixes (Pavol Juhas)
@@ -62,7 +62,7 @@ IMPROVEMENTS
    * Handle cases when xml or cif files do not open correctly
    * Nicer display of large molecules (>200 atoms)
    * When exploring spacegroups, exploit extinction conditions to avoid
-   performing redundant Le Bail fits 
+   performing redundant Le Bail fits
 BUG FIXES
    * Correct file opening from the Fox.Grid server window
    * Correct identification of monoclinic spacegroups with unique axis=c
@@ -103,10 +103,10 @@ NEW FEATURES
    * Take into account rigid groups during least-squares refinement
    * Working triclinic indexing
    * Allow manual adding of peaks for indexing without a peak search
-   * Add manual least-squares refinement of the structure in the 
+   * Add manual least-squares refinement of the structure in the
    global optimization run/stop menu
    * Better import of CIF files, using either the Hall symbol
-   or the symmetry_equiv_pos_as_xyz fields to avoid 
+   or the symmetry_equiv_pos_as_xyz fields to avoid
    ambiguous space group
    * Enable auto-generation of powder patterns from a CIF file
    for both X-ray and neutron radiation
@@ -149,7 +149,7 @@ BUG FIXES
    * Correct import of gsas raw format
    * Faster read of uncompressed xml files under windows
    * Many fixes for the Linux unicode build of Fox
-   
+
 #### 1.8.0.3 - February 2009 (Revision #1088)
 BUG FIXES
    * Fixed reading, writing files and display of labels in the
@@ -222,7 +222,7 @@ BUG FIXES
 NEW FEATURES
    * Add support to compute Fourier maps (observed, difference),
      with a "live" update during optimization
-   * Profile fitting and Le Bail extraction is now directly 
+   * Profile fitting and Le Bail extraction is now directly
      available from a right-click on the powder pattern graph.
    * Support for Intel macs
    * Indexing triclinic lattices
@@ -232,7 +232,7 @@ NEW FEATURES
 IMPROVEMENTS
    * More stable profile fitting
    * Linux: keyboard shortcuts are working again
-   * Correctly compute reflections beyond the supplied 
+   * Correctly compute reflections beyond the supplied
      max(sin(theta)/lambda), but whose profile extend below the limit.
 
 BUG FIXES
@@ -245,13 +245,13 @@ BUG FIXES
 NEW FEATURES
    * Add peak detection & auto-indexing (still beta for some values)
    * Add Le Bail fitting
-   * Add graph representing Iobs and Icalc as a function of 1/d 
+   * Add graph representing Iobs and Icalc as a function of 1/d
      for single crystal data.
    * Add user-controlled rotation of atoms around any existing bond
 
 IMPROVEMENTS
    * Better support for CIF files import
-   * More responsive UI (refresh display even when no new solution 
+   * More responsive UI (refresh display even when no new solution
    has been found, every 30s at least, and no more than once every second)
    * Always report *real* time instead of process-time for the
    first 100s, and then real time
@@ -262,7 +262,7 @@ BUG FIXES
 
 #### 1.7.0 - February 2007
 NEW FEATURES
-   * Support for multiple optimizations - store all the solutions 
+   * Support for multiple optimizations - store all the solutions
      obtained, then allow 'browsing' the solutions.
    * Support for neutron time-of-flight data
    * Support for reflection profiles other than symmetrical pseudo-Voigt
@@ -275,8 +275,8 @@ NEW FEATURES
    * Support for Mac OS X (using XCode /Apple Developper tools)
    * Add a 'tracker' window to display the progress of the optimization,
      including all the Chi^2, antibump costs, ...
-   * Add preferences (remembered between sessions) to automatically open 
-     crystal 3D view, powder pattern graph, display names / reflections 
+   * Add preferences (remembered between sessions) to automatically open
+     crystal 3D view, powder pattern graph, display names / reflections
      Miller indices,...
    * Enable saving files in a compressed (gzip) format (*.xml.gz)
    * Add graph display for Single Crystal data (Iobs and Icalc vs 1/d)
@@ -288,7 +288,7 @@ IMPROVEMENTS
      a beer') compiler Visual C++ 2005. Large speed improvement.
    * Fox can be compiled without GUI under *nix, using "make Fox-nogui"
      removing the requirement for wxGTK on *nix servers.
-   * Support for large Molecules (1000's of atoms) - these *must* be 
+   * Support for large Molecules (1000's of atoms) - these *must* be
      treated as rigid bodies
    * Better graphical interface to a Molecule's parameters, including
      rigid sub-groups
@@ -301,14 +301,14 @@ IMPROVEMENTS
      is now set to 0.1 Angstroem.
    * Faster refresh of graphical user interface
    * Using cctbx rather than atominfo + sglite, enabling using either
-     Hall, Hermann-Mauguin or spacegroup number for spacegroup 
+     Hall, Hermann-Mauguin or spacegroup number for spacegroup
      description. Fox will revert to the Hermann-Mauguin symbol.
    * freeglut and wxWidgets are statically linked under Linux as well
      to avoid compilation issues for user without root access.
 
 BUG FIXES
    * Avoid creating H-H bonds when converting ZScatterer to a Molecule
-   
+
 #### 1.6.0.2 - december 2003
 NEW FEATURES
    * Added the export to a POV-Ray file to create a Ray-traced
@@ -338,7 +338,7 @@ NEW FEATURES
      X-Ray tube parameters when they have been entered manually.
    * Fourier maps with negative contour values will now be highlighted
      towards negative values, for Fobs-Fcalc maps display.
-   
+
 BUG FIXES
    * The position of peaks on a powder pattern was randomly displaced
      by up to +/-2 pixels for each reflection. This could be serious
@@ -346,7 +346,7 @@ BUG FIXES
      peak widths, although the use of "integrated" Chi^2 and R-factors
      reduced the gravity of this bug. (thanks Michal Husak for
      serious testing and reporting)
-   * In the CIF output, some atoms were wrongly labeled as being 
+   * In the CIF output, some atoms were wrongly labeled as being
      overlapping with another identical element.
    * In the graphical display of powder patterns, improve the precison
      of the display.
@@ -364,7 +364,7 @@ NEW FEATURES-MAJOR CHANGES
    * Added a Molecule class, which suprsedes the ZScatterer approach
      The scatterer is defined by a list of atoms, and restraints
      (bond lengths, angles and dihedral angles) to specify the
-     geometry. This gives more flexibility, allows a better 
+     geometry. This gives more flexibility, allows a better
      convergence and allows to correctly define cyclic molecules.
    * Added the ability to define a statistical positionnal error
      for atoms, which will be taken into account following Maximum
@@ -376,7 +376,7 @@ NEW FEATURES-MAJOR CHANGES
 OTHER NEW FEATURES
    * Faster computation when using integrated profiles for powder
      pattern objects
-   * Error bars are now displayed on the Powder Pattern graphical 
+   * Error bars are now displayed on the Powder Pattern graphical
      display.
    * Further improvements of the Fourier maps display (mostly from
      Brian Toby)
@@ -393,7 +393,7 @@ OTHER NEW FEATURES
      DiffractionSingleCrystal object, including detailed contributions
      from different elements (useful for anomalous diffraction
      experiments)
-     
+
 BUG FIXES
    * Fixed bug when exporting to a Fenske-Hall z-matrix, the 4th atom
      was always repeated twice
@@ -404,14 +404,14 @@ BUG FIXES
 #### 1.3 - december 2002
 NEW FEATURES
    * Added a contribution from Michael Y. Polyakov, (working with
-     Brian Toby) to display Fourier maps exported from GSAS in 
+     Brian Toby) to display Fourier maps exported from GSAS in
      Fox (use right-click when displaying 3D structure to import).
    * Added scattering power for a sphere, e.g. to modelize a
      disordered fullerene.
    * Added the option to use pseudo-crystallographic symmetry in a
      Crystal structure (i.e. use a spacegroup which is not allowed
      by the unit cell). Could be useful for phase transitions.
-   * Added data format for FullProf formats 4 (synchrotron) and 
+   * Added data format for FullProf formats 4 (synchrotron) and
      6 (multi-detector, LLB G42)
    * Now more than 100 atoms can be displayed in a ZScatterer unit.
    * Added the ability to set relative limits on all scatterer
@@ -421,14 +421,14 @@ NEW FEATURES
      a xml file.
    * shift-dragging with left mouse button allows to change center of
      the 3D Crystal view.
-   
+
 BUG FIXES
    * Fix serious bug in the dtermination of systematic extinctions,
      which lead to missing reflections for (body|face)-centered
      spacegroups with a center of symmetry not on the origin
      (e.g. for Fd3m (Si,...))
    * Fixed various bugs in the display and update of powder patterns
-   
+
 #### 1.2 - august 2002
 NEW FEATURES
    * FOX now supports Preferred Orientation, using the March-Dollase
@@ -444,17 +444,17 @@ NEW FEATURES
      than exclusively through a menu.
    * Added ability to duplicate scatterers in Crystal.
    * Powder diffraction pattern keeps zoomed during optimization.
-     
+
 BUG FIXES
    * The atom names in ZScatterer are now validated without the
      'enter' key being hit.
    * Adding atoms in a z-matrix scatterer does not crash anymore.
-   * removing a scatterer (or any object...) after running an 
-     optimisation, does not crash any more when optimization is 
+   * removing a scatterer (or any object...) after running an
+     optimisation, does not crash any more when optimization is
      relaunched (the parameter list is now correctly rebuilt).
-   * Now correctly zooming when the dragged area goes beyond 
+   * Now correctly zooming when the dragged area goes beyond
      2theta limits.
-     
+
 #### 1.1.2 - 2002/02/18
 License changed to the GNU General Public License.
 NEW FEATURES
@@ -478,17 +478,17 @@ BUG FIXES
 	  number, and if atoms were of the same type, both atoms would
 	  have the same name in the .xml saved file, and would crash
      on reloading. Molecules thus created need to be re-imported.
-	  
+
 #### 1.1.1 - 2002/01/17
 BUG FIXES
    * Under windows, the global optimization lead to a crash after
      some random time.
-   * Under windows, clicking on some part of a powder pattern graph 
+   * Under windows, clicking on some part of a powder pattern graph
      would make Fox crash
 
 #### 1.1 - 2002/01/8
 NEW FEATURES
-   * Now it is possible to import Z-matrices to build a molecule 
+   * Now it is possible to import Z-matrices to build a molecule
      structure (eg a Z-matrix file can be generated from a .pdb file
      using babel, and then imported into Fox)
    * Added integrated R and RW factors as new cost functions (thus
@@ -503,7 +503,7 @@ NEW FEATURES
      'return' key (which was *very* annoying)
    * Ability to zoom on the powder pattern graph, using the left button
      (double-click to unzoom)
-   * Possibility to reduce the part of the displayed unit cell in 3D 
+   * Possibility to reduce the part of the displayed unit cell in 3D
      view (use the popup menu with right-click)
    * Significant speed improvement.
    * The Parallel Tempering algorithm has been tuned to yield a higher
@@ -514,9 +514,9 @@ NEW FEATURES
      first...)
    * Added interface for 2theta zero/displacement/transparency
      parameters in a Powder Pattern object
-   * Added an overall temperature factor (Biso) for each crystalline 
+   * Added an overall temperature factor (Biso) for each crystalline
      phase in powder diffraction (also available in single crystal).
-   * new examples for organic molecules (potassium tartrate and 
+   * new examples for organic molecules (potassium tartrate and
      cimetidine with powder & extracted pseud-single crystal
      intensities)
    * The program now forbids to check lattice or profile parameters
@@ -535,47 +535,47 @@ NEW FEATURES
    * a number of minor bugfixes...
 
 #### 1.0.1 - 2001/10/15
--BUG FIX: 
+-BUG FIX:
    * corrected minimum FWHM for profiles from .001 to .00001 radians
 
 #### 1.0 - 2001/10/15
 -NEW FEATURES
    * support for multiple crystalline phases in Powder Diffraction (you
-      can refine several phases from one pattern ...provided you can 
+      can refine several phases from one pattern ...provided you can
       index them)
    * the Windows version now displays a console to give a better idea
      about what the program is doing.
    * Import of Sietronics data files (.cpi)
    * Linux binary version also available for glibc 2.1
-   
+
 -BUG FIXES:
-   * removed another bug in ZMatrix interpretation, which prevented the  
+   * removed another bug in ZMatrix interpretation, which prevented the
      correct coordinates to be generated when using mono/triclinic unit
      cells (thanks Mark Edgar).
-   * the program will no longer crash when importing data with null or 
+   * the program will no longer crash when importing data with null or
      negative points.
    * U,V and W parameters leading to negative profile width will no
      longer crash the program (profile forced to be strictly positive)
    * various cosmetic bugs
-   
+
 #### 0.9.1 Beta - 2001/09/20
 -NEW FEATURES
    * Added menus to change limits globally in a ZScatterer(bond,angles)
    * Now the pivot atom (around which the ZScatterer is rotated, and
-     which corresponds to the displayed x,y,z position of the 
-     ZScatterer) is saved in the .xml file. It can also be changed 
+     which corresponds to the displayed x,y,z position of the
+     ZScatterer) is saved in the .xml file. It can also be changed
      from a menu.
-   * Limits can be changed individually for all parameters, using a 
+   * Limits can be changed individually for all parameters, using a
      popu menu: right-click on the parameter name to get the local menu
 
 -BUG FIXES:
-   * removed a nasty bug in ZMatrix interpretation, which prevented  
-     the correct coordinates to be generated  for chains longer than 3 
+   * removed a nasty bug in ZMatrix interpretation, which prevented
+     the correct coordinates to be generated  for chains longer than 3
      atoms. Did not affect polyhedras... (thanks Yuri Andreev)
 
 #### 0.9   Beta - 2001/09/18
    Initial Public release
-   
+
 #### 0.5-0.9
-   Internal release only... Thanks to Laure Guenee, 
+   Internal release only... Thanks to Laure Guenee,
    Guillaume Renaudin and Radovan Cerny for testing !

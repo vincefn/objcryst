@@ -352,7 +352,7 @@ bool MolAtom::IsNonFlipAtom() const
 {
    return mIsNonFlipAtom;
 }
-   
+
 #ifdef __WX__CRYST__
 WXCrystObjBasic* MolAtom::WXCreate(wxWindow* parent)
 {
@@ -7175,7 +7175,7 @@ void Molecule::BuildFlipGroup()
          for(set<MolAtom*>::iterator pos1=pos->mvRotatedChainList.begin()->second.begin();
             pos1!=pos->mvRotatedChainList.begin()->second.end();++pos1)
             cout<<(*pos1)->GetName()<<"  ";
-         
+
          cout<<endl;
 
          pos=mvFlipGroup.erase(pos);

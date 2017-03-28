@@ -36,7 +36,7 @@ void WXTrackerGraph::UpdateDisplay()
    VFN_DEBUG_ENTRY("WXTrackerGraph::UpdateDisplay()",4)
    const std::set<Tracker*> *pList=&(mpMainTracker->GetTrackerList());
    std::set<Tracker*>::const_iterator pos;
-   
+
    // Remove orphan graphs
    if(mClockGraphList<mpMainTracker->GetClockTrackerList())
    {
@@ -102,5 +102,5 @@ void WXTrackerGraph::DeleteGraph(const unsigned long id)
    this->WXMultiGraph::DeleteGraph(id);
 }
 
-   
+
 }//namespace

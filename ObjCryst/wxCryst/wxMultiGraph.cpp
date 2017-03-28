@@ -202,7 +202,7 @@ void WXMultiGraph::OnPaint(wxPaintEvent &event)
    wxBufferedPaintDC dc(this);
    this->PrepareDC(dc);
    mpParentFrame->PrepareDC(dc);
-   
+
    dc.DestroyClippingRegion();
    dc.SetBackground(wxBrush(_T("white"), wxSOLID));
    dc.Clear();
@@ -216,7 +216,7 @@ void WXMultiGraph::OnPaint(wxPaintEvent &event)
    // Get Window Size
    wxCoord width,height;
    this->GetSize(&width, &height);
-   
+
    // Draw Axis
    VFN_DEBUG_MESSAGE("WXMultiGraph::OnPaint():Axis",3)
    {
@@ -233,7 +233,7 @@ void WXMultiGraph::OnPaint(wxPaintEvent &event)
          if(dy<1e-6)dy=1e-6;
          yStep=pow((float)10,(float)floor(log10(dy/nbTick)));
          yStep *= floor((dy/yStep+0.1)/nbTick);
-         
+
          xStep=pow((float)10,(float)floor(log10(dx/nbTick)));
          xStep *= floor((dx/xStep+0.1)/nbTick);
 
@@ -244,11 +244,11 @@ void WXMultiGraph::OnPaint(wxPaintEvent &event)
             dc.GetTextExtent(fontInfo, &tmpW, &tmpH);
             if((tmpW+3)>mLeft) mLeft=tmpW+3;
          }
-         
+
          fontInfo.Printf(_T("%g"),xStep);
          dc.GetTextExtent(fontInfo, &tmpW, &tmpH);
          mBottom=tmpH*3/2+3;
-         
+
       //Y axis
          dc.DrawLine(mLeft,height-mBottom,mLeft,mTop);
          VFN_DEBUG_MESSAGE("WXMultiGraph::OnPaint():AxisStep="<<yStep<<","<<mMinY<<","<<mMaxY,3)
@@ -327,7 +327,7 @@ void WXMultiGraph::OnPaint(wxPaintEvent &event)
 void WXMultiGraph::OnMouse(wxMouseEvent &event)
 {
    event.Skip();// Make sure the default handler gets the event too
-   
+
    if(event.Leaving()) return;// ?
    wxCoord width,height;
    this->GetSize(&width, &height);
@@ -514,7 +514,7 @@ void WXMultiGraph::OnKeyDown(wxKeyEvent& event)
          mMaxY=mMinY+range*4.0/3.0;
          break;
       }
-      default: 
+      default:
       {
          VFN_DEBUG_MESSAGE("WXMultiGraph::OnKeyDown(): no command for key #"<<event.GetKeyCode(),5);
       }
@@ -561,12 +561,12 @@ void WXMultiGraph::Screen2Data(float &x,float &y)
 {
    wxCoord width,height;
    this->GetSize(&width, &height);
-   
+
    float range=float(width-(mLeft+mRight));
    if(range<=0) range=1.0;
    x=(x-mLeft)/range;
    x=mMinX+x*(mMaxX-mMinX);
-   
+
    range=float(height-(mTop+mBottom));
    if(range<=0) range=1.0;
    y=(height-mBottom-y)/range;

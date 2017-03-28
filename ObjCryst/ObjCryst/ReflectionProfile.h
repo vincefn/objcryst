@@ -226,7 +226,7 @@ class ReflectionProfilePseudoVoigtAnisotropic:public ReflectionProfile
        */
       REAL mCagliotiU,mCagliotiV,mCagliotiW,mScherrerP,mLorentzX,mLorentzY,
            mLorentzGammaHH,mLorentzGammaKK,mLorentzGammaLL,mLorentzGammaHK,mLorentzGammaHL,mLorentzGammaKL;
-      ///Pseudo-Voigt mixing parameter : \f$ \eta=\eta_0 +2*\vartheta*\eta_1\f$ 
+      ///Pseudo-Voigt mixing parameter : \f$ \eta=\eta_0 +2*\vartheta*\eta_1\f$
       /// eta=1 -> pure Lorentzian ; eta=0 -> pure Gaussian
       REAL mPseudoVoigtEta0,mPseudoVoigtEta1;
       /** Asymmetry parameters, following the analytical function for asymmetric pseudo-voigt

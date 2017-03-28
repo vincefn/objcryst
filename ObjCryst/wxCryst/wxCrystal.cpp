@@ -51,7 +51,7 @@
    #ifdef __WXGTK__
       #include "GL/glu.h"
    #endif
-   
+
    #ifdef __WXMAC__ // For the wxMac version of wxWindows, i.e. with the "Aqua" look
       #include <OpenGL/glu.h>
       #include "AGL/agl.h"
@@ -60,11 +60,11 @@
    #ifdef __LINUX__
       #include "GL/glx.h"
    #endif
-   
+
    #ifdef __WIN32__
      #include "gl/glu.h"
    #endif
-   
+
    #ifdef HAVE_GLUT
       #ifdef __WXMAC__ // For the wxMac version of wxWindows, i.e. with the "Aqua" look
          #include <GLUT/glut.h>
@@ -236,7 +236,7 @@ Molecule* Atoms2Molecule(list<Atom *> &vAtom)
       else
       {
          radius(i)=mol->GetAtom(i).GetScatteringPower().GetRadius();
-         scattpow[i].first=dynamic_cast<const ScatteringPowerAtom *> 
+         scattpow[i].first=dynamic_cast<const ScatteringPowerAtom *>
                              (&(mol->GetAtom(i).GetScatteringPower()));
          scattpow[i].second=scattpow[i].first->GetAtomicNumber();
       }
@@ -483,7 +483,7 @@ mpCrystalGL(0)
          _T("the spacegroup. This can be useful to search\n")
          _T("structures derived from higher symmetries.\n\n")
          _T("This option should almost never be used."));
-      
+
       dynamic_cast<WXFieldOption *>(mpCrystal->GetOption(1).WXGet())->SetToolTip(
          _T("This option allows Fox to automatically adjust\n")
          _T("the occupancy of atoms that are on a special position,\n")
@@ -495,7 +495,7 @@ mpCrystalGL(0)
          _T("This option increases computing time\n")
          _T("by up to 50%, so only use when necessary\n\n")
          _T("In doubt, choose Yes"));
-      
+
       dynamic_cast<WXFieldOption *>(mpCrystal->GetOption(2).WXGet())->SetToolTip(
          _T("This option only affects the 3D display,\n")
          _T("and is used to display the enantiomer\n")
@@ -553,15 +553,15 @@ mpCrystalGL(0)
    // Lattice
       wxBoxSizer* lattice=new wxBoxSizer(wxHORIZONTAL);
 
-      WXCrystObjBasic* pFieldLatticeA 
+      WXCrystObjBasic* pFieldLatticeA
          =mpCrystal->GetPar("a").WXCreate(this);
-      WXCrystObjBasic* pFieldLatticeB 
+      WXCrystObjBasic* pFieldLatticeB
          =mpCrystal->GetPar("b").WXCreate(this);
-      WXCrystObjBasic* pFieldLatticeC 
+      WXCrystObjBasic* pFieldLatticeC
          =mpCrystal->GetPar("c").WXCreate(this);
-      WXCrystObjBasic* pFieldLatticeAlpha 
+      WXCrystObjBasic* pFieldLatticeAlpha
          =mpCrystal->GetPar("alpha").WXCreate(this);
-      WXCrystObjBasic* pFieldLatticeBeta 
+      WXCrystObjBasic* pFieldLatticeBeta
          =mpCrystal->GetPar("beta").WXCreate(this);
       WXCrystObjBasic* pFieldLatticeGamma
          =mpCrystal->GetPar("gamma").WXCreate(this);
@@ -573,7 +573,7 @@ mpCrystalGL(0)
       lattice->Add(pFieldLatticeBeta ,0,wxALIGN_CENTER);
       lattice->Add(pFieldLatticeGamma,0,wxALIGN_CENTER);
       lattice->Layout();
-      
+
       mpSizer->Add(lattice,0,wxALIGN_LEFT);
       mList.Add(pFieldLatticeA);
       mList.Add(pFieldLatticeB);
@@ -581,26 +581,26 @@ mpCrystalGL(0)
       mList.Add(pFieldLatticeAlpha);
       mList.Add(pFieldLatticeBeta);
       mList.Add(pFieldLatticeGamma);
-      
+
       dynamic_cast<WXFieldRefPar *>(pFieldLatticeA)->SetFormat(_T("%8.4f"));
       dynamic_cast<WXFieldRefPar *>(pFieldLatticeB)->SetFormat(_T("%8.4f"));
       dynamic_cast<WXFieldRefPar *>(pFieldLatticeC)->SetFormat(_T("%8.4f"));
       dynamic_cast<WXFieldRefPar *>(pFieldLatticeAlpha)->SetFormat(_T("%8.3f"));
       dynamic_cast<WXFieldRefPar *>(pFieldLatticeBeta)->SetFormat(_T("%8.3f"));
       dynamic_cast<WXFieldRefPar *>(pFieldLatticeGamma)->SetFormat(_T("%8.3f"));
-      
+
       pFieldLatticeA->SetToolTip(_T("Lattice length parameter (in Angstroems)"));
       pFieldLatticeB->SetToolTip(_T("Lattice length parameter (in Angstroems)"));
       pFieldLatticeC->SetToolTip(_T("Lattice length parameter (in Angstroems)"));
       pFieldLatticeAlpha->SetToolTip(_T("Lattice angle parameter (in degrees)"));
       pFieldLatticeBeta->SetToolTip(_T("Lattice angle parameter (in degrees)"));
       pFieldLatticeGamma->SetToolTip(_T("Lattice angle parameter (in degrees)"));
-      
+
    // SpaceGroup
       mpFieldSpacegroup=new WXFieldName(this,"SpaceGroup:",this,ID_CRYSTAL_SPACEGROUP,100);
       mpSizer->Add(mpFieldSpacegroup,0,wxALIGN_LEFT);
       mList.Add(mpFieldSpacegroup);
-      
+
       mpFieldSpacegroup->SetToolTip(_T("Spacegroup Symbol. You can use:\n\n")
                                     _T("- spacegroup number: \"1\" \"62\" ... \"227\",\"230\"\n")
                                     _T("- Hermann-Mauguin symbol: \"P1\" \"Pnma\" ... \"Fd3m\",\"Ia3d\"\n")
@@ -617,7 +617,7 @@ mpCrystalGL(0)
                     ->GetScatteringPowerRegistry().WXCreate(this);
       mpSizer->Add(mpWXScatteringPowerRegistry,0,wxALIGN_LEFT);
       mList.Add(mpWXScatteringPowerRegistry);
-   
+
    // Scatterers
       mpWXScattererRegistry=mpCrystal
                     ->GetScattererRegistry().WXCreate(this);
@@ -654,9 +654,9 @@ WXCrystal::~WXCrystal()
 void WXCrystal::CrystUpdate(const bool uui,const bool lock)
 {
    VFN_DEBUG_ENTRY("WXCrystal::CrystUpdate()",5)
-   
+
    wxWakeUpIdle();
-   
+
    mpCrystal->GetBumpMergeCost();
    mpCrystal->GetBondValenceCost();
    #ifdef OBJCRYST_GL
@@ -672,12 +672,12 @@ void WXCrystal::CrystUpdate(const bool uui,const bool lock)
    if(lock) mMutex.Lock();
    // Necessary to change the "used" status of unit cell parameters.
    if((false==this->GetCrystal().IsBeingRefined()) && wxThread::IsMain() ) this->GetCrystal().InitRefParList();
-   
+
    if((false==this->GetCrystal().IsBeingRefined()) && wxThread::IsMain() &&(mpScattPowWin!=0)&&(mpAntiBumpWin!=0)&&(mpBondValenceWin!=0))
    {
       //set<ScatteringPowerAtom*> vpRemovedScattPow;
       //set<ScatteringPowerAtom*> vpAddedScattPow;
-      
+
       bool needLayout=false;
       // Delete rows & cols as required
       for(map<ScatteringPowerAtom*,RowScattPow>::iterator pos=mvpRowScattPow.begin();pos!=mvpRowScattPow.end();)
@@ -944,7 +944,7 @@ void WXCrystal::OnMenuCrystalGL(wxCommandEvent & WXUNUSED(event))
    frame->CreateStatusBar(1);
    frame->SetStatusText(wxString::Format("%s [%s]",mpCrystal->GetName().c_str(), mpCrystal->GetSpaceGroup().GetName().c_str()));
    #endif
-   
+
    frame->Show(true);
    frame->Raise();
    //The contents to be displayed will be generated on the first OnPaint event, in InitGL
@@ -966,7 +966,7 @@ void WXCrystal::OnMenuSaveCIF(wxCommandEvent & WXUNUSED(event))
    WXCrystValidateAllUserInput();
    wxFileDialog save(this,_T("Choose a file"),_T(""),_T(""),_T("*.cif"),wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
-   
+
    ofstream out(save.GetPath().ToAscii());
    if(!out) return;//:TODO:
    mpCrystal->CIFOutput(out);
@@ -978,7 +978,7 @@ void WXCrystal::OnMenuSaveText(wxCommandEvent & WXUNUSED(event))
    WXCrystValidateAllUserInput();
    wxFileDialog save(this,_T("Choose a file"),_T(""),_T(""),_T("*.txt"),wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
-   
+
    ofstream out(save.GetPath().ToAscii());
    if(!out) return;//:TODO:
    mpCrystal->Print(out);
@@ -1456,7 +1456,7 @@ void WXCrystal::OnMenuAtoms2Molecule(wxCommandEvent &event)
    }
    const unsigned int nb=v.size();
    wxString *choices = new wxString[nb];
-   for(unsigned int i=0;i<nb;i++) 
+   for(unsigned int i=0;i<nb;i++)
       choices[i]= wxString::FromAscii((v[i]->GetName()).c_str());
    #if 0
    wxMultiChoiceDialog dialog (this,_T("Choose the molecule's atoms"),_T("Select Atoms"),nb,choices,wxOK | wxCANCEL);
@@ -1534,7 +1534,7 @@ void WXCrystal::OnMenuSetRelativeXYZLimits(wxCommandEvent & WXUNUSED(event))
    double limit;
    limitDialog.GetValue().ToDouble(&limit);
    limit=fabs(limit);
- 
+
    mpCrystal->SetLimitsRelative(gpRefParTypeScattTranslX,
                                 -limit/mpCrystal->GetLatticePar(0),
                                 limit/mpCrystal->GetLatticePar(0));
@@ -1583,7 +1583,7 @@ class TestCrystalThread: public wxThread
 void WXCrystal::OnMenuTestRandomMoves(wxCommandEvent &event)
 {
    TestCrystalThread *pTest = new TestCrystalThread(*mpCrystal,30);
-   if(pTest->Create() != wxTHREAD_NO_ERROR) 
+   if(pTest->Create() != wxTHREAD_NO_ERROR)
       wxLogError(_T("Can't create test optimization thread"));
    else pTest->Run();
 }
@@ -1724,12 +1724,12 @@ void WXCrystal::OnMenuShowScattPowWindow(wxCommandEvent &event)
    {// Individual parameters
       mpScattPowWin = new WXCrystalScrolledGridWindow(notebook,this,ID_CRYSTAL_WIN_SCATTPOW);
       notebook->AddPage(mpScattPowWin, _T("Scattering Powers"), true);
-      
+
       mpScattPowWin->SetDefaultRenderer(new wxGridCellFloatRenderer(5,3));
       mpScattPowWin->SetDefaultEditor(new wxGridCellFloatEditor(5,3));
       mpScattPowWin->SetColMinimalAcceptableWidth(150);
       mpScattPowWin->CreateGrid(0,7);
-      
+
       mpScattPowWin->SetColLabelValue(0,_T("Biso"));
       mpScattPowWin->SetColLabelValue(1,_T("Charge"));
       mpScattPowWin->SetColLabelValue(2,_T("Red"));
@@ -1737,31 +1737,31 @@ void WXCrystal::OnMenuShowScattPowWindow(wxCommandEvent &event)
       mpScattPowWin->SetColLabelValue(4,_T("Blue"));
       mpScattPowWin->SetColLabelValue(5,_T("ML Error"));
       mpScattPowWin->SetColLabelValue(6,_T("#ghost"));
-      
+
       mpScattPowWin->AutoSizeRows();
       mpScattPowWin->AutoSizeColumns();
    }
    {// Anti-Bump
       mpAntiBumpWin = new WXCrystalScrolledGridWindow(notebook,this,ID_CRYSTAL_WIN_ANTIBUMP);
       notebook->AddPage(mpAntiBumpWin, _T("AntiBump"), true);
-      
+
       mpAntiBumpWin->SetDefaultRenderer(new wxGridCellFloatRenderer(5,3));
       mpAntiBumpWin->SetDefaultEditor(new wxGridCellFloatEditor(5,3));
       mpAntiBumpWin->SetColMinimalAcceptableWidth(150);
       mpAntiBumpWin->CreateGrid(0,0);
-      
+
       mpAntiBumpWin->AutoSizeRows();
       mpAntiBumpWin->AutoSizeColumns();
    }
    {// Bond Valence
       mpBondValenceWin = new WXCrystalScrolledGridWindow(notebook,this,ID_CRYSTAL_WIN_BONDVALENCE);
       notebook->AddPage(mpBondValenceWin, _T("BondValence"), true);
-      
+
       mpBondValenceWin->SetDefaultRenderer(new wxGridCellFloatRenderer(5,3));
       mpBondValenceWin->SetDefaultEditor(new wxGridCellFloatEditor(5,3));
       mpBondValenceWin->SetColMinimalAcceptableWidth(150);
       mpBondValenceWin->CreateGrid(0,0);
-      
+
       mpBondValenceWin->AutoSizeRows();
       mpBondValenceWin->AutoSizeColumns();
    }
@@ -1779,7 +1779,7 @@ void WXCrystal::OnEditGridScattPow(wxGridEvent &e)
    map<ScatteringPowerAtom*,RowScattPow>::iterator pos=mvpRowScattPow.begin();
    while(pos->second.mIdx!=r)++pos;
    ScatteringPowerAtom *const p=pos->first;
-   
+
    wxString s=mpScattPowWin->GetCellValue(r,c);
    switch(c)
    {
@@ -1872,11 +1872,11 @@ void WXCrystal::OnEditGridScattPowAntiBump(wxGridEvent &e)
    map<ScatteringPowerAtom*,RowScattPow>::iterator pos=mvpRowScattPow.begin();
    while(pos->second.mIdx!=r)++pos;
    const ScatteringPowerAtom *const p1=pos->first;
-   
+
    pos=mvpRowScattPow.begin();
    while(pos->second.mIdx!=c)++pos;
    const ScatteringPowerAtom *const p2=pos->first;
-   
+
    wxString s=mpAntiBumpWin->GetCellValue(r,c);
    double d;
    s.ToDouble(&d);
@@ -1894,11 +1894,11 @@ void WXCrystal::OnEditGridScattPowBondValence(wxGridEvent &e)
    map<ScatteringPowerAtom*,RowScattPow>::iterator pos=mvpRowScattPow.begin();
    while(pos->second.mIdx!=r)++pos;
    const ScatteringPowerAtom *const p1=pos->first;
-   
+
    pos=mvpRowScattPow.begin();
    while(pos->second.mIdx!=c)++pos;
    const ScatteringPowerAtom *const p2=pos->first;
-   
+
    wxString s=mpBondValenceWin->GetCellValue(r,c);
    double d;
    s.ToDouble(&d);
@@ -2063,8 +2063,8 @@ void UnitCellMap::GLInitDisplayList(const float minValue,
          }
       glEnd();
 
-   delete [] subPoints; 
-   delete [] pTriangles; 
+   delete [] subPoints;
+   delete [] pTriangles;
    VFN_DEBUG_EXIT("UnitCellMap::GLInitDisplayList():nb triangles="<<numOfTriangles,10)
 }
 
@@ -2133,13 +2133,13 @@ void UnitCellMap::POVRayDescription(ostream &os,const float minValue,
          const float z1=pTriangles[i].p[0].z;
          const float z2=pTriangles[i].p[1].z;
          const float z3=pTriangles[i].p[2].z;
-         
+
          // Avoid null-length cylinders that make POV-Ray choke
          const float d12=abs(x1-x2)+abs(y1-y2)+abs(z1-z2);
          const float d13=abs(x1-x3)+abs(y1-y3)+abs(z1-z3);
          const float d23=abs(x2-x3)+abs(y2-y3)+abs(z2-z3);
          if((d12<0.05)||(d13<0.05)||(d23<0.05)) continue;
-         
+
          //:TODO: Fix normals
          normx=pTriangles[i].norm[j].x;
          normy=pTriangles[i].norm[j].y;
@@ -2156,8 +2156,8 @@ void UnitCellMap::POVRayDescription(ostream &os,const float minValue,
            <<endl;
       }
 
-   delete [] subPoints; 
-   delete [] pTriangles; 
+   delete [] subPoints;
+   delete [] pTriangles;
    VFN_DEBUG_EXIT("UnitCellMap::GLInitDisplayList()",7)
 }
 
@@ -2181,24 +2181,24 @@ int UnitCellMap::ImportGRD(const string&filename)
    /*
    float afac = 180/M_PI, limit = 0.0001;
    if((a - mpWXCrystal->GetCrystal().GetLatticePar()(0)) > limit || (b - mpWXCrystal->GetCrystal().GetLatticePar()(1))> limit ||
-      (c - mpWXCrystal->GetCrystal().GetLatticePar()(2)) > limit || (alpha - mpWXCrystal->GetCrystal().GetLatticePar()(3)*afac) > limit || 
+      (c - mpWXCrystal->GetCrystal().GetLatticePar()(2)) > limit || (alpha - mpWXCrystal->GetCrystal().GetLatticePar()(3)*afac) > limit ||
       (beta - mpWXCrystal->GetCrystal().GetLatticePar()(4)*afac) > limit || (gamma - mpWXCrystal->GetCrystal().GetLatticePar()(5)*afac) > limit )
       if(wxMessageBox(wxString::Format("Cell dimensions in the file do not match those of the crystal loaded:\n\n" +
-         wxString("These are the value:\n") + "  Crystal:                     File:\n   a = %f                  a = %f\n" 
+         wxString("These are the value:\n") + "  Crystal:                     File:\n   a = %f                  a = %f\n"
          "   b = %f                  b = %f\n   c = %f                   c = %f\n   alpha = %f             alpha = %f\n" +
          "   beta =  %f            beta = %f\n   gamma = %f          gamma = %f\n\nPercent errors are:\n" +
-         "   a: %f\n   b: %f\n   c: %f\n   alpha: %f\n   beta:  %f\n   gamma: %f\n\n\n"+ 
+         "   a: %f\n   b: %f\n   c: %f\n   alpha: %f\n   beta:  %f\n   gamma: %f\n\n\n"+
          "Continue loading " + filename.c_str() + " ?",
-         mpWXCrystal->GetCrystal().GetLatticePar()(0), a,    mpWXCrystal->GetCrystal().GetLatticePar()(1), b, 
-         mpWXCrystal->GetCrystal().GetLatticePar()(2), c,    mpWXCrystal->GetCrystal().GetLatticePar()(3)*afac, alpha, 
-         mpWXCrystal->GetCrystal().GetLatticePar()(4)*afac, beta,mpWXCrystal->GetCrystal().GetLatticePar()(5)*afac, gamma, 
-         fabs(a-mpWXCrystal->GetCrystal().GetLatticePar()(0)) / mpWXCrystal->GetCrystal().GetLatticePar()(0)*100, 
-         fabs(b-mpWXCrystal->GetCrystal().GetLatticePar()(1)) / mpWXCrystal->GetCrystal().GetLatticePar()(1)*100, 
+         mpWXCrystal->GetCrystal().GetLatticePar()(0), a,    mpWXCrystal->GetCrystal().GetLatticePar()(1), b,
+         mpWXCrystal->GetCrystal().GetLatticePar()(2), c,    mpWXCrystal->GetCrystal().GetLatticePar()(3)*afac, alpha,
+         mpWXCrystal->GetCrystal().GetLatticePar()(4)*afac, beta,mpWXCrystal->GetCrystal().GetLatticePar()(5)*afac, gamma,
+         fabs(a-mpWXCrystal->GetCrystal().GetLatticePar()(0)) / mpWXCrystal->GetCrystal().GetLatticePar()(0)*100,
+         fabs(b-mpWXCrystal->GetCrystal().GetLatticePar()(1)) / mpWXCrystal->GetCrystal().GetLatticePar()(1)*100,
          fabs(c-mpWXCrystal->GetCrystal().GetLatticePar()(2)) / mpWXCrystal->GetCrystal().GetLatticePar()(2)*100,
          fabs(alpha-mpWXCrystal->GetCrystal().GetLatticePar()(3)*afac) / mpWXCrystal->GetCrystal().GetLatticePar()(3)*afac*100,
          fabs(beta-mpWXCrystal->GetCrystal().GetLatticePar()(4)*afac ) / mpWXCrystal->GetCrystal().GetLatticePar()(4)*afac*100,
          fabs(gamma-mpWXCrystal->GetCrystal().GetLatticePar()(5)*afac) / mpWXCrystal->GetCrystal().GetLatticePar()(5)*afac*100 ),
-         "Cell Dimensions Notice", wxYES_NO | wxCENTRE, (wxWindow*)this) == wxNO) 
+         "Cell Dimensions Notice", wxYES_NO | wxCENTRE, (wxWindow*)this) == wxNO)
        {
          ffile.close();
          return;
@@ -2216,7 +2216,7 @@ int UnitCellMap::ImportGRD(const string&filename)
      }
    }
    ffile.close();
-   
+
    mMean=mPoints.sum()/(REAL)(mPoints.numElements());
    mMin=mPoints.min();
    mMax=mPoints.max();
@@ -2285,7 +2285,7 @@ int UnitCellMap::ImportDSN6(const string&filename)
    bool needswap=false;
    if (header[18] == 25600) needswap=true;
    if(needswap) swap2(header, 19*sizeof(short));
-   
+
    const long xstart=header[0];
    const long ystart=header[1];
    const long zstart=header[2];
@@ -2323,7 +2323,7 @@ int UnitCellMap::ImportDSN6(const string&filename)
 
    #define BRICKSIZE 512
    #define BRICKEDGE 8
-   
+
    unsigned char Points[BRICKSIZE];
    // :KLUDGE: stored map is the size of the entire unit cell, not of the input map...
    // The result is that if the input map is smaller than the unit cell size,
@@ -2357,7 +2357,7 @@ int UnitCellMap::ImportDSN6(const string&filename)
                   }
          }
    fclose (pfile);
-   
+
    mMean=mPoints.sum()/(REAL)(mPoints.numElements());
    mMin=mPoints.min();
    mMax=mPoints.max();
@@ -2451,15 +2451,15 @@ int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0, 
    //cout<<"UnitCellMap::CalcFourierMap():"<<sizex<<","<<sizey<<","<<sizez<<","<<endl;
    fftwf_complex *in= (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * sizex*sizey*sizez);
    fftwf_plan plan=fftwf_plan_dft_3d(sizez, sizey, sizex,in, in,FFTW_FORWARD, FFTW_ESTIMATE);
-   
+
    float *p=(float*)in;
    for(unsigned long i=0;i<sizex*sizey*sizez*2;i++) *p++=0;
-   
+
    const long nb=data.GetNbReflBelowMaxSinThetaOvLambda();
-   
+
    mType=type0;
    if(data.GetFhklObsSq().numElements()==0) mType=1;
-   
+
    CrystVector_REAL norm_sf;
    if(normalized_sf)
    {
@@ -2474,17 +2474,17 @@ int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0, 
          tmp=pSF->find((*pComp)(i).mpScattPow)->second;// safe enough ?
          tmp*=tmp;
          tmp*=  (*pComp)(i).mOccupancy * (*pComp)(i).mDynPopCorr;
-         
+
          const REAL sf0=(*pComp)(i).mpScattPow->GetForwardScatteringFactor(data.GetRadiationType ());
          norm0+=(*pComp)(i).mOccupancy * (*pComp)(i).mDynPopCorr *sf0*sf0;
-         
+
          norm_sf+=tmp;
       }
       REAL *p=norm_sf.data();
       norm0=1/norm0;
       for(unsigned int i=norm_sf.numElements();i>0;i--) {*p=sqrt(*p * norm0);p++;}
    }
-   
+
    // Auto-scale Fcalc and Fobs ?
    REAL scale_fobs=1.0;
    if(mType!=1)
@@ -2538,7 +2538,7 @@ int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0, 
       }
       //cout<<endl;
    }
-   
+
    if(mType!=2)
    {// F000, for obs & calc fourier maps ?
       const int nbSymmetrics=mpCrystal->GetSpaceGroup().GetNbSymmetrics(false,false);
@@ -2585,7 +2585,7 @@ int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0, 
    */
    fftwf_destroy_plan(plan);
    fftwf_free(in);
-   
+
    mName=data.GetClassName()+":";
    if(data.GetName()=="") mName+="?";
    else mName+=data.GetName();
@@ -2595,7 +2595,7 @@ int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0, 
       if(data.GetRadiationType()==RAD_XRAY)     mName+="Xray:";
       if(data.GetRadiationType()==RAD_NEUTRON)  mName+="Neut:";
       if(data.GetRadiationType()==RAD_ELECTRON) mName+="Elec:";
-      
+
       char buf[100];
       if(data.GetRadiation().GetWavelengthType()==WAVELENGTH_TOF) mName+="TOF:";
       else
@@ -2612,7 +2612,7 @@ int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0, 
       if(data.GetRadiationType()==RAD_XRAY)     mName+="Xray:";
       if(data.GetRadiationType()==RAD_NEUTRON)  mName+="Neut:";
       if(data.GetRadiationType()==RAD_ELECTRON) mName+="Elec:";
-      
+
       char buf[100];
       if(data.GetRadiation().GetWavelengthType()==WAVELENGTH_TOF) mName+="TOF:";
       else
@@ -2621,7 +2621,7 @@ int UnitCellMap::CalcFourierMap(const ScatteringData& data, unsigned int type0, 
          mName+=buf;
       }
       mName+=data.GetName();
-      
+
    }
    if(mType==0) mName="(Fo)"+mName;
    if(mType==1) mName="(Fc)"+mName;
@@ -2721,22 +2721,22 @@ void UnitCellMapGLList::Draw()const
    glPushMatrix();
       if(mShowWire) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
       else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-      
+
       glMaterialfv(GL_FRONT, GL_AMBIENT, mColour);
       glMaterialfv(GL_FRONT, GL_DIFFUSE, mColour);
       glMaterialfv(GL_FRONT, GL_SPECULAR, mColour);
-      const GLfloat colour0[] = {0.0f, 0.0f, 0.0f, 0.0f}; 
-      glMaterialfv(GL_FRONT, GL_EMISSION, colour0); 
-      // :TODO: 
-      // Disabled Shininess as there is a problem with normals 
+      const GLfloat colour0[] = {0.0f, 0.0f, 0.0f, 0.0f};
+      glMaterialfv(GL_FRONT, GL_EMISSION, colour0);
+      // :TODO:
+      // Disabled Shininess as there is a problem with normals
       // and non-orthogonal unit cells
-      glMaterialf( GL_FRONT, GL_SHININESS, 0.0); 
+      glMaterialf( GL_FRONT, GL_SHININESS, 0.0);
 
       const GLfloat colorBack [] = {mColour[0]/3., mColour[1]/3., mColour[2]/3., mColour[3]};
       glMaterialfv(GL_BACK, GL_AMBIENT, colorBack);
       glMaterialfv(GL_BACK, GL_DIFFUSE, colorBack);
       glMaterialfv(GL_BACK, GL_SPECULAR, colorBack);
-      glMaterialf( GL_BACK, GL_SHININESS, 0.0); 
+      glMaterialf( GL_BACK, GL_SHININESS, 0.0);
       // :TODO: Check display list is not being modified (lock it), useless for now
       // as the map is not dynamically updated.
       glCallList(mGLDisplayList);
@@ -2779,49 +2779,49 @@ wxWindow(parent,-1),mpGLCrystalCanvas(pGLCrystalCanvas),mIsUpdating(false)
       pSizerButtons->Add(mpShowFourier,0,wxALIGN_CENTER);
       pSizerButtons->Add(mpSharpenMap,0,wxALIGN_CENTER);
       pSizer->Add(pSizerButtons,0,wxALIGN_CENTER);
-   
+
    // Map lists
       wxBoxSizer* pSizerMaps=new wxBoxSizer(wxHORIZONTAL);
-      
+
       // Left column - available maps
          wxBoxSizer* pSizerLeft=new wxBoxSizer(wxVERTICAL);
          pSizerMaps->Add(pSizerLeft,0,wxALIGN_TOP);
-         
+
          wxStaticText *mpLabel0=new wxStaticText(this,-1,_T("Available Maps"));
          pSizerLeft->Add(mpLabel0,0,wxALIGN_CENTER);
          mpAvailableMapList=new wxListBox(this,ID_GLCRYSTAL_FOURIER_LISTMAP,wxDefaultPosition,wxSize(400,150));
          pSizerLeft->Add(mpAvailableMapList,0,wxALIGN_CENTER);
-         
+
          mpMapInfo=new wxStaticText(this,-1,_T("min=+00.00 max=+00.00 sigma=00.00"));
          pSizerLeft->Add(mpMapInfo,0,wxALIGN_CENTER);
-         
+
          wxBoxSizer* pSizerLeft2=new wxBoxSizer(wxHORIZONTAL);
          pSizerLeft->Add(pSizerLeft2,0,wxALIGN_CENTER);
          wxStaticText *mpLabel2=new wxStaticText(this,-1,_T("New Contour:"));
          mpNewContourValue=new wxTextCtrl(this,ID_GLCRYSTAL_FOURIER_NEWCONTOUR,_T(""),wxDefaultPosition,wxDefaultSize,wxTE_PROCESS_ENTER);
          pSizerLeft2->Add(mpLabel2,0,wxALIGN_CENTER);
          pSizerLeft2->Add(mpNewContourValue,0,wxALIGN_CENTER);
-      
+
          wxButton *pButtonAdd=new wxButton(this,ID_GLCRYSTAL_FOURIER_ADD,_T("Add"));
          pSizerLeft->Add(pButtonAdd,0,wxALIGN_CENTER);
-      
+
       pSizerMaps->AddSpacer(5);
       // Right column - displayed maps & contours
          wxBoxSizer* pSizerRight=new wxBoxSizer(wxVERTICAL);
          pSizerMaps->Add(pSizerRight,0,wxALIGN_TOP);
-         
+
          wxStaticText *mpLabel0r=new wxStaticText(this,-1,_T("Displayed Maps"));
          pSizerRight->Add(mpLabel0r,0,wxALIGN_CENTER);
          mpDisplayedMapList=new wxListBox(this,ID_GLCRYSTAL_FOURIER_LISTGLMAP,wxDefaultPosition,wxSize(400,150));
          pSizerRight->Add(mpDisplayedMapList,0,wxALIGN_CENTER);
-         
+
          wxBoxSizer* pSizerRight1=new wxBoxSizer(wxHORIZONTAL);
          pSizerRight->Add(pSizerRight1,0,wxALIGN_CENTER);
          wxStaticText *mpLabel3=new wxStaticText(this,-1,_T("Contour:"));
          mpContourValue=new wxTextCtrl(this,ID_GLCRYSTAL_FOURIER_CONTOUR,_T(""),wxDefaultPosition,wxDefaultSize,wxTE_PROCESS_ENTER);
          pSizerRight1->Add(mpLabel3,0,wxALIGN_CENTER);
          pSizerRight1->Add(mpContourValue,0,wxALIGN_CENTER);
-         
+
          mpColourPicker=new wxColourPickerCtrl(this, ID_GLCRYSTAL_FOURIER_COLOURPICKER, *wxRED, wxDefaultPosition, wxDefaultSize,wxCLRP_USE_TEXTCTRL);
          wxButton *pButtonRemove=new wxButton(this,ID_GLCRYSTAL_FOURIER_REMOVE,_T("Remove"));
          pSizerRight->Add(mpColourPicker,0,wxALIGN_CENTER);
@@ -2880,7 +2880,7 @@ static const long ID_GLCRYSTAL_MENU_LOADFOURIERDSN6=   WXCRYST_ID();
 //static const long ID_GLCRYSTAL_MENU_UNLOADFOURIER=     WXCRYST_ID();
 static const long ID_GLCRYSTAL_MENU_POVRAY=            WXCRYST_ID();
 static const long ID_GLCRYSTAL_MENU_SHOWHELP=        WXCRYST_ID();
-   
+
 
 BEGIN_EVENT_TABLE(WXGLCrystalCanvas, wxGLCanvas)
    EVT_PAINT            (WXGLCrystalCanvas::OnPaint)
@@ -2943,21 +2943,21 @@ mIsGLFontBuilt(false),mGLFontDisplayListBase(0),mpFourierMapListWin(0),mFadeDist
       for(int i=0;i<4;++i) mQuat[i]=sGLCrystalConfig.mQuat[i];
       mShowAtomName=sGLCrystalConfig.mShowAtomName;
       mShowCursor=sGLCrystalConfig.mShowCursor;
-      
+
       mcellbbox.xMin=sGLCrystalConfig.mcellbbox.xMin;
       mcellbbox.xMax=sGLCrystalConfig.mcellbbox.xMax;
       mcellbbox.yMin=sGLCrystalConfig.mcellbbox.yMin;
       mcellbbox.yMax=sGLCrystalConfig.mcellbbox.yMax;
       mcellbbox.zMin=sGLCrystalConfig.mcellbbox.zMin;
       mcellbbox.zMax=sGLCrystalConfig.mcellbbox.zMax;
-      
+
       mmapbbox.xMin=sGLCrystalConfig.mmapbbox.xMin;
       mmapbbox.xMax=sGLCrystalConfig.mmapbbox.xMax;
       mmapbbox.yMin=sGLCrystalConfig.mmapbbox.yMin;
       mmapbbox.yMax=sGLCrystalConfig.mmapbbox.yMax;
       mmapbbox.zMin=sGLCrystalConfig.mmapbbox.zMin;
       mmapbbox.zMax=sGLCrystalConfig.mmapbbox.zMax;
-      
+
       mViewCntr.x=sGLCrystalConfig.mViewCntr.x;
       mViewCntr.y=sGLCrystalConfig.mViewCntr.y;
       mViewCntr.z=sGLCrystalConfig.mViewCntr.z;
@@ -2971,7 +2971,7 @@ mIsGLFontBuilt(false),mGLFontDisplayListBase(0),mpFourierMapListWin(0),mFadeDist
       mcellbbox.yMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Ymax();
       mcellbbox.zMax = mpWXCrystal->GetCrystal().GetSpaceGroup().GetAsymUnit().Zmax();
    }
-     // N.B. xMin=xMax so that the previous cell bbox is used for Maps 
+     // N.B. xMin=xMax so that the previous cell bbox is used for Maps
      // until mmapbbox is changed
    mmapbbox.xMin = mmapbbox.xMax = mmapbbox.yMin = mmapbbox.zMin = 0.;
    mmapbbox.yMax = mmapbbox.zMax = 1.;
@@ -3035,14 +3035,14 @@ mIsGLFontBuilt(false),mGLFontDisplayListBase(0),mpFourierMapListWin(0),mFadeDist
    // Fade distance for showing transparent atoms beyond display limit
    if(!wxConfigBase::Get()->HasEntry(_T("Crystal/REAL/3D fade distance")))
       wxConfigBase::Get()->Write(_T("Crystal/REAL/3D fade distance"), 4);
-   
+
    wxConfigBase::Get()->Read(_T("Crystal/REAL/3D fade distance"), &mFadeDistance);
    if(mShowAtomName) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, _T("Hide Atom Labels"));
    else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, _T("Show Atom Labels"));
 }
 
 WXGLCrystalCanvas::~WXGLCrystalCanvas()
-{	
+{
    mpWXCrystal->NotifyCrystalGLDelete();
    #ifndef HAVE_GLUT
    this->DeleteGLFont();
@@ -3056,21 +3056,21 @@ WXGLCrystalCanvas::~WXGLCrystalCanvas()
    for(int i=0;i<4;++i) sGLCrystalConfig.mQuat[i]=mQuat[i];
    sGLCrystalConfig.mShowAtomName=mShowAtomName;
    sGLCrystalConfig.mShowCursor=mShowCursor;
-    
+
    sGLCrystalConfig.mcellbbox.xMin=mcellbbox.xMin;
    sGLCrystalConfig.mcellbbox.xMax=mcellbbox.xMax;
    sGLCrystalConfig.mcellbbox.yMin=mcellbbox.yMin;
    sGLCrystalConfig.mcellbbox.yMax=mcellbbox.yMax;
    sGLCrystalConfig.mcellbbox.zMin=mcellbbox.zMin;
    sGLCrystalConfig.mcellbbox.zMax=mcellbbox.zMax;
-    
+
    sGLCrystalConfig.mmapbbox.xMin=mmapbbox.xMin;
    sGLCrystalConfig.mmapbbox.xMax=mmapbbox.xMax;
    sGLCrystalConfig.mmapbbox.yMin=mmapbbox.yMin;
    sGLCrystalConfig.mmapbbox.yMax=mmapbbox.yMax;
    sGLCrystalConfig.mmapbbox.zMin=mmapbbox.zMin;
    sGLCrystalConfig.mmapbbox.zMax=mmapbbox.zMax;
-   
+
    sGLCrystalConfig.mViewCntr.x=mViewCntr.x;
    sGLCrystalConfig.mViewCntr.y=mViewCntr.y;
    sGLCrystalConfig.mViewCntr.z=mViewCntr.z;
@@ -3080,7 +3080,7 @@ WXGLCrystalCanvas::~WXGLCrystalCanvas()
 
 void WXGLCrystalCanvas::OnExit(wxCommandEvent &event)
 {
-   
+
 }
 
 void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
@@ -3119,7 +3119,7 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
    build_rotmatrix( m,mQuat);
    glMultMatrixf( &m[0][0] );
    glTranslatef( mX0, mY0, mZ0 );
-   
+
    //Draw first non-transparent object then transparent ones
    for(unsigned int passnum = 0; passnum<2; passnum++)
    {
@@ -3150,7 +3150,7 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
             glTranslatef( mX0, mY0, mZ0 );
             glCallList(mpWXCrystal->GetCrystalGLDisplayList(true));  //Draw Atom Names
          }
-         
+
       }
       {//Show display limits and help text
          int w, h;
@@ -3170,17 +3170,17 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
          sprintf(c,"%5.3f<x<%5.3f\n",mcellbbox.xMin,mcellbbox.xMax);
          crystGLPrint(c);
          i++;
-         
+
          glRasterPos2i(2, h-12*i);
          sprintf(c,"%5.3f<y<%5.3f\n",mcellbbox.yMin,mcellbbox.yMax);
          crystGLPrint(c);
          i++;
-         
+
          glRasterPos2i(2, h-12*i);
          sprintf(c,"%5.3f<z<%5.3f\n",mcellbbox.zMin,mcellbbox.zMax);
          crystGLPrint(c);
          i++;
-         
+
          if(mShowHelp)
          {
             glRasterPos2i(2, h-12*i);
@@ -3199,7 +3199,7 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
             sprintf(c,"   wheel: rotate");
             crystGLPrint(c);
             i++;
-            
+
             glRasterPos2i(2, h-12*i);
             sprintf(c,"Trackpad");
             crystGLPrint(c);
@@ -3208,7 +3208,7 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
             sprintf(c,"   two-finger drag: change orientation");
             crystGLPrint(c);
             i++;
-            
+
             glRasterPos2i(2, h-12*i);
             sprintf(c,"Keyboard");
             crystGLPrint(c);
@@ -3261,10 +3261,10 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
          glBegin(GL_LINES);
          glVertex3f(-1.0f, 0.0f, 0.0f);
          glVertex3f( 1.0f, 0.0f, 0.0f);
-         
+
          glVertex3f( 0.0f,-1.0f, 0.0f);
          glVertex3f( 0.0f, 1.0f, 0.0f);
-         
+
          glVertex3f( 0.0f, 0.0f,-1.0f);
          glVertex3f( 0.0f, 0.0f, 1.0f);
          glEnd();
@@ -3337,7 +3337,7 @@ void WXGLCrystalCanvas::OnKeyDown(wxKeyEvent& event)
          glLoadIdentity();
          if( (width>0)&&(height>0)) //in case size is null...
             gluPerspective(mViewAngle,(float)width/(float)height,
-                        (mDist>100)?(mDist-100):1.,mDist+100);   
+                        (mDist>100)?(mDist-100):1.,mDist+100);
          Refresh(FALSE);
          break;
       }
@@ -3352,7 +3352,7 @@ void WXGLCrystalCanvas::OnKeyDown(wxKeyEvent& event)
          glLoadIdentity();
          if( (width>0)&&(height>0)) //in case size is null...
             gluPerspective(mViewAngle,(float)width/(float)height,
-                        (mDist>100)?(mDist-100):1.,mDist+100);   
+                        (mDist>100)?(mDist-100):1.,mDist+100);
          Refresh(FALSE);
          break;
       }
@@ -3626,10 +3626,10 @@ void WXGLCrystalCanvas::OnMouse( wxMouseEvent& event )
          if(event.ShiftDown())
          {
             VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnMouse():Dragging Left Button",2)
-            
+
             REAL vx1=mTrackBallLastX,vy1=mTrackBallLastY,vz1,
                  vx2=event.GetX(),   vy2=event.GetY(),   vz2;
-            
+
             this->UnProject(vx1,vy1,vz1);
             this->UnProject(vx2,vy2,vz2);
 
@@ -3660,7 +3660,7 @@ void WXGLCrystalCanvas::OnMouse( wxMouseEvent& event )
          VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnMouse():Dragging Middle Button",2)
          const float v= (mTrackBallLastY-event.GetY())/(float)height;
          const float h= (mTrackBallLastX-event.GetX())/(float)width;
-         
+
          mDist *= (1.+v)/(1.+h);
          mViewAngle *=(1.+h);
          SetCurrent();
@@ -3668,7 +3668,7 @@ void WXGLCrystalCanvas::OnMouse( wxMouseEvent& event )
          glLoadIdentity();
          if( (width>0)&&(height>0)) //in case size is null...
             gluPerspective(mViewAngle,(float)width/(float)height,
-                        (mDist>101)?(mDist-100):1.,mDist+100);   
+                        (mDist>101)?(mDist-100):1.,mDist+100);
          Refresh(FALSE);
          VFN_DEBUG_MESSAGE(mViewAngle <<" "<<mDist,2)
       }
@@ -3704,7 +3704,7 @@ void WXGLCrystalCanvas::OnMouse( wxMouseEvent& event )
          GetClientSize(& width, & height);
          const int delta=event.GetWheelDelta();
          const int rotation=event.GetWheelRotation();
-         
+
          if(event.GetWheelAxis()==0) mDist *= (1.+float(rotation)/100.);
          else
          {
@@ -3736,7 +3736,7 @@ void WXGLCrystalCanvas::OnMouse( wxMouseEvent& event )
                    (     height - 2.0*mTrackBallLastY) / (height+.001),
                    (2.0*(mTrackBallLastX+dx) -       width) / (width+.001),
                    (     height - 2.0*(mTrackBallLastY+dy)) / (height+.001));
-         
+
          add_quats( spin_quat, mQuat, mQuat );
          Refresh(FALSE);
       }
@@ -3790,7 +3790,7 @@ void WXGLCrystalCanvas::CrystUpdate()
       if(!keep)
       {
          //erase corresponding gl maps
-         for(vector<boost::shared_ptr<UnitCellMapGLList> >::iterator 
+         for(vector<boost::shared_ptr<UnitCellMapGLList> >::iterator
                posgl=mvpUnitCellMapGLList.begin();posgl!=mvpUnitCellMapGLList.end();)
          {
             if(&(**pos)==&((*posgl)->GetMap()))
@@ -3801,7 +3801,7 @@ void WXGLCrystalCanvas::CrystUpdate()
          }
          pos=mvpUnitCellMap.erase(pos);
       }
-      else 
+      else
       {
          if((*pos)->GetType()!=3)
          {
@@ -3822,7 +3822,7 @@ void WXGLCrystalCanvas::CrystUpdate()
       for(int i=0;i<mpWXCrystal->GetCrystal().GetClientRegistry().GetNb();++i)
       {
          ScatteringData* data=dynamic_cast<ScatteringData *>(&(mpWXCrystal->GetCrystal().GetClientRegistry().GetObj(i)));
-         
+
          if(data!=0)
          {
             // Add if not already listed
@@ -3854,7 +3854,7 @@ void WXGLCrystalCanvas::CrystUpdate()
       }
    #endif
    //update GL maps
-   for(vector<boost::shared_ptr<UnitCellMapGLList> >::iterator 
+   for(vector<boost::shared_ptr<UnitCellMapGLList> >::iterator
          pos=mvpUnitCellMapGLList.begin();pos!=mvpUnitCellMapGLList.end();++pos)
    {
       //cout<<"Updating GL map:"<<(*pos)->GetName()<<endl;
@@ -3884,21 +3884,21 @@ void WXGLCrystalCanvas::OnUpdateUI(wxUpdateUIEvent&event)
    {
       mpFourierMapListWin->mIsUpdating=true;
       mpFourierMapListWin->mMutex.Lock();
-      
+
       wxArrayString maps;
-      for(vector<boost::shared_ptr<UnitCellMap> >::iterator 
+      for(vector<boost::shared_ptr<UnitCellMap> >::iterator
           pos=mvpUnitCellMap.begin();pos!=mvpUnitCellMap.end();++pos)
             maps.Add( wxString::FromAscii((*pos)->GetName().c_str()));
       if(mpFourierMapListWin->mpAvailableMapList->GetStrings()!=maps)
          mpFourierMapListWin->mpAvailableMapList->Set(maps);
-      
+
       wxArrayString glmaps;
-      for(vector<boost::shared_ptr<UnitCellMapGLList> >::iterator 
+      for(vector<boost::shared_ptr<UnitCellMapGLList> >::iterator
           pos=mvpUnitCellMapGLList.begin();pos!=mvpUnitCellMapGLList.end();++pos)
             glmaps.Add( wxString::FromAscii((*pos)->GetName().c_str()));
       if(mpFourierMapListWin->mpDisplayedMapList->GetStrings()!=glmaps)
          mpFourierMapListWin->mpDisplayedMapList->Set(glmaps);
-      
+
       if(mpFourierMapListWin->mpAvailableMapList->GetSelection()>=0)
       {
          boost::shared_ptr<ObjCryst::UnitCellMap> pMap=mvpUnitCellMap[mpFourierMapListWin->mpAvailableMapList->GetSelection()];
@@ -3948,35 +3948,35 @@ void WXGLCrystalCanvas::InitGL()
       glutInit(&argc,argv);// We cannot pass arguments directly in Unicode mode, so...
    }
    #endif
-   
+
    int width, height;
    GetClientSize(& width, & height);
    glViewport(0, 0, width, height);
-      
+
    glEnable(GL_DEPTH_TEST);
    glEnable(GL_ALPHA_TEST);
    glEnable(GL_LIGHTING);
    glEnable (GL_BLEND);
    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-   
-   const GLfloat colour_Ambient [] = {0.4, 0.4, 0.4, 1.00}; 
-   const GLfloat colour_Diffuse [] = {0.6, 0.6, 0.6, 1.00}; 
-   const GLfloat colour_Specular[] = {0.2, 0.2, 0.2, 1.00}; 
 
-   glLightModelf(GL_LIGHT_MODEL_TWO_SIDE, 1.0); 
+   const GLfloat colour_Ambient [] = {0.4, 0.4, 0.4, 1.00};
+   const GLfloat colour_Diffuse [] = {0.6, 0.6, 0.6, 1.00};
+   const GLfloat colour_Specular[] = {0.2, 0.2, 0.2, 1.00};
 
-   const GLfloat LightPosition[]= { -10.0f, 10.0f, 10.0f, 0.0f };   
-   glLightfv(GL_LIGHT1, GL_AMBIENT,  colour_Ambient); 
-   glLightfv(GL_LIGHT1, GL_DIFFUSE,  colour_Diffuse); 
-   glLightfv(GL_LIGHT1, GL_SPECULAR, colour_Specular);  
-   glLightfv(GL_LIGHT1, GL_SHININESS,colour_Specular);  
+   glLightModelf(GL_LIGHT_MODEL_TWO_SIDE, 1.0);
+
+   const GLfloat LightPosition[]= { -10.0f, 10.0f, 10.0f, 0.0f };
+   glLightfv(GL_LIGHT1, GL_AMBIENT,  colour_Ambient);
+   glLightfv(GL_LIGHT1, GL_DIFFUSE,  colour_Diffuse);
+   glLightfv(GL_LIGHT1, GL_SPECULAR, colour_Specular);
+   glLightfv(GL_LIGHT1, GL_SHININESS,colour_Specular);
    glLightfv(GL_LIGHT1, GL_POSITION,LightPosition);
-   glEnable(GL_LIGHT1);  
+   glEnable(GL_LIGHT1);
 
    glEnable(GL_NORMALIZE);
    glHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);//GL_FASTEST
    glHint(GL_POLYGON_SMOOTH_HINT,GL_NICEST);//GL_FASTEST
-   
+
    if(sGLCrystalConfig.mSaved==false)
    {
       //Initialize Trackball
@@ -3984,7 +3984,7 @@ void WXGLCrystalCanvas::InitGL()
    }
    wxSizeEvent ev;
    wxPostEvent(this,ev);
-   
+
    //First display
    this->CrystUpdate();
    VFN_DEBUG_EXIT("WXGLCrystalCanvas::InitGL()",8)
@@ -4040,14 +4040,14 @@ void WXGLCrystalCanvas::OnChangeLimits(wxCommandEvent &event)
             wxBusyInfo wait(_T("Processing Fourier Map..."));
             (*pos)->GenList();
          }
-         VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnChangeLimits (X: " << 
-		         mcellbbox.xMin << ", " << mcellbbox.xMax << 
-		         " Y: " << 
-		         mcellbbox.yMin << ", " << mcellbbox.yMax << 
-		         " Z: " << 
-		         mcellbbox.zMin << ", " << mcellbbox.zMax << 
+         VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnChangeLimits (X: " <<
+		         mcellbbox.xMin << ", " << mcellbbox.xMax <<
+		         " Y: " <<
+		         mcellbbox.yMin << ", " << mcellbbox.yMax <<
+		         " Z: " <<
+		         mcellbbox.zMin << ", " << mcellbbox.zMax <<
 		         ")", 10)
-      } 
+      }
       BoxDlg->Destroy();
    }
    if(!(mpWXCrystal->GetCrystal().IsBeingRefined()))
@@ -4123,7 +4123,7 @@ void WXGLCrystalCanvas::OnSetCursor( wxCommandEvent & WXUNUSED(event))
      Refresh(FALSE);
   }
 }
-   
+
 void WXGLCrystalCanvas::OnShowHelp(wxCommandEvent &event)
 {
    if(mShowHelp) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWHELP, _T("Show Help"));
@@ -4178,7 +4178,7 @@ void WXGLCrystalCanvas::OnFourier(wxCommandEvent &event)
       }
       mpFourierMapListWin->mMutex.Unlock();
    }
-   
+
    if(event.GetId()==ID_GLCRYSTAL_FOURIER_LISTMAP)
    {// Selected one map
       mpFourierMapListWin->mMutex.Lock();
@@ -4214,7 +4214,7 @@ void WXGLCrystalCanvas::OnFourier(wxCommandEvent &event)
          else scontour.ToDouble(&contour);
          wxColor ncolor(255,0,0);
          ncolor = wxGetColourFromUser((wxWindow*)this, ncolor);
-   
+
          wxBusyInfo wait(_T("Processing Fourier Map..."));
          mvpUnitCellMapGLList.push_back(boost::shared_ptr<UnitCellMapGLList>(new UnitCellMapGLList(*pMap,this,true,(float)contour)));
          mvpUnitCellMapGLList.back()->SetName(pMap->GetName());
@@ -4249,14 +4249,14 @@ void WXGLCrystalCanvas::OnFourier(wxCommandEvent &event)
          (*pos)->ToggleShowWire();
       mpFourierMapListWin->mMutex.Unlock();
    }
-   
+
    if(event.GetId()==ID_GLCRYSTAL_FOURIER_SHARPEN)
    {
       mpFourierMapListWin->mMutex.Lock();
       mSharpenMap=mpFourierMapListWin->mpSharpenMap->GetValue();
       mpFourierMapListWin->mMutex.Unlock();
    }
-   
+
    // Update - if the crystal is being refined, it will be done at the next display update
    if(false==mpWXCrystal->GetCrystal().IsBeingRefined())
       this->CrystUpdate();
@@ -4381,7 +4381,7 @@ void WXGLCrystalCanvas::OnPOVRay( wxCommandEvent & WXUNUSED(event))
 void WXGLCrystalCanvas::POVRayOutput(const std::string &filename)
 {
    ofstream os(filename.c_str());
-   
+
    os << "#version 3.6 ;"<<endl
       << "// This File was created by FOX/ObjCryst++ (http://objcryst.sf.net)"<<endl
       << "//"<<endl
@@ -4417,13 +4417,13 @@ void WXGLCrystalCanvas::POVRayOutput(const std::string &filename)
       << "//"<<endl
       << "// See http://povray.org/documentation/ for more options"<<endl
       << "//"<<endl<<endl;
-   
+
    os << "// Description of Crystal :" << mpWXCrystal->GetCrystal().GetName() <<endl;
    os << "global_settings { assumed_gamma 2.2 ambient_light rgb <1,1,1>}"<<endl;
    float m[4][4];
    REAL xcam=0,ycam=0,zcam=mDist;
    build_rotmatrix( m,mQuat);
-   
+
    REAL x=(mcellbbox.xMin+mcellbbox.xMax)/2.;
    REAL y=(mcellbbox.yMin+mcellbbox.yMax)/2.;
    REAL z=(mcellbbox.zMin+mcellbbox.zMax)/2.;
@@ -4434,26 +4434,26 @@ void WXGLCrystalCanvas::POVRayOutput(const std::string &filename)
    {
       const REAL q1=mQuat[0];const REAL q2=mQuat[1];
       const REAL q3=mQuat[2];const REAL q4=mQuat[3];
-      
+
       REAL yaw =(q4*q4 + q1*q1 - q2*q2 - q3*q3);
       if(abs(yaw)>1e-6)  yaw  =atan( 2*(q1*q2+q4*q3) /yaw )*RAD2DEG;
       else { if((q1*q2+q4*q3)>0) yaw =90.; else yaw =-90;}
-      
+
       const REAL pitch=asin(-2*(q1*q3-q4*q2))*RAD2DEG;
-      
+
       REAL roll=(q4*q4 - q1*q1 - q2*q2 + q3*q3);
       if(abs(roll)>1e-6) roll =atan( 2*(q4*q1+q2*q3) /roll)*RAD2DEG;
       else { if((q4*q1+q2*q3)>0) roll=90.; else roll=-90;}
-      
+
       if((q4*q4 + q1*q1 - q2*q2 - q3*q3)<0) yaw  +=180;
       if((q4*q4 - q1*q1 - q2*q2 + q3*q3)<0) roll +=180;
-      
+
       os<<endl;
       os << "#declare OrientRoll="<<roll<<";"<<endl;
       os << "#declare OrientPitch="<<pitch<<"+360*clock;"<<endl;
       os << "#declare OrientYaw="<<yaw<<";"<<endl<<endl;
    }
-   
+
    os << "camera" <<endl;
    os << "{"<<endl;
    os << "    location  <"<<xcam+x<<","<<ycam+y<<","<<zcam+z<<">"<<endl
@@ -4479,9 +4479,9 @@ void WXGLCrystalCanvas::POVRayOutput(const std::string &filename)
       << "    rotate  <0,0,OrientYaw>" <<endl
       << "    translate   <" << x << "," << y << "," << z <<">"<<endl
       << "}" <<endl<<endl;
-   
+
    os << "background { colour rgb <0.0, 0.0, 0.0> }"<<endl<<endl;
-   
+
    CrystalPOVRayOptions options;
    options.mXmin=mcellbbox.xMin;
    options.mXmax=mcellbbox.xMax;
@@ -4572,7 +4572,7 @@ void WXGLCrystalCanvas::POVRayOutput(const std::string &filename)
                << "   }"<<endl;
          }
       }
-      
+
    }
    os.close();
 }
@@ -4585,12 +4585,12 @@ BBox WXGLCrystalCanvas::GetCellBBox() {
 BBox WXGLCrystalCanvas::GetMapBBox() {
   return mmapbbox;
 }
-   
+
 REAL WXGLCrystalCanvas::GetFadeDistance()
 {
   return mFadeDistance;
 }
-   
+
 void WXGLCrystalCanvas::UnProject(REAL &x, REAL &y, REAL &z)
 {
    GLdouble vx,vy,vz,junk;
@@ -4610,7 +4610,7 @@ void WXGLCrystalCanvas::UnProject(REAL &x, REAL &y, REAL &z)
 
    // First, get the z depth of where we want to translate
    gluProject(0, 0, 0 ,modelMatrix,projMatrix,viewport,&junk,&junk,&z0);
-   // Get the orthonormal coordinates 
+   // Get the orthonormal coordinates
    gluUnProject(x,y,z0,modelMatrix,projMatrix,viewport,&vx,&vy,&vz);
    vy = -vy;
    // Use Quaternion to get the correct position
@@ -4633,7 +4633,7 @@ void WXGLCrystalCanvas::BuildGLFont()
 
       mGLFontDisplayListBase = glGenLists(96);
 
-      dpy = XOpenDisplay(NULL); 
+      dpy = XOpenDisplay(NULL);
 
       fontInfo = XLoadQueryFont(dpy, "-adobe-helvetica-bold-*-r-*-10-*-*-*-*-*-*-*");
       if (fontInfo == NULL)
@@ -4712,7 +4712,7 @@ END_EVENT_TABLE()
   UserSelectBoundingBox::UserSelectBoundingBox (wxWindow *parent, const char * title,
 					      const BBox bbox)
   : wxDialog((wxWindow *)parent, -1, _T("Set bounding box"), wxDefaultPosition,
-  	     wxSize(250, 250), wxDEFAULT_DIALOG_STYLE) 
+  	     wxSize(250, 250), wxDEFAULT_DIALOG_STYLE)
 {
   wxBoxSizer *dialogSizer = new wxBoxSizer(wxVERTICAL);
   wxFlexGridSizer *inputSizer = new wxFlexGridSizer(4, 3, 10, 10);
@@ -4722,37 +4722,37 @@ END_EVENT_TABLE()
   inputSizer->Add(new wxStaticText(this, -1, _T("maximum")), 0, wxALIGN_CENTER);
   // 1st row
   inputSizer->Add(new wxStaticText(this, -1, _T("a")), 0, wxALIGN_CENTRE_VERTICAL);
-  inputSizer->Add(mpXminCtrl = new wxTextCtrl(this, -1, 
-					      wxString::Format(_T("%f"),bbox.xMin)), 
+  inputSizer->Add(mpXminCtrl = new wxTextCtrl(this, -1,
+					      wxString::Format(_T("%f"),bbox.xMin)),
 					      0, wxALIGN_CENTRE_VERTICAL);
-  inputSizer->Add(mpXmaxCtrl = new wxTextCtrl(this, -1, 
-					      wxString::Format(_T("%f"),bbox.xMax)), 
+  inputSizer->Add(mpXmaxCtrl = new wxTextCtrl(this, -1,
+					      wxString::Format(_T("%f"),bbox.xMax)),
 					      0, wxALIGN_CENTRE_VERTICAL);
   // 2nd row
   inputSizer->Add(new wxStaticText(this, -1, _T("b")), 0, wxALIGN_CENTRE_VERTICAL);
-  inputSizer->Add(mpYminCtrl = new wxTextCtrl(this, -1, 
-					      wxString::Format(_T("%f"),bbox.yMin)), 
+  inputSizer->Add(mpYminCtrl = new wxTextCtrl(this, -1,
+					      wxString::Format(_T("%f"),bbox.yMin)),
 					      0, wxALIGN_CENTRE_VERTICAL);
-  inputSizer->Add(mpYmaxCtrl = new wxTextCtrl(this, -1, 
-					      wxString::Format(_T("%f"),bbox.yMax)), 
+  inputSizer->Add(mpYmaxCtrl = new wxTextCtrl(this, -1,
+					      wxString::Format(_T("%f"),bbox.yMax)),
 					      0, wxALIGN_CENTRE_VERTICAL);
   // 3rd row
   inputSizer->Add(new wxStaticText(this, -1, _T("c")), 0, wxALIGN_CENTRE_VERTICAL);
-  inputSizer->Add(mpZminCtrl = new wxTextCtrl(this, -1, 
-					      wxString::Format(_T("%f"),bbox.zMin)), 
+  inputSizer->Add(mpZminCtrl = new wxTextCtrl(this, -1,
+					      wxString::Format(_T("%f"),bbox.zMin)),
 					      0, wxALIGN_CENTRE_VERTICAL);
-  inputSizer->Add(mpZmaxCtrl = new wxTextCtrl(this, -1, 
-					      wxString::Format(_T("%f"),bbox.zMax)), 
+  inputSizer->Add(mpZmaxCtrl = new wxTextCtrl(this, -1,
+					      wxString::Format(_T("%f"),bbox.zMax)),
 					      0, wxALIGN_CENTRE_VERTICAL);
   // button section
   wxFlexGridSizer *buttonSizer = new wxFlexGridSizer(1, 2, 10, 10);
-  buttonSizer->Add(new wxButton(this, wxID_OK, _T("OK")), 
+  buttonSizer->Add(new wxButton(this, wxID_OK, _T("OK")),
 		   0, wxALIGN_CENTRE_VERTICAL);
-  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _T("Cancel")), 
+  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _T("Cancel")),
 		   0, wxALIGN_CENTRE_VERTICAL);
 
   dialogSizer->Add(10, 10);
-  dialogSizer->Add(new wxStaticText(this, -1,  wxString::FromAscii(title)), 0, 
+  dialogSizer->Add(new wxStaticText(this, -1,  wxString::FromAscii(title)), 0,
 		   wxALIGN_CENTER);
   dialogSizer->Add(10, 10);
   dialogSizer->Add(inputSizer, 0, wxALIGN_CENTER);
@@ -4831,30 +4831,30 @@ END_EVENT_TABLE()
   UserXYZBox::UserXYZBox (wxWindow *parent, const wxString &title,
 					      const Triple xyz)
   : wxDialog((wxWindow *)parent, -1, _T("Set position"), wxDefaultPosition,
-  	     wxSize(250, 250), wxDEFAULT_DIALOG_STYLE) 
+  	     wxSize(250, 250), wxDEFAULT_DIALOG_STYLE)
 {
   wxBoxSizer *dialogSizer = new wxBoxSizer(wxVERTICAL);
   wxFlexGridSizer *inputSizer = new wxFlexGridSizer(3, 2, 10, 10);
   // 1st row
   inputSizer->Add(new wxStaticText(this, -1, _T("x")), 0, wxALIGN_CENTRE_VERTICAL);
-  inputSizer->Add(mpXCtrl = new wxTextCtrl(this, -1, 
+  inputSizer->Add(mpXCtrl = new wxTextCtrl(this, -1,
 					   wxString::Format(_T("%.3f"),xyz.x), wxDefaultPosition, wxDefaultSize, wxTE_CENTRE, wxTextValidator(wxFILTER_NUMERIC)),
 					   0, wxALIGN_CENTRE_VERTICAL);
   // 2nd row
   inputSizer->Add(new wxStaticText(this, -1, _T("y")), 0, wxALIGN_CENTRE_VERTICAL);
-  inputSizer->Add(mpYCtrl = new wxTextCtrl(this, -1, 
+  inputSizer->Add(mpYCtrl = new wxTextCtrl(this, -1,
 					   wxString::Format(_T("%.3f"),xyz.y), wxDefaultPosition, wxDefaultSize, wxTE_CENTRE, wxTextValidator(wxFILTER_NUMERIC)),
 					   0, wxALIGN_CENTRE_VERTICAL);
   // 3rd row
   inputSizer->Add(new wxStaticText(this, -1, _T("z")), 0, wxALIGN_CENTRE_VERTICAL);
-  inputSizer->Add(mpZCtrl = new wxTextCtrl(this, -1, 
-					   wxString::Format(_T("%.3f"),xyz.z), wxDefaultPosition, wxDefaultSize, wxTE_CENTRE, wxTextValidator(wxFILTER_NUMERIC)), 
+  inputSizer->Add(mpZCtrl = new wxTextCtrl(this, -1,
+					   wxString::Format(_T("%.3f"),xyz.z), wxDefaultPosition, wxDefaultSize, wxTE_CENTRE, wxTextValidator(wxFILTER_NUMERIC)),
 					   0, wxALIGN_CENTRE_VERTICAL);
   // button section
   wxFlexGridSizer *buttonSizer = new wxFlexGridSizer(1, 2, 10, 10);
-  buttonSizer->Add(new wxButton(this, wxID_OK, _T("OK")), 
+  buttonSizer->Add(new wxButton(this, wxID_OK, _T("OK")),
 		   0, wxALIGN_CENTRE_VERTICAL);
-  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _T("Cancel")), 
+  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _T("Cancel")),
 		   0, wxALIGN_CENTRE_VERTICAL);
 
   dialogSizer->Add(10, 10);
@@ -4896,4 +4896,4 @@ Triple UserXYZBox::GetXYZ () {
 
 #endif // #ifdef OBJCRYST_GL
 
-}// namespace 
+}// namespace

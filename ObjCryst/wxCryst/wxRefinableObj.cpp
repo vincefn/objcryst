@@ -56,7 +56,7 @@
 #ifdef DrawText
 #undef DrawText
 #endif
- 
+
 namespace ObjCryst
 {
 /// This pointer records the last wxField in which something was enetered,
@@ -94,7 +94,7 @@ WXField(parent,label,ID_WXFIELD_REFPAR),mValue(0.),mpRefPar(par),mIsSelfUpdating
       this->SetLabel(label+":R");
       mpButtonFix=new wxCheckBox(this,ID_WXFIELD_REFPAR_FIXBUTTON,_T("L"),wxDefaultPosition, wxDefaultSize);
       //mpButtonFix->Fit();
-      mpButtonFix->SetToolTip(_T("Check this box to enable optimizing this parameter.\n") 
+      mpButtonFix->SetToolTip(_T("Check this box to enable optimizing this parameter.\n")
                               _T("(some parameters may be automatically fixed for global optimization)"));
       mpSizer->Add(mpButtonFix,0,wxALIGN_CENTER);
    }else mpButtonFix=0;
@@ -105,7 +105,7 @@ WXField(parent,label,ID_WXFIELD_REFPAR),mValue(0.),mpRefPar(par),mIsSelfUpdating
       mpButtonLimited->SetToolTip(_T("Check this box to use limits for this parameter"));
       mpSizer->Add(mpButtonLimited,0,wxALIGN_CENTER);
    }else mpButtonLimited=0;
-   
+
    mpField=new wxTextCtrl(this,ID_WXFIELD,_T(""),
                             wxDefaultPosition,wxSize(hsize,-1),wxTE_PROCESS_ENTER,
                             wxTextValidator(wxFILTER_NUMERIC));
@@ -122,7 +122,7 @@ void WXFieldRefPar::OnEnter(wxCommandEvent & WXUNUSED(event))
    WXCrystValidateAllUserInput();
 }
 void WXFieldRefPar::OnText(wxCommandEvent & WXUNUSED(event))
-{   
+{
    if(true==mIsSelfUpdating) return;
    VFN_DEBUG_MESSAGE("WXFieldRefPar::OnEnter()",6)
    if(spLastWXFieldInputNotValidated!=this)
@@ -237,13 +237,13 @@ void WXFieldRefPar::UpdateUI(const bool lock)
    }
    if(false==mpRefPar->IsUsed()) this->Show(false);
    else this->Show(true);
-   
+
    if(mpField==0)
    {
       if(lock) mMutex.Unlock();
       return;
    }
-   
+
    //mpField->SetValue(wxString::Printf("%f",mValue));
    wxString tmp;
    //if((abs(mValue)<100)&&(abs(mValue)>0.01)) tmp.Printf(_T("%6.4f"),mValue);
@@ -300,7 +300,7 @@ mChoice(-1),mChoiceOld(-1),mpOption(option),mpList(0)
    wxString choices[20];//:TODO: dynamically choose correct number
    for(int i=0;i<mpOption->GetNbChoice();i++)
       choices[i]=wxString::FromAscii(mpOption->GetChoiceName(i).c_str());
-   
+
    mpList= new wxChoice(this,ID_WXFIELD,wxDefaultPosition,wxDefaultSize,
                         mpOption->GetNbChoice(),choices);
    mpSizer->Add(mpList,0,wxALIGN_CENTER);
@@ -439,7 +439,7 @@ template<class T> T* WXDialogChooseFromRegistry(ObjRegistry<T> &reg,wxWindow*par
                                                 const string &message,int &choice)
 {
    wxString* choices=new wxString[reg.GetNb()];
-   for(int i=0;i<reg.GetNb();i++) 
+   for(int i=0;i<reg.GetNb();i++)
       *(choices+i)=wxString::FromAscii((reg.GetObj(i).GetClassName()+":"+reg.GetObj(i).GetName()).c_str());
    #if wxCHECK_VERSION( 2, 9, 4 )
    wxSingleChoiceDialog dialog
@@ -464,30 +464,30 @@ template<class T> T* WXDialogChooseFromRegistry(ObjRegistry<T> &reg,wxWindow*par
    return &(reg.GetObj(choice));
 }
 
-template RefinableObj* 
+template RefinableObj*
    WXDialogChooseFromRegistry(ObjRegistry<RefinableObj> &,wxWindow*,const string &,int &);
-template Crystal* 
+template Crystal*
    WXDialogChooseFromRegistry(ObjRegistry<Crystal> &,wxWindow*,const string &,int &);
-template Scatterer* 
+template Scatterer*
    WXDialogChooseFromRegistry(ObjRegistry<Scatterer> &,wxWindow*,const string &,int &);
-template ScatteringPower* 
+template ScatteringPower*
    WXDialogChooseFromRegistry(ObjRegistry<ScatteringPower> &,wxWindow*,const string &,int &);
-template ScatteringPowerAtom* 
+template ScatteringPowerAtom*
    WXDialogChooseFromRegistry(ObjRegistry<ScatteringPowerAtom> &,wxWindow*,
                               const string &,int &);
-template ZAtom* 
+template ZAtom*
    WXDialogChooseFromRegistry(ObjRegistry<ZAtom> &,wxWindow*,const string &,int &);
-template PowderPattern* 
+template PowderPattern*
    WXDialogChooseFromRegistry(ObjRegistry<PowderPattern> &,wxWindow*,const string &,int &);
-template PowderPatternComponent* 
+template PowderPatternComponent*
    WXDialogChooseFromRegistry(ObjRegistry<PowderPatternComponent>&,wxWindow*,
                               const string&,int &);
-template DiffractionDataSingleCrystal* 
+template DiffractionDataSingleCrystal*
    WXDialogChooseFromRegistry(ObjRegistry<DiffractionDataSingleCrystal>&,wxWindow*,
                               const string &,int &);
-template OptimizationObj* 
+template OptimizationObj*
    WXDialogChooseFromRegistry(ObjRegistry<OptimizationObj> &,wxWindow*,const string &,int &);
-template XMLCrystTag* 
+template XMLCrystTag*
    WXDialogChooseFromRegistry(ObjRegistry<XMLCrystTag> &,wxWindow*,const string &,int &);
 
 
@@ -496,7 +496,7 @@ template<class T> const T* WXDialogChooseFromRegistry(const ObjRegistry<T> &reg,
                                                       ,int &choice)
 {
    wxString* choices=new wxString[reg.GetNb()];
-   for(int i=0;i<reg.GetNb();i++) 
+   for(int i=0;i<reg.GetNb();i++)
       *(choices+i)=wxString::FromAscii((reg.GetObj(i).GetClassName()+":"+reg.GetObj(i).GetName()).c_str());
    #if wxCHECK_VERSION( 2, 9, 4 )
    wxSingleChoiceDialog dialog
@@ -516,43 +516,43 @@ template<class T> const T* WXDialogChooseFromRegistry(const ObjRegistry<T> &reg,
    return &(reg.GetObj(choice));
 }
 
-template const RefinableObj* 
+template const RefinableObj*
    WXDialogChooseFromRegistry(const ObjRegistry<RefinableObj> &,wxWindow*,const string &,int &);
-   
-template const Crystal* 
+
+template const Crystal*
    WXDialogChooseFromRegistry(const ObjRegistry<Crystal> &,wxWindow*,const string &,int &);
-   
-template const Scatterer* 
+
+template const Scatterer*
    WXDialogChooseFromRegistry(const ObjRegistry<Scatterer> &,wxWindow*,const string &,int &);
-   
-template const ScatteringPower* 
+
+template const ScatteringPower*
    WXDialogChooseFromRegistry(const ObjRegistry<ScatteringPower> &,wxWindow*,
                               const string &,int &);
-                              
-template const ScatteringPowerAtom* 
+
+template const ScatteringPowerAtom*
    WXDialogChooseFromRegistry(const ObjRegistry<ScatteringPowerAtom> &,wxWindow*,
                               const string &,int &);
-                              
-template const ZAtom* 
+
+template const ZAtom*
    WXDialogChooseFromRegistry(const ObjRegistry<ZAtom> &,wxWindow*,const string &,int &);
-   
-template const PowderPattern* 
+
+template const PowderPattern*
    WXDialogChooseFromRegistry(const ObjRegistry<PowderPattern> &,wxWindow*,
                               const string &,int &);
-                              
-template const PowderPatternComponent* 
+
+template const PowderPatternComponent*
    WXDialogChooseFromRegistry(const ObjRegistry<PowderPatternComponent>&,wxWindow*,
                               const string&,int &);
-                              
-template const DiffractionDataSingleCrystal* 
+
+template const DiffractionDataSingleCrystal*
    WXDialogChooseFromRegistry(const ObjRegistry<DiffractionDataSingleCrystal>&,wxWindow*,
                               const string &,int &);
-                              
-template const OptimizationObj* 
+
+template const OptimizationObj*
    WXDialogChooseFromRegistry(const ObjRegistry<OptimizationObj> &,wxWindow*,
                               const string &,int &);
-                              
-template const XMLCrystTag* 
+
+template const XMLCrystTag*
    WXDialogChooseFromRegistry(const ObjRegistry<XMLCrystTag> &,wxWindow*,
                               const string &,int &);
 
@@ -578,10 +578,10 @@ WXCrystObj(parent,wxHORIZONTAL),mpRefinableObj(obj)
    cout <<"new CrystMutex("<<&mMutex<<")for :"<<obj->GetClassName()<<":"<<obj->GetName()<<endl;
    #endif
    mpWXTitle->SetLabel(mpRefinableObj->GetClassName());
-   
+
    // Menu
       mpMenuBar=new WXCrystMenuBar(this,this);
-   
+
       mpSizer->Add(mpMenuBar);
       mList.Add(mpMenuBar);
    //:TODO: Rather use a WXRegistry for the options ?
@@ -642,7 +642,7 @@ void WXRefinableObj::OnMenuSave(wxCommandEvent & WXUNUSED(event))
    VFN_DEBUG_MESSAGE("WXRefinableObj::OnButtonSave()",6)
    wxFileDialog save(this,_T("Choose a file"),_T(""),_T(""),_T("*.xml"),wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
-   
+
    ofstream out(save.GetPath().ToAscii());
    if(!out) return;//:TODO:
    {
@@ -657,7 +657,7 @@ void WXRefinableObj::OnMenuLoad(wxCommandEvent & WXUNUSED(event))
    wxFileDialog *open= new wxFileDialog(this,_T("Choose a file"),_T(""),_T(""),_T("*.xml"),
                                         wxFD_OPEN | wxFD_FILE_MUST_EXIST);
    if(open->ShowModal() != wxID_OK) return;
-   
+
    ifstream fin(open->GetPath().ToAscii());
    if(!fin) return;//:TODO:
    {
@@ -714,4 +714,4 @@ void WXRefinableObj::UpdateUI(const bool lock)
    VFN_DEBUG_EXIT("WXRefinableObj::UpdateUI()"<<mpRefinableObj->GetName(),6)
 }
 
-}// namespace 
+}// namespace

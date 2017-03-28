@@ -40,7 +40,7 @@
 #ifdef DrawText
 #undef DrawText
 #endif
- 
+
 namespace ObjCryst
 {
 ////////////////////////////////////////////////////////////////////////
@@ -148,5 +148,4 @@ void WXScatteringPowerAtom::UpdateUI(const bool lock)
    VFN_DEBUG_EXIT("WXScatteringPowerAtom::UpdateUI()",3)
 }
 
-}// namespace 
-
+}// namespace
