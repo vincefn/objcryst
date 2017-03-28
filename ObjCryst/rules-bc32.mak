@@ -215,7 +215,7 @@ libcryst:
 #wxCryst++
 !if $(wxcryst)==1
 libwxCryst:
-   cd ${DIR_WXWCRYST}
+	cd ${DIR_WXWCRYST}
 	$(MAKE) -f bc32.mak  lib
 !else
 libwxCryst:
