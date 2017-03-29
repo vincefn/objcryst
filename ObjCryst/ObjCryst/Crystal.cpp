@@ -1681,8 +1681,8 @@ void Crystal::MergeEqualScatteringPowers(const bool oneScatteringPowerPerElement
       for(std::map<ScatteringPower*,std::set<ScatteringPower*> >::iterator pos=vequivpow.begin();pos!=vequivpow.end();++pos)
       {
          if(pos->second.size()==0) continue;
-         float b = pos->first->GetBiso();
-         CrystVector<float> bij(6);
+         REAL b = pos->first->GetBiso();
+         CrystVector_REAL bij(6);
          for(unsigned int i=0;i<6;i++) bij(i) = pos->first->GetBij(i);
          for(std::set<ScatteringPower*>::const_iterator pos2=pos->second.begin(); pos2!=pos->second.end();++pos2)
          {
