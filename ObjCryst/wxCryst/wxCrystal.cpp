@@ -4712,7 +4712,7 @@ END_EVENT_TABLE()
   UserSelectBoundingBox::UserSelectBoundingBox (wxWindow *parent, const char * title,
 					      const BBox bbox)
   : wxDialog((wxWindow *)parent, -1, _T("Set bounding box"), wxDefaultPosition,
-  	     wxSize(250, 250), wxDEFAULT_DIALOG_STYLE)
+             wxSize(250, 250), wxDEFAULT_DIALOG_STYLE)
 {
   wxBoxSizer *dialogSizer = new wxBoxSizer(wxVERTICAL);
   wxFlexGridSizer *inputSizer = new wxFlexGridSizer(4, 3, 10, 10);
@@ -4831,7 +4831,7 @@ END_EVENT_TABLE()
   UserXYZBox::UserXYZBox (wxWindow *parent, const wxString &title,
 					      const Triple xyz)
   : wxDialog((wxWindow *)parent, -1, _T("Set position"), wxDefaultPosition,
-  	     wxSize(250, 250), wxDEFAULT_DIALOG_STYLE)
+             wxSize(250, 250), wxDEFAULT_DIALOG_STYLE)
 {
   wxBoxSizer *dialogSizer = new wxBoxSizer(wxVERTICAL);
   wxFlexGridSizer *inputSizer = new wxFlexGridSizer(3, 2, 10, 10);
