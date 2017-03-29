@@ -34,6 +34,8 @@ using namespace std;
 
 #include <iomanip>
 
+#define POSSIBLY_UNUSED(expr) (void)(expr)
+
 namespace ObjCryst
 {
 
@@ -142,7 +144,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
       CrystMatrix_REAL designMatrix(nbVar,nbObs);
       CrystVector_REAL deltaVar(nbVar);
       long i,j,k;
-      REAL R_ini,Rw_ini;
+      REAL R_ini,Rw_ini;  POSSIBLY_UNUSED(R_ini);
       REAL *pTmp1,*pTmp2;
 
       REAL marquardt=1e-2;
