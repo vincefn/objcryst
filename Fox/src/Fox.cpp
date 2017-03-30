@@ -430,7 +430,53 @@ static const long ID_FOX_COD_LIST=                     WXCRYST_ID();
 static const long MENU_GRID_SERVER_RUN=                WXCRYST_ID();
 static const long MENU_GRID_CLIENT_START=              WXCRYST_ID();
 
-
+/// Function to check for updates
+bool CheckUpdates(std::map<unsigned int,std::pair<int,wxString> > &vUpdates)
+{
+   vUpdates.clear();
+   std::list<wxString> vurl;
+   vurl.push_back(wxString("http://vincefn.net/FoxUpdates.txt"));
+   vurl.push_back(wxString("http://objcryst.sourceforge.net/FoxUpdates.txt"));
+   wxInputStream *fstream=NULL;
+   wxFileSystem fs;
+   wxFSFile *fp= NULL;
+   bool ok=false;
+   for(std::list<wxString>::const_iterator pos=vurl.begin();pos!=vurl.end();++pos)
+   {
+      if(wxFileSystem::HasHandlerForPath(*pos))
+      {
+         fp= fs.OpenFile(*pos,wxFS_READ);
+         if(fp!=NULL)
+            fstream = fp->GetStream();
+         if(fstream!=NULL)
+            ok = (fstream->IsOk()) && (!fstream->Eof());
+         if(ok)
+         {
+            (*fpObjCrystInformUser)(wxString::Format("Fetching updates from: %s", *pos).ToStdString());
+            break;
+         }
+      }
+      (*fpObjCrystInformUser)(wxString("Failed fetching updates from: "+ *pos).ToStdString());
+   }
+   if(ok)
+   {
+      wxTextInputStream txtis(*fstream);
+      txtis.ReadLine();//first line
+      while(!fstream->Eof())
+      {
+         unsigned int revisionfix=txtis.Read16();
+         unsigned int revisionbug=txtis.Read16();
+         unsigned int severity=txtis.Read16();
+         wxString reason=txtis.ReadLine();
+         if((revisionfix>__FOXREVISION__)&&(__FOXREVISION__>revisionbug))
+         {
+            //cout<<"Revision:"<<revisionfix<<", severity="<<severity<<",reason="<<reason<<endl;
+            vUpdates[revisionfix]=make_pair(severity,reason);
+         }
+      }
+   }
+   return ok;
+}
 /// Separate thread to check for updates////////////////////////////////////////////////////////////
 static const long ID_FOX_UPDATES_RESULT=               WXCRYST_ID();
 
@@ -443,39 +489,7 @@ class WXThreadCheckUpdates:public wxThread
       wxThread::ExitCode Entry()
       {
          //cout<<"WXThreadCheckUpdates:: OnEntry()"<<endl;
-         mpvUpdates->clear();
-         #if 0
-         wxFileSystem fs;
-         wxFSFile *fp= NULL;
-         fp= fs.OpenFile(wxString::FromAscii("http://objcryst.sourceforge.net/FoxUpdates.txt"),wxFS_READ);
-         if(fp!=NULL)
-         {
-            wxInputStream *fstream = fp->GetStream();
-         #else
-         wxURL url("http://objcryst.sourceforge.net/FoxUpdates.txt");
-         if(url.GetError()==wxURL_NOERR)
-         {
-            wxInputStream *fstream = url.GetInputStream();
-         #endif
-            if(fstream->IsOk())
-            {
-               wxTextInputStream txtis(*fstream);
-               txtis.ReadLine();//first line
-               while(!fstream->Eof())
-               {
-                  unsigned int revisionfix=txtis.Read16();
-                  unsigned int revisionbug=txtis.Read16();
-                  unsigned int severity=txtis.Read16();
-                  wxString reason=txtis.ReadLine();
-                  if((revisionfix>__FOXREVISION__)&&(__FOXREVISION__>revisionbug))
-                  {
-                     //cout<<"Revision:"<<revisionfix<<", severity="<<severity<<",reason="<<reason<<endl;
-                     (*mpvUpdates)[revisionfix]=make_pair(severity,reason);
-                  }
-               }
-            }
-            delete fstream;
-         }
+         CheckUpdates(*mpvUpdates);
          return NULL;
       }
       void OnExit()
@@ -1464,7 +1478,7 @@ int main (int argc, char *argv[])
    }
 #ifdef __WX__CRYST__
    wxSocketBase::Initialize();// Need this for threaded check of updates
-   this->SetVendorName(_T("http://objcryst.sf.net/Fox"));
+   this->SetVendorName(_T("http://fox.vincefn.net/"));
    this->SetAppName(_T("FOX-Free Objects for Crystallography"));
    // Read (and automatically create if necessary) global Fox preferences
    // We explicitely use a wxFileConfig, to avoid the registry under Windows
@@ -2576,7 +2590,23 @@ void WXCrystMainFrame::OnPreferences(wxCommandEvent& event)
 void WXCrystMainFrame::OnCheckUpdate(wxCommandEvent& event)
 {
    VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnCheckUpdate",10);
-   if(event.GetId()==ID_FOX_UPDATES_RESULT)
+   #if 0 // Threaded check for updates
+   if(event.GetId()!=ID_FOX_UPDATES_RESULT)
+   {
+      #if 1
+      if(false == wxFileSystem::HasHandlerForPath(_T("http://objcryst.sourceforge.net/FoxUpdates.txt")))
+         wxFileSystem::AddHandler(new wxInternetFSHandler);
+      #endif
+      mvUpdatesAutoCheck=false;
+      WXThreadCheckUpdates *pThreadCheckUpdates = new WXThreadCheckUpdates(mvUpdates,*this);
+      if(pThreadCheckUpdates->Create() != wxTHREAD_NO_ERROR)
+         wxLogError(_T("Can't create updates check thread"));
+      else pThreadCheckUpdates->Run();
+   }
+   else
+   #else // Avoid thread to check for updates -unreliable !
+   CheckUpdates(mvUpdates);
+   #endif
    {
       unsigned int nbminorfeature=0,nbmajorfeature=0,nbrelease=0,nbminorbug=0,nbmajorbug=0,nbcritical=0;
       for(map<unsigned int,pair<int,wxString> >::const_iterator pos=mvUpdates.begin();pos!=mvUpdates.end();++pos)
@@ -2667,18 +2697,6 @@ void WXCrystMainFrame::OnCheckUpdate(wxCommandEvent& event)
          }
          frame->Show(true);
       }
-   }
-   else
-   {
-      #if 0
-      if(false == wxFileSystem::HasHandlerForPath(_T("http://objcryst.sourceforge.net/FoxUpdates.txt")))
-         wxFileSystem::AddHandler(new wxInternetFSHandler);
-      #endif
-      mvUpdatesAutoCheck=false;
-      WXThreadCheckUpdates *pThreadCheckUpdates = new WXThreadCheckUpdates(mvUpdates,*this);
-      if(pThreadCheckUpdates->Create() != wxTHREAD_NO_ERROR) 
-         wxLogError(_T("Can't create updates check thread"));
-      else pThreadCheckUpdates->Run();
    }
 }
 
