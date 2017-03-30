@@ -1180,7 +1180,7 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
             }
             ctatom++;
 
-            const float t20=chrono.seconds();
+            //const float t20=chrono.seconds();
             // Try to find an existing scattering power with the same properties, or create a new one
             ScatteringPower* sp=NULL;
             if(oneScatteringPowerPerElement)
@@ -1202,7 +1202,7 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
                   vElementBiso[sp].first+=posat->mBiso;
                   vElementBiso[sp].second=1;
                   pCryst->AddScatteringPower(sp);
-                  const float t21=chrono.seconds();
+                  //const float t21=chrono.seconds();
                   //(*fpObjCrystInformUser)((boost::format("CIF: Add scattering power: %s (dt=%6.3fsCrystal creation=%6.3fs total)")% posat->mSymbol % (t21-t20) % t21).str());
                }
             }
@@ -1239,7 +1239,7 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
                      for (int idx=0; idx<6; ++idx) sp->SetBij(idx, posat->mBeta[idx]);
                   }
                   pCryst->AddScatteringPower(sp);
-                  const float t21=chrono.seconds();
+                  //const float t21=chrono.seconds();
                   //(*fpObjCrystInformUser)((boost::format("CIF: Add scattering power: %s (dt=%6.3fsCrystal creation=%6.3fs total)") % posat->mLabel % (t21-t20) % t21).str());
                }
             }

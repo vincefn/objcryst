@@ -877,7 +877,6 @@ float PeakList::Simulate(float zero, float a, float b, float c,
 
 void PeakList::ExportDhklDSigmaIntensity(std::ostream &os)const
 {
-   char buf[100];
    for(vector<PeakList::hkl>::const_iterator pos=mvHKL.begin();pos!=mvHKL.end();++pos)
    {
       const float sigma=1/(pos->dobs-pos->dobssigma/2)-1/(pos->dobs+pos->dobssigma/2);

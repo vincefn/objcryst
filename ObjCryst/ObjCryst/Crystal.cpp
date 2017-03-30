@@ -1577,7 +1577,7 @@ void Crystal::ConnectAtoms(const REAL min_relat_dist, const REAL max_relat_dist,
             if(extra>0)
             {
                std::sort(vbonds.begin(), vbonds.end(),CompareBondDist);
-               if(extra<vbonds.size())// Am I paranoid ?
+               if(size_t(extra) < vbonds.size()) // Am I paranoid ?
                {
                   const REAL maxdist=vbonds[vbonds.size()-extra]->GetLength()*1.05;
                   while(vbonds.back()->GetLength()>maxdist)
