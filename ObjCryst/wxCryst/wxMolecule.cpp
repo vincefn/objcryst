@@ -45,7 +45,7 @@ template<class T> T const* WXDialogChooseFromVector(const vector<T*> &reg,wxWind
                                                 const string &message,int &choice)
 {
    wxString *choices = new wxString[reg.size()];
-   for(unsigned int i=0;i<reg.size();i++) 
+   for(unsigned int i=0;i<reg.size();i++)
       choices[i]= wxString::FromAscii((reg[i]->GetName()).c_str());
    wxSingleChoiceDialog dialog
          (parent,message.c_str(),"Choose",reg.size(),choices,NULL,wxOK | wxCANCEL);
@@ -60,11 +60,11 @@ template<class T> T * WXDialogChooseFromVector(vector<T*> &reg,wxWindow*parent,
                                                 const string &message,int &choice)
 {
    wxString *choices = new wxString[reg.size()];
-   for(unsigned int i=0;i<reg.size();i++) 
+   for(unsigned int i=0;i<reg.size();i++)
       choices[i]= wxString::FromAscii((reg[i]->GetName()).c_str());
    #if wxCHECK_VERSION( 2, 9, 4 )
    wxSingleChoiceDialog dialog
-   (parent, wxString::FromAscii(message.c_str()),_T("Choose"),reg.size(),choices,(void**)NULL,wxOK | wxCANCEL);   
+   (parent, wxString::FromAscii(message.c_str()),_T("Choose"),reg.size(),choices,(void**)NULL,wxOK | wxCANCEL);
    #else
    wxSingleChoiceDialog dialog
          (parent, wxString::FromAscii(message.c_str()),_T("Choose"),reg.size(),choices,NULL,wxOK | wxCANCEL);
@@ -80,7 +80,7 @@ template<class T> list<T *> WXDialogChooseMultipleFromVector(vector<T*> &reg,wxW
                                                 const string &message)
 {
    wxString *choices = new wxString[reg.size()];
-   for(unsigned int i=0;i<reg.size();i++) 
+   for(unsigned int i=0;i<reg.size();i++)
       choices[i]= wxString::FromAscii((reg[i]->GetName()).c_str());
    wxMultiChoiceDialog_ListBox dialog
          (parent, wxString::FromAscii(message.c_str()),_T("Choose"),reg.size(),choices);
@@ -95,7 +95,7 @@ template<class T> list<T const*> WXDialogChooseMultipleFromVector(const vector<T
                                                 const string &message)
 {
    wxString *choices = new wxString[reg.size()];
-   for(unsigned int i=0;i<reg.size();i++) 
+   for(unsigned int i=0;i<reg.size();i++)
       choices[i]= wxString::FromAscii((reg[i]->GetName()).c_str());
    wxMultiChoiceDialog_ListBox dialog
          (parent, wxString::FromAscii(message.c_str()),_T("Choose"),reg.size(),choices);
@@ -119,7 +119,7 @@ string CompressString(const string &s,const string &c)
    }
    return sc;
 }
-// Split 
+// Split
 list<string> SplitString(const string &str, const string &separator)
 {
    string::size_type idx0=(string::size_type) 0;
@@ -194,7 +194,7 @@ WXCrystObjBasic(parent),mpMolAtom(obj)
       mpSizer->Add(pFieldZ,0,wxALIGN_CENTER);
       mList.Add(pFieldZ);
    }
-   
+
    this->SetSizer(mpSizer);
    this->Layout();
    this->CrystUpdate(true);
@@ -272,7 +272,7 @@ WXCrystObjBasic(parent),mpMolBond(obj),mpButtonFree(0)
    mpFieldAtom1->SetValue(mpMolBond->GetAtom1().GetName());
    mpSizer->Add(mpFieldAtom1,0,wxALIGN_CENTER);
    mList.Add(mpFieldAtom1);
-   
+
    mpFieldAtom2=new WXFieldChoice(this,ID_MOLBOND_ATOM2,"-",60);
    mpFieldAtom2->SetValue(mpMolBond->GetAtom2().GetName());
    mpSizer->Add(mpFieldAtom2,0,wxALIGN_CENTER);
@@ -287,7 +287,7 @@ WXCrystObjBasic(parent),mpMolBond(obj),mpButtonFree(0)
       new WXFieldPar<REAL>(this,",Restraint=",-1,&(mpMolBond->Length0()));
    mpSizer->Add(length,0,wxALIGN_CENTER);
    mList.Add(length);
-   
+
    WXFieldPar<REAL> *delta=
       new WXFieldPar<REAL>(this,",delta=",-1,&(mpMolBond->LengthDelta()));
    mpSizer->Add(delta,0,wxALIGN_CENTER);
@@ -360,7 +360,7 @@ void WXMolBond::OnChangeAtom(wxCommandEvent &event)
       }
       mpMolBond->SetAtom2(*at);
    }
-   
+
    this->CrystUpdate(true);
    this->UpdateUI(true);
    VFN_DEBUG_EXIT("WXMolBond::OnChangeScattPow()",6)
@@ -369,7 +369,7 @@ void WXMolBond::OnChangeAtom(wxCommandEvent &event)
 void WXMolBond::OnToggleFree(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXMolBond::OnToggleFree()",6)
-   if(0!=mpButtonFree) mpMolBond->SetFreeTorsion(mpButtonFree->GetValue()); 
+   if(0!=mpButtonFree) mpMolBond->SetFreeTorsion(mpButtonFree->GetValue());
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -397,12 +397,12 @@ WXCrystObjBasic(parent),mpMolBondAngle(obj)
    mpFieldAtom1->SetValue(mpMolBondAngle->GetAtom1().GetName());
    mpSizer->Add(mpFieldAtom1,0,wxALIGN_CENTER);
    mList.Add(mpFieldAtom1);
-   
+
    mpFieldAtom2=new WXFieldChoice(this,ID_MOLBONDANGLE_ATOM2,"-",60);
    mpFieldAtom2->SetValue(mpMolBondAngle->GetAtom2().GetName());
    mpSizer->Add(mpFieldAtom2,0,wxALIGN_CENTER);
    mList.Add(mpFieldAtom2);
-   
+
    mpFieldAtom3=new WXFieldChoice(this,ID_MOLBONDANGLE_ATOM3,"-",60);
    mpFieldAtom3->SetValue(mpMolBondAngle->GetAtom3().GetName());
    mpSizer->Add(mpFieldAtom3,0,wxALIGN_CENTER);
@@ -506,7 +506,7 @@ void WXMolBondAngle::OnChangeAtom(wxCommandEvent &event)
       }
       mpMolBondAngle->SetAtom3(*at);
    }
-   
+
    this->CrystUpdate(true);
    this->UpdateUI(true);
    VFN_DEBUG_EXIT("WXMolBondAngle::OnChangeScattPow()",6)
@@ -538,12 +538,12 @@ WXCrystObjBasic(parent),mpMolDihedralAngle(obj)
    mpFieldAtom1->SetValue(mpMolDihedralAngle->GetAtom1().GetName());
    mpSizer->Add(mpFieldAtom1,0,wxALIGN_CENTER);
    mList.Add(mpFieldAtom1);
-   
+
    mpFieldAtom2=new WXFieldChoice(this,ID_MOLDIHEDRALANGLE_ATOM2,"-",60);
    mpFieldAtom2->SetValue(mpMolDihedralAngle->GetAtom2().GetName());
    mpSizer->Add(mpFieldAtom2,0,wxALIGN_CENTER);
    mList.Add(mpFieldAtom2);
-   
+
    mpFieldAtom3=new WXFieldChoice(this,ID_MOLDIHEDRALANGLE_ATOM3,"-",60);
    mpFieldAtom3->SetValue(mpMolDihedralAngle->GetAtom3().GetName());
    mpSizer->Add(mpFieldAtom3,0,wxALIGN_CENTER);
@@ -671,7 +671,7 @@ void WXMolDihedralAngle::OnChangeAtom(wxCommandEvent &event)
       }
       mpMolDihedralAngle->SetAtom4(*at);
    }
-   
+
    this->CrystUpdate(true);
    this->UpdateUI(true);
    VFN_DEBUG_EXIT("WXMolDihedralAngle::OnChangeScattPow()",6)
@@ -760,7 +760,7 @@ BEGIN_EVENT_TABLE(WXMolecule,wxWindow)
    EVT_MENU(ID_MOLECULE_MENU_PAR_MDTEST,                  WXMolecule::OnMenuMDTest)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_OPTIMIZECONFORMATION,WXMolecule::OnMenuOptimizeConformation)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_STATUS,              WXMolecule::OnMenuPrintRestraintStatus)
-   EVT_MENU(ID_MOLECULE_MENU_EXPORT_RESTRAINTS,           WXMolecule::OnMenuExportRestraints)  
+   EVT_MENU(ID_MOLECULE_MENU_EXPORT_RESTRAINTS,           WXMolecule::OnMenuExportRestraints)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_ADD_ATOM,            WXMolecule::OnMenuAddAtom)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_ADD_BOND,            WXMolecule::OnMenuAddBond)
    EVT_MENU(ID_MOLECULE_MENU_FORMULA_ADD_ANGLE,           WXMolecule::OnMenuAddAngle)
@@ -814,7 +814,7 @@ mpBondWin(0),mpAngleWin(0),mpDihedralAngleWin(0),mpRigidGroupWin(0),mpNonFlipAto
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_STATUS,
                                 "Print Detailed Restraint Values");
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_EXPORT_RESTRAINTS,
-                                "Export Restraints in CVS File format");         
+                                "Export Restraints in CVS File format");
          mpMenuBar->GetMenu(ID_MOLECULE_MENU_FORMULA).AppendSeparator();
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_ADD_ATOM,
                                 "Add an Atom");
@@ -834,16 +834,16 @@ mpBondWin(0),mpAngleWin(0),mpDihedralAngleWin(0),mpRigidGroupWin(0),mpNonFlipAto
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_REMOVE_ATOM,
                                 "Remove an Atom");
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_REMOVE_BOND,
-                                "Remove a Bond Restraint");         
+                                "Remove a Bond Restraint");
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_REMOVE_ANGLE,
                                 "Remove a Bond Angle Restraint");
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_REMOVE_DIHEDRAL,
                                 "Remove a Dihedral Angle Restraint");
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_REMOVE_RIGID_GROUP,
-                                "Remove Rigid Group"); 
+                                "Remove Rigid Group");
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_REMOVE_NONFLIPATOM,
                                 "Remove Non-Flip (optically active) Atom");
-         
+
          mpMenuBar->GetMenu(ID_MOLECULE_MENU_FORMULA).AppendSeparator();
          mpMenuBar->AddMenuItem(ID_MOLECULE_MENU_FORMULA,ID_MOLECULE_MENU_FORMULA_SHOW_RESTRAINT,
                                 "Show Restraint Window");
@@ -884,7 +884,7 @@ mpBondWin(0),mpAngleWin(0),mpDihedralAngleWin(0),mpRigidGroupWin(0),mpNonFlipAto
       mpSizer->Add(pMDSizer,0,wxALIGN_LEFT);
       mList.Add(pWXFieldMDEnergy);
       mList.Add(pWXFieldMDFrequency);
-      
+
       pWXFieldMDFrequency->SetToolTip(_T("Frequency of Molecular Dynamics Moves (0.0-1.0)\n\n")
                                       _T("MD moves are used to alter the conformation of atom groups \n")
                                       _T("which cannot be changed by simple bond distance\n")
@@ -950,7 +950,7 @@ void WXMolecule::OnMenuOptimizeConformation(wxCommandEvent & WXUNUSED(event))
    mpMolecule->OptimizeConformation(20000,mpMolecule->GetAtomList().size());
    mpMolecule->OptimizeConformationSteepestDescent(0.01,100);
    mpMolecule->RestraintStatus(cout);
-   
+
    LSQNumObj lsq;
    lsq.SetRefinedObj(*mpMolecule);
    lsq.PrepareRefParList(true);
@@ -962,7 +962,7 @@ void WXMolecule::OnMenuOptimizeConformation(wxCommandEvent & WXUNUSED(event))
    mpMolecule->RestraintStatus(cout);
 
    mpMolecule->GetCrystal().UpdateDisplay();
-   
+
    VFN_DEBUG_EXIT("WXMolecule::OnMenuOptimizeConformation()",5)
 }
 void WXMolecule::OnMenuExportRestraints(wxCommandEvent & WXUNUSED(event))
@@ -972,7 +972,7 @@ void WXMolecule::OnMenuExportRestraints(wxCommandEvent & WXUNUSED(event))
 
    stringstream ss;
    mpMolecule->RestraintExport(ss);
-   
+
    wxFileDialog open(this,_T("Choose File to save restraints:"),
                         _T(""),_T(""),_T("*.csv"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
    if(open.ShowModal() != wxID_OK) return;
@@ -1038,7 +1038,7 @@ void WXMolecule::OnMenuAddBond(wxCommandEvent & WXUNUSED(event))
    MolAtom *at2=WXDialogChooseFromVector(v,
                                (wxWindow*)this,"Choose the second Atom",choice);
    if(0==at2) return;
-   
+
    if(at1==at2)
    {
       wxMessageDialog dumbUser(this,_T("The two atoms must be different !"),
@@ -1060,7 +1060,7 @@ void WXMolecule::OnMenuAddBond(wxCommandEvent & WXUNUSED(event))
       return;
    }
    dialog.GetValue().ToDouble(&d);
-   
+
    mpMolecule->AddBond(*at1,*at2,d,.01,.02,1.);
    VFN_DEBUG_EXIT("WXMolecule::OnMenuAddBond()",6)
 }
@@ -1081,7 +1081,7 @@ void WXMolecule::OnMenuAddAngle(wxCommandEvent & WXUNUSED(event))
    MolAtom *at3=WXDialogChooseFromVector(v,
                                (wxWindow*)this,"Choose the third Atom",choice);
    if(0==at2) return;
-   
+
    if( (at1==at2) || (at1==at3) ||(at2==at3))
    {
       wxMessageDialog dumbUser(this,_T("The three atoms must be different !"),
@@ -1089,7 +1089,7 @@ void WXMolecule::OnMenuAddAngle(wxCommandEvent & WXUNUSED(event))
       dumbUser.ShowModal();
       return;
    }
-   
+
    static double a=109.5;//static so that last entered value will be used next time
    wxString s;
    s.Printf(_T("%6.2f"),a);
@@ -1104,7 +1104,7 @@ void WXMolecule::OnMenuAddAngle(wxCommandEvent & WXUNUSED(event))
       return;
    }
    dialog.GetValue().ToDouble(&a);
-   
+
    mpMolecule->AddBondAngle(*at1,*at2,*at3,a*DEG2RAD,.01,0.02);
    VFN_DEBUG_EXIT("WXMolecule::OnMenuAddBond()",6)
 }
@@ -1129,7 +1129,7 @@ void WXMolecule::OnMenuAddDihedralAngle(wxCommandEvent & WXUNUSED(event))
    MolAtom *at4=WXDialogChooseFromVector(v,
                                (wxWindow*)this,"Choose the fourth Atom",choice);
    if(0==at4) return;
-   
+
    if( (at1==at2) || (at1==at3) || (at1==at4) || (at2==at3) || (at2==at4) || (at3==at4))
    {
       wxMessageDialog dumbUser(this,_T("The atoms must be different !"),
@@ -1190,7 +1190,7 @@ void WXMolecule::OnMenuAddNonFlipAtom(wxCommandEvent & WXUNUSED(event))
       dumbUser.ShowModal();
       return;
    }
-      
+
    at1->SetNonFlipAtom(true);
    this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXMolecule::OnMenuAddNonFlipAtom()",6)
@@ -1302,7 +1302,7 @@ void WXMolecule::OnMenuRemoveNonFlipAtom(wxCommandEvent & WXUNUSED(event))
       dumbUser.ShowModal();
       return;
    }
-    
+
    at1->SetNonFlipAtom(false);
    this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXMolecule::OnMenuRemoveNonFlipAtom()",6)
@@ -1331,7 +1331,7 @@ void WXMolecule::OnMenuRemoveFlipGroup(wxCommandEvent & WXUNUSED(event))
 
    wxString *choices = new wxString[v.size()];
    int i=0;
-   for(list<Molecule::FlipGroup>::iterator pos=v.begin();pos!=v.end();++pos) {       
+   for(list<Molecule::FlipGroup>::iterator pos=v.begin();pos!=v.end();++pos) {
        if(pos->mvRotatedChainList.begin()->first==pos->mpAtom0) {
            choices[i] = pos->mpAtom0->GetName();
            choices[i] += ": ";
@@ -1347,12 +1347,12 @@ void WXMolecule::OnMenuRemoveFlipGroup(wxCommandEvent & WXUNUSED(event))
            choices[i].Remove(choices[i].size()-5, choices[i].size());
        }
        i++;
-   }    
-   
+   }
+
    wxMultiChoiceDialog_ListBox dialog ((wxWindow*)this, "Choose the Flip Group(s) to be removed",_T("Choose"),v.size(),choices);
    dialog.ShowModal();
    wxArrayInt choice=dialog.GetSelections();
-       
+
    delete[] choices;
 
    this->CrystUpdate(true);
@@ -1690,7 +1690,7 @@ void WXMolecule::OnEditGridRigidGroup(wxGridEvent &e)
 {
    if(mIsSelfUpdating) return;
    VFN_DEBUG_ENTRY("WXMolecule::OnEditGridRigidGroup():"<<e.GetRow()<<","<<e.GetCol(),10)
-   
+
    const long r=e.GetRow();
    const long c=e.GetCol();
    wxString s=mpRigidGroupWin->GetCellValue(r,c);
@@ -1704,7 +1704,7 @@ void WXMolecule::OnEditGridRigidGroup(wxGridEvent &e)
    }
    set<MolAtom *> *pold=(set<MolAtom *>*)  mpMolecule->GetRigidGroupList()[r];
    set<MolAtom *> *pnew=(set<MolAtom *>*) &rg;
-   
+
    if( *pold != *pnew)
    {
       *pold = *pnew;
@@ -1718,7 +1718,7 @@ void WXMolecule::OnMenuExport2ZMatrix(wxCommandEvent &event)
 {
    VFN_DEBUG_MESSAGE("WXMolecule::OnMenuExport2ZMatrix()",6)
    const vector<MolZAtom> *pz=&(mpMolecule->AsZMatrix(true));
-   
+
    if(event.GetId()==ID_MOLECULE_MENU_FILE_2ZMATRIX)
    {
       wxFileDialog open(this,_T("Choose a file to save the Z-matrix to"),_T(""),_T(""),_T("*.fhz"),
@@ -1739,7 +1739,7 @@ void WXMolecule::OnMenuExport2ZMatrix(wxCommandEvent &event)
             {
                tmp.Printf(_T("%6.3f"),pos->mBondLength);
                fout<<tmp;
-               if(i>1) 
+               if(i>1)
                {
                   tmp.Printf(_T(" %2lu%8.3f"),pos->mBondAngleAtom+1,pos->mBondAngle*RAD2DEG);
                   fout<<tmp;
@@ -1760,14 +1760,14 @@ void WXMolecule::OnMenuExport2ZMatrix(wxCommandEvent &event)
    {
       wxFileDialog open(this,_T("Choose a file to save the (named) Z-matrix to"),_T(""),_T(""),_T("*.zmat"),
                         wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-      
+
       if(open.ShowModal() != wxID_OK) return;
-      
+
       unsigned long nbchar=0;
       for(vector<MolAtom*>::const_iterator pos=mpMolecule->GetAtomList().begin();
           pos!=mpMolecule->GetAtomList().end();++pos)
             if(nbchar<(*pos)->GetName().size()) nbchar=(*pos)->GetName().size();
-      
+
       ofstream fout (open.GetPath().ToAscii());
       if(fout)
       {
@@ -1787,7 +1787,7 @@ void WXMolecule::OnMenuExport2ZMatrix(wxCommandEvent &event)
             {
                tmp.Printf(_T("%6.3f "),pos->mBondLength);
                fout<<tmp;
-               if(i>1) 
+               if(i>1)
                {
                   fout.width(nbchar);
                   fout<<mpMolecule->GetAtomList()[pos->mBondAngleAtom]->GetName();
@@ -1819,7 +1819,7 @@ void WXMolecule::OnMenuTest(wxCommandEvent & WXUNUSED(event))
    mpMolecule->BuildStretchModeBondAngle();
    mpMolecule->BuildStretchModeTorsion();
    mpMolecule->BuildStretchModeTwist();
-   
+
    //mpMolecule->BuildRotorGroup();
    mpMolecule->BuildFlipGroup();
    mpMolecule->TuneGlobalOptimRotationAmplitude();
@@ -1971,7 +1971,7 @@ public:
                                              mpMolecule->GetBondAngleList(),
                                              mpMolecule->GetDihedralAngleList(),
                                              vr,nrj0);
-         
+
          // Display
          wxMilliSleep(1);// Slow down display for simple structures
          if((chrono.seconds()-dt0)>0.05) {mpMolecule->GetCrystal().UpdateDisplay();dt0=chrono.seconds();}
@@ -2012,14 +2012,14 @@ void WXMolecule::OnMenuMDTest(wxCommandEvent & WXUNUSED(event))
       dlgProgress.Update(6,_T("Build MD Atom Groups")) ;
       mpMolecule->BuildMDAtomGroups();
    }
-   
+
    MoleculeMDTestThread *pTest = new MoleculeMDTestThread(*mpMolecule,30);
    if(pTest->Create() != wxTHREAD_NO_ERROR)
       wxLogError(_T("Can't create test optimization thread"));
    else pTest->Run();
    VFN_DEBUG_EXIT("WXMolecule::OnMenuMDTest()",6)
 }
-   
+
 static const long ID_MOLECULE_ROTATE_BOND_GO   =WXCRYST_ID();
 static const long ID_MOLECULE_ROTATE_BOND_ATOMS=WXCRYST_ID();
 
@@ -2031,35 +2031,35 @@ class WXMoleculeRotation:public wxWindow
       {
          VFN_DEBUG_ENTRY("WXMoleculeRotation::WXMoleculeRotation()",10)
          this->SetFont(wxFont(8,wxTELETYPE,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL));
-         
+
          wxArrayString choices;
          for(vector<MolBond*>::const_iterator pos=mol.GetBondList().begin();pos!=mol.GetBondList().end();++pos)
             choices.Add(wxString::FromAscii((*pos)->GetName().c_str()));
-         
+
          wxBoxSizer* pSizer=new wxBoxSizer(wxHORIZONTAL);
-         
+
          wxBoxSizer* pSizer1=new wxBoxSizer(wxVERTICAL);
          pSizer1->Add(new wxStaticText(this,-1,_T("Select bond:")),0,wxALIGN_CENTER);
          mpBond= new wxChoice(this,ID_MOLECULE_ROTATE_BOND_ATOMS,wxDefaultPosition,wxDefaultSize,choices);
          mpBond->SetSelection(0);
          pSizer1->Add(mpBond,0,wxALIGN_CENTER);
          pSizer->Add(pSizer1,0,wxALIGN_CENTER);
-         
+
          wxBoxSizer* pSizer2=new wxBoxSizer(wxVERTICAL);
          pSizer2->Add(new wxStaticText(this,-1,_T("Atoms to rotate:")),0,wxALIGN_CENTER);
          mpRotatedAtoms= new wxListBox(this,-1,wxDefaultPosition,wxSize(150,60));
          pSizer2->Add(mpRotatedAtoms,0,wxALIGN_CENTER);
          pSizer->Add(pSizer2,0,wxALIGN_CENTER);
-         
+
          wxBoxSizer* pSizer3=new wxBoxSizer(wxVERTICAL);
          pSizer3->Add(new wxStaticText(this,-1,_T("Amplitude:")),0,wxALIGN_CENTER);
          mpAngle=new wxTextCtrl(this,-1,_T("10"));
          pSizer3->Add(mpAngle,0,wxALIGN_CENTER);
          pSizer->Add(pSizer3,0,wxALIGN_CENTER);
-         
+
          wxButton *pButtonRotate=new wxButton(this,ID_MOLECULE_ROTATE_BOND_GO,_T("Rotate !"));
          pSizer->Add(pButtonRotate,0,wxALIGN_CENTER);
-         
+
          this->SetSizer(pSizer);
          this->SetAutoLayout(true);
          pSizer->SetSizeHints(this);
@@ -2069,7 +2069,7 @@ class WXMoleculeRotation:public wxWindow
          wxPostEvent(this,ev);
          VFN_DEBUG_EXIT("WXMoleculeRotation::WXMoleculeRotation()",10)
       }
-      
+
       void OnRotate(wxCommandEvent &event)
       {
          if(mBondListClock<mpMol->GetBondListClock())
@@ -2101,29 +2101,29 @@ class WXMoleculeRotation:public wxWindow
          MolAtom *pAt1=&(mpMol->GetBondList()[choice]->GetAtom1());
          MolAtom *pAt2=&(mpMol->GetBondList()[choice]->GetAtom2());
          mpMol->BuildConnectivityTable();
-         
+
          mvpRotatedAtoms.clear();
          mvpRotatedAtoms.resize(2);
          mvpRotatedAtoms[0].insert(pAt1);
          ExpandAtomGroupRecursive(pAt2,mpMol->GetConnectivityTable(),mvpRotatedAtoms[0]);
-         
+
          mvpRotatedAtoms[1].insert(pAt2);
          ExpandAtomGroupRecursive(pAt1,mpMol->GetConnectivityTable(),mvpRotatedAtoms[1]);
-         
+
          wxArrayString choices;
-         
+
          set<MolAtom *>::const_iterator pos=mvpRotatedAtoms[0].begin();
          wxString choice1(wxString::FromAscii((*pos++)->GetName().c_str()));
          for(;pos!=mvpRotatedAtoms[0].end();++pos)
             choice1 +=_T("-")+wxString::FromAscii((*pos)->GetName().c_str());
          choices.Add(choice1);
-         
+
          pos=mvpRotatedAtoms[1].begin();
          wxString choice2(wxString::FromAscii((*pos++)->GetName().c_str()));
          for(;pos!=mvpRotatedAtoms[1].end();++pos)
             choice2 +=_T("-")+wxString::FromAscii((*pos)->GetName().c_str());
          choices.Add(choice2);
-         
+
          mpRotatedAtoms->Set(choices);
          mpRotatedAtoms->SetSelection(0);
       }
@@ -2153,7 +2153,7 @@ class WXMoleculeRotationDihed:public wxWindow
       {
          VFN_DEBUG_ENTRY("WXMoleculeRotationDihed::WXMoleculeRotationDihed()",10)
          this->SetFont(wxFont(8,wxTELETYPE,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL));
-         
+
          wxArrayString choices;
          // Use existing angle restraints to generate dihedral angles
          for(vector<MolBondAngle*>::const_iterator pos=mol.GetBondAngleList().begin();pos!=mol.GetBondAngleList().end();++pos)
@@ -2169,31 +2169,31 @@ class WXMoleculeRotationDihed:public wxWindow
                choices.Add(wxString::FromAscii(mvDihed.back().GetName().c_str()));
             }
          }
-         
+
          wxBoxSizer* pSizer=new wxBoxSizer(wxHORIZONTAL);
-         
+
          wxBoxSizer* pSizer1=new wxBoxSizer(wxVERTICAL);
          pSizer1->Add(new wxStaticText(this,-1,_T("Dihedral Angle:")),0,wxALIGN_CENTER);
          mpDihed= new wxChoice(this,ID_MOLECULE_ROTATE_DIHED_ATOMS,wxDefaultPosition,wxDefaultSize,choices);
          mpDihed->SetSelection(0);
          pSizer1->Add(mpDihed,0,wxALIGN_CENTER);
          pSizer->Add(pSizer1,0,wxALIGN_CENTER);
-         
+
          wxBoxSizer* pSizer2=new wxBoxSizer(wxVERTICAL);
          pSizer2->Add(new wxStaticText(this,-1,_T("Atoms to rotate:")),0,wxALIGN_CENTER);
          mpRotatedAtoms= new wxListBox(this,-1,wxDefaultPosition,wxSize(150,60));
          pSizer2->Add(mpRotatedAtoms,0,wxALIGN_CENTER);
          pSizer->Add(pSizer2,0,wxALIGN_CENTER);
-         
+
          wxBoxSizer* pSizer3=new wxBoxSizer(wxVERTICAL);
          pSizer3->Add(new wxStaticText(this,-1,_T("Angle:")),0,wxALIGN_CENTER);
          mpAngle=new wxTextCtrl(this,-1,_T("10"));
          pSizer3->Add(mpAngle,0,wxALIGN_CENTER);
          pSizer->Add(pSizer3,0,wxALIGN_CENTER);
-         
+
          wxButton *pButtonRotate=new wxButton(this,ID_MOLECULE_ROTATE_DIHED_GO,_T("Set angle !"));
          pSizer->Add(pButtonRotate,0,wxALIGN_CENTER);
-         
+
          this->SetSizer(pSizer);
          this->SetAutoLayout(true);
          pSizer->SetSizeHints(this);
@@ -2203,7 +2203,7 @@ class WXMoleculeRotationDihed:public wxWindow
          wxPostEvent(this,ev);
          VFN_DEBUG_EXIT("WXMoleculeRotationDihed::WXMoleculeRotationDihed()",10)
       }
-      
+
       void OnRotate(wxCommandEvent &event)
       {
          if(mBondListClock<mpMol->GetBondListClock())
@@ -2219,9 +2219,9 @@ class WXMoleculeRotationDihed:public wxWindow
          mpAngle->GetValue().ToDouble(&angle);
          angle*=DEG2RAD;
          angle-=pDihed->GetAngle();
-         
+
          if(mvpRotatedAtoms[choice].find(&(pDihed->GetAtom1()))!=mvpRotatedAtoms[choice].end()) angle*=-1;
-         
+
          mpMol->RotateAtomGroup(pDihed->GetAtom2(),
                                 pDihed->GetAtom3(),
                                 mvpRotatedAtoms[choice], angle, true);
@@ -2242,36 +2242,36 @@ class WXMoleculeRotationDihed:public wxWindow
          MolAtom *pAt3=&(pDihed->GetAtom3());
          MolAtom *pAt4=&(pDihed->GetAtom4());
          mpMol->BuildConnectivityTable();
-         
+
          mvpRotatedAtoms.clear();
          mvpRotatedAtoms.resize(2);
-         
+
          mvpRotatedAtoms[0].insert(pAt1);
          mvpRotatedAtoms[0].insert(pAt2);
          ExpandAtomGroupRecursive(pAt3,mpMol->GetConnectivityTable(),mvpRotatedAtoms[0]);
          mvpRotatedAtoms[0].erase(pAt1);
          mvpRotatedAtoms[0].erase(pAt2);
-         
+
          mvpRotatedAtoms[1].insert(pAt4);
          mvpRotatedAtoms[1].insert(pAt3);
          ExpandAtomGroupRecursive(pAt2,mpMol->GetConnectivityTable(),mvpRotatedAtoms[1]);
          mvpRotatedAtoms[1].erase(pAt4);
          mvpRotatedAtoms[1].erase(pAt3);
-         
+
          wxArrayString choices;
-         
+
          set<MolAtom *>::const_iterator pos=mvpRotatedAtoms[0].begin();
          wxString choice1(wxString::FromAscii((*pos++)->GetName().c_str()));
          for(;pos!=mvpRotatedAtoms[0].end();++pos)
             choice1 +=_T("-")+wxString::FromAscii((*pos)->GetName().c_str());
          choices.Add(choice1);
-         
+
          pos=mvpRotatedAtoms[1].begin();
          wxString choice2(wxString::FromAscii((*pos++)->GetName().c_str()));
          for(;pos!=mvpRotatedAtoms[1].end();++pos)
             choice2 +=_T("-")+wxString::FromAscii((*pos)->GetName().c_str());
          choices.Add(choice2);
-         
+
          mpRotatedAtoms->Set(choices);
          mpRotatedAtoms->SetSelection(0);
          mpAngle->SetValue(wxString::Format(_T("%6.2f"),pDihed->GetAngle()*RAD2DEG));
@@ -2460,10 +2460,10 @@ void WXMolecule::CrystUpdate(const bool uui,const bool lock)
             }
          }
       }
-      if(0!=mpNonFlipAtomWin) 
+      if(0!=mpNonFlipAtomWin)
       {
          if(mpNonFlipAtomWin->GetNumberRows()>0)
-            mpNonFlipAtomWin->DeleteRows(0, mpNonFlipAtomWin->GetRows(), true);   
+            mpNonFlipAtomWin->DeleteRows(0, mpNonFlipAtomWin->GetRows(), true);
       }
       //Add any atom, bond, bond angle or dihedral angle that could have been added
       {
@@ -2533,7 +2533,7 @@ void WXMolecule::CrystUpdate(const bool uui,const bool lock)
             }
          }
       }
-      if(0!=mpNonFlipAtomWin) 
+      if(0!=mpNonFlipAtomWin)
       {
           vector<MolAtom*> v = mpMolecule->GetAtomList();
           unsigned int i=0;
@@ -2666,7 +2666,7 @@ void WXMolecule::CrystUpdate(const bool uui,const bool lock)
          }
       }
    }
-   if(0!=mpNonFlipAtomWin) 
+   if(0!=mpNonFlipAtomWin)
    {
 
    }
@@ -2678,7 +2678,7 @@ void WXMolecule::CrystUpdate(const bool uui,const bool lock)
 void WXMolecule::OnMenuShowRestraintWindow(wxCommandEvent &event)
 {
    if(0!=mpBondWin) return;
-   
+
    // Frame with notebook
       wxFrame *frame= new wxFrame(this,-1,_T("Restraints for: ")+wxString::FromAscii(mpMolecule->GetName().c_str()),
                                   wxDefaultPosition,wxSize(800,300));
@@ -2788,7 +2788,7 @@ void WXMolecule::OnMenuShowRestraintWindow(wxCommandEvent &event)
       wxGridCellAttr* cellAttrName = new wxGridCellAttr;
       cellAttrName->SetRenderer(new wxGridCellStringRenderer);
       cellAttrName->SetEditor(new wxGridCellTextEditor);
-      
+
       mpRigidGroupWin = new WXMolScrolledWindow(notebook,this,ID_WINDOW_RIGIDGROUP);
       notebook->AddPage(mpRigidGroupWin, _T("Rigid Groups"), true);
       mpRigidGroupWin->CreateGrid(0,1);
@@ -2806,7 +2806,7 @@ void WXMolecule::OnMenuShowRestraintWindow(wxCommandEvent &event)
       cellAttrName->SetReadOnly();
       cellAttrName->SetRenderer(new wxGridCellStringRenderer);
       cellAttrName->SetEditor(new wxGridCellTextEditor);
-      
+
       mpNonFlipAtomWin = new WXMolScrolledWindow(notebook,this,ID_WINDOW_NONFLIPATOM);
       notebook->AddPage(mpNonFlipAtomWin, _T("Optically active atoms"), true);
       mpNonFlipAtomWin->CreateGrid(0,1);
@@ -2833,7 +2833,7 @@ void WXMolecule::OnMenuRigidfyWithDihedralAngles(wxCommandEvent & WXUNUSED(event
    wxMessageDialog w(this,msg,_T("Warning !"),wxYES_NO|wxNO_DEFAULT|wxICON_EXCLAMATION);
    int result=w.ShowModal();
    if(wxID_YES==result) mpMolecule->RigidifyWithDihedralAngles();
-   
+
    VFN_DEBUG_EXIT("WXMolecule::OnMenuRigidfyWithDihedralAngles()",6)
 }
 
@@ -3075,10 +3075,10 @@ void WXMolecule::UpdateUI(const bool lock)
    if(mpMolecule->GetCenterAtom()!=0)
       mpFieldCenterAtom->SetValue(mpMolecule->GetCenterAtom()->GetName());
    else mpFieldCenterAtom->SetValue("No atom !");
-   
+
    //if(mpMolecule->GetOption(3).GetChoice()==0) mpFieldCenterAtom->Enable(false);
    //else mpFieldCenterAtom->Enable(true);
-   
+
    if(lock) mMutex.Unlock();
    this->WXRefinableObj::UpdateUI(lock);
    VFN_DEBUG_EXIT("WXMolecule::UpdateUI()",5)

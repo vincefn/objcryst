@@ -83,7 +83,7 @@ libcctbx.a : ${OBJ}
 	${AR} crs $@ ${filter-out %.a %.so, $^}
 
 -include $(OBJ:.o=.dep)
-   
+
 lib: libcctbx.a
 
 install:lib

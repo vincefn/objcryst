@@ -178,8 +178,8 @@ SEARCHDIRS = -I${DIR_CRYST} -I. -I.. -I..\.. -I..\..\.. -I$(DIR_NEWMAT) -I${DIR_
 !if $(opengl)==1
    GL_DIR   = ${DIR_CRYST}/../OpenGL
    GL_FLAGS := -I$(GL_DIR)/include
-   GL_LIB   := -L$(GL_DIR)/lib 
-   GL_WX_LIB = 
+   GL_LIB   := -L$(GL_DIR)/lib
+   GL_WX_LIB =
    GL_FLAGS := -DOBJCRYST_GL
    GL_OBJ   :=
 !else
@@ -215,7 +215,7 @@ libcryst:
 #wxCryst++
 !if $(wxcryst)==1
 libwxCryst:
-   cd ${DIR_WXWCRYST}
+	cd ${DIR_WXWCRYST}
 	$(MAKE) -f bc32.mak  lib
 !else
 libwxCryst:
@@ -245,4 +245,3 @@ libnewmat:
 libcctbx:
 	@cd ${DIR_CCTBX}
 	$(MAKE) -f bc32.mak lib
-

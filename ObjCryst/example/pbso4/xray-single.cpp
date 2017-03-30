@@ -92,18 +92,18 @@ void testPbSO4()
       }
    //cryst.GLDisplayCrystal();
    cryst.RefinableObj::Print();
-   
-   
+
+
    //Create Diffraction data object
    DiffractionDataSingleCrystal data;
       data.SetWavelength("CuA1");
       cout << "Creating PBSO4 crystal..."<<endl;
       data.SetCrystal(cryst);
-   
+
    //Experimental data
       //Integrated F(hkl)
       data.ImportHklIobsSigma("xray-single.hkl",80);//83,374
-      
+
 
    //Options for faster or better calculations
       //Use Dynamical population correction for special positions / shared atoms
@@ -124,29 +124,29 @@ void testPbSO4()
    //Print Crystal structure
    cout << "Random starting configuration"<<endl;
    cryst.Print();
-   
-   
-   
+
+
+
    //Calc intensity before doing anything
       data.GetIcalc();
       data.FitScaleFactorForRw();
       data.PrintObsCalcData();
-   
-   //Annealing parameters (schedule, Tmax, Tmin, displacement schedule, 
+
+   //Annealing parameters (schedule, Tmax, Tmin, displacement schedule,
       globalOptObj.SetAlgorithmParallTempering(ANNEALING_SMART,1,.00001,
-                                              ANNEALING_EXPONENTIAL,8,.125);      
-      
+                                              ANNEALING_EXPONENTIAL,8,.125);
+
    //Global Optimization
       //The real job-first test
       long nbTrial=50000;
       globalOptObj.Optimize(nbTrial);
-      
+
    //Print calculated reflections
    data.PrintObsCalcData();
-   
+
    //Print Crystal structure
    cryst.Print();
-   //Print minimum distance between different atoms 
+   //Print minimum distance between different atoms
    // (<.05 are considered identical, if same element)
    cryst.PrintMinDistanceTable(.05);
    //Also print real structure
@@ -162,7 +162,7 @@ void testPbSO4()
 }
 int main (int argc, char *argv[])
 {
-   TAU_PROFILE_SET_NODE(0); // sequential code 
+   TAU_PROFILE_SET_NODE(0); // sequential code
    TAU_PROFILE("main()","int()",TAU_DEFAULT);
 
    cout << " Beginning PbSO4 example...." << endl ;
@@ -172,9 +172,9 @@ int main (int argc, char *argv[])
       level=atoi(argv[1]);
    }
    VFN_DEBUG_GLOBAL_LEVEL(level);
-   
+
    testPbSO4();
-   
+
    cout << " End of PbSO4 example." << endl ;
    TAU_REPORT_STATISTICS();
    return 0;

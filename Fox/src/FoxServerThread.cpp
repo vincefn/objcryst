@@ -32,7 +32,7 @@ m_working_directory(workingDir)
    m_availableCPUs = 0;
    m_name = _T("n/a");
    m_status = FG_N_A;
-} 
+}
 
 FoxServerThread::~FoxServerThread()
 {
@@ -54,14 +54,14 @@ wxSocketBase* FoxServerThread::GetSocket()
    return m_pSocket;
 }
 void *FoxServerThread::Entry()
-{ 
+{
    m_exit = false;
    do {
 
-      if(TestDestroy()) 
+      if(TestDestroy())
          break;
 
-      //is still connected?      
+      //is still connected?
       if(!m_pSocket->IsConnected()) {
           CloseConnection();
           wxThread::Sleep(1000);
@@ -72,7 +72,7 @@ void *FoxServerThread::Entry()
           WriteLogMessage(_T("m_tThreadMutex locking error (Entry)"));
           return false;
       }
-      
+
       WriteLogMessage(_T("Looping"));
 
       if(m_newEvt){
@@ -120,7 +120,7 @@ void *FoxServerThread::Entry()
    } while(true);
 
    return 0;
-} 
+}
 void FoxServerThread::OnInput()
 {
    VFN_DEBUG_MESSAGE(__FUNCTION__,10)
@@ -144,15 +144,15 @@ void FoxServerThread::OnInput()
    m_tMutexObj->Unlock();
 
    VFN_DEBUG_MESSAGE(__FUNCTION__,10)
-   return; 
+   return;
 }
 void FoxServerThread::CloseConnection()
-{   
+{
     WriteLogMessage(_T("Closing Connection"));
     m_pSocket->Destroy();
     m_pSocket = 0;
 }
-void FoxServerThread::OnExit() 
+void FoxServerThread::OnExit()
 {
    VFN_DEBUG_MESSAGE(__FUNCTION__,10)
    WriteLogMessage(_T("This thread terminates..."));
@@ -173,7 +173,7 @@ bool FoxServerThread::AnalyzeMessage(std::string message)
    SaveDataAsFile(wxString::FromAscii(message.c_str()), tmp_path);
 
    stringstream in_string;
-   
+
    wxString ID, Cost;
    long nbCPUs=0;
    vector<long> ids;
@@ -185,7 +185,7 @@ bool FoxServerThread::AnalyzeMessage(std::string message)
 
    in_string<<message;
    while(true)
-   {   
+   {
       XMLCrystTag tag;
       in_string>>tag;
       if(true==in_string.eof()) break;
@@ -250,7 +250,7 @@ bool FoxServerThread::AnalyzeMessage(std::string message)
           for(int j=0;j<(*m_jobs).size();j++) {
              if((*m_jobs)[j].getM_ID() == (int)ids[i]) {
                 wxString tmp;
-                tmp.Printf(_T("result=%d (%d), m_jobs->Item(%d).getM_ID()=%d, m_jobs->Item(j)->getNbThread()=%d, done=%d"), i, results.size(), j, (*m_jobs)[j].getM_ID(), (*m_jobs)[j].getNbThread(), (*m_jobs)[j].getNbDone()); 
+                tmp.Printf(_T("result=%d (%d), m_jobs->Item(%d).getM_ID()=%d, m_jobs->Item(j)->getNbThread()=%d, done=%d"), i, results.size(), j, (*m_jobs)[j].getM_ID(), (*m_jobs)[j].getNbThread(), (*m_jobs)[j].getNbDone());
                 WriteLogMessage(tmp);
                 WriteLogMessage((*m_jobs)[j].getListOfThreads());
                 tmp.Printf(_T("removing thread: %d"), GetId());
@@ -258,10 +258,10 @@ bool FoxServerThread::AnalyzeMessage(std::string message)
                 (*m_jobs)[j].RemoveThread(GetId());
                 WriteLogMessage((*m_jobs)[j].getListOfThreads());
                 (*m_jobs)[j].setNbDone((*m_jobs)[j].getNbDone()+1);
-                tmp.Printf(_T("m_jobs->Item(j)->getNbThread()=%d, done=%d"), (*m_jobs)[j].getNbThread(), (*m_jobs)[j].getNbDone()); 
+                tmp.Printf(_T("m_jobs->Item(j)->getNbThread()=%d, done=%d"), (*m_jobs)[j].getNbThread(), (*m_jobs)[j].getNbDone());
                 WriteLogMessage(tmp);
              }
-          } 
+          }
           //WriteLogMessage(_T("Joblist Updated"));
       }
       wxThread::Sleep(2000);
@@ -270,8 +270,8 @@ bool FoxServerThread::AnalyzeMessage(std::string message)
    if(rejectedJobs.size()!=0) {
       WriteLogMessage(_T("rejecting jobs"));
       rejectJobs(rejectedJobs);
-   } 
-   if(answer) {      
+   }
+   if(answer) {
       wxThread::Sleep(2000);
       SendJob(nbCPUs);
    }
@@ -300,7 +300,7 @@ wxString FoxServerThread::getResult(wxString message, long pos)
     //save it
     result = in.Left(p);
    VFN_DEBUG_MESSAGE(__FUNCTION__<<":"<<message<<","<<in,10)
-    return result;    
+    return result;
 }
 void FoxServerThread::SaveResult(wxString result, int JobID, float ResultCost)
 {//this function must be under m_tMutexObj->Lock()!!
@@ -355,7 +355,7 @@ void FoxServerThread::SendJob(int nbOfJobs)
       m_status = FG_CONNECTED;
       return; //No job available
    }
-   
+
    wxString out = _T("<FoxGrid>\n");
    int current = -1;
     for(int i=0;i<jobsToSend.size();i++) {
@@ -394,7 +394,7 @@ void FoxServerThread::SendJob(int nbOfJobs)
             (*m_jobs)[jobsToSend[i]].RemoveThread(GetId());
         }
         return;
-    }  
+    }
     WriteLogMessage(_T("Job sent"));
     m_status = FG_EXPECTING_RESULT;
 }
@@ -409,7 +409,7 @@ bool FoxServerThread::SendAsk(bool getClientInfo)
     }
     out+= _T("/>\n</FoxGrid>\n");
     VFN_DEBUG_MESSAGE(__FUNCTION__<<":"<<out,10)
-    
+
     WriteLogMessage(_T("Sending ask..."));
     if(!m_IOSocket.WriteStringToSocket(m_pSocket, string(out.ToAscii()))) {
         WriteLogMessage(m_IOSocket.getError());
@@ -428,7 +428,7 @@ void FoxServerThread::SaveDataAsFile(wxString out, wxString filename)
       outFile.Write(out);
       outFile.Close();
    }
-}   
+}
 bool FoxServerThread::LoadFile(wxString filename, wxString &in)
 {
    wxFile infile(filename, wxFile::read);
@@ -453,7 +453,7 @@ void FoxServerThread::WriteLogMessage(wxString msg)
 #else
    filename = m_working_directory + _T("/") + filename;
 #endif
-   
+
    wxFile logfile(filename, wxFile::write_append);
    if(logfile.IsOpened())
    {

@@ -390,7 +390,7 @@ class Crystal:public UnitCell
       * classification will be merged into one, with the averaged isotropic Debye-Waller factor. Otherwise, the scattering
       * powers will be merged only if the Debye Waller factors (isotropic and anisotropic, if any) are identical.
       *
-      * \warning: this currently only works if the Crystal is only made of Atoms and ScatteringPowerAtoms (it is used at the end 
+      * \warning: this currently only works if the Crystal is only made of Atoms and ScatteringPowerAtoms (it is used at the end
       * of a CIF import).
       */
       void MergeEqualScatteringPowers(const bool oneScatteringPowerPerElement);

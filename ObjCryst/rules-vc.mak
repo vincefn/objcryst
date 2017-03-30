@@ -39,14 +39,14 @@ SEARCHDIRS = -I$(DIR_CRYST) -I. -I.. -I..\.. -I..\..\.. -I$(DIR_NEWMAT) -I$(DIR_
 !if ($(debug)==1)
 CPPDEBUGFLAGS = -D__DEBUG__
 !else
-CPPDEBUGFLAGS = 
+CPPDEBUGFLAGS =
 !endif
 
 #wxWindows flags
 !if $(wxcryst)==1
 #@$(DIR_WXWINDOWS)\src\msw\wxw32.cfg
 WXCRYSTFLAGS = -D__WX__CRYST__ -DOBJCRYST_GL
-WINLIBS=  kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib oldnames.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib 
+WINLIBS=  kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib oldnames.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib
 
 #wx2.6
 WX_LDFLAGS = -LIBPATH:$(DIR_WXWCRYST) -LIBPATH:$(DIR_WXWINDOWS)\lib\vc_lib
@@ -61,9 +61,9 @@ WX_LIBS = libwxcryst.lib wxexpat.lib wxjpeg.lib wxmsw26.lib wxmsw26_gl.lib wxpng
 #WX_LIBS = libwxcryst.lib wxmsw.lib jpeg.lib tiff.lib png.lib zlib.lib opengl32.lib glu32.lib $(WINLIBS)
 
 !else
-WXCRYSTFLAGS = 
-WX_LDFLAGS = 
-WX_LIBS = 
+WXCRYSTFLAGS =
+WX_LDFLAGS =
+WX_LIBS =
 !endif
 
 

@@ -1,8 +1,8 @@
 BUILD_DIR=$(CURDIR)/../..
 include $(BUILD_DIR)/ObjCryst/rules.mak
 
-# GeneticAlgorithm.o Powell.o ConjugateGradient.o 
-OBJ= Tracker.o Simplex.o RefinableObj.o GlobalOptimObj.o IO.o LSQNumObj.o 
+# GeneticAlgorithm.o Powell.o ConjugateGradient.o
+OBJ= Tracker.o Simplex.o RefinableObj.o GlobalOptimObj.o IO.o LSQNumObj.o
 
 ifeq ($(profile),2)
 %.o : %.cpp
@@ -14,7 +14,7 @@ else
 	@$(MAKEDEPEND)
 	${CXX} ${CPPFLAGS} ${CXXFLAGS} -c $< -o $@
 endif
-   
+
 libRefinableObj.a : ${OBJ}
 	@${RM} $@
 	${AR} crs $@ ${filter-out %.a %.so, $^}

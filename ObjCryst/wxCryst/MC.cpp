@@ -18,9 +18,9 @@
 //	email	:	myp@andrew.cmu.edu  or  mikepolyakov@hotmail.com
 //	website	:	www.angelfire.com/linux/myp
 //	date	:	July 2002
-//	
+//
 //	Description:	'Straight' and Recursive Marching Cubes Algorithms
-//					Recursive method is faster than the 'straight' one, especially when intersection does not 
+//					Recursive method is faster than the 'straight' one, especially when intersection does not
 //						have to be searched for every time.
 //				Normal vectors are defined for each vertex as a gradients
 //				For function definitions see MarchingCubes.h
@@ -39,7 +39,7 @@ mpVector LinearInterp(mp4Vector p1, mp4Vector p2, float value)
 	mpVector p;
 	if(fabs(p1.val - p2.val) > 0.00001)
 		p = (mpVector)p1 + ((mpVector)p2 - (mpVector)p1)/(p2.val - p1.val)*(value - p1.val);
-	else 
+	else
 		p = (mpVector)p1;
 	return p;
 }
@@ -69,16 +69,16 @@ int YtimeZ;		//'plane' of cubes on YZ (equal to (ncellsY+1)*pointsZ )
 //	'STRAIGHT' MARCHING CUBES	ALGORITHM  ///////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //for gradients at the edges values 1.0, 1.0, 1.0, 1.0  are given
-TRIANGLE* MC(int ncellsX, int ncellsY, int ncellsZ, 
+TRIANGLE* MC(int ncellsX, int ncellsY, int ncellsZ,
 						float gradFactorX, float gradFactorY, float gradFactorZ,
 						float minValue, mp4Vector * points, int &numTriangles)
 {
 	//this should be enough space, if not change 3 to 4
 	TRIANGLE * triangles = new TRIANGLE[3*ncellsX*ncellsY*ncellsZ];
 	numTriangles = int(0);
-	
-	pointsZ = ncellsZ+1;			//initialize global variable (for extra speed) 
-	YtimeZ = (ncellsY+1)*pointsZ;	
+
+	pointsZ = ncellsZ+1;			//initialize global variable (for extra speed)
+	YtimeZ = (ncellsY+1)*pointsZ;
 	int lastX = ncellsX;			//left from older version
 	int lastY = ncellsY;
 	int lastZ = ncellsZ;
@@ -87,7 +87,7 @@ TRIANGLE* MC(int ncellsX, int ncellsY, int ncellsZ,
 	mpVector intVerts[12];			//linearly interpolated vertices on each edge
 	int cubeIndex;					//shows which vertices are outside/inside
 	int edgeIndex;					//index returned by edgeTable[cubeIndex]
-	mp4Vector gradVerts[8];			//gradients at each vertex of a cube		
+	mp4Vector gradVerts[8];			//gradients at each vertex of a cube
 	mpVector grads[12];				//linearly interpolated gradients on each edge
 	int indGrad;					//shows which gradients already have been computed
 	int ind, ni, nj;				//ind: index of vertex 0
@@ -116,13 +116,13 @@ TRIANGLE* MC(int ncellsX, int ncellsY, int ncellsZ,
 				cubeIndex = int(0);
 				for(int n=0; n < 8; n++)
 					if(verts[n]->val <= minValue) cubeIndex |= (1 << n);
-				
+
 				//check if its completely inside or outside
 				if(!edgeTable[cubeIndex]) continue;
-			
+
 				indGrad = int(0);
 				edgeIndex = edgeTable[cubeIndex];
-				
+
 				if(edgeIndex & 1) {
 					intVerts[0] = LinearInterp(*verts[0], *verts[1], minValue);
 					if(i != 0 && j != 0 && k != 0) gradVerts[0] = CALC_GRAD_VERT_0(*verts)
@@ -176,13 +176,13 @@ TRIANGLE* MC(int ncellsX, int ncellsY, int ncellsZ,
 				}
 				if(edgeIndex & 16) {
 					intVerts[4] = LinearInterp(*verts[4], *verts[5], minValue);
-					
+
 					if(i != 0 && j != lastY-1 && k != 0) gradVerts[4] = CALC_GRAD_VERT_4(*verts)
 					else gradVerts[4] = mp4Vector(1.0, 1.0, 1.0, 1.0);
-					
+
 					if(i != lastX-1 && j != lastY-1 && k != 0) gradVerts[5] = CALC_GRAD_VERT_5(*verts)
 					else gradVerts[5] = mp4Vector(1.0, 1.0, 1.0, 1.0);
-					
+
 					indGrad |= 48;
 					grads[4] = LinearInterp(gradVerts[4], gradVerts[5], minValue);
 					grads[4].x *= factor.x; grads[4].y *= factor.y; grads[4].z *= factor.z;
@@ -194,7 +194,7 @@ TRIANGLE* MC(int ncellsX, int ncellsY, int ncellsZ,
 						else gradVerts[5] = mp4Vector(1.0, 1.0, 1.0, 1.0);
 						indGrad |= 32;
 					}
-					
+
 					if(i != lastX-1 && j != lastY-1 && k != lastZ-1) gradVerts[6] = CALC_GRAD_VERT_6(*verts)
 					else gradVerts[6] = mp4Vector(1.0, 1.0, 1.0, 1.0);
 					indGrad |= 64;
@@ -208,7 +208,7 @@ TRIANGLE* MC(int ncellsX, int ncellsY, int ncellsZ,
 						else gradVerts[6] = mp4Vector(1.0, 1.0, 1.0, 1.0);
 						indGrad |= 64;
 					}
-					
+
 					if(i != 0 && j != lastY-1 && k != lastZ-1) gradVerts[7] = CALC_GRAD_VERT_7(*verts)
 					else gradVerts[7] = mp4Vector(1.0, 1.0, 1.0, 1.0);
 					indGrad |= 128;
@@ -299,7 +299,7 @@ TRIANGLE* MC(int ncellsX, int ncellsY, int ncellsZ,
 						triangles[numTriangles].norm[h] = grads[index[h]];
 					}
 					numTriangles++;	//one more triangle has been added
-				}			
+				}
 			}	//END OF FOR LOOP ON Z AXIS
 		}	//END OF FOR LOOP ON Y AXIS
 	}	//END OF FOR LOOP ON X AXIS
@@ -322,7 +322,7 @@ TRIANGLE* MC(int ncellsX, int ncellsY, int ncellsZ,
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //  MACROS  ///////////////////////////////////////////////////////////////////////////////////////////////////
-//these macros initialize data and then run marching cubes on the cube with the surface having the specified 
+//these macros initialize data and then run marching cubes on the cube with the surface having the specified
 //	number as 'recieving' data (but number of that surface for the current cube is going to be 'opposite').
 //	Each runs the corresponding recursive function
 //	For numbering, to see which indices of prevVerts,... correspong to indices of the current cube, see
@@ -484,9 +484,9 @@ TRIANGLE* MC(int ncellsX, int ncellsY, int ncellsZ,
 
 // RECURSIVE Marching Cubes Function - cubes at indexes ii, jj, kk intersect the surface
 //	Number of intersecting cubes = numCubes
-TRIANGLE* MarchingCubesRec(int ncellsX, int ncellsY, int ncellsZ, 
+TRIANGLE* MarchingCubesRec(int ncellsX, int ncellsY, int ncellsZ,
 							float gradFactorX, float gradFactorY, float gradFactorZ,
-							int numCubes, int *ii, int *jj, int *kk, 
+							int numCubes, int *ii, int *jj, int *kk,
 							float minValue, mp4Vector * points, int &numTriangles)
 {
 	TRIANGLE * triangles = new TRIANGLE[3*ncellsX*ncellsY*ncellsZ];
@@ -501,11 +501,11 @@ TRIANGLE* MarchingCubesRec(int ncellsX, int ncellsY, int ncellsZ,
 	int all = ncellsX*ncellsY*ncellsZ;
 	bool* marchedCubes = new bool[all];
 	for(int i=0; i < all; i++) marchedCubes[i] = FALSE;		//initialize
-		
+
 	mp4Vector verts[8];				//vertices of a starting cube
 	mpVector intVerts[12];			//linearly interpolated vertices on each edge
 	int edgeIndex;					//shows which edges are intersected
-	mp4Vector gradVerts[8];			//gradients at each vertex of a cube		
+	mp4Vector gradVerts[8];			//gradients at each vertex of a cube
 	mpVector grads[12];				//linearly interpolated gradients on each edge
 	int gradIndex;					//show on which vertices gradients have been computed
 	//initialize global variables - for speed - these would be used by all the recursive functions
@@ -516,7 +516,7 @@ TRIANGLE* MarchingCubesRec(int ncellsX, int ncellsY, int ncellsZ,
 	mpVector prevIntVerts[4];		//passes interpolated vertices on edges
 	mp4Vector prevGradVerts[4];		//passes gradients at vertices
 	mpVector prevGrads[4];			//passes interpolated gradients on edges
-	
+
 	//two new indexes formed for each face
 	int passEdgeIndex, passGradIndex;	//used to tell which vertices and which edges have been initialized
 	//indices
@@ -534,13 +534,13 @@ TRIANGLE* MarchingCubesRec(int ncellsX, int ncellsY, int ncellsZ,
 		verts[5] = points[ind + YtimeZ + pointsZ];
 		verts[6] = points[ind + YtimeZ + pointsZ + 1];
 		verts[7] = points[ind + pointsZ + 1];
-		
+
 		//first check if this cube wasnt marched in recursive calls of the previous cube
 		if(! marchedCubes[ind]) {
 			//run marching cubes on the initial cube
 			gradIndex = edgeIndex = 0;
 			triangles = MarchOneCube(ncellsX, ncellsY, ncellsZ, gradFactorX, gradFactorY, gradFactorZ,
-							ind, i, j, k, minValue, points, triangles, numTriangles, 
+							ind, i, j, k, minValue, points, triangles, numTriangles,
 							verts, intVerts, edgeIndex, gradVerts, grads, gradIndex);
 			//this cube has been done:
 			marchedCubes[ind] = TRUE;
@@ -564,9 +564,9 @@ TRIANGLE* MarchingCubesRec(int ncellsX, int ncellsY, int ncellsZ,
 //SURFACE 0 - Cube ran on surface 0 of previous cube. Recieving side: 2.
 TRIANGLE* MCFace0(int ncellsX, int ncellsY, int ncellsZ,
 						float gradFactorX, float gradFactorY, float gradFactorZ,
-						int ind, int i, int j, int k, 
+						int ind, int i, int j, int k,
 						float minValue, mp4Vector * points, TRIANGLE *triangles, int &numTriangles,
-						mp4Vector prevVerts[4], mpVector prevIntVerts[4], int edgeIndex, 
+						mp4Vector prevVerts[4], mpVector prevIntVerts[4], int edgeIndex,
 						mp4Vector prevGradVerts[4], mpVector prevGrads[4], int gradIndex, bool* marchedCubes)
 {
 	//first check if not outside the region
@@ -596,7 +596,7 @@ TRIANGLE* MCFace0(int ncellsX, int ncellsY, int ncellsZ,
 	mpVector grads[12];
 	grads[2] = prevGrads[0]; grads[10] = prevGrads[1]; grads[6] = prevGrads[2]; grads[11] = prevGrads[3];
 	//for test if this cube is intersected:
-	int oldNumTriangles = numTriangles;				
+	int oldNumTriangles = numTriangles;
 	//run marching cubes on this cube
 	triangles = MarchOneCube(ncellsX, ncellsY, ncellsZ, gradFactorX, gradFactorY, gradFactorZ, ind, i, j, k,
 								minValue, points, triangles, numTriangles, verts, intVerts, edgeIndex,
@@ -618,9 +618,9 @@ TRIANGLE* MCFace0(int ncellsX, int ncellsY, int ncellsZ,
 //SURFACE 1 - Cube ran on surface 1 of previous cube. Recieving side: 3.
 TRIANGLE* MCFace1(int ncellsX, int ncellsY, int ncellsZ,
 						float gradFactorX, float gradFactorY, float gradFactorZ,
-						int ind, int i, int j, int k, 
+						int ind, int i, int j, int k,
 						float minValue, mp4Vector * points, TRIANGLE *triangles, int &numTriangles,
-						mp4Vector prevVerts[4], mpVector prevIntVerts[4], int edgeIndex, 
+						mp4Vector prevVerts[4], mpVector prevIntVerts[4], int edgeIndex,
 						mp4Vector prevGradVerts[4], mpVector prevGrads[4], int gradIndex, bool* marchedCubes)
 {
 	//first check if not outside the region
@@ -650,7 +650,7 @@ TRIANGLE* MCFace1(int ncellsX, int ncellsY, int ncellsZ,
 	mpVector grads[12];
 	grads[3] = prevGrads[0]; grads[8] = prevGrads[1]; grads[7] = prevGrads[2]; grads[11] = prevGrads[3];
 	//for test if this cube is intersected:
-	int oldNumTriangles = numTriangles;				
+	int oldNumTriangles = numTriangles;
 	//run marching cubes on this cube
 	triangles = MarchOneCube(ncellsX, ncellsY, ncellsZ, gradFactorX, gradFactorY, gradFactorZ, ind, i, j, k,
 								minValue, points, triangles, numTriangles, verts, intVerts, edgeIndex,
@@ -672,9 +672,9 @@ TRIANGLE* MCFace1(int ncellsX, int ncellsY, int ncellsZ,
 //SURFACE 2 - Cube ran on surface 2 of previous cube. Recieving side: 0.
 TRIANGLE* MCFace2(int ncellsX, int ncellsY, int ncellsZ,
 						float gradFactorX, float gradFactorY, float gradFactorZ,
-						int ind, int i, int j, int k, 
+						int ind, int i, int j, int k,
 						float minValue, mp4Vector * points, TRIANGLE *triangles, int &numTriangles,
-						mp4Vector prevVerts[4], mpVector prevIntVerts[4], int edgeIndex, 
+						mp4Vector prevVerts[4], mpVector prevIntVerts[4], int edgeIndex,
 						mp4Vector prevGradVerts[4], mpVector prevGrads[4], int gradIndex, bool* marchedCubes)
 {
 	//first check if not outside the region
@@ -704,7 +704,7 @@ TRIANGLE* MCFace2(int ncellsX, int ncellsY, int ncellsZ,
 	mpVector grads[12];
 	grads[0] = prevGrads[0]; grads[9] = prevGrads[1]; grads[4] = prevGrads[2]; grads[8] = prevGrads[3];
 	//for test if this cube is intersected
-	int oldNumTriangles = numTriangles;				
+	int oldNumTriangles = numTriangles;
 	//run marching cubes on this cube
 	triangles = MarchOneCube(ncellsX, ncellsY, ncellsZ, gradFactorX, gradFactorY, gradFactorZ, ind, i, j, k,
 								minValue, points, triangles, numTriangles, verts, intVerts, edgeIndex,
@@ -726,9 +726,9 @@ TRIANGLE* MCFace2(int ncellsX, int ncellsY, int ncellsZ,
 //SURFACE 3 - Cube ran on surface 3 of previous cube. Recieving side: 1.
 TRIANGLE* MCFace3(int ncellsX, int ncellsY, int ncellsZ,
 						float gradFactorX, float gradFactorY, float gradFactorZ,
-						int ind, int i, int j, int k, 
+						int ind, int i, int j, int k,
 						float minValue, mp4Vector * points, TRIANGLE *triangles, int &numTriangles,
-						mp4Vector prevVerts[4], mpVector prevIntVerts[4], int edgeIndex, 
+						mp4Vector prevVerts[4], mpVector prevIntVerts[4], int edgeIndex,
 						mp4Vector prevGradVerts[4], mpVector prevGrads[4], int gradIndex, bool* marchedCubes)
 {
 	//first check if not outside the region
@@ -739,8 +739,8 @@ TRIANGLE* MCFace3(int ncellsX, int ncellsY, int ncellsZ,
 	//initialize vertices
 	mp4Vector verts[8];
 	verts[0] = points[ind];
-	verts[1] = prevVerts[1];	
-	verts[2] = prevVerts[0];	
+	verts[1] = prevVerts[1];
+	verts[2] = prevVerts[0];
 	verts[3] = points[ind + 1];
 	verts[4] = points[ind + ncellsZ + 1];
 	verts[5] = prevVerts[2];
@@ -758,7 +758,7 @@ TRIANGLE* MCFace3(int ncellsX, int ncellsY, int ncellsZ,
 	mpVector grads[12];
 	grads[1] = prevGrads[0]; grads[9] = prevGrads[1]; grads[5] = prevGrads[2]; grads[10] = prevGrads[3];
 	//for test if this cube is intersected
-	int oldNumTriangles = numTriangles;				
+	int oldNumTriangles = numTriangles;
 	//run marching cubes on this cube
 	triangles = MarchOneCube(ncellsX, ncellsY, ncellsZ, gradFactorX, gradFactorY, gradFactorZ, ind, i, j, k,
 								minValue, points, triangles, numTriangles, verts, intVerts, edgeIndex,
@@ -780,9 +780,9 @@ TRIANGLE* MCFace3(int ncellsX, int ncellsY, int ncellsZ,
 //SURFACE 4 - Cube ran on surface 4 of previous cube. Recieving side: 5.
 TRIANGLE* MCFace4(int ncellsX, int ncellsY, int ncellsZ,
 						float gradFactorX, float gradFactorY, float gradFactorZ,
-						int ind, int i, int j, int k, 
+						int ind, int i, int j, int k,
 						float minValue, mp4Vector * points, TRIANGLE *triangles, int &numTriangles,
-						mp4Vector prevVerts[4], mpVector prevIntVerts[4], int edgeIndex, 
+						mp4Vector prevVerts[4], mpVector prevIntVerts[4], int edgeIndex,
 						mp4Vector prevGradVerts[4], mpVector prevGrads[4], int gradIndex, bool* marchedCubes)
 {
 	//first check if not outside the region
@@ -793,8 +793,8 @@ TRIANGLE* MCFace4(int ncellsX, int ncellsY, int ncellsZ,
 	//initialize vertices
 	mp4Vector verts[8];
 	verts[0] = prevVerts[3];
-	verts[1] = prevVerts[2];	
-	verts[2] = prevVerts[1];	
+	verts[1] = prevVerts[2];
+	verts[2] = prevVerts[1];
 	verts[3] = prevVerts[0];
 	verts[4] = points[ind + ncellsZ + 1];
 	verts[5] = points[ind + YtimeZ + ncellsZ + 1];
@@ -812,7 +812,7 @@ TRIANGLE* MCFace4(int ncellsX, int ncellsY, int ncellsZ,
 	mpVector grads[12];
 	grads[2] = prevGrads[0]; grads[1] = prevGrads[1]; grads[0] = prevGrads[2]; grads[3] = prevGrads[3];
 	//for test if this cube is intersected
-	int oldNumTriangles = numTriangles;				
+	int oldNumTriangles = numTriangles;
 	//run marching cubes on this cube
 	triangles = MarchOneCube(ncellsX, ncellsY, ncellsZ, gradFactorX, gradFactorY, gradFactorZ, ind, i, j, k,
 								minValue, points, triangles, numTriangles, verts, intVerts, edgeIndex,
@@ -834,9 +834,9 @@ TRIANGLE* MCFace4(int ncellsX, int ncellsY, int ncellsZ,
 //SURFACE 5 - Cube ran on surface 5 of previous cube. Recieving side: 4.
 TRIANGLE* MCFace5(int ncellsX, int ncellsY, int ncellsZ,
 						float gradFactorX, float gradFactorY, float gradFactorZ,
-						int ind, int i, int j, int k, 
+						int ind, int i, int j, int k,
 						float minValue, mp4Vector * points, TRIANGLE *triangles, int &numTriangles,
-						mp4Vector prevVerts[4], mpVector prevIntVerts[4], int edgeIndex, 
+						mp4Vector prevVerts[4], mpVector prevIntVerts[4], int edgeIndex,
 						mp4Vector prevGradVerts[4], mpVector prevGrads[4], int gradIndex, bool* marchedCubes)
 {
 	//first check if not outside the region
@@ -847,8 +847,8 @@ TRIANGLE* MCFace5(int ncellsX, int ncellsY, int ncellsZ,
 	//initialize vertices
 	mp4Vector verts[8];
 	verts[0] = points[ind];
-	verts[1] = points[ind + YtimeZ];	
-	verts[2] = points[ind + YtimeZ + 1];	
+	verts[1] = points[ind + YtimeZ];
+	verts[2] = points[ind + YtimeZ + 1];
 	verts[3] = points[ind + 1];
 	verts[4] = prevVerts[3];
 	verts[5] = prevVerts[2];
@@ -866,7 +866,7 @@ TRIANGLE* MCFace5(int ncellsX, int ncellsY, int ncellsZ,
 	mpVector grads[12];
 	grads[6] = prevGrads[0]; grads[5] = prevGrads[1]; grads[4] = prevGrads[2]; grads[7] = prevGrads[3];
 	//for test if this cube is intersected
-	int oldNumTriangles = numTriangles;				
+	int oldNumTriangles = numTriangles;
 	//run marching cubes on this cube
 	triangles = MarchOneCube(ncellsX, ncellsY, ncellsZ, gradFactorX, gradFactorY, gradFactorZ, ind, i, j, k,
 								minValue, points, triangles, numTriangles, verts, intVerts, edgeIndex,
@@ -890,9 +890,9 @@ TRIANGLE* MCFace5(int ncellsX, int ncellsY, int ncellsZ,
 //  Global variables YtimeZ and pointsZ should be defined and initialized
 TRIANGLE* MarchOneCube(int ncellsX, int ncellsY, int ncellsZ,
 						float gradFactorX, float gradFactorY, float gradFactorZ,
-						int ind, int i, int j, int k, 
+						int ind, int i, int j, int k,
 						float minValue, mp4Vector * points, TRIANGLE *triangles, int &numTriangles,
-						mp4Vector verts[8], mpVector intVerts[12], int &edgeIndex, 
+						mp4Vector verts[8], mpVector intVerts[12], int &edgeIndex,
 						mp4Vector gradVerts[8], mpVector grads[12], int &indGrad)
 {
 	//factor by which gradients are scaled
@@ -1080,12 +1080,12 @@ TRIANGLE* MarchOneCube(int ncellsX, int ncellsY, int ncellsZ,
 float* MCFind(int ncellsX, int ncellsY, int ncellsZ, float minValue, mp4Vector * points)
 {
 	pointsZ = ncellsZ+1;			//initializes global variables
-	YtimeZ = (ncellsY+1)*pointsZ;	
+	YtimeZ = (ncellsY+1)*pointsZ;
 	int lastX = ncellsX - 1, lastY = ncellsY - 1, lastZ = ncellsZ - 1;	//for a little extra speed
 	mp4Vector *verts[8];		//store address of each point rather than copying x,y,z, and val
 	int cubeIndex, ind, ni;
 	float *found = new float[3];//returned indices: initialized to -1
-	found[0] = -1; found[0] = -1; found[0] = -1; 		
+	found[0] = -1; found[0] = -1; found[0] = -1;
 
 	for(int i=1; i < lastX; i++) {
 		ni = i*YtimeZ;
@@ -1105,7 +1105,7 @@ float* MCFind(int ncellsX, int ncellsY, int ncellsZ, float minValue, mp4Vector *
 				verts[4] = &points[ind + pointsZ];
 				verts[5] = &points[ind + YtimeZ + pointsZ];
 				verts[6] = &points[ind + YtimeZ + ncellsZ + 2];
-				verts[7] = &points[ind + ncellsZ + 2];	
+				verts[7] = &points[ind + ncellsZ + 2];
 				//build index - shows which vertices are outside/inside
 				cubeIndex = int(0);
 				for(int n=0; n < 8; n++) if(verts[n]->val <= minValue) cubeIndex |= (1 << n);
@@ -1118,7 +1118,7 @@ float* MCFind(int ncellsX, int ncellsY, int ncellsZ, float minValue, mp4Vector *
 	}
 	return found;
 }
-		
+
 //First finds intersecting cube and runs recursive Marching Cubes.
 TRIANGLE* MCRecFind(int ncellsX, int ncellsY, int ncellsZ,
 						float gradFactorX, float gradFactorY, float gradFactorZ,

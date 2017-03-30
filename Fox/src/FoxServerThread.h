@@ -27,11 +27,11 @@
    #include "wx/zstream.h"
    #include "wx/wfstream.h"
 
-    
+
 #endif
 
 #ifndef __FOX_THREAD__
-#define __FOX_THREAD__ 
+#define __FOX_THREAD__
 #include "GridResult.h"
 #include "FoxJob.h"
 #include "IOSocket.h"
@@ -44,7 +44,7 @@ enum ServerThreadStatus {FG_N_A, FG_CONNECTED, FG_EXPECTING_ANSWER, FG_EXPECTING
 class FoxServerThread : public wxThread
 {
 ////////////////////////////////////////////////////////////////////////////////////////
-//Set the Socket->SetNotify(wxSOCKET_LOST_FLAG) and wxMutex before you run this thread//  
+//Set the Socket->SetNotify(wxSOCKET_LOST_FLAG) and wxMutex before you run this thread//
 ////////////////////////////////////////////////////////////////////////////////////////
 
 public:
@@ -54,7 +54,7 @@ public:
                   wxMutex *pMutex,
                   std::vector<GridResult > *pResults,
                   std::vector<FoxJob > *pJobs,
-                  wxString workingDir);              
+                  wxString workingDir);
 
    ~FoxServerThread();
    //bool GetJobID(int &ID);
@@ -63,19 +63,19 @@ public:
    wxSocketBase* GetSocket();
 
    virtual void *Entry();
-   virtual void OnExit(); 
+   virtual void OnExit();
    int GetId();
    wxString getName();
    long     getAvailCPUs();
    long     getAllCPUs();
    ServerThreadStatus getStatus();
-    
+
 private:
    void   CloseConnection();
    void   OnInput();
    bool   AnalyzeMessage(std::string message);
    void   SendJob(int nbOfJobs);
-   bool   SendAsk(bool getClientInfo=false);   
+   bool   SendAsk(bool getClientInfo=false);
    void   SaveDataAsFile(wxString out, wxString filename);
    bool   LoadFile(wxString filename, wxString &in);
    void   WriteLogMessage(wxString msg);
@@ -95,7 +95,7 @@ private:
    IOSocket             m_IOSocket;
    wxString             m_name;
    long                 m_allCPUs;
-   long                 m_availableCPUs;   
+   long                 m_availableCPUs;
    ServerThreadStatus   m_status;
    wxString             m_working_directory;
 

@@ -1,13 +1,13 @@
 /*! \page page_status               Current status and development history of ObjCryst++
 *
-* If you have a question you can 
+* If you have a question you can
 * <a href="mailto:vincefn@users.sourceforge.net"> drop me an email</a>
 *
 *
 *\section history History
-*\par 1.1 
+*\par 1.1
 * \li INCOMPATIBLE CHANGES:GlobalOptimObj has been replaced by MonteCarloObj,
-* RefinableObj::GetClassName now returns a "const string&", and 
+* RefinableObj::GetClassName now returns a "const string&", and
 * RefinableObj::BeginOptimization has two parameters, to enable
 * approximations and restraints
 * \li now one can choose either float or double for precision. The default
@@ -27,7 +27,7 @@
 * \li restraints: added base Restraint class, not really used so far.
 * \li cleaned up a bit wxCryst classes in the hope to remove any GUI
 * bugs. Still some crashes under windows, unfortunately...
-* 
+*
 *\par 1.02(2001-nov 12th)
 * \li PowderPattern: Added the input format for Sietronics (.cpi) files.
 * Now importing data will allow null points without crashing. Also
@@ -69,7 +69,7 @@
 *\par 0.6(march 2001)
 * First public release.
 *
-*\par 0.5 (february, 2001): 
+*\par 0.5 (february, 2001):
 *\li ZPolyhedron
 *  Added a ZPolyhedron class, based on the Zscatterer objects, to describe (almost) regular
 * polyhedra.
@@ -93,39 +93,39 @@
 * and dihedral angles), and that polyhedra (for inorganic crystals) can also be described by it.
 *\li Special positions-Dynamical Correction
 *     Added a function to compute a 'smooth' correction of population
-*     as several atoms overlap (this is a dynamical correction during model search) 
+*     as several atoms overlap (this is a dynamical correction during model search)
 *\li Compilation & Makefiles
-*     Cleaned up directories & makefile to minimize platform dependencies. All 
+*     Cleaned up directories & makefile to minimize platform dependencies. All
 * platform-dependant commands should be in rules.mak, in the top directory.
 *
-*\par 0.3 (2000, november 24) : 
+*\par 0.3 (2000, november 24) :
 *\li RefinablePar
 *  Now Scatterer, DiffractionData and Crystal inherit are children of RefinableParList,
 *which makes the 'refining' methods easier to write & use.
 *\li Compilation on Win32-Cygwin
 *  Compilation works using the win32 port of gcc by cygnus : http://www.cygwin.com.
-*  
 *
-*\par 0.2 (2000, november 07) : 
+*
+*\par 0.2 (2000, november 07) :
 *\li SpaceGroup
 *     Moved to SgLite package, thanks to R. Grosse-Kunstleve.
 *\li Powder Diffraction
 *     Most of features needed for 'basic' powder profile spectrum generation/analysis
 *     has been added (DiffractionDataPowder).
 *\li Least-Squares
-*     Added an LSQObjNum class, to perform Least-Squares Refinement. 
+*     Added an LSQObjNum class, to perform Least-Squares Refinement.
 *     Num stands for 'numerical', since only numerical derivatives are used
-*     for that object. Uses eigenvalue filtering to avoid correlations. 
+*     for that object. Uses eigenvalue filtering to avoid correlations.
 *\li DiffractionData
-*     is now an abstract base class, with children 
+*     is now an abstract base class, with children
 *     DiffractionDataSingleCrystal, DiffractionDataPowder.
 *
 *\par 0.1 :
 *\li General
 *     The basic classes (SpaceGroup, Crystal, Scatterer, Scatterer:Atom,
-*     Scatterer:RegularPolyhedra, DiffractionData) are there. 
+*     Scatterer:RegularPolyhedra, DiffractionData) are there.
 *\li Speed
-*     Computing of structure factors works with a fair speed. 
+*     Computing of structure factors works with a fair speed.
 *
 */
 /*\section status Current Status
@@ -133,14 +133,14 @@
 * a better design, especially for the scattering/diffraction class. The RefinableObj
 * is also being improved to be more 'generic' and easier to use with varied algorithms.
 *\par Spacegroup
-*  Thanks to the sglite package, all SpaceGroup can be recognized from their symbol. 
+*  Thanks to the sglite package, all SpaceGroup can be recognized from their symbol.
 * An AsymmetricUnit is also generated for each spacegroup (actually it is a parallelepipedic
 * approximation). Only 3D spacegroup are allowed.
 * We will eventually (that is, when I find time... at the autumn 2001, move
 * to the <a href="http://cctbx.sourceforge.net/"> cctbx library </a>
 *\par Crystal
-* For a Crystal, definition of spacegroup and adding of various types of scatterers 
-* are working. Dynamical occupancy correction 
+* For a Crystal, definition of spacegroup and adding of various types of scatterers
+* are working. Dynamical occupancy correction
 * for global optimizations has been implemeted  (to correct overlap of identical
 * atoms due to sharing of corner atoms in polyhedra, or due to symmetry). An anti-bump
 * cost function (simple) is also implemented, and also enables atoms to merge continuously.
@@ -158,7 +158,7 @@
 *  PowderPattern is the most developped class and its support is sufficient
 * for most Global Optimization work. DiffractionDataSingleCrystal is less being worked on,
 * but it can be used provided that the data has been corrected and merged beforehand.
-*\par Global optimization 
+*\par Global optimization
 *  GlobalOptimObj provides an algorithm for the so-called 'ab initio' structure determination
 * from diffraction data using either a simulated annealing or a parallel tempering
 * algorithm. Genetic algorithm may be added later.
@@ -170,7 +170,7 @@
 *\par Graphical user interface
 *  Most objects have a graphical counterpart, which has been created using the
 * <a href="http://www.wxWindows.org"> wxWindows</a> (linux,unix,windows,mac,...)
-* library. The result is the 
+* library. The result is the
 * <a href="http://objcryst.sourceforge.net"> Fox program</a>, but the GUI
 * interface can be used for any other purpose. It is of course possible
 * to use ObjCryst++ without the wxObjCryst part.

@@ -2672,7 +2672,7 @@ const CrystVector_REAL& PowderPattern::GetChi2Cumul(const int m)const
    {
       this->CalcPowderPatternIntegrated();
       if(mNbIntegrationUsed==0)
-      	mChi2Cumul=0;
+         mChi2Cumul=0;
       else
       {
          const REAL *pObs=mIntegratedObs.data();

@@ -70,7 +70,7 @@ void testPbSO4()
       }
    cryst_orig.PrintMinDistanceTable(.05);
    //cryst_orig.GLDisplayCrystal();
-   
+
    //Creating PbSo4 refined crystal, either with independent atoms or a SO4 tetrahedron
    cout << "Creating PBSO4 crystal..."<<endl;
       // PbSo4 crystal, version with SO4 tetrahedron
@@ -91,15 +91,15 @@ void testPbSO4()
          cryst.AddScatterer(SO4);
       }
    cryst.RefinableObj::Print();
-   
-   
+
+
    //Create Diffraction data object
       PowderPattern data;
       data.SetRadiationType(RAD_XRAY);
       data.SetWavelength("CuA1");
       data.SetName("PbSO4-RR");
       data.ImportPowderPatternFullprof("xray-pattern.dat");
-   
+
    //Components
       //diffraction
       PowderPatternDiffraction * diffData=new PowderPatternDiffraction;
@@ -111,7 +111,7 @@ void testPbSO4()
       data.AddPowderPatternComponent(*backgdData);
       backgdData->ImportUserBackground("xray-background.dat");
       backgdData->SetName("PbSo4-background");
-      
+
    //Profile (approximate parameters,again)
    diffData->SetReflectionProfilePar(PROFILE_PSEUDO_VOIGT,
                                      .03*DEG2RAD*DEG2RAD,
@@ -128,7 +128,7 @@ void testPbSO4()
    //Create the global optimization object
       MonteCarloObj globalOptObj;
       globalOptObj.AddRefinableObj(data);
-   
+
    //Refine only positionnal parameters
       globalOptObj.FixAllPar();
       globalOptObj.SetParIsFixed(gpRefParTypeScattTransl,false);
@@ -145,24 +145,24 @@ void testPbSO4()
    //Print Crystal structure
    cout << "Random starting configuration"<<endl;
    cryst.Print();
-   
-   //Annealing parameters (schedule, Tmax, Tmin, displacement schedule, 
+
+   //Annealing parameters (schedule, Tmax, Tmin, displacement schedule,
       globalOptObj.SetAlgorithmParallTempering(ANNEALING_SMART,1,.00001,
-                                              ANNEALING_EXPONENTIAL,8,.125);      
+                                              ANNEALING_EXPONENTIAL,8,.125);
    //Global Optimization
       //The real job-first test
       long nbTrial=50000;
       globalOptObj.Optimize(nbTrial);
-   
+
    //Save obtained spectrum
    //data.SavePowderPattern("calc.out");
-   
+
    //Print calculated reflections
    diffData->PrintFhklCalc();
-   
+
    //Print Crystal structure
    cryst.Print();
-   //Print minimum distance between different atoms 
+   //Print minimum distance between different atoms
    // (<.05 are considered identical, if same element)
    cryst.PrintMinDistanceTable(.05);
    //Also print real structure
@@ -180,20 +180,20 @@ void testPbSO4()
 
 int main (int argc, char *argv[])
 {
-   TAU_PROFILE_SET_NODE(0); // sequential code 
+   TAU_PROFILE_SET_NODE(0); // sequential code
    TAU_PROFILE("main()","int()",TAU_DEFAULT);
 
    cout << " Beginning PbSO4 example...." << endl ;
-   
+
    int level =10;
    if(argc==2)//debug level hase been supplied
    {
       level=atoi(argv[1]);
    }
    VFN_DEBUG_GLOBAL_LEVEL(level);
-   
+
    testPbSO4();
-   
+
    cout << " End of PbSO4 example." << endl ;
    TAU_REPORT_STATISTICS();
    return 0;

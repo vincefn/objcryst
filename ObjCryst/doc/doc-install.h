@@ -5,7 +5,7 @@
 *  with the library, please contact me at vincefn@users.sourceforge.net
 *  and I'll try to help.
 *
-*  Also note that if you want to develop something using ObjCryst++, I recommend 
+*  Also note that if you want to develop something using ObjCryst++, I recommend
 *  to contact me so that I can help you and avoid possible conflicts.
 *  There are numerous things I want to implement, so an incompatibility is always
 *  possible when I had something...
@@ -14,7 +14,7 @@
 *  and most especially the "objcryst-devel" and "objcryst-announce".
 *
 *\section download Download
-*     You can download the ObjCryst library from the 
+*     You can download the ObjCryst library from the
 *     <a href="http://www.sourceforge.net/projects/objcryst/">ObjCryst project page</a>
 *     on SourceForge,
 *      or from the mirrors:
@@ -22,7 +22,7 @@
 *     - <a href="http://ccp14.sims.nrc.ca/ccp/ccp14/ftp-mirror/objcryst/"> CCP14 (Ca)</a>
 *     - <a href="http://ccp14.semo.edu/ccp/ccp14/ftp-mirror/objcryst/"> CCP14 (USA)</a>
 *     - <a href="ftp://ftp.unige.ch/pub/soft/crystal/fox/"> University of Geneva</a>
-*      
+*
 *      You will need to download the ObjCryst tar.bz2 (.zip for windows), as well as
 *     the 'external libraries' tar.gz (.zip) archives (the latter include libraries which are
 *     used by this project: currently atominfo,sglite and newmat). Simply uncompress both archives
@@ -48,7 +48,7 @@
 *      For further questions about cvs (doing this under windows, etc...): http://www.cvshome.org/
 *
 *\section compile Compiling
-*     
+*
 *\par ANSI C++ Compliance
 *     The ObjCryst++ library makes use of some (relatively) recent C++ features, such as
 *     templates, exceptions, mutable members. This implies that you need a compiler with
@@ -67,8 +67,8 @@
 *     GNU compiler gcc </a>, version 2.95.3 (release) or more recent (not tested yet on
 *      gcc 3.0+).
 *\par Windows
-*     The library has been tested under windows (NT,98) using the 
-*      <a href="http://www.borland.com/bcppbuilder/freecompiler/"> 
+*     The library has been tested under windows (NT,98) using the
+*      <a href="http://www.borland.com/bcppbuilder/freecompiler/">
 *      free Borland C++ compiler 5.5</a>. As for the cygwin gcc port, I encountered a few
 *      problems with the standard library packaged with it so it does not work now.
 *\par Macintosh
@@ -88,9 +88,9 @@
 *      in the wxWindows documentation, and make sure
 *     you (i) activate opengl support and (ii) deactivate debug-context in setup.h.
 *     You can leave all other options at default values.
-*      
+*
 *\section example Example
-*      There is a short example in the ObjCryst/example/pbso4 directory. 
+*      There is a short example in the ObjCryst/example/pbso4 directory.
 *\par Linux
 *     Under linux, change to the ObjCryst/example/pbso4 directoryand simply type:\code
 *      make -f gnu.mak wxcryst=1 opengl=1 debug=0 all \endcode
@@ -102,7 +102,7 @@
 *
 *      That should compile all necessary libraries and programs.
 *     You can try the different example programs, running on PbSO4, on neutron
-*      and X-Ray powder diffraction, as well as X-Ray single crystal 
+*      and X-Ray powder diffraction, as well as X-Ray single crystal
 *      (in fact, extracted intensities)
 *\par Windows
 *     Under Windows (a DOS command prompt), change to the ObjCryst/example/pbso4 and do:\code
@@ -112,7 +112,7 @@
 *     On a 500 Mhz linux box, pbso4-xray2 (using only the first 80 reflections and no
 *     dynamical occupancy correction),
 *     50000 trials are done in less than 30 s (for 5 independent atoms, each with 4
-*     symetrics (not counting the center of symmetry): that's 
+*     symetrics (not counting the center of symmetry): that's
 *     80*50000*5*4/27.2 = 2.9 10^6 reflection.atom per second).
 *     For pbso4-xray and pbso4-neutron, it takes 2 to 3 more time, using only the first
 *     90 degrees of the powder pattern (about 80 reflections again), because a full

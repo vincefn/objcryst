@@ -19,8 +19,8 @@
 //	email	:	myp@andrew.cmu.edu	or  mikepolyakov@hotmail.com
 //	Website	:	www.angelfire.com/linux/myp
 //	Date	:	7/16/2002
-//	
-//		Provides basic vector handling. 
+//
+//		Provides basic vector handling.
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #ifndef MPVECTOR_H
@@ -37,7 +37,7 @@ class mpVector
 friend class mp4Vector;
 public:
 	float x, y, z;
-	
+
 	mpVector();
 	mpVector(float xx, float yy, float zz);
 	mpVector(const mpVector& other);
@@ -56,7 +56,7 @@ public:
 	operator mp4Vector() const;
 
 	operator char*()  const;
-	
+
 };
 
 class mp4Vector
@@ -68,7 +68,7 @@ public:
 	mp4Vector(float aa, float bb, float cc, float dd);
 	mp4Vector(const mp4Vector& other);
 	mp4Vector(const mpVector& v, const float value);
-	
+
 	void operator = (const mp4Vector& v);
 	void operator = (const mpVector& v);
 

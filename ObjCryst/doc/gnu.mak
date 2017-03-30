@@ -23,4 +23,3 @@ clean:
 
 sourceforge:
 	scp -C -r html/* vincefn@shell.sourceforge.net:/home/groups/o/ob/objcryst/htdocs/ObjCryst/
-	

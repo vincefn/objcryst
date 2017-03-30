@@ -6,7 +6,7 @@ Introduction
 ============
 Fox, 'Free Objects for Crystallography' is a free, open-source program for the ab initio structure determination from powder diffraction.
 
-The FOX program (for Linux, MacOS X and windows) was made for the ab initio crystal structure solution from diffraction data (mostly powder diffraction data). 
+The FOX program (for Linux, MacOS X and windows) was made for the ab initio crystal structure solution from diffraction data (mostly powder diffraction data).
 
 Features
 ========
@@ -25,7 +25,7 @@ So, if you:
 - have an unknown compound but with (approximately) known composition.
 - have a powder pattern (X-Ray or neutron or both)
 - would like to solve the structure (i.e. find the atom -or group of atoms- positions, before refining them with another package).
- 
+
 Then Fox can help you.
 
 Viewing crystal structure, diffraction data and CIF files

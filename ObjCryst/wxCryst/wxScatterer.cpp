@@ -40,7 +40,7 @@
 #ifdef DrawText
 #undef DrawText
 #endif
- 
+
 namespace ObjCryst
 {
 ////////////////////////////////////////////////////////////////////////
@@ -62,7 +62,7 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpScatterer(obj)
          =mpScatterer->GetPar(mpScatterer->mXYZ.data()+1).WXCreate(this);
       WXCrystObjBasic* pFieldZ
          =mpScatterer->GetPar(mpScatterer->mXYZ.data()+2).WXCreate(this);
-      WXCrystObjBasic* pFieldPopu 
+      WXCrystObjBasic* pFieldPopu
          =mpScatterer->GetPar(&(mpScatterer->mOccupancy)).WXCreate(this);
       dynamic_cast<WXField *> (pFieldX)->SetLabel("X: R");
       dynamic_cast<WXField *> (pFieldY)->SetLabel("Y: R");
@@ -72,7 +72,7 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpScatterer(obj)
       sizer->Add(pFieldY    ,0,wxALIGN_CENTER);
       sizer->Add(pFieldZ    ,0,wxALIGN_CENTER);
       sizer->Add(pFieldPopu ,0,wxALIGN_CENTER);
-      
+
       mpSizer->Add(sizer,0,wxALIGN_LEFT);
       mList.Add(pFieldX);
       mList.Add(pFieldY);
@@ -81,5 +81,4 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpScatterer(obj)
    //layout & update is done in derived objects
 }
 
-}// namespace 
-
+}// namespace

@@ -4,7 +4,7 @@
 DIR_CRYST = $(BUILD_DIR)/ObjCryst
 
 #Libraries to be statically linked are installed in $(DIR_STATIC_LIBS)/lib,
-#with their headers in DIR_STATIC_LIBS)/include 
+#with their headers in DIR_STATIC_LIBS)/include
 DIR_STATIC_LIBS = $(BUILD_DIR)/static-libs
 
 #Internal directories
@@ -35,7 +35,7 @@ CFLAGS  = ${DEPENDFLAGS}
 CXXFLAGS  = ${DEPENDFLAGS} ${PROFILEFLAGS}
 # FORTRAN compiler
 FC     := f77
-FFLAGS  = 
+FFLAGS  =
 # linker
 LINKER    := ${CXX}
 CRYST_LDFLAGS   = ${LDFLAGS} -L/usr/lib -L/usr/local/lib -L$(DIR_CRYSTVECTOR) -L$(DIR_LIBCRYST) -L$(DIR_REFOBJ) -L$(DIR_STATIC_LIBS)/lib -L$(DIR_VFNQUIRKS) -L$(DIR_WXWCRYST) -L$(DIR_TAU)/x86_64/lib
@@ -119,7 +119,7 @@ FFTW_FLAGS :=
 endif
 
 ifneq ($(sse),0)
-SSE_FLAGS = -DHAVE_SSE_MATHFUN -DUSE_SSE2 -march=native 
+SSE_FLAGS = -DHAVE_SSE_MATHFUN -DUSE_SSE2 -march=native
 else
 SSE_FLAGS =
 endif
@@ -151,7 +151,7 @@ else
  #Set DEBUG options
    ifdef RPM_OPT_FLAGS
       # we are building a RPM !
-      CPPFLAGS = ${RPM_OPT_FLAGS} 
+      CPPFLAGS = ${RPM_OPT_FLAGS}
    else
       CPPFLAGS = -g -Wall -D__DEBUG__ ${SSE_FLAGS} ${COD_FLAGS}
    endif
@@ -229,11 +229,11 @@ endif
 else
 libwx=
 endif
-     
+
 #cctbx
 $(BUILD_DIR)/cctbx.tar.bz2:
 	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND) http://downloads.sourceforge.net/project/objcryst/3rdPartyLibraries/cctbx.tar.bz2
-	
+
 $(DIR_STATIC_LIBS)/lib/libcctbx.a: $(BUILD_DIR)/cctbx.tar.bz2
 	mkdir -p $(DIR_STATIC_LIBS)/lib/ $(DIR_STATIC_LIBS)/include/
 	cd $(BUILD_DIR) && tar -xjf cctbx.tar.bz2
@@ -309,4 +309,3 @@ libQuirks: $(libwx)
 #Library to take care of refinable parameters, plus Global optimization and Least Squares refinements
 libRefinableObj:$(libnewmat) $(libwx) libcctbx
 	$(MAKE) -f gnu.mak -C ${DIR_REFOBJ}/ lib
-

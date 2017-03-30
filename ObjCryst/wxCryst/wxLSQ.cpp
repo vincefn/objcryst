@@ -52,4 +52,3 @@ bool WXLSQ::OnChangeName(const int id)
 }
 
 } //namespace
-

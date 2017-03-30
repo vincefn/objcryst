@@ -26,10 +26,10 @@ BuildRequires: gcc /usr/include/GL/gl.h /usr/include/gtk-2.0/gtk/gtk.h
 # DESCRIPTION
 #------------------------------------------------------------------------------
 %description
-FOX is an open-source program for crystallographers who wish to solve crystal 
+FOX is an open-source program for crystallographers who wish to solve crystal
 structures from powder diffraction data (X-ray, neutron, neutron TOF).
 
-Additionally, it can be used to create crystal structures and display them 
+Additionally, it can be used to create crystal structures and display them
 in 3D, simulate powder patterns and calculate structure factors. It can also
 import crystal structures from CIF (Crystallographic Information File) files.
 
@@ -67,4 +67,3 @@ install -s -m 755 Fox/src/Fox ${RPM_BUILD_ROOT}%{prefix}/bin/Fox
 
 * Thu Jul 06 2005 Vincent Favre-Nicolin <vincefn@users.sf.net>
 - First rpm package !
-

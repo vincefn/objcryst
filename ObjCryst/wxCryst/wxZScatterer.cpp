@@ -42,7 +42,7 @@
 #ifdef DrawText
 #undef DrawText
 #endif
- 
+
 namespace ObjCryst
 {
 /// Conversion from ZScatterer to the newer Molecule object.
@@ -64,7 +64,7 @@ Molecule *ZScatterer2Molecule(ZScatterer *scatt)
       z0+=z;
       mol->AddAtom(x,y,z,scatt->GetZAtomRegistry().GetObj(i).GetScatteringPower(),
                    scatt->GetZAtomRegistry().GetObj(i).GetName());
-      
+
       #if 0
       if(i>0)
       {
@@ -132,7 +132,7 @@ Molecule *ZScatterer2Molecule(ZScatterer *scatt)
       else
       {
          radius(i)=mol->GetAtom(i).GetScatteringPower().GetRadius();
-         scattpow[i].first=dynamic_cast<const ScatteringPowerAtom *> 
+         scattpow[i].first=dynamic_cast<const ScatteringPowerAtom *>
                              (&(mol->GetAtom(i).GetScatteringPower()));
          scattpow[i].second=scattpow[i].first->GetAtomicNumber();
       }
@@ -210,7 +210,7 @@ WXCrystObjBasic(parent),mpZAtom(obj)
 {
    VFN_DEBUG_ENTRY("WXZAtom::WXZAtom()",6)
    mpSizer=new wxBoxSizer(wxHORIZONTAL);
-      
+
    mpFieldName=new WXFieldString(this, mpZAtom->mName,ID_ZATOM_NAME,80,true);
    mpSizer->Add(mpFieldName,0,wxALIGN_LEFT);
    mpFieldScattPower=new WXFieldChoice(this,ID_ZATOM_SCATTPOW,"Type:",60);
@@ -226,7 +226,7 @@ WXCrystObjBasic(parent),mpZAtom(obj)
       mpSizer->Add(pFieldBond,0,wxALIGN_LEFT);
       mList.Add(pFieldBond);
    }
-   
+
    if(1<mpZAtom->GetZScatterer().GetZAtomRegistry().Find(*mpZAtom))
    {
       RefinablePar *par=&(mpZAtom->GetZScatterer().GetPar(&(mpZAtom->mAngle)));
@@ -255,7 +255,7 @@ WXCrystObjBasic(parent),mpZAtom(obj)
    }
 
    this->SetSizer(mpSizer);
-   
+
    this->BottomLayout(0);
    this->CrystUpdate(true);
    VFN_DEBUG_EXIT("WXZAtom::WXZAtom()",6)
@@ -371,7 +371,7 @@ WXScatterer(parent,obj),mpZScatterer(obj)
       sizer->Add(pFieldPhi    ,0,wxALIGN_CENTER);
       sizer->Add(pFieldChi    ,0,wxALIGN_CENTER);
       sizer->Add(pFieldPsi    ,0,wxALIGN_CENTER);
-      
+
       mpSizer->Add(sizer,0,wxALIGN_LEFT);
       mList.Add(pFieldPhi);
       mList.Add(pFieldChi);
@@ -380,7 +380,7 @@ WXScatterer(parent,obj),mpZScatterer(obj)
       mpWXZAtomRegistry=mpZScatterer->mZAtomRegistry.WXCreate(this);
       mpSizer->Add(mpWXZAtomRegistry,0,wxALIGN_LEFT);
       mList.Add(mpWXZAtomRegistry);
-   
+
    this->BottomLayout(0);
    this->CrystUpdate(true);
 }
@@ -389,7 +389,7 @@ void WXZScatterer::OnMenuAddZAtom(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXZScatterer::OnMenuAddZAtom()",6)
    WXCrystValidateAllUserInput();
-   
+
    int choice;
    int bondAtomId=0;
    double bondLength;
@@ -406,7 +406,7 @@ void WXZScatterer::OnMenuAddZAtom(wxCommandEvent & WXUNUSED(event))
          VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom():Cancelled",6)
          return;
       }
-   //Bond atom 
+   //Bond atom
    if(0<mpZScatterer->GetZAtomRegistry().GetNb())
    {
 
@@ -497,7 +497,7 @@ void WXZScatterer::OnMenuAddZAtom(wxCommandEvent & WXUNUSED(event))
 }
 
 void WXZScatterer::OnMenuSetLimits(wxCommandEvent & event)
-{//:TODO: Need to 
+{//:TODO: Need to
    VFN_DEBUG_ENTRY("WXZScatterer::OnMenuSetLimits()",6)
    WXCrystValidateAllUserInput();
    if(event.GetId()==ID_ZSCATTERER_MENU_PAR_LIMITS_RELAT_BOND)
@@ -615,16 +615,4 @@ void WXZScatterer::OnMenuConvert2Molecule(wxCommandEvent &WXUNUSED(event))
    //mol->GetCrystal().UpdateDisplay();
 }
 
-}// namespace 
-
-
-
-
-
-
-
-
-
-
-
-
+}// namespace

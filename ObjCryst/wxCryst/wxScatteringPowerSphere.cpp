@@ -56,7 +56,7 @@ BEGIN_EVENT_TABLE(WXScatteringPowerSphere, wxWindow)
    EVT_UPDATE_UI(ID_CRYST_UPDATEUI,             WXRefinableObj::OnUpdateUI)
 END_EVENT_TABLE()
 
-WXScatteringPowerSphere::WXScatteringPowerSphere(wxWindow* parent, 
+WXScatteringPowerSphere::WXScatteringPowerSphere(wxWindow* parent,
                                                        ScatteringPowerSphere *obj):
 WXRefinableObj(parent,(RefinableObj*)obj),mpScatteringPower(obj)
 {
@@ -70,7 +70,7 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpScatteringPower(obj)
          mpScatteringPower->GetPar(&(mpScatteringPower->mRadius)).WXCreate(this);
       WXCrystObjBasic* pFieldBiso=
          mpScatteringPower->GetPar(&(mpScatteringPower->mBiso  )).WXCreate(this);
-      
+
       mpSizer->Add(pFieldRadius,0,wxALIGN_LEFT);
       mList.Add(pFieldRadius);
       mpSizer->Add(pFieldBiso,0,wxALIGN_LEFT);
@@ -140,5 +140,4 @@ void WXScatteringPowerSphere::UpdateUI(const bool lock)
    this->WXRefinableObj::UpdateUI(lock);
 }
 
-}// namespace 
-
+}// namespace

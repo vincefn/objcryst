@@ -256,4 +256,3 @@ const POVRayColours gPOVRayColours[]=
     {"",{0. , 0. , 0.}},
 };
 #endif
-

@@ -9,7 +9,7 @@ include $(BUILD_DIR)/ObjCryst/rules.mak
 #   AR_BLITZ := ${DIR_BLITZ}/lib/libblitz.a
 #else
    C_BLITZFLAG :=
-   AR_BLITZ := 
+   AR_BLITZ :=
 #endif
 
 OBJ=CrystVector.o
@@ -26,14 +26,14 @@ else
 endif
 
 -include $(OBJ:.o=.dep)
-   
+
 libCrystVector.a : ${OBJ}
 	${AR} crs $@ ${AR_BLITZ} ${filter-out %.a %.so, $^}
 
 lib: libCrystVector.a
 
 dep:
-	makedepend *.cpp -Y -I. -I../ 
+	makedepend *.cpp -Y -I. -I../
 
 default: lib
 

@@ -29,9 +29,9 @@ static long GRID_JOB_LIST=                        WXCRYST_ID();
 static long SHOW_RESULTS=                        WXCRYST_ID();
 
 BEGIN_EVENT_TABLE(WXFoxServer, wxWindow)
-  //EVT_BUTTON(STOP_TO_CLIENT,                  WXFoxServer::StopAllClients) 
-  EVT_BUTTON(RUN_LOCAL_CLIENT,                 WXFoxServer::RunLocalClient) 
-  EVT_BUTTON(RUN_TO_CLIENT,                 WXFoxServer::RunALLClient) 
+  //EVT_BUTTON(STOP_TO_CLIENT,                  WXFoxServer::StopAllClients)
+  EVT_BUTTON(RUN_LOCAL_CLIENT,                 WXFoxServer::RunLocalClient)
+  EVT_BUTTON(RUN_TO_CLIENT,                 WXFoxServer::RunALLClient)
   EVT_BUTTON(NEW_JOB,                        WXFoxServer::OnNewJob)
   EVT_BUTTON(EDIT_JOB,                        WXFoxServer::OnEditJob)
   EVT_BUTTON(DELETE_JOB,                     WXFoxServer::OnDeleteJob)
@@ -53,7 +53,7 @@ wxWindow(parent,-1),m_parent(parent)
 }
 WXFoxServer::~WXFoxServer(void)
 {
-   
+
 }
 void WXFoxServer::Clear()
 {
@@ -69,7 +69,7 @@ void WXFoxServer::InitServer()
    m_FoxServer = new FoxServer();
    m_FoxServer->SetWorkingDir(m_working_dir);
    m_FoxServer->StartGridServer();
-   
+
    //Start update timer
    m_UpdateTimer = new wxTimer(this, ID_UPDATE_TIMER);
    m_UpdateTimer->Start(10*1000, false);
@@ -112,7 +112,7 @@ void WXFoxServer::InitServer()
    AddJobButton->SetToolTip(_T("Create job from objects currently in memory\n\n")
                             _T("This requires that you have one global \n")
                             _T("optimization obect in memory."));
-   
+
    wxButton *EditJobButton = new wxButton(this, EDIT_JOB, _T("Edit Job"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T(""));
    JobButtonSizer->Add(EditJobButton,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
 
@@ -136,7 +136,7 @@ void WXFoxServer::InitServer()
    wxButton *StopButton = new wxButton(this, STOP_TO_CLIENT, _T("Stop"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("Button1"));
    JobButtonSizer->Add(StopButton,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
    */
-   
+
    //client list label
    wxBoxSizer *listClientSizer = new wxBoxSizer( wxVERTICAL );
    wxStaticText *label2 = new wxStaticText(this, NULL, _T("Client list: "), wxDefaultPosition, wxDefaultSize, 0 , _T("label"));
@@ -160,17 +160,17 @@ void WXFoxServer::InitServer()
    listClientSizer->Add(m_ClientTable,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
    /*
    m_ClientWindow = new wxTextCtrl(this, NULL, wxEmptyString, wxDefaultPosition,
-                                                wxSize(xsize/2-5,150), wxTE_MULTILINE|wxTE_READONLY, 
+                                                wxSize(xsize/2-5,150), wxTE_MULTILINE|wxTE_READONLY,
                                                 wxDefaultValidator, _T("TextBox"));
    listClientSizer->Add(m_ClientWindow,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
    */
-   
+
    //result list label
    wxBoxSizer *listResultSizer = new wxBoxSizer( wxVERTICAL );
    wxStaticText *label3 = new wxStaticText(this, NULL, _T("Result list: "), wxDefaultPosition, wxDefaultSize, 0 , _T("label"));
    listResultSizer->Add(label3,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
 
-   //result list table   
+   //result list table
    m_ResultTable = new wxGrid(this, GRID_RESULT_LIST, wxDefaultPosition, wxSize(xsize/2-5,150), wxWANTS_CHARS, _T("m_ResultTable"));
    m_ResultTable->CreateGrid(1,3,wxGrid::wxGridSelectCells);
    m_ResultTable->SetColLabelValue(0, _T("Nb"));
@@ -189,7 +189,7 @@ void WXFoxServer::InitServer()
 
    wxButton *ShowButtom = new wxButton(this, SHOW_RESULTS, _T("Show Result"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("Button3"));
    listResultSizer->Add(ShowButtom,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
-   
+
    wxBoxSizer *listsSizer = new wxBoxSizer( wxHORIZONTAL );
 
    listsSizer->Add(listClientSizer, 0, wxALL|wxALIGN_TOP);
@@ -241,7 +241,7 @@ void WXFoxServer::ChangeJobHeader(wxString filename, int ID, wxString name, long
         if(pos!=-1) {
             pos +=9;
             file = file.Mid(pos);
-        } 
+        }
         data.Printf(_T("<FoxJob Name=\"%s\" ID=\"%d\" nbOfTrial=\"%d\" nbRun=\"%d\" rand=\"%ld\"></FoxJob>\n"), name.c_str(), ID, nbOfTrial, nbRun, r);
         data +=file;
         SaveDataAsFile(data, filename);
@@ -278,8 +278,8 @@ void WXFoxServer::OnNewJob(wxCommandEvent& event)
       wxMessageBox(_T("You need at least one optimization object !"), _T("No data to optimize"), wxOK | wxICON_INFORMATION, this);
       return;
    }
-   
-   WXCrystValidateAllUserInput(); 
+
+   WXCrystValidateAllUserInput();
 
    int newID = GenerateJobID();
    wxString Name = _T("jobname");
@@ -291,7 +291,7 @@ void WXFoxServer::OnNewJob(wxCommandEvent& event)
       if(!ShowSetJobWindow(newID, Name, nbOfTrial, nbRun, randomize)) return;
       cout<<nbRun<<","<<nbOfTrial<<","<<Name<<endl;
    }while((nbRun<=0)||(nbOfTrial<=0)||(Name==_T("")));
-   
+
    /*
    wxString filename;
    filename.Printf(_T("JOB_%d.xml"), newID);
@@ -311,7 +311,7 @@ void WXFoxServer::OnNewJob(wxCommandEvent& event)
    #endif
    tmp = str.str();
    //unicode
-   XMLCrystFileSaveGlobal(tmp); 
+   XMLCrystFileSaveGlobal(tmp);
    saveJobHeader(wxString::FromAscii(tmp.c_str()), newID, Name, nbOfTrial, nbRun, randomize);
    AddJob(wxString::FromAscii(tmp.c_str()), Name, newID, nbOfTrial, nbRun, randomize);
 }
@@ -486,7 +486,7 @@ bool WXFoxServer::ShowSetJobWindow(int ID, wxString &name, long &trials, long &r
    tmp.Printf(_T("%d"), ID);
    wxDialog *InfoWindow = new wxDialog(NULL, -1,_T("Set job parameters"),wxDefaultPosition, wxDefaultSize, wxCAPTION);
    wxBoxSizer *sizer = new wxBoxSizer( wxVERTICAL );
-   
+
    wxStaticText *label1 = new wxStaticText(InfoWindow, NULL, _T("Job ID:"));
    sizer->Add(label1, 0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
    wxTextCtrl *IDText = new wxTextCtrl(InfoWindow, NULL, tmp, wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
@@ -522,7 +522,7 @@ bool WXFoxServer::ShowSetJobWindow(int ID, wxString &name, long &trials, long &r
    InfoWindow->SetSizer( sizer );
    sizer->SetSizeHints( InfoWindow );
    sizer->Fit( InfoWindow );
-   if(InfoWindow->ShowModal() == wxID_OK) 
+   if(InfoWindow->ShowModal() == wxID_OK)
    {
       wxString Trials = TrialText->GetValue();
       wxString Runs = RunText->GetValue();
@@ -549,7 +549,7 @@ void WXFoxServer::OnEditJob(wxCommandEvent& event)
    }
 
    int r = m_JobListTable->GetSelectedRows().Item(0);
-   
+
    if(r>= m_jobs.size()) {
       m_WXFoxServerDataMutex->Unlock();
       return;
@@ -566,14 +566,14 @@ void WXFoxServer::OnEditJob(wxCommandEvent& event)
          return;
       }
    }while((runs<=0)||(trials<=0)||(name==_T("")));
-   
+
    ChangeJobHeader(filename, ID, name, trials, runs, randomize);
    m_jobs[r].setNbTrial(trials);
    m_jobs[r].setNbRuns(runs);
    m_jobs[r].setName(name);
    m_jobs[r].setRand(randomize);
-   m_FoxServer->ChangeJob(r,&m_jobs[r]); 
-   
+   m_FoxServer->ChangeJob(r,&m_jobs[r]);
+
    m_WXFoxServerDataMutex->Unlock();
 
    m_UpdateTimer->Stop();
@@ -588,12 +588,12 @@ void WXFoxServer::OnDeleteJob(wxCommandEvent& event)
 {
    int nb = m_JobListTable->GetSelectedRows().Count();
    if(nb!=1) return;
-   
+
    wxMessageDialog d(this,_T("Do you really want to delete selected job?"), _T("Alert"), wxYES | wxNO);
     if(wxID_YES!=d.ShowModal()) return;
 
    int r = m_JobListTable->GetSelectedRows().Item(0);
-   
+
    int er = m_FoxServer->DeleteJob(r);
    if(er==1)  wxMessageBox(_T("Job was deleted"), _T("Notice"), wxOK, this);
    if(er==0)  wxMessageBox(_T("Can't delete this job.\n Job was sent to clients or job finished. Only 'nbRuns' was changed."), _T("Notice"), wxOK, this);
@@ -609,7 +609,7 @@ void WXFoxServer::OnDeleteJob(wxCommandEvent& event)
 }
 void WXFoxServer::RunLocalClient(wxCommandEvent& event)
 {
-   
+
    int nCPU = wxThread::GetCPUCount();
    wxString nbCPUs;
    nbCPUs.Printf(_T("%d"), nCPU);
@@ -628,15 +628,15 @@ void WXFoxServer::RunLocalClient(wxCommandEvent& event)
        //if(!wxDirExists(dir.c_str())) {
        //    wxMkdir(dir.c_str());
 	   //}
-       //if(!wxFileExists(dir + _T("\\Fox.exe"))) - 
+       //if(!wxFileExists(dir + _T("\\Fox.exe"))) -
        //wxCopyFile(appname,dir+_T("\\Fox.exe"));
        wxString ClientDir = m_working_dir + _T("\\client");
        if(!wxDirExists(ClientDir)) wxMkdir(ClientDir);
        wxString cmd = appname + _T(" --runclient localhost --CPUs ") + nbCPUs + _T(" --working_dir ") + ClientDir;
-       wxExecute(cmd);  
+       wxExecute(cmd);
        #else
        //if(appname(0,1)!=_T("/")) appname=wxGetCwd()+_T("/")+appname;
-       //wxExecute(appname+_T(" --runclient localhost --CPUs ") + nbCPUs); 
+       //wxExecute(appname+_T(" --runclient localhost --CPUs ") + nbCPUs);
        wxString ClientDir = m_working_dir + _T("/client");
        if(!wxDirExists(ClientDir)) wxMkdir(ClientDir);
        long result= wxExecute(appname+_T(" --runclient localhost --CPUs ") + nbCPUs + _T(" --working_dir ") + ClientDir);
@@ -644,7 +644,7 @@ void WXFoxServer::RunLocalClient(wxCommandEvent& event)
        //if(result==0) result=wxExecute(_T("/usr/bin/")+appname+_T(" --runclient localhost --CPUs ") + nbCPUs);
        //if(result==0) result=wxExecute(_T("/usr/local/bin/")+appname+_T(" --runclient localhost --CPUs ") + nbCPUs);
        //if(appname(0,1)!=_T("/")) appname=wxGetCwd()+_T("/")+appname;
-       //wxExecute(appname+_T(" --runclient localhost --CPUs ") + nbCPUs);  
+       //wxExecute(appname+_T(" --runclient localhost --CPUs ") + nbCPUs);
        #endif
    }
 }
@@ -685,7 +685,7 @@ void WXFoxServer::UpdateResultList()
    wxString tmp;
    for(int i=nb;i<m_results.size();i++){
       m_ResultTable->InsertRows(i, 1, false);
-      
+
       tmp.Printf(_T("%d"), i);
       m_ResultTable->SetCellValue(i, 0, tmp);//Nb
       tmp.Printf(_T("%d"), m_results[i].JobID);
@@ -699,12 +699,12 @@ void WXFoxServer::UpdateResultList()
 void WXFoxServer::UpdateLists(wxTimerEvent& event)
 {
    std::vector<GridClient> clients;
-   
+
    if(m_WXFoxServerDataMutex->Lock()!=wxMUTEX_NO_ERROR) return;
 
    if(m_FoxServer->IsServerRunning()){
       m_FoxServer->GetData(clients, m_results, m_jobs);
-      
+
    }
 
    //update client list
@@ -727,12 +727,12 @@ void WXFoxServer::UpdateLists(wxTimerEvent& event)
         tmp.Printf(_T("%d/%d"), (int) clients[i].allCPUs, (int) clients[i].availCPUs);
         m_ClientTable->SetCellValue(i,2,tmp);
         m_ClientTable->SetReadOnly(i,2);
-        
+
         //status
         m_ClientTable->SetCellValue(i,3,clients[i].status);
         m_ClientTable->SetReadOnly(i,3);
    }
-   
+
    UpdateResultList();
    UpdateJobList();
 
@@ -743,7 +743,7 @@ void WXFoxServer::OnGridJobClick(wxGridEvent &event)
 {
    int r = event.GetRow();
    int c = event.GetCol();
-   
+
    if(m_JobListTable->GetSelectedRows().Count()==1){
       m_JobListTable->DeselectRow(m_JobListTable->GetSelectedRows().Item(0));
    }
@@ -768,7 +768,7 @@ void WXFoxServer::OnGridResultClick(wxGridEvent &event)
    if(c!=3) return;
 
    if(m_WXFoxServerDataMutex->Lock()!=wxMUTEX_NO_ERROR) return;
-   
+
    if(r<m_results.size()){
 
       if(m_results[r].Show)   {
@@ -782,7 +782,7 @@ void WXFoxServer::OnGridResultClick(wxGridEvent &event)
    }
    m_WXFoxServerDataMutex->Unlock();
    */
-   
+
 }
 void WXFoxServer::OnShowResults(wxCommandEvent& event)
 {
@@ -827,7 +827,7 @@ void WXFoxServer::OnShowResults(wxCommandEvent& event)
    //if(result==0) result=wxExecute(_T("/usr/local/bin/")+appname+_T(" ")+file);
    #endif
 
-  
+
 
     /*
    wxString files=_T(" ");
@@ -842,7 +842,7 @@ void WXFoxServer::OnShowResults(wxCommandEvent& event)
       }
    }
    m_WXFoxServerDataMutex->Unlock();
-   
+
    if(nb==0) {
       wxMessageBox(_T("Select result(s)!"), _T("Error"), wxOK, this);
       return;
@@ -850,9 +850,9 @@ void WXFoxServer::OnShowResults(wxCommandEvent& event)
 
    wxString cmd;
    #ifdef WIN32
-  
+
    //!CrystalCMPgui.exe should be copied before running server to the same path as a server!
-   
+
    cmd = _T("CrystalCMPgui.exe -dir ");
    cmd += wxGetCwd();
    cmd += files;
@@ -868,5 +868,3 @@ void WXFoxServer::RunALLClient(wxCommandEvent& event)
 {
     m_FoxServer->RunAllClients();
 }
-
-
