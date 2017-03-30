@@ -48,7 +48,7 @@ public:
      ~streamReceiveThread();
 
      virtual void *Entry();
-     virtual void OnExit(); 
+     virtual void OnExit();
 protected:
     wxString *message;
     wxSocketBase *pSocket;
@@ -123,7 +123,7 @@ public:
      bool   m_Connecting;
      bool   m_exit;
 
-protected:  
+protected:
    wxString getJob(wxString inmsg, long pos);
    bool SendResult(wxString result);
    void answerToAsk(vector<wxString> ask);
@@ -141,9 +141,9 @@ protected:
    void Reconnect();
 
    //it runs new job, return 0 if successful
-   //job - content of the file, id - job id, 
+   //job - content of the file, id - job id,
    int runNewJob(wxString job, int id, int nbTrial, bool rand);
-  
+
    //send not-accepted jobs back to the server
    void rejectJobs(std::vector<int> ids);
 
@@ -152,7 +152,7 @@ protected:
 
    //get cost from file name "out-Cost-%f.xml"
    wxString getCost(wxString filename);
-   
+
    //reset processes (delete old and set new)
    void resetProcesses(int nbProcesses);
 
@@ -166,7 +166,7 @@ protected:
    wxMutex              * m_ResultsMutex;
    vector<FoxProcess>     m_processes;
    vector<GrdRslt>        m_results;
-   
+
    //int                    m_ID;
    int                    m_nbOfAvailCPUs;
    IOSocket               m_IOSocket;

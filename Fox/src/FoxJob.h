@@ -49,7 +49,7 @@ public:
    void replaceThreadID(std::vector<int> threadID);
    void setFileName(wxString name);
    bool randomize();
-    
+
    void       setRand(bool rand);
    int        getM_ID();
    wxString   getName();

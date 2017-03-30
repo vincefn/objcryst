@@ -27,7 +27,7 @@ CXX      := g++
 CXXFLAGS  = ${DEPENDFLAGS} ${PROFILEFLAGS}
 # FORTRAN compiler
 FC     := f77
-FFLAGS  = 
+FFLAGS  =
 # linker
 LINKER    := g++
 LDFLAGS   = -L$(DIR_ATOMINFO) -L$(DIR_CRYSTVECTOR) -L$(DIR_LIBCRYST) -L$(DIR_NEWMAT) -L$(DIR_BLITZ)/lib -L$(DIR_REFOBJ) -L$(DIR_SGLITE) -L$(DIR_VFNQUIRKS) -L$(DIR_TAU)/i386_linux/lib -L$(DIR_WXWCRYST)
@@ -41,7 +41,7 @@ SEARCHDIRS = -I- -I${DIR_CRYST}/.. -I./ -I$(DIR_BLITZ)  -I$(DIR_TAU)/include -I$
 #wxWindows flags
 ifeq ($(wxcryst),1)
    WXCRYSTFLAGS = -D__WX__CRYST__ --pipe -fvtable-thunks -c -D_X86_=1 -D_WIN32 -DWINVER=0x0400 -D__WIN95__ -D__GNUWIN32__ -DSTRICT  -D__WXMSW__ -D__WINDOWS__
-   WX_LDFLAGS =  -L$(DIR_WXWINDOWS)/lib -L/usr/lib -L/usr/X11R6/lib -lwxcryst -lwx -lpng -ljpeg -lzlib -lxpm -ltiff -lstdc++ -lgcc -lcomctl32 -lole32 -luuid -lopengl32 -lglu32 -lglut32 -lgdi32 -lcomdlg32    
+   WX_LDFLAGS =  -L$(DIR_WXWINDOWS)/lib -L/usr/lib -L/usr/X11R6/lib -lwxcryst -lwx -lpng -ljpeg -lzlib -lxpm -ltiff -lstdc++ -lgcc -lcomctl32 -lole32 -luuid -lopengl32 -lglu32 -lglut32 -lgdi32 -lcomdlg32
 	#-mwindows -Wl,--subsystem,windows -mno-cygwin -lodbc32 -lctl3d32 -loleaut32 -lwsock32 -lwinspool -lwinmm -lshell32 -ladvapi32
 else
    WXCRYSTFLAGS :=
@@ -75,7 +75,7 @@ GL_OBJ   :=
 endif
 
 #Set DEBUG options
-#for Blitz++: -ftemplate-depth-30 
+#for Blitz++: -ftemplate-depth-30
 ifeq ($(debug),1)
    DEPENDFLAGS = -g -Wall -D__DEBUG__ ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS}
    BIN_DIR  := obj_debug
@@ -86,7 +86,7 @@ else
 endif
 LOADLIBES = -s -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lsglite -latominfo ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS}
 
-CPPFLAGS = 
+CPPFLAGS =
 
 ######################################################################
 #####################      LIBRAIRIES         ########################
@@ -121,11 +121,11 @@ libRefinableObj:
 #Newmat Matrix Algebra library (used for SVD)
 libnewmat:
 	$(MAKE) -f nm_gnu.mak -C ${DIR_NEWMAT} libnewmat.a
-     
+
 #SgLite -Spacegroup Lib
 libsglite:
 	$(MAKE) -f linux.mak -C ${DIR_SGLITE} lib
-     
+
 #AtomInfo
 libatominfo:
 	$(MAKE) -f linux.mak -C ${DIR_ATOMINFO} lib

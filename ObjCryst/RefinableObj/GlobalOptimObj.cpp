@@ -710,7 +710,7 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
    #ifdef __WX__CRYST__
    mMutexStopAfterCycle.Unlock();
    #endif
-   
+
    if(finalcost>1)
       cout<<endl<<"Finished all runs, number of trials to reach cost="
           <<finalcost<<" : <nbTrial>="<<nbTrialCumul/(nbCycle0-nbCycle)<<endl;

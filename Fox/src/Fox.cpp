@@ -70,7 +70,7 @@
 #include <mysql.h>
 #else
 // Using otlv4, requires installing an ODBC connector...
-   #if defined(__DARWIN__) 
+   #if defined(__DARWIN__)
 		#define OTL_ODBC
 		#define OTL_ODBC_UNIX
    #endif
@@ -398,7 +398,7 @@ static const long MENU_HELP_TOGGLETOOLTIP=             WXCRYST_ID();
 static const long MENU_HELP_UPDATE=                    WXCRYST_ID();
 static const long MENU_PREFS_PREFERENCES=              WXCRYST_ID();
 static const long MENU_FILE_LOAD=                      WXCRYST_ID();
-static const long MENU_FILE_BROWSE=                    WXCRYST_ID(); 
+static const long MENU_FILE_BROWSE=                    WXCRYST_ID();
 static const long MENU_FILE_CLOSE=                     WXCRYST_ID();
 static const long MENU_FILE_SAVE=                      WXCRYST_ID();
 static const long MENU_OBJECT_CREATE_CRYSTAL=          WXCRYST_ID();
@@ -617,7 +617,7 @@ int main (int argc, char *argv[])
       //FoxGrid
       if(STRCMP("--runclient",argv[i])==0)
       {
-         
+
          if(!useGUI) {
             cout << "Client output: Run client with GUI only!"<<endl;
             cout << "i.e. Fox --runclient 10.0.0.1 --CPUs 4 --working_dir c:\\FOXGrid"<<endl;
@@ -649,19 +649,19 @@ int main (int argc, char *argv[])
       {
          useGUI=false;
          cout << "Running Fox without GUI"<<endl;
-         continue;  
+         continue;
       }
       if(STRCMP("--randomize",argv[i])==0)
       {
          randomize=true;
          cout << "Randomizing parameters before running"<<endl;
-         continue;  
+         continue;
       }
       if(STRCMP("--silent",argv[i])==0)
       {
          silent=true;
          cout << "Running Fox quietly"<<endl;
-         continue;  
+         continue;
       }
       if(STRCMP("--finalcost",argv[i])==0)
       {
@@ -673,7 +673,7 @@ int main (int argc, char *argv[])
          sstr >> finalCost;
          #endif
          cout << "Fox will stop after reaching cost:"<<finalCost<<endl;
-         continue;  
+         continue;
       }
       if(STRCMP("-n",argv[i])==0)
       {
@@ -823,7 +823,7 @@ int main (int argc, char *argv[])
          #else
          ifstream f(argv[i]);
          #endif
-         if(!f) 
+         if(!f)
          {
             cout<<"Cannot find file to index:"<<argv[i]<<endl;
             exit(0);
@@ -835,10 +835,10 @@ int main (int argc, char *argv[])
          for(vector<PeakList::hkl>::iterator pos=pl.mvHKL.begin();pos!=pl.mvHKL.end();++pos)
          //{   pos->d2obsmin=(3*pos->d2obs+pos->d2obsmin)/4; pos->d2obsmax=(3*pos->d2obs+pos->d2obsmax)/4;}
          { pos->d2obsmin=pos->d2obs; pos->d2obsmax=pos->d2obs;}
-         
+
          CellExplorer cx(pl,TRICLINIC,0);
          cx.SetAngleMinMax((float)90*DEG2RAD,(float)120*DEG2RAD);
-         
+
          // Use at most 20 lines ?
          if(pl.GetPeakList().size()>20) pl.GetPeakList().resize(20);
          unsigned int nb=pl.GetPeakList().size();
@@ -848,14 +848,14 @@ int main (int argc, char *argv[])
 
          const float vmin=EstimateCellVolume(dmin,dmax,nb,TRICLINIC  ,LATTICE_P,1.2);
          const float vmax=EstimateCellVolume(dmin,dmax,nb,TRICLINIC  ,LATTICE_P,0.2);
-         
+
          float lengthmax=pow(vmax,(float)(1/3.0))*4;
          if(lengthmax<25)lengthmax=25;
          //if(lengthmax>(2.1/pl.GetPeakList()[0].dobs)) lengthmax=2.1/pl.GetPeakList()[0].dobs;
-         
+
          cx.SetVolumeMinMax(vmin,vmax);
          cx.SetLengthMinMax(3,lengthmax);
-         
+
          cx.DicVol(10,4,50,4);
          /*
          for(unsigned int i=0;;++i)
@@ -884,8 +884,8 @@ int main (int argc, char *argv[])
                alpha=50+rand()/float(RAND_MAX)*80,
                beta =50+rand()/float(RAND_MAX)*80,
                gamma=50+rand()/float(RAND_MAX)*80;
-               
-               //a=21.611; b= 4.407; c=16.848; alpha= 93.27; beta= 71.47; gamma= 87.13; //V= 1514.99   ;                                                        
+
+               //a=21.611; b= 4.407; c=16.848; alpha= 93.27; beta= 71.47; gamma= 87.13; //V= 1514.99   ;
 
                if( (alpha<(beta+gamma-5)) && (beta<(alpha+gamma-5)) && (gamma<(beta+alpha-5)) && ((alpha+beta+gamma)<355)) break;
             }
@@ -896,24 +896,24 @@ int main (int argc, char *argv[])
             const float v=pl.Simulate(0,a,b,c,alpha,beta,gamma,true,nb,nbspurious,1e-4,missing,true);
             //v=pl.Simulate(0,10.317,9.414,13.178,87.90,89.76,74.10,true,20,0,0.);
             //v=pl.Simulate(0,10.451,12.884,7.072,86.91,96.07,83.36,true,20,0,0.);
-            //v=pl.Simulate(21.611,4.407,16.848,93.27,71.47,87.13,1514.99,true,20,0,1e-4,0.2,true);                                                 
+            //v=pl.Simulate(21.611,4.407,16.848,93.27,71.47,87.13,1514.99,true,20,0,1e-4,0.2,true);
 
             pl.Print(cout);
-            
+
             CellExplorer cx(pl,TRICLINIC,LATTICE_P);
             cx.SetAngleMinMax((float)90*DEG2RAD,(float)120*DEG2RAD);
-            
+
             const float dmin=pl.GetPeakList()[nb-1].dobs;
             const float dmax=pl.GetPeakList()[0].dobs;// /10: assume no peaks at lower resolution
 
             const float vmin=EstimateCellVolume(dmin,dmax,nb,TRICLINIC  ,LATTICE_P,1.2);
             const float vmax=EstimateCellVolume(dmin,dmax,nb,TRICLINIC  ,LATTICE_P,0.5);
-            
+
             float lengthmax=pow(vmax,(float)(1/3.0))*4;
             if(lengthmax<25)lengthmax=25;
             //if(lengthmax>(2.1/pl.GetPeakList()[0].dobs)) lengthmax=2.1/pl.GetPeakList()[0].dobs;
             cout<<"Indexing using TRICLINIC lattice, latt=3.0->"<<lengthmax<<"A, V="<<vmin<<"->"<<vmax<<"A^3"<<endl;
-            
+
             cx.SetVolumeMinMax(vmin,vmax);
             //cx.SetVolumeMinMax(861.06299999999987,1599.117);
             //cx.SetVolumeMinMax(938.4*0.7,938.4*1.3);
@@ -1165,7 +1165,7 @@ int main (int argc, char *argv[])
 
            <<"Load file 'alumina.cif', import Fourier map from the 'alumina.grd' file, and launch GUI with the automatic 3D display:"<<endl<<endl
            <<"    Fox alumina.cif alumina.grd"<<endl<<endl
-           
+
            <<"Load file 'ktartrate.xml', randomize, then make 1 optimization of "<<endl
            <<"1 million trials, and save the best structure in 'best.xml' :"<<endl<<endl
            <<"    Fox Cimetidine-powder.xml --nogui --randomize -n 1000000 -o best.xml"<<endl<<endl
@@ -1174,13 +1174,13 @@ int main (int argc, char *argv[])
            <<"a random structure) of 10 million trials (each run saves one xml file)"<<endl
            <<", and save the best structure in 'best.xml' :"<<endl<<endl
            <<"    Fox Cimetidine-powder.xml --nogui --randomize -n 10000000 --nbrun 10 -o best.xml"<<endl<<endl
-           
+
            <<"Load file 'Cimetidine-powder.xml', then make 10 silent runs of 10 million trials"<<endl
            <<" (each run saves one xml file), and save the best structure in 'best.xml'."<<endl
            <<" For each run, the optimization stops if the cost goes below 200000."<<endl<<endl
            <<"    Fox Cimetidine-powder.xml --nogui --silent --randomize -n 10000000 --nbrun 10 --finalcost 200000 -o best.xml"<<endl<<endl
            <<endl;
-      exit(0);  
+      exit(0);
    }
    if(fitprofile)
    {
@@ -1231,9 +1231,9 @@ int main (int argc, char *argv[])
         try
         {
           lsq.SetParIsFixed(gpRefParTypeScattDataScale,false);
-          
+
           if(fitzero) lsq.SetParIsFixed(gPowderPatternRegistry.GetObj(i).GetPar("Zero"),false);
-          if(fitwidth0) 
+          if(fitwidth0)
             for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
               lsq.SetParIsFixed((*pos)->GetProfile().GetPar("W"),false);
           if(fitzero||fitwidth0)
@@ -1242,13 +1242,13 @@ int main (int argc, char *argv[])
             for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
               (*pos)->ExtractLeBail(2);
           }
-          if(fitwidth) 
+          if(fitwidth)
             for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
               lsq.SetParIsFixed((*pos)->GetProfile().GetPar("U"),false);
-          if(fitwidth) 
+          if(fitwidth)
             for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
               lsq.SetParIsFixed((*pos)->GetProfile().GetPar("V"),false);
-          if(fiteta) 
+          if(fiteta)
             for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
               lsq.SetParIsFixed((*pos)->GetProfile().GetPar("Eta0"),false);
           if(fitwidth||fiteta)
@@ -1257,7 +1257,7 @@ int main (int argc, char *argv[])
               for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
                 (*pos)->ExtractLeBail(2);
           }
-          
+
           if(fitTOFInstWidth)
           {// TOF
             for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
@@ -1285,8 +1285,8 @@ int main (int argc, char *argv[])
             for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
               lsq.SetParIsFixed((*pos)->GetProfile().GetPar("GaussianSigma1"),true);
           }
-          
-          if(fiteta) 
+
+          if(fiteta)
             for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
               lsq.SetParIsFixed((*pos)->GetProfile().GetPar("Eta1"),false);
           if(fiteta)
@@ -1295,20 +1295,20 @@ int main (int argc, char *argv[])
             for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
               (*pos)->ExtractLeBail(2);
           }
-          
-          if(fitasym) 
+
+          if(fitasym)
             for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
               lsq.SetParIsFixed((*pos)->GetProfile().GetPar("Asym0"),false);
-          if(fitasym) 
+          if(fitasym)
             for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
               lsq.SetParIsFixed((*pos)->GetProfile().GetPar("Asym1"),false);
-          if(fitasym) 
+          if(fitasym)
             for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
               lsq.SetParIsFixed((*pos)->GetProfile().GetPar("Asym2"),false);
-          if(fitdispltransp) 
+          if(fitdispltransp)
             for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
               lsq.SetParIsFixed((*pos)->GetParentPowderPattern().GetPar("2ThetaDispl"),false);
-          if(fitdispltransp)  
+          if(fitdispltransp)
             for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
               lsq.SetParIsFixed((*pos)->GetParentPowderPattern().GetPar("2ThetaTransp"),false);
           if(fitdispltransp||fitasym)
@@ -1317,7 +1317,7 @@ int main (int argc, char *argv[])
             for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
               (*pos)->ExtractLeBail(2);
           }
-          
+
           if(fitbackgd)
           {
             lsq.SetParIsFixed(gpRefParTypeScattDataBackground,false);
@@ -1328,16 +1328,16 @@ int main (int argc, char *argv[])
                 PowderPatternBackground *pback=dynamic_cast<PowderPatternBackground *> (&(gPowderPatternRegistry.GetObj(i).GetPowderPatternComponent(k)));
                 pback->FixParametersBeyondMaxresolution(lsq.GetCompiledRefinedObj());
               }
-  
+
             lsq.Refine(5,true,true);
             for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
               (*pos)->ExtractLeBail(2);
           }
-          
+
           if(fitcell)
           {
               lsq.SetParIsFixed(gpRefParTypeUnitCell,false);
-              
+
               lsq.Refine(5,true,true);
               for(set<PowderPatternDiffraction *>::iterator pos=vpDiff.begin();pos!=vpDiff.end();++pos)
                 (*pos)->ExtractLeBail(2);
@@ -1370,7 +1370,7 @@ int main (int argc, char *argv[])
       #endif
       exit(0);
    }
-   
+
    if(cif2pattern)
    {
       #ifdef __WX__CRYST__
@@ -1381,7 +1381,7 @@ int main (int argc, char *argv[])
    if(randomize)
       for(int i=0;i<gOptimizationObjRegistry.GetNb();i++)
          gOptimizationObjRegistry.GetObj(i).RandomizeStartingConfig();
-   
+
 #ifndef __WX__CRYST__
    useGUI=false;
 #endif
@@ -1478,10 +1478,10 @@ int main (int argc, char *argv[])
        wxToolTip::SetDelay(500);
    }
    else wxConfigBase::Get()->Write(_T("Fox/BOOL/Enable tooltips"), true);
-   
+
    if(!wxConfigBase::Get()->HasEntry(_T("Fox/BOOL/Ask confirmation before exiting Fox")))
       wxConfigBase::Get()->Write(_T("Fox/BOOL/Ask confirmation before exiting Fox"), true);
-   
+
    if(!wxConfigBase::Get()->HasEntry(_T("Fox/BOOL/Use compressed file format (.xmlgz)")))
       wxConfigBase::Get()->Write(_T("Fox/BOOL/Use compressed file format (.xmlgz)"), true);
 
@@ -1501,7 +1501,7 @@ int main (int argc, char *argv[])
    // Use the main frame status bar to pass messages to the user
       pLogWindowForUserMessage=mpFrame->GetLogWindow();
       fpObjCrystInformUser=&WXCrystInformUserStdOut;
-   
+
    WXCrystal *pWXCryst;
    if(loadFourierGRD || loadFourierDSN6)
    {
@@ -1543,7 +1543,7 @@ int main (int argc, char *argv[])
       }
    }
    if(runclient)
-   { 
+   {
       wxString dir = wxPathOnly(argv[0]);
       wxSetWorkingDirectory(dir);
       wxCommandEvent com;
@@ -1635,7 +1635,7 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
          menuFile->Append(MENU_FILE_QUIT, _T("Exit\tCtrl-Q"), _T("Quit "));
          menuFile->AppendSeparator();
          menuFile->Append(MENU_FILE_BROWSE, _T("&Browse .xml, .xmlgz or .cif files...\tCtrl-B"), _T("Browse .xml, .xmlgz or .cif files..."));
-      
+
       wxMenu *objectMenu = new wxMenu(_T(""), wxMENU_TEAROFF);
          objectMenu->Append(MENU_OBJECT_CREATE_CRYSTAL, _T("&New Crystal\tCtrl-N"),
                            _T("Add a new Crystal structure"));
@@ -1651,10 +1651,10 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
          gridMenu->Append(MENU_GRID_SERVER_RUN, _T("&Run Server"), _T("Start Fox Grid Server"));
          gridMenu->AppendSeparator();
          gridMenu->Append(MENU_GRID_CLIENT_START, _T("&Start Client"), _T("Start Fox Grid Client"));
-      
+
       wxMenu *prefsMenu = new wxMenu;
          prefsMenu->Append(MENU_PREFS_PREFERENCES, _T("&Preferences..."), _T("Fox Preferences..."));
-      
+
       wxMenu *helpMenu = new wxMenu;
          helpMenu->Append(MENU_HELP_ABOUT, _T("&About..."), _T("About ObjCryst..."));
          helpMenu->Append(MENU_HELP_TOGGLETOOLTIP, _T("Toggle Tooltips"), _T("Set Tooltips on/off"));
@@ -1699,7 +1699,7 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
    SetStatusText(_T("Welcome to FOX/ObjCryst++!"));
 #endif // wxUSE_STATUSBAR
 
-   
+
       wxSizer* s0 = new wxBoxSizer(wxVERTICAL);
       this->SetSizer(s0);
       this->SetAutoLayout(true);
@@ -1722,13 +1722,13 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
       mpWin2->SetChild(gPowderPatternRegistry.WXCreate(mpWin2));
       mpWin2->Layout();
       mpNotebook->AddPage(mpWin2,_T("Powder Diffraction"),true);
-      
+
    // Third window - SingleCrystal
       WXCrystScrolledWindow *mpWin3 = new WXCrystScrolledWindow(mpNotebook);
       mpWin3->SetChild(gDiffractionDataSingleCrystalRegistry.WXCreate(mpWin3));
       mpWin3->Layout();
       mpNotebook->AddPage(mpWin3,_T("Single Crystal Diffraction"),true);
-      
+
    // Fourth window - Global Optimization
       WXCrystScrolledWindow *mpWin4 = new WXCrystScrolledWindow(mpNotebook);
       mpWin4->SetChild(gOptimizationObjRegistry.WXCreate(mpWin4));
@@ -1742,13 +1742,13 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
       mpNotebook->AddPage(mpWin5,_T("FOXGrid"),true);
 
    mpNotebook->SetSelection(0);
-   
+
    // Log windows
    mpLog =new wxTextCtrl(this,-1,_T(""),wxDefaultPosition,wxSize(600,100),wxTE_MULTILINE|wxTE_READONLY|wxTE_DONTWRAP);
    mpLog->SetFont(wxFont(10,wxTELETYPE,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL));
    s0->Add(mpLog,0,wxALIGN_CENTER|wxEXPAND);
    mpLog->AppendText(wxString::Format(_T("Welcome to FOX !\n")));
-   
+
    this->SetIcon(wxICON(Fox));
    this->Show(TRUE);
    this->Layout();
@@ -1765,7 +1765,7 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
    if(check || ((rand()%10)==0))
    {
       WXThreadCheckUpdates *pThreadCheckUpdates = new WXThreadCheckUpdates(mvUpdates,*this);
-      if(pThreadCheckUpdates->Create() != wxTHREAD_NO_ERROR) 
+      if(pThreadCheckUpdates->Create() != wxTHREAD_NO_ERROR)
          wxLogError("Can't create updates check thread");
       else pThreadCheckUpdates->Run();
       mvUpdatesAutoCheck=true;
@@ -1959,7 +1959,7 @@ void WXCrystMainFrame::OnBrowse(wxCommandEvent& event)
   wxMiniFrame *frame= new wxMiniFrame(this,ID_FOX_BROWSE, _T("Fox .xml file browsing"),
                                       wxDefaultPosition,wxSize(500,500),wxCLOSE_BOX|wxCAPTION|wxSTAY_ON_TOP);
   wxArrayString choices;
-  mpBrowseList=new wxListBox(frame, ID_FOX_BROWSE, wxDefaultPosition, 
+  mpBrowseList=new wxListBox(frame, ID_FOX_BROWSE, wxDefaultPosition,
                              wxDefaultSize, choices,
                              wxLB_SINGLE|wxLB_NEEDED_SB, wxDefaultValidator,
                              _T("listBox"));
@@ -1969,7 +1969,7 @@ void WXCrystMainFrame::OnBrowse(wxCommandEvent& event)
   {
     if(wxNOT_FOUND==filename.Find(_T("~")))
     {
-      if(wxNOT_FOUND!=filename.Find(_T(".xml"))) 
+      if(wxNOT_FOUND!=filename.Find(_T(".xml")))
       {
         mpBrowseList->Append(filename);
       }
@@ -2023,7 +2023,7 @@ void WXCrystMainFrame::Close(bool safe)
          wxString msg;
          msg.Printf( _T("Some objects have not been saved\n")
                   _T("Do you really want to close all ?"));
-   
+
          wxMessageDialog d(this,msg, _T("Really Close ?"), wxYES | wxNO);
          if(wxID_YES!=d.ShowModal()) return;
       }
@@ -2092,11 +2092,11 @@ void WXCrystMainFrame::SafeQuit()
    cout<<"Removing all Crystal objects..."<<endl;
    gCrystalRegistry.DeleteAll();
    //FoxGrid
-   mpGridWindow->Clear(); 
+   mpGridWindow->Clear();
 
    mpGridWindow->Destroy();
    this->Destroy();
-   
+
 }
 void WXCrystMainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
 {
@@ -2156,7 +2156,7 @@ void WXCrystMainFrame::OnAddCrystal(wxCommandEvent& WXUNUSED(event))
    }
    obj->UpdateDisplay();
    mpNotebook->SetSelection(0);
-   
+
    // Fake pdf for linking ?
    //PDF pdf;
    //pdf.GetPDFR();
@@ -2298,25 +2298,25 @@ void WXCrystMainFrame::OnDebugTest(wxCommandEvent& event)
       Molecule *mol;
       mol=MakeTetrahedron(*cryst,"SO4",ScattPowS,ScattPowO,1.5);
       mol->RestraintStatus(cout);cryst->AddScatterer(mol);
-      
+
       mol=MakeOctahedron(*cryst,"SO6",ScattPowS,ScattPowO,1.5);
       mol->RestraintStatus(cout);cryst->AddScatterer(mol);
-      
+
       mol=MakeSquarePlane(*cryst,"SO6",ScattPowS,ScattPowO,1.5);
       mol->RestraintStatus(cout);cryst->AddScatterer(mol);
-      
+
       mol=MakeCube(*cryst,"SO8",ScattPowS,ScattPowO,1.5);
       mol->RestraintStatus(cout);cryst->AddScatterer(mol);
-      
+
       mol=MakePrismTrigonal(*cryst,"SO6",ScattPowS,ScattPowO,1.5);
       mol->RestraintStatus(cout);cryst->AddScatterer(mol);
-      
+
       mol=MakeIcosahedron(*cryst,"SO12",ScattPowS,ScattPowO,1.5);
       mol->RestraintStatus(cout);cryst->AddScatterer(mol);
-      
+
       mol=MakeTriangle(*cryst,"SO3",ScattPowS,ScattPowO,1.5);
       mol->RestraintStatus(cout);cryst->AddScatterer(mol);
-      
+
       mol=MakeAntiPrismTetragonal(*cryst,"SO8",ScattPowS,ScattPowO,1.5);
       mol->RestraintStatus(cout);cryst->AddScatterer(mol);
 
@@ -2411,24 +2411,24 @@ wxDialog(parent,-1,_T("FOX Preferences: "),wxDefaultPosition,wxSize(400,400),wxD
    sw->SetSizer(sizer);
    list<pair<wxString,wxString> > ltmp;
    GetRecursiveConfigEntryList(ltmp);
-   
+
    wxWindow *w;
    list<FoxPref> l2;
    for(list<pair<wxString,wxString> >::const_iterator pos=ltmp.begin();pos!=ltmp.end();++pos)
    {
       wxString component,entry;
       FOX_PREF_TYPE type;
-      
+
       size_t tmp=pos->first.find(_T("/"),1);
       component=pos->first.substr(1,tmp-1);
-      
+
       entry=pos->second;
-      
+
       if(pos->first.find(_T("BOOL")  ,1)!=wxString::npos) type=PREF_BOOL;
       if(pos->first.find(_T("STRING"),1)!=wxString::npos) type=PREF_STRING;
       if(pos->first.find(_T("LONG")  ,1)!=wxString::npos) type=PREF_LONG;
       if(pos->first.find(_T("REAL")  ,1)!=wxString::npos) type=PREF_REAL;
-      
+
       switch(type)
       {
          case PREF_BOOL:
@@ -2595,7 +2595,7 @@ void WXCrystMainFrame::OnCheckUpdate(wxCommandEvent& event)
             wxString msg;
             msg.Printf( _T("A new version of Fox is available, including CRITICAL bug fixes\n")
                         _T("It is strongly recommended to update to a new version\n\n Major changes: \n"));
-   
+
             for(map<unsigned int,pair<int,wxString> >::const_iterator pos=mvUpdates.begin();pos!=mvUpdates.end();++pos)
             {
                if(pos->second.first==12)
@@ -2676,7 +2676,7 @@ void WXCrystMainFrame::OnCheckUpdate(wxCommandEvent& event)
       #endif
       mvUpdatesAutoCheck=false;
       WXThreadCheckUpdates *pThreadCheckUpdates = new WXThreadCheckUpdates(mvUpdates,*this);
-      if(pThreadCheckUpdates->Create() != wxTHREAD_NO_ERROR) 
+      if(pThreadCheckUpdates->Create() != wxTHREAD_NO_ERROR)
          wxLogError(_T("Can't create updates check thread"));
       else pThreadCheckUpdates->Run();
    }
@@ -2716,7 +2716,7 @@ void WXCrystMainFrame::OnCOD(wxCommandEvent &event)
    pWinCOD->SetSizer(topsizer);
 
    wxBoxSizer *tmpsizer;
-   
+
    tmpsizer=new wxBoxSizer(wxHORIZONTAL);
    topsizer->Add(tmpsizer);
    wxStaticText *pWords=new wxStaticText(pWinCOD,-1,"Words (title, crystal name):");
@@ -2786,12 +2786,12 @@ class WXGridCellAutoWrapStringRendererFixedWidth: public wxGridCellAutoWrapStrin
                               const wxGridCellAttr& attr,
                               const wxRect& rect,
                               int row, int col);
-   
+
       void BreakLine(wxDC& dc,
                   const wxString& logicalLine,
                   wxCoord maxWidth,
                   wxArrayString& lines);
-   
+
       wxCoord BreakWord(wxDC& dc,
                      const wxString& word,
                      wxCoord maxWidth,
@@ -2810,23 +2810,23 @@ WXGridCellAutoWrapStringRendererFixedWidth::GetTextLines(wxGrid& grid,
 {
    dc.SetFont(attr.GetFont());
    const wxCoord maxWidth = rect.GetWidth();
-   
+
    // Transform logical lines into physical ones, wrapping the longer ones.
    const wxArrayString
    logicalLines = wxSplit(grid.GetCellValue(row, col), '\n', '\0');
-   
+
    // Trying to do anything if the column is hidden anyhow doesn't make sense
    // and we run into problems in BreakLine() in this case.
    if ( maxWidth <= 0 )
       return logicalLines;
-   
+
    wxArrayString physicalLines;
    for ( wxArrayString::const_iterator it = logicalLines.begin();
         it != logicalLines.end();
         ++it )
    {
       const wxString& line = *it;
-      
+
       if ( dc.GetTextExtent(line).x > maxWidth )
       {
          // Line does not fit, break it up.
@@ -2837,7 +2837,7 @@ WXGridCellAutoWrapStringRendererFixedWidth::GetTextLines(wxGrid& grid,
          physicalLines.push_back(line);
       }
    }
-   
+
    return physicalLines;
 }
 
@@ -2849,7 +2849,7 @@ void WXGridCellAutoWrapStringRendererFixedWidth::BreakLine(wxDC& dc,
 {
    wxCoord lineWidth = 0;
    wxString line;
-   
+
    // For each word
    wxStringTokenizer wordTokenizer(logicalLine, wxS(" \t"), wxTOKEN_RET_DELIMS);
    while ( wordTokenizer.HasMoreTokens() )
@@ -2882,13 +2882,13 @@ void WXGridCellAutoWrapStringRendererFixedWidth::BreakLine(wxDC& dc,
                line.clear();
                lineWidth = 0;
             }
-            
+
             // Break it up in several lines.
             lineWidth = BreakWord(dc, word, maxWidth, lines, line);
          }
       }
    }
-   
+
    if ( !line.empty() )
       lines.push_back(line);
 }
@@ -2903,7 +2903,7 @@ wxCoord WXGridCellAutoWrapStringRendererFixedWidth::BreakWord(wxDC& dc,
 {
    wxArrayInt widths;
    dc.GetPartialTextExtents(word, widths);
-   
+
    const unsigned count = widths.size();
    unsigned n;
    for ( n = 0; n < count; n++ )
@@ -2911,14 +2911,14 @@ wxCoord WXGridCellAutoWrapStringRendererFixedWidth::BreakWord(wxDC& dc,
       if ( widths[n] > maxWidth )
          break;
    }
-   
+
    if ( n == 0 )
    {
       n = 1;
    }
-   
+
    lines.push_back(word.substr(0, n));
-   
+
    const wxString rest = word.substr(n);
    const wxCoord restWidth = dc.GetTextExtent(rest).x;
    if ( restWidth <= maxWidth )
@@ -2926,7 +2926,7 @@ wxCoord WXGridCellAutoWrapStringRendererFixedWidth::BreakWord(wxDC& dc,
       line = rest;
       return restWidth;
    }
-   
+
    return BreakWord(dc, rest, maxWidth, lines, line);
 }
 
@@ -2934,13 +2934,13 @@ wxCoord WXGridCellAutoWrapStringRendererFixedWidth::BreakWord(wxDC& dc,
 wxSize WXGridCellAutoWrapStringRendererFixedWidth::GetBestSize(wxGrid& grid, wxGridCellAttr& attr,wxDC& dc,int row, int col)
 {
    const int lineHeight = dc.GetCharHeight();
-   
+
    // Search for a shape no taller than the golden ratio.
    wxSize size;
    size.x=mFixedWidth;
    const size_t numLines = GetTextLines(grid, dc, attr, size, row, col).size();
    size.y = numLines * lineHeight;
-   
+
    return size;
 }
 
@@ -2964,7 +2964,7 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
       {
          if(notfirst) query<<"and ";notfirst=true;
          query<<"(formula rlike '[[:blank:]]"<<v<<"[[:digit:]]' or formula rlike '[[:blank:]]"<<v<<"[[:blank:]]') ";
-         
+
       }
    }
    //Nb elements
@@ -2980,7 +2980,7 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
       if(notfirst) query<<"and ";notfirst=true;
       query<<"nel<="<<v<<" ";
    }
-   
+
    //Volume
    v=mpCOD_MinVol->GetValue();
    if(v.IsEmpty()==false)
@@ -2994,7 +2994,7 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
       if(notfirst) query<<"and ";notfirst=true;
       query<<"vol<="<<v<<" ";
    }
-   
+
    //Authors
    for(std::list<wxTextCtrl*>::iterator pos=mvpCOD_Authors.begin();pos!=mvpCOD_Authors.end();++pos)
    {
@@ -3005,7 +3005,7 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
          query<<"authors rlike '"<<v<<"' ";
       }
    }
-   
+
    //Words
    for(std::list<wxTextCtrl*>::iterator pos=mvpCOD_TitleWords.begin();pos!=mvpCOD_TitleWords.end();++pos)
    {
@@ -3019,7 +3019,7 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
          query<<"or commonname rlike '"<<v<<"') ";
       }
    }
-   
+
    if(notfirst==false)
    {
       wxMessageDialog d(this,_T("COD: Empty request !"),_T("Error"),wxOK|wxICON_ERROR);
@@ -3027,7 +3027,7 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
       return;
    }
    query<<"order by formula limit 500";
-   
+
    VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton():Query="<<query.str()<<" (dt="<<chrono.seconds()<<")", 10)
    if( (mpCODFrame!=0)  && (wxWindow::FindWindowById(ID_FOX_COD_LIST)!=NULL)) mpCODFrame->Close();
 #ifdef OTL_ODBC
@@ -3057,10 +3057,10 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
    VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton()",10)
    try
    {
-      
+
       otl_stream i(50, query.str().c_str(),db);
       long codid;//'file' record in COD
-      
+
       i; // Writing input values into the stream
       mvCOD_Record.clear();
       while(!i.eof())
@@ -3110,12 +3110,12 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
 #else
    // Using MySQL native C API
    MYSQL *connection, mysql;
-   
+
    int state;
    dlgProgress.Update(2,"Connecting to COD database");
-   
+
    mysql_init(&mysql);
-   
+
    connection = mysql_real_connect(&mysql,"www.crystallography.net","cod_reader","","cod",3306,0,0);
    if (connection == NULL)
    {
@@ -3127,7 +3127,7 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
       return ;
    }
    VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton(): MySQL connection OK"<<" (dt="<<chrono.seconds()<<")", 10)
-   
+
    dlgProgress.Update(4,"Query COD database");
    state = mysql_query(connection, query.str().c_str());
    if (state !=0)
@@ -3139,9 +3139,9 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
       d.ShowModal();
       return ;
    }
-   
+
    MYSQL_RES *result = mysql_store_result(connection);
-   
+
    const unsigned int nbresult = mysql_num_rows(result);
    VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton(): Got "<<nbresult<<"rows (dt="<<chrono.seconds()<<")", 10)
    mvCOD_Record.clear();
@@ -3172,7 +3172,7 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
          if(row[++i]!=NULL){p->mineral=row[i];}
          if(row[++i]!=NULL){p->formula=row[i];}
          if(row[++i]!=NULL){p->calcformula=row[i];}
-         
+
          if(row[++i]!=NULL){p->authors=row[i];}
          if(row[++i]!=NULL){p->title=row[i];}
          if(row[++i]!=NULL){p->journal=row[i];}
@@ -3193,10 +3193,10 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
       }
       ct++;
    }
-   
+
    dlgProgress.Update(105,"Closing database connection");
    mysql_free_result(result);
-   
+
    mysql_close(connection);
 
 #endif
@@ -3217,7 +3217,7 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
    mpCODGrid->EnableEditing(false);
    mpCODFrame->Show();
    pSizer->Add(mpCODGrid,wxEXPAND);
-   
+
    mpCODGrid->SetColLabelSize(0);
    mpCODGrid->SetRowLabelSize(0);
    mpCODGrid->CreateGrid(3*mvCOD_Record.size(),2);
@@ -3226,15 +3226,15 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
    mpCODGrid->SetColMinimalWidth(0,120);
    mpCODGrid->SetColMinimalWidth(1,300);
    mpCODGrid->DisableDragRowSize();
-   
+
    wxGridCellAttr* cellAttrFormula = new wxGridCellAttr;
    cellAttrFormula->SetRenderer(new WXGridCellAutoWrapStringRendererFixedWidth(190));
    mpCODGrid->SetColAttr(0,cellAttrFormula);
-   
+
    wxGridCellAttr* cellAttrInfo = new wxGridCellAttr;
    cellAttrInfo->SetRenderer(new WXGridCellAutoWrapStringRendererFixedWidth(500));
    mpCODGrid->SetColAttr(1,cellAttrInfo);
-   
+
    std::vector<cod_record>::const_iterator ps=mvCOD_Record.begin();
    for(unsigned int i=0;i<mvCOD_Record.size();i++)
    {
@@ -3261,7 +3261,7 @@ void WXCrystMainFrame::OnCODSelect(wxGridEvent &ev)
       VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnCODSelect(): wrong wxGrid !", 10)
       return;
    }
-   
+
    std::vector<cod_record>::const_iterator pos=mvCOD_Record.begin();
    for(unsigned int i=ev.GetRow()/3;i>0;i--) pos++;
    wxString cifurl=wxString::Format("http://www.crystallography.net/cod/%ld.cif",pos->file);
@@ -3331,7 +3331,7 @@ void standardSpeedTest()
    vfnBogoMRAPS_n_201001(7)=107;
    vfnBogoMRAPS_n_201001(8)=89;
    vfnBogoMRAPS_n_201001(9)=105;
-   
+
    vfnBogoMRAPS_n_201001(10)=39;
    vfnBogoMRAPS_n_201001(11)=41;
    vfnBogoMRAPS_n_201001(12)=79;
@@ -3342,7 +3342,7 @@ void standardSpeedTest()
    vfnBogoMRAPS_n_201001(17)=105;
    vfnBogoMRAPS_n_201001(18)=86;
    vfnBogoMRAPS_n_201001(19)=102;
-   
+
    cout<<" Spacegroup NbAtoms NbAtType Radiation Type  NbRefl  BogoSPS    BogoMRAPS   BogoMRAPS(n)  relat%"<<endl;
    unsigned int i=0;
    REAL vfnCompar2010=0.;

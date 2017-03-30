@@ -45,12 +45,12 @@
 #ifdef DrawText
 #undef DrawText
 #endif
- 
+
 namespace ObjCryst
 {
 std::map<wxWindowID,std::pair<wxPoint,wxSize> > gvWindowPosition;
 
-wxMultiChoiceDialog_ListBox::wxMultiChoiceDialog_ListBox(wxWindow* parent, const wxString& message, const wxString& caption, 
+wxMultiChoiceDialog_ListBox::wxMultiChoiceDialog_ListBox(wxWindow* parent, const wxString& message, const wxString& caption,
                             int n, const wxString* choices):
 wxDialog(parent,-1,_T("Choose the molecule's atoms"),wxDefaultPosition,wxSize(300,400),wxCAPTION|wxSTAY_ON_TOP),
 mListBox(this,-1,wxDefaultPosition,wxSize(250,350),n,choices,wxLB_MULTIPLE)
@@ -60,7 +60,7 @@ mListBox(this,-1,wxDefaultPosition,wxSize(250,350),n,choices,wxLB_MULTIPLE)
    sizer->Add(this->CreateSeparatedButtonSizer(wxOK | wxCANCEL));
    this->SetSizer(sizer);
    sizer->SetSizeHints(this);
-   sizer->Fit(this); 
+   sizer->Fit(this);
 }
 
 wxArrayInt wxMultiChoiceDialog_ListBox::GetSelections() const
@@ -134,7 +134,7 @@ wxWindow(parent,-1),mWXCrystParent(0),mIsShown(true),mNeedUpdateUI(true)
 #ifdef __WXGTK__
 #ifndef __WXGTK20__
    // Why is this necessary for GTK 1.2 ? wxWidgets 2.6.3
-   this->SetBackgroundColour(wxColour(240,240,240));// wxLIGHT_GREY 
+   this->SetBackgroundColour(wxColour(240,240,240));// wxLIGHT_GREY
 #endif
 #endif
    VFN_DEBUG_MESSAGE("WXCrystObjBasic::WXCrystObjBasic():End",6)
@@ -506,7 +506,7 @@ void WXFieldName::UpdateUI(const bool lock)
    if(w>mpField->GetSize().GetWidth())
       this->GetSizer()->SetItemMinSize(mpField,w+30,-1);
    this->GetSizer()->Fit(this);
-   
+
    mIsSelfUpdating=false;
    mNeedUpdateUI=false;
    if(lock) mMutex.Unlock();
@@ -555,7 +555,7 @@ WXField(parent,label,id),mIsSelfUpdating(false),mFormat(_T("%8f"))
                             wxDefaultPosition,wxSize(hsize,-1),wxTE_PROCESS_ENTER,
                             wxTextValidator(wxFILTER_NUMERIC));
    mpSizer->Add(mpField,0,wxALIGN_CENTER);
-   
+
    this->Layout();
 }
 
@@ -566,7 +566,7 @@ void WXFieldParBase::OnEnter(wxCommandEvent & WXUNUSED(event))
    WXCrystValidateAllUserInput();
 }
 void WXFieldParBase::OnText(wxCommandEvent & WXUNUSED(event))
-{   
+{
    if(true==mIsSelfUpdating) return;
    VFN_DEBUG_MESSAGE("WXFieldRefPar::OnText()",6)
    if(spLastWXFieldInputNotValidated!=this)
@@ -593,14 +593,14 @@ void WXFieldParBase::SetFormat(const wxString &format)
 //    WXFieldPar<T>
 //
 ////////////////////////////////////////////////////////////////////////
-template<class T> WXFieldPar<T>::WXFieldPar(wxWindow *parent,const string& label, 
+template<class T> WXFieldPar<T>::WXFieldPar(wxWindow *parent,const string& label,
                                             const int id,T *par,const int hsize):
 WXFieldParBase(parent,label,id,hsize),mpValue(par),mValue(*par),mValueOld(*par),mHumanScale(1)
 {
    this->CrystUpdate(true,true);
 }
 
-template<> WXFieldPar<long>::WXFieldPar(wxWindow *parent,const string& label, 
+template<> WXFieldPar<long>::WXFieldPar(wxWindow *parent,const string& label,
                                             const int id,long *par,const int hsize):
 WXFieldParBase(parent,label,id,hsize),mpValue(par),mValue(*par),mValueOld(*par),mHumanScale(1)
 {
@@ -771,8 +771,8 @@ const long ID_WXOBJ_ENABLE=WXCRYST_ID(); //These are used in ObjCryst/RefinableO
 const long ID_WXOBJ_DISABLE=WXCRYST_ID();
 BEGIN_EVENT_TABLE(WXCrystObj,wxWindow)
    EVT_BUTTON(ID_WXOBJ_COLLAPSE,WXCrystObj::OnToggleCollapse)
-   EVT_UPDATE_UI(ID_WXOBJ_ENABLE,WXCrystObj::OnEnable)                
-   EVT_UPDATE_UI(ID_WXOBJ_DISABLE,WXCrystObj::OnEnable)                
+   EVT_UPDATE_UI(ID_WXOBJ_ENABLE,WXCrystObj::OnEnable)
+   EVT_UPDATE_UI(ID_WXOBJ_DISABLE,WXCrystObj::OnEnable)
 END_EVENT_TABLE()
 
 WXCrystObj::WXCrystObj(wxWindow* parent,int orient,bool showName):
@@ -781,21 +781,21 @@ WXCrystObjBasic(parent),mIsExpanded(true)
    VFN_DEBUG_ENTRY("WXCrystObj::WXCrystObj()",6)
    mpTopSizer= new wxBoxSizer(orient);
    this->SetSizer(mpTopSizer);
-   
+
    mpCollapseButton=new wxButton(this,ID_WXOBJ_COLLAPSE,_T("-"),
                                  wxDefaultPosition,wxSize(14,14));
    mpTopSizer->Add(mpCollapseButton,0, wxALIGN_TOP);//wxRIGHT | wxTOP | wxALIGN_TOP,4
    //mpCollapseButton->PushEventHandler(this);
-   
+
    mpSizer=new wxBoxSizer(wxVERTICAL);
    mpTopSizer->Add(mpSizer,0, wxALIGN_TOP);
-   
+
    if(showName)
    {
       mpWXTitle = new WXFieldName(this,"name:",this,ID_WXOBJ_NAME,100);
       mpSizer->Add(mpWXTitle,0,wxALIGN_LEFT);
    }else mpWXTitle=0;
-   
+
    //this->Layout();
    VFN_DEBUG_EXIT("WXCrystObj::WXCrystObj():End",6)
 }

@@ -144,7 +144,7 @@ class WXMolecule: public WXScatterer
       void OnMenuRemoveAngle(wxCommandEvent & WXUNUSED(event));
       void OnMenuRemoveDihedralAngle(wxCommandEvent & WXUNUSED(event));
       void OnMenuRemoveNonFlipAtom(wxCommandEvent & WXUNUSED(event));
-      void OnMenuRemoveRigidGroup(wxCommandEvent & WXUNUSED(event));   
+      void OnMenuRemoveRigidGroup(wxCommandEvent & WXUNUSED(event));
       void OnMenuSetLimits(wxCommandEvent &event);
       void OnMenuShowRestraintWindow(wxCommandEvent &event);
       void OnMenuSetDeltaSigma(wxCommandEvent &event);
@@ -186,7 +186,7 @@ class WXMolecule: public WXScatterer
       /** Displayed list of atoms
       */
       std::list<CellAtom> mvpAtom;
-      
+
       /// Structure to store the bond current values
       struct CellBond
       {

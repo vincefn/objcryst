@@ -7,7 +7,7 @@ FoxJob::~FoxJob(void)
 {
 }
 void FoxJob::AddThread(int threadID, int nbCPUs)
-{  
+{
     for(int i=0;i<nbCPUs;i++){
        m_ThreadID.push_back(threadID);
     }

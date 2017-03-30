@@ -1,6 +1,6 @@
 !include ../../rules.mak
 
-xray-single: xray-single.obj 
+xray-single: xray-single.obj
 	$(CPP) $(LINKFLAGS) xray-single.obj $(LINKLIBS)
 
 xray: xray.obj

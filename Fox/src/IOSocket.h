@@ -1,4 +1,3 @@
-
 #ifdef __WX__CRYST__
    // For compilers that support precompilation, includes "wx/wx.h".
    #ifndef __DARWIN__ // work around MacOSX type_info bug (??)
@@ -54,15 +53,15 @@ public:
     bool WriteStringToSocket(wxSocketBase *pSocket, std::string s, bool receipt=true);
 
     //returns error message
-    //Please note that this function merely returns the last error message, 
-    //but it should not be used to determine if an error has occurred 
+    //Please note that this function merely returns the last error message,
+    //but it should not be used to determine if an error has occurred
     wxString getError();
 private:
 
     unsigned int getMessageLen(wxSocketBase *pSocket);
 
     wxString m_error;
-    
+
 };
 
 #endif

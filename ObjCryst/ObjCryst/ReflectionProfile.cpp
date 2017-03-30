@@ -151,12 +151,12 @@ CrystVector_REAL ReflectionProfilePseudoVoigt::GetProfile(const CrystVector_REAL
    CrystVector_REAL profile,tmpV;
    const REAL asym=mAsym0+mAsym1/sin(center)+mAsym2/pow((REAL)sin(center),(REAL)2.0);
    profile=PowderProfileGauss(x,fwhm,center,asym);
-   
+
    // Eta for gaussian/lorentzian mix. Make sure 0<=eta<=1, else profiles could be <0 !
    REAL eta=mPseudoVoigtEta0+center*mPseudoVoigtEta1;
    if(eta>1) eta=1;
    if(eta<0) eta=0;
-   
+
    profile *= 1-eta;
    tmpV=PowderProfileLorentz(x,fwhm,center,asym);
    tmpV *= eta;
@@ -204,7 +204,7 @@ REAL ReflectionProfilePseudoVoigt::GetFullProfileWidth(const REAL relativeIntens
       const REAL tmp=fwhm*n/nb;
       for(int i=0;i<nb;i++) *p++ = tmp*(i-halfnb);
       x+=center;
-      
+
       prof=this->GetProfile(x,center,0,0,0);
       const REAL max=prof.max();
       const REAL test=max*relativeIntensity;
@@ -508,7 +508,7 @@ ReflectionProfilePseudoVoigtAnisotropic::~ReflectionProfilePseudoVoigtAnisotropi
    }
    #endif
 }
-   
+
 ReflectionProfilePseudoVoigtAnisotropic*   ReflectionProfilePseudoVoigtAnisotropic::CreateCopy()const
 {
    return new ReflectionProfilePseudoVoigtAnisotropic(*this);
@@ -651,13 +651,13 @@ void ReflectionProfilePseudoVoigtAnisotropic::XMLOutput(ostream &os,int indent)c
    XMLCrystTag tag("ReflectionProfilePseudoVoigtAnisotropic");
    os <<tag<<endl;
    indent++;
-   
+
    this->GetPar(&mCagliotiU).XMLOutput(os,"U",indent);
    os <<endl;
-   
+
    this->GetPar(&mCagliotiV).XMLOutput(os,"V",indent);
    os <<endl;
-   
+
    this->GetPar(&mCagliotiW).XMLOutput(os,"W",indent);
    os <<endl;
 
@@ -672,34 +672,34 @@ void ReflectionProfilePseudoVoigtAnisotropic::XMLOutput(ostream &os,int indent)c
 
    this->GetPar(&mLorentzGammaHH).XMLOutput(os,"G_HH",indent);
    os <<endl;
-   
+
    this->GetPar(&mLorentzGammaKK).XMLOutput(os,"G_KK",indent);
    os <<endl;
-   
+
    this->GetPar(&mLorentzGammaLL).XMLOutput(os,"G_LL",indent);
    os <<endl;
-   
+
    this->GetPar(&mLorentzGammaHK).XMLOutput(os,"G_HK",indent);
    os <<endl;
-   
+
    this->GetPar(&mLorentzGammaHL).XMLOutput(os,"G_HL",indent);
    os <<endl;
-   
+
    this->GetPar(&mLorentzGammaKL).XMLOutput(os,"G_KL",indent);
    os <<endl;
-   
+
    this->GetPar(&mPseudoVoigtEta0).XMLOutput(os,"Eta0",indent);
    os <<endl;
-   
+
    this->GetPar(&mPseudoVoigtEta1).XMLOutput(os,"Eta1",indent);
    os <<endl;
-   
+
    this->GetPar(&mAsym0).XMLOutput(os,"Asym0",indent);
    os <<endl;
-   
+
    this->GetPar(&mAsym1).XMLOutput(os,"Asym1",indent);
    os <<endl;
-   
+
    this->GetPar(&mAsym2).XMLOutput(os,"Asym2",indent);
    os <<endl;
    indent--;

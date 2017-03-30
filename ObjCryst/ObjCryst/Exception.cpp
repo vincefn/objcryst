@@ -81,5 +81,3 @@ void ObjCrystInformUserStdOut(const string &str)
 }
 
 }//namespace
-
-

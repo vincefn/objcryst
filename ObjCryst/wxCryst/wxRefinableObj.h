@@ -58,11 +58,11 @@ template<class T> const T* WXDialogChooseFromRegistry(const ObjRegistry<T> &reg,
 class WXFieldRefPar:public WXField
 {
    public:
-      WXFieldRefPar(wxWindow *parent,const string& label, 
+      WXFieldRefPar(wxWindow *parent,const string& label,
                     RefinablePar *refpar,const int hsize=65,
                     const bool enableFixButton=true, const bool enableLimitedButton=true);
       /// When a new value is entered (must type it and then hit the 'enter' key).
-      /// The Field reads the new value, 
+      /// The Field reads the new value,
       /// and directly changes the RefinablePar value (contrary to what happens
       /// for WXFieldName)by using RefinablePar::SetHumanValue().
       ~WXFieldRefPar();
@@ -140,7 +140,7 @@ template<class T> class WXRegistry:public WXCrystObj
    private:
       ObjRegistry<T> *mpRegistry;
 };
-                                                      
+
 /// The base wxCryst class for all RefinableObj objects. This shows the title,
 /// a menu for XMLInput/XMLOutput, and all RefObjOpt.
 class WXRefinableObj: public WXCrystObj

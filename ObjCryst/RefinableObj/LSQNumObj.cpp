@@ -710,7 +710,7 @@ bool LSQNumObj::SafeRefine(std::list<RefinablePar*> vnewpar, std::list<const Ref
    // :TODO: update mObs and mWeight in a centralized way... Not in BeginOptimization() (not always called)
    mObs=this->GetLSQObs();
    mWeight=this->GetLSQWeight();
-   
+
    //Prepare for refinement (get non-fixed parameters)
    if(mRefParList.GetNbPar()==0) this->PrepareRefParList();
    mRefParList.PrepareForRefinement();

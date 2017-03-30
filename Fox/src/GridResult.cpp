@@ -24,4 +24,3 @@ GridClient::GridClient(void) {
 }
 GridClient::~GridClient(void){
 }
-

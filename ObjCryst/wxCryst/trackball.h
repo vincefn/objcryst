@@ -75,4 +75,3 @@ build_rotmatrix(float m[4][4], float q[4]);
  */
 void
 axis_to_quat(float a[3], float phi, float q[4]);
-

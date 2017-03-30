@@ -72,4 +72,3 @@ dist-libs:
 #target to make a complete archive of ObjCryst++
 archive:
 	tar -czf ../archives/ObjCryst-complete.tar.gz  -C .. --exclude='*.o' --exclude='.systemG.Desktop' --exclude='*.a' --exclude='*.exe' --exclude='*.out' --exclude='CVS' --exclude='ObjCryst/doc/html' --exclude='ObjCryst/doc/latex' --exclude='*.oxy' --exclude='profile.0.0.0' --exclude='Makefile' cctbx newmat AsymProfLarryFinger ObjCryst --dereference
-

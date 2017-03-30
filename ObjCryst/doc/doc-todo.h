@@ -21,7 +21,7 @@
 *     Ability to export (and import) Crystallographic Info Files. The importing will
 *     be much harder, and is not a priority.
 *\par Export to other LSQ refinement programs(****,**)
-*     Ability to export for other refinement programs (fullprof, gsas, shellx,...). 
+*     Ability to export for other refinement programs (fullprof, gsas, shellx,...).
 *\par Anisotropic Thermic Factors (**,****)
 *     Add support for anisotropic thermic factors. Spacegroup object should be able
 *     to indicate the permutations needed for symetrical atoms. Also determine
@@ -37,7 +37,7 @@
 *\par Multi-phase (****,**) - DONE
 *     Multiple phase for powder diffraction.
 *\par ZScatterer import(**,**)
-*     Import Z-Matrix from file. Add the possibility to link two existing ZScatterer by 
+*     Import Z-Matrix from file. Add the possibility to link two existing ZScatterer by
 *     linking terminal atoms.
 *\par Genetic Algorithm (****,***)
 *      And compare the 3 different algorithms on several structures.

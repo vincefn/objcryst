@@ -67,4 +67,3 @@ all: Fox Fox-nogui
 clean:
 	rm -Rf build/Fox.build
 	make -f gnu.mak clean
-

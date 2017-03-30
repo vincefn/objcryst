@@ -41,7 +41,7 @@
 #ifdef DrawText
 #undef DrawText
 #endif
- 
+
 namespace ObjCryst
 {
 ////////////////////////////////////////////////////////////////////////
@@ -72,38 +72,38 @@ class WXDiffractionSingleCrystalGraph:public WXMultiGraph
 //    WXDiffractionSingleCrystal
 //
 ////////////////////////////////////////////////////////////////////////
-static long ID_DIFFSINGLECRYST_MENU_SAVEHKLIOBSICALC=      WXCRYST_ID(); 
-static long ID_DIFFSINGLECRYST_MENU_SAVEHKLFCALC=          WXCRYST_ID(); 
-static long ID_DIFFSINGLECRYST_MENU_SIMULATE=              WXCRYST_ID(); 
-static long ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBS=        WXCRYST_ID(); 
-static long ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBSSIGMA=   WXCRYST_ID(); 
-static long ID_DIFFSINGLECRYST_MENU_IMPORT_SHELXHKLF4=     WXCRYST_ID(); 
-static long ID_DIFFSINGLECRYST_MENU_IMPORT_CIF=            WXCRYST_ID(); 
-static long ID_DIFFSINGLECRYST_MENU_IMPORT_JANAM91=        WXCRYST_ID(); 
-static long ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBSGROUP=   WXCRYST_ID(); 
-static long ID_DIFFSINGLECRYST_MENU_FITSCALE_R=            WXCRYST_ID(); 
-static long ID_DIFFSINGLECRYST_MENU_FITSCALE_RW=           WXCRYST_ID(); 
-static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH=            WXCRYST_ID(); 
-static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_XRAY=       WXCRYST_ID(); 
-static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_NEUTRON=    WXCRYST_ID(); 
-static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_ELECTRON=   WXCRYST_ID(); 
-static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET=        WXCRYST_ID(); 
-static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_AG=     WXCRYST_ID(); 
-static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_MO=     WXCRYST_ID(); 
-static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CU=     WXCRYST_ID(); 
-static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_FE=     WXCRYST_ID(); 
-static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CO=     WXCRYST_ID(); 
-static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CR=     WXCRYST_ID(); 
-static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_AGA1=   WXCRYST_ID(); 
-static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_MOA1=   WXCRYST_ID(); 
-static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CUA1=   WXCRYST_ID(); 
-static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_FEA1=   WXCRYST_ID(); 
-static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_COA1=   WXCRYST_ID(); 
-static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CRA1=   WXCRYST_ID(); 
-static long ID_DIFFSINGLECRYST_CRYSTAL=                    WXCRYST_ID(); 
+static long ID_DIFFSINGLECRYST_MENU_SAVEHKLIOBSICALC=      WXCRYST_ID();
+static long ID_DIFFSINGLECRYST_MENU_SAVEHKLFCALC=          WXCRYST_ID();
+static long ID_DIFFSINGLECRYST_MENU_SIMULATE=              WXCRYST_ID();
+static long ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBS=        WXCRYST_ID();
+static long ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBSSIGMA=   WXCRYST_ID();
+static long ID_DIFFSINGLECRYST_MENU_IMPORT_SHELXHKLF4=     WXCRYST_ID();
+static long ID_DIFFSINGLECRYST_MENU_IMPORT_CIF=            WXCRYST_ID();
+static long ID_DIFFSINGLECRYST_MENU_IMPORT_JANAM91=        WXCRYST_ID();
+static long ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBSGROUP=   WXCRYST_ID();
+static long ID_DIFFSINGLECRYST_MENU_FITSCALE_R=            WXCRYST_ID();
+static long ID_DIFFSINGLECRYST_MENU_FITSCALE_RW=           WXCRYST_ID();
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH=            WXCRYST_ID();
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_XRAY=       WXCRYST_ID();
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_NEUTRON=    WXCRYST_ID();
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_ELECTRON=   WXCRYST_ID();
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET=        WXCRYST_ID();
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_AG=     WXCRYST_ID();
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_MO=     WXCRYST_ID();
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CU=     WXCRYST_ID();
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_FE=     WXCRYST_ID();
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CO=     WXCRYST_ID();
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CR=     WXCRYST_ID();
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_AGA1=   WXCRYST_ID();
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_MOA1=   WXCRYST_ID();
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CUA1=   WXCRYST_ID();
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_FEA1=   WXCRYST_ID();
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_COA1=   WXCRYST_ID();
+static long ID_DIFFSINGLECRYST_MENU_WAVELENGTH_SET_CRA1=   WXCRYST_ID();
+static long ID_DIFFSINGLECRYST_CRYSTAL=                    WXCRYST_ID();
 static long ID_DIFFSINGLECRYST_MENU_DATA=                  WXCRYST_ID();
 static long ID_DIFFSINGLECRYST_MENU_DATA_GRAPH=            WXCRYST_ID();
-  
+
 BEGIN_EVENT_TABLE(WXDiffractionSingleCrystal, wxWindow)
    EVT_BUTTON(ID_WXOBJ_COLLAPSE,                        WXCrystObj::OnToggleCollapse)
    EVT_MENU(ID_REFOBJ_MENU_OBJ_SAVE,                    WXRefinableObj::OnMenuSave)
@@ -174,7 +174,7 @@ WXRefinableObj(parent,data),mpData(data),mpGraph(0),mGrapIdObs(0),mGrapIdCalc(0)
          //                        "Import Jana M91");
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_DIFFSINGLECRYST_MENU_IMPORT_HKLIOBSGROUP,
                                  "Import Reflections with group intensity");
-        
+
       mpMenuBar->AddMenu("Radiation",ID_DIFFSINGLECRYST_MENU_WAVELENGTH);
          mpMenuBar->AddMenuItem(ID_DIFFSINGLECRYST_MENU_WAVELENGTH,
                                 ID_DIFFSINGLECRYST_MENU_WAVELENGTH_NEUTRON,
@@ -249,25 +249,25 @@ WXRefinableObj(parent,data),mpData(data),mpGraph(0),mGrapIdObs(0),mGrapIdCalc(0)
       mList.Add(maxSiThOvLa);
    // Statistics
       wxBoxSizer* pStats=new wxBoxSizer(wxHORIZONTAL);
-      
+
       WXFieldPar<REAL> *pWXFieldChi2=new WXFieldPar<REAL>(this,"Chi^2",-1,&mChi2,100);
       pStats->Add(pWXFieldChi2    ,0,wxALIGN_CENTER);
       mList.Add(pWXFieldChi2);
-      
+
       WXFieldPar<REAL> *pWXFieldGof=new WXFieldPar<REAL>(this,"GoF",-1,&mGoF,70);
       pStats->Add(pWXFieldGof    ,0,wxALIGN_CENTER);
       mList.Add(pWXFieldGof);
-      
+
       WXFieldPar<REAL> *pWXFieldRwp=new WXFieldPar<REAL>(this,"Rwp",-1,&mRwp,70);
       pStats->Add(pWXFieldRwp    ,0,wxALIGN_CENTER);
       mList.Add(pWXFieldRwp);
-      
+
       WXFieldPar<REAL> *pWXFieldRp=new WXFieldPar<REAL>(this,"Rp",-1,&mRp,70);
       pStats->Add(pWXFieldRp    ,0,wxALIGN_CENTER);
       mList.Add(pWXFieldRp);
-      
+
       mpSizer->Add(pStats);
-         
+
    this->CrystUpdate(true);
    VFN_DEBUG_MESSAGE("WXDiffractionSingleCrystal::WXDiffractionSingleCrystal():End",6)
 }
@@ -302,7 +302,7 @@ void WXDiffractionSingleCrystal::CrystUpdate(const bool uui,const bool lock)
    if(lock) mMutex.Unlock();
    this->WXRefinableObj::CrystUpdate(uui,lock);
    VFN_DEBUG_EXIT("WXDiffractionSingleCrystal::CrystUpdate()",6)
-} 
+}
 
 void WXDiffractionSingleCrystal::NotifyDeleteGraph()
 {
@@ -501,12 +501,12 @@ void WXDiffractionSingleCrystal::OnMenuShowGraph(wxCommandEvent &event)
    mpGraph->SetYLabel(_T("Intensity"));
    mGrapIdObs =mpGraph->AddGraph("Iobs");
    mGrapIdCalc=mpGraph->AddGraph("Icalc");
-   
+
    wxSizer *ps=new wxBoxSizer(wxHORIZONTAL);
    ps->Add(mpGraph,1,wxEXPAND);
    frame->SetSizer(ps);
    frame->SetAutoLayout(true);
-   
+
    //frame->CreateStatusBar(2);
    frame->Show(true);
    frame->Raise();

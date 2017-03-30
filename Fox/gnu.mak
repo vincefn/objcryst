@@ -44,5 +44,3 @@ update:
 
 dist:
 	cd ../.. && tar -cjf Fox.tar.bz2 --exclude "*.o" --exclude "Fox-LastOptimizationStop.xml" --exclude ".#*" --exclude "*.a" --exclude "*.dep" --exclude "*.exe"  --exclude "Obj*.xml" --exclude "profile*" --exclude "Fox/src/Fox" --exclude "*~" --exclude "cctbx" --exclude "newmat" --exclude "static-libs" --exclude "doc" --exclude "*.bak" --exclude "*.pdf" Fox
-
-

@@ -55,7 +55,7 @@ void fluorine()
       Atom *f=new Atom( .25,.25,.25,"F" ,ScattPowF  ,1.);
       caf2.AddScatterer(ca);
       caf2.AddScatterer(f);
-      
+
    //Create Diffraction data object, for Cu-Alpha1
       PowderPattern data;
       data.SetWavelength("CuA1");
@@ -70,7 +70,7 @@ void fluorine()
       obs=1;
       data.SetPowderPatternObs(obs);
       data.Prepare();
-      
+
    // Save the powder pattern in text format
       data.SavePowderPattern("caf2.dat");
    // Save everything in xml so that we can reload it later
@@ -79,20 +79,20 @@ void fluorine()
 
 int main (int argc, char *argv[])
 {
-   TAU_PROFILE_SET_NODE(0); // sequential code 
+   TAU_PROFILE_SET_NODE(0); // sequential code
    TAU_PROFILE("main()","int()",TAU_DEFAULT);
 
    cout << " Beginning CaF2 example...." << endl ;
-   
+
    int level =10;
    if(argc==2)//debug level hase been supplied
    {
       level=atoi(argv[1]);
    }
    VFN_DEBUG_GLOBAL_LEVEL(level);
-   
+
    fluorine();
-   
+
    cout << " End of CaF2 example." << endl ;
    TAU_REPORT_STATISTICS();
    return 0;

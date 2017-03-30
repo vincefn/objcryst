@@ -31,7 +31,7 @@
 //#include <list>
 #include <vector>
 
-#define __FOX_SERVER__ 
+#define __FOX_SERVER__
 
 #include "FoxServerThread.h"
 //#include "wxCryst/wxCryst.h"
