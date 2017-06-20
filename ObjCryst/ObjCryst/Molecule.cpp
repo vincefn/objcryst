@@ -4707,8 +4707,6 @@ REAL FlatLorentzianIntegral(const REAL x1,const REAL x2, const REAL sigma, const
    return atan((x2-delta)/sigma)-atan((x1-delta)/sigma);
 }
 
-ofstream f;
-
 /** Random move respecting a gaussian probability distribution with a flat top.
 * i.e. x in [-delta;+delta], P(x)=1
 * outside, P(x)=1/(1+(abs(x)-delta)^2/sigma^2)
@@ -4874,6 +4872,7 @@ void TestLorentzianBiasedRandomMove()
 {
    srand(time(NULL));
    REAL x=0,sigma=0.1,delta=0.5,amplitude=0.05;
+   ofstream f;
    f.open("test.dat");
    for(long i=0;i<400000;i++)
    {

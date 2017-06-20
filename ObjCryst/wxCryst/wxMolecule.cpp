@@ -36,6 +36,7 @@
 #include "ObjCryst/wxCryst/wxMolecule.h"
 #include "ObjCryst/RefinableObj/LSQNumObj.h"
 #include "ObjCryst/Quirks/Chronometer.h"
+#include "ObjCryst/Quirks/VFNStreamFormat.h"
 
 namespace ObjCryst
 {
@@ -1725,6 +1726,7 @@ void WXMolecule::OnMenuExport2ZMatrix(wxCommandEvent &event)
                         wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
       if(open.ShowModal() != wxID_OK) return;
       ofstream fout (open.GetPath().ToAscii());
+      fout.imbue(std::locale::classic());
       if(fout)
       {
          wxString tmp;
@@ -1737,16 +1739,14 @@ void WXMolecule::OnMenuExport2ZMatrix(wxCommandEvent &event)
             fout<<tmp;
             if(i>0)
             {
-               tmp.Printf(_T("%6.3f"),pos->mBondLength);
-               fout<<tmp;
+               fout<<FormatFloat(pos->mBondLength,6,3);;
                if(i>1)
                {
-                  tmp.Printf(_T(" %2lu%8.3f"),pos->mBondAngleAtom+1,pos->mBondAngle*RAD2DEG);
-                  fout<<tmp;
+                  tmp.Printf(_T(" %2lu"),pos->mBondAngleAtom+1);
+                  fout<<tmp<<FormatFloat(pos->mBondAngle*RAD2DEG,8,3);;
                   if(i>2)
                   {
-                     tmp.Printf(_T(" %2lu%8.3f"),pos->mDihedralAtom+1,pos->mDihedralAngle*RAD2DEG);
-                     fout<<tmp;
+                     fout<<" "<<FormatInt(pos->mDihedralAtom+1,2)<<FormatFloat(pos->mDihedralAngle*RAD2DEG,8,3);
                   }
                }
             }
@@ -1769,6 +1769,7 @@ void WXMolecule::OnMenuExport2ZMatrix(wxCommandEvent &event)
             if(nbchar<(*pos)->GetName().size()) nbchar=(*pos)->GetName().size();
 
       ofstream fout (open.GetPath().ToAscii());
+      fout.imbue(std::locale::classic());
       if(fout)
       {
          wxString tmp;
@@ -1782,23 +1783,20 @@ void WXMolecule::OnMenuExport2ZMatrix(wxCommandEvent &event)
             tmp.Printf(_T(" %2s "),pos->mpPow->GetSymbol().c_str());
             fout<<tmp;
             fout.width(nbchar);
-            fout<<mpMolecule->GetAtomList()[pos->mBondAtom]->GetName();
+            fout<<mpMolecule->GetAtomList()[pos->mBondAtom]->GetName()<<" ";
             if(i>0)
             {
-               tmp.Printf(_T("%6.3f "),pos->mBondLength);
-               fout<<tmp;
+               fout<<FormatFloat(pos->mBondLength,6,3)<<" ";
                if(i>1)
                {
                   fout.width(nbchar);
                   fout<<mpMolecule->GetAtomList()[pos->mBondAngleAtom]->GetName();
-                  tmp.Printf(_T(" %8.3f "),pos->mBondAngle*RAD2DEG);
-                  fout<<tmp;
+                  fout<<" "<<FormatFloat(pos->mBondAngle*RAD2DEG,8,3)<<" ";
                   if(i>2)
                   {
                      fout.width(nbchar);
                      fout<<mpMolecule->GetAtomList()[pos->mDihedralAtom]->GetName();
-                     tmp.Printf(_T(" %8.3f"),pos->mDihedralAngle*RAD2DEG);
-                     fout<<tmp;
+                     fout<<" "<<FormatFloat(pos->mDihedralAngle*RAD2DEG,8,3)<<" ";
                   }
                }
             }

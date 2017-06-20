@@ -603,6 +603,7 @@ void WXZScatterer::OnMenuExportZMatrix(wxCommandEvent &WXUNUSED(event))
       throw ObjCrystException("WXZScatterer::OnMenuExportZMatrix() : \
 Error opening file for input:"+string(save.GetPath().ToAscii()));
    }
+   fout.imbue(std::locale::classic());
    mpZScatterer->ExportFenskeHallZMatrix(fout);
    fout.close();
 }

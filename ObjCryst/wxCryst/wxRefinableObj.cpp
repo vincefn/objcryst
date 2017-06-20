@@ -646,6 +646,7 @@ void WXRefinableObj::OnMenuSave(wxCommandEvent & WXUNUSED(event))
    ofstream out(save.GetPath().ToAscii());
    if(!out) return;//:TODO:
    {
+      out.imbue(std::locale::classic());
       mpRefinableObj->XMLOutput(out);
    }
    out.close();

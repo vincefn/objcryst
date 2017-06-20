@@ -885,6 +885,7 @@ int main (int argc, char *argv[])
       if(STRCMP("--index-test",argv[i])==0)
       {
          ofstream out("indexing-results.txt");
+         out.imbue(std::locale::classic());
          srand(time(NULL));
          for(unsigned int k=0;k<100;++k)
          {
@@ -1134,6 +1135,7 @@ int main (int argc, char *argv[])
                 <<"   peak width: "<<cif2patternPeakWidth*RAD2DEG<<"?"<<endl
                 <<"   to FILE:"<<sst.str()<<endl;
             ofstream out(sst.str().c_str());
+            out.imbue(std::locale::classic());
             CrystVector_REAL ttheta,icalc;
             icalc=data.GetPowderPatternCalc();
             icalc*=100/icalc.max();
