@@ -1,3 +1,16 @@
+#### 2017.1 (20 June 2017)
+IMPROVEMENTS
+  * More stable Le Bail fit, notably in the auto-profile fit of indexing results
+  * Indexing: 
+    * take into account centering. 
+    * Try only 1 or 2 spurious lines in the quick indexing approach
+  * 3D Crystal view: add more shortcuts (h to toggle), to shift viewing area
+
+BUG FIXES
+  * Correct output of z-matrices independently of the locale
+  * Corrections to the FoxGrid client/server
+  * Safer least squares refinement
+
 #### 2016.2 (13 November 2016)
 IMPROVEMENTS
   * faded atoms which are part of a Molecule which is centered in the display region
