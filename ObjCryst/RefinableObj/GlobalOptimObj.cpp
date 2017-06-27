@@ -555,6 +555,7 @@ void MonteCarloObj::Optimize(long &nbStep,const bool silent,const REAL finalcost
    if(mSaveTrackedData.GetChoice()==1)
    {
       ofstream outTracker;
+      outTracker.imbue(std::locale::classic());
       const string outTrackerName=this->GetName()+"-Tracker.dat";
       outTracker.open(outTrackerName.c_str());
       mMainTracker.SaveAll(outTracker);
@@ -662,6 +663,7 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
       if(mSaveTrackedData.GetChoice()==1)
       {
          ofstream outTracker;
+         outTracker.imbue(std::locale::classic());
          char runNum[40];
          sprintf(runNum,"-Tracker-Run#%ld.dat",abs(nbCycle));
          const string outTrackerName=this->GetName()+runNum;
