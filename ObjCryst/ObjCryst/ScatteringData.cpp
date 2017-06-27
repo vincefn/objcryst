@@ -150,16 +150,15 @@ mXRayTubeAlpha2Alpha1Ratio(0.5),mLinearPolarRate(0)
    mWavelength=1;
    this->InitOptions();
    mRadiationType.SetChoice(RAD_XRAY);
-   mWavelengthType.SetChoice(WAVELENGTH_MONOCHROMATIC);
    mClockMaster.AddChild(mClockWavelength);
    mClockMaster.AddChild(mClockRadiation);
+   this->SetWavelengthType(WAVELENGTH_MONOCHROMATIC);
 }
 
 Radiation::Radiation(const RadiationType rad,const REAL wavelength)
 {
    this->InitOptions();
    mRadiationType.SetChoice(rad);
-   mWavelengthType.SetChoice(WAVELENGTH_MONOCHROMATIC);
    mWavelength=wavelength;
    mXRayTubeName="";
    mXRayTubeDeltaLambda=0.;//useless here
@@ -167,6 +166,7 @@ Radiation::Radiation(const RadiationType rad,const REAL wavelength)
    mLinearPolarRate=0.95;//assume it's synchrotron ?
    mClockMaster.AddChild(mClockWavelength);
    mClockMaster.AddChild(mClockRadiation);
+   this->SetWavelengthType(WAVELENGTH_MONOCHROMATIC);
 }
 
 Radiation::Radiation(const string &XRayTubeElementName,const REAL alpha2Alpha2ratio)
@@ -189,6 +189,7 @@ mLinearPolarRate(old.mLinearPolarRate)
    mClockWavelength.Click();
    mClockMaster.AddChild(mClockWavelength);
    mClockMaster.AddChild(mClockRadiation);
+   this->SetWavelengthType((WavelengthType)old.mWavelengthType.GetChoice());
 }
 
 Radiation::~Radiation()
@@ -203,13 +204,13 @@ const string& Radiation::GetClassName() const
 void Radiation::operator=(const Radiation &old)
 {
    mRadiationType             =old.mRadiationType;
-   mWavelengthType            =old.mWavelengthType;
    mWavelength                =old.mWavelength;
    mXRayTubeName              =old.mXRayTubeName;
    mXRayTubeDeltaLambda       =old.mXRayTubeDeltaLambda;
    mXRayTubeAlpha2Alpha1Ratio =old.mXRayTubeAlpha2Alpha1Ratio;
    mClockWavelength.Click();
    mRadiationType.SetChoice(old.mRadiationType.GetChoice());
+   this->SetWavelengthType((WavelengthType) old.mWavelengthType.GetChoice());
 }
 
 RadiationType Radiation::GetRadiationType()const
@@ -220,13 +221,26 @@ void Radiation::SetRadiationType(const RadiationType rad)
    mRadiationType.SetChoice(rad);
    if(rad == RAD_NEUTRON) mLinearPolarRate=0;
    if(rad == RAD_ELECTRON) mLinearPolarRate=0;
+   if(rad != RAD_XRAY) this->SetWavelengthType(WAVELENGTH_MONOCHROMATIC);
+   else this->UpdateDisplay();
 }
 
 void Radiation::SetWavelengthType(const WavelengthType &type)
 {
    mWavelengthType.SetChoice((unsigned long) type);
    if(type==WAVELENGTH_TOF) this->SetRadiationType(RAD_NEUTRON);
-   if(type==WAVELENGTH_ALPHA12) this->SetRadiationType(RAD_XRAY);
+   if(type==WAVELENGTH_ALPHA12)
+   {
+      this->SetRadiationType(RAD_XRAY);
+      this->GetPar("XRayTubeDeltaLambda").SetIsUsed(true);
+      this->GetPar("XRayTubeAlpha2Alpha1Ratio").SetIsUsed(true);
+   }
+   if(type==WAVELENGTH_MONOCHROMATIC)
+   {
+      this->GetPar("XRayTubeDeltaLambda").SetIsUsed(false);
+      this->GetPar("XRayTubeAlpha2Alpha1Ratio").SetIsUsed(false);
+   }
+   this->UpdateDisplay();
 }
 
 WavelengthType Radiation::GetWavelengthType()const
@@ -238,6 +252,8 @@ void Radiation::SetWavelength(const REAL l)
    mWavelength.resize(1);
    mWavelength=l;
    mClockWavelength.Click();
+   this->GetPar("XRayTubeDeltaLambda").SetIsUsed(false);
+   this->GetPar("XRayTubeAlpha2Alpha1Ratio").SetIsUsed(false);
 }
 void Radiation::SetWavelength(const string &XRayTubeElementName,
                               const REAL alpha2Alpha2ratio)
@@ -250,10 +266,10 @@ void Radiation::SetWavelength(const string &XRayTubeElementName,
 
    if(XRayTubeElementName.length() >=3) //:KLUDGE:
    {
-      mWavelengthType.SetChoice(WAVELENGTH_MONOCHROMATIC);
       if(XRayTubeElementName=="CoA1")
       {
          mWavelength=1.78901;
+         this->SetWavelengthType(WAVELENGTH_MONOCHROMATIC);
       }
       else
       {
@@ -267,17 +283,18 @@ void Radiation::SetWavelength(const string &XRayTubeElementName,
                return;
             }
             mWavelength=ch.as_angstrom();
+            this->SetWavelengthType(WAVELENGTH_MONOCHROMATIC);
          }
          catch(cctbx::error)
          {
             cout << "WARNING: could not interpret X-Ray tube name:"<<XRayTubeElementName<<endl
                  << "         not modifying wavelength !"<<endl;
+            return;
          }
       }
    }
    else
    {
-      mWavelengthType.SetChoice(WAVELENGTH_ALPHA12);
       mXRayTubeAlpha2Alpha1Ratio=alpha2Alpha2ratio;
       REAL lambda1 = 0, lambda2 = 0;
       if(XRayTubeElementName=="Co")
@@ -310,11 +327,14 @@ void Radiation::SetWavelength(const string &XRayTubeElementName,
          {
             cout << "WARNING: could not interpret X-Ray tube name:"<<XRayTubeElementName<<endl
                  << "         not modifying wavelength !"<<endl;
+            return;
          }
       }
       mXRayTubeDeltaLambda=lambda2-lambda1;
       mWavelength=lambda1
             +mXRayTubeDeltaLambda*mXRayTubeAlpha2Alpha1Ratio/(1.+mXRayTubeAlpha2Alpha1Ratio);
+      VFN_DEBUG_MESSAGE("Radiation::SetWavelength("<<XRayTubeElementName<<","<<alpha2Alpha2ratio<<"):", 10)
+      this->SetWavelengthType(WAVELENGTH_ALPHA12);
    }
    mClockWavelength.Click();
 }
@@ -390,6 +410,22 @@ void Radiation::InitOptions()
       RefinablePar tmp("Wavelength",mWavelength.data(),0.05,20.,
                         gpRefParTypeRadiationWavelength,REFPAR_DERIV_STEP_ABSOLUTE,
                         true,true,true,false,1.0);
+      tmp.SetDerivStep(1e-4);
+      tmp.AssignClock(mClockWavelength);
+      this->AddPar(tmp);
+   }
+   {//Fixed by default
+      RefinablePar tmp("XRayTubeDeltaLambda",&mXRayTubeDeltaLambda,0.01,20.,
+                       gpRefParTypeRadiationWavelength,REFPAR_DERIV_STEP_ABSOLUTE,
+                       true,true,true,false,1.0);
+      tmp.SetDerivStep(1e-4);
+      tmp.AssignClock(mClockWavelength);
+      this->AddPar(tmp);
+   }
+   {//Fixed by default
+      RefinablePar tmp("XRayTubeAlpha2Alpha1Ratio",&mXRayTubeAlpha2Alpha1Ratio,0.5,0.5,
+                       gpRefParTypeRadiationWavelength,REFPAR_DERIV_STEP_ABSOLUTE,
+                       true,true,true,false,1.0);
       tmp.SetDerivStep(1e-4);
       tmp.AssignClock(mClockWavelength);
       this->AddPar(tmp);

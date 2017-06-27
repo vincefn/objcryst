@@ -566,12 +566,12 @@ mpCrystalGL(0)
       WXCrystObjBasic* pFieldLatticeGamma
          =mpCrystal->GetPar("gamma").WXCreate(this);
 
-      lattice->Add(pFieldLatticeA    ,0,wxALIGN_CENTER);
-      lattice->Add(pFieldLatticeB    ,0,wxALIGN_CENTER);
-      lattice->Add(pFieldLatticeC    ,0,wxALIGN_CENTER);
-      lattice->Add(pFieldLatticeAlpha,0,wxALIGN_CENTER);
-      lattice->Add(pFieldLatticeBeta ,0,wxALIGN_CENTER);
-      lattice->Add(pFieldLatticeGamma,0,wxALIGN_CENTER);
+      lattice->Add(pFieldLatticeA    ,0,wxALIGN_CENTER|wxRESERVE_SPACE_EVEN_IF_HIDDEN);
+      lattice->Add(pFieldLatticeB    ,0,wxALIGN_CENTER|wxRESERVE_SPACE_EVEN_IF_HIDDEN);
+      lattice->Add(pFieldLatticeC    ,0,wxALIGN_CENTER|wxRESERVE_SPACE_EVEN_IF_HIDDEN);
+      lattice->Add(pFieldLatticeAlpha,0,wxALIGN_CENTER|wxRESERVE_SPACE_EVEN_IF_HIDDEN);
+      lattice->Add(pFieldLatticeBeta ,0,wxALIGN_CENTER|wxRESERVE_SPACE_EVEN_IF_HIDDEN);
+      lattice->Add(pFieldLatticeGamma,0,wxALIGN_CENTER|wxRESERVE_SPACE_EVEN_IF_HIDDEN);
       lattice->Layout();
 
       mpSizer->Add(lattice,0,wxALIGN_LEFT);

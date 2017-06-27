@@ -75,36 +75,40 @@ WXCrystObjBasic(parent),mpRadiation(rad)
    VFN_DEBUG_ENTRY("WXRadiation::WXRadiation()",6)
    // :TODO: Add a choice for the wavlength type, with 'monochromatic', and a list
    // of X-Ray tubes.
-   mpSizer=new wxBoxSizer(wxHORIZONTAL);
+   mpSizer=new wxBoxSizer(wxVERTICAL);
+   wxSizer *pSizer1=new wxBoxSizer(wxHORIZONTAL);
+   wxSizer *pSizer2=new wxBoxSizer(wxHORIZONTAL);
 
    mpFieldRadType= new WXFieldOption(this,-1,&(mpRadiation->mRadiationType));
-   mpSizer->Add(mpFieldRadType,0);
+   pSizer1->Add(mpFieldRadType,0);
    mList.Add(mpFieldRadType);
 
    mpFieldWavelengthType= new WXFieldOption(this,-1,&(mpRadiation->mWavelengthType));
-   mpSizer->Add(mpFieldWavelengthType,0);
+   pSizer1->Add(mpFieldWavelengthType,0);
    mList.Add(mpFieldWavelengthType);
 
    WXCrystObjBasic* pFieldWavelength
       =mpRadiation->GetPar(mpRadiation->mWavelength.data()).WXCreate(this);
-   mpSizer->Add(pFieldWavelength,0);
+   pSizer1->Add(pFieldWavelength,0);
    mList.Add(pFieldWavelength);
 
    WXFieldPar<REAL> *polarRate=new WXFieldPar<REAL>(this,"Linear Polar Rate:",-1,
                                             &(mpRadiation->mLinearPolarRate));
-   mpSizer->Add(polarRate,0,wxALIGN_LEFT);
+   pSizer2->Add(polarRate,0,wxALIGN_LEFT);
    mList.Add(polarRate);
 
-   WXFieldPar<REAL> *xRayTubeDlambda=new WXFieldPar<REAL>(this,"Tube-DeltaLambda:",-1,
-                                                &(mpRadiation->mXRayTubeDeltaLambda));
-   mpSizer->Add(xRayTubeDlambda,0,wxALIGN_LEFT);
-   mList.Add(xRayTubeDlambda);
+   WXCrystObjBasic* pFieldXRayTubeDlambda=mpRadiation->GetPar("XRayTubeDeltaLambda").WXCreate(this);
 
-   WXFieldPar<REAL> *xRayTubeAlpha2Alpha1=new WXFieldPar<REAL>(this,"Tube-Alpha2/Alpha1:",-1,
-                                            &(mpRadiation->mXRayTubeAlpha2Alpha1Ratio));
-   mpSizer->Add(xRayTubeAlpha2Alpha1,0,wxALIGN_LEFT);
-   mList.Add(xRayTubeAlpha2Alpha1);
+   pSizer2->Add(pFieldXRayTubeDlambda,0,wxALIGN_LEFT|wxRESERVE_SPACE_EVEN_IF_HIDDEN);
+   mList.Add(pFieldXRayTubeDlambda);
 
+   WXCrystObjBasic* pFieldXRayTubeAlpha2Alpha1=mpRadiation->GetPar("XRayTubeAlpha2Alpha1Ratio").WXCreate(this);
+   pSizer2->Add(pFieldXRayTubeAlpha2Alpha1,0,wxALIGN_LEFT|wxRESERVE_SPACE_EVEN_IF_HIDDEN);
+   mList.Add(pFieldXRayTubeAlpha2Alpha1);
+
+   mpSizer->Add(pSizer1,0);
+   mpSizer->Add(pSizer2,0);
+   
    this->CrystUpdate(true);
    this->SetSizer(mpSizer);
    mpSizer->SetSizeHints(this);
@@ -131,10 +135,12 @@ void WXRadiation::CrystUpdate(const bool uui,const bool lock)
       }
    }
 }
+
 void WXRadiation::UpdateUI(const bool lock)
 {
    mList.UpdateUI(lock);
 }
+
 void WXRadiation::OnUpdateUI(wxUpdateUIEvent& event)
 {
    this->UpdateUI(true);

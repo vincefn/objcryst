@@ -123,7 +123,7 @@ void XMLCrystFileSaveGlobal(ostream &out)
    char strDate[40];
    strftime(strDate,sizeof(strDate),"%Y-%m-%dT%H:%M:%S%Z",gmtime(&date));//%Y-%m-%dT%H:%M:%S%Z
    tag.AddAttribute("Date",strDate);
-   tag.AddAttribute("Revision","1280");
+   tag.AddAttribute("Revision","2017002");
    out<<tag<<endl;
 
    for(int i=0;i<gCrystalRegistry.GetNb();i++)
@@ -1077,30 +1077,16 @@ void Radiation::XMLOutput(ostream &os,int indent)const
       os << tag2<<endl;
    }
 
-   if(WAVELENGTH_ALPHA12==this->GetWavelengthType())
-   {
-      for(int i=0;i<indent;i++) os << "  " ;
-      {
-         XMLCrystTag tag2("XRayTubeDeltaLambda");
-         os << tag2<< mXRayTubeDeltaLambda;
-         tag2.SetIsEndTag(true);
-         os << tag2<<endl;
-      }
-      for(int i=0;i<indent;i++) os << "  " ;
-      {
-         XMLCrystTag tag2("XRayTubeAlpha2Alpha1Ratio");
-         os << tag2<< mXRayTubeAlpha2Alpha1Ratio;
-         tag2.SetIsEndTag(true);
-         os << tag2<<endl;
-      }
-   }
-
    switch(this->GetWavelengthType())
    {
       case WAVELENGTH_MONOCHROMATIC: this->GetPar(mWavelength.data()).XMLOutput(os,indent);break;
       case WAVELENGTH_ALPHA12:
       {
-         this->GetPar(mWavelength.data()).XMLOutput(os,"Wavelength",indent);
+         this->GetPar(mWavelength.data()).XMLOutput(os,indent);
+         os <<endl;
+         this->GetPar("XRayTubeDeltaLambda").XMLOutput(os,indent);
+         os <<endl;
+         this->GetPar("XRayTubeAlpha2Alpha1Ratio").XMLOutput(os,indent);
          break;
       }
       case WAVELENGTH_TOF:break;
@@ -1132,6 +1118,8 @@ void Radiation::XMLInput(istream &is,const XMLCrystTag &tagg)
       XMLCrystTag tag(is);
       if(("Radiation"==tag.GetName())&&tag.IsEndTag())
       {
+         // This will force the update of the 'used' status of the alpha1/alpha2 and delta lambda parameters
+         this->SetWavelengthType((WavelengthType) mWavelengthType.GetChoice());
          VFN_DEBUG_EXIT("Radiation::Exit():"<<this->GetName(),5)
          return;
       }
@@ -1168,6 +1156,16 @@ void Radiation::XMLInput(istream &is,const XMLCrystTag &tagg)
                if("Wavelength"==tag.GetAttributeValue(i))
                {
                   this->GetPar(mWavelength.data()).XMLInput(is,tag);
+                  break;
+               }
+               if("XRayTubeDeltaLambda"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar("XRayTubeDeltaLambda").XMLInput(is,tag);
+                  break;
+               }
+               if("XRayTubeAlpha2Alpha1Ratio"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar("XRayTubeAlpha2Alpha1Ratio").XMLInput(is,tag);
                   break;
                }
             }
