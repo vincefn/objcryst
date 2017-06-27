@@ -243,7 +243,8 @@ class Crystal:public UnitCell
                                      const REAL zMin=-.1,const REAL zMax=1.1,
                                      const bool displayNames=false,
                                      const bool hideHydrogens=false,
-                                     const REAL fadeDistance=0)const;
+                                     const REAL fadeDistance=0,
+                                     const bool fullMoleculeInLimits=false)const;
 
       /** \internal \brief Compute the 'Dynamical population correction for all atoms.
       * Atoms which are considered "equivalent" (ie currently with the same Z number)

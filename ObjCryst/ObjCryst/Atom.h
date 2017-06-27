@@ -126,14 +126,16 @@ class Atom: public Scatterer
       */
       virtual ostream& POVRayDescription(ostream &os,
                                          const CrystalPOVRayOptions &options)const;
-      virtual void GLInitDisplayList(const bool onlyIndependentAtoms=false,
+
+      virtual void GLInitDisplayList(const bool noSymmetrics=false,
                                      const REAL xMin=-.1,const REAL xMax=1.1,
                                      const REAL yMin=-.1,const REAL yMax=1.1,
                                      const REAL zMin=-.1,const REAL zMax=1.1,
                                      const bool displayEnantiomer=false,
                                      const bool displayNames=false,
                                      const bool hideHydrogens=false,
-                                     const REAL fadeDistance=0)const;
+                                     const REAL fadeDistance=0,
+                                     const bool fullMoleculeInLimits=false)const;
 
       /// Is this a dummy atom ? (ie no ScatteringPower)
       /// Dummy atoms should not exist !

@@ -298,7 +298,8 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
                              const bool displayEnantiomer,
                              const bool displayNames,
                              const bool hideHydrogens,
-                             const REAL fadeDistance)const
+                             const REAL fadeDistance,
+                             const bool fullMoleculeInLimits)const
 {
    #ifdef OBJCRYST_GL
    VFN_DEBUG_MESSAGE("Atom::GLInitDisplayList():"<<this->GetName(),5)

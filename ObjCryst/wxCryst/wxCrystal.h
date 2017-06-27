@@ -89,7 +89,8 @@ class WXCrystal: public WXRefinableObj
                     const REAL xMin=-.1,const REAL xMax=1.1,
                     const REAL yMin=-.1,const REAL yMax=1.1,
                     const REAL zMin=-.1,const REAL zMax=1.1,
-                    const REAL fadeDistance=0);
+                    const REAL fadeDistance=0,
+                    const bool fullMoleculeInLimits=false);
       /// Gets the integer index of the OpenGL display list. Wait, if necessary, for the list
       /// not to be used any more. When finished, ReleaseCrystalGLDisplayList() must be called.
       /// if AtomName=true, then the display list returned is the one with the atom names.
@@ -416,7 +417,7 @@ class WXGLCrystalCanvas : public wxGLCanvas
       wxMenu* mpPopUpMenu;
 
       /// Display options
-      bool mShowFourier, mShowCrystal, mShowAtomName, mShowHydrogens, mShowCursor, mSharpenMap, mShowHelp;
+      bool mShowFourier, mShowCrystal, mShowAtomName, mShowHydrogens, mShowCursor, mSharpenMap, mShowHelp, mShowFullMolecule;
       /// bounding box for atoms to be included
       BBox mcellbbox;
       /// bounding box for display of Fourier map

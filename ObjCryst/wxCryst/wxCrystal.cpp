@@ -666,7 +666,10 @@ void WXCrystal::CrystUpdate(const bool uui,const bool lock)
       BBox box=mpCrystalGL->GetCellBBox();
       const REAL fadeDistance=mpCrystalGL->GetFadeDistance();
       if(lock) mMutex.Unlock();
-      this->UpdateGL(false,box.xMin,box.xMax,box.yMin,box.yMax,box.zMin,box.zMax,fadeDistance);
+      bool showFullMolecule;
+      wxConfigBase::Get()->Read(_T("Crystal/BOOL/Show full molecules in 3D view"), &showFullMolecule);
+
+      this->UpdateGL(false,box.xMin,box.xMax,box.yMin,box.yMax,box.zMin,box.zMax,fadeDistance, showFullMolecule);
    }
    #endif
    if(lock) mMutex.Lock();
@@ -836,7 +839,8 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
                          const REAL xMin,const REAL xMax,
                          const REAL yMin,const REAL yMax,
                          const REAL zMin,const REAL zMax,
-                         const REAL fadeDistance)
+                         const REAL fadeDistance,
+                         const bool fullMoleculeInLimits)
 {
    // :KLUDGE: !!! UGLY !!! This should be done in WXGLCrystalCanvas !
    VFN_DEBUG_ENTRY("WXCrystal::UpdateGL()",8)
@@ -875,7 +879,7 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
       }
       glNewList(mCrystalGLDisplayList,GL_COMPILE);
          glPushMatrix();
-            mpCrystal->GLInitDisplayList(onlyIndependentAtoms,xMin,xMax,yMin,yMax,zMin,zMax,false,!(mpCrystalGL->GetShowHydrogens()),fadeDistance);
+            mpCrystal->GLInitDisplayList(onlyIndependentAtoms,xMin,xMax,yMin,yMax,zMin,zMax,false,!(mpCrystalGL->GetShowHydrogens()),fadeDistance,fullMoleculeInLimits);
             //ScatteringPowerMap map1(mpCrystal->GetScatteringPowerRegistry().GetObj(0),
             //                            *mpCrystal,.02,.05,.05,RAD_XRAY);
             //map1.GLInitDisplayList(xMin,xMax,yMin,yMax,zMin,zMax);
@@ -886,7 +890,7 @@ void WXCrystal::UpdateGL(const bool onlyIndependentAtoms,
       glEndList();
       glNewList(mCrystalGLNameDisplayList,GL_COMPILE);
          glPushMatrix();
-            mpCrystal->GLInitDisplayList(onlyIndependentAtoms,xMin,xMax,yMin,yMax,zMin,zMax,true,!(mpCrystalGL->GetShowHydrogens()),fadeDistance);
+            mpCrystal->GLInitDisplayList(onlyIndependentAtoms,xMin,xMax,yMin,yMax,zMin,zMax,true,!(mpCrystalGL->GetShowHydrogens()),fadeDistance,fullMoleculeInLimits);
          glPopMatrix();
       glEndList();
       mpCrystalGL->CrystUpdate();
@@ -2928,7 +2932,8 @@ wxGLCanvas(parent, id,AttribList,pos,size,wxDEFAULT_FRAME_STYLE | wxFULL_REPAINT
 //wxGLCanvas(parent,id,pos,size,wxDEFAULT_FRAME_STYLE,_T("GLCanvas"),AttribList),
 mpParentFrame(parent),
 mpWXCrystal(wxcryst),mIsGLInit(false),mDist(60),mX0(0),mY0(0),mZ0(0),mViewAngle(15),
-mShowFourier(true),mShowCrystal(true),mShowAtomName(true),mShowHydrogens(true),mShowCursor(false),mSharpenMap(true),mShowHelp(false),
+mShowFourier(true),mShowCrystal(true),mShowAtomName(true),mShowHydrogens(true),
+mShowCursor(false),mSharpenMap(true),mShowHelp(false),mShowFullMolecule(false),
 mIsGLFontBuilt(false),mGLFontDisplayListBase(0),mpFourierMapListWin(0),mFadeDistance(0)
 {
    mpwxGLContext=new wxGLContext(this);
@@ -3035,8 +3040,15 @@ mIsGLFontBuilt(false),mGLFontDisplayListBase(0),mpFourierMapListWin(0),mFadeDist
    // Fade distance for showing transparent atoms beyond display limit
    if(!wxConfigBase::Get()->HasEntry(_T("Crystal/REAL/3D fade distance")))
       wxConfigBase::Get()->Write(_T("Crystal/REAL/3D fade distance"), 4);
-
+   
    wxConfigBase::Get()->Read(_T("Crystal/REAL/3D fade distance"), &mFadeDistance);
+   
+   // Show full molecules for those centered inside the display limits ?
+   if(!wxConfigBase::Get()->HasEntry(_T("Crystal/BOOL/Show full molecules in 3D view")))
+      wxConfigBase::Get()->Write(_T("Crystal/BOOL/Show full molecules in 3D view"), mShowFullMolecule);
+   
+   wxConfigBase::Get()->Read(_T("Crystal/BOOL/Show full molecules in 3D view"), &mShowFullMolecule);
+   
    if(mShowAtomName) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, _T("Hide Atom Labels"));
    else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, _T("Show Atom Labels"));
 }
@@ -3210,7 +3222,7 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
             i++;
 
             glRasterPos2i(2, h-12*i);
-            sprintf(c,"Keyboard");
+            sprintf(c,"Keyboard (all lowercase)");
             crystGLPrint(c);
             i++;
             glRasterPos2i(2, h-12*i);
@@ -3239,6 +3251,18 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
             i++;
             glRasterPos2i(2, h-12*i);
             sprintf(c,"   H: toggle help display");
+            crystGLPrint(c);
+            i++;
+            glRasterPos2i(2, h-12*i);
+            sprintf(c,"   L: toggle atom labels");
+            crystGLPrint(c);
+            i++;
+            glRasterPos2i(2, h-12*i);
+            sprintf(c,"   M: toggle full molecules");
+            crystGLPrint(c);
+            i++;
+            glRasterPos2i(2, h-12*i);
+            sprintf(c,"   Y: toggle hydrogens");
             crystGLPrint(c);
             i++;
          }
@@ -3324,6 +3348,7 @@ void WXGLCrystalCanvas::OnEraseBackground(wxEraseEvent& event)
 void WXGLCrystalCanvas::OnKeyDown(wxKeyEvent& event)
 {
    VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnKeyDown()",2)
+   cout<<"WXGLCrystalCanvas::OnKeyDown(): KeyCode: "<<event.GetKeyCode()<<endl;
    switch(event.GetKeyCode())
    {
       case(45):// +
@@ -3439,6 +3464,38 @@ void WXGLCrystalCanvas::OnKeyDown(wxKeyEvent& event)
          VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnKeyDown():toggle help",2)
          mShowHelp = !mShowHelp;
          Refresh(FALSE);
+         break;
+      }
+      case(76):// L
+      {
+         VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnKeyDown():toggle atom labels",2)
+         mShowAtomName = !mShowAtomName;
+         Refresh(FALSE);
+         break;
+      }
+      case(77):// M
+      {
+         mShowFullMolecule = !mShowFullMolecule;
+         wxConfigBase::Get()->Write(_T("Crystal/BOOL/Show full molecules in 3D view"), mShowFullMolecule);
+         VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnKeyDown():toggle showing full molecules: "<<mShowFullMolecule,2)
+
+         // Should be done with an event ?
+         if(!(mpWXCrystal->GetCrystal().IsBeingRefined()))
+            mpWXCrystal->UpdateGL(false,
+                                  mcellbbox.xMin,mcellbbox.xMax,
+                                  mcellbbox.yMin,mcellbbox.yMax,
+                                  mcellbbox.zMin,mcellbbox.zMax, mFadeDistance, mShowFullMolecule);
+         break;
+      }
+      case(89):// y
+      {
+         mShowHydrogens = !mShowHydrogens;
+         // Should be done with an event ?
+         if(!(mpWXCrystal->GetCrystal().IsBeingRefined()))
+            mpWXCrystal->UpdateGL(false,
+                                  mcellbbox.xMin,mcellbbox.xMax,
+                                  mcellbbox.yMin,mcellbbox.yMax,
+                                  mcellbbox.zMin,mcellbbox.zMax, mFadeDistance, mShowFullMolecule);
          break;
       }
       case(WXK_F1):
@@ -3578,6 +3635,10 @@ void WXGLCrystalCanvas::OnKeyDown(wxKeyEvent& event)
          mcellbbox.zMax = 1;
          break;
       }
+      default:
+      {
+         cout<<"WXGLCrystalCanvas::OnKeyDown(): Unknown KeyCode: "<<event.GetKeyCode()<<endl;
+      }
    }
    if(  (event.GetKeyCode()==WXK_F1)||(event.GetKeyCode()==WXK_F2)||(event.GetKeyCode()==WXK_F3)||(event.GetKeyCode()==WXK_F4)
       ||(event.GetKeyCode()==WXK_F5)||(event.GetKeyCode()==WXK_F6)||(event.GetKeyCode()==WXK_F7)||(event.GetKeyCode()==WXK_F8)
@@ -3587,7 +3648,7 @@ void WXGLCrystalCanvas::OnKeyDown(wxKeyEvent& event)
          mpWXCrystal->UpdateGL(false,
                                mcellbbox.xMin,mcellbbox.xMax,
                                mcellbbox.yMin,mcellbbox.yMax,
-                               mcellbbox.zMin,mcellbbox.zMax, mFadeDistance);
+                               mcellbbox.zMin,mcellbbox.zMax, mFadeDistance, mShowFullMolecule);
    }
    event.Skip();
 }
@@ -3753,7 +3814,7 @@ void WXGLCrystalCanvas::OnUpdate(wxCommandEvent & WXUNUSED(event))
    mpWXCrystal->UpdateGL(false,
 			 mcellbbox.xMin,mcellbbox.xMax,
 			 mcellbbox.yMin,mcellbbox.yMax,
-			 mcellbbox.zMin,mcellbbox.zMax, mFadeDistance);
+			 mcellbbox.zMin,mcellbbox.zMax, mFadeDistance, mShowFullMolecule);
    VFN_DEBUG_EXIT("WXGLCrystalCanvas::OnUpdate()",4)
 }
 
@@ -4033,7 +4094,7 @@ void WXGLCrystalCanvas::OnChangeLimits(wxCommandEvent &event)
          mpWXCrystal->UpdateGL(false,
 			    mcellbbox.xMin,mcellbbox.xMax,
 			    mcellbbox.yMin,mcellbbox.yMax,
-			    mcellbbox.zMin,mcellbbox.zMax, mFadeDistance);
+			    mcellbbox.zMin,mcellbbox.zMax, mFadeDistance, mShowFullMolecule);
          vector<boost::shared_ptr<UnitCellMapGLList> >::iterator pos;
          for(pos=mvpUnitCellMapGLList.begin();pos != mvpUnitCellMapGLList.end();pos++)
          {
@@ -4054,7 +4115,7 @@ void WXGLCrystalCanvas::OnChangeLimits(wxCommandEvent &event)
       mpWXCrystal->UpdateGL(false,
 			                   mcellbbox.xMin,mcellbbox.xMax,
 			                   mcellbbox.yMin,mcellbbox.yMax,
-			                   mcellbbox.zMin,mcellbbox.zMax, mFadeDistance);
+			                   mcellbbox.zMin,mcellbbox.zMax, mFadeDistance, mShowFullMolecule);
 
   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnChangeLimits():UserSelectBoundingBox done",10)
 }

@@ -788,7 +788,8 @@ class Molecule: public Scatterer
                                      const bool displayEnantiomer=false,
                                      const bool displayNames=false,
                                      const bool hideHydrogens=false,
-                                     const REAL fadeDistance=0)const;
+                                     const REAL fadeDistance=0,
+                                     const bool fullMoleculeInLimits=false)const;
       /** Add an atom
       *
       *

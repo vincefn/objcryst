@@ -282,7 +282,8 @@ class ZScatterer: public Scatterer
                                      const bool displayEnantiomer=false,
                                      const bool displayNames=false,
                                      const bool hideHydrogens=false,
-                                     const REAL fadeDistance=0)const;
+                                     const REAL fadeDistance=0,
+                                     const bool fullMoleculeInLimits=false)const;
       /** \brief use a Global scattering power for this scatterer ?
       *
       * If true, then the overall scattering power of this ZScatterer will be

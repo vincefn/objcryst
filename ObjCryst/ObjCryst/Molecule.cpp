@@ -3426,7 +3426,8 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                                const bool displayEnantiomer,
                                const bool displayNames,
                                const bool hideHydrogens,
-                               const REAL fadeDistance)const
+                               const REAL fadeDistance,
+                               const bool fullMoleculeInLimits)const
 {
    #ifdef OBJCRYST_GL
    VFN_DEBUG_ENTRY("Molecule::GLInitDisplayList()",3)
@@ -3435,6 +3436,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
       VFN_DEBUG_EXIT("Molecule::GLInitDisplayList():No atom to display !",4)
       return;
    }
+
    bool large=false;
    if(mvpAtom.size()>200) large=true;
    REAL en=1;
@@ -3591,9 +3593,9 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
             z += translate(j,2);
             CrystVector<bool> isinside(x.numElements());
             CrystVector<REAL> borderdist(x.numElements());//distance to display limit
-            const bool molcenter_isinside =    ((mXYZ(0)+translate(j,0))>=xMin) && ((mXYZ(0)+translate(j,0))<=xMax)
-                                            && ((mXYZ(1)+translate(j,1))>=yMin) && ((mXYZ(1)+translate(j,1))<=yMax)
-                                            && ((mXYZ(2)+translate(j,2))>=zMin) && ((mXYZ(2)+translate(j,2))<=zMax);
+            const bool molcenter_isinside =(   ((x.sum()/x.size())>=xMin) && ((x.sum()/x.size())<=xMax)
+                                            && ((y.sum()/y.size())>=yMin) && ((y.sum()/y.size())<=yMax)
+                                            && ((z.sum()/z.size())>=zMin) && ((z.sum()/z.size())<=zMax));
             if(  ((x.min()<(xMax+fadeDistance/aa)) && (x.max()>(xMin-fadeDistance/aa)))
                &&((y.min()<(yMax+fadeDistance/bb)) && (y.max()>(yMin-fadeDistance/bb)))
                &&((z.min()<(zMax+fadeDistance/cc)) && (z.max()>(zMin-fadeDistance/cc))))
@@ -3614,7 +3616,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                      borderdist(k)=sqrt(borderdist(k));
                   }
                   REAL fout=1.0;
-                  if(isinside(k)==false)
+                  if((isinside(k)==false) && ((molcenter_isinside==false) || (fullMoleculeInLimits==false)))
                   {
                      if ((fadeDistance == 0) || borderdist(k)>fadeDistance) fout = 0;
                      else fout*=(fadeDistance-borderdist(k))/fadeDistance*this->GetCrystal().GetDynPopCorr(this,k);
@@ -3686,7 +3688,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                         const unsigned long n1=rix[&(mvpBond[k]->GetAtom1())],
                                             n2=rix[&(mvpBond[k]->GetAtom2())];
                         REAL fout=1.0;
-                        if((isinside(n1)==false) || (isinside(n2)==false))
+                        if(((isinside(n1)==false) || (isinside(n2)==false)) && ((molcenter_isinside==false) || (fullMoleculeInLimits==false)))
                         {
                            if((fadeDistance==0) || ((borderdist(n1)+borderdist(n2))/2)>fadeDistance) fout = 0;
                            else fout*=(fadeDistance-(borderdist(n1)+borderdist(n2))/2)/fadeDistance*
@@ -3752,7 +3754,7 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                                             n2=rix[&(mvpBond[k]->GetAtom2())];
                         REAL fout=1.0;
                         //if((isinside(n1)==false) || (isinside(n2)==false)) fout=exp(-(borderdist(n1)+borderdist(n2))/2);
-                        if((isinside(n1)==false) || (isinside(n2)==false))
+                        if(((isinside(n1)==false) || (isinside(n2)==false)) && ((molcenter_isinside==false) || (fullMoleculeInLimits==false)))
                         {
                            if ((fadeDistance == 0) || ((borderdist(n1) + borderdist(n2)) / 2)>fadeDistance)
                               fout = 0;

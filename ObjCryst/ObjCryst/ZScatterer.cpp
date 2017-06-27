@@ -650,7 +650,8 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                                    const bool displayEnantiomer,
                                    const bool displayNames,
                                    const bool hideHydrogens,
-                                   const REAL fadeDistance)const
+                                   const REAL fadeDistance,
+                                   const bool fullMoleculeInLimits)const
 {
    #ifdef OBJCRYST_GL
    VFN_DEBUG_ENTRY("ZScatterer::GLInitDisplayList()",4)
