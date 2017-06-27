@@ -1999,6 +1999,8 @@ class WXCellExplorer:public wxWindow
       /// User chose to automatically run Le Bail & profile fitting,
       ///make sure there is a background and a crystal structure selected
       void OnAutoLeBail(wxCommandEvent &event);
+      /// Export indexing results to a csv file
+      void OnExportIndexingResults(wxCommandEvent &event);
    private:
       WXPowderPatternGraph *mpGraph;
       PeakList *mpPeakList;
@@ -2034,6 +2036,7 @@ static const long ID_CELLEXPLORER_CHOOSECRYSTAL= WXCRYST_ID();
 static const long ID_CELLEXPLORER_LEBAIL= WXCRYST_ID();
 static const long ID_CELLEXPLORER_CENTERED= WXCRYST_ID();
 static const long ID_CELLEXPLORER_SPURIOUS= WXCRYST_ID();
+static const long ID_CELLEXPLORER_EXPORT= WXCRYST_ID();
 
 BEGIN_EVENT_TABLE(WXCellExplorer, wxWindow)
    EVT_BUTTON(ID_CELLEXPLORER_INDEX,             WXCellExplorer::OnIndex)
@@ -2043,6 +2046,7 @@ BEGIN_EVENT_TABLE(WXCellExplorer, wxWindow)
    EVT_BUTTON(ID_CELLEXPLORER_APPLYCELL,         WXCellExplorer::OnApplyCell)
    EVT_BUTTON(ID_CELLEXPLORER_CHOOSECRYSTAL,     WXCellExplorer::OnChooseCrystal)
    EVT_CHECKBOX(ID_CELLEXPLORER_LEBAIL,          WXCellExplorer::OnAutoLeBail)
+   EVT_BUTTON(ID_CELLEXPLORER_EXPORT,          WXCellExplorer::OnExportIndexingResults)
 END_EVENT_TABLE()
 
 //:TODO: allow sorting solutions by number of spurious lines or score
@@ -2067,6 +2071,9 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
       wxButton *pQuickButtonIndex=new wxButton(pQuick,ID_CELLEXPLORER_INDEX_QUICK,_T("Find cell!"));
       pSizerQuick->Add(pQuickButtonIndex,0,wxALIGN_CENTER);
 
+      wxButton *pQuickButtonExport=new wxButton(pQuick,ID_CELLEXPLORER_EXPORT,_T("Export Indexing Results"));
+      pSizerQuick->Add(pQuickButtonExport,0,wxALIGN_CENTER);
+
       mpWeakDiffraction=new wxCheckBox(pQuick,ID_CELLEXPLORER_WEAK,_T("Weak Diffraction (scan larger volume)"));
       pSizerQuick->Add(mpWeakDiffraction,0,wxALIGN_CENTER);
 
@@ -2080,6 +2087,7 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
       mpTrySpurious=new wxCheckBox(pQuick,ID_CELLEXPLORER_SPURIOUS,_T("Try with 1 and 2 spurious lines"));
       pSizerQuick->Add(mpTrySpurious,0,wxALIGN_CENTER);
 
+
       pQuick->SetSizer(pSizerQuick);
       pSizerQuick->Fit(pQuick);
       pSizerQuick->RecalcSizes();
@@ -2091,6 +2099,9 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
 
       wxButton *pButton1=new wxButton(pAdvanced,ID_CELLEXPLORER_INDEX,_T("Find cell!"));
       pSizerAdvanced->Add(pButton1,0,wxALIGN_CENTER);
+
+      wxButton *pQuickButtonExport2=new wxButton(pAdvanced,ID_CELLEXPLORER_EXPORT,_T("Export Indexing Results"));
+      pSizerAdvanced->Add(pQuickButtonExport2,0,wxALIGN_CENTER);
 
       wxBoxSizer *pLengthSizer=new wxBoxSizer(wxHORIZONTAL);
       wxStaticText *pLengthText=new wxStaticText(pAdvanced,-1,_T("Length min, max (A):"));
@@ -3107,6 +3118,71 @@ void WXCellExplorer::OnAutoLeBail(wxCommandEvent &event)
    VFN_DEBUG_EXIT("WXCellExplorer::OnAutoLeBail()",7)
 }
 
+void WXCellExplorer::OnExportIndexingResults(wxCommandEvent &event)
+{
+   bool ok=true;
+   if(mpCellExplorer==0) ok = false;
+   else
+   {
+      if(mpCellExplorer->GetSolutions().size()==0) ok = false;
+   }
+   if(!ok)
+   {
+      wxMessageDialog dumbUser(this,_T("There are no solutions. Index first !"),
+                               _T("Whooops"),wxOK|wxICON_EXCLAMATION);
+      dumbUser.ShowModal();
+      return;
+   }
+   
+   wxFileDialog save(this,_T("Choose a file"),_T(""),_T(""),_T("*.csv"),wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+   if(save.ShowModal() != wxID_OK) return;
+   
+   ofstream out(save.GetPath().ToAscii());
+   if(!out) return;//:TODO:
+   
+   wxArrayString sols;
+   float bestvol=0;
+   out <<"Score, Volume, Volume/V_best, a, b, c, alpha, beta, gamma, Lattice, Centering, NbSpurious"<<endl;
+   for(list<pair<RecUnitCell,float> >::const_iterator pos=mpCellExplorer->GetSolutions().begin();
+       pos!=mpCellExplorer->GetSolutions().end();++pos)
+   {
+      vector<float> uc=pos->first.DirectUnitCell();
+      if(pos==mpCellExplorer->GetSolutions().begin()) bestvol=uc[6]*.99999;
+      const float relvol=uc[6]/bestvol;
+      string sys;
+      switch(pos->first.mlattice)
+      {
+         case TRICLINIC:sys="TRICLINIC"; break;
+         case MONOCLINIC:sys="MONOCLINIC"; break;
+         case ORTHOROMBIC:sys="ORTHOROMBIC"; break;
+         case HEXAGONAL:sys="HEXAGONAL"; break;
+         case RHOMBOEDRAL:sys="RHOMBOEDRAL"; break;
+         case TETRAGONAL:sys="TETRAGONAL"; break;
+         case CUBIC:sys="CUBIC"; break;
+      }
+      char centc;
+      switch(pos->first.mCentering)
+      {
+         case LATTICE_P:centc='P'; break;
+         case LATTICE_I:centc='I'; break;
+         case LATTICE_A:centc='A'; break;
+         case LATTICE_B:centc='B'; break;
+         case LATTICE_C:centc='C'; break;
+         case LATTICE_F:centc='F'; break;
+      }
+      stringstream spurious;
+      if(pos->first.mNbSpurious>0)
+         spurious<<"(nbspurious = "<<pos->first.mNbSpurious<<")";
+      
+      out<<pos->second<<","<<uc[6]<<","<<relvol<<","<<uc[0]<<","<<uc[1]<<","<<uc[2]<<","
+         <<uc[3]*RAD2DEG<<","<<uc[4]*RAD2DEG<<","<<uc[5]*RAD2DEG<<","
+         <<sys.c_str()<<","<<centc<<","<<pos->first.mNbSpurious<<endl;
+   }
+
+   
+   out.close();
+
+}
 //////////////////////////////////////// END WXCellExplorer /////////////////////
 
 void WXPowderPatternGraph::OnIndex(wxCommandEvent& WXUNUSED(event))
