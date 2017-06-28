@@ -88,8 +88,10 @@ WXFieldRefPar::WXFieldRefPar(wxWindow *parent,const string& label,
                              const bool enableFixButton, const bool enableLimitedButton):
 WXField(parent,label,ID_WXFIELD_REFPAR),mValue(0.),mpRefPar(par),mIsSelfUpdating(false),mFormat(_T("%8f"))
 {
-   VFN_DEBUG_MESSAGE("WXFieldRefPar::WXFieldName():End",6)
-   if(enableFixButton)
+   VFN_DEBUG_MESSAGE("WXFieldRefPar::WXFieldName():End", 6)
+
+   mpLabel->Bind(wxEVT_RIGHT_DOWN, &WXFieldRefPar::OnPopupMenu, this);
+   if (enableFixButton)
    {
       this->SetLabel(label+":R");
       mpButtonFix=new wxCheckBox(this,ID_WXFIELD_REFPAR_FIXBUTTON,_T("L"),wxDefaultPosition, wxDefaultSize);
@@ -97,20 +99,26 @@ WXField(parent,label,ID_WXFIELD_REFPAR),mValue(0.),mpRefPar(par),mIsSelfUpdating
       mpButtonFix->SetToolTip(_T("Check this box to enable optimizing this parameter.\n")
                               _T("(some parameters may be automatically fixed for global optimization)"));
       mpSizer->Add(mpButtonFix,0,wxALIGN_CENTER);
-   }else mpButtonFix=0;
+      mpButtonFix->Bind(wxEVT_RIGHT_DOWN, &WXFieldRefPar::OnPopupMenu, this);
+   }
+   else mpButtonFix = 0;
    if(enableLimitedButton)
    {
       mpButtonLimited=new wxCheckBox(this,ID_WXFIELD_REFPAR_LIMITEDBUTTON,_T(""),
                                      wxDefaultPosition, wxSize(16,20));
       mpButtonLimited->SetToolTip(_T("Check this box to use limits for this parameter"));
       mpSizer->Add(mpButtonLimited,0,wxALIGN_CENTER);
-   }else mpButtonLimited=0;
+      mpButtonLimited->Bind(wxEVT_RIGHT_DOWN, &WXFieldRefPar::OnPopupMenu, this);
+   }
+   else mpButtonLimited = 0;
 
    mpField=new wxTextCtrl(this,ID_WXFIELD,_T(""),
                             wxDefaultPosition,wxSize(hsize,-1),wxTE_PROCESS_ENTER,
                             wxTextValidator(wxFILTER_NUMERIC));
    mpSizer->Add(mpField,0,wxALIGN_CENTER);
+   mpField->Bind(wxEVT_RIGHT_DOWN, &WXFieldRefPar::OnPopupMenu, this);
 }
+
 WXFieldRefPar::~WXFieldRefPar()
 {
    mpRefPar->WXNotifyDelete();
@@ -121,6 +129,7 @@ void WXFieldRefPar::OnEnter(wxCommandEvent & WXUNUSED(event))
    VFN_DEBUG_MESSAGE("WXFieldRefPar::OnEnter()",6)
    WXCrystValidateAllUserInput();
 }
+
 void WXFieldRefPar::OnText(wxCommandEvent & WXUNUSED(event))
 {
    if(true==mIsSelfUpdating) return;
@@ -171,7 +180,7 @@ void WXFieldRefPar::OnPopupMenuChoice(wxCommandEvent& event)
                                  _T("Minimum"),str,wxOK | wxCANCEL);
          if(wxID_OK!=limitDialog.ShowModal())
          {
-            VFN_DEBUG_EXIT("WXZScatterer::OnMenuSetLimits():Cancelled",6)
+            VFN_DEBUG_EXIT("WXFieldRefPar::OnPopupMenuChoice():Cancelled",6)
             return;
          }
          limitDialog.GetValue().ToDouble(&min);
@@ -183,7 +192,7 @@ void WXFieldRefPar::OnPopupMenuChoice(wxCommandEvent& event)
                                  _T("Maximum"),str,wxOK | wxCANCEL);
          if(wxID_OK!=limitDialog.ShowModal())
          {
-            VFN_DEBUG_EXIT("WXZScatterer::OnMenuSetLimits():Cancelled",6)
+            VFN_DEBUG_EXIT("WXFieldRefPar::OnPopupMenuChoice():Cancelled",6)
             return;
          }
          limitDialog.GetValue().ToDouble(&max);
