@@ -937,11 +937,11 @@ void WXCrystal::OnMenuCrystalGL(wxCommandEvent & WXUNUSED(event))
 	   //cout << "WXCrystal::OnMenuCrystalGL():@(" << gvWindowPosition[ID_GLCRYSTAL_WINDOW].first.x << "," << gvWindowPosition[ID_GLCRYSTAL_WINDOW].first.y << ")" << endl;
 	   frame = new WXGLCrystalCanvasFrame(this, ID_GLCRYSTAL_WINDOW, wxString::Format("%s [%s]",mpCrystal->GetName().c_str(), mpCrystal->GetSpaceGroup().GetName().c_str()),
 		   gvWindowPosition[ID_GLCRYSTAL_WINDOW].first,
-		   gvWindowPosition[ID_GLCRYSTAL_WINDOW].second, wxCLOSE_BOX | wxRESIZE_BORDER | wxCAPTION);//wxFRAME_FLOAT_ON_PARENT
+         gvWindowPosition[ID_GLCRYSTAL_WINDOW].second, wxCLOSE_BOX | wxRESIZE_BORDER | wxCAPTION | wxMINIMIZE_BOX | wxMAXIMIZE_BOX);//wxFRAME_FLOAT_ON_PARENT
    }
    else
 	   frame = new WXGLCrystalCanvasFrame(this, ID_GLCRYSTAL_WINDOW, wxString::Format("%s [%s]",mpCrystal->GetName().c_str(), mpCrystal->GetSpaceGroup().GetName().c_str()),
-                        wxDefaultPosition,wxSize(400,400),wxCLOSE_BOX|wxRESIZE_BORDER|wxCAPTION);//wxFRAME_FLOAT_ON_PARENT
+                                         wxDefaultPosition, wxSize(400, 400), wxCLOSE_BOX | wxRESIZE_BORDER | wxCAPTION | wxMINIMIZE_BOX | wxMAXIMIZE_BOX);//wxFRAME_FLOAT_ON_PARENT
 
    mpCrystalGL=new WXGLCrystalCanvas(this,frame,-1);
    #if wxUSE_STATUSBAR
