@@ -71,7 +71,7 @@ float EstimateCellVolume(const float dmin, const float dmax, const float nbrefl,
    if(centering==LATTICE_F){C0/=4;D0/=4;}
    const float alpha=D0*q2/(3*C0*q1), beta=nbrefl/(2*kappa*C0*q1);
    const float eta=beta-alpha*alpha*alpha,gamma=sqrt(beta*beta-2*beta*alpha*alpha*alpha);
-   const float v=pow(pow(eta+gamma,(float)(1/3.))+pow((eta-gamma),(float)(1/3.))-alpha,(float)3);
+   const float v=pow(pow(eta+gamma,(float)(1/3.))+pow(fabs(eta-gamma),(float)(1/3.))-alpha,(float)3);
    return v;
 }
 
