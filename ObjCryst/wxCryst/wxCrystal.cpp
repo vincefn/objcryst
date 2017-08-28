@@ -1132,6 +1132,7 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
       //Bond length
          wxTextEntryDialog bondLengthDialog(this,_T("Bond length"),
                                  _T("Enter bond length (Angstroems)"),_T("1"),wxOK | wxCANCEL);
+         bondLengthDialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
          if(wxID_OK!=bondLengthDialog.ShowModal())
          {
             VFN_DEBUG_EXIT("WXZScatterer))OnMenuAddZAtom())Cancelled",6)
@@ -1169,6 +1170,7 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
       //Bond length
          wxTextEntryDialog bondLengthDialog(this,_T("Bond length"),
                                  _T("Enter bond length (Angstroems)"),_T("1"),wxOK | wxCANCEL);
+         bondLengthDialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
          if(wxID_OK!=bondLengthDialog.ShowModal())
          {
             VFN_DEBUG_EXIT("WXZScatterer))OnMenuAddZAtom())Cancelled",6)
@@ -1207,6 +1209,7 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
       //Bond length
          wxTextEntryDialog bondLengthDialog(this,_T("Bond length"),
                                  _T("Enter bond length (Angstroems)"),_T("1"),wxOK | wxCANCEL);
+         bondLengthDialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
          if(wxID_OK!=bondLengthDialog.ShowModal())
          {
             VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom():Cancelled",6)
@@ -1245,6 +1248,7 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
       //Bond length
          wxTextEntryDialog bondLengthDialog(this,_T("Bond length"),
                                  _T("Enter bond length (Angstroems)"),_T("1"),wxOK | wxCANCEL);
+         bondLengthDialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
          if(wxID_OK!=bondLengthDialog.ShowModal())
          {
             VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom():Cancelled",6)
@@ -1282,6 +1286,7 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
       //Bond length
          wxTextEntryDialog bondLengthDialog(this,_T("Bond length"),
                                  _T("Enter bond length (Angstroems)"),_T("1"),wxOK | wxCANCEL);
+         bondLengthDialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
          if(wxID_OK!=bondLengthDialog.ShowModal())
          {
             VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom():Cancelled",6)
@@ -1319,6 +1324,7 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
       //Bond length
          wxTextEntryDialog bondLengthDialog(this,_T("Bond length"),
                                  _T("Enter bond length (Angstroems)"),_T("1"),wxOK | wxCANCEL);
+         bondLengthDialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
          if(wxID_OK!=bondLengthDialog.ShowModal())
          {
             VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom():Cancelled",6)
@@ -1356,6 +1362,7 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
       //Bond length
          wxTextEntryDialog bondLengthDialog(this,_T("Bond length"),
                                  _T("Enter bond length (Angstroems)"),_T("1"),wxOK | wxCANCEL);
+         bondLengthDialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
          if(wxID_OK!=bondLengthDialog.ShowModal())
          {
             VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom())Cancelled",6)
@@ -1393,6 +1400,7 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
       //Bond length
          wxTextEntryDialog bondLengthDialog(this,_T("Bond length"),
                                  _T("Enter bond length (Angstroems)"),_T("1"),wxOK | wxCANCEL);
+         bondLengthDialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
          if(wxID_OK!=bondLengthDialog.ShowModal())
          {
             VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom():Cancelled",6)
@@ -1530,6 +1538,7 @@ void WXCrystal::OnMenuSetRelativeXYZLimits(wxCommandEvent & WXUNUSED(event))
    wxTextEntryDialog limitDialog(this,_T("Relative limits"),
                            _T("Enter relative limits for x,y,z (Angstroems)"),
                            _T("0.5"),wxOK | wxCANCEL);
+   limitDialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
    if(wxID_OK!=limitDialog.ShowModal())
    {
       VFN_DEBUG_EXIT("WXCrystal::OnMenuSetRelativeXYZLimits():Cancelled",6)
@@ -2802,7 +2811,8 @@ wxWindow(parent,-1),mpGLCrystalCanvas(pGLCrystalCanvas),mIsUpdating(false)
          wxBoxSizer* pSizerLeft2=new wxBoxSizer(wxHORIZONTAL);
          pSizerLeft->Add(pSizerLeft2,0,wxALIGN_CENTER);
          wxStaticText *mpLabel2=new wxStaticText(this,-1,_T("New Contour:"));
-         mpNewContourValue=new wxTextCtrl(this,ID_GLCRYSTAL_FOURIER_NEWCONTOUR,_T(""),wxDefaultPosition,wxDefaultSize,wxTE_PROCESS_ENTER);
+         mpNewContourValue=new wxTextCtrl(this,ID_GLCRYSTAL_FOURIER_NEWCONTOUR,_T(""),wxDefaultPosition,wxDefaultSize,
+                                          wxTE_PROCESS_ENTER,wxTextValidator(wxFILTER_NUMERIC));
          pSizerLeft2->Add(mpLabel2,0,wxALIGN_CENTER);
          pSizerLeft2->Add(mpNewContourValue,0,wxALIGN_CENTER);
 
@@ -2822,7 +2832,8 @@ wxWindow(parent,-1),mpGLCrystalCanvas(pGLCrystalCanvas),mIsUpdating(false)
          wxBoxSizer* pSizerRight1=new wxBoxSizer(wxHORIZONTAL);
          pSizerRight->Add(pSizerRight1,0,wxALIGN_CENTER);
          wxStaticText *mpLabel3=new wxStaticText(this,-1,_T("Contour:"));
-         mpContourValue=new wxTextCtrl(this,ID_GLCRYSTAL_FOURIER_CONTOUR,_T(""),wxDefaultPosition,wxDefaultSize,wxTE_PROCESS_ENTER);
+         mpContourValue=new wxTextCtrl(this,ID_GLCRYSTAL_FOURIER_CONTOUR,_T(""),wxDefaultPosition,wxDefaultSize,
+                                       wxTE_PROCESS_ENTER,wxTextValidator(wxFILTER_NUMERIC));
          pSizerRight1->Add(mpLabel3,0,wxALIGN_CENTER);
          pSizerRight1->Add(mpContourValue,0,wxALIGN_CENTER);
 
