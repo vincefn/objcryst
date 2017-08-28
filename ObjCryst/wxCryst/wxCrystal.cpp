@@ -3638,6 +3638,7 @@ void WXGLCrystalCanvas::OnKeyDown(wxKeyEvent& event)
       default:
       {
          cout<<"WXGLCrystalCanvas::OnKeyDown(): Unknown KeyCode: "<<event.GetKeyCode()<<endl;
+         event.Skip();
       }
    }
    if(  (event.GetKeyCode()==WXK_F1)||(event.GetKeyCode()==WXK_F2)||(event.GetKeyCode()==WXK_F3)||(event.GetKeyCode()==WXK_F4)
@@ -3650,7 +3651,6 @@ void WXGLCrystalCanvas::OnKeyDown(wxKeyEvent& event)
                                mcellbbox.yMin,mcellbbox.yMax,
                                mcellbbox.zMin,mcellbbox.zMax, mFadeDistance, mShowFullMolecule);
    }
-   event.Skip();
 }
 
 void WXGLCrystalCanvas::OnKeyUp(wxKeyEvent& event)
