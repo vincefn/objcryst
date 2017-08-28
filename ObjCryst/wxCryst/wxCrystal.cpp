@@ -2944,7 +2944,7 @@ wxGLCanvas(parent, id,AttribList,pos,size,wxDEFAULT_FRAME_STYLE | wxFULL_REPAINT
 mpParentFrame(parent),
 mpWXCrystal(wxcryst),mIsGLInit(false),mDist(60),mX0(0),mY0(0),mZ0(0),mViewAngle(15),
 mShowFourier(true),mShowCrystal(true),mShowAtomName(true),mShowHydrogens(true),
-mShowCursor(false),mSharpenMap(true),mShowHelp(false),mShowFullMolecule(false),
+mShowCursor(false),mSharpenMap(true),mShowHelp(false),mShowFullMolecule(false), mWhiteBackground(false),
 mIsGLFontBuilt(false),mGLFontDisplayListBase(0),mpFourierMapListWin(0),mFadeDistance(0)
 {
    mpwxGLContext=new wxGLContext(this);
@@ -3132,7 +3132,8 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
    glMatrixMode( GL_MODELVIEW );
 
    //clear
-   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);//Black background
+   if(mWhiteBackground) glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // White background
+   else glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Black background
    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
    //Orientation using the trackball
@@ -3159,7 +3160,8 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
        if(mShowCrystal)
       {
 		  glLoadIdentity();
-		  glColor3f(1.0, 1.0, 1.0);
+        if(mWhiteBackground) glColor3f(0.0,0.0,0.0);
+        else glColor3f(1.0,1.0,1.0);
 		  glTranslatef(0, 0, -mDist);
 		  glMultMatrixf(&m[0][0]);
 		  glTranslatef(mX0, mY0, mZ0);
@@ -3167,7 +3169,8 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
          if(mShowAtomName)
          {
             glLoadIdentity();
-            glColor3f(1.0,1.0,1.0);
+            if(mWhiteBackground) glColor3f(0.0,0.0,0.0);
+            else glColor3f(1.0,1.0,1.0);
             glTranslatef( -0.3, 0, -mDist+1. );// Put labels in front of the atom position
             glMultMatrixf( &m[0][0] );
             glTranslatef( mX0, mY0, mZ0 );
@@ -3178,7 +3181,12 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
       {//Show display limits and help text
          int w, h;
          GetClientSize(& w, & h);
-         const GLfloat colour2 [] = {1.00, 1.00, 1.00, 0.3};
+         GLfloat colour2 [] = {1.00, 1.00, 1.00, 0.3};
+         if(mWhiteBackground)
+            for(unsigned int i=0;i<3;i++) colour2[i] = 0.0;
+         else
+            for(unsigned int i=0;i<3;i++) colour2[i] = 1.0;
+
          glMaterialfv(GL_FRONT, GL_EMISSION,  colour2);
          glPushMatrix();
          glLoadIdentity();
@@ -3186,7 +3194,8 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
          glPushMatrix();
          glLoadIdentity();
          gluOrtho2D(0,w,0,h);
-         glColor3f(1.0,1.0,1.0);
+         if(mWhiteBackground) glColor3f(0.0,0.0,0.0);
+         else glColor3f(1.0,1.0,1.0);
          unsigned int i=1;
          glRasterPos2i(2,h-12*i);
          char c[256];
@@ -3274,6 +3283,10 @@ void WXGLCrystalCanvas::OnPaint(wxPaintEvent &event)
             i++;
             glRasterPos2i(2, h-12*i);
             sprintf(c,"   Y: toggle hydrogens");
+            crystGLPrint(c);
+            i++;
+            glRasterPos2i(2, h-12*i);
+            sprintf(c,"   B: toggle white/black background");
             crystGLPrint(c);
             i++;
          }
@@ -3458,6 +3471,13 @@ void WXGLCrystalCanvas::OnKeyDown(wxKeyEvent& event)
          float spin_quat[4];
          trackball(spin_quat,0,0,0,-.05);
          add_quats( spin_quat, mQuat, mQuat );
+         Refresh(FALSE);
+         break;
+      }
+      case(66):// B
+      {
+         VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnKeyDown():toggle black/white background",2)
+         mWhiteBackground = !mWhiteBackground;
          Refresh(FALSE);
          break;
       }
