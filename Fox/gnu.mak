@@ -1,7 +1,5 @@
 BUILD_DIR := $(CURDIR)/..
 
->FOXVERSION:=1.7.6
-
 ifeq ($(shared),1)
 shared-newmat=1
 shared-wxgtk=1
@@ -18,7 +16,7 @@ Fox:
 	$(MAKE) -f gnu.mak wxcryst=1 opengl=1 fftw=1 debug=$(debug) unicode=$(unicode) cod=$(cod) shared=$(shared) shared-wxgtk=$(shared-wxgtk) shared-glut=$(shared-glut) shared-newmat=$(shared-newmat) shared-fftw=$(shared-fftw) shared-mysql=$(shared-mysql) -C src Fox
 
 Fox-nogui:
-	$(MAKE) -f gnu.mak wxcryst=0 opengl=0 fftw=0 debug=$(debug) -C src Fox-nogui
+	$(MAKE) -f gnu.mak wxcryst=0 opengl=0 fftw=0 cod=0 debug=$(debug) -C src Fox-nogui
 
 doc:
 	python wiki2pdf.py

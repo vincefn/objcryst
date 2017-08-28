@@ -1,3 +1,18 @@
+#### 2017.2 (28 June 2017)
+NEW FEATURES
+  * 3D crystal view: add 'M' shortcut to allow forcing the full display
+    of molecules when their center is inside the display limits.
+  * 3D crystal view: add 'Y' shortcut to toggle hydrogen display, and 'L' to toggle labels
+  * Add button to export indexing results in csv file
+
+IMPROVEMENTS
+  * Hide X-ray tube alpha1/alpha2 parameters when not relevant
+  * Restore minimize/maximize button for 3D and diffraction pattern views (windows)
+
+BUG FIXES
+  * Re-enable popup menu to set limits for parameters (windows)
+  * Fix rare NaN when estimating indexing volume for centered monoclinic lattices
+
 #### 2017.1 (20 June 2017)
 IMPROVEMENTS
   * More stable Le Bail fit, notably in the auto-profile fit of indexing results

@@ -18,11 +18,11 @@ ifeq ($(profile),2)
 %.o :  %.cpp $(libwx) $(libnewmat) libcctbx
 	@rm -f $(*F).gcda $(*F).gcno
 	@$(MAKEDEPEND)
-	${CXX} ${CPPFLAGS} ${CXXFLAGS} -D'__FOXVERSION__="$(foxversion)"' -c $< -o $@
+	${CXX} ${CPPFLAGS} ${CXXFLAGS} -c $< -o $@
 else
 %.o :  %.cpp
 	@$(MAKEDEPEND)
-	${CXX} ${CPPFLAGS} ${CXXFLAGS} -D'__FOXVERSION__="$(foxversion)"' -c $< -o $@
+	${CXX} ${CPPFLAGS} ${CXXFLAGS} -c $< -o $@
 endif
 
 %.o : %.rc
