@@ -1752,7 +1752,7 @@ void ScatteringData::CalcGeomStructFactor() const
                const long * RESTRICT intK=mIntK.data();
                const long * RESTRICT intL=mIntL.data();
 
-               register long * RESTRICT tmpInt=intVect.data();
+               long * RESTRICT tmpInt=intVect.data();
                // :KLUDGE: using a AND to bring back within [0;sLibCrystNbTabulSine[ may
                // not be portable, depending on the model used to represent signed integers
                // a test should be added to throw up in that case.
@@ -1787,9 +1787,9 @@ void ScatteringData::CalcGeomStructFactor() const
                const REAL x=allCoords(j,0);
                const REAL y=allCoords(j,1);
                const REAL z=allCoords(j,2);
-               const register REAL *hh=mH2Pi.data();
-               const register REAL *kk=mK2Pi.data();
-               const register REAL *ll=mL2Pi.data();
+               const REAL *hh=mH2Pi.data();
+               const REAL *kk=mK2Pi.data();
+               const REAL *ll=mL2Pi.data();
 
                #ifdef HAVE_SSE_MATHFUN
                #if 0
@@ -1942,7 +1942,7 @@ void ScatteringData::CalcGeomStructFactor() const
                }
                #endif
                #else
-               register REAL *tmp=tmpVect.data();
+               REAL *tmp=tmpVect.data();
                for(int jj=0;jj<mNbReflUsed;jj++) *tmp++ = *hh++ * x + *kk++ * y + *ll++ *z;
 
                REAL *sf=mvRealGeomSF[pScattPow].data();
@@ -1966,9 +1966,9 @@ void ScatteringData::CalcGeomStructFactor() const
          if( (pSpg->GetSpaceGroupNumber()>= 143) && (pSpg->GetSpaceGroupNumber()<= 167))
          {//Special case for trigonal groups R3,...
             REAL * RESTRICT p1=tmpVect.data();
-            const register REAL * RESTRICT hh=mH2Pi.data();
-            const register REAL * RESTRICT kk=mK2Pi.data();
-            const register REAL * RESTRICT ll=mL2Pi.data();
+            const REAL * RESTRICT hh=mH2Pi.data();
+            const REAL * RESTRICT kk=mK2Pi.data();
+            const REAL * RESTRICT ll=mL2Pi.data();
             for(long j=mNbReflUsed;j>0;j--) *p1++ += 2*cos((*hh++ - *kk++ - *ll++)/3.);
          }
          else
@@ -1979,9 +1979,9 @@ void ScatteringData::CalcGeomStructFactor() const
                const REAL y=(*pTransVect)[j].tr[1];
                const REAL z=(*pTransVect)[j].tr[2];
                REAL *p1=tmpVect.data();
-               const register REAL *hh=mH2Pi.data();
-               const register REAL *kk=mK2Pi.data();
-               const register REAL *ll=mL2Pi.data();
+               const REAL *hh=mH2Pi.data();
+               const REAL *kk=mK2Pi.data();
+               const REAL *ll=mL2Pi.data();
                for(long j=mNbReflUsed;j>0;j--) *p1++ += cos(*hh++ *x + *kk++ *y + *ll++ *z );
             }
          }
@@ -2131,9 +2131,9 @@ void ScatteringData::CalcGeomStructFactor_FullDeriv(std::set<RefinablePar*> &vPa
       if( (pSpg->GetSpaceGroupNumber()>= 143) && (pSpg->GetSpaceGroupNumber()<= 167))
       {//Special case for trigonal groups R3,...
          REAL * RESTRICT p1=transMult.data();
-         const register REAL * RESTRICT hh=mH2Pi.data();
-         const register REAL * RESTRICT kk=mK2Pi.data();
-         const register REAL * RESTRICT ll=mL2Pi.data();
+         const REAL * RESTRICT hh=mH2Pi.data();
+         const REAL * RESTRICT kk=mK2Pi.data();
+         const REAL * RESTRICT ll=mL2Pi.data();
          for(long j=mNbReflUsed;j>0;j--) *p1++ += 2*cos((*hh++ - *kk++ - *ll++)/3.);
       }
       else
@@ -2144,9 +2144,9 @@ void ScatteringData::CalcGeomStructFactor_FullDeriv(std::set<RefinablePar*> &vPa
             const REAL y=(*pTransVect)[j].tr[1];
             const REAL z=(*pTransVect)[j].tr[2];
             REAL *p1=transMult.data();
-            const register REAL * RESTRICT hh=mH2Pi.data();
-            const register REAL * RESTRICT kk=mK2Pi.data();
-            const register REAL * RESTRICT ll=mL2Pi.data();
+            const REAL * RESTRICT hh=mH2Pi.data();
+            const REAL * RESTRICT kk=mK2Pi.data();
+            const REAL * RESTRICT ll=mL2Pi.data();
             for(long j=mNbReflUsed;j>0;j--) *p1++ += cos(*hh++ *x + *kk++ *y + *ll++ *z );
          }
       }
@@ -2175,9 +2175,9 @@ void ScatteringData::CalcGeomStructFactor_FullDeriv(std::set<RefinablePar*> &vPa
          {
             REAL *pc=c.data();
             REAL *ps=s.data();
-            const register REAL *hh=mH2Pi.data();
-            const register REAL *kk=mK2Pi.data();
-            const register REAL *ll=mL2Pi.data();
+            const REAL *hh=mH2Pi.data();
+            const REAL *kk=mK2Pi.data();
+            const REAL *ll=mL2Pi.data();
             #ifdef HAVE_SSE_MATHFUN
             const v4sf v4x=_mm_load1_ps(&x);
             const v4sf v4y=_mm_load1_ps(&y);
@@ -2238,12 +2238,12 @@ void ScatteringData::CalcGeomStructFactor_FullDeriv(std::set<RefinablePar*> &vPa
                mvImagGeomSF_FullDeriv[*par][pScattPow]=0;
             }
             pSpg->GetSymmetric(j,dx,dy,dz,true,true,true);
-            const register REAL *hh=mH2Pi.data();
-            const register REAL *kk=mK2Pi.data();
-            const register REAL *ll=mL2Pi.data();
-            const register REAL *pmult=transMult.data();
-            register REAL *rsf=mvRealGeomSF_FullDeriv[*par][pScattPow].data();
-            register REAL *isf=mvImagGeomSF_FullDeriv[*par][pScattPow].data();
+            const REAL *hh=mH2Pi.data();
+            const REAL *kk=mK2Pi.data();
+            const REAL *ll=mL2Pi.data();
+            const REAL *pmult=transMult.data();
+            REAL *rsf=mvRealGeomSF_FullDeriv[*par][pScattPow].data();
+            REAL *isf=mvImagGeomSF_FullDeriv[*par][pScattPow].data();
             VFN_DEBUG_MESSAGE("ScatteringData::CalcGeomStructFactor_FullDeriv()comp="<<i<<", par="<<(*par)->GetName()<<", rs="<<mvRealGeomSF_FullDeriv[*par][pScattPow].size(),1)
             const REAL *pc=c.data();
             const REAL *ps=s.data();
