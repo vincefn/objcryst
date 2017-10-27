@@ -105,15 +105,15 @@ template<class T> long CrystVector<T>::size()const {return mNumElements;}
 
 template<class T> T CrystVector<T>::sum()const
 {
-   register T tmp=0;
-   register const T *p=this->data();
+   T tmp=0;
+   const T *p=this->data();
    for(long i=0;i<this->numElements();i++) tmp += *p++ ;
    return tmp;
 }
 template<class T> T CrystVector<T>::min()const
 {
-   register T tmp=0;
-   register const T *p=this->data();
+   T tmp=0;
+   const T *p=this->data();
    tmp=*p++;
    for(long i=1;i<this->numElements();i++)
    {
@@ -124,8 +124,8 @@ template<class T> T CrystVector<T>::min()const
 }
 template<class T> T CrystVector<T>::max()const
 {
-   register T tmp=0;
-   register const T *p=this->data();
+   T tmp=0;
+   const T *p=this->data();
    tmp=*p++;
    for(long i=1;i<this->numElements();i++)
    {
@@ -143,8 +143,8 @@ template<class T> unsigned long CrystVector<T>::imin(const unsigned long start0,
       start=0;
       finish=this->numElements();
    }
-   register T tmp=0;
-   register const T *p=this->data()+start;
+   T tmp=0;
+   const T *p=this->data()+start;
    tmp=*p++;
    long im=0;
    for(unsigned long i=start+1;i<finish;i++)
@@ -162,8 +162,8 @@ template<class T> unsigned long CrystVector<T>::imax(const unsigned long start0,
       start=0;
       finish=this->numElements();
    }
-   register T tmp=0;
-   register const T *p=this->data()+start;
+   T tmp=0;
+   const T *p=this->data()+start;
    tmp=*p++;
    long im=start;
    for(unsigned long i=start+1;i<finish;i++)
@@ -199,8 +199,8 @@ template<class T> void CrystVector<T>::resizeAndPreserve(const long newNbElement
 {
    //:TODO: check memory allocation
    if(newNbElements == mNumElements) return;
-   register T * RESTRICT p=mpData;
-   register T * RESTRICT p2,*p1;
+   T * RESTRICT p=mpData;
+   T * RESTRICT p2,*p1;
    mpData=0;
    mpData=new T[newNbElements];
    p2=mpData;
@@ -217,7 +217,7 @@ template<class T> void CrystVector<T>::resizeAndPreserve(const long newNbElement
 
 template<class T> void CrystVector<T>::operator*=(const T num)
 {
-   register T * RESTRICT p=mpData;
+   T * RESTRICT p=mpData;
    for(int i=mNumElements;i>0;i--) *p++ *= num;
 }
 
@@ -233,20 +233,20 @@ template<class T> void CrystVector<T>::operator*=(const CrystVector<T> &vect)
    #endif
    if(mpData!=vect.data())
    {
-      register T * RESTRICT p=mpData;
-      register const T * RESTRICT rhs=vect.data();
+      T * RESTRICT p=mpData;
+      const T * RESTRICT rhs=vect.data();
       for(int i=mNumElements;i>0;i--) { *p *= *rhs; p++ ; rhs++;}
    }
    else
    {
-      register T *p=mpData;
+      T *p=mpData;
       for(int i=mNumElements;i>0;i--) { *p *= *p; p++ ;}
    }
 }
 
 template<class T> void CrystVector<T>::operator/=(const T num)
 {
-   register T * RESTRICT p=mpData;
+   T * RESTRICT p=mpData;
    const REAL d=1/num;
    for(int i=mNumElements;i>0;i--) *p++ *= d;
 }
@@ -263,8 +263,8 @@ template<class T> void CrystVector<T>::operator/=(const CrystVector<T> &vect)
    #endif
    if(mpData!=vect.data())
    {
-      register T * RESTRICT p=mpData;
-      register const T * RESTRICT rhs=vect.data();
+      T * RESTRICT p=mpData;
+      const T * RESTRICT rhs=vect.data();
       for(int i=mNumElements;i>0;i--) { *p /= *rhs; p++ ; rhs++;}
    }
    else *this=1;
@@ -272,7 +272,7 @@ template<class T> void CrystVector<T>::operator/=(const CrystVector<T> &vect)
 
 template<class T> void CrystVector<T>::operator+=(const T num)
 {
-   register T * RESTRICT p=mpData;
+   T * RESTRICT p=mpData;
    for(int i=mNumElements;i>0;i--) *p++ += num;
 }
 
@@ -288,13 +288,13 @@ template<class T> void CrystVector<T>::operator+=(const CrystVector<T> &vect)
    #endif
    if(mpData!=vect.data())
    {
-      register T * RESTRICT p=mpData;
+      T * RESTRICT p=mpData;
       const T * RESTRICT rhs=vect.data();
       for(int i=mNumElements;i>0;i--) *p++ += *rhs++;
    }
    else
    {
-      register T *p=mpData;
+      T *p=mpData;
       for(int i=mNumElements;i>0;i--) {*p += *p; p++;}
    }
 }
@@ -311,7 +311,7 @@ template<class T> void CrystVector<T>::operator-=(const CrystVector<T> &vect)
    #endif
    if(mpData!=vect.data())
    {
-      register T * RESTRICT p=mpData;
+      T * RESTRICT p=mpData;
       const T * RESTRICT rhs=vect.data();
       for(int i=mNumElements;i>0;i--) *p++ -= *rhs++;
    }
@@ -320,7 +320,7 @@ template<class T> void CrystVector<T>::operator-=(const CrystVector<T> &vect)
 
 template<class T> void CrystVector<T>::operator=(const T num)
 {
-   register T *p=mpData;
+   T *p=mpData;
    for(int i=mNumElements;i>0;i--) *p++ = num;
 }
 
@@ -447,8 +447,8 @@ template<class T> CrystMatrix<T>::CrystMatrix(const CrystMatrix &old):
 mNumElements(old.numElements()),mXSize(old.cols()),mYSize(old.rows()),mIsAreference(false)
 {
    mpData=new T[mNumElements];
-   register T *p1=mpData;
-   register const T *p2=old.data();
+   T *p1=mpData;
+   const T *p2=old.data();
    for(long i=0;i<mNumElements;i++) *p1++=*p2++;
 }
 
@@ -474,8 +474,8 @@ template<class T> void CrystMatrix<T>::operator=(const CrystMatrix<T> &old)
       mNumElements=old.numElements();
       mpData=new T[mNumElements];
    }
-   register T *p1=mpData;
-   register const T *p2=old.data();
+   T *p1=mpData;
+   const T *p2=old.data();
    for(long i=0;i<mNumElements;i++) *p1++=*p2++;
 }
 
@@ -495,16 +495,16 @@ template<class T> long CrystMatrix<T>::size()const {return mNumElements;}
 
 template<class T> T CrystMatrix<T>::sum()const
 {
-   register T tmp=0;
-   register const T *p=this->data();
+   T tmp=0;
+   const T *p=this->data();
    for(long i=0;i<this->numElements();i++) tmp += *p++ ;
    return tmp;
 }
 
 template<class T> T CrystMatrix<T>::min()const
 {
-   register T tmp=0;
-   register const T *p=this->data();
+   T tmp=0;
+   const T *p=this->data();
    tmp=*p++;
    for(long i=1;i<this->numElements();i++)
    {
@@ -516,8 +516,8 @@ template<class T> T CrystMatrix<T>::min()const
 
 template<class T> T CrystMatrix<T>::max()const
 {
-   register T tmp=0;
-   register const T *p=this->data();
+   T tmp=0;
+   const T *p=this->data();
    tmp=*p++;
    for(long i=1;i<this->numElements();i++)
    {
@@ -558,8 +558,8 @@ template<class T> void CrystMatrix<T>::resizeAndPreserve(const long ySize,const 
    mXSize=xSize;
    mYSize=ySize;
    if(xSize*ySize == mNumElements) return;
-   register T *p=mpData;
-   register T *p2,*p1;
+   T *p=mpData;
+   T *p2,*p1;
    mpData=0;
    mpData=new T[xSize*ySize];
    p2=mpData;
@@ -576,13 +576,13 @@ template<class T> void CrystMatrix<T>::resizeAndPreserve(const long ySize,const 
 /*
 template<class T> void CrystMatrix<T>::operator=(const T num)
 {
-   register T *p=mpData;
+   T *p=mpData;
    for(int i=0;i<mNumElements;i++) *p++ = num;
 }
 */
 template<class T> void CrystMatrix<T>::operator*=(const T num)
 {
-   register T *p=mpData;
+   T *p=mpData;
    for(int i=0;i<mNumElements;i++) *p++ *= num;
 }
 
@@ -595,26 +595,26 @@ template<class T> void CrystMatrix<T>::operator*=(const CrystMatrix<T> &vect)
       //throw 0;
    }
    #endif
-   register T *p=mpData;
-   register const T *rhs=vect.data();
+   T *p=mpData;
+   const T *rhs=vect.data();
    for(int i=0;i<mNumElements;i++) *p++ *= *rhs++;
 }
 
 template<class T> void CrystMatrix<T>::operator/=(const T num)
 {
-   register T *p=mpData;
+   T *p=mpData;
    for(int i=0;i<mNumElements;i++) *p++ /= num;
 }
 
 template<class T> void CrystMatrix<T>::operator+=(const T num)
 {
-   register T *p=mpData;
+   T *p=mpData;
    for(int i=0;i<mNumElements;i++) *p++ += num;
 }
 
 template<class T> void CrystMatrix<T>::operator-=(const T num)
 {
-   register T *p=mpData;
+   T *p=mpData;
    for(int i=0;i<mNumElements;i++) *p++ -= num;
 }
 
@@ -714,8 +714,8 @@ mXSize(old.cols()),mYSize(old.rows()),mZSize(old.depth()),
 mIsAreference(false)
 {
    mpData=new T[mNumElements];
-   register T *p1=mpData;
-   register const T *p2=old.data();
+   T *p1=mpData;
+   const T *p2=old.data();
    for(long i=0;i<mNumElements;i++) *p1++=*p2++;
 }
 
@@ -734,8 +734,8 @@ template<class T> void CrystArray3D<T>::operator=(const CrystArray3D<T> &old)
       if(mIsAreference==false)delete[] mpData ;
       mpData=new T[mNumElements];
    }
-   register T *p1=mpData;
-   register const T *p2=old.data();
+   T *p1=mpData;
+   const T *p2=old.data();
    for(long i=0;i<mNumElements;i++) *p1++=*p2++;
 }
 
@@ -752,16 +752,16 @@ template<class T> long CrystArray3D<T>::size()const{return mNumElements;}
 
 template<class T> T CrystArray3D<T>::sum()const
 {
-   register T tmp=0;
-   register const T *p=this->data();
+   T tmp=0;
+   const T *p=this->data();
    for(long i=0;i<this->numElements();i++) tmp += *p++ ;
    return tmp;
 }
 
 template<class T> T CrystArray3D<T>::min()const
 {
-   register T tmp=0;
-   register const T *p=this->data();
+   T tmp=0;
+   const T *p=this->data();
    tmp=*p++;
    for(long i=1;i<this->numElements();i++)
    {
@@ -773,8 +773,8 @@ template<class T> T CrystArray3D<T>::min()const
 
 template<class T> T CrystArray3D<T>::max()const
 {
-   register T tmp=0;
-   register const T *p=this->data();
+   T tmp=0;
+   const T *p=this->data();
    tmp=*p++;
    for(long i=1;i<this->numElements();i++)
    {
@@ -815,8 +815,8 @@ template<class T> void CrystArray3D<T>::resizeAndPreserve(const long zSize,
    mYSize=ySize;
    mZSize=zSize;
    if(xSize*ySize*zSize == mNumElements) return;
-   register T *p=mpData;
-   register T *p2,*p1;
+   T *p=mpData;
+   T *p2,*p1;
    mpData=new T[xSize*ySize*zSize];
    p2=mpData;
    p1=p;
@@ -830,12 +830,12 @@ template<class T> void CrystArray3D<T>::resizeAndPreserve(const long zSize,
 template<class T> void CrystArray3D<T>::operator=(const T num)
 {
    VFN_DEBUG_MESSAGE("CrystArray3D<T>::operator=():"<<num,1)
-   register T *p=mpData;
+   T *p=mpData;
    for(int i=0;i<mNumElements;i++) *p++ = num;
 }
 template<class T> void CrystArray3D<T>::operator*=(const T num)
 {
-   register T *p=mpData;
+   T *p=mpData;
    for(int i=0;i<mNumElements;i++) *p++ *= num;
 }
 
@@ -848,26 +848,26 @@ template<class T> void CrystArray3D<T>::operator*=(const CrystArray3D<T> &vect)
       //throw 0;
    }
    #endif
-   register T *p=mpData;
-   register const T *rhs=vect.data();
+   T *p=mpData;
+   const T *rhs=vect.data();
    for(int i=0;i<mNumElements;i++) *p++ *= *rhs++;
 }
 
 template<class T> void CrystArray3D<T>::operator/=(const T num)
 {
-   register T *p=mpData;
+   T *p=mpData;
    for(int i=0;i<mNumElements;i++) *p++ /= num;
 }
 
 template<class T> void CrystArray3D<T>::operator+=(const T num)
 {
-   register T *p=mpData;
+   T *p=mpData;
    for(int i=0;i<mNumElements;i++) *p++ += num;
 }
 
 template<class T> void CrystArray3D<T>::operator-=(const T num)
 {
-   register T *p=mpData;
+   T *p=mpData;
    for(int i=0;i<mNumElements;i++) *p++ -= num;
 }
 

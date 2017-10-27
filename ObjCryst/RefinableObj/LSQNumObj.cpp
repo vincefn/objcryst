@@ -214,23 +214,23 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
          {
             #if 1
             {
-               const register REAL * RESTRICT pD=designMatrix.data()+i*designMatrix.cols();
-               const register REAL * RESTRICT pW=mWeight.data();
+               const REAL * RESTRICT pD=designMatrix.data()+i*designMatrix.cols();
+               const REAL * RESTRICT pW=mWeight.data();
                REAL * RESTRICT p=tmpV1.data();
                for(k=0;k<nbObs;k++) *p++ = *pD++ * *pW++;
             }
-            const register REAL * pD=designMatrix.data();
+            const REAL * pD=designMatrix.data();
             for(j=0;j<nbVar;j++)
             {
-               const register REAL * p1=tmpV1.data();
+               const REAL * p1=tmpV1.data();
                REAL v2=0;
                for(k=0;k<nbObs;k++) v2+= *pD++ * *p1++;
                M(j,i)=v2;
             }
             REAL b=0;
-            const register REAL * pObs=mObs.data();
-            const register REAL * pCalc=calc0.data();
-            const register REAL * p1=tmpV1.data();
+            const REAL * pObs=mObs.data();
+            const REAL * pCalc=calc0.data();
+            const REAL * p1=tmpV1.data();
             for(k=0;k<nbObs;k++) b+= (*pObs++ - *pCalc++)* *p1++;
             B(i)=b;
             #else
