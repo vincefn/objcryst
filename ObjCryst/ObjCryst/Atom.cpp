@@ -291,6 +291,7 @@ ostream& Atom::POVRayDescription(ostream &os,
    return os;
 }
 
+#ifdef OBJCRYST_GL
 void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
                              const REAL xMin,const REAL xMax,
                              const REAL yMin,const REAL yMax,
@@ -301,7 +302,6 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
                              const REAL fadeDistance,
                              const bool fullMoleculeInLimits)const
 {
-   #ifdef OBJCRYST_GL
    VFN_DEBUG_MESSAGE("Atom::GLInitDisplayList():"<<this->GetName(),5)
    REAL en=1;
    if(displayEnantiomer==true) en=-1;
@@ -469,8 +469,8 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
    }
    gluDeleteQuadric(pQuadric);
    VFN_DEBUG_MESSAGE("Atom::GLInitDisplayList():End",5)
-   #endif
 }
+#endif  // OBJCRYST_GL
 
 bool Atom::IsDummy()const { if(0==mScattCompList(0).mpScattPow) return true; return false;}
 

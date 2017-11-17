@@ -275,6 +275,7 @@ class ZScatterer: public Scatterer
       virtual ostream& POVRayDescription(ostream &os,
                                          const CrystalPOVRayOptions &options)const;
 
+#ifdef OBJCRYST_GL
       virtual void GLInitDisplayList(const bool onlyIndependentAtoms=false,
                                      const REAL xMin=-.1,const REAL xMax=1.1,
                                      const REAL yMin=-.1,const REAL yMax=1.1,
@@ -284,6 +285,8 @@ class ZScatterer: public Scatterer
                                      const bool hideHydrogens=false,
                                      const REAL fadeDistance=0,
                                      const bool fullMoleculeInLimits=false)const;
+#endif  // OBJCRYST_GL
+
       /** \brief use a Global scattering power for this scatterer ?
       *
       * If true, then the overall scattering power of this ZScatterer will be

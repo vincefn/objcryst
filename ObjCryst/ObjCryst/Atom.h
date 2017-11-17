@@ -127,6 +127,7 @@ class Atom: public Scatterer
       virtual ostream& POVRayDescription(ostream &os,
                                          const CrystalPOVRayOptions &options)const;
 
+#ifdef OBJCRYST_GL
       virtual void GLInitDisplayList(const bool noSymmetrics=false,
                                      const REAL xMin=-.1,const REAL xMax=1.1,
                                      const REAL yMin=-.1,const REAL yMax=1.1,
@@ -136,6 +137,7 @@ class Atom: public Scatterer
                                      const bool hideHydrogens=false,
                                      const REAL fadeDistance=0,
                                      const bool fullMoleculeInLimits=false)const;
+#endif    // OBJCRYST_GL
 
       /// Is this a dummy atom ? (ie no ScatteringPower)
       /// Dummy atoms should not exist !

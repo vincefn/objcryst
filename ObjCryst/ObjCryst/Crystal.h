@@ -224,6 +224,7 @@ class Crystal:public UnitCell
       */
       ostream& POVRayDescription(ostream &os,const CrystalPOVRayOptions &options)const;
 
+#ifdef OBJCRYST_GL
       /** Create an OpenGL DisplayList of the crystal.
       * \param onlyIndependentAtoms if false (the default), then all symmetrics
       * are displayed within the given limits
@@ -245,6 +246,7 @@ class Crystal:public UnitCell
                                      const bool hideHydrogens=false,
                                      const REAL fadeDistance=0,
                                      const bool fullMoleculeInLimits=false)const;
+#endif  // OBJCRYST_GL
 
       /** \internal \brief Compute the 'Dynamical population correction for all atoms.
       * Atoms which are considered "equivalent" (ie currently with the same Z number)
