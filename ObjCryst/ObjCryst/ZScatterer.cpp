@@ -643,6 +643,7 @@ ostream& ZScatterer::POVRayDescription(ostream &os,
    return os;
 }
 
+#ifdef OBJCRYST_GL
 void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                                    const REAL xMin,const REAL xMax,
                                    const REAL yMin,const REAL yMax,
@@ -653,7 +654,6 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
                                    const REAL fadeDistance,
                                    const bool fullMoleculeInLimits)const
 {
-   #ifdef OBJCRYST_GL
    VFN_DEBUG_ENTRY("ZScatterer::GLInitDisplayList()",4)
    if(mZAtomRegistry.GetNb()==0)
    {
@@ -1066,8 +1066,8 @@ void ZScatterer::GLInitDisplayList(const bool onlyIndependentAtoms,
    }//else
    gluDeleteQuadric(pQuadric);
    VFN_DEBUG_EXIT("ZScatterer::GLInitDisplayList()",4)
-   #endif //GLCryst
 }
+#endif  // OBJCRYST_GL
 
 void ZScatterer::SetUseGlobalScatteringPower(const bool useIt)
 {

@@ -543,6 +543,7 @@ ostream& Crystal::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opti
    return os;
 }
 
+#ifdef OBJCRYST_GL
 void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
                                 const REAL xMin,const REAL xMax,
                                 const REAL yMin,const REAL yMax,
@@ -553,7 +554,6 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
                                 const bool fullMoleculeInLimits)const
 {
    VFN_DEBUG_ENTRY("Crystal::GLInitDisplayList()",5)
-   #ifdef OBJCRYST_GL
       REAL en=1;// if -1, display enantiomeric structure
       if(mDisplayEnantiomer.GetChoice()==1) en=-1;
 
@@ -702,11 +702,10 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
                                                    displayEnantiomer,displayNames,hideHydrogens,fadeDistance,fullMoleculeInLimits);
          }
       glPopMatrix();
-   #else
    cout << "Crystal::GLView(): Compiled without OpenGL support !" <<endl;
-   #endif
    VFN_DEBUG_EXIT("Crystal::GLInitDisplayList(bool)",5)
 }
+#endif  // OBJCRYST_GL
 
 void Crystal::CalcDynPopCorr(const REAL overlapDist, const REAL mergeDist) const
 {
