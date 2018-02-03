@@ -417,7 +417,7 @@ class WXGLCrystalCanvas : public wxGLCanvas
       wxMenu* mpPopUpMenu;
 
       /// Display options
-      bool mShowFourier, mShowCrystal, mShowAtomName, mShowHydrogens, mShowCursor, mSharpenMap, mShowHelp, mShowFullMolecule;
+      bool mShowFourier, mShowCrystal, mShowAtomName, mShowHydrogens, mShowCursor, mSharpenMap, mShowHelp, mShowFullMolecule, mWhiteBackground;
       /// bounding box for atoms to be included
       BBox mcellbbox;
       /// bounding box for display of Fourier map

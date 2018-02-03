@@ -3428,6 +3428,7 @@ ostream& Molecule::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opt
    return os;
 }
 
+#ifdef OBJCRYST_GL
 void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                                const REAL xMin,const REAL xMax,
                                const REAL yMin,const REAL yMax,
@@ -3438,7 +3439,6 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                                const REAL fadeDistance,
                                const bool fullMoleculeInLimits)const
 {
-   #ifdef OBJCRYST_GL
    VFN_DEBUG_ENTRY("Molecule::GLInitDisplayList()",3)
    if(mvpAtom.size()==0)
    {
@@ -3836,8 +3836,8 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
    }//else
    gluDeleteQuadric(pQuadric);
    VFN_DEBUG_EXIT("Molecule::GLInitDisplayList()",3)
-   #endif //GLCryst
 }
+#endif  // OBJCRYST_GL
 
 void Molecule::AddAtom(const REAL x, const REAL y, const REAL z,
                        const ScatteringPower *pPow, const string &name,

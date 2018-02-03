@@ -522,8 +522,10 @@ CrystVector_REAL ScatteringPowerAtom::GetScatteringFactor(const ScatteringData &
             const long nb=data.GetSinThetaOverLambda().numElements();
             const REAL *pstol=data.GetSinThetaOverLambda().data();
             for(long i=0;i<nb;i++)
+            {
                sf(i)=(z-mpGaussian->at_stol(*pstol))/(*pstol * *pstol);
                pstol++;
+            }
          }
          else sf=1.0;//:KLUDGE:  Should never happen
          break;

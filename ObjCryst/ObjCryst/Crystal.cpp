@@ -543,6 +543,7 @@ ostream& Crystal::POVRayDescription(ostream &os,const CrystalPOVRayOptions &opti
    return os;
 }
 
+#ifdef OBJCRYST_GL
 void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
                                 const REAL xMin,const REAL xMax,
                                 const REAL yMin,const REAL yMax,
@@ -553,7 +554,6 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
                                 const bool fullMoleculeInLimits)const
 {
    VFN_DEBUG_ENTRY("Crystal::GLInitDisplayList()",5)
-   #ifdef OBJCRYST_GL
       REAL en=1;// if -1, display enantiomeric structure
       if(mDisplayEnantiomer.GetChoice()==1) en=-1;
 
@@ -606,10 +606,10 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
             const GLfloat colour0 [] = {0.00, 0.00, 0.00, 0.00};
             const GLfloat colour1 [] = {0.50, 0.50, 0.50, 1.00};
             const GLfloat colour2 [] = {1.00, 1.00, 1.00, 1.00};
-            glMaterialfv(GL_FRONT, GL_AMBIENT,   colour2);
+            glMaterialfv(GL_FRONT, GL_AMBIENT,   colour1);
             glMaterialfv(GL_FRONT, GL_DIFFUSE,   colour0);
             glMaterialfv(GL_FRONT, GL_SPECULAR,  colour0);
-            glMaterialfv(GL_FRONT, GL_EMISSION,  colour2);
+            glMaterialfv(GL_FRONT, GL_EMISSION,  colour1);
             glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
             REAL x,y,z;
             x=1.2-xc;y=-yc;z=-zc;
@@ -628,8 +628,8 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
             crystGLPrint("c");
          // Cell
             glMaterialfv(GL_FRONT, GL_AMBIENT,   colour1);
-            glMaterialfv(GL_FRONT, GL_DIFFUSE,   colour2);
-            glMaterialfv(GL_FRONT, GL_SPECULAR,  colour2);
+            glMaterialfv(GL_FRONT, GL_DIFFUSE,   colour1);
+            glMaterialfv(GL_FRONT, GL_SPECULAR,  colour1);
             glMaterialfv(GL_FRONT, GL_EMISSION,  colour0);
             glMaterialfv(GL_FRONT, GL_SHININESS, colour0);
             this->FractionalToOrthonormalCoords(xc,yc,zc);
@@ -702,11 +702,10 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
                                                    displayEnantiomer,displayNames,hideHydrogens,fadeDistance,fullMoleculeInLimits);
          }
       glPopMatrix();
-   #else
    cout << "Crystal::GLView(): Compiled without OpenGL support !" <<endl;
-   #endif
    VFN_DEBUG_EXIT("Crystal::GLInitDisplayList(bool)",5)
 }
+#endif  // OBJCRYST_GL
 
 void Crystal::CalcDynPopCorr(const REAL overlapDist, const REAL mergeDist) const
 {

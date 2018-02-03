@@ -229,6 +229,8 @@ class Scatterer:virtual public RefinableObj
       */
       virtual ostream& POVRayDescription(ostream &os,
                                          const CrystalPOVRayOptions &options)const=0;
+
+#ifdef OBJCRYST_GL
       /** \internal Create an OpenGL Display List of the scatterer. This should only
       * be called by a Crystal object.
       *
@@ -255,6 +257,8 @@ class Scatterer:virtual public RefinableObj
                                      const bool hideHydrogens=false,
                                      const REAL fadeDistance=0,
                                      const bool fullMoleculeInLimits=false)const=0;
+#endif  // OBJCRYST_GL
+
       /// Last time anything in the scatterer was changed (atoms, positions, scattering power)
       const RefinableObjClock& GetClockScatterer()const;
       /// Last time anything in the scatterer was changed (atoms, positions, scattering power)
