@@ -5270,11 +5270,14 @@ void BuildRingRecursive(MolAtom * currentAtom,
    {
       atomlist.push_back(currentAtom);
       map<MolAtom *,set<MolAtom *> >::const_iterator c=connect.find(currentAtom);
-      set<MolAtom *>::const_iterator pos;
-      for(pos=c->second.begin();pos!=c->second.end();++pos)
+      if(c != connect.end())
       {
-         if(*pos==previousAtom) continue;
-         BuildRingRecursive(*pos,currentAtom,connect,atomlist,ringlist);
+         set<MolAtom *>::const_iterator pos;
+         for(pos=c->second.begin();pos!=c->second.end();++pos)
+         {
+            if(*pos==previousAtom) continue;
+            BuildRingRecursive(*pos,currentAtom,connect,atomlist,ringlist);
+         }
       }
       atomlist.pop_back(); //??
    }
