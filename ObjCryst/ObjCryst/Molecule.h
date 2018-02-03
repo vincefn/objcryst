@@ -1184,6 +1184,10 @@ class Molecule: public Scatterer
          RefinableObjClock mClockBondAngleList;
          RefinableObjClock mClockDihedralAngleList;
          RefinableObjClock mClockRigidGroup;
+         /// This clock is the parent of mClockAtomList, mClockBondList, mClockBondAngleList,
+         /// mClockDihedralAngleList and mClockRigidGroup. It can be used to determine if
+         /// either the list of atoms or restraints have changed.
+         RefinableObjClock mClockRestraint;
          RefinableObjClock mClockAtomPosition;
          RefinableObjClock mClockAtomScattPow;
          RefinableObjClock mClockOrientation;
