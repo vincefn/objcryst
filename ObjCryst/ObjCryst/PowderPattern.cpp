@@ -2562,7 +2562,7 @@ void PowderPattern::SetPowderPatternX(const CrystVector_REAL &x)
    mPowderPatternObsSigma.resizeAndPreserve(mNbPoint);
    mPowderPatternWeight.resizeAndPreserve(mNbPoint);
    mClockPowderPatternPar.Click();
-   if(mX(mNbPoint-1)>mX(0))mIsXAscending=true;
+   if(mNbPoint < 2 || mX(mNbPoint-1) > mX(0))  mIsXAscending=true;
    else mIsXAscending=false;
    VFN_DEBUG_MESSAGE("PowderPattern::SetPowderPatternX() is ascending="<<mIsXAscending,5)
 }
