@@ -3681,10 +3681,9 @@ void PowderPattern::ImportPowderPatternCIF(const CIF &cif)
 
 void PowderPattern::SetPowderPatternObs(const CrystVector_REAL& obs)
 {
-   VFN_DEBUG_MESSAGE("PowderPattern::ImportPowderPatternObs()",5)
+   VFN_DEBUG_MESSAGE("PowderPattern::SetPowderPatternObs()",5)
    if((unsigned long)obs.numElements() != mNbPoint)
    {
-      cout << obs.numElements()<<" "<<mNbPoint<<" "<<this<<endl;
       throw(ObjCrystException("PowderPattern::SetPowderPatternObs(vect): The \
 supplied vector of observed intensities does not have the expected number of points!"));
    }
