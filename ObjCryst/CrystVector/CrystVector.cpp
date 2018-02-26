@@ -182,7 +182,7 @@ template<class T> void CrystVector<T>::resize(const long newNbElements)
    if(mNumElements==newNbElements) return;
    VFN_DEBUG_MESSAGE("CrystVector<T>::resize():("<<mNumElements<<"->"
       <<newNbElements<<").",0)
-   if((mIsAreference==false) && (mNumElements != 0))
+   if(!mIsAreference)
    {
       delete[] mpData ;
    }
