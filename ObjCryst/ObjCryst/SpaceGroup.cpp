@@ -471,9 +471,12 @@ char SpaceGroup::GetExtension()const{return mExtension;}
 
 CrystVector_REAL SpaceGroup::GetInversionCenter()const {
    CrystVector_REAL center(3);
-   center(0) =((REAL)this->GetCCTbxSpg().inv_t()[0])/(REAL)this->GetCCTbxSpg().inv_t().den();//inversion not at the origin
-   center(1) =((REAL)this->GetCCTbxSpg().inv_t()[1])/(REAL)this->GetCCTbxSpg().inv_t().den();
-   center(2) =((REAL)this->GetCCTbxSpg().inv_t()[2])/(REAL)this->GetCCTbxSpg().inv_t().den();
+   center(0) = this->GetCCTbxSpg().inv_t()[0];
+   center(1) = this->GetCCTbxSpg().inv_t()[1];
+   center(2) = this->GetCCTbxSpg().inv_t()[2];
+   // inv_t is the overall translation associated with inversion,
+   // the actual inversion center is therefore at midpoint.
+   center /= 2 * this->GetCCTbxSpg().inv_t().den();
    return center;
 }
 
