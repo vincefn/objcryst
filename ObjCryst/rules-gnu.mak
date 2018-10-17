@@ -215,14 +215,14 @@ endif
 $(BUILD_DIR)/wxWidgets-3.0.2.tar.bz2:
 	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND) http://ftp.wxwidgets.org/pub/3.0.2/wxWidgets-3.0.2.tar.bz2
 
-$(BUILD_DIR)/static-libs/lib/libwx_gtk2u_core-3.0.a: $(BUILD_DIR)/wxWidgets-3.0.2.tar.bz2
+$(BUILD_DIR)/static-libs/include/wx-3.0/wx/wx.h: $(BUILD_DIR)/wxWidgets-3.0.2.tar.bz2
 	cd $(BUILD_DIR) && rm -Rf wxWidgets-3.0.2 && tar -xjf wxWidgets-3.0.2.tar.bz2
 	cd $(BUILD_DIR)/wxWidgets-3.0.2 && ./configure --with-gtk --with-opengl --prefix=$(BUILD_DIR)/static-libs --enable-unicode  --enable-optimise --disable-shared --x-includes=/usr/X11R6/include/ && $(MAKE) install
 	rm -Rf $(BUILD_DIR)/wxWidgets-3.0.2
 
 ifneq ($(wxcryst),0)
 ifneq ($(shared-wxgtk),1)
-libwx = $(BUILD_DIR)/static-libs/lib/libwx_gtk2u_core-3.0.a
+libwx = $(BUILD_DIR)/static-libs/include/wx-3.0/wx/wx.h
 else
 libwx=
 endif
