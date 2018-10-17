@@ -70,7 +70,7 @@ void *FoxServerThread::Entry()
 
       if(m_tThreadMutex->Lock()!=wxMUTEX_NO_ERROR) {
           WriteLogMessage(_T("m_tThreadMutex locking error (Entry)"));
-          return false;
+          return (ExitCode)-1;
       }
 
       WriteLogMessage(_T("Looping"));
