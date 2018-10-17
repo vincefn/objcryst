@@ -262,13 +262,13 @@ libfftw=
 endif
 
 #Boost library - this is not normally used, we take boost from the cctbx bundle
-$(BUILD_DIR)/boost_1_58_0.tar.bz2:
-	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND)  http://downloads.sourceforge.net/project/boost/boost/1.58.0/boost_1_58_0.tar.bz2
+$(BUILD_DIR)/boost_1_68_0.tar.bz2:
+	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND) https://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.bz2
 
-libboost:$(BUILD_DIR)/boost_1_58_0.tar.bz2
-	cd $(BUILD_DIR) && tar -xjf boost_1_58_0.tar.bz2
-	cd $(BUILD_DIR)/boost_1_58_0 && rsync -ar boost --exclude="accumulators/" --exclude="archive/" --exclude="asio/" --exclude="asign/" --exclude="bimap/" --exclude="bind/" --exclude="circular_buffer/" --exclude="concept_check/" --exclude="dynamic_bitset/" --exclude="filesystem/" --exclude="flyweight/" --exclude="function/" --exclude="function_types/"  --exclude="gil/" --exclude="graph/" --exclude="interprocess/" --exclude="intrusive/" --exclude="iostreams/" --exclude="lambda/" --exclude="logic/" --exclude="mpi/" --exclude="parameter/" --exclude="pending/" --exclude="pool/" --exclude="program_options/" --exclude="property_tree/" --exclude="proto/" --exclude="ptr_container/" --exclude="python/" --exclude="random/" --exclude="regex/" --exclude="serialization/" --exclude="signals/" --exclude="spirit/" --exclude="statechart/" --exclude="system/" --exclude="test/" --exclude="thread/" --exclude="units/" --exclude="unordered/" --exclude="wave/" --exclude="xpressive/" --filter="+ */" --filter="+ *.hpp"  --filter="+ *.ipp" $(DIR_STATIC_LIBS)/include/
-	rm -Rf $(BUILD_DIR)/boost_1_58_0
+libboost:$(BUILD_DIR)/boost_1_68_0.tar.bz2
+	cd $(BUILD_DIR) && tar -xjf boost_1_68_0.tar.bz2
+	cd $(BUILD_DIR)/boost_1_68_0 && rsync -ar boost --exclude="accumulators/" --exclude="archive/" --exclude="asio/" --exclude="asign/" --exclude="bimap/" --exclude="bind/" --exclude="circular_buffer/" --exclude="concept_check/" --exclude="dynamic_bitset/" --exclude="filesystem/" --exclude="flyweight/" --exclude="function/" --exclude="function_types/"  --exclude="gil/" --exclude="graph/" --exclude="interprocess/" --exclude="intrusive/" --exclude="iostreams/" --exclude="lambda/" --exclude="logic/" --exclude="mpi/" --exclude="parameter/" --exclude="pending/" --exclude="pool/" --exclude="program_options/" --exclude="property_tree/" --exclude="proto/" --exclude="ptr_container/" --exclude="python/" --exclude="random/" --exclude="regex/" --exclude="serialization/" --exclude="signals/" --exclude="spirit/" --exclude="statechart/" --exclude="system/" --exclude="test/" --exclude="thread/" --exclude="units/" --exclude="unordered/" --exclude="wave/" --exclude="xpressive/" --filter="+ */" --filter="+ *.hpp"  --filter="+ *.ipp" $(DIR_STATIC_LIBS)/include/
+	rm -Rf $(BUILD_DIR)/boost_1_68_0
 
 # MySQL
 $(BUILD_DIR)/mysql-5.6.24.tar.gz:
