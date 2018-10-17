@@ -35,10 +35,10 @@ libFox: $(OBJ)
 #Main Application
 Fox: $(libwx) $(libnewmat)  $(libfftw) $(COD_LIB) libCrystVector libQuirks libRefinableObj libcctbx libCryst libwxCryst
 	$(MAKE) -f gnu.mak libFox
-	${LINKER} ${CRYST_LDFLAGS} -o $@ ${filter-out %.a %.so lib%, $^} $(OBJ) ${LOADLIBES}
+	${LINKER} ${CRYST_LDFLAGS} -o $@ ${filter-out %.h %.a %.so lib%, $^} $(OBJ) ${LOADLIBES}
 
 Fox-nogui: $(libnewmat) libcctbx libCrystVector libQuirks libRefinableObj libCryst Fox.o
-	${LINKER} ${CRYST_LDFLAGS} -o $@ ${filter-out %.a %.so lib%, $^} ${LOADLIBES}
+	${LINKER} ${CRYST_LDFLAGS} -o $@ ${filter-out %.h %.a %.so lib%, $^} ${LOADLIBES}
 
 fox: Fox
 
