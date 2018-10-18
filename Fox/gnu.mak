@@ -1,5 +1,7 @@
 BUILD_DIR := $(CURDIR)/..
 
+DESTDIR ?= /usr/local/bin
+
 ifeq ($(shared),1)
 shared-newmat=1
 shared-wxgtk=1
@@ -35,7 +37,7 @@ tidy:
 
 #install Fox in /usr/local/bin
 install:
-	install -m 755 src/Fox /usr/local/bin
+	install -m 755 src/Fox $(DESTDIR)
 
 update:
 	cd $(BUILD_DIR) && git pull
