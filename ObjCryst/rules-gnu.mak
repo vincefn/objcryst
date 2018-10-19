@@ -83,11 +83,11 @@ WXCONFIG= wx-config --unicode=yes
 endif
 
 # Which command to use for download ?
-CURL=$(shell which curl 2>/dev/null)
-ifneq ($(CURL),)
-DOWNLOAD_COMMAND=curl -L -O
-else
+WGET=$(shell which wget 2>/dev/null)
+ifneq ($(WGET),)
 DOWNLOAD_COMMAND=wget
+else
+DOWNLOAD_COMMAND=curl -L -O
 endif
 
 # If using glut (freeglut)
@@ -212,13 +212,13 @@ else
 libfreeglut=
 endif
 
-$(BUILD_DIR)/wxWidgets-3.0.2.tar.bz2:
-	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND) http://ftp.wxwidgets.org/pub/3.0.2/wxWidgets-3.0.2.tar.bz2
+$(BUILD_DIR)/wxWidgets-3.0.4.tar.bz2:
+	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND) https://github.com/wxWidgets/wxWidgets/releases/download/v3.0.4/wxWidgets-3.0.4.tar.bz2
 
-$(BUILD_DIR)/static-libs/include/wx-3.0/wx/wx.h: $(BUILD_DIR)/wxWidgets-3.0.2.tar.bz2
-	cd $(BUILD_DIR) && rm -Rf wxWidgets-3.0.2 && tar -xjf wxWidgets-3.0.2.tar.bz2
-	cd $(BUILD_DIR)/wxWidgets-3.0.2 && ./configure --with-gtk --with-opengl --prefix=$(BUILD_DIR)/static-libs --enable-unicode  --enable-optimise --disable-shared --x-includes=/usr/X11R6/include/ && $(MAKE) install
-	rm -Rf $(BUILD_DIR)/wxWidgets-3.0.2
+$(BUILD_DIR)/static-libs/include/wx-3.0/wx/wx.h: $(BUILD_DIR)/wxWidgets-3.0.4.tar.bz2
+	cd $(BUILD_DIR) && rm -Rf wxWidgets-3.0.4 && tar -xjf wxWidgets-3.0.4.tar.bz2
+	cd $(BUILD_DIR)/wxWidgets-3.0.4 && ./configure --with-gtk --with-opengl --prefix=$(BUILD_DIR)/static-libs --enable-unicode  --enable-optimise --disable-shared --x-includes=/usr/X11R6/include/ && $(MAKE) install
+	rm -Rf $(BUILD_DIR)/wxWidgets-3.0.4
 
 ifneq ($(wxcryst),0)
 ifneq ($(shared-wxgtk),1)
