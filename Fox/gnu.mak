@@ -37,7 +37,7 @@ tidy:
 
 #install Fox in /usr/local/bin
 install:
-	install -m 755 src/Fox $(DESTDIR)
+	install -Dm 755 src/Fox $(DESTDIR)
 
 update:
 	cd $(BUILD_DIR) && git pull
