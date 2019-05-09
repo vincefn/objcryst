@@ -7676,7 +7676,7 @@ vector<MolAtom*>::reverse_iterator Molecule::FindAtom(const string &name)
    for(rpos=mvpAtom.rbegin();rpos!=mvpAtom.rend();++rpos)
       if(name==(*rpos)->GetName())
       {
-         VFN_DEBUG_EXIT("Molecule::FindAtom():"<<name<<"...NOT FOUND !",4)
+         VFN_DEBUG_EXIT("Molecule::FindAtom():"<<name<<"...FOUND !",4)
          return rpos;
       }
    VFN_DEBUG_EXIT("Molecule::FindAtom():"<<name<<"...NOT FOUND !",4)
