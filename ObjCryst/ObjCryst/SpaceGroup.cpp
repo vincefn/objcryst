@@ -581,27 +581,29 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
    #endif
    try
    {
+      // replace mpCCTbxSpaceGroup only after we get new space group
       cctbx::sgtbx::space_group_symbols sgs=cctbx::sgtbx::space_group_symbols(spgId);
-      if(mpCCTbxSpaceGroup!=0) delete mpCCTbxSpaceGroup;
-      mpCCTbxSpaceGroup=0;
-      mpCCTbxSpaceGroup = new cctbx::sgtbx::space_group(sgs);
+      cctbx::sgtbx::space_group *nsg = new cctbx::sgtbx::space_group(sgs);
+      assert(nsg);
+      delete mpCCTbxSpaceGroup;
+      mpCCTbxSpaceGroup = nsg;
    }
-   catch(exception &ex1)
+   catch(cctbx::error ex1)
    {
       try
       {
-         (*fpObjCrystInformUser)("Failed lookup symbol ! try Hall symbol ?");
-         if(mpCCTbxSpaceGroup!=0) delete mpCCTbxSpaceGroup;
-         mpCCTbxSpaceGroup=0;
-         mpCCTbxSpaceGroup = new cctbx::sgtbx::space_group(spgId);
+         (*fpObjCrystInformUser)("Lookup of '" + spgId + "' symbol failed, trying as Hall symbol.");
+         // replace mpCCTbxSpaceGroup only after we get new space group
+         cctbx::sgtbx::space_group *nsg = new cctbx::sgtbx::space_group(spgId);
+         assert(nsg);
+         delete mpCCTbxSpaceGroup;
+         mpCCTbxSpaceGroup = nsg;
       }
-      catch(exception &ex2)
+      catch(cctbx::error ex2)
       {
          (*fpObjCrystInformUser)("Could not interpret Spacegroup Symbol:"+spgId);
-         (*fpObjCrystInformUser)("Reverting to spacegroup symbol:"+mId);
-         this->InitSpaceGroup(mId);
-         VFN_DEBUG_EXIT("SpaceGroup::InitSpaceGroup() could not interpret spacegroup:"<<spgId<<":"<<ex1.what()<<":"<<ex2.what(),8)
-         return;
+         string emsg = "Space group symbol '" + spgId + "' not recognized";
+         throw ObjCrystException(emsg);
       }
    }
 
