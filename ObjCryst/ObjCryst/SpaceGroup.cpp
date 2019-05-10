@@ -644,13 +644,17 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
 
       mExtension='\0'; //this->GetCCTbxSpg().type().extension();
    }
-   catch(exception &ex)
+   catch(cctbx::error ex)
    {
       (*fpObjCrystInformUser)("Error initializing spacegroup (Incorrect Hall symbol ?):"+spgId);
-      this->InitSpaceGroup(mId);
-      (*fpObjCrystInformUser)("Reverting to spacegroup symbol:"+mId);
+      if (mId != spgId)
+      {
+         (*fpObjCrystInformUser)("Reverting to spacegroup symbol:"+mId);
+         this->InitSpaceGroup(mId);
+      }
       VFN_DEBUG_EXIT("SpaceGroup::InitSpaceGroup() could not interpret spacegroup:"<<spgId<<":"<<ex.what(),8)
-      return;
+      string emsg = "Space group symbol '" + spgId + "' not recognized";
+      throw ObjCrystException(emsg);
    }
 
    mExtension=this->GetCCTbxSpg().match_tabulated_settings().extension();
