@@ -1120,12 +1120,12 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
             unsigned int bestscore=0;
             for(vector<string>::const_iterator posOrig=origin_list.begin();posOrig!=origin_list.end();++posOrig)
             {
-               // The origin extension may not make sense, so we need to watch for ObjCrystException
+               // The origin extension may not make sense, so we need to watch for exception
                try
                {
                   pCryst->GetSpaceGroup().ChangeSpaceGroup(hmorig+*posOrig);
                }
-               catch(ObjCrystException e)
+               catch(invalid_argument)
                {
                   continue;
                }

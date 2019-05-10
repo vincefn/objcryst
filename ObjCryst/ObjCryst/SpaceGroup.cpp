@@ -603,7 +603,7 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
       {
          (*fpObjCrystInformUser)("Could not interpret Spacegroup Symbol:"+spgId);
          string emsg = "Space group symbol '" + spgId + "' not recognized";
-         throw ObjCrystException(emsg);
+         throw invalid_argument(emsg);
       }
    }
 
@@ -654,7 +654,7 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
       }
       VFN_DEBUG_EXIT("SpaceGroup::InitSpaceGroup() could not interpret spacegroup:"<<spgId<<":"<<ex.what(),8)
       string emsg = "Space group symbol '" + spgId + "' not recognized";
-      throw ObjCrystException(emsg);
+      throw invalid_argument(emsg);
    }
 
    mExtension=this->GetCCTbxSpg().match_tabulated_settings().extension();
