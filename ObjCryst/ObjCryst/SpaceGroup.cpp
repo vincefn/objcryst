@@ -588,7 +588,7 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
       delete mpCCTbxSpaceGroup;
       mpCCTbxSpaceGroup = nsg;
    }
-   catch(cctbx::error ex1)
+   catch(exception ex1)
    {
       try
       {
@@ -599,7 +599,7 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
          delete mpCCTbxSpaceGroup;
          mpCCTbxSpaceGroup = nsg;
       }
-      catch(cctbx::error ex2)
+      catch(exception ex2)
       {
          (*fpObjCrystInformUser)("Could not interpret Spacegroup Symbol:"+spgId);
          string emsg = "Space group symbol '" + spgId + "' not recognized";
@@ -644,7 +644,7 @@ void SpaceGroup::InitSpaceGroup(const string &spgId)
 
       mExtension='\0'; //this->GetCCTbxSpg().type().extension();
    }
-   catch(cctbx::error ex)
+   catch(exception ex)
    {
       (*fpObjCrystInformUser)("Error initializing spacegroup (Incorrect Hall symbol ?):"+spgId);
       if (mId != spgId)
