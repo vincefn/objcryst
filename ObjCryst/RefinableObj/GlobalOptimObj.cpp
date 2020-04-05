@@ -2110,6 +2110,16 @@ void MonteCarloObj::InitLSQ(const bool useFullPowderPatternProfile)
    mLSQ.SetParIsFixed(gpRefParTypeRadiation,true);
 }
 
+RefObjOpt & MonteCarloObj::GetAutoLSQOption()
+{
+   return mAutoLSQ;
+}
+
+const RefObjOpt & MonteCarloObj::GetAutoLSQOption() const
+{
+   return mAutoLSQ;
+}
+
 #ifdef __WX__CRYST__
 WXCrystObjBasic* MonteCarloObj::WXCreate(wxWindow *parent)
 {

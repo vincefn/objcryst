@@ -440,6 +440,14 @@ class MonteCarloObj:public OptimizationObj
       * will be used (faster).
       */
       virtual void InitLSQ(const bool useFullPowderPatternProfile=true);
+      /** Access automatic leas-squares option for parallel tempering
+      *
+      */
+      RefObjOpt & GetAutoLSQOption();
+      /** Access automatic leas-squares option for parallel tempering
+      *
+      */
+      const RefObjOpt & GetAutoLSQOption() const;
    protected:
 
       /** \brief Make a random change in the configuration.
