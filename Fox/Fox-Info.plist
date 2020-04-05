@@ -15,6 +15,8 @@
 			<string>Fox.icns</string>
 			<key>CFBundleTypeName</key>
 			<string>Crystallographic Information File</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
 			<key>LSItemContentTypes</key>
 			<array>
 				<string></string>
@@ -23,8 +25,6 @@
 			<false/>
 			<key>NSPersistentStoreTypeKey</key>
 			<string>XML</string>
-			<key>CFBundleTypeRole</key>
-			<string>Viewer</string>
 		</dict>
 		<dict>
 			<key>CFBundleTypeExtensions</key>
@@ -58,6 +58,6 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>2016.1</string>
+	<string>2020.1</string>
 </dict>
 </plist>

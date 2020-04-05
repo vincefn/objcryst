@@ -37,13 +37,13 @@ libfftw: ../static-libs/lib/libfftw3f.a
 libmysql: ../static-libs/lib/libmysqlclient.a
 
 
-../wxWidgets-3.0.2.tar.bz2:
-	cd .. && curl -O  ftp://ftp.wxwidgets.org/pub/3.0.2/wxWidgets-3.0.2.tar.bz2
+../wxWidgets-3.0.4.tar.bz2:
+	cd .. && $(DOWNLOAD_COMMAND)  https://github.com/wxWidgets/wxWidgets/releases/download/v3.0.4/wxWidgets-3.0.4.tar.bz2
 
-../static-libs/bin/wx-config: ../wxWidgets-3.0.2.tar.bz2
-	cd .. && tar -xjf wxWidgets-3.0.2.tar.bz2
-	cd ../wxWidgets-3.0.2 && ./configure --with-opengl --disable-webviewwebkit --enable-optimise --disable-shared  --enable-monolithic --prefix=$(PWD)/../static-libs && make -j4 install
-	rm -Rf ../wxWidgets-3.0.2
+../static-libs/bin/wx-config: ../wxWidgets-3.0.4.tar.bz2
+	cd .. && tar -xjf wxWidgets-3.0.4.tar.bz2
+	cd ../wxWidgets-3.0.4 && ./configure --with-opengl --disable-webviewwebkit --enable-optimise --disable-shared  --enable-monolithic --disable-mediactrl --prefix=$(PWD)/../static-libs && make -j4 install
+	rm -Rf ../wxWidgets-3.0.4
 
 libwx: ../static-libs/bin/wx-config
 
