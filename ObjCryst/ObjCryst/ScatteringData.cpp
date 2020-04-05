@@ -220,15 +220,23 @@ void Radiation::SetRadiationType(const RadiationType rad)
 {
    mRadiationType.SetChoice(rad);
    if(rad == RAD_NEUTRON) mLinearPolarRate=0;
-   if(rad == RAD_ELECTRON) mLinearPolarRate=0;
-   if(rad != RAD_XRAY) this->SetWavelengthType(WAVELENGTH_MONOCHROMATIC);
+   if(rad == RAD_ELECTRON)
+   {
+      mLinearPolarRate=0;
+      this->SetWavelengthType(WAVELENGTH_MONOCHROMATIC);
+   }
    else this->UpdateDisplay();
 }
 
 void Radiation::SetWavelengthType(const WavelengthType &type)
 {
    mWavelengthType.SetChoice((unsigned long) type);
-   if(type==WAVELENGTH_TOF) this->SetRadiationType(RAD_NEUTRON);
+   if(type==WAVELENGTH_TOF)
+   {
+      this->SetRadiationType(RAD_NEUTRON);
+      this->GetPar("XRayTubeDeltaLambda").SetIsUsed(false);
+      this->GetPar("XRayTubeAlpha2Alpha1Ratio").SetIsUsed(false);
+   }
    if(type==WAVELENGTH_ALPHA12)
    {
       this->SetRadiationType(RAD_XRAY);
