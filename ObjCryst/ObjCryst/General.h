@@ -80,7 +80,9 @@ namespace ObjCryst
 #define DEG2RAD (M_PI/180.)
 #define RAD2DEG (180./M_PI)
 
+#ifndef REAL
 #define REAL float
+#endif
 
 // Implemented in IO.cpp
 /// Function to convert a substring to a floating point value, imposing a C locale (using '.' as decimal separator).

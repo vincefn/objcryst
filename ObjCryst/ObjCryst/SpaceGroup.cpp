@@ -28,7 +28,7 @@
 #include "cctbx/sgtbx/space_group.h"
 #include "cctbx/sgtbx/brick.h"
 #include "cctbx/miller/sym_equiv.h"
-#include "boost/rational.hpp"
+#include <boost/rational.hpp>
 
 #include "ObjCryst/ObjCryst/SpaceGroup.h"
 #include "ObjCryst/Quirks/VFNStreamFormat.h" //simple formatting of integers, REALs..

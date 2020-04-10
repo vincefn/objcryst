@@ -21,7 +21,7 @@
 #include <algorithm>
 
 #include "cctbx/sgtbx/space_group.h"
-#include "boost/format.hpp"
+#include <boost/format.hpp>
 
 // wx headers, with or without precompilation
 #include "wx/wxprec.h"

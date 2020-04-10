@@ -22,7 +22,8 @@
 
 #include <stdlib.h>
 #include <iostream>
-#include "boost/date_time/posix_time/posix_time_types.hpp"
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+
 using namespace std;
 
 /** Simple chronometer class, with microsecond precision

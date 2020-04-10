@@ -55,7 +55,7 @@
 #include <sstream>
 #include <list>
 #include <cstring>
-#include "boost/format.hpp"
+#include <boost/format.hpp>
 
 #ifdef __FOX_COD__
 #if 1

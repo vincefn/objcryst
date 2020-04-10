@@ -245,7 +245,7 @@ class Scatterer:virtual public RefinableObj
       * \param hideHydrogens: if true, do not display hydrogens/deuterium and their bonds
       * \param fadeDistance: atoms which are beyond the display limits are still showm, but
       * with transparency which is progressively fading up to a certain distance.
-      * \param fullMoleculeInLimits: if true, molecules which are centered inside the 
+      * \param fullMoleculeInLimits: if true, molecules which are centered inside the
       * display limits will be shown completely without fading. (default=false)
       */
       virtual void GLInitDisplayList(const bool noSymmetrics=false,

@@ -25,7 +25,7 @@
 #include <set>
 #include <vector>
 #include <typeinfo>
-#include "boost/format.hpp"
+#include <boost/format.hpp>
 
 #include "cctbx/sgtbx/space_group.h"
 

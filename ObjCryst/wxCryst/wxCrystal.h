@@ -27,7 +27,7 @@
 #define _VFN_WX_CRYSTAL_H_
 
 #include <list>
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 
 #include "ObjCryst/wxCryst/wxRefinableObj.h"
 

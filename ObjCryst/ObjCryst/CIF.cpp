@@ -1,6 +1,6 @@
 #include <ctype.h>
 #include <cmath>
-#include "boost/format.hpp"
+#include <boost/format.hpp>
 
 #include "cctbx/sgtbx/space_group.h"
 #include "cctbx/sgtbx/space_group_type.h"
