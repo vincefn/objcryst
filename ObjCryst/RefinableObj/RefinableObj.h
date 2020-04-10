@@ -1133,8 +1133,12 @@ class RefinableObj
          unsigned int GetNbOption()const;
          /// Access to the options
          RefObjOpt& GetOption(const unsigned int i);
+         /// Access to the options by name
+         RefObjOpt& GetOption(const string & name);
          /// const access to the options
          const RefObjOpt& GetOption(const unsigned int i)const;
+         /// const access to the options by name
+         const RefObjOpt& GetOption(const string & name)const;
       // Genetic
          /** \brief Get the gene group assigned to each parameter.
          *

@@ -222,6 +222,17 @@ class OptimizationObj
       virtual long& NbTrialPerRun();
       /// Number of trial per run
       virtual const long& NbTrialPerRun() const;
+      //Options
+      /// Number of Options for this object
+      unsigned int GetNbOption()const;
+      /// Access to the options
+      RefObjOpt& GetOption(const unsigned int i);
+      /// Access to the options by name
+      RefObjOpt& GetOption(const string & name);
+      /// const access to the options
+      const RefObjOpt& GetOption(const unsigned int i)const;
+      /// const access to the options by name
+      const RefObjOpt& GetOption(const string & name)const;
    protected:
       /// \internal Prepare mRefParList for the refinement
       void PrepareRefParList();
@@ -235,6 +246,8 @@ class OptimizationObj
       /// object has been added or modified. If no object has been
       /// added and no sub-object has been added/removed, then nothing is done.
       void BuildRecursiveRefObjList();
+      /// \internal Add an option for this parameter
+      void AddOption(RefObjOpt *opt);
       /// The refinable par list used during refinement. Only a condensed version
       /// of all objects. This is useful to keep an history of modifications, and to
       /// restore previous values.
@@ -308,6 +321,10 @@ class OptimizationObj
       /// MainTracker object to track the evolution of cost functions, likelihood,
       /// and individual parameters.
       MainTracker mMainTracker;
+      /// List of options for this object. Note that these are just references,
+      /// to options allocated by the object, to have a simple global access to
+      /// all options
+      ObjRegistry<RefObjOpt> mOptionRegistry;
    private:
    #ifdef __WX__CRYST__
    public:
@@ -440,14 +457,6 @@ class MonteCarloObj:public OptimizationObj
       * will be used (faster).
       */
       virtual void InitLSQ(const bool useFullPowderPatternProfile=true);
-      /** Access automatic leas-squares option for parallel tempering
-      *
-      */
-      RefObjOpt & GetAutoLSQOption();
-      /** Access automatic leas-squares option for parallel tempering
-      *
-      */
-      const RefObjOpt & GetAutoLSQOption() const;
    protected:
 
       /** \brief Make a random change in the configuration.

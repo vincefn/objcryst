@@ -983,11 +983,13 @@ template<class T> void ObjRegistry<T>::DeleteAll()
 
 template<class T> T& ObjRegistry<T>::GetObj(const unsigned int i)
 {
+   if(i>=this->GetNb()) throw ObjCrystException("ObjRegistry<T>::GetObj(i): i >= nb!");
    return *(mvpRegistry[i]);
 }
 
 template<class T> const T& ObjRegistry<T>::GetObj(const unsigned int i) const
 {
+   if(i>=this->GetNb()) throw ObjCrystException("ObjRegistry<T>::GetObj(i): i >= nb!");
    return *(mvpRegistry[i]);
 }
 
@@ -1858,10 +1860,34 @@ RefObjOpt& RefinableObj::GetOption(const unsigned int i)
    return mOptionRegistry.GetObj(i);
 }
 
+RefObjOpt& RefinableObj::GetOption(const string & name)
+{
+    VFN_DEBUG_MESSAGE("RefinableObj::GetOption()"<<name,3)
+    const long i=mOptionRegistry.Find(name);
+    if(i<0)
+    {
+        this->Print();
+        throw ObjCrystException("RefinableObj::GetOption(): cannot find option: "+name+" in object:"+this->GetName());
+    }
+    return mOptionRegistry.GetObj(i);
+}
+
 const RefObjOpt& RefinableObj::GetOption(const unsigned int i)const
 {
    //:TODO: Check
    return mOptionRegistry.GetObj(i);
+}
+
+const RefObjOpt& RefinableObj::GetOption(const string & name)const
+{
+    VFN_DEBUG_MESSAGE("RefinableObj::GetOption()"<<name,3)
+    const long i=mOptionRegistry.Find(name);
+    if(i<0)
+    {
+        this->Print();
+        throw ObjCrystException("RefinableObj::GetOption(): cannot find option: "+name+" in object:"+this->GetName());
+    }
+    return mOptionRegistry.GetObj(i);
 }
 
 void RefinableObj::GetGeneGroup(const RefinableObj &obj,
