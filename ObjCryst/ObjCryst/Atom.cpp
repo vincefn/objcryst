@@ -169,16 +169,23 @@ string Atom::GetComponentName(const int i) const{ return this->GetName();}
 void Atom::Print() const
 {
    VFN_DEBUG_MESSAGE("Atom::Print()",1)
-   cout << "Atom ("
-        << FormatString(mpScattPowAtom->GetSymbol(),4) << ") :"
-        << FormatString(this->GetName(),16)  << " at : "
-        << FormatFloat(this->GetX())
-        << FormatFloat(this->GetY())
-        << FormatFloat(this->GetZ());
-   if(this->IsDummy()) cout << " DUMMY! ";
+   if(this->IsDummy())
+   {
+      cout << "Atom (DUMMY) :"
+           << FormatString(this->GetName(),16)  << " at : "
+           << FormatFloat(this->GetX())
+           << FormatFloat(this->GetY())
+           << FormatFloat(this->GetZ());
+   }
    else
    {
-      cout << ", Biso="
+      cout << "Atom ("
+           << FormatString(mpScattPowAtom->GetSymbol(),4) << ") :"
+           << FormatString(this->GetName(),16)  << " at : "
+           << FormatFloat(this->GetX())
+           << FormatFloat(this->GetY())
+           << FormatFloat(this->GetZ())
+           << ", Biso="
            << FormatFloat(mpScattPowAtom->GetBiso())
            << ", Popu=" << FormatFloat(this->GetOccupancy());
    }
@@ -303,6 +310,7 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
                              const bool fullMoleculeInLimits)const
 {
    VFN_DEBUG_MESSAGE("Atom::GLInitDisplayList():"<<this->GetName(),5)
+   if(this->IsDummy()) return ;
    REAL en=1;
    if(displayEnantiomer==true) en=-1;
 
@@ -323,7 +331,6 @@ void Atom::GLInitDisplayList(const bool onlyIndependentAtoms,
    const REAL bb=this->GetCrystal().GetLatticePar(1);
    const REAL cc=this->GetCrystal().GetLatticePar(2);
 
-   if(this->IsDummy()) return ;
    if(hideHydrogens  && (mpScattPowAtom->GetForwardScatteringFactor(RAD_XRAY)<1.5)) return;
    GLUquadricObj* pQuadric = gluNewQuadric();
    if(true==onlyIndependentAtoms)
