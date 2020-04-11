@@ -304,6 +304,11 @@ unsigned int OptimizationObj::GetNbOption()const
    return mOptionRegistry.GetNb();
 }
 
+ObjRegistry<RefObjOpt>& OptimizationObj::GetOptionList()
+{
+   return mOptionRegistry;
+}
+
 RefObjOpt& OptimizationObj::GetOption(const unsigned int i)
 {
    VFN_DEBUG_MESSAGE("RefinableObj::GetOption()"<<i,3)
@@ -340,6 +345,11 @@ const RefObjOpt& OptimizationObj::GetOption(const string & name)const
       throw ObjCrystException("OptimizationObj::GetOption(): cannot find option: "+name+" in object:"+this->GetName());
    }
    return mOptionRegistry.GetObj(i);
+}
+
+const ObjRegistry<RefinableObj>& OptimizationObj::GetRefinedObjList() const
+{
+   return mRefinedObjList;
 }
 
 void OptimizationObj::PrepareRefParList()

@@ -936,6 +936,9 @@ void MolBondAngle::SetAtom3(MolAtom& at){mvpAtom[2]=&at;}
 //MolAtom& MolBondAngle::GetAtom1(){return *(mvpAtom[0]);}
 //MolAtom& MolBondAngle::GetAtom2(){return *(mvpAtom[1]);}
 //MolAtom& MolBondAngle::GetAtom3(){return *(mvpAtom[2]);}
+std::size_t MolBondAngle::size() const {return mvpAtom.size();}
+vector<MolAtom*>::const_iterator MolBondAngle::begin() const {return mvpAtom.begin();}
+vector<MolAtom*>::const_iterator MolBondAngle::end() const  {return mvpAtom.end();}
 #ifdef __WX__CRYST__
 WXCrystObjBasic* MolBondAngle::WXCreate(wxWindow* parent)
 {
@@ -1293,6 +1296,9 @@ MolAtom& MolDihedralAngle::GetAtom1(){return *(mvpAtom[0]);}
 MolAtom& MolDihedralAngle::GetAtom2(){return *(mvpAtom[1]);}
 MolAtom& MolDihedralAngle::GetAtom3(){return *(mvpAtom[2]);}
 MolAtom& MolDihedralAngle::GetAtom4(){return *(mvpAtom[3]);}
+std::size_t MolDihedralAngle::size() const {return mvpAtom.size();}
+vector<MolAtom*>::const_iterator MolDihedralAngle::begin() const {return mvpAtom.begin();}
+vector<MolAtom*>::const_iterator MolDihedralAngle::end() const  {return mvpAtom.end();}
 #ifdef __WX__CRYST__
 WXCrystObjBasic* MolDihedralAngle::WXCreate(wxWindow* parent)
 {

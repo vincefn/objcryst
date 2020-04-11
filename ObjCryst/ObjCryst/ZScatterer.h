@@ -350,6 +350,19 @@ class ZScatterer: public Scatterer
       void SetCenterAtomIndex(const unsigned int);
       /// Get the index of the central atom (around which the rotation is made)
       unsigned int GetCenterAtomIndex()const;
+      /** STL access to registry of Zatom size
+       */
+      std::size_t size() const;
+      /** low-level access to the underlying vector of ZAtom begin().
+       * Const access as we do not want the number and order of objects to change,
+       * but the objects themselves can be modified.
+       */
+      vector<ZAtom*>::const_iterator begin() const;
+      /** low-level access to the underlying vector of ZAtom end().
+       * Const access as we do not want the number and order of objects to change,
+       * but the objects themselves can be modified.
+       */
+      vector<ZAtom*>::const_iterator end() const;
    protected:
       /** Update the atom coordinates (in real units, in Angstroems).
       *

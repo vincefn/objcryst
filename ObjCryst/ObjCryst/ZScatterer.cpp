@@ -1530,6 +1530,21 @@ void ZScatterer::ExportFenskeHallZMatrix(ostream &os)
 void ZScatterer::SetCenterAtomIndex(const unsigned int ix){mCenterAtomIndex=ix;}
 unsigned int ZScatterer::GetCenterAtomIndex()const{return mCenterAtomIndex;}
 
+std::size_t ZScatterer::size() const
+{
+   return mZAtomRegistry.size();
+}
+
+vector<ZAtom*>::const_iterator ZScatterer::begin() const
+{
+   return mZAtomRegistry.begin();
+}
+
+vector<ZAtom*>::const_iterator ZScatterer::end() const
+{
+   return mZAtomRegistry.end();
+}
+
 void ZScatterer::GlobalOptRandomMove(const REAL mutationAmplitude,
                                      const RefParType *type)
 {

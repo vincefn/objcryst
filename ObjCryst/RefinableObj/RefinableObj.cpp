@@ -1118,6 +1118,21 @@ template<class T> void ObjRegistry<T>::UpdateUI()
    #endif
 }
 
+template<class T> std::size_t ObjRegistry<T>::size() const
+{
+   return (std::size_t) mvpRegistry.size();
+}
+
+template<class T> typename vector<T*>::const_iterator ObjRegistry<T>::begin() const
+{
+   return mvpRegistry.begin();
+}
+
+template<class T> typename vector<T*>::const_iterator ObjRegistry<T>::end() const
+{
+   return mvpRegistry.end();
+}
+
 #ifdef __WX__CRYST__
 template<class T> WXRegistry<T>* ObjRegistry<T>::WXCreate(wxWindow *parent)
 {
@@ -1846,6 +1861,11 @@ void RefinableObj::ResetParList()
    this->EraseAllParamSet();
    mRefParListClock.Click();
    VFN_DEBUG_MESSAGE("RefinableObj::ResetParList():End.",3)
+}
+
+ObjRegistry<RefObjOpt>& RefinableObj::GetOptionList()
+{
+    return mOptionRegistry;
 }
 
 unsigned int RefinableObj::GetNbOption()const

@@ -229,6 +229,7 @@ class MolBond:public Restraint
       void SetBondOrder(const REAL length);
       bool IsFreeTorsion()const;
       void SetFreeTorsion(const bool isInRing);
+   
   private:
       pair<MolAtom*,MolAtom*> mAtomPair;
       REAL mLength0,mDelta,mSigma;
@@ -316,6 +317,9 @@ class MolBondAngle:public Restraint
       MolAtom& GetAtom3();
       bool IsFlexible()const;
       void SetFlexible(const bool isInRing);
+      std::size_t size() const;
+      vector<MolAtom*>::const_iterator begin() const;
+      vector<MolAtom*>::const_iterator end() const;
    private:
       /// The vector of the 3 atoms involved in the bond angle.
       vector<MolAtom*> mvpAtom;
@@ -408,6 +412,9 @@ class MolDihedralAngle:public Restraint
       MolAtom& GetAtom2();
       MolAtom& GetAtom3();
       MolAtom& GetAtom4();
+      std::size_t size() const;
+      vector<MolAtom*>::const_iterator begin() const;
+      vector<MolAtom*>::const_iterator end() const;
    private:
       /// The vector of the 4 atoms involved in the bond angle.
       vector<MolAtom*> mvpAtom;

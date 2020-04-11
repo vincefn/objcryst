@@ -223,6 +223,8 @@ class OptimizationObj
       /// Number of trial per run
       virtual const long& NbTrialPerRun() const;
       //Options
+      /// Access to the options registry
+      ObjRegistry<RefObjOpt>& GetOptionList();
       /// Number of Options for this object
       unsigned int GetNbOption()const;
       /// Access to the options
@@ -233,6 +235,8 @@ class OptimizationObj
       const RefObjOpt& GetOption(const unsigned int i)const;
       /// const access to the options by name
       const RefObjOpt& GetOption(const string & name)const;
+      /// Access the list of refined object
+      const ObjRegistry<RefinableObj>& GetRefinedObjList() const;
    protected:
       /// \internal Prepare mRefParList for the refinement
       void PrepareRefParList();
