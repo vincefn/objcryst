@@ -21,6 +21,7 @@
 *
 */
 #include <ctime>
+#include <boost/format.hpp>
 #include "ObjCryst/RefinableObj/RefinableObj.h"
 #include "ObjCryst/Quirks/VFNStreamFormat.h"
 #include "ObjCryst/Quirks/VFNDebug.h"
@@ -1027,7 +1028,7 @@ template<class T> void ObjRegistry<T>::Print()const
    cout <<mName<<" :"<<this->GetNb()<<" object registered:" <<endl;
 
    for(long i=0;i<this->GetNb();++i)
-      cout <<i<<"("<<this->GetObj(i).GetName()<<")"<<endl;
+      cout << boost::format("#%3d:%s(%s)") %i %this->GetObj(i).GetClassName() %this->GetObj(i).GetName()<<endl;
 }
 
 template<class T> void ObjRegistry<T>::SetName(const string &name){ mName=name;}
