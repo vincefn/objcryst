@@ -2260,7 +2260,7 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
    mpLog->AppendText(wxString::Format(_T("  Tetragonal I    v=%6.0f -> %6.0f A\n"),EstimateCellVolume(dmin,dmax,nb,TETRAGONAL ,LATTICE_I,1.2),EstimateCellVolume(dmin,dmax,nb,TETRAGONAL ,LATTICE_I,0.3)));
    mpLog->AppendText(wxString::Format(_T("  Orthorombic P   v=%6.0f -> %6.0f A\n"),EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_P,1.2),EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_P,0.3)));
    mpLog->AppendText(wxString::Format(_T("  Orthorombic I,C v=%6.0f -> %6.0f A\n"),EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_I,1.2),EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_I,0.3)));
-   mpLog->AppendText(wxString::Format(_T("  Orthorombic F   v=%6.0f -> %6.0f A\n"),EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_F,1.2),EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_I,0.3)));
+   mpLog->AppendText(wxString::Format(_T("  Orthorombic F   v=%6.0f -> %6.0f A\n"),EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_F,1.2),EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_F,0.3)));
    mpLog->AppendText(wxString::Format(_T("  Hexagonal       v=%6.0f -> %6.0f A\n"),EstimateCellVolume(dmin,dmax,nb,HEXAGONAL  ,LATTICE_P,1.2),EstimateCellVolume(dmin,dmax,nb,HEXAGONAL  ,LATTICE_P,0.3)));
    mpLog->AppendText(wxString::Format(_T("  Monoclinic P    v=%6.0f -> %6.0f A\n"),EstimateCellVolume(dmin,dmax,nb,MONOCLINIC ,LATTICE_P,1.2),EstimateCellVolume(dmin,dmax,nb,MONOCLINIC ,LATTICE_P,0.3)));
    mpLog->AppendText(wxString::Format(_T("  Monoclinic C    v=%6.0f -> %6.0f A\n"),EstimateCellVolume(dmin,dmax,nb,MONOCLINIC ,LATTICE_C,1.2),EstimateCellVolume(dmin,dmax,nb,MONOCLINIC ,LATTICE_C,0.3)));
