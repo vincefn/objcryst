@@ -30,6 +30,7 @@
 #include <time.h>
 #include "ObjCryst/RefinableObj/RefinableObj.h"
 #include "ObjCryst/RefinableObj/LSQNumObj.h"
+#include "ObjCryst/ObjCryst/PowderPattern.h"
 namespace ObjCryst
 {
 /** Different lattice types.

@@ -34,7 +34,7 @@
 
 namespace ObjCryst
 {
-
+class PeakList;
 class PowderPattern;
 
 //######################################################################
@@ -1124,6 +1124,80 @@ CrystVector_REAL PowderProfileLorentz(const CrystVector_REAL theta,
                                       const REAL fwhm,
                                       const REAL asymmetryPar=1.);
 
+
+//######################################################################
+//    Spacegroup explorer
+//######################################################################
+/** Structure to hold the score corresponding to a given spacegroup.
+*
+*/
+struct SPGScore
+{
+   SPGScore(const string &s, const REAL r, const REAL g, const unsigned int nbextinct, const REAL ngof=0);
+   string hm;
+   /// Rw factor, from PowderPattern::GetRw()
+   REAL rw;
+   /// Goodness-of-fit, from PowderPattern::GetChi2() normalised by 
+   REAL gof;
+   /// Normalised goodness-of-fit =  gof * (nb_refl) / (nb_refl in P1)
+   REAL ngof;
+   unsigned int nbextinct446;
+};
+
+bool compareSPGScore(const SPGScore &s1, const SPGScore &s2);
+
+/// Function which determines the unique extinction fingerprint of a spacegroup,
+/// by calculating all present reflections between 0<=H<=4 0<=K<=4 0<=L<=6
+std::vector<bool> spgExtinctionFingerprint(Crystal &c, const cctbx::sgtbx::space_group &spg);
+
+/** Algorithm class to find the correct spacegroup for an indexed powder pattern.
+ *
+ */
+class SpacegroupExplorer
+{
+public:
+   /** Constructor
+   *
+   * \param pd: the PowderPatternDiffraction for which we are trying to find the spacegroup.
+   */
+   SpacegroupExplorer(PowderPatternDiffraction *pd);
+   /** Run test on a single spacegroup
+    *
+    * \param spg: the name of the spacegroup, ideally a Hall symbol, or an Hermann-Mauguin,
+    *  or a number
+    * \param fitprofile: if true, will perform a full profile fitting instead of just Le Bail
+    *  extraction. Much slower.
+    * \return: the SPGScore corresponding to this spacegroup
+    */
+   SPGScore Run(const string &spg, const bool fitprofile=false, const bool verbose=false);
+   /** Run test on a single spacegroup
+    *
+    * \param spg: the cctbx::sgtbx::space_group
+    * \param fitprofile: if true, will perform a full profile fitting instead of just Le Bail
+    *  extraction. Much slower.
+    * \return: the SPGScore corresponding to this spacegroup
+    */
+   SPGScore Run(const cctbx::sgtbx::space_group &spg, const bool fitprofile=false, const bool verbose=false);
+   /** Run test on all spacegroups compatible with the unit cell
+    *
+    * \param fitprofile_all: if true, will perform a full profile fitting instead of just Le Bail
+    *  extraction for all spacegroups. Much slower. By default, the profile fitting is only
+    *  performed for the first spacegroup (P1)
+    * \param verbose: 0 (default), not verbose, 1 minimal information, 2, very verbose
+    * \return: the SPGScore corresponding to this spacegroup
+    */
+   void RunAll(const bool fitprofile_all=false, const bool verbose=true);
+   /// Get the list of all scores obatined after using RunAll()
+   const list<SPGScore>& GetScores() const;
+private:
+   /// PwderPatternDiffraction for which we explore the spacegroups
+   PowderPatternDiffraction *mpDiff;
+   /// List of scores for the explore spacegroups
+   list<SPGScore> mvSPG;
+   /// Map extinction fingerprint
+   std::map<std::vector<bool>,SPGScore> mvSPGExtinctionFingerprint;
+};
+   
 
 }//namespace ObjCryst
 #endif // _OBJCRYST_POWDERPATTERN_H_

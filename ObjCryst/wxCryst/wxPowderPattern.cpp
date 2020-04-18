@@ -4804,50 +4804,10 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
    mpDiff->GetCrystal().UpdateDisplay();
 }
 
-struct SPGScore
-{
-   SPGScore(const string &s, const REAL r, const REAL g, const unsigned int nbextinct):
-   hm(s),rw(r),gof(g),nbextinct446(nbextinct)
-   {};
-   string hm;
-   REAL rw,gof;
-   unsigned int nbextinct446;
-};
-
-bool compareSPGScore(const SPGScore &s1, const SPGScore &s2)
-{
-   return s1.gof < s2.gof;
-}
-
-std::vector<bool> spgExtinctionFingerprint(Crystal &c,cctbx::sgtbx::space_group &spg)
-{
-  // We don't have the extinction symbol, so do it the stupid way
-  std::vector<bool> fingerprint(5*5*7-1+6);
-  long i=0;
-  fingerprint[i++]=c.GetPar("a").IsUsed();
-  fingerprint[i++]=c.GetPar("b").IsUsed();
-  fingerprint[i++]=c.GetPar("c").IsUsed();
-  fingerprint[i++]=c.GetPar("alpha").IsUsed();
-  fingerprint[i++]=c.GetPar("beta").IsUsed();
-  fingerprint[i++]=c.GetPar("gamma").IsUsed();
-  for(long h=0;h<5;++h)
-    for(long k=0;k<5;++k)
-      for (long l=0;l<7;++l)
-      {
-        if((h+k+l)==0) continue;
-        cctbx::miller::index<long> hkl(scitbx::vec3<long>(h,k,l));
-        if(i>=fingerprint.size()) cout<<"WHOOOOOOOOOOOOOPS"<<endl;
-        fingerprint[i++] =spg.is_sys_absent(hkl);
-      }
-  return fingerprint;
-}
 
 void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
 {
    TAU_PROFILE("WXProfileFitting::OnExploreSpacegroups()","void (wxCommandEvent &)",TAU_DEFAULT);
-   TAU_PROFILE_TIMER(timer1,"WXProfileFitting::OnExploreSpacegroups()LSQ-P1","", TAU_FIELD);
-   TAU_PROFILE_TIMER(timer2,"WXProfileFitting::OnExploreSpacegroups()LSQ1","", TAU_FIELD);
-   TAU_PROFILE_TIMER(timer3,"WXProfileFitting::OnExploreSpacegroups()LSQ2","", TAU_FIELD);
    PowderPatternDiffraction *pDiff=0;
    if(mpDiff!=0) pDiff=mpDiff;
    else
@@ -4905,10 +4865,17 @@ void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
                                  nbspg*nbcycle,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME|wxPD_CAN_ABORT|wxPD_APP_MODAL);
 
    list<SPGScore> vSPG;
+   
+   SpacegroupExplorer ex(pDiff);
+   
    // we don't have the extinction symbols, so do it the stupid way
    // create a fingerprint of systematically extinct reflections
    // for 0<H<5 0<K<5 0<L<7
    std::map<std::vector<bool>,SPGScore> vSPGExtinctionFingerprint;
+
+   // Nb refl below max sin(theta/lambda) for p1, to compute nGoF
+   unsigned int nb_refl_p1=1;
+
    // Try & optimize every spacegroup
    it=cctbx::sgtbx::space_group_symbol_iterator();
    Chronometer chrono;
@@ -4927,112 +4894,47 @@ void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
          cout<<s.number()<<","<<hm.c_str()<<","<<(int)compat<<endl;
          pCrystal->Init(a,b,c,d,e,f,hm,name);
          mpLog->AppendText(wxString::Format(_T(" (#%3d) %-14s:"),s.number(),wxString::FromAscii(hm.c_str()).c_str()));
+         if(s.number() == 1) nb_refl_p1 = mpDiff->GetNbReflBelowMaxSinThetaOvLambda();
+
          std::vector<bool> fgp=spgExtinctionFingerprint(*pCrystal,spg);
          std::map<std::vector<bool>,SPGScore>::iterator posfgp=vSPGExtinctionFingerprint.find(fgp);
          if(posfgp!=vSPGExtinctionFingerprint.end())
          {
-            vSPG.push_back(SPGScore(hm.c_str(),posfgp->second.rw,posfgp->second.gof,posfgp->second.nbextinct446));
+            vSPG.push_back(SPGScore(hm.c_str(),posfgp->second.rw,posfgp->second.gof,
+                                    posfgp->second.nbextinct446, posfgp->second.ngof));
             cout<<"Spacegroup:"<<hm<<" has same extinctions as:"<<posfgp->second.hm<<endl;
             mpLog->AppendText(_T(" same as:")+wxString::FromAscii(posfgp->second.hm.c_str())+_T("\n"));
          }
          else
          {
             pDiff->GetParentPowderPattern().UpdateDisplay();
-            // Number of free parameters (not taking into account refined profile/background parameters)
-            unsigned int nbfreepar=pDiff->GetProfileFitNetNbObs();
-            if(nbfreepar<1) nbfreepar=1; // Should not happen !
 
-            for(unsigned int j=0;j<nbcycle;j++)
-            {
-                // First, Le Bail
-                pDiff->SetExtractionMode(true,true);
-                const float t0=chrono.seconds();
-                cout<<"Doing Le Bail, t="<<FormatFloat(t0,6,2)<<"s";
-                pDiff->ExtractLeBail(5);
-                cout<<",   dt="<<FormatFloat(chrono.seconds()-t0,6,2)<<"s"<<endl;
-                pDiff->GetParentPowderPattern().FitScaleFactorForRw();
-                if(event.GetId()==ID_PROFILEFITTING_EXPLORE_SPG)
-                {// Perform LSQ
-                  LSQNumObj lsq;
-                  TAU_PROFILE_START(timer2);
-                  lsq.SetRefinedObj(pDiff->GetParentPowderPattern(),0,true,true);
-                  lsq.PrepareRefParList(true);
-                  lsq.SetParIsFixed(gpRefParTypeObjCryst,true);
-                  lsq.SetParIsFixed(gpRefParTypeScattDataScale,false);
-                  std::list<RefinablePar*> vnewpar;
-                  std::list<const RefParType*> vnewpartype;
-                  // Only do the full monty for P1, keep the parameters for other spacegroups
-                  if(s.number()==1) vnewpar.push_back(&lsq.GetCompiledRefinedObj().GetPar("Zero"));
-                  lsq.SetParIsFixed(gpRefParTypeUnitCell,false);
-                  lsq.SafeRefine(vnewpar, vnewpartype,2,true,false);
-                  vnewpar.clear();
-                  TAU_PROFILE_STOP(timer2);
-                  if(s.number()==1)
-                  {
-                      TAU_PROFILE_START(timer1);
-                      vnewpar.push_back(&lsq.GetCompiledRefinedObj().GetPar("2ThetaDispl"));
-                      vnewpar.push_back(&lsq.GetCompiledRefinedObj().GetPar("2ThetaTransp"));
-                      lsq.SafeRefine(vnewpar, vnewpartype,2,true,false);
-                      vnewpar.clear();
-                      lsq.SetParIsFixed(gpRefParTypeScattDataBackground,false);
-                      // Fix background point beyond optimized domain
-                      const unsigned int nbcomp= pDiff->GetParentPowderPattern().GetNbPowderPatternComponent();
-                      for(unsigned int i=0;i<nbcomp;++i)
-                        if(pDiff->GetParentPowderPattern().GetPowderPatternComponent(i).GetClassName()=="PowderPatternBackground")
-                        {
-                            PowderPatternBackground *pback=dynamic_cast<PowderPatternBackground *>
-                            (&(pDiff->GetParentPowderPattern().GetPowderPatternComponent(i)));
-                            pback->FixParametersBeyondMaxresolution(lsq.GetCompiledRefinedObj());
-                        }
-                     for(unsigned int i=0; i<lsq.GetCompiledRefinedObj().GetNbPar();i++)
-                        if(  (lsq.GetCompiledRefinedObj().GetPar(i).IsFixed()==false)
-                           &&(lsq.GetCompiledRefinedObj().GetPar(i).GetType()==gpRefParTypeScattDataBackground))
-                           vnewpar.push_back(&lsq.GetCompiledRefinedObj().GetPar(i));
-                      lsq.SafeRefine(vnewpar,vnewpartype,2,true,false);
-                      vnewpar.clear();
-                      TAU_PROFILE_STOP(timer1);
-                  }
-                  // restart from equal intensities
-                  pDiff->SetExtractionMode(true,true);
-                  pDiff->ExtractLeBail(5);
-                  TAU_PROFILE_START(timer3);
-                  lsq.SafeRefine(vnewpar,vnewpartype,3,true,false);
-                  TAU_PROFILE_STOP(timer3);
-                  //mpLog->AppendText(wxString::Format(_T("%5.2f%%/"),pDiff->GetParentPowderPattern().GetRw()*100));
-                  pDiff->GetParentPowderPattern().FitScaleFactorForRw();
-                }
-                pDiff->GetParentPowderPattern().UpdateDisplay();
-                const REAL rw=pDiff->GetParentPowderPattern().GetRw()*100;
-                const REAL gof=pDiff->GetParentPowderPattern().GetChi2()/nbfreepar;
-                if(dlgProgress.Update(i*nbcycle+j,wxString::FromAscii(hm.c_str())+wxString::Format(_T("  (cycle #%u)\n   Rwp=%5.2f%%\n   GoF=%9.2f"),
-                                                                  j,rw,gof))==false) user_stop=true;
+            SPGScore score = ex.Run(spg, event.GetId()==ID_PROFILEFITTING_EXPLORE_SPG, false);
+            score.ngof = score.gof * mpDiff->GetNbReflBelowMaxSinThetaOvLambda() / (float)nb_refl_p1;
 
-                if(user_stop) break;
-            }
+            if(dlgProgress.Update(i*nbcycle,wxString::FromAscii(hm.c_str())+wxString::Format(_T("  (%u cycles)\n   Rwp=%5.2f%%\n   GoF=%9.2f"),
+                                  nbcycle,score.rw,score.gof))==false) user_stop=true;
+            
             if(user_stop) break;
-            const REAL rw=pDiff->GetParentPowderPattern().GetRw()*100;
-            const REAL gof=pDiff->GetParentPowderPattern().GetChi2()/nbfreepar;
-            unsigned int nbextinct446=0;
-            for(unsigned int i=6;i<fgp.size();++i) nbextinct446+=(unsigned int)(fgp[i]);
-            vSPG.push_back(SPGScore(hm.c_str(),rw,gof,nbextinct446));
-            mpLog->AppendText(wxString::Format(_T(" Rwp= %5.2f%%  GoF=%9.2f  (%2u extinct refls)\n"),rw,gof,nbextinct446));
-            vSPGExtinctionFingerprint.insert(make_pair(fgp,SPGScore(hm.c_str(),rw,gof,nbextinct446)));
+            vSPG.push_back(score);
+            mpLog->AppendText(wxString::Format(_T(" Rwp= %5.2f%%  GoF=%9.2f  nGoF=%9.2f  (%2u extinct refls)\n"),score.rw,score.gof,score.ngof,score.nbextinct446));
+            vSPGExtinctionFingerprint.insert(make_pair(fgp,score));
           }
         }
       if(user_stop) break;
    }
    // sort results by GoF
    vSPG.sort(compareSPGScore);
-   mpLog->AppendText(wxString::Format(_T("\n\n BEST Solutions, from min_GoF to 2*min_Gof:\n")));
+   mpLog->AppendText(wxString::Format(_T("\n\n BEST Solutions, from min_nGoF to 4*min_nGof:\n")));
    mpLog->AppendText(wxString::Format(_T("\n\'extinct refls\' gives the number of extinct reflections\n")));
    mpLog->AppendText(wxString::Format(_T("for 0<=H<=4 0<=K<=4 0<=L<=6 \n\n")));
-   mpLog->AppendText(wxString::Format(_T("Note that the listed GoF takes into account the net observed points\n")));
-   mpLog->AppendText(wxString::Format(_T("so that spacegroups (P1) with a high ration of nb reflections/nb points\n")));
-   mpLog->AppendText(wxString::Format(_T("can have an optimal Chi2 or Rwp and yet ranked lower in terms of GoF\n\n")));
+   mpLog->AppendText(wxString::Format(_T("GoF = Chi^2 / nb observed points\n\n")));
+   mpLog->AppendText(wxString::Format(_T("nGof = GoF * (nb_refl) / (nb_refl_P1) takes into account the number\n"
+                                         "  of observed reflections and is the best indicator\n\n")));
    for(list<SPGScore>::const_iterator pos=vSPG.begin();pos!=vSPG.end();++pos)
    {
-      if(pos->gof>(2*vSPG.begin()->gof)) break;
-      mpLog->AppendText(wxString::Format(_T(" Rwp= %5.2f%%  GoF=%9.2f: (extinct refls=%2u )"),pos->rw,pos->gof,pos->nbextinct446)+wxString::FromAscii(pos->hm.c_str())+_T(" \n"));
+      if( (pos->ngof>(4*vSPG.begin()->ngof))) break;
+      mpLog->AppendText(wxString::Format(_T(" Rwp=%5.2f%%  GoF=%8.2f  nGoF=%8.2f: (extinct refls=%3u) "),pos->rw,pos->gof,pos->ngof,pos->nbextinct446)+wxString::FromAscii(pos->hm.c_str())+_T(" \n"));
    }
    mpLog->AppendText(wxString::Format(_T("\n\n You can copy the chosen spacegroup symbol in the Crystal window\n")));
    // Back to original spacegroup
@@ -5041,6 +4943,7 @@ void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
    pDiff->SetExtractionMode(true,true);
    pDiff->ExtractLeBail(5);
    pDiff->GetParentPowderPattern().UpdateDisplay();
+   ex.RunAll(event.GetId()==ID_PROFILEFITTING_EXPLORE_SPG, true);
 }
 
 void WXPowderPatternDiffraction::OnLeBail(wxCommandEvent &event)
