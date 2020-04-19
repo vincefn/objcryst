@@ -6727,10 +6727,10 @@ std::vector<bool> spgExtinctionFingerprint(Crystal &c, const cctbx::sgtbx::space
 /** Algorithm class to find the correct spacegroup for an indexed powder pattern.
  *
  */
-SpacegroupExplorer::SpacegroupExplorer(PowderPatternDiffraction *pd):
+SpaceGroupExplorer::SpaceGroupExplorer(PowderPatternDiffraction *pd):
    mpDiff(pd){};
 
-SPGScore SpacegroupExplorer::Run(const string &spgId, const bool fitprofile, const bool verbose)
+SPGScore SpaceGroupExplorer::Run(const string &spgId, const bool fitprofile, const bool verbose)
 {
    cctbx::sgtbx::space_group sg;
    try
@@ -6755,12 +6755,12 @@ SPGScore SpacegroupExplorer::Run(const string &spgId, const bool fitprofile, con
    return this->Run(sg, fitprofile);
 }
 
-SPGScore SpacegroupExplorer::Run(const cctbx::sgtbx::space_group &spg, const bool fitprofile, const bool verbose)
+SPGScore SpaceGroupExplorer::Run(const cctbx::sgtbx::space_group &spg, const bool fitprofile, const bool verbose)
 {
-   TAU_PROFILE("SpacegroupExplorer::Run()","void (wxCommandEvent &)",TAU_DEFAULT);
-   TAU_PROFILE_TIMER(timer1,"SpacegroupExplorer::Run()LSQ-P1","", TAU_FIELD);
-   TAU_PROFILE_TIMER(timer2,"SpacegroupExplorer::Run()LSQ1","", TAU_FIELD);
-   TAU_PROFILE_TIMER(timer3,"SpacegroupExplorer::Run()LSQ2","", TAU_FIELD);
+   TAU_PROFILE("SpaceGroupExplorer::Run()","void (wxCommandEvent &)",TAU_DEFAULT);
+   TAU_PROFILE_TIMER(timer1,"SpaceGroupExplorer::Run()LSQ-P1","", TAU_FIELD);
+   TAU_PROFILE_TIMER(timer2,"SpaceGroupExplorer::Run()LSQ1","", TAU_FIELD);
+   TAU_PROFILE_TIMER(timer3,"SpaceGroupExplorer::Run()LSQ2","", TAU_FIELD);
    mpDiff->SetExtractionMode(true,true);
    Crystal *pCrystal=&(mpDiff->GetCrystal());
    // Keep initial lattice parameters & spg
@@ -6858,7 +6858,7 @@ SPGScore SpacegroupExplorer::Run(const cctbx::sgtbx::space_group &spg, const boo
    return SPGScore(hm.c_str(),rw,gof,nbextinct446);
 }
 
-void SpacegroupExplorer::RunAll(const bool fitprofile_all, const bool verbose)
+void SpaceGroupExplorer::RunAll(const bool fitprofile_all, const bool verbose)
 {
    Crystal *pCrystal=&(mpDiff->GetCrystal());
    
@@ -6931,7 +6931,7 @@ void SpacegroupExplorer::RunAll(const bool fitprofile_all, const bool verbose)
    mvSPG.sort(compareSPGScore);
 }
 
-const list<SPGScore>& SpacegroupExplorer::GetScores() const
+const list<SPGScore>& SpaceGroupExplorer::GetScores() const
 {
    return mvSPG;
 }

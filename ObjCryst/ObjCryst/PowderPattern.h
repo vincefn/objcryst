@@ -1153,14 +1153,14 @@ std::vector<bool> spgExtinctionFingerprint(Crystal &c, const cctbx::sgtbx::space
 /** Algorithm class to find the correct spacegroup for an indexed powder pattern.
  *
  */
-class SpacegroupExplorer
+class SpaceGroupExplorer
 {
 public:
    /** Constructor
    *
    * \param pd: the PowderPatternDiffraction for which we are trying to find the spacegroup.
    */
-   SpacegroupExplorer(PowderPatternDiffraction *pd);
+   SpaceGroupExplorer(PowderPatternDiffraction *pd);
    /** Run test on a single spacegroup
     *
     * \param spg: the name of the spacegroup, ideally a Hall symbol, or an Hermann-Mauguin,

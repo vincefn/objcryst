@@ -4866,7 +4866,7 @@ void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
 
    list<SPGScore> vSPG;
    
-   SpacegroupExplorer ex(pDiff);
+   SpaceGroupExplorer ex(pDiff);
    
    // we don't have the extinction symbols, so do it the stupid way
    // create a fingerprint of systematically extinct reflections
