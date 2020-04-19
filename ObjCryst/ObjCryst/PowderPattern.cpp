@@ -6807,7 +6807,7 @@ SPGScore SpaceGroupExplorer::Run(const cctbx::sgtbx::space_group &spg, const boo
          // Only do the full monty for P1, keep the parameters for other spacegroups
          if(s.number()==1) vnewpar.push_back(&lsq.GetCompiledRefinedObj().GetPar("Zero"));
          lsq.SetParIsFixed(gpRefParTypeUnitCell,false);
-         lsq.SafeRefine(vnewpar, vnewpartype,2,true,false);
+         lsq.SafeRefine(vnewpar, vnewpartype,1.01,2,true,true);
          vnewpar.clear();
          TAU_PROFILE_STOP(timer2);
          if(s.number()==1)
@@ -6815,7 +6815,7 @@ SPGScore SpaceGroupExplorer::Run(const cctbx::sgtbx::space_group &spg, const boo
             TAU_PROFILE_START(timer1);
             vnewpar.push_back(&lsq.GetCompiledRefinedObj().GetPar("2ThetaDispl"));
             vnewpar.push_back(&lsq.GetCompiledRefinedObj().GetPar("2ThetaTransp"));
-            lsq.SafeRefine(vnewpar, vnewpartype,2,true,false);
+            lsq.SafeRefine(vnewpar, vnewpartype,1.01,2,true,true);
             vnewpar.clear();
             lsq.SetParIsFixed(gpRefParTypeScattDataBackground,false);
             // Fix background point beyond optimized domain
@@ -6831,7 +6831,7 @@ SPGScore SpaceGroupExplorer::Run(const cctbx::sgtbx::space_group &spg, const boo
                if(  (lsq.GetCompiledRefinedObj().GetPar(i).IsFixed()==false)
                   &&(lsq.GetCompiledRefinedObj().GetPar(i).GetType()==gpRefParTypeScattDataBackground))
                   vnewpar.push_back(&lsq.GetCompiledRefinedObj().GetPar(i));
-            lsq.SafeRefine(vnewpar,vnewpartype,2,true,false);
+            lsq.SafeRefine(vnewpar,vnewpartype,1.01,2,true,true);
             vnewpar.clear();
             TAU_PROFILE_STOP(timer1);
          }
@@ -6839,7 +6839,7 @@ SPGScore SpaceGroupExplorer::Run(const cctbx::sgtbx::space_group &spg, const boo
          mpDiff->SetExtractionMode(true,true);
          mpDiff->ExtractLeBail(5);
          TAU_PROFILE_START(timer3);
-         lsq.SafeRefine(vnewpar,vnewpartype,3,true,false);
+         lsq.SafeRefine(vnewpar,vnewpartype,1.01,3,true,true);
          TAU_PROFILE_STOP(timer3);
          //mpLog->AppendText(wxString::Format(_T("%5.2f%%/"),pDiff->GetParentPowderPattern().GetRw()*100));
          mpDiff->GetParentPowderPattern().FitScaleFactorForRw();
@@ -6913,7 +6913,7 @@ void SpaceGroupExplorer::RunAll(const bool fitprofile_all, const bool verbose)
          std::map<std::vector<bool>,SPGScore>::iterator posfgp=mvSPGExtinctionFingerprint.find(fgp);
          if(posfgp!=mvSPGExtinctionFingerprint.end())
          {
-            mvSPG.push_back(SPGScore(hm.c_str(),posfgp->second.rw,posfgp->second.gof,posfgp->second.nbextinct446));
+            mvSPG.push_back(SPGScore(hm.c_str(),posfgp->second.rw,posfgp->second.gof,posfgp->second.nbextinct446, posfgp->second.ngof));
             if(verbose) cout<<"Spacegroup:"<<hm<<" has same extinctions as:"<<posfgp->second.hm<<endl;
          }
          else

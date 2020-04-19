@@ -380,10 +380,40 @@ void Crystal::Print(ostream &os)const
    const long genMult=this->GetSpaceGroup().GetNbSymmetrics();
    for(int i=0;i<mScattCompList.GetNbComponent();i++)
       nbAtoms += genMult * mScattCompList(i).mOccupancy * mScattCompList(i).mDynPopCorr;
-   os << " Total number of components (atoms) in one unit cell : " << nbAtoms<<endl<<endl;
+   os << " Total number of components (atoms) in one unit cell : " << nbAtoms<<endl
+      << " Chemical formula: "<< this->GetFormula() <<endl;
 
    VFN_DEBUG_MESSAGE("Crystal::Print():End",5)
 }
+
+std::string Crystal::GetFormula() const
+{
+   this->GetScatteringComponentList();
+   if(mScattCompList.GetNbComponent() == 0) return "";
+   std::map<std::string,float> velts;
+   for(unsigned int i=0; i<mScattCompList.GetNbComponent(); ++i)
+   {
+      const ScatteringComponent* psi = &mScattCompList(i);
+      if(psi->mpScattPow == 0) continue;
+      if(psi->mpScattPow->GetClassName().compare("ScatteringPowerAtom")!=0) continue;
+      const ScatteringPowerAtom *pat=dynamic_cast<const ScatteringPowerAtom*>(psi->mpScattPow);
+      string p=pat->GetSymbol();
+      if(velts.count(p)==0)
+         velts[p] = psi->mOccupancy * psi->mDynPopCorr ;
+      else velts[p] += psi->mOccupancy * psi->mDynPopCorr;
+   }
+   stringstream s;
+   s<<std::setprecision(2);
+   for(std::map<std::string,float>::const_iterator pos=velts.begin();pos!=velts.end();++pos)
+   {
+      if(pos!=velts.begin()) s<<" ";
+      float nb=pos->second;
+      if((abs(nb)-nb)<0.01) s<<pos->first<<int(round(nb));
+      else s<<pos->first<<nb;
+   }
+   return s.str();
+}
+   
 
 CrystMatrix_REAL Crystal::GetMinDistanceTable(const REAL minDistance) const
 {

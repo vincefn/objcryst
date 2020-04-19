@@ -2179,8 +2179,8 @@ std::string Molecule::GetFormula() const
       if((*pos)->IsDummy()) continue;
       string p=(*pos)->GetScatteringPower().GetSymbol();
       if(velts.count(p)==0)
-         velts[(*pos)->GetScatteringPower().GetName()]=(*pos)->GetOccupancy();
-      else velts[(*pos)->GetScatteringPower().GetName()]+=(*pos)->GetOccupancy();
+         velts[p]=(*pos)->GetOccupancy();
+      else velts[p]+=(*pos)->GetOccupancy();
    }
    stringstream s;
    s<<std::setprecision(2);

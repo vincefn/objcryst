@@ -1171,8 +1171,10 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
             if(verbose) cout<<endl<<"Finally using spacegroup name:"<<bestsymbol<<endl;
             pCryst->GetSpaceGroup().ChangeSpaceGroup(bestsymbol);
          }
+         // Try to set name from CIF. If that fails, the computed formula will be used at the end
          if(pos->second.mName!="") pCryst->SetName(pos->second.mName);
          else if(pos->second.mFormula!="") pCryst->SetName(pos->second.mFormula);
+         
          const float t1=chrono.seconds();
          (*fpObjCrystInformUser)((boost::format("CIF: Create Crystal:%s(%s)(dt=%6.3fs)")%pCryst->GetName() % pCryst->GetSpaceGroup().GetName() % t1).str());
 
@@ -1277,6 +1279,7 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
             }
             (*fpObjCrystInformUser)((boost::format("CIF: finished connecting atoms (%u isolated atoms, %u molecules) (Crystal creation=%6.3fs total)") % ctat % ctmol % chrono.seconds()).str());
          }
+         if(pCryst->GetName()=="") pCryst->SetName(pCryst->GetFormula());
       }
    return pCryst;
 }
@@ -1299,6 +1302,7 @@ PowderPattern* CreatePowderPatternFromCIF(CIF &cif)
 DiffractionDataSingleCrystal* CreateSingleCrystalDataFromCIF(CIF &cif, Crystal *pcryst)
 {
    DiffractionDataSingleCrystal* pData=NULL;
+   std::string name("");
    for(map<string,CIFData>::iterator pos=cif.mvData.begin();pos!=cif.mvData.end();++pos)
    {
       if(pos->second.mH.numElements()>0)
@@ -1310,6 +1314,7 @@ DiffractionDataSingleCrystal* CreateSingleCrystalDataFromCIF(CIF &cif, Crystal *
             {  // Use last Crystal created
                pcryst=&(gCrystalRegistry.GetObj(gCrystalRegistry.GetNb()-1));
                (*fpObjCrystInformUser)((boost::format("CIF: Importing SINGLE CRYSTAL DIFFRACTION data: using last Crystal structure as corresponding crystal [%s]") % pcryst->GetName().c_str()).str());
+               name = pcryst->GetName();
             }
             else
             {
@@ -1320,6 +1325,7 @@ DiffractionDataSingleCrystal* CreateSingleCrystalDataFromCIF(CIF &cif, Crystal *
          }
          pData=new DiffractionDataSingleCrystal(*pcryst);
          pData->SetHklIobs(pos->second.mH,pos->second.mK,pos->second.mL,pos->second.mIobs,pos->second.mSigma);
+         if(pData->GetName()=="") pData->SetName(name);
          (*fpObjCrystInformUser)((boost::format("CIF: Imported SINGLE CRYSTAL DIFFRACTION data, with %d reflections") % pData->GetNbRefl()).str());
       }
    }

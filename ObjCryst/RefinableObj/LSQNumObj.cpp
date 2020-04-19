@@ -409,21 +409,24 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
             }
             catch(...)
             {
-               cout<<"Caught a Newmat exception :"<<BaseException::what()<<endl;
-               cout<<"A:"<<endl<<newmatA<<endl<<"W:"<<endl<<newmatW<<endl<<"V:"<<endl<<newmatV<<endl<<"Dscale:"<<newmatDscale*1e6<<endl;
-               cout<<setw(5)<<"B:"<<endl;
-               for(unsigned int i=0;i<B.size();i++) cout<<B(i)<<" ";
-               cout<<endl<<endl<<"M:"<<endl;
-               for(unsigned int i=0;i<M.rows();i++)
+               if(!silent)
                {
-                  for(unsigned int j=0;j<M.cols();j++) cout<<M(i,j)<<" ";
-                  cout<<endl;
-               }
-               cout<<endl<<endl<<"D("<<designMatrix.rows()<<"x"<<designMatrix.cols()<<"):"<<endl;
-               for(unsigned int i=0;i<designMatrix.rows();i++)
-               {
-                  for(unsigned int j=0;j<designMatrix.cols();j++) cout<<designMatrix(i,j)<<" ";
-                  cout<<endl;
+                  cout<<"Caught a Newmat exception :"<<BaseException::what()<<endl;
+                  cout<<"A:"<<endl<<newmatA<<endl<<"W:"<<endl<<newmatW<<endl<<"V:"<<endl<<newmatV<<endl<<"Dscale:"<<newmatDscale*1e6<<endl;
+                  cout<<setw(5)<<"B:"<<endl;
+                  for(unsigned int i=0;i<B.size();i++) cout<<B(i)<<" ";
+                  cout<<endl<<endl<<"M:"<<endl;
+                  for(unsigned int i=0;i<M.rows();i++)
+                  {
+                     for(unsigned int j=0;j<M.cols();j++) cout<<M(i,j)<<" ";
+                     cout<<endl;
+                  }
+                  cout<<endl<<endl<<"D("<<designMatrix.rows()<<"x"<<designMatrix.cols()<<"):"<<endl;
+                  for(unsigned int i=0;i<designMatrix.rows();i++)
+                  {
+                     for(unsigned int j=0;j<designMatrix.cols();j++) cout<<designMatrix(i,j)<<" ";
+                     cout<<endl;
+                  }
                }
                throw ObjCrystException("LSQNumObj::Refine():caught a newmat exception during Eigenvalues computing !");
             }
@@ -734,13 +737,13 @@ bool LSQNumObj::SafeRefine(std::list<RefinablePar*> vnewpar, std::list<const Ref
    catch(const ObjCrystException &except)
    {
       diverged = true;
-      cout << "Refinement did not converge !";
+      if(!silent) cout << "Refinement did not converge !";
    }
    const REAL deltachi2 = (mChiSq-chi2_0)/(chi2_0+1e-6);
    if(callBeginEndOptimization) this->EndOptimization();
    if(deltachi2>maxChi2factor)
    {
-      cout << "Refinement did not converge ! Chi2 increase("<<chi2_0<<"->"<<mChiSq<<") by a factor: "<< deltachi2<<endl;
+      if(!silent) cout << "Refinement did not converge ! Chi2 increase("<<chi2_0<<"->"<<mChiSq<<") by a factor: "<< deltachi2<<endl;
       diverged = true;
    }
    if(diverged)
@@ -757,7 +760,7 @@ bool LSQNumObj::SafeRefine(std::list<RefinablePar*> vnewpar, std::list<const Ref
       this->CalcRfactor();
       this->CalcRwFactor();
       this->CalcChiSquare();
-      cout <<"=> REVERTING to initial parameters values and fixing new parameters"<<endl;
+      if(!silent) cout <<"=> REVERTING to initial parameters values and fixing new parameters"<<endl;
       return false;
    }
    return true;

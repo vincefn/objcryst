@@ -189,6 +189,9 @@ class Crystal:public UnitCell
       /// \todo one function to print on one line and a PrintLong() function
       /// \param os the stream to which the information is outputed (default=cout)
       void Print(ostream &os=cout) const;
+   
+      /// Formula with atoms in alphabetic order
+      std::string GetFormula() const;
 
       /** \brief Minimum interatomic distance between all scattering components (atoms) in
       * the crystal.

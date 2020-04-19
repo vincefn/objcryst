@@ -28,6 +28,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <list>
 #include <map>
 #include <set>
 
@@ -721,16 +722,33 @@ template<class T> class ObjRegistry
       /** low-level access to the underlying vector begin().
       * Const access as we do not want the number and order of objects to change,
       * but the objects themselves can be modified.
+      * \warning: the iterator can be invalidated if the registry is modified
       */
       typename vector<T*>::const_iterator begin() const;
       /** low-level access to the underlying vector end().
       * Const access as we do not want the number and order of objects to change,
       * but the objects themselves can be modified.
+      * \warning: the iterator can be invalidated if the registry is modified
       */
       typename vector<T*>::const_iterator end() const;
+      /** low-level access to the underlying list begin().
+       * Const access as we do not want the number and order of objects to change,
+       * but the objects themselves can be modified.
+       * This iterator should remain valid even if an object is removed.
+       */
+      typename list<T*>::const_iterator list_begin() const;
+      /** low-level access to the underlying list end().
+       * Const access as we do not want the number and order of objects to change,
+       * but the objects themselves can be modified.
+       * This iterator should remain valid even if an object is removed.
+       */
+      typename list<T*>::const_iterator list_end() const;
    private:
       /// The registry of objects
       vector<T*> mvpRegistry;
+      /// Another view of the registry of objects - this time as a std::list, which
+      /// will not be invalidated if one object is deleted
+      list<T*> mvpRegistryList;
       /// Name of this registry
       string mName;
       /// Last time an object was added or removed
