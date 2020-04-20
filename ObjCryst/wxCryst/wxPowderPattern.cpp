@@ -4909,7 +4909,7 @@ void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
          {
             pDiff->GetParentPowderPattern().UpdateDisplay();
 
-            SPGScore score = ex.Run(spg, event.GetId()==ID_PROFILEFITTING_EXPLORE_SPG, false);
+            SPGScore score = ex.Run(spg, event.GetId()==ID_PROFILEFITTING_EXPLORE_SPG, false, false);
             score.ngof = score.gof * mpDiff->GetNbReflBelowMaxSinThetaOvLambda() / (float)nb_refl_p1;
 
             if(dlgProgress.Update(i*nbcycle,wxString::FromAscii(hm.c_str())+wxString::Format(_T("  (%u cycles)\n   Rwp=%5.2f%%\n   GoF=%9.2f"),
@@ -4937,8 +4937,9 @@ void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
       mpLog->AppendText(wxString::Format(_T(" Rwp=%5.2f%%  GoF=%8.2f  nGoF=%8.2f: (extinct refls=%3u) "),pos->rw,pos->gof,pos->ngof,pos->nbextinct446)+wxString::FromAscii(pos->hm.c_str())+_T(" \n"));
    }
    mpLog->AppendText(wxString::Format(_T("\n\n You can copy the chosen spacegroup symbol in the Crystal window\n")));
-   // Back to original spacegroup
-   pCrystal->Init(a,b,c,d,e,f,spgname,name);
+   mpLog->AppendText(wxString::Format(_T("\n\n The spacegroup with the best nGoF has been applied\n")));
+   // Set best solution
+   pCrystal->GetSpaceGroup().ChangeSpaceGroup(vSPG.front().hm);
    pDiff->GetParentPowderPattern().UpdateDisplay();
    pDiff->SetExtractionMode(true,true);
    pDiff->ExtractLeBail(5);

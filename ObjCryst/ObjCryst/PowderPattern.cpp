@@ -6730,7 +6730,8 @@ std::vector<bool> spgExtinctionFingerprint(Crystal &c, const cctbx::sgtbx::space
 SpaceGroupExplorer::SpaceGroupExplorer(PowderPatternDiffraction *pd):
    mpDiff(pd){};
 
-SPGScore SpaceGroupExplorer::Run(const string &spgId, const bool fitprofile, const bool verbose)
+SPGScore SpaceGroupExplorer::Run(const string &spgId, const bool fitprofile,
+                                 const bool verbose, const bool restore_orig)
 {
    cctbx::sgtbx::space_group sg;
    try
@@ -6752,10 +6753,10 @@ SPGScore SpaceGroupExplorer::Run(const string &spgId, const bool fitprofile, con
          throw ObjCrystException(emsg);
       }
    }
-   return this->Run(sg, fitprofile);
+   return this->Run(sg, fitprofile, verbose, restore_orig);
 }
 
-SPGScore SpaceGroupExplorer::Run(const cctbx::sgtbx::space_group &spg, const bool fitprofile, const bool verbose)
+SPGScore SpaceGroupExplorer::Run(const cctbx::sgtbx::space_group &spg, const bool fitprofile, const bool verbose, const bool restore_orig)
 {
    TAU_PROFILE("SpaceGroupExplorer::Run()","void (wxCommandEvent &)",TAU_DEFAULT);
    TAU_PROFILE_TIMER(timer1,"SpaceGroupExplorer::Run()LSQ-P1","", TAU_FIELD);
@@ -6770,8 +6771,9 @@ SPGScore SpaceGroupExplorer::Run(const cctbx::sgtbx::space_group &spg, const boo
               d=pCrystal->GetLatticePar(3),
               e=pCrystal->GetLatticePar(4),
               f=pCrystal->GetLatticePar(5);
-   const string spgname=pCrystal->GetSpaceGroup().GetName();
+   const string spghm=pCrystal->GetSpaceGroup().GetCCTbxSpg().match_tabulated_settings().hermann_mauguin();
    const string name=pCrystal->GetName();
+   // Set up new spacegroup
    const cctbx::sgtbx::space_group_symbols s = spg.match_tabulated_settings();
    const string hm=s.universal_hermann_mauguin();
    const cctbx::uctbx::unit_cell uc(scitbx::af::double6(a,b,c,d*RAD2DEG,e*RAD2DEG,f*RAD2DEG));
@@ -6779,6 +6781,7 @@ SPGScore SpaceGroupExplorer::Run(const cctbx::sgtbx::space_group &spg, const boo
    {
       throw ObjCrystException("Spacegroup is not compatible with unit cell.");
    }
+   mpDiff->GetCrystal().Init(a,b,c,d,e,f,hm,name);
    unsigned int nbcycle=1;
    mpDiff->GetParentPowderPattern().UpdateDisplay();
    // Number of free parameters (not taking into account refined profile/background parameters)
@@ -6855,10 +6858,18 @@ SPGScore SpaceGroupExplorer::Run(const cctbx::sgtbx::space_group &spg, const boo
    std::vector<bool> fgp=spgExtinctionFingerprint(*pCrystal,spg);
    for(unsigned int i=6;i<fgp.size();++i) nbextinct446+=(unsigned int)(fgp[i]);
    if(verbose>0) cout << boost::format(" Rwp= %5.2f%%  GoF=%9.2f  (%2u extinct refls)") % rw % gof % nbextinct446<<endl;
+   
+   if(restore_orig)
+   {
+      mpDiff->GetCrystal().Init(a,b,c,d,e,f,spghm,name);
+      mpDiff->GetCrystal().UpdateDisplay();
+      this->mpDiff->GetParentPowderPattern().UpdateDisplay();
+   }
+
    return SPGScore(hm.c_str(),rw,gof,nbextinct446);
 }
 
-void SpaceGroupExplorer::RunAll(const bool fitprofile_all, const bool verbose)
+void SpaceGroupExplorer::RunAll(const bool fitprofile_all, const bool verbose, const bool keep_best)
 {
    Crystal *pCrystal=&(mpDiff->GetCrystal());
    
@@ -6870,7 +6881,7 @@ void SpaceGroupExplorer::RunAll(const bool fitprofile_all, const bool verbose)
    e=pCrystal->GetLatticePar(4),
    f=pCrystal->GetLatticePar(5);
    const cctbx::uctbx::unit_cell uc(scitbx::af::double6(a,b,c,d*RAD2DEG,e*RAD2DEG,f*RAD2DEG));
-   const string spgname=pCrystal->GetSpaceGroup().GetName();
+   const string spghm=pCrystal->GetSpaceGroup().GetCCTbxSpg().match_tabulated_settings().hermann_mauguin();
    const string name=pCrystal->GetName();
 
    cctbx::sgtbx::space_group_symbol_iterator it=cctbx::sgtbx::space_group_symbol_iterator();
@@ -6918,8 +6929,8 @@ void SpaceGroupExplorer::RunAll(const bool fitprofile_all, const bool verbose)
          }
          else
          {
-            if((s.number()==1) || fitprofile_all) mvSPG.push_back(this->Run(spg, true, false));
-            else mvSPG.push_back(this->Run(spg, false, false));
+            if((s.number()==1) || fitprofile_all) mvSPG.push_back(this->Run(spg, true, false, false));
+            else mvSPG.push_back(this->Run(spg, false, false, false));
             mvSPG.back().ngof = mvSPG.back().gof * mpDiff->GetNbReflBelowMaxSinThetaOvLambda() / (float)nb_refl_p1;
             mvSPGExtinctionFingerprint.insert(make_pair(fgp, mvSPG.back()));
 
@@ -6929,6 +6940,21 @@ void SpaceGroupExplorer::RunAll(const bool fitprofile_all, const bool verbose)
       }
    }
    mvSPG.sort(compareSPGScore);
+   if(keep_best)
+   {
+      if(verbose) cout<<"Restoring best spacegroup: "<<mvSPG.front().hm<<endl;
+      pCrystal->GetSpaceGroup().ChangeSpaceGroup(mvSPG.front().hm);
+   }
+   else
+   {
+      // Go back to original lattice and spacegroup & update display
+      pCrystal->Init(a,b,c,d,e,f,spghm,name);
+   }
+   mpDiff->SetExtractionMode(true,true);
+   mpDiff->ExtractLeBail(5);
+   pCrystal->UpdateDisplay();
+   this->mpDiff->GetParentPowderPattern().UpdateDisplay();
+
 }
 
 const list<SPGScore>& SpaceGroupExplorer::GetScores() const
