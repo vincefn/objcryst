@@ -97,7 +97,8 @@ public:
      FoxClient(wxString working_dir);
      ~FoxClient();
      bool ConnectClient(int nbOfTrial, wxString hostname);
-     void OnSendResults(wxTimerEvent& event);
+     void DoManyThingsOnTimer(wxTimerEvent& event);
+     //void OnSendResults(wxTimerEvent& event);
      void OnSocketEvent(wxSocketEvent &event);
      void WriteProtocol();
      bool IsClientConnected();
@@ -125,27 +126,25 @@ public:
 
 protected:
    wxString getJob(wxString inmsg, long pos);
-   bool SendResult(wxString result);
-   void answerToAsk(vector<wxString> ask);
+   void SendCurrentState();
    void SaveResult(wxString fileName, wxString Cost, int ID);
    void WriteMessageLog(wxString msg);
-   bool AnalyzeMessage(wxSocketBase* tmpSock);
-   int  WriteStringToSocket(wxSocketBase *pSocket, std::string s);
-   int  ReadStringFromSocket(wxSocketBase *pSocket, std::string &message);
+   bool AnalyzeMessage(wxString msg);
+
    void SaveDataAsFile(wxString out, wxString filename);
    bool LoadFile(wxString filename, wxString &in);
    wxString getMyHostname();
    wxString addToPath(wxString str1, wxString str2);
 
    //reconnect client
-   void Reconnect();
+   //void Reconnect();
 
    //it runs new job, return 0 if successful
    //job - content of the file, id - job id,
    int runNewJob(wxString job, int id, int nbTrial, bool rand);
 
    //send not-accepted jobs back to the server
-   void rejectJobs(std::vector<int> ids);
+   //void rejectJobs(std::vector<int> ids);
 
    //get file name "out-Cost-%f.xml", dir - directory with file
    wxString getOutputFile(wxString dir);
@@ -163,11 +162,8 @@ protected:
    wxString               m_hostname;
    wxTimer              * m_sendingTimer;
    wxMutex              * m_DataMutex;
-   wxMutex              * m_ResultsMutex;
    vector<FoxProcess>     m_processes;
    vector<GrdRslt>        m_results;
-
-   //int                    m_ID;
    int                    m_nbOfAvailCPUs;
    IOSocket               m_IOSocket;
    wxString               m_working_dir;

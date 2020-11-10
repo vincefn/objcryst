@@ -37,6 +37,7 @@ public:
    //remove thread's id from thread list (default: remove only one)
    //nbThreads=-1 remove all thread's ids in the list (called when lost_socket occurs)
    void RemoveThread(int threadID, int nbThreads = 1);
+   int getAvailableRuns();
 
    wxString getListOfThreads();
    void setName(wxString name);

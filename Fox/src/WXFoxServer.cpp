@@ -16,6 +16,7 @@ using namespace std;
 #include "WXFoxServer.h"
 #include <iostream>
 
+
 static long STOP_TO_CLIENT=                        WXCRYST_ID();
 static long RUN_LOCAL_CLIENT=                     WXCRYST_ID();
 static long RUN_TO_CLIENT=                        WXCRYST_ID();
@@ -373,11 +374,11 @@ void WXFoxServer::AddJob(wxString filename, wxString name, int id, long nbOfTria
     newJob.setName(name);
     newJob.setRand(rand);
 
-    if(m_WXFoxServerDataMutex->Lock()!=wxMUTEX_NO_ERROR) return;
+    //if(m_WXFoxServerDataMutex->Lock()!=wxMUTEX_NO_ERROR) return;
     //save it and save it in FoxServer
     m_jobs.push_back(newJob);
     m_FoxServer->AddJobToList(newJob);
-    m_WXFoxServerDataMutex->Unlock();
+    //m_WXFoxServerDataMutex->Unlock();
 
     m_UpdateTimer->Stop();
     //Update Lists
@@ -700,7 +701,7 @@ void WXFoxServer::UpdateLists(wxTimerEvent& event)
 {
    std::vector<GridClient> clients;
 
-   if(m_WXFoxServerDataMutex->Lock()!=wxMUTEX_NO_ERROR) return;
+   //if(m_WXFoxServerDataMutex->Lock()!=wxMUTEX_NO_ERROR) return;
 
    if(m_FoxServer->IsServerRunning()){
       m_FoxServer->GetData(clients, m_results, m_jobs);
@@ -736,7 +737,7 @@ void WXFoxServer::UpdateLists(wxTimerEvent& event)
    UpdateResultList();
    UpdateJobList();
 
-   m_WXFoxServerDataMutex->Unlock();
+   //m_WXFoxServerDataMutex->Unlock();
 
 }
 void WXFoxServer::OnGridJobClick(wxGridEvent &event)
