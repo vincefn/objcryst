@@ -34,7 +34,11 @@
 
 #define __FOX_SERVER__
 
-#include "FoxServerThread.h"
+#include "FoxJob.h"
+#include "GridResult.h"
+#include "IOSocket.h"
+
+//#include "FoxServerThread.h"
 //#include "wxCryst/wxCryst.h"
 //DECLARE_EVENT_TYPE(SERVER_THREAD_EVENT, -1)
 const wxEventType wxEVT_WORKER = wxNewEventType();
@@ -97,6 +101,7 @@ private:
     //this will return N of available jobs (or lower no.)
     vector<FoxJob > getJobsToCalculate(int n);
     void AddResultToJobList(int id);
+    void RemoveThreadFromJobList();
     void cannot_calculate_this_job(FoxJob fj);
     
     wxString             m_working_directory;

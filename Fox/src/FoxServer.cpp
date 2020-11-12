@@ -170,6 +170,14 @@ void ThreadWorker::cannot_calculate_this_job(FoxJob fj)
     }
     m_mutexProtecting_Jobs_Results->Unlock();
 }
+void ThreadWorker::RemoveThreadFromJobList()
+{//run this before closing this thread
+    if(m_mutexProtecting_Jobs_Results->Lock()!=wxMUTEX_NO_ERROR) return;
+    for(int j=0;j<(*m_global_jobs).size();j++) {
+       (*m_global_jobs)[j].RemoveThread(GetId(), -1);
+    }
+    m_mutexProtecting_Jobs_Results->Unlock();
+}
 void ThreadWorker::AddResultToJobList(int id)
 {
     if(m_mutexProtecting_Jobs_Results->Lock()!=wxMUTEX_NO_ERROR) return;
@@ -275,18 +283,6 @@ bool ThreadWorker::analyze_message_and_get_answer(wxString msg, wxString &answer
               }
           }
       }
-      /*
-      if("rejectedJob"==tag.GetName()){
-           long rejctd=0;
-           for(int i=tag.GetNbAttribute()-1;i>=0;i--){
-              if(tag.GetAttributeName(i)=="id") {
-                    wxString nb = wxString::FromAscii(tag.GetAttributeValue(i).c_str());
-                    nb.ToLong((long *) &rejctd);
-                    rejectedJobs.push_back(rejctd);
-              }
-           }
-      }
-      */
    }
 
    if(availableCPUs!=-1) {
@@ -411,7 +407,7 @@ wxThread::ExitCode ThreadWorker::Entry()
             wxString msg;
             WriteLogMessage("Reading message from the socket");
             if(!m_IO.ReadStringFromSocket(m_socket, msg)) {
-                WriteLogMessage("ERROR reading from the socket");
+                WriteLogMessage("ERROR: reading from the socket");
                 continue;
             }
 
@@ -423,17 +419,23 @@ wxThread::ExitCode ThreadWorker::Entry()
             tmp_path = m_working_directory + _T("/server_msg_in.txt");
             #endif
             SaveDataAsFile(msg, tmp_path);
-            
 
             wxString answ;
             if(!analyze_message_and_get_answer(msg, answ)) {
-                WriteLogMessage("Error: something wrong during analyzing the message...");
+                WriteLogMessage("ERROR: something wrong during analyzing the message...");
             }
+
             if(answ.length()==0) {
+                //send just dummy answer, because something has to be send (client is waiting for it...)
                 answ = "Nothing to do...";
             }
             WriteLogMessage("Sending answer ...");
-            m_IO.WriteStringToSocket(m_socket, answ);
+            if(!m_IO.WriteStringToSocket(m_socket, answ)) {
+                WriteLogMessage("ERROR: sending answer returned false");
+                continue;
+            }
+
+            //inform parent thread about news. Sending event is a save way how to do it.
             WorkerEvent e(this);
             e.m_exit = false;
             e.m_thread_info.m_name = m_name;
@@ -444,7 +446,12 @@ wxThread::ExitCode ThreadWorker::Entry()
         }
     }
 
-    WriteLogMessage("Connectiction lost ...");
+    WriteLogMessage("Connection lost ...");
+
+    //Remove this thread ID from all jobs before leaving
+    RemoveThreadFromJobList();
+
+    //inform parent thread about leaving
     WorkerEvent e(this);
     e.m_exit = true;
     e.m_thread_info.m_name = m_name;

@@ -32,7 +32,7 @@ static long SHOW_RESULTS=                        WXCRYST_ID();
 BEGIN_EVENT_TABLE(WXFoxServer, wxWindow)
   //EVT_BUTTON(STOP_TO_CLIENT,                  WXFoxServer::StopAllClients)
   EVT_BUTTON(RUN_LOCAL_CLIENT,                 WXFoxServer::RunLocalClient)
-  EVT_BUTTON(RUN_TO_CLIENT,                 WXFoxServer::RunALLClient)
+  //EVT_BUTTON(RUN_TO_CLIENT,                 WXFoxServer::RunALLClient)
   EVT_BUTTON(NEW_JOB,                        WXFoxServer::OnNewJob)
   EVT_BUTTON(EDIT_JOB,                        WXFoxServer::OnEditJob)
   EVT_BUTTON(DELETE_JOB,                     WXFoxServer::OnDeleteJob)
@@ -91,7 +91,7 @@ void WXFoxServer::InitServer()
    m_JobListTable->SetColLabelValue(1, _T("Job name"));
    m_JobListTable->SetColLabelValue(2, _T("Nb trials"));
    m_JobListTable->SetColLabelValue(3, _T("Randomize ?"));
-   m_JobListTable->SetColLabelValue(4, _T("nbRuns/done/active"));
+   m_JobListTable->SetColLabelValue(4, _T("runs/done/active"));
 
    m_JobListTable->SetColLabelSize(20);
    m_JobListTable->SetRowLabelSize(0);
@@ -127,10 +127,10 @@ void WXFoxServer::InitServer()
    RunClientButton->SetToolTip(_T("Gives you the option to run the job \n")
                                _T("locally, using multiple processors or cores"));
    //run button
-   wxButton *RunButton = new wxButton(this, RUN_TO_CLIENT, _T("Ping clients"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("Button2"));
-   JobButtonSizer->Add(RunButton,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
-   RunButton->SetToolTip(_T("It asks connected clients whether they compute.\n If not, it sends them job\n\n")
-                         _T("This is useful when some client does not compute.\n Use it carefully, it increases traffic on the server."));
+   //wxButton *RunButton = new wxButton(this, RUN_TO_CLIENT, _T("Ping clients"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("Button2"));
+   //JobButtonSizer->Add(RunButton,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
+   //RunButton->SetToolTip(_T("It asks connected clients whether they compute.\n If not, it sends them job\n\n")
+   //                      _T("This is useful when some client does not compute.\n Use it carefully, it increases traffic on the server."));
 
    //stop button
    /*
@@ -143,20 +143,20 @@ void WXFoxServer::InitServer()
    wxStaticText *label2 = new wxStaticText(this, NULL, _T("Client list: "), wxDefaultPosition, wxDefaultSize, 0 , _T("label"));
    listClientSizer->Add(label2,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
 
-
+   xsize = xsize/2-5;
    //client list table
-   m_ClientTable = new wxGrid(this, NULL, wxDefaultPosition, wxSize(xsize/2-5,150), wxWANTS_CHARS, _T("m_ClientTable"));
-   m_ClientTable->CreateGrid(1,4,wxGrid::wxGridSelectRows);
+   m_ClientTable = new wxGrid(this, NULL, wxDefaultPosition, wxSize(xsize,150), wxWANTS_CHARS, _T("m_ClientTable"));
+   m_ClientTable->CreateGrid(1,3,wxGrid::wxGridSelectRows);
    m_ClientTable->SetColLabelValue(0, _T("Name"));
    m_ClientTable->SetColLabelValue(1, _T("ID"));
-   m_ClientTable->SetColLabelValue(2, _T("CPU/avail"));
-   m_ClientTable->SetColLabelValue(3, _T("Status"));
+   m_ClientTable->SetColLabelValue(2, _T("CPUs/using"));
+   //m_ClientTable->SetColLabelValue(3, _T("Status"));
    m_ClientTable->SetColLabelSize(20);
    m_ClientTable->SetRowLabelSize(0);
-   m_ClientTable->SetColumnWidth(0, xsize/8+50);
-   m_ClientTable->SetColumnWidth(1, xsize/8-25);
-   m_ClientTable->SetColumnWidth(2, xsize/8-25);
-   m_ClientTable->SetColumnWidth(3, xsize/8);
+   m_ClientTable->SetColumnWidth(0, xsize/3);
+   m_ClientTable->SetColumnWidth(1, xsize/3);
+   m_ClientTable->SetColumnWidth(2, xsize/3);
+   //m_ClientTable->SetColumnWidth(3, xsize/8);
    m_ClientTable->DeleteRows(0, 1, false);
    listClientSizer->Add(m_ClientTable,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
    /*
@@ -172,7 +172,7 @@ void WXFoxServer::InitServer()
    listResultSizer->Add(label3,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
 
    //result list table
-   m_ResultTable = new wxGrid(this, GRID_RESULT_LIST, wxDefaultPosition, wxSize(xsize/2-5,150), wxWANTS_CHARS, _T("m_ResultTable"));
+   m_ResultTable = new wxGrid(this, GRID_RESULT_LIST, wxDefaultPosition, wxSize(xsize,150), wxWANTS_CHARS, _T("m_ResultTable"));
    m_ResultTable->CreateGrid(1,3,wxGrid::wxGridSelectCells);
    m_ResultTable->SetColLabelValue(0, _T("Nb"));
    m_ResultTable->SetColLabelValue(1, _T("Job ID"));
@@ -181,8 +181,8 @@ void WXFoxServer::InitServer()
    m_ResultTable->SetColLabelSize(20);
    m_ResultTable->SetRowLabelSize(0);
    m_ResultTable->SetColumnWidth(0, 50);
-   m_ResultTable->SetColumnWidth(1, (xsize/2-95)/2);
-   m_ResultTable->SetColumnWidth(2, (xsize/2-95)/2);
+   m_ResultTable->SetColumnWidth(1, (xsize-50)/2);
+   m_ResultTable->SetColumnWidth(2, (xsize-50)/2);
    //m_ResultTable->SetColumnWidth(3, 50);
    m_ResultTable->DeleteRows(0, 1, false);
    listResultSizer->Add(m_ResultTable,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
@@ -725,13 +725,13 @@ void WXFoxServer::UpdateLists(wxTimerEvent& event)
         m_ClientTable->SetReadOnly(i,1);
 
         //CPUs
-        tmp.Printf(_T("%d/%d"), (int) clients[i].allCPUs, (int) clients[i].availCPUs);
+        tmp.Printf(_T("%d/%d"), (int) clients[i].allCPUs, (int) (clients[i].allCPUs-clients[i].availCPUs));
         m_ClientTable->SetCellValue(i,2,tmp);
         m_ClientTable->SetReadOnly(i,2);
 
         //status
-        m_ClientTable->SetCellValue(i,3,clients[i].status);
-        m_ClientTable->SetReadOnly(i,3);
+        //m_ClientTable->SetCellValue(i,3,clients[i].status);
+        //m_ClientTable->SetReadOnly(i,3);
    }
 
    UpdateResultList();
