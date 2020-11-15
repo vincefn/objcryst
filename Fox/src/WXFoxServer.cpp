@@ -727,11 +727,26 @@ void WXFoxServer::UpdateLists(wxTimerEvent& event)
         //CPUs
         tmp.Printf(_T("%d/%d"), (int) clients[i].allCPUs, (int) (clients[i].allCPUs-clients[i].availCPUs));
         m_ClientTable->SetCellValue(i,2,tmp);
-        m_ClientTable->SetReadOnly(i,2);
-
+        m_ClientTable->SetReadOnly(i,2);        
         //status
         //m_ClientTable->SetCellValue(i,3,clients[i].status);
         //m_ClientTable->SetReadOnly(i,3);
+        //set colors
+        if(clients[i].availCPUs < clients[i].allCPUs) {
+            m_ClientTable->SetCellBackgroundColour(wxColor(255, 200, 200), i, 0);
+            m_ClientTable->SetCellBackgroundColour(wxColor(255, 200, 200), i, 1);
+            m_ClientTable->SetCellBackgroundColour(wxColor(255, 200, 200), i, 2);
+        } else {
+            m_ClientTable->SetCellBackgroundColour(wxColor(200, 255, 200), i, 0);
+            m_ClientTable->SetCellBackgroundColour(wxColor(200, 255, 200), i, 1);
+            m_ClientTable->SetCellBackgroundColour(wxColor(200, 255, 200), i, 2);
+        }
+   }
+
+   //set colors
+   for(int i=0;i<clients.size();i++){
+
+        
    }
 
    UpdateResultList();

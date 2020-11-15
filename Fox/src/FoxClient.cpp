@@ -94,10 +94,11 @@ wxEvtHandler()
    m_working_dir = working_dir;
    wxString dirName = addToPath(getWorkingDir(), _T("processes"));
    if(!wxDirExists(dirName)) wxMkdir(dirName);
+   m_ProcessMutex = new wxMutex();
    //m_DataMutex = new wxMutex();
    //m_ResultsMutex = new wxMutex();
    mpClient = new wxSocketClient();
-   m_Connecting = false;
+   //m_Connecting = false;
    m_sendingTimer = new wxTimer(this, ID_SEND_TIMER);
    m_exit = false;
    m_nbOfAvailCPUs = wxThread::GetCPUCount();
@@ -126,6 +127,8 @@ int FoxClient::getNbOfAvailCPUs()
 }
 void FoxClient::resetProcesses(int nbProcesses)
 {
+    if(m_ProcessMutex->Lock()!=wxMUTEX_NO_ERROR) return;
+    
     m_processes.clear();
     for(int i=0;i<nbProcesses;i++) {
       wxString dir;
@@ -150,6 +153,7 @@ void FoxClient::resetProcesses(int nbProcesses)
       FoxProcess proc(dir);
       m_processes.push_back(proc);
    }
+    m_ProcessMutex->Unlock();
 }
 void FoxClient::WriteMessageLog(wxString msg)
 {
@@ -164,11 +168,14 @@ void FoxClient::WriteMessageLog(wxString msg)
 }
 void FoxClient::onProcessTerminate(int pid, int status, wxString dir)
 {
+   if(m_ProcessMutex->Lock()!=wxMUTEX_NO_ERROR) return;
+
    wxString st = _T("");
    st.Printf(_T("pid=%d, status=%d, dir="), pid, status);
    WriteMessageLog(_T("Process terminated: ") + st + dir);
    int ID;
    //identify process ID
+   
    for(int i=0;i<m_processes.size();i++) {
        if(m_processes[i].getPid() == pid) {
            m_processes[i].setRunning(false);
@@ -177,9 +184,12 @@ void FoxClient::onProcessTerminate(int pid, int status, wxString dir)
            break;
        }
    }
+   m_ProcessMutex->Unlock();
+
    //if some error return
    if(status!=0) {
        WriteMessageLog(_T("process terminated with an error => no result will be sent to the server"));
+       //m_ProcessMutex->Unlock();
        return;
    }
 
@@ -199,6 +209,8 @@ void FoxClient::onProcessTerminate(int pid, int status, wxString dir)
    wxRemoveFile(dir + _T("/input.xml"));
    wxRemoveFile(dir + _T("/out.txt"));
    #endif
+
+   
 }
 wxString FoxClient::getOutputFile(wxString dir)
 {
@@ -251,6 +263,7 @@ void FoxClient::Reconnect()
 */
 void FoxClient::KillProcesses()
 {
+    if(m_ProcessMutex->Lock()!=wxMUTEX_NO_ERROR) return;
     WriteMessageLog(_T("Killing processes"));
     for(int i=0;i<m_processes.size();i++) {
         if(m_processes[i].isRunning()) {
@@ -261,10 +274,12 @@ void FoxClient::KillProcesses()
             WriteMessageLog(tmp);
         }
     }
+    m_ProcessMutex->Unlock();
 }
 void FoxClient::Disconnect()
 {
     WriteMessageLog(_T("Disconnecting"));
+    //m_sendingTimer->Stop();
     if(mpClient!=0) {
        mpClient->Destroy();
        mpClient = 0;
@@ -272,14 +287,16 @@ void FoxClient::Disconnect()
 }
 bool FoxClient::ConnectClient(int nbOfTrial, wxString hostname)
 {
-   m_Connecting = true;
+   //m_Connecting = true;
    WriteMessageLog(_T("Client try to connect"));
    wxIPV4address ip;
    int i=0;
 
    m_hostname = hostname;
    ip.Service(2854);
-   if(!ip.Hostname(m_hostname)) return false;
+   if(!ip.Hostname(m_hostname)) {
+       return false;
+   }
 
    if(mpClient==0) mpClient = new wxSocketClient();
    mpClient->SetEventHandler(*this, GRID_CLIENT_SOCKET_ID);
@@ -294,11 +311,11 @@ bool FoxClient::ConnectClient(int nbOfTrial, wxString hostname)
       mpClient->Connect(ip, false);
       mpClient->WaitOnConnect(3,0);
       if(i==nbOfTrial) break;
-      if(!m_Connecting) break;
+      //if(!m_Connecting) break;
       if(m_exit) break;
    } while(!mpClient->IsConnected());
    
-   m_Connecting = false;
+   //m_Connecting = false;
    
    if (mpClient->IsConnected()){
       mpClient->SaveState();
@@ -331,6 +348,11 @@ void FoxClient::OnSocketEvent(wxSocketEvent &event)
         {
           //ClientEvent("Connection failed.\n");
            WriteMessageLog(_T("LOST - This can sometimes happen!"));
+           //m_sendingTimer->Stop();
+           if(mpClient!=0) {
+               mpClient->Destroy();
+               mpClient = NULL;
+           }
            break;
         }
      case wxSOCKET_OUTPUT:
@@ -494,24 +516,42 @@ wxString FoxClient::getJob(wxString inmsg, long pos)
     job = in.Left(p);
     return job;
 }
+vector<FoxProcess> FoxClient::get_copy_of_processes()
+{
+    vector<FoxProcess> res;
+    if(m_ProcessMutex->Lock()!=wxMUTEX_NO_ERROR) return res;    
+    for(int i=0;i<m_processes.size();i++) {
+        res.push_back(m_processes[i]);
+    }
+    m_ProcessMutex->Unlock();
+    return res;
+}
 int FoxClient::getNbOfUnusedProcesses()
 {
+    if(m_ProcessMutex->Lock()!=wxMUTEX_NO_ERROR) return 0;
     int nb=0;
     for(int i=0;i<m_processes.size();i++) {
         if (!m_processes[i].isRunning()) nb++;
     }
+    m_ProcessMutex->Unlock();
     return nb;
 }
 FoxProcess * FoxClient::getUnusedProcess()
-{
+{//this function itself can't lock m_ProcessMutex, because it returns pointer
+ //the mutex has to be used by the caller
+    
     for(int i=0;i<m_processes.size();i++) {
-        if(!m_processes[i].isRunning()) return &m_processes[i];
+        if(!m_processes[i].isRunning()) {
+            return &m_processes[i];
+        }
     }
     return 0;
 }
 int FoxClient::runNewJob(wxString job, int id, int nbTrial, bool rand)
 {
     WriteMessageLog(_T("run new job"));
+    //we have to use protection for m_processes here!
+    if(m_ProcessMutex->Lock()!=wxMUTEX_NO_ERROR) return -1;
     FoxProcess *proc = getUnusedProcess();
     if(proc!=0) {
         WriteMessageLog(_T("process found"));
@@ -578,6 +618,7 @@ int FoxClient::runNewJob(wxString job, int id, int nbTrial, bool rand)
         if ( !pid ) {
             delete process;
             WriteMessageLog(_T("Process not started: ") + cmd_content);
+            m_ProcessMutex->Unlock();
             return -1;
         } else {
             proc->setPid(pid);
@@ -586,12 +627,15 @@ int FoxClient::runNewJob(wxString job, int id, int nbTrial, bool rand)
             wxString tmp;
             tmp.Printf(_T("%d"), pid);
             WriteMessageLog(_T("Process started: pid=") + tmp + _T(", dir=") + cmd_content);
+            m_ProcessMutex->Unlock();
             return 0;
         }
     } else {
         WriteMessageLog(_T("No unsused process is available, job will be rejected to server"));
+        m_ProcessMutex->Unlock();
         return -1;
     }
+    m_ProcessMutex->Unlock();
     return 0;
 }
 /*
@@ -678,6 +722,10 @@ void FoxClient::SaveResult(wxString fileName, wxString Cost, int ID)
 }
 void FoxClient::DoManyThingsOnTimer(wxTimerEvent& event)
 {
+    if(mpClient == NULL) {  
+        
+        return;
+    }
     if (!mpClient->IsConnected()) {
         //TODO: try to connect...
 

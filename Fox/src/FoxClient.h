@@ -117,11 +117,15 @@ public:
      //Do not use it for getting nb of all processes!!!
      int getNbOfUnusedProcesses();
 
+     //Thread-safe way to get info about all processes
+     //Returns copy of the processes, that can be used without mutex
+     vector<FoxProcess> get_copy_of_processes();
+
      //kill all running processes
      void KillProcesses();
 
 
-     bool   m_Connecting;
+     //bool   m_Connecting;
      bool   m_exit;
 
 protected:
@@ -161,7 +165,7 @@ protected:
    wxSocketClient       * mpClient;
    wxString               m_hostname;
    wxTimer              * m_sendingTimer;
-   wxMutex              * m_DataMutex;
+   wxMutex              * m_ProcessMutex;
    vector<FoxProcess>     m_processes;
    vector<GrdRslt>        m_results;
    int                    m_nbOfAvailCPUs;
