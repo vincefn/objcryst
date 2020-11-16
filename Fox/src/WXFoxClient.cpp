@@ -115,15 +115,17 @@ void WXFoxClient::InitClient()
    topSizer->Add(ConnectSizer, 0, wxALL|wxALIGN_TOP);
    topSizer->Add(new wxStaticText(this, NULL, "List of Processes", wxDefaultPosition, wxDefaultSize, 0 , _T("label")), 0, wxALL|wxALIGN_TOP, 3);
    m_process_table = new wxGrid(this, NULL, wxDefaultPosition, wxSize(xsize,200), wxWANTS_CHARS, _T("List of Processes"));
-   m_process_table->CreateGrid(1,3,wxGrid::wxGridSelectRows);
-   m_process_table->SetColLabelValue(0, _T("Process ID"));
+   m_process_table->CreateGrid(1,4,wxGrid::wxGridSelectRows);
+   m_process_table->SetColLabelValue(0, _T("No."));
    m_process_table->SetColLabelValue(1, _T("Job ID"));
-   m_process_table->SetColLabelValue(2, _T("Status"));
+   m_process_table->SetColLabelValue(2, _T("Started"));
+   m_process_table->SetColLabelValue(3, _T("Status"));
    m_process_table->SetColLabelSize(20);
    m_process_table->SetRowLabelSize(0);
-   m_process_table->SetColumnWidth(0, xsize/3);
-   m_process_table->SetColumnWidth(1, xsize/3);
-   m_process_table->SetColumnWidth(2, xsize/3);
+   m_process_table->SetColumnWidth(0, 1.0 * xsize/10.0);
+   m_process_table->SetColumnWidth(1, 3.0 * xsize/10.0);
+   m_process_table->SetColumnWidth(2, 3.0 * xsize/10.0);
+   m_process_table->SetColumnWidth(3, 3.0 * xsize/10.0);
    m_process_table->DeleteRows(0, 1, false);
    topSizer->Add(m_process_table, 0, wxALL|wxALIGN_BOTTOM);
 
@@ -186,25 +188,41 @@ void WXFoxClient::OnUpdateProcessTimer(wxTimerEvent& event)
     if(nbRow>0) m_process_table->DeleteRows(0, nbRow, true);
     m_process_table->ClearGrid();
     for(int i=0;i<p.size();i++) {
-        
-        m_process_table->InsertRows(i, 1, false);
-
-        m_process_table->SetCellValue(i,0,wxString::Format("%d",p[i].getPid()));
-        m_process_table->SetReadOnly(i,0);
-
-        m_process_table->SetCellValue(i,1,wxString::Format("%d",p[i].getJobID()));
-        m_process_table->SetReadOnly(i,1);
-
-        wxString tmp = "Unused";
+        m_process_table->InsertRows(i, 1, false);            
         if(p[i].isRunning()) {
-            tmp = "running";
+            m_process_table->SetCellValue(i,0,wxString::Format("%d",i));
+            m_process_table->SetReadOnly(i,0);
+            m_process_table->SetCellBackgroundColour(wxColor(255, 200, 200), i, 0);
+
+            m_process_table->SetCellValue(i,1,wxString::Format("%d",p[i].getJobID()));
+            m_process_table->SetReadOnly(i,1);           
+            m_process_table->SetCellBackgroundColour(wxColor(255, 200, 200), i, 1);
+
+            m_process_table->SetCellValue(i,2,wxString::Format("%s",p[i].getStartingTime().FormatTime()));
+            m_process_table->SetReadOnly(i,2);           
+            m_process_table->SetCellBackgroundColour(wxColor(255, 200, 200), i, 2);
+
+            m_process_table->SetCellValue(i,3,"running");
+            m_process_table->SetReadOnly(i,3);
+            m_process_table->SetCellBackgroundColour(wxColor(255, 200, 200), i, 3);
+        } else {
+            m_process_table->SetCellValue(i,0,wxString::Format("%d",i));
+            m_process_table->SetReadOnly(i,0);
+            m_process_table->SetCellBackgroundColour(wxColor(200, 255, 200), i, 0);
+
+            m_process_table->SetCellValue(i,1,"");
+            m_process_table->SetReadOnly(i,1);           
+            m_process_table->SetCellBackgroundColour(wxColor(200, 255, 200), i, 1);
+
+            m_process_table->SetCellValue(i,2,"");
+            m_process_table->SetReadOnly(i,2);
+            m_process_table->SetCellBackgroundColour(wxColor(200, 255, 200), i, 2);
+
+            m_process_table->SetCellValue(i,3,"waiting for job");
+            m_process_table->SetReadOnly(i,3);
+            m_process_table->SetCellBackgroundColour(wxColor(200, 255, 200), i, 3);
         }
-        m_process_table->SetCellValue(i,2,tmp);
-        m_process_table->SetReadOnly(i,2);
-
-        
     }
-
 }
 void WXFoxClient::OnConnectTimer(wxTimerEvent& event)
 {

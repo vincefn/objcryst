@@ -69,6 +69,8 @@ public:
     bool isRunning();
     void setJobID(int id);
     int  getJobID();
+    void setStarted(wxDateTime t);
+    wxDateTime getStartingTime();
 
 private:
 
@@ -76,6 +78,7 @@ private:
     wxString tmpDIR;
     bool     running;
     int      jobID;
+    wxDateTime startingtime;
 };
 class GrdRslt
 {
