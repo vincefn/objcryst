@@ -537,22 +537,14 @@ bool WXFoxServer::ShowSetJobWindow(int ID, wxString &name, long &trials, long &r
    InfoWindow->Destroy();
    return false;
 }
-void WXFoxServer::OnEditJob(wxCommandEvent& event)
+void WXFoxServer::EditJob()
 {
-    int nb = m_JobListTable->GetSelectedRows().Count();
+   int nb = m_JobListTable->GetSelectedRows().Count();
    if(nb!=1) return;
-
-   std::vector<GridClient> clients;
-   if(m_WXFoxServerDataMutex->Lock()!=wxMUTEX_NO_ERROR) return;
-
-   if(m_FoxServer->IsServerRunning()){
-      m_FoxServer->GetData(clients, m_results, m_jobs);
-   }
 
    int r = m_JobListTable->GetSelectedRows().Item(0);
 
    if(r>= m_jobs.size()) {
-      m_WXFoxServerDataMutex->Unlock();
       return;
    }
    int ID        = m_jobs[r].getM_ID();
@@ -563,7 +555,6 @@ void WXFoxServer::OnEditJob(wxCommandEvent& event)
    bool randomize = m_jobs[r].randomize();
    do{//show setup window
       if(!ShowSetJobWindow(ID, name, trials, runs, randomize)) {
-         m_WXFoxServerDataMutex->Unlock();
          return;
       }
    }while((runs<=0)||(trials<=0)||(name==_T("")));
@@ -573,15 +564,22 @@ void WXFoxServer::OnEditJob(wxCommandEvent& event)
    m_jobs[r].setNbRuns(runs);
    m_jobs[r].setName(name);
    m_jobs[r].setRand(randomize);
-   m_FoxServer->ChangeJob(r,&m_jobs[r]);
 
-   m_WXFoxServerDataMutex->Unlock();
+   m_FoxServer->UpdateJob(r,&m_jobs[r]);
 
+}
+void WXFoxServer::OnEditJob(wxCommandEvent& event)
+{
    m_UpdateTimer->Stop();
-   //Update Lists
+
+   this->EditJob();
+
+   //Update Lists now
    wxTimerEvent evt;
    evt.SetId(ID_UPDATE_TIMER);
    this->UpdateLists(evt);
+
+   //start timer for updating gui...
    int interval = m_UpdateTimer->GetInterval();
    m_UpdateTimer->Start(interval);
 }

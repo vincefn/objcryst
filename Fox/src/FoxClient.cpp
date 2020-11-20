@@ -14,7 +14,7 @@ static const long ID_SEND_TIMER=                         WXCRYST_ID();
 BEGIN_EVENT_TABLE(FoxClient, wxEvtHandler)
    EVT_SOCKET(GRID_CLIENT_SOCKET_ID,                FoxClient::OnSocketEvent)
    //EVT_TIMER(ID_SEND_TIMER,                  FoxClient::OnSendResults)
-    EVT_TIMER(ID_SEND_TIMER,                  FoxClient::DoManyThingsOnTimer)
+    EVT_TIMER(ID_SEND_TIMER,                  FoxClient::OnTimerEvent)
     //EVT_UPDATE_UI(ID_CRYST_UPDATEUI,                FoxClient::OnUpdateUI)
 END_EVENT_TABLE()
 
@@ -329,7 +329,8 @@ bool FoxClient::ConnectClient(int nbOfTrial, wxString hostname)
    
    if (mpClient->IsConnected()){
       mpClient->SaveState();
-      m_sendingTimer->Start(10*1000, false);
+      //better to run it just once and then start it again after all precedures are done
+      m_sendingTimer->Start(10*1000, true);
       WriteMessageLog(_T("Client is connected to the server"));
       return true;
    }
@@ -450,7 +451,7 @@ bool FoxClient::AnalyzeMessage(wxString msg)
                 if(runNewJob(jobs[i], ids[i], (int) trials[i], rands[i])!=0) {
                     jobsForRejecting.push_back(ids[i]);
                 }
-                wxSleep(2);
+                //wxSleep(2);
             }
         }
         //TODO
@@ -736,8 +737,17 @@ void FoxClient::SaveResult(wxString fileName, wxString Cost, int ID)
     m_results.push_back(res);
     //WriteMessageLog(_T("Result saved"));
 }
-void FoxClient::DoManyThingsOnTimer(wxTimerEvent& event)
+void FoxClient::OnTimerEvent(wxTimerEvent& event)
 {
+    DoManyThingsOnTimer();
+    //timer should be called  only for one shot. 
+    //Imagine, that the communication with server is not done and another timer event occur...
+    m_sendingTimer->Start(10*1000, true);
+}
+void FoxClient::DoManyThingsOnTimer()
+{
+    //stop timer until this function finishes - then we have to run it again
+    
     if(mpClient == NULL) {  
         
         return;

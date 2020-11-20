@@ -100,7 +100,8 @@ public:
      FoxClient(wxString working_dir);
      ~FoxClient();
      bool ConnectClient(int nbOfTrial, wxString hostname);
-     void DoManyThingsOnTimer(wxTimerEvent& event);
+     void OnTimerEvent(wxTimerEvent& event);
+     void DoManyThingsOnTimer();
      //void OnSendResults(wxTimerEvent& event);
      void OnSocketEvent(wxSocketEvent &event);
      void WriteProtocol();

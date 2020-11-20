@@ -646,17 +646,17 @@ void FoxServer::GetData( std::vector<GridClient> &clients, std::vector<GridResul
     s_mutexProtecting_Jobs_Results->Unlock();
   
 }
-void FoxServer::ChangeJob(int index, FoxJob *cjob)
+void FoxServer::UpdateJob(int index, FoxJob *cjob)
 {
-    /*
+    
    VFN_DEBUG_MESSAGE(__FUNCTION__,10)
 //change only nbRuns and nbTrial
 //You can't change jobID
 
-   if(s_mutexProtectingTheGlobalData->Lock()!=wxMUTEX_NO_ERROR) return;
+   if(s_mutexProtecting_Jobs_Results->Lock()!=wxMUTEX_NO_ERROR) return;
 
    if(index >= m_jobs.size()) {
-      s_mutexProtectingTheGlobalData->Unlock();
+      s_mutexProtecting_Jobs_Results->Unlock();
       return;
    }
    //nbsolve + nbDone <= nbRuns
@@ -668,8 +668,8 @@ void FoxServer::ChangeJob(int index, FoxJob *cjob)
    m_jobs[index].setName(cjob->getName());
    m_jobs[index].setRand(cjob->randomize());
 
-   s_mutexProtectingTheGlobalData->Unlock();
-   */
+   s_mutexProtecting_Jobs_Results->Unlock();
+   
 }
 int FoxServer::DeleteJob(int index)
 {

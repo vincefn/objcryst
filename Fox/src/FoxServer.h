@@ -135,7 +135,7 @@ class FoxServer: public wxFrame
      bool IsServerRunning();
      void RunAllClients();
      void AddJobToList(FoxJob newjob);
-     void ChangeJob(int index, FoxJob *cjob);
+     void UpdateJob(int index, FoxJob *cjob);
      int DeleteJob(int index);
      void OnWorkerEvent(WorkerEvent& pEvent);
 
