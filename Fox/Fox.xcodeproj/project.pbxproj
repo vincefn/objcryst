@@ -8,6 +8,70 @@
 
 /* Begin PBXBuildFile section */
 		BF0BC98D1B225401009C5CCA /* libmysqlclient.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF0BC98B1B225401009C5CCA /* libmysqlclient.a */; };
+		BF11E7BA2440AA42009C104D /* GlobalOptimObj.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7B42440AA40009C104D /* GlobalOptimObj.h */; };
+		BF11E7BB2440AA42009C104D /* Simplex.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7B52440AA40009C104D /* Simplex.h */; };
+		BF11E7BC2440AA42009C104D /* RefinableObj.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7B62440AA41009C104D /* RefinableObj.h */; };
+		BF11E7BD2440AA42009C104D /* LSQNumObj.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7B72440AA42009C104D /* LSQNumObj.h */; };
+		BF11E7BE2440AA42009C104D /* Tracker.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7B82440AA42009C104D /* Tracker.h */; };
+		BF11E7BF2440AA42009C104D /* IO.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7B92440AA42009C104D /* IO.h */; };
+		BF11E7C12440C199009C104D /* CrystVector.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7C02440C199009C104D /* CrystVector.h */; };
+		BF11E7DA2440C1BF009C104D /* ScatteringData.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7C22440C1BB009C104D /* ScatteringData.h */; };
+		BF11E7DB2440C1BF009C104D /* Crystal.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7C32440C1BB009C104D /* Crystal.h */; };
+		BF11E7DC2440C1BF009C104D /* ReflectionProfile.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7C42440C1BB009C104D /* ReflectionProfile.h */; };
+		BF11E7DD2440C1BF009C104D /* SpaceGroup.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7C52440C1BB009C104D /* SpaceGroup.h */; };
+		BF11E7DE2440C1BF009C104D /* ScatteringCorr.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7C62440C1BC009C104D /* ScatteringCorr.h */; };
+		BF11E7DF2440C1BF009C104D /* PowderPattern.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7C72440C1BC009C104D /* PowderPattern.h */; };
+		BF11E7E02440C1BF009C104D /* ScatteringPower.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7C82440C1BC009C104D /* ScatteringPower.h */; };
+		BF11E7E12440C1BF009C104D /* IO.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7C92440C1BC009C104D /* IO.h */; };
+		BF11E7E22440C1BF009C104D /* test.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7CA2440C1BC009C104D /* test.h */; };
+		BF11E7E32440C1BF009C104D /* DiffractionDataSingleCrystal.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7CB2440C1BC009C104D /* DiffractionDataSingleCrystal.h */; };
+		BF11E7E42440C1BF009C104D /* ScatteringPowerSphere.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7CC2440C1BD009C104D /* ScatteringPowerSphere.h */; };
+		BF11E7E52440C1BF009C104D /* ZScatterer.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7CD2440C1BD009C104D /* ZScatterer.h */; };
+		BF11E7E62440C1BF009C104D /* Molecule.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7CE2440C1BD009C104D /* Molecule.h */; };
+		BF11E7E72440C1BF009C104D /* Colours.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7CF2440C1BD009C104D /* Colours.h */; };
+		BF11E7E82440C1BF009C104D /* Scatterer.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7D02440C1BD009C104D /* Scatterer.h */; };
+		BF11E7E92440C1BF009C104D /* PDF.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7D12440C1BD009C104D /* PDF.h */; };
+		BF11E7EA2440C1BF009C104D /* Atom.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7D22440C1BE009C104D /* Atom.h */; };
+		BF11E7EB2440C1BF009C104D /* General.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7D32440C1BE009C104D /* General.h */; };
+		BF11E7EC2440C1BF009C104D /* CIF.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7D42440C1BE009C104D /* CIF.h */; };
+		BF11E7ED2440C1BF009C104D /* PowderPatternBackgroundBayesianMinimiser.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7D52440C1BE009C104D /* PowderPatternBackgroundBayesianMinimiser.h */; };
+		BF11E7EE2440C1BF009C104D /* Indexing.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7D62440C1BE009C104D /* Indexing.h */; };
+		BF11E7EF2440C1BF009C104D /* Polyhedron.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7D72440C1BE009C104D /* Polyhedron.h */; };
+		BF11E7F02440C1BF009C104D /* GeomStructFactor.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7D82440C1BF009C104D /* GeomStructFactor.h */; };
+		BF11E7F12440C1BF009C104D /* UnitCell.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7D92440C1BF009C104D /* UnitCell.h */; };
+		BF11E7F72440C1D6009C104D /* VFNStreamFormat.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7F22440C1D6009C104D /* VFNStreamFormat.h */; };
+		BF11E7F82440C1D6009C104D /* sse_mathfun.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7F32440C1D6009C104D /* sse_mathfun.h */; };
+		BF11E7F92440C1D6009C104D /* ci_string.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7F42440C1D6009C104D /* ci_string.h */; };
+		BF11E7FA2440C1D6009C104D /* Chronometer.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7F52440C1D6009C104D /* Chronometer.h */; };
+		BF11E7FB2440C1D6009C104D /* VFNDebug.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7F62440C1D6009C104D /* VFNDebug.h */; };
+		BF11E8102440C1EB009C104D /* wxAtom.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7FC2440C1E8009C104D /* wxAtom.h */; };
+		BF11E8112440C1EB009C104D /* wxZScatterer.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7FD2440C1E8009C104D /* wxZScatterer.h */; };
+		BF11E8122440C1EB009C104D /* wxTrackerGraph.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7FE2440C1E8009C104D /* wxTrackerGraph.h */; };
+		BF11E8132440C1EB009C104D /* wxMultiGraph.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7FF2440C1E8009C104D /* wxMultiGraph.h */; };
+		BF11E8142440C1EB009C104D /* wxScatteringPower.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E8002440C1E8009C104D /* wxScatteringPower.h */; };
+		BF11E8152440C1EB009C104D /* wxDiffractionSingleCrystal.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E8012440C1E9009C104D /* wxDiffractionSingleCrystal.h */; };
+		BF11E8162440C1EB009C104D /* wxRefinableObj.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E8022440C1E9009C104D /* wxRefinableObj.h */; };
+		BF11E8172440C1EB009C104D /* wxLSQ.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E8032440C1E9009C104D /* wxLSQ.h */; };
+		BF11E8182440C1EB009C104D /* mpVector.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E8042440C1E9009C104D /* mpVector.h */; };
+		BF11E8192440C1EB009C104D /* wxCrystal.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E8052440C1E9009C104D /* wxCrystal.h */; };
+		BF11E81A2440C1EB009C104D /* wxRadiation.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E8062440C1E9009C104D /* wxRadiation.h */; };
+		BF11E81B2440C1EB009C104D /* MC.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E8072440C1E9009C104D /* MC.h */; };
+		BF11E81C2440C1EB009C104D /* wxScatterer.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E8082440C1EA009C104D /* wxScatterer.h */; };
+		BF11E81D2440C1EB009C104D /* wxScatteringPowerSphere.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E8092440C1EA009C104D /* wxScatteringPowerSphere.h */; };
+		BF11E81E2440C1EB009C104D /* MCTable.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E80A2440C1EA009C104D /* MCTable.h */; };
+		BF11E81F2440C1EB009C104D /* wxPowderPattern.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E80B2440C1EA009C104D /* wxPowderPattern.h */; };
+		BF11E8202440C1EB009C104D /* wxGlobalOptimObj.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E80C2440C1EA009C104D /* wxGlobalOptimObj.h */; };
+		BF11E8212440C1EB009C104D /* wxMolecule.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E80D2440C1EA009C104D /* wxMolecule.h */; };
+		BF11E8222440C1EB009C104D /* wxCryst.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E80E2440C1EB009C104D /* wxCryst.h */; };
+		BF11E8232440C1EB009C104D /* trackball.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E80F2440C1EB009C104D /* trackball.h */; };
+		BF11E82D2440C200009C104D /* IOSocket.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E8242440C1FE009C104D /* IOSocket.h */; };
+		BF11E82E2440C200009C104D /* FoxJob.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E8252440C1FF009C104D /* FoxJob.h */; };
+		BF11E82F2440C200009C104D /* WXFoxServer.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E8262440C1FF009C104D /* WXFoxServer.h */; };
+		BF11E8312440C200009C104D /* WXFoxClient.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E8282440C1FF009C104D /* WXFoxClient.h */; };
+		BF11E8322440C200009C104D /* WXGridWindow.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E8292440C1FF009C104D /* WXGridWindow.h */; };
+		BF11E8332440C200009C104D /* GridResult.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E82A2440C1FF009C104D /* GridResult.h */; };
+		BF11E8342440C200009C104D /* FoxServer.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E82B2440C1FF009C104D /* FoxServer.h */; };
+		BF11E8352440C200009C104D /* FoxClient.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E82C2440C200009C104D /* FoxClient.h */; };
 		BF1DDDEE0D228E3700A3939D /* Fox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD88E0890422000044EBA /* Fox.cpp */; };
 		BF1DDDEF0D228E3700A3939D /* Atom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8900890426600044EBA /* Atom.cpp */; };
 		BF1DDDF00D228E3700A3939D /* Crystal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8910890426600044EBA /* Crystal.cpp */; };
@@ -82,7 +146,6 @@
 		BF69C4D1124F8C310035CF57 /* FoxClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4C8124F8C310035CF57 /* FoxClient.cpp */; };
 		BF69C4D2124F8C310035CF57 /* FoxJob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4C9124F8C310035CF57 /* FoxJob.cpp */; };
 		BF69C4D3124F8C310035CF57 /* FoxServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4CA124F8C310035CF57 /* FoxServer.cpp */; };
-		BF69C4D4124F8C310035CF57 /* FoxServerThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4CB124F8C310035CF57 /* FoxServerThread.cpp */; };
 		BF69C4D5124F8C310035CF57 /* GridResult.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4CC124F8C310035CF57 /* GridResult.cpp */; };
 		BF69C4D6124F8C310035CF57 /* IOSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4CD124F8C310035CF57 /* IOSocket.cpp */; };
 		BF69C4D7124F8C310035CF57 /* WXFoxClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4CE124F8C310035CF57 /* WXFoxClient.cpp */; };
@@ -205,6 +268,70 @@
 		BF08978A0B072DF600C0F576 /* CIF.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = CIF.cpp; path = ../ObjCryst/ObjCryst/CIF.cpp; sourceTree = "<group>"; };
 		BF08978D0B072E2F00C0F576 /* ci_string.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ci_string.cpp; path = ../ObjCryst/Quirks/ci_string.cpp; sourceTree = "<group>"; };
 		BF0BC98B1B225401009C5CCA /* libmysqlclient.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libmysqlclient.a; path = "../static-libs/lib/libmysqlclient.a"; sourceTree = "<group>"; };
+		BF11E7B42440AA40009C104D /* GlobalOptimObj.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GlobalOptimObj.h; path = ../ObjCryst/RefinableObj/GlobalOptimObj.h; sourceTree = "<group>"; };
+		BF11E7B52440AA40009C104D /* Simplex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Simplex.h; path = ../ObjCryst/RefinableObj/Simplex.h; sourceTree = "<group>"; };
+		BF11E7B62440AA41009C104D /* RefinableObj.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RefinableObj.h; path = ../ObjCryst/RefinableObj/RefinableObj.h; sourceTree = "<group>"; };
+		BF11E7B72440AA42009C104D /* LSQNumObj.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LSQNumObj.h; path = ../ObjCryst/RefinableObj/LSQNumObj.h; sourceTree = "<group>"; };
+		BF11E7B82440AA42009C104D /* Tracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Tracker.h; path = ../ObjCryst/RefinableObj/Tracker.h; sourceTree = "<group>"; };
+		BF11E7B92440AA42009C104D /* IO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IO.h; path = ../ObjCryst/RefinableObj/IO.h; sourceTree = "<group>"; };
+		BF11E7C02440C199009C104D /* CrystVector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CrystVector.h; path = ../ObjCryst/CrystVector/CrystVector.h; sourceTree = "<group>"; };
+		BF11E7C22440C1BB009C104D /* ScatteringData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ScatteringData.h; path = ../ObjCryst/ObjCryst/ScatteringData.h; sourceTree = "<group>"; };
+		BF11E7C32440C1BB009C104D /* Crystal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Crystal.h; path = ../ObjCryst/ObjCryst/Crystal.h; sourceTree = "<group>"; };
+		BF11E7C42440C1BB009C104D /* ReflectionProfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ReflectionProfile.h; path = ../ObjCryst/ObjCryst/ReflectionProfile.h; sourceTree = "<group>"; };
+		BF11E7C52440C1BB009C104D /* SpaceGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SpaceGroup.h; path = ../ObjCryst/ObjCryst/SpaceGroup.h; sourceTree = "<group>"; };
+		BF11E7C62440C1BC009C104D /* ScatteringCorr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ScatteringCorr.h; path = ../ObjCryst/ObjCryst/ScatteringCorr.h; sourceTree = "<group>"; };
+		BF11E7C72440C1BC009C104D /* PowderPattern.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PowderPattern.h; path = ../ObjCryst/ObjCryst/PowderPattern.h; sourceTree = "<group>"; };
+		BF11E7C82440C1BC009C104D /* ScatteringPower.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ScatteringPower.h; path = ../ObjCryst/ObjCryst/ScatteringPower.h; sourceTree = "<group>"; };
+		BF11E7C92440C1BC009C104D /* IO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IO.h; path = ../ObjCryst/ObjCryst/IO.h; sourceTree = "<group>"; };
+		BF11E7CA2440C1BC009C104D /* test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = test.h; path = ../ObjCryst/ObjCryst/test.h; sourceTree = "<group>"; };
+		BF11E7CB2440C1BC009C104D /* DiffractionDataSingleCrystal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DiffractionDataSingleCrystal.h; path = ../ObjCryst/ObjCryst/DiffractionDataSingleCrystal.h; sourceTree = "<group>"; };
+		BF11E7CC2440C1BD009C104D /* ScatteringPowerSphere.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ScatteringPowerSphere.h; path = ../ObjCryst/ObjCryst/ScatteringPowerSphere.h; sourceTree = "<group>"; };
+		BF11E7CD2440C1BD009C104D /* ZScatterer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ZScatterer.h; path = ../ObjCryst/ObjCryst/ZScatterer.h; sourceTree = "<group>"; };
+		BF11E7CE2440C1BD009C104D /* Molecule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Molecule.h; path = ../ObjCryst/ObjCryst/Molecule.h; sourceTree = "<group>"; };
+		BF11E7CF2440C1BD009C104D /* Colours.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Colours.h; path = ../ObjCryst/ObjCryst/Colours.h; sourceTree = "<group>"; };
+		BF11E7D02440C1BD009C104D /* Scatterer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Scatterer.h; path = ../ObjCryst/ObjCryst/Scatterer.h; sourceTree = "<group>"; };
+		BF11E7D12440C1BD009C104D /* PDF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PDF.h; path = ../ObjCryst/ObjCryst/PDF.h; sourceTree = "<group>"; };
+		BF11E7D22440C1BE009C104D /* Atom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Atom.h; path = ../ObjCryst/ObjCryst/Atom.h; sourceTree = "<group>"; };
+		BF11E7D32440C1BE009C104D /* General.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = General.h; path = ../ObjCryst/ObjCryst/General.h; sourceTree = "<group>"; };
+		BF11E7D42440C1BE009C104D /* CIF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CIF.h; path = ../ObjCryst/ObjCryst/CIF.h; sourceTree = "<group>"; };
+		BF11E7D52440C1BE009C104D /* PowderPatternBackgroundBayesianMinimiser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PowderPatternBackgroundBayesianMinimiser.h; path = ../ObjCryst/ObjCryst/PowderPatternBackgroundBayesianMinimiser.h; sourceTree = "<group>"; };
+		BF11E7D62440C1BE009C104D /* Indexing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Indexing.h; path = ../ObjCryst/ObjCryst/Indexing.h; sourceTree = "<group>"; };
+		BF11E7D72440C1BE009C104D /* Polyhedron.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Polyhedron.h; path = ../ObjCryst/ObjCryst/Polyhedron.h; sourceTree = "<group>"; };
+		BF11E7D82440C1BF009C104D /* GeomStructFactor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GeomStructFactor.h; path = ../ObjCryst/ObjCryst/GeomStructFactor.h; sourceTree = "<group>"; };
+		BF11E7D92440C1BF009C104D /* UnitCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UnitCell.h; path = ../ObjCryst/ObjCryst/UnitCell.h; sourceTree = "<group>"; };
+		BF11E7F22440C1D6009C104D /* VFNStreamFormat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VFNStreamFormat.h; path = ../ObjCryst/Quirks/VFNStreamFormat.h; sourceTree = "<group>"; };
+		BF11E7F32440C1D6009C104D /* sse_mathfun.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sse_mathfun.h; path = ../ObjCryst/Quirks/sse_mathfun.h; sourceTree = "<group>"; };
+		BF11E7F42440C1D6009C104D /* ci_string.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ci_string.h; path = ../ObjCryst/Quirks/ci_string.h; sourceTree = "<group>"; };
+		BF11E7F52440C1D6009C104D /* Chronometer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Chronometer.h; path = ../ObjCryst/Quirks/Chronometer.h; sourceTree = "<group>"; };
+		BF11E7F62440C1D6009C104D /* VFNDebug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VFNDebug.h; path = ../ObjCryst/Quirks/VFNDebug.h; sourceTree = "<group>"; };
+		BF11E7FC2440C1E8009C104D /* wxAtom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = wxAtom.h; path = ../ObjCryst/wxCryst/wxAtom.h; sourceTree = "<group>"; };
+		BF11E7FD2440C1E8009C104D /* wxZScatterer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = wxZScatterer.h; path = ../ObjCryst/wxCryst/wxZScatterer.h; sourceTree = "<group>"; };
+		BF11E7FE2440C1E8009C104D /* wxTrackerGraph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = wxTrackerGraph.h; path = ../ObjCryst/wxCryst/wxTrackerGraph.h; sourceTree = "<group>"; };
+		BF11E7FF2440C1E8009C104D /* wxMultiGraph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = wxMultiGraph.h; path = ../ObjCryst/wxCryst/wxMultiGraph.h; sourceTree = "<group>"; };
+		BF11E8002440C1E8009C104D /* wxScatteringPower.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = wxScatteringPower.h; path = ../ObjCryst/wxCryst/wxScatteringPower.h; sourceTree = "<group>"; };
+		BF11E8012440C1E9009C104D /* wxDiffractionSingleCrystal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = wxDiffractionSingleCrystal.h; path = ../ObjCryst/wxCryst/wxDiffractionSingleCrystal.h; sourceTree = "<group>"; };
+		BF11E8022440C1E9009C104D /* wxRefinableObj.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = wxRefinableObj.h; path = ../ObjCryst/wxCryst/wxRefinableObj.h; sourceTree = "<group>"; };
+		BF11E8032440C1E9009C104D /* wxLSQ.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = wxLSQ.h; path = ../ObjCryst/wxCryst/wxLSQ.h; sourceTree = "<group>"; };
+		BF11E8042440C1E9009C104D /* mpVector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mpVector.h; path = ../ObjCryst/wxCryst/mpVector.h; sourceTree = "<group>"; };
+		BF11E8052440C1E9009C104D /* wxCrystal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = wxCrystal.h; path = ../ObjCryst/wxCryst/wxCrystal.h; sourceTree = "<group>"; };
+		BF11E8062440C1E9009C104D /* wxRadiation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = wxRadiation.h; path = ../ObjCryst/wxCryst/wxRadiation.h; sourceTree = "<group>"; };
+		BF11E8072440C1E9009C104D /* MC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MC.h; path = ../ObjCryst/wxCryst/MC.h; sourceTree = "<group>"; };
+		BF11E8082440C1EA009C104D /* wxScatterer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = wxScatterer.h; path = ../ObjCryst/wxCryst/wxScatterer.h; sourceTree = "<group>"; };
+		BF11E8092440C1EA009C104D /* wxScatteringPowerSphere.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = wxScatteringPowerSphere.h; path = ../ObjCryst/wxCryst/wxScatteringPowerSphere.h; sourceTree = "<group>"; };
+		BF11E80A2440C1EA009C104D /* MCTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MCTable.h; path = ../ObjCryst/wxCryst/MCTable.h; sourceTree = "<group>"; };
+		BF11E80B2440C1EA009C104D /* wxPowderPattern.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = wxPowderPattern.h; path = ../ObjCryst/wxCryst/wxPowderPattern.h; sourceTree = "<group>"; };
+		BF11E80C2440C1EA009C104D /* wxGlobalOptimObj.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = wxGlobalOptimObj.h; path = ../ObjCryst/wxCryst/wxGlobalOptimObj.h; sourceTree = "<group>"; };
+		BF11E80D2440C1EA009C104D /* wxMolecule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = wxMolecule.h; path = ../ObjCryst/wxCryst/wxMolecule.h; sourceTree = "<group>"; };
+		BF11E80E2440C1EB009C104D /* wxCryst.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = wxCryst.h; path = ../ObjCryst/wxCryst/wxCryst.h; sourceTree = "<group>"; };
+		BF11E80F2440C1EB009C104D /* trackball.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = trackball.h; path = ../ObjCryst/wxCryst/trackball.h; sourceTree = "<group>"; };
+		BF11E8242440C1FE009C104D /* IOSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IOSocket.h; path = src/IOSocket.h; sourceTree = "<group>"; };
+		BF11E8252440C1FF009C104D /* FoxJob.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FoxJob.h; path = src/FoxJob.h; sourceTree = "<group>"; };
+		BF11E8262440C1FF009C104D /* WXFoxServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WXFoxServer.h; path = src/WXFoxServer.h; sourceTree = "<group>"; };
+		BF11E8282440C1FF009C104D /* WXFoxClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WXFoxClient.h; path = src/WXFoxClient.h; sourceTree = "<group>"; };
+		BF11E8292440C1FF009C104D /* WXGridWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WXGridWindow.h; path = src/WXGridWindow.h; sourceTree = "<group>"; };
+		BF11E82A2440C1FF009C104D /* GridResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GridResult.h; path = src/GridResult.h; sourceTree = "<group>"; };
+		BF11E82B2440C1FF009C104D /* FoxServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FoxServer.h; path = src/FoxServer.h; sourceTree = "<group>"; };
+		BF11E82C2440C200009C104D /* FoxClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FoxClient.h; path = src/FoxClient.h; sourceTree = "<group>"; };
 		BF1DDDE90D228DCF00A3939D /* Fox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Fox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF1DDDEB0D228DCF00A3939D /* FoxCocoa-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "FoxCocoa-Info.plist"; sourceTree = "<group>"; };
 		BF1DE1230D228EA500A3939D /* libfftw3f.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfftw3f.a; path = "../static-libs/lib/libfftw3f.a"; sourceTree = SOURCE_ROOT; };
@@ -223,7 +350,6 @@
 		BF69C4C8124F8C310035CF57 /* FoxClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FoxClient.cpp; path = src/FoxClient.cpp; sourceTree = "<group>"; };
 		BF69C4C9124F8C310035CF57 /* FoxJob.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FoxJob.cpp; path = src/FoxJob.cpp; sourceTree = "<group>"; };
 		BF69C4CA124F8C310035CF57 /* FoxServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FoxServer.cpp; path = src/FoxServer.cpp; sourceTree = "<group>"; };
-		BF69C4CB124F8C310035CF57 /* FoxServerThread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FoxServerThread.cpp; path = src/FoxServerThread.cpp; sourceTree = "<group>"; };
 		BF69C4CC124F8C310035CF57 /* GridResult.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GridResult.cpp; path = src/GridResult.cpp; sourceTree = "<group>"; };
 		BF69C4CD124F8C310035CF57 /* IOSocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IOSocket.cpp; path = src/IOSocket.cpp; sourceTree = "<group>"; };
 		BF69C4CE124F8C310035CF57 /* WXFoxClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WXFoxClient.cpp; path = src/WXFoxClient.cpp; sourceTree = "<group>"; };
@@ -1859,12 +1985,18 @@
 		BF3479340915057C006E569C /* RefinableObj */ = {
 			isa = PBXGroup;
 			children = (
-				BFFCD8A80890426600044EBA /* RefinableObj.cpp */,
-				BFFCD8AF0890426600044EBA /* Simplex.cpp */,
-				BFFCD8B20890426600044EBA /* Tracker.cpp */,
-				BFFCD89F0890426600044EBA /* IO.cpp */,
-				BFFCD8A00890426600044EBA /* LSQNumObj.cpp */,
 				BFFCD89D0890426600044EBA /* GlobalOptimObj.cpp */,
+				BF11E7B42440AA40009C104D /* GlobalOptimObj.h */,
+				BFFCD89F0890426600044EBA /* IO.cpp */,
+				BF11E7B92440AA42009C104D /* IO.h */,
+				BFFCD8A00890426600044EBA /* LSQNumObj.cpp */,
+				BF11E7B72440AA42009C104D /* LSQNumObj.h */,
+				BFFCD8A80890426600044EBA /* RefinableObj.cpp */,
+				BF11E7B62440AA41009C104D /* RefinableObj.h */,
+				BFFCD8AF0890426600044EBA /* Simplex.cpp */,
+				BF11E7B52440AA40009C104D /* Simplex.h */,
+				BFFCD8B20890426600044EBA /* Tracker.cpp */,
+				BF11E7B82440AA42009C104D /* Tracker.h */,
 			);
 			name = RefinableObj;
 			sourceTree = "<group>";
@@ -1872,24 +2004,44 @@
 		BF347939091505C7006E569C /* wxCryst */ = {
 			isa = PBXGroup;
 			children = (
-				BFFB474D0E5E0E620027591E /* wxLSQ.cpp */,
-				BFFCD8A30890426600044EBA /* mpVector.cpp */,
-				BFFCD97C08904D7D00044EBA /* trackball.c */,
 				BFFCD8A10890426600044EBA /* MC.cpp */,
+				BF11E8072440C1E9009C104D /* MC.h */,
+				BF11E80A2440C1EA009C104D /* MCTable.h */,
+				BFFCD8A30890426600044EBA /* mpVector.cpp */,
+				BF11E8042440C1E9009C104D /* mpVector.h */,
+				BFFCD97C08904D7D00044EBA /* trackball.c */,
+				BF11E80F2440C1EB009C104D /* trackball.h */,
 				BFFCD8B60890426600044EBA /* wxAtom.cpp */,
+				BF11E7FC2440C1E8009C104D /* wxAtom.h */,
 				BFFCD8B70890426600044EBA /* wxCryst.cpp */,
+				BF11E80E2440C1EB009C104D /* wxCryst.h */,
 				BFFCD8B80890426600044EBA /* wxCrystal.cpp */,
+				BF11E8052440C1E9009C104D /* wxCrystal.h */,
 				BFFCD8B90890426600044EBA /* wxDiffractionSingleCrystal.cpp */,
+				BF11E8012440C1E9009C104D /* wxDiffractionSingleCrystal.h */,
 				BFFCD8BA0890426600044EBA /* wxGlobalOptimObj.cpp */,
+				BF11E80C2440C1EA009C104D /* wxGlobalOptimObj.h */,
+				BFFB474D0E5E0E620027591E /* wxLSQ.cpp */,
+				BF11E8032440C1E9009C104D /* wxLSQ.h */,
 				BFFCD8BB0890426600044EBA /* wxMolecule.cpp */,
+				BF11E80D2440C1EA009C104D /* wxMolecule.h */,
 				BFFCD8BC0890426600044EBA /* wxMultiGraph.cpp */,
+				BF11E7FF2440C1E8009C104D /* wxMultiGraph.h */,
 				BFFCD8BD0890426600044EBA /* wxPowderPattern.cpp */,
+				BF11E80B2440C1EA009C104D /* wxPowderPattern.h */,
+				BF11E8062440C1E9009C104D /* wxRadiation.h */,
 				BFFCD8BE0890426600044EBA /* wxRefinableObj.cpp */,
+				BF11E8022440C1E9009C104D /* wxRefinableObj.h */,
 				BFFCD8BF0890426600044EBA /* wxScatterer.cpp */,
+				BF11E8082440C1EA009C104D /* wxScatterer.h */,
 				BFFCD8C00890426600044EBA /* wxScatteringPower.cpp */,
+				BF11E8002440C1E8009C104D /* wxScatteringPower.h */,
 				BFFCD8C10890426600044EBA /* wxScatteringPowerSphere.cpp */,
+				BF11E8092440C1EA009C104D /* wxScatteringPowerSphere.h */,
 				BFFCD8C20890426600044EBA /* wxTrackerGraph.cpp */,
+				BF11E7FE2440C1E8009C104D /* wxTrackerGraph.h */,
 				BFFCD8C30890426700044EBA /* wxZScatterer.cpp */,
+				BF11E7FD2440C1E8009C104D /* wxZScatterer.h */,
 			);
 			name = wxCryst;
 			sourceTree = "<group>";
@@ -1897,9 +2049,14 @@
 		BF34793A091505E2006E569C /* Quirks */ = {
 			isa = PBXGroup;
 			children = (
+				BF11E7F52440C1D6009C104D /* Chronometer.h */,
 				BF08978D0B072E2F00C0F576 /* ci_string.cpp */,
+				BF11E7F42440C1D6009C104D /* ci_string.h */,
+				BF11E7F32440C1D6009C104D /* sse_mathfun.h */,
 				BFFCD8B40890426600044EBA /* VFNDebug.cpp */,
+				BF11E7F62440C1D6009C104D /* VFNDebug.h */,
 				BFFCD8B50890426600044EBA /* VFNStreamFormat.cpp */,
+				BF11E7F22440C1D6009C104D /* VFNStreamFormat.h */,
 			);
 			name = Quirks;
 			sourceTree = "<group>";
@@ -2013,6 +2170,7 @@
 		BF347947091506B7006E569C /* CrystVector */ = {
 			isa = PBXGroup;
 			children = (
+				BF11E7C02440C199009C104D /* CrystVector.h */,
 				BFFCD8920890426600044EBA /* CrystVector.cpp */,
 			);
 			name = CrystVector;
@@ -2021,17 +2179,24 @@
 		BF3EAF90089628D200E02367 /* Fox */ = {
 			isa = PBXGroup;
 			children = (
-				BF69C4C8124F8C310035CF57 /* FoxClient.cpp */,
-				BF69C4C9124F8C310035CF57 /* FoxJob.cpp */,
-				BF69C4CA124F8C310035CF57 /* FoxServer.cpp */,
-				BF69C4CB124F8C310035CF57 /* FoxServerThread.cpp */,
-				BF69C4CC124F8C310035CF57 /* GridResult.cpp */,
-				BF69C4CD124F8C310035CF57 /* IOSocket.cpp */,
-				BF69C4CE124F8C310035CF57 /* WXFoxClient.cpp */,
-				BF69C4CF124F8C310035CF57 /* WXFoxServer.cpp */,
-				BF69C4D0124F8C310035CF57 /* WXGridWindow.cpp */,
-				BF26F598089306500008175B /* Fox.icns */,
 				BFFCD88E0890422000044EBA /* Fox.cpp */,
+				BF26F598089306500008175B /* Fox.icns */,
+				BF69C4C8124F8C310035CF57 /* FoxClient.cpp */,
+				BF11E82C2440C200009C104D /* FoxClient.h */,
+				BF69C4C9124F8C310035CF57 /* FoxJob.cpp */,
+				BF11E8252440C1FF009C104D /* FoxJob.h */,
+				BF69C4CA124F8C310035CF57 /* FoxServer.cpp */,
+				BF11E82B2440C1FF009C104D /* FoxServer.h */,
+				BF69C4CC124F8C310035CF57 /* GridResult.cpp */,
+				BF11E82A2440C1FF009C104D /* GridResult.h */,
+				BF69C4CD124F8C310035CF57 /* IOSocket.cpp */,
+				BF11E8242440C1FE009C104D /* IOSocket.h */,
+				BF69C4CE124F8C310035CF57 /* WXFoxClient.cpp */,
+				BF11E8282440C1FF009C104D /* WXFoxClient.h */,
+				BF69C4CF124F8C310035CF57 /* WXFoxServer.cpp */,
+				BF11E8262440C1FF009C104D /* WXFoxServer.h */,
+				BF69C4D0124F8C310035CF57 /* WXGridWindow.cpp */,
+				BF11E8292440C1FF009C104D /* WXGridWindow.h */,
 			);
 			name = Fox;
 			sourceTree = SOURCE_ROOT;
@@ -2039,14 +2204,17 @@
 		BF3EAF910896291100E02367 /* ObjCryst */ = {
 			isa = PBXGroup;
 			children = (
-				BF08978A0B072DF600C0F576 /* CIF.cpp */,
-				BFFCD8940890426600044EBA /* Exception.cpp */,
-				BFFCD8C60890426700044EBA /* ZScatterer.cpp */,
-				BFFCD8B10890426600044EBA /* test.cpp */,
 				BFFCD8900890426600044EBA /* Atom.cpp */,
+				BF11E7D22440C1BE009C104D /* Atom.h */,
+				BF08978A0B072DF600C0F576 /* CIF.cpp */,
+				BF11E7D42440C1BE009C104D /* CIF.h */,
+				BF11E7CF2440C1BD009C104D /* Colours.h */,
 				BFFCD8910890426600044EBA /* Crystal.cpp */,
+				BF11E7C32440C1BB009C104D /* Crystal.h */,
 				BFFCD8930890426600044EBA /* DiffractionDataSingleCrystal.cpp */,
-				BFE6AC680B886ACA007AFBA8 /* Indexing.cpp */,
+				BF11E7CB2440C1BC009C104D /* DiffractionDataSingleCrystal.h */,
+				BFFCD8940890426600044EBA /* Exception.cpp */,
+				BF11E7D32440C1BE009C104D /* General.h */,
 				BFFCD8960890426600044EBA /* geomStructFactor_001.cpp */,
 				BFFCD8970890426600044EBA /* geomStructFactor_002.cpp */,
 				BFFCD8980890426600044EBA /* geomStructFactor_067.cpp */,
@@ -2054,19 +2222,40 @@
 				BFFCD89A0890426600044EBA /* geomStructFactor_230.cpp */,
 				BFFCD89B0890426600044EBA /* geomStructFactor_centro.cpp */,
 				BFFCD89C0890426600044EBA /* geomStructFactor.cpp */,
+				BF11E7D82440C1BF009C104D /* GeomStructFactor.h */,
+				BFE6AC680B886ACA007AFBA8 /* Indexing.cpp */,
+				BF11E7D62440C1BE009C104D /* Indexing.h */,
 				BFFCD89E0890426600044EBA /* IO.cpp */,
+				BF11E7C92440C1BC009C104D /* IO.h */,
 				BFFCD8A20890426600044EBA /* Molecule.cpp */,
+				BF11E7CE2440C1BD009C104D /* Molecule.h */,
+				BF11E7D12440C1BD009C104D /* PDF.h */,
 				BFFCD8A50890426600044EBA /* Polyhedron.cpp */,
+				BF11E7D72440C1BE009C104D /* Polyhedron.h */,
 				BFFCD8A60890426600044EBA /* PowderPattern.cpp */,
+				BF11E7C72440C1BC009C104D /* PowderPattern.h */,
 				BFFCD8A70890426600044EBA /* PowderPatternBackgroundBayesianMinimiser.cpp */,
+				BF11E7D52440C1BE009C104D /* PowderPatternBackgroundBayesianMinimiser.h */,
 				BFFCD8A90890426600044EBA /* ReflectionProfile.cpp */,
+				BF11E7C42440C1BB009C104D /* ReflectionProfile.h */,
 				BFFCD8AA0890426600044EBA /* Scatterer.cpp */,
+				BF11E7D02440C1BD009C104D /* Scatterer.h */,
 				BFFCD8AB0890426600044EBA /* ScatteringCorr.cpp */,
+				BF11E7C62440C1BC009C104D /* ScatteringCorr.h */,
 				BFFCD8AC0890426600044EBA /* ScatteringData.cpp */,
+				BF11E7C22440C1BB009C104D /* ScatteringData.h */,
 				BFFCD8AD0890426600044EBA /* ScatteringPower.cpp */,
+				BF11E7C82440C1BC009C104D /* ScatteringPower.h */,
 				BFFCD8AE0890426600044EBA /* ScatteringPowerSphere.cpp */,
+				BF11E7CC2440C1BD009C104D /* ScatteringPowerSphere.h */,
 				BFFCD8B00890426600044EBA /* SpaceGroup.cpp */,
+				BF11E7C52440C1BB009C104D /* SpaceGroup.h */,
+				BFFCD8B10890426600044EBA /* test.cpp */,
+				BF11E7CA2440C1BC009C104D /* test.h */,
 				BFFCD8B30890426600044EBA /* UnitCell.cpp */,
+				BF11E7D92440C1BF009C104D /* UnitCell.h */,
+				BFFCD8C60890426700044EBA /* ZScatterer.cpp */,
+				BF11E7CD2440C1BD009C104D /* ZScatterer.h */,
 			);
 			name = ObjCryst;
 			sourceTree = "<group>";
@@ -4265,6 +4454,70 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BF11E81D2440C1EB009C104D /* wxScatteringPowerSphere.h in Headers */,
+				BF11E8332440C200009C104D /* GridResult.h in Headers */,
+				BF11E82F2440C200009C104D /* WXFoxServer.h in Headers */,
+				BF11E7BD2440AA42009C104D /* LSQNumObj.h in Headers */,
+				BF11E8342440C200009C104D /* FoxServer.h in Headers */,
+				BF11E7FB2440C1D6009C104D /* VFNDebug.h in Headers */,
+				BF11E7DC2440C1BF009C104D /* ReflectionProfile.h in Headers */,
+				BF11E7EE2440C1BF009C104D /* Indexing.h in Headers */,
+				BF11E81E2440C1EB009C104D /* MCTable.h in Headers */,
+				BF11E7E12440C1BF009C104D /* IO.h in Headers */,
+				BF11E7BA2440AA42009C104D /* GlobalOptimObj.h in Headers */,
+				BF11E7F92440C1D6009C104D /* ci_string.h in Headers */,
+				BF11E8182440C1EB009C104D /* mpVector.h in Headers */,
+				BF11E8122440C1EB009C104D /* wxTrackerGraph.h in Headers */,
+				BF11E82D2440C200009C104D /* IOSocket.h in Headers */,
+				BF11E8172440C1EB009C104D /* wxLSQ.h in Headers */,
+				BF11E7E82440C1BF009C104D /* Scatterer.h in Headers */,
+				BF11E7F72440C1D6009C104D /* VFNStreamFormat.h in Headers */,
+				BF11E7BF2440AA42009C104D /* IO.h in Headers */,
+				BF11E8142440C1EB009C104D /* wxScatteringPower.h in Headers */,
+				BF11E7E52440C1BF009C104D /* ZScatterer.h in Headers */,
+				BF11E81C2440C1EB009C104D /* wxScatterer.h in Headers */,
+				BF11E7BE2440AA42009C104D /* Tracker.h in Headers */,
+				BF11E8162440C1EB009C104D /* wxRefinableObj.h in Headers */,
+				BF11E8112440C1EB009C104D /* wxZScatterer.h in Headers */,
+				BF11E8312440C200009C104D /* WXFoxClient.h in Headers */,
+				BF11E7E72440C1BF009C104D /* Colours.h in Headers */,
+				BF11E7E32440C1BF009C104D /* DiffractionDataSingleCrystal.h in Headers */,
+				BF11E8132440C1EB009C104D /* wxMultiGraph.h in Headers */,
+				BF11E7F82440C1D6009C104D /* sse_mathfun.h in Headers */,
+				BF11E82E2440C200009C104D /* FoxJob.h in Headers */,
+				BF11E7F12440C1BF009C104D /* UnitCell.h in Headers */,
+				BF11E7E92440C1BF009C104D /* PDF.h in Headers */,
+				BF11E7DA2440C1BF009C104D /* ScatteringData.h in Headers */,
+				BF11E7C12440C199009C104D /* CrystVector.h in Headers */,
+				BF11E7F02440C1BF009C104D /* GeomStructFactor.h in Headers */,
+				BF11E8102440C1EB009C104D /* wxAtom.h in Headers */,
+				BF11E7EA2440C1BF009C104D /* Atom.h in Headers */,
+				BF11E7E62440C1BF009C104D /* Molecule.h in Headers */,
+				BF11E81F2440C1EB009C104D /* wxPowderPattern.h in Headers */,
+				BF11E7BB2440AA42009C104D /* Simplex.h in Headers */,
+				BF11E7DE2440C1BF009C104D /* ScatteringCorr.h in Headers */,
+				BF11E8202440C1EB009C104D /* wxGlobalOptimObj.h in Headers */,
+				BF11E8222440C1EB009C104D /* wxCryst.h in Headers */,
+				BF11E7EC2440C1BF009C104D /* CIF.h in Headers */,
+				BF11E7DB2440C1BF009C104D /* Crystal.h in Headers */,
+				BF11E7E02440C1BF009C104D /* ScatteringPower.h in Headers */,
+				BF11E8232440C1EB009C104D /* trackball.h in Headers */,
+				BF11E8152440C1EB009C104D /* wxDiffractionSingleCrystal.h in Headers */,
+				BF11E7E22440C1BF009C104D /* test.h in Headers */,
+				BF11E8352440C200009C104D /* FoxClient.h in Headers */,
+				BF11E8322440C200009C104D /* WXGridWindow.h in Headers */,
+				BF11E7DF2440C1BF009C104D /* PowderPattern.h in Headers */,
+				BF11E7ED2440C1BF009C104D /* PowderPatternBackgroundBayesianMinimiser.h in Headers */,
+				BF11E7E42440C1BF009C104D /* ScatteringPowerSphere.h in Headers */,
+				BF11E81A2440C1EB009C104D /* wxRadiation.h in Headers */,
+				BF11E8192440C1EB009C104D /* wxCrystal.h in Headers */,
+				BF11E81B2440C1EB009C104D /* MC.h in Headers */,
+				BF11E7EB2440C1BF009C104D /* General.h in Headers */,
+				BF11E7EF2440C1BF009C104D /* Polyhedron.h in Headers */,
+				BF11E7FA2440C1D6009C104D /* Chronometer.h in Headers */,
+				BF11E7DD2440C1BF009C104D /* SpaceGroup.h in Headers */,
+				BF11E7BC2440AA42009C104D /* RefinableObj.h in Headers */,
+				BF11E8212440C1EB009C104D /* wxMolecule.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4434,7 +4687,6 @@
 				BF69C4D1124F8C310035CF57 /* FoxClient.cpp in Sources */,
 				BF69C4D2124F8C310035CF57 /* FoxJob.cpp in Sources */,
 				BF69C4D3124F8C310035CF57 /* FoxServer.cpp in Sources */,
-				BF69C4D4124F8C310035CF57 /* FoxServerThread.cpp in Sources */,
 				BF69C4D5124F8C310035CF57 /* GridResult.cpp in Sources */,
 				BF69C4D6124F8C310035CF57 /* IOSocket.cpp in Sources */,
 				BF69C4D7124F8C310035CF57 /* WXFoxClient.cpp in Sources */,

@@ -1,7 +1,7 @@
 BUILD_DIR = $(CURDIR)/../..
 include $(BUILD_DIR)/ObjCryst/rules.mak
 
-OBJ = Fox.o FoxJob.o GridResult.o IOSocket.o FoxServerThread.o FoxServer.o FoxClient.o WXFoxClient.o WXFoxServer.o WXGridWindow.o
+OBJ = Fox.o FoxJob.o GridResult.o IOSocket.o FoxServer.o FoxClient.o WXFoxClient.o WXFoxServer.o WXGridWindow.o
 
 ifeq ($(profile),2)
 %.o : %.c

@@ -129,23 +129,25 @@ void standardSpeedTest();
 
 /** Load CIF data (crystal structure, powder and single crystal diffraction data).
 * \param in: the input stream (can be an ifstream, stringstream, etc..)
+* \param connectAtoms: if true, will connect the atoms after import. This is ignored
+* in the GUI version, as the option is read from the Fox preferences.
 * \note: this function will disable automatic UI update when loading the Crystal structure,
 * until after the scattering powers have been merged and the atoms connected.
 */
-void FoxLoadCIF(std::istream &in)
+void FoxLoadCIF(std::istream &in, const bool verbose=true, bool connectAtoms=true)
 {
    Chronometer chrono;
    chrono.start();
    gCrystalRegistry.AutoUpdateUI(false);
-   ObjCryst::CIF cif(in,true,true);
-   bool oneScatteringPowerPerElement=true, connectAtoms=true;
+   ObjCryst::CIF cif(in,true,verbose);
+   bool oneScatteringPowerPerElement=true;
    #ifdef __WX__CRYST__
    wxConfigBase::Get()->Read(_T("Fox/BOOL/CIF import: automatically convert to molecules"), &connectAtoms);
    wxConfigBase::Get()->Read(_T("Fox/BOOL/CIF import: only one scattering power per element"), &oneScatteringPowerPerElement);
    #endif
    // In case several Crystal structures are loaded, record the number of crystal structures rather than rely on the last one returned by the function
    const int nb0 = gCrystalRegistry.GetNb();
-    CreateCrystalFromCIF(cif, true, true, false, false);
+   CreateCrystalFromCIF(cif, verbose, true, false, false);
    for(int i=nb0;i<gCrystalRegistry.GetNb();i++)
    {
       Crystal *pCryst = &(gCrystalRegistry.GetObj(i));
@@ -674,7 +676,7 @@ int main (int argc, char *argv[])
       if(STRCMP("--silent",argv[i])==0)
       {
          silent=true;
-         cout << "Running Fox quietly"<<endl;
+         cout << "Running Fox (mostly) quietly"<<endl;
          continue;
       }
       if(STRCMP("--finalcost",argv[i])==0)
@@ -1068,7 +1070,7 @@ int main (int argc, char *argv[])
          cout<<"Loading: "<<argv[i]<<endl;
          ifstream in (argv[i]);
          #endif
-         FoxLoadCIF(in);
+         FoxLoadCIF(in, !silent, !cif2pattern);
          if(!cif2pattern)continue;
       }
       #ifdef __WX__CRYST__

@@ -477,7 +477,7 @@ void CIFData::ExtractPowderPattern(const bool verbose)
    {
       mWavelength=CIFNumeric2REAL(positem->second);
       defaultWavelength=mWavelength;
-      cout<<"Found wavelength:"<<defaultWavelength<<endl;
+      if(verbose) cout<<"Found wavelength:"<<defaultWavelength<<endl;
    }
    else mWavelength=defaultWavelength;
 
@@ -490,10 +490,10 @@ void CIFData::ExtractPowderPattern(const bool verbose)
       pos_wavelength=loop->second.find("_diffrn_radiation_wavelength");
       if(pos_wavelength!=loop->second.end())
       {
-         cout<<"Found wavelength (in loop):"<<pos_wavelength->second[0];
+         if(verbose) cout<<"Found wavelength (in loop):"<<pos_wavelength->second[0];
          mWavelength=CIFNumeric2REAL(pos_wavelength->second[0]);
          defaultWavelength=mWavelength;
-         cout<<" -> "<<defaultWavelength<<endl;
+         if(verbose) cout<<" -> "<<defaultWavelength<<endl;
       }
 
       pos_iobs=loop->second.find("_pd_meas_counts_total");
@@ -580,7 +580,7 @@ void CIFData::ExtractSingleCrystalData(const bool verbose)
    {
       mWavelength=CIFNumeric2REAL(positem->second);
       defaultWavelength=mWavelength;
-      cout<<"Found wavelength:"<<defaultWavelength<<endl;
+      if(verbose) cout<<"Found wavelength:"<<defaultWavelength<<endl;
    }
    else mWavelength=defaultWavelength;
 
@@ -593,10 +593,10 @@ void CIFData::ExtractSingleCrystalData(const bool verbose)
       pos_wavelength=loop->second.find("_diffrn_radiation_wavelength");
       if(pos_wavelength!=loop->second.end())
       {
-         cout<<"Found wavelength (in loop):"<<pos_wavelength->second[0];
+         if(verbose) cout<<"Found wavelength (in loop):"<<pos_wavelength->second[0];
          mWavelength=CIFNumeric2REAL(pos_wavelength->second[0]);
          defaultWavelength=mWavelength;
-         cout<<" -> "<<defaultWavelength<<endl;
+         if(verbose) cout<<" -> "<<defaultWavelength<<endl;
       }
 
       pos_iobs=loop->second.find("_refln_F_squared_meas");
