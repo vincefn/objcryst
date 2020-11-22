@@ -58,31 +58,8 @@
 #include <boost/format.hpp>
 
 #ifdef __FOX_COD__
-#if 1
-// Using MySQL C++ connector
-//#include "mysql_connection.h"
-//#include "cppconn/driver.h"
-//#include "cppconn/exception.h"
-//#include "cppconn/resultset.h"
-//#include "cppconn/statement.h"
-//#include "mysql_driver.h"
-// Using MySQL native API
-#include <mysql.h>
-#else
-// Using otlv4, requires installing an ODBC connector...
-   #if defined(__DARWIN__)
-		#define OTL_ODBC
-		#define OTL_ODBC_UNIX
-   #endif
-   #ifdef _MSC_VER
-      #define OTL_ODBC
-	  //#define OTL_ANSI_CPP
-      //#define OTL_UNICODE
-	  //#define OTL_ODBC_SELECT_STM_EXECUTE_BEFORE_DESCRIBE
-   #endif
-   #define OTL_STL
-   #include "otlv4.h"
-#endif
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 #endif
 
 #include "ObjCryst/ObjCryst/General.h"
@@ -341,12 +318,16 @@ private:
    wxListBox *mpBrowseList;
 #ifdef __FOX_COD__
    std::list<wxTextCtrl*> mvpCOD_Elements;
-   std::list<wxTextCtrl*> mvpCOD_Authors;
-   std::list<wxTextCtrl*> mvpCOD_TitleWords;
+   std::list<wxTextCtrl*> mvpCOD_NElements;
+   wxTextCtrl* mvpCOD_Formula;
+   wxTextCtrl* mvpCOD_SMARTS;
+   wxTextCtrl* mvpCOD_Text1;
+   wxTextCtrl* mvpCOD_Text2;
    wxTextCtrl* mpCOD_MinNel;
    wxTextCtrl* mpCOD_MaxNel;
    wxTextCtrl* mpCOD_MinVol;
    wxTextCtrl* mpCOD_MaxVol;
+   wxTextCtrl* mvpCOD_ID;
    wxListBox* mpCOD_List;
    wxFrame *mpCODFrame;
    wxGrid *mpCODGrid;
@@ -2740,52 +2721,85 @@ void WXCrystMainFrame::OnCOD(wxCommandEvent &event)
    wxBoxSizer *tmpsizer;
 
    tmpsizer=new wxBoxSizer(wxHORIZONTAL);
-   topsizer->Add(tmpsizer);
-   wxStaticText *pWords=new wxStaticText(pWinCOD,-1,"Words (title, crystal name):");
+   topsizer->Add(tmpsizer, 0, wxEXPAND);
+   wxStaticText *pWords=new wxStaticText(pWinCOD,-1,"Free text:");
+   pWords->SetToolTip(_T("Name, formula, authors, etc..."));
+
    tmpsizer->Add(pWords);
-   for(unsigned int i=0;i<3;i++)
-   {
-      mvpCOD_TitleWords.push_back(new wxTextCtrl(pWinCOD,-1));
-      tmpsizer->Add(mvpCOD_TitleWords.back());
-   }
+   mvpCOD_Text1 = new wxTextCtrl(pWinCOD,-1);
+   tmpsizer->Add(mvpCOD_Text1,1, wxEXPAND);
+   mvpCOD_Text2 = new wxTextCtrl(pWinCOD,-1);
+   tmpsizer->Add(mvpCOD_Text2,1, wxEXPAND);
+   
+   tmpsizer=new wxBoxSizer(wxHORIZONTAL);
+   topsizer->Add(tmpsizer, 0, wxEXPAND);
+   wxStaticText *pFormula=new wxStaticText(pWinCOD,-1,"Formula (Hill notation):");
+   tmpsizer->Add(pFormula);
+   mvpCOD_Formula = new wxTextCtrl(pWinCOD,-1);
+   tmpsizer->Add(mvpCOD_Formula,1, wxEXPAND);
+   pFormula->SetToolTip(_T("Ordered formula: C first, then H,\n"
+                           "then alphabetical order, separated by 1 space\n"
+                           "\nSee https://en.wikipedia.org/wiki/Hill_notation\n"
+                           "Example: C2 H5 Br, C18 H18 Cl N O3 S"));
 
    tmpsizer=new wxBoxSizer(wxHORIZONTAL);
-   topsizer->Add(tmpsizer);
+   topsizer->Add(tmpsizer, 0, wxEXPAND);
+   wxStaticText *pSMARTS=new wxStaticText(pWinCOD,-1,"SMARTS pattern:");
+   tmpsizer->Add(pSMARTS);
+   mvpCOD_SMARTS = new wxTextCtrl(pWinCOD,-1);
+   tmpsizer->Add(mvpCOD_SMARTS,1, wxEXPAND);
+   pSMARTS->SetToolTip(_T("SMARTS pattern, e.g. [OH]c1ccccc1 for phenol\n"
+                          "See https://www.daylight.com/dayhtml/doc/theory/theory.smarts.html\n"
+                          "Characters not allowed (untested): at least &"));
+   
+   
+   tmpsizer=new wxBoxSizer(wxHORIZONTAL);
+   topsizer->Add(tmpsizer, 0, wxEXPAND);
+   wxStaticText *pCODId=new wxStaticText(pWinCOD,-1,"COD id:");
+   tmpsizer->Add(pCODId);
+   mvpCOD_ID = new wxTextCtrl(pWinCOD,-1);
+   tmpsizer->Add(mvpCOD_ID,1, wxEXPAND);
+   pCODId->SetToolTip(_T("COD id or range, e.g.:\n"
+                          "single entry: 1100661\n"
+                          "multiple entries: 1100661,1501768"));
+
+   tmpsizer=new wxBoxSizer(wxHORIZONTAL);
+   topsizer->Add(tmpsizer, 0, wxEXPAND);
    wxStaticText *pElements=new wxStaticText(pWinCOD,-1,"Elements ('C', 'O6'..):");
    tmpsizer->Add(pElements);
    for(unsigned int i=0;i<6;i++)
    {
-      mvpCOD_Elements.push_back(new wxTextCtrl(pWinCOD,-1));
-      tmpsizer->Add(mvpCOD_Elements.back());
+      mvpCOD_Elements.push_back(new wxTextCtrl(pWinCOD,-1, wxEmptyString, wxDefaultPosition, wxSize(50,-1)));
+      tmpsizer->Add(mvpCOD_Elements.back(),1, wxEXPAND);
    }
-
+   
    tmpsizer=new wxBoxSizer(wxHORIZONTAL);
-   topsizer->Add(tmpsizer);
-   wxStaticText *pAuthors=new wxStaticText(pWinCOD,-1,"Author names:");
-   tmpsizer->Add(pAuthors);
-   for(unsigned int i=0;i<3;i++)
+   topsizer->Add(tmpsizer, 0, wxEXPAND);
+   pElements=new wxStaticText(pWinCOD,-1,"Excluded Elements:");
+   tmpsizer->Add(pElements);
+   for(unsigned int i=0;i<4;i++)
    {
-      mvpCOD_Authors.push_back(new wxTextCtrl(pWinCOD,-1));
-      tmpsizer->Add(mvpCOD_Authors.back());
+      mvpCOD_NElements.push_back(new wxTextCtrl(pWinCOD, -1));
+      tmpsizer->Add(mvpCOD_NElements.back(),1, wxEXPAND);
    }
 
    tmpsizer=new wxBoxSizer(wxHORIZONTAL);
-   topsizer->Add(tmpsizer);
+   topsizer->Add(tmpsizer, 0, wxEXPAND);
    wxStaticText *pNbElements=new wxStaticText(pWinCOD,-1,"Min and Max number of elements:");
    tmpsizer->Add(pNbElements);
-   mpCOD_MinNel=new wxTextCtrl(pWinCOD,-1);
-   tmpsizer->Add(mpCOD_MinNel);
-   mpCOD_MaxNel=new wxTextCtrl(pWinCOD,-1);
-   tmpsizer->Add(mpCOD_MaxNel);
+   mpCOD_MinNel=new wxTextCtrl(pWinCOD,-1, wxEmptyString, wxDefaultPosition, wxSize(50,-1));
+   tmpsizer->Add(mpCOD_MinNel,1, wxEXPAND);
+   mpCOD_MaxNel=new wxTextCtrl(pWinCOD,-1, wxEmptyString, wxDefaultPosition, wxSize(50,-1));
+   tmpsizer->Add(mpCOD_MaxNel,1, wxEXPAND);
 
    tmpsizer=new wxBoxSizer(wxHORIZONTAL);
-   topsizer->Add(tmpsizer);
+   topsizer->Add(tmpsizer, 0, wxEXPAND);
    wxStaticText *pVolume=new wxStaticText(pWinCOD,-1,"Min and Max unit cell volume (A^3):");
    tmpsizer->Add(pVolume);
    mpCOD_MinVol=new wxTextCtrl(pWinCOD,-1);
-   tmpsizer->Add(mpCOD_MinVol);
+   tmpsizer->Add(mpCOD_MinVol,1, wxEXPAND);
    mpCOD_MaxVol=new wxTextCtrl(pWinCOD,-1);
-   tmpsizer->Add(mpCOD_MaxVol);
+   tmpsizer->Add(mpCOD_MaxVol,1, wxEXPAND);
 
    wxButton *pbut=new wxButton(pWinCOD,ID_FOX_BUTTON_COD,"Query COD");
    topsizer->Add(pbut);
@@ -2974,254 +2988,188 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
    Chronometer chrono;
    chrono.start();
    stringstream query;
-   query<<"select file,a,b,c,alpha,beta,gamma,vol,sg,sgHall,nel,commonname,chemname,mineral,formula,calcformula,authors,title,journal,volume,year,firstpage from data where ";
+   //query<<"select file,a,b,c,alpha,beta,gamma,vol,sg,sgHall,nel,commonname,chemname,mineral,formula,calcformula,authors,title,journal,volume,year,firstpage from data where ";
+   query<<"http://www.crystallography.net/cod/result.php?";
    //Read parameters from GUI
    wxString v;
-   bool notfirst=false;
+   bool empty_query=true;
+   // text
+   v=mvpCOD_Text1->GetValue();
+   if(v.IsEmpty()==false)
+   {
+      query<<"&text1="<<v;
+      empty_query = false;
+   }
+   
+   v=mvpCOD_Text2->GetValue();
+   if(v.IsEmpty()==false)
+   {
+      query<<"&text2="<<v;
+      empty_query = false;
+   }
+   
+   // Formula
+   v=mvpCOD_Formula->GetValue();
+   if(v.IsEmpty()==false)
+   {
+      query<<"&formula="<<v;
+      empty_query = false;
+   }
+   
+   // SMARTS
+   v=mvpCOD_SMARTS->GetValue();
+   if(v.IsEmpty()==false)
+   {
+      query<<"&smarts="<<v;
+      empty_query = false;
+   }
+
+   // COD ID
+   v=mvpCOD_ID->GetValue();
+   if(v.IsEmpty()==false)
+   {
+      query<<"&id="<<v;
+      empty_query = false;
+   }
+   
    //Elements
+   int idxel=1;
    for(std::list<wxTextCtrl*>::iterator pos=mvpCOD_Elements.begin();pos!=mvpCOD_Elements.end();++pos)
    {
       v=(*pos)->GetValue();
       if(v.IsEmpty()==false)
       {
-         if(notfirst) query<<"and ";notfirst=true;
-         query<<"(formula rlike '[[:blank:]]"<<v<<"[[:digit:]]' or formula rlike '[[:blank:]]"<<v<<"[[:blank:]]') ";
-
+         query<<"&el" << idxel++ <<"="<<v;
+         empty_query = false;
       }
    }
+   
+   // Excluded elements
+   idxel=1;
+   for(std::list<wxTextCtrl*>::iterator pos=mvpCOD_NElements.begin();pos!=mvpCOD_NElements.end();++pos)
+   {
+      v=(*pos)->GetValue();
+      if(v.IsEmpty()==false)
+      {
+         query<<"&nel" << idxel++ <<"="<<v;
+         empty_query = false;
+      }
+   }
+
    //Nb elements
    v=mpCOD_MinNel->GetValue();
    if(v.IsEmpty()==false)
    {
-      if(notfirst) query<<"and ";notfirst=true;
-      query<<"nel>="<<v<<" ";
+      query<<"&strictmin=" << v;
+      empty_query = false;
    }
    v=mpCOD_MaxNel->GetValue();
    if(v.IsEmpty()==false)
    {
-      if(notfirst) query<<"and ";notfirst=true;
-      query<<"nel<="<<v<<" ";
+      query<<"&strictmax=" << v;
+      empty_query = false;
    }
-
    //Volume
    v=mpCOD_MinVol->GetValue();
    if(v.IsEmpty()==false)
    {
-      if(notfirst) query<<"and ";notfirst=true;
-      query<<"vol>="<<v<<" ";
+      query<<"&vmin="<<v;
+      empty_query = false;
    }
    v=mpCOD_MaxVol->GetValue();
    if(v.IsEmpty()==false)
    {
-      if(notfirst) query<<"and ";notfirst=true;
-      query<<"vol<="<<v<<" ";
+      query<<"&vmax="<<v;
+      empty_query = false;
    }
 
-   //Authors
-   for(std::list<wxTextCtrl*>::iterator pos=mvpCOD_Authors.begin();pos!=mvpCOD_Authors.end();++pos)
-   {
-      v=(*pos)->GetValue();
-      if(v.IsEmpty()==false)
-      {
-         if(notfirst) query<<"and ";notfirst=true;
-         query<<"authors rlike '"<<v<<"' ";
-      }
-   }
-
-   //Words
-   for(std::list<wxTextCtrl*>::iterator pos=mvpCOD_TitleWords.begin();pos!=mvpCOD_TitleWords.end();++pos)
-   {
-      v=(*pos)->GetValue();
-      if(v.IsEmpty()==false)
-      {
-         if(notfirst) query<<"and ";notfirst=true;
-         query<<"(title rlike '"<<v<<"' ";
-         query<<"or mineral rlike '"<<v<<"' ";
-         query<<"or chemname rlike '"<<v<<"' ";
-         query<<"or commonname rlike '"<<v<<"') ";
-      }
-   }
-
-   if(notfirst==false)
+   if(empty_query)
    {
       wxMessageDialog d(this,_T("COD: Empty request !"),_T("Error"),wxOK|wxICON_ERROR);
       d.ShowModal();
       return;
    }
-   query<<"order by formula limit 500";
+   (*fpObjCrystInformUser)((boost::format("COD query: %s") % query.str()).str());
 
    VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton():Query="<<query.str()<<" (dt="<<chrono.seconds()<<")", 10)
    if( (mpCODFrame!=0)  && (wxWindow::FindWindowById(ID_FOX_COD_LIST)!=NULL)) mpCODFrame->Close();
-#ifdef OTL_ODBC
-   otl_connect db;
-   otl_connect::otl_initialize();
-   std::string s;
-   #ifdef __DARWIN__
-   s=wxStandardPaths::Get().GetExecutablePath().c_str();//"somwhere/Fox.app/Contents/MacOS/Fox"
-   std::size_t pos=s.rfind("/Contents/");
-   s="driver="+s.substr(0,pos)+"/Contents/Resources/libmyodbc5a.so;server=www.crystallography.net;user=cod_reader;database=cod";
-   s = "driver={MySQL ODBC 5.2 Unicode Driver};server=www.crystallography.net;user=cod_reader;database=cod";
-   #endif
-   #ifdef _MSC_VER
-   s = "driver={MySQL ODBC 5.3 Unicode Driver};server=www.crystallography.net;user=cod_reader;database=cod";
-   #endif
-   VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton()" + s, 10)
-   try {
-      db.rlogon(s.c_str());
-   }
-   catch (otl_exception &except)
+   
+   // Query using REST API
+   if(false == wxFileSystem::HasHandlerForPath(_T("http://objcryst.sourceforge.net/FoxUpdates.txt")))
+      wxFileSystem::AddHandler(new wxInternetFSHandler);
+   // First get the number of results
+   if(wxFileSystem::HasHandlerForPath(query.str()))
    {
-      VFN_DEBUG_MESSAGE("OTL Exception!"<<endl<<"   message:"<<except.msg<<endl<<"   sqlstate:"<<except.sqlstate,10)
-	  wxMessageDialog d(this, _T("COD: Error loading ODBC driver or connecting to database server ? Message:\n") + wxString(except.msg), _T("Error"), wxOK | wxICON_ERROR);
-	  d.ShowModal();
-	  return;
-   }
-   VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton()",10)
-   try
-   {
-
-      otl_stream i(50, query.str().c_str(),db);
-      long codid;//'file' record in COD
-
-      i; // Writing input values into the stream
-      mvCOD_Record.clear();
-      while(!i.eof())
-      { // while not end-of-data
-         //mvCOD_Record[codid]=cod_record();
-         mvCOD_Record.push_back(cod_record());
-         cod_record *p=&(mvCOD_Record.back());
-         i>> p->file;
-         VFN_DEBUG_MESSAGE("COD id="<<p->file<<"("<<mvCOD_Record.size()<<")",10)
-         i>> p->a;
-         i>> p->b;
-         i>> p->c;
-         i>> p->alpha;
-         i>> p->beta;
-         i>> p->gamma;
-         i>> p->vol;
-         i>> p->sg;
-         i>> p->sgHall;
-         i>> p->nel;
-         i>> p->commonname;
-         i>> p->chemname;
-         i>> p->mineral;
-         i>> p->formula;
-         i>> p->calcformula;
-         i>> p->authors;
-         i>> p->title;
-         i>> p->journal;
-         i>> p->volume;
-         i>> p->year;
-         i>> p->firstpage;
-		 VFN_DEBUG_MESSAGE("   Formula: " << p->formula << " a=" << p->a << " b=" << p->b << " c=" << p->c << endl
-			               << "   Journal: " << p->journal << " " << p->volume << "(" << p->year << "), " << p->firstpage << ":" << p->authors << endl
-			               << "   Title:   " << p->title << endl, 10)
-      }
-      cout<<endl<<"Total: "<<mvCOD_Record.size()<<endl;
-   }
-   catch (otl_exception &except)
-   {
-	  VFN_DEBUG_MESSAGE("OTL Exception!" << endl << "   message:" << except.msg << endl << "   sqlstate:" << except.sqlstate << endl,10)
-      cout<<"OTL Exception!"<<endl
-      <<"   message:"<<except.msg<<endl
-      <<"   sqlstate:"<<except.sqlstate<<endl;
-      wxMessageDialog d(this,_T("COD: SQL Error ?")+wxString(except.msg),_T("Error"),wxOK|wxICON_ERROR);
-      d.ShowModal();
-      return;
-   }
-#else
-   // Using MySQL native C API
-   MYSQL *connection, mysql;
-
-   int state;
-   dlgProgress.Update(2,"Connecting to COD database");
-
-   mysql_init(&mysql);
-
-   connection = mysql_real_connect(&mysql,"www.crystallography.net","cod_reader","","cod",3306,0,0);
-   if (connection == NULL)
-   {
-      stringstream s;
-      s<<"MySQL: error opening connection to COD database"<<endl<<"MySQL ErrNo:"<<mysql_errno(&mysql)<<endl<<"MySQL ErrMsg:"<<mysql_error(&mysql)<<endl<<"MySQL state:"<<mysql_sqlstate(&mysql);
-      VFN_DEBUG_MESSAGE(s.str(), 10)
-      wxMessageDialog d(this,wxString(s.str()),_T("Error connecting to COD database"),wxOK|wxICON_ERROR);
-      d.ShowModal();
-      return ;
-   }
-   VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton(): MySQL connection OK"<<" (dt="<<chrono.seconds()<<")", 10)
-
-   dlgProgress.Update(4,"Query COD database");
-   state = mysql_query(connection, query.str().c_str());
-   if (state !=0)
-   {
-      stringstream s;
-      s<<"MySQL: querying COD database"<<endl<<"MySQL ErrNo:"<<mysql_errno(&mysql)<<endl<<"MySQL ErrMsg:"<<mysql_error(&mysql)<<endl<<"MySQL state:"<<mysql_sqlstate(&mysql);
-      VFN_DEBUG_MESSAGE(s.str(), 10)
-      wxMessageDialog d(this,wxString(s.str()),_T("Error querying COD database"),wxOK|wxICON_ERROR);
-      d.ShowModal();
-      return ;
-   }
-
-   MYSQL_RES *result = mysql_store_result(connection);
-
-   const unsigned int nbresult = mysql_num_rows(result);
-   VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton(): Got "<<nbresult<<"rows (dt="<<chrono.seconds()<<")", 10)
-   mvCOD_Record.clear();
-   stringstream s;
-   s.imbue(std::locale::classic());
-   unsigned int ct=0;
-   MYSQL_ROW row;
-   while ( ( row=mysql_fetch_row(result)) != NULL )
-   {
-      try
+      wxFSFile *fp= NULL;
+      wxFileSystem fs;
+      fp= fs.OpenFile((boost::format("%s&format=count") % query.str()).str(),wxFS_READ);
+      if(fp!=NULL)
       {
-         mvCOD_Record.push_back(cod_record());
-         cod_record *p=&(mvCOD_Record.back());
-         unsigned int i=0;
-         if(row[i  ]!=NULL){stringstream s; s<<row[i]; s.imbue(std::locale::classic()); s >>p->file;}
-         if(row[++i]!=NULL){stringstream s; s<<row[i]; s.imbue(std::locale::classic()); s >> p->a;}
-         if(row[++i]!=NULL){stringstream s; s<<row[i]; s.imbue(std::locale::classic()); s >> p->b;}
-         if(row[++i]!=NULL){stringstream s; s<<row[i]; s.imbue(std::locale::classic()); s >> p->c;}
-         if(row[++i]!=NULL){stringstream s; s<<row[i]; s.imbue(std::locale::classic()); s >> p->alpha;}
-         if(row[++i]!=NULL){stringstream s; s<<row[i]; s.imbue(std::locale::classic()); s >> p->beta;}
-         if(row[++i]!=NULL){stringstream s; s<<row[i]; s.imbue(std::locale::classic()); s >> p->gamma;}
-         if(row[++i]!=NULL){stringstream s; s<<row[i]; s.imbue(std::locale::classic()); s >> p->vol;}
-         if(row[++i]!=NULL){p->sg=row[i];}
-         if(row[++i]!=NULL){p->sgHall=row[i];}
-         if(row[++i]!=NULL){p->nel=row[i];}
-         if(row[++i]!=NULL){p->commonname=row[i];}
-         if(row[++i]!=NULL){p->chemname=row[i];}
-         if(row[++i]!=NULL){p->mineral=row[i];}
-         if(row[++i]!=NULL){p->formula=row[i];}
-         if(row[++i]!=NULL){p->calcformula=row[i];}
-
-         if(row[++i]!=NULL){p->authors=row[i];}
-         if(row[++i]!=NULL){p->title=row[i];}
-         if(row[++i]!=NULL){p->journal=row[i];}
-         if(row[++i]!=NULL){stringstream s; s<<row[i]; s.imbue(std::locale::classic()); s >> p->volume;}
-         if(row[++i]!=NULL){stringstream s; s<<row[i]; s.imbue(std::locale::classic()); s >> p->year;}
-         if(row[++i]!=NULL){stringstream s; s<<row[i]; s.imbue(std::locale::classic()); s >> p->firstpage;}
-         VFN_DEBUG_MESSAGE("   Formula: " << p->formula << " a=" << p->a << " b=" << p->b << " c=" << p->c << endl
-                           << "   Journal: " << p->journal << " " << p->volume << "(" << p->year << "), " << p->firstpage << ":" << p->authors << endl
-                           << "   Title:   " << p->title << endl<<" (dt="<<chrono.seconds()<<")", 10)
-         dlgProgress.Update(4+(ct*100)/nbresult,wxString::Format("Getting result #%u/%u, cod:%ld, formula:%s", ct,nbresult,p->file,p->formula));
-      } catch (exception &ex)
-      {
-         VFN_DEBUG_MESSAGE("Error reading record #"<<ct<<endl<<"MySQL ErrNo:"<<mysql_errno(&mysql)<<endl<<"MySQL ErrMsg:"<<mysql_error(&mysql)<<endl<<"MySQL state:"<<mysql_sqlstate(&mysql), 10)
-         cod_record *p=&(mvCOD_Record.back());
-         VFN_DEBUG_MESSAGE("   Formula: " << p->formula << " a=" << p->a << " b=" << p->b << " c=" << p->c << endl
-                           << "   Journal: " << p->journal << " " << p->volume << "(" << p->year << "), " << p->firstpage << ":" << p->authors << endl
-                           << "   Title:   " << p->title << endl, 10)
+         wxInputStream *fstream = fp->GetStream();
+         wxStringOutputStream wxresult;
+         fstream->Read(wxresult);
+         (*fpObjCrystInformUser)((boost::format("COD: number of results= %s") % wxresult.GetString().c_str()).str());
+         const int ct = std::atoi(wxresult.GetString().c_str());
+         if(ct>200)
+         {
+            wxMessageDialog d(this,_T("COD: more than 200 results - narrow your search"),_T("Error"),wxOK|wxICON_ERROR);
+            d.ShowModal();
+            return;
+         }
       }
-      ct++;
+   }
+   // Get the actual results and parse them
+   if(wxFileSystem::HasHandlerForPath(query.str()))
+   {
+      wxFSFile *fp= NULL;
+      wxFileSystem fs;
+      fp= fs.OpenFile((boost::format("%s&format=json") % query.str()).str(),wxFS_READ);
+      if(fp!=NULL)
+      {
+         wxInputStream *fstream = fp->GetStream();
+         wxStringOutputStream wxresult;
+         fstream->Read(wxresult);
+         
+         // Parse results
+         boost::property_tree::ptree root;
+         stringstream ss;
+         ss <<wxresult.GetString().c_str();
+         boost::property_tree::read_json(ss, root);
+         // (*fpObjCrystInformUser)((boost::format("Size of JSON results: %d")%(root.size())).str());
+         for (boost::property_tree::ptree::iterator pos=root.begin();pos!=root.end();pos++)
+         {
+            //(*fpObjCrystInformUser)((boost::format("COD entry size: %d")%(pos->second.size())).str());
+            //(*fpObjCrystInformUser)((boost::format("COD id: %d")%(pos->second.get<std::string>("file"))).str());
+            mvCOD_Record.push_back(cod_record());
+            cod_record *p=&(mvCOD_Record.back());
+            p->file = std::atoi(pos->second.get<std::string>("file").c_str() );
+            VFN_DEBUG_MESSAGE("COD id="<<p->file<<"("<<mvCOD_Record.size()<<")",10)
+            p->a = std::atoi(pos->second.get<std::string>("a").c_str());
+            p->b = std::atoi(pos->second.get<std::string>("b").c_str());
+            p->c = std::atoi(pos->second.get<std::string>("c").c_str());
+            p->alpha = std::atof(pos->second.get<std::string>("alpha").c_str());
+            p->beta = std::atof(pos->second.get<std::string>("beta").c_str());
+            p->gamma = std::atof(pos->second.get<std::string>("gamma").c_str());
+            p->vol = std::atof(pos->second.get<std::string>("vol").c_str());
+            p->sg = pos->second.get<std::string>("file");
+            p->sgHall = pos->second.get<std::string>("file");
+            p->nel = std::atoi(pos->second.get<std::string>("nel").c_str());
+            p->commonname = pos->second.get<std::string>("commonname");
+            p->chemname = pos->second.get<std::string>("chemname");
+            p->mineral = pos->second.get<std::string>("mineral");
+            p->formula = pos->second.get<std::string>("formula");
+            p->calcformula = pos->second.get<std::string>("calcformula");
+            p->authors = pos->second.get<std::string>("authors");
+            p->title = pos->second.get<std::string>("title");
+            p->journal = pos->second.get<std::string>("journal");
+            p->volume = std::atoi(pos->second.get<std::string>("volume").c_str());
+            p->year = std::atoi(pos->second.get<std::string>("year").c_str());
+            p->firstpage = std::atoi(pos->second.get<std::string>("firstpage").c_str());
+         }
+         // (*fpObjCrystInformUser)(string(wxresult.GetString().c_str()));
+      }
    }
 
-   dlgProgress.Update(105,"Closing database connection");
-   mysql_free_result(result);
-
-   mysql_close(connection);
-
-#endif
    if(mvCOD_Record.size()==0)
    {
       wxMessageDialog d(this,_T("COD: No results !"),_T("No results"),wxOK|wxICON_ERROR);
