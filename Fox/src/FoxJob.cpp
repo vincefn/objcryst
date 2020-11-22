@@ -2,6 +2,12 @@
 
 FoxJob::FoxJob(void)
 {
+   m_ID = 0;
+   m_nbTrial = 0;
+   m_nbRuns = 0;
+   m_nbDone = 0;
+   m_status = 0;
+   m_randomize = true;
 }
 FoxJob::~FoxJob(void)
 {
@@ -69,7 +75,10 @@ void FoxJob::setStatus(short status){
 void FoxJob::setFileName(wxString name){
     this->m_fileName = name;
 }
-
+int FoxJob::getAvailableRuns()
+{
+    return (getNbRuns()-getNbDone()-GetSolvingNb());
+}
 int FoxJob::getM_ID(){
     return m_ID;
 }

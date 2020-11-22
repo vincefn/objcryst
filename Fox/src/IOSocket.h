@@ -44,13 +44,13 @@ public:
     //returns true if successful, otherwise returns false
     //use getError() message to get error details;
     //receipt - send receipt?
-    bool ReadStringFromSocket(wxSocketBase *pSocket, std::string &message, bool receipt=true);
+    bool ReadStringFromSocket(wxSocketBase *pSocket, wxString &message);
 
     //writes message to the socket
     //returns true if successful, otherwise returns false
     //use getError() message to get error details;
     //receipt - send receipt?
-    bool WriteStringToSocket(wxSocketBase *pSocket, std::string s, bool receipt=true);
+    bool WriteStringToSocket(wxSocketBase *pSocket, wxString msg);
 
     //returns error message
     //Please note that this function merely returns the last error message,
@@ -60,6 +60,7 @@ private:
 
     unsigned int getMessageLen(wxSocketBase *pSocket);
 
+    wxString m_log;
     wxString m_error;
 
 };

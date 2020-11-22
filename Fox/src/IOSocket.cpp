@@ -14,127 +14,64 @@ IOSocket::IOSocket(void)
 IOSocket::~IOSocket(void)
 {
 }
-bool IOSocket::ReadStringFromSocket(wxSocketBase *pSocket, std::string &message, bool receipt)
+bool IOSocket::ReadStringFromSocket(wxSocketBase *pSocket, wxString &message)
 {
-    //clearing error message
-    m_error.Clear();
-
-    VFN_DEBUG_MESSAGE(__FUNCTION__<<":"<<message,10)
-    //set one minute to wait
-    pSocket->SetTimeout(20);
-
-    //the same as in writestringtosocket(...)
+    //m_log = "";
+    //m_log = "ThreadWorker: Reading the socket ...";
+    pSocket->SetFlags(wxSOCKET_WAITALL);
+    unsigned int len;
+    pSocket->Read(&len, sizeof(int));
     if (pSocket->Error()) {
-       m_error << _T("ReadStringFromSocket: Previous error detected: ") << (int) pSocket->LastError() << _T(", ") << pSocket->GetLastIOSize() <<_T(", ") << pSocket->LastCount();
-       m_error << _T(" try to continue\n");
-    }
-
-    //get length
-    unsigned int len = getMessageLen(pSocket);
-
-    //alloc memory for message
-#if 1 //def __WIN32__
-    char *buf;
-    buf = (char *) calloc(len+1, sizeof(char) );
-    if(buf==NULL)  {
-        m_error << _T("Can't alloc memory\n");
+        m_error = "ThreadWorker: Read error";
+        m_log += m_error;
         return false;
     }
-#else
-    char buf[len+1];
-#endif
+    int processed = pSocket->LastCount();
+    //m_log += wxString::Format("ThreadWorker: %d bytes read in the header (len = %d)", processed, len);           
 
-    //try to read message
-    pSocket->ReadMsg(buf,len);
-    if (pSocket->Error()) {
-        pSocket->Discard();
-        m_error << _T("ReadStringFromSocket error: ") << (int) pSocket->LastError() << _T(", ") << pSocket->GetLastIOSize() <<_T(", ") << pSocket->LastCount();
-        m_error << _T(" (sending message)\n");
-        #if 1//def __WIN32__
-            free(buf);
-        #endif
+    if (len == 0) {
+        //m_log += "ThreadWorker: 0 bytes in socket, nothing to read...";
+        return true;
+    }
+
+    wxCharBuffer buf(len);
+    //m_log += wxString::Format("Message header was: size = %d (bytes)",len);
+    //WriteLogMessage("ThreadWorker: Reading message ...");
+    pSocket->Read(buf.data(), len);
+
+    if (pSocket->Error())
+    {
+        //WriteLogMessage("ThreadWorker: Read error");
+        //wxGetApp().AddPendingEvent(e);
         return false;
     }
-   /*
-    if(receipt) {
-        //send receipt
-        wxString sreceipt;
-        sreceipt << (int) len;
-        //wait for write
-        if( !pSocket->WaitForWrite(10)) {
-            m_error << _T("ReadStringFromSocket error: WaitForWrite return false (sending receipt)\n");
-            #ifdef __WIN32__
-                free(buf);
-            #endif
-            return false;
-        }
-        if( !WriteStringToSocket(pSocket, string(sreceipt.ToAscii()), false) ) {
-            m_error << _T("ReadStringFromSocket error: sending receipt return false (sending receipt)\n");
-            #ifdef __WIN32__
-                free(buf);
-            #endif
-            return false;
-        }
-    }
-*/
-    //saving message
-    buf[len]='\0';
-    message=string(buf);
-    VFN_DEBUG_MESSAGE(__FUNCTION__<<":"<<message,10)
-
-    //free memory
-#if 1 //def __WIN32__
-    free(buf);
-#endif
-
+    processed = pSocket->LastCount();
+    //m_log += wxString::Format("ThreadWorker: %d bytes readed", processed);
+    wxString tmp(buf);
+    message = tmp;
     return true;
-}
-bool IOSocket::WriteStringToSocket(wxSocketBase *pSocket, std::string s, bool receipt)
+ }
+bool IOSocket::WriteStringToSocket(wxSocketBase *pSocket, wxString msg)
 {
-    //clearing error message
-    m_error.Clear();
-
-    pSocket->SetTimeout(20);
-
-    //inform about previous error...
-    if (pSocket->Error()) {
-       m_error << _T("WriteStringToSocket: Previous error detected: ") << (int) pSocket->LastError() << _T(", ") << pSocket->GetLastIOSize() <<_T(", ") << pSocket->LastCount();
-       m_error << _T(" try to continue\n");
-    }
-    VFN_DEBUG_MESSAGE(__FUNCTION__<<":"<<s,10)
-
-    //send message
-    pSocket->WriteMsg((void*) s.c_str(),s.size());
-    if (pSocket->Error()) {
-       m_error << _T("WriteStringToSocket error: ") << (int) pSocket->LastError() << _T(", ") << pSocket->GetLastIOSize() <<_T(", ") << pSocket->LastCount();
-       m_error << _T(" (sending message)\n");
-       return false;
-    }
-
-    if(!receipt) return true;
-/*
-    //wait for receipt
-    pSocket->WaitForRead(10);
-    if(!pSocket->IsData()) {
-        m_error << _T("WriteStringToSocket error: waiting for receipt - timeout\n");
-        return false;
-    }
-    //read receipt
-    string sreceipt;
-    long lreceipt;
-    if(!ReadStringFromSocket(pSocket, sreceipt, false)) {
-        m_error << _T("WriteStringToSocket error: reading receipt return false\n");
-        return false;
-    }
-    //convert to a number and compare
-    wxString tmp = wxString::FromAscii(sreceipt.c_str());
-    tmp.ToLong((long *) &lreceipt);
-    if(lreceipt!=s.size()) {
-        m_error << _T("WriteStringToSocket error: returned size does not match ") << (int) s.size() <<_T(" != ") << (int) lreceipt << _T("\n");
-        return false;
-    }
-*/
-    return true;
+      pSocket->SetFlags(wxSOCKET_WAITALL);
+     
+      wxCharBuffer buffer=msg.ToAscii();
+      // Note that len is in bytes here!
+      unsigned int len = strlen(buffer.data()) * sizeof(char);
+      //WriteLogMessage(wxString::Format("ThreadWorker: Sending header of the message of %d kilobytes", len));
+      pSocket->Write(&len, sizeof(int));
+      if (pSocket->Error()) {
+         //WriteLogMessage("ThreadWorker: Write error");
+         return false;
+      }
+      //WriteLogMessage("ThreadWorker: Sending the message ...");
+      pSocket->Write(buffer.data(), len);
+      if (pSocket->Error()) {
+         //WriteLogMessage("ThreadWorker: Write error");
+         return false;
+      }
+      //WriteLogMessage(m_socket->Error() ? _("ThreadWorker: failed !\n") : _("ThreadWorker: done\n"));
+      return true;
 }
 unsigned int IOSocket::getMessageLen(wxSocketBase *pSocket)
 {

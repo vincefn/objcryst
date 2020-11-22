@@ -54,6 +54,7 @@ private:
    void UpdateLists(wxTimerEvent& event);
    void OnNewJob(wxCommandEvent& event);
    void OnEditJob(wxCommandEvent& event);
+   void EditJob();
    void OnDeleteJob(wxCommandEvent& event);
    void OnLoadJob(wxCommandEvent& event);
    int  GenerateJobID();
