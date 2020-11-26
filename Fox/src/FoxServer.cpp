@@ -853,16 +853,4 @@ void FoxServer::OnSocketEvent(wxSocketEvent &event)
    WriteLogMessage(_T("OnSocketEvent_end"));
 }
 */
-void FoxServer::RunAllClients()
-{
-    /*
-   VFN_DEBUG_MESSAGE(__FUNCTION__,10)
-   if(m_threadMutex->Lock()!=wxMUTEX_NO_ERROR) return;
 
-   for(int i=0; i<m_threads.size(); i++)
-   {
-      m_threads[i]->NewEvent(SEND_JOB, m_threadMutex);
-   }
-   m_threadMutex->Unlock();
-   */
-}

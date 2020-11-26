@@ -133,7 +133,7 @@ class FoxServer: public wxFrame
      //void WriteProtocol();
      void GetData(std::vector<GridClient> &Clients, std::vector<GridResult > &results,  std::vector<FoxJob > &Joblist);
      bool IsServerRunning();
-     void RunAllClients();
+     //void RunAllClients();
      void AddJobToList(FoxJob newjob);
      void UpdateJob(int index, FoxJob *cjob);
      int DeleteJob(int index);

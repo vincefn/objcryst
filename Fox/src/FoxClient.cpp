@@ -199,7 +199,6 @@ void FoxClient::onProcessTerminate(int pid, int status, wxString dir)
    //if some error return
    if(status!=0) {
        WriteMessageLog(_T("process terminated with an error => no result will be sent to the server"));
-       //m_ProcessMutex->Unlock();
        return;
    }
 
@@ -451,7 +450,6 @@ bool FoxClient::AnalyzeMessage(wxString msg)
                 if(runNewJob(jobs[i], ids[i], (int) trials[i], rands[i])!=0) {
                     jobsForRejecting.push_back(ids[i]);
                 }
-                //wxSleep(2);
             }
         }
         //TODO
