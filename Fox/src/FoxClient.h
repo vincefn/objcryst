@@ -40,21 +40,33 @@
 #define __FOX_CLIENT__
 
 #define __CLIENT_LOGS 1
-/*
-class streamReceiveThread : public wxThread
+const wxEventType wxEVT_PROCESS_MY = wxNewEventType();
+
+class ProcessMyEvent : public wxEvent
 {
 public:
-     streamReceiveThread(wxString *message, wxSocketBase* pSocket, wxMutex *mtx);
-     ~streamReceiveThread();
+    ProcessMyEvent(void* pSender)
+    {
+        SetId(-1);
+        SetEventType(wxEVT_PROCESS_MY);
+        m_sender = pSender;
+        m_exit = false;
+        m_pid = -1;
+        m_status = -1;
+    }
 
-     virtual void *Entry();
-     virtual void OnExit();
-protected:
-    wxString *message;
-    wxSocketBase *pSocket;
-    wxMutex *pMutex;
+    virtual wxEvent* Clone() const
+    {
+        return new ProcessMyEvent(*this);
+    }
+
+    void*           m_sender;
+    int             m_pid;
+    int             m_status;
+    wxString        m_dir;
+    bool            m_exit;
 };
-*/
+
 class FoxProcess
 {
 public:
@@ -107,6 +119,7 @@ public:
      void WriteProtocol();
      bool IsClientConnected();
      void Disconnect();
+     void OnProcessEvent(ProcessMyEvent& pEvent);
      void onProcessTerminate(int pid, int status, wxString dir);
      wxString getWorkingDir();
 
@@ -135,7 +148,7 @@ public:
 protected:
    wxString getJob(wxString inmsg, long pos);
    void SendCurrentState();
-   void SaveResult(wxString fileName, wxString Cost, int ID);
+   void SaveResult(wxString fileName, wxString Cost, int ID, bool error);
    void WriteMessageLog(wxString msg);
    bool AnalyzeMessage(wxString msg);
 

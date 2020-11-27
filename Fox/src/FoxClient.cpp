@@ -11,10 +11,18 @@ using namespace std;
 static const long GRID_CLIENT_SOCKET_ID=                  WXCRYST_ID();
 static const long ID_UPDATE_TIMER_CLIENT=                   WXCRYST_ID();
 static const long ID_SEND_TIMER=                         WXCRYST_ID();
+
+#define EVT_PROCESS_MY(func) DECLARE_EVENT_TABLE_ENTRY( wxEVT_PROCESS_MY, -1, -1, (wxObjectEventFunction) (wxEventFunction) (ProcessEventFunction) & func, (wxObject *) NULL ),
+
+typedef void (wxEvtHandler::*ProcessEventFunction)(ProcessMyEvent&);
+
+
+
 BEGIN_EVENT_TABLE(FoxClient, wxEvtHandler)
    EVT_SOCKET(GRID_CLIENT_SOCKET_ID,                FoxClient::OnSocketEvent)
    //EVT_TIMER(ID_SEND_TIMER,                  FoxClient::OnSendResults)
     EVT_TIMER(ID_SEND_TIMER,                  FoxClient::OnTimerEvent)
+    EVT_PROCESS_MY(FoxClient::OnProcessEvent)
     //EVT_UPDATE_UI(ID_CRYST_UPDATEUI,                FoxClient::OnUpdateUI)
 END_EVENT_TABLE()
 
@@ -27,7 +35,14 @@ MyProcess::MyProcess(FoxClient *parent, const wxString& cmd, wxString dir)
 }
 void MyProcess::OnTerminate(int pid, int status)
 {
-    m_parent->onProcessTerminate(pid, status, m_dir);
+    ProcessMyEvent *e = new ProcessMyEvent(this);
+    e->m_exit = true;
+    e->m_pid = pid;
+    e->m_dir = m_dir;
+    e->m_status = status;
+    //m_parent->AddPendingEvent( e );
+    m_parent->QueueEvent(e);
+    //m_parent->onProcessTerminate(pid, status, m_dir);
     delete this;
 }
 ///////////////////////////////////////////////
@@ -176,9 +191,21 @@ void FoxClient::WriteMessageLog(wxString msg)
 #endif
    (*fpObjCrystInformUser)(msg.ToStdString());
 }
+void FoxClient::OnProcessEvent(ProcessMyEvent& pEvent)
+{
+    onProcessTerminate(pEvent.m_pid, pEvent.m_status, pEvent.m_dir);
+}
 void FoxClient::onProcessTerminate(int pid, int status, wxString dir)
 {
-   if(m_ProcessMutex->Lock()!=wxMUTEX_NO_ERROR) return;
+   int nb=0;
+   //WriteMessageLog(_T("Process terminated"));
+   //MyMutexHelper mmh(m_ProcessMutex, 10000, nb);
+   
+   //if(mmh.getError()!=wxMUTEX_NO_ERROR) {
+   //    WriteMessageLog(_T("Process terminated but not processed!!! error: "+wxString::Format("%d, %d", mmh.getError(), nb)));
+   //    return;
+   //}
+   //WriteMessageLog(_T("Mutex locked by using this number of attempts: "+wxString::Format("%d", nb)));
 
    wxString st = _T("");
    st.Printf(_T("pid=%d, status=%d, dir="), pid, status);
@@ -194,11 +221,13 @@ void FoxClient::onProcessTerminate(int pid, int status, wxString dir)
            break;
        }
    }
-   m_ProcessMutex->Unlock();
-
+   
+   
+   //WriteMessageLog(_T("onProcessTerminate: Mutex Unlocked"));
    //if some error return
    if(status!=0) {
        WriteMessageLog(_T("process terminated with an error => no result will be sent to the server"));
+       SaveResult("", "-1", ID, true);
        return;
    }
 
@@ -206,20 +235,22 @@ void FoxClient::onProcessTerminate(int pid, int status, wxString dir)
    wxString cost = getCost(filename);
    #ifdef WIN32
    //save result to the memory
-   SaveResult(dir + _T("\\") + filename, cost, ID);
+   SaveResult(dir + _T("\\") + filename, cost, ID, false);
    //delete output and input files
    wxRemoveFile(dir + _T("\\") + filename);
    wxRemoveFile(dir + _T("\\input.xml"));
+
    #else
    //save result to the memory
-   SaveResult(dir + _T("/") + filename, cost, ID);
+   SaveResult(dir + _T("/") + filename, cost, ID, false);
    //delete output and input files
    wxRemoveFile(dir + _T("/") + filename);
    wxRemoveFile(dir + _T("/input.xml"));
    wxRemoveFile(dir + _T("/out.txt"));
    #endif
 
-   
+   //wxMutexError qre = mmh.Unlock();
+   //WriteMessageLog(_T("Mutex unlocked"+wxString::Format("%d", qre)));
 }
 wxString FoxClient::getOutputFile(wxString dir)
 {
@@ -542,12 +573,15 @@ vector<FoxProcess> FoxClient::get_copy_of_processes()
 }
 int FoxClient::getNbOfUnusedProcesses()
 {
+    //WriteMessageLog("getNbOfUnusedProcesses: Locking mutex");
     if(m_ProcessMutex->Lock()!=wxMUTEX_NO_ERROR) return 0;
+    //WriteMessageLog("getNbOfUnusedProcesses: Locked");
     int nb=0;
     for(int i=0;i<m_processes.size();i++) {
         if (!m_processes[i].isRunning()) nb++;
     }
     m_ProcessMutex->Unlock();
+    //WriteMessageLog("getNbOfUnusedProcesses: Unlocked");
     return nb;
 }
 FoxProcess * FoxClient::getUnusedProcess()
@@ -718,21 +752,32 @@ bool FoxClient::LoadFile(wxString filename, wxString &in)
    free(buffer);
    return true;
 }
-void FoxClient::SaveResult(wxString fileName, wxString Cost, int ID)
+void FoxClient::SaveResult(wxString fileName, wxString Cost, int ID, bool error)
 {
     WriteMessageLog(_T("Saving new result"));
     wxString in;
-    if(!LoadFile(fileName, in)) {
-        WriteMessageLog(_T("can't load the file"));
-        return;
-    }
-    wxString out;
-    out.Printf(_T("<result ID=\"%d\" Cost=\"%s\">\n"), ID, Cost.c_str());
-    out += in;
-    out += _T("</result>\n");
+    if(!error) {
+        if(!LoadFile(fileName, in)) {
+            WriteMessageLog(_T("can't load the file"));
+            return;
+        }
+        wxString out;
+        out.Printf(_T("<result ID=\"%d\" Cost=\"%s\">\n"), ID, Cost.c_str());
+        out += in;
+        out += _T("</result>\n");
+        
+        GrdRslt res(ID, Cost, out);
+        m_results.push_back(res);
+    } else {
+        wxString out;
+        out.Printf(_T("<result ID=\"%d\" Cost=\"-1\">\n"), ID);
+        out += in;
+        out += _T("</result>\n");
 
-    GrdRslt res(ID, Cost, out);
-    m_results.push_back(res);
+        GrdRslt res(ID, Cost, out);
+        m_results.push_back(res);
+    }
+    
     //WriteMessageLog(_T("Result saved"));
 }
 void FoxClient::OnTimerEvent(wxTimerEvent& event)

@@ -380,13 +380,14 @@ void WXFoxServer::AddServerJob(wxString filename, wxString name, int id, long nb
     m_FoxServer->AddJobToList(newJob);
     //m_WXFoxServerDataMutex->Unlock();
 
-    m_UpdateTimer->Stop();
-    //Update Lists
+    //m_UpdateTimer->Stop();
+    //Update GUI
     wxTimerEvent evt;
     evt.SetId(ID_UPDATE_TIMER);
     this->UpdateLists(evt);
-    int interval = m_UpdateTimer->GetInterval();
-    m_UpdateTimer->Start(interval);
+
+    //int interval = m_UpdateTimer->GetInterval();
+    //m_UpdateTimer->Start(interval);
 }
 void WXFoxServer::OnLoadJob(wxCommandEvent& event)
 {
@@ -574,7 +575,7 @@ void WXFoxServer::OnEditJob(wxCommandEvent& event)
 
    this->EditJob();
 
-   //Update Lists now
+   //Update GUI List
    wxTimerEvent evt;
    evt.SetId(ID_UPDATE_TIMER);
    this->UpdateLists(evt);

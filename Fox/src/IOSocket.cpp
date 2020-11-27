@@ -6,6 +6,34 @@ using namespace ObjCryst;
 using namespace std;
 
 #include "IOSocket.h"
+#include <wx/stopwatch.h>
+
+MyMutexHelper::MyMutexHelper(wxMutex *m, long milliseconds, int &nb)
+{
+    m_mutex = m;
+    wxStopWatch sw;
+    nb = 0;
+    do {
+        nb++;
+        m_error = m_mutex->Lock();
+        if(m_error == wxMUTEX_NO_ERROR) return;
+        wxSleep(1);
+        if(nb>10) return;
+    } while(sw.Time()!=milliseconds);
+}
+MyMutexHelper::~MyMutexHelper()
+{
+    m_mutex->Unlock();
+}
+wxMutexError MyMutexHelper::getError()
+{
+    return m_error;
+}
+wxMutexError MyMutexHelper::Unlock()
+{
+    return m_mutex->Unlock();
+}
+
 
 IOSocket::IOSocket(void)
 {

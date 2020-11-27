@@ -185,10 +185,19 @@ void WXFoxClient::OnUpdateProcessTimer(wxTimerEvent& event)
     vector<FoxProcess> p = m_FoxClient->get_copy_of_processes();
     
     int nbRow = m_process_table->GetRows();
-    if(nbRow>0) m_process_table->DeleteRows(0, nbRow, true);
+    
+    //delete it just in the case of different nb of processes then before
+    if(nbRow != p.size()) {
+        if(nbRow>0) {
+            m_process_table->DeleteRows(0, nbRow, true);
+        }
+        for(int i=0;i<p.size();i++) {
+            m_process_table->InsertRows(i, 1, false);   
+        }
+    }
+
     m_process_table->ClearGrid();
     for(int i=0;i<p.size();i++) {
-        m_process_table->InsertRows(i, 1, false);            
         if(p[i].isRunning()) {
             m_process_table->SetCellValue(i,0,wxString::Format("%d",i));
             m_process_table->SetReadOnly(i,0);

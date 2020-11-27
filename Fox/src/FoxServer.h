@@ -101,6 +101,7 @@ private:
     //this will return N of available jobs (or lower no.)
     vector<FoxJob > getJobsToCalculate(int n);
     void AddResultToJobList(int id);
+    void RemoveActiveFromJobList(int id);
     void RemoveThreadFromJobList();
     void cannot_calculate_this_job(FoxJob fj);
     
