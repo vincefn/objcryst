@@ -204,7 +204,8 @@ void FoxClient::onProcessTerminate(int pid, int status, wxString dir)
    wxString st = _T("");
    st.Printf(_T("pid=%d, status=%d, dir="), pid, status);
    WriteMessageLog(_T("Process terminated: ") + st + dir);
-   int ID;
+   int ID=-1;
+   wxDateTime startingtime;
    //identify process ID
    
    for(int i=0;i<m_processes.size();i++) {
@@ -212,8 +213,28 @@ void FoxClient::onProcessTerminate(int pid, int status, wxString dir)
            m_processes[i].setRunning(false);
            m_processes[i].setPid(-1);
            ID = m_processes[i].getJobID();
+           startingtime = m_processes[i].getStartingTime();
            break;
        }
+   }
+   //saving the time of duration
+   bool saved = false;
+   for(int i=0;i<m_ListOfProcessedJobs.size();i++) {
+       if(ID==m_ListOfProcessedJobs[i].ID) {
+           wxLongLong Avtime = m_ListOfProcessedJobs[i].average_calc_time.GetSeconds();
+           wxTimeSpan newt = wxDateTime::Now() - startingtime;
+           double p = (Avtime.ToDouble()*m_ListOfProcessedJobs[i].nb_done + newt.GetSeconds().ToDouble()) / ((double) m_ListOfProcessedJobs[i].nb_done+1.0);
+           m_ListOfProcessedJobs[i].average_calc_time = wxTimeSpan::Seconds(p);
+           m_ListOfProcessedJobs[i].nb_done++;
+           saved = true;
+       }
+   }
+   if(!saved) {
+       ClientJob cj;
+       cj.ID = ID;
+       cj.nb_done = 1;
+       cj.average_calc_time = wxDateTime::Now() - startingtime;
+       m_ListOfProcessedJobs.push_back(cj);
    }
    
    
@@ -555,17 +576,21 @@ wxString FoxClient::getJob(wxString inmsg, long pos)
     job = in.Left(p);
     return job;
 }
-vector<FoxProcess> FoxClient::get_copy_of_processes()
+void FoxClient::get_copy_of_processes(vector<FoxProcess> &FP, vector<ClientJob> &CJ)
 {
-    WriteMessageLog("get_copy_of_processes: Locking");
-    vector<FoxProcess> res;
+    //WriteMessageLog("get_copy_of_processes: Locking");
+    FP.clear();
+    CJ.clear();
     wxCriticalSectionLocker locker(m_ProcessCriticalSection);  
-    WriteMessageLog("get_copy_of_processes: Locked");
+    //WriteMessageLog("get_copy_of_processes: Locked");
     for(int i=0;i<m_processes.size();i++) {
-        res.push_back(m_processes[i]);
+        FP.push_back(m_processes[i]);
     }
-    WriteMessageLog("get_copy_of_processes: Locking");
-    return res;
+    for(int i=0;i<m_ListOfProcessedJobs.size();i++) {
+        CJ.push_back(m_ListOfProcessedJobs[i]);
+    }
+    //WriteMessageLog("get_copy_of_processes: Locking");
+    
 }
 int FoxClient::getNbOfUnusedProcesses()
 {
@@ -804,6 +829,10 @@ void FoxClient::DoManyThingsOnTimer()
     wxString msg;
     if(!m_IOSocket.ReadStringFromSocket(mpClient, msg)) {
         return;
+    }
+    WriteMessageLog("List of jobs done:");
+    for(int i=0;i<m_ListOfProcessedJobs.size();i++) {
+        WriteMessageLog(wxString::Format("JobID = %d, Avtime = %d s, nbdone = %d", m_ListOfProcessedJobs[i].ID, m_ListOfProcessedJobs[i].average_calc_time.GetSeconds().ToLong(), m_ListOfProcessedJobs[i].nb_done));
     }
 
     //3. analyze answer, todo

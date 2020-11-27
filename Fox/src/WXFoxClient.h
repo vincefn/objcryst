@@ -69,6 +69,7 @@ private:
    bool           m_connecting;
    wxString       m_working_dir;
    wxGrid       * m_process_table;
+   wxGrid       * m_job_table;
 
       DECLARE_EVENT_TABLE()
 };

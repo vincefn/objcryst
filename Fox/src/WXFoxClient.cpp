@@ -129,6 +129,22 @@ void WXFoxClient::InitClient()
    m_process_table->DeleteRows(0, 1, false);
    topSizer->Add(m_process_table, 0, wxALL|wxALIGN_BOTTOM);
 
+   
+   m_job_table = new wxGrid(this, NULL, wxDefaultPosition, wxSize(xsize,200), wxWANTS_CHARS, _T("List of Processes"));
+   m_job_table->CreateGrid(1,4,wxGrid::wxGridSelectRows);
+   m_job_table->SetColLabelValue(0, _T("No."));
+   m_job_table->SetColLabelValue(1, _T("Job ID"));
+   m_job_table->SetColLabelValue(2, _T("Started"));
+   m_job_table->SetColLabelValue(3, _T("Status"));
+   m_job_table->SetColLabelSize(20);
+   m_job_table->SetRowLabelSize(0);
+   m_job_table->SetColumnWidth(0, 1.0 * xsize/10.0);
+   m_job_table->SetColumnWidth(1, 3.0 * xsize/10.0);
+   m_job_table->SetColumnWidth(2, 3.0 * xsize/10.0);
+   m_job_table->SetColumnWidth(3, 3.0 * xsize/10.0);
+   m_job_table->DeleteRows(0, 1, false);
+   topSizer->Add(m_job_table, 0, wxALL|wxALIGN_BOTTOM);
+
    SetSizer(topSizer);
 
    //this->LoadUsedIPs();
@@ -182,7 +198,10 @@ void WXFoxClient::OnUpdateProcessTimer(wxTimerEvent& event)
 {
     if(m_FoxClient==0) return;
     
-    vector<FoxProcess> p = m_FoxClient->get_copy_of_processes();
+    vector<FoxProcess> p;
+    vector<ClientJob>  cj;
+
+    m_FoxClient->get_copy_of_processes(p, cj);
     
     int nbRow = m_process_table->GetRows();
     

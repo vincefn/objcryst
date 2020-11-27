@@ -105,6 +105,13 @@ public:
 	bool pending;
 };
 
+struct ClientJob
+{
+   int ID;
+   int nb_done;
+   wxTimeSpan average_calc_time;
+};
+
 class FoxClient: public wxEvtHandler
 {
 
@@ -136,7 +143,7 @@ public:
 
      //Thread-safe way to get info about all processes
      //Returns copy of the processes, that can be used without mutex
-     vector<FoxProcess> get_copy_of_processes();
+     void get_copy_of_processes(vector<FoxProcess> &FP, vector<ClientJob> &CJ);
 
      //kill all running processes
      void KillProcesses();
@@ -188,6 +195,7 @@ protected:
    IOSocket               m_IOSocket;
    wxString               m_working_dir;
    wxCriticalSection      m_ProcessCriticalSection;
+   vector<ClientJob>      m_ListOfProcessedJobs;
    DECLARE_EVENT_TABLE()
 };
 class MyProcess : public wxProcess
