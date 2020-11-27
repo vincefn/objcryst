@@ -119,9 +119,9 @@ wxEvtHandler()
    m_working_dir = working_dir;
    wxString dirName = addToPath(getWorkingDir(), _T("processes"));
    if(!wxDirExists(dirName)) wxMkdir(dirName);
-   m_ProcessMutex = new wxMutex();
    //m_DataMutex = new wxMutex();
    //m_ResultsMutex = new wxMutex();
+   //m_ProcessMutex = new wxMutex();
    mpClient = new wxSocketClient();
    //m_Connecting = false;
    m_sendingTimer = new wxTimer(this, ID_SEND_TIMER);
@@ -152,7 +152,7 @@ int FoxClient::getNbOfAvailCPUs()
 }
 void FoxClient::resetProcesses(int nbProcesses)
 {
-    if(m_ProcessMutex->Lock()!=wxMUTEX_NO_ERROR) return;
+    wxCriticalSectionLocker locker(m_ProcessCriticalSection);
     
     m_processes.clear();
     for(int i=0;i<nbProcesses;i++) {
@@ -178,7 +178,6 @@ void FoxClient::resetProcesses(int nbProcesses)
       FoxProcess proc(dir);
       m_processes.push_back(proc);
    }
-    m_ProcessMutex->Unlock();
 }
 void FoxClient::WriteMessageLog(wxString msg)
 {
@@ -198,14 +197,9 @@ void FoxClient::OnProcessEvent(ProcessMyEvent& pEvent)
 void FoxClient::onProcessTerminate(int pid, int status, wxString dir)
 {
    int nb=0;
-   //WriteMessageLog(_T("Process terminated"));
-   //MyMutexHelper mmh(m_ProcessMutex, 10000, nb);
-   
-   //if(mmh.getError()!=wxMUTEX_NO_ERROR) {
-   //    WriteMessageLog(_T("Process terminated but not processed!!! error: "+wxString::Format("%d, %d", mmh.getError(), nb)));
-   //    return;
-   //}
-   //WriteMessageLog(_T("Mutex locked by using this number of attempts: "+wxString::Format("%d", nb)));
+   //WriteMessageLog(_T("Going to lock"));
+   wxCriticalSectionLocker locker(m_ProcessCriticalSection);
+   //WriteMessageLog(_T("Going to locked"));
 
    wxString st = _T("");
    st.Printf(_T("pid=%d, status=%d, dir="), pid, status);
@@ -226,7 +220,7 @@ void FoxClient::onProcessTerminate(int pid, int status, wxString dir)
    //WriteMessageLog(_T("onProcessTerminate: Mutex Unlocked"));
    //if some error return
    if(status!=0) {
-       WriteMessageLog(_T("process terminated with an error => no result will be sent to the server"));
+       WriteMessageLog(_T("process terminated with an error => empty result will be sent to the server"));
        SaveResult("", "-1", ID, true);
        return;
    }
@@ -248,6 +242,7 @@ void FoxClient::onProcessTerminate(int pid, int status, wxString dir)
    wxRemoveFile(dir + _T("/input.xml"));
    wxRemoveFile(dir + _T("/out.txt"));
    #endif
+   //WriteMessageLog(_T("Leaving the locked part..."));
 
    //wxMutexError qre = mmh.Unlock();
    //WriteMessageLog(_T("Mutex unlocked"+wxString::Format("%d", qre)));
@@ -303,7 +298,7 @@ void FoxClient::Reconnect()
 */
 void FoxClient::KillProcesses()
 {
-    if(m_ProcessMutex->Lock()!=wxMUTEX_NO_ERROR) return;
+    wxCriticalSectionLocker locker(m_ProcessCriticalSection);
     WriteMessageLog(_T("Killing processes"));
     for(int i=0;i<m_processes.size();i++) {
         if(m_processes[i].isRunning()) {
@@ -314,7 +309,6 @@ void FoxClient::KillProcesses()
             WriteMessageLog(tmp);
         }
     }
-    m_ProcessMutex->Unlock();
 }
 void FoxClient::Disconnect()
 {
@@ -563,25 +557,26 @@ wxString FoxClient::getJob(wxString inmsg, long pos)
 }
 vector<FoxProcess> FoxClient::get_copy_of_processes()
 {
+    WriteMessageLog("get_copy_of_processes: Locking");
     vector<FoxProcess> res;
-    if(m_ProcessMutex->Lock()!=wxMUTEX_NO_ERROR) return res;    
+    wxCriticalSectionLocker locker(m_ProcessCriticalSection);  
+    WriteMessageLog("get_copy_of_processes: Locked");
     for(int i=0;i<m_processes.size();i++) {
         res.push_back(m_processes[i]);
     }
-    m_ProcessMutex->Unlock();
+    WriteMessageLog("get_copy_of_processes: Locking");
     return res;
 }
 int FoxClient::getNbOfUnusedProcesses()
 {
-    //WriteMessageLog("getNbOfUnusedProcesses: Locking mutex");
-    if(m_ProcessMutex->Lock()!=wxMUTEX_NO_ERROR) return 0;
-    //WriteMessageLog("getNbOfUnusedProcesses: Locked");
+    WriteMessageLog("getNbOfUnusedProcesses: Locking");
+    wxCriticalSectionLocker locker(m_ProcessCriticalSection);
+    WriteMessageLog("getNbOfUnusedProcesses: Locked");
     int nb=0;
     for(int i=0;i<m_processes.size();i++) {
         if (!m_processes[i].isRunning()) nb++;
     }
-    m_ProcessMutex->Unlock();
-    //WriteMessageLog("getNbOfUnusedProcesses: Unlocked");
+    WriteMessageLog("getNbOfUnusedProcesses: Unlocked");
     return nb;
 }
 FoxProcess * FoxClient::getUnusedProcess()
@@ -599,7 +594,9 @@ int FoxClient::runNewJob(wxString job, int id, int nbTrial, bool rand)
 {
     WriteMessageLog(_T("running new job"));
     //we have to use protection for m_processes here!
-    if(m_ProcessMutex->Lock()!=wxMUTEX_NO_ERROR) return -1;
+    //if(m_ProcessMutex->Lock()!=wxMUTEX_NO_ERROR) return -1;
+    wxCriticalSectionLocker locker(m_ProcessCriticalSection);
+
     FoxProcess *proc = getUnusedProcess();
     if(proc!=0) {
         //WriteMessageLog(_T("process found"));
@@ -666,7 +663,7 @@ int FoxClient::runNewJob(wxString job, int id, int nbTrial, bool rand)
         if ( !pid ) {
             delete process;
             WriteMessageLog(_T("Process not started: ") + cmd_content);
-            m_ProcessMutex->Unlock();
+            //m_ProcessMutex->Unlock();
             return -1;
         } else {
             proc->setPid(pid);
@@ -676,15 +673,15 @@ int FoxClient::runNewJob(wxString job, int id, int nbTrial, bool rand)
             wxString tmp;
             tmp.Printf(_T("%d"), pid);
             WriteMessageLog(_T("Process started: pid=") + tmp + _T(", dir=") + cmd_content);
-            m_ProcessMutex->Unlock();
+            //m_ProcessMutex->Unlock();
             return 0;
         }
     } else {
         WriteMessageLog(_T("No unsused process is available, job will be rejected to server"));
-        m_ProcessMutex->Unlock();
+        //m_ProcessMutex->Unlock();
         return -1;
     }
-    m_ProcessMutex->Unlock();
+    //m_ProcessMutex->Unlock();
     return 0;
 }
 /*

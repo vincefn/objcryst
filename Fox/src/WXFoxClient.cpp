@@ -181,7 +181,7 @@ void WXFoxClient::CloseClient()
 void WXFoxClient::OnUpdateProcessTimer(wxTimerEvent& event)
 {
     if(m_FoxClient==0) return;
-
+    
     vector<FoxProcess> p = m_FoxClient->get_copy_of_processes();
     
     int nbRow = m_process_table->GetRows();
@@ -195,7 +195,6 @@ void WXFoxClient::OnUpdateProcessTimer(wxTimerEvent& event)
             m_process_table->InsertRows(i, 1, false);   
         }
     }
-
     m_process_table->ClearGrid();
     for(int i=0;i<p.size();i++) {
         if(p[i].isRunning()) {

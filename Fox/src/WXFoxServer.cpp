@@ -766,13 +766,16 @@ void WXFoxServer::UpdateLists(wxTimerEvent& event)
    if(update) {
        UpdateClientList();
    }
-
+   //update job list only when something is new there...
    update = false;
    if(m_jobs.size() == newjobs.size()) {
        for(int i=0;i<m_jobs.size();i++) {
            if(m_jobs[i].getName().compare(newjobs[i].getName())!=0) update = true;
            if(m_jobs[i].getNbDone() != newjobs[i].getNbDone()) update = true;
            if(m_jobs[i].getNbRuns() != newjobs[i].getNbRuns()) update = true;
+           if(m_jobs[i].GetSolvingNb() != newjobs[i].GetSolvingNb()) update = true;
+           if(m_jobs[i].getNbTrial() != newjobs[i].getNbTrial()) update = true;
+           if(m_jobs[i].randomize() != newjobs[i].randomize()) update = true;
        }
    } else {
        update = true;

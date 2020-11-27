@@ -34,18 +34,6 @@
 #ifndef __IO_SOCKET__
 #define __IO_SOCKET__
 
-class MyMutexHelper
-{
-public:
-    MyMutexHelper(wxMutex *m, long milliseconds, int &nb);
-    ~MyMutexHelper();
-    wxMutexError getError();
-    wxMutexError Unlock();
-
-private:
-    wxMutex *m_mutex;
-    wxMutexError m_error;
-};
 
 class IOSocket
 {

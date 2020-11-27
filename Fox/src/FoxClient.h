@@ -144,7 +144,7 @@ public:
 
      //bool   m_Connecting;
      bool   m_exit;
-
+     
 protected:
    wxString getJob(wxString inmsg, long pos);
    void SendCurrentState();
@@ -182,12 +182,12 @@ protected:
    wxSocketClient       * mpClient;
    wxString               m_hostname;
    wxTimer              * m_sendingTimer;
-   wxMutex              * m_ProcessMutex;
    vector<FoxProcess>     m_processes;
    vector<GrdRslt>        m_results;
    int                    m_nbOfAvailCPUs;
    IOSocket               m_IOSocket;
    wxString               m_working_dir;
+   wxCriticalSection      m_ProcessCriticalSection;
    DECLARE_EVENT_TABLE()
 };
 class MyProcess : public wxProcess
