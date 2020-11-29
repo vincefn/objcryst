@@ -49,6 +49,7 @@ private:
    void OnGridResultClick(wxGridEvent &event);
    void OnGridJobClick(wxGridEvent &event);
    void OnShowResults(wxCommandEvent& event);
+   void OnShowResultsServer(wxCommandEvent& event);
    void RunLocalClient(wxCommandEvent& event);
    //void RunALLClient(wxCommandEvent& event);
    void UpdateLists(wxTimerEvent& event);

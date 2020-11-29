@@ -321,6 +321,7 @@ void ThreadWorker::SaveResult(wxString result, int JobID, float ResultCost)
    newres.JobID = JobID;
    newres.threadID = this->GetId();
    newres.Cost = ResultCost;
+   newres.order = m_global_results->size();
    m_global_results->push_back(newres);
    WriteLogMessage(_T("Result saved in global data"));
 
@@ -598,7 +599,7 @@ void FoxServer::GetData( std::vector<GridClient> &clients, std::vector<GridResul
     if(s_mutexProtecting_Jobs_Results->Lock()!=wxMUTEX_NO_ERROR) return;
 
     //Results. It adds only new results.
-    for(int i=results.size();i<m_results.size();i++){
+    for(int i=results.size();i<m_results.size();i++) {
        results.push_back(m_results[i]);
     }
     

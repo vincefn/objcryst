@@ -97,6 +97,14 @@ wxDateTime FoxProcess::getStartingTime()
 {
     return startingtime;
 }
+int FoxProcess::getProgressInPercents(wxTimeSpan avCalcTime)
+{
+    wxDateTime ct = wxDateTime::Now();
+    wxTimeSpan duration = ct - startingtime;
+    int p = (int) (100*(duration.GetSeconds().ToDouble() / avCalcTime.GetSeconds().ToDouble()));
+    if(p>100) p=100;
+    return p;
+}
 ///////////////////////////////////////////////
 GrdRslt::GrdRslt(int ID, wxString cost, wxString content)
 {
@@ -594,14 +602,14 @@ void FoxClient::get_copy_of_processes(vector<FoxProcess> &FP, vector<ClientJob> 
 }
 int FoxClient::getNbOfUnusedProcesses()
 {
-    WriteMessageLog("getNbOfUnusedProcesses: Locking");
+    //WriteMessageLog("getNbOfUnusedProcesses: Locking");
     wxCriticalSectionLocker locker(m_ProcessCriticalSection);
-    WriteMessageLog("getNbOfUnusedProcesses: Locked");
+    //WriteMessageLog("getNbOfUnusedProcesses: Locked");
     int nb=0;
     for(int i=0;i<m_processes.size();i++) {
         if (!m_processes[i].isRunning()) nb++;
     }
-    WriteMessageLog("getNbOfUnusedProcesses: Unlocked");
+    //WriteMessageLog("getNbOfUnusedProcesses: Unlocked");
     return nb;
 }
 FoxProcess * FoxClient::getUnusedProcess()
@@ -830,11 +838,12 @@ void FoxClient::DoManyThingsOnTimer()
     if(!m_IOSocket.ReadStringFromSocket(mpClient, msg)) {
         return;
     }
+    /*
     WriteMessageLog("List of jobs done:");
     for(int i=0;i<m_ListOfProcessedJobs.size();i++) {
         WriteMessageLog(wxString::Format("JobID = %d, Avtime = %d s, nbdone = %d", m_ListOfProcessedJobs[i].ID, m_ListOfProcessedJobs[i].average_calc_time.GetSeconds().ToLong(), m_ListOfProcessedJobs[i].nb_done));
     }
-
+    */
     //3. analyze answer, todo
     if(!AnalyzeMessage(msg)) {
         return;

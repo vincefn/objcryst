@@ -56,6 +56,7 @@ private:
 
    void OnConnectTimer(wxTimerEvent& event);
    void OnUpdateProcessTimer(wxTimerEvent& event);
+   void UpdateListOfProcesses(vector<FoxProcess> p);
    void InitClient();
 
    FoxClient    * m_FoxClient;

@@ -67,6 +67,13 @@ public:
     bool            m_exit;
 };
 
+struct ClientJob
+{
+   int ID;
+   int nb_done;
+   wxTimeSpan average_calc_time;
+};
+
 class FoxProcess
 {
 public:
@@ -83,6 +90,7 @@ public:
     int  getJobID();
     void setStarted(wxDateTime t);
     wxDateTime getStartingTime();
+    int getProgressInPercents(wxTimeSpan avCalcTime);
 
 private:
 
@@ -105,12 +113,7 @@ public:
 	bool pending;
 };
 
-struct ClientJob
-{
-   int ID;
-   int nb_done;
-   wxTimeSpan average_calc_time;
-};
+
 
 class FoxClient: public wxEvtHandler
 {
@@ -151,12 +154,13 @@ public:
 
      //bool   m_Connecting;
      bool   m_exit;
-     
+   void WriteMessageLog(wxString msg);
+
 protected:
    wxString getJob(wxString inmsg, long pos);
    void SendCurrentState();
    void SaveResult(wxString fileName, wxString Cost, int ID, bool error);
-   void WriteMessageLog(wxString msg);
+   
    bool AnalyzeMessage(wxString msg);
 
    void SaveDataAsFile(wxString out, wxString filename);
