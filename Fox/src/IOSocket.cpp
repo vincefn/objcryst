@@ -6,6 +6,8 @@ using namespace ObjCryst;
 using namespace std;
 
 #include "IOSocket.h"
+#include <wx/stopwatch.h>
+
 
 IOSocket::IOSocket(void)
 {

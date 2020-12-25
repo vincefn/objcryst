@@ -35,6 +35,12 @@ public:
    int         JobID;
    float      Cost;
    bool      Show;
+   int       order;
+   bool operator<(const GridResult &m) const
+   {
+	    return (Cost < m.Cost);
+   }
+
 };
 
 class GridClient

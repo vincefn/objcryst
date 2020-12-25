@@ -3533,7 +3533,7 @@ BEGIN_EVENT_TABLE(WXPowderPatternBackground, wxWindow)
                      WXPowderPatternBackground::OnMenuImportUserBackground)
    EVT_MENU(ID_POWDERBACKGROUND_OPTIMIZEBAYESIAN,
                      WXPowderPatternBackground::OnMenuOptimizeBayesianBackground)
-   EVT_GRID_CMD_CELL_CHANGE(ID_POWDERBACKGROUND_GRID,
+   EVT_GRID_CMD_CELL_CHANGED(ID_POWDERBACKGROUND_GRID,
                      WXPowderPatternBackground::OnEditGridBackgroundPoint)
    EVT_MENU(ID_POWDERBACKGROUND_NEWBAYESIAN,
                      WXPowderPatternBackground::OnMenuAutomaticBayesianBackground)

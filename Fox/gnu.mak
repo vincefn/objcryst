@@ -28,12 +28,12 @@ doc:
 clean: tidy
 	$(MAKE) -f gnu.mak -C src clean
 	$(MAKE) -f gnu.mak -C $(BUILD_DIR)/ObjCryst clean
-	${RM} -Rf ${BUILD_DIR}/static-libs/* ${BUILD_DIR}/fftw-3.3.4 ${BUILD_DIR}/newmat ${BUILD_DIR}/wxWidgets-3.0.2
+	${RM} -Rf ${BUILD_DIR}/static-libs/*
 
 tidy:
 	$(MAKE) -f gnu.mak -C src tidy
 	$(MAKE) -f gnu.mak -C ${BUILD_DIR}/ObjCryst tidy
-	${RM} -Rf ${BUILD_DIR}/fftw-3.3.4 ${BUILD_DIR}/newmat ${BUILD_DIR}/wxWidgets-3.0.2
+	${RM} -Rf ${BUILD_DIR}/fftw-3.3.4 ${BUILD_DIR}/newmat ${BUILD_DIR}/wxWidgets-3.1.4
 
 #install Fox in /usr/local/bin
 install:

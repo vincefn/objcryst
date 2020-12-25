@@ -213,9 +213,6 @@
     <ClCompile Include="src\FoxServer.cpp">
       <Filter>Source Files\Fox</Filter>
     </ClCompile>
-    <ClCompile Include="src\FoxServerThread.cpp">
-      <Filter>Source Files\Fox</Filter>
-    </ClCompile>
     <ClCompile Include="src\GridResult.cpp">
       <Filter>Source Files\Fox</Filter>
     </ClCompile>

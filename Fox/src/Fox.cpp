@@ -1745,7 +1745,7 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
    // Log windows
    mpLog =new wxTextCtrl(this,-1,_T(""),wxDefaultPosition,wxSize(600,100),wxTE_MULTILINE|wxTE_READONLY|wxTE_DONTWRAP);
    mpLog->SetFont(wxFont(10,wxTELETYPE,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL));
-   s0->Add(mpLog,0,wxALIGN_CENTER|wxEXPAND);
+   s0->Add(mpLog,0,wxEXPAND);
    mpLog->AppendText(wxString::Format(_T("Welcome to FOX !\n")));
 
    this->SetIcon(wxICON(Fox));
@@ -3191,8 +3191,8 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
    mpCODGrid->SetColLabelSize(0);
    mpCODGrid->SetRowLabelSize(0);
    mpCODGrid->CreateGrid(3*mvCOD_Record.size(),2);
-   mpCODGrid->SetColumnWidth(0,190);
-   mpCODGrid->SetColumnWidth(1,500);
+   mpCODGrid->SetColSize(0,190);
+   mpCODGrid->SetColSize(1,500);
    mpCODGrid->SetColMinimalWidth(0,120);
    mpCODGrid->SetColMinimalWidth(1,300);
    mpCODGrid->DisableDragRowSize();
