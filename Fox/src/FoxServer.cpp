@@ -199,12 +199,10 @@ bool ThreadWorker::analyze_message_and_get_answer(wxString msg, wxString &answer
          double cost;
          for(int i=tag.GetNbAttribute()-1;i>=0;i--){
             if(tag.GetAttributeName(i)=="ID"){
-               ID = wxString::FromAscii(tag.GetAttributeValue(i).c_str());
-               ID.ToLong((long *) &id);
+               id = atol(tag.GetAttributeValue(i).c_str());
             }
             if(tag.GetAttributeName(i)=="Cost"){
-               Cost = wxString::FromAscii(tag.GetAttributeValue(i).c_str());
-               Cost.ToDouble(&cost);
+               cost = atof(tag.GetAttributeValue(i).c_str());
             }
          }
          long pos = in_string.tellg();
@@ -229,15 +227,13 @@ bool ThreadWorker::analyze_message_and_get_answer(wxString msg, wxString &answer
       if("currentstate"==tag.GetName()){
           for(int i=tag.GetNbAttribute()-1;i>=0;i--){
               if(tag.GetAttributeName(i)=="availableCPUs") {
-                    wxString nb = wxString::FromAscii(tag.GetAttributeValue(i).c_str());
-                    nb.ToLong((long *) &availableCPUs);
+                    availableCPUs = atoi(tag.GetAttributeValue(i).c_str());
               }
               if(tag.GetAttributeName(i)=="name") {
-                    name = wxString::FromAscii(tag.GetAttributeValue(i).c_str());
+                    name = wxString(tag.GetAttributeValue(i));
               }
               if(tag.GetAttributeName(i)=="freeCPUs") {
-                    wxString nb = wxString::FromAscii(tag.GetAttributeValue(i).c_str());
-                    nb.ToLong((long *) &freeCPUs);
+                    freeCPUs = atoi(tag.GetAttributeValue(i).c_str());
               }
           }
       }
