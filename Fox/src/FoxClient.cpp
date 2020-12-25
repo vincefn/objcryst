@@ -11,10 +11,18 @@ using namespace std;
 static const long GRID_CLIENT_SOCKET_ID=                  WXCRYST_ID();
 static const long ID_UPDATE_TIMER_CLIENT=                   WXCRYST_ID();
 static const long ID_SEND_TIMER=                         WXCRYST_ID();
+
+#define EVT_PROCESS_MY(func) DECLARE_EVENT_TABLE_ENTRY( wxEVT_PROCESS_MY, -1, -1, (wxObjectEventFunction) (wxEventFunction) (ProcessEventFunction) & func, (wxObject *) NULL ),
+
+typedef void (wxEvtHandler::*ProcessEventFunction)(ProcessMyEvent&);
+
+
+
 BEGIN_EVENT_TABLE(FoxClient, wxEvtHandler)
    EVT_SOCKET(GRID_CLIENT_SOCKET_ID,                FoxClient::OnSocketEvent)
    //EVT_TIMER(ID_SEND_TIMER,                  FoxClient::OnSendResults)
     EVT_TIMER(ID_SEND_TIMER,                  FoxClient::OnTimerEvent)
+    EVT_PROCESS_MY(FoxClient::OnProcessEvent)
     //EVT_UPDATE_UI(ID_CRYST_UPDATEUI,                FoxClient::OnUpdateUI)
 END_EVENT_TABLE()
 
@@ -27,7 +35,14 @@ MyProcess::MyProcess(FoxClient *parent, const wxString& cmd, wxString dir)
 }
 void MyProcess::OnTerminate(int pid, int status)
 {
-    m_parent->onProcessTerminate(pid, status, m_dir);
+    ProcessMyEvent *e = new ProcessMyEvent(this);
+    e->m_exit = true;
+    e->m_pid = pid;
+    e->m_dir = m_dir;
+    e->m_status = status;
+    //m_parent->AddPendingEvent( e );
+    m_parent->QueueEvent(e);
+    //m_parent->onProcessTerminate(pid, status, m_dir);
     delete this;
 }
 ///////////////////////////////////////////////
@@ -82,6 +97,14 @@ wxDateTime FoxProcess::getStartingTime()
 {
     return startingtime;
 }
+int FoxProcess::getProgressInPercents(wxTimeSpan avCalcTime)
+{
+    wxDateTime ct = wxDateTime::Now();
+    wxTimeSpan duration = ct - startingtime;
+    int p = (int) (100*(duration.GetSeconds().ToDouble() / avCalcTime.GetSeconds().ToDouble()));
+    if(p>100) p=100;
+    return p;
+}
 ///////////////////////////////////////////////
 GrdRslt::GrdRslt(int ID, wxString cost, wxString content)
 {
@@ -104,9 +127,9 @@ wxEvtHandler()
    m_working_dir = working_dir;
    wxString dirName = addToPath(getWorkingDir(), _T("processes"));
    if(!wxDirExists(dirName)) wxMkdir(dirName);
-   m_ProcessMutex = new wxMutex();
    //m_DataMutex = new wxMutex();
    //m_ResultsMutex = new wxMutex();
+   //m_ProcessMutex = new wxMutex();
    mpClient = new wxSocketClient();
    //m_Connecting = false;
    m_sendingTimer = new wxTimer(this, ID_SEND_TIMER);
@@ -137,7 +160,7 @@ int FoxClient::getNbOfAvailCPUs()
 }
 void FoxClient::resetProcesses(int nbProcesses)
 {
-    if(m_ProcessMutex->Lock()!=wxMUTEX_NO_ERROR) return;
+    wxCriticalSectionLocker locker(m_ProcessCriticalSection);
     
     m_processes.clear();
     for(int i=0;i<nbProcesses;i++) {
@@ -163,7 +186,6 @@ void FoxClient::resetProcesses(int nbProcesses)
       FoxProcess proc(dir);
       m_processes.push_back(proc);
    }
-    m_ProcessMutex->Unlock();
 }
 void FoxClient::WriteMessageLog(wxString msg)
 {
@@ -176,14 +198,22 @@ void FoxClient::WriteMessageLog(wxString msg)
 #endif
    (*fpObjCrystInformUser)(msg.ToStdString());
 }
+void FoxClient::OnProcessEvent(ProcessMyEvent& pEvent)
+{
+    onProcessTerminate(pEvent.m_pid, pEvent.m_status, pEvent.m_dir);
+}
 void FoxClient::onProcessTerminate(int pid, int status, wxString dir)
 {
-   if(m_ProcessMutex->Lock()!=wxMUTEX_NO_ERROR) return;
+   int nb=0;
+   //WriteMessageLog(_T("Going to lock"));
+   wxCriticalSectionLocker locker(m_ProcessCriticalSection);
+   //WriteMessageLog(_T("Going to locked"));
 
    wxString st = _T("");
    st.Printf(_T("pid=%d, status=%d, dir="), pid, status);
    WriteMessageLog(_T("Process terminated: ") + st + dir);
-   int ID;
+   int ID=-1;
+   wxDateTime startingtime;
    //identify process ID
    
    for(int i=0;i<m_processes.size();i++) {
@@ -191,15 +221,36 @@ void FoxClient::onProcessTerminate(int pid, int status, wxString dir)
            m_processes[i].setRunning(false);
            m_processes[i].setPid(-1);
            ID = m_processes[i].getJobID();
+           startingtime = m_processes[i].getStartingTime();
            break;
        }
    }
-   m_ProcessMutex->Unlock();
-
+   //saving the time of duration
+   bool saved = false;
+   for(int i=0;i<m_ListOfProcessedJobs.size();i++) {
+       if(ID==m_ListOfProcessedJobs[i].ID) {
+           wxLongLong Avtime = m_ListOfProcessedJobs[i].average_calc_time.GetSeconds();
+           wxTimeSpan newt = wxDateTime::Now() - startingtime;
+           double p = (Avtime.ToDouble()*m_ListOfProcessedJobs[i].nb_done + newt.GetSeconds().ToDouble()) / ((double) m_ListOfProcessedJobs[i].nb_done+1.0);
+           m_ListOfProcessedJobs[i].average_calc_time = wxTimeSpan::Seconds(p);
+           m_ListOfProcessedJobs[i].nb_done++;
+           saved = true;
+       }
+   }
+   if(!saved) {
+       ClientJob cj;
+       cj.ID = ID;
+       cj.nb_done = 1;
+       cj.average_calc_time = wxDateTime::Now() - startingtime;
+       m_ListOfProcessedJobs.push_back(cj);
+   }
+   
+   
+   //WriteMessageLog(_T("onProcessTerminate: Mutex Unlocked"));
    //if some error return
    if(status!=0) {
-       WriteMessageLog(_T("process terminated with an error => no result will be sent to the server"));
-       //m_ProcessMutex->Unlock();
+       WriteMessageLog(_T("process terminated with an error => empty result will be sent to the server"));
+       SaveResult("", "-1", ID, true);
        return;
    }
 
@@ -207,20 +258,23 @@ void FoxClient::onProcessTerminate(int pid, int status, wxString dir)
    wxString cost = getCost(filename);
    #ifdef WIN32
    //save result to the memory
-   SaveResult(dir + _T("\\") + filename, cost, ID);
+   SaveResult(dir + _T("\\") + filename, cost, ID, false);
    //delete output and input files
    wxRemoveFile(dir + _T("\\") + filename);
    wxRemoveFile(dir + _T("\\input.xml"));
+
    #else
    //save result to the memory
-   SaveResult(dir + _T("/") + filename, cost, ID);
+   SaveResult(dir + _T("/") + filename, cost, ID, false);
    //delete output and input files
    wxRemoveFile(dir + _T("/") + filename);
    wxRemoveFile(dir + _T("/input.xml"));
    wxRemoveFile(dir + _T("/out.txt"));
    #endif
+   //WriteMessageLog(_T("Leaving the locked part..."));
 
-   
+   //wxMutexError qre = mmh.Unlock();
+   //WriteMessageLog(_T("Mutex unlocked"+wxString::Format("%d", qre)));
 }
 wxString FoxClient::getOutputFile(wxString dir)
 {
@@ -273,7 +327,7 @@ void FoxClient::Reconnect()
 */
 void FoxClient::KillProcesses()
 {
-    if(m_ProcessMutex->Lock()!=wxMUTEX_NO_ERROR) return;
+    wxCriticalSectionLocker locker(m_ProcessCriticalSection);
     WriteMessageLog(_T("Killing processes"));
     for(int i=0;i<m_processes.size();i++) {
         if(m_processes[i].isRunning()) {
@@ -284,7 +338,6 @@ void FoxClient::KillProcesses()
             WriteMessageLog(tmp);
         }
     }
-    m_ProcessMutex->Unlock();
 }
 void FoxClient::Disconnect()
 {
@@ -451,7 +504,6 @@ bool FoxClient::AnalyzeMessage(wxString msg)
                 if(runNewJob(jobs[i], ids[i], (int) trials[i], rands[i])!=0) {
                     jobsForRejecting.push_back(ids[i]);
                 }
-                //wxSleep(2);
             }
         }
         //TODO
@@ -512,7 +564,7 @@ void FoxClient::SendCurrentState()
         for(int i=0;i<m_results.size();i++) {
             if(m_results[i].sent==false && m_results[i].pending==true) {
                 m_results[i].sent=true;
-                m_results[i].pending==false;
+                m_results[i].pending=false;
             }
         }
     }
@@ -532,24 +584,32 @@ wxString FoxClient::getJob(wxString inmsg, long pos)
     job = in.Left(p);
     return job;
 }
-vector<FoxProcess> FoxClient::get_copy_of_processes()
+void FoxClient::get_copy_of_processes(vector<FoxProcess> &FP, vector<ClientJob> &CJ)
 {
-    vector<FoxProcess> res;
-    if(m_ProcessMutex->Lock()!=wxMUTEX_NO_ERROR) return res;    
+    //WriteMessageLog("get_copy_of_processes: Locking");
+    FP.clear();
+    CJ.clear();
+    wxCriticalSectionLocker locker(m_ProcessCriticalSection);  
+    //WriteMessageLog("get_copy_of_processes: Locked");
     for(int i=0;i<m_processes.size();i++) {
-        res.push_back(m_processes[i]);
+        FP.push_back(m_processes[i]);
     }
-    m_ProcessMutex->Unlock();
-    return res;
+    for(int i=0;i<m_ListOfProcessedJobs.size();i++) {
+        CJ.push_back(m_ListOfProcessedJobs[i]);
+    }
+    //WriteMessageLog("get_copy_of_processes: Locking");
+    
 }
 int FoxClient::getNbOfUnusedProcesses()
 {
-    if(m_ProcessMutex->Lock()!=wxMUTEX_NO_ERROR) return 0;
+    //WriteMessageLog("getNbOfUnusedProcesses: Locking");
+    wxCriticalSectionLocker locker(m_ProcessCriticalSection);
+    //WriteMessageLog("getNbOfUnusedProcesses: Locked");
     int nb=0;
     for(int i=0;i<m_processes.size();i++) {
         if (!m_processes[i].isRunning()) nb++;
     }
-    m_ProcessMutex->Unlock();
+    //WriteMessageLog("getNbOfUnusedProcesses: Unlocked");
     return nb;
 }
 FoxProcess * FoxClient::getUnusedProcess()
@@ -567,7 +627,9 @@ int FoxClient::runNewJob(wxString job, int id, int nbTrial, bool rand)
 {
     WriteMessageLog(_T("running new job"));
     //we have to use protection for m_processes here!
-    if(m_ProcessMutex->Lock()!=wxMUTEX_NO_ERROR) return -1;
+    //if(m_ProcessMutex->Lock()!=wxMUTEX_NO_ERROR) return -1;
+    wxCriticalSectionLocker locker(m_ProcessCriticalSection);
+
     FoxProcess *proc = getUnusedProcess();
     if(proc!=0) {
         //WriteMessageLog(_T("process found"));
@@ -634,7 +696,7 @@ int FoxClient::runNewJob(wxString job, int id, int nbTrial, bool rand)
         if ( !pid ) {
             delete process;
             WriteMessageLog(_T("Process not started: ") + cmd_content);
-            m_ProcessMutex->Unlock();
+            //m_ProcessMutex->Unlock();
             return -1;
         } else {
             proc->setPid(pid);
@@ -644,15 +706,15 @@ int FoxClient::runNewJob(wxString job, int id, int nbTrial, bool rand)
             wxString tmp;
             tmp.Printf(_T("%d"), pid);
             WriteMessageLog(_T("Process started: pid=") + tmp + _T(", dir=") + cmd_content);
-            m_ProcessMutex->Unlock();
+            //m_ProcessMutex->Unlock();
             return 0;
         }
     } else {
         WriteMessageLog(_T("No unsused process is available, job will be rejected to server"));
-        m_ProcessMutex->Unlock();
+        //m_ProcessMutex->Unlock();
         return -1;
     }
-    m_ProcessMutex->Unlock();
+    //m_ProcessMutex->Unlock();
     return 0;
 }
 /*
@@ -720,21 +782,32 @@ bool FoxClient::LoadFile(wxString filename, wxString &in)
    free(buffer);
    return true;
 }
-void FoxClient::SaveResult(wxString fileName, wxString Cost, int ID)
+void FoxClient::SaveResult(wxString fileName, wxString Cost, int ID, bool error)
 {
     WriteMessageLog(_T("Saving new result"));
     wxString in;
-    if(!LoadFile(fileName, in)) {
-        WriteMessageLog(_T("can't load the file"));
-        return;
-    }
-    wxString out;
-    out.Printf(_T("<result ID=\"%d\" Cost=\"%s\">\n"), ID, Cost.c_str());
-    out += in;
-    out += _T("</result>\n");
+    if(!error) {
+        if(!LoadFile(fileName, in)) {
+            WriteMessageLog(_T("can't load the file"));
+            return;
+        }
+        wxString out;
+        out.Printf(_T("<result ID=\"%d\" Cost=\"%s\">\n"), ID, Cost.c_str());
+        out += in;
+        out += _T("</result>\n");
+        
+        GrdRslt res(ID, Cost, out);
+        m_results.push_back(res);
+    } else {
+        wxString out;
+        out.Printf(_T("<result ID=\"%d\" Cost=\"-1\">\n"), ID);
+        out += in;
+        out += _T("</result>\n");
 
-    GrdRslt res(ID, Cost, out);
-    m_results.push_back(res);
+        GrdRslt res(ID, Cost, out);
+        m_results.push_back(res);
+    }
+    
     //WriteMessageLog(_T("Result saved"));
 }
 void FoxClient::OnTimerEvent(wxTimerEvent& event)
@@ -765,7 +838,12 @@ void FoxClient::DoManyThingsOnTimer()
     if(!m_IOSocket.ReadStringFromSocket(mpClient, msg)) {
         return;
     }
-
+    /*
+    WriteMessageLog("List of jobs done:");
+    for(int i=0;i<m_ListOfProcessedJobs.size();i++) {
+        WriteMessageLog(wxString::Format("JobID = %d, Avtime = %d s, nbdone = %d", m_ListOfProcessedJobs[i].ID, m_ListOfProcessedJobs[i].average_calc_time.GetSeconds().ToLong(), m_ListOfProcessedJobs[i].nb_done));
+    }
+    */
     //3. analyze answer, todo
     if(!AnalyzeMessage(msg)) {
         return;

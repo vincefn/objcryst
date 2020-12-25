@@ -3791,9 +3791,9 @@ void Molecule::GLInitDisplayList(const bool onlyIndependentAtoms,
                            }
                         }
                         const float f=(mvpBond[k]->GetAtom1().GetOccupancy()+mvpBond[k]->GetAtom2().GetOccupancy())/2*this->GetOccupancy();
-                        const GLfloat colour_bondnonfree[]= { 0.2*fout, .2*fout, .2*fout, f*fout };
-                        const GLfloat colour_bondrigid[]=   { 0.5*fout, .3*fout, .3*fout, f*fout };
-                        const GLfloat colour_bondfree[]=    { 0.8*fout, .8*fout, .8*fout, f*fout };
+                        const GLfloat colour_bondnonfree[]= { 0.2f*fout, .2f*fout, .2f*fout, f*fout };
+                        const GLfloat colour_bondrigid[]=   { 0.5f*fout, .3f*fout, .3f*fout, f*fout };
+                        const GLfloat colour_bondfree[]=    { 0.8f*fout, .8f*fout, .8f*fout, f*fout };
                         if(isRigidGroup)
                            glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,colour_bondrigid);
                         else

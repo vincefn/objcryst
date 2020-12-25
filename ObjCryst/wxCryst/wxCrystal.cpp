@@ -384,9 +384,9 @@ BEGIN_EVENT_TABLE(WXCrystal,wxWindow)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_DUPLICSCATTERER,    WXCrystal::OnMenuDuplicateScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SHOW_SCATTPOW_WIN,        WXCrystal::OnMenuShowScattPowWindow)
    EVT_UPDATE_UI(ID_CRYST_UPDATEUI,                   WXRefinableObj::OnUpdateUI)
-   EVT_GRID_CMD_CELL_CHANGE(ID_CRYSTAL_WIN_SCATTPOW,  WXCrystal::OnEditGridScattPow)
-   EVT_GRID_CMD_CELL_CHANGE(ID_CRYSTAL_WIN_ANTIBUMP,  WXCrystal::OnEditGridScattPowAntiBump)
-   EVT_GRID_CMD_CELL_CHANGE(ID_CRYSTAL_WIN_BONDVALENCE,WXCrystal::OnEditGridScattPowBondValence)
+   EVT_GRID_CMD_CELL_CHANGED(ID_CRYSTAL_WIN_SCATTPOW,  WXCrystal::OnEditGridScattPow)
+   EVT_GRID_CMD_CELL_CHANGED(ID_CRYSTAL_WIN_ANTIBUMP,  WXCrystal::OnEditGridScattPowAntiBump)
+   EVT_GRID_CMD_CELL_CHANGED(ID_CRYSTAL_WIN_BONDVALENCE,WXCrystal::OnEditGridScattPowBondValence)
 //   EVT_MENU(ID_CRYSTAL_MENU_SHOW_PDF,                 WXCrystal::OnMenuPDF)
 END_EVENT_TABLE()
 
@@ -2745,7 +2745,7 @@ void UnitCellMapGLList::Draw()const
       // and non-orthogonal unit cells
       glMaterialf( GL_FRONT, GL_SHININESS, 0.0);
 
-      const GLfloat colorBack [] = {mColour[0]/3., mColour[1]/3., mColour[2]/3., mColour[3]};
+      const GLfloat colorBack [] = {mColour[0]/3.0f, mColour[1]/3.0f, mColour[2]/3.0f, mColour[3]};
       glMaterialfv(GL_BACK, GL_AMBIENT, colorBack);
       glMaterialfv(GL_BACK, GL_DIFFUSE, colorBack);
       glMaterialfv(GL_BACK, GL_SPECULAR, colorBack);

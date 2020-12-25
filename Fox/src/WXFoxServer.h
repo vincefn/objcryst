@@ -49,8 +49,9 @@ private:
    void OnGridResultClick(wxGridEvent &event);
    void OnGridJobClick(wxGridEvent &event);
    void OnShowResults(wxCommandEvent& event);
+   void OnShowResultsServer(wxCommandEvent& event);
    void RunLocalClient(wxCommandEvent& event);
-   void RunALLClient(wxCommandEvent& event);
+   //void RunALLClient(wxCommandEvent& event);
    void UpdateLists(wxTimerEvent& event);
    void OnNewJob(wxCommandEvent& event);
    void OnEditJob(wxCommandEvent& event);
@@ -60,11 +61,12 @@ private:
    int  GenerateJobID();
    void UpdateJobList();
    void UpdateResultList();
+   void UpdateClientList();
    bool ShowSetJobWindow(int ID, wxString &name, long &trials, long &runs, bool &rand);
    bool isFileFoxJob(wxString path, wxString &name, int &id, long &nbOfTrial, long &nbRun, bool &rand);
    void saveJobHeader(wxString filename, int ID, wxString name, long nbOfTrial, int nbRun, bool rand);
    void ChangeJobHeader(wxString filename, int ID, wxString name, long nbOfTrial, int nbRun, bool rand);
-   void AddJob(wxString filename, wxString name, int id, long nbOfTrial, long nbRun, bool rand);
+   void AddServerJob(wxString filename, wxString name, int id, long nbOfTrial, long nbRun, bool rand);
    void SaveDataAsFile(wxString out, wxString filename);
    bool LoadFile(wxString filename, wxString &in);
    bool isJobLoaded(long ID);
@@ -80,7 +82,8 @@ private:
    FoxServer         * m_FoxServer;
    std::vector<FoxJob >         m_jobs;
    std::vector<GridResult >     m_results;
-   wxMutex            * m_WXFoxServerDataMutex;
+   std::vector<GridClient>      m_clients;
+   //wxMutex            * m_WXFoxServerDataMutex;
    wxString             m_working_dir;
 
    DECLARE_EVENT_TABLE()
