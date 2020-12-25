@@ -95,11 +95,11 @@ void WXFoxServer::InitServer()
 
    m_JobListTable->SetColLabelSize(20);
    m_JobListTable->SetRowLabelSize(0);
-   m_JobListTable->SetColumnWidth(0, (xsize-10)/5);
-   m_JobListTable->SetColumnWidth(1, (xsize-10)/5+20);
-   m_JobListTable->SetColumnWidth(2, (xsize-10)/5-20);
-   m_JobListTable->SetColumnWidth(3, (xsize-10)/5-10);
-   m_JobListTable->SetColumnWidth(4, (xsize-10)/5+10);
+   m_JobListTable->SetColSize(0, (xsize-10)/5);
+   m_JobListTable->SetColSize(1, (xsize-10)/5+20);
+   m_JobListTable->SetColSize(2, (xsize-10)/5-20);
+   m_JobListTable->SetColSize(3, (xsize-10)/5-10);
+   m_JobListTable->SetColSize(4, (xsize-10)/5+10);
    m_JobListTable->DeleteRows(0, 1, false);
    JobSizer->Add(m_JobListTable,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
 
@@ -153,10 +153,10 @@ void WXFoxServer::InitServer()
    //m_ClientTable->SetColLabelValue(3, _T("Status"));
    m_ClientTable->SetColLabelSize(20);
    m_ClientTable->SetRowLabelSize(0);
-   m_ClientTable->SetColumnWidth(0, xsize/3);
-   m_ClientTable->SetColumnWidth(1, xsize/3);
-   m_ClientTable->SetColumnWidth(2, xsize/3);
-   //m_ClientTable->SetColumnWidth(3, xsize/8);
+   m_ClientTable->SetColSize(0, xsize/3);
+   m_ClientTable->SetColSize(1, xsize/3);
+   m_ClientTable->SetColSize(2, xsize/3);
+   //m_ClientTable->SetColSize(3, xsize/8);
    m_ClientTable->DeleteRows(0, 1, false);
    listClientSizer->Add(m_ClientTable,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
    /*
@@ -180,10 +180,10 @@ void WXFoxServer::InitServer()
    //m_ResultTable->SetColLabelValue(3, _T("Show"));
    m_ResultTable->SetColLabelSize(20);
    m_ResultTable->SetRowLabelSize(0);
-   m_ResultTable->SetColumnWidth(0, 50);
-   m_ResultTable->SetColumnWidth(1, (xsize-50)/2);
-   m_ResultTable->SetColumnWidth(2, (xsize-50)/2);
-   //m_ResultTable->SetColumnWidth(3, 50);
+   m_ResultTable->SetColSize(0, 50);
+   m_ResultTable->SetColSize(1, (xsize-50)/2);
+   m_ResultTable->SetColSize(2, (xsize-50)/2);
+   //m_ResultTable->SetColSize(3, 50);
    m_ResultTable->DeleteRows(0, 1, false);
    listResultSizer->Add(m_ResultTable,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
 
@@ -243,7 +243,7 @@ void WXFoxServer::ChangeJobHeader(wxString filename, int ID, wxString name, long
             pos +=9;
             file = file.Mid(pos);
         }
-        data.Printf(_T("<FoxJob Name=\"%s\" ID=\"%d\" nbOfTrial=\"%d\" nbRun=\"%d\" rand=\"%ld\"></FoxJob>\n"), name.c_str(), ID, nbOfTrial, nbRun, r);
+        data.Printf(_T("<FoxJob Name=\"%s\" ID=\"%d\" nbOfTrial=\"%ld\" nbRun=\"%d\" rand=\"%d\"></FoxJob>\n"), name.c_str(), ID, nbOfTrial, nbRun, r);
         data +=file;
         SaveDataAsFile(data, filename);
     }
@@ -600,7 +600,7 @@ void WXFoxServer::OnDeleteJob(wxCommandEvent& event)
 
    m_UpdateTimer->Stop();
    //Update Lists
-   wxTimerEvent evt;
+   wxTimerEvent evt; // TODO: wxTimerEvent use is deprecated
    evt.SetId(ID_UPDATE_TIMER);
    this->UpdateLists(evt);
    int interval = m_UpdateTimer->GetInterval();
@@ -616,7 +616,7 @@ void WXFoxServer::RunLocalClient(wxCommandEvent& event)
    wxString message;
     wxStandardPaths sp=wxStandardPaths::Get();
 
-   message.Printf(_T("Would you also like to run client on this PC?\nSet the number of CPUs available for client or cancel this operation.\n%d CPUs has been detected on this PC.") , nCPU);
+   message.Printf(_T("Would you also like to run client on this computer?\nSet the number of CPUs available for client or cancel this operation.\n%d CPUs have been detected.") , nCPU);
    wxTextEntryDialog dlg(m_parent, message, _T("Set a number of available CPUs"), nbCPUs, wxCANCEL | wxOK );
    if(wxID_OK==dlg.ShowModal()){
        nbCPUs = dlg.GetValue();
@@ -649,7 +649,7 @@ void WXFoxServer::RunLocalClient(wxCommandEvent& event)
 }
 void WXFoxServer::UpdateJobList()
 {
-   int nbRow = m_JobListTable->GetRows();
+   int nbRow = m_JobListTable->GetNumberRows();
    if(nbRow>0) m_JobListTable->DeleteRows(0, nbRow, true);
    wxString tmp;
 
@@ -680,7 +680,7 @@ void WXFoxServer::UpdateJobList()
 }
 void WXFoxServer::UpdateResultList()
 {
-   int nb = m_ResultTable->GetRows();
+   int nb = m_ResultTable->GetNumberRows();
    wxString tmp;
    for(int i=nb;i<m_results.size();i++){
       m_ResultTable->InsertRows(i, 1, false);
@@ -707,7 +707,7 @@ void WXFoxServer::UpdateLists(wxTimerEvent& event)
    }
 
    //update client list
-   int nbRow = m_ClientTable->GetRows();
+   int nbRow = m_ClientTable->GetNumberRows();
    if(nbRow>0) m_ClientTable->DeleteRows(0, nbRow, true);
    for(int i=0;i<clients.size();i++){
         m_ClientTable->InsertRows(i,1,false);
@@ -731,13 +731,13 @@ void WXFoxServer::UpdateLists(wxTimerEvent& event)
         //m_ClientTable->SetReadOnly(i,3);
         //set colors
         if(clients[i].availCPUs < clients[i].allCPUs) {
-            m_ClientTable->SetCellBackgroundColour(wxColor(255, 200, 200), i, 0);
-            m_ClientTable->SetCellBackgroundColour(wxColor(255, 200, 200), i, 1);
-            m_ClientTable->SetCellBackgroundColour(wxColor(255, 200, 200), i, 2);
+            m_ClientTable->SetCellBackgroundColour(i, 0, wxColour(255, 200, 200));
+            m_ClientTable->SetCellBackgroundColour(i, 1, wxColour(255, 200, 200));
+            m_ClientTable->SetCellBackgroundColour(i, 2, wxColour(255, 200, 200));
         } else {
-            m_ClientTable->SetCellBackgroundColour(wxColor(200, 255, 200), i, 0);
-            m_ClientTable->SetCellBackgroundColour(wxColor(200, 255, 200), i, 1);
-            m_ClientTable->SetCellBackgroundColour(wxColor(200, 255, 200), i, 2);
+            m_ClientTable->SetCellBackgroundColour(i, 0, wxColour(200, 255, 200));
+            m_ClientTable->SetCellBackgroundColour(i, 1, wxColour(200, 255, 200));
+            m_ClientTable->SetCellBackgroundColour(i, 2, wxColour(200, 255, 200));
         }
    }
 

@@ -94,7 +94,7 @@ void WXFoxClient::InitClient()
    wxStaticBoxSizer *ConnectSizer = new wxStaticBoxSizer( wxVERTICAL, this, "Connection");
    //ConnectSizer->Add(IPSizer, 0, wxALL|wxALIGN_TOP);
    ConnectSizer->Add(connect_sizer, 0, wxALL|wxALIGN_TOP);
-   ConnectSizer->Add(IPButtonSizer, 0, wxALL|wxALIGN_BOTTOM|wxALIGN_RIGHT);
+   ConnectSizer->Add(IPButtonSizer, 0, wxALL|wxALIGN_RIGHT);
    /*
    wxBoxSizer *eventSizer = new wxBoxSizer( wxVERTICAL );
 
@@ -122,12 +122,12 @@ void WXFoxClient::InitClient()
    m_process_table->SetColLabelValue(3, _T("Status"));
    m_process_table->SetColLabelSize(20);
    m_process_table->SetRowLabelSize(0);
-   m_process_table->SetColumnWidth(0, 1.0 * xsize/10.0);
-   m_process_table->SetColumnWidth(1, 3.0 * xsize/10.0);
-   m_process_table->SetColumnWidth(2, 3.0 * xsize/10.0);
-   m_process_table->SetColumnWidth(3, 3.0 * xsize/10.0);
+   m_process_table->SetColSize(0, 1.0 * xsize/10.0);
+   m_process_table->SetColSize(1, 3.0 * xsize/10.0);
+   m_process_table->SetColSize(2, 3.0 * xsize/10.0);
+   m_process_table->SetColSize(3, 3.0 * xsize/10.0);
    m_process_table->DeleteRows(0, 1, false);
-   topSizer->Add(m_process_table, 0, wxALL|wxALIGN_BOTTOM);
+   topSizer->Add(m_process_table, 0, wxALL);
 
    SetSizer(topSizer);
 
@@ -184,7 +184,7 @@ void WXFoxClient::OnUpdateProcessTimer(wxTimerEvent& event)
 
     vector<FoxProcess> p = m_FoxClient->get_copy_of_processes();
     
-    int nbRow = m_process_table->GetRows();
+    int nbRow = m_process_table->GetNumberRows();
     if(nbRow>0) m_process_table->DeleteRows(0, nbRow, true);
     m_process_table->ClearGrid();
     for(int i=0;i<p.size();i++) {
@@ -192,35 +192,35 @@ void WXFoxClient::OnUpdateProcessTimer(wxTimerEvent& event)
         if(p[i].isRunning()) {
             m_process_table->SetCellValue(i,0,wxString::Format("%d",i));
             m_process_table->SetReadOnly(i,0);
-            m_process_table->SetCellBackgroundColour(wxColor(255, 200, 200), i, 0);
+            m_process_table->SetCellBackgroundColour(i, 0, wxColour(255, 200, 200));
 
             m_process_table->SetCellValue(i,1,wxString::Format("%d",p[i].getJobID()));
             m_process_table->SetReadOnly(i,1);           
-            m_process_table->SetCellBackgroundColour(wxColor(255, 200, 200), i, 1);
+           m_process_table->SetCellBackgroundColour(i, 1, wxColour(255, 200, 200));
 
             m_process_table->SetCellValue(i,2,wxString::Format("%s",p[i].getStartingTime().FormatTime()));
             m_process_table->SetReadOnly(i,2);           
-            m_process_table->SetCellBackgroundColour(wxColor(255, 200, 200), i, 2);
+           m_process_table->SetCellBackgroundColour(i, 2, wxColor(255, 200, 200));
 
             m_process_table->SetCellValue(i,3,"running");
             m_process_table->SetReadOnly(i,3);
-            m_process_table->SetCellBackgroundColour(wxColor(255, 200, 200), i, 3);
+           m_process_table->SetCellBackgroundColour(i, 3, wxColor(255, 200, 200));
         } else {
             m_process_table->SetCellValue(i,0,wxString::Format("%d",i));
             m_process_table->SetReadOnly(i,0);
-            m_process_table->SetCellBackgroundColour(wxColor(200, 255, 200), i, 0);
+            m_process_table->SetCellBackgroundColour(i, 0, wxColour(200, 255, 200));
 
             m_process_table->SetCellValue(i,1,"");
             m_process_table->SetReadOnly(i,1);           
-            m_process_table->SetCellBackgroundColour(wxColor(200, 255, 200), i, 1);
+            m_process_table->SetCellBackgroundColour(i, 1, wxColour(200, 255, 200));
 
             m_process_table->SetCellValue(i,2,"");
             m_process_table->SetReadOnly(i,2);
-            m_process_table->SetCellBackgroundColour(wxColor(200, 255, 200), i, 2);
+            m_process_table->SetCellBackgroundColour(i, 2, wxColour(200, 255, 200));
 
             m_process_table->SetCellValue(i,3,"waiting for job");
             m_process_table->SetReadOnly(i,3);
-            m_process_table->SetCellBackgroundColour(wxColor(200, 255, 200), i, 3);
+            m_process_table->SetCellBackgroundColour(i, 3, wxColour(200, 255, 200));
         }
     }
 }

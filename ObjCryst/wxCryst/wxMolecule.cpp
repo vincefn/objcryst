@@ -783,11 +783,11 @@ BEGIN_EVENT_TABLE(WXMolecule,wxWindow)
    EVT_MENU(ID_MOLECULE_MENU_FILE_2ZMATRIXNAMED,          WXMolecule::OnMenuExport2ZMatrix)
    EVT_MENU(ID_MOLECULE_MENU_GEOMETRY_ROTATE_BOND,        WXMolecule::OnMenuRotate)
    EVT_MENU(ID_MOLECULE_MENU_GEOMETRY_ROTATE_DIHED,        WXMolecule::OnMenuRotate)
-   EVT_GRID_CMD_CELL_CHANGE(ID_WINDOW_ATOM,               WXMolecule::OnEditGridAtom)
-   EVT_GRID_CMD_CELL_CHANGE(ID_WINDOW_BONDLENGTH,         WXMolecule::OnEditGridBondLength)
-   EVT_GRID_CMD_CELL_CHANGE(ID_WINDOW_BONDANGLE,          WXMolecule::OnEditGridBondAngle)
-   EVT_GRID_CMD_CELL_CHANGE(ID_WINDOW_DIHEDRALANGLE,      WXMolecule::OnEditGridDihedralAngle)
-   EVT_GRID_CMD_CELL_CHANGE(ID_WINDOW_RIGIDGROUP,         WXMolecule::OnEditGridRigidGroup)
+   EVT_GRID_CMD_CELL_CHANGED(ID_WINDOW_ATOM,               WXMolecule::OnEditGridAtom)
+   EVT_GRID_CMD_CELL_CHANGED(ID_WINDOW_BONDLENGTH,         WXMolecule::OnEditGridBondLength)
+   EVT_GRID_CMD_CELL_CHANGED(ID_WINDOW_BONDANGLE,          WXMolecule::OnEditGridBondAngle)
+   EVT_GRID_CMD_CELL_CHANGED(ID_WINDOW_DIHEDRALANGLE,      WXMolecule::OnEditGridDihedralAngle)
+   EVT_GRID_CMD_CELL_CHANGED(ID_WINDOW_RIGIDGROUP,         WXMolecule::OnEditGridRigidGroup)
    EVT_BUTTON(ID_MOLECULE_CHANGE_CENTER_ATOM,             WXMolecule::OnChangeCenterAtom)
 END_EVENT_TABLE()
 
@@ -2461,7 +2461,7 @@ void WXMolecule::CrystUpdate(const bool uui,const bool lock)
       if(0!=mpNonFlipAtomWin)
       {
          if(mpNonFlipAtomWin->GetNumberRows()>0)
-            mpNonFlipAtomWin->DeleteRows(0, mpNonFlipAtomWin->GetRows(), true);
+            mpNonFlipAtomWin->DeleteRows(0, mpNonFlipAtomWin->GetNumberRows(), true);
       }
       //Add any atom, bond, bond angle or dihedral angle that could have been added
       {
