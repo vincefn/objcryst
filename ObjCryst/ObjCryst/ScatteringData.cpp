@@ -423,7 +423,7 @@ void Radiation::InitOptions()
       this->AddPar(tmp);
    }
    {//Fixed by default
-      RefinablePar tmp("XRayTubeDeltaLambda",&mXRayTubeDeltaLambda,0.01,20.,
+      RefinablePar tmp("XRayTubeDeltaLambda",&mXRayTubeDeltaLambda,0.001,20.,
                        gpRefParTypeRadiationWavelength,REFPAR_DERIV_STEP_ABSOLUTE,
                        true,true,true,false,1.0);
       tmp.SetDerivStep(1e-4);

@@ -101,6 +101,7 @@ private:
     //this will return N of available jobs (or lower no.)
     vector<FoxJob > getJobsToCalculate(int n);
     void AddResultToJobList(int id);
+    void RemoveActiveFromJobList(int id);
     void RemoveThreadFromJobList();
     void cannot_calculate_this_job(FoxJob fj);
     
@@ -133,7 +134,7 @@ class FoxServer: public wxFrame
      //void WriteProtocol();
      void GetData(std::vector<GridClient> &Clients, std::vector<GridResult > &results,  std::vector<FoxJob > &Joblist);
      bool IsServerRunning();
-     void RunAllClients();
+     //void RunAllClients();
      void AddJobToList(FoxJob newjob);
      void UpdateJob(int index, FoxJob *cjob);
      int DeleteJob(int index);

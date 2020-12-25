@@ -69,76 +69,13 @@ bool ThreadWorker::LoadFile(wxString filename, wxString &in)
    free(buffer);
    return true;
 }
-/*
-bool ThreadWorker::write_socket(wxSocketBase* m_socket, wxCharBuffer message)
-{
-      //deprechated
 
-      m_socket->SetFlags(wxSOCKET_WAITALL);
-
-      // Note that len is in kbytes here!
-      unsigned int len  = message.length();
-      WriteLogMessage(wxString::Format("ThreadWorker: Sending header of the message of %d kilobytes", len));
-      m_socket->Write(&len, sizeof(int));
-      if (m_socket->Error()) {
-         WriteLogMessage("ThreadWorker: Write error");
-         return false;
-      }
-      WriteLogMessage("ThreadWorker: Sending the message ...");
-      m_socket->Write(message, len);
-      WriteLogMessage(m_socket->Error() ? _("ThreadWorker: failed !\n") : _("ThreadWorker: done\n"));
-      return true;
-}
-*/
 int ThreadWorker::GetId()
 {
    int i= (int) wxThread::GetId();
    return i;
 }
-/*
-bool ThreadWorker::read_socket(wxSocketBase* m_socket, wxCharBuffer &message)
-{
-    //deprechated
 
-    WriteLogMessage("ThreadWorker: Reading the socket ...");
-    m_socket->SetFlags(wxSOCKET_WAITALL);
-    unsigned int len;
-    m_socket->Read(&len, sizeof(int));
-    if (m_socket->Error()) {
-        WriteLogMessage("ThreadWorker: Read error");
-        //wxGetApp().AddPendingEvent(e);
-        return false;
-    }
-    int processed = m_socket->LastCount();
-    WriteLogMessage(wxString::Format("ThreadWorker: %d bytes read in the header", processed));           
-
-    if (len == 0)
-    {
-        //e.m_exit = true;
-        //return 0;
-        WriteLogMessage("ThreadWorker: 0 bytes in socket, nothing to read...");
-        return true;
-    }
-
-    
-    message.extend(len);
-    WriteLogMessage(wxString::Format("Message header was: size = %d (bytes)",len));
-    WriteLogMessage("ThreadWorker: Reading message ...");
-    m_socket->Read(message.data(), len);
-
-    if (m_socket->Error())
-    {
-        WriteLogMessage("ThreadWorker: Read error");
-        //wxGetApp().AddPendingEvent(e);
-        return 0;
-    }
-    processed = m_socket->LastCount();
-    WriteLogMessage(wxString::Format("ThreadWorker: %d bytes readed", processed));
-
-    return true;
-           
-}
-*/
 void ThreadWorker::WriteLogMessage(wxString msg)
 {
 #if __SERVER_LOGS
@@ -175,6 +112,16 @@ void ThreadWorker::RemoveThreadFromJobList()
     if(m_mutexProtecting_Jobs_Results->Lock()!=wxMUTEX_NO_ERROR) return;
     for(int j=0;j<(*m_global_jobs).size();j++) {
        (*m_global_jobs)[j].RemoveThread(GetId(), -1);
+    }
+    m_mutexProtecting_Jobs_Results->Unlock();
+}
+void ThreadWorker::RemoveActiveFromJobList(int id)
+{
+    if(m_mutexProtecting_Jobs_Results->Lock()!=wxMUTEX_NO_ERROR) return;
+    for(int j=0;j<(*m_global_jobs).size();j++) {
+        if((*m_global_jobs)[j].getM_ID() == id) {
+            (*m_global_jobs)[j].RemoveThread(GetId());
+        }
     }
     m_mutexProtecting_Jobs_Results->Unlock();
 }
@@ -246,7 +193,7 @@ bool ThreadWorker::analyze_message_and_get_answer(wxString msg, wxString &answer
       in_string>>tag;
       if(true==in_string.eof()) break;
       
-      if( ("result"==tag.GetName()) && (!tag.IsEndTag()) ){
+      if( ("result"==tag.GetName()) && (!tag.IsEndTag()) ) {
          newResult = true;
          long id;
          double cost;
@@ -261,11 +208,22 @@ bool ThreadWorker::analyze_message_and_get_answer(wxString msg, wxString &answer
             }
          }
          long pos = in_string.tellg();
-         wxString res = getResult(msg, pos);
-         if(res.Cmp(_T(""))!=0) {
+         if(cost<0) {
+             //error occured during the calculation and empty result was obtained
              ids.push_back(id);
              costs.push_back(cost);
-             results.push_back(res);
+             results.push_back("");
+         } else {
+             wxString res = getResult(msg, pos);
+             if(res.Cmp(_T(""))!=0) {
+                 ids.push_back(id);
+                 costs.push_back(cost);
+                 results.push_back(res);
+             } else {
+                 ids.push_back(id);
+                 costs.push_back(-1.0);
+                 results.push_back(res);
+             }
          }
       }
       if("currentstate"==tag.GetName()){
@@ -297,9 +255,14 @@ bool ThreadWorker::analyze_message_and_get_answer(wxString msg, wxString &answer
 
    if(newResult) {
       for(int i=0;i<results.size();i++) {
-          SaveResult(results[i], ids[i], (float) costs[i]);
-          //Updating JobList...
-          AddResultToJobList(ids[i]);
+          if(costs[i]<0) {
+              //if result was empty or obtained with an error, just update the job list...
+              RemoveActiveFromJobList(ids[i]);
+          } else {
+              SaveResult(results[i], ids[i], (float) costs[i]);
+              //Updating JobList...
+              AddResultToJobList(ids[i]);
+          }
       }
    }
 
@@ -358,6 +321,7 @@ void ThreadWorker::SaveResult(wxString result, int JobID, float ResultCost)
    newres.JobID = JobID;
    newres.threadID = this->GetId();
    newres.Cost = ResultCost;
+   newres.order = m_global_results->size();
    m_global_results->push_back(newres);
    WriteLogMessage(_T("Result saved in global data"));
 
@@ -432,6 +396,7 @@ wxThread::ExitCode ThreadWorker::Entry()
             WriteLogMessage("Sending answer ...");
             if(!m_IO.WriteStringToSocket(m_socket, answ)) {
                 WriteLogMessage("ERROR: sending answer returned false");
+                //Remove thread from joblist?
                 continue;
             }
 
@@ -634,7 +599,7 @@ void FoxServer::GetData( std::vector<GridClient> &clients, std::vector<GridResul
     if(s_mutexProtecting_Jobs_Results->Lock()!=wxMUTEX_NO_ERROR) return;
 
     //Results. It adds only new results.
-    for(int i=results.size();i<m_results.size();i++){
+    for(int i=results.size();i<m_results.size();i++) {
        results.push_back(m_results[i]);
     }
     
@@ -853,16 +818,4 @@ void FoxServer::OnSocketEvent(wxSocketEvent &event)
    WriteLogMessage(_T("OnSocketEvent_end"));
 }
 */
-void FoxServer::RunAllClients()
-{
-    /*
-   VFN_DEBUG_MESSAGE(__FUNCTION__,10)
-   if(m_threadMutex->Lock()!=wxMUTEX_NO_ERROR) return;
 
-   for(int i=0; i<m_threads.size(); i++)
-   {
-      m_threads[i]->NewEvent(SEND_JOB, m_threadMutex);
-   }
-   m_threadMutex->Unlock();
-   */
-}
