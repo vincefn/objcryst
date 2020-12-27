@@ -24,7 +24,6 @@ shared-newmat=1
 shared-wxgtk=1
 shared-fftw=1
 shared-glut=1
-shared-mysql=1
 endif
 ### Rules for Linux & GCC
 # C compiler
@@ -132,14 +131,8 @@ endif
 
 #Using COD, with MySQL
 ifneq ($(cod),0)
- ifneq ($(shared-mysql),1)
-  COD_LIB = $(DIR_STATIC_LIBS)/lib/libmysqlclient.a
- else
-  COD_LIB = -lmysqlclient
- endif
- COD_FLAGS = -D__FOX_COD__ -I/usr/include/mysql
+ COD_FLAGS = -D__FOX_COD__
 else
- COD_LIB :=
  COD_FLAGS :=
 endif
 
@@ -156,7 +149,7 @@ else
       CPPFLAGS = -g -Wall -D__DEBUG__ ${SSE_FLAGS} ${COD_FLAGS}
    endif
    DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS} ${FFTW_FLAGS} ${REAL_FLAG}
-   LOADLIBES = -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx ${LDNEWMAT} ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS} ${FFTW_LIB} ${COD_LIB}
+   LOADLIBES = -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx ${LDNEWMAT} ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS} ${FFTW_LIB}
  else
    ifdef RPM_OPT_FLAGS
       # we are building a RPM !
@@ -166,7 +159,7 @@ else
       CPPFLAGS = -O3 -w -ffast-math -fstrict-aliasing -pipe -fomit-frame-pointer -funroll-loops -ftree-vectorize ${SSE_FLAGS} ${COD_FLAGS}
    endif
    DEPENDFLAGS = ${SEARCHDIRS} ${GL_FLAGS} ${WXCRYSTFLAGS} ${FFTW_FLAGS} ${REAL_FLAG}
-   LOADLIBES = -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx ${LDNEWMAT} ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS} ${FFTW_LIB} ${COD_LIB}
+   LOADLIBES = -lm -lcryst -lCrystVector -lQuirks -lRefinableObj -lcctbx ${LDNEWMAT} ${PROFILELIB} ${GL_LIB} ${WX_LDFLAGS} ${FFTW_LIB}
  endif
 endif
 # Add to statically link: -nodefaultlibs -lgcc /usr/lib/libstdc++.a
@@ -261,32 +254,15 @@ else
 libfftw=
 endif
 
-#Boost library - this is not normally used, we take boost from the cctbx bundle
+# Boost library - used for cctbx and Fox. 
+# TODO: clarify install to see if we use boost from cctbx or independently installed...
 $(BUILD_DIR)/boost_1_68_0.tar.bz2:
 	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND) https://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.bz2
 
 libboost:$(BUILD_DIR)/boost_1_68_0.tar.bz2
 	cd $(BUILD_DIR) && tar -xjf boost_1_68_0.tar.bz2
-	cd $(BUILD_DIR)/boost_1_68_0 && rsync -ar boost --exclude="accumulators/" --exclude="archive/" --exclude="asio/" --exclude="asign/" --exclude="bimap/" --exclude="bind/" --exclude="circular_buffer/" --exclude="concept_check/" --exclude="dynamic_bitset/" --exclude="filesystem/" --exclude="flyweight/" --exclude="function/" --exclude="function_types/"  --exclude="gil/" --exclude="graph/" --exclude="interprocess/" --exclude="intrusive/" --exclude="iostreams/" --exclude="lambda/" --exclude="logic/" --exclude="mpi/" --exclude="parameter/" --exclude="pending/" --exclude="pool/" --exclude="program_options/" --exclude="property_tree/" --exclude="proto/" --exclude="ptr_container/" --exclude="python/" --exclude="random/" --exclude="regex/" --exclude="serialization/" --exclude="signals/" --exclude="spirit/" --exclude="statechart/" --exclude="system/" --exclude="test/" --exclude="thread/" --exclude="units/" --exclude="unordered/" --exclude="wave/" --exclude="xpressive/" --filter="+ */" --filter="+ *.hpp"  --filter="+ *.ipp" $(DIR_STATIC_LIBS)/include/
+	cd $(BUILD_DIR)/boost_1_68_0 && rsync -ar boost --exclude="accumulators/" --exclude="asio/" --exclude="asign/" --exclude="bimap/" --exclude="circular_buffer/" --exclude="concept_check/" --exclude="dynamic_bitset/" --exclude="filesystem/" --exclude="flyweight/" --exclude="function/" --exclude="function_types/"  --exclude="gil/" --exclude="graph/" --exclude="interprocess/" --exclude="intrusive/" --exclude="iostreams/" --exclude="lambda/" --exclude="logic/" --exclude="mpi/" --exclude="parameter/" --exclude="pending/" --exclude="pool/" --exclude="program_options/" --exclude="proto/" --exclude="ptr_container/" --exclude="python/" --exclude="random/" --exclude="regex/" --exclude="signals/" --exclude="spirit/" --exclude="statechart/" --exclude="system/" --exclude="test/" --exclude="thread/" --exclude="units/" --exclude="unordered/" --exclude="wave/" --exclude="xpressive/" --filter="+ */" --filter="+ *.hpp"  --filter="+ *.ipp" $(DIR_STATIC_LIBS)/include/
 	rm -Rf $(BUILD_DIR)/boost_1_68_0
-
-# MySQL
-$(BUILD_DIR)/mysql-5.6.24.tar.gz:
-	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND) http://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.24.tar.gz
-
-#We only build and install libmysql and development headers here (OK on Linux)
-$(DIR_STATIC_LIBS)/lib/libmysqlclient.a: $(BUILD_DIR)/mysql-5.6.24.tar.gz
-	cd $(BUILD_DIR) && tar -xzf mysql-5.6.24.tar.gz
-	cd $(BUILD_DIR)/mysql-5.6.24 && rm -f CMakeCache.txt && cmake -DCMAKE_INSTALL_PREFIX=$(DIR_STATIC_LIBS) && $(MAKE) libmysql
-	cd $(BUILD_DIR)/mysql-5.6.24/include && make install
-	cd $(BUILD_DIR)/mysql-5.6.24/libmysql && make install
-	rm -Rf $(BUILD_DIR)/mysql-5.6.24
-
-ifneq ($(shared-mysql),1)
-libmysql=$(DIR_STATIC_LIBS)/lib/libmysqlclient.a
-else
-libmysql=
-endif
 
 #ObjCryst++
 libCryst: $(libwx) libcctbx
