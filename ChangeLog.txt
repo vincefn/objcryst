@@ -1,3 +1,17 @@
+#### 2020.1 (January 2021)
+NEW FEATURES
+  * Add cylindrical absorption correction (mu*R)
+  * Access to Crystallography Open Database now uses an http access without
+    need for MySQL, and should work through firewalls
+
+IMPROVEMENTS
+  * Switched to wxWidgets 3.1
+  * When using --cif2pattern, do not convert atoms to a Molecule (faster)
+
+BUG FIXES
+  * Re-enable popup menu to set limits for parameters (windows)
+  * Fix rare NaN when estimating indexing volume for centered monoclinic lattices
+
 #### 2017.2 (28 June 2017)
 NEW FEATURES
   * 3D crystal view: add 'M' shortcut to allow forcing the full display
