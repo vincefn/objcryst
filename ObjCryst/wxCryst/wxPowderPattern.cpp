@@ -425,7 +425,7 @@ mChi2(0.0),mGoF(0.0),mRwp(0.0),mRp(0.0)
       mList.Add(fieldThetaDispl);
       mList.Add(fieldThetaTransp);
       mpSizer->Add(thetaCorrSizer);
-   // Time OF Flight parameters
+   // Time of Flight parameters
       wxBoxSizer* tofSizer=new wxBoxSizer(wxHORIZONTAL);
       WXCrystObjBasic* fieldDIFC=mpPowderPattern->GetPar(&(mpPowderPattern->mDIFC)).WXCreate(this);
       WXCrystObjBasic* fieldDIFA=mpPowderPattern->GetPar(&(mpPowderPattern->mDIFA)).WXCreate(this);
@@ -438,6 +438,12 @@ mChi2(0.0),mGoF(0.0),mRwp(0.0),mRp(0.0)
       mList.Add(fieldDIFC);
       mList.Add(fieldDIFA);
       mpSizer->Add(tofSizer);
+   // Cylindrical absorption correction
+      WXCrystObjBasic* fieldMuR=mpPowderPattern->GetPar(&(mpPowderPattern->mMuR)).WXCreate(this);
+      fieldMuR->SetToolTip(_T("Cylindrical absorption correction parameter (muR)"));
+      mList.Add(fieldMuR);
+      mpSizer->Add(fieldMuR);
+
    // Max Sin(theta/Lambda)
       WXFieldPar<REAL> *maxSiThOvLa=
          new WXFieldPar<REAL>(this,"Max Sin(theta)/lambda:",-1,
