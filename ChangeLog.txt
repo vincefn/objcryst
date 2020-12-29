@@ -9,8 +9,8 @@ IMPROVEMENTS
   * When using --cif2pattern, do not convert atoms to a Molecule (faster)
 
 BUG FIXES
-  * Re-enable popup menu to set limits for parameters (windows)
-  * Fix rare NaN when estimating indexing volume for centered monoclinic lattices
+  * Correct EstimateCellVolume estimation for orthorombic F
+  * + several minor issues
 
 #### 2017.2 (28 June 2017)
 NEW FEATURES
