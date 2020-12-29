@@ -58,6 +58,69 @@ namespace ObjCryst
 {
 ////////////////////////////////////////////////////////////////////////
 //
+//        Cylinder absorption correction
+//
+////////////////////////////////////////////////////////////////////////
+CylinderAbsCorr::CylinderAbsCorr(const PowderPatternDiffraction & data):
+ScatteringCorr(data), mpPowderPatternDiff(&data)
+{}
+
+CylinderAbsCorr::~CylinderAbsCorr()
+{}
+
+const string & CylinderAbsCorr::GetName() const
+{
+   //So far, we do not need a personalized name...
+   const static string mName="CylinderAbsCorr";
+   return mName;
+}
+
+const string & CylinderAbsCorr::GetClassName() const
+{
+   const static string className="CylinderAbsCorr";
+   return className;
+}
+
+void CylinderAbsCorr::CalcCorr() const
+{
+   const REAL *pstol=mpData->GetSinThetaOverLambda().data();
+   if(mpPowderPatternDiff->GetParentPowderPattern().GetClockPowderPatternAbsCorr() < mClockCorrCalc) return;
+   TAU_PROFILE("CylinderAbsCorr::CalcCorr()","void ()",TAU_DEFAULT);
+   mCorr.resize(mpData->GetNbRefl());
+   const REAL muR = mpPowderPatternDiff->GetParentPowderPattern().GetMuR();
+   if(muR == 0)
+   {
+      mCorr = 1;
+      return;
+   }
+   for(long i=0;i<mpData->GetNbRefl();i++)
+   {
+      const REAL s2 = pow(sin(mpData->GetTheta()(i)),2);
+      if(muR<=3)
+      {
+         const REAL t0 = 16.0/(3.*M_PI);
+         const REAL t1 = (25.99978-0.01911*pow(s2,0.25))*exp(-0.024551*s2)+ 0.109561*sqrt(s2)-26.04556;
+         const REAL t2 = -0.02489-0.39499*s2+1.219077*pow(s2,1.5)- 1.31268*pow(s2,2)+0.871081*pow(s2,2.5)-0.2327*pow(s2,3);
+         const REAL t3 = 0.003045+0.018167*s2-0.03305*pow(s2,2);
+         const REAL t = -t0*muR-t1*pow(muR,2)-t2*pow(muR,3)-t3*pow(muR,4);
+         mCorr(i) = exp(t);
+      }
+      else
+      {
+         const REAL t1 = 1.433902+11.07504*s2-8.77629*s2*s2+ 10.02088*s2*s2*s2-3.36778*s2*s2*s2*s2;
+         const REAL t2 = (0.013869-0.01249*s2)*exp(3.27094*s2)+ (0.337894+13.77317*s2)/pow(1.0+11.53544*s2, 1.555039);
+         const REAL t3 = 1.933433/pow(1.0+23.12967*s2, 1.686715) -0.13576*sqrt(s2)+1.163198;
+         const REAL t4 = 0.044365-0.04259/pow(1.0+0.41051*s2, 148.4202);
+         const REAL t = (t1-t4)/pow(1+t2*(muR-3),t3)+t4;
+         mCorr(i) = t/100;
+      }
+   }
+
+   mClockCorrCalc.Click();
+}
+
+////////////////////////////////////////////////////////////////////////
+//
 //    PowderPatternComponent
 //
 ////////////////////////////////////////////////////////////////////////
@@ -729,7 +792,7 @@ WXCrystObjBasic* PowderPatternBackground::WXCreate(wxWindow* parent)
 PowderPatternDiffraction::PowderPatternDiffraction():
 mpReflectionProfile(0),
 mCorrLorentz(*this),mCorrPolar(*this),mCorrSlitAperture(*this),
-mCorrTextureMarchDollase(*this),mCorrTextureEllipsoid(*this),mCorrTOF(*this),mExtractionMode(false),
+mCorrTextureMarchDollase(*this),mCorrTextureEllipsoid(*this),mCorrTOF(*this),mCorrCylAbs(*this),mExtractionMode(false),
 mpLeBailData(0),mFrozenLatticePar(6),mFreezeLatticePar(false),mFrozenBMatrix(3,3)
 {
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::PowderPatternDiffraction()",10)
@@ -749,7 +812,7 @@ mpLeBailData(0),mFrozenLatticePar(6),mFreezeLatticePar(false),mFrozenBMatrix(3,3
 PowderPatternDiffraction::PowderPatternDiffraction(const PowderPatternDiffraction &old):
 mpReflectionProfile(0),
 mCorrLorentz(*this),mCorrPolar(*this),mCorrSlitAperture(*this),
-mCorrTextureMarchDollase(*this),mCorrTextureEllipsoid(*this),mCorrTOF(*this),mExtractionMode(false),
+mCorrTextureMarchDollase(*this),mCorrTextureEllipsoid(*this),mCorrTOF(*this),mCorrCylAbs(*this),mExtractionMode(false),
 mpLeBailData(0),mFrozenLatticePar(6),mFreezeLatticePar(old.FreezeLatticePar()),mFrozenBMatrix(3,3)
 {
    this->AddSubRefObj(mCorrTextureMarchDollase);
@@ -798,6 +861,7 @@ void PowderPatternDiffraction::SetParentPowderPattern(PowderPattern &s)
    mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPatternPar());
    mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPatternXCorr());
    mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPatternRadiation());
+   mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPatternAbsCorr());
 }
 
 const CrystVector_REAL& PowderPatternDiffraction::GetPowderPatternCalc()const
@@ -1979,7 +2043,7 @@ void PowderPatternDiffraction::CalcIntensityCorr()const
    this->CalcSinThetaLambda();
    if((mClockIntensityCorr<mClockTheta)||(mClockIntensityCorr<this->GetClockNbReflBelowMaxSinThetaOvLambda())) needRecalc=true;
 
-   const CrystVector_REAL *mpCorr[5] = {0, 0, 0, 0, 0};
+   const CrystVector_REAL *mpCorr[6] = {0, 0, 0, 0, 0, 0};
 
    if(this->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
    {
@@ -1999,6 +2063,12 @@ void PowderPatternDiffraction::CalcIntensityCorr()const
 
       mpCorr[2]=&(mCorrSlitAperture.GetCorr());
       if(mClockIntensityCorr<mCorrSlitAperture.GetClockCorr()) needRecalc=true;
+
+      if(mpParentPowderPattern!=NULL)
+      {
+         mpCorr[5] = &(mCorrCylAbs.GetCorr());
+         if(mClockIntensityCorr<mCorrCylAbs.GetClockCorr()) needRecalc=true;
+      }
    }
 
    if(mCorrTextureMarchDollase.GetNbPhase()>0)
@@ -2008,8 +2078,7 @@ void PowderPatternDiffraction::CalcIntensityCorr()const
    }
    mpCorr[4]=&(mCorrTextureEllipsoid.GetCorr());
    if(mClockIntensityCorr<mCorrTextureEllipsoid.GetClockCorr()) needRecalc=true;
-
-
+   
    if(needRecalc==false) return;
 
    TAU_PROFILE("PowderPatternDiffraction::CalcIntensityCorr()","void ()",TAU_DEFAULT);
@@ -2046,6 +2115,13 @@ void PowderPatternDiffraction::CalcIntensityCorr()const
       p=mpCorr[4]->data();
       for(long i=mNbReflUsed;i>0;i--) *pCorr++ *= *p++;
    }
+   if(mpCorr[5] != NULL)
+      if(mpCorr[5]->numElements()>0)
+      {
+         pCorr=mIntensityCorr.data();
+         p=mpCorr[5]->data();
+         for(long i=mNbReflUsed;i>0;i--) *pCorr++ *= *p++;
+      }
    mClockIntensityCorr.Click();
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcIntensityCorr():finished",2)
 }
@@ -2400,7 +2476,7 @@ PowderPattern::PowderPattern():
 mIsXAscending(true),mNbPoint(0),
 mXZero(0.),m2ThetaDisplacement(0.),m2ThetaTransparency(0.),
 mDIFC(48277.14),mDIFA(-6.7),
-mScaleFactor(20),mUseFastLessPreciseFunc(false),
+mScaleFactor(20),mMuR(0), mUseFastLessPreciseFunc(false),
 mStatisticsExcludeBackground(false),mMaxSinThetaOvLambda(10),mNbPointUsed(0)
 {
    mScaleFactor=1;
@@ -2415,6 +2491,7 @@ mStatisticsExcludeBackground(false),mMaxSinThetaOvLambda(10),mNbPointUsed(0)
    mClockMaster.AddChild(mClockPowderPatternXCorr);
    mClockMaster.AddChild(mClockScaleFactor);
    mClockMaster.AddChild(mClockPowderPatternRadiation);
+   mClockMaster.AddChild(mClockCorrAbs);
 }
 
 PowderPattern::PowderPattern(const PowderPattern &old):
@@ -2424,7 +2501,7 @@ mXZero(old.mXZero),m2ThetaDisplacement(old.m2ThetaDisplacement),
 m2ThetaTransparency(old.m2ThetaTransparency),
 mDIFC(old.mDIFC),mDIFA(old.mDIFA),
 mPowderPatternComponentRegistry(old.mPowderPatternComponentRegistry),
-mScaleFactor(old.mScaleFactor),
+mScaleFactor(old.mScaleFactor),mMuR(old.mMuR),
 mUseFastLessPreciseFunc(old.mUseFastLessPreciseFunc),
 mStatisticsExcludeBackground(old.mStatisticsExcludeBackground),
 mMaxSinThetaOvLambda(old.mMaxSinThetaOvLambda),mNbPointUsed(old.mNbPointUsed)
@@ -2731,6 +2808,9 @@ const RefinableObjClock& PowderPattern::GetClockPowderPatternRadiation()const
 
 const RefinableObjClock& PowderPattern::GetClockPowderPatternXCorr()const
 {  return mClockPowderPatternXCorr;}
+
+const RefinableObjClock& PowderPattern::GetClockPowderPatternAbsCorr() const
+{ return mClockCorrAbs;}
 
 void PowderPattern::SetXZero(const REAL newZero)
 {
@@ -5828,6 +5908,10 @@ void PowderPattern::ExportFullprof(const std::string &prefix)const
    pcr.close();
 }
 
+void PowderPattern::SetMuR(const REAL muR) {mMuR=0.0f; mClockCorrAbs.Click();}
+
+REAL PowderPattern::GetMuR() const {return mMuR;}
+
 void PowderPattern::CalcPowderPattern() const
 {
    this->CalcNbPointUsed();
@@ -6431,8 +6515,15 @@ void PowderPattern::Init()
    }
    {
       RefinablePar tmp("DIFA",&mDIFA,-1e4,1e4,gpRefParTypeScattDataCorrPos,
-                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1.0);
+                       REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1.0);
       tmp.AssignClock(mClockPowderPatternXCorr);
+      tmp.SetDerivStep(1e-4);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("MuR",&mMuR,0,1000,gpRefParTypeScattDataCorrIntAbsorp,
+                       REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1.0);
+      tmp.AssignClock(mClockCorrAbs);
       tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }

@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		BF0BC98D1B225401009C5CCA /* libmysqlclient.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF0BC98B1B225401009C5CCA /* libmysqlclient.a */; };
 		BF11E7BA2440AA42009C104D /* GlobalOptimObj.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7B42440AA40009C104D /* GlobalOptimObj.h */; };
 		BF11E7BB2440AA42009C104D /* Simplex.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7B52440AA40009C104D /* Simplex.h */; };
 		BF11E7BC2440AA42009C104D /* RefinableObj.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7B62440AA41009C104D /* RefinableObj.h */; };
@@ -267,7 +266,6 @@
 /* Begin PBXFileReference section */
 		BF08978A0B072DF600C0F576 /* CIF.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = CIF.cpp; path = ../ObjCryst/ObjCryst/CIF.cpp; sourceTree = "<group>"; };
 		BF08978D0B072E2F00C0F576 /* ci_string.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ci_string.cpp; path = ../ObjCryst/Quirks/ci_string.cpp; sourceTree = "<group>"; };
-		BF0BC98B1B225401009C5CCA /* libmysqlclient.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libmysqlclient.a; path = "../static-libs/lib/libmysqlclient.a"; sourceTree = "<group>"; };
 		BF11E7B42440AA40009C104D /* GlobalOptimObj.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GlobalOptimObj.h; path = ../ObjCryst/RefinableObj/GlobalOptimObj.h; sourceTree = "<group>"; };
 		BF11E7B52440AA40009C104D /* Simplex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Simplex.h; path = ../ObjCryst/RefinableObj/Simplex.h; sourceTree = "<group>"; };
 		BF11E7B62440AA41009C104D /* RefinableObj.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RefinableObj.h; path = ../ObjCryst/RefinableObj/RefinableObj.h; sourceTree = "<group>"; };
@@ -1950,7 +1948,6 @@
 				BFE729E6243A6A7300BABE40 /* libwxjpeg-3.1.a in Frameworks */,
 				BF1DE1150D228E6100A3939D /* System.framework in Frameworks */,
 				BF1DE1160D228E6100A3939D /* IOKit.framework in Frameworks */,
-				BF0BC98D1B225401009C5CCA /* libmysqlclient.a in Frameworks */,
 				BFE729E7243A6A7600BABE40 /* libwxpng-3.1.a in Frameworks */,
 				BF1DE1170D228E6100A3939D /* OpenGL.framework in Frameworks */,
 				BF1DE1180D228E6100A3939D /* AppKit.framework in Frameworks */,
@@ -2276,7 +2273,6 @@
 				BFF7D0C21478047800799F7A /* libwxpng-3.1.a */,
 				BFF7D0C31478047800799F7A /* libwxregexu-3.1.a */,
 				BF1DE1230D228EA500A3939D /* libfftw3f.a */,
-				BF0BC98B1B225401009C5CCA /* libmysqlclient.a */,
 				BF36112F0BD6E409000C0EE9 /* WebKit.framework */,
 				BF36112B0BD6E3F5000C0EE9 /* GLUT.framework */,
 				BF3611280BD6E3CA000C0EE9 /* AppKit.framework */,
@@ -4845,7 +4841,6 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../static-libs/lib",
-					"/Users/vincent/dev/Fox/static-libs/lib",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				OTHER_CFLAGS = (
@@ -5021,7 +5016,6 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../static-libs/lib",
-					"/Users/vincent/dev/Fox/static-libs/lib",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				OTHER_CFLAGS = (

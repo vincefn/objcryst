@@ -9,7 +9,8 @@ project.xcworkspace
 *.app
 build
 *.log
-/cctbx
+/cctbx/cctbx
+/cctbx/include
 /newmat
 /freeglut*
 /fftw*
@@ -31,3 +32,4 @@ JOB*.xml*
 *.dmg
 Fox/wikihtml
 *.pov
+boost_1_68_0

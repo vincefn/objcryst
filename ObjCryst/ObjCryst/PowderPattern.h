@@ -36,6 +36,30 @@ namespace ObjCryst
 {
 class PeakList;
 class PowderPattern;
+class PowderPatternDiffraction;
+
+//######################################################################
+/** \brief Cylinder absorption correction
+ *
+ * Correction formulas from Lobanov & Alte da Veiga,
+ * Code re-implemented from GSAS-II (courtesy of B. von Dreele), original version:
+ * https://subversion.xray.aps.anl.gov/trac/pyGSAS/browser/trunk/GSASIIpwd.py
+ *
+ */
+class CylinderAbsCorr:public ScatteringCorr
+{
+public:
+   /** Constructor
+    * \param powp: the PowderPattern object which has the muR parameter
+    */
+   CylinderAbsCorr(const PowderPatternDiffraction &data);
+   virtual ~CylinderAbsCorr();
+   virtual const string & GetName() const;
+   virtual const string & GetClassName() const;
+protected:
+   virtual void CalcCorr() const;
+   const PowderPatternDiffraction *mpPowderPatternDiff;
+};
 
 //######################################################################
 /** \brief Generic class to compute components (eg the contribution of
@@ -471,6 +495,8 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
          TextureEllipsoid mCorrTextureEllipsoid;
          /// Time-Of-Flight intensity correction
          TOFCorr mCorrTOF;
+         /// Cylinder absorption correction
+         CylinderAbsCorr mCorrCylAbs;
 
       /// Computed intensities for all reflections
          mutable CrystVector_REAL mIhklCalc;
@@ -529,7 +555,6 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       // Avoid compiler warnings.  Explicitly hide the base-class method.
       void GenHKLFullSpace(const REAL, const bool);
 };
-
 
 //######################################################################
 /** \brief Powder pattern class, with an observed pattern and several
@@ -696,6 +721,8 @@ class PowderPattern : public RefinableObj
          /// When were the parameters for 2theta/TOF correction (zero, transparency,
          /// displacement) last changed ?
          const RefinableObjClock& GetClockPowderPatternXCorr()const;
+         /// When were the absorption correction parameters (muR) last changed ?
+         const RefinableObjClock& GetClockPowderPatternAbsCorr() const;
 
       // Corrections to the x (2theta, tof) coordinate
          ///Change Zero in x (2theta,tof)
@@ -937,6 +964,10 @@ class PowderPattern : public RefinableObj
       * \note: in development. Only supports constant wavelength neutron & X-ray patterns.
       */
       void ExportFullprof(const std::string &prefix)const;
+      /// Set the $\mu R$ value for cylinder absorption correction
+      void SetMuR(const REAL muR);
+      /// Get the $\mu R$ value
+      REAL GetMuR() const;
    protected:
       /// Calc the powder pattern
       void CalcPowderPattern() const;
@@ -1018,6 +1049,8 @@ class PowderPattern : public RefinableObj
          RefinableObjClock mClockPowderPatternXCorr;
          /// Last modification of the scale factor
          mutable RefinableObjClock mClockScaleFactor;
+         /// Last modification of absorption correction parameters
+         mutable RefinableObjClock mClockCorrAbs;
 
       //Excluded regions in the powder pattern, for statistics.
          /// Min coordinate for for all excluded regions
@@ -1048,6 +1081,9 @@ class PowderPattern : public RefinableObj
          /// This is mutable because generally we use the 'best' scale factor, but
          /// it should not be...
          mutable CrystVector_REAL mScaleFactor;
+   
+      /// Mu*R parameter for cylinder absorption correction
+      REAL mMuR;
 
       /// Use faster, less precise functions ?
       bool mUseFastLessPreciseFunc;

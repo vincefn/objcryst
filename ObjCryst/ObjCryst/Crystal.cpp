@@ -732,7 +732,6 @@ void Crystal::GLInitDisplayList(const bool onlyIndependentAtoms,
                                                    displayEnantiomer,displayNames,hideHydrogens,fadeDistance,fullMoleculeInLimits);
          }
       glPopMatrix();
-   cout << "Crystal::GLView(): Compiled without OpenGL support !" <<endl;
    VFN_DEBUG_EXIT("Crystal::GLInitDisplayList(bool)",5)
 }
 #endif  // OBJCRYST_GL

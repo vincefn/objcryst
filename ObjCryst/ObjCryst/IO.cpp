@@ -123,7 +123,7 @@ void XMLCrystFileSaveGlobal(ostream &out)
    char strDate[40];
    strftime(strDate,sizeof(strDate),"%Y-%m-%dT%H:%M:%S%Z",gmtime(&date));//%Y-%m-%dT%H:%M:%S%Z
    tag.AddAttribute("Date",strDate);
-   tag.AddAttribute("Revision","2017002");
+   tag.AddAttribute("Revision","2021001");
    out<<tag<<endl;
 
    for(int i=0;i<gCrystalRegistry.GetNb();i++)
@@ -2001,6 +2001,11 @@ void PowderPattern::XMLOutput(ostream &os,int indent)const
       this->GetPar(&m2ThetaTransparency).XMLOutput(os,"2ThetaTransparency",indent);
       os <<endl;
    }
+   if(mMuR>0)
+   {
+      this->GetPar(&mMuR).XMLOutput(os,"MuR",indent);
+      os <<endl;
+   }
 
    for(unsigned int i=0;i<this->GetNbOption();i++)
    {
@@ -2132,6 +2137,11 @@ void PowderPattern::XMLInput(istream &is,const XMLCrystTag &tagg)
                if("TOF-DIFA"==tag.GetAttributeValue(i))
                {
                   this->GetPar(&mDIFA).XMLInput(is,tag);
+                  break;
+               }
+               if("MuR"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar(&mMuR).XMLInput(is,tag);
                   break;
                }
             }
