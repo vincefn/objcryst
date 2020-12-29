@@ -3371,8 +3371,7 @@ void WXGLCrystalCanvas::OnEraseBackground(wxEraseEvent& event)
 
 void WXGLCrystalCanvas::OnKeyDown(wxKeyEvent& event)
 {
-   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnKeyDown()",2)
-   cout<<"WXGLCrystalCanvas::OnKeyDown(): KeyCode: "<<event.GetKeyCode()<<endl;
+   VFN_DEBUG_MESSAGE("WXGLCrystalCanvas::OnKeyDown():"<<event.GetKeyCode(),2)
    switch(event.GetKeyCode())
    {
       case(45):// +
