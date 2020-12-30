@@ -316,6 +316,7 @@ void WXDiffractionSingleCrystal::OnMenuSimulate(wxCommandEvent & WXUNUSED(event)
    {
       wxTextEntryDialog dialog(this,_T("Theta Max"),
                               _T("Enter maximum Theta (degrees)"),_T("50"),wxOK | wxCANCEL);
+      dialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
       if(wxID_OK!=dialog.ShowModal())
       {
          VFN_DEBUG_EXIT("WXDiffractionSingleCrystal::OnMenuSimulate():Cancelled",6)
@@ -346,6 +347,7 @@ void WXDiffractionSingleCrystal::OnMenuImport(wxCommandEvent & event)
          wxTextEntryDialog dialog(this,_T("Number of reflections"),
                                  _T("Enter The number of reflections to import"),_T("50"),
                                  wxOK | wxCANCEL);
+         dialog.SetTextValidator(wxTextValidator(wxFILTER_DIGITS));
          if(wxID_OK!=dialog.ShowModal())
          {
             VFN_DEBUG_EXIT("WXDiffractionSingleCrystal))OnMenuImport())Cancelled",6)
@@ -367,6 +369,7 @@ void WXDiffractionSingleCrystal::OnMenuImport(wxCommandEvent & event)
          wxTextEntryDialog dialog(this,_T("Number of reflections"),
                                  _T("Enter The number of reflections to import"),_T("50"),
                                  wxOK | wxCANCEL);
+         dialog.SetTextValidator(wxTextValidator(wxFILTER_DIGITS));
          if(wxID_OK!=dialog.ShowModal())
          {
             VFN_DEBUG_EXIT("WXDiffractionSingleCrystal))OnMenuImport())Cancelled",6)
@@ -449,6 +452,7 @@ void WXDiffractionSingleCrystal::OnMenuSetWavelength(wxCommandEvent &event)
       double lambda;
       wxTextEntryDialog dialog(this,_T("new Wavelength)"),
                               _T("Enter new Wavelength (Angstroems)"),_T("1"),wxOK | wxCANCEL);
+      dialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
       if(wxID_OK!=dialog.ShowModal())
       {
          VFN_DEBUG_EXIT("WXDiffractionSingleCrystal))OnMenuSetWavelength())Monochromatic)Cancelled",6)

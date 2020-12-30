@@ -99,6 +99,7 @@ void WXScatteringPowerSphere::OnChangeColour(wxCommandEvent & event)
       str<<r;
       wxTextEntryDialog dialog(this,_T("Red"),
                               _T("Enter Red component (0.<r<1.)"),str,wxOK | wxCANCEL);
+      dialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
       if(wxID_OK!=dialog.ShowModal())
       {
          VFN_DEBUG_EXIT("WXScatteringPowerSphere::OnChangeColour():Cancelled",6)
@@ -112,6 +113,7 @@ void WXScatteringPowerSphere::OnChangeColour(wxCommandEvent & event)
       str<<g;
       wxTextEntryDialog dialog(this,_T("Green"),
                               _T("Enter Green component (0.<g<1.)"),str,wxOK | wxCANCEL);
+      dialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
       if(wxID_OK!=dialog.ShowModal())
       {
          VFN_DEBUG_EXIT("WXScatteringPowerSphere::OnChangeColour():Cancelled",6)
@@ -125,6 +127,7 @@ void WXScatteringPowerSphere::OnChangeColour(wxCommandEvent & event)
       str<<b;
       wxTextEntryDialog dialog(this,_T("Blue"),
                               _T("Enter Blue component (0.<b<1.)"),str,wxOK | wxCANCEL);
+      dialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
       if(wxID_OK!=dialog.ShowModal())
       {
          VFN_DEBUG_EXIT("WXScatteringPowerSphere::OnChangeColour():Cancelled",6)

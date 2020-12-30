@@ -178,6 +178,7 @@ void WXFieldRefPar::OnPopupMenuChoice(wxCommandEvent& event)
          str << mpRefPar->GetHumanMin();
          wxTextEntryDialog limitDialog(this,_T("Enter the minimum value"),
                                  _T("Minimum"),str,wxOK | wxCANCEL);
+         limitDialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
          if(wxID_OK!=limitDialog.ShowModal())
          {
             VFN_DEBUG_EXIT("WXFieldRefPar::OnPopupMenuChoice():Cancelled",6)
@@ -190,6 +191,7 @@ void WXFieldRefPar::OnPopupMenuChoice(wxCommandEvent& event)
          str << mpRefPar->GetHumanMax();
          wxTextEntryDialog limitDialog(this,_T("Enter the maximum value"),
                                  _T("Maximum"),str,wxOK | wxCANCEL);
+         limitDialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
          if(wxID_OK!=limitDialog.ShowModal())
          {
             VFN_DEBUG_EXIT("WXFieldRefPar::OnPopupMenuChoice():Cancelled",6)

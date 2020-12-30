@@ -1807,13 +1807,12 @@ wxDialog(parent,-1,_T("About Fox"),wxDefaultPosition,wxDefaultSize,wxCAPTION|wxS
    wxBoxSizer *sizer=new wxBoxSizer(wxVERTICAL);
    string msg(string("F.O.X. - Free Objects for Xtallography\n")
               +"Version "+ foxVersion +" \n\n"
-              +"(c) 2000-     Vincent FAVRE-NICOLIN, vincent.favre-nicolin@univ-grenoble-alpes.fr\n"
-              +"                                   , Univ. Grenoble Alpes & ESRF\n"
+              +"(c) 2000-     Vincent FAVRE-NICOLIN, favre@esrf.fr,\n"
+              +"                     ESRF and Univ. Grenoble Alpes\n"
               +"    2000-2001 Radovan CERNY, University of Geneva\n"
               +"    2009-     Jan Rohlicek, Michal Husak (Inst. Chem. Tech, Prague)\n\n"
               +"http://fox.vincefn.net\n"
-              +"https://github.com/vincefn/objcryst\n"
-              +"http://objcryst.sourceforge.net\n\n"
+              +"https://github.com/vincefn/objcryst\n\n"
               +"FOX comes with ABSOLUTELY NO WARRANTY. It is free software, and you are\n"
               +"welcome to redistribute it under certain conditions. \n"
               +"See the LICENSE file for details.\n\n");

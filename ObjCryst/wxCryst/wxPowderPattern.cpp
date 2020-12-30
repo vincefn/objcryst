@@ -642,6 +642,7 @@ void WXPowderPattern::OnMenuAddCompBackgdBayesian(wxCommandEvent & WXUNUSED(even
    s.Printf(_T("%ld"),nbPointSpline);
    wxTextEntryDialog dialog(this,mes,_T("Automatic Bayesian (David-Sivia) Background"),
                             s,wxOK | wxCANCEL);
+   dialog.SetTextValidator(wxTextValidator(wxFILTER_DIGITS));
    if(wxID_OK!=dialog.ShowModal())
    {
       VFN_DEBUG_EXIT("WXPowderPattern::OnMenuAddCompBackgdBayesian():Canceled",6)
@@ -790,6 +791,7 @@ void WXPowderPattern::OnMenuSimulate(wxCommandEvent & WXUNUSED(event))
    {
       wxTextEntryDialog dialog(this,_T("2Theta Min"),
                               _T("Enter minimum 2Theta (degrees)"),_T("5"),wxOK | wxCANCEL);
+      dialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
       if(wxID_OK!=dialog.ShowModal())
       {
          VFN_DEBUG_EXIT("WXPowderPattern::OnMenuSimulate():Cancelled",6)
@@ -801,6 +803,7 @@ void WXPowderPattern::OnMenuSimulate(wxCommandEvent & WXUNUSED(event))
    {
       wxTextEntryDialog dialog(this,_T("2Theta Max"),
                               _T("Enter maximum 2Theta (degrees)"),_T("100"),wxOK | wxCANCEL);
+      dialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
       if(wxID_OK!=dialog.ShowModal())
       {
          VFN_DEBUG_EXIT("WXPowderPattern::OnMenuSimulate():Cancelled",6)
@@ -811,6 +814,7 @@ void WXPowderPattern::OnMenuSimulate(wxCommandEvent & WXUNUSED(event))
    {
       wxTextEntryDialog dialog(this,_T("Number of points"),
                               _T("Enter the number of points"),_T("1000"),wxOK | wxCANCEL);
+      dialog.SetTextValidator(wxTextValidator(wxFILTER_DIGITS));
       if(wxID_OK!=dialog.ShowModal())
       {
          VFN_DEBUG_EXIT("WXPowderPattern::OnMenuSimulate():Cancelled",6)
@@ -917,6 +921,7 @@ void WXPowderPattern::OnMenuSetWavelength(wxCommandEvent & event)
       double lambda;
       wxTextEntryDialog dialog(this,_T("new Wavelength)"),
                               _T("Enter new Wavelength (Angstroems)"),_T("1"),wxOK | wxCANCEL);
+      dialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
       if(wxID_OK!=dialog.ShowModal())
       {
          VFN_DEBUG_EXIT("WXPowderPattern))OnMenuSetWavelength())Monochromatic)Cancelled",6)
@@ -962,6 +967,7 @@ void WXPowderPattern::OnMenuAddExclude(wxCommandEvent & WXUNUSED(event))
       if(mpPowderPattern->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
          txt=_T("Enter Min 2theta to exclude (microseconds):");
       wxTextEntryDialog dialog(this,_T("Min"),txt,_T("0"),wxOK | wxCANCEL);
+      dialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
       if(wxID_OK!=dialog.ShowModal())
       {
          VFN_DEBUG_EXIT("WXPowderPattern::OnMenuAddExclude():Cancelled",6)
@@ -975,6 +981,7 @@ void WXPowderPattern::OnMenuAddExclude(wxCommandEvent & WXUNUSED(event))
       if(mpPowderPattern->GetRadiation().GetWavelengthType()==WAVELENGTH_TOF)
          txt=_T("Enter Max 2theta to exclude (microseconds):");
       wxTextEntryDialog dialog(this,_T("Max"),txt,_T("5"),wxOK | wxCANCEL);
+      dialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
       if(wxID_OK!=dialog.ShowModal())
       {
          VFN_DEBUG_EXIT("WXPowderPattern::OnMenuAddExclude():Cancelled",6)
@@ -3618,6 +3625,7 @@ void WXPowderPatternBackground::OnMenuAutomaticBayesianBackground(wxCommandEvent
    s.Printf(_T("%ld"),nbPointSpline);
    wxTextEntryDialog dialog(this,mes,_T("Automatic Bayesian (David-Sivia) Background"),
                             s,wxOK | wxCANCEL);
+   dialog.SetTextValidator(wxTextValidator(wxFILTER_DIGITS));
    if(wxID_OK!=dialog.ShowModal())
    {
       VFN_DEBUG_EXIT("WXPowderPatternBackground::OnMenuAutomaticBayesianBackground():Canceled",6)

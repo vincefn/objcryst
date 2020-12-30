@@ -633,6 +633,7 @@ void WXFoxServer::RunLocalClient(wxCommandEvent& event)
 
    message.Printf(_T("Would you also like to run client on this computer?\nSet the number of CPUs available for client or cancel this operation.\n%d CPUs have been detected.") , nCPU);
    wxTextEntryDialog dlg(m_parent, message, _T("Set a number of available CPUs"), nbCPUs, wxCANCEL | wxOK );
+   dlg.SetTextValidator(wxTextValidator(wxFILTER_DIGITS));
    if(wxID_OK==dlg.ShowModal()){
        nbCPUs = dlg.GetValue();
 	   //wxString appname = wxApp::GetInstance()->argv[0];

@@ -4814,26 +4814,32 @@ END_EVENT_TABLE()
   // 1st row
   inputSizer->Add(new wxStaticText(this, -1, _T("a")), 0, wxALIGN_CENTRE_VERTICAL);
   inputSizer->Add(mpXminCtrl = new wxTextCtrl(this, -1,
-					      wxString::Format(_T("%f"),bbox.xMin)),
+                                              wxString::Format(_T("%f"),bbox.xMin), wxDefaultPosition,
+                                              wxDefaultSize, 0, wxTextValidator(wxFILTER_NUMERIC)),
 					      0, wxALIGN_CENTRE_VERTICAL);
   inputSizer->Add(mpXmaxCtrl = new wxTextCtrl(this, -1,
-					      wxString::Format(_T("%f"),bbox.xMax)),
+                                              wxString::Format(_T("%f"),bbox.xMax), wxDefaultPosition,
+                                              wxDefaultSize, 0, wxTextValidator(wxFILTER_NUMERIC)),
 					      0, wxALIGN_CENTRE_VERTICAL);
   // 2nd row
   inputSizer->Add(new wxStaticText(this, -1, _T("b")), 0, wxALIGN_CENTRE_VERTICAL);
   inputSizer->Add(mpYminCtrl = new wxTextCtrl(this, -1,
-					      wxString::Format(_T("%f"),bbox.yMin)),
+                                              wxString::Format(_T("%f"),bbox.yMin), wxDefaultPosition,
+                                              wxDefaultSize, 0, wxTextValidator(wxFILTER_NUMERIC)),
 					      0, wxALIGN_CENTRE_VERTICAL);
   inputSizer->Add(mpYmaxCtrl = new wxTextCtrl(this, -1,
-					      wxString::Format(_T("%f"),bbox.yMax)),
+                                              wxString::Format(_T("%f"),bbox.yMax), wxDefaultPosition,
+                                              wxDefaultSize, 0, wxTextValidator(wxFILTER_NUMERIC)),
 					      0, wxALIGN_CENTRE_VERTICAL);
   // 3rd row
   inputSizer->Add(new wxStaticText(this, -1, _T("c")), 0, wxALIGN_CENTRE_VERTICAL);
   inputSizer->Add(mpZminCtrl = new wxTextCtrl(this, -1,
-					      wxString::Format(_T("%f"),bbox.zMin)),
+                                              wxString::Format(_T("%f"),bbox.zMin), wxDefaultPosition,
+                                              wxDefaultSize, 0, wxTextValidator(wxFILTER_NUMERIC)),
 					      0, wxALIGN_CENTRE_VERTICAL);
   inputSizer->Add(mpZmaxCtrl = new wxTextCtrl(this, -1,
-					      wxString::Format(_T("%f"),bbox.zMax)),
+                                              wxString::Format(_T("%f"),bbox.zMax), wxDefaultPosition,
+                                              wxDefaultSize, 0, wxTextValidator(wxFILTER_NUMERIC)),
 					      0, wxALIGN_CENTRE_VERTICAL);
   // button section
   wxFlexGridSizer *buttonSizer = new wxFlexGridSizer(1, 2, 10, 10);
@@ -4929,17 +4935,20 @@ END_EVENT_TABLE()
   // 1st row
   inputSizer->Add(new wxStaticText(this, -1, _T("x")), 0, wxALIGN_CENTRE_VERTICAL);
   inputSizer->Add(mpXCtrl = new wxTextCtrl(this, -1,
-					   wxString::Format(_T("%.3f"),xyz.x), wxDefaultPosition, wxDefaultSize, wxTE_CENTRE, wxTextValidator(wxFILTER_NUMERIC)),
+                                           wxString::Format(_T("%.3f"),xyz.x), wxDefaultPosition, wxDefaultSize,
+                                           wxTE_CENTRE, wxTextValidator(wxFILTER_NUMERIC)),
 					   0, wxALIGN_CENTRE_VERTICAL);
   // 2nd row
   inputSizer->Add(new wxStaticText(this, -1, _T("y")), 0, wxALIGN_CENTRE_VERTICAL);
   inputSizer->Add(mpYCtrl = new wxTextCtrl(this, -1,
-					   wxString::Format(_T("%.3f"),xyz.y), wxDefaultPosition, wxDefaultSize, wxTE_CENTRE, wxTextValidator(wxFILTER_NUMERIC)),
+                                           wxString::Format(_T("%.3f"),xyz.y), wxDefaultPosition, wxDefaultSize,
+                                           wxTE_CENTRE, wxTextValidator(wxFILTER_NUMERIC)),
 					   0, wxALIGN_CENTRE_VERTICAL);
   // 3rd row
   inputSizer->Add(new wxStaticText(this, -1, _T("z")), 0, wxALIGN_CENTRE_VERTICAL);
   inputSizer->Add(mpZCtrl = new wxTextCtrl(this, -1,
-					   wxString::Format(_T("%.3f"),xyz.z), wxDefaultPosition, wxDefaultSize, wxTE_CENTRE, wxTextValidator(wxFILTER_NUMERIC)),
+					   wxString::Format(_T("%.3f"),xyz.z), wxDefaultPosition, wxDefaultSize,
+                                           wxTE_CENTRE, wxTextValidator(wxFILTER_NUMERIC)),
 					   0, wxALIGN_CENTRE_VERTICAL);
   // button section
   wxFlexGridSizer *buttonSizer = new wxFlexGridSizer(1, 2, 10, 10);

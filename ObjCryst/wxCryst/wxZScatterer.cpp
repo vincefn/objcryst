@@ -420,6 +420,7 @@ void WXZScatterer::OnMenuAddZAtom(wxCommandEvent & WXUNUSED(event))
       //Bond length
       wxTextEntryDialog bondLengthDialog(this,_T("Enter bond length (Angstroems)"),
                               _T("Bond length"),_T("1.5"),wxOK | wxCANCEL);
+      bondLengthDialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
       if(wxID_OK!=bondLengthDialog.ShowModal())
       {
          VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom():Cancelled",6)
@@ -440,6 +441,7 @@ void WXZScatterer::OnMenuAddZAtom(wxCommandEvent & WXUNUSED(event))
       //angle
       wxTextEntryDialog angleDialog(this,_T("Enter bond angle (degrees)"),
                               _T("Bond Angle"),_T("110"),wxOK | wxCANCEL);
+      angleDialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
       if(wxID_OK!=angleDialog.ShowModal())
       {
          VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom():Cancelled",6)
@@ -460,6 +462,7 @@ void WXZScatterer::OnMenuAddZAtom(wxCommandEvent & WXUNUSED(event))
    //dihedral angle
       wxTextEntryDialog dihedDialog(this,_T("Enter dihedral angle (degrees)"),
                               _T("Dihedral Angle"),_T("0"),wxOK | wxCANCEL);
+      dihedDialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
       if(wxID_OK!=dihedDialog.ShowModal())
       {
          VFN_DEBUG_EXIT("WXZScatterer::OnMenuAddZAtom():Cancelled",6)
@@ -505,6 +508,7 @@ void WXZScatterer::OnMenuSetLimits(wxCommandEvent & event)
       double limit=.1;
       wxTextEntryDialog limitDialog(this,_T("Enter maximum shift in Angstroems\n The limits are taken symmetrically around current position:\n X0-l < X < X0+l "),
                               _T("Set limits (relative) for bondlengths"),_T(".1"),wxOK | wxCANCEL);
+      limitDialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
       if(wxID_OK!=limitDialog.ShowModal())
       {
          VFN_DEBUG_EXIT("WXZScatterer::OnMenuSetLimits():Cancelled",6)
@@ -525,6 +529,7 @@ void WXZScatterer::OnMenuSetLimits(wxCommandEvent & event)
       double limit=5;
       wxTextEntryDialog limitDialog(this,_T("Enter maximum shift in Degrees\n The limits are taken symmetrically around current position:\n X0-l < X < X0+l "),
                               _T("Set limits (relative) for bond angles"),_T(".1"),wxOK | wxCANCEL);
+      limitDialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
       if(wxID_OK!=limitDialog.ShowModal())
       {
          VFN_DEBUG_EXIT("WXZScatterer::OnMenuSetLimits():Cancelled",6)
@@ -546,6 +551,7 @@ void WXZScatterer::OnMenuSetLimits(wxCommandEvent & event)
       double limit=5;
       wxTextEntryDialog limitDialog(this,_T("Enter maximum shift in Degrees\n The limits are taken symmetrically around current position:\n X0-l < X < X0+l "),
                               _T("Set limits (relative) for dihedral angles"),_T(".1"),wxOK | wxCANCEL);
+      limitDialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
       if(wxID_OK!=limitDialog.ShowModal())
       {
          VFN_DEBUG_EXIT("WXZScatterer::OnMenuSetLimits():Cancelled",6)

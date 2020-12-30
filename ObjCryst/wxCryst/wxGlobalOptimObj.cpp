@@ -535,6 +535,7 @@ void WXMonteCarloObj::OnRunOptimization(wxCommandEvent & event)
       mpMonteCarloObj->NbTrialPerRun() = - mpMonteCarloObj->NbTrialPerRun();
       wxTextEntryDialog costDialog(this,_T("Enter desired cost for the optimization to stop"),
                               _T("Goal Cost"),_T(".20"),wxOK | wxCANCEL);
+      costDialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
       if(wxID_OK==costDialog.ShowModal()) costDialog.GetValue().ToDouble(&finalCost);
    }
    if(0!=mpGlobalOptimRunThread)

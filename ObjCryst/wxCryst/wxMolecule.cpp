@@ -1055,6 +1055,7 @@ void WXMolecule::OnMenuAddBond(wxCommandEvent & WXUNUSED(event))
    string mes="Enter bond distance (Angstroems) for "+at1->GetName()+"-"+at2->GetName();
    wxTextEntryDialog dialog(this,wxString::FromAscii(mes.c_str()),
                            _T("Bond distance"),s,wxOK | wxCANCEL);
+   dialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
    if(wxID_OK!=dialog.ShowModal())
    {
       VFN_DEBUG_EXIT("WXMolecule::OnMenuAddBond():Canceled",6)
@@ -1099,6 +1100,7 @@ void WXMolecule::OnMenuAddAngle(wxCommandEvent & WXUNUSED(event))
                                            +"-"+at3->GetName();
    wxTextEntryDialog dialog(this,wxString::FromAscii(mes.c_str()),
                            _T("Bond angle"),s,wxOK | wxCANCEL);
+   dialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
    if(wxID_OK!=dialog.ShowModal())
    {
       VFN_DEBUG_EXIT("WXMolecule::OnMenuAddAngle():Canceled",6)
@@ -1148,6 +1150,7 @@ void WXMolecule::OnMenuAddDihedralAngle(wxCommandEvent & WXUNUSED(event))
                                                +"-"+at4->GetName();
    wxTextEntryDialog dialog(this,_T("Enter dihedral angle (degrees)"),
                            _T("Bond angle"),s,wxOK | wxCANCEL);
+   dialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
    if(wxID_OK!=dialog.ShowModal())
    {
       VFN_DEBUG_EXIT("WXMolecule::OnMenuAddDihedralAngle():Canceled",6)
@@ -2051,7 +2054,8 @@ class WXMoleculeRotation:public wxWindow
 
          wxBoxSizer* pSizer3=new wxBoxSizer(wxVERTICAL);
          pSizer3->Add(new wxStaticText(this,-1,_T("Amplitude:")),0,wxALIGN_CENTER);
-         mpAngle=new wxTextCtrl(this,-1,_T("10"));
+         mpAngle=new wxTextCtrl(this,-1,_T("10"), wxDefaultPosition,
+                                wxDefaultSize, 0, wxTextValidator(wxFILTER_NUMERIC));
          pSizer3->Add(mpAngle,0,wxALIGN_CENTER);
          pSizer->Add(pSizer3,0,wxALIGN_CENTER);
 
@@ -2185,7 +2189,8 @@ class WXMoleculeRotationDihed:public wxWindow
 
          wxBoxSizer* pSizer3=new wxBoxSizer(wxVERTICAL);
          pSizer3->Add(new wxStaticText(this,-1,_T("Angle:")),0,wxALIGN_CENTER);
-         mpAngle=new wxTextCtrl(this,-1,_T("10"));
+         mpAngle=new wxTextCtrl(this,-1,_T("10"), wxDefaultPosition,
+                                wxDefaultSize, 0, wxTextValidator(wxFILTER_NUMERIC));
          pSizer3->Add(mpAngle,0,wxALIGN_CENTER);
          pSizer->Add(pSizer3,0,wxALIGN_CENTER);
 
@@ -2854,6 +2859,7 @@ void WXMolecule::OnMenuSetDeltaSigma(wxCommandEvent &event)
                   _T("Fox has been optimized with the default values...")
                  );
       wxTextEntryDialog dialog(this,info,title,s,wxOK|wxCANCEL);
+      dialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
       if(wxID_OK!=dialog.ShowModal())
       {
          VFN_DEBUG_EXIT("WXMolecule::OnMenuSetDeltaSigma():Canceled",6)
@@ -2875,6 +2881,7 @@ void WXMolecule::OnMenuSetDeltaSigma(wxCommandEvent &event)
                   _T("Fox has been optimized with the default values...")
                  );
       wxTextEntryDialog dialog(this,info,title.c_str(),s,wxOK|wxCANCEL);
+      dialog.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
       if(wxID_OK!=dialog.ShowModal())
       {
          VFN_DEBUG_EXIT("WXMolecule::OnMenuSetDeltaSigma():Canceled",6)
