@@ -284,6 +284,7 @@ REAL& OptimizationObj::GetBestCost(){return mBestCost;}
 
 void OptimizationObj::BeginOptimization(const bool allowApproximations, const bool enableRestraints)
 {
+   mvContextObjStats.clear();
    for(int i=0;i<mRefinedObjList.GetNb();i++)
    {
       mRefinedObjList.GetObj(i).BeginOptimization(allowApproximations,enableRestraints);
