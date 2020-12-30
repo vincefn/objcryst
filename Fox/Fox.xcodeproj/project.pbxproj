@@ -4856,6 +4856,7 @@
 					"-D__WXOSX__",
 					"-D__WXOSX_COCOA__",
 					"-D__FOX_COD__",
+					"-DwxDEBUG_LEVEL=0",
 				);
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -5031,6 +5032,7 @@
 					"-D__WXOSX__",
 					"-D__WXOSX_COCOA__",
 					"-D__FOX_COD__",
+					"-DwxDEBUG_LEVEL=0",
 				);
 				OTHER_LDFLAGS = (
 					"-framework",
