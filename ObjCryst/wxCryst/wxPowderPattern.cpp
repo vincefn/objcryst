@@ -2096,7 +2096,7 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
 
       pQuick->SetSizer(pSizerQuick);
       pSizerQuick->Fit(pQuick);
-      pSizerQuick->RecalcSizes();
+      //pSizerQuick->RecalcSizes();
       pQuick->Layout();
    // Advanced interface
       wxWindow *pAdvanced=new wxWindow(pNotebook,-1);
@@ -2218,7 +2218,7 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
       #endif
       pAdvanced->SetSizer(pSizerAdvanced);
       pSizerAdvanced->Fit(pAdvanced);
-      pSizerAdvanced->RecalcSizes();
+      //pSizerAdvanced->RecalcSizes();
       pAdvanced->Layout();
 
       pNotebook->AddPage(pAdvanced,_T("Advanced"));
