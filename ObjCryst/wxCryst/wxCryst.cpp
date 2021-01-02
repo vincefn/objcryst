@@ -29,6 +29,7 @@
 #endif
 
 #include "ObjCryst/wxCryst/wxCryst.h"
+#include "ObjCryst/ObjCryst/Undo.h"
 
 //#include "ObjCryst/Quirks/VFNStreamFormat.h"
 #include "ObjCryst/Quirks/VFNDebug.h"
@@ -256,6 +257,8 @@ WXField *spLastWXFieldInputNotValidated=0;
 
 void WXCrystValidateAllUserInput()
 {
+   // Hijack this function to record changes in the configuration
+   gConfigHistory.Store();
    if(0==spLastWXFieldInputNotValidated) return;
    VFN_DEBUG_ENTRY("WXCrystValidateAllUserInput()...",6)
    static WXField *pField;

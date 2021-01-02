@@ -1203,6 +1203,7 @@ void WXMolecule::OnMenuAddNonFlipAtom(wxCommandEvent & WXUNUSED(event))
 void WXMolecule::OnMenuRemoveAtom(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXMolecule::OnMenuRemoveAtom()",6)
+   WXCrystValidateAllUserInput();
    vector<MolAtom*> v=mpMolecule->GetAtomList();
    list<MolAtom*> vAt=WXDialogChooseMultipleFromVector(v,(wxWindow*)this,
                                                        "Choose the Atom(s) to be removed");
@@ -1215,6 +1216,7 @@ void WXMolecule::OnMenuRemoveAtom(wxCommandEvent & WXUNUSED(event))
 void WXMolecule::OnMenuRemoveBond(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXMolecule::OnMenuRemoveBond()",6)
+   WXCrystValidateAllUserInput();
    vector<MolBond*> v=mpMolecule->GetBondList();
    list<MolBond*> vBond=WXDialogChooseMultipleFromVector(v,(wxWindow*)this,
                                                          "Choose the Bond(s) to be removed");
@@ -1260,6 +1262,7 @@ void WXMolecule::OnMenuRemoveBond(wxCommandEvent & WXUNUSED(event))
 void WXMolecule::OnMenuRemoveAngle(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXMolecule::OnMenuRemoveAngle()",6)
+   WXCrystValidateAllUserInput();
    vector<MolBondAngle*> v=mpMolecule->GetBondAngleList();
    list<MolBondAngle*> vAngle=WXDialogChooseMultipleFromVector(v,(wxWindow*)this,
                                                               "Choose the Bond Angle(s) to be removed");
@@ -1273,6 +1276,7 @@ void WXMolecule::OnMenuRemoveAngle(wxCommandEvent & WXUNUSED(event))
 void WXMolecule::OnMenuRemoveDihedralAngle(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXMolecule::OnMenuRemoveDihedralAngle()",6)
+   WXCrystValidateAllUserInput();
    vector<MolDihedralAngle*> v=mpMolecule->GetDihedralAngleList();
    list<MolDihedralAngle*> vAngle=WXDialogChooseMultipleFromVector(v,(wxWindow*)this,
                                      "Choose the Dihedral Angle(s) to be removed");
@@ -1285,7 +1289,8 @@ void WXMolecule::OnMenuRemoveDihedralAngle(wxCommandEvent & WXUNUSED(event))
 
 void WXMolecule::OnMenuRemoveNonFlipAtom(wxCommandEvent & WXUNUSED(event))
 {
-    VFN_DEBUG_ENTRY("WXMolecule::OnMenuRemoveNonFlipAtom()",6)
+   VFN_DEBUG_ENTRY("WXMolecule::OnMenuRemoveNonFlipAtom()",6)
+   WXCrystValidateAllUserInput();
    int choice;
    vector<MolAtom*> v;
    for(vector<MolAtom*>::const_iterator pos=mpMolecule->GetAtomList().begin();pos!=mpMolecule->GetAtomList().end();++pos)
@@ -1367,6 +1372,7 @@ void WXMolecule::OnEditGridAtom(wxGridEvent &e)
 {
    if(mIsSelfUpdating) return;
    VFN_DEBUG_ENTRY("WXMolecule::OnEditGridAtom():"<<e.GetRow()<<","<<e.GetCol(),10)
+   WXCrystValidateAllUserInput();
    const long r=e.GetRow();
    const long c=e.GetCol();
    if(c==0)
@@ -1441,6 +1447,7 @@ void WXMolecule::OnEditGridBondLength(wxGridEvent &e)
 {
    if(mIsSelfUpdating) return;
    VFN_DEBUG_ENTRY("WXMolecule::OnEditGridBondLength():"<<e.GetRow()<<","<<e.GetCol(),10)
+   WXCrystValidateAllUserInput();
    const long r=e.GetRow();
    const long c=e.GetCol();
    if(c==0)
@@ -1509,6 +1516,7 @@ void WXMolecule::OnEditGridBondAngle(wxGridEvent &e)
 {
    if(mIsSelfUpdating) return;
    VFN_DEBUG_ENTRY("WXMolecule::OnEditGridBondAngle():"<<e.GetRow()<<","<<e.GetCol(),10)
+   WXCrystValidateAllUserInput();
    const long r=e.GetRow();
    const long c=e.GetCol();
    if(c==0)
@@ -1594,6 +1602,7 @@ void WXMolecule::OnEditGridDihedralAngle(wxGridEvent &e)
 {
    if(mIsSelfUpdating) return;
    VFN_DEBUG_ENTRY("WXMolecule::OnEditGridDihedralAngle():"<<e.GetRow()<<","<<e.GetCol(),10)
+   WXCrystValidateAllUserInput();
    const long r=e.GetRow();
    const long c=e.GetCol();
    if(c==0)
@@ -1694,6 +1703,7 @@ void WXMolecule::OnEditGridRigidGroup(wxGridEvent &e)
 {
    if(mIsSelfUpdating) return;
    VFN_DEBUG_ENTRY("WXMolecule::OnEditGridRigidGroup():"<<e.GetRow()<<","<<e.GetCol(),10)
+   WXCrystValidateAllUserInput();
 
    const long r=e.GetRow();
    const long c=e.GetCol();
@@ -1814,6 +1824,7 @@ void WXMolecule::OnMenuExport2ZMatrix(wxCommandEvent &event)
 void WXMolecule::OnMenuTest(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXMolecule::OnMenuTest()",6)
+   WXCrystValidateAllUserInput();
    #if 1
    mpMolecule->BuildRingList();
    mpMolecule->BuildStretchModeBondLength();
@@ -1993,6 +2004,7 @@ private:
 void WXMolecule::OnMenuMDTest(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXMolecule::OnMenuMDTest()",6)
+   WXCrystValidateAllUserInput();
    {
       wxProgressDialog dlgProgress(_T("Beginning MD Test..."),_T("Building Flip Groups"),
                                    7,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME);//|wxPD_CAN_ABORT
@@ -2081,6 +2093,7 @@ class WXMoleculeRotation:public wxWindow
             return;
          }
          VFN_DEBUG_MESSAGE("WXMoleculeRotation::OnRotate()",10)
+         WXCrystValidateAllUserInput();
          unsigned int bond=mpBond->GetSelection();
          unsigned int choice=mpRotatedAtoms->GetSelection();
          double angle;
@@ -2099,6 +2112,7 @@ class WXMoleculeRotation:public wxWindow
             return;
          }
          VFN_DEBUG_MESSAGE("WXMoleculeRotation::OnSelectBond()",10)
+         WXCrystValidateAllUserInput();
          const unsigned int choice=mpBond->GetSelection();
          MolAtom *pAt1=&(mpMol->GetBondList()[choice]->GetAtom1());
          MolAtom *pAt2=&(mpMol->GetBondList()[choice]->GetAtom2());
@@ -2216,6 +2230,7 @@ class WXMoleculeRotationDihed:public wxWindow
             return;
          }
          VFN_DEBUG_MESSAGE("WXMoleculeRotationDihed::OnRotate()",10)
+         WXCrystValidateAllUserInput();
          MolDihedralAngle *pDihed=&mvDihed[mpDihed->GetSelection()];
          unsigned int choice=mpRotatedAtoms->GetSelection();
          double angle;
@@ -2239,6 +2254,7 @@ class WXMoleculeRotationDihed:public wxWindow
             return;
          }
          VFN_DEBUG_MESSAGE("WXMoleculeRotationDihed::OnSelectBond()",10)
+         WXCrystValidateAllUserInput();
          MolDihedralAngle *pDihed=&mvDihed[mpDihed->GetSelection()];
          MolAtom *pAt1=&(pDihed->GetAtom1());
          MolAtom *pAt2=&(pDihed->GetAtom2());
@@ -2298,6 +2314,7 @@ END_EVENT_TABLE()
 void WXMolecule::OnMenuRotate(wxCommandEvent &event)
 {
    VFN_DEBUG_ENTRY("WXMolecule::OnMenuRotate()",10)
+   WXCrystValidateAllUserInput();
    if(event.GetId()==ID_MOLECULE_MENU_GEOMETRY_ROTATE_BOND)
    {
       #ifdef __WXGTK__
@@ -2827,6 +2844,7 @@ void WXMolecule::OnMenuShowRestraintWindow(wxCommandEvent &event)
 void WXMolecule::OnMenuRigidfyWithDihedralAngles(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXMolecule::OnMenuRigidfyWithDihedralAngles()",6)
+   WXCrystValidateAllUserInput();
    wxString msg;
    msg.Printf( _T("This will add all possible dihedral angles,\n")
                _T("in practice making the Molecule rigid\n\n")

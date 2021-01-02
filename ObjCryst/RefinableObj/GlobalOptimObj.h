@@ -237,15 +237,15 @@ class OptimizationObj
       const RefObjOpt& GetOption(const string & name)const;
       /// Access the list of refined object
       const ObjRegistry<RefinableObj>& GetRefinedObjList() const;
+      /// Update Display (if any display is available), when a new 'relevant' configuration
+      /// is reached. This calls all RefinableObj::UpdateDisplay()
+      virtual void UpdateDisplay();
    protected:
       /// \internal Prepare mRefParList for the refinement
       void PrepareRefParList();
 
       /// Initialization of options.
       virtual void InitOptions();
-      /// Update Display (if any display is available), when a new 'relevant' configuration
-      /// is reached. This calls all RefinableObj::UpdateDisplay()
-      virtual void UpdateDisplay();
       /// (Re)build OptimizationObj::mRecursiveRefinedObjList, if an
       /// object has been added or modified. If no object has been
       /// added and no sub-object has been added/removed, then nothing is done.

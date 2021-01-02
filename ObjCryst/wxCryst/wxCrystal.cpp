@@ -1414,7 +1414,11 @@ void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
       mol->RestraintStatus(cout);
       scatt=mol;
    }
-   if(scatt!=0) mpCrystal->AddScatterer(scatt);
+   if(scatt!=0)
+   {
+      mpCrystal->AddScatterer(scatt);
+      mpCrystal->UpdateDisplay();
+   }
    VFN_DEBUG_MESSAGE("WXCrystal::OnMenuAddScatterer():calling Layout()",6)
    //this->CrystUpdate();
    this->Layout();

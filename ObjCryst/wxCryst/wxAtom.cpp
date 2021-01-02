@@ -73,6 +73,7 @@ WXAtom::~WXAtom()
 void WXAtom::OnChangeScattPow(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXAtom::OnChangeScattPow()",6)
+   WXCrystValidateAllUserInput();
    int choice;
    const ScatteringPower *scatt=
        WXDialogChooseFromRegistry

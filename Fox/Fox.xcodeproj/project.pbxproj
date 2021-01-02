@@ -150,6 +150,7 @@
 		BF69C4D7124F8C310035CF57 /* WXFoxClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4CE124F8C310035CF57 /* WXFoxClient.cpp */; };
 		BF69C4D8124F8C310035CF57 /* WXFoxServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4CF124F8C310035CF57 /* WXFoxServer.cpp */; };
 		BF69C4D9124F8C310035CF57 /* WXGridWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4D0124F8C310035CF57 /* WXGridWindow.cpp */; };
+		BF92D5CF259F2D50005FD5D7 /* Undo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF92D5CE259F2D4F005FD5D7 /* Undo.cpp */; };
 		BFCB29CD258F7484008A8CCB /* include.h in Headers */ = {isa = PBXBuildFile; fileRef = BFCB29CC258F7484008A8CCB /* include.h */; };
 		BFE729E4243A6A6D00BABE40 /* libwx_osx_cocoau_gl-3.1.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BFF7D0BF1478047800799F7A /* libwx_osx_cocoau_gl-3.1.a */; };
 		BFE729E5243A6A7000BABE40 /* libwx_osx_cocoau-3.1.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BFF7D0C01478047800799F7A /* libwx_osx_cocoau-3.1.a */; };
@@ -353,6 +354,8 @@
 		BF69C4CE124F8C310035CF57 /* WXFoxClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WXFoxClient.cpp; path = src/WXFoxClient.cpp; sourceTree = "<group>"; };
 		BF69C4CF124F8C310035CF57 /* WXFoxServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WXFoxServer.cpp; path = src/WXFoxServer.cpp; sourceTree = "<group>"; };
 		BF69C4D0124F8C310035CF57 /* WXGridWindow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WXGridWindow.cpp; path = src/WXGridWindow.cpp; sourceTree = "<group>"; };
+		BF92D5CD259F2D4F005FD5D7 /* Undo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Undo.h; path = ../ObjCryst/ObjCryst/Undo.h; sourceTree = "<group>"; };
+		BF92D5CE259F2D4F005FD5D7 /* Undo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Undo.cpp; path = ../ObjCryst/ObjCryst/Undo.cpp; sourceTree = "<group>"; };
 		BFCB29CC258F7484008A8CCB /* include.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = include.h; path = ../newmat/include.h; sourceTree = "<group>"; };
 		BFE6AC680B886ACA007AFBA8 /* Indexing.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Indexing.cpp; path = ../ObjCryst/ObjCryst/Indexing.cpp; sourceTree = SOURCE_ROOT; };
 		BFF7D0BF1478047800799F7A /* libwx_osx_cocoau_gl-3.1.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libwx_osx_cocoau_gl-3.1.a"; path = "../static-libs/lib/libwx_osx_cocoau_gl-3.1.a"; sourceTree = "<group>"; };
@@ -2201,6 +2204,8 @@
 		BF3EAF910896291100E02367 /* ObjCryst */ = {
 			isa = PBXGroup;
 			children = (
+				BF92D5CE259F2D4F005FD5D7 /* Undo.cpp */,
+				BF92D5CD259F2D4F005FD5D7 /* Undo.h */,
 				BFFCD8900890426600044EBA /* Atom.cpp */,
 				BF11E7D22440C1BE009C104D /* Atom.h */,
 				BF08978A0B072DF600C0F576 /* CIF.cpp */,
@@ -4674,6 +4679,7 @@
 				BF1DDE1E0D228E3700A3939D /* wxScatteringPowerSphere.cpp in Sources */,
 				BF1DDE1F0D228E3700A3939D /* wxTrackerGraph.cpp in Sources */,
 				BF1DDE200D228E3700A3939D /* wxZScatterer.cpp in Sources */,
+				BF92D5CF259F2D50005FD5D7 /* Undo.cpp in Sources */,
 				BF1DDE210D228E3700A3939D /* ZScatterer.cpp in Sources */,
 				BF1DDE220D228E3700A3939D /* trackball.c in Sources */,
 				BF1DDE230D228E3700A3939D /* CIF.cpp in Sources */,

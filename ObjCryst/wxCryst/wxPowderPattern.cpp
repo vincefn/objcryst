@@ -3599,6 +3599,7 @@ WXRefinableObj(parent,b),mpPowderPatternBackground(b),mNeedUpdateUI(false),mIsSe
 void WXPowderPatternBackground::OnMenuImportUserBackground(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_MESSAGE("WXPowderPatternBackground::OnMenuImportUserBackground()",6)
+   WXCrystValidateAllUserInput();
    wxFileDialog *open= new wxFileDialog(this,_T("Choose background file with 2Theta Ibackgd"),
                                         _T(""),_T(""),_T("*.*"),wxFD_OPEN | wxFD_FILE_MUST_EXIST);
    if(open->ShowModal() != wxID_OK) return;
@@ -3608,6 +3609,7 @@ void WXPowderPatternBackground::OnMenuImportUserBackground(wxCommandEvent & WXUN
 void WXPowderPatternBackground::OnMenuOptimizeBayesianBackground(wxCommandEvent & WXUNUSED(event))
 {
    VFN_DEBUG_ENTRY("WXPowderPatternBackground::OnMenuOptimizeBayesianBackground()",6)
+   WXCrystValidateAllUserInput();
    mpPowderPatternBackground->UnFixAllPar();
    mpPowderPatternBackground->OptimizeBayesianBackground();
    mpPowderPatternBackground->FixAllPar();
@@ -3674,6 +3676,7 @@ void WXPowderPatternBackground::OnMenuAutomaticBayesianBackground(wxCommandEvent
 void WXPowderPatternBackground::OnEditGridBackgroundPoint(wxGridEvent &e)
 {
    if(mIsSelfUpdating) return;
+   WXCrystValidateAllUserInput();
    VFN_DEBUG_ENTRY("WXPowderPatternBackground::OnEditGridBackgroundPoint():"<<e.GetRow()<<","<<e.GetCol(),10)
    const long r=e.GetRow();
    const long c=e.GetCol();
@@ -4112,6 +4115,7 @@ bool WXPowderPatternDiffraction::Enable(bool e)
 void WXPowderPatternDiffraction::OnChangeProfile(wxCommandEvent & event)
 {
    VFN_DEBUG_ENTRY("WXPowderPatternDiffraction::OnChangeProfile()",6)
+   WXCrystValidateAllUserInput();
    bool add=false;
    if(event.GetId()==ID_POWDERDIFF_PROFILE_PV)
    {
@@ -4441,6 +4445,7 @@ WXProfileFitting::~WXProfileFitting()
 
 void WXProfileFitting::OnFit(wxCommandEvent &event)
 {
+   WXCrystValidateAllUserInput();
    // Map of crystalline phases to be fitted (or not)
    map<PowderPatternDiffraction *,bool> vpDiff;
    // Multiple phases can be fitted - which one was chosen ?
@@ -4821,6 +4826,7 @@ void WXProfileFitting::OnFit(wxCommandEvent &event)
 
 void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
 {
+   WXCrystValidateAllUserInput();
    TAU_PROFILE("WXProfileFitting::OnExploreSpacegroups()","void (wxCommandEvent &)",TAU_DEFAULT);
    PowderPatternDiffraction *pDiff=0;
    if(mpDiff!=0) pDiff=mpDiff;
@@ -4963,6 +4969,7 @@ void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
 
 void WXPowderPatternDiffraction::OnLeBail(wxCommandEvent &event)
 {
+   WXCrystValidateAllUserInput();
    if((event.GetId()==ID_POWDERDIFF_PROFILEFITTINGMODE)&&(mpProfileFittingMode->GetValue()==false))
    {
       mpPowderPatternDiffraction->SetExtractionMode(false);

@@ -65,6 +65,7 @@
 #include "ObjCryst/ObjCryst/General.h"
 #include "ObjCryst/Quirks/Chronometer.h"
 #include "ObjCryst/ObjCryst/IO.h"
+#include "ObjCryst/ObjCryst/Undo.h"
 #include "ObjCryst/ObjCryst/Crystal.h"
 #include "ObjCryst/ObjCryst/PowderPattern.h"
 #include "ObjCryst/ObjCryst/DiffractionDataSingleCrystal.h"
@@ -284,6 +285,8 @@ public:
    void OnAddSingleCrystalData(wxCommandEvent& WXUNUSED(event));
    void OnAddGlobalOptimObj(wxCommandEvent& WXUNUSED(event));
    void OnAddGeneticAlgorithm(wxCommandEvent& WXUNUSED(event));
+   void OnUndo(wxCommandEvent &ev);
+   void OnRedo(wxCommandEvent &ev);
    void OnDebugTest(wxCommandEvent& event);
    void OnSetDebugLevel(wxCommandEvent& event);
    void OnUpdateUI(wxUpdateUIEvent& event);
@@ -508,6 +511,8 @@ BEGIN_EVENT_TABLE(WXCrystMainFrame, wxFrame)
    EVT_MENU(MENU_OBJECT_CREATE_SINGLECRYSTALDATA,  WXCrystMainFrame::OnAddSingleCrystalData)
    EVT_MENU(MENU_OBJECT_CREATE_GLOBALOPTOBJ,       WXCrystMainFrame::OnAddGlobalOptimObj)
    EVT_MENU(MENU_OBJECT_CREATE_GENETICALGORITHM,   WXCrystMainFrame::OnAddGeneticAlgorithm)
+   EVT_MENU(wxID_UNDO,                             WXCrystMainFrame::OnUndo)
+   EVT_MENU(wxID_REDO,                             WXCrystMainFrame::OnRedo)
    EVT_MENU(MENU_DEBUG_LEVEL0,                     WXCrystMainFrame::OnSetDebugLevel)
    EVT_MENU(MENU_DEBUG_LEVEL1,                     WXCrystMainFrame::OnSetDebugLevel)
    EVT_MENU(MENU_DEBUG_LEVEL2,                     WXCrystMainFrame::OnSetDebugLevel)
@@ -1645,7 +1650,11 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
          objectMenu->Append(MENU_OBJECT_CREATE_GLOBALOPTOBJ, _T("New Monte-Carlo Object"),
                            _T("Add a new Monte-Carlo Object"));
 
-         //FoxGrid////////////////////////////////////////////////////////////////////
+      wxMenu *menuEdit = new wxMenu;//
+         menuEdit->Append(wxID_UNDO, _T("&Undo\tCtrl-Z"), _T("Undo last change in objects (EXPERIMENTAL)"));
+         menuEdit->Append(wxID_REDO, _T("&Redo\tCtrl-Y"), _T("Redo next change  in objects (EXPERIMENTAL)"));
+   
+      //FoxGrid////////////////////////////////////////////////////////////////////
       wxMenu *gridMenu = new wxMenu;
          gridMenu->Append(MENU_GRID_SERVER_RUN, _T("&Run Server"), _T("Start Fox Grid Server"));
          gridMenu->AppendSeparator();
@@ -1665,6 +1674,7 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
       wxMenuBar *menuBar = new wxMenuBar();
          menuBar->Append(menuFile,  _T("&File"));
          menuBar->Append(objectMenu,_T("&Objects"));
+         menuBar->Append(menuEdit,_T("Edit"));
       #ifdef __FOX_COD__
          menuBar->Append(codMenu,_T("COD"));
       #endif
@@ -2208,6 +2218,17 @@ void WXCrystMainFrame::OnAddGeneticAlgorithm(wxCommandEvent& WXUNUSED(event))
    //GeneticAlgorithm* obj;
    //obj=new GeneticAlgorithm("Change Me!");
 }
+
+void WXCrystMainFrame::OnUndo(wxCommandEvent &ev)
+{
+   gConfigHistory.Previous();
+}
+
+void WXCrystMainFrame::OnRedo(wxCommandEvent &ev)
+{
+   gConfigHistory.Next();
+}
+
 //FOXGrid
 void WXCrystMainFrame::OnStartGridServer(wxCommandEvent &event)
 {
