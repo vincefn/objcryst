@@ -96,8 +96,10 @@ class XMLConfigHistory
       /// List of configurations
       std::list<boost::shared_ptr<XMLConfig> > mvpConfig;
       /// The current configuration loaded (can be null if none is selected)
-      /// This is reset every time a
+      /// This is reset every time a change is manually made
       boost::shared_ptr<XMLConfig> mpCurrentConfig;
+      /// Lock used during Store and Restore
+      bool mLock;
 };
 
 /// Global object to hold configurations history

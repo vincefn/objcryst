@@ -356,11 +356,13 @@ const RefinableObjClock& XMLConfig::GetClock() const { return mClock;}
 //
 ////////////////////////////////////////////////////////////////////////
 XMLConfigHistory::XMLConfigHistory(const int maxnb):
-mMaxNb(maxnb), mpCurrentConfig()
+mMaxNb(maxnb), mpCurrentConfig(), mLock(false)
 {}
 
 bool XMLConfigHistory::Store()
 {
+   if(mLock) return false;
+   mLock=true;
    VFN_DEBUG_ENTRY("XMLConfigHistory::Store()", 10)
    if(mvpConfig.size()==0) mvpConfig.push_front(boost::shared_ptr<XMLConfig>(new XMLConfig));
    else
@@ -372,6 +374,7 @@ bool XMLConfigHistory::Store()
       if(*newconf == *previous)
       {
          VFN_DEBUG_EXIT("XMLConfigHistory::Store(): nothing new", 10)
+         mLock=false;
          return false;
       }
       mvpConfig.push_front(newconf);
@@ -381,13 +384,16 @@ bool XMLConfigHistory::Store()
    (*fpObjCrystInformUser)("XMLConfigHistory::Store()");
    
    VFN_DEBUG_EXIT("XMLConfigHistory::Store(): new config", 10)
+   mLock=false;
    return true;
 }
    
 void XMLConfigHistory::Restore(boost::shared_ptr<XMLConfig> &p)
 {
+   mLock=true;
    p->Restore();
    mpCurrentConfig = p;
+   mLock=false;
 }
 
 std::list<boost::shared_ptr<XMLConfig> > XMLConfigHistory::GetList() { return mvpConfig;}
@@ -402,6 +408,7 @@ bool XMLConfigHistory::Previous()
       fpObjCrystInformUser("XMLConfigHistory::Previous(): already at last stored configuration");
       return false;
    }
+   mLock=true;
    boost::shared_ptr<XMLConfig> p;
    if(mpCurrentConfig==NULL) p = mvpConfig.front();
    else
@@ -414,6 +421,7 @@ bool XMLConfigHistory::Previous()
    (*fpObjCrystInformUser)("XMLConfigHistory::Previous()");
    mpCurrentConfig = p;
    p->Restore();
+   mLock=false;
    return true;
 }
 
@@ -425,6 +433,7 @@ bool XMLConfigHistory::Next()
       fpObjCrystInformUser("XMLConfigHistory::Next(): already at first stored configuration");
       return false;
    }
+   mLock=true;
    (*fpObjCrystInformUser)("XMLConfigHistory::Next()");
 
    std::list<boost::shared_ptr<XMLConfig> >::const_reverse_iterator pos;
@@ -432,6 +441,7 @@ bool XMLConfigHistory::Next()
       if(*pos == mpCurrentConfig) {++pos ; break;}
    (*pos)->Restore();
    mpCurrentConfig = *pos;
+   mLock=false;
    return true;
 }
 
