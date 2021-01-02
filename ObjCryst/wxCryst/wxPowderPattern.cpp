@@ -522,8 +522,8 @@ void WXPowderPattern::CrystUpdate(const bool uui,const bool lock)
 {
    VFN_DEBUG_ENTRY("WXPowderPattern::CrystUpdate()",7)
    wxWakeUpIdle();
-   if(lock) mMutex.Lock();
    WXCrystValidateAllUserInput();
+   if(lock) mMutex.Lock();
 
    if(mpPowderPattern->GetNbPoint()<=0)
    {
@@ -546,6 +546,7 @@ void WXPowderPattern::CrystUpdate(const bool uui,const bool lock)
          mPowderPatternWasPreviouslyEmpty = false;
          wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_POWDER_MENU_GRAPH);
          wxPostEvent(this,event);
+      	if(lock) mMutex.Unlock();
       }
       else
       {
