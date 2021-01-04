@@ -228,6 +228,9 @@
     <ClCompile Include="src\WXGridWindow.cpp">
       <Filter>Source Files\Fox</Filter>
     </ClCompile>
+    <ClCompile Include="..\ObjCryst\ObjCryst\Undo.cpp">
+      <Filter>Source Files\ObjCryst</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\Fox.icns">
