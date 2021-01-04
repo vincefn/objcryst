@@ -344,7 +344,7 @@ bool XMLConfig::operator==(const ObjCryst::XMLConfig &rhs) const
 
 bool XMLConfig::operator!=(const ObjCryst::XMLConfig &rhs) const
 {
-   return not(this->operator==(rhs));
+   return !(this->operator==(rhs));
 }
 
 const RefinableObjClock& XMLConfig::GetClock() const { return mClock;}
