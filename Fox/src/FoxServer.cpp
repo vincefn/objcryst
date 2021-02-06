@@ -429,7 +429,7 @@ wxThread::ExitCode ThreadWorker::Entry()
 FoxServer::FoxServer():
 mpServer(0)
 {
-   s_mutexProtecting_Jobs_Results = new wxMutex();
+   m_mutexProtecting_Jobs_Results = new wxMutex();
    //m_needUpdate = false;
    m_isRunning = false;
    srand( (unsigned)time( NULL ) );
@@ -438,7 +438,7 @@ mpServer(0)
 FoxServer::~FoxServer()
 {
    //todo: clear m_results
-   delete s_mutexProtecting_Jobs_Results;
+   delete m_mutexProtecting_Jobs_Results;
 }
 void FoxServer::WriteLogMessage(wxString msg)
 {
@@ -480,13 +480,6 @@ void FoxServer::OnWorkerEvent(WorkerEvent& pEvent)
          }
      }
 }
-/*
-void FoxServer::OnThreadEvent(wxCommandEvent &event)
-{
-    WriteLogMessage("Nova udalost z Threadu");
-    WriteLogMessage(event.GetString());
-}
-*/
 void FoxServer::SetWorkingDir(wxString path)
 {
     m_working_dir = path;
@@ -592,7 +585,7 @@ void FoxServer::GetData( std::vector<GridClient> &clients, std::vector<GridResul
         clients.push_back(client);
     }
 
-    if(s_mutexProtecting_Jobs_Results->Lock()!=wxMUTEX_NO_ERROR) return;
+    if(m_mutexProtecting_Jobs_Results->Lock()!=wxMUTEX_NO_ERROR) return;
 
     //Results. It adds only new results.
     for(int i=results.size();i<m_results.size();i++) {
@@ -604,7 +597,7 @@ void FoxServer::GetData( std::vector<GridClient> &clients, std::vector<GridResul
     for(int i=0;i<m_jobs.size();i++) {
        Joblist.push_back(m_jobs[i]);
     }
-    s_mutexProtecting_Jobs_Results->Unlock();
+    m_mutexProtecting_Jobs_Results->Unlock();
   
 }
 void FoxServer::UpdateJob(int index, FoxJob *cjob)
@@ -614,10 +607,10 @@ void FoxServer::UpdateJob(int index, FoxJob *cjob)
 //change only nbRuns and nbTrial
 //You can't change jobID
 
-   if(s_mutexProtecting_Jobs_Results->Lock()!=wxMUTEX_NO_ERROR) return;
+   if(m_mutexProtecting_Jobs_Results->Lock()!=wxMUTEX_NO_ERROR) return;
 
    if(index >= m_jobs.size()) {
-      s_mutexProtecting_Jobs_Results->Unlock();
+      m_mutexProtecting_Jobs_Results->Unlock();
       return;
    }
    //nbsolve + nbDone <= nbRuns
@@ -629,7 +622,7 @@ void FoxServer::UpdateJob(int index, FoxJob *cjob)
    m_jobs[index].setName(cjob->getName());
    m_jobs[index].setRand(cjob->randomize());
 
-   s_mutexProtecting_Jobs_Results->Unlock();
+   m_mutexProtecting_Jobs_Results->Unlock();
    
 }
 int FoxServer::DeleteJob(int index)
@@ -641,16 +634,16 @@ int FoxServer::DeleteJob(int index)
  *          1 = Job deleted
  */
     
-   if(s_mutexProtecting_Jobs_Results->Lock()!=wxMUTEX_NO_ERROR) return -1;
+   if(m_mutexProtecting_Jobs_Results->Lock()!=wxMUTEX_NO_ERROR) return -1;
 
    if(index >= m_jobs.size()) {
-      s_mutexProtecting_Jobs_Results->Unlock();
+      m_mutexProtecting_Jobs_Results->Unlock();
       return -1;
    }
    //if job was sent to client, we can't erase it. We can only change the numer of runs...
    if((m_jobs[index].getNbDone() + m_jobs[index].getNbThread())>0) {
       m_jobs[index].setNbRuns(m_jobs[index].getNbDone() + m_jobs[index].getNbThread());
-      s_mutexProtecting_Jobs_Results->Unlock();
+      m_mutexProtecting_Jobs_Results->Unlock();
       return 0;
    }
 
@@ -658,15 +651,15 @@ int FoxServer::DeleteJob(int index)
    std::vector<FoxJob >::iterator it = m_jobs.begin()+index;
    m_jobs.erase(it);
 
-   s_mutexProtecting_Jobs_Results->Unlock();
+   m_mutexProtecting_Jobs_Results->Unlock();
    return 1;
 }
 void FoxServer::AddJobToList(FoxJob newjob)
 {
    VFN_DEBUG_MESSAGE(__FUNCTION__,10)
-   if(s_mutexProtecting_Jobs_Results->Lock()!=wxMUTEX_NO_ERROR) return;
+   if(m_mutexProtecting_Jobs_Results->Lock()!=wxMUTEX_NO_ERROR) return;
    m_jobs.push_back(newjob);
-   s_mutexProtecting_Jobs_Results->Unlock();
+   m_mutexProtecting_Jobs_Results->Unlock();
 }
 bool FoxServer::IsServerRunning()
 {
@@ -698,7 +691,7 @@ void FoxServer::OnServerEvent(wxSocketEvent &event)
                                                    this,
                                                    &m_results,
                                                    &m_jobs,
-                                                   s_mutexProtecting_Jobs_Results);
+                                                   m_mutexProtecting_Jobs_Results);
                 if (c->Create() == wxTHREAD_NO_ERROR)
                 {
                     MY_STHREAD tmp;
@@ -728,90 +721,5 @@ void FoxServer::OnServerEvent(wxSocketEvent &event)
          break;
    }
 }
-/*
-void FoxServer::OnSocketEvent(wxSocketEvent &event)
-{
-   VFN_DEBUG_MESSAGE(__FUNCTION__,10)
-   WriteLogMessage(_T("OnSocketEvent - this should not happen!!!"));
-   wxSocketBase* tmpSock = event.GetSocket();
 
-   //do not setNotify back to LOST | INPUT in this function, it does the thread itself...
-   tmpSock->SetNotify(wxSOCKET_LOST_FLAG);
-
-   int No = -1;
-   int i;
-
-   //locking mutex for the thread list.
-   if(m_threadMutex->Lock()!=wxMUTEX_NO_ERROR) {
-       WriteLogMessage(_T("error: m_threadMutex locked => return"));
-       return;
-   }
-   //who sent this socket?
-   for(i=0; i<m_threads.size(); i++) {
-      if(tmpSock==m_threads[i]->GetSocket()) {
-         No = i;
-         break;
-      }
-   }
-   //bad client identification
-   if(No==-1) {
-      WriteLogMessage(_T("error: Bad client identification"));
-      m_threadMutex->Unlock();
-      return;
-   }
-   switch(event.GetSocketEvent())
-   {
-     case wxSOCKET_INPUT:
-     {
-        WriteLogMessage(_T("wxSOCKET_INPUT"));
-        //call the thread.
-        m_threads[i]->NewEvent(INPUT_MSG, m_threadMutex);
-        m_threadMutex->Unlock();
-        break;
-     }
-     case wxSOCKET_LOST:
-     {
-         wxString tmp;
-         int id;
-         id = m_threads[i]->GetId();
-         tmp.Printf(_T("Client disconnected, thread id=%d"), id);
-         WriteLogMessage(tmp);
-         //call the thread "socket lost".
-         m_threads[i]->NewEvent(LOST_CONNECTION, m_threadMutex);
-
-         std::vector<FoxServerThread *>::iterator it;
-         it = m_threads.begin()+i;
-         m_threads.erase(it);
-
-         //ulocking before locking global data!
-         m_threadMutex->Unlock();
-
-         if(s_mutexProtectingTheGlobalData->Lock()!=wxMUTEX_NO_ERROR) return;
-
-         tmp.Printf(_T("removing thread %d from jobs..."), id);
-         WriteLogMessage(tmp);
-         //reduce nbSolving number
-         for(int q=0;q<m_jobs.size();q++){
-            WriteLogMessage(m_jobs[q].getListOfThreads());
-            m_jobs[q].RemoveThread(id, -1);
-            WriteLogMessage(m_jobs[q].getListOfThreads());
-         }
-
-         s_mutexProtectingTheGlobalData->Unlock();
-
-         break;
-     }
-     default:
-     {
-        //just unlock the mutex
-        m_threadMutex->Unlock();
-        WriteLogMessage(_T("unrecognized event"));
-        break;
-     }
-   }
-
-   m_needUpdate=true;
-   WriteLogMessage(_T("OnSocketEvent_end"));
-}
-*/
 

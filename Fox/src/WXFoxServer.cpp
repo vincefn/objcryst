@@ -698,10 +698,10 @@ void WXFoxServer::UpdateJobList()
           ccolor.Set(255, 255, 200);
       } 
       m_JobListTable->SetCellBackgroundColour(i, 0, ccolor);
-      m_JobListTable->SetCellBackgroundColour(i, 0, ccolor);
-      m_JobListTable->SetCellBackgroundColour(i, 0, ccolor);
-      m_JobListTable->SetCellBackgroundColour(i, 0, ccolor);
-      m_JobListTable->SetCellBackgroundColour(i, 0, ccolor);
+      m_JobListTable->SetCellBackgroundColour(i, 1, ccolor);
+      m_JobListTable->SetCellBackgroundColour(i, 2, ccolor);
+      m_JobListTable->SetCellBackgroundColour(i, 3, ccolor);
+      m_JobListTable->SetCellBackgroundColour(i, 4, ccolor);
 
    }
 }

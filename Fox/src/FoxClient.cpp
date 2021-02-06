@@ -300,31 +300,7 @@ bool FoxClient::IsClientConnected()
    if(mpClient!=0)   return mpClient->IsConnected();
    else return false;
 }
-/*
-void FoxClient::Reconnect()
-{
-    
-    //stop timer
-    if(m_sendingTimer!=NULL) {
-       m_sendingTimer->Stop();
-    }
-    WriteMessageLog(_T("Reconnecting..."));
-    Disconnect();
 
-    //clear results
-    //m_results.clear();
-
-    //wait a few seconds...
-    wxSleep(10);
-    ConnectClient(3, m_hostname);
-
-    //start timer
-    if(m_sendingTimer!=NULL) {
-        m_sendingTimer->Start(30*1000, false);
-    }
-    
-}
-*/
 void FoxClient::KillProcesses()
 {
     wxCriticalSectionLocker locker(m_ProcessCriticalSection);
@@ -717,34 +693,6 @@ int FoxClient::runNewJob(wxString job, int id, int nbTrial, bool rand)
     //m_ProcessMutex->Unlock();
     return 0;
 }
-/*
-void FoxClient::rejectJobs(std::vector<int> ids)
-{
-    
-    if(ids.size()==0) return;
-
-    WriteMessageLog(_T("Rejecting jobs..."));
-    wxString out;
-    out.Printf(_T("<FoxGrid>\n"), ids.size());
-
-    for(int i=0;i<ids.size();i++) {
-        wxString jobTag;
-        jobTag.Printf(_T("  <rejectedJob id=\"%d\" />\n"), ids[i]);
-        out+=jobTag;
-    }
-    out+=_T("</FoxGrid>\n");
-    WriteMessageLog(_T("Saving output message to the file"));
-    SaveDataAsFile(out, addToPath(getWorkingDir(), _T("client_out.txt")));
-
-    WriteMessageLog(_T("sending message..."));
-    wxSleep(2);
-    if(!m_IOSocket.WriteStringToSocket(mpClient, string(out.ToAscii()))) {
-        WriteMessageLog(m_IOSocket.getError());
-        Reconnect();
-    }
-    WriteMessageLog(_T("Rejecting jobs...end"));
-}
-*/
 void FoxClient::SaveDataAsFile(wxString out, wxString filename)
 {
    wxFile outFile(filename, wxFile::write);

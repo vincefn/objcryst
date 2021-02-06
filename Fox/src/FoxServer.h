@@ -147,7 +147,7 @@ class FoxServer: public wxFrame
      //TList m_threadWorkers;
 
      //protecting jobs and results
-     wxMutex            * s_mutexProtecting_Jobs_Results;
+     wxMutex            * m_mutexProtecting_Jobs_Results;
 
      //wxMutex            * mutexMessageLog;
      //wxMutex            * m_threadMutex;
