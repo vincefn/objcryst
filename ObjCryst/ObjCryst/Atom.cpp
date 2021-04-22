@@ -160,6 +160,7 @@ const ScatteringComponentList& Atom::GetScatteringComponentList() const
    mScattCompList(0).mY=mXYZ(1);
    mScattCompList(0).mZ=mXYZ(2);
    mScattCompList(0).mOccupancy=mOccupancy;
+   mScattCompList(0).mName=GetName();
    mClockScattCompList.Click();
    return mScattCompList;
 }

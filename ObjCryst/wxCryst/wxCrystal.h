@@ -154,6 +154,7 @@ class WXCrystal: public WXRefinableObj
       WXCrystalScrolledGridWindow* mpScattPowWin;
       WXCrystalScrolledGridWindow* mpAntiBumpWin;
       WXCrystalScrolledGridWindow* mpBondValenceWin;
+      WXCrystalScrolledGridWindow* mpIntermolDistWin;
 
       std::map<ScatteringPowerAtom*,RowScattPow> mvpRowScattPow;
 
