@@ -483,6 +483,10 @@ void OptimizationObj::PrepareRefParList()
             fc=&Crystal::GetBondValenceCost;
             mMainTracker.AddTracker(new TrackerObject<Crystal>
                (pCryst->GetName()+"::BondValenceCost",*pCryst,fc));
+
+            fc=&Crystal::GetInterMolDistCost;
+             mMainTracker.AddTracker(new TrackerObject<Crystal>
+               (pCryst->GetName()+"::InterMolDistCost",*pCryst,fc));
          }
       }
    }

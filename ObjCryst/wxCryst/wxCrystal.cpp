@@ -653,9 +653,9 @@ void WXCrystal::CrystUpdate(const bool uui,const bool lock)
    VFN_DEBUG_ENTRY("WXCrystal::CrystUpdate()",5)
 
    wxWakeUpIdle();
-
    mpCrystal->GetBumpMergeCost();
    mpCrystal->GetBondValenceCost();
+   mpCrystal->GetInterMolDistCost();
    #ifdef OBJCRYST_GL
    if(mpCrystalGL!=0)
    {

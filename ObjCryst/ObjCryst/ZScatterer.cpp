@@ -2025,6 +2025,7 @@ void ZScatterer::UpdateScattCompList() const
       mScattCompList(0).mZ=mXYZ(2);
       mScattCompList(0).mOccupancy=mOccupancy;
       mScattCompList(0).mpScattPow=mpGlobalScattPow;
+      mScattCompList(0).mName=GetName();
 
       // Update central atom for Display.
       //mXCoord(mCenterAtomIndex)=this->GetX();

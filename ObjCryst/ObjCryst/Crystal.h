@@ -337,6 +337,32 @@ class Crystal:public UnitCell
       typedef std::map<pair<const ScatteringPower*, const ScatteringPower*>,Crystal::BumpMergePar > VBumpMergePar;
       const VBumpMergePar& GetBumpMergeParList()const;
       VBumpMergePar& GetBumpMergeParList();
+
+      struct InterMolDistPar
+      {
+          InterMolDistPar();
+          
+          InterMolDistPar(const string At1, const string At2, const REAL actualDist, const REAL dist, const REAL sigma, const REAL delta);
+          
+          //the first is the atom in the asymmetric part of the unit cell
+          const string mAt1; 
+          //the second one is the neighbour
+          const string mAt2;
+          //dummy, just actual distance
+          REAL mActDist;
+          //defined distance (to be found)
+          REAL mDist2;
+          //sigma and delta are the same meaning as for restraints
+          REAL mSig;
+          REAL mDelta;
+      };
+      //typedef std::map<pair<const ScatteringPower*, const ScatteringPower*>,Crystal::InterMolDistPar > InterMolDistMap;
+      void SetNewInterMolDist(const string At1, const string At2, const REAL dist, const REAL sigma, const REAL delta) const;
+
+
+      REAL GetInterMolDistCost() const;
+
+
       /// When was the list of scatterers last changed ?
       const RefinableObjClock& GetClockScattererList()const;
 
@@ -421,6 +447,10 @@ class Crystal:public UnitCell
       /// \warning There should be no duplicate names !!! :TODO: test in AddScatterer()
       int FindScatterer(const string &scattName)const;
 
+      /*returns array of indexes in the mScattCompList*/
+      vector<int> FindScatterersInComponentList(const string &scattName)const;
+
+
       /** \internal \brief Compute the distance Table (mDistTable) for all scattering components
       * \param fast : if true, the distance calculations will be made using
       * integers, thus with a lower precision but faster. Less atoms will also
@@ -438,6 +468,10 @@ class Crystal:public UnitCell
       */
       void CalcDistTable(const bool fast)const;
 
+      //void CalcMyDistTable()const;
+      void CalcDistTableForInterMolDistCost()const;
+      
+
       /** Calculate all Bond Valences.
       *
       */
@@ -448,6 +482,9 @@ class Crystal:public UnitCell
 
       /// Anti-bump parameters map
       VBumpMergePar mvBumpMergePar;
+
+      
+
       /// Last Time Anti-bump parameters were changed
       RefinableObjClock mBumpMergeParClock;
       /// Last Time Anti-bump parameters were changed
@@ -457,6 +494,10 @@ class Crystal:public UnitCell
       /// Bump-merge scale factor
       REAL mBumpMergeScale;
 
+      mutable std::vector<InterMolDistPar> mInterMolDistList;      
+      mutable REAL mInterMolDistCost;
+      mutable RefinableObjClock mInterMolDistCostClock;
+      REAL mInterMolDistCostScale;
 
       /// Interatomic distance for a given neighbour
       struct Neighbour
@@ -486,6 +527,11 @@ class Crystal:public UnitCell
       /** Interatomic distance table for all unique atoms
       *
       */
+      /// The time when the distance table was last calculated
+      mutable RefinableObjClock mDistTableForInterMolDistClock;
+
+      mutable std::vector<NeighbourHood> imdTable;
+
       mutable std::vector<NeighbourHood> mvDistTableSq;
       /// The time when the distance table was last calculated
       mutable RefinableObjClock mDistTableClock;

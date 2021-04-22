@@ -7632,6 +7632,7 @@ void Molecule::UpdateScattCompList()const
       mScattCompList(i).mX=mvpAtom[i]->GetX();
       mScattCompList(i).mY=mvpAtom[i]->GetY();
       mScattCompList(i).mZ=mvpAtom[i]->GetZ();
+      mScattCompList(i).mName=mvpAtom[i]->GetName();
       mScattCompList(i).mOccupancy=mvpAtom[i]->GetOccupancy()*mOccupancy;
    }
 

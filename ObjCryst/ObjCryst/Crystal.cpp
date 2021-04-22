@@ -59,7 +59,8 @@ mScattererRegistry("List of Crystal Scatterers"),
 mBumpMergeCost(0.0),mBumpMergeScale(1.0),
 mDistTableMaxDistance(1.0),
 mScatteringPowerRegistry("List of Crystal ScatteringPowers"),
-mBondValenceCost(0.0),mBondValenceCostScale(1.0),mDeleteSubObjInDestructor(1)
+mBondValenceCost(0.0),mBondValenceCostScale(1.0),mDeleteSubObjInDestructor(1),
+mInterMolDistCostScale(10),mInterMolDistCost(0.0)
 {
    VFN_DEBUG_MESSAGE("Crystal::Crystal()",10)
    this->InitOptions();
@@ -76,7 +77,8 @@ mScattererRegistry("List of Crystal Scatterers"),
 mBumpMergeCost(0.0),mBumpMergeScale(1.0),
 mDistTableMaxDistance(1.0),
 mScatteringPowerRegistry("List of Crystal ScatteringPowers"),
-mBondValenceCost(0.0),mBondValenceCostScale(1.0),mDeleteSubObjInDestructor(1)
+mBondValenceCost(0.0),mBondValenceCostScale(1.0),mDeleteSubObjInDestructor(1),
+mInterMolDistCostScale(10),mInterMolDistCost(0.0)
 {
    VFN_DEBUG_MESSAGE("Crystal::Crystal(a,b,c,Sg)",10)
    this->Init(a,b,c,M_PI/2,M_PI/2,M_PI/2,SpaceGroupId,"");
@@ -94,7 +96,8 @@ mScattererRegistry("List of Crystal Scatterers"),
 mBumpMergeCost(0.0),mBumpMergeScale(1.0),
 mDistTableMaxDistance(1.0),
 mScatteringPowerRegistry("List of Crystal ScatteringPowers"),
-mBondValenceCost(0.0),mBondValenceCostScale(1.0),mDeleteSubObjInDestructor(1)
+mBondValenceCost(0.0),mBondValenceCostScale(1.0),mDeleteSubObjInDestructor(1),
+mInterMolDistCostScale(10),mInterMolDistCost(0.0)
 {
    VFN_DEBUG_MESSAGE("Crystal::Crystal(a,b,c,alpha,beta,gamma,Sg)",10)
    this->Init(a,b,c,alpha,beta,gamma,SpaceGroupId,"");
@@ -111,7 +114,8 @@ mScattererRegistry("List of Crystal Scatterers"),
 mBumpMergeCost(0.0),mBumpMergeScale(1.0),
 mDistTableMaxDistance(1.0),
 mScatteringPowerRegistry("List of Crystal ScatteringPowers"),
-mBondValenceCost(0.0),mBondValenceCostScale(1.0),mDeleteSubObjInDestructor(1)
+mBondValenceCost(0.0),mBondValenceCostScale(1.0),mDeleteSubObjInDestructor(1),
+mInterMolDistCostScale(10),mInterMolDistCost(0.0)
 {
    VFN_DEBUG_MESSAGE("Crystal::Crystal()",10)
    // Only create a default crystal, then copy old using XML
@@ -863,12 +867,24 @@ int Crystal::FindScatterer(const string &scattName)const
    throw ObjCrystException("Crystal::FindScatterer(string)\
       Cannot find this scatterer:"+scattName);
 }
+vector<int> Crystal::FindScatterersInComponentList(const string &scattName)const
+{
+   vector<int> res;
+   for(int i=0;i<mScattCompList.GetNbComponent();i++) {
+        if(mScattCompList(i).mName.compare(scattName)==0) {
+            res.push_back(i);
+        }
+   }
+   return res;
+}
 
 Crystal::BumpMergePar::BumpMergePar():
    mDist2(1.),mCanOverlap(false){}
 
 Crystal::BumpMergePar::BumpMergePar(const REAL dist, const bool canOverlap):
    mDist2(dist*dist),mCanOverlap(canOverlap){}
+
+
 
 REAL Crystal::GetBumpMergeCost() const
 {
@@ -942,6 +958,127 @@ void Crystal::RemoveBumpMergeDistance(const ScatteringPower &scatt1,
 const Crystal::VBumpMergePar& Crystal::GetBumpMergeParList()const{return mvBumpMergePar;}
 Crystal::VBumpMergePar& Crystal::GetBumpMergeParList(){return mvBumpMergePar;}
 
+Crystal::InterMolDistPar::InterMolDistPar():
+    mActDist(-1),mDist2(-1),mSig(0.01),mDelta(0.01)
+{}
+Crystal::InterMolDistPar::InterMolDistPar(const string At1, const string At2, const REAL actualDist, const REAL dist, const REAL sigma, const REAL delta):
+    mAt1(At1),mAt2(At2),mActDist(actualDist),mDist2(dist*dist),mSig(sigma),mDelta(delta)
+{}
+void Crystal::SetNewInterMolDist(const string At1, const string At2, const REAL dist, const REAL sigma, const REAL delta) const
+{
+    mInterMolDistList.push_back(InterMolDistPar(At1, At2, 0, dist, sigma, delta));
+}
+REAL Crystal::GetInterMolDistCost() const
+{
+
+   //REMOVE THIS PART
+   //just for testing - fill something to the intermoldist list
+   if(mInterMolDistList.size()==0) {
+       std::cout<<"create testing data for mInterMolDistList\n";
+       if((FindScatterersInComponentList("N6").size()!=0) && (FindScatterersInComponentList("N7").size()!=0)) {
+           SetNewInterMolDist("N6", "N7", 2.83, 0.1, 0.5);
+       }
+   }
+   std::cout<<"mInterMolDistList.size()=="<<mInterMolDistList.size()<<"\n";
+   //REMOVE THIS PART - END
+
+
+   if(mInterMolDistList.size()==0) return 0;
+
+   this->CalcDistTableForInterMolDistCost();
+   
+   VFN_DEBUG_ENTRY("Crystal::GetInterMolDistCost()",4)
+   if(mInterMolDistCostClock>mDistTableForInterMolDistClock) return mInterMolDistCost*mInterMolDistCostScale;
+   TAU_PROFILE("Crystal::GetInterMolDistCost()","REAL (REAL)",TAU_DEFAULT);
+   
+   mInterMolDistCost=0;
+
+   std::cout<<"list of atoms:\n";
+   for(int i=0;i<mScattCompList.GetNbComponent();i++) {
+       std::cout<<"["<<i<<"]"<<mScattCompList(i).mName<<"\n";
+   }
+   
+   std::vector<NeighbourHood>::const_iterator pos;
+   std::vector<Crystal::Neighbour>::const_iterator neigh;
+   REAL tmp;
+   string i1,i2;  
+    
+   cout<<"DistanceTable:\n";
+   for(pos=imdTable.begin();pos<imdTable.end();pos++) {
+       i1=mScattCompList(pos->mIndex).mName;
+       cout<<i1<<"\n";       
+       for(neigh=pos->mvNeighbour.begin();neigh<pos->mvNeighbour.end();neigh++) {
+           i2=mScattCompList(neigh->mNeighbourIndex).mName;
+           cout<<"   "<<i2<<" d="<<sqrt(neigh->mDist2)<<"\n";
+       }
+   }
+ 
+   std::vector<InterMolDistPar>::const_iterator imd;
+   //std::vector<NeighbourHood>::const_iterator pos;
+
+   float actdiff=0;
+   float mindiff=10000000;
+   float bestDist=0;
+
+   //searching all defined mInterMolDistList
+   for(imd = mInterMolDistList.begin();imd<mInterMolDistList.end();imd++) {
+       actdiff = 0;
+       mindiff = 10000000;
+       bestDist = mDistTableMaxDistance;    //TODO this is not the correct maxDist!!! It will create jumps in cost function   
+       for(pos=imdTable.begin();pos<imdTable.end();pos++)
+       {      
+          i1=mScattCompList(pos->mIndex).mName;
+          //i1=mScattCompList(pos->mIndex).
+          
+          if(i1 != imd->mAt1) continue;
+          std::cout<<"found imd->mAt1 ("<<imd->mAt1<<")\n";
+          //cout<<mScattCompList(pos->mIndex).
+
+          for(neigh=pos->mvNeighbour.begin();neigh<pos->mvNeighbour.end();neigh++)
+          {             
+             //i2=mScattCompList(neigh->mNeighbourIndex).mpScattPow;
+             i2=mScattCompList(neigh->mNeighbourIndex).mName;
+             if(i2 != imd->mAt2) continue;
+             std::cout<<"found imd->mAt2 ("<<imd->mAt2<<")\n";
+
+             if(imd->mDist2 > neigh->mDist2) actdiff = imd->mDist2 - neigh->mDist2;
+             else actdiff = neigh->mDist2 - imd->mDist2;
+             std::cout<<"actualdiff = "<<actdiff<<"\n";
+             if(actdiff<mindiff) {
+                 mindiff = actdiff;
+                 bestDist = neigh->mDist2;
+                 std::cout<<"saving, bestDist="<<bestDist<<"\n";                 
+             }         
+          }          
+       }
+       if(bestDist<=0) bestDist = 0;
+       else bestDist = sqrt(bestDist);
+       float d = imd->mDist2;
+       if(d<=0) d = 0;
+       else d = sqrt(d);
+       std::cout<<"Nx-Ny best dist ("<<d<<") = "<<bestDist<<"\n";
+
+       if((bestDist < (d + imd->mDelta)) && (bestDist > (d - imd->mDelta))) {
+           mInterMolDistCost += 0;
+       } else if(bestDist<=(d-imd->mDelta)) {
+           mInterMolDistCost += pow((bestDist-(d-imd->mDelta))/imd->mSig, 2);
+       } else {
+           mInterMolDistCost += pow((bestDist-(d+imd->mDelta))/imd->mSig, 2);
+       }       
+       
+   }
+   
+   mInterMolDistCost *= this->GetSpaceGroup().GetNbSymmetrics();   
+      
+   mInterMolDistCostClock.Click();
+   
+   std::cout<<"mInterMolDistCost="<<mInterMolDistCost<<"\n";
+   std::cout<<"mInterMolDistCostScale="<<mInterMolDistCostScale<<"\n";
+
+   return mInterMolDistCost*mInterMolDistCostScale;
+}
+
+
 const RefinableObjClock& Crystal::GetClockScattererList()const {return mClockScattererList;}
 
 void Crystal::GlobalOptRandomMove(const REAL mutationAmplitude,
@@ -977,7 +1114,7 @@ void Crystal::GlobalOptRandomMove(const REAL mutationAmplitude,
 
 REAL Crystal::GetLogLikelihood()const
 {
-   return this->GetBumpMergeCost()+this->GetBondValenceCost();
+   return this->GetBumpMergeCost()+this->GetBondValenceCost()+this->GetInterMolDistCost();
 }
 
 void Crystal::CIFOutput(ostream &os, double mindist)const
@@ -1233,7 +1370,7 @@ void Crystal::BeginOptimization(const bool allowApproximations,const bool enable
    }
    this->RefinableObj::BeginOptimization(allowApproximations,enableRestraints);
    // Calculate mDistTableMaxDistance: Default 1 Angstroem, for dynamical occupancy correction
-   mDistTableMaxDistance=1.0;
+   mDistTableMaxDistance=10.0;
    // Up to 4 Angstroem if bond-valence is used
    if((mvBondValenceRo.size()>0) && (mBondValenceCostScale>1e-5)) mDistTableMaxDistance=4;
    // Up to whatever antibump distance the user requires (hopefully not too large !)
@@ -1856,7 +1993,507 @@ struct DistTableInternalPosition
    /// Fractionnal coordinates
    REAL mX,mY,mZ;
 };
+/*
+void Crystal::CalcMyDistTable() const
+{
+   this->GetScatteringComponentList();
 
+   cout<<"finding the maximal distance in the user-defined list\n";
+   //finding the maximal distance in the user-defined list
+   float maxDist = -1;
+   for(int i=0;i<mInterMolDistList.size();i++) {
+       if(mInterMolDistList[i].mDist2>0) {
+           float d = sqrt(mInterMolDistList[i].mDist2);
+           if(d>maxDist) {
+               maxDist = d;
+           }
+       }
+   }
+   cout<<"maxDist = "<<maxDist<<"\n";
+   if(maxDist<0) return;
+   maxDist*=2;
+   cout<<"maxDist = "<<maxDist<<"\n";
+
+   if(true) {//calculate the table (imdTable) just for user-defined atoms 
+    //this code is almost the same as in this->CalcDistTable(true);
+
+       //this->GetScatteringComponentList();
+
+       const long nbComponent=mScattCompList.GetNbComponent();
+
+       // Get range and origin of the (pseudo) asymmetric unit
+        const REAL asux0=this->GetSpaceGroup().GetAsymUnit().Xmin();
+        const REAL asuy0=this->GetSpaceGroup().GetAsymUnit().Ymin();
+        const REAL asuz0=this->GetSpaceGroup().GetAsymUnit().Zmin();
+
+        const REAL asux1=this->GetSpaceGroup().GetAsymUnit().Xmax();
+        const REAL asuy1=this->GetSpaceGroup().GetAsymUnit().Ymax();
+        const REAL asuz1=this->GetSpaceGroup().GetAsymUnit().Zmax();
+
+        const REAL halfasuxrange=(asux1-asux0)*0.5+1e-5;
+        const REAL halfasuyrange=(asuy1-asuy0)*0.5+1e-5;
+        const REAL halfasuzrange=(asuz1-asuz0)*0.5+1e-5;
+
+        const REAL asuxc=0.5*(asux0+asux1);
+        const REAL asuyc=0.5*(asuy0+asuy1);
+        const REAL asuzc=0.5*(asuz0+asuz1);
+
+        const REAL maxdx=halfasuxrange+maxDist/GetLatticePar(0);
+        const REAL maxdy=halfasuyrange+maxDist/GetLatticePar(1);
+        const REAL maxdz=halfasuzrange+maxDist/GetLatticePar(2);
+
+       // List of all positions within or near the first atom generated
+       std::vector<DistTableInternalPosition> vPos;
+       // index of unique atoms in vPos, which are strictly in the asymmetric unit
+       std::vector<unsigned long> vUniqueIndex(nbComponent);
+
+       const REAL asymUnitMargin2 = maxDist*maxDist;
+
+       {
+          // No need to loop on a,b,c translations if maxDist is small enough
+          bool loopOnLattice=true;
+          if(  ((this->GetLatticePar(0)*.5)>maxDist)
+             &&((this->GetLatticePar(1)*.5)>maxDist)
+             &&((this->GetLatticePar(2)*.5)>maxDist)) loopOnLattice=false;
+
+          
+          //allocate the table 
+          imdTable.resize(nbComponent);
+          {
+              std::vector<NeighbourHood>::iterator pos;
+              for(pos=imdTable.begin();pos<imdTable.end();pos++)
+                 pos->mvNeighbour.clear();
+          }
+
+          CrystMatrix_REAL symmetricsCoords;
+          const int nbSymmetrics=this->GetSpaceGroup().GetNbSymmetrics(false,false);
+
+          // Get the list of all atoms within or near the asymmetric unit
+          for(long i=0;i<nbComponent;i++)
+          {
+             VFN_DEBUG_MESSAGE("Crystal::CalcDistTable(fast):3:component "<<i,0)
+             // generate all symmetrics, excluding translations
+             symmetricsCoords=this->GetSpaceGroup().GetAllSymmetrics(mScattCompList(i).mX,
+                                                                     mScattCompList(i).mY,
+                                                                     mScattCompList(i).mZ,
+                                                                     false,false,false);
+             imdTable[i].mIndex=i;//USELESS ?
+             bool hasUnique=false;
+             for(int j=0;j<nbSymmetrics;j++)
+             {
+                // take the closest position (using lattice translations) to the center of the ASU
+                REAL x=fmod(symmetricsCoords(j,0)-asuxc,(REAL)1.0);if(x<-.5)x+=1;else if(x>.5)x-=1;
+                REAL y=fmod(symmetricsCoords(j,1)-asuyc,(REAL)1.0);if(y<-.5)y+=1;else if(y>.5)y-=1;
+                REAL z=fmod(symmetricsCoords(j,2)-asuzc,(REAL)1.0);if(z<-.5)z+=1;else if(z>.5)z-=1;
+
+                //cout<<i<<","<<j<<":"<<FormatFloat(x,8,5)<<","<<FormatFloat(y,8,5)<<","<<FormatFloat(z,8,5)<<endl;
+                if( (abs(x)<maxdx) && (abs(y)<maxdy) && (abs(z)<maxdz) )
+                   vPos.push_back(DistTableInternalPosition(i, j, x+asuxc, y+asuyc, z+asuzc));
+                // Get one reference atom strictly within the pseudo-ASU
+                if(!hasUnique)
+                   if( (abs(x)<halfasuxrange) && (abs(y)<halfasuyrange) && (abs(z)<halfasuzrange) )
+                   {
+                      hasUnique=true;
+                      vUniqueIndex[i]=vPos.size()-1;
+                      imdTable[i].mUniquePosSymmetryIndex=j;
+                   }
+             }
+             if(!hasUnique)
+             {
+                throw ObjCrystException("One atom did not have any symmetric in the ASU !");
+             }
+          }
+
+          const CrystMatrix_REAL* pOrthMatrix=&(this->GetOrthMatrix());
+
+          const REAL m00=(*pOrthMatrix)(0,0);
+          const REAL m01=(*pOrthMatrix)(0,1);
+          const REAL m02=(*pOrthMatrix)(0,2);
+          const REAL m11=(*pOrthMatrix)(1,1);
+          const REAL m12=(*pOrthMatrix)(1,2);
+          const REAL m22=(*pOrthMatrix)(2,2);
+
+          cout<<"Get the list of all atoms in the asymmetric unit in mInterMolDistList\n";
+          // Get the list of all atoms in the asymmetric unit in mInterMolDistList
+          vector<int> listOfCurrentScatterers;
+          for(long i=0;i<mInterMolDistList.size();i++) {
+              vector<int> p = FindScatterersInComponentList(mInterMolDistList[i].mAt1);
+              listOfCurrentScatterers.insert(listOfCurrentScatterers.end(), p.begin(), p.end());
+          }
+          if(listOfCurrentScatterers.size()==0) return;
+          cout<<"listOfCurrentScatterers="<<listOfCurrentScatterers.size()<<"\n";
+
+          for(long i=0;i<nbComponent;i++)
+          {
+             bool found = false;
+             for(int q=0;q<listOfCurrentScatterers.size();q++) {
+                 if(i==listOfCurrentScatterers[q]) {
+                     found = true;
+                     break;
+                 }
+             }
+             //calculate the table just for user-define atoms 
+             if(!found) continue;
+
+             VFN_DEBUG_MESSAGE("Crystal::CalcDistTable(fast):4:component "<<i,0)
+             #if 0
+             if(!this->IsBeingRefined()) cout<<endl<<"Unique pos:"<<vUniqueIndex[i]<<":"
+                 <<vPos[vUniqueIndex[i]].mAtomIndex<<":"
+                 <<mScattCompList(vPos[vUniqueIndex[i]].mAtomIndex).mpScattPow->GetName()<<":"
+                 <<vPos[vUniqueIndex[i]].mSymmetryIndex<<":"
+                 <<FormatFloat(vPos[vUniqueIndex[i]].mX,8,5)<<","
+                 <<FormatFloat(vPos[vUniqueIndex[i]].mY,8,5)<<","
+                 <<FormatFloat(vPos[vUniqueIndex[i]].mZ,8,5)<<endl;
+             #endif
+             std::vector<Crystal::Neighbour> * const vnb=&(imdTable[i].mvNeighbour);
+             const REAL x0i=vPos[vUniqueIndex[i] ].mX;
+             const REAL y0i=vPos[vUniqueIndex[i] ].mY;
+             const REAL z0i=vPos[vUniqueIndex[i] ].mZ;
+             for(unsigned long j=0;j<vPos.size();j++)
+             {
+                if((vUniqueIndex[i]==j) && (!loopOnLattice)) continue;// distance to self !
+                // Start with the smallest absolute coordinates possible
+                REAL x=fmod(vPos[j].mX - x0i,(REAL)1.0);if(x<-.5)x+=1;if(x>.5)x-=1;
+                REAL y=fmod(vPos[j].mY - y0i,(REAL)1.0);if(y<-.5)y+=1;if(y>.5)y-=1;
+                REAL z=fmod(vPos[j].mZ - z0i,(REAL)1.0);if(z<-.5)z+=1;if(z>.5)z-=1;
+
+                const REAL x0=m00 * x + m01 * y + m02 * z;
+                const REAL y0=          m11 * y + m12 * z;
+                const REAL z0=                    m22 * z;
+
+                if(loopOnLattice)// distance to self !
+                {//Now loop over lattice translations
+                   for(int sz=-1;sz<=1;sz+=2)// Sign of translation
+                   {
+                      for(int nz=(sz+1)/2;;++nz)
+                      {
+                         const REAL z=z0+sz*nz*m22;
+                         if(abs(z)>maxDist) break;
+                         for(int sy=-1;sy<=1;sy+=2)// Sign of translation
+                         {
+                            for(int ny=(sy+1)/2;;++ny)
+                            {
+                               const REAL y=y0 + sy*ny*m11 + sz*nz*m12;
+                               if(abs(y)>maxDist) break;
+                               for(int sx=-1;sx<=1;sx+=2)// Sign of translation
+                               {
+                                  for(int nx=(sx+1)/2;;++nx)
+                                  {
+                                     if((vUniqueIndex[i]==j) && (nx==0) && (ny==0) && (nz==0)) continue;// distance to self !
+                                     const REAL x=x0 + sx*nx*m00 + sy*ny*m01 + sz*nz*m02;
+                                     if(abs(x)>maxDist) break;
+                                     const REAL d2=x*x+y*y+z*z;
+                                     if(d2<=asymUnitMargin2)
+                                     {
+                                        Neighbour neigh(vPos[j].mAtomIndex,vPos[j].mSymmetryIndex,d2);
+                                        vnb->push_back(neigh);
+                                        #if 0
+                                        if(!this->IsBeingRefined()) cout<<"    "<<vPos[j].mAtomIndex<<":"
+                                              <<mScattCompList(vPos[j].mAtomIndex).mpScattPow->GetName()<<":"
+                                              <<vPos[j].mSymmetryIndex<<":"
+                                              <<FormatFloat(vPos[j].mX,8,5)<<","
+                                              <<FormatFloat(vPos[j].mY,8,5)<<","<<","
+                                              <<FormatFloat(vPos[j].mZ,8,5)<<","<<" vector="
+                                              <<FormatFloat(x,8,5)<<","
+                                              <<FormatFloat(y,8,5)<<","
+                                              <<FormatFloat(z,8,5)<<":"<<sqrt(d2)<<","
+                                              <<"("<<sx*nx<<","<<sy*ny<<","<<sz*nz<<")"<<endl;
+                                        #endif
+                                     }
+                                  }
+                               }
+                            }
+                         }
+                      }
+                   }
+                }
+                else
+                {
+                   const REAL d2=x0*x0+y0*y0+z0*z0;
+                   if(d2<=asymUnitMargin2)
+                   {
+                      Neighbour neigh(vPos[j].mAtomIndex,vPos[j].mSymmetryIndex,d2);
+                      vnb->push_back(neigh);
+                      #if 0
+                      if(!this->IsBeingRefined()) cout<<vPos[j].mAtomIndex<<":"
+                            <<mScattCompList(vPos[j].mAtomIndex).mpScattPow->GetName()<<":"
+                            <<vPos[j].mSymmetryIndex<<":"
+                            <<vPos[j].mX<<","
+                            <<vPos[j].mY<<","
+                            <<vPos[j].mZ<<" vector="
+                            <<x0<<","<<y0<<","<<z0<<":"<<sqrt(d2)<<","<<asymUnitMargin2<<endl;
+                      #endif
+                   }
+                }
+
+             }
+          }
+       }
+    }
+}
+*/
+void Crystal::CalcDistTableForInterMolDistCost() const
+{
+   this->GetScatteringComponentList();
+
+   if(  (mDistTableForInterMolDistClock>mClockScattCompList)
+      /*&&(mDistTableForInterMolDistClock>this->GetClockMetricMatrix())*/) return;
+   
+
+   cout<<"finding the maximal distance in the user-defined list\n";
+   //finding the maximal distance in the user-defined list
+   float maxDist = -1;
+   for(int i=0;i<mInterMolDistList.size();i++) {
+       if(mInterMolDistList[i].mDist2>0) {
+           float d = sqrt(mInterMolDistList[i].mDist2);
+           if(d>maxDist) {
+               maxDist = d;
+           }
+       }
+   }
+   cout<<"maxDist = "<<maxDist<<"\n";
+   if(maxDist<0) return;
+   maxDist*=2;
+   cout<<"maxDist = "<<maxDist<<"\n";
+
+   if(true) {//calculate the table (imdTable) just for user-defined atoms 
+    //this code is almost the same as in this->CalcDistTable(true);
+
+       //this->GetScatteringComponentList();
+
+       const long nbComponent=mScattCompList.GetNbComponent();
+
+       // Get range and origin of the (pseudo) asymmetric unit
+        const REAL asux0=this->GetSpaceGroup().GetAsymUnit().Xmin();
+        const REAL asuy0=this->GetSpaceGroup().GetAsymUnit().Ymin();
+        const REAL asuz0=this->GetSpaceGroup().GetAsymUnit().Zmin();
+
+        const REAL asux1=this->GetSpaceGroup().GetAsymUnit().Xmax();
+        const REAL asuy1=this->GetSpaceGroup().GetAsymUnit().Ymax();
+        const REAL asuz1=this->GetSpaceGroup().GetAsymUnit().Zmax();
+
+        const REAL halfasuxrange=(asux1-asux0)*0.5+1e-5;
+        const REAL halfasuyrange=(asuy1-asuy0)*0.5+1e-5;
+        const REAL halfasuzrange=(asuz1-asuz0)*0.5+1e-5;
+
+        const REAL asuxc=0.5*(asux0+asux1);
+        const REAL asuyc=0.5*(asuy0+asuy1);
+        const REAL asuzc=0.5*(asuz0+asuz1);
+
+        const REAL maxdx=halfasuxrange+maxDist/GetLatticePar(0);
+        const REAL maxdy=halfasuyrange+maxDist/GetLatticePar(1);
+        const REAL maxdz=halfasuzrange+maxDist/GetLatticePar(2);
+
+       // List of all positions within or near the first atom generated
+       std::vector<DistTableInternalPosition> vPos;
+       // index of unique atoms in vPos, which are strictly in the asymmetric unit
+       std::vector<unsigned long> vUniqueIndex(nbComponent);
+
+       const REAL asymUnitMargin2 = maxDist*maxDist;
+
+       {
+          // No need to loop on a,b,c translations if maxDist is small enough
+          bool loopOnLattice=true;
+          if(  ((this->GetLatticePar(0)*.5)>maxDist)
+             &&((this->GetLatticePar(1)*.5)>maxDist)
+             &&((this->GetLatticePar(2)*.5)>maxDist)) loopOnLattice=false;
+
+          
+          //allocate the table 
+          imdTable.resize(nbComponent);
+          {
+              std::vector<NeighbourHood>::iterator pos;
+              for(pos=imdTable.begin();pos<imdTable.end();pos++)
+                 pos->mvNeighbour.clear();
+          }
+
+          CrystMatrix_REAL symmetricsCoords;
+          const int nbSymmetrics=this->GetSpaceGroup().GetNbSymmetrics(false,false);
+
+          // Get the list of all atoms within or near the asymmetric unit
+          for(long i=0;i<nbComponent;i++)
+          {
+             VFN_DEBUG_MESSAGE("Crystal::CalcDistTable(fast):3:component "<<i,0)
+             // generate all symmetrics, excluding translations
+             symmetricsCoords=this->GetSpaceGroup().GetAllSymmetrics(mScattCompList(i).mX,
+                                                                     mScattCompList(i).mY,
+                                                                     mScattCompList(i).mZ,
+                                                                     false,false,false);
+             imdTable[i].mIndex=i;//USELESS ?
+             bool hasUnique=false;
+             for(int j=0;j<nbSymmetrics;j++)
+             {
+                // take the closest position (using lattice translations) to the center of the ASU
+                REAL x=fmod(symmetricsCoords(j,0)-asuxc,(REAL)1.0);if(x<-.5)x+=1;else if(x>.5)x-=1;
+                REAL y=fmod(symmetricsCoords(j,1)-asuyc,(REAL)1.0);if(y<-.5)y+=1;else if(y>.5)y-=1;
+                REAL z=fmod(symmetricsCoords(j,2)-asuzc,(REAL)1.0);if(z<-.5)z+=1;else if(z>.5)z-=1;
+
+                //cout<<i<<","<<j<<":"<<FormatFloat(x,8,5)<<","<<FormatFloat(y,8,5)<<","<<FormatFloat(z,8,5)<<endl;
+                if( (abs(x)<maxdx) && (abs(y)<maxdy) && (abs(z)<maxdz) )
+                   vPos.push_back(DistTableInternalPosition(i, j, x+asuxc, y+asuyc, z+asuzc));
+                // Get one reference atom strictly within the pseudo-ASU
+                if(!hasUnique)
+                   if( (abs(x)<halfasuxrange) && (abs(y)<halfasuyrange) && (abs(z)<halfasuzrange) )
+                   {
+                      hasUnique=true;
+                      vUniqueIndex[i]=vPos.size()-1;
+                      imdTable[i].mUniquePosSymmetryIndex=j;
+                   }
+             }
+             if(!hasUnique)
+             {
+                throw ObjCrystException("One atom did not have any symmetric in the ASU !");
+             }
+          }
+
+          const CrystMatrix_REAL* pOrthMatrix=&(this->GetOrthMatrix());
+
+          const REAL m00=(*pOrthMatrix)(0,0);
+          const REAL m01=(*pOrthMatrix)(0,1);
+          const REAL m02=(*pOrthMatrix)(0,2);
+          const REAL m11=(*pOrthMatrix)(1,1);
+          const REAL m12=(*pOrthMatrix)(1,2);
+          const REAL m22=(*pOrthMatrix)(2,2);
+
+          cout<<"Get the list of all atoms in the asymmetric unit in mInterMolDistList\n";
+          // Get the list of all atoms in the asymmetric unit in mInterMolDistList
+          vector<int> listOfCurrentScatterers;
+          for(long i=0;i<mInterMolDistList.size();i++) {
+              vector<int> p = FindScatterersInComponentList(mInterMolDistList[i].mAt1);
+              listOfCurrentScatterers.insert(listOfCurrentScatterers.end(), p.begin(), p.end());
+          }
+          if(listOfCurrentScatterers.size()==0) return;
+          cout<<"listOfCurrentScatterers="<<listOfCurrentScatterers.size()<<"\n";
+
+          // Get the list of all mAt2 atoms in mInterMolDistList
+          vector<int> listOfNeigScatterers;
+          for(long i=0;i<mInterMolDistList.size();i++) {
+              vector<int> p = FindScatterersInComponentList(mInterMolDistList[i].mAt2);
+              listOfNeigScatterers.insert(listOfNeigScatterers.end(), p.begin(), p.end());
+          }
+          if(listOfNeigScatterers.size()==0) return;
+          cout<<"listOfNeigScatterers="<<listOfNeigScatterers.size()<<"\n";
+
+          for(long i=0;i<nbComponent;i++)
+          {
+             //calculate the table just for user-define atoms mAt1
+             bool found = false;
+             for(int q=0;q<listOfCurrentScatterers.size();q++) {
+                 if(i==listOfCurrentScatterers[q]) {
+                     found = true;
+                     break;
+                 }
+             }
+             if(!found) continue;
+
+             VFN_DEBUG_MESSAGE("Crystal::CalcDistTable(fast):4:component "<<i,0)
+             #if 0
+             if(!this->IsBeingRefined()) cout<<endl<<"Unique pos:"<<vUniqueIndex[i]<<":"
+                 <<vPos[vUniqueIndex[i]].mAtomIndex<<":"
+                 <<mScattCompList(vPos[vUniqueIndex[i]].mAtomIndex).mpScattPow->GetName()<<":"
+                 <<vPos[vUniqueIndex[i]].mSymmetryIndex<<":"
+                 <<FormatFloat(vPos[vUniqueIndex[i]].mX,8,5)<<","
+                 <<FormatFloat(vPos[vUniqueIndex[i]].mY,8,5)<<","
+                 <<FormatFloat(vPos[vUniqueIndex[i]].mZ,8,5)<<endl;
+             #endif
+             std::vector<Crystal::Neighbour> * const vnb=&(imdTable[i].mvNeighbour);
+             const REAL x0i=vPos[vUniqueIndex[i] ].mX;
+             const REAL y0i=vPos[vUniqueIndex[i] ].mY;
+             const REAL z0i=vPos[vUniqueIndex[i] ].mZ;
+             for(unsigned long j=0;j<vPos.size();j++)
+             {
+                
+                 //Calculate it just for user-defied atoms mAt2
+                found = false;
+                for(int q=0;q<listOfNeigScatterers.size();q++) {
+                     if(vPos[j].mAtomIndex==listOfNeigScatterers[q]) {
+                         found = true;
+                         break;
+                     }
+                }
+                if(!found) continue;
+
+                if((vUniqueIndex[i]==j) && (!loopOnLattice)) continue;// distance to self !
+                // Start with the smallest absolute coordinates possible
+                REAL x=fmod(vPos[j].mX - x0i,(REAL)1.0);if(x<-.5)x+=1;if(x>.5)x-=1;
+                REAL y=fmod(vPos[j].mY - y0i,(REAL)1.0);if(y<-.5)y+=1;if(y>.5)y-=1;
+                REAL z=fmod(vPos[j].mZ - z0i,(REAL)1.0);if(z<-.5)z+=1;if(z>.5)z-=1;
+
+                const REAL x0=m00 * x + m01 * y + m02 * z;
+                const REAL y0=          m11 * y + m12 * z;
+                const REAL z0=                    m22 * z;
+
+                if(loopOnLattice)// distance to self !
+                {//Now loop over lattice translations
+                   for(int sz=-1;sz<=1;sz+=2)// Sign of translation
+                   {
+                      for(int nz=(sz+1)/2;;++nz)
+                      {
+                         const REAL z=z0+sz*nz*m22;
+                         if(abs(z)>maxDist) break;
+                         for(int sy=-1;sy<=1;sy+=2)// Sign of translation
+                         {
+                            for(int ny=(sy+1)/2;;++ny)
+                            {
+                               const REAL y=y0 + sy*ny*m11 + sz*nz*m12;
+                               if(abs(y)>maxDist) break;
+                               for(int sx=-1;sx<=1;sx+=2)// Sign of translation
+                               {
+                                  for(int nx=(sx+1)/2;;++nx)
+                                  {
+                                     if((vUniqueIndex[i]==j) && (nx==0) && (ny==0) && (nz==0)) continue;// distance to self !
+                                     const REAL x=x0 + sx*nx*m00 + sy*ny*m01 + sz*nz*m02;
+                                     if(abs(x)>maxDist) break;
+                                     const REAL d2=x*x+y*y+z*z;
+                                     if(d2<=asymUnitMargin2)
+                                     {
+                                        Neighbour neigh(vPos[j].mAtomIndex,vPos[j].mSymmetryIndex,d2);
+                                        vnb->push_back(neigh);
+                                        #if 0
+                                        if(!this->IsBeingRefined()) cout<<"    "<<vPos[j].mAtomIndex<<":"
+                                              <<mScattCompList(vPos[j].mAtomIndex).mpScattPow->GetName()<<":"
+                                              <<vPos[j].mSymmetryIndex<<":"
+                                              <<FormatFloat(vPos[j].mX,8,5)<<","
+                                              <<FormatFloat(vPos[j].mY,8,5)<<","<<","
+                                              <<FormatFloat(vPos[j].mZ,8,5)<<","<<" vector="
+                                              <<FormatFloat(x,8,5)<<","
+                                              <<FormatFloat(y,8,5)<<","
+                                              <<FormatFloat(z,8,5)<<":"<<sqrt(d2)<<","
+                                              <<"("<<sx*nx<<","<<sy*ny<<","<<sz*nz<<")"<<endl;
+                                        #endif
+                                     }
+                                  }
+                               }
+                            }
+                         }
+                      }
+                   }
+                }
+                else
+                {
+                   const REAL d2=x0*x0+y0*y0+z0*z0;
+                   if(d2<=asymUnitMargin2)
+                   {
+                      Neighbour neigh(vPos[j].mAtomIndex,vPos[j].mSymmetryIndex,d2);
+                      vnb->push_back(neigh);
+                      #if 0
+                      if(!this->IsBeingRefined()) cout<<vPos[j].mAtomIndex<<":"
+                            <<mScattCompList(vPos[j].mAtomIndex).mpScattPow->GetName()<<":"
+                            <<vPos[j].mSymmetryIndex<<":"
+                            <<vPos[j].mX<<","
+                            <<vPos[j].mY<<","
+                            <<vPos[j].mZ<<" vector="
+                            <<x0<<","<<y0<<","<<z0<<":"<<sqrt(d2)<<","<<asymUnitMargin2<<endl;
+                      #endif
+                   }
+                }
+
+             }
+          }
+       }
+    }
+    mDistTableForInterMolDistClock.Click();
+}
 void Crystal::CalcDistTable(const bool fast) const
 {
    this->GetScatteringComponentList();
