@@ -641,7 +641,7 @@ void WXFoxServer::RunLocalClient(wxCommandEvent& event)
        #ifdef WIN32
        wxString ClientDir = m_working_dir + _T("\\client");
        if(!wxDirExists(ClientDir)) wxMkdir(ClientDir);
-       wxString cmd = appname + _T(" --runclient localhost --CPUs ") + nbCPUs + _T(" --working_dir ") + ClientDir;
+       wxString cmd = appname + _T(" --runclient localhost --CPUs ") + nbCPUs + _T(" --working_dir ") + _T("\"") + ClientDir + _T("\"");
        wxExecute(cmd);
        #else
        //if(appname(0,1)!=_T("/")) appname=wxGetCwd()+_T("/")+appname;
