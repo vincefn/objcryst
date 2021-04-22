@@ -356,9 +356,11 @@ class Crystal:public UnitCell
           REAL mSig;
           REAL mDelta;
       };
-      //typedef std::map<pair<const ScatteringPower*, const ScatteringPower*>,Crystal::InterMolDistPar > InterMolDistMap;
+      
       void SetNewInterMolDist(const string At1, const string At2, const REAL dist, const REAL sigma, const REAL delta) const;
 
+      int GetIntermolDistNb() const;
+      InterMolDistPar GetIntermolDistPar(int Index) const;
 
       REAL GetInterMolDistCost() const;
 

@@ -323,6 +323,7 @@ static const long ID_CRYSTAL_MENU_SCATT_ADDPRISMTRIGONAL        =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT_ADDICOSAHEDRON          =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT_REMOVESCATTERER         =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT_DUPLICSCATTERER         =WXCRYST_ID();
+static const long ID_CRYSTAL_MENU_ADD_INTERMOLECULARDIST        =WXCRYST_ID();
 static const long ID_CRYSTAL_SPACEGROUP                         =WXCRYST_ID();
 static const long ID_GLCRYSTAL_MENU_UPDATE                      =WXCRYST_ID();
 static const long ID_GLCRYSTAL_WINDOW                           =WXCRYST_ID();
@@ -330,6 +331,8 @@ static const long ID_CRYSTAL_WIN_SCATTPOW                       =WXCRYST_ID();
 static const long ID_CRYSTAL_WIN_ANTIBUMP                       =WXCRYST_ID();
 static const long ID_CRYSTAL_WIN_BONDVALENCE                    =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SHOW_SCATTPOW_WIN             =WXCRYST_ID();
+static const long ID_CRYSTAL_MENU_SHOW_INTERMOLDIST_WIN         =WXCRYST_ID();
+static const long ID_CRYSTAL_WIN_INTERMOLDIST_EVENT             =WXCRYST_ID();
 //static const long ID_CRYSTAL_MENU_SHOW_PDF                      =WXCRYST_ID();
 
 static const long ID_GLCRYSTAL_FOURIER_ADD=            WXCRYST_ID();
@@ -377,19 +380,22 @@ BEGIN_EVENT_TABLE(WXCrystal,wxWindow)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDANTIPRISMTETRAGONAL,WXCrystal::OnMenuAddScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDPRISMTRIGONAL,   WXCrystal::OnMenuAddScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDICOSAHEDRON,     WXCrystal::OnMenuAddScatterer)
+   EVT_MENU(ID_CRYSTAL_MENU_ADD_INTERMOLECULARDIST,   WXCrystal::OnMenuAddIntermolecularDistRestr)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_REMOVESCATTERER,    WXCrystal::OnMenuRemoveScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_DUPLICSCATTERER,    WXCrystal::OnMenuDuplicateScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SHOW_SCATTPOW_WIN,        WXCrystal::OnMenuShowScattPowWindow)
+   EVT_MENU(ID_CRYSTAL_MENU_SHOW_INTERMOLDIST_WIN,    WXCrystal::OnMenuShowIntermoDistWindow)
    EVT_UPDATE_UI(ID_CRYST_UPDATEUI,                   WXRefinableObj::OnUpdateUI)
    EVT_GRID_CMD_CELL_CHANGED(ID_CRYSTAL_WIN_SCATTPOW,  WXCrystal::OnEditGridScattPow)
    EVT_GRID_CMD_CELL_CHANGED(ID_CRYSTAL_WIN_ANTIBUMP,  WXCrystal::OnEditGridScattPowAntiBump)
    EVT_GRID_CMD_CELL_CHANGED(ID_CRYSTAL_WIN_BONDVALENCE,WXCrystal::OnEditGridScattPowBondValence)
+   EVT_GRID_CMD_CELL_CHANGED(ID_CRYSTAL_WIN_INTERMOLDIST_EVENT, WXCrystal::OnEditGridIntermolDistWindow)
 //   EVT_MENU(ID_CRYSTAL_MENU_SHOW_PDF,                 WXCrystal::OnMenuPDF)
 END_EVENT_TABLE()
 
 WXCrystal::WXCrystal(wxWindow* parent, Crystal *obj):
 WXRefinableObj(parent,(RefinableObj*)obj),mpCrystal(obj),
-mpScattPowWin(0),mpAntiBumpWin(0),mpBondValenceWin(0),
+mpScattPowWin(0),mpAntiBumpWin(0),mpBondValenceWin(0),mpIntermolDistWin(0),
 mIsSelfUpdating(false)
 #ifdef OBJCRYST_GL
 ,mCrystalGLDisplayList(0),mCrystalGLNameDisplayList(0),
@@ -463,6 +469,13 @@ mpCrystalGL(0)
                                 "Add Prism Trigonal");
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SCATT_ADDICOSAHEDRON,
                                 "Add Icosahedron");
+         mpMenuBar->GetMenu(ID_CRYSTAL_MENU_SCATT).AppendSeparator();
+         mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_ADD_INTERMOLECULARDIST,
+                                "Add Intermolecular Distance Restraint");
+         mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SHOW_INTERMOLDIST_WIN,
+                                "Show Intermolecular Distance Restraints");
+         
+
       mpMenuBar->AddMenu("Display",ID_CRYSTAL_MENU_DISPLAY);
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_DISPLAY,ID_CRYSTAL_MENU_DISPLAY_3DVIEW,
                                 "3D Display");
@@ -645,6 +658,7 @@ WXCrystal::~WXCrystal()
 {
    VFN_DEBUG_ENTRY("WXCrystal::~WXCrystal()",10)
    if(0!=mpScattPowWin) mpScattPowWin->GetParent()->Destroy();
+   if(0!=mpIntermolDistWin) mpIntermolDistWin->GetParent()->Destroy();
    VFN_DEBUG_EXIT("WXCrystal::~WXCrystal()",10)
 }
 
@@ -672,6 +686,10 @@ void WXCrystal::CrystUpdate(const bool uui,const bool lock)
    if(lock) mMutex.Lock();
    // Necessary to change the "used" status of unit cell parameters.
    if((false==this->GetCrystal().IsBeingRefined()) && wxThread::IsMain() ) this->GetCrystal().InitRefParList();
+
+   //if((false==this->GetCrystal().IsBeingRefined()) && wxThread::IsMain() &&(mpIntermolDistWin!=0)) {
+   //    bool needLayout=false;
+   //}
 
    if((false==this->GetCrystal().IsBeingRefined()) && wxThread::IsMain() &&(mpScattPowWin!=0)&&(mpAntiBumpWin!=0)&&(mpBondValenceWin!=0))
    {
@@ -1043,7 +1061,59 @@ void WXCrystal::OnMenuRemoveScattPow(wxCommandEvent & WXUNUSED(event))
    wxTheApp->GetTopWindow()->Layout();
    wxTheApp->GetTopWindow()->SendSizeEvent();
 }
+void WXCrystal::OnMenuAddIntermolecularDistRestr(wxCommandEvent & event)
+{
+   VFN_DEBUG_ENTRY("WXMolecule::OnMenuAddBond()",6)
+   WXCrystValidateAllUserInput();
+   int choice;
+   const ScatteringComponentList pList=mpCrystal->GetScatteringComponentList();
+   
+   const unsigned int nb=pList.GetNbComponent();
+   wxArrayString choices;
+   choices.resize(nb);
+   for(unsigned int i=0;i<nb;i++)
+      choices[i]= wxString::FromAscii(pList(i).mName.c_str());
+   
+   wxSingleChoiceDialog dialog(this,_T("Choose name of the first atom"),_T("Select Atom"),choices);
+   if(wxID_OK!=dialog.ShowModal()) return;
+   int At1=dialog.GetSelection();
+   if((At1<0) || (At1>=nb)) return;
 
+   wxSingleChoiceDialog dialog1(this,_T("Choose name of the second atom"),_T("Select Atom"),choices);
+   if(wxID_OK!=dialog1.ShowModal()) return;
+   int At2=dialog1.GetSelection();
+   if((At2<0) || (At2>=nb)) return;
+
+   string mes = "Enter bond distance (Angstroems) for "+choices[At1] + " - " + choices[At2];
+   wxTextEntryDialog dialog2(this,wxString::FromAscii(mes.c_str()),
+                           _T("Intermolecular bond distance"),"3.5",wxOK | wxCANCEL);
+   dialog2.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
+   if(wxID_OK!=dialog2.ShowModal()) return;
+   double d;
+   dialog2.GetValue().ToDouble(&d);
+
+   wxTextEntryDialog dialog3(this,_T("Enter sigma"),
+                           _T("Sigma"),"0.1",wxOK | wxCANCEL);
+   dialog3.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
+   if(wxID_OK!=dialog3.ShowModal()) return;
+   double sigma;
+   dialog3.GetValue().ToDouble(&sigma);
+
+   wxTextEntryDialog dialog4(this,_T("Enter Delta"),
+                           _T("Delta"),"0.5",wxOK | wxCANCEL);
+   dialog4.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
+   if(wxID_OK!=dialog4.ShowModal()) return;
+   double delta;
+   dialog4.GetValue().ToDouble(&delta);   
+
+   mpCrystal->SetNewInterMolDist(string(choices[At1].c_str()), string(choices[At2].c_str()), d, sigma, delta);
+
+   wxMessageDialog dialog5(this, _T("The restriction was added"));
+   dialog5.ShowModal();
+
+   wxTheApp->GetTopWindow()->Layout();
+   wxTheApp->GetTopWindow()->SendSizeEvent();
+}
 void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
 {
    VFN_DEBUG_ENTRY("WXCrystal::OnMenuAddScatterer()",6)
@@ -1724,6 +1794,46 @@ void WXCrystal::UpdateUI(const bool lock)
 Crystal& WXCrystal::GetCrystal(){return *mpCrystal;}
 const Crystal& WXCrystal::GetCrystal()const{return *mpCrystal;}
 
+void WXCrystal::OnMenuShowIntermoDistWindow(wxCommandEvent &event)
+{
+    if(mpIntermolDistWin!=0) return;
+    WXCrystValidateAllUserInput();
+    wxFrame *frame= new wxFrame(this,-1,_T("Intermolecular Distance Restraints"),
+                                  wxDefaultPosition,wxSize(800,300));
+
+    mpIntermolDistWin = new WXCrystalScrolledGridWindow(frame,this,ID_CRYSTAL_WIN_INTERMOLDIST_EVENT);
+
+    mpIntermolDistWin->SetDefaultRenderer(new wxGridCellFloatRenderer(5,3));
+    mpIntermolDistWin->SetDefaultEditor(new wxGridCellFloatEditor(5,3));
+    mpIntermolDistWin->SetColMinimalAcceptableWidth(150);
+    mpIntermolDistWin->CreateGrid(0,5);
+
+    mpIntermolDistWin->SetColLabelValue(0,_T("At1"));
+    mpIntermolDistWin->SetColLabelValue(1,_T("At2"));
+    mpIntermolDistWin->SetColLabelValue(2,_T("Distance"));
+    mpIntermolDistWin->SetColLabelValue(3,_T("Sigma"));
+    mpIntermolDistWin->SetColLabelValue(4,_T("Delta"));
+    
+    mpIntermolDistWin->AutoSizeRows();
+    mpIntermolDistWin->AutoSizeColumns();
+
+    mpIntermolDistWin->AppendRows(mpCrystal->GetIntermolDistNb());
+    for(int i=0;i<mpCrystal->GetIntermolDistNb();i++) {
+        Crystal::InterMolDistPar imdp = mpCrystal->GetIntermolDistPar(i);
+        mpIntermolDistWin->SetCellValue(i, 0, imdp.mAt1);
+        mpIntermolDistWin->SetCellValue(i, 1, imdp.mAt2);
+        float d = imdp.mDist2;
+        if(d>0) d=sqrt(d);            
+        mpIntermolDistWin->SetCellValue(i, 2, wxString::Format(wxT("%f"), d));
+        mpIntermolDistWin->SetCellValue(i, 3, wxString::Format(wxT("%f"), imdp.mSig));
+        mpIntermolDistWin->SetCellValue(i, 4, wxString::Format(wxT("%f"), imdp.mDelta));
+    }
+    
+    this->CrystUpdate(true);
+    frame->Show(true);
+    frame->Layout();
+    //mpCrystal->GetIntermolDistPar(0);
+}
 void WXCrystal::OnMenuShowScattPowWindow(wxCommandEvent &event)
 {
    VFN_DEBUG_MESSAGE("WXCrystal::OnMenuShowScattPowWindow()",10)
@@ -1784,7 +1894,10 @@ void WXCrystal::OnMenuShowScattPowWindow(wxCommandEvent &event)
    frame->Show(true);
    frame->Layout();
 }
+void WXCrystal::OnEditGridIntermolDistWindow(wxGridEvent &e)
+{
 
+}
 void WXCrystal::OnEditGridScattPow(wxGridEvent &e)
 {
    if(mIsSelfUpdating) return;
@@ -1926,6 +2039,7 @@ void WXCrystal::NotifyDeleteListWin(WXCrystalScrolledGridWindow *win)
    if(win==mpScattPowWin) mpScattPowWin=0;
    if(win==mpAntiBumpWin) mpAntiBumpWin=0;
    if(win==mpBondValenceWin) mpBondValenceWin=0;
+   if(win==mpIntermolDistWin) mpIntermolDistWin=0;
    // NOTE : all three subwindows should actually be deleted at the *same* time.
    if((mpScattPowWin==0)&&(mpAntiBumpWin==0)&&(mpBondValenceWin==0)) mvpRowScattPow.clear();
 }
@@ -1974,6 +2088,7 @@ bool WXCrystal::Enable(bool e)
    if(0!=mpScattPowWin)    mpScattPowWin   ->Enable(e);
    if(0!=mpAntiBumpWin)    mpAntiBumpWin   ->Enable(e);
    if(0!=mpBondValenceWin) mpBondValenceWin->Enable(e);
+   if(0!=mpIntermolDistWin) mpIntermolDistWin->Enable(e);
    return this->::wxWindow::Enable(e);
 }
 

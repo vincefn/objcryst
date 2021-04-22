@@ -285,6 +285,7 @@ const ScatteringPower& Crystal::GetScatteringPower(const string &name)const
 const RefinableObjClock& Crystal::GetMasterClockScatteringPower()const
 { return mMasterClockScatteringPower;}
 
+
 const ScatteringComponentList& Crystal::GetScatteringComponentList()const
 {
    if(mClockScattCompList>mClockMaster) return mScattCompList;
@@ -967,6 +968,17 @@ Crystal::InterMolDistPar::InterMolDistPar(const string At1, const string At2, co
 void Crystal::SetNewInterMolDist(const string At1, const string At2, const REAL dist, const REAL sigma, const REAL delta) const
 {
     mInterMolDistList.push_back(InterMolDistPar(At1, At2, 0, dist, sigma, delta));
+}
+int Crystal::GetIntermolDistNb() const
+{
+    return mInterMolDistList.size();
+}
+Crystal::InterMolDistPar Crystal::GetIntermolDistPar(int Index) const
+{
+    if((Index>=mInterMolDistList.size()) || (Index<0)) {
+        return InterMolDistPar();
+    }
+    return mInterMolDistList[Index];
 }
 REAL Crystal::GetInterMolDistCost() const
 {
