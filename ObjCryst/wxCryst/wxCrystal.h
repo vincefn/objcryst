@@ -108,6 +108,7 @@ class WXCrystal: public WXRefinableObj
       void OnMenuAddScattPowSphere(wxCommandEvent & WXUNUSED(event));
       void OnMenuRemoveScattPow(wxCommandEvent & WXUNUSED(event));
       void OnMenuAddScatterer(wxCommandEvent & event);
+      void OnMenuAddIntermolecularDistRestr(wxCommandEvent & event);
       void OnMenuRemoveScatterer(wxCommandEvent & WXUNUSED(event));
       void OnMenuDuplicateScatterer(wxCommandEvent & WXUNUSED(event));
       void OnMenuImportMoleculeFromFenskeHallZMatrix(wxCommandEvent &event);
@@ -119,6 +120,8 @@ class WXCrystal: public WXRefinableObj
       Crystal& GetCrystal();
       const Crystal& GetCrystal()const;
       void OnMenuShowScattPowWindow(wxCommandEvent &event);
+      void OnMenuShowIntermoDistWindow(wxCommandEvent &event);
+      void OnEditGridIntermolDistWindow(wxGridEvent &e);
       void OnEditGridScattPow(wxGridEvent &e);
       void OnEditGridScattPowAntiBump(wxGridEvent &e);
       void OnEditGridScattPowBondValence(wxGridEvent &e);
