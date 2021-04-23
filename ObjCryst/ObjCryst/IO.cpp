@@ -878,7 +878,24 @@ void Crystal::XMLOutput(ostream &os,int indent)const
       tag2.SetIsEndTag(true);
       os << tag2<<endl;
    }
-
+   if(mInterMolDistList.size()>0) {
+       for(int i=0;i<mInterMolDistList.size();i++) {
+           for(int k=0;k<=indent;k++) os << "  " ;
+           XMLCrystTag tagIMD("InterMolecularDistRestr", false, true);
+           tagIMD.AddAttribute("At1",mInterMolDistList[i].mAt1);
+           tagIMD.AddAttribute("At2",mInterMolDistList[i].mAt2);
+           tagIMD.AddAttribute("Dist",std::to_string(sqrt(mInterMolDistList[i].mDist2)));
+           tagIMD.AddAttribute("Delta",std::to_string(mInterMolDistList[i].mDelta));
+           tagIMD.AddAttribute("Sigma",std::to_string(mInterMolDistList[i].mSig));           
+           os<<tagIMD;
+           os<<endl;
+       }
+       for(int k=0;k<=indent;k++) os << "  " ;
+       XMLCrystTag tag2("InterMolDistScale");
+       os << tag2<< mInterMolDistCostScale;
+       tag2.SetIsEndTag(true);
+       os << tag2<<endl;
+   }
    indent--;
    tag.SetIsEndTag(true);
    for(int i=0;i<indent;i++) os << "  " ;
@@ -1017,6 +1034,29 @@ void Crystal::XMLInput(istream &is,const XMLCrystTag &tagg)
       if("BondValenceCostScale"==tag.GetName())
       {
          is>>mBondValenceCostScale;
+         XMLCrystTag junk(is);
+      }
+      if("InterMolecularDistRestr"==tag.GetName())
+      {
+         string At1;
+         string At2;
+         string Dist;
+         string Sigma;
+         string Delta;
+         for(unsigned int i=0;i<tag.GetNbAttribute();i++)
+         {
+            if("At1"==tag.GetAttributeName(i)) At1=tag.GetAttributeValue(i);
+            if("At2"==tag.GetAttributeName(i)) At2=tag.GetAttributeValue(i);
+            if("Dist"==tag.GetAttributeName(i)) Dist=tag.GetAttributeValue(i);
+            if("Sigma"==tag.GetAttributeName(i)) Sigma=tag.GetAttributeValue(i);
+            if("Delta"==tag.GetAttributeName(i)) Delta=tag.GetAttributeValue(i);
+         }                  
+         this->SetNewInterMolDist(At1, At2, stof(Dist), stof(Sigma), stof(Delta));
+         continue;
+      }
+      if("InterMolDistScale"==tag.GetName())
+      {
+         is>>mInterMolDistCostScale;
          XMLCrystTag junk(is);
       }
       if("Atom"==tag.GetName())

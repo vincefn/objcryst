@@ -560,6 +560,27 @@ mpCrystalGL(0)
          _T("Note that bond valence should only be used if the diffraction data\n\n")
          _T("is not of good enough quality to ensure finding the correct\n\n")
          _T("structure."));
+      // Intermolecular distance cost
+      wxBoxSizer* pInterMolDistSizer=new wxBoxSizer(wxHORIZONTAL);
+      WXFieldPar<REAL> *pWXFieldInterMoldDistCost=
+         new WXFieldPar<REAL>(this,"Inter-molecular Distance Cost",-1,&(mpCrystal->mInterMolDistCost),100);
+      WXFieldPar<REAL> *pInterMoleDistScale=
+         new WXFieldPar<REAL>(this,"Scale",-1,&(mpCrystal->mInterMolDistCostScale));
+      pInterMolDistSizer->Add(pWXFieldInterMoldDistCost);
+      pInterMolDistSizer->Add(pInterMoleDistScale);
+      mpSizer->Add(pInterMolDistSizer,0,wxALIGN_LEFT);
+      mList.Add(pWXFieldInterMoldDistCost);
+      mList.Add(pInterMoleDistScale);
+      pWXFieldInterMoldDistCost->SetFormat(_T("%8.2f"));
+      pInterMoleDistScale->SetFormat(_T("%8.2f"));
+      pWXFieldInterMoldDistCost->SetToolTip(_T("Current Inter-molecular Distance cost"));
+      pInterMoleDistScale->SetToolTip(
+         _T("Scale (multiplier) for the inter-molecular distance cost.\n")
+         _T("If 0, the user-defined inter-molecular distances will be ignored and not calculated\n")
+         _T("during optimization (saving time)\n\n")
+         _T("Use a value larger than 1 to increase the importance\n")
+         _T("of the bond valence relatively to the diffraction data Chi^2.\n\n"));
+
    // Lattice
       wxBoxSizer* lattice=new wxBoxSizer(wxHORIZONTAL);
 

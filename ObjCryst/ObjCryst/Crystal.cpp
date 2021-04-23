@@ -60,7 +60,7 @@ mBumpMergeCost(0.0),mBumpMergeScale(1.0),
 mDistTableMaxDistance(1.0),
 mScatteringPowerRegistry("List of Crystal ScatteringPowers"),
 mBondValenceCost(0.0),mBondValenceCostScale(1.0),mDeleteSubObjInDestructor(1),
-mInterMolDistCostScale(10),mInterMolDistCost(0.0)
+mInterMolDistCostScale(1.0),mInterMolDistCost(0.0)
 {
    VFN_DEBUG_MESSAGE("Crystal::Crystal()",10)
    this->InitOptions();
@@ -78,7 +78,7 @@ mBumpMergeCost(0.0),mBumpMergeScale(1.0),
 mDistTableMaxDistance(1.0),
 mScatteringPowerRegistry("List of Crystal ScatteringPowers"),
 mBondValenceCost(0.0),mBondValenceCostScale(1.0),mDeleteSubObjInDestructor(1),
-mInterMolDistCostScale(10),mInterMolDistCost(0.0)
+mInterMolDistCostScale(1.0),mInterMolDistCost(0.0)
 {
    VFN_DEBUG_MESSAGE("Crystal::Crystal(a,b,c,Sg)",10)
    this->Init(a,b,c,M_PI/2,M_PI/2,M_PI/2,SpaceGroupId,"");
@@ -97,7 +97,7 @@ mBumpMergeCost(0.0),mBumpMergeScale(1.0),
 mDistTableMaxDistance(1.0),
 mScatteringPowerRegistry("List of Crystal ScatteringPowers"),
 mBondValenceCost(0.0),mBondValenceCostScale(1.0),mDeleteSubObjInDestructor(1),
-mInterMolDistCostScale(10),mInterMolDistCost(0.0)
+mInterMolDistCostScale(1.0),mInterMolDistCost(0.0)
 {
    VFN_DEBUG_MESSAGE("Crystal::Crystal(a,b,c,alpha,beta,gamma,Sg)",10)
    this->Init(a,b,c,alpha,beta,gamma,SpaceGroupId,"");
@@ -115,7 +115,7 @@ mBumpMergeCost(0.0),mBumpMergeScale(1.0),
 mDistTableMaxDistance(1.0),
 mScatteringPowerRegistry("List of Crystal ScatteringPowers"),
 mBondValenceCost(0.0),mBondValenceCostScale(1.0),mDeleteSubObjInDestructor(1),
-mInterMolDistCostScale(10),mInterMolDistCost(0.0)
+mInterMolDistCostScale(1.0),mInterMolDistCost(0.0)
 {
    VFN_DEBUG_MESSAGE("Crystal::Crystal()",10)
    // Only create a default crystal, then copy old using XML
@@ -985,17 +985,19 @@ REAL Crystal::GetInterMolDistCost() const
 
    //REMOVE THIS PART
    //just for testing - fill something to the intermoldist list
-   if(mInterMolDistList.size()==0) {
+   /*
+    if(mInterMolDistList.size()==0) {
        std::cout<<"create testing data for mInterMolDistList\n";
        if((FindScatterersInComponentList("N6").size()!=0) && (FindScatterersInComponentList("N7").size()!=0)) {
            SetNewInterMolDist("N6", "N7", 2.83, 0.1, 0.5);
        }
    }
    std::cout<<"mInterMolDistList.size()=="<<mInterMolDistList.size()<<"\n";
+   */
    //REMOVE THIS PART - END
 
-
    if(mInterMolDistList.size()==0) return 0;
+   if(mInterMolDistCostScale<=0) return 0;
 
    this->CalcDistTableForInterMolDistCost();
    
@@ -1076,14 +1078,11 @@ REAL Crystal::GetInterMolDistCost() const
            mInterMolDistCost += pow((bestDist-(d-imd->mDelta))/imd->mSig, 2);
        } else {
            mInterMolDistCost += pow((bestDist-(d+imd->mDelta))/imd->mSig, 2);
-       }       
-       
+       }              
    }
    
-   mInterMolDistCost *= this->GetSpaceGroup().GetNbSymmetrics();   
-      
-   mInterMolDistCostClock.Click();
-   
+   mInterMolDistCost *= this->GetSpaceGroup().GetNbSymmetrics();         
+   mInterMolDistCostClock.Click();   
    std::cout<<"mInterMolDistCost="<<mInterMolDistCost<<"\n";
    std::cout<<"mInterMolDistCostScale="<<mInterMolDistCostScale<<"\n";
 
