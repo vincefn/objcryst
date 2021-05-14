@@ -2170,8 +2170,18 @@ void MonteCarloObj::InitLSQ(const bool useFullPowderPatternProfile)
    }
    // Only refine structural parameters (excepting parameters already fixed) and scale factor
    mLSQ.PrepareRefParList(true);
+   
+   // Intensity corrections can be refined
+   std::list<RefinablePar*> vIntCorrPar;
+   for(int i=0; i<mLSQ.GetCompiledRefinedObj().GetNbPar();i++)
+      if(mLSQ.GetCompiledRefinedObj().GetPar(i).GetType()->IsDescendantFromOrSameAs(gpRefParTypeScattDataCorrInt) && mLSQ.GetCompiledRefinedObj().GetPar(i).IsFixed()==false)
+         vIntCorrPar.push_back(&mLSQ.GetCompiledRefinedObj().GetPar(i));
+   
    mLSQ.SetParIsFixed(gpRefParTypeScattData,true);
    mLSQ.SetParIsFixed(gpRefParTypeScattDataScale,false);
+   
+   for(std::list<RefinablePar*>::iterator pos=vIntCorrPar.begin();pos!=vIntCorrPar.end();pos++)
+      (*pos)->SetIsFixed(false);
    mLSQ.SetParIsFixed(gpRefParTypeUnitCell,true);
    mLSQ.SetParIsFixed(gpRefParTypeScattPow,true);
    mLSQ.SetParIsFixed(gpRefParTypeRadiation,true);

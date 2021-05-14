@@ -1063,7 +1063,7 @@ void TextureEllipsoid::InitRefParList()
                            gpRefParTypeScattDataCorrInt_Ellipsoid, REFPAR_DERIV_STEP_ABSOLUTE,
 						   false, true, true, false, 1.0);
          tmp.AssignClock(mClockTextureEllipsoidPar);
-         tmp.SetDerivStep(1e-7);
+         tmp.SetDerivStep(1e-4);
          tmp.SetGlobalOptimStep(0.1);
          this->AddPar(tmp);
       }
