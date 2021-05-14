@@ -648,7 +648,7 @@ void WXFoxServer::RunLocalClient(wxCommandEvent& event)
        //wxExecute(appname+_T(" --runclient localhost --CPUs ") + nbCPUs);
        wxString ClientDir = m_working_dir + _T("/client");
        if(!wxDirExists(ClientDir)) wxMkdir(ClientDir);
-       long result= wxExecute(appname+_T(" --runclient localhost --CPUs ") + nbCPUs + _T(" --working_dir ") + ClientDir);
+       long result= wxExecute(appname+_T(" --runclient localhost --CPUs ") + nbCPUs + _T(" --working_dir \"") + ClientDir+ _T("\""));
        //if(result==0) result=wxExecute(wxGetCwd()+_T("/")+appname+_T(" --runclient localhost --CPUs ") + nbCPUs);
        //if(result==0) result=wxExecute(_T("/usr/bin/")+appname+_T(" --runclient localhost --CPUs ") + nbCPUs);
        //if(result==0) result=wxExecute(_T("/usr/local/bin/")+appname+_T(" --runclient localhost --CPUs ") + nbCPUs);

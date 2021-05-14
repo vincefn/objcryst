@@ -616,7 +616,7 @@ int FoxClient::runNewJob(wxString job, int id, int nbTrial, bool rand)
         //wxFile *batFile = new wxFile(proc->getTmpDir() + _T("\\!run.bat"), wxFile::write);
         //creating bat file content
         wxString cmd_content;
-		wxString appname = wxApp::GetInstance()->argv[0];
+        wxString appname = wxApp::GetInstance()->argv[0];
         if(rand) {
 			cmd_content.Printf(_T("%3$s   \"%1$s\\input.xml\" --nogui -n %2$d --randomize -o \"%1$s\\out#cost.xml\""), proc->getTmpDir(), nbTrial, appname);
         } else {
@@ -638,9 +638,9 @@ int FoxClient::runNewJob(wxString job, int id, int nbTrial, bool rand)
         wxString tr;
         tr.Printf(_T("%d"), nbTrial);
         if(rand) {
-            content = appname+_T(" ")+proc->getTmpDir()+_T("/input.xml --nogui -n ")+tr+_T(" --randomize --silent -o ")+proc->getTmpDir()+_T("/out#cost.xml > ")+proc->getTmpDir()+_T("/out.txt");
+            content = appname+_T(" \"")+proc->getTmpDir()+_T("/input.xml\" --nogui -n ")+tr+_T(" --randomize --silent -o \"")+proc->getTmpDir()+_T("/out#cost.xml\" > \"")+proc->getTmpDir()+_T("/out.txt\"");
         } else {
-            content = appname+_T(" ")+proc->getTmpDir()+_T("/input.xml --nogui -n ")+tr+_T(" --silent -o ")            +proc->getTmpDir()+_T("/out#cost.xml > ")+proc->getTmpDir()+_T("/out.txt");
+            content = appname+_T(" \"")+proc->getTmpDir()+_T("/input.xml\" --nogui -n ")+tr+_T(" --silent -o \"")            +proc->getTmpDir()+_T("/out#cost.xml\" > \"")+proc->getTmpDir()+_T("/out.txt\"");
         }
         //wxString path_to_input;
         //path_to_input = proc->getTmpDir();
@@ -663,7 +663,7 @@ int FoxClient::runNewJob(wxString job, int id, int nbTrial, bool rand)
         #ifdef WIN32
         //wxString cmd = proc->getTmpDir() + _T("\\!run.bat");
         #else
-        wxString cmd_content = _T("sh ")+ proc->getTmpDir() + _T("/run.sh");
+        wxString cmd_content = _T("sh \"")+ proc->getTmpDir() + _T("/run.sh\"");
         #endif
         //WriteMessageLog(_T("creating process"));
         wxProcess *process = new MyProcess(this, cmd_content, proc->getTmpDir());
