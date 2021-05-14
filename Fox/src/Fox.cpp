@@ -3164,13 +3164,13 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
             cod_record *p=&(mvCOD_Record.back());
             p->file = std::atoi(pos->second.get<std::string>("file").c_str() );
             VFN_DEBUG_MESSAGE("COD id="<<p->file<<"("<<mvCOD_Record.size()<<")",10)
-            p->a = std::atoi(pos->second.get<std::string>("a").c_str());
-            p->b = std::atoi(pos->second.get<std::string>("b").c_str());
-            p->c = std::atoi(pos->second.get<std::string>("c").c_str());
-            p->alpha = std::atof(pos->second.get<std::string>("alpha").c_str());
-            p->beta = std::atof(pos->second.get<std::string>("beta").c_str());
-            p->gamma = std::atof(pos->second.get<std::string>("gamma").c_str());
-            p->vol = std::atof(pos->second.get<std::string>("vol").c_str());
+            p->a = string2floatC(pos->second.get<std::string>("a"));
+            p->b = string2floatC(pos->second.get<std::string>("b"));
+            p->c = string2floatC(pos->second.get<std::string>("c"));
+            p->alpha = string2floatC(pos->second.get<std::string>("alpha"));
+            p->beta = string2floatC(pos->second.get<std::string>("beta"));
+            p->gamma = string2floatC(pos->second.get<std::string>("gamma"));
+            p->vol = string2floatC(pos->second.get<std::string>("vol"));
             p->sg = pos->second.get<std::string>("file");
             p->sgHall = pos->second.get<std::string>("file");
             p->nel = std::atoi(pos->second.get<std::string>("nel").c_str());
@@ -3182,7 +3182,7 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
             p->authors = pos->second.get<std::string>("authors");
             p->title = pos->second.get<std::string>("title");
             p->journal = pos->second.get<std::string>("journal");
-            p->volume = std::atoi(pos->second.get<std::string>("volume").c_str());
+            p->volume = string2floatC(pos->second.get<std::string>("volume"));
             p->year = std::atoi(pos->second.get<std::string>("year").c_str());
             p->firstpage = std::atoi(pos->second.get<std::string>("firstpage").c_str());
          }
@@ -3232,7 +3232,7 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
       mpCODGrid->SetCellAlignment(i*3,0, wxALIGN_CENTER, wxALIGN_CENTER);
       const cod_record *c=(cod_record*)&(*ps);
       mpCODGrid->SetCellValue(i*3,0,wxString::Format("%s",c->formula.substr(2,c->formula.size()-4).c_str()));
-      mpCODGrid->SetCellValue(i*3,1,wxString::Format("%.2f %.2f %.2f %.1f %.1f %.1f %s",c->a,c->b,c->c,c->alpha,c->beta,c->gamma,c->sg));
+      mpCODGrid->SetCellValue(i*3,1,wxString::Format("%.3f %.3f %.3f %.1f %.1f %.1f %s",c->a,c->b,c->c,c->alpha,c->beta,c->gamma,c->sg));
       mpCODGrid->SetCellValue(i*3+1,1,wxString::Format("%s %ld (%ld), %s: %s",c->journal,c->volume,c->year,c->firstpage,c->authors));
       mpCODGrid->SetCellValue(i*3+2,1,wxString::Format("%s",c->title));
       //VFN_DEBUG_MESSAGE(i<<":"<<mpCODGrid->GetRowSize(i*3+2),10)
