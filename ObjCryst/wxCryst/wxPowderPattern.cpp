@@ -4348,7 +4348,7 @@ wxWindow(parent,-1),mpPattern(pPattern),mpDiff(pDiff),mLSQ("Profile Fitting obje
          mpFitCheckList->Check(6,true);
          mpFitCheckList->Check(7,true);
       }
-      pSizer->Add(mpFitCheckList,1,wxEXPAND|wxALIGN_CENTER);
+      pSizer->Add(mpFitCheckList,1,wxEXPAND);
 
       pQuick->SetSizer(pSizer);
       pSizer->SetSizeHints(pQuick);
@@ -4404,7 +4404,7 @@ wxWindow(parent,-1),mpPattern(pPattern),mpDiff(pDiff),mLSQ("Profile Fitting obje
    pNotebook->ChangeSelection(0);
    mpLog =new wxTextCtrl(this,-1,_T(""),wxDefaultPosition,wxSize(600,300),wxTE_MULTILINE|wxTE_READONLY|wxTE_DONTWRAP);
    mpLog->SetFont(wxFont(10,wxTELETYPE,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL));
-   pSizer0->Add(mpLog,0,wxALIGN_CENTER|wxEXPAND);
+   pSizer0->Add(mpLog,0,wxEXPAND);
    mpLog->AppendText(wxString::Format(_T("Profile fitting & Space Group exploration:\n")));
    mpLog->AppendText(wxString::Format(_T("\nTo perform a QUICK fit:\n")));
    mpLog->AppendText(wxString::Format(_T("  - if you are not too far to a reasonable fit, just use 'Le Bail + Fit profile',\n")));
