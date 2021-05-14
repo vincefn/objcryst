@@ -5908,7 +5908,7 @@ void PowderPattern::ExportFullprof(const std::string &prefix)const
    pcr.close();
 }
 
-void PowderPattern::SetMuR(const REAL muR) {mMuR=0.0f; mClockCorrAbs.Click();}
+void PowderPattern::SetMuR(const REAL muR) {mMuR=muR; mClockCorrAbs.Click();}
 
 REAL PowderPattern::GetMuR() const {return mMuR;}
 
