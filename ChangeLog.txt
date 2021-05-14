@@ -7,6 +7,7 @@ NEW FEATURES
 IMPROVEMENTS
   * Switched to wxWidgets 3.1
   * When using --cif2pattern, do not convert atoms to a Molecule (faster)
+  * Fox grid allows a working directory with spaces in the path.
 
 BUG FIXES
   * Correct EstimateCellVolume estimation for orthorombic F
