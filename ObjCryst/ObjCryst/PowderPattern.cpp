@@ -83,7 +83,7 @@ const string & CylinderAbsCorr::GetClassName() const
 
 void CylinderAbsCorr::CalcCorr() const
 {
-   const REAL *pstol=mpData->GetSinThetaOverLambda().data();
+   mpData->GetTheta(); // Make sure theta is up-to-date
    if(mpPowderPatternDiff->GetParentPowderPattern().GetClockPowderPatternAbsCorr() < mClockCorrCalc) return;
    TAU_PROFILE("CylinderAbsCorr::CalcCorr()","void ()",TAU_DEFAULT);
    mCorr.resize(mpData->GetNbRefl());
@@ -6822,7 +6822,8 @@ SpaceGroupExplorer::SpaceGroupExplorer(PowderPatternDiffraction *pd):
    mpDiff(pd){};
 
 SPGScore SpaceGroupExplorer::Run(const string &spgId, const bool fitprofile,
-                                 const bool verbose, const bool restore_orig)
+                                 const bool verbose, const bool restore_orig,
+                                 const bool update_display)
 {
    cctbx::sgtbx::space_group sg;
    try
@@ -6844,10 +6845,11 @@ SPGScore SpaceGroupExplorer::Run(const string &spgId, const bool fitprofile,
          throw ObjCrystException(emsg);
       }
    }
-   return this->Run(sg, fitprofile, verbose, restore_orig);
+   return this->Run(sg, fitprofile, verbose, restore_orig, update_display);
 }
 
-SPGScore SpaceGroupExplorer::Run(const cctbx::sgtbx::space_group &spg, const bool fitprofile, const bool verbose, const bool restore_orig)
+SPGScore SpaceGroupExplorer::Run(const cctbx::sgtbx::space_group &spg, const bool fitprofile, const bool verbose,
+                                 const bool restore_orig, const bool update_display)
 {
    TAU_PROFILE("SpaceGroupExplorer::Run()","void (wxCommandEvent &)",TAU_DEFAULT);
    TAU_PROFILE_TIMER(timer1,"SpaceGroupExplorer::Run()LSQ-P1","", TAU_FIELD);
@@ -6874,10 +6876,18 @@ SPGScore SpaceGroupExplorer::Run(const cctbx::sgtbx::space_group &spg, const boo
    }
    mpDiff->GetCrystal().Init(a,b,c,d,e,f,hm,name);
    unsigned int nbcycle=1;
-   mpDiff->GetParentPowderPattern().UpdateDisplay();
+   if(update_display) mpDiff->GetParentPowderPattern().UpdateDisplay();
    // Number of free parameters (not taking into account refined profile/background parameters)
    unsigned int nbfreepar=mpDiff->GetProfileFitNetNbObs();
    if(nbfreepar<1) nbfreepar=1; // Should not happen !
+
+   // Create the LSQ obj even if the profile is not fitted, to allow restoring all parameters
+   LSQNumObj lsq;
+   lsq.SetRefinedObj(mpDiff->GetParentPowderPattern(),0,true,true);
+   lsq.PrepareRefParList(true);
+   const unsigned int saved_par = lsq.GetCompiledRefinedObj().CreateParamSet("SpaceGroupExplorer saved parameters");
+   lsq.GetCompiledRefinedObj().SaveParamSet(saved_par);
+   
    Chronometer chrono;
    for(unsigned int j=0;j<nbcycle;j++)
    {
@@ -6890,10 +6900,7 @@ SPGScore SpaceGroupExplorer::Run(const cctbx::sgtbx::space_group &spg, const boo
       mpDiff->GetParentPowderPattern().FitScaleFactorForRw();
       if(fitprofile)
       {// Perform LSQ
-         LSQNumObj lsq;
          TAU_PROFILE_START(timer2);
-         lsq.SetRefinedObj(mpDiff->GetParentPowderPattern(),0,true,true);
-         lsq.PrepareRefParList(true);
          lsq.SetParIsFixed(gpRefParTypeObjCryst,true);
          lsq.SetParIsFixed(gpRefParTypeScattDataScale,false);
          std::list<RefinablePar*> vnewpar;
@@ -6938,7 +6945,7 @@ SPGScore SpaceGroupExplorer::Run(const cctbx::sgtbx::space_group &spg, const boo
          //mpLog->AppendText(wxString::Format(_T("%5.2f%%/"),pDiff->GetParentPowderPattern().GetRw()*100));
          mpDiff->GetParentPowderPattern().FitScaleFactorForRw();
       }
-      mpDiff->GetParentPowderPattern().UpdateDisplay();
+      if(update_display) mpDiff->GetParentPowderPattern().UpdateDisplay();
       const REAL rw=mpDiff->GetParentPowderPattern().GetRw()*100;
       const REAL gof=mpDiff->GetParentPowderPattern().GetChi2()/mpDiff->GetParentPowderPattern().GetNbPointUsed();
       if(verbose) cout << boost::format("  (cycle #%u)\n   Rwp=%5.2f%%\n   GoF=%9.2f") % j % rw % gof <<endl;
@@ -6953,14 +6960,19 @@ SPGScore SpaceGroupExplorer::Run(const cctbx::sgtbx::space_group &spg, const boo
    if(restore_orig)
    {
       mpDiff->GetCrystal().Init(a,b,c,d,e,f,spghm,name);
-      mpDiff->GetCrystal().UpdateDisplay();
-      this->mpDiff->GetParentPowderPattern().UpdateDisplay();
+      lsq.GetCompiledRefinedObj().RestoreParamSet(saved_par);
+      if (update_display)
+      {
+         mpDiff->GetCrystal().UpdateDisplay();
+         this->mpDiff->GetParentPowderPattern().UpdateDisplay();
+      }
    }
 
    return SPGScore(hm.c_str(),rw,gof,nbextinct446);
 }
 
-void SpaceGroupExplorer::RunAll(const bool fitprofile_all, const bool verbose, const bool keep_best)
+void SpaceGroupExplorer::RunAll(const bool fitprofile_all, const bool verbose, const bool keep_best,
+                                const bool update_display, const bool fitprofile_p1)
 {
    Crystal *pCrystal=&(mpDiff->GetCrystal());
    
@@ -7020,8 +7032,8 @@ void SpaceGroupExplorer::RunAll(const bool fitprofile_all, const bool verbose, c
          }
          else
          {
-            if((s.number()==1) || fitprofile_all) mvSPG.push_back(this->Run(spg, true, false, false));
-            else mvSPG.push_back(this->Run(spg, false, false, false));
+            if(((s.number()==1) && fitprofile_p1) || fitprofile_all) mvSPG.push_back(this->Run(spg, true, true, false, update_display));
+            else mvSPG.push_back(this->Run(spg, false, true, true, update_display));
             mvSPG.back().ngof = mvSPG.back().gof * mpDiff->GetNbReflBelowMaxSinThetaOvLambda() / (float)nb_refl_p1;
             mvSPGExtinctionFingerprint.insert(make_pair(fgp, mvSPG.back()));
 
@@ -7043,8 +7055,11 @@ void SpaceGroupExplorer::RunAll(const bool fitprofile_all, const bool verbose, c
    }
    mpDiff->SetExtractionMode(true,true);
    mpDiff->ExtractLeBail(5);
-   pCrystal->UpdateDisplay();
-   this->mpDiff->GetParentPowderPattern().UpdateDisplay();
+   if(update_display)
+   {
+      pCrystal->UpdateDisplay();
+      this->mpDiff->GetParentPowderPattern().UpdateDisplay();
+   }
 
 }
 

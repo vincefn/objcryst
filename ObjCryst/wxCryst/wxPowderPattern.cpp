@@ -2627,7 +2627,7 @@ void WXCellExplorer::OnSelectCell(wxCommandEvent &event)
          mpCrystal->GetPar("alpha").SetValue(uc[3]);
          mpCrystal->GetPar("beta").SetValue(uc[4]);
          mpCrystal->GetPar("gamma").SetValue(uc[5]);
-         // Choose the spcegroup wuth the highest possible symmetry given the centering used.
+         // Choose the spcegroup with the highest possible symmetry given the centering used.
          // We only try P, I, F, but also handle others, just in case
          switch(pos->first.mCentering)
          {

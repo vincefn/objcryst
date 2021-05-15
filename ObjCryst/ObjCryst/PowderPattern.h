@@ -1204,20 +1204,22 @@ public:
     * \param fitprofile: if true, will perform a full profile fitting instead of just Le Bail
     *  extraction. Much slower.
     * \param restore_orig: if true, will go back to the original unit cell and spacegroup at the end
+    
     * \return: the SPGScore corresponding to this spacegroup
     */
    SPGScore Run(const string &spg, const bool fitprofile=false, const bool verbose=false,
-                const bool restore_orig=false);
+                const bool restore_orig=false, const bool update_display=true);
    /** Run test on a single spacegroup
     *
     * \param spg: the cctbx::sgtbx::space_group
     * \param fitprofile: if true, will perform a full profile fitting instead of just Le Bail
     *  extraction. Much slower.
     * \param restore_orig: if true, will go back to the original unit cell and spacegroup at the end
+    * \param update_display: if true, update the display during the search
     * \return: the SPGScore corresponding to this spacegroup
     */
    SPGScore Run(const cctbx::sgtbx::space_group &spg, const bool fitprofile=false,
-                const bool verbose=false, const bool restore_orig=false);
+                const bool verbose=false, const bool restore_orig=false, const bool update_display=true);
    /** Run test on all spacegroups compatible with the unit cell
     *
     * \param fitprofile_all: if true, will perform a full profile fitting instead of just Le Bail
@@ -1225,9 +1227,12 @@ public:
     *  performed for the first spacegroup (P1)
     * \param verbose: 0 (default), not verbose, 1 minimal information, 2, very verbose
     * \param keep_best: if true, will keep the best solution at the end (default: restore the original one)
+    * \param update_display: if true, update the display during the search
+    * \param fitprofile_p1: if true, fit the profile for p1 (ignored if fitprofile_all=true)
     * \return: the SPGScore corresponding to this spacegroup
     */
-   void RunAll(const bool fitprofile_all=false, const bool verbose=true, const bool keep_best=false);
+   void RunAll(const bool fitprofile_all=false, const bool verbose=true, const bool keep_best=false,
+               const bool update_display=true, const bool fitprofile_p1=true);
    /// Get the list of all scores obatined after using RunAll()
    const list<SPGScore>& GetScores() const;
 private:
