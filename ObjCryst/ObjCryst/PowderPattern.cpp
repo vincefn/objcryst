@@ -7032,8 +7032,8 @@ void SpaceGroupExplorer::RunAll(const bool fitprofile_all, const bool verbose, c
          }
          else
          {
-            if(((s.number()==1) && fitprofile_p1) || fitprofile_all) mvSPG.push_back(this->Run(spg, true, true, false, update_display));
-            else mvSPG.push_back(this->Run(spg, false, true, true, update_display));
+            if(((s.number()==1) && fitprofile_p1) || fitprofile_all) mvSPG.push_back(this->Run(spg, true, false, false, update_display));
+            else mvSPG.push_back(this->Run(spg, false, false, true, update_display));
             mvSPG.back().ngof = mvSPG.back().gof * mpDiff->GetNbReflBelowMaxSinThetaOvLambda() / (float)nb_refl_p1;
             mvSPGExtinctionFingerprint.insert(make_pair(fgp, mvSPG.back()));
 
