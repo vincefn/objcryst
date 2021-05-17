@@ -1278,9 +1278,9 @@ unsigned int PowderPatternDiffraction::GetProfileFitNetNbObs()const
       irefl++;
       if(irefl>=this->GetNbReflBelowMaxSinThetaOvLambda()) break;
    }
-   REAL stol=mSinThetaLambda(irefl);
    while(irefl<this->GetNbReflBelowMaxSinThetaOvLambda())
    {
+      const REAL stol = mSinThetaLambda(irefl);
       while(mSinThetaLambda(irefl)==stol)
       {
          //cout<<int(mH(irefl))<<" "<<int(mK(irefl))<<" "<<int(mL(irefl))<<endl;
@@ -1291,7 +1291,6 @@ unsigned int PowderPatternDiffraction::GetProfileFitNetNbObs()const
       if(nbnew>1) nb += nbnew-1;
       //cout<<"     => Added "<< nbnew-1<< "net observed points ("<<this->GetParentPowderPattern().STOL2Pixel(stol)<<"-"<<ilast<<")"<<endl;
       ilast=this->GetParentPowderPattern().STOL2Pixel(stol);
-      stol = mSinThetaLambda(irefl);
    }
    //cout<<"Final number of net observed points: "<<nb<<endl;
    return nb;
