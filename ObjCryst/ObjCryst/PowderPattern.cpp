@@ -84,7 +84,8 @@ const string & CylinderAbsCorr::GetClassName() const
 void CylinderAbsCorr::CalcCorr() const
 {
    mpData->GetTheta(); // Make sure theta is up-to-date
-   if(mpPowderPatternDiff->GetParentPowderPattern().GetClockPowderPatternAbsCorr() < mClockCorrCalc) return;
+   if((mpPowderPatternDiff->GetParentPowderPattern().GetClockPowderPatternAbsCorr() < mClockCorrCalc)
+      && (mpData->GetClockTheta()<mClockCorrCalc)) return;
    TAU_PROFILE("CylinderAbsCorr::CalcCorr()","void ()",TAU_DEFAULT);
    mCorr.resize(mpData->GetNbRefl());
    const REAL muR = mpPowderPatternDiff->GetParentPowderPattern().GetMuR();
