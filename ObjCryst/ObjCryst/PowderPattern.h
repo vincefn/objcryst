@@ -1169,15 +1169,22 @@ CrystVector_REAL PowderProfileLorentz(const CrystVector_REAL theta,
 */
 struct SPGScore
 {
-   SPGScore(const string &s, const REAL r, const REAL g, const unsigned int nbextinct, const REAL ngof=0);
+   SPGScore(const string &s, const REAL r, const REAL g, const unsigned int nbextinct, const REAL ngof=0, const unsigned int nbrefl=0);
    string hm;
    /// Rw factor, from PowderPattern::GetRw()
    REAL rw;
    /// Goodness-of-fit, from PowderPattern::GetChi2() normalised by 
    REAL gof;
-   /// Normalised goodness-of-fit =  gof * (nb_refl) / (nb_refl in P1)
+   /// Normalised & integrated goodness-of-fit =  iGoF * (nb_refl) / (nb_refl in P1),
+   /// where iGoF is the integrated goodness-of-fit, computed using the integration
+   /// intervals determined for the P1 spacegroup. This is only computed
+   /// if the P1 spacegroup was tested first.
    REAL ngof;
+   /// Number of extinct reflections for 0<=H<=4, 0<=K<=4, 0<=L<=6, which
+   /// can be used as unique fingerprint for the spacegroup systematic extinctions.
    unsigned int nbextinct446;
+   /// Number of reflections used for the fit.
+   unsigned int nbreflused;
 };
 
 bool compareSPGScore(const SPGScore &s1, const SPGScore &s2);
@@ -1221,6 +1228,8 @@ public:
    SPGScore Run(const cctbx::sgtbx::space_group &spg, const bool fitprofile=false,
                 const bool verbose=false, const bool restore_orig=false, const bool update_display=true);
    /** Run test on all spacegroups compatible with the unit cell
+    * Note that all scores's ngof values will be multiplied by nb_refl/nb_refl_P1 to
+    * have a better indicator of the quality taking into account the number of reflections used.
     *
     * \param fitprofile_all: if true, will perform a full profile fitting instead of just Le Bail
     *  extraction for all spacegroups. Much slower. By default, the profile fitting is only
@@ -1236,8 +1245,15 @@ public:
    /// Get the list of all scores obatined after using RunAll()
    const list<SPGScore>& GetScores() const;
 private:
+   /// Compute the integrated goodness-of-fit using P1 integration intervals. If this is called
+   /// and the spacegroup is P1, this initialises the P1 intervals as well. If the intervals
+   /// have not been initialised and the spaceroup is not P1, zero is returned.
+   REAL GetP1IntegratedGoF();
    /// PwderPatternDiffraction for which we explore the spacegroups
    PowderPatternDiffraction *mpDiff;
+   /// Min and max of intervals for integration domains, for the P1 specegroup. This is
+   /// used to compute a normalised integrated goodness of fit using the same intervals
+   CrystVector_REAL mP1IntegratedProfileMin,mP1IntegratedProfileMax;
    /// List of scores for the explore spacegroups
    list<SPGScore> mvSPG;
    /// Map extinction fingerprint

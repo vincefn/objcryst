@@ -4404,7 +4404,7 @@ wxWindow(parent,-1),mpPattern(pPattern),mpDiff(pDiff),mLSQ("Profile Fitting obje
    pNotebook->ChangeSelection(0);
    mpLog =new wxTextCtrl(this,-1,_T(""),wxDefaultPosition,wxSize(600,300),wxTE_MULTILINE|wxTE_READONLY|wxTE_DONTWRAP);
    mpLog->SetFont(wxFont(10,wxTELETYPE,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL));
-   pSizer0->Add(mpLog,0,wxEXPAND);
+   pSizer0->Add(mpLog,1,wxEXPAND);
    mpLog->AppendText(wxString::Format(_T("Profile fitting & Space Group exploration:\n")));
    mpLog->AppendText(wxString::Format(_T("\nTo perform a QUICK fit:\n")));
    mpLog->AppendText(wxString::Format(_T("  - if you are not too far to a reasonable fit, just use 'Le Bail + Fit profile',\n")));
@@ -4913,32 +4913,36 @@ void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
          i++;
          const string hm=s.universal_hermann_mauguin();
          cout<<s.number()<<","<<hm.c_str()<<","<<(int)compat<<endl;
-         pCrystal->Init(a,b,c,d,e,f,hm,name);
          mpLog->AppendText(wxString::Format(_T(" (#%3d) %-14s:"),s.number(),wxString::FromAscii(hm.c_str()).c_str()));
-         if(s.number() == 1) nb_refl_p1 = mpDiff->GetNbReflBelowMaxSinThetaOvLambda();
 
          std::vector<bool> fgp=spgExtinctionFingerprint(*pCrystal,spg);
          std::map<std::vector<bool>,SPGScore>::iterator posfgp=vSPGExtinctionFingerprint.find(fgp);
          if(posfgp!=vSPGExtinctionFingerprint.end())
          {
-            vSPG.push_back(SPGScore(hm.c_str(),posfgp->second.rw,posfgp->second.gof,
-                                    posfgp->second.nbextinct446, posfgp->second.ngof));
+            pCrystal->Init(a,b,c,d,e,f,hm,name);
+            mpDiff->SetExtractionMode(true,true); //:TODO: why is this needed to actually get the updated GetNbReflBelowMaxSinThetaOvLambda ?
+            unsigned int nbrefl = pDiff->GetNbReflBelowMaxSinThetaOvLambda();
+            REAL ngof = (posfgp->second.ngof * nbrefl) / posfgp->second.nbreflused;
+            SPGScore score = SPGScore(hm.c_str(),posfgp->second.rw,posfgp->second.gof, posfgp->second.nbextinct446, ngof, nbrefl);
+            vSPG.push_back(score);
             cout<<"Spacegroup:"<<hm<<" has same extinctions as:"<<posfgp->second.hm<<endl;
-            mpLog->AppendText(_T(" same as:")+wxString::FromAscii(posfgp->second.hm.c_str())+_T("\n"));
+            //mpLog->AppendText(_T(" same as:")+wxString::FromAscii(posfgp->second.hm.c_str())+_T("\n"));
+            mpLog->AppendText(wxString::Format(_T(" same refl as %13s nGoF=%9.5f (%3u reflections, %3u extinct)\n"),
+                                               wxString::FromAscii(posfgp->second.hm.c_str()), score.ngof, score.nbreflused, score.nbextinct446));
          }
          else
          {
-            pDiff->GetParentPowderPattern().UpdateDisplay();
-
             SPGScore score = ex.Run(spg, event.GetId()==ID_PROFILEFITTING_EXPLORE_SPG, false, false);
-            score.ngof = score.gof * mpDiff->GetNbReflBelowMaxSinThetaOvLambda() / (float)nb_refl_p1;
+            pDiff->GetParentPowderPattern().UpdateDisplay();
+            if(s.number() == 1) nb_refl_p1 = score.nbreflused;
+            score.ngof *= mpDiff->GetNbReflBelowMaxSinThetaOvLambda() / (float)nb_refl_p1;
 
             if(dlgProgress.Update(i*nbcycle,wxString::FromAscii(hm.c_str())+wxString::Format(_T("  (%u cycles)\n   Rwp=%5.2f%%\n   GoF=%9.2f"),
                                   nbcycle,score.rw,score.gof))==false) user_stop=true;
             
             if(user_stop) break;
             vSPG.push_back(score);
-            mpLog->AppendText(wxString::Format(_T(" Rwp= %5.2f%%  GoF=%9.2f  nGoF=%9.2f  (%2u extinct refls)\n"),score.rw,score.gof,score.ngof,score.nbextinct446));
+            mpLog->AppendText(wxString::Format(_T(" Rwp= %5.2f%%  GoF=%8.3f  nGoF=%9.5f (%3u reflections, %3u extinct)\n"),score.rw,score.gof,score.ngof, score.nbreflused,score.nbextinct446));
             vSPGExtinctionFingerprint.insert(make_pair(fgp,score));
           }
         }
@@ -4946,19 +4950,23 @@ void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
    }
    // sort results by GoF
    vSPG.sort(compareSPGScore);
-   mpLog->AppendText(wxString::Format(_T("\n\n BEST Solutions, from min_nGoF to 4*min_nGof:\n")));
-   mpLog->AppendText(wxString::Format(_T("\n\'extinct refls\' gives the number of extinct reflections\n")));
-   mpLog->AppendText(wxString::Format(_T("for 0<=H<=4 0<=K<=4 0<=L<=6 \n\n")));
+   mpLog->AppendText(wxString::Format(_T("\n\nBEST Solutions, from min_nGoF to 4*min_nGof:\n")));
+   mpLog->AppendText(wxString::Format(_T("\nThe number of reflections use for the fit is given, and\n"
+                                         "  \'extinct\' gives the number of extinct reflections\n")));
+   mpLog->AppendText(wxString::Format(_T("  for 0<=H<=4 0<=K<=4 0<=L<=6 \n\n")));
    mpLog->AppendText(wxString::Format(_T("GoF = Chi^2 / nb observed points\n\n")));
-   mpLog->AppendText(wxString::Format(_T("nGof = GoF * (nb_refl) / (nb_refl_P1) takes into account the number\n"
-                                         "  of observed reflections and is the best indicator\n\n")));
+   mpLog->AppendText(wxString::Format(_T("nGof = iGoF_P1 * (nb_refl) / (nb_refl_P1) \n"
+                                         "  where iGoF_P1 is the integrated Goodness-of-Fit \n"
+                                         "  using P1 integration intervals.\n"
+                                         "  This takes into account the number of used reflections\n"
+                                         "  and is the best indicator\n\n")));
    for(list<SPGScore>::const_iterator pos=vSPG.begin();pos!=vSPG.end();++pos)
    {
       if( (pos->ngof>(4*vSPG.begin()->ngof))) break;
-      mpLog->AppendText(wxString::Format(_T(" Rwp=%5.2f%%  GoF=%8.2f  nGoF=%8.2f: (extinct refls=%3u) "),pos->rw,pos->gof,pos->ngof,pos->nbextinct446)+wxString::FromAscii(pos->hm.c_str())+_T(" \n"));
+      mpLog->AppendText(wxString::Format(_T(" Rwp=%5.2f%%  GoF=%8.2f  nGoF=%9.5f: (%3u reflections, %3u extinct) "),pos->rw,pos->gof,pos->ngof, pos->nbreflused,pos->nbextinct446)+wxString::FromAscii(pos->hm.c_str())+_T(" \n"));
    }
-   mpLog->AppendText(wxString::Format(_T("\n\n You can copy the chosen spacegroup symbol in the Crystal window\n")));
-   mpLog->AppendText(wxString::Format(_T("\n\n The spacegroup with the best nGoF has been applied\n")));
+   mpLog->AppendText(wxString::Format(_T("\n\nYou can copy the chosen spacegroup symbol in the Crystal window\n")));
+   mpLog->AppendText(wxString::Format(_T("\n\nThe spacegroup with the best nGoF has been applied\n")));
    // Set best solution
    pCrystal->GetSpaceGroup().ChangeSpaceGroup(vSPG.front().hm);
    pDiff->GetParentPowderPattern().UpdateDisplay();

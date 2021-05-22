@@ -1195,6 +1195,7 @@ void PowderPatternDiffraction::ExtractLeBail(unsigned int nbcycle)
       }
       mClockFhklObsSq.Click();
       //cout<<"PowderPatternDiffraction::ExtractLeBail():results (scale factor="<<mpParentPowderPattern->GetScaleFactor(*this)*1e6<<")" <<endl<< FormatVertVectorHKLFloats<REAL>(mH,mK,mL,this->GetFhklCalcSq(),mFhklObsSq,10,4,nbrefl)<<endl;
+      mClockIhklCalc.Reset(); // During Le Bail
    }
    // Store extracted data in a single crystal data object
    if(mpLeBailData==0) mpLeBailData=new DiffractionDataSingleCrystal(*mpCrystal,false);
@@ -2387,6 +2388,7 @@ void PowderPatternDiffraction::CalcFrozenBMatrix()const
 void PowderPatternDiffraction::PrepareIntegratedProfile()const
 {
    this->CalcPowderReflProfile();
+   this->GetNbReflBelowMaxSinThetaOvLambda();
 
    if(  (mClockIntegratedProfileFactor>mClockProfileCalc)
       &&(mClockIntegratedProfileFactor>mpParentPowderPattern->GetIntegratedProfileLimitsClock())
@@ -4508,7 +4510,7 @@ void PowderPattern::FitScaleFactorForR()const
                        -mScaleFactor(mScalableComponentIndex(i));
       if(ISNAN_OR_INF(s))
       {
-         (*fpObjCrystInformUser)("Warning: working around NaN scale factor...");
+         (*fpObjCrystInformUser)("Warning:FitScaleFactorForR: working around NaN scale factor...");
          continue;
       }
       for(unsigned long j=0;j<mNbPointUsed;j++) *p0++ += s * *p1++;
@@ -4657,7 +4659,7 @@ void PowderPattern::FitScaleFactorForIntegratedR()const
                        -mScaleFactor(mScalableComponentIndex(i));
       if(ISNAN_OR_INF(s))
       {
-         (*fpObjCrystInformUser)("Warning: working around NaN scale factor...");
+         (*fpObjCrystInformUser)("Warning:FitScaleFactorForIntegratedR: working around NaN scale factor...");
          continue;
       }
       for(unsigned long j=0;j<mNbPointUsed;j++) *p0++ += s * *p1++;
@@ -4833,7 +4835,7 @@ void PowderPattern::FitScaleFactorForRw()const
                        -mScaleFactor(mScalableComponentIndex(i));
       if(ISNAN_OR_INF(s))
       {
-         (*fpObjCrystInformUser)("Warning: working around NaN scale factor...");
+         (*fpObjCrystInformUser)("Warning:FitScaleFactorForRw working around NaN scale factor...");
          continue;
       }
       for(unsigned long j=0;j<mNbPointUsed;j++) *p0++ += s * *p1++;
@@ -5065,7 +5067,7 @@ void PowderPattern::FitScaleFactorForIntegratedRw()const
                           -mScaleFactor(mScalableComponentIndex(i));
          if(ISNAN_OR_INF(s))
          {
-            (*fpObjCrystInformUser)("Warning: working around NaN scale factor...");
+            (*fpObjCrystInformUser)("Warning:FitScaleFactorForIntegratedRw: working around NaN scale factor...");
             continue;
          }
          if(nbVarCalc>0)
@@ -6779,14 +6781,14 @@ WXCrystObjBasic* PowderPattern::WXCreate(wxWindow* parent)
 /** Structure to hold the score corresponding to a given spacegroup.
  *
  */
-SPGScore::SPGScore(const string &s, const REAL r, const REAL g, const unsigned int nbextinct, const REAL ngof):
-   hm(s),rw(r),gof(g),ngof(ngof),nbextinct446(nbextinct)
+SPGScore::SPGScore(const string &s, const REAL r, const REAL g, const unsigned int nbextinct, const REAL ngof, const unsigned int nbrefl):
+   hm(s),rw(r),gof(g),ngof(ngof),nbextinct446(nbextinct),nbreflused(nbrefl)
    {};
 
 
 bool compareSPGScore(const SPGScore &s1, const SPGScore &s2)
 {
-   if(s1.ngof > 0.01 && s2.ngof >0.01) return s1.ngof < s2.ngof;
+   if(s1.ngof > 0.00001 && s2.ngof >0.00001) return s1.ngof < s2.ngof;
    return s1.gof < s2.gof;
 }
 
@@ -6855,7 +6857,6 @@ SPGScore SpaceGroupExplorer::Run(const cctbx::sgtbx::space_group &spg, const boo
    TAU_PROFILE_TIMER(timer1,"SpaceGroupExplorer::Run()LSQ-P1","", TAU_FIELD);
    TAU_PROFILE_TIMER(timer2,"SpaceGroupExplorer::Run()LSQ1","", TAU_FIELD);
    TAU_PROFILE_TIMER(timer3,"SpaceGroupExplorer::Run()LSQ2","", TAU_FIELD);
-   mpDiff->SetExtractionMode(true,true);
    Crystal *pCrystal=&(mpDiff->GetCrystal());
    // Keep initial lattice parameters & spg
    const REAL a=pCrystal->GetLatticePar(0),
@@ -6875,6 +6876,7 @@ SPGScore SpaceGroupExplorer::Run(const cctbx::sgtbx::space_group &spg, const boo
       throw ObjCrystException("Spacegroup is not compatible with unit cell.");
    }
    mpDiff->GetCrystal().Init(a,b,c,d,e,f,hm,name);
+   mpDiff->SetExtractionMode(true,true);
    unsigned int nbcycle=1;
    if(update_display) mpDiff->GetParentPowderPattern().UpdateDisplay();
    // Number of free parameters (not taking into account refined profile/background parameters)
@@ -6897,7 +6899,7 @@ SPGScore SpaceGroupExplorer::Run(const cctbx::sgtbx::space_group &spg, const boo
       if(verbose) cout<<"Doing Le Bail, t="<<FormatFloat(t0,6,2)<<"s";
       mpDiff->ExtractLeBail(5);
       if(verbose) cout<<",   dt="<<FormatFloat(chrono.seconds()-t0,6,2)<<"s"<<endl;
-      mpDiff->GetParentPowderPattern().FitScaleFactorForRw();
+      //mpDiff->GetParentPowderPattern().FitScaleFactorForIntegratedRw();
       if(fitprofile)
       {// Perform LSQ
          TAU_PROFILE_START(timer2);
@@ -6943,7 +6945,7 @@ SPGScore SpaceGroupExplorer::Run(const cctbx::sgtbx::space_group &spg, const boo
          lsq.SafeRefine(vnewpar,vnewpartype,1.01,3,true,true);
          TAU_PROFILE_STOP(timer3);
          //mpLog->AppendText(wxString::Format(_T("%5.2f%%/"),pDiff->GetParentPowderPattern().GetRw()*100));
-         mpDiff->GetParentPowderPattern().FitScaleFactorForRw();
+         //mpDiff->GetParentPowderPattern().FitScaleFactorForIntegratedRw();
       }
       if(update_display) mpDiff->GetParentPowderPattern().UpdateDisplay();
       const REAL rw=mpDiff->GetParentPowderPattern().GetRw()*100;
@@ -6952,10 +6954,12 @@ SPGScore SpaceGroupExplorer::Run(const cctbx::sgtbx::space_group &spg, const boo
    }
    const REAL rw=mpDiff->GetParentPowderPattern().GetRw()*100;
    const REAL gof=mpDiff->GetParentPowderPattern().GetChi2()/nbfreepar;
+   const REAL ngof = this->GetP1IntegratedGoF();
    unsigned int nbextinct446=0;
    std::vector<bool> fgp=spgExtinctionFingerprint(*pCrystal,spg);
    for(unsigned int i=6;i<fgp.size();++i) nbextinct446+=(unsigned int)(fgp[i]);
-   if(verbose>0) cout << boost::format(" Rwp= %5.2f%%  GoF=%9.2f  (%2u extinct refls)") % rw % gof % nbextinct446<<endl;
+   const unsigned int nbrefl = mpDiff->GetNbReflBelowMaxSinThetaOvLambda();
+   if(verbose>0) cout << boost::format(" Rwp= %5.2f%%  GoF=%9.2f  nGoF =%9.2f (%3u reflections, %3u extinct)") % rw % gof % ngof % nbrefl % nbextinct446<<endl;
    
    if(restore_orig)
    {
@@ -6968,7 +6972,7 @@ SPGScore SpaceGroupExplorer::Run(const cctbx::sgtbx::space_group &spg, const boo
       }
    }
 
-   return SPGScore(hm.c_str(),rw,gof,nbextinct446);
+   return SPGScore(hm.c_str(),rw,gof,nbextinct446, ngof, nbrefl);
 }
 
 void SpaceGroupExplorer::RunAll(const bool fitprofile_all, const bool verbose, const bool keep_best,
@@ -7027,18 +7031,24 @@ void SpaceGroupExplorer::RunAll(const bool fitprofile_all, const bool verbose, c
          std::map<std::vector<bool>,SPGScore>::iterator posfgp=mvSPGExtinctionFingerprint.find(fgp);
          if(posfgp!=mvSPGExtinctionFingerprint.end())
          {
-            mvSPG.push_back(SPGScore(hm.c_str(),posfgp->second.rw,posfgp->second.gof,posfgp->second.nbextinct446, posfgp->second.ngof));
-            if(verbose) cout<<"Spacegroup:"<<hm<<" has same extinctions as:"<<posfgp->second.hm<<endl;
+            pCrystal->Init(a,b,c,d,e,f,hm,name);
+            mpDiff->SetExtractionMode(true,true); //:TODO: why is this needed to actually get the updated GetNbReflBelowMaxSinThetaOvLambda ?
+            unsigned int nbrefl = mpDiff->GetNbReflBelowMaxSinThetaOvLambda();
+            REAL ngof = (posfgp->second.ngof * nbrefl) / posfgp->second.nbreflused;
+            mvSPG.push_back(SPGScore(hm.c_str(),posfgp->second.rw,posfgp->second.gof,posfgp->second.nbextinct446, ngof, posfgp->second.nbreflused));
+            if(verbose) cout<<boost::format("  (#%3d) %-14s: Rwp= %5.2f%%  GoF=%9.2f  nGoF=%9.2f  (%3u reflections, %3u extinct)\n")
+               % s.number() % hm.c_str() % mvSPG.back().rw % mvSPG.back().gof % mvSPG.back().ngof % mvSPG.back().nbreflused % mvSPG.back().nbextinct446
+               <<" [same extinctions as:"<<posfgp->second.hm<<"]";
          }
          else
          {
             if(((s.number()==1) && fitprofile_p1) || fitprofile_all) mvSPG.push_back(this->Run(spg, true, false, false, update_display));
             else mvSPG.push_back(this->Run(spg, false, false, true, update_display));
-            mvSPG.back().ngof = mvSPG.back().gof * mpDiff->GetNbReflBelowMaxSinThetaOvLambda() / (float)nb_refl_p1;
+            mvSPG.back().ngof *= mpDiff->GetNbReflBelowMaxSinThetaOvLambda() / (float)nb_refl_p1;
             mvSPGExtinctionFingerprint.insert(make_pair(fgp, mvSPG.back()));
 
-            if(verbose) cout<<boost::format("  (#%3d) %-14s: Rwp= %5.2f%%  GoF=%9.2f  nGoF=%9.2f  (%2u extinct refls)\n")
-               % s.number() % hm.c_str() % mvSPG.back().rw % mvSPG.back().gof % mvSPG.back().ngof % mvSPG.back().nbextinct446;
+            if(verbose) cout<<boost::format("  (#%3d) %-14s: Rwp= %5.2f%%  GoF=%9.2f  nGoF=%9.2f  (%3u reflections, %3u extinct)\n")
+               % s.number() % hm.c_str() % mvSPG.back().rw % mvSPG.back().gof % mvSPG.back().ngof % mvSPG.back().nbreflused % mvSPG.back().nbextinct446;
          }
       }
    }
@@ -7066,6 +7076,47 @@ void SpaceGroupExplorer::RunAll(const bool fitprofile_all, const bool verbose, c
 const list<SPGScore>& SpaceGroupExplorer::GetScores() const
 {
    return mvSPG;
+}
+
+REAL SpaceGroupExplorer::GetP1IntegratedGoF()
+{
+   if(mpDiff->GetCrystal().GetSpaceGroup().GetSpaceGroupNumber()==1)
+   {
+      mpDiff->GetPowderPatternIntegratedCalc();
+      mP1IntegratedProfileMin = mpDiff->GetParentPowderPattern().GetIntegratedProfileMin();
+      mP1IntegratedProfileMax = mpDiff->GetParentPowderPattern().GetIntegratedProfileMax();
+      cout<<"Updating mP1IntegratedProfileMin/Max:"<<endl
+          <<FormatVertVectorHKLFloats<REAL>(mP1IntegratedProfileMin, mP1IntegratedProfileMax,mP1IntegratedProfileMax)<<endl;
+   }
+   else if (mP1IntegratedProfileMin.size()==0) return 0;
+   
+   //cout<<FormatVertVectorHKLFloats<REAL>(mpDiff->GetH(), mpDiff->GetK(), mpDiff->GetL(), mpDiff->GetFhklCalcSq());
+   REAL integratedChi2=0.;
+   REAL integratedChi2LikeNorm=0.;
+   const REAL * RESTRICT p1, * RESTRICT p2, * RESTRICT p3;
+   CrystVector_REAL const* pcalc = &(mpDiff->GetParentPowderPattern().GetPowderPatternCalc());
+   CrystVector_REAL const* pobs = &(mpDiff->GetParentPowderPattern().GetPowderPatternObs());
+   CrystVector_REAL const* psigma = &(mpDiff->GetParentPowderPattern().GetPowderPatternObsSigma());
+   const unsigned int jmax = mpDiff->GetParentPowderPattern().GetNbPointUsed();
+   REAL chi2=0;
+   unsigned int nbpoint = 0;
+   for(unsigned long i=0;i<mP1IntegratedProfileMin.size();i++)
+   {
+      if(mP1IntegratedProfileMin(i) > jmax) break;
+      if(mP1IntegratedProfileMax(i) < 0) continue;
+      REAL v=0, c=0, o=0;
+      for(unsigned long j=mP1IntegratedProfileMin(i); j<=mP1IntegratedProfileMax(i); j++)
+      {
+         if(j<0) continue;
+         if(j >= jmax) break;
+         nbpoint++;
+         c += (*pcalc)(j);               // calc
+         o += (*pobs)(j);                // obs
+         v += (*psigma)(j)*(*psigma)(j); // variance
+      }
+      if(v>0) chi2 += (c-o)*(c-o)/v;
+   }
+   return chi2 / nbpoint;
 }
    
 }//namespace ObjCryst

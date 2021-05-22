@@ -350,6 +350,7 @@ void UnitCell::Init(const REAL a, const REAL b, const REAL c, const REAL alpha,
    mCellDim(3)=alpha;
    mCellDim(4)=beta;
    mCellDim(5)=gamma;
+   mClockLatticePar.Click();
 
    mClockMetricMatrix.Reset();
    mClockLatticeParUpdate.Reset();
