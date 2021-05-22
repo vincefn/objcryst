@@ -7036,9 +7036,9 @@ void SpaceGroupExplorer::RunAll(const bool fitprofile_all, const bool verbose, c
             unsigned int nbrefl = mpDiff->GetNbReflBelowMaxSinThetaOvLambda();
             REAL ngof = (posfgp->second.ngof * nbrefl) / posfgp->second.nbreflused;
             mvSPG.push_back(SPGScore(hm.c_str(),posfgp->second.rw,posfgp->second.gof,posfgp->second.nbextinct446, ngof, posfgp->second.nbreflused));
-            if(verbose) cout<<boost::format("  (#%3d) %-14s: Rwp= %5.2f%%  GoF=%9.2f  nGoF=%9.2f  (%3u reflections, %3u extinct)\n")
+            if(verbose) cout<<boost::format("  (#%3d) %-14s: Rwp= %5.2f%%  GoF=%9.2f  nGoF=%9.2f  (%3u reflections, %3u extinct)")
                % s.number() % hm.c_str() % mvSPG.back().rw % mvSPG.back().gof % mvSPG.back().ngof % mvSPG.back().nbreflused % mvSPG.back().nbextinct446
-               <<" [same extinctions as:"<<posfgp->second.hm<<"]";
+               <<" [same extinctions as:"<<posfgp->second.hm<<"]\n";
          }
          else
          {
