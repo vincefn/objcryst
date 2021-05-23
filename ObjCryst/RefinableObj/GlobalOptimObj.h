@@ -222,6 +222,10 @@ class OptimizationObj
       virtual long& NbTrialPerRun();
       /// Number of trial per run
       virtual const long& NbTrialPerRun() const;
+      /// Current trial number (updated during a run)
+      long GetTrial() const;
+      /// Current run number (updated during a run)
+      long GetRun() const;
       //Options
       /// Access to the options registry
       ObjRegistry<RefObjOpt>& GetOptionList();
@@ -240,6 +244,17 @@ class OptimizationObj
       /// Update Display (if any display is available), when a new 'relevant' configuration
       /// is reached. This calls all RefinableObj::UpdateDisplay()
       virtual void UpdateDisplay();
+      /// Get the number of saved parameters set
+      unsigned int GetNbParamSet() const;
+      /// Get the index of a saved parameters set in the compiled RefinableObj.
+      /// The parameters can then be accessed using GetRefinedObjList().GetParamSet(idx)
+      long GetParamSetIndex(const unsigned int i) const;
+      /// Get the cost (log-likelihood) of a saved parameters set
+      long GetParamSetCost(const unsigned int i) const;
+      /// Restore a given saved parameter set.
+      /// This is equivalent to GetRefinedObjList().RestoreParamSet(GetSavedParamSetIndex(i))
+      /// \param i: the order of the saved parameter set
+      void RestoreParamSet(const unsigned int i, const bool update_display=true);
    protected:
       /// \internal Prepare mRefParList for the refinement
       void PrepareRefParList();
@@ -265,8 +280,10 @@ class OptimizationObj
       //Status of optimization
          /// Number of trial per run, to be saved/restored in XML output
          long mNbTrialPerRun;
-         /// Number of trials so far
+         /// Current trial number
          long mNbTrial;
+         /// Current run number (during multiple runs)
+         long mRun;
          /// Best value of the cost function so far
          REAL mBestCost;
          /// Index of the 'best' saved parameter set

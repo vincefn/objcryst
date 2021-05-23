@@ -68,7 +68,7 @@ ObjRegistry<OptimizationObj> gOptimizationObjRegistry("List of all Optimization 
 
 OptimizationObj::OptimizationObj(const string name):
 mName(name),mSaveFileName("GlobalOptim.save"),
-mNbTrialPerRun(10000000),mNbTrial(0),mBestCost(-1),
+mNbTrialPerRun(10000000),mNbTrial(0),mRun(0),mBestCost(-1),
 mBestParSavedSetIndex(-1),
 mContext(0),
 mIsOptimizing(false),mStopAfterCycle(false),
@@ -300,6 +300,10 @@ long& OptimizationObj::NbTrialPerRun() {return mNbTrialPerRun;}
 
 const long& OptimizationObj::NbTrialPerRun() const {return mNbTrialPerRun;}
 
+long OptimizationObj::GetTrial() const {return mNbTrial;}
+
+long OptimizationObj::GetRun() const {return mRun;}
+
 unsigned int OptimizationObj::GetNbOption()const
 {
    return mOptionRegistry.GetNb();
@@ -351,6 +355,32 @@ const RefObjOpt& OptimizationObj::GetOption(const string & name)const
 const ObjRegistry<RefinableObj>& OptimizationObj::GetRefinedObjList() const
 {
    return mRefinedObjList;
+}
+
+unsigned int OptimizationObj::GetNbParamSet() const
+{
+   return mvSavedParamSet.size();
+}
+
+long OptimizationObj::GetParamSetIndex(const unsigned int i) const
+{
+   if(i>=mvSavedParamSet.size())
+      throw ObjCrystException("OptimizationObj::GetSavedParamSetIndex(i): i > nb saved param set");
+   
+   return mvSavedParamSet[i].first;
+}
+
+long OptimizationObj::GetParamSetCost(const unsigned int i) const
+{
+   if(i>=mvSavedParamSet.size())
+      throw ObjCrystException("OptimizationObj::GetSavedParamSetCost(i): i > nb saved param set");
+   return mvSavedParamSet[i].second;
+}
+
+void OptimizationObj::RestoreParamSet(const unsigned int i, const bool update_display)
+{
+   mRefParList.RestoreParamSet(this->GetParamSetIndex(i));
+   if(update_display) this->UpdateDisplay();
 }
 
 void OptimizationObj::PrepareRefParList()
@@ -665,6 +695,7 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
    long nbTrialCumul=0;
    const long nbCycle0=nbCycle;
 	Chronometer chrono;
+   mRun = 0;
    while(nbCycle!=0)
    {
       if(!silent) cout <<"MonteCarloObj::MultiRunOptimize: Starting Run#"<<abs(nbCycle)<<endl;
@@ -747,6 +778,7 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
       #ifdef __WX__CRYST__
       mMutexStopAfterCycle.Unlock();
       #endif
+      mRun++;
    }
    mIsOptimizing=false;
 
@@ -1130,6 +1162,7 @@ void MonteCarloObj::RunRandomLSQMethod(long &nbCycle)
 
     const long starting_point=mRefParList.CreateParamSet("MonteCarloObj:Last parameters (RANDOM-LSQ)");
     mRefParList.SaveParamSet(starting_point);
+    mRun = 0;
     while(nbCycle!=0) {
         nbCycle--;
         mRefParList.RestoreParamSet(starting_point);
@@ -1181,6 +1214,7 @@ void MonteCarloObj::RunRandomLSQMethod(long &nbCycle)
           #ifdef __WX__CRYST__
           mMutexStopAfterCycle.Unlock();
           #endif
+        mRun++;
     }
 
     if(bsigma<0 || bdelta<0 || asigma<0 || adelta<0) return;
