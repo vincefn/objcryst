@@ -138,9 +138,6 @@ GLvoid crystGLPrint(const string &s)
    glEnable (GL_BLEND);
 }
 
-/// Conversion from ZScatterer to the newer Molecule object. (in WXZScatterer.cpp)
-Molecule *ZScatterer2Molecule(ZScatterer *scatt);
-
 // dialog to get a bounding box
   class UserSelectBoundingBox : public wxDialog {
   public:

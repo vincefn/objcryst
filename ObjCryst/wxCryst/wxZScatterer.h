@@ -22,6 +22,7 @@
 
 #include "ObjCryst/wxCryst/wxScatterer.h"
 #include "ObjCryst/ObjCryst/ZScatterer.h"
+#include "ObjCryst/ObjCryst/Molecule.h"
 
 namespace ObjCryst
 {

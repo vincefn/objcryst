@@ -1432,6 +1432,11 @@ void ExpandAtomGroupRecursive(MolAtom* atom,
                               const map<MolAtom*,set<MolAtom*> > &connect,
                               map<MolAtom*,unsigned long> &atomlist,const unsigned long maxdepth, unsigned long depth=0);
 
+// Forward declaration
+class ZScatterer;
+
+/// Converter from ZScatterer to a Molecule object
+Molecule *ZScatterer2Molecule(ZScatterer *scatt);
 
 }//namespace
 #endif
