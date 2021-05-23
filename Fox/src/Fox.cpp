@@ -1649,11 +1649,11 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
                            _T("Add a new Single Crystal Diffraction Object"));
          objectMenu->Append(MENU_OBJECT_CREATE_GLOBALOPTOBJ, _T("New Monte-Carlo Object"),
                            _T("Add a new Monte-Carlo Object"));
-      /*
+      #ifdef __FOX_UNDO__
       wxMenu *menuEdit = new wxMenu;//
          menuEdit->Append(wxID_UNDO, _T("&Undo\tCtrl-Z"), _T("Undo last change in objects (EXPERIMENTAL)"));
          menuEdit->Append(wxID_REDO, _T("&Redo\tCtrl-Y"), _T("Redo next change  in objects (EXPERIMENTAL)"));
-      */
+      #endif
       //FoxGrid////////////////////////////////////////////////////////////////////
       wxMenu *gridMenu = new wxMenu;
          gridMenu->Append(MENU_GRID_SERVER_RUN, _T("&Run Server"), _T("Start Fox Grid Server"));
@@ -1674,7 +1674,9 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
       wxMenuBar *menuBar = new wxMenuBar();
          menuBar->Append(menuFile,  _T("&File"));
          menuBar->Append(objectMenu,_T("&Objects"));
-         // menuBar->Append(menuEdit,_T("Edit"));
+         #ifdef __FOX_UNDO__
+         menuBar->Append(menuEdit,_T("Edit"));
+         #endif
       #ifdef __FOX_COD__
          menuBar->Append(codMenu,_T("COD"));
       #endif

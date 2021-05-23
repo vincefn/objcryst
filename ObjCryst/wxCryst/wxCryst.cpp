@@ -257,10 +257,10 @@ WXField *spLastWXFieldInputNotValidated=0;
 
 void WXCrystValidateAllUserInput()
 {
-   /*
+   #ifdef __FOX_UNDO__
    // Hijack this function to record changes in the configuration
    gConfigHistory.Store();
-    */
+   #endif
    if(0==spLastWXFieldInputNotValidated) return;
    VFN_DEBUG_ENTRY("WXCrystValidateAllUserInput()...",6)
    static WXField *pField;
