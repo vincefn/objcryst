@@ -4915,11 +4915,11 @@ void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
          cout<<s.number()<<","<<hm.c_str()<<","<<(int)compat<<endl;
          mpLog->AppendText(wxString::Format(_T(" (#%3d) %-14s:"),s.number(),wxString::FromAscii(hm.c_str()).c_str()));
 
+         pCrystal->Init(a,b,c,d,e,f,hm,name);
          std::vector<bool> fgp=spgExtinctionFingerprint(*pCrystal,spg);
          std::map<std::vector<bool>,SPGScore>::iterator posfgp=vSPGExtinctionFingerprint.find(fgp);
          if(posfgp!=vSPGExtinctionFingerprint.end())
          {
-            pCrystal->Init(a,b,c,d,e,f,hm,name);
             mpDiff->SetExtractionMode(true,true); //:TODO: why is this needed to actually get the updated GetNbReflBelowMaxSinThetaOvLambda ?
             unsigned int nbrefl = pDiff->GetNbReflBelowMaxSinThetaOvLambda();
             REAL ngof = (posfgp->second.ngof * nbrefl) / posfgp->second.nbreflused;

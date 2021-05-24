@@ -7025,7 +7025,6 @@ void SpaceGroupExplorer::RunAll(const bool fitprofile_all, const bool verbose, c
          const string hm=s.universal_hermann_mauguin();
          // cout<<s.number()<<","<<hm.c_str()<<","<<(int)compat<<endl;
          pCrystal->Init(a,b,c,d,e,f,hm,name);
-         if(s.number() == 1) nb_refl_p1 = mpDiff->GetNbReflBelowMaxSinThetaOvLambda();
 
          std::vector<bool> fgp=spgExtinctionFingerprint(*pCrystal,spg);
          std::map<std::vector<bool>,SPGScore>::iterator posfgp=mvSPGExtinctionFingerprint.find(fgp);
@@ -7035,7 +7034,7 @@ void SpaceGroupExplorer::RunAll(const bool fitprofile_all, const bool verbose, c
             mpDiff->SetExtractionMode(true,true); //:TODO: why is this needed to actually get the updated GetNbReflBelowMaxSinThetaOvLambda ?
             unsigned int nbrefl = mpDiff->GetNbReflBelowMaxSinThetaOvLambda();
             REAL ngof = (posfgp->second.ngof * nbrefl) / posfgp->second.nbreflused;
-            mvSPG.push_back(SPGScore(hm.c_str(),posfgp->second.rw,posfgp->second.gof,posfgp->second.nbextinct446, ngof, posfgp->second.nbreflused));
+            mvSPG.push_back(SPGScore(hm.c_str(),posfgp->second.rw,posfgp->second.gof,posfgp->second.nbextinct446, ngof, nbrefl));
             if(verbose) cout<<boost::format("  (#%3d) %-14s: Rwp= %5.2f%%  GoF=%9.2f  nGoF=%9.2f  (%3u reflections, %3u extinct)")
                % s.number() % hm.c_str() % mvSPG.back().rw % mvSPG.back().gof % mvSPG.back().ngof % mvSPG.back().nbreflused % mvSPG.back().nbextinct446
                <<" [same extinctions as:"<<posfgp->second.hm<<"]\n";
@@ -7044,6 +7043,7 @@ void SpaceGroupExplorer::RunAll(const bool fitprofile_all, const bool verbose, c
          {
             if(((s.number()==1) && fitprofile_p1) || fitprofile_all) mvSPG.push_back(this->Run(spg, true, false, false, update_display));
             else mvSPG.push_back(this->Run(spg, false, false, true, update_display));
+            if(s.number() == 1) nb_refl_p1 = mvSPG.back().nbreflused;
             mvSPG.back().ngof *= mpDiff->GetNbReflBelowMaxSinThetaOvLambda() / (float)nb_refl_p1;
             mvSPGExtinctionFingerprint.insert(make_pair(fgp, mvSPG.back()));
 
@@ -7085,8 +7085,8 @@ REAL SpaceGroupExplorer::GetP1IntegratedGoF()
       mpDiff->GetPowderPatternIntegratedCalc();
       mP1IntegratedProfileMin = mpDiff->GetParentPowderPattern().GetIntegratedProfileMin();
       mP1IntegratedProfileMax = mpDiff->GetParentPowderPattern().GetIntegratedProfileMax();
-      cout<<"Updating mP1IntegratedProfileMin/Max:"<<endl
-          <<FormatVertVectorHKLFloats<REAL>(mP1IntegratedProfileMin, mP1IntegratedProfileMax,mP1IntegratedProfileMax)<<endl;
+      // cout<<"Updating mP1IntegratedProfileMin/Max:"<<endl
+      //     <<FormatVertVectorHKLFloats<REAL>(mP1IntegratedProfileMin, mP1IntegratedProfileMax,mP1IntegratedProfileMax)<<endl;
    }
    else if (mP1IntegratedProfileMin.size()==0) return 0;
    
