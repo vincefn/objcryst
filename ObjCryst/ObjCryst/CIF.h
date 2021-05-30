@@ -210,11 +210,16 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose=true,const bool checkS
 * e.g. when importing CIFs obtained from single crystal data refinement.
 * \param connectAtoms: if true, call Crystal::ConnectAtoms to try to create as many Molecules
 * as possible from the list of imported atoms.
+* \param pcryst: a pointer to an existing Crystal can be given. In this case,
+* only the first Crystal structure found is imported from the CIF. The given
+* Crystal is assumed to be empty.
 * \warning The behaviour of oneScatteringPowerPerElement has changed [2016/11/11]:
 * when set to false, it will return one scattering power per atom, where as prior to this
 * change, scattering powers where identical for identical Debye-Waller factors.
 */
-Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsXYZ, const bool oneScatteringPowerPerElement, const bool connectAtoms);
+Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsXYZ,
+                              const bool oneScatteringPowerPerElement, const bool connectAtoms,
+                              Crystal *pcryst=NULL);
 
 /// Create PowderPattern object(s) from a CIF, if possible.
 /// Returns a null pointer if no pattern could be extracted.

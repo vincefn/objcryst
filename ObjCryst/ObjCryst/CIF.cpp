@@ -1001,16 +1001,20 @@ Crystal* CreateCrystalFromCIF(CIF &cif,bool verbose,bool checkSymAsXYZ)
    return CreateCrystalFromCIF(cif,verbose,checkSymAsXYZ,false,false);
 }
 
-Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsXYZ, const bool oneScatteringPowerPerElement, const bool connectAtoms)
+Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsXYZ,
+                              const bool oneScatteringPowerPerElement, const bool connectAtoms,
+                              Crystal *pCryst)
 {
    (*fpObjCrystInformUser)("CIF: Opening CIF");
    Chronometer chrono;
    chrono.start();
-
+   
    // If oneScatteringPowerPerElement==true, we hold this to compute the average Biso per element
    std::map<ScatteringPower*,std::pair<REAL,unsigned int> > vElementBiso;
-
-   Crystal *pCryst=NULL;
+   
+   bool import_multiple = true;
+   if(pCryst!=NULL) import_multiple = false;
+   
    for(map<string,CIFData>::iterator pos=cif.mvData.begin();pos!=cif.mvData.end();++pos)
       if(pos->second.mvLatticePar.size()==6)
       {
@@ -1092,8 +1096,12 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
              <<"-> "<<spg
              <<endl;
          (*fpObjCrystInformUser)("CIF: Create Crystal=");
-         pCryst=new Crystal(pos->second.mvLatticePar[0],pos->second.mvLatticePar[1],pos->second.mvLatticePar[2],
-                                     pos->second.mvLatticePar[3],pos->second.mvLatticePar[4],pos->second.mvLatticePar[5],spg);
+         if(pCryst==NULL)
+            pCryst=new Crystal(pos->second.mvLatticePar[0],pos->second.mvLatticePar[1],pos->second.mvLatticePar[2],
+                               pos->second.mvLatticePar[3],pos->second.mvLatticePar[4],pos->second.mvLatticePar[5],spg);
+         else
+            pCryst->Init(pos->second.mvLatticePar[0],pos->second.mvLatticePar[1],pos->second.mvLatticePar[2],
+                         pos->second.mvLatticePar[3],pos->second.mvLatticePar[4],pos->second.mvLatticePar[5],spg, "");
          if(  (pos->second.mSpacegroupSymbolHall=="")
             &&(pos->second.mvSymmetry_equiv_pos_as_xyz.size()>0)
             &&(pos->second.mSpacegroupHermannMauguin!="")
@@ -1280,6 +1288,7 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
             (*fpObjCrystInformUser)((boost::format("CIF: finished connecting atoms (%u isolated atoms, %u molecules) (Crystal creation=%6.3fs total)") % ctat % ctmol % chrono.seconds()).str());
          }
          if(pCryst->GetName()=="") pCryst->SetName(pCryst->GetFormula());
+         if(!import_multiple) return pCryst;
       }
    return pCryst;
 }
