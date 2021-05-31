@@ -354,6 +354,8 @@ bool MolAtom::IsNonFlipAtom() const
    return mIsNonFlipAtom;
 }
 
+size_t MolAtom::int_ptr() const {return (size_t)this;}
+
 #ifdef __WX__CRYST__
 WXCrystObjBasic* MolAtom::WXCreate(wxWindow* parent)
 {
@@ -633,6 +635,9 @@ void MolBond::SetFreeTorsion(const bool isFreeTorsion)
    mIsFreeTorsion=isFreeTorsion;
    mpMol->GetBondListClock().Click();
 }
+
+size_t MolBond::int_ptr() const {return (size_t)this;}
+
 #ifdef __WX__CRYST__
 WXCrystObjBasic* MolBond::WXCreate(wxWindow* parent)
 {
@@ -940,6 +945,9 @@ void MolBondAngle::SetAtom3(MolAtom& at){mvpAtom[2]=&at;}
 std::size_t MolBondAngle::size() const {return mvpAtom.size();}
 vector<MolAtom*>::const_iterator MolBondAngle::begin() const {return mvpAtom.begin();}
 vector<MolAtom*>::const_iterator MolBondAngle::end() const  {return mvpAtom.end();}
+
+size_t MolBondAngle::int_ptr() const {return (size_t)this;}
+
 #ifdef __WX__CRYST__
 WXCrystObjBasic* MolBondAngle::WXCreate(wxWindow* parent)
 {
@@ -1300,6 +1308,9 @@ MolAtom& MolDihedralAngle::GetAtom4(){return *(mvpAtom[3]);}
 std::size_t MolDihedralAngle::size() const {return mvpAtom.size();}
 vector<MolAtom*>::const_iterator MolDihedralAngle::begin() const {return mvpAtom.begin();}
 vector<MolAtom*>::const_iterator MolDihedralAngle::end() const  {return mvpAtom.end();}
+
+size_t MolDihedralAngle::int_ptr() const {return (size_t)this;}
+
 #ifdef __WX__CRYST__
 WXCrystObjBasic* MolDihedralAngle::WXCreate(wxWindow* parent)
 {
@@ -1324,6 +1335,9 @@ string RigidGroup::GetName()const
    for(;at!=this->end();++at) name+=", "+(*at)->GetName();
    return name;
 }
+
+size_t RigidGroup::int_ptr() const {return (size_t)this;}
+
 //######################################################################
 //
 //      MolRing
@@ -1337,6 +1351,9 @@ const std::list<MolAtom*>& MolRing::GetAtomList()const
 
 std::list<MolAtom*>& MolRing::GetAtomList()
 {return mvpAtom;}
+
+size_t MolRing::int_ptr() const {return (size_t)this;}
+
 //######################################################################
 //
 //      Quaternion

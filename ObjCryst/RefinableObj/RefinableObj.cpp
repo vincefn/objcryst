@@ -1981,6 +1981,7 @@ void RefinableObj::TagNewBestConfig()const
 }
 const RefinableObjClock& RefinableObj::GetClockMaster()const{return mClockMaster;}
 
+size_t RefinableObj::int_ptr() const {return (size_t)this;}
 
 void RefinableObj::UpdateDisplay()const
 {

@@ -117,6 +117,8 @@ class MolAtom
       void SetNonFlipAtom(const bool nonflip);
       /// Can this atom be flipped (return=false) or should its absolute configuration be kept (return=true)
       bool IsNonFlipAtom() const;
+      /// Access to the integer address of this object, for unique identification from python
+      size_t int_ptr() const;
    private:
       /// Name for this atom
       string mName;
@@ -229,7 +231,8 @@ class MolBond:public Restraint
       void SetBondOrder(const REAL length);
       bool IsFreeTorsion()const;
       void SetFreeTorsion(const bool isInRing);
-   
+      /// Access to the integer address of this object, for unique identification from python
+      size_t int_ptr() const;
   private:
       pair<MolAtom*,MolAtom*> mAtomPair;
       REAL mLength0,mDelta,mSigma;
@@ -320,6 +323,8 @@ class MolBondAngle:public Restraint
       std::size_t size() const;
       vector<MolAtom*>::const_iterator begin() const;
       vector<MolAtom*>::const_iterator end() const;
+      /// Access to the integer address of this object, for unique identification from python
+      size_t int_ptr() const;
    private:
       /// The vector of the 3 atoms involved in the bond angle.
       vector<MolAtom*> mvpAtom;
@@ -415,6 +420,8 @@ class MolDihedralAngle:public Restraint
       std::size_t size() const;
       vector<MolAtom*>::const_iterator begin() const;
       vector<MolAtom*>::const_iterator end() const;
+      /// Access to the integer address of this object, for unique identification from python
+      size_t int_ptr() const;
    private:
       /// The vector of the 4 atoms involved in the bond angle.
       vector<MolAtom*> mvpAtom;
@@ -454,6 +461,8 @@ class MolRing
       MolRing();
       const std::list<MolAtom*>& GetAtomList()const;
       std::list<MolAtom*>& GetAtomList();
+      /// Access to the integer address of this object, for unique identification from python
+      size_t int_ptr() const;
    private:
       std::list<MolAtom*> mvpAtom;
 };
@@ -529,6 +538,8 @@ class RigidGroup:public std::set<MolAtom *>
       /// Temporary list of the atoms indices in the molecule, used during optimization
       /// This is created in Molecule::BeginOptimization()
       mutable std::set<unsigned int> mvIdx;
+      /// Access to the integer address of this object, for unique identification from python
+      size_t int_ptr() const;
 };
 
 /** Abstract base Stretch Mode for Molecule objects

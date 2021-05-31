@@ -1238,6 +1238,8 @@ class RefinableObj
       virtual void TagNewBestConfig()const;
       /// This clocks records _any_ change in the object. See refinableObj::mClockMaster
       const RefinableObjClock& GetClockMaster()const;
+      /// Access to the integer address of this object, for unique identification from python
+      size_t int_ptr() const;
    protected:
       /// Find a refinable parameter with a given name
       long FindPar(const string &name) const;
