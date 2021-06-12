@@ -1014,7 +1014,8 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
    
    bool import_multiple = true;
    if(pCryst!=NULL) import_multiple = false;
-   
+   bool crystal_found = false;
+
    for(map<string,CIFData>::iterator pos=cif.mvData.begin();pos!=cif.mvData.end();++pos)
       if(pos->second.mvLatticePar.size()==6)
       {
@@ -1102,6 +1103,7 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
          else
             pCryst->Init(pos->second.mvLatticePar[0],pos->second.mvLatticePar[1],pos->second.mvLatticePar[2],
                          pos->second.mvLatticePar[3],pos->second.mvLatticePar[4],pos->second.mvLatticePar[5],spg, "");
+         crystal_found = true;
          if(  (pos->second.mSpacegroupSymbolHall=="")
             &&(pos->second.mvSymmetry_equiv_pos_as_xyz.size()>0)
             &&(pos->second.mSpacegroupHermannMauguin!="")
@@ -1290,6 +1292,7 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
          if(pCryst->GetName()=="") pCryst->SetName(pCryst->GetFormula());
          if(!import_multiple) return pCryst;
       }
+   if(!crystal_found) throw ObjCrystException("CreateCrystalFromCIF: no structure found");
    return pCryst;
 }
 
