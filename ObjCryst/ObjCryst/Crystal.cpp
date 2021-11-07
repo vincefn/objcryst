@@ -420,7 +420,7 @@ REAL Crystal::GetWeight() const
 {
    this->GetScatteringComponentList();
    if(mScattCompList.GetNbComponent() == 0) return 0;
-   REAL w;
+   REAL w=0;
    for(unsigned int i=0; i<mScattCompList.GetNbComponent(); ++i)
    {
       const ScatteringComponent* psi = &mScattCompList(i);
