@@ -381,8 +381,10 @@ class ScatteringPowerAtom:virtual public ScatteringPower
       *which uses data from the CRC Handbook of Chemistry & Physics, 63rd & 70th editions
       */
       string GetElementName() const;
-      ///Atomic number for this atom
+      /// Atomic number for this atom
       int GetAtomicNumber() const;
+      /// Atomic weight (g/mol) for this atom
+      REAL GetAtomicWeight() const;
       /// Atomic radius for this atom or ion, in Angstroems (ICSD table from cctbx)
       REAL GetRadius() const;
       /// Covalent Radius for this atom, in Angstroems (from cctbx)
@@ -412,6 +414,8 @@ class ScatteringPowerAtom:virtual public ScatteringPower
       string mSymbol;
       /// atomic number (Z) for the atom
       int mAtomicNumber;
+      /// atomic weight (g/mol) for the atom
+      REAL mAtomicWeight;
 
       /** Pointer to cctbx's gaussian describing the thomson x-ray
       * scattering factor.

@@ -192,6 +192,9 @@ class Crystal:public UnitCell
    
       /// Formula with atoms in alphabetic order
       std::string GetFormula() const;
+      /// Weight for the crystal formula, in atomic units (g/mol). This should be
+      /// multiplied by the spacegroup multiplity to get the unit cell weight.
+      REAL GetWeight() const;
 
       /** \brief Minimum interatomic distance between all scattering components (atoms) in
       * the crystal.

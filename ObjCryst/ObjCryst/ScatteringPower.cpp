@@ -366,6 +366,7 @@ void ScatteringPowerAtom::Init(const string &name,const string &symbol,const REA
 
       cctbx::eltbx::tiny_pse::table tpse(mSymbol);
       mAtomicNumber=tpse.atomic_number();
+      mAtomicWeight=tpse.weight();
 
       cctbx::eltbx::icsd_radii::table ticsd(mSymbol);
       mRadius= ticsd.radius();
@@ -781,6 +782,7 @@ string ScatteringPowerAtom::GetElementName() const
 }
 
 int ScatteringPowerAtom::GetAtomicNumber() const {return mAtomicNumber;}
+REAL ScatteringPowerAtom::GetAtomicWeight() const {return mAtomicWeight;}
 REAL ScatteringPowerAtom::GetRadius() const {return mRadius;}
 REAL ScatteringPowerAtom::GetCovalentRadius() const {return mCovalentRadius;}
 unsigned int ScatteringPowerAtom::GetMaxCovBonds()const{ return mMaxCovBonds;}
