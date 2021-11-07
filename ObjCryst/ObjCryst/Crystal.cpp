@@ -409,12 +409,12 @@ std::string Crystal::GetFormula() const
    {
       if(pos!=velts.begin()) s<<" ";
       float nb=pos->second;
-      if((abs(nb)-nb)<0.01) s<<pos->first<<int(round(nb));
+      if(abs(round(nb)-nb)<0.005) s<<pos->first<<int(round(nb));
       else s<<pos->first<<nb;
    }
    return s.str();
 }
-   
+
 
 REAL Crystal::GetWeight() const
 {
