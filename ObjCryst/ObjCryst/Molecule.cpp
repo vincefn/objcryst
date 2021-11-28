@@ -24,6 +24,7 @@
 #include <iterator>
 #include <algorithm>
 #include <iomanip>
+#include <ctime>
 
 #include "ObjCryst/Quirks/VFNStreamFormat.h"
 #include "ObjCryst/ObjCryst/Molecule.h"
@@ -2206,8 +2207,12 @@ std::string Molecule::GetFormula() const
    {
       if(pos!=velts.begin()) s<<" ";
       float nb=pos->second;
-      if((abs(nb)-nb)<0.01) s<<pos->first<<int(round(nb));
-      else s<<pos->first<<nb;
+      if(abs(round(nb)-nb)<0.005)
+      {
+         if(int(round(nb))==1) s<<pos->first;
+         else s<<pos->first<<int(round(nb));
+      }
+     else s<<pos->first<<nb;
    }
    return s.str();
 }
