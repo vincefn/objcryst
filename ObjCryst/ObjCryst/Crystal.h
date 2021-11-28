@@ -341,19 +341,26 @@ class Crystal:public UnitCell
       const RefinableObjClock& GetClockScattererList()const;
 
       virtual void XMLOutput(ostream &os,int indent=0)const;
+      /** \brief Input the crystal structure from a stream.
+      *
+      * This will destroy any Scatterer of ScatteringPower if
+      * mDeleteSubObjInDestructor is true. Otherwise they will just
+      * be de-registered and should be deleted somewhere else,
+      * but there is a special hook implemented where any
+      * previously existing ScatteringPowerAtom will be re-used if
+      * equivalent to the one in the input.
+      */
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
 
       virtual void GlobalOptRandomMove(const REAL mutationAmplitude,
                                        const RefParType *type=gpRefParTypeObjCryst);
       virtual REAL GetLogLikelihood()const;
-      /** \brief output Crystal structure as a cif file (EXPERIMENTAL !)
+      /** \brief output Crystal structure as a cif file
       *  \param mindist : minimum distance between atoms to consider them
       *  overlapping. Overlapping atoms are only included as comments in the
       *  CIF file.
       *
-      * \warning This is very crude and EXPERIMENTAL so far:  there is not much
-      * information beside atom positions...
       */
       virtual void CIFOutput(ostream &os, double mindist = 0.5)const;
 

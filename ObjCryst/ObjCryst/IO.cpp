@@ -896,13 +896,37 @@ void Crystal::XMLInput(istream &is,const XMLCrystTag &tagg)
          this->RemoveSubRefObj(mScatteringPowerRegistry.GetObj(i));
          mScatteringPowerRegistry.GetObj(i).DeRegisterClient(*this);
       }
-      mScatteringPowerRegistry.DeleteAll();
+
+      std::list<ScatteringPowerAtom*> vold_scattpow;
+      if(mDeleteSubObjInDestructor)
+      {
+         mScatteringPowerRegistry.DeleteAll();
+      }
+      else
+      {
+         // Keep track of the old atomic scattering powers to see if they can be re-used
+         for(std::vector<ScatteringPower*>::const_iterator pos=mScatteringPowerRegistry.begin() ;
+            pos!=mScatteringPowerRegistry.end(); ++pos)
+         {
+            if((*pos)->GetClassName().compare("ScatteringPowerAtom")!=0) continue;
+            vold_scattpow.push_back(dynamic_cast<ScatteringPowerAtom*>(*pos));
+         }
+         mScatteringPowerRegistry.DeRegisterAll();
+      }
+
       for(long i=0;i<mScattererRegistry.GetNb();i++)
       {
          this->RemoveSubRefObj(mScattererRegistry.GetObj(i));
          mScattererRegistry.GetObj(i).DeRegisterClient(*this);
       }
-      mScattererRegistry.DeleteAll();
+      if(mDeleteSubObjInDestructor)
+      {
+         mScattererRegistry.DeleteAll();
+      }
+      else
+      {
+         mScattererRegistry.DeRegisterAll();
+      }
 
    for(unsigned int i=0;i<tagg.GetNbAttribute();i++)
    {
@@ -1011,6 +1035,33 @@ void Crystal::XMLInput(istream &is,const XMLCrystTag &tagg)
          VFN_DEBUG_MESSAGE("Crystal::XMLInput():reading a ScatteringPowerAtom",5)
          ScatteringPowerAtom *sc=new ScatteringPowerAtom;
          sc->XMLInput(is,tag);
+         if(!mDeleteSubObjInDestructor)
+         {
+            // Can we re-use a previous scattering power since we did not delete them ?
+            for(std::list<ScatteringPowerAtom*>::iterator pos= vold_scattpow.begin();
+                pos!=vold_scattpow.end();++pos)
+            {
+               if((*pos)->GetSymbol() != sc->GetSymbol()) continue;
+               if((*pos)->GetName() != sc->GetName()) continue;
+               if((*pos)->GetFormalCharge() != sc->GetFormalCharge()) continue;
+               if((*pos)->GetMaximumLikelihoodNbGhostAtom() != sc->GetMaximumLikelihoodNbGhostAtom()) continue;
+               if((*pos)->GetMaximumLikelihoodPositionError() != sc->GetMaximumLikelihoodPositionError()) continue;
+               if((*pos)->IsIsotropic() != sc->IsIsotropic()) continue;
+               if(fabs((*pos)->GetBiso() - sc->GetBiso()) > 1e-4f) continue;
+               if(!(*pos)->IsIsotropic())
+               {
+                  if(fabs((*pos)->GetBij(0) - sc->GetBij(0)) > 1e-4f) continue;
+                  if(fabs((*pos)->GetBij(1) - sc->GetBij(1)) > 1e-4f) continue;
+                  if(fabs((*pos)->GetBij(2) - sc->GetBij(2)) > 1e-4f) continue;
+                  if(fabs((*pos)->GetBij(3) - sc->GetBij(3)) > 1e-4f) continue;
+                  if(fabs((*pos)->GetBij(4) - sc->GetBij(4)) > 1e-4f) continue;
+                  if(fabs((*pos)->GetBij(5) - sc->GetBij(5)) > 1e-4f) continue;
+               }
+               VFN_DEBUG_MESSAGE("Crystal::XMLInput(): reusing scattering power: "<<sc->GetName(),5);
+               delete sc;
+               sc = *pos;
+            }
+         }
          this->AddScatteringPower(sc);
          VFN_DEBUG_EXIT("Crystal::XMLInput():reading a ScatteringPowerAtom",5)
          continue;
