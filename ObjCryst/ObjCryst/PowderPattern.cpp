@@ -6825,7 +6825,8 @@ SpaceGroupExplorer::SpaceGroupExplorer(PowderPatternDiffraction *pd):
 
 SPGScore SpaceGroupExplorer::Run(const string &spgId, const bool fitprofile,
                                  const bool verbose, const bool restore_orig,
-                                 const bool update_display)
+                                 const bool update_display, const REAL relative_length_tolerance,
+                                 const REAL absolute_angle_tolerance_degree)
 {
    cctbx::sgtbx::space_group sg;
    try
@@ -6847,11 +6848,13 @@ SPGScore SpaceGroupExplorer::Run(const string &spgId, const bool fitprofile,
          throw ObjCrystException(emsg);
       }
    }
-   return this->Run(sg, fitprofile, verbose, restore_orig, update_display);
+   return this->Run(sg, fitprofile, verbose, restore_orig, update_display,
+                    relative_length_tolerance, absolute_angle_tolerance_degree);
 }
 
 SPGScore SpaceGroupExplorer::Run(const cctbx::sgtbx::space_group &spg, const bool fitprofile, const bool verbose,
-                                 const bool restore_orig, const bool update_display)
+                                 const bool restore_orig, const bool update_display,
+                                 const REAL relative_length_tolerance, const REAL absolute_angle_tolerance_degree)
 {
    TAU_PROFILE("SpaceGroupExplorer::Run()","void (wxCommandEvent &)",TAU_DEFAULT);
    TAU_PROFILE_TIMER(timer1,"SpaceGroupExplorer::Run()LSQ-P1","", TAU_FIELD);
@@ -6871,7 +6874,7 @@ SPGScore SpaceGroupExplorer::Run(const cctbx::sgtbx::space_group &spg, const boo
    const cctbx::sgtbx::space_group_symbols s = spg.match_tabulated_settings();
    const string hm=s.universal_hermann_mauguin();
    const cctbx::uctbx::unit_cell uc(scitbx::af::double6(a,b,c,d*RAD2DEG,e*RAD2DEG,f*RAD2DEG));
-   if(!spg.is_compatible_unit_cell(uc,0.01,0.1))
+   if(!spg.is_compatible_unit_cell(uc,relative_length_tolerance,absolute_angle_tolerance_degree))
    {
       throw ObjCrystException("Spacegroup is not compatible with unit cell.");
    }
@@ -6976,7 +6979,8 @@ SPGScore SpaceGroupExplorer::Run(const cctbx::sgtbx::space_group &spg, const boo
 }
 
 void SpaceGroupExplorer::RunAll(const bool fitprofile_all, const bool verbose, const bool keep_best,
-                                const bool update_display, const bool fitprofile_p1)
+                                const bool update_display, const bool fitprofile_p1,
+                                const REAL relative_length_tolerance, const REAL absolute_angle_tolerance_degree)
 {
    Crystal *pCrystal=&(mpDiff->GetCrystal());
    
@@ -6999,7 +7003,7 @@ void SpaceGroupExplorer::RunAll(const bool fitprofile_all, const bool verbose, c
       cctbx::sgtbx::space_group_symbols s=it.next();
       if(s.number()==0) break;
       cctbx::sgtbx::space_group spg(s);
-      if(spg.is_compatible_unit_cell(uc,0.01,0.1)) nbspg++;
+      if(spg.is_compatible_unit_cell(uc,relative_length_tolerance, absolute_angle_tolerance_degree)) nbspg++;
       //if(s.universal_hermann_mauguin().size()>hmlen) hmlen=s.universal_hermann_mauguin().size();
    }
    if(verbose) cout << boost::format("Beginning spacegroup exploration... %u to go...\n") % nbspg;
@@ -7018,7 +7022,7 @@ void SpaceGroupExplorer::RunAll(const bool fitprofile_all, const bool verbose, c
       cctbx::sgtbx::space_group_symbols s=it.next();
       if(s.number()==0) break;
       cctbx::sgtbx::space_group spg(s);
-      bool compat=spg.is_compatible_unit_cell(uc,0.01,0.1);
+      bool compat=spg.is_compatible_unit_cell(uc,relative_length_tolerance,absolute_angle_tolerance_degree);
       if(compat)
       {
          i++;
@@ -7041,8 +7045,9 @@ void SpaceGroupExplorer::RunAll(const bool fitprofile_all, const bool verbose, c
          }
          else
          {
-            if(((s.number()==1) && fitprofile_p1) || fitprofile_all) mvSPG.push_back(this->Run(spg, true, false, false, update_display));
-            else mvSPG.push_back(this->Run(spg, false, false, true, update_display));
+            if(((s.number()==1) && fitprofile_p1) || fitprofile_all) mvSPG.push_back(this->Run(spg, true, false, false, update_display,
+                                                                                               relative_length_tolerance, absolute_angle_tolerance_degree));
+            else mvSPG.push_back(this->Run(spg, false, false, true, update_display,relative_length_tolerance,absolute_angle_tolerance_degree));
             if(s.number() == 1) nb_refl_p1 = mvSPG.back().nbreflused;
             mvSPG.back().ngof *= mpDiff->GetNbReflBelowMaxSinThetaOvLambda() / (float)nb_refl_p1;
             mvSPGExtinctionFingerprint.insert(make_pair(fgp, mvSPG.back()));

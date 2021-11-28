@@ -1211,11 +1211,15 @@ public:
     * \param fitprofile: if true, will perform a full profile fitting instead of just Le Bail
     *  extraction. Much slower.
     * \param restore_orig: if true, will go back to the original unit cell and spacegroup at the end
-    
+    * \param relative_length_tolerance: relative length tolerance to determine compatible unit cells
+    * (i.e. the a/b ratio for quadratic spacegroups)
+    * \param absolute_angle_tolerance_degree: the absolute angular tolerance in degrees
+    * to determine compatible unit cells.
     * \return: the SPGScore corresponding to this spacegroup
     */
    SPGScore Run(const string &spg, const bool fitprofile=false, const bool verbose=false,
-                const bool restore_orig=false, const bool update_display=true);
+                const bool restore_orig=false, const bool update_display=true,
+                const REAL relative_length_tolerance=0.01, const REAL absolute_angle_tolerance_degree=0.5);
    /** Run test on a single spacegroup
     *
     * \param spg: the cctbx::sgtbx::space_group
@@ -1223,10 +1227,15 @@ public:
     *  extraction. Much slower.
     * \param restore_orig: if true, will go back to the original unit cell and spacegroup at the end
     * \param update_display: if true, update the display during the search
+    * \param relative_length_tolerance: relative length tolerance to determine compatible unit cells
+    * (i.e. the a/b ratio for quadratic spacegroups)
+    * \param absolute_angle_tolerance_degree: the absolute angular tolerance in degrees
+    * to determine compatible unit cells.
     * \return: the SPGScore corresponding to this spacegroup
     */
    SPGScore Run(const cctbx::sgtbx::space_group &spg, const bool fitprofile=false,
-                const bool verbose=false, const bool restore_orig=false, const bool update_display=true);
+                const bool verbose=false, const bool restore_orig=false, const bool update_display=true,
+                const REAL relative_length_tolerance=0.01, const REAL absolute_angle_tolerance_degree=0.5);
    /** Run test on all spacegroups compatible with the unit cell
     * Note that all scores's ngof values will be multiplied by nb_refl/nb_refl_P1 to
     * have a better indicator of the quality taking into account the number of reflections used.
@@ -1238,10 +1247,15 @@ public:
     * \param keep_best: if true, will keep the best solution at the end (default: restore the original one)
     * \param update_display: if true, update the display during the search
     * \param fitprofile_p1: if true, fit the profile for p1 (ignored if fitprofile_all=true)
+    * \param relative_length_tolerance: relative length tolerance to determine compatible unit cells
+    * (i.e. the a/b ratio for quadratic spacegroups)
+    * \param absolute_angle_tolerance_degree: the absolute angular tolerance in degrees
+    * to determine compatible unit cells.
     * \return: the SPGScore corresponding to this spacegroup
     */
    void RunAll(const bool fitprofile_all=false, const bool verbose=true, const bool keep_best=false,
-               const bool update_display=true, const bool fitprofile_p1=true);
+               const bool update_display=true, const bool fitprofile_p1=true,
+               const REAL relative_length_tolerance=0.01, const REAL absolute_angle_tolerance_degree=0.5);
    /// Get the list of all scores obatined after using RunAll()
    const list<SPGScore>& GetScores() const;
 private:
