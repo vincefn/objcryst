@@ -6559,7 +6559,7 @@ void PowderPattern::PrepareIntegratedRfactor()const
       for(int i=0;i<mPowderPatternComponentRegistry.GetNb();i++)
       {
          const CrystVector_long vLim=mPowderPatternComponentRegistry.GetObj(i).GetBraggLimits();
-         for(i=0;i<vLim.numElements();i++) vLimits.push_back(vLim(i));
+         for(int j=0;j<vLim.numElements();j++) vLimits.push_back(vLim(j));
       }
       if(vLimits.size()<2)
       {
