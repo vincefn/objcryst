@@ -25,6 +25,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <ctime>
+#include <boost/format.hpp>
 
 #include "ObjCryst/Quirks/VFNStreamFormat.h"
 #include "ObjCryst/ObjCryst/Molecule.h"
@@ -2292,8 +2293,12 @@ void Molecule::XMLOutput(ostream &os,int indent)const
       for(pos=mvRigidGroup.begin();pos!=mvRigidGroup.end();++pos)
       {
          XMLCrystTag tagg("RigidGroup",false,true);
-         for(set<MolAtom *>::const_iterator at=(*pos)->begin();at!=(*pos)->end();++at)
-            tagg.AddAttribute("Atom",(*at)->GetName());
+         // Need to use Atom1, Atom2 etc.. so a valid XML is produced
+         // See https://github.com/vincefn/objcryst/issues/52
+         // This won't be backwards-compatible
+         int idx = 0;
+         for (set<MolAtom*>::const_iterator at = (*pos)->begin(); at != (*pos)->end(); ++at)
+             tagg.AddAttribute((boost::format("Atom%d") %idx++).str(), (*at)->GetName());
          /*
          tagg.AddAttribute("Q0",(*pos)->mQuat.Q0());
          tagg.AddAttribute("Q1",(*pos)->mQuat.Q1());
@@ -2384,7 +2389,7 @@ void Molecule::XMLInput(istream &is,const XMLCrystTag &tag)
       {
          RigidGroup s;
          for(unsigned int i=0;i<tagg.GetNbAttribute();i++)
-            if("Atom"==tagg.GetAttributeName(i))
+            if(tagg.GetAttributeName(i).rfind("Atom", 0)==0)
                s.insert(&(this->GetAtom(tagg.GetAttributeValue(i))));
          this->AddRigidGroup(s);
       }
