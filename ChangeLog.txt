@@ -1,16 +1,26 @@
-#### 2020.1 (January 2021)
+#### 2022.1 (May 2022)
 NEW FEATURES
   * Add cylindrical absorption correction (mu*R)
   * Access to Crystallography Open Database now uses an http access without
     need for MySQL, and should work through firewalls
+  * Added more internal functions for the pyobjcryst Python interface.
+    See https://pyobjcryst.readthedocs.io/en/latest/examples/index.html
 
 IMPROVEMENTS
+  * Improve indexing: use the integrated goodness-of-fit based on P1 integration
+    intervals as a default indicator, normalised by the number of reflections
+    used (* nb_refl / nb_refl_P1)
   * Switched to wxWidgets 3.1
   * When using --cif2pattern, do not convert atoms to a Molecule (faster)
   * Fox grid allows a working directory with spaces in the path.
+  * In the XML output, the atom list inside a RigidGroup will now be
+    valid XML. NB: older Fox versions will not be able to read correctly
+    the list of atoms inside the group.
 
 BUG FIXES
   * Correct EstimateCellVolume estimation for orthorombic F
+  * Correct calculation of integrated figures of merit (Rwp, etc..)
+    with multiple crystalline phases (https://github.com/vincefn/objcryst/pull/53)
   * + several minor issues
 
 #### 2017.2 (28 June 2017)

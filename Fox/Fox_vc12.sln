@@ -16,26 +16,26 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
-		Release_XP_NoCOD|Win32 = Release_XP_NoCOD|Win32
+		Release (profile-guided optim generate)|Win32 = Release (profile-guided optim generate)|Win32
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{2775CD9F-FFF3-4373-A229-94DD4B6D7747}.Debug|Win32.ActiveCfg = Debug|Win32
 		{2775CD9F-FFF3-4373-A229-94DD4B6D7747}.Debug|Win32.Build.0 = Debug|Win32
-		{2775CD9F-FFF3-4373-A229-94DD4B6D7747}.Release_XP_NoCOD|Win32.ActiveCfg = Release_XP_NoCOD|Win32
-		{2775CD9F-FFF3-4373-A229-94DD4B6D7747}.Release_XP_NoCOD|Win32.Build.0 = Release_XP_NoCOD|Win32
+		{2775CD9F-FFF3-4373-A229-94DD4B6D7747}.Release (profile-guided optim generate)|Win32.ActiveCfg = Release (profile-guided optim generate)|Win32
+		{2775CD9F-FFF3-4373-A229-94DD4B6D7747}.Release (profile-guided optim generate)|Win32.Build.0 = Release (profile-guided optim generate)|Win32
 		{2775CD9F-FFF3-4373-A229-94DD4B6D7747}.Release|Win32.ActiveCfg = Release|Win32
 		{2775CD9F-FFF3-4373-A229-94DD4B6D7747}.Release|Win32.Build.0 = Release|Win32
 		{39353CCC-A61A-47C9-8C1F-30FA52D3A1A2}.Debug|Win32.ActiveCfg = Debug|Win32
 		{39353CCC-A61A-47C9-8C1F-30FA52D3A1A2}.Debug|Win32.Build.0 = Debug|Win32
-		{39353CCC-A61A-47C9-8C1F-30FA52D3A1A2}.Release_XP_NoCOD|Win32.ActiveCfg = Release_XP_NoCOD|Win32
-		{39353CCC-A61A-47C9-8C1F-30FA52D3A1A2}.Release_XP_NoCOD|Win32.Build.0 = Release_XP_NoCOD|Win32
+		{39353CCC-A61A-47C9-8C1F-30FA52D3A1A2}.Release (profile-guided optim generate)|Win32.ActiveCfg = Release (profile-guided optim generate)|Win32
+		{39353CCC-A61A-47C9-8C1F-30FA52D3A1A2}.Release (profile-guided optim generate)|Win32.Build.0 = Release (profile-guided optim generate)|Win32
 		{39353CCC-A61A-47C9-8C1F-30FA52D3A1A2}.Release|Win32.ActiveCfg = Release|Win32
 		{39353CCC-A61A-47C9-8C1F-30FA52D3A1A2}.Release|Win32.Build.0 = Release|Win32
 		{BA6FA16F-837D-4869-90B9-44ACCD4EC001}.Debug|Win32.ActiveCfg = Debug|Win32
 		{BA6FA16F-837D-4869-90B9-44ACCD4EC001}.Debug|Win32.Build.0 = Debug|Win32
-		{BA6FA16F-837D-4869-90B9-44ACCD4EC001}.Release_XP_NoCOD|Win32.ActiveCfg = Release_XP_NoCOD|Win32
-		{BA6FA16F-837D-4869-90B9-44ACCD4EC001}.Release_XP_NoCOD|Win32.Build.0 = Release_XP_NoCOD|Win32
+		{BA6FA16F-837D-4869-90B9-44ACCD4EC001}.Release (profile-guided optim generate)|Win32.ActiveCfg = Release (profile-guided optim generate)|Win32
+		{BA6FA16F-837D-4869-90B9-44ACCD4EC001}.Release (profile-guided optim generate)|Win32.Build.0 = Release (profile-guided optim generate)|Win32
 		{BA6FA16F-837D-4869-90B9-44ACCD4EC001}.Release|Win32.ActiveCfg = Release|Win32
 		{BA6FA16F-837D-4869-90B9-44ACCD4EC001}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
