@@ -450,9 +450,9 @@ bool CheckUpdates(std::map<unsigned int,std::pair<int,wxString> > &vUpdates)
       txtis.ReadLine();//first line
       while(!fstream->Eof())
       {
-         unsigned int revisionfix=txtis.Read16();
-         unsigned int revisionbug=txtis.Read16();
-         unsigned int severity=txtis.Read16();
+         unsigned long revisionfix=txtis.Read32();
+         unsigned long revisionbug=txtis.Read32();
+         unsigned long severity=txtis.Read32();
          wxString reason=txtis.ReadLine();
          if((revisionfix>__FOXREVISION__)&&(__FOXREVISION__>revisionbug))
          {
@@ -2695,8 +2695,7 @@ void WXCrystMainFrame::OnCheckUpdate(wxCommandEvent& event)
                      wUpdates->AppendText(wxString::Format(_T("  #%d: %s\n"),pos->first,pos->second.second.c_str()));
                }
             }
-            wUpdates->AppendText(wxString::Format(_T("\n\n => go to http://objcryst.sf.net/Fox/ to get the new version")));
-            wUpdates->AppendText(wxString::Format(_T("\n\n See the full changelog at: http://objcryst.sf.net/Fox/Changelog")));
+            wUpdates->AppendText(wxString::Format(_T("\n\n => go to https://github.com/vincefn/objcryst/releases to get the new version")));
          }
          else
          {
