@@ -96,7 +96,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 // Now using YYYY### (4-digit year + 3 number for the version)
-#define __FOXREVISION__ 2021001
+#define __FOXREVISION__ 2022001
 
 static std::string foxVersion;
 

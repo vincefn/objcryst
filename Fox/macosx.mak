@@ -1,3 +1,7 @@
+# NOTE: beware of multiple installed libraries, when using homebrew or macports.
+# For example iconv in /usr/lib and /opt/local/lib, leading to link errors...
+# For a clean compile exluding non-system libraries, use "PATH=/usr/bin:/bin:/usr/sbin:/sbin make Fox"
+
 # Which command to use for download ?
 CURL=$(shell which curl 2>/dev/null)
 ifneq ($(CURL),)
@@ -6,10 +10,16 @@ else
 DOWNLOAD_COMMAND=wget
 endif
 
-../cctbx:
+../cctbx.tar.bz2:
+	cd .. && $(DOWNLOAD_COMMAND)  https://github.com/vincefn/objcryst/releases/download/v2021-3rdPartyLibs/cctbx.tar.bz2
+
+../cctbx: ../cctbx.tar.bz2
 	cd .. && tar -xjf cctbx.tar.bz2
 
-../newmat:
+../newmat.tar.bz2:
+	cd .. && $(DOWNLOAD_COMMAND)  https://github.com/vincefn/objcryst/releases/download/v2021-3rdPartyLibs/newmat.tar.bz2
+
+../newmat: ../newmat.tar.bz2
 	cd .. && tar -xjf newmat.tar.bz2
 
 ../fftw-3.3.4.tar.gz:
@@ -24,13 +34,13 @@ endif
 libfftw: ../static-libs/lib/libfftw3f.a
 
 
-../wxWidgets-3.1.4.tar.bz2:
-	cd .. && $(DOWNLOAD_COMMAND)  https://github.com/wxWidgets/wxWidgets/releases/download/v3.1.4/wxWidgets-3.1.4.tar.bz2
+../wxWidgets-3.1.6.tar.bz2:
+	cd .. && $(DOWNLOAD_COMMAND)  https://github.com/wxWidgets/wxWidgets/releases/download/v3.1.6/wxWidgets-3.1.6.tar.bz2
 
-../static-libs/bin/wx-config: ../wxWidgets-3.1.4.tar.bz2
-	cd .. && tar -xjf wxWidgets-3.1.4.tar.bz2
-	cd ../wxWidgets-3.1.4 && ./configure --with-opengl --disable-debug --disable-webviewwebkit --enable-optimise --disable-shared  --enable-monolithic --disable-mediactrl --without-libtiff --enable-cxx11 --prefix=$(PWD)/../static-libs && make -j4 install
-	rm -Rf ../wxWidgets-3.1.4
+../static-libs/bin/wx-config: ../wxWidgets-3.1.6.tar.bz2
+	cd .. && tar -xjf wxWidgets-3.1.6.tar.bz2
+	cd ../wxWidgets-3.1.6 && ./configure --with-opengl --disable-debug --disable-webviewwebkit --enable-optimise --disable-shared  --enable-monolithic --disable-mediactrl --without-libtiff --enable-cxx11 --prefix=$(PWD)/../static-libs && make -j4 install
+	rm -Rf ../wxWidgets-3.1.6
 
 libwx: ../static-libs/bin/wx-config
 
