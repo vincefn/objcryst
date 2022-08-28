@@ -420,6 +420,16 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       * No over paremeters (profile, background) are taken into account
       */
       unsigned int GetProfileFitNetNbObs()const;
+      /// Return true if there are extracted (le Bail) squared structure factors, false otherwise
+      bool HasFhklObsSq() const;
+      /** Get the extracted structure factors modulus (squared), e.g. using the Le Bail method.
+      *
+      * Note that the number of reflections listed is limited to the evaluated ones,
+      *which is usually smaller than the H,K and L arrays.
+      *
+      * Raises an exception if this is not available.
+      */
+      const CrystVector_REAL& GetFhklObsSq() const;
    protected:
       virtual void CalcPowderPattern() const;
       virtual void CalcPowderPattern_FullDeriv(std::set<RefinablePar *> &vPar);

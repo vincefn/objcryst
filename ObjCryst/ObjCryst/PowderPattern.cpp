@@ -1298,6 +1298,19 @@ unsigned int PowderPatternDiffraction::GetProfileFitNetNbObs()const
    return nb;
 }
 
+bool PowderPatternDiffraction::HasFhklObsSq() const
+{
+  if(mpLeBailData==NULL) return false;
+  return mpLeBailData->GetFhklObsSq().size() > 0;
+}
+
+const CrystVector_REAL& PowderPatternDiffraction::GetFhklObsSq() const
+{
+  if(mpLeBailData==NULL)
+    throw ObjCrystException("PowderPatternDiffraction::GetFhklObsSq(): no extracted intensities available");
+   return mpLeBailData->GetFhklObsSq();
+}
+
 void PowderPatternDiffraction::CalcPowderPattern() const
 {
    this->GetNbReflBelowMaxSinThetaOvLambda();
